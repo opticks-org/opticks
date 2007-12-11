@@ -1,0 +1,515 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Defines the Directories and Files to be installed, please reference Opticks-UI.wxs to change the UI used for the installer. -->
+
+<!-- The UpgradeCode64Bit, ProductCode64Bit,
+UpgradeCode32Bit, ProductCode32Bit,
+PublicVersionNumber and InternalVersionNumber variables
+are defined in Opticks-Version.wxi, so include that file now -->
+<?include Opticks-Version.wxi ?> 
+
+<?ifdef Is64Bit ?>
+   <?define UserPlatform = "64-bit"?>
+   <?define UpgradeCode = $(var.UpgradeCode64BitGuid) ?>
+   <?define ProductCode = $(var.ProductCode64BitGuid) ?>
+   <?define 64Bit = "yes"?>
+   <?define InstallFolder = "ProgramFiles64Folder" ?>
+   <?define MsiPlatform = "x64" ?>
+<?else?>
+   <?define UserPlatform = "32-bit"?>
+   <?define UpgradeCode = $(var.UpgradeCode32BitGuid) ?>
+   <?define ProductCode = $(var.ProductCode32BitGuid) ?>
+   <?define 64Bit = "no" ?>
+   <?define InstallFolder = "ProgramFilesFolder" ?>
+   <?define MsiPlatform = "Intel" ?>
+<?endif?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:Util="http://schemas.microsoft.com/wix/UtilExtension" RequiredVersion="3.0.2925.0">
+   <Product Id="$(var.ProductCode)" Name="Opticks $(var.PublicVersionNumber) $(var.UserPlatform)" Language="1033" Version="$(var.InternalVersionNumber)" Manufacturer="Ball Aerospace &amp; Technologies Corp." UpgradeCode="$(var.UpgradeCode)">
+      <Package InstallerVersion="200" Compressed="yes" Platforms="$(var.MsiPlatform)"
+               Description="Opticks"
+               Comments="Opticks is an open-source application that enables the viewing, processing and annotating of imagery and video data."
+               />
+
+      <Media Id="1" Cabinet="Opticks.cab" EmbedCab="yes" CompressionLevel="high"  />
+      
+      <Directory Id="TARGETDIR" Name="SourceDir">
+         <Directory Id="D__Bin" Name="Bin" FileSource="$(var.OpticksDependenciesDir)">
+            <Directory Id="D__ImageFormats" Name="imageformats" FileSource="$(var.OpticksDependenciesDir)\imageformats">
+               <Component Id="C__QtImageFormatGif" Guid="$(var.C__QtImageFormatGifGuid)" Win64="$(var.64Bit)">
+                  <File Name="qgif4.dll" Id="F__QtImageFormatGif" DiskId="1" KeyPath="yes" />
+               </Component>
+               <Component Id="C__QtImageFormatJpeg" Guid="$(var.C__QtImageFormatJpegGuid)" Win64="$(var.64Bit)">
+                  <File Name="qjpeg4.dll" Id="F__QtImageFormatJpeg" DiskId="1" KeyPath="yes" />
+               </Component>
+               <Component Id="C__QtImageFormatMng" Guid="$(var.C__QtImageFormatMngGuid)" Win64="$(var.64Bit)">
+                  <File Name="qmng4.dll" Id="F__QtImageFormatMng" DiskId="1" KeyPath="yes" />
+               </Component>
+               <Component Id="C__QtImageFormatSvg" Guid="$(var.C__QtImageFormatSvgGuid)" Win64="$(var.64Bit)">
+                  <File Name="qsvg4.dll" Id="F__QtImageFormatSvg" DiskId="1" KeyPath="yes" />
+               </Component>
+               <Component Id="C__QtImageFormatTiff" Guid="$(var.C__QtImageFormatTiffGuid)" Win64="$(var.64Bit)">
+                  <File Name="qtiff4.dll" Id="F__QtImageFormatTiff" DiskId="1" KeyPath="yes" />
+               </Component>
+               <Component Id="C__VC80_CRT_For_imageformats" Guid="$(var.C__VC80_CRT_For_imageformats_Guid)" Win64="$(var.64Bit)">
+                  <File Name="msvcp80.dll" Id="F__msvcp80_For_imageformats" DiskId="1" KeyPath="yes" Source="$(var.VisualStudioRuntimeDir)\msvcp80.dll" />
+                  <File Name="msvcr80.dll" Id="F__msvcr80_For_imageformats" DiskId="1" Source="$(var.VisualStudioRuntimeDir)\msvcr80.dll" />
+                  <File Name="Microsoft.VC80.CRT.manifest" Id="F__VC80_CRT_Manifest_For_imageformats" DiskId="1" Source="$(var.VisualStudioRuntimeDir)\Microsoft.VC80.CRT.manifest" />
+               </Component>
+               <Component Id="C__VC80_OpenMP_For_imageformats" Guid="$(var.C__VC80_OpenMP_For_imageformats_Guid)" Win64="$(var.64Bit)">
+                  <File Name="vcomp.dll" Id="F__vcomp_For_imageformats" DiskId="1" KeyPath="yes" Source="$(var.VisualStudioRuntimeDir)\vcomp.dll" />
+                  <File Name="Microsoft.VC80.OpenMP.manifest" Id="F__VC80_OpenMP_Manifest_For_imageformats" DiskId="1" Source="$(var.VisualStudioRuntimeDir)\Microsoft.VC80.OpenMP.manifest" />
+               </Component>
+            </Directory>
+            <Component Id="C__VC80_CRT_For_Bin" Guid="$(var.C__VC80_CRT_For_Bin_Guid)" Win64="$(var.64Bit)">
+               <File Name="msvcp80.dll" Id="F__msvcp80_For_Bin" DiskId="1" KeyPath="yes" Source="$(var.VisualStudioRuntimeDir)\msvcp80.dll" />
+               <File Name="msvcr80.dll" Id="F__msvcr80_For_Bin" DiskId="1" Source="$(var.VisualStudioRuntimeDir)\msvcr80.dll" />
+               <File Name="Microsoft.VC80.CRT.manifest" Id="F__VC80_CRT_Manifest_For_Bin" DiskId="1" Source="$(var.VisualStudioRuntimeDir)\Microsoft.VC80.CRT.manifest" />
+            </Component>
+            <Component Id="C__VC80_OpenMP_For_Bin" Guid="$(var.C__VC80_OpenMP_For_Bin_Guid)" Win64="$(var.64Bit)">
+               <File Name="vcomp.dll" Id="F__vcomp_For_Bin" DiskId="1" KeyPath="yes" Source="$(var.VisualStudioRuntimeDir)\vcomp.dll" />
+               <File Name="Microsoft.VC80.OpenMP.manifest" Id="F__VC80_OpenMP_Manifest_For_Bin" DiskId="1" Source="$(var.VisualStudioRuntimeDir)\Microsoft.VC80.OpenMP.manifest" />
+            </Component>
+            <Component Id="C__AppFiles" Guid="$(var.C__AppFilesGuid)" Win64="$(var.64Bit)">
+               <File Name="Opticks.exe" Id="F__Opticks" DiskId="1" KeyPath="yes" Source="$(var.OpticksBinariesDir)\Bin\Opticks.exe" />
+               <File Name="OpticksBatch.exe" Id="F__OpticksBatch"  DiskId="1"  Source="$(var.OpticksBinariesDir)\Bin\OpticksBatch.exe" />
+            </Component>
+            <Component Id="C__avcodec_Dependency" Guid="$(var.C__avcodec_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="avcodec.dll" Id="F__avcodec_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
+            <Component Id="C__avformat_Dependency" Guid="$(var.C__avformat_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="avformat.dll" Id="F__avformat_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
+            <Component Id="C__avutil_Dependency" Guid="$(var.C__avutil_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="avutil.dll" Id="F__avutil_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
+            <Component Id="C__cg_Dependency" Guid="$(var.C__cg_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="cg.dll" Id="F__cg_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
+            <Component Id="C__cgc_Dependency" Guid="$(var.C__cgc_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="cgc.exe" Id="F__cgc_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
+            <Component Id="C__cgD3D9_Dependency" Guid="$(var.C__cgD3D9_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="cgD3D9.dll" Id="F__cgD3D9_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
+            <Component Id="C__cgGL_Dependency" Guid="$(var.C__cgGL_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="cgGL.dll" Id="F__cgGL_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
+            <Component Id="C__ehs_Dependency" Guid="$(var.C__ehs_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="ehs.dll" Id="F__ehs_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
+            <Component Id="C__glew32_Dependency" Guid="$(var.C__glew32_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="glew32.dll" Id="F__glew32_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
+            <Component Id="C__hdf5dll_Dependency" Guid="$(var.C__hdf5dll_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="hdf5dll.dll" Id="F__hdf5dll_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
+            <Component Id="C__ossim_Dependency" Guid="$(var.C__ossim_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="ossim.dll" Id="F__ossim_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
+            <Component Id="C__pthreadVC2_Dependency" Guid="$(var.C__pthreadVC2_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="pthreadVC2.dll" Id="F__pthreadVC2_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
+            <Component Id="C__Qt3Support4_Dependency" Guid="$(var.C__Qt3Support4_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="Qt3Support4.dll" Id="F__Qt3Support4_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
+            <Component Id="C__QtCore4_Dependency" Guid="$(var.C__QtCore4_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="QtCore4.dll" Id="F__QtCore4_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
+            <Component Id="C__QtGui4_Dependency" Guid="$(var.C__QtGui4_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="QtGui4.dll" Id="F__QtGui4_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
+            <Component Id="C__QtNetwork4_Dependency" Guid="$(var.C__QtNetwork4_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="QtNetwork4.dll" Id="F__QtNetwork4_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
+            <Component Id="C__QtOpenGL4_Dependency" Guid="$(var.C__QtOpenGL4_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="QtOpenGL4.dll" Id="F__QtOpenGL4_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
+            <Component Id="C__QtScript4_Dependency" Guid="$(var.C__QtScript4_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="QtScript4.dll" Id="F__QtScript4_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
+            <Component Id="C__QtSql4_Dependency" Guid="$(var.C__QtSql4_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="QtSql4.dll" Id="F__QtSql4_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
+            <Component Id="C__QtSvg4_Dependency" Guid="$(var.C__QtSvg4_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="QtSvg4.dll" Id="F__QtSvg4_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
+            <Component Id="C__QtXml4_Dependency" Guid="$(var.C__QtXml4_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="QtXml4.dll" Id="F__QtXml4_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
+            <Component Id="C__qwt5_Dependency" Guid="$(var.C__qwt5_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="qwt5.dll" Id="F__qwt5_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
+            <Component Id="C__shapelib_Dependency" Guid="$(var.C__shapelib_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="shapelib.dll" Id="F__shapelib_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
+            <Component Id="C__xercesc_2_7_Dependency" Guid="$(var.C__xercesc_2_7_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="xerces-c_2_7.dll" Id="F__xercesc_2_7_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
+            <Component Id="C__xqilla10_Dependency" Guid="$(var.C__xqilla10_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="xqilla10.dll" Id="F__xqilla10_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
+            <Component Id="C__zlib1_Dependency" Guid="$(var.C__zlib1_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="zlib1.dll" Id="F__zlib1_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
+            <?ifndef Is64Bit ?>
+            <!-- Dependencies for 32-bit only -->
+            <Component Id="C__cgD3D8_Dependency" Guid="$(var.C__cgD3D8_DependencyGuid)" Win64="no">
+               <File Name="cgD3D8.dll" Id="F__cgD3D8_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
+            <Component Id="C__glut32_Dependency" Guid="$(var.C__glut32_DependencyGuid)" Win64="no">
+               <File Name="glut32.dll" Id="F__glut32_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
+            <Component Id="C__hd421m_Dependency" Guid="$(var.C__hd421m_DependencyGuid)" Win64="no">
+               <File Name="hd421m.dll" Id="F__hd421m_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
+            <Component Id="C__hm421m_Dependency" Guid="$(var.C__hm421m_DependencyGuid)" Win64="no">
+               <File Name="hm421m.dll" Id="F__hm421m_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
+            <Component Id="C__szlibdll_Dependency" Guid="$(var.C__szlibdll_DependencyGuid)" Win64="no">
+               <File Name="szlibdll.dll" Id="F__szlibdll_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
+            <?endif?>
+         </Directory>
+         <Directory Id="D__DefaultSettings" Name="DefaultSettings" FileSource="$(var.OpticksCodeDir)\Release\DefaultSettings" DiskId="1">
+            <Component Id="C__DefaultSettings" Guid="$(var.C__DefaultSettingsGuid)" Win64="no">
+               <File Name="1-ApplicationDefaults.cfg" Id="F__AppDefaultsCfg"  KeyPath="yes" />
+               <File Name="2-ApplicationMode.cfg" Id="F__AppModeCfg" />
+               <File Name="40-PicturesExporters.cfg" Id="F__PicturesExportersCfg" />
+               <File Name="41-MovieExporter.cfg" Id="F__MovieExporterCfg" />
+               <File Name="42-Nitf.cfg" Id="F__NitfCfg" />
+               <File Name="3-ApplicationTempDir.cfg" Id="F__TempDirCfg" Source="$(sys.SOURCEFILEDIR)"/>
+               <Util:XmlFile Id="F__UpdateTempDirCfg" Action="setValue" File="[#F__TempDirCfg]" ElementPath="/ConfigurationSettings/group/attribute/attribute/value" Value="[TEMPDATADIR]" />
+            </Component>
+            <Component Id="C__SaveTempDataDirSelection" Guid="$(var.C__SaveTempDataDirSelectionGuid)" Win64="no">
+               <RegistryValue Key="Software\Opticks\$(var.PublicVersionNumber) $(var.UserPlatform)\StoredTempDataDirSelection" Value="[TEMPDATADIR]" Root="HKMU" Action="write" Id="R__StoredTempDataDirSelection" Type="string" KeyPath="yes" />
+            </Component>
+         </Directory>
+         <Directory Id="D__PlugIns" Name="PlugIns" FileSource="$(var.OpticksBinariesDir)\PlugIns">
+            <Directory Id="D__ArcProxy" Name="ArcProxy" FileSource="$(var.OpticksBinariesDir)\PlugIns\ArcProxy">
+               <Component Id="C__ArcProxy" Guid="$(var.C__ArcProxyGuid)" Win64="no">
+                  <File Name="ArcProxy.exe" Id="F__ArcProxy" DiskId="1" KeyPath="yes" />
+               </Component>
+               <Component Id="C__ArcProxyQtCore" Guid="$(var.C__ArcProxyQtCoreGuid)" Win64="no">
+                  <File Name="QtCore4.dll" Id="F__ArcProxyQtCore" DiskId="1" KeyPath="yes" Source="$(var.Opticks32BitDependenciesDir)\QtCore4.dll" />
+               </Component>
+               <Component Id="C__ArcProxyQtNetwork" Guid="$(var.C__ArcProxyQtNetworkGuid)" Win64="no">
+                  <File Name="QtNetwork4.dll" Id="F__ArcProxyQtNetwork" DiskId="1" KeyPath="yes" Source="$(var.Opticks32BitDependenciesDir)\QtNetwork4.dll" />
+               </Component>
+               <Component Id="C__VC80_CRT_For_ArcProxy" Guid="$(var.C__VC80_CRT_For_ArcProxy_Guid)" Win64="$(var.64Bit)">
+                  <File Name="msvcp80.dll" Id="F__msvcp80_For_ArcProxy" DiskId="1" KeyPath="yes" Source="$(var.VisualStudio32BitRuntimeDir)\msvcp80.dll" />
+                  <File Name="msvcr80.dll" Id="F__msvcr80_For_ArcProxy" DiskId="1" Source="$(var.VisualStudio32BitRuntimeDir)\msvcr80.dll" />
+                  <File Name="Microsoft.VC80.CRT.manifest" Id="F__VC80_CRT_Manifest_For_ArcProxy" DiskId="1" Source="$(var.VisualStudio32BitRuntimeDir)\Microsoft.VC80.CRT.manifest" />
+               </Component>
+               <Component Id="C__VC80_OpenMP_For_ArcProxy" Guid="$(var.C__VC80_OpenMP_For_ArcProxy_Guid)" Win64="$(var.64Bit)">
+                  <File Name="vcomp.dll" Id="F__vcomp_For_ArcProxy" DiskId="1" KeyPath="yes" Source="$(var.VisualStudio32BitRuntimeDir)\vcomp.dll" />
+                  <File Name="Microsoft.VC80.OpenMP.manifest" Id="F__VC80_OpenMP_Manifest_For_ArcProxy" DiskId="1" Source="$(var.VisualStudio32BitRuntimeDir)\Microsoft.VC80.OpenMP.manifest" />
+               </Component>
+            </Directory>
+            <Component Id="C__VC80_CRT_For_PlugIns" Guid="$(var.C__VC80_CRT_For_PlugIns_Guid)" Win64="$(var.64Bit)">
+               <File Name="msvcp80.dll" Id="F__msvcp80_For_PlugIns" DiskId="1" KeyPath="yes" Source="$(var.VisualStudioRuntimeDir)\msvcp80.dll" />
+               <File Name="msvcr80.dll" Id="F__msvcr80_For_PlugIns" DiskId="1" Source="$(var.VisualStudioRuntimeDir)\msvcr80.dll" />
+               <File Name="Microsoft.VC80.CRT.manifest" Id="F__VC80_CRT_Manifest_For_PlugIns" DiskId="1" Source="$(var.VisualStudioRuntimeDir)\Microsoft.VC80.CRT.manifest" />
+            </Component>
+            <Component Id="C__VC80_OpenMP_For_PlugIns" Guid="$(var.C__VC80_OpenMP_For_PlugIns_Guid)" Win64="$(var.64Bit)">
+               <File Name="vcomp.dll" Id="F__vcomp_For_PlugIns" DiskId="1" KeyPath="yes" Source="$(var.VisualStudioRuntimeDir)\vcomp.dll" />
+               <File Name="Microsoft.VC80.OpenMP.manifest" Id="F__VC80_OpenMP_Manifest_For_PlugIns" DiskId="1" Source="$(var.VisualStudioRuntimeDir)\Microsoft.VC80.OpenMP.manifest" />
+            </Component>
+            <Component Id="C__PlugIns" Guid="$(var.C__PlugInsGuid)" Win64="$(var.64Bit)">
+               <File Name="Aspam.dll" Id="F__AspamPlugIn" DiskId="1" />
+               <File Name="AutoImporter.dll" Id="F__AutoImporterPlugIn" DiskId="1" />
+               <File Name="BandMath.dll" Id="F__BandMathPlugIn" DiskId="1" />
+               <File Name="CoreIo.dll" Id="F__CoreIoPlugIn" DiskId="1" />
+               <File Name="DataFusion.dll" Id="F__DataFusionPlugIn" DiskId="1" />
+               <File Name="Dted.dll" Id="F__DtedPlugIn" DiskId="1" />
+               <File Name="Envi.dll" Id="F__EnviPlugIn" DiskId="1" />
+               <File Name="Generic.dll" Id="F__GenericPlugIn" KeyPath="yes" DiskId="1" />
+               <File Name="GeographicFeatures.dll" Id="F__GeographicFeaturesPlugIn" DiskId="1" />
+               <File Name="Georeference.dll" Id="F__GeoreferencePlugIn" DiskId="1" />
+               <File Name="Hdf.dll" Id="F__HdfPlugIn" DiskId="1" />
+               <File Name="Ice.dll" Id="F__IcePlugIn" DiskId="1" />
+               <File Name="MovieExporter.dll" Id="F__MovieExporterPlugIn" DiskId="1" />
+               <File Name="Nitf.dll" Id="F__NitfPlugIn" DiskId="1" />
+               <File Name="NitfCommonTre.dll" Id="F__NitfCommonTrePlugIn" DiskId="1" />
+               <File Name="Pca.dll" Id="F__PcaPlugIn" DiskId="1" />
+               <File Name="Pictures.dll" Id="F__PicturesPlugIn" DiskId="1" />
+               <File Name="Results.dll" Id="F__ResultsPlugIn" DiskId="1" />
+               <File Name="Scripts.dll" Id="F__ScriptsPlugIn" DiskId="1" />
+               <File Name="SecondMoment.dll" Id="F__SecondMomentPlugIn" DiskId="1" />
+               <File Name="ShapeFileExporter.dll" Id="F__ShapeFileExporterPlugIn" DiskId="1" />
+               <File Name="Sio.dll" Id="F__SioPlugIn" DiskId="1" />
+               <File Name="WizardExecutor.dll" Id="F__WizardExecutorPlugIn" DiskId="1" />
+               <File Name="WizardItems.dll" Id="F__WizardItemsPlugIn" DiskId="1" />
+            </Component>
+         </Directory>
+         <Directory Id="D__SupportFiles" Name="SupportFiles">
+            <Directory Id="D__Annotation" Name="Annotation" FileSource="$(var.OpticksCodeDir)\Release\SupportFiles\Annotation">
+               <Component Id="C__Annotation" Guid="$(var.C__AnnotationGuid)" Win64="no">
+                  <File Name="default.cgm" Id="F__DefaultCgm" DiskId="1" />
+                  <File Name="East.ano" Id="F__EastArrowAnnotation" DiskId="1" KeyPath="yes" />
+                  <File Name="North.ano" Id="F__NorthArrowAnnotation" DiskId="1" />
+               </Component>
+            </Directory>
+            <Directory Id="D__Cg" Name="Cg" FileSource="$(var.OpticksCodeDir)\Release\SupportFiles\Cg">
+               <Component Id="C__Cg" Guid="$(var.C__CgGuid)" Win64="no">
+                  <File Name="ByPass.cg" Id="F__ByPassFilter" DiskId="1" />
+                  <File Name="ColormapDisplay.cg" Id="F__ColormapDisplayFilter" DiskId="1" />
+                  <File Name="EdgeDetection.cg" Id="F__EdgeDetectionFilter" DiskId="1" />
+                  <File Name="GrayscaleDisplay.cg" Id="F__GrayscaleDisplayFilter" DiskId="1" KeyPath="yes" />
+                  <File Name="RgbDisplay.cg" Id="F__RgbDisplayFilter" DiskId="1" />
+               </Component>
+            </Directory>
+            <Directory Id="D__ColorTables" Name="ColorTables" FileSource="$(var.OpticksCodeDir)\Release\SupportFiles\ColorTables">
+               <Component Id="C__ColorTables" Guid="$(var.C__ColorTablesGuid)" Win64="no">
+                  <File Name="autocolor.clu" Id="F__AutoColorColorMap" DiskId="1" KeyPath="yes" />
+                  <File Name="HotIron.clu" Id="F__HotIronColorMap" DiskId="1" />
+                  <File Name="HotIronAlpha.clu" Id="F__HotIronAlphaColorMap" DiskId="1" />
+                  <File Name="Primaries.clu" Id="F__PrimariesColorMap" DiskId="1" />
+                  <File Name="RedTemp.cgr" Id="F__RedTempColorMap" DiskId="1" />
+                  <File Name="Spectrum.cgr" Id="F__SpectrumColorMap" DiskId="1" />
+                  <File Name="SpectrumAlpha.clu" Id="F__SpectrumAlphaColorMap" DiskId="1" />
+                  <File Name="StopLight.clu" Id="F__StopLightColorMap" DiskId="1" />
+                  <File Name="WeatherMap.clu" Id="F__WeatherMapColorMap" DiskId="1" />
+               </Component>
+            </Directory>
+            <Directory Id="D__ImageFilters" Name="ImageFilters" FileSource="$(var.OpticksCodeDir)\Release\SupportFiles\ImageFilters">
+               <Component Id="C__ImageFilters" Guid="$(var.C__ImageFiltersGuid)" Win64="no">
+                  <File Name="FilterDefaults.gic" Id="F__FilterDefaults" DiskId="1" KeyPath="yes" />
+               </Component>
+            </Directory>
+            <Directory Id="D__SecurityMarkings" Name="SecurityMarkings" FileSource="$(var.OpticksCodeDir)\Release\SupportFiles\SecurityMarkings">
+               <Component Id="C__UnclassLevelFile" Guid="$(var.C__UnclassLevelFileGuid)" Win64="no">
+                  <Condition>CLASSIFICATIONLEVEL = "Unclassified"</Condition>
+                  <File Name="ClassificationLevels.txt" Id="F__UnclassLevelFile" DiskId="1" Source="$(var.OpticksClassificationDir)\ClassificationLevels-U.txt" />
+               </Component>
+               <Component Id="C__ConfidentialLevelFile" Guid="$(var.C__ConfidentialLevelFileGuid)" Win64="no">
+                  <Condition>CLASSIFICATIONLEVEL = "Confidential"</Condition>
+                  <File Name="ClassificationLevels.txt" Id="F__ConfidentialLevelFile" DiskId="1" Source="$(var.OpticksClassificationDir)\ClassificationLevels-C.txt" />
+               </Component>
+               <Component Id="C__SecretLevelFile" Guid="$(var.C__SecretLevelFileGuid)" Win64="no">
+                  <Condition>CLASSIFICATIONLEVEL = "Secret"</Condition>
+                  <File Name="ClassificationLevels.txt" Id="F__SecretLevelFile" DiskId="1" Source="$(var.OpticksClassificationDir)\ClassificationLevels-S.txt" />
+               </Component>
+               <Component Id="C__TopSecretLevelFile" Guid="$(var.C__TopSecretLevelFileGuid)" Win64="no">
+                  <Condition>CLASSIFICATIONLEVEL = "TopSecret"</Condition>
+                  <File Name="ClassificationLevels.txt" Id="F__TopSecretLevelFile" DiskId="1" Source="$(sys.SOURCEFILEDIR)\ClassificationLevels-T.txt" />
+               </Component>
+               <Component Id="C__SecurityMarkings" Guid="$(var.C__SecurityMarkingsGuid)" Win64="no">
+                  <File Name="Authority.txt" Id="F__AuthorityMarkings" DiskId="1" />
+                  <File Name="AuthoritySourceDate.txt" Id="F__AuthoritySourceDateMarkings" DiskId="1" />
+                  <File Name="AuthorityType.txt" Id="F__AuthorityTypeMarkings" DiskId="1" />
+                  <File Name="ClassificationReason.txt" Id="F__ClassificationReasonMarkings" DiskId="1" />
+                  <File Name="Codewords.txt" Id="F__CodewordsMarkings" DiskId="1" />
+                  <File Name="CountryCode-Default.txt" Id="F__CountryCodeMarkings" DiskId="1" />
+                  <File Name="DeclassificationExemption.txt" Id="F__DeclassificationExemptionMarkings" DiskId="1" />
+                  <File Name="DeclassificationType.txt" Id="F__DeclassificationTypeMarkings" DiskId="1" />
+                  <File Name="Description.txt" Id="F__DescriptionMarkings" DiskId="1" />
+                  <File Name="Downgrade.txt" Id="F__DowngradeMarkings" DiskId="1" />
+                  <File Name="FileControls.txt" Id="F__FileControlsMarkings" DiskId="1" />
+                  <File Name="FileDowngrade.txt" Id="F__FileDowngradeMarkings" DiskId="1" />
+                  <File Name="FileReleasing.txt" Id="F__FileReleasingMarkings" DiskId="1" />
+                  <File Name="securitymarkingslist.txt" Id="F__SecurityMarkingsList" DiskId="1" KeyPath="yes" />
+                  <File Name="Systems.txt" Id="F__SystemsMarkings" DiskId="1" />
+               </Component>
+            </Directory>
+            <Directory Id="D__Xml" Name="Xml" FileSource="$(var.OpticksCodeDir)\Release\SupportFiles\Xml">
+               <Component Id="C__Xml" Guid="$(var.C__XmlGuid)" Win64="no">
+                  <File Name="opticks-1.xsd" Id="F__OpticksSchemaVersion1" DiskId="1" />
+                  <File Name="opticks-2.xsd" Id="F__OpticksSchemaVersion2" DiskId="1" />
+                  <File Name="opticks-3.xsd" Id="F__OpticksSchemaVersion3" DiskId="1" KeyPath="yes" />
+               </Component>
+            </Directory>
+         </Directory>
+         <Directory Id="D__Templates" Name="Templates" DiskId="1" FileSource="$(var.OpticksCodeDir)\Release\Templates">
+            <Component Id="C__Templates" Guid="$(var.C__TemplatesGuid)" Win64="no">
+               <File Name="MultipleImages.spg" Id="F__MultipleImages.spg" KeyPath="yes" />
+               <File Name="SingleImage.spg" Id="F__SingleImage.spg" />
+               <File Name="ZoomedImages.spg" Id="F__ZoomedImages.spg" />
+            </Component>            
+         </Directory>
+         <Directory Id="ProgramMenuFolder" Name=".">
+            <Directory Id="D__OpticksStartMenuFolder" Name="Opticks $(var.PublicVersionNumber) $(var.UserPlatform)">
+               <Component Id="C__OpticksShortcuts" Guid="$(var.C__OpticksShortcutsGuid)" Win64="$(var.64Bit)">
+                  <RegistryValue Id="R__OpticksShortcut" Action="write" Key="Software\Opticks\$(var.PublicVersionNumber) $(var.UserPlatform)\OpticksShortcut" KeyPath="yes" Root="HKCU" Type="string" Value="ShortcutInstalled"/>
+                  <Shortcut Id="S__Opticks" Directory="D__OpticksStartMenuFolder" Advertise="no" Show="normal" Target="[TARGETDIR]\Bin\Opticks.exe" Name="Opticks" />
+                  <Shortcut Id="S__Help" Directory="D__OpticksStartMenuFolder" Advertise="no" Show="normal" Target="[TARGETDIR]\Help\Opticks\index.htm" Name="Help" />
+                  <RemoveFolder Id="RF__OpticksStartMenu" On="uninstall"/>
+               </Component>
+            </Directory>
+         </Directory>
+         <Directory Id="DesktopFolder" Name=".">
+            <Component Id="C__OpticksDesktopShortcuts" Guid="$(var.C__OpticksDesktopShortcutsGuid)" Win64="$(var.64Bit)">
+               <RegistryValue Id="R__OpticksDesktopShortcut" Action="write" Key="Software\Opticks\$(var.PublicVersionNumber) $(var.UserPlatform)\OpticksDesktopShortcut" KeyPath="yes" Root="HKCU" Type="string" Value="ShortcutInstalled"/>
+               <Shortcut Id="S__OpticksDesktop" Directory="DesktopFolder" Advertise="no" Show="normal" Target="[TARGETDIR]\Bin\Opticks.exe" Name="Opticks $(var.PublicVersionNumber) $(var.UserPlatform)" />
+            </Component>
+         </Directory>
+         <Component Id="C__OpticksEventLogKeys" Guid="$(var.C__OpticksEventLogKeysGuid)" Win64="no">
+            <Condition>ALLUSERS = 1</Condition>
+            <RegistryKey Id="R__OpticksEventLog" Action="createAndRemoveOnUninstall" Key="SYSTEM\CurrentControlSet\Services\Eventlog\Application\Opticks" Root="HKLM">
+               <RegistryValue Id="R__EventLogTypesSupported" Action="write" Name="TypesSupported" KeyPath="yes" Type="integer" Value="7" />
+               <RegistryValue Id="R__EventLogCategoryCount" Action="write" Name="CategoryCount" Type="integer" Value="1" />
+               <RegistryValue Id="R__EventLogEventMessageFile" Action="write" Name="EventMessageFile" Type="expandable" Value="[TARGETDIR]\Bin\Opticks.exe" />
+            </RegistryKey>
+         </Component>
+      </Directory>
+
+      <Feature Id="FT__MainFeature" Title="Opticks" Level="1" Display="expand" Description="The Opticks application and supporting files." ConfigurableDirectory="TARGETDIR">
+         <ComponentRef Id="C__AppFiles" />
+         <ComponentRef Id="C__DefaultSettings" />
+         <ComponentRef Id="C__UnclassLevelFile" />
+         <ComponentRef Id="C__ConfidentialLevelFile" />
+         <ComponentRef Id="C__SecretLevelFile" />
+         <ComponentRef Id="C__TopSecretLevelFile" />
+         <ComponentRef Id="C__PlugIns" />
+         <ComponentRef Id="C__Annotation" />
+         <ComponentRef Id="C__Cg" />
+         <ComponentRef Id="C__ColorTables" />
+         <ComponentRef Id="C__ImageFilters" />
+         <ComponentRef Id="C__SecurityMarkings" />
+         <ComponentRef Id="C__Xml" />
+         <ComponentRef Id="C__avcodec_Dependency" />
+         <ComponentRef Id="C__avformat_Dependency" />
+         <ComponentRef Id="C__avutil_Dependency" />
+         <ComponentRef Id="C__cg_Dependency" />
+         <ComponentRef Id="C__cgc_Dependency" />
+         <ComponentRef Id="C__cgD3D9_Dependency" />
+         <ComponentRef Id="C__cgGL_Dependency" />
+         <ComponentRef Id="C__ehs_Dependency" />
+         <ComponentRef Id="C__glew32_Dependency" />
+         <ComponentRef Id="C__hdf5dll_Dependency" />
+         <ComponentRef Id="C__ossim_Dependency" />
+         <ComponentRef Id="C__pthreadVC2_Dependency" />
+         <ComponentRef Id="C__Qt3Support4_Dependency" />
+         <ComponentRef Id="C__QtCore4_Dependency" />
+         <ComponentRef Id="C__QtGui4_Dependency" />
+         <ComponentRef Id="C__QtNetwork4_Dependency" />
+         <ComponentRef Id="C__QtOpenGL4_Dependency" />
+         <ComponentRef Id="C__QtScript4_Dependency" />
+         <ComponentRef Id="C__QtSql4_Dependency" />
+         <ComponentRef Id="C__QtSvg4_Dependency" />
+         <ComponentRef Id="C__QtXml4_Dependency" />
+         <ComponentRef Id="C__qwt5_Dependency" />
+         <ComponentRef Id="C__shapelib_Dependency" />
+         <ComponentRef Id="C__xercesc_2_7_Dependency" />
+         <ComponentRef Id="C__xqilla10_Dependency" />
+         <ComponentRef Id="C__zlib1_Dependency" />
+         <ComponentRef Id="C__QtImageFormatGif" />
+         <ComponentRef Id="C__QtImageFormatJpeg" />
+         <ComponentRef Id="C__QtImageFormatMng" />
+         <ComponentRef Id="C__QtImageFormatSvg" />
+         <ComponentRef Id="C__QtImageFormatTiff" />
+         <ComponentRef Id="C__ArcProxy" />
+         <ComponentRef Id="C__ArcProxyQtCore" />
+         <ComponentRef Id="C__ArcProxyQtNetwork" />
+         <ComponentRef Id="C__OpticksEventLogKeys" />
+         <ComponentRef Id="C__SaveTempDataDirSelection" />
+         <ComponentRef Id="C__VC80_CRT_For_Bin"/>
+         <ComponentRef Id="C__VC80_OpenMP_For_Bin"/>
+         <ComponentRef Id="C__VC80_CRT_For_imageformats"/>
+         <ComponentRef Id="C__VC80_OpenMP_For_imageformats"/>
+         <ComponentRef Id="C__VC80_CRT_For_PlugIns"/>
+         <ComponentRef Id="C__VC80_OpenMP_For_PlugIns"/>
+         <ComponentRef Id="C__VC80_CRT_For_ArcProxy"/>
+         <ComponentRef Id="C__VC80_OpenMP_For_ArcProxy"/>
+         <ComponentRef Id="C__Templates" />
+
+         <!-- The Components that make up the help directory -->
+         <ComponentRef Id="C__Help_view" />
+         <ComponentRef Id="C__Help_opticks" />
+         <ComponentRef Id="C__Help_properties" />
+         <ComponentRef Id="C__Help_scenario5_files" />
+         <ComponentRef Id="C__Help_aoi" />
+         <ComponentRef Id="C__Help_scenario10_files" />
+         <ComponentRef Id="C__Help_importers_exporters" />
+         <ComponentRef Id="C__Help_process" />
+         <ComponentRef Id="C__Help_options1" />
+         <ComponentRef Id="C__Help_skinnewwindow" />
+         <ComponentRef Id="C__Help_quicklookdatafusion" />
+         <ComponentRef Id="C__Help_layers" />
+         <ComponentRef Id="C__Help_images1" />
+         <ComponentRef Id="C__Help_items" />
+         <ComponentRef Id="C__Help_annotation" />
+         <ComponentRef Id="C__Help_data" />
+         <ComponentRef Id="C__Help_movies" />
+         <ComponentRef Id="C__Help_sessions" />
+         <ComponentRef Id="C__Help_images" />
+         <ComponentRef Id="C__Help_tie_points" />
+         <ComponentRef Id="C__Help_geographic_features" />
+         <ComponentRef Id="C__Help_tools" />
+         <ComponentRef Id="C__Help_histogram_window" />
+         <ComponentRef Id="C__Help_tutorials" />
+         <ComponentRef Id="C__Help_skinsupport" />
+         <ComponentRef Id="C__Help_analysis" />
+         <ComponentRef Id="C__Help_options" />
+         <ComponentRef Id="C__Help_geo" />
+         <ComponentRef Id="C__Help_products" />
+         <ComponentRef Id="C__Help_wizard_builder" />
+         <ComponentRef Id="C__Help_scenario9_files" />
+         <ComponentRef Id="C__Help_skin" />
+         <ComponentRef Id="C__Help_toolbars" />
+         <ComponentRef Id="C__Help_scenario6_files" />
+         <ComponentRef Id="C__Help_message_log_window" />
+         <ComponentRef Id="C__Help_content" />
+         
+         <?ifdef Is32Bit ?>
+         <ComponentRef Id="C__cgD3D8_Dependency" />
+         <ComponentRef Id="C__glut32_Dependency" />
+         <ComponentRef Id="C__hd421m_Dependency" />
+         <ComponentRef Id="C__hm421m_Dependency" />
+         <ComponentRef Id="C__szlibdll_Dependency" />
+         <?endif?>
+
+         <Feature Id="FT__Shortcuts" Title="Start Menu Shortcuts" Level="1"
+                  Description="Installs shortcuts for the application in the Start menu."
+                  InstallDefault="followParent"
+                  AllowAdvertise="no">
+            <ComponentRef Id="C__OpticksShortcuts"/>
+         </Feature>
+         <Feature Id="FT__DesktopShortcuts" Title="Desktop Shortcuts" Level="1"
+                  Description="Installs shortcut for the application on the Desktop"
+                  InstallDefault="followParent"
+                  AllowAdvertise="no">
+            <ComponentRef Id="C__OpticksDesktopShortcuts"/>
+         </Feature>
+      </Feature>
+
+      <UIRef Id="OpticksUI"/>
+      <!-- Defined in Opticks-UI.wxs -->
+
+      <Icon Id="OpticksIcon" SourceFile="$(sys.SOURCEFILEDIR)\OpticksIcon.ico" />
+      
+      <Property Id="ALLUSERS" Value="1" />
+      <Property Id="ARPPRODUCTICON" Value="OpticksIcon" />
+      <Property Id="CLASSIFICATIONLEVEL" Value="TopSecret" Secure="yes" />
+      <Property Id="TEMPDATADIR" Value="NotSet" Secure="yes" />
+      <Property Id="__STOREDTEMPDATADIRSELECTION" Value="NotFound" Secure="yes">
+         <RegistrySearch Root="HKCU" Key="Software\Opticks\$(var.PublicVersionNumber) $(var.UserPlatform)\StoredTempDataDirSelection" Type="raw" Id="RS__FindStoredTempDataDirSelectionInCurrentUser" />
+         <RegistrySearch Root="HKLM" Key="Software\Opticks\$(var.PublicVersionNumber) $(var.UserPlatform)\StoredTempDataDirSelection" Type="raw" Id="RS__FindStoredTempDataDirSelectionInLocalMachine" />
+      </Property>
+
+      <CustomAction Id="PreserveInstallLocation" Property="ARPINSTALLLOCATION" Value="[TARGETDIR]" />
+      <CustomAction Id="SetInitialInstallLocation" Property="TARGETDIR" Value="[$(var.InstallFolder)]\Opticks\$(var.PublicVersionNumber)" Execute="firstSequence" />
+      <CustomAction Id="RetrieveStoredInstallLocation" Script="vbscript">
+      <![CDATA[
+      set inst = CreateObject("WindowsInstaller.Installer")
+      mypc = Property("ProductCode")
+      Property("TARGETDIR") = inst.ProductInfo(mypc, "InstallLocation")      
+      ]]>
+      </CustomAction>
+
+      <CustomAction Id="SetTempDataDir" Property="TEMPDATADIR" Value="[TempFolder]" Execute="firstSequence" />
+      <CustomAction Id="RetrieveStoredTempDataDirSelection" Property="TEMPDATADIR" Value="[__STOREDTEMPDATADIRSELECTION]" />
+
+      <InstallExecuteSequence>
+         <Custom Action="PreserveInstallLocation" After="InstallValidate">NOT Installed</Custom>
+         <Custom Action="SetInitialInstallLocation" Before="CostInitialize">NOT Installed AND TARGETDIR=""</Custom>
+         <Custom Action="SetTempDataDir" Before="CostInitialize">NOT Installed AND TEMPDATADIR="NotSet"</Custom>
+         <Custom Action="RetrieveStoredTempDataDirSelection" After="AppSearch">Installed</Custom>
+      </InstallExecuteSequence>
+
+      <InstallUISequence>
+         <Custom Action="SetInitialInstallLocation" After="StartupDlg">NOT Installed AND TARGETDIR=""</Custom>
+         <Custom Action="RetrieveStoredInstallLocation" After="StartupDlg">Installed</Custom>
+         <Custom Action="SetTempDataDir" After="StartupDlg">NOT Installed AND TEMPDATADIR="NotSet"</Custom>
+      </InstallUISequence>
+
+   </Product>   
+</Wix>

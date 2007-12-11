@@ -1,0 +1,13 @@
+PKG=BALLOpticks
+ARCH=sparc
+SUNW_ISA=sparcv9
+VERSION=4.1.0
+NAME=Opticks is an open-source application that enables the viewing, processing and annotating of imagery and video data.  Runs on sparcv9 hardware.
+CATEGORY=application
+BASEDIR=/opt
+APPDIR=Opticks
+MAXINST=3000
+GROUP=opticks
+CLASSES=none classification tempdir startup
+CLASSIFICATIONLEVEL=TopSecret
+TEMPDATADIR=/tmp

@@ -1,0 +1,117 @@
+i pkginfo
+i copyright
+i request
+i i.classification
+i i.tempdir
+i i.startup
+i checkinstall
+d none $APPDIR 0755 root $GROUP 
+s none $APPDIR/Opticks=Bin/Opticks
+s none $APPDIR/OpticksBatch=Bin/OpticksBatch
+d none $APPDIR/Bin 0755 root $GROUP 
+f startup $APPDIR/Bin/Environment=$currentDir/Environment 0755 root $GROUP
+f startup $APPDIR/Bin/Opticks=$currentDir/Opticks 0755 root $GROUP
+f startup $APPDIR/Bin/OpticksBatch=$currentDir/OpticksBatch 0755 root $GROUP
+d none $APPDIR/Bin/imageformats 0755 root $GROUP
+f none $APPDIR/Bin/imageformats/libqgif.so=$OpticksDependenciesDir/imageformats/libqgif.so 0755 root $GROUP
+f none $APPDIR/Bin/imageformats/libqjpeg.so=$OpticksDependenciesDir/imageformats/libqjpeg.so 0755 root $GROUP
+f none $APPDIR/Bin/imageformats/libqmng.so=$OpticksDependenciesDir/imageformats/libqmng.so 0755 root $GROUP
+f none $APPDIR/Bin/imageformats/libqsvg.so=$OpticksDependenciesDir/imageformats/libqsvg.so 0755 root $GROUP
+f none $APPDIR/Bin/imageformats/libqtiff.so=$OpticksDependenciesDir/imageformats/libqtiff.so 0755 root $GROUP
+f none $APPDIR/Bin/libQt3Support.so.4=$OpticksDependenciesDir/libQt3Support.so.4 0755 root $GROUP
+f none $APPDIR/Bin/libQtCore.so.4=$OpticksDependenciesDir/libQtCore.so.4 0755 root $GROUP
+f none $APPDIR/Bin/libQtGui.so.4=$OpticksDependenciesDir/libQtGui.so.4 0755 root $GROUP
+f none $APPDIR/Bin/libQtNetwork.so.4=$OpticksDependenciesDir/libQtNetwork.so.4 0755 root $GROUP
+f none $APPDIR/Bin/libQtOpenGL.so.4=$OpticksDependenciesDir/libQtOpenGL.so.4 0755 root $GROUP
+f none $APPDIR/Bin/libQtScript.so.4=$OpticksDependenciesDir/libQtScript.so.4 0755 root $GROUP
+f none $APPDIR/Bin/libQtSql.so.4=$OpticksDependenciesDir/libQtSql.so.4 0755 root $GROUP
+f none $APPDIR/Bin/libQtSvg.so.4=$OpticksDependenciesDir/libQtSvg.so.4 0755 root $GROUP
+f none $APPDIR/Bin/libQtXml.so.4=$OpticksDependenciesDir/libQtXml.so.4 0755 root $GROUP
+f none $APPDIR/Bin/libavcodec.so.51=$OpticksDependenciesDir/libavcodec.so.51 0755 root $GROUP
+f none $APPDIR/Bin/libavformat.so.50=$OpticksDependenciesDir/libavformat.so.50 0755 root $GROUP
+f none $APPDIR/Bin/libavutil.so.49=$OpticksDependenciesDir/libavutil.so.49 0755 root $GROUP
+f none $APPDIR/Bin/libehs.so.0=$OpticksDependenciesDir/libehs.so.0 0755 root $GROUP
+f none $APPDIR/Bin/libhdf5.so.0=$OpticksDependenciesDir/libhdf5.so.0 0755 root $GROUP
+f none $APPDIR/Bin/libossim.so.1=$OpticksDependenciesDir/libossim.so.1 0755 root $GROUP
+f none $APPDIR/Bin/libqwt.so.5=$OpticksDependenciesDir/libqwt.so.5 0755 root $GROUP
+f none $APPDIR/Bin/libshp.so=$OpticksDependenciesDir/libshp.so 0755 root $GROUP
+f none $APPDIR/Bin/libsz.so.2=$OpticksDependenciesDir/libsz.so.2 0755 root $GROUP
+f none $APPDIR/Bin/libxerces-c.so.27=$OpticksDependenciesDir/libxerces-c.so.27 0755 root $GROUP
+f none $APPDIR/Bin/libxqilla.so.1=$OpticksDependenciesDir/libxqilla.so.1 0755 root $GROUP
+f none $APPDIR/Bin/libstlport.so.1=/opt/SUNWspro/prod/lib/stlport4/v9/libstlport.so.1 0755 root $GROUP
+f none $APPDIR/Bin/solOpticks=$OpticksBinariesDir/Bin/solOpticks 0755 root $GROUP 
+f none $APPDIR/Bin/solBatch=$OpticksBinariesDir/Bin/solBatch 0755 root $GROUP 
+d none $APPDIR/DefaultSettings 0755 root $GROUP
+f tempdir $APPDIR/DefaultSettings/3-ApplicationTempDir.cfg=$currentDir/3-ApplicationTempDir.cfg 0644 root $GROUP
+f none $APPDIR/DefaultSettings/1-ApplicationDefaults.cfg=$OpticksCodeDir/Release/DefaultSettings/1-ApplicationDefaults.cfg 0644 root $GROUP
+f none $APPDIR/DefaultSettings/2-ApplicationMode.cfg=$OpticksCodeDir/Release/DefaultSettings/2-ApplicationMode.cfg 0644 root $GROUP
+f none $APPDIR/DefaultSettings/40-PicturesExporters.cfg=$OpticksCodeDir/Release/DefaultSettings/40-PicturesExporters.cfg 644 root $GROUP
+f none $APPDIR/DefaultSettings/41-MovieExporter.cfg=$OpticksCodeDir/Release/DefaultSettings/41-MovieExporter.cfg 0644 root $GROUP
+f none $APPDIR/DefaultSettings/42-Nitf.cfg=$OpticksCodeDir/Release/DefaultSettings/42-Nitf.cfg 644 root $GROUP
+d none $APPDIR/PlugIns 0755 root $GROUP
+f none $APPDIR/PlugIns/Aspam.so=$OpticksBinariesDir/PlugIns/Aspam.so 644 root $GROUP
+f none $APPDIR/PlugIns/AutoImporter.so=$OpticksBinariesDir/PlugIns/AutoImporter.so 644 root $GROUP
+f none $APPDIR/PlugIns/BandMath.so=$OpticksBinariesDir/PlugIns/BandMath.so 644 root $GROUP
+f none $APPDIR/PlugIns/CoreIo.so=$OpticksBinariesDir/PlugIns/CoreIo.so 644 root $GROUP
+f none $APPDIR/PlugIns/DataFusion.so=$OpticksBinariesDir/PlugIns/DataFusion.so 644 root $GROUP
+f none $APPDIR/PlugIns/Dted.so=$OpticksBinariesDir/PlugIns/Dted.so 644 root $GROUP
+f none $APPDIR/PlugIns/ENVI.so=$OpticksBinariesDir/PlugIns/ENVI.so 644 root $GROUP
+f none $APPDIR/PlugIns/Generic.so=$OpticksBinariesDir/PlugIns/Generic.so 644 root $GROUP
+f none $APPDIR/PlugIns/GeographicFeatures.so=$OpticksBinariesDir/PlugIns/GeographicFeatures.so 644 root $GROUP
+f none $APPDIR/PlugIns/Georeference.so=$OpticksBinariesDir/PlugIns/Georeference.so 644 root $GROUP
+f none $APPDIR/PlugIns/Hdf.so=$OpticksBinariesDir/PlugIns/Hdf.so 644 root $GROUP
+f none $APPDIR/PlugIns/Ice.so=$OpticksBinariesDir/PlugIns/Ice.so 644 root $GROUP
+f none $APPDIR/PlugIns/MovieExporter.so=$OpticksBinariesDir/PlugIns/MovieExporter.so 644 root $GROUP
+f none $APPDIR/PlugIns/Nitf.so=$OpticksBinariesDir/PlugIns/Nitf.so 644 root $GROUP
+f none $APPDIR/PlugIns/NitfCommonTre.so=$OpticksBinariesDir/PlugIns/NitfCommonTre.so 644 root $GROUP
+f none $APPDIR/PlugIns/Pca.so=$OpticksBinariesDir/PlugIns/Pca.so 644 root $GROUP
+f none $APPDIR/PlugIns/Pictures.so=$OpticksBinariesDir/PlugIns/Pictures.so 644 root $GROUP
+f none $APPDIR/PlugIns/Results.so=$OpticksBinariesDir/PlugIns/Results.so 644 root $GROUP
+f none $APPDIR/PlugIns/Scripts.so=$OpticksBinariesDir/PlugIns/Scripts.so 644 root $GROUP
+f none $APPDIR/PlugIns/SecondMoment.so=$OpticksBinariesDir/PlugIns/SecondMoment.so 644 root $GROUP
+f none $APPDIR/PlugIns/ShapeFileExporter.so=$OpticksBinariesDir/PlugIns/ShapeFileExporter.so 644 root $GROUP
+f none $APPDIR/PlugIns/Sio.so=$OpticksBinariesDir/PlugIns/Sio.so 644 root $GROUP
+f none $APPDIR/PlugIns/WizardExecutor.so=$OpticksBinariesDir/PlugIns/WizardExecutor.so 644 root $GROUP
+f none $APPDIR/PlugIns/WizardItems.so=$OpticksBinariesDir/PlugIns/WizardItems.so 644 root $GROUP
+d none $APPDIR/SupportFiles 0755 root $GROUP
+d none $APPDIR/SupportFiles/Annotation 0755 root $GROUP
+f none $APPDIR/SupportFiles/Annotation/default.cgm=$OpticksCodeDir/Release/SupportFiles/Annotation/default.cgm 644 root $GROUP
+f none $APPDIR/SupportFiles/Annotation/East.ano=$OpticksCodeDir/Release/SupportFiles/Annotation/East.ano 644 root $GROUP
+f none $APPDIR/SupportFiles/Annotation/North.ano=$OpticksCodeDir/Release/SupportFiles/Annotation/North.ano 644 root $GROUP
+d none $APPDIR/SupportFiles/ColorTables 0755 root $GROUP
+f none $APPDIR/SupportFiles/ColorTables/autocolor.clu=$OpticksCodeDir/Release/SupportFiles/ColorTables/autocolor.clu 644 root $GROUP
+f none $APPDIR/SupportFiles/ColorTables/HotIron.clu=$OpticksCodeDir/Release/SupportFiles/ColorTables/HotIron.clu 644 root $GROUP
+f none $APPDIR/SupportFiles/ColorTables/HotIronAlpha.clu=$OpticksCodeDir/Release/SupportFiles/ColorTables/HotIronAlpha.clu 644 root $GROUP
+f none $APPDIR/SupportFiles/ColorTables/Primaries.clu=$OpticksCodeDir/Release/SupportFiles/ColorTables/Primaries.clu 644 root $GROUP
+f none $APPDIR/SupportFiles/ColorTables/RedTemp.cgr=$OpticksCodeDir/Release/SupportFiles/ColorTables/RedTemp.cgr 644 root $GROUP
+f none $APPDIR/SupportFiles/ColorTables/Spectrum.cgr=$OpticksCodeDir/Release/SupportFiles/ColorTables/Spectrum.cgr 644 root $GROUP
+f none $APPDIR/SupportFiles/ColorTables/SpectrumAlpha.clu=$OpticksCodeDir/Release/SupportFiles/ColorTables/SpectrumAlpha.clu 644 root $GROUP
+f none $APPDIR/SupportFiles/ColorTables/StopLight.clu=$OpticksCodeDir/Release/SupportFiles/ColorTables/StopLight.clu 644 root $GROUP
+f none $APPDIR/SupportFiles/ColorTables/WeatherMap.clu=$OpticksCodeDir/Release/SupportFiles/ColorTables/WeatherMap.clu 644 root $GROUP
+d none $APPDIR/SupportFiles/SecurityMarkings 0755 root $GROUP
+f classification $APPDIR/SupportFiles/SecurityMarkings/ClassificationLevels.txt=$currentDir/ClassificationLevels-T.txt 644 root $GROUP 
+f none $APPDIR/SupportFiles/SecurityMarkings/Authority.txt=$OpticksCodeDir/Release/SupportFiles/SecurityMarkings/Authority.txt 644 root $GROUP
+f none $APPDIR/SupportFiles/SecurityMarkings/AuthoritySourceDate.txt=$OpticksCodeDir/Release/SupportFiles/SecurityMarkings/AuthoritySourceDate.txt 644 root $GROUP
+f none $APPDIR/SupportFiles/SecurityMarkings/AuthorityType.txt=$OpticksCodeDir/Release/SupportFiles/SecurityMarkings/AuthorityType.txt 644 root $GROUP
+f none $APPDIR/SupportFiles/SecurityMarkings/ClassificationReason.txt=$OpticksCodeDir/Release/SupportFiles/SecurityMarkings/ClassificationReason.txt 644 root $GROUP
+f none $APPDIR/SupportFiles/SecurityMarkings/Codewords.txt=$OpticksCodeDir/Release/SupportFiles/SecurityMarkings/Codewords.txt 644 root $GROUP
+f none $APPDIR/SupportFiles/SecurityMarkings/CountryCode-Default.txt=$OpticksCodeDir/Release/SupportFiles/SecurityMarkings/CountryCode-Default.txt 644 root $GROUP
+f none $APPDIR/SupportFiles/SecurityMarkings/DeclassificationExemption.txt=$OpticksCodeDir/Release/SupportFiles/SecurityMarkings/DeclassificationExemption.txt 644 root $GROUP
+f none $APPDIR/SupportFiles/SecurityMarkings/DeclassificationType.txt=$OpticksCodeDir/Release/SupportFiles/SecurityMarkings/DeclassificationType.txt 644 root $GROUP
+f none $APPDIR/SupportFiles/SecurityMarkings/Description.txt=$OpticksCodeDir/Release/SupportFiles/SecurityMarkings/Description.txt 644 root $GROUP
+f none $APPDIR/SupportFiles/SecurityMarkings/Downgrade.txt=$OpticksCodeDir/Release/SupportFiles/SecurityMarkings/Downgrade.txt 644 root $GROUP
+f none $APPDIR/SupportFiles/SecurityMarkings/FileControls.txt=$OpticksCodeDir/Release/SupportFiles/SecurityMarkings/FileControls.txt 644 root $GROUP
+f none $APPDIR/SupportFiles/SecurityMarkings/FileDowngrade.txt=$OpticksCodeDir/Release/SupportFiles/SecurityMarkings/FileDowngrade.txt 644 root $GROUP
+f none $APPDIR/SupportFiles/SecurityMarkings/FileReleasing.txt=$OpticksCodeDir/Release/SupportFiles/SecurityMarkings/FileReleasing.txt 644 root $GROUP
+f none $APPDIR/SupportFiles/SecurityMarkings/securitymarkingslist.txt=$OpticksCodeDir/Release/SupportFiles/SecurityMarkings/securitymarkingslist.txt 644 root $GROUP
+f none $APPDIR/SupportFiles/SecurityMarkings/Systems.txt=$OpticksCodeDir/Release/SupportFiles/SecurityMarkings/Systems.txt 644 root $GROUP
+d none $APPDIR/SupportFiles/Xml 0755 root $GROUP
+f none $APPDIR/SupportFiles/Xml/opticks-1.xsd=$OpticksCodeDir/Release/SupportFiles/Xml/opticks-1.xsd 644 root $GROUP
+f none $APPDIR/SupportFiles/Xml/opticks-2.xsd=$OpticksCodeDir/Release/SupportFiles/Xml/opticks-2.xsd 644 root $GROUP
+f none $APPDIR/SupportFiles/Xml/opticks-3.xsd=$OpticksCodeDir/Release/SupportFiles/Xml/opticks-3.xsd 644 root $GROUP
+d none $APPDIR/Templates 0755 root $GROUP
+f none $APPDIR/Templates/MultipleImages.spg=$OpticksCodeDir/Release/Templates/MultipleImages.spg 644 root $GROUP
+f none $APPDIR/Templates/SingleImage.spg=$OpticksCodeDir/Release/Templates/SingleImage.spg 644 root $GROUP
+f none $APPDIR/Templates/ZoomedImages.spg=$OpticksCodeDir/Release/Templates/ZoomedImages.spg 644 root $GROUP
+d none $APPDIR/Help 0755 root $GROUP
+!include $currentDir/PackageOutput/help-prototype

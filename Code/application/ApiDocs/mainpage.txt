@@ -1,0 +1,26 @@
+/**
+ * @mainpage Opticks - Plug-In Interface Specification
+ *
+ * <h2>Getting Started:</h2>
+ * <ul>
+ * <li>There are sample Opticks plug-ins provided in the
+ * Toolkit\\Application\\PlugIns\\src folder of a Opticks Installation provided
+ * the Developer's Toolkit was installed.</li>
+ * <li>The Opticks Plug-In Interface is divided into four parts, Interfaces,
+ * PlugInUtilities, PlugInLib and HdfPlugInLib which are all documented here
+ * together, a explanation of each part is provided below:
+ *   <ul><li>The Toolkit\\Application\\Interfaces folder provides the base
+ * interface for the Opticks application, ie. the API of Opticks that plug-ins
+ * can interact with.</li>
+ *     <li>The Toolkit\\Application\\PlugInUtilities provides helper and
+ * convenience classes that can be compiled into Opticks plug-ins to make using
+ * the Opticks API a little easier; you should look here often.</li>
+ *     <li>The Toolkit\\Application\\PlugInLib provides code that you should
+ * subclass and include into your Opticks plug-in so that the Opticks Application
+ * can locate and access your plug-in.</li>
+ *     <li>The Toolkit\\Application\\HdfPlugInLib provides code to make it
+ * easier for plug-in developers to work with datafiles using the HDF4 or
+ * HDF5 file specification.</li>
+ *   </ul>
+ * </ul>
+ */

@@ -1,0 +1,150 @@
+# recreate the top level SConstruct so we can
+# build these independent of the core
+
+import os
+import os.path
+import subprocess
+
+####
+# the default SConscript...will be created if none exist
+####
+default_sconscript = """import glob
+
+####
+# import the environment
+####
+Import('env extra_obj build_dir')
+
+####
+# build sources
+####
+srcs = map(lambda x,bd=build_dir: '%%s/%%s' %% (bd,x), glob.glob("*.cpp"))
+objs = env.SharedObject(srcs)
+
+####
+# build the plug-in library and set up an alias to wase building it later
+####
+lib = env.SharedLibrary('%%s/%s' %% build_dir,objs+extra_obj)
+libInstall = env.Install(env["PLUGINDIR"], lib)
+env.Alias('%s', libInstall)
+
+####
+# return the plug-in library
+####
+Return("libInstall")
+"""
+
+
+####
+# END DEFAULT SCONSCRIPT
+####
+
+####
+# Set up the options and environment
+####
+opts = Options()
+opts.AddOptions(BoolOption('RELEASE','False for debug, true for release',0),
+                       ('RELEASE_DIR','Point to the release directory','#/../../../release'),
+                       ('ignore','List of plugins which should not be built',''))
+opts.Add('BUILDDIR','Directory for build files','#/../../../Build')
+opts.Add('CACHEDIR','Directory for cache files. Default is not caching.','')
+
+TOOLPATH = Dir("#/../../CompileSettings").abspath
+PLATFORM = "%s-%s" % (os.environ['OSTYPE'],os.environ['MACHTYPE'])
+
+env = Environment(options=opts,
+                  PLATFORM=PLATFORM,
+                  ENV=os.environ,
+                  tools=["default","qt4","xercesc","boost",
+                         "suncc","sunar","sunlink"],
+                  toolpath=[TOOLPATH])
+if env['RELEASE']:
+   MODE='release'
+else:
+   MODE='debug'
+BUILDDIR = env.Dir(env["BUILDDIR"]).abspath
+env["PLUGINDIR"] = '%s/Binaries-%s-%s/PlugIns' % (BUILDDIR,PLATFORM,MODE)
+env["BINDIR"] = '%s/Binaries-%s-%s/Bin' % (BUILDDIR,PLATFORM,MODE)
+env["LIBDIR"] = '%s/Binaries-%s-%s/Lib' % (BUILDDIR,PLATFORM,MODE)
+env["BUILDDIR"] = '%s/%s-%s/PlugIns' % (BUILDDIR,PLATFORM,MODE)
+env["COREDIR"] = "#/../.."
+
+
+Help(opts.GenerateHelpText(env))
+env["QT_MODULES"] = ["QtCore","QtGui","Qt3Support"]
+env.Qt4AddModules(env["QT_MODULES"])
+
+env['SHLIBPREFIX'] = ""
+env.Append(CXXFLAGS="-library=stlport4 -xarch=v9 -xcode=pic32 -erroff=nonewline",
+           SHLINKFLAGS="-library=stlport4 -xarch=v9 -xcode=pic32 -mt -L/usr/sfw/lib/sparcv9",
+           CPPDEFINES=["_USRDLL","APPLICATION_XERCES"],
+           LIBPATH=[env["LIBDIR"]],
+           LIBS=env["QT_MODULES"] + ["PlugInLib","PlugInUtilities","PlugInLib","nsl","dl","GLU","GL","Xm","Xext","X11","m"])
+env.BuildDir(env["BUILDDIR"], "#", duplicate=0)
+
+if MODE == 'release':
+   env.Append(CXXFLAGS="-xO3")
+else:
+   env.Append(CXXFLAGS="-g")
+
+ignore = Split(env['ignore'])
+
+plugins = map(lambda x: x.split('./')[-1].split('/')[0],
+              map(lambda x: x[0],
+                  filter(lambda x: 'ModuleManager.cpp' in x[2] or 'modulemanager.cpp' in x[2],os.walk('.'))))
+
+# check for extra vars
+if os.path.exists(".extravars"):
+   fp=open(".extravars","r")
+   exec(fp.read())
+   fp.close()
+
+incdirs = [".",
+           "$COREDIR/Interfaces",
+           "$COREDIR/PlugInLib",
+           "$COREDIR/PlugInUtilities",
+           "$COREDIR/PlugInUtilities/MathUtilities",
+           "$COREDIR/PlugInUtilities/Interfaces",
+           "$COREDIR/PlugInUtilities/pthreads-wrapper"]
+env.Append(CPPPATH=incdirs)
+if len(env["CACHEDIR"]) > 0:
+   print "Enable caching to",env["CACHEDIR"]
+   env.CacheDir(env["CACHEDIR"])
+
+###
+# tell SCons this is a shared object
+###
+extra_obj_file = env.File("%s/ModuleShell.os" % env["LIBDIR"])
+class SharedObjectProxy:
+   def __init__(self):
+      self.shared = 1
+extra_obj_file.attributes = SharedObjectProxy()
+extra_obj = [extra_obj_file]
+
+libs = []
+Export('env','MODE','extra_obj','TOOLPATH','PLATFORM')
+
+subprocess.Popen(["../../../update-build-revision.py"]).wait()
+
+for plugin in plugins:
+   if plugin in ignore:
+      continue
+   if not os.path.isfile('%s/SConscript' % plugin):
+      try:
+         fp = open('%s/SConscript' % plugin, 'w')
+         fp.write(default_sconscript % (plugin,plugin))
+         fp.close()
+         print 'Created a default SConscript for plugin %s..remember to check it in' % plugin
+      except:
+         continue
+   src_dir = '#/%s' % plugin
+   build_dir = '%s/%s' % (env["BUILDDIR"], plugin)
+   env.BuildDir(build_dir, src_dir, duplicate=0)
+   libs.append(env.SConscript('%s/SConscript' % plugin, exports='build_dir'))
+
+####
+# Install the plug-ins to the proper directories
+# and set up some useful aliases
+####
+all = env.Alias('all', libs)
+Default(all)
