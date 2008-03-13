@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="Qt-Debug"
+	InheritedPropertySheets=".\Qt.vsprops"
+	>
+	<Tool
+		Name="VCLinkerTool"
+		AdditionalDependencies="qtmaind.lib Qt3Supportd4.lib QtCored4.lib QtGuid4.lib QtOpenGLd4.lib QtXmld4.lib"
+	/>
+</VisualStudioPropertySheet>

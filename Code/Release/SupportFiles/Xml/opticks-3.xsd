@@ -1,0 +1,1095 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:opticks="https://comet.balldayton.com/standards/namespaces/2005/v1/comet.xsd" targetNamespace="https://comet.balldayton.com/standards/namespaces/2005/v1/comet.xsd">
+   <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+         This is version 3.0 of the opticks Data Type schema. Information contained within is subject to change without notice.
+         When changing this definition, please increment the version tag below and in the namespace above (and in the xmlbase.* source files).
+
+The information in this file is
+Copyright(c) 2007 Ball Aerospace &amp; Technologies Corporation
+and is subject to the terms and conditions of the
+GNU Lesser General Public License Version 2.1
+The license text is available from   
+http://www.gnu.org/licenses/lgpl.html
+      </xsd:documentation>
+   </xsd:annotation>
+   <xsd:attributeGroup name="versionHeader">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            This is the version number of the current schema definition. All top level types use this construct.
+            This should be included in the xsd:schema verion attribute as well
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:attribute name="version" type="xsd:positiveInteger" fixed="3" use="required" />
+   </xsd:attributeGroup>
+   <xsd:simpleType name="coordinateType">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            This is a freeform coordinate. It consists of a list of double's. This is typically
+            used to represent a 2D point (x and y value) or a rectangle (x and y of lower left then x and y of upper right).
+            Uses of this datatype not consistent with the above should be documented.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:list itemType="xsd:double" />
+   </xsd:simpleType>
+   <xsd:simpleType name="ColorTripleType">
+      <xsd:restriction base="xsd:token">
+         <xsd:pattern value="#[a-fA-F0-9]{6,8}" />
+      </xsd:restriction>
+   </xsd:simpleType>
+   <xsd:simpleType name="EncodingType">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="INT1UBYTE" />
+         <xsd:enumeration value="INT1SBYTE" />
+         <xsd:enumeration value="INT2UBYTES" />
+         <xsd:enumeration value="INT2SBYTES" />
+         <xsd:enumeration value="INT4UBYTES" />
+         <xsd:enumeration value="INT4SBYTES" />
+         <xsd:enumeration value="INT4SCOMPLEX" />
+         <xsd:enumeration value="FLT4BYTES" />
+         <xsd:enumeration value="FLT8COMPLEX" />
+         <xsd:enumeration value="FLT8BYTES" />
+      </xsd:restriction>
+   </xsd:simpleType>
+   <xsd:simpleType name="EndianType">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="big" />
+         <xsd:enumeration value="little" />
+      </xsd:restriction>
+   </xsd:simpleType>
+   <xsd:simpleType name="DisplayMode">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="grayscale" />
+         <xsd:enumeration value="rgb" />
+      </xsd:restriction>
+   </xsd:simpleType>
+   <xsd:simpleType name="InterleaveFormatType">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="BIL" />
+         <xsd:enumeration value="BIP" />
+         <xsd:enumeration value="BSQ" />
+      </xsd:restriction>
+   </xsd:simpleType>
+   <xsd:simpleType name="ProcessingLocation">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="inMemory" />
+         <xsd:enumeration value="onDisk" />
+         <xsd:enumeration value="onDiskReadOnly" />
+      </xsd:restriction>
+   </xsd:simpleType>
+   <xsd:simpleType name="uintList">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            This is a freeform unsigned integer list.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:list itemType="xsd:nonNegativeInteger" />
+   </xsd:simpleType>
+   <xsd:attributeGroup name="idHeader">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            This group is common in objects. It contains an object name and type.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:attribute name="name" type="xsd:string" use="required" />
+      <xsd:attribute name="type" type="xsd:string" default="" />
+   </xsd:attributeGroup>
+   <xsd:complexType name="DynamicObjectElement">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            A DynamicObjectElement is a name/type/value grouping.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:all>
+         <xsd:element name="value" form="qualified" />
+      </xsd:all>
+      <xsd:attributeGroup ref="opticks:idHeader" />
+      <xsd:attribute name="hasValue" type="xsd:boolean" use="optional" default="true" />
+   </xsd:complexType>
+   <xsd:complexType name="DynamicObject">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            This is a generic DynamicObject and is always extended. See Classification for an example of an extension
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:sequence>
+         <xsd:element name="attribute" type="opticks:DynamicObjectElement" minOccurs="0" maxOccurs="unbounded" form="qualified" />
+      </xsd:sequence>
+      <xsd:attributeGroup ref="opticks:versionHeader" />
+   </xsd:complexType>
+   <xsd:simpleType name="classificationLevelType">
+      <xsd:restriction base="xsd:string">
+         <xsd:enumeration value="UNCLASSIFIED" />
+         <xsd:enumeration value="CONFIDENTIAL" />
+         <xsd:enumeration value="SECRET" />
+         <xsd:enumeration value="TOP SECRET" />
+         <xsd:enumeration value="U" />
+         <xsd:enumeration value="C" />
+         <xsd:enumeration value="S" />
+         <xsd:enumeration value="T" />
+      </xsd:restriction>
+   </xsd:simpleType>
+   <xsd:complexType name="Classification">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            Extension of a DynamicObject containing Classification info.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:complexContent>
+         <xsd:extension base="opticks:DynamicObject">
+            <xsd:attribute name="level" type="opticks:classificationLevelType" use="required" />
+            <xsd:attribute name="system" type="xsd:string" use="optional" />
+            <xsd:attribute name="codewords" type="xsd:string" use="optional" />
+            <xsd:attribute name="fileControl" type="xsd:string" use="optional" />
+            <xsd:attribute name="fileReleasing" type="xsd:string" use="optional" />
+            <xsd:attribute name="declassificationDate" type="xsd:dateTime" use="optional" />
+            <xsd:attribute name="declassificationExemption" type="xsd:string" use="optional" />
+            <xsd:attribute name="fileDowngrade" type="xsd:string" use="optional" />
+            <xsd:attribute name="countryCode" type="xsd:string" use="optional" />
+            <xsd:attribute name="downgradeDate" type="xsd:dateTime" use="optional" />
+            <xsd:attribute name="description" type="xsd:string" use="optional" />
+            <xsd:attribute name="authority" type="xsd:string" use="optional" />
+            <xsd:attribute name="authorityType" type="xsd:string" use="optional" />
+            <xsd:attribute name="securitySourceDate" type="xsd:dateTime" use="optional" />
+            <xsd:attribute name="securityControlNumber" type="xsd:string" use="optional" />
+            <xsd:attribute name="fileCopyNumber" type="xsd:string" use="optional" />
+            <xsd:attribute name="fileNumberOfCopies" type="xsd:string" use="optional" />
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
+   <xsd:complexType name="FileDescriptor">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            A FileDescriptor.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:attribute name="datasetLocation" type="xsd:string" use="optional" />
+      <xsd:attribute name="filename" type="xsd:anyURI" use="required" />
+      <xsd:attribute name="endian" type="opticks:EndianType" use="required" />
+      <xsd:attribute name="type" type="xsd:string" use="required" />
+   </xsd:complexType>
+   <xsd:complexType name="DimensionDescriptor">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            Information about a dimension element such as a row, column, or band.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:attribute name="originalNumber" type="xsd:nonNegativeInteger" use="optional" />
+      <xsd:attribute name="onDiskNumber" type="xsd:nonNegativeInteger" use="optional" />
+      <xsd:attribute name="activeNumber" type="xsd:nonNegativeInteger" use="optional" />
+   </xsd:complexType>
+   <xsd:complexType name="RasterFileDescriptor">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            A FileDescriptor for a RasterElement.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:complexContent>
+         <xsd:extension base="opticks:FileDescriptor">
+            <xsd:sequence>
+               <xsd:element name="BadValues" minOccurs="1" maxOccurs="1" form="qualified">
+                  <xsd:complexType>
+                     <xsd:sequence>
+                        <xsd:element name="value" minOccurs="0" maxOccurs="unbounded" form="qualified" type="xsd:integer" />
+                     </xsd:sequence>
+                  </xsd:complexType>
+               </xsd:element>
+               <xsd:element name="rows" minOccurs="1" maxOccurs="1" form="qualified">
+                  <xsd:complexType>
+                     <xsd:sequence>
+                        <xsd:element name="row" minOccurs="0" maxOccurs="unbounded" form="qualified" type="opticks:DimensionDescriptor" />
+                     </xsd:sequence>
+                     <xsd:attribute name="compression" type="xsd:string" use="optional" />
+                  </xsd:complexType>
+               </xsd:element>
+               <xsd:element name="columns" minOccurs="1" maxOccurs="1" form="qualified">
+                  <xsd:complexType>
+                     <xsd:sequence>
+                        <xsd:element name="column" minOccurs="0" maxOccurs="unbounded" form="qualified" type="opticks:DimensionDescriptor" />
+                     </xsd:sequence>
+                     <xsd:attribute name="compression" type="xsd:string" use="optional" />
+                  </xsd:complexType>
+               </xsd:element>
+               <xsd:element name="pixelSize" type="opticks:coordinateType" minOccurs="1" maxOccurs="1" form="qualified" />
+               <xsd:element name="units" type="opticks:Units" minOccurs="1" maxOccurs="1" form="qualified" />
+               <xsd:element name="gcpPoint" type="opticks:GcpPoint" form="qualified" />
+               <xsd:element name="bandFile" type="xsd:anyURI" form="qualified" minOccurs="0" maxOccurs="unbounded" />
+               <xsd:element name="bands" minOccurs="1" maxOccurs="1" form="qualified">
+                  <xsd:complexType>
+                     <xsd:sequence>
+                        <xsd:element name="band" minOccurs="0" maxOccurs="unbounded" form="qualified" type="opticks:DimensionDescriptor" />
+                     </xsd:sequence>
+                     <xsd:attribute name="compression" type="xsd:string" use="optional" />
+                  </xsd:complexType>
+               </xsd:element>
+            </xsd:sequence>
+            <xsd:attribute name="headerBytes" type="xsd:nonNegativeInteger" use="required" />
+            <xsd:attribute name="trailerBytes" type="xsd:nonNegativeInteger" use="required" />
+            <xsd:attribute name="prelineBytes" type="xsd:nonNegativeInteger" use="required" />
+            <xsd:attribute name="postlineBytes" type="xsd:nonNegativeInteger" use="required" />
+            <xsd:attribute name="bitsPerElement" type="xsd:nonNegativeInteger" use="required" />
+            <xsd:attribute name="prebandBytes" type="xsd:nonNegativeInteger" use="required" />
+            <xsd:attribute name="postbandBytes" type="xsd:nonNegativeInteger" use="required" />
+            <xsd:attribute name="interleaveFormat" type="opticks:InterleaveFormatType" use="required" />
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
+   <xsd:complexType name="DataDescriptor">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            A DataDescriptor.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:sequence>
+         <xsd:element name="classification" type="opticks:Classification" form="qualified" />
+         <xsd:element name="metadata" type="opticks:DynamicObject" form="qualified" minOccurs="1" />
+         <xsd:element name="FileDescriptor" type="opticks:FileDescriptor" form="qualified" minOccurs="0" />
+      </xsd:sequence>
+      <xsd:attribute name="processingLocation" type="opticks:ProcessingLocation" use="required" />
+      <xsd:attributeGroup ref="opticks:idHeader" />
+      <xsd:attributeGroup ref="opticks:versionHeader" />
+   </xsd:complexType>
+   <xsd:complexType name="DataElement">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            This is a generic DataElement.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:sequence>
+         <xsd:element name="DataDescriptor" type="opticks:DataDescriptor" form="qualified" />
+      </xsd:sequence>
+      <xsd:attributeGroup ref="opticks:versionHeader" />
+      <xsd:attributeGroup ref="opticks:idHeader" />
+   </xsd:complexType>
+   <xsd:complexType name="GcpPoint">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            This is gcp point.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:all>
+         <xsd:element name="pixel" type="opticks:coordinateType" form="qualified" />
+         <xsd:element name="coordinate" type="opticks:coordinateType" form="qualified" />
+         <xsd:element name="rmsError" type="opticks:coordinateType" form="qualified" />
+      </xsd:all>
+   </xsd:complexType>
+   <xsd:complexType name="GcpList">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            A GCP list.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:complexContent>
+         <xsd:extension base="opticks:DataElement">
+            <xsd:sequence>
+               <xsd:element name="gcpPoint" type="opticks:GcpPoint" minOccurs="0" maxOccurs="unbounded" form="qualified" />
+            </xsd:sequence>
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
+   <xsd:complexType name="TiePointList">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            A tie point list.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:complexContent>
+         <xsd:extension base="opticks:DataElement">
+            <xsd:sequence>
+               <xsd:element name="missionDataset" minOccurs="1" maxOccurs="1" form="qualified">
+                  <xsd:complexType>
+                     <xsd:attribute name="name" type="xsd:string" />
+                  </xsd:complexType>
+               </xsd:element>
+               <xsd:element name="pt" minOccurs="0" maxOccurs="unbounded" type="opticks:coordinateType" form="qualified" />
+            </xsd:sequence>
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
+   <xsd:complexType name="RawData" mixed="true">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            This is base-64 encoded 32-bit integer big endian data.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:attribute name="size" type="xsd:nonNegativeInteger" use="required" />
+   </xsd:complexType>
+   <xsd:complexType name="aoiBitmask">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            An AOI Bitmask type. The ecc attribute contains the name of the error
+            correcting code used when encoding the mask. The encoding should allow
+            the bitmask to be decoded without checking the ECC. Currently supported
+            values are: nil = no ECC used, RS(255,223) = a common reed-solomon code
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:all>
+         <xsd:element name="rectangle" minOccurs="1" maxOccurs="1" type="opticks:coordinateType" form="qualified" />
+         <xsd:element name="boundingBox" minOccurs="1" maxOccurs="1" type="opticks:coordinateType" form="qualified" />
+         <xsd:element name="size" minOccurs="1" maxOccurs="1" type="opticks:coordinateType" form="qualified">
+            <xsd:annotation>
+               <xsd:documentation xml:lang="us">The size of the bitmask. column, row, pointCount.</xsd:documentation>
+            </xsd:annotation>
+         </xsd:element>
+         <xsd:element name="mask" type="xsd:base64Binary" form="qualified">
+            <xsd:annotation>
+               <xsd:documentation xml:lang="us">Encode the bitmask as an array of bytes then convert to base64.</xsd:documentation>
+            </xsd:annotation>
+         </xsd:element>
+      </xsd:all>
+      <xsd:attribute name="outside" type="xsd:boolean" />
+      <xsd:attribute name="ecc" type="xsd:string" default="" />
+   </xsd:complexType>
+   <xsd:complexType name="AoiElement">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            An AOI list.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:complexContent>
+         <xsd:extension base="opticks:GraphicElement">
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
+   <xsd:complexType name="graphicProperty" abstract="true">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            An graphic object property.
+         </xsd:documentation>
+      </xsd:annotation>
+   </xsd:complexType>
+   <xsd:complexType name="alphaProperty">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            An alpha graphic object property.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:complexContent>
+         <xsd:extension base="opticks:graphicProperty">
+            <xsd:attribute name="alpha" type="xsd:double" use="required" />
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
+   <xsd:complexType name="apexProperty">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            An apex graphic object property.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:complexContent>
+         <xsd:extension base="opticks:graphicProperty">
+            <xsd:attribute name="position" type="xsd:double" use="required" />
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
+   <xsd:complexType name="arcRegionProperty">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            An arc region graphic object property.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:complexContent>
+         <xsd:extension base="opticks:graphicProperty">
+            <xsd:attribute name="region" use="required">
+               <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                     <xsd:enumeration value="center" />
+                     <xsd:enumeration value="chord" />
+                     <xsd:enumeration value="open" />
+                  </xsd:restriction>
+               </xsd:simpleType>
+            </xsd:attribute>
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
+   <xsd:complexType name="boundingBoxProperty">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            A bounding box graphic object property.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:all>
+         <xsd:element name="boundingBox" minOccurs="0" maxOccurs="1" type="opticks:coordinateType" form="qualified" />
+         <xsd:element name="geoBox" minOccurs="0" maxOccurs="1" type="opticks:coordinateType" form="qualified" />
+      </xsd:all>
+   </xsd:complexType>
+   <xsd:complexType name="drawModeProperty">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            A draw mode graphic object property.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:complexContent>
+         <xsd:extension base="opticks:graphicProperty">
+            <xsd:attribute name="mode" use="required">
+               <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                     <xsd:enumeration value="draw" />
+                     <xsd:enumeration value="erase" />
+                     <xsd:enumeration value="toggle" />
+                  </xsd:restriction>
+               </xsd:simpleType>
+            </xsd:attribute>
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
+   <xsd:complexType name="fillColorProperty">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            A fill color graphic object property.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:all>
+         <xsd:element name="color" minOccurs="1" maxOccurs="1" type="opticks:coordinateType" form="qualified">
+            <xsd:annotation>
+               <xsd:documentation xml:lang="en">
+                  This is a 3-tuple graphic Red Green Blue
+               </xsd:documentation>
+            </xsd:annotation>
+         </xsd:element>
+      </xsd:all>
+   </xsd:complexType>
+   <xsd:complexType name="fillStyleProperty">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            A fill style graphic object property.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:complexContent>
+         <xsd:extension base="opticks:graphicProperty">
+            <xsd:attribute name="style" use="required">
+               <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                     <xsd:enumeration value="solid" />
+                     <xsd:enumeration value="hatch" />
+                     <xsd:enumeration value="empty" />
+                  </xsd:restriction>
+               </xsd:simpleType>
+            </xsd:attribute>
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
+   <xsd:complexType name="fontProperty">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            A font graphic object property.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:complexContent>
+         <xsd:extension base="opticks:graphicProperty">
+            <xsd:attribute name="face" type="xsd:string" />
+            <xsd:attribute name="size" type="xsd:positiveInteger" use="required" />
+            <xsd:attribute name="bold" type="xsd:boolean" />
+            <xsd:attribute name="italic" type="xsd:boolean" />
+            <xsd:attribute name="underline" type="xsd:boolean" />
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
+   <xsd:complexType name="graphicSymbolProperty">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            A graphic symbol graphic object property.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:complexContent>
+         <xsd:extension base="opticks:graphicProperty">
+            <xsd:attribute name="name" use="required" type="xsd:string" />
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
+   <xsd:complexType name="graphicSymbolSizeProperty">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            A symbol size graphic object property.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:complexContent>
+         <xsd:extension base="opticks:graphicProperty">
+            <xsd:attribute name="size" use="required" type="xsd:nonNegativeInteger" />
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
+   <xsd:complexType name="hatchStyleProperty">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            A hatch style graphic object property.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:complexContent>
+         <xsd:extension base="opticks:graphicProperty">
+            <xsd:attribute name="boxed" type="xsd:boolean" default="false" />
+            <xsd:attribute name="style" use="required">
+               <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                     <xsd:enumeration value="solid" />
+                     <xsd:enumeration value="x" />
+                     <xsd:enumeration value="cross hair" />
+                     <xsd:enumeration value="asterisk" />
+                     <xsd:enumeration value="horizontal line" />
+                     <xsd:enumeration value="vertical line" />
+                     <xsd:enumeration value="forward slash" />
+                     <xsd:enumeration value="back slash" />
+                  </xsd:restriction>
+               </xsd:simpleType>
+            </xsd:attribute>
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
+   <xsd:complexType name="latLonProperty">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            A lat/long graphic object property.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:all>
+         <xsd:element name="point" minOccurs="1" maxOccurs="1" type="opticks:coordinateType" form="qualified">
+            <xsd:annotation>
+               <xsd:documentation xml:lang="en">
+                  This is a 2-tuple containing Lat Lon
+               </xsd:documentation>
+            </xsd:annotation>
+         </xsd:element>
+      </xsd:all>
+   </xsd:complexType>
+   <xsd:complexType name="lineColorProperty">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            A line color graphic object property.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:all>
+         <xsd:element name="color" minOccurs="1" maxOccurs="1" type="opticks:coordinateType" form="qualified">
+            <xsd:annotation>
+               <xsd:documentation xml:lang="en">
+                  This is a 3-tuple containing Red Green Blue
+               </xsd:documentation>
+            </xsd:annotation>
+         </xsd:element>
+      </xsd:all>
+   </xsd:complexType>
+   <xsd:complexType name="lineOnProperty">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            A line on graphic object property.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:complexContent>
+         <xsd:extension base="opticks:graphicProperty">
+            <xsd:attribute name="on" type="xsd:boolean" use="required" />
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
+   <xsd:complexType name="lineScaledProperty">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            A line scaled graphic object property.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:complexContent>
+         <xsd:extension base="opticks:graphicProperty">
+            <xsd:attribute name="scaled" use="required" type="xsd:boolean" />
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
+   <xsd:complexType name="lineStyleProperty">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            A line style graphic object property.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:complexContent>
+         <xsd:extension base="opticks:graphicProperty">
+            <xsd:attribute name="style" use="required">
+               <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                     <xsd:enumeration value="solid" />
+                     <xsd:enumeration value="dashed" />
+                     <xsd:enumeration value="dot" />
+                     <xsd:enumeration value="dash dot" />
+                     <xsd:enumeration value="dash dot dot" />
+                  </xsd:restriction>
+               </xsd:simpleType>
+            </xsd:attribute>
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
+   <xsd:complexType name="lineWidthProperty">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            A line width graphic object property.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:complexContent>
+         <xsd:extension base="opticks:graphicProperty">
+            <xsd:attribute name="width" use="required" type="xsd:double" />
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
+   <xsd:complexType name="pixelSymbolProperty">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            A pixel symbol graphic object property.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:complexContent>
+         <xsd:extension base="opticks:graphicProperty">
+            <xsd:attribute name="boxed" type="xsd:boolean" default="false" />
+            <xsd:attribute name="symbol" use="required">
+               <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                     <xsd:enumeration value="solid" />
+                     <xsd:enumeration value="x" />
+                     <xsd:enumeration value="cross hair" />
+                     <xsd:enumeration value="asterisk" />
+                     <xsd:enumeration value="horizontal line" />
+                     <xsd:enumeration value="vertical line" />
+                     <xsd:enumeration value="forward slash" />
+                     <xsd:enumeration value="back slash" />
+                  </xsd:restriction>
+               </xsd:simpleType>
+            </xsd:attribute>
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
+   <xsd:complexType name="rotationProperty">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            A rotation graphic object property.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:complexContent>
+         <xsd:extension base="opticks:graphicProperty">
+            <xsd:attribute name="rotation" use="required" type="xsd:double" />
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
+   <xsd:complexType name="scaleProperty">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            A scale graphic object property.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:complexContent>
+         <xsd:extension base="opticks:graphicProperty">
+            <xsd:attribute name="scale" use="required" type="xsd:double" />
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
+   <xsd:complexType name="textAlignmentProperty">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            A text alignment graphic object property.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:complexContent>
+         <xsd:extension base="opticks:graphicProperty">
+            <xsd:attribute name="alignment" use="required" type="xsd:integer" />
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
+   <xsd:complexType name="textColorProperty">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            A text color graphic object property.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:all>
+         <xsd:element name="color" minOccurs="1" maxOccurs="1" type="opticks:coordinateType" form="qualified">
+            <xsd:annotation>
+               <xsd:documentation xml:lang="en">
+                  This is a 3-tuple containing Red Green Blue
+               </xsd:documentation>
+            </xsd:annotation>
+         </xsd:element>
+      </xsd:all>
+   </xsd:complexType>
+   <xsd:complexType name="textStringProperty">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            A text string graphic object property.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:all>
+         <xsd:element name="string" minOccurs="1" maxOccurs="1" type="xsd:string" form="qualified" />
+      </xsd:all>
+   </xsd:complexType>
+   <xsd:complexType name="wedgeProperty">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            A wedge graphic object property.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:complexContent>
+         <xsd:extension base="opticks:graphicProperty">
+            <xsd:attribute name="start" use="required" type="xsd:double" />
+            <xsd:attribute name="stop" use="required" type="xsd:double" />
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
+   <xsd:complexType name="paperSizeProperty">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            A paper size graphic object property.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:all>
+         <xsd:element name="size" minOccurs="1" maxOccurs="1" type="opticks:coordinateType" form="qualified">
+            <xsd:annotation>
+               <xsd:documentation xml:lang="en">
+                  This is a 2-tuple containing Width Height
+               </xsd:documentation>
+            </xsd:annotation>
+         </xsd:element>
+      </xsd:all>
+   </xsd:complexType>
+   <xsd:complexType name="filenameProperty">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            A filename graphic object property.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:complexContent>
+         <xsd:extension base="opticks:graphicProperty">
+            <xsd:attribute name="source" use="required" type="xsd:anyURI" />
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
+   <xsd:complexType name="cgmProperty">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            Properties for a CGM object.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:complexContent>
+         <xsd:extension base="opticks:graphicProperty">
+            <xsd:sequence>
+               <xsd:element name="element" minOccurs="0" maxOccurs="unbounded" type="xsd:integer" />
+               <xsd:element name="font" minOccurs="0" maxOccurs="unbounded" type="xsd:string" />
+            </xsd:sequence>
+            <xsd:attribute name="metafile" type="xsd:string" use="required" />
+            <xsd:attribute name="picture" type="xsd:string" use="required" />
+            <xsd:attribute name="version" type="xsd:integer" use="required" />
+            <xsd:attribute name="description" type="xsd:string" use="required" />
+            <xsd:attribute name="colorSelectionMode" type="xsd:integer" use="required" />
+            <xsd:attribute name="edgeWidthMode" type="xsd:integer" use="required" />
+            <xsd:attribute name="lineWidthMode" type="xsd:integer" use="required" />
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
+   <xsd:complexType name="Graphic">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            Annotation object(s). This actually combines GraphicGroup and other Graphic objects in one.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:all>
+         <xsd:element name="Alpha" type="opticks:alphaProperty" minOccurs="0" maxOccurs="1" form="qualified" />
+         <xsd:element name="Apex" type="opticks:apexProperty" minOccurs="0" maxOccurs="1" form="qualified" />
+         <xsd:element name="ArcRegion" type="opticks:arcRegionProperty" minOccurs="0" maxOccurs="1" form="qualified" />
+         <xsd:element name="BoundingBox" type="opticks:boundingBoxProperty" minOccurs="0" maxOccurs="1" form="qualified" />
+         <xsd:element name="DrawMode" type="opticks:drawModeProperty" minOccurs="0" maxOccurs="1" form="qualified" />
+         <xsd:element name="FillColor" type="opticks:fillColorProperty" minOccurs="0" maxOccurs="1" form="qualified" />
+         <xsd:element name="FillStyle" type="opticks:fillStyleProperty" minOccurs="0" maxOccurs="1" form="qualified" />
+         <xsd:element name="Font" type="opticks:fontProperty" minOccurs="0" maxOccurs="1" form="qualified" />
+         <xsd:element name="GraphicSymbol" type="opticks:graphicSymbolProperty" minOccurs="0" maxOccurs="1" form="qualified" />
+         <xsd:element name="GraphicSymbolSize" type="opticks:graphicSymbolSizeProperty" minOccurs="0" maxOccurs="1" form="qualified" />
+         <xsd:element name="HatchStyle" type="opticks:hatchStyleProperty" minOccurs="0" maxOccurs="1" form="qualified" />
+         <xsd:element name="LatLon" type="opticks:latLonProperty" minOccurs="0" maxOccurs="1" form="qualified" />
+         <xsd:element name="LineColor" type="opticks:lineColorProperty" minOccurs="0" maxOccurs="1" form="qualified" />
+         <xsd:element name="LineOn" type="opticks:lineOnProperty" minOccurs="0" maxOccurs="1" form="qualified" />
+         <xsd:element name="LineScaled" type="opticks:lineScaledProperty" minOccurs="0" maxOccurs="1" form="qualified" />
+         <xsd:element name="LineStyle" type="opticks:lineStyleProperty" minOccurs="0" maxOccurs="1" form="qualified" />
+         <xsd:element name="LineWidth" type="opticks:lineWidthProperty" minOccurs="0" maxOccurs="1" form="qualified" />
+         <xsd:element name="PixelSymbol" type="opticks:pixelSymbolProperty" minOccurs="0" maxOccurs="1" form="qualified" />
+         <xsd:element name="Rotation" type="opticks:rotationProperty" minOccurs="0" maxOccurs="1" form="qualified" />
+         <xsd:element name="Scale" type="opticks:scaleProperty" minOccurs="0" maxOccurs="1" form="qualified" />
+         <xsd:element name="TextAlignment" type="opticks:textAlignmentProperty" minOccurs="0" maxOccurs="1" form="qualified" />
+         <xsd:element name="TextColor" type="opticks:textColorProperty" minOccurs="0" maxOccurs="1" form="qualified" />
+         <xsd:element name="TextString" type="opticks:textStringProperty" minOccurs="0" maxOccurs="1" form="qualified" />
+         <xsd:element name="Wedge" type="opticks:wedgeProperty" minOccurs="0" maxOccurs="1" form="qualified" />
+         <xsd:element name="PaperSize" type="opticks:paperSizeProperty" minOccurs="0" maxOccurs="1" form="qualified" />
+         <xsd:element name="Filename" type="opticks:filenameProperty" minOccurs="0" maxOccurs="1" form="qualified" />
+         <xsd:element name="Cgm" type="opticks:cgmProperty" minOccurs="0" maxOccurs="1" form="qualified" />
+         <xsd:element name="objects" minOccurs="0" maxOccurs="1" form="qualified">
+            <xsd:complexType>
+               <xsd:sequence>
+                  <xsd:element name="Graphic" minOccurs="1" maxOccurs="unbounded" type="opticks:Graphic" form="qualified" />
+               </xsd:sequence>
+            </xsd:complexType>
+         </xsd:element>
+         <xsd:element name="vertices" minOccurs="0" maxOccurs="1" form="qualified">
+            <xsd:complexType>
+               <xsd:sequence>
+                  <xsd:element name="pixel" minOccurs="1" maxOccurs="unbounded" type="opticks:coordinateType" form="qualified" />
+               </xsd:sequence>
+            </xsd:complexType>
+         </xsd:element>
+         <xsd:element name="geoVertices" minOccurs="0" maxOccurs="1" form="qualified">
+            <xsd:complexType>
+               <xsd:sequence>
+                  <xsd:element name="latlong" minOccurs="1" maxOccurs="unbounded" type="opticks:coordinateType" form="qualified" />
+               </xsd:sequence>
+            </xsd:complexType>
+         </xsd:element>
+         <xsd:element name="paths" minOccurs="0" maxOccurs="1" form="qualified">
+            <xsd:complexType>
+               <xsd:sequence>
+                  <xsd:element name="pixel" minOccurs="1" maxOccurs="unbounded" type="opticks:coordinateType" form="qualified" />
+               </xsd:sequence>
+            </xsd:complexType>
+         </xsd:element>
+         <xsd:element name="bitmask" minOccurs="0" maxOccurs="1" type="opticks:aoiBitmask" form="qualified" />
+      </xsd:all>
+      <xsd:attributeGroup ref="opticks:versionHeader" />
+      <xsd:attributeGroup ref="opticks:idHeader" />
+   </xsd:complexType>
+   <xsd:complexType name="GraphicElement">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            Adding DataElement members to a Graphic
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:complexContent>
+         <xsd:extension base="opticks:DataElement">
+            <xsd:sequence>
+               <xsd:element name="group" minOccurs="1" maxOccurs="1" type="opticks:Graphic" form="qualified" />
+            </xsd:sequence>
+            <xsd:attribute name="geocentric" type="xsd:boolean" default="false" />
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
+   <xsd:complexType name="AnnotationElement">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            Properties for an annotation object.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:complexContent>
+         <xsd:extension base="opticks:GraphicElement">
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
+   <xsd:complexType name="wizardNode">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            A WizardNode.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:sequence>
+         <xsd:element name="validType" type="xsd:string" minOccurs="0" maxOccurs="unbounded" form="qualified" />
+         <xsd:element name="value" minOccurs="0" form="qualified" />
+      </xsd:sequence>
+      <xsd:attribute name="version" type="xsd:string" use="required" />
+      <xsd:attribute name="originalType" type="xsd:string" use="required" />
+      <xsd:attributeGroup ref="opticks:idHeader" />
+   </xsd:complexType>
+   <xsd:complexType name="wizardItem">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            A WizardItem.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:sequence>
+         <xsd:element name="location" type="opticks:coordinateType" form="qualified" minOccurs="1" />
+         <xsd:element name="input" type="opticks:wizardNode" minOccurs="0" maxOccurs="unbounded" form="qualified" />
+         <xsd:element name="output" type="opticks:wizardNode" minOccurs="0" maxOccurs="unbounded" form="qualified" />
+      </xsd:sequence>
+      <xsd:attribute name="batch" type="xsd:boolean" default="false" />
+      <xsd:attribute name="batchSupported" type="xsd:boolean" default="true" />
+      <xsd:attributeGroup ref="opticks:idHeader" />
+   </xsd:complexType>
+   <xsd:complexType name="wizardConnection">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            A WizardConnection.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:attribute name="inputItem" type="xsd:nonNegativeInteger" use="required" />
+      <xsd:attribute name="inputNode" type="xsd:nonNegativeInteger" use="required" />
+      <xsd:attribute name="outputItem" type="xsd:nonNegativeInteger" use="required" />
+      <xsd:attribute name="outputNode" type="xsd:nonNegativeInteger" use="required" />
+   </xsd:complexType>
+   <xsd:complexType name="Wizard">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            A WizardObject.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:sequence>
+         <xsd:element name="item" type="opticks:wizardItem" minOccurs="0" maxOccurs="unbounded" form="qualified" />
+         <xsd:element name="connection" type="opticks:wizardConnection" minOccurs="0" maxOccurs="unbounded" form="qualified" />
+      </xsd:sequence>
+      <xsd:attribute name="batch" type="xsd:boolean" default="false" />
+      <xsd:attribute name="menuLocation" type="xsd:string" use="required" />
+      <xsd:attributeGroup ref="opticks:versionHeader" />
+      <xsd:attributeGroup ref="opticks:idHeader" />
+   </xsd:complexType>
+   <xsd:complexType name="Units">
+      <xsd:attribute name="type" use="required" type="xsd:nonNegativeInteger" />
+      <xsd:attribute name="name" type="xsd:string" use="optional" />
+      <xsd:attribute name="range" use="optional" type="opticks:coordinateType" />
+      <xsd:attribute name="scale" type="xsd:double" />
+   </xsd:complexType>
+   <xsd:complexType name="RasterDataDescriptor">
+      <xsd:complexContent>
+         <xsd:extension base="opticks:DataDescriptor">
+            <xsd:sequence>
+               <xsd:element name="BadValues" minOccurs="1" maxOccurs="1" form="qualified">
+                  <xsd:complexType>
+                     <xsd:sequence>
+                        <xsd:element name="value" minOccurs="0" maxOccurs="unbounded" form="qualified" type="xsd:integer" />
+                     </xsd:sequence>
+                  </xsd:complexType>
+               </xsd:element>
+               <xsd:element name="rows" minOccurs="1" maxOccurs="1" form="qualified">
+                  <xsd:complexType>
+                     <xsd:sequence>
+                        <xsd:element name="row" minOccurs="0" maxOccurs="unbounded" form="qualified" type="opticks:DimensionDescriptor" />
+                     </xsd:sequence>
+                     <xsd:attribute name="compression" type="xsd:string" use="optional" />
+                  </xsd:complexType>
+               </xsd:element>
+               <xsd:element name="columns" minOccurs="1" maxOccurs="1" form="qualified">
+                  <xsd:complexType>
+                     <xsd:sequence>
+                        <xsd:element name="column" minOccurs="0" maxOccurs="unbounded" form="qualified" type="opticks:DimensionDescriptor" />
+                     </xsd:sequence>
+                     <xsd:attribute name="compression" type="xsd:string" use="optional" />
+                  </xsd:complexType>
+               </xsd:element>
+               <xsd:element name="pixelSize" type="opticks:coordinateType" minOccurs="1" maxOccurs="1" form="qualified" />
+               <xsd:element name="units" type="opticks:Units" minOccurs="1" maxOccurs="1" form="qualified" />
+               <xsd:element name="bands" minOccurs="1" maxOccurs="1" form="qualified">
+                  <xsd:complexType>
+                     <xsd:sequence>
+                        <xsd:element name="band" minOccurs="0" maxOccurs="unbounded" form="qualified" type="opticks:DimensionDescriptor" />
+                     </xsd:sequence>
+                     <xsd:attribute name="compression" type="xsd:string" use="optional" />
+                  </xsd:complexType>
+               </xsd:element>
+               <xsd:element name="grayBand" form="qualified" type="opticks:DimensionDescriptor" />
+               <xsd:element name="redBand" form="qualified" type="opticks:DimensionDescriptor" />
+               <xsd:element name="greenBand" form="qualified" type="opticks:DimensionDescriptor" />
+               <xsd:element name="blueBand" form="qualified" type="opticks:DimensionDescriptor" />
+            </xsd:sequence>
+            <xsd:attribute name="dataType" type="opticks:EncodingType" use="required" />
+            <xsd:attribute name="interleaveFormat" type="opticks:InterleaveFormatType" use="required" />
+            <xsd:attribute name="displayMode" type="opticks:DisplayMode" use="required" />
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
+   <xsd:complexType name="RasterElement">
+      <xsd:complexContent>
+         <xsd:extension base="opticks:DataElement">
+            <xsd:sequence>
+               <xsd:element name="RasterDataDescriptor" type="opticks:RasterDataDescriptor" form="qualified" />
+            </xsd:sequence>
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
+   <xsd:complexType name="PseudocolorClass">
+      <xsd:attribute name="color" use="required" type="opticks:ColorTripleType" />
+      <xsd:attribute name="displayed" use="required" type="xsd:boolean" />
+      <xsd:attribute name="name" use="required" type="xsd:string" />
+      <xsd:attribute name="value" use="required" type="xsd:integer" />
+   </xsd:complexType>
+   <xsd:element name="GcpList" type="opticks:GcpList" />
+   <xsd:element name="Graphic" type="opticks:Graphic" />
+   <xsd:element name="AnnotationElement" type="opticks:AnnotationElement" />
+   <xsd:element name="AoiElement" type="opticks:AoiElement" />
+   <xsd:element name="TiePointList" type="opticks:TiePointList" />
+   <xsd:element name="Wizard" type="opticks:Wizard" />
+   <xsd:complexType name="Layer" abstract="true">
+      <xsd:sequence>
+         <xsd:element ref="opticks:AnnotationElement" minOccurs="0" />
+         <xsd:element ref="opticks:AoiElement" minOccurs="0" />
+         <xsd:element ref="opticks:GcpList" minOccurs="0" />
+         <xsd:element ref="opticks:TiePointList" minOccurs="0" />
+         <xsd:element ref="opticks:Wizard" minOccurs="0" />
+      </xsd:sequence>
+      <xsd:attribute name="offset" use="optional" type="opticks:coordinateType" />
+      <xsd:attribute name="scale" use="optional" type="opticks:coordinateType" />
+      <xsd:attributeGroup ref="opticks:versionHeader" />
+      <xsd:attributeGroup ref="opticks:idHeader" />
+   </xsd:complexType>
+   <xsd:complexType name="GraphicLayer">
+      <xsd:complexContent>
+         <xsd:extension base="opticks:Layer">
+            <xsd:attribute name="showLabels" type="xsd:boolean" use="optional" default="false" />
+            <xsd:attribute name="layerLocked" type="xsd:boolean" use="optional" default="false" />
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
+   <xsd:complexType name="AnnotationLayer">
+      <xsd:complexContent>
+         <xsd:extension base="opticks:GraphicLayer">
+            <xsd:attribute name="snapToGrid" type="xsd:boolean" use="optional" default="false" />
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
+   <xsd:element name="AnnotationLayer" type="opticks:AnnotationLayer" />
+   <xsd:complexType name="AoiLayer">
+      <xsd:complexContent>
+         <xsd:extension base="opticks:GraphicLayer">
+            <xsd:attribute name="aoiSymbol" type="xsd:string" use="required" />
+            <xsd:attribute name="aoiColor" use="required" type="opticks:ColorTripleType" />
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
+   <xsd:element name="AoiLayer" type="opticks:AoiLayer" />
+   <xsd:complexType name="GcpLayer">
+      <xsd:complexContent>
+         <xsd:extension base="opticks:Layer">
+            <xsd:attribute name="symbolColor" use="required" type="opticks:ColorTripleType" />
+            <xsd:attribute name="symbol" type="xsd:string" use="required" />
+            <xsd:attribute name="symbolSize" type="xsd:nonNegativeInteger" use="required" />
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
+   <xsd:element name="GcpLayer" type="opticks:GcpLayer" />
+   <xsd:complexType name="PseudocolorLayer">
+      <xsd:complexContent>
+         <xsd:extension base="opticks:Layer">
+            <xsd:sequence>
+               <xsd:element name="PseudocolorClass" type="opticks:PseudocolorClass" minOccurs="0" maxOccurs="unbounded" form="qualified" />
+            </xsd:sequence>
+            <xsd:attribute name="symbol" type="xsd:string" use="required" />
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
+   <xsd:element name="PseudocolorLayer" type="opticks:PseudocolorLayer" />
+   <xsd:complexType name="TiePointLayer">
+      <xsd:complexContent>
+         <xsd:extension base="opticks:Layer">
+            <xsd:attribute name="isMission" use="required" type="xsd:boolean" />
+            <xsd:attribute name="labelIsEnabled" use="required" type="xsd:boolean" />
+            <xsd:attribute name="symbolColor" use="required" type="opticks:ColorTripleType" />
+            <xsd:attribute name="symbolSize" use="required" type="xsd:nonNegativeInteger" />
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
+   <xsd:element name="TiePointLayer" type="opticks:TiePointLayer" />
+   <xsd:complexType name="Branding">
+      <xsd:sequence>
+         <xsd:element name="SplashScreen" minOccurs="1" maxOccurs="1" form="qualified">
+            <xsd:complexType>
+               <xsd:attribute name="filePath" type="xsd:string" use="required" />
+            </xsd:complexType>
+         </xsd:element>
+         <xsd:element name="Title" minOccurs="1" maxOccurs="1" form="qualified" type="xsd:string" />
+         <xsd:element name="Description" minOccurs="1" maxOccurs="1" form="qualified" type="xsd:string" />
+         <xsd:element name="Version" minOccurs="1" maxOccurs="1" form="qualified" type="xsd:string" />
+         <xsd:element name="License" minOccurs="0" maxOccurs="1" form="qualified" type="xsd:string" />
+         <xsd:element name="Help" minOccurs="0" maxOccurs="1" form="qualified">
+            <xsd:complexType>
+               <xsd:sequence>
+                  <xsd:element name="Title" minOccurs="1" maxOccurs="1" form="qualified" type="xsd:string" />
+                  <xsd:element name="Webpage" minOccurs="1" maxOccurs="1" form="qualified" type="xsd:string" />
+               </xsd:sequence>
+            </xsd:complexType>
+         </xsd:element>
+      </xsd:sequence>
+      <xsd:attributeGroup ref="opticks:versionHeader" />
+   </xsd:complexType>
+   <xsd:element name="Branding" type="opticks:Branding" />
+</xsd:schema>

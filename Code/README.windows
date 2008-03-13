@@ -1,0 +1,158 @@
+Instructions on building the Opticks source code in windows 32-bit/64-bit.
+---------------------------------------------------------------------------
+
+
+Programs that need to be installed before building the source code:
+-----------------------------------------------------------------------
+ - Visual Studio 2005
+
+ - Python 2.5 or later (http://www.python.org/download/)
+ 
+ - Subversion Command Line Client (http://downloads.open.collab.net/collabnet-subversion.html)
+
+
+Download these required dependencies:
+---------------------------------------------------
+The Dependencies folder in the trunk contains a system which automatically downloads the appropriate
+dependencies. This system requires python v2.5 or later.
+> python dependencies.py --help
+will provide a usage summary. Most of the time, no command line options are needed.
+Install all the dependencies.
+> python dependencies.py
+This will download the appropriate dependencies builds and will install them in the proper directories.
+Some dependencies (notably Qt) can not be distributed on the opticks website. If you create a
+zip of the Qt build with the proper directory structure and place it in the Dependencies/packages directory,
+it will be installed as part of the download. The Qt/__init__.py file indicates the expected zip file name.
+
+Point the OPTICKSDEPENDENCIES variable at the Dependencies folder so the build system can find
+the installed dependencies.
+
+Instructions on building Qt:
+------------------------------------------ 
+
+(Please note that there are only 32-bit binary builds of Qt available from TrollTech. Because of this, 
+in order to run Qt in 64-bit, Qt must be manually built on windows in both 32-bit and 64-bit binary builds.)
+
+
+Things to do before building Qt:
+
+
+-  First extract the Qt zip file to a directory on your system.
+
+-  If you plan on building a 64-bit version of Qt, make a copy of the extracted Qt directory to another one, 
+   but add 64-bit to end of the new directory name. This new directory will be used to make the Qt 64-bit binary 
+   build. (For example if the name of the extracted Qt directory is Qt-win-src, then the name would be 
+   Qt-win-src-64-bit).   
+
+
+A. Building the 32-bit version:
+
+
+1. To make the 32-bit build of Qt, go to Visual Studio 2005->Visual Studio tools in the start menu and click on 
+   Visual Studio 2005 Command Prompt.
+
+2. In the Command Prompt, go to the 32-bit Qt directory you just extracted.
+
+3. Once you in the directory, type:
+
+	configure.exe -qt-gif -qt-libpng -qt-libmng -qt-libtiff -qt-libjpeg
+
+   This will generate a Makefile.
+   
+4. Now to start the compilation, run nmake by typing:
+
+	nmake
+
+5. Once the compilation is complete, then type:
+
+	nmake install
+
+   The reason for doing this is so you will only need the include directory from Qt, not the src one. 
+   
+6. The 32-bit binary build of Qt is now done.
+
+
+B. Building the 64-bit version:  
+
+
+1. To make the 64-bit build of Qt, go to Visual Studio 2005->Visual Studio tools in the start menu and click on 
+   Visual Studio 2005 x64 Win64 Command Prompt.
+
+2. In the Command Prompt, go to the 64-bit Qt directory you just extracted.
+
+3. Once you in the directory, type:
+
+	configure.exe -qt-gif -qt-libpng -qt-libmng -qt-libtiff -qt-libjpeg
+
+   This will generate a Makefile.
+   
+4. Now to start the compilation, run nmake by typing:
+
+	nmake
+
+5. Once the compilation is complete, then type:
+
+	nmake install
+
+   The reason for doing this is so you will only need the include directory from Qt, not the src one. 
+
+6. The 64-bit binary build of Qt is now done.
+
+C. Setting up the folders:
+
+
+Once Qt is done building, don't move it to the dependencies folder just yet. You will still need to do some work
+on the files.
+
+1. Create a new directory named Qt in the dependencies folder.
+
+2. Inside the new Qt directory, Create the following 4 folders: bin, include, lib, and plugins.
+
+3. Inside each of these folders, Make a win32 folder if you are using the 32-bit version or a x64 folder if you 
+   are using the 64-bit version.
+
+4. Copy all of the folders in the old Qt directory include folder and paste them in the new directory 
+   include -> win32/x64 folder.
+
+5. Next go to the old Qt directory bin folder and copy all of the .dll files as well as the mac.exe, qmake.exe,
+   rcc.exe, and uic.exe. Paste these files in the new Qt directory bin -> win32/x64 folder.
+
+6. Also copy the .pdb files located in the old Qt directory lib folder and paste them in the new directory 
+   bin -> win32/x64 folder.
+
+7. Now Move all of the .lib files in the old directory lib folder and put them in the new Qt directory
+   lib -> win32/x64 folder.
+
+8. Go to the plugins win32/x64 folder in the new Qt directory and create a new folder named imageformats.
+
+9. In the plugin -> imageformats folder in the old directory, copy all files expect the .exp and .ilk files.
+   Paste these in the plugins -> win32/x64 -> imagefromats located in the new Qt directory.
+
+10. Qt is now ready to run with Visual Studio. 
+
+
+Opening the source code in Visual Studio
+---------------------------------------------------
+
+To get to the Opticks source code in Visual Studio, open the Opticks.sln file in Visual Studio. This should be 
+located in the application folder.
+
+
+How to compile and run Opticks though Visual Studio
+------------------------------------------------------------
+
+Once the dependencies are set, you are now able to build the code. However, when you try to run it, you may get 
+an error. This is because the environment variables do not point to the right .dll files.
+
+To set the variables to the right file path, you must follow these steps:
+
+1. Make sure that Visual studio is shut down.
+
+2. Go to the application folder, here you should see a file named Opticks.vcproj.FILLINUSERNAME.user.template.	
+
+3. Change FILLINUSERNAME to your user name and remove the template file extension. You may need to remove the existing
+   .user file.
+	Example: Opticks.vcproj.username.user
+
+4. Once this is done, the environment variables should be pointing to the .dll files and Opticks can now be able 
+to run in Visual Studio.

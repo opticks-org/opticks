@@ -1,0 +1,15 @@
+Authority.txt
+AuthoritySourceDate.txt
+AuthorityType.txt
+ClassificationLevels.txt
+ClassificationReason.txt
+Codewords.txt
+CountryCode.txt
+DeclassificationExemption.txt
+DeclassificationType.txt
+Description.txt
+Downgrade.txt
+FileControls.txt
+FileDowngrade.txt
+FileReleasing.txt
+Systems.txt
