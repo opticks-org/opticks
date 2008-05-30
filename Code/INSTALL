@@ -1,0 +1,198 @@
+Environment variable OPTICKSDEPENDENCIES should point to a directory with the following:
+   Boost - 1.33...do not compile, used in #include mode.
+   Cg - 1.4.1
+   ffmpeg - Subversion trunk revision 6181 with local changes.
+   glew - 1.3.4
+   Hdf4 -
+   Hdf5 - 1.6.5
+   libjpeg - 6b
+   libgeotiff - 1.2.3
+   libproj4 - 4.4.9
+   libtiff - 3.8.1
+   OoModtran - 2.0
+   ossim - CVS-21Aug06 with local changes
+   pthreads - 2.7.0...only needed on windows platforms
+   Qt - 4.2.3 with local changes..local changes include patches from trolltech which have not been
+                                  incorporated into 4.2.3. Contact the Opticks team for a list of patches.
+   qwt - 5.0.0rc0
+   ShapeLib - 1.2.10
+   Xerces - 2.7.0
+   zlib - 1.2.3
+Any merged "with local changes" indicate patches may be required...contact the Opticks team for further
+information. Not all packages will build cleanly on all platforms without changes (usually x64).
+In a directory structure that matches the following. Cases with a platform name indicate files specific to
+that platform. The files correspond to the installed layout of the applicable package unless otherwise noted.
+
+Dependencies/
+   Boost  - use the standard boost directory layout
+   Cg - Not needed on solaris
+      bin
+         Win32
+         x64
+      include
+         Cg
+         GL
+      lib
+         Win32
+         x64
+   ffmpeg - use the standard ffmpeg directory layout with local changes for Windows builds
+   glew
+      bin
+         solaris-sparc
+         Win32
+         x64
+      include
+         GL
+      lib
+         solaris-sparc
+         Win32
+         x64
+   Hdf4 - not supported on windows x64
+      bin
+         solaris-sparc
+         Win32
+      include
+         solaris-sparc
+         windows
+      lib
+         solaris-sparc
+         Win32
+   Hdf5
+      bin
+         solaris-sparc
+         Win32
+         x64
+      include
+         solaris-sparc
+         windows
+      lib
+         solaris-sparc
+         Win32
+         x64
+   libgeotiff
+      include
+         solaris-sparc
+         windows
+      lib
+         solaris-sparc
+         Win32
+         x64
+      share
+         epsg_csv
+   libjpeg
+      include
+      lib
+         solaris-sparc
+         Win32
+         x64
+   libproj4
+      include
+      lib
+         solaris-sparc
+         Win32
+         x64
+   libtiff
+      include
+         solaris-sparc
+         Win32
+         x64
+   ossim
+      bin
+         win32
+         x64
+      include
+         ossim
+      lib
+         solaris-sparc
+         win32
+         x64
+   pthreads
+      bin
+         win32
+         x64
+      include
+      lib
+         win32
+         x64
+   Qt
+      bin
+         solaris-sparc
+         win32
+         x64
+      include
+         solaris-sparc
+         win32
+         x64
+      lib
+         solaris-sparc
+         win32
+         x64
+      plugins
+         solaris-sparc
+         win32
+         x64
+   qwt
+      bin
+         win32
+         x64
+      include
+      lib
+         solaris-sparc
+         win32
+         x64
+   ShapeLib
+      bin
+         Win32
+         x64
+      include
+      lib
+         solaris-sparc
+         Win32
+         x64
+   Xerces
+      bin
+         win32
+         x64
+      include
+         solaris-sparc
+         windows
+      lib
+         solaris-sparc
+         win32
+         x64
+   zlib
+      bin
+         Win32
+         x64
+      include
+      lib
+         Win32
+         x64
+
+
+
+Building Opticks on Windows
+---------------------------
+Opticks builds in Microsoft Visual Studio 2005 SP1 only.
+ 1) Set OPTICKSDEPENDENCIES to point to the dependecies directory.
+ 2) Rename the Opticks.vcproj.FILLINUSERNAME.user.template to Opticks.vcproj.username.user with your
+    login name.
+ 3) Open the Opticks.sln in the "application" directory.
+ 4) Build the Solution.
+ 5) Set "Opticks" as the default project.
+ 6) Run Opticks.
+
+Building Opticks on Solaris
+---------------------------
+Opticks requires Solaris 10 with Sun Studio 11 and scons version 0.96 or later.
+scons -h will list options.
+ 1) Set OPTICKSDEPENDENCIES to point to the dependencies dirtory.
+ 2) Set LD_LIBRARY_PATH_64 to point to JDK 1.4 or later directories.
+ 3) cd into the "application" directory.
+ 4) run scons
+ 5) cd into the "application/PlugIns/src" directory.
+ 6) run scons
+ 7) set the OPTICKS_HOME environment variable to the "Release" directory.
+ 8) run solOpticks
+ 9) Set your plug-in path to point to "Build/Binaries-solaris-sparc-*/PlugIns" directory.
+ 10) Restart Opticks.

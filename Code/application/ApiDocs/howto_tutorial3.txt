@@ -1,0 +1,83 @@
+/** \page howto_tutorial3 Accessing cube data
+Files:
+ - \ref Tutorial/Tutorial3.h "Tutorial/Tutorial3.h"
+ - \ref Tutorial/Tutorial3.cpp "Tutorial/Tutorial3.cpp"
+
+This tutorial demonstrates an important part of most %Opticks plug-ins; accessing data in a raster cube.
+We'll build a plug-in which calculates some basic statistics over band 1 of a data cube.
+We'll see how to use DataAccessor and switchOnEncoding.h.
+
+\dontinclude Tutorial/Tutorial3.cpp
+\skip namespace
+\until };
+This defines a functor which will be used later in the plug-in.
+It updates some statistical data based on a pixel value in the cube.
+
+\skipline setAbortSupported
+This allows the user to abort the plug-in.
+We'll see how to properly handle aborts below.
+
+\skipline addArg<RasterElement>
+This adds a DataElement argument.
+RasterElement is a sub-class of DataElement.
+%Opticks will allow any sub-class of DataElement in the Executable::DataElementArg() argument.
+
+\skip getOutputSpecification
+\until }
+We are specifying output arguments in this tutorial.
+These are useful if you want to chain plug-ins together in a wizard and use the output of one plug-in as the input to another plug-in.
+We are using doubles for most of these values so we can store statistics for any non-complex data encoding.
+
+\skipline getDataDescriptor
+Each DataElement has a DataDescriptor which store information about the DataElement.
+A RasterElement will always have a RasterDataDescriptor so we can safely use static_cast instead of dynamic_cast.
+
+\skip FactoryResource
+\until getDataAccessor
+Here we are creating a DataRequest object.
+A DataRequest sets the parameters for the cube access such as the rows, columns, and bands we need access to and how many of each we will need at any particular time.
+This provides hints to the data importers about access patterns so %Opticks can load only the data needed at a particular time.
+We'll talk more about importers and pagers in \ref howto_importer.
+The DataRequest reference documentation explains what the defaults are for the various attributes.
+This code requests an accessor over the entire first band of the data cube in BSQ format.
+We are only calculating statistics on the first band in order to simplify the plug-in.
+
+\until for
+We initialize various statistics accumulators and begin accessing data over all the rows.
+
+\skip isAborted
+\until }
+This block of code checks to see if the plug-in was aborted.
+This might be because the user clicked the cancel button or another plug-in may have called Executable::abort().
+
+\until }
+This code checks to make sure the DataAccessor is still valid.
+If the DataRequest could not be provided, the DataAccessor will be invalid.
+If DataAccessorImpl::nextRow() attempts to move past the end of the requested block of data, the DataAccessor will become invalid.
+
+\until }
+This inner loop processes all the columns in the current row.
+In the DataRequest we specified that we would be accessing one row and all columns at once so DataAccessorImpl::getColumn() will return a pointer to data from the current column to the end of the current row.
+We could have called DataAccessorImpl::getRow() to get a pointer to the entire row then called updateStatistics() with that pointer.
+We'd need to put the column loop inside updateStatistics().
+The method presented is usually preferable because we could have requested a DataAccessor with only a single pixel (1 concurrent row and 1 concurrent column) and the code above would still work.
+This would allow a pager to load less data into memory if necessary.
+
+The switchOnEncoding() function takes an EncodingType and cases the void* returned from DataAccessorImpl::getColumn() into the appropriate data type for the specified EncodingType.
+It then calls the updateStatistics() function with the remaining arguments.
+This is a common pattern for accessing data in a raster cube.
+Finally, DataAccessorImpl::nextColumn() moves the DataAccessor's internal pointer to the next column.
+
+\until double mean
+Here we move the DataAccessor's internal pointer to the next row completing the outer loop.
+After we have processed the entire cube we calculate the mean.
+
+\skip pProgress
+\until return true
+The remainder of the execute() method reports the statistical information to the user in the Progress if available, in the message log, and in the output arguments.
+
+\example Tutorial/Tutorial3.h
+Declaration file for \ref howto_tutorial3 "Tutorial 3".
+\example Tutorial/Tutorial3.cpp
+Implementation file for \ref howto_tutorial3 "Tutorial 3".
+ */
