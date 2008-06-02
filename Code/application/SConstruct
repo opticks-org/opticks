@@ -1,0 +1,153 @@
+import os
+import subprocess
+
+####
+# Set up the options and environment
+####
+opts = Options()
+opts.AddOptions(BoolOption('RELEASE','False for debug, true for release',0))
+opts.Add('BUILDDIR','Directory for build files','#/../Build')
+opts.Add('CACHEDIR','Directory for cache files. Default is not caching.','')
+
+TOOLPATH = Dir("CompileSettings").abspath
+PLATFORM = "%s-%s" % (os.environ['OSTYPE'],os.environ['MACHTYPE'])
+
+env = Environment(options=opts,
+                  PLATFORM=PLATFORM,
+                  ENV=os.environ,
+                  tools=["default","qt4","qwt","xercesc","boost","java",
+                         "ehs","suncc","sunar","sunlink"],
+                  toolpath=[TOOLPATH])
+if env['RELEASE']:
+   MODE='release'
+else:
+   MODE='debug'
+BUILDDIR = env.Dir(env["BUILDDIR"]).abspath
+env["BINDIR"] = '%s/Binaries-%s-%s/Bin' % (BUILDDIR,PLATFORM,MODE)
+env["PLUGINDIR"] = '%s/Binaries-%s-%s/PlugIns' % (BUILDDIR,PLATFORM,MODE)
+env["LIBDIR"] = '%s/Binaries-%s-%s/Lib' % (BUILDDIR,PLATFORM,MODE)
+env["BUILDDIR"] = '%s/%s-%s' % (BUILDDIR,PLATFORM,MODE)
+
+
+Help(opts.GenerateHelpText(env))
+env["QT_MODULES"] = ["QtCore","QtGui","Qt3Support","QtOpenGL", "QtXml"]
+env.Qt4AddModules(env["QT_MODULES"])
+
+env['LINK'] = "$CXX"
+env.Append(CXXFLAGS="-library=stlport4 -xarch=v9 -xcode=pic32 -erroff=nonewline",
+           LINKFLAGS="-library=stlport4 -xarch=v9 -xcode=pic32 -mt -L/usr/sfw/lib/sparcv9",
+           CPPDEFINES=["APPLICATION_XERCES"],
+           LIBS=env["QT_MODULES"] + ["nsl","dl","GLU","GL","Xm","Xext","Xrender","X11","m"])
+env.BuildDir(env["BUILDDIR"], "#", duplicate=0)
+
+if MODE == 'release':
+   env.Append(CXXFLAGS="-xO3")
+else:
+   env.Append(CXXFLAGS="-g")
+   env.Append(CPPDEFINES=["DEBUG"])
+
+libdirs = ["Desktop", 
+           "Framework",
+           "Gui",
+           "HdfPlugInLib",
+           "Model",
+           "NitfPlugInLib",
+           "PlugInLib",
+           "PlugInManager",
+           "PlugInUtilities",
+           "Utilities",
+           "Wizard"]
+
+incdirs = map(lambda x: "#/" + x, libdirs) + \
+          ["#/Interfaces",
+           "#/PlugInUtilities/pthreads-wrapper",
+           "#/PlugInUtilities/MathUtilities",
+           "#/PlugInUtilities/Interfaces"]
+env.Append(CPPPATH=incdirs)
+if len(env["CACHEDIR"]) > 0:
+   print "Enable caching to",env["CACHEDIR"]
+   env.CacheDir(env["CACHEDIR"])
+
+####
+# Load the SConscript files for each library
+####
+libs = []
+libInstallTargets = []
+Export('env','libInstallTargets','MODE','TOOLPATH')
+
+for sub in libdirs:
+   src_dir = '#/%s' % sub
+   build_dir = '%s/%s' % (env["BUILDDIR"], sub)
+   env.BuildDir(build_dir, src_dir, duplicate=0)
+   libs.append(env.SConscript('%s/SConscript' % sub, exports='build_dir'))
+   libInstallTargets.append(libs[-1])
+
+####
+# Build the solOpticks binary
+####
+opticks = env.Object("%s/Main.cpp" % env['BUILDDIR'])
+opticksBin = env.Program('%s/solOpticks' % env['BUILDDIR'],opticks+libs+libs+libs)
+env.Alias('opticks',opticksBin)
+
+####
+# Create a new environment for the arcproxy
+# binary (it uses ArcSDK). It's also a 32-bit program
+####
+arcenv = Environment(options=opts,
+                     PLATFORM=PLATFORM,
+                     ENV=os.environ,
+                     tools=["default","suncc","sunar","sunlink","ArcGIS","ArcProxyLib","qt4"],
+                     toolpath=[TOOLPATH])
+arcenv["BINDIR"] = env["BINDIR"]
+arcenv["PLUGINDIR"] = env["PLUGINDIR"]
+arcenv["LIBDIR"] = env["LIBDIR"]
+arcenv["BUILDDIR"] = env["BUILDDIR"]+"/ArcProxy"
+arcenv["LINK"] = env['LINK']
+arcenv.Append(CXXFLAGS="-library=stlport4 -xarch=v8 -xcode=pic32 -erroff=nonewline",
+              LINKFLAGS="-library=stlport4 -xarch=v8 -xcode=pic32 -mt")
+arcenv.BuildDir(arcenv["BUILDDIR"], "#", duplicate=0)
+arcenv["QT_MODULES"] = env["QT_MODULES"] + ["QtNetwork"]
+arcenv.Qt4AddModules(arcenv["QT_MODULES"])
+if MODE == 'release':
+   arcenv.Append(CXXFLAGS="-xO3",
+                 LIBS=arcenv["QT_MODULES"])
+else:
+   arcenv.Append(CXXFLAGS="-g",
+                 LIBS=map(lambda x: x + "_debug", arcenv["QT_MODULES"]))
+arcenv.Append(CPPPATH=["#/PlugInUtilities"])
+if len(env["CACHEDIR"]) > 0:
+   arcenv.CacheDir(env["CACHEDIR"])
+
+subprocess.Popen(["../update-build-revision.py"]).wait()
+####
+# Build the solBatch binary
+####
+src_dir=Dir('#/Batch').abspath
+build_dir = '%s/Batch' % env["BUILDDIR"]
+env.BuildDir(build_dir, src_dir, duplicate=0)
+batch = SConscript('Batch/SConscript', exports='build_dir')
+batchBin = env.Program('%s/solBatch' % env["BUILDDIR"],batch+libs+libs+libs+libs)
+env.Alias('batch',batchBin)
+
+####
+# Build the solArcProxy binary
+####
+# ArcGIS on solaris not working so there's no need to build this
+# We compile the object files just to do some compile time checking.
+#
+src_dir=Dir('#/ArcProxy').abspath
+build_dir = '%s/ArcProxy' % env["BUILDDIR"]
+arcenv.BuildDir(build_dir+"/ArcProxy", src_dir, duplicate=0)
+arcproxy = SConscript('ArcProxy/SConscript', exports=['build_dir','arcenv'])
+#arcproxyBin = arcenv.Program('%s/solArcProxy' % arcenv["BUILDDIR"],arcproxy)
+env.Alias('arcproxy',arcproxy)
+
+####
+# Install the binaries and libraries to the proper directories
+# and set up some useful aliases
+####
+libInstall = env.Install(env["LIBDIR"], libInstallTargets)
+binInstall = env.Install(env["BINDIR"], [opticksBin, batchBin])
+core = env.Alias('core', [libInstall, binInstall])
+all = env.Alias('all', [libInstall, binInstall, 'arcproxy'])
+Default(core)

@@ -1,0 +1,20 @@
+Building Sample PlugIns
+=======================
+
+Building on Windows - in Release mode
+======================================
+Open the SamplePlugIns.sln and select a configuration of "Release" and then build the sample plug-ins. NOTE: Please read below for pre-configuration that must be done.
+
+Building on Windows - in Debug mode
+===================================
+This can be done the same way as in Release mode, but you must first locate PlugInLib.lib and PlugInUtilities.lib from the "DebugBuild.zip" available on the Opticks Website and put them into Toolkit\Application\PlugInLib\Debug for PlugInLib.lib and Toolkit\Application\PlugInUtilities\Debug for PlugInUtilities.lib.
+
+Before Building
+===============
+You will need to set an environment variable QTDIR which points a built configuration of Qt 3.3.1 such that the following is true:
+   $QTDIR\bin - contains moc.exe and uic.exe
+In addition, you will need to add the QT header files and binaries in such a way that Visual Studio can locate them.  This is currently done by starting Visual Studio clicking on "Tools->Options..." and selecting "Projects->VC++ Directories" in the left pane and then in the right pane putting the path to the QT header files as a entry in the "Include files" directory listing and putting the path to the QT binaries in the "Library files" directory listing.
+
+Building on Solaris
+===================
+The sample plug-ins can be built on Solaris, but currently you must provide your own makefile or similiar build system on Solaris.

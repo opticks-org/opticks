@@ -1,0 +1,41 @@
+/** \page howtos Getting Started with Opticks Plug-in Development
+The following tutorials and HOWTOs assume you have some C++ knowledge including a basic understanding of virtual functions.
+There is some documentation on setting up a build environment but it is also assumed that you know how to build dynamic libraries (.dll files on Windows and .so files on Solaris) on your platform.
+
+If you are new to %Opticks, the tutorial is a good place to start.
+If you have some %Opticks plug-in development experience, try the more targeted HOWTOs.
+See the reference documentation if you need information on specific classes and methods.
+The Related Pages section lists protocol and file format descriptions, and other reference documentation not specific to a class or method.
+The %PlugInSampler plug-ins are working example and test plug-ins which provide concrete examples without narrative explanation.
+
+\section tutorial The Opticks Tutorial
+This group of HOWTOs provides a tutorial to help you get started writing plug-ins.
+Start with the first and work your way through the tutorial as each successive step builds on the previous steps.
+  -# \subpage howto_tutorial1
+  -# \subpage howto_tutorial2
+  -# \subpage howto_tutorial3
+  -# \subpage howto_tutorial4
+ 
+\section howto_list Other HOWTOs
+These HOWTOs provide more in-depth examples on specific topics.
+They assume you have basic %Opticks plug-in development knowledge.
+If you are just starting out, you should look at the tutorial first.
+  -# \subpage howto_buildenvironment
+  -# \subpage howto_coordinate "Understanding coordinate spaces"
+  -# \subpage howto_exporter "Creating an exporter plug-in"
+  -# \subpage howto_createrasterlement "Creating a new RasterElement"
+  -# \subpage howto_importer
+  -# \subpage howto_modlessdialog "Creating a modeless dialog plug-in"
+  -# \subpage howto_dockwindow "Creating a dock window plug-in"
+  -# \subpage howto_customdataelement "Creating a custom DataElement"
+  -# \subpage howto_optionswidget "Creating a custom options widget"
+  -# \subpage howto_propertieswidget "Creating a custom properties widget"
+  -# \subpage howto_undo "Using undo and creating undoable steps"
+  -# \subpage howto_xml "Reading and writing data with the XML utilities"
+  -# \subpage howto_sessionstate "Saving and restoring session state"
+  -# \subpage contextmenus
+  -# \subpage pluginbranding
+  -# \subpage settingsmacros
+  -# \subpage usingimporterresource
+  -# \subpage EnumWrapperHowTo
+ */
