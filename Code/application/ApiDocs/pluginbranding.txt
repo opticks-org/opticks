@@ -1,0 +1,35 @@
+/** \page pluginbranding Plug-In Branding of the Application
+This document describes how to add plug-in suite branding to the application.
+Plug-In Suites can add a custom splash screen to the application and can have some general description information added to the About dialog of the application.
+In order to brand the application, plug-in developers need to create a .brand file and install it to the OPTICKS_HOME/SupportFiles/PlugInBranding directory.
+On start-up the application will parse information out of all the .brand files located in that directory.
+The format of the .brand file is defined in the .xsd used to define all of the application's xml formats.
+A sample .brand file is shown below
+\code
+<Branding xmlns="https://comet.balldayton.com/standards/namespaces/2005/v1.1/comet.xsd" version="3">
+   <SplashScreen filePath="$C(FileLocations/SupportFilesPath)/PlugInBranding/sample.png" />
+   <Title>Sample Plug-In Suite</Title> 
+   <Description>This is a sample plug-in suite to demonstrate the plug-in branding.</Description>
+   <Version>1.0.0</Version>
+   <License>
+      <![CDATA[<h1>Sample Plug-In Suite</h1>
+      Fill in the license terms for Sample Plug-In Suite here.<br /><br />
+      <b>HTML can be used for the license text.</b>   
+      ]]>
+   </License>
+   <Help>
+      <Title>Sample Plug-In Help...</Title>
+      <Webpage>$V(APP_HOME)/Help/SamplePlugIn/index.htm</Webpage>      
+   </Help>
+</Branding>
+\endcode
+
+The SplashScreen entry in the .brand file lets you provide a path to an image file that will displayed to the user for approx. 1 second when the application starts up.
+The image file used for the splash screen must be in one of the following formats: .png, .jpeg, .bmp or .gif.
+The image file used for the splash screen will also be scaled to a size of a width of 480 pixels by a height of 324 pixels when displayed to the user.
+
+The Title, Description and Name entries in the .brand file will be displayed to the user when they display the About dialog for the application.  The License entry will be displayed inside a QTextEdit as HTML on the About dialog for the application.  The License entry is currently optional and is not required to be present.  The Help entry will display a menu item on the main help menu.  The menu item will have a title as provided in the "Title" element.  When the user clicks on the menu item, the user's default web browser will be opened to the file specified in the "Webpage" element.  The Help entry is currently optional and is not required to be present.
+
+The order that .brand files are loaded is currently undefined, i.e. the order splash screen images are displayed is undefined.
+
+ */

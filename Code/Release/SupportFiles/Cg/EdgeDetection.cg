@@ -1,0 +1,19 @@
+float4 main(in float2 coord : TEXCOORD0,
+            uniform samplerRECT inputImage) : COLOR
+{   
+   float4 gx = -1 * texRECT(inputImage, coord + float2(-1, -1)) +
+               -2 * texRECT(inputImage, coord + float2(-1,  0)) +
+               -1 * texRECT(inputImage, coord + float2(-1,  1)) +
+                1 * texRECT(inputImage, coord + float2( 1, -1)) +
+                2 * texRECT(inputImage, coord + float2( 1,  0)) +
+                1 * texRECT(inputImage, coord + float2( 1,  1));
+   float4 gy = -1 * texRECT(inputImage, coord + float2(-1, -1)) +
+               -2 * texRECT(inputImage, coord + float2( 0, -1)) +
+               -1 * texRECT(inputImage, coord + float2( 1, -1)) +
+                1 * texRECT(inputImage, coord + float2(-1,  1)) +
+                2 * texRECT(inputImage, coord + float2( 0,  1)) +
+                1 * texRECT(inputImage, coord + float2( 1,  1));
+
+   float4 magnitude = sqrt(gx * gx + gy * gy);
+   return magnitude;
+}
