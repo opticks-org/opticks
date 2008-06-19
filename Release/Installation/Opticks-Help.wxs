@@ -1,0 +1,1170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?include Opticks-Version.wxi ?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" RequiredVersion="3.0.2925.0">
+   <Fragment Id="Opticks-Help">
+      <DirectoryRef Id="TARGETDIR">
+         <Directory Id="D__Help_help" Name="Help" DiskId="1" FileSource="$(var.OpticksHelpDir)">
+            <Directory Id="D__Help_opticks" Name="Opticks" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks">
+               <Component Id="C__Help_opticks" Guid="$(var.C__Help_opticks_Guid)" Win64="no">
+                  <File Name="index.htm" Id="F__Help_index.htm" />
+                  <File Name="index.js" Id="F__Help_index.js" />
+                  <File Name="index.mcwebhelp" Id="F__Help_index.mcwebhelp" />
+                  <File Name="index.xml" Id="F__Help_index.xml" />
+                  <File Name="index_CSH.htm" Id="F__Help_index_csh.htm" />
+                  <File Name="index_Left.htm" Id="F__Help_index_left.htm" />
+               </Component>
+               <Directory Id="D__Help_content" Name="Content" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content">
+                  <Component Id="C__Help_content" Guid="$(var.C__Help_content_Guid)" Win64="no">
+                     <File Name="about_opticks_suite_data_files.htm" Id="F__Help_about_opticks_suite_data_files.htm" />
+                     <File Name="ASPAM_Viewer.gif" Id="F__Help_aspam_viewer.gif" />
+                     <File Name="Close_a_Window.htm" Id="F__Help_close_a_window.htm" />
+                     <File Name="COMET_Styles.css" Id="F__Help_comet_styles.css" />
+                     <File Name="decdeg.png" Id="F__Help_decdeg.png" />
+                     <File Name="decmin.gif" Id="F__Help_decmin.gif" />
+                     <File Name="Edit_Color.htm" Id="F__Help_edit_color.htm" />
+                     <File Name="ehlpdhtm.js" Id="F__Help_ehlpdhtm.js" />
+                     <File Name="Glossary.htm" Id="F__Help_glossary.htm" />
+                     <File Name="Glossary.xml" Id="F__Help_glossary.xml" />
+                     <File Name="image1.jpg" Id="F__Help_image1.jpg" />
+                     <File Name="image10.gif" Id="F__Help_image10.gif" />
+                     <File Name="image10.jpg" Id="F__Help_image10.jpg" />
+                     <File Name="image100.gif" Id="F__Help_image100.gif" />
+                     <File Name="image101.gif" Id="F__Help_image101.gif" />
+                     <File Name="image102.gif" Id="F__Help_image102.gif" />
+                     <File Name="image103.gif" Id="F__Help_image103.gif" />
+                     <File Name="image105.gif" Id="F__Help_image105.gif" />
+                     <File Name="image107.gif" Id="F__Help_image107.gif" />
+                     <File Name="image108.gif" Id="F__Help_image108.gif" />
+                     <File Name="image11.gif" Id="F__Help_image11.gif" />
+                     <File Name="image110.gif" Id="F__Help_image110.gif" />
+                     <File Name="image112.gif" Id="F__Help_image112.gif" />
+                     <File Name="image115.gif" Id="F__Help_image115.gif" />
+                     <File Name="image118.gif" Id="F__Help_image118.gif" />
+                     <File Name="image119.gif" Id="F__Help_image119.gif" />
+                     <File Name="image12.gif" Id="F__Help_image12.gif" />
+                     <File Name="image12.jpg" Id="F__Help_image12.jpg" />
+                     <File Name="image120.gif" Id="F__Help_image120.gif" />
+                     <File Name="image121.gif" Id="F__Help_image121.gif" />
+                     <File Name="image122.gif" Id="F__Help_image122.gif" />
+                     <File Name="image123.gif" Id="F__Help_image123.gif" />
+                     <File Name="image124.gif" Id="F__Help_image124.gif" />
+                     <File Name="image125.gif" Id="F__Help_image125.gif" />
+                     <File Name="image126.gif" Id="F__Help_image126.gif" />
+                     <File Name="image127.gif" Id="F__Help_image127.gif" />
+                     <File Name="image128.gif" Id="F__Help_image128.gif" />
+                     <File Name="image129.gif" Id="F__Help_image129.gif" />
+                     <File Name="image13.jpg" Id="F__Help_image13.jpg" />
+                     <File Name="image130.gif" Id="F__Help_image130.gif" />
+                     <File Name="image131.gif" Id="F__Help_image131.gif" />
+                     <File Name="image132.gif" Id="F__Help_image132.gif" />
+                     <File Name="image133.gif" Id="F__Help_image133.gif" />
+                     <File Name="image134.gif" Id="F__Help_image134.gif" />
+                     <File Name="image135.gif" Id="F__Help_image135.gif" />
+                     <File Name="image136.gif" Id="F__Help_image136.gif" />
+                     <File Name="image137.gif" Id="F__Help_image137.gif" />
+                     <File Name="image138.gif" Id="F__Help_image138.gif" />
+                     <File Name="image139.gif" Id="F__Help_image139.gif" />
+                     <File Name="image14.gif" Id="F__Help_image14.gif" />
+                     <File Name="image14.jpg" Id="F__Help_image14.jpg" />
+                     <File Name="image140.gif" Id="F__Help_image140.gif" />
+                     <File Name="image141.gif" Id="F__Help_image141.gif" />
+                     <File Name="image142.gif" Id="F__Help_image142.gif" />
+                     <File Name="image143.gif" Id="F__Help_image143.gif" />
+                     <File Name="image144.gif" Id="F__Help_image144.gif" />
+                     <File Name="image145.gif" Id="F__Help_image145.gif" />
+                     <File Name="image146.gif" Id="F__Help_image146.gif" />
+                     <File Name="image147.gif" Id="F__Help_image147.gif" />
+                     <File Name="image148.gif" Id="F__Help_image148.gif" />
+                     <File Name="image149.gif" Id="F__Help_image149.gif" />
+                     <File Name="image15.gif" Id="F__Help_image15.gif" />
+                     <File Name="image15.jpg" Id="F__Help_image15.jpg" />
+                     <File Name="image150.gif" Id="F__Help_image150.gif" />
+                     <File Name="image151.gif" Id="F__Help_image151.gif" />
+                     <File Name="image152.gif" Id="F__Help_image152.gif" />
+                     <File Name="image153.gif" Id="F__Help_image153.gif" />
+                     <File Name="image154.gif" Id="F__Help_image154.gif" />
+                     <File Name="image155.gif" Id="F__Help_image155.gif" />
+                     <File Name="image156.gif" Id="F__Help_image156.gif" />
+                     <File Name="image158.gif" Id="F__Help_image158.gif" />
+                     <File Name="image159.gif" Id="F__Help_image159.gif" />
+                     <File Name="image16.jpg" Id="F__Help_image16.jpg" />
+                     <File Name="image160.gif" Id="F__Help_image160.gif" />
+                     <File Name="image161.gif" Id="F__Help_image161.gif" />
+                     <File Name="image162.gif" Id="F__Help_image162.gif" />
+                     <File Name="image163.gif" Id="F__Help_image163.gif" />
+                     <File Name="image164.gif" Id="F__Help_image164.gif" />
+                     <File Name="image169.gif" Id="F__Help_image169.gif" />
+                     <File Name="image17.gif" Id="F__Help_image17.gif" />
+                     <File Name="image17.jpg" Id="F__Help_image17.jpg" />
+                     <File Name="image170.gif" Id="F__Help_image170.gif" />
+                     <File Name="image176.gif" Id="F__Help_image176.gif" />
+                     <File Name="image177.gif" Id="F__Help_image177.gif" />
+                     <File Name="image178.gif" Id="F__Help_image178.gif" />
+                     <File Name="image179.gif" Id="F__Help_image179.gif" />
+                     <File Name="image18.gif" Id="F__Help_image18.gif" />
+                     <File Name="image180.gif" Id="F__Help_image180.gif" />
+                     <File Name="image182.gif" Id="F__Help_image182.gif" />
+                     <File Name="image186.gif" Id="F__Help_image186.gif" />
+                     <File Name="image187.gif" Id="F__Help_image187.gif" />
+                     <File Name="image188.gif" Id="F__Help_image188.gif" />
+                     <File Name="image19.gif" Id="F__Help_image19.gif" />
+                     <File Name="image19.jpg" Id="F__Help_image19.jpg" />
+                     <File Name="image191.gif" Id="F__Help_image191.gif" />
+                     <File Name="image192.gif" Id="F__Help_image192.gif" />
+                     <File Name="image194.gif" Id="F__Help_image194.gif" />
+                     <File Name="image196.gif" Id="F__Help_image196.gif" />
+                     <File Name="image197.gif" Id="F__Help_image197.gif" />
+                     <File Name="image198.gif" Id="F__Help_image198.gif" />
+                     <File Name="image199.gif" Id="F__Help_image199.gif" />
+                     <File Name="image20.gif" Id="F__Help_image20.gif" />
+                     <File Name="image20.jpg" Id="F__Help_image20.jpg" />
+                     <File Name="image200.gif" Id="F__Help_image200.gif" />
+                     <File Name="image202.gif" Id="F__Help_image202.gif" />
+                     <File Name="image205.gif" Id="F__Help_image205.gif" />
+                     <File Name="image206.gif" Id="F__Help_image206.gif" />
+                     <File Name="image207.gif" Id="F__Help_image207.gif" />
+                     <File Name="image21.gif" Id="F__Help_image21.gif" />
+                     <File Name="image211.gif" Id="F__Help_image211.gif" />
+                     <File Name="image212.gif" Id="F__Help_image212.gif" />
+                     <File Name="image213.gif" Id="F__Help_image213.gif" />
+                     <File Name="image214.gif" Id="F__Help_image214.gif" />
+                     <File Name="image215.gif" Id="F__Help_image215.gif" />
+                     <File Name="image216.gif" Id="F__Help_image216.gif" />
+                     <File Name="image217.gif" Id="F__Help_image217.gif" />
+                     <File Name="image218.gif" Id="F__Help_image218.gif" />
+                     <File Name="image219.gif" Id="F__Help_image219.gif" />
+                     <File Name="image22.gif" Id="F__Help_image22.gif" />
+                     <File Name="image220.gif" Id="F__Help_image220.gif" />
+                     <File Name="image221.gif" Id="F__Help_image221.gif" />
+                     <File Name="image222.gif" Id="F__Help_image222.gif" />
+                     <File Name="image223.gif" Id="F__Help_image223.gif" />
+                     <File Name="image224.gif" Id="F__Help_image224.gif" />
+                     <File Name="image225.gif" Id="F__Help_image225.gif" />
+                     <File Name="image226.gif" Id="F__Help_image226.gif" />
+                     <File Name="image227.gif" Id="F__Help_image227.gif" />
+                     <File Name="image228.gif" Id="F__Help_image228.gif" />
+                     <File Name="image229.gif" Id="F__Help_image229.gif" />
+                     <File Name="image23.gif" Id="F__Help_image23.gif" />
+                     <File Name="image230.gif" Id="F__Help_image230.gif" />
+                     <File Name="image231.gif" Id="F__Help_image231.gif" />
+                     <File Name="image232.gif" Id="F__Help_image232.gif" />
+                     <File Name="image233.gif" Id="F__Help_image233.gif" />
+                     <File Name="image234.gif" Id="F__Help_image234.gif" />
+                     <File Name="image235.gif" Id="F__Help_image235.gif" />
+                     <File Name="image236.gif" Id="F__Help_image236.gif" />
+                     <File Name="image237.gif" Id="F__Help_image237.gif" />
+                     <File Name="image238.gif" Id="F__Help_image238.gif" />
+                     <File Name="image239.gif" Id="F__Help_image239.gif" />
+                     <File Name="image24.gif" Id="F__Help_image24.gif" />
+                     <File Name="image240.gif" Id="F__Help_image240.gif" />
+                     <File Name="image241.gif" Id="F__Help_image241.gif" />
+                     <File Name="image242.gif" Id="F__Help_image242.gif" />
+                     <File Name="image243.gif" Id="F__Help_image243.gif" />
+                     <File Name="image244.gif" Id="F__Help_image244.gif" />
+                     <File Name="image245.gif" Id="F__Help_image245.gif" />
+                     <File Name="image246.gif" Id="F__Help_image246.gif" />
+                     <File Name="image247.gif" Id="F__Help_image247.gif" />
+                     <File Name="image248.gif" Id="F__Help_image248.gif" />
+                     <File Name="image249.gif" Id="F__Help_image249.gif" />
+                     <File Name="image25.gif" Id="F__Help_image25.gif" />
+                     <File Name="image25.jpg" Id="F__Help_image25.jpg" />
+                     <File Name="image250.gif" Id="F__Help_image250.gif" />
+                     <File Name="image252.gif" Id="F__Help_image252.gif" />
+                     <File Name="image254.gif" Id="F__Help_image254.gif" />
+                     <File Name="image255.gif" Id="F__Help_image255.gif" />
+                     <File Name="image257.gif" Id="F__Help_image257.gif" />
+                     <File Name="image258.gif" Id="F__Help_image258.gif" />
+                     <File Name="image259.gif" Id="F__Help_image259.gif" />
+                     <File Name="image26.gif" Id="F__Help_image26.gif" />
+                     <File Name="image26.jpg" Id="F__Help_image26.jpg" />
+                     <File Name="image263.gif" Id="F__Help_image263.gif" />
+                     <File Name="image264.gif" Id="F__Help_image264.gif" />
+                     <File Name="image265.gif" Id="F__Help_image265.gif" />
+                     <File Name="image266.gif" Id="F__Help_image266.gif" />
+                     <File Name="image267.gif" Id="F__Help_image267.gif" />
+                     <File Name="image268.gif" Id="F__Help_image268.gif" />
+                     <File Name="image27.gif" Id="F__Help_image27.gif" />
+                     <File Name="image27.jpg" Id="F__Help_image27.jpg" />
+                     <File Name="image271.gif" Id="F__Help_image271.gif" />
+                     <File Name="image276.gif" Id="F__Help_image276.gif" />
+                     <File Name="image28.gif" Id="F__Help_image28.gif" />
+                     <File Name="image284.gif" Id="F__Help_image284.gif" />
+                     <File Name="image285.gif" Id="F__Help_image285.gif" />
+                     <File Name="image289.gif" Id="F__Help_image289.gif" />
+                     <File Name="image29.gif" Id="F__Help_image29.gif" />
+                     <File Name="image290.gif" Id="F__Help_image290.gif" />
+                     <File Name="image3.gif" Id="F__Help_image3.gif" />
+                     <File Name="image3.jpg" Id="F__Help_image3.jpg" />
+                     <File Name="image30.gif" Id="F__Help_image30.gif" />
+                     <File Name="image31.gif" Id="F__Help_image31.gif" />
+                     <File Name="image311.gif" Id="F__Help_image311.gif" />
+                     <File Name="image312.gif" Id="F__Help_image312.gif" />
+                     <File Name="image317.gif" Id="F__Help_image317.gif" />
+                     <File Name="image318.gif" Id="F__Help_image318.gif" />
+                     <File Name="image319.gif" Id="F__Help_image319.gif" />
+                     <File Name="image32.gif" Id="F__Help_image32.gif" />
+                     <File Name="image325.gif" Id="F__Help_image325.gif" />
+                     <File Name="image326.gif" Id="F__Help_image326.gif" />
+                     <File Name="image327.gif" Id="F__Help_image327.gif" />
+                     <File Name="image328.gif" Id="F__Help_image328.gif" />
+                     <File Name="image329.gif" Id="F__Help_image329.gif" />
+                     <File Name="image33.gif" Id="F__Help_image33.gif" />
+                     <File Name="image330.gif" Id="F__Help_image330.gif" />
+                     <File Name="image332.gif" Id="F__Help_image332.gif" />
+                     <File Name="image333.gif" Id="F__Help_image333.gif" />
+                     <File Name="image334.gif" Id="F__Help_image334.gif" />
+                     <File Name="image335.gif" Id="F__Help_image335.gif" />
+                     <File Name="image336.gif" Id="F__Help_image336.gif" />
+                     <File Name="image337.gif" Id="F__Help_image337.gif" />
+                     <File Name="image34.gif" Id="F__Help_image34.gif" />
+                     <File Name="image35.gif" Id="F__Help_image35.gif" />
+                     <File Name="image36.gif" Id="F__Help_image36.gif" />
+                     <File Name="image360.gif" Id="F__Help_image360.gif" />
+                     <File Name="image363.gif" Id="F__Help_image363.gif" />
+                     <File Name="image364.gif" Id="F__Help_image364.gif" />
+                     <File Name="image365.gif" Id="F__Help_image365.gif" />
+                     <File Name="image367.gif" Id="F__Help_image367.gif" />
+                     <File Name="image368.gif" Id="F__Help_image368.gif" />
+                     <File Name="image369.gif" Id="F__Help_image369.gif" />
+                     <File Name="image37.gif" Id="F__Help_image37.gif" />
+                     <File Name="image370.gif" Id="F__Help_image370.gif" />
+                     <File Name="image372.gif" Id="F__Help_image372.gif" />
+                     <File Name="image373.gif" Id="F__Help_image373.gif" />
+                     <File Name="image376.gif" Id="F__Help_image376.gif" />
+                     <File Name="image379.gif" Id="F__Help_image379.gif" />
+                     <File Name="image38.gif" Id="F__Help_image38.gif" />
+                     <File Name="image380.gif" Id="F__Help_image380.gif" />
+                     <File Name="image381.gif" Id="F__Help_image381.gif" />
+                     <File Name="image383.gif" Id="F__Help_image383.gif" />
+                     <File Name="image384.gif" Id="F__Help_image384.gif" />
+                     <File Name="image385.gif" Id="F__Help_image385.gif" />
+                     <File Name="image386.gif" Id="F__Help_image386.gif" />
+                     <File Name="image392.gif" Id="F__Help_image392.gif" />
+                     <File Name="image393.gif" Id="F__Help_image393.gif" />
+                     <File Name="image394.gif" Id="F__Help_image394.gif" />
+                     <File Name="image395.gif" Id="F__Help_image395.gif" />
+                     <File Name="image396.gif" Id="F__Help_image396.gif" />
+                     <File Name="image397.gif" Id="F__Help_image397.gif" />
+                     <File Name="image398.gif" Id="F__Help_image398.gif" />
+                     <File Name="image4.gif" Id="F__Help_image4.gif" />
+                     <File Name="image4.jpg" Id="F__Help_image4.jpg" />
+                     <File Name="image401.gif" Id="F__Help_image401.gif" />
+                     <File Name="image402.gif" Id="F__Help_image402.gif" />
+                     <File Name="image404.gif" Id="F__Help_image404.gif" />
+                     <File Name="image405.gif" Id="F__Help_image405.gif" />
+                     <File Name="image406.gif" Id="F__Help_image406.gif" />
+                     <File Name="image407.gif" Id="F__Help_image407.gif" />
+                     <File Name="image408.gif" Id="F__Help_image408.gif" />
+                     <File Name="image409.gif" Id="F__Help_image409.gif" />
+                     <File Name="image41.gif" Id="F__Help_image41.gif" />
+                     <File Name="image410.gif" Id="F__Help_image410.gif" />
+                     <File Name="image413.gif" Id="F__Help_image413.gif" />
+                     <File Name="image414.gif" Id="F__Help_image414.gif" />
+                     <File Name="image415.gif" Id="F__Help_image415.gif" />
+                     <File Name="image416.gif" Id="F__Help_image416.gif" />
+                     <File Name="image417.gif" Id="F__Help_image417.gif" />
+                     <File Name="image418.gif" Id="F__Help_image418.gif" />
+                     <File Name="image419.gif" Id="F__Help_image419.gif" />
+                     <File Name="image420.gif" Id="F__Help_image420.gif" />
+                     <File Name="image421.gif" Id="F__Help_image421.gif" />
+                     <File Name="image422.gif" Id="F__Help_image422.gif" />
+                     <File Name="image423.gif" Id="F__Help_image423.gif" />
+                     <File Name="image424.gif" Id="F__Help_image424.gif" />
+                     <File Name="image425.gif" Id="F__Help_image425.gif" />
+                     <File Name="image426.gif" Id="F__Help_image426.gif" />
+                     <File Name="image427.gif" Id="F__Help_image427.gif" />
+                     <File Name="image428.gif" Id="F__Help_image428.gif" />
+                     <File Name="image430.gif" Id="F__Help_image430.gif" />
+                     <File Name="image432.gif" Id="F__Help_image432.gif" />
+                     <File Name="image437.gif" Id="F__Help_image437.gif" />
+                     <File Name="image439.gif" Id="F__Help_image439.gif" />
+                     <File Name="image440.gif" Id="F__Help_image440.gif" />
+                     <File Name="image443.gif" Id="F__Help_image443.gif" />
+                     <File Name="image444.gif" Id="F__Help_image444.gif" />
+                     <File Name="image445.gif" Id="F__Help_image445.gif" />
+                     <File Name="image446.gif" Id="F__Help_image446.gif" />
+                     <File Name="image447.gif" Id="F__Help_image447.gif" />
+                     <File Name="image448.gif" Id="F__Help_image448.gif" />
+                     <File Name="image469.gif" Id="F__Help_image469.gif" />
+                     <File Name="image47.gif" Id="F__Help_image47.gif" />
+                     <File Name="image470.gif" Id="F__Help_image470.gif" />
+                     <File Name="image471.gif" Id="F__Help_image471.gif" />
+                     <File Name="image472.gif" Id="F__Help_image472.gif" />
+                     <File Name="image473.gif" Id="F__Help_image473.gif" />
+                     <File Name="image474.gif" Id="F__Help_image474.gif" />
+                     <File Name="image475.gif" Id="F__Help_image475.gif" />
+                     <File Name="image476.gif" Id="F__Help_image476.gif" />
+                     <File Name="image477.gif" Id="F__Help_image477.gif" />
+                     <File Name="image48.gif" Id="F__Help_image48.gif" />
+                     <File Name="image480.gif" Id="F__Help_image480.gif" />
+                     <File Name="image481.gif" Id="F__Help_image481.gif" />
+                     <File Name="image482.gif" Id="F__Help_image482.gif" />
+                     <File Name="image484.gif" Id="F__Help_image484.gif" />
+                     <File Name="image485.gif" Id="F__Help_image485.gif" />
+                     <File Name="image49.gif" Id="F__Help_image49.gif" />
+                     <File Name="image491.gif" Id="F__Help_image491.gif" />
+                     <File Name="image492.gif" Id="F__Help_image492.gif" />
+                     <File Name="image494.gif" Id="F__Help_image494.gif" />
+                     <File Name="image495.gif" Id="F__Help_image495.gif" />
+                     <File Name="image496.gif" Id="F__Help_image496.gif" />
+                     <File Name="image497.gif" Id="F__Help_image497.gif" />
+                     <File Name="image50.gif" Id="F__Help_image50.gif" />
+                     <File Name="image500.gif" Id="F__Help_image500.gif" />
+                     <File Name="image501.gif" Id="F__Help_image501.gif" />
+                     <File Name="image503.gif" Id="F__Help_image503.gif" />
+                     <File Name="image504.gif" Id="F__Help_image504.gif" />
+                     <File Name="image51.gif" Id="F__Help_image51.gif" />
+                     <File Name="image510.gif" Id="F__Help_image510.gif" />
+                     <File Name="image515.gif" Id="F__Help_image515.gif" />
+                     <File Name="image516.gif" Id="F__Help_image516.gif" />
+                     <File Name="image517.gif" Id="F__Help_image517.gif" />
+                     <File Name="image52.gif" Id="F__Help_image52.gif" />
+                     <File Name="image527.gif" Id="F__Help_image527.gif" />
+                     <File Name="image53.gif" Id="F__Help_image53.gif" />
+                     <File Name="image530.gif" Id="F__Help_image530.gif" />
+                     <File Name="image531.gif" Id="F__Help_image531.gif" />
+                     <File Name="image532.gif" Id="F__Help_image532.gif" />
+                     <File Name="image533.gif" Id="F__Help_image533.gif" />
+                     <File Name="image534.gif" Id="F__Help_image534.gif" />
+                     <File Name="image535.gif" Id="F__Help_image535.gif" />
+                     <File Name="image536.gif" Id="F__Help_image536.gif" />
+                     <File Name="image537.gif" Id="F__Help_image537.gif" />
+                     <File Name="image538.gif" Id="F__Help_image538.gif" />
+                     <File Name="image539.gif" Id="F__Help_image539.gif" />
+                     <File Name="image54.gif" Id="F__Help_image54.gif" />
+                     <File Name="image540.gif" Id="F__Help_image540.gif" />
+                     <File Name="image541.gif" Id="F__Help_image541.gif" />
+                     <File Name="image542.gif" Id="F__Help_image542.gif" />
+                     <File Name="image543.gif" Id="F__Help_image543.gif" />
+                     <File Name="image544.gif" Id="F__Help_image544.gif" />
+                     <File Name="image545.gif" Id="F__Help_image545.gif" />
+                     <File Name="image546.gif" Id="F__Help_image546.gif" />
+                     <File Name="image547.gif" Id="F__Help_image547.gif" />
+                     <File Name="image548.gif" Id="F__Help_image548.gif" />
+                     <File Name="image549.gif" Id="F__Help_image549.gif" />
+                     <File Name="image55.gif" Id="F__Help_image55.gif" />
+                     <File Name="image550.gif" Id="F__Help_image550.gif" />
+                     <File Name="image551.gif" Id="F__Help_image551.gif" />
+                     <File Name="image552.gif" Id="F__Help_image552.gif" />
+                     <File Name="image553.gif" Id="F__Help_image553.gif" />
+                     <File Name="image56.gif" Id="F__Help_image56.gif" />
+                     <File Name="image57.gif" Id="F__Help_image57.gif" />
+                     <File Name="image574.gif" Id="F__Help_image574.gif" />
+                     <File Name="image579.gif" Id="F__Help_image579.gif" />
+                     <File Name="image58.gif" Id="F__Help_image58.gif" />
+                     <File Name="image59.gif" Id="F__Help_image59.gif" />
+                     <File Name="image6.gif" Id="F__Help_image6.gif" />
+                     <File Name="image6.jpg" Id="F__Help_image6.jpg" />
+                     <File Name="image60.gif" Id="F__Help_image60.gif" />
+                     <File Name="image61.gif" Id="F__Help_image61.gif" />
+                     <File Name="image63.gif" Id="F__Help_image63.gif" />
+                     <File Name="image635.gif" Id="F__Help_image635.gif" />
+                     <File Name="image636.gif" Id="F__Help_image636.gif" />
+                     <File Name="image638.gif" Id="F__Help_image638.gif" />
+                     <File Name="image639.gif" Id="F__Help_image639.gif" />
+                     <File Name="image64.gif" Id="F__Help_image64.gif" />
+                     <File Name="image640.gif" Id="F__Help_image640.gif" />
+                     <File Name="image641.gif" Id="F__Help_image641.gif" />
+                     <File Name="image642.gif" Id="F__Help_image642.gif" />
+                     <File Name="image643.gif" Id="F__Help_image643.gif" />
+                     <File Name="image644.gif" Id="F__Help_image644.gif" />
+                     <File Name="image646.gif" Id="F__Help_image646.gif" />
+                     <File Name="image648.gif" Id="F__Help_image648.gif" />
+                     <File Name="image649.gif" Id="F__Help_image649.gif" />
+                     <File Name="image650.gif" Id="F__Help_image650.gif" />
+                     <File Name="image651.gif" Id="F__Help_image651.gif" />
+                     <File Name="image655.gif" Id="F__Help_image655.gif" />
+                     <File Name="image656.gif" Id="F__Help_image656.gif" />
+                     <File Name="image66.gif" Id="F__Help_image66.gif" />
+                     <File Name="image661.gif" Id="F__Help_image661.gif" />
+                     <File Name="image662.gif" Id="F__Help_image662.gif" />
+                     <File Name="image663.gif" Id="F__Help_image663.gif" />
+                     <File Name="image664.gif" Id="F__Help_image664.gif" />
+                     <File Name="image665.gif" Id="F__Help_image665.gif" />
+                     <File Name="image666.gif" Id="F__Help_image666.gif" />
+                     <File Name="image667.gif" Id="F__Help_image667.gif" />
+                     <File Name="image668.gif" Id="F__Help_image668.gif" />
+                     <File Name="image67.gif" Id="F__Help_image67.gif" />
+                     <File Name="image670.gif" Id="F__Help_image670.gif" />
+                     <File Name="image671.gif" Id="F__Help_image671.gif" />
+                     <File Name="image672.gif" Id="F__Help_image672.gif" />
+                     <File Name="image673.gif" Id="F__Help_image673.gif" />
+                     <File Name="image674.gif" Id="F__Help_image674.gif" />
+                     <File Name="image675.gif" Id="F__Help_image675.gif" />
+                     <File Name="image676.gif" Id="F__Help_image676.gif" />
+                     <File Name="image677.gif" Id="F__Help_image677.gif" />
+                     <File Name="image678.gif" Id="F__Help_image678.gif" />
+                     <File Name="image679.gif" Id="F__Help_image679.gif" />
+                     <File Name="image68.gif" Id="F__Help_image68.gif" />
+                     <File Name="image680.gif" Id="F__Help_image680.gif" />
+                     <File Name="image681.gif" Id="F__Help_image681.gif" />
+                     <File Name="image682.gif" Id="F__Help_image682.gif" />
+                     <File Name="image683.gif" Id="F__Help_image683.gif" />
+                     <File Name="image684.gif" Id="F__Help_image684.gif" />
+                     <File Name="image685.gif" Id="F__Help_image685.gif" />
+                     <File Name="image686.gif" Id="F__Help_image686.gif" />
+                     <File Name="image689.gif" Id="F__Help_image689.gif" />
+                     <File Name="image69.gif" Id="F__Help_image69.gif" />
+                     <File Name="image690.gif" Id="F__Help_image690.gif" />
+                     <File Name="image691.gif" Id="F__Help_image691.gif" />
+                     <File Name="image692.gif" Id="F__Help_image692.gif" />
+                     <File Name="image693.gif" Id="F__Help_image693.gif" />
+                     <File Name="image695.gif" Id="F__Help_image695.gif" />
+                     <File Name="image697.gif" Id="F__Help_image697.gif" />
+                     <File Name="image698.gif" Id="F__Help_image698.gif" />
+                     <File Name="image699.gif" Id="F__Help_image699.gif" />
+                     <File Name="image7.gif" Id="F__Help_image7.gif" />
+                     <File Name="image7.jpg" Id="F__Help_image7.jpg" />
+                     <File Name="image70.gif" Id="F__Help_image70.gif" />
+                     <File Name="image700.gif" Id="F__Help_image700.gif" />
+                     <File Name="image701.gif" Id="F__Help_image701.gif" />
+                     <File Name="image702.gif" Id="F__Help_image702.gif" />
+                     <File Name="image703.gif" Id="F__Help_image703.gif" />
+                     <File Name="image704.gif" Id="F__Help_image704.gif" />
+                     <File Name="image705.gif" Id="F__Help_image705.gif" />
+                     <File Name="image707.gif" Id="F__Help_image707.gif" />
+                     <File Name="image708.gif" Id="F__Help_image708.gif" />
+                     <File Name="image709.gif" Id="F__Help_image709.gif" />
+                     <File Name="image71.gif" Id="F__Help_image71.gif" />
+                     <File Name="image710.gif" Id="F__Help_image710.gif" />
+                     <File Name="image711.gif" Id="F__Help_image711.gif" />
+                     <File Name="image712.gif" Id="F__Help_image712.gif" />
+                     <File Name="image713.gif" Id="F__Help_image713.gif" />
+                     <File Name="image714.gif" Id="F__Help_image714.gif" />
+                     <File Name="image716.gif" Id="F__Help_image716.gif" />
+                     <File Name="image717.gif" Id="F__Help_image717.gif" />
+                     <File Name="image72.gif" Id="F__Help_image72.gif" />
+                     <File Name="image73.gif" Id="F__Help_image73.gif" />
+                     <File Name="image74.gif" Id="F__Help_image74.gif" />
+                     <File Name="image75.gif" Id="F__Help_image75.gif" />
+                     <File Name="image76.gif" Id="F__Help_image76.gif" />
+                     <File Name="image77.gif" Id="F__Help_image77.gif" />
+                     <File Name="image78.gif" Id="F__Help_image78.gif" />
+                     <File Name="image79.gif" Id="F__Help_image79.gif" />
+                     <File Name="image8.gif" Id="F__Help_image8.gif" />
+                     <File Name="image8.jpg" Id="F__Help_image8.jpg" />
+                     <File Name="image80.gif" Id="F__Help_image80.gif" />
+                     <File Name="image81.gif" Id="F__Help_image81.gif" />
+                     <File Name="image82.gif" Id="F__Help_image82.gif" />
+                     <File Name="image83.gif" Id="F__Help_image83.gif" />
+                     <File Name="image84.gif" Id="F__Help_image84.gif" />
+                     <File Name="image85.gif" Id="F__Help_image85.gif" />
+                     <File Name="image86.gif" Id="F__Help_image86.gif" />
+                     <File Name="image87.gif" Id="F__Help_image87.gif" />
+                     <File Name="image88.gif" Id="F__Help_image88.gif" />
+                     <File Name="image89.gif" Id="F__Help_image89.gif" />
+                     <File Name="image9.gif" Id="F__Help_image9.gif" />
+                     <File Name="image90.gif" Id="F__Help_image90.gif" />
+                     <File Name="image91.gif" Id="F__Help_image91.gif" />
+                     <File Name="image93.gif" Id="F__Help_image93.gif" />
+                     <File Name="image94.gif" Id="F__Help_image94.gif" />
+                     <File Name="image95.gif" Id="F__Help_image95.gif" />
+                     <File Name="image96.gif" Id="F__Help_image96.gif" />
+                     <File Name="image97.gif" Id="F__Help_image97.gif" />
+                     <File Name="image98.gif" Id="F__Help_image98.gif" />
+                     <File Name="image99.gif" Id="F__Help_image99.gif" />
+                     <File Name="Import_Data.htm" Id="F__Help_import_data.htm" />
+                     <File Name="Menu_Location.gif" Id="F__Help_menu_location.gif" />
+                     <File Name="Mouse_Actions.htm" Id="F__Help_mouse_actions.htm" />
+                     <File Name="No_Unit.gif" Id="F__Help_no_unit.gif" />
+                     <File Name="Open_Files_When_Opticks_Starts.htm" Id="F__Help_open_files_when_opticks_starts.htm" />
+                     <File Name="Print_the_Active_Window.htm" Id="F__Help_print_the_active_window.htm" />
+                     <File Name="Rename_AOI.gif" Id="F__Help_rename_aoi.gif" />
+                     <File Name="Toolbar_handle.gif" Id="F__Help_toolbar_handle.gif" />
+                     <File Name="Welcome.htm" Id="F__Help_welcome.htm" />
+                     <File Name="Wizard_Builder_Callouts.gif" Id="F__Help_wizard_builder_callouts.gif" />
+                     <File Name="Working_with_the_Main_Application_Window.htm" Id="F__Help_working_with_the_main_application_window.htm" />
+                  </Component>
+                  <Directory Id="D__Help_annotation" Name="Annotation" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\Annotation">
+                     <Component Id="C__Help_annotation" Guid="$(var.C__Help_annotation_Guid)" Win64="no">
+                        <File Name="Annotation_Drop-Down_Menu.htm" Id="F__Help_annotation_drop_down_menu.htm" />
+                        <File Name="Annotation_Layer.htm" Id="F__Help_annotation_layer.htm" />
+                        <File Name="Annotation_Objects.htm" Id="F__Help_annotation_objects.htm" />
+                        <File Name="Working_with_Annotation_Objects.htm" Id="F__Help_working_with_annotation_objects.htm" />
+                        <File Name="Working_with_Annotation_Text_Boxes.htm" Id="F__Help_working_with_annotation_text_boxes.htm" />
+                     </Component>
+                  </Directory>
+                  <Directory Id="D__Help_aoi" Name="AOI" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\AOI">
+                     <Component Id="C__Help_aoi" Guid="$(var.C__Help_aoi_Guid)" Win64="no">
+                        <File Name="AOI.htm" Id="F__Help_aoi.htm" />
+                        <File Name="AOI_Pixel_Selection_Tool.htm" Id="F__Help_aoi_pixel_selection_tool.htm" />
+                        <File Name="Change_AOI_Marker_Symbol.htm" Id="F__Help_change_aoi_marker_symbol.htm" />
+                        <File Name="Merge_AOIs.htm" Id="F__Help_merge_aois.htm" />
+                     </Component>
+                  </Directory>
+                  <Directory Id="D__Help_geo" Name="Geo" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\Geo">
+                     <Component Id="C__Help_geo" Guid="$(var.C__Help_geo_Guid)" Win64="no">
+                        <File Name="GCP.htm" Id="F__Help_gcp.htm" />
+                        <File Name="GCP_Editor.htm" Id="F__Help_gcp_editor.htm" />
+                        <File Name="GCP_Lists.htm" Id="F__Help_gcp_lists.htm" />
+                        <File Name="gcp_polynomial_order.htm" Id="F__Help_gcp_polynomial_order.htm" />
+                        <File Name="Georeference.htm" Id="F__Help_georeference.htm" />
+                     </Component>
+                  </Directory>
+                  <Directory Id="D__Help_geographic_features" Name="Geographic_Features" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\Geographic_Features">
+                     <Component Id="C__Help_geographic_features" Guid="$(var.C__Help_geographic_features_Guid)" Win64="no">
+                        <File Name="Clipping_Tab.htm" Id="F__Help_clipping_tab.htm" />
+                        <File Name="Connection_Tab.htm" Id="F__Help_connection_tab.htm" />
+                        <File Name="Display_Tab.htm" Id="F__Help_display_tab.htm" />
+                        <File Name="Geographic_Features.htm" Id="F__Help_geographic_features.htm" />
+                     </Component>
+                  </Directory>
+                  <Directory Id="D__Help_importers_exporters" Name="Importers_Exporters" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\Importers_Exporters">
+                     <Component Id="C__Help_importers_exporters" Guid="$(var.C__Help_importers_exporters_Guid)" Win64="no">
+                        <File Name="ASPAM_Viewer.htm" Id="F__Help_aspam_viewer.htm" />
+                        <File Name="ENVI_Exporter.htm" Id="F__Help_envi_exporter.htm" />
+                        <File Name="ENVI_Header_Format.htm" Id="F__Help_envi_header_format.htm" />
+                        <File Name="ENVI_Importer.htm" Id="F__Help_envi_importer.htm" />
+                        <File Name="ENVI_Library_Exporter.htm" Id="F__Help_envi_library_exporter.htm" />
+                        <File Name="ENVI_Library_Importer.htm" Id="F__Help_envi_library_importer.htm" />
+                        <File Name="Exporters.htm" Id="F__Help_exporters.htm" />
+                        <File Name="Export_Data_Set.htm" Id="F__Help_export_data_set.htm" />
+                        <File Name="Export_Primary_Raster_Element.htm" Id="F__Help_export_primary_raster_element.htm" />
+                        <File Name="Export_Product_Data.htm" Id="F__Help_export_product_data.htm" />
+                        <File Name="Export_Results_Matrix.htm" Id="F__Help_export_results_matrix.htm" />
+                        <File Name="Export_Shape_File.htm" Id="F__Help_export_shape_file.htm" />
+                        <File Name="Importers.htm" Id="F__Help_importers.htm" />
+                        <File Name="Import_ASPAM_File.htm" Id="F__Help_import_aspam_file.htm" />
+                        <File Name="Import_Shape_File.htm" Id="F__Help_import_shape_file.htm" />
+                        <File Name="JPEG_Exporter.htm" Id="F__Help_jpeg_exporter.htm" />
+                        <File Name="NITF_Exporter.htm" Id="F__Help_nitf_exporter.htm" />
+                        <File Name="NITF_Export_Classification.htm" Id="F__Help_nitf_export_classification.htm" />
+                        <File Name="NITF_Importer.htm" Id="F__Help_nitf_importer.htm" />
+                        <File Name="Paragraph_A.htm" Id="F__Help_paragraph_a.htm" />
+                        <File Name="Paragraph_B.htm" Id="F__Help_paragraph_b.htm" />
+                        <File Name="Paragraph_D.htm" Id="F__Help_paragraph_d.htm" />
+                        <File Name="Paragraph_F.htm" Id="F__Help_paragraph_f.htm" />
+                        <File Name="Paragraph_G.htm" Id="F__Help_paragraph_g.htm" />
+                        <File Name="Paragraph_H.htm" Id="F__Help_paragraph_h.htm" />
+                        <File Name="Paragraph_J.htm" Id="F__Help_paragraph_j.htm" />
+                     </Component>
+                     <Directory Id="D__Help_options" Name="Options" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\Importers_Exporters\Options">
+                        <Component Id="C__Help_options" Guid="$(var.C__Help_options_Guid)" Win64="no">
+                           <File Name="Data_Tab.htm" Id="F__Help_data_tab.htm" />
+                           <File Name="File_Tab.htm" Id="F__Help_file_tab.htm" />
+                           <File Name="Import_Options.htm" Id="F__Help_import_options.htm" />
+                           <File Name="Metadata_Tab.htm" Id="F__Help_metadata_tab.htm" />
+                           <File Name="Select_Options_When_Exporting.htm" Id="F__Help_select_options_when_exporting.htm" />
+                           <File Name="Subset_Tab.htm" Id="F__Help_subset_tab.htm" />
+                        </Component>
+                     </Directory>
+                  </Directory>
+                  <Directory Id="D__Help_layers" Name="Layers" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\Layers">
+                     <Component Id="C__Help_layers" Guid="$(var.C__Help_layers_Guid)" Win64="no">
+                        <File Name="Activate_a_Layer.htm" Id="F__Help_activate_a_layer.htm" />
+                        <File Name="Create_a_New_Layer.htm" Id="F__Help_create_a_new_layer.htm" />
+                        <File Name="Show-Hide_Layers.htm" Id="F__Help_show_hide_layers.htm" />
+                        <File Name="Working_with_Layers.htm" Id="F__Help_working_with_layers.htm" />
+                     </Component>
+                  </Directory>
+                  <Directory Id="D__Help_movies" Name="Movies" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\Movies">
+                     <Component Id="C__Help_movies" Guid="$(var.C__Help_movies_Guid)" Win64="no">
+                        <File Name="Animation_Toolbar.htm" Id="F__Help_animation_toolbar.htm" />
+                        <File Name="Create_Animation.htm" Id="F__Help_create_animation.htm" />
+                        <File Name="Delete_Animation.htm" Id="F__Help_delete_animation.htm" />
+                        <File Name="Play_Animation.htm" Id="F__Help_play_animation.htm" />
+                     </Component>
+                  </Directory>
+                  <Directory Id="D__Help_options2" Name="Options" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\Options">
+                     <Component Id="C__Help_options1" Guid="$(var.C__Help_options1_Guid)" Win64="no">
+                        <File Name="Annotation_Layer_Options.htm" Id="F__Help_annotation_layer_options.htm" />
+                        <File Name="AOI_Layer_Options.htm" Id="F__Help_aoi_layer_options.htm" />
+                        <File Name="Creating_Shortcut_Keys.htm" Id="F__Help_creating_shortcut_keys.htm" />
+                        <File Name="Export_Options.htm" Id="F__Help_export_options.htm" />
+                        <File Name="GCP_Layer_Options.htm" Id="F__Help_gcp_layer_options.htm" />
+                        <File Name="Keyboard_Shortcuts.htm" Id="F__Help_keyboard_shortcuts.htm" />
+                        <File Name="Lat_Lon_Layer_Options.htm" Id="F__Help_lat_lon_layer_options.htm" />
+                        <File Name="Layers_Options.htm" Id="F__Help_layers_options.htm" />
+                        <File Name="Options.htm" Id="F__Help_options.htm" />
+                        <File Name="Pseudocolor_Layer_Options.htm" Id="F__Help_pseudocolor_layer_options.htm" />
+                        <File Name="Raster_Layer_Options.htm" Id="F__Help_raster_layer_options.htm" />
+                        <File Name="Session_Options.htm" Id="F__Help_session_options.htm" />
+                        <File Name="Threshold_Layer_Options.htm" Id="F__Help_threshold_layer_options.htm" />
+                        <File Name="Tie_Point_Layer_Options.htm" Id="F__Help_tie_point_layer_options.htm" />
+                        <File Name="Windows_Options.htm" Id="F__Help_windows_options.htm" />
+                        <File Name="Windows_Overview_Options.htm" Id="F__Help_windows_overview_options.htm" />
+                        <File Name="Windows_Status_Bar_Options.htm" Id="F__Help_windows_status_bar_options.htm" />
+                        <File Name="Windows_Workspace_Options_All.htm" Id="F__Help_windows_workspace_options_all.htm" />
+                        <File Name="Windows_Workspace_Options_Cube.htm" Id="F__Help_windows_workspace_options_cube.htm" />
+                     </Component>
+                  </Directory>
+                  <Directory Id="D__Help_products" Name="Products" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\Products">
+                     <Component Id="C__Help_products" Guid="$(var.C__Help_products_Guid)" Win64="no">
+                        <File Name="Create_a_New_Product.htm" Id="F__Help_create_a_new_product.htm" />
+                        <File Name="Derive_a_Product.htm" Id="F__Help_derive_a_product.htm" />
+                        <File Name="Edit_Selected_View.htm" Id="F__Help_edit_selected_view.htm" />
+                        <File Name="Load_a_Template.htm" Id="F__Help_load_a_template.htm" />
+                        <File Name="Product_Windows.htm" Id="F__Help_product_windows.htm" />
+                        <File Name="Save_a_Template.htm" Id="F__Help_save_a_template.htm" />
+                        <File Name="Select_Product_Paper_Size.htm" Id="F__Help_select_product_paper_size.htm" />
+                     </Component>
+                  </Directory>
+                  <Directory Id="D__Help_properties" Name="Properties" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\Properties">
+                     <Component Id="C__Help_properties" Guid="$(var.C__Help_properties_Guid)" Win64="no">
+                        <File Name="Annotation_Layer_Properties.htm" Id="F__Help_annotation_layer_properties.htm" />
+                        <File Name="AOI_Layer_Properties.htm" Id="F__Help_aoi_layer_properties.htm" />
+                        <File Name="Cube_Layer_Properties.htm" Id="F__Help_cube_layer_properties.htm" />
+                        <File Name="Data_Elements_Properties.htm" Id="F__Help_data_elements_properties.htm" />
+                        <File Name="GCP_Layer_Properties.htm" Id="F__Help_gcp_layer_properties.htm" />
+                        <File Name="Histogram_Window_Properties.htm" Id="F__Help_histogram_window_properties.htm" />
+                        <File Name="Latitude_Longitude_Layer_Properties.htm" Id="F__Help_latitude_longitude_layer_properties.htm" />
+                        <File Name="Plug-In_Properties.htm" Id="F__Help_plug_in_properties.htm" />
+                        <File Name="Product_Window_Properties.htm" Id="F__Help_product_window_properties.htm" />
+                        <File Name="Properties.htm" Id="F__Help_properties.htm" />
+                        <File Name="Properties_for_Annotation_Objects.htm" Id="F__Help_properties_for_annotation_objects.htm" />
+                        <File Name="Raster_Layer_Properties.htm" Id="F__Help_raster_layer_properties.htm" />
+                        <File Name="Scripting_Window_Properties.htm" Id="F__Help_scripting_window_properties.htm" />
+                        <File Name="Tie_Point_Layer_Properties.htm" Id="F__Help_tie_point_layer_properties.htm" />
+                        <File Name="Working_with_Metadata.htm" Id="F__Help_working_with_metadata.htm" />
+                     </Component>
+                  </Directory>
+                  <Directory Id="D__Help_quicklookdatafusion" Name="QuickLookDataFusion" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\QuickLookDataFusion">
+                     <Component Id="C__Help_quicklookdatafusion" Guid="$(var.C__Help_quicklookdatafusion_Guid)" Win64="no">
+                        <File Name="about_the_quick-look_data_fusion_plug-in.htm" Id="F__Help_about_the_quick_look_data_fusion_plug_in.htm" />
+                        <File Name="Copying_Layers.htm" Id="F__Help_copying_layers.htm" />
+                        <File Name="creating_tie_points.htm" Id="F__Help_creating_tie_points.htm" />
+                        <File Name="manipulating_fused_views.htm" Id="F__Help_manipulating_fused_views.htm" />
+                        <File Name="Selecting_a_ROI_and_Output_Views.htm" Id="F__Help_selecting_a_roi_and_output_views.htm" />
+                        <File Name="starting_the_quick-look_data_fusion_plug-in.htm" Id="F__Help_starting_the_quick_look_data_fusion_plug_in.htm" />
+                     </Component>
+                  </Directory>
+                  <Directory Id="D__Help_resources" Name="Resources" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\Resources">
+                     <Directory Id="D__Help_images" Name="Images" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\Resources\Images">
+                        <Component Id="C__Help_images" Guid="$(var.C__Help_images_Guid)" Win64="no">
+                           <File Name="Activate_Band.gif" Id="F__Help_activate_band.gif" />
+                           <File Name="Activate_Layer_1.gif" Id="F__Help_activate_layer_1.gif" />
+                           <File Name="Activate_Layer_2.gif" Id="F__Help_activate_layer_2.gif" />
+                           <File Name="Advance_end_button.gif" Id="F__Help_advance_end_button.gif" />
+                           <File Name="Animations_Tab.gif" Id="F__Help_animations_tab.gif" />
+                           <File Name="Annotation_Layer_Properties.gif" Id="F__Help_annotation_layer_properties.gif" />
+                           <File Name="Ann_Object_create_button.gif" Id="F__Help_ann_object_create_button.gif" />
+                           <File Name="AOI_Layer_Properties.gif" Id="F__Help_aoi_layer_properties.gif" />
+                           <File Name="AOI_Select_Rectangle.gif" Id="F__Help_aoi_select_rectangle.gif" />
+                           <File Name="ASPAM_Importer.gif" Id="F__Help_aspam_importer.gif" />
+                           <File Name="Band_Selection_Options.gif" Id="F__Help_band_selection_options.gif" />
+                           <File Name="Band_Selection_Tutorial.gif" Id="F__Help_band_selection_tutorial.gif" />
+                           <File Name="Brightness_layer.gif" Id="F__Help_brightness_layer.gif" />
+                           <File Name="Browse_button.gif" Id="F__Help_browse_button.gif" />
+                           <File Name="Browse_for_Folder.gif" Id="F__Help_browse_for_folder.gif" />
+                           <File Name="Change_template.gif" Id="F__Help_change_template.gif" />
+                           <File Name="Close_Session_dialog.gif" Id="F__Help_close_session_dialog.gif" />
+                           <File Name="Colormap_Editor.gif" Id="F__Help_colormap_editor.gif" />
+                           <File Name="Colormap_Editor_Example.gif" Id="F__Help_colormap_editor_example.gif" />
+                           <File Name="Colormap_Select_Layer.gif" Id="F__Help_colormap_select_layer.gif" />
+                           <File Name="Compression_Options_JPEG.gif" Id="F__Help_compression_options_jpeg.gif" />
+                           <File Name="Compression_Option_GeoTIFF.gif" Id="F__Help_compression_option_geotiff.gif" />
+                           <File Name="Compression_Option_JPEG.gif" Id="F__Help_compression_option_jpeg.gif" />
+                           <File Name="Corner_Coordinates_Layer_Properties.gif" Id="F__Help_corner_coordinates_layer_properties.gif" />
+                           <File Name="Create_Layer.gif" Id="F__Help_create_layer.gif" />
+                           <File Name="Cube_Layer_Properties.gif" Id="F__Help_cube_layer_properties.gif" />
+                           <File Name="Cube_Layer_Properties_select.gif" Id="F__Help_cube_layer_properties_select.gif" />
+                           <File Name="Current_Shortcuts.gif" Id="F__Help_current_shortcuts.gif" />
+                           <File Name="Custom_Zoom.gif" Id="F__Help_custom_zoom.gif" />
+                           <File Name="Data_Elements_Properties.gif" Id="F__Help_data_elements_properties.gif" />
+                           <File Name="Data_Elements_Properties_2.gif" Id="F__Help_data_elements_properties_2.gif" />
+                           <File Name="Data_Elements_Properties_3.gif" Id="F__Help_data_elements_properties_3.gif" />
+                           <File Name="Data_Elements_Properties_4.gif" Id="F__Help_data_elements_properties_4.gif" />
+                           <File Name="Edit_Mode_Off_button.gif" Id="F__Help_edit_mode_off_button.gif" />
+                           <File Name="Edit_mode_on_button.gif" Id="F__Help_edit_mode_on_button.gif" />
+                           <File Name="Export_Movie_Options.gif" Id="F__Help_export_movie_options.gif" />
+                           <File Name="Export_Product.gif" Id="F__Help_export_product.gif" />
+                           <File Name="File_image_button.gif" Id="F__Help_file_image_button.gif" />
+                           <File Name="File_Location.gif" Id="F__Help_file_location.gif" />
+                           <File Name="File_Location_select.gif" Id="F__Help_file_location_select.gif" />
+                           <File Name="Font_size.gif" Id="F__Help_font_size.gif" />
+                           <File Name="Frame_Label_button.gif" Id="F__Help_frame_label_button.gif" />
+                           <File Name="GCP_Editor.gif" Id="F__Help_gcp_editor.gif" />
+                           <File Name="GCP_Layer_Properties.gif" Id="F__Help_gcp_layer_properties.gif" />
+                           <File Name="GCP_Layer_Properties_dialog.gif" Id="F__Help_gcp_layer_properties_dialog.gif" />
+                           <File Name="GCP_marker_symbol.gif" Id="F__Help_gcp_marker_symbol.gif" />
+                           <File Name="General_options.gif" Id="F__Help_general_options.gif" />
+                           <File Name="geodb_display.gif" Id="F__Help_geodb_display.gif" />
+                           <File Name="Geofeature_1.gif" Id="F__Help_geofeature_1.gif" />
+                           <File Name="Geofeature_3.gif" Id="F__Help_geofeature_3.gif" />
+                           <File Name="Geofeature_4.gif" Id="F__Help_geofeature_4.gif" />
+                           <File Name="Geo_dialog.gif" Id="F__Help_geo_dialog.gif" />
+                           <File Name="Geo_Properties.gif" Id="F__Help_geo_properties.gif" />
+                           <File Name="Geo_Results_Select.gif" Id="F__Help_geo_results_select.gif" />
+                           <File Name="Hist_Window_Plot_View.gif" Id="F__Help_hist_window_plot_view.gif" />
+                           <File Name="Hist_Window_select.gif" Id="F__Help_hist_window_select.gif" />
+                           <File Name="Hist_Window_select_2.gif" Id="F__Help_hist_window_select_2.gif" />
+                           <File Name="image032.jpg" Id="F__Help_image032.jpg" />
+                           <File Name="image038.jpg" Id="F__Help_image038.jpg" />
+                           <File Name="image417.gif" Id="F__Help_image417.gif2" />
+                           <File Name="image438.gif" Id="F__Help_image438.gif" />
+                           <File Name="image509.gif" Id="F__Help_image509.gif" />
+                           <File Name="Image_Display_Properties.gif" Id="F__Help_image_display_properties.gif" />
+                           <File Name="Import_Data.gif" Id="F__Help_import_data.gif" />
+                           <File Name="Import_geo_features.gif" Id="F__Help_import_geo_features.gif" />
+                           <File Name="Import_Options_1.gif" Id="F__Help_import_options_1.gif" />
+                           <File Name="Import_Options_2.gif" Id="F__Help_import_options_2.gif" />
+                           <File Name="Import_Options_3.gif" Id="F__Help_import_options_3.gif" />
+                           <File Name="Import_Options_4.png" Id="F__Help_import_options_4.png" />
+                           <File Name="Import_Shape_1.gif" Id="F__Help_import_shape_1.gif" />
+                           <File Name="Import_Shape_2.gif" Id="F__Help_import_shape_2.gif" />
+                           <File Name="Import_Shape_3.gif" Id="F__Help_import_shape_3.gif" />
+                           <File Name="JPEG_Exporter.gif" Id="F__Help_jpeg_exporter.gif" />
+                           <File Name="Keyboard_Shortcuts.gif" Id="F__Help_keyboard_shortcuts.gif" />
+                           <File Name="Keyboard_Shortcut_2.gif" Id="F__Help_keyboard_shortcut_2.gif" />
+                           <File Name="Keyboard_Shortcut_3.gif" Id="F__Help_keyboard_shortcut_3.gif" />
+                           <File Name="Keyboard_Shortcut_Select.gif" Id="F__Help_keyboard_shortcut_select.gif" />
+                           <File Name="Layer_button.gif" Id="F__Help_layer_button.gif" />
+                           <File Name="Link_Unlink_Layers.gif" Id="F__Help_link_unlink_layers.gif" />
+                           <File Name="Link_Unlink_Step_1.gif" Id="F__Help_link_unlink_step_1.gif" />
+                           <File Name="Link_Unlink_Step_3.gif" Id="F__Help_link_unlink_step_3.gif" />
+                           <File Name="Link_Unlink_Views.gif" Id="F__Help_link_unlink_views.gif" />
+                           <File Name="Lock_button.gif" Id="F__Help_lock_button.gif" />
+                           <File Name="Main_Window.gif" Id="F__Help_main_window.gif" />
+                           <File Name="Menu_Location.gif" Id="F__Help_menu_location.gif2" />
+                           <File Name="Message_Log_Window.gif" Id="F__Help_message_log_window.gif" />
+                           <File Name="Message_Log_Window_SE.gif" Id="F__Help_message_log_window_se.gif" />
+                           <File Name="Minus_box.gif" Id="F__Help_minus_box.gif" />
+                           <File Name="Minus_box_gray.gif" Id="F__Help_minus_box_gray.gif" />
+                           <File Name="Movie_Product_window.gif" Id="F__Help_movie_product_window.gif" />
+                           <File Name="Nautical_Miles_button.gif" Id="F__Help_nautical_miles_button.gif" />
+                           <File Name="New_Layer.gif" Id="F__Help_new_layer.gif" />
+                           <File Name="New_Layer_Added.gif" Id="F__Help_new_layer_added.gif" />
+                           <File Name="New_Layer_AOI.gif" Id="F__Help_new_layer_aoi.gif" />
+                           <File Name="nitf_classification_export.gif" Id="F__Help_nitf_classification_export.gif" />
+                           <File Name="NITF_Importer.gif" Id="F__Help_nitf_importer.gif" />
+                           <File Name="NITF_Import_Metadata.gif" Id="F__Help_nitf_import_metadata.gif" />
+                           <File Name="No_symbol.gif" Id="F__Help_no_symbol.gif" />
+                           <File Name="Open_Session_dialog.gif" Id="F__Help_open_session_dialog.gif" />
+                           <File Name="Options_geotiff.gif" Id="F__Help_options_geotiff.gif" />
+                           <File Name="Options_Layers_Annotation.gif" Id="F__Help_options_layers_annotation.gif" />
+                           <File Name="Options_Layers_AOI.gif" Id="F__Help_options_layers_aoi.gif" />
+                           <File Name="Options_Layers_GCP.gif" Id="F__Help_options_layers_gcp.gif" />
+                           <File Name="Options_Layers_Lat_Lon.gif" Id="F__Help_options_layers_lat_lon.gif" />
+                           <File Name="Options_Layers_Pseudocolor.gif" Id="F__Help_options_layers_pseudocolor.gif" />
+                           <File Name="Options_Layers_Raster.gif" Id="F__Help_options_layers_raster.gif" />
+                           <File Name="Options_Layers_Threshold.gif" Id="F__Help_options_layers_threshold.gif" />
+                           <File Name="Options_Layers_Tie_Points.gif" Id="F__Help_options_layers_tie_points.gif" />
+                           <File Name="Options_Open.gif" Id="F__Help_options_open.gif" />
+                           <File Name="Options_Windows_Status_Bar.gif" Id="F__Help_options_windows_status_bar.gif" />
+                           <File Name="Options_Windows_Workspace_All.gif" Id="F__Help_options_windows_workspace_all.gif" />
+                           <File Name="Options_Window_Overview.gif" Id="F__Help_options_window_overview.gif" />
+                           <File Name="Options_Window_Workspace_Cube.gif" Id="F__Help_options_window_workspace_cube.gif" />
+                           <File Name="Plug-Ins_Properties.gif" Id="F__Help_plug_ins_properties.gif" />
+                           <File Name="Plug-Ins_Select.gif" Id="F__Help_plug_ins_select.gif" />
+                           <File Name="Plug-Ins_Tab.gif" Id="F__Help_plug_ins_tab.gif" />
+                           <File Name="Plus_box.gif" Id="F__Help_plus_box.gif" />
+                           <File Name="Plus_box_gray.gif" Id="F__Help_plus_box_gray.gif" />
+                           <File Name="Product_Class_Properties.gif" Id="F__Help_product_class_properties.gif" />
+                           <File Name="Product_Properties.gif" Id="F__Help_product_properties.gif" />
+                           <File Name="Properties_Spatial_Data_View_tab.gif" Id="F__Help_properties_spatial_data_view_tab.gif" />
+                           <File Name="Properties_View_tab.gif" Id="F__Help_properties_view_tab.gif" />
+                           <File Name="Raster_Layer_Properties2.gif" Id="F__Help_raster_layer_properties2.gif" />
+                           <File Name="Raster_Layer_Properties_Select.gif" Id="F__Help_raster_layer_properties_select.gif" />
+                           <File Name="Rename_AOI.gif" Id="F__Help_rename_aoi.gif2" />
+                           <File Name="Reset_Button.gif" Id="F__Help_reset_button.gif" />
+                           <File Name="Results_Exporter_Subset.gif" Id="F__Help_results_exporter_subset.gif" />
+                           <File Name="Results_Exporter_tab.gif" Id="F__Help_results_exporter_tab.gif" />
+                           <File Name="Rewind_Beginning_Button.gif" Id="F__Help_rewind_beginning_button.gif" />
+                           <File Name="Save_options.gif" Id="F__Help_save_options.gif" />
+                           <File Name="Save_PCA_Transform.gif" Id="F__Help_save_pca_transform.gif" />
+                           <File Name="Save_Session_As_dialog.gif" Id="F__Help_save_session_as_dialog.gif" />
+                           <File Name="Save_Session_Close.gif" Id="F__Help_save_session_close.gif" />
+                           <File Name="Scale_button.gif" Id="F__Help_scale_button.gif" />
+                           <File Name="Scripting_Prop_Dialog.gif" Id="F__Help_scripting_prop_dialog.gif" />
+                           <File Name="Scripting_Window_Select.gif" Id="F__Help_scripting_window_select.gif" />
+                           <File Name="sec_markings1.jpg" Id="F__Help_sec_markings1.jpg" />
+                           <File Name="Select_Text_Box.gif" Id="F__Help_select_text_box.gif" />
+                           <File Name="Session_Explorer_Annotation_Layer.gif" Id="F__Help_session_explorer_annotation_layer.gif" />
+                           <File Name="Session_Explorer_AOI_Layer.gif" Id="F__Help_session_explorer_aoi_layer.gif" />
+                           <File Name="Session_Explorer_Button.gif" Id="F__Help_session_explorer_button.gif" />
+                           <File Name="Session_Explorer_Elements_Tab.gif" Id="F__Help_session_explorer_elements_tab.gif" />
+                           <File Name="Session_Explorer_GCP_List.gif" Id="F__Help_session_explorer_gcp_list.gif" />
+                           <File Name="Session_Explorer_Plug-Ins_Tab.gif" Id="F__Help_session_explorer_plug_ins_tab.gif" />
+                           <File Name="Session_Explorer_Tie_Point_Layer.gif" Id="F__Help_session_explorer_tie_point_layer.gif" />
+                           <File Name="Session_Explorer_Windows_Tab.gif" Id="F__Help_session_explorer_windows_tab.gif" />
+                           <File Name="Set_Opacity.gif" Id="F__Help_set_opacity.gif" />
+                           <File Name="Set_Zoom_Trail.gif" Id="F__Help_set_zoom_trail.gif" />
+                           <File Name="SE_Elements.gif" Id="F__Help_se_elements.gif" />
+                           <File Name="ShapeFileExport.gif" Id="F__Help_shapefileexport.gif" />
+                           <File Name="Spatial_Sampling.gif" Id="F__Help_spatial_sampling.gif" />
+                           <File Name="Step_Back_button.gif" Id="F__Help_step_back_button.gif" />
+                           <File Name="Step_Forward_button.gif" Id="F__Help_step_forward_button.gif" />
+                           <File Name="Step_Front_button.gif" Id="F__Help_step_front_button.gif" />
+                           <File Name="Text_Object.gif" Id="F__Help_text_object.gif" />
+                           <File Name="Tie_Point_Layer_Properties.gif" Id="F__Help_tie_point_layer_properties.gif" />
+                           <File Name="Tutorial2TextBox.gif" Id="F__Help_tutorial2textbox.gif" />
+                           <File Name="Tutorial_2_SessionExplorer.gif" Id="F__Help_tutorial_2_sessionexplorer.gif" />
+                           <File Name="Tutorial_Change_Color.gif" Id="F__Help_tutorial_change_color.gif" />
+                           <File Name="Tutorial_Product_Display.gif" Id="F__Help_tutorial_product_display.gif" />
+                           <File Name="Units_button.gif" Id="F__Help_units_button.gif" />
+                           <File Name="X_button.gif" Id="F__Help_x_button.gif" />
+                        </Component>
+                     </Directory>
+                  </Directory>
+                  <Directory Id="D__Help_sessions" Name="Sessions" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\Sessions">
+                     <Component Id="C__Help_sessions" Guid="$(var.C__Help_sessions_Guid)" Win64="no">
+                        <File Name="Create_a_New_Session.htm" Id="F__Help_create_a_new_session.htm" />
+                        <File Name="Open_a_Session.htm" Id="F__Help_open_a_session.htm" />
+                        <File Name="Save_a_Session.htm" Id="F__Help_save_a_session.htm" />
+                        <File Name="Sessions.htm" Id="F__Help_sessions.htm" />
+                        <File Name="session_explorer.htm" Id="F__Help_session_explorer.htm" />
+                     </Component>
+                  </Directory>
+                  <Directory Id="D__Help_skinsupport" Name="SkinSupport" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\SkinSupport">
+                     <Component Id="C__Help_skinsupport" Guid="$(var.C__Help_skinsupport_Guid)" Win64="no">
+                        <File Name="ExpandingClosed.gif" Id="F__Help_expandingclosed.gif" />
+                        <File Name="ExpandingOpen.gif" Id="F__Help_expandingopen.gif" />
+                        <File Name="MadCap.css" Id="F__Help_madcap.css" />
+                        <File Name="MadCapBody.js" Id="F__Help_madcapbody.js" />
+                        <File Name="MadCapBodyEnd.js" Id="F__Help_madcapbodyend.js" />
+                        <File Name="MadCapDefault.js" Id="F__Help_madcapdefault.js" />
+                        <File Name="MadCapEffects.js" Id="F__Help_madcapeffects.js" />
+                        <File Name="MadCapEffectsMenu.js" Id="F__Help_madcapeffectsmenu.js" />
+                        <File Name="MadCapFavorites.js" Id="F__Help_madcapfavorites.js" />
+                        <File Name="MadCapGlossary.js" Id="F__Help_madcapglossary.js" />
+                        <File Name="MadCapHighlighter.js" Id="F__Help_madcaphighlighter.js" />
+                        <File Name="MadCapIndex.js" Id="F__Help_madcapindex.js" />
+                        <File Name="MadCapMerging.js" Id="F__Help_madcapmerging.js" />
+                        <File Name="MadCapNavigation.js" Id="F__Help_madcapnavigation.js" />
+                        <File Name="MadCapParser.js" Id="F__Help_madcapparser.js" />
+                        <File Name="MadCapSearch.js" Id="F__Help_madcapsearch.js" />
+                        <File Name="MadCapStemmer.js" Id="F__Help_madcapstemmer.js" />
+                        <File Name="MadCapToc.js" Id="F__Help_madcaptoc.js" />
+                        <File Name="MadCapToolbar.js" Id="F__Help_madcaptoolbar.js" />
+                        <File Name="MadCapUtilities.js" Id="F__Help_madcaputilities.js" />
+                     </Component>
+                  </Directory>
+                  <Directory Id="D__Help_spectral" Name="Spectral" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\Spectral">
+                     <Directory Id="D__Help_analysis" Name="Analysis" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\Spectral\Analysis">
+                        <Component Id="C__Help_analysis" Guid="$(var.C__Help_analysis_Guid)" Win64="no">
+                           <File Name="band_math.htm" Id="F__Help_band_math.htm" />
+                           <File Name="Band_Math_Operators.htm" Id="F__Help_band_math_operators.htm" />
+                        </Component>
+                     </Directory>
+                     <Directory Id="D__Help_process" Name="Process" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\Spectral\Process">
+                        <Component Id="C__Help_process" Guid="$(var.C__Help_process_Guid)" Win64="no">
+                           <File Name="principal_component_analysis.htm" Id="F__Help_principal_component_analysis.htm" />
+                        </Component>
+                     </Directory>
+                  </Directory>
+                  <Directory Id="D__Help_tie_points" Name="Tie_Points" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\Tie_Points">
+                     <Component Id="C__Help_tie_points" Guid="$(var.C__Help_tie_points_Guid)" Win64="no">
+                        <File Name="Delete_Tie_Points.htm" Id="F__Help_delete_tie_points.htm" />
+                        <File Name="Tie_Points.htm" Id="F__Help_tie_points.htm" />
+                        <File Name="Tie_Point_Editor.htm" Id="F__Help_tie_point_editor.htm" />
+                     </Component>
+                  </Directory>
+                  <Directory Id="D__Help_toolbars" Name="Toolbars" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\Toolbars">
+                     <Component Id="C__Help_toolbars" Guid="$(var.C__Help_toolbars_Guid)" Win64="no">
+                        <File Name="Annotation_Toolbar.htm" Id="F__Help_annotation_toolbar.htm" />
+                        <File Name="AOI_Toolbar.htm" Id="F__Help_aoi_toolbar.htm" />
+                        <File Name="ASPAM_Toolbar.htm" Id="F__Help_aspam_toolbar.htm" />
+                        <File Name="Brightness_Toolbar.htm" Id="F__Help_brightness_toolbar.htm" />
+                        <File Name="Display_Toolbar.htm" Id="F__Help_display_toolbar.htm" />
+                        <File Name="Distance_Units.htm" Id="F__Help_distance_units.htm" />
+                        <File Name="General_Algorithms_Toolbar.htm" Id="F__Help_general_algorithms_toolbar.htm" />
+                        <File Name="Geographic_Features_Toolbar.htm" Id="F__Help_geographic_features_toolbar.htm" />
+                        <File Name="Geo_Toolbar.htm" Id="F__Help_geo_toolbar.htm" />
+                        <File Name="Location_Units.htm" Id="F__Help_location_units.htm" />
+                        <File Name="Measurement_Toolbar.htm" Id="F__Help_measurement_toolbar.htm" />
+                        <File Name="Spectral_Toolbar.htm" Id="F__Help_spectral_toolbar.htm" />
+                        <File Name="Standard_Toolbar.htm" Id="F__Help_standard_toolbar.htm" />
+                        <File Name="Tie_Point_Toolbar.htm" Id="F__Help_tie_point_toolbar.htm" />
+                        <File Name="Toolbars.htm" Id="F__Help_toolbars.htm" />
+                        <File Name="Toolbox_Toolbar.htm" Id="F__Help_toolbox_toolbar.htm" />
+                     </Component>
+                  </Directory>
+                  <Directory Id="D__Help_tools" Name="Tools" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\Tools">
+                     <Component Id="C__Help_tools" Guid="$(var.C__Help_tools_Guid)" Win64="no">
+                        <File Name="Background_PlugIn_Window.htm" Id="F__Help_background_plugin_window.htm" />
+                        <File Name="Image_Chipping_Window.htm" Id="F__Help_image_chipping_window.htm" />
+                        <File Name="Link_Unlink.htm" Id="F__Help_link_unlink.htm" />
+                        <File Name="Overview_Window.htm" Id="F__Help_overview_window.htm" />
+                        <File Name="Scripting_Window.htm" Id="F__Help_scripting_window.htm" />
+                        <File Name="Security_Markings.htm" Id="F__Help_security_markings.htm" />
+                     </Component>
+                     <Directory Id="D__Help_histogram_window" Name="Histogram_Window" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\Tools\Histogram_Window">
+                        <Component Id="C__Help_histogram_window" Guid="$(var.C__Help_histogram_window_Guid)" Win64="no">
+                           <File Name="Activate_a_Histogram_Plot.htm" Id="F__Help_activate_a_histogram_plot.htm" />
+                           <File Name="Band_Bad_Values.htm" Id="F__Help_band_bad_values.htm" />
+                           <File Name="Color_Map.htm" Id="F__Help_color_map.htm" />
+                           <File Name="Create_Edit_Color_Map.htm" Id="F__Help_create_edit_color_map.htm" />
+                           <File Name="Custom_Zoom.htm" Id="F__Help_custom_zoom.htm" />
+                           <File Name="Displayed_Band.htm" Id="F__Help_displayed_band.htm" />
+                           <File Name="Display_Gridlines_on_a_Plot.htm" Id="F__Help_display_gridlines_on_a_plot.htm" />
+                           <File Name="Histogram_Window.htm" Id="F__Help_histogram_window.htm" />
+                           <File Name="Histogram_Window_Mouse_Mode.htm" Id="F__Help_histogram_window_mouse_mode.htm" />
+                           <File Name="Moving_and_Hiding_a_Dock_Window.htm" Id="F__Help_moving_and_hiding_a_dock_window.htm" />
+                           <File Name="Print_the_Histogram_Window.htm" Id="F__Help_print_the_histogram_window.htm" />
+                           <File Name="Save_the_Histogram_Window_Data.htm" Id="F__Help_save_the_histogram_window_data.htm" />
+                           <File Name="Set_Spatial_Sampling.htm" Id="F__Help_set_spatial_sampling.htm" />
+                           <File Name="Stretch_Type.htm" Id="F__Help_stretch_type.htm" />
+                           <File Name="Stretch_Units.htm" Id="F__Help_stretch_units.htm" />
+                           <File Name="Working_with_the_Histogram_Window_Display.htm" Id="F__Help_working_with_the_histogram_window_display.htm" />
+                        </Component>
+                     </Directory>
+                     <Directory Id="D__Help_message_log_window" Name="Message_Log_Window" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\Tools\Message_Log_Window">
+                        <Component Id="C__Help_message_log_window" Guid="$(var.C__Help_message_log_window_Guid)" Win64="no">
+                           <File Name="Message_Log_Window.htm" Id="F__Help_message_log_window.htm" />
+                        </Component>
+                     </Directory>
+                  </Directory>
+                  <Directory Id="D__Help_tutorials" Name="Tutorials" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\Tutorials">
+                     <Component Id="C__Help_tutorials" Guid="$(var.C__Help_tutorials_Guid)" Win64="no">
+                        <File Name="More_About_Georeferencing.htm" Id="F__Help_more_about_georeferencing.htm" />
+                        <File Name="Tutorials.css" Id="F__Help_tutorials.css" />
+                        <File Name="Tutorials.htm" Id="F__Help_tutorials.htm" />
+                        <File Name="tutorial_batch_mode.htm" Id="F__Help_tutorial_batch_mode.htm" />
+                        <File Name="tutorial_export_shape_files.htm" Id="F__Help_tutorial_export_shape_files.htm" />
+                        <File Name="tutorial_georeference.htm" Id="F__Help_tutorial_georeference.htm" />
+                        <File Name="Tutorial_Image_Manipulation.htm" Id="F__Help_tutorial_image_manipulation.htm" />
+                        <File Name="tutorial_import_display_shape_files.htm" Id="F__Help_tutorial_import_display_shape_files.htm" />
+                        <File Name="tutorial_product_mode.htm" Id="F__Help_tutorial_product_mode.htm" />
+                        <File Name="tutorial_quick_look_fusion.htm" Id="F__Help_tutorial_quick_look_fusion.htm" />
+                        <File Name="tutorial_subsetting_aoi_pca.htm" Id="F__Help_tutorial_subsetting_aoi_pca.htm" />
+                        <File Name="tutorial_wizard_builder.htm" Id="F__Help_tutorial_wizard_builder.htm" />
+                     </Component>
+                     <Directory Id="D__Help_scenario10_files" Name="scenario10_files" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\Tutorials\scenario10_files">
+                        <Component Id="C__Help_scenario10_files" Guid="$(var.C__Help_scenario10_files_Guid)" Win64="no">
+                           <File Name="image024.jpg" Id="F__Help_image024.jpg" />
+                           <File Name="image028.jpg" Id="F__Help_image028.jpg" />
+                           <File Name="image034.jpg" Id="F__Help_image034.jpg" />
+                           <File Name="image048.jpg" Id="F__Help_image048.jpg" />
+                           <File Name="image052.jpg" Id="F__Help_image052.jpg" />
+                        </Component>
+                     </Directory>
+                     <Directory Id="D__Help_scenario5_files" Name="scenario5_files" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\Tutorials\scenario5_files">
+                        <Component Id="C__Help_scenario5_files" Guid="$(var.C__Help_scenario5_files_Guid)" Win64="no">
+                           <File Name="image030.jpg" Id="F__Help_image030.jpg" />
+                        </Component>
+                     </Directory>
+                     <Directory Id="D__Help_scenario6_files" Name="scenario6_files" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\Tutorials\scenario6_files">
+                        <Component Id="C__Help_scenario6_files" Guid="$(var.C__Help_scenario6_files_Guid)" Win64="no">
+                           <File Name="image029.jpg" Id="F__Help_image029.jpg" />
+                           <File Name="image031.jpg" Id="F__Help_image031.jpg" />
+                           <File Name="image033.jpg" Id="F__Help_image033.jpg" />
+                           <File Name="image035.jpg" Id="F__Help_image035.jpg" />
+                        </Component>
+                     </Directory>
+                     <Directory Id="D__Help_scenario9_files" Name="scenario9_files" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\Tutorials\scenario9_files">
+                        <Component Id="C__Help_scenario9_files" Guid="$(var.C__Help_scenario9_files_Guid)" Win64="no">
+                           <File Name="image032.jpg" Id="F__Help_image032.jpg2" />
+                        </Component>
+                     </Directory>
+                  </Directory>
+                  <Directory Id="D__Help_view" Name="View" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\View">
+                     <Component Id="C__Help_view" Guid="$(var.C__Help_view_Guid)" Win64="no">
+                        <File Name="Create_a_Snapshot.htm" Id="F__Help_create_a_snapshot.htm" />
+                        <File Name="Generate_Image.htm" Id="F__Help_generate_image.htm" />
+                        <File Name="Pan.htm" Id="F__Help_pan.htm" />
+                        <File Name="Pan_Mode.htm" Id="F__Help_pan_mode.htm" />
+                        <File Name="Rotate.htm" Id="F__Help_rotate.htm" />
+                        <File Name="Zoom.htm" Id="F__Help_zoom.htm" />
+                     </Component>
+                  </Directory>
+                  <Directory Id="D__Help_wizard_builder" Name="Wizard_Builder" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\Wizard_Builder">
+                     <Component Id="C__Help_wizard_builder" Guid="$(var.C__Help_wizard_builder_Guid)" Win64="no">
+                        <File Name="Create_a_Wizard.htm" Id="F__Help_create_a_wizard.htm" />
+                        <File Name="Open_a_Wizard.htm" Id="F__Help_open_a_wizard.htm" />
+                        <File Name="Run_a_Wizard.htm" Id="F__Help_run_a_wizard.htm" />
+                        <File Name="Save_a_Wizard.htm" Id="F__Help_save_a_wizard.htm" />
+                        <File Name="Update_Wizard_List.htm" Id="F__Help_update_wizard_list.htm" />
+                        <File Name="Using_the_Wizard_Builder.htm" Id="F__Help_using_the_wizard_builder.htm" />
+                        <File Name="Wizard_Builder_Toolbar.htm" Id="F__Help_wizard_builder_toolbar.htm" />
+                        <File Name="Wizard_Builder__Edit_Menu.htm" Id="F__Help_wizard_builder__edit_menu.htm" />
+                        <File Name="Wizard_Builder__File_Menu.htm" Id="F__Help_wizard_builder__file_menu.htm" />
+                        <File Name="Wizard_Builder__Item_Menu.htm" Id="F__Help_wizard_builder__item_menu.htm" />
+                        <File Name="Wizard_Execution_Mode.htm" Id="F__Help_wizard_execution_mode.htm" />
+                        <File Name="Wizard_Menu_Location.htm" Id="F__Help_wizard_menu_location.htm" />
+                     </Component>
+                     <Directory Id="D__Help_items" Name="Items" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\Wizard_Builder\Items">
+                        <Component Id="C__Help_items" Guid="$(var.C__Help_items_Guid)" Win64="no">
+                           <File Name="Add_a_Desktop_Item.htm" Id="F__Help_add_a_desktop_item.htm" />
+                           <File Name="Add_a_Plug-In_Item.htm" Id="F__Help_add_a_plug_in_item.htm" />
+                           <File Name="Add_Edit_a_Value_Item.htm" Id="F__Help_add_edit_a_value_item.htm" />
+                           <File Name="Connect_Wizard_Items.htm" Id="F__Help_connect_wizard_items.htm" />
+                           <File Name="Execution_Mode_of_Wizard_Items.htm" Id="F__Help_execution_mode_of_wizard_items.htm" />
+                           <File Name="Value_Item_Types.htm" Id="F__Help_value_item_types.htm" />
+                           <File Name="Wizard_Items.htm" Id="F__Help_wizard_items.htm" />
+                        </Component>
+                     </Directory>
+                  </Directory>
+               </Directory>
+               <Directory Id="D__Help_data" Name="Data" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Data">
+                  <Component Id="C__Help_data" Guid="$(var.C__Help_data_Guid)" Win64="no">
+                     <File Name="Alias.xml" Id="F__Help_alias.xml" />
+                     <File Name="Concepts.xml" Id="F__Help_concepts.xml" />
+                     <File Name="Index.xml" Id="F__Help_index.xml2" />
+                     <File Name="Index_Chunk1.xml" Id="F__Help_index_chunk1.xml" />
+                     <File Name="Index_Chunk2.xml" Id="F__Help_index_chunk2.xml" />
+                     <File Name="Index_Chunk3.xml" Id="F__Help_index_chunk3.xml" />
+                     <File Name="Search.xml" Id="F__Help_search.xml" />
+                     <File Name="Search_Chunk1.xml" Id="F__Help_search_chunk1.xml" />
+                     <File Name="Search_Chunk10.xml" Id="F__Help_search_chunk10.xml" />
+                     <File Name="Search_Chunk11.xml" Id="F__Help_search_chunk11.xml" />
+                     <File Name="Search_Chunk12.xml" Id="F__Help_search_chunk12.xml" />
+                     <File Name="Search_Chunk13.xml" Id="F__Help_search_chunk13.xml" />
+                     <File Name="Search_Chunk14.xml" Id="F__Help_search_chunk14.xml" />
+                     <File Name="Search_Chunk15.xml" Id="F__Help_search_chunk15.xml" />
+                     <File Name="Search_Chunk16.xml" Id="F__Help_search_chunk16.xml" />
+                     <File Name="Search_Chunk17.xml" Id="F__Help_search_chunk17.xml" />
+                     <File Name="Search_Chunk18.xml" Id="F__Help_search_chunk18.xml" />
+                     <File Name="Search_Chunk19.xml" Id="F__Help_search_chunk19.xml" />
+                     <File Name="Search_Chunk2.xml" Id="F__Help_search_chunk2.xml" />
+                     <File Name="Search_Chunk20.xml" Id="F__Help_search_chunk20.xml" />
+                     <File Name="Search_Chunk21.xml" Id="F__Help_search_chunk21.xml" />
+                     <File Name="Search_Chunk22.xml" Id="F__Help_search_chunk22.xml" />
+                     <File Name="Search_Chunk23.xml" Id="F__Help_search_chunk23.xml" />
+                     <File Name="Search_Chunk24.xml" Id="F__Help_search_chunk24.xml" />
+                     <File Name="Search_Chunk25.xml" Id="F__Help_search_chunk25.xml" />
+                     <File Name="Search_Chunk26.xml" Id="F__Help_search_chunk26.xml" />
+                     <File Name="Search_Chunk27.xml" Id="F__Help_search_chunk27.xml" />
+                     <File Name="Search_Chunk28.xml" Id="F__Help_search_chunk28.xml" />
+                     <File Name="Search_Chunk29.xml" Id="F__Help_search_chunk29.xml" />
+                     <File Name="Search_Chunk3.xml" Id="F__Help_search_chunk3.xml" />
+                     <File Name="Search_Chunk30.xml" Id="F__Help_search_chunk30.xml" />
+                     <File Name="Search_Chunk31.xml" Id="F__Help_search_chunk31.xml" />
+                     <File Name="Search_Chunk32.xml" Id="F__Help_search_chunk32.xml" />
+                     <File Name="Search_Chunk33.xml" Id="F__Help_search_chunk33.xml" />
+                     <File Name="Search_Chunk34.xml" Id="F__Help_search_chunk34.xml" />
+                     <File Name="Search_Chunk35.xml" Id="F__Help_search_chunk35.xml" />
+                     <File Name="Search_Chunk36.xml" Id="F__Help_search_chunk36.xml" />
+                     <File Name="Search_Chunk37.xml" Id="F__Help_search_chunk37.xml" />
+                     <File Name="Search_Chunk38.xml" Id="F__Help_search_chunk38.xml" />
+                     <File Name="Search_Chunk39.xml" Id="F__Help_search_chunk39.xml" />
+                     <File Name="Search_Chunk4.xml" Id="F__Help_search_chunk4.xml" />
+                     <File Name="Search_Chunk40.xml" Id="F__Help_search_chunk40.xml" />
+                     <File Name="Search_Chunk41.xml" Id="F__Help_search_chunk41.xml" />
+                     <File Name="Search_Chunk5.xml" Id="F__Help_search_chunk5.xml" />
+                     <File Name="Search_Chunk6.xml" Id="F__Help_search_chunk6.xml" />
+                     <File Name="Search_Chunk7.xml" Id="F__Help_search_chunk7.xml" />
+                     <File Name="Search_Chunk8.xml" Id="F__Help_search_chunk8.xml" />
+                     <File Name="Search_Chunk9.xml" Id="F__Help_search_chunk9.xml" />
+                     <File Name="Toc.xml" Id="F__Help_toc.xml" />
+                  </Component>
+                  <Directory Id="D__Help_skinnewwindow" Name="SkinNewWindow" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Data\SkinNewWindow">
+                     <Component Id="C__Help_skinnewwindow" Guid="$(var.C__Help_skinnewwindow_Guid)" Win64="no">
+                        <File Name="Skin.xml" Id="F__Help_skin.xml" />
+                        <File Name="Stylesheet.xml" Id="F__Help_stylesheet.xml" />
+                     </Component>
+                  </Directory>
+               </Directory>
+               <Directory Id="D__Help_skin" Name="Skin" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Skin">
+                  <Component Id="C__Help_skin" Guid="$(var.C__Help_skin_Guid)" Win64="no">
+                     <File Name="Blank.htm" Id="F__Help_blank.htm" />
+                     <File Name="BrowseSequences.htm" Id="F__Help_browsesequences.htm" />
+                     <File Name="Favorites.htm" Id="F__Help_favorites.htm" />
+                     <File Name="Index.htm" Id="F__Help_index.htm2" />
+                     <File Name="Navigation.htm" Id="F__Help_navigation.htm" />
+                     <File Name="Search.htm" Id="F__Help_search.htm" />
+                     <File Name="Toc.htm" Id="F__Help_toc.htm" />
+                     <File Name="Toolbar.htm" Id="F__Help_toolbar.htm" />
+                  </Component>
+                  <Directory Id="D__Help_images2" Name="Images" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Skin\Images">
+                     <Component Id="C__Help_images1" Guid="$(var.C__Help_images1_Guid)" Win64="no">
+                        <File Name="AccordionIconsBackground.jpg" Id="F__Help_accordioniconsbackground.jpg" />
+                        <File Name="AddSearchToFavorites.gif" Id="F__Help_addsearchtofavorites.gif" />
+                        <File Name="AddSearchToFavorites_over.gif" Id="F__Help_addsearchtofavorites_over.gif" />
+                        <File Name="AddSearchToFavorites_selected.gif" Id="F__Help_addsearchtofavorites_selected.gif" />
+                        <File Name="AddTopicToFavorites.gif" Id="F__Help_addtopictofavorites.gif" />
+                        <File Name="AddTopicToFavorites_over.gif" Id="F__Help_addtopictofavorites_over.gif" />
+                        <File Name="AddTopicToFavorites_selected.gif" Id="F__Help_addtopictofavorites_selected.gif" />
+                        <File Name="ArrowDown.gif" Id="F__Help_arrowdown.gif" />
+                        <File Name="ArrowUp.gif" Id="F__Help_arrowup.gif" />
+                        <File Name="Back.gif" Id="F__Help_back.gif" />
+                        <File Name="Back_over.gif" Id="F__Help_back_over.gif" />
+                        <File Name="Back_selected.gif" Id="F__Help_back_selected.gif" />
+                        <File Name="Book.gif" Id="F__Help_book.gif" />
+                        <File Name="BookOpen.gif" Id="F__Help_bookopen.gif" />
+                        <File Name="BrowsesequencesAccordionBackground.jpg" Id="F__Help_browsesequencesaccordionbackground.jpg" />
+                        <File Name="BrowsesequencesAccordionBackground_over.jpg" Id="F__Help_browsesequencesaccordionbackground_over.jpg" />
+                        <File Name="BrowsesequencesIcon.gif" Id="F__Help_browsesequencesicon.gif" />
+                        <File Name="Collapse.gif" Id="F__Help_collapse.gif" />
+                        <File Name="Collapse_over.gif" Id="F__Help_collapse_over.gif" />
+                        <File Name="Collapse_selected.gif" Id="F__Help_collapse_selected.gif" />
+                        <File Name="Delete.gif" Id="F__Help_delete.gif" />
+                        <File Name="Delete_over.gif" Id="F__Help_delete_over.gif" />
+                        <File Name="Delete_selected.gif" Id="F__Help_delete_selected.gif" />
+                        <File Name="Expand.gif" Id="F__Help_expand.gif" />
+                        <File Name="ExpandingClosed.gif" Id="F__Help_expandingclosed.gif2" />
+                        <File Name="ExpandingOpen.gif" Id="F__Help_expandingopen.gif2" />
+                        <File Name="Expand_over.gif" Id="F__Help_expand_over.gif" />
+                        <File Name="Expand_selected.gif" Id="F__Help_expand_selected.gif" />
+                        <File Name="FavoritesAccordionBackground.jpg" Id="F__Help_favoritesaccordionbackground.jpg" />
+                        <File Name="FavoritesAccordionBackground_over.jpg" Id="F__Help_favoritesaccordionbackground_over.jpg" />
+                        <File Name="FavoritesBlank.gif" Id="F__Help_favoritesblank.gif" />
+                        <File Name="FavoritesIcon.gif" Id="F__Help_favoritesicon.gif" />
+                        <File Name="FavoritesSearch.gif" Id="F__Help_favoritessearch.gif" />
+                        <File Name="FavoritesTopic.gif" Id="F__Help_favoritestopic.gif" />
+                        <File Name="Forward.gif" Id="F__Help_forward.gif" />
+                        <File Name="Forward_over.gif" Id="F__Help_forward_over.gif" />
+                        <File Name="Forward_selected.gif" Id="F__Help_forward_selected.gif" />
+                        <File Name="GlossaryAccordionBackground.jpg" Id="F__Help_glossaryaccordionbackground.jpg" />
+                        <File Name="GlossaryAccordionBackground_over.jpg" Id="F__Help_glossaryaccordionbackground_over.jpg" />
+                        <File Name="GlossaryIcon.gif" Id="F__Help_glossaryicon.gif" />
+                        <File Name="HelpControl.gif" Id="F__Help_helpcontrol.gif" />
+                        <File Name="HideNavigation.gif" Id="F__Help_hidenavigation.gif" />
+                        <File Name="HideNavigation_checked.gif" Id="F__Help_hidenavigation_checked.gif" />
+                        <File Name="HideNavigation_over.gif" Id="F__Help_hidenavigation_over.gif" />
+                        <File Name="HideNavigation_selected.gif" Id="F__Help_hidenavigation_selected.gif" />
+                        <File Name="Highlight.gif" Id="F__Help_highlight.gif" />
+                        <File Name="Highlight_over.gif" Id="F__Help_highlight_over.gif" />
+                        <File Name="Highlight_selected.gif" Id="F__Help_highlight_selected.gif" />
+                        <File Name="Home.gif" Id="F__Help_home.gif" />
+                        <File Name="Home_over.gif" Id="F__Help_home_over.gif" />
+                        <File Name="Home_selected.gif" Id="F__Help_home_selected.gif" />
+                        <File Name="IndexAccordionBackground.jpg" Id="F__Help_indexaccordionbackground.jpg" />
+                        <File Name="IndexAccordionBackground_over.jpg" Id="F__Help_indexaccordionbackground_over.jpg" />
+                        <File Name="IndexIcon.gif" Id="F__Help_indexicon.gif" />
+                        <File Name="Loading.gif" Id="F__Help_loading.gif" />
+                        <File Name="Logo.gif" Id="F__Help_logo.gif" />
+                        <File Name="LogoIcon.gif" Id="F__Help_logoicon.gif" />
+                        <File Name="NavigationBottomGradient.jpg" Id="F__Help_navigationbottomgradient.jpg" />
+                        <File Name="NavigationBottomGradient_selected.jpg" Id="F__Help_navigationbottomgradient_selected.jpg" />
+                        <File Name="NavigationTopGradient.jpg" Id="F__Help_navigationtopgradient.jpg" />
+                        <File Name="NewItemIndicator.bmp" Id="F__Help_newitemindicator.bmp" />
+                        <File Name="Print.gif" Id="F__Help_print.gif" />
+                        <File Name="Print_over.gif" Id="F__Help_print_over.gif" />
+                        <File Name="Print_selected.gif" Id="F__Help_print_selected.gif" />
+                        <File Name="QuickSearch.gif" Id="F__Help_quicksearch.gif" />
+                        <File Name="QuickSearch_over.gif" Id="F__Help_quicksearch_over.gif" />
+                        <File Name="QuickSearch_selected.gif" Id="F__Help_quicksearch_selected.gif" />
+                        <File Name="Refresh.gif" Id="F__Help_refresh.gif" />
+                        <File Name="Refresh_over.gif" Id="F__Help_refresh_over.gif" />
+                        <File Name="Refresh_selected.gif" Id="F__Help_refresh_selected.gif" />
+                        <File Name="SearchAccordionBackground.jpg" Id="F__Help_searchaccordionbackground.jpg" />
+                        <File Name="SearchAccordionBackground_over.jpg" Id="F__Help_searchaccordionbackground_over.jpg" />
+                        <File Name="SearchGradient.jpg" Id="F__Help_searchgradient.jpg" />
+                        <File Name="SearchGradient_over.jpg" Id="F__Help_searchgradient_over.jpg" />
+                        <File Name="SearchGradient_selected.jpg" Id="F__Help_searchgradient_selected.jpg" />
+                        <File Name="SearchIcon.gif" Id="F__Help_searchicon.gif" />
+                        <File Name="SelectBrowsesequences.gif" Id="F__Help_selectbrowsesequences.gif" />
+                        <File Name="SelectBrowsesequences_over.gif" Id="F__Help_selectbrowsesequences_over.gif" />
+                        <File Name="SelectBrowsesequences_selected.gif" Id="F__Help_selectbrowsesequences_selected.gif" />
+                        <File Name="SelectFavorites.gif" Id="F__Help_selectfavorites.gif" />
+                        <File Name="SelectFavorites_over.gif" Id="F__Help_selectfavorites_over.gif" />
+                        <File Name="SelectFavorites_selected.gif" Id="F__Help_selectfavorites_selected.gif" />
+                        <File Name="SelectGlossary.gif" Id="F__Help_selectglossary.gif" />
+                        <File Name="SelectGlossary_over.gif" Id="F__Help_selectglossary_over.gif" />
+                        <File Name="SelectGlossary_selected.gif" Id="F__Help_selectglossary_selected.gif" />
+                        <File Name="SelectIndex.gif" Id="F__Help_selectindex.gif" />
+                        <File Name="SelectIndex_over.gif" Id="F__Help_selectindex_over.gif" />
+                        <File Name="SelectIndex_selected.gif" Id="F__Help_selectindex_selected.gif" />
+                        <File Name="SelectSearch.gif" Id="F__Help_selectsearch.gif" />
+                        <File Name="SelectSearch_over.gif" Id="F__Help_selectsearch_over.gif" />
+                        <File Name="SelectSearch_selected.gif" Id="F__Help_selectsearch_selected.gif" />
+                        <File Name="SelectToc.gif" Id="F__Help_selecttoc.gif" />
+                        <File Name="SelectToc_over.gif" Id="F__Help_selecttoc_over.gif" />
+                        <File Name="SelectToc_selected.gif" Id="F__Help_selecttoc_selected.gif" />
+                        <File Name="Separator.gif" Id="F__Help_separator.gif" />
+                        <File Name="Stop.gif" Id="F__Help_stop.gif" />
+                        <File Name="Stop_over.gif" Id="F__Help_stop_over.gif" />
+                        <File Name="Stop_selected.gif" Id="F__Help_stop_selected.gif" />
+                        <File Name="TocAccordionBackground.jpg" Id="F__Help_tocaccordionbackground.jpg" />
+                        <File Name="TocAccordionBackground_over.jpg" Id="F__Help_tocaccordionbackground_over.jpg" />
+                        <File Name="TocIcon.gif" Id="F__Help_tocicon.gif" />
+                        <File Name="ToolbarBackground.jpg" Id="F__Help_toolbarbackground.jpg" />
+                        <File Name="Topic.gif" Id="F__Help_topic.gif" />
+                     </Component>
+                  </Directory>
+               </Directory>
+            </Directory>
+         </Directory>
+      </DirectoryRef>         
+   </Fragment>
+</Wix>

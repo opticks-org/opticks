@@ -1,0 +1,6 @@
+<html>
+   <body>
+      <hr>
+      <center> Plug-In Interface Specification - $projectname $projectnumber </center>
+   </body>
+</html>
