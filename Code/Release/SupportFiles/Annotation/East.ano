@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<Graphic xmlns="https://comet.balldayton.com/standards/namespaces/2005/v1/comet.xsd" name="EastArrowObject" type="East Arrow" version="3">
+
+  <BoundingBox>
+    <boundingBox>0.0 0.0 150.0 75.0</boundingBox>
+  </BoundingBox>
+  <Rotation rotation="0"/>
+  <FillColor>
+    <color>255 255 255</color>
+  </FillColor>
+  <LineColor>
+    <color>0 0 0</color>
+  </LineColor>
+  <LineWidth width="6"/>
+  <TextColor>
+    <color>0 0 0</color>
+  </TextColor>
+  <objects>
+    <Graphic name="GraphicGroup" type="Group" version="3">
+      <BoundingBox>
+        <boundingBox>0.0 0.0 150.0 75.0</boundingBox>
+      </BoundingBox>
+      <Rotation rotation="0"/>
+      <objects>
+        <Graphic name="TriangleObject" type="Triangle" version="3">
+          <BoundingBox>
+            <boundingBox>75.0 0.0 150.0 75.0</boundingBox>
+          </BoundingBox>
+          <Rotation rotation="-90"/>
+          <FillStyle style="solid"/>
+          <HatchStyle boxed="false" style="solid"/>
+          <FillColor>
+            <color>255 255 255</color>
+          </FillColor>
+          <LineOn on="true"/>
+          <LineWidth width="6"/>
+          <LineColor>
+            <color>0 0 0</color>
+          </LineColor>
+          <LineStyle style="solid"/>
+          <Apex position="0.5"/>
+        </Graphic>
+        <Graphic name="TextObject" type="Text" version="3">
+          <BoundingBox>
+            <boundingBox>80.0 55.0 115.0 20.0</boundingBox>
+          </BoundingBox>
+          <Rotation rotation="0"/>
+          <FillStyle style="empty"/>
+          <HatchStyle boxed="false" style="solid"/>
+          <FillColor>
+            <color>255 255 255</color>
+          </FillColor>
+          <LineOn on="false"/>
+          <LineWidth width="1"/>
+          <LineColor>
+            <color>0 0 0</color>
+          </LineColor>
+          <LineStyle style="solid"/>
+          <Font face="Tahoma" bold="false" italic="false" size="26" underline="false"/>
+          <TextAlignment alignment="0"/>
+          <TextColor>
+            <color>0 0 0</color>
+          </TextColor>
+          <TextString>
+            <string>E</string>
+          </TextString>
+        </Graphic>
+        <Graphic name="LineObject" type="Line" version="3">
+          <BoundingBox>
+            <boundingBox>0.0 37.5 75.0 37.5</boundingBox>
+          </BoundingBox>
+          <Rotation rotation="0"/>
+          <LineWidth width="6"/>
+          <LineColor>
+            <color>0 0 0</color>
+          </LineColor>
+          <LineStyle style="solid"/>
+        </Graphic>
+      </objects>
+    </Graphic>
+  </objects>
+
+</Graphic>
