@@ -1,0 +1,20 @@
+import glob
+
+####
+# import the environment
+####
+Import('env arcenv build_dir TOOLPATH')
+env = env.Copy()
+env.Tool("ArcProxyLib",toolpath=[TOOLPATH])
+arcenv.Append(CPPDEFINES=["ARC_PROXY"])
+
+####
+# build sources
+####
+srcs = map(lambda x,bd=build_dir: '%s/%s' % (bd,x), glob.glob("*.cpp"))
+objs = arcenv.Object(srcs)
+
+####
+# return the objects
+####
+Return('objs')

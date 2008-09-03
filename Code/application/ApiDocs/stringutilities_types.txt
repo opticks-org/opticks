@@ -1,0 +1,121 @@
+/** \page stringutilities_types Supported StringUtilities Types
+ * StringUtilities supports using the following types with toDisplayString, toXmlString,
+ * fromDisplayString and fromXmlString:
+ * - Enum Types
+ *   - AnimationCycle
+ *   - AnimationState
+ *   - AoiAddMode
+ *   - ArcRegion
+ *   - ArrowStyle
+ *   - ColorType
+ *   - ComplexComponent
+ *   - DataOrigin
+ *   - DisplayMode
+ *   - DistanceUnits
+ *   - DmsFormatType
+ *   - EncodingType
+ *   - EndianType
+ *   - FillStyle
+ *   - FrameType
+ *   - GcpSymbol
+ *   - GeocoordType
+ *   - GraphicObjectType
+ *   - InsetZoomMode
+ *   - InterleaveFormatType
+ *   - LatLonStyle
+ *   - LayerType
+ *   - LineStyle
+ *   - LocationType
+ *   - Locator::LocatorStyle
+ *   - OrientationType
+ *   - PanLimitType
+ *   - PassArea
+ *   - PlotObjectType
+ *   - PlotType
+ *   - Point::PointSymbolType
+ *   - PositionType
+ *   - ProcessingLocation
+ *   - RasterChannelType
+ *   - RegionUnits
+ *   - ReleaseType
+ *   - ScaleType
+ *   - SessionSaveType
+ *   - StretchType
+ *   - string
+ *   - SymbolType
+ *   - TextureMode
+ *   - UnitType
+ *   - WindowSizeType
+ *   - WindowType
+ * - Other Types
+ *   - bool
+ *   - char
+ *   - DateTime* (const and non-const)
+ *   - double
+ *   - Filename* (const and non-const)
+ *   - float
+ *   - int
+ *   - int64_t
+ *   - long
+ *   - short
+ *   - uint64_t
+ *   - unsigned char
+ *   - unsigned int
+ *   - unsigned long
+ *   - unsigned short
+ *   - vector<AnimationCycle>
+ *   - vector<AoiAddMode>
+ *   - vector<ArcRegion>
+ *   - vector<ArrowStyle>
+ *   - vector<bool>
+ *   - vector<char>
+ *   - vector<ComplexComponent>
+ *   - vector<DataOrigin>
+ *   - vector<DisplayMode>
+ *   - vector<DistanceUnits>
+ *   - vector<DmsFormatType>
+ *   - vector<double>
+ *   - vector<EncodingType>
+ *   - vector<EndianType>
+ *   - vector<Filename*>
+ *   - vector<FillStyle>
+ *   - vector<float>
+ *   - vector<FrameType>
+ *   - vector<GcpSymbol>
+ *   - vector<GeocoordType>
+ *   - vector<GraphicObjectType>
+ *   - vector<InsetZoomMode>
+ *   - vector<int>
+ *   - vector<int64_t>
+ *   - vector<InterleaveFormatType>
+ *   - vector<LatLonStyle>
+ *   - vector<LayerType>
+ *   - vector<LineStyle>
+ *   - vector<Locator::LocatorStyle>
+ *   - vector<long>
+ *   - vector<OrientationType>
+ *   - vector<PanLimitType>
+ *   - vector<PassArea>
+ *   - vector<PlotObjectType>
+ *   - vector<PlotType>
+ *   - vector<Point::PointSymbolType>
+ *   - vector<PositionType>
+ *   - vector<ProcessingLocation>
+ *   - vector<RasterChannelType>
+ *   - vector<RegionUnits>
+ *   - vector<ReleaseType>
+ *   - vector<ScaleType>
+ *   - vector<short>
+ *   - vector<SessionSaveType>
+ *   - vector<StretchType>
+ *   - vector<string>
+ *   - vector<SymbolType>
+ *   - vector<TextureMode>
+ *   - vector<uint64_t>
+ *   - vector<UnitType>
+ *   - vector<unsigned char>
+ *   - vector<unsigned int>
+ *   - vector<unsigned long>
+ *   - vector<unsigned short>
+ *   - vector<WindowSizeType>
+ */
