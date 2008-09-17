@@ -1,0 +1,110 @@
+/** \page howto_tutorial5 Creating an random data access edge detection algorithm
+Files:
+ - \ref Tutorial/Tutorial5.h "Tutorial/Tutorial5.h"
+ - \ref Tutorial/Tutorial5.cpp "Tutorial/Tutorial5.cpp"
+
+This tutorial will demonstrate how to randomly access data in a raster element and how to create a new raster element while performing an edge detection algorithm.
+We'll create a plug-in which performs edge detection and returns a RasterElement with the edge detected data.
+
+If you would like to run this tutorial as you follow along with the code, see \ref RunningTutorial.
+If you would like to build and experiment with this tutorial as you follow along with the code, see \ref howto_buildtutorials.
+If you are running this tutorial in %Opticks, you will need to select "Tutorial 5" from the Tutorial toolbar to execute it.
+
+\dontinclude Tutorial/Tutorial5.cpp
+
+This tutorial is distinct from the others and does not extend the plug-in used in those tutorials.
+
+The Sobel edge detection algorithm can be calculated using convolution.
+This algorithm will only do edge detection with the first band in the data cube.
+The algorithm uses two kernels: one to calculate the vertical gradient, and one to calculate the horizontal gradient.
+
+Vertical Gradient:
+
+<table>
+<tr><td><b>-1</b></td><td><b>0</b></td><td><b>+1</b></td></tr>
+<tr><td><b>-2</b></td><td><b>0</b></td><td><b>+2</b></td></tr>
+<tr><td><b>-1</b></td><td><b>0</b></td><td><b>+1</b></td></tr>
+</table>
+
+Horizontal Gradient:
+
+<table>
+<tr><td><b>+1</b></td><td><b>+2</b></td><td><b>+1</b></td></tr>
+<tr><td><b>0</b></td><td><b>0</b></td><td><b>0</b></td></tr>
+<tr><td><b>-1</b></td><td><b>-2</b></td><td><b>-1</b></td></tr>
+</table>
+
+These two results form a vector which describes the edge direction and magnitude at each point in the image.
+We are not concerned with edge direction so we will display only the absolute magnitude.
+ 
+Now let’s go over the edge detection function.
+
+\skip template<typename T>
+\until {
+The first parameter of this function is templated so that the function can use switchOnEncoding() to set its type.
+This parameter is then used to store the edge detection result.
+
+\skip prevCol
+\until nextRow
+The DataAccessor does not perform any bounds checking.
+Because of this, we'll use std::max and std::min to cap the convolution filter to the cube boundaries.
+
+\skip pSrcAcc->toPixel(prevRow, prevCol);
+\until T upperLeftVal
+These lines of code will move the DataAccessor to a pixel located in the upper left corner of the window and get its data.
+The \ref DataAccessorImpl::toPixel() "toPixel()" function is used to randomly access data in the cube.
+The \ref DataAccessorImpl::toPixel() "toPixel()" function does not perform bound or argument checking.
+We'll then call \ref DataAccessorImpl::getColumn() "getColumn()" to get the data from the pixel.
+
+\skip gx
+\until gy
+Next we'll apply the gradient kernels.
+
+\skipline magnitude
+Now we'll calculate the magnitude of the edge vector.
+
+\skip *pData
+\until }
+Finally, we'll store the magnitude in the result cube.
+
+\skip getOutputSpecification
+\until }
+This tutorial will return a RasterElement output argument which will contain the edge detection data.
+
+\skip pDesc->getDataType() == INT4SCOMPLEX
+\until return false
+In order to simplify the code for this tutorial, we will not support complex types.
+
+\skip pResultCube
+\until pDesc->getRowCount(),
+This line of code will create a new RasterElement which will have the same number of columns and rows as the RasterElement we're edge detecting.
+The new RasterElement will only need one band since we're only going to edge detect a single band.
+The ModelResource is an RAII ("resource acquisition is initialization") primitive that manages the life of the new RasterElement.
+
+\skip pResultRequest
+\until pDestAcc
+We create a DataRequest so that we can get a DataAccessor for the result cube. 
+We call \ref DataRequest::setWritable() "DataRequest::setWritable(true)" so that we can perform a write to the DataAccessor we receive, which will allow us to store the edge detection result.
+
+\skip switchOnEncoding
+\until pDesc->getColumnCount());
+These lines of code will take a pixel from the source cube and run the edge detection algorithm to get a magnitude based on the data from the nearby pixels.
+
+\skip  pDestAcc->nextColumn()
+\until pDestAcc->nextRow()
+These lines will move the destination DataAccessor to the next row and column.
+
+\skip (!isBatch())
+\until pView->createLayer
+Once we get the edge detection results, we'll check to see what mode we are running in.
+If we're running in interactive mode, we'll create a a new SpatialDataWindow that will show the new edge detected cube to the user.
+
+\skipline pOutArgList->setPlugInArgValue
+This line will set the result RasterElement as a output argument.
+We'll call the release function to transfer ownership from the ModelResource to the plug-in caller.
+
+\example Tutorial/Tutorial5.h
+Declaration file for \ref howto_tutorial5 "Tutorial 5".
+\example Tutorial/Tutorial5.cpp
+Implementation file for \ref howto_tutorial5 "Tutorial 5".
+*/
