@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<AnnotationLayer xmlns="https://comet.balldayton.com/standards/namespaces/2005/v1/comet.xsd" layerLocked="false" name="Layout" showLabels="false" snapToGrid="false" type="AnnotationLayer" version="3">
+
+  <AnnotationElement geocentric="false" name="Layout" type="AnnotationElement" version="3">
+    <DataDescriptor name="Layout" processingLocation="inMemory" type="AnnotationElement" version="3">
+      <classification level="U" version="3"/>
+      <metadata version="3"/>
+    </DataDescriptor>
+    <group name="Group" type="Group" version="3">
+      <BoundingBox>
+        <boundingBox>0 0 808.026431565 1043.78103677</boundingBox>
+      </BoundingBox>
+      <Rotation rotation="0"/>
+      <PaperSize>
+        <size>8.5 11</size>
+      </PaperSize>
+      <objects>
+        <Graphic name="View" type="View" version="3">
+          <BoundingBox>
+            <boundingBox>37.8879887346 195.425046371 808.026431565 1043.78103677</boundingBox>
+          </BoundingBox>
+          <Rotation rotation="0"/>
+          <DrawMode mode="draw"/>
+          <FillStyle style="solid"/>
+          <HatchStyle boxed="false" style="solid"/>
+          <FillColor>
+            <color>128 128 128</color>
+          </FillColor>
+          <LineOn on="true"/>
+          <LineWidth width="1"/>
+          <LineColor>
+            <color>0 0 0</color>
+          </LineColor>
+          <LineScaled scaled="false"/>
+          <LineStyle style="solid"/>
+          <PixelSymbol boxed="false" symbol="solid"/>
+          <objects>
+            <Graphic name="Text" type="Text" version="3">
+              <BoundingBox>
+                <boundingBox>373.985210445 652.251044539 471.929209855 586.955038602</boundingBox>
+              </BoundingBox>
+              <Rotation rotation="0"/>
+              <DrawMode mode="draw"/>
+              <FillStyle style="empty"/>
+              <HatchStyle boxed="false" style="solid"/>
+              <FillColor>
+                <color>255 0 0</color>
+              </FillColor>
+              <LineOn on="false"/>
+              <LineWidth width="1"/>
+              <LineColor>
+                <color>0 0 255</color>
+              </LineColor>
+              <LineScaled scaled="false"/>
+              <LineStyle style="solid"/>
+              <PixelSymbol boxed="false" symbol="solid"/>
+              <Font bold="false" face="Tahoma" italic="false" size="12" underline="false"/>
+              <TextAlignment alignment="1"/>
+              <TextColor>
+                <color>0 0 0</color>
+              </TextColor>
+              <TextString>
+                <string>View not
+available</string>
+              </TextString>
+            </Graphic>
+          </objects>
+        </Graphic>
+        <Graphic name="Analyst" type="Text" version="3">
+          <BoundingBox>
+            <boundingBox>47.7509760804 108.599934682 183.26138679 53.8191254171</boundingBox>
+          </BoundingBox>
+          <Rotation rotation="0"/>
+          <DrawMode mode="draw"/>
+          <FillStyle style="empty"/>
+          <HatchStyle boxed="false" style="solid"/>
+          <FillColor>
+            <color>255 0 0</color>
+          </FillColor>
+          <LineOn on="false"/>
+          <LineWidth width="1"/>
+          <LineColor>
+            <color>0 0 255</color>
+          </LineColor>
+          <LineScaled scaled="false"/>
+          <LineStyle style="solid"/>
+          <PixelSymbol boxed="false" symbol="solid"/>
+          <Font bold="false" face="Tahoma" italic="false" size="24" underline="false"/>
+          <TextAlignment alignment="1"/>
+          <TextColor>
+            <color>255 0 0</color>
+          </TextColor>
+          <TextString>
+            <string>Analyst</string>
+          </TextString>
+        </Graphic>
+        <Graphic name="Comments" type="Text" version="3">
+          <BoundingBox>
+            <boundingBox>44.8677769489 174.140270082 249.574993652 119.359457752</boundingBox>
+          </BoundingBox>
+          <Rotation rotation="0"/>
+          <DrawMode mode="draw"/>
+          <FillStyle style="empty"/>
+          <HatchStyle boxed="false" style="solid"/>
+          <FillColor>
+            <color>255 0 0</color>
+          </FillColor>
+          <LineOn on="false"/>
+          <LineWidth width="1"/>
+          <LineColor>
+            <color>0 0 255</color>
+          </LineColor>
+          <LineScaled scaled="false"/>
+          <LineStyle style="solid"/>
+          <PixelSymbol boxed="false" symbol="solid"/>
+          <Font bold="false" face="Tahoma" italic="false" size="24" underline="false"/>
+          <TextAlignment alignment="1"/>
+          <TextColor>
+            <color>255 0 0</color>
+          </TextColor>
+          <TextString>
+            <string>Comments</string>
+          </TextString>
+        </Graphic>
+        <Graphic name="Text" type="Text" version="3">
+          <BoundingBox>
+            <boundingBox>0 0 0 0</boundingBox>
+          </BoundingBox>
+          <Rotation rotation="0"/>
+          <DrawMode mode="draw"/>
+          <FillStyle style="empty"/>
+          <HatchStyle boxed="false" style="solid"/>
+          <FillColor>
+            <color>255 0 0</color>
+          </FillColor>
+          <LineOn on="false"/>
+          <LineWidth width="1"/>
+          <LineColor>
+            <color>0 0 255</color>
+          </LineColor>
+          <LineScaled scaled="false"/>
+          <LineStyle style="solid"/>
+          <PixelSymbol boxed="false" symbol="solid"/>
+          <Font bold="false" face="Tahoma" italic="false" size="8" underline="false"/>
+          <TextAlignment alignment="4"/>
+          <TextColor>
+            <color>0 0 0</color>
+          </TextColor>
+          <TextString>
+            <string>ClassificationLabel</string>
+          </TextString>
+        </Graphic>
+      </objects>
+    </group>
+  </AnnotationElement>
+
+</AnnotationLayer>
