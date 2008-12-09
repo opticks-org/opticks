@@ -1,0 +1,121 @@
+/** \page howto_customdraganddrop Adding drag and drop to a plug-in.
+%Opticks supports drag and drop GUI interfaces within the %Opticks application window.
+There are two ways to add drag and drop to a plug-in's GUI depending on what items need to be handled.
+
+\section sessionitem_drops Dropping session items into a custom window.
+The %Opticks plug-in API makes it easy for plug-in windows to accept drops of session items from the session explorer.
+Any Window sub-class (usually dock windows) can accept session item drops from the session explorer.
+A custom window needs to call the Window::enableSessionItemDrops() method to enable drop support.
+The method parameter is an object which implements the Window::SessionItemDropFilter interface.
+The Window::SessionItemDropFilter::accept() method will be called on a drag enter event for each SessionItem dragged into the custom window.
+This method should return true if the SessionItem is valid for a drop event.
+A typical implementation will look like this.
+\code
+bool CustomWindow::accept(SessionItem *pItem) const
+{
+   return dynamic_cast<RasterElement*>(pItem) != NULL;
+}
+\endcode
+This code will accept any drag enter event which contains at least one RasterElement.
+If any SessionItem in the event is accepted and a drop occurs, the Window will emit Window::signalSessionItemDropped() and Window::signalSessionItemsDropped().
+
+The first signal's argument is a SessionItem pointer and is emitted once for each SessionItem in the event, not just SessionItems accepted by the drop filter.
+The second signal's argument is a std::vector of SessionItem pointers containing all SessionItems in the event, not just SessionItems accepted by the drop filter.
+
+An example event handler is presented below. 
+This handler is attached to the Window::signalSessionItemDropped() signal.
+\code
+void CustomWindow::dropSessionItem(Subject& subject, const string& signal, const boost::any& value)
+{
+   RasterElement* pRaster = dynamic_cast<RasterElement*>(boost::any_cast<SessionItem*>(value));
+   if(pRaster != NULL)
+   {
+      watchNewRasterElement(pRaster);
+   }
+}
+\endcode
+
+\section custom_drops Custom drop handling.
+If a plug-in needs to handle other drag and drop types or needs finer grained control over SessionItem drag and drop, a qt event filter can be established.
+
+First, the drop target needs an event handler installed and drops need to be enabled.
+The drop target can be any QWidget, including widgets which the plug-in does not implement such as SpatialDataView as in the example below.
+
+\code
+CustomWidget::CustomWidget()
+{
+   std::vector<Window*> windows;
+   Service<DesktopServices>()->getWindows(SPATIAL_DATA_WINDOW, windows);
+   for(std::vector<Window*>::iterator window = windows.begin(); window != windows.end(); ++window)
+   {
+      SpatialDataWindow* pWindow = static_cast<SpatialDataWindow*>(*window);
+      if(pWindow != NULL)
+      {
+         pWindow->getWidget()->installEventFilter(this);
+         pWindow->getWidget()->setAcceptDrops(true);
+      }
+   }
+}
+\endcode
+Don't forget to remove the event filter when your custom widget is destroyed.
+
+\code
+CustomWidget::~CustomWidget()
+{
+   std::vector<Window*> windows;
+   Service<DesktopServices>()->getWindows(SPATIAL_DATA_WINDOW, windows);
+   for(std::vector<Window*>::iterator window = windows.begin(); window != windows.end(); ++window)
+   {
+      SpatialDataWindow* pWindow = static_cast<SpatialDataWindow*>(*window);
+      if(pWindow != NULL)
+      {
+         pWindow->getWidget()->removeEventFilter(this);
+      }
+   }
+}
+\endcode
+
+The event filter should handle DragEnter and Drop events as in the below example.
+\code
+bool CustomWidget::eventFilter(QObject *pObj, QEvent *pEvent)
+{
+   SpatialDataView* pView = dynamic_cast<SpatialDataView*>(pObj);
+   switch(pEvent->type())
+   {
+   case QEvent::DragEnter:
+      windowDragEnterEvent(pView, static_cast<QDragEnterEvent*>(pEvent));
+      return pEvent->isAccepted();
+   case QEvent::Drop:
+      windowDropEvent(pView, static_cast<QDropEvent*>(pEvent));
+      return pEvent->isAccepted();
+   }
+   return false;
+}
+
+void CustomWidget::windowDragEnterEvent(SpatialDataView *pView, QDragEnterEvent *pEvent)
+{
+   if(pEvent != NULL && pEvent->mimeData()->hasFormat("text/x-session-id"))
+   {
+      pEvent->acceptProposedAction();
+   }
+}
+
+void CustomWidget::windowDropEvent(SpatialDataView *pView, QDropEvent *pEvent)
+{
+   VERIFYNRV(pEvent && pView);
+
+   QString sessionId(pEvent->mimeData()->data("text/x-session-id"));
+   SessionItem* pSessionItem = Service<SessionManager>()->getSessionItem(sessionId);
+   if(pSessionItem != NULL)
+   {
+      watchSessionItem(pSessionItem);
+      pEvent->accept();
+   }
+}
+\endcode
+
+This example accepts drops with the \tt text/x-session-id MIME type.
+This is the MIME type emmitted by the session explorer on session item drags and is normally handled by \ref sessionitem_drops.
+The MIME type accepted can be \tt text/x-session-id, any standard qt drag and drop MIME type, or a custom MIME type emitted by a plug-in widget.
+See the qt documentation on drag and drop for information on generating drag events.
+*/
