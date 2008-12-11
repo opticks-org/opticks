@@ -114,6 +114,15 @@ public:
     *  @return A vector containing the size of each block.
     */
    virtual std::vector<int64_t> getBlockSizes() const = 0;
+
+protected:
+   /**
+    *  Destroys the SessionItemDeserializer object.
+    *
+    *  The SessionItemDeserializer object is automatically deleted by
+    *  SessionManager.  Plug-ins do not need to destroy it.
+    */
+   virtual ~SessionItemDeserializer() {}
 };
 
 /**
@@ -135,6 +144,15 @@ public:
     *  @return The block number of the current block.
     */
    virtual int getCurrentBlock() const = 0;
+
+protected:
+   /**
+    *  Destroys the SessionItemDeserializerExt1 object.
+    *
+    *  The SessionItemDeserializerExt1 object is automatically deleted by
+    *  SessionManager.  Plug-ins do not need to destroy it.
+    */
+   virtual ~SessionItemDeserializerExt1() {}
 };
 
 #endif

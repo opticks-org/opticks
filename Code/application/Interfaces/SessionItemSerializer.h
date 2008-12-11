@@ -130,6 +130,15 @@ public:
     *        on the disk.
     */
    virtual void endBlock() = 0;
+
+protected:
+   /**
+    *  Destroys the SessionItemSerializer object.
+    *
+    *  The SessionItemSerializer object is automatically deleted by
+    *  SessionManager.  Plug-ins do not need to destroy it.
+    */
+   virtual ~SessionItemSerializer() {}
 };
 
 #endif
