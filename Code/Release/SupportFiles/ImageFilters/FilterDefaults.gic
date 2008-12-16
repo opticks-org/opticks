@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<FilterList xmlns="https://comet.balldayton.com/standards/namespaces/2005/v1.1/comet.xsd">
+
+   <filter name="EdgeDetection" type="ImageFilter"
+     description="This program is used to compute an edge detection filter.">
+      <program name="EdgeDetection.cg" type="Fragment">
+         <parameter name="inputImage" type="unsigned int" value="0"></parameter>
+      </program>
+   </filter>
+
+   <filter name="ByPass" type="ImageFilter"
+     description="This program is used during testing of the the GPU read back capability.">
+      <program name="ByPass.cg" type="Fragment">
+         <parameter name="inputImage" type="unsigned int" value="0"></parameter>
+      </program>
+   </filter>
+
+</FilterList>

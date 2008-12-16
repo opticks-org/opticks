@@ -1,0 +1,58 @@
+import glob
+
+####
+# import the environment
+####
+Import('env build_dir TOOLPATH')
+env = env.Copy()
+env.Tool("ossim",toolpath=[TOOLPATH])
+
+####
+# subdirectories to build objects from
+####
+subdirs = ["pthreads-wrapper"]
+
+####
+# build top-level sources and extra moc files
+####
+srcs = map(lambda x,bd=build_dir: '%s/%s' % (bd,x), glob.glob("*.cpp"))
+mocfiles = map(lambda x,bd=build_dir,e=env: e.Moc('%s/Interfaces/%s' % (bd,x)),
+               ["AlgorithmDialog.h",
+                "CustomColorButton.h",
+                "CustomTreeWidget.h",
+                "FileBrowser.h",
+                "ImageHandler.h",
+                "LabeledSection.h",
+                "LabeledSectionGroup.h",
+                "LatLonLineEdit.h",
+                "Modifier.h",
+                "MuHttpServer.h",
+                "SecurityMarkingsDlg.h",
+                "SignaturePropertiesDlg.h",
+                "SignatureSelector.h",
+                "UndoAction.h"])
+objs = env.Object(srcs + mocfiles)
+
+####
+# build subdirectory sources
+####
+for sub in subdirs:
+   env.Append(CPPPATH="#/PlugInUtilities/%s" % sub)
+   srcs = map(lambda x,bd=build_dir: '%s/%s' % (bd,x), glob.glob("%s/*.cpp" % sub))
+   objs += env.Object(srcs)
+
+####
+# Extra includes
+####
+env.Append(CPPPATH="#/PlugInUtilities/Interfaces")
+
+####
+# build the library and set up an alias to ease building it later
+####
+lib = env.Library("%s/PlugInUtilities" % build_dir,objs)
+env.Alias('libPlugInUtilities', lib)
+
+####
+# return the library
+####
+Return('lib')
