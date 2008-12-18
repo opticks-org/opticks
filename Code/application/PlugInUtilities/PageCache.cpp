@@ -17,7 +17,7 @@
 #include <sstream>
 using namespace std;
 
-PageCache::PageCache(const int maxCacheSize) :
+PageCache::PageCache(const size_t maxCacheSize) :
    MAX_CACHE_SIZE(maxCacheSize),
    mCacheSize(0)
 {

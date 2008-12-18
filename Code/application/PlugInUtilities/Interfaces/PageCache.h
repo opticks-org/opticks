@@ -45,7 +45,7 @@ public:
     * @param  maxCacheSize
     *         The maximum size of the cache in bytes.
     */
-   PageCache(const int maxCacheSize = 20000000);
+   PageCache(const size_t maxCacheSize = 20000000);
 
    /**
     * Destroys the thread-safe LRU PageCache.

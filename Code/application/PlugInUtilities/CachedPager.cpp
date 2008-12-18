@@ -36,7 +36,7 @@ CachedPager::CachedPager() :
 }
 
 CachedPager::CachedPager(const size_t cacheSize) :
-   mCache(static_cast<const int>(cacheSize)),
+   mCache(cacheSize),
    mpMutex(new mta::DMutex),
    mpDescriptor(NULL),
    mpRaster(NULL),
