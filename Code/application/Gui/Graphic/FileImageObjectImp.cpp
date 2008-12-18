@@ -83,7 +83,7 @@ bool FileImageObjectImp::processMousePress(LocationType screenCoord,
    char pwd[256];
    GETCWD(pwd, 256);
    QString filename = QFileDialog::getOpenFileName(pWidget, QString(), pwd,
-      "Image Files (*.bmp; *.jpg);;All Files (*.*)");
+      "Image Files (*.bmp *.jpg);;All Files (*)");
 
    if (filename.isEmpty() == true)
    {
