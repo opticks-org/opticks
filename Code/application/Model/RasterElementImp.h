@@ -11,12 +11,10 @@
 #define RASTERELEMENTIMP_H
 
 #include "AttachmentPtr.h"
-#include "DataElementImp.h"
-
-#include "AttachmentPtr.h"
-#include "DimensionDescriptor.h"
 #include "ComplexData.h"
 #include "DataAccessor.h"
+#include "DataElementImp.h"
+#include "DimensionDescriptor.h"
 #include "StatisticsImp.h"
 #include "TypesFile.h"
 #include "ProgressAdapter.h"
@@ -49,9 +47,6 @@ public:
       const std::vector<DimensionDescriptor>& selectedRows,
       const std::vector<DimensionDescriptor>& selectedColumns,
       const std::vector<DimensionDescriptor>& selectedBands = std::vector<DimensionDescriptor>()) const;
-   RasterElement* rotateAndFlip(const std::string& appendName, int angle, bool horizontalFlip, bool verticalFlip,
-      const AoiElement* pAoi = NULL) const;
-   bool transpose();
    DataElement *copy(const std::string &name, DataElement *pParent) const;
 
    bool createTemporaryFile();
@@ -266,17 +261,7 @@ private:
    { \
       return impClass::createChip(pParent, appendName, selectedRows, selectedColumns, selectedBands); \
    } \
-   RasterElement* rotateAndFlip(const std::string& appendName, int angle, bool horizontalFlip, \
-      bool verticalFlip, const AoiElement* pAoi = NULL) const \
-   { \
-      return impClass::rotateAndFlip(appendName, angle, \
-         horizontalFlip, verticalFlip, pAoi); \
-   } \
-   bool transpose() \
-   { \
-      return impClass::transpose(); \
-   } \
-      bool createTemporaryFile() \
+   bool createTemporaryFile() \
    { \
       return impClass::createTemporaryFile(); \
    } \
@@ -355,6 +340,5 @@ private:
    { \
       return impClass::updateGeoreferenceData(); \
    }
-
 
 #endif

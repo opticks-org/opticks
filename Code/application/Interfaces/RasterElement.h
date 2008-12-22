@@ -11,18 +11,18 @@
 #define RASTERELEMENT_H
 
 #include "AppConfig.h"
-#include "DataElement.h"
 #include "ComplexData.h"
 #include "DataAccessor.h"
+#include "DataElement.h"
 #include "DimensionDescriptor.h"
 #include "LocationType.h"
+
+#include <string>
 #include <vector>
 
-class AoiElement;
 class DataRequest;
 class Georeference;
 class Progress;
-class RasterDataDescriptor;
 class RasterPager;
 class Statistics;
 
@@ -255,62 +255,6 @@ public:
     *           on RasterElements that have not had their terrain map set.
     */
    virtual const RasterElement* getTerrain() const = 0;
-
-   /**
-    *  Creates a new dataset that is rotated and/or flipped.
-    *
-    *  This file contains the main routines from the CASE Executive 
-    *  RotateFlip utility.  This method rotates and/or flips the dataset and
-    *  changes row and column values for the dataset. This method rotates
-    *  the actual data. You can use SpatialDataView methods if you need to
-    *  just flip the data visually.  A matrix algebra transpose is equivalent
-    *  to a 90 degree rotate and a vertical flip. The output data type will
-    *  simply be the same as the input data type.  When both a rotate and
-    *  flip are done, the rotate is done first and the flip second.
-    *  Currently this method only works on a single band dataset.
-    *
-    *  @param   appendName
-    *           What to append to the name of the RasterElement.
-    *           ie. "_flipped" would transform the name "A.sio" to "A_flipped.sio".
-    *  @param   angle
-    *           The degree of rotation, clockwise in 90 degree increments
-    *           (0, 90, 180, 270).
-    *  @param   horizontalFlip
-    *           Flip the dataset horizontally. This can not be true if 
-    *           verticalFlip is true.
-    *  @param   verticalFlip
-    *           Flip the dataset vertically. This can not be true if 
-    *           horizontalFlip is true.
-    *  @param   pAoi
-    *           An optional parameter that specifies a subset of the 
-    *           dataset to rotate and flip. The bounding box for the 
-    *           AOI is used to specify the rectangular region of the 
-    *           dataset.
-    *
-    *  @return  A pointer to the created RasterElement.  NULL
-    *           is returned if the operation failed.
-    *
-    *  @author  Brian J. Hennen (GD-AIS), routine from CASE Executive.
-    */
-   virtual RasterElement* rotateAndFlip(const std::string& appendName, int angle, bool horizontalFlip,
-      bool verticalFlip, const AoiElement* pAoi = NULL) const = 0;
-
-   /**
-    *  Completes an in-place, matrix transpose function on the dataset.
-    *
-    *  The transpose of a matrix A is a matrix formed from A by 
-    *  interchanging the rows and columns such that row i of matrix A 
-    *  becomes column i of the transposed matrix. The transpose of A is 
-    *  denoted by B. Each element a[i,j] in A becomes element b[j,i] in B. 
-    *  If A is an m by n matrix, then B is an n by m matrix. Currently this 
-    *  method only works on a single band dataset.
-    *
-    *  This method has known UI issues.  If the view is to be used again, it
-    *  should be transposed back before handing it back to the user.
-    *
-    *  @return   Returns true if the transpose was successful.
-    */
-   virtual bool transpose() = 0;
 
    /**
     *  Creates an empty temporary file.

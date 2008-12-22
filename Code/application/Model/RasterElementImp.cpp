@@ -379,95 +379,6 @@ void RasterElementImp::Deleter::operator()(DataAccessorImpl* pDataAccessor)
    delete this;
 }
 
-RasterElement* RasterElementImp::rotateAndFlip(const string& appendName ,int angle, bool horizontalFlip,
-                                               bool verticalFlip, const AoiElement* pAoi) const
-{
-   return NULL;
-
-/*
-   // ****************
-   // validate input
-   if (horizontalFlip == true && verticalFlip == true)
-   {
-      // these options are mutually exclusive
-      return NULL;
-   }
-   switch (angle)
-   {
-   case 0: // fall through
-   case 90: // fall through
-   case 180: // fall through
-   case 270:
-      break;
-   default:
-      return NULL;
-   };
-
-   if (pAppendName == NULL)
-   {
-      return NULL;
-   }
-
-   // ***************
-   int minX = 0;
-   int minY = 0;
-   int maxX = 0;
-   int maxY = 0;
-
-   SensorDataDescriptorImp* pDd = dynamic_cast<SensorDataDescriptorImp*>(getDataDescriptor());
-   VERIFY(pDd != NULL);
-
-   InterleaveFormatType interleave = pDd->getInterleaveFormat();
-   EncodingType encoding = pDd->getDataType();
-
-   auto_ptr<SamplingCriteriaImp> pSample(new SamplingCriteriaImp);
-
-   if (pAoi != NULL)
-   {
-      pSample->setAllPixels(false);
-      const BitMask *pBitmask = dynamic_cast<const BitMask238*>(pAoi->getSelectedPoints());
-      if (pBitmask != NULL)
-      {
-         pBitmask->getMinimalBoundingBox(minX, minY, maxX, maxY);
-      }
-   }
-   else
-   {
-      pSample->setAllPixels(true);
-      // use the whole cube
-      minX = minY = 0;
-      maxX = pDd->getColumnCount()-1;
-      maxY = pDd->getRowCount()-1;
-   }
-
-   unsigned int bands = pDd->getBandCount();
-
-   vector<unsigned int> rows;
-   rows.reserve(maxY-minY+1);
-   for (int i = minY; i <= maxY; ++i)
-   {
-      rows.push_back(i);
-   }
-
-   vector<unsigned int> columns;
-   columns.reserve(maxX-minX+1);
-   for (int i = minX; i <= maxX; ++i)
-   {
-      columns.push_back(i);
-   }
-   
-   pSample->setAllBands(true);
-   pSample->setTotalNumRows(rows.size());
-   pSample->setRows(rows);
-   pSample->setTotalNumColumns(columns.size());
-   pSample->setColumns(columns);
-   pSample->setTotalNumBands(bands);
-
-   SensorData* pSensor = resample(pAppendName, pSample.get(), 1, angle, horizontalFlip, verticalFlip);
-   return pSensor;
-*/
-}
-
 bool RasterElementImp::updateDims(const vector<DimensionDescriptor>& srcDims,
                                   const vector<DimensionDescriptor>& selectedDims,
                                   vector<DimensionDescriptor>& chipActiveDims,
@@ -630,11 +541,6 @@ RasterElement* RasterElementImp::createChipInternal(DataElement* pParent, const 
    VERIFYRV(copyDataToChip(pRasterChip.get(), *pSelectedRows, *pSelectedCols, *pSelectedBands, abort), NULL);
 
    return pRasterChip.release();
-}
-
-bool RasterElementImp::transpose()
-{
-   return false;
 }
 
 string RasterElementImp::appendToBasename(const string &name,

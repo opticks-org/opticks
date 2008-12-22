@@ -30,6 +30,7 @@
 #include <string>
 
 class AlgorithmResource;
+class AoiElement;
 class ApplicationServices;
 class SpatialDataView;
 class Step;
