@@ -187,39 +187,10 @@ public:
     */
    virtual void removeItem(QAction* pAction) = 0;
 
-protected:
    /**
-    * This should be destroyed by calling DesktopServices::deleteWindow.
-    */
-   virtual ~ToolBar() {}
-};
-
-/**
- *  Extends capability of the ToolBar interface.
- *
- *  This class provides additional capability for the ToolBar interface class.
- *  A pointer to this class can be obtained by performing a dynamic cast on a
- *  pointer to ToolBar or any of its subclasses.
- *
- *  @warning A pointer to this class can only be used to call methods contained
- *           in this extension class and cannot be used to call any methods in
- *           ToolBar or its subclasses.
- */
-class ToolBarExt1
-{
-public:
-   /**
-    *  This method will return the current visiblity state of the toolbar.
-    *
-    *  @return  Returns \c true if the toolbar is shown or \c false
-    *           if the toolbar is hidden.
-    */
-   virtual bool isShown() const = 0;
-
-    /**
     *  Shows the toolbar.
     *
-    *  This method will display the toolbar only if it's hidden.   
+    *  This method will display the toolbar only if it's hidden.
     *  If the toolbar already shown, this method will do nothing.
     *
     *  @notify  This method will notify signalShown() if the window was
@@ -229,10 +200,10 @@ public:
     */
    virtual void show() = 0;
 
-    /**
+   /**
     *  Hides the toolbar.
     *
-    *  This method will hide the toolbar only if it's shown.   
+    *  This method will hide the toolbar only if it's shown.
     *  If the toolbar already hidden, this method will do nothing.
     *
     *  @notify  This method will notify signalHidden() if the window was
@@ -242,11 +213,19 @@ public:
     */
    virtual void hide() = 0;
 
+   /**
+    *  This method will return the current visiblity state of the toolbar.
+    *
+    *  @return  Returns \c true if the toolbar is shown or \c false
+    *           if the toolbar is hidden.
+    */
+   virtual bool isShown() const = 0;
+
 protected:
    /**
     * This should be destroyed by calling DesktopServices::deleteWindow.
     */
-   virtual ~ToolBarExt1() {}
+   virtual ~ToolBar() {}
 };
 
 #endif

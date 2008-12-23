@@ -22,7 +22,7 @@ class ProgressImp;
 class MessageLogMgr;
 class Options;
 
-class UtilityServicesImp : public UtilityServices, public UtilityServicesExt1
+class UtilityServicesImp : public UtilityServices
 {
 public:
    static UtilityServicesImp* instance();

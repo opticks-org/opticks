@@ -53,13 +53,7 @@ WizardItemImp& WizardItemImp::operator=(const WizardItemImp& item)
          {
             const string& nodeName = pExistNode->getName();
             const string& nodeType = pExistNode->getOriginalType();
-            string nodeDescription = "";
-
-            WizardNodeExt1* pExistNodeExt1 = dynamic_cast<WizardNodeExt1*>(pExistNode);
-            if (pExistNodeExt1 != NULL)
-            {
-               nodeDescription = pExistNodeExt1->getDescription();
-            }
+            const string& nodeDescription = pExistNode->getDescription();
 
             WizardNodeImp* pNode = static_cast<WizardNodeImp*>(addInputNode(nodeName, nodeType, nodeDescription));
             if (pNode != NULL)
@@ -79,13 +73,7 @@ WizardItemImp& WizardItemImp::operator=(const WizardItemImp& item)
          {
             const string& nodeName = pExistNode->getName();
             const string& nodeType = pExistNode->getOriginalType();
-            string nodeDescription = "";
-
-            WizardNodeExt1* pExistNodeExt1 = dynamic_cast<WizardNodeExt1*>(pExistNode);
-            if (pExistNodeExt1 != NULL)
-            {
-               nodeDescription = pExistNodeExt1->getDescription();
-            }
+            const string& nodeDescription = pExistNode->getDescription();
 
             WizardNodeImp* pNode = static_cast<WizardNodeImp*>(addOutputNode(nodeName, nodeType, nodeDescription));
             if (pNode != NULL)

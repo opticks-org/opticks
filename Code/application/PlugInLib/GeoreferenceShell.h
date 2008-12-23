@@ -14,7 +14,7 @@
 #include "LocationType.h"
 #include "ExecutableShell.h"
 
-class GeoreferenceShell : public ExecutableShell, public Georeference, public GeoreferenceExt1
+class GeoreferenceShell : public ExecutableShell, public Georeference
 {
 public:
    /**
@@ -79,7 +79,7 @@ public:
    bool validateGuiInput() const;
 
    /**
-    *  @copydoc GeoreferenceExt1::canExtrapolate()
+    *  @copydoc Georeference::canExtrapolate()
     *
     *  @default The default implementation returns \c false.
     */

@@ -39,8 +39,8 @@ public:
    void setImporterSubtype(const std::string& subtype);
    std::string getImporterSubtype() const;
    void setFilename(const std::string& filename);
-   void setEditType(ImportAgentExt1::EditType editType = ImportAgentExt1::AS_NEEDED_EDIT);
-   ImportAgentExt1::EditType getEditType() const;
+   void setEditType(ImportAgent::EditType editType = ImportAgent::AS_NEEDED_EDIT);
+   ImportAgent::EditType getEditType() const;
    void updateMruFileList(bool updateList);
    bool isMruFileListUpdated() const;
    void setImportDescriptors(const std::vector<ImportDescriptor*>& descriptors);
@@ -60,7 +60,7 @@ private:
    std::string mImporterSubtype;
    std::string mFilename;
    std::vector<ImportDescriptor*> mDescriptors;
-   ImportAgentExt1::EditType mEditType;
+   ImportAgent::EditType mEditType;
    bool mUpdateMruList;
    DataElement* mpElement;
    std::vector<DataElement*> mImportedElements;
@@ -99,18 +99,18 @@ private:
    } \
    void showOptionsDialog(bool showDialog) \
    { \
-      impClass::setEditType(showDialog ? ImportAgentExt1::ALWAYS_EDIT : ImportAgentExt1::NEVER_EDIT); \
+      impClass::setEditType(showDialog ? ImportAgent::ALWAYS_EDIT : ImportAgent::NEVER_EDIT); \
    } \
    bool isOptionsDialogShown() const \
    { \
-      ImportAgentExt1::EditType editType = impClass::getEditType(); \
-      return (editType == ImportAgentExt1::ALWAYS_EDIT); \
+      ImportAgent::EditType editType = impClass::getEditType(); \
+      return (editType == ImportAgent::ALWAYS_EDIT); \
    } \
-   void setEditType(ImportAgentExt1::EditType editType = ImportAgentExt1::AS_NEEDED_EDIT) \
+   void setEditType(ImportAgent::EditType editType = ImportAgent::AS_NEEDED_EDIT) \
    { \
       impClass::setEditType(editType); \
    } \
-   ImportAgentExt1::EditType getEditType() const \
+   ImportAgent::EditType getEditType() const \
    { \
       return impClass::getEditType(); \
    } \

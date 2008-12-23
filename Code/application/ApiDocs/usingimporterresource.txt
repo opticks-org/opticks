@@ -35,9 +35,9 @@ execution behavior.  The text describes how the setting is used when the resourc
    <td><b>\link ImportAgent::setPlugIn() %Importer \endlink</b></td>
    <td><b>\link ApplicationServices::isBatch() Application Mode \endlink</b></td>
    <td><b>\link ImportAgent::execute() %Resource Execution Behavior \endlink</b></td>
-   <td><b>\link ImportAgentExt1::setImporterSubtype() %Importer Subtype \endlink</b></td>
-   <td><b>\link ImportAgentExt1::setEditType() Edit Type \endlink</b></td>
-   <td><b>\link ImportAgentExt1::updateMruFileList() Update MRU File List \endlink</b></td>
+   <td><b>\link ImportAgent::setImporterSubtype() %Importer Subtype \endlink</b></td>
+   <td><b>\link ImportAgent::setEditType() Edit Type \endlink</b></td>
+   <td><b>\link ImportAgent::updateMruFileList() Update MRU File List \endlink</b></td>
 </tr>
 <tr>
    <td>&nbsp;</td>

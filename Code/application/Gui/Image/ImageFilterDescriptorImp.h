@@ -49,8 +49,7 @@ private:
    FactoryResource<DynamicObject> mpInputParams;
 };
 
-#define IMAGEFILTERDESCRIPTOREXTENSION_CLASSES \
-   , public ImageFilterDescriptorExt1
+#define IMAGEFILTERDESCRIPTOREXTENSION_CLASSES
 
 // Adapter must implement ImageFilterDescriptor::copy()
 #define IMAGEFILTERDESCRIPTORADAPTER_METHODS(impClass) \

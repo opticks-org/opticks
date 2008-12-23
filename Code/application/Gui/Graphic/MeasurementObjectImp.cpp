@@ -568,7 +568,7 @@ string MeasurementObjectImp::generateGeoStrings() const
 
       // check if georeference needs to extrapolate and if it can do so with accuracy
       bool canExtrapolate(false);
-      GeoreferenceExt1* pGeoPlugin = dynamic_cast<GeoreferenceExt1*>(mpGeoreference->getGeoreferencePlugin());
+      Georeference* pGeoPlugin = mpGeoreference->getGeoreferencePlugin();
       if (pGeoPlugin != NULL)
       {
          canExtrapolate = pGeoPlugin->canExtrapolate();

@@ -95,11 +95,6 @@ bool FeatureClass::close(string &errorMessage)
    return true;
 }
 
-AnyData *FeatureClass::copy() const
-{
-   return NULL;
-}
-
 bool FeatureClass::setParentElement(GraphicElement *pParentElement)
 {
    mpParentElement = pParentElement;
@@ -258,11 +253,9 @@ bool FeatureClass::update(Progress *pProgress, string &errorMessage)
    GraphicGroup* pGroup = mpParentElement->getGroup();
    VERIFY(pGroup != NULL);
 
-   GraphicObjectExt1* pGroupExt1 = dynamic_cast<GraphicObjectExt1*>(pGroup);
-   VERIFY(pGroupExt1 != NULL);
-
    View* pView = NULL;
-   GraphicLayer* pLayer = pGroupExt1->getLayer();
+
+   GraphicLayer* pLayer = pGroup->getLayer();
    if (pLayer != NULL)
    {
       pView = pLayer->getView();

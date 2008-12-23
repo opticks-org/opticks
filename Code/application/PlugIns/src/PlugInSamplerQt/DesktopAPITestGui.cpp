@@ -254,12 +254,8 @@ DesktopAPITestGui::DesktopAPITestGui(QWidget* pParent) :
          pView->refresh();
       }
 
-      PlotViewExt1* pViewExt = dynamic_cast<PlotViewExt1*>(pView);
-      if (pViewExt != NULL)
-      {
-         double marginFactor = pViewExt->getExtentsMargin();
-         mpMarginEdit->setText(QString::number(marginFactor));
-      }
+      double marginFactor = pView->getExtentsMargin();
+      mpMarginEdit->setText(QString::number(marginFactor));
 
       QWidget* pViewWidget = pView->getWidget();
       if (pViewWidget != NULL)
@@ -647,7 +643,7 @@ void DesktopAPITestGui::setPlotMargin()
 {
    if (mpPlotWidget.get() != NULL)
    {
-      PlotViewExt1* pPlotView = dynamic_cast<PlotViewExt1*>(mpPlotWidget->getPlot());
+      PlotView* pPlotView = mpPlotWidget->getPlot();
       if (pPlotView != NULL)
       {
          double marginFactor = 0.0;

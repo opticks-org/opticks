@@ -98,7 +98,7 @@ void ImportAgentImp::instantiate(PlugIn* pPlugIn, const vector<ImportDescriptor*
 }
 
 ImportAgentImp::ImportAgentImp() :
-   mEditType(ImportAgentExt1::NEVER_EDIT),
+   mEditType(ImportAgent::NEVER_EDIT),
    mUpdateMruList(false),
    mpElement(NULL)
 {
@@ -144,7 +144,7 @@ void ImportAgentImp::setFilename(const string& filename)
    mFilename = strFilename.toStdString();
 }
 
-void ImportAgentImp::setEditType(ImportAgentExt1::EditType editType)
+void ImportAgentImp::setEditType(ImportAgent::EditType editType)
 {
    checkInstantiate();
 
@@ -155,7 +155,7 @@ void ImportAgentImp::setEditType(ImportAgentExt1::EditType editType)
    }
 }
 
-ImportAgentExt1::EditType ImportAgentImp::getEditType() const
+ImportAgent::EditType ImportAgentImp::getEditType() const
 {
    checkInstantiate();
    return mEditType;
@@ -317,8 +317,8 @@ bool ImportAgentImp::execute()
       unsigned int numValidDescriptors = validateImportDescriptors(descriptors, pImporter, errorMessage);
 
       // Display the options dialog if necessary
-      if ((pImporter != NULL) && ((mEditType == ImportAgentExt1::ALWAYS_EDIT) ||
-         ((mEditType == ImportAgentExt1::AS_NEEDED_EDIT) && (numValidDescriptors < descriptors.size()))))
+      if ((pImporter != NULL) && ((mEditType == ImportAgent::ALWAYS_EDIT) ||
+         ((mEditType == ImportAgent::AS_NEEDED_EDIT) && (numValidDescriptors < descriptors.size()))))
       {
          Service<DesktopServices> pDesktop;
          vector<ImportDescriptor*> importerDescriptors = descriptors;

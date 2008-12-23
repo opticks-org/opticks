@@ -392,13 +392,11 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
       populateListFromFile(mpClassLevelCombo, strDefaultDir + "ClassificationLevels.txt", false);
    }
 
-   UtilityServicesExt1* pUtilExt1 = dynamic_cast<UtilityServicesExt1*>(Service<UtilityServices>().get());
-
-   VERIFYNRV(pUtilExt1 != NULL);
+   Service<UtilityServices> pUtilities;
 
    if ((pWidget == NULL) || (pWidget == mpCodewordList))
    {
-      vector<string> codewords = pUtilExt1->getCodewords();
+      vector<string> codewords = pUtilities->getCodewords();
       mpCodewordList->clear();
       for (vector<string>::iterator iter = codewords.begin(); iter != codewords.end(); ++iter)
       {
@@ -407,7 +405,7 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
    }
    if ((pWidget == NULL) || (pWidget == mpSystemList))
    {
-      vector<string> systems = pUtilExt1->getSystems();
+      vector<string> systems = pUtilities->getSystems();
       mpSystemList->clear();
       for (vector<string>::iterator iter = systems.begin(); iter != systems.end(); ++iter)
       {
@@ -416,7 +414,7 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
    }
    if ((pWidget == NULL) || (pWidget == mpCountryCodeList))
    {
-      vector<string> countryCodes = pUtilExt1->getCountryCodes();
+      vector<string> countryCodes = pUtilities->getCountryCodes();
       mpCountryCodeList->clear();
       for (vector<string>::iterator iter = countryCodes.begin(); iter != countryCodes.end(); ++iter)
       {
@@ -425,7 +423,7 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
    }
    if ((pWidget == NULL) || (pWidget == mpFileReleasingList))
    {
-      vector<string> fileReleasing = pUtilExt1->getFileReleasing();
+      vector<string> fileReleasing = pUtilities->getFileReleasing();
       mpFileReleasingList->clear();
       for (vector<string>::iterator iter = fileReleasing.begin(); iter != fileReleasing.end(); ++iter)
       {
@@ -434,7 +432,7 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
    }
    if ((pWidget == NULL) || (pWidget == mpExemptionList))
    {
-      vector<string> exemption = pUtilExt1->getDeclassificationExemptions();
+      vector<string> exemption = pUtilities->getDeclassificationExemptions();
       mpExemptionList->clear();
       for (vector<string>::iterator iter = exemption.begin(); iter != exemption.end(); ++iter)
       {
@@ -443,7 +441,7 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
    }
    if ((pWidget == NULL) || (pWidget == mpClassReasonCombo))
    {
-      vector<string> classReason = pUtilExt1->getClassificationReasons();
+      vector<string> classReason = pUtilities->getClassificationReasons();
       mpClassReasonCombo->clear();
       for (vector<string>::iterator iter = classReason.begin(); iter != classReason.end(); ++iter)
       {
@@ -452,7 +450,7 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
    }
    if ((pWidget == NULL) || (pWidget == mpDeclassTypeCombo))
    {
-      vector<string> declassType = pUtilExt1->getDeclassificationTypes();
+      vector<string> declassType = pUtilities->getDeclassificationTypes();
       mpDeclassTypeCombo->clear();
       for (vector<string>::iterator iter = declassType.begin(); iter != declassType.end(); ++iter)
       {
@@ -461,7 +459,7 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
    }
    if ((pWidget == NULL) || (pWidget == mpFileDowngradeCombo))
    {
-      vector<string> fileDowngrade = pUtilExt1->getFileDowngrades();
+      vector<string> fileDowngrade = pUtilities->getFileDowngrades();
       mpFileDowngradeCombo->clear();
       for (vector<string>::iterator iter = fileDowngrade.begin(); iter != fileDowngrade.end(); ++iter)
       {
@@ -470,7 +468,7 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
    }
    if ((pWidget == NULL) || (pWidget == mpFileControlCombo))
    {
-      vector<string> fileControl = pUtilExt1->getFileControls();
+      vector<string> fileControl = pUtilities->getFileControls();
       mpFileControlCombo->clear();
       for (vector<string>::iterator iter = fileControl.begin(); iter != fileControl.end(); ++iter)
       {

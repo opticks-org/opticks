@@ -111,12 +111,7 @@ int Application::run(int argc, char** argv)
    }
 
    // Build the plug-in list from the plug-in directory
-   ConfigurationSettingsExt2* pSettings2 = dynamic_cast<ConfigurationSettingsExt2*>(pSettings.get());
-   if (pSettings2 == NULL)
-   {
-      return -1;
-   }
-   string plugPath = pSettings2->getPlugInPath();
+   string plugPath = pSettings->getPlugInPath();
 
    //check all singletons here for proper creation
    PlugInManagerServicesImp* pManager = NULL;

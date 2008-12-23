@@ -2187,14 +2187,7 @@ void WizardBuilder::updateItemInfo()
                strNodeType = QString::fromStdString(nodeType);
             }
 
-            WizardNodeExt1* pNodeExt1 = dynamic_cast<WizardNodeExt1*>(pNode);
-            string nodeDescripton;
-            if (pNodeExt1 != NULL)
-            {
-               nodeDescripton = pNodeExt1->getDescription();
-
-            }
-
+            string nodeDescripton = pNode->getDescription();
             if (nodeDescripton.empty() == false)
             {
                strNodeDescription = QString::fromStdString(nodeDescripton);
@@ -2237,13 +2230,7 @@ void WizardBuilder::updateItemInfo()
                strNodeType = QString::fromStdString(nodeType);
             }
 
-            WizardNodeExt1* pNodeExt1 = dynamic_cast<WizardNodeExt1*>(pNode);
-            string nodeDescription;
-            if (pNodeExt1 != NULL)
-            {
-               nodeDescription = pNodeExt1->getDescription();
-            }
-
+            string nodeDescription = pNode->getDescription();
             if (nodeDescription.empty() == false)
             {
                strNodeDescription = QString::fromStdString(nodeDescription);

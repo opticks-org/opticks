@@ -35,7 +35,7 @@ class WizardItem;
  *  same data type as the original node.  The connected nodes can be retrieved with the
  *  getConnectedNodes() method.
  */
-class WizardNodeImp : public WizardNode, public SubjectAdapter, public WizardNodeExt1
+class WizardNodeImp : public WizardNode, public SubjectAdapter
 {
 public:
    /**

@@ -17,7 +17,7 @@
 #include <string>
 #include <vector>
 
-class SessionItemDeserializerImp : public SessionItemDeserializer, public SessionItemDeserializerExt1
+class SessionItemDeserializerImp : public SessionItemDeserializer
 {
 public:
    SessionItemDeserializerImp(const std::string &filename, const std::vector<int64_t> &blockSizes);

@@ -24,8 +24,6 @@ class RasterElement;
  *  For Georeference plug-ins to properly serialize and deserialize as part of
  *  a session, they need to implement SessionItem::serialize and 
  *  SessionItem::deserialize.
- *
- *  @see GeoreferenceExt1
  */
 class Georeference
 {
@@ -76,39 +74,52 @@ public:
     */
    virtual LocationType geoToPixelQuick(LocationType geo) const = 0;
 
-    /**
-     *  Gets a QWidget to set all parameters needed by the georeferencing algorithm.
-     *
-     *  The calling method takes ownership of the returned widget.  The returned widget
-     *  may be destroyed at any time after calling Executable::execute() on the plug-in.
-     *
-     *  @param   pRaster
-     *          The RasterElement to create the GUI for.
-     *
-     *  @return  The widget with any appropriate controls, or \b NULL if interactive mode
-     *           is not supported or no controls are needed.
-     */
-    virtual QWidget *getGui(RasterElement *pRaster) = 0;
+   /**
+    *  Gets a QWidget to set all parameters needed by the georeferencing algorithm.
+    *
+    *  The calling method takes ownership of the returned widget.  The returned widget
+    *  may be destroyed at any time after calling Executable::execute() on the plug-in.
+    *
+    *  @param   pRaster
+    *           The RasterElement to create the GUI for.
+    *
+    *  @return  The widget with any appropriate controls, or \b NULL if interactive mode
+    *           is not supported or no controls are needed.
+    */
+   virtual QWidget* getGui(RasterElement* pRaster) = 0;
 
-    /**
-     *  Determines if the user input through the GUI is valid.
-     *
-     *  @return  Returns \b true if the input is valid, otherwise returns
-     *           \b false.
-     *
-     *  @see     getGui()
-     */
-    virtual bool validateGuiInput() const = 0;
+   /**
+    *  Determines if the user input through the GUI is valid.
+    *
+    *  @return  Returns \b true if the input is valid, otherwise returns
+    *           \b false.
+    *
+    *  @see     getGui()
+    */
+   virtual bool validateGuiInput() const = 0;
 
-    /**
-     * Determine if this georeferencing algorithm can be used for the given 
-     * RasterElement.
-     *
-     * @param pRaster
-     *        The RasterElement to test.
-     * @return \c true if the plugin can handle the RasterElement, \c false otherwise
-     */
-    virtual bool canHandleRasterElement(RasterElement *pRaster) const = 0;
+   /**
+    * Determine if this georeferencing algorithm can be used for the given 
+    * RasterElement.
+    *
+    * @param pRaster
+    *        The RasterElement to test.
+    * @return \c true if the plugin can handle the RasterElement, \c false otherwise
+    */
+   virtual bool canHandleRasterElement(RasterElement *pRaster) const = 0;
+
+   /**
+    *  Specifies whether the plug-in can accurately extrapolate beyond the
+    *  extents of its associated raster element.
+    *
+    *  E.g. if this method returns \c true, the status bar will display geocoordinates
+    *  regardless of whether the cursor is within its associated raster element
+    *  or not.
+    *
+    *  @return  Returns \c true if the plug-in can extrapolate, otherwise returns
+    *           \c false.
+    */
+   virtual bool canExtrapolate() const = 0;
 
 protected:
    /**
@@ -117,37 +128,6 @@ protected:
     *  the PlugIn interface and calling PlugInManagerServices::destroyPlugIn().
     */
    virtual ~Georeference() {}
-};
-
-/**
- *  Extension interface specific to georeference plug-ins.
- *
- *  If a georeference plug-in can accurately extrapolate beyond the extents of
- *  its associated raster element, it should inherit and implement this interface.
- */
-class GeoreferenceExt1
-{
-public:
-    /**
-     *  Specifies whether the plug-in can accurately extrapolate beyond the
-     *  extents of its associated raster element.
-     *
-     *  E.g. if this method returns \c true, the status bar will display geocoordinates
-     *  regardless of whether the cursor is within its associated raster element
-     *  or not.
-     *
-     *  @return  Returns \c true if the plug-in can extrapolate, otherwise returns
-     *           \c false.
-     */
-   virtual bool canExtrapolate() const = 0;
-
-protected:
-   /**
-    *  Since the GeoreferenceExt1 interface is usually used in conjunction with the
-    *  PlugIn and Executable interfaces, this should be destroyed by casting to
-    *  the PlugIn interface and calling PlugInManagerServices::destroyPlugIn().
-    */
-   virtual ~GeoreferenceExt1() {}
 };
 
 #endif

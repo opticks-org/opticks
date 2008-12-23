@@ -481,9 +481,8 @@ FeatureProxyConnector *FeatureManager::getProxy()
    if (mpProxy == NULL)
    {
       // Start up ArcProxy
-      ConfigurationSettingsExt2* pSettings =
-         dynamic_cast<ConfigurationSettingsExt2*>(Service<ConfigurationSettings>().get());
-      VERIFYRV(pSettings != NULL, NULL);
+      Service<ConfigurationSettings> pSettings;
+
       string plugInPath = pSettings->getPlugInPath();
 #if defined(WIN_API)
       QString proxyPath = QString::fromStdString(

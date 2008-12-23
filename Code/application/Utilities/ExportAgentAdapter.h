@@ -13,7 +13,7 @@
 #include "ExportAgent.h"
 #include "ExportAgentImp.h"
 
-class ExportAgentAdapter : public ExportAgentCommon, public ExportAgentImp
+class ExportAgentAdapter : public ExportAgent, public ExportAgentImp
 {
 public:
    virtual ~ExportAgentAdapter()

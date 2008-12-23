@@ -38,7 +38,7 @@ class XMLWriter;
  *
  *  @see    ConfigurationSettings
  */
-class ConfigurationSettingsImp : public ConfigurationSettings, public SubjectImp, public ConfigurationSettingsExt1, public ConfigurationSettingsExt2
+class ConfigurationSettingsImp : public ConfigurationSettings, public SubjectImp
 {
 public:
    SETTING(ReleaseType, General, ReleaseType, RT_NORMAL); 

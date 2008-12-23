@@ -819,15 +819,11 @@ void GpuImage::initializeFilter(ImageFilterDescriptor *pDescriptor)
       // number of iterations to use to initialize the feedback buffer
       // filters can override this value through the gic file
       unsigned int numInitFrames = 20;
-      ImageFilterDescriptorExt1* pDescriptorExt = dynamic_cast<ImageFilterDescriptorExt1*>(pDescriptor);
-      if (NN(pDescriptorExt))
+
+      const unsigned int* pInitFrames = dv_cast<unsigned int>(&pDescriptor->getParameter("initializationIterations"));
+      if (pInitFrames != NULL)
       {
-         const unsigned int* pInitFrames =
-            dv_cast<unsigned int>(&pDescriptorExt->getParameter("initializationIterations"));
-         if (pInitFrames != NULL)
-         {
-            numInitFrames = *pInitFrames;
-         }
+         numInitFrames = *pInitFrames;
       }
 
       for (unsigned int j = 0; j < tilesToUpdate.size(); ++j)

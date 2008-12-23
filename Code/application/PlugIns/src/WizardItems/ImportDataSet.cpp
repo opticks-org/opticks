@@ -124,7 +124,7 @@ bool ImportDataSet::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
       }
    }
 
-   importer->setEditType(mShowDialog ? ImportAgentExt1::ALWAYS_EDIT : ImportAgentExt1::AS_NEEDED_EDIT);
+   importer->setEditType(mShowDialog ? ImportAgent::ALWAYS_EDIT : ImportAgent::AS_NEEDED_EDIT);
    importer->updateMruFileList((mpDescriptor == NULL) && (mpFilename == NULL));
 
    if (importer->execute() == false)

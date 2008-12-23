@@ -188,11 +188,9 @@ bool ScriptPlugIn::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList
    setEnvironmentOption(ConfigurationSettings::getSettingTempPath(), "OPTICKS_TEMP_PATH");
 
    Service<ConfigurationSettings> pConfig;
-   ConfigurationSettingsExt2* pSettings = dynamic_cast<ConfigurationSettingsExt2*>(pConfig.get());
-   VERIFY(pSettings != NULL);
    string homePath = pConfig->getHome();
    setEnvironmentVariable("OPTICKS_HOME", homePath.c_str());
-   setEnvironmentVariable("PLUG_IN_PATH", pSettings->getPlugInPath().c_str());
+   setEnvironmentVariable("PLUG_IN_PATH", pConfig->getPlugInPath().c_str());
 
    bool success = true;
 #if defined(WIN_API)

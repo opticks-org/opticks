@@ -1938,7 +1938,7 @@ void ApplicationWindow::fileMenuActivated(QAction* pAction)
       }
 
       // Do not set any import descriptors to cause the resource to use the descriptors obtained by the importer
-      importer->setEditType(ImportAgentExt1::ALWAYS_EDIT);
+      importer->setEditType(ImportAgent::ALWAYS_EDIT);
    }
    else
    {
@@ -1970,8 +1970,8 @@ void ApplicationWindow::fileMenuActivated(QAction* pAction)
       }
 
       importer->setImportDescriptors(resourceDescriptors);
-      importer->setEditType(QApplication::keyboardModifiers() == Qt::ShiftModifier ? ImportAgentExt1::ALWAYS_EDIT :
-         ImportAgentExt1::AS_NEEDED_EDIT);
+      importer->setEditType(QApplication::keyboardModifiers() == Qt::ShiftModifier ? ImportAgent::ALWAYS_EDIT :
+         ImportAgent::AS_NEEDED_EDIT);
    }
 
    // Import the MRU file
@@ -3415,9 +3415,8 @@ void ApplicationWindow::showZapDlg()
 void ApplicationWindow::registerPlugIns()
 {
    // Get the plug-in directory from the options
-   ConfigurationSettingsExt2* pSettings =
-      dynamic_cast<ConfigurationSettingsExt2*>(Service<ConfigurationSettings>().get());
-   VERIFYNRV(pSettings != NULL);
+   Service<ConfigurationSettings> pSettings;
+
    string plugInDir = pSettings->getPlugInPath();
    if (plugInDir.empty())
    {
@@ -5302,7 +5301,7 @@ void ApplicationWindow::dropEvent(QDropEvent *pEvent)
       }
    }
 
-   mDroppedFilesEditType = ImportAgentExt1::NEVER_EDIT;
+   mDroppedFilesEditType = ImportAgent::NEVER_EDIT;
 
    if (pEvent->mouseButtons() == contextMenuButton)
    {
@@ -5318,15 +5317,15 @@ void ApplicationWindow::dropEvent(QDropEvent *pEvent)
       QAction* pSelectedAction = contextMenu.exec(mapToGlobal(pEvent->pos()));
       if (pSelectedAction == pAlwaysAction)
       {
-         mDroppedFilesEditType = ImportAgentExt1::ALWAYS_EDIT;
+         mDroppedFilesEditType = ImportAgent::ALWAYS_EDIT;
       }
       else if (pSelectedAction == pAsNeededAction)
       {
-         mDroppedFilesEditType = ImportAgentExt1::AS_NEEDED_EDIT;
+         mDroppedFilesEditType = ImportAgent::AS_NEEDED_EDIT;
       }
       else if (pSelectedAction == pNeverAction)
       {
-         mDroppedFilesEditType = ImportAgentExt1::NEVER_EDIT;
+         mDroppedFilesEditType = ImportAgent::NEVER_EDIT;
       }
       else
       {
@@ -5774,7 +5773,7 @@ void ApplicationWindow::importDroppedFiles()
 
          if (!importer->execute())
          {
-            if ((mDroppedFilesEditType != ImportAgentExt1::NEVER_EDIT) && (it != mDroppedFilesList.end()-1) &&
+            if ((mDroppedFilesEditType != ImportAgent::NEVER_EDIT) && (it != mDroppedFilesList.end()-1) &&
                (displayContinueMessage == true))
             {
                int continueButton = QMessageBox::question(this, "Import File(s)",

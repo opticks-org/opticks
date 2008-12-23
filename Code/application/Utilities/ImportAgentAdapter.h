@@ -13,7 +13,7 @@
 #include "ImportAgent.h"
 #include "ImportAgentImp.h"
 
-class ImportAgentAdapter : public ImportAgentCommon, public ImportAgentImp
+class ImportAgentAdapter : public ImportAgent, public ImportAgentImp
 {
 public:
    virtual ~ImportAgentAdapter()

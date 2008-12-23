@@ -72,10 +72,7 @@
  *    - DimensionDescriptor
  *    - DynamicObject
  *    - ExecutableAgent
- *    - ExecutableAgentCommon
- *    - ExecutableAgentCommon1
  *    - ExportAgent
- *    - ExportAgentCommon
  *    - FileDescriptor
  *    - FileFinder
  *    - Filename
@@ -86,7 +83,6 @@
  *    - GraphicElement
  *    - GraphicLayer
  *    - ImportAgent
- *    - ImportAgentCommon
  *    - IntegerComplex
  *    - LatLonLayer
  *    - Layer

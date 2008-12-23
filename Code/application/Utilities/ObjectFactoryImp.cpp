@@ -262,12 +262,8 @@ ObjectFactoryImp* ObjectFactoryImp::instance()
          (void*(*)())CreateRasterFileDescriptor));
       sCreateObjectMap.insert(ObjectMapType::value_type("SettableSessionItem", (void*(*)())CreateSettableSessionItem));
       sCreateObjectMap.insert(ObjectMapType::value_type("ExecutableAgent", (void*(*)())CreateExecutableAgent));
-      sCreateObjectMap.insert(ObjectMapType::value_type("ExecutableAgentCommon", (void*(*)())CreateExecutableAgent));
-      sCreateObjectMap.insert(ObjectMapType::value_type("ExecutableAgentCommon1", (void*(*)())CreateExecutableAgent));
       sCreateObjectMap.insert(ObjectMapType::value_type("ImportAgent", (void*(*)())CreateImportAgent));
-      sCreateObjectMap.insert(ObjectMapType::value_type("ImportAgentCommon", (void*(*)())CreateImportAgent));
       sCreateObjectMap.insert(ObjectMapType::value_type("ExportAgent", (void*(*)())CreateExportAgent));
-      sCreateObjectMap.insert(ObjectMapType::value_type("ExportAgentCommon", (void*(*)())CreateExportAgent));
       sCreateObjectMap.insert(ObjectMapType::value_type("Units", (void*(*)())CreateUnits));
       sCreateObjectMap.insert(ObjectMapType::value_type("WizardObject", (void*(*)())CreateWizardObject));
       sCreateObjectMap.insert(ObjectMapType::value_type(typeid(unsigned char).name(), (void*(*)())CreateUnsignedChar));
@@ -321,14 +317,8 @@ ObjectFactoryImp* ObjectFactoryImp::instance()
       sDestroyObjectMap.insert(ObjectMapType2::value_type("SettableSessionItem",
          (void(*)(void*))DestroySettableSessionItem));
       sDestroyObjectMap.insert(ObjectMapType2::value_type("ExecutableAgent", (void(*)(void*))DestroyExecutableAgent));
-      sDestroyObjectMap.insert(ObjectMapType2::value_type("ExecutableAgentCommon",
-         (void(*)(void*))DestroyExecutableAgent));
-      sDestroyObjectMap.insert(ObjectMapType2::value_type("ExecutableAgentCommon1",
-         (void(*)(void*))DestroyExecutableAgent));
       sDestroyObjectMap.insert(ObjectMapType2::value_type("ImportAgent", (void(*)(void*))DestroyImportAgent));
-      sDestroyObjectMap.insert(ObjectMapType2::value_type("ImportAgentCommon", (void(*)(void*))DestroyImportAgent));
       sDestroyObjectMap.insert(ObjectMapType2::value_type("ExportAgent", (void(*)(void*))DestroyExportAgent));
-      sDestroyObjectMap.insert(ObjectMapType2::value_type("ExportAgentCommon", (void(*)(void*))DestroyExportAgent));
       sDestroyObjectMap.insert(ObjectMapType2::value_type("Units", (void(*)(void*))DestroyUnits));
       sDestroyObjectMap.insert(ObjectMapType2::value_type("WizardObject", (void(*)(void*))DestroyWizardObject));
 

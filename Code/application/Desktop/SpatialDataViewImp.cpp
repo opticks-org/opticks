@@ -1907,10 +1907,10 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
    RasterElement* pPrimaryRasterElement = mpLayerList->getPrimaryRasterElement();
    if (pPrimaryRasterElement)
    {
-      GeoreferenceExt1* pGeoExt1 = dynamic_cast<GeoreferenceExt1*>(pPrimaryRasterElement->getGeoreferencePlugin());
-      if (pGeoExt1 != NULL)
+      Georeference* pGeoref = pPrimaryRasterElement->getGeoreferencePlugin();
+      if (pGeoref != NULL)
       {
-         geoCanExtrapolate = pGeoExt1->canExtrapolate();
+         geoCanExtrapolate = pGeoref->canExtrapolate();
       }
    }
 

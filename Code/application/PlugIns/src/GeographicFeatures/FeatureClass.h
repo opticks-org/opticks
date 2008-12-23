@@ -36,8 +36,6 @@ public:
    FeatureClass();
    ~FeatureClass();
 
-   AnyData* copy() const;
-
    bool setParentElement(GraphicElement* pParentElement);
 
    bool open(std::string& errorMessage);

@@ -20,7 +20,7 @@ class XmlReader;
  *  Used by SessionItems during session deserialization to restore their state 
  *  from the saved session.
  *
- *  @see        SessionItem, SessionItemSerializer, SessionItemDeserializerExt1
+ *  @see        SessionItem, SessionItemSerializer
  */
 class SessionItemDeserializer
 {
@@ -94,6 +94,13 @@ public:
    virtual XERCES_CPP_NAMESPACE_QUALIFIER DOMElement *deserialize(XmlReader &reader, const char *pRootElementName) = 0;
 
    /**
+    *  Accessor for the current block index.
+    *
+    *  @return The block number of the current block.
+    */
+   virtual int getCurrentBlock() const = 0;
+
+   /**
     *  Moves to the next block of the serialized session.
     *
     *  This method moves the deserializer to the next block of serialized data
@@ -123,36 +130,6 @@ protected:
     *  SessionManager.  Plug-ins do not need to destroy it.
     */
    virtual ~SessionItemDeserializer() {}
-};
-
-/**
- *  Extension class for SessionItemDeserializer which adds an accessor for the current block.
- *
- *  This class provides additional capability for the SessionItemDeserializer interface class.
- *  A pointer to this class can be obtained by performing a dynamic cast on a
- *  pointer to SessionItemDeserializer.
- *
- *  @warning A pointer to this class can only be used to call methods contained
- *           in this extension class and cannot be used to call any methods in SessionItemDeserializer.
- */
-class SessionItemDeserializerExt1
-{
-public:
-   /**
-    *  Accessor for the current block index.
-    *
-    *  @return The block number of the current block.
-    */
-   virtual int getCurrentBlock() const = 0;
-
-protected:
-   /**
-    *  Destroys the SessionItemDeserializerExt1 object.
-    *
-    *  The SessionItemDeserializerExt1 object is automatically deleted by
-    *  SessionManager.  Plug-ins do not need to destroy it.
-    */
-   virtual ~SessionItemDeserializerExt1() {}
 };
 
 #endif

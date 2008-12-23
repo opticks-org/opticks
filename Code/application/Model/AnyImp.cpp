@@ -98,12 +98,13 @@ bool AnyImp::serialize(SessionItemSerializer &serializer) const
    {
       return false;
    }
-   AnyDataExt1* pExt1 = dynamic_cast<AnyDataExt1*>(mpData);
-   if (pExt1 != NULL)
+
+   if (mpData != NULL)
    {
       serializer.endBlock();
-      return pExt1->serialize(serializer);
+      return mpData->serialize(serializer);
    }
+
    return true;
 }
 
@@ -113,12 +114,13 @@ bool AnyImp::deserialize(SessionItemDeserializer &deserializer)
    {
       return false;
    }
-   AnyDataExt1* pExt1 = dynamic_cast<AnyDataExt1*>(mpData);
-   if (pExt1 != NULL)
+
+   if (mpData != NULL)
    {
       deserializer.nextBlock();
-      return pExt1->deserialize(deserializer);
+      return mpData->deserialize(deserializer);
    }
+
    return true;
 }
 

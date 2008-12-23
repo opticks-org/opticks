@@ -444,7 +444,7 @@ private:
 
    // Drag and Drop File Import
    std::vector<std::string> mDroppedFilesList;
-   ImportAgentExt1::EditType mDroppedFilesEditType;
+   ImportAgent::EditType mDroppedFilesEditType;
 
 private:
    bool isDefaultWindow(Window* pWindow) const;

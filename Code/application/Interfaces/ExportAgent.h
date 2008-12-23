@@ -328,21 +328,4 @@ protected:
    virtual ~ExportAgent() {}
 };
 
-/**
- *  Extends capability of the ExportAgent interface.
- *
- *  This class provides a means by which the ExportAgent interface is extended
- *  without breaking binary compatibility.  Instances of ExporterResource can
- *  use the methods in all interface extension classes inherited by this common
- *  interface without having to first cast to the extension class.
- *
- *  \cond INTERNAL
- *  @warning All new extension classes must be added at the end of the
- *           derivation list.
- *  \endcond
- */
-class ExportAgentCommon : public ExportAgent, public ExecutableAgentExt1
-{
-};
-
 #endif

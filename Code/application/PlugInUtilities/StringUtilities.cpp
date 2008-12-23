@@ -232,16 +232,7 @@ string StringUtilities::expandVariables(const string& originalString,
                      }
                      else if (variableName == "USER_DOCS")
                      {
-                        ConfigurationSettingsExt1* pExt = 
-                           dynamic_cast<ConfigurationSettingsExt1*>(pSettings.get());
-                        if (pExt != NULL)
-                        {
-                           replacementString = pExt->getUserDocs();
-                        }
-                        else
-                        {
-                           replacementString = "";
-                        }
+                        replacementString = pSettings->getUserDocs();
                         replaced = true;
                      }
                      else if (variableName == "APP_VERSION")

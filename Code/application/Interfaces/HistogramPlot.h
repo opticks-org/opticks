@@ -134,27 +134,6 @@ public:
     */
    virtual ColorType getHistogramColor() const = 0;
 
-protected:
-   /**
-    * This object should be destroyed by calling DesktopServices::deleteView().
-    */
-   virtual ~HistogramPlot() {}
-};
-
-/**
- *  Extends capability of the HistogramPlot interface.
- *
- *  This class provides additional capability for the HistogramPlot interface
- *  class.  A pointer to this class can be obtained by performing a dynamic cast
- *  on a HistogramPlot pointer.
- *
- *  @warning A pointer to this class can only be used to call methods contained
- *           in this extension class and cannot be used to call any methods in
- *           HistogramPlot.
- */
-class HistogramPlotExt1
-{
-public:
    /**
     *  Toggles the capability of the plot to update its zoom when the histogram
     *  data changes.
@@ -185,9 +164,9 @@ public:
 
 protected:
    /**
-    *  This object should be destroyed by calling DesktopServices::deleteView().
+    * This object should be destroyed by calling DesktopServices::deleteView().
     */
-   virtual ~HistogramPlotExt1() {}
+   virtual ~HistogramPlot() {}
 };
 
 #endif

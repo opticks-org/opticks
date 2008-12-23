@@ -126,9 +126,9 @@ public:
  *  the actual helper methods when working with instances of
  *  Executable plug-ins.
  *
- *  @see ExecutableAgent, Executable, ExecutableAgentExt1, ExecutableAgentExt2
+ *  @see ExecutableAgent, Executable
  */
-class ExecutableResource : public FactoryResource<ExecutableAgentCommon1>
+class ExecutableResource : public FactoryResource<ExecutableAgent>
 {
 public:
    /**
@@ -141,7 +141,7 @@ public:
     */
    explicit ExecutableResource(Progress* pProgress = NULL, bool batch = true)
    {
-      ExecutableAgentCommon1* pAgent = get();
+      ExecutableAgent* pAgent = get();
       if (pAgent != NULL)
       {
          pAgent->instantiate(pProgress, batch);
@@ -159,7 +159,7 @@ public:
    explicit ExecutableResource(const std::string& plugInName, const std::string& menuCommand = std::string(),
                                Progress* pProgress = NULL, bool batch = true)
    {
-      ExecutableAgentCommon1* pAgent = get();
+      ExecutableAgent* pAgent = get();
       if (pAgent != NULL)
       {
          pAgent->instantiate(plugInName, menuCommand, pProgress, batch);
@@ -177,7 +177,7 @@ public:
    explicit ExecutableResource(PlugIn* pPlugIn, const std::string& menuCommand = std::string(),
                                Progress* pProgress = NULL, bool batch = true)
    {
-      ExecutableAgentCommon1* pAgent = get();
+      ExecutableAgent* pAgent = get();
       if (pAgent != NULL)
       {
          pAgent->instantiate(pPlugIn, menuCommand, pProgress, batch);
@@ -193,7 +193,7 @@ public:
  *
  *  @see ImportAgent, Importer, \ref usingimporterresource "Using ImporterResource"
  */
-class ImporterResource : public FactoryResource<ImportAgentCommon>
+class ImporterResource : public FactoryResource<ImportAgent>
 {
 public:
    /**
@@ -206,7 +206,7 @@ public:
     */
    ImporterResource(Progress* pProgress = NULL, bool batch = true)
    {
-      ImportAgentCommon* pAgent = get();
+      ImportAgent* pAgent = get();
       if (pAgent != NULL)
       {
          pAgent->instantiate(pProgress, batch);
@@ -223,7 +223,7 @@ public:
     */
    ImporterResource(const std::string& importerName, Progress* pProgress = NULL, bool batch = true)
    {
-      ImportAgentCommon* pAgent = get();
+      ImportAgent* pAgent = get();
       if (pAgent != NULL)
       {
          pAgent->instantiate(importerName, pProgress, batch);
@@ -241,7 +241,7 @@ public:
    ImporterResource(const std::string& importerName, const std::string& filename, Progress* pProgress = NULL,
                     bool batch = true)
    {
-      ImportAgentCommon* pAgent = get();
+      ImportAgent* pAgent = get();
       if (pAgent != NULL)
       {
          pAgent->instantiate(importerName, filename, pProgress, batch);
@@ -259,7 +259,7 @@ public:
    ImporterResource(const std::string& importerName, const std::vector<ImportDescriptor*>& descriptors,
                     Progress* pProgress = NULL, bool batch = true)
    {
-      ImportAgentCommon* pAgent = get();
+      ImportAgent* pAgent = get();
       if (pAgent != NULL)
       {
          pAgent->instantiate(importerName, descriptors, pProgress, batch);
@@ -277,7 +277,7 @@ public:
    ImporterResource(PlugIn* pPlugIn, const std::vector<ImportDescriptor*>& descriptors, Progress* pProgress = NULL,
                     bool batch = true)
    {
-      ImportAgentCommon* pAgent = get();
+      ImportAgent* pAgent = get();
       if (pAgent != NULL)
       {
          pAgent->instantiate(pPlugIn, descriptors, pProgress, batch);
@@ -293,7 +293,7 @@ public:
  *
  *  @see ExportAgent, Exporter.
  */
-class ExporterResource : public FactoryResource<ExportAgentCommon>
+class ExporterResource : public FactoryResource<ExportAgent>
 {
 public:
    /**
@@ -306,7 +306,7 @@ public:
     */
    ExporterResource(Progress* pProgress = NULL, bool batch = true)
    {
-      ExportAgentCommon* pAgent = get();
+      ExportAgent* pAgent = get();
       if (pAgent != NULL)
       {
          pAgent->instantiate(pProgress, batch);
@@ -323,7 +323,7 @@ public:
     */
    ExporterResource(std::string exporterName, Progress* pProgress = NULL, bool batch = true)
    {
-      ExportAgentCommon* pAgent = get();
+      ExportAgent* pAgent = get();
       if (pAgent != NULL)
       {
          pAgent->instantiate(exporterName, pProgress, batch);
@@ -340,7 +340,7 @@ public:
     */
    ExporterResource(PlugIn* pPlugIn, Progress* pProgress = NULL, bool batch = true)
    {
-      ExportAgentCommon* pAgent = get();
+      ExportAgent* pAgent = get();
       if (pAgent != NULL)
       {
          pAgent->instantiate(pPlugIn, pProgress, batch);
@@ -358,7 +358,7 @@ public:
    ExporterResource(std::string exporterName, SessionItem* pItem, FileDescriptor* pFileDescriptor,
                     Progress* pProgress = NULL, bool batch = true)
    {
-      ExportAgentCommon* pAgent = get();
+      ExportAgent* pAgent = get();
       if (pAgent != NULL)
       {
          pAgent->instantiate(exporterName, pItem, pFileDescriptor, pProgress, batch);
@@ -376,7 +376,7 @@ public:
    ExporterResource(PlugIn* pPlugIn, SessionItem* pItem, FileDescriptor* pFileDescriptor,
                     Progress* pProgress = NULL, bool batch = true)
    {
-      ExportAgentCommon* pAgent = get();
+      ExportAgent* pAgent = get();
       if (pAgent != NULL)
       {
          pAgent->instantiate(pPlugIn, pItem, pFileDescriptor, pProgress, batch);

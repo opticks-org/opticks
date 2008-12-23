@@ -34,11 +34,34 @@ class ImportDescriptor;
  *  You cannot call instantiate() twice on the same instance
  *  or a std::logic_error will be thrown.
  *
- *  @see        ImportAgentExt1, ImporterResource, Importer
+ *  @see        ImporterResource, Importer
  */
 class ImportAgent : public ExecutableAgent
 {
 public:
+   /**
+    *  Specifies the conditions in which the user can edit the import data
+    *  parameters.
+    *
+    *  @see     setEditType()
+    */
+   enum EditTypeEnum
+   {
+      NEVER_EDIT,       /**< The user can never edit the import parameters
+                             before the import is performed. */
+      AS_NEEDED_EDIT,   /**< The user can only edit the import parameters if
+                             the importer cannot import the data with the
+                             current parameters. */
+      ALWAYS_EDIT       /**< The user is always given the chance to edit the
+                             import parameters before the import is
+                             performed. */
+   };
+
+   /**
+    *  @EnumWrapper  EditTypeEnum
+    */
+   typedef EnumWrapper<EditTypeEnum> EditType;
+
    /**
     *  Creates an invalid object for delayed initialization of an ImportAgent.
     *
@@ -171,195 +194,6 @@ public:
    virtual void setFilename(const std::string& filename) = 0;
 
    /**
-    *  Sets the import options dialog to be displayed before importing the
-    *  data.
-    *
-    *  By default, the agent does not show the import options dialog unless
-    *  this method is called with a value of \c true.
-    *
-    *  This method does nothing if ApplicationServices::isInteractive() returns
-    *  \c false.
-    *
-    *  @deprecated   This method is obsolete and should not be called.  It may
-    *                be removed in a future version.  Call
-    *                ImportAgentExt1::setEditType() instead.
-    *
-    *  @param   showDialog
-    *           Set to \c true to display the options dialog or to \c false to
-    *           not display the dialog before importing the data.
-    *
-    *  @throw   std::logic_error
-    *           Thrown if the instantiate() method has not yet been called on
-    *           this instance.
-    *
-    *  @see     isOptionsDialogShown()
-    */
-   virtual void showOptionsDialog(bool showDialog) = 0;
-
-   /**
-    *  Queries whether the import options dialog is displayed before importing
-    *  the data.
-    *
-    *  @deprecated   This method is obsolete and should not be called.  It may
-    *                be removed in a future version.  Call
-    *                ImportAgentExt1::getEditType() instead.
-    *
-    *  @throw   std::logic_error
-    *           Thrown if the instantiate() method has not yet been called on
-    *           this instance.
-    *
-    *  @return  Returns \c true if the options dialog is displayed or \c false
-    *           if the dialog is not displayed before the data is imported.
-    *           This method also returns \c false if showOptionsDialog() has
-    *           not been called or if ApplicationServices::isInteractive()
-    *           returns \c false.
-    */
-   virtual bool isOptionsDialogShown() const = 0;
-
-   /**
-    *  Sets the data sets to import.
-    *
-    *  This method sets the data sets that will be imported.  The agent will
-    *  take ownership over the provided import descriptors.  After calling this
-    *  method, the next call to execute() will import these data sets and will
-    *  not call Importer::getImportDescriptors() to obtain the data sets to
-    *  import.
-    *
-    *  @param   descriptors
-    *           The data sets to import.
-    *
-    *  @throw   std::logic_error
-    *           Thrown if the instantiate() method has not yet been called on
-    *           this instance.
-    */
-   virtual void setImportDescriptors(const std::vector<ImportDescriptor*>& descriptors) = 0;
-
-   /**
-    *  Returns the data sets that will be used on import.
-    *
-    *  This method calls returns the data sets specified in instantiate() or
-    *  from setImportDescriptors().  If the import descriptors have not been
-    *  set, Importer::getImportDescriptors() is called using the filename set
-    *  in instantiate() or from setFilename().  These descriptors are owned by
-    *  the agent.
-    *
-    *  @throw   std::logic_error
-    *           Thrown if the instantiate() method has not yet been called on
-    *           this instance.
-    *
-    *  @return  The import descriptors that will be used on import.
-    */
-   virtual std::vector<ImportDescriptor*> getImportDescriptors() = 0;
-
-   /**
-    *  Gets the default file extensions from the importer.
-    *
-    *  @throw   std::logic_error
-    *           Thrown if the instantiate() method has not yet
-    *           been called on this instance.
-    *
-    *  @return  The default extensions string returned by calling
-    *           Importer::getDefaultExtensions().
-    */
-   virtual std::string getDefaultExtensions() const = 0;
-
-   /**
-    *  Executes the importer to load the data.
-    *
-    *  This method first creates the input and output arg lists if necessary,
-    *  populates the input arg list, and then executes the importer.
-    *
-    *  If the import descriptors of the data sets to import have not been set,
-    *  getImportDescriptors() is called.  The model element is created using
-    *  the data descriptor contained in each import descriptor, and the
-    *  ExecutableAgent::execute() base class method is called to execute the
-    *  importer.  All successfully imported data can be retrieved by calling
-    *  getImportedElements().
-    *
-    *  @par Arg Values:
-    *  The following input arg values are automatically populated unless the
-    *  actual value in the arg has already been set and
-    *  PlugInArg::isActualSet() returns \c true:
-    *  - All args documented in ExecutableAgent::execute().
-    *  - Importer::ImportElementArg() is populated with the DataElement that
-    *    was created for each data set based on each DataDescriptor contained
-    *    in the ImportDescriptor returned from getImportDescriptors().
-    *
-    *  @throw   std::logic_error
-    *           Thrown if the instantiate() method has not yet been called on
-    *           this instance.
-    *
-    *  @return  If the options dialog is displayed, this method returns
-    *           \c false if the user cancels the dialog or if the user
-    *           deselects all data sets to import in the dialog.  Otherwise,
-    *           this method returns the success value returned by the importer.
-    *
-    *  @see     isOptionsDialogShown()
-    */
-   virtual bool execute() = 0;
-
-   /**
-    *  Returns all successfully imported data elements.
-    *
-    *  The execute() method must be called prior to calling this method for
-    *  the returned vector to be populated.
-    *
-    *  @throw   std::logic_error
-    *           Thrown if the instantiate() method has not yet
-    *           been called on this instance.
-    *
-    *  @return  A vector containing pointers to the data elements that were
-    *           created as a result of calling execute().  An empty vector is
-    *           returned if execute() has not previously been called or if the
-    *           importer was not able to import any data.
-    */
-   virtual std::vector<DataElement*> getImportedElements() const = 0;
-
-protected:
-   /**
-    * This should be destroyed by calling ObjectFactory::destroyObject.
-    */
-   virtual ~ImportAgent() {}
-};
-
-/**
- *  Extends capability of the ImportAgent interface.
- *
- *  This class provides additional capability for the ImportAgent interface
- *  class.  A pointer to this class can be obtained by performing a dynamic
- *  cast on a pointer to ImportAgent.
- *
- *  @warning A pointer to this class can only be used to call methods contained
- *           in this extension class and cannot be used to call any methods in
- *           ImportAgent.
- */
-class ImportAgentExt1
-{
-public:
-   /**
-    *  Specifies the conditions in which the user can edit the import data
-    *  parameters.
-    *
-    *  @see     setEditType()
-    */
-   enum EditTypeEnum
-   {
-      NEVER_EDIT,       /**< The user can never edit the import parameters
-                             before the import is performed. */
-      AS_NEEDED_EDIT,   /**< The user can only edit the import parameters if
-                             the importer cannot import the data with the
-                             current parameters. */
-      ALWAYS_EDIT       /**< The user is always given the chance to edit the
-                             import parameters before the import is
-                             performed. */
-   };
-
-   /**
-    *  @EnumWrapper  EditTypeEnum
-    */
-   typedef EnumWrapper<EditTypeEnum> EditType;
-
-   /**
     *  Filters importers displayed in the import dialog based on subtype.
     *
     *  If the agent executes in interactive mode and no filename has been set,
@@ -484,28 +318,156 @@ public:
     */
    virtual bool isMruFileListUpdated() const = 0;
 
+   /**
+    *  Sets the import options dialog to be displayed before importing the
+    *  data.
+    *
+    *  By default, the agent does not show the import options dialog unless
+    *  this method is called with a value of \c true.
+    *
+    *  This method does nothing if ApplicationServices::isInteractive() returns
+    *  \c false.
+    *
+    *  @deprecated   This method is obsolete and should not be called.  It may
+    *                be removed in a future version.  Call setEditType()
+    *                instead.
+    *
+    *  @param   showDialog
+    *           Set to \c true to display the options dialog or to \c false to
+    *           not display the dialog before importing the data.
+    *
+    *  @throw   std::logic_error
+    *           Thrown if the instantiate() method has not yet been called on
+    *           this instance.
+    *
+    *  @see     isOptionsDialogShown()
+    */
+   virtual void showOptionsDialog(bool showDialog) = 0;
+
+   /**
+    *  Queries whether the import options dialog is displayed before importing
+    *  the data.
+    *
+    *  @deprecated   This method is obsolete and should not be called.  It may
+    *                be removed in a future version.  Call getEditType()
+    *                instead.
+    *
+    *  @throw   std::logic_error
+    *           Thrown if the instantiate() method has not yet been called on
+    *           this instance.
+    *
+    *  @return  Returns \c true if the options dialog is displayed or \c false
+    *           if the dialog is not displayed before the data is imported.
+    *           This method also returns \c false if showOptionsDialog() has
+    *           not been called or if ApplicationServices::isInteractive()
+    *           returns \c false.
+    */
+   virtual bool isOptionsDialogShown() const = 0;
+
+   /**
+    *  Sets the data sets to import.
+    *
+    *  This method sets the data sets that will be imported.  The agent will
+    *  take ownership over the provided import descriptors.  After calling this
+    *  method, the next call to execute() will import these data sets and will
+    *  not call Importer::getImportDescriptors() to obtain the data sets to
+    *  import.
+    *
+    *  @param   descriptors
+    *           The data sets to import.
+    *
+    *  @throw   std::logic_error
+    *           Thrown if the instantiate() method has not yet been called on
+    *           this instance.
+    */
+   virtual void setImportDescriptors(const std::vector<ImportDescriptor*>& descriptors) = 0;
+
+   /**
+    *  Returns the data sets that will be used on import.
+    *
+    *  This method calls returns the data sets specified in instantiate() or
+    *  from setImportDescriptors().  If the import descriptors have not been
+    *  set, Importer::getImportDescriptors() is called using the filename set
+    *  in instantiate() or from setFilename().  These descriptors are owned by
+    *  the agent.
+    *
+    *  @throw   std::logic_error
+    *           Thrown if the instantiate() method has not yet been called on
+    *           this instance.
+    *
+    *  @return  The import descriptors that will be used on import.
+    */
+   virtual std::vector<ImportDescriptor*> getImportDescriptors() = 0;
+
+   /**
+    *  Gets the default file extensions from the importer.
+    *
+    *  @throw   std::logic_error
+    *           Thrown if the instantiate() method has not yet
+    *           been called on this instance.
+    *
+    *  @return  The default extensions string returned by calling
+    *           Importer::getDefaultExtensions().
+    */
+   virtual std::string getDefaultExtensions() const = 0;
+
+   /**
+    *  Executes the importer to load the data.
+    *
+    *  This method first creates the input and output arg lists if necessary,
+    *  populates the input arg list, and then executes the importer.
+    *
+    *  If the import descriptors of the data sets to import have not been set,
+    *  getImportDescriptors() is called.  The model element is created using
+    *  the data descriptor contained in each import descriptor, and the
+    *  ExecutableAgent::execute() base class method is called to execute the
+    *  importer.  All successfully imported data can be retrieved by calling
+    *  getImportedElements().
+    *
+    *  @par Arg Values:
+    *  The following input arg values are automatically populated unless the
+    *  actual value in the arg has already been set and
+    *  PlugInArg::isActualSet() returns \c true:
+    *  - All args documented in ExecutableAgent::execute().
+    *  - Importer::ImportElementArg() is populated with the DataElement that
+    *    was created for each data set based on each DataDescriptor contained
+    *    in the ImportDescriptor returned from getImportDescriptors().
+    *
+    *  @throw   std::logic_error
+    *           Thrown if the instantiate() method has not yet been called on
+    *           this instance.
+    *
+    *  @return  If the options dialog is displayed, this method returns
+    *           \c false if the user cancels the dialog or if the user
+    *           deselects all data sets to import in the dialog.  Otherwise,
+    *           this method returns the success value returned by the importer.
+    *
+    *  @see     isOptionsDialogShown()
+    */
+   virtual bool execute() = 0;
+
+   /**
+    *  Returns all successfully imported data elements.
+    *
+    *  The execute() method must be called prior to calling this method for
+    *  the returned vector to be populated.
+    *
+    *  @throw   std::logic_error
+    *           Thrown if the instantiate() method has not yet
+    *           been called on this instance.
+    *
+    *  @return  A vector containing pointers to the data elements that were
+    *           created as a result of calling execute().  An empty vector is
+    *           returned if execute() has not previously been called or if the
+    *           importer was not able to import any data.
+    */
+   virtual std::vector<DataElement*> getImportedElements() const = 0;
+
 protected:
    /**
-    *  This object should be destroyed by calling ObjectFactory::destroyObject().
+    * This should be destroyed by calling ObjectFactory::destroyObject.
     */
-   virtual ~ImportAgentExt1() {}
-};
-
-/**
- *  Extends capability of the ImportAgent interface.
- *
- *  This class provides a means by which the ImportAgent interface is extended
- *  without breaking binary compatibility.  Instances of ImporterResource can
- *  use the methods in all interface extension classes inherited by this common
- *  interface without having to first cast to the extension class.
- *
- *  \cond INTERNAL
- *  @warning All new extension classes must be added at the end of the
- *           derivation list.
- *  \endcond
- */
-class ImportAgentCommon : public ImportAgent, public ExecutableAgentExt1, public ImportAgentExt1
-{
+   virtual ~ImportAgent() {}
 };
 
 #endif

@@ -23,7 +23,7 @@
  *  in the Interfaces. These are inherited from Serializable,
  *  and therefore cannot be created with the ObjectFactory.
  *
- *  @see        ObjectFactory, UtilityServicesExt1
+ *  @see        ObjectFactory
  */
 class UtilityServices
 {
@@ -95,88 +95,6 @@ public:
     */
    virtual std::string getDefaultClassification() const = 0;
 
-   /** 
-    *  Provides a color taken from a color table
-    *
-    *  This method returns a ColorType from an autocolor.clu file based on the index
-    *
-    *  @param   color_index
-    *           The index value of the color in the autocolor file.
-    *
-    *  @return  The color in the autocolor file.  A red ColorType is returned if
-    *           there is a failure.
-    */
-   virtual ColorType getAutoColor(int color_index) const = 0;
-
-   /**
-    *  Returns the size of the largest free contiguous memory block.
-    *
-    *  Windows fragments memory with DLL's statically mapped throughout
-    *  the process space.  This method walks the virtual memory and 
-    *  determine the largest contiguous free block of memory.  UNIX
-    *  platforms do not have this limitation and for UNIX this method returns
-    *  the available virtual memory.
-    *
-    *  @return  The size of the largest block possible in bytes.
-    */
-   virtual size_t getMaxMemoryBlockSize() = 0;
-
-   /**
-    *  Returns the total amount of physical memory.
-    *
-    *  @return  The amount of total physical memory in bytes.
-    */
-   virtual size_t getTotalPhysicalMemory() = 0;
-
-   /**
-    *  Returns the current amount of available virtual memory.
-    *
-    *  @return  The amount of free virtual memory in bytes.
-    */
-   virtual size_t getAvailableVirtualMemory() = 0;
-
-   /**
-    *  Returns the amount of available disk space.
-    *
-    *  WARNING: This method is currently unimplemented.  It will
-    *  always return 0.
-    * 
-    *  @param   path 
-    *           The directory path used to determine the disk to query.
-    *           If NULL, the available space on the disk associated with the 
-    *           current working directory is returned.
-    *
-    *  @return  The amount of free disk space in bytes for the disk
-    *           associated with the given path.
-    */
-   virtual uint64_t getAvailableDiskSpace( std::string path = "" ) = 0;
-
-
-protected:
-   /**
-    * This will be cleaned up during application close.  Plug-ins do not
-    * need to destroy it.
-    */
-   virtual ~UtilityServices() {}
-};
-
-/**
- *  Extends capability of the UtilityServices interface.
- *
- *  This class provides additional capability for the UtilityServices interface
- *  class.  A pointer to this class can be obtained by performing a dynamic
- *  cast on a pointer to UtilityServices.
- *
- *  @warning A pointer to this class can only be used to call methods contained
- *           in this extension class and cannot be used to call any methods in
- *           UtilityServices.
- *
- *  @see     Classification, SecurityMarkingsDlg
- */
-class UtilityServicesExt1
-{
-public:
-
    /**
     *  Returns the file control security codes.
     *
@@ -239,12 +157,69 @@ public:
     *  @return  The codeword security codes.
     */
    virtual const std::vector<std::string>& getCodewords() const = 0;
+
+   /**
+    *  Provides a color taken from a color table
+    *
+    *  This method returns a ColorType from an autocolor.clu file based on the index
+    *
+    *  @param   color_index
+    *           The index value of the color in the autocolor file.
+    *
+    *  @return  The color in the autocolor file.  A red ColorType is returned if
+    *           there is a failure.
+    */
+   virtual ColorType getAutoColor(int color_index) const = 0;
+
+   /**
+    *  Returns the size of the largest free contiguous memory block.
+    *
+    *  Windows fragments memory with DLL's statically mapped throughout
+    *  the process space.  This method walks the virtual memory and 
+    *  determine the largest contiguous free block of memory.  UNIX
+    *  platforms do not have this limitation and for UNIX this method returns
+    *  the available virtual memory.
+    *
+    *  @return  The size of the largest block possible in bytes.
+    */
+   virtual size_t getMaxMemoryBlockSize() = 0;
+
+   /**
+    *  Returns the total amount of physical memory.
+    *
+    *  @return  The amount of total physical memory in bytes.
+    */
+   virtual size_t getTotalPhysicalMemory() = 0;
+
+   /**
+    *  Returns the current amount of available virtual memory.
+    *
+    *  @return  The amount of free virtual memory in bytes.
+    */
+   virtual size_t getAvailableVirtualMemory() = 0;
+
+   /**
+    *  Returns the amount of available disk space.
+    *
+    *  WARNING: This method is currently unimplemented.  It will
+    *  always return 0.
+    * 
+    *  @param   path 
+    *           The directory path used to determine the disk to query.
+    *           If NULL, the available space on the disk associated with the 
+    *           current working directory is returned.
+    *
+    *  @return  The amount of free disk space in bytes for the disk
+    *           associated with the given path.
+    */
+   virtual uint64_t getAvailableDiskSpace( std::string path = "" ) = 0;
+
 protected:
    /**
     * This will be cleaned up during application close.  Plug-ins do not
     * need to destroy it.
     */
-   virtual ~UtilityServicesExt1() {}
+   virtual ~UtilityServices() {}
 };
 
-#endif   // _UTILITYSERVICES_H
+#endif

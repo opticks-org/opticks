@@ -38,11 +38,7 @@ ImageFilter::ImageFilter(ImageFilterDescriptor *pDescriptor) :
 
    if (getFilterType() == ImageFilterDescriptor::FEEDBACK_FILTER)
    {
-      ImageFilterDescriptorExt1 *pDescriptorExt = dynamic_cast<ImageFilterDescriptorExt1*>(pDescriptor);
-      if (pDescriptorExt != NULL)
-      {
-         mRunBackwards = dv_cast<bool>(pDescriptorExt->getParameter("runBackwards"), mRunBackwards);
-      }
+      mRunBackwards = dv_cast<bool>(mpDescriptor->getParameter("runBackwards"), mRunBackwards);
    }
 
    // get GPU program descriptors

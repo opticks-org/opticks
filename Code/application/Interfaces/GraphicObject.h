@@ -39,7 +39,7 @@ class View;
  *    the object is modified.
  *  - All notifications documented in Subject.
  *
- *  @see     GraphicObjectExt1, GraphicLayer, GraphicObjectType
+ *  @see     GraphicLayer, GraphicObjectType
  */
 class GraphicObject : public SessionItem, public Subject, public Serializable
 {
@@ -60,9 +60,17 @@ public:
    virtual void setName(const std::string& name) = 0;
 
    /**
+    *  Gets the GraphicLayer displaying this GraphicObject.
+    * 
+    *  @return  The GraphicLayer displaying this GraphicObject. \c NULL is
+    *           returned if no GraphicLayer is displaying this GraphicObject.
+    */
+   virtual GraphicLayer* getLayer() const = 0;
+
+   /**
     *  Converts the object to a CGM object containing CGM metadata.
     *
-    *  @return  A pointer to the CGM object.  NULL is returned if an
+    *  @return  A pointer to the CGM object.  \c NULL is returned if an
     *           error occurs or if the object cannot be converted.
     */
    virtual CgmObject* convertToCgm() = 0;
@@ -479,18 +487,18 @@ public:
     *  Sets the font for object text.
     *
     *  @param   pTextFont
-    *           The new object text font.  This method does nothing if \b NULL
+    *           The new object text font.  This method does nothing if \c NULL
     *           is passed in.
     *
-    *  @return  Returns \b true if the font was set successfully on the object.
-    *           Returns \b false if this object does not support text fonts.
+    *  @return  Returns \c true if the font was set successfully on the object.
+    *           Returns \c false if this object does not support text fonts.
     */
    virtual bool setFont(const Font* pTextFont) = 0;
 
    /**
     *  Returns the current object text font.
     *
-    *  @return  The current object text font.  \b NULL is returned if the
+    *  @return  The current object text font.  \c NULL is returned if the
     *           object does not support text fonts.
     */
    virtual const Font* getFont() const = 0;
@@ -569,7 +577,7 @@ public:
     *
     *  @param   pFilename
     *           The name of the file containing the image to display in the
-    *           object.  Cannot be NULL.
+    *           object.  Cannot be \c NULL.
     *
     *  @return  TRUE if the image was set successfully from the file, otherwise
     *           FALSE.  FALSE is also returned if the object is not a file
@@ -583,7 +591,7 @@ public:
     *  Sets the image for an image object.
     *
     *  @param   pData
-    *           A pointer to the image data.  Cannot be NULL;
+    *           A pointer to the image data.  Cannot be \c NULL.
     *  @param   width
     *           The width of the image.
     *  @param   height
@@ -613,7 +621,7 @@ public:
     *           Populated with color that is used to identify transparent
     *           pixels.
     *
-    *  @return  A pointer to the image data.  NULL is returned if an
+    *  @return  A pointer to the image data.  \c NULL is returned if an
     *           error occurs.
     */
    virtual const unsigned int* getObjectImage(int &width, int &height, ColorType &transparent) const = 0;
@@ -653,8 +661,8 @@ public:
     *  should not be done until the view displaying this object has been repainted.
     *
     *  @param   pView
-    *           A pointer to the view to display in the view object.  NULL is
-    *           a valid input, where the view object displays a message
+    *           A pointer to the view to display in the view object.  \c NULL
+    *           is a valid input, where the view object displays a message
     *           indicating that no view is available.
     *
     *  @return  TRUE if the value was set successfully, otherwise FALSE.
@@ -669,7 +677,7 @@ public:
    /**
     *  Returns the view displayed in a view object.
     *
-    *  @return  A pointer to the view displayed in the view object.  NULL is
+    *  @return  A pointer to the view displayed in the view object.  \c NULL is
     *           returned if the object is not a view object.
     */
    virtual View* getObjectView() const = 0;
@@ -772,14 +780,14 @@ public:
     */
    virtual unsigned int getSymbolSize() const = 0;
 
-   /** 
+   /**
     * Set the draw mode when composing bitmasks with this object.
     *
     * @param mode
     *        The new draw mode.
     */
    virtual bool setDrawMode(ModeType mode) = 0;
-   
+
    /**
     * Get the draw mode for composing bitmasks with this object.
     *
@@ -792,36 +800,6 @@ protected:
     * This should be destroyed by calling GraphicLayer::removeObject.
     */
    virtual ~GraphicObject() {}
-};
-
-/**
- * Extends capability of the GraphicObject interface.
- *
- * This class provides additional capability for the GraphicObject interface class.
- * A pointer to this class can be obtained by performing a dynamic cast on a
- * pointer to GraphicObject or any of its subclasses.
- *
- * @warning A pointer to this class can only be used to call methods contained
- *           in this extension class and cannot be used to call any methods in
- *           GraphicObject or its subclasses.
- */
-class GraphicObjectExt1
-{
-public:
-   /**
-    * Get the GraphicLayer displaying this GraphicObject.
-    * 
-    * @return
-    *         The GraphicLayer displaying this GraphicObject. \c NULL is
-    *         returned if no GraphicLayer is displaying this GraphicObject.
-    */
-   virtual GraphicLayer* getLayer() const = 0;
-
-protected:
-   /**
-    * This should be destroyed by calling GraphicLayer::removeObject.
-    */
-   virtual ~GraphicObjectExt1() {}
 };
 
 #endif

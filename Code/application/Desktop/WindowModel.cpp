@@ -380,21 +380,20 @@ bool WindowModel::WindowSourceModel::setData(const QModelIndex& index, const QVa
          pView->refresh();
       }
 
-      ToolBarExt1* pToolbarExt1 = dynamic_cast<ToolBarExt1*>(pWrapper->getSessionItem());
-      if (pToolbarExt1 != NULL)
+      ToolBar* pToolbar = dynamic_cast<ToolBar*>(pWrapper->getSessionItem());
+      if (pToolbar != NULL)
       {
          checkboxClicked = true;
          if (checkState == Qt::Checked)
          {
-            pToolbarExt1->show();
+            pToolbar->show();
          }
          else
          {
-            pToolbarExt1->hide();
+            pToolbar->hide();
          }
       }
-      
-      
+
       DockWindow* pDock = dynamic_cast<DockWindow*>(pWrapper->getSessionItem());
       if (pDock != NULL)
       {
@@ -878,20 +877,13 @@ WindowModel::WindowSourceModel::SessionItemWrapper* WindowModel::WindowSourceMod
       ToolBar* pToolbar = dynamic_cast<ToolBar*>(pWindow);
       if (pToolbar != NULL)
       {
-         // Check if the toolbar is hidden before it was added to the parent.
-         ToolBarExt1* pToolbarExt1 = dynamic_cast<ToolBarExt1*>(pToolbar);
-         if (pToolbarExt1 != NULL)
-         {
-            QFont itemFont = pWindowWrapper->getDisplayFont();
-            bool toolbarDisplayed = pToolbarExt1->isShown();
+         bool toolbarDisplayed = pToolbar->isShown();
 
-            itemFont.setItalic(!toolbarDisplayed);
+         QFont itemFont = pWindowWrapper->getDisplayFont();
+         itemFont.setItalic(!toolbarDisplayed);
 
-            pWindowWrapper->setDisplayFont(itemFont);
-
-            // Check state
-            pWindowWrapper->setCheckState(toolbarDisplayed ? Qt::Checked : Qt::Unchecked);
-         }
+         pWindowWrapper->setDisplayFont(itemFont);
+         pWindowWrapper->setCheckState(toolbarDisplayed ? Qt::Checked : Qt::Unchecked);
 
          // Connections
          pToolbar->attach(SIGNAL_NAME(ToolBar, Shown), Slot(this, &WindowSourceModel::updateToolbarDisplay));
@@ -901,20 +893,13 @@ WindowModel::WindowSourceModel::SessionItemWrapper* WindowModel::WindowSourceMod
       DockWindow* pDockWindow = dynamic_cast<DockWindow*>(pWindow);
       if (pDockWindow != NULL)
       {
-         // Check if the dock window was hidden before it was added to the parent.
-         DockWindowExt1* pDockExt1 = dynamic_cast<DockWindowExt1*>(pDockWindow);
-         if (pDockExt1 != NULL)
-         {
-            QFont itemFont = pWindowWrapper->getDisplayFont();
-            bool dockWindowDisplayed = pDockExt1->isShown();
+         bool dockWindowDisplayed = pDockWindow->isShown();
 
-            itemFont.setItalic(!dockWindowDisplayed);
+         QFont itemFont = pWindowWrapper->getDisplayFont();
+         itemFont.setItalic(!dockWindowDisplayed);
 
-            pWindowWrapper->setDisplayFont(itemFont);
-
-            // Check state
-            pWindowWrapper->setCheckState(dockWindowDisplayed ? Qt::Checked : Qt::Unchecked);
-         }
+         pWindowWrapper->setDisplayFont(itemFont);
+         pWindowWrapper->setCheckState(dockWindowDisplayed ? Qt::Checked : Qt::Unchecked);
 
          // Connections
          pDockWindow->attach(SIGNAL_NAME(DockWindow, Shown), Slot(this, &WindowSourceModel::updateDockDisplay));

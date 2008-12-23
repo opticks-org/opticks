@@ -46,7 +46,7 @@ class UndoAction;
  *  - The user right-clicks in the view to invoke a context menu.
  *  - Everything else documented in Subject.
  *
- *  @see     Window, ViewExt1
+ *  @see     Window
  */
 class View : public SessionItem, public Subject
 {
@@ -233,8 +233,8 @@ public:
     *  to add the view to a custom dialog or widget if it is not already contained
     *  in a ViewWindow.
     *
-    *  @return  A pointer to the widget that displays the view.  NULL is returned
-    *           if the widget cannot be accessed.
+    *  @return  A pointer to the widget that displays the view.  \c NULL is
+    *           returned if the widget cannot be accessed.
     */
    virtual QWidget* getWidget() const = 0;
 
@@ -269,7 +269,7 @@ public:
     *
     *  @param   pClassification
     *           A pointer to the classification object from which to set the view's
-    *           text markings.  Cannot be NULL.
+    *           text markings.  Cannot be \c NULL.
     *
     *  @see     Classification, setClassificationText()
     *
@@ -305,6 +305,16 @@ public:
    virtual void getClassificationText(std::string& classificationText) const = 0;
 
    /**
+    *  Enables/disables display of classification markings.
+    *
+    *  @param   enable
+    *           If \c true (the default), classification markings are displayed
+    *           on the view.  If \c false, classification markings are not
+    *           displayed.
+    */
+   virtual void enableClassification(bool enable) = 0;
+
+   /**
     *  Sets the data origin location in the view.
     *
     *  This method does not call refresh() so that multiple calls to modify view
@@ -329,9 +339,9 @@ public:
     *  Registers a new mouse mode.
     *
     *  @param   pMouseMode
-    *           The mouse mode to register with the view.  Cannot be NULL.  The
-    *           mouse mode name must be unique for all mouse modes registered
-    *           with the view.
+    *           The mouse mode to register with the view.  Cannot be \c NULL.
+    *           The mouse mode name must be unique for all mouse modes
+    *           registered with the view.
     *
     *  @return  TRUE if the mouse mode was successfully registered the view,
     *           otherwise FALSE.  FALSE is returned if the mouse mode cannot be
@@ -395,16 +405,18 @@ public:
     *  @param   modeName
     *           The name for the mouse mode to get.  Cannot be empty.
     *
-    *  @return  A pointer to the mouse mode with the given name.  NULL is returned
-    *           if the view does not contain a mouse mode with the given name.
+    *  @return  A pointer to the mouse mode with the given name.  \c NULL is
+    *           returned if the view does not contain a mouse mode with the
+    *           given name.
     */
    virtual MouseMode* getMouseMode(const std::string& modeName) const = 0;
 
    /**
     *  Returns the current mouse mode.
     *
-    *  @return  A pointer to the current mouse mode.  NULL is returned if the view
-    *           does not contain any mouse modes, or if no mode is considered current.
+    *  @return  A pointer to the current mouse mode.  \c NULL is returned if
+    *           the view does not contain any mouse modes, or if no mode is
+    *           considered current.
     */
    virtual MouseMode* getCurrentMouseMode() const = 0;
 
@@ -419,7 +431,7 @@ public:
    /**
     *  Retrieves the animation controller associated with the view.
     *
-    *  @return  A pointer to the associated AnimationController or NULL
+    *  @return  A pointer to the associated AnimationController or \c NULL
     *           if there is no associated AnimationController
     *
     *  @see  setAnimationController()
@@ -627,8 +639,8 @@ public:
     *           should use QImage::Format_ARGB32. If the format is different,
     *           the QImage will be converted to QImage::Format_ARGB32.
     *
-    *  @return  Returns \b true if a valid image was successfully retrieved,
-    *           otherwise returns \b false.
+    *  @return  Returns \c true if a valid image was successfully retrieved,
+    *           otherwise returns \c false.
     */
    virtual bool getCurrentImage(QImage &image) = 0;
 
@@ -661,7 +673,7 @@ public:
     *  are linked depending on the link type specified.
     *
     *  @param   pView
-    *           The view to link with this view.  Cannot be NULL.
+    *           The view to link with this view.  Cannot be \c NULL.
     *  @param   type
     *           The type of link to create.  Specifying NO_LINK
     *           is equivilent to calling unlinkView().
@@ -695,7 +707,7 @@ public:
     *  Breaks the link between this view and a given view.
     *
     *  @param   pView
-    *           The view to unlink with this view.  Cannot be NULL.
+    *           The view to unlink with this view.  Cannot be \c NULL.
     *
     *  @return  TRUE if the view was successfully unlinked with this view, otherwise
     *           FALSE.
@@ -708,7 +720,8 @@ public:
     *  This is designed to copy an existing view into a product view object.
     *  This method will not create a new window.
     *
-    *  @return  A pointer to the new view.  NULL is returned if an error occurs.
+    *  @return  A pointer to the new view.  \c NULL is returned if an error
+    *           occurs.
     */
    virtual View* copy() const = 0;
 
@@ -799,7 +812,7 @@ public:
     *           A negative value indicates that the world coordinate is not currently
     *           displayed in the view widget.
     *  @param   pVisible
-    *           If this value is non-NULL, the pointer is populated with a value
+    *           If this value is non-\c NULL, the pointer is populated with a value
     *           indicating whether the given world coordinate is visible with the
     *           current view widget.
     *
@@ -972,36 +985,6 @@ protected:
     *  @see     UndoGroup, inUndoGroup(), addUndoAction()
     */
    virtual void endUndoGroup() = 0;
-};
-
-/**
- *  Extends capability of the View interface.
- *
- *  This class provides additional capability for the View interface class.
- *  A pointer to this class can be obtained by performing a dynamic cast on a
- *  pointer to View or any of its subclasses.
- *
- *  @warning A pointer to this class can only be used to call methods contained
- *           in this extension class and cannot be used to call any methods in
- *           View or its subclasses.
- */
-class ViewExt1
-{
-public:
-   /**
-    * Enable/disable display of classification markings.
-    *
-    * @param enable
-    *        If true (the default), classification markings are display on the view.
-    *        If false, classification markings are not displayed.
-    */
-   virtual void enableClassification(bool enable) = 0;
-
-protected:
-   /**
-    * This should be destroyed by calling DesktopServices::deleteView.
-    */
-   virtual ~ViewExt1() {}
 };
 
 #endif

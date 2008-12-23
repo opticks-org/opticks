@@ -13,6 +13,10 @@
 #include "AnyData.h"
 #include "DataVariant.h"
 #include "ObjectResource.h"
+#include "SessionItemDeserializer.h"
+#include "SessionItemSerializer.h"
+#include "xmlreader.h"
+#include "xmlwriter.h"
 
 /**
  *  A custom data container for an Any element that contains a DataVariant.
@@ -91,6 +95,50 @@ public:
       pData->mData = mData;
 
       return pData.release();
+   }
+
+   /**
+    *  Saves the DataVariant as part of a full session save.
+    *
+    *  @param   serializer
+    *           The object to use to save the DataVariant as part of the current
+    *           session.
+    *
+    *  @return  Returns \c true if the DataVariant was successfully saved and
+    *           \c false otherwise.
+    */
+   bool serialize(SessionItemSerializer& serializer) const
+   {
+      XMLWriter xml("DataVariant");
+      if (mData.toXml(&xml) == false)
+      {
+         return false;
+      }
+
+      return serializer.serialize(xml);
+   }
+
+   /**
+    *  Restores the DataVariant from a saved session.
+    *
+    *  @param   deserializer
+    *           The object to use to restore the DataVariant from a saved
+    *           session.
+    *
+    *  @return  Returns \c true if the DataVariant was successfully restored and
+    *           \c false otherwise.
+    */
+   bool deserialize(SessionItemDeserializer& deserializer)
+   {
+      XmlReader reader(NULL, false);
+
+      XERCES_CPP_NAMESPACE_QUALIFIER DOMElement* pRoot = deserializer.deserialize(reader, "DataVariant");
+      if (pRoot == NULL)
+      {
+         return false;
+      }
+
+      return mData.fromXml(pRoot, XmlBase::VERSION);
    }
 
    /**

@@ -924,7 +924,7 @@ void HistogramWindowImp::syncAutoZoom()
       PlotWidget* pPlotWidget = getPlot(pLayer, RED);
       if (pPlotWidget != NULL)
       {
-         HistogramPlotExt1* pRedPlot = dynamic_cast<HistogramPlotExt1*>(pPlotWidget->getPlot());
+         HistogramPlot* pRedPlot = dynamic_cast<HistogramPlot*>(pPlotWidget->getPlot());
          if (pRedPlot != NULL)
          {
             pRedPlot->enableAutoZoom(autoZoom);
@@ -937,7 +937,7 @@ void HistogramWindowImp::syncAutoZoom()
       PlotWidget* pPlotWidget = getPlot(pLayer, GREEN);
       if (pPlotWidget != NULL)
       {
-         HistogramPlotExt1* pGreenPlot = dynamic_cast<HistogramPlotExt1*>(pPlotWidget->getPlot());
+         HistogramPlot* pGreenPlot = dynamic_cast<HistogramPlot*>(pPlotWidget->getPlot());
          if (pGreenPlot != NULL)
          {
             pGreenPlot->enableAutoZoom(autoZoom);
@@ -950,7 +950,7 @@ void HistogramWindowImp::syncAutoZoom()
       PlotWidget* pPlotWidget = getPlot(pLayer, BLUE);
       if (pPlotWidget != NULL)
       {
-         HistogramPlotExt1* pBluePlot = dynamic_cast<HistogramPlotExt1*>(pPlotWidget->getPlot());
+         HistogramPlot* pBluePlot = dynamic_cast<HistogramPlot*>(pPlotWidget->getPlot());
          if (pBluePlot != NULL)
          {
             pBluePlot->enableAutoZoom(autoZoom);

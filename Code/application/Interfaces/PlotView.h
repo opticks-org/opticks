@@ -50,7 +50,7 @@ class PlotObject;
  *    selectObject(), deleteSelectedObjects().
  *  - Everything else documented in OrthographicView.
  *
- *  @see     PlotViewExt1, PlotObject
+ *  @see     PlotObject
  */
 class PlotView : public OrthographicView
 {
@@ -59,10 +59,12 @@ public:
     *  Emitted with any<PlotObject*> when an object is added to the plot.
     */
    SIGNAL_METHOD(PlotView, ObjectAdded);
+
    /**
     *  Emitted with any<PlotObject*> when an object is deleted from the plot.
     */
    SIGNAL_METHOD(PlotView, ObjectDeleted);
+
    /**
     *  Emitted with any<pair<PlotObject*,bool> > when an object is selected or deselected in the plot.
     */
@@ -431,37 +433,16 @@ public:
     */
    virtual bool isShadingEnabled() const = 0;
 
-protected:
-   /**
-    * This object should be destroyed by calling DesktopServices::deleteView().
-    */
-   virtual ~PlotView() {}
-};
-
-/**
- *  Extends capability of the PlotView interface.
- *
- *  This class provides additional capability for the PlotView interface class.
- *  A pointer to this class can be obtained by performing a dynamic cast on a
- *  pointer to PlotView or any of its subclasses.
- *
- *  @warning A pointer to this class can only be used to call methods contained
- *           in this extension class and cannot be used to call any methods in
- *           PlotView or its subclasses.
- */
-class PlotViewExt1
-{
-public:
    /**
     *  Sets a margin around the overall plot extents.
     *
-    *  The plot extents as returned by PlotView::getExtents() is calculated
-    *  based on the extents of all primary plot objects it contains.  An
-    *  additional amount can be added to the plot extents by specifying a
-    *  margin factor that is multiplied to the data range of the object
-    *  extents.  For example a margin factor of 0.01 subtracts one percent of
-    *  the data range from the minimum value and adds one percent of the data
-    *  range to the maximum value.
+    *  The plot extents as returned by getExtents() is calculated based on the
+    *  extents of all primary plot objects it contains.  An additional amount
+    *  can be added to the plot extents by specifying a margin factor that is
+    *  multiplied to the data range of the object extents.  For example a
+    *  margin factor of 0.01 subtracts one percent of the data range from the
+    *  minimum value and adds one percent of the data range to the maximum
+    *  value.
     *
     *  Calling this method sets the margin for both X and Y dimensions.
     *
@@ -486,9 +467,9 @@ public:
 
 protected:
    /**
-    *  This object should be destroyed by calling DesktopServices::deleteView().
+    * This object should be destroyed by calling DesktopServices::deleteView().
     */
-   virtual ~PlotViewExt1() {}
+   virtual ~PlotView() {}
 };
 
 #endif
