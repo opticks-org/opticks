@@ -8,6 +8,7 @@
  */
 
 #include "EnviField.h"
+#include "FileResource.h"
 #include "StringUtilities.h"
 
 using namespace std;
@@ -93,17 +94,16 @@ bool EnviField::populateFromHeader(const string& filename)
    string line;
    int i;
 
-   FILE* pFp = fopen(filename.c_str(), "rt");
-   if (pFp == NULL)
+   FileResource pFile(filename.c_str(), "rt");
+   if (pFile.get() == NULL)
    {
       return false;
    }
 
    char pBuffer[2048];
-   fgets(pBuffer, 2047, pFp);
+   fgets(pBuffer, 2047, pFile);
    if (strncmp(pBuffer, "ENVI", 4) != 0)
    {
-      fclose(pFp);
       return false;
    }
 
@@ -114,13 +114,12 @@ bool EnviField::populateFromHeader(const string& filename)
    vector<string> headerText;      // stores the lines in the ENVI header file
    headerText.push_back("ENVI");
 
-   while (feof(pFp) == 0)
+   while (feof(pFile) == 0)
    {
-      if (fgets(pBuffer, 2047, pFp) == NULL)
+      if (fgets(pBuffer, 2047, pFile) == NULL)
       {
-         if (feof(pFp) == 0)
+         if (feof(pFile) == 0)
          {
-            fclose(pFp);
             return false;
          }
       }
@@ -129,16 +128,14 @@ bool EnviField::populateFromHeader(const string& filename)
       i = strlen(pBuffer) - 1;
       if (i > 2047)
       {
-         fclose(pFp);
          return false;
       }
 
       int j;
       for (j = i; j >= 0; j--)
       {
-         if (!isascii(pBuffer[j]) || (pBuffer[j] < 9))
+         if (static_cast<unsigned char>(pBuffer[j]) < 9)
          {
-            fclose(pFp);
             return false;
          }
       }
@@ -161,8 +158,6 @@ bool EnviField::populateFromHeader(const string& filename)
 
       headerText.push_back(line);
    }
-
-   fclose(pFp);
 
    // Parse the header text for the field values
    vector<string>::iterator lineIterator = headerText.begin();
