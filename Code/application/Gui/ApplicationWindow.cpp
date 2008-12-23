@@ -4848,6 +4848,30 @@ void ApplicationWindow::optionsModified(Subject &subject, const string &signal, 
 
 void ApplicationWindow::closeEvent(QCloseEvent* e)
 {
+   // Close the wizard builder instances
+   vector<WizardBuilder*> wizardBuilders;
+
+   QWidgetList topLevelWidgets = QApplication::topLevelWidgets();
+   for (int i = 0; i < topLevelWidgets.count(); ++i)
+   {
+      WizardBuilder* pWizardBuilder = dynamic_cast<WizardBuilder*>(topLevelWidgets[i]);
+      if (pWizardBuilder != NULL)
+      {
+         // Push the pointers into a vector to prevent corrupting the widget list when the wizard builder is closed
+         wizardBuilders.push_back(pWizardBuilder);
+      }
+   }
+
+   for (vector<WizardBuilder*>::iterator iter = wizardBuilders.begin(); iter != wizardBuilders.end(); ++iter)
+   {
+      WizardBuilder* pWizardBuilder = *iter;
+      if ((pWizardBuilder != NULL) && (pWizardBuilder->close() == false))
+      {
+         e->ignore();
+         return;
+      }
+   }
+
    // Save the position and the visibility state of the toolbars and dock windows
    saveConfiguration();
 
