@@ -21,6 +21,29 @@
 
 using namespace std;
 
+namespace
+{
+template<typename T>
+bool readAttribute(int32 obj_id, int32 attr_index, int32 count, DataVariant& value)
+{
+   vector<T> temp(count);
+   int iSuccess = SDreadattr(obj_id, attr_index, &temp.front());
+   if (iSuccess != SUCCEED)
+   {
+      return false;
+   }
+   if (count > 1)
+   {
+      value = temp;
+   }
+   else
+   {
+      value = temp[0];
+   }
+   return value.isValid();
+}
+}
+
 string HdfUtilities::hdf4TypeToString(long type, size_t count)
 {
    string strType = UNKNOWN_TYPE;
@@ -112,26 +135,6 @@ string HdfUtilities::hdf4TypeToString(long type, size_t count)
          break;
    }
    return strType;
-}
-
-template<typename T>
-bool readAttribute(int32 obj_id, int32 attr_index, int32 count, DataVariant& value)
-{
-   vector<T> temp(count);
-   int iSuccess = SDreadattr(obj_id, attr_index, &temp.front());
-   if (iSuccess != SUCCEED)
-   {
-      return false;
-   }
-   if (count > 1)
-   {
-      value = temp;
-   }
-   else
-   {
-      value = temp[0];
-   }
-   return value.isValid();
 }
 
 bool HdfUtilities::readHdf4Attribute(int32 obj_id, int32 attr_index, DataVariant& var)

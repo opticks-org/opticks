@@ -25,6 +25,34 @@
 using namespace HdfUtilities;
 using namespace std;
 
+namespace
+{
+template<typename T>
+bool readAttribute(hid_t attrId, hid_t attrType, hid_t dataSpace, DataVariant& var)
+{
+   auto_ptr<Hdf5CustomReader> pReader(createHdf5CustomReader<T>(attrType));
+   DO_IF(pReader.get() == NULL || !pReader->isValid(), return false)
+   hsize_t sizeArray[H5S_MAX_RANK];
+   int num_dimensions = H5Sget_simple_extent_dims(dataSpace, sizeArray, NULL);
+   DO_IF(num_dimensions != pReader->getSupportedDimensionality(), return false);
+
+   vector<hsize_t> dimensions;
+   for (int i = 0; i < num_dimensions; ++i)
+   {
+      dimensions.push_back(sizeArray[i]);
+   }
+   DO_IF(!pReader->setReadDataSpace(dimensions), return false);
+   void* pData = pReader->getReadBuffer();
+   Hdf5TypeResource memType(pReader->getReadMemoryType());
+   herr_t status = H5Aread(attrId, *memType, pData);
+   DO_IF(status < 0, return false);
+   T* pValue = reinterpret_cast<T*>(pReader->getValue());
+   var = *(pValue);
+   delete pValue; //delete the value, because the DataVariant creates a deep copy of the value.
+   return var.isValid();
+}
+}
+
 string HdfUtilities::hdf5TypeToTypeString(hid_t dataTypeId)
 {
    H5T_class_t dataType = H5Tget_class(dataTypeId); // integer or floating point or misc data?
@@ -153,31 +181,6 @@ string HdfUtilities::hdf5TypeToTypeString(hid_t dataTypeId)
    }
 
    return type;
-}
-
-template<typename T>
-bool readAttribute(hid_t attrId, hid_t attrType, hid_t dataSpace, DataVariant& var)
-{
-   auto_ptr<Hdf5CustomReader> pReader(createHdf5CustomReader<T>(attrType));
-   DO_IF(pReader.get() == NULL || !pReader->isValid(), return false)
-   hsize_t sizeArray[H5S_MAX_RANK];
-   int num_dimensions = H5Sget_simple_extent_dims(dataSpace, sizeArray, NULL);
-   DO_IF(num_dimensions != pReader->getSupportedDimensionality(), return false);
-
-   vector<hsize_t> dimensions;
-   for (int i = 0; i < num_dimensions; ++i)
-   {
-      dimensions.push_back(sizeArray[i]);
-   }
-   DO_IF(!pReader->setReadDataSpace(dimensions), return false);
-   void* pData = pReader->getReadBuffer();
-   Hdf5TypeResource memType(pReader->getReadMemoryType());
-   herr_t status = H5Aread(attrId, *memType, pData);
-   DO_IF(status < 0, return false);
-   T* pValue = reinterpret_cast<T*>(pReader->getValue());
-   var = *(pValue);
-   delete pValue; //delete the value, because the DataVariant creates a deep copy of the value.
-   return var.isValid();
 }
 
 bool HdfUtilities::readHdf5Attribute(hid_t attrId, DataVariant& var)
