@@ -47,6 +47,8 @@ public:
    AnimationController* getAnimationController(const std::string& name) const;
    const std::vector<AnimationController*>& getAnimationControllers() const;
    unsigned int getNumAnimationControllers() const;
+   void setCurrentAnimationController(AnimationController* pController);
+   AnimationController* getCurrentAnimationController() const;
    bool renameAnimationController(AnimationController* pController, const std::string& newName);
    void destroyAnimationController(AnimationController* pController);
    void clear();

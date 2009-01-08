@@ -168,6 +168,30 @@ unsigned int AnimationServicesImp::getNumAnimationControllers() const
    return mControllers.size();
 }
 
+void AnimationServicesImp::setCurrentAnimationController(AnimationController* pController)
+{
+   Service<DesktopServices> pDesktop;
+
+   AnimationToolBar* pToolBar = static_cast<AnimationToolBar*>(pDesktop->getWindow("Animation", TOOLBAR));
+   if (pToolBar != NULL)
+   {
+      pToolBar->setAnimationController(pController);
+   }
+}
+
+AnimationController* AnimationServicesImp::getCurrentAnimationController() const
+{
+   Service<DesktopServices> pDesktop;
+
+   AnimationToolBar* pToolBar = static_cast<AnimationToolBar*>(pDesktop->getWindow("Animation", TOOLBAR));
+   if (pToolBar != NULL)
+   {
+      return pToolBar->getAnimationController();
+   }
+
+   return NULL;
+}
+
 bool AnimationServicesImp::renameAnimationController(AnimationController* pController, const string& newName)
 {
    if ((pController == NULL) || (newName.empty() == true))

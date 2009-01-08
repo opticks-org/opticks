@@ -115,6 +115,33 @@ public:
    virtual unsigned int getNumAnimationControllers() const = 0;
 
    /**
+    *  Sets the current animation controller on the %Animation toolbar.
+    *
+    *  This method is a convenience method that calls
+    *  AnimationToolBar::setAnimationController() passing in the given
+    *  controller.
+    *
+    *  @param   pController
+    *           The animation controller to activate on the %Animation toolbar.
+    *
+    *  @see     AnimationToolBar::setAnimationController()
+    */
+   virtual void setCurrentAnimationController(AnimationController* pController) = 0;
+
+   /**
+    *  Returns the current animation controller on the %Animation toolbar.
+    *
+    *  This method is a convenience method that calls
+    *  AnimationToolBar::getAnimationController().
+    *
+    *  @return  A pointer to the current animation controller on the %Animation
+    *           toolbar.
+    *
+    *  @see     AnimationToolBar::getAnimationController()
+    */
+   virtual AnimationController* getCurrentAnimationController() const = 0;
+
+   /**
     *  Sets a new name for an animation controller.
     *
     *  @param   pController

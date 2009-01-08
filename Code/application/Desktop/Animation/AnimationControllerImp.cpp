@@ -17,7 +17,7 @@
 #include "AnimationAdapter.h"
 #include "AnimationController.h"
 #include "AnimationControllerImp.h"
-#include "AnimationToolBar.h"
+#include "AnimationServices.h"
 #include "AppVerify.h"
 #include "ContextMenuAction.h"
 #include "ContextMenuActions.h"
@@ -992,8 +992,8 @@ bool AnimationControllerImp::serialize(SessionItemSerializer& serializer) const
    xml.addAttr("cycle", mCycle);
    xml.addAttr("dropframes", mCanDropFrames);
 
-   AnimationToolBar* pToolBar = static_cast<AnimationToolBar*>(Service<DesktopServices>()->getWindow("Animation", TOOLBAR));
-   if (pToolBar != NULL && dynamic_cast<const AnimationController*>(this) == pToolBar->getAnimationController())
+   Service<AnimationServices> pServices;
+   if (dynamic_cast<const AnimationController*>(this) == pServices->getCurrentAnimationController())
    {
       xml.addAttr("selected", true);
    }
@@ -1060,11 +1060,8 @@ bool AnimationControllerImp::deserialize(SessionItemDeserializer &deserializer)
 #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Should this be moved into the tool bar? (mconsidine)")
    if (pRoot->hasAttribute(X("selected")))
    {
-      AnimationToolBar* pToolBar = static_cast<AnimationToolBar*>(Service<DesktopServices>()->getWindow("Animation", TOOLBAR));
-      if (pToolBar != NULL)
-      {
-         pToolBar->setAnimationController(dynamic_cast<AnimationController*>(this));
-      }
+      Service<AnimationServices> pServices;
+      pServices->setCurrentAnimationController(dynamic_cast<AnimationController*>(this));
    }
    return true;
 }
