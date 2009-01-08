@@ -15,7 +15,6 @@
 #include <QtGui/QMessageBox>
 #include <QtGui/QPixmap>
 
-#include "SignatureSelector.h"
 #include "ApplicationServices.h"
 #include "DesktopServices.h"
 #include "DynamicObject.h"
@@ -33,6 +32,7 @@
 #include "SearchDlg.h"
 #include "Signature.h"
 #include "SignaturePropertiesDlg.h"
+#include "SignatureSelector.h"
 #include "SignatureSet.h"
 #include "UtilityServices.h"
 
@@ -41,9 +41,12 @@ using namespace std;
 
 SignatureSelector::SignatureSelector(Progress* pProgress, QWidget* parent,
                                      QAbstractItemView::SelectionMode mode,
-                                     bool addApply) :
+                                     bool addApply,
+                                     const string& customButtonLabel) :
    QDialog(parent),
    mpProgress(pProgress),
+   mpApplyButton(NULL),
+   mpCustomButton(NULL),
    mpSearchDlg(NULL)
 {
    // Display format
@@ -81,12 +84,17 @@ SignatureSelector::SignatureSelector(Progress* pProgress, QWidget* parent,
    mpUnloadButton = new QPushButton("&Unload", this);
    mpImportButton = new QPushButton("&Import >>", this);
 
-   mpApplyButton = NULL;
    if (addApply)
    {
       mpApplyButton = new QPushButton("&Apply", this);
       connect(mpApplyButton, SIGNAL(clicked()), this, SLOT(apply()));
       mpApplyButton->setEnabled(false);
+   }
+
+   if (customButtonLabel.empty() == false)
+   {
+      mpCustomButton = new QPushButton(QString::fromStdString(customButtonLabel), this);
+      VERIFYNRV(connect(mpCustomButton, SIGNAL(clicked()), this, SLOT(customButtonClicked())));
    }
 
    QVBoxLayout* pButtonLayout = new QVBoxLayout();
@@ -100,6 +108,12 @@ SignatureSelector::SignatureSelector(Progress* pProgress, QWidget* parent,
    }
 
    pButtonLayout->addWidget(pCancelButton);
+
+   if (mpCustomButton != NULL)
+   {
+      pButtonLayout->addWidget(mpCustomButton);
+   }
+
    pButtonLayout->addStretch(10);
    pButtonLayout->addWidget(mpPropertiesButton);
    pButtonLayout->addWidget(mpExportButton);
@@ -223,6 +237,14 @@ void SignatureSelector::enableApplyButton(bool enable)
    if (mpApplyButton != NULL)
    {
       mpApplyButton->setEnabled(enable);
+   }
+}
+
+void SignatureSelector::enableCustomButton(bool enable)
+{
+   if (mpCustomButton != NULL)
+   {
+      mpCustomButton->setEnabled(enable);
    }
 }
 
@@ -918,7 +940,7 @@ void SignatureSelector::searchDirectories()
    }
    mpSearchDlg->setBrowseDirectory(strDirectory);
 
-   // Invoe the dialog
+   // invoke the dialog
    int iReturn = -1;
    iReturn = mpSearchDlg->exec();
    if (iReturn == QDialog::Accepted)
@@ -990,4 +1012,10 @@ void SignatureSelector::loadSignatures()
 
    loadSignatures(loadList, mpProgress);
    updateSignatureList();
+}
+
+void SignatureSelector::customButtonClicked()
+{
+   // Overload this method in derived classes
+   QMessageBox::warning(this, "Custom Button Clicked", "No actions have been setup for this button");
 }

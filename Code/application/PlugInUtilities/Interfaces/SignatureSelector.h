@@ -88,10 +88,14 @@ public:
     *  @param   mode
     *           The selection mode to be used for the list of signatures.
     *  @param   addApply
-    *           If true, an Apply button will appear.
+    *           If \c true, an Apply button will appear.
+    *  @param   customButtonLabel
+    *           Label that will appear on the custom button. The custom button will only be
+    *           added to the dialog if \c customButtonLabel is not empty.
     */
    SignatureSelector(Progress* pProgress, QWidget* parent = 0,
-      QAbstractItemView::SelectionMode mode = QAbstractItemView::ExtendedSelection, bool addApply = false);
+      QAbstractItemView::SelectionMode mode = QAbstractItemView::ExtendedSelection, bool addApply = false,
+      const std::string& customButtonLabel = std::string());
 
    /**
     *  Destroys the signature selector dialog.
@@ -131,8 +135,8 @@ public:
     *  the Apply button is enabled when it is created.  So, this method is really only
     *  useful after the enableApplyButton() method has been called.
     *
-    *  @return  This method returns true if the Apply button is currently enabled, or
-    *           false if the Apply button is disabled.  False is also returned if the
+    *  @return  This method returns \c true if the Apply button is currently enabled, or
+    *           \c false if the Apply button is disabled.  \c False is also returned if the
     *           dialog is modal and therefore does not contain the Apply button.
     */
    bool isApplyButtonEnabled() const;
@@ -237,12 +241,24 @@ protected:
     *  This method does nothing if the dialog is created as a modal dialog.
     *
     *  @param   enable
-    *           Set this parameter to true to enable the Apply button or to false to
+    *           Set this parameter to \c true to enable the Apply button or to \c false to
     *           disable the Apply button.
     *
     *  @see     isApplyButtonEnabled()
     */
    void enableApplyButton(bool enable);
+
+   /**
+   *  Enables or disables the custom button.
+   *
+   *  This method enables or disables the custom button. It allows a derived class to control
+   *  enabling/disabling of the custom button. The button is initially enabled by default.
+   *
+   *  @param   enable
+   *           Set this parameter to \c true to enable the custom button or to \c false to
+   *           disable the custom button.
+   */
+   void enableCustomButton(bool enable);
 
 protected slots:
    /**
@@ -352,6 +368,15 @@ protected slots:
     */
    virtual void updateSignatureList();
 
+   /**
+    *  Performs tasks associated with the custom button.
+    *
+    *  This slot method displays a QMessageBox stating that the actions for the custom
+    *  button have not been set up. Classes derived from SignatureSelector need to overload
+    *  this method with the actions for their custom button. 
+    */
+   virtual void customButtonClicked();
+
 private:
    Progress* mpProgress;
    Service<PlugInManagerServices> mpManager;
@@ -367,6 +392,7 @@ private:
    QPushButton* mpUnloadButton;
    QPushButton* mpImportButton;
    QPushButton* mpApplyButton;
+   QPushButton* mpCustomButton;
    QWidget* mpImportWidget;
    QListWidget* mpFilesList;
 
