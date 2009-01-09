@@ -18,6 +18,7 @@
 #include <QtGui/QListWidget>
 #include <QtGui/QPushButton>
 #include <QtGui/QRadioButton>
+#include <QtGui/QTextEdit>
 
 #include <vector>
 
@@ -122,8 +123,8 @@ private:
    QStringList mBandList;
    QStringList mCubeList;
 
-   // Label
-   QLabel* txtExpression;
+   // Expression
+   QTextEdit* txtExpression;
 
    // Buttons
    QPushButton* btnClear;

@@ -29,7 +29,7 @@ struct Last
 
 QString FrmBM::getExpression(bool bLoadedBands) const
 {
-   QString strOrigExpression = txtExpression->text();
+   QString strOrigExpression = txtExpression->toPlainText();
    if (bLoadedBands == false)
    {
       return strOrigExpression;
@@ -139,7 +139,7 @@ void FrmBM::addBand()
 {
    QString qsTmp;
 
-   qsTmp = txtExpression->text();
+   qsTmp = txtExpression->toPlainText();
    sLast.qsExpr = qsTmp;
 
    // Get original band number
@@ -173,11 +173,11 @@ void FrmBM::addBand()
    {
       if (rbBand->isChecked())
       {
-         qsTmp = QString("%1b%2").arg(txtExpression->text()).arg(originalBandNumber);
+         qsTmp = QString("%1b%2").arg(txtExpression->toPlainText()).arg(originalBandNumber);
       }
       else
       {
-         qsTmp = QString("%1c%2").arg(txtExpression->text()).arg(lisBands->currentRow()+1);
+         qsTmp = QString("%1c%2").arg(txtExpression->toPlainText()).arg(lisBands->currentRow()+1);
       }
    }
 
@@ -209,7 +209,7 @@ void FrmBM::addNumber( int iButton )
       textToAdd = "pi";
    }
 
-   qsTmp = txtExpression->text();
+   qsTmp = txtExpression->toPlainText();
    sLast.qsExpr = qsTmp;
 
    if (iPos > 0)
@@ -261,7 +261,7 @@ void FrmBM::addOperator(int iButton)
 {
    QString qsTmp;
 
-   qsTmp = txtExpression->text();
+   qsTmp = txtExpression->toPlainText();
    sLast.qsExpr = qsTmp;
 
    if ((iButton >= 1) && (iButton <= 5))
@@ -419,10 +419,9 @@ void FrmBM::setNumbers(bool bVal)
 
 void FrmBM::setExpression(QString qsExpr)
 {
-   sLast.qsExpr = txtExpression->text();
+   sLast.qsExpr = txtExpression->toPlainText();
 
-   txtExpression->setText(qsExpr);
-   adjustSize();
+   txtExpression->setPlainText(qsExpr);
 }
 
 void FrmBM::setButtons(bool bVal)

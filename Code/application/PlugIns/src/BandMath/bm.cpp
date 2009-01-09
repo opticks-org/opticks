@@ -326,10 +326,9 @@ FrmBM::FrmBM(const RasterDataDescriptor* pDescriptor, const vector<RasterElement
    pBandsLayout->addWidget(lisBands, 10);
 
    // Expression
-   txtExpression = new QLabel(this);
-   txtExpression->setFrameStyle(QFrame::Panel | QFrame::Sunken);
-   txtExpression->setWordWrap(true);
-   txtExpression->setFixedWidth(465);
+   txtExpression = new QTextEdit(this);
+   txtExpression->setReadOnly(true);
+   txtExpression->setWordWrapMode(QTextOption::WrapAnywhere);
 
    QFont txtExpression_font(txtExpression->font());
    txtExpression_font.setBold(true);
@@ -436,6 +435,8 @@ FrmBM::FrmBM(const RasterDataDescriptor* pDescriptor, const vector<RasterElement
    rbRadians->setChecked(true);
    rbBand->setChecked(true);
    setCubeList(0);
+
+   resize(minimumSize());
 }
 
 FrmBM::~FrmBM()
