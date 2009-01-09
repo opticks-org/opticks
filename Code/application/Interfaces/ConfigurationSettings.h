@@ -494,13 +494,18 @@ class Filename;
  *
  *  These settings are initialized on application startup.  This is done by
  *  locating any .cfg files contained in getHome()/DefaultSettings and the
- *  directory defined by the "/defaultDir" command-line argument.  These .cfg
+ *  directory defined by the AdditionalDefaultDir value of the deployment file.
+ *  Please see @ref deploymentfiles for more details. These .cfg
  *  files must follow the naming convention of "[LoadOrder]-[Name].cfg" where
  *  LoadOrder is an unsigned int and Name can be any text recognized by the file
  *  system. These .cfg's are then parsed according to the LoadOrder, with 1 reserved
  *  for the application and being the first .cfg that will be parsed.  After
  *  these files are parsed, there is a .cfg file for the user that is running
  *  the application that will be parsed and created as per-user settings.
+ *
+ *  The directory that is used to store per-user settings can be controlled
+ *  by a plug-in developer by creating a deployment file.
+ *  See \ref deploymentfiles for more details.
  *
  *  The configuration settings can also be used to allow the Studio to create
  *  PlugInArg objects prior to plug-in execution.  If the plug-in args cannot be
@@ -551,6 +556,9 @@ public:
     *
     * This method returns the fully qualified path for the base 
     * of the directory tree associated with the main application.
+    *
+    * This path can be adjusted by a plug-in developer by creating
+    * a deployment file. See @ref deploymentfiles for more details.
     *
     * @return   Base folder for the main application.
     */
@@ -652,7 +660,10 @@ public:
     *  This is the directory where plug-ins must be placed if they are to be
     *  loaded by the application.
     *
-    * @return  The plug-in path.
+    *  This path can be adjusted by a plug-in developer by creating
+    *  a deployment file. See @ref deploymentfiles for more details.
+    *
+    *  @return  The plug-in path.
     */
    virtual std::string getPlugInPath() const = 0;
 

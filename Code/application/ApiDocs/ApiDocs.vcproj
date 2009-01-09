@@ -73,6 +73,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\deploymentfiles.txt"
+				>
+			</File>
+			<File
 				RelativePath=".\howto_buildenvironment.txt"
 				>
 			</File>
@@ -165,7 +169,7 @@
 			Name="Generated Doxygen"
 			>
 			<File
-				RelativePath="$(OPTICKS_CODE_DIR)\Build\DoxygenOutput\html\index.html"
+				RelativePath="$(BUILDDIR)\DoxygenOutput\html\index.html"
 				>
 			</File>
 		</Filter>

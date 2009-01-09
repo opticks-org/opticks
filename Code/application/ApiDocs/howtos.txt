@@ -26,7 +26,7 @@ These HOWTOs provide more in-depth examples on specific topics.
 They assume you have basic %Opticks plug-in development knowledge.
 If you are just starting out, you should look at the tutorial first.
   -# \subpage howto_buildenvironment
-  -# \subpage howto_coordinate "Understanding coordinate spaces"
+  -# \subpage coordinate_systems
   -# \subpage howto_exporter "Creating an exporter plug-in"
   -# \subpage howto_createrasterlement "Creating a new RasterElement"
   -# \subpage howto_importer
@@ -44,5 +44,5 @@ If you are just starting out, you should look at the tutorial first.
   -# \subpage settingsmacros
   -# \subpage usingimporterresource
   -# \subpage EnumWrapperHowTo
-  -# \subpage coordinate_systems
+  -# \subpage deploymentfiles
  */
