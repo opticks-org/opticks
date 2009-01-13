@@ -206,3 +206,8 @@ void GraphicTextWidget::notifyFontChange()
    QFont textFont = getTextFont();
    emit fontChanged(textFont);
 }
+
+void GraphicTextWidget::setTextReadOnly(bool bTextReadOnly)
+{
+   mpTextEdit->setReadOnly(bTextReadOnly);
+}

@@ -133,6 +133,7 @@ bool PropertiesMeasurementObject::initialize(const list<GraphicObject*>& graphic
    mpLineWidget->setLineScaled(GraphicUtilities::getLineScaled(mObjects));
 
    // Text
+   mpTextWidget->setTextReadOnly(true);
    mpTextWidget->setText(QString::fromStdString(GraphicUtilities::getText(mObjects)));
    mpTextWidget->setAlignment(GraphicUtilities::getTextAlignment(mObjects));
    mpTextWidget->setTextFont(GraphicUtilities::getFont(mObjects));

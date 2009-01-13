@@ -9,6 +9,7 @@
 
 #include "AppVersion.h"
 #include "AppVerify.h"
+#include "FrameLabelObjectImp.h"
 #include "GraphicArcWidget.h"
 #include "GraphicFillWidget.h"
 #include "GraphicImageWidget.h"
@@ -26,6 +27,7 @@
 #include "GraphicViewWidget.h"
 #include "LabeledSection.h"
 #include "PropertiesGraphicObject.h"
+#include "TextObjectImp.h"
 #include "ViewObjectImp.h"
 #include "Undo.h"
 
@@ -190,6 +192,7 @@ bool PropertiesGraphicObject::initialize(const list<GraphicObject*>& graphicObje
    bool bScale = false;
    bool bSymbol = false;
    bool bText = false;
+   bool bEditText = false;
    bool bTriangle = false;
    bool bView = false;
 
@@ -263,6 +266,14 @@ bool PropertiesGraphicObject::initialize(const list<GraphicObject*>& graphicObje
          if (dynamic_cast<ViewObjectImp*>(pGraphicObject) != NULL)
          {
             bView = true;
+         }
+
+         // Only allow text to be edited for TextObjects, make text read-only for
+         // ScaleBarObject, FrameLabelObject, etc.
+         if ((dynamic_cast<TextObjectImp*>(pGraphicObject) != NULL) &&
+            (dynamic_cast<FrameLabelObjectImp*>(pGraphicObject) == NULL))
+         {
+            bEditText = true;
          }
       }
    }
@@ -356,6 +367,7 @@ bool PropertiesGraphicObject::initialize(const list<GraphicObject*>& graphicObje
    mpSymbolWidget->setSymbolSize(GraphicUtilities::getGraphicSymbolSize(mObjects));
 
    // Text
+   mpTextWidget->setTextReadOnly(!bEditText);
    mpTextWidget->setText(QString::fromStdString(GraphicUtilities::getText(mObjects)));
    mpTextWidget->setAlignment(GraphicUtilities::getTextAlignment(mObjects));
    mpTextWidget->setTextFont(GraphicUtilities::getFont(mObjects));

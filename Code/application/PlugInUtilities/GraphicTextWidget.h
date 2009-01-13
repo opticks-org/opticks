@@ -37,6 +37,7 @@ public slots:
    void setAlignment(int alignment);
    void setTextFont(const QFont& textFont);
    void setColor(const QColor& color);
+   void setTextReadOnly(bool bTextReadOnly);
 
 signals:
    void textChanged(const QString& text);
