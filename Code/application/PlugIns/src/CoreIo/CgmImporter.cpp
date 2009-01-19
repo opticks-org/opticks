@@ -125,52 +125,66 @@ unsigned char CgmImporter::getFileAffinity(const std::string& filename)
    }
    Endian swapper(BIG_ENDIAN);
 
-   uint32_t paramLength = 0;
+   // Read the first two bytes of the file, which should be the start of the Begin Metafile element
    uint16_t beginMetafileVal;
    if (fread(&beginMetafileVal, sizeof(beginMetafileVal), 1, cgmFile) != 1)
    {
       return Importer::CAN_NOT_LOAD;
    }
    swapper.swapValue(beginMetafileVal);
+
+   // Check the last 11 bits of the element for the required value
    if ((beginMetafileVal & COMMAND_MASK) != BEGIN_METAFILE_VAL)
    {
       return Importer::CAN_NOT_LOAD;
    }
 
-   paramLength = beginMetafileVal & LENGTH_MASK;
-   if (paramLength == 31) // long form
+   // Check the first five bits of the element to get the parameter list length,
+   // which also determines long or short form input
+   uint16_t paramLength = beginMetafileVal & LENGTH_MASK;
+   if (paramLength == 31)  // long form
    {
+      // Read the next two bytes to determine the parameter list length
       if (fread(&paramLength, sizeof(paramLength), 1, cgmFile) != 1)
       {
          return Importer::CAN_NOT_LOAD;
       }
       swapper.swapValue(paramLength);
    }
-   if (paramLength & 1) // odd number
+
+   // Add padding to the parameter list length, if necessary
+   if (paramLength & 1)    // odd number
    {
-      ++paramLength; // padded
+      ++paramLength;       // padded
    }
 
+   // Seek past the parameter list to the Metafile Version element
    if (fseek(cgmFile, paramLength, SEEK_CUR) != 0)
    {
       return Importer::CAN_NOT_LOAD;
    }
 
+   // Read the next four bytes, which is the Metafile Version element
    uint32_t metafileVersion;
    if (fread(&metafileVersion, sizeof(metafileVersion), 1, cgmFile) != 1)
    {
       return Importer::CAN_NOT_LOAD;
    }
    swapper.swapValue(metafileVersion);
+
+   // Check the read value with the required Metafile Version value
    if (metafileVersion != METAFILE_VERSION_VAL)
    {
       return Importer::CAN_NOT_LOAD;
    }
 
+   // Seek to four bytes before the end of the file
    if (fseek(cgmFile, -4, SEEK_END) != 0)
    {
       return Importer::CAN_NOT_LOAD;
    }
+
+   // Read the last four bytes of the file, which should be the End Picture and End Metafile elements
    uint16_t endPictureVal;
    uint16_t endMetafileVal;
    if (fread(&endPictureVal, sizeof(endPictureVal), 1, cgmFile) != 1)
@@ -184,6 +198,7 @@ unsigned char CgmImporter::getFileAffinity(const std::string& filename)
    swapper.swapValue(endPictureVal);
    swapper.swapValue(endMetafileVal);
 
+   // Check the read values with the required End Picture and End Metafile values
    if ((endPictureVal == END_PICTURE_VAL) && (endMetafileVal == END_METAFILE_VAL))
    {
       return Importer::CAN_LOAD;
