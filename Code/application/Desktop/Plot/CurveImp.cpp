@@ -301,7 +301,7 @@ const QPixmap& CurveImp::getLegendPixmap(bool bSelected) const
       if (selectedPixColor != mColor)
       {
          selectedPixColor = mColor;
-         selectedPix.fill(Qt::white);
+         selectedPix.fill(Qt::transparent);
 
          QRect rcPixmap = selectedPix.rect();
 
@@ -327,7 +327,7 @@ const QPixmap& CurveImp::getLegendPixmap(bool bSelected) const
       if (pixColor != mColor)
       {
          pixColor = mColor;
-         pix.fill(Qt::white);
+         pix.fill(Qt::transparent);
 
          QRect rcPixmap = pix.rect();
 

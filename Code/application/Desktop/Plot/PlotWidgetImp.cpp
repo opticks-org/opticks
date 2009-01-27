@@ -252,10 +252,7 @@ void PlotWidgetImp::initialize(PlotViewImp *pPlotView, const string& plotName, P
    pLayout->addWidget(mpPlotWidget, 10);
 
    // Initialization
-   QPalette plotPalette = mpPlotWidget->palette();
-   plotPalette.setColor(QPalette::Window, Qt::white);
-   mpPlotWidget->setPalette(plotPalette);
-
+   setBackgroundColor(Qt::white);
    mpPlotWidget->setAutoFillBackground(true);
    setContextMenuPolicy(Qt::DefaultContextMenu);
 
@@ -474,6 +471,23 @@ bool PlotWidgetImp::getCurrentImage(QImage& image)
 
    image = pixPlotWidget.toImage();
    return true;
+}
+
+void PlotWidgetImp::setBackgroundColor(const QColor& backgroundColor)
+{
+   if ((backgroundColor.isValid() == true) && (backgroundColor != getBackgroundColor()))
+   {
+      QPalette plotPalette = mpPlotWidget->palette();
+      plotPalette.setColor(QPalette::Window, backgroundColor);
+      mpPlotWidget->setPalette(plotPalette);
+      notify(SIGNAL_NAME(Subject, Modified));
+   }
+}
+
+QColor PlotWidgetImp::getBackgroundColor() const
+{
+   QPalette plotPalette = mpPlotWidget->palette();
+   return plotPalette.color(QPalette::Window);
 }
 
 void PlotWidgetImp::setClassificationPosition(PositionType ePosition)
@@ -849,6 +863,20 @@ bool PlotWidgetImp::isLegendShown() const
 Legend* PlotWidgetImp::getLegend() const
 {
    return mpLegend;
+}
+
+void PlotWidgetImp::setLegendBackgroundColor(const QColor& backgroundColor)
+{
+   if ((backgroundColor.isValid() == true) && (backgroundColor != getLegendBackgroundColor()))
+   {
+      mpLegend->setBackgroundColor(backgroundColor);
+      notify(SIGNAL_NAME(Subject, Modified));
+   }
+}
+
+QColor PlotWidgetImp::getLegendBackgroundColor() const
+{
+   return mpLegend->getBackgroundColor();
 }
 
 void PlotWidgetImp::showLegend(bool bShow)

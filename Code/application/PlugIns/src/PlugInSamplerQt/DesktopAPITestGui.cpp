@@ -135,6 +135,18 @@ DesktopAPITestGui::DesktopAPITestGui(QWidget* pParent) :
    mpMarginEdit = new QLineEdit(pPlotWidget);
    mpMarginEdit->setFixedWidth(75);
 
+   QLabel* pBackgroundColorLabel = new QLabel("Background Color:", pPlotWidget);
+   CustomColorButton* pBackgroundColorButton = new CustomColorButton(pPlotWidget);
+   pBackgroundColorButton->usePopupGrid(true);
+
+   QLabel* pPlotBackgroundColorLabel = new QLabel("Plot Background Color:", pPlotWidget);
+   CustomColorButton* pPlotBackgroundColorButton = new CustomColorButton(pPlotWidget);
+   pPlotBackgroundColorButton->usePopupGrid(true);
+
+   QLabel* pLegendBackgroundColorLabel = new QLabel("Legend Background Color:", pPlotWidget);
+   CustomColorButton* pLegendBackgroundColorButton = new CustomColorButton(pPlotWidget);
+   pLegendBackgroundColorButton->usePopupGrid(true);
+
    QLabel* pTextColorLabel = new QLabel("Classification Text Color:", pPlotWidget);
    CustomColorButton* pTextColorButton = new CustomColorButton(pPlotWidget);
    pTextColorButton->usePopupGrid(true);
@@ -197,7 +209,7 @@ DesktopAPITestGui::DesktopAPITestGui(QWidget* pParent) :
    QGridLayout* pPlotWidgetGrid = new QGridLayout(pPlotWidget);
    pPlotWidgetGrid->setMargin(0);
    pPlotWidgetGrid->setSpacing(5);
-   pPlotWidgetGrid->addWidget(mpPlotWidget->getWidget(), 0, 0, 7, 1);
+   pPlotWidgetGrid->addWidget(mpPlotWidget->getWidget(), 0, 0, 10, 1);
    pPlotWidgetGrid->addWidget(pClassificationLabel, 0, 2);
    pPlotWidgetGrid->addWidget(mpClassificationEdit, 0, 3);
    pPlotWidgetGrid->addWidget(pClassificationApplyButton, 0, 4);
@@ -206,12 +218,18 @@ DesktopAPITestGui::DesktopAPITestGui(QWidget* pParent) :
    pPlotWidgetGrid->addWidget(pMouseModeApplyButton, 1, 4);
    pPlotWidgetGrid->addWidget(pMarginLabel, 2, 2);
    pPlotWidgetGrid->addWidget(mpMarginEdit, 2, 3, 1, 2, Qt::AlignLeft);
-   pPlotWidgetGrid->addWidget(pTextColorLabel, 3, 2);
-   pPlotWidgetGrid->addWidget(pTextColorButton, 3, 3, 1, 2, Qt::AlignLeft);
-   pPlotWidgetGrid->addWidget(pTitleColorLabel, 4, 2);
-   pPlotWidgetGrid->addWidget(pTitleColorButton, 4, 3, 1, 2, Qt::AlignLeft);
-   pPlotWidgetGrid->addWidget(mpContextMenuCheck, 5, 2, 1, 3);
-   pPlotWidgetGrid->setRowStretch(6, 10);
+   pPlotWidgetGrid->addWidget(pBackgroundColorLabel, 3, 2);
+   pPlotWidgetGrid->addWidget(pBackgroundColorButton, 3, 3, 1, 2, Qt::AlignLeft);
+   pPlotWidgetGrid->addWidget(pPlotBackgroundColorLabel, 4, 2);
+   pPlotWidgetGrid->addWidget(pPlotBackgroundColorButton, 4, 3, 1, 2, Qt::AlignLeft);
+   pPlotWidgetGrid->addWidget(pLegendBackgroundColorLabel, 5, 2);
+   pPlotWidgetGrid->addWidget(pLegendBackgroundColorButton, 5, 3, 1, 2, Qt::AlignLeft);
+   pPlotWidgetGrid->addWidget(pTextColorLabel, 6, 2);
+   pPlotWidgetGrid->addWidget(pTextColorButton, 6, 3, 1, 2, Qt::AlignLeft);
+   pPlotWidgetGrid->addWidget(pTitleColorLabel, 7, 2);
+   pPlotWidgetGrid->addWidget(pTitleColorButton, 7, 3, 1, 2, Qt::AlignLeft);
+   pPlotWidgetGrid->addWidget(mpContextMenuCheck, 8, 2, 1, 3);
+   pPlotWidgetGrid->setRowStretch(9, 10);
    pPlotWidgetGrid->setColumnStretch(0, 10);
    pPlotWidgetGrid->setColumnStretch(3, 5);
    pPlotWidgetGrid->setColumnMinimumWidth(1, 15);
@@ -250,12 +268,15 @@ DesktopAPITestGui::DesktopAPITestGui(QWidget* pParent) :
       Histogram* pHistogram = static_cast<Histogram*>(pView->addObject(HISTOGRAM, true));
       if (pHistogram != NULL)
       {
+         pHistogram->setObjectName("Histogram");
          pHistogram->setHistogramData(256, binCenters, binValues);
          pView->refresh();
       }
 
       double marginFactor = pView->getExtentsMargin();
       mpMarginEdit->setText(QString::number(marginFactor));
+
+      pPlotBackgroundColorButton->setColor(pView->getBackgroundColor());
 
       QWidget* pViewWidget = pView->getWidget();
       if (pViewWidget != NULL)
@@ -279,6 +300,8 @@ DesktopAPITestGui::DesktopAPITestGui(QWidget* pParent) :
 
    mpPlotWidget->showLegend(false);
    mpClassificationEdit->setText(QString::fromStdString(mpPlotWidget->getClassificationText()));
+   pBackgroundColorButton->setColor(mpPlotWidget->getBackgroundColor());
+   pLegendBackgroundColorButton->setColor(mpPlotWidget->getLegendBackgroundColor());
    pTextColorButton->setColor(mpPlotWidget->getClassificationColor());
 
    // Connections
@@ -289,6 +312,12 @@ DesktopAPITestGui::DesktopAPITestGui(QWidget* pParent) :
    VERIFYNR(connect(pMouseModeApplyButton, SIGNAL(clicked()), this, SLOT(enableMouseMode())));
    VERIFYNR(connect(mpMouseModeAction, SIGNAL(triggered()), this, SLOT(setCustomMouseMode())));
    VERIFYNR(connect(mpMarginEdit, SIGNAL(editingFinished()), this, SLOT(setPlotMargin())));
+   VERIFYNR(connect(pBackgroundColorButton, SIGNAL(colorChanged(const QColor&)), this,
+      SLOT(setBackgroundColor(const QColor&))));
+   VERIFYNR(connect(pPlotBackgroundColorButton, SIGNAL(colorChanged(const QColor&)), this,
+      SLOT(setPlotBackgroundColor(const QColor&))));
+   VERIFYNR(connect(pLegendBackgroundColorButton, SIGNAL(colorChanged(const QColor&)), this,
+      SLOT(setLegendBackgroundColor(const QColor&))));
    VERIFYNR(connect(pTextColorButton, SIGNAL(colorChanged(const QColor&)), this, SLOT(setTextColor(const QColor&))));
    VERIFYNR(connect(pTitleColorButton, SIGNAL(colorChanged(const QColor&)), this, SLOT(setTitleColor(const QColor&))));
    VERIFYNR(connect(pPropertiesButton, SIGNAL(clicked()), this, SLOT(displayProperties())));
@@ -656,6 +685,35 @@ void DesktopAPITestGui::setPlotMargin()
 
          pPlotView->setExtentsMargin(marginFactor);
       }
+   }
+}
+
+void DesktopAPITestGui::setBackgroundColor(const QColor& backgroundColor)
+{
+   if ((backgroundColor.isValid() == true) && (mpPlotWidget.get() != NULL))
+   {
+      mpPlotWidget->setBackgroundColor(QCOLOR_TO_COLORTYPE(backgroundColor));
+   }
+}
+
+void DesktopAPITestGui::setPlotBackgroundColor(const QColor& backgroundColor)
+{
+   if ((backgroundColor.isValid() == true) && (mpPlotWidget.get() != NULL))
+   {
+      PlotView* pPlotView = mpPlotWidget->getPlot();
+      if (pPlotView != NULL)
+      {
+         pPlotView->setBackgroundColor(QCOLOR_TO_COLORTYPE(backgroundColor));
+         pPlotView->refresh();
+      }
+   }
+}
+
+void DesktopAPITestGui::setLegendBackgroundColor(const QColor& backgroundColor)
+{
+   if ((backgroundColor.isValid() == true) && (mpPlotWidget.get() != NULL))
+   {
+      mpPlotWidget->setLegendBackgroundColor(QCOLOR_TO_COLORTYPE(backgroundColor));
    }
 }
 

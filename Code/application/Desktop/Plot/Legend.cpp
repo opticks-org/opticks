@@ -49,6 +49,22 @@ bool Legend::areSecondaryObjectsShown() const
    return mSecondaryObjects;
 }
 
+QColor Legend::getBackgroundColor() const
+{
+   QPalette legendPalette = palette();
+   return legendPalette.color(QPalette::Base);
+}
+
+void Legend::setBackgroundColor(const QColor& backgroundColor)
+{
+   if (backgroundColor.isValid() == true)
+   {
+      QPalette legendPalette = palette();
+      legendPalette.setColor(QPalette::Base, backgroundColor);
+      setPalette(legendPalette);
+   }
+}
+
 bool Legend::insertItem(PlotObject* pObject)
 {
    if (pObject == NULL)

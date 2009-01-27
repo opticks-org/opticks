@@ -259,7 +259,7 @@ const QPixmap& PolygonPlotObjectImp::getLegendPixmap(bool bSelected) const
          selectedPixFillColor = mFillColor;
          selectedPixFillStyle = mFillStyle;
          selectedPixHatchStyle = mHatchStyle;
-         selectedPix.fill(Qt::white);
+         selectedPix.fill(Qt::transparent);
 
          QPainter p(&selectedPix);
 
@@ -364,7 +364,7 @@ const QPixmap& PolygonPlotObjectImp::getLegendPixmap(bool bSelected) const
          pixFillColor = mFillColor;
          pixFillStyle = mFillStyle;
          pixHatchStyle = mHatchStyle;
-         pix.fill(Qt::white);
+         pix.fill(Qt::transparent);
 
          QPainter p(&pix);
 

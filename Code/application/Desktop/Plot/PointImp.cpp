@@ -302,7 +302,7 @@ const QPixmap& PointImp::getLegendPixmap(bool bSelected) const
          selectedPixSymbol = mSymbol;
          selectedPixWidth = iWidth;
          selectedPixHeight = iHeight;
-         selectedPix.fill(Qt::white);
+         selectedPix.fill(Qt::transparent);
 
          QRect rcPix = selectedPix.rect();
 
@@ -554,7 +554,7 @@ const QPixmap& PointImp::getLegendPixmap(bool bSelected) const
          pixSymbol = mSymbol;
          pixWidth = iWidth;
          pixHeight = iHeight;
-         pix.fill(Qt::white);
+         pix.fill(Qt::transparent);
 
          QRect rcPix = pix.rect();
 

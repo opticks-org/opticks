@@ -328,7 +328,7 @@ const QPixmap& HistogramImp::getLegendPixmap(bool bSelected) const
       if (pixColor != mColor)
       {
          pixColor = mColor;
-         pix.fill(Qt::white);
+         pix.fill(Qt::transparent);
 
          QRect rcPixmap = pix.rect();
 

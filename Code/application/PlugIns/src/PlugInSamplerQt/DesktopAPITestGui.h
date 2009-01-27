@@ -50,6 +50,9 @@ protected slots:
    void setCustomMouseMode();
    void setClassificationText();
    void setPlotMargin();
+   void setBackgroundColor(const QColor& backgroundColor);
+   void setPlotBackgroundColor(const QColor& backgroundColor);
+   void setLegendBackgroundColor(const QColor& backgroundColor);
    void setTextColor(const QColor& textColor);
    void setTitleColor(const QColor& titleColor);
    void displayProperties();

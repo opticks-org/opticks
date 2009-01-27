@@ -279,7 +279,7 @@ const QPixmap& RegionObjectImp::getLegendPixmap(bool bSelected) const
       if (pixColor != currentColor)
       {
          pixColor = currentColor;
-         pix.fill(Qt::white);
+         pix.fill(Qt::transparent);
 
          QRect rcPixmap = pix.rect();
 

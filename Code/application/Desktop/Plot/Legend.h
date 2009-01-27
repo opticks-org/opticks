@@ -27,7 +27,10 @@ public:
    void showSecondaryObjects(bool bShow);
    bool areSecondaryObjectsShown() const;
 
+   QColor getBackgroundColor() const;
+
 public slots:
+   void setBackgroundColor(const QColor& backgroundColor);
    bool insertItem(PlotObject* pObject);
    bool setItemText(PlotObject* pObject, const QString& strName);
    bool setItemSelected(PlotObject* pObject, bool bSelected);

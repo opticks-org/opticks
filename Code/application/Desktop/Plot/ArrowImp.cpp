@@ -178,7 +178,7 @@ const QPixmap& ArrowImp::getLegendPixmap(bool bSelected) const
       if (selectedPixColor != mLine.getLineColor())
       {
          selectedPixColor = mLine.getLineColor();
-         selectedPix.fill(Qt::white);
+         selectedPix.fill(Qt::transparent);
 
          QRect rcPixmap = selectedPix.rect();
 
@@ -200,7 +200,7 @@ const QPixmap& ArrowImp::getLegendPixmap(bool bSelected) const
       if (pixColor != mLine.getLineColor())
       {
          pixColor = mLine.getLineColor();
-         pix.fill(Qt::white);
+         pix.fill(Qt::transparent);
 
          QRect rcPixmap = pix.rect();
 

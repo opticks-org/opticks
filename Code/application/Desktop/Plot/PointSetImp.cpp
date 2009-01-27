@@ -586,7 +586,7 @@ const QPixmap& PointSetImp::getLegendPixmap(bool bSelected) const
       if (selectedPixColor != mLineColor)
       {
          selectedPixColor = mLineColor;
-         selectedPix.fill(Qt::white);
+         selectedPix.fill(Qt::transparent);
 
          QRect rcPixmap = selectedPix.rect();
 
@@ -612,7 +612,7 @@ const QPixmap& PointSetImp::getLegendPixmap(bool bSelected) const
       if (pixColor != mLineColor)
       {
          pixColor = mLineColor;
-         pix.fill(Qt::white);
+         pix.fill(Qt::transparent);
 
          QRect rcPixmap = pix.rect();
 

@@ -43,6 +43,7 @@ class QWidget;
  *  This subclass of Subject will notify upon the following conditions:
  *  - The plot is renamed.
  *  - The plot is deleted.
+ *  - The background color changes.
  *  - The classification text label position changes.
  *  - The classification text label color changes.
  *  - The classification text label font changes.
@@ -53,6 +54,7 @@ class QWidget;
  *  - The organization text label text changes.
  *  - The title text changes.
  *  - The title text font changes.
+ *  - The legend background color changes.
  *  - The user right-clicks in the widget to invoke a context menu.
  *  - Everything else documented in Subject.
  *
@@ -151,6 +153,33 @@ public:
     *  @see     PlotView
     */
    virtual PlotView* getPlot() const = 0;
+
+   /**
+    *  Sets the background color of the plot widget.
+    *
+    *  This method sets the background color of the plot widget, but does not
+    *  set the background color of the plot area or the legend.
+    *
+    *  @param   backgroundColor
+    *           The new plot widget background color, which must be valid.
+    *
+    *  @notify  This method will notify Subject::signalModified().
+    *
+    *  @see     setLegendBackgroundColor(), PlotView::setBackgroundColor()
+    */
+   virtual void setBackgroundColor(const ColorType& backgroundColor) = 0;
+
+   /**
+    *  Returns the background color of the plot widget.
+    *
+    *  The background color of the plot widget is separate from the background
+    *  color of the plot area and legend.
+    *
+    *  @return  The current background color of the plot widget.
+    *
+    *  @see     getLegendBackgroundColor(), PlotView::getBackgroundColor()
+    */
+   virtual ColorType getBackgroundColor() const = 0;
 
    /**
     *  Sets the position of the classification label.
@@ -421,6 +450,33 @@ public:
     *           legend is hidden.
     */
    virtual bool isLegendShown() const = 0;
+
+   /**
+    *  Sets the background color of the legend.
+    *
+    *  This method sets the background color of the legend, which is separate
+    *  from the background color of the plot widget and plot area.
+    *
+    *  @param   backgroundColor
+    *           The new legend background color, which must be valid.
+    *
+    *  @notify  This method will notify Subject::signalModified().
+    *
+    *  @see     setBackgroundColor(), PlotView::setBackgroundColor()
+    */
+   virtual void setLegendBackgroundColor(const ColorType& backgroundColor) = 0;
+
+   /**
+    *  Returns the background color of the legend.
+    *
+    *  The background color of the legend is separate from the background
+    *  color of the plot widget and plot area.
+    *
+    *  @return  The current background color of the legend.
+    *
+    *  @see     getBackgroundColor(), PlotView::getBackgroundColor()
+    */
+   virtual ColorType getLegendBackgroundColor() const = 0;
 
    /**
     *  Retrieves an image of the plot widget.

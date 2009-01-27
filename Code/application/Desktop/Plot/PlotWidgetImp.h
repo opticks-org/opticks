@@ -15,14 +15,14 @@
 #include <QtGui/QPixmap>
 #include <QtGui/QWidget>
 
+#include "ColorType.h"
 #include "FontImp.h"
 #include "LocationType.h"
 #include "SessionItemImp.h"
 #include "SubjectImp.h"
 #include "TypesFile.h"
-#include "xmlwriter.h"
-
 #include "XercesIncludes.h"
+#include "xmlwriter.h"
 
 class AnnotationToolBar;
 class Axis;
@@ -63,6 +63,7 @@ public:
 
    QImage getCurrentImage();
    bool getCurrentImage(QImage& image);
+   QColor getBackgroundColor() const;
 
    // Classification
    void setClassificationPosition(PositionType ePosition);
@@ -94,6 +95,7 @@ public:
    // Legend
    bool isLegendShown() const;
    Legend* getLegend() const;
+   QColor getLegendBackgroundColor() const;
 
    // Session
    bool serialize(SessionItemSerializer &serializer) const;
@@ -105,12 +107,14 @@ public:
    bool rename(const std::string &newName, std::string &errorMessage);
 
 public slots:
+   void setBackgroundColor(const QColor& backgroundColor);
    void setClassificationText(const QString& strClassification);
    void setClassificationFont(const QFont& ftClassification);
    void setClassificationColor(const QColor& clrClassification);
    void setTitle(const QString& strTitle);
    void setTitleFont(const QFont& ftTitle);
    void showLegend(bool bShow);
+   void setLegendBackgroundColor(const QColor& backgroundColor);
    void print(bool bDialog = true);
 
 protected:
@@ -189,6 +193,14 @@ private:
    PlotView* getPlot() const \
    { \
       return impClass::getPlot(); \
+   } \
+   void setBackgroundColor(const ColorType& backgroundColor) \
+   { \
+      impClass::setBackgroundColor(COLORTYPE_TO_QCOLOR(backgroundColor)); \
+   } \
+   ColorType getBackgroundColor() const \
+   { \
+      return QCOLOR_TO_COLORTYPE(impClass::getBackgroundColor()); \
    } \
    void setClassificationPosition(PositionType ePosition) \
    { \
@@ -325,6 +337,14 @@ private:
    bool isLegendShown() const \
    { \
       return impClass::isLegendShown(); \
+   } \
+   void setLegendBackgroundColor(const ColorType& backgroundColor) \
+   { \
+      impClass::setLegendBackgroundColor(COLORTYPE_TO_QCOLOR(backgroundColor)); \
+   } \
+   ColorType getLegendBackgroundColor() const \
+   { \
+      return QCOLOR_TO_COLORTYPE(impClass::getLegendBackgroundColor()); \
    } \
    bool getCurrentImage(QImage& image) \
    { \

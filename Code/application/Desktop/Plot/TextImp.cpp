@@ -191,7 +191,7 @@ const QPixmap& TextImp::getLegendPixmap(bool bSelected) const
       {
          selectedPixColor = mColor;
          selectedPixFont = mFont;
-         selectedPix.fill(Qt::white);
+         selectedPix.fill(Qt::transparent);
 
          QFont ftPix = mFont;
          ftPix.setPointSize(8);
@@ -212,7 +212,7 @@ const QPixmap& TextImp::getLegendPixmap(bool bSelected) const
       {
          pixColor = mColor;
          pixFont = mFont;
-         pix.fill(Qt::white);
+         pix.fill(Qt::transparent);
 
          QFont ftPix = mFont;
          ftPix.setPointSize(8);
