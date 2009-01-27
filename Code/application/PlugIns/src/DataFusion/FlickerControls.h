@@ -10,49 +10,17 @@
 #ifndef FLICKERCONTROLS_H
 #define FLICKERCONTROLS_H
 
-#include <QtCore/QObject>
-#include <QtGui/QAction>
+#include "DockWindowShell.h"
 
-#include "AlgorithmShell.h"
-#include "DesktopServices.h"
-#include "Observer.h"
-
-class DockWindow;
-
-namespace boost
+class FlickerControls : public DockWindowShell
 {
-   class any;
-}
-
-class FlickerControls : public QObject, public AlgorithmShell
-{
-   Q_OBJECT
-
 public:
    FlickerControls();
    ~FlickerControls();
 
-   void windowHidden(Subject& subject, const std::string& signal, const boost::any& v);
-   void windowShown(Subject& subject, const std::string& signal, const boost::any& v);
-
-   bool execute(PlugInArgList* pInputArgList, PlugInArgList* pOutputArgList);
-   bool getInputSpecification(PlugInArgList*& pArgList);
-   bool getOutputSpecification(PlugInArgList*& pArgList);
-
-   bool setBatch();
-
-   bool serialize(SessionItemSerializer& serializer) const;
-   bool deserialize(SessionItemDeserializer& deserializer);
-
-protected slots:
-   void displayFlickerWindow(bool bDisplay);
-   bool createFlickerWindow();
-   void createMenuItem();
-   void attachToFlickerWindow(DockWindow* pFlickerWindow);
-
-private:
-   Service<DesktopServices> mpDesktop;
-   QAction* mpWindowAction;
+protected:
+   QAction* createAction();
+   QWidget* createWidget();
 };
 
 #endif

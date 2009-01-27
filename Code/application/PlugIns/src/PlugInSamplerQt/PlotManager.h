@@ -10,44 +10,19 @@
 #ifndef PLOTMANAGER_H
 #define PLOTMANAGER_H
 
-#include <QtCore/QObject>
-#include <QtGui/QAction>
-
-#include "AlgorithmShell.h"
-#include "DesktopServices.h"
+#include "DockWindowShell.h"
 
 #define PLOT_MANAGER_NAME "Plot Manager"
 
-namespace boost
+class PlotManager : public DockWindowShell
 {
-   class any;
-}
-
-class PlotManager : public QObject, public AlgorithmShell
-{
-   Q_OBJECT
-
 public:
    PlotManager();
    ~PlotManager();
 
-   void windowHidden(Subject& subject, const std::string &signal, const boost::any& v);
-   void windowShown(Subject& subject, const std::string &signal, const boost::any& v);
-
-   bool setBatch();
-   bool getInputSpecification(PlugInArgList*& pArgList);
-   bool getOutputSpecification(PlugInArgList*& pArgList);
-   bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
-
-   bool serialize(SessionItemSerializer &serializer) const;
-   bool deserialize(SessionItemDeserializer &deserializer);
-
-protected slots:
-   void displayPlotManager(bool bDisplay);
-
-private:
-   Service<DesktopServices> mpDesktop;
-   QAction* mpWindowAction;
+protected:
+   QAction* createAction();
+   QWidget* createWidget();
 };
 
 #endif

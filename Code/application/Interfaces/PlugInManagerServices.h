@@ -75,6 +75,19 @@ public:
    }
 
    /**
+    *  The type that should be returned from PlugIn::getType() for dock window
+    *  plug-ins.
+    *
+    *  @return  Returns the type used for dock window plug-ins.
+    *
+    *  @see     DockWindowShell
+    */
+   static std::string DockWindowType()
+   {
+      return "DockWindow";
+   }
+
+   /**
     * The type that should be returned from PlugIn::getType()
     * for types of plug-in that implement the Exporter interface.
     *

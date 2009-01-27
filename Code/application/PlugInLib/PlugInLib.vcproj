@@ -20,7 +20,7 @@
 		<Configuration
 			Name="Release|Win32"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\CompileSettings\32bitSettings.vsprops;..\CompileSettings\Qt.vsprops;..\CompileSettings\LibraryCommonSettings.vsprops;..\CompileSettings\AllCommonSettings-Release-32bit.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops"
+			InheritedPropertySheets="..\CompileSettings\32bitSettings.vsprops;..\CompileSettings\Qt.vsprops;..\CompileSettings\LibraryCommonSettings.vsprops;..\CompileSettings\AllCommonSettings-Release-32bit.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\Xerces-Release.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -80,7 +80,7 @@
 		<Configuration
 			Name="Release|x64"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\CompileSettings\Qt.vsprops;..\CompileSettings\LibraryCommonSettings.vsprops;..\CompileSettings\AllCommonSettings-Release-64bit.vsprops;..\CompileSettings\64bitSettings.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops"
+			InheritedPropertySheets="..\CompileSettings\Qt.vsprops;..\CompileSettings\LibraryCommonSettings.vsprops;..\CompileSettings\AllCommonSettings-Release-64bit.vsprops;..\CompileSettings\64bitSettings.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\Xerces-Release.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -141,7 +141,7 @@
 		<Configuration
 			Name="Debug|Win32"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\CompileSettings\32bitSettings.vsprops;..\CompileSettings\Qt.vsprops;..\CompileSettings\LibraryCommonSettings.vsprops;..\CompileSettings\AllCommonSettings-Debug-32bit.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops"
+			InheritedPropertySheets="..\CompileSettings\32bitSettings.vsprops;..\CompileSettings\Qt.vsprops;..\CompileSettings\LibraryCommonSettings.vsprops;..\CompileSettings\AllCommonSettings-Debug-32bit.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\Xerces-Debug.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -201,7 +201,7 @@
 		<Configuration
 			Name="Debug|x64"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\CompileSettings\Qt.vsprops;..\CompileSettings\LibraryCommonSettings.vsprops;..\CompileSettings\AllCommonSettings-Debug-64bit.vsprops;..\CompileSettings\64bitSettings.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops"
+			InheritedPropertySheets="..\CompileSettings\Qt.vsprops;..\CompileSettings\LibraryCommonSettings.vsprops;..\CompileSettings\AllCommonSettings-Debug-64bit.vsprops;..\CompileSettings\64bitSettings.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\Xerces-Debug.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -276,6 +276,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\DockWindowShell.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ExecutableShell.cpp"
 				>
 			</File>
@@ -341,6 +345,50 @@
 				>
 			</File>
 			<File
+				RelativePath=".\DockWindowShell.h"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing $(InputName).h..."
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
+						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing $(InputName).h..."
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
+						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing $(InputName).h..."
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
+						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing $(InputName).h..."
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
+						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\ExecutableShell.h"
 				>
 			</File>
@@ -386,6 +434,15 @@
 			</File>
 			<File
 				RelativePath=".\WizardShell.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="moc"
+			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
+			>
+			<File
+				RelativePath="$(BuildDir)\Moc\$(ProjectName)\moc_DockWindowShell.cpp"
 				>
 			</File>
 		</Filter>

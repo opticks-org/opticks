@@ -8,252 +8,96 @@
  */
 
 #include <QtGui/QMenu>
-#include <QtGui/QWidget>
 
-#include "FlickerControls.h"
 #include "AppVersion.h"
-#include "DockWindow.h"
+#include "DesktopServices.h"
+#include "FlickerControls.h"
 #include "ImageAdjustWidget.h"
 #include "MenuBar.h"
-#include "SessionItemDeserializer.h"
-#include "SessionItemSerializer.h"
-#include "SessionManager.h"
-#include "Slot.h"
 #include "SpatialDataWindow.h"
-#include "XercesIncludes.h"
-#include "xmlreader.h"
-#include "xmlwriter.h"
 
-#include <sstream>
-
-XERCES_CPP_NAMESPACE_USE
-
-FlickerControls::FlickerControls() :
-   mpWindowAction(NULL)
+FlickerControls::FlickerControls()
 {
-   AlgorithmShell::setName("Flicker Controls");
+   DockWindowShell::setName("Flicker Controls");
    setCreator("Ball Aerospace & Technologies Corp.");
    setCopyright(APP_COPYRIGHT);
    setVersion(APP_VERSION_NUMBER);
-   setDescription("Manipulates the display of the primary raster layer and "
-                  "the topmost raster layer.");
-   executeOnStartup(true);
+   setDescription("Manipulates the display of the primary raster layer and the topmost raster layer.");
    setDescriptorId("{99CBDAC8-9E7E-4e6d-A3A7-F6936A84E9BF}");
-   allowMultipleInstances(false);
-   destroyAfterExecute(false);
    setProductionStatus(APP_IS_PRODUCTION_RELEASE);
 }
 
 FlickerControls::~FlickerControls()
 {
-   if (mpWindowAction != NULL)
+   QAction* pAction = getAction();
+   if (pAction != NULL)
    {
-      MenuBar* pMenuBar = mpDesktop->getMainMenuBar();
+      Service<DesktopServices> pDesktop;
+
+      // Remove the menu command
+      MenuBar* pMenuBar = pDesktop->getMainMenuBar();
       if (pMenuBar != NULL)
       {
-         pMenuBar->removeMenuItem(mpWindowAction);
+         pMenuBar->removeMenuItem(pAction);
       }
 
-      if (mpDesktop->getMainWidget() != NULL)
+      // Delete the action
+      if (pDesktop->getMainWidget() != NULL)
       {
-         delete mpWindowAction;
-      }
-   }
-
-   Window* pWindow = mpDesktop->getWindow("Flicker Window", DOCK_WINDOW);
-   if (pWindow != NULL)
-   {
-      pWindow->detach(SIGNAL_NAME(DockWindow, Shown), Slot(this, &FlickerControls::windowShown));
-      pWindow->detach(SIGNAL_NAME(DockWindow, Hidden), Slot(this, &FlickerControls::windowHidden));
-      mpDesktop->deleteWindow(pWindow);
-   }
-}
-
-void FlickerControls::windowHidden(Subject& subject, const std::string& signal, const boost::any& v)
-{
-   DockWindow* pWindow = static_cast<DockWindow*>(mpDesktop->getWindow("Flicker Window", DOCK_WINDOW));
-   if (pWindow != NULL)
-   {
-      if ((dynamic_cast<DockWindow*>(&subject) == pWindow) && (mpWindowAction != NULL))
-      {
-         mpWindowAction->setChecked(false);
+         delete pAction;
       }
    }
 }
 
-void FlickerControls::windowShown(Subject& subject, const std::string& signal, const boost::any& v)
+QAction* FlickerControls::createAction()
 {
-   DockWindow* pWindow = static_cast<DockWindow*>(mpDesktop->getWindow("Flicker Window", DOCK_WINDOW));
-   if (pWindow != NULL)
+   Service<DesktopServices> pDesktop;
+
+   MenuBar* pMenuBar = pDesktop->getMainMenuBar();
+   if (pMenuBar == NULL)
    {
-      if ((dynamic_cast<DockWindow*>(&subject) == pWindow) && (mpWindowAction != NULL))
-      {
-         mpWindowAction->setChecked(true);
-      }
+      return NULL;
    }
-}
 
-bool FlickerControls::execute(PlugInArgList* pInputArgList, PlugInArgList* pOutputArgList)
-{
-   createMenuItem();
+   QAction* pBeforeAction = NULL;
 
-   return createFlickerWindow() && mpWindowAction != NULL;
-}
-
-bool FlickerControls::getInputSpecification(PlugInArgList*& pArgList)
-{
-   pArgList = NULL;
-   return true;
-}
-
-bool FlickerControls::getOutputSpecification(PlugInArgList*& pArgList)
-{
-   pArgList = NULL;
-   return true;
-}
-
-bool FlickerControls::setBatch()
-{
-   AlgorithmShell::setBatch();
-   return false;
-}
-
-void FlickerControls::createMenuItem()
-{
-   // Add a menu command to invoke the window
-   MenuBar* pMenuBar = mpDesktop->getMainMenuBar();
-   if (pMenuBar != NULL)
+   QAction* pToolsAction = pMenuBar->getMenuItem("&Tools");
+   if (pToolsAction != NULL)
    {
-      QAction* pBeforeAction = NULL;
-
-      QAction* pToolsAction = pMenuBar->getMenuItem("&Tools");
-      if (pToolsAction != NULL)
+      QMenu* pMenu = pToolsAction->menu();
+      if (pMenu != NULL)
       {
-         QMenu* pMenu = pToolsAction->menu();
-         if (pMenu != NULL)
+         QList<QAction*> actions = pMenu->actions();
+         for (int i = 0; i < actions.count(); ++i)
          {
-            QList<QAction*> actions = pMenu->actions();
-            for (int i = 0; i < actions.count(); ++i)
+            QAction* pAction = actions[i];
+            if (pAction != NULL)
             {
-               QAction* pAction = actions[i];
-               if (pAction != NULL)
+               if ((pAction->text() == "S&cripting Window") && (pAction != actions.back()))
                {
-                  if ((pAction->text() == "S&cripting Window") && (pAction != actions.back()))
-                  {
-                     pBeforeAction = actions[i + 1];
-                     break;
-                  }
+                  pBeforeAction = actions[i + 1];
+                  break;
                }
             }
          }
       }
-
-      mpWindowAction = pMenuBar->addCommand("&Tools/&Flicker Window", getName(), pBeforeAction);
-      if (mpWindowAction != NULL)
-      {
-         mpWindowAction->setAutoRepeat(false);
-         mpWindowAction->setCheckable(true);
-         mpWindowAction->setToolTip("Flicker Window");
-         mpWindowAction->setStatusTip("Toggles the display of the Flicker Window");
-         connect(mpWindowAction, SIGNAL(triggered(bool)), this, SLOT(displayFlickerWindow(bool)));
-      }
    }
+
+   // Create an action on the menu bar
+   QAction* pAction = pMenuBar->addCommand("&Tools/&Flicker Controls", getName(), pBeforeAction);
+   if (pAction != NULL)
+   {
+      pAction->setToolTip("Flicker Controls Window");
+      pAction->setStatusTip("Toggles the display of the Flicker Controls Window");
+   }
+
+   return pAction;
 }
 
-bool FlickerControls::createFlickerWindow()
+QWidget* FlickerControls::createWidget()
 {
-   // Create the flicker window
-   if (mpWindowAction != NULL)
-   {
-      DockWindow* pFlickerWindow = static_cast<DockWindow*>(mpDesktop->getWindow("Flicker Window", DOCK_WINDOW));
-      if (pFlickerWindow == NULL)
-      {
-         pFlickerWindow = static_cast<DockWindow*>(mpDesktop->createWindow("Flicker Window", DOCK_WINDOW));
-         if (pFlickerWindow != NULL)
-         {
-            attachToFlickerWindow(pFlickerWindow);
+   Service<DesktopServices> pDesktop;
 
-            pFlickerWindow->hide();
-         }
-         else
-         {
-            return false;
-         }
-      }
-   }
-   return true;
-}
-
-void FlickerControls::attachToFlickerWindow(DockWindow* pFlickerWindow)
-{
-   if (pFlickerWindow != NULL)
-   {
-      pFlickerWindow->attach(SIGNAL_NAME(DockWindow, Shown), Slot(this, &FlickerControls::windowShown));
-      pFlickerWindow->attach(SIGNAL_NAME(DockWindow, Hidden), Slot(this, &FlickerControls::windowHidden));
-
-      SpatialDataWindow* pWindow = dynamic_cast<SpatialDataWindow*>(mpDesktop->getCurrentWorkspaceWindow());
-
-      QWidget* pWidget = new ImageAdjustWidget(pWindow, mpDesktop->getMainWidget());
-      if (pWidget != NULL)
-      {
-         pFlickerWindow->setWidget(pWidget);
-      }
-   }
-}
-
-void FlickerControls::displayFlickerWindow(bool bDisplay)
-{
-   DockWindow* pFlickerWindow = static_cast<DockWindow*>(mpDesktop->getWindow("Flicker Window", DOCK_WINDOW));
-   if (pFlickerWindow != NULL)
-   {
-      if (bDisplay == true)
-      {
-         pFlickerWindow->show();
-      }
-      else
-      {
-         pFlickerWindow->hide();
-      }
-   }
-}
-
-bool FlickerControls::serialize(SessionItemSerializer& serializer) const
-{
-   if (mpWindowAction != NULL)
-   {
-      XMLWriter writer("FlickerControls");
-      writer.addAttr("shown", mpWindowAction->isChecked());
-      DockWindow* pFlickerWindow = static_cast<DockWindow*>(mpDesktop->getWindow("Flicker Window", DOCK_WINDOW));
-      if (pFlickerWindow)
-      {
-         writer.addAttr("windowId", pFlickerWindow->getId());
-         return serializer.serialize(writer);
-      }
-   }
-   return false;
-}
-
-bool FlickerControls::deserialize(SessionItemDeserializer& deserializer)
-{
-   createMenuItem();
-
-   if (mpWindowAction != NULL)
-   {
-      XmlReader reader(NULL, false);
-      DOMElement* pRootElement = deserializer.deserialize(reader, "FlickerControls");
-      if (pRootElement)
-      {
-         std::string windowId = A(pRootElement->getAttribute(X("windowId")));
-         DockWindow* pFlickerWindow = dynamic_cast<DockWindow*>(Service<SessionManager>()->getSessionItem(windowId));
-         if (pFlickerWindow != NULL)
-         {
-            attachToFlickerWindow(pFlickerWindow);
-            bool shown = XmlReader::StringStreamAssigner<bool>()(A(pRootElement->getAttribute(X("shown"))));
-            mpWindowAction->setChecked(shown);
-            return true;
-         }
-      }
-   }
-
-   return false;
+   SpatialDataWindow* pWindow = dynamic_cast<SpatialDataWindow*>(pDesktop->getCurrentWorkspaceWindow());
+   return new ImageAdjustWidget(pWindow, pDesktop->getMainWidget());
 }

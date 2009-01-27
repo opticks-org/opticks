@@ -10,19 +10,11 @@
 #include <QtGui/QBitmap>
 #include <QtGui/QMenu>
 
-#include "PlotManager.h"
 #include "DesktopServices.h"
-#include "DockWindow.h"
 #include "DockWindowWidget.h"
 #include "MenuBar.h"
-#include "SessionItemDeserializer.h"
-#include "SessionItemSerializer.h"
-#include "Slot.h"
+#include "PlotManager.h"
 #include "ToolBar.h"
-#include "xmlreader.h"
-#include "xmlwriter.h"
-
-XERCES_CPP_NAMESPACE_USE
 
 static const char* const PlotManagerIcon[] =
 {
@@ -52,227 +44,106 @@ static const char* const PlotManagerIcon[] =
    "................"
 };
 
-PlotManager::PlotManager() :
-   mpWindowAction(NULL)
+PlotManager::PlotManager()
 {
-   AlgorithmShell::setName(PLOT_MANAGER_NAME);
+   DockWindowShell::setName(PLOT_MANAGER_NAME);
    setCreator("Opticks Community");
    setVersion("Sample");
    setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
    setDescription("Provides access to plot windows and their plots.");
-   setProductionStatus(false);
    setDescriptorId("{2204D4DE-7F7E-455f-B4AB-CD730A9AA0A2}");
-   allowMultipleInstances(false);
-   executeOnStartup(true);
-   destroyAfterExecute(false);
-   setInteractive();
+   setProductionStatus(false);
 }
 
 PlotManager::~PlotManager()
 {
-   if (mpWindowAction != NULL)
+   QAction* pAction = getAction();
+   if (pAction != NULL)
    {
-      MenuBar* pMenuBar = mpDesktop->getMainMenuBar();
+      Service<DesktopServices> pDesktop;
+
+      // Remove the menu command
+      MenuBar* pMenuBar = pDesktop->getMainMenuBar();
       if (pMenuBar != NULL)
       {
-         pMenuBar->removeMenuItem(mpWindowAction);
+         pMenuBar->removeMenuItem(pAction);
       }
 
-      ToolBar* pToolBar = static_cast<ToolBar*>(mpDesktop->getWindow("Demo", TOOLBAR));
+      // Remove the toolbar button
+      ToolBar* pToolBar = static_cast<ToolBar*>(pDesktop->getWindow("Demo", TOOLBAR));
       if (pToolBar != NULL)
       {
-         pToolBar->removeItem(mpWindowAction);
+         pToolBar->removeItem(pAction);
       }
 
-      if (mpDesktop->getMainWidget() != NULL)
+      // Delete the action
+      if (pDesktop->getMainWidget() != NULL)
       {
-         delete mpWindowAction;
-      }
-   }
-
-   Window* pWindow = mpDesktop->getWindow(PLOT_MANAGER_NAME, DOCK_WINDOW);
-   if (pWindow != NULL)
-   {
-      pWindow->detach(SIGNAL_NAME(DockWindow, Shown), Slot(this, &PlotManager::windowShown));
-      pWindow->detach(SIGNAL_NAME(DockWindow, Hidden), Slot(this, &PlotManager::windowHidden));
-      mpDesktop->deleteWindow(pWindow);
-   }
-}
-
-void PlotManager::windowHidden(Subject& subject, const std::string &signal, const boost::any& v)
-{
-   DockWindow* pWindow = static_cast<DockWindow*>(mpDesktop->getWindow(PLOT_MANAGER_NAME, DOCK_WINDOW));
-   if (pWindow != NULL)
-   {
-      if ((dynamic_cast<DockWindow*>(&subject) == pWindow) && (mpWindowAction != NULL))
-      {
-         mpWindowAction->setChecked(false);
+         delete pAction;
       }
    }
 }
 
-void PlotManager::windowShown(Subject& subject, const std::string &signal, const boost::any& v)
+QAction* PlotManager::createAction()
 {
-   DockWindow* pWindow = static_cast<DockWindow*>(mpDesktop->getWindow(PLOT_MANAGER_NAME, DOCK_WINDOW));
-   if (pWindow != NULL)
+   Service<DesktopServices> pDesktop;
+
+   MenuBar* pMenuBar = pDesktop->getMainMenuBar();
+   if (pMenuBar == NULL)
    {
-      if ((dynamic_cast<DockWindow*>(&subject) == pWindow) && (mpWindowAction != NULL))
-      {
-         mpWindowAction->setChecked(true);
-      }
+      return NULL;
    }
-}
 
-bool PlotManager::setBatch()
-{
-   AlgorithmShell::setBatch();
-   return false;
-}
+   QAction* pBeforeAction = NULL;
 
-bool PlotManager::getInputSpecification(PlugInArgList*& pArgList)
-{
-   pArgList = NULL;
-   return true;
-}
-
-bool PlotManager::getOutputSpecification(PlugInArgList*& pArgList)
-{
-   pArgList = NULL;
-   return true;
-}
-
-bool PlotManager::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
-{
-   QPixmap windowPix = QPixmap(PlotManagerIcon);
-   windowPix.setMask(windowPix.createHeuristicMask());
-   QIcon windowIcon(windowPix);
-
-   // Add a menu command to invoke the window
-   MenuBar* pMenuBar = mpDesktop->getMainMenuBar();
-   if (pMenuBar != NULL)
+   QAction* pToolsAction = pMenuBar->getMenuItem("&Tools");
+   if (pToolsAction != NULL)
    {
-      QAction* pBeforeAction = NULL;
-
-      QAction* pToolsAction = pMenuBar->getMenuItem("&Tools");
-      if (pToolsAction != NULL)
+      QMenu* pMenu = pToolsAction->menu();
+      if (pMenu != NULL)
       {
-         QMenu* pMenu = pToolsAction->menu();
-         if (pMenu != NULL)
+         QList<QAction*> actions = pMenu->actions();
+         for (int i = 0; i < actions.count(); ++i)
          {
-            QList<QAction*> actions = pMenu->actions();
-            for (int i = 0; i < actions.count(); ++i)
+            QAction* pAction = actions[i];
+            if (pAction != NULL)
             {
-               QAction* pAction = actions[i];
-               if (pAction != NULL)
+               if ((pAction->text() == "S&cripting Window") && (pAction != actions.back()))
                {
-                  if ((pAction->text() == "S&cripting Window") && (pAction != actions.back()))
-                  {
-                     pBeforeAction = actions[i + 1];
-                     break;
-                  }
+                  pBeforeAction = actions[i + 1];
+                  break;
                }
             }
          }
       }
-
-      mpWindowAction = pMenuBar->addCommand("&Tools/&Plot Manager", getName(), pBeforeAction);
-      if (mpWindowAction != NULL)
-      {
-         mpWindowAction->setAutoRepeat(false);
-         mpWindowAction->setIcon(windowIcon);
-         mpWindowAction->setCheckable(true);
-         mpWindowAction->setToolTip(PLOT_MANAGER_NAME);
-         mpWindowAction->setStatusTip("Toggles the display of the Plot Manager window");
-         connect(mpWindowAction, SIGNAL(triggered(bool)), this, SLOT(displayPlotManager(bool)));
-
-         // Add the action to the toolbar
-         ToolBar* pToolBar = static_cast<ToolBar*>(mpDesktop->getWindow("Demo", TOOLBAR));
-         if (pToolBar != NULL)
-         {
-            pToolBar->addSeparator();
-            pToolBar->addButton(mpWindowAction);
-         }
-      }
    }
 
-   // Create the plot manager dock window
-   if (mpWindowAction != NULL)
+   // Create an action on the menu bar
+   QAction* pAction = pMenuBar->addCommand("&Tools/&Plot Manager", getName(), pBeforeAction);
+   if (pAction != NULL)
    {
-      bool created = true;
-      DockWindow* pWindow = static_cast<DockWindow*>(mpDesktop->createWindow(PLOT_MANAGER_NAME, DOCK_WINDOW));
-      if (pWindow == NULL)
-      {
-         pWindow = static_cast<DockWindow*>(mpDesktop->getWindow(PLOT_MANAGER_NAME, DOCK_WINDOW));
-         created = false;
-      }
-      if (pWindow != NULL)
-      {
-         DockWindowWidget* pWidget = new DockWindowWidget(mpDesktop->getMainWidget());
-         if (pWidget != NULL)
-         {
-            pWindow->setWidget(pWidget);
-         }
+      QPixmap windowPix = QPixmap(PlotManagerIcon);
+      windowPix.setMask(windowPix.createHeuristicMask());
+      QIcon windowIcon(windowPix);
 
-         pWindow->setIcon(windowIcon);
-         pWindow->attach(SIGNAL_NAME(DockWindow, Shown), Slot(this, &PlotManager::windowShown));
-         pWindow->attach(SIGNAL_NAME(DockWindow, Hidden), Slot(this, &PlotManager::windowHidden));
-         if (created)
-         {
-            pWindow->hide();
-         }
-      }
-      else
+      pAction->setIcon(windowIcon);
+      pAction->setToolTip(PLOT_MANAGER_NAME);
+      pAction->setStatusTip("Toggles the display of the Plot Manager window");
+
+      // Add the action to the toolbar
+      ToolBar* pToolBar = static_cast<ToolBar*>(pDesktop->getWindow("Demo", TOOLBAR));
+      if (pToolBar != NULL)
       {
-         return false;
+         pToolBar->addSeparator();
+         pToolBar->addButton(pAction);
       }
    }
 
-   return (mpWindowAction != NULL);
+   return pAction;
 }
 
-void PlotManager::displayPlotManager(bool bDisplay)
+QWidget* PlotManager::createWidget()
 {
-   DockWindow* pWindow = static_cast<DockWindow*>(mpDesktop->getWindow(PLOT_MANAGER_NAME, DOCK_WINDOW));
-   if (pWindow != NULL)
-   {
-      if (bDisplay == true)
-      {
-         pWindow->show();
-      }
-      else
-      {
-         pWindow->hide();
-      }
-   }
-}
-
-bool PlotManager::serialize(SessionItemSerializer &serializer) const
-{
-   if (mpWindowAction != NULL)
-   {
-      XMLWriter writer("PlotManager");
-      writer.addAttr("shown", mpWindowAction->isChecked());
-      return serializer.serialize(writer);
-   }
-   else
-   {
-      return false;
-   }
-}
-
-bool PlotManager::deserialize(SessionItemDeserializer &deserializer)
-{
-   execute(NULL, NULL);
-   if (mpWindowAction != NULL)
-   {
-      XmlReader reader(NULL, false);
-      DOMElement* pRootElement = deserializer.deserialize(reader, "PlotManager");
-      if (pRootElement)
-      {
-         bool shown = XmlReader::StringStreamAssigner<bool>()(A(pRootElement->getAttribute(X("shown"))));
-         mpWindowAction->setChecked(shown);
-         return true;
-      }
-   }
-   return false;
+   Service<DesktopServices> pDesktop;
+   return new DockWindowWidget(pDesktop->getMainWidget());
 }
