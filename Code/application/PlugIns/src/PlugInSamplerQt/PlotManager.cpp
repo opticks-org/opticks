@@ -46,7 +46,7 @@ static const char* const PlotManagerIcon[] =
 
 PlotManager::PlotManager()
 {
-   DockWindowShell::setName(PLOT_MANAGER_NAME);
+   ExecutableShell::setName(PLOT_MANAGER_NAME);
    setCreator("Opticks Community");
    setVersion("Sample");
    setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");

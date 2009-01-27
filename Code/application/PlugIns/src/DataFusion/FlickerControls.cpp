@@ -18,7 +18,7 @@
 
 FlickerControls::FlickerControls()
 {
-   DockWindowShell::setName("Flicker Controls");
+   ExecutableShell::setName("Flicker Controls");
    setCreator("Ball Aerospace & Technologies Corp.");
    setCopyright(APP_COPYRIGHT);
    setVersion(APP_VERSION_NUMBER);
