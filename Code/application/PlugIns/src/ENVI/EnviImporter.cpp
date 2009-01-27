@@ -34,8 +34,6 @@
 using namespace std;
 
 static bool parseDefaultBands(EnviField* pField, vector<unsigned int>* pBandNumbers);
-static bool parseFwhm(EnviField* pField, vector<double>* pWavelengthStarts,
-                      const vector<double>* pWavelengthCenters, vector<double>* pWavelengthEnds);
 static bool parseBbl(EnviField* pField, vector<unsigned int>* pBadBands);
 
 template <class T>
@@ -59,7 +57,8 @@ void vectorFromField(EnviField* pField, vector<T>& vec, const char* pFormat)
    delete pBuffer;
 }
 
-EnviImporter::EnviImporter()
+EnviImporter::EnviImporter() :
+   mWavelengthUnits(WU_UNKNOWN)
 {
    setName("ENVI Importer");
    setCreator("Ball Aerospace & Technologies Corp.");
@@ -576,10 +575,9 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
 
                   // wavelength units
                   pField = mFields.find("wavelength units");
-                  WavelengthUnitsType eType(WU_UNKNOWN);
                   if (pField != NULL)
                   {
-                     eType = strToType(pField->mValue);
+                     mWavelengthUnits = strToType(pField->mValue);
                   }
 
                   // Wavelengths
@@ -587,8 +585,7 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
                   pField = mFields.find("wavelength");
                   if (pField != NULL)
                   {
-                     parseWavelengths(pField, &centerWavelengths, eType);
-                     if (pMetadata != NULL)
+                     if ((parseWavelengths(pField, &centerWavelengths) == true) && (pMetadata != NULL))
                      {
                         string pCenterPath[] = { SPECIAL_METADATA_NAME, BAND_METADATA_NAME, 
                            CENTER_WAVELENGTHS_METADATA_NAME, END_METADATA_NAME };
@@ -602,9 +599,9 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
                   {
                      vector<double> startWavelengths;
                      vector<double> endWavelengths;
-                     parseFwhm(pField, &startWavelengths, &centerWavelengths, &endWavelengths);
-                     
-                     if (pMetadata != NULL)
+
+                     if ((parseFwhm(pField, &startWavelengths, &centerWavelengths, &endWavelengths) == true) &&
+                        (pMetadata != NULL))
                      {
                         string pStartPath[] = { SPECIAL_METADATA_NAME, BAND_METADATA_NAME, 
                            START_WAVELENGTHS_METADATA_NAME, END_METADATA_NAME };
@@ -640,7 +637,7 @@ unsigned char EnviImporter::getFileAffinity(const string& filename)
    }
 }
 
-bool EnviImporter::parseWavelengths(EnviField* pField, vector<double>* pWavelengthCenters, WavelengthUnitsType eType)
+bool EnviImporter::parseWavelengths(EnviField* pField, vector<double>* pWavelengthCenters)
 {
    unsigned int i;
    double maxWavelength(0.0);
@@ -657,7 +654,7 @@ bool EnviImporter::parseWavelengths(EnviField* pField, vector<double>* pWaveleng
       }
    }
 
-   switch (eType)
+   switch (mWavelengthUnits)
    {
    case WU_MICROMETERS:  // already in micrometers, nothing further to do
       break;
@@ -690,6 +687,8 @@ bool EnviImporter::parseWavelengths(EnviField* pField, vector<double>* pWaveleng
          {
             pWavelengthCenters->at(i) *= 0.001;  // convert to micrometers
          }
+
+         mWavelengthUnits = WU_NANOMETERS;
       }
       break;
    }
@@ -717,15 +716,13 @@ static bool parseDefaultBands(EnviField* pField, vector<unsigned int>* pBandNumb
    return true;
 }
 
-static double sWavelengthScaleFactor = 1.0;
-
-static bool parseFwhm(EnviField* pField, vector<double>* pWavelengthStarts, const vector<double>* pWavelengthCenters,
-                      vector<double>* pWavelengthEnds)
+bool EnviImporter::parseFwhm(EnviField* pField, vector<double>* pWavelengthStarts,
+                             const vector<double>* pWavelengthCenters, vector<double>* pWavelengthEnds)
 {
    vector<double> fwhmValues;
-   for (vector<EnviField*>::size_type i = 0; i < pField->mChildren.size(); i++)
+   for (vector<EnviField*>::size_type i = 0; i < pField->mChildren.size(); ++i)
    {
-      vectorFromField(pField->mChildren.at(i), fwhmValues, "%lf");
+      vectorFromField(pField->mChildren[i], fwhmValues, "%lf");
    }
 
    if (fwhmValues.size() != pWavelengthCenters->size())
@@ -733,10 +730,51 @@ static bool parseFwhm(EnviField* pField, vector<double>* pWavelengthStarts, cons
       return false;
    }
 
-   for (vector<double>::size_type i = 0; i < fwhmValues.size(); i++)
+   switch (mWavelengthUnits)
    {
-      pWavelengthStarts->push_back(pWavelengthCenters->at(i) - sWavelengthScaleFactor * fwhmValues[i] / 2.0);
-      pWavelengthEnds->push_back(pWavelengthCenters->at(i) + sWavelengthScaleFactor * fwhmValues[i] / 2.0);
+   case WU_MICROMETERS:  // Already in micrometers, nothing further to do
+      break;
+
+   case WU_NANOMETERS:
+      for (vector<double>::size_type i = 0; i < fwhmValues.size(); ++i)
+      {
+         fwhmValues[i] *= 0.001;  // Convert to micrometers
+      }
+      break;
+
+   case WU_WAVENUMBER:
+      for (vector<double>::size_type i = 0; i < fwhmValues.size(); ++i)
+      {
+         // Convert the center wavelength to wave number
+         double centerValue = 10000.0 / pWavelengthCenters->at(i);
+
+         // Find the start and stop wave numbers
+         double startValue = centerValue - (fwhmValues[i] / 2);
+         double endValue = centerValue + (fwhmValues[i] / 2);
+
+         // Convert the start and stop wave numbers to micrometers
+         double startConverted = 10000.0 / startValue;
+         double endConverted = 10000.0 / endValue;
+
+         // Update the FWHM value
+         fwhmValues[i] = endConverted - startConverted;
+      }
+      break;
+
+   case WU_GHZ:      // Fall through
+   case WU_MHZ:      // Fall through
+   case WU_INDEX:
+      return false;  // Not supported
+
+   case WU_UNKNOWN:  // Fall through
+   default:
+      break;
+   }
+
+   for (vector<double>::size_type i = 0; i < fwhmValues.size(); ++i)
+   {
+      pWavelengthStarts->push_back(pWavelengthCenters->at(i) - fwhmValues[i] / 2.0);
+      pWavelengthEnds->push_back(pWavelengthCenters->at(i) + fwhmValues[i] / 2.0);
    }
 
    return true;

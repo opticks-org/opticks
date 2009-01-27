@@ -43,12 +43,15 @@ protected:
    WavelengthUnitsType strToType(std::string strType);
 
    bool parseHeader(const std::string& filename);
-   bool parseWavelengths(EnviField* pField, std::vector<double>* pWavelengthCenters, WavelengthUnitsType eType);
+   bool parseWavelengths(EnviField* pField, std::vector<double>* pWavelengthCenters);
+   bool parseFwhm(EnviField* pField, std::vector<double>* pWavelengthStarts,
+      const std::vector<double>* pWavelengthCenters, std::vector<double>* pWavelengthEnds);
    std::string findDataFile(const std::string& headerPath);
    std::string findHeaderFile(const std::string& dataPath);
 
 private:
    EnviField mFields;
+   WavelengthUnitsType mWavelengthUnits;
 };
 
 #endif
