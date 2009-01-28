@@ -7,8 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #ifndef MOUSEMODEIMP_H
 #define MOUSEMODEIMP_H
 
@@ -24,8 +22,6 @@ class MouseModeImp : public MouseMode
 {
 public:
    MouseModeImp(const QString& strModeName, const QCursor& mouseCursor, QAction* pAction = NULL);
-   MouseModeImp(const QString& strModeName, const QBitmap& mouseCursor, const QBitmap& cursorMask,
-      int iHotX = -1, int iHotY = -1, QAction* pAction = NULL);
    ~MouseModeImp();
 
    void getName(std::string& modeName) const;

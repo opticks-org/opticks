@@ -112,9 +112,9 @@ ProductViewImp::ProductViewImp(const string& id, const string& viewName, QGLCont
    setWindowIcon(pIcons->mSpectralData);
    addMouseMode(new MouseModeImp("LayerMode", QCursor(Qt::ArrowCursor)));
    addMouseMode(new MouseModeImp("PanMode", QCursor(Qt::OpenHandCursor)));
-   addMouseMode(new MouseModeImp("ZoomInMode", pIcons->mZoomInCursor, pIcons->mZoomInMask, 0, 0));
-   addMouseMode(new MouseModeImp("ZoomOutMode", pIcons->mZoomOutCursor, pIcons->mZoomOutMask, 0, 0));
-   addMouseMode(new MouseModeImp("ZoomBoxMode", pIcons->mZoomRectCursor, pIcons->mZoomRectMask, 0, 0));
+   addMouseMode(new MouseModeImp("ZoomInMode", QCursor(pIcons->mZoomInCursor, pIcons->mZoomInMask, 0, 0)));
+   addMouseMode(new MouseModeImp("ZoomOutMode", QCursor(pIcons->mZoomOutCursor, pIcons->mZoomOutMask, 0, 0)));
+   addMouseMode(new MouseModeImp("ZoomBoxMode", QCursor(pIcons->mZoomRectCursor, pIcons->mZoomRectMask, 0, 0)));
 
    // Connections
    connect(this, SIGNAL(mouseModeChanged(const MouseMode*)), this, SLOT(updateMouseCursor(const MouseMode*)));

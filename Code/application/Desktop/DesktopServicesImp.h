@@ -114,6 +114,7 @@ public:
 
    MouseMode* createMouseMode(const std::string& modeName, const char* const mouseCursor[],
       const char* const cursorMask[], int iHotX = 0, int iHotY = 0, QAction* pAction = NULL) const;
+   MouseMode* createMouseMode(const std::string& modeName, const QCursor& mouseCursor, QAction* pAction = NULL) const;
    void deleteMouseMode(MouseMode* pMouseMode) const;
 
    void setPanMode(PanModeType panMode);

@@ -30,6 +30,7 @@ class PlugInCallback;
 class ProductWindow;
 class Progress;
 class QAction;
+class QCursor;
 class QImage;
 class QWidget;
 class SessionItem;
@@ -562,7 +563,7 @@ public:
    /**
     *  Creates the mouse mode.
     *
-    *  This method creates a mouse mode that is available to add to a view type.
+    *  This method creates a mouse mode that is available to add to a view.
     *
     *  @param   modeName
     *           The name for the mouse mode.  Mouse mode names must be unique for
@@ -582,7 +583,46 @@ public:
     *           The y-coordinate for the cursor hot spot.
     *  @param   pAction
     *           A Qt action associated with the mouse mode.  When the mouse mode
-    *           is added to a view, a non-NULL value will add the action to the
+    *           is added to a view, a non-\c NULL value will add the action to the
+    *           main mouse mode action group containing the following mouse modes:
+    *           @arg    "LayerMode"
+    *           @arg    "MeasurementMode"
+    *           @arg    "PanMode"
+    *           @arg    "RotateMode"
+    *           @arg    "ZoomInMode"
+    *           @arg    "ZoomOutMode"
+    *           @arg    "ZoomBoxMode"
+    *
+    *           When the mouse mode is activated in the view, the action is toggled
+    *           on and the other actions in the group are toggled off.  So, this
+    *           value should only be set if the action should be added to the action
+    *           group.
+    *
+    *  @return  A pointer to the newly created mouse mode.
+    *
+    *  @see     createMouseMode(const std::string&, const QCursor&, QAction*) const,
+    *           MouseMode, deleteMouseMode(), View::addMouseMode(), View::setMouseMode()
+    */
+   virtual MouseMode* createMouseMode(const std::string& modeName, const char* const mouseCursor[],
+      const char* const cursorMask[], int iHotX = 0, int iHotY = 0, QAction* pAction = NULL) const = 0;
+
+   /**
+    *  Creates the mouse mode.
+    *
+    *  This overloaded method serves as a convenience to create a mouse mode
+    *  that is available to add to a view.
+    *
+    *  @param   modeName
+    *           The name for the mouse mode.  Mouse mode names must be unique for
+    *           the view type to which they are added.
+    *  @param   mouseCursor
+    *           The cursor that should be displayed when the mouse mode is active.
+    *           Cursors  can be any size, but typically they are 32 x 32 pixels
+    *           in size or less.  Currently only black and white cursors are
+    *           supported.
+    *  @param   pAction
+    *           A Qt action associated with the mouse mode.  When the mouse mode
+    *           is added to a view, a non-\c NULL value will add the action to the
     *           main mouse mode action group containing the following mouse modes:
     *           @arg    "LayerMode"
     *           @arg    "MeasurementMode"
@@ -601,8 +641,8 @@ public:
     *
     *  @see     MouseMode, deleteMouseMode(), View::addMouseMode(), View::setMouseMode()
     */
-   virtual MouseMode* createMouseMode(const std::string& modeName, const char* const mouseCursor[],
-      const char* const cursorMask[], int iHotX = 0, int iHotY = 0, QAction* pAction = NULL) const = 0;
+   virtual MouseMode* createMouseMode(const std::string& modeName, const QCursor& mouseCursor,
+      QAction* pAction = NULL) const = 0;
 
    /**
     *  Deletes a mouse mode.

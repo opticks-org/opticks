@@ -165,7 +165,8 @@ PlotViewImp::PlotViewImp(const string& id, const string& viewName, QGLContext* d
    addMouseMode(new MouseModeImp("LocatorMode", QCursor(Qt::CrossCursor), mpLocateAction));
    addMouseMode(new MouseModeImp("PanMode", QCursor(Qt::OpenHandCursor), mpPanAction));
    addMouseMode(new MouseModeImp("SelectionMode", QCursor(Qt::ArrowCursor), mpObjectSelectAction));
-   addMouseMode(new MouseModeImp("ZoomBoxMode", pIcons->mZoomRectCursor, pIcons->mZoomRectMask, 0, 0, mpZoomAction));
+   addMouseMode(new MouseModeImp("ZoomBoxMode", QCursor(pIcons->mZoomRectCursor, pIcons->mZoomRectMask, 0, 0),
+      mpZoomAction));
    addMouseMode(new MouseModeImp("AnnotationMode", mpAnnotationLayer->getMouseCursor(), mpAnnotateAction));
 
    mMouseLocator.setVisible(false);

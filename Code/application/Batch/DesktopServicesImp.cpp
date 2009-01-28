@@ -238,6 +238,12 @@ MouseMode* DesktopServicesImp::createMouseMode(const string& modeName, const cha
    return NULL;
 }
 
+MouseMode* DesktopServicesImp::createMouseMode(const string& modeName, const QCursor& mouseCursor,
+                                               QAction* pAction) const
+{
+   return NULL;
+}
+
 void DesktopServicesImp::deleteMouseMode(MouseMode* pMouseMode) const
 {
 }

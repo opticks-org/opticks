@@ -7,8 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QBitmap>
-
 #include "MouseModeImp.h"
 
 using namespace std;
@@ -18,25 +16,6 @@ MouseModeImp::MouseModeImp(const QString& strModeName, const QCursor& mouseCurso
    mCursor(mouseCursor),
    mpAction(pAction)
 {
-}
-
-MouseModeImp::MouseModeImp(const QString& strModeName, const QBitmap& mouseCursor, const QBitmap& cursorMask,
-   int iHotX, int iHotY, QAction* pAction) :
-   mName(strModeName),
-   mCursor(Qt::ArrowCursor),
-   mpAction(pAction)
-{
-   if (mouseCursor.isNull() == false)
-   {
-      if (cursorMask.isNull() == false)
-      {
-         mCursor = QCursor(mouseCursor, cursorMask, iHotX, iHotY);
-      }
-      else
-      {
-         mCursor = QCursor(mouseCursor, iHotX, iHotY);
-      }
-   }
 }
 
 MouseModeImp::~MouseModeImp()

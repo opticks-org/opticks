@@ -652,8 +652,6 @@ MouseMode* DesktopServicesImp::createMouseMode(const string& modeName, const cha
       return NULL;
    }
 
-   QString strModeName = QString::fromStdString(modeName);
-
    QBitmap bmpCursor;
    if (mouseCursor != NULL)
    {
@@ -666,7 +664,31 @@ MouseMode* DesktopServicesImp::createMouseMode(const string& modeName, const cha
       bmpMask = QPixmap(cursorMask);
    }
 
-   MouseMode* pMouseMode = new MouseModeImp(strModeName, bmpCursor, bmpMask, iHotX, iHotY, pAction);
+   QCursor cursor(Qt::ArrowCursor);
+   if (bmpCursor.isNull() == false)
+   {
+      if (bmpMask.isNull() == false)
+      {
+         cursor = QCursor(bmpCursor, bmpMask, iHotX, iHotY);
+      }
+      else
+      {
+         cursor = QCursor(bmpCursor, iHotX, iHotY);
+      }
+   }
+
+   return createMouseMode(modeName, cursor, pAction);
+}
+
+MouseMode* DesktopServicesImp::createMouseMode(const string& modeName, const QCursor& mouseCursor,
+                                               QAction* pAction) const
+{
+   if (modeName.empty() == true)
+   {
+      return NULL;
+   }
+
+   MouseMode* pMouseMode = new MouseModeImp(QString::fromStdString(modeName), mouseCursor, pAction);
    return pMouseMode;
 }
 

@@ -287,12 +287,13 @@ SpatialDataViewImp::SpatialDataViewImp(const string& id, const string& viewName,
       setIcon(pIcons->mSpectralData);
       setWindowIcon(QIcon(pIcons->mSpectralData));
       addMouseMode(new MouseModeImp("LayerMode", QCursor(Qt::ArrowCursor)));
-      addMouseMode(new MouseModeImp("MeasurementMode", pIcons->mMeasurementCursor, pIcons->mMeasurementMask, 2, 17));
+      addMouseMode(new MouseModeImp("MeasurementMode",
+         QCursor(pIcons->mMeasurementCursor, pIcons->mMeasurementMask, 2, 17)));
       addMouseMode(new MouseModeImp("PanMode", QCursor(Qt::OpenHandCursor)));
-      addMouseMode(new MouseModeImp("RotateMode", pIcons->mFreeRotateCursor, pIcons->mFreeRotateMask, 7, 9));
-      addMouseMode(new MouseModeImp("ZoomInMode", pIcons->mZoomInCursor, pIcons->mZoomInMask, 0, 0));
-      addMouseMode(new MouseModeImp("ZoomOutMode", pIcons->mZoomOutCursor, pIcons->mZoomOutMask, 0, 0));
-      addMouseMode(new MouseModeImp("ZoomBoxMode", pIcons->mZoomRectCursor, pIcons->mZoomRectMask, 0, 0));
+      addMouseMode(new MouseModeImp("RotateMode", QCursor(pIcons->mFreeRotateCursor, pIcons->mFreeRotateMask, 7, 9)));
+      addMouseMode(new MouseModeImp("ZoomInMode", QCursor(pIcons->mZoomInCursor, pIcons->mZoomInMask, 0, 0)));
+      addMouseMode(new MouseModeImp("ZoomOutMode", QCursor(pIcons->mZoomOutCursor, pIcons->mZoomOutMask, 0, 0)));
+      addMouseMode(new MouseModeImp("ZoomBoxMode", QCursor(pIcons->mZoomRectCursor, pIcons->mZoomRectMask, 0, 0)));
    }
 
    // Connections
