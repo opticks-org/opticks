@@ -20,8 +20,10 @@
 #include "AppVerify.h"
 #include "DesktopServicesImp.h"
 #include "DimensionDescriptor.h"
+#include "GcpList.h"
 #include "Icons.h"
 #include "LayerList.h"
+#include "ModelServices.h"
 #include "ObjectResource.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
@@ -222,6 +224,10 @@ void ChippingWindow::createView()
       return;
    }
 
+   const RasterDataDescriptor* pDescriptor =
+      dynamic_cast<const RasterDataDescriptor*>(pRasterChip->getDataDescriptor());
+   VERIFYNRV(pDescriptor != NULL);
+
    // Create a view for the new sensor data
    DesktopServicesImp* pDesktop = DesktopServicesImp::instance();
    if (pDesktop == NULL)
@@ -283,9 +289,6 @@ void ChippingWindow::createView()
                RasterElement* pGreenRaster = pOrigLayer->getDisplayedRasterElement(GREEN);
                RasterElement* pBlueRaster = pOrigLayer->getDisplayedRasterElement(BLUE);
 
-               const RasterDataDescriptor* pDescriptor = 
-                  dynamic_cast<const RasterDataDescriptor*>(pRasterChip->getDataDescriptor());
-               VERIFYNRV(pDescriptor != NULL);
                // Set the properties of the cube layer in the new view
                pLayer->setDisplayedBand(GRAY, grayBand);
                pLayer->setDisplayedBand(RED, redBand);
@@ -367,6 +370,92 @@ void ChippingWindow::createView()
          }
       }
    }
+
+   // Create a GCP layer
+   if (pRaster->isGeoreferenced() == true)
+   {
+      const vector<DimensionDescriptor>& rows = mpChippingWidget->getChipRows();
+      const vector<DimensionDescriptor>& columns = mpChippingWidget->getChipColumns();
+      if ((rows.empty() == false) && (columns.empty() == false))
+      {
+         // Get the geocoordinates at the chip corners
+         VERIFYNRV(rows.front().isActiveNumberValid() == true);
+         VERIFYNRV(rows.back().isActiveNumberValid() == true);
+         VERIFYNRV(columns.front().isActiveNumberValid() == true);
+         VERIFYNRV(columns.back().isActiveNumberValid() == true);
+
+         unsigned int startRow = rows.front().getActiveNumber();
+         unsigned int endRow = rows.back().getActiveNumber();
+         unsigned int startCol = columns.front().getActiveNumber();
+         unsigned int endCol = columns.back().getActiveNumber();
+
+         GcpPoint ulPoint;
+         ulPoint.mPixel = LocationType(startCol, startRow);
+         ulPoint.mCoordinate = pRaster->convertPixelToGeocoord(ulPoint.mPixel);
+
+         GcpPoint urPoint;
+         urPoint.mPixel = LocationType(endCol, startRow);
+         urPoint.mCoordinate = pRaster->convertPixelToGeocoord(urPoint.mPixel);
+
+         GcpPoint llPoint;
+         llPoint.mPixel = LocationType(startCol, endRow);
+         llPoint.mCoordinate = pRaster->convertPixelToGeocoord(llPoint.mPixel);
+
+         GcpPoint lrPoint;
+         lrPoint.mPixel = LocationType(endCol, endRow);
+         lrPoint.mCoordinate = pRaster->convertPixelToGeocoord(lrPoint.mPixel);
+
+         GcpPoint centerPoint;
+         centerPoint.mPixel = LocationType((startCol + endCol) / 2, (startRow + endRow) / 2);
+         centerPoint.mCoordinate = pRaster->convertPixelToGeocoord(centerPoint.mPixel);
+
+         // Reset the coordinates to be in active numbers relative to the chip
+         const vector<DimensionDescriptor>& chipRows = pDescriptor->getRows();
+         const vector<DimensionDescriptor>& chipColumns = pDescriptor->getColumns();
+
+         VERIFYNRV(chipRows.front().isActiveNumberValid() == true);
+         VERIFYNRV(chipRows.back().isActiveNumberValid() == true);
+         VERIFYNRV(chipColumns.front().isActiveNumberValid() == true);
+         VERIFYNRV(chipColumns.back().isActiveNumberValid() == true);
+
+         unsigned int chipStartRow = chipRows.front().getActiveNumber();
+         unsigned int chipEndRow = chipRows.back().getActiveNumber();
+         unsigned int chipStartCol = chipColumns.front().getActiveNumber();
+         unsigned int chipEndCol = chipColumns.back().getActiveNumber();
+         ulPoint.mPixel = LocationType(chipStartCol, chipStartRow);
+         urPoint.mPixel = LocationType(chipEndCol, chipStartRow);
+         llPoint.mPixel = LocationType(chipStartCol, chipEndRow);
+         lrPoint.mPixel = LocationType(chipEndCol, chipEndRow);
+         centerPoint.mPixel = LocationType((chipStartCol + chipEndCol) / 2, (chipStartRow + chipEndRow) / 2);
+
+         // Create the GCP list
+         Service<ModelServices> pModel;
+
+         GcpList* pGcpList = static_cast<GcpList*>(pModel->createElement("Corner Coordinates",
+            TypeConverter::toString<GcpList>(), pRasterChip));
+         if (pGcpList != NULL)
+         {
+            list<GcpPoint> gcps;
+            gcps.push_back(ulPoint);
+            gcps.push_back(urPoint);
+            gcps.push_back(llPoint);
+            gcps.push_back(lrPoint);
+            gcps.push_back(centerPoint);
+
+            pGcpList->addPoints(gcps);
+
+            // Create the layer
+            if (pView->createLayer(GCP_LAYER, pGcpList) == NULL)
+            {
+               QMessageBox::warning(this, windowTitle(), "Could not create a GCP layer.");
+            }
+         }
+         else
+         {
+            QMessageBox::warning(this, windowTitle(), "Could not create a GCP list.");
+         }
+      }
+   }
 }
 
 RasterElement* ChippingWindow::getRasterElement() const
@@ -386,31 +475,10 @@ void ChippingWindow::accept()
    if (mpView != NULL)
    {
       RasterElement* pRaster = getRasterElement();
-      VERIFYNRV(pRaster != NULL)
-      bool bGeoreferenced = pRaster->isGeoreferenced();
-
-      // Check for GCPs if chipping to a new view since the file descriptor
-      // of the chip will match that of the original data set
-      if (bGeoreferenced == false)
-      {
-         if ((mpWindowRadio->isChecked() == true) && (pRaster != NULL))
-         {
-            const DataDescriptor* pDescriptor = pRaster->getDataDescriptor();
-            if (pDescriptor != NULL)
-            {
-               const RasterFileDescriptor* pFileDescriptor =
-                  dynamic_cast<const RasterFileDescriptor*>(pDescriptor->getFileDescriptor());
-               if (pFileDescriptor != NULL)
-               {
-                  const list<GcpPoint>& gcps = pFileDescriptor->getGcps();
-                  bGeoreferenced = !gcps.empty();
-               }
-            }
-         }
-      }
+      VERIFYNRV(pRaster != NULL);
 
       // Display a warning if the data set has not been georeferenced
-      if (bGeoreferenced == false)
+      if (pRaster->isGeoreferenced() == false)
       {
          QString strMessage = "The parent data set is not georeferenced so the created chip will not "
             "contain a GCP List.\nIf you want to preserve geographic info, press Cancel, cancel the "
