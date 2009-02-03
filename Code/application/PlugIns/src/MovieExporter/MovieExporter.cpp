@@ -411,12 +411,12 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
    }
    if (!open_video(pFormat, pVideoStream))
    {
-      log_error("Unable to open video.");
+      log_error("Unable to initialize video stream.");
       return false;
    }
    if (url_fopen(&pFormat->pb, filename.c_str(), URL_WRONLY) < 0)
    {
-      log_error("Could not open the output file.");
+      log_error("Could not open the output file. Ensure the destination directory is writable.");
       return false;
    }
    av_write_header(pFormat);

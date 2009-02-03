@@ -59,10 +59,17 @@ public:
       {
          for (int i = 0; i < pFormat->nb_streams; ++i)
          {
-            av_freep(&pFormat->streams[i]->codec);
+            if (pFormat->streams[i]->codec != NULL)
+            {
+               av_freep(&pFormat->streams[i]->codec);
+               pFormat->streams[i]->codec = NULL;
+            }
             av_freep(&pFormat->streams[i]);
          }
-         url_fclose(&pFormat->pb);
+         if (pFormat->pb.opaque != NULL)
+         {
+            url_fclose(&pFormat->pb);
+         }
          av_free(pFormat);
       }
    }
@@ -137,7 +144,7 @@ public:
 
    void releaseResource(const Args& args, AVStream* pStream) const
    {
-      if (pStream != NULL)
+      if (pStream != NULL && pStream->codec != NULL)
       {
          avcodec_close(pStream->codec);
       }
