@@ -9,6 +9,8 @@
 
 #include "DesktopServices.h"
 #include "LayerList.h"
+#include "PlugInArgList.h"
+#include "PlugInManagerServices.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "RasterLayer.h"
@@ -42,11 +44,6 @@ RasterTimingTest::RasterTimingTest()
    setInteractive();
 }
 
-bool RasterTimingTest::setBatch()
-{
-   return false;
-}
-
 bool RasterTimingTest::getInputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
@@ -55,12 +52,24 @@ bool RasterTimingTest::getInputSpecification(PlugInArgList*& pArgList)
 
 bool RasterTimingTest::getOutputSpecification(PlugInArgList*& pArgList)
 {
-   pArgList = NULL;
+   if (isBatch())
+   {
+      VERIFY(pArgList = Service<PlugInManagerServices>()->getPlugInArgList());
+      VERIFY(pArgList->addArg<double>("Framerate"));
+   }
+   else
+   {
+      pArgList = NULL;
+   }
    return true;
 }
 
 bool RasterTimingTest::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
+   if (isBatch())
+   {
+      VERIFY(pOutArgList != NULL);
+   }
    Service<DesktopServices> pDesktop;
    SpatialDataView* pView = dynamic_cast<SpatialDataView*>(pDesktop->getCurrentWorkspaceWindowView());
    if (pView)
@@ -91,6 +100,9 @@ bool RasterTimingTest::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
       {
          pElement->getStatistics(pDesc->getActiveBand(i))->getMin();
       }
+      // set grayscale display mode
+      DisplayMode initialDisplayMode = pLayer->getDisplayMode();
+      pLayer->setDisplayMode(GRAYSCALE_MODE);
       const int frameiterations = 10000;
       clock_t startTime = clock();
       QWidget* pWidget = pView->getWidget();
@@ -128,8 +140,20 @@ bool RasterTimingTest::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
       clock_t stopTime = clock();
       double framesPerSec = i / (static_cast<double>(stopTime - startTime) / CLOCKS_PER_SEC);
 
-      QMessageBox::information(pDesktop->getMainWidget(), "Frame Rate", 
-         "The number of frames per second was:\n" + QString::number(framesPerSec));
+      // restore display mode
+      pLayer->setDisplayMode(initialDisplayMode);
+
+      if (isBatch())
+      {
+         pOutArgList->setPlugInArgValue<double>("Framerate", &framesPerSec);
+      }
+      else
+      {
+         QMessageBox::information(pDesktop->getMainWidget(), "Frame Rate", 
+            QString("The number of frames per second was: %1\nGPU Acceleration was%2 enabled\n").arg(framesPerSec)
+                     .arg(pLayer->isGpuImageEnabled() ? "" : " not"));
+      }
+
       return true;
    }
 

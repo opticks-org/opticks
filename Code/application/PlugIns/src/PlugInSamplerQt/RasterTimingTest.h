@@ -17,7 +17,6 @@ class RasterTimingTest : public AlgorithmShell
 public:
    RasterTimingTest();
 
-   bool setBatch();
    bool getInputSpecification(PlugInArgList*& pArgList);
    bool getOutputSpecification(PlugInArgList*& pArgList);
    bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);

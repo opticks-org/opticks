@@ -64,6 +64,15 @@ public:
    void elementModifiedGreen(Subject &subject, const std::string &signal, const boost::any &v);
    void elementModifiedBlue(Subject &subject, const std::string &signal, const boost::any &v);
 
+   // Since Subject::attach does not reference count attachments, we need 4 
+   // separate slots to force attach/detach pairs to function correctly. When 
+   // Subject::attach is updated to reference count, these can be removed and
+   // fullImageRegen can be used directly.
+   void fullImageRegenGray(Subject& subject, const std::string& signal, const boost::any& v);
+   void fullImageRegenRed(Subject& subject, const std::string& signal, const boost::any& v);
+   void fullImageRegenGreen(Subject& subject, const std::string& signal, const boost::any& v);
+   void fullImageRegenBlue(Subject& subject, const std::string& signal, const boost::any& v);
+
    RasterLayerImp& operator= (const RasterLayerImp& rasterLayer);
 
    LayerType getLayerType() const;

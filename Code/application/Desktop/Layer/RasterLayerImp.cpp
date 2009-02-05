@@ -173,6 +173,11 @@ RasterLayerImp::RasterLayerImp(const string& id, const string& layerName, DataEl
    mpRedRasterElement.addSignal(SIGNAL_NAME(Subject, Deleted), Slot(this, &RasterLayerImp::elementDeletedRed));
    mpGreenRasterElement.addSignal(SIGNAL_NAME(Subject, Deleted), Slot(this, &RasterLayerImp::elementDeletedGreen));
    mpBlueRasterElement.addSignal(SIGNAL_NAME(Subject, Deleted), Slot(this, &RasterLayerImp::elementDeletedBlue));
+   // Force total image regeneration when the underlying raster data changes
+   mpGrayRasterElement.addSignal(SIGNAL_NAME(RasterElement, DataModified), Slot(this, &RasterLayerImp::fullImageRegenGray));
+   mpRedRasterElement.addSignal(SIGNAL_NAME(RasterElement, DataModified), Slot(this, &RasterLayerImp::fullImageRegenRed));
+   mpGreenRasterElement.addSignal(SIGNAL_NAME(RasterElement, DataModified), Slot(this, &RasterLayerImp::fullImageRegenGreen));
+   mpBlueRasterElement.addSignal(SIGNAL_NAME(RasterElement, DataModified), Slot(this, &RasterLayerImp::fullImageRegenBlue));
 }
 
 RasterLayerImp::~RasterLayerImp()
@@ -248,6 +253,26 @@ void RasterLayerImp::elementDeletedGreen(Subject& subject, const string& signal,
 void RasterLayerImp::elementDeletedBlue(Subject& subject, const string& signal, const boost::any& data)
 {
    setDisplayedBand(BLUE, DimensionDescriptor());
+}
+
+void RasterLayerImp::fullImageRegenGray(Subject& subject, const std::string& signal, const boost::any& v)
+{
+   setImage(NULL);
+}
+
+void RasterLayerImp::fullImageRegenRed(Subject& subject, const std::string& signal, const boost::any& v)
+{
+   setImage(NULL);
+}
+
+void RasterLayerImp::fullImageRegenGreen(Subject& subject, const std::string& signal, const boost::any& v)
+{
+   setImage(NULL);
+}
+
+void RasterLayerImp::fullImageRegenBlue(Subject& subject, const std::string& signal, const boost::any& v)
+{
+   setImage(NULL);
 }
 
 RasterLayerImp& RasterLayerImp::operator= (const RasterLayerImp& rasterLayer)
