@@ -1,0 +1,6 @@
+#!/bin/csh -f
+ 
+source %%%OPTICKS_INSTALL_DIR%%%/Bin/Environment
+cd $OPTICKS_HOME/Bin
+./solOpticks "$argv"
+ 
