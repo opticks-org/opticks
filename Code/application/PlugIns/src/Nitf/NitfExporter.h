@@ -57,9 +57,6 @@ namespace Nitf
 
    private:
       bool validateExportDescriptor(const RasterFileDescriptor* pDescriptor, std::string& errorMessage) const;
-      bool setBandRepresentation(const RasterChannelType& eColor,
-         const std::string& representation,
-         ossimNitfImageHeaderV2_1* pImageHeader);
       bool exportClassification(const PlugInArgList* pArgList, const Classification* pClassification,
          ossimNitfFileHeaderV2_1* pFileHeader, ossimNitfImageHeaderV2_1* pImageHeader, std::string& errorMessage);
 

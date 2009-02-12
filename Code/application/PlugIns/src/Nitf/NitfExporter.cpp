@@ -31,6 +31,8 @@
 #include "RasterLayer.h"
 #include "MessageLogResource.h"
 #include "SpatialDataView.h"
+#include "SpecialMetadata.h"
+#include "StringUtilities.h"
 
 #include <ossim/base/ossimKeywordNames.h>
 #include <ossim/base/ossimIrect.h>
@@ -155,7 +157,8 @@ bool Nitf::NitfExporter::execute(PlugInArgList *pInParam, PlugInArgList *pOutPar
    source.initialize();
 
    auto_ptr<ossimBandSelector> pSelector;
-   size_t numBands = mpDestination->getBandCount();
+   const vector<DimensionDescriptor>& exportBands = mpDestination->getBands();
+   const unsigned int numBands = exportBands.size();
    vector<ossim_uint32> bandList;
    for (ossim_uint32 i = 0; i < numBands; ++i)
    {
@@ -224,7 +227,7 @@ bool Nitf::NitfExporter::execute(PlugInArgList *pInParam, PlugInArgList *pOutPar
                backgroundColor.mGreen, backgroundColor.mBlue);
 
             // Set the band representations. Note that this only supports single-image export.
-            pImageHeader->setNumberOfBands(mpDestination->getBandCount());
+            pImageHeader->setNumberOfBands(numBands);
 
             mpRasterLayer = dynamic_cast<RasterLayer*>(pLayerList->getLayer(RASTER, mpRaster));
             VERIFY(mpRasterLayer != NULL);
@@ -232,12 +235,91 @@ bool Nitf::NitfExporter::execute(PlugInArgList *pInParam, PlugInArgList *pOutPar
             // Note that some special cases which are undefined in the spec could occur here:
             // 1) Some (but not all) of Red, Green, and Blue bands are defined.
             // 2) Both RGB and MONO layers are valid (in this case MONO is ignored).
+            DimensionDescriptor redBand;
+            DimensionDescriptor greenBand;
+            DimensionDescriptor blueBand;
+            DimensionDescriptor grayBand;
             if (mpRasterLayer->getDisplayMode() == RGB_MODE)
             {
-               setBandRepresentation(RED, Nitf::ImageSubheaderFieldValues::BAND_REPRESENTATIONS_RED, pImageHeader);
-               setBandRepresentation(GREEN, Nitf::ImageSubheaderFieldValues::BAND_REPRESENTATIONS_GREEN, pImageHeader);
-               setBandRepresentation(BLUE, Nitf::ImageSubheaderFieldValues::BAND_REPRESENTATIONS_BLUE, pImageHeader);
-               pImageHeader->setRepresentation(Nitf::ImageSubheaderFieldValues::REPRESENTATION_MULTI);
+               if (mpRasterLayer->getDisplayedRasterElement(RED) == mpRaster)
+               {
+                  redBand = mpRasterLayer->getDisplayedBand(RED);
+               }
+
+               if (mpRasterLayer->getDisplayedRasterElement(GREEN) == mpRaster)
+               {
+                  greenBand = mpRasterLayer->getDisplayedBand(GREEN);
+               }
+
+               if (mpRasterLayer->getDisplayedRasterElement(BLUE) == mpRaster)
+               {
+                  blueBand = mpRasterLayer->getDisplayedBand(BLUE);
+               }
+            }
+            else if (mpRasterLayer->getDisplayedRasterElement(GRAY) == mpRaster)
+            {
+               grayBand = mpRasterLayer->getDisplayedBand(GRAY);
+            }
+
+            vector<string> isubcats;
+            vector<double> centerWavelengths;
+            const string centerWavelengthsPath[] = { SPECIAL_METADATA_NAME, BAND_METADATA_NAME,
+               CENTER_WAVELENGTHS_METADATA_NAME, END_METADATA_NAME };
+            if (pMetadata->getAttributeByPath(centerWavelengthsPath).getValue(centerWavelengths) == true)
+            {
+               for (vector<double>::const_iterator iter = centerWavelengths.begin();
+                  iter != centerWavelengths.end();
+                  ++iter)
+               {
+                  // Per MIL-STD-2500C, the ISUBCAT field is in nm and cannot be more than 999999.
+                  const double isubcat = *iter * 1000.0;
+                  if (isubcat > 999999)
+                  {
+                     isubcats.push_back(string());
+                  }
+                  else
+                  {
+                     isubcats.push_back(StringUtilities::toDisplayString(isubcat));
+                  }
+               }
+            }
+            else
+            {
+               const string isubcatPath[] = { Nitf::NITF_METADATA, Nitf::IMAGE_SUBHEADER,
+                  Nitf::ImageSubheaderFieldNames::BAND_SIGNIFICANCES, END_METADATA_NAME };
+               pMetadata->getAttributeByPath(isubcatPath).getValue(isubcats);
+            }
+
+            for (unsigned int band = 0; band < numBands; ++band)
+            {
+               if (exportBands[band].isOriginalNumberValid() == true)
+               {
+                  ossimNitfImageBandV2_1 imageBand;
+                  const unsigned int originalNumber = exportBands[band].getOriginalNumber();
+                  if (redBand.isOriginalNumberValid() == true && originalNumber == redBand.getOriginalNumber())
+                  {
+                     imageBand.setBandRepresentation(Nitf::ImageSubheaderFieldValues::BAND_REPRESENTATIONS_RED);
+                  }
+                  else if (greenBand.isOriginalNumberValid() == true && originalNumber == greenBand.getOriginalNumber())
+                  {
+                     imageBand.setBandRepresentation(Nitf::ImageSubheaderFieldValues::BAND_REPRESENTATIONS_GREEN);
+                  }
+                  else if (blueBand.isOriginalNumberValid() == true && originalNumber == blueBand.getOriginalNumber())
+                  {
+                     imageBand.setBandRepresentation(Nitf::ImageSubheaderFieldValues::BAND_REPRESENTATIONS_BLUE);
+                  }
+                  else if (grayBand.isOriginalNumberValid() == true && originalNumber == grayBand.getOriginalNumber())
+                  {
+                     imageBand.setBandRepresentation(Nitf::ImageSubheaderFieldValues::BAND_REPRESENTATIONS_MONO);
+                  }
+
+                  if (isubcats.size() > originalNumber)
+                  {
+                     imageBand.setBandSignificance(isubcats[originalNumber]);
+                  }
+
+                  pImageHeader->setBandInfo(band, imageBand);
+               }
             }
          }
       }
@@ -293,30 +375,6 @@ void Nitf::NitfExporter::processEvent(ossimEvent &event)
          pProgress->updateProgress("Exporting data", pProgressEvent->getPercentComplete(), NORMAL);
       }
    }
-}
-
-bool Nitf::NitfExporter::setBandRepresentation(const RasterChannelType& eColor,
-   const string& representation,
-   ossimNitfImageHeaderV2_1* pImageHeader)
-{
-   VERIFY(mpDestination != NULL && mpRasterLayer != NULL && pImageHeader != NULL);
-   if (mpRasterLayer->getDisplayedRasterElement(eColor) == mpRaster)
-   {
-      DimensionDescriptor inBand = mpRasterLayer->getDisplayedBand(eColor);
-      if (inBand.isOriginalNumberValid() == true)
-      {
-         DimensionDescriptor outBand = mpDestination->getOriginalBand(inBand.getOriginalNumber());
-         if (outBand.isOnDiskNumberValid() == true)
-         {
-            ossimNitfImageBandV2_1 imageBand;
-            imageBand.setBandRepresentation(representation);
-            pImageHeader->setBandInfo(outBand.getOnDiskNumber(), imageBand);
-            return true;
-         }
-      }
-   }
-
-   return false;
 }
 
 bool Nitf::NitfExporter::exportClassification(const PlugInArgList* pArgList, const Classification* pClassification,
