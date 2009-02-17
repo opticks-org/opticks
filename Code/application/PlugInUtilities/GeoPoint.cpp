@@ -205,6 +205,15 @@ string DmsPoint::getValueText(DmsFormatType format, int precision) const
       dPositiveValue = -mValue;
    }
 
+   #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This is a short term solution " \
+   "the draw method in LatLonLayer needs to be changed! (mconsidi)")
+   // Special cases of the Antimeridian and poles
+   if (dPositiveValue > 180)
+   {
+      bPositive = false;
+      dPositiveValue = 360.0 - dPositiveValue;
+   }
+
    int iDegrees = static_cast<int>(dPositiveValue);
    int iMinutes = static_cast<int>(60.0 * (dPositiveValue - iDegrees));
    double dSeconds = fabs((dPositiveValue - iDegrees - iMinutes / 60.0) * 3600.0);
@@ -226,7 +235,11 @@ string DmsPoint::getValueText(DmsFormatType format, int precision) const
    char direction;
    if (bPositive == true)
    {
-      if (mType == DmsPoint::DMS_DECIMAL)
+      if (mValue == 0.0 || fabs(mValue) == 180.0)
+      {
+         direction = ' ';
+      }
+      else if (mType == DmsPoint::DMS_DECIMAL)
       {
          direction = ' ';
       }

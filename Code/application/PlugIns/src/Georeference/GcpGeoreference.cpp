@@ -159,23 +159,36 @@ bool GcpGeoreference::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
    vector<double> pYCoeffs(numReverseCoeffs);
    vector<LocationType> latlonValues(numPoints);
    vector<LocationType> pixelValues(numPoints);
+   double maxLonSeparation(0.0);
 
    list<GcpPoint>::const_iterator it;
    unsigned int i;
    unsigned int j;
    for (i = 0, it = pGcpList->getSelectedPoints().begin(); 
                it != pGcpList->getSelectedPoints().end();
-               it++, i++)
+               ++it, ++i)
    {
       pixelValues[i] = it->mPixel;
       latlonValues[i] = it->mCoordinate;
    }
 
+   // Find the maximum separation to determine if it is the antimeridian or the poles
+   for (i = 0; i < pGcpList->getSelectedPoints().size(); ++i)
+   {
+      for (j = i + 1; j < pGcpList->getSelectedPoints().size(); ++j)
+      {
+         if (fabs(latlonValues[i].mY - latlonValues[j].mY) > maxLonSeparation)
+         {
+            maxLonSeparation = fabs(latlonValues[i].mY - latlonValues[j].mY);
+         }
+      }
+   }
+
    bool badValues = true;
    bool badPixelValues = true;
-   for (i = 0; i < pGcpList->getSelectedPoints().size(); i++)
+   for (i = 0; i < pGcpList->getSelectedPoints().size(); ++i)
    {
-      for (j = i + 1; j < pGcpList->getSelectedPoints().size(); j++)
+      for (j = i + 1; j < pGcpList->getSelectedPoints().size(); ++j)
       {
          if (fabs(latlonValues[i].mX - latlonValues[j].mX) > 1e-20)
          {
@@ -186,6 +199,21 @@ bool GcpGeoreference::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
          {
             badValues = false;
             break;
+         }
+      }
+   }
+
+   #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This is a short term solution " \
+   "the draw method in LatLonLayer needs to be changed! (mconsidi)")
+   // Special lon cases of the Antimeridian and poles
+   // A value of more than 180.0 in maxLonSeparation indicates a special condition
+   if (maxLonSeparation > 180.0)
+   {
+      for (i = 0; i < pGcpList->getSelectedPoints().size(); ++i)
+      {
+         if (latlonValues[i].mY < 0.0)
+         {
+            latlonValues[i].mY = 360.0 + latlonValues[i].mY;
          }
       }
    }
@@ -201,9 +229,9 @@ bool GcpGeoreference::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
       return false;
    }
 
-   for (i = 0; i < pGcpList->getSelectedPoints().size(); i++)
+   for (i = 0; i < pGcpList->getSelectedPoints().size(); ++i)
    {
-      for (j = i + 1; j < pGcpList->getSelectedPoints().size(); j++)
+      for (j = i + 1; j < pGcpList->getSelectedPoints().size(); ++j)
       {
          if (fabs(pixelValues[i].mX - pixelValues[j].mX) > 1e-20)
          {
@@ -285,13 +313,18 @@ bool GcpGeoreference::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
 
    list<GcpPoint> newPoints;
    list<GcpPoint>::iterator npIter;
-   for (i = 0, it = pGcpList->getSelectedPoints().begin(); it != pGcpList->getSelectedPoints().end(); it++, i++)
+   for (i = 0, it = pGcpList->getSelectedPoints().begin(); it != pGcpList->getSelectedPoints().end(); ++it, ++i)
    {
       GcpPoint newPoint;
       newPoint.mPixel.mX = it->mPixel.mX;
       newPoint.mPixel.mY = it->mPixel.mY;
       newPoint.mCoordinate.mX = it->mCoordinate.mX;
       newPoint.mCoordinate.mY = it->mCoordinate.mY;
+      // If maxLonSeparation > 180.0 then this is a special case
+      if (maxLonSeparation > 180.0 && newPoint.mCoordinate.mY < 0.0)
+      {
+         newPoint.mCoordinate.mY = newPoint.mCoordinate.mY + 360.0;
+      }
       LocationType newPixel = geoToPixel(newPoint.mCoordinate);
       newPoint.mRmsError.mX = fabs(newPixel.mX - newPoint.mPixel.mX);
       newPoint.mRmsError.mY = fabs(newPixel.mY - newPoint.mPixel.mY);
@@ -475,10 +508,10 @@ double GcpGeoreference::computePolynomial(LocationType pixel, int order, vector<
 
    int count = 0;
    double value = 0.0;
-   for (int i = 0; i <= order; i++)          // y power
+   for (int i = 0; i <= order; ++i)          // y power
    {
       yValue = pow(pixel.mY, i);
-      for (int j = 0; j <= order - i; j++)   // x power
+      for (int j = 0; j <= order - i; ++j)   // x power
       {
          value += coeffs[count] * pow (pixel.mX, j) * yValue;
          count++;
@@ -532,10 +565,10 @@ void GcpGeoreference::basisFunction(const LocationType& pixelCoord, double* pBas
    double yValue;
 
    int count = 0;
-   for (int i = 0; i <= order; i++)          // y power
+   for (int i = 0; i <= order; ++i)          // y power
    {
       yValue = pow(pixelCoord.mY, i);
-      for (int j = 0; j <= order - i; j++)   // x power
+      for (int j = 0; j <= order - i; ++j)   // x power
       {
          pBasisValues[count] = pow (pixelCoord.mX, j) * yValue;
          count++;
