@@ -111,13 +111,6 @@ namespace
 
 ArcProxy::ArcProxy(QObject *pParent) : QObject(pParent), mState(INITIALIZE)
 {
-   InitializeApp();
-
-   ISpatialReferenceFactory2Ptr pSpatialFactory(CLSID_SpatialReferenceEnvironment);
-   IGeographicCoordinateSystemPtr pSystem;
-   pSpatialFactory->CreateGeographicCoordinateSystem(esriSRGeoCS_WGS1984, &pSystem);
-   mpDestinationReference = pSystem;
-
    QTimer::singleShot(0, this, SLOT(connectToServer()));
 
    int idx = QCoreApplication::arguments().indexOf("-pid");
@@ -159,6 +152,11 @@ void ArcProxy::initialize(const QString &data)
 {
    if(data == APP_VERSION_NUMBER)
    {
+      InitializeApp();
+      ISpatialReferenceFactory2Ptr pSpatialFactory(CLSID_SpatialReferenceEnvironment);
+      IGeographicCoordinateSystemPtr pSystem;
+      pSpatialFactory->CreateGeographicCoordinateSystem(esriSRGeoCS_WGS1984, &pSystem);
+      mpDestinationReference = pSystem;
       mStream << APP_VERSION_NUMBER << endl;
    }
    else
