@@ -197,8 +197,21 @@ bool Nitf::NitfExporter::execute(PlugInArgList *pInParam, PlugInArgList *pOutPar
    RasterDataDescriptor* pDd = dynamic_cast<RasterDataDescriptor*>(mpRaster->getDataDescriptor());
    VERIFY(pDd != NULL);
 
+   // VQ exports are unsupported
+   const string icomPathName[] = { Nitf::NITF_METADATA, Nitf::IMAGE_SUBHEADER,
+      Nitf::ImageSubheaderFieldNames::COMPRESSION, END_METADATA_NAME };
+
+   string icom;
+   const DataVariant& dvCom = pMetadata->getAttributeByPath(icomPathName);
+
+
    EncodingType dataType = pDd->getDataType();
-   if (dataType == INT4SCOMPLEX || dataType == FLT8COMPLEX)
+   if ((dvCom.getValue(icom) == true) && (icom == "M4" || icom == "C4"))
+   {
+      errorMessage = "NITF export for VQ compression is unsupported. Please use another exporter.";
+      status = false;
+   }
+   else if (dataType == INT4SCOMPLEX || dataType == FLT8COMPLEX)
    {
       errorMessage = "NITF export for complex numbers is unsupported. Please use another exporter.";
       status = false;
