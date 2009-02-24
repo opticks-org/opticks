@@ -1,0 +1,60 @@
+/** \page settingsmacros Settings Macros
+ * The SETTING(), SETTING_PTR(), CUSTOM_SETTING() and CUSTOM_SETTING_PTR() macro's provided
+ * by ConfigurationSettings.h should be used to create type-safe get and set methods
+ * to access settings and their values stored in ConfigurationSettings.
+ *
+ * If you used the macro's as shown below:
+ * \code
+ * class Example
+ * {
+ * public:
+ *    SETTING(Name, Example, std::string, "Unknown")
+ *    SETTING(Age, Example, unsigned int, 3)
+ *    SETTING_PTR(AdditionalData, Example, DynamicObject)
+ *    CUSTOM_SETTING(FriendName, Example, std::string, "Unknown")
+ * }; 
+ * \endcode
+ *
+ * Then you could access those settings as shown below:
+ * \code
+ * //Get the values for the settings
+ * string name = Example::getSettingName(); //if name setting didn't exist, "Unknown" would be returned and a verification error reported.
+ * unsigned int age = Example::getSettingAge(); //if age setting didn't exist, 3 would be returned and a verification error reported.
+ * const DynamicObject* pData = Example::getSettingAdditionalData(); //if AdditionalData didn't exist, NULL would be returned
+ * string friend1 = Example::getSettingFriendName("Friend1"); //if Friend1 value of FriendName setting didn't exist, "Unknown" would be returned and a verification error reported.
+ * string friend2 = Example::getSettingFriendName("Friend2"); //if Friend2 value of FriendName setting didn't exist, "Unknown" would be returned and a verification error reported.
+ * //Set the values for the settings
+ * Example::setSettingName("JohnDoe");
+ * Example::setSettingAge(25);
+ * FactoryResource<DynamicObject> pObject;
+ * Example::setSettingAdditionalData(pObject.get());
+ * Example::setSettingFriendName("Friend1", "JaneDoe");
+ * Example::setSettingFriendName("Friend2", "JackDoe");
+ * //Determine if the setting have values without retrieving the value
+ * bool hasName = Example::hasSettingName(); //return true if getSetting method would return a value and not report a verification error, false otherwise
+ * bool hasAge = Example::hasSettingAge();
+ * bool hasData = Example::hasSettingAdditionalData();
+ * bool hasFriend1 = Example::hasSettingFriendName("Friend1");
+ * bool hasFriend2 = Example::hasSettingFriendName("Friend2");
+ * //Interact with setting directly using ConfigurationSettings
+ * string name = Example::getSettingName();
+ * //these two lines below are equivalent to the line above
+ * Service<ConfigurationSettings> pSettings;
+ * string name2 = dv_cast<string>(pSettings->getSetting(Example::getSettingNameKey()), "Unknown");
+ *
+ * string friend1 = Example::getSettingFriendName("Friend1");
+ * //these two lines below are equivalent to the line above
+ * Service<ConfigurationSettings> pSettings;
+ * string name2 = dv_cast<string>(pSettings->getSetting(Example::getSettingFriendNameKey("Friend1")), "Unknown");
+ *
+ * Example::setSettingAge(45);
+ * //these two lines below are equivalent to the line above
+ * Service<ConfigurationSettings> pSettings;
+ * pSettings->setSetting(Example::getSettingAgeKey(), 45);
+ *
+ * Example::setSettingFriendName("Friend2", "JohnDoe");
+ * //these two lines below are equivalent to the line above
+ * Service<ConfigurationSettings> pSettings;
+ * pSettings->setSetting(Example::getSettingFriendNameKey("Friend2"), "JohnDoe"); 
+ * \endcode
+ */

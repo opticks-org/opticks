@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="Xerces"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+		AdditionalIncludeDirectories="&quot;$(XERCES)\include\windows&quot;;&quot;$(XQILLA)\include&quot;"
+		PreprocessorDefinitions="APPLICATION_XERCES"
+	/>
+	<Tool
+		Name="VCLinkerTool"
+		AdditionalLibraryDirectories="$(XERCES)\lib\$(PlatformName);$(XQILLA)\lib\$(PlatformName)"
+	/>
+</VisualStudioPropertySheet>

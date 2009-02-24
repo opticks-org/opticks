@@ -1,0 +1,44 @@
+import glob
+
+####
+# import the environment
+####
+Import('env build_dir')
+
+####
+# subdirectories to build objects from
+####
+subdirs = ["GLView", "Graphic", "Undo"]
+
+####
+# build top-level sources
+####
+srcs = map(lambda x,bd=build_dir: '%s/%s' % (bd,x), glob.glob("*.cpp"))
+srcs.append(env.Qrc("%s/res/Application.qrc" % build_dir))
+objs = env.Object(srcs)
+
+####
+# build subdirectory sources
+####
+for sub in subdirs:
+   env.Append(CPPPATH="#/Gui/%s" % sub)
+   srcs = map(lambda x,bd=build_dir: '%s/%s' % (bd,x), glob.glob("%s/*.cpp" % sub))
+   objs += env.Object(srcs)
+
+####
+# special build instructions for Image
+# we only want the singletons
+####
+env.Append(CPPPATH="#/Gui/Image")
+objs += env.Object(map(lambda d: "%s/Image/%s" % (build_dir, d), ["GpuResourceManager.cpp","ImageFilterManager.cpp","GpuProgramDescriptorImp.cpp","ImageFilterDescriptorImp.cpp"]))
+
+####
+# build the library and set up an alias to ease building it later
+####
+lib = env.Library("%s/Gui" % build_dir,objs)
+env.Alias('libGui', lib)
+
+####
+# return the library
+####
+Return('lib')

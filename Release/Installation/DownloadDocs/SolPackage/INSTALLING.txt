@@ -1,0 +1,4 @@
+Run the following command as root:
+	pkgadd -d opticks-[VersionNumber]-sol10-sparc.pkg
+
+You can either use the "su" command or "sudo" to run a command as root.

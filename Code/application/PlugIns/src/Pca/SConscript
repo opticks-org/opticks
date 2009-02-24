@@ -1,0 +1,35 @@
+import glob
+
+####
+# import the environment
+####
+Import('env extra_obj build_dir TOOLPATH PLATFORM')
+env = env.Copy(PLATFORM=PLATFORM)
+env.Tool("ossim",toolpath=[TOOLPATH])
+env.Tool("qwt",toolpath=[TOOLPATH])
+
+##
+# This works around a compiler bug. It can be removed when the bug is fixed.
+# I can't find a specific reference for CC v5.8, but the workaround from
+# sunsolve document 4869524 (http://sunsolve.sun.com/search/document.do?assetkey=1-1-4869524-1)
+# works.
+##
+env.Append(CXXFLAGS="+d")
+
+####
+# build sources
+####
+srcs = map(lambda x,bd=build_dir: '%s/%s' % (bd,x), glob.glob("*.cpp"))
+objs = env.SharedObject(srcs)
+
+####
+# build the plug-in library and set up an alias to wase building it later
+####
+lib = env.SharedLibrary('%s/Pca' % build_dir,objs+extra_obj)
+libInstall = env.Install(env["PLUGINDIR"], lib)
+env.Alias('Pca', libInstall)
+
+####
+# return the plug-in library
+####
+Return("libInstall")

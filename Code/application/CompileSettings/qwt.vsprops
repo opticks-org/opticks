@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="qwt"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+		AdditionalIncludeDirectories="&quot;$(QWT)\include&quot;;&quot;$(QT)\include\windows\QtCore&quot;;&quot;$(QT)\include\windows\QtGui&quot;"
+	/>
+	<Tool
+		Name="VCLinkerTool"
+		AdditionalDependencies="qwt5.lib"
+	/>
+</VisualStudioPropertySheet>

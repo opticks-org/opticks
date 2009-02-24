@@ -1,0 +1,5 @@
+
+while read src dest
+do
+  sed -e s:TEMPDIR_FOR_OPTICKS:${TEMPDATADIR}: "$src" > "$dest"
+done
