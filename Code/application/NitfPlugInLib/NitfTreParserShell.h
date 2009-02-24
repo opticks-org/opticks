@@ -20,7 +20,7 @@ namespace Nitf
    /**
     *  This class is a shell for a tre parer plug-in.
     *
-    *  TreParser developers should take this class and extend it to support thier 
+    *  TreParser developers should take this class and extend it to support their 
     *  importer specific code.
     */
    class TreParserShell : public PlugInShell, public Testable, public TreParser

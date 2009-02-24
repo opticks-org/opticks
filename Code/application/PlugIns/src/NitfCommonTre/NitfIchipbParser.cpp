@@ -396,7 +396,8 @@ TreExportStatus Nitf::IchipbParser::exportMetadata(const RasterDataDescriptor &d
             tre.merge(pExistingIchipb);
          }
 
-         // Make sure we have at least one of BLOCKA, RPC00A or RPC00B otherwise we don't write an ICHIPB
+         // Make sure we have at least one of BLOCKA, RPC00A, RPC00B, STDIDB or STDIDC 
+         // otherwise we don't write an ICHIPB
          const DynamicObject* pExistingBlocka =
             getTagHandle(dv_cast<DynamicObject>(nitfMetadata), "BLOCKA", FindFirst());
 
@@ -406,7 +407,13 @@ TreExportStatus Nitf::IchipbParser::exportMetadata(const RasterDataDescriptor &d
          const DynamicObject* pExistingRpc00b =
             getTagHandle(dv_cast<DynamicObject>(nitfMetadata), "RPC00B", FindFirst());
 
-         if (!pExistingBlocka && !pExistingRpc00a && !pExistingRpc00b)
+         const DynamicObject* pExistingStdidb =
+            getTagHandle(dv_cast<DynamicObject>(nitfMetadata), "STDIDB", FindFirst());
+
+         const DynamicObject* pExistingStdidc =
+            getTagHandle(dv_cast<DynamicObject>(nitfMetadata), "STDIDC", FindFirst());
+
+         if (!pExistingBlocka && !pExistingRpc00a && !pExistingRpc00b && !pExistingStdidb && !pExistingStdidc)
          {
             return REMOVE;
          }
@@ -434,7 +441,14 @@ TreExportStatus Nitf::IchipbParser::exportMetadata(const RasterDataDescriptor &d
       VERIFYRV(lastRow.isValid(), REMOVE);
       VERIFYRV(lastCol.isValid(), REMOVE);
 
-       // will always be 0 + .5 zero based
+      tre.setAttribute(Nitf::TRE::ICHIPB::XFRM_FLAG, false);
+      tre.setAttribute(Nitf::TRE::ICHIPB::SCALE_FACTOR, 1.0);
+      tre.setAttribute(Nitf::TRE::ICHIPB::ANAMRPH_CORR, false);
+      tre.setAttribute(Nitf::TRE::ICHIPB::SCANBLK_NUM, static_cast<unsigned int> (0));
+      tre.setAttribute(Nitf::TRE::ICHIPB::FI_ROW, lastRow.getOriginalNumber());
+      tre.setAttribute(Nitf::TRE::ICHIPB::FI_COL, lastCol.getOriginalNumber());
+
+      // will always be 0 + .5 zero based
       tre.setAttribute(Nitf::TRE::ICHIPB::OP_ROW_11, firstRow.getOnDiskNumber() + 0.5);
       tre.setAttribute(Nitf::TRE::ICHIPB::OP_COL_11, firstCol.getOnDiskNumber() + 0.5);
 
