@@ -1,178 +1,167 @@
 Instructions on building the Opticks source code in Solaris 64-bit.
 ---------------------------------------------------------------------------
 
-
 Programs that need to be installed before building the source code:
 --------------------------------------------------------------------------
- - Solaris 10
-
- - Sun Studio 11
-
- - Python 2.5 or later (http://www.python.org/download/)
-
- - Subversion Command Line Client (http://downloads.open.collab.net/collabnet-subversion.html)
-
- - SCons 0.97 (http://www.scons.org)
+- Solaris 10
+- Sun Studio 11
+- Python 2.5 or later (http://www.python.org/download/)
+- Subversion Command Line Client
+  (http://downloads.open.collab.net/collabnet-subversion.html)
+- SCons 1.2 or later (http://www.scons.org)
 
 
 Download these required dependencies:
 -----------------------------------------------------
-The Dependencies folder in the trunk contains a system which automatically downloads the appropriate
-dependencies. This system requires python v2.5 or later.
+The Dependencies folder in the trunk contains a system which automatically
+downloads the appropriate dependencies.  This system requires python v2.5 or
+later.
 > python dependencies.py --help
-will provide a usage summary. Most of the time, no command line options are needed.
-Install all the dependencies.
+will provide a usage summary.  Most of the time, no command line options are
+needed.  Install all the dependencies.
 > python dependencies.py
-This will download the appropriate dependencies builds and will install them in the proper directories.
+This will download the appropriate dependencies builds and will install
+them in the proper directories.
 
 Qt will not download properly, this is because Qt can either be licensed
-commercially or under the terms of the GPL license. Please look below for information on obtaining Qt.
+commercially or under the terms of the GPL license.  Please look below for
+information on obtaining Qt.
 
-Point the OPTICKSDEPENDENCIES variable at the Dependencies folder so the build system can find
-the installed dependencies.
+Point the OPTICKSDEPENDENCIES variable at the Dependencies folder so the
+build system can find the installed dependencies.
 
 Instructions on obtaining Qt:
 ------------------------------------------ 
 
--  First determine if Qt will be used under the commercial or GPL license, this depends on the type
-   of development you will be doing with Opticks. Please review the developer FAQ for Qt available at
-   http://trolltech.com/developer/downloads/qt/faq to determine under which license you will be using Qt.
+1. First determine if Qt will be used under the commercial or GPL license,
+   this depends on the type of development you will be doing with Opticks.
+   Please review the licensing FAQ for Qt available at
+   http://www.qtsoftware.com/products/licensing to determine under which
+   license you will be using Qt.
 
--  If Qt will be used under the open-source or GPL license, follow the instructions below:
-        -  Download a pre-built binary of Qt 4.3.4 Open-Source edition available on the Opticks website at:
+2. If Qt will be used under the open-source or GPL license, follow the
+   instructions below:
+      2.1. Download a pre-built binary of Qt 4.3.4 Open-Source edition
+           available on the Opticks website at:
            https://opticks.ballforge.net/files/documents/8/112/Qt-4.3.4-opensource.zip.
-        -  Put the downloaded .zip file into your OPTICKSDEPENDENCIES\packages folder.  This assumes you
-           have followed the above instructions on downloading the other required dependencies for Opticks.
-           Rename the download .zip file from Qt-4.3.4-opensource.zip to Qt-4.3.4.zip
-        -  Run "python dependencies.py" on the command-line.  This will deploy your Qt 4.3.4 open-source edition
-           binaries to the proper locations.
+      2.2. Put the downloaded .zip file into your OPTICKSDEPENDENCIES\packages
+           folder.  This assumes you have followed the above instructions on
+           downloading the other required dependencies for Opticks.  Rename
+           the download .zip file from Qt-4.3.4-opensource.zip to Qt-4.3.4.zip
+      2.3. Run "python dependencies.py" on the command-line.  This will deploy
+           your Qt 4.3.4 open-source edition binaries to the proper locations.
 
--  If Qt will be used under the commercial Qt license, follow the instructions below:
-        -  Once you have purchased a commercial license, download the Qt 4.3.4 source code binaries
-           for the Unix platform.
-        -  Follow the instructions listed below on how to build Qt from the source code.
-
-
+3. If Qt will be used under the commercial Qt license, follow the
+   instructions below:
+      3.1. Once you have purchased a commercial license, download the
+           Qt 4.3.4 source code binaries for the Unix platform.
+      3.2. Follow the instructions listed below on how to build Qt from the
+           source code.
 
 Instructions on building Qt:
 -------------------------------------------
 
 1. Go to the directory where the qt build is located at.
-
-2. In this directory, uncompress the distribution  by typing:
-
-        gzip -cd qt-file-name.tar.gz | tar xf -
-
+2. In this directory, uncompress the distribution by typing:
+      gzip -cd qt-file-name.tar.gz | tar xf -
    For Example: gzip -cd qt-x11-commercial-src-4.3.1.tar.gz | tar xf -
-
 3. Once the folder is unzipped, open it and then type:
+      ./configure -platform solaris-cc-64 -qt-gif -qt-libpng -qt-libmng -qt-libjpeg -qt-libtiff -prefix /tmp/qt-install
+   When the configuration is done, the following status report should appear
+   on your screen:
 
-        ./configure -platform solaris-cc-64 -qt-gif -qt-libpng -qt-libmng -qt-libjpeg -qt-libtiff -prefix /tmp/qt-install
+      Build type:    solaris-cc-64
+      Architecture:  sparc
 
-   When the configuration is done, the following status report should appear on your screen:
-
-        Build type:    solaris-cc-64
-        Architecture:  sparc
-
-        Build ............... libs tools examples demos
-        Configuration ....... release shared dll largefile stl  qt3support accessibility opengl minimal-config 
-        small-config medium-config large-config full-config ipv6 clock-monotonic getaddrinfo ipv6ifname png gif 
-        system-freetype system-zlib nis glib openssl x11sm xshape xfixes xrender fontconfig tablet xkb release
-        Debug ............... no
-        Qt 3 compatibility .. yes
-        QtDBus module ....... no
-        STL support ......... yes
-        PCH support ......... no
-        MMX/3DNOW/SSE/SSE2 .. no/no/no/no
-        IPv6 support ........ yes
-        IPv6 ifname support . yes
-        getaddrinfo support . yes
-        getifaddrs support .. no
-        Accessibility ....... yes
-        NIS support ......... yes
-        CUPS support ........ no
-        Iconv support ....... no
-        Glib support ........ yes
-        Large File support .. yes
-        GIF support ......... yes
-        TIFF support ........ plugin (qt)
-        JPEG support ........ plugin (qt)
-        PNG support ......... yes (qt)
-        MNG support ......... plugin (qt)
-        zlib support ........ system
-        OpenGL support ...... yes
-        NAS sound support ... no
-        Session management .. yes
-        XShape support ...... yes
-        Xinerama support .... no
-        Xcursor support ..... no
-        Xfixes support ...... yes
-        Xrandr support ...... no
-        Xrender support ..... yes
-        FontConfig support .. yes
-        XKB Support ......... yes
-        immodule support .... yes
-        SQLite support ...... plugin (qt)
-        OpenSSL support ..... yes
+      Build ............... libs tools examples demos
+      Configuration ....... release shared dll largefile stl  qt3support accessibility opengl minimal-config 
+      small-config medium-config large-config full-config ipv6 clock-monotonic getaddrinfo ipv6ifname png gif 
+      system-freetype system-zlib nis glib openssl x11sm xshape xfixes xrender fontconfig tablet xkb release
+      Debug ............... no
+      Qt 3 compatibility .. yes
+      QtDBus module ....... no
+      STL support ......... yes
+      PCH support ......... no
+      MMX/3DNOW/SSE/SSE2 .. no/no/no/no
+      IPv6 support ........ yes
+      IPv6 ifname support . yes
+      getaddrinfo support . yes
+      getifaddrs support .. no
+      Accessibility ....... yes
+      NIS support ......... yes
+      CUPS support ........ no
+      Iconv support ....... no
+      Glib support ........ yes
+      Large File support .. yes
+      GIF support ......... yes
+      TIFF support ........ plugin (qt)
+      JPEG support ........ plugin (qt)
+      PNG support ......... yes (qt)
+      MNG support ......... plugin (qt)
+      zlib support ........ system
+      OpenGL support ...... yes
+      NAS sound support ... no
+      Session management .. yes
+      XShape support ...... yes
+      Xinerama support .... no
+      Xcursor support ..... no
+      Xfixes support ...... yes
+      Xrandr support ...... no
+      Xrender support ..... yes
+      FontConfig support .. yes
+      XKB Support ......... yes
+      immodule support .... yes
+      SQLite support ...... plugin (qt)
+      OpenSSL support ..... yes
    
-
 4. Now to start building Qt, type this in the command line:
-
-        make
-
+      make
 5. Once Qt is done building, install it by typing:
+      make install
+   The reason for this is so you will only need the include directory from
+   Qt, not the src one.
 
-        make install
-
-   The reason for this is so you will only need the include directory from Qt, not the src one.
-
-6. Install qt into the OPTICKSDEPENDENCIES directory structure by copying the following directories:
-   qtinstall/bin -> $OPTICKSDEPENDENCIES/Qt/bin/solaris-sparc
-   qtinstall/include -> $OPTICKSDEPENDENCIES/Qt/include/solaris-sparc
-   qtinstall/lib -> $OPTICKSDEPENDENCIES/Qt/lib/solaris-sparc
-   qtinstall/plugins -> $OPTICKSDEPENDENCIES/Qt/plugins/solaris-sparc
+6. Install qt into the OPTICKSDEPENDENCIES directory structure by copying
+   the following directories:
+      qtinstall/bin -> $OPTICKSDEPENDENCIES/Qt/bin/solaris-sparc
+      qtinstall/include -> $OPTICKSDEPENDENCIES/Qt/include/solaris-sparc
+      qtinstall/lib -> $OPTICKSDEPENDENCIES/Qt/lib/solaris-sparc
+      qtinstall/plugins -> $OPTICKSDEPENDENCIES/Qt/plugins/solaris-sparc
 
 
 How to Build Opticks: 
 -------------------------------
+In order to build Opticks, you will need to run the build.py python script
+that is included with the source code.
 
-There are two ways to build Opticks in Solaris: you can ether build it using the included build.py file or build it manually by using scons. 
+An example of building Opticks with build.py is shown below:
+   ./build.py -d /Opticks/Dependencies --mode=debug --build-opticks=core --prep --concurrency=3 
 
+The -d command-line argument is used to point to the location where you
+created the Opticks dependencies as mentioned earlier.  If you have
+created an OPTICKSDEPENDENCIES environment variable, you don't need to
+use the -d command-line argument.  You will always need to provide the
+--mode, --build-opticks and --prep command-line arguments.  The
+--build-opticks command-line argument should always be equal to "core" as 
+shown in the sample line above.  The --mode=debug will cause a debug binary
+of Opticks to be built, using --mode=release will cause a release binary
+of Opticks to be built.  The --concurrency command-line argument is optional,
+but it controls how many concurrent compilers are used, so it may speed up
+your compilation time.  If you need more information about running
+build.py, run it with --help.
 
-A. Building Opticks using the build.py script:
+You may notice compiler and linker warnings, however there should not be
+any compiler or linker errors.
 
-An example of building Opticks with build.py:
-
-        ./build.py -d /Opticks/Dependencies --mode=debug --build-opticks=core --prep --concurrency=3 
-
-If you need more information about running build.py,  run it with --help.
-
-If you used --prep, all of your dependencies will be placed in the Code/Release/LibsFordebug directory.
-
-
-B. Manually building Opticks:
-
-Another way of building Opticks is to do it manually by using scons. 
-
-Here is an example of using scons that would build Opticks, OpticksBatch and all plug-ins by using 3 threads: 
-
-        cd Code/application
-        scons -j3
-        cd Plugins/src
-        scons -j3
-
-If you need help with using scons, type scons -H.
-
-If you need Opticks build options, type scons -h. 
-
-Please note that this will not place the dependencies in one directory.  
-
-
-Running Opticks:
---------------------------------
-
-To run Opticks on your machine, you must set the following settings; OPTICKS_HOME to the Code/Release 
-directory, and LD_LIBRARY_PATH_64 to the directories that holds the needed dependency .so files.
-
-If you decide to build Opticks manually, you won't get access any plugins unless you start Opticks and go to 
-Tools->Options and change the plug-in path.
+How to Run Opticks:
+-------------------------------
+Once you have built Opticks, you can go into either the
+"Build/Binaries-solaris-sparc-debug/Bin" or
+"Build/Binaries-solaris-sparc-release/Bin" directory depending on whether
+you built a debug or release binary.  You will then need to set the 
+LD_LIBRARY_PATH_64 environment variable to this "Bin" directory.  Once this
+environment variable is set, you can simply run
+   ./solOpticks
+to run the interactive version of Opticks, or
+   ./solBatch
+to run the batch version of Opticks.
