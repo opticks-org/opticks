@@ -228,7 +228,7 @@ const vector<string>& ModelServicesImp::getValidElementTypes() const
 
 namespace
 {
-   struct ElementDepthComparitor : greater<vector<string>::size_type >
+   struct ElementDepthComparitor : less<vector<string>::size_type >
    {
       bool operator()(DataDescriptor* pA, DataDescriptor* pB)
       {
@@ -236,7 +236,7 @@ namespace
          {
             return false;
          }
-         return greater::operator()(pA->getParentDesignator().size(), pB->getParentDesignator().size());
+         return less::operator()(pA->getParentDesignator().size(), pB->getParentDesignator().size());
       }
    };
 };
@@ -244,11 +244,13 @@ namespace
 vector<DataElement*> ModelServicesImp::createElements(const vector<DataDescriptor*> &descriptors)
 {
    vector<DataElement*> elements;
-   priority_queue<DataDescriptor*, vector<DataDescriptor*>, ElementDepthComparitor> q(ElementDepthComparitor(),
-      descriptors);
-   for (; !q.empty(); q.pop())
+
+   vector<DataDescriptor*> sortedDescriptors = descriptors;
+   stable_sort(sortedDescriptors.begin(), sortedDescriptors.end(), ElementDepthComparitor());
+
+   for (vector<DataDescriptor*>::iterator it = sortedDescriptors.begin(); it != sortedDescriptors.end(); ++it)
    {
-      DataElement* pElement = createElement(q.top());
+      DataElement* pElement = createElement(*it);
       if (pElement != NULL)
       {
          elements.push_back(pElement);
