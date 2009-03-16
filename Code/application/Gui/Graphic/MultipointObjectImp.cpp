@@ -596,6 +596,13 @@ bool MultipointObjectImp::fromXml(DOMNode* pDocument, unsigned int version)
       pObjectNode = pObjectNode->getNextSibling();
    }
 
+   if (Service<SessionManager>()->isSessionLoading())
+   {
+      mVertices = vertices;
+      mGeoVertices = geoVertices;
+      return true;
+   }
+
    // Use geoVertices if they are available and this object is georeferenced, otherwise use vertices.
    if (getGeoreferenceElement() != NULL && geoVertices.empty() == false)
    {
