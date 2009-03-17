@@ -27,6 +27,7 @@ struct JavaVM_;
 typedef JavaVM_ JavaVM;
 
 /**
+ *  \ingroup ServiceModule
  *  Provides access to application specific interfaces.
  *
  *  This class provides a means for clients to access interfaces of
@@ -79,36 +80,44 @@ public:
    virtual bool isInteractive() const = 0;
 
    /**
+    *  \cond INTERNAL
     *  Get the handle to the configuration settings currently being
     *  employed by the application.
     *
     *  @return   A pointer to an interface for the configuration settings.
     */
    virtual ConfigurationSettings* getConfigurationSettings() = 0;
+   /// \endcond
 
    /**
+    *  \cond INTERNAL
     *  Get the handle to the object factory currently being
     *  employed by the application.
     *
     *  @return   A pointer to an interface for the object factory.
     */
    virtual ObjectFactory* getObjectFactory() = 0;
+   /// \endcond
 
    /**
+    *  \cond INTERNAL
     *  Get the handle to the DataVariant factory currently being
     *  employed by the application.
     *
     *  @return   A pointer to an interface for the DataVariant factory.
     */
    virtual DataVariantFactory* getDataVariantFactory() = 0;
+   /// \endcond
 
    /**
+    *  \cond INTERNAL
     *  Get the handle to the session manager currently being
     *  employed by the application.
     *
     *  @return   A pointer to an interface for the session manager.
     */
    virtual SessionManager* getSessionManager() = 0;
+   /// \endcond
 
    /**
     *  Get a Java VM

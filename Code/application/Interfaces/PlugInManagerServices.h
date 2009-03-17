@@ -30,6 +30,7 @@ class View;
 class WorkspaceWindow;
 
 /**
+ *  \ingroup ServiceModule
  *  Provides access to the plug-in argument list and their arguments.
  *
  *  PlugInManagerServices provides methods for creating and destroying

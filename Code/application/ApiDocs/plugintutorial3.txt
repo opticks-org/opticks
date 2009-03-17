@@ -1,14 +1,14 @@
-/** \page howto_tutorial3 Accessing cube data
+/** \page plugintutorial3 Tutorial 3 - Accessing cube data
 Files:
  - \ref Tutorial/Tutorial3.h "Tutorial/Tutorial3.h"
  - \ref Tutorial/Tutorial3.cpp "Tutorial/Tutorial3.cpp"
 
-This tutorial demonstrates an important part of most %Opticks plug-ins; accessing data in a raster cube.
+This tutorial demonstrates an important part of most %Opticks plug-ins, accessing data in a raster cube.
 We'll build a plug-in which calculates some basic statistics over band 1 of a data cube.
 We'll see how to use DataAccessor and switchOnEncoding.h.
 
 If you would like to run this tutorial as you follow along with the code, see \ref RunningTutorial.
-If you would like to build and experiment with this tutorial as you follow along with the code, see \ref howto_buildtutorials.
+If you would like to build and experiment with this tutorial as you follow along with the code, see \ref plugintutorial_building.
 If you are running this tutorial in %Opticks, you will need to select "Tutorial 3" from the Tutorial toolbar to execute it.
 
 \dontinclude Tutorial/Tutorial3.cpp
@@ -84,7 +84,7 @@ After we have processed the entire cube we calculate the mean.
 The remainder of the execute() method reports the statistical information to the user in the Progress if available, in the message log, and in the output arguments.
 
 \example Tutorial/Tutorial3.h
-Declaration file for \ref howto_tutorial3 "Tutorial 3".
+Declaration file for \ref plugintutorial3 "Tutorial 3".
 \example Tutorial/Tutorial3.cpp
-Implementation file for \ref howto_tutorial3 "Tutorial 3".
+Implementation file for \ref plugintutorial3 "Tutorial 3".
  */

@@ -119,7 +119,7 @@ You will still need to do some work on the files.
 4. Copy all of the folders in the old Qt directory include folder and paste
    them in the new directory include -> win32 or x64 folder.
 5. Next go to the old Qt directory bin folder and copy all of the .dll files
-   as well as the mac.exe, qmake.exe, rcc.exe, and uic.exe. Paste these
+   as well as the moc.exe, qmake.exe, rcc.exe, and uic.exe. Paste these
    files in the new Qt directory bin -> win32 or x64 folder.
 6. Also copy the .pdb files located in the old Qt directory lib folder and
    paste them in the new directory bin -> win32 or x64 folder.
@@ -128,7 +128,7 @@ You will still need to do some work on the files.
 8. Go to the plugins win32 or x64 folder in the new Qt directory and create a
    new folder named imageformats.
 9. In the plugin -> imageformats folder in the old directory, copy all files
-   expect the .exp and .ilk files.  Paste these in the
+   except the .exp and .ilk files.  Paste these in the
    plugins -> win32 or x64 -> imageformats located in the new Qt directory.
 10. Qt is now ready to run with Opticks. 
 

@@ -13,9 +13,6 @@
 #include "bmutex.h"
 #include "bthread_signal.h"
 
-/**
- * MTA is the Multi-Threaded Algorithm namespace.
- */
 namespace mta
 {
    /**

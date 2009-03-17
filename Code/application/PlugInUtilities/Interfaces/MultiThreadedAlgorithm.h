@@ -30,6 +30,9 @@
 class Progress;
 class MessageLogMgr;
 
+/**
+ * MTA is the Multi-Threaded Algorithm namespace.
+ */
 namespace mta // Multi-Threaded Algorithm
 {
 

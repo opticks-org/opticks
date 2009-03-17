@@ -114,8 +114,8 @@ void CustomWidget::windowDropEvent(SpatialDataView *pView, QDropEvent *pEvent)
 }
 \endcode
 
-This example accepts drops with the \tt text/x-session-id MIME type.
-This is the MIME type emmitted by the session explorer on session item drags and is normally handled by \ref sessionitem_drops.
-The MIME type accepted can be \tt text/x-session-id, any standard qt drag and drop MIME type, or a custom MIME type emitted by a plug-in widget.
-See the qt documentation on drag and drop for information on generating drag events.
+This example accepts drops with the <tt>text/x-session-id</tt> MIME type.
+This is the MIME type emitted by the session explorer on session item drags and is normally handled by \ref sessionitem_drops.
+The MIME type accepted can be <tt>text/x-session-id</tt>, any standard Qt drag-and-drop MIME type, or a custom MIME type emitted by a plug-in widget.
+See the Qt documentation on drag-and-drop for information on generating drag events.
 */

@@ -97,7 +97,7 @@ Tutorial5::~Tutorial5()
 {
 }
 
-bool Tutorial5::getInputSpecification(PlugInArgList *&pInArgList)
+bool Tutorial5::getInputSpecification(PlugInArgList*& pInArgList)
 {
    VERIFY(pInArgList = Service<PlugInManagerServices>()->getPlugInArgList());
    pInArgList->addArg<Progress>(Executable::ProgressArg(), NULL, "Progress reporter");
@@ -105,14 +105,14 @@ bool Tutorial5::getInputSpecification(PlugInArgList *&pInArgList)
    return true;
 }
 
-bool Tutorial5::getOutputSpecification(PlugInArgList *&pOutArgList)
+bool Tutorial5::getOutputSpecification(PlugInArgList*& pOutArgList)
 {
    VERIFY(pOutArgList = Service<PlugInManagerServices>()->getPlugInArgList());
    pOutArgList->addArg<RasterElement>("Result", NULL);
    return true;
 }
 
-bool Tutorial5::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
+bool Tutorial5::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
    StepResource pStep("Tutorial 5", "app", "5EA0CC75-9E0B-4c3d-BA23-6DB7157BBD54");
    if (pInArgList == NULL || pOutArgList == NULL)

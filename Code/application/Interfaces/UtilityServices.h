@@ -17,6 +17,7 @@
 #include "Service.h"
 
 /**
+ *  \ingroup ServiceModule
  *  Provides access to data objects not available in the object factory
  *
  *  Access to instantiation of Utilities objects found

@@ -13,6 +13,9 @@
 #include "ExecutableShell.h"
 #include "RasterPager.h"
 
+/**
+ *  \ingroup ShellModule
+ */
 class RasterPagerShell : public ExecutableShell, public RasterPager
 {
 public:

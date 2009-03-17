@@ -24,6 +24,7 @@ class RasterElement;
 class SpatialDataView;
 
 /**
+ *  \ingroup ShellModule
  *  Provides a shell class for importers loading RasterElement objects.
  *
  *  This class provides capabilities for importers to load data from a file

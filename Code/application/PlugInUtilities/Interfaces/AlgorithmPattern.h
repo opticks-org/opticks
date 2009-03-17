@@ -164,6 +164,9 @@ private:
    }
 };
 
+/** 
+ *  \ingroup ShellModule
+ */
 class AlgorithmPlugIn : public AlgorithmShell, public AlgorithmRunner
 {
 public:

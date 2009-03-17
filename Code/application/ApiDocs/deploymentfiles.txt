@@ -12,7 +12,7 @@ A deployment file provides control over the following:
      This is also used to locate the application help (i.e. AppHomePath/Help/Opticks/index.htm).
  -# PlugInPath - This is the directory from which application plug-ins will be loaded.
      See ConfigurationSettings::getPlugInPath for more details.
- -# UserConfigPath - This is the directory from which the user settings will be stored and read.
+ -# UserConfigPath - This is the directory used for storing and reading the user settings.
      See ConfigurationSettings for more details.
  -# AdditionalDefaultPath - This is the directory from which any .cfg's will be parsed and loaded when initializing ConfigurationSettings in addition to those that are always loaded from AppHomePath/DefaultSettings.
      See ConfigurationSettings for more details.
@@ -40,9 +40,12 @@ One example .dep file is shown below:
 deployment:
 	AppHomePath: C:/FooBar
 	PlugInPath: C:\FooBar
+	UserConfigPath: 'C:\Path With\Spaces'
 \endverbatim
-You should note that each value is optional, you only need to provide values for those settings you wish to change.
-Also note that either forward or back slashes can be used.
+You should note the following:
+ - Each value is optional; you only need to provide values for those settings you wish to change.
+ - Either forward or back slashes can be used.
+ - If you are referencing a path with spaces, you can use single quotes to enclose the value.
 
 You can also use the compact YAML syntax as shown below:
 \verbatim

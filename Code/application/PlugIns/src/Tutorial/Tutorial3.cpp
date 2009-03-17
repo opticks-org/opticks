@@ -28,7 +28,7 @@
 namespace
 {
    template<typename T>
-   void updateStatistics(T *pData, double &min, double &max, double &total)
+   void updateStatistics(T* pData, double& min, double& max, double& total)
    {
       min = std::min(min, static_cast<double>(*pData));
       max = std::max(max, static_cast<double>(*pData));
@@ -55,7 +55,7 @@ Tutorial3::~Tutorial3()
 {
 }
 
-bool Tutorial3::getInputSpecification(PlugInArgList *&pInArgList)
+bool Tutorial3::getInputSpecification(PlugInArgList* &pInArgList)
 {
    VERIFY(pInArgList = Service<PlugInManagerServices>()->getPlugInArgList());
    pInArgList->addArg<Progress>(Executable::ProgressArg(), NULL, "Progress reporter");
@@ -63,7 +63,7 @@ bool Tutorial3::getInputSpecification(PlugInArgList *&pInArgList)
    return true;
 }
 
-bool Tutorial3::getOutputSpecification(PlugInArgList *&pOutArgList)
+bool Tutorial3::getOutputSpecification(PlugInArgList*& pOutArgList)
 {
    VERIFY(pOutArgList = Service<PlugInManagerServices>()->getPlugInArgList());
    pOutArgList->addArg<double>("Minimum", "The minimum value");
@@ -73,7 +73,7 @@ bool Tutorial3::getOutputSpecification(PlugInArgList *&pOutArgList)
    return true;
 }
 
-bool Tutorial3::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
+bool Tutorial3::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
    StepResource pStep("Tutorial 3", "app", "27170298-10CE-4E6C-AD7A-97E8058C29FF");
    if (pInArgList == NULL || pOutArgList == NULL)
@@ -102,7 +102,7 @@ bool Tutorial3::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
    double min = std::numeric_limits<double>::max();
    double max = -min;
    double total = 0.0;
-   for (unsigned int row = 0; row < pDesc->getRowCount(); row++)
+   for (unsigned int row = 0; row < pDesc->getRowCount(); ++row)
    {
       if (isAborted())
       {
@@ -132,7 +132,7 @@ bool Tutorial3::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
          pProgress->updateProgress("Calculating statistics", row * 100 / pDesc->getRowCount(), NORMAL);
       }
 
-      for (unsigned int col = 0; col < pDesc->getColumnCount(); col++)
+      for (unsigned int col = 0; col < pDesc->getColumnCount(); ++col)
       {
          switchOnEncoding(pDesc->getDataType(), updateStatistics, pAcc->getColumn(), min, max, total);
          pAcc->nextColumn();

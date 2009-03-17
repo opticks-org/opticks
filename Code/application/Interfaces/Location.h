@@ -15,6 +15,9 @@
 #include "AppAssert.h"
 #include "AppConfig.h"
 
+/**
+ * This namespace is a collection of the general API classes.
+ */
 namespace Opticks
 {
 

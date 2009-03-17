@@ -23,6 +23,7 @@ class SessionItem;
 class SessionSaveLock;
 
 /**
+ *  \ingroup ServiceModule
  *  Provides interfaces for saving and restoring the session and for creating
  *  a new session.
  *

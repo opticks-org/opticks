@@ -19,6 +19,7 @@
 class RasterElement;
 
 /**
+ *  \ingroup ShellModule
  *  The base class for all HDF Importers.
  *
  *  Requires linking against PlugInUtilities.

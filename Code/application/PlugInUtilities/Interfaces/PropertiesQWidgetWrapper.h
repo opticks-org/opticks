@@ -15,6 +15,7 @@
 #include <string>
 
 /**
+ *  \ingroup ShellModule
  *  A plug-in that both implements the Properties interface and provides a
  *  QWidget.
  *

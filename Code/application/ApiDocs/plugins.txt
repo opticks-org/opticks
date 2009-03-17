@@ -1,0 +1,253 @@
+/** \page writing_plugin Writing a plug-in class
+
+\section plugin_subclass Create Plug-In Class
+In order to create a plug-in, you must first decide which plug-in interface you would like to implement.
+The available plug-in types and sub-types are:
+ - PlugIn
+	- Option
+	- Properties
+	- Executable
+		- Georeference
+		- Importer
+		- Interpreter
+		- RasterPager
+		- Exporter
+		
+You can directly subclass one of those interfaces and implement all of the abstract functions in order to create a plug-in.
+However, it is <b>highly</b> recommended that you subclass one of our Shell classes.
+These Shell classes implement large portions of these interfaces for you and require you write less code.
+A complete list of Shell classes is shown below:
+ - PlugInShell
+	- OptionShell
+		- OptionQWidgetWrapper
+	- PropertiesShell
+		- PropertiesQWidgetWrapper
+	- ExecutableShell
+		- AlgorithmShell
+			- AlgorithmPlugIn
+		- DockWindowShell
+		- ExporterShell
+		- GeoreferenceShell
+		- ImporterShell
+			- RasterElementImporterShell
+				- HdfImporterShell
+					- Hdf4ImporterShell
+					- Hdf5ImporterShell
+		- InterpreterShell
+		- RasterPagerShell
+			- CachedPager
+		- ViewerShell
+		- WizardShell
+
+\section using_services Accessing Opticks Services
+While writing your plug-in you will need access to the rest of the plug-in API.
+The way that you access the rest of the plug-in API is to use our Services.
+The complete list of our Services is:
+- DesktopServices <sup>1</sup>
+	- SessionExplorer <sup>1</sup>
+- ModelServices
+- ApplicationServices
+	- SessionManager
+	- ConfigurationSettings
+	- ObjectFactory
+	- DataVariantFactory
+- UtilityServices
+	- MessageLog
+- AnimationServices
+- PlugInManagerServices
+
+<sup>1</sup> - DesktopServices and SessionExplorer are only available when ApplicationServices::isBatch() returns false.
+
+The easiest method to access these Services is to use the Service template specialization, so
+\code
+#include "ConfigurationSettings.h"
+#include <string>
+
+void foo()
+{
+	std::string version = Service<ConfigurationSettings>()->getVersion(); //Fetch the application version # from the ConfigurationSettings Service.
+
+	//OR, another way to do the above
+
+	Service<ConfigurationSettings> pConfSett;
+	std::string version = pConfSett->getVersion(); 
+
+	//OR, yet another way to do the above
+		
+	ConfigurationSettings* pConfPointer = pConfSett.get();
+	version = pConfPointer->getVersion();
+}
+\endcode
+
+There is a Service template specialization for each of the Services mentioned above.
+The Service classes can be used anywhere inside your plug-in library (i.e. .dll, .so).
+
+Now that you have created a plug-in subclass, you need to register it with the application.
+Please read \ref register_plugin for more details.
+*/
+
+/** \page register_plugin Registering your plug-in
+%Opticks discovers your plug-ins by using the ModuleManager provided by your plug-in library.
+If you haven't created a plug-in subclass to register, please read \ref plugin_subclass .
+You must include ModuleManager.cpp when compiling and linking your plug-in library (i.e. .dll, .so).
+It is suggested you use the template ModuleManager.cpp in SDK_HOME\\Src.
+
+You must set the mspUniqueId static variable shown below.
+This is a UUID enclosed in {}, for example "{9e9a931f-1b4a-4c43-9c02-db66ad2fc390}".
+A UUID can be generated with the "Create GUID" tool on Windows or the makeuuid program on Solaris.
+Specifically the UUID is a version 4 UUID as defined by <a href="http://www.faqs.org/rfcs/rfc4122.html">RFC4122</a>.
+The UUID for your plug-in library must be unique.
+If two plug-in libraries have the same UUID, only the first will be loaded by the application.
+\dontinclude src/ModuleManager.cpp
+\skip mspDescription
+\skip /**
+\until mspUniqueId
+
+You must also set the name of your module using the mspName static variable shown below.
+This is the name of your module that will be shown to users on the Plug-Ins tab of the Session Explorer when running %Opticks.
+\dontinclude src/ModuleManager.cpp
+\skip required for your plug-in here
+\skip /**
+\until mspName
+
+It is recommended, but not required that you provide a version for your plug-in library using the mspVersion static variable. 
+This can be any freeform string.
+\dontinclude src/ModuleManager.cpp
+\skip mspName
+\skip /**
+\until mspVersion
+
+You can also provide a description for your plug-in library using the mspDescription static variable.
+This is not required and may be any freeform string.
+\skip /**
+\until mspDescription
+
+The above fields are only set once for the plug-in library (i.e. .dll, .so) that contains your plug-in subclass.
+A single plug-in library can contain as many plug-in subclasses as you like.
+You will need to update the ModuleManager::getTotalPlugIns method shown below to return the total number of plug-in subclasses that are compiled into your plug-in library.
+\dontinclude src/ModuleManager.cpp
+\skip getTotalPlugIns
+\until }
+
+During start-up, the application will call your ModuleManager::getPlugIn method once for each plug-in in your module.
+The number of plug-ins in your module is reported by ModuleManager::getTotalPlugIns.
+The plugInNumber parameter is the zero based index of the plug-in which should be created.
+This method should return a new instance of the appropriate plug-in.
+\skip getPlugIn
+\until return pPlugIn
+It is critical that you always construct the same plug-in subclass for a specific plugInNumber parameter value.
+For example, if you have two PlugIn subclasses.
+\code
+class MyAlgorithm : AlgorithmShell {};
+class MyImporter : ImporterShell {};
+\endcode
+Assuming you code getPlugIn() to return MyAlgorithm when getPlugIn(0) is called, you must always return MyAlgorithm when getPlugIn(0) is called. 
+ 
+\example src/ModuleManager.cpp
+Template Module Manager file.
+*/
+
+/** \page runningplugins Running your plug-ins
+This document will describe the options available to you when running your newly written plug-ins with %Opticks.
+Two approaches to configuring %Opticks to run your plug-ins will be presented.
+Following that is a more detailed section that describes all the necessary configuration for running %Opticks.
+It is highly recommended that you read this entire document before deciding which approach is most appropriate for you.
+
+\section running_approach1 Approach 1: Use an Opticks installation
+This approach involves copying your plug-ins into an existing %Opticks installation.
+The installers only provide a release mode build of %Opticks.
+On Windows, you must use either the 32-bit or 64-bit install of %Opticks, depending on whether you are building 32-bit or 64-bit plug-ins.
+On Solaris, we only provide a 64-bit binary.
+Also on Solaris, there is no distiction between debug and release, so you put either compilation type of your plug-in into a Solaris installation of %Opticks.
+In order to use this approach on either Windows or Solaris, you need to perform the following steps:
+ -# Copy your compiled plug-in (i.e. .dll or .so) into the PlugIns folder of the %Opticks installation.
+ -# Copy any third party dependency libraries (i.e. .dll or .so's that are not plug-ins) into the Bin folder of the installation.
+ -# Copy any custom settings default files (i.e. *.cfg, see ConfigurationSettings) into the DefaultSettings folder of the installation.
+ -# Copy any plug-in on-line help into the the Help folder of the installation.
+ -# Copy any product templates into the Templates folder of the installation.
+ -# Copy any wizard files into either the Wizards folder of the installation or the SupportFiles/Wizards folder of the installation.
+ -# Copy any other custom supporting data files into the SupportFiles folder of the installation.
+ -# On Windows, if you wished to run your plug-ins in debug mode, you would need to perform the following additional steps:
+   -# Rename the existing Bin folder in the installation to Bin-release
+   -# Rename the existing PlugIns folder in the installation to PlugIns-release
+   -# Create a new Bin folder in the installation by copying either the SDK_HOME\\Build\\Binaries-Win32-Debug\\Bin or SDK_HOME\\Build\\Binaries-x64-Debug\\Bin folder depending on whether you are trying to run 32-bit or 64-bit plug-ins respectively.
+   -# Create a new PlugIns folder in the installation by copying either the SDK_HOME\\Build\\Binaries-Win32-Debug\\PlugIns or SDK_HOME\\Build\\Binaries-x64-Debug\\PlugIns folder depending on whether you are trying to run 32-bit or 64-bit plug-ins respectively.
+   -# Copy your compiled plug-in (i.e. .dll or .so) into the PlugIns folder that you just created in the installation folder.
+   -# Copy any third party dependency libraries (i.e. .dll or .so's that are not plug-ins) into the Bin that you just created in the installation folder.
+   -# At this point, you could run your plug-ins in debug mode.
+      If you wished to revert back to running in release mode, you would have to reverse the above steps.
+      Also, note that with this approach you cannot run debug mode and release mode simultaneously.
+    
+\section running_approach2 Approach 2: Create a custom workspace
+This approach involves creating a custom workspace. 
+You will need to perform the following steps:
+ -# Create a new folder anywhere on the filesystem.
+    This directory will be called WS_HOME from this point forward.
+ -# Copy the DefaultSettings, Help, SupportFiles, Templates folders from an %Opticks installation into the WS_HOME folder.
+ -# Create a UserSettings folder in the WS_HOME folder.
+ -# Create a Build folder in the WS_HOME folder.
+ -# On Windows, perform the following steps:
+    -# If you will run plug-ins in release 32-bit mode, then copy the Bin and PlugIns folder from SDK_HOME\\Build\\Binaries-Win32-Release into WS_HOME\\Build\\Binaries-Win32-Release folder.
+    -# If you will run plug-ins in debug 32-bit mode, then copy the Bin and PlugIns folder from the SDK_HOME\\Build\\Binaries-Win32-Debug into WS_HOME\\Build\\Binaries-Win32-Debug folder.
+    -# If you will run plug-ins in release 64-bit mode, then copy the Bin and PlugIns folder from the SDK_HOME\\Build\\Binaries-x64-Release into WS_HOME\\Build\\Binaries-x64-Release folder.
+    -# If you will run plug-ins in debug 64-bit mode, then copy the Bin and PlugIns folder from the SDK_HOME\\Build\\Binaries-x64-Debug into WS_HOME\\Build\\Binaries-x64-Debug folder.
+ -# On Solaris, perform the following steps:
+	-# Copy the Bin and PlugIns folder from an %Opticks installation into the WS_HOME/Build/Binaries-solaris-sparc-release folder.
+ -# For both Windows and Solaris, perform the following steps:
+    -# Create a opticks.dep file (it must be named exactly this) in all the Bin folders you have created thus far in the WS_HOME/Build/Binaries-* folders with the content shown below.
+    \verbatim
+    !depV1
+    deployment:
+		UserConfigPath: ../../UserSettings
+		AppHomePath: ../..
+    \endverbatim
+    For more details on the opticks.dep file, please see \ref deploymentfiles .
+
+Once you have created this workspace, you would copy any custom plug-ins into the appropriate PlugIns folder.
+The advantage of this approach is that this workspace is entirely self-contained.
+This means that you can follow this procedure as many times as you wish on a single computer even using the same version of %Opticks and each WS_HOME you create will not interfere with any WS_HOME you've created on the same machine.
+This approach also has the advantage that you can easily switch between debug and release on Windows.
+All you need to do is run the Opticks.exe in the appropriate Build\\Binaries-* folder, no other configuration is necessary to switch back and forth.
+
+\section running_notes Additional notes about running Opticks
+In general, when running %Opticks there are two classes of things that %Opticks requires to run properly.
+%Opticks requires:
+ -# %Executable code
+ -# Other supporting data
+ -# User settings
+
+The "Executable Code" consists of:
+ -# The %Opticks and OpticksBatch executable.
+ -# %Opticks plug-ins.
+ -# Third-party dependency libraries.
+ 
+The first and third items should reside in the same folder, for an %Opticks installation this is the Bin folder.
+The plug-ins need to all reside in a single folder, for an %Opticks installation this is the PlugIns folder.
+The location of the %PlugIn folder is controlled by the "PlugInPath" setting in the deployment file.
+You can read \ref deploymentfiles to determine the default location %Opticks searches for plug-ins if a deployment file is not present along with documentation on how to provide a custom deployment file.
+
+The "Other supporting data" consists of:
+ -# DefaultSettings
+ -# Help
+ -# Templates
+ -# SupportFiles
+ 
+The DefaultSettings and Help must always be located in the folder specified by the "AppHomePath" setting in the deployment file.
+You can read \ref deploymentfiles to determine the default location %Optick uses for the "AppHomePath" along with ways to change that path.
+
+The Templates and SupportFiles are controlled by ConfigurationSettings.
+Specifically ProductView::getSettingTemplatePath(), ProductView::setSettingTemplatePath(), ConfigurationSettings::getSettingSupportFilesPath(), ConfigurationSettings::setSettingSupportFilesPath().
+This means that each individual user that runs %Opticks can have a custom SupportFiles and Template path just for their user account.
+By default, this does not occur.
+In a traditional installation, the SupportFiles defaults to AppHomePath/SupportFiles and Templates defaults to AppHomePath/Templates.
+If the user wants to change the paths, they can use "Tools\Options..." in the application.
+
+The "User Settings" consist of a .cfg file that is saved to the disk during application shutdown.
+This file contains all of the setting values in ConfigurationSettings that have been overridden by the user, see ConfigurationSettings::isUserSetting(), ConfigurationSettings::setSetting() for more details.
+This file is saved to the folder specified by the "UserConfigPath" setting in the deployment file.
+You can read \ref deploymentfiles to determine the default location %Opticks uses for "UserConfigPath" along with ways to change that path.
+The user setting file is named according the following convention, "UserSettings-[version]-[operating system]-[arch][mode].cfg"
+In practice this means that all %Opticks installations on the same machine that use the same "UserConfigPath" that have the  same arch (e.g. 32-bit, 64-bit) and mode (e.g. debug, release) will share one user settings file.
+This can cause confusion and the solution to this problem is to use a deployment file to specify a different value for the "UserConfigPath" for the problematic installations.
+*/
+ 

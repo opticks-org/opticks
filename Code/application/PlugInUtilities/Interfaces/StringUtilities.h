@@ -16,6 +16,10 @@
 #include <string>
 #include <vector>
 
+/**
+ * This namespace contains helper functions for converting types to and from strings along with other
+ * convenience string functions.
+ */
 namespace StringUtilities
 {
    // constants for the readSTLString class

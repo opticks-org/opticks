@@ -14,6 +14,9 @@
 #include "LocationType.h"
 #include "ExecutableShell.h"
 
+/**
+ *  \ingroup ShellModule
+ */
 class GeoreferenceShell : public ExecutableShell, public Georeference
 {
 public:

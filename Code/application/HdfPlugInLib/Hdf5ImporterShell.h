@@ -18,6 +18,7 @@ class Hdf5FileResource;
 class RasterElement;
 
 /**
+ * \ingroup ShellModule
  * The base class of an importer that loads data in HDF Version 5 format.
  *
  * The HDF5 Importer Shell is a class designed to wrap the HDF5 libraries and

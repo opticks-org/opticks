@@ -15,6 +15,7 @@
 #include <string>
 
 /**
+ *  \ingroup ServiceModule
  *  Dynamic creation of arbitrary class objects
  *
  *  The ObjectFactory can create and destroy objects of arbitrary classes

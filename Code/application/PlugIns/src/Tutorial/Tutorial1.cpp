@@ -31,20 +31,20 @@ Tutorial1::~Tutorial1()
 {
 }
 
-bool Tutorial1::getInputSpecification(PlugInArgList *&pInArgList)
+bool Tutorial1::getInputSpecification(PlugInArgList*& pInArgList)
 {
    VERIFY(pInArgList = Service<PlugInManagerServices>()->getPlugInArgList());
    pInArgList->addArg<Progress>(Executable::ProgressArg(), NULL, "Progress reporter");
    return true;
 }
 
-bool Tutorial1::getOutputSpecification(PlugInArgList *&pOutArgList)
+bool Tutorial1::getOutputSpecification(PlugInArgList*& pOutArgList)
 {
    pOutArgList = NULL;
    return true;
 }
 
-bool Tutorial1::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
+bool Tutorial1::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
    if (pInArgList == NULL)
    {

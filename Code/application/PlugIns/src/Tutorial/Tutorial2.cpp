@@ -41,7 +41,7 @@ Tutorial2::~Tutorial2()
 {
 }
 
-bool Tutorial2::getInputSpecification(PlugInArgList *&pInArgList)
+bool Tutorial2::getInputSpecification(PlugInArgList*& pInArgList)
 {
    VERIFY(pInArgList = Service<PlugInManagerServices>()->getPlugInArgList());
    pInArgList->addArg<Progress>(Executable::ProgressArg(), NULL, "Progress reporter");
@@ -50,13 +50,13 @@ bool Tutorial2::getInputSpecification(PlugInArgList *&pInArgList)
    return true;
 }
 
-bool Tutorial2::getOutputSpecification(PlugInArgList *&pOutArgList)
+bool Tutorial2::getOutputSpecification(PlugInArgList*& pOutArgList)
 {
    pOutArgList = NULL;
    return true;
 }
 
-bool Tutorial2::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
+bool Tutorial2::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
    StepResource pStep("Tutorial 2", "app", "A8FEFCB3-5D08-4670-B47E-CC533A932737");
    if (pInArgList == NULL)

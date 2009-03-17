@@ -1,13 +1,12 @@
-/** \page howto_buildtutorials Building and Running Tutorial plug-ins
+/** \page plugintutorial_building Building and Running Tutorial plug-ins
 
 The SDK includes tutorial plug-ins to help first-time developers understand how to create plug-ins for %Opticks.
 The SDK also includes other sample plug-ins that more advanced developers can use as reference.
 This document will describe how to build those plug-ins and then run them with an installation of %Opticks.
 This document assumes that the SDK was unzipped to a location known as SDK_HOME.
-For example, this means you are browing SDK_HOME/doc/html/index.html currently in your web browser.
-Wherever you see the word SDK_HOME, please expand that to be the directory where unzipped this SDK.
+Wherever you see the word SDK_HOME, please expand that to be the directory where you unzipped this SDK.
 
-If you have any difficulty building or running the tutorials, please join the developers mailing list at https://opticks.ballforge.net/servlets/ProjectMailingListList and send an e-mail describing your problem.
+If you have any difficulty building or running the tutorials, please join the developers mailing list at <a href="https://opticks.ballforge.net/ds/viewForums.do" target="_blank">https://opticks.ballforge.net/servlets/ProjectMailingListList</a> and send an e-mail describing your problem.
 
 \section GettingTutorialDependencies Acquiring 3rd party software and libraries
 Before you can compile the tutorials or sample plug-ins you must first acquire all necessary 3rd party software.
@@ -37,29 +36,10 @@ python dependencies.py Boost Hdf4 pthreads Xerces xqilla
 </li>
 <li>You should not encounter any errors running the previous step.</li>
 <li>
-You will need to acquire a copy of Qt (http://trolltech.com/products/qt).
-Since Qt is made available under either the GPL (i.e. open-source) license or a commercial license, you will first need to decide how you will be using Qt.
-If you are just going to build the tutorials and sample plug-ins or create an open-source (i.e. GPL or LGPL) licensed plug-in you can use the open-source edition of Qt.
-If you are going to create a commercially licensed or closed-source plug-in you will need to use the commerically licensed version of Qt.
-Please read the Trolltech FAQ about Qt licensing (http://trolltech.com/developer/downloads/qt/faq) before making your decision.
-<ol>
-<li>
-If you are using the commercial licensed edition of Qt, you will need to build Qt yourself and then arrange it into our required directory structure.
-You can find more details about this on the opticks website at https://opticks.ballforge.net/servlets/ProjectProcess?tab=5 .
-</li>
-<li>
-If you are using the open-source edition of Qt, you can download a pre-built binary provided by the %Opticks project from https://opticks.ballforge.net/files/documents/8/112/Qt-4.3.4-opensource.zip .
-</li>
-<li>Once you have downloaded this .zip, please rename the file to Qt-4.3.4.zip and place it in SDK_HOME/Dependencies/packages/ folder.</li>
-<li>
-Open a command window or terminal and run the following command to properly deploy Qt:
-\verbatim
-cd SDK_HOME/Dependencies
-python dependencies.py Qt
-\endverbatim
+You will need to acquire a copy of Qt (http://www.qtsoftware.com/products).
+Please follow the instructions found in \ref FetchingQt
 </li>
 </ol>
-</li>
 At this point you have all of the necessary dependencies.
 You will now need to create an environment variable called OPTICKSDEPENDENCIES set to SDK_HOME/Dependencies using the appropriate method for your system/operating system.
 
@@ -92,7 +72,10 @@ scons RELEASE="yes"
 
 \section RunningTutorial Running Tutorials With Opticks
 
-You do not need to have completed \ref GettingTutorialDependencies, \ref BuildingTutorialWindows or \ref BuildingTutorialSolaris before starting this step.  The SDK includes pre-built binaries of all of the tutorials and sample plug-ins.  If you do build the tutorial and sample plug-ins they will simply overwrite the pre-built binaries.  You will need to have downloaded and installed %Opticks (https://opticks.ballforge.net/servlets/ProjectProcess?tab=1) before you can run the tutorials or sample plug-ins.
+You do not need to have completed \ref GettingTutorialDependencies, \ref BuildingTutorialWindows or \ref BuildingTutorialSolaris before starting this step.
+The SDK includes pre-built binaries of all of the tutorials and sample plug-ins.
+If you do build the tutorial and sample plug-ins they will simply overwrite the pre-built binaries.
+You will need to have downloaded and installed %Opticks (<a href="https://opticks.ballforge.net/servlets/ProjectProcess?tab=1" target="_blank">https://opticks.ballforge.net/servlets/ProjectProcess?tab=1</a>) before you can run the tutorials or sample plug-ins.
  
 <ol>
 <li>Preparing to run on Windows
@@ -111,7 +94,7 @@ Start %Opticks as you would normally.
 You may need to right-click on the menu bar and click on the toolbar name in order to make it appear.
 The toolbars you would need to make visible are "Demo", "Tests" and "Tutorial."
 If you cannot find those toolbars please double-check the above steps.
-You can also open the message log to see if there are any error message's related to trying to load those plug-ins.
+You can also open the message log to see if there are any error messages related to trying to load those plug-ins.
 </li>
 </ol>
 

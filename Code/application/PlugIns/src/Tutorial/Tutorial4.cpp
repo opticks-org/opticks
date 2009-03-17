@@ -36,7 +36,7 @@
 namespace
 {
    template<typename T>
-   void updateStatistics(T *pData, double &min, double &max, double &total)
+   void updateStatistics(T* pData, double& min, double& max, double& total)
    {
       min = std::min(min, static_cast<double>(*pData));
       max = std::max(max, static_cast<double>(*pData));
@@ -63,7 +63,7 @@ Tutorial4::~Tutorial4()
 {
 }
 
-bool Tutorial4::getInputSpecification(PlugInArgList *&pInArgList)
+bool Tutorial4::getInputSpecification(PlugInArgList*& pInArgList)
 {
    VERIFY(pInArgList = Service<PlugInManagerServices>()->getPlugInArgList());
    pInArgList->addArg<Progress>(Executable::ProgressArg(), NULL, "Progress reporter");
@@ -75,7 +75,7 @@ bool Tutorial4::getInputSpecification(PlugInArgList *&pInArgList)
    return true;
 }
 
-bool Tutorial4::getOutputSpecification(PlugInArgList *&pOutArgList)
+bool Tutorial4::getOutputSpecification(PlugInArgList*& pOutArgList)
 {
    VERIFY(pOutArgList = Service<PlugInManagerServices>()->getPlugInArgList());
    pOutArgList->addArg<double>("Minimum", "The minimum value");
@@ -85,7 +85,7 @@ bool Tutorial4::getOutputSpecification(PlugInArgList *&pOutArgList)
    return true;
 }
 
-bool Tutorial4::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
+bool Tutorial4::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
    StepResource pStep("Tutorial 4", "app", "95034AC8-EC4C-4CB6-9089-4EF0DCBB41C3");
    if (pInArgList == NULL || pOutArgList == NULL)
@@ -181,7 +181,7 @@ bool Tutorial4::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
    double max = -min;
    double total = 0.0;
    unsigned int count = 0;
-   for (unsigned int row = startRow; row <= endRow; row++)
+   for (unsigned int row = startRow; row <= endRow; ++row)
    {
       if (isAborted())
       {
@@ -211,7 +211,7 @@ bool Tutorial4::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList)
          pProgress->updateProgress("Calculating statistics", row * 100 / pDesc->getRowCount(), NORMAL);
       }
 
-      for (unsigned int col = startColumn; col <= endColumn; col++)
+      for (unsigned int col = startColumn; col <= endColumn; ++col)
       {
          if (pPoints == NULL || pPoints->getPixel(col, row))
          {

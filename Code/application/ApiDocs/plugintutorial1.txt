@@ -1,4 +1,4 @@
-/** \page howto_tutorial1 Creating your first plug-in
+/** \page plugintutorial1 Tutorial 1 - Creating your first plug-in
 Files:
  - \ref Tutorial/Tutorial1.h "Tutorial/Tutorial1.h"
  - \ref Tutorial/Tutorial1.cpp "Tutorial/Tutorial1.cpp"
@@ -8,7 +8,7 @@ It does very little interesting but is a framework for a plug-in.
 It demonstrates a basic executable plug-in framework, use of PlugInArgList, and use of Progress.
 
 If you would like to run this tutorial as you follow along with the code, see \ref RunningTutorial.
-If you would like to build and experiment with this tutorial as you follow along with the code, see \ref howto_buildtutorials.
+If you would like to build and experiment with this tutorial as you follow along with the code, see \ref plugintutorial_building.
 If you are running this tutorial in %Opticks, you will need to select "Tutorial 1" from the Tutorial toolbar to execute it.
 
 \section header_file The Header File
@@ -61,7 +61,7 @@ The Tutorial1::~Tutorial() and Tutorial1::getOutputSpecification() methods don't
 \skip getInputSpecification
 \until getPlugInArgList
 The VERIFY() macro checks for errors and if one is detected, logs a message and returns false.
-There are a few variations on VERIFY() includig VERIFYNRV() and VERIFYRV().
+There are a few variations on VERIFY() including VERIFYNRV() and VERIFYRV().
 See the reference documentation for a complete list.
 VERIFY() should only be used for detecting programming errors as it may display an error dialog to the user with developer oriented debugging information.
 In this case, PlugInManagerServices::getPlugInArgList() will never return a \c NULL pointer unless there is a serious run-time error such as insufficient memory.
@@ -74,7 +74,7 @@ If we have no arguments, the PlugInArgList should be set to \c NULL like we are 
 We are adding a new Progress argument.
 Some interfaces, such as Executable, expect certain plug-in arguments.
 The argument name is defined in the interface and should be used when creating and accessing those plug-in arguments.
-If you are adding and argument specific to your plug-in, you can use any name you like as long as it is not already used by another argument on one of the plug-in interfaces.
+If you are adding an argument specific to your plug-in, you can use any name you like as long as it is not already used by another argument on one of the plug-in interfaces.
 Executable::ProgressArg() can be \c NULL when the plug-in is called in batch mode.
 Since \c NULL is a valid value, we'll make \c NULL the default.
 The last argument is an optional description.
@@ -91,16 +91,16 @@ If we were returning data in the output argument list, we would ensure that pOut
 \line Progress
 This gets the value of the Executable::ProgressArg() argument we declared in Tutorial1::getInputSpecification().
 \until }
-Remember that Executable::ProgressArg() is allow to be \c NULL when calling Executable::execute() so we need to check for \c NULL here.
+Remember that Executable::ProgressArg() is allowed to be \c NULL when calling Executable::execute() so we need to check for \c NULL here.
 If we have a valid progress, we display a message to the user.
 We indicate that the progress is 100\%.
 Normally, we should always set the progress to 100\% before returning successfully from Executable::execute().
-The progress dialog may close when the plug-in finishes executing to make sure the "Automatically close on process completion" option is not checked in "Tools->Options->Session->General->Progress Dialog".
+The progress dialog may close when the plug-in finishes executing so make sure the "Automatically close on process completion" option is not checked in "Tools->Options->Session->General->Progress Dialog".
 \until }
 Finally, indicate that the plug-in successfully executed.
 
 \example Tutorial/Tutorial1.h
-Declaration file for \ref howto_tutorial1 "Tutorial 1".
+Declaration file for \ref plugintutorial1 "Tutorial 1".
 \example Tutorial/Tutorial1.cpp
-Implementation file for \ref howto_tutorial1 "Tutorial 1".
+Implementation file for \ref plugintutorial1 "Tutorial 1".
  */

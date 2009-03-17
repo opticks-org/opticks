@@ -15,6 +15,7 @@
 #include <string>
 
 /**
+ * \ingroup ShellModule
  * This templated class provides a way to implement
  * both the Option interface and provide a QWidget
  * by writing a single class instead of two.

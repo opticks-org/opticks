@@ -13,6 +13,7 @@
 #include "ExecutableShell.h"
 
 /**
+ *  \ingroup ShellModule
  *  Wizard Shell
  *
  *  This class represents the shell for a wizard plug-in.  Wizard

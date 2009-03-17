@@ -18,6 +18,7 @@ namespace Nitf
 {
 
    /**
+    *  \ingroup ShellModule
     *  This class is a shell for a tre parer plug-in.
     *
     *  TreParser developers should take this class and extend it to support their 

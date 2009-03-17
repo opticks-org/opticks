@@ -73,6 +73,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\dependencies.txt"
+				>
+			</File>
+			<File
 				RelativePath=".\deploymentfiles.txt"
 				>
 			</File>
@@ -81,7 +85,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\howto_buildtutorials.txt"
+				RelativePath=".\howto_compileplugins.txt"
 				>
 			</File>
 			<File
@@ -97,30 +101,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\howto_tutorial1.txt"
-				>
-			</File>
-			<File
-				RelativePath=".\howto_tutorial2.txt"
-				>
-			</File>
-			<File
-				RelativePath=".\howto_tutorial3.txt"
-				>
-			</File>
-			<File
-				RelativePath=".\howto_tutorial4.txt"
-				>
-			</File>
-			<File
-				RelativePath=".\howto_tutorial5.txt"
-				>
-			</File>
-			<File
-				RelativePath=".\howtos.txt"
-				>
-			</File>
-			<File
 				RelativePath=".\iceformat.txt"
 				>
 			</File>
@@ -129,7 +109,43 @@
 				>
 			</File>
 			<File
+				RelativePath=".\overviews.txt"
+				>
+			</File>
+			<File
 				RelativePath=".\pluginbranding.txt"
+				>
+			</File>
+			<File
+				RelativePath=".\plugins.txt"
+				>
+			</File>
+			<File
+				RelativePath=".\plugintutorial1.txt"
+				>
+			</File>
+			<File
+				RelativePath=".\plugintutorial2.txt"
+				>
+			</File>
+			<File
+				RelativePath=".\plugintutorial3.txt"
+				>
+			</File>
+			<File
+				RelativePath=".\plugintutorial4.txt"
+				>
+			</File>
+			<File
+				RelativePath=".\plugintutorial5.txt"
+				>
+			</File>
+			<File
+				RelativePath=".\plugintutorial_building.txt"
+				>
+			</File>
+			<File
+				RelativePath=".\plugintutorial_overview.txt"
 				>
 			</File>
 			<File

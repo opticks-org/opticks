@@ -18,11 +18,14 @@
 #include <sstream>
 #include <typeinfo>
 
+/**
+ *  \cond INTERNAL
+ */
 namespace boost
 {
    class any;
 }
-
+/// \endcond
 class Subject;
 
 class SlotInvalidator;

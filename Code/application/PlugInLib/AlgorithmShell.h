@@ -13,6 +13,7 @@
 #include "ExecutableShell.h"
 
 /**
+ *  \ingroup ShellModule
  *  Algorithm Shell
  *
  *  This class represents the shell for an algorithm plug-in.  Algorithm

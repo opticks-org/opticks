@@ -13,14 +13,19 @@
 #include "AttachmentPtr.h"
 #include "ExecutableShell.h"
 
+/**
+ *  \cond INTERNAL
+ */
 namespace boost
 {
    class any;
 }
+/// \endcond
 class QWidget;
 class ApplicationServices;
 
 /**
+ *  \ingroup ShellModule
  *  A base class for plug-ins with modeless dialogs.
  *
  *  This class contains functionality to properly destroy modeless

@@ -61,7 +61,7 @@ Files:
  
  An ImportDescriptorResource is created and populated with a DataDescriptor.
  RasterUtilities contains a number of functions which are usually used to create the DataDescriptor and FileDescriptor for a raster data set.
- If a file format's data can be loaded with the generic importer, all of the relavent attributes should be set on the FileDescriptor to indicate the header bytes, inter-line bytes, etc.
+ If a file format's data can be loaded with the generic importer, all of the relevant attributes should be set on the FileDescriptor to indicate the header bytes, inter-line bytes, etc.
  This information is used by the generic RasterPager to map the data from disk to memory.
  The metadata for the data set should also be set in this method.
  A DynamicObject is created using a FactoryResource and the appropriate fields are populated.

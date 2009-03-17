@@ -40,7 +40,7 @@ const char *ModuleManager::mspVersion = "";
 const char *ModuleManager::mspDescription = "";
 
 /**
- * Set a unique identifier your your module, see SessionItem::getId() for more details
+ * Set a unique identifier for your module, see SessionItem::getId() for more details
  */
 const char *ModuleManager::mspUniqueId = "";
 

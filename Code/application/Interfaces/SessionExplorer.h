@@ -20,6 +20,7 @@
 class SessionItem;
 
 /**
+ *  \ingroup ServiceModule
  *  A window that displays all items in the current session.
  *
  *  The session explorer window contains a tab widget that contains tree views

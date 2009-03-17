@@ -40,11 +40,15 @@
 #pragma warning( pop )
 #endif
 #else
+/**
+ *  \cond INTERNAL
+ */
 #define XERCES_CPP_NAMESPACE_QUALIFIER xercesc_2_7::
 namespace xercesc_2_7
 {
    class DOMNode;
 }
+/// \endcond
 #endif
 
 #endif

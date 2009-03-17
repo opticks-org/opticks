@@ -18,6 +18,7 @@
 class QObject;
 
 /**
+ *  \ingroup ShellModule
  *  %Interpreter Shell
  *
  *  This class represents the shell for an interpreter plug-in.  %Interpreter

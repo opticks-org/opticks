@@ -41,6 +41,7 @@ class Window;
 class WorkspaceWindow;
 
 /**
+ *  \ingroup ServiceModule
  *  Interface to manage windows and to provide access to widgets in the main
  *  application window.
  *

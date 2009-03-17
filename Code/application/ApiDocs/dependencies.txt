@@ -1,0 +1,116 @@
+/** \page dependencies Acquiring and using 3rd party libraries
+
+This document will explain how to acquire the 3rd party libraries that are needed to make plug-ins for %Opticks.
+This document will also explain how to compile and link against the 3rd party libraries once you have acquired them.
+This document assumes that the SDK was unzipped to a location known as SDK_HOME.
+Wherever you see the word SDK_HOME, please expand that to be the directory where you unzipped this SDK.
+
+\section GettingPreqs Prerequisite Software
+You must first install Python 2.5 or later (http://www.python.org/download/).
+
+\section FetchingDeps Fetching 3rd party libraries
+The SDK includes a python script that will automatically fetch all of the 3rd party libraries except Qt that may be needed when creating plug-ins for %Opticks.
+This script can be found in the SDK_HOME\\Dependencies folder.
+In general, this script can be run by opening a command window or terminal and running the following command:
+\verbatim
+cd SDK_HOME/Dependencies
+python dependencies.py [NameOfDependency1] [NameOfDependency2]
+\endverbatim
+where [NameOfDependency1] and [NameOfDependency2] are the names of the two 3rd party libraries to fetch.
+
+If you want help on the script arguments, you can run the following command:
+\verbatim
+python dependencies.py -h
+\endverbatim
+
+If you would like a complete list of all of the 3rd party libraries that can be downloaded, you can run the following command:
+\verbatim
+python dependencies.py -m list
+\endverbatim
+
+If you would like to fetch all of the 3rd party libraries, you can run the script without any arguments:
+\verbatim
+python dependencies.py
+\endverbatim
+
+\section FetchingQt Fetching Qt
+The dependencies script does not currently provide a method to fetch Qt (http://www.qtsoftware.com/).
+Qt is needed if you are creating any plug-ins that need a GUI.
+Since Qt is made available under either the GPL (i.e. open-source) license or a commercial license, you will first need to decide how you will be using Qt.
+If you are just going to build the tutorials and sample plug-ins or create an open-source (i.e. GPL or LGPL) licensed plug-in you can use the open-source edition of Qt.
+If you are going to create a commercially licensed or closed-source plug-in you will need to use the commerically licensed version of Qt.
+Please read the Trolltech FAQ about Qt licensing (http://www.qtsoftware.com/developer/faqs/licensing) before making your decision.
+<ol>
+<li>
+If you are using the commercial licensed edition of Qt, you will need to build Qt yourself and then arrange it into our required directory structure.
+You can find more details about this on the opticks website at <a href="https://opticks.ballforge.net/servlets/ProjectProcess?tab=5" target="_blank">https://opticks.ballforge.net/servlets/ProjectProcess?tab=5</a>.
+</li>
+<li>
+If you are using the open-source edition of Qt, you can download a pre-built binary provided by the %Opticks project from https://opticks.ballforge.net/files/documents/8/224/Qt-4.3.4-opensource-fixed-libqjpeg.zip .
+</li>
+<li>Once you have downloaded this .zip, please rename the file to Qt-4.3.4.zip and place it in SDK_HOME/Dependencies/packages/ folder.</li>
+<li>
+Open a command window or terminal and run the following command to properly deploy Qt:
+\verbatim
+cd SDK_HOME/Dependencies
+python dependencies.py Qt
+\endverbatim
+</li>
+</ol>
+
+\section DepsCompilingLinking Compiling and Linking With 3rd party libraries
+The pre-built binaries that dependencies.py fetches are compilations of the original source distributions and then they have been arranged into a convenient directory structure to support cross-platform compilations.
+Each dependency usually follows the sample layout shown below:
+
+<ul>
+<li>Xerces 
+	<ul>
+		<li>bin
+			<ul>
+				<li>Win32 - contains the windows 32-bit dll's, either in this directory or in two subdirectories called debug and release.
+					<ul>
+						<li>debug - if both debug and release are present, this contains the debug dll's only</li>
+						<li>release - contains the release dll's only</li>
+					</ul>
+				</li>
+				<li>x64  - contains the windows 64-bit dll's, either in this directory or in two subdirectories called debug and release.
+					<ul>
+						<li>debug - if both debug and release are present, this contains the debug dll's only</li>
+						<li>release - contains the release dll's only</li>
+					</ul>
+				</li>
+			</ul>
+		</li>
+		<li>include - contains the header files, either in this directory on in a subdirectory based upon operating system.
+			<ul>
+				<li>solaris-sparc - if both solaris-sparc and windows are present, this contains the solaris only include files</li>
+				<li>windows - contains windows only include files</li>
+			</ul>
+		</li>
+		<li>lib
+			<ul>
+				<li>solaris-sparc - contains the solaris so's, both debug and release</li>
+				<li>win32 - contains the windows 32-bit lib's, either in this directory or in two subdirectories called debug and release.
+					<ul>
+						<li>debug - if both debug and release are present, this contains the debug lib's only</li>
+						<li>release - contains the release lib's only</li>
+					</ul>				
+				</li>
+				<li>x64 - contains the windows 64-bit lib's, either in this directory or in two subdirectories called debug and release.
+					<ul>
+						<li>debug - if both debug and release are present, this contains the debug lib's only</li>
+						<li>release - contains the release lib's only</li>
+					</ul>
+				</li>
+			</ul>
+		</li>
+	</ul>
+</li>
+</ul>
+
+For detailed information on the compiler and linker settings needed when compiling against these third-party dependencies, you can either reference the Visual Studio 2005 property sheets or SCons tool configurations.
+The Visual Studio 2005 property sheets are located in SDK_HOME\\Application\\CompileSettings and can be opened in any text editor.
+It should be self explanatory how to read the property sheets and apply the settings to the build tool of your choice.
+The SCons tool configurations are also located in SDK_HOME\\Application\\CompileSettings and can be opened in any text editor.
+
+*/

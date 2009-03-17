@@ -16,6 +16,7 @@
 #include <string>
 
 /**
+ *  \ingroup ShellModule
  *  %Importer Shell
  *
  *  This class represents the shell for an importer plug-in.  %Importer

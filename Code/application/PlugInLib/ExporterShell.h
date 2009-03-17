@@ -19,6 +19,7 @@
 class PlugInArgList;
 
 /**
+ *  \ingroup ShellModule
  *  %Exporter Shell
  *
  *  This class represents the shell for an exporter plug-in.  %Exporter

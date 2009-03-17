@@ -484,6 +484,7 @@ class Filename;
    }
    
 /**
+ *  \ingroup ServiceModule
  *  Contains settings specific to the user and application run that
  *  will be persisted between runs of the application.
  *

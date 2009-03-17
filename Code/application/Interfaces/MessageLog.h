@@ -26,6 +26,7 @@ class Message;
 class Step;
 
 /**
+ *  \ingroup ServiceModule
  *  This class provides an interface to the message logging system.
  *  A message log is displayed as a tab in the message log window and
  *  saved to a file of the same name. New messages and steps can be

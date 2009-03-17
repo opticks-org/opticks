@@ -16,6 +16,7 @@
 #include <string>
 
 /**
+ *  \ingroup ShellModule
  * A base class for plug-in shells or plug-in instances.
  *
  * This class provides a default implementation of the Option

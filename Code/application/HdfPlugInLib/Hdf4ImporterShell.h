@@ -22,6 +22,7 @@ class Hdf4File;
 class RasterElement;
 
 /**
+ * \ingroup ShellModule
  * The base class of an importer that loads data in HDF Version 4 format.
  *
  * The HDF4 Importer Shell is a class designed to wrap the HDF4 libraries and

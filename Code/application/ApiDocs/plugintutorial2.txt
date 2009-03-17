@@ -1,4 +1,4 @@
-/** \page howto_tutorial2 Using resources and services
+/** \page plugintutorial2 Tutorial 2 - Using resources and services
 Files:
  - \ref Tutorial/Tutorial2.h "Tutorial/Tutorial2.h"
  - \ref Tutorial/Tutorial2.cpp "Tutorial/Tutorial2.cpp"
@@ -10,12 +10,12 @@ They help manage the lifecycle of message log entries, model elements, and other
 There are many kinds of resources available and you can create your own.
 Look at the reference documentation for more information.
 A Service is a type of Resource which obtains a singleton pointer.
-We've already seen a Service used in \ref howto_tutorial1 "Tutorial 1".
+We've already seen a Service used in \ref plugintutorial1 "Tutorial 1".
 Look at the Service reference documentation for a list of available services.
 In this tutorial we'll explore a couple of the more often used resource types, message log resources and plug-in resources.
 
 If you would like to run this tutorial as you follow along with the code, see \ref RunningTutorial.
-If you would like to build and experiment with this tutorial as you follow along with the code, see \ref howto_buildtutorials.
+If you would like to build and experiment with this tutorial as you follow along with the code, see \ref plugintutorial_building.
 If you are running this tutorial in %Opticks, you will need to select "Tutorial 2" from the Tutorial toolbar to execute it.
 
 \section message_log Message Log Resources
@@ -70,7 +70,7 @@ They may be used, for example, by a plug-in which lists an expected workflow for
 \skip int count
 \until addProperty
 We extract the values of the new input arguments and do a little sanity checking.
-The Step::finalize() call indicates that an error occured and sets and appropriate error message.
+The Step::finalize() call indicates that an error occured and sets an appropriate error message.
 If there is a Progress object, we also display the error there.
 If this seems like a lot of work just to set an error message, take a look at ProgressTracker.
 It combines step and progress message reporting.
@@ -110,7 +110,7 @@ This will allow you to change the Count and Depth arguments.
 Try different combinations of values and see how the various error checks work.
  
 \example Tutorial/Tutorial2.h
-Declaration file for \ref howto_tutorial2 "Tutorial 2".
+Declaration file for \ref plugintutorial2 "Tutorial 2".
 \example Tutorial/Tutorial2.cpp
-Implementation file for \ref howto_tutorial2 "Tutorial 2".
+Implementation file for \ref plugintutorial2 "Tutorial 2".
  */

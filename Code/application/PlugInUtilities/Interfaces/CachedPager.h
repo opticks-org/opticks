@@ -27,6 +27,7 @@ namespace mta
 }
 
 /**
+ *  \ingroup ShellModule
  *  This class represents provides cached access to pages.
  *
  *  By 'cached', we mean that a block may be indexed into

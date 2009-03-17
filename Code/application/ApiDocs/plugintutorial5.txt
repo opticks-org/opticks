@@ -1,4 +1,4 @@
-/** \page howto_tutorial5 Creating an random data access edge detection algorithm
+/** \page plugintutorial5 Tutorial 5 - Creating a random data access edge detection algorithm
 Files:
  - \ref Tutorial/Tutorial5.h "Tutorial/Tutorial5.h"
  - \ref Tutorial/Tutorial5.cpp "Tutorial/Tutorial5.cpp"
@@ -7,7 +7,7 @@ This tutorial will demonstrate how to randomly access data in a raster element a
 We'll create a plug-in which performs edge detection and returns a RasterElement with the edge detected data.
 
 If you would like to run this tutorial as you follow along with the code, see \ref RunningTutorial.
-If you would like to build and experiment with this tutorial as you follow along with the code, see \ref howto_buildtutorials.
+If you would like to build and experiment with this tutorial as you follow along with the code, see \ref plugintutorial_building.
 If you are running this tutorial in %Opticks, you will need to select "Tutorial 5" from the Tutorial toolbar to execute it.
 
 \dontinclude Tutorial/Tutorial5.cpp
@@ -37,7 +37,7 @@ Horizontal Gradient:
 These two results form a vector which describes the edge direction and magnitude at each point in the image.
 We are not concerned with edge direction so we will display only the absolute magnitude.
  
-Now let’s go over the edge detection function.
+Now let's go over the edge detection function.
 
 \skip template<typename T>
 \until {
@@ -104,7 +104,7 @@ This line will set the result RasterElement as a output argument.
 We'll call the release function to transfer ownership from the ModelResource to the plug-in caller.
 
 \example Tutorial/Tutorial5.h
-Declaration file for \ref howto_tutorial5 "Tutorial 5".
+Declaration file for \ref plugintutorial5 "Tutorial 5".
 \example Tutorial/Tutorial5.cpp
-Implementation file for \ref howto_tutorial5 "Tutorial 5".
+Implementation file for \ref plugintutorial5 "Tutorial 5".
 */

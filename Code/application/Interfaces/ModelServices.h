@@ -26,6 +26,7 @@ class DataElement;
 class ImportDescriptor;
 
 /**
+ *  \ingroup ServiceModule
  *  Provides access for storing and managing data.
  *
  *  This interface allows for creation and manipulation of data, including

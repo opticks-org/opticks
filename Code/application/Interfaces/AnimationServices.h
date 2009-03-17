@@ -20,6 +20,7 @@
 class AnimationController;
 
 /**
+ *  \ingroup ServiceModule
  *  Manages animation controllers within the application.
  *
  *  This class provides the capability to create and destroy animation

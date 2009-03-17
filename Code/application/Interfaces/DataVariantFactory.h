@@ -18,6 +18,9 @@
 using XERCES_CPP_NAMESPACE_QUALIFIER DOMNode;
 class DataValueWrapper;
 
+/**
+ *  \ingroup ServiceModule
+ */
 class DataVariantFactory
 {
 public:
