@@ -922,11 +922,6 @@ bool AnimationControllerImp::getCanDropFrames() const
 
 double AnimationControllerImp::getNextValue(double value) const
 {
-   if (getCanDropFrames())
-   {
-      return value;
-   }
-
    double newValue = value;
    AnimationState state = getAnimationState();
    if (state == PLAY_FORWARD)
@@ -966,8 +961,16 @@ double AnimationControllerImp::getNextValue(double value) const
 
    if (newValue != value)
    {
+      if (getCanDropFrames())
+      {
+         mpDesktop->setStatusBarMessage("Frames are being dropped to preserve the frame speed.");
+
+         return value;
+      }
+
       mpDesktop->setStatusBarMessage("Slowing down to avoid dropping frames.");
    }
+
    return newValue;
 }
 
