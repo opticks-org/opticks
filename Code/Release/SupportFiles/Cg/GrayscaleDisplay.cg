@@ -1,0 +1,35 @@
+// Grayscale display program
+
+// Applies a stretch to the given pixel color
+void applyStretch(float4 inputColor,
+                  float  dataMax,
+                  float  lowerValue,
+                  float  upperValue,
+              out float4 modifiedColor)
+{
+   // Currently only a linear raw value stretch is supported
+   modifiedColor.r = ((inputColor.r - lowerValue / dataMax) / ((upperValue - lowerValue) / dataMax));
+   modifiedColor.a = inputColor.a;
+}
+
+void main(in  float2 texCoord     : TEXCOORD0, 
+          out float4 outputColor  : COLOR,
+          const uniform samplerRECT inputImage,
+          uniform float             dataMax,
+          uniform float             lowerValue,
+          uniform float             upperValue,
+          uniform float             alpha)
+{
+   // Get the texture value
+   float4 imageColor = texRECT(inputImage, texCoord);
+
+   // Apply the stretch
+   float4 stretchColor;
+   applyStretch(imageColor, dataMax, lowerValue, upperValue, stretchColor);
+
+   // Clip the stretched data value
+   outputColor.r = clamp(stretchColor.r, 0.0f, 1.0f);
+   outputColor.g = outputColor.r;
+   outputColor.b = outputColor.r;
+   outputColor.a = (alpha / 255.0f) * stretchColor.a;
+}
