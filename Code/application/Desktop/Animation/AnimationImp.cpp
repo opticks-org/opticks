@@ -460,6 +460,8 @@ bool AnimationImp::deserialize(SessionItemDeserializer& deserializer)
    mFrameType = StringUtilities::fromXmlString<FrameType>(A(pRoot->getAttribute(X("frametype"))));
    VERIFY(mFrameType.isValid());
 
+   mFrames.clear();
+
    for (DOMNode* pNode = pRoot->getFirstChild(); pNode != NULL; pNode = pNode->getNextSibling())
    {
       if (XMLString::equals(pNode->getNodeName(), X("DisplayText")))
@@ -486,11 +488,6 @@ bool AnimationImp::deserialize(SessionItemDeserializer& deserializer)
             A(pRoot->getAttribute(X("currentFrameID"))));
          setCurrentFrame(currentID);
       }
-      else
-      {
-         setCurrentFrame(&mFrames.front());
-         VERIFY_MSG(false, "Problem occurred while restoring the current frame - Frame ID was not found");
-      }
       break;
 
    case FRAME_TIME:
@@ -498,11 +495,6 @@ bool AnimationImp::deserialize(SessionItemDeserializer& deserializer)
       {
          double currentTime = StringUtilities::fromXmlString<double>(A(pRoot->getAttribute(X("currentFrameTime"))));
          setCurrentFrame(currentTime);
-      }
-      else
-      {
-         setCurrentFrame(&mFrames.front());
-         VERIFY_MSG(false, "Problem occurred while restoring the current frame - Frame Time was not found");
       }
       break;
 
