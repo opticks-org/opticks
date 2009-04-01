@@ -47,79 +47,6 @@ ModuleDescriptor::ModuleDescriptor(const string& id) :
    addPropertiesPage(PropertiesModuleDescriptor::getName());
 }
 
-ModuleDescriptor::ModuleDescriptor(const string& id, const string& file, map<string, string>& plugInIds) :
-   SessionItemImp(id),
-   mVersion(""),
-   mDescription(""),
-   mPlugInTotal(0),
-   mValidationKey(""),
-   mFileName(""),
-   mFileSize(0),
-   mFileDate(0),
-   mpModule(0)
-{
-   bool initValid = false;
-   char* pModuleName = NULL;
-   char* pModuleVersion = NULL;
-   char* pModuleDescription = NULL;
-   unsigned int totalPlugIns = 0;
-   char* pModuleValidationKey = NULL;
-   char* pModuleId = NULL;
-
-   FilenameImp fileObj(file);
-   mFileName = fileObj.getFullPathAndName();
-
-   FileFinderImp find;
-   find.findFile(fileObj.getPath(), fileObj.getFileName());
-   find.findNextFile();
-   mFileSize = find.getLength();
-
-   find.getLastModificationTime(mFileDate);
-
-   if (!load())
-   {
-      return;
-   }
-
-   // Get the name, description, version, number of plugins
-   bool(*moduleNameProcedure)(char**, char**, char**, unsigned int*, char**, char**) =
-      reinterpret_cast<bool(*)(char**, char**, char**, unsigned int*, char**, char**)>(
-                              mpModule->getProcedureAddress("get_name"));
-
-   if (moduleNameProcedure)
-   {
-      initValid = moduleNameProcedure(&pModuleName, &pModuleVersion, &pModuleDescription,
-         &totalPlugIns, &pModuleValidationKey, &pModuleId);
-   }
-
-   Icons* pIcons = Icons::instance();
-   if (pIcons != NULL)
-   {
-      setIcon(pIcons->mModule);
-   }
-
-   if (initValid)
-   {
-      setName(pModuleName);
-      setDisplayText(mFileName);
-      mVersion = pModuleVersion;
-      mDescription = pModuleDescription;
-      mPlugInTotal = totalPlugIns;
-      mValidationKey = pModuleValidationKey;
-      initializePlugInInformation(plugInIds);
-   }
-   else
-   {
-      mVersion = "";
-      mDescription = "";
-      mPlugInTotal = 0;
-      mValidationKey = "none";
-   }
-
-   unload();
-   addPropertiesPage(PropertiesModuleDescriptor::getName());
-}
-
 ModuleDescriptor::~ModuleDescriptor()
 {
    vector<PlugInDescriptorImp*>::iterator plugIn;
@@ -145,50 +72,84 @@ ModuleDescriptor::~ModuleDescriptor()
    }
 }
 
-string ModuleDescriptor::getModuleId(const string& filename)
+ModuleDescriptor* ModuleDescriptor::getModule(const std::string& filename, map<string, string>& plugInIds)
 {
-   string id;
-
-   DynamicModule* pModule = Service<PlugInManagerServices>()->getDynamicModule(filename);
-   if (pModule == NULL)
+   DynamicModule* pDynMod = Service<PlugInManagerServices>()->getDynamicModule(filename);
+   if (pDynMod == NULL || !pDynMod->isLoaded())
    {
-      return string();
+      return NULL;
    }
 
+   // Check the module interface version
+   int(*moduleVersionProcedure)() = reinterpret_cast<int(*)()>
+      (pDynMod->getProcedureAddress( "opticks_get_module_interface_version" ));
+   int version = 0; // no module should ever have this version so it's a good "invalid" value
+   if (moduleVersionProcedure != NULL)
+   {
+      version = moduleVersionProcedure();
+   }
+
+   if (version != 1) // This is the currently expected version...it hardly changes so it's hardcoded
+   {
+      Service<PlugInManagerServices>()->destroyDynamicModule(pDynMod);
+      return NULL;
+   }
+
+   // below are the functions required for a version 1 module
    bool(*pInitProcedure)(External*) =
-      reinterpret_cast<bool(*)(External*)>(pModule->getProcedureAddress("initialize"));
-
-   if (pInitProcedure)
-   {
-      if (!pInitProcedure(ConnectionManager::instance()))
-      {
-         Service<PlugInManagerServices>()->destroyDynamicModule(pModule);
-         return string();
-      }
-   }
-
+      reinterpret_cast<bool(*)(External*)>(pDynMod->getProcedureAddress("initialize"));
    bool(*pNameProcedure)(char**, char**, char**, unsigned int*, char**, char**) =
       reinterpret_cast<bool(*)(char**, char**, char**, unsigned int*, char**, char**)>(
-                               pModule->getProcedureAddress("get_name"));
+                               pDynMod->getProcedureAddress("get_name"));
+   DMPROC pInterfaceProc = pDynMod->getProcedureAddress("instantiate_interface");
+   DMPROC pDestroyProc = pDynMod->getProcedureAddress("destroy");
 
-   if (pNameProcedure)
+   if (pInitProcedure == NULL || pNameProcedure == NULL || pInterfaceProc == NULL || pDestroyProc == NULL)
    {
-      char* pModuleName = NULL;
-      char* pModuleVersion = NULL;
-      char* pModuleDescription = NULL;
-      unsigned int totalPlugIns = 0;
-      char* pModuleId = NULL;
-      char* pValidationKey = NULL;
-      if (!pNameProcedure(&pModuleName, &pModuleVersion, &pModuleDescription,
-         &totalPlugIns, &pValidationKey, &pModuleId) || pModuleId == NULL)
-      {
-         Service<PlugInManagerServices>()->destroyDynamicModule(pModule);
-         return string();
-      }
-      id = pModuleId;
+      Service<PlugInManagerServices>()->destroyDynamicModule(pDynMod);
+      return NULL;
    }
-   Service<PlugInManagerServices>()->destroyDynamicModule(pModule);
-   return id;
+
+   if (!pInitProcedure(ConnectionManager::instance()))
+   {
+      Service<PlugInManagerServices>()->destroyDynamicModule(pDynMod);
+      return NULL;
+   }
+
+   char* pModuleName = NULL;
+   char* pModuleVersion = NULL;
+   char* pModuleDescription = NULL;
+   unsigned int totalPlugIns = 0;
+   char* pModuleId = NULL;
+   char* pValidationKey = NULL;
+   if (!pNameProcedure(&pModuleName, &pModuleVersion, &pModuleDescription,
+      &totalPlugIns, &pValidationKey, &pModuleId) || pModuleId == NULL)
+   {
+      Service<PlugInManagerServices>()->destroyDynamicModule(pDynMod);
+      return NULL;
+   }
+
+   ModuleDescriptor* pModule = new ModuleDescriptor(string(pModuleId));
+   pModule->setName(pModuleName);
+   pModule->setDisplayText(filename);
+
+   FilenameImp fileObj(filename);
+   pModule->mFileName = fileObj.getFullPathAndName();
+
+   FileFinderImp find;
+   find.findFile(fileObj.getPath(), fileObj.getFileName());
+   find.findNextFile();
+   pModule->mFileSize = find.getLength();
+
+   find.getLastModificationTime(pModule->mFileDate);
+   pModule->mVersion = pModuleVersion;
+   pModule->mDescription = pModuleDescription;
+   pModule->mPlugInTotal = totalPlugIns;
+   pModule->mValidationKey = pValidationKey;
+   pModule->mpModule = pDynMod;
+   pModule->initializePlugInInformation(plugInIds);
+  
+   return pModule;
 }
 
 bool ModuleDescriptor::load()
@@ -324,47 +285,6 @@ PlugIn* ModuleDescriptor::createInterface(PlugInDescriptorImp* pDescriptor)
 
    PlugIn* pPlugIn = createInterface(pDescriptor->getPlugInNumber());
    return pPlugIn;
-}
-
-bool ModuleDescriptor::isModule(const string& file)
-{
-   bool success = false;
-
-   FilenameImp fileObj(file);
-   Service<PlugInManagerServices> pPluginMgrSvc;
-   DynamicModule* pModule = pPluginMgrSvc->getDynamicModule(fileObj.getFullPathAndName());
-
-   if (pModule->isLoaded())
-   {
-      // Check the module interface version
-      int(*moduleVersionProcedure)() = reinterpret_cast<int(*)()>
-         (pModule->getProcedureAddress( "opticks_get_module_interface_version" ));
-      int version = 0; // no module should ever have this version so it's a good "invalid" value
-      if (moduleVersionProcedure != NULL)
-      {
-         version = moduleVersionProcedure();
-      }
-
-      if (version == 1) // This is the currently expected version...it hardly changes so it's hardcoded
-      {
-         vector<const char*> procNames;
-         procNames.push_back("get_name");
-         procNames.push_back("initialize");
-         procNames.push_back("instantiate_interface");
-         procNames.push_back("destroy");
-
-         success = true; // will be set back to false in loop in case of failure
-         for (vector<const char*>::const_iterator iter = procNames.begin();
-            iter != procNames.end(); ++iter)
-         {
-            DMPROC pProcAddr = pModule->getProcedureAddress(*iter);
-            success = success && pProcAddr != NULL;
-         }
-      }
-   }
-   pPluginMgrSvc->destroyDynamicModule(pModule);
-
-   return success;
 }
 
 const bool ModuleDescriptor::isValidatedModule() const

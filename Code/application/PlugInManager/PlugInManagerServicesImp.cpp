@@ -790,12 +790,6 @@ ModuleDescriptor* PlugInManagerServicesImp::addModule(const string& moduleFilena
       return NULL;
    }
 
-   bool bValid = ModuleDescriptor::isModule(moduleFilename);
-   if (bValid == false)
-   {
-      return NULL;
-   }
-
    // Do not add the module if is already exists
    ModuleDescriptor* pModule = getModuleDescriptor(moduleFilename);
    if (pModule != NULL)
@@ -803,35 +797,37 @@ ModuleDescriptor* PlugInManagerServicesImp::addModule(const string& moduleFilena
       return NULL;
    }
 
-   string moduleId = ModuleDescriptor::getModuleId(moduleFilename);
+   pModule = ModuleDescriptor::getModule(moduleFilename, plugInIds);
+   if (pModule == NULL)
+   {
+      return NULL;
+   }
+
+   string moduleId = pModule->getId();
    VERIFYRV_MSG(moduleId.empty() == false, NULL, 
       "A plug-in module is specifying an empty session id. It will not be loaded.");
 
-   // Create the module
-   pModule = new ModuleDescriptor(moduleId, moduleFilename, plugInIds);
-   if (pModule != NULL)
+   // Make sure module hasn't already been added
+   if (getModuleDescriptorByName(pModule->getName()) != NULL)
    {
-      if (getModuleDescriptorByName(pModule->getName()) != NULL)
-      {
-         delete pModule;
-         return NULL;
-      }
-      // Add the module to the list
-      mModules.push_back(pModule);
-
-      // Add the module's plug-ins to the map
-      vector<PlugInDescriptorImp*> plugIns = pModule->getPlugInSet();
-
-      for (vector<PlugInDescriptorImp*>::iterator iter = plugIns.begin(); iter != plugIns.end(); ++iter)
-      {
-         PlugInDescriptorImp* pPlugIn = *iter;
-         if (pPlugIn != NULL)
-         {
-            mPlugIns.insert(pair<string, PlugInDescriptorImp*>((*iter)->getName(), (*iter)));
-         }
-      }
-      notify(SIGNAL_NAME(PlugInManagerServices, ModuleCreated), boost::any(pModule));
+      delete pModule;
+      return NULL;
    }
+   // Add the module to the list
+   mModules.push_back(pModule);
+
+   // Add the module's plug-ins to the map
+   vector<PlugInDescriptorImp*> plugIns = pModule->getPlugInSet();
+
+   for (vector<PlugInDescriptorImp*>::iterator iter = plugIns.begin(); iter != plugIns.end(); ++iter)
+   {
+      PlugInDescriptorImp* pPlugIn = *iter;
+      if (pPlugIn != NULL)
+      {
+         mPlugIns.insert(pair<string, PlugInDescriptorImp*>((*iter)->getName(), (*iter)));
+      }
+   }
+   notify(SIGNAL_NAME(PlugInManagerServices, ModuleCreated), boost::any(pModule));
 
    return pModule;
 }

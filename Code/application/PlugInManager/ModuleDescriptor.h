@@ -35,35 +35,7 @@ class ModuleDescriptor : public SessionItem, public SessionItemImp
 {
 public:
    /**
-    *  Default constructor for a Module
-    *
-    *  This constructor creates an empty Module Descriptor.
-    *  No module is loaded and only default information is set.
-    *
-    *  @param   id
-    *           The unique ID for the module.
-    */
-   ModuleDescriptor(const std::string& id);
-
-   /**
-    *  Main constructor for a Module
-    *
-    *  This constructor creates a Module Descriptor for Dynamic
-    *  Library associated with the given filename parameter.  The
-    *  Dynamic Library is loaded, queryied to determine if it is
-    *  a real Module, and then loads all information about
-    *  the Plug-Ins within the Module.  The Module is then
-    *  released and its memory is freed.
-    *
-    *  @param   id
-    *           The unique ID for the module.
-    *  @param   file
-    *           Full filename path of the Module.
-    */
-   ModuleDescriptor(const std::string& id, const std::string& file, std::map<std::string, std::string>& plugInIds);
-
-   /**
-    *  Default desctructor for a Module
+    *  Default destructor for a Module
     *
     *  This destructor deletes all dynamic memory associated
     *  with the ModuleDescriptor.  As part of this destructor,
@@ -124,27 +96,6 @@ public:
     *  @return  A pointer to the created interface.
     */
    virtual PlugIn* createInterface(PlugInDescriptorImp* pDescriptor);
-
-   /**
-    *  Test whether a given file is a Module
-    *
-    *  The isModule() method is a class method that loads the
-    *  Dynamic Library and tests to see if it is a valid Module.
-    *  Since this method is static it can be called without
-    *  creating an instance of a Module Descriptor.  Simply
-    *  call ModuleDescriptor::isModule( filename ).  If the given
-    *  file is a Module, the method returns true.  The test tries to
-    *  call procedure that is part of the Module interface,
-    *  defined in the Module.h header file.
-    *
-    *  @param    file
-    *            The given file to test whether it is a valid
-    *            Module.
-    *
-    *  @return   This method returns true if the given filename
-    *            is a valid Module.
-    */
-   static bool isModule(const std::string& file);
 
    virtual const bool isValidatedModule() const;
 
@@ -260,19 +211,8 @@ public:
 
       return mpModule->isLoaded();
    }
-
-   /**
-    *  Retrieves the UUID from the specified module.
-    *
-    *  This method opens the specified module file and retrieves its unique
-    *  id. If the file isn't a plug-in module, an empty string will be returned.
-    *
-    *  @param filename
-    *            The filename of the plug-in module to read the id from.
-    *
-    *  @return The unique id specified by the module.
-    */
-   static std::string getModuleId(const std::string& filename);
+   
+   static ModuleDescriptor* getModule(const std::string& filename, std::map<std::string, std::string>& plugInIds);
 
    SESSIONITEMACCESSOR_METHODS(SessionItemImp)
 
@@ -287,6 +227,17 @@ public:
    virtual bool deserialize(SessionItemDeserializer& deserializer);
 
 protected:
+   /**
+    *  Default constructor for a Module
+    *
+    *  This constructor creates an empty Module Descriptor.
+    *  No module is loaded and only default information is set.
+    *
+    *  @param   id
+    *           The unique ID for the module.
+    */
+   ModuleDescriptor(const std::string& id);
+
    std::string  mVersion;
    std::string  mDescription;
    unsigned int mPlugInTotal;
