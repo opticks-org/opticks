@@ -352,6 +352,9 @@ bool Nitf::ImageSubheader::importBandInformation(const ossimPropertyInterface *p
    vector<unsigned int> pNumLuts;
    vector<string> pBandRepresentations;
    vector<string> pBandSignificances;
+   vector<double> centerWavelengths;
+   const string imageCategory = pImageHeader->getCategory().trim();
+   const bool subcatIsWavelength = (imageCategory == "MS" || imageCategory == "HS" || imageCategory == "IR");
    for (unsigned int i = 0; i < numBands; i++)
    {
       ossimRefPtr<ossimNitfImageBand> pBandInformation = pImageHeader->getBandInformation(i);
@@ -362,7 +365,7 @@ bool Nitf::ImageSubheader::importBandInformation(const ossimPropertyInterface *p
          unsigned int numLuts = static_cast<unsigned int>(pImageBand->getNumberOfLuts());
          pNumLuts.push_back(numLuts);
 
-         string bandSignificance = pImageBand->getBandSignificance().trim();
+         ossimString bandSignificance = pImageBand->getBandSignificance().trim();
          pBandSignificances.push_back(bandSignificance);
 
          string bandRepresentation = pImageBand->getBandRepresentation().trim();
@@ -395,7 +398,21 @@ bool Nitf::ImageSubheader::importBandInformation(const ossimPropertyInterface *p
                pDescriptor->setDisplayBand(channelType, dim);
             }
          }
+
+         if (subcatIsWavelength && bandSignificance.trim().length() > 0)
+         {
+            // Per MIL-STD-2500C, bandSignificance is in nm, but special metadata is in um.
+            centerWavelengths.push_back(bandSignificance.toFloat64() / 1000.0);
+         }
       }
+   }
+
+   if (centerWavelengths.size() == pDescriptor->getBandCount())
+   {
+      vector<double> startWavelengths;
+      vector<double> endWavelengths;
+      vector<double> fwhms;
+      updateSpecialMetadata(pDescriptor->getMetadata(), centerWavelengths, startWavelengths, endWavelengths, fwhms);
    }
 
    return pDynObj->setAttribute(NUMBER_OF_LUTS, pNumLuts) &&

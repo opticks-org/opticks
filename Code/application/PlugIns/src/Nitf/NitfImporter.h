@@ -11,6 +11,7 @@
 #define NITFIMPORTER_H
 
 #include "RasterElementImporterShell.h"
+#include "Testable.h"
 
 #include <ossim/base/ossimConstants.h>
 #include <string>
@@ -18,7 +19,7 @@
 
 namespace Nitf
 {
-   class NitfImporter : public RasterElementImporterShell
+   class NitfImporter : public RasterElementImporterShell, public Testable
    {
    public:
       NitfImporter();
@@ -33,6 +34,9 @@ namespace Nitf
       bool validateDefaultOnDiskReadOnly(const DataDescriptor* pDescriptor, std::string& errorMessage) const;
 
       static EncodingType ossimEncodingToEncodingType(ossimScalarType scalar);
+
+      virtual bool runOperationalTests(Progress* pProgress, std::ostream& failure);
+      virtual bool runAllTests(Progress* pProgress, std::ostream& failure);
 
    private:
       std::map<std::string, std::string> mParseMessages;

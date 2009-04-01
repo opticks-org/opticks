@@ -71,7 +71,8 @@ namespace
 
 }
 
-Nitf::BandsbParser::BandsbParser()
+Nitf::BandsbParser::BandsbParser() :
+   mWavelengthsInInverseCentimeters(false)
 {
    setName("BANDSB");
    setDescriptorId("{9A2CC336-E28D-4284-9CEC-896FC92F14DD}");
@@ -1273,7 +1274,6 @@ bool Nitf::BandsbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
    string &errorMessage) const
 {
    // BANDSB NITF data is always Big Endian
-
    vector<char> buf;             // Input buffer
    vector<unsigned char> bufUC;  // buffer for array of unsigned char
    vector<unsigned int>  bufInt; // buffer for array of int
@@ -1405,9 +1405,10 @@ bool Nitf::BandsbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
       output.setAttribute(BANDSB::DATA_FLD_2, bufUC);
    }
 
+   // The WAVE_LENGTH_UNIT field can be triggered by any of the following bits:
    // b24 signals the CWAVE and WAVE_LENGTH_UNIT fields.
    // b23 signals the FWHM and WAVE_LENGTH_UNIT fields.
-   // b22 signals the FWHM_UNC and WAVE_LENGTH_UNIT field.
+   // b22 signals the FWHM_UNC and WAVE_LENGTH_UNIT fields.
    // b21 signals the NOM_WAVEn and WAVE_LENGTH_UNIT fields.
    // b20 signals the NOM_WAVE_UNCn field and WAVE_LENGTH_UNIT fields.
    // b19 signals the LBOUNDn, UBOUNDn and WAVE_LENGTH_UNIT fields.
@@ -1415,6 +1416,10 @@ bool Nitf::BandsbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
       bitTest(existmask, 22) || bitTest(existmask, 21) || bitTest(existmask, 20) || bitTest(existmask, 19)))
    {
       readField<string>(input, output, success, BANDSB::WAVE_LENGTH_UNIT, 1, errorMessage, buf);
+      if (buf[0] == 'W')
+      {
+         mWavelengthsInInverseCentimeters = true;
+      }
    }
 
    for (unsigned int bandNum = 0; bandNum < count; ++bandNum)
@@ -1453,49 +1458,53 @@ bool Nitf::BandsbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
          readField<int>(input, output, success, fieldName, 5, errorMessage, buf);
       }
 
-      // b24 signals the CWAVE and WAVE_LENGTH_UNIT fields.
+      // b24 signals the CWAVE field.
       if (success && bitTest(existmask, 24))
       {
          fieldName = BANDSB::CWAVE + bandNumStr;
          readField<double>(input, output, success, fieldName, 7, errorMessage, buf);
+         mCenterWavelengths.push_back(boost::lexical_cast<double>(&buf[0]));
       }
 
-      // b23 signals the FWHM and WAVE_LENGTH_UNIT fields.
+      // b23 signals the FWHM field.
       if (success && bitTest(existmask, 23))
       {
          fieldName = BANDSB::FWHM + bandNumStr;
          readField<double>(input, output, success, fieldName, 7, errorMessage, buf);
+         mFwhms.push_back(boost::lexical_cast<double>(&buf[0]));
       }
 
-      // b22 signals the FWHM_UNC and WAVE_LENGTH_UNIT field.
+      // b22 signals the FWHM_UNC field.
       if (success && bitTest(existmask, 22))
       {
          fieldName = BANDSB::FWHM_UNC + bandNumStr;
          readField<double>(input, output, success, fieldName, 7, errorMessage, buf);
       }
 
-      // b21 signals the NOM_WAVEn and WAVE_LENGTH_UNIT fields.
+      // b21 signals the NOM_WAVEn field.
       if (success && bitTest(existmask, 21))
       {
          fieldName = BANDSB::NOM_WAVE + bandNumStr;
          readField<double>(input, output, success, fieldName, 7, errorMessage, buf);
       }
 
-      // b20 signals the NOM_WAVE_UNCn field and WAVE_LENGTH_UNIT fields.
+      // b20 signals the NOM_WAVE_UNCn field.
       if (success && bitTest(existmask, 20))
       {
          fieldName = BANDSB::NOM_WAVE_UNC + bandNumStr;
          readField<double>(input, output, success, fieldName, 7, errorMessage, buf);
       }
 
-      // b19 signals the LBOUNDn, UBOUNDn and WAVE_LENGTH_UNIT fields.
+      // b19 signals the LBOUNDn, UBOUNDn field.
       if (success && bitTest(existmask, 19))
       {
          fieldName = BANDSB::LBOUND + bandNumStr;
          readField<double>(input, output, success, fieldName, 7, errorMessage, buf);
+         mStartWavelengths.push_back(boost::lexical_cast<double>(&buf[0]));
 
          fieldName = BANDSB::UBOUND + bandNumStr;
          readField<double>(input, output, success, fieldName, 7, errorMessage, buf);
+         mEndWavelengths.push_back(boost::lexical_cast<double>(&buf[0]));
       }
 
       // b18 signals the SCALE FACTORn, and ADDITIVE FACTORn fields.
@@ -2081,11 +2090,12 @@ Nitf::TreState Nitf::BandsbParser::isTreValid(const DynamicObject& tre, ostream&
       ++numFields;
    }
 
+   // The WAVE_LENGTH_UNIT field can be triggered by any of the following bits:
    // b24 signals the CWAVE and WAVE_LENGTH_UNIT fields.
    // b23 signals the FWHM and WAVE_LENGTH_UNIT fields.
-   // b22 signals the FWHM_UNC and WAVE_LENGTH_UNIT field.
+   // b22 signals the FWHM_UNC and WAVE_LENGTH_UNIT fields.
    // b21 signals the NOM_WAVEn and WAVE_LENGTH_UNIT fields.
-   // b20 signals the NOM_WAVE_UNCn field and WAVE_LENGTH_UNIT fields.
+   // b20 signals the NOM_WAVE_UNCn and WAVE_LENGTH_UNIT fields.
    // b19 signals the LBOUNDn, UBOUNDn and WAVE_LENGTH_UNIT fields.
    if (status != INVALID && (bitTest(existmask, 24) || bitTest(existmask, 23) || bitTest(existmask, 22) ||
       bitTest(existmask, 21) || bitTest(existmask, 20) || bitTest(existmask, 19)))
@@ -2136,42 +2146,42 @@ Nitf::TreState Nitf::BandsbParser::isTreValid(const DynamicObject& tre, ostream&
          status = MaxState(status, testTagValueRange<int>(tre, reporter, &numFields, fieldName, 1, 99999));
       }
 
-      // b24 signals the CWAVE and WAVE_LENGTH_UNIT fields.
+      // b24 signals the CWAVE field.
       if (status != INVALID && bitTest(existmask, 24))
       {
          fieldName = BANDSB::CWAVE + bandNumStr;
          status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, fieldName, 0.00001, 10000.0));
       }
 
-      // b23 signals the FWHM and WAVE_LENGTH_UNIT fields.
+      // b23 signals the FWHM field.
       if (status != INVALID && bitTest(existmask, 23))
       {
          fieldName = BANDSB::FWHM + bandNumStr;
          status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, fieldName, 0.00001, 10000.0));
       }
 
-      // b22 signals the FWHM_UNC and WAVE_LENGTH_UNIT field.
+      // b22 signals the FWHM_UNC field.
       if (status != INVALID && bitTest(existmask, 22))
       {
          fieldName = BANDSB::FWHM_UNC + bandNumStr;
          status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, fieldName, 0.00001, 10000.0));
       }
 
-      // b21 signals the NOM_WAVEn and WAVE_LENGTH_UNIT fields.
+      // b21 signals the NOM_WAVEn field.
       if (status != INVALID && bitTest(existmask, 21))
       {
          fieldName = BANDSB::NOM_WAVE + bandNumStr;
          status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, fieldName, 0.00001, 10000.0));
       }
 
-      // b20 signals the NOM_WAVE_UNCn field and WAVE_LENGTH_UNIT fields.
+      // b20 signals the NOM_WAVE_UNCn field.
       if (status != INVALID && bitTest(existmask, 20))
       {
          fieldName = BANDSB::NOM_WAVE_UNC + bandNumStr;
          status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, fieldName, 0.00001, 10000.0));
       }
 
-      // b19 signals the LBOUNDn, UBOUNDn and WAVE_LENGTH_UNIT fields.
+      // b19 signals the LBOUNDn, UBOUNDn field.
       if (status != INVALID && bitTest(existmask, 19))
       {
          fieldName = BANDSB::LBOUND + bandNumStr;
@@ -2796,11 +2806,12 @@ bool Nitf::BandsbParser::fromDynamicObject(const DynamicObject& input, ostream& 
          output.write(&buf[0], length);
       }
 
+      // The WAVE_LENGTH_UNIT field can be triggered by any of the following bits:
       // b24 signals the CWAVE and WAVE_LENGTH_UNIT fields.
       // b23 signals the FWHM and WAVE_LENGTH_UNIT fields.
-      // b22 signals the FWHM_UNC and WAVE_LENGTH_UNIT field.
+      // b22 signals the FWHM_UNC and WAVE_LENGTH_UNIT fields.
       // b21 signals the NOM_WAVEn and WAVE_LENGTH_UNIT fields.
-      // b20 signals the NOM_WAVE_UNCn field and WAVE_LENGTH_UNIT fields.
+      // b20 signals the NOM_WAVE_UNCn and WAVE_LENGTH_UNIT fields.
       // b19 signals the LBOUNDn, UBOUNDn and WAVE_LENGTH_UNIT fields.
       if (bitTest(existmask, 24) || bitTest(existmask, 23) || bitTest(existmask, 22) ||
          bitTest(existmask, 21) || bitTest(existmask, 20) || bitTest(existmask, 19))
@@ -2844,42 +2855,42 @@ bool Nitf::BandsbParser::fromDynamicObject(const DynamicObject& input, ostream& 
             output << toString(dv_cast<int>(input.getAttribute(fieldName)), 5);
          }
 
-         // b24 signals the CWAVE and WAVE_LENGTH_UNIT fields.
+         // b24 signals the CWAVE field.
          if (bitTest(existmask, 24))
          {
             fieldName = BANDSB::CWAVE + bandNumStr;
             output << toString(dv_cast<double>(input.getAttribute(fieldName)), 7);
          }
 
-         // b23 signals the FWHM and WAVE_LENGTH_UNIT fields.
+         // b23 signals the FWHM field.
          if (bitTest(existmask, 23))
          {
             fieldName = BANDSB::FWHM + bandNumStr;
             output << toString(dv_cast<double>(input.getAttribute(fieldName)), 7);
          }
 
-         // b22 signals the FWHM_UNC and WAVE_LENGTH_UNIT field.
+         // b22 signals the FWHM_UNC field.
          if (bitTest(existmask, 22))
          {
             fieldName = BANDSB::FWHM_UNC + bandNumStr;
             output << toString(dv_cast<double>(input.getAttribute(fieldName)), 7);
          }
 
-         // b21 signals the NOM_WAVEn and WAVE_LENGTH_UNIT fields.
+         // b21 signals the NOM_WAVEn field.
          if (bitTest(existmask, 21))
          {
             fieldName = BANDSB::NOM_WAVE + bandNumStr;
             output << toString(dv_cast<double>(input.getAttribute(fieldName)), 7);
          }
 
-         // b20 signals the NOM_WAVE_UNCn field and WAVE_LENGTH_UNIT fields.
+         // b20 signals the NOM_WAVE_UNCn field.
          if (bitTest(existmask, 20))
          {
             fieldName = BANDSB::NOM_WAVE_UNC + bandNumStr;
             output << toString(dv_cast<double>(input.getAttribute(fieldName)), 7);
          }
 
-         // b19 signals the LBOUNDn, UBOUNDn and WAVE_LENGTH_UNIT fields.
+         // b19 signals the LBOUNDn, UBOUNDn field.
          if (bitTest(existmask, 19))
          {
             fieldName = BANDSB::LBOUND + bandNumStr;
@@ -3396,11 +3407,12 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
          tre.setAttribute(BANDSB::DATA_FLD_2, pExistingBandsb->getAttribute(BANDSB::DATA_FLD_2));
       }
 
+      // The WAVE_LENGTH_UNIT field can be triggered by any of the following bits:
       // b24 signals the CWAVE and WAVE_LENGTH_UNIT fields.
       // b23 signals the FWHM and WAVE_LENGTH_UNIT fields.
-      // b22 signals the FWHM_UNC and WAVE_LENGTH_UNIT field.
+      // b22 signals the FWHM_UNC and WAVE_LENGTH_UNIT fields.
       // b21 signals the NOM_WAVEn and WAVE_LENGTH_UNIT fields.
-      // b20 signals the NOM_WAVE_UNCn field and WAVE_LENGTH_UNIT fields.
+      // b20 signals the NOM_WAVE_UNCn and WAVE_LENGTH_UNIT fields.
       // b19 signals the LBOUNDn, UBOUNDn and WAVE_LENGTH_UNIT fields.
       if (bitTest(existMask, 24) || bitTest(existMask, 23) || bitTest(existMask, 22)
          || bitTest(existMask, 21) || bitTest(existMask, 20) || bitTest(existMask, 19))
@@ -3462,7 +3474,7 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
          }
 
-         // b24 signals the CWAVE and WAVE_LENGTH_UNIT fields.
+         // b24 signals the CWAVE field.
          if (bitTest(existMask, 24))
          {
             fieldName = BANDSB::CWAVE + bandStr;
@@ -3477,7 +3489,7 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
             }
          }
 
-         // b23 signals the FWHM and WAVE_LENGTH_UNIT fields.
+         // b23 signals the FWHM field.
          if (bitTest(existMask, 23))
          {
             fieldName = BANDSB::FWHM + bandStr;
@@ -3492,7 +3504,7 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
             }
          }
 
-         // b22 signals the FWHM_UNC and WAVE_LENGTH_UNIT field.
+         // b22 signals the FWHM_UNC field.
          if (bitTest(existMask, 22))
          {
             fieldName = BANDSB::FWHM_UNC + bandStr;
@@ -3500,7 +3512,7 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
          }
 
-         // b21 signals the NOM_WAVEn and WAVE_LENGTH_UNIT fields.
+         // b21 signals the NOM_WAVEn field.
          if (bitTest(existMask, 21))
          {
             fieldName = BANDSB::NOM_WAVE + bandStr;
@@ -3508,7 +3520,7 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
          }
 
-         // b20 signals the NOM_WAVE_UNCn field and WAVE_LENGTH_UNIT fields.
+         // b20 signals the NOM_WAVE_UNCn field.
          if (bitTest(existMask, 20))
          {
             fieldName = BANDSB::NOM_WAVE_UNC + bandStr;
@@ -3516,7 +3528,7 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
             tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
          }
 
-         // b19 signals the LBOUNDn, UBOUNDn and WAVE_LENGTH_UNIT fields.
+         // b19 signals the LBOUNDn, UBOUNDn field.
          if (bitTest(existMask, 19))
          {
             fieldName = BANDSB::LBOUND + bandStr;
@@ -3863,4 +3875,11 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
    }
 
    return REPLACE;
+}
+
+bool Nitf::BandsbParser::importMetadata(const DynamicObject& tre,
+   RasterDataDescriptor& descriptor, string& errorMessage) const
+{
+   return updateSpecialMetadata(descriptor.getMetadata(), mCenterWavelengths,
+      mStartWavelengths, mEndWavelengths, mFwhms, mWavelengthsInInverseCentimeters);
 }

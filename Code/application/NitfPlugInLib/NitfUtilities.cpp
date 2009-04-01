@@ -10,6 +10,7 @@
 #include "Classification.h"
 #include "DateTime.h"
 #include "NitfUtilities.h"
+#include "SpecialMetadata.h"
 #include "StringUtilities.h"
 
 #include <algorithm>
@@ -1068,4 +1069,206 @@ bool Nitf::isClassificationFieldValidForExport(const Classification& classificat
    }
 
    return true;
+}
+
+bool Nitf::updateSpecialMetadata(DynamicObject* pMetadata, vector<double>& centerWavelengths,
+   vector<double>& startWavelengths, vector<double>& endWavelengths,
+   const vector<double>& fwhms, bool convertFromInverseCentimeters)
+{
+   if (pMetadata == NULL)
+   {
+      return false;
+   }
+
+   const string centerWavelengthsPath[] = {SPECIAL_METADATA_NAME, BAND_METADATA_NAME,
+      CENTER_WAVELENGTHS_METADATA_NAME, END_METADATA_NAME};
+   const string startWavelengthsPath[] = {SPECIAL_METADATA_NAME, BAND_METADATA_NAME,
+      START_WAVELENGTHS_METADATA_NAME, END_METADATA_NAME};
+   const string endWavelengthsPath[] = {SPECIAL_METADATA_NAME, BAND_METADATA_NAME,
+      END_WAVELENGTHS_METADATA_NAME, END_METADATA_NAME};
+
+   // Remove any existing wavelength information.
+   pMetadata->removeAttributeByPath(centerWavelengthsPath);
+   pMetadata->removeAttributeByPath(startWavelengthsPath);
+   pMetadata->removeAttributeByPath(endWavelengthsPath);
+
+   vector<double>::const_iterator centerIter;
+   vector<double>::const_iterator startIter;
+   vector<double>::const_iterator endIter;
+   vector<double>::const_iterator fwhmIter;
+
+   // If no centerWavelengths exist, compute them if possible.
+   if (centerWavelengths.empty() == true)
+   {
+      if (startWavelengths.empty() == false)
+      {
+         if (endWavelengths.empty() == false)
+         {
+            // Compute centerWavelengths from startWavelengths and endWavelengths.
+            if (startWavelengths.size() != endWavelengths.size())
+            {
+               return false;
+            }
+
+            for (startIter = startWavelengths.begin(), endIter = endWavelengths.begin();
+               startIter != startWavelengths.end() && endIter != endWavelengths.end();
+               ++startIter, ++endIter)
+            {
+               centerWavelengths.push_back(*startIter + ((*endIter - *startIter) / 2.0));
+            }
+         }
+         else if (fwhms.empty() == false)
+         {
+            // Compute centerWavelengths from startWavelengths and fwhms.
+            if (startWavelengths.size() != fwhms.size())
+            {
+               return false;
+            }
+
+            for (startIter = startWavelengths.begin(), fwhmIter = fwhms.begin();
+               startIter != startWavelengths.end() && fwhmIter != fwhms.end();
+               ++startIter, ++fwhmIter)
+            {
+               centerWavelengths.push_back(*startIter + (*fwhmIter / 2.0));
+            }
+         }
+      }
+      else if (endWavelengths.empty() == false && fwhms.empty() == false)
+      {
+         // Compute centerWavelengths from endWavelengths and fwhms.
+         if (endWavelengths.size() != fwhms.size())
+         {
+            return false;
+         }
+
+         for (endIter = endWavelengths.begin(), fwhmIter = fwhms.begin();
+            endIter != endWavelengths.end() && fwhmIter != fwhms.end();
+            ++endIter, ++fwhmIter)
+         {
+            centerWavelengths.push_back(*endIter - (*fwhmIter / 2.0));
+         }
+      }
+   }
+
+   // If no startWavelengths exist, compute them if possible.
+   if (startWavelengths.empty() == true)
+   {
+      if (centerWavelengths.empty() == false)
+      {
+         if (fwhms.empty() == false)
+         {
+            // Compute startWavelengths from centerWavelengths and fwhms.
+            if (centerWavelengths.size() != fwhms.size())
+            {
+               return false;
+            }
+
+            for (centerIter = centerWavelengths.begin(), fwhmIter = fwhms.begin();
+               centerIter != centerWavelengths.end() && fwhmIter != fwhms.end();
+               ++centerIter, ++fwhmIter)
+            {
+               startWavelengths.push_back(*centerIter - (*fwhmIter / 2.0));
+            }
+         }
+         else if (endWavelengths.empty() == false)
+         {
+            // Compute startWavelengths from centerWavelengths and endWavelengths.
+            if (centerWavelengths.size() != endWavelengths.size())
+            {
+               return false;
+            }
+
+            for (centerIter = centerWavelengths.begin(), endIter = endWavelengths.begin();
+               centerIter != centerWavelengths.end() && endIter != endWavelengths.end();
+               ++centerIter, ++endIter)
+            {
+               startWavelengths.push_back(*centerIter - (*endIter - *centerIter));
+            }
+         }
+      }
+   }
+
+   // If no endWavelengths exist, compute them if possible.
+   if (endWavelengths.empty() == true)
+   {
+      if (centerWavelengths.empty() == false)
+      {
+         if (fwhms.empty() == false)
+         {
+            // Compute endWavelengths from centerWavelengths and fwhms.
+            if (centerWavelengths.size() != fwhms.size())
+            {
+               return false;
+            }
+
+            for (centerIter = centerWavelengths.begin(), fwhmIter = fwhms.begin();
+               centerIter != centerWavelengths.end() && fwhmIter != fwhms.end();
+               ++centerIter, ++fwhmIter)
+            {
+               endWavelengths.push_back(*centerIter + (*fwhmIter / 2.0));
+            }
+         }
+         else if (startWavelengths.empty() == false)
+         {
+            // Compute endWavelengths from centerWavelengths and startWavelengths.
+            if (centerWavelengths.size() != startWavelengths.size())
+            {
+               return false;
+            }
+
+            for (centerIter = centerWavelengths.begin(), startIter = startWavelengths.begin();
+               centerIter != centerWavelengths.end() && startIter != startWavelengths.end();
+               ++centerIter, ++startIter)
+            {
+               endWavelengths.push_back(*centerIter + (*centerIter - *startIter));
+            }
+         }
+      }
+   }
+
+   // Write all values to the appropriate special metadata sections.
+   bool success = true;
+   if (centerWavelengths.empty() == false)
+   {
+      // Convert all values to microns if necessary.
+      if (convertFromInverseCentimeters)
+      {
+         for (vector<double>::iterator iter = centerWavelengths.begin(); iter != centerWavelengths.end(); ++iter)
+         {
+            *iter = 10000.0 / *iter;
+         }
+      }
+
+      success = pMetadata->setAttributeByPath(centerWavelengthsPath, centerWavelengths) && success;
+   }
+
+   if (startWavelengths.empty() == false)
+   {
+      // Convert all values to microns if necessary.
+      if (convertFromInverseCentimeters)
+      {
+         for (vector<double>::iterator iter = startWavelengths.begin(); iter != startWavelengths.end(); ++iter)
+         {
+            *iter = 10000.0 / *iter;
+         }
+      }
+
+      success = pMetadata->setAttributeByPath(startWavelengthsPath, startWavelengths) && success;
+   }
+
+   if (endWavelengths.empty() == false)
+   {
+      // Convert all values to microns if necessary.
+      if (convertFromInverseCentimeters)
+      {
+         for (vector<double>::iterator iter = endWavelengths.begin(); iter != endWavelengths.end(); ++iter)
+         {
+            *iter = 10000.0 / *iter;
+         }
+      }
+
+      success = pMetadata->setAttributeByPath(endWavelengthsPath, endWavelengths) && success;
+   }
+
+   return success;
 }

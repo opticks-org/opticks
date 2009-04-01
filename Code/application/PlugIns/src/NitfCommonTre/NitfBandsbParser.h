@@ -12,6 +12,8 @@
 
 #include "NitfTreParserShell.h"
 
+#include <vector>
+
 namespace Nitf
 {
    class BandsbParser : public TreParserShell
@@ -31,6 +33,15 @@ namespace Nitf
       virtual TreState isTreValid(const DynamicObject& tre, std::ostream& reporter) const;
 
       bool runAllTests(Progress* pProgress, std::ostream& failure);
+
+      bool importMetadata(const DynamicObject& tre, RasterDataDescriptor& descriptor, std::string& errorMessage) const;
+
+   private:
+      mutable std::vector<double> mCenterWavelengths;
+      mutable std::vector<double> mStartWavelengths;
+      mutable std::vector<double> mEndWavelengths;
+      mutable std::vector<double> mFwhms;
+      mutable bool mWavelengthsInInverseCentimeters;
    };
 }
 

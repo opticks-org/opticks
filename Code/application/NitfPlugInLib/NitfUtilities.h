@@ -934,6 +934,34 @@ namespace Nitf
     * @return True if the given field is valid for NITF 2.1 export, false otherwise.
     */
    bool isClassificationFieldValidForExport(const Classification& classification, const std::string& fieldName);
+
+   /**
+    * Updates band information in the special metadata, computing start,
+    * center, and end wavelengths from the given data if possible.
+    *
+    * @param  pMetadata
+    *         The metadata to update.
+    *
+    * @param  centerWavelengths
+    *         The center wavelengths to write or an empty vector if center wavelengths are unknown.
+    *
+    * @param  startWavelengths
+    *         The start wavelengths to write or an empty vector if start wavelengths are unknown.
+    *
+    * @param  endWavelengths
+    *         The end wavelengths to write or an empty vector if end wavelengths are unknown.
+    *
+    * @param  fwhms
+    *         The FWHM for each band or an empty vector if FWHMs are unknown.
+    *
+    * @param  convertFromInverseCentimeters
+    *         \c True if all data is in inverse centimeters, \c false if all data is in microns.
+    *
+    * @return \c True on success, \c false otherwise.
+    */
+   bool updateSpecialMetadata(DynamicObject* pMetadata, std::vector<double>& centerWavelengths,
+      std::vector<double>& startWavelengths, std::vector<double>& endWavelengths,
+      const std::vector<double>& fwhms, bool convertFromInverseCentimeters = false);
 }
 
 #endif
