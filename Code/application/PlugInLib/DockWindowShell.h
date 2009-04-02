@@ -46,6 +46,8 @@ class DockWindowShell : public QObject, public ExecutableShell
    Q_OBJECT
 
 public:
+   using ExecutableShell::setName;
+
    /**
     *  Creates a dock window plug-in.
     *

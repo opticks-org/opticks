@@ -48,6 +48,7 @@ public:
       const std::vector<DimensionDescriptor>& selectedColumns,
       const std::vector<DimensionDescriptor>& selectedBands = std::vector<DimensionDescriptor>()) const;
    DataElement *copy(const std::string &name, DataElement *pParent) const;
+   virtual RasterElement* copyShallow(const std::string& name, DataElement* pParent) const;
 
    bool createTemporaryFile();
    bool createDefaultPager();
@@ -92,7 +93,8 @@ protected:
    RasterElement* createChipInternal(DataElement* pParent, const std::string& name,
       const std::vector<DimensionDescriptor>& selectedRows,
       const std::vector<DimensionDescriptor>& selectedColumns,
-      const std::vector<DimensionDescriptor>& selectedBands = std::vector<DimensionDescriptor>()) const;
+      const std::vector<DimensionDescriptor>& selectedBands = std::vector<DimensionDescriptor>(),
+      bool copyRasterData = true) const;
 
    bool createMemoryMappedPager(bool bUseDataDescriptor);
 
@@ -240,6 +242,10 @@ private:
    virtual uint64_t sanitizeData(double value = 0.0) \
    { \
       return impClass::sanitizeData(value); \
+   } \
+   virtual RasterElement* copyShallow(const std::string& name, DataElement* pParent) const \
+   { \
+      return impClass::copyShallow(name, pParent); \
    } \
    void setTerrain(RasterElement* pTerrain) \
    { \

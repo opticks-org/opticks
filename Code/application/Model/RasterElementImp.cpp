@@ -431,7 +431,8 @@ RasterElement *RasterElementImp::createChip(DataElement *pParent, const string &
 RasterElement* RasterElementImp::createChipInternal(DataElement* pParent, const string& name,
                                                     const vector<DimensionDescriptor>& selectedRows,
                                                     const vector<DimensionDescriptor>& selectedColumns,
-                                                    const vector<DimensionDescriptor>& selectedBands) const
+                                                    const vector<DimensionDescriptor>& selectedBands,
+                                                    bool copyRasterData) const
 {
    const RasterDataDescriptorImp* pDescriptor = dynamic_cast<const RasterDataDescriptorImp*>(getDataDescriptor());
    VERIFYRV(pDescriptor != NULL, NULL);
@@ -538,7 +539,11 @@ RasterElement* RasterElementImp::createChipInternal(DataElement* pParent, const 
    bool abort = false;
    VERIFYRV(RasterUtilities::chipMetadata(pRasterChip->getMetadata(), *pSelectedRows, *pSelectedCols,
       *pSelectedBands), NULL);
-   VERIFYRV(copyDataToChip(pRasterChip.get(), *pSelectedRows, *pSelectedCols, *pSelectedBands, abort), NULL);
+
+   if (copyRasterData)
+   {
+      VERIFYRV(copyDataToChip(pRasterChip.get(), *pSelectedRows, *pSelectedCols, *pSelectedBands, abort), NULL);
+   }
 
    return pRasterChip.release();
 }
@@ -894,6 +899,12 @@ DataElement* RasterElementImp::copy(const string& name, DataElement* pParent) co
 {
    vector<DimensionDescriptor> dims;
    return createChipInternal(pParent, name, dims, dims, dims);
+}
+
+RasterElement* RasterElementImp::copyShallow(const string& name, DataElement* pParent) const
+{
+   vector<DimensionDescriptor> dims;
+   return createChipInternal(pParent, name, dims, dims, dims, false);
 }
 
 RasterElementImp::StatusBarProgress::StatusBarProgress() : mText(), mPercent(0), mGranularity(NORMAL)

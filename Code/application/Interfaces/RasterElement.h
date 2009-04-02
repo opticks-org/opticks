@@ -234,6 +234,30 @@ public:
       bool &abort, Progress *pProgress = NULL) const = 0;
 
    /**
+    *  Creates a new raster element with the same values as this element but without copying the raster data.
+    *
+    *  The method creates a new element based on the data contained in this
+    *  element, which includes a copy of all data in the data descriptor. It is similar to
+    *  RasterElement::copy() but does not copy the raw raster data so it is faster.
+    *  This is useful if you are going to modify the raw raster data but otherwise would
+    *  like a duplicate of the raster element.
+    *
+    *  @param   name
+    *           The name for the created raster element, which can be the same
+    *           as this object's name if the parent is different than this
+    *           object's parent.
+    *  @param   pParent
+    *           The parent element for the created data element, which can be
+    *           the same as this object's parent if the name is different
+    *           than this object's name.
+    *
+    *  @return  A pointer to the new raster element.  \b NULL is returned if
+    *           the element cannot be copied or if the given parent is the
+    *           same as this object's parent and the given name is the same as this object's name.
+    */
+   virtual RasterElement* copyShallow(const std::string& name, DataElement* pParent) const = 0;
+
+   /**
     *  Sets a terrain map of the RasterElement.
     *
     *  @param   pTerrain

@@ -177,6 +177,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
                <File Name="41-MovieExporter.cfg" Id="F__MovieExporterCfg" />
                <File Name="42-Nitf.cfg" Id="F__NitfCfg" />
                <File Name="43-IceExporter.cfg" Id="F__IceExporterCfg" />
+               <File Name="44-AnnotationImagePalette.cfg" Id="F__AnnotationImagePaletteCfg" />
                <File Name="50-KmlServer.cfg" Id="F__KmlServerCfg" />
                <Util:XmlFile Id="F__UpdateTempDirCfg" Action="setValue" File="[#F__TempDirCfg]" ElementPath="/ConfigurationSettings/group/attribute/attribute/value" Value="[TEMPDATADIR]" />
             </Component>
@@ -211,9 +212,11 @@ are defined in Opticks-Version.wxi, so include that file now -->
                <File Name="Microsoft.VC80.OpenMP.manifest" Id="F__VC80_OpenMP_Manifest_For_PlugIns" DiskId="1" Source="$(var.VisualStudioRuntimeDir)\Microsoft.VC80.OpenMP.manifest" />
             </Component>
             <Component Id="C__PlugIns" Guid="$(var.C__PlugInsGuid)" Win64="$(var.64Bit)">
+               <File Name="AnnotationImagePalette.dll" Id="F__AnnotationImagePalettePlugIn" DiskId="1" />
                <File Name="Aspam.dll" Id="F__AspamPlugIn" DiskId="1" />
                <File Name="AutoImporter.dll" Id="F__AutoImporterPlugIn" DiskId="1" />
                <File Name="BandMath.dll" Id="F__BandMathPlugIn" DiskId="1" />
+               <File Name="ConvolutionFilter.dll" Id="F__ConvolutionFilterPlugIn" DiskId="1" />
                <File Name="CoreIo.dll" Id="F__CoreIoPlugIn" DiskId="1" />
                <File Name="DataFusion.dll" Id="F__DataFusionPlugIn" DiskId="1" />
                <File Name="Dted.dll" Id="F__DtedPlugIn" DiskId="1" />
@@ -224,6 +227,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
                <File Name="Georeference.dll" Id="F__GeoreferencePlugIn" DiskId="1" />
                <File Name="Hdf.dll" Id="F__HdfPlugIn" DiskId="1" />
                <File Name="Ice.dll" Id="F__IcePlugIn" DiskId="1" />
+               <File Name="ImageComparison.dll" Id="F__ImageComparisonPlugIn" DiskId="1" />
                <File Name="Kml.dll" Id="F__KmlPlugIn" DiskId="1" />
                <File Name="MovieExporter.dll" Id="F__MovieExporterPlugIn" DiskId="1" />
                <File Name="Nitf.dll" Id="F__NitfPlugIn" DiskId="1" />
@@ -399,36 +403,41 @@ are defined in Opticks-Version.wxi, so include that file now -->
          <ComponentRef Id="C__Help_view" />
          <ComponentRef Id="C__Help_opticks" />
          <ComponentRef Id="C__Help_properties" />
+         <ComponentRef Id="C__Help_export_product_options" />
          <ComponentRef Id="C__Help_scenario5_files" />
          <ComponentRef Id="C__Help_aoi" />
          <ComponentRef Id="C__Help_scenario10_files" />
          <ComponentRef Id="C__Help_importers_exporters" />
-         <ComponentRef Id="C__Help_process" />
          <ComponentRef Id="C__Help_options1" />
          <ComponentRef Id="C__Help_skinnewwindow" />
          <ComponentRef Id="C__Help_quicklookdatafusion" />
+         <ComponentRef Id="C__Help_tablestyles" />
+         <ComponentRef Id="C__Help_export_data_options" />
          <ComponentRef Id="C__Help_layers" />
          <ComponentRef Id="C__Help_images1" />
          <ComponentRef Id="C__Help_items" />
          <ComponentRef Id="C__Help_annotation" />
          <ComponentRef Id="C__Help_data" />
-         <ComponentRef Id="C__Help_movies" />
          <ComponentRef Id="C__Help_sessions" />
          <ComponentRef Id="C__Help_images" />
          <ComponentRef Id="C__Help_tie_points" />
+         <ComponentRef Id="C__Help_general_algorithms" />
          <ComponentRef Id="C__Help_geographic_features" />
          <ComponentRef Id="C__Help_tools" />
          <ComponentRef Id="C__Help_histogram_window" />
          <ComponentRef Id="C__Help_tutorials" />
          <ComponentRef Id="C__Help_skinsupport" />
-         <ComponentRef Id="C__Help_analysis" />
+         <ComponentRef Id="C__Help_skinrobin" />
          <ComponentRef Id="C__Help_options" />
          <ComponentRef Id="C__Help_geo" />
+         <ComponentRef Id="C__Help_animation" />
          <ComponentRef Id="C__Help_products" />
          <ComponentRef Id="C__Help_wizard_builder" />
          <ComponentRef Id="C__Help_scenario9_files" />
+         <ComponentRef Id="C__Help_skinbluegov" />
          <ComponentRef Id="C__Help_skin" />
          <ComponentRef Id="C__Help_toolbars" />
+         <ComponentRef Id="C__Help_skinopticksskin" />
          <ComponentRef Id="C__Help_scenario6_files" />
          <ComponentRef Id="C__Help_message_log_window" />
          <ComponentRef Id="C__Help_content" />

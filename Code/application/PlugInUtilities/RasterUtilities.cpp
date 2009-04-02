@@ -8,11 +8,15 @@
  */
 
 #include "AppVerify.h"
+#include "DataAccessor.h"
+#include "DataAccessorImpl.h"
+#include "DataRequest.h"
 #include "DataVariant.h"
 #include "DimensionDescriptor.h"
 #include "DynamicObject.h"
 #include "Endian.h"
 #include "ObjectResource.h"
+#include "Progress.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "RasterFileDescriptor.h"
@@ -24,8 +28,6 @@
 #include <boost/bind.hpp>
 #include <sstream>
 
-using namespace std;
-
 namespace
 {
    const double BlueCenter = 0.45;
@@ -34,12 +36,67 @@ namespace
    const double GreenTolerance = 0.04;
    const double RedCenter = 0.65;
    const double RedTolerance = 0.04;
+
+   void calculateNewPoints(Opticks::PixelLocation point0,
+                           Opticks::PixelLocation point1,
+                           std::vector<Opticks::PixelLocation>& endPoints)
+   {
+      endPoints.clear();
+      bool steep = abs(point1.mY - point0.mY) > abs(point1.mX - point0.mX);
+      if (steep)
+      {
+         std::swap(point0.mX, point0.mY);
+         std::swap(point1.mX, point1.mY);
+      }
+      bool swapped = (point0.mX > point1.mX);
+      if (swapped)
+      {
+         std::swap(point0, point1);
+      }
+      int deltax = point1.mX - point0.mX;
+      int deltay = abs(point1.mY - point0.mY);
+      int error = deltax / 2;
+      int ystep = (point0.mY < point1.mY) ? 1 : -1;
+      int y = point0.mY;
+      for (int x = point0.mX; x <= point1.mX; ++x)
+      {
+         endPoints.push_back(steep ? Opticks::PixelLocation(y, x) : Opticks::PixelLocation(x, y));
+         error -= deltay;
+         if (error < 0)
+         {
+            y += ystep;
+            error += deltax;
+         }
+      }
+      if (swapped)
+      {
+         std::reverse(endPoints.begin(), endPoints.end());
+      }
+   }
+
+   template<typename T>
+   void setPixel(T* pPixel, int defaultValue, unsigned int numValues)
+   {
+      memset(pPixel, defaultValue, sizeof(T) * numValues);
+   }
+
+   template<>
+   void setPixel<IntegerComplex>(IntegerComplex* pPixel, int defaultValue, unsigned int numValues)
+   {
+      memset(pPixel, defaultValue, sizeof(IntegerComplex) * numValues);
+   }
+
+   template<>
+   void setPixel<FloatComplex>(FloatComplex* pPixel, int defaultValue, unsigned int numValues)
+   {
+      memset(pPixel, defaultValue, sizeof(FloatComplex) * numValues);
+   }
 }
 
-vector<DimensionDescriptor> RasterUtilities::generateDimensionVector(unsigned int count,
+std::vector<DimensionDescriptor> RasterUtilities::generateDimensionVector(unsigned int count,
    bool setOriginalNumbers, bool setActiveNumbers, bool setOnDiskNumbers)
 {
-   vector<DimensionDescriptor> retval(count);
+   std::vector<DimensionDescriptor> retval(count);
    for (size_t i = 0; i < count; ++i)
    {
       if (setOriginalNumbers)
@@ -61,7 +118,7 @@ vector<DimensionDescriptor> RasterUtilities::generateDimensionVector(unsigned in
 bool RasterUtilities::determineSkipFactor(const std::vector<DimensionDescriptor>& values, unsigned int& skipFactor)
 {
    unsigned int calcSkipFactor = 1;
-   for (vector<DimensionDescriptor>::size_type count = 0; count != values.size(); ++count)
+   for (std::vector<DimensionDescriptor>::size_type count = 0; count != values.size(); ++count)
    {
       if (!values[count].isOnDiskNumberValid())
       {
@@ -93,7 +150,7 @@ bool RasterUtilities::determineSkipFactor(const std::vector<DimensionDescriptor>
 bool RasterUtilities::determineExportSkipFactor(const std::vector<DimensionDescriptor>&values, unsigned int& skipFactor)
 {
    unsigned int calcSkipFactor = 1;
-   for (vector<DimensionDescriptor>::size_type count = 0; count != values.size(); ++count)
+   for (std::vector<DimensionDescriptor>::size_type count = 0; count != values.size(); ++count)
    {
       if (!values[count].isActiveNumberValid())
       {
@@ -123,12 +180,12 @@ bool RasterUtilities::determineExportSkipFactor(const std::vector<DimensionDescr
 }
 
 std::vector<DimensionDescriptor> RasterUtilities::subsetDimensionVector(
-   const vector<DimensionDescriptor>& origValues,
+   const std::vector<DimensionDescriptor>& origValues,
    const DimensionDescriptor& start,
    const DimensionDescriptor& stop,
    unsigned int skipFactor)
 {
-   vector<DimensionDescriptor> newValues = origValues;
+   std::vector<DimensionDescriptor> newValues = origValues;
    unsigned int theStartValue = 0;
    if (start.isOriginalNumberValid())
    {
@@ -205,17 +262,17 @@ namespace
          unsigned int bitsPerElement = RasterUtilities::bytesInEncoding(pRasterDd->getDataType()) * 8;
          pRasterFd->setBitsPerElement(bitsPerElement);
 
-         vector<DimensionDescriptor> cols = pRasterDd->getColumns();
+         std::vector<DimensionDescriptor> cols = pRasterDd->getColumns();
          std::transform(cols.begin(), cols.end(), cols.begin(), SetOnDiskNumber());
          pRasterFd->setColumns(cols);
          pRasterDd->setColumns(cols);
          
-         vector<DimensionDescriptor> rows = pRasterDd->getRows();
+         std::vector<DimensionDescriptor> rows = pRasterDd->getRows();
          std::transform(rows.begin(), rows.end(), rows.begin(), SetOnDiskNumber());
          pRasterFd->setRows(rows);
          pRasterDd->setRows(rows);
 
-         vector<DimensionDescriptor> bands = pRasterDd->getBands();
+         std::vector<DimensionDescriptor> bands = pRasterDd->getBands();
          std::transform(bands.begin(), bands.end(), bands.begin(), SetOnDiskNumber());
          pRasterFd->setBands(bands);
          pRasterDd->setBands(bands);
@@ -234,7 +291,9 @@ namespace
       return sizeof(T);
    }
 
-   string getBandName(const vector<string>* pBandNames, const string* pBandPrefix, const DimensionDescriptor& band)
+   std::string getBandName(const std::vector<std::string>* pBandNames,
+                           const std::string* pBandPrefix,
+                           const DimensionDescriptor& band)
    {
       if (!band.isActiveNumberValid() || !band.isOriginalNumberValid())
       {
@@ -248,8 +307,8 @@ namespace
             return pBandNames->at(activeNumber);
          }
       }
-      ostringstream formatter;
-      string bandPrefix = "Band";
+      std::ostringstream formatter;
+      std::string bandPrefix = "Band";
       if (pBandPrefix != NULL)
       {
          bandPrefix = *pBandPrefix;
@@ -315,7 +374,7 @@ FileDescriptor* RasterUtilities::generateFileDescriptorForExport(const DataDescr
    const std::string &filename)
 {
    DimensionDescriptor emptyDesc;
-   vector<DimensionDescriptor> emptyVector;
+   std::vector<DimensionDescriptor> emptyVector;
    return generateFileDescriptorForExport(pDd, filename, emptyDesc, emptyDesc, 0,
       emptyDesc, emptyDesc, 0, emptyVector);
 }
@@ -327,7 +386,7 @@ FileDescriptor* RasterUtilities::generateFileDescriptorForExport(const DataDescr
    const DimensionDescriptor& startCol,
    const DimensionDescriptor& stopCol,
    unsigned int colSkipFactor,
-   const vector<DimensionDescriptor>& subsetBands)
+   const std::vector<DimensionDescriptor>& subsetBands)
 {
    const RasterDataDescriptor* pRasterDd = dynamic_cast<const RasterDataDescriptor*>(pDd);
 
@@ -363,12 +422,13 @@ FileDescriptor* RasterUtilities::generateFileDescriptorForExport(const DataDescr
       pRasterFd->setBitsPerElement(bitsPerElement);
 
       // Rows
-      vector<DimensionDescriptor> rows = subsetDimensionVector(pRasterDd->getRows(), startRow, stopRow, rowSkipFactor);
+      std::vector<DimensionDescriptor> rows =
+         subsetDimensionVector(pRasterDd->getRows(), startRow, stopRow, rowSkipFactor);
       std::transform(rows.begin(), rows.end(), rows.begin(), SetOnDiskNumber());
       pRasterFd->setRows(rows);
 
       // Columns
-      vector<DimensionDescriptor> columns =
+      std::vector<DimensionDescriptor> columns =
          subsetDimensionVector(pRasterDd->getColumns(), startCol, stopCol, colSkipFactor);
       std::transform(columns.begin(), columns.end(), columns.begin(), SetOnDiskNumber());
       pRasterFd->setColumns(columns);
@@ -378,15 +438,15 @@ FileDescriptor* RasterUtilities::generateFileDescriptorForExport(const DataDescr
       pRasterFd->setYPixelSize(pRasterDd->getYPixelSize());
 
       // Bands
-      vector<DimensionDescriptor> bands = pRasterDd->getBands();
-      const vector<DimensionDescriptor>& origBands = pRasterDd->getBands();
-      vector<DimensionDescriptor>::const_iterator foundBand;
+      std::vector<DimensionDescriptor> bands = pRasterDd->getBands();
+      const std::vector<DimensionDescriptor>& origBands = pRasterDd->getBands();
+      std::vector<DimensionDescriptor>::const_iterator foundBand;
       if (!subsetBands.empty())
       {
          bands.clear();
          for (unsigned int count = 0; count < subsetBands.size(); count++)
          {
-            foundBand = find(origBands.begin(), origBands.end(), subsetBands[count]);
+            foundBand = std::find(origBands.begin(), origBands.end(), subsetBands[count]);
             if (foundBand != origBands.end())
             {
                DimensionDescriptor bandDim = subsetBands[count];
@@ -421,7 +481,7 @@ FileDescriptor* RasterUtilities::generateFileDescriptorForExport(const DataDescr
    if (pRasterDd != NULL)
    {
       // Bands
-      vector<DimensionDescriptor> bands =
+      std::vector<DimensionDescriptor> bands =
          subsetDimensionVector(pRasterDd->getBands(), startBand, stopBand, bandSkipFactor);
       return generateFileDescriptorForExport(pDd, filename, startRow, stopRow,
          rowSkipFactor, startCol, stopCol, colSkipFactor, bands);
@@ -436,14 +496,14 @@ size_t RasterUtilities::bytesInEncoding(EncodingType encoding)
    return 0;
 }
 
-RasterDataDescriptor* RasterUtilities::generateRasterDataDescriptor(const string& name, DataElement* pParent,
+RasterDataDescriptor* RasterUtilities::generateRasterDataDescriptor(const std::string& name, DataElement* pParent,
                                                                     unsigned int rows, unsigned int columns,
                                                                     EncodingType encoding, ProcessingLocation location)
 {
    return generateRasterDataDescriptor(name, pParent, rows, columns, 1, BIP, encoding, location);
 }
 
-RasterDataDescriptor* RasterUtilities::generateRasterDataDescriptor(const string& name, DataElement* pParent,
+RasterDataDescriptor* RasterUtilities::generateRasterDataDescriptor(const std::string& name, DataElement* pParent,
                                                                     unsigned int rows, unsigned int columns,
                                                                     unsigned int bands, InterleaveFormatType interleave,
                                                                     EncodingType encoding, ProcessingLocation location)
@@ -456,11 +516,11 @@ RasterDataDescriptor* RasterUtilities::generateRasterDataDescriptor(const string
       return NULL;
    }
 
-   vector<DimensionDescriptor> rowDims = generateDimensionVector(rows);
+   std::vector<DimensionDescriptor> rowDims = generateDimensionVector(rows);
    pDd->setRows(rowDims);
-   vector<DimensionDescriptor> colDims = generateDimensionVector(columns);
+   std::vector<DimensionDescriptor> colDims = generateDimensionVector(columns);
    pDd->setColumns(colDims);
-   vector<DimensionDescriptor> bandDims = generateDimensionVector(bands);
+   std::vector<DimensionDescriptor> bandDims = generateDimensionVector(bands);
    pDd->setBands(bandDims);
 
    pDd->setInterleaveFormat(interleave);
@@ -483,24 +543,25 @@ void RasterUtilities::subsetDataDescriptor(DataDescriptor* pDd,
    if (pRasterDd != NULL)
    {
       // Rows
-      vector<DimensionDescriptor> rows = subsetDimensionVector(pRasterDd->getRows(), startRow, stopRow, rowSkipFactor);
+      std::vector<DimensionDescriptor> rows =
+         subsetDimensionVector(pRasterDd->getRows(), startRow, stopRow, rowSkipFactor);
       pRasterDd->setRows(rows);
 
       // Columns
-      vector<DimensionDescriptor> columns =
+      std::vector<DimensionDescriptor> columns =
          subsetDimensionVector(pRasterDd->getColumns(), startCol, stopCol, colSkipFactor);
       pRasterDd->setColumns(columns);
 
       // Bands
-      vector<DimensionDescriptor> bands = pRasterDd->getBands();
-      const vector<DimensionDescriptor>& origBands = pRasterDd->getBands();
-      vector<DimensionDescriptor>::const_iterator foundBand;
+      std::vector<DimensionDescriptor> bands = pRasterDd->getBands();
+      const std::vector<DimensionDescriptor>& origBands = pRasterDd->getBands();
+      std::vector<DimensionDescriptor>::const_iterator foundBand;
       if (!subsetBands.empty())
       {
          bands.clear();
          for (unsigned int count = 0; count < subsetBands.size(); count++)
          {
-            foundBand = find(origBands.begin(), origBands.end(), subsetBands[count]);
+            foundBand = std::find(origBands.begin(), origBands.end(), subsetBands[count]);
             if (foundBand != origBands.end())
             {
                DimensionDescriptor bandDim = subsetBands[count];
@@ -527,7 +588,7 @@ void RasterUtilities::subsetDataDescriptor(DataDescriptor* pDd,
    if (pRasterDd != NULL)
    {
       // Bands
-      vector<DimensionDescriptor> bands =
+      std::vector<DimensionDescriptor> bands =
          subsetDimensionVector(pRasterDd->getBands(), startBand, stopBand, bandSkipFactor);
       subsetDataDescriptor(pDd, startRow, stopRow,
          rowSkipFactor, startCol, stopCol, colSkipFactor, bands);
@@ -583,16 +644,16 @@ RasterDataDescriptor *RasterUtilities::generateUnchippedRasterDataDescriptor(
       return NULL;
    }
 
-   vector<DimensionDescriptor> rows = pOrigFileDescriptor->getRows();
-   vector<DimensionDescriptor> columns = pOrigFileDescriptor->getColumns();
-   vector<DimensionDescriptor> bands = pOrigFileDescriptor->getBands();
+   std::vector<DimensionDescriptor> rows = pOrigFileDescriptor->getRows();
+   std::vector<DimensionDescriptor> columns = pOrigFileDescriptor->getColumns();
+   std::vector<DimensionDescriptor> bands = pOrigFileDescriptor->getBands();
 
    
-   for_each(rows.begin(), rows.end(),
+   std::for_each(rows.begin(), rows.end(),
       boost::bind(&DimensionDescriptor::setActiveNumberValid, _1, false)); 
-   for_each(columns.begin(), columns.end(),
+   std::for_each(columns.begin(), columns.end(),
       boost::bind(&DimensionDescriptor::setActiveNumberValid, _1, false)); 
-   for_each(bands.begin(), bands.end(),
+   std::for_each(bands.begin(), bands.end(),
       boost::bind(&DimensionDescriptor::setActiveNumberValid, _1, false)); 
 
    DataDescriptorResource<RasterDataDescriptor> pNewDescriptor("TempImport", "RasterElement", 
@@ -616,9 +677,9 @@ RasterDataDescriptor *RasterUtilities::generateUnchippedRasterDataDescriptor(
    return pNewDescriptor.release();
 }
 
-vector<string> RasterUtilities::getBandNames(const RasterDataDescriptor* pDescriptor)
+std::vector<std::string> RasterUtilities::getBandNames(const RasterDataDescriptor* pDescriptor)
 {
-   vector<string> foundBandNames;
+   std::vector<std::string> foundBandNames;
    if (pDescriptor == NULL)
    {
       return foundBandNames;
@@ -628,18 +689,19 @@ vector<string> RasterUtilities::getBandNames(const RasterDataDescriptor* pDescri
    {
       return foundBandNames;
    }
-   string pNamesPath[] = { SPECIAL_METADATA_NAME, BAND_METADATA_NAME, NAMES_METADATA_NAME, END_METADATA_NAME };
-   const vector<string>* pBandNames = dv_cast<vector<string> >(&pMetadata->getAttributeByPath(pNamesPath));
-   string pPrefixPath[] = { SPECIAL_METADATA_NAME, BAND_NAME_PREFIX_METADATA_NAME, END_METADATA_NAME };
-   const string* pBandPrefix = dv_cast<string>(&pMetadata->getAttributeByPath(pPrefixPath));
-   const vector<DimensionDescriptor>& activeBands = pDescriptor->getBands();
+   std::string pNamesPath[] = { SPECIAL_METADATA_NAME, BAND_METADATA_NAME, NAMES_METADATA_NAME, END_METADATA_NAME };
+   const std::vector<std::string>* pBandNames =
+      dv_cast<std::vector<std::string> >(&pMetadata->getAttributeByPath(pNamesPath));
+   std::string pPrefixPath[] = { SPECIAL_METADATA_NAME, BAND_NAME_PREFIX_METADATA_NAME, END_METADATA_NAME };
+   const std::string* pBandPrefix = dv_cast<std::string>(&pMetadata->getAttributeByPath(pPrefixPath));
+   const std::vector<DimensionDescriptor>& activeBands = pDescriptor->getBands();
    for (unsigned int i = 0; i < activeBands.size(); ++i)
    {
       const DimensionDescriptor& bandDim = activeBands[i];
-      string bandName = ::getBandName(pBandNames, pBandPrefix, bandDim);
+      std::string bandName = ::getBandName(pBandNames, pBandPrefix, bandDim);
       if (bandName.empty())
       {
-         return vector<string>();
+         return std::vector<std::string>();
       }
       foundBandNames.push_back(bandName);
    }
@@ -647,7 +709,7 @@ vector<string> RasterUtilities::getBandNames(const RasterDataDescriptor* pDescri
    return foundBandNames;
 }
 
-string RasterUtilities::getBandName(const RasterDataDescriptor* pDescriptor, DimensionDescriptor band)
+std::string RasterUtilities::getBandName(const RasterDataDescriptor* pDescriptor, DimensionDescriptor band)
 {
    if (pDescriptor == NULL)
    {
@@ -658,10 +720,11 @@ string RasterUtilities::getBandName(const RasterDataDescriptor* pDescriptor, Dim
    {
       return "";
    }
-   string pNamesPath[] = { SPECIAL_METADATA_NAME, BAND_METADATA_NAME, NAMES_METADATA_NAME, END_METADATA_NAME };
-   const vector<string>* pBandNames = dv_cast<vector<string> >(&pMetadata->getAttributeByPath(pNamesPath));
-   string pPrefixPath[] = { SPECIAL_METADATA_NAME, BAND_NAME_PREFIX_METADATA_NAME, END_METADATA_NAME };
-   const string* pBandPrefix = dv_cast<string>(&pMetadata->getAttributeByPath(pPrefixPath));
+   std::string pNamesPath[] = { SPECIAL_METADATA_NAME, BAND_METADATA_NAME, NAMES_METADATA_NAME, END_METADATA_NAME };
+   const std::vector<std::string>* pBandNames =
+      dv_cast<std::vector<std::string> >(&pMetadata->getAttributeByPath(pNamesPath));
+   std::string pPrefixPath[] = { SPECIAL_METADATA_NAME, BAND_NAME_PREFIX_METADATA_NAME, END_METADATA_NAME };
+   const std::string* pBandPrefix = dv_cast<std::string>(&pMetadata->getAttributeByPath(pPrefixPath));
    return ::getBandName(pBandNames, pBandPrefix, band);
 }
 
@@ -681,9 +744,9 @@ namespace
          return false;
       }
 
-      string pWavelengthPath[] = { SPECIAL_METADATA_NAME, BAND_METADATA_NAME, 
+      std::string pWavelengthPath[] = { SPECIAL_METADATA_NAME, BAND_METADATA_NAME, 
          CENTER_WAVELENGTHS_METADATA_NAME, END_METADATA_NAME };
-      const vector<double>* pWaveLengths = dv_cast<vector<double> >(
+      const std::vector<double>* pWaveLengths = dv_cast<std::vector<double> >(
          &pMeta->getAttributeByPath(pWavelengthPath));
       if (pWaveLengths == NULL)
       {
@@ -775,9 +838,9 @@ int RasterUtilities::findBestMatch(const std::vector<double> &values, double val
    return bestMatch;
 }
 
-vector<RasterChannelType> RasterUtilities::getVisibleRasterChannels()
+std::vector<RasterChannelType> RasterUtilities::getVisibleRasterChannels()
 {
-   vector<RasterChannelType> channels;
+   std::vector<RasterChannelType> channels;
    channels.push_back(GRAY);
    channels.push_back(RED);
    channels.push_back(GREEN);
@@ -789,15 +852,15 @@ vector<RasterChannelType> RasterUtilities::getVisibleRasterChannels()
 namespace
 {
    template<typename T>
-   bool chipMetadataDimTemplate(DataVariant &dimMetadataVariant, const vector<DimensionDescriptor> &selectedDims)
+   bool chipMetadataDimTemplate(DataVariant &dimMetadataVariant, const std::vector<DimensionDescriptor> &selectedDims)
    {
-      vector<T> *pVec = dimMetadataVariant.getPointerToValue<vector<T> >();
+      std::vector<T> *pVec = dimMetadataVariant.getPointerToValue<std::vector<T> >();
       if (pVec != NULL)
       {
-         vector<T> &dimMetadataVector = *pVec;
-         vector<T> newDimMetadata;
+         std::vector<T> &dimMetadataVector = *pVec;
+         std::vector<T> newDimMetadata;
          newDimMetadata.reserve(selectedDims.size());
-         vector<DimensionDescriptor>::const_iterator selectedDimIter = selectedDims.begin();
+         std::vector<DimensionDescriptor>::const_iterator selectedDimIter = selectedDims.begin();
          for (size_t i = 0; i < dimMetadataVector.size() && selectedDimIter != selectedDims.end(); ++i)
          {
             VERIFY(selectedDimIter->isActiveNumberValid());
@@ -814,12 +877,12 @@ namespace
       return false;
    }
 
-   void chipMetadataDim(DynamicObject *pMetadata, const vector<DimensionDescriptor> &selectedDims)
+   void chipMetadataDim(DynamicObject *pMetadata, const std::vector<DimensionDescriptor> &selectedDims)
    {
       VERIFYNRV(pMetadata != NULL);
-      vector<string> attributeNames;
+      std::vector<std::string> attributeNames;
       pMetadata->getAttributeNames(attributeNames);
-      for (vector<string>::const_iterator iter = attributeNames.begin();
+      for (std::vector<std::string>::const_iterator iter = attributeNames.begin();
          iter != attributeNames.end(); ++iter)
       {
          DataVariant& dimMetadataVariant = pMetadata->getAttribute(*iter);
@@ -898,7 +961,7 @@ namespace
             continue;
          }
 
-         if (chipMetadataDimTemplate<string>(dimMetadataVariant, selectedDims))
+         if (chipMetadataDimTemplate<std::string>(dimMetadataVariant, selectedDims))
          {
             continue;
          }
@@ -908,9 +971,9 @@ namespace
    }
 }
 
-bool RasterUtilities::chipMetadata(DynamicObject* pMetadata, const vector<DimensionDescriptor>& selectedRows,
-                                   const vector<DimensionDescriptor>& selectedColumns,
-                                   const vector<DimensionDescriptor>& selectedBands)
+bool RasterUtilities::chipMetadata(DynamicObject* pMetadata, const std::vector<DimensionDescriptor>& selectedRows,
+                                   const std::vector<DimensionDescriptor>& selectedColumns,
+                                   const std::vector<DimensionDescriptor>& selectedBands)
 {
    if (pMetadata != NULL)
    {
@@ -1038,7 +1101,7 @@ int64_t RasterUtilities::calculateFileSize(const RasterFileDescriptor* pDescript
    {
    case BSQ:
       {
-         const vector<const Filename*>& bandFiles = pDescriptor->getBandFiles();
+         const std::vector<const Filename*>& bandFiles = pDescriptor->getBandFiles();
          if (bandFiles.empty() == false)  // then data in multiple files
          {
             numBands = 1;                 // one band per file
@@ -1066,4 +1129,213 @@ int64_t RasterUtilities::calculateFileSize(const RasterFileDescriptor* pDescript
    }
 
    return fileSize;
+}
+
+bool RasterUtilities::rotate(RasterElement* pDst, const RasterElement* pSrc, double angle, int defaultValue,
+                             RasterUtilities::InterpolationType interp, Progress* pProgress, bool* pAbort)
+{
+   if (pDst == NULL || pSrc == NULL)
+   {
+      if (pProgress != NULL)
+      {
+         pProgress->updateProgress("Invalid cube", 0, ERRORS);
+      }
+      return false;
+   }
+   const RasterDataDescriptor* pSrcDesc = static_cast<const RasterDataDescriptor*>(pSrc->getDataDescriptor());
+   RasterDataDescriptor* pDstDesc = static_cast<RasterDataDescriptor*>(pDst->getDataDescriptor());
+   std::vector<int> bvalues = pDstDesc->getBadValues();
+   if (std::find(bvalues.begin(), bvalues.end(), defaultValue) == bvalues.end())
+   {
+      bvalues.push_back(defaultValue);
+      pDstDesc->setBadValues(bvalues);
+   }
+   unsigned int numRows = pSrcDesc->getRowCount();
+   unsigned int numCols = pSrcDesc->getColumnCount();
+   unsigned int numBands = pSrcDesc->getBandCount();
+   bool isBip = (pSrcDesc->getInterleaveFormat() == BIP);
+
+   if (numRows != pDstDesc->getRowCount() ||
+       numCols != pDstDesc->getColumnCount() ||
+       numBands != pDstDesc->getBandCount() ||
+       isBip != (pDstDesc->getInterleaveFormat() == BIP))
+   {
+      if (pProgress != NULL)
+      {
+         pProgress->updateProgress("Desitnation cube is not compatible with source cube.", 0, ERRORS);
+      }
+      return false;
+   }
+
+   // calculate the rotation of the four corners
+   int x1 = numCols / 2;
+   int y1 = numRows / 2;
+   int x0 = -(static_cast<int>(numCols) - x1 - 1);
+   int y0 = -(static_cast<int>(numRows) - y1 - 1);
+   Opticks::PixelLocation ul(x0, y0);
+   Opticks::PixelLocation ur(x1, y0);
+   Opticks::PixelLocation ll(x0, y1);
+   Opticks::PixelLocation lr(x1, y1);
+   double cosA = cos(angle);
+   double sinA = sin(angle);
+   Opticks::PixelLocation ulPrime(static_cast<int>(ul.mX * cosA - ul.mY * sinA + 0.5),
+      static_cast<int>(ul.mX * sinA + ul.mY * cosA + 0.5));
+   Opticks::PixelLocation urPrime(static_cast<int>(ur.mX * cosA - ur.mY * sinA + 0.5),
+      static_cast<int>(ur.mX * sinA + ur.mY * cosA + 0.5));
+   Opticks::PixelLocation llPrime(static_cast<int>(ll.mX * cosA - ll.mY * sinA + 0.5),
+      static_cast<int>(ll.mX * sinA + ll.mY * cosA + 0.5));
+   Opticks::PixelLocation lrPrime(static_cast<int>(lr.mX * cosA - lr.mY * sinA + 0.5),
+      static_cast<int>(lr.mX * sinA + lr.mY * cosA + 0.5));
+
+   // use Bresenham's to calculate the start and end coordinates of each row
+   std::vector<Opticks::PixelLocation> newRowStartPre;
+   calculateNewPoints(ulPrime, llPrime, newRowStartPre);
+   std::vector<Opticks::PixelLocation> newRowEndPre;
+   calculateNewPoints(urPrime, lrPrime, newRowEndPre);
+
+   // interpolate so we have the proper number of points
+   std::vector<Opticks::PixelLocation> newRowStart;
+   std::vector<Opticks::PixelLocation> newRowEnd;
+   newRowStart.reserve(numRows);
+   newRowEnd.reserve(numRows);
+   double startMult = newRowStartPre.size() / static_cast<double>(numRows);
+   double endMult = newRowEndPre.size() / static_cast<double>(numRows);
+   for (unsigned int row = 0; row < numRows; ++row)
+   {
+      if (pProgress != NULL)
+      {
+         pProgress->updateProgress("Calculating row shifts.", row * 100 / numRows, NORMAL);
+      }
+      switch(interp)
+      {
+      case NEAREST_NEIGHBOR:
+         {
+            unsigned int preStartRow = static_cast<int>(startMult * row + 0.5);
+            unsigned int preEndRow = static_cast<int>(endMult * row + 0.5);
+            newRowStart.push_back(newRowStartPre[preStartRow]);
+            newRowEnd.push_back(newRowEndPre[preEndRow]);
+            break;
+         }
+      case BILINEAR:
+      case BICUBIC:
+      default:
+         if (pProgress != NULL)
+         {
+            pProgress->updateProgress("Invalid or unsupported interpolation method.", 0, ERRORS);
+         }
+         return false;
+      }
+   }
+   if (newRowStart.size() != numRows || newRowEnd.size() != numRows)
+   {
+      if (pProgress != NULL)
+      {
+         pProgress->updateProgress("Error calculating new row positions.", 0, ERRORS);
+      }
+      return false;
+   }
+
+   unsigned int outBandLoop = isBip ? 1 : numBands;
+   unsigned int inBandLoop = isBip ? numBands : 1;
+   for (unsigned int outBand = 0; outBand < outBandLoop; ++outBand)
+   {
+      FactoryResource<DataRequest> pSrcRequest;
+      FactoryResource<DataRequest> pDstRequest;
+      VERIFY(pSrcRequest.get() && pDstRequest.get());
+      pSrcRequest->setRows(DimensionDescriptor(), DimensionDescriptor(), 1);
+      pDstRequest->setRows(DimensionDescriptor(), DimensionDescriptor(), 1);
+      pSrcRequest->setColumns(DimensionDescriptor(), DimensionDescriptor(), numCols);
+      pDstRequest->setColumns(DimensionDescriptor(), DimensionDescriptor(), numCols);
+      if (!isBip)
+      {
+         pSrcRequest->setBands(pSrcDesc->getActiveBand(outBand), pSrcDesc->getActiveBand(outBand), 1);
+         pDstRequest->setBands(pDstDesc->getActiveBand(outBand), pDstDesc->getActiveBand(outBand), 1);
+      }
+      pDstRequest->setWritable(true);
+
+      DataAccessor pSrcAcc = pSrc->getDataAccessor(pSrcRequest.release());
+      DataAccessor pDstAcc = pDst->getDataAccessor(pDstRequest.release());
+      for (unsigned int row = 0; row < numRows; ++row)
+      {
+         if (pProgress != NULL)
+         {
+            pProgress->updateProgress("Warping rows.", row * 100 / numRows, NORMAL);
+         }
+         if (pAbort != NULL && *pAbort)
+         {
+            if (pProgress != NULL)
+            {
+               pProgress->updateProgress("Aborted by user.", 0, ABORT);
+            }
+            return false;
+         }
+         if (!pDstAcc.isValid())
+         {
+            if (pProgress != NULL)
+            {
+               pProgress->updateProgress("Error copying data.", 0, ERRORS);
+            }
+            return false;
+         }
+         // initialize the row...this is faster than checking validity at each
+         // pixel and setting the default value at that pixel
+         switchOnComplexEncoding(pDstDesc->getDataType(), setPixel,
+            pDstAcc->getRow(), defaultValue, inBandLoop*numCols);
+
+         // use Bresenham's to calculate the column coordinates
+         std::vector<Opticks::PixelLocation> newColPre;
+         calculateNewPoints(newRowStart[row], newRowEnd[row], newColPre);
+         // interpolate so we have the proper number of points
+         double mult = newColPre.size() / static_cast<double>(numCols);
+         for (unsigned int col = 0; col < numCols; ++col)
+         {
+            if (!pDstAcc.isValid())
+            {
+               if (pProgress != NULL)
+               {
+                  pProgress->updateProgress("Error copying data.", 0, ERRORS);
+               }
+               return false;
+            }
+            Opticks::PixelLocation sourcePixel;
+            switch(interp)
+            {
+            case NEAREST_NEIGHBOR:
+               {
+                  unsigned int preCol = static_cast<int>(mult * col + 0.5);
+                  sourcePixel = newColPre[preCol];
+                  break;
+               }
+            case BILINEAR:
+            case BICUBIC:
+            default:
+               if (pProgress != NULL)
+               {
+                  pProgress->updateProgress("Invalid or unsupported interpolation method.", 0, ERRORS);
+               }
+               return false;
+            }
+            sourcePixel -= Opticks::PixelLocation(x0, y0);
+            if (sourcePixel.mX >= 0 && sourcePixel.mX < static_cast<int>(numCols) &&
+                sourcePixel.mY >= 0 && sourcePixel.mY < static_cast<int>(numRows))
+            {
+               pSrcAcc->toPixel(sourcePixel.mY, sourcePixel.mX);
+               if (!pSrcAcc.isValid())
+               {
+                  if (pProgress != NULL)
+                  {
+                     pProgress->updateProgress("Error reading source cube.", 0, ERRORS);
+                  }
+                  return false;
+               }
+               memcpy(pDstAcc->getColumn(), pSrcAcc->getColumn(), pDstDesc->getBytesPerElement() * inBandLoop);
+            }
+            pDstAcc->nextColumn();
+         }
+         pDstAcc->nextRow();
+      }
+   }
+   pDst->updateData();
+
+   return true;
 }

@@ -18,7 +18,7 @@
 
 FlickerControls::FlickerControls()
 {
-   ExecutableShell::setName("Flicker Controls");
+   setName("Flicker Controls");
    setCreator("Ball Aerospace & Technologies Corp.");
    setCopyright(APP_COPYRIGHT);
    setVersion(APP_VERSION_NUMBER);

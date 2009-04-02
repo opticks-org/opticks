@@ -10,7 +10,7 @@
 #ifndef GEOCONVERSIONS_H
 #define GEOCONVERSIONS_H
 
-#include <cmath>
+#include <math.h>
 #include "AppConfig.h"
 
 /**

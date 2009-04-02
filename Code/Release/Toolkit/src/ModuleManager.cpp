@@ -1,4 +1,3 @@
-
 /**
  * Module Manager 
  *
@@ -12,75 +11,92 @@
  */
 
 #include "ModuleManager.h"
-
-using namespace std;
+#include "PlugInFactory.h"
+#include <algorithm>
+#include <vector>
 
 /**
  * This is deprecated, so the value set does not currently matter.
  */
-const char *ModuleManager::mspValidationKey = "None";
-
-/**
- * Add any #include's required for your plug-in here.
- */
+const char* ModuleManager::mspValidationKey = "None";
 
 /**
  * Set this to the name of your module, ie. "Band Math"
  */
-const char *ModuleManager::mspName = "";
+const char* ModuleManager::mspName = "";
 
 /**
  * Set this to the version of your module, ie. "1.0"
  */
-const char *ModuleManager::mspVersion = "";
+const char* ModuleManager::mspVersion = "";
 
 /**
  * Set this to a description of your module, ie. "Use to perform math using the bands of a RasterElement"
  */
-const char *ModuleManager::mspDescription = "";
+const char* ModuleManager::mspDescription = "";
 
 /**
  * Set a unique identifier for your module, see SessionItem::getId() for more details
  */
-const char *ModuleManager::mspUniqueId = "";
+const char* ModuleManager::mspUniqueId = "";
+
+/**
+ * The following code configures ModuleManager to use PlugInFactory.
+ *
+ * This allows you to register a plug-in by including a macro in the plug-in's cpp file.
+ * Further modifications to ModuleManager.cpp are not necessary.
+ *
+ * @see PlugInFactory
+ */
+std::vector<PlugInFactory*>& factories()
+{
+   static std::vector<PlugInFactory*> sFactories;
+   return sFactories;
+}
 
 unsigned int ModuleManager::getTotalPlugIns()
 {
-   /**
-    * Return the number of plug-ins contained within your dll or so here. 
-    * NOTE: You can use the Service<> classes available in the application
-    * at this point to read data files to dynamically determine how many plug-ins
-    * your module has available.  
-    */
-   return 1;
+   return static_cast<unsigned int>(factories().size());
 }
+
+void addFactory(PlugInFactory* pFactory)
+{
+   if (pFactory != NULL)
+   {
+      factories().push_back(pFactory);
+   }
+}
+
+struct FactoryPtrComparator
+{
+   bool operator()(PlugInFactory* pLhs, PlugInFactory* pRhs)
+   {
+      if (pLhs == NULL || pRhs == NULL)
+      {
+         return false;
+      }
+      size_t leftCount = std::count(pLhs->mName.begin(), pLhs->mName.end(), '_');
+      size_t rightCount = std::count(pRhs->mName.begin(), pRhs->mName.end(), '_');
+      if (leftCount != rightCount)
+      {
+         return leftCount > rightCount;
+      }
+      return pLhs->mName < pRhs->mName;
+   }
+};
 
 PlugIn* ModuleManager::getPlugIn(unsigned int plugInNumber)
 {
-    PlugIn* pPlugIn = NULL;
-
-    /**
-     * This method will called with plugInNumbers between from 0 and the return value from getTotalPlugIns() - 1.
-     * This method should construct the given subclass of the PlugIn interface and return the given pointer.
-     * WARNING: The subclass of the PlugIn interface constructed for a given plugInNumber MUST be the same
-     * for a single run of the application, it CANNOT change during an application run.
-     * 
-     * An example of implementing this is shown below:
-     */
-
-    switch (plugInNumber)
-    {
-        case 0:
-           /**
-            * Change this to create your plug-in instance.  Your plug-in must
-            * be a subclass of the PlugIn interface.  Please see the *Shell classes
-            * the .h files in Toolkit\Application\PlugInLib
-            */
-           pPlugIn = new myPlugIn; 
-           break;
-        default:
-           break;
-    }
-
-   return pPlugIn;
+   static bool factoriesSorted = false;
+   if (!factoriesSorted)
+   {
+      factoriesSorted = true;
+      FactoryPtrComparator comp;
+      std::sort(factories().begin(), factories().end(), comp);
+   }
+   if (plugInNumber >= factories().size())
+   {
+      return NULL;
+   }
+   return (*(factories()[plugInNumber]))();
 }

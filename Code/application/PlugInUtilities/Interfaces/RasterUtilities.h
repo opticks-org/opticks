@@ -12,6 +12,7 @@
 
 #include "AppConfig.h"
 #include "DimensionDescriptor.h"
+#include "EnumWrapper.h"
 #include "TypesFile.h"
 
 #if defined(WIN_API)
@@ -32,6 +33,7 @@ class DataDescriptor;
 class DataElement;
 class DynamicObject;
 class FileDescriptor;
+class Progress;
 class RasterDataDescriptor;
 class RasterDataDescriptor;
 class RasterElement;
@@ -870,6 +872,46 @@ namespace RasterUtilities
     *          if pDescriptor is NULL.
     */
    int64_t calculateFileSize(const RasterFileDescriptor* pDescriptor);
+
+   /**
+    * Types of interpolation.
+    */
+   enum InterpolationTypeEnum
+   {
+      NEAREST_NEIGHBOR, /**< Duplicate the nearest neighbor */
+      BILINEAR, /**< Bilinear interpolation */
+      BICUBIC /**< Bicubic interpolation */
+   };
+
+   /**
+    * @EnumWrapper RasterUtilities::InterpolationTypeEnum.
+    */
+   typedef EnumWrapper<InterpolationTypeEnum> InterpolationType;
+
+   /**
+    *  Rotate a data set.
+    *
+    *  The original dimensions of the data set are maintained. This means that data clipping and padding may occur.
+    *
+    *  @param pDst
+    *         Destination RasterElement. Must be initialized to the same params as pSrc.
+    *  @param pSrc
+    *         RasterElement to rotate.
+    *  @param angle
+    *         Rotate by this angle. In radians.
+    *  @param defaultValue
+    *         Pixels which do not map to anything in the original data set will be set to this value.
+    *         This value will be added to the bad values list if it is not already there.
+    *  @param interp
+    *         Interpolation type. Only NEAREST_NEIGHBOR is currently supported.
+    *  @param pProgress
+    *         Report progress.
+    *  @param pAbort
+    *         If not \c NULL, check this value during the rotation. If the value becomes \c true, abort.
+    *  @return \c True if successful, \c false on error.
+    */
+   bool rotate(RasterElement* pDst, const RasterElement* pSrc, double angle, int defaultValue,
+               InterpolationType interp = NEAREST_NEIGHBOR, Progress* pProgress = NULL, bool* pAbort = NULL);
 }
 
 #endif

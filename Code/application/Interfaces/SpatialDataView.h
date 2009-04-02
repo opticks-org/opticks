@@ -369,11 +369,10 @@ public:
    /**
     *  Returns the top-most layer.
     *
-    *  This method returns the to-pmost layer in the view, regardless of its
-    *  layer type and whether it is shown or hidden.
+    *  This method returns the top-most visible layer in the view regardless of layer type.
     *
-    *  @return  A pointer to the current layer.  \b NULL is returned if the
-    *           no layers are present in the view.
+    *  @return  A pointer to the current layer.  \b NULL is returned if no
+    *           visible layers are present in the view.
     *
     *  @see     getTopMostLayer(const LayerType&) const, getTopMostElement(),
     *           getActiveLayer()
@@ -383,14 +382,13 @@ public:
    /**
     *  Returns the top-most layer of a given type.
     *
-    *  This method returns the top-most layer of the given type, regardless
-    *  of whether it is shown or hidden.
+    *  This method returns the top-most visible layer of the given type.
     *
     *  @param   layerType
     *           The type of layer for which to get the top-most layer.
     *
     *  @return  A pointer to the current layer of the given type.  \b NULL is
-    *           returned if no layers of the given type are present in the
+    *           returned if no visible layers of the given type are present in the
     *           view.
     *
     *  @see     getTopMostLayer()
@@ -401,11 +399,10 @@ public:
     *  Returns the data element of the top-most layer.
     *
     *  This method returns the data element being displayed by the top-most
-    *  layer regardless of the layer type and whether the layer is shown or
-    *  hidden.
+    *  visible layer regardless of the layer type.
     *
     *  @return  A pointer to the data element of the current layer.  \b NULL is
-    *           returned if no layers are present in the view.
+    *           returned if no visible layers are present in the view.
     */
    virtual DataElement* getTopMostElement() const = 0;
 
@@ -413,15 +410,14 @@ public:
     *  Returns the data element of the top-most layer of a given type.
     *
     *  This method returns the data element being displayed by the top-most
-    *  layer of the given layer type, regardless of whether the layer is shown
-    *  or hidden.
+    *  visible layer of the given layer type.
     *
     *  @param   layerType
     *           The type of layer for which to get the top-most layer to get
     *           its element.
     *
     *  @return  A pointer to the data element of the current layer of the given
-    *           type.  \b NULL is returned if no layers of the given type are
+    *           type.  \b NULL is returned if no visible layers of the given type are
     *           present in the view.
     */
    virtual DataElement* getTopMostElement(LayerType layerType) const = 0;

@@ -2840,6 +2840,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Interfaces\PlugInFactory.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Interfaces\PlugInResource.h"
 				>
 			</File>
