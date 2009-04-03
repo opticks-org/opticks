@@ -4601,10 +4601,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\GLView\GlContextSave.h"
-				>
-			</File>
-			<File
 				RelativePath=".\GLView\Image.cpp"
 				>
 			</File>
