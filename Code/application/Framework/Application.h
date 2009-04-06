@@ -35,7 +35,9 @@ protected:
 
    bool isXmlInitialized() const;
    bool generateXml();
-   bool executeStartupBatchWizards(Progress* pProgress);
+   bool executeStartupBatchWizards();
+
+   Progress* mpProgress;
 
 private:
    QCoreApplication& mApplication;

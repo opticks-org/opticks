@@ -101,6 +101,9 @@ are defined in Opticks-Version.wxi, so include that file now -->
             <Component Id="C__hdf5dll_Dependency" Guid="$(var.C__hdf5dll_DependencyGuid)" Win64="$(var.64Bit)">
                <File Name="hdf5dll.dll" Id="F__hdf5dll_Dependency" DiskId="1" KeyPath="yes" />
             </Component>
+            <Component Id="C__libexpat_Dependency" Guid="$(var.C__libexpat_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="libexpat.dll" Id="F__libexpat_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
             <Component Id="C__ossim_Dependency" Guid="$(var.C__ossim_DependencyGuid)" Win64="$(var.64Bit)">
                <File Name="ossim.dll" Id="F__ossim_Dependency" DiskId="1" KeyPath="yes" />
             </Component>
@@ -139,6 +142,9 @@ are defined in Opticks-Version.wxi, so include that file now -->
             </Component>
             <Component Id="C__qwt5_Dependency" Guid="$(var.C__qwt5_DependencyGuid)" Win64="$(var.64Bit)">
                <File Name="qwt5.dll" Id="F__qwt5_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
+            <Component Id="C__raptor_Dependency" Guid="$(var.C__raptor_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="raptor.dll" Id="F__raptor_Dependency" DiskId="1" KeyPath="yes" />
             </Component>
             <Component Id="C__shapelib_Dependency" Guid="$(var.C__shapelib_DependencyGuid)" Win64="$(var.64Bit)">
                <File Name="shapelib.dll" Id="F__shapelib_Dependency" DiskId="1" KeyPath="yes" />
@@ -317,6 +323,13 @@ are defined in Opticks-Version.wxi, so include that file now -->
                <File Name="ZoomedImages.spg" Id="F__ZoomedImages.spg" />
             </Component>            
          </Directory>
+         <Directory Id="D__Extensions" Name="Extensions">
+            <Directory Id="D__AutoInstall" Name="AutoInstall">
+               <Component Id="C__AutoInstall" Guid="$(var.C__AutoInstallGuid)" Win64="no">
+                  <CreateFolder/>
+               </Component>
+            </Directory>
+         </Directory>
          <Directory Id="ProgramMenuFolder" Name=".">
             <Directory Id="D__OpticksStartMenuFolder" Name="Opticks $(var.PublicVersionNumber) $(var.UserPlatform)">
                <Component Id="C__OpticksShortcuts" Guid="$(var.C__OpticksShortcutsGuid)" Win64="$(var.64Bit)">
@@ -368,6 +381,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
          <ComponentRef Id="C__gdal_Dependency" />
          <ComponentRef Id="C__glew32_Dependency" />
          <ComponentRef Id="C__hdf5dll_Dependency" />
+         <ComponentRef Id="C__libexpat_Dependency" />
          <ComponentRef Id="C__ossim_Dependency" />
          <ComponentRef Id="C__pthreadVC2_Dependency" />
          <ComponentRef Id="C__QtConf" />
@@ -381,6 +395,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
          <ComponentRef Id="C__QtSvg4_Dependency" />
          <ComponentRef Id="C__QtXml4_Dependency" />
          <ComponentRef Id="C__qwt5_Dependency" />
+         <ComponentRef Id="C__raptor_Dependency" />
          <ComponentRef Id="C__shapelib_Dependency" />
          <ComponentRef Id="C__xercesc_2_7_Dependency" />
          <ComponentRef Id="C__xqilla10_Dependency" />
@@ -402,6 +417,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
          <ComponentRef Id="C__VC80_OpenMP_For_PlugIns"/>
          <ComponentRef Id="C__VC80_CRT_For_ArcProxy"/>
          <ComponentRef Id="C__Templates" />
+         <ComponentRef Id="C__AutoInstall" />
 
          <!-- The Components that make up the help directory -->
          <ComponentRef Id="C__Help_view" />
@@ -445,7 +461,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
          <ComponentRef Id="C__Help_scenario6_files" />
          <ComponentRef Id="C__Help_message_log_window" />
          <ComponentRef Id="C__Help_content" />
-         
+
          <?ifdef Is32Bit ?>
          <ComponentRef Id="C__cgD3D8_Dependency" />
          <ComponentRef Id="C__glut32_Dependency" />

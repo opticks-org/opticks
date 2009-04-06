@@ -1,12 +1,12 @@
 /** \page howto_importer Creating a raster data importer plug-in
 Files:
- - \ref PlugInSampler/SampleRasterElementImporter.h "PlugInSampler/SampleRasterElementImporter.h"
- - \ref PlugInSampler/SampleRasterElementImporter.cpp "PlugInSampler/SampleRasterElementImporter.cpp"
+ - \ref SampleRasterElementImporter.h "SampleRasterElementImporter.h"
+ - \ref SampleRasterElementImporter.cpp "SampleRasterElementImporter.cpp"
  
  This page describes the basic RasterElement importer provided in the plug-in sampler.
  This is a basic importer which simulates loading from a file and provides a fixed 1 band data array.
  The header file contains declarations for three classes.
- \dontinclude PlugInSampler/SampleRasterElementImporter.h
+ \dontinclude SampleRasterElementImporter.h
  \skipline class
  \skipline class
  \skipline class
@@ -17,7 +17,7 @@ Files:
  It is not used here so we can isolate the RasterPager code from the plug-in code which is normally required by RasterPagerShell.
  
  Now we'll exam the implementation of these classes.
- \dontinclude PlugInSampler/SampleRasterElementImporter.cpp
+ \dontinclude SampleRasterElementImporter.cpp
  \skip NUM_ROWS
  \until End of SampleRasterPage
  A RasterPage is the basic unit of data for a RasterElement.
@@ -88,8 +88,8 @@ Files:
  The RasterElementImporterShell will create the pager and use it to copy the data into memory.
  The pager is then destroyed before execute() returns.
 
-\example PlugInSampler/SampleRasterElementImporter.h
+\example SampleRasterElementImporter.h
 Declaration file for \ref howto_importer
-\example PlugInSampler/SampleRasterElementImporter.cpp
+\example SampleRasterElementImporter.cpp
 Implementation file for \ref howto_importer
  */

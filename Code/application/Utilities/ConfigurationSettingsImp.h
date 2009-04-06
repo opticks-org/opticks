@@ -90,6 +90,7 @@ public:
 
    bool serializeAsDefaults(const Filename* pFilename, const DynamicObject* pObject) const;
    DynamicObject* deserialize(const Filename* pFilename) const;
+   bool loadSettings(std::string& errorMessage);
 
    void updateProductionStatus();
 
@@ -116,7 +117,6 @@ protected:
    std::string translateKey(const std::string& key) const;
 
    bool serialize() const;
-   bool loadSettings(std::string& errorMessage);
    void deserializeMruFiles();
    void applicationClosed(Subject& subject, const std::string& signal, const boost::any& args);
    void initDeploymentValues();

@@ -6,7 +6,7 @@
 	>
 	<Tool
 		Name="VCCLCompilerTool"
-		AdditionalIncludeDirectories="&quot;$(CODE_DIR)\Application\Desktop&quot;;&quot;$(CODE_DIR)\Application\Desktop\Layer&quot;;&quot;$(CODE_DIR)\Application\Desktop\Animation&quot;;&quot;$(CODE_DIR)\Application\Desktop\Plot&quot;;&quot;$(CODE_DIR)\Application\Framework&quot;;&quot;$(CODE_DIR)\Application\Gui&quot;;&quot;$(CODE_DIR)\Application\Gui\GlView&quot;;&quot;$(CODE_DIR)\Application\Gui\Graphic&quot;;&quot;$(CODE_DIR)\Application\Gui\Image&quot;;&quot;$(CODE_DIR)\Application\Gui\Undo&quot;;&quot;$(CODE_DIR)\Application\Interfaces&quot;;&quot;$(CODE_DIR)\Application\Model&quot;;&quot;$(CODE_DIR)\Application\PlugInLib&quot;;&quot;$(CODE_DIR)\Application\PlugInManager&quot;;&quot;$(CODE_DIR)\Application\PlugInUtilities&quot;;&quot;$(CODE_DIR)\Application\PlugInUtilities\Interfaces&quot;;&quot;$(CODE_DIR)\Application\PlugInUtilities\MathUtilities&quot;;&quot;$(CODE_DIR)\Application\PlugInUtilities\pthreads-wrapper&quot;;&quot;$(CODE_DIR)\Application\PlugInUtilities\Wizards&quot;;&quot;$(CODE_DIR)\Application\Utilities&quot;;&quot;$(CODE_DIR)\Application\Wizard&quot;"
+		AdditionalIncludeDirectories="&quot;$(CODE_DIR)\Application\Desktop&quot;;&quot;$(CODE_DIR)\Application\Desktop\Layer&quot;;&quot;$(CODE_DIR)\Application\Desktop\Animation&quot;;&quot;$(CODE_DIR)\Application\Desktop\Plot&quot;;&quot;$(CODE_DIR)\Application\Framework&quot;;&quot;$(CODE_DIR)\Application\Gui&quot;;&quot;$(CODE_DIR)\Application\Gui\GlView&quot;;&quot;$(CODE_DIR)\Application\Gui\Graphic&quot;;&quot;$(CODE_DIR)\Application\Gui\Image&quot;;&quot;$(CODE_DIR)\Application\Gui\Undo&quot;;&quot;$(CODE_DIR)\Application\Installer&quot;;&quot;$(CODE_DIR)\Application\Interfaces&quot;;&quot;$(CODE_DIR)\Application\Model&quot;;&quot;$(CODE_DIR)\Application\PlugInLib&quot;;&quot;$(CODE_DIR)\Application\PlugInManager&quot;;&quot;$(CODE_DIR)\Application\PlugInUtilities&quot;;&quot;$(CODE_DIR)\Application\PlugInUtilities\Interfaces&quot;;&quot;$(CODE_DIR)\Application\PlugInUtilities\MathUtilities&quot;;&quot;$(CODE_DIR)\Application\PlugInUtilities\pthreads-wrapper&quot;;&quot;$(CODE_DIR)\Application\PlugInUtilities\Wizards&quot;;&quot;$(CODE_DIR)\Application\Utilities&quot;;&quot;$(CODE_DIR)\Application\Wizard&quot;"
 	/>
 	<Tool
 		Name="VCLibrarianTool"
@@ -14,7 +14,7 @@
 	/>
 	<Tool
 		Name="VCLinkerTool"
-		AdditionalDependencies="Desktop.lib Framework.lib Gui.lib Model.lib PlugInLib.lib PlugInManager.lib PlugInUtilities.lib Utilities.lib Wizard.lib opengl32.lib glu32.lib advapi32.lib shell32.lib"
+		AdditionalDependencies="Desktop.lib Framework.lib Gui.lib Model.lib Installer.lib PlugInLib.lib PlugInManager.lib PlugInUtilities.lib Utilities.lib Wizard.lib opengl32.lib glu32.lib advapi32.lib shell32.lib"
 		OutputFile="$(BuildDir)\Binaries-$(PlatformName)-$(ConfigurationName)\Bin\$(ProjectName).exe"
 		AdditionalLibraryDirectories="&quot;$(LibraryDir)\Binaries-$(PlatformName)-$(ConfigurationName)\Lib&quot;;&quot;$(LibraryDir)\$(PlatformName)\$(ConfigurationName)\PlugInLib&quot;"
 	/>

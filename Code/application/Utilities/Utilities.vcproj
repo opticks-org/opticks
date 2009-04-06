@@ -328,10 +328,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\PlugInBranding.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\ProgressImp.cpp"
 				>
 			</File>
@@ -466,10 +462,6 @@
 			</File>
 			<File
 				RelativePath=".\ObjectFactoryImp.h"
-				>
-			</File>
-			<File
-				RelativePath=".\PlugInBranding.h"
 				>
 			</File>
 			<File

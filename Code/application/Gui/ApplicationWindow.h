@@ -272,6 +272,7 @@ protected slots:
 
    // Help actions
    void helpTopics();
+   void displayExtensions();
    void aboutApp();
    void displayPlugInHelp();
 

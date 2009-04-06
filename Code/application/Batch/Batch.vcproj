@@ -20,7 +20,7 @@
 		<Configuration
 			Name="Release|Win32"
 			ConfigurationType="1"
-			InheritedPropertySheets="..\CompileSettings\32bitSettings.vsprops;..\CompileSettings\Cg.vsprops;..\CompileSettings\Xerces-Release.vsprops;..\CompileSettings\ApplicationCommonSettings-Release.vsprops;..\CompileSettings\Qt-Release.vsprops;..\CompileSettings\qwt-release.vsprops;..\CompileSettings\pthreads.vsprops;..\CompileSettings\AllCommonSettings-Release-32bit.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\glew-release.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\yaml-cpp.vsprops"
+			InheritedPropertySheets="..\CompileSettings\32bitSettings.vsprops;..\CompileSettings\Cg.vsprops;..\CompileSettings\Xerces-Release.vsprops;..\CompileSettings\ApplicationCommonSettings-Release.vsprops;..\CompileSettings\Qt-Release.vsprops;..\CompileSettings\qwt-release.vsprops;..\CompileSettings\pthreads.vsprops;..\CompileSettings\AllCommonSettings-Release-32bit.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\glew-release.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\raptor.vsprops;..\CompileSettings\minizip-release.vsprops;..\CompileSettings\yaml-cpp.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -94,7 +94,7 @@
 		<Configuration
 			Name="Release|x64"
 			ConfigurationType="1"
-			InheritedPropertySheets="..\CompileSettings\Cg.vsprops;..\CompileSettings\Xerces-Release.vsprops;..\CompileSettings\ApplicationCommonSettings-Release.vsprops;..\CompileSettings\Qt-Release.vsprops;..\CompileSettings\qwt-release.vsprops;..\CompileSettings\pthreads.vsprops;..\CompileSettings\AllCommonSettings-Release-64bit.vsprops;..\CompileSettings\64bitSettings.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\glew-release.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\yaml-cpp.vsprops"
+			InheritedPropertySheets="..\CompileSettings\Cg.vsprops;..\CompileSettings\Xerces-Release.vsprops;..\CompileSettings\ApplicationCommonSettings-Release.vsprops;..\CompileSettings\Qt-Release.vsprops;..\CompileSettings\qwt-release.vsprops;..\CompileSettings\pthreads.vsprops;..\CompileSettings\AllCommonSettings-Release-64bit.vsprops;..\CompileSettings\64bitSettings.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\glew-release.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\raptor.vsprops;..\CompileSettings\minizip-release.vsprops;..\CompileSettings\yaml-cpp.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -169,7 +169,7 @@
 		<Configuration
 			Name="Debug|Win32"
 			ConfigurationType="1"
-			InheritedPropertySheets="..\CompileSettings\32bitSettings.vsprops;..\CompileSettings\Cg.vsprops;..\CompileSettings\Xerces-Debug.vsprops;..\CompileSettings\ApplicationCommonSettings-Debug.vsprops;..\CompileSettings\Qt-Debug.vsprops;..\CompileSettings\qwt-debug.vsprops;..\CompileSettings\pthreads.vsprops;..\CompileSettings\AllCommonSettings-Debug-32bit.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\glew-debug.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\yaml-cpp.vsprops"
+			InheritedPropertySheets="..\CompileSettings\32bitSettings.vsprops;..\CompileSettings\Cg.vsprops;..\CompileSettings\Xerces-Debug.vsprops;..\CompileSettings\ApplicationCommonSettings-Debug.vsprops;..\CompileSettings\Qt-Debug.vsprops;..\CompileSettings\qwt-debug.vsprops;..\CompileSettings\pthreads.vsprops;..\CompileSettings\AllCommonSettings-Debug-32bit.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\glew-debug.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\raptor.vsprops;..\CompileSettings\minizip-debug.vsprops;..\CompileSettings\yaml-cpp.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -243,7 +243,7 @@
 		<Configuration
 			Name="Debug|x64"
 			ConfigurationType="1"
-			InheritedPropertySheets="..\CompileSettings\Cg.vsprops;..\CompileSettings\Xerces-Debug.vsprops;..\CompileSettings\ApplicationCommonSettings-Debug.vsprops;..\CompileSettings\Qt-Debug.vsprops;..\CompileSettings\qwt-debug.vsprops;..\CompileSettings\pthreads.vsprops;..\CompileSettings\AllCommonSettings-Debug-64bit.vsprops;..\CompileSettings\64bitSettings.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\glew-debug.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\yaml-cpp.vsprops"
+			InheritedPropertySheets="..\CompileSettings\Cg.vsprops;..\CompileSettings\Xerces-Debug.vsprops;..\CompileSettings\ApplicationCommonSettings-Debug.vsprops;..\CompileSettings\Qt-Debug.vsprops;..\CompileSettings\qwt-debug.vsprops;..\CompileSettings\pthreads.vsprops;..\CompileSettings\AllCommonSettings-Debug-64bit.vsprops;..\CompileSettings\64bitSettings.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\glew-debug.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\raptor.vsprops;..\CompileSettings\minizip-debug.vsprops;..\CompileSettings\yaml-cpp.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"

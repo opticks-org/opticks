@@ -7,26 +7,27 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #include <QtGui/QApplication>
 #include <QtGui/QGridLayout>
+#include <QtGui/QHBoxLayout>
 #include <QtGui/QHeaderView>
 #include <QtGui/QLabel>
 #include <QtGui/QTableWidget>
 #include <QtGui/QPushButton>
 #include <QtGui/QTabWidget>
 #include <QtGui/QTextEdit>
+#include <QtGui/QVBoxLayout>
 
 #include "AboutDlg.h"
+#include "Aeb.h"
 #include "AppConfig.h"
 #include "AppVersion.h"
 #include "ConfigurationSettingsImp.h"
 #include "DateTime.h"
 #include "Icons.h"
+#include "InstallerServices.h"
 #include "LabeledSection.h"
 #include "LabeledSectionGroup.h"
-#include "PlugInBranding.h"
 #include "PlugInDescriptor.h"
 #include "PlugInManagerServices.h"
 #include "Service.h"
@@ -127,35 +128,41 @@ AboutDlg::AboutDlg(QWidget* parent) :
    pAboutGroup->addSection(pAppInfoSection);
 
    //Plug-In Suites listing
-   const vector<PlugInBranding>& brandings = PlugInBranding::getBrandings();
+   list<const Aeb*> aebs = Service<InstallerServices>()->getAebs();
    QTableWidget* pPlugInBrandingTable = new QTableWidget(this);
    pPlugInBrandingTable->setColumnCount(3);
-   pPlugInBrandingTable->setRowCount(brandings.size());
+   pPlugInBrandingTable->setRowCount(aebs.size());
    pPlugInBrandingTable->setSelectionMode(QAbstractItemView::NoSelection);
    pPlugInBrandingTable->verticalHeader()->hide();
    pPlugInBrandingTable->setHorizontalHeaderLabels(QStringList() << "Name" << "Description" << "Version");
    pPlugInBrandingTable->horizontalHeader()->setClickable(false);
    pPlugInBrandingTable->horizontalHeader()->setResizeMode(1, QHeaderView::Stretch);
    pPlugInBrandingTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
-   for (unsigned int itemCount = 0;
-        itemCount < brandings.size();
-        ++itemCount)
+   int itemCount = 0;
+   for(list<const Aeb*>::const_iterator aeb = aebs.begin(); aeb != aebs.end(); ++aeb, ++itemCount)
    {
-      QTableWidgetItem* pTitle = new QTableWidgetItem(QString::fromStdString(brandings[itemCount].getTitle()));
+      const Aeb* pAeb = *aeb;
+      if (pAeb == NULL || pAeb->isHidden())
+      {
+         itemCount--;
+         continue;
+      }
+      QTableWidgetItem* pTitle = new QTableWidgetItem(QString::fromStdString(pAeb->getName()));
       pTitle->setToolTip(pTitle->text());
       pPlugInBrandingTable->setItem(itemCount, 0, pTitle);
-      QTableWidgetItem* pDesc = new QTableWidgetItem(QString::fromStdString(brandings[itemCount].getDescription()));
+      QTableWidgetItem* pDesc = new QTableWidgetItem(QString::fromStdString(pAeb->getDescription()));
       pDesc->setToolTip(pDesc->text());
       pPlugInBrandingTable->setItem(itemCount, 1, pDesc);
-      QTableWidgetItem* pVersionItem = new QTableWidgetItem(QString::fromStdString(brandings[itemCount].getVersion()));
-      pVersion->setToolTip(pVersionItem->text());
+      QTableWidgetItem* pVersionItem = new QTableWidgetItem(QString::fromStdString(pAeb->getVersion().toString()));
+      pVersionItem->setToolTip(pVersionItem->text());
       pPlugInBrandingTable->setItem(itemCount, 2, pVersionItem);
    }
+   pPlugInBrandingTable->setRowCount(itemCount);
    pPlugInBrandingTable->resizeColumnToContents(0);
    pPlugInBrandingTable->resizeColumnToContents(2);
    pPlugInBrandingTable->sortItems(0);
 
-   LabeledSection* pPlugInSuiteSection = new LabeledSection(pPlugInBrandingTable, "Plug-In Suites");
+   LabeledSection* pPlugInSuiteSection = new LabeledSection(pPlugInBrandingTable, "Extensions");
    pAboutGroup->addSection(pPlugInSuiteSection, 1000);
 
    // Create the copyright notice box
@@ -634,23 +641,43 @@ AboutDlg::AboutDlg(QWidget* parent) :
    QTabWidget* pLicenseTabBox = new QTabWidget(this);
    pLicenseTabBox->addTab(pNoticeEdit, APP_NAME);
 
-   for (unsigned int itemCount = 0; itemCount < brandings.size(); ++itemCount)
+   for(list<const Aeb*>::const_iterator aeb = aebs.begin(); aeb != aebs.end(); ++aeb)
    {
-      string license = brandings[itemCount].getLicense();
-      if (license.empty())
+      const Aeb* pAeb = *aeb;
+      if (pAeb == NULL)
       {
          continue;
       }
-      QTextEdit* pEdit = new QTextEdit(this);
-      pEdit->setLineWrapMode(QTextEdit::WidgetWidth);
-      pEdit->setReadOnly(true);
-      pEdit->setHtml(QString::fromStdString(license));
-      QPalette plt = pEdit->palette();
-      plt.setColor(QPalette::Base, Qt::lightGray);
-      pEdit->setPalette(plt);
-      pLicenseTabBox->addTab(pEdit, QString::fromStdString(brandings[itemCount].getTitle()));
-   }
+      QStringList licenses = pAeb->getLicenses();
+      std::vector<std::string> licenseURLs = pAeb->getLicenseURLs();
+      for (int licnum = 0; licnum < licenses.size(); licnum++)
+      {
+         QTextEdit *pEdit = new QTextEdit(this);
+         pEdit->setLineWrapMode(QTextEdit::WidgetWidth);
+         pEdit->setReadOnly(true);
 
+         QString url = QString::fromStdString(licenseURLs[licnum]).toLower();
+         if (url.endsWith(".html") || url.endsWith(".htm"))
+         {
+            pEdit->setHtml(licenses[licnum]);
+         }
+         else
+         {
+            pEdit->setPlainText(licenses[licnum]);
+         }
+         QPalette plt = pEdit->palette();
+         plt.setColor(QPalette::Base, Qt::lightGray);
+         pEdit->setPalette(plt);
+         if (licenses.size() > 1)
+         {
+            pLicenseTabBox->addTab(pEdit, QString("%1 %2").arg(QString::fromStdString(pAeb->getName())).arg(licnum + 1));
+         }
+         else
+         {
+            pLicenseTabBox->addTab(pEdit, QString::fromStdString(pAeb->getName()));
+         }
+      }
+   }
 
    LabeledSection* pCopyrightSection = new LabeledSection(pLicenseTabBox, APP_NAME " and Plug-In Suite Licenses");
    pAboutGroup->addSection(pCopyrightSection, 1000);
@@ -696,16 +723,23 @@ AboutDlg::AboutDlg(QWidget* parent) :
    pAboutGroup->collapseSection(pLicenseSection);
    pAboutGroup->collapseSection(pCopyrightSection);
 
-   // Create the OK button
+   // Create the buttons
    QPushButton* pOk = new QPushButton("&OK", this);
-   connect(pOk, SIGNAL(clicked()), this, SLOT(accept()));
+   pOk->setDefault(true);
+   VERIFYNR(connect(pOk, SIGNAL(clicked()), this, SLOT(accept())));
+
+   QHBoxLayout* pButtonLayout = new QHBoxLayout;
+   pButtonLayout->setMargin(5);
+   pButtonLayout->setSpacing(10);
+   pButtonLayout->addStretch();
+   pButtonLayout->addWidget(pOk);
 
    // Dialog layout
    QVBoxLayout* pLayout = new QVBoxLayout(this);
    pLayout->setMargin(10);
    pLayout->setSpacing(10);
    pLayout->addWidget(pAboutGroup, 10);
-   pLayout->addWidget(pOk, 0, Qt::AlignRight);
+   pLayout->addLayout(pButtonLayout);
 
    // Initialization
    setWindowTitle(QString("About %1").arg(APP_NAME));

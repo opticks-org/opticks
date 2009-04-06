@@ -15,8 +15,8 @@ PLATFORM = "%s-%s" % (os.environ['OSTYPE'],os.environ['MACHTYPE'])
 env = Environment(options=opts,
                   PLATFORM=PLATFORM,
                   ENV=os.environ,
-                  tools=["default","qt4","qwt","xercesc","boost","java",
-                         "ehs","suncc","sunar","sunlink","yaml-cpp"],
+                  tools=["default","qt4","qwt","xercesc","boost","raptor",
+                         "minizip","java","ehs","yaml-cpp","suncc","sunar","sunlink"],
                   toolpath=[TOOLPATH])
 if env['RELEASE']:
    MODE='release'
@@ -50,6 +50,7 @@ libdirs = ["Desktop",
            "Framework",
            "Gui",
            "HdfPlugInLib",
+           "Installer",
            "Model",
            "NitfPlugInLib",
            "PlugInLib",

@@ -9,14 +9,21 @@
 
 #include <iostream>
 
+#include "Aeb.h"
+#include "AebIo.h"
 #include "AppVersion.h"
 #include "ApplicationServicesImp.h"
 #include "ArgumentList.h"
 #include "BatchApplication.h"
+#include "ConfigurationSettingsImp.h"
+#include "InstallerServicesImp.h"
 #include "PlugInManagerServicesImp.h"
 #include "ProgressBriefConsole.h"
 #include "ProgressConsole.h"
 #include "SessionManagerImp.h"
+
+#include <QtCore/QDirIterator>
+#include <QtCore/QString>
 
 #include <vector>
 using namespace std;
@@ -119,7 +126,6 @@ int BatchApplication::run(int argc, char** argv)
    }
 
    // Create the progress object
-   Progress* pProgress = NULL;
    bool bBrief = false;
 
    ArgumentList* pArgumentList = ArgumentList::instance();
@@ -130,21 +136,69 @@ int BatchApplication::run(int argc, char** argv)
 
    if (bBrief == false)
    {
-      pProgress = new ProgressConsole();
+      mpProgress = new ProgressConsole();
    }
    else
    {
-      pProgress = new ProgressBriefConsole();
+      mpProgress = new ProgressBriefConsole();
+   }
+
+   // process pending extension uninstalls
+   InstallerServicesImp::instance()->processPending(mpProgress);
+   std::string errMsg;
+   if(!ConfigurationSettingsImp::instance()->loadSettings(errMsg))
+   {
+      std::cerr << "Warning: unable to release application settings." << std::endl
+         << errMsg << std::endl << "Opticks will now exit." << std::endl;
+      return -1;
+   }
+
+   // process auto-installs
+   QDirIterator autos(QString::fromStdString(ConfigurationSettingsImp::instance()->getSettingExtensionFilesPath()->getFullPathAndName())
+      + "/AutoInstall", QStringList() << "*.aeb", QDir::Files);
+   int numExtFailed = 0;
+   bool autoInstallOccurred = false;
+   while(autos.hasNext())
+   {
+      bool success = InstallerServicesImp::instance()->installExtension(autos.next().toStdString(), mpProgress);
+      if(!success && mpProgress != NULL)
+      {
+         // Attempt to parse the AEB so we can get a better name
+         std::string extName = autos.fileName().toStdString();
+         Aeb extension;
+         AebIo io(extension);
+         std::string errMsg; // ignored
+         if (io.fromFile(autos.filePath().toStdString(), errMsg))
+         {
+            extName = extension.getName();
+         }
+         mpProgress->updateProgress("Unable to install " + extName + "\nThe extension will be removed.", 0, WARNING);
+         numExtFailed++;
+      }
+      if (success)
+      {
+         autoInstallOccurred = true;
+      }
+      QDir().remove(autos.filePath());
+   }
+   if (numExtFailed != 0)
+   {
+      return -numExtFailed;
+   }
+   if (autoInstallOccurred)
+   {
+      // rescan the plug-ins
+      PlugInManagerServicesImp::instance()->buildPlugInList(Service<ConfigurationSettings>()->getPlugInPath());
    }
 
    // Perform the batch processing
    PlugInManagerServicesImp* pManager = PlugInManagerServicesImp::instance();
    if (pManager != NULL)
    {
-      pManager->executeStartupPlugIns(pProgress);
+      pManager->executeStartupPlugIns(mpProgress);
    }
 
-   bool bSuccess = executeStartupBatchWizards(pProgress);
+   bool bSuccess = executeStartupBatchWizards();
 
    // Close the session to cleanup created objects
    SessionManagerImp::instance()->close();
@@ -152,11 +206,11 @@ int BatchApplication::run(int argc, char** argv)
    // Cleanup
    if (bBrief == false)
    {
-      delete dynamic_cast<ProgressConsole*>(pProgress);
+      delete dynamic_cast<ProgressConsole*>(mpProgress);
    }
    else
    {
-      delete dynamic_cast<ProgressBriefConsole*>(pProgress);
+      delete dynamic_cast<ProgressBriefConsole*>(mpProgress);
    }
 
    if (bSuccess == true)

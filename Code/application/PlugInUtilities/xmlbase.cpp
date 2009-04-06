@@ -220,9 +220,9 @@ void XmlBase::logError(const XERCES_CPP_NAMESPACE_QUALIFIER DOMError& exc)
       if (pLoc != NULL)
       {
          pMsg->addProperty("file", A(pLoc->getURI()));
-         pMsg->addProperty("line", pLoc->getLineNumber());
-         pMsg->addProperty("column", pLoc->getColumnNumber());
-         pMsg->addProperty("offset", pLoc->getOffset());
+         pMsg->addProperty("line", static_cast<unsigned long>(pLoc->getLineNumber()));
+         pMsg->addProperty("column", static_cast<unsigned long>(pLoc->getColumnNumber()));
+         pMsg->addProperty("offset", static_cast<unsigned long>(pLoc->getOffset()));
       }
       switch (exc.getSeverity())
       {

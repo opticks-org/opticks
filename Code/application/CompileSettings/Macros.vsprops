@@ -112,4 +112,8 @@
 		Name="YAMLCPP"
 		Value="$(OPTICKSDEPENDENCIES)\yaml-cpp"
 	/>
+	<UserMacro
+		Name="RAPTOR"
+		Value="$(OPTICKSDEPENDENCIES)\raptor"
+	/>
 </VisualStudioPropertySheet>

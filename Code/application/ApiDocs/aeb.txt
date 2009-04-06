@@ -1,0 +1,54 @@
+/** \page aeb Application Extention Bundles
+\section opticks_specific_aebl Opticks implementation details
+Extension IDs are not case sensitive and will be converted to lower case values when installing in %Opticks.
+In addition to the standard AEBL verbs, %Opticks defined the following verbs in the \c urn:2008:03:opticks-aebl-extension-ns# namespace.
+ - splashScreenURL - This is an \c aeb:// URL identifying an image to use as an extension splash screen. This is an optional verb.
+ - helpEntry - This block describes an entry in the %Opticks help menu. There may be zero or more \c helpEntry verbs.
+   - name - This describes the name of the help entry. This name will appear in the help menu.
+   - url - This describes a URL which will be displayed when the help entry is selected. This is usually an \c aeb:// URL but may be an \c http:// or \c https:// URL.
+   
+Platform strings are defined as: os-procarch-compiler-debugmode
+Valid values are:
+ - os: win32, win64, solaris, unknown
+ - procarch: x86, sparc, unknown
+ - compiler: msvc8.1, studio11, unknown
+ - debugmode: debug, release
+
+Combinations currently recognized in %Opticks are:
+ - win32-x86-msvc8.1-debug
+ - win32-x86-msvc8.1-release
+ - win64-x86-msvc8.1-debug
+ - win64-x86-msvc8.1-release
+ - solaris-sparc-studio11-debug
+ - solaris-sparc-studio11-release
+ 
+The following are paths allowed in the "content" portion of an AEB.
+ - Bin - 3rd party dll's, misc executables, and Qt plug-ins
+ - PlugIns - plug-in modules
+ - DefaultSettings - .cfg overrides, sub-directories are not allowed, only files with extension .cfg
+ - Doc - misc documentation
+ - Help - help files, top-level files are not allowed, only sub-directories
+ - Templates - product templates, no sub-directories allowed
+ - SupportFiles - misc support files
+ - Wizards - wizard files: This will install wizards in the user's configurable wizard directory which is, by default, the %Opticks temp directory. If you need to install wizards which will always be visible to all users, place them in the SupportFiles/Wizards directory.
+
+Icon files can be in any format supported by Qt's QImage.
+The default supported formats are: bmp, gif, jpg, mng, png, pbm, pgm, ppm, tiff, xbm, and xpm.
+
+License files can be either plain text or Qt richtext which is a subset of HTML.
+License files ending in ".htm" or ".html" are assumed to be richtext and all other license files are assumed to be plain text.
+
+AEB files may be placed in the $APP_HOME/Extensions/AutoInstall directory.
+Files in this directory will be automatically installed when %Opticks is started.
+If this method is used, the user will not be prompted to accept license agreements.
+Only AEB files will be installed from this directory, not unpacked AEB archives.
+
+Files installed via an AEB should not be modified during execution.
+During the life cycle of an extension install, it is assumed that all installed files remain identical to the files in the original AEB.
+   
+\section aeb_spec Application Extension Bundle
+\htmlinclude aeb.html
+
+\section aebl_spec Application Extension Bundle Language
+\htmlinclude aebl.html
+ */

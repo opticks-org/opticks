@@ -7,11 +7,14 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtCore/QDirIterator>
 #include <QtCore/QFileInfo>
 #include <QtCore/QTimer>
 #include <QtGui/QApplication>
 #include <QtGui/QMessageBox>
 
+#include "Aeb.h"
+#include "AebIo.h"
 #include "AppConfig.h"
 #include "ApplicationServicesImp.h"
 #include "ApplicationWindow.h"
@@ -19,9 +22,10 @@
 #include "ArgumentList.h"
 #include "ConfigurationSettingsImp.h"
 #include "DataVariant.h"
+#include "DesktopServicesImp.h"
 #include "FilenameImp.h"
+#include "InstallerServicesImp.h"
 #include "InteractiveApplication.h"
-#include "PlugInBranding.h"
 #include "PlugInManagerServicesImp.h"
 #include "PlugInResource.h"
 #include "ProgressAdapter.h"
@@ -111,56 +115,100 @@ int InteractiveApplication::run(int argc, char** argv)
       SessionSaveLock lock;
 
       // Create a progress object
-      ProgressAdapter progress;
+      mpProgress = new ProgressAdapter();
 
       // Splash screen
       Q_INIT_RESOURCE(Application);
-      const vector<PlugInBranding>& branding = PlugInBranding::getBrandings();
-      list<string> splashImages;
-      for (vector<PlugInBranding>::const_iterator brandingIter = branding.begin();
-           brandingIter != branding.end();
-           ++brandingIter)
-      {
-         const Filename* pFilename = brandingIter->getSplashScreenImage();
-         if (pFilename != NULL)
-         {
-            string fullPathAndName = pFilename->getFullPathAndName();
-            if (!fullPathAndName.empty())
-            {
-               splashImages.push_back(fullPathAndName);
-            }
-         }
-      }
-
-      SplashScreen splashScreen(&progress);
-      splashScreen.setSplashImages(splashImages);
-      splashScreen.show();
+      SplashScreen* pSplash = new SplashScreen(mpProgress);
+      vector<string> splashPaths = Service<InstallerServices>()->getSplashScreenPaths();
+      pSplash->setSplashImages(list<string>(splashPaths.begin(), splashPaths.end()));
+      pSplash->show();
 
       qApplication.processEvents();
 
-      // Initialization
-      progress.updateProgress("Building the plug-in list...", 0, NORMAL);
+      // process pending extension uninstalls
+      InstallerServicesImp::instance()->processPending(mpProgress);
+      std::string errMsg;
+      if(!ConfigurationSettingsImp::instance()->loadSettings(errMsg))
+      {
+         if (QMessageBox::warning(pSplash, "Error loading configuration settings",
+            QString("Warning: unable to reload application settings.\n%1\nContinue loading Opticks?").arg(QString::fromStdString(errMsg)),
+            QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes) == QMessageBox::No)
+         {
+            pSplash->close();
+            delete pSplash;
+            return -1;
+         }
+      }
 
+      // Initialization
       int iReturn = Application::run(argc, argv);
       if (iReturn == -1)
       {
-         splashScreen.close();
+         pSplash->close();
+         delete pSplash;
          return -1;
       }
 
       qApplication.processEvents();
 
-      // Create the main GUI window
-      progress.updateProgress("Creating the main application window...", 0, NORMAL);
+      // process auto-installs
+      QDirIterator autos(QString::fromStdString(ConfigurationSettingsImp::instance()->getSettingExtensionFilesPath()->getFullPathAndName())
+         + "/AutoInstall", QStringList() << "*.aeb", QDir::Files);
+      int numExtFailed = 0;
+      bool autoInstallOccurred = false;
+      while(autos.hasNext())
+      {
+         bool success = InstallerServicesImp::instance()->installExtension(autos.next().toStdString(), mpProgress);
+         if(!success)
+         {
+            // Attempt to parse the AEB so we can get a better name
+            std::string extName = autos.fileName().toStdString();
+            { // scope the AebIo so we don't hold a handle to the aeb file and can delete it below
+               Aeb extension;
+               AebIo io(extension);
+               std::string errMsg; // ignored
+               if (io.fromFile(autos.filePath().toStdString(), errMsg))
+               {
+                  extName = extension.getName();
+               }
+            }
+            if(DesktopServicesImp::instance()->showMessageBox("Installation error", "Unable to install " + extName
+               + "\nWould you like to delete the file?", "Yes", "No") == 0)
+            {
+               QDir().remove(autos.filePath());
+            }
+            numExtFailed++;
+         }
+         else
+         {
+            autoInstallOccurred = true;
+            QDir().remove(autos.filePath());
+         }
+      }
+      if (numExtFailed != 0)
+      {
+         return -numExtFailed;
+      }
 
-      ApplicationWindow* pAppWindow = new ApplicationWindow(&splashScreen);
+      if (autoInstallOccurred)
+      {
+         // rescan the plug-ins
+         PlugInManagerServicesImp::instance()->buildPlugInList(Service<ConfigurationSettings>()->getPlugInPath());
+      }
+
+
+      // Create the main GUI window
+      mpProgress->updateProgress("Creating the main application window...", 0, NORMAL);
+
+      ApplicationWindow* pAppWindow = new ApplicationWindow(pSplash);
       qApplication.processEvents();
 
       // Execute startup plug-ins
       PlugInManagerServicesImp* pManager = PlugInManagerServicesImp::instance();
       if (pManager != NULL)
       {
-         pManager->executeStartupPlugIns(&progress);
+         pManager->executeStartupPlugIns(mpProgress);
          qApplication.processEvents();
       }
 
@@ -168,18 +216,19 @@ int InteractiveApplication::run(int argc, char** argv)
       pAppWindow->restoreConfiguration();
 
       // Keep the splash screen up until all images have been shown to the user.
-      while (!splashScreen.canClose()) {}
+      while (!pSplash->canClose()) {}
 
       // Display the main application window
       pAppWindow->show();
 
-      // Close the splash screen
-      splashScreen.close();
+      // Destroy the splash screen
+      pSplash->close();
+      delete pSplash;
 
       // Create a progress dialog
       ProgressDlg* pProgressDlg = new ProgressDlg(APP_NAME, pAppWindow);
-      progress.attach(SIGNAL_NAME(Subject, Modified), Slot(pProgressDlg, &ProgressDlg::progressUpdated));
-      progress.attach(SIGNAL_NAME(Subject, Deleted), Slot(pProgressDlg, &ProgressDlg::progressDeleted));
+      mpProgress->attach(SIGNAL_NAME(Subject, Modified), Slot(pProgressDlg, &ProgressDlg::progressUpdated));
+      mpProgress->attach(SIGNAL_NAME(Subject, Deleted), Slot(pProgressDlg, &ProgressDlg::progressDeleted));
 
       // Load files specified on the command line
       ArgumentList* pArgList(ArgumentList::instance());
@@ -251,7 +300,7 @@ int InteractiveApplication::run(int argc, char** argv)
                      {
                         vector<string> batchFiles;
                         batchFiles.push_back(normalizedFilename);
-                        WizardUtilities::runBatchFiles(batchFiles, &progress);
+                        WizardUtilities::runBatchFiles(batchFiles, mpProgress);
                      }
                      else if (info.suffix() == "session")
                      {
@@ -264,7 +313,7 @@ int InteractiveApplication::run(int argc, char** argv)
                      }
                      else
                      {
-                        ImporterResource importer("Auto Importer", normalizedFilename, &progress, false);
+                        ImporterResource importer("Auto Importer", normalizedFilename, mpProgress, false);
                         importer->execute();
                      }
                   }
@@ -276,20 +325,21 @@ int InteractiveApplication::run(int argc, char** argv)
                }
             }
          }
-         else
+         else if (mpProgress != NULL)
          {
             string msg = "Unable to import the files specified on the command line.  " + string(APP_NAME) +
                " supports loading one session file, one or more wizard files, or one or more data set files.";
-            progress.updateProgress(msg, 0, ERRORS);
+            mpProgress->updateProgress(msg, 0, ERRORS);
          }
       }
 
       // If there are any wizards, run them
-      executeStartupBatchWizards(&progress);
+      executeStartupBatchWizards();
 
       // Destroy the progress object and progress dialog
-      progress.detach(SIGNAL_NAME(Subject, Modified), Slot(pProgressDlg, &ProgressDlg::progressUpdated));
-      progress.detach(SIGNAL_NAME(Subject, Deleted), Slot(pProgressDlg, &ProgressDlg::progressDeleted));
+      mpProgress->detach(SIGNAL_NAME(Subject, Modified), Slot(pProgressDlg, &ProgressDlg::progressUpdated));
+      mpProgress->detach(SIGNAL_NAME(Subject, Deleted), Slot(pProgressDlg, &ProgressDlg::progressDeleted));
+      delete dynamic_cast<ProgressAdapter*>(mpProgress);
 
       vector<string> autoExitOptions = pArgList->getOptions("autoExit");
       if (autoExitOptions.empty() == false)

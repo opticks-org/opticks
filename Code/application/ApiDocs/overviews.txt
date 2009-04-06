@@ -28,7 +28,6 @@
 \section overview_detailed Detailed Docs 
 - \subpage coordinate_systems
 - \subpage iceformat
-- \subpage pluginbranding
 - \subpage specialmetadata
 - \subpage stringutilities_types
 - \subpage typeconverter_types
@@ -38,4 +37,5 @@
 - \subpage stringutilitiesmacros
 - \subpage multithreadedhowto
 - \subpage EnumWrapperHowTo
+- \subpage howto_writeinstaller
 */

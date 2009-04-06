@@ -27,6 +27,8 @@
 #include <QtGui/QWhatsThis>
 
 #include "AboutDlg.h"
+#include "Aeb.h"
+#include "AebIo.h"
 #include "AnimationController.h"
 #include "AnimationToolBarAdapter.h"
 #include "AnnotationLayer.h"
@@ -60,6 +62,7 @@
 #include "DockWindowAdapter.h"
 #include "Endian.h"
 #include "ExportDlg.h"
+#include "ExtensionListDialog.h"
 #include "FileDescriptor.h"
 #include "FileDescriptorImp.h"
 #include "FileFinderImp.h"
@@ -75,6 +78,8 @@
 #include "HistogramWindowAdapter.h"
 #include "Icons.h"
 #include "ImportDescriptor.h"
+#include "InstallerServices.h"
+#include "InstallWizard.h"
 #include "LatLonLayer.h"
 #include "Layer.h"
 #include "LayerList.h"
@@ -90,7 +95,6 @@
 #include "PaperSizeDlg.h"
 #include "PlotWindowAdapter.h"
 #include "PlugIn.h"
-#include "PlugInBranding.h"
 #include "PlugInDescriptor.h"
 #include "PlugInManagerServicesImp.h"
 #include "PlugInResource.h"
@@ -692,6 +696,12 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    pHelp_Topics_Action->setStatusTip(QString("Lists available help topics for the %1 application").arg(APP_NAME));
    VERIFYNR(connect(pHelp_Topics_Action, SIGNAL(triggered()), this, SLOT(helpTopics())));
 
+   QAction* pExtensions_Action = new QAction(QString("&Extensions..."), this);
+   pExtensions_Action->setAutoRepeat(false);
+   pExtensions_Action->setToolTip(QString("Display Extensions"));
+   pExtensions_Action->setStatusTip(QString("Display information about extensions and check for updates."));
+   VERIFYNR(connect(pExtensions_Action, SIGNAL(triggered()), this, SLOT(displayExtensions())));
+
    QAction* pAbout_Action = new QAction(pIcons->mAbout, QString("&About %1...").arg(APP_NAME), this);
    pAbout_Action->setAutoRepeat(false);
    pAbout_Action->setToolTip(QString("About %1").arg(APP_NAME));
@@ -1093,22 +1103,21 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    // Help menu
    string helpContext = m_pHelp->menuAction()->toolTip().toStdString();
    mpMenuBar->insertCommand(pHelp_Topics_Action, m_pHelp, helpContext);
-   const vector<PlugInBranding>& brandings = PlugInBranding::getBrandings();
-   for (unsigned int i = 0; i < brandings.size(); ++i)
+   map<string, string> helpEntries = Service<InstallerServices>()->getHelpEntries();
+   for(map<string, string>::const_iterator entry = helpEntries.begin(); entry != helpEntries.end(); ++entry)
    {
-      const Filename* pFilename = brandings[i].getHelpWebpage();
-      if (!brandings[i].getHelpTitle().empty() && pFilename != NULL && !pFilename->getFullPathAndName().empty())
-      {
-         QAction* pAction = new QAction(this);
-         pAction->setText(QString::fromStdString(brandings[i].getHelpTitle()));
-         pAction->setStatusTip(QString("Displays help topics for ") + QString::fromStdString(brandings[i].getTitle()) );
-         QMap<QString, QVariant> actionData;
-         actionData["helpWebpage"] = QString::fromStdString(pFilename->getFullPathAndName());
-         pAction->setData(actionData);
-         connect(pAction, SIGNAL(triggered()), this, SLOT(displayPlugInHelp()));
-         mpMenuBar->insertCommand(pAction, m_pHelp, helpContext); 
-      }
+      QAction* pAction = new QAction(this);
+      pAction->setText(QString::fromStdString(entry->first));
+      pAction->setStatusTip(QString("Displays help topics for ") + QString::fromStdString(entry->first));
+      QMap<QString, QVariant> actionData;
+      actionData["helpWebpage"] = QString::fromStdString(entry->second);
+      pAction->setData(actionData);
+      connect(pAction, SIGNAL(triggered()), this, SLOT(displayPlugInHelp()));
+      mpMenuBar->insertCommand(pAction, m_pHelp, helpContext); 
    }
+
+   m_pHelp->addSeparator();
+   mpMenuBar->insertCommand(pExtensions_Action, m_pHelp, helpContext);
    m_pHelp->addSeparator();
    mpMenuBar->insertCommand(pAbout_Action, m_pHelp, helpContext);
 
@@ -3484,6 +3493,12 @@ void ApplicationWindow::helpTopics()
    }
 }
 
+void ApplicationWindow::displayExtensions()
+{
+   ExtensionListDialog dlg(this);
+   dlg.exec();
+}
+
 void ApplicationWindow::aboutApp()
 {
    AboutDlg dlgAbout(this);
@@ -5761,12 +5776,32 @@ void ApplicationWindow::importDroppedFiles()
 {
    bool errorContinue = true;
    bool displayContinueMessage = true;
+   QList<Aeb*> extensions;
+   AebListResource extensionRes;
    ProgressResource pProgress("Import files...");
    vector<string>::iterator it;
    for (it=mDroppedFilesList.begin(); it!=mDroppedFilesList.end(); ++it)
    {
       if ((*it).empty() == false)
       {
+         if(QFileInfo(QString::fromStdString(*it)).suffix() == "aeb")
+         {
+            extensionRes.push_back(new Aeb());
+            AebIo deserializer(*extensionRes.back());
+            std::string errMsg;
+            if (!deserializer.fromFile(*it, errMsg))
+            {
+               if (pProgress.get() != NULL)
+               {
+                  pProgress->updateProgress("Invalid extension bundle " + *it + "\n" + errMsg, 0, WARNING);
+               }
+            }
+            else
+            {
+               extensions.push_back(extensionRes.back());
+            }
+            continue;
+         }
          ImporterResource importer("Auto Importer", *it, pProgress.get(), false);
          importer->setEditType(mDroppedFilesEditType);
          importer->updateMruFileList(true);
@@ -5803,6 +5838,13 @@ void ApplicationWindow::importDroppedFiles()
             }
          }
       }
+   }
+
+
+   if(!extensions.empty())
+   {
+      InstallWizard wiz(extensions, pProgress.get(), this);
+      wiz.exec();
    }
 
    if (pProgress.get() != NULL)

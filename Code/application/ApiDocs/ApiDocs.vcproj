@@ -65,6 +65,18 @@
 			Name="Documentation"
 			>
 			<File
+				RelativePath=".\aeb.html"
+				>
+			</File>
+			<File
+				RelativePath=".\aeb.txt"
+				>
+			</File>
+			<File
+				RelativePath=".\aebl.html"
+				>
+			</File>
+			<File
 				RelativePath=".\contextmenus.txt"
 				>
 			</File>
@@ -101,6 +113,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\howto_writeinstaller.txt"
+				>
+			</File>
+			<File
 				RelativePath=".\iceformat.txt"
 				>
 			</File>
@@ -110,10 +126,6 @@
 			</File>
 			<File
 				RelativePath=".\overviews.txt"
-				>
-			</File>
-			<File
-				RelativePath=".\pluginbranding.txt"
 				>
 			</File>
 			<File

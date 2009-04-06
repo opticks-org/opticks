@@ -9,13 +9,14 @@
 
 #include <QtCore/QCoreApplication>
 
+#include "Aeb.h"
 #include "AppConfig.h"
 #include "AppVersion.h"
 #include "ArgumentList.h"
 #include "BatchApplication.h"
 #include "ConfigurationSettingsImp.h"
 #include "DateTime.h"
-#include "PlugInBranding.h"
+#include "InstallerServicesImp.h"
 #include "StringUtilities.h"
 #include "SystemServicesImp.h"
 
@@ -48,6 +49,7 @@ int main(int argc, char** argv)
    pArgumentList->registerOption("generate");
    pArgumentList->registerOption("processors");
    pArgumentList->registerOption("version");
+   pArgumentList->registerOption("showHiddenExtensions");
    pArgumentList->registerOption("help");
    pArgumentList->registerOption("h");
    pArgumentList->registerOption("?");
@@ -121,15 +123,23 @@ int main(int argc, char** argv)
 
    cout << endl;
 
-   const vector<PlugInBranding>& brandings = PlugInBranding::getBrandings();
-   if (!brandings.empty())
+   bool showHidden = pArgumentList->exists("showHiddenExtensions");
+   list<const Aeb*> aebs = InstallerServicesImp::instance()->getAebs();
+   if(!aebs.empty())
    {
       cout << "Plug-In Suites:" << endl;
-      for (vector<PlugInBranding>::const_iterator brandingIter = brandings.begin();
-           brandingIter != brandings.end();
-           ++brandingIter)
+      if (showHidden)
       {
-         cout << "   " << brandingIter->getTitle() << ", Version " << brandingIter->getVersion() << endl;
+         cout << "Hidden extensions will have a * before them." << endl;
+      }
+      for(list<const Aeb*>::const_iterator aeb = aebs.begin(); aeb != aebs.end(); ++aeb)
+      {
+         const Aeb* pAeb = *aeb;
+         if (pAeb == NULL || (pAeb->isHidden() && !showHidden))
+         {
+            continue;
+         }
+         cout << "  " << (pAeb->isHidden() ? "*" : " ") << pAeb->getName() << ", Version " << pAeb->getVersion().toString() << endl;
       }
    }
 
@@ -140,15 +150,16 @@ int main(int argc, char** argv)
       string dlm = pArgumentList->getDelimiter();
       cout << endl << "batch " << dlm << "input:filename.batchwiz " << dlm << "input:filename.batchwiz " <<
          dlm << "generate:filename.wiz" << endl;
-      cout << "     " << dlm << "input       The batch file to process" << endl;
-      cout << "     " << dlm << "generate    Generates a batch file based on the given wizard 'filename.batchwiz'" <<
+      cout << "     " << dlm << "input                 The batch file to process" << endl;
+      cout << "     " << dlm << "generate              Generates a batch file based on the given wizard 'filename.batchwiz'" <<
          endl;
-      cout << "     " << dlm << "brief       Displays brief output messages" << endl;
-      cout << "     " << dlm << "processors  Sets number of available processors" << endl;
+      cout << "     " << dlm << "brief                 Displays brief output messages" << endl;
+      cout << "     " << dlm << "processors            Sets number of available processors" << endl;
       //cout << "     " << dlm << "test        Runs a set of operational tests" << endl;
       //cout << "     " << dlm << "testAll     Runs the full set of system tests" << endl;
-      cout << "     " << dlm << "version     Displays a message listing the version of each Plug-In" << endl;
-      cout << "     " << dlm << "help        Displays this help message" << endl;
+      cout << "     " << dlm << "showHiddenExtensions  Show hidden extensions when listing installed extensions" << endl;
+      cout << "     " << dlm << "version               Displays a message listing the version of each Plug-In" << endl;
+      cout << "     " << dlm << "help                  Displays this help message" << endl;
       SystemServicesImp::instance()->WriteLogInfo(string(APP_NAME) + " Batch shutdown");
       return 0;
    }

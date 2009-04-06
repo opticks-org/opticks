@@ -1,0 +1,102 @@
+/** \page howto_writeinstaller Writing an extension installer
+Opticks extension installers use the AEB file format.
+AEB files are zip files with a specific structure as detailed in the above link.
+The metadata for an AEB is specified in AEBL, and RDF grammar represented in XML.
+An easier way to specify RDF is in the notation3 format which can be converted to XML using the raptor package available in the %Opticks dependencies distribution.
+This howto will present a sample extension and explain how to convert the notation3 metadata and installer files into an AEB.
+
+\section writeinstaller_filestructure Setting up the file structure.
+The first step is to create a directory for the AEB.
+This sample AEB will provide an extension icon, an end user license agreement, a splash screen, a default settings file, some end user help, and a plug-in module.
+ - SampleAeb
+   - content
+     - DefaultSettings
+       - 60-Sample.cfg
+     - Help
+       - Sample
+         - index.html
+         - tutorial.html
+   - platform
+     - win32-x86-msvc8.1-release
+       - PlugIns
+         - Sample.dll
+     - win64-x86-msvc8.1-release
+       - PlugIns
+         - Sample.dll
+     - solaris-sparc-studio11-release
+       - PlugIns
+         - Sample.so
+   - splashScreen
+     - SampleSplash.jpg
+   - icon
+     - sample.png
+   - license
+     - LGPL.html
+   - install.rdf
+
+The \c content and  \c platform subdirectories contain all the content that will be installed into the %Opticks directory structure.
+\c content contains platform independent files and \c platform contains a subdirectory for each supported platform.
+The \c splashScreen, \c icon, and \c license subdirectories contain metdata files.
+Finally, the \c install.rdf file contains the extension metadata.
+The notation3 source code is placed in \c install.n3 and the rapper.exe utility is used to convert this to \c install.rdf.
+\code
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix aebl: <urn:2008:03:aebl-syntax-ns#> .
+@prefix opticks: <urn:2008:03:opticks-aebl-extension-ns#> .
+
+<urn:aebl:install-manifest>
+   aebl:id "sample@ballforge.net" ;
+   aebl:name "Sample" ;
+   aebl:version "1.0" ;
+   aebl:type "2" ;
+   aebl:description "Sample AEB from the Opticks tutorials." ;
+   aebl:creator "The Opticks team" ;
+   aebl:homepageURL "https://opticks.ballforge.net" ;
+   aebl:iconURL "aeb:///icon/sample.png" ;
+   aebl:licenseURL "aeb:///license/LGPL.html" ;
+   aebl:targetApplication [
+      aebl:id "opticks@ballforge.net" ;
+      aebl:minVersion "4.2.0" ;
+      aebl:maxVersion "4.2.*" ] ;
+   aebl:targetPlatform "win32-x86-msvc8.1-release" ;
+   aebl:targetPlatform "win64-x86-msvc8.1-release" ;
+   aebl:targetPlatform "solaris-sparc-studio11-release" ;
+   opticks:splashScreenURL "aeb:///splashScreen/SampleSplash.jpg" ;
+   opticks:helpEntry [
+      opticks:name "Sample Help" ;
+      opticks:url "aeb:///Help/Sample" ] .
+\endcode
+The first few lines setup some XML namespaces used by the AEBL metadata format and begin the metadata block.
+The extension name, version, description, homepage, and creator are strictly for display purposes and are defined near the beginning of the metadata.
+The \c aebl:type field is usually 2 indicating a general extension.
+The only other value relevant to %Opticks is 32 indicating a collection of extensions.
+Collections are beyond the scope of this tutorial and are discussed in the AEBL document.
+The \c aebl:id field uniquely identifies this extension and should either look like an email address (it does not need to be a real address) or it should be a bracketed UUID.
+
+The icon URL and license URL point to files in the AEB zip file.
+They are both optional and there can be multiple license URLs specified.
+The icon is displayed in the %Opticks extension manager dialog and the licenses are displayed to the user when an extension is installed.
+The \c opticks:splashScreenURL field is similar to the icon and license URLs and identifies an image which will be displayed to the user when %Opticks is starting.
+The splash screen does not replace the standard splash screen and all installed extension splash screen will be displayed during startup.
+
+The \c aebl:targetApplication block indicates the version of %Opticks this extension targets.
+The id will always be opticks@ballforge.net for official versions of %Opticks.
+See the %Opticks ballforge website for an up-to-date list of released versions.
+The \c aebl:targetPlatform entries identify which platforms this extension supports.
+
+Finally, the \c opticks:helpEntry block add an entry to the help menu in %Opticks which points to a file or directory in the AEB zip file.
+
+The notation3 file can be converted to an XML file using the rapper tool.
+If you are using the %Opticks dependencies build of the rapper tool on Windows, you may need to add Dependencies/expat/bin/win32 to your path so that rapper.exe can locate libexpat.dll.
+\code
+rapper -g -o rdfxml-abbrev install.n3 > install.rdf
+\endcode
+Once this file has been generated, create a zip file containing the entire directory structure.
+Do not include the top level directory so the install.rdf file, content directory, etc. are at the top level position in the zip file.
+The zip file should be renamed so that it has the \c .aeb file extension.
+The AEB is now ready to install in %Opticks.
+If you would like to test an AEB without generating a zip file, you can point the %Opticks extension installer directly to the install.rdf file.
+
+That's all that is needed to create an extension but there are other features supported including automatic dependency checking between %Opticks extensions.
+See \subpage opticks_specific_aebl for more information.
+ */

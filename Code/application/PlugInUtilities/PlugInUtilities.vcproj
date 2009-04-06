@@ -20,7 +20,7 @@
 		<Configuration
 			Name="Debug|Win32"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\CompileSettings\32bitSettings.vsprops;..\CompileSettings\pthreads.vsprops;..\CompileSettings\ehs.vsprops;..\CompileSettings\Qt.vsprops;..\CompileSettings\Xerces.vsprops;..\CompileSettings\ApplicationCommonSettings.vsprops;..\CompileSettings\AllCommonSettings-Debug-32bit.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\Qt-Debug.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\Ossim-Debug.vsprops"
+			InheritedPropertySheets="..\CompileSettings\32bitSettings.vsprops;..\CompileSettings\pthreads.vsprops;..\CompileSettings\ehs.vsprops;..\CompileSettings\Qt.vsprops;..\CompileSettings\Xerces.vsprops;..\CompileSettings\ApplicationCommonSettings.vsprops;..\CompileSettings\AllCommonSettings-Debug-32bit.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\Qt-Debug.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\Ossim-Debug.vsprops;..\CompileSettings\raptor.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -80,7 +80,7 @@
 		<Configuration
 			Name="Debug|x64"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\CompileSettings\pthreads.vsprops;..\CompileSettings\ehs.vsprops;..\CompileSettings\Qt.vsprops;..\CompileSettings\Xerces.vsprops;..\CompileSettings\ApplicationCommonSettings.vsprops;..\CompileSettings\AllCommonSettings-Debug-64bit.vsprops;..\CompileSettings\64bitSettings.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\Qt-Debug.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\Ossim-Debug.vsprops"
+			InheritedPropertySheets="..\CompileSettings\pthreads.vsprops;..\CompileSettings\ehs.vsprops;..\CompileSettings\Qt.vsprops;..\CompileSettings\Xerces.vsprops;..\CompileSettings\ApplicationCommonSettings.vsprops;..\CompileSettings\AllCommonSettings-Debug-64bit.vsprops;..\CompileSettings\64bitSettings.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\Qt-Debug.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\Ossim-Debug.vsprops;..\CompileSettings\raptor.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -141,7 +141,7 @@
 		<Configuration
 			Name="Release|Win32"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\CompileSettings\32bitSettings.vsprops;..\CompileSettings\ehs.vsprops;..\CompileSettings\pthreads.vsprops;..\CompileSettings\Qt.vsprops;..\CompileSettings\Xerces.vsprops;..\CompileSettings\ApplicationCommonSettings.vsprops;..\CompileSettings\AllCommonSettings-Release-32bit.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\Qt-Release.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\Ossim-Release.vsprops"
+			InheritedPropertySheets="..\CompileSettings\32bitSettings.vsprops;..\CompileSettings\ehs.vsprops;..\CompileSettings\pthreads.vsprops;..\CompileSettings\Qt.vsprops;..\CompileSettings\Xerces.vsprops;..\CompileSettings\ApplicationCommonSettings.vsprops;..\CompileSettings\AllCommonSettings-Release-32bit.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\Qt-Release.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\Ossim-Release.vsprops;..\CompileSettings\raptor.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -201,7 +201,7 @@
 		<Configuration
 			Name="Release|x64"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\CompileSettings\pthreads.vsprops;..\CompileSettings\ehs.vsprops;..\CompileSettings\Qt.vsprops;..\CompileSettings\Xerces.vsprops;..\CompileSettings\ApplicationCommonSettings.vsprops;..\CompileSettings\AllCommonSettings-Release-64bit.vsprops;..\CompileSettings\64bitSettings.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\Qt-Release.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\Ossim-Release.vsprops"
+			InheritedPropertySheets="..\CompileSettings\pthreads.vsprops;..\CompileSettings\ehs.vsprops;..\CompileSettings\Qt.vsprops;..\CompileSettings\Xerces.vsprops;..\CompileSettings\ApplicationCommonSettings.vsprops;..\CompileSettings\AllCommonSettings-Release-64bit.vsprops;..\CompileSettings\64bitSettings.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\Qt-Release.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\Ossim-Release.vsprops;..\CompileSettings\raptor.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -1856,6 +1856,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Rdf.h"
+				>
+			</File>
+			<File
 				RelativePath=".\RegionUnitsComboBox.h"
 				>
 				<FileConfiguration
@@ -3450,6 +3454,10 @@
 			</File>
 			<File
 				RelativePath=".\RasterUtilities.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Rdf.cpp"
 				>
 			</File>
 			<File

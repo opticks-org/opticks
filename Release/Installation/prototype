@@ -109,4 +109,6 @@ f none $APPDIR/Templates/MultipleImages.spg=$OpticksCodeDir/Release/Templates/Mu
 f none $APPDIR/Templates/SingleImage.spg=$OpticksCodeDir/Release/Templates/SingleImage.spg 644 root $GROUP
 f none $APPDIR/Templates/ZoomedImages.spg=$OpticksCodeDir/Release/Templates/ZoomedImages.spg 644 root $GROUP
 d none $APPDIR/Help 0755 root $GROUP
+d none $APPDIR/Extensions 0755 root $GROUP
+d none $APPDIR/Extensions/AutoInstall 0755 root $GROUP
 !include $currentDir/PackageOutput/help-prototype

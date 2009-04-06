@@ -26,6 +26,7 @@
 #include "DesktopServicesImp.h"
 #include "FileFinderImp.h"
 #include "Filename.h"
+#include "InstallerServicesImp.h"
 #include "MessageLogMgrImp.h"
 #include "ModelServicesImp.h"
 #include "ModuleManager.h"
@@ -42,7 +43,8 @@ using namespace std;
 
 Application::Application(QCoreApplication& app) :
    mApplication(app),
-   mXmlInitialized(true)
+   mXmlInitialized(true),
+   mpProgress(NULL)
 {
    // Initialize Xerces and XQilla
    try
@@ -59,6 +61,7 @@ Application::Application(QCoreApplication& app) :
 
 Application::~Application()
 {
+   InstallerServicesImp::destroy();
    PlugInManagerServicesImp::destroy();
    AnimationServicesImp::destroy();
    DesktopServicesImp::destroy();
@@ -133,7 +136,8 @@ int Application::run(int argc, char** argv)
            (ObjectFactoryImp::instance() == NULL) ||
            (DataVariantFactoryImp::instance() == NULL) ||
            (MessageLogMgrImp::instance() == NULL) ||
-           (ConnectionManager::instance() == NULL))
+           (ConnectionManager::instance() == NULL) ||
+           (InstallerServicesImp::instance() == NULL))
       {
          return -1;
       }
@@ -142,6 +146,11 @@ int Application::run(int argc, char** argv)
    {
       // one of the services cxtr's threw an assertion...treat it as if the instance is NULL
       return -1;
+   }
+   
+   if (mpProgress != NULL)
+   {
+      mpProgress->updateProgress("Building the plug-in list...", 0, NORMAL);
    }
 
    const Filename* pSupportFilesPath = ConfigurationSettings::getSettingSupportFilesPath();
@@ -198,7 +207,7 @@ bool Application::generateXml()
    return true;
 }
 
-bool Application::executeStartupBatchWizards(Progress* pProgress)
+bool Application::executeStartupBatchWizards()
 {
    vector<string> wizardFiles;
 
@@ -213,5 +222,5 @@ bool Application::executeStartupBatchWizards(Progress* pProgress)
       return true;
    }
 
-   return WizardUtilities::runBatchFiles(wizardFiles, pProgress);
+   return WizardUtilities::runBatchFiles(wizardFiles, mpProgress);
 }
