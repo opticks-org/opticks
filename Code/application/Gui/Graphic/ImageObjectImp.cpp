@@ -249,12 +249,16 @@ bool ImageObjectImp::setImageData(const QImage& image, ColorType transparent)
       for (int j = 0; j < iWidth; j++)
       {
          QRgb sourcePixel = image.pixel(j, i);
-         *pDestPixel = (qRed(sourcePixel)) + (qGreen(sourcePixel) << 8) +
-            (qBlue(sourcePixel) << 16) + (qAlpha(sourcePixel) << 24);
 
          if (colorDepth < 32)
          {
-            *pDestPixel <<= 8;
+            *pDestPixel = (qRed(sourcePixel) << 8) + (qGreen(sourcePixel) << 16) +
+               (qBlue(sourcePixel) << 24) + (qAlpha(sourcePixel));
+         }
+         else
+         {
+            *pDestPixel = (qRed(sourcePixel)) + (qGreen(sourcePixel) << 8) +
+               (qBlue(sourcePixel) << 16) + (qAlpha(sourcePixel) << 24);
          }
 
          pDestPixel++;

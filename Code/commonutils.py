@@ -123,6 +123,8 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
     dp = dependencies_path
 
     dp_list = list()
+    create_qt_conf(dp, 0)
+    la("qt.conf")
     if platform == "Solaris":
         la("ffmpeg/solaris-sparc/libavcodec/libavcodec.so.51")
         la("ffmpeg/solaris-sparc/libavformat/libavformat.so.50")
@@ -248,3 +250,17 @@ class DependencyDir:
                 the_dir = join(the_dir, mode)
             temp_list.append([join(the_dir, the_dll), self.dest])
         return temp_list
+
+def create_qt_conf(path, verbosity):
+    qt_conf_file_path = join(path, "qt.conf")
+    if not(os.path.exists(qt_conf_file_path)):
+        if not(os.path.exists(path)):
+            os.makedirs(path)
+        if verbosity > 1:
+            print "Creating qt.conf file..."
+        qt_conf_file = open(qt_conf_file_path, "w")
+        qt_conf_file.write("[Paths]\n"\
+            "Plugins = .")
+        qt_conf_file.close()
+        if verbosity > 1:
+            print "Done creating qt.conf file"

@@ -548,12 +548,12 @@ class WixBuilder(CommonBuilder):
         else:
             platform = "32"
         dependencies_output = os.path.join(output_path, "Dependencies")
+        sys.path.append(self.opticks_code_dir)
+        import commonutils
         if not(os.path.exists(dependencies_output)):
             if self.verbosity > 1:
                 print "Gathering dependency libraries for %s "\
                 "platform..." % (platform)
-            sys.path.append(self.opticks_code_dir)
-            import commonutils
 
             dependencies_list = \
                 commonutils.get_dependencies(self.opticks_dependencies_dir,

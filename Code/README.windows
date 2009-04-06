@@ -42,11 +42,11 @@ Instructions on obtaining Qt:
    instructions below:
       2.1. Download a pre-built binary of Qt 4.3.4 Open-Source edition
            available on the Opticks website at:
-           https://opticks.ballforge.net/files/documents/8/112/Qt-4.3.4-opensource.zip.
+           https://opticks.ballforge.net/files/documents/8/224/Qt-4.3.4-opensource-fixed-libqjpeg.zip.
       2.2. Put the downloaded .zip file into your OPTICKSDEPENDENCIES\packages
            folder.  This assumes you have followed the above instructions on
            downloading the other required dependencies for Opticks.  Rename
-           the download .zip file from Qt-4.3.4-opensource.zip to Qt-4.3.4.zip
+           the downloaded .zip file to Qt-4.3.4.zip
       2.3. Run "python dependencies.py" on the command-line.  This will
            deploy your Qt 4.3.4 open-source edition binaries to the proper
            locations.
@@ -79,7 +79,7 @@ Building the 32-bit version:
    tools in the start menu and click on Visual Studio 2005 Command Prompt.
 2. In the Command Prompt window, go to the 32-bit Qt directory you just
    extracted.
-3. Once you in the directory, type:
+3. Once you are in the directory, type:
       configure.exe -qt-gif -qt-libpng -qt-libmng -qt-libtiff -qt-libjpeg
    This will generate a Makefile.
 4. Now to start the compilation, run nmake by typing:
@@ -96,7 +96,7 @@ Building the 64-bit version:
    Prompt.
 2. In the Command Prompt window, go to the 64-bit Qt directory you just
    extracted.
-3. Once you in the directory, type:
+3. Once you are in the directory, type:
       configure.exe -qt-gif -qt-libpng -qt-libmng -qt-libtiff -qt-libjpeg
    This will generate a Makefile.
 4. Now to start the compilation, run nmake by typing:

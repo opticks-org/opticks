@@ -38,6 +38,7 @@ f none $APPDIR/Bin/libshp.so=$OpticksDependenciesDir/libshp.so 0755 root $GROUP
 f none $APPDIR/Bin/libsz.so.2=$OpticksDependenciesDir/libsz.so.2 0755 root $GROUP
 f none $APPDIR/Bin/libxerces-c.so.27=$OpticksDependenciesDir/libxerces-c.so.27 0755 root $GROUP
 f none $APPDIR/Bin/libxqilla.so.1=$OpticksDependenciesDir/libxqilla.so.1 0755 root $GROUP
+f none $APPDIR/Bin/qt.conf=$OpticksDependenciesDir/qt.conf 0644 root $GROUP
 f none $APPDIR/Bin/libstlport.so.1=/opt/SUNWspro/prod/lib/stlport4/v9/libstlport.so.1 0755 root $GROUP
 f none $APPDIR/Bin/solOpticks=$OpticksBinariesDir/Bin/solOpticks 0755 root $GROUP 
 f none $APPDIR/Bin/solBatch=$OpticksBinariesDir/Bin/solBatch 0755 root $GROUP 

@@ -363,15 +363,15 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir,
                 win_debug_code_dir, libs,plugins, True, True, verbosity)
             dp_list = commonutils.get_dependencies(opticks_dependencies_dir,
                 "Windows", True, "32")
-            commonutils.copy_dependencies(dp_list,
-                join(out_dir, "Build", "Binaries-win32-debug", "Bin"))
+            bin_dir = join(out_dir, "Build", "Binaries-win32-debug", "Bin")
+            commonutils.copy_dependencies(dp_list, bin_dir)
         if release32:
             copy_windows_build(opticks_code_dir, out_dir,
                 win_debug_code_dir, libs, plugins, True, False, verbosity)
             dp_list = commonutils.get_dependencies(opticks_dependencies_dir,
                 "Windows", False, "32")
-            commonutils.copy_dependencies(dp_list,
-                join(out_dir, "Build", "Binaries-win32-release", "Bin"))
+            bin_dir = join(out_dir, "Build", "Binaries-win32-release", "Bin")
+            commonutils.copy_dependencies(dp_list, bin_dir)
 
         #Win64 Build
         if debug64:
@@ -379,15 +379,15 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir,
                 win_debug_code_dir, libs, plugins, False, True, verbosity)
             dp_list = commonutils.get_dependencies(opticks_dependencies_dir,
                 "Windows", True, "64")
-            commonutils.copy_dependencies(dp_list,
-                join(out_dir, "Build", "Binaries-x64-debug", "Bin"))
+            bin_dir = join(out_dir, "Build", "Binaries-x64-debug", "Bin")
+            commonutils.copy_dependencies(dp_list, bin_dir)
         if release64:
             copy_windows_build(opticks_code_dir, out_dir,
                 win_debug_code_dir, libs, plugins, False, False, verbosity)
             dp_list = commonutils.get_dependencies(opticks_dependencies_dir,
                 "Windows", False, "64")
-            commonutils.copy_dependencies(dp_list,
-                join(out_dir, "Build", "Binaries-x64-release", "Bin"))
+            bin_dir = join(out_dir, "Build", "Binaries-x64-release", "Bin")
+            commonutils.copy_dependencies(dp_list, bin_dir)
     else:
         cp_file2(s_app, d_app, join("PlugIns", "src"), "SConstruct")
 
