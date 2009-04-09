@@ -426,6 +426,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\OptionsSuppressibleMsgDlg.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\PixelAspectRatio.cpp"
 				>
 			</File>
@@ -1175,6 +1179,50 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\OptionsSuppressibleMsgDlg.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing $(InputName).h..."
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
+						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing $(InputName).h..."
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
+						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing $(InputName).h..."
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
+						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing $(InputName).h..."
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
+						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\PixelAspectRatio.h"
 				>
 				<FileConfiguration
@@ -1497,6 +1545,10 @@
 			</File>
 			<File
 				RelativePath="$(BuildDir)\Moc\$(ProjectName)\moc_OptionsSample.cpp"
+				>
+			</File>
+			<File
+				RelativePath="$(BuildDir)\Moc\$(ProjectName)\moc_OptionsSuppressibleMsgDlg.cpp"
 				>
 			</File>
 			<File

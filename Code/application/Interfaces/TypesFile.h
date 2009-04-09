@@ -435,6 +435,23 @@ enum MessageReportingLevelEnum { ML_SILENT, ML_NORMAL, ML_VERBOSE };
 typedef EnumWrapper<MessageReportingLevelEnum> MessageReportingLevel;
 
 /**
+ *  Identifies the type of message used in the suppressible message dialog.
+ *
+ *  @see    SuppressibleMsgDlg
+ */
+enum MessageTypeEnum 
+{   
+   MESSAGE_INFO,           /**< The message will tell the user some information. */
+   MESSAGE_WARNING,        /**< The message will give the user a warning. */
+   MESSAGE_ERROR           /**< The message will show the user an error. */
+};
+
+/**
+ * @EnumWrapper ::MessageTypeEnum.
+ */
+typedef EnumWrapper<MessageTypeEnum> MessageType;
+
+/**
  *  Pixel selection mode.
  *
  *  Used in combination with the ToolType pixel selection tools, the pixel mode defines

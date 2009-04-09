@@ -30,6 +30,7 @@ public:
    void setMetadata(DynamicObject* pMetadata);
    bool isModified() const;
    bool applyChanges();
+   static const std::string& getEditWarningDialogId();
 
    QSize sizeHint() const;
 
@@ -53,7 +54,6 @@ private:
    QSortFilterProxyModel* mpMetadataSortingModel;
 
    bool mModified;
-   static bool mEditWarning;
 
    QPushButton* mpModifyButton;
    QPushButton* mpAddChildButton;

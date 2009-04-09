@@ -14,6 +14,7 @@
 #include <QtGui/QSortFilterProxyModel>
 
 #include "AppVersion.h"
+#include "DesktopServices.h"
 #include "DynamicObjectItemModel.h"
 #include "DynamicObjectAdapter.h"
 #include "MetadataWidget.h"
@@ -21,8 +22,6 @@
 
 #include <string>
 using namespace std;
-
-bool MetadataWidget::mEditWarning = true;
 
 MetadataWidget::MetadataWidget(QWidget* parent) :
    QWidget(parent),
@@ -96,20 +95,23 @@ MetadataWidget::MetadataWidget(QWidget* parent) :
    pGrid->addLayout(pButtonLayout, 3, 0);
    pGrid->setRowStretch(1, 10);
 
+   Service<DesktopServices> pDesktop;
+   bool editWarning = pDesktop->getSuppressibleMsgDlgState(getEditWarningDialogId());
+
    // Initialization
-   mpModifyButton->setEnabled(mEditWarning);
-   mpAddChildButton->setEnabled(!mEditWarning);
+   mpModifyButton->setEnabled(!editWarning);
+   mpAddChildButton->setEnabled(editWarning);
    mpAddSiblingButton->setEnabled(false);
    mpEditButton->setEnabled(false);
    mpDeleteButton->setEnabled(false);
-   mpClearButton->setEnabled(!mEditWarning);
+   mpClearButton->setEnabled(editWarning);
 
    // Connections
-   if (mEditWarning == false)
+   if (editWarning == true)
    {
       connect(mpMetadataTree->selectionModel(), SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)), this,
          SLOT(currentChanged(const QModelIndex&, const QModelIndex&)));
-      connect(mpMetadataTree, SIGNAL(doubleClicked(const QModelIndex&)), this,
+      connect(mpMetadataTree, SIGNAL(doubleClicked(const QModelIndex&)), this, 
          SLOT(editSelectedValue(const QModelIndex&)));
    }
 
@@ -169,6 +171,12 @@ bool MetadataWidget::applyChanges()
    return false;
 }
 
+const string& MetadataWidget::getEditWarningDialogId()
+{
+   static string editWarningDialogId = "{A70B4321-44D8-491a-B78C-5ABDA44605F8}";
+   return editWarningDialogId;
+}
+
 QSize MetadataWidget::sizeHint() const
 {
    return QSize(575, 325);
@@ -176,22 +184,11 @@ QSize MetadataWidget::sizeHint() const
 
 void MetadataWidget::modifyValues()
 {
-   if (mEditWarning == true)
-   {
-      int iReturn = QMessageBox::warning(this, QString::fromStdString(APP_NAME), "Modifying the metadata "
-         "values could have adverse effects since some\nplug-ins may require the existence of specific "
-         "metadata key-value pairs.\nDo you want to continue?\n\nClicking the Ignore button will allow the "
-         "values to be modified for the\nremainder of the session without displaying this message.",
-         QMessageBox::Yes, QMessageBox::No, QMessageBox::Ignore);
-      if (iReturn == QMessageBox::No)
-      {
-         return;
-      }
-      else if (iReturn == QMessageBox::Ignore)
-      {
-         mEditWarning = false;
-      }
-   }
+   Service<DesktopServices> pDesktop;
+
+   pDesktop->showSuppressibleMsgDlg(APP_NAME, "Modifying the metadata values could have adverse effects since"
+         " some plug-ins may require the existence of specific metadata key-value pairs.", MESSAGE_WARNING, 
+         getEditWarningDialogId(), this);
 
    mpMetadataTree->selectionModel()->clear();
    mpModifyButton->setEnabled(false);

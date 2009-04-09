@@ -25,6 +25,7 @@
 #include "MultiMovie.h"
 #include "OptionQWidgetWrapper.h"
 #include "OptionsSample.h"
+#include "OptionsSuppressibleMsgDlg.h"
 #include "PixelAspectRatio.h"
 #include "PlugInTester.h"
 #include "PlotManager.h"
@@ -41,7 +42,7 @@ const char* ModuleManager::mspUniqueId = "{5A464B36-8FAB-4168-9234-B1C341CE2999}
 
 unsigned int ModuleManager::getTotalPlugIns()
 {
-   return 21;
+   return 22;
 }
 
 PlugIn* ModuleManager::getPlugIn(unsigned int plugInNumber)
@@ -131,6 +132,10 @@ PlugIn* ModuleManager::getPlugIn(unsigned int plugInNumber)
 
       case 20:
          pPlugIn = new AnimationTimingTestPlugIn();
+         break;
+
+      case 21:
+         pPlugIn = new OptionQWidgetWrapper<OptionsSuppressibleMsgDlg>();
          break;
 
       default:

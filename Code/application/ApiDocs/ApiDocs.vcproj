@@ -173,6 +173,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\suppressiblemsgdlg.txt"
+				>
+			</File>
+			<File
 				RelativePath=".\typeconverter_types.txt"
 				>
 			</File>

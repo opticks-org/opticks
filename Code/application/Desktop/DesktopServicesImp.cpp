@@ -25,15 +25,15 @@
 #include <QtGui/QPixmap>
 #include <QtGui/QStatusBar>
 
-#include "DesktopServicesImp.h"
 #include "ApplicationWindow.h"
 #include "AxisAdapter.h"
+#include "AppAssert.h"
+#include "AppVerify.h"
 #include "BackgroundPluginWindow.h"
 #include "CartesianPlotAdapter.h"
 #include "ConfigurationSettingsImp.h"
-#include "AppAssert.h"
-#include "AppVerify.h"
 #include "DataVariant.h"
+#include "DesktopServicesImp.h"
 #include "DynamicObject.h"
 #include "HistogramPlotAdapter.h"
 #include "MenuBar.h"
@@ -45,6 +45,7 @@
 #include "ProgressDlg.h"
 #include "SignaturePlotAdapter.h"
 #include "SpatialDataViewAdapter.h"
+#include "SuppressibleMsgDlg.h"
 #include "SymbolManager.h"
 #include "TypesFile.h"
 #include "ViewImp.h"
@@ -1038,6 +1039,36 @@ int DesktopServicesImp::showMessageBox(const string& caption, const string& text
    {
       cout << "MESSAGE BOX: \nTitle: " << caption << ":\nMessage: " << text << endl;
       return 0;
+   }
+}
+
+void DesktopServicesImp::setSuppressibleMsgDlgState(const string& id, bool bState)
+{
+   Service<ConfigurationSettings> pSettings;
+   pSettings->setSetting(id, bState);
+}
+
+bool DesktopServicesImp::getSuppressibleMsgDlgState(const string& id)
+{
+   Service<ConfigurationSettings> pSettings;
+   const bool* pState = dv_cast<bool>(&pSettings->getSetting(id));
+   return pState != NULL ? *pState : false;
+}
+
+void DesktopServicesImp::showSuppressibleMsgDlg(const string& dialogTitle, const string& dialogMsg, MessageType type, 
+                                        const string& id, QWidget* pParent)
+{
+   bool dontShow = getSuppressibleMsgDlgState(id);
+
+   if (!dontShow)
+   {
+      if (pParent == NULL)
+      {
+         pParent = getMainWidget();
+      }
+      SuppressibleMsgDlg dialog(dialogTitle, dialogMsg, type, dontShow, pParent);
+      dialog.exec();
+      setSuppressibleMsgDlgState(id, dialog.getDontShowAgain());
    }
 }
 

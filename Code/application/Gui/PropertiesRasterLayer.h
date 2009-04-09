@@ -50,6 +50,7 @@ public:
    static const std::string& getCopyright();
    static const std::string& getVersion();
    static const std::string& getDescriptorId();
+   static const std::string& getFilterWarningDialogId();
    static bool isProduction();
 
 protected:

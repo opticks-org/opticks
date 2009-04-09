@@ -144,6 +144,10 @@ public:
    bool displayHelp(const QString& filename) const;
    bool displayHelp(const QUrl& url) const;
    void setStatusBarMessage(const std::string& messageText) const;
+   void setSuppressibleMsgDlgState(const std::string& id, bool bState);
+   bool getSuppressibleMsgDlgState(const std::string& id);
+   void showSuppressibleMsgDlg(const std::string& dialogTitle, const std::string& dialogMsg, MessageType type, 
+      const std::string& id, QWidget* pParent = NULL);
    void useMessageBox(bool enable);
    int showMessageBox(const std::string& caption, const std::string& text,
       const std::string& button0 = std::string(), const std::string& button1 = std::string(),

@@ -9,6 +9,8 @@
 
 #include <iostream>
 
+#include "ConfigurationSettings.h"
+#include "DataVariant.h"
 #include "DesktopServicesImp.h"
 #include <QtGui/QImage>
 
@@ -327,6 +329,28 @@ void DesktopServicesImp::displayProperties(SessionItem* pItem, const vector<stri
 void DesktopServicesImp::setStatusBarMessage(const string& messageText) const
 {
    cout << "SHORT MESSAGE: " << messageText << endl;
+}
+
+void DesktopServicesImp::setSuppressibleMsgDlgState(const string& id, bool bState)
+{
+   Service<ConfigurationSettings> pSettings;
+   pSettings->setSetting(id, bState);
+}
+
+bool DesktopServicesImp::getSuppressibleMsgDlgState(const string& id)
+{
+   Service<ConfigurationSettings> pSettings;
+   const bool* pState = dv_cast<bool>(&pSettings->getSetting(id));
+   return pState != NULL ? *pState : false;
+}
+
+void DesktopServicesImp::showSuppressibleMsgDlg(const string& dialogTitle, const string& dialogMsg, MessageType type, 
+                                        const string& id, QWidget* pParent) 
+{ 
+   if (!getSuppressibleMsgDlgState(id))
+   {
+      cout << "SUPPRESSIBLE MESSAGE DIALOG: \nTitle: " << dialogTitle << ":\nMessage: " << dialogMsg << endl;
+   }
 }
 
 int DesktopServicesImp::showMessageBox(const string& caption, const string& text, const string& button0,

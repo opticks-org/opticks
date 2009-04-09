@@ -14,6 +14,7 @@
 #include "AppVersion.h"
 #include "AppConfig.h"
 #include "ComplexComponentComboBox.h"
+#include "DesktopServices.h"
 #include "ImageFilterManager.h"
 #include "LabeledSection.h"
 #include "ModelServices.h"
@@ -589,6 +590,12 @@ const string& PropertiesRasterLayer::getDescriptorId()
    return id;
 }
 
+const string& PropertiesRasterLayer::getFilterWarningDialogId()
+{
+   static string filterWarningDialog = "{98E390BE-2D58-4e89-9DFE-506412BD59C1}";
+   return filterWarningDialog;
+}
+
 bool PropertiesRasterLayer::isProduction()
 {
    return APP_IS_PRODUCTION_RELEASE;
@@ -966,16 +973,13 @@ void PropertiesRasterLayer::enableFilterCombo(bool bEnable)
 {
    if ((mInitializing == false) && (bEnable == true))
    {
-      int iReturn = QMessageBox::warning(this, APP_NAME, "<b>This is an EXPERIMENTAL feature!</b><br/>"
+      Service<DesktopServices> pDesktop;
+      
+      pDesktop->showSuppressibleMsgDlg(APP_NAME,  "<b>This is an EXPERIMENTAL feature!</b><br/>"
          "Enabling image filtering uses additional system resources when generating the image for display.<br/>"
          "For large data sets it is possible for the system to run out of resources, which could have adverse "
-         "effects including application shutdown or system reboot.<br/><br/>Do you want to continue?",
-         QMessageBox::Yes, QMessageBox::No);
-      if (iReturn == QMessageBox::No)
-      {
-         mpFilterCheck->setChecked(false);
-         return;
-      }
+         "effects including application shutdown or system reboot.", MESSAGE_WARNING, 
+         getFilterWarningDialogId(), this);
    }
 
    mpFilterList->setEnabled(bEnable);

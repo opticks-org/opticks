@@ -38,4 +38,5 @@
 - \subpage multithreadedhowto
 - \subpage EnumWrapperHowTo
 - \subpage howto_writeinstaller
+- \subpage suppressiblemsgdlg
 */

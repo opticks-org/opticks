@@ -912,6 +912,73 @@ public:
    virtual void setStatusBarMessage(const std::string& messageText) const = 0;
 
    /**
+    *   Sets the state of the check box inside a suppressible message dialog. 
+    *
+    *   The check box state is stored in ConfigurationSettings.
+    *   
+    *   Please see \ref suppressiblemsgdlg for more details.
+    *
+    *   @param   id
+    *            The suppressible message dialog key that will be passed into ConfigurationSettings::getSetting() to set
+    *            the dialog's check box state.
+    *            
+    *   @param   bState
+    *            The state of the check box inside the suppressible message dialog.
+    *
+    *   @see     getSuppressibleMsgDlgState(), showSuppressibleMsgDlg(), SuppressibleMsgDlg
+    */
+   virtual void setSuppressibleMsgDlgState(const std::string& id, bool bState) = 0;
+
+   /**
+    *  Gets the state of the check box inside a suppressible message dialog.
+    *
+    *  Please see \ref suppressiblemsgdlg for more details.
+    *
+    *  @param   id
+    *           This ID will be used to get the suppressible message dialog check box state from ConfigurationSettings::getSetting().
+    *
+    *  @return  This method will return \c true if the state of the check box inside the suppressible message dialog is checked,
+    *           meaning that the dialog will not be shown again. If the dialog check box is not checked, then the method will
+    *           return \c false. 
+    *
+    *  @see     setSuppressibleMsgDlgState(), showSuppressibleMsgDlg(), SuppressibleMsgDlg
+    */
+   virtual bool getSuppressibleMsgDlgState(const std::string& id) = 0;
+
+   /**
+    *  Displays a suppressible message dialog that the user can disable by clicking on the check box inside the dialog.
+    *
+    *  This method will display a suppressible message dialog based on its ID as long as its "don't show this again" 
+    *  check box has not been checked. While this method shows the dialog, it's the dialog itself that 
+    *  handles both showing and reading of the "don't show this again" check box state.
+    *  The icon that will be shown next to the message in the dialog will depend on the message type.
+    *
+    *  Each suppressible message dialog must have its own unique ID. This ID will be passed into 
+    *  ConfigurationSettings::getSetting() in order to get the dialog's current check box state.
+    *
+    *  If a plug-in developer wanted to give the user more control on when the message dialog 
+    *  gets displayed, the developer will have to write an option plug-in himself. For a example on how 
+    *  this would be done, take a look at the OptionsSuppressibleMsgDlg class located in PlugInSamplerQt.
+    *
+    *  Please see \ref suppressiblemsgdlg for more details.
+    *
+    *  @param   dialogTitle
+    *           The text that will appear on the suppressible message dialog title bar.
+    *  @param   dialogMsg
+    *           The text that will be displayed inside the suppressible message dialog.
+    *  @param   type
+    *           The type of message.
+    *  @param   id
+    *           The message dialog ID that will be used to get the check box state from ConfigurationSettings::getSetting().
+    *  @param   pParent
+    *           The message box parent. If \em pParent is NULL, the main application window will be the parent.
+    *
+    *  @see     getSuppressibleMsgDlgState(), setSuppressibleMsgDlgState(), SuppressibleMsgDlg
+    */
+   virtual void showSuppressibleMsgDlg(const std::string& dialogTitle, const std::string& dialogMsg, MessageType type, 
+      const std::string& id, QWidget* pParent = NULL) = 0;
+
+   /**
     *  Displays a message box to the user.
     *
     *  In interactive mode, this method displays a QMessageBox to the user. 

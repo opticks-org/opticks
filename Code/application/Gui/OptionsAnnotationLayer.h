@@ -56,7 +56,7 @@ public:
 
    static const std::string& getShortDescription()
    {
-      static std::string var = "Widget to display annotation layer related related options for the application";
+      static std::string var = "Widget to display annotation layer related options for the application";
       return var;
    }
 
