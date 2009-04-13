@@ -27,7 +27,7 @@ public:
 
    static const std::string& getName()
    {
-      static std::string var = "Suppressible Dialog Options for Opticks";
+      static std::string var = "Suppressible Dialog Options";
       return var;
    }
 

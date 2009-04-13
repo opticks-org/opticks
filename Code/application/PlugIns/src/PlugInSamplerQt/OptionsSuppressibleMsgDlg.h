@@ -24,7 +24,7 @@ public:
 
    static const std::string& getName()
    {
-      static std::string var = "Plug-in Sampler Example Suppressible Dialog Options";
+      static std::string var = "Example Suppressible Dialog Options";
       return var;
    }
 
