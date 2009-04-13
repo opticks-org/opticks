@@ -115,6 +115,22 @@ public:
    SIGNAL_METHOD(AnimationController, FrameRangeChanged)
 
    /**
+   *  Emitted with boost::any<bool> when the enabled status of the playback
+   *  bumpers changes for any reason.
+   */
+   SIGNAL_METHOD(AnimationController, BumpersEnabledChanged)
+
+   /**
+   *  Emitted with boost::any<double> when the start playback bumper changes for any reason.
+   */
+   SIGNAL_METHOD(AnimationController, BumperStartChanged)
+
+   /**
+   *  Emitted with boost::any<double> when the stop playback bumper changes for any reason.
+   */
+   SIGNAL_METHOD(AnimationController, BumperStopChanged)
+
+   /**
     *  Creates a new animation and adds it to the controller.
     *
     *  This method creates a new animation with the given name and the same frame type as
@@ -249,6 +265,77 @@ public:
     *           getFrameType().
     */
    virtual double getStopFrame() const = 0;
+
+   /**
+    *  Returns the enabled status of the playback bumpers in the controller.
+    *
+    *  When the playback bumpers are enabled (status of \c true), the animation playback
+    *  will be limited to the frame values between the start and stop playback bumpers.
+    *
+    *  @return  The enabled status of the playback bumpers.
+    */
+   virtual bool getBumpersEnabled() const = 0;
+
+   /**
+    *  Sets the enabled status of the playback bumpers in the controller.
+    *
+    *  When the playback bumpers are enabled (status of \c true), the animation playback
+    *  will be limited to the frame values between the start and stop playback bumpers.
+    *
+    *  @param  enabled
+    *          The enabled status of the playback bumpers.
+    *
+    *  @notify  This method will notify signalBumpersEnabledChanged() with boost::any<bool>.
+    */
+   virtual void setBumpersEnabled(bool enabled) = 0;
+
+   /**
+    *  Returns the start playback bumper value in the controller.
+    *
+    *  The start playback bumper value is defined as the first frame value across all frames
+    *  in all animations that will be played back when the playback bumpers are enabled.
+    *
+    *  @return  The start bumper value.  The value corresponds to the type returned by
+    *           getFrameType().
+    */
+   virtual double getStartBumper() const = 0;
+
+   /**
+    *  Sets the start playback bumper value in the controller.
+    *
+    *  The start playback bumper value is defined as the first frame value across all frames
+    *  in all animations that will be played back when the playback bumpers are enabled.
+    *
+    *  @param  frameValue
+    *          The start bumper value.
+    *
+    *  @notify  This method will notify signalBumperStartChanged() with boost::any<double>.
+    */
+   virtual void setStartBumper(double frameValue) = 0;
+
+   /**
+   *  Returns the stop playback bumper value in the controller.
+   *
+   *  The stop playback bumper value is defined as the last frame value across all frames
+   *  in all animations that will be played back when the playback bumpers are enabled.
+   *
+   *  @return  The stop bumper value.  The value corresponds to the type returned by
+   *           getFrameType().
+   */
+   virtual double getStopBumper() const = 0;
+
+   /**
+    *  Sets the stop playback bumper value in the controller.
+    *
+    *  The stop playback bumper value is defined as the last frame value across all frames
+    *  in all animations that will be played back when the playback bumpers are enabled.
+    *
+    *  @param  frameValue
+    *          The stop bumper value.
+    *
+    *  @notify  This method will notify signalBumperStopChanged() with boost::any<double>.
+    */
+   virtual void setStopBumper(double frameValue) = 0;
 
    /**
     *  Sets the multiplier value associated with the value interval that is used when

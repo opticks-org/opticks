@@ -9,8 +9,10 @@
 
 #include <QtCore/QDateTime>
 #include <QtCore/QEvent>
+#include <QtGui/QApplication>
 #include <QtGui/QLayout>
 #include <QtGui/QLineEdit>
+#include <QtGui/QPainter>
 #include <QtGui/QToolButton>
 #include <QtGui/QWidgetAction>
 
@@ -32,21 +34,8 @@
 
 #include <boost/rational.hpp>
 #include <string>
-using namespace std;
 
-AnimationToolBarImp::WheelEventSlider::WheelEventSlider(
-   Qt::Orientation orientation, QWidget *parent)
-   : QSlider(orientation, parent)
-{
-}
-
-void AnimationToolBarImp::WheelEventSlider::wheelEvent(QWheelEvent *e)
-{
-   QSlider::wheelEvent(e);
-   triggerAction(QAbstractSlider::SliderMove);
-}
-
-AnimationToolBarImp::AnimationToolBarImp(const string& id, QWidget* parent) :
+AnimationToolBarImp::AnimationToolBarImp(const std::string& id, QWidget* parent) :
    ToolBarImp(id, "Animation", parent),
    mpChangeDirectionAction(NULL),
    mpStopAction(NULL),
@@ -57,6 +46,13 @@ AnimationToolBarImp::AnimationToolBarImp(const string& id, QWidget* parent) :
    mpStepForwardAction(NULL),
    mpStepBackwardAction(NULL),
    mpFrameSlider(NULL),
+   mpBumperButton(NULL),
+   mpLeftBumperToFrameAction(NULL),
+   mpRightBumperToFrameAction(NULL),
+   mpAdjustBumpersAction(NULL),
+   mpResetBumpersAction(NULL),
+   mpStoreBumpersAction(NULL),
+   mpRestoreBumpersAction(NULL),
    mpDropFramesAction(NULL),
    mpCycle(NULL),
    mpTimestampLabel(NULL),
@@ -65,7 +61,7 @@ AnimationToolBarImp::AnimationToolBarImp(const string& id, QWidget* parent) :
    mHideTimestamp(false)
 {
    Service<DesktopServices> pDesktop;
-   string shortcutContext = windowTitle().toStdString();
+   std::string shortcutContext = windowTitle().toStdString();
 
    // Animation buttons
    Icons* pIcons = Icons::instance();
@@ -102,8 +98,8 @@ AnimationToolBarImp::AnimationToolBarImp(const string& id, QWidget* parent) :
 
    mpFrameSpeedCombo = new QComboBox(this);
 
-   vector<double> frameSpeeds = AnimationToolBar::getSettingFrameSpeeds();
-   for (vector<double>::iterator iter = frameSpeeds.begin(); iter != frameSpeeds.end(); ++iter)
+   std::vector<double> frameSpeeds = AnimationToolBar::getSettingFrameSpeeds();
+   for (std::vector<double>::iterator iter = frameSpeeds.begin(); iter != frameSpeeds.end(); ++iter)
    {
       mpFrameSpeedCombo->addItem(QString::number(*iter, 'g', 3));
    }
@@ -146,6 +142,39 @@ AnimationToolBarImp::AnimationToolBarImp(const string& id, QWidget* parent) :
    VERIFYNR(connect(mpCycle, SIGNAL(valueChanged(AnimationCycle)), this, SLOT(updateAnimationCycle(AnimationCycle))));
    addWidget(mpCycle);
    addSeparator();
+
+   // Animation Bumper button
+   mpBumperButton = new QToolButton(this);
+   mpBumperButton->setCheckable(true);
+   mpBumperButton->setIcon(pIcons->mAnimationBumpers);
+   mpBumperButton->setPopupMode(QToolButton::MenuButtonPopup);
+   addWidget(mpBumperButton);
+   QAction* pEnabled = new QAction(pIcons->mAnimationBumpers, "Bumpers Enabled", this);
+   pEnabled->setCheckable(true);
+   pEnabled->setChecked(false);
+   VERIFYNR(connect(pEnabled, SIGNAL(toggled(bool)), this, SLOT(bumpersEnabled(bool))));
+   pDesktop->initializeAction(pEnabled, shortcutContext + "/Bumpers");
+   mpBumperButton->setDefaultAction(pEnabled);
+   QMenu* pMenu = new QMenu(mpBumperButton);
+   VERIFYNR(connect(pMenu, SIGNAL(aboutToShow()), this, SLOT(updateBumperMenu())));
+   mpBumperButton->setMenu(pMenu);
+   mpBumperButton->setToolTip("Enable Bumpers");
+
+   // menu actions will be connected/disconnected in setAnimationController
+   mpLeftBumperToFrameAction = pMenu->addAction("Snap Left Bumper to Current Frame");
+   pDesktop->initializeAction(mpLeftBumperToFrameAction, shortcutContext + "/Bumpers");
+   mpRightBumperToFrameAction = pMenu->addAction("Snap Right Bumper to Current Frame");
+   pDesktop->initializeAction(mpRightBumperToFrameAction, shortcutContext + "/Bumpers");
+   mpAdjustBumpersAction = pMenu->addAction("Adjust Bumpers...");
+   pDesktop->initializeAction(mpAdjustBumpersAction, shortcutContext + "/Bumpers");
+   mpResetBumpersAction = pMenu->addAction("Reset Bumpers");
+   pDesktop->initializeAction(mpResetBumpersAction, shortcutContext + "/Bumpers");
+   pMenu->addSeparator();
+   mpStoreBumpersAction = pMenu->addAction("Store Bumpers");
+   pDesktop->initializeAction(mpStoreBumpersAction, shortcutContext + "/Bumpers");
+   mpRestoreBumpersAction = pMenu->addAction("Restore Bumpers");
+   mpRestoreBumpersAction->setEnabled(false);  // will be updated in updateBumperMenu prior to display
+   pDesktop->initializeAction(mpRestoreBumpersAction, shortcutContext + "/Bumpers");
 
    // Current frame slider
    QWidget* pSliderWidget = new QWidget(this);
@@ -192,13 +221,13 @@ AnimationToolBarImp::~AnimationToolBarImp()
 {
 }
 
-const string& AnimationToolBarImp::getObjectType() const
+const std::string& AnimationToolBarImp::getObjectType() const
 {
-   static string type("AnimationToolBarImp");
+   static std::string type("AnimationToolBarImp");
    return type;
 }
 
-bool AnimationToolBarImp::isKindOf(const string& className) const
+bool AnimationToolBarImp::isKindOf(const std::string& className) const
 {
    if ((className == getObjectType()) || (className == "AnimationToolBar"))
    {
@@ -333,7 +362,23 @@ void AnimationToolBarImp::stop()
 
 void AnimationToolBarImp::sliderActionTriggered(int action)
 {
-   setCurrentFrame(mpFrameSlider->sliderPosition());
+   int start;
+   int stop;
+   mpFrameSlider->getPlaybackRange(start, stop);
+
+   // convert bumper index to frame index
+
+   int framePos = mpFrameSlider->sliderPosition();
+   if (framePos < start)
+   {
+      framePos = start;
+   }
+   else if (framePos > stop)
+   {
+      framePos = stop;
+   }
+   mpFrameSlider->setSliderPosition(framePos);
+   setCurrentFrame(framePos);
 }
 
 void AnimationToolBarImp::setCurrentFrame(int frameIndex)
@@ -341,9 +386,9 @@ void AnimationToolBarImp::setCurrentFrame(int frameIndex)
    if (mpController != NULL)
    {
       double startFrame = mpController->getStartFrame();
-      double intervalMultiplier = mpController->getIntervalMultiplier();
-      const int frequency = mpController->getFrequency();
-      double newFrame = startFrame + (intervalMultiplier / frequency * frameIndex);
+      double range = mpController->getStopFrame() - startFrame;
+      double fraction = static_cast<double>(frameIndex) / static_cast<double>(mpFrameSlider->maximum());
+      double newFrame = startFrame + range * fraction;
       mpController->setCurrentFrame(newFrame);
    }
 }
@@ -408,22 +453,26 @@ void AnimationToolBarImp::updateFrameRange()
       }
 
       // Calculate the total number of steps, adding 0.5 to round to the nearest number
-      numSteps = static_cast<int> (((stopFrame - startFrame) * frequency / intervalMultiplier) + 0.5);
+      double dNumSteps = (stopFrame - startFrame) * frequency / intervalMultiplier;
+
+      // make sure reasonable number and prevent very large number from becoming a negative on cast to int
+      if (dNumSteps > 100000.0)
+      {
+         dNumSteps = 100000.0;
+      }
+      numSteps = static_cast<int>(dNumSteps + 0.5);
+
+      // make sure there are a minimum number of steps so slider moves smoothly
+      if (numSteps < 100)
+      {
+         numSteps = 100;
+      }
 
       // Define the line step size as one frame or one second
       lineStep = frequency / intervalMultiplier;
 
-      // Define the page step size
-      if ((stopFrame - startFrame) < 10.0)
-      {
-         // The range is less than ten, so use the line step size of one frame or one second
-         pageStep = lineStep;
-      }
-      else
-      {
-         // Ten steps for the entire range
-         pageStep = numSteps / 10;
-      }
+      // Define the page step size so ten steps for the entire range
+      pageStep = numSteps / 10;
 
       // Determine the maximum width of the timestamp
       FrameType frameType = mpController->getFrameType();
@@ -451,6 +500,9 @@ void AnimationToolBarImp::updateFrameRange()
    mpFrameSlider->setSingleStep(lineStep);
    mpFrameSlider->setPageStep(pageStep);
 
+   // update bumpers
+   updateBumpers();
+
    mpTimestampLabel->setFixedWidth(timestampWidth);
 
    // Update the slider value
@@ -474,7 +526,7 @@ void AnimationToolBarImp::updateCurrentFrame(double frameValue)
       const int frequency = mpController->getFrequency();
 
       // Add 0.5 to round to the nearest index
-      currentStep = static_cast<int> (((frameValue - startFrame) * frequency / intervalMultiplier) + 0.5);
+      currentStep = static_cast<int> (mpFrameSlider->maximum() * ((frameValue - startFrame) / (stopFrame - startFrame)) + 0.5);
 
       // Slider
       mpFrameSlider->setValue(currentStep);
@@ -493,7 +545,7 @@ void AnimationToolBarImp::updateCurrentFrame(double frameValue)
 
 void AnimationToolBarImp::cleanUpItems()
 {
-   vector<double> frameSpeeds = AnimationToolBar::getSettingFrameSpeeds();
+   std::vector<double> frameSpeeds = AnimationToolBar::getSettingFrameSpeeds();
 
    if (AnimationToolBar::getSettingFrameSpeeds().size() != mpFrameSpeedCombo->count())
    {
@@ -550,7 +602,8 @@ void AnimationToolBarImp::updateAnimationCycle(AnimationCycle cycle)
 
 void AnimationToolBarImp::setAnimationController(AnimationController* pController)
 {
-   if (pController == mpController)
+   AnimationControllerImp* pImp = dynamic_cast<AnimationControllerImp*>(pController);
+   if (pImp == mpController)
    {
       return;
    }
@@ -561,27 +614,41 @@ void AnimationToolBarImp::setAnimationController(AnimationController* pControlle
 
    if (mpController != NULL)
    {
-      AnimationControllerImp* pControllerImp = dynamic_cast<AnimationControllerImp*>(mpController);
-      if (pControllerImp != NULL)
-      {
-         VERIFYNR(disconnect(pControllerImp, SIGNAL(frameRangeChanged()), this, SLOT(updateFrameRange())));
-         VERIFYNR(disconnect(pControllerImp, SIGNAL(frameChanged(double)), this, SLOT(updateCurrentFrame(double))));
-         VERIFYNR(disconnect(pControllerImp, SIGNAL(animationStateChanged(AnimationState)), this,
-            SLOT(updateAnimationState(AnimationState))));
-         VERIFYNR(disconnect(pControllerImp, SIGNAL(animationCycleChanged(AnimationCycle)), this,
-            SLOT(updateAnimationCycle(AnimationCycle))));
-         VERIFYNR(disconnect(pControllerImp, SIGNAL(intervalMultiplierChanged(double)), this,
-            SLOT(updateFrameSpeed(double))));
-         VERIFYNR(disconnect(pControllerImp, SIGNAL(animationAdded(Animation*)), this,
-            SLOT(updateAnimationControls())));
-         VERIFYNR(disconnect(pControllerImp, SIGNAL(animationRemoved(Animation*)), this,
-            SLOT(updateAnimationControls())));
-         VERIFYNR(disconnect(pControllerImp, SIGNAL(canDropFramesChanged(bool)), this,
-            SLOT(setCanDropFrames(bool))));
-      }
+      VERIFYNR(disconnect(mpController, SIGNAL(frameRangeChanged()), this, SLOT(updateFrameRange())));
+      VERIFYNR(disconnect(mpController, SIGNAL(frameChanged(double)), this, SLOT(updateCurrentFrame(double))));
+      VERIFYNR(disconnect(mpController, SIGNAL(animationStateChanged(AnimationState)), this,
+         SLOT(updateAnimationState(AnimationState))));
+      VERIFYNR(disconnect(mpController, SIGNAL(animationCycleChanged(AnimationCycle)), this,
+         SLOT(updateAnimationCycle(AnimationCycle))));
+      VERIFYNR(disconnect(mpController, SIGNAL(intervalMultiplierChanged(double)), this,
+         SLOT(updateFrameSpeed(double))));
+      VERIFYNR(disconnect(mpController, SIGNAL(animationAdded(Animation*)), this,
+         SLOT(updateAnimationControls())));
+      VERIFYNR(disconnect(mpController, SIGNAL(animationRemoved(Animation*)), this,
+         SLOT(updateAnimationControls())));
+      VERIFYNR(disconnect(mpController, SIGNAL(canDropFramesChanged(bool)), this,
+         SLOT(setCanDropFrames(bool))));
+      VERIFYNR(disconnect(mpController, SIGNAL(bumpersEnabledChanged(bool)), this,
+         SLOT(bumpersEnabled(bool))));
+      VERIFYNR(disconnect(mpController, SIGNAL(bumperStartChanged(double)), this,
+         SLOT(setStartBumper(double))));
+      VERIFYNR(disconnect(mpController, SIGNAL(bumperStopChanged(double)), this,
+         SLOT(setStopBumper(double))));
+      VERIFYNR(disconnect(mpLeftBumperToFrameAction, SIGNAL(triggered()), mpController,
+         SLOT(snapStartBumperToFrame())));
+      VERIFYNR(disconnect(mpRightBumperToFrameAction, SIGNAL(triggered()), mpController,
+         SLOT(snapStopBumperToFrame())));
+      VERIFYNR(disconnect(mpAdjustBumpersAction, SIGNAL(triggered()), mpController,
+         SLOT(adjustBumpers())));
+      VERIFYNR(disconnect(mpResetBumpersAction, SIGNAL(triggered()), mpController,
+         SLOT(resetBumpers())));
+      VERIFYNR(disconnect(mpStoreBumpersAction, SIGNAL(triggered()), mpController,
+         SLOT(storeBumpers())));
+      VERIFYNR(disconnect(mpRestoreBumpersAction, SIGNAL(triggered()), mpController,
+         SLOT(restoreBumpers())));
    }
 
-   mpController = pController;
+   mpController = pImp;
 
    if (mpController != NULL)
    {
@@ -590,24 +657,39 @@ void AnimationToolBarImp::setAnimationController(AnimationController* pControlle
       intervalMultiplier = mpController->getIntervalMultiplier();
       cycle = mpController->getAnimationCycle();
 
-      AnimationControllerImp* pControllerImp = dynamic_cast<AnimationControllerImp*>(mpController);
-      if (pControllerImp != NULL)
-      {
-         VERIFYNR(connect(pControllerImp, SIGNAL(frameRangeChanged()), this, SLOT(updateFrameRange())));
-         VERIFYNR(connect(pControllerImp, SIGNAL(frameChanged(double)), this, SLOT(updateCurrentFrame(double))));
-         VERIFYNR(connect(pControllerImp, SIGNAL(animationStateChanged(AnimationState)), this,
-            SLOT(updateAnimationState(AnimationState))));
-         VERIFYNR(connect(pControllerImp, SIGNAL(animationCycleChanged(AnimationCycle)), this,
-            SLOT(updateAnimationCycle(AnimationCycle))));
-         VERIFYNR(connect(pControllerImp, SIGNAL(intervalMultiplierChanged(double)), this,
-            SLOT(updateFrameSpeed(double))));
-         VERIFYNR(connect(pControllerImp, SIGNAL(animationAdded(Animation*)), this, SLOT(updateAnimationControls())));
-         VERIFYNR(connect(pControllerImp, SIGNAL(animationRemoved(Animation*)), this, SLOT(updateAnimationControls())));
-         VERIFYNR(connect(pControllerImp, SIGNAL(canDropFramesChanged(bool)), this,
-            SLOT(setCanDropFrames(bool))));
+      VERIFYNR(connect(mpController, SIGNAL(frameRangeChanged()), this, SLOT(updateFrameRange())));
+      VERIFYNR(connect(mpController, SIGNAL(frameChanged(double)), this, SLOT(updateCurrentFrame(double))));
+      VERIFYNR(connect(mpController, SIGNAL(animationStateChanged(AnimationState)), this,
+         SLOT(updateAnimationState(AnimationState))));
+      VERIFYNR(connect(mpController, SIGNAL(animationCycleChanged(AnimationCycle)), this,
+         SLOT(updateAnimationCycle(AnimationCycle))));
+      VERIFYNR(connect(mpController, SIGNAL(intervalMultiplierChanged(double)), this,
+         SLOT(updateFrameSpeed(double))));
+      VERIFYNR(connect(mpController, SIGNAL(animationAdded(Animation*)), this, SLOT(updateAnimationControls())));
+      VERIFYNR(connect(mpController, SIGNAL(animationRemoved(Animation*)), this, SLOT(updateAnimationControls())));
+      VERIFYNR(connect(mpController, SIGNAL(canDropFramesChanged(bool)), this,
+         SLOT(setCanDropFrames(bool))));
+      VERIFYNR(connect(mpController, SIGNAL(bumpersEnabledChanged(bool)), this,
+         SLOT(bumpersEnabled(bool))));
+      VERIFYNR(connect(mpController, SIGNAL(bumperStartChanged(double)), this,
+         SLOT(setStartBumper(double))));
+      VERIFYNR(connect(mpController, SIGNAL(bumperStopChanged(double)), this,
+         SLOT(setStopBumper(double))));
+      VERIFYNR(connect(mpLeftBumperToFrameAction, SIGNAL(triggered()), mpController,
+         SLOT(snapStartBumperToFrame())));
+      VERIFYNR(connect(mpRightBumperToFrameAction, SIGNAL(triggered()), mpController,
+         SLOT(snapStopBumperToFrame())));
+      VERIFYNR(connect(mpAdjustBumpersAction, SIGNAL(triggered()), mpController,
+         SLOT(adjustBumpers())));
+      VERIFYNR(connect(mpResetBumpersAction, SIGNAL(triggered()), mpController,
+         SLOT(resetBumpers())));
+      VERIFYNR(connect(mpStoreBumpersAction, SIGNAL(triggered()), mpController,
+         SLOT(storeBumpers())));
+      VERIFYNR(connect(mpRestoreBumpersAction, SIGNAL(triggered()), mpController,
+         SLOT(restoreBumpers())));
 
-         mpDropFramesAction->setChecked(pControllerImp->getCanDropFrames());
-      }
+      mpBumperButton->defaultAction()->setChecked(mpController->getBumpersEnabled());
+      mpDropFramesAction->setChecked(mpController->getCanDropFrames());
    }
 
    updateAnimationControls();
@@ -658,11 +740,13 @@ void AnimationToolBarImp::updateAnimationControls()
    mpFrameSpeedCombo->setEnabled(bEnable);
    mpCycle->setEnabled(bEnable);
    mpDropFramesAction->setEnabled(bEnable);
+   mpChangeDirectionAction->setEnabled(bEnable);
+   mpBumperButton->setEnabled(bEnable);
 }
 
 AnimationController* AnimationToolBarImp::getAnimationController() const
 {
-   return mpController;
+   return dynamic_cast<AnimationController*>(mpController);
 }
 
 void AnimationToolBarImp::activateSlider()
@@ -711,4 +795,199 @@ void AnimationToolBarImp::setHideTimestamp(bool hideTimestamp)
 bool AnimationToolBarImp::getHideTimestamp() const
 {
    return mHideTimestamp;
+}
+
+void AnimationToolBarImp::bumpersEnabled(bool enabled)
+{
+   if (mpController != NULL && mpFrameSlider->getBumpersEnabled() != enabled)
+   {
+      // need to set button since change may have been from controller context menu action
+      mpBumperButton->defaultAction()->setChecked(enabled);
+      mpFrameSlider->setBumpersEnabled(enabled);
+      mpFrameSlider->repaint();
+      mpController->setBumpersEnabled(enabled);
+      if (enabled)
+      {
+         mpBumperButton->setToolTip("Disable Bumpers");
+      }
+      else
+      {
+         mpBumperButton->setToolTip("Enable Bumpers");
+      }
+   }
+}
+
+void AnimationToolBarImp::setStartBumper(double newValue)
+{
+   mpFrameSlider->setLeftBumper(getSliderIndex(newValue));
+   mpFrameSlider->repaint();
+}
+
+void AnimationToolBarImp::setStopBumper(double newValue)
+{
+   mpFrameSlider->setRightBumper(getSliderIndex(newValue));
+   mpFrameSlider->repaint();
+}
+
+void AnimationToolBarImp::updateBumperMenu()
+{
+   Service<ConfigurationSettings> pSettings;
+   std::string bumperPath("AnimationController/Bumpers/BumpersActive");
+   DataVariant bumpersEnabled = pSettings->getSetting(bumperPath);
+   mpRestoreBumpersAction->setEnabled(bumpersEnabled.isValid());
+}
+
+int AnimationToolBarImp::getSliderIndex(double frameValue)
+{
+   if (frameValue < 0.0)  // unset bumper value
+   {
+      return -1;
+   }
+
+   double index(0.0);
+
+   if (mpController != NULL)
+   {
+      double startFrame = mpController->getStartFrame();
+      double stopFrame = mpController->getStopFrame();
+      double sliderRange = mpFrameSlider->maximum() - mpFrameSlider->minimum();
+      index = ((frameValue - startFrame) / (stopFrame - startFrame)) * sliderRange + mpFrameSlider->minimum() + 0.5;
+   }
+
+   return static_cast<int>(index);
+}
+
+void AnimationToolBarImp::updateBumpers()
+{
+   if (mpController != NULL)
+   {
+      mpFrameSlider->setLeftBumper(getSliderIndex(mpController->getStartBumper()));
+      mpFrameSlider->setRightBumper(getSliderIndex(mpController->getStopBumper()));
+      if (mpController->getNumAnimations() > 0)
+      {
+         mpFrameSlider->setBumpersEnabled(mpController->getBumpersEnabled());
+      }
+      else
+      {
+         mpController->setBumpersEnabled(false);
+      }
+   }
+   else
+   {
+      mpFrameSlider->resetBumpers();
+   }
+
+   mpFrameSlider->repaint();
+}
+
+AnimationToolBarImp::WheelEventSlider::WheelEventSlider(
+                                   Qt::Orientation orientation, QWidget *parent)
+                                   : QSlider(orientation, parent),
+                                   mLeftBumper(-1),
+                                   mRightBumper(-1),
+                                   mBumpersEnabled(false)
+{
+}
+
+void AnimationToolBarImp::WheelEventSlider::wheelEvent(QWheelEvent* pEvent)
+{
+   QSlider::wheelEvent(pEvent);
+   triggerAction(QAbstractSlider::SliderMove);
+}
+
+void AnimationToolBarImp::WheelEventSlider::paintEvent(QPaintEvent* pEvent)
+{
+   // only paint bumpers if bumpers are enabled and have been set to valid frame values, i.e. > -1
+   if (mBumpersEnabled)
+   {
+      QPainter painter(this);
+      QBrush brush(palette().mid());
+      int x1 = rect().left() -1 ;
+      int y1 = rect().top() + 5;
+      int x2 = rect().right() + 1;
+      int y2 = rect().bottom() - 5;
+      if (mLeftBumper > -1)
+      {
+         QRect rect;
+         rect.setCoords(x1, y1, mLeftBumper, y2);
+         painter.fillRect(rect, brush);
+      }
+      if (mRightBumper > -1)
+      {
+         QRect rect2;
+         rect2.setCoords(mRightBumper, y1, x2, y2);
+         painter.fillRect(rect2, brush);
+      }
+   }
+
+   QSlider::paintEvent(pEvent);
+}
+
+void AnimationToolBarImp::WheelEventSlider::setLeftBumper(int index)
+{
+   // convert index to widget rectangle coordinates
+   mLeftBumper = (index * (rect().width() - 1)) / (maximum() - minimum());
+   if (mBumpersEnabled)
+   {
+      repaint();
+   }
+}
+
+void AnimationToolBarImp::WheelEventSlider::setRightBumper(int index)
+{
+   // convert index to widget rectangle coordinates
+   mRightBumper = (index * (rect().width() - 1)) / (maximum() - minimum());
+   if (mBumpersEnabled)
+   {
+      repaint();
+   }
+}
+
+void AnimationToolBarImp::WheelEventSlider::resetBumpers()
+{
+   mLeftBumper = rect().left();
+   mRightBumper = rect().right();
+   repaint();
+}
+
+void AnimationToolBarImp::WheelEventSlider::setBumpersEnabled(bool enabled)
+{
+   mBumpersEnabled = enabled;
+   repaint();
+}
+
+bool AnimationToolBarImp::WheelEventSlider::getBumpersEnabled() const
+{
+   return mBumpersEnabled;
+}
+
+void AnimationToolBarImp::WheelEventSlider::getPlaybackRange(int& start, int& stop) const
+{
+   // return in units of slider index
+   int sliderWidth = width() - 1;
+   if (mBumpersEnabled && sliderWidth > 0)
+   {
+      int sliderRange = maximum() - minimum();
+      if (mLeftBumper > -1)
+      {
+         start = (mLeftBumper * sliderRange) / sliderWidth;
+      }
+      else
+      {
+         start = minimum();
+      }
+      if (mRightBumper > -1)
+      {
+         stop = (mRightBumper * sliderRange) / sliderWidth;
+      }
+      else
+      {
+         stop = maximum();
+      }
+   }
+   else
+   {
+      start = minimum();
+      stop = maximum();
+   }
 }

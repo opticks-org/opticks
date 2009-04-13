@@ -55,6 +55,12 @@ public:
    double getCurrentFrame() const;
    double getStartFrame() const;
    double getStopFrame() const;
+   bool getBumpersEnabled() const;
+   void setBumpersEnabled(bool enabled);
+   double getStartBumper() const;
+   void setStartBumper(double frameValue);
+   double getStopBumper() const;
+   void setStopBumper(double frameValue);
 
    void setIntervalMultiplier(double multiplier);
    double getIntervalMultiplier() const;
@@ -86,6 +92,13 @@ public slots:
    void stepBackward();
    void fastForward(double);
    void fastRewind(double);
+   void changeBumpersEnabled(bool enabled);
+   void snapStartBumperToFrame();
+   void snapStopBumperToFrame();
+   void adjustBumpers();
+   void resetBumpers();
+   void storeBumpers();
+   void restoreBumpers();
 
    bool serialize(SessionItemSerializer& serializer) const;
    bool deserialize(SessionItemDeserializer &deserializer);
@@ -100,6 +113,9 @@ signals:
    void animationCycleChanged(AnimationCycle cycle);
    void intervalMultiplierChanged(double multiplier);
    void canDropFramesChanged(bool canDropFrames);
+   void bumpersEnabledChanged(bool enabled);
+   void bumperStartChanged(double newValue);
+   void bumperStopChanged(double newValue);
 
 protected:
    void removeAnimation(Animation* pAnimation);
@@ -123,6 +139,10 @@ private:
    double mCurrentFrame;
    double mMaxCurrentTime;
    double mEffectiveCurrentTime;
+   double mStartBumper;
+   double mStopBumper;
+   double mPlaybackStartFrame;
+   double mPlaybackStopFrame;
    const int mFrequency;
    boost::rational<int> mMinimumFrameRate;
    double mInterval;
@@ -132,6 +152,7 @@ private:
 
    double mStartTime;
    bool mCanDropFrames;
+   bool mBumpersEnabled;
 
    QAction* mpPlayAction;
    QAction* mpPauseAction;
@@ -139,6 +160,15 @@ private:
    QAction* mpChangeDirectionAction;
    QAction* mpStepBackwardAction;
    QAction* mpStepForwardAction;
+   QAction* mpBumpersEnabledAction;
+   QAction* mpLeftBumperToCurrentAction;
+   QAction* mpRightBumperToCurrentAction;
+   QAction* mpAdjustBumpersAction;
+   QAction* mpResetBumpersAction;
+   QAction* mpSeparatorAction;
+   QAction* mpSeparator2Action;
+   QAction* mpStoreBumpersAction;
+   QAction* mpRestoreBumpersAction;
    static std::list<AnimationControllerImp*> mRunningControllers;
    static std::list<AnimationControllerImp*>::iterator mppActiveController;
 };
@@ -193,6 +223,30 @@ private:
    double getStopFrame() const \
    { \
       return impClass::getStopFrame(); \
+   } \
+   bool getBumpersEnabled() const \
+   { \
+      return impClass::getBumpersEnabled(); \
+   } \
+   void setBumpersEnabled(bool enabled) \
+   { \
+      return impClass::setBumpersEnabled(enabled); \
+   } \
+   double getStartBumper() const \
+   { \
+      return impClass::getStartBumper(); \
+   } \
+   void setStartBumper(double frameValue) \
+   { \
+      return impClass::setStartBumper(frameValue); \
+   } \
+   double getStopBumper() const \
+   { \
+      return impClass::getStopBumper(); \
+   } \
+   void setStopBumper(double frameValue) \
+   { \
+      return impClass::setStopBumper(frameValue); \
    } \
    void setIntervalMultiplier(double multiplier) \
    { \

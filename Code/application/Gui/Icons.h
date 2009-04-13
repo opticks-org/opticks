@@ -314,6 +314,7 @@ public:
    QPixmap mAnimationBackwardDirection;
    QPixmap mAnimationForwardDirection;
    QPixmap mAnimationChangeDirection;
+   QPixmap mAnimationBumpers;
    
    QPixmap mPlayOnce;
    QPixmap mBouncePlay;

@@ -695,6 +695,9 @@ Icons::Icons()
    mRepeatPlay = QPixmap(IconImages::PlayRepeatIcon);
    mRepeatPlay.setMask(mRepeatPlay.createHeuristicMask());
 
+   mAnimationBumpers = QPixmap(IconImages::AnimationBumpersIcon);
+   mAnimationBumpers.setMask(mAnimationBumpers.createHeuristicMask());
+
    // Wizard builder
    mDesktop = QPixmap(IconImages::DesktopIcon);
    mDesktop.setMask(mDesktop.createHeuristicMask());

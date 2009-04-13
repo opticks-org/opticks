@@ -12,12 +12,18 @@
 #include <QtCore/QString>
 #include <QtGui/QIcon>
 #include <QtGui/QApplication>
+#include <QtGui/QDialog>
+#include <QtGui/QDialogButtonBox>
+#include <QtGui/QDoubleSpinBox>
+#include <QtGui/QGridLayout>
+#include <QtGui/QLabel>
 #include <QtGui/QMessageBox>
 
 #include "AnimationAdapter.h"
 #include "AnimationController.h"
 #include "AnimationControllerImp.h"
 #include "AnimationServices.h"
+#include "ApplicationServices.h"
 #include "AppVerify.h"
 #include "ContextMenuAction.h"
 #include "ContextMenuActions.h"
@@ -26,6 +32,7 @@
 #include "SessionItemDeserializer.h"
 #include "SessionItemSerializer.h"
 #include "SessionManager.h"
+#include "TypeConverter.h"
 #include "XercesIncludes.h"
 #include "xmlreader.h"
 #include "xmlwriter.h"
@@ -57,6 +64,10 @@ AnimationControllerImp::AnimationControllerImp(FrameType frameType, const string
    mCurrentFrame(-1.0),
    mMaxCurrentTime(0.0),
    mEffectiveCurrentTime(0.0),
+   mStartBumper(-1.0),
+   mStopBumper(-1.0),
+   mPlaybackStartFrame(mStartFrame),
+   mPlaybackStopFrame(mStopFrame),
    mFrequency(60),
    mMinimumFrameRate(mFrequency, 1),
    mInterval(AnimationController::getSettingFrameSpeedSelection() / mFrequency),
@@ -64,12 +75,22 @@ AnimationControllerImp::AnimationControllerImp(FrameType frameType, const string
    mCycle(AnimationController::getSettingAnimationCycleSelection()),
    mStartTime(0.0),
    mCanDropFrames(true),
+   mBumpersEnabled(false),
    mpPlayAction(NULL),
    mpPauseAction(NULL),
    mpStopAction(NULL),
    mpChangeDirectionAction(NULL),
    mpStepBackwardAction(NULL),
-   mpStepForwardAction(NULL)
+   mpStepForwardAction(NULL),
+   mpBumpersEnabledAction(NULL),
+   mpLeftBumperToCurrentAction(NULL),
+   mpRightBumperToCurrentAction(NULL),
+   mpAdjustBumpersAction(NULL),
+   mpResetBumpersAction(NULL),
+   mpSeparatorAction(NULL),
+   mpSeparator2Action(NULL),
+   mpStoreBumpersAction(NULL),
+   mpRestoreBumpersAction(NULL)
 {
    // Context menu actions
    mpPlayAction = new QAction("Play", this);
@@ -89,6 +110,34 @@ AnimationControllerImp::AnimationControllerImp(FrameType frameType, const string
 
    mpStepForwardAction = new QAction("Step Forward", this);
    mpStepForwardAction->setAutoRepeat(false);
+
+   mpBumpersEnabledAction = new QAction("Bumpers Enabled", this);
+   mpBumpersEnabledAction->setAutoRepeat(false);
+   mpBumpersEnabledAction->setCheckable(true);
+   mpBumpersEnabledAction->setChecked(false);
+
+   mpResetBumpersAction = new QAction("Reset Bumpers", this);
+   mpResetBumpersAction->setAutoRepeat(false);
+
+   mpLeftBumperToCurrentAction = new QAction("Left Bumper to Current Frame", this);
+   mpLeftBumperToCurrentAction->setAutoRepeat(false);
+
+   mpRightBumperToCurrentAction = new QAction("Right Bumper to Current Frame", this);
+   mpRightBumperToCurrentAction->setAutoRepeat(false);
+
+   mpAdjustBumpersAction = new QAction("Adjust Bumpers...", this);
+   mpAdjustBumpersAction->setAutoRepeat(false);
+
+   mpStoreBumpersAction = new QAction("Store Bumpers", this);
+   mpStoreBumpersAction->setAutoRepeat(false);
+
+   mpRestoreBumpersAction = new QAction("Restore Bumpers", this);
+   mpRestoreBumpersAction->setAutoRepeat(false);
+
+   mpSeparatorAction = new QAction("", this);
+   mpSeparatorAction->setSeparator(true);
+   mpSeparator2Action = new QAction("", this);
+   mpSeparator2Action->setSeparator(true);
 
    // Initialization
    Icons* pIcons = Icons::instance();
@@ -110,6 +159,13 @@ AnimationControllerImp::AnimationControllerImp(FrameType frameType, const string
    VERIFYNR(connect(mpChangeDirectionAction, SIGNAL(triggered()), this, SLOT(changeDirection())));
    VERIFYNR(connect(mpStepBackwardAction, SIGNAL(triggered()), this, SLOT(stepBackward())));
    VERIFYNR(connect(mpStepForwardAction, SIGNAL(triggered()), this, SLOT(stepForward())));
+   VERIFYNR(connect(mpBumpersEnabledAction, SIGNAL(triggered(bool)), this, SLOT(changeBumpersEnabled(bool))));
+   VERIFYNR(connect(mpLeftBumperToCurrentAction, SIGNAL(triggered()), this, SLOT(snapStartBumperToFrame())));
+   VERIFYNR(connect(mpRightBumperToCurrentAction, SIGNAL(triggered()), this, SLOT(snapStopBumperToFrame())));
+   VERIFYNR(connect(mpAdjustBumpersAction, SIGNAL(triggered()), this, SLOT(adjustBumpers())));
+   VERIFYNR(connect(mpResetBumpersAction, SIGNAL(triggered()), this, SLOT(resetBumpers())));
+   VERIFYNR(connect(mpStoreBumpersAction, SIGNAL(triggered()), this, SLOT(storeBumpers())));
+   VERIFYNR(connect(mpRestoreBumpersAction, SIGNAL(triggered()), this, SLOT(restoreBumpers())));
 }
 
 AnimationControllerImp::~AnimationControllerImp()
@@ -144,25 +200,45 @@ bool AnimationControllerImp::isKindOf(const string& className) const
 list<ContextMenuAction> AnimationControllerImp::getContextMenuActions() const
 {
    list<ContextMenuAction> menuActions = SessionItemImp::getContextMenuActions();
-   menuActions.push_front(ContextMenuAction(mpStepBackwardAction, APP_ANIMATIONCONTROLLER_STEP_BACKWARD_ACTION));
-   menuActions.push_front(ContextMenuAction(mpStepForwardAction, APP_ANIMATIONCONTROLLER_STEP_FORWARD_ACTION));
+   if (mAnimations.empty() == false)  // only add actions if there are animations
+   {
+      menuActions.push_front(ContextMenuAction(mpStepBackwardAction, APP_ANIMATIONCONTROLLER_STEP_BACKWARD_ACTION));
+      menuActions.push_front(ContextMenuAction(mpStepForwardAction, APP_ANIMATIONCONTROLLER_STEP_FORWARD_ACTION));
 
-   AnimationState animationState = getAnimationState();
-   if (animationState == STOP)
-   {
-      menuActions.push_front(ContextMenuAction(mpPlayAction, APP_ANIMATIONCONTROLLER_PLAY_ACTION));
-   }
-   else if (animationState == PAUSE_FORWARD || animationState == PAUSE_BACKWARD)
-   {
-      menuActions.push_front(ContextMenuAction(mpStopAction, APP_ANIMATIONCONTROLLER_STOP_ACTION));
-      menuActions.push_front(ContextMenuAction(mpPlayAction, APP_ANIMATIONCONTROLLER_PLAY_ACTION));
-   }
-   else
-   {
-      menuActions.push_front(ContextMenuAction(mpChangeDirectionAction, 
-                             APP_ANIMATIONCONTROLLER_CHANGE_DIRECTION_ACTION));
-      menuActions.push_front(ContextMenuAction(mpStopAction, APP_ANIMATIONCONTROLLER_STOP_ACTION));
-      menuActions.push_front(ContextMenuAction(mpPauseAction, APP_ANIMATIONCONTROLLER_PAUSE_ACTION));
+      AnimationState animationState = getAnimationState();
+      if (animationState == STOP)
+      {
+         menuActions.push_front(ContextMenuAction(mpPlayAction, APP_ANIMATIONCONTROLLER_PLAY_ACTION));
+      }
+      else if (animationState == PAUSE_FORWARD || animationState == PAUSE_BACKWARD)
+      {
+         menuActions.push_front(ContextMenuAction(mpStopAction, APP_ANIMATIONCONTROLLER_STOP_ACTION));
+         menuActions.push_front(ContextMenuAction(mpPlayAction, APP_ANIMATIONCONTROLLER_PLAY_ACTION));
+      }
+      else
+      {
+         menuActions.push_front(ContextMenuAction(mpChangeDirectionAction, 
+            APP_ANIMATIONCONTROLLER_CHANGE_DIRECTION_ACTION));
+         menuActions.push_front(ContextMenuAction(mpStopAction, APP_ANIMATIONCONTROLLER_STOP_ACTION));
+         menuActions.push_front(ContextMenuAction(mpPauseAction, APP_ANIMATIONCONTROLLER_PAUSE_ACTION));
+      }
+
+      menuActions.push_back(ContextMenuAction(mpSeparatorAction, APP_ANIMATIONCONTROLLER_BUMPER_SEPARATOR_ACTION));
+      menuActions.push_back(ContextMenuAction(mpBumpersEnabledAction, APP_ANIMATIONCONTROLLER_ENABLE_BUMPERS_ACTION));
+      menuActions.push_back(ContextMenuAction(mpLeftBumperToCurrentAction,
+         APP_ANIMATIONCONTROLLER_SET_LEFT_BUMPER_ACTION));
+      menuActions.push_back(ContextMenuAction(mpRightBumperToCurrentAction,
+         APP_ANIMATIONCONTROLLER_SET_RIGHT_BUMPER_ACTION));
+      menuActions.push_back(ContextMenuAction(mpAdjustBumpersAction, APP_ANIMATIONCONTROLLER_ADJUST_BUMPERS_ACTION));
+      menuActions.push_back(ContextMenuAction(mpResetBumpersAction, APP_ANIMATIONCONTROLLER_RESET_BUMPERS_ACTION));
+      menuActions.push_back(ContextMenuAction(mpSeparator2Action,
+         APP_ANIMATIONCONTROLLER_STORE_BUMPERS_SEPARATOR_ACTION));
+      menuActions.push_back(ContextMenuAction(mpStoreBumpersAction, APP_ANIMATIONCONTROLLER_STORE_BUMPERS_ACTION));
+      Service<ConfigurationSettings> pSettings;
+      string bumperPath("AnimationController/Bumpers/BumpersActive");
+      DataVariant bumpersEnabled = pSettings->getSetting(bumperPath);
+      mpRestoreBumpersAction->setEnabled(bumpersEnabled.isValid());
+      menuActions.push_back(ContextMenuAction(mpRestoreBumpersAction, APP_ANIMATIONCONTROLLER_RESTORE_BUMPERS_ACTION));
    }
 
    return menuActions;
@@ -276,14 +352,14 @@ FrameType AnimationControllerImp::getFrameType() const
 
 void AnimationControllerImp::setCurrentFrame(double frameValue)
 {
-   if (frameValue < mStartFrame)
+   if (frameValue < mPlaybackStartFrame)
    {
-      frameValue = mStartFrame;
+      frameValue = mPlaybackStartFrame;
    }
 
-   if (frameValue > mStopFrame)
+   if (frameValue > mPlaybackStopFrame)
    {
-      frameValue = mStopFrame;
+      frameValue = mPlaybackStopFrame;
    }
 
    if (frameValue != mCurrentFrame)
@@ -386,12 +462,12 @@ AnimationCycle AnimationControllerImp::getAnimationCycle() const
 
 void AnimationControllerImp::moveToBeginning()
 {
-   setCurrentFrame(mStartFrame);
+   setCurrentFrame(mPlaybackStartFrame);
 }
 
 void AnimationControllerImp::moveToEnd()
 {
-   setCurrentFrame(mStopFrame);
+   setCurrentFrame(mPlaybackStopFrame);
 }
 
 void AnimationControllerImp::play()
@@ -726,7 +802,25 @@ void AnimationControllerImp::updateFrameData()
 
       // Update the start and stop values
       mStartFrame = startFrame;
+      if (mStartBumper < mStartFrame)
+      {
+         mStartBumper = mStartFrame;
+      }
       mStopFrame = stopFrame;
+      if (mStopBumper > mStopFrame || mStopBumper < 0.0)  // unset bumper has value of -1.0
+      {
+         mStopBumper = mStopFrame;
+      }
+      if (mpBumpersEnabledAction->isChecked())
+      {
+         mPlaybackStartFrame = mStartBumper;
+         mPlaybackStopFrame = mStopBumper;
+      }
+      else
+      {
+         mPlaybackStartFrame = mStartFrame;
+         mPlaybackStopFrame = mStopFrame;
+      }
 
       if (shouldStop == true)
       {
@@ -808,7 +902,7 @@ void AnimationControllerImp::advance()
    double nextFrame = -1.0;
    if (mState == PLAY_FORWARD)
    {
-      if (mCurrentFrame >= mStopFrame)
+      if (mCurrentFrame >= mPlaybackStopFrame)
       {
          if (mCycle == PLAY_ONCE)
          {
@@ -817,25 +911,25 @@ void AnimationControllerImp::advance()
          }
          else if (mCycle == REPEAT)
          {
-            nextFrame = mStartFrame;
+            nextFrame = mPlaybackStartFrame;
          }
          else if (mCycle == BOUNCE)
          {
-            if (mStartFrame != mStopFrame)
+            if (mPlaybackStartFrame != mPlaybackStopFrame)
             {
                nextFrame = mCurrentFrame - (mInterval * intervalMultiplier);
             }
             else
             {
-               nextFrame = mStartFrame;
+               nextFrame = mPlaybackStartFrame;
             }
 
             setAnimationState(PLAY_BACKWARD);
          }
       }
-      else if (mCurrentFrame < mStartFrame)
+      else if (mCurrentFrame < mPlaybackStartFrame)
       {
-         nextFrame = mStartFrame;
+         nextFrame = mPlaybackStartFrame;
       }
       else
       {
@@ -844,7 +938,7 @@ void AnimationControllerImp::advance()
    }
    else if (mState == PLAY_BACKWARD)
    {
-      if (mCurrentFrame <= mStartFrame)
+      if (mCurrentFrame <= mPlaybackStartFrame)
       {
          if (mCycle == PLAY_ONCE)
          {
@@ -853,25 +947,25 @@ void AnimationControllerImp::advance()
          }
          else if (mCycle == REPEAT)
          {
-            nextFrame = mStopFrame;
+            nextFrame = mPlaybackStopFrame;
          }
          else if (mCycle == BOUNCE)
          {
-            if (mStartFrame != mStopFrame)
+            if (mPlaybackStartFrame != mPlaybackStopFrame)
             {
                nextFrame = mCurrentFrame + (mInterval * intervalMultiplier);
             }
             else
             {
-               nextFrame = mStopFrame;
+               nextFrame = mPlaybackStopFrame;
             }
 
             setAnimationState(PLAY_FORWARD);
          }
       }
-      else if (mCurrentFrame > mStopFrame)
+      else if (mCurrentFrame > mPlaybackStopFrame)
       {
-         nextFrame = mStopFrame;
+         nextFrame = mPlaybackStopFrame;
       }
       else
       {
@@ -987,6 +1081,9 @@ bool AnimationControllerImp::serialize(SessionItemSerializer& serializer) const
    xml.addAttr("startframe", mStartFrame);
    xml.addAttr("stopframe", mStopFrame);
    xml.addAttr("currentframe", mCurrentFrame);
+   xml.addAttr("startbumper", mStartBumper);
+   xml.addAttr("stopbumper", mStopBumper);
+   xml.addAttr("bumpersenabled", mBumpersEnabled);
    // ideally, this would use StringUtilities but we don't want
    // to impose a boost requirement on everything that uses StringUtilities
    xml.addAttr("minimumframerate", QString("%1/%2").arg(mMinimumFrameRate.numerator())
@@ -1025,6 +1122,24 @@ bool AnimationControllerImp::deserialize(SessionItemDeserializer &deserializer)
       A(pRoot->getAttribute(X("stopframe"))));
    mCurrentFrame = StringUtilities::fromXmlString<double>(
       A(pRoot->getAttribute(X("currentframe"))));
+   resetBumpers();  // initialize to start and stop frames
+   setStartBumper(StringUtilities::fromXmlString<double>(
+      A(pRoot->getAttribute(X("startbumper")))));
+   setStopBumper(StringUtilities::fromXmlString<double>(
+      A(pRoot->getAttribute(X("stopbumper")))));
+   setBumpersEnabled(StringUtilities::fromXmlString<bool>(
+      A(pRoot->getAttribute(X("bumpersenabled")))));
+
+   if (mBumpersEnabled)
+   {
+      mPlaybackStartFrame = mStartBumper;
+      mPlaybackStopFrame = mStopBumper;
+   }
+   else
+   {
+      mPlaybackStartFrame = mStartFrame;
+      mPlaybackStopFrame = mStopFrame;
+   }
    QStringList minFrameRate = QString(A(pRoot->getAttribute(X("minimumframerate")))).split("/");
    if (minFrameRate.size() != 2)
    {
@@ -1067,4 +1182,277 @@ bool AnimationControllerImp::deserialize(SessionItemDeserializer &deserializer)
       pServices->setCurrentAnimationController(dynamic_cast<AnimationController*>(this));
    }
    return true;
+}
+
+bool AnimationControllerImp::getBumpersEnabled() const
+{
+   return mBumpersEnabled;
+}
+
+void AnimationControllerImp::setBumpersEnabled(bool enabled)
+{
+   if (enabled == mBumpersEnabled)
+   {
+      return;
+   }
+
+   mBumpersEnabled = enabled;
+   mpBumpersEnabledAction->setChecked(mBumpersEnabled);
+   if (mBumpersEnabled)
+   {
+      mPlaybackStartFrame = mStartBumper;
+      mPlaybackStopFrame = mStopBumper;
+      if (mCurrentFrame < mPlaybackStartFrame)
+      {
+         setCurrentFrame(mPlaybackStartFrame);
+      }
+      else if (mCurrentFrame > mPlaybackStopFrame)
+      {
+         setCurrentFrame(mPlaybackStopFrame);
+      }
+   }
+   else
+   {
+      mPlaybackStartFrame = mStartFrame;
+      mPlaybackStopFrame = mStopFrame;
+   }
+
+   emit bumpersEnabledChanged(mBumpersEnabled);
+   notify(SIGNAL_NAME(AnimationController, BumpersEnabledChanged), boost::any(mBumpersEnabled));
+}
+
+void AnimationControllerImp::resetBumpers()
+{
+   setStartBumper(mStartFrame);
+   setStopBumper(mStopFrame);
+}
+void AnimationControllerImp::setStartBumper(double frameValue)
+{
+   double newValue = frameValue;
+   if (getFrameType() == FRAME_ID)
+   {
+      newValue = floor(frameValue + 0.5);
+   }
+
+   if (newValue == mStartBumper)
+   {
+      return;
+   }
+
+   mStartBumper = newValue;
+
+   if (mStartBumper < mStartFrame)
+   {
+      mStartBumper = mStartFrame;
+   }
+
+   if (mStartBumper > mStopBumper)
+   {
+      mStartBumper = mStopBumper;
+   }
+
+   if (mBumpersEnabled)
+   {
+      mPlaybackStartFrame = mStartBumper;
+   }
+
+   if (mCurrentFrame < mPlaybackStartFrame)
+   {
+      setCurrentFrame(mPlaybackStartFrame);
+   }
+
+   if (!mBumpersEnabled && mStartBumper >= 0.0)  // invalid bumper = -1.0
+   {
+      setBumpersEnabled(true);
+   }
+
+   emit bumperStartChanged(mStartBumper);
+   notify(SIGNAL_NAME(AnimationController, BumperStartChanged), boost::any(mStartBumper));
+}
+
+void AnimationControllerImp::setStopBumper(double frameValue)
+{
+   double newValue = frameValue;
+   if (getFrameType() == FRAME_ID)
+   {
+      newValue = floor(frameValue + 0.5);
+   }
+
+   if (newValue == mStopBumper)
+   {
+      return;
+   }
+
+   mStopBumper = newValue;
+
+   if (mStopBumper > mStopFrame || mStopBumper < 0.0)  // value of -1.0 for reset or uninitialized bumper
+   {
+      mStopBumper = mStopFrame;
+   }
+
+   if (mStopBumper < mStartBumper)
+   {
+      mStopBumper = mStartBumper;
+   }
+
+   if (mBumpersEnabled)
+   {
+      mPlaybackStopFrame = mStopBumper;
+   }
+
+   if (mCurrentFrame > mPlaybackStopFrame)
+   {
+      setCurrentFrame(mPlaybackStopFrame);
+   }
+
+   if (!mBumpersEnabled && mStopBumper >= 0.0)  // invalid bumper = -1.0
+   {
+      setBumpersEnabled(true);
+   }
+   emit bumperStopChanged(mStopBumper);
+   notify(SIGNAL_NAME(AnimationController, BumperStopChanged), boost::any(mStopBumper));
+}
+
+void AnimationControllerImp::snapStartBumperToFrame()
+{
+   setStartBumper(mCurrentFrame);
+}
+
+void AnimationControllerImp::snapStopBumperToFrame()
+{
+   setStopBumper(mCurrentFrame);
+}
+
+double AnimationControllerImp::getStartBumper() const
+{
+   return mStartBumper;
+}
+
+double AnimationControllerImp::getStopBumper() const
+{
+   return mStopBumper;
+}
+
+void AnimationControllerImp::changeBumpersEnabled(bool enabled)
+{
+   setBumpersEnabled(enabled);
+}
+
+void AnimationControllerImp::storeBumpers()
+{
+   Service<ConfigurationSettings> pSettings;
+   string bumperPath("AnimationController/Bumpers");
+   pSettings->setSetting(bumperPath + "/BumpersActive", mBumpersEnabled);
+   pSettings->setSetting(bumperPath + "/StartBumper", mStartBumper);
+   pSettings->setSetting(bumperPath + "/StopBumper", mStopBumper);
+}
+
+void AnimationControllerImp::restoreBumpers()
+{
+   Service<ConfigurationSettings> pSettings;
+   string bumperPath("AnimationController/Bumpers");
+   bool validRestore(true);
+   bool bumpersEnabled;
+   double startBumper;
+   double stopBumper;
+   DataVariant value = pSettings->getSetting(bumperPath + "/BumpersActive");
+   if (value.isValid() && value.getTypeName() == TypeConverter::toString<bool>())
+   {
+      bumpersEnabled = dv_cast<bool>(value);
+   }
+   else
+   {
+      validRestore = false;
+   }
+
+   value = pSettings->getSetting(bumperPath + "/StartBumper");
+   if (value.isValid() && value.getTypeName() == TypeConverter::toString<double>())
+   {
+      startBumper = dv_cast<double>(value);
+   }
+   else
+   {
+      validRestore = false;
+   }
+
+   value = pSettings->getSetting(bumperPath + "/StopBumper");
+   if (value.isValid() && value.getTypeName() == TypeConverter::toString<double>())
+   {
+      stopBumper = dv_cast<double>(value);
+   }
+   else
+   {
+      validRestore = false;
+   }
+
+   if (validRestore && startBumper >= 0.0 && stopBumper >= 0.0)
+   {
+      setStartBumper(startBumper);
+      setStopBumper(stopBumper);
+      setBumpersEnabled(bumpersEnabled);
+   }
+   else
+   {
+      if (Service<ApplicationServices>()->isBatch() == false)
+      {
+         QMessageBox::critical(mpDesktop->getMainWidget(), "Restore Bumpers Failed",
+            "Could not retrieve valid bumper set from Configuration Settings");
+      }
+   }
+}
+
+void AnimationControllerImp::adjustBumpers()
+{
+   double startFrame = mStartFrame;
+   double stopFrame = mStopFrame;
+   double startBumper = mStartBumper;
+   double stopBumper = mStopBumper;
+   if (getFrameType() == FRAME_ID)
+   {
+      ++startFrame;
+      ++stopFrame;
+      ++startBumper;
+      ++stopBumper;
+   }
+   QDialog dlg(mpDesktop->getMainWidget());
+   dlg.setWindowTitle("Adjust Bumpers");
+   dlg.setModal(true);
+   QGridLayout* pGrid = new QGridLayout(&dlg);
+   QLabel* pLeftLabel = new QLabel("Left Bumper", &dlg);
+   QLabel* pRightLabel = new QLabel("Right Bumper", &dlg);
+   QDoubleSpinBox* pLeftSpin = new QDoubleSpinBox(&dlg);
+   pLeftSpin->setDecimals(6);
+   pLeftSpin->setRange(startFrame, stopFrame);
+   pLeftSpin->setValue(startBumper);
+   pLeftSpin->setMinimumWidth(80);
+   QDoubleSpinBox* pRightSpin = new QDoubleSpinBox(&dlg);
+   pRightSpin->setDecimals(6);
+   pRightSpin->setRange(startFrame, stopFrame);
+   pRightSpin->setValue(stopBumper);
+   pRightSpin->setMinimumWidth(80);
+   QDialogButtonBox* pButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
+      Qt::Horizontal, &dlg);
+   pGrid->setMargin(10);
+   pGrid->setSpacing(10);
+   pGrid->addWidget(pLeftLabel, 0, 0);
+   pGrid->addWidget(pRightLabel, 0, 1);
+   pGrid->addWidget(pLeftSpin, 1, 0);
+   pGrid->addWidget(pRightSpin, 1, 1);
+   pGrid->addWidget(pButtonBox, 2, 0, 1, 2);
+   VERIFYNR(connect(pButtonBox, SIGNAL(accepted()), &dlg, SLOT(accept())));
+   VERIFYNR(connect(pButtonBox, SIGNAL(rejected()), &dlg, SLOT(reject())));
+   dlg.setFixedSize(dlg.sizeHint());
+
+   if (dlg.exec() == QDialog::Accepted)
+   {
+      double newStartBumper = pLeftSpin->value();
+      double newStopBumper = pRightSpin->value();
+      if (getFrameType() == FRAME_ID)
+      {
+         --newStartBumper;
+         --newStopBumper;
+      }
+      setStartBumper(newStartBumper);
+      setStopBumper(newStopBumper);
+   }
 }

@@ -90,6 +90,15 @@
  *    <tr><td>%Step backward</td><td>APP_ANIMATIONCONTROLLER_STEP_BACKWARD_ACTION()</td></tr>
  *    <tr><td>%Step forward</td><td>APP_ANIMATIONCONTROLLER_STEP_FORWARD_ACTION()</td></tr>
  *    <tr><td>Stop</td><td>APP_ANIMATIONCONTROLLER_STOP_ACTION()</td></tr>
+ *    <tr><td>Separator</td><td>APP_ANIMATIONCONTROLLER_BUMPER_SEPARATOR_ACTION()</td></tr>
+ *    <tr><td>Bumpers Enabled</td><td>APP_ANIMATIONCONTROLLER_ENABLE_BUMPERS_ACTION()</td></tr>
+ *    <tr><td>Left Bumper to Current Frame</td><td>APP_ANIMATIONCONTROLLER_SET_LEFT_BUMPER_ACTION()</td></tr>
+ *    <tr><td>Right Bumper to Current Frame</td><td>APP_ANIMATIONCONTROLLER_SET_RIGHT_BUMPER_ACTION()</td></tr>
+ *    <tr><td>Adjust Bumpers...</td><td>APP_ANIMATIONCONTROLLER_ADJUST_BUMPERS_ACTION()</td></tr>
+ *    <tr><td>Reset Bumpers</td><td>APP_ANIMATIONCONTROLLER_RESET_BUMPERS_ACTION()</td></tr>
+ *    <tr><td>Separator</td><td>APP_ANIMATIONCONTROLLER_STORE_BUMPERS_SEPARATOR_ACTION()</td></tr>
+ *    <tr><td>Store Bumpers</td><td>APP_ANIMATIONCONTROLLER_STORE_BUMPERS_ACTION()</td></tr>
+ *    <tr><td>Restore Bumpers</td><td>APP_ANIMATIONCONTROLLER_RESTORE_BUMPERS_ACTION()</td></tr>
  *  </table>
  *
  *  \subsection animationservices Animation Services

@@ -347,7 +347,21 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
          }
          else
          {
-            startExport = pController->getStartFrame();
+            if (pController->getBumpersEnabled())
+            {
+               startExport = pController->getStartBumper();
+            }
+            else
+            {
+               startExport = pController->getStartFrame();
+            }
+
+            // input arg and mpOptionsWidget return 1-based value for FRAME_ID so need to
+            // increment here since controller returns 0-based value
+            if (eType == FRAME_ID)
+            {
+               ++startExport;
+            }
          }
       }
 
@@ -359,14 +373,28 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
          }
          else
          {
-            stopExport = pController->getStopFrame();
+            if (pController->getBumpersEnabled())
+            {
+               stopExport = pController->getStopBumper();
+            }
+            else
+            {
+               stopExport = pController->getStopFrame();
+            }
+
+            // input arg and mpOptionsWidget return 1-based value for FRAME_ID so need to
+            // increment here since controller returns 0-based value
+            if (eType == FRAME_ID)
+            {
+               ++stopExport;
+            }
          }
       }
       string valueType("Time");
       if (eType == FRAME_ID)
       {
          valueType = "Frame";
-         --startExport;   // frame id type uses 1-number of frames so subtract 1 for looping
+         --startExport;   // frame id type uses 1-based number of frames so subtract 1 for looping
          --stopExport;
       }
 
@@ -448,6 +476,10 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
       stopExport += 0.99;
    }
 
+   // make sure controller is not running prior to export. Save current state and restore after export finished
+   AnimationState savedAnimationState = pController->getAnimationState();
+   pController->setAnimationState(STOP);
+
    for (double video_pts = startExport; video_pts <= stopExport; video_pts += interval)
    {
       if (isAborted() == true)
@@ -463,6 +495,7 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
          {
             mpProgress->updateProgress("Export aborted", 0, ABORT);
          }
+         pController->setAnimationState(savedAnimationState);
          mpStep->finalize(Message::Abort);
          return false;
       }
@@ -491,6 +524,7 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
          remove(filename.c_str());
          string msg = "Can't write frame.";
          log_error(msg.c_str());
+         pController->setAnimationState(savedAnimationState);
          return false;
       }
    }
@@ -505,6 +539,8 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
    {
       mpProgress->updateProgress("Finished saving movie", 100, NORMAL);
    }
+
+   pController->setAnimationState(savedAnimationState);
    mpStep->finalize(Message::Success);
    return true;
 }
@@ -644,7 +680,7 @@ QWidget* MovieExporter::getExportOptionsWidget(const PlugInArgList* pInArgList)
             FrameType eType = pController->getFrameType();
             mpOptionWidget->setFrameType(eType);
 
-            // Start and stop values
+            // set range to start and stop frames
             double start = pController->getStartFrame();
             double stop = pController->getStopFrame();
             if (eType == FRAME_ID) // values are frame numbers so add 1 so first frame is 1 and not 0
@@ -652,8 +688,20 @@ QWidget* MovieExporter::getExportOptionsWidget(const PlugInArgList* pInArgList)
                ++start;
                ++stop;
             }
-
             mpOptionWidget->setRange(start, stop);
+
+            // now check if need to change start and stop to playback bumpers
+            if (pController->getBumpersEnabled())
+            {
+               start = pController->getStartBumper();
+               stop = pController->getStopBumper();
+               if (eType == FRAME_ID) // have to adjust playback bumpers if values are FRAME_ID
+               {
+                  ++start;
+                  ++stop;
+               }
+            }
+
             mpOptionWidget->setStart(start);
             mpOptionWidget->setStop(stop);
 

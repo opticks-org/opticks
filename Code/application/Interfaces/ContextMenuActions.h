@@ -11,9 +11,24 @@
 #define CONTEXTMENUACTIONS_H
 
 /**
+ *  Displays dialog for user to adjust the left and right bumper values.
+ */
+#define APP_ANIMATIONCONTROLLER_ADJUST_BUMPERS_ACTION "APP_ANIMATIONCONTROLLER_ADJUST_BUMPERS_ACTION"
+
+/**
+ *  Animation bumper actions separator.
+ */
+#define APP_ANIMATIONCONTROLLER_BUMPER_SEPARATOR_ACTION "APP_ANIMATIONCONTROLLER_BUMPER_SEPARATOR_ACTION"
+
+/**
  *  Changes the direction of animation play.
  */
 #define APP_ANIMATIONCONTROLLER_CHANGE_DIRECTION_ACTION "APP_ANIMATIONCONTROLLER_CHANGE_DIRECTION_ACTION"
+
+/**
+ *  Enables the animation bumpers to limit playback to a subset of the animation.
+ */
+#define APP_ANIMATIONCONTROLLER_ENABLE_BUMPERS_ACTION "APP_ANIMATIONCONTROLLER_ENABLE_BUMPERS_ACTION"
 
 /**
  *  Stops animation at the current frame.
@@ -24,6 +39,26 @@
  *  Begins animation.
  */
 #define APP_ANIMATIONCONTROLLER_PLAY_ACTION "APP_ANIMATIONCONTROLLER_PLAY_ACTION"
+
+/**
+ *  Resets the bumpers to the start and stop frames of the animation.
+ */
+#define APP_ANIMATIONCONTROLLER_RESET_BUMPERS_ACTION "APP_ANIMATIONCONTROLLER_RESET_BUMPERS_ACTION"
+
+/**
+ *  Restores the bumpers to the values in the user's configuration settings.
+ */
+#define APP_ANIMATIONCONTROLLER_RESTORE_BUMPERS_ACTION "APP_ANIMATIONCONTROLLER_RESTORE_BUMPERS_ACTION"
+
+/**
+ *  Sets the left (start) bumper to the current frame of the animation.
+ */
+#define APP_ANIMATIONCONTROLLER_SET_LEFT_BUMPER_ACTION "APP_ANIMATIONCONTROLLER_SET_LEFT_BUMPER_ACTION"
+
+/**
+ *  Sets the right (stop) bumper to the current frame of the animation.
+ */
+#define APP_ANIMATIONCONTROLLER_SET_RIGHT_BUMPER_ACTION "APP_ANIMATIONCONTROLLER_SET_RIGHT_BUMPER_ACTION"
 
 /**
  *  Moves backward one frame in the animation.
@@ -39,6 +74,16 @@
  *  Stops animation and sets the current frame to the first frame.
  */
 #define APP_ANIMATIONCONTROLLER_STOP_ACTION "APP_ANIMATIONCONTROLLER_STOP_ACTION"
+
+/**
+ *  Stores the current bumper values in the user's configuration settings.
+ */
+#define APP_ANIMATIONCONTROLLER_STORE_BUMPERS_ACTION "APP_ANIMATIONCONTROLLER_STORE_BUMPERS_ACTION"
+
+/**
+ *  Animation bumper store/restore actions separator.
+ */
+#define APP_ANIMATIONCONTROLLER_STORE_BUMPERS_SEPARATOR_ACTION "APP_ANIMATIONCONTROLLER_STORE_BUMPERS_SEPARATOR_ACTION"
 
 /**
  *  Appearing in a context menu for an AnimationController, this action sets

@@ -25,7 +25,9 @@
 #include <vector>
 
 class AnimationController;
+class AnimationControllerImp;
 class AnimationCycleButton;
+class QToolButton;
 
 class AnimationToolBarImp : public ToolBarImp
 {
@@ -69,6 +71,10 @@ protected slots:
    void updateCurrentFrame(double frameValue);
    void updateFrameSpeed(double speed);
    void updateAnimationCycle(AnimationCycle cycle);
+   void bumpersEnabled(bool enabled);
+   void setStartBumper(double newValue);
+   void setStopBumper(double newValue);
+   void updateBumperMenu();
 
    void updateAnimationControls();
 
@@ -83,40 +89,60 @@ protected:
 private:
    void setPlayButtonState(AnimationState state);
    void setChangeDirectionButtonState(AnimationState state);
-
+   int getSliderIndex(double frameValue);
+   void updateBumpers();
    /**
-    * WheelEventSlider is a subclass of QSlider to avoid
-    * a bug in QSlider's mouse wheel event handling.
-    */
+   * WheelEventSlider is a subclass of QSlider to avoid
+   * a bug in QSlider's mouse wheel event handling.
+   */
    class WheelEventSlider : public QSlider
    {
    public:
       WheelEventSlider(Qt::Orientation orientation, QWidget *parent = 0);
+      void setLeftBumper(int index);
+      void setRightBumper(int index);
+      void resetBumpers();
+      void setBumpersEnabled(bool enabled);
+      bool getBumpersEnabled() const;
+      void getPlaybackRange(int& start, int& stop) const;
 
    protected:
       /**
-       * Since QSlider's wheelEvent() method does not
-       * call triggerAction, we shall have to do it ourselves.
-       */
-      void wheelEvent(QWheelEvent *e);
+      * Since QSlider's wheelEvent() method does not
+      * call triggerAction, we shall have to do it ourselves.
+      */
+      void wheelEvent(QWheelEvent* pEvent);
+      void paintEvent(QPaintEvent* pEvent);
+
+   private:
+      bool mBumpersEnabled;
+      int mLeftBumper;
+      int mRightBumper;
    };
 
-   QAction* mpChangeDirectionAction;   // button changes the direction in which the movie is playing
-   QAction* mpStopAction;              // button to stop playing movie and return to beginning of movie
-   QAction* mpPlayPauseAction;         // pause/play button
-   QAction* mpSlowDownAction;          // button changes the speed to the previous value in the list
-   QAction* mpSpeedUpAction;           // button changes the speed to the next value in the list
-   QComboBox* mpFrameSpeedCombo;       // button changes the speed at which the movie is playing
-   QAction* mpStepForwardAction;       // button steps the movie one frame forward
-   QAction* mpStepBackwardAction;      // button steps the movie one frame backward
-   QSlider* mpFrameSlider;             // slider is used to change the frame the movie is displaying
-   QAction* mpDropFramesAction;        // button to determine show if frames can be dropped or not
+   QAction* mpChangeDirectionAction;     // button changes the direction in which the movie is playing
+   QAction* mpStopAction;                // button to stop playing movie and return to beginning of movie
+   QAction* mpPlayPauseAction;           // pause/play button
+   QAction* mpSlowDownAction;            // button changes the speed to the previous value in the list
+   QAction* mpSpeedUpAction;             // button changes the speed to the next value in the list
+   QComboBox* mpFrameSpeedCombo;         // button changes the speed at which the movie is playing
+   QAction* mpStepForwardAction;         // button steps the movie one frame forward
+   QAction* mpStepBackwardAction;        // button steps the movie one frame backward
+   WheelEventSlider* mpFrameSlider;      // slider is used to change the frame the movie is displaying
+   QToolButton* mpBumperButton;          // button enables/disables bumpers and provides access to bumpers menu
+   QAction* mpLeftBumperToFrameAction;   // menu action to set left bumper to current frame
+   QAction* mpRightBumperToFrameAction;  // menu action to set right bumper to current frame
+   QAction* mpAdjustBumpersAction;       // menu action to display dialog to adjust bumpers
+   QAction* mpResetBumpersAction;        // menu action to reset the bumpers
+   QAction* mpStoreBumpersAction;        // menu action to store mpController's set of bumpers
+   QAction* mpRestoreBumpersAction;      // menu action to restore a set of bumpers to mpController
+   QAction* mpDropFramesAction;          // button to determine if frames can be dropped or not
    AnimationCycleButton* mpCycle;
    QLabel* mpTimestampLabel;
 
-   AnimationController* mpController;       // current animation controller to play attached movies
+   AnimationControllerImp* mpController; // current animation controller to play attached movies
 
-   AnimationState mPrevAnimationState; // stores the previous animation state to be used after the slider is released
+   AnimationState mPrevAnimationState;   // stores the previous animation state to be used after the slider is released
    bool mHideTimestamp;
 };
 
