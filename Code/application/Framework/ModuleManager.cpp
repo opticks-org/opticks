@@ -77,7 +77,7 @@ const char* ModuleManager::mspValidationKey = "none";
 
 unsigned int ModuleManager::getTotalPlugIns()
 {
-   return 43;
+   return 44;
 }
 
 PlugIn* ModuleManager::getPlugIn(unsigned int plugInNumber)
