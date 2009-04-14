@@ -78,7 +78,7 @@ public:
    void applyChanges();
 
 private:
-   std::vector<std::pair<std::string, std::string>> mDialogList;
+   std::vector<std::pair<std::string, std::string> > mDialogList;
    CustomTreeWidget* mpDialogTree;
 };
 
