@@ -43,7 +43,7 @@ OptionsSuppressibleMsgDlg::OptionsSuppressibleMsgDlg() :
    mDialogList.push_back(std::pair<string, string>("This is another test dialog", "{6E22C35B-6B64-458c-9C41-E1BF9B1E6861}"));
 
    Service<DesktopServices> pDesktop;
-   for (std::vector<std::pair<string, string>>::iterator iter = mDialogList.begin(); iter != mDialogList.end(); ++iter)
+   for (std::vector<std::pair<string, string> >::iterator iter = mDialogList.begin(); iter != mDialogList.end(); ++iter)
    {
       QTreeWidgetItem* pItem = new QTreeWidgetItem(mpDialogTree);
       if (pItem != NULL)
