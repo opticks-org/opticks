@@ -34,8 +34,8 @@ env["QT_MODULES"] = ["QtCore","QtGui","Qt3Support","QtOpenGL", "QtXml"]
 env.Qt4AddModules(env["QT_MODULES"])
 
 env['LINK'] = "$CXX"
-env.Append(CXXFLAGS="-library=stlport4 -xarch=v9 -xcode=pic32 -erroff=nonewline",
-           LINKFLAGS="-library=stlport4 -xarch=v9 -xcode=pic32 -mt -L/usr/sfw/lib/sparcv9",
+env.Append(CXXFLAGS="-library=stlport4 -m64 -xcode=pic32 -erroff=nonewline",
+           LINKFLAGS="-library=stlport4 -m64 -xcode=pic32 -mt -L/usr/sfw/lib/sparcv9",
            CPPDEFINES=["APPLICATION_XERCES"],
            LIBS=env["QT_MODULES"] + ["nsl","dl","GLU","GL","Xm","Xext","Xrender","X11","m"])
 env.BuildDir(env["BUILDDIR"], "#", duplicate=0)

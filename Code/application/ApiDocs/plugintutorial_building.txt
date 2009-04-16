@@ -19,8 +19,8 @@ Before you can compile the tutorials or sample plug-ins you must first acquire a
 <li>On Windows, please install a copy of Visual Studio 2005 SP1 (any edition will work)</li>
 <li>On Solaris, please install the following software:
     <ul>
-    <li>Sun Studio 11</li>
-    <li>SCons 0.97 (http://www.scons.org).</li>
+    <li>Sun Studio 12</li>
+    <li>SCons 1.2 or later (http://www.scons.org).</li>
     </ul>
 </li>
 </ol>

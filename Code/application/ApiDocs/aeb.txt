@@ -11,7 +11,7 @@ Platform strings are defined as: os-procarch-compiler-debugmode
 Valid values are:
  - os: win32, win64, solaris, unknown
  - procarch: x86, sparc, unknown
- - compiler: msvc8.1, studio11, unknown
+ - compiler: msvc8.1, studio11 <sup>1</sup>, studio12, unknown
  - debugmode: debug, release
 
 Combinations currently recognized in %Opticks are:
@@ -19,8 +19,12 @@ Combinations currently recognized in %Opticks are:
  - win32-x86-msvc8.1-release
  - win64-x86-msvc8.1-debug
  - win64-x86-msvc8.1-release
- - solaris-sparc-studio11-debug
- - solaris-sparc-studio11-release
+ - solaris-sparc-studio11-debug <sup>1</sup>
+ - solaris-sparc-studio11-release <sup>1</sup>
+ - solaris-sparc-studio12-debug
+ - solaris-sparc-studio12-release
+ 
+ 1 - All officially compiled binaries of %Opticks will use Studio 12, not Studio 11.
  
 The following are paths allowed in the "content" portion of an AEB.
  - Bin - 3rd party dll's, misc executables, and Qt plug-ins

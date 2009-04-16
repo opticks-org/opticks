@@ -23,7 +23,7 @@ This sample AEB will provide an extension icon, an end user license agreement, a
      - win64-x86-msvc8.1-release
        - PlugIns
          - Sample.dll
-     - solaris-sparc-studio11-release
+     - solaris-sparc-studio12-release
        - PlugIns
          - Sample.so
    - splashScreen
@@ -60,7 +60,7 @@ The notation3 source code is placed in \c install.n3 and the rapper.exe utility 
       aebl:maxVersion "4.2.*" ] ;
    aebl:targetPlatform "win32-x86-msvc8.1-release" ;
    aebl:targetPlatform "win64-x86-msvc8.1-release" ;
-   aebl:targetPlatform "solaris-sparc-studio11-release" ;
+   aebl:targetPlatform "solaris-sparc-studio12-release" ;
    opticks:splashScreenURL "aeb:///splashScreen/SampleSplash.jpg" ;
    opticks:helpEntry [
       opticks:name "Sample Help" ;

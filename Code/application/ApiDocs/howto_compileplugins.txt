@@ -19,7 +19,7 @@ The following platform and compiler combinations are supported when building %Op
 <tr><th>Operating System</th><th>Processor</th><th>Compiler</th></tr>
 <tr><td>Windows XP 32-bit</td><td>x86</td><td>Visual Studio 2005 SP1 (any edition)</td></tr>
 <tr><td>Windows XP 64-bit</td><td>x86</td><td>Visual Studio 2005 SP1 (any edition)</td></tr>
-<tr><td>Solaris 10</td><td>SPARC v9</td><td>Sun Studio 11</td></tr>
+<tr><td>Solaris 10</td><td>SPARC v9</td><td>Sun Studio 12</td></tr>
 </table>
 
 \section compileplugins_general_basic Compiling Basic Plug-Ins For Any Platform, Compiler, or Build Tool
@@ -68,14 +68,14 @@ When compiling on Windows using Visual Studio 2005, you also need to do the foll
 </ul>
 </li>
 <li>
-When compiling on Solaris using Sun Studio 11, you also need to do the following:
+When compiling on Solaris using Sun Studio 12, you also need to do the following:
 <ul>
     <li>You must use the STLPort library included with the compiler instead of the standard STL Library in order to properly interact with the plug-in API on Solaris.
     You must also build your plug-ins using the v9 architecture.
     See the table below for the recommended additional compiler and linker settings.
     <table>
-    <tr><td>Additional Compiler Args</td><td>-library=stlport4 -xarch=v9 -xcode=pic32</td></tr>
-    <tr><td>Additional Linker Args</td><td>-library=stlport4 -xarch=v9 -xcode=pic32 -lnsl -ldl -lGLU -lGL -lXm -lXext -lX11 -lm</td></tr>
+    <tr><td>Additional Compiler Args</td><td>-library=stlport4 -m64 -xcode=pic32</td></tr>
+    <tr><td>Additional Linker Args</td><td>-library=stlport4 -m64 -xcode=pic32 -lnsl -ldl -lGLU -lGL -lXm -lXext -lX11 -lm</td></tr>
     </table>
 </ul>
 </li>

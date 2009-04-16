@@ -4,7 +4,7 @@ Instructions on building the Opticks source code in Solaris 64-bit.
 Programs that need to be installed before building the source code:
 --------------------------------------------------------------------------
 - Solaris 10
-- Sun Studio 11
+- Sun Studio 12
 - Python 2.5 or later (http://www.python.org/download/)
 - Subversion Command Line Client
   (http://downloads.open.collab.net/collabnet-subversion.html)

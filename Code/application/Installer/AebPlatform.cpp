@@ -74,6 +74,8 @@ std::string AebPlatform::currentPlatform()
    platform += "-msvc8.1";
 #elif __SUNPRO_CC == 0x580
    platform += "-studio11";
+#elif __SUNPRO_CC == 0x590
+   platform += "-studio12";
 #else
    platform += "-unknown";
 #endif
