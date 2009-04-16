@@ -722,6 +722,8 @@ QString ArcProxy::convertWhereClause(IFeatureClassPtr pFeatures, const QString &
       QString operand = *iter++;
       QString parameter = *iter++;
 
+      parameter = parameter.replace("%~", ",");
+
       long fieldIndex = 0;
       pFields->FindField(to_BSTR(fieldName), &fieldIndex);
       
@@ -738,7 +740,8 @@ QString ArcProxy::convertWhereClause(IFeatureClassPtr pFeatures, const QString &
       converted += startDelim + fieldName + stopDelim;
       converted += operand;
 
-      if (type == esriFieldTypeString || type == esriFieldTypeDate)
+      //do not force quotes around Date inputs that want to change the format
+      if (type == esriFieldTypeString || (type == esriFieldTypeDate && !parameter.contains(QString("TO_DATE"), Qt::CaseInsensitive)) )
       {
          converted += "'" + parameter.replace('\'', "''") + "'"; 
       }
