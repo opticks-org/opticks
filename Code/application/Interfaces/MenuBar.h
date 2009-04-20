@@ -316,6 +316,12 @@ public:
     *           successfully removed; otherwise returns \b false.
     */
    virtual bool removeMenuItem(QAction* pAction) = 0;
+
+protected:
+   /**
+    * This should not be deleted directly.
+    */
+   virtual ~MenuBar() {}
 };
 
 #endif
