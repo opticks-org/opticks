@@ -30,8 +30,6 @@
 #include <Windows.h>
 #endif
 
-const int CONNECTION_TIMEOUT = 5000;
-
 FeatureProxyConnector *FeatureProxyConnector::instance()
 {
    Service<PlugInManagerServices> pPlugInManager;
@@ -83,7 +81,8 @@ bool FeatureProxyConnector::initialize()
 
    mpConnectionTimer = new QTimer(this);
    mpConnectionTimer->setSingleShot(true);
-   mpConnectionTimer->setInterval(CONNECTION_TIMEOUT);
+   int connectionTimeout = FeatureProxyConnector::getSettingConnectionTimeout();
+   mpConnectionTimer->setInterval(connectionTimeout);
    VERIFYNR(connect(mpConnectionTimer, SIGNAL(timeout()), this, SLOT(abortConnection())));
 
    if (mpProcess->state() != QProcess::NotRunning)

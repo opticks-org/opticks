@@ -16,6 +16,7 @@
 #include "FeatureClassProperties.h"
 #include "LocationType.h"
 #include "ShapelibProxy.h"
+#include "ConfigurationSettings.h"
 
 #include <QtCore/QObject>
 #include <QtCore/QQueue>
@@ -86,6 +87,9 @@ class FeatureProxyConnector : public QObject
    Q_OBJECT
 
 public:
+
+   SETTING(ConnectionTimeout, FeatureProxyConnector, int, 5000)
+
    static FeatureProxyConnector *instance();
 
    FeatureProxyConnector(const QString &executable, QObject *pParent = NULL);

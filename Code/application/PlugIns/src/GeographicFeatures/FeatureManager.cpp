@@ -482,14 +482,14 @@ FeatureProxyConnector *FeatureManager::getProxy()
    {
       // Start up ArcProxy
       Service<ConfigurationSettings> pSettings;
-
       string plugInPath = pSettings->getPlugInPath();
+      string arcProxyExec = FeatureManager::getSettingArcProxyExecutable();
 #if defined(WIN_API)
       QString proxyPath = QString::fromStdString(
-         plugInPath + SLASH + "ArcProxy" + SLASH + "ArcProxy" + EXE_EXTENSION);
+         plugInPath + SLASH + "ArcProxy" + SLASH + arcProxyExec + EXE_EXTENSION);
 #elif defined(UNIX_API)
       QString proxyPath = QString::fromStdString(
-         plugInPath + SLASH + "ArcProxy" + SLASH + "solArcProxy" + EXE_EXTENSION);
+         plugInPath + SLASH + "ArcProxy" + SLASH + "sol" + arcProxyExec + EXE_EXTENSION);
 #else
 #error "Don't know how to start ArcProxy"
 #endif

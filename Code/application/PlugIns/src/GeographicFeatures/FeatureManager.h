@@ -36,6 +36,7 @@ public:
 
    SETTING_PTR(Options, FeatureManager, DynamicObject);
    SETTING(OptionsVersion, FeatureManager, unsigned int, 0);
+   SETTING(ArcProxyExecutable, FeatureManager, std::string, "ArcProxy");
 
    bool execute(PlugInArgList *pInputArgList, PlugInArgList *pOutputArgList);
 
