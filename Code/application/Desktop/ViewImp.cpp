@@ -729,20 +729,26 @@ bool ViewImp::getCurrentImage(QImage &image)
 }
 
 ViewImp::SubImageIteratorImp::SubImageIteratorImp(ViewImp *pView, const QSize &totalSize, const QSize &subImageSize) :
-         mpView(pView), mTotalSize(totalSize), mSubImageSize(subImageSize), mCurrentTileX(-1), mCurrentTileY(0)
+         mpView(pView), mTotalSize(totalSize), mSubImageSize(subImageSize), mTotalTilesX(0), mTotalTilesY(0),
+         mCurrentTileX(-1), mCurrentTileY(0)
 {
+   // save the current view settings
+   //
+   LocationType dummy;
+   mpView->getVisibleCorners(mRestoreLowerLeft, dummy, mRestoreUpperRight, dummy);
+   mRestoreViewSize = mpView->size();
+
+   if (subImageSize.width() == 0 || subImageSize.height() == 0 || totalSize.width() == 0 || totalSize.height() == 0)
+   {
+      return;
+   }
+
    // Calculate the total number of sub-images.
    //
    mTotalTilesX = totalSize.width() / subImageSize.width() +
                 ((totalSize.width() % subImageSize.width() == 0) ? 0 : 1);
    mTotalTilesY = totalSize.height() / subImageSize.height() +
                 ((totalSize.height() % subImageSize.height() == 0) ? 0 : 1);
-
-   // save the current view settings
-   //
-   LocationType dummy;
-   mpView->getVisibleCorners(mRestoreLowerLeft, dummy, mRestoreUpperRight, dummy);
-   mRestoreViewSize = mpView->size();
 
    // resize the view to the requested sub-image size (pixel coordinates)
    //

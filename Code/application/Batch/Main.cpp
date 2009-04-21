@@ -32,7 +32,7 @@ int main(int argc, char** argv)
 
    //Need to initialize QCoreApplication so that ConfigSettingsImp
    //can use QCoreApplication::applicationDirPath()
-   QCoreApplication qApp(argc, argv);
+   QCoreApplication qCoreApp(argc, argv);
 
    // Register the command line options
    ArgumentList* pArgumentList = NULL;
@@ -55,7 +55,7 @@ int main(int argc, char** argv)
    pArgumentList->registerOption("?");
    pArgumentList->set(argc, argv);
 
-   BatchApplication batchApp(qApp);
+   BatchApplication batchApp(qCoreApp);
 
    // Display application information
    bool bProductionRelease = false;

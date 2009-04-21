@@ -2834,7 +2834,7 @@ void HistogramPlotImp::detached(Subject& subject, const string& signal, const Sl
 }
 
 #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove QListWidget subclass when QListWidget " \
-   "defines an appropriate size hint! (Qt 4.3.1) (dsulgrov)")
+   "defines an appropriate size hint! (Qt 4.5.0) (dsulgrov)")
 QSize HistogramPlotImp::MenuListWidget::sizeHint() const
 {
    int iWidth = sizeHintForColumn(0) + 25;   // Add 25 to provide room for the scroll bar

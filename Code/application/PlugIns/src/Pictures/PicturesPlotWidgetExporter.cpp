@@ -56,13 +56,14 @@ bool PicturesPlotWidgetExporter::generateImage(QImage &image)
       return false;
    }
 
+   bool presizedImage = !image.isNull();
    QSize outputSize = image.size();
    pPlotWidget->getCurrentImage(image);
    // we just scale the plot...there's not "hidden" data that's not rendered at
    // a smaller scale like in a spatial data view. if the output size is very large
    // this could result in some aliasing and jaggies...if this becomes a problem
    // for users, we can deal with that situation later.
-   if (outputSize.isValid() && image.size() != outputSize)
+   if (presizedImage)
    {
       image = image.scaled(outputSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
    }

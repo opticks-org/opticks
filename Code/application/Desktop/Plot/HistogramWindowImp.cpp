@@ -734,6 +734,10 @@ void HistogramWindowImp::setCurrentPlot(const DisplayMode& displayMode)
 
 void HistogramWindowImp::activateLayer(PlotWidget* pPlot)
 {
+   if (pPlot == NULL)
+   {
+      return;
+   }
    HistogramPlotImp* pHistogramPlot = dynamic_cast<HistogramPlotImp*>(pPlot->getPlot());
    if ((pHistogramPlot == NULL) || (mDisplayModeChanging))
    {

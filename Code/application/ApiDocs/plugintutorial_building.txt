@@ -31,14 +31,10 @@ Once you have acquired the above software, you will need to acquire the 3rd part
 Open a command window or terminal and run the following command:
 \verbatim
 cd SDK_HOME/Dependencies
-python dependencies.py Boost Hdf4 pthreads Xerces xqilla
+python dependencies.py Boost Hdf4 pthreads Xerces xqilla Qt
 \endverbatim
 </li>
 <li>You should not encounter any errors running the previous step.</li>
-<li>
-You will need to acquire a copy of Qt (http://www.qtsoftware.com/products).
-Please follow the instructions found in \ref FetchingQt
-</li>
 </ol>
 At this point you have all of the necessary dependencies.
 You will now need to create an environment variable called OPTICKSDEPENDENCIES set to SDK_HOME/Dependencies using the appropriate method for your system/operating system.

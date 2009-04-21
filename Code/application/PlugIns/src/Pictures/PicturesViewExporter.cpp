@@ -66,8 +66,7 @@ bool PicturesViewExporter::generateImage(QImage &image)
       return false;
    }
 
-   QSize imageSize = image.size();
-   if (imageSize == QSize())
+   if (image.isNull())
    {
       pView->getCurrentImage(image);
 
@@ -75,7 +74,7 @@ bool PicturesViewExporter::generateImage(QImage &image)
       if (pProductView != NULL)
       {
          // For Product View, crop the background if the background is different from the paper color.
-         imageSize = image.size();
+         QSize imageSize = image.size();
          QRgb paperColor = COLORTYPE_TO_QCOLOR(pProductView->getPaperColor()).rgb();
          QRgb backgroundColor = COLORTYPE_TO_QCOLOR(pProductView->getBackgroundColor()).rgb();
          if (paperColor != backgroundColor)
@@ -123,6 +122,7 @@ bool PicturesViewExporter::generateImage(QImage &image)
    }
    else
    {
+      QSize imageSize = image.size();
       QSize subImageSize(512, 512);
       QPoint origin(0, imageSize.height() - subImageSize.height());
       QPainter painter(&image);

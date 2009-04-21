@@ -9,7 +9,7 @@ Wherever you see the word SDK_HOME, please expand that to be the directory where
 You must first install Python 2.5 or later (http://www.python.org/download/).
 
 \section FetchingDeps Fetching 3rd party libraries
-The SDK includes a python script that will automatically fetch all of the 3rd party libraries except Qt that may be needed when creating plug-ins for %Opticks.
+The SDK includes a python script that will automatically fetch all of the 3rd party libraries that may be needed when creating plug-ins for %Opticks.
 This script can be found in the SDK_HOME\\Dependencies folder.
 In general, this script can be run by opening a command window or terminal and running the following command:
 \verbatim
@@ -32,31 +32,6 @@ If you would like to fetch all of the 3rd party libraries, you can run the scrip
 \verbatim
 python dependencies.py
 \endverbatim
-
-\section FetchingQt Fetching Qt
-The dependencies script does not currently provide a method to fetch Qt (http://www.qtsoftware.com/).
-Qt is needed if you are creating any plug-ins that need a GUI.
-Since Qt is made available under either the GPL (i.e. open-source) license or a commercial license, you will first need to decide how you will be using Qt.
-If you are just going to build the tutorials and sample plug-ins or create an open-source (i.e. GPL or LGPL) licensed plug-in you can use the open-source edition of Qt.
-If you are going to create a commercially licensed or closed-source plug-in you will need to use the commerically licensed version of Qt.
-Please read the Trolltech FAQ about Qt licensing (http://www.qtsoftware.com/developer/faqs/licensing) before making your decision.
-<ol>
-<li>
-If you are using the commercial licensed edition of Qt, you will need to build Qt yourself and then arrange it into our required directory structure.
-You can find more details about this on the opticks website at <a href="https://opticks.ballforge.net/servlets/ProjectProcess?tab=5" target="_blank">https://opticks.ballforge.net/servlets/ProjectProcess?tab=5</a>.
-</li>
-<li>
-If you are using the open-source edition of Qt, you can download a pre-built binary provided by the %Opticks project from https://opticks.ballforge.net/files/documents/8/224/Qt-4.3.4-opensource-fixed-libqjpeg.zip .
-</li>
-<li>Once you have downloaded this .zip, please rename the file to Qt-4.3.4.zip and place it in SDK_HOME/Dependencies/packages/ folder.</li>
-<li>
-Open a command window or terminal and run the following command to properly deploy Qt:
-\verbatim
-cd SDK_HOME/Dependencies
-python dependencies.py Qt
-\endverbatim
-</li>
-</ol>
 
 \section DepsCompilingLinking Compiling and Linking With 3rd party libraries
 The pre-built binaries that dependencies.py fetches are compilations of the original source distributions and then they have been arranged into a convenient directory structure to support cross-platform compilations.

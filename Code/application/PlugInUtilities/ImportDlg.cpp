@@ -139,7 +139,7 @@ ImportDlg::ImportDlg(const QString& strPlugInSubtype, const QString& strInitialP
    // Connections
 #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Change the currentChanged() signal to " \
    "filesSelected() and remove the mFilename member when the filesSelected() signal is emitted when the " \
-   "selection changes. (Qt 4.3.1) (dsulgrov)")
+   "selection changes but before the dialog is accepted. (Qt 4.5.0) (dsulgrov)")
    VERIFYNR(connect(this, SIGNAL(currentChanged(const QString&)), this, SLOT(updateFromFile(const QString&))));
    VERIFYNR(connect(this, SIGNAL(plugInSelected(const QString&)), this, SLOT(updateFromImporter(const QString&))));
    VERIFYNR(connect(this, SIGNAL(optionsClicked()), this, SLOT(invokeOptionsDialog())));

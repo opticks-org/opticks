@@ -24,6 +24,9 @@ class Package(object):
 
    def __init__(self, url=None, downloadLocation=None, targetDirectory=None, sentinal=None):
       self.url = url
+      self.extraUrl = None
+      self.extraDownloadLocation = None
+      self.extraTargetDirectory = None
       if not os.path.isabs(downloadLocation):
          self.downloadLocation = os.path.join(toplevel, "packages", downloadLocation)
       else:
@@ -36,6 +39,17 @@ class Package(object):
          self.sentinal = os.path.join(toplevel, sentinal)
       else:
          self.sentinal = sentinal
+
+   def addExtraPackage(self, url=None, downloadLocation=None, targetDirectory=None):
+      self.extraUrl = url
+      if not os.path.isabs(downloadLocation):
+         self.extraDownloadLocation = os.path.join(toplevel, "packages", downloadLocation)
+      else:
+         self.extraDownloadLocation = downloadLocation
+      if not os.path.isabs(targetDirectory):
+         self.extraTargetDirectory = os.path.join(toplevel, targetDirectory)
+      else:
+         self.extraTargetDirectory = targetDirectory
 
    def isValid(self):
       if self.downloadLocation == None or self.targetDirectory == None:
@@ -51,7 +65,7 @@ class Package(object):
    def updateSentinal(self):
       open(self.sentinal,"w").close()
 
-   def download(self,force=False):
+   def download(self,force=False,all=False):
       if not self.downloadLocation:
          raise DependencyException("Download location must be defined.")
       if force or self.needsUpdate(self.downloadLocation, None):
@@ -65,9 +79,25 @@ class Package(object):
       else:
          if verbosity > 0: print "%s is up to date..." % os.path.basename(self.downloadLocation)
 
-   def unpack(self,force=False):
+      if not all or not self.extraDownloadLocation:
+         return 
+      if force or self.needsUpdate(self.extraDownloadLocation, None):
+         if not self.extraUrl:
+            raise DependencyException("No package URL specified. This package is not available for download. Place %s package URL in the packages directory." % os.path.basename(self.extraDownloadLocation))
+         import urllib
+         if verbosity > 0: print "Downloading %s -> %s..." % (self.extraUrl, self.extraDownloadLocation)
+         if not os.path.exists(os.path.dirname(self.extraDownloadLocation)):
+            os.makedirs(os.path.dirname(self.extraDownloadLocation))
+         urllib.urlretrieve(self.extraUrl, self.extraDownloadLocation)
+      else:
+         if verbosity > 0: print "%s is up to date..." % os.path.basename(self.extraDownloadLocation)
+
+   def unpack(self,force=False,all=False):
       if not self.downloadLocation or not self.targetDirectory:
          raise DependencyException("Download location and target directory must be defined.")
+
+      haveExtras = all and self.extraDownloadLocation is not None
+      unpackExtras = haveExtras and (force or self.needsUpdate(self.sentinal, self.extraDownloadLocation))
 
       if force or self.needsUpdate(self.sentinal, self.downloadLocation):
          import subprocess
@@ -79,10 +109,32 @@ class Package(object):
             if verbosity < 2: cmd.append('-q')
             cmd = cmd + ['-o','-d', self.targetDirectory, self.downloadLocation]
             if subprocess.call(cmd) < 0:
-                  raise DependencyException("Unable to unzip the package")
+               raise DependencyException("Unable to unzip the package")
             self.updateSentinal()
       else:
          if verbosity > 0: print "%s is up to date..." % os.path.basename(self.targetDirectory)
+
+      if not haveExtras:
+         return 
+
+      if not self.extraTargetDirectory:
+         raise DependencyException("Target directory must be defined.")
+          
+      if unpackExtras:
+         import subprocess
+         if verbosity > 0: print "Unpacking %s to %s..." % (self.extraDownloadLocation,self.extraTargetDirectory)
+         if not os.path.exists(self.extraTargetDirectory):
+            os.makedirs(self.extraTargetDirectory)
+         if os.path.splitext(self.extraDownloadLocation)[1].lower() == '.zip':
+            cmd = [UNZIP]
+            if verbosity < 2: cmd.append('-q')
+            cmd = cmd + ['-o','-d', self.extraTargetDirectory, self.extraDownloadLocation]
+            if subprocess.call(cmd) < 0:
+               raise DependencyException("Unable to unzip the package")
+            self.updateSentinal()
+      else:
+         if verbosity > 0: print "%s is up to date..." % os.path.basename(self.extraTargetDirectory)
+         
 
 def buildDepsList(deppath):
       depdirs = []
@@ -106,12 +158,18 @@ def buildDepsList(deppath):
          else:
             deps[depname] = Package()
             deps[depname].doc = mod.__doc__
+         if 'extra_package' in mod.__dict__:
+            if 'targetDirectory' not in mod.extra_package:
+               mod.extra_package['targetDirectory'] = toplevel
+            deps[depname].addExtraPackage(*[], **mod.extra_package)
+
       return deps
 
 if __name__ == '__main__':
    import optparse,imp,sys,os
    parser = optparse.OptionParser(usage="usage: %prog [options] [dependency]...\nBy default, all dependencies are installed. The OPTICKS_DEP_PATH environment variable, if present, will be searched for dependency configurations.")
    parser.add_option("-m","--mode",help="list: list available dependencies -- build: build from source -- package: the default, install from pre-build packages",action="store",choices=("list","build","package"),default="package",dest="mode")
+   parser.add_option("-s","--size",help="min: the default, download only parts of the package required for compilation -- all: all parts of the package",action="store",choices=("min","all"),default="min",dest="package")
    parser.add_option("-f","--force",help="Force installation",action="store_true",dest="force",default=False)
    parser.add_option("-q","--quiet",help="Print fewer messages",action="store_true",dest="quiet")
    parser.add_option("-v","--verbose",help="Print more messages",action="store_true",dest="verbose")
@@ -139,13 +197,17 @@ if __name__ == '__main__':
       sys.exit(0)
    if len(args) == 0:
       args = deps.keys()
+   if options.package == "all":
+      all = True
+   else:
+      all = False
    for pkg in args:
       if pkg not in deps or not deps[pkg].isValid():
          if verbosity >= 0: print "%s does not support package installation. You must build from source." % pkg
          continue
       p = deps[pkg]
       try:
-         p.download(options.force)
-         p.unpack(options.force)
+         p.download(options.force, all)
+         p.unpack(options.force, all)
       except DependencyException,e:
          print "Unable to install %s: %s" % (pkg,str(e))

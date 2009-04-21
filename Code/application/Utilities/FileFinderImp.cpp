@@ -124,27 +124,12 @@ void FileFinderImp::getLastAccessTime(DateTime& dt) const
 {
    if (mCurrentEntry != mEntryList.end())
    {
-#if defined(WIN_API)
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Workaround for Qt 4.3.1 issue #186743 (dadkins)")
-      WIN32_FILE_ATTRIBUTE_DATA fileData;
-      if (GetFileAttributesEx(mCurrentEntry->absoluteFilePath().toStdString().c_str(),
-         GetFileExInfoStandard, &fileData))
-      {
-         SYSTEMTIME systemTime;
-         if (FileTimeToSystemTime(&fileData.ftLastAccessTime, &systemTime))
-         {
-            dt.set(systemTime.wYear, systemTime.wMonth, systemTime.wDay,
-               systemTime.wHour, systemTime.wMinute, systemTime.wSecond);
-         }
-      }
-#else
       QDateTime qdt = mCurrentEntry->lastRead().toUTC();
       if (qdt.isValid())
       {
          dt.set(qdt.date().year(), qdt.date().month(), qdt.date().day(), qdt.time().hour(),
             qdt.time().minute(), qdt.time().second());
       }
-#endif
    }
 }
 
@@ -152,27 +137,12 @@ void FileFinderImp::getLastModificationTime(DateTime& dt) const
 {
    if (mCurrentEntry != mEntryList.end())
    {
-#if defined(WIN_API)
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Workaround for Qt 4.3.1 issue #186743 (dadkins)")
-      WIN32_FILE_ATTRIBUTE_DATA fileData;
-      if (GetFileAttributesEx(mCurrentEntry->absoluteFilePath().toStdString().c_str(),
-         GetFileExInfoStandard, &fileData))
-      {
-         SYSTEMTIME systemTime;
-         if (FileTimeToSystemTime(&fileData.ftLastWriteTime, &systemTime))
-         {
-            dt.set(systemTime.wYear, systemTime.wMonth, systemTime.wDay,
-               systemTime.wHour, systemTime.wMinute, systemTime.wSecond);
-         }
-      }
-#else
       QDateTime qdt = mCurrentEntry->lastModified().toUTC();
       if (qdt.isValid())
       {
          dt.set(qdt.date().year(), qdt.date().month(), qdt.date().day(), qdt.time().hour(),
             qdt.time().minute(), qdt.time().second());
       }
-#endif
    }
 }
 
