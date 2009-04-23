@@ -96,6 +96,7 @@ def is_subversion_soft_link(srcname):
 def copy_dependencies(dp_list, dest_dir):
     if not(os.path.exists(dest_dir)):
         os.makedirs(dest_dir)
+    create_qt_conf(dest_dir, 1)
     for the_file, the_dest_dir in dp_list:
         the_file = os.path.abspath(the_file)
         file_name = os.path.split(the_file)[1]
@@ -123,8 +124,6 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
     dp = dependencies_path
 
     dp_list = list()
-    create_qt_conf(dp, 0)
-    la("qt.conf")
     if platform == "Solaris":
         la("ffmpeg/solaris-sparc/libavcodec/libavcodec.so.51")
         la("ffmpeg/solaris-sparc/libavformat/libavformat.so.50")

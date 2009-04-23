@@ -168,19 +168,17 @@ CachedPage::UnitPtr Nitf::Pager::fetchUnit(DataRequest *pOriginalRequest)
    ossimIrect region(colNumber + minx, rowNumber + miny,
                      colNumber + minx + concurrentColumns-1, rowNumber + miny + concurrentRows-1);
 
-
    ossimRefPtr<ossimImageData> cubeData = mpImageHandler->getTile(region);
-   VERIFYRV(cubeData != NULL, pUnit);
-
-   ossimDataObjectStatus stat = cubeData->getDataObjectStatus();
-   // VERIFYRV(stat == OSSIM_FULL, NULL);
+   if (cubeData == NULL || cubeData->getBuf(bandNumber) == NULL)
+   {
+      return pUnit;
+   }
 
    size_t srcSize = static_cast<size_t>(cubeData->getSizePerBandInBytes()) * concurrentBands;
    size_t dstSize = static_cast<size_t>(concurrentRows)*concurrentColumns*concurrentBands*getBytesPerBand();
    VERIFYRV(srcSize >= dstSize && dstSize > 0, pUnit);
 
    char* pData = new char[dstSize];
-   VERIFYRV(pData != NULL, pUnit);
    memcpy(pData, cubeData->getBuf(bandNumber), dstSize);
 
    CachedPage::CacheUnit* pCacheUnit = new CachedPage::CacheUnit(pData, startRow, concurrentRows,

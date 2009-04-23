@@ -275,8 +275,6 @@ bool Nitf::importMetadata(const unsigned int& currentImage, const Nitf::OssimFil
    }
 
    // Now do the TREs
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Combine the TRE Information and TRE fields " \
-   "when not in binary lockdown (dadkins)")
    FactoryResource<DynamicObject> pTres;
    FactoryResource<DynamicObject> pTreInfo;
 

@@ -7,6 +7,7 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtCore/QFile>
 #include <QtCore/QString>
 
 #include "AppAssert.h"
@@ -16,6 +17,7 @@
 #include "DataDescriptor.h"
 #include "DesktopServices.h"
 #include "DynamicObject.h"
+#include "FileDescriptor.h"
 #include "FileResource.h"
 #include "ImportDescriptor.h"
 #include "NitfConstants.h"
@@ -462,15 +464,31 @@ bool Nitf::NitfImporter::validate(const DataDescriptor* pDescriptor, string& err
 
    if (pDescriptor == NULL)
    {
-      errorMessage = "No descriptor available.";
+      errorMessage += "No descriptor available.";
       return false;
    }
 
    const DynamicObject* const pMetadata = pDescriptor->getMetadata();
    if (pMetadata == NULL)
    {
-      errorMessage = "No metadata available.";
+      errorMessage += "No metadata available.";
       return false;
+   }
+
+   const FileDescriptor* const pFileDescriptor = pDescriptor->getFileDescriptor();
+   if (pFileDescriptor == NULL)
+   {
+      errorMessage += "No file descriptor available.";
+      return false;
+   }
+
+   const qint64 actualSize = QFile(QString::fromStdString(pFileDescriptor->getFilename().getFullPathAndName())).size();
+   const qint64 maxSize = numeric_limits<ossim_uint64>::max() & numeric_limits<std::streamoff>::max();
+   if (actualSize > maxSize)
+   {
+      errorMessage += "This file exceeds the maximum supported size for this platform.\n"
+         "Data at the end of the file may be missing or incorrect.\n"
+         "IMPORT DATA FROM THIS FILE WITH THE KNOWLEDGE THAT IT IS NOT FULLY SUPPORTED.\n";
    }
 
    // warn user if unsupported metadata is in the file
