@@ -847,11 +847,11 @@ string MessageImp::propertyToString(const string& type, void* pValue) const
    stringstream buf;
    if (type == "char")
    {
-      buf << *(reinterpret_cast<char*>(pValue));
+      buf << static_cast<short>(*(reinterpret_cast<char*>(pValue)));
    }
    else if (type == "unsigned char")
    {
-      buf << *(reinterpret_cast<unsigned char*>(pValue));
+      buf << static_cast<unsigned short>(*(reinterpret_cast<unsigned char*>(pValue)));
    }
    else if (type == "short")
    {
