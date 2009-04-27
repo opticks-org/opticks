@@ -342,6 +342,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\MetadataExporter.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ModelExporter.cpp"
 				>
 			</File>
@@ -377,6 +381,10 @@
 			</File>
 			<File
 				RelativePath=".\LayerImporter.h"
+				>
+			</File>
+			<File
+				RelativePath=".\MetadataExporter.h"
 				>
 			</File>
 			<File

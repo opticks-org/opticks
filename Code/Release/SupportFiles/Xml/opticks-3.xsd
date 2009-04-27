@@ -1003,6 +1003,7 @@ http://www.gnu.org/licenses/lgpl.html
    <xsd:element name="AoiElement" type="opticks:AoiElement" />
    <xsd:element name="TiePointList" type="opticks:TiePointList" />
    <xsd:element name="Wizard" type="opticks:Wizard" />
+   <xsd:element name="Metadata" type="opticks:DynamicObject" />
    <xsd:complexType name="Layer" abstract="true">
       <xsd:sequence>
          <xsd:element ref="opticks:AnnotationElement" minOccurs="0" />

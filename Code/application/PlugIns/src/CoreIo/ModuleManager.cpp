@@ -7,13 +7,14 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "ModelExporter.h"
-#include "ModelImporter.h"
-#include "ModuleManager.h"
 #include "CgmExporter.h"
 #include "CgmImporter.h"
 #include "LayerExporter.h"
 #include "LayerImporter.h"
+#include "MetadataExporter.h"
+#include "ModelExporter.h"
+#include "ModelImporter.h"
+#include "ModuleManager.h"
 
 class AnnotationElement;
 class AoiElement;
@@ -29,7 +30,7 @@ const char* ModuleManager::mspUniqueId = "{D83A0C6B-4125-4d53-91E1-18F0C85A966D}
 
 unsigned int ModuleManager::getTotalPlugIns()
 {
-   return 12;
+   return 13;
 }
 
 PlugIn* ModuleManager::getPlugIn(unsigned int plugInNumber)
@@ -72,6 +73,9 @@ PlugIn* ModuleManager::getPlugIn(unsigned int plugInNumber)
          break;
       case 11:
          pPlugIn = new CgmExporter();
+         break;
+      case 12:
+         pPlugIn = new MetadataExporter();
          break;
       default:
          break;
