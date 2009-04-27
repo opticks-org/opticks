@@ -9,6 +9,7 @@
 
 #include <QtGui/QIcon>
 
+#include "ApplicationServices.h"
 #include "PlugInDescriptorImp.h"
 #include "Executable.h"
 #include "Exporter.h"
@@ -20,6 +21,7 @@
 #include "PlugInManagerServices.h"
 #include "ProgressAdapter.h"
 #include "PropertiesPlugInDescriptor.h"
+#include "Service.h"
 #include "SessionItemDeserializer.h"
 #include "SessionItemSerializer.h"
 #include "SessionManager.h"
@@ -39,7 +41,6 @@ PlugInDescriptorImp::PlugInDescriptorImp(const string& id, PlugIn* pPlugIn) :
    mExecutableInterface(false),
    mExecuteOnStartup(false),
    mDestroyAfterExecute(true),
-   mpMenuIcon(NULL),
    mAbort(false),
    mWizardSupport(false),
    mBatchSupport(false),
@@ -74,6 +75,11 @@ PlugInDescriptorImp::PlugInDescriptorImp(const string& id, PlugIn* pPlugIn) :
       mSubtype = pPlugIn->getSubtype();
       mAllowMultipleInstances = pPlugIn->areMultipleInstancesAllowed();
 
+      if (Service<ApplicationServices>()->isInteractive())
+      {
+         setIcon(pPlugIn->getIcon());
+      }
+
       Executable* pExecutable = dynamic_cast<Executable*>(pPlugIn);
       if (pExecutable != NULL)
       {
@@ -81,7 +87,7 @@ PlugInDescriptorImp::PlugInDescriptorImp(const string& id, PlugIn* pPlugIn) :
          mExecuteOnStartup = pExecutable->isExecutedOnStartup();
          mDestroyAfterExecute = pExecutable->isDestroyedAfterExecute();
          mMenuLocations = pExecutable->getMenuLocations();
-         mpMenuIcon = pExecutable->getMenuIcon();
+
          mAbort = pExecutable->hasAbort();
          mWizardSupport = pExecutable->hasWizardSupport();
 
@@ -263,11 +269,6 @@ bool PlugInDescriptorImp::isDestroyedAfterExecute() const
 const vector<string>& PlugInDescriptorImp::getMenuLocations() const
 {
    return mMenuLocations;
-}
-
-const char** PlugInDescriptorImp::getMenuIcon() const
-{
-   return mpMenuIcon;
 }
 
 bool PlugInDescriptorImp::hasAbort() const

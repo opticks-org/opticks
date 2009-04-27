@@ -15,7 +15,6 @@ ExecutableShell::ExecutableShell() :
    mAborted(false),
    mExecuteOnStartup(false),
    mDestroyAfterExecute(true),
-   mpMenuIcon(NULL),
    mBatch(true),
    mHasAbort(false),
    mBackground(false),
@@ -40,11 +39,6 @@ bool ExecutableShell::isDestroyedAfterExecute() const
 const vector<string>& ExecutableShell::getMenuLocations() const
 {
    return mMenuLocations;
-}
-
-const char** ExecutableShell::getMenuIcon() const
-{
-   return mpMenuIcon;
 }
 
 bool ExecutableShell::setBatch()
@@ -114,11 +108,6 @@ void ExecutableShell::setMenuLocation(const string& menuLocation)
 void ExecutableShell::addMenuLocation(const string& menuLocation)
 {
    mMenuLocations.push_back(menuLocation);
-}
-
-void ExecutableShell::setMenuIcon(const char* pIcon[])
-{
-   mpMenuIcon = pIcon;
 }
 
 void ExecutableShell::setAbortSupported(bool bSupported)

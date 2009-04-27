@@ -124,7 +124,6 @@ public:
    bool isExecutedOnStartup() const;
    bool isDestroyedAfterExecute() const;
    const std::vector<std::string>& getMenuLocations() const;
-   const char** getMenuIcon() const;
    bool hasAbort() const;
    bool hasBatchSupport() const;
    bool hasInteractiveSupport() const;
@@ -183,7 +182,6 @@ private:
    bool mExecuteOnStartup;
    bool mDestroyAfterExecute;
    std::vector<std::string> mMenuLocations;
-   const char** mpMenuIcon;
    bool mAbort;
    bool mWizardSupport;
    bool mBatchSupport;

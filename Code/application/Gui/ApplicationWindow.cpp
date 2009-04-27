@@ -3554,10 +3554,10 @@ void ApplicationWindow::updatePlugInCommands()
       QIcon plugInIcon;
       vector<string> locations;
 
-      const char** pIcon = pDescriptor->getMenuIcon();
-      if (pIcon != NULL)
+      const QIcon icon = pDescriptor->getIcon();
+      if (icon.isNull() == false)
       {
-         QPixmap pix(pIcon);
+         QPixmap pix = icon.pixmap(QSize(16,16));
          pix.setMask(pix.createHeuristicMask());
          plugInIcon.addPixmap(pix);
       }

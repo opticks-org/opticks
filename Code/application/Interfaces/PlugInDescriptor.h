@@ -107,15 +107,6 @@ public:
 
    /**
     * Queries the value of
-    * Executable::getMenuIcon() for Executable plug-ins.
-    * 
-    * @return Returns the value provided by Executable::getMenuIcon()
-    * or NULL if the plug-in is not of type Executable.
-    */
-   virtual const char** getMenuIcon() const = 0;
-
-   /**
-    * Queries the value of
     * Executable::hasAbort() for Executable plug-ins.
     * 
     * @return Returns the value provided by Executable::hasAbort()

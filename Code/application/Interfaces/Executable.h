@@ -157,14 +157,6 @@ public:
    virtual const std::vector<std::string>& getMenuLocations() const = 0;
 
    /**
-    *  Returns the icon for a menu command or toolbar button from which the
-    *  plug-in is executed.
-    *
-    *  @return  The icon.
-    */
-   virtual const char** getMenuIcon() const = 0;
-
-   /**
     *  Sets the plug-in to execute in batch mode.
     *
     *  This method is used to set the plug-in to execute in a

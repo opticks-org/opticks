@@ -10,7 +10,10 @@
 #ifndef MODELESS_H
 #define MODELESS_H
 
+#include <memory>
+
 #include <QtGui/QDialog>
+#include <QtGui/QIcon>
 
 #include "ViewerShell.h"
 
@@ -22,6 +25,7 @@ public:
 
    bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
    bool abort();
+   const QIcon& getIcon() const;
 
 protected:
    QWidget* getWidget() const;
@@ -30,6 +34,7 @@ private:
    QDialog* mpDialog;
    int mRuns;
    bool mSessionClosed;
+   mutable std::auto_ptr<QIcon> mMenuIcon;
 
    void aboutToClose(Subject& subject, const std::string& signal, const boost::any &args);
    void updateConfigSettings(Subject& subject, const std::string& signal, const boost::any &args);

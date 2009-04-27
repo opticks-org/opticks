@@ -266,10 +266,10 @@ bool PropertiesPlugInDescriptor::initialize(SessionItem* pSessionItem)
       // Get the menu icon
       QPixmap menuIcon;
 
-      const char** pIcon = pDescriptor->getMenuIcon();
-      if (pIcon != NULL)
+      const QIcon icon = pDescriptor->getIcon();
+      if (icon.isNull() == false)
       {
-         menuIcon = QPixmap(pIcon);
+         menuIcon = icon.pixmap(QSize(16,16));
       }
 
       // Initialize the widgets

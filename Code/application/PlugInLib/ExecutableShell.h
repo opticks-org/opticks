@@ -56,7 +56,6 @@ public:
    bool isExecutedOnStartup() const;
    bool isDestroyedAfterExecute() const;
    const std::vector<std::string>& getMenuLocations() const;
-   const char** getMenuIcon() const;
 
    /**
     *  @copydoc Executable::setBatch()
@@ -248,17 +247,6 @@ protected:
    void addMenuLocation(const std::string& menuLocation);
 
    /**
-    *  Sets an optional icon for a menu command or toolbar button from which
-    *  the plug-in is executed.
-    *
-    *  @param   pIcon
-    *           The icon in XPM format.
-    *
-    *  @see     setIcon()
-    */
-   void setMenuIcon(const char* pIcon[]);
-
-   /**
     *  Sets whether the plug-in supports aborting.
     *
     *  @param   bSupported
@@ -309,7 +297,6 @@ private:
    bool mExecuteOnStartup;
    bool mDestroyAfterExecute;
    std::vector<std::string> mMenuLocations;
-   const char** mpMenuIcon;
    bool mBatch;
    bool mHasAbort;
    bool mBackground;
