@@ -114,7 +114,6 @@ public:
 protected:
    std::string getUserSettingsFilePath() const;
    std::string getUserSettingsFileName() const;
-   std::string translateKey(const std::string& key) const;
 
    bool serialize() const;
    void deserializeMruFiles();

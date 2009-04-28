@@ -666,11 +666,9 @@ bool ConfigurationSettingsImp::setSetting(const string& key, const DataVariant& 
 {
    bool same = false;
 
-   const string strKey = translateKey(key);
-
    if (!setIfSame)
    {
-      DataVariant curValue = getSetting(strKey);
+      DataVariant curValue = getSetting(key);
       try
       {
          //Need try-catch because DataVariant comparison can
@@ -682,11 +680,11 @@ bool ConfigurationSettingsImp::setSetting(const string& key, const DataVariant& 
    bool success = true;
    if (!same)
    {
-      success = mpUserSettings->setAttributeByPath(strKey, var);
+      success = mpUserSettings->setAttributeByPath(key, var);
       if (success)
       {
-         deleteSessionSetting(strKey);
-         notify(SIGNAL_NAME(ConfigurationSettings, SettingModified), boost::any(strKey));
+         deleteSessionSetting(key);
+         notify(SIGNAL_NAME(ConfigurationSettings, SettingModified), boost::any(key));
       }
    }
    return success;
@@ -696,19 +694,17 @@ const DataVariant& ConfigurationSettingsImp::getSetting(const string& key) const
 {
    static DataVariant sEmpty;
 
-   const string strKey = translateKey(key);
-
-   const DataVariant& sessionValue = mpSessionSettings->getAttributeByPath(strKey);
+   const DataVariant& sessionValue = mpSessionSettings->getAttributeByPath(key);
    if (sessionValue.isValid())
    {
       return sessionValue;
    }
-   const DataVariant& userValue = mpUserSettings->getAttributeByPath(strKey);
+   const DataVariant& userValue = mpUserSettings->getAttributeByPath(key);
    if (userValue.isValid())
    {
       return userValue;
    }
-   const DataVariant& defaultValue = mpDefaultSettings->getAttributeByPath(strKey);
+   const DataVariant& defaultValue = mpDefaultSettings->getAttributeByPath(key);
    if (defaultValue.isValid())
    {
       return defaultValue;
@@ -724,22 +720,18 @@ const DataVariant& ConfigurationSettingsImp::getSetting(const string& key) const
 
 bool ConfigurationSettingsImp::isUserSetting(const string& key) const
 {
-   const string strKey = translateKey(key);
-
-   const DataVariant& sessionValue = mpSessionSettings->getAttributeByPath(strKey);
+   const DataVariant& sessionValue = mpSessionSettings->getAttributeByPath(key);
    if (sessionValue.isValid())
    {
       return false;
    }
-   const DataVariant& userValue = mpUserSettings->getAttributeByPath(strKey);
+   const DataVariant& userValue = mpUserSettings->getAttributeByPath(key);
    return userValue.isValid();
 }
 
 void ConfigurationSettingsImp::deleteUserSetting(const string& key)
 {
-   const string strKey = translateKey(key);
-
-   bool success = mpUserSettings->removeAttributeByPath(strKey);
+   bool success = mpUserSettings->removeAttributeByPath(key);
    if (success)
    {
       notify(SIGNAL_NAME(Subject, Modified));
@@ -748,9 +740,7 @@ void ConfigurationSettingsImp::deleteUserSetting(const string& key)
 
 void ConfigurationSettingsImp::deleteSessionSetting(const string& key)
 {
-   const string strKey = translateKey(key);
-
-   bool success = mpSessionSettings->removeAttributeByPath(strKey);
+   bool success = mpSessionSettings->removeAttributeByPath(key);
    if (success)
    {
       notify(SIGNAL_NAME(Subject, Modified));
@@ -759,40 +749,21 @@ void ConfigurationSettingsImp::deleteSessionSetting(const string& key)
 
 bool ConfigurationSettingsImp::setSessionSetting(const string& key, const DataVariant& var)
 {
-   const string strKey = translateKey(key);
-
-   bool success = mpSessionSettings->setAttributeByPath(strKey, var);
+   bool success = mpSessionSettings->setAttributeByPath(key, var);
    if (success)
    {
-      notify(SIGNAL_NAME(ConfigurationSettings, SettingModified), boost::any(strKey));
+      notify(SIGNAL_NAME(ConfigurationSettings, SettingModified), boost::any(key));
    }
    return success;
 }
 
 void ConfigurationSettingsImp::copySetting(const string& key, DynamicObject* pObject) const
 {
-   const string strKey = translateKey(key);
-
-   const DataVariant& dv = getSetting(strKey);
+   const DataVariant& dv = getSetting(key);
    if (dv.isValid())
    {
-      pObject->setAttributeByPath(strKey, dv);
+      pObject->setAttributeByPath(key, dv);
    }
-}
-
-string ConfigurationSettingsImp::translateKey(const string& key) const
-{
-   string strKey;
-   if (key == "FileLocations/ImportExportPath")
-   {
-      strKey = getSettingImportPathKey();
-   }
-   else
-   {
-      strKey = key;
-   }
-
-   return strKey;
 }
 
 void ConfigurationSettingsImp::setMruFiles(const vector<MruFile>& mruFiles)
