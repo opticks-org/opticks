@@ -275,6 +275,22 @@ void RasterLayerImp::fullImageRegenBlue(Subject& subject, const std::string& sig
    setImage(NULL);
 }
 
+bool RasterLayerImp::isKindOfLayer(const string& className)
+{
+   if ((className == "RasterLayerImp") || (className == "RasterLayer"))
+   {
+      return true;
+   }
+
+   return LayerImp::isKindOfLayer(className);
+}
+
+void RasterLayerImp::getLayerTypes(vector<string>& classList)
+{
+   classList.push_back("RasterLayer");
+   LayerImp::getLayerTypes(classList);
+}
+
 RasterLayerImp& RasterLayerImp::operator= (const RasterLayerImp& rasterLayer)
 {
    if (this != &rasterLayer)

@@ -17,6 +17,7 @@
 
 #include <string>
 
+class CustomColorButton;
 class QDateTimeEdit;
 class QDoubleValidator;
 class QIntValidator;
@@ -26,11 +27,12 @@ class QPushButton;
 class QRadioButton;
 class QStackedWidget;
 class QTextEdit;
+class SymbolTypeGrid;
 
 class DataVariantEditorDelegate
 {
 public:
-   enum TypeEnum { INTEGRAL, DOUBLE, BOOL, DATE_TIME, ENUMERATION, VECTOR, DYNAMIC_OBJECT, TEXT };
+   enum TypeEnum { INTEGRAL, DOUBLE, BOOL, DATE_TIME, ENUMERATION, VECTOR, DYNAMIC_OBJECT, TEXT, COLOR, SYMBOL_TYPE };
    typedef EnumWrapper<TypeEnum> Type;
 
    DataVariantEditorDelegate() :
@@ -122,13 +124,14 @@ private:
    QRadioButton* mpFalseRadio;
    QRadioButton* mpTrueRadio;
    QDateTimeEdit* mpDateTimeEdit;
+   CustomColorButton* mpColorEdit;
+   SymbolTypeGrid* mpSymbolTypeEdit;
 
    QIntValidator* mpIntValidator;
    QDoubleValidator* mpDoubleValidator;
 
    DataVariant mValue;
    std::vector<DataVariantEditorDelegate> mDelegates;
-
 };
 
 #endif

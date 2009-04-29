@@ -458,6 +458,39 @@ public:
    virtual void getViewTypes(const std::string& className, std::vector<std::string>& classList) = 0;
 
    /**
+    *  Queries a layer to see if it is a kind of another layer.
+    *
+    *  This method checks type compatibility between two layers.  This functionality
+    *  is different than TypeAwareObject::isKindOf() in that only Layer-derived
+    *  classes are checked.
+    *
+    *  @param   className
+    *           The name of the Layer-derived class to query.
+    *  @param   layerName
+    *           The Layer-derived class name to check type compatibility.
+    *
+    *  @return  Returns true if the given layer class name is a kind of the given
+    *           class name; otherwise returns false.
+    */
+   virtual bool isKindOfLayer(const std::string& className, const std::string& layerName) = 0;
+
+   /**
+    *  Returns a list of inherited layer class names for a given class name.
+    *
+    *  This method populates a vector with the class names of all inherited Layer
+    *  class types.  The given class name is used as the initial class for
+    *  populating the vector.  For example, passing in "RasterLayer" as a
+    *  class name populates a vector with the "RasterLayer" and "Layer" strings.
+    *
+    *  @param   className
+    *           The layer class name for which to get all layer element types.
+    *  @param   classList
+    *           This vector is populated with the class names of all inherited layer
+    *           classes and the given class name.
+    */
+   virtual void getLayerTypes(const std::string& className, std::vector<std::string>& classList) = 0;
+
+   /**
     *  Derive a new Product from an existing View.
     *
     *  This method creates a new ProductWindow and populates the view object with the specified View.

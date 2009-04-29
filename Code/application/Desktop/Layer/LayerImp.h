@@ -41,6 +41,9 @@ class LayerImp : public QObject, public SessionItemImp, public SubjectImp
    Q_OBJECT
 
 public:
+   static bool isKindOfLayer(const std::string& className);
+   static void getLayerTypes(std::vector<std::string>& classList);
+
    virtual ~LayerImp();
 
    const std::string& getObjectType() const;

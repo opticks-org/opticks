@@ -131,6 +131,22 @@ bool ThresholdLayerImp::isKindOf(const string& className) const
    return LayerImp::isKindOf(className);
 }
 
+bool ThresholdLayerImp::isKindOfLayer(const string& className)
+{
+   if ((className == "ThresholdLayerImp") || (className == "ThresholdLayer"))
+   {
+      return true;
+   }
+
+   return LayerImp::isKindOfLayer(className);
+}
+
+void ThresholdLayerImp::getLayerTypes(vector<string>& classList)
+{
+   classList.push_back("ThresholdLayer");
+   LayerImp::getLayerTypes(classList);
+}
+
 ThresholdLayerImp& ThresholdLayerImp::operator=(const ThresholdLayerImp& thresholdLayer)
 {
    if (this != &thresholdLayer)

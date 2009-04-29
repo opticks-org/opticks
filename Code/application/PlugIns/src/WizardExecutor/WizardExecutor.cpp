@@ -19,6 +19,7 @@
 #include "Executable.h"
 #include "FileDescriptor.h"
 #include "Filename.h"
+#include "Layer.h"
 #include "MessageLogResource.h"
 #include "ModelServices.h"
 #include "ObjectFactory.h"
@@ -629,6 +630,18 @@ void WizardExecutor::setConnectedNodeValues(WizardItem* pItem, PlugInArgList* pO
                      if ((bView == true) && (pValue != NULL))
                      {
                         bValidKind = reinterpret_cast<View*>(pValue)->isKindOf(connectedNodeType);
+                     }
+                  }
+               }
+               if (!bValidKind)
+               {
+                  bValidKind = mpDesktop->isKindOfLayer(nodeType, connectedNodeType);
+                  if (!bValidKind)
+                  {
+                     bool bLayer = mpDesktop->isKindOfLayer(nodeType, TypeConverter::toString<Layer>());
+                     if ((bLayer == true) && (pValue != NULL))
+                     {
+                        bValidKind = reinterpret_cast<Layer*>(pValue)->isKindOf(connectedNodeType);
                      }
                   }
                }

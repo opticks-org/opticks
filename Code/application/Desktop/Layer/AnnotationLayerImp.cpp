@@ -71,6 +71,38 @@ AnnotationLayerImp::~AnnotationLayerImp()
 {
 }
 
+const string& AnnotationLayerImp::getObjectType() const
+{
+   static string sType("AnnotationLayerImp");
+   return sType;
+}
+
+bool AnnotationLayerImp::isKindOf(const string& className) const
+{
+   if ((className == getObjectType()) || (className == "AnnotationLayer"))
+   {
+      return true;
+   }
+
+   return GraphicLayerImp::isKindOf(className);
+}
+
+bool AnnotationLayerImp::isKindOfLayer(const string& className)
+{
+   if ((className == "AnnotationLayerImp") || (className == "AnnotationLayer"))
+   {
+      return true;
+   }
+
+   return GraphicLayerImp::isKindOfLayer(className);
+}
+
+void AnnotationLayerImp::getLayerTypes(vector<string>& classList)
+{
+   classList.push_back("AnnotationLayer");
+   GraphicLayerImp::getLayerTypes(classList);
+}
+
 AnnotationLayerImp &AnnotationLayerImp::operator = (const AnnotationLayerImp &annotationLayer)
 {
    if (this != &annotationLayer)

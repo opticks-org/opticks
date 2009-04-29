@@ -74,6 +74,22 @@ bool GcpLayerImp::isKindOf(const string& className) const
    return LayerImp::isKindOf(className);
 }
 
+bool GcpLayerImp::isKindOfLayer(const string& className)
+{
+   if ((className == "GcpLayerImp") || (className == "GcpLayer"))
+   {
+      return true;
+   }
+
+   return LayerImp::isKindOfLayer(className);
+}
+
+void GcpLayerImp::getLayerTypes(vector<string>& classList)
+{
+   classList.push_back("GcpLayer");
+   LayerImp::getLayerTypes(classList);
+}
+
 GcpLayerImp& GcpLayerImp::operator= (const GcpLayerImp& gcpLayer)
 {
    if (this != &gcpLayer)

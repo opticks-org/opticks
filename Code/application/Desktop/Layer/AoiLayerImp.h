@@ -23,6 +23,9 @@ class AoiLayerImp : public GraphicLayerImp
    Q_OBJECT
 
 public:
+   static bool isKindOfLayer(const std::string& className);
+   static void getLayerTypes(std::vector<std::string>& classList);
+
    AoiLayerImp(const std::string& id, const std::string& layerName, DataElement* pElement);
    ~AoiLayerImp();
 

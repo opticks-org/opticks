@@ -125,6 +125,22 @@ bool GraphicLayerImp::isKindOf(const string& className) const
    return LayerImp::isKindOf(className);
 }
 
+bool GraphicLayerImp::isKindOfLayer(const string& className)
+{
+   if ((className == "GraphicLayerImp") || (className == "GraphicLayer"))
+   {
+      return true;
+   }
+
+   return LayerImp::isKindOfLayer(className);
+}
+
+void GraphicLayerImp::getLayerTypes(vector<string>& classList)
+{
+   classList.push_back("GraphicLayer");
+   LayerImp::getLayerTypes(classList);
+}
+
 GraphicLayerImp& GraphicLayerImp::operator= (const GraphicLayerImp& graphicLayer)
 {
    if (this != &graphicLayer)

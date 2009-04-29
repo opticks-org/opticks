@@ -99,6 +99,22 @@ void LatLonLayerImp::georeferenceModified(Subject& subject, const string& signal
    setTickSpacingDirty(true);
 }
 
+bool LatLonLayerImp::isKindOfLayer(const string& className)
+{
+   if ((className == "LatLonLayerImp") || (className == "LatLonLayer"))
+   {
+      return true;
+   }
+
+   return LayerImp::isKindOfLayer(className);
+}
+
+void LatLonLayerImp::getLayerTypes(vector<string>& classList)
+{
+   classList.push_back("LatLonLayer");
+   LayerImp::getLayerTypes(classList);
+}
+
 LatLonLayerImp& LatLonLayerImp::operator=(const LatLonLayerImp& latLonLayer)
 {
    if (this != &latLonLayer)

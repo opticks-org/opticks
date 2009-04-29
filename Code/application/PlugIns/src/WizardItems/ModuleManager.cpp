@@ -26,6 +26,7 @@
 #include "SelectPlugIn.h"
 #include "SetDisplayedBand.h"
 #include "SetDisplayMode.h"
+#include "SetThresholdOptions.h"
 #include "TemplateUtilities.h"
 
 const char* ModuleManager::mspName = "Wizard Items";
@@ -36,7 +37,7 @@ const char* ModuleManager::mspUniqueId = "{BA831023-B042-4c89-9B2D-E1ACE238CB04}
 
 unsigned int ModuleManager::getTotalPlugIns()
 {
-   return 29;
+   return 30;
 }
 
 PlugIn* ModuleManager::getPlugIn(unsigned int plugInNumber)
@@ -61,7 +62,7 @@ PlugIn* ModuleManager::getPlugIn(unsigned int plugInNumber)
          break;
 
       case 4:
-         pPlugIn = new DeriveAoi();
+         pPlugIn = new DeriveLayer();
          break;
 
       case 5:
@@ -158,6 +159,10 @@ PlugIn* ModuleManager::getPlugIn(unsigned int plugInNumber)
 
       case 28:
          pPlugIn = new SetDisplayMode();
+         break;
+
+      case 29:
+         pPlugIn = new SetThresholdOptions();
          break;
 
       default:

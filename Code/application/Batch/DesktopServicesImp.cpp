@@ -215,6 +215,15 @@ void DesktopServicesImp::getViewTypes(const string& className, vector<string>& c
 {
 }
 
+bool DesktopServicesImp::isKindOfLayer(const std::string& className, const std::string& layerName)
+{
+   return false;
+}
+
+void DesktopServicesImp::getLayerTypes(const std::string& className, std::vector<std::string>& classList)
+{
+}
+
 ProductWindow* DesktopServicesImp::deriveProduct(View* pView)
 {
    return NULL;

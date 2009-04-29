@@ -115,7 +115,23 @@ bool ClassificationLayerImp::isKindOf(const string& className) const
       return true;
    }
 
-   return GraphicLayerImp::isKindOf(className);
+   return AnnotationLayerImp::isKindOf(className);
+}
+
+bool ClassificationLayerImp::isKindOfLayer(const string& className)
+{
+   if ((className == "ClassificationLayerImp") || (className == "ClassificationLayer"))
+   {
+      return true;
+   }
+
+   return AnnotationLayerImp::isKindOfLayer(className);
+}
+
+void ClassificationLayerImp::getLayerTypes(vector<string>& classList)
+{
+   classList.push_back("ClassificationLayer");
+   AnnotationLayerImp::getLayerTypes(classList);
 }
 
 ClassificationLayerImp& ClassificationLayerImp::operator=(const ClassificationLayerImp& classificationLayer)

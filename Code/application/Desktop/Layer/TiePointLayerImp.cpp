@@ -332,6 +332,22 @@ bool TiePointLayerImp::getExtents(double& x1, double& y1, double& x4, double& y4
    return true;
 }
 
+bool TiePointLayerImp::isKindOfLayer(const string& className)
+{
+   if ((className == "TiePointLayerImp") || (className == "TiePointLayer"))
+   {
+      return true;
+   }
+
+   return LayerImp::isKindOfLayer(className);
+}
+
+void TiePointLayerImp::getLayerTypes(vector<string>& classList)
+{
+   classList.push_back("TiePointLayer");
+   LayerImp::getLayerTypes(classList);
+}
+
 TiePointLayerImp& TiePointLayerImp::operator= (const TiePointLayerImp& tiePointLayer)
 {
    if (this != &tiePointLayer)

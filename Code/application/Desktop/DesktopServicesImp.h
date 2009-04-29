@@ -101,6 +101,8 @@ public:
    void deleteView(View* pView);
    bool isKindOfView(const std::string& className, const std::string& viewName);
    void getViewTypes(const std::string& className, std::vector<std::string>& classList);
+   bool isKindOfLayer(const std::string& className, const std::string& layerName);
+   void getLayerTypes(const std::string& className, std::vector<std::string>& classList);
    ProductWindow* deriveProduct(View* pView);
 
    // Plot services

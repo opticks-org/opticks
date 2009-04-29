@@ -7,21 +7,20 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#ifndef SETTHRESHOLDOPTIONS_H
+#define SETTHRESHOLDOPTIONS_H
 
-
-#ifndef DERIVELAYER_H
-#define DERIVELAYER_H
-
+#include "ColorType.h"
 #include "DesktopItems.h"
 #include "TypesFile.h"
 
-class Layer;
+class ThresholdLayer;
 
-class DeriveLayer : public DesktopItems
+class SetThresholdOptions : public DesktopItems
 {
 public:
-   DeriveLayer();
-   virtual ~DeriveLayer();
+   SetThresholdOptions();
+   virtual ~SetThresholdOptions();
 
    virtual bool setBatch();
    virtual bool getInputSpecification(PlugInArgList*& pArgList);
@@ -29,12 +28,18 @@ public:
    virtual bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
 
 protected:
-   bool extractInputArgs(PlugInArgList* pInArgList);
+   virtual bool extractInputArgs(PlugInArgList* pInArgList);
 
 private:
-   Layer* mpInputLayer;
-   LayerType mNewLayerType;
-   std::string mNewLayerName;
+   ThresholdLayer* mpLayer;
+   double mFirstThreshold;
+   double mSecondThreshold;
+   bool mHasFirst;
+   bool mHasSecond;
+   PassArea mPassArea;
+   RegionUnits mRegionUnits;
+   SymbolType mSymbol;
+   ColorType mColor;
 };
 
-#endif   // DERIVELAYER_H
+#endif

@@ -25,6 +25,9 @@ class ClassificationLayerImp : public AnnotationLayerImp
    Q_OBJECT
 
 public:
+   static bool isKindOfLayer(const std::string& className);
+   static void getLayerTypes(std::vector<std::string>& classList);
+
    ClassificationLayerImp(const std::string& id, const std::string& layerName, DataElement* pElement);
    ~ClassificationLayerImp();
 

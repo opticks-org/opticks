@@ -25,17 +25,25 @@
 #include <QtGui/QPixmap>
 #include <QtGui/QStatusBar>
 
+#include "AnnotationLayerImp.h"
+#include "AoiLayerImp.h"
 #include "ApplicationWindow.h"
 #include "AxisAdapter.h"
 #include "AppAssert.h"
 #include "AppVerify.h"
 #include "BackgroundPluginWindow.h"
 #include "CartesianPlotAdapter.h"
+#include "ClassificationLayerImp.h"
 #include "ConfigurationSettingsImp.h"
 #include "DataVariant.h"
 #include "DesktopServicesImp.h"
 #include "DynamicObject.h"
+#include "GcpLayerImp.h"
+#include "GraphicLayerImp.h"
 #include "HistogramPlotAdapter.h"
+#include "LatLonLayerImp.h"
+#include "LayerImp.h"
+#include "MeasurementLayerImp.h"
 #include "MenuBar.h"
 #include "MouseModeImp.h"
 #include "ObjectResource.h"
@@ -43,10 +51,14 @@
 #include "PolarPlotAdapter.h"
 #include "ProductViewAdapter.h"
 #include "ProgressDlg.h"
+#include "PseudocolorLayerImp.h"
+#include "RasterLayerImp.h"
 #include "SignaturePlotAdapter.h"
 #include "SpatialDataViewAdapter.h"
 #include "SuppressibleMsgDlg.h"
 #include "SymbolManager.h"
+#include "ThresholdLayerImp.h"
+#include "TiePointLayerImp.h"
 #include "TypesFile.h"
 #include "ViewImp.h"
 #include "WorkspaceWindow.h"
@@ -555,6 +567,114 @@ void DesktopServicesImp::getViewTypes(const string& className, vector<string>& c
    else if ((className == "View") || (className == "ViewImp"))
    {
       ViewImp::getViewTypes(classList);
+   }
+}
+
+bool DesktopServicesImp::isKindOfLayer(const string& className, const string& layerName)
+{
+   bool bSuccess = false;
+
+   if (className.find("GcpLayer") == 0)
+   {
+      bSuccess = GcpLayerImp::isKindOfLayer(layerName);
+   }
+   else if (className.find("GraphicLayer") == 0)
+   {
+      bSuccess = GraphicLayerImp::isKindOfLayer(layerName);
+   }
+   else if (className.find("AoiLayer") == 0)
+   {
+      bSuccess = AoiLayerImp::isKindOfLayer(layerName);
+   }
+   else if (className.find("AnnotationLayer") == 0)
+   {
+      bSuccess = AnnotationLayerImp::isKindOfLayer(layerName);
+   }
+   else if (className.find("ClassificationLayer") == 0)
+   {
+      bSuccess = ClassificationLayerImp::isKindOfLayer(layerName);
+   }
+   else if (className.find("MeasurementLayer") == 0)
+   {
+      bSuccess = MeasurementLayerImp::isKindOfLayer(layerName);
+   }
+   else if (className.find("LatLonLayer") == 0)
+   {
+      bSuccess = LatLonLayerImp::isKindOfLayer(layerName);
+   }
+   else if (className.find("PseudocolorLayer") == 0)
+   {
+      bSuccess = PseudocolorLayerImp::isKindOfLayer(layerName);
+   }
+   else if (className.find("RasterLayer") == 0)
+   {
+      bSuccess = RasterLayerImp::isKindOfLayer(layerName);
+   }
+   else if (className.find("ThresholdLayer") == 0)
+   {
+      bSuccess = ThresholdLayerImp::isKindOfLayer(layerName);
+   }
+   else if (className.find("TiePointLayer") == 0)
+   {
+      bSuccess = TiePointLayerImp::isKindOfLayer(layerName);
+   }
+   else if (className.find("Layer") == 0)
+   {
+      bSuccess = LayerImp::isKindOfLayer(layerName);
+   }
+
+   return bSuccess;
+}
+
+void DesktopServicesImp::getLayerTypes(const string& className, vector<string>& classList)
+{
+   if (className.find("GcpLayer") == 0)
+   {
+      GcpLayerImp::getLayerTypes(classList);
+   }
+   else if (className.find("GraphicLayer") == 0)
+   {
+      GraphicLayerImp::getLayerTypes(classList);
+   }
+   else if (className.find("AoiLayer") == 0)
+   {
+      AoiLayerImp::getLayerTypes(classList);
+   }
+   else if (className.find("AnnotationLayer") == 0)
+   {
+      AnnotationLayerImp::getLayerTypes(classList);
+   }
+   else if (className.find("ClassificationLayer") == 0)
+   {
+      ClassificationLayerImp::getLayerTypes(classList);
+   }
+   else if (className.find("MeasurementLayer") == 0)
+   {
+      MeasurementLayerImp::getLayerTypes(classList);
+   }
+   else if (className.find("LatLonLayer") == 0)
+   {
+      LatLonLayerImp::getLayerTypes(classList);
+   }
+   else if (className.find("PseudocolorLayer") == 0)
+   {
+      PseudocolorLayerImp::getLayerTypes(classList);
+   }
+   else if (className.find("RasterLayer") == 0)
+   {
+      RasterLayerImp::getLayerTypes(classList);
+   }
+   else if (className.find("ThresholdLayer") == 0)
+   {
+      ThresholdLayerImp::getLayerTypes(classList);
+   }
+   else if (className.find("TiePointLayer") == 0)
+   {
+      TiePointLayerImp::getLayerTypes(classList);
+   }
+   else if (className.find("Layer") == 0)
+   {
+      LayerImp::getLayerTypes(classList);
    }
 }
 

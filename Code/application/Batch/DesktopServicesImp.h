@@ -98,8 +98,10 @@ public:
    View* createView(const std::string& viewName, ViewType viewType, QWidget* pParent = 0);
    PlotView* createPlot(const std::string& plotName, PlotType plotType, QWidget* pParent = 0);
    void getViewTypes(const std::string& className, std::vector<std::string>& classList);
+   void getLayerTypes(const std::string& className, std::vector<std::string>& classList);
    void deleteView(View* pView);
    bool isKindOfView(const std::string& className, const std::string& viewName);
+   bool isKindOfLayer(const std::string& className, const std::string& layerName);
    ProductWindow* deriveProduct(View* pView);
 
    PlotWidget* createPlotWidget(const std::string& plotName, PlotType plotType, QWidget* pParent = 0);

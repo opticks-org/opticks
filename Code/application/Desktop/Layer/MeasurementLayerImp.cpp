@@ -58,6 +58,22 @@ bool MeasurementLayerImp::isKindOf(const string& className) const
    return AnnotationLayerImp::isKindOf(className);
 }
 
+bool MeasurementLayerImp::isKindOfLayer(const string& className)
+{
+   if ((className == "MeasurementLayerImp") || (className == "MeasurementLayer"))
+   {
+      return true;
+   }
+
+   return AnnotationLayerImp::isKindOfLayer(className);
+}
+
+void MeasurementLayerImp::getLayerTypes(vector<string>& classList)
+{
+   classList.push_back("MeasurementLayer");
+   AnnotationLayerImp::getLayerTypes(classList);
+}
+
 MeasurementLayerImp &MeasurementLayerImp::operator =(
    const MeasurementLayerImp &measurementLayer)
 {

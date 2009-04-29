@@ -19,6 +19,7 @@
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
 #include "RasterElement.h"
+#include "RasterLayer.h"
 #include "SpatialDataView.h"
 #include "SpatialDataWindow.h"
 
@@ -75,26 +76,10 @@ bool GetDataSet::getOutputSpecification(PlugInArgList*& pArgList)
       VERIFY(pArgList != NULL);
 
       // Add args
-      PlugInArg* pArg = pPlugInManager->getPlugInArg();
-      VERIFY(pArg != NULL);
-      pArg->setName("View");
-      pArg->setType("SpatialDataView");
-      pArg->setDefaultValue(NULL);
-      pArgList->addArg(*pArg);
-
-      pArg = pPlugInManager->getPlugInArg();
-      VERIFY(pArg != NULL);
-      pArg->setName("Data Set");
-      pArg->setType("RasterElement");
-      pArg->setDefaultValue(NULL);
-      pArgList->addArg(*pArg);
-
-      pArg = pPlugInManager->getPlugInArg();
-      VERIFY(pArg != NULL);
-      pArg->setName("Filename");
-      pArg->setType("Filename");
-      pArg->setDefaultValue(NULL);
-      pArgList->addArg(*pArg);
+      VERIFY(pArgList->addArg<SpatialDataView>("View", NULL));
+      VERIFY(pArgList->addArg<RasterElement>("Data Set", NULL));
+      VERIFY(pArgList->addArg<RasterLayer>("Layer", NULL));
+      VERIFY(pArgList->addArg<Filename>("Filename", NULL));
    }
 
    return true;
@@ -140,11 +125,13 @@ bool GetDataSet::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 
    // Get the raster element
    RasterElement* pRasterElement = NULL;
+   RasterLayer* pRasterLayer = NULL;
 
    LayerList* pLayerList = pView->getLayerList();
    if (pLayerList != NULL)
    {
       pRasterElement = pLayerList->getPrimaryRasterElement();
+      pRasterLayer = static_cast<RasterLayer*>(pLayerList->getLayer(RASTER, pRasterElement));
    }
 
    if (pRasterElement == NULL)
@@ -179,6 +166,17 @@ bool GetDataSet::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
       else
       {
          reportError("Could not set the data set output value!", "1397E975-C843-469a-9D62-AE704A973079");
+         return false;
+      }
+
+      // Layer
+      if (pOutArgList->getArg("Layer", pArg) && (pArg != NULL))
+      {
+         pArg->setActualValue(pRasterLayer);
+      }
+      else
+      {
+         reportError("Could not set the layer output value!", "{ae0aabcf-996b-4312-80de-bff862c47ae9}");
          return false;
       }
 

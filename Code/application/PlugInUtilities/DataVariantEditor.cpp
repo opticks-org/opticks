@@ -7,6 +7,19 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include "DataVariantEditor.h"
+
+#include "AppVerify.h"
+#include "ColorType.h"
+#include "CustomColorButton.h"
+#include "DateTimeImp.h"
+#include "FilenameImp.h"
+#include "IconImages.h"
+#include "StringUtilities.h"
+#include "DynamicObjectAdapter.h"
+#include "ObjectResource.h"
+#include "SymbolTypeGrid.h"
+
 #include <QtCore/QDateTime>
 #include <QtGui/QBitmap>
 #include <QtGui/QDateTimeEdit>
@@ -23,17 +36,6 @@
 #include <QtGui/QStackedWidget>
 #include <QtGui/QTextEdit>
 #include <QtGui/QValidator>
-
-#include "DataVariantEditor.h"
-
-#include "AppVerify.h"
-#include "DateTimeImp.h"
-#include "FilenameImp.h"
-#include "IconImages.h"
-#include "StringUtilities.h"
-#include "DynamicObjectAdapter.h"
-#include "ObjectResource.h"
-
 #include <string>
 #include <vector>
 using namespace std;
@@ -58,6 +60,7 @@ DataVariantEditor::DataVariantEditor(QWidget* parent) :
    mDelegates.push_back(DataVariantEditorDelegate("bool", DataVariantEditorDelegate::BOOL));
    mDelegates.push_back(DataVariantEditorDelegate("string", DataVariantEditorDelegate::TEXT));
    mDelegates.push_back(DataVariantEditorDelegate("Filename", DataVariantEditorDelegate::TEXT, true));
+   mDelegates.push_back(DataVariantEditorDelegate("ColorType", DataVariantEditorDelegate::COLOR));
    mDelegates.push_back(DataVariantEditorDelegate("DateTime", DataVariantEditorDelegate::DATE_TIME));
    DataVariantEditorDelegate temp = DataVariantEditorDelegate("DisplayMode", DataVariantEditorDelegate::ENUMERATION);
    temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<DisplayMode>());
@@ -74,6 +77,9 @@ DataVariantEditor::DataVariantEditor(QWidget* parent) :
    temp = DataVariantEditorDelegate("InterleaveFormatType", DataVariantEditorDelegate::ENUMERATION);
    temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<InterleaveFormatType>());
    mDelegates.push_back(temp);
+   temp = DataVariantEditorDelegate("LayerType", DataVariantEditorDelegate::ENUMERATION);
+   temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<LayerType>());
+   mDelegates.push_back(temp);
    temp = DataVariantEditorDelegate("UnitType", DataVariantEditorDelegate::ENUMERATION);
    temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<UnitType>());
    mDelegates.push_back(temp);
@@ -86,6 +92,10 @@ DataVariantEditor::DataVariantEditor(QWidget* parent) :
    temp = DataVariantEditorDelegate("RasterChannelType", DataVariantEditorDelegate::ENUMERATION);
    temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<RasterChannelType>());
    mDelegates.push_back(temp);
+   temp = DataVariantEditorDelegate("RegionUnits", DataVariantEditorDelegate::ENUMERATION);
+   temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<RegionUnits>());
+   mDelegates.push_back(temp);
+   mDelegates.push_back(DataVariantEditorDelegate("SymbolType", DataVariantEditorDelegate::SYMBOL_TYPE));
    mDelegates.push_back(DataVariantEditorDelegate("vector<char>", DataVariantEditorDelegate::VECTOR));
    mDelegates.push_back(DataVariantEditorDelegate("vector<unsigned char>", DataVariantEditorDelegate::VECTOR));
    mDelegates.push_back(DataVariantEditorDelegate("vector<short>", DataVariantEditorDelegate::VECTOR));
@@ -151,11 +161,30 @@ DataVariantEditor::DataVariantEditor(QWidget* parent) :
    mpIntValidator = new QIntValidator(NULL);
    mpDoubleValidator = new QDoubleValidator(NULL);
 
+   QWidget* pColorWidget = new QWidget(mpStack);
+   mpColorEdit = new CustomColorButton(pColorWidget);
+   QVBoxLayout* pColorGrid = new QVBoxLayout(pColorWidget);
+   pColorGrid->setMargin(0);
+   pColorGrid->setSpacing(10);
+   pColorGrid->addWidget(mpColorEdit, 0, Qt::AlignLeft);
+   pColorGrid->addStretch();
+
+   QWidget* pSymbolTypeWidget = new QWidget(mpStack);
+   mpSymbolTypeEdit = new SymbolTypeGrid(pSymbolTypeWidget);
+   mpSymbolTypeEdit->setBorderedSymbols(true);
+   QVBoxLayout* pSymbolTypeGrid = new QVBoxLayout(pSymbolTypeWidget);
+   pSymbolTypeGrid->setMargin(0);
+   pSymbolTypeGrid->setSpacing(10);
+   pSymbolTypeGrid->addWidget(mpSymbolTypeEdit, 0, Qt::AlignLeft);
+   pSymbolTypeGrid->addStretch();
+
    mpStack->addWidget(pValueWidget);
    mpStack->addWidget(mpValueList);
    mpStack->addWidget(mpValueTextEdit);
    mpStack->addWidget(pBoolWidget);
    mpStack->addWidget(pDateTimeWidget);
+   mpStack->addWidget(pColorWidget);
+   mpStack->addWidget(pSymbolTypeWidget);
 
    // Browse button
    QPixmap pixOpen(IconImages::OpenIcon);
@@ -187,6 +216,8 @@ DataVariantEditor::DataVariantEditor(QWidget* parent) :
    VERIFYNR(connect(mpFalseRadio, SIGNAL(toggled(bool)), this, SIGNAL(modified())));
    VERIFYNR(connect(mpTrueRadio, SIGNAL(toggled(bool)), this, SIGNAL(modified())));
    VERIFYNR(connect(mpDateTimeEdit, SIGNAL(dateTimeChanged(const QDateTime&)), this, SIGNAL(modified())));
+   VERIFYNR(connect(mpColorEdit, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(modified())));
+   VERIFYNR(connect(mpSymbolTypeEdit, SIGNAL(valueChanged(SymbolType)), this, SIGNAL(modified())));
 }
 
 DataVariantEditor::~DataVariantEditor()
@@ -297,6 +328,28 @@ void DataVariantEditor::setValue(const DataVariant& value, bool useVariantCurren
          }
       }
    }
+   else if (curDelegate.getType() == DataVariantEditorDelegate::COLOR)
+   {
+      if (useVariantCurrentValue)
+      {
+         mpColorEdit->setColor(dv_cast<ColorType>(value));
+      }
+      else
+      {
+         mpColorEdit->setColor(ColorType());
+      }
+   }
+   else if (curDelegate.getType() == DataVariantEditorDelegate::SYMBOL_TYPE)
+   {
+      if (useVariantCurrentValue)
+      {
+         mpSymbolTypeEdit->setCurrentValue(dv_cast<SymbolType>(value));
+      }
+      else
+      {
+         mpSymbolTypeEdit->setCurrentValue(SymbolType());
+      }
+   }
    else
    {
       if (useVariantCurrentValue)
@@ -347,6 +400,14 @@ const DataVariant& DataVariantEditor::getValue()
    {
       strValue = mpValueTextEdit->toPlainText();
       strValue.replace("\n", ", ");
+   }
+   else if (curDelegate.getType() == DataVariantEditorDelegate::COLOR)
+   {
+      mValue = mpColorEdit->getColorType();
+   }
+   else if (curDelegate.getType() == DataVariantEditorDelegate::SYMBOL_TYPE)
+   {
+      mValue = mpSymbolTypeEdit->getCurrentValue();
    }
    else
    {
@@ -414,6 +475,14 @@ void DataVariantEditor::setStackWidget(string type)
    else if (curDelegate.getType() == DataVariantEditorDelegate::VECTOR)
    {
       mpStack->setCurrentIndex(2);
+   }
+   else if (curDelegate.getType() == DataVariantEditorDelegate::COLOR)
+   {
+      mpStack->setCurrentIndex(5);
+   }
+   else if (curDelegate.getType() == DataVariantEditorDelegate::SYMBOL_TYPE)
+   {
+      mpStack->setCurrentIndex(6);
    }
    else
    {

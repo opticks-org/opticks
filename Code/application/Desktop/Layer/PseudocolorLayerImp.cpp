@@ -109,6 +109,22 @@ void PseudocolorLayerImp::rasterElementDataModified(Subject& subject, const stri
    invalidateImage();
 }
 
+bool PseudocolorLayerImp::isKindOfLayer(const string& className)
+{
+   if ((className == "PseudocolorLayerImp") || (className == "PseudocolorLayer"))
+   {
+      return true;
+   }
+
+   return LayerImp::isKindOfLayer(className);
+}
+
+void PseudocolorLayerImp::getLayerTypes(vector<string>& classList)
+{
+   classList.push_back("PseudocolorLayer");
+   LayerImp::getLayerTypes(classList);
+}
+
 PseudocolorLayerImp& PseudocolorLayerImp::operator= (const PseudocolorLayerImp& pseudocolorLayer)
 {
    if (this != &pseudocolorLayer)

@@ -143,7 +143,23 @@ bool AoiLayerImp::isKindOf(const string& className) const
       return true;
    }
 
-   return LayerImp::isKindOf(className);
+   return GraphicLayerImp::isKindOf(className);
+}
+
+bool AoiLayerImp::isKindOfLayer(const string& className)
+{
+   if ((className == "AoiLayerImp") || (className == "AoiLayer"))
+   {
+      return true;
+   }
+
+   return GraphicLayerImp::isKindOfLayer(className);
+}
+
+void AoiLayerImp::getLayerTypes(vector<string>& classList)
+{
+   classList.push_back("AoiLayer");
+   GraphicLayerImp::getLayerTypes(classList);
 }
 
 AoiLayerImp& AoiLayerImp::operator= (const AoiLayerImp& aoiLayer)

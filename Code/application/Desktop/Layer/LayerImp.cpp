@@ -682,6 +682,21 @@ void LayerImp::isFlipped(const LocationType& dataLowerLeft, const LocationType& 
    bVerticalFlip = screenLowerLeft.mY > screenUpperLeft.mY;
 }
 
+bool LayerImp::isKindOfLayer(const string& className)
+{
+   if ((className == "LayerImp") || (className == "Layer"))
+   {
+      return true;
+   }
+
+   return false;
+}
+
+void LayerImp::getLayerTypes(vector<string>& classList)
+{
+   classList.push_back("Layer");
+}
+
 LayerImp& LayerImp::operator= (const LayerImp& rhs)
 {
    if (&rhs != this)

@@ -625,6 +625,10 @@ void WizardBuilder::buildInputNodes(WizardItem* pItem, const PlugInArgList* pArg
          {
             pDesktop->getViewTypes(argType, validTypes);
          }
+         if (validTypes.empty() && pDesktop != NULL)
+         {
+            pDesktop->getLayerTypes(argType, validTypes);
+         }
 
          pNode->setValidTypes(validTypes);
          if (pArg != NULL)
@@ -706,6 +710,10 @@ void WizardBuilder::buildOutputNodes(WizardItem* pItem, const PlugInArgList* pAr
          if (validTypes.empty() && pDesktop != NULL)
          {
             pDesktop->getViewTypes(argType, validTypes);
+         }
+         if (validTypes.empty() && pDesktop != NULL)
+         {
+            pDesktop->getLayerTypes(argType, validTypes);
          }
 
          pNode->setValidTypes(validTypes);

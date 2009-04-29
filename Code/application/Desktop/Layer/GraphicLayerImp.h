@@ -43,6 +43,9 @@ class GraphicLayerImp : public LayerImp
    Q_OBJECT
 
 public:
+   static bool isKindOfLayer(const std::string& className);
+   static void getLayerTypes(std::vector<std::string>& classList);
+
    GraphicLayerImp(const std::string& id, const std::string& layerName, DataElement* pElement);
    ~GraphicLayerImp();
 
