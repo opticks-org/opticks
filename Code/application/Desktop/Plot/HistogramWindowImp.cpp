@@ -983,7 +983,7 @@ HistogramWindowImp::HistogramUpdater::UpdateMomento::UpdateMomento(HistogramWind
                                                                    RasterLayer* pLayer,
                                                                    RasterChannelType channel) :
    mpWindow(pWindow),
-   mpRasterLayer(new AttachmentPtr<RasterLayer>(pLayer)),
+   mpRasterLayer(new SafePtr<RasterLayer>(pLayer)),
    mChannel(channel)
 {
 }

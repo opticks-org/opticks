@@ -189,10 +189,10 @@ private:
 
    TextureMode mTextureMode;
    LayerListAdapter* mpLayerList;
-   AttachmentPtr<RasterLayer> mpPrimaryRasterLayer;
+   SafePtr<RasterLayer> mpPrimaryRasterLayer;
    MeasurementLayerAdapter* mpMeasurementsLayer;
    bool mShowMeasurements;
-   AttachmentPtr<Layer> mpActiveLayer;
+   SafePtr<Layer> mpActiveLayer;
    LayerImp* mpDrawLayer;
    QTimer* mpPanTimer;
    int mPanKey;

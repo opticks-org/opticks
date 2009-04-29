@@ -33,8 +33,8 @@ public:
    SubjectImp();
    virtual ~SubjectImp();
 
-   virtual bool attach(const std::string &signal, const Slot &slot);
-   virtual bool detach(const std::string &signal, const Slot &slot);
+   virtual bool attach(const std::string& signal, const Slot& slot);
+   virtual bool detach(const std::string& signal, const Slot& slot);
 
    /**
     *  Inherited obligation from TypeAwareObject. Allow observers to
@@ -65,25 +65,50 @@ public:
     *  @return  A (possibly empty) list containing slots attached to the 
     *           specified signal.
     */
-   const std::list<SafeSlot>& getSlots(const std::string &signal);
+   const std::list<SafeSlot>& getSlots(const std::string& signal);
+
+   /**
+    *  Indicates whether the Subject's notification mechanism is enabled or not.
+    *
+    *  @return   true if the Subject's notification is enabled, or false otherwise.
+    */
+   bool signalsEnabled() const;
 
 protected:
    void notify(const std::string& signal, const boost::any& data = boost::any());
 
-private:
+   /**
+    *  Allows the notification of signals by a Subject to be enabled or disabled.
+    *
+    *  @param   enabled
+    *           Controls whether the Subject will notify or not when its notify
+    *           method is called.
+    */
+   void enableSignals(bool enabled);
+
    SubjectImpPrivate* mpImpPrivate;
 };
 
 #define SUBJECTADAPTEREXTENSION_CLASSES
 
 #define SUBJECTADAPTER_METHODS(impClass) \
-   bool attach(const std::string &signal, const Slot &slot) \
+   bool attach(const std::string& signal, const Slot& slot) \
    { \
       return impClass::attach(signal, slot); \
    } \
-   bool detach(const std::string &signal, const Slot &slot) \
+   bool detach(const std::string& signal, const Slot& slot) \
    { \
       return impClass::detach(signal, slot); \
+   } \
+   private: \
+   void enableSignals(bool enabled) \
+   { \
+      impClass::enableSignals(enabled); \
+   } \
+   public: \
+   bool signalsEnabled() const \
+   { \
+      return impClass::signalsEnabled(); \
    }
 
 #endif

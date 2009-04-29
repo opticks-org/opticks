@@ -10,11 +10,11 @@
 #ifndef RASTERELEMENTIMP_H
 #define RASTERELEMENTIMP_H
 
-#include "AttachmentPtr.h"
 #include "ComplexData.h"
 #include "DataAccessor.h"
 #include "DataElementImp.h"
 #include "DimensionDescriptor.h"
+#include "SafePtr.h"
 #include "StatisticsImp.h"
 #include "TypesFile.h"
 #include "ProgressAdapter.h"
@@ -198,7 +198,7 @@ protected:
    };
 
 private:
-   AttachmentPtr<RasterElement> mpTerrain;
+   SafePtr<RasterElement> mpTerrain;
    std::map<DimensionDescriptor, StatisticsImp*> mStatistics;
 
    std::string mTempFilename;

@@ -13,16 +13,6 @@
 
 using namespace std;
 
-bool SubjectAdapter::attach(const std::string &signal, const Slot &slot)
-{
-   return SubjectImp::attach(signal, slot);
-}
-
-bool SubjectAdapter::detach(const std::string &signal, const Slot &slot)
-{
-   return SubjectImp::detach(signal, slot);
-}
-
 const string& SubjectAdapter::getObjectType() const
 {
    static string type("SubjectAdapter");

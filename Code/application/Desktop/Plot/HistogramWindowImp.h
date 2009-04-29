@@ -92,7 +92,7 @@ private:
          void update() const;
       private:
          HistogramWindowImp* mpWindow;
-         boost::shared_ptr<AttachmentPtr<RasterLayer> > mpRasterLayer;
+         boost::shared_ptr<SafePtr<RasterLayer> > mpRasterLayer;
          RasterChannelType mChannel;
       };
       std::set<UpdateMomento> mUpdatesPending;

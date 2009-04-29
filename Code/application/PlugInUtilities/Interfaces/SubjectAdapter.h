@@ -23,16 +23,6 @@ class SubjectAdapter : public Subject, public SubjectImp SUBJECTADAPTEREXTENSION
 {
 public:
    /**
-    * @copydoc Subject::attach()
-    */
-   bool attach(const std::string &signal, const Slot &slot);
-
-   /**
-    * @copydoc Subject::detach()
-    */
-   bool detach(const std::string &signal, const Slot &slot);
-
-   /**
     *  Inherited obligation from TypeAwareObject. Allow observers to
     *  determine the type of mutating object notifying them.
     *
@@ -51,6 +41,8 @@ public:
     *           is a parent of the class identified in the argument.
     */
    virtual bool isKindOf(const std::string& name) const;
+
+   SUBJECTADAPTER_METHODS(SubjectImp)
 };
 
 #endif

@@ -10,8 +10,7 @@
 #ifndef ATTACHMENTPTR_H
 #define ATTACHMENTPTR_H
 
-#include "Slot.h"
-#include "Subject.h"
+#include "SafePtr.h"
 
 #include <string>
 #include <vector>
@@ -41,15 +40,26 @@
  * automatically detached when the SafeSlot's invalidator object is destroyed.
  */
 template<typename T>
-class AttachmentPtr
+class AttachmentPtr : public SafePtr<T>
 {
 public:
    /**
     * Default constructor.
     *
-    * No Subject is observed, no signals or slots registered.
+    * No Subject is observed.
     */
-   AttachmentPtr() : mpSubject(NULL)
+   AttachmentPtr() : SafePtr(NULL)
+   {
+   }
+
+   /**
+    *  Construct with a subject to observe.
+    *
+    *  @param   pSubject
+    *           The subject to observe.
+    */
+   AttachmentPtr(T* pSubject) :
+      SafePtr(pSubject)
    {
    }
 
@@ -62,22 +72,9 @@ public:
     * @param slot
     *        The slot to call when the signal is emitted.
     */
-   AttachmentPtr(const std::string &signalName, const Slot &slot) : 
-      mSignalSlots(1, std::make_pair(signalName, slot)), mpSubject(NULL)
+   AttachmentPtr(const std::string& signalName, const Slot& slot) : SafePtr(NULL),
+      mSignalSlots(1, std::make_pair(signalName, slot))
    {
-   }
-
-   /**
-    *  Construct with a subject to observe and no signals or slots registered.
-    *
-    *  @param   pSubject
-    *           The subject to observe.
-    */
-   AttachmentPtr(T* pSubject) :
-      mpSubject(NULL)
-   {
-      // Call reset() instead of using the initializer list to ensure the deleted signal is attached
-      reset(pSubject);
    }
 
    /**
@@ -91,11 +88,10 @@ public:
     * @param slot
     *        The slot to call when the signal is emitted.
     */
-   AttachmentPtr(T *pSubject, const std::string &signalName, const Slot &slot) : 
-      mSignalSlots(1, std::make_pair(signalName, slot)), mpSubject(NULL)
+   AttachmentPtr(T* pSubject, const std::string& signalName, const Slot& slot) : SafePtr(pSubject),
+      mSignalSlots(1, std::make_pair(signalName, slot))
    {
-      // Call reset() instead of using the initializer list to ensure the input signal is attached
-      reset(pSubject);
+      attach(signalName, slot);
    }
 
    /**
@@ -120,14 +116,11 @@ public:
     * @param slot
     *        The slot to call when the signal is emitted.
     */
-   void addSignal(const std::string &signalName, const Slot &slot)
+   void addSignal(const std::string& signalName, const Slot& slot)
    {
       mSignalSlots.push_back(std::make_pair(signalName, slot));
 
-      if (mpSubject != NULL)
-      {
-         mpSubject->attach(signalName, slot);
-      }
+      attach(signalName, slot);
    }
 
    /**
@@ -139,80 +132,29 @@ public:
     * @param pSubject
     *        The subject to begin observing.
     */
-   void reset(T *pSubject = NULL)
+   void reset(T* pSubject = NULL)
    {
-      if (pSubject != mpSubject)
+      if (pSubject != get())
       {
-         if (mpSubject != NULL)
+         for (std::vector<std::pair<std::string, Slot> >::const_iterator iter = mSignalSlots.begin();
+            iter != mSignalSlots.end(); ++iter)
          {
-            for (std::vector<std::pair<std::string, Slot> >::const_iterator iter = mSignalSlots.begin();
-               iter != mSignalSlots.end(); ++iter)
-            {
-               mpSubject->detach(iter->first, iter->second);
-            }
-            mpSubject->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &AttachmentPtr::subjectDeleted));
+            detach(iter->first, iter->second);
          }
-         mpSubject = pSubject;
-         if (mpSubject != NULL)
+         SafePtr<T>::reset(pSubject);
+         for (std::vector<std::pair<std::string, Slot> >::const_iterator iter = mSignalSlots.begin();
+            iter != mSignalSlots.end(); ++iter)
          {
-            mpSubject->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &AttachmentPtr::subjectDeleted));
-            for (std::vector<std::pair<std::string, Slot> >::const_iterator iter = mSignalSlots.begin();
-               iter != mSignalSlots.end(); ++iter)
-            {
-               mpSubject->attach(iter->first, iter->second);
-            }
+            attach(iter->first, iter->second);
          }
       }
-   }
-
-   /**
-    * Get the observed Subject.
-    *
-    * @return The observed Subject.
-    */
-   T *get()
-   {
-      return mpSubject;
-   }
-
-   /**
-    * @copydoc AttachmentPtr::get()
-    */
-   const T *get() const
-   {
-      return mpSubject;
-   }
-
-   /**
-    * @copydoc AttachmentPtr::get()
-    */
-   T *operator->()
-   {
-      return get();
-   }
-
-   /**
-    * @copydoc AttachmentPtr::get()
-    */
-   const T *operator->() const
-   {
-      return get();
    }
 
 private:
-   AttachmentPtr(const AttachmentPtr &);
-   AttachmentPtr &operator=(const AttachmentPtr &);
-
-   void subjectDeleted(Subject &subject, const std::string &signal, const boost::any &data)
-   {
-      if (&subject == mpSubject)
-      {
-         mpSubject = NULL;
-      }
-   }
+   AttachmentPtr(const AttachmentPtr&);
+   AttachmentPtr &operator=(const AttachmentPtr&);
 
    std::vector<std::pair<std::string, Slot> > mSignalSlots;
-   T* mpSubject;
 };
 
 #endif

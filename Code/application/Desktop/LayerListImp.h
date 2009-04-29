@@ -12,8 +12,8 @@
 
 #include <QtCore/QObject>
 
-#include "AttachmentPtr.h"
 #include "RasterElement.h"
+#include "SafePtr.h"
 #include "SubjectImp.h"
 #include "TypesFile.h"
 
@@ -78,7 +78,7 @@ signals:
    void layerDeleted(Layer* pLayer);
 
 private:
-   AttachmentPtr<RasterElement> mpRasterElement;
+   SafePtr<RasterElement> mpRasterElement;
    std::vector<Layer*> mLayers;
    std::vector<Layer*> mDisplayedLayers;
 };

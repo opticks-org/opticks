@@ -100,19 +100,7 @@ public:
     */
    bool isKindOf(const std::string& className) const;
 
-   //
-   // Inherited from Subject
-   //
-
-   bool attach(const std::string& signal, const Slot& slot)
-   {
-      return SubjectImp::attach(signal, slot);
-   }
-
-   bool detach(const std::string& signal, const Slot& slot)
-   {
-      return SubjectImp::detach(signal, slot);
-   }
+   SUBJECTADAPTER_METHODS(SubjectImp)
 
 private:
    std::string mMessage;

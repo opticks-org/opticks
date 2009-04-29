@@ -45,6 +45,8 @@ public:
 
    bool attach(const std::string& signal, const Slot& slot);
    bool detach(const std::string& signal, const Slot& slot);
+   void enableSignals(bool enabled);
+   bool signalsEnabled() const;
 
    QWidget* getMainWidget() const;
    MenuBar* getMainMenuBar() const;

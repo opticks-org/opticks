@@ -27,7 +27,7 @@ SubjectImp::~SubjectImp()
    delete mpImpPrivate;
 }
 
-bool SubjectImp::attach(const std::string &signal, const Slot &slot)
+bool SubjectImp::attach(const std::string& signal, const Slot& slot)
 {
    Subject* pSubject = dynamic_cast<Subject*>(this);
    if (pSubject == NULL)
@@ -38,7 +38,7 @@ bool SubjectImp::attach(const std::string &signal, const Slot &slot)
    return mpImpPrivate->attach(*pSubject, signal, slot);
 }
 
-bool SubjectImp::detach(const std::string &signal, const Slot &slot)
+bool SubjectImp::detach(const std::string& signal, const Slot& slot)
 {
    Subject* pSubject = dynamic_cast<Subject*>(this);
    if (pSubject == NULL)
@@ -49,7 +49,7 @@ bool SubjectImp::detach(const std::string &signal, const Slot &slot)
    return mpImpPrivate->detach(*pSubject, signal, slot);
 }
 
-void SubjectImp::notify(const string &signal, const boost::any &data)
+void SubjectImp::notify(const string& signal, const boost::any& data)
 {
    Subject* pSubject = dynamic_cast<Subject*>(this);
    if (pSubject == NULL)
@@ -76,7 +76,7 @@ bool SubjectImp::isKindOf(const string& className) const
    return false;
 }
 
-void Signal::SignalValue::update(Subject &subject, const std::string &signal, const boost::any &data) const
+void Signal::SignalValue::update(Subject& subject, const std::string& signal, const boost::any& data) const
 {
    SubjectImp* pSubjectImp = dynamic_cast<SubjectImp*>(&mSubject);
    if (NN(pSubjectImp))
@@ -92,7 +92,7 @@ void Signal::SignalValue::update(Subject &subject, const std::string &signal, co
    }
 }
 
-const list<SafeSlot>& SubjectImp::getSlots(const string &signal)
+const list<SafeSlot>& SubjectImp::getSlots(const string& signal)
 {
    static list<SafeSlot> emptyList;
    if (signal.empty())
@@ -107,4 +107,26 @@ const list<SafeSlot>& SubjectImp::getSlots(const string &signal)
    }
 
    return mpImpPrivate->getSlots(signal);
+}
+
+void SubjectImp::enableSignals(bool enabled)
+{
+   Subject* pSubject = dynamic_cast<Subject*>(this);
+   if (pSubject == NULL)
+   {
+      return;
+   }
+
+   mpImpPrivate->enableSignals(enabled);
+}
+
+bool SubjectImp::signalsEnabled() const
+{
+   const Subject* pSubject = dynamic_cast<const Subject*>(this);
+   if (pSubject == NULL)
+   {
+      return false;
+   }
+
+   return mpImpPrivate->signalsEnabled();
 }

@@ -14,7 +14,7 @@
 #include <QtGui/QPushButton>
 #include <QtGui/QTableView>
 
-#include "AttachmentPtr.h"
+#include "SafePtr.h"
 #include "TiePointLayer.h"
 #include "TiePointList.h"
 
@@ -54,7 +54,7 @@ private:
    QPushButton* mpDeleteButton;
    QPushButton* mpGoToButton;
 
-   AttachmentPtr<TiePointLayer> mpLayer;
+   SafePtr<TiePointLayer> mpLayer;
    TiePointTableModel* mpTableModel;
 
    void enableButtons(bool bEnable);

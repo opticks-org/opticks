@@ -81,6 +81,9 @@ class Slot;
  *  %Subject of type MyClass will be called when that MyClass object 
  *  emits SIGNAL_NAME(MyClass, MySignal).
  *
+ *  Signals for a particular instance of a %Subject can be supressed by using
+ *  either the SignalBlocker or SignalEnabler classes.
+ *
  *  The notification of slots is done in two passes.
  *  First, all slots attached to the specific signal are notified in FIFO
  *  order (First In == first attached, and First Out == first notified).
@@ -88,13 +91,14 @@ class Slot;
  *  Subject::Modified, all slots attached to Subject::Modified
  *  are notified in FIFO order.
 
- *  @see    TypeAwareObject, Slot, SafeSlot, AutoSlot, Signal
+ *  @see    TypeAwareObject, Slot, SafeSlot, AutoSlot, Signal, SignalBlocker, SignalEnabler
  */
 class Subject : public TypeAwareObject
 {
 public:
    /**
-    *  Emitted when a %Subject is deleted.
+    *  Emitted when a %Subject is deleted.  This will always be emitted, it CANNOT
+    *  be blocked using SignalBlocker or SignalEnabler.
     */
    SIGNAL_METHOD(Subject, Deleted)
    /**
@@ -122,7 +126,7 @@ public:
     *  @notify  This method will call Observer::attached on the object in
     *           the slot, if the object inherits Observer.
     */
-    virtual bool attach(const std::string& signal, const Slot &slot) = 0;
+    virtual bool attach(const std::string& signal, const Slot& slot) = 0;
 
    /**
     *  Allow a Slot to be deregistered from a signal on this %Subject.
@@ -144,7 +148,24 @@ public:
     *  @notify  This method will call Observer::detached on the object in
     *           the slot, if the object inherits Observer.
     */
-   virtual bool detach(const std::string& signal, const Slot &slot) = 0;
+   virtual bool detach(const std::string& signal, const Slot& slot) = 0;
+
+   /**
+    *  Indicates whether the Subject's notification mechanism is enabled or not.
+    *  If signals are disabled, then only SIGNAL_NAME(Subject, Deleted) will be
+    *  emitted when requested, all other signals will be suppressed.
+    *
+    *  To disable signals, either the SignalBlocker or SignalEnabler classes 
+    *  must be used.
+    *
+    *  @warning  Disabling signals can be very dangerous as it hides details from
+    *            any attached slots which may depend on being notified to
+    *            function properly.
+    *  
+    *  @see      SignalBlocker, SignalEnabler
+    *  @return   true if the Subject's notification is enabled, or false otherwise.
+    */
+   virtual bool signalsEnabled() const = 0;
 
 protected:
    /**
@@ -152,6 +173,22 @@ protected:
     * the instructions provided for the relevant subclass.
     */
    virtual ~Subject() {}
+
+private:
+   /**
+    *  Allows the notification of signals by a Subject to be enabled or disabled.
+    *
+    *  @param   enabled
+    *           Controls whether the Subject will notify or not when its notify
+    *           method is called.
+    */
+   virtual void enableSignals(bool enabled) = 0;
+
+friend class SignalEnabler;
+friend class SignalBlocker;
+#ifdef CPPTESTS
+friend class SubjectObserverTest;
+#endif
 };
 
 #endif

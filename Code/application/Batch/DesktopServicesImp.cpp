@@ -79,6 +79,15 @@ bool DesktopServicesImp::detach(const string& signal, const Slot& slot)
    return false;
 }
 
+void DesktopServicesImp::enableSignals(bool enabled)
+{
+}
+
+bool DesktopServicesImp::signalsEnabled() const
+{
+   return false;
+}
+
 QWidget* DesktopServicesImp::getMainWidget() const
 {
    return NULL;

@@ -166,7 +166,7 @@ private:
    ValuesType meSelectedValue;
 
    RasterChannelType mRasterChannelType;
-   AttachmentPtr<Layer> mpLayer;
+   SafePtr<Layer> mpLayer;
    AttachmentPtr<RasterElement> mpElement;
    bool mAutoZoom;
 

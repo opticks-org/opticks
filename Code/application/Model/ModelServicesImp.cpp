@@ -13,7 +13,6 @@
 #include "AoiElementAdapter.h"
 #include "AppAssert.h"
 #include "AppVerify.h"
-#include "AttachmentPtr.h"
 #include "DataDescriptorAdapter.h"
 #include "DataElementAdapter.h"
 #include "DataElementGroupAdapter.h"
@@ -25,6 +24,7 @@
 #include "RasterDataDescriptorAdapter.h"
 #include "RasterElementAdapter.h"
 #include "RasterFileDescriptorImp.h"
+#include "SafePtr.h"
 #include "SessionItemSerializer.h"
 #include "SessionItemDeserializer.h"
 #include "SignatureAdapter.h"
@@ -675,7 +675,7 @@ bool ModelServicesImp::destroyElement(DataElement* pElement)
       return false;
    }
 
-   AttachmentPtr<DataElement> pParent(pElement);
+   SafePtr<DataElement> pParent(pElement);
 
    // Destroy the element's children
    vector<DataElement*> children = getElements(pParent.get(), string());

@@ -18,7 +18,7 @@
 
 using namespace std;
 
-SubjectImpPrivate::SubjectImpPrivate() : mpSubject(NULL)
+SubjectImpPrivate::SubjectImpPrivate() : mpSubject(NULL), mSignalsEnabled(true)
 {
 }
 
@@ -26,7 +26,7 @@ SubjectImpPrivate::~SubjectImpPrivate()
 {
 }
 
-bool SubjectImpPrivate::attach(Subject &subject, const string &signal, const Slot &slot)
+bool SubjectImpPrivate::attach(Subject& subject, const string& signal, const Slot& slot)
 {
    if (slot == SafeSlot())
    {
@@ -73,7 +73,7 @@ bool SubjectImpPrivate::attach(Subject &subject, const string &signal, const Slo
    return true;
 }
 
-bool SubjectImpPrivate::detach(Subject &subject, const string &signal, const Slot &slot)
+bool SubjectImpPrivate::detach(Subject& subject, const string& signal, const Slot& slot)
 {
    bool success = true;
    MapType::iterator pSlotVec = mSlots.find(signal);
@@ -147,7 +147,7 @@ bool SubjectImpPrivate::detach(Subject &subject, const string &signal, const Slo
 class PopRecursion
 {
 public:
-   PopRecursion(vector<string> &recursions, const string &recursion) : mRecursions(recursions) 
+   PopRecursion(vector<string>& recursions, const string& recursion) : mRecursions(recursions) 
    {
       mRecursions.push_back(recursion);
    }
@@ -159,12 +159,24 @@ private:
    vector<string>& mRecursions;
 };
 
-void SubjectImpPrivate::notify(Subject &subject, const string &signal, const string &originalSignal,
-                               const boost::any &data)
+void SubjectImpPrivate::notify(Subject& subject, const string& signal, const string& originalSignal,
+                               const boost::any& data)
 {
    if (signal.empty())
    {
       return;
+   }
+
+   bool signalIsDeleted = false;
+   bool deletedFlagSet = false; // only want to do the signal name check if necessary
+   if (!mSignalsEnabled)
+   {
+      signalIsDeleted = (signal == SIGNAL_NAME(Subject, Deleted));
+      if (!signalIsDeleted)
+      {
+         return;
+      }
+      deletedFlagSet = true;
    }
 
    // notify slots attached to signal
@@ -173,7 +185,7 @@ void SubjectImpPrivate::notify(Subject &subject, const string &signal, const str
    {
       list<SafeSlot>& slotVec = pSlotVec->second;
 
-      // Scope the recursion popper
+      if (!slotVec.empty())
       {
          PopRecursion popper(mRecursions, signal);
 
@@ -214,7 +226,7 @@ void SubjectImpPrivate::notify(Subject &subject, const string &signal, const str
    }
 }
 
-const list<SafeSlot>& SubjectImpPrivate::getSlots(const string &signal)
+const list<SafeSlot>& SubjectImpPrivate::getSlots(const string& signal)
 {
    static list<SafeSlot> emptyList;
 
@@ -236,7 +248,7 @@ const list<SafeSlot>& SubjectImpPrivate::getSlots(const string &signal)
    }
 }
 
-void SubjectImpPrivate::removeEmptySlots(const string &recursion, list<SafeSlot> &slotVec)
+void SubjectImpPrivate::removeEmptySlots(const string& recursion, list<SafeSlot>& slotVec)
 {
    if (count(mRecursions.begin(), mRecursions.end(), recursion) == 0)
    {
@@ -252,4 +264,14 @@ void SubjectImpPrivate::removeEmptySlots(const string &recursion, list<SafeSlot>
          }
       }
    }
+}
+
+void SubjectImpPrivate::enableSignals(bool enabled)
+{
+   mSignalsEnabled = enabled;
+}
+
+bool SubjectImpPrivate::signalsEnabled() const
+{
+   return mSignalsEnabled;
 }

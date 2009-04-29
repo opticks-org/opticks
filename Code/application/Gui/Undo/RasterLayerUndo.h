@@ -10,12 +10,12 @@
 #ifndef RASTERLAYERUNDO_H
 #define RASTERLAYERUNDO_H
 
-#include "AttachmentPtr.h"
 #include "ColorMap.h"
 #include "ComplexData.h"
 #include "DimensionDescriptor.h"
 #include "LayerUndo.h"
 #include "RasterElement.h"
+#include "SafePtr.h"
 #include "TypesFile.h"
 #include "UndoAction.h"
 
@@ -192,10 +192,10 @@ private:
    DimensionDescriptor mGreenBand;
    DimensionDescriptor mBlueBand;
 
-   AttachmentPtr<RasterElement> mpGrayRasterElement;
-   AttachmentPtr<RasterElement> mpRedRasterElement;
-   AttachmentPtr<RasterElement> mpGreenRasterElement;
-   AttachmentPtr<RasterElement> mpBlueRasterElement;
+   SafePtr<RasterElement> mpGrayRasterElement;
+   SafePtr<RasterElement> mpRedRasterElement;
+   SafePtr<RasterElement> mpGreenRasterElement;
+   SafePtr<RasterElement> mpBlueRasterElement;
 
    double mGrayLower;
    double mGrayUpper;

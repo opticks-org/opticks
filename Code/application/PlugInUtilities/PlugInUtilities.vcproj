@@ -2880,6 +2880,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Interfaces\SafePtr.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Interfaces\SecurityMarkingsDlg.h"
 				>
 				<FileConfiguration
@@ -2929,6 +2933,10 @@
 			</File>
 			<File
 				RelativePath=".\Interfaces\SessionResource.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Interfaces\SignalBlocker.h"
 				>
 			</File>
 			<File

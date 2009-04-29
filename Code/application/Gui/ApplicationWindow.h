@@ -16,12 +16,12 @@
 #include <QtGui/QMenu>
 #include <QtGui/QUndoGroup>
 
-#include "AttachmentPtr.h"
 #include "ConfigurationSettings.h"
 #include "DynamicObject.h"
 #include "GraphicGroupAdapter.h"
 #include "ImportAgent.h"
 #include "MruFile.h"
+#include "SafePtr.h"
 #include "SettableSessionItemAdapter.h"
 #include "SubjectAdapter.h"
 #include "TypesFile.h"
@@ -418,7 +418,7 @@ private:
    Workspace* mpWorkspace;
    std::vector<Window*> mWindows;
    WorkspaceWindowImp* mpCurrentWnd;
-   AttachmentPtr<View> mpCurrentView;
+   SafePtr<View> mpCurrentView;
    View* mpCurrentEditView;
 
    // Docking windows

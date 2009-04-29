@@ -10,12 +10,12 @@
 #ifndef DATADESCRIPTORIMP_H
 #define DATADESCRIPTORIMP_H
 
-#include "AttachmentPtr.h"
 #include "ClassificationAdapter.h"
 #include "DataElement.h"
 #include "DynamicObjectAdapter.h"
 #include "FileDescriptor.h"
 #include "FileDescriptorImp.h"
+#include "SafePtr.h"
 #include "SerializableImp.h"
 #include "SubjectImp.h"
 #include "TypesFile.h"
@@ -79,7 +79,7 @@ private:
    void generateParentDesignator();
    std::string mName;
    std::string mType;
-   AttachmentPtr<DataElement> mpParent;
+   SafePtr<DataElement> mpParent;
    std::vector<std::string> mParentDesignator;
    ClassificationAdapter mClassification;
    DynamicObjectAdapter mMetadata;

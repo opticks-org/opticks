@@ -11,6 +11,7 @@
 #define FRAMELABELOBJECTIMP_H
 
 #include "AnimationController.h"
+#include "AttachmentPtr.h"
 #include "LayerList.h"
 #include "TextObjectImp.h"
 #include "View.h"

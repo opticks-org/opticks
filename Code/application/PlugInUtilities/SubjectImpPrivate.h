@@ -35,11 +35,14 @@ public:
       const boost::any& data = boost::any());
    const std::list<SafeSlot>& getSlots(const std::string& signal);
    void removeEmptySlots(const std::string& recursion, std::list<SafeSlot>& slotVec);
+   void enableSignals(bool enabled);
+   bool signalsEnabled() const;
 
 private:
    MapType mSlots;
    std::vector<std::string> mRecursions;
    Subject* mpSubject;
+   bool mSignalsEnabled;
 };
 
 #endif
