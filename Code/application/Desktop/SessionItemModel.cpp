@@ -274,7 +274,7 @@ QVariant SessionItemModel::data(const QModelIndex& index, int role) const
             }
          }
       }
-      else if (role == Qt::UserRole)
+      else if (role == SessionItemModel::SessionItemRole)
       {
          return QVariant::fromValue(pItem);
       }

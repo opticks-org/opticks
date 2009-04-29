@@ -75,7 +75,7 @@ QMimeData* WindowModel::mimeData(const QModelIndexList& indexes) const
    QModelIndex index = indexes.front();
    if (index.isValid() == true)
    {
-      SessionItem* pItem = index.data(Qt::UserRole).value<SessionItem*>();
+      SessionItem* pItem = index.data(SessionItemModel::SessionItemRole).value<SessionItem*>();
       if (pItem != NULL)
       {
          strItemId = QString::fromStdString(pItem->getId());
@@ -118,7 +118,7 @@ bool WindowModel::dropMimeData(const QMimeData* pData, Qt::DropAction action, in
          QModelIndex layerIndex = dropIndex.child(i, 0);
          if (layerIndex.isValid() == true)
          {
-            Layer* pLayer = dynamic_cast<Layer*>(layerIndex.data(Qt::UserRole).value<SessionItem*>());
+            Layer* pLayer = dynamic_cast<Layer*>(layerIndex.data(SessionItemModel::SessionItemRole).value<SessionItem*>());
             if (pLayer != NULL)
             {
                if (QString::fromStdString(pLayer->getId()) == strItemId)
@@ -174,9 +174,9 @@ bool WindowModel::lessThan(const QModelIndex& left, const QModelIndex& right) co
       }
 
       // Check for layer items
-      SessionItem* pSessionItem = left.data(Qt::UserRole).value<SessionItem*>();
+      SessionItem* pSessionItem = left.data(SessionItemModel::SessionItemRole).value<SessionItem*>();
       Layer* pLeftLayer = dynamic_cast<Layer*>(pSessionItem);
-      pSessionItem = right.data(Qt::UserRole).value<SessionItem*>();
+      pSessionItem = right.data(SessionItemModel::SessionItemRole).value<SessionItem*>();
       Layer* pRightLayer = dynamic_cast<Layer*>(pSessionItem);
 
       if ((pLeftLayer != NULL) && (pRightLayer != NULL))
@@ -295,7 +295,7 @@ Qt::ItemFlags WindowModel::WindowSourceModel::flags(const QModelIndex& index) co
    Qt::ItemFlags itemFlags = SessionItemModel::flags(index);
    if (index.isValid() == true)
    {
-      Layer* pLayer = dynamic_cast<Layer*>(index.data(Qt::UserRole).value<SessionItem*>());
+      Layer* pLayer = dynamic_cast<Layer*>(index.data(SessionItemModel::SessionItemRole).value<SessionItem*>());
       if (pLayer != NULL)
       {
          itemFlags |= Qt::ItemIsDragEnabled;
@@ -311,7 +311,7 @@ Qt::ItemFlags WindowModel::WindowSourceModel::flags(const QModelIndex& index) co
          QModelIndex childIndex = index.child(0, 0);
          if (childIndex.isValid() == true)
          {
-            SessionItem* pItem = childIndex.data(Qt::UserRole).value<SessionItem*>();
+            SessionItem* pItem = childIndex.data(SessionItemModel::SessionItemRole).value<SessionItem*>();
             if (dynamic_cast<Layer*>(pItem) != NULL)
             {
                itemFlags |= Qt::ItemIsDropEnabled;
@@ -319,13 +319,13 @@ Qt::ItemFlags WindowModel::WindowSourceModel::flags(const QModelIndex& index) co
          }
       }
 
-      ToolBar* pToolbar = dynamic_cast<ToolBar*>(index.data(Qt::UserRole).value<SessionItem*>());
+      ToolBar* pToolbar = dynamic_cast<ToolBar*>(index.data(SessionItemModel::SessionItemRole).value<SessionItem*>());
       if (pToolbar != NULL)
       {
          itemFlags |= Qt::ItemIsUserCheckable;
       }
 
-      DockWindow* pDock = dynamic_cast<DockWindow*>(index.data(Qt::UserRole).value<SessionItem*>());
+      DockWindow* pDock = dynamic_cast<DockWindow*>(index.data(SessionItemModel::SessionItemRole).value<SessionItem*>());
       if (pDock != NULL)
       {
          itemFlags |= Qt::ItemIsUserCheckable;

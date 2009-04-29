@@ -7,12 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QHeaderView>
-#include <QtGui/QLabel>
-#include <QtGui/QLayout>
-#include <QtGui/QMessageBox>
-#include <QtGui/QSortFilterProxyModel>
-
 #include "AppVersion.h"
 #include "DesktopServices.h"
 #include "DynamicObjectItemModel.h"
@@ -20,6 +14,14 @@
 #include "MetadataWidget.h"
 #include "NameTypeValueDlg.h"
 
+#include <QtGui/QAction>
+#include <QtGui/QApplication>
+#include <QtGui/QClipboard>
+#include <QtGui/QHeaderView>
+#include <QtGui/QLabel>
+#include <QtGui/QLayout>
+#include <QtGui/QMessageBox>
+#include <QtGui/QSortFilterProxyModel>
 #include <string>
 using namespace std;
 
@@ -57,6 +59,11 @@ MetadataWidget::MetadataWidget(QWidget* parent) :
    mpMetadataTree->setModel(mpMetadataSortingModel);  
    mpMetadataTree->setSelectionBehavior(QAbstractItemView::SelectRows);
    mpMetadataTree->setAllColumnsShowFocus(true);
+   mpMetadataTree->setContextMenuPolicy(Qt::ActionsContextMenu);
+   QAction* pCopyIdAction = new QAction("Copy item ID to clipboard", mpMetadataTree);
+   mpMetadataTree->addAction(pCopyIdAction);
+   QAction* pCopyValueAction = new QAction("Copy item value to clipboard", mpMetadataTree);
+   mpMetadataTree->addAction(pCopyValueAction);
 
    QHeaderView* pHeader = mpMetadataTree->header();
    if (pHeader != NULL)
@@ -109,18 +116,20 @@ MetadataWidget::MetadataWidget(QWidget* parent) :
    // Connections
    if (editWarning == true)
    {
-      connect(mpMetadataTree->selectionModel(), SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)), this,
-         SLOT(currentChanged(const QModelIndex&, const QModelIndex&)));
-      connect(mpMetadataTree, SIGNAL(doubleClicked(const QModelIndex&)), this, 
-         SLOT(editSelectedValue(const QModelIndex&)));
+      VERIFYNR(connect(mpMetadataTree->selectionModel(), SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)), this,
+         SLOT(currentChanged(const QModelIndex&, const QModelIndex&))));
+      VERIFYNR(connect(mpMetadataTree, SIGNAL(doubleClicked(const QModelIndex&)), this,
+         SLOT(editSelectedValue(const QModelIndex&))));
    }
 
-   connect(mpModifyButton, SIGNAL(clicked()), this, SLOT(modifyValues()));
-   connect(mpAddChildButton, SIGNAL(clicked()), this, SLOT(addKey()));
-   connect(mpAddSiblingButton, SIGNAL(clicked()), this, SLOT(addKey()));
-   connect(mpEditButton, SIGNAL(clicked()), this, SLOT(editCurrentValue()));
-   connect(mpDeleteButton, SIGNAL(clicked()), this, SLOT(deleteKey()));
-   connect(mpClearButton, SIGNAL(clicked()), this, SLOT(clearKeys()));
+   VERIFYNR(connect(mpModifyButton, SIGNAL(clicked()), this, SLOT(modifyValues())));
+   VERIFYNR(connect(mpAddChildButton, SIGNAL(clicked()), this, SLOT(addKey())));
+   VERIFYNR(connect(mpAddSiblingButton, SIGNAL(clicked()), this, SLOT(addKey())));
+   VERIFYNR(connect(mpEditButton, SIGNAL(clicked()), this, SLOT(editCurrentValue())));
+   VERIFYNR(connect(mpDeleteButton, SIGNAL(clicked()), this, SLOT(deleteKey())));
+   VERIFYNR(connect(mpClearButton, SIGNAL(clicked()), this, SLOT(clearKeys())));
+   VERIFYNR(connect(pCopyIdAction, SIGNAL(triggered()), this, SLOT(copyIdToClipboard())));
+   VERIFYNR(connect(pCopyValueAction, SIGNAL(triggered()), this, SLOT(copyValueToClipboard())));
 }
 
 MetadataWidget::~MetadataWidget()
@@ -197,10 +206,10 @@ void MetadataWidget::modifyValues()
    mpDeleteButton->setEnabled(false);
    mpClearButton->setEnabled(mpMetadata != NULL);
 
-   connect(mpMetadataTree->selectionModel(), SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)), this,
-      SLOT(currentChanged(const QModelIndex&, const QModelIndex&)));
-   connect(mpMetadataTree, SIGNAL(doubleClicked(const QModelIndex&)), this,
-      SLOT(editSelectedValue(const QModelIndex&)));
+   VERIFYNR(connect(mpMetadataTree->selectionModel(), SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)), this,
+      SLOT(currentChanged(const QModelIndex&, const QModelIndex&))));
+   VERIFYNR(connect(mpMetadataTree, SIGNAL(doubleClicked(const QModelIndex&)), this,
+      SLOT(editSelectedValue(const QModelIndex&))));
 }
 
 void MetadataWidget::addKey()
@@ -221,7 +230,7 @@ void MetadataWidget::addKey()
 
    if (parent.isValid() == true)
    {
-      DataVariant* pValue = parent.data(Qt::UserRole).value<DataVariant*>();
+      DataVariant* pValue = parent.data(DataVariantRole).value<DataVariant*>();
       if ((pValue != NULL) && (pValue->isValid() == true))
       {
          if (pValue->getTypeName() == "DynamicObject")
@@ -277,7 +286,7 @@ void MetadataWidget::deleteKey()
    QModelIndex parent = mpMetadataSortingModel->mapToSource(mpMetadataTree->currentIndex().parent());
    if (parent.isValid() == true)
    {
-      DataVariant* pValue = parent.data(Qt::UserRole).value<DataVariant*>();
+      DataVariant* pValue = parent.data(DataVariantRole).value<DataVariant*>();
       if ((pValue != NULL) && (pValue->isValid() == true))
       {
          if (pValue->getTypeName() == "DynamicObject")
@@ -330,7 +339,7 @@ void MetadataWidget::currentChanged(const QModelIndex& selectedItem, const QMode
 
    if (bSelectedItem == true)
    {
-      DataVariant* pValue = selected.data(Qt::UserRole).value<DataVariant*>();
+      DataVariant* pValue = selected.data(DataVariantRole).value<DataVariant*>();
       if ((pValue != NULL) && (pValue->isValid() == true))
       {
          if (pValue->getTypeName() == "DynamicObject")
@@ -351,7 +360,7 @@ void MetadataWidget::editSelectedValue(const QModelIndex& selectedItem)
    QModelIndex index = mpMetadataSortingModel->mapToSource(selectedItem);
    if (index.isValid() == true)
    {
-      DataVariant* pValue = index.data(Qt::UserRole).value<DataVariant*>();
+      DataVariant* pValue = index.data(DataVariantRole).value<DataVariant*>();
       if ((pValue != NULL) && (pValue->isValid() == true))
       {
          if (pValue->getTypeName() == "DynamicObject")
@@ -371,7 +380,7 @@ void MetadataWidget::editSelectedValue(const QModelIndex& selectedItem)
    QModelIndex parent = mpMetadataSortingModel->mapToSource(selectedItem.parent());
    if (parent.isValid() == true)
    {
-      DataVariant* pValue = parent.data(Qt::UserRole).value<DataVariant*>();
+      DataVariant* pValue = parent.data(DataVariantRole).value<DataVariant*>();
       if ((pValue != NULL) && (pValue->isValid() == true))
       {
          if (pValue->getTypeName() == "DynamicObject")
@@ -394,7 +403,7 @@ void MetadataWidget::editSelectedValue(const QModelIndex& selectedItem)
    index = index.sibling(index.row(), 0);
 
    QString name = index.data(Qt::DisplayRole).toString();
-   DataVariant* pValue = index.data(Qt::UserRole).value<DataVariant*>();
+   DataVariant* pValue = index.data(DataVariantRole).value<DataVariant*>();
    VERIFYNRV(pValue != NULL);
 
    // Get the new name and value from the user
@@ -413,6 +422,41 @@ void MetadataWidget::editSelectedValue(const QModelIndex& selectedItem)
          // Update the modified flag
          mModified = true;
          emit modified();
+      }
+   }
+}
+
+void MetadataWidget::copyIdToClipboard()
+{
+   QModelIndexList selected = mpMetadataTree->selectionModel()->selectedIndexes();
+   if (selected.size() >= 1)
+   {
+      QStringList id;
+      QModelIndex idx = selected.front();
+      while (idx.isValid())
+      {
+         QString tmp = idx.data().toString();
+         tmp.replace("/", "//");
+         id.push_front(tmp);
+         idx = idx.parent();
+      }
+      QApplication::clipboard()->setText(id.join("/"));
+   }
+}
+
+void MetadataWidget::copyValueToClipboard()
+{
+   QModelIndexList selected = mpMetadataTree->selectionModel()->selectedIndexes();
+   if (selected.size() >= 1)
+   {
+      QModelIndex idx = selected.front();
+      if (idx.isValid())
+      {
+         DataVariant* pValue = idx.data(DataVariantRole).value<DataVariant*>();
+         if (pValue != NULL && pValue->isValid())
+         {
+            QApplication::clipboard()->setText(QString::fromStdString(pValue->toDisplayString()));
+         }
       }
    }
 }

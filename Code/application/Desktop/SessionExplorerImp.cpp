@@ -6,15 +6,6 @@
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
-
-#include <QtGui/QContextMenuEvent>
-#include <QtGui/QHeaderView>
-#include <QtGui/QMenu>
-#include <QtGui/QMessageBox>
-#include <QtGui/QSortFilterProxyModel>
-#include <QtGui/QTabWidget>
-#include <QtGui/QTreeView>
-
 #include "SessionExplorerImp.h"
 
 #include "AnimationModel.h"
@@ -26,8 +17,19 @@
 #include "ElementModel.h"
 #include "Icons.h"
 #include "PlugInModel.h"
+#include "SessionItem.h"
 #include "SessionItemModel.h"
 #include "WindowModel.h"
+
+#include <QtGui/QApplication>
+#include <QtGui/QClipboard>
+#include <QtGui/QContextMenuEvent>
+#include <QtGui/QHeaderView>
+#include <QtGui/QMenu>
+#include <QtGui/QMessageBox>
+#include <QtGui/QSortFilterProxyModel>
+#include <QtGui/QTabWidget>
+#include <QtGui/QTreeView>
 
 using namespace std;
 
@@ -40,7 +42,8 @@ SessionExplorerImp::SessionExplorerImp(const string& id, const string& windowNam
    mpSeparatorAction(NULL),
    mpExpandAction(NULL),
    mpCollapseAction(NULL),
-   mpRenameAction(NULL)
+   mpRenameAction(NULL),
+   mpCopyNameToClipboardAction(NULL)
 {
    // Tab widget
    QTabWidget* pTabWidget = new QTabWidget(this);
@@ -147,6 +150,16 @@ SessionExplorerImp::SessionExplorerImp(const string& id, const string& windowNam
    mpElementTree->addAction(mpRenameAction);
    mpPlugInTree->addAction(mpRenameAction);
 
+   mpCopyNameToClipboardAction = new QAction("Copy name to clipboard", this);
+   mpCopyNameToClipboardAction->setAutoRepeat(false);
+   mpCopyNameToClipboardAction->setShortcutContext(Qt::WidgetShortcut);
+   mpCopyNameToClipboardAction->setStatusTip("Copy the full item name to the clipboard");
+   pDesktop->initializeAction(mpCopyNameToClipboardAction, shortcutContext);
+   mpWindowTree->addAction(mpCopyNameToClipboardAction);
+   mpAnimationTree->addAction(mpCopyNameToClipboardAction);
+   mpElementTree->addAction(mpCopyNameToClipboardAction);
+   mpPlugInTree->addAction(mpCopyNameToClipboardAction);
+
    // Initialization
    pTabWidget->addTab(mpWindowTree, "Windows");
    pTabWidget->addTab(mpAnimationTree, "Animations");
@@ -160,10 +173,11 @@ SessionExplorerImp::SessionExplorerImp(const string& id, const string& windowNam
    setWidget(pTabWidget);
 
    // Connections
-   connect(pTabWidget, SIGNAL(currentChanged(int)), this, SLOT(treeViewChanged()));
-   connect(mpExpandAction, SIGNAL(triggered()), this, SLOT(expandCurrentTreeView()));
-   connect(mpCollapseAction, SIGNAL(triggered()), this, SLOT(collapseCurrentTreeView()));
-   connect(mpRenameAction, SIGNAL(triggered()), this, SLOT(renameItem()));
+   VERIFYNR(connect(pTabWidget, SIGNAL(currentChanged(int)), this, SLOT(treeViewChanged())));
+   VERIFYNR(connect(mpExpandAction, SIGNAL(triggered()), this, SLOT(expandCurrentTreeView())));
+   VERIFYNR(connect(mpCollapseAction, SIGNAL(triggered()), this, SLOT(collapseCurrentTreeView())));
+   VERIFYNR(connect(mpRenameAction, SIGNAL(triggered()), this, SLOT(renameItem())));
+   VERIFYNR(connect(mpCopyNameToClipboardAction, SIGNAL(triggered()), this, SLOT(copyNameToClipboard())));
 }
 
 SessionExplorerImp::~SessionExplorerImp()
@@ -305,7 +319,7 @@ vector<SessionItem*> SessionExplorerImp::getSelectedSessionItems(SessionExplorer
             QModelIndex index = selectedIndexes[i];
             if (index.isValid() == true)
             {
-               SessionItem* pItem = index.data(Qt::UserRole).value<SessionItem*>();
+               SessionItem* pItem = index.data(SessionItemModel::SessionItemRole).value<SessionItem*>();
                if (pItem != NULL)
                {
                   selectedItems.push_back(pItem);
@@ -328,7 +342,7 @@ SessionItem* SessionExplorerImp::getCurrentSessionItem(SessionExplorer::ItemView
       QModelIndex index = pTreeView->currentIndex();
       if (index.isValid() == true)
       {
-         pItem = index.data(Qt::UserRole).value<SessionItem*>();
+         pItem = index.data(SessionItemModel::SessionItemRole).value<SessionItem*>();
       }
    }
 
@@ -564,6 +578,11 @@ void SessionExplorerImp::updateContextMenu(Subject& subject, const string& signa
             {
                defaultActions.push_back(ContextMenuAction(mpRenameAction, APP_SESSIONEXPLORER_RENAME_ACTION));
             }
+            if (pItemImp != NULL)
+            {
+               defaultActions.push_back(ContextMenuAction(mpCopyNameToClipboardAction,
+                  APP_SESSIONEXPLORER_COPY_NAME_TO_CLIPBOARD_ACTION));
+            }
          }
       }
 
@@ -707,6 +726,25 @@ void SessionExplorerImp::renameItem()
       else
       {
          QMessageBox::critical(pView, windowTitle(), "The selected session item cannot be renamed.");
+      }
+   }
+}
+
+void SessionExplorerImp::copyNameToClipboard()
+{
+   QTreeView* pView = getCurrentTreeView();
+   if (pView == NULL)
+   {
+      return;
+   }
+
+   QModelIndex index = pView->currentIndex();
+   if (index.isValid())
+   {
+      SessionItem* pItem = index.data(SessionItemModel::SessionItemRole).value<SessionItem*>();
+      if (pItem != NULL)
+      {
+         QApplication::clipboard()->setText(QString::fromStdString(pItem->getName()));
       }
    }
 }

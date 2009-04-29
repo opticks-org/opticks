@@ -360,6 +360,11 @@
 #define APP_SESSIONEXPLORER_COLLAPSE_ALL_ACTION "APP_SESSIONEXPLORER_COLLAPSE_ALL_ACTION"
 
 /**
+ *  Copy the name of the current item in the current SessionExplorer tab to the clipboard.
+ */
+#define APP_SESSIONEXPLORER_COPY_NAME_TO_CLIPBOARD_ACTION "APP_SESSIONEXPLORER_COPY_NAME_TO_CLIPBOARD_ACTION"
+
+/**
  *  Expands all nodes in the current tree view.
  */
 #define APP_SESSIONEXPLORER_EXPAND_ALL_ACTION "APP_SESSIONEXPLORER_EXPAND_ALL_ACTION"

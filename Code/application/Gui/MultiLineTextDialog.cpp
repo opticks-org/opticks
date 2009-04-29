@@ -48,6 +48,17 @@ MultiLineTextDialog::MultiLineTextDialog(QWidget *pParent) :
    setWindowTitle("Enter Text");
    setModal(true);
 
+   setWhatsThis("Metadata fields may be included by specifying a metadata field using $M(specification) where "
+      "specification is:<ul>"
+      "<li>a metadata path which will be loaded from a default location"
+      "<li>//<i>dataset_name</i>//<i>path</i> -- where <i>dataset_name</i> is the name of the element"
+      "<li>//[<i>view_object_name</i>]//<i>path</i> -- where <i>view_object_name</i> is the name of a view object "
+      "in a product view</ul>"
+      "Examples:<ul>"
+      "<li>$M(NITF/File Header/ONAME)"
+      "<li>$M(//C:/Data/mydata.ntf-I1//NITF/File Header/ONAME)"
+      "<li>$M(//[View 1]//NITF/File Header/ONAME)</ul>");
+
    const string geometry = MultiLineTextDialog::getSettingGeometry();
    if (geometry.empty() == false)
    {
@@ -78,5 +89,5 @@ QString MultiLineTextDialog::getText() const
 
 void MultiLineTextDialog::setText(const QString& text)
 {
-   mpEdit->append(text);
+   mpEdit->setText(text);
 }

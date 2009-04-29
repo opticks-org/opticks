@@ -12,10 +12,13 @@
 
 #include <QtGui/QBitmap>
 
+#include "AttachmentPtr.h"
+#include "DynamicObject.h"
 #include "glCommon.h"
 #include "RectangleObjectImp.h"
 #include "GraphicProperty.h"
 #include "TypesFile.h"
+#include <map>
 
 class GraphicLayer;
 
@@ -49,11 +52,14 @@ public:
    bool edit();
    void moveHandle(int handle, LocationType point, bool bMaintainAspect);
 
+   virtual std::string getSubstitutedText();
+
 public slots:
    void updateTexture();
    void updateBoundingBox();
 
 protected:
+   void invalidateTexture(Subject& subject, const std::string& signal, const boost::any& v);
    QFont getScaledFont(double minSize = -1.0, double maxSize = 256.0);
    void drawTexture() const;
 
@@ -67,6 +73,7 @@ private:
    bool mUpdateTexture;
    bool mUpdateBoundingBox;
    std::stack<GLuint> mTextureIdStack;
+   std::map<DynamicObject*, AttachmentPtr<DynamicObject>* > mMetadataObjects;
 };
 
 #define TEXTOBJECTADAPTEREXTENSION_CLASSES \

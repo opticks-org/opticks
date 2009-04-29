@@ -24,6 +24,10 @@ class Subject;
 class SessionItemModel : public QAbstractItemModel
 {
 public:
+   enum ItemDataRole
+   {
+      SessionItemRole = Qt::UserRole,
+   };
    SessionItemModel(QObject* pParent = 0);
    ~SessionItemModel();
 

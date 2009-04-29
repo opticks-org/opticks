@@ -10,17 +10,24 @@
 #include <QtGui/QImage>
 #include <QtGui/QPainter>
 
+#include "DataDescriptor.h"
+#include "DataVariant.h"
+#include "DynamicObject.h"
 #include "DrawUtil.h"
 #include "Endian.h"
 #include "glCommon.h"
+#include "GraphicElement.h"
 #include "GraphicLayer.h"
 #include "GraphicLayerImp.h"
+#include "LayerList.h"
 #include "MipMappedTextures.h"
 #include "MultiLineTextDialog.h"
 #include "OrthographicView.h"
 #include "ProductView.h"
+#include "RasterElement.h"
 #include "SpatialDataView.h"
 #include "TextObjectImp.h"
+#include "TypeConverter.h"
 #include "View.h"
 
 #include <math.h>
@@ -51,6 +58,12 @@ TextObjectImp::TextObjectImp(const string& id, GraphicObjectType type, GraphicLa
 
 TextObjectImp::~TextObjectImp()
 {
+   for (std::map<DynamicObject*, AttachmentPtr<DynamicObject>* >::iterator it = mMetadataObjects.begin();
+      it != mMetadataObjects.end(); ++it)
+   {
+      delete it->second;
+   }
+
    while (!mTextureIdStack.empty())
    {
       // this does not attempt to delete any textures
@@ -204,6 +217,13 @@ void TextObjectImp::drawTexture() const
 
 void TextObjectImp::updateTexture()
 {
+   for (std::map<DynamicObject*, AttachmentPtr<DynamicObject>* >::iterator it = mMetadataObjects.begin();
+      it != mMetadataObjects.end(); ++it)
+   {
+      delete it->second;
+   }
+   mMetadataObjects.clear();
+
    if (mTextureId != 0)
    {
       glDeleteTextures(1, &mTextureId);
@@ -211,7 +231,7 @@ void TextObjectImp::updateTexture()
    }
 
    // Get the text to display
-   string text = getText();
+   string text = getSubstitutedText();
    if (text.empty())
    {
       return;
@@ -390,7 +410,7 @@ void TextObjectImp::updateBoundingBox()
    int iWidth = 0;
    int iHeight = 0;
 
-   string text = getText();
+   string text = getSubstitutedText();
    if (text.empty() == false)
    {
       QString strMessage = QString::fromStdString(text);
@@ -580,4 +600,146 @@ QFont TextObjectImp::getScaledFont(double minSize, double maxSize)
 void TextObjectImp::moveHandle(int handle, LocationType point, bool bMaintainAspect)
 {
    // Do nothing
+}
+
+string TextObjectImp::getSubstitutedText()
+{
+   string txt = getText();
+
+   DataElement* pParent = getElement();
+   pParent = (pParent == NULL) ? NULL : pParent->getParent();
+   DataDescriptor* pParentDesc = (pParent == NULL) ? NULL : pParent->getDataDescriptor();
+   DynamicObject* pParentMetadata = (pParentDesc == NULL) ? NULL : pParentDesc->getMetadata();
+   for (int i = 0; i < 50; ++i)
+   {
+      //each pass does replacement of $M(a) currently in the string.
+      //do 50 passes to perform sub-expansion at most fifty times, ie. prevent infinite loop
+      //for non-terminating recursive expansion
+      string::size_type pos = txt.find("$");
+      while (pos != string::npos)
+      {
+         if (pos + 1 >= txt.size())
+         {
+            break;
+         }
+         string type = txt.substr(pos+1, 1);
+         if (type != "$") //ie. not $$, the escape sequence so continue
+         {
+            bool replaced = false;
+            if (pos+4 < txt.size()) //ie. $M(a)
+            {
+               if (txt[pos+2] == '(')
+               {
+                  string::size_type closeParen = txt.find(')', pos+2);
+                  if (closeParen == string::npos)
+                  {
+                     closeParen = txt.size();
+                  }
+                  string variableName = txt.substr(pos+3, closeParen-(pos+2)-1);
+                  string replacementString;
+                  if (type == "M")
+                  {
+                     DynamicObject* pMetadata = pParentMetadata;
+                     if (variableName.substr(0, 2) == "//")
+                     {
+                        string::size_type endNamePos = variableName.find("//", 2);
+                        if (endNamePos != string::npos)
+                        {
+                           string elementName = variableName.substr(2, endNamePos - 2);
+                           variableName = variableName.substr(endNamePos + 2);
+                           if (!variableName.empty())
+                           {
+                              if (elementName[0] == '[' && elementName[elementName.size() - 1] == ']')
+                              {
+                                 elementName = elementName.substr(1, elementName.size() - 2);
+                                 std::list<GraphicObject*> objects;
+                                 getLayer()->getObjects(VIEW_OBJECT, objects);
+                                 for (std::list<GraphicObject*>::iterator object = objects.begin();
+                                    object != objects.end(); ++object)
+                                 {
+                                    GraphicObject* pObj = *object;
+                                    if (pObj->getName() == elementName)
+                                    {
+                                       SpatialDataView* pSdv = dynamic_cast<SpatialDataView*>(pObj->getObjectView());
+                                       if (pSdv != NULL)
+                                       {
+                                          DataElement* pElmnt = pSdv->getLayerList()->getPrimaryRasterElement();
+                                          DataDescriptor* pDesc =
+                                             (pElmnt == NULL) ? NULL : pElmnt->getDataDescriptor();
+                                          pMetadata = (pDesc == NULL) ? NULL : pDesc->getMetadata();
+                                       }
+                                       break;
+                                    }
+                                 }
+                              }
+                              else
+                              {
+                                 DataElement* pElmnt = Service<ModelServices>()->getElement(elementName,
+                                    TypeConverter::toString<RasterElement>(), NULL);
+                                 DataDescriptor* pDesc = (pElmnt == NULL) ? NULL : pElmnt->getDataDescriptor();
+                                 pMetadata = (pDesc == NULL) ? NULL : pDesc->getMetadata();
+                              }
+                           }
+                           else
+                           {
+                              pMetadata = NULL;
+                           }
+                        }
+                     }
+                     bool success = false;
+                     if (pMetadata != NULL)
+                     {
+                        DataVariant var = pMetadata->getAttributeByPath(variableName);
+                        if (var.isValid())
+                        {
+                           DataVariant::Status status;
+                           replacementString = var.toDisplayString(&status);
+                           success = (status == DataVariant::SUCCESS);
+                           if (mMetadataObjects.find(pMetadata) == mMetadataObjects.end())
+                           {
+                              mMetadataObjects.insert(make_pair(pMetadata, new AttachmentPtr<DynamicObject>(
+                                 pMetadata, SIGNAL_NAME(Subject, Modified),
+                                 Slot(this, &TextObjectImp::invalidateTexture))));
+                           }
+                        }
+                     }
+                     if (!success)
+                     {
+                        replacementString = "Error!";
+                     }
+                     replaced = true;
+                  }
+                  if (replaced)
+                  {
+                     txt.replace(pos, closeParen-pos+1, replacementString);
+                     pos = txt.find("$", pos+replacementString.size());
+                  }
+               }
+            }
+            if (!replaced)
+            {
+               pos = txt.find("$", pos+1);
+            }
+         }
+         else
+         {
+            pos = txt.find("$", pos+2);
+         }
+      }
+   }
+   string::size_type pos = txt.find("$$");
+   while (pos != string::npos)
+   {
+      txt.replace(pos, 2, "$");
+      pos = txt.find("$$");
+   }
+
+   return txt;
+}
+
+void TextObjectImp::invalidateTexture(Subject& subject, const std::string& signal, const boost::any& v)
+{
+   mUpdateTexture = true;
+   mUpdateBoundingBox = true;
+   getLayer()->getView()->refresh();
 }

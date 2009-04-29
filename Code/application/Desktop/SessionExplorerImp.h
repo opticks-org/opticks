@@ -60,6 +60,7 @@ protected slots:
    void collapseCurrentTreeView();
    void treeViewChanged();
    void renameItem();
+   void copyNameToClipboard();
 
 private:
    QTreeView* mpWindowTree;
@@ -71,6 +72,7 @@ private:
    QAction* mpExpandAction;
    QAction* mpCollapseAction;
    QAction* mpRenameAction;
+   QAction* mpCopyNameToClipboardAction;
 };
 
 #define SESSIONEXPLORERADAPTEREXTENSION_CLASSES \

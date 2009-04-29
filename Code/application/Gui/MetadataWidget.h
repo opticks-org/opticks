@@ -45,6 +45,14 @@ protected slots:
    void clearKeys();
    void currentChanged(const QModelIndex& selectedItem, const QModelIndex& deselectedItem);
    void editSelectedValue(const QModelIndex& selectedItem);
+   void copyIdToClipboard();
+   void copyValueToClipboard();
+
+protected:
+   enum ItemDataRole
+   {
+      DataVariantRole = Qt::UserRole,
+   };
 
 private:
    QTreeView* mpMetadataTree;

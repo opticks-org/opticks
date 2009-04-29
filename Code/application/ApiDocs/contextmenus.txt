@@ -237,6 +237,7 @@
  *  <table>
  *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
  *    <tr><td>Collapse All</td><td>APP_SESSIONEXPLORER_COLLAPSE_ALL_ACTION()</td></tr>
+ *    <tr><td>Copy name to clipboard</td><td>APP_SESSIONEXPLORER_COPY_NAME_TO_CLIPBOARD_ACTION()</td></tr>
  *    <tr><td>Expand All</td><td>APP_SESSIONEXPLORER_EXPAND_ALL_ACTION()</td></tr>
  *    <tr><td>Rename</td><td>APP_SESSIONEXPLORER_RENAME_ACTION()</td></tr>
  *    <tr><td>Separator</td><td>APP_SESSIONEXPLORER_SEPARATOR_ACTION()</td></tr>
