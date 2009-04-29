@@ -68,7 +68,6 @@ void Hdf4Dataset::getDataEncoding(EncodingType& encoding) const
       break;
    case UNSUPPORTED:
    default:
-      encoding = ::UNKNOWN;
       break;
    };
 }

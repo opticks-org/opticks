@@ -17,7 +17,6 @@
    #define WIN_API
 
    #define BYTE_ORDER LITTLE_ENDIAN_BYTE_ORDER
-
    #define LONG_SIZE 4
    typedef __int16 int16_t;
    typedef __int32 int32_t;
@@ -31,7 +30,6 @@
       #define PTR_SIZE 8
       #define BROKEN_INLINE_HINT __declspec(noinline)
    #elif defined(_WIN32)
-      #define HDF4_SUPPORT
       #define PTR_SIZE 4
    #endif
 
@@ -64,7 +62,6 @@
    #define PTR_SIZE _POINTER_ALIGNMENT
    #define LONG_SIZE _LONG_ALIGNMENT
 
-   #define HDF4_SUPPORT
 
    //platform defines
    #define O_TEXT O_BINARY

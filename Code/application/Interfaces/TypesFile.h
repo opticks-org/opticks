@@ -213,8 +213,7 @@ enum EncodingTypeEnum
    INT4UBYTES = 6,     /**< unsigned int */
    FLT4BYTES = 7,      /**< float */
    FLT8COMPLEX = 8,    /**< complex float */
-   FLT8BYTES = 9,      /**< double */
-   UNKNOWN = 10        /**< N/A */
+   FLT8BYTES = 9       /**< double */
 };
 
 /**

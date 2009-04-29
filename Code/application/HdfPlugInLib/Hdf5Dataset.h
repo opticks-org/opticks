@@ -39,12 +39,12 @@ public:
    /**
     * Gets the data encoding type for the HDF dataset.
     *
-    * For non-native types or compound datasets, returns UNKNOWN.
+    * For non-native types or compound datasets, EncodingType will not be valid (EncodingType.isValid()).
     *
     * @param  encoding
     *         The data encoding type that corresponds to the member string.
     *         For those types that do not correspond to an EncodingType (ie. a compound dataset),
-    *         UNKNOWN is returned.
+    *         the EncodingType will not be valid.
     *
     */
    void getDataEncoding(EncodingType& encoding) const;

@@ -1228,7 +1228,7 @@ bool PCA::m_ComputePCAwhole()
    }
 
    EncodingType eDataType = pOrigDescriptor->getDataType();
-   if (eDataType == UNKNOWN)
+   if (!eDataType.isValid())
    {
       mMessage = "PCA received invalid value for source data encoding type";
       if (mpProgress != NULL)
@@ -1413,7 +1413,7 @@ bool PCA::m_ComputePCAaoi()
    }
 
    EncodingType eDataType = pOrigDescriptor->getDataType();
-   if (eDataType == UNKNOWN)
+   if (!eDataType.isValid())
    {
       mMessage = "PCA received invalid value for source data encoding type";
       if (mpProgress != NULL)

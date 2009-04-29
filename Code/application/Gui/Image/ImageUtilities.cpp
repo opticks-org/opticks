@@ -86,7 +86,6 @@ GLenum ImageUtilities::convertEncodingType(EncodingType encodingType)
    case INT4SCOMPLEX:
    case FLT8BYTES:
    case FLT8COMPLEX:
-   case UNKNOWN:
    default:
       return GL_NONE;
       break;

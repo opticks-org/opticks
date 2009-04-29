@@ -173,7 +173,7 @@ CachedPage::UnitPtr Hdf5Pager::fetchUnit(DataRequest *pOriginalRequest)
    VERIFYRV(pFileDescriptor != NULL, pUnit);
 
    EncodingType dataEncoding = pDescriptor->getDataType();
-   VERIFYRV(dataEncoding != UNKNOWN, pUnit);
+   VERIFYRV(dataEncoding.isValid(), pUnit);
 
    double bpp = getBytesPerBand();
 

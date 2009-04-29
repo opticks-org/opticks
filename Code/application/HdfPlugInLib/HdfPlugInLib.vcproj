@@ -20,7 +20,7 @@
 		<Configuration
 			Name="Release|Win32"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\CompileSettings\32bitSettings.vsprops;..\CompileSettings\LibraryCommonSettings.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\hdf4.vsprops;..\CompileSettings\pthreads.vsprops;..\CompileSettings\AllCommonSettings-Release-32bit.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\hdf5-release.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops"
+			InheritedPropertySheets="..\CompileSettings\32bitSettings.vsprops;..\CompileSettings\LibraryCommonSettings.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\pthreads.vsprops;..\CompileSettings\AllCommonSettings-Release-32bit.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\hdf5-release.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\hdf4-release.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -82,7 +82,7 @@
 		<Configuration
 			Name="Release|x64"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\CompileSettings\LibraryCommonSettings.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\hdf4.vsprops;..\CompileSettings\pthreads.vsprops;..\CompileSettings\AllCommonSettings-Release-64bit.vsprops;..\CompileSettings\64bitSettings.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\hdf5-release.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops"
+			InheritedPropertySheets="..\CompileSettings\LibraryCommonSettings.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\pthreads.vsprops;..\CompileSettings\AllCommonSettings-Release-64bit.vsprops;..\CompileSettings\64bitSettings.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\hdf5-release.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\hdf4-release.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -145,7 +145,7 @@
 		<Configuration
 			Name="Debug|Win32"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\CompileSettings\32bitSettings.vsprops;..\CompileSettings\LibraryCommonSettings.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\hdf4.vsprops;..\CompileSettings\pthreads.vsprops;..\CompileSettings\AllCommonSettings-Debug-32bit.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\hdf5-release.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops"
+			InheritedPropertySheets="..\CompileSettings\32bitSettings.vsprops;..\CompileSettings\LibraryCommonSettings.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\pthreads.vsprops;..\CompileSettings\AllCommonSettings-Debug-32bit.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\hdf5-release.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\hdf4-debug.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -207,7 +207,7 @@
 		<Configuration
 			Name="Debug|x64"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\CompileSettings\LibraryCommonSettings.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\hdf4.vsprops;..\CompileSettings\pthreads.vsprops;..\CompileSettings\AllCommonSettings-Debug-64bit.vsprops;..\CompileSettings\64bitSettings.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\hdf5-release.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops"
+			InheritedPropertySheets="..\CompileSettings\LibraryCommonSettings.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\pthreads.vsprops;..\CompileSettings\AllCommonSettings-Debug-64bit.vsprops;..\CompileSettings\64bitSettings.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\hdf5-release.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\hdf4-debug.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"

@@ -8,7 +8,6 @@
  */
 
 #include "AppConfig.h"
-#if defined(HDF4_SUPPORT)
 
 // these must be before Hdf4Utilities so the symbols are properly compiled
 #include <hdf.h>
@@ -248,5 +247,3 @@ void HdfUtilities::Hdf4DatasetObject::releaseResource(const HdfUtilities::Hdf4Da
       delete pHandle;
    }
 }
-
-#endif

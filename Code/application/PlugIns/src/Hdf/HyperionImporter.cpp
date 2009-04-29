@@ -8,7 +8,6 @@
  */
 
 #include "AppConfig.h"
-#if defined(HDF4_SUPPORT)
 
 #include "AppVersion.h"
 #include "AppVerify.h"
@@ -73,7 +72,7 @@ namespace
       for (size_t ui = 0; ui < numElements; ++ui)
       {
          size_t index = ui * colCount + column;
-         if (type == UNKNOWN)
+         if (!type.isValid())
          {
             throw HdfUtilities::Exception("Invalid wavelength type!");
          }
@@ -242,7 +241,7 @@ vector<ImportDescriptor*> HyperionImporter::getImportDescriptors(const string& f
                   }
 
                   // Data type
-                  EncodingType e = UNKNOWN;
+                  EncodingType e;
                   pPrimaryDataset->getDataEncoding(e);
                   pDescriptor->setDataType(e);
                   pFileDescriptor->setBitsPerElement(pDescriptor->getBytesPerElement() * 8);
@@ -264,7 +263,7 @@ vector<ImportDescriptor*> HyperionImporter::getImportDescriptors(const string& f
                      void* pData = loadDatasetFromFile(parsedFile, *pCenterDataset);
                      if (pData != NULL)
                      {
-                        EncodingType dataType = UNKNOWN;
+                        EncodingType dataType;
                         pCenterDataset->getDataEncoding(dataType);
                         unsigned int wavelengthSize = HdfUtilities::getDataSize(dataType);
 
@@ -309,7 +308,7 @@ vector<ImportDescriptor*> HyperionImporter::getImportDescriptors(const string& f
                         void* pData = loadDatasetFromFile(parsedFile, *pWidthDataset);
                         if (pData != NULL)
                         {
-                           EncodingType dataType = UNKNOWN;
+                           EncodingType dataType;
                            pWidthDataset->getDataEncoding(dataType);
                            unsigned int wavelengthSize = HdfUtilities::getDataSize(dataType);
 
@@ -455,5 +454,3 @@ bool HyperionImporter::runAllTests(Progress* pProgress, ostream& failure)
 
    return true;
 }
-
-#endif

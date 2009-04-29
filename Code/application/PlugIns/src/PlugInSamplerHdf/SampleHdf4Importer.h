@@ -11,7 +11,6 @@
 #define SAMPLEHDF4IMPORTER_H
 
 #include "AppConfig.h"
-#if defined(HDF4_SUPPORT)
 
 #include "Hdf4ImporterShell.h"
 
@@ -36,7 +35,5 @@ public:
 private:
    std::vector<ImportDescriptor*> getImportDescriptors(const std::string& filename);
 };
-
-#endif
 
 #endif

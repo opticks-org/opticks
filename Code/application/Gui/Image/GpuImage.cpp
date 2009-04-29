@@ -440,7 +440,6 @@ private:
                currentChannel, totalChannels, outputType);
             break;
 
-         case UNKNOWN:        // Fall through to the next case statement
          case INT4SCOMPLEX:   // Fall through to the next case statement
          case FLT8COMPLEX:    // Fall through to the next case statement
          default:
@@ -535,7 +534,6 @@ private:
                currentChannel, totalChannels, outputType);
             break;
 
-         case UNKNOWN:        // Fall through to the next case statement
          case INT4SCOMPLEX:   // Fall through to the next case statement
          case FLT8COMPLEX:    // Fall through to the next case statement
          default:

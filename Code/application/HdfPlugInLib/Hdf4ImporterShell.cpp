@@ -8,7 +8,6 @@
  */
 
 #include "AppConfig.h"
-#if defined(HDF4_SUPPORT)
 
 #include <hdf.h>
 #include <mfhdf.h>
@@ -269,7 +268,7 @@ void* Hdf4ImporterShell::loadDatasetFromFile(const Hdf4File& parsedFile, const H
          double numBytes = 0;
          try
          {
-            EncodingType e = UNKNOWN;
+            EncodingType e;
             dataset.getDataEncoding(e);
 
             numBytes = HdfUtilities::getDataSize(e);
@@ -307,5 +306,3 @@ void* Hdf4ImporterShell::loadDatasetFromFile(const Hdf4File& parsedFile, const H
    }
    return pBlock.release();
 }
-
-#endif

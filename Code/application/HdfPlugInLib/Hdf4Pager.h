@@ -11,7 +11,6 @@
 #define HDF4PAGER_H
 
 #include "AppConfig.h"
-#if defined(HDF4_SUPPORT)
 
 #include "HdfPager.h"
 
@@ -68,7 +67,5 @@ private:
    CachedPage::UnitPtr fetchUnit(DataRequest *pOriginalRequest);
 
 };
-
-#endif
 
 #endif

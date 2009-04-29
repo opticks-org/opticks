@@ -16,9 +16,7 @@
 #include <hdf5.h>
 
 // required to include by Hdf4Pager.h
-#ifdef HDF4_SUPPORT
 #include <hdf.h>
-#endif
 
 #include "Hdf4Pager.h"
 #include "Hdf5Pager.h"
@@ -31,11 +29,7 @@ const char* ModuleManager::mspUniqueId = "{A213B97A-2170-44c6-BCA8-8C5082ADBB7F}
 
 unsigned int ModuleManager::getTotalPlugIns()
 {
-#if defined(HDF4_SUPPORT)
    return 4;
-#else
-   return 2;
-#endif
 }
 
 PlugIn* ModuleManager::getPlugIn(unsigned int plugInNumber)
@@ -51,7 +45,6 @@ PlugIn* ModuleManager::getPlugIn(unsigned int plugInNumber)
       pPlugIn = new Hdf5Pager();
       break;
 
-#if defined(HDF4_SUPPORT)
    case 2:
       pPlugIn = new HyperionImporter();
       break;
@@ -59,7 +52,6 @@ PlugIn* ModuleManager::getPlugIn(unsigned int plugInNumber)
    case 3:
       pPlugIn = new Hdf4Pager();
       break;
-#endif
 
    default:
       break;

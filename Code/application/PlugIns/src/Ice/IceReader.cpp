@@ -242,7 +242,7 @@ ImportDescriptor* IceReader::getImportDescriptor(const Hdf5Group* pCube)
       return NULL;
    }
 
-   EncodingType encoding = UNKNOWN;
+   EncodingType encoding;
    pData->getDataEncoding(encoding);
    pFileDescriptor->setBitsPerElement(RasterUtilities::bytesInEncoding(encoding)*8);
    pDescriptor->setDataType(encoding);

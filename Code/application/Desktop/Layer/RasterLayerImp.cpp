@@ -601,7 +601,7 @@ double RasterLayerImp::getNumberThreshold() const
    }
    else
    {
-      EncodingType redEncoding = UNKNOWN;
+      EncodingType redEncoding;
       if (mpRedRasterElement.get() != NULL)
       {
          const RasterDataDescriptor* pRedDescriptor = 
@@ -609,7 +609,7 @@ double RasterLayerImp::getNumberThreshold() const
          redEncoding = pRedDescriptor->getDataType();
       }
       double redThreshold = calculateThresholdForEncodingType(redEncoding);
-      EncodingType greenEncoding = UNKNOWN;
+      EncodingType greenEncoding;
       if (mpGreenRasterElement.get() != NULL)
       {
          const RasterDataDescriptor* pGreenDescriptor = 
@@ -618,7 +618,7 @@ double RasterLayerImp::getNumberThreshold() const
       }
       double greenThreshold = calculateThresholdForEncodingType(greenEncoding);
 
-      EncodingType blueEncoding = UNKNOWN;
+      EncodingType blueEncoding;
       if (mpBlueRasterElement.get() != NULL)
       {
          const RasterDataDescriptor* pBlueDescriptor = 
@@ -847,7 +847,7 @@ void RasterLayerImp::drawPixelValues()
       if (displayMode == GRAYSCALE_MODE)
       {
          DataAccessor accessor(NULL, NULL);
-         EncodingType dataType = UNKNOWN;
+         EncodingType dataType;
          vector<int> badValues;
 
          if (mGrayBand.isValid() == true)
@@ -874,7 +874,7 @@ void RasterLayerImp::drawPixelValues()
             }
          }
 
-         if ((accessor.isValid() == true) && (dataType != UNKNOWN))
+         if ((accessor.isValid() == true) && (dataType.isValid()))
          {
             for (int j = y1; j <= y2; ++j)
             {
@@ -925,9 +925,9 @@ void RasterLayerImp::drawPixelValues()
          DataAccessor greenAccessor(NULL, NULL);
          DataAccessor blueAccessor(NULL, NULL);
 
-         EncodingType redDataType = UNKNOWN;
-         EncodingType greenDataType = UNKNOWN;
-         EncodingType blueDataType = UNKNOWN;
+         EncodingType redDataType;
+         EncodingType greenDataType;
+         EncodingType blueDataType;
 
          vector<int> redBadValues;
          vector<int> greenBadValues;
@@ -1021,7 +1021,7 @@ void RasterLayerImp::drawPixelValues()
 
                // Red text
                QString strRed = "N/A";
-               if ((redValid == true) && (redDataType != UNKNOWN))
+               if ((redValid == true) && (redDataType.isValid()))
                {
                   switchOnEncoding(redDataType, stringifyValue, redAccessor->getColumn(), complexComponent,
                      redBadValues, strRed);
@@ -1030,7 +1030,7 @@ void RasterLayerImp::drawPixelValues()
 
                // Green text
                QString strGreen = "N/A";
-               if ((greenValid == true) && (greenDataType != UNKNOWN))
+               if ((greenValid == true) && (greenDataType.isValid()))
                {
                   switchOnEncoding(greenDataType, stringifyValue, greenAccessor->getColumn(), complexComponent,
                      greenBadValues, strGreen);
@@ -1039,7 +1039,7 @@ void RasterLayerImp::drawPixelValues()
 
                // Blue text
                QString strBlue = "N/A";
-               if ((blueValid == true) && (blueDataType != UNKNOWN))
+               if ((blueValid == true) && (blueDataType.isValid()))
                {
                   switchOnEncoding(blueDataType, stringifyValue, blueAccessor->getColumn(), complexComponent,
                      blueBadValues, strBlue);
@@ -2812,19 +2812,19 @@ void RasterLayerImp::generateImage()
          pBlueDescriptor = dynamic_cast<const RasterDataDescriptor*>(pBlueElement->getDataDescriptor());
       }
 
-      EncodingType eRedEncoding = UNKNOWN;
+      EncodingType eRedEncoding;
       if (pRedDescriptor != NULL)
       {
          eRedEncoding = pRedDescriptor->getDataType();
       }
 
-      EncodingType eGreenEncoding = UNKNOWN;
+      EncodingType eGreenEncoding;
       if (pGreenDescriptor != NULL)
       {
          eGreenEncoding = pGreenDescriptor->getDataType();
       }
 
-      EncodingType eBlueEncoding = UNKNOWN;
+      EncodingType eBlueEncoding;
       if (pBlueDescriptor != NULL)
       {
          eBlueEncoding = pBlueDescriptor->getDataType();

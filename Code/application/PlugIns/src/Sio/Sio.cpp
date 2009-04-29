@@ -217,7 +217,7 @@ static bool readDynamicObjectTags(DynamicObject* pDynObjRoot, string key, string
 SioFile::SioFile() :
    mVersion(8),
    mEndian(Endian::getSystemEndian()),
-   mDataType(UNKNOWN),
+   mDataType(),
    mBitsPerElement(0),
    mColumns(0),
    mRows(0),

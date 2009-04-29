@@ -532,7 +532,7 @@ bool SecondMomentAlgorithm::processAll()
    unsigned int numRows(0);
    unsigned int numColumns(0);
    unsigned int numBands(0);
-   EncodingType eType = UNKNOWN;
+   EncodingType eType;
 
    RasterElement* pRasterElement = getRasterElement();
    if (pRasterElement == NULL)

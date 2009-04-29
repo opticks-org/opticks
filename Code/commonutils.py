@@ -169,8 +169,8 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
         dd(r"pthreads\bin", ["pthreadVC2.dll"])
         dd(r"Cg\bin", ["cg.dll", "cgc.exe", "cgD3D9.dll", "cgGL.dll"],
             False, ["cgD3D8.dll", "glut32.dll"])
-        ds(r"Hdf4\bin", [], "d.dll", ".dll", ["hd421m", "hm421m"])
-        ds(r"Hdf4\bin", [], "", "", ["szlibdll.dll"])
+        ds(r"Hdf4\bin",["hd423m","hm423m"],"d.dll",".dll")
+        ds(r"Hdf4\bin", ["szlibdll.dll"],"","")
         ds(r"Hdf5\bin", ["hdf5"], "dll.dll", "dll.dll")
         ds(r"zlib\bin", ["zlib1"], "d.dll", ".dll")
         ds(r"zlib\bin", [], "", "", ["zlib1.dll"], ["zlib1.dll"])

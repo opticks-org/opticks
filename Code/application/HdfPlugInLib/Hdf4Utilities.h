@@ -11,7 +11,6 @@
 #define HDF4UTILITIES_H
 
 #include "AppConfig.h"
-#if defined(HDF4_SUPPORT)
 
 #include <hdf.h>
 #include <mfhdf.h>
@@ -351,7 +350,5 @@ namespace HdfUtilities
       }
    };
 }
-
-#endif
 
 #endif

@@ -11,7 +11,6 @@
 #define HDF4IMPORTERSHELL_H
 
 #include "AppConfig.h"
-#if defined(HDF4_SUPPORT)
 
 #include "HdfImporterShell.h"
 
@@ -86,7 +85,5 @@ private:
     */
    virtual bool createRasterPager(RasterElement *pRaster) const;
 };
-
-#endif
 
 #endif

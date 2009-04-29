@@ -75,10 +75,6 @@ void Hdf5Dataset::getDataEncoding(EncodingType& encoding) const
    {
       encoding = FLT8COMPLEX;
    }
-   else
-   {
-      encoding = UNKNOWN;
-   }
 }
 
 /**

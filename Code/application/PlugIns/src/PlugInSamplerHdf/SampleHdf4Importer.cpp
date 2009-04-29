@@ -8,7 +8,6 @@
  */
 
 #include "AppConfig.h"
-#if defined(HDF4_SUPPORT)
 
 #include <hdf.h>
 #include <mfhdf.h>
@@ -112,7 +111,7 @@ vector<ImportDescriptor*> SampleHdf4Importer::getImportDescriptors(const string&
                      }
 
                      // Data type
-                     EncodingType e = UNKNOWN;
+                     EncodingType e;
                      pDataset->getDataEncoding(e);
                      pDescriptor->setDataType(e);
                      pFileDescriptor->setBitsPerElement(pDescriptor->getBytesPerElement() * 8);
@@ -176,5 +175,3 @@ unsigned char SampleHdf4Importer::getFileAffinity(const std::string& filename)
       return Importer::CAN_LOAD;
    }
 }
-
-#endif

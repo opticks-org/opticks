@@ -8,7 +8,6 @@
  */
 
 #include "AppConfig.h"
-#if defined(HDF4_SUPPORT)
 
 #include <hdf.h> // #include this first so Hdf4Pager class is included properly
 #include <mfhdf.h>
@@ -198,5 +197,3 @@ CachedPage::UnitPtr Hdf4Pager::fetchUnit(DataRequest *pOriginalRequest)
    pUnit.reset(pCacheUnit);
    return pUnit;
 }
-
-#endif

@@ -11,7 +11,6 @@
 #define HYPERIONIMPORTER_H
 
 #include "AppConfig.h"
-#if defined(HDF4_SUPPORT)
 
 #include "Hdf4ImporterShell.h"
 #include "Testable.h"
@@ -50,7 +49,5 @@ public:
 private:
    std::vector<ImportDescriptor*> getImportDescriptors(const std::string& filename);
 };
-
-#endif   // HDF4_SUPPORT
 
 #endif   // HYPERIONIMPORTER_H

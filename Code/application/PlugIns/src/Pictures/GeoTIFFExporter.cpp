@@ -54,8 +54,6 @@ namespace
       case FLT4BYTES:
       case FLT8BYTES:
          return SAMPLEFORMAT_IEEEFP;
-      case UNKNOWN:
-         return SAMPLEFORMAT_VOID;
       default:
          break;
       }

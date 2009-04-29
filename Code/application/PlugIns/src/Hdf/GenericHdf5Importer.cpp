@@ -173,7 +173,7 @@ vector<ImportDescriptor*> GenericHdf5Importer::getImportDescriptors(const string
                         dynamic_cast<RasterDataDescriptor*>(pImportDescriptor->getDataDescriptor());
                      if (pDescriptor != NULL)
                      {
-                        EncodingType encoding = UNKNOWN;
+                        EncodingType encoding;
                         pDataset->getDataEncoding(encoding);
                         pDescriptor->setDataType(encoding);
                         pFileDescriptor->setBitsPerElement(RasterUtilities::bytesInEncoding(encoding) * 8);
