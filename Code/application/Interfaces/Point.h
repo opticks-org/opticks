@@ -18,6 +18,8 @@
 #include "PlotObject.h"
 #include "TypesFile.h"
 
+class PointSet;
+
 /**
  *  A Point.
  *
@@ -144,6 +146,20 @@ public:
    virtual ColorType getColor() const = 0;
 
    /**
+    *  Returns the PointSet that contains the point
+    *  
+    *  @return  The PointSet. Will return \c NULL if the Point is not in a PointSet.
+    */
+   virtual const PointSet* getPointSet() const = 0;
+
+   /**
+   *  Returns the PointSet that contains the point
+   *  
+   *  @return  The PointSet. Will return \c NULL if the Point is not in a PointSet.
+   */
+   virtual PointSet* getPointSet() = 0;
+
+   /**
     *  Determines if this plot object resides at this point, most likely a mouse click
     *
     *  @param point  The location of the mouse click
@@ -200,6 +216,13 @@ public:
     *  @notify  This method will notify signalColorChanged with any<ColorType>.
     */
    virtual void setColor(const ColorType& clrSymbol) = 0;
+
+   /**
+    *  Sets the PointSet of the Point
+    *  
+    *  @param pPointSet  The PointSet. Pass \c NULL to remove the Point from current PointSet.
+    */
+   virtual void setPointSet(PointSet* pPointSet) = 0;
 
 protected:
    /**

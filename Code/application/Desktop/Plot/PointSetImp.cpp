@@ -11,14 +11,14 @@
 
 #include <QtGui/QPainter>
 
-#include "glCommon.h"
-#include "PointSet.h"
-#include "PointSetImp.h"
 #include "AppVerify.h"
 #include "DrawUtil.h"
+#include "glCommon.h"
 #include "PlotView.h"
 #include "PlotViewImp.h"
 #include "PointAdapter.h"
+#include "PointSet.h"
+#include "PointSetImp.h"
 
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
@@ -249,6 +249,7 @@ bool PointSetImp::insertPoint(Point* pPoint)
       return false;
    }
 
+   pPoint->setPointSet(dynamic_cast<PointSet*>(this));
    pPoint->attach(SIGNAL_NAME(Point, LocationChanged), Slot(this, &PointSetImp::propagateLocationChanged));
    mPoints.push_back(pPoint);
    if (getInteractive())
@@ -274,6 +275,7 @@ void PointSetImp::setPoints(const vector<Point*>& points)
       pPoint = *iter;
       if (pPoint != NULL)
       {
+         pPoint->setPointSet(dynamic_cast<PointSet*>(this));
          pPoint->attach(SIGNAL_NAME(Point, LocationChanged), Slot(this, &PointSetImp::propagateLocationChanged));
          mPoints.push_back(pPoint);
       }
@@ -351,6 +353,10 @@ bool PointSetImp::removePoint(Point* pPoint, bool bDelete)
             {
                delete pPointImp;
             }
+            else
+            {
+               pPointImp->setParent(NULL);
+            }
 
             if (getInteractive())
             {
@@ -382,6 +388,10 @@ void PointSetImp::clear(bool bDelete)
          if (bDelete == true)
          {
             delete pPoint;
+         }
+         else
+         {
+            pPoint->setParent(NULL);
          }
       }
    }

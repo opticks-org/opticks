@@ -13,7 +13,9 @@
 #include <QtGui/QColor>
 #include <QtGui/QPixmap>
 
+#include "AttachmentPtr.h"
 #include "PlotObjectImp.h"
+#include "PointSet.h"
 #include "TypesFile.h"
 #include "Point.h"
 
@@ -41,6 +43,10 @@ public:
    int getSymbolSize() const;
    QColor getColor() const;
 
+   virtual const PointSet* getPointSet() const;
+   virtual PointSet* getPointSet();
+   virtual void setPointSet(PointSet* pPointSet);
+
    bool hit(LocationType point) const;
    bool getExtents(double& dMinX, double& dMinY, double& dMaxX, double& dMaxY);
    const QPixmap& getLegendPixmap(bool bSelected) const;
@@ -66,6 +72,7 @@ private:
    Point::PointSymbolType mSymbol;
    int mSymbolSize;
    QColor mColor;
+   AttachmentPtr<PointSet> mpPointSet;
 };
 
 #define POINTADAPTEREXTENSION_CLASSES \
@@ -98,6 +105,14 @@ private:
       QColor color = impClass::getColor(); \
       return ColorType(color.red(), color.green(), color.blue()); \
    } \
+   const PointSet* getPointSet() const \
+   { \
+      return impClass::getPointSet(); \
+   } \
+   PointSet* getPointSet() \
+   { \
+      return impClass::getPointSet(); \
+   } \
    bool hit(LocationType point) \
    { \
       return impClass::hit(point); \
@@ -121,6 +136,10 @@ private:
    void setColor(const ColorType& clrSymbol) \
    { \
       return impClass::setColor(QColor(clrSymbol.mRed, clrSymbol.mGreen, clrSymbol.mBlue)); \
+   } \
+    void setPointSet(PointSet* pPointSet) \
+   { \
+      return impClass::setPointSet(pPointSet); \
    }
-   
+  
 #endif

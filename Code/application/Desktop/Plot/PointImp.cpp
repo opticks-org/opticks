@@ -883,3 +883,18 @@ bool PointImp::fromXml(DOMNode* pDocument, unsigned int version)
 
    return true;
 }
+
+const PointSet* PointImp::getPointSet() const
+{
+   return mpPointSet.get();
+}
+
+PointSet* PointImp::getPointSet()
+{
+   return mpPointSet.get();
+}
+
+void PointImp::setPointSet(PointSet* pPointSet)
+{
+   mpPointSet.reset(pPointSet);
+}
