@@ -13,11 +13,11 @@
 #include <QtGui/QColor>
 #include <QtGui/QPixmap>
 
-#include "AttachmentPtr.h"
 #include "PlotObjectImp.h"
-#include "PointSet.h"
 #include "TypesFile.h"
 #include "Point.h"
+
+class PointSet;
 
 class PointImp : public PlotObjectImp
 {
@@ -72,7 +72,7 @@ private:
    Point::PointSymbolType mSymbol;
    int mSymbolSize;
    QColor mColor;
-   AttachmentPtr<PointSet> mpPointSet;
+   PointSet* mpPointSet;
 };
 
 #define POINTADAPTEREXTENSION_CLASSES \

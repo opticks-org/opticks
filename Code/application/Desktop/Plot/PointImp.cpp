@@ -15,6 +15,7 @@
 #include "glCommon.h"
 #include "Point.h"
 #include "PointImp.h"
+#include "PointSet.h"
 #include "PlotView.h"
 #include "PlotViewImp.h"
 
@@ -28,7 +29,8 @@ PointImp::PointImp(PlotViewImp* pPlot, bool bPrimary) :
    mLocation(LocationType()),
    mSymbol(Point::SOLID),
    mSymbolSize(5),
-   mColor(Qt::black)
+   mColor(Qt::black),
+   mpPointSet(NULL)
 {
    VERIFYNR(connect(this, SIGNAL(locationChanged(const LocationType&)), this, SIGNAL(extentsChanged())));
    VERIFYNR(connect(this, SIGNAL(symbolSizeChanged(int)), this, SIGNAL(legendPixmapChanged())));
@@ -41,7 +43,8 @@ PointImp::PointImp(PlotViewImp* pPlot, bool bPrimary, LocationType point) :
    mLocation(point),
    mSymbol(Point::SOLID),
    mSymbolSize(5),
-   mColor(Qt::black)
+   mColor(Qt::black),
+   mpPointSet(NULL)
 {
    VERIFYNR(connect(this, SIGNAL(locationChanged(const LocationType&)), this, SIGNAL(extentsChanged())));
    VERIFYNR(connect(this, SIGNAL(symbolSizeChanged(int)), this, SIGNAL(legendPixmapChanged())));
@@ -54,7 +57,8 @@ PointImp::PointImp(PlotViewImp* pPlot, bool bPrimary, double dX, double dY) :
    mLocation(dX, dY),
    mSymbol(Point::SOLID),
    mSymbolSize(5),
-   mColor(Qt::black)
+   mColor(Qt::black),
+   mpPointSet(NULL)
 {
    VERIFYNR(connect(this, SIGNAL(locationChanged(const LocationType&)), this, SIGNAL(extentsChanged())));
    VERIFYNR(connect(this, SIGNAL(symbolSizeChanged(int)), this, SIGNAL(legendPixmapChanged())));
@@ -76,6 +80,7 @@ PointImp& PointImp::operator= (const PointImp& object)
       mSymbol = object.mSymbol;
       mSymbolSize = object.mSymbolSize;
       mColor = object.mColor;
+      mpPointSet = object.mpPointSet;
 
       notify(SIGNAL_NAME(Subject, Modified));
    }
@@ -886,15 +891,15 @@ bool PointImp::fromXml(DOMNode* pDocument, unsigned int version)
 
 const PointSet* PointImp::getPointSet() const
 {
-   return mpPointSet.get();
+   return mpPointSet;
 }
 
 PointSet* PointImp::getPointSet()
 {
-   return mpPointSet.get();
+   return mpPointSet;
 }
 
 void PointImp::setPointSet(PointSet* pPointSet)
 {
-   mpPointSet.reset(pPointSet);
+   mpPointSet = pPointSet;
 }
