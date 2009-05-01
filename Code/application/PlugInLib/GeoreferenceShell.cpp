@@ -48,14 +48,14 @@ bool GeoreferenceShell::getInputSpecification(PlugInArgList*& pArgList)
    return success;
 }
 
-LocationType GeoreferenceShell::pixelToGeoQuick(LocationType pixel) const
+LocationType GeoreferenceShell::pixelToGeoQuick(LocationType pixel, bool* pAccurate) const
 {
-   return pixelToGeo(pixel);
+   return pixelToGeo(pixel, pAccurate);
 }
 
-LocationType GeoreferenceShell::geoToPixelQuick(LocationType geo) const
+LocationType GeoreferenceShell::geoToPixelQuick(LocationType geo, bool* pAccurate) const
 {
-   return geoToPixel(geo);
+   return geoToPixel(geo, pAccurate);
 }
 
 QWidget* GeoreferenceShell::getGui(RasterElement* pRaster)
@@ -66,11 +66,4 @@ QWidget* GeoreferenceShell::getGui(RasterElement* pRaster)
 bool GeoreferenceShell::validateGuiInput() const
 {
    return true;
-}
-
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : When we break binary compatibility, this should be " \
-   "reimplemented as a third bool& arg in pixelToGeo* and geoToPixel* (tjohnson)")
-bool GeoreferenceShell::canExtrapolate() const
-{
-   return false;
 }

@@ -424,10 +424,14 @@ public:
     *  @param   quick
     *           Set this to true if less accurate results are acceptable
     *           in exchange for speed.
+    *  @param   pAccurate
+    *           Evaluation of the accuracy of the computed location as determined by the
+    *           Georeference plug-in. When \c NULL, no accuracy check is performed.
     *
     *  @return  The corresponding geocoordinate as a LocationType.
     */
-   virtual LocationType convertPixelToGeocoord(LocationType pixel, bool quick = false) const = 0;
+   virtual LocationType convertPixelToGeocoord(LocationType pixel, bool quick = false,
+                                               bool* pAccurate = NULL) const = 0;
 
    /**
     *  Returns geocoordinates for multiple pixel locations.
@@ -440,11 +444,16 @@ public:
     *  @param   quick
     *           Set this to true if less accurate results are acceptable
     *           in exchange for speed.
+    *  @param   pAccurate
+    *           Evaluation of the accuracy of the computed locations as determined by the
+    *           Georeference plug-in. When \c NULL, no accuracy checks are performed.
     *
     *  @return  A vector containing the geocoordinates that correspond to
     *           each pixel location in the given vector.
     */
-   virtual std::vector<LocationType> convertPixelsToGeocoords(const std::vector<LocationType>& pixels, bool quick = false) const = 0;
+   virtual std::vector<LocationType> convertPixelsToGeocoords(const std::vector<LocationType>& pixels,
+                                                              bool quick = false,
+                                                              bool* pAccurate = NULL) const = 0;
 
    /**
     *  Returns a scene pixel location corresponding to a given geocoordinate.
@@ -454,10 +463,14 @@ public:
     *  @param   quick
     *           Set this to true if less accurate results are acceptable
     *           in exchange for speed.
+    *  @param   pAccurate
+    *           Evaluation of the accuracy of the computed location as determined by the
+    *           Georeference plug-in. When \c NULL, no accuracy check is performed.
     *
     *  @return  The corresponding pixel location as a LocationType.
     */
-   virtual LocationType convertGeocoordToPixel(LocationType geocoord, bool quick = false) const = 0;
+   virtual LocationType convertGeocoordToPixel(LocationType geocoord, bool quick = false,
+                                               bool* pAccurate = NULL) const = 0;
 
    /**
     *  Returns pixel locations for multiple geocoordinates.
@@ -470,11 +483,16 @@ public:
     *  @param   quick
     *           Set this to true if less accurate results are acceptable
     *           in exchange for speed.
+    *  @param   pAccurate
+    *           Evaluation of the accuracy of the computed locations as determined by the
+    *           Georeference plug-in. When \c NULL, no accuracy checks are performed.
     *
     *  @return  A vector containing the pixel locations that correspond to
     *           each geocoordinate in the given vector.
     */
-   virtual std::vector<LocationType> convertGeocoordsToPixels(const std::vector<LocationType>& geocoords, bool quick = false) const = 0;
+   virtual std::vector<LocationType> convertGeocoordsToPixels(const std::vector<LocationType>& geocoords,
+                                                              bool quick = false,
+                                                              bool* pAccurate = NULL) const = 0;
 
    /**
     * Determine if the RasterElement has been georeferenced.

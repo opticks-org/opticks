@@ -58,14 +58,14 @@ public:
     *
     *  @default The default implementation calls pixelToGeo().
     */
-   LocationType pixelToGeoQuick(LocationType pixel) const;
+   LocationType pixelToGeoQuick(LocationType pixel, bool* pAccurate = NULL) const;
 
    /**
     *  @copydoc Georeference::geoToPixelQuick()
     *
     *  @default The default implementation calls geoToPixel().
     */
-   LocationType geoToPixelQuick(LocationType geo) const;
+   LocationType geoToPixelQuick(LocationType geo, bool* pAccurate = NULL) const;
 
    /**
     *  @copydoc Georeference::getGui()
@@ -80,13 +80,6 @@ public:
     *  @default The default implementation returns \b true.
     */
    bool validateGuiInput() const;
-
-   /**
-    *  @copydoc Georeference::canExtrapolate()
-    *
-    *  @default The default implementation returns \c false.
-    */
-   bool canExtrapolate() const;
 };
 
 #endif

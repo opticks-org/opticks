@@ -34,8 +34,8 @@ public:
    bool serialize(SessionItemSerializer &serializer) const;
    bool deserialize(SessionItemDeserializer &deserializer);
 
-   LocationType geoToPixel(LocationType geo) const;
-   LocationType pixelToGeo(LocationType pixel) const;
+   LocationType geoToPixel(LocationType geo, bool* pAccurate = NULL) const;
+   LocationType pixelToGeo(LocationType pixel, bool* pAccurate = NULL) const;
 
    bool canHandleRasterElement(RasterElement *pRaster) const;
 
@@ -44,8 +44,6 @@ public:
    bool validateGuiInput() const;
 
    void animationFrameChanged(Subject &subject, const std::string &signal, const boost::any &data);
-
-   bool canExtrapolate() const;
 
 private:
    static LocationType rotate(LocationType loc, double rad);
@@ -64,6 +62,7 @@ private:
 
    AttachmentPtr<Animation> mpAnimation;
    RasterElement* mpRaster;
+
 
    SampleGeorefGui* mpGui;
 };

@@ -1678,60 +1678,96 @@ void *RasterElementImp::getRawData()
    return NULL;
 }
 
-LocationType RasterElementImp::convertPixelToGeocoord(LocationType pixel, bool quick) const
+LocationType RasterElementImp::convertPixelToGeocoord(LocationType pixel, bool quick, bool* pAccurate) const
 {
    LocationType geocoord;
+
+   if (pAccurate != NULL)
+   {
+      *pAccurate = false;
+   }
 
    if (mpGeoPlugin != NULL)
    {
       if (!quick)
       {
-         geocoord = mpGeoPlugin->pixelToGeo(pixel);
+         geocoord = mpGeoPlugin->pixelToGeo(pixel, pAccurate);
       }
       else
       {
-         geocoord = mpGeoPlugin->pixelToGeoQuick(pixel);
+         geocoord = mpGeoPlugin->pixelToGeoQuick(pixel, pAccurate);
       }
    }
    return geocoord;
 }
 
-std::vector<LocationType> RasterElementImp::convertPixelsToGeocoords(
-   const std::vector<LocationType>& pixels, bool quick) const
+vector<LocationType> RasterElementImp::convertPixelsToGeocoords(
+   const vector<LocationType>& pixels, bool quick, bool* pAccurate) const
 {
    vector<LocationType> geocoords;
-
-   std::transform(pixels.begin(), pixels.end(), std::back_inserter(geocoords), 
-      boost::bind(&RasterElementImp::convertPixelToGeocoord, this, _1, quick));
+   
+   if (pAccurate != NULL)
+   {
+      bool bAccurate(false);
+      *pAccurate = true;
+      for (vector<LocationType>::const_iterator it = pixels.begin(); it != pixels.end(); ++it)
+      {
+         geocoords.push_back(convertPixelToGeocoord(*it, quick, &bAccurate));
+         *pAccurate = *pAccurate && bAccurate;
+      }
+   }
+   else
+   {
+      transform(pixels.begin(), pixels.end(), back_inserter(geocoords), 
+         boost::bind(&RasterElementImp::convertPixelToGeocoord, this, _1, quick, pAccurate));
+   }
 
    return geocoords;
 }
 
-LocationType RasterElementImp::convertGeocoordToPixel(LocationType geocoord, bool quick) const
+LocationType RasterElementImp::convertGeocoordToPixel(LocationType geocoord, bool quick, bool* pAccurate) const
 {
    LocationType pixel;
+
+   if (pAccurate != NULL)
+   {
+      *pAccurate = false;
+   }
 
    if (mpGeoPlugin != NULL)
    {
       if (!quick)
       {
-         pixel = mpGeoPlugin->geoToPixel(geocoord);
+         pixel = mpGeoPlugin->geoToPixel(geocoord, pAccurate);
       }
       else
       {
-         pixel = mpGeoPlugin->geoToPixelQuick(geocoord);
+         pixel = mpGeoPlugin->geoToPixelQuick(geocoord, pAccurate);
       }
    }
    return pixel;
 }
 
-std::vector<LocationType> RasterElementImp::convertGeocoordsToPixels(
-   const std::vector<LocationType>& geocoords, bool quick) const
+vector<LocationType> RasterElementImp::convertGeocoordsToPixels(
+   const vector<LocationType>& geocoords, bool quick, bool* pAccurate) const
 {
    vector<LocationType> pixels;
 
-   std::transform(geocoords.begin(), geocoords.end(), std::back_inserter(pixels), 
-      boost::bind(&RasterElementImp::convertGeocoordToPixel, this, _1, quick));
+   if (pAccurate != NULL)
+   {
+      bool bAccurate(false);
+      *pAccurate = true;
+      for (vector<LocationType>::const_iterator it = geocoords.begin(); it != geocoords.end(); ++it)
+      {
+         pixels.push_back(convertGeocoordToPixel(*it, quick, &bAccurate));
+         *pAccurate = *pAccurate && bAccurate;
+      }
+   }
+   else
+   {
+      transform(geocoords.begin(), geocoords.end(), std::back_inserter(pixels), 
+         boost::bind(&RasterElementImp::convertGeocoordToPixel, this, _1, quick, pAccurate));
+   }
 
    return pixels;
 }

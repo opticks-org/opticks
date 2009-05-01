@@ -34,8 +34,8 @@ namespace Nitf
       bool getInputSpecification(PlugInArgList*& pArgList);
       bool getOutputSpecification(PlugInArgList*& pArgList);
 
-      LocationType pixelToGeo(LocationType pixel) const;
-      LocationType geoToPixel(LocationType geo) const;
+      LocationType pixelToGeo(LocationType pixel, bool* pAccurate = NULL) const;
+      LocationType geoToPixel(LocationType geo, bool* pAccurate = NULL) const;
       bool canHandleRasterElement(RasterElement* pRaster) const;
 
       bool hasAbort();

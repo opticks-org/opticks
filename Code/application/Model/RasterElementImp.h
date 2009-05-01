@@ -78,12 +78,12 @@ public:
    void *getRawData();
 
    // Georeferencing
-   LocationType convertPixelToGeocoord(LocationType pixel, bool quick = false) const;
+   LocationType convertPixelToGeocoord(LocationType pixel, bool quick = false, bool* pAccurate = NULL) const;
    std::vector<LocationType> convertPixelsToGeocoords(
-      const std::vector<LocationType>& pixels, bool quick = false) const;
-   LocationType convertGeocoordToPixel(LocationType geocoord, bool quick = false) const;
+      const std::vector<LocationType>& pixels, bool quick = false, bool* pAccurate = NULL) const;
+   LocationType convertGeocoordToPixel(LocationType geocoord, bool quick = false, bool* pAccurate = NULL) const;
    std::vector<LocationType> convertGeocoordsToPixels(
-      const std::vector<LocationType>& geocoords, bool quick = false) const;
+      const std::vector<LocationType>& geocoords, bool quick = false, bool* pAccurate = NULL) const;
    bool isGeoreferenced() const;
    void setGeoreferencePlugin(Georeference* pGeo);
    Georeference *getGeoreferencePlugin() const;
@@ -312,23 +312,23 @@ private:
       return impClass::copyDataToChip(pRasterChip, selectedRows, selectedColumns, \
          selectedBands, abort, pProgress); \
    } \
-   LocationType convertPixelToGeocoord(LocationType pixel, bool quick = false) const \
+   LocationType convertPixelToGeocoord(LocationType pixel, bool quick = false, bool* pAccurate = NULL) const \
    { \
-      return impClass::convertPixelToGeocoord(pixel, quick); \
+      return impClass::convertPixelToGeocoord(pixel, quick, pAccurate); \
    } \
    std::vector<LocationType> convertPixelsToGeocoords(const std::vector<LocationType>& pixels, \
-                                                      bool quick = false) const \
+                                                      bool quick = false, bool* pAccurate = NULL) const \
    { \
-      return impClass::convertPixelsToGeocoords(pixels, quick); \
+      return impClass::convertPixelsToGeocoords(pixels, quick, pAccurate); \
    } \
-   LocationType convertGeocoordToPixel(LocationType geocoord, bool quick = false) const \
+   LocationType convertGeocoordToPixel(LocationType geocoord, bool quick = false, bool* pAccurate = NULL) const \
    { \
-      return impClass::convertGeocoordToPixel(geocoord, quick); \
+      return impClass::convertGeocoordToPixel(geocoord, quick, pAccurate); \
    } \
    std::vector<LocationType> convertGeocoordsToPixels(const std::vector<LocationType>& geocoords, \
-                                                      bool quick = false) const \
+                                                      bool quick = false, bool* pAccurate = NULL) const \
    { \
-      return impClass::convertGeocoordsToPixels(geocoords, quick); \
+      return impClass::convertGeocoordsToPixels(geocoords, quick, pAccurate); \
    } \
    bool isGeoreferenced() const \
    { \

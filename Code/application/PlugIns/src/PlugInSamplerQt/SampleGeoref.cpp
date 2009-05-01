@@ -145,7 +145,7 @@ bool SampleGeoref::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
    return true;
 }
 
-LocationType SampleGeoref::geoToPixel(LocationType geo) const
+LocationType SampleGeoref::geoToPixel(LocationType geo, bool* pAccurate) const
 {
    LocationType pixel;
    if (mRotate)
@@ -159,10 +159,26 @@ LocationType SampleGeoref::geoToPixel(LocationType geo) const
       pixel.mX = (geo.mY - (mYSize * mCurrentFrame/mFrames)) / mYScale;
       pixel.mY = geo.mX / mXScale;
    }
+
+   // actual Georeference subclass will need to implement means to check for extrapolation
+   // and to set pAccurate appropriately.
+   if (pAccurate != NULL && mpRaster != NULL)
+   {
+      *pAccurate = false;
+      RasterDataDescriptor* pDesc = dynamic_cast<RasterDataDescriptor*>(mpRaster->getDataDescriptor());
+      if (pDesc != NULL)
+      {
+         bool outsideCols = pixel.mX < 0.0 || pixel.mX > static_cast<double>(pDesc->getColumnCount());
+         bool outsideRows = pixel.mY < 0.0 || pixel.mY > static_cast<double>(pDesc->getRowCount());
+         bool locationExtrapolated = outsideCols || outsideRows;
+         *pAccurate = (locationExtrapolated ? mExtrapolate : true);
+      }
+   }
+
    return pixel;
 }
 
-LocationType SampleGeoref::pixelToGeo(LocationType pixel) const
+LocationType SampleGeoref::pixelToGeo(LocationType pixel, bool* pAccurate) const
 {
    LocationType geo;
    if (mRotate)
@@ -176,6 +192,22 @@ LocationType SampleGeoref::pixelToGeo(LocationType pixel) const
       geo.mX = pixel.mY * mXScale;
       geo.mY = pixel.mX * mYScale + (mYSize * mCurrentFrame/mFrames);
    }
+
+   // actual Georeference subclass will need to implement means to check for extrapolation
+   // and to set pAccurate appropriately.
+   if (pAccurate != NULL && mpRaster != NULL)
+   {
+      *pAccurate = false;
+      RasterDataDescriptor* pDesc = dynamic_cast<RasterDataDescriptor*>(mpRaster->getDataDescriptor());
+      if (pDesc != NULL)
+      {
+         bool outsideCols = pixel.mX < 0.0 || pixel.mX > static_cast<double>(pDesc->getColumnCount());
+         bool outsideRows = pixel.mY < 0.0 || pixel.mY > static_cast<double>(pDesc->getRowCount());
+         bool locationExtrapolated = outsideCols || outsideRows;
+         *pAccurate = (locationExtrapolated ? mExtrapolate : true);
+      }
+   }
+
    return geo;
 }
 
@@ -237,7 +269,7 @@ bool SampleGeoref::serialize(SessionItemSerializer &serializer) const
    writer.addAttr("xScale", mXScale);
    writer.addAttr("yScale", mYScale);
    writer.addAttr("frames", mFrames);
-   writer.addAttr("extrapolate", mExtrapolate);
+   writer.addAttr("extrapolationAccurate", mExtrapolate);
    writer.addAttr("currentFrame", mCurrentFrame);
    writer.addAttr("rotate", mRotate);
    const Animation* pAnim = mpAnimation.get();
@@ -263,7 +295,8 @@ bool SampleGeoref::deserialize(SessionItemDeserializer &deserializer)
          mXScale = atof(A(pRootElement->getAttribute(X("xScale"))));
          mYScale = atof(A(pRootElement->getAttribute(X("yScale"))));
          mFrames = atof(A(pRootElement->getAttribute(X("frames"))));
-         mExtrapolate = StringUtilities::fromXmlString<bool>(A(pRootElement->getAttribute(X("extrapolate"))));
+         mExtrapolate = StringUtilities::fromXmlString<bool>(
+            A(pRootElement->getAttribute(X("extrapolationAccurate"))));
          mCurrentFrame = atoi(A(pRootElement->getAttribute(X("currentFrame"))));
          mRotate = atoi(A(pRootElement->getAttribute(X("rotate"))));
          std::string animId = A(pRootElement->getAttribute(X("animationId")));
@@ -279,9 +312,4 @@ bool SampleGeoref::deserialize(SessionItemDeserializer &deserializer)
       }
    }
    return false;
-}
-
-bool SampleGeoref::canExtrapolate() const
-{
-   return mExtrapolate;
 }

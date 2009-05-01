@@ -72,7 +72,7 @@ private:
    int mDistancePrecision;
    int mBearingPrecision;
    int mEndPointsPrecision;
-   mutable bool mUsingInaccurateExtrapolation;
+   mutable bool mUsingInaccurateGeocoords;
 
    void refreshGeoInformation() const;
    std::string generateGeoStrings() const;

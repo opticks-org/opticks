@@ -308,7 +308,7 @@ bool Nitf::RpcGeoreference::getOutputSpecification(PlugInArgList*& pArgList)
    return true;
 }
 
-LocationType Nitf::RpcGeoreference::pixelToGeo(LocationType pixel) const
+LocationType Nitf::RpcGeoreference::pixelToGeo(LocationType pixel, bool* pAccurate) const
 {
    pixel = mpChipConverter->activeToOriginal(pixel);
    ossimDpt imagePoint(pixel.mX, pixel.mY);
@@ -316,12 +316,21 @@ LocationType Nitf::RpcGeoreference::pixelToGeo(LocationType pixel) const
    mModel.lineSampleToWorld(imagePoint, worldPoint);
    if (worldPoint.isNan())
    {
+      if (pAccurate != NULL)
+      {
+         *pAccurate = false;
+      }
       return LocationType();
+   }
+
+   if (pAccurate != NULL)
+   {
+      *pAccurate = true;
    }
    return LocationType(worldPoint.latd(), worldPoint.lond());
 }
 
-LocationType Nitf::RpcGeoreference::geoToPixel(LocationType geo) const
+LocationType Nitf::RpcGeoreference::geoToPixel(LocationType geo, bool* pAccurate) const
 {
    ossimGpt worldPoint;
    worldPoint.latd(geo.mX);
@@ -330,7 +339,16 @@ LocationType Nitf::RpcGeoreference::geoToPixel(LocationType geo) const
    mModel.worldToLineSample(worldPoint, imagePoint);
    if (imagePoint.isNan())
    {
+      if (pAccurate != NULL)
+      {
+         *pAccurate = false;
+      }
       return LocationType();
+   }
+
+   if (pAccurate != NULL)
+   {
+      *pAccurate = true;
    }
    return mpChipConverter->originalToActive(LocationType(imagePoint.x, imagePoint.y));
 }

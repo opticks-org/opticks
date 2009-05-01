@@ -161,7 +161,7 @@ protected:
 
    void updateContextMenu(Subject& subject, const std::string& signal, const boost::any& value);
 
-   void updateStatusBarGeocoords(StatusBar *pBar, RasterElement *pRaster, LocationType dataCoord);
+   void updateStatusBarGeocoords(StatusBar *pBar, LocationType geoCoord);
 
 protected slots:
    void keyPan();

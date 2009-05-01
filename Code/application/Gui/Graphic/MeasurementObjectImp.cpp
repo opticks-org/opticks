@@ -34,7 +34,7 @@ XERCES_CPP_NAMESPACE_USE
 MeasurementObjectImp::MeasurementObjectImp(const string& id, GraphicObjectType type, GraphicLayer* pLayer,
                                            LocationType pixelCoord) :
    LineObjectImp(id, type, pLayer, pixelCoord),
-   mUsingInaccurateExtrapolation(false)
+   mUsingInaccurateGeocoords(false)
 {
    // Properties used by MeasurementObject
    addProperty("LineColor");
@@ -140,7 +140,7 @@ void MeasurementObjectImp::draw(double zoomFactor) const
 
    // Get text font info (used for all text, set to italic if using inaccurate extrapolation)
    QFont font = getFont();
-   font.setItalic(mUsingInaccurateExtrapolation);
+   font.setItalic(mUsingInaccurateGeocoords);
 
    // Calculate arrow info (line only)
    LocationType arrowStartPoint; // The start point of the arrow line
@@ -513,9 +513,9 @@ string MeasurementObjectImp::generateGeoStrings() const
    // Get lat lon coordinates and terrain raster
    const RasterElement* pTerrain = NULL;
 
+   bool geoValid(false);
    if (mpGeoreference.get() != NULL)
    {
-      bool needsToExtrapolate(false);
       GraphicLayer* pLayer = getLayer();
       if (pLayer != NULL)
       {
@@ -533,57 +533,22 @@ string MeasurementObjectImp::generateGeoStrings() const
             {
                pPrimaryRasterLayer->translateWorldToData(llCorner.mX, llCorner.mY, llCorner.mX, llCorner.mY);
                pPrimaryRasterLayer->translateWorldToData(urCorner.mX, urCorner.mY, urCorner.mX, urCorner.mY);
-
-               // check if outside bounds of data, i.e., need to extrapolate
-               // llCorner and urCorner are now in data coordinates so check against data dimensions
-               const RasterDataDescriptor* pDesc = static_cast<const RasterDataDescriptor*>(
-                  mpGeoreference->getDataDescriptor());
-               double dataMinX(static_cast<double>(pDesc->getColumns().front().getActiveNumber()));
-               double dataMinY(static_cast<double>(pDesc->getRows().front().getActiveNumber()));
-               double dataMaxX(static_cast<double>(pDesc->getColumns().back().getActiveNumber() + 1));  // add 1 since need 
-               double dataMaxY(static_cast<double>(pDesc->getRows().back().getActiveNumber() + 1));     // to go to outer edge
-
-               vector<LocationType> boundingBox;
-               boundingBox.push_back(LocationType(dataMinX, dataMinY));
-               boundingBox.push_back(LocationType(dataMaxX, dataMinY));
-               boundingBox.push_back(LocationType(dataMaxX, dataMaxY));
-               boundingBox.push_back(LocationType(dataMinX, dataMaxY));
-               if (DrawUtil::isWithin(llCorner, &(*boundingBox.begin()), 
-                   static_cast<int>(boundingBox.size())) == false
-                  || DrawUtil::isWithin(urCorner, &(*boundingBox.begin()), 
-                     static_cast<int>(boundingBox.size())) == false)
-               {
-                  needsToExtrapolate = true;
-               }
             }
          }
       }
 
       if (mpGeoreference->isGeoreferenced())
       {
-         llCornerLatLon = mpGeoreference->convertPixelToGeocoord(llCorner);
-         urCornerLatLon = mpGeoreference->convertPixelToGeocoord(urCorner);
-         unitsValid = true;
-      }
-
-      // check if georeference needs to extrapolate and if it can do so with accuracy
-      bool canExtrapolate(false);
-      Georeference* pGeoPlugin = mpGeoreference->getGeoreferencePlugin();
-      if (pGeoPlugin != NULL)
-      {
-         canExtrapolate = pGeoPlugin->canExtrapolate();
-      }
-
-      if (needsToExtrapolate && canExtrapolate == false)
-      {
-         unitsValid = false;
-         mUsingInaccurateExtrapolation = true;
-      }
-      else
-      {
-         mUsingInaccurateExtrapolation = false;
+         bool llValid(false);
+         bool urValid(false);
+         llCornerLatLon = mpGeoreference->convertPixelToGeocoord(llCorner, false, &llValid);
+         urCornerLatLon = mpGeoreference->convertPixelToGeocoord(urCorner, false, &urValid);
+         geoValid = llValid && urValid;
       }
    }
+
+   mUsingInaccurateGeocoords = !geoValid;
+   unitsValid = geoValid;
 
    //String Variables
    string startLoc = "";

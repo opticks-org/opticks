@@ -35,9 +35,8 @@ public:
    bool getInputSpecification(PlugInArgList*& pArgList);
    bool setInteractive();
 
-   LocationType pixelToGeo(LocationType pixel) const;
-   LocationType geoToPixel(LocationType geocoord) const;
-   LocationType geoToPixelQuick(LocationType geo) const;
+   LocationType pixelToGeo(LocationType pixel, bool* pAccurate = NULL) const;
+   LocationType geoToPixel(LocationType geocoord, bool* pAccurate = NULL) const;
    bool canHandleRasterElement(RasterElement *pRaster) const;
    QWidget *getGui(RasterElement *pRaster);
    bool validateGuiInput() const;

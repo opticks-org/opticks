@@ -1867,9 +1867,9 @@ bool SpatialDataViewImp::sendLayerBackward(Layer* pLayer)
    return bSuccess;
 }
 
-void SpatialDataViewImp::updateStatusBarGeocoords(StatusBar *pBar, RasterElement *pRaster, LocationType dataCoord)
+void SpatialDataViewImp::updateStatusBarGeocoords(StatusBar *pBar, LocationType geoCoord)
 {
-   if (pBar == NULL || pRaster == NULL)
+   if (pBar == NULL)
    {
       return;
    }
@@ -1884,7 +1884,6 @@ void SpatialDataViewImp::updateStatusBarGeocoords(StatusBar *pBar, RasterElement
       dmsFormat = pLatLonLayer->getLatLonFormat();
    }
 
-   LocationType geoCoord = pRaster->convertPixelToGeocoord(dataCoord);
    pBar->setGeoCoords(geoCoord, geocoordType, dmsFormat);
 }
 
@@ -1904,17 +1903,6 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
       return;
    }
 
-   bool geoCanExtrapolate = false;
-   RasterElement* pPrimaryRasterElement = mpLayerList->getPrimaryRasterElement();
-   if (pPrimaryRasterElement)
-   {
-      Georeference* pGeoref = pPrimaryRasterElement->getGeoreferencePlugin();
-      if (pGeoref != NULL)
-      {
-         geoCanExtrapolate = pGeoref->canExtrapolate();
-      }
-   }
-
    pBar->clearValues();
    if (screenCoord.isNull() == false)
    {
@@ -1928,15 +1916,20 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
       double dMaxY = 0.0;
       getExtents(dMinX, dMinY, dMaxX, dMaxY);
 
-      bool geoUpdated = false;
-      if (geoCanExtrapolate)
+      LocationType dataCoord;
+      LocationType geoCoord;
+      if (mpPrimaryRasterLayer.get() != NULL)
       {
-         LocationType dataCoord;
-         if (mpPrimaryRasterLayer.get() != NULL)
+         RasterElement* pPrimaryRasterElement = mpLayerList->getPrimaryRasterElement();
+         if (pPrimaryRasterElement != NULL)
          {
             mpPrimaryRasterLayer->translateWorldToData(dX, dY, dataCoord.mX, dataCoord.mY);
-            updateStatusBarGeocoords(pBar, pPrimaryRasterElement, dataCoord);
-            geoUpdated = true;
+            bool geoValid(false);
+            geoCoord = pPrimaryRasterElement->convertPixelToGeocoord(dataCoord, false, &geoValid);
+            if (geoValid)
+            {
+               updateStatusBarGeocoords(pBar, geoCoord);
+            }
          }
       }
 
@@ -1977,12 +1970,6 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
                               if (pRasterLayer == NULL)
                               {
                                  continue;
-                              }
-
-                              if (!geoUpdated)
-                              {
-                                 updateStatusBarGeocoords(pBar, pRaster, dataCoord);
-                                 geoUpdated = true;
                               }
 
                               DimensionDescriptor rowDim = activeRows[dataCoord.mY];

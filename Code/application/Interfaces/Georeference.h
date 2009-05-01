@@ -34,10 +34,15 @@ public:
     *
     *  @param   pixel
     *           The scene pixel location as a LocationType
+    *  @param   pAccurate
+    *           Output indicator of conversion accuracy. Georeference plug-ins that
+    *           can not accurately extrapolate should return \c false when \c pixel is
+    *           outside the extents of the reference points. When \c NULL, no accuracy
+    *           check is performed. 
     *
     *  @return  The corresponding geocoordinate as a LocationType.
     */
-   virtual LocationType pixelToGeo(LocationType pixel) const = 0;
+   virtual LocationType pixelToGeo(LocationType pixel, bool* pAccurate = NULL) const = 0;
 
    /**
     *  Takes a scene pixel coordinate and returns the approximate corresponding 
@@ -46,10 +51,15 @@ public:
     *
     *  @param   pixel
     *           The scene pixel location as a LocationType
+    *  @param   pAccurate
+    *           Output indicator of conversion accuracy. Georeference plug-ins that
+    *           can not accurately extrapolate should return \c false when \c pixel is
+    *           outside the extents of the reference points. When \c NULL, no accuracy
+    *           check is performed. 
     *
     *  @return  The corresponding geocoordinate as a LocationType.
     */
-   virtual LocationType pixelToGeoQuick(LocationType pixel) const = 0;
+   virtual LocationType pixelToGeoQuick(LocationType pixel, bool* pAccurate = NULL) const = 0;
 
    /**
     *  Takes a geocoordinate and returns the corresponding pixel
@@ -57,10 +67,15 @@ public:
     *
     *  @param   geo
     *           The geocoordinate as a LocationType
+    *  @param   pAccurate
+    *           Output indicator of conversion accuracy. Georeference plug-ins that
+    *           can not accurately extrapolate should return \c false when \c geo is
+    *           outside the extents of the reference points. When \c NULL, no accuracy
+    *           check is performed. 
     *
     *  @return  The corresponding pixel as a LocationType.
     */
-   virtual LocationType geoToPixel(LocationType geo) const = 0;
+   virtual LocationType geoToPixel(LocationType geo, bool* pAccurate = NULL) const = 0;
 
    /**
     *  Takes a  and returns the approximate corresponding geocoordinate
@@ -69,10 +84,15 @@ public:
     *
     *  @param   geo
     *           The geocoordinate location as a LocationType
+    *  @param   pAccurate
+    *           Output indicator of conversion accuracy. Georeference plug-ins that
+    *           can not accurately extrapolate should return \c false when \c geo is
+    *           outside the extents of the reference points. When \c NULL, no accuracy
+    *           check is performed. 
     *
     *  @return  The corresponding pixel as a LocationType.
     */
-   virtual LocationType geoToPixelQuick(LocationType geo) const = 0;
+   virtual LocationType geoToPixelQuick(LocationType geo, bool* pAccurate = NULL) const = 0;
 
    /**
     *  Gets a QWidget to set all parameters needed by the georeferencing algorithm.
@@ -107,19 +127,6 @@ public:
     * @return \c true if the plugin can handle the RasterElement, \c false otherwise
     */
    virtual bool canHandleRasterElement(RasterElement *pRaster) const = 0;
-
-   /**
-    *  Specifies whether the plug-in can accurately extrapolate beyond the
-    *  extents of its associated raster element.
-    *
-    *  E.g. if this method returns \c true, the status bar will display geocoordinates
-    *  regardless of whether the cursor is within its associated raster element
-    *  or not.
-    *
-    *  @return  Returns \c true if the plug-in can extrapolate, otherwise returns
-    *           \c false.
-    */
-   virtual bool canExtrapolate() const = 0;
 
 protected:
    /**

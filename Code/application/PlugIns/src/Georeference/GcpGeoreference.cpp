@@ -367,19 +367,28 @@ static LocationType solveLinearEquations(LocationType size1, LocationType size2,
    return distance;
 }
 
-LocationType GcpGeoreference::geoToPixel(LocationType geocoord) const
+LocationType GcpGeoreference::geoToPixel(LocationType geocoord, bool* pAccurate) const
 {
-   return evaluatePolynomial(geocoord, mXCoefficients, mYCoefficients, mReverseOrder);
+   LocationType pixcoord = evaluatePolynomial(geocoord, mXCoefficients, mYCoefficients, mReverseOrder);
+   if (pAccurate != NULL)
+   {
+      bool outsideCols = pixcoord.mX < 0.0 || pixcoord.mX > static_cast<double>(mNumColumns);
+      bool outsideRows = pixcoord.mY < 0.0 || pixcoord.mY > static_cast<double>(mNumRows);
+      *pAccurate = !(outsideCols || outsideRows);
+   }
+
+   return pixcoord;
 }
 
-LocationType GcpGeoreference::geoToPixelQuick(LocationType geo) const
+LocationType GcpGeoreference::pixelToGeo(LocationType pixel, bool* pAccurate) const
 {
-   return geoToPixel(geo);
-}
-
-LocationType GcpGeoreference::pixelToGeo(LocationType pixel) const
-{
-   return evaluatePolynomial(pixel, mLatCoefficients, mLonCoefficients, mOrder);
+   if (pAccurate != NULL)
+   {
+      bool outsideCols = pixel.mX < 0.0 || pixel.mX > static_cast<double>(mNumColumns);
+      bool outsideRows = pixel.mY < 0.0 || pixel.mY > static_cast<double>(mNumRows);
+      *pAccurate = !(outsideCols || outsideRows);
+   }
+  return evaluatePolynomial(pixel, mLatCoefficients, mLonCoefficients, mOrder);
 }
 
 bool GcpGeoreference::canHandleRasterElement(RasterElement *pRaster) const
