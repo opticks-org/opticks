@@ -192,6 +192,8 @@ void PlugInArgImp::initArgTypes()
       mArgTypes.push_back("unsigned int");
       mArgTypes.push_back("long");
       mArgTypes.push_back("unsigned long");
+      mArgTypes.push_back("Int64");
+      mArgTypes.push_back("UInt64");
       mArgTypes.push_back("float");
       mArgTypes.push_back("double");
       mArgTypes.push_back("bool");
@@ -204,6 +206,8 @@ void PlugInArgImp::initArgTypes()
       mArgTypes.push_back("vector<unsigned int>");
       mArgTypes.push_back("vector<long>");
       mArgTypes.push_back("vector<unsigned long>");
+      mArgTypes.push_back("vector<Int64>");
+      mArgTypes.push_back("vector<UInt64>");
       mArgTypes.push_back("vector<float>");
       mArgTypes.push_back("vector<double>");
       mArgTypes.push_back("vector<bool>");

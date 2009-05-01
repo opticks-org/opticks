@@ -11,6 +11,9 @@
 #define UINT64_H
 
 #include "AppConfig.h"
+#include "DataVariantValidator.h"
+
+#include <vector>
 
 /**
  * A unsigned 64-bit value.  This class exists because there is no
@@ -99,6 +102,7 @@ private:
  * These template specializations are required to allow these types to be put into a DataVariant.
  */
 template <> class VariantTypeValidator<UInt64> {};
+template <> class VariantTypeValidator<std::vector<UInt64> > {};
 /// \endcond
 
 #endif

@@ -7,17 +7,20 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "ApplicationServices.h"
-#include "AppConfig.h"
 #include "AppAssert.h"
+#include "AppConfig.h"
+#include "ApplicationServices.h"
 #include "DateTimeImp.h"
 #include "DynamicObjectAdapter.h"
 #include "FilenameImp.h"
+#include "Int64.h"
 #include "MessageLogAdapter.h"
+#include "UInt64.h"
 #include "xmlwriter.h"
 
-#include <sstream>
 #include <iostream>
+#include <sstream>
+#include <vector>
 
 #include <QtCore/QString>
 #include <QtCore/QTemporaryFile>
@@ -498,6 +501,30 @@ bool MessageImp::addProperty(const string& name, unsigned long value)
    return true;
 }
 
+bool MessageImp::addProperty(const string& name, Int64 value)
+{
+   if (mFinalized)
+   {
+      return false;
+   }
+
+   mpProperties->setAttribute(name, value);
+   notify(SIGNAL_NAME(Message, MessageModified), boost::any(dynamic_cast<Message*>(this)));
+   return true;
+}
+
+bool MessageImp::addProperty(const string& name, UInt64 value)
+{
+   if (mFinalized)
+   {
+      return false;
+   }
+
+   mpProperties->setAttribute(name, value);
+   notify(SIGNAL_NAME(Message, MessageModified), boost::any(dynamic_cast<Message*>(this)));
+   return true;
+}
+
 bool MessageImp::addBooleanProperty(const string& name, bool value)
 {
    if (mFinalized)
@@ -655,6 +682,30 @@ bool MessageImp::addProperty(const string& name, const vector<long>& value)
 }
 
 bool MessageImp::addProperty(const string& name, const vector<unsigned long>& value)
+{
+   if (mFinalized)
+   {
+      return false;
+   }
+
+   mpProperties->setAttribute(name, value);
+   notify(SIGNAL_NAME(Message, MessageModified), boost::any(dynamic_cast<Message*>(this)));
+   return true;
+}
+
+bool MessageImp::addProperty(const string& name, const vector<Int64>& value)
+{
+   if (mFinalized)
+   {
+      return false;
+   }
+
+   mpProperties->setAttribute(name, value);
+   notify(SIGNAL_NAME(Message, MessageModified), boost::any(dynamic_cast<Message*>(this)));
+   return true;
+}
+
+bool MessageImp::addProperty(const string& name, const vector<UInt64>& value)
 {
    if (mFinalized)
    {

@@ -24,6 +24,7 @@
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
 #include "Progress.h"
+#include "UInt64.h"
 
 #include <sstream>
 
@@ -1024,7 +1025,7 @@ bool AspamImporter::deserialize(FILE* pFp)
          unsigned int numberRead = fread(const_cast<char*>(buf.c_str()), sizeof(char), 1024, pFp);
          data += buf.substr(0, numberRead);
       }
-      pLoadMsg->addProperty("Length", static_cast<unsigned long>(data.size()));
+      pLoadMsg->addProperty("Length", UInt64(data.size()));
       pLoadMsg->finalize(Message::Success);
    }
 

@@ -15,6 +15,7 @@
 #include "DimensionDescriptor.h"
 #include "DynamicObject.h"
 #include "Endian.h"
+#include "Int64.h"
 #include "ObjectResource.h"
 #include "Progress.h"
 #include "RasterDataDescriptor.h"
@@ -23,6 +24,7 @@
 #include "RasterUtilities.h"
 #include "SpecialMetadata.h"
 #include "switchOnEncoding.h"
+#include "UInt64.h"
 
 #include <algorithm>
 #include <boost/bind.hpp>
@@ -942,6 +944,16 @@ namespace
          }
 
          if (chipMetadataDimTemplate<uint64_t>(dimMetadataVariant, selectedDims))
+         {
+            continue;
+         }
+
+         if (chipMetadataDimTemplate<Int64>(dimMetadataVariant, selectedDims))
+         {
+            continue;
+         }
+
+         if (chipMetadataDimTemplate<UInt64>(dimMetadataVariant, selectedDims))
          {
             continue;
          }

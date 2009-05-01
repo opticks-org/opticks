@@ -66,6 +66,10 @@ template <> class VariantTypeValidator<std::vector<std::string> > {};
 /**
  *  A type-safe variant type that allows variants to be passed by value.
  *  The DataVariant class is a type-safe alternative to void pointers.
+ *
+ *  @warning For serialization and deserialization, use of \c long, \c unsigned \c long,
+ *  \c int64_t, and \c uint64_t and their associated \c vector types is strongly discouraged
+ *  due to cross-platform compatibility issues. Use Int64 or UInt64 instead.
  */
 class DataVariant
 {

@@ -194,6 +194,8 @@ public:
       {
          if (XMLString::equals(pNode->getNodeName(), X("value")))
          {
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Serialization should fail if fromXml fails. "\
+   "See OPTICKS-589 (dadkins)")
             string str = A(pNode->getTextContent());
             mValue = StringUtilities::fromXmlString<T>(str);
             return true;

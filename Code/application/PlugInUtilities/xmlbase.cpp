@@ -8,6 +8,7 @@
  */
 
 #include "Endian.h"
+#include "Int64.h"
 #include "XercesIncludes.h"
 #include "xmlbase.h"
 
@@ -184,8 +185,8 @@ void XmlBase::logException(const SAXParseException* pExc, std::string severity)
    {
       Message* msg(mpLog->createMessage("XmlReader SAXParserException", "app", "EC355E3E-03CA-4081-9006-5F45D6A488B3"));
       msg->addProperty("severity", severity);
-      msg->addProperty("line", pExc->getLineNumber());
-      msg->addProperty("column", pExc->getColumnNumber());
+      msg->addProperty("line", Int64(pExc->getLineNumber()));
+      msg->addProperty("column", Int64(pExc->getColumnNumber()));
       msg->addProperty("message", std::string(A(pExc->getMessage())));
       if (pExc->getPublicId() != NULL)
       {
@@ -220,9 +221,9 @@ void XmlBase::logError(const XERCES_CPP_NAMESPACE_QUALIFIER DOMError& exc)
       if (pLoc != NULL)
       {
          pMsg->addProperty("file", A(pLoc->getURI()));
-         pMsg->addProperty("line", static_cast<unsigned long>(pLoc->getLineNumber()));
-         pMsg->addProperty("column", static_cast<unsigned long>(pLoc->getColumnNumber()));
-         pMsg->addProperty("offset", static_cast<unsigned long>(pLoc->getOffset()));
+         pMsg->addProperty("line", Int64(pLoc->getLineNumber()));
+         pMsg->addProperty("column", Int64(pLoc->getColumnNumber()));
+         pMsg->addProperty("offset", Int64(pLoc->getOffset()));
       }
       switch (exc.getSeverity())
       {

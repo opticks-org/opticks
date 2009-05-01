@@ -450,7 +450,9 @@ void DataVariantEditor::setStackWidget(string type)
    }
    else if (curDelegate.getType() == DataVariantEditorDelegate::INTEGRAL)
    {
-      mpValueLineEdit->setValidator(mpIntValidator);
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Consider using one or more custom QValidator subclasses "\
+   "and removing mpIntValidator when implementing OPTICKS-588 (dadkins)")
+      mpValueLineEdit->setValidator(NULL);
       mpStack->setCurrentIndex(0);
    }
    else if (curDelegate.getType() == DataVariantEditorDelegate::DOUBLE)

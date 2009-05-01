@@ -223,6 +223,8 @@ public:
    virtual bool addProperty(const std::string &name, unsigned int value);
    virtual bool addProperty(const std::string &name, long value);
    virtual bool addProperty(const std::string &name, unsigned long value);
+   virtual bool addProperty(const std::string &name, Int64 value);
+   virtual bool addProperty(const std::string &name, UInt64 value);
    virtual bool addProperty(const std::string &name, float value);
    virtual bool addProperty(const std::string &name, double value);
    virtual bool addProperty(const std::string &name, const std::string &value);
@@ -236,6 +238,8 @@ public:
    virtual bool addProperty(const std::string &name, const std::vector<unsigned int>& value);
    virtual bool addProperty(const std::string &name, const std::vector<long>& value);
    virtual bool addProperty(const std::string &name, const std::vector<unsigned long>& value);
+   virtual bool addProperty(const std::string &name, const std::vector<Int64>& value);
+   virtual bool addProperty(const std::string &name, const std::vector<UInt64>& value);
    virtual bool addProperty(const std::string &name, const std::vector<float>& value);
    virtual bool addProperty(const std::string &name, const std::vector<double>& value);
    virtual bool addProperty(const std::string &name, const std::vector<bool>& value);
@@ -393,6 +397,16 @@ bool addProperty(const std::string &name, unsigned long value) \
    return impClass::addProperty(name, value); \
 } \
  \
+bool addProperty(const std::string &name, Int64 value) \
+{ \
+   return impClass::addProperty(name, value); \
+} \
+ \
+bool addProperty(const std::string &name, UInt64 value) \
+{ \
+   return impClass::addProperty(name, value); \
+} \
+ \
 bool addProperty(const std::string &name, float value) \
 { \
    return impClass::addProperty(name, value); \
@@ -454,6 +468,16 @@ bool addProperty(const std::string &name, const std::vector<long>& value) \
 } \
  \
 bool addProperty(const std::string &name, const std::vector<unsigned long>& value) \
+{ \
+   return impClass::addProperty(name, value); \
+} \
+ \
+bool addProperty(const std::string &name, const std::vector<Int64>& value) \
+{ \
+   return impClass::addProperty(name, value); \
+} \
+ \
+bool addProperty(const std::string &name, const std::vector<UInt64>& value) \
 { \
    return impClass::addProperty(name, value); \
 } \

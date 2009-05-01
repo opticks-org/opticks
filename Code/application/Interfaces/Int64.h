@@ -11,8 +11,9 @@
 #define INT64_H
 
 #include "AppConfig.h"
+#include "DataVariantValidator.h"
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove long, unsigned long, int64t and uint64_t from DataVariant when both source and binary compatiblity can be broken. (kstreith)")
+#include <vector>
 
 /**
  * A signed 64-bit value.  This class exists because there is no
@@ -102,6 +103,7 @@ private:
  * These template specializations are required to allow these types to be put into a DataVariant.
  */
 template <> class VariantTypeValidator<Int64> {};
+template <> class VariantTypeValidator<std::vector<Int64> > {};
 /// \endcond
 
 #endif

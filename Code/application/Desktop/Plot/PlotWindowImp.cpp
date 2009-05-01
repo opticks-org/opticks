@@ -19,6 +19,7 @@
 #include "DynamicObject.h"
 #include "PlotWindowImp.h"
 #include "InfoBar.h"
+#include "Int64.h"
 #include "MessageLogResource.h"
 #include "PlotView.h"
 #include "PlotWidget.h"
@@ -27,6 +28,7 @@
 #include "PointSet.h"
 #include "SessionItemSerializer.h"
 #include "Signature.h"
+#include "UInt64.h"
 
 #include <algorithm>
 XERCES_CPP_NAMESPACE_USE
@@ -690,6 +692,18 @@ namespace
       }
 
       extractFromVariant<unsigned long>(var, data);
+      if (!data.empty())
+      {
+         return;
+      }
+
+      extractFromVariant<Int64>(var, data);
+      if (!data.empty())
+      {
+         return;
+      }
+
+      extractFromVariant<UInt64>(var, data);
       if (!data.empty())
       {
          return;

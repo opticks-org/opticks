@@ -413,134 +413,18 @@ STRINGSTREAM_MAPPING_FROM_DISPLAY_STRING_VEC(bool)
 STRINGSTREAM_MAPPING_TO_XML_STRING_VEC(bool)
 STRINGSTREAM_MAPPING_FROM_XML_STRING_VEC(bool)
 
-template<>
-std::string StringUtilities::toXmlString(const char& val, bool* pError)
-{
-   stringstream buf;
-   buf << static_cast<short>(val);
-   if (pError != NULL)
-   {
-      *pError = buf.fail();
-   }
-
-   return buf.str();
-}
-
-template<>
-std::string StringUtilities::toDisplayString(const char& val, bool* pError)
-{
-   stringstream buf;
-   buf << static_cast<short>(val);
-   if (pError != NULL)
-   {
-      *pError = buf.fail();
-   }
-
-   return buf.str();
-}
-
-template<>
-char StringUtilities::fromXmlString<char>(std::string value, bool* pError)
-{
-   stringstream buf(value);
-   short parsedValue;
-   buf >> parsedValue;
-   if (pError != NULL)
-   {
-      *pError = buf.fail() || parsedValue > numeric_limits<char>::max() || parsedValue < numeric_limits<char>::min();
-   }
-
-   return static_cast<char>(parsedValue & 0x00FF);
-}
-
-template<>
-char StringUtilities::fromDisplayString<char>(std::string value, bool* pError)
-{
-   stringstream buf(value);
-   short parsedValue;
-   buf >> parsedValue;
-   if (pError != NULL)
-   {
-      *pError = buf.fail() || parsedValue > numeric_limits<char>::max() || parsedValue < numeric_limits<char>::min();
-   }
-
-   return static_cast<char>(parsedValue & 0x00FF);
-}
-
-STRINGSTREAM_MAPPING_TO_XML_STRING_VEC(char)
-STRINGSTREAM_MAPPING_TO_DISPLAY_STRING_VEC(char)
-STRINGSTREAM_MAPPING_FROM_XML_STRING_VEC(char)
-STRINGSTREAM_MAPPING_FROM_DISPLAY_STRING_VEC(char)
-
-template<>
-std::string StringUtilities::toXmlString(const unsigned char& val, bool* pError)
-{
-   stringstream buf;
-   buf << static_cast<unsigned short>(val);
-   if (pError != NULL)
-   {
-      *pError = buf.fail();
-   }
-
-   return buf.str();
-}
-
-template<>
-std::string StringUtilities::toDisplayString(const unsigned char& val, bool* pError)
-{
-   stringstream buf;
-   buf << static_cast<unsigned short>(val);
-   if (pError != NULL)
-   {
-      *pError = buf.fail();
-   }
-
-   return buf.str();
-}
-
-template<>
-unsigned char StringUtilities::fromXmlString<unsigned char>(std::string value, bool* pError)
-{
-   stringstream buf(value);
-   unsigned short parsedValue;
-   buf >> parsedValue;
-   if (pError != NULL)
-   {
-      *pError = buf.fail() || parsedValue > numeric_limits<unsigned char>::max();
-   }
-
-   return static_cast<unsigned char>(parsedValue & 0x00FF);
-}
-
-template<>
-unsigned char StringUtilities::fromDisplayString<unsigned char>(std::string value, bool* pError)
-{
-   stringstream buf(value);
-   unsigned short parsedValue;
-   buf >> parsedValue;
-   if (pError != NULL)
-   {
-      *pError = buf.fail() || parsedValue > numeric_limits<unsigned char>::max();
-   }
-
-   return static_cast<unsigned char>(parsedValue & 0x00FF);
-}
-
-STRINGSTREAM_MAPPING_TO_XML_STRING_VEC(unsigned char)
-STRINGSTREAM_MAPPING_TO_DISPLAY_STRING_VEC(unsigned char)
-STRINGSTREAM_MAPPING_FROM_XML_STRING_VEC(unsigned char)
-STRINGSTREAM_MAPPING_FROM_DISPLAY_STRING_VEC(unsigned char)
-
+STRINGSTREAM_MAPPING_CAST(char, short)
+STRINGSTREAM_MAPPING_CAST(unsigned char, unsigned short)
 STRINGSTREAM_MAPPING(short)
 STRINGSTREAM_MAPPING(unsigned short)
 STRINGSTREAM_MAPPING(int)
 STRINGSTREAM_MAPPING(unsigned int)
-STRINGSTREAM_MAPPING(long)
-STRINGSTREAM_MAPPING(unsigned long)
 #ifdef WIN_API
+STRINGSTREAM_MAPPING_CAST(long, int64_t)
+STRINGSTREAM_MAPPING_CAST(unsigned long, uint64_t)
+#endif
 STRINGSTREAM_MAPPING(int64_t)
 STRINGSTREAM_MAPPING(uint64_t)
-#endif
 STRINGSTREAM_MAPPING_PRECISION(float, numeric_limits<float>::digits10)
 STRINGSTREAM_MAPPING_PRECISION(double, numeric_limits<double>::digits10)
 

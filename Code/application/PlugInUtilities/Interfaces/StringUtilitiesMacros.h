@@ -14,7 +14,7 @@
  *  The StringUtilitiesMacros.h file contains definitions for macros which simplify defining type to string mappings.
  *  Basic usage is as follows.
  *  \code
- *  STRINGSTREAM_MAPPING(char)
+ *  STRINGSTREAM_MAPPING(int)
  *
  *  STRINGSTREAM_MAPPING_PRECISION(float, numeric_limits<float>::digits10)
  *
@@ -33,6 +33,7 @@
 #include "StringUtilities.h"
 #include <algorithm>
 #include <boost/tuple/tuple.hpp>
+#include <limits>
 #include <string>
 #include <vector>
 
@@ -349,7 +350,6 @@ ENUM_MAPPING_FUNCTION(eAlias__) \
    return values; \
 }
 
-
 #define STRINGSTREAM_MAPPING_TO_XML_STRING(type__, __precision) \
 template<>\
 std::string StringUtilities::toXmlString(const type__ & val, bool* pError)\
@@ -360,6 +360,23 @@ std::string StringUtilities::toXmlString(const type__ & val, bool* pError)\
       buf.precision(__precision);\
    }\
    buf << val;\
+   if (pError != NULL)\
+   {\
+      *pError = buf.fail();\
+   }\
+   return buf.str();\
+}\
+
+#define STRINGSTREAM_MAPPING_TO_XML_STRING_CAST(type__, cast__, precision__) \
+template<>\
+std::string StringUtilities::toXmlString(const type__ & val, bool* pError)\
+{\
+   stringstream buf;\
+   if (precision__ != -1)\
+   {\
+      buf.precision(precision__);\
+   }\
+   buf << static_cast<cast__>(val);\
    if (pError != NULL)\
    {\
       *pError = buf.fail();\
@@ -391,12 +408,30 @@ std::string StringUtilities::toDisplayString(const type__ & val, bool* pError)\
    return buf.str();\
 }\
 
+#define STRINGSTREAM_MAPPING_TO_DISPLAY_STRING_CAST(type__, cast__, precision__) \
+template<>\
+std::string StringUtilities::toDisplayString(const type__ & val, bool* pError)\
+{\
+   stringstream buf;\
+   if (precision__ != -1)\
+   {\
+      buf.precision(precision__);\
+   }\
+   buf << static_cast<cast__>(val);\
+   if (pError != NULL)\
+   {\
+      *pError = buf.fail();\
+   }\
+   return buf.str();\
+}\
+
 #define STRINGSTREAM_MAPPING_TO_DISPLAY_STRING_VEC(type__) \
 template<>\
 std::string StringUtilities::toDisplayString(const vector<type__> & vec, bool* pError)\
 {\
    return convertVectorToString(vec, pError, ", ", true);\
 }\
+
 
 #define STRINGSTREAM_MAPPING_FROM_XML_STRING(type__) \
 template<>\
@@ -410,6 +445,29 @@ type__ StringUtilities::fromXmlString<type__>(std::string value, bool* pError)\
       *pError = buf.fail();\
    }\
    return parsedValue;\
+}\
+
+#define STRINGSTREAM_MAPPING_FROM_XML_STRING_CAST(type__, cast__) \
+template<>\
+type__ StringUtilities::fromXmlString<type__>(std::string value, bool* pError)\
+{\
+   stringstream buf(value);\
+   cast__ parsedValue;\
+   buf >> parsedValue;\
+   if (pError != NULL)\
+   {\
+      *pError = buf.fail() || parsedValue > std::numeric_limits<type__>::max()\
+         || parsedValue < std::numeric_limits<type__>::min();\
+   }\
+   if (parsedValue > std::numeric_limits<type__>::max())\
+   {\
+      return std::numeric_limits<type__>::max();\
+   }\
+   if (parsedValue < std::numeric_limits<type__>::min())\
+   {\
+      return std::numeric_limits<type__>::min();\
+   }\
+   return static_cast<type__>(parsedValue);\
 }\
 
 #define STRINGSTREAM_MAPPING_FROM_XML_STRING_VEC(type__) \
@@ -433,6 +491,29 @@ type__ StringUtilities::fromDisplayString<type__>(std::string value, bool* pErro
    return parsedValue;\
 }\
 
+#define STRINGSTREAM_MAPPING_FROM_DISPLAY_STRING_CAST(type__, cast__) \
+template<>\
+type__ StringUtilities::fromDisplayString<type__>(std::string value, bool* pError)\
+{\
+   stringstream buf(value);\
+   cast__ parsedValue;\
+   buf >> parsedValue;\
+   if (pError != NULL)\
+   {\
+      *pError = buf.fail() || parsedValue > std::numeric_limits<type__>::max()\
+         || parsedValue < std::numeric_limits<type__>::min();\
+   }\
+   if (parsedValue > std::numeric_limits<type__>::max())\
+   {\
+      return std::numeric_limits<type__>::max();\
+   }\
+   if (parsedValue < std::numeric_limits<type__>::min())\
+   {\
+      return std::numeric_limits<type__>::min();\
+   }\
+   return static_cast<type__>(parsedValue);\
+}\
+
 #define STRINGSTREAM_MAPPING_FROM_DISPLAY_STRING_VEC(type__) \
 template<>\
 vector<type__> StringUtilities::fromDisplayString<vector<type__> >(std::string value, bool* pError)\
@@ -440,10 +521,10 @@ vector<type__> StringUtilities::fromDisplayString<vector<type__> >(std::string v
    return convertStringToVector<type__>(value, pError, ", ", true);\
 }\
 
-#define STRINGSTREAM_MAPPING_PRECISION(type__, __precision) \
-STRINGSTREAM_MAPPING_TO_XML_STRING(type__, __precision) \
+#define STRINGSTREAM_MAPPING_PRECISION(type__, precision__) \
+STRINGSTREAM_MAPPING_TO_XML_STRING(type__, precision__) \
 STRINGSTREAM_MAPPING_TO_XML_STRING_VEC(type__) \
-STRINGSTREAM_MAPPING_TO_DISPLAY_STRING(type__, __precision) \
+STRINGSTREAM_MAPPING_TO_DISPLAY_STRING(type__, precision__) \
 STRINGSTREAM_MAPPING_TO_DISPLAY_STRING_VEC(type__) \
 STRINGSTREAM_MAPPING_FROM_XML_STRING(type__) \
 STRINGSTREAM_MAPPING_FROM_XML_STRING_VEC(type__) \
@@ -452,6 +533,19 @@ STRINGSTREAM_MAPPING_FROM_DISPLAY_STRING_VEC(type__) \
 
 #define STRINGSTREAM_MAPPING(__type) \
 STRINGSTREAM_MAPPING_PRECISION(__type, -1) \
+
+#define STRINGSTREAM_MAPPING_PRECISION_CAST(type__, cast__, precision__) \
+STRINGSTREAM_MAPPING_TO_XML_STRING_CAST(type__, cast__, precision__) \
+STRINGSTREAM_MAPPING_TO_XML_STRING_VEC(type__) \
+STRINGSTREAM_MAPPING_TO_DISPLAY_STRING_CAST(type__, cast__, precision__) \
+STRINGSTREAM_MAPPING_TO_DISPLAY_STRING_VEC(type__) \
+STRINGSTREAM_MAPPING_FROM_XML_STRING_CAST(type__, cast__) \
+STRINGSTREAM_MAPPING_FROM_XML_STRING_VEC(type__) \
+STRINGSTREAM_MAPPING_FROM_DISPLAY_STRING_CAST(type__, cast__) \
+STRINGSTREAM_MAPPING_FROM_DISPLAY_STRING_VEC(type__) \
+
+#define STRINGSTREAM_MAPPING_CAST(__type, __cast) \
+STRINGSTREAM_MAPPING_PRECISION_CAST(__type, __cast, -1)
 
 #define TO_DISPLAY_POINTER_VARIATIONS(interface__) \
 template<>\

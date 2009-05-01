@@ -9,6 +9,7 @@
 
 #include "Classification.h"
 #include "DataVariant.h"
+#include "Int64.h"
 #include "NitfConstants.h"
 #include "NitfFileHeader.h"
 #include "NitfHeader.h"
@@ -174,7 +175,7 @@ bool Nitf::FileHeader::importMetadata(const ossimPropertyInterface *pHeader, Ras
    VERIFY(Header::importMetadata(pFileHeader, pDescriptor, pFileHeaderMetadata.get()));
    pFileHeaderMetadata->setAttribute(FILE_VERSION, mFileVersion);
 
-   int64_t fileLength = pFileHeader->getFileSize();
+   Int64 fileLength(pFileHeader->getFileSize());
    pFileHeaderMetadata->setAttribute(LENGTH, fileLength);
 
    int headerLength = pFileHeader->getHeaderSize();

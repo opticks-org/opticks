@@ -13,14 +13,17 @@
 #define MESSAGE_LOG_H
 
 #include "EnumWrapper.h"
-#include "Filename.h"
-#include "DateTime.h"
+#include "Int64.h"
+#include "Serializable.h"
 #include "Subject.h"
+#include "UInt64.h"
 
 #include <string>
 #include <vector>
 
+class DateTime;
 class DynamicObject;
+class Filename;
 class MessageLog;
 class Message;
 class Step;
@@ -297,6 +300,8 @@ public: // methods
    virtual bool addProperty(const std::string &name, unsigned int value) = 0;
    virtual bool addProperty(const std::string &name, long value) = 0;
    virtual bool addProperty(const std::string &name, unsigned long value) = 0;
+   virtual bool addProperty(const std::string &name, Int64 value) = 0;
+   virtual bool addProperty(const std::string &name, UInt64 value) = 0;
    virtual bool addProperty(const std::string &name, float value) = 0;
    virtual bool addProperty(const std::string &name, double value) = 0;
    virtual bool addProperty(const std::string &name, const std::string &value) = 0;
@@ -310,6 +315,8 @@ public: // methods
    virtual bool addProperty(const std::string &name, const std::vector<unsigned int>& value) = 0;
    virtual bool addProperty(const std::string &name, const std::vector<long>& value) = 0;
    virtual bool addProperty(const std::string &name, const std::vector<unsigned long>& value) = 0;
+   virtual bool addProperty(const std::string &name, const std::vector<Int64>& value) = 0;
+   virtual bool addProperty(const std::string &name, const std::vector<UInt64>& value) = 0;
    virtual bool addProperty(const std::string &name, const std::vector<float>& value) = 0;
    virtual bool addProperty(const std::string &name, const std::vector<double>& value) = 0;
    virtual bool addProperty(const std::string &name, const std::vector<bool>& value) = 0;
