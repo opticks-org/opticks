@@ -158,6 +158,14 @@ are defined in Opticks-Version.wxi, so include that file now -->
             <Component Id="C__zlib1_Dependency" Guid="$(var.C__zlib1_DependencyGuid)" Win64="$(var.64Bit)">
                <File Name="zlib1.dll" Id="F__zlib1_Dependency" DiskId="1" KeyPath="yes" />
             </Component>
+            <Component Id="C__hd423m_Dependency" Guid="$(var.C__hd423m_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="hd423m.dll" Id="F__hd423m_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
+            <Component Id="C__hm423m_Dependency" Guid="$(var.C__hm423m_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="hm423m.dll" Id="F__hm423m_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
+            <Component Id="C__szlibdll_Dependency" Guid="$(var.C__szlibdll_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="szlibdll.dll" Id="F__szlibdll_Dependency" DiskId="1" KeyPath="yes" />
             <?ifndef Is64Bit ?>
             <!-- Dependencies for 32-bit only -->
             <Component Id="C__cgD3D8_Dependency" Guid="$(var.C__cgD3D8_DependencyGuid)" Win64="no">
@@ -166,14 +174,6 @@ are defined in Opticks-Version.wxi, so include that file now -->
             <Component Id="C__glut32_Dependency" Guid="$(var.C__glut32_DependencyGuid)" Win64="no">
                <File Name="glut32.dll" Id="F__glut32_Dependency" DiskId="1" KeyPath="yes" />
             </Component>
-            <Component Id="C__hd423m_Dependency" Guid="$(var.C__hd423m_DependencyGuid)" Win64="no">
-               <File Name="hd423m.dll" Id="F__hd423m_Dependency" DiskId="1" KeyPath="yes" />
-            </Component>
-            <Component Id="C__hm423m_Dependency" Guid="$(var.C__hm423m_DependencyGuid)" Win64="no">
-               <File Name="hm423m.dll" Id="F__hm423m_Dependency" DiskId="1" KeyPath="yes" />
-            </Component>
-            <Component Id="C__szlibdll_Dependency" Guid="$(var.C__szlibdll_DependencyGuid)" Win64="no">
-               <File Name="szlibdll.dll" Id="F__szlibdll_Dependency" DiskId="1" KeyPath="yes" />
             </Component>
             <?endif?>
          </Directory>
