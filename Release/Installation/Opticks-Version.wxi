@@ -35,6 +35,9 @@
    <?define C__gdal_DependencyGuid = "019263e2-5f3e-424f-abfd-a39e4fb5eff4" ?>
    <?define C__glew32_DependencyGuid = "ee1bccab-9fad-4985-a8b6-c7cf927f2fa3" ?>
    <?define C__hdf5dll_DependencyGuid = "2254e0c1-c8e4-41a1-8a36-759355491f33" ?>
+   <?define C__hd423m_DependencyGuid = "ad315317-e0cf-4eae-99c9-7a3b616c41df" ?>
+   <?define C__hm423m_DependencyGuid = "8e4a98e7-317b-4006-a6c0-3a6b2dc1b3a1" ?>
+   <?define C__szlibdll_DependencyGuid = "180ebfde-6ba9-42bd-9381-a7498f5d4aaa" ?>
    <?define C__libexpat_DependencyGuid = "428d9f8d-ec5d-4c7b-93a6-86f602f5a2d5" ?>
    <?define C__ossim_DependencyGuid = "c01663dd-92da-4850-adbd-fe0201a3f7a3" ?>
    <?define C__pthreadVC2_DependencyGuid = "df7d3bc2-b105-4fbb-a63e-213b64eb4765" ?>
@@ -143,6 +146,9 @@
    <?define C__gdal_DependencyGuid = "3cf817a8-175a-4ac6-bf04-21818cf21838" ?>
    <?define C__glew32_DependencyGuid = "f05ec678-72f6-4922-a80a-bc23f7f696c1" ?>
    <?define C__hdf5dll_DependencyGuid = "c681b2fa-fa0d-4608-b9e0-25df37ead36a" ?>
+   <?define C__hd423m_DependencyGuid = "ad315317-e0cf-4eae-99c9-7a3b616c41df" ?>
+   <?define C__hm423m_DependencyGuid = "8e4a98e7-317b-4006-a6c0-3a6b2dc1b3a1" ?>
+   <?define C__szlibdll_DependencyGuid = "180ebfde-6ba9-42bd-9381-a7498f5d4aaa" ?>
    <?define C__libexpat_DependencyGuid = "40a917f7-0dd3-4d95-9a9d-b947b017cd45" ?>
    <?define C__ossim_DependencyGuid = "a6f6fd3d-646d-4b0c-b04d-e871cf5a86b0" ?>
    <?define C__pthreadVC2_DependencyGuid = "60a287fd-8796-4e8c-accc-4c3b0b1bbfc5" ?>
@@ -226,9 +232,6 @@
    <!-- 32-bit Only -->
    <?define C__cgD3D8_DependencyGuid = "5295ef65-3d7e-4d30-9e4c-a2ab5973aca5" ?>
    <?define C__glut32_DependencyGuid = "4c765e57-0434-4eb0-8068-fe43f77aae94" ?>
-   <?define C__hd421m_DependencyGuid = "ad315317-e0cf-4eae-99c9-7a3b616c41df" ?>
-   <?define C__hm421m_DependencyGuid = "8e4a98e7-317b-4006-a6c0-3a6b2dc1b3a1" ?>
-   <?define C__szlibdll_DependencyGuid = "180ebfde-6ba9-42bd-9381-a7498f5d4aaa" ?>
    
 <?endif?>
 </Include>

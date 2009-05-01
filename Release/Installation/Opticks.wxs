@@ -166,11 +166,11 @@ are defined in Opticks-Version.wxi, so include that file now -->
             <Component Id="C__glut32_Dependency" Guid="$(var.C__glut32_DependencyGuid)" Win64="no">
                <File Name="glut32.dll" Id="F__glut32_Dependency" DiskId="1" KeyPath="yes" />
             </Component>
-            <Component Id="C__hd421m_Dependency" Guid="$(var.C__hd421m_DependencyGuid)" Win64="no">
-               <File Name="hd421m.dll" Id="F__hd421m_Dependency" DiskId="1" KeyPath="yes" />
+            <Component Id="C__hd423m_Dependency" Guid="$(var.C__hd423m_DependencyGuid)" Win64="no">
+               <File Name="hd423m.dll" Id="F__hd423m_Dependency" DiskId="1" KeyPath="yes" />
             </Component>
-            <Component Id="C__hm421m_Dependency" Guid="$(var.C__hm421m_DependencyGuid)" Win64="no">
-               <File Name="hm421m.dll" Id="F__hm421m_Dependency" DiskId="1" KeyPath="yes" />
+            <Component Id="C__hm423m_Dependency" Guid="$(var.C__hm423m_DependencyGuid)" Win64="no">
+               <File Name="hm423m.dll" Id="F__hm423m_Dependency" DiskId="1" KeyPath="yes" />
             </Component>
             <Component Id="C__szlibdll_Dependency" Guid="$(var.C__szlibdll_DependencyGuid)" Win64="no">
                <File Name="szlibdll.dll" Id="F__szlibdll_Dependency" DiskId="1" KeyPath="yes" />
@@ -381,6 +381,9 @@ are defined in Opticks-Version.wxi, so include that file now -->
          <ComponentRef Id="C__gdal_Dependency" />
          <ComponentRef Id="C__glew32_Dependency" />
          <ComponentRef Id="C__hdf5dll_Dependency" />
+         <ComponentRef Id="C__hd423m_Dependency" />
+         <ComponentRef Id="C__hm423m_Dependency" />
+         <ComponentRef Id="C__szlibdll_Dependency" />
          <ComponentRef Id="C__libexpat_Dependency" />
          <ComponentRef Id="C__ossim_Dependency" />
          <ComponentRef Id="C__pthreadVC2_Dependency" />
@@ -465,9 +468,6 @@ are defined in Opticks-Version.wxi, so include that file now -->
          <?ifdef Is32Bit ?>
          <ComponentRef Id="C__cgD3D8_Dependency" />
          <ComponentRef Id="C__glut32_Dependency" />
-         <ComponentRef Id="C__hd421m_Dependency" />
-         <ComponentRef Id="C__hm421m_Dependency" />
-         <ComponentRef Id="C__szlibdll_Dependency" />
          <?endif?>
 
          <Feature Id="FT__Shortcuts" Title="Start Menu Shortcuts" Level="1"
