@@ -10,9 +10,10 @@
 #ifndef DYNAMICOBJECT_H
 #define DYNAMICOBJECT_H
 
+#include "DataVariant.h"
 #include "DataVariantValidator.h"
-#include "Subject.h"
 #include "Serializable.h"
+#include "Subject.h"
 
 #include <string>
 #include <vector>
@@ -20,177 +21,224 @@
 class DataVariant;
 
 /**
- *  Dynamic extension of class attributes
+ * Dynamic extension of class attributes
  *
- *  Dynamic Object refers to a class that allows attributes to be 
- *  added during runtime.  Many classes extend the Dynamic Object
- *  to provide future support for new attributes without changing
- *  the class specification.
+ * Dynamic Object refers to a class that allows attributes to be 
+ * added during runtime.  Many classes extend the Dynamic Object
+ * to provide future support for new attributes without changing
+ * the class specification.
  *
- *  This subclass of Subject will notify upon the following conditions:
- *  - The following methods are called: setAttribute(), setAttributeByPath(),
- *    adoptAttribute(), adoptAttributeByPath(), merge(), removeAttribute(),
- *    removeAttributeByPath(), clear().
- *  - %Any of the objects within the DynamicObject post a notification.
- *    These notifications will be passed on to any observers of the
- *    DynamicObject
- *  - Everything else documented in Subject.
+ * This subclass of Subject will notify upon the following conditions:
+ * - The following methods are called: setAttribute(), setAttributeByPath(),
+ *   adoptAttribute(), adoptAttributeByPath(), merge(), removeAttribute(),
+ *   removeAttributeByPath(), clear().
+ * - %Any of the objects within the DynamicObject post a notification.
+ *   These notifications will be passed on to any observers of the
+ *   DynamicObject
+ * - Everything else documented in Subject.
  */
 class DynamicObject : public Subject, public Serializable
 {
 public:
    /**
-    *  Emitted just after a new attribute is added with
-    *  boost::any<std::pair<std::string, DataVariant*> > containing the
-    *  attribute name and value.
+    * Emitted just after a new attribute is added with
+    * boost::any<std::pair<std::string, DataVariant*> > containing the
+    * attribute name and value.
     */
    SIGNAL_METHOD(DynamicObject, AttributeAdded)
 
    /**
-    *  Emitted just after an existing attribute is modified with
-    *  boost::any<std::pair<std::string, DataVariant*> > containing the
-    *  attribute name and the new value.
+    * Emitted just after an existing attribute is modified with
+    * boost::any<std::pair<std::string, DataVariant*> > containing the
+    * attribute name and the new value.
     */
    SIGNAL_METHOD(DynamicObject, AttributeModified)
 
    /**
-    *  Emitted just before an existing attribute is removed with
-    *  boost::any<std::pair<std::string, DataVariant*> > containing the
-    *  name and value of the attribute that will be removed.\   The attribute
-    *  value is guaranteed to be valid when the signal is emitted.
+    * Emitted just before an existing attribute is removed with
+    * boost::any<std::pair<std::string, DataVariant*> > containing the
+    * name and value of the attribute that will be removed.\   The attribute
+    * value is guaranteed to be valid when the signal is emitted.
     */
    SIGNAL_METHOD(DynamicObject, AttributeRemoved)
 
    /**
-    *  Emitted just before the dynamic object is cleared.\   All existing
-    *  attribute values are guaranteed to be valid when the signal is emitted.
+    * Emitted just before the dynamic object is cleared.\   All existing
+    * attribute values are guaranteed to be valid when the signal is emitted.
     */
    SIGNAL_METHOD(DynamicObject, Cleared)
 
    /**
-    *  Sets attributes from those of another dynamic object.
+    * Sets attributes from those of another dynamic object.
     *
-    *  This method parses the given object's attributes, adding them to or
-    *  setting them in this object.  Any existing attributes that are not
-    *  contained in the given object are not removed.
+    * This method parses the given object's attributes, adding them to or
+    * setting them in this object.  Any existing attributes that are not
+    * contained in the given object are not removed.
     *
-    *  @param   pObject
-    *           The object from which to set this object's attributes.
-    *           Cannot be NULL.
+    * @param   pObject
+    *          The object from which to set this object's attributes.
+    *          Cannot be \c NULL.
     *
-    *  @notify  This method will notify once for each attribute which gets set.
-    *           The parameters will depend on the attribute modified.
+    * @notify  This method will notify Subject::signalModified once for each
+    *          attribute which gets merged. The parameters will depend on
+    *          the attribute modified.
     *
-    *  @see setAttribute()
+    * @see setAttribute()
     */
    virtual void merge(const DynamicObject* pObject) = 0;
 
    /**
-    *  Creates a new attribute or sets an existing dynamic attribute.
+    * Sets attributes from those of another dynamic object.
     *
-    * This method differs from adoptAttribute() in that it does perform a deep
-    * copy of the DataVariant. Since a deep copy is performed, this method can
-    * be much slower than adoptAttribute(), especially when dealing with DynamicObject values.
+    * This method parses the given object's attributes, adopting them into
+    * the destination object.  Any existing attributes that are not
+    * contained in the given object are not removed. The attributes of
+    * the given dynamic object will be modified in an undefined manner.
     *
-    *  @param   name
-    *           The name of the attribute to set the value.  If an attribute
-    *           with the given name does not exist, an attribute is added.
-    *  @param   value
-    *           A variant holding the attribute's value.
+    * This method is intended for use when the given object will be discarded
+    * after being merged into the destination object and can be much faster
+    * than using the merge() method which sets the attributes rather than 
+    * adopting them.
     *
-    *  @return  True if the attributes was successfully created or set,
-    *           otherwise false.
+    * @param   pObject
+    *          The object from which to adopt into this object's attributes.
+    *          Cannot be \c NULL.
     *
-    *  @notify  This method will notify Subject::signalModified.
+    * @notify  This method will notify Subject::signalModified once for each
+    *          attribute which gets adopted. The parameters will depend on
+    *          the attribute modified.
     *
-    *  @see adoptAttribute()
+    * @see adoptAttribute()
     */
-   virtual bool setAttribute(const std::string& name, const DataVariant &value) = 0;
+   virtual void adoptiveMerge(DynamicObject* pObject) = 0;
 
    /**
-    *  Creates a new attribute or sets an existing dynamic attribute.
+    * Creates a new attribute or sets an existing dynamic attribute.
     *
-    * This method differs from setAttribute() in that it does \b not perform a deep
-    * copy of the DataVariant. Since no deep copy is performed, this method can
-    * be much faster than setAttribute(), especially when dealing with DynamicObject values.
+    * This method is preferred to adoptAttribute() unless
+    * you are passing an already constructed DataVariant in
+    * which case, adoptAttribute() will be faster because
+    * it avoids a deep copy.
     *
-    *  @param   name
-    *           The name of the attribute to set the value.  If an attribute
-    *           with the given name does not exist, an attribute is added.
-    *  @param   value
-    *           A variant holding the attribute's value. On return, this will contain the value previously stored in the DynamicObject.
-    *           If the value did not previously exist in the DynamicObject, then this will contain an invalid DataVariant.
+    * @param   name
+    *          The name of the attribute to set the value.  If an attribute
+    *          with the given name does not exist, an attribute is added.
+    * @param   value
+    *          The attribute's value.
     *
-    *  @return  True if the attributes was successfully created or set,
-    *           otherwise false.
+    * @return  Returns \c true if the attributes was successfully created or set,
+    *          otherwise \c false.
     *
-    *  @notify  This method will notify Subject::signalModified.
+    * @notify  This method will notify Subject::signalModified.
     *
-    *  @see setAttribute()
+    * @see adoptAttribute()
     */
-   virtual bool adoptAttribute(const std::string& name, DataVariant &value) = 0;
+   template<class T>
+   bool setAttribute(const std::string& name, const T& value)
+   {
+      DataVariant temp(value);
+      return adoptAttribute(name, temp);
+   }
+
+   /**
+    * Creates a new attribute or sets an existing dynamic attribute.
+    *
+    * This method should not be used; generally setAttribute() is
+    * preferred. This method and setAttribute() have identical
+    * performance characteristics and setAttribute() is easier to
+    * call.  This method is faster than setAttribute() though if
+    * you have an already constructed DataVariant and is
+    * preferred to setAttribute() in this case.
+    *  
+    * @param   name
+    *          The name of the attribute to set the value.  If an attribute
+    *          with the given name does not exist, an attribute is added.
+    * @param   value
+    *          A variant holding the attribute's value. On return, this will 
+    *          contain the value previously stored in the DynamicObject.
+    *          If the value did not previously exist in the DynamicObject, 
+    *          then this will contain an invalid DataVariant.
+    *
+    * @return  Returns \c true if the attributes was successfully created or set,
+    *          otherwise \c false.
+    *
+    * @notify  This method will notify Subject::signalModified.
+    *
+    * @see setAttribute()
+    */
+   virtual bool adoptAttribute(const std::string& name, DataVariant& value) = 0;
+   
+   /**
+    * Sets the value within the DynamicObject hierarchy as described in the path.
+    *
+    * This method will create DynamicObjects as needed to set the value.
+    * This method is preferred to adoptAttributeByPath() unless
+    * you are passing an already constructed DataVariant in
+    * which case, adoptAttributeByPath() will be faster because
+    * it avoids a deep copy.
+    *
+    * @param   path
+    *          The path of names within names for the DynamicObjects,
+    *          separated by '/'.  A slash in the name can be represented by
+    *          escaping the slash with another slash (e.g. '//').  If the path
+    *          ends in a single slash, it will be ignored.
+    * @param   value
+    *          The value to set into the DynamicObject.
+    *
+    * @return  Returns \c true if the operation was a success, \c false otherwise.
+    *          This method will fail if any object along the path already exists
+    *          but is not a DynamicObject.
+    *
+    * @notify  This method will notify Subject::signalModified.
+    *
+    * @see adoptAttributeByPath()
+    */
+   template<class T>
+   bool setAttributeByPath(const std::string& path, const T& value)
+   {
+      DataVariant temp(value);
+      return adoptAttributeByPath(path, temp);
+   }
+
+   /**
+    * Sets the value within the DynamicObject hierarchy as described in the path.
+    *
+    * This method should not be used; generally setAttributeByPath() is
+    * preferred. This method and setAttributeByPath() have identical
+    * performance characteristics and setAttributeByPath() is easier to
+    * call.  This method is faster than setAttributeByPath() though if
+    * you have an already constructed DataVariant and is
+    * preferred to setAttributeByPath() in this case.
+    *
+    * @param   path
+    *          The path of names within names for the DynamicObjects,
+    *          separated by '/'.  A slash in the name can be represented by
+    *          escaping the slash with another slash (e.g. '//').  If the path
+    *          ends in a single slash, it will be ignored.
+    * @param   value
+    *          The value to set into the DynamicObject. On return, this will
+    *          contain the value previously stored in the DynamicObject.  If
+    *          the value did not previously exist in the DynamicObject, then
+    *          this will contain an invalid DataVariant.
+    *
+    * @return  Returns \c true if the operation was a success, \c false otherwise.
+    *          This method will fail if any object along the path already exists
+    *          but is not a DynamicObject.
+    *
+    * @notify  This method will notify Subject::signalModified.
+    *
+    * @see setAttributeByPath()
+    */
+   virtual bool adoptAttributeByPath(const std::string& path, DataVariant& value) = 0;
 
    /**
     * Sets the value within the DynamicObject hierarchy as described in the path.
     *
     * This method will create DynamicObjects as needed to set the value.
-    * This method differs from adoptAttributeByPath() in that it does perform a deep
-    * copy of the DataVariant. Since a deep copy is performed, this method can
-    * be much slower than adoptAttributeByPath(), especially when dealing with DynamicObject values.
-    *
-    *  @param   path
-    *           The path of names within names for the DynamicObjects,
-    *           separated by '/'.  A slash in the name can be represented by
-    *           escaping the slash with another slash (e.g. '//').  If the path
-    *           ends in a single slash, it will be ignored.
-    *  @param   value
-    *           The value to set into the DynamicObject.
-    *
-    *  @return  True if the operation was a success, false otherwise.
-    *           This method will fail if there exists a non-DynamicObject
-    *           as an intermediate path.
-    *
-    *  @notify  This method will notify Subject::signalModified.
-    *
-    *  @see adoptAttributeByPath()
-    */
-   virtual bool setAttributeByPath(const std::string& path, const DataVariant &value) = 0;
-
-   /**
-    * Sets the value within the DynamicObject hierarchy as described in the path.
-    *
-    * This method differs from setAttributeByPath() in that it does \b not perform a deep
-    * copy of the DataVariant. Since no deep copy is performed, this method can
-    * be much faster than setAttributeByPath(), especially when dealing with DynamicObject values.
-    *
-    *  @param   path
-    *           The path of names within names for the DynamicObjects,
-    *           separated by '/'.  A slash in the name can be represented by
-    *           escaping the slash with another slash (e.g. '//').  If the path
-    *           ends in a single slash, it will be ignored.
-    *  @param   value
-    *           The value to set into the DynamicObject. On return, this will
-    *           contain the value previously stored in the DynamicObject.  If
-    *           the value did not previously exist in the DynamicObject, then
-    *           this will contain an invalid DataVariant.
-    *
-    *  @return  True if the operation was a success, false otherwise.
-    *           This method will fail if there exists a non-DynamicObject
-    *           as an intermediate path.
-    *
-    *  @notify  This method will notify Subject::signalModified.
-    *
-    *  @see setAttributeByPath()
-    */
-   virtual bool adoptAttributeByPath(const std::string& path, DataVariant &value) = 0;
-
-   /**
-    * Sets the value within the DynamicObject hierarchy as described in the path.
-    *
-    * This method will create DynamicObjects as needed to set the value.
-    * This method differs from adoptAttributeByPath() in that it does perform a deep
-    * copy of the DataVariant. Since a deep copy is performed, this method can
-    * be much slower than adoptAttributeByPath(), especially when dealing with DynamicObject values.
+    * This method is preferred to adoptAttributeByPath() unless
+    * you are passing an already constructed DataVariant in
+    * which case, adoptAttributeByPath() will be faster because
+    * it avoids a deep copy.
     *
     * @param pComponents
     *        An array of path components to the desired object as std::strings.  Must end with
@@ -199,110 +247,117 @@ public:
     * @param value
     *        The value to set into the DynamicObject.
     *
-    * @return True if the operation was a success, false otherwise.
-    *         This method will fail if there exists a non-DynamicObject
-    *         as an intermediate path.
+    * @return Returns \c true if the operation was a success, \c false otherwise.
+    *         This method will fail if any object along the path already exists
+    *         but is not a DynamicObject.
     *
-    *  @notify  This method will notify Subject::signalModified.
+    * @notify  This method will notify Subject::signalModified.
     *
-    *  @see adoptAttributeByPath()
+    * @see adoptAttributeByPath()
     */
-   virtual bool setAttributeByPath(const std::string pComponents[], const DataVariant &value) = 0;
+   template<class T>
+   bool setAttributeByPath(const std::string pComponents[], const T& value)
+   {
+      DataVariant temp(value);
+      return adoptAttributeByPath(pComponents, temp);
+   }
 
    /**
     * Sets the value within the DynamicObject hierarchy as described in the path.
     *
-    * This method will create DynamicObjects as needed to set the value.
-    * This method differs from setAttributeByPath() in that it does \b not perform a deep
-    * copy of the DataVariant. Since no deep copy is performed, this method can
-    * be much faster than setAttributeByPath(), especially when dealing with DynamicObject values.
+    * This method should not be used; generally setAttributeByPath() is
+    * preferred. This method and setAttributeByPath() have identical
+    * performance characteristics and setAttributeByPath() is easier to
+    * call.  This method is faster than setAttributeByPath() though if
+    * you have an already constructed DataVariant and is
+    * preferred to setAttributeByPath() in this case.
     *
     * @param pComponents
     *        An array of path components to the desired object as std::strings.  Must end with
     *        END_METADATA_NAME.
     *
-    *  @param   value
+    * @param value
     *        The value to set into the DynamicObject. On return, this will contain the value previously stored in the DynamicObject.
     *        If the value did not previously exist in the DynamicObject, then this will contain an invalid DataVariant.
     *
-    * @return True if the operation was a success, false otherwise.
-    *         This method will fail if there exists a non-DynamicObject
-    *         as an intermediate path.
+    * @return Returns \c true if the operation was a success, \c false otherwise.
+    *         This method will fail if any object along the path already exists
+    *         but is not a DynamicObject.
     *
-    *  @notify  This method will notify Subject::signalModified.
+    * @notify  This method will notify Subject::signalModified.
     *
-    *  @see setAttributeByPath()
+    * @see setAttributeByPath()
     */
-   virtual bool adoptAttributeByPath(const std::string pComponents[], DataVariant &value) = 0;
+   virtual bool adoptAttributeByPath(const std::string pComponents[], DataVariant& value) = 0;
 
    /**
-    *  Returns an attribute value.
+    * Returns an attribute value.
     *
-    *  @param   name
-    *           The name of the attribute for which to get the value.
+    * @param   name
+    *          The name of the attribute for which to get the value.
     *
-    *  @return  A variant holding the attributes value. The variant will be
-    *           invalid if the attribute did not exist.
+    * @return  A variant holding the attributes value. The variant will be
+    *          invalid if the attribute did not exist.
     *
-    *  @see     DataVariant::isValid()
+    * @see     DataVariant::isValid()
     */
-   virtual const DataVariant &getAttribute(const std::string& name) const = 0;
+   virtual const DataVariant& getAttribute(const std::string& name) const = 0;
 
    /**
-    *  Returns an attribute value.
+    * Returns an attribute value.
     *
-    *  @param   name
-    *           The name of the attribute for which to get the value.
+    * @param   name
+    *          The name of the attribute for which to get the value.
     *
-    *  @return  A variant holding the attributes value. The variant will be
-    *           invalid if the attribute did not exist.
+    * @return  A variant holding the attributes value. The variant will be
+    *          invalid if the attribute did not exist.
     *
-    *  @see     DataVariant::isValid()
+    * @see     DataVariant::isValid()
     */
-   virtual DataVariant &getAttribute(const std::string& name) = 0;
-
-   /**
-    * Get the value within the DynamicObject hierarchy
-    * as described in the path.
-    *
-    *  @param   path
-    *           The path of names within names for the DynamicObjects,
-    *           separated by '/'.  A slash in the name can be represented by
-    *           escaping the slash with another slash (e.g. '//').  If the path
-    *           ends in a single slash, it will be ignored.
-    *
-    *  @return  A variant holding the attributes value. The variant will be
-    *           empty if the attribute did not exist.
-    */
-   virtual const DataVariant &getAttributeByPath(const std::string &path) const = 0;
+   virtual DataVariant& getAttribute(const std::string& name) = 0;
 
    /**
     * Get the value within the DynamicObject hierarchy
     * as described in the path.
     *
-    *  @param   path
-    *           The path of names within names for the DynamicObjects,
-    *           separated by '/'.  A slash in the name can be represented by
-    *           escaping the slash with another slash (e.g. '//').  If the path
-    *           ends in a single slash, it will be ignored.
+    * @param   path
+    *          The path of names within names for the DynamicObjects,
+    *          separated by '/'.  A slash in the name can be represented by
+    *          escaping the slash with another slash (e.g. '//').  If the path
+    *          ends in a single slash, it will be ignored.
     *
-    *  @return  A variant holding the attributes value. The variant will be
-    *           empty if the attribute did not exist.
+    * @return  A variant holding the attributes value. The variant will be
+    *          empty if the attribute did not exist.
     */
-   virtual DataVariant &getAttributeByPath(const std::string &path) = 0;
+   virtual const DataVariant& getAttributeByPath(const std::string& path) const = 0;
+
+   /**
+    * Get the value within the DynamicObject hierarchy
+    * as described in the path.
+    *
+    * @param   path
+    *          The path of names within names for the DynamicObjects,
+    *          separated by '/'.  A slash in the name can be represented by
+    *          escaping the slash with another slash (e.g. '//').  If the path
+    *          ends in a single slash, it will be ignored.
+    *
+    * @return  A variant holding the attributes value. The variant will be
+    *          empty if the attribute did not exist.
+    */
+   virtual DataVariant& getAttributeByPath(const std::string& path) = 0;
 
     /**
-    * Get the value within the DynamicObject hierarchy
-    * as described in the path.
-    *
-    * @param pComponents
-    *        An array of path components to the desired object as std::strings.  Must end with
-    *        END_METADATA_NAME.
-    *
-    *  @return  A variant holding the attributes value. The variant will be
-    *           empty if the attribute did not exist.
-    */
-   virtual const DataVariant &getAttributeByPath(const std::string pComponents[]) const = 0;
+     * Get the value within the DynamicObject hierarchy
+     * as described in the path.
+     *
+     * @param pComponents
+     *        An array of path components to the desired object as std::strings.  Must end with
+     *        END_METADATA_NAME.
+     *
+     * @return  A variant holding the attributes value. The variant will be
+     *          empty if the attribute did not exist.
+     */
+   virtual const DataVariant& getAttributeByPath(const std::string pComponents[]) const = 0;
 
    /**
     * Get the value within the DynamicObject hierarchy
@@ -312,10 +367,10 @@ public:
     *        An array of path components to the desired object as std::strings.  Must end with
     *        END_METADATA_NAME.
     *
-    *  @return  A variant holding the attributes value. The variant will be
-    *           empty if the attribute did not exist.
+    * @return  A variant holding the attributes value. The variant will be
+    *          empty if the attribute did not exist.
     */
-   virtual DataVariant &getAttributeByPath(const std::string pComponents[]) = 0;
+   virtual DataVariant& getAttributeByPath(const std::string pComponents[]) = 0;
 
    /**
     * Retrieves the names of all attributes in the object.
@@ -343,8 +398,8 @@ public:
     * @param   name
     *          The name of the attribute to remove.
     *
-    * @return  True if the attribute was was successfully removed from the object,
-    *          otherwise false.
+    * @return  Returns \c true if the attribute was was successfully removed from the object,
+    *          otherwise \c false.
     *
     * @notify This method will notify Subject::signalModified.
     *
@@ -359,8 +414,8 @@ public:
     *        An array of path components to the desired object as std::strings.  Must end with
     *        END_METADATA_NAME.
     *
-    * @return  True if the attribute was was successfully removed from the object,
-    *          otherwise false.
+    * @return  Returns \c true if the attribute was was successfully removed from the object,
+    *          otherwise \c false.
     *
     * @notify This method will notify Subject::signalModified.
     *
@@ -371,27 +426,27 @@ public:
    /**
     * Removes an attribute from the object.
     *
-    *  @param   path
-    *           The path of names within names for the DynamicObjects,
-    *           separated by '/'.  A slash in the name can be represented by
-    *           escaping the slash with another slash (e.g. '//').  If the path
-    *           ends in a single slash, it will be ignored.
+    * @param   path
+    *          The path of names within names for the DynamicObjects,
+    *          separated by '/'.  A slash in the name can be represented by
+    *          escaping the slash with another slash (e.g. '//').  If the path
+    *          ends in a single slash, it will be ignored.
     *
-    *  @return  True if the attribute was was successfully removed from the object,
-    *           otherwise false.
+    * @return  Returns \c true if the attribute was was successfully removed from the object,
+    *          otherwise \c false.
     *
-    *  @notify  This method will notify Subject::signalModified.
+    * @notify  This method will notify Subject::signalModified.
     *
-    *  @see     clear()
+    * @see     clear()
     */
    virtual bool removeAttributeByPath(const std::string& path) = 0;
 
    /**
-    *  Erases all attributes in the object.
+    * Erases all attributes in the object.
     *
-    *  @notify This method will notify Subject::signalModified.
+    * @notify This method will notify Subject::signalModified.
     *
-    *  @see     remove()
+    * @see     remove()
     */
    virtual void clear() = 0;
 

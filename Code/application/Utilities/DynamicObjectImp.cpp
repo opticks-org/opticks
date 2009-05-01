@@ -68,7 +68,8 @@ void copyVector(vector<T>* pValue, void*& pCopy)
    pCopy = pVector;
 }
 
-DynamicObjectImp::DynamicObjectImp()
+DynamicObjectImp::DynamicObjectImp() :
+   mpParent(NULL)
 {
 }
 
@@ -88,7 +89,7 @@ DynamicObjectImp& DynamicObjectImp::operator=(const DynamicObjectImp& rhs)
    map<string, DataVariant>::const_iterator pPair;
    for (pPair = rhs.mVariantAttributes.begin(); pPair != rhs.mVariantAttributes.end(); ++pPair)
    {
-      setAttribute(pPair->first, pPair->second);
+      setAttribute(pPair->first, const_cast<DataVariant&>(pPair->second), false);
    }
 
    return *this;
@@ -122,16 +123,46 @@ void DynamicObjectImp::merge(const DynamicObject* pObject)
             }
             else
             {
-               setAttribute(name, var);
+               setAttribute(name, const_cast<DataVariant&>(var), false);
             }
          }
       }
    }
 }
 
-bool DynamicObjectImp::setAttribute(const string& name, const DataVariant& value)
+void DynamicObjectImp::adoptiveMerge(DynamicObject* pObject)
 {
-   return setAttribute(name, const_cast<DataVariant&>(value), false);
+   if (pObject == NULL)
+   {
+      return;
+   }
+
+   vector<string> attributes;
+   pObject->getAttributeNames(attributes);
+
+   vector<string>::const_iterator iter;
+   for (iter = attributes.begin(); iter != attributes.end(); ++iter)
+   {
+      string name = *iter;
+      if (name.empty() == false)
+      {
+         DataVariant& var = pObject->getAttribute(name);
+         string type = var.getTypeName();
+         if (var.isValid())
+         {
+            DataVariant& myVar = getAttribute(name);
+            string myType = myVar.getTypeName();
+            if (type == "DynamicObject" && myVar.isValid() && myType == "DynamicObject") // both are DOs
+            {
+               dv_cast<DynamicObject>(myVar).adoptiveMerge(&dv_cast<DynamicObject>(var));
+            }
+            else
+            {
+               adoptAttribute(name, var);
+            }
+         }
+      }
+   }
 }
 
 bool DynamicObjectImp::adoptAttribute(const string& name, DataVariant& value)
@@ -139,29 +170,14 @@ bool DynamicObjectImp::adoptAttribute(const string& name, DataVariant& value)
    return setAttribute(name, value, true);
 }
 
-bool DynamicObjectImp::setAttributeByPath(QStringList pathComponents, const DataVariant& value)
-{
-   return setAttributeByPath(pathComponents, const_cast<DataVariant&>(value), false);
-}
-
 bool DynamicObjectImp::adoptAttributeByPath(QStringList pathComponents, DataVariant& value)
 {
    return setAttributeByPath(pathComponents, value, true);
 }
 
-bool DynamicObjectImp::setAttributeByPath(const string& path, const DataVariant& value)
-{
-   return setAttributeByPath(path, const_cast<DataVariant&>(value), false);
-}
-
 bool DynamicObjectImp::adoptAttributeByPath(const string& path, DataVariant& value)
 {
    return setAttributeByPath(path, value, true);
-}
-
-bool DynamicObjectImp::setAttributeByPath(const string pComponents[], const DataVariant& value)
-{
-   return setAttributeByPath(pComponents, const_cast<DataVariant&>(value), false);
 }
 
 bool DynamicObjectImp::adoptAttributeByPath(const string pComponents[], DataVariant& value)
@@ -181,6 +197,14 @@ bool DynamicObjectImp::setAttribute(const string& name, DataVariant& value, bool
       if (swap)
       {
          mapVariant.swap(value);
+         DynamicObjectImp* pValue = dynamic_cast<DynamicObjectImp*>(dv_cast<DynamicObject>(&value));
+         if (pValue != NULL && pValue->mpParent != NULL)
+         {
+            //since value is no longer in the map it should
+            //not be notifying this object when it changes.
+            pValue->detach(SIGNAL_NAME(Subject, Modified), Signal(dynamic_cast<Subject*>(pValue->mpParent),
+               SIGNAL_NAME(Subject, Modified)));
+         }
       }
       else
       {
@@ -200,8 +224,14 @@ bool DynamicObjectImp::setAttribute(const string& name, DataVariant& value, bool
       DynamicObjectImp* pValue = dynamic_cast<DynamicObjectImp*>(dv_cast<DynamicObject>(&mapVariant));
       if (pValue != NULL)
       {
+         if (pValue->mpParent != NULL)
+         {
+            pValue->detach(SIGNAL_NAME(Subject, Modified), Signal(dynamic_cast<Subject*>(pValue->mpParent),
+               SIGNAL_NAME(Subject, Modified)));
+         }
          pValue->attach(SIGNAL_NAME(Subject, Modified), Signal(dynamic_cast<Subject*>(this),
             SIGNAL_NAME(Subject, Modified)));
+         pValue->mpParent = this;
       }
    }
 
@@ -611,7 +641,7 @@ bool DynamicObjectImp::fromXml(DOMNode* pDocument, unsigned int version)
             throw exc;
          }
 
-         setAttribute(name, var);
+         setAttribute(name, var, true);
       }
    }
 

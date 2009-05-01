@@ -69,7 +69,7 @@ void LibrarySignatureImp::getElementTypes(vector<string>& classList)
    SignatureImp::getElementTypes(classList);
 }
 
-const DataVariant& LibrarySignatureImp::getData(string name) const
+const DataVariant& LibrarySignatureImp::getData(const string& name) const
 {
    if (name == "Reflectance")
    {
@@ -105,16 +105,16 @@ const DataVariant& LibrarySignatureImp::getData(string name) const
    return SignatureImp::getData(name);
 }
 
-void LibrarySignatureImp::setData(string name, const DataVariant &data)
+void LibrarySignatureImp::adoptData(const string& name, DataVariant& data)
 {
    if (name == "Reflectance" || name == "Wavelength")
    {
       return;
    }
-   SignatureImp::setData(name, data);
+   SignatureImp::adoptData(name, data);
 }
 
-const Units* LibrarySignatureImp::getUnits(string name) const
+const Units* LibrarySignatureImp::getUnits(const string& name) const
 {
    if (name == "Reflectance")
    {

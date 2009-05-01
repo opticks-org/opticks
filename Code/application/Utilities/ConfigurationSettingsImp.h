@@ -76,12 +76,12 @@ public:
    bool isInitialized();
    const char* getInitializationErrorMsg();
 
-   bool setSetting(const std::string& key, const DataVariant& var, bool setIfSame = false);
+   bool adoptSetting(const std::string& key, DataVariant& var, bool setIfSame = false);
    const DataVariant& getSetting(const std::string& key) const;
    bool isUserSetting(const std::string& key) const;
    void deleteUserSetting(const std::string& key);
    void deleteSessionSetting(const std::string& key);
-   bool setSessionSetting(const std::string& key, const DataVariant& var);
+   bool adoptSessionSetting(const std::string& key, DataVariant& var);
    void copySetting(const std::string& key, DynamicObject* pObject) const;
 
    void setMruFiles(const std::vector<MruFile>& mruFiles);
@@ -112,6 +112,8 @@ public:
    SUBJECTADAPTER_METHODS(SubjectImp);
 
 protected:
+   bool setSetting(const std::string& key, DataVariant& var, bool setIfSame, bool adopt);
+   bool setSessionSetting(const std::string& key, DataVariant& var, bool adopt);
    std::string getUserSettingsFilePath() const;
    std::string getUserSettingsFileName() const;
 

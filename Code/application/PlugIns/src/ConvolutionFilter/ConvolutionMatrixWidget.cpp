@@ -453,9 +453,9 @@ void ConvolutionMatrixWidget::saveToConfigurationSettings() const
       preset != mPresets.end(); ++preset)
    {
       std::string presetPrefix = preset.key().toStdString();
-      pPresetsDo->setAttributeByPath(presetPrefix + "/divisor", DataVariant(preset->second));
-      pPresetsDo->setAttributeByPath(presetPrefix + "/rowcount", DataVariant(preset->first.Nrows()));
-      pPresetsDo->setAttributeByPath(presetPrefix + "/colcount", DataVariant(preset->first.Ncols()));
+      pPresetsDo->setAttributeByPath(presetPrefix + "/divisor", preset->second);
+      pPresetsDo->setAttributeByPath(presetPrefix + "/rowcount", preset->first.Nrows());
+      pPresetsDo->setAttributeByPath(presetPrefix + "/colcount", preset->first.Ncols());
       std::vector<double> elements;
       elements.reserve(preset->first.Storage());
       for (int row = 1; row <= preset->first.Nrows(); ++row)

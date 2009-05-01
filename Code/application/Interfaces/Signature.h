@@ -10,8 +10,9 @@
 #ifndef SIGNATURE_H
 #define SIGNATURE_H
 
-#include "DateTime.h"
 #include "DataElement.h"
+#include "DataVariant.h"
+#include "DateTime.h"
 #include "Units.h"
 
 #include <set>
@@ -21,60 +22,65 @@
 class DataVariant;
 
 /**
- *  Signature with identifying attributes
+ * Signature with identifying attributes
  *
- *  A signature is an object that essentially consists of a list of
- *  data sets, along with optional units for each data set.
+ * A signature is an object that essentially consists of a list of
+ * data sets, along with optional units for each data set.
  *
- *  This subclass of Subject will notify upon the following conditions:
- *  - The following methods are called: setData(), setUnits().
- *  - Everything else documented in DataElement.
+ * This subclass of Subject will notify upon the following conditions:
+ * - The following methods are called: setData(), setUnits().
+ * - Everything else documented in DataElement.
  *
- *  @see    DataElement
+ * @see    DataElement
  */
 class Signature : public DataElement
 {
 public:
    /**
-    *  Emitted with any<std::pair<string,DataVariant> > when an attribute is added, or changed.
+    * Emitted with any<std::pair<string,DataVariant> > when an attribute is added, or changed.
     */
    SIGNAL_METHOD(Signature, DataChanged)
    /**
-    *  Emitted with any<std::pair<string,const Units*> > when a units object is added, or changed.
+    * Emitted with any<std::pair<string,const Units*> > when a units object is added, or changed.
     */
    SIGNAL_METHOD(Signature, UnitsChanged)
 
    /**
-    *  Gets a data set from the signature.
+    * Gets a data set from the signature.
     *
-    *  This method returns a data set from the signature in the form of a
-    *  DataVariant. 
+    * This method returns a data set from the signature in the form of a
+    * DataVariant. 
     *
-    *  @param   name
-    *           The name of the data set, as provided when the data set was
-    *           added to the Signature.
+    * @param   name
+    *          The name of the data set, as provided when the data set was
+    *          added to the Signature.
     *
-    *  @return  A DataVariant containing the requested data set. If no data
-    *           set exists in the signature with the specified name, it will 
-    *           return an invalid DataVariant.
+    * @return  A DataVariant containing the requested data set. If no data
+    *          set exists in the signature with the specified name, it will 
+    *          return an invalid DataVariant.
     *
-    *  @see  DataVariant::isValid()
+    * @see  DataVariant::isValid()
     */
-   virtual const DataVariant &getData(std::string name) const = 0;
+   virtual const DataVariant& getData(const std::string& name) const = 0;
 
    /**
-    *  Adds a data set to the signature.
+    * Adds a data set to the signature.
     *
-    *  This method adds a data set to the signature. A deep copy of the
-    *  DataVariant will be performed. If a data set already exists in the
-    *  Signature with the name specified, it will be replaced with the new
-    *  value.
+    * This method adds a data set to the signature. A deep copy of the
+    * value will be performed. If a data set already exists in the
+    * Signature with the name specified, it will be replaced with the new
+    * value.
     *
-    *  @param   name
-    *           The name of the data set to be added to the signature.
+    * This method is preferred to adoptData() unless
+    * you are passing an already constructed DataVariant in
+    * which case, adoptData() will be faster because
+    * it avoids a deep copy.
     *
-    *  @param   data
-    *           The data set to be added to the Signature. For example:
+    * @param   name
+    *          The name of the data set to be added to the signature.
+    *
+    * @param   data
+    *          The data set to be added to the Signature. For example:
     *
     * @code
     * bool populateSignature(Signature *pSig, 
@@ -82,58 +88,94 @@ public:
     *                        const vector<double> &reflectances)
     * {
     *    if (pSig == NULL) return false;
-    *    pSig->setData("wavelengths", DataVariant(wavelengths));
-    *    pSig->setData("reflectances", DataVariant(reflectances));
+    *    pSig->setData("wavelengths", wavelengths);
+    *    pSig->setData("reflectances", reflectances);
     *    return true;
     * }
     * @endcode
     *
-    *  @notify  This method will notify signalDataChanged with
-    *           any<std::pair<string,DataVariant> > after the 
-    *           data set is added to the Signature.
+    * @notify  This method will notify signalDataChanged with
+    *          any<std::pair<string,DataVariant> > after the 
+    *          data set is added to the Signature.
     */
-   virtual void setData(std::string name, const DataVariant &data) = 0;
+   template<typename T>
+   void setData(const std::string& name, const T& data)
+   {
+      DataVariant temp(data);
+      adoptData(name, temp);
+   }
 
    /**
-    *  Returns the units object associated with the data set of the specified 
-    *  name. 
+    * Adds a data set to the signature.
     *
-    *  @param   name
-    *           The name of the units object to get from the signature.
+    * This method adds a data set to the signature. A deep copy of the
+    * value will be performed. If a data set already exists in the
+    * Signature with the name specified, it will be replaced with the new
+    * value.
     *
-    *  @return  A pointer to the units object with the specified name. NULL
-    *           will be returned if no Units object exists with the specified
-    *           name.
+    * This method should not be used; generally setData() is
+    * preferred. This method and setData() have identical
+    * performance characteristics and setData() is easier to
+    * call.  This method is faster than setData() though if
+    * you have an already constructed DataVariant and is 
+    * preferred to setData() in this case.
+    *
+    * @param   name
+    *          The name of the data set to be added to the signature.
+    *
+    * @param   data
+    *          The data set to be added to the Signature. On return, this
+    *          will contain the value previously stored. If the value did
+    *          not previously exist, then this will contain an invalid
+    *          DataVariant.
+    *
+    * @notify  This method will notify signalDataChanged with
+    *          any<std::pair<string,DataVariant> > after the 
+    *          data set is added to the Signature.
     */
-   virtual const Units *getUnits(std::string name) const = 0;
+   virtual void adoptData(const std::string& name, DataVariant& data) = 0;
+
+   
+   /**
+    * Returns the units object associated with the data set of the specified 
+    * name. 
+    *
+    * @param   name
+    *          The name of the units object to get from the signature.
+    *
+    * @return  A pointer to the units object with the specified name. NULL
+    *          will be returned if no Units object exists with the specified
+    *          name.
+    */
+   virtual const Units* getUnits(const std::string& name) const = 0;
 
    /**
-    *  Sets the units object associated with the data set of the specified
-    *  name.
+    * Sets the units object associated with the data set of the specified
+    * name.
     *
-    *  @param   name
-    *           The name to associated with the units object.
+    * @param   name
+    *          The name to associated with the units object.
     *
-    *  @param   pUnits
-    *           A pointer to the units object. Cannot be NULL.
+    * @param   pUnits
+    *          A pointer to the units object. Cannot be NULL.
     *
-    *  @notify  This method will notify signalUnitsChanged with
-    *           any<std::pair<string,const Units*> > after the 
-    *           units object is added to the Signature.
+    * @notify  This method will notify signalUnitsChanged with
+    *          any<std::pair<string,const Units*> > after the 
+    *          units object is added to the Signature.
     */
-   virtual void setUnits(std::string name, const Units *pUnits) = 0;
+   virtual void setUnits(const std::string& name, const Units* pUnits) = 0;
 
    /**
-    *  Gets the names associated with data in this Signature.
+    * Gets the names associated with data in this Signature.
     *
-    *  @return set of names
+    * @return set of names
     */
    virtual std::set<std::string> getDataNames() const = 0;
 
    /**
-    *  Gets the names associated with units in this Signature.
+    * Gets the names associated with units in this Signature.
     *
-    *  @return set of names
+    * @return set of names
     */
    virtual std::set<std::string> getUnitNames() const = 0;
 

@@ -659,7 +659,7 @@ bool IceReader::parseClassification(const Hdf5Group* pCube, RasterDataDescriptor
             pClassification->setSecuritySourceDate(pSourceDate.get());
             pClassification->setFileCopyNumber(copyNumber);
             pClassification->setFileNumberOfCopies(numberOfCopies);
-            pClassification->merge(pClassMetadata.get());
+            pClassification->adoptiveMerge(pClassMetadata.get());
             string errorMessage;
             if (!pClassification->isValid(errorMessage))
             {

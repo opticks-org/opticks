@@ -37,7 +37,7 @@ DataElement* SignatureImp::copy(const string& name, DataElement* pParent) const
       map<string, DataVariant>::const_iterator dataIter;
       for (dataIter = mData.begin(); dataIter != mData.end(); ++dataIter)
       {
-         pSignature->setData(dataIter->first, dataIter->second);
+         pSignature->setData(dataIter->first, const_cast<DataVariant&>(dataIter->second), false);
       }
 
       map<string, boost::shared_ptr<UnitsImp> >::const_iterator unitsIter;
@@ -166,7 +166,7 @@ void SignatureImp::getElementTypes(vector<string>& classList)
    DataElementImp::getElementTypes(classList);
 }
 
-const DataVariant &SignatureImp::getData(string name) const
+const DataVariant& SignatureImp::getData(const string& name) const
 {
    map<string, DataVariant>::const_iterator ppData = mData.find(name);
    if (ppData == mData.end())
@@ -179,14 +179,26 @@ const DataVariant &SignatureImp::getData(string name) const
    }
 }
 
-void SignatureImp::setData(std::string name, const DataVariant &data)
+void SignatureImp::adoptData(const string& name, DataVariant& data)
 {
-   mData[name] = data;
+   setData(name, data, true);
+}
+
+void SignatureImp::setData(const string& name, DataVariant& data, bool adopt)
+{
+   if (adopt)
+   {
+      mData[name].swap(data);
+   }
+   else
+   {
+      mData[name] = data;
+   }
    notify(SIGNAL_NAME(Signature, DataChanged), boost::any(
       std::pair<string, DataVariant>(name, data)));
 }
 
-const Units *SignatureImp::getUnits(string name) const
+const Units* SignatureImp::getUnits(const string& name) const
 {
    map<string, boost::shared_ptr<UnitsImp> >::const_iterator ppUnits = mUnits.find(name);
    if (ppUnits == mUnits.end())
@@ -201,7 +213,7 @@ const Units *SignatureImp::getUnits(string name) const
    }
 }
 
-void SignatureImp::setUnits(string name, const Units *pUnits)
+void SignatureImp::setUnits(const string& name, const Units* pUnits)
 {
    map<string, boost::shared_ptr<UnitsImp> >::const_iterator ppUnits = mUnits.find(name);
    if (ppUnits == mUnits.end())

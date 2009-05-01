@@ -30,10 +30,10 @@ public:
    SignatureImp(const DataDescriptorImp& descriptor, const std::string& id);
    ~SignatureImp();
 
-   virtual const DataVariant &getData(std::string name) const;
-   virtual void setData(std::string name, const DataVariant &data);
-   virtual const Units *getUnits(std::string name) const;
-   void setUnits(std::string name, const Units *pUnits);
+   virtual const DataVariant& getData(const std::string& name) const;
+   virtual void adoptData(const std::string& name, DataVariant& data);
+   virtual const Units *getUnits(const std::string& name) const;
+   void setUnits(const std::string& name, const Units* pUnits);
    std::set<std::string> getDataNames() const;
    std::set<std::string> getUnitNames() const;
 
@@ -48,6 +48,7 @@ public:
    static void getElementTypes(std::vector<std::string>& classList);
 
 private:
+   void setData(const std::string& name, DataVariant& data, bool adopt);
    std::map<std::string, DataVariant> mData;
    std::map<std::string, boost::shared_ptr<UnitsImp> > mUnits;
    DataVariant mNullData;
@@ -58,19 +59,19 @@ private:
 
 #define SIGNATUREADAPTER_METHODS(impClass) \
    DATAELEMENTADAPTER_METHODS(impClass) \
-   const DataVariant& getData(std::string name) const \
+   const DataVariant& getData(const std::string& name) const \
    { \
       return impClass::getData(name); \
    } \
-   void setData(std::string name, const DataVariant& data) \
+   void adoptData(const std::string& name, DataVariant& data) \
    { \
-      impClass::setData(name, data); \
+      impClass::adoptData(name, data); \
    } \
-   const Units* getUnits(std::string name) const \
+   const Units* getUnits(const std::string& name) const \
    { \
       return impClass::getUnits(name); \
    } \
-   void setUnits(std::string name, const Units* pUnits) \
+   void setUnits(const std::string& name, const Units* pUnits) \
    { \
       impClass::setUnits(name, pUnits); \
    } \

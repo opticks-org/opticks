@@ -1355,30 +1355,30 @@ void AnimationControllerImp::restoreBumpers()
    bool bumpersEnabled;
    double startBumper;
    double stopBumper;
-   DataVariant value = pSettings->getSetting(bumperPath + "/BumpersActive");
-   if (value.isValid() && value.getTypeName() == TypeConverter::toString<bool>())
+   const bool* pBoolValue = dv_cast<bool>(&pSettings->getSetting(bumperPath + "/BumpersActive"));
+   if (pBoolValue != NULL)
    {
-      bumpersEnabled = dv_cast<bool>(value);
+      bumpersEnabled = *pBoolValue;
    }
    else
    {
       validRestore = false;
    }
 
-   value = pSettings->getSetting(bumperPath + "/StartBumper");
-   if (value.isValid() && value.getTypeName() == TypeConverter::toString<double>())
+   const double* pDoubleValue = dv_cast<double>(&pSettings->getSetting(bumperPath + "/StartBumper"));
+   if (pDoubleValue != NULL)
    {
-      startBumper = dv_cast<double>(value);
+      startBumper = *pDoubleValue;
    }
    else
    {
       validRestore = false;
    }
 
-   value = pSettings->getSetting(bumperPath + "/StopBumper");
-   if (value.isValid() && value.getTypeName() == TypeConverter::toString<double>())
+   pDoubleValue = dv_cast<double>(&pSettings->getSetting(bumperPath + "/StopBumper"));
+   if (pDoubleValue != NULL)
    {
-      stopBumper = dv_cast<double>(value);
+      stopBumper = *pDoubleValue;
    }
    else
    {

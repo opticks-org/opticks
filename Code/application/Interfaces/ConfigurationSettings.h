@@ -74,12 +74,12 @@ class Filename;
       return dv_cast_with_verification< type >(pSettings->getSetting(getSetting##settingname##Key()), errorDefault); \
    } \
    /**
-    * Returns true if this setting exists and has a 
+    * Returns \c true if this setting exists and has a 
     * value in ConfigurationSettings.
     *
     * Please see \ref settingsmacros for more details
     *
-    * \return true if this setting exists, false otherwise.
+    * \return \c true if this setting exists, \c false otherwise.
     */ \
    static bool hasSetting##settingname() \
    { \
@@ -99,10 +99,10 @@ class Filename;
     * \param newValue
     *        the new value for this setting.
     * \param setIfSame
-    *        If true, the value will be set into ConfigurationSettings
+    *        If \c true, the value will be set into ConfigurationSettings
     *        even if the newValue and existing value are the same.  This
     *        has the side-effect of making the value a per-user setting
-    *        and stored in the user's configuration file.  If false, this
+    *        and stored in the user's configuration file.  If \c false, this
     *        value will only be set if the newValue and existing value
     *        are different.  Therefore the value will only be stored in 
     *        the user's configuration file if the newValue is unique
@@ -157,11 +157,11 @@ class Filename;
    /**
     * Returns the current value for this setting.  If this
     * setting does not exist in ConfigurationSettings, a
-    * NULL value will be returned.
+    * \c NULL value will be returned.
     *
     * Please see \ref settingsmacros for more details
     * 
-    * \return the current value for this setting or NULL if not found.
+    * \return the current value for this setting or \c NULL if not found.
     */ \
    static const type* getSetting##settingname() \
    { \
@@ -169,12 +169,12 @@ class Filename;
       return dv_cast< type >(&pSettings->getSetting(getSetting##settingname##Key())); \
    } \
    /**
-    * Returns true if this setting exists in ConfigurationSettings.
-    * It may still be NULL however.
+    * Returns \c true if this setting exists in ConfigurationSettings.
+    * It may still be \c NULL however.
     *
     * Please see \ref settingsmacros for more details
     *
-    * \return true if this setting exists, false otherwise.
+    * \return \c true if this setting exists, \c false otherwise.
     */ \
    static bool hasSetting##settingname() \
    { \
@@ -192,12 +192,12 @@ class Filename;
     * Please see \ref settingsmacros for more details
     *
     * \param pNewValue
-    *        the new value for this setting.  If NULL, the value will not be set.
+    *        the new value for this setting.  If \c NULL, the value will not be set.
     * \param setIfSame
-    *        If true, the value will be set into ConfigurationSettings
+    *        If \c true, the value will be set into ConfigurationSettings
     *        even if the pNewValue and existing value are the same.  This
     *        has the side-effect of making the value a per-user setting
-    *        and stored in the user's configuration file.  If false, this
+    *        and stored in the user's configuration file.  If \c false, this
     *        value will only be set if the pNewValue and existing value
     *        are different.  Therefore the value will only be stored in 
     *        the user's configuration file if the pNewValue is unique
@@ -290,7 +290,7 @@ class Filename;
       return dv_cast_with_verification< type >(pSettings->getSetting(getSetting##settingname##Key(namespaceStr)), errorDefault); \
    } \
    /**
-    * Returns true if this setting exists and has a 
+    * Returns \c true if this setting exists and has a 
     * value in ConfigurationSettings.
     *
     * Please see \ref settingsmacros for more details
@@ -300,7 +300,7 @@ class Filename;
     *        identifier for this particular setting so
     *        that it can be stored and retrieved from ConfigurationSettings.
     *
-    * \return true if this setting exists, false otherwise.
+    * \return \c true if this setting exists, \c false otherwise.
     */ \
    static bool hasSetting##settingname(const std::string& namespaceStr ) \
    { \
@@ -324,10 +324,10 @@ class Filename;
     * \param newValue
     *        the new value for this setting.
     * \param setIfSame
-    *        If true, the value will be set into ConfigurationSettings
+    *        If \c true, the value will be set into ConfigurationSettings
     *        even if the newValue and existing value are the same.  This
     *        has the side-effect of making the value a per-user setting
-    *        and stored in the user's configuration file.  If false, this
+    *        and stored in the user's configuration file.  If \c false, this
     *        value will only be set if the newValue and existing value
     *        are different.  Therefore the value will only be stored in 
     *        the user's configuration file if the newValue is unique
@@ -395,7 +395,7 @@ class Filename;
    /**
     * Returns the current value for this setting.  If this
     * setting does not exist in ConfigurationSettings, a
-    * NULL value will be returned.
+    * \c NULL value will be returned.
     *
     * Please see \ref settingsmacros for more details
     * 
@@ -404,7 +404,7 @@ class Filename;
     *        identifier for this particular setting so
     *        that it can be stored and retrieved from ConfigurationSettings.
     *
-    * \return the current value for this setting or NULL if not found.
+    * \return the current value for this setting or \c NULL if not found.
     */ \
    static const type* getSetting##settingname(const std::string& namespaceStr) \
    { \
@@ -412,8 +412,8 @@ class Filename;
       return dv_cast< type >(&pSettings->getSetting(getSetting##settingname##Key(namespaceStr))); \
    } \
    /**
-    * Returns true if this setting exists in ConfigurationSettings.
-    * It may still be NULL however.
+    * Returns \c true if this setting exists in ConfigurationSettings.
+    * It may still be \c NULL however.
     *
     * Please see \ref settingsmacros for more details
     *
@@ -422,7 +422,7 @@ class Filename;
     *        identifier for this particular setting so
     *        that it can be stored and retrieved from ConfigurationSettings.
     *
-    * \return true if this setting exists, false otherwise.
+    * \return \c true if this setting exists, \c false otherwise.
     */ \
    static bool hasSetting##settingname(const std::string& namespaceStr ) \
    { \
@@ -444,12 +444,12 @@ class Filename;
     *        identifier for this particular setting so
     *        that it can be stored and retrieved from ConfigurationSettings.
     * \param pNewValue
-    *        the new value for this setting.  If NULL, the value will not be set.
+    *        the new value for this setting.  If \c NULL, the value will not be set.
     * \param setIfSame
-    *        If true, the value will be set into ConfigurationSettings
+    *        If \c true, the value will be set into ConfigurationSettings
     *        even if the pNewValue and existing value are the same.  This
     *        has the side-effect of making the value a per-user setting
-    *        and stored in the user's configuration file.  If false, this
+    *        and stored in the user's configuration file.  If \c false, this
     *        value will only be set if the pNewValue and existing value
     *        are different.  Therefore the value will only be stored in 
     *        the user's configuration file if the pNewValue is unique
@@ -484,50 +484,50 @@ class Filename;
    }
    
 /**
- *  \ingroup ServiceModule
- *  Contains settings specific to the user and application run that
- *  will be persisted between runs of the application.
+ * \ingroup ServiceModule
+ * Contains settings specific to the user and application run that
+ * will be persisted between runs of the application.
  *
- *  The configuration settings allow data values to be stored per-user and
- *  during a application run.  Settings which are saved per-user and persist
- *  between application runs are called per-user settings.  Settings which
- *  only exist during one application run are called per-session settings.
+ * The configuration settings allow data values to be stored per-user and
+ * during a application run.  Settings which are saved per-user and persist
+ * between application runs are called per-user settings.  Settings which
+ * only exist during one application run are called per-session settings.
  *
- *  These settings are initialized on application startup.  This is done by
- *  locating any .cfg files contained in getHome()/DefaultSettings and the
- *  directory defined by the AdditionalDefaultDir value of the deployment file.
- *  Please see @ref deploymentfiles for more details. These .cfg
- *  files must follow the naming convention of "[LoadOrder]-[Name].cfg" where
- *  LoadOrder is an unsigned int and Name can be any text recognized by the file
- *  system. These .cfg's are then parsed according to the LoadOrder, with 1 reserved
- *  for the application and being the first .cfg that will be parsed.  After
- *  these files are parsed, there is a .cfg file for the user that is running
- *  the application that will be parsed and created as per-user settings.
+ * These settings are initialized on application startup.  This is done by
+ * locating any .cfg files contained in getHome()/DefaultSettings and the
+ * directory defined by the AdditionalDefaultDir value of the deployment file.
+ * Please see @ref deploymentfiles for more details. These .cfg
+ * files must follow the naming convention of "[LoadOrder]-[Name].cfg" where
+ * LoadOrder is an unsigned int and Name can be any text recognized by the file
+ * system. These .cfg's are then parsed according to the LoadOrder, with 1 reserved
+ * for the application and being the first .cfg that will be parsed.  After
+ * these files are parsed, there is a .cfg file for the user that is running
+ * the application that will be parsed and created as per-user settings.
  *
- *  The directory that is used to store per-user settings can be controlled
- *  by a plug-in developer by creating a deployment file.
- *  See \ref deploymentfiles for more details.
+ * The directory that is used to store per-user settings can be controlled
+ * by a plug-in developer by creating a deployment file.
+ * See \ref deploymentfiles for more details.
  *
- *  The configuration settings can also be used to allow the Studio to create
- *  PlugInArg objects prior to plug-in execution.  If the plug-in args cannot be
- *  defined the configuration setting are queried for specific values using the
- *  plug-in name for the Setting group name.
+ * The configuration settings can also be used to allow the Studio to create
+ * PlugInArg objects prior to plug-in execution.  If the plug-in args cannot be
+ * defined the configuration setting are queried for specific values using the
+ * plug-in name for the Setting group name.
  *
- *  This subclass of Subject will notify upon the following conditions:
- *  - The following methods are called: setSetting(), setSessionSetting,
- *    deleteUserSetting, deleteSessionSetting.
+ * This subclass of Subject will notify upon the following conditions:
+ * - The following methods are called: setSetting(), setSessionSetting,
+ *   deleteUserSetting, deleteSessionSetting.
  */
 class ConfigurationSettings : public Subject
 {
 public:
    /**
-    *  Emitted with any<std::string> when setSetting or setSessionSetting is called.
-    *  The string will be the key of the setting that was modified.
+    * Emitted with any<std::string> when setSetting or setSessionSetting is called.
+    * The string will be the key of the setting that was modified.
     */
    SIGNAL_METHOD(ConfigurationSettings, SettingModified);
    /**
-    *  Emitted with no data just prior to save of the configuration settings
-    *  to disk.
+    * Emitted with no data just prior to save of the configuration settings
+    * to disk.
     */
    SIGNAL_METHOD(ConfigurationSettings, AboutToSave);
 
@@ -602,11 +602,11 @@ public:
    virtual std::string getUserName() const = 0;
 
    /**
-    *  Gets the path to the user's documents folder.
+    * Gets the path to the user's documents folder.
     *
-    *  @return  The full path to the current user's documents folder.  On Windows this is usually
-    *           C:\\Documents and Settings\\username\\My Documents\\%Opticks and on Solaris it is
-    *           usually /export/home/username/Opticks.
+    * @return  The full path to the current user's documents folder.  On Windows this is usually
+    *          C:\\Documents and Settings\\username\\My Documents\\%Opticks and on Solaris it is
+    *          usually /export/home/username/Opticks.
     */
    virtual std::string getUserDocs() const = 0;
 
@@ -645,7 +645,7 @@ public:
    /**
     * Gets the production status.
     *
-    * @return   True if the application and all plug-ins are production.
+    * @return   \c true if the application and all plug-ins are production.
     */
    virtual bool isProductionRelease() const = 0;
 
@@ -657,15 +657,15 @@ public:
    virtual ReleaseType getReleaseType() const = 0;
 
    /**
-    *  Gets the plug-in path.
+    * Gets the plug-in path.
     *
-    *  This is the directory where plug-ins must be placed if they are to be
-    *  loaded by the application.
+    * This is the directory where plug-ins must be placed if they are to be
+    * loaded by the application.
     *
-    *  This path can be adjusted by a plug-in developer by creating
-    *  a deployment file. See @ref deploymentfiles for more details.
+    * This path can be adjusted by a plug-in developer by creating
+    * a deployment file. See @ref deploymentfiles for more details.
     *
-    *  @return  The plug-in path.
+    * @return  The plug-in path.
     */
    virtual std::string getPlugInPath() const = 0;
 
@@ -682,6 +682,11 @@ public:
     * with setSessionSetting(), it will no longer be a session setting
     * and will become a per-user setting.
     *
+    * This method is preferred to adoptSetting() unless
+    * you are passing an already constructed DataVariant in
+    * which case, adoptSetting() will be faster because
+    * it avoids a deep copy.
+    *
     * @param   key
     *          The name of the setting.  This key
     *          can have '/' in it, in which it will behave like DynamicObject::setAttributeByPath.
@@ -689,22 +694,73 @@ public:
     *          The value of the setting. If this is invalid, no setting will 
     *          be added or modified.
     * @param   setIfSame
-    *          If false, the setting will not be set if the new value of the
+    *          If \c false, the setting will not be set if the new value of the
     *          setting is equal to the current value (ie. getSetting()) for the setting
     *          (ie. the value will not be serialized to the user's configuration file).
-    *          If true, the setting will be set regardless of the current
+    *          If \c true, the setting will be set regardless of the current
     *          value (ie. it will be serialized to the user's configuration file).
     *
-    * @return  TRUE if the setting was successfully set, and FALSE otherwise.
+    * @return  \c true if the setting was successfully set, and \c false otherwise.
     *
-    * @see     DynamicObject::setAttribute
+    * @see     DynamicObject::setAttribute, adoptSetting()
     */
-   virtual bool setSetting(const std::string &key, const DataVariant &var, bool setIfSame = false) = 0;
+   template<typename T>
+   bool setSetting(const std::string& key, const T& var, bool setIfSame = false)
+   {
+      DataVariant temp(var);
+      return adoptSetting(key, temp, setIfSame);
+   }
+
+   /**
+    * Sets the given setting.
+    *
+    * This method sets the given setting.  If the setting
+    * already exists, the data is simply replaced.  If the
+    * setting does not exist, it is created.  This
+    * setting will be saved into the user's configuration file
+    * during application shutdown
+    * meaning the particular value set for this setting will be
+    * a per-user value.  If the given setting was previously set
+    * with setSessionSetting(), it will no longer be a session setting
+    * and will become a per-user setting.
+    *
+    * This method should not be used; generally setSetting() is
+    * preferred. This method and setSetting() have identical
+    * performance characteristics and setSetting() is easier to
+    * call.  This method is faster than setSetting() though if
+    * you have an already constructed DataVariant and is
+    * preferred to setSetting() in this case.
+    *
+    * @param   key
+    *          The name of the setting.  This key
+    *          can have '/' in it, in which it will behave like DynamicObject::setAttributeByPath.
+    * @param   var
+    *          The value of the setting. If this is invalid, no setting will 
+    *          be added or modified. On return, this will contain the value
+    *          previously stored. If the value did not previously exist, then this
+    *          will contain an invalid DataVariant.
+    * @param   setIfSame
+    *          If \c false, the setting will not be set if the new value of the
+    *          setting is equal to the current value (ie. getSetting()) for the setting
+    *          (ie. the value will not be serialized to the user's configuration file).
+    *          If \c true, the setting will be set regardless of the current
+    *          value (ie. it will be serialized to the user's configuration file).
+    *
+    * @return  \c true if the setting was successfully set, and \c false otherwise.
+    *
+    * @see     DynamicObject::adoptAttribute, setSetting()
+    */
+   virtual bool adoptSetting(const std::string& key, DataVariant& var, bool setIfSame = false) = 0;
 
    /**
     * Sets the given setting for this session only.  Any value
     * set using this method will only be valid while the application
     * is running.
+    *
+    * This method is preferred to adoptSessionSetting() unless
+    * you are passing an already constructed DataVariant in
+    * which case, adoptSessionSetting() will be faster because
+    * it avoids a deep copy.
     *
     * @param key
     *        The name of the setting.  This key
@@ -713,9 +769,39 @@ public:
     *        The value of the setting. If this is invalid, no setting will 
     *        be added or modified.
     *
-    * @return TRUE if the setting was successfully set, and FALSE otherwise.
+    * @return \c true if the setting was successfully set, and \c false otherwise.
     */
-   virtual bool setSessionSetting(const std::string& key, const DataVariant& var) = 0;
+   template<typename T>
+   bool setSessionSetting(const std::string& key, const T& var)
+   {
+      DataVariant temp(var);
+      return adoptSessionSetting(key, temp);
+   }
+
+   /**
+    * Sets the given setting for this session only.  Any value
+    * set using this method will only be valid while the application
+    * is running.
+    *
+    * This method should not be used; generally setSessionSetting() is
+    * preferred. This method and setSessionSetting() have identical
+    * performance characteristics and setSessionSetting() is easier to
+    * call.  This method is faster than setSessionSetting() though if
+    * you have an already constructed DataVariant and is
+    * preferred to setSessionSetting() in this case.
+    *
+    * @param key
+    *        The name of the setting.  This key
+    *        can have '/' in it, in which it will behave like DynamicObject::setAttributeByPath.
+    * @param var
+    *        The value of the setting. If this is invalid, no setting will 
+    *        be added or modified.  On return, this will contain the value
+    *        previously stored. If the value did not previously exist, then this
+    *        will contain an invalid DataVariant.
+    *
+    * @return \c true if the setting was successfully set, and \c false otherwise.
+    */
+   virtual bool adoptSessionSetting(const std::string& key, DataVariant& var) = 0;
 
    /**
     * Gets the current value for the given setting.  The value
@@ -732,7 +818,7 @@ public:
     * @return  The setting in a DataVariant. If the setting was not found,
     *          an invalid DataVariant will be returned.
     */
-   virtual const DataVariant &getSetting(const std::string& key) const = 0;
+   virtual const DataVariant& getSetting(const std::string& key) const = 0;
 
    /**
     * Queries whether a given setting has a per-user value defined.
@@ -742,7 +828,7 @@ public:
     *        can have '/' in it, in which case it will behave like
     *        DynamicObject::getAttributeByPath.
     *
-    * @return true if this particular setting has a per-user value set and
+    * @return \c true if this particular setting has a per-user value set and
     *         does not have a per-session value set.
     */
    virtual bool isUserSetting(const std::string& key) const = 0;
@@ -791,7 +877,7 @@ public:
     * @param pObject
     *        The settings that should be saved into the file.
     *
-    * @return TRUE if the save was successful, otherwise FALSE.
+    * @return \c true if the save was successful, otherwise \c false.
     */
    virtual bool serializeAsDefaults(const Filename* pFilename, const DynamicObject* pObject) const = 0;
 
@@ -803,7 +889,7 @@ public:
     * @param pFilename
     *        the full path to the file containing the settings.
     *
-    * @return A dynamic object containing the loaded settings or NULL
+    * @return A dynamic object containing the loaded settings or \c NULL
     *         if the settings could not be loaded.
     */
    virtual DynamicObject* deserialize(const Filename* pFilename) const = 0;

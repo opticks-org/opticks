@@ -21,9 +21,9 @@ public:
       const SignatureLibrary* pLib);
    ~LibrarySignatureImp();
 
-   const DataVariant &getData(std::string name) const;
-   void setData(std::string name, const DataVariant &data);
-   const Units *getUnits(std::string name) const;
+   const DataVariant& getData(const std::string& name) const;
+   void adoptData(const std::string& name, DataVariant& data);
+   const Units *getUnits(const std::string& name) const;
 
    DataElement* copy(const std::string& name, DataElement* pParent) const;
 

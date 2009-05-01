@@ -306,8 +306,9 @@ int InteractiveApplication::run(int argc, char** argv)
                      {
                         string saveKey = SessionManager::getSettingQueryForSaveKey();
                         SessionSaveType saveType = SESSION_DONT_AUTO_SAVE;
+                        DataVariant dvSaveType(saveType);
 
-                        pConfigSettings->setSessionSetting(saveKey, saveType);
+                        pConfigSettings->adoptSessionSetting(saveKey, dvSaveType);
                         pAppWindow->openSession(strFilename);
                         pConfigSettings->deleteSessionSetting(saveKey);
                      }
@@ -351,8 +352,9 @@ int InteractiveApplication::run(int argc, char** argv)
             tempSettingQueryForSave = SESSION_AUTO_SAVE;
             pAppWindow->setSessionFilename(FilenameImp(sessionFilename).getFullPathAndName());
          }
+         DataVariant dvTempSettingQueryForSave(tempSettingQueryForSave);
 
-         pConfigSettings->setSessionSetting(SessionManager::getSettingQueryForSaveKey(), tempSettingQueryForSave);
+         pConfigSettings->adoptSessionSetting(SessionManager::getSettingQueryForSaveKey(), dvTempSettingQueryForSave);
          pAppWindow->close();
          return iReturn;
       }

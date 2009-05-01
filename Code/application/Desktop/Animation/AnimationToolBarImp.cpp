@@ -833,8 +833,7 @@ void AnimationToolBarImp::updateBumperMenu()
 {
    Service<ConfigurationSettings> pSettings;
    std::string bumperPath("AnimationController/Bumpers/BumpersActive");
-   DataVariant bumpersEnabled = pSettings->getSetting(bumperPath);
-   mpRestoreBumpersAction->setEnabled(bumpersEnabled.isValid());
+   mpRestoreBumpersAction->setEnabled(dv_cast<bool>(pSettings->getSetting(bumperPath), false));
 }
 
 int AnimationToolBarImp::getSliderIndex(double frameValue)

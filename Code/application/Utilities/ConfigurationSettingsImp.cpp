@@ -662,7 +662,12 @@ const char* ConfigurationSettingsImp::getInitializationErrorMsg()
    return pErrorMsg;
 }
 
-bool ConfigurationSettingsImp::setSetting(const string& key, const DataVariant& var, bool setIfSame)
+bool ConfigurationSettingsImp::adoptSetting(const std::string& key, DataVariant& var, bool setIfSame)
+{
+   return setSetting(key, var, setIfSame, true);
+}
+
+bool ConfigurationSettingsImp::setSetting(const string& key, DataVariant& var, bool setIfSame, bool adopt)
 {
    bool same = false;
 
@@ -680,7 +685,14 @@ bool ConfigurationSettingsImp::setSetting(const string& key, const DataVariant& 
    bool success = true;
    if (!same)
    {
-      success = mpUserSettings->setAttributeByPath(key, var);
+      if (adopt)
+      {
+         success = mpUserSettings->adoptAttributeByPath(key, var);
+      }
+      else
+      {
+         success = mpUserSettings->setAttributeByPath(key, var);
+      }
       if (success)
       {
          deleteSessionSetting(key);
@@ -747,9 +759,22 @@ void ConfigurationSettingsImp::deleteSessionSetting(const string& key)
    }
 }
 
-bool ConfigurationSettingsImp::setSessionSetting(const string& key, const DataVariant& var)
+bool ConfigurationSettingsImp::adoptSessionSetting(const std::string& key, DataVariant& var)
 {
-   bool success = mpSessionSettings->setAttributeByPath(key, var);
+   return setSessionSetting(key, var, true);
+}
+
+bool ConfigurationSettingsImp::setSessionSetting(const string& key, DataVariant& var, bool adopt)
+{
+   bool success = false;
+   if (adopt)
+   {
+      success = mpSessionSettings->adoptAttributeByPath(key, var);
+   }
+   else
+   {
+      success = mpSessionSettings->setAttributeByPath(key, var);
+   }
    if (success)
    {
       notify(SIGNAL_NAME(ConfigurationSettings, SettingModified), boost::any(key));
@@ -1106,7 +1131,7 @@ bool ConfigurationSettingsImp::loadSettings(string& errorMessage)
       FactoryResource<Filename> pFilename;
       pFilename->setFullPathAndName(configFileIter->second);
       FactoryResource<DynamicObject> pObj(deserialize(pFilename.get()));
-      mpDefaultSettings->merge(pObj.get());
+      mpDefaultSettings->adoptiveMerge(pObj.get());
    }
 
    //parse the user's config file
@@ -1115,7 +1140,7 @@ bool ConfigurationSettingsImp::loadSettings(string& errorMessage)
    FactoryResource<DynamicObject> pObj(deserialize(pFilename.get()));
    if (pObj.get() != NULL)
    {
-      mpUserSettings->merge(pObj.get());
+      mpUserSettings->adoptiveMerge(pObj.get());
    }
 
    notify(SIGNAL_NAME(Subject, Modified));

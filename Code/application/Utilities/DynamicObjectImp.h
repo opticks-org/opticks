@@ -33,13 +33,10 @@ public:
    virtual DynamicObjectImp& operator= (const DynamicObjectImp& rhs);
 
    virtual void merge(const DynamicObject* pObject);
-   virtual bool setAttribute(const std::string& name, const DataVariant &value);
+   virtual void adoptiveMerge(DynamicObject* pObject);
    virtual bool adoptAttribute(const std::string& name, DataVariant &value);
-   virtual bool setAttributeByPath(QStringList pathComponents, const DataVariant &value);
    virtual bool adoptAttributeByPath(QStringList pathComponents, DataVariant &value);
-   virtual bool setAttributeByPath(const std::string& path, const DataVariant &value);
    virtual bool adoptAttributeByPath(const std::string& path, DataVariant &value);
-   virtual bool setAttributeByPath(const std::string pComponents[], const DataVariant& value);
    virtual bool adoptAttributeByPath(const std::string pComponents[], DataVariant &value);
    virtual const DataVariant &getAttribute(const std::string& name) const;
    virtual DataVariant &getAttribute(const std::string& name);
@@ -80,6 +77,7 @@ protected:
    virtual bool isParentOf(const DynamicObjectImp *pObject) const;
 
    std::map<std::string, DataVariant> mVariantAttributes;
+   DynamicObjectImp* mpParent;
 };
 
 #define DYNAMICOBJECTADAPTEREXTENSION_CLASSES \
@@ -93,33 +91,21 @@ protected:
    { \
       return impClass::merge(pObject); \
    } \
-   bool setAttribute(const std::string& name, const DataVariant& data) \
+   void adoptiveMerge(DynamicObject* pObject) \
    { \
-      return impClass::setAttribute(name, data); \
+      return impClass::adoptiveMerge(pObject); \
    } \
    bool adoptAttribute(const std::string& name, DataVariant& data) \
    { \
       return impClass::adoptAttribute(name, data); \
    } \
-   bool setAttributeByPath(const std::string& path, const DataVariant &value) \
-   { \
-      return impClass::setAttributeByPath(path, value); \
-   } \
    bool adoptAttributeByPath(const std::string& path, DataVariant &value) \
    { \
       return impClass::adoptAttributeByPath(path, value); \
    } \
-   bool setAttributeByPath(const std::string pComponents[], const DataVariant &value) \
-   { \
-      return impClass::setAttributeByPath(pComponents, value); \
-   } \
    bool adoptAttributeByPath(const std::string pComponents[], DataVariant &value) \
    { \
       return impClass::adoptAttributeByPath(pComponents, value); \
-   } \
-   bool setAttributeByPath(QStringList pathComponents, const DataVariant &value) \
-   { \
-      return impClass::setAttributeByPath(pathComponents, value); \
    } \
    bool adoptAttributeByPath(QStringList pathComponents, DataVariant &value) \
    { \
