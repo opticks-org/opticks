@@ -163,7 +163,7 @@ public:
     *
     *  @param   importerName
     *           The name of the importer to create and execute.
-    *  @param   descriptors
+    *  @param   datasets
     *           The files and data sets to import.  The descriptor values should
     *           have been obtained by calling Importer::getImportDescriptors().
     *           The provided import descriptors will be owned by the agent.
@@ -180,7 +180,7 @@ public:
     *           this instance.
     */
    virtual void instantiate(const std::string& importerName,
-      const std::map<std::string, std::vector<ImportDescriptor*> >& descriptors, Progress* pProgress, bool batch) = 0;
+      const std::map<std::string, std::vector<ImportDescriptor*> >& datasets, Progress* pProgress, bool batch) = 0;
 
    /**
     *  Uses an existing importer to import individual data sets from one or more

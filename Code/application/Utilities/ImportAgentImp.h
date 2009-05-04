@@ -34,7 +34,7 @@ public:
    void instantiate(const std::string& importerName, const std::vector<std::string>& filenames, Progress* pProgress,
       bool batch);
    void instantiate(const std::string& importerName,
-      const std::map<std::string, std::vector<ImportDescriptor*> >& descriptors, Progress* pProgress, bool batch);
+      const std::map<std::string, std::vector<ImportDescriptor*> >& datasets, Progress* pProgress, bool batch);
    void instantiate(PlugIn* pPlugIn, const std::map<std::string, std::vector<ImportDescriptor*> >& descriptors,
       Progress* pProgress, bool batch);
 
@@ -90,10 +90,10 @@ private:
       impClass::instantiate(importerName, filenames, pProgress, batch); \
    } \
    void instantiate(const std::string& importerName, \
-                    const std::map<std::string, std::vector<ImportDescriptor*> >& descriptors, Progress* pProgress, \
-                    bool batch) \
+                    const std::map<std::string, std::vector<ImportDescriptor*> >& datasets, \
+                    Progress* pProgress, bool batch) \
    { \
-      impClass::instantiate(importerName, descriptors, pProgress, batch); \
+      impClass::instantiate(importerName, datasets, pProgress, batch); \
    } \
    void instantiate(PlugIn* pPlugIn, const std::map<std::string, std::vector<ImportDescriptor*> >& descriptors, \
                     Progress* pProgress, bool batch) \

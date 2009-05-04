@@ -111,7 +111,7 @@ void ImportAgentImp::instantiate(const string& importerName, const vector<string
 }
 
 void ImportAgentImp::instantiate(const string& importerName,
-                                 const map<string, vector<ImportDescriptor*> >& descriptors, Progress* pProgress,
+                                 const map<string, vector<ImportDescriptor*> >& datasets, Progress* pProgress,
                                  bool batch)
 {
    if (getInstantiated())
@@ -121,7 +121,7 @@ void ImportAgentImp::instantiate(const string& importerName,
 
    ExecutableAgentImp::instantiate(importerName, string(), pProgress, batch);
    mpElement = NULL;
-   setDatasets(descriptors);
+   setDatasets(datasets);
 }
 
 void ImportAgentImp::instantiate(PlugIn* pPlugIn, const map<string, vector<ImportDescriptor*> >& descriptors,
