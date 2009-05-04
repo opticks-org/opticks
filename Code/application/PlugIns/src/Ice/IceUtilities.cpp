@@ -16,10 +16,13 @@
 
 using namespace std;
 
+namespace StringUtilities
+{
 BEGIN_ENUM_MAPPING_ALIAS(IceUtilities::FileType, IceUtilitiesFileType)
 ADD_ENUM_MAPPING(IceUtilities::RASTER_ELEMENT, "Raster Element", "RasterElement")
 ADD_ENUM_MAPPING(IceUtilities::PSEUDOCOLOR_LAYER, "Pseudocolor Layer", "PseudocolorLayer")
 END_ENUM_MAPPING()
+}
 
 bool IceFormatDescriptor::getSupportedFeature(FeatureType feature)
 {

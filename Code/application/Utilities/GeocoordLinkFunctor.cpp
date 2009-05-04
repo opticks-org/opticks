@@ -35,10 +35,10 @@ GeocoordLinkFunctor::~GeocoordLinkFunctor()
 {
 }
 
-void GeocoordLinkFunctor::operator()(ViewImp *pDestView)
+void GeocoordLinkFunctor::operator()(ViewImp *pDestView) const
 {
    // lazily prepare the functor with the source information
-   if (!initialize())
+   if (!const_cast<GeocoordLinkFunctor*>(this)->initialize())
    {
       return;
    }

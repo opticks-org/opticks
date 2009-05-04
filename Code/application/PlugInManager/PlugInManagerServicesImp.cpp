@@ -109,7 +109,7 @@ DynamicModule* PlugInManagerServicesImp::getDynamicModule(const string& value)
    {
       return new DynamicModuleImp();
    }
-   return new DynamicModuleImp(value.c_str());
+   return new DynamicModuleImp(value);
 }
 
 bool PlugInManagerServicesImp::destroyDynamicModule(DynamicModule* pModule)
@@ -345,7 +345,7 @@ void PlugInManagerServicesImp::buildPlugInList(const string& plugInPath)
    // Search plug-in directory for modules
 #if defined(WIN_API)
    finder.findFile(plugInPath, "*.dll");
-#elif defined(SOLARIS)
+#elif defined(UNIX_API)
    finder.findFile(plugInPath, "*.so");
 #else
 #error "Unsupported platform"
@@ -398,8 +398,10 @@ void PlugInManagerServicesImp::buildPlugInList(const string& plugInPath)
 
    // Add new modules and update existing modules
 #if defined(WIN_API)
+   string autoImporter = "AutoImporter.dll";
    finder.findFile(plugInPath, "*.dll");
-#elif defined(SOLARIS)
+#elif defined(UNIX_API)
+   string autoImporter = "AutoImporter.so";
    finder.findFile(plugInPath, "*.so");
 #else
 #error "Unsupported platform"
@@ -408,6 +410,7 @@ void PlugInManagerServicesImp::buildPlugInList(const string& plugInPath)
    bool bSuccess = finder.findNextFile();
 
    string moduleFilename = "";
+   string libraryFilename;
    if (bSuccess)
    {
       finder.getFullPath(moduleFilename);
@@ -415,6 +418,16 @@ void PlugInManagerServicesImp::buildPlugInList(const string& plugInPath)
 
    while (bSuccess == true)
    {
+      libraryFilename = finder.getFileName();
+      if (libraryFilename == autoImporter)
+      {
+         //skip AutoImporter, we will load it later
+         //outside this loop
+         // Get the next file in the directory
+         bSuccess = finder.findNextFile();
+         finder.getFullPath(moduleFilename);
+         continue;
+      }
       double dFileSize = finder.getLength();
 
       DateTimeImp fileDate;
@@ -477,15 +490,9 @@ void PlugInManagerServicesImp::buildPlugInList(const string& plugInPath)
       finder.getFullPath(moduleFilename);
    }
 
-   // Update the Auto Importers' file extensions now that all importers have been loaded
-#if defined(WIN_API)
-   string autoImporter = "AutoImporter.dll";
-#elif defined(SOLARIS)
-   string autoImporter = "AutoImporter.so";
-#else
-#error "Unsupported platform"
-#endif
-
+   //load AutoImporter as the last plug-in, so that it can
+   //properly determine it's extensions based upon extensions
+   //of all other importers.
    if (finder.findFile(plugInPath, autoImporter) == true)
    {
       finder.findNextFile();
@@ -615,10 +622,7 @@ PlugIn* PlugInManagerServicesImp::createPlugInInstance(const string& plugInName,
          ModuleDescriptor* pModule = getModuleDescriptorByName(pPlugInDescriptor->getModuleName());
          if (pModule != NULL)
          {
-            if (pModule->isLoaded() == false)
-            {
-               pModule->load();
-            }
+            pModule->load();
 
             PlugIn* pPlugIn = pModule->createInterface(pPlugInDescriptor);
             if (pPlugIn != NULL)
@@ -809,6 +813,13 @@ ModuleDescriptor* PlugInManagerServicesImp::addModule(const string& moduleFilena
 
    // Make sure module hasn't already been added
    if (getModuleDescriptorByName(pModule->getName()) != NULL)
+   {
+      delete pModule;
+      return NULL;
+   }
+   // Make sure the module is a valid version
+   if (pModule->getModuleVersion() != 1 && // legacy module
+       pModule->getModuleVersion() != 2)   // version 2 is the current version
    {
       delete pModule;
       return NULL;

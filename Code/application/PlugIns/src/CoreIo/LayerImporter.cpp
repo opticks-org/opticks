@@ -20,6 +20,7 @@
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "Progress.h"
 #include "RasterElement.h"
 #include "SpatialDataView.h"
@@ -31,6 +32,8 @@
 #include <sstream>
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
+
+REGISTER_PLUGIN_BASIC(OpticksCoreIo, LayerImporter);
 
 LayerImporter::LayerImporter()
 {

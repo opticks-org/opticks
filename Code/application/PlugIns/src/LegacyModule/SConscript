@@ -4,6 +4,8 @@ import glob
 # import the environment
 ####
 Import('env extra_obj build_dir')
+env = env.Clone()
+env.Append(CPPDEFINES=["DEPRECATED_MODULE_TYPE"])
 
 ####
 # build sources
@@ -14,9 +16,9 @@ objs = env.SharedObject(srcs)
 ####
 # build the plug-in library and set up an alias to wase building it later
 ####
-lib = env.SharedLibrary('%s/ProductionPlugInTester' % build_dir,objs+extra_obj)
+lib = env.SharedLibrary('%s/LegacyModule' % build_dir,objs+extra_obj)
 libInstall = env.Install(env["PLUGINDIR"], lib)
-env.Alias('ProductionPlugInTester', libInstall)
+env.Alias('LegacyModule', libInstall)
 
 ####
 # return the plug-in library

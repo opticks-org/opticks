@@ -128,8 +128,8 @@ public:
    void setAnnotationObject(GraphicObjectType objectType);
    GraphicObjectType getAnnotationObject() const;
 
-   bool importFile(const std::string& importerSubtype = std::string(), Progress* pProgress = NULL,
-      std::vector<DataElement*>& importedElements = std::vector<DataElement*>());
+   bool importFile(const std::string& importerSubtype = std::string(), Progress* pProgress = NULL);
+   bool importFile(const std::string& importerSubtype, Progress* pProgress, std::vector<DataElement*>& importedElements);
    bool exportSessionItem(SessionItem* pItem, FileDescriptor* pNewFileDescriptor = NULL, Progress* pProgress = NULL);
    bool exportSessionItems(const std::vector<SessionItem*>& items, Progress* pProgress = NULL);
 

@@ -13,6 +13,7 @@
 #include "NitfMpd26aParser.h"
 #include "NitfUtilities.h"
 #include "ObjectResource.h"
+#include "PlugInRegistration.h"
 
 #include <sstream>
 #include <string>
@@ -20,6 +21,8 @@
 using namespace std;
 using namespace Nitf;
 using namespace Nitf::TRE;
+
+REGISTER_PLUGIN(OpticksNitfCommonTre, Mpd26aParser, Nitf::Mpd26aParser());
 
 Nitf::Mpd26aParser::Mpd26aParser()
 {

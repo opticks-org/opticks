@@ -14,6 +14,7 @@ class Classification;
 class DateTime;
 #include "DataVariant.h"
 #include "DynamicObject.h"
+#include "Endian.h"
 #include "NitfConstants.h"
 #include "NitfTreParser.h"
 #include "TypesFile.h"
@@ -732,7 +733,7 @@ namespace Nitf
                   expSize = 2;
                }
 
-               outp.setf(ios::uppercase);
+               outp.setf(std::ios::uppercase);
                outp << std::scientific << std::setprecision(prec) << num;
             }
          }
@@ -754,7 +755,7 @@ namespace Nitf
       // so cast it to a signed int to force the "+" 
       // then use a int64 for the extra room to force it positive even 
       // if the sign bit was set.
-      else if (!numeric_limits<T>::is_signed) 
+      else if (!std::numeric_limits<T>::is_signed) 
       {
          outp << static_cast<long long>(num);
       }
@@ -772,7 +773,7 @@ namespace Nitf
       {
          // Find the first digit in the exponent
          const unsigned int eLocation = outStr.rfind("E");
-         VERIFYRV(eLocation != string::npos && eLocation < outStr.length() - 2, std::string());
+         VERIFYRV(eLocation != std::string::npos && eLocation < outStr.length() - 2, std::string());
          const unsigned int exponentLocation = eLocation + 2;
 
          // If there are not enough digits, add them
@@ -803,7 +804,7 @@ namespace Nitf
    template<typename T>
    inline T fromBuffer(std::vector<char>& buf, bool& ok, bool allBlankOk)
    {
-      if (!numeric_limits<T>::is_signed)
+      if (!std::numeric_limits<T>::is_signed)
       {
          std::string temp = StringUtilities::stripWhitespace(std::string(&buf.front()));
          if (temp.size() > 0 && temp[0] == '-')
@@ -816,7 +817,7 @@ namespace Nitf
 
       try
       {
-         string trimmedString = StringUtilities::stripWhitespace(std::string(&buf.front()));
+         std::string trimmedString = StringUtilities::stripWhitespace(std::string(&buf.front()));
          if (trimmedString.empty() == true)
          {
             ok = allBlankOk;
@@ -919,8 +920,7 @@ namespace Nitf
     *
     * @return True if the given object is valid for NITF 2.1 export, false otherwise.
     */
-   bool isClassificationValidForExport(const Classification& classification,
-      std::string& errorMessage = std::string());
+   bool isClassificationValidForExport(const Classification& classification, std::string& errorMessage);
 
    /**
     * Determines whether a classification field is valid for export to a NITF 2.1 file.

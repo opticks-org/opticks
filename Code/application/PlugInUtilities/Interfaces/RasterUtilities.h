@@ -20,8 +20,12 @@
 #include <float.h>
 #define FINITE _finite
 #define isnanf(x) (_finite(x) == 0)
-#else
+#elif defined(SOLARIS)
    #include <ieeefp.h>
+   #define FINITE finite
+#elif defined(LINUX)
+   #include <ieee754.h>
+   #include <math.h>
    #define FINITE finite
 #endif
 

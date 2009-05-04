@@ -529,7 +529,8 @@ void PlotWidgetImp::setClassificationText(const Classification* pClassification)
 
    if (pClassification != NULL)
    {
-      if (pClassification->isValid() == true)
+      std::string tmp;
+      if (pClassification->isValid(tmp) == true)
       {
          string classificationText = "";
          pClassification->getClassificationText(classificationText);

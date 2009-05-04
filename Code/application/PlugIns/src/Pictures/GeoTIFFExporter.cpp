@@ -28,6 +28,7 @@
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "Progress.h"
 #include "RasterElement.h"
 #include "RasterDataDescriptor.h"
@@ -61,6 +62,8 @@ namespace
    }
 
 };
+
+REGISTER_PLUGIN_BASIC(OpticksPictures, GeoTIFFExporter);
 
 GeoTIFFExporter::GeoTIFFExporter() :
    mpStep(NULL),

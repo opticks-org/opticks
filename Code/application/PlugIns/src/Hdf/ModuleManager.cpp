@@ -7,10 +7,9 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
  
-#include "AppConfig.h"
-#include "GenericHdf5Importer.h"
-#include "HyperionImporter.h"
-#include "ModuleManager.h"
+#include "PlugInRegistration.h"
+
+REGISTER_MODULE(OpticksHdf);
 
 // required to include by Hdf5Pager.h
 #include <hdf5.h>
@@ -21,41 +20,5 @@
 #include "Hdf4Pager.h"
 #include "Hdf5Pager.h"
 
-const char* ModuleManager::mspName = "HDF";
-const char* ModuleManager::mspVersion = "1.0.0";
-const char* ModuleManager::mspDescription = "Hierarchical Data Format (HDF) PlugIns";
-const char* ModuleManager::mspValidationKey = "none";
-const char* ModuleManager::mspUniqueId = "{A213B97A-2170-44c6-BCA8-8C5082ADBB7F}";
-
-unsigned int ModuleManager::getTotalPlugIns()
-{
-   return 4;
-}
-
-PlugIn* ModuleManager::getPlugIn(unsigned int plugInNumber)
-{
-   PlugIn* pPlugIn = NULL;
-   switch (plugInNumber)
-   {
-   case 0:
-      pPlugIn = new GenericHdf5Importer();
-      break;
-
-   case 1:
-      pPlugIn = new Hdf5Pager();
-      break;
-
-   case 2:
-      pPlugIn = new HyperionImporter();
-      break;
-
-   case 3:
-      pPlugIn = new Hdf4Pager();
-      break;
-
-   default:
-      break;
-   }
-
-   return pPlugIn;
-}
+REGISTER_PLUGIN_BASIC(OpticksHdf, Hdf5Pager);
+REGISTER_PLUGIN_BASIC(OpticksHdf, Hdf4Pager);

@@ -1034,7 +1034,7 @@ void ViewImp::reorderImage(unsigned int pImage[], int iWidth, int iHeight)
    int i;
    int j;
 
-   if (Endian::getSystemEndian() == BIG_ENDIAN)
+   if (Endian::getSystemEndian() == BIG_ENDIAN_ORDER)
    {
       for (i = 0; i < numPixels; i++)
       {

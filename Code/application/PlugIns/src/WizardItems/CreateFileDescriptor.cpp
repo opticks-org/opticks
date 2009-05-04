@@ -21,11 +21,15 @@
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "RasterFileDescriptor.h"
 #include "RasterUtilities.h"
 #include "Units.h"
 
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksWizardItems, CreateFileDescriptor);
+REGISTER_PLUGIN_BASIC(OpticksWizardItems, CreateRasterFileDescriptor);
 
 //////////////////////////
 // CreateFileDescriptor //

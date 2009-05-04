@@ -23,7 +23,7 @@
 
 #include <stdlib.h>
 
-#include "ModuleManager.h"
+#include "PlugInRegistration.h"
 
 //
 // The attribute singleton is the only allowable reference

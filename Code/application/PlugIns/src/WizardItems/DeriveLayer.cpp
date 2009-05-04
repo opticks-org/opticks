@@ -17,12 +17,15 @@
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "RasterElement.h"
 #include "SpatialDataView.h"
 #include "SpatialDataWindow.h"
 #include "StringUtilities.h"
 
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksWizardItems, DeriveLayer);
 
 DeriveLayer::DeriveLayer() :
    mpInputLayer(NULL)

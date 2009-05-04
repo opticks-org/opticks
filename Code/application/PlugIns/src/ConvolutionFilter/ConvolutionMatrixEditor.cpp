@@ -13,12 +13,12 @@
 #include "DesktopServices.h"
 #include "DockWindow.h"
 #include "MenuBar.h"
-#include "PlugInFactory.h"
+#include "PlugInRegistration.h"
 
 #include <QtGui/QAction>
 #include <QtGui/QMenu>
 
-PLUGINFACTORY(ConvolutionMatrixEditor);
+REGISTER_PLUGIN_BASIC(OpticksConvolutionFilter, ConvolutionMatrixEditor);
 
 ConvolutionMatrixEditor::ConvolutionMatrixEditor()
 {

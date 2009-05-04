@@ -20,6 +20,7 @@
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "RasterElement.h"
 #include "RasterDataDescriptor.h"
 #include "SessionItemDeserializer.h"
@@ -33,6 +34,8 @@
 
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
+
+REGISTER_PLUGIN_BASIC(OpticksGeoreference, GcpGeoreference);
 
 static double sAnchorFractions[] = {-0.25, 0.25, 0.75, 1.25};
 static int sNumAnchorFractions = sizeof(sAnchorFractions) / sizeof(sAnchorFractions[0]);

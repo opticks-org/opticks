@@ -13,12 +13,15 @@
 #include "NitfMensrbParser.h"
 #include "NitfUtilities.h"
 #include "ObjectResource.h"
+#include "PlugInRegistration.h"
 
 #include <sstream>
 
 using namespace std;
 using namespace Nitf;
 using namespace Nitf::TRE;
+
+REGISTER_PLUGIN(OpticksNitfCommonTre, MensrbParser, Nitf::MensrbParser());
 
 Nitf::MensrbParser::MensrbParser()
 {

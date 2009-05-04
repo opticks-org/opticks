@@ -51,7 +51,7 @@ public:
     * @param pDestView
     *        Destination view to cause to match.
     */
-   void operator()(ViewImp *pDestView);
+   void operator()(ViewImp *pDestView) const;
 
 private:
 

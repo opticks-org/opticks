@@ -52,7 +52,7 @@ namespace
          {
             return false;
          }
-         return less::operator()(pDdA->getParentDesignator().size(), pDdB->getParentDesignator().size());
+         return less<vector<string>::size_type>::operator()(pDdA->getParentDesignator().size(), pDdB->getParentDesignator().size());
       }
    };
 };

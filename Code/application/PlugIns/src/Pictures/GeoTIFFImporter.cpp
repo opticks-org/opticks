@@ -31,6 +31,7 @@
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "PlugInResource.h"
 #include "QuickbirdIsd.h"
 #include "RasterDataDescriptor.h"
@@ -43,6 +44,8 @@
 #include <QtCore/QString>
 #include <QtCore/QVariant>
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksPictures, GeoTIFFImporter);
 
 GeoTIFFImporter::GeoTIFFImporter() : mImportOptionsWidget(NULL)
 {
@@ -204,7 +207,7 @@ bool GeoTIFFImporter::populateDataDescriptor(RasterDataDescriptor* pDescriptor)
             unsigned short tiffVersion;
             fread(&tiffVersion, sizeof(tiffVersion), 1, pFile);
 
-            EndianType fileEndianType = (fileEndian == tiffBigEndianMagicNumber ? BIG_ENDIAN : LITTLE_ENDIAN);
+            EndianType fileEndianType = (fileEndian == tiffBigEndianMagicNumber ? BIG_ENDIAN_ORDER : LITTLE_ENDIAN_ORDER);
             Endian swapper(fileEndianType);
             swapper.swapBuffer(&tiffVersion, 1);
 

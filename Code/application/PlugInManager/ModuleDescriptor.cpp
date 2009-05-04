@@ -16,9 +16,11 @@
 #include "FileFinderImp.h"
 #include "FilenameImp.h"
 #include "Icons.h"
+#include "MessageLogResource.h"
 #include "PlugIn.h"
 #include "PlugInDescriptorImp.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "PropertiesModuleDescriptor.h"
 #include "FilenameImp.h"
 #include "SessionItemSerializer.h"
@@ -33,10 +35,11 @@ ModuleDescriptor::ModuleDescriptor(const string& id) :
    mDescription(""),
    mPlugInTotal(0),
    mValidationKey(""),
+   mModuleVersion(0),
    mFileName(""),
    mFileSize(0),
    mFileDate(0),
-   mpModule(0)
+   mpModule(NULL)
 {
    Icons* pIcons = Icons::instance();
    if (pIcons != NULL)
@@ -49,19 +52,16 @@ ModuleDescriptor::ModuleDescriptor(const string& id) :
 
 ModuleDescriptor::~ModuleDescriptor()
 {
-   vector<PlugInDescriptorImp*>::iterator plugIn;
    try
    {
-      plugIn = mPlugins.begin();
-      while (plugIn != mPlugins.end())
+      for (std::vector<PlugInDescriptorImp*>::iterator plugIn = mPlugins.begin(); plugIn != mPlugins.end(); ++plugIn)
       {
          delete *plugIn;
-         plugIn++;
       }
 
       if (mpModule != NULL)
       {
-         mpPluginMgrSvc->destroyDynamicModule(mpModule);
+         Service<PlugInManagerServices>()->destroyDynamicModule(mpModule);
          mpModule = NULL;
       }
    }
@@ -80,10 +80,82 @@ ModuleDescriptor* ModuleDescriptor::getModule(const std::string& filename, map<s
       return NULL;
    }
 
+   // try a new style module first
+   OpticksGetModuleDescriptorType pProcAddr =
+      reinterpret_cast<OpticksGetModuleDescriptorType>(pDynMod->getProcedureAddress("opticks_get_module_descriptor"));
+   if (pProcAddr != NULL)
+   {
+      struct OpticksModuleDescriptor* pDescriptor = pProcAddr(ConnectionManager::instance());
+      if (pDescriptor != NULL)
+      {
+         VERIFY(pDescriptor->version == 2);
+#if defined(WIN_API)
+         if (pDescriptor->debug == DEBUG_BOOL)
+         {
+#endif
+            ModuleDescriptor* pModule = new ModuleDescriptor(pDescriptor->pModuleId);
+            FilenameImp fileObj(filename);
+            pModule->mFileName = fileObj.getFullPathAndName();
+
+            pModule->setName(pModule->mFileName);
+            pModule->setDisplayText(filename);
+
+            FileFinderImp find;
+            find.findFile(fileObj.getPath(), fileObj.getFileName());
+            find.findNextFile();
+            pModule->mFileSize = find.getLength();
+
+            find.getLastModificationTime(pModule->mFileDate);
+            pModule->mDescription = "";
+            pModule->mpModule = pDynMod;
+            pModule->mModuleVersion = pDescriptor->version;
+            pModule->mInstantiateSymbol = pDescriptor->pInstantiateSymbol;
+            pModule->initializePlugInInformation(plugInIds);
+
+            return pModule;
+#if defined(WIN_API)
+         }
+         else
+         {
+            std::string errorMessage("Error loading plug-in from PlugIns folder, the plug-in was ");
+            if (DEBUG_BOOL)
+            {
+               errorMessage += "built in release mode, but this a debug mode version of the application.";
+            }
+            else
+            {
+               errorMessage += "built in debug mode, but this a release mode version of the application.";
+            }
+            MessageResource message("PlugInError", "app", "8B5F1ADB-1210-406f-B961-72C2189CE84D");
+            message->addProperty("message", errorMessage);
+            message->addProperty("filename", filename);
+            message->finalize();
+
+            Service<PlugInManagerServices>()->destroyDynamicModule(pDynMod);
+            return NULL;
+         }
+#endif
+      }
+      else
+      {
+         std::string errorMessage("Error loading plug-in from PlugIns folder, the plug-in did not return the proper struct.");
+         MessageResource message("PlugInError", "app", "B63EB55A-2881-4A2A-AE8B-C8FE7E9C4080");
+         message->addProperty("message", errorMessage);
+         message->addProperty("filename", filename);
+         message->finalize();
+
+         Service<PlugInManagerServices>()->destroyDynamicModule(pDynMod);
+         return NULL;
+      }
+   }
+
+   // old style modules only supported on Solaris and Windows
+#if defined(SOLARIS) || defined(WIN_API)
+   // try an old style module
    // Check the module interface version
+   int version = 0; // no module should ever have this version so it's a good "invalid" value
    int(*moduleVersionProcedure)() = reinterpret_cast<int(*)()>
       (pDynMod->getProcedureAddress( "opticks_get_module_interface_version" ));
-   int version = 0; // no module should ever have this version so it's a good "invalid" value
    if (moduleVersionProcedure != NULL)
    {
       version = moduleVersionProcedure();
@@ -130,11 +202,10 @@ ModuleDescriptor* ModuleDescriptor::getModule(const std::string& filename, map<s
    }
 
    ModuleDescriptor* pModule = new ModuleDescriptor(string(pModuleId));
-   pModule->setName(pModuleName);
-   pModule->setDisplayText(filename);
-
    FilenameImp fileObj(filename);
    pModule->mFileName = fileObj.getFullPathAndName();
+   pModule->setName(pModule->mFileName);
+   pModule->setDisplayText(filename);
 
    FileFinderImp find;
    find.findFile(fileObj.getPath(), fileObj.getFileName());
@@ -147,58 +218,57 @@ ModuleDescriptor* ModuleDescriptor::getModule(const std::string& filename, map<s
    pModule->mPlugInTotal = totalPlugIns;
    pModule->mValidationKey = pValidationKey;
    pModule->mpModule = pDynMod;
+   pModule->mModuleVersion = version;
    pModule->initializePlugInInformation(plugInIds);
   
    return pModule;
+#else
+   return NULL;
+#endif
 }
 
 bool ModuleDescriptor::load()
 {
-   if (mpModule != NULL)
+   VERIFY(mModuleVersion > 0);
+   if (isLoaded())
    {
-      return true; // no load is needed
+      return true;
    }
 
-   bool initValid = false;
-
-   mpModule = mpPluginMgrSvc->getDynamicModule(getFileName());
+   mpModule = Service<PlugInManagerServices>()->getDynamicModule(getFileName());
    if (mpModule == NULL)
    {
       return false;
    }
 
    //
-   // Call Module's initialize routine.
+   // Attempt to call Module's initialize routine if it is a legacy module.
    //
-
-   bool(*moduleProcedure)(External*) =
-      reinterpret_cast<bool(*)(External*)>(mpModule->getProcedureAddress("initialize"));
-
-   if (moduleProcedure)
+   if (mModuleVersion == 1)
    {
-      initValid = moduleProcedure(ConnectionManager::instance());
+      bool(*moduleProcedure)(External*) =
+         reinterpret_cast<bool(*)(External*)>(mpModule->getProcedureAddress("initialize"));
+      if (moduleProcedure != NULL && !moduleProcedure(ConnectionManager::instance()))
+      {
+         return false;
+      }
    }
 
-   return initValid;
+   return true;
 }
 
 void ModuleDescriptor::unload()
 {
    if (mpModule != NULL)
    {
-      mpPluginMgrSvc->destroyDynamicModule(mpModule);
+      Service<PlugInManagerServices>()->destroyDynamicModule(mpModule);
       mpModule = NULL;
    }
 }
 
 bool ModuleDescriptor::initializePlugInInformation(map<string, string>& plugInIds)
 {
-   bool previouslyLoaded = false;
-   if (mpModule == NULL)
-   {
-      VERIFY(load());
-      previouslyLoaded = true;
-   }
+   VERIFY(load());
 
    //
    // Determine what Plug-Ins are available.
@@ -206,52 +276,55 @@ bool ModuleDescriptor::initializePlugInInformation(map<string, string>& plugInId
 
    // TODO : Update Plug-Ins currently in the list.
 
-   for (unsigned int plugInNumber = 0; plugInNumber < getNumPlugIns(); plugInNumber++)
+   for (unsigned int plugInNumber = 0; mModuleVersion > 1 || plugInNumber < getNumPlugIns(); plugInNumber++)
    {
       PlugIn* pPlugIn = createInterface(plugInNumber);
-      if (pPlugIn != NULL)
+      if (mModuleVersion > 1 && pPlugIn == NULL)
       {
-         string type = pPlugIn->getType();
-         if (type.empty())
-         {
-            VERIFYNR_MSG(false, string("A plug-in is specifying an empty type. "
-               "The plug-in " + pPlugIn->getName() + " will not be loaded.").c_str());
-            delete pPlugIn;
-            continue;
-         }
-
-         string descriptorId = pPlugIn->getDescriptorId();
-         if (descriptorId.empty())
-         {
-            VERIFYNR_MSG(false, string("A plug-in is specifying an empty session id. "
-               "The plug-in " + pPlugIn->getName() + " will not be loaded.").c_str());
-            delete pPlugIn;
-            continue;
-         }
-         map<string, string>::iterator foundPlugIn = plugInIds.find(descriptorId);
-         if (foundPlugIn != plugInIds.end())
-         {
-            VERIFYNR_MSG(false, string("Both the " + foundPlugIn->second + " plug-in and " +
-               pPlugIn->getName() + " plug-in are attempting to register with the same session id. "
-               "The " + pPlugIn->getName() + " plug-in will not be loaded.").c_str());
-            delete pPlugIn;
-            continue;
-         }
-         plugInIds.insert(pair<string, string>(descriptorId, pPlugIn->getName()));
-         PlugInDescriptorImp* pDescriptor = new PlugInDescriptorImp(descriptorId, pPlugIn);
-         pDescriptor->setModuleFileName(getFileName());
-         pDescriptor->setModuleName(getName());
-         pDescriptor->setPlugInNumber(plugInNumber);
-
-         mPlugins.push_back(pDescriptor);
-         delete pPlugIn;
+         mPlugInTotal = plugInNumber + 1;
+         break;
       }
+      else if (pPlugIn == NULL)
+      {
+         continue;
+      }
+      string type = pPlugIn->getType();
+      if (type.empty())
+      {
+         VERIFYNR_MSG(false, string("A plug-in is specifying an empty type. "
+            "The plug-in " + pPlugIn->getName() + " will not be loaded.").c_str());
+         delete pPlugIn;
+         continue;
+      }
+
+      string descriptorId = pPlugIn->getDescriptorId();
+      if (descriptorId.empty())
+      {
+         VERIFYNR_MSG(false, string("A plug-in is specifying an empty session id. "
+            "The plug-in " + pPlugIn->getName() + " will not be loaded.").c_str());
+         delete pPlugIn;
+         continue;
+      }
+      map<string, string>::iterator foundPlugIn = plugInIds.find(descriptorId);
+      if (foundPlugIn != plugInIds.end())
+      {
+         VERIFYNR_MSG(false, string("Both the " + foundPlugIn->second + " plug-in and " +
+            pPlugIn->getName() + " plug-in are attempting to register with the same session id. "
+            "The " + pPlugIn->getName() + " plug-in will not be loaded.").c_str());
+         delete pPlugIn;
+         continue;
+      }
+      plugInIds.insert(pair<string, string>(descriptorId, pPlugIn->getName()));
+      PlugInDescriptorImp* pDescriptor = new PlugInDescriptorImp(descriptorId, pPlugIn);
+      pDescriptor->setModuleFileName(getFileName());
+      pDescriptor->setModuleName(getName());
+      pDescriptor->setPlugInNumber(plugInNumber);
+
+      mPlugins.push_back(pDescriptor);
+      delete pPlugIn;
    }
 
-   if (!previouslyLoaded)
-   {
-      unload();
-   }
+   unload();
 
    return true;
 }
@@ -265,12 +338,26 @@ PlugIn* ModuleDescriptor::createInterface(unsigned int plugInNumber)
 
    PlugIn* pPlugIn = NULL;
 
-   bool(*moduleProcedure)(unsigned int, PlugIn**) =
-      reinterpret_cast<bool(*)(unsigned int, PlugIn**)>(mpModule->getProcedureAddress("instantiate_interface"));
-
-   if (moduleProcedure)
+   if (mModuleVersion == 1)
    {
-      moduleProcedure(plugInNumber, &pPlugIn);
+      bool(*moduleProcedure)(unsigned int, PlugIn**) =
+         reinterpret_cast<bool(*)(unsigned int, PlugIn**)>(mpModule->getProcedureAddress("instantiate_interface"));
+
+      if (moduleProcedure)
+      {
+         moduleProcedure(plugInNumber, &pPlugIn);
+      }
+   }
+   else if (mModuleVersion > 1)
+   {
+      OpticksInstantiateType moduleProcedure =
+         reinterpret_cast<OpticksInstantiateType>(mpModule->getProcedureAddress(mInstantiateSymbol));
+
+      if (moduleProcedure != NULL)
+      {
+         External* pExternal = ConnectionManager::instance();
+         moduleProcedure(pExternal, plugInNumber, &pPlugIn);
+      }
    }
 
    return pPlugIn;
@@ -292,7 +379,7 @@ const bool ModuleDescriptor::isValidatedModule() const
    // TODO : Come up with test that uses name, version, and description 
    // to generate a checksum that is tested against validationKey.
 
-   return (mValidationKey == "YES");
+   return (mModuleVersion != 1) || (mValidationKey == "YES");
 }
 
 bool ModuleDescriptor::serialize(SessionItemSerializer& serializer) const

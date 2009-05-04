@@ -11,6 +11,9 @@
 #include "DesktopServices.h"
 #include "DesktopAPITest.h"
 #include "DesktopAPITestGui.h"
+#include "PlugInRegistration.h"
+
+REGISTER_PLUGIN_BASIC(OpticksPlugInSamplerQt, DesktopAPITest);
 
 DesktopAPITest::DesktopAPITest() :
    mpGui(NULL)

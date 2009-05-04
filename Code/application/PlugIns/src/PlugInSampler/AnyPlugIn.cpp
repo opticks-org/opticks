@@ -19,9 +19,12 @@
 #include "ObjectResource.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 
 #include <string>
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksPlugInSampler, AnyPlugIn);
 
 AnyPlugIn::AnyPlugIn() :
    mInteractive(false)

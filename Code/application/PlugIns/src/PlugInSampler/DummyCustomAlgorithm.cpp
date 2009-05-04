@@ -12,12 +12,15 @@
 #include "DimensionDescriptor.h"
 #include "DummyCustomAlgorithm.h"
 #include "PlugInArgList.h"
+#include "PlugInRegistration.h"
 #include "PseudocolorLayer.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "SpatialDataView.h"
 #include "SpatialDataWindow.h"
 #include "ThresholdLayer.h"
+
+REGISTER_PLUGIN_BASIC(OpticksPlugInSampler, DummyCustomAlgorithm);
 
 DummyCustomAlgorithm::DummyCustomAlgorithm()
 {

@@ -27,6 +27,7 @@
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "PlugInResource.h"
 #include "Progress.h"
 #include "Slot.h"
@@ -39,6 +40,8 @@
 #include "xmlreader.h"
 
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksWizardExecutor, WizardExecutor);
 
 WizardExecutor::WizardExecutor() :
    mbInteractive(false),

@@ -64,7 +64,7 @@ public:
    void setFileNumberOfCopies(const std::string& myFileNumberOfCopies);
    void getClassificationText(std::string& classificationText) const;
    void setClassification(const Classification* pClassification);
-   bool isValid(std::string& errorMessage = std::string()) const;
+   bool isValid(std::string& errorMessage) const;
 
    bool toXml(XMLWriter* pXml) const;
    bool fromXml(DOMNode* pDocument, unsigned int version);

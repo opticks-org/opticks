@@ -25,6 +25,7 @@
 #include "OptionsNitfExporter.h"
 #include "OssimAppMemorySource.h"
 #include "PlugInArgList.h"
+#include "PlugInRegistration.h"
 #include "Progress.h"
 #include "RasterDataDescriptor.h"
 #include "RasterFileDescriptor.h"
@@ -52,6 +53,9 @@
 #include <boost/scoped_array.hpp>
 
 using namespace boost;
+using namespace std;
+
+REGISTER_PLUGIN(OpticksNitf, NitfExporter, Nitf::NitfExporter);
 
 Nitf::NitfExporter::NitfExporter() :
    mpRaster(NULL),
@@ -434,7 +438,8 @@ bool Nitf::NitfExporter::exportClassification(const PlugInArgList* pArgList, con
    string classificationText = pClassification->getDescription();
 
    // Check that the classification is valid
-   if (Nitf::isClassificationValidForExport(*pClassification) == false)
+   string err;
+   if (Nitf::isClassificationValidForExport(*pClassification, err) == false)
    {
       if (getExportOptionsWidget(pArgList) == NULL)
       {
@@ -517,7 +522,7 @@ bool Nitf::NitfExporter::exportClassification(const PlugInArgList* pArgList, con
    return true;
 }
 
-ValidationResultType Nitf::NitfExporter::validate(const PlugInArgList* pArgList, std::string& errorMessage) const
+ValidationResultType Nitf::NitfExporter::validate(const PlugInArgList* pArgList, string& errorMessage) const
 {
    VERIFYRV(pArgList != NULL, VALIDATE_FAILURE);
    const RasterFileDescriptor* pDescriptor = pArgList->getPlugInArgValue<RasterFileDescriptor>(ExportDescriptorArg());

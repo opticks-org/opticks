@@ -15,8 +15,8 @@
 #include "GraphicLayer.h"
 #include "GraphicObject.h"
 #include "PlugInArgList.h"
-#include "PlugInFactory.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "ProgressTracker.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
@@ -27,7 +27,7 @@
 #include "Statistics.h"
 #include "Undo.h"
 
-PLUGINFACTORY(ChangeUpDirection);
+REGISTER_PLUGIN_BASIC(OpticksImageComparison, ChangeUpDirection);
 
 ChangeUpDirection::ChangeUpDirection() : mAbort(false)
 {

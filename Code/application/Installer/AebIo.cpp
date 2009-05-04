@@ -19,6 +19,7 @@
 #include <QtCore/QDir>
 #include <QtCore/QQueue>
 #include <QtCore/QUrl>
+#include <memory>
 #include <unzip.h>
 
 std::string AebIo::sAeblPrefix = "urn:2008:03:aebl-syntax-ns#";
@@ -55,7 +56,7 @@ public:
 
 protected:
    unz_file_pos mPos;
-   friend AebIo;
+   friend class AebIo;
 };
 
 class FsAebEntry : public AebEntry
@@ -67,7 +68,7 @@ public:
 
 protected:
    QString mAbsoluteFilePath;
-   friend AebIo;
+   friend class AebIo;
 };
 
 

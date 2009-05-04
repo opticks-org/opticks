@@ -10,7 +10,7 @@
 #include "Service.h"
 #include "ApplicationServices.h"
 #include "DesktopServices.h"
-#include "ModuleManager.h"
+#include "PlugInRegistration.h"
 #include "SessionExplorer.h"
 #include "UtilityServices.h"
 #include <stdexcept>

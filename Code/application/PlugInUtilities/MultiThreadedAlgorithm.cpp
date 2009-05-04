@@ -115,24 +115,28 @@ Result MultiThreadReporter::reportProgress(int threadIndex, int percentDone)
    Result result = SUCCESS;
    if (percentDone != mThreadProgress[threadIndex])
    {
-      result = signalMainThread(ProgressFunctor(&mThreadProgress[threadIndex], percentDone), THREAD_PROGRESS);
+      ProgressFunctor cmd(&mThreadProgress[threadIndex], percentDone);
+      result = signalMainThread(cmd, THREAD_PROGRESS);
    }
    return result;
 }
 
 Result MultiThreadReporter::reportError(std::string errorText)
 {
-   return signalMainThread(ErrorFunctor(errorText, mErrorMessage, mpResult), THREAD_ERROR);
+   ErrorFunctor cmd(errorText, mErrorMessage, mpResult);
+   return signalMainThread(cmd, THREAD_ERROR);
 }
 
 Result MultiThreadReporter::reportCompletion(int threadIndex)
 {
-   return signalMainThread(CompletionFunctor(&mThreadProgress[threadIndex]), THREAD_COMPLETE);
+   CompletionFunctor cmd(&mThreadProgress[threadIndex]);
+   return signalMainThread(cmd, THREAD_COMPLETE);
 }
 
 void MultiThreadReporter::runInMainThread(ThreadCommand &command)
 {
-   Result result = signalMainThread(WorkFunctor(mpThreadCommand, command), THREAD_WORK);
+   WorkFunctor cmd(mpThreadCommand, command);
+   Result result = signalMainThread(cmd, THREAD_WORK);
    mpThreadCommand = NULL;
 }
 

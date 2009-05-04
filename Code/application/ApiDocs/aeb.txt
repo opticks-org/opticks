@@ -1,5 +1,5 @@
-/** \page aeb Application Extention Bundles
-\section opticks_specific_aebl Opticks implementation details
+/** \page opticks_specific_aebl Application Extension Bundles
+\section opticks_aebl_section Opticks implementation details
 Extension IDs are not case sensitive and will be converted to lower case values when installing in %Opticks.
 In addition to the standard AEBL verbs, %Opticks defined the following verbs in the \c urn:2008:03:opticks-aebl-extension-ns# namespace.
  - splashScreenURL - This is an \c aeb:// URL identifying an image to use as an extension splash screen. This is an optional verb.

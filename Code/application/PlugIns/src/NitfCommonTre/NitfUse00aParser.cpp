@@ -13,6 +13,7 @@
 #include "NitfUse00aParser.h"
 #include "NitfUtilities.h"
 #include "ObjectResource.h"
+#include "PlugInRegistration.h"
 
 #include <sstream>
 #include <string>
@@ -20,6 +21,8 @@
 using namespace std;
 using namespace Nitf;
 using namespace Nitf::TRE;
+
+REGISTER_PLUGIN(OpticksNitfCommonTre, Use00aParser, Nitf::Use00aParser());
 
 Nitf::Use00aParser::Use00aParser()
 {

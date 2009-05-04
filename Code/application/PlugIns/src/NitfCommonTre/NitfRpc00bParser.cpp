@@ -9,6 +9,9 @@
 
 #include "AppVersion.h"
 #include "NitfRpc00bParser.h"
+#include "PlugInRegistration.h"
+
+REGISTER_PLUGIN(OpticksNitfCommonTre, Rpc00bParser, Nitf::Rpc00bParser());
 
 Nitf::Rpc00bParser::Rpc00bParser()
 {

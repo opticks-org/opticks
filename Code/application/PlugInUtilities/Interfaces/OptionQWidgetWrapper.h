@@ -20,17 +20,14 @@
  * both the Option interface and provide a QWidget
  * by writing a single class instead of two.
  * This templated class is used by writing a QWidget
- * subclass and then in ModuleManager::getPlugIn()
- * doing the following:
+ * subclass and then doing the following to register the
+ * plug-in:
  *
  * @code
- *    //assume SampleOption is a subclass a QWidget.
- *    switch (plugInNumber)
- *    {
- *      case 0:
- *        pPlugIn = static_cast<PlugIn*>(new OptionQWidgetWrapper<SampleOption>());
- *        break;
- *     }
+ *    //assume SampleOption is a subclass of QWidget and
+ *    //the plug-in belongs to a module that was registered
+ *    //using REGISTER_MODULE(SampleModule);
+ *    REGISTER_PLUGIN(SampleModule, SampleOption, OptionQWidgetWrapper<SampleOption>());
  * @endcode
  *
  * The templated argument must meet the following requirements:

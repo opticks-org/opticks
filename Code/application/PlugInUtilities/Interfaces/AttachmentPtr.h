@@ -48,7 +48,7 @@ public:
     *
     * No Subject is observed.
     */
-   AttachmentPtr() : SafePtr(NULL)
+   AttachmentPtr() : SafePtr<T>(NULL)
    {
    }
 
@@ -59,7 +59,7 @@ public:
     *           The subject to observe.
     */
    AttachmentPtr(T* pSubject) :
-      SafePtr(pSubject)
+      SafePtr<T>(pSubject)
    {
    }
 
@@ -72,7 +72,7 @@ public:
     * @param slot
     *        The slot to call when the signal is emitted.
     */
-   AttachmentPtr(const std::string& signalName, const Slot& slot) : SafePtr(NULL),
+   AttachmentPtr(const std::string& signalName, const Slot& slot) : SafePtr<T>(NULL),
       mSignalSlots(1, std::make_pair(signalName, slot))
    {
    }
@@ -88,10 +88,10 @@ public:
     * @param slot
     *        The slot to call when the signal is emitted.
     */
-   AttachmentPtr(T* pSubject, const std::string& signalName, const Slot& slot) : SafePtr(pSubject),
+   AttachmentPtr(T* pSubject, const std::string& signalName, const Slot& slot) : SafePtr<T>(pSubject),
       mSignalSlots(1, std::make_pair(signalName, slot))
    {
-      attach(signalName, slot);
+      SafePtr<T>::attach(signalName, slot);
    }
 
    /**
@@ -120,7 +120,7 @@ public:
    {
       mSignalSlots.push_back(std::make_pair(signalName, slot));
 
-      attach(signalName, slot);
+      SafePtr<T>::attach(signalName, slot);
    }
 
    /**
@@ -134,18 +134,18 @@ public:
     */
    void reset(T* pSubject = NULL)
    {
-      if (pSubject != get())
+      if (pSubject != SafePtr<T>::get())
       {
          for (std::vector<std::pair<std::string, Slot> >::const_iterator iter = mSignalSlots.begin();
             iter != mSignalSlots.end(); ++iter)
          {
-            detach(iter->first, iter->second);
+            SafePtr<T>::detach(iter->first, iter->second);
          }
          SafePtr<T>::reset(pSubject);
          for (std::vector<std::pair<std::string, Slot> >::const_iterator iter = mSignalSlots.begin();
             iter != mSignalSlots.end(); ++iter)
          {
-            attach(iter->first, iter->second);
+            SafePtr<T>::attach(iter->first, iter->second);
          }
       }
    }

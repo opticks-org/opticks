@@ -165,7 +165,7 @@ namespace HdfUtilities
    template<typename T>
    bool writeAttribute(hid_t dataDescriptor, const std::string& attributeName, const T& attributeValue)
    {
-      auto_ptr<Hdf5CustomWriter> pWriter(createHdf5CustomWriter<T>());
+      std::auto_ptr<Hdf5CustomWriter> pWriter(createHdf5CustomWriter<T>());
       if (pWriter.get() == NULL)
       {
          return false;

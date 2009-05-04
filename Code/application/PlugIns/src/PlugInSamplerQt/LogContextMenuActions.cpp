@@ -10,11 +10,14 @@
 #include "LogContextMenuActions.h"
 #include "ContextMenu.h"
 #include "MenuBar.h"
+#include "PlugInRegistration.h"
 #include "SessionItemSerializer.h"
 #include "ToolBar.h"
 
 #include <string>
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksPlugInSamplerQt, LogContextMenuActions);
 
 LogContextMenuActions::LogContextMenuActions() :
    mpLogAction(NULL)

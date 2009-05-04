@@ -735,7 +735,7 @@ void DrawUtil::drawRotatedText(DrawUtil::TextTexture &tex, QString text, QFont f
             }
             else
             {
-               if (Endian::getSystemEndian() == BIG_ENDIAN)
+               if (Endian::getSystemEndian() == BIG_ENDIAN_ORDER)
                {
                   *target = 0xffffff00;
                }

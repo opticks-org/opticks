@@ -608,6 +608,8 @@ string ConfigurationSettingsImp::getOperatingSystemName() const
    os = "Windows";
 #elif defined(SOLARIS)
    os = "Solaris";
+#elif defined(LINUX)
+   os = "Linux";
 #else
    os = "Unkown"
 #endif
@@ -626,6 +628,10 @@ string ConfigurationSettingsImp::getArchitectureName() const
 #elif defined(SOLARIS)
 #if PTR_SIZE == 8
    arch = "sparcv9";
+#endif
+#elif defined(LINUX)
+#if PTR_SIZE == 8
+   arch = "x86_64";
 #endif
 #endif
    return arch;
@@ -732,13 +738,37 @@ const DataVariant& ConfigurationSettingsImp::getSetting(const string& key) const
 
 bool ConfigurationSettingsImp::isUserSetting(const string& key) const
 {
-   const DataVariant& sessionValue = mpSessionSettings->getAttributeByPath(key);
-   if (sessionValue.isValid())
+   if (isSessionSetting(key))
    {
       return false;
    }
    const DataVariant& userValue = mpUserSettings->getAttributeByPath(key);
    return userValue.isValid();
+}
+
+bool ConfigurationSettingsImp::isSessionSetting(const string& key) const
+{
+   return mpSessionSettings->getAttributeByPath(key).isValid();
+}
+
+bool ConfigurationSettingsImp::isDefaultSetting(const string& key) const
+{
+   const DataVariant& defaultValue = mpDefaultSettings->getAttributeByPath(key);
+   if (!defaultValue.isValid())
+   {
+      return false;
+   }
+   const DataVariant& userValue = mpUserSettings->getAttributeByPath(key);
+   if (userValue.isValid())
+   {
+      return false;
+   }
+   const DataVariant& sessionValue = mpSessionSettings->getAttributeByPath(key);
+   if (sessionValue.isValid())
+   {
+      return false;
+   }
+   return true;
 }
 
 void ConfigurationSettingsImp::deleteUserSetting(const string& key)

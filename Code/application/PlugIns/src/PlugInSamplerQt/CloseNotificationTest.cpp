@@ -7,9 +7,12 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 #include "CloseNotificationTest.h"
+#include "PlugInRegistration.h"
 #include "SessionItemSerializer.h"
 #include "Slot.h"
 #include <QtGui/QMessageBox>
+
+REGISTER_PLUGIN_BASIC(OpticksPlugInSamplerQt, CloseNotificationTest);
 
 CloseNotificationTest::CloseNotificationTest()
 {

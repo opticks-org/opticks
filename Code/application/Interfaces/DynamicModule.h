@@ -10,6 +10,8 @@
 #ifndef DYNAMICMODULE_H
 #define DYNAMICMODULE_H
 
+#include <string>
+
 typedef void(*DMPROC)();
 
 /**
@@ -34,7 +36,7 @@ public:
     *  @return  This method returns true if the library is sucessfully
     *           loaded.
     */
-   virtual bool load(const char *moduleName) = 0;
+   virtual bool load(const std::string& moduleName) = 0;
 
    /**
     *  Remove the dynamic library from memory
@@ -72,7 +74,7 @@ public:
     *  @return  This method returns the address of the procedure or
     *           function, otherwise NULL is returned.
     */
-   virtual DMPROC getProcedureAddress(const char *name) const = 0;
+   virtual DMPROC getProcedureAddress(const std::string& name) const = 0;
 
 protected:
    /**

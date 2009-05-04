@@ -17,7 +17,8 @@
 #include "Filename.h"
 #include "LabeledSection.h"
 #include "ObjectResource.h"
-#include "PlugInFactory.h"
+#include "OptionQWidgetWrapper.h"
+#include "PlugInRegistration.h"
 
 #include <QtGui/QAction>
 #include <QtGui/QCheckBox>
@@ -28,7 +29,7 @@
 #include <QtGui/QSpinBox>
 #include <vector>
 
-PLUGINFACTORY_OPTIONWRAPPER(AnnotationImagePaletteOptions);
+REGISTER_PLUGIN(OpticksAnnotationImagePalette, AnnotationImagePaletteOptions,  OptionQWidgetWrapper<AnnotationImagePaletteOptions>);
 
 AnnotationImagePaletteOptions::AnnotationImagePaletteOptions() : mDirty(false)
 {

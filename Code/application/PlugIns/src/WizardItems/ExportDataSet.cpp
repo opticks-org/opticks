@@ -16,10 +16,13 @@
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "PlugInResource.h"
 #include "View.h"
 
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksWizardItems, ExportDataSet);
 
 ExportDataSet::ExportDataSet() :
    mpView(NULL),

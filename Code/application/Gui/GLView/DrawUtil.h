@@ -27,6 +27,8 @@ class BitMask;
 
 namespace DrawUtil
 {
+int determineOctant(double dx, double dy);
+
 template<class T>
 T minimum(T t1, T t2)
 {
@@ -384,8 +386,8 @@ void drawPixelLine(LocationType p0, LocationType p1, T &drawer)
 
    if (dx == 0)
    {
-      int miny = min(y0, y1);
-      int maxy = max(y0, y1);
+      int miny = std::min(y0, y1);
+      int maxy = std::max(y0, y1);
       for (int y = miny; y < maxy; ++y)
       {
          drawer(x0, y);
@@ -394,8 +396,8 @@ void drawPixelLine(LocationType p0, LocationType p1, T &drawer)
    }
    else if (dy == 0)
    {
-      int minx = min(x0, x1);
-      int maxx = max(x0, x1);
+      int minx = std::min(x0, x1);
+      int maxx = std::max(x0, x1);
       for (int x = minx; x < maxx; ++x)
       {
          drawer(x, y0);
@@ -472,14 +474,13 @@ void drawPixelLine(LocationType p0, LocationType p1, T &drawer)
    }
 }
 
-int determineOctant(double dx, double dy);
 template<typename T>
 void drawPixelPolygon(const std::vector<LocationType> &vertices, const std::vector<unsigned int> &paths, 
                       int iStartColumn, int iStartRow, int iEndColumn, int iEndRow, T &drawer)
 {
    unsigned int numVertices = vertices.size();
-   vector<double> xVertices(numVertices);
-   vector<double> yVertices(numVertices);
+   std::vector<double> xVertices(numVertices);
+   std::vector<double> yVertices(numVertices);
 
    unsigned int k = 0;
    for (k = 0; k < numVertices; ++k)
@@ -488,7 +489,7 @@ void drawPixelPolygon(const std::vector<LocationType> &vertices, const std::vect
       yVertices[k] = vertices[k].mY - 0.5;
    }
 
-   vector<double> slopes(numVertices - 1);
+   std::vector<double> slopes(numVertices - 1);
    for (k = 0; k < numVertices - 1; ++k)
    {
       if (fabs(yVertices[k + 1] - yVertices[k]) > 1e-6)
@@ -511,7 +512,7 @@ void drawPixelPolygon(const std::vector<LocationType> &vertices, const std::vect
    }
 
    int iRowIndex = 0;
-   vector<unsigned char> insides(iEndColumn - iStartColumn + 1);
+   std::vector<unsigned char> insides(iEndColumn - iStartColumn + 1);
    unsigned char *pInsides = &insides.front();
    for (int i = iStartRow, iRowIndex = 0; i <= iEndRow; ++i, ++iRowIndex)
    {

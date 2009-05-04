@@ -17,6 +17,8 @@
 #include "ModelServices.h"
 #include "UtilityServices.h"
 
+#include <memory>
+
 #include <ossim/base/ossimListener.h>
 
 class Classification;

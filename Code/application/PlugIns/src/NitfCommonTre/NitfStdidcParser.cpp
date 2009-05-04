@@ -14,6 +14,7 @@
 #include "NitfStdidcParser.h"
 #include "NitfUtilities.h"
 #include "ObjectResource.h"
+#include "PlugInRegistration.h"
 
 #include <sstream>
 #include <string>
@@ -23,6 +24,8 @@
 using namespace std;
 using namespace Nitf;
 using namespace Nitf::TRE;
+
+REGISTER_PLUGIN(OpticksNitfCommonTre, StdidcParser, Nitf::StdidcParser());
 
 Nitf::StdidcParser::StdidcParser()
 {

@@ -13,11 +13,15 @@
 #include <QtGui/QSpinBox>
 
 #include "LabeledSection.h"
+#include "OptionQWidgetWrapper.h"
 #include "OptionsTiffExporter.h"
+#include "PlugInRegistration.h"
 
 #include <limits>
 #include <string>
 using namespace std;
+
+REGISTER_PLUGIN(OpticksPictures, OptionsTiffExporter, OptionQWidgetWrapper<OptionsTiffExporter>());
 
 OptionsTiffExporter::OptionsTiffExporter() :
    LabeledSectionGroup(NULL)

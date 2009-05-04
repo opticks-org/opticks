@@ -13,7 +13,10 @@
 #include "MenuAndToolBarTest.h"
 #include "MenuAndToolBarTestGui.h"
 #include "MenuBar.h"
+#include "PlugInRegistration.h"
 #include "ToolBar.h"
+
+REGISTER_PLUGIN_BASIC(OpticksPlugInSamplerQt, MenuAndToolBarTest);
 
 MenuAndToolBarTest::MenuAndToolBarTest() :
    mpGui(NULL)

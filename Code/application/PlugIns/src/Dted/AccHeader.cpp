@@ -10,8 +10,9 @@
 #include <memory>
 #include <string>
 #include "AppConfig.h"
-#ifdef UNIX_API
+#if defined(UNIX_API)
 #include <strings.h>
+#include <string.h>
 #endif
 
 #include "AccHeader.h"

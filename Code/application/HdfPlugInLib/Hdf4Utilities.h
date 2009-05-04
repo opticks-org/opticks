@@ -16,6 +16,7 @@
 #include <mfhdf.h>
 #include "HdfUtilities.h"
 
+#include "Hdf4Attribute.h"
 #include "Hdf4Element.h"
 #include "DataVariant.h"
 #include "Resource.h"

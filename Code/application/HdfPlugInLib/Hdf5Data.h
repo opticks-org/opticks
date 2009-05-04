@@ -12,6 +12,7 @@
 
 #include "Hdf5CustomReader.h"
 
+#include <memory>
 #include <string>
 #include <vector>
 

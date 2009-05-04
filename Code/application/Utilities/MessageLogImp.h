@@ -580,14 +580,14 @@ const std::string& getFailureMessage() const \
 { \
    return impClass::getFailureMessage(); \
 } \
-Step *StepAdapter::addStep(const std::string &action, \
+Step *addStep(const std::string &action, \
                            const std::string &component, \
                            const std::string &key, \
                            bool recurse = true) \
 { \
    return impClass::addStep(action, component, key, recurse); \
 } \
-Message *StepAdapter::addMessage(const std::string &action, \
+Message *addMessage(const std::string &action, \
                                  const std::string &component, \
                                  const std::string &key, \
                                  bool finalizeOnCreate = false, \

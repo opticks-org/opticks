@@ -7,25 +7,20 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef PRODUCTIONPLUGINTESTER_H
-#define PRODUCTIONPLUGINTESTER_H
+#ifndef PASSTHROUGH_H
+#define PASSTHROUGH_H
 
-#include "AlgorithmShell.h"
-#include "PlugInManagerServices.h"
+#include "ExecutableShell.h"
 
-class ProductionPlugInTester : public AlgorithmShell
+class Passthrough : public ExecutableShell
 {
 public:
-   ProductionPlugInTester();
+   Passthrough();
 
    bool getInputSpecification(PlugInArgList*& pArgList);
    bool getOutputSpecification(PlugInArgList*& pArgList);
 
    bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
-   bool setBatch();
-
-private:
-   Service<PlugInManagerServices> mpPlugMgr;
 };
 
 #endif

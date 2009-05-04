@@ -22,6 +22,7 @@
 #include "ObjectResource.h"
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
+#include "PlugInRegistration.h"
 #include "Progress.h"
 #include "RasterDataDescriptor.h"
 #include "RasterFileDescriptor.h"
@@ -33,6 +34,8 @@
 #include "Undo.h"
 
 #include <boost/bind.hpp>
+
+REGISTER_PLUGIN_BASIC(OpticksBandMath, BandMath);
 
 using namespace std;
 

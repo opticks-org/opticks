@@ -61,7 +61,7 @@ class GraphicResource : public Resource<T, GraphicObjectObject<T> >
 {
 public:
    GraphicResource(GraphicObjectType type, GraphicLayer* pLayer = NULL, LocationType pixel = LocationType()) :
-      Resource<T, GraphicObjectObject<T> >(GraphicObjectObject<T>::Args(type, pLayer, pixel)) {}
+      Resource<T, GraphicObjectObject<T> >(typename GraphicObjectObject<T>::Args(type, pLayer, pixel)) {}
 };
 
 #endif

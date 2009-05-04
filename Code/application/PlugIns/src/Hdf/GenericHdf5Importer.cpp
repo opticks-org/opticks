@@ -25,6 +25,7 @@
 #include "ModelServices.h"
 #include "ObjectResource.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "PlugInResource.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
@@ -87,6 +88,8 @@ namespace
       return pDimensions;
    }
 }
+
+REGISTER_PLUGIN_BASIC(OpticksHdf, GenericHdf5Importer);
 
 GenericHdf5Importer::GenericHdf5Importer()
 {

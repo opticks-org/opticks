@@ -53,7 +53,9 @@ bool readAttribute(hid_t attrId, hid_t attrType, hid_t dataSpace, DataVariant& v
 }
 }
 
-string HdfUtilities::hdf5TypeToTypeString(hid_t dataTypeId)
+namespace HdfUtilities
+{
+string hdf5TypeToTypeString(hid_t dataTypeId)
 {
    H5T_class_t dataType = H5Tget_class(dataTypeId); // integer or floating point or misc data?
    size_t size = H5Tget_size(dataTypeId); // get the size of the type
@@ -183,7 +185,7 @@ string HdfUtilities::hdf5TypeToTypeString(hid_t dataTypeId)
    return type;
 }
 
-bool HdfUtilities::readHdf5Attribute(hid_t attrId, DataVariant& var)
+bool readHdf5Attribute(hid_t attrId, DataVariant& var)
 {
    Hdf5TypeResource attrIdType(H5Aget_type(attrId));
    Hdf5DataSpaceResource attrSpace(H5Aget_space(attrId));
@@ -311,7 +313,7 @@ bool HdfUtilities::readHdf5Attribute(hid_t attrId, DataVariant& var)
    return success;
 }
 
-string HdfUtilities::hdf5AttributeToString(hid_t attrId)
+string hdf5AttributeToString(hid_t attrId)
 {
    DataVariant var;
    if (HdfUtilities::readHdf5Attribute(attrId, var) && var.isValid())
@@ -325,55 +327,55 @@ string HdfUtilities::hdf5AttributeToString(hid_t attrId)
 }
 
 template<>
-Hdf5TypeResource HdfUtilities::getHdf5Type<char>()
+Hdf5TypeResource getHdf5Type<char>()
 {
    return Hdf5TypeResource(H5Tcopy(H5T_NATIVE_CHAR));
 }
 
 template<>
-Hdf5TypeResource HdfUtilities::getHdf5Type<unsigned char>()
+Hdf5TypeResource getHdf5Type<unsigned char>()
 {
    return Hdf5TypeResource(H5Tcopy(H5T_NATIVE_UCHAR));
 }
 
 template<>
-Hdf5TypeResource HdfUtilities::getHdf5Type<short>()
+Hdf5TypeResource getHdf5Type<short>()
 {
    return Hdf5TypeResource(H5Tcopy(H5T_NATIVE_SHORT));
 }
 
 template<>
-Hdf5TypeResource HdfUtilities::getHdf5Type<unsigned short>()
+Hdf5TypeResource getHdf5Type<unsigned short>()
 {
    return Hdf5TypeResource(H5Tcopy(H5T_NATIVE_USHORT));
 }
 
 template<>
-Hdf5TypeResource HdfUtilities::getHdf5Type<int>()
+Hdf5TypeResource getHdf5Type<int>()
 {
    return Hdf5TypeResource(H5Tcopy(H5T_NATIVE_INT));
 }
 
 template<>
-Hdf5TypeResource HdfUtilities::getHdf5Type<unsigned int>()
+Hdf5TypeResource getHdf5Type<unsigned int>()
 {
    return Hdf5TypeResource(H5Tcopy(H5T_NATIVE_UINT));
 }
 
 template<>
-Hdf5TypeResource HdfUtilities::getHdf5Type<float>()
+Hdf5TypeResource getHdf5Type<float>()
 {
    return Hdf5TypeResource(H5Tcopy(H5T_NATIVE_FLOAT));
 }
 
 template<>
-Hdf5TypeResource HdfUtilities::getHdf5Type<double>()
+Hdf5TypeResource getHdf5Type<double>()
 {
    return Hdf5TypeResource(H5Tcopy(H5T_NATIVE_DOUBLE));
 }
 
 template<>
-Hdf5TypeResource HdfUtilities::getHdf5Type<std::string>()
+Hdf5TypeResource getHdf5Type<std::string>()
 {
    Hdf5TypeResource typeId(H5Tcopy(H5T_C_S1));
    H5Tset_size(*typeId, H5T_VARIABLE);
@@ -381,7 +383,7 @@ Hdf5TypeResource HdfUtilities::getHdf5Type<std::string>()
    return typeId;
 }
 
-bool HdfUtilities::createGroups(const string& hdfPath, hid_t fileDescriptor, bool bLastItemIsGroup)
+bool createGroups(const string& hdfPath, hid_t fileDescriptor, bool bLastItemIsGroup)
 {
    if (hdfPath.empty() == true)
    {
@@ -437,4 +439,5 @@ bool HdfUtilities::createGroups(const string& hdfPath, hid_t fileDescriptor, boo
    }
 
    return bSuccess;
+}
 }

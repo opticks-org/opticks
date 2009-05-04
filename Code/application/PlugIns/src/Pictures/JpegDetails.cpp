@@ -9,6 +9,12 @@
 
 #include "JpegDetails.h"
 #include "OptionsJpegExporter.h"
+#include "PicturesPlotWidgetExporter.h"
+#include "PicturesViewExporter.h"
+#include "PlugInRegistration.h"
+
+REGISTER_PLUGIN(OpticksPictures, JpegPicturesPlotWidgetExporter, PicturesPlotWidgetExporter(new JpegDetails));
+REGISTER_PLUGIN(OpticksPictures, JpegPicturesViewExporter, PicturesViewExporter(new JpegDetails));
 
 JpegDetails::JpegDetails() : mpOptionsWidget(NULL)
 {

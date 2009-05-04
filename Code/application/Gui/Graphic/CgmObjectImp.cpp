@@ -2002,7 +2002,7 @@ short CgmObjectImp::readElement(short* pData, int& lByteIndex)
    short sElement = -1;
    sElement = pData[lByteIndex];
 
-   if (Endian::getSystemEndian() == LITTLE_ENDIAN)
+   if (Endian::getSystemEndian() == LITTLE_ENDIAN_ORDER)
    {
       // Swap the bytes
       unsigned char* buffer = reinterpret_cast<unsigned char*>(&sElement);
@@ -2042,7 +2042,7 @@ bool CgmObjectImp::writeElement(short sElement, short* pData, int& lByteIndex, b
 {
    if ((bCountOnly == false) && (pData != NULL))
    {
-      if (Endian::getSystemEndian() == LITTLE_ENDIAN)
+      if (Endian::getSystemEndian() == LITTLE_ENDIAN_ORDER)
       {
          // Swap the bytes
          unsigned char* buffer = reinterpret_cast<unsigned char*>(&sElement);

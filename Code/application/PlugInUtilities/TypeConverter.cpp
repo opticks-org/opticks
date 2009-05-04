@@ -24,29 +24,35 @@ class Int64;
 class UInt64;
 
 #define TYPECONVERTERTOSTRING_IMP(type__) \
+   namespace TypeConverter \
+   { \
    template<> \
-   const char* TypeConverter::toString< type__ >() \
+   const char* toString< type__ >() \
    { \
       return #type__; \
    } \
    template<> \
-   const char* TypeConverter::toString<std::vector< type__ *> >() \
+   const char* toString<std::vector< type__ *> >() \
    { \
       return "vector<"#type__">"; \
    } \
    template<> \
-   const char* TypeConverter::toString<std::vector< type__ > >() \
+   const char* toString<std::vector< type__ > >() \
    { \
       return toString<std::vector<type__*> >(); \
+   } \
    }
 
 #define TYPECONVERTERTOSTRING_IMP_FORWARD(type__) \
    class type__; \
    TYPECONVERTERTOSTRING_IMP(type__) \
+   namespace TypeConverter \
+   { \
    template<> \
-   const char* TypeConverter::toString< type__ * >() \
+   const char* toString< type__ * >() \
    { \
       return #type__; \
+   } \
    }
 
 using std::string;

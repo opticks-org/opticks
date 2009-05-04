@@ -7,8 +7,11 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "Mpeg1Exporter.h"
 #include "AppVersion.h"
+#include "Mpeg1Exporter.h"
+#include "PlugInRegistration.h"
+
+REGISTER_PLUGIN_BASIC(OpticksMovieExporter, Mpeg1Exporter);
 
 Mpeg1Exporter::Mpeg1Exporter()
 {

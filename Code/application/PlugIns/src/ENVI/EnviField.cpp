@@ -10,6 +10,7 @@
 #include "EnviField.h"
 #include "FileResource.h"
 #include "StringUtilities.h"
+#include <string.h>
 
 using namespace std;
 

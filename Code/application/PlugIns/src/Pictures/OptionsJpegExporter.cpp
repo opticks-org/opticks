@@ -8,7 +8,9 @@
  */
 
 #include "LabeledSection.h"
+#include "OptionQWidgetWrapper.h"
 #include "OptionsJpegExporter.h"
+#include "PlugInRegistration.h"
 #include "SessionManager.h"
 
 #include <QtGui/QCheckBox>
@@ -21,6 +23,8 @@
 #include <string>
 
 using namespace std;
+
+REGISTER_PLUGIN(OpticksPictures, OptionsJpegExporter, OptionQWidgetWrapper<OptionsJpegExporter>());
 
 OptionsJpegExporter::OptionsJpegExporter() :
    LabeledSectionGroup(NULL)

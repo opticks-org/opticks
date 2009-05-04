@@ -29,6 +29,7 @@
 #include "NitfUtilities.h"
 #include "ObjectResource.h"
 #include "PlugInArgList.h"
+#include "PlugInRegistration.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "RasterFileDescriptor.h"
@@ -54,6 +55,8 @@ using namespace std;
 
 #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : TODO: The NULL pix value for OSSIM_PARTIAL " \
    "is a bad value (leckels)")
+
+REGISTER_PLUGIN(OpticksNitf, NitfImporter, Nitf::NitfImporter);
 
 Nitf::NitfImporter::NitfImporter()
 {
@@ -147,7 +150,7 @@ vector<ImportDescriptor*> Nitf::NitfImporter::getImportDescriptors(const string 
       pDd->setProcessingLocation(IN_MEMORY);
 
       RasterFileDescriptor* pFd = dynamic_cast<RasterFileDescriptor*>(
-         RasterUtilities::generateAndSetFileDescriptor(pDd, filename, imageName, LITTLE_ENDIAN));
+         RasterUtilities::generateAndSetFileDescriptor(pDd, filename, imageName, LITTLE_ENDIAN_ORDER));
 
       string errorMessage;
       if (Nitf::importMetadata(currentIndex + 1, pFile, pFileHeader, pImgHeader, pDd, errorMessage) == true)

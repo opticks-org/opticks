@@ -16,10 +16,14 @@
 #include "CustomTreeWidget.h"
 #include "DesktopServices.h"
 #include "LabeledSection.h"
+#include "OptionQWidgetWrapper.h"
 #include "OptionsSuppressibleMsgDlg.h"
+#include "PlugInRegistration.h"
 
 #include <string>
 using namespace std;
+
+REGISTER_PLUGIN(OpticksPlugInSamplerQt, OptionsSuppressibleMsgDlg, OptionQWidgetWrapper<OptionsSuppressibleMsgDlg>());
 
 OptionsSuppressibleMsgDlg::OptionsSuppressibleMsgDlg() :
    LabeledSectionGroup(NULL)

@@ -16,6 +16,7 @@
 #include "ImportDescriptor.h"
 #include "ModelServices.h"
 #include "ObjectResource.h"
+#include "PlugInRegistration.h"
 #include "RasterDataDescriptor.h"
 #include "RasterFileDescriptor.h"
 #include "RasterUtilities.h"
@@ -23,6 +24,8 @@
 #include <sstream>
 #include <string>
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksGeneric, GenericImporter);
 
 GenericImporter::GenericImporter()
 {

@@ -13,11 +13,14 @@
 #include "LayerList.h"
 #include "MessageLogResource.h"
 #include "PlugInArgList.h"
+#include "PlugInRegistration.h"
 #include "RasterElement.h"
 #include "RasterLayer.h"
 #include "SpatialDataView.h"
 
 #include <string>
+
+REGISTER_PLUGIN_BASIC(OpticksWizardItems, GetPrimaryRasterLayer);
 
 GetPrimaryRasterLayer::GetPrimaryRasterLayer() :
    mpSpatialDataView(NULL)

@@ -12,6 +12,7 @@
 #include "MessageLogResource.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "PlugInResource.h"
 #include "Progress.h"
 #include "StringUtilities.h"
@@ -21,6 +22,8 @@
 #else
 #include <unistd.h>
 #endif
+
+REGISTER_PLUGIN_BASIC(OpticksTutorial, Tutorial2);
 
 Tutorial2::Tutorial2()
 {

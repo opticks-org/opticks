@@ -320,6 +320,8 @@ public:
     *
     *  @return  A pointer to the new DynamicModule, or NULL if
     *           the module could not be created.
+    *
+    *  @see     DynamicModule::load()
     */
    virtual DynamicModule* getDynamicModule(const std::string& value) = 0;
 

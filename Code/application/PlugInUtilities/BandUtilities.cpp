@@ -49,7 +49,7 @@ int* deriveBadBands(const vector<T>& bandsToSave, const unsigned int totalBands,
    catch(...)
    {
       // TODO: If interactive mode, issue dialog? 
-      LogVerificationError(plzBadBands == NULL, "Exception in deriveBadBands");
+      LogVerificationError("plzBadBands == NULL", "Exception in deriveBadBands");
       delete plzBadBands;
       numBad = 0;
       return NULL;

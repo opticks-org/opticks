@@ -7,14 +7,14 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include "Passthrough.h"
 #include "ModuleManager.h"
-#include "ProductionPlugInTester.h"
 
-const char* ModuleManager::mspName = "Production Plug-In Tester";
-const char* ModuleManager::mspVersion = "1.0";
-const char* ModuleManager::mspDescription = "Lists the Not For Production Plug-Ins.";
+const char* ModuleManager::mspName = "Legacy Module";
+const char* ModuleManager::mspVersion = "1.0.0";
+const char* ModuleManager::mspDescription = "Legacy Module";
 const char* ModuleManager::mspValidationKey = "none";
-const char* ModuleManager::mspUniqueId = "{EC7AD794-B303-40da-B73B-FC8ED33107FB}";
+const char* ModuleManager::mspUniqueId = "OpticksLegacyModule";
 
 unsigned int ModuleManager::getTotalPlugIns()
 {
@@ -27,12 +27,12 @@ PlugIn* ModuleManager::getPlugIn(unsigned int plugInNumber)
    switch (plugInNumber)
    {
       case 0:
-         pPlugIn = new ProductionPlugInTester();
+         pPlugIn = new Passthrough();
          break;
-
       default:
          break;
    }
 
    return pPlugIn;
 }
+

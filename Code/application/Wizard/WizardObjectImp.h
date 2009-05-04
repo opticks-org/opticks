@@ -224,23 +224,23 @@ private:
 #define WIZARDOBJECTADAPTER_METHODS(impClass) \
    SUBJECTADAPTER_METHODS(impClass) \
    SERIALIZABLEADAPTER_METHODS(impClass) \
-   void WizardObjectAdapter::setName(const std::string& name) \
+   void setName(const std::string& name) \
    { \
       impClass::setName(name); \
    } \
-   const std::string& WizardObjectAdapter::getName() const \
+   const std::string& getName() const \
    { \
       return impClass::getName(); \
    } \
-   const std::vector<WizardItem*>& WizardObjectAdapter::getItems() const \
+   const std::vector<WizardItem*>& getItems() const \
    { \
       return impClass::getItems(); \
    } \
-   bool WizardObjectAdapter::isBatch() const \
+   bool isBatch() const \
    { \
       return impClass::isBatch(); \
    } \
-   const std::string& WizardObjectAdapter::getMenuLocation() const \
+   const std::string& getMenuLocation() const \
    { \
       return impClass::getMenuLocation(); \
    } \

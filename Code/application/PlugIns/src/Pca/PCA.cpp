@@ -29,6 +29,7 @@
 #include "PcaDlg.h"
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
+#include "PlugInRegistration.h"
 #include "PlugInResource.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
@@ -433,7 +434,7 @@ void StorePcaValue(T* pPcaData, double* pValue, double* pMinVal, double* pScaleF
    *pPcaData = static_cast<T>((*pValue - *pMinVal) * (*pScaleFactor) + 0.5);
 }
 
-using namespace std;
+REGISTER_PLUGIN_BASIC(OpticksPCA, PCA);
 
 PCA::PCA() :
    mbUseEigenValPlot(false),

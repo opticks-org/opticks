@@ -25,6 +25,7 @@
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "Progress.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
@@ -43,6 +44,8 @@
 #include <sstream>
 
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksResults, ResultsExporter);
 
 ResultsExporter::ResultsExporter() :
    mbInteractive(false),

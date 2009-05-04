@@ -13,6 +13,7 @@
 #include "AppConfig.h"
 #include "GeoPoint.h"
 #include "MgrsEngine.h"
+#include <string.h>
 
 using namespace std;
 

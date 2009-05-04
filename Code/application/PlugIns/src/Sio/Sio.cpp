@@ -285,24 +285,24 @@ bool SioFile::deserialize(FILE* pFile)
    // Endian
    if ((mVersion != 5) && (mVersion != 6) && (mVersion != 7) && (mVersion != 8) && (mVersion != 9))
    {
-      if (mEndian == LITTLE_ENDIAN)
+      if (mEndian == LITTLE_ENDIAN_ORDER)
       {
-         Endian endian(BIG_ENDIAN);
+         Endian endian(BIG_ENDIAN_ORDER);
          endian.swapValue(mVersion);
 
          if ((mVersion == 5) || (mVersion == 6) || (mVersion == 7) || (mVersion == 8) || (mVersion == 9))
          {
-            mEndian = BIG_ENDIAN;
+            mEndian = BIG_ENDIAN_ORDER;
          }
       }
-      else if (mEndian == BIG_ENDIAN)
+      else if (mEndian == BIG_ENDIAN_ORDER)
       {
-         Endian endian(LITTLE_ENDIAN);
+         Endian endian(LITTLE_ENDIAN_ORDER);
          endian.swapValue(mVersion);
 
          if ((mVersion == 5) || (mVersion == 6) || (mVersion == 7) || (mVersion == 8) || (mVersion == 9))
          {
-            mEndian = LITTLE_ENDIAN;
+            mEndian = LITTLE_ENDIAN_ORDER;
          }
       }
 

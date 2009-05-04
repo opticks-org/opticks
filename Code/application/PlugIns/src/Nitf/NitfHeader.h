@@ -12,6 +12,7 @@
 
 #include <ossim/base/ossimDateProperty.h>
 #include <ossim/base/ossimContainerProperty.h>
+#include <ossim/base/ossimPropertyInterface.h>
 
 #include "ObjectResource.h"
 #include "StringUtilities.h"

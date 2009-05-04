@@ -22,6 +22,7 @@
 #include "ImportDescriptor.h"
 #include "ModelServices.h"
 #include "ObjectResource.h"
+#include "PlugInRegistration.h"
 #include "RasterDataDescriptor.h"
 #include "RasterFileDescriptor.h"
 #include "RasterUtilities.h"
@@ -32,6 +33,8 @@
 #include <sstream>
 
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksENVI, EnviImporter);
 
 static bool parseDefaultBands(EnviField* pField, vector<unsigned int>* pBandNumbers);
 static bool parseBbl(EnviField* pField, vector<unsigned int>* pBadBands);
@@ -440,11 +443,11 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
                      int byteOrder = atoi(pField->mValue.c_str());
                      if (byteOrder == 0)
                      {
-                        pFileDescriptor->setEndian(LITTLE_ENDIAN);
+                        pFileDescriptor->setEndian(LITTLE_ENDIAN_ORDER);
                      }
                      else if (byteOrder == 1)
                      {
-                        pFileDescriptor->setEndian(BIG_ENDIAN);
+                        pFileDescriptor->setEndian(BIG_ENDIAN_ORDER);
                      }
                   }
 

@@ -11,6 +11,7 @@
 #define EXTERNAL_H
 
 /**
+ * \cond INTERNAL
  *  Primary plug-in interface to the main application
  *
  *  Defines the external abstract interface to the main application.
@@ -44,5 +45,6 @@ protected:
     */
    virtual ~External() {}
 };
+/// \endcond
 
 #endif

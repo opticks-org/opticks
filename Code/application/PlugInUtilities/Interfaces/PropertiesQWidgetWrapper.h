@@ -19,17 +19,14 @@
  *  A plug-in that both implements the Properties interface and provides a
  *  QWidget.
  *
- *  This templated class is used by writing a QWidget subclass and then in
- *  ModuleManager::getPlugIn() doing the following:
+ *  This templated class is used by writing a QWidget subclass and
+ *  then doing the following to register the plug-in:
  *
  * @code
- * // Assume SampleProperties is a QWidget subclass
- * switch (plugInNumber)
- * {
- *    case 0:
- *       pPlugIn = static_cast<PlugIn*>(new PropertiesQWidgetWrapper<SampleProperties>());
- *       break;
- * }
+ *    //assume SampleProperties is a subclass of QWidget and
+ *    //the plug-in belongs to a module that was registered
+ *    //using REGISTER_MODULE(SampleModule);
+ *    REGISTER_PLUGIN(SampleModule, SampleProperties, PropertiesQWidgetWrapper<SampleProperties>());
  * @endcode
  *
  *  The templated argument must meet the following requirements:

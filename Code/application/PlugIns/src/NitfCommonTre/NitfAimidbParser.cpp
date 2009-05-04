@@ -11,9 +11,10 @@
 #include "DataVariant.h"
 #include "DateTime.h"
 #include "NitfAimidbParser.h"
-#include "ObjectResource.h"
 #include "NitfUtilities.h"
 #include "NitfConstants.h"
+#include "ObjectResource.h"
+#include "PlugInRegistration.h"
 #include "StringUtilities.h"
 
 #include <sstream>
@@ -21,6 +22,8 @@
 using namespace std;
 using namespace Nitf;
 using namespace Nitf::TRE;
+
+REGISTER_PLUGIN(OpticksNitfCommonTre, AimidbParser, Nitf::AimidbParser());
 
 Nitf::AimidbParser::AimidbParser()
 {

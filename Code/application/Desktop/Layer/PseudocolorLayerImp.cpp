@@ -50,8 +50,7 @@ public:
 
    inline bool operator()(int row, int col) const
    {
-      int value = static_cast<int>(ModelServices::getDataValue(static_cast<T>(mpData[row * mCols + col]),
-         COMPLEX_MAGNITUDE));
+      int value = static_cast<int>(ModelServices::getDataValue(*const_cast<T*>(mpData + (row * mCols + col)), COMPLEX_MAGNITUDE));
       return (value == static_cast<int>(mValue));
    }
 

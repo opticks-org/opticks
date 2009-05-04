@@ -62,17 +62,17 @@ public:
    EndianType getEndian() const;
 
    /**
-    *  Queries the endian type of <em>this</em> for EndianType::BIG_ENDIAN.
+    *  Queries the endian type of <em>this</em> for EndianType::BIG_ENDIAN_ORDER.
     *
-    *  @return  Returns true if the endian type is EndianType::BIG_ENDIAN,
+    *  @return  Returns true if the endian type is EndianType::BIG_ENDIAN_ORDER,
     *           otherwise returns false.
     */
    bool isBigEndian() const;
 
    /**
-    *  Queries the endian type of <em>this</em> for EndianType::LITTLE_ENDIAN.
+    *  Queries the endian type of <em>this</em> for EndianType::LITTLE_ENDIAN_ORDER.
     *
-    *  @return  Returns true if the endian type is EndianType::LITTLE_ENDIAN,
+    *  @return  Returns true if the endian type is EndianType::LITTLE_ENDIAN_ORDER,
     *           otherwise returns false.
     */
    bool isLittleEndian() const;

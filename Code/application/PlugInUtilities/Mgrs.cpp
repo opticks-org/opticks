@@ -14,8 +14,9 @@
 
 #include <stdio.h>
 #include <string>
-#ifdef UNIX_API
+#if defined(UNIX_API)
 #include <strings.h>
+#include <string.h>
 #endif
 #include <math.h>
 

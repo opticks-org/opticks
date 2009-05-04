@@ -57,6 +57,8 @@ protected:
       QFont getDisplayFont() const;
       void setDisplayColor(const QColor& itemColor);
       QColor getDisplayColor() const;
+      void setBackgroundColor(const QColor& itemColor);
+      QColor getBackgroundColor() const;
       SessionItemWrapper* getParent() const;
       const std::vector<SessionItemWrapper*>& getChildren() const;
 
@@ -74,6 +76,7 @@ protected:
       QString mDisplayName;
       QFont mDisplayFont;
       QColor mDisplayColor;
+      QColor mBackgroundColor;
       SessionItemWrapper* mpParent;
       std::vector<SessionItemWrapper*> mChildren;
    };

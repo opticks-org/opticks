@@ -12,8 +12,11 @@
 #include "MessageLog.h"
 #include "MessageLogMgr.h"
 #include "MessageLogTest.h"
+#include "PlugInRegistration.h"
 #include "Service.h"
 #include "UtilityServices.h"
+
+REGISTER_PLUGIN_BASIC(OpticksPlugInSampler, MessageLogTestPlugin);
 
 MessageLogTestPlugin::MessageLogTestPlugin()
 {

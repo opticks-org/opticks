@@ -23,6 +23,10 @@ class RasterElement;
  */
 namespace MatrixFunctions
 {
+   //forward declarations only, see below for actual function definition
+   template<typename T> T** createMatrix(const int& numRows, const int& numCols, const T* pInitialData = NULL);
+   template<typename T> bool deleteMatrix(T**& pMatrix);
+
    /**
     * The %MatrixObject is a trait object for use with the %Resource template. 
     *
@@ -51,12 +55,27 @@ namespace MatrixFunctions
             mNumRows(numRows), mNumCols(numCols), mpInitialData(pInitialData) {}
       };
 
-      T* obtainResource(const Args &args) const 
+      /**
+       * Obtains an matrix using the createMatrix function.
+       *
+       * @param  args
+       *         The arguments for obtaining the resource. Should be of type MatrixObject::Args.
+       * @return Returns a pointer to the created Matrix.
+       */
+      T* obtainResource(const Args& args) const 
       {
          return reinterpret_cast<T*>(createMatrix<T>(args.mNumRows, args.mNumCols, args.mpInitialData));
       }
 
-      void releaseResource(const Args &args, T* pMatrix) const
+      /**
+       * Releases a matrix using the deleteMatrix function.
+       *
+       * @param  args
+       *         The arguments for releasing the resource. Should be of type MatrixObject::Args.
+       * @param  pMatrix
+       *         A pointer to the matrix to be freed.
+       */
+      void releaseResource(const Args& args, T* pMatrix) const
       {
          deleteMatrix<T>(reinterpret_cast<T**&>(pMatrix));
       }
@@ -92,7 +111,7 @@ namespace MatrixFunctions
        *           If this parameter is \b NULL, the returned matrix will be set to 0 before returning.
        */
       MatrixResource(const int& numRows, const int& numCols, const T* pInitialData = NULL) :
-         Resource<T, MatrixObject<T> >(MatrixObject<T>::Args(numRows, numCols, pInitialData)) {}
+         Resource<T, MatrixObject<T> >(typename MatrixObject<T>::Args(numRows, numCols, pInitialData)) {}
 
       /**
        *  Returns a pointer to the underlying T**.
@@ -105,7 +124,7 @@ namespace MatrixFunctions
        */
       operator T**()
       {
-         return reinterpret_cast<T**>(get());
+         return reinterpret_cast<T**>(Resource<T,MatrixObject<T> >::get());
       }
 
       /**
@@ -119,7 +138,7 @@ namespace MatrixFunctions
        */
       operator const T**() const
       {
-         return reinterpret_cast<const T**>(const_cast<T*>(get()));
+         return reinterpret_cast<const T**>(const_cast<T*>(Resource<T,MatrixObject<T> >::get()));
       }
 
       /**
@@ -134,7 +153,7 @@ namespace MatrixFunctions
        */
        T*& operator[] (const int& index)
       {
-         T** pMatrix = reinterpret_cast<T**>(get());
+         T** pMatrix = reinterpret_cast<T**>(Resource<T,MatrixObject<T> >::get());
          return pMatrix[index];
       }
 
@@ -150,7 +169,7 @@ namespace MatrixFunctions
        */
       const T*& operator[] (const int& index) const
       {
-         T** pMatrix = reinterpret_cast<T**>(get());
+         T** pMatrix = reinterpret_cast<T**>(Resource<T,MatrixObject<T> >::get());
          return pMatrix[index];
       }
    };
@@ -176,7 +195,7 @@ namespace MatrixFunctions
     *  @see deleteMatrix()
     */
    template<typename T>
-   T** createMatrix(const int& numRows, const int& numCols, const T* pInitialData = NULL)
+   T** createMatrix(const int& numRows, const int& numCols, const T* pInitialData)
    {
       if (numRows <= 0 || numCols <= 0)
       {

@@ -12,6 +12,7 @@
 #include "DataRequest.h"
 #include "GdalRasterPager.h"
 #include "PlugInArgList.h"
+#include "PlugInRegistration.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "RasterUtilities.h"
@@ -19,6 +20,8 @@
 
 #include <gdal_priv.h>
 #include <vector>
+
+REGISTER_PLUGIN_BASIC(OpticksGdalImporter, GdalRasterPager);
 
 namespace
 {

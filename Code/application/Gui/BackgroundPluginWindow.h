@@ -196,8 +196,8 @@ private:
    QPushButton* mpDismissButton;
    QPushButton* mpAbortButton;
 
-   friend ModifiedEvent;
-   friend CallbackEvent;
+   friend class ModifiedEvent;
+   friend class CallbackEvent;
 };
 
 #endif

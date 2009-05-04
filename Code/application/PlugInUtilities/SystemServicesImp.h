@@ -45,7 +45,7 @@ protected:
    SystemServicesImp();
 
 private:
-   static SystemServicesImp* SystemServicesImp::singleton;
+   static SystemServicesImp* singleton;
 
    bool mLoggingActive;
 #if defined(WIN_API)

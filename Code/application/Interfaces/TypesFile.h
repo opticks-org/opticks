@@ -226,8 +226,8 @@ typedef EnumWrapper<EncodingTypeEnum> EncodingType;
  */
 enum EndianTypeEnum
 {
-   BIG_ENDIAN,       /**< The big endian type has the most significant byte first. */
-   LITTLE_ENDIAN     /**< The little endian type has the least significant byte first. */
+   BIG_ENDIAN_ORDER,       /**< The big endian type has the most significant byte first. */
+   LITTLE_ENDIAN_ORDER     /**< The little endian type has the least significant byte first. */
 };
 
 /**

@@ -1,4 +1,4 @@
-#!/usr/local/bin/python
+#!/usr/bin/env python
 import sys
 import subprocess
 import os
@@ -529,6 +529,31 @@ class SolarisBuilder(Builder):
 
         return self.generic_prep_to_run(build_dir, "Solaris", "")
 
+class LinuxBuilder(SolarisBuilder):
+    def __init__(self, dependencies, arcsdk, build_in_debug, verbosity):
+        SolarisBuilder.__init__(self, dependencies, arcsdk, build_in_debug, verbosity)
+
+    def other_doxygen_prep(self, build, env):
+        graphviz_dir = os.path.abspath(join(self.depend_path,
+            "graphviz", "app"))
+        env["GVBINDIR"] = join(graphviz_dir, "lib", "graphviz")
+        new_value = join(graphviz_dir, "lib")
+        if env.has_key("LD_LIBRARY_PATH"):
+            new_value = new_value + ":" + env["LD_LIBRARY_PATH"]
+        env["LD_LIBRARY_PATH"] = new_value
+
+    def get_binaries_dir(self, build_dir):
+        return join(build_dir,"Binaries-linux-x86_64-%s" % (self.mode))
+
+    def get_zip_name(self):
+        return "Binaries-linux-x86_64-%s.zip" % (self.mode)
+
+    def prep_to_run(self, build_dir):
+        if build_dir is None:
+            build_dir = "Build"
+
+        return self.generic_prep_to_run(build_dir, "Linux", "")
+
 def create_builder(opticks_depends, arcsdk, build_in_debug,
                    visualstudio, ms_help_compiler, arch, verbosity):
     builder = None
@@ -539,6 +564,8 @@ def create_builder(opticks_depends, arcsdk, build_in_debug,
         if arch == "64":
             builder = Windows64bitBuilder(opticks_depends, arcsdk,
                 build_in_debug, verbosity, visualstudio, ms_help_compiler)
+    elif sys.platform.startswith("linux"):
+        builder = LinuxBuilder(opticks_depends, arcsdk, build_in_debug, verbosity)
     else:
         builder = SolarisBuilder(opticks_depends, arcsdk,
             build_in_debug, verbosity)

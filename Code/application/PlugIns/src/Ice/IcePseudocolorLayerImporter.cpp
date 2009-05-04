@@ -15,11 +15,14 @@
 #include "IcePseudocolorLayerImporter.h"
 #include "IceReader.h"
 #include "PlugInArgList.h"
+#include "PlugInRegistration.h"
 #include "RasterElement.h"
 #include "SpatialDataView.h"
 #include "SpatialDataWindow.h"
 
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksIce, IcePseudocolorLayerImporter);
 
 IcePseudocolorLayerImporter::IcePseudocolorLayerImporter() :
    IceImporterShell(IceUtilities::PSEUDOCOLOR_LAYER),

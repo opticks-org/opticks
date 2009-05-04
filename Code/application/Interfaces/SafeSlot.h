@@ -14,6 +14,7 @@
 #include "Observer.h"
 #include "Slot.h"
 
+#include <memory>
 #include <string>
 #include <sstream>
 #include <typeinfo>
@@ -207,9 +208,9 @@ private:
             }
             else // neither has an invalidator
             {
-               auto_ptr<const SlotValue<T> > pThisCopy(dynamic_cast<const SlotValue<T>*>(this->SlotValue<T>::clone()));
+               std::auto_ptr<const SlotValue<T> > pThisCopy(dynamic_cast<const SlotValue<T>*>(this->SlotValue<T>::clone()));
                const SlotValue<T>& rhsValue = static_cast<const SlotValue<T>&>(rhs);
-               auto_ptr<const SlotValue<T> > pRhsCopy(dynamic_cast<const SlotValue<T>*>(
+               std::auto_ptr<const SlotValue<T> > pRhsCopy(dynamic_cast<const SlotValue<T>*>(
                   rhsValue.SlotValue<T>::clone()));
                return pThisCopy->matches(*(pRhsCopy.get()));
             }

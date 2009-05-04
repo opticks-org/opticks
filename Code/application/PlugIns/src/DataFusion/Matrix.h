@@ -69,9 +69,7 @@ class Matrix
       inline bool operator==(const Matrix<T>& rhs) const;
       inline bool operator!=(const Matrix<T>& rhs) const;
 
-      inline Matrix<T>& operator+=(const Matrix<T>& opMatrix);
       inline Matrix<T>& operator-=(const Matrix<T>& opMatrix);
-      inline Matrix<T>& operator*=(const double scalar);
 
    private:
       Vector<Vector<T> > mMatrix;
@@ -193,7 +191,7 @@ void Matrix<T>::setToZero()
 template<class T>
 void Matrix<T>::print() const
 {
-   Vector< Vector<T> >::const_iterator iter;
+   typename Vector< Vector<T> >::const_iterator iter;
 
    for (iter = mMatrix.begin(); iter != mMatrix.end(); iter++)
    {
@@ -267,7 +265,7 @@ Matrix<T> Matrix<T>::invert() const
 template<class T>
 inline Matrix<T>& Matrix<T>::operator=(const Matrix<T>& srcMatrix)
 {
-   Vector< Vector<T> >::const_iterator iter;
+   typename Vector< Vector<T> >::const_iterator iter;
    if (this != &srcMatrix)
    {
       mMatrix.clear();
@@ -342,8 +340,8 @@ inline bool Matrix<T>::operator==(const Matrix<T>& rhs) const
 template<class T>
 inline bool Matrix<T>::operator!=(const Matrix<T>& rhs) const
 {
-   Vector< Vector<T> >::const_iterator iter;
-   Vector< Vector<T> >::const_iterator rhsIter;
+   typename Vector< Vector<T> >::const_iterator iter;
+   typename Vector< Vector<T> >::const_iterator rhsIter;
 
    if ((rhs.getNumRows() != getNumRows()) || (rhs.getNumColumns() != getNumColumns()))
    {
@@ -385,28 +383,6 @@ inline Matrix<T> Matrix<T>::operator~() const
 }
 
 template<class T>
-inline Matrix<T>& Matrix<T>::operator+=(const Matrix& srcMatrix)
-{
-   Vector< Vector<T> >::iterator iter;
-   Vector< Vector<T> >::const_iterator srcIter;
-
-   // size mismatch error
-   if ((srcMatrix.getNumRows() != getNumRows()) || (srcMatrix.getNumColumns() != getNumColumns()))
-   {
-      throw FusionException(std::string("Size mismatch"), __LINE__, __FILE__);
-   }
-
-   for (iter = mMatrix.begin(), srcIter = srcMatrix.mMatrix.begin();
-      iter != end() && srcIter != srcMatrix.mMatrix.end();
-      iter++, srcIter++)
-   {
-      *iter += *srcIter;
-   }
-
-   return *this;
-}
-
-template<class T>
 inline Matrix<T>& Matrix<T>::operator-=(const Matrix& srcMatrix)
 {
    (*this) += (srcMatrix * -1);
@@ -414,22 +390,9 @@ inline Matrix<T>& Matrix<T>::operator-=(const Matrix& srcMatrix)
 }
 
 template<class T>
-inline Matrix<T>& Matrix<T>::operator*=(const double scalar)
-{
-   Matrix<T>::iterator iter;
-
-   for (iter = begin(); iter != end(); iter++)
-   {
-      *iter *= scalar;
-   }
-
-   return *this;
-}
-
-template<class T>
 void Matrix<T>::LuDecompose(Vector<int>& index, T& detVal)
 {
-   T verySmallValue = numeric_limits<T>::epsilon();
+   T verySmallValue = std::numeric_limits<T>::epsilon();
    T currentVal = (T)0, detSum = (T)0, largestVal = (T)0, sum = (T)0;
    // Interim calculation values
    int pivotVal = 0;

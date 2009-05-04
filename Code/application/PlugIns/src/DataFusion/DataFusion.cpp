@@ -13,10 +13,13 @@
 #include "DataFusionTools.h"
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
+#include "PlugInRegistration.h"
 #include "ProgressTracker.h"
 
 #include <string>
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksDataFusion, DataFusion);
 
 const string DataFusion::PLUGIN_NAME = "Data Fusion";
 

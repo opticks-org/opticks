@@ -39,6 +39,7 @@ public:
 
 private:
    // Module
+   QWidget* mpModuleWidget;
    QLabel* mpNameLabel;
    QLabel* mpVersionLabel;
    QLabel* mpDescriptionLabel;

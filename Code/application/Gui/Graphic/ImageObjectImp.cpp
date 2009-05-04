@@ -344,7 +344,7 @@ ImageObjectImp::ImageData::ImageData(const unsigned int* pData, int iWidth, int 
       unsigned int transparentCpack = (transparent.mRed << 24) +
          (transparent.mGreen << 16) + (transparent.mBlue << 8);
 
-      if (Endian::getSystemEndian() == LITTLE_ENDIAN)
+      if (Endian::getSystemEndian() == LITTLE_ENDIAN_ORDER)
       {
          orMask[0] = 0xff000000;
          orMask[1] = 0;
@@ -354,7 +354,7 @@ ImageObjectImp::ImageData::ImageData(const unsigned int* pData, int iWidth, int 
       int whichMask;
       for (i = 0; i < pixelCount; i++)
       {
-         if (Endian::getSystemEndian() == LITTLE_ENDIAN)
+         if (Endian::getSystemEndian() == LITTLE_ENDIAN_ORDER)
          {
             mpData.get()[i] &= 0x00ffffff;
          }
@@ -366,14 +366,14 @@ ImageObjectImp::ImageData::ImageData(const unsigned int* pData, int iWidth, int 
          whichMask = (mpData.get()[i] == transparentCpack);
          mpData.get()[i] = orMask[whichMask] | mpData.get()[i];
 
-         if (Endian::getSystemEndian() == BIG_ENDIAN)
+         if (Endian::getSystemEndian() == BIG_ENDIAN_ORDER)
          {
             mpData.get()[i] = ((mpData.get()[i] & 0xff00) << 16) | (mpData.get()[i] & 0xff0000) |
                ((mpData.get()[i] & 0xff000000) >> 16) | (mpData.get()[i] & 0xff);
          }
       }
    }
-   else if (Endian::getSystemEndian() == BIG_ENDIAN)
+   else if (Endian::getSystemEndian() == BIG_ENDIAN_ORDER)
    {
       for (i = 0; i < pixelCount; i++)
       {

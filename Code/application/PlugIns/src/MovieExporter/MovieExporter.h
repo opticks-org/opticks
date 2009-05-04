@@ -15,6 +15,9 @@
 
 #pragma warning(push, 1)
 #pragma warning(disable: 4244)
+#if defined(LINUX)
+#undef OFFSET_T_DEFINED
+#endif
 #include "avformat.h"
 #include "avutil.h"
 #pragma warning(pop)

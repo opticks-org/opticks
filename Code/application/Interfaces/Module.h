@@ -15,9 +15,14 @@
 class External;
 class PlugIn;
 
+/**
+ * \cond INTERNAL
+ */
 extern "C" int LINKAGE opticks_get_module_interface_version();
+/// \endcond
 
 /**
+ *  \cond INTERNAL
  *  Gets descriptive information about the module.
  *
  *  This method returns the module name, version, description, total
@@ -48,8 +53,10 @@ extern "C" bool LINKAGE get_name( char **name,
                                     unsigned int *totalPlugIns,
                                     char **validationKey,
                                     char **pModuleId);
+/// \endcond
 
 /**
+ *  \cond INTERNAL
  *  Initializes the module.
  *
  *  This method initializes the Module.  Initialization includes
@@ -63,8 +70,10 @@ extern "C" bool LINKAGE get_name( char **name,
  *  @return  This method returns true if completed successfully.
  */
 extern "C" bool LINKAGE initialize( External *services );
+/// \endcond
 
 /**
+ *  \cond INTERNAL
  *  Instantiates the given plug-in.
  *
  *  This method instantiates the given plug-in and returns the reference
@@ -78,8 +87,10 @@ extern "C" bool LINKAGE initialize( External *services );
  *  @return  This method returns true if completed successfully.
  */
 extern "C" bool LINKAGE instantiate_interface(unsigned int plugInNumber, PlugIn** interfaceAddress);
+/// \endcond
 
 /**
+ *  \cond INTERNAL
  *  Destroys all plug-ins within the module.
  *
  *  This method tells the module to delete all plug-ins within 
@@ -88,5 +99,6 @@ extern "C" bool LINKAGE instantiate_interface(unsigned int plugInNumber, PlugIn*
  *  @return  This method returns true if completed successfully.
  */
 extern "C" bool LINKAGE destroy();
+/// \endcond
 
 #endif

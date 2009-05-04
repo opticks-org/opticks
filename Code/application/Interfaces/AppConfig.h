@@ -16,7 +16,7 @@
 #if defined(_MSC_VER)
    #define WIN_API
 
-   #define BYTE_ORDER LITTLE_ENDIAN_BYTE_ORDER
+   #define OPTICKS_BYTE_ORDER LITTLE_ENDIAN_BYTE_ORDER
    #define LONG_SIZE 4
    typedef __int16 int16_t;
    typedef __int32 int32_t;
@@ -47,6 +47,7 @@
    #define snprintf _snprintf
 
    #include <stddef.h>
+   #define DISAMBIGUATE_TEMPLATE
 #elif defined (__SUNPRO_CC)
    #include <sys/isa_defs.h>
 
@@ -54,9 +55,9 @@
    #define SOLARIS
 
    #ifdef _BIG_ENDIAN
-      #define BYTE_ORDER BIG_ENDIAN_BYTE_ORDER
+      #define OPTICKS_BYTE_ORDER BIG_ENDIAN_BYTE_ORDER
    #else
-      #define BYTE_ORDER LITTLE_ENDIAN_BYTE_ORDER
+      #define OPTICKS_BYTE_ORDER LITTLE_ENDIAN_BYTE_ORDER
    #endif
 
    #define PTR_SIZE _POINTER_ALIGNMENT
@@ -77,6 +78,48 @@
    #define __stdcall
 
    #include <sys/int_types.h>
+   #define DISAMBIGUATE_TEMPLATE
+#elif defined(__linux__)
+#if !defined(__amd64__)
+#error "Linux support requires a 64-bit x86 (AMD64) processor"
+#endif
+
+#if !defined(__GNUC__) || __GNUC__ != 4
+#error "Linux support requires version 4 of the GNU g++ compiler"
+#endif
+
+   #include <stddef.h>
+   #include <stdlib.h>
+   #include <sys/types.h>
+   #include <stdint.h>
+   #include <stdexcept>
+
+   #include <endian.h>
+   #define UNIX_API
+   #define LINUX
+
+   #if __BYTE_ORDER == __LITTLE_ENDIAN
+      #define OPTICKS_BYTE_ORDER LITTLE_ENDIAN_BYTE_ORDER
+   #else
+      #define OPTICKS_BYTE_ORDER BIG_ENDIAN_BYTE_ORDER
+   #endif
+
+   #define PTR_SIZE __SIZEOF_POINTER__
+   #define LONG_SIZE __SIZEOF_LONG__
+
+   //platform defines
+   #define SLASH std::string("/")
+   #define EXE_EXTENSION std::string("")
+   #define FILENO fileno
+   #define LINKAGE
+   #define HANDLE_TYPE int
+   #define MICRON std::string("u")
+   #define DEG_CHAR std::string("*")
+
+   //allow user to use __stdcall on unix and do the correct thing
+   #define __stdcall
+
+   #define DISAMBIGUATE_TEMPLATE template
 #else
    #error Unrecognized build platform
 #endif

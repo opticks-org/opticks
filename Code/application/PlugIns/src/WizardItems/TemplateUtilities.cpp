@@ -14,11 +14,15 @@
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "ProductView.h"
 #include "ProductWindow.h"
 #include "TemplateUtilities.h"
 
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksWizardItems, LoadTemplate);
+REGISTER_PLUGIN_BASIC(OpticksWizardItems, SaveTemplate);
 
 ///////////////////////
 // TemplateUtilities //

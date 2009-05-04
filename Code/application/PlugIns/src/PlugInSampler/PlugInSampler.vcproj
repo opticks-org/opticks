@@ -94,82 +94,6 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Debug|x64"
-			ConfigurationType="2"
-			InheritedPropertySheets="..\..\..\CompileSettings\PlugInCommonSettings.vsprops;..\..\..\CompileSettings\AllCommonSettings-Debug-64bit.vsprops;..\..\..\CompileSettings\64bitSettings.vsprops;..\..\..\CompileSettings\Macros.vsprops;..\..\..\CompileSettings\pthreads.vsprops;..\..\..\CompileSettings\Xerces-Debug.vsprops"
-			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="false"
-			CharacterSet="2"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				PreprocessorDefinitions="_DEBUG"
-				MkTypLibCompatible="true"
-				SuppressStartupBanner="true"
-				TargetEnvironment="3"
-				TypeLibraryName=".\Debug/PlugInSampler.tlb"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories=""
-				AssemblerListingLocation=""
-				BrowseInformationFile=""
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="_DEBUG"
-				Culture="1033"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				Version=""
-				AdditionalLibraryDirectories=""
-				IgnoreDefaultLibraryNames=""
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
 			Name="Release|Win32"
 			ConfigurationType="2"
 			InheritedPropertySheets="..\..\..\CompileSettings\32bitSettings.vsprops;..\..\..\CompileSettings\PlugInCommonSettings.vsprops;..\..\..\CompileSettings\AllCommonSettings-Release-32bit.vsprops;..\..\..\CompileSettings\Macros.vsprops;..\..\..\CompileSettings\pthreads.vsprops;..\..\..\CompileSettings\Xerces-Release.vsprops"
@@ -209,6 +133,82 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				Version=""
+				AdditionalLibraryDirectories=""
+				IgnoreDefaultLibraryNames=""
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Debug|x64"
+			ConfigurationType="2"
+			InheritedPropertySheets="..\..\..\CompileSettings\PlugInCommonSettings.vsprops;..\..\..\CompileSettings\AllCommonSettings-Debug-64bit.vsprops;..\..\..\CompileSettings\64bitSettings.vsprops;..\..\..\CompileSettings\Macros.vsprops;..\..\..\CompileSettings\pthreads.vsprops;..\..\..\CompileSettings\Xerces-Debug.vsprops"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="_DEBUG"
+				MkTypLibCompatible="true"
+				SuppressStartupBanner="true"
+				TargetEnvironment="3"
+				TypeLibraryName=".\Debug/PlugInSampler.tlb"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalIncludeDirectories=""
+				AssemblerListingLocation=""
+				BrowseInformationFile=""
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_DEBUG"
 				Culture="1033"
 			/>
 			<Tool
@@ -342,6 +342,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CustomMenuPlugIn.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\DummyCustomAlgorithm.cpp"
 				>
 			</File>
@@ -384,6 +388,10 @@
 			</File>
 			<File
 				RelativePath=".\CustomElementPlugIn.h"
+				>
+			</File>
+			<File
+				RelativePath=".\CustomMenuPlugIn.h"
 				>
 			</File>
 			<File

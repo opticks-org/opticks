@@ -27,10 +27,10 @@ class Vector : public std::vector<T>
 
       T magnitude() const
       {
-         Vector<T>::const_iterator iter;
+         typename Vector<T>::const_iterator iter;
          T returnValue = (T)0;
 
-         for (iter = begin(); iter != end(); iter++)
+         for (iter = std::vector<T>::begin(); iter != std::vector<T>::end(); iter++)
          {
             returnValue += ((*iter) * (*iter));
          }
@@ -40,15 +40,15 @@ class Vector : public std::vector<T>
       Vector<T> normalize() const
       {
          T magn;
-         Vector<T>::const_iterator iter;
-         Vector<T>::iterator returnIter;
-         Vector<T> returnVector(size());
+         typename Vector<T>::const_iterator iter;
+         typename Vector<T>::iterator returnIter;
+         Vector<T> returnVector(typename std::vector<T>::size());
 
          magn = magnitude();
 
          if (magn > (T)0)
          {
-            for (returnIter = returnVector.begin(), iter = begin(); 
+            for (returnIter = returnVector.begin(), iter = typename std::vector<T>::begin(); 
                  returnIter != returnVector.end(); 
                  returnIter++, iter++)
             {
@@ -69,9 +69,9 @@ class Vector : public std::vector<T>
 
       inline const T& operator[](const size_t element) const
       {
-         if (element < size())
+         if (element < std::vector<T>::size())
          {
-            return *(begin() + element);
+            return *(std::vector<T>::begin() + element);
          }
          else
          {
@@ -81,9 +81,9 @@ class Vector : public std::vector<T>
 
       inline T& operator[](const size_t element)
       {
-         if (element < size())
+         if (element < std::vector<T>::size())
          {
-            return *(begin() + element);
+            return *(std::vector<T>::begin() + element);
          }
          else
          {
@@ -114,17 +114,17 @@ class Vector : public std::vector<T>
 
       Vector<T>& operator+=(const Vector<T>& srcVector)
       {
-         Vector<T>::iterator iter;
-         Vector<T>::const_iterator srcIter;
+         typename Vector<T>::iterator iter;
+         typename Vector<T>::const_iterator srcIter;
 
          // size mismatch error
-         if (srcVector.size() != size())
+         if (srcVector.size() != std::vector<T>::size())
          {
             throw FusionException(std::string("Size mismatch"), __LINE__, __FILE__);
          }
 
-         for (iter = begin(), srcIter = srcVector.begin();
-            iter != end() && srcIter != srcVector.end();
+         for (iter = std::vector<T>::begin(), srcIter = srcVector.begin();
+            iter != std::vector<T>::end() && srcIter != srcVector.end();
             iter++, srcIter++)
          {
             *iter += *srcIter;
@@ -141,10 +141,10 @@ class Vector : public std::vector<T>
 
       Vector<T>& operator*=(const T scalar)
       {
-         Vector<T>::iterator iter;
+         typename Vector<T>::iterator iter;
 
          //std::cout<<"Vec Size: "<<(int)size( )<<std::endl;
-         for (iter = begin(); iter != end( ); iter++)
+         for (iter = std::vector<T>::begin(); iter != std::vector<T>::end(); iter++)
          {
             *iter *= scalar;
          }
@@ -159,16 +159,16 @@ class Vector : public std::vector<T>
 
       bool operator!=(const Vector<T>& rhs)
       {
-         Vector<T>::const_iterator iter;
-         Vector<T>::const_iterator rhsIter;
+         typename Vector<T>::const_iterator iter;
+         typename Vector<T>::const_iterator rhsIter;
 
-         if (size() != rhs.size())
+         if (typename std::vector<T>::size() != rhs.size())
          {
             throw FusionException(std::string("Size mismatch"), __LINE__, __FILE__);
          }
 
-         for (iter = begin(), rhsIter = rhs.begin();
-              iter != end() && rhsIter != rhs.end();
+         for (iter = typename std::vector<T>::begin(), rhsIter = rhs.begin();
+              iter != typename std::vector<T>::end() && rhsIter != rhs.end();
               iter++, rhsIter++)
          {
             if (*iter != *rhsIter)

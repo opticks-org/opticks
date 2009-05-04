@@ -16,8 +16,8 @@
 #include "ConvolutionFilterShell.h"
 #include "LayerList.h"
 #include "PlugInArgList.h"
-#include "PlugInFactory.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "RasterDataDescriptor.h"
 #include "RasterLayer.h"
 #include "RasterUtilities.h"
@@ -466,7 +466,7 @@ bool ConvolutionFilterShell::ConvolutionFilterThreadOutput::compileOverallResult
    return true;
 }
 
-PLUGINFACTORY(GenericConvolution);
+REGISTER_PLUGIN_BASIC(OpticksConvolutionFilter, GenericConvolution);
 
 GenericConvolution::GenericConvolution()
 {

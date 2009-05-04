@@ -297,7 +297,7 @@ void TextObjectImp::updateTexture()
          }
          else
          {
-            if (Endian::getSystemEndian() == LITTLE_ENDIAN)
+            if (Endian::getSystemEndian() == LITTLE_ENDIAN_ORDER)
             {
                *target = 0xffffff;
             }

@@ -12,8 +12,11 @@
 #include "MessageLogResource.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "SetThresholdOptions.h"
 #include "ThresholdLayer.h"
+
+REGISTER_PLUGIN_BASIC(OpticksWizardItems, SetThresholdOptions);
 
 SetThresholdOptions::SetThresholdOptions() : mFirstThreshold(0.0), mSecondThreshold(0.0), mHasFirst(false), mHasSecond(false)
 {

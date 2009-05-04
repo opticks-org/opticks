@@ -11,6 +11,7 @@
 #include "LayerList.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "RasterLayer.h"
@@ -26,6 +27,8 @@
 #include <time.h>
 
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksPlugInSamplerQt, RasterTimingTest);
 
 RasterTimingTest::RasterTimingTest()
 {

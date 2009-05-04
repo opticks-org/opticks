@@ -14,6 +14,7 @@
 #include "GdalRasterPager.h"
 #include "ImportDescriptor.h"
 #include "PlugInArgList.h"
+#include "PlugInRegistration.h"
 #include "PlugInResource.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
@@ -24,6 +25,8 @@
 #include "TypeConverter.h"
 
 #include <gdal_priv.h>
+
+REGISTER_PLUGIN_BASIC(OpticksGdalImporter, GdalImporter);
 
 namespace
 {

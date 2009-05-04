@@ -12,6 +12,7 @@
 
 #include "Hdf5CustomReader.h"
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -171,7 +172,7 @@ public:
       hssize_t numberOfPoints = getNumberOfSelectedPoints();
       DO_IF(numberOfPoints <= 0, return NULL);
       bool supported = false;
-      vector<hsize_t> dimensions;
+      std::vector<hsize_t> dimensions;
       if (pReader->getSupportedDimensionality() == 1)
       {
          dimensions.push_back(numberOfPoints);

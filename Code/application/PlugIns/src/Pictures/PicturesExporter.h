@@ -16,6 +16,7 @@
 #include "PlugInManagerServices.h"
 #include "TypesFile.h"
 
+#include <memory>
 #include <string>
 
 class PlotWidget;

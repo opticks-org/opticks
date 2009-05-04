@@ -20,6 +20,7 @@
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "RasterFileDescriptor.h"
@@ -188,6 +189,8 @@ bool Cache::CacheCleaner(const CacheUnit *pUnit)
 }
 
 }; // namespace GeoTiffOnDisk
+
+REGISTER_PLUGIN_BASIC(OpticksPictures, GeoTiffPager);
 
 GeoTiffPager::GeoTiffPager() :
          RasterPagerShell(),

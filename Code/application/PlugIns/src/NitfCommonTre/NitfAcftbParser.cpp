@@ -14,6 +14,7 @@
 #include "NitfConstants.h"
 #include "NitfUtilities.h"
 #include "ObjectResource.h"
+#include "PlugInRegistration.h"
 #include "StringUtilities.h"
 
 #include <set>
@@ -25,6 +26,8 @@
 using namespace std;
 using namespace Nitf;
 using namespace Nitf::TRE;
+
+REGISTER_PLUGIN(OpticksNitfCommonTre, AcftbParser, Nitf::AcftbParser());
 
 Nitf::AcftbParser::AcftbParser()
 {

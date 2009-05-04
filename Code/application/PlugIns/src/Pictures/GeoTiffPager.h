@@ -61,8 +61,8 @@ public:
    CacheUnit* getCacheUnit(std::vector<unsigned int>& blocks, size_t blockSize);
 
 private:
-   static bool Cache::CacheLocator(std::vector<unsigned int> blockNumbers, CacheUnit* pUnit);
-   static bool Cache::CacheCleaner(const CacheUnit* pUnit);
+   static bool CacheLocator(std::vector<unsigned int> blockNumbers, CacheUnit* pUnit);
+   static bool CacheCleaner(const CacheUnit* pUnit);
 
    cache_t mCache;
    const unsigned int mCacheSize;

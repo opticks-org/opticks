@@ -26,7 +26,7 @@ public:
    OptionsNitfExporter(const Classification* const pClassification, QWidget* pParent = NULL);
    ~OptionsNitfExporter();
 
-   bool isValid(std::string& errorMessage = std::string());
+   bool isValid(std::string& errorMessage);
    std::string getModifiedValue(const QString& name);
 
    static const QString LEVEL;

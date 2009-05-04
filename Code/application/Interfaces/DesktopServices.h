@@ -803,6 +803,29 @@ public:
     *  @param   pProgress
     *           The progress object to use when importing the data.  If \b NULL
     *           is passed in, a new progress object is created.
+    *
+    *  @return  Returns \b true if at least one or more data sets was successfully
+    *           loaded from the file.
+    *  @see importFile(const std::string&, Progress*, std::vector<DataElement*>&)
+    */
+   virtual bool importFile(const std::string& importerSubtype = std::string(), Progress* pProgress = NULL) = 0;
+
+
+   /**
+    *  Loads data from a file.
+    *
+    *  This method is used to open any type of data from a file.  A file selection
+    *  dialog appears for the user to select a desired file and importer.  If a
+    *  valid importer subtype is given, only the importers of that subtype are
+    *  available to the user; otherwise all importers are available.
+    *
+    *  @param   importerSubtype
+    *           The importer subtype for which to set the available importer in
+    *           the file selection dialog.  Passing in an empty string allows all
+    *           importers to be available.
+    *  @param   pProgress
+    *           The progress object to use when importing the data.  If \b NULL
+    *           is passed in, a new progress object is created.
     *  @param   importedElements
     *           A vector that will be populated with the data elements that were
     *           successfully imported from the user selected file.  This vector
@@ -811,9 +834,9 @@ public:
     *
     *  @return  Returns \b true if at least one or more data sets was successfully
     *           loaded from the file.
+    *  @see importFile(const std::string&, Progress*)
     */
-   virtual bool importFile(const std::string& importerSubtype = std::string(), Progress* pProgress = NULL,
-      std::vector<DataElement*>& importedElements = std::vector<DataElement*>()) = 0;
+   virtual bool importFile(const std::string& importerSubtype, Progress* pProgress, std::vector<DataElement*>& importedElements) = 0;
 
    /**
     *  Saves a session item to disk.

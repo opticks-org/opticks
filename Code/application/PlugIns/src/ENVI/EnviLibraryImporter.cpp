@@ -23,6 +23,7 @@
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "PlugInResource.h"
 #include "Progress.h"
 #include "RasterDataDescriptor.h"
@@ -34,6 +35,8 @@
 
 #include <sstream>
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksENVI, EnviLibraryImporter);
 
 EnviLibraryImporter::EnviLibraryImporter() :
    mbAbort(false),

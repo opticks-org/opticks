@@ -17,6 +17,7 @@
 #include "LayerList.h"
 #include "MouseMode.h"
 #include "MouseModePlugIn.h"
+#include "PlugInRegistration.h"
 #include "RasterElement.h"
 #include "RasterDataDescriptor.h"
 #include "Slot.h"
@@ -48,6 +49,8 @@ static const char* const MouseModeIcon[] =
    "................",
    "................"
 };
+
+REGISTER_PLUGIN_BASIC(OpticksPlugInSamplerQt, MouseModePlugIn);
 
 MouseModePlugIn::MouseModePlugIn() :
    mpMouseMode(NULL),

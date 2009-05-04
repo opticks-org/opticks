@@ -10,6 +10,7 @@
 #include "ColorMap.h"
 #include "FileResource.h"
 
+#include <memory>
 #include <QtCore/QBuffer>
 #include <QtCore/QFile>
 #include <QtCore/QTextStream>
@@ -428,7 +429,8 @@ bool ColorMap::deserializeGradient(QIODevice &io, int version)
    }
 
    std::vector<ColorType> colorTable;
-   colorTable.swap(tableFromGradient(*pGradient));
+   std::vector<ColorType> table = tableFromGradient(*pGradient);
+   colorTable.swap(table);
    if (!ColorMap::tableIsValid(colorTable)) 
    {
       return false;

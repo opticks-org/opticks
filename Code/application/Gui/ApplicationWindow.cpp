@@ -2137,6 +2137,12 @@ void ApplicationWindow::updateUndoActions(const string& oldId, const string& new
 ///////////////////////////////////////////////////////////////////////////////////////////
 // File actions
 
+bool ApplicationWindow::importFile(const QString& strImporterSubtype, Progress* pProgress)
+{
+   vector<DataElement*> dummy;
+   return importFile(strImporterSubtype, pProgress, dummy);
+}
+
 bool ApplicationWindow::importFile(const QString& strImporterSubtype, Progress* pProgress,
                                    vector<DataElement*>& importedElements)
 {

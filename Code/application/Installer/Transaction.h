@@ -16,6 +16,7 @@
 #include <string>
 
 class AebEntry;
+class AebIo;
 
 /**
  * This class indicates a failure processing a transaction during execution or rollback.

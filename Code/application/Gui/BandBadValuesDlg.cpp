@@ -127,7 +127,8 @@ void BandBadValuesDlg::okPressed()
 {
    bool conversionSuccess;
    vector<int> enteredValues;
-   enteredValues = BandBadValuesValidator::convertStringToVector(mpBandBadValue->text(), conversionSuccess);
+   QString tmp = mpBandBadValue->text();
+   enteredValues = BandBadValuesValidator::convertStringToVector(tmp, conversionSuccess);
    if (conversionSuccess)
    {
       //change the vector of ints returned from this dialog since the

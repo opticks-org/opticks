@@ -279,10 +279,6 @@
 				RelativePath=".\InteractiveApplication.cpp"
 				>
 			</File>
-			<File
-				RelativePath=".\ModuleManager.cpp"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"

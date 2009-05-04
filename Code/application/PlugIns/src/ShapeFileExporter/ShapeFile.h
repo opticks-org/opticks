@@ -41,7 +41,7 @@ public:
    void setShape(ShapeType eShape);
    ShapeType getShape() const;
 
-   std::vector<Feature*> addFeatures(DataElement* pElement, RasterElement* pGeoref, std::string& message = std::string());
+   std::vector<Feature*> addFeatures(DataElement* pElement, RasterElement* pGeoref, std::string& message);
    bool removeFeature(Feature* pFeature);
    const std::vector<Feature*>& getFeatures() const;
    unsigned int getNumFeatures() const;
@@ -55,7 +55,7 @@ public:
    bool hasField(const std::string& name) const;
    void removeAllFields();
 
-   bool save(Progress* pProgress = NULL, std::string& errorMessage = std::string());
+   bool save(Progress* pProgress, std::string& errorMessage);
 
 private:
    void cleanup();

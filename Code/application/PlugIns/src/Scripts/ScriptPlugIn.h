@@ -11,12 +11,11 @@
 #define SCRIPTPLUGIN_H
 
 #include "AlgorithmShell.h"
-#include "Descriptors.h"
 
 class ScriptPlugIn : public AlgorithmShell
 {
 public:
-   ScriptPlugIn(int scriptIndex);
+   ScriptPlugIn();
    ~ScriptPlugIn();
 
    bool getInputSpecification(PlugInArgList *&);
@@ -26,8 +25,6 @@ public:
 
 private:
    bool populateOutputArgList(PlugInArgList *pOutArgList);
-
-   Descriptor mDescriptor;
 };
 
 #endif

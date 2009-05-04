@@ -30,6 +30,7 @@
 #include "ObjectResource.h"
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
+#include "PlugInRegistration.h"
 #include "PlugInResource.h"
 #include "ProgressResource.h"
 #include "QueryOptions.h"
@@ -55,6 +56,8 @@
 
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
+
+REGISTER_PLUGIN_BASIC(OpticksGeographicFeatures, FeatureManager);
 
 #define APP_FEATUREMANAGER_REFRESH_ACTION "APP_FEATUREMANAGER_REFRESH_ACTION"
 #define APP_FEATUREMANAGER_SEPARATOR_ACTION "APP_FEATUREMANAGER_SEPARATOR_ACTION"

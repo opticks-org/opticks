@@ -19,7 +19,7 @@
 #define NOGDI
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-#elif defined(SOLARIS)
+#elif defined(UNIX_API)
 #include <dlfcn.h>
 #include <link.h>
 #else
@@ -142,7 +142,7 @@ bool ApplicationServicesImp::getJvm(JavaVM *&pJvm, JNIEnv *&pEnv)
    }
    string jvmLoaderLibrary = pJvmLoaderLibrary->getFullPathAndName();
 
-#if defined(SOLARIS)
+#if defined(SOLARIS) || defined(LINUX)
    void* pJvmLoaderLibraryHandle(dlopen(jvmLoaderLibrary.c_str(), RTLD_NOW | RTLD_GLOBAL));
    if (pJvmLoaderLibraryHandle == NULL)
    {

@@ -273,9 +273,6 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir,
         suffixes_to_match=source_suffixes)
     cp_file2(s_app, d_app, join("PlugIns", "src", "Aspam"), "Aspam.h")
 
-    #Copy the ModuleManager.cpp to the right spot in the Toolkit
-    cp_file(join(s_release, "Toolkit", "src", "ModuleManager.cpp"),
-        join(out_dir, "Src"))
     if verbosity > 1:
         print "Done gathering files for SDK"
 
@@ -351,7 +348,7 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir,
         "Scripts", "SecondMoment", "ShapeFileExporter", "Sio",
         "WizardExecutor", "WizardItems" ]
     sample_plugins = ["PlugInSampler", "PlugInSamplerQt",
-        "PlugInSamplerHdf", "ProductionPlugInTester", "Tutorial" ]
+        "PlugInSamplerHdf", "Tutorial" ]
     if is_windows():
         cp_file2(s_app, d_app, "", "SamplePlugIns.sln")
         cp_file2(s_app, d_app, "PlugInManager", "PlugInModule.def")

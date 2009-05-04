@@ -23,6 +23,7 @@
 #include "ObjectFactory.h"
 #include "ObjectResource.h"
 #include "PlugInArgList.h"
+#include "PlugInRegistration.h"
 #include "RasterDataDescriptor.h"
 #include "RasterUtilities.h"
 #include "SecondMoment.h"
@@ -292,6 +293,8 @@ void ComputeMaskedSmm(T* pData, MaskInput* pInput, RasterElement* pRaster)
       }
    }
 }
+
+REGISTER_PLUGIN_BASIC(OpticksSecondMoment, SecondMoment);
 
 bool SecondMoment::canRunBatch() const
 {

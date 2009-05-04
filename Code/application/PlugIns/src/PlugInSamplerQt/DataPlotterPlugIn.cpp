@@ -11,11 +11,14 @@
 #include "DataPlotterPlugIn.h"
 #include "DataVariant.h"
 #include "ModelServices.h"
+#include "PlugInRegistration.h"
 #include "Signature.h"
 
 #include <vector>
 
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksPlugInSamplerQt, DataPlotterPlugIn);
 
 DataPlotterPlugIn::DataPlotterPlugIn() :
    mInteractive(true)

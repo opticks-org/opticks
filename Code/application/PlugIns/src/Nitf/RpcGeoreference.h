@@ -15,6 +15,7 @@
 #include "PlugInManagerServices.h"
 #include "UtilityServices.h"
 #include <ossim/projection/ossimRpcModel.h>
+#include <memory>
 
 #define NUM_RPC_COEFFICIENTS 20 
 

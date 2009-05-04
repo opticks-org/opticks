@@ -424,7 +424,7 @@ public:
 #if defined(WIN_API)
       return _telli64(mHandle);
 #else
-      return tell64(mHandle);
+      return lseek64(mHandle, 0, SEEK_CUR);
 #endif
    }
 

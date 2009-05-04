@@ -17,6 +17,7 @@
 #include "DesktopServices.h"
 #include "Executable.h"
 #include "Modeless.h"
+#include "PlugInRegistration.h"
 #include "Slot.h"
 
 static const char* sHelpXpm[] = 
@@ -109,6 +110,8 @@ static const char* sHelpXpm[] =
 //////////////////////////////////////////////////////////////////////////
 // ModelessPlugIn
 static const char* spConfigKey = "ModelessDialog/Runs";
+
+REGISTER_PLUGIN_BASIC(OpticksPlugInSamplerQt, ModelessPlugIn);
 
 ModelessPlugIn::ModelessPlugIn() :
    mpDialog(NULL),

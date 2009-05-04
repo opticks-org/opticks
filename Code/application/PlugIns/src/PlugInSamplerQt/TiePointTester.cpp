@@ -7,11 +7,14 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include "PlugInArgList.h"
+#include "PlugInRegistration.h"
 #include "TiePointTester.h"
 #include "TiePointTesterAlgorithm.h"
-#include "PlugInArgList.h"
 
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksPlugInSamplerQt, TiePointTester);
 
 /**
  *  Obligation from the base class. Indicates if the algorithm can

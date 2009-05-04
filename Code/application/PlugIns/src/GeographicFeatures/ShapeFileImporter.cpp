@@ -33,6 +33,7 @@
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "Progress.h"
 #include "RasterElement.h"
 #include "ShapeFileImporter.h"
@@ -46,6 +47,8 @@
 #include <QtGui/QLayout>
 
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksGeographicFeatures, ShapeFileImporter);
 
 const std::string ShapeFileImporter::PLUGIN_NAME = "Shape File Importer";
 const std::string ShapeFileImporter::PLUGIN_SUBTYPE = "Shape File";
@@ -122,7 +125,7 @@ unsigned char ShapeFileImporter::getFileAffinity(const std::string& filename)
       return Importer::CAN_NOT_LOAD;
    }
 
-   Endian endian(BIG_ENDIAN);
+   Endian endian(BIG_ENDIAN_ORDER);
 
    // check the magic numbers in a SHP file
    vector<uint32_t> buffer(7);

@@ -29,6 +29,7 @@
 #include "PlugInArgList.h"
 #include "PlugInDescriptor.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "PlugInResource.h"
 #include "RasterElement.h"
 #include "SpatialDataView.h"
@@ -37,6 +38,8 @@
 
 #include <algorithm>
 #include <boost/bind.hpp>
+
+REGISTER_PLUGIN_BASIC(OpticksGeoreference, GeoreferencePlugIn);
 
 GeoreferencePlugIn::GeoreferencePlugIn() :
    mDisplayLayer(false),

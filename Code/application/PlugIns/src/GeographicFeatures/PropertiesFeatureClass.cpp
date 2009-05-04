@@ -13,10 +13,13 @@
 #include "FeatureClassWidget.h"
 #include "FeatureManager.h"
 #include "FeatureProxyConnector.h"
+#include "PlugInRegistration.h"
 #include "ProgressResource.h"
 #include "PropertiesFeatureClass.h"
 
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksGeographicFeatures, PropertiesFeatureClass);
 
 PropertiesFeatureClass::PropertiesFeatureClass() :
    mpFeatureClass(NULL)

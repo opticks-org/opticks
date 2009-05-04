@@ -30,7 +30,7 @@ public:
    bool getOutputSpecification(PlugInArgList*& pArgList);
    bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
 
-   bool validate(const DataDescriptor *pDescriptor, std::string &errorMessage = std::string()) const;
+   bool validate(const DataDescriptor *pDescriptor, std::string &errorMessage) const;
 
    std::vector<ImportDescriptor*> getImportDescriptors(const std::string& filename);
    unsigned char getFileAffinity(const std::string& filename);

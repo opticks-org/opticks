@@ -120,7 +120,7 @@ RasterElement* poly_2D(T* pDummy, RasterElement* pRasterElement,
    REQUIRE(dimX > 0 && dimY > 0);
    REQUIRE(nx > 0 && ny > 0);
 
-   string msg = "Warping image...";
+   std::string msg = "Warping image...";
 
    RasterDataDescriptor* pNewDescriptor = RasterUtilities::generateRasterDataDescriptor("SecondaryPrime",
       pRasterElement, dimY, dimX, 1, BSQ, pOrigDescriptor->getDataType(), inMemory ? IN_MEMORY : ON_DISK);
@@ -227,7 +227,7 @@ RasterElement* poly_2D(T* pDummy, RasterElement* pRasterElement,
 
    if ((badValues / (dimX * dimY)) > THRESHOLD) 
    {
-      string txt = "Warning: Too many values in the primary data set are not in the secondary data set! "
+      std::string txt = "Warning: Too many values in the primary data set are not in the secondary data set! "
          "Possible causes: you selected a region in the primary image that is not in the secondary image, "
          "or the georeferencing is bad!";
       progressTracker.report(txt, 99, WARNING, true);
@@ -236,7 +236,7 @@ RasterElement* poly_2D(T* pDummy, RasterElement* pRasterElement,
    Statistics* pStatistics = pNewRaster->getStatistics();
    if (pStatistics != NULL)
    {
-      vector<int> badVals;
+      std::vector<int> badVals;
       badVals.push_back((const int)BAD_VALUE);
 
       pStatistics->setBadValues(badVals);

@@ -25,6 +25,7 @@
 #include "ModelServices.h"
 #include "ObjectFactory.h"
 #include "ObjectResource.h"
+#include "PlugInRegistration.h"
 #include "SampleHdf4Importer.h"
 #include "RasterDataDescriptor.h"
 #include "RasterFileDescriptor.h"
@@ -32,6 +33,8 @@
 
 using namespace HdfUtilities;
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksPlugInSamplerHdf, SampleHdf4Importer);
 
 SampleHdf4Importer::SampleHdf4Importer()
 {

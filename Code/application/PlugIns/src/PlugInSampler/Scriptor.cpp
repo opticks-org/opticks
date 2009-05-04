@@ -9,10 +9,13 @@
 
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
+#include "PlugInRegistration.h"
 #include "Scriptor.h"
 #include "SessionItemSerializer.h"
 
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksPlugInSampler, Scriptor);
 
 Scriptor::Scriptor()
 {

@@ -14,6 +14,7 @@
 #include "NitfUtilities.h"
 #include "NitfConstants.h"
 #include "ObjectResource.h"
+#include "PlugInRegistration.h"
 
 #include <sstream>
 
@@ -22,6 +23,8 @@ using namespace Nitf;
 using namespace Nitf::TRE;
 
 #include <boost/algorithm/string/case_conv.hpp>
+
+REGISTER_PLUGIN(OpticksNitfCommonTre, StdidbParser, Nitf::StdidbParser());
 
 Nitf::StdidbParser::StdidbParser()
 {

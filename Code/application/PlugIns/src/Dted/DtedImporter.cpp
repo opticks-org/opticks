@@ -14,6 +14,7 @@
 #include "Endian.h"
 #include "ImportDescriptor.h"
 #include "ModelServices.h"
+#include "PlugInRegistration.h"
 #include "ObjectResource.h"
 #include "RasterDataDescriptor.h"
 #include "RasterFileDescriptor.h"
@@ -22,6 +23,8 @@
 
 #include <string>
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksDTED, DtedImporter);
 
 DtedImporter::DtedImporter()
 {
@@ -92,7 +95,7 @@ vector<ImportDescriptor*> DtedImporter::getImportDescriptors(const string& filen
             pDescriptor->setBadValues(badValues);
             
             RasterFileDescriptor* pFileDescriptor = dynamic_cast<RasterFileDescriptor*>(
-               RasterUtilities::generateAndSetFileDescriptor(pDescriptor, filename, "", BIG_ENDIAN));
+               RasterUtilities::generateAndSetFileDescriptor(pDescriptor, filename, "", BIG_ENDIAN_ORDER));
 
             if (pFileDescriptor != NULL)
             {

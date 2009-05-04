@@ -26,6 +26,7 @@
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "Progress.h"
 #include "RasterElement.h"
 #include "RasterDataDescriptor.h"
@@ -40,6 +41,8 @@
 #include <string>
 #include <vector>
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksENVI, EnviExporter);
 
 EnviExporter::EnviExporter() :
    mpProgress(NULL),
@@ -554,12 +557,12 @@ bool EnviExporter::exportHeaderFile() const
       bool bMsb = false;
       if (mExportDataFile == true)
       {
-         if (Endian::getSystemEndian() == BIG_ENDIAN)
+         if (Endian::getSystemEndian() == BIG_ENDIAN_ORDER)
          {
             bMsb = true;
          }
       }
-      else if (pFileDescriptor->getEndian() == BIG_ENDIAN)
+      else if (pFileDescriptor->getEndian() == BIG_ENDIAN_ORDER)
       {
          bMsb = true;
       }

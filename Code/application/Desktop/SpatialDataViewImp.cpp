@@ -1429,7 +1429,7 @@ QImage SpatialDataViewImp::getLayerImage(Layer* pLayer, ColorType& transparent, 
 
       // Scan the buffer to find the actual bounding box that contains all pixels not equal to the background color
       unsigned int backgroundCpack = clrBackground.red() + (clrBackground.green() << 8) + (clrBackground.blue() << 16);
-      if (Endian::getSystemEndian() == BIG_ENDIAN)
+      if (Endian::getSystemEndian() == BIG_ENDIAN_ORDER)
       {
          backgroundCpack = (clrBackground.red() << 24) + (clrBackground.green() << 16) + (clrBackground.blue() << 8);
       }
@@ -1439,7 +1439,7 @@ QImage SpatialDataViewImp::getLayerImage(Layer* pLayer, ColorType& transparent, 
          for (int j = 0; j < iWidth; j++)
          {
             unsigned int pixel = img.pixel(j, i) & 0xffffff;
-            if (Endian::getSystemEndian() == BIG_ENDIAN)
+            if (Endian::getSystemEndian() == BIG_ENDIAN_ORDER)
             {
                pixel = img.pixel(j, i) & 0xffffff00;
             }
@@ -1518,7 +1518,7 @@ QImage SpatialDataViewImp::getLayerImage(Layer* pLayer, ColorType& transparent, 
 
       // Scan the buffer to find the actual bounding box that contains all pixels not equal to the background color
       unsigned int backgroundCpack = clrBackground.red() + (clrBackground.green() << 8) + (clrBackground.blue() << 16);
-      if (Endian::getSystemEndian() == BIG_ENDIAN)
+      if (Endian::getSystemEndian() == BIG_ENDIAN_ORDER)
       {
          backgroundCpack = (clrBackground.red() << 24) + (clrBackground.green() << 16) + (clrBackground.blue() << 8);
       }
@@ -1528,7 +1528,7 @@ QImage SpatialDataViewImp::getLayerImage(Layer* pLayer, ColorType& transparent, 
          for (int j = 0; j < iWidth; j++)
          {
             unsigned int pixel = pixels[i * iWidth + j] & 0xffffff;
-            if (Endian::getSystemEndian() == BIG_ENDIAN)
+            if (Endian::getSystemEndian() == BIG_ENDIAN_ORDER)
             {
                pixel = pixels[i * iWidth + j] & 0xffffff00;
             }
@@ -1601,7 +1601,7 @@ QSize SpatialDataViewImp::sizeHint() const
    double dMaxY = 0.0;
    getExtents(dMinX, dMinY, dMaxX, dMaxY);
 
-   QSize szExtents(dMaxX - dMinX, dMaxY - dMinY);
+   QSize szExtents(static_cast<int>(dMaxX - dMinX), static_cast<int>(dMaxY - dMinY));
    return szExtents;
 }
 
@@ -1959,10 +1959,10 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
                         const vector<DimensionDescriptor>& activeColumns = pDescriptor->getColumns();
                         if ((dataCoord.mY >= 0) &&
                            (activeRows.size() > static_cast<unsigned int>(dataCoord.mY)) &&
-                           (activeRows[dataCoord.mY].isValid()) &&
+                           (activeRows[static_cast<int>(dataCoord.mY)].isValid()) &&
                            (dataCoord.mX >= 0) &&
                            (activeColumns.size() > static_cast<unsigned int>(dataCoord.mX)) &&
-                           (activeColumns[dataCoord.mX].isValid()))
+                           (activeColumns[static_cast<int>(dataCoord.mX)].isValid()))
                         {
                            if (pRaster == mpLayerList->getPrimaryRasterElement())
                            {
@@ -1972,8 +1972,8 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
                                  continue;
                               }
 
-                              DimensionDescriptor rowDim = activeRows[dataCoord.mY];
-                              DimensionDescriptor columnDim = activeColumns[dataCoord.mX];
+                              DimensionDescriptor rowDim = activeRows[static_cast<int>(dataCoord.mY)];
+                              DimensionDescriptor columnDim = activeColumns[static_cast<int>(dataCoord.mX)];
 
                               int originalSceneX = columnDim.getOriginalNumber();
                               int originalSceneY = rowDim.getOriginalNumber();
@@ -2151,8 +2151,10 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
                               if ((dataCoord.mX >= 0) && (dataCoord.mX < numCols) && (dataCoord.mY >= 0) &&
                                  (dataCoord.mY < numRows))
                               {
-                                 DimensionDescriptor column = pDescriptor->getActiveColumn(dataCoord.mX);
-                                 DimensionDescriptor row = pDescriptor->getActiveRow(dataCoord.mY);
+                                 DimensionDescriptor column = pDescriptor->getActiveColumn(
+                                    static_cast<unsigned int>(dataCoord.mX));
+                                 DimensionDescriptor row = pDescriptor->getActiveRow(
+                                    static_cast<unsigned int>(dataCoord.mY));
 
                                  double dValue = pRaster->getPixelValue(column, row, bandDim, eComponent);
                                  if (std::find(badValues.begin(), badValues.end(),

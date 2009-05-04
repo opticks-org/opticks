@@ -10,6 +10,7 @@
 #include "CustomElementData.h"
 #include "CustomElementPlugIn.h"
 #include "ModelServices.h"
+#include "PlugInRegistration.h"
 #include "SessionItemDeserializer.h"
 #include "SessionItemSerializer.h"
 #include "SessionManager.h"
@@ -18,6 +19,8 @@
 
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
+
+REGISTER_PLUGIN_BASIC(OpticksPlugInSampler, CustomElementPlugIn);
 
 CustomElementPlugIn::CustomElementPlugIn()
 {

@@ -296,7 +296,7 @@ CachedPage::UnitPtr Hdf5Pager::fetchUnit(DataRequest *pOriginalRequest)
    else
    {
       loadedType = Hdf5TypeResource(H5Tcopy(*dataType));
-      if (Endian::getSystemEndian() == LITTLE_ENDIAN)
+      if (Endian::getSystemEndian() == LITTLE_ENDIAN_ORDER)
       {
          H5Tset_order(*loadedType, H5T_ORDER_LE);
       }

@@ -7,19 +7,16 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef OSSIMSERVICES_H
-#define OSSIMSERVICES_H
-
-#include "AlgorithmShell.h"
 #include "AppVersion.h"
+#include "ExecutableShell.h"
+#include "PlugInRegistration.h"
 #include "SessionItemSerializer.h"
 
 #include <ossim/init/ossimInit.h>
 
 namespace Nitf
 {
-
-   class OssimServices : public AlgorithmShell
+   class OssimServices : public ExecutableShell
    {
    public:
       OssimServices()
@@ -27,6 +24,7 @@ namespace Nitf
          setName("OSSIM Services");
          destroyAfterExecute(false);
          executeOnStartup(true);
+         setType("Service");
          setDescriptorId("{FE6F67B0-2DC1-48d1-85EC-18DC62BE9980}");
          setProductionStatus(APP_IS_PRODUCTION_RELEASE);
 
@@ -55,17 +53,16 @@ namespace Nitf
          return true;
       }
 
-      bool serialize( SessionItemSerializer &serializer )const
+      bool serialize(SessionItemSerializer& serializer) const
       {
          return serializer.serialize(NULL, 0);
       }
 
-      bool deserialize( SessionItemDeserializer &deserializer )
+      bool deserialize(SessionItemDeserializer& deserializer)
       {
          return true;
       }
-
    };
 }
 
-#endif
+REGISTER_PLUGIN(OpticksNitf, OssimServices, Nitf::OssimServices);

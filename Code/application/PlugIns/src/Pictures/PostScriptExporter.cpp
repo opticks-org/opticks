@@ -14,6 +14,7 @@
 #include "FileResource.h"
 #include "MessageLogResource.h"
 #include "PlugInArgList.h"
+#include "PlugInRegistration.h"
 #include "PostScriptExporter.h"
 #include "Progress.h"
 #include "View.h"
@@ -22,6 +23,8 @@
 #include <cstdio>
 
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksPictures, PostScriptExporter);
 
 PostScriptExporter::PostScriptExporter() : mpOutFile(NULL), mWidth(72), mPos(0), mTuple(0), mCount(0)
 {

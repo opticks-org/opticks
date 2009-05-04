@@ -665,7 +665,8 @@ private:
                da->nextRow(reductionFactor);
             }
 
-            runInMainThread(SetTileTexture(pTile, &pTexData[0], mTileZoomIndices[tileId]));
+            SetTileTexture cmd(pTile, &pTexData[0], mTileZoomIndices[tileId]);
+            runInMainThread(cmd);
          }
 
          int percentDone = 100 * (tileId - mTileRange.mFirst + 1) / (mTileRange.mLast - mTileRange.mFirst + 1);
@@ -807,7 +808,8 @@ private:
                da->nextRow(reductionFactor);
             }
 
-            runInMainThread(SetTileTexture(pTile, &pTexData[0], mTileZoomIndices[tileId]));
+            SetTileTexture cmd(pTile, &pTexData[0], mTileZoomIndices[tileId]);
+            runInMainThread(cmd);
          }
 
          int percentDone = 100 * (tileId- mTileRange.mFirst + 1) / (mTileRange.mLast - mTileRange.mFirst + 1);
@@ -999,7 +1001,8 @@ private:
                createEmptyRgbTile(pTexData, posX, posY, geomSizeX, geomSizeY, reductionFactor, 2);
             }
 
-            runInMainThread(SetTileTexture(pTile, &pTexData[0], mTileZoomIndices[tileId]));
+            SetTileTexture cmd(pTile, &pTexData[0], mTileZoomIndices[tileId]);
+            runInMainThread(cmd);
          }
 
          int percentDone = 100 * (tileId - mTileRange.mFirst + 1) / (mTileRange.mLast - mTileRange.mFirst + 1);

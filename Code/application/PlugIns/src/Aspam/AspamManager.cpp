@@ -17,11 +17,12 @@
 #include "DataDescriptor.h"
 #include "Filename.h"
 #include "FileDescriptor.h"
-#include "PlugInResource.h"
 #include "MessageLogResource.h"
 #include "ModelServices.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
+#include "PlugInResource.h"
 #include "SessionItemDeserializer.h"
 #include "SessionItemSerializer.h"
 #include "XercesIncludes.h"
@@ -30,6 +31,8 @@
 
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
+
+REGISTER_PLUGIN_BASIC(OpticksAspam, AspamManager);
 
 AspamManager::AspamManager()
 {

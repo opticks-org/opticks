@@ -13,10 +13,10 @@
 #include "AppVerify.h"
 #include "DesktopServices.h"
 #include "MessageLogResource.h"
-#include "ModuleManager.h"
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 
 #include <string>
 
@@ -29,6 +29,8 @@
 #endif
 
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksPlugInSampler, BackgroundTest);
 
 BackgroundTest::BackgroundTest() :
    mInteractive(false),

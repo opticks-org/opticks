@@ -12,12 +12,15 @@
 #include "DynamicObject.h"
 #include "NitfConstants.h"
 #include "NitfUnknownTreParser.h"
+#include "PlugInRegistration.h"
 
 #include <ossim/support_data/ossimNitfRegisteredTag.h>
 
 using namespace std;
 
 const string Nitf::UnknownTreParser::PLUGIN_NAME = "Unknown Tre Parser";
+
+REGISTER_PLUGIN(OpticksNitf, UnknownTreParser, Nitf::UnknownTreParser);
 
 Nitf::UnknownTreParser::UnknownTreParser()
 {

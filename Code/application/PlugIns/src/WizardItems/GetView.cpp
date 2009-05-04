@@ -18,6 +18,7 @@
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "RasterElement.h"
 #include "RasterLayer.h"
 #include "SpatialDataView.h"
@@ -25,6 +26,8 @@
 
 #include <string>
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksWizardItems, GetDataSet);
 
 ////////////////
 // GetDataSet //

@@ -21,6 +21,7 @@
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "PlugInResource.h"
 #include "SaveLayer.h"
 #include "RasterElement.h"
@@ -28,6 +29,12 @@
 #include "SpatialDataWindow.h"
 
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksWizardItems, SaveAnnotation);
+REGISTER_PLUGIN_BASIC(OpticksWizardItems, SaveAoi);
+REGISTER_PLUGIN_BASIC(OpticksWizardItems, SaveAoiFromDataSet);
+REGISTER_PLUGIN_BASIC(OpticksWizardItems, SaveGcpList);
+REGISTER_PLUGIN_BASIC(OpticksWizardItems, SaveGcpListFromDataSet);
 
 ///////////////
 // SaveLayer //

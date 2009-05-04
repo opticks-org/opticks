@@ -54,8 +54,10 @@ std::string AebPlatform::currentPlatform()
    platform += "win64";
 #elif defined(_WIN32)
    platform += "win32";
-#elif defined(UNIX_API)
+#elif defined(SOLARIS)
    platform += "solaris";
+#elif defined(LINUX)
+   platform += "linux";
 #else
    platform += "unknown";
 #endif
@@ -65,6 +67,8 @@ std::string AebPlatform::currentPlatform()
    platform += "-x86";
 #elif defined(__sparc)
    platform += "-sparc";
+#elif defined(LINUX) && defined(__amd64__)
+   platform += "-x86_64";
 #else
    platform += "-unknown";
 #endif
@@ -76,12 +80,13 @@ std::string AebPlatform::currentPlatform()
    platform += "-studio11";
 #elif __SUNPRO_CC == 0x590
    platform += "-studio12";
+#elif __GNUC__ == 4
+   platform += "-gcc4";
 #else
    platform += "-unknown";
 #endif
 
    // Debug/release
-   //tclarke: should this only be appended on windows?
 #if defined(DEBUG)
    platform += "-debug";
 #else

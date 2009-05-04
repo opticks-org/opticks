@@ -17,7 +17,7 @@ Endian::Endian(EndianType endian) :
 }
 
 Endian::Endian() : 
-   mType(getSystemEndian() == BIG_ENDIAN ? LITTLE_ENDIAN : BIG_ENDIAN),
+   mType(getSystemEndian() == BIG_ENDIAN_ORDER ? LITTLE_ENDIAN_ORDER : BIG_ENDIAN_ORDER),
    mSystemType(getSystemEndian())
 {
 }
@@ -33,20 +33,20 @@ EndianType Endian::getEndian() const
 
 bool Endian::isBigEndian() const
 {
-   return (mType == BIG_ENDIAN);
+   return (mType == BIG_ENDIAN_ORDER);
 }
 
 bool Endian::isLittleEndian() const
 {
-   return (mType == LITTLE_ENDIAN);
+   return (mType == LITTLE_ENDIAN_ORDER);
 }
 
 EndianType Endian::getSystemEndian()
 {
-   if (BYTE_ORDER == LITTLE_ENDIAN_BYTE_ORDER)
+   if (OPTICKS_BYTE_ORDER == LITTLE_ENDIAN_BYTE_ORDER)
    {
-      return LITTLE_ENDIAN;
+      return LITTLE_ENDIAN_ORDER;
    }
 
-   return BIG_ENDIAN;
+   return BIG_ENDIAN_ORDER;
 }

@@ -32,10 +32,13 @@
 
 using namespace std;
 
+namespace StringUtilities
+{
+
 /* this is a handy-dandy function that reads READSIZE bytes into the target string in APPEND MODE
 by default. This way, you can actually OVERWRITE a string if you'd like!
 */
-bool StringUtilities::readSTLString(FILE* pInputFile, size_t readSize, string &target, bool append)
+bool readSTLString(FILE* pInputFile, size_t readSize, string &target, bool append)
 {
    bool success = true;
    char c;
@@ -74,7 +77,7 @@ bool StringUtilities::readSTLString(FILE* pInputFile, size_t readSize, string &t
    return success;
 }
 
-string StringUtilities::stripRightWhitespace(const string& source)
+string stripRightWhitespace(const string& source)
 {
    unsigned int right = 0;
    for (right = source.length() - 1; right < source.length(); right--)
@@ -93,7 +96,7 @@ string StringUtilities::stripRightWhitespace(const string& source)
    return source.substr(0, right + 1);
 }
 
-string StringUtilities::stripLeftWhitespace(const string& source)
+string stripLeftWhitespace(const string& source)
 {
    unsigned int left = 0;
    for (left = 0; left < source.length(); left++)
@@ -112,14 +115,14 @@ string StringUtilities::stripLeftWhitespace(const string& source)
    return source.substr(left, source.length() - left);
 }
 
-string StringUtilities::stripWhitespace(const string& source)
+string stripWhitespace(const string& source)
 {
    string copy = stripRightWhitespace(source);
    copy = stripLeftWhitespace(copy);
    return copy;
 }
 
-bool StringUtilities::isAllBlank(const string &source)
+bool isAllBlank(const string &source)
 {
    static const basic_string <char>::size_type npos = -1;
    basic_string <char>::size_type findIndex = source.find_first_not_of(" ");
@@ -131,7 +134,7 @@ bool StringUtilities::isAllBlank(const string &source)
    return false;
 }
 
-string StringUtilities::toLower(const string& source)
+string toLower(const string& source)
 {
    string lowerString = source;
    for (unsigned int i = 0; i < lowerString.size(); i++)
@@ -142,7 +145,7 @@ string StringUtilities::toLower(const string& source)
    return lowerString;
 }
 
-string StringUtilities::toUpper(const string& source)
+string toUpper(const string& source)
 {
    string upperString = source;
    for (unsigned int i = 0; i < upperString.size(); i++)
@@ -153,7 +156,7 @@ string StringUtilities::toUpper(const string& source)
    return upperString;
 }
 
-vector<string> StringUtilities::split(const string &source, char separator)
+vector<string> split(const string &source, char separator)
 {
    vector<char> sep(1, separator);
    string::const_iterator start = source.begin();
@@ -172,7 +175,7 @@ vector<string> StringUtilities::split(const string &source, char separator)
    return components;
 }
 
-string StringUtilities::join(const vector<string> &source, const string &separator)
+string join(const vector<string> &source, const string &separator)
 {
    string rval;
    for(vector<string>::const_iterator it = source.begin(); it != source.end(); ++it)
@@ -186,13 +189,13 @@ string StringUtilities::join(const vector<string> &source, const string &separat
    return rval;
 }
 
-string StringUtilities::latLonToText(LocationType latLonCoords)
+string latLonToText(LocationType latLonCoords)
 {
    LatLonPoint latLon(latLonCoords);
    return latLon.getText().c_str();
 }
 
-string StringUtilities::expandVariables(const string& originalString,
+string expandVariables(const string& originalString,
    const vector<string>& ignoredExpansions)
 {
    bool allowV = (find(ignoredExpansions.begin(), ignoredExpansions.end(), "V") == ignoredExpansions.end());
@@ -304,7 +307,7 @@ string StringUtilities::expandVariables(const string& originalString,
    return newString;
 }
 
-const char* StringUtilities::escapedToken(const string &textIn)
+const char* escapedToken(const string &textIn)
 {
    static string text;
    static string retval;
@@ -345,7 +348,7 @@ const char* StringUtilities::escapedToken(const string &textIn)
    {
       return NULL;
    }
-   retval = StringUtilities::stripWhitespace(retval);
+   retval = stripWhitespace(retval);
 
    return retval.c_str();
 }
@@ -353,7 +356,7 @@ const char* StringUtilities::escapedToken(const string &textIn)
 //toString and fromString implementations
 
 template<>
-string StringUtilities::toDisplayString(const bool& val, bool* pError)
+string toDisplayString(const bool& val, bool* pError)
 {
    if (pError != NULL)
    {
@@ -363,7 +366,7 @@ string StringUtilities::toDisplayString(const bool& val, bool* pError)
 }
 
 template<>
-string StringUtilities::toXmlString(const bool& val, bool* pError)
+string toXmlString(const bool& val, bool* pError)
 {
    if (pError != NULL)
    {
@@ -373,13 +376,13 @@ string StringUtilities::toXmlString(const bool& val, bool* pError)
 }
 
 template<>
-bool StringUtilities::fromDisplayString<bool>(string value, bool* pError)
+bool fromDisplayString<bool>(string value, bool* pError)
 {
    if (pError != NULL)
    {
       *pError = false;
    }
-   string lowerValue = StringUtilities::toLower(value);
+   string lowerValue = toLower(value);
    if ( (lowerValue == "true") || (lowerValue == "1") ||
         (lowerValue == "t") || (lowerValue == "y") ||
         (lowerValue == "yes") )
@@ -403,9 +406,9 @@ bool StringUtilities::fromDisplayString<bool>(string value, bool* pError)
 }
 
 template<>
-bool StringUtilities::fromXmlString<bool>(string value, bool* pError)
+bool fromXmlString<bool>(string value, bool* pError)
 {
-   return StringUtilities::fromDisplayString<bool>(value, pError);
+   return fromDisplayString<bool>(value, pError);
 }
 
 STRINGSTREAM_MAPPING_TO_DISPLAY_STRING_VEC(bool)
@@ -513,8 +516,8 @@ ADD_ENUM_MAPPING(FLT8BYTES, "Float 8 Bytes", "FLT8BYTES")
 END_ENUM_MAPPING()
 
 BEGIN_ENUM_MAPPING(EndianType)
-ADD_ENUM_MAPPING(BIG_ENDIAN, "Big", "big")
-ADD_ENUM_MAPPING(LITTLE_ENDIAN, "Little", "little")
+ADD_ENUM_MAPPING(BIG_ENDIAN_ORDER, "Big", "big")
+ADD_ENUM_MAPPING(LITTLE_ENDIAN_ORDER, "Little", "little")
 END_ENUM_MAPPING()
 
 BEGIN_ENUM_MAPPING(FillStyle)
@@ -825,7 +828,7 @@ ADD_ENUM_MAPPING(RT_PROTO, "", "prototype")
 END_ENUM_MAPPING()
 
 template<>
-string StringUtilities::toDisplayString(const ReleaseType& val, bool* pError)
+string toDisplayString(const ReleaseType& val, bool* pError)
 {
    if (pError != NULL)
    {
@@ -856,7 +859,7 @@ string StringUtilities::toDisplayString(const ReleaseType& val, bool* pError)
 }
 
 template<>
-ReleaseType StringUtilities::fromDisplayString<ReleaseType>(string value, bool* pError)
+ReleaseType fromDisplayString<ReleaseType>(string value, bool* pError)
 {
    if (pError != NULL)
    {
@@ -890,7 +893,7 @@ ReleaseType StringUtilities::fromDisplayString<ReleaseType>(string value, bool* 
 }
 
 template<>
-ColorType StringUtilities::fromDisplayString<ColorType>(string value, bool* pError)
+ColorType fromDisplayString<ColorType>(string value, bool* pError)
 {
    if (pError != NULL)
    {
@@ -969,13 +972,13 @@ ColorType StringUtilities::fromDisplayString<ColorType>(string value, bool* pErr
 }
 
 template<>
-ColorType StringUtilities::fromXmlString<ColorType>(string value, bool* pError)
+ColorType fromXmlString<ColorType>(string value, bool* pError)
 {
    return fromDisplayString<ColorType>(value, pError);
 }
 
 template<>
-string StringUtilities::toDisplayString(const ColorType& val, bool* pError)
+string toDisplayString(const ColorType& val, bool* pError)
 {
    if (pError != NULL)
    {
@@ -998,13 +1001,13 @@ string StringUtilities::toDisplayString(const ColorType& val, bool* pError)
 }
 
 template<>
-string StringUtilities::toXmlString(const ColorType& val, bool* pError)
+string toXmlString(const ColorType& val, bool* pError)
 {
    return toDisplayString(val, pError);
 }
 
 template<>
-string StringUtilities::toDisplayString(const LocationType& val, bool* pError)
+string toDisplayString(const LocationType& val, bool* pError)
 {
    if (pError != NULL)
    {
@@ -1016,7 +1019,7 @@ string StringUtilities::toDisplayString(const LocationType& val, bool* pError)
 }
 
 template<>
-string StringUtilities::toXmlString(const LocationType& val, bool* pError)
+string toXmlString(const LocationType& val, bool* pError)
 {
    if (pError != NULL)
    {
@@ -1028,7 +1031,7 @@ string StringUtilities::toXmlString(const LocationType& val, bool* pError)
 }
 
 template<>
-LocationType StringUtilities::fromDisplayString<LocationType>(string value, bool* pError)
+LocationType fromDisplayString<LocationType>(string value, bool* pError)
 {
    if (pError != NULL)
    {
@@ -1057,7 +1060,7 @@ LocationType StringUtilities::fromDisplayString<LocationType>(string value, bool
 }
 
 template<>
-LocationType StringUtilities::fromXmlString<LocationType>(string value, bool* pError)
+LocationType fromXmlString<LocationType>(string value, bool* pError)
 {
    LocationType parsedValue;
    if (pError != NULL)
@@ -1082,7 +1085,7 @@ LocationType StringUtilities::fromXmlString<LocationType>(string value, bool* pE
 }
 
 template<>
-string StringUtilities::toDisplayString(const string& val, bool* pError)
+string toDisplayString(const string& val, bool* pError)
 {
    if (pError != NULL)
    {
@@ -1092,25 +1095,25 @@ string StringUtilities::toDisplayString(const string& val, bool* pError)
 }
 
 template<>
-string StringUtilities::toDisplayString(const vector<string>& vec, bool* pError)
+string toDisplayString(const vector<string>& vec, bool* pError)
 {
    return convertVectorToString(vec, pError, ", ", true);
 }
 
 template<>
-string StringUtilities::toXmlString(const string& val, bool* pError)
+string toXmlString(const string& val, bool* pError)
 {
    return toDisplayString(val, pError);
 }
 
 template<>
-string StringUtilities::toXmlString(const vector<string>& vec, bool* pError)
+string toXmlString(const vector<string>& vec, bool* pError)
 {
    return convertVectorToString(vec, pError, ", ", false);
 }
 
 template<>
-string StringUtilities::fromDisplayString<string>(string value, bool* pError)
+string fromDisplayString<string>(string value, bool* pError)
 {
    if (pError != NULL)
    {
@@ -1120,25 +1123,25 @@ string StringUtilities::fromDisplayString<string>(string value, bool* pError)
 }
 
 template<>
-vector<string> StringUtilities::fromDisplayString<vector<string> >(string value, bool* pError)
+vector<string> fromDisplayString<vector<string> >(string value, bool* pError)
 {
    return convertStringToVector<string>(value, pError, ", ", true);
 }
 
 template<>
-string StringUtilities::fromXmlString<string>(string value, bool* pError)
+string fromXmlString<string>(string value, bool* pError)
 {
    return fromDisplayString<string>(value, pError);
 }
 
 template<>
-vector<string> StringUtilities::fromXmlString<vector<string> >(string value, bool* pError)
+vector<string> fromXmlString<vector<string> >(string value, bool* pError)
 {
    return convertStringToVector<string>(value, pError, ", ", false);
 }
 
 template<>
-string StringUtilities::toDisplayString<const Filename*>(const Filename* const & val, bool* pError)
+string toDisplayString<const Filename*>(const Filename* const & val, bool* pError)
 {
    if (pError != NULL)
    {
@@ -1156,7 +1159,7 @@ string StringUtilities::toDisplayString<const Filename*>(const Filename* const &
 }
 
 template<>
-string StringUtilities::toDisplayString(const vector<Filename*> & vec, bool* pError)
+string toDisplayString(const vector<Filename*> & vec, bool* pError)
 {
    return convertVectorToString(vec, pError, ", ", true);
 }
@@ -1164,7 +1167,7 @@ string StringUtilities::toDisplayString(const vector<Filename*> & vec, bool* pEr
 TO_DISPLAY_POINTER_VARIATIONS(Filename)
 
 template<>
-string StringUtilities::toXmlString<const Filename*>(const Filename* const & val, bool* pError)
+string toXmlString<const Filename*>(const Filename* const & val, bool* pError)
 {
    if (pError != NULL)
    {
@@ -1182,7 +1185,7 @@ string StringUtilities::toXmlString<const Filename*>(const Filename* const & val
 }
 
 template<>
-string StringUtilities::toXmlString(const vector<Filename*>& vec, bool* pError)
+string toXmlString(const vector<Filename*>& vec, bool* pError)
 {
    return convertVectorToString(vec, pError, ", ", false);
 }
@@ -1190,7 +1193,7 @@ string StringUtilities::toXmlString(const vector<Filename*>& vec, bool* pError)
 TO_XML_POINTER_VARIATIONS(Filename)
 
 template<>
-Filename* StringUtilities::fromDisplayString<Filename*>(string value, bool* pError)
+Filename* fromDisplayString<Filename*>(string value, bool* pError)
 {
    if (pError != NULL)
    {
@@ -1202,13 +1205,13 @@ Filename* StringUtilities::fromDisplayString<Filename*>(string value, bool* pErr
 }
 
 template<>
-vector<Filename*> StringUtilities::fromDisplayString<vector<Filename*> >(string value, bool* pError)
+vector<Filename*> fromDisplayString<vector<Filename*> >(string value, bool* pError)
 {
    return convertStringToVector<Filename*>(value, pError, ", ", true);
 }
 
 template<>
-Filename* StringUtilities::fromXmlString<Filename*>(string value, bool* pError)
+Filename* fromXmlString<Filename*>(string value, bool* pError)
 {
    if (pError != NULL)
    {
@@ -1220,13 +1223,13 @@ Filename* StringUtilities::fromXmlString<Filename*>(string value, bool* pError)
 }
 
 template<>
-vector<Filename*> StringUtilities::fromXmlString<vector<Filename*> >(string value, bool* pError)
+vector<Filename*> fromXmlString<vector<Filename*> >(string value, bool* pError)
 {
    return convertStringToVector<Filename*>(value, pError, ", ", false);
 }
 
 template<>
-string StringUtilities::toDisplayString<const DateTime*>(const DateTime* const & val, bool* pError)
+string toDisplayString<const DateTime*>(const DateTime* const & val, bool* pError)
 {
    if (pError != NULL)
    {
@@ -1270,7 +1273,7 @@ string StringUtilities::toDisplayString<const DateTime*>(const DateTime* const &
 TO_DISPLAY_POINTER_VARIATIONS(DateTime)
 
 template<>
-string StringUtilities::toXmlString<const DateTime*>(const DateTime* const & val, bool* pError)
+string toXmlString<const DateTime*>(const DateTime* const & val, bool* pError)
 {
    if (pError != NULL)
    {
@@ -1307,7 +1310,7 @@ string StringUtilities::toXmlString<const DateTime*>(const DateTime* const & val
 TO_XML_POINTER_VARIATIONS(DateTime)
 
 template<>
-DateTime* StringUtilities::fromDisplayString<DateTime*>(string dateText, bool* pError)
+DateTime* fromDisplayString<DateTime*>(string dateText, bool* pError)
 {
    if (pError != NULL)
    {
@@ -1367,7 +1370,7 @@ DateTime* StringUtilities::fromDisplayString<DateTime*>(string dateText, bool* p
 }
 
 template<>
-DateTime* StringUtilities::fromXmlString<DateTime*>(string value, bool* pError)
+DateTime* fromXmlString<DateTime*>(string value, bool* pError)
 {
    FactoryResource<DateTime> pDateTime;
    if (pError != NULL)
@@ -1394,27 +1397,27 @@ DateTime* StringUtilities::fromXmlString<DateTime*>(string value, bool* pError)
 }
 
 template<>
-string StringUtilities::toDisplayString(const Int64& val, bool* pError)
+string toDisplayString(const Int64& val, bool* pError)
 {
-   return StringUtilities::toDisplayString<int64_t>(val.get(), pError);
+   return toDisplayString<int64_t>(val.get(), pError);
 }
 
 template<>
-string StringUtilities::toXmlString(const Int64& val, bool* pError)
+string toXmlString(const Int64& val, bool* pError)
 {
-   return StringUtilities::toXmlString<int64_t>(val.get(), pError);
+   return toXmlString<int64_t>(val.get(), pError);
 }
 
 template<>
-Int64 StringUtilities::fromDisplayString<Int64>(string value, bool* pError)
+Int64 fromDisplayString<Int64>(string value, bool* pError)
 {
-   return Int64(StringUtilities::fromDisplayString<int64_t>(value, pError));
+   return Int64(fromDisplayString<int64_t>(value, pError));
 }
 
 template<>
-Int64 StringUtilities::fromXmlString<Int64>(string value, bool* pError)
+Int64 fromXmlString<Int64>(string value, bool* pError)
 {
-   return Int64(StringUtilities::fromXmlString<int64_t>(value, pError));
+   return Int64(fromXmlString<int64_t>(value, pError));
 }
 
 namespace Int64Functors
@@ -1443,25 +1446,25 @@ namespace UInt64Functors
 };
 
 template<>
-string StringUtilities::toDisplayString(const vector<Int64>& val, bool* pError)
+string toDisplayString(const vector<Int64>& val, bool* pError)
 {
    vector<int64_t> tempValues(val.size());
    copy(val.begin(), val.end(), tempValues.begin());
-   return StringUtilities::toDisplayString<vector<int64_t> >(tempValues, pError);
+   return toDisplayString<vector<int64_t> >(tempValues, pError);
 }
 
 template<>
-string StringUtilities::toXmlString(const vector<Int64>& val, bool* pError)
+string toXmlString(const vector<Int64>& val, bool* pError)
 {
    vector<int64_t> tempValues(val.size());
    copy(val.begin(), val.end(), tempValues.begin());
-   return StringUtilities::toXmlString<vector<int64_t> >(tempValues, pError);
+   return toXmlString<vector<int64_t> >(tempValues, pError);
 }
 
 template<>
-vector<Int64> StringUtilities::fromDisplayString<vector<Int64> >(string value, bool* pError)
+vector<Int64> fromDisplayString<vector<Int64> >(string value, bool* pError)
 {
-   vector<int64_t> tempValues = StringUtilities::fromDisplayString<vector<int64_t> >(value, pError);
+   vector<int64_t> tempValues = fromDisplayString<vector<int64_t> >(value, pError);
    vector<Int64> retValues;
    retValues.reserve(tempValues.size());
    transform(tempValues.begin(), tempValues.end(), back_inserter(retValues), Int64Functors::CreateInt64Object());
@@ -1469,9 +1472,9 @@ vector<Int64> StringUtilities::fromDisplayString<vector<Int64> >(string value, b
 }
 
 template<>
-vector<Int64> StringUtilities::fromXmlString<vector<Int64> >(string value, bool* pError)
+vector<Int64> fromXmlString<vector<Int64> >(string value, bool* pError)
 {
-   vector<int64_t> tempValues = StringUtilities::fromXmlString<vector<int64_t> >(value, pError);
+   vector<int64_t> tempValues = fromXmlString<vector<int64_t> >(value, pError);
    vector<Int64> retValues;
    retValues.reserve(tempValues.size());
    transform(tempValues.begin(), tempValues.end(), back_inserter(retValues), Int64Functors::CreateInt64Object());
@@ -1479,49 +1482,49 @@ vector<Int64> StringUtilities::fromXmlString<vector<Int64> >(string value, bool*
 }
 
 template<>
-string StringUtilities::toDisplayString(const UInt64& val, bool* pError)
+string toDisplayString(const UInt64& val, bool* pError)
 {
-   return StringUtilities::toDisplayString<uint64_t>(val.get(), pError);
+   return toDisplayString<uint64_t>(val.get(), pError);
 }
 
 template<>
-string StringUtilities::toXmlString(const UInt64& val, bool* pError)
+string toXmlString(const UInt64& val, bool* pError)
 {
-   return StringUtilities::toXmlString<uint64_t>(val.get(), pError);
+   return toXmlString<uint64_t>(val.get(), pError);
 }
 
 template<>
-UInt64 StringUtilities::fromDisplayString<UInt64>(string value, bool* pError)
+UInt64 fromDisplayString<UInt64>(string value, bool* pError)
 {
-   return UInt64(StringUtilities::fromDisplayString<uint64_t>(value, pError));
+   return UInt64(fromDisplayString<uint64_t>(value, pError));
 }
 
 template<>
-UInt64 StringUtilities::fromXmlString<UInt64>(string value, bool* pError)
+UInt64 fromXmlString<UInt64>(string value, bool* pError)
 {
-   return UInt64(StringUtilities::fromXmlString<uint64_t>(value, pError));
+   return UInt64(fromXmlString<uint64_t>(value, pError));
 }
 
 template<>
-string StringUtilities::toDisplayString(const vector<UInt64>& val, bool* pError)
+string toDisplayString(const vector<UInt64>& val, bool* pError)
 {
    vector<uint64_t> tempValues(val.size());
    copy(val.begin(), val.end(), tempValues.begin());
-   return StringUtilities::toDisplayString<vector<uint64_t> >(tempValues, pError);
+   return toDisplayString<vector<uint64_t> >(tempValues, pError);
 }
 
 template<>
-string StringUtilities::toXmlString(const vector<UInt64>& val, bool* pError)
+string toXmlString(const vector<UInt64>& val, bool* pError)
 {
    vector<uint64_t> tempValues(val.size());
    copy(val.begin(), val.end(), tempValues.begin());
-   return StringUtilities::toXmlString<vector<uint64_t> >(tempValues, pError);
+   return toXmlString<vector<uint64_t> >(tempValues, pError);
 }
 
 template<>
-vector<UInt64> StringUtilities::fromDisplayString<vector<UInt64> >(string value, bool* pError)
+vector<UInt64> fromDisplayString<vector<UInt64> >(string value, bool* pError)
 {
-   vector<uint64_t> tempValues = StringUtilities::fromDisplayString<vector<uint64_t> >(value, pError);
+   vector<uint64_t> tempValues = fromDisplayString<vector<uint64_t> >(value, pError);
    vector<UInt64> retValues;
    retValues.reserve(tempValues.size());
    transform(tempValues.begin(), tempValues.end(), back_inserter(retValues), UInt64Functors::CreateUInt64Object());
@@ -1529,11 +1532,12 @@ vector<UInt64> StringUtilities::fromDisplayString<vector<UInt64> >(string value,
 }
 
 template<>
-vector<UInt64> StringUtilities::fromXmlString<vector<UInt64> >(string value, bool* pError)
+vector<UInt64> fromXmlString<vector<UInt64> >(string value, bool* pError)
 {
-   vector<uint64_t> tempValues = StringUtilities::fromXmlString<vector<uint64_t> >(value, pError);
+   vector<uint64_t> tempValues = fromXmlString<vector<uint64_t> >(value, pError);
    vector<UInt64> retValues;
    retValues.reserve(tempValues.size());
    transform(tempValues.begin(), tempValues.end(), back_inserter(retValues), UInt64Functors::CreateUInt64Object());
    return retValues;
+}
 }

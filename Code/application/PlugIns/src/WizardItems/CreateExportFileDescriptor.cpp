@@ -18,12 +18,15 @@
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "RasterFileDescriptor.h"
 #include "RasterUtilities.h"
 
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksWizardItems, CreateExportFileDescriptor);
 
 CreateExportFileDescriptor::CreateExportFileDescriptor() :
    mpFilename(NULL),

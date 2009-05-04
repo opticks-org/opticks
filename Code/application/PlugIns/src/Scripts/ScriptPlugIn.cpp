@@ -25,7 +25,6 @@ using namespace std;
 #include "AppVersion.h"
 #include "ConfigurationSettings.h"
 #include "AppVerify.h"
-#include "Descriptors.h"
 #include "Filename.h"
 #include "FileResource.h"
 #include "MessageLogResource.h"
@@ -34,37 +33,24 @@ using namespace std;
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "ProductView.h"
 #include "ScriptPlugIn.h"
 #include "StringUtilities.h"
 #include "UtilityServices.h"
 
-ScriptPlugIn::ScriptPlugIn(int scriptIndex)
+REGISTER_PLUGIN_BASIC(OpticksScripts, ScriptPlugIn);
+
+ScriptPlugIn::ScriptPlugIn()
 {
    // set description values
-   if (static_cast<int>(gDescriptors.size()) <= scriptIndex)
-   {
-      setName("RunScript");
-      setVersion(APP_VERSION_NUMBER);
-      setCreator("Ball Aerospace & Technologies Corp.");
-      setCopyright(APP_COPYRIGHT);
-      setShortDescription("Runs a script file");
-      setDescription("Runs the script file specified in the arg list");
-      setMenuLocation("");
-      mDescriptor.mScriptPath = "";
-   }
-   else
-   {
-      setName(gDescriptors[scriptIndex].mPlugInName);
-      setVersion(gDescriptors[scriptIndex].mVersion.c_str());
-      setCreator(gDescriptors[scriptIndex].mCreator);
-      setCopyright(gDescriptors[scriptIndex].mCopyright);
-      setShortDescription(gDescriptors[scriptIndex].mShortDescription);
-      setDescription(gDescriptors[scriptIndex].mDescription);
-      setMenuLocation(gDescriptors[scriptIndex].mMenuLocation);
-
-      mDescriptor = gDescriptors[scriptIndex];
-   }
+   setName("RunScript");
+   setVersion(APP_VERSION_NUMBER);
+   setCreator("Ball Aerospace & Technologies Corp.");
+   setCopyright(APP_COPYRIGHT);
+   setShortDescription("Runs a script file");
+   setDescription("Runs the script file specified in the arg list");
+   setMenuLocation("");
    setDescriptorId("{DF1A9C13-C2EE-4795-8556-DE26CF302754}");
    allowMultipleInstances(true);
    setProductionStatus(APP_IS_PRODUCTION_RELEASE);
@@ -76,22 +62,17 @@ ScriptPlugIn::~ScriptPlugIn()
 
 bool ScriptPlugIn::getInputSpecification(PlugInArgList *&pArgList)
 {
-   if (mDescriptor.mScriptPath == "")
-   {
-      Service<PlugInManagerServices> pPlugInManager;
-      VERIFY(pPlugInManager.get() != NULL);
-      pArgList = pPlugInManager->getPlugInArgList();
-      VERIFY(pArgList != NULL);
-      PlugInArg* p1 = pPlugInManager->getPlugInArg();
-      VERIFY(p1 != NULL);
-      p1->setName("ScriptPath");
-      p1->setType("Filename");
-      p1->setDefaultValue(NULL);
-      pArgList->addArg(*p1);
-      return true;
-   }
-
-   return false;
+   Service<PlugInManagerServices> pPlugInManager;
+   VERIFY(pPlugInManager.get() != NULL);
+   pArgList = pPlugInManager->getPlugInArgList();
+   VERIFY(pArgList != NULL);
+   PlugInArg* p1 = pPlugInManager->getPlugInArg();
+   VERIFY(p1 != NULL);
+   p1->setName("ScriptPath");
+   p1->setType("Filename");
+   p1->setDefaultValue(NULL);
+   pArgList->addArg(*p1);
+   return true;
 }
 
 bool ScriptPlugIn::getOutputSpecification(PlugInArgList *&pArgList)
@@ -167,7 +148,7 @@ bool ScriptPlugIn::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList
    VERIFY(pInArgList != NULL);
    VERIFY(pOutArgList != NULL);
 
-   string scriptPath = mDescriptor.mScriptPath;
+   string scriptPath = "";
    PlugInArg* pArg = NULL;
    pInArgList->getArg("ScriptPath", pArg);
    if (pArg != NULL)

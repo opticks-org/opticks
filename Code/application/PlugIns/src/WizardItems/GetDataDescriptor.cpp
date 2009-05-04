@@ -18,9 +18,12 @@
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "PlugInResource.h"
 
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksWizardItems, GetDataDescriptor);
 
 GetDataDescriptor::GetDataDescriptor() :
    mpFilename(NULL)

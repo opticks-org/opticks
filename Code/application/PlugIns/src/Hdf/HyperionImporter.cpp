@@ -24,13 +24,14 @@
 #include "ImportDescriptor.h"
 #include "ObjectFactory.h"
 #include "ObjectResource.h"
-#include "TestDataPath.h"
+#include "PlugInRegistration.h"
 #include "RasterDataDescriptor.h"
 #include "RasterFileDescriptor.h"
 #include "RasterUtilities.h"
 #include "SpecialMetadata.h"
 #include "StringUtilities.h"
 #include "switchOnEncoding.h"
+#include "TestDataPath.h"
 
 #include <algorithm>
 #include <vector>
@@ -81,6 +82,8 @@ namespace
       return wavelengths;
    }
 }
+
+REGISTER_PLUGIN_BASIC(OpticksHdf, HyperionImporter);
 
 HyperionImporter::HyperionImporter()
 {
@@ -153,11 +156,11 @@ vector<ImportDescriptor*> HyperionImporter::getImportDescriptors(const string& f
                               var.getValue(value);
                               if (value == "Big endian")
                               {
-                                 pFileDescriptor->setEndian(BIG_ENDIAN);
+                                 pFileDescriptor->setEndian(BIG_ENDIAN_ORDER);
                               }
                               else if (value == "Little endian")
                               {
-                                 pFileDescriptor->setEndian(LITTLE_ENDIAN);
+                                 pFileDescriptor->setEndian(LITTLE_ENDIAN_ORDER);
                               }
                            }
                            else if (name == "Interleave Format")

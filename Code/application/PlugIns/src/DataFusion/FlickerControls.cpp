@@ -14,7 +14,10 @@
 #include "FlickerControls.h"
 #include "ImageAdjustWidget.h"
 #include "MenuBar.h"
+#include "PlugInRegistration.h"
 #include "SpatialDataWindow.h"
+
+REGISTER_PLUGIN_BASIC(OpticksDataFusion, FlickerControls);
 
 FlickerControls::FlickerControls()
 {

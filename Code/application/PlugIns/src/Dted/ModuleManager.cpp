@@ -7,32 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "DtedImporter.h"
-#include "ModuleManager.h"
+#include "PlugInRegistration.h"
 
-const char* ModuleManager::mspName = "DTED";
-const char* ModuleManager::mspVersion = "1.00";
-const char* ModuleManager::mspDescription = "DTED";
-const char* ModuleManager::mspValidationKey = "none";
-const char* ModuleManager::mspUniqueId = "{5210B1CC-A305-46ec-BEF8-2F51EFD06E51}";
-
-unsigned int ModuleManager::getTotalPlugIns()
-{
-   return 1;
-}
-
-PlugIn* ModuleManager::getPlugIn(unsigned int plugInNumber)
-{
-   PlugIn* pPlugIn = NULL;
-   switch (plugInNumber)
-   {
-      case 0:
-         pPlugIn = new DtedImporter();
-         break;
-
-      default:
-         break;
-   }
-
-   return pPlugIn;
-}
+REGISTER_MODULE(OpticksDTED);

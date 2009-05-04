@@ -236,7 +236,7 @@ namespace
          {
             return false;
          }
-         return less::operator()(pA->getParentDesignator().size(), pB->getParentDesignator().size());
+         return less<vector<string>::size_type>::operator()(pA->getParentDesignator().size(), pB->getParentDesignator().size());
       }
    };
 };

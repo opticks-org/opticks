@@ -556,7 +556,7 @@ namespace
    {
       vector<T>* pValue = *dv_cast<vector<T> >(&var);
       VERIFY(pValue != NULL);
-      for (vector<T>::iterator vit = pValue->begin(); vit != pValue->end(); ++vit)
+      for (typename vector<T>::iterator vit = pValue->begin(); vit != pValue->end(); ++vit)
       {
          stringstream sstr;
          DOMElement* pElement = pXml->addElement("value");

@@ -18,6 +18,7 @@
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "PlugInResource.h"
 #include "RasterElement.h"
 #include "SpatialDataView.h"
@@ -25,6 +26,10 @@
 
 #include <string>
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksWizardItems, LoadAnnotation);
+REGISTER_PLUGIN_BASIC(OpticksWizardItems, LoadAoi);
+REGISTER_PLUGIN_BASIC(OpticksWizardItems, LoadGcpList);
 
 ///////////////
 // LoadLayer //

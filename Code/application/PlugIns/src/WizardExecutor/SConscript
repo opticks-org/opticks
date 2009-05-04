@@ -3,8 +3,8 @@ import glob
 ####
 # import the environment
 ####
-Import('env extra_obj build_dir TOOLPATH')
-env = env.Copy()
+Import('env build_dir TOOLPATH')
+env = env.Clone()
 env.Append(CPPDEFINES=["APPLICATION_XERCES"],CPPPATH=["$COREDIR/Wizard","#/WizardItems"],LIBS=["Wizard"])
 
 ####
@@ -12,17 +12,17 @@ env.Append(CPPDEFINES=["APPLICATION_XERCES"],CPPPATH=["$COREDIR/Wizard","#/Wizar
 ####
 srcs = map(lambda x,bd=build_dir: '%s/%s' % (bd,x), glob.glob("*.cpp"))
 objs = env.SharedObject(srcs)
-extra_obj_file = env.File("%s/libWizard.a" % env["LIBDIR"])
+wizard_static_lib = env.File("%s/libWizard.a" % env["LIBDIR"])
 class SharedObjectProxy:
    def __init__(self):
       self.shared = 1
-extra_obj_file.attributes = SharedObjectProxy()
-extra_obj.append(extra_obj_file)
+wizard_static_lib.attributes = SharedObjectProxy()
+wizard_extras = [wizard_static_lib]
 
 ####
 # build the plug-in library and set up an alias to wase building it later
 ####
-lib = env.SharedLibrary('%s/WizardExecutor' % build_dir,objs+extra_obj)
+lib = env.SharedLibrary('%s/WizardExecutor' % build_dir,objs+wizard_extras)
 libInstall = env.Install(env["PLUGINDIR"], lib)
 env.Alias('WizardExecutor', libInstall)
 

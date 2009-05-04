@@ -4,8 +4,9 @@ import glob
 # import the environment
 ####
 Import('env build_dir TOOLPATH')
-env = env.Copy()
+env = env.Clone()
 env.Tool("ossim",toolpath=[TOOLPATH])
+env.Tool("ehs",toolpath=[TOOLPATH])
 
 ####
 # subdirectories to build objects from

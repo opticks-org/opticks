@@ -104,6 +104,11 @@ public:
       explicit UnsupportedOperation(const std::string& message) : std::exception(), mMessage() {}
 
       /**
+       * Destructor.
+       */
+      virtual ~UnsupportedOperation() throw() {}
+
+      /**
        * Query for additional information.
        *
        * @return Returns a string providing additional information on why
@@ -179,7 +184,7 @@ public:
     *       a DataVariant of the given type cannot be constructed.  If
     *       false, no verification error message will be generated.
     */
-   DataVariant::DataVariant(const std::string& type, const void *pValue, bool strict = true) :
+   DataVariant(const std::string& type, const void *pValue, bool strict = true) :
       mpValue(NULL)
    {
       mpValue = createWrapper(pValue, type.c_str(), strict);

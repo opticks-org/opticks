@@ -31,7 +31,7 @@ public:
 protected:
    AebEntry(QString path, size_t size);
    virtual ~AebEntry();
-   friend AebIo;
+   friend class AebIo;
 
    QString mFilePath;
    size_t mFileSize;

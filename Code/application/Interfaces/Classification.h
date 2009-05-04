@@ -512,7 +512,7 @@ public:
     *
     *  @return  True if the classification is valid, otherwise false.
     */
-   virtual bool isValid(std::string& errorMessage = std::string()) const = 0;
+   virtual bool isValid(std::string& errorMessage) const = 0;
 
 protected:
    /**

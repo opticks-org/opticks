@@ -25,10 +25,11 @@
  */
 
 #include "AppConfig.h"
+#if defined(WIN_API) || defined(SOLARIS)
 #include "Module.h"
 #include "External.h"
 #include "PlugIn.h"
-#include "ModuleManager.h"
+#include "PlugInRegistration.h"
 
 extern "C" int LINKAGE opticks_get_module_interface_version()
 {
@@ -82,3 +83,4 @@ extern "C" bool LINKAGE destroy()
 {
    return true;
 }
+#endif

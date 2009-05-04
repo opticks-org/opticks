@@ -22,6 +22,7 @@
 #include "NitfResource.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "RasterDataDescriptor.h"
 #include "RasterFileDescriptor.h"
 #include "RpcGeoreference.h"
@@ -37,6 +38,8 @@ using namespace Nitf::TRE;
 using namespace Nitf::TRE::RPC;
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
+
+REGISTER_PLUGIN(OpticksNitf, RpcGeoreference, Nitf::RpcGeoreference);
 
 Nitf::RpcGeoreference::RpcGeoreference() : mpRaster(NULL)
 {

@@ -14,11 +14,15 @@
 #include "LabeledSection.h"
 #include "PlotView.h"
 #include "PlotWidget.h"
+#include "PlugInRegistration.h"
 #include "PointSet.h"
+#include "PropertiesQWidgetWrapper.h"
 #include "DesktopAPITestProperties.h"
 
 #include <list>
 using namespace std;
+
+REGISTER_PLUGIN(OpticksPlugInSamplerQt, DesktopAPITestProperties, PropertiesQWidgetWrapper<DesktopAPITestProperties>());
 
 DesktopAPITestProperties::DesktopAPITestProperties() :
    LabeledSectionGroup(NULL),

@@ -834,6 +834,31 @@ public:
    virtual bool isUserSetting(const std::string& key) const = 0;
 
    /**
+    * Queries whether a given setting has been set using setSessionSetting().
+    *
+    * @param key
+    *        Name of the setting to be found.  This key
+    *        can have '/' in it, in which case it will behave like
+    *        DynamicObject::getAttributeByPath.
+    *
+    * @return true if this particular setting has been set using setSessionSetting().
+    */
+   virtual bool isSessionSetting(const std::string& key) const = 0;
+
+   /**
+    * Queries whether a given setting is the default value, i.e. it has not been
+    * overridden by the user or by calling setSessionSetting().
+    *
+    * @param key
+    *        Name of the setting to be found.  This key
+    *        can have '/' in it, in which case it will behave like
+    *        DynamicObject::getAttributeByPath.
+    *
+    * @return true if this particular setting is the default value.
+    */
+   virtual bool isDefaultSetting(const std::string& key) const = 0;
+
+   /**
     * Removes a per-user setting.  See getSetting() for
     * more details.
     *

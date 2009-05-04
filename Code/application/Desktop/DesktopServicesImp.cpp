@@ -923,6 +923,12 @@ GraphicObjectType DesktopServicesImp::getAnnotationObject() const
    return objectType;
 }
 
+bool DesktopServicesImp::importFile(const string& importerSubtype, Progress* pProgress)
+{
+   vector<DataElement*> dummy;
+   return importFile(importerSubtype, pProgress, dummy);
+}
+
 bool DesktopServicesImp::importFile(const string& importerSubtype, Progress* pProgress,
                                     vector<DataElement*>& importedElements)
 {

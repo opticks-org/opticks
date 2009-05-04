@@ -9,6 +9,9 @@
 
 #include "AviExporter.h"
 #include "AppVersion.h"
+#include "PlugInRegistration.h"
+
+REGISTER_PLUGIN_BASIC(OpticksMovieExporter, AviExporter);
 
 AviExporter::AviExporter()
 {

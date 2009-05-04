@@ -36,7 +36,7 @@ namespace
       template<typename T>
       T *get(const std::string &name)
       {
-         return const_cast<T*>(const_cast<const DynamicObjectSource*>(this)->get(name));
+         return const_cast<T*>(const_cast<const DynamicObjectSource*>(this)->get<T>(name));
       }
 
       template<typename T>

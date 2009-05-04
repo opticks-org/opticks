@@ -12,12 +12,15 @@
 #include "IcePseudocolorLayerExporter.h"
 #include "IceWriter.h"
 #include "PlugInArgList.h"
+#include "PlugInRegistration.h"
 #include "PseudocolorLayer.h"
 #include "RasterElement.h"
 #include "RasterFileDescriptor.h"
 #include "RasterUtilities.h"
 
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksIce, IcePseudocolorLayerExporter);
 
 IcePseudocolorLayerExporter::IcePseudocolorLayerExporter() :
    IceExporterShell(IceUtilities::PSEUDOCOLOR_LAYER),

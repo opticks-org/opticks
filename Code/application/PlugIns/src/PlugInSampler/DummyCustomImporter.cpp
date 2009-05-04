@@ -10,8 +10,11 @@
 #include "DummyCustomImporter.h"
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
+#include "PlugInRegistration.h"
 
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksPlugInSampler, DummyCustomImporter);
 
 DummyCustomImporter::DummyCustomImporter()
 {

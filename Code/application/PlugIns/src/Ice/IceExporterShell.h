@@ -14,6 +14,7 @@
 #include "IceUtilities.h"
 #include "PlugInManagerServices.h"
 
+#include <memory>
 #include <string>
 
 class IceWriter;

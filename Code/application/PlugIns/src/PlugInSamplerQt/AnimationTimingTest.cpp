@@ -11,6 +11,7 @@
 #include "AnimationTimingTest.h"
 #include "DesktopServices.h"
 #include "LayerList.h"
+#include "PlugInRegistration.h"
 #include "RasterElement.h"
 #include "SpatialDataView.h"
 
@@ -22,6 +23,8 @@
 #include <vector>
 
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksPlugInSamplerQt, AnimationTimingTestPlugIn);
 
 AnimationTimingTestPlugIn::AnimationTimingTestPlugIn() :
    mpDialog(NULL)

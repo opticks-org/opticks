@@ -27,6 +27,7 @@
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "Progress.h"
 #include "RasterElement.h"
 #include "SpatialDataView.h"
@@ -34,6 +35,8 @@
 #include "Undo.h"
 
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksCoreIo, CgmImporter);
 
 CgmImporter::CgmImporter()
 {
@@ -123,7 +126,7 @@ unsigned char CgmImporter::getFileAffinity(const std::string& filename)
    {
       return Importer::CAN_NOT_LOAD;
    }
-   Endian swapper(BIG_ENDIAN);
+   Endian swapper(BIG_ENDIAN_ORDER);
 
    // Read the first two bytes of the file, which should be the start of the Begin Metafile element
    uint16_t beginMetafileVal;

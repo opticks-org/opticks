@@ -2843,8 +2843,10 @@ QSize HistogramPlotImp::MenuListWidget::sizeHint() const
    return QSize(iWidth, iHeight);
 }
 
+namespace StringUtilities
+{
 template<>
-std::string StringUtilities::toXmlString(const HistogramPlotImp::ValuesType& val, bool* pError)
+std::string toXmlString(const HistogramPlotImp::ValuesType& val, bool* pError)
 {
    string retValue;
    switch (val)
@@ -2869,7 +2871,7 @@ std::string StringUtilities::toXmlString(const HistogramPlotImp::ValuesType& val
 }
 
 template<>
-HistogramPlotImp::ValuesType StringUtilities::fromXmlString<HistogramPlotImp::ValuesType>(string value, bool* pError)
+HistogramPlotImp::ValuesType fromXmlString<HistogramPlotImp::ValuesType>(string value, bool* pError)
 {
    HistogramPlotImp::ValuesType retValue;
    if (value == "none") 
@@ -2889,6 +2891,7 @@ HistogramPlotImp::ValuesType StringUtilities::fromXmlString<HistogramPlotImp::Va
       *pError = (!retValue.isValid());
    }
    return retValue;
+}
 }
 
 bool HistogramPlotImp::toXml(XMLWriter* pXml) const

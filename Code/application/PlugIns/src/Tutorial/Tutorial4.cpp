@@ -21,6 +21,7 @@
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
 #include "PlugInResource.h"
+#include "PlugInRegistration.h"
 #include "Progress.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
@@ -32,6 +33,8 @@
 #include <vector>
 #include <QtCore/QStringList>
 #include <QtGui/QInputDialog>
+
+REGISTER_PLUGIN_BASIC(OpticksTutorial, Tutorial4);
 
 namespace
 {

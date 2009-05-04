@@ -64,8 +64,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				Version=""
 				AdditionalDependencies="advapi32.lib"
+				Version=""
 				AdditionalLibraryDirectories=""
 				IgnoreDefaultLibraryNames=""
 			/>
@@ -142,8 +142,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				Version=""
 				AdditionalDependencies="advapi32.lib"
+				Version=""
 				AdditionalLibraryDirectories=""
 				IgnoreDefaultLibraryNames=""
 			/>
@@ -220,8 +220,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				Version=""
 				AdditionalDependencies="advapi32.lib"
+				Version=""
 				AdditionalLibraryDirectories=""
 			/>
 			<Tool
@@ -296,8 +296,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				Version=""
 				AdditionalDependencies="advapi32.lib"
+				Version=""
 				AdditionalLibraryDirectories=""
 			/>
 			<Tool
@@ -334,10 +334,6 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
-				RelativePath=".\Descriptors.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\ModuleManager.cpp"
 				>
 			</File>
@@ -354,10 +350,6 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl"
 			>
-			<File
-				RelativePath=".\Descriptors.h"
-				>
-			</File>
 			<File
 				RelativePath=".\ScriptPlugIn.h"
 				>

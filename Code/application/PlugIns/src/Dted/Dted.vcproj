@@ -346,10 +346,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\PlugInManager\PlugInModule.def"
-				>
-			</File>
-			<File
 				RelativePath=".\UhlHeader.cpp"
 				>
 			</File>

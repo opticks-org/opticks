@@ -79,6 +79,8 @@ public:
    bool adoptSetting(const std::string& key, DataVariant& var, bool setIfSame = false);
    const DataVariant& getSetting(const std::string& key) const;
    bool isUserSetting(const std::string& key) const;
+   bool isSessionSetting(const std::string& key) const;
+   bool isDefaultSetting(const std::string& key) const;
    void deleteUserSetting(const std::string& key);
    void deleteSessionSetting(const std::string& key);
    bool adoptSessionSetting(const std::string& key, DataVariant& var);

@@ -241,19 +241,19 @@ protected:
    virtual void drawClassification();
 
    template<typename V, typename T>
-   void executeOnLinks(T &functor)
+   void executeOnLinks(const T &functor)
    {
       executeOnLinks<V, V>(functor, functor);
    }
 
    template<typename V, typename T1, typename T2>
-   void executeOnLinks(T1 &mirrorFunctor, T2 &geoFunctor)
+   void executeOnLinks(const T1 &mirrorFunctor, const T2 &geoFunctor)
    {
       executeOnLinks<V, V>(mirrorFunctor, geoFunctor);
    }
 
    template<typename VMirror, typename VGeo, typename T1, typename T2>
-   void executeOnLinks(T1 &mirrorFunctor, T2 &geoFunctor)
+   void executeOnLinks(const T1 &mirrorFunctor, const T2 &geoFunctor)
    {
       if (mbLinking)
       {

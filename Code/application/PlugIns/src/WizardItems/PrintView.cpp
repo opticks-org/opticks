@@ -14,6 +14,7 @@
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "PrintView.h"
 #include "RasterElement.h"
 #include "SpatialDataView.h"
@@ -21,6 +22,8 @@
 
 #include <vector>
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksWizardItems, PrintView);
 
 PrintView::PrintView() :
    mpRasterElement(NULL),

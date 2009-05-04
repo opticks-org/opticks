@@ -10,8 +10,11 @@
 
 #include "AppVersion.h"
 #include "IceRasterElementImporter.h"
+#include "PlugInRegistration.h"
 
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksIce, IceRasterElementImporter);
 
 IceRasterElementImporter::IceRasterElementImporter() :
    IceImporterShell(IceUtilities::RASTER_ELEMENT)

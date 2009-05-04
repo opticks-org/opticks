@@ -13,7 +13,10 @@
 #include "DesktopServices.h"
 #include "MouseModeTest.h"
 #include "MouseModeTestGui.h"
+#include "PlugInRegistration.h"
 #include "SpatialDataWindow.h"
+
+REGISTER_PLUGIN_BASIC(OpticksPlugInSamplerQt, MouseModeTest);
 
 MouseModeTest::MouseModeTest() :
    mpGui(NULL)

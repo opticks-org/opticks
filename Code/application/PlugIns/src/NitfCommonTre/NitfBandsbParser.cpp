@@ -19,6 +19,7 @@
 #include "NitfConstants.h"
 #include "NitfUtilities.h"
 #include "ObjectResource.h"
+#include "PlugInRegistration.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "RasterFileDescriptor.h"
@@ -33,6 +34,8 @@ using namespace std;
 using namespace Nitf;
 using namespace Nitf::TRE;
 
+
+REGISTER_PLUGIN(OpticksNitfCommonTre, BandsbParser, Nitf::BandsbParser());
 
 /***************************************************************************
 BANDSB Support Data Extension - Version 8.01 (Sept 2003)
@@ -1296,7 +1299,7 @@ bool Nitf::BandsbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
    if (success)
    {
       success = readFromStream(input, buf, 4) &&
-         output.setAttribute(BANDSB::SCALE_FACTOR, convertBinary<float>(&buf[0], BIG_ENDIAN));
+         output.setAttribute(BANDSB::SCALE_FACTOR, convertBinary<float>(&buf[0], BIG_ENDIAN_ORDER));
       if (!success)
       {
          errorMessage += "Read or setAttribute Error with convertBinary: " + BANDSB::SCALE_FACTOR + "\n";
@@ -1305,7 +1308,7 @@ bool Nitf::BandsbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
    if (success)
    {
       success = readFromStream(input, buf, 4) &&
-         output.setAttribute(BANDSB::ADDITIVE_FACTOR, convertBinary<float>(&buf[0], BIG_ENDIAN));
+         output.setAttribute(BANDSB::ADDITIVE_FACTOR, convertBinary<float>(&buf[0], BIG_ENDIAN_ORDER));
       if (!success)
       {
          errorMessage += "Read or setAttribute Error with convertBinary: " + BANDSB::ADDITIVE_FACTOR + "\n";
@@ -1363,7 +1366,7 @@ bool Nitf::BandsbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
          errorMessage += "Read Error " + BANDSB::EXISTENCE_MASK + "\n";
       }
    }
-   unsigned int existmask = convertBinary<unsigned int>(&buf[0], BIG_ENDIAN);
+   unsigned int existmask = convertBinary<unsigned int>(&buf[0], BIG_ENDIAN_ORDER);
    if (success)
    {
       success = output.setAttribute(BANDSB::EXISTENCE_MASK, existmask);
@@ -1380,7 +1383,7 @@ bool Nitf::BandsbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
       if (success)
       {
          success = readFromStream(input, buf, 4) &&
-            output.setAttribute(BANDSB::ATMOSPHERIC_ADJUSTMENT_ALTITUDE, convertBinary<float>(&buf[0], BIG_ENDIAN));
+            output.setAttribute(BANDSB::ATMOSPHERIC_ADJUSTMENT_ALTITUDE, convertBinary<float>(&buf[0], BIG_ENDIAN_ORDER));
          if (!success)
          {
             errorMessage += "Read or setAttribute Error with convertBinary: " +
@@ -1514,7 +1517,7 @@ bool Nitf::BandsbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
          if (success)
          {
             success = readFromStream(input, buf, 4) &&
-               output.setAttribute(fieldName, convertBinary<float>(&buf[0], BIG_ENDIAN));
+               output.setAttribute(fieldName, convertBinary<float>(&buf[0], BIG_ENDIAN_ORDER));
             if (!success)
             {
                errorMessage += "Read or setAttribute Error with convertBinary: " + fieldName + "\n";
@@ -1525,7 +1528,7 @@ bool Nitf::BandsbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
          if (success)
          {
             success = readFromStream(input, buf, 4) &&
-               output.setAttribute(fieldName, convertBinary<float>(&buf[0], BIG_ENDIAN));
+               output.setAttribute(fieldName, convertBinary<float>(&buf[0], BIG_ENDIAN_ORDER));
             if (!success)
             {
                errorMessage += "Read or setAttribute Error with convertBinary: " + fieldName + "\n";
@@ -1774,7 +1777,7 @@ bool Nitf::BandsbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
                if (success)
                {
                   success = readFromStream(input, buf, 4) &&
-                     output.setAttribute(fieldName, convertBinary<float>(&buf[0], BIG_ENDIAN));
+                     output.setAttribute(fieldName, convertBinary<float>(&buf[0], BIG_ENDIAN_ORDER));
                   if (!success)
                   {
                      errorMessage += "Read or setAttribute Error with convertBinary: " + fieldName + "\n";
@@ -1831,7 +1834,7 @@ bool Nitf::BandsbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
             if (success)
             {
                success = readFromStream(input, buf, 4) &&
-                  output.setAttribute(fieldName, convertBinary<float>(&buf[0], BIG_ENDIAN));
+                  output.setAttribute(fieldName, convertBinary<float>(&buf[0], BIG_ENDIAN_ORDER));
                if (!success)
                {
                   errorMessage += "Read or setAttribute Error with convertBinary: " + fieldName + "\n";
@@ -2702,10 +2705,10 @@ bool Nitf::BandsbParser::fromDynamicObject(const DynamicObject& input, ostream& 
       output << sizeString(dv_cast<string>(input.getAttribute(BANDSB::RADIOMETRIC_QUANTITY)), 24);
       output << sizeString(dv_cast<string>(input.getAttribute(BANDSB::RADIOMETRIC_QUANTITY_UNIT)), 1);
 
-      tempFloat = convertBinary<float>(&dv_cast<float>(input.getAttribute(BANDSB::SCALE_FACTOR)), BIG_ENDIAN);
+      tempFloat = convertBinary<float>(&dv_cast<float>(input.getAttribute(BANDSB::SCALE_FACTOR)), BIG_ENDIAN_ORDER);
       output.write(reinterpret_cast<char*>(&tempFloat), 4);
 
-      tempFloat = convertBinary<float>(&dv_cast<float>(input.getAttribute(BANDSB::ADDITIVE_FACTOR)), BIG_ENDIAN);
+      tempFloat = convertBinary<float>(&dv_cast<float>(input.getAttribute(BANDSB::ADDITIVE_FACTOR)), BIG_ENDIAN_ORDER);
       output.write(reinterpret_cast<char*>(&tempFloat), 4);
 
       DataVariant tempDV = input.getAttribute(BANDSB::ROW_GSD);
@@ -2771,7 +2774,7 @@ bool Nitf::BandsbParser::fromDynamicObject(const DynamicObject& input, ostream& 
       // A bit set to zero signals that a conditional field is not present in this
       // extension. A bit set to the value one indicates the inclusion of the conditional field.
       unsigned int existmask = dv_cast<unsigned int>(input.getAttribute(BANDSB::EXISTENCE_MASK));
-      unsigned int tempUInt = convertBinary<unsigned int>(&existmask, BIG_ENDIAN);
+      unsigned int tempUInt = convertBinary<unsigned int>(&existmask, BIG_ENDIAN_ORDER);
       output.write(reinterpret_cast<char*>(&tempUInt), 4);
 
       // b31 signals the RADIOMETRIC ADJUSTMENT SURFACE and ATMOSPHERIC ADJUSTMENT ALTITUDE fields.
@@ -2780,7 +2783,7 @@ bool Nitf::BandsbParser::fromDynamicObject(const DynamicObject& input, ostream& 
          output << sizeString(dv_cast<string>(input.getAttribute(BANDSB::RADIOMETRIC_ADJUSTMENT_SURFACE)), 24);
 
          tempFloat = convertBinary<float>(&dv_cast<float>
-            (input.getAttribute(BANDSB::ATMOSPHERIC_ADJUSTMENT_ALTITUDE)), BIG_ENDIAN);
+            (input.getAttribute(BANDSB::ATMOSPHERIC_ADJUSTMENT_ALTITUDE)), BIG_ENDIAN_ORDER);
          output.write(reinterpret_cast<char*>(&tempFloat), 4);
       }
 
@@ -2904,11 +2907,11 @@ bool Nitf::BandsbParser::fromDynamicObject(const DynamicObject& input, ostream& 
          if (bitTest(existmask, 18))
          {
             fieldName = BANDSB::SCALE_FACTOR + bandNumStr;
-            tempFloat = convertBinary<float>(&dv_cast<float>(input.getAttribute(fieldName)), BIG_ENDIAN);
+            tempFloat = convertBinary<float>(&dv_cast<float>(input.getAttribute(fieldName)), BIG_ENDIAN_ORDER);
             output.write(reinterpret_cast<char*>(&tempFloat), 4);
 
             fieldName = BANDSB::ADDITIVE_FACTOR + bandNumStr;
-            tempFloat = convertBinary<float>(&dv_cast<float>(input.getAttribute(fieldName)), BIG_ENDIAN);
+            tempFloat = convertBinary<float>(&dv_cast<float>(input.getAttribute(fieldName)), BIG_ENDIAN_ORDER);
             output.write(reinterpret_cast<char*>(&tempFloat), 4);
          }
 
@@ -3164,7 +3167,7 @@ bool Nitf::BandsbParser::fromDynamicObject(const DynamicObject& input, ostream& 
                case 'R':
                {
                   fieldName = BANDSB::APR + auxbStr + bandNumStr;
-                  tempFloat = convertBinary<float>(&dv_cast<float>(input.getAttribute(fieldName)), BIG_ENDIAN);
+                  tempFloat = convertBinary<float>(&dv_cast<float>(input.getAttribute(fieldName)), BIG_ENDIAN_ORDER);
                   output.write(reinterpret_cast<char*>(&tempFloat), 4);
                   break;
                }
@@ -3211,7 +3214,7 @@ bool Nitf::BandsbParser::fromDynamicObject(const DynamicObject& input, ostream& 
             case 'R':
             {
                fieldName = BANDSB::APR + auxcStr;
-               tempFloat = convertBinary<float>(&dv_cast<float>(input.getAttribute(fieldName)), BIG_ENDIAN);
+               tempFloat = convertBinary<float>(&dv_cast<float>(input.getAttribute(fieldName)), BIG_ENDIAN_ORDER);
                output.write(reinterpret_cast<char*>(&tempFloat), 4);
                break;
             }

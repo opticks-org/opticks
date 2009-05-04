@@ -23,12 +23,15 @@
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "Progress.h"
 #include "UInt64.h"
 
 #include <sstream>
 
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksAspam, AspamImporter);
 
 /******
  * Parsing helper functions

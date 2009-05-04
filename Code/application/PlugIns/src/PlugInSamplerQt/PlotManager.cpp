@@ -14,6 +14,7 @@
 #include "DockWindowWidget.h"
 #include "MenuBar.h"
 #include "PlotManager.h"
+#include "PlugInRegistration.h"
 #include "ToolBar.h"
 
 static const char* const PlotManagerIcon[] =
@@ -43,6 +44,8 @@ static const char* const PlotManagerIcon[] =
    "################",
    "................"
 };
+
+REGISTER_PLUGIN_BASIC(OpticksPlugInSamplerQt, PlotManager);
 
 PlotManager::PlotManager()
 {

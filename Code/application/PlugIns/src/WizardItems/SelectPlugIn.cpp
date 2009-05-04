@@ -17,10 +17,13 @@
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "PlugInSelectDlg.h"
 #include "StringUtilities.h"
 
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksWizardItems, SelectPlugIn);
 
 SelectPlugIn::SelectPlugIn()
 {

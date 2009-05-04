@@ -24,6 +24,7 @@
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "SpatialDataView.h"
 #include "SpatialDataWindow.h"
 #include "StringUtilities.h"
@@ -34,6 +35,11 @@
 #include <string>
 
 using namespace std;
+
+REGISTER_PLUGIN(OpticksCoreIo, LayerExporterAnnotation, LayerExporter(ANNOTATION));
+REGISTER_PLUGIN(OpticksCoreIo, LayerExporterAoi, LayerExporter(AOI_LAYER));
+REGISTER_PLUGIN(OpticksCoreIo, LayerExporterGcp, LayerExporter(GCP_LAYER));
+REGISTER_PLUGIN(OpticksCoreIo, LayerExporterTiePoint, LayerExporter(TIEPOINT_LAYER));
 
 LayerExporter::LayerExporter(LayerType layerType)
 {

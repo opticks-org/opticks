@@ -23,6 +23,7 @@
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "Progress.h"
 #include "RasterElement.h"
 #include "ShapeFile.h"
@@ -31,6 +32,8 @@
 #include "SpatialDataView.h"
 
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksShapeFileExporter, ShapeFileExporter);
 
 ShapeFileExporter::ShapeFileExporter() : mpAoi(NULL), mpGeoref(NULL), mpLayers(NULL)
 {
@@ -238,7 +241,8 @@ bool ShapeFileExporter::extractInputs(const PlugInArgList* pInArgList, string& m
 
    //add aoi to shape file
    mShapefile.setShape(MULTIPOINT_SHAPE);
-   mShapefile.addFeatures(mpAoi, mpGeoref);
+   string err;
+   mShapefile.addFeatures(mpAoi, mpGeoref, err);
 
    return true;
 }

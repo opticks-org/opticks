@@ -26,12 +26,15 @@
 #include "PlugInArgList.h"
 #include "PlugInDescriptor.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "PlugInResource.h"
 #include "Progress.h"
 
 #include <algorithm>
 
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksAutoImporter, AutoImporter);
 
 AutoImporter::AutoImporter() :
    mbInteractive(false),

@@ -11,11 +11,14 @@
 #include "AppVersion.h"
 #include "MessageLogResource.h"
 #include "PlugInArgList.h"
+#include "PlugInRegistration.h"
 #include "RasterLayer.h"
 #include "SetDisplayMode.h"
 #include "SpatialDataView.h"
 
 #include <string>
+
+REGISTER_PLUGIN_BASIC(OpticksWizardItems, SetDisplayMode);
 
 SetDisplayMode::SetDisplayMode() :
    mpRasterLayer(NULL),

@@ -16,6 +16,7 @@
 #include "NitfIchipbParser.h"
 #include "NitfUtilities.h"
 #include "ObjectResource.h"
+#include "PlugInRegistration.h"
 #include "RasterDataDescriptor.h"
 #include "RasterFileDescriptor.h"
 
@@ -29,6 +30,8 @@
 using namespace std;
 using namespace Nitf;
 using namespace Nitf::TRE;
+
+REGISTER_PLUGIN(OpticksNitfCommonTre, IchipbParser, Nitf::IchipbParser());
 
 Nitf::IchipbParser::IchipbParser()
 {

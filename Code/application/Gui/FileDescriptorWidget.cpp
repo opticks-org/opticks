@@ -215,8 +215,8 @@ void FileDescriptorWidget::initialize()
       {
          QComboBox* pEndianCombo = new QComboBox(mpTreeWidget);
          pEndianCombo->setEditable(false);
-         pEndianCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(LITTLE_ENDIAN)));
-         pEndianCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(BIG_ENDIAN)));
+         pEndianCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(LITTLE_ENDIAN_ORDER)));
+         pEndianCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(BIG_ENDIAN_ORDER)));
          pEndianCombo->hide();
 
          mpTreeWidget->setCellWidgetType(pEndianItem, 1, CustomTreeWidget::COMBO_BOX);

@@ -12,6 +12,7 @@
 
 #include "RasterElementImporterShell.h"
 
+#include <memory>
 #include <vector>
 
 class OptionsTiffImporter;

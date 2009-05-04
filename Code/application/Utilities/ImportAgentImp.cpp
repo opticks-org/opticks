@@ -56,7 +56,7 @@ namespace
             return false;
          }
 
-         return less::operator()(pDataDescriptor1->getParentDesignator().size(),
+         return less<vector<string>::size_type>::operator()(pDataDescriptor1->getParentDesignator().size(),
             pDataDescriptor2->getParentDesignator().size());
       }
    };

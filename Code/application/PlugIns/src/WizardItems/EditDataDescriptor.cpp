@@ -18,11 +18,14 @@
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "RasterDataDescriptor.h"
 #include "RasterFileDescriptor.h"
 #include "Units.h"
 
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksWizardItems, EditDataDescriptor);
 
 EditDataDescriptor::EditDataDescriptor() :
    mpDescriptor(NULL),

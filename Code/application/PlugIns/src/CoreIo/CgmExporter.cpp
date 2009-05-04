@@ -15,10 +15,13 @@
 #include "GraphicElement.h"
 #include "MessageLogResource.h"
 #include "PlugInArgList.h"
+#include "PlugInRegistration.h"
 #include "Progress.h"
 
 #include <string>
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksCoreIo, CgmExporter);
 
 CgmExporter::CgmExporter()
 {

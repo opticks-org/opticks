@@ -15,6 +15,7 @@
 #include "NitfUtilities.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "switchOnEncoding.h"
 
 #include <ossim/base/ossimFilename.h>
@@ -27,6 +28,8 @@
 #include <ossim/init/ossimInit.h>
 
 #include <QtCore/QString>
+
+REGISTER_PLUGIN(OpticksNitf, Pager, Nitf::Pager);
 
 Nitf::Pager::Pager() :
    mSegment(1),

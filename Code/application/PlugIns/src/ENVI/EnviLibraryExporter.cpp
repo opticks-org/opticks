@@ -19,6 +19,7 @@
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "Progress.h"
 #include "Signature.h"
 #include "SignatureSet.h"
@@ -26,6 +27,8 @@
 #include <algorithm>
 
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksENVI, EnviLibraryExporter);
 
 EnviLibraryExporter::EnviLibraryExporter() :
    mbAbort(false),
@@ -329,7 +332,7 @@ bool EnviLibraryExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
    fprintf(pFp, "file type = ENVI Spectral Library\n");
    fprintf(pFp, "data type = 4\n");
    fprintf(pFp, "interleave = bsq\n");
-   fprintf(pFp, "byte order = %d\n", Endian::getSystemEndian()==BIG_ENDIAN);    
+   fprintf(pFp, "byte order = %d\n", Endian::getSystemEndian() == BIG_ENDIAN_ORDER);    
    fprintf(pFp, "wavelength units = Micrometers\n");
    if (unitType == REFLECTANCE)
    {

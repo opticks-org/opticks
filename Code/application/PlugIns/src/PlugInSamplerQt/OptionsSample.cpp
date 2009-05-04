@@ -11,6 +11,8 @@
 
 #include "ConfigurationSettings.h"
 #include "LabeledSection.h"
+#include "OptionQWidgetWrapper.h"
+#include "PlugInRegistration.h"
 #include "UtilityServices.h"
 
 #include <QtGui/QCheckBox>
@@ -24,6 +26,8 @@
 #include <string>
 
 using namespace std;
+
+REGISTER_PLUGIN(OpticksPlugInSamplerQt, OptionsSample, OptionQWidgetWrapper<OptionsSample>());
 
 OptionsSample::OptionsSample() :
    QWidget(NULL)

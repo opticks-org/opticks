@@ -11,8 +11,6 @@ See the README.windows and README.solaris files for information on using this ut
 
 Plug-ins are distributed in dynamic modules (.dll files on Windows and .so files on Solaris) which can contain multiple plug-ins.
 In addition to plug-in source files, each module requires a ModuleManager.cpp file which acts as a factory for the plug-ins in the module.
-The %Opticks SDK has a template ModuleManager.cpp in the Src directory.
-The template file has inline comments describing what you need to do.
 Below is the ModuleManager.cpp file for the tutorial.
 \include Tutorial/ModuleManager.cpp
 
@@ -81,8 +79,8 @@ This shows how to include the libtiff tool.
 \skipline Import
 Change this line and add the following lines.
 \code
-Import('env extra_obj build_dir TOOLPATH')
-env = env.Copy()
+Import('env build_dir TOOLPATH')
+env = env.Clone()
 env.Tool("libtiff",toolpath=[TOOLPATH])
 \endcode
 The tool name is the name of the .py file in Application/CompileSettings.

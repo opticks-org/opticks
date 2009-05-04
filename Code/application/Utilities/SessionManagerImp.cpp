@@ -1048,7 +1048,8 @@ bool SessionManagerImp::open(const string &filename, Progress *pProgress)
       {
          pAppWindow->registerPlugIns();
          pAppWindow->updateWizardCommands();
-         restoreSessionItem(IndexFileItem(ModelServicesImp::instance()));
+         IndexFileItem ifi(ModelServicesImp::instance());
+         restoreSessionItem(ifi);
          createSessionItems(items, pProgress);
          populateItemMap(items);
          restoreSessionItems(items, pProgress);
@@ -1239,8 +1240,8 @@ SessionManagerImp::serialize(const string& filename, Progress* pProgress)
       mIsSaveLoad = true;
       deleteObsoleteFiles(sessionDirPath, items);
 
-      ModelServicesImp::instance()->serialize(
-         SessionItemSerializerImp(getPathForItem(sessionDirPath, ModelServicesImp::instance())));
+      SessionItemSerializerImp sis(getPathForItem(sessionDirPath, ModelServicesImp::instance()));
+      ModelServicesImp::instance()->serialize(sis);
 
       int count = items.size();
       int i = 0;

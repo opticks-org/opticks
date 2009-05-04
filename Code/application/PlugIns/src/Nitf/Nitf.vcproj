@@ -83,9 +83,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Debug|x64"
+			Name="Release|Win32"
 			ConfigurationType="2"
-			InheritedPropertySheets="..\..\..\CompileSettings\Qt-Debug.vsprops;..\..\..\CompileSettings\Xerces-Debug.vsprops;..\..\..\CompileSettings\boost.vsprops;..\..\..\CompileSettings\64bitSettings.vsprops;..\..\..\CompileSettings\PlugInCommonSettings.vsprops;..\..\..\CompileSettings\AllCommonSettings-Debug-64bit.vsprops;..\..\..\CompileSettings\Macros.vsprops;..\..\..\CompileSettings\pthreads.vsprops;..\..\..\CompileSettings\NitfPlugInLibrary.vsprops;..\..\..\CompileSettings\Ossim-Debug.vsprops;..\..\..\CompileSettings\UpdateBuildRevision.vsprops"
+			InheritedPropertySheets="..\..\..\CompileSettings\Qt-Release.vsprops;..\..\..\CompileSettings\Xerces-Release.vsprops;..\..\..\CompileSettings\boost.vsprops;..\..\..\CompileSettings\32bitSettings.vsprops;..\..\..\CompileSettings\PlugInCommonSettings.vsprops;..\..\..\CompileSettings\AllCommonSettings-Release-32bit.vsprops;..\..\..\CompileSettings\Macros.vsprops;..\..\..\CompileSettings\pthreads.vsprops;..\..\..\CompileSettings\NitfPlugInLibrary.vsprops;..\..\..\CompileSettings\Ossim-Release.vsprops;..\..\..\CompileSettings\UpdateBuildRevision.vsprops"
 			CharacterSet="2"
 			>
 			<Tool
@@ -102,7 +102,6 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TargetEnvironment="3"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
@@ -148,9 +147,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Release|Win32"
+			Name="Debug|x64"
 			ConfigurationType="2"
-			InheritedPropertySheets="..\..\..\CompileSettings\Qt-Release.vsprops;..\..\..\CompileSettings\Xerces-Release.vsprops;..\..\..\CompileSettings\boost.vsprops;..\..\..\CompileSettings\32bitSettings.vsprops;..\..\..\CompileSettings\PlugInCommonSettings.vsprops;..\..\..\CompileSettings\AllCommonSettings-Release-32bit.vsprops;..\..\..\CompileSettings\Macros.vsprops;..\..\..\CompileSettings\pthreads.vsprops;..\..\..\CompileSettings\NitfPlugInLibrary.vsprops;..\..\..\CompileSettings\Ossim-Release.vsprops;..\..\..\CompileSettings\UpdateBuildRevision.vsprops"
+			InheritedPropertySheets="..\..\..\CompileSettings\Qt-Debug.vsprops;..\..\..\CompileSettings\Xerces-Debug.vsprops;..\..\..\CompileSettings\boost.vsprops;..\..\..\CompileSettings\64bitSettings.vsprops;..\..\..\CompileSettings\PlugInCommonSettings.vsprops;..\..\..\CompileSettings\AllCommonSettings-Debug-64bit.vsprops;..\..\..\CompileSettings\Macros.vsprops;..\..\..\CompileSettings\pthreads.vsprops;..\..\..\CompileSettings\NitfPlugInLibrary.vsprops;..\..\..\CompileSettings\Ossim-Debug.vsprops;..\..\..\CompileSettings\UpdateBuildRevision.vsprops"
 			CharacterSet="2"
 			>
 			<Tool
@@ -167,6 +166,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
+				TargetEnvironment="3"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
@@ -338,6 +338,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\OssimServices.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\RpcGeoreference.cpp"
 				>
 			</File>
@@ -401,7 +405,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|x64"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCustomBuildTool"
@@ -411,7 +415,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|Win32"
+					Name="Debug|x64"
 					>
 					<Tool
 						Name="VCCustomBuildTool"
@@ -433,10 +437,6 @@
 			</File>
 			<File
 				RelativePath=".\OssimAppMemorySource.h"
-				>
-			</File>
-			<File
-				RelativePath=".\OssimServices.h"
 				>
 			</File>
 			<File

@@ -228,8 +228,8 @@ bool CurveImp::hit(LocationType point) const
       pPlot->translateDataToScreen(currentPoint.mX, currentPoint.mY, 
          dCurrentScreenX, dCurrentScreenY);
 
-      double dXDist = abs(dCurrentScreenX - dScreenX);
-      double dYDist = abs(dCurrentScreenY - dScreenY);
+      double dXDist = fabs(dCurrentScreenX - dScreenX);
+      double dYDist = fabs(dCurrentScreenY - dScreenY);
 
       if ((dXDist < 3.0) && (dYDist < 3.0))
       {

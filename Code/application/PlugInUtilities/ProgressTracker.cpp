@@ -149,7 +149,8 @@ void ProgressTracker::upALevel()
    currentStage.finalize(Message::Success);
    if (pParentStage != NULL)
    {
-      pParentStage->subdivide(vector<Stage>());
+      vector<Stage> stages;
+      pParentStage->subdivide(stages);
    }
 }
 

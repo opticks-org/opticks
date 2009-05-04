@@ -18,6 +18,7 @@
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "UtilityServices.h"
 #include "xmlwriter.h"
 
@@ -28,6 +29,11 @@ class AnnotationElement;
 class AoiElement;
 class GcpList;
 class TiePointList;
+
+REGISTER_PLUGIN(OpticksCoreIo, ModelExporterAoi, ModelExporter(TypeConverter::toString<AoiElement>()));
+REGISTER_PLUGIN(OpticksCoreIo, ModelExporterAnnotation, ModelExporter(TypeConverter::toString<AnnotationElement>()));
+REGISTER_PLUGIN(OpticksCoreIo, ModelExporterGcpList, ModelExporter(TypeConverter::toString<GcpList>()));
+REGISTER_PLUGIN(OpticksCoreIo, ModelExporterTiePointList, ModelExporter(TypeConverter::toString<TiePointList>()));
 
 ModelExporter::ModelExporter(const string& dataElementSubclass) :
    mDataElementSubclass(dataElementSubclass)

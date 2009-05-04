@@ -663,7 +663,7 @@ MultiThreadedAlgorithm<AlgInput, AlgOutput, AlgThread>::MultiThreadedAlgorithm(i
 template<class AlgInput, class AlgOutput, class AlgThread>
 MultiThreadedAlgorithm<AlgInput, AlgOutput, AlgThread>::~MultiThreadedAlgorithm()
 {
-   std::vector<AlgThread*>::iterator iter;
+   typename std::vector<AlgThread*>::iterator iter;
    for (iter = mThreads.begin(); iter != mThreads.end(); ++iter)
    {
       AlgThread* pThread = *iter;
@@ -696,7 +696,7 @@ Result MultiThreadedAlgorithm<AlgInput, AlgOutput, AlgThread>::createThreads(int
 template<class AlgInput, class AlgOutput, class AlgThread>
 Result MultiThreadedAlgorithm<AlgInput, AlgOutput, AlgThread>::startAllThreads()
 {
-   std::vector<AlgThread*>::iterator iter;
+   typename std::vector<AlgThread*>::iterator iter;
 
    mMutexA.MutexLock();
    mMutexB.MutexLock();
@@ -725,7 +725,7 @@ Result MultiThreadedAlgorithm<AlgInput, AlgOutput, AlgThread>::waitForThreadsToC
       {
          mMutexA.MutexUnlock();
 
-         std::vector<AlgThread*>::iterator iter;
+         typename std::vector<AlgThread*>::iterator iter;
          for (iter = mThreads.begin(); iter != mThreads.end(); ++iter)
          {
             (*iter)->wait();

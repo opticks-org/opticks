@@ -14,10 +14,12 @@
 #include "DemoAlgorithm.h"
 #include "DesktopServices.h"
 #include "PlugInArgList.h"
+#include "PlugInRegistration.h"
 #include "Resource.h"
 
 using namespace std;
 
+REGISTER_PLUGIN_BASIC(OpticksPlugInSamplerQt, Demo);
 /**
  *  Obligation from the base class. Indicates if the algorithm can
  *  be run in batch mode.

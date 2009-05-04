@@ -21,12 +21,18 @@
 #include "GraphicObject.h"
 #include "LayerList.h"
 #include "OptionsTiffExporter.h"
+#include "PicturesPlotWidgetExporter.h"
+#include "PicturesViewExporter.h"
+#include "PlugInRegistration.h"
 #include "ProductView.h"
 #include "RasterElement.h"
 #include "SpatialDataView.h"
 #include "TiffDetails.h"
 
 #include <string>
+
+REGISTER_PLUGIN(OpticksPictures, TiffPicturesPlotWidgetExporter, PicturesPlotWidgetExporter(new TiffDetails));
+REGISTER_PLUGIN(OpticksPictures, TiffPicturesViewExporter, PicturesViewExporter(new TiffDetails));
 
 TiffDetails::TiffDetails() : mpOptionsWidget(NULL)
 {

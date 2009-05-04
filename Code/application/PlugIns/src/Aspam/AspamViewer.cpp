@@ -15,6 +15,7 @@
 #include "AppAssert.h"
 #include "DesktopServices.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "SessionItemDeserializer.h"
 #include "SessionItemSerializer.h"
 #include "SessionManager.h"
@@ -25,6 +26,8 @@
 
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
+
+REGISTER_PLUGIN_BASIC(OpticksAspam, AspamViewer);
 
 AspamViewer::AspamViewer() : mpMainWindow(NULL), mbSessionClosing(false)
 {

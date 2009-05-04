@@ -13,6 +13,7 @@
 #include "NitfExpltaParser.h"
 #include "NitfUtilities.h"
 #include "ObjectResource.h"
+#include "PlugInRegistration.h"
 
 #include <ostream>
 #include <sstream>
@@ -20,6 +21,8 @@
 using namespace std;
 using namespace Nitf;
 using namespace Nitf::TRE;
+
+REGISTER_PLUGIN(OpticksNitfCommonTre, ExpltaParser, Nitf::ExpltaParser());
 
 Nitf::ExpltaParser::ExpltaParser()
 {

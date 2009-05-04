@@ -11,6 +11,7 @@
 #include "Filename.h"
 #include "ImportDescriptor.h"
 #include "ObjectResource.h"
+#include "PlugInRegistration.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "RasterFileDescriptor.h"
@@ -91,6 +92,8 @@ int SampleRasterPager::getSupportedRequestVersion() const
 }
 // End of SampleRasterPager
 
+REGISTER_PLUGIN_BASIC(OpticksPlugInSampler, SampleRasterElementImporter);
+
 SampleRasterElementImporter::SampleRasterElementImporter()
 {
    setName("Sample RasterElement Importer");
@@ -136,7 +139,7 @@ std::vector<ImportDescriptor*> SampleRasterElementImporter::getImportDescriptors
       return descriptors;
    }
    pDesc->setDataDescriptor(pDataDesc);
-   if (RasterUtilities::generateAndSetFileDescriptor(pDataDesc, filename, "", LITTLE_ENDIAN) == NULL)
+   if (RasterUtilities::generateAndSetFileDescriptor(pDataDesc, filename, "", LITTLE_ENDIAN_ORDER) == NULL)
    {
       return descriptors;
    }

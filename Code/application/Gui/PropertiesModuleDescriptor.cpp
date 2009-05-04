@@ -6,7 +6,7 @@
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
-
+#include <QtGui/QFormLayout>
 #include <QtGui/QLayout>
 
 #include "AppVersion.h"
@@ -21,38 +21,14 @@ PropertiesModuleDescriptor::PropertiesModuleDescriptor() :
    LabeledSectionGroup(NULL)
 {
    // Module
-   QWidget* pModuleWidget = new QWidget(this);
-   QLabel* pNameLabel = new QLabel("Name:", pModuleWidget);
-   mpNameLabel = new QLabel(pModuleWidget);
-   QLabel* pVersionLabel = new QLabel("Version:", pModuleWidget);
-   mpVersionLabel = new QLabel(pModuleWidget);
-   QLabel* pDescriptionLabel = new QLabel("Description:", pModuleWidget);
-   mpDescriptionLabel = new QLabel(pModuleWidget);
-   QLabel* pPlugInsLabel = new QLabel("Number of Plug-Ins:", pModuleWidget);
-   mpPlugInsLabel = new QLabel(pModuleWidget);
-   QLabel* pValidatedLabel = new QLabel("Validated:", pModuleWidget);
-   mpValidatedLabel = new QLabel(pModuleWidget);
-   QLabel* pLoadedLabel = new QLabel("Loaded:", pModuleWidget);
-   mpLoadedLabel = new QLabel(pModuleWidget);
-   LabeledSection* pModuleSection = new LabeledSection(pModuleWidget, "Module", this);
-
-   QGridLayout* pModuleGrid = new QGridLayout(pModuleWidget);
-   pModuleGrid->setMargin(0);
-   pModuleGrid->setSpacing(5);
-   pModuleGrid->addWidget(pNameLabel, 0, 0);
-   pModuleGrid->addWidget(mpNameLabel, 0, 2);
-   pModuleGrid->addWidget(pVersionLabel, 1, 0);
-   pModuleGrid->addWidget(mpVersionLabel, 1, 2);
-   pModuleGrid->addWidget(pDescriptionLabel, 2, 0);
-   pModuleGrid->addWidget(mpDescriptionLabel, 2, 2);
-   pModuleGrid->addWidget(pPlugInsLabel, 3, 0);
-   pModuleGrid->addWidget(mpPlugInsLabel, 3, 2);
-   pModuleGrid->addWidget(pValidatedLabel, 4, 0);
-   pModuleGrid->addWidget(mpValidatedLabel, 4, 2);
-   pModuleGrid->addWidget(pLoadedLabel, 5, 0);
-   pModuleGrid->addWidget(mpLoadedLabel, 5, 2);
-   pModuleGrid->setColumnMinimumWidth(1, 15);
-   pModuleGrid->setColumnStretch(2, 10);
+   mpModuleWidget = new QWidget(this);
+   mpNameLabel = new QLabel(mpModuleWidget);
+   mpVersionLabel = new QLabel(mpModuleWidget);
+   mpDescriptionLabel = new QLabel(mpModuleWidget);
+   mpPlugInsLabel = new QLabel(mpModuleWidget);
+   mpValidatedLabel = new QLabel(mpModuleWidget);
+   mpLoadedLabel = new QLabel(mpModuleWidget);
+   LabeledSection* pModuleSection = new LabeledSection(mpModuleWidget, "Module", this);
 
    // File
    QWidget* pFileWidget = new QWidget(this);
@@ -95,13 +71,40 @@ bool PropertiesModuleDescriptor::initialize(SessionItem* pSessionItem)
       return false;
    }
 
+   QFormLayout* pFormLayout = new QFormLayout(mpModuleWidget); //replace existing layout
+   pFormLayout->setMargin(0);
+   pFormLayout->setSpacing(5);
+   //overridding QFormLayout's auto-detection of system style because
+   //we are displaying QLabel's in the second column and not editable widgets
+   //so we don't want the auto-detected style for QFormLayout.
+   pFormLayout->setLabelAlignment(Qt::AlignLeft);
+   pFormLayout->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
+   pFormLayout->addRow("Name:", mpNameLabel);
+
    // Module
    mpNameLabel->setText(QString::fromStdString(pModule->getName()));
-   mpVersionLabel->setText(QString::fromStdString(pModule->getVersion()));
-   mpDescriptionLabel->setText(QString::fromStdString(pModule->getDescription()));
+   if (pModule->getModuleVersion() == 1)
+   {
+      pFormLayout->addRow("Version:", mpVersionLabel);
+      mpVersionLabel->setText(QString::fromStdString(pModule->getVersion()));
+      pFormLayout->addRow("Description:", mpDescriptionLabel);
+      mpDescriptionLabel->setText(QString::fromStdString(pModule->getDescription()));
+   }
+   pFormLayout->addRow("Number of Plug-Ins:", mpPlugInsLabel);
    mpPlugInsLabel->setText(QString::number(pModule->getNumPlugIns()));
-   mpValidatedLabel->setText(pModule->isValidatedModule() ? "Yes" : "No");
+   if (pModule->getModuleVersion() == 1)
+   {
+      mpValidatedLabel->setText(pModule->isValidatedModule() ? "Yes" : "No");
+      pFormLayout->addRow("Validated:", mpValidatedLabel);
+   }
+   pFormLayout->addRow("Loaded:", mpLoadedLabel);
    mpLoadedLabel->setText(pModule->isLoaded() ? "Yes" : "No");
+   if (pModule->getModuleVersion() == 1)
+   {
+      QLabel* pLegacyWarning = new QLabel("This is a legacy module", mpModuleWidget);
+      pLegacyWarning->setStyleSheet("color: blue");
+      pFormLayout->addRow(pLegacyWarning);
+   }
 
    // File
    unsigned int fileSize = static_cast<unsigned int>(pModule->getFileSize());

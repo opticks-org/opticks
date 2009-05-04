@@ -359,10 +359,6 @@
 				RelativePath=".\ModuleManager.cpp"
 				>
 			</File>
-			<File
-				RelativePath="..\..\..\PlugInManager\PlugInModule.def"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"

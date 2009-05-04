@@ -263,6 +263,11 @@ QVariant SessionItemModel::data(const QModelIndex& index, int role) const
          QColor itemColor = pWrapper->getDisplayColor();
          return QVariant(itemColor);
       }
+      else if (role == Qt::BackgroundRole)
+      {
+         QColor itemColor = pWrapper->getBackgroundColor();
+         return QVariant(itemColor);
+      }
       else if (role == Qt::ToolTipRole)
       {
          if (pItem != NULL)
@@ -365,6 +370,7 @@ SessionItemModel::SessionItemWrapper::SessionItemWrapper(SessionItemModel* pMode
    mpSessionItem(pItem),
    mCheckState(Qt::Unchecked),
    mDisplayColor(Qt::black),
+   mBackgroundColor(Qt::white),
    mpParent(pParent)
 {
 }
@@ -420,6 +426,19 @@ void SessionItemModel::SessionItemWrapper::setDisplayColor(const QColor& itemCol
 QColor SessionItemModel::SessionItemWrapper::getDisplayColor() const
 {
    return mDisplayColor;
+}
+
+void SessionItemModel::SessionItemWrapper::setBackgroundColor(const QColor& itemColor)
+{
+   if (itemColor.isValid() == true)
+   {
+      mBackgroundColor = itemColor;
+   }
+}
+
+QColor SessionItemModel::SessionItemWrapper::getBackgroundColor() const
+{
+   return mBackgroundColor;
 }
 
 SessionItemModel::SessionItemWrapper* SessionItemModel::SessionItemWrapper::getParent() const

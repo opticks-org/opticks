@@ -16,11 +16,14 @@
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "ProductView.h"
 #include "ProductWindow.h"
 #include "SpatialDataView.h"
 #include "SpatialDataWindow.h"
 #include "View.h"
+
+REGISTER_PLUGIN_BASIC(OpticksWizardItems, DeriveProduct);
 
 DeriveProduct::DeriveProduct()
 {

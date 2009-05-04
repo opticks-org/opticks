@@ -875,7 +875,8 @@ string Nitf::sizeString(const string &str, unsigned int size, char fillChar, boo
 bool Nitf::isClassificationValidForExport(const Classification& classification, string& errorMessage)
 {
    using namespace Nitf;
-   if (classification.isValid() == false)
+   std::string err;
+   if (classification.isValid(err) == false)
    {
       errorMessage = "Invalid parameter.";
       return false;
@@ -912,7 +913,8 @@ bool Nitf::isClassificationValidForExport(const Classification& classification, 
 
 bool Nitf::isClassificationFieldValidForExport(const Classification& classification, const string& fieldName)
 {
-   if (classification.isValid() == false)
+   std::string err;
+   if (classification.isValid(err) == false)
    {
       return false;
    }

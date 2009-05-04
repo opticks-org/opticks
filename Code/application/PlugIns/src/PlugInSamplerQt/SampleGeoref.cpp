@@ -12,6 +12,7 @@
 #include "LayerList.h"
 #include "MessageLogResource.h"
 #include "PlugInArgList.h"
+#include "PlugInRegistration.h"
 #include "Progress.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
@@ -26,6 +27,8 @@
 #include <boost/any.hpp>
 
 XERCES_CPP_NAMESPACE_USE
+
+REGISTER_PLUGIN_BASIC(OpticksPlugInSamplerQt, SampleGeoref);
 
 SampleGeoref::SampleGeoref() :
    mXSize(10),

@@ -86,66 +86,30 @@ Now that you have created a plug-in subclass, you need to register it with the a
 Please read \ref register_plugin for more details.
 */
 
+//KIP - Fix up the docs on registration
 /** \page register_plugin Registering your plug-in
-%Opticks discovers your plug-ins by using the ModuleManager provided by your plug-in library.
+%Opticks discovers your plug-ins by loading your plug-in library and then querying for any registered plug-ins.
 If you haven't created a plug-in subclass to register, please read \ref plugin_subclass .
-You must include ModuleManager.cpp when compiling and linking your plug-in library (i.e. .dll, .so).
-It is suggested you use the template ModuleManager.cpp in SDK_HOME\\Src.
+Once you have a plug-in subclass to register, you will first need to prepare your plug-in library (i.e. .dll, .so) by registering a module inside your library.
 
-You must set the mspUniqueId static variable shown below.
-This is a UUID enclosed in {}, for example "{9e9a931f-1b4a-4c43-9c02-db66ad2fc390}".
-A UUID can be generated with the "Create GUID" tool on Windows or the makeuuid program on Solaris.
-Specifically the UUID is a version 4 UUID as defined by <a href="http://www.faqs.org/rfcs/rfc4122.html">RFC4122</a>.
-The UUID for your plug-in library must be unique.
-If two plug-in libraries have the same UUID, only the first will be loaded by the application.
-\dontinclude src/ModuleManager.cpp
-\skip mspDescription
-\skip /**
-\until mspUniqueId
+In order to register a module inside your library, it is recommended that you create a new .cpp file called ModuleManager.cpp.
+Inside this ModuleManager.cpp, you should use the REGISTER_MODULE macro.
+Below, you will see the ModuleManager.cpp that is included with the Tutorial plug-in library.
+\include Tutorial/ModuleManager.cpp
 
-You must also set the name of your module using the mspName static variable shown below.
-This is the name of your module that will be shown to users on the Plug-Ins tab of the Session Explorer when running %Opticks.
-\dontinclude src/ModuleManager.cpp
-\skip required for your plug-in here
-\skip /**
-\until mspName
+The REGISTER_MODULE macro has one argument, which is the module id.
+This module id must be a valid C++ identifier and must not be used elsewhere in your plug-in library.
+The module id will be used to declare a C++ namespace inside your plug-in library and must therefore be unique.
+In addition, this module id must be unique for all other plug-in libraries that might be loaded by the application.
+If two plug-in libraries have the same module id, only the first will be loaded by the application.
+In addition, you must only use the REGISTER_MODULE macro once in your plug-in library.
+Attempting to use it twice inside a single plug-in library will cause compile and link errors.
 
-It is recommended, but not required that you provide a version for your plug-in library using the mspVersion static variable. 
-This can be any freeform string.
-\dontinclude src/ModuleManager.cpp
-\skip mspName
-\skip /**
-\until mspVersion
+Now that your plug-in library has a registered module, you can actually register your individual plug-in subclasses.
 
-You can also provide a description for your plug-in library using the mspDescription static variable.
-This is not required and may be any freeform string.
-\skip /**
-\until mspDescription
-
-The above fields are only set once for the plug-in library (i.e. .dll, .so) that contains your plug-in subclass.
-A single plug-in library can contain as many plug-in subclasses as you like.
-You will need to update the ModuleManager::getTotalPlugIns method shown below to return the total number of plug-in subclasses that are compiled into your plug-in library.
-\dontinclude src/ModuleManager.cpp
-\skip getTotalPlugIns
-\until }
-
-During start-up, the application will call your ModuleManager::getPlugIn method once for each plug-in in your module.
-The number of plug-ins in your module is reported by ModuleManager::getTotalPlugIns.
-The plugInNumber parameter is the zero based index of the plug-in which should be created.
-This method should return a new instance of the appropriate plug-in.
-\skip getPlugIn
-\until return pPlugIn
-It is critical that you always construct the same plug-in subclass for a specific plugInNumber parameter value.
-For example, if you have two PlugIn subclasses.
-\code
-class MyAlgorithm : AlgorithmShell {};
-class MyImporter : ImporterShell {};
-\endcode
-Assuming you code getPlugIn() to return MyAlgorithm when getPlugIn(0) is called, you must always return MyAlgorithm when getPlugIn(0) is called. 
- 
-\example src/ModuleManager.cpp
-Template Module Manager file.
 */
+
+//KIP - Mention the "Extensions" folder from AEB stuff here.
 
 /** \page runningplugins Running your plug-ins
 This document will describe the options available to you when running your newly written plug-ins with %Opticks.

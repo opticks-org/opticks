@@ -8,7 +8,7 @@ import sys
 toplevel = os.path.abspath(os.curdir)
 verbosity = 1
 
-UNZIP = "/bin/unzip"
+UNZIP = "/usr/bin/unzip"
 if sys.platform == "win32":
    UNZIP = os.path.join(toplevel,"win32-progs","unzip.exe")
 

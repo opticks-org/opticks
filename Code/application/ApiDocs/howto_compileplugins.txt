@@ -44,26 +44,22 @@ Add the listed SDK libraries in the table below to your link line when creating 
 <tr><td>Libraries</td><td><ul><li>PlugInLib.lib</li><li>PlugInUtilities.lib</li></ul></td></tr>
 <tr><td rowspan="3">Solaris</td><td rowspan="3">Debug</td><td rowspan="3">64-bit</td><td>INCLUDE directory</td><td><ul><li>SDK_HOME/application/Interfaces</li><li>SDK_HOME/application/PlugInLib</li><li>SDK_HOME/application/PlugInUtilities/Interfaces</li><li>SDK_HOME/application/PlugInUtilities/pthreads-wrapper</li></ul></td></tr>
 <tr><td>LIB directory</td><td><ul><li>SDK_HOME/Build-Binaries-solaris-sparc-debug/Lib/</li></ul></td></tr>
-<tr><td>Libraries</td><td><ul><li>libPlugInLib.a</li><li>libPlugInUtilities.a</li><li>ModuleShell.os</li></ul></td></tr>
+<tr><td>Libraries</td><td><ul><li>libPlugInLib.a</li><li>libPlugInUtilities.a</li></ul></td></tr>
 <tr><td rowspan="3">Solaris</td><td rowspan="3">Release</td><td rowspan="3">64-bit</td><td>INCLUDE directory</td><td><ul><li>SDK_HOME/application/Interfaces</li><li>SDK_HOME/application/PlugInLib</li><li>SDK_HOME/application/PlugInUtilities/Interfaces</li><li>SDK_HOME/application/PlugInUtilities/pthreads-wrapper</li></ul></td></tr>
 <tr><td>LIB directory</td><td><ul><li>SDK_HOME/Build-Binaries-solaris-sparc-release/Lib/</li></ul></td></tr>
-<tr><td>Libraries</td><td><ul><li>libPlugInLib.a</li><li>libPlugInUtilities.a</li><li>ModuleShell.os</li></ul></td></tr>
+<tr><td>Libraries</td><td><ul><li>libPlugInLib.a</li><li>libPlugInUtilities.a</li></ul></td></tr>
 </table>
 </li>
 <li>
 When compiling on Windows using Visual Studio 2005, you also need to do the following:
 <ul>
-    <li>You must use the same C++ runtime library that is used by %Opticks when building your plug-in or you will crash %Opticks when your plug-in is loaded.
+    <li>You must use the same C++ runtime library that is used by %Opticks when building your plug-in.
     See the following table for more information.
     <table>
     <tr><th>Configuration</th><th>Run-time Library</th><th>Ignore Specific Libraries</th></tr>
     <tr><td>Debug</td><td>Multi-threaded Debug DLL (i.e. the /MDd cmpiler flag)</td><td><ul><li>libc.lib</li><li>libcmt.lib</li><li>msvcrt.lib</li><li>libcd.lib</li><li>libcmtd.lib</li></ul> (i.e. the /NODEFAULTLIB: linker flag)</td></tr>
     <tr><td>Release</td><td>Multi-threaded DLL (i.e. the /MD cmpiler flag)</td><td><ul><li>libc.lib</li><li>libcmt.lib</li><li>libcd.lib</li><li>libcmtd.lib</li><li>msvcrtd.lib</li></ul> (i.e. the /NODEFAULTLIB: linker flag)</td></tr>
     </table>
-    </li>
-    <li>You must also include a module definition file that will include required external symbols in your plug-in dll that will allow %Opticks to load your plug-in.
-    
-    You should specify the module definition file included in the SDK, it can be found at SDK_HOME\\application\\PlugInManager\\PlugInModule.def (i.e. the /DEF: linker flag)
     </li>
 </ul>
 </li>

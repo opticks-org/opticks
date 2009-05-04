@@ -17,6 +17,8 @@
 #include <QtCore/QDataStream>
 #include <QtCore/QFile>
 
+#include <memory>
+
 XERCES_CPP_NAMESPACE_USE
 
 TransactionLog::TransactionLog(Progress* pProgress) :

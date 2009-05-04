@@ -14,6 +14,7 @@
 #include "ImageHandler.h"
 #include "IntrospectionMethods.h"
 #include "MessageLogResource.h"
+#include "PlugInRegistration.h"
 #include "UtilityServices.h"
 #include "XmlRpcServer.h"
 #include "xmlreader.h"
@@ -23,6 +24,8 @@ XERCES_CPP_NAMESPACE_USE
 
 #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove qDebug() calls " \
    "after debugging is complete (tclarke)")
+
+REGISTER_PLUGIN_BASIC(OpticksXmlRpc, XmlRpcServer);
 
 XmlRpcServer::XmlRpcServer() : MuHttpServer(getSettingXmlRpcServerPort(), NULL)
 {

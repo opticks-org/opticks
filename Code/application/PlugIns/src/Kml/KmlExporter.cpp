@@ -16,11 +16,14 @@
 #include "LayerList.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "ProgressTracker.h"
 #include "RasterElement.h"
 #include "SpatialDataView.h"
 #include "SpatialDataWindow.h"
 #include <QtCore/QDateTime>
+
+REGISTER_PLUGIN_BASIC(OpticksKml, KmlExporter);
 
 KmlExporter::KmlExporter()
 {
@@ -113,6 +116,8 @@ bool KmlExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
    progress.upALevel();
    return true;
 }
+
+REGISTER_PLUGIN_BASIC(OpticksKml, KmlLayerExporter);
 
 KmlLayerExporter::KmlLayerExporter()
 {

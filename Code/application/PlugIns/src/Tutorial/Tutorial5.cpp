@@ -15,6 +15,7 @@
 #include "ObjectResource.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "Progress.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
@@ -24,6 +25,8 @@
 #include "switchOnEncoding.h"
 #include "Tutorial5.h"
 #include <limits>
+
+REGISTER_PLUGIN_BASIC(OpticksTutorial, Tutorial5);
 
 namespace
 {

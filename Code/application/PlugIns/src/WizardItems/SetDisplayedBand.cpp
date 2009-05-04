@@ -13,6 +13,7 @@
 #include "DimensionDescriptor.h"
 #include "MessageLogResource.h"
 #include "PlugInArgList.h"
+#include "PlugInRegistration.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "RasterLayer.h"
@@ -20,6 +21,8 @@
 #include "SpatialDataView.h"
 
 #include <string>
+
+REGISTER_PLUGIN_BASIC(OpticksWizardItems, SetDisplayedBand);
 
 SetDisplayedBand::SetDisplayedBand() :
    mpRasterLayer(NULL),

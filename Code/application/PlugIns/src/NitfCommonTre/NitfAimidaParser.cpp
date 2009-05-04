@@ -14,6 +14,7 @@
 #include "NitfConstants.h"
 #include "NitfUtilities.h"
 #include "ObjectResource.h"
+#include "PlugInRegistration.h"
 
 #include <set>
 #include <sstream>
@@ -23,6 +24,8 @@
 using namespace std;
 using namespace Nitf;
 using namespace Nitf::TRE;
+
+REGISTER_PLUGIN(OpticksNitfCommonTre, AimidaParser, Nitf::AimidaParser());
 
 Nitf::AimidaParser::AimidaParser()
 {

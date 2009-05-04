@@ -17,6 +17,7 @@
 #include "NitfConstants.h"
 #include "NitfUtilities.h"
 #include "ObjectResource.h"
+#include "PlugInRegistration.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "RasterFileDescriptor.h"
@@ -27,6 +28,8 @@
 using namespace std;
 using namespace Nitf;
 using namespace Nitf::TRE;
+
+REGISTER_PLUGIN(OpticksNitfCommonTre, BandsaParser, Nitf::BandsaParser());
 
 Nitf::BandsaParser::BandsaParser()
 {

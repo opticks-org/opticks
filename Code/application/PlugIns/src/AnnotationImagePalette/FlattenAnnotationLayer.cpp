@@ -20,8 +20,8 @@
 #include "GraphicObject.h"
 #include "LayerList.h"
 #include "PlugInArgList.h"
-#include "PlugInFactory.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "ProgressTracker.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
@@ -33,7 +33,7 @@
 
 #include <QtGui/QImage>
 
-PLUGINFACTORY(FlattenAnnotationLayer);
+REGISTER_PLUGIN_BASIC(OpticksAnnotationImagePalette, FlattenAnnotationLayer);
 
 FlattenAnnotationLayer::FlattenAnnotationLayer()
 {

@@ -29,6 +29,7 @@
 #include "AnimationToolBar.h"
 #include "DesktopServices.h"
 #include "Executable.h"
+#include "PlugInRegistration.h"
 
 #include <boost/any.hpp>
 #include <math.h>
@@ -39,6 +40,8 @@ using namespace std;
 
 //////////////////////////////////////////////////////////////////////////
 // AnimationTestPlugIn
+
+REGISTER_PLUGIN_BASIC(OpticksPlugInSamplerQt, AnimationTestPlugIn);
 
 AnimationTestPlugIn::AnimationTestPlugIn() :
    mpDialog(NULL)

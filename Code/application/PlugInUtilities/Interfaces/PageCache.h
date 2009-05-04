@@ -106,7 +106,7 @@ public:
     * @return The created page, or NULL if pUnit is NULL.  The caller
     *         takes ownership over the created page.
     */
-   CachedPage *PageCache::createPage(CachedPage::UnitPtr pUnit, InterleaveFormatType requestedFormat,
+   CachedPage *createPage(CachedPage::UnitPtr pUnit, InterleaveFormatType requestedFormat,
       DimensionDescriptor startRow, DimensionDescriptor startColumn, DimensionDescriptor startBand);
 
 protected:

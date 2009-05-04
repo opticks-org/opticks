@@ -49,7 +49,7 @@ public:
 
    inline bool operator()(int row, int col) const
    {
-      double value = ModelServices::getDataValue(static_cast<T>(mpData[row * mCols + col]), COMPLEX_MAGNITUDE);
+      double value = ModelServices::getDataValue(*const_cast<T*>(mpData + (row * mCols + col)), COMPLEX_MAGNITUDE);
       bool passed = mPassArea.contains(value);
       if (passed)
       {

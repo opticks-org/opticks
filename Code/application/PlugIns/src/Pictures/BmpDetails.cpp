@@ -7,9 +7,14 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "BmpDetails.h"
-
 #include "AppVersion.h"
+#include "BmpDetails.h"
+#include "PicturesPlotWidgetExporter.h"
+#include "PicturesViewExporter.h"
+#include "PlugInRegistration.h"
+
+REGISTER_PLUGIN(OpticksPictures, BmpPicturesPlotWidgetExporter, PicturesPlotWidgetExporter(new BmpDetails));
+REGISTER_PLUGIN(OpticksPictures, BmpPicturesViewExporter, PicturesViewExporter(new BmpDetails));
 
 std::string BmpDetails::name()
 {

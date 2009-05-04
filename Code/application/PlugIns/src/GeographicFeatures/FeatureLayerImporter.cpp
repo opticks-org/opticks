@@ -17,6 +17,7 @@
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "Progress.h"
 #include "XercesIncludes.h"
 #include "xmlreader.h"
@@ -25,6 +26,8 @@
 #include <cctype>
 
 XERCES_CPP_NAMESPACE_USE
+
+REGISTER_PLUGIN_BASIC(OpticksGeographicFeatures, FeatureLayerImporter);
 
 const std::string FeatureLayerImporter::FEATURE_DYNAMIC_OBJECT_ARG = "Feature Dynamic Object";
 const std::string FeatureLayerImporter::PLUGIN_NAME = "Geographic Feature Layer Importer";

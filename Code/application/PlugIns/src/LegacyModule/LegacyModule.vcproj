@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="ProductionPlugInTester"
-	ProjectGUID="{4181206C-87F1-45B2-A3A2-6C1DF6E1A24C}"
-	RootNamespace="ProductionPlugInTester"
+	Name="LegacyModule"
+	ProjectGUID="{6A048975-EA90-4281-A25B-2EB7FE98D9C4}"
+	RootNamespace="LegacyModule"
 	>
 	<Platforms>
 		<Platform
@@ -20,7 +20,7 @@
 		<Configuration
 			Name="Debug|Win32"
 			ConfigurationType="2"
-			InheritedPropertySheets="..\..\..\CompileSettings\32bitSettings.vsprops;..\..\..\CompileSettings\PlugInCommonSettings.vsprops;..\..\..\CompileSettings\Qt-Debug.vsprops;..\..\..\CompileSettings\AllCommonSettings-Debug-32bit.vsprops;..\..\..\CompileSettings\Macros.vsprops;..\..\..\CompileSettings\Xerces-Debug.vsprops;..\..\..\CompileSettings\boost.vsprops;..\..\..\CompileSettings\UpdateBuildRevision.vsprops"
+			InheritedPropertySheets="..\..\..\CompileSettings\32bitSettings.vsprops;..\..\..\CompileSettings\PlugInCommonSettings.vsprops;..\..\..\CompileSettings\AllCommonSettings-Debug-32bit.vsprops;..\..\..\CompileSettings\Macros.vsprops;..\..\..\CompileSettings\Xerces-Debug.vsprops;..\..\..\CompileSettings\UpdateBuildRevision.vsprops;..\..\..\CompileSettings\DeprecatedPlugInSettings.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -43,7 +43,7 @@
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="1"
-				TypeLibraryName=".\Debug/ProductionPlugInTester.tlb"
+				TypeLibraryName=".\Debug/LegacyModule.tlb"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
@@ -97,7 +97,7 @@
 		<Configuration
 			Name="Debug|x64"
 			ConfigurationType="2"
-			InheritedPropertySheets="..\..\..\CompileSettings\PlugInCommonSettings.vsprops;..\..\..\CompileSettings\Qt-Debug.vsprops;..\..\..\CompileSettings\AllCommonSettings-Debug-64bit.vsprops;..\..\..\CompileSettings\64bitSettings.vsprops;..\..\..\CompileSettings\Macros.vsprops;..\..\..\CompileSettings\Xerces-Debug.vsprops;..\..\..\CompileSettings\boost.vsprops;..\..\..\CompileSettings\UpdateBuildRevision.vsprops"
+			InheritedPropertySheets="..\..\..\CompileSettings\PlugInCommonSettings.vsprops;..\..\..\CompileSettings\AllCommonSettings-Debug-64bit.vsprops;..\..\..\CompileSettings\64bitSettings.vsprops;..\..\..\CompileSettings\Macros.vsprops;..\..\..\CompileSettings\Xerces-Debug.vsprops;..\..\..\CompileSettings\UpdateBuildRevision.vsprops;..\..\..\CompileSettings\DeprecatedPlugInSettings.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -120,7 +120,7 @@
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="3"
-				TypeLibraryName=".\Debug/ProductionPlugInTester.tlb"
+				TypeLibraryName=".\Debug/LegacyModule.tlb"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
@@ -174,7 +174,7 @@
 		<Configuration
 			Name="Release|Win32"
 			ConfigurationType="2"
-			InheritedPropertySheets="..\..\..\CompileSettings\32bitSettings.vsprops;..\..\..\CompileSettings\PlugInCommonSettings.vsprops;..\..\..\CompileSettings\Qt-Release.vsprops;..\..\..\CompileSettings\AllCommonSettings-Release-32bit.vsprops;..\..\..\CompileSettings\Macros.vsprops;..\..\..\CompileSettings\Xerces-Release.vsprops;..\..\..\CompileSettings\boost.vsprops;..\..\..\CompileSettings\UpdateBuildRevision.vsprops"
+			InheritedPropertySheets="..\..\..\CompileSettings\32bitSettings.vsprops;..\..\..\CompileSettings\PlugInCommonSettings.vsprops;..\..\..\CompileSettings\AllCommonSettings-Release-32bit.vsprops;..\..\..\CompileSettings\Macros.vsprops;..\..\..\CompileSettings\Xerces-Release.vsprops;..\..\..\CompileSettings\UpdateBuildRevision.vsprops;..\..\..\CompileSettings\DeprecatedPlugInSettings.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -197,7 +197,7 @@
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="1"
-				TypeLibraryName=".\Release/ProductionPlugInTester.tlb"
+				TypeLibraryName=".\Release/LegacyModule.tlb"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
@@ -251,7 +251,7 @@
 		<Configuration
 			Name="Release|x64"
 			ConfigurationType="2"
-			InheritedPropertySheets="..\..\..\CompileSettings\PlugInCommonSettings.vsprops;..\..\..\CompileSettings\Qt-Release.vsprops;..\..\..\CompileSettings\AllCommonSettings-Release-64bit.vsprops;..\..\..\CompileSettings\64bitSettings.vsprops;..\..\..\CompileSettings\Macros.vsprops;..\..\..\CompileSettings\Xerces-Release.vsprops;..\..\..\CompileSettings\boost.vsprops;..\..\..\CompileSettings\UpdateBuildRevision.vsprops"
+			InheritedPropertySheets="..\..\..\CompileSettings\PlugInCommonSettings.vsprops;..\..\..\CompileSettings\AllCommonSettings-Release-64bit.vsprops;..\..\..\CompileSettings\64bitSettings.vsprops;..\..\..\CompileSettings\Macros.vsprops;..\..\..\CompileSettings\Xerces-Release.vsprops;..\..\..\CompileSettings\UpdateBuildRevision.vsprops;..\..\..\CompileSettings\DeprecatedPlugInSettings.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -274,7 +274,7 @@
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="3"
-				TypeLibraryName=".\Release/ProductionPlugInTester.tlb"
+				TypeLibraryName=".\Release/LegacyModule.tlb"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
@@ -338,7 +338,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ProductionPlugInTester.cpp"
+				RelativePath=".\Passthrough.cpp"
 				>
 			</File>
 		</Filter>
@@ -347,7 +347,7 @@
 			Filter="h;hpp;hxx;hm;inl"
 			>
 			<File
-				RelativePath=".\ProductionPlugInTester.h"
+				RelativePath=".\Passthrough.h"
 				>
 			</File>
 		</Filter>

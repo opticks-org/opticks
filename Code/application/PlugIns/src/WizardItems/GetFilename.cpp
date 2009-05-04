@@ -23,9 +23,14 @@
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 
 #include <string>
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksWizardItems, GetExistingFilename);
+REGISTER_PLUGIN_BASIC(OpticksWizardItems, GetExistingFilenames);
+REGISTER_PLUGIN_BASIC(OpticksWizardItems, GetNewFilename);
 
 /////////////////
 // GetFilename //

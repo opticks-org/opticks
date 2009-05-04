@@ -10,6 +10,7 @@
 #ifndef SHAPEFILEEXPORTER_H
 #define SHAPEFILEEXPORTER_H
 
+#include <memory>
 #include <QtGui/QWidget>
 
 #include "ExporterShell.h"

@@ -22,6 +22,7 @@
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "StringUtilities.h"
 #include "UtilityServices.h"
 #include "WizardExecutor.h"
@@ -30,6 +31,8 @@
 #include "xmlreader.h"
 
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksWizardExecutor, BatchWizardExecutor);
 
 BatchWizardExecutor::BatchWizardExecutor() :
    mbAbort(false),
@@ -120,7 +123,8 @@ bool BatchWizardExecutor::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
       pBatchWizard->initializeFilesets(mpObjFact.get());
 
       // Repeat until done
-      bool bRepeatWizard = pBatchWizard->isRepeating();
+      string tmp;
+      bool bRepeatWizard = pBatchWizard->isRepeating(tmp);
 
       bool bExecutedOnce = false;
       while ((!bRepeatWizard && !bExecutedOnce) || !pBatchWizard->isComplete())

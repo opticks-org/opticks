@@ -14,8 +14,6 @@
 		AdditionalDependencies="PlugInLib.lib PlugInUtilities.lib"
 		OutputFile="$(BuildDir)\Binaries-$(PlatformName)-$(ConfigurationName)\PlugIns\$(ProjectName).dll"
 		AdditionalLibraryDirectories="&quot;$(LibraryDir)\Binaries-$(PlatformName)-$(ConfigurationName)\Lib&quot;"
-		ModuleDefinitionFile="$(CODE_DIR)\Application\PlugInManager\PlugInModule.def"
-		BaseAddress="0x7b000000"
 		ImportLibrary="$(OutDir)\$(TargetName).lib"
 	/>
 </VisualStudioPropertySheet>

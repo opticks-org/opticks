@@ -10,10 +10,13 @@
 #include "AppVersion.h"
 #include "IceRasterElementExporter.h"
 #include "PlugInArgList.h"
+#include "PlugInRegistration.h"
 #include "RasterElement.h"
 #include "RasterFileDescriptor.h"
 
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksIce, IceRasterElementExporter);
 
 IceRasterElementExporter::IceRasterElementExporter() :
    IceExporterShell(IceUtilities::RASTER_ELEMENT),

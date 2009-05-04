@@ -29,7 +29,7 @@ public:
    void setWizardFilename(const std::string& filename);
    const std::string& getWizardFilename() const;
    void setRepeatFileset(BatchFileset* pFileset);
-   bool isRepeating(std::string& repeatName = std::string()) const;
+   bool isRepeating(std::string& repeatName) const;
    void setCleanup(bool bCleanup = true);
    bool doesCleanup() const;
 

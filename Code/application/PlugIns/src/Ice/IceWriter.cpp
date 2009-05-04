@@ -67,11 +67,14 @@ namespace
    }
 };
 
+namespace StringUtilities
+{
 BEGIN_ENUM_MAPPING(IceCompressionType)
 ADD_ENUM_MAPPING(NONE, "None", "none")
 ADD_ENUM_MAPPING(GZIP, "GZIP", "gzip")
 ADD_ENUM_MAPPING(SHUFFLE_AND_GZIP, "Shuffle+GZIP", "shuffle_gzip")
 END_ENUM_MAPPING()
+}
 
 IceWriter::IceWriter(hid_t fileHandle, IceUtilities::FileType fileType) :
    mFileHandle(fileHandle),

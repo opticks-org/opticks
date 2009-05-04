@@ -95,35 +95,6 @@ protected:
       double firstThreshold, double secondThreshold, Opticks::PixelOffset offset = Opticks::PixelOffset());
    void displayPseudocolorResults(RasterElement* pRasterElement, std::vector<std::string>& sigNames,
       Opticks::PixelOffset offset = Opticks::PixelOffset());
-   template <class ValueRange>
-   void mergePseudocolorResults(RasterElement* pRasterElement, float* pCurrentData, int id, ValueRange range)
-   {
-      float* pPseudocolorData = static_cast<float*>(pRasterElement->getData());
-      int numRows = pMatrix->getNumRows();
-      int numColumns = pMatrix->getNumColumns();
-      if (pPseudocolorData != NULL)
-      {
-         for (int j = 0; j < numRows; j++)
-         {
-            for (int k = 0; k < numColumns; k++)
-            {
-               if (range.contains(pCurrentData[(j * numColumns) + k]))
-               {
-                  if (pPseudocolorData[(j * numColumns) + k] == 0.0f)
-                  {
-                     pPseudocolorData[(j * numColumns) + k] = id;
-                  }
-                  else
-                  {
-                     pPseudocolorData[(j * numColumns) + k] = -1;
-                  }
-               }
-            }
-         }
-
-         pMatrix->setData(pPseudocolorData);
-      }
-   }
 
    Service<ApplicationServices> mpApplicationServices;
    Service<DesktopServices> mpDesktopServices;

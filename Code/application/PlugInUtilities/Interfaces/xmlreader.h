@@ -699,7 +699,7 @@ void extractContainerElementValue(std::stringstream& str, T& iter)
 template <class Container>
 void extractContainerElementValue(std::stringstream& str, std::back_insert_iterator<Container>& iter)
 {
-   Container::value_type value;
+   typename Container::value_type value;
    str >> value;
    *iter = value;
 }

@@ -9,6 +9,8 @@
 
 #include "LabeledSection.h"
 #include "OptionsIceExporter.h"
+#include "OptionQWidgetWrapper.h"
+#include "PlugInRegistration.h"
 #include "SessionManager.h"
 #include "StringUtilities.h"
 
@@ -22,6 +24,8 @@
 #include <string>
 
 using namespace std;
+
+REGISTER_PLUGIN(OpticksIce, OptionsIceExporter, OptionQWidgetWrapper<OptionsIceExporter>);
 
 OptionsIceExporter::OptionsIceExporter() :
    LabeledSectionGroup(NULL), mSaveSettings(true)

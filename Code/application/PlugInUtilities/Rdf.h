@@ -47,7 +47,7 @@ public:
       int mLine;
       int mColumn;
 
-      friend RdfParser;
+      friend class RdfParser;
    };
 
    const std::vector<Problem> getParseWarnings() const;
@@ -95,7 +95,7 @@ public:
 private:
    std::map<std::string, RdfObject*> mSubjects; // indexed on subject
 
-   friend RdfParser;
+   friend class RdfParser;
 };
 
 class RdfObject
@@ -111,7 +111,7 @@ private:
    std::string mObjectName;
    std::map<std::string, std::vector<RdfObject*> > mObjects;
 
-   friend Rdf;
+   friend class Rdf;
 };
 
 

@@ -48,7 +48,7 @@ std::string convertVectorToString(const std::vector<T>& vec, bool* pError, std::
       *pError = false;
    }
    string vecString = "";
-   for (vector<T>::const_iterator iter = vec.begin(); iter != vec.end(); ++iter)
+   for (typename vector<T>::const_iterator iter = vec.begin(); iter != vec.end(); ++iter)
    {
       string curVal;
       if (forDisplay)
@@ -139,7 +139,7 @@ public:
    template<typename tupleType>
    bool operator()(tupleType compareValue)
    {
-      return compareValue.get<tupleIndex>() == mValue;
+      return compareValue.DISAMBIGUATE_TEMPLATE get<tupleIndex>() == mValue;
    }
 
 private:
@@ -148,7 +148,7 @@ private:
 
 #define ENUM_MAPPING_TO_DISPLAY_STRING(eName__, eAlias__) \
 template<>\
-std::string StringUtilities::toDisplayString(const eName__& val, bool* pError)\
+std::string toDisplayString(const eName__& val, bool* pError)\
 {\
    eAlias__##Mapping values = get##eAlias__##Mapping();\
    eAlias__##Mapping::iterator foundValue;\
@@ -168,21 +168,21 @@ std::string StringUtilities::toDisplayString(const eName__& val, bool* pError)\
    return "";\
 }\
 template<>\
-std::string StringUtilities::toDisplayString(const eName__::EnumType& val, bool* pError)\
+std::string toDisplayString(const eName__::EnumType& val, bool* pError)\
 {\
    return toDisplayString(EnumWrapper<eName__::EnumType>(val), pError);\
 }\
 
 #define ENUM_MAPPING_TO_DISPLAY_STRING_VEC(eName__) \
 template<>\
-std::string StringUtilities::toDisplayString(const vector<eName__>& vec, bool* pError)\
+std::string toDisplayString(const vector<eName__>& vec, bool* pError)\
 {\
    return convertVectorToString(vec, pError, ", ", true);\
 }\
 
 #define ENUM_MAPPING_TO_XML_STRING(eName__, eAlias__) \
 template<>\
-std::string StringUtilities::toXmlString(const eName__& val, bool* pError)\
+std::string toXmlString(const eName__& val, bool* pError)\
 {\
    eAlias__##Mapping values = get##eAlias__##Mapping();\
    eAlias__##Mapping::iterator foundValue;\
@@ -202,21 +202,21 @@ std::string StringUtilities::toXmlString(const eName__& val, bool* pError)\
    return "";\
 }\
 template<>\
-std::string StringUtilities::toXmlString(const eName__::EnumType& val, bool* pError)\
+std::string toXmlString(const eName__::EnumType& val, bool* pError)\
 {\
    return toXmlString(EnumWrapper<eName__::EnumType>(val), pError);\
 }\
 
 #define ENUM_MAPPING_TO_XML_STRING_VEC(eName__) \
 template<>\
-std::string StringUtilities::toXmlString(const vector<eName__>& vec, bool* pError)\
+std::string toXmlString(const vector<eName__>& vec, bool* pError)\
 {\
    return convertVectorToString(vec, pError, ", ", false);\
 }\
 
 #define ENUM_MAPPING_FROM_DISPLAY_STRING(eName__, eAlias__) \
 template<>\
-eName__ StringUtilities::fromDisplayString<eName__>(std::string value, bool* pError)\
+eName__ fromDisplayString<eName__>(std::string value, bool* pError)\
 {\
    eAlias__##Mapping values = get##eAlias__##Mapping();\
    eAlias__##Mapping::iterator foundValue;\
@@ -238,14 +238,14 @@ eName__ StringUtilities::fromDisplayString<eName__>(std::string value, bool* pEr
 
 #define ENUM_MAPPING_FROM_DISPLAY_STRING_VEC(eName__) \
 template<>\
-vector<eName__> StringUtilities::fromDisplayString<vector<eName__> >(std::string value, bool* pError)\
+vector<eName__> fromDisplayString<vector<eName__> >(std::string value, bool* pError)\
 {\
    return convertStringToVector<eName__>(value, pError, ", ", true);\
 }\
 
 #define ENUM_MAPPING_FROM_XML_STRING(eName__, eAlias__) \
 template<>\
-eName__ StringUtilities::fromXmlString<eName__>(std::string value, bool* pError)\
+eName__ fromXmlString<eName__>(std::string value, bool* pError)\
 {\
    eAlias__##Mapping values = get##eAlias__##Mapping();\
    eAlias__##Mapping::iterator foundValue;\
@@ -267,7 +267,7 @@ eName__ StringUtilities::fromXmlString<eName__>(std::string value, bool* pError)
 
 #define ENUM_MAPPING_FROM_XML_STRING_VEC(eName__) \
 template<>\
-vector<eName__> StringUtilities::fromXmlString<vector<eName__> >(std::string value, bool* pError)\
+vector<eName__> fromXmlString<vector<eName__> >(std::string value, bool* pError)\
 {\
    return convertStringToVector<eName__>(value, pError, ", ", false);\
 }\
@@ -285,7 +285,7 @@ const eAlias__##Mapping& get##eAlias__##Mapping()\
 
 #define ENUM_GET_ALL_VALUES(eName__, eAlias__) \
 template<>\
-vector<eName__> StringUtilities::getAllEnumValues<eName__>()\
+vector<eName__> getAllEnumValues<eName__>()\
 {\
    vector<eName__> retValues;\
    eAlias__##Mapping values = get##eAlias__##Mapping();\
@@ -299,7 +299,7 @@ vector<eName__> StringUtilities::getAllEnumValues<eName__>()\
 
 #define ENUM_GET_ALL_VALUES_DISPLAY_STRING(eName__, eAlias__) \
 template<>\
-vector<string> StringUtilities::getAllEnumValuesAsDisplayString<eName__>()\
+vector<string> getAllEnumValuesAsDisplayString<eName__>()\
 {\
    vector<string> retValues;\
    eAlias__##Mapping values = get##eAlias__##Mapping();\
@@ -313,7 +313,7 @@ vector<string> StringUtilities::getAllEnumValuesAsDisplayString<eName__>()\
 
 #define ENUM_GET_ALL_VALUES_XML_STRING(eName__, eAlias__) \
 template<>\
-vector<string> StringUtilities::getAllEnumValuesAsXmlString<eName__>()\
+vector<string> getAllEnumValuesAsXmlString<eName__>()\
 {\
    vector<string> retValues;\
    eAlias__##Mapping values = get##eAlias__##Mapping();\
@@ -352,7 +352,7 @@ ENUM_MAPPING_FUNCTION(eAlias__) \
 
 #define STRINGSTREAM_MAPPING_TO_XML_STRING(type__, __precision) \
 template<>\
-std::string StringUtilities::toXmlString(const type__ & val, bool* pError)\
+std::string toXmlString(const type__ & val, bool* pError)\
 {\
    stringstream buf;\
    if (__precision != -1)\
@@ -369,7 +369,7 @@ std::string StringUtilities::toXmlString(const type__ & val, bool* pError)\
 
 #define STRINGSTREAM_MAPPING_TO_XML_STRING_CAST(type__, cast__, precision__) \
 template<>\
-std::string StringUtilities::toXmlString(const type__ & val, bool* pError)\
+std::string toXmlString(const type__ & val, bool* pError)\
 {\
    stringstream buf;\
    if (precision__ != -1)\
@@ -386,14 +386,14 @@ std::string StringUtilities::toXmlString(const type__ & val, bool* pError)\
 
 #define STRINGSTREAM_MAPPING_TO_XML_STRING_VEC(type__) \
 template<>\
-std::string StringUtilities::toXmlString(const vector<type__> & vec, bool* pError)\
+std::string toXmlString(const vector<type__> & vec, bool* pError)\
 {\
    return convertVectorToString(vec, pError, ", ", false);\
 }\
 
 #define STRINGSTREAM_MAPPING_TO_DISPLAY_STRING(type__, __precision) \
 template<>\
-std::string StringUtilities::toDisplayString(const type__ & val, bool* pError)\
+std::string toDisplayString(const type__ & val, bool* pError)\
 {\
    stringstream buf;\
    if (__precision != -1)\
@@ -410,7 +410,7 @@ std::string StringUtilities::toDisplayString(const type__ & val, bool* pError)\
 
 #define STRINGSTREAM_MAPPING_TO_DISPLAY_STRING_CAST(type__, cast__, precision__) \
 template<>\
-std::string StringUtilities::toDisplayString(const type__ & val, bool* pError)\
+std::string toDisplayString(const type__ & val, bool* pError)\
 {\
    stringstream buf;\
    if (precision__ != -1)\
@@ -427,7 +427,7 @@ std::string StringUtilities::toDisplayString(const type__ & val, bool* pError)\
 
 #define STRINGSTREAM_MAPPING_TO_DISPLAY_STRING_VEC(type__) \
 template<>\
-std::string StringUtilities::toDisplayString(const vector<type__> & vec, bool* pError)\
+std::string toDisplayString(const vector<type__> & vec, bool* pError)\
 {\
    return convertVectorToString(vec, pError, ", ", true);\
 }\
@@ -435,7 +435,7 @@ std::string StringUtilities::toDisplayString(const vector<type__> & vec, bool* p
 
 #define STRINGSTREAM_MAPPING_FROM_XML_STRING(type__) \
 template<>\
-type__ StringUtilities::fromXmlString<type__>(std::string value, bool* pError)\
+type__ fromXmlString<type__>(std::string value, bool* pError)\
 {\
    stringstream buf(value);\
    type__ parsedValue;\
@@ -449,7 +449,7 @@ type__ StringUtilities::fromXmlString<type__>(std::string value, bool* pError)\
 
 #define STRINGSTREAM_MAPPING_FROM_XML_STRING_CAST(type__, cast__) \
 template<>\
-type__ StringUtilities::fromXmlString<type__>(std::string value, bool* pError)\
+type__ fromXmlString<type__>(std::string value, bool* pError)\
 {\
    stringstream buf(value);\
    cast__ parsedValue;\
@@ -472,14 +472,14 @@ type__ StringUtilities::fromXmlString<type__>(std::string value, bool* pError)\
 
 #define STRINGSTREAM_MAPPING_FROM_XML_STRING_VEC(type__) \
 template<>\
-vector<type__> StringUtilities::fromXmlString<vector<type__> >(std::string value, bool* pError)\
+vector<type__> fromXmlString<vector<type__> >(std::string value, bool* pError)\
 {\
    return convertStringToVector<type__>(value, pError, ", ", false);\
 }\
 
 #define STRINGSTREAM_MAPPING_FROM_DISPLAY_STRING(type__) \
 template<>\
-type__ StringUtilities::fromDisplayString<type__>(std::string value, bool* pError)\
+type__ fromDisplayString<type__>(std::string value, bool* pError)\
 {\
    stringstream buf(value);\
    type__ parsedValue;\
@@ -493,7 +493,7 @@ type__ StringUtilities::fromDisplayString<type__>(std::string value, bool* pErro
 
 #define STRINGSTREAM_MAPPING_FROM_DISPLAY_STRING_CAST(type__, cast__) \
 template<>\
-type__ StringUtilities::fromDisplayString<type__>(std::string value, bool* pError)\
+type__ fromDisplayString<type__>(std::string value, bool* pError)\
 {\
    stringstream buf(value);\
    cast__ parsedValue;\
@@ -516,7 +516,7 @@ type__ StringUtilities::fromDisplayString<type__>(std::string value, bool* pErro
 
 #define STRINGSTREAM_MAPPING_FROM_DISPLAY_STRING_VEC(type__) \
 template<>\
-vector<type__> StringUtilities::fromDisplayString<vector<type__> >(std::string value, bool* pError)\
+vector<type__> fromDisplayString<vector<type__> >(std::string value, bool* pError)\
 {\
    return convertStringToVector<type__>(value, pError, ", ", true);\
 }\
@@ -549,24 +549,24 @@ STRINGSTREAM_MAPPING_PRECISION_CAST(__type, __cast, -1)
 
 #define TO_DISPLAY_POINTER_VARIATIONS(interface__) \
 template<>\
-std::string StringUtilities::toDisplayString<interface__>(const interface__ & val, bool* pError)\
+std::string toDisplayString<interface__>(const interface__ & val, bool* pError)\
 {\
    return toDisplayString<const interface__ *>(&val, pError);\
 }\
 template<>\
-std::string StringUtilities::toDisplayString<interface__ *>(interface__ * const & val, bool* pError)\
+std::string toDisplayString<interface__ *>(interface__ * const & val, bool* pError)\
 {\
    return toDisplayString<const interface__*>(val, pError);\
 }\
 
 #define TO_XML_POINTER_VARIATIONS(interface__) \
 template<>\
-std::string StringUtilities::toXmlString<interface__>(const interface__ & val, bool* pError)\
+std::string toXmlString<interface__>(const interface__ & val, bool* pError)\
 {\
    return toXmlString<const interface__ *>(&val, pError);\
 }\
 template<>\
-std::string StringUtilities::toXmlString<interface__ *>(interface__ * const & val, bool* pError)\
+std::string toXmlString<interface__ *>(interface__ * const & val, bool* pError)\
 {\
    return toXmlString<const interface__*>(val, pError);\
 }

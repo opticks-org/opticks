@@ -235,6 +235,7 @@ bool PropertiesPlugInDescriptor::initialize(SessionItem* pSessionItem)
    mpNameLabel->setText(QString::fromStdString(pDescriptor->getName()));
    mpVersionLabel->setText(QString::fromStdString(pDescriptor->getVersion()));
    mpProductionStatusLabel->setText(pDescriptor->isProduction() ? "Yes" : "No");
+   mpProductionStatusLabel->setStyleSheet(pDescriptor->isProduction() ? "" : "color: red");
    mpCreatorLabel->setText(QString::fromStdString(pDescriptor->getCreator()));
    mpCopyrightLabel->setText(QString::fromStdString(pDescriptor->getCopyright()));
    mpDescriptionLabel->setText(QString::fromStdString(pDescriptor->getDescription()));

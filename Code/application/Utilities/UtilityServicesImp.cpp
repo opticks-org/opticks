@@ -480,9 +480,13 @@ size_t UtilityServicesImp::getAvailableVirtualMemory()
 {
    size_t total = 0;
 
-#if defined(UNIX_API)
+#if defined(SOLARIS)
    struct rlimit64 totMem;
    unsigned long rlim_ret = getrlimit64(RLIMIT_VMEM, &totMem);
+   total = totMem.rlim_max;
+#elif defined(LINUX)
+   struct rlimit totMem;
+   getrlimit(RLIMIT_AS, &totMem);
    total = totMem.rlim_max;
 #elif defined(WIN_API)
    MEMORYSTATUSEX stat;

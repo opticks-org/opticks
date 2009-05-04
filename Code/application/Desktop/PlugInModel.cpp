@@ -136,6 +136,10 @@ void PlugInModel::addModuleItem(ModuleDescriptor* pModule)
    SessionItemWrapper* pModuleWrapper = pRootWrapper->addChild(pModule);
    if (pModuleWrapper != NULL)
    {
+      if (pModule->getModuleVersion() == 1)
+      {
+         pModuleWrapper->setDisplayColor(Qt::blue);
+      }
       // Add the plug-in descriptor items
       vector<PlugInDescriptorImp*> descriptors = pModule->getPlugInSet();
       for (vector<PlugInDescriptorImp*>::size_type i = 0; i < descriptors.size(); ++i)
@@ -148,6 +152,10 @@ void PlugInModel::addModuleItem(ModuleDescriptor* pModule)
             SessionItemWrapper* pDescriptorWrapper = pModuleWrapper->addChild(pDescriptorItem);
             if (pDescriptorWrapper != NULL)
             {
+               if (pDescriptor->isProduction() == false)
+               {
+                  pDescriptorWrapper->setDisplayColor(Qt::red);
+               }
                // Add the plug-in instance items
                vector<PlugIn*> plugIns = pDescriptor->getPlugIns();
                for (vector<PlugIn*>::size_type j = 0; j < plugIns.size(); ++j)

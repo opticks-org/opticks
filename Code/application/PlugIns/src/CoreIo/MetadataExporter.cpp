@@ -17,10 +17,13 @@
 #include "MetadataExporter.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "Progress.h"
 #include "xmlwriter.h"
 
 #include <string>
+
+REGISTER_PLUGIN_BASIC(OpticksCoreIo, MetadataExporter);
 
 MetadataExporter::MetadataExporter()
 {

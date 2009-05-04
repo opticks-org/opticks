@@ -14,6 +14,7 @@
 #include "NitfConstants.h"
 #include "NitfUtilities.h"
 #include "ObjectResource.h"
+#include "PlugInRegistration.h"
 
 #include <sstream>
 
@@ -22,6 +23,8 @@
 using namespace std;
 using namespace Nitf;
 using namespace Nitf::TRE;
+
+REGISTER_PLUGIN(OpticksNitfCommonTre, CmetaaParser, Nitf::CmetaaParser());
 
 Nitf::CmetaaParser::CmetaaParser()
 {

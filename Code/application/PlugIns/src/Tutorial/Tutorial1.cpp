@@ -10,8 +10,11 @@
 #include "AppVerify.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "Progress.h"
 #include "Tutorial1.h"
+
+REGISTER_PLUGIN_BASIC(OpticksTutorial, Tutorial1);
 
 Tutorial1::Tutorial1()
 {

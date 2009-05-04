@@ -91,7 +91,7 @@ public:
     *  @param   pClassification
     *           The optional classification object to display and edit.
     */
-   SecurityMarkingsDlg::SecurityMarkingsDlg(QWidget* parent = 0, const QString& strInitialMarkings = QString(),
+   SecurityMarkingsDlg(QWidget* parent = 0, const QString& strInitialMarkings = QString(),
       Classification* pClassification = NULL);
 
    /**

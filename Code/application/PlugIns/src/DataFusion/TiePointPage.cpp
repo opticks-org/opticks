@@ -23,7 +23,6 @@
 #include "GcpList.h"
 #include "LayerList.h"
 #include "ModelServices.h"
-#include "ModuleManager.h"
 #include "Resource.h"
 #include "RasterElement.h"
 #include "Slot.h"

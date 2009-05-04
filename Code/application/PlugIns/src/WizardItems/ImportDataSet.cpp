@@ -19,10 +19,13 @@
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "PlugInResource.h"
 
 #include <vector>
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksWizardItems, ImportDataSet);
 
 ImportDataSet::ImportDataSet() :
    mpDescriptor(NULL),

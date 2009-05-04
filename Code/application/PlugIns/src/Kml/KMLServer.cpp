@@ -19,6 +19,7 @@
 #include "LayerList.h"
 #include "MessageLogResource.h"
 #include "MultipointObject.h"
+#include "PlugInRegistration.h"
 #include "PolygonObject.h"
 #include "PolylineObject.h"
 #include "RasterDataDescriptor.h"
@@ -40,6 +41,8 @@ namespace
 {
    string sKmlNamespace = "http://earth.google.com/kml/2.1";
 };
+
+REGISTER_PLUGIN_BASIC(OpticksKml, KMLServer);
 
 // If there's no server port setting (i.e. the kml .cfg file is missing) don't verify, just don't start the server
 KMLServer::KMLServer() : MuHttpServer(hasSettingKmlServerPort() ? getSettingKmlServerPort() : 0, NULL)

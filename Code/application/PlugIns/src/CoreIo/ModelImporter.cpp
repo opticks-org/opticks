@@ -24,6 +24,7 @@
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "Progress.h"
 #include "RasterElement.h"
 #include "SpatialDataView.h"
@@ -37,6 +38,8 @@ using namespace std;
 XERCES_CPP_NAMESPACE_USE
 
 map<string,string> ModelImporter::sTypeMap;
+
+REGISTER_PLUGIN_BASIC(OpticksCoreIo, ModelImporter);
 
 ModelImporter::ModelImporter() :
    mpOptionsWidget(NULL),

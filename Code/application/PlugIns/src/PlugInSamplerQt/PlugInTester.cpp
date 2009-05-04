@@ -12,6 +12,7 @@
 #include "PlugInArgList.h"
 #include "PlugInDescriptor.h"
 #include "PlugInManagerServices.h"
+#include "PlugInRegistration.h"
 #include "PlugInResource.h"
 #include "PlugInTester.h"
 #include "PlugInSelectorDlg.h"
@@ -22,6 +23,8 @@
 #include <string>
 
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksPlugInSamplerQt, PlugInTester);
 
 PlugInTester::PlugInTester()
 {

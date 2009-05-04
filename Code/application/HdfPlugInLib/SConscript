@@ -4,7 +4,7 @@ import glob
 # import the environment and set up a unique sub-environment
 ####
 Import('env build_dir TOOLPATH')
-env = env.Copy()
+env = env.Clone()
 env.Tool("hdf4",toolpath=[TOOLPATH])
 env.Tool("hdf5",toolpath=[TOOLPATH])
 

@@ -7,9 +7,14 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include "AppVersion.h"
+#include "PicturesPlotWidgetExporter.h"
+#include "PicturesViewExporter.h"
+#include "PlugInRegistration.h"
 #include "PngDetails.h"
 
-#include "AppVersion.h"
+REGISTER_PLUGIN(OpticksPictures, PngPicturesPlotWidgetExporter, PicturesPlotWidgetExporter(new PngDetails));
+REGISTER_PLUGIN(OpticksPictures, PngPicturesViewExporter, PicturesViewExporter(new PngDetails));
 
 std::string PngDetails::name()
 {

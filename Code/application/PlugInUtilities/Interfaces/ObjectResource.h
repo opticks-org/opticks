@@ -41,10 +41,10 @@ public:
    public:
       std::string mType;
       Args(std::string type) : mType(type) {}
-      Args(const char *type) : mType(type) {}
+      Args(const char* type) : mType(type) {}
    };
 protected:
-   ObjectFactory *getFactory() const
+   ObjectFactory* getFactory() const
    {
       Service<ApplicationServices> pApplication;
       return pApplication->getObjectFactory();
@@ -61,11 +61,11 @@ protected:
 class FactoryObject : public FactoryAllocator
 {
 public:
-   void *obtainResource(const Args &args) const
+   void* obtainResource(const Args& args) const
    { 
       return getFactory()->createObject(args.mType.c_str()); 
    }
-   void releaseResource(const Args &args, void *pObject) const
+   void releaseResource(const Args& args, void* pObject) const
    { 
       getFactory()->destroyObject(pObject, args.mType.c_str());
    }
@@ -81,11 +81,11 @@ public:
 class FactoryVector : public FactoryAllocator
 {
 public:
-   void *obtainResource(const Args &args) const
+   void* obtainResource(const Args& args) const
    { 
       return getFactory()->createObjectVector(args.mType.c_str()); 
    }
-   void releaseResource(const Args &args, void *pVector) const
+   void releaseResource(const Args& args, void* pVector) const
    { 
       getFactory()->destroyObjectVector(pVector, args.mType.c_str());
    }
@@ -114,7 +114,7 @@ typedef FactoryAllocator::Args FactoryArgs;
  *  @see ObjectFactory
  */
 template<class T>
-class FactoryResource : public Resource<T,FactoryObject>
+class FactoryResource : public Resource<T, FactoryObject>
 {
 public:
    explicit FactoryResource() :
@@ -123,7 +123,7 @@ public:
    }
 
    explicit FactoryResource<T>(T* pObject) :
-      Resource<T, FactoryObject>(pObject, Args(TypeConverter::toString<T>()))
+      Resource<T, FactoryObject>(pObject, typename Resource<T, FactoryObject>::Args(TypeConverter::toString<T>()))
    {
    }
 };
@@ -192,7 +192,7 @@ public:
 
       return NULL;
    }
-   void releaseResource(const Args &args, DataElement *pObject) const
+   void releaseResource(const Args& args, DataElement* pObject) const
    {
       Service<ModelServices>()->destroyElement(pObject);
    }
@@ -220,11 +220,11 @@ typedef ModelObject::Args ModelArgs;
  *  @see ModelServices
  */
 template<class T>
-class ModelResource : public Resource<T,ModelObject>
+class ModelResource : public Resource<T, ModelObject>
 {
 public:
    explicit ModelResource(std::string name, DataElement* pParent = NULL, std::string type = std::string()) :
-      Resource<T, ModelObject>(Args(name, type.empty() ? TypeConverter::toString<T>() : type, pParent))
+      Resource<T, ModelObject>(typename Resource<T, ModelObject>::Args(name, type.empty() ? TypeConverter::toString<T>() : type, pParent))
    {
    }
 
@@ -237,7 +237,7 @@ public:
     *        safe to dereference pDescriptor after creating the ModelResource.
     */
    explicit ModelResource(DataDescriptor *pDescriptor) :
-      Resource<T, ModelObject>(Args(pDescriptor))
+      Resource<T, ModelObject>(typename Resource<T, ModelObject>::Args(pDescriptor))
    {
    }
 
@@ -248,7 +248,7 @@ public:
     * @param pElement the element that will be owned by this resource.
     */
    explicit ModelResource(T* pElement) :
-      Resource<T, ModelObject>(pElement, Args())
+      Resource<T, ModelObject>(pElement, typename Resource<T, ModelObject>::Args())
    {
    }
 };
@@ -260,7 +260,7 @@ class DataDescriptorObject
 public:
    typedef ModelObject::Args Args;
 
-   void *obtainResource(const Args &args) const
+   void* obtainResource(const Args& args) const
    {
       if (args.mpDescriptor == NULL)
       {
@@ -270,23 +270,23 @@ public:
 
       return args.mpDescriptor;
    }
-   void releaseResource(const Args &args, DataDescriptor *pObject) const
+   void releaseResource(const Args& args, DataDescriptor* pObject) const
    {
       Service<ModelServices>()->destroyDataDescriptor(pObject);
    }
 };
 
 template<class T>
-class DataDescriptorResource : public Resource<T,DataDescriptorObject>
+class DataDescriptorResource : public Resource<T, DataDescriptorObject>
 {
 public:
    explicit DataDescriptorResource(std::string name, std::string dataDescriptorType, DataElement* pParent = NULL) :
-      Resource<T, DataDescriptorObject>(Args(name, dataDescriptorType, pParent))
+      Resource<T, DataDescriptorObject>(typename Resource<T, DataDescriptorObject>::Args(name, dataDescriptorType, pParent))
    {
    }
 
    explicit DataDescriptorResource(T* pDescriptor) :
-      Resource<T, DataDescriptorObject>(Args(pDescriptor))
+      Resource<T, DataDescriptorObject>(typename Resource<T, DataDescriptorObject>::Args(pDescriptor))
    {
    }
 };
@@ -351,7 +351,7 @@ public:
       bool mImported;
    };
 
-   void *obtainResource(const Args &args) const
+   void* obtainResource(const Args& args) const
    {
       if (args.mpDescriptor == NULL && args.mpDataDescriptor == NULL)
       {
@@ -376,7 +376,7 @@ public:
    }
 };
 
-class ImportDescriptorResource : public Resource<ImportDescriptor,ImportDescriptorObject>
+class ImportDescriptorResource : public Resource<ImportDescriptor, ImportDescriptorObject>
 {
 public:
    explicit ImportDescriptorResource(std::string name, std::string dataDescriptorType, DataElement* pParent = NULL,
@@ -432,7 +432,7 @@ class ObjectArray
 {
 public:
    typedef ObjectArrayArgs Args;
-   T *obtainResource(const Args &args) const 
+   T* obtainResource(const Args& args) const 
    {
       if (args.mSize != 0)
       {
@@ -478,13 +478,13 @@ template<class T>
 class ArrayResource : public Resource<T, ObjectArray<T> >
 {
 public:
-   explicit ArrayResource(const Args& args) :
+   explicit ArrayResource(const typename Resource<T, ObjectArray<T> >::Args& args) :
       Resource<T, ObjectArray<T> >(args)
    {
    }
 
    explicit ArrayResource(int size) :
-      Resource<T, ObjectArray<T> >(Args(size))
+      Resource<T, ObjectArray<T> >(typename Resource<T, ObjectArray<T> >::Args(size))
    {
    }
 
@@ -499,7 +499,7 @@ public:
     *  @param   args
     *           The arguments that would have been provided to the obtainResource method of the ArrayObject class.
     */
-   ArrayResource(T* pObject, const Args& args) :
+   ArrayResource(T* pObject, const typename Resource<T, ObjectArray<T> >::Args& args) :
       Resource<T, ObjectArray<T> >(pObject, args)
    {
    }
@@ -516,7 +516,7 @@ public:
     *           The number of objects in the array.
     */
    ArrayResource(T* pObject, int size) :
-      Resource<T, ObjectArray<T> >(pObject, Args(size))
+      Resource<T, ObjectArray<T> >(pObject, typename Resource<T, ObjectArray<T> >::Args(size))
    {
    }
 
@@ -532,7 +532,7 @@ public:
     */
    int size() const
    {
-      return getArgs().mSize;
+      return Resource<T, ObjectArray<T> >::getArgs().mSize;
    }
 
    /**
@@ -555,7 +555,7 @@ public:
          throw std::exception("Range Error in ArrayResource");
       }
 
-      return operator[](index);
+      return Resource<T, ObjectArray<T> >::operator[](index);
    }
 };
 

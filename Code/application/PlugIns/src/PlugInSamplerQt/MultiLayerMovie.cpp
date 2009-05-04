@@ -14,6 +14,7 @@
 #include "DataAccessorImpl.h"
 #include "DesktopServices.h"
 #include "MultiLayerMovie.h"
+#include "PlugInRegistration.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "RasterLayer.h"
@@ -26,6 +27,8 @@
 #include <vector>
 
 using namespace std;
+
+REGISTER_PLUGIN_BASIC(OpticksPlugInSamplerQt, MultiLayerMovie);
 
 MultiLayerMovie::MultiLayerMovie() : 
    mpRaster1(NULL), mpRaster2(NULL), mpRaster3(NULL),

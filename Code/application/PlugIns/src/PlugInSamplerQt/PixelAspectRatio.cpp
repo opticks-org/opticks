@@ -13,8 +13,11 @@
 #include "ModelServices.h"
 #include "PixelAspectRatio.h"
 #include "PixelAspectRatioGui.h"
+#include "PlugInRegistration.h"
 #include "Service.h"
 #include "SessionItemSerializer.h"
+
+REGISTER_PLUGIN_BASIC(OpticksPlugInSamplerQt, PixelAspectRatio);
 
 PixelAspectRatio::PixelAspectRatio() :
    mpGui(NULL)

@@ -31,8 +31,10 @@ using boost::rational;
 using boost::rational_cast;
 using namespace std;
 
+namespace StringUtilities
+{
 template<>
-Motion_Est_ID StringUtilities::fromXmlString<Motion_Est_ID>(string value, bool* pError)
+Motion_Est_ID fromXmlString<Motion_Est_ID>(string value, bool* pError)
 {
    if (pError != NULL)
    {
@@ -71,6 +73,7 @@ Motion_Est_ID StringUtilities::fromXmlString<Motion_Est_ID>(string value, bool* 
 
    return Motion_Est_ID();
 }
+}
 
 namespace
 {
@@ -78,7 +81,11 @@ namespace
    QString logBuffer;
 };
 
+#if defined(LINUX)
+extern "C" void av_log_callback(void* pPtr, int level, const char* pFmt, va_list vl)
+#else
 extern "C" static void av_log_callback(void* pPtr, int level, const char* pFmt, va_list vl)
+#endif
 {
    if (level > av_log_level)
    {
