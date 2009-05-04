@@ -10,11 +10,14 @@
 #ifndef IMPORTAGENTIMP_H
 #define IMPORTAGENTIMP_H
 
+#include <QtCore/QMap>
+
 #include "ExecutableAgentImp.h"
+
+#include <map>
 #include <string>
 #include <vector>
 
-class DataDescriptor;
 class DataElement;
 class ImportDescriptor;
 class Importer;
@@ -28,23 +31,30 @@ public:
    void instantiate(const std::string& importerName, Progress* pProgress, bool batch);
    void instantiate(const std::string& importerName, const std::string& filename, Progress* pProgress,
       bool batch);
-   void instantiate(const std::string& importerName, const std::vector<ImportDescriptor*>& descriptors,
-      Progress* pProgress, bool batch);
-   void instantiate(PlugIn* pPlugIn, const std::vector<ImportDescriptor*>& descriptors, Progress* pProgress,
+   void instantiate(const std::string& importerName, const std::vector<std::string>& filenames, Progress* pProgress,
       bool batch);
+   void instantiate(const std::string& importerName,
+      const std::map<std::string, std::vector<ImportDescriptor*> >& descriptors, Progress* pProgress, bool batch);
+   void instantiate(PlugIn* pPlugIn, const std::map<std::string, std::vector<ImportDescriptor*> >& descriptors,
+      Progress* pProgress, bool batch);
 
    ImportAgentImp();
    ~ImportAgentImp();
 
    void setImporterSubtype(const std::string& subtype);
    std::string getImporterSubtype() const;
+
    void setFilename(const std::string& filename);
+   void setFilenames(const std::vector<std::string>& filenames);
+   void setDatasets(const std::map<std::string, std::vector<ImportDescriptor*> >& datasets);
+   std::vector<ImportDescriptor*> getImportDescriptors();
+   std::vector<ImportDescriptor*> getImportDescriptors(const std::string& filename);
+   std::map<std::string, std::vector<ImportDescriptor*> > getDatasets();
+
    void setEditType(ImportAgent::EditType editType = ImportAgent::AS_NEEDED_EDIT);
    ImportAgent::EditType getEditType() const;
    void updateMruFileList(bool updateList);
    bool isMruFileListUpdated() const;
-   void setImportDescriptors(const std::vector<ImportDescriptor*>& descriptors);
-   std::vector<ImportDescriptor*> getImportDescriptors();
    std::string getDefaultExtensions() const;
    bool execute();
    std::vector<DataElement*> getImportedElements() const;
@@ -54,12 +64,11 @@ public:
 
 protected:
    void populateArgValues(PlugInArgList *pArgList);
-   void updateMruFileList();
+   void updateMruFileList(const std::map<ImportDescriptor*, bool>& importedDescriptors);
 
 private:
    std::string mImporterSubtype;
-   std::string mFilename;
-   std::vector<ImportDescriptor*> mDescriptors;
+   QMap<QString, std::vector<ImportDescriptor*> > mDatasets;
    ImportAgent::EditType mEditType;
    bool mUpdateMruList;
    DataElement* mpElement;
@@ -71,17 +80,23 @@ private:
 
 #define IMPORTAGENTADAPTER_METHODS(impClass) \
    EXECUTABLEAGENTADAPTER_METHODS(impClass) \
-   void instantiate(const std::string& importerName, const std::vector<ImportDescriptor*>& descriptors, \
-                    Progress* pProgress, bool batch) \
-   { \
-      impClass::instantiate(importerName, descriptors, pProgress, batch); \
-   } \
    void instantiate(const std::string& importerName, Progress* pProgress, bool batch) \
    { \
       impClass::instantiate(importerName, pProgress, batch); \
    } \
-   void instantiate(PlugIn* pPlugIn, const std::vector<ImportDescriptor*>& descriptors, Progress* pProgress, \
+   void instantiate(const std::string& importerName, const std::vector<std::string>& filenames, Progress* pProgress, \
                     bool batch) \
+   { \
+      impClass::instantiate(importerName, filenames, pProgress, batch); \
+   } \
+   void instantiate(const std::string& importerName, \
+                    const std::map<std::string, std::vector<ImportDescriptor*> >& descriptors, Progress* pProgress, \
+                    bool batch) \
+   { \
+      impClass::instantiate(importerName, descriptors, pProgress, batch); \
+   } \
+   void instantiate(PlugIn* pPlugIn, const std::map<std::string, std::vector<ImportDescriptor*> >& descriptors, \
+                    Progress* pProgress, bool batch) \
    { \
       impClass::instantiate(pPlugIn, descriptors, pProgress, batch); \
    } \
@@ -97,14 +112,9 @@ private:
    { \
       impClass::setFilename(filename); \
    } \
-   void showOptionsDialog(bool showDialog) \
+   void setFilenames(const std::vector<std::string>& filenames) \
    { \
-      impClass::setEditType(showDialog ? ImportAgent::ALWAYS_EDIT : ImportAgent::NEVER_EDIT); \
-   } \
-   bool isOptionsDialogShown() const \
-   { \
-      ImportAgent::EditType editType = impClass::getEditType(); \
-      return (editType == ImportAgent::ALWAYS_EDIT); \
+      impClass::setFilenames(filenames); \
    } \
    void setEditType(ImportAgent::EditType editType = ImportAgent::AS_NEEDED_EDIT) \
    { \
@@ -122,13 +132,21 @@ private:
    { \
       return impClass::isMruFileListUpdated(); \
    } \
-   void setImportDescriptors(const std::vector<ImportDescriptor*>& descriptors) \
+   void setDatasets(const std::map<std::string, std::vector<ImportDescriptor*> >& datasets) \
    { \
-      impClass::setImportDescriptors(descriptors); \
+      impClass::setDatasets(datasets); \
    } \
    std::vector<ImportDescriptor*> getImportDescriptors() \
    { \
       return impClass::getImportDescriptors(); \
+   } \
+   std::vector<ImportDescriptor*> getImportDescriptors(const std::string& filename) \
+   { \
+      return impClass::getImportDescriptors(filename); \
+   } \
+   std::map<std::string, std::vector<ImportDescriptor*> > getDatasets() \
+   { \
+      return impClass::getDatasets(); \
    } \
    std::string getDefaultExtensions() const \
    { \

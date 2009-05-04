@@ -304,7 +304,10 @@ bool GenericHdf5Importer::runAllTests(Progress* pProgress, std::ostream& failure
       }
    }
 
-   hdfImporter->setImportDescriptors(descriptorsToImport);
+   map<string, vector<ImportDescriptor*> > resourceDescriptors;
+   resourceDescriptors[testFile] = descriptorsToImport;
+
+   hdfImporter->setDatasets(resourceDescriptors);
    hdfImporter->execute();
 
    vector<DataElement*> elements = hdfImporter->getImportedElements();

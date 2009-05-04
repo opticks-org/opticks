@@ -425,18 +425,23 @@ bool SioImporter::validate(const DataDescriptor* pDescriptor, string& errorMessa
    if (mVersion9Sio)
    {
       //issue a warning about version 9 sio's
-      errorMessage = "This SIO file was created with a development version of COMET4. "
-         "This file is not officially supported and should not be used in a production environment..\n";
+      errorMessage = "This SIO file was created with a development version of the software.  "
+         "This file is not officially supported and should not be used in a production environment.";
    }
    else
    {
-      errorMessage = "SIO files are deprecated.  This file will still be loaded. "
-         "In the future, this importer may be removed; please re-export this image "
-         "using the Ice Exporter.\n";
+      errorMessage = "SIO files are deprecated.  This file will still be loaded, but the importer "
+         "may be removed in the future.  Please export the data using the Ice Exporter.";
    }
+
    string baseErrorMessage;
+
    bool bValid = RasterElementImporterShell::validate(pDescriptor, baseErrorMessage);
-   errorMessage += baseErrorMessage;
+   if (baseErrorMessage.empty() == false)
+   {
+      errorMessage += string("\n") + baseErrorMessage;
+   }
+
    if (bValid == false)
    {
       return false;
@@ -445,7 +450,7 @@ bool SioImporter::validate(const DataDescriptor* pDescriptor, string& errorMessa
    const RasterDataDescriptor* pRasterDescriptor = dynamic_cast<const RasterDataDescriptor*>(pDescriptor);
    if (pRasterDescriptor == NULL)
    {
-      errorMessage += "The data descriptor is invalid!";
+      errorMessage += "\nThe data descriptor is invalid!";
       return false;
    }
 
@@ -453,7 +458,7 @@ bool SioImporter::validate(const DataDescriptor* pDescriptor, string& errorMessa
       dynamic_cast<const RasterFileDescriptor*>(pRasterDescriptor->getFileDescriptor());
    if (pFileDescriptor == NULL)
    {
-      errorMessage += "The file descriptor is invalid!";
+      errorMessage += "\nThe file descriptor is invalid!";
       return false;
    }
 
@@ -465,7 +470,7 @@ bool SioImporter::validate(const DataDescriptor* pDescriptor, string& errorMessa
       const vector<const Filename*>& bandFiles = pFileDescriptor->getBandFiles();
       if (bandFiles.empty() == false)
       {
-         errorMessage += "On-disk processing is not supported with multiple files!";
+         errorMessage += "\nOn-disk processing is not supported with multiple files!";
          return false;
       }
    }

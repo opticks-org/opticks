@@ -11,6 +11,7 @@
 #include "AppVersion.h"
 #include "AppVerify.h"
 #include "DataDescriptor.h"
+#include "FileDescriptor.h"
 #include "Filename.h"
 #include "ImportDescriptor.h"
 #include "MessageLogResource.h"
@@ -24,7 +25,6 @@
 using namespace std;
 
 ImportDataSet::ImportDataSet() :
-   mpFilename(NULL),
    mpDescriptor(NULL),
    mShowDialog(false)
 {
@@ -58,6 +58,7 @@ bool ImportDataSet::getInputSpecification(PlugInArgList*& pArgList)
 
    VERIFY(pArgList != NULL);
    VERIFY(pArgList->addArg<Filename>("Filename", NULL));
+   VERIFY(pArgList->addArg<vector<Filename*> >("Filenames", NULL));
    VERIFY(pArgList->addArg<DataDescriptor>("Data Descriptor", NULL));
    VERIFY(pArgList->addArg<string>("Importer Name", NULL));
 
@@ -97,40 +98,80 @@ bool ImportDataSet::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
 
    Progress* pProgress = getProgress();
 
-   // Load the data set
+   // Set the data sets to load
    ImporterResource importer(mImporterName, pProgress, !mbInteractive);
    if (mpDescriptor != NULL)
    {
       // Copy the data descriptor because the importer resource owns all data descriptors
       DataDescriptor* pTempDescriptor = mpDescriptor->copy();
 
-      Service<ModelServices> pModel;
-
-      ImportDescriptor* pImportDescriptor = pModel->createImportDescriptor(pTempDescriptor);
-      if (pImportDescriptor != NULL)
+      ImportDescriptorResource importDescriptor(pTempDescriptor);
+      if (importDescriptor.get() != NULL)
       {
-         vector<ImportDescriptor*> descriptors;
-         descriptors.push_back(pImportDescriptor);
+         // Filename
+         string filename;
 
-         importer->setImportDescriptors(descriptors);
+         const FileDescriptor* pFileDescriptor = pTempDescriptor->getFileDescriptor();
+         if (pFileDescriptor != NULL)
+         {
+            filename = pFileDescriptor->getFilename().getFullPathAndName();
+         }
+
+         if (filename.empty() == true)
+         {
+            reportError("The filename could not be obtained from the data descriptor!",
+               "67D177B8-345D-4102-A677-81BDA38B6D63");
+            return false;
+         }
+
+         // Datasets
+         vector<ImportDescriptor*> descriptors;
+         descriptors.push_back(importDescriptor.release());
+
+         map<string, vector<ImportDescriptor*> > resourceDescriptors;
+         resourceDescriptors[filename] = descriptors;
+
+         importer->setDatasets(resourceDescriptors);
       }
    }
-   else if (mpFilename != NULL)
+   else if (mFilenames.empty() == false)
    {
-      const string& filename = mpFilename->getFullPathAndName();
-      if (filename.empty() == false)
-      {
-         importer->setFilename(filename);
-      }
+      importer->setFilenames(mFilenames);
    }
 
    importer->setEditType(mShowDialog ? ImportAgent::ALWAYS_EDIT : ImportAgent::AS_NEEDED_EDIT);
-   importer->updateMruFileList((mpDescriptor == NULL) && (mpFilename == NULL));
+   importer->updateMruFileList((mpDescriptor == NULL) && (mFilenames.empty() == true));
 
+   // Get the number of data sets to import
+   unsigned int numDatasetsToImport = 0;
+
+   vector<ImportDescriptor*> importDescriptors = importer->getImportDescriptors();
+   for (vector<ImportDescriptor*>::iterator iter = importDescriptors.begin(); iter != importDescriptors.end(); ++iter)
+   {
+      ImportDescriptor* pImportDescriptor = *iter;
+      if ((pImportDescriptor != NULL) && (pImportDescriptor->isImported() == true))
+      {
+         ++numDatasetsToImport;
+      }
+   }
+
+   // Import the data sets
    if (importer->execute() == false)
    {
-      reportError("Unable to import the data set!", "260757E4-31FA-49ba-850D-965AA6F1EB54");
+      reportError("Unable to import any data set!", "260757E4-31FA-49ba-850D-965AA6F1EB54");
       return false;
+   }
+
+   // If specific data sets were given check to make sure that all data sets were successfully imported
+   if ((mpDescriptor != NULL) || (mFilenames.empty() == false))
+   {
+      vector<DataElement*> importedElements = importer->getImportedElements();
+      if (importedElements.size() < numDatasetsToImport)
+      {
+         reportError("Unable to import at least one of the specified data sets.",
+            "E5FBD561-2F34-4CFD-A400-B559463114D6");
+         return false;
+      }
    }
 
    // Set the output arg value
@@ -166,8 +207,35 @@ bool ImportDataSet::extractInputArgs(PlugInArgList* pInArgList)
       return false;
    }
 
-   // Filename
-   mpFilename = pInArgList->getPlugInArgValue<Filename>("Filename");
+   // Filenames
+   mFilenames.clear();
+
+   Filename* pFilename = pInArgList->getPlugInArgValue<Filename>("Filename");
+   if (pFilename != NULL)
+   {
+      string filename = pFilename->getFullPathAndName();
+      if (filename.empty() == false)
+      {
+         mFilenames.push_back(filename);
+      }
+   }
+
+   vector<Filename*>* pFilenames = pInArgList->getPlugInArgValue<vector<Filename*> >("Filenames");
+   if (pFilenames != NULL)
+   {
+      for (vector<Filename*>::iterator iter = pFilenames->begin(); iter != pFilenames->end(); ++iter)
+      {
+         Filename* pCurrentFilename = *iter;
+         if (pCurrentFilename != NULL)
+         {
+            string filename = pCurrentFilename->getFullPathAndName();
+            if (filename.empty() == false)
+            {
+               mFilenames.push_back(filename);
+            }
+         }
+      }
+   }
 
    // Data descriptor
    mpDescriptor = pInArgList->getPlugInArgValue<DataDescriptor>("Data Descriptor");
@@ -175,6 +243,10 @@ bool ImportDataSet::extractInputArgs(PlugInArgList* pInArgList)
    // Importer name
    mImporterName.erase();
    pInArgList->getPlugInArgValue<string>("Importer Name", mImporterName);
+   if (mImporterName.empty() == true)
+   {
+      mImporterName = "Auto Importer";
+   }
 
    // Show options dialog
    if (mbInteractive == true)
@@ -185,17 +257,17 @@ bool ImportDataSet::extractInputArgs(PlugInArgList* pInArgList)
    // Error checking
    if (mbInteractive == false)
    {
-      if ((mpFilename == NULL) && (mpDescriptor == NULL))
+      if ((mFilenames.empty() == true) && (mpDescriptor == NULL))
       {
-         reportError("Both of the filename and the data descriptor input values are invalid!",
+         reportError("Both filename and data descriptor input values are invalid!",
             "35588FCD-F8BC-4383-BFFA-35A64297DF23");
          return false;
       }
 
-      if ((mpFilename != NULL) && (mpDescriptor != NULL))
+      if ((mFilenames.empty() == false) && (mpDescriptor != NULL))
       {
-         reportWarning("Both of the filename and the data descriptor input values are valid.  "
-            "The data descriptor will be used and the filename value will be ignored.",
+         reportWarning("Both filename and data descriptor input values are valid.  "
+            "The data descriptor will be used and the filename value(s) will be ignored.",
             "8B77531E-3D22-4EBC-8D6C-D4F4AB8B4026");
       }
    }

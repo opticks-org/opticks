@@ -10,6 +10,8 @@
 #ifndef IMPORTOPTIONSDLG_H
 #define IMPORTOPTIONSDLG_H
 
+#include <QtCore/QMap>
+#include <QtCore/QString>
 #include <QtGui/QDialog>
 #include <QtGui/QLabel>
 #include <QtGui/QPushButton>
@@ -34,11 +36,16 @@ class ImportOptionsDlg : public QDialog
    Q_OBJECT
 
 public:
-   ImportOptionsDlg(Importer* pImporter, const std::vector<ImportDescriptor*>& descriptors, QWidget* pParent = NULL);
+   ImportOptionsDlg(Importer* pImporter, const QMap<QString, std::vector<ImportDescriptor*> >& files,
+      QWidget* pParent = NULL);
    ~ImportOptionsDlg();
+
+   void allowDeselectedFiles(bool allowDeselectedFiles);
+   bool areDeselectedFilesAllowed() const;
 
    void setCurrentDataset(ImportDescriptor* pImportDescriptor);
    ImportDescriptor* getCurrentDataset() const;
+   QString getCurrentFile() const;
 
 public slots:
    void accept();
@@ -47,10 +54,16 @@ signals:
    void currentDatasetChanged(ImportDescriptor* pDataset);
 
 protected:
+   bool validateDataset(DataDescriptor* pDescriptor);
+   bool validateDataset(DataDescriptor* pDescriptor, QString& validationMessage);
+   void selectCurrentDatasetItem();
+   void validateEditDataset();
+   void enforceSelections(QTreeWidgetItem* pItem);
    void removeImporterPage();
 
 protected slots:
-   void updateCurrentDataset();
+   void datasetItemChanged(QTreeWidgetItem* pItem);
+   void updateEditDataset();
    void selectAllDatasets();
    void deselectAllDatasets();
    void generateDimensionVector(const QString& strValueName);
@@ -59,9 +72,7 @@ protected slots:
    void updateDataBands(const std::vector<DimensionDescriptor>& bands);
    void updateMetadata();
    void pagesModified();
-   void validate();
    bool applyChanges();
-   void enforceSelections(QTreeWidgetItem *pItem);
 
 private:
    void updateConnections(bool bConnect);
@@ -71,6 +82,8 @@ private:
    std::map<ImportDescriptor*, QTreeWidgetItem*> mDatasets;
    ImportDescriptor* mpCurrentDataset;
    DataDescriptor* mpEditDescriptor;    // Contains un-applied user changes
+   bool mPromptForChanges;
+   bool mAllowDeselectedFiles;
 
    QTreeWidget* mpDatasetTree;
    QTabWidget* mpTabWidget;

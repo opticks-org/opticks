@@ -18,6 +18,7 @@
 #include "DataVariant.h"
 #include "DynamicObject.h"
 #include "FileDescriptorWidget.h"
+#include "Icons.h"
 #include "ImportDescriptorImp.h"
 #include "Importer.h"
 #include "ImportOptionsDlg.h"
@@ -61,12 +62,14 @@ namespace
 #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Make ImportOptionsDlg provide the data descriptor " \
    "being modified by the user to the custom options widget (kstreith)")
 
-ImportOptionsDlg::ImportOptionsDlg(Importer* pImporter, const vector<ImportDescriptor*>& descriptors,
+ImportOptionsDlg::ImportOptionsDlg(Importer* pImporter, const QMap<QString, vector<ImportDescriptor*> >& files,
    QWidget* pParent) :
    QDialog(pParent),
    mpImporter(pImporter),
    mpCurrentDataset(NULL),
    mpEditDescriptor(NULL),
+   mPromptForChanges(true),
+   mAllowDeselectedFiles(true),
    mpDatasetTree(NULL),
    mpTabWidget(NULL),
    mpDataPage(NULL),
@@ -84,6 +87,7 @@ ImportOptionsDlg::ImportOptionsDlg(Importer* pImporter, const vector<ImportDescr
 
    mpDatasetTree = new QTreeWidget(pDatasetWidget);
    mpDatasetTree->setSelectionMode(QAbstractItemView::SingleSelection);
+   mpDatasetTree->setSelectionBehavior(QAbstractItemView::SelectItems);
    mpDatasetTree->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
    mpDatasetTree->setTextElideMode(Qt::ElideLeft);
    mpDatasetTree->setMinimumWidth(225);
@@ -94,14 +98,11 @@ ImportOptionsDlg::ImportOptionsDlg(Importer* pImporter, const vector<ImportDescr
 
    // Tab widget
    mpTabWidget = new QTabWidget(pSplitter);
-
-   // Create the pages
    mpDataPage = new DataDescriptorWidget();
    mpSubsetPage = new SubsetWidget();
    mpFilePage = new FileDescriptorWidget();
    mpMetadataPage = new MetadataWidget();
 
-   // Add the pages to the tab widget
    mpTabWidget->addTab(mpDataPage, "Data");
    mpTabWidget->addTab(mpFilePage, "File");
    mpTabWidget->addTab(mpSubsetPage, "Subset");
@@ -115,7 +116,7 @@ ImportOptionsDlg::ImportOptionsDlg(Importer* pImporter, const vector<ImportDescr
    validationFont.setBold(true);
    mpValidationLabel->setFont(validationFont);
 
-   // Set the dialog buttons
+   // Dialog buttons
    mpOkButton = new QPushButton("&OK", this);
    QPushButton* pCancelButton = new QPushButton("&Cancel", this);
 
@@ -168,6 +169,7 @@ ImportOptionsDlg::ImportOptionsDlg(Importer* pImporter, const vector<ImportDescr
    pVBox->addLayout(pButtonLayout);
 
    // Initialization
+   setWindowTitle("Import Options");
    setModal(true);
    resize(700, 450);
 
@@ -195,77 +197,116 @@ ImportOptionsDlg::ImportOptionsDlg(Importer* pImporter, const vector<ImportDescr
       mpDataPage->setValidProcessingLocations(locations);
    }
 
-   vector<ImportDescriptor*> datasets;
-   copy(descriptors.begin(), descriptors.end(), back_inserter(datasets));
-   stable_sort(datasets.begin(), datasets.end(), ElementDepthComparitor());
+   // Populate the data set tree widget
+   QTreeWidgetItem* pSelectItem = NULL;
 
-   map<vector<string>, QTreeWidgetItem*> parentPaths;
-   bool bInitialized = false;
-   for (vector<ImportDescriptor*>::iterator iter = datasets.begin(); iter != datasets.end(); ++iter)
+   QMap<QString, vector<ImportDescriptor*> >::const_iterator fileIter;
+   for (fileIter = files.begin(); fileIter != files.end(); ++fileIter)
    {
-      ImportDescriptor* pImportDescriptor = *iter;
-      if (pImportDescriptor == NULL)
+      // Filename item
+      QString filename = fileIter.key();
+      if (filename.isEmpty() == true)
       {
          continue;
       }
-      DataDescriptor* pDescriptor = pImportDescriptor->getDataDescriptor();
-      if (pDescriptor == NULL)
-      {
-         continue;
-      }
-      const string& name = pDescriptor->getName();
-      if (name.empty())
-      {
-         continue;
-      }
-      QTreeWidgetItem* pItem = new QTreeWidgetItem(static_cast<QTreeWidget*>(NULL),
-         QStringList() << QString::fromStdString(name));
-      if (pItem == NULL)
-      {
-         continue;
-      }
-      // Tool tip
-      pItem->setToolTip(0, QString::fromStdString(name));
 
-      // Check state
-      Qt::ItemFlags itemFlags = pItem->flags();
-      itemFlags |= Qt::ItemIsUserCheckable;
-      pItem->setFlags(itemFlags);
+      QTreeWidgetItem* pFileItem = new QTreeWidgetItem(mpDatasetTree);
 
-      if (pImportDescriptor->isImported())
+      QFileInfo fileInfo(filename);
+      pFileItem->setText(0, fileInfo.fileName());
+      pFileItem->setIcon(0, style()->standardIcon(QStyle::SP_FileIcon));
+      pFileItem->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+      pFileItem->setToolTip(0, filename);
+      pFileItem->setCheckState(0, Qt::Unchecked);
+
+      // Dataset items
+      vector<ImportDescriptor*> fileDatasets = fileIter.value();
+      vector<ImportDescriptor*> datasets;
+      copy(fileDatasets.begin(), fileDatasets.end(), back_inserter(datasets));
+      stable_sort(datasets.begin(), datasets.end(), ElementDepthComparitor());
+
+      map<vector<string>, QTreeWidgetItem*> parentPaths;
+
+      vector<ImportDescriptor*>::iterator datasetIter;
+      for (datasetIter = datasets.begin(); datasetIter != datasets.end(); ++datasetIter)
       {
-         pItem->setCheckState(0, Qt::Checked);
-
-         if (!bInitialized)
+         ImportDescriptor* pImportDescriptor = *datasetIter;
+         if (pImportDescriptor == NULL)
          {
-            mpDatasetTree->setItemSelected(pItem, true);
-            bInitialized = true;
+            continue;
          }
-      }
-      else
-      {
-         pItem->setCheckState(0, Qt::Unchecked);
-      }
 
-      // Add to the proper parent
-      map<vector<string>, QTreeWidgetItem*>::iterator parent = parentPaths.find(pDescriptor->getParentDesignator());
-      if (parent != parentPaths.end())
-      {
-         parent->second->addChild(pItem);
-      }
-      else
-      {
-         mpDatasetTree->addTopLevelItem(pItem);
-      }
-      vector<string> myDesignator = pDescriptor->getParentDesignator();
-      myDesignator.push_back(pDescriptor->getName());
-      parentPaths[myDesignator] = pItem;
+         DataDescriptor* pDescriptor = pImportDescriptor->getDataDescriptor();
+         if (pDescriptor == NULL)
+         {
+            continue;
+         }
 
-      mDatasets[pImportDescriptor] = pItem;
+         const string& name = pDescriptor->getName();
+         if (name.empty())
+         {
+            continue;
+         }
+
+         QTreeWidgetItem* pItem = new QTreeWidgetItem(static_cast<QTreeWidget*>(NULL),
+            QStringList() << QString::fromStdString(name));
+         if (pItem == NULL)
+         {
+            continue;
+         }
+
+         // Tool tip
+         pItem->setToolTip(0, QString::fromStdString(name));
+
+         // Check state
+         Qt::ItemFlags itemFlags = pItem->flags();
+         itemFlags |= Qt::ItemIsUserCheckable;
+         pItem->setFlags(itemFlags);
+
+         if (pImportDescriptor->isImported())
+         {
+            pItem->setCheckState(0, Qt::Checked);
+
+            if (pSelectItem == NULL)
+            {
+               pSelectItem = pItem;
+            }
+         }
+         else
+         {
+            pItem->setCheckState(0, Qt::Unchecked);
+         }
+
+         // Add to the proper parent
+         map<vector<string>, QTreeWidgetItem*>::iterator parent = parentPaths.find(pDescriptor->getParentDesignator());
+         if (parent != parentPaths.end())
+         {
+            parent->second->addChild(pItem);
+         }
+         else
+         {
+            pFileItem->addChild(pItem);
+         }
+
+         vector<string> myDesignator = pDescriptor->getParentDesignator();
+         myDesignator.push_back(pDescriptor->getName());
+         parentPaths[myDesignator] = pItem;
+
+         mDatasets[pImportDescriptor] = pItem;
+         validateDataset(pDescriptor);
+         enforceSelections(pItem);
+      }
    }
 
-   QList<QTreeWidgetItem*> selectedItems = mpDatasetTree->selectedItems();
-   if (selectedItems.empty() == true)
+   mpDatasetTree->expandAll();
+
+   // Update the tab widget for the selected data set
+   if (pSelectItem != NULL)
+   {
+      mpDatasetTree->setItemSelected(pSelectItem, true);
+      updateEditDataset();
+   }
+   else
    {
       map<ImportDescriptor*, QTreeWidgetItem*>::iterator iter = mDatasets.begin();
       if (iter != mDatasets.end())
@@ -273,27 +314,31 @@ ImportOptionsDlg::ImportOptionsDlg(Importer* pImporter, const vector<ImportDescr
          setCurrentDataset(iter->first);
       }
    }
-   else
-   {
-      updateCurrentDataset();
-   }
 
    // Connections
-   VERIFYNR(connect(mpDatasetTree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(validate())));
    VERIFYNR(connect(mpDatasetTree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
-      SLOT(enforceSelections(QTreeWidgetItem*))));
-   VERIFYNR(connect(mpDatasetTree, SIGNAL(itemSelectionChanged()), this, SLOT(updateCurrentDataset())));
+      SLOT(datasetItemChanged(QTreeWidgetItem*))));
+   VERIFYNR(connect(mpDatasetTree, SIGNAL(itemSelectionChanged()), this, SLOT(updateEditDataset())));
    VERIFYNR(connect(pImportAllButton, SIGNAL(clicked()), this, SLOT(selectAllDatasets())));
    VERIFYNR(connect(pImportNoneButton, SIGNAL(clicked()), this, SLOT(deselectAllDatasets())));
    VERIFYNR(connect(mpOkButton, SIGNAL(clicked()), this, SLOT(accept())));
    VERIFYNR(connect(pCancelButton, SIGNAL(clicked()), this, SLOT(reject())));
    updateConnections(true);
-   mpDatasetTree->expandAll();
 }
 
 ImportOptionsDlg::~ImportOptionsDlg()
 {
    removeImporterPage();
+}
+
+void ImportOptionsDlg::allowDeselectedFiles(bool allowDeselectedFiles)
+{
+   mAllowDeselectedFiles = allowDeselectedFiles;
+}
+
+bool ImportOptionsDlg::areDeselectedFilesAllowed() const
+{
+   return mAllowDeselectedFiles;
 }
 
 void ImportOptionsDlg::setCurrentDataset(ImportDescriptor* pImportDescriptor)
@@ -315,21 +360,39 @@ void ImportOptionsDlg::setCurrentDataset(ImportDescriptor* pImportDescriptor)
       if ((mpDataPage->isModified() == true) || (mpFilePage->isModified() == true) ||
          (mpMetadataPage->isModified() == true))
       {
-         int iReturn = QMessageBox::question(this, APP_NAME, "Apply changes?", QMessageBox::Yes, QMessageBox::No,
-            QMessageBox::Cancel);
-         if (iReturn == QMessageBox::Yes)
+         if (mPromptForChanges == true)
+         {
+            int iReturn = QMessageBox::question(this, APP_NAME, "Apply changes?",
+               QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No | QMessageBox::Cancel);
+            if ((iReturn == QMessageBox::Yes) || (iReturn == QMessageBox::YesToAll))
+            {
+               bSuccess = applyChanges();
+               if (iReturn == QMessageBox::YesToAll)
+               {
+                  mPromptForChanges = false;
+               }
+            }
+            else if (iReturn == QMessageBox::No)
+            {
+               // Update the validation icon for the original data descriptor
+               validateDataset(mpCurrentDataset->getDataDescriptor());
+            }
+            else if (iReturn == QMessageBox::Cancel)
+            {
+               bSuccess = false;
+            }
+         }
+         else
          {
             bSuccess = applyChanges();
-         }
-         else if (iReturn == QMessageBox::Cancel)
-         {
-            bSuccess = false;
          }
       }
    }
 
    if (bSuccess == false)
    {
+      // Select the tree widget item for the previously selected data set
+      selectCurrentDatasetItem();
       return;
    }
 
@@ -352,18 +415,8 @@ void ImportOptionsDlg::setCurrentDataset(ImportDescriptor* pImportDescriptor)
 
    VERIFYNRV(mpEditDescriptor != NULL);
 
-   // Set the current list widget item
-   map<ImportDescriptor*, QTreeWidgetItem*>::iterator iter(mDatasets.find(mpCurrentDataset));
-   if (iter != mDatasets.end())
-   {
-      QTreeWidgetItem* pItem = iter->second;
-      if (pItem != NULL)
-      {
-         disconnect(mpDatasetTree, SIGNAL(itemSelectionChanged()), this, SLOT(updateCurrentDataset()));
-         mpDatasetTree->setCurrentItem(pItem);     // Also selects the item
-         VERIFYNR(connect(mpDatasetTree, SIGNAL(itemSelectionChanged()), this, SLOT(updateCurrentDataset())));
-      }
-   }
+   // Select the tree widget item for the current data set
+   selectCurrentDatasetItem();
 
    // Disconnect pages
    updateConnections(false);
@@ -526,27 +579,8 @@ void ImportOptionsDlg::setCurrentDataset(ImportDescriptor* pImportDescriptor)
       }
    }
 
-   // Update the dialog title
-   QString strTitle = "Import Options";
-   if (pFileDescriptor != NULL)
-   {
-      string filename = pFileDescriptor->getFilename();
-      if (filename.empty() == false)
-      {
-         QFileInfo fileInfo(QString::fromStdString(filename));
-
-         QString strName = fileInfo.fileName();
-         if (strName.isEmpty() == false)
-         {
-            strTitle += ": " + strName;
-         }
-      }
-   }
-
-   setWindowTitle(strTitle);
-
    // Validate the current data descriptor
-   validate();
+   validateEditDataset();
 
    // Reconnect the pages
    updateConnections(true);
@@ -560,10 +594,51 @@ ImportDescriptor* ImportOptionsDlg::getCurrentDataset() const
    return mpCurrentDataset;
 }
 
+QString ImportOptionsDlg::getCurrentFile() const
+{
+   QString filename;
+
+   map<ImportDescriptor*, QTreeWidgetItem*>::const_iterator iter = mDatasets.find(mpCurrentDataset);
+   if (iter != mDatasets.end())
+   {
+      QTreeWidgetItem* pDatasetItem = iter->second;
+      if (pDatasetItem != NULL)
+      {
+         QTreeWidgetItem* pFileItem = pDatasetItem->parent();
+         if (pFileItem != NULL)
+         {
+            filename = pFileItem->toolTip(0);
+         }
+      }
+   }
+
+   return filename;
+}
+
 void ImportOptionsDlg::accept()
 {
    // Apply changes to the data descriptor
    applyChanges();
+
+   // Check if the user has no selected data sets for a file and display a message box if necessary
+   if (mAllowDeselectedFiles == true)
+   {
+      for (int i = 0; i < mpDatasetTree->topLevelItemCount(); ++i)
+      {
+         QTreeWidgetItem* pFileItem = mpDatasetTree->topLevelItem(i);
+         if ((pFileItem != NULL) && (pFileItem->checkState(0) == Qt::Unchecked))
+         {
+            int returnValue = QMessageBox::question(this, windowTitle(), "At least one file does not have any data "
+               "sets that will be imported.  Do you want to continue?", QMessageBox::Yes | QMessageBox::No);
+            if (returnValue == QMessageBox::No)
+            {
+               return;
+            }
+
+            break;
+         }
+      }
+   }
 
    // Apply changes to the imported data sets
    for (map<ImportDescriptor*, QTreeWidgetItem*>::iterator iter = mDatasets.begin(); iter != mDatasets.end(); ++iter)
@@ -582,6 +657,216 @@ void ImportOptionsDlg::accept()
 
    // Close the dialog
    QDialog::accept();
+}
+
+bool ImportOptionsDlg::validateDataset(DataDescriptor* pDescriptor)
+{
+   QString message;
+   return validateDataset(pDescriptor, message);
+}
+
+bool ImportOptionsDlg::validateDataset(DataDescriptor* pDescriptor, QString& validationMessage)
+{
+   validationMessage.clear();
+   if (pDescriptor == NULL)
+   {
+      return false;
+   }
+
+   // Validate the user inputs from the importer
+   bool validDataset = false;
+   if (mpImporter != NULL)
+   {
+      string errorMessage;
+      validDataset = mpImporter->validate(pDescriptor, errorMessage);
+      if (!errorMessage.empty())
+      {
+         validationMessage = QString::fromStdString(errorMessage);
+      }
+   }
+
+   // Update the validation icon for the dataset
+   map<ImportDescriptor*, QTreeWidgetItem*>::iterator iter;
+   if (pDescriptor == mpEditDescriptor)
+   {
+      iter = mDatasets.find(mpCurrentDataset);
+   }
+   else
+   {
+      for (iter = mDatasets.begin(); iter != mDatasets.end(); ++iter)
+      {
+         ImportDescriptor* pImportDescriptor = iter->first;
+         if (pImportDescriptor != NULL)
+         {
+            if (pImportDescriptor->getDataDescriptor() == pDescriptor)
+            {
+               break;
+            }
+         }
+      }
+   }
+
+   if (iter != mDatasets.end())
+   {
+      QTreeWidgetItem* pItem = iter->second;
+      if (pItem != NULL)
+      {
+         disconnect(mpDatasetTree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
+            SLOT(datasetItemChanged(QTreeWidgetItem*)));
+
+         Icons* pIcons = Icons::instance();
+         VERIFY(pIcons != NULL);
+
+         if (validDataset == true)
+         {
+            pItem->setIcon(0, QIcon(pIcons->mOk));
+         }
+         else
+         {
+            pItem->setIcon(0, QIcon(pIcons->mCritical));
+         }
+
+         pItem->setData(0, Qt::UserRole, QVariant(validDataset));
+
+         VERIFYNR(connect(mpDatasetTree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
+            SLOT(datasetItemChanged(QTreeWidgetItem*))));
+      }
+   }
+
+   return validDataset;
+}
+
+void ImportOptionsDlg::selectCurrentDatasetItem()
+{
+   if (mpCurrentDataset == NULL)
+   {
+      return;
+   }
+
+   map<ImportDescriptor*, QTreeWidgetItem*>::iterator iter = mDatasets.find(mpCurrentDataset);
+   if (iter != mDatasets.end())
+   {
+      QTreeWidgetItem* pItem = iter->second;
+      if (pItem != NULL)
+      {
+         disconnect(mpDatasetTree, SIGNAL(itemSelectionChanged()), this, SLOT(updateEditDataset()));
+         mpDatasetTree->setCurrentItem(pItem);     // Also selects the item
+         VERIFYNR(connect(mpDatasetTree, SIGNAL(itemSelectionChanged()), this, SLOT(updateEditDataset())));
+      }
+   }
+}
+
+void ImportOptionsDlg::validateEditDataset()
+{
+   QString validationMessage;
+   bool validDataset = validateDataset(mpEditDescriptor, validationMessage);
+
+   // Enable/disable the OK button
+   bool enableButton = true;
+   bool noDatasets = true;
+   for (map<ImportDescriptor*, QTreeWidgetItem*>::iterator iter = mDatasets.begin(); iter != mDatasets.end(); ++iter)
+   {
+      // Check that there is at least one imported data set and that all imported data sets are valid
+      QTreeWidgetItem* pItem = iter->second;
+      if (pItem != NULL && pItem->checkState(0) == Qt::Checked)
+      {
+         QVariant validValue = pItem->data(0, Qt::UserRole);
+         if (validValue.toBool() == false)
+         {
+            if (validationMessage.isEmpty() == true)
+            {
+               validationMessage = "At least one data set selected for import is invalid.";
+               validDataset = false;
+            }
+
+            enableButton = false;
+            break;
+         }
+
+         noDatasets = false;
+      }
+   }
+
+   if ((enableButton == true) && (noDatasets == true))
+   {
+      validationMessage = "No data sets are selected for import.";
+      validDataset = false;
+      enableButton = false;
+   }
+
+   // Check if the user has no imported data sets for a file and display a message box if necessary
+   if ((enableButton == true) && (mAllowDeselectedFiles == false))
+   {
+      for (int i = 0; i < mpDatasetTree->topLevelItemCount(); ++i)
+      {
+         QTreeWidgetItem* pFileItem = mpDatasetTree->topLevelItem(i);
+         if ((pFileItem != NULL) && (pFileItem->checkState(0) == Qt::Unchecked))
+         {
+            if (validationMessage.isEmpty() == false)
+            {
+               validationMessage += "\n\n";
+            }
+
+            validationMessage += "At least one file does not have any data sets that will be imported.";
+            validDataset = false;
+            enableButton = false;
+            break;
+         }
+      }
+   }
+
+   mpOkButton->setEnabled(enableButton);
+
+   // Update the validation text label
+   QPalette validationPalette = mpValidationLabel->palette();
+   QColor validationColor = (validDataset ? Qt::blue : Qt::red);
+   validationPalette.setColor(QPalette::WindowText, validationColor);
+   mpValidationLabel->setPalette(validationPalette);
+
+   mpValidationLabel->setText(validationMessage);
+}
+
+void ImportOptionsDlg::enforceSelections(QTreeWidgetItem* pItem)
+{
+   if (pItem == NULL)
+   {
+      return;
+   }
+
+   // Update the children
+   Qt::CheckState itemCheck = pItem->checkState(0);
+   if (itemCheck != Qt::PartiallyChecked)
+   {
+      for (int i = 0; i < pItem->childCount(); ++i)
+      {
+         QTreeWidgetItem* pChild = pItem->child(i);
+         if (pChild != NULL)
+         {
+            pChild->setCheckState(0, itemCheck);
+         }
+      }
+   }
+
+   // Update the parent
+   QTreeWidgetItem* pParent = pItem->parent();
+   if (pParent != NULL)
+   {
+      for (int i = 0; i < pParent->childCount(); ++i)
+      {
+         QTreeWidgetItem* pSibling = pParent->child(i);
+         if (pSibling != NULL)
+         {
+            Qt::CheckState currentCheck = pSibling->checkState(0);
+            if (currentCheck != itemCheck)
+            {
+               itemCheck = Qt::PartiallyChecked;
+               break;
+            }
+         }
+      }
+
+      pParent->setCheckState(0, itemCheck);
+   }
 }
 
 void ImportOptionsDlg::removeImporterPage()
@@ -603,19 +888,43 @@ void ImportOptionsDlg::removeImporterPage()
    mpImporterPage = NULL;
 }
 
-void ImportOptionsDlg::updateCurrentDataset()
+void ImportOptionsDlg::datasetItemChanged(QTreeWidgetItem* pItem)
+{
+   if (pItem == NULL)
+   {
+      return;
+   }
+
+   VERIFYNR(disconnect(mpDatasetTree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
+      SLOT(datasetItemChanged(QTreeWidgetItem*))));
+
+   enforceSelections(pItem);
+   validateEditDataset();
+
+   VERIFYNR(connect(mpDatasetTree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
+      SLOT(datasetItemChanged(QTreeWidgetItem*))));
+}
+
+void ImportOptionsDlg::updateEditDataset()
 {
    // Get the current dataset in the list widget
    QList<QTreeWidgetItem*> selectedItems = mpDatasetTree->selectedItems();
+   if (selectedItems.empty() == true)
+   {
+      // User selected a file item, which clears the selection, so reset the current item to the dataset
+      selectCurrentDatasetItem();
+      return;
+   }
+
    VERIFYNRV(selectedItems.count() == 1);
 
    QTreeWidgetItem* pItem = selectedItems.front();
    VERIFYNRV(pItem != NULL);
 
    ImportDescriptor* pDataset = NULL;
-
-   map<ImportDescriptor*, QTreeWidgetItem*>::const_iterator iter;
-   for (iter = mDatasets.begin(); iter != mDatasets.end(); ++iter)
+   for (map<ImportDescriptor*, QTreeWidgetItem*>::const_iterator iter = mDatasets.begin();
+      iter != mDatasets.end();
+      ++iter)
    {
       QTreeWidgetItem* pCurrentItem = iter->second;
       if (pCurrentItem == pItem)
@@ -631,26 +940,44 @@ void ImportOptionsDlg::updateCurrentDataset()
 
 void ImportOptionsDlg::selectAllDatasets()
 {
+   VERIFYNR(disconnect(mpDatasetTree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
+      SLOT(datasetItemChanged(QTreeWidgetItem*))));
+
    for (map<ImportDescriptor*, QTreeWidgetItem*>::iterator iter = mDatasets.begin(); iter != mDatasets.end(); ++iter)
    {
       QTreeWidgetItem* pItem = iter->second;
       if (pItem != NULL)
       {
          pItem->setCheckState(0, Qt::Checked);
+         enforceSelections(pItem);
       }
    }
+
+   validateEditDataset();
+
+   VERIFYNR(connect(mpDatasetTree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
+      SLOT(datasetItemChanged(QTreeWidgetItem*))));
 }
 
 void ImportOptionsDlg::deselectAllDatasets()
 {
+   VERIFYNR(disconnect(mpDatasetTree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
+      SLOT(datasetItemChanged(QTreeWidgetItem*))));
+
    for (map<ImportDescriptor*, QTreeWidgetItem*>::iterator iter = mDatasets.begin(); iter != mDatasets.end(); ++iter)
    {
       QTreeWidgetItem* pItem = iter->second;
       if (pItem != NULL)
       {
          pItem->setCheckState(0, Qt::Unchecked);
+         enforceSelections(pItem);
       }
    }
+
+   validateEditDataset();
+
+   VERIFYNR(connect(mpDatasetTree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
+      SLOT(datasetItemChanged(QTreeWidgetItem*))));
 }
 
 void ImportOptionsDlg::generateDimensionVector(const QString& strValueName)
@@ -734,7 +1061,7 @@ void ImportOptionsDlg::updateDataRows(const vector<DimensionDescriptor>& rows)
    if (pDescriptor != NULL)
    {
       pDescriptor->setRows(rows);
-      validate();
+      validateEditDataset();
    }
 
    VERIFYNR(connect(mpDataPage, SIGNAL(modified()), this, SLOT(pagesModified())));
@@ -750,7 +1077,7 @@ void ImportOptionsDlg::updateDataColumns(const vector<DimensionDescriptor>& colu
    if (pDescriptor != NULL)
    {
       pDescriptor->setColumns(columns);
-      validate();
+      validateEditDataset();
    }
 
    VERIFYNR(connect(mpDataPage, SIGNAL(modified()), this, SLOT(pagesModified())));
@@ -766,7 +1093,7 @@ void ImportOptionsDlg::updateDataBands(const vector<DimensionDescriptor>& bands)
    if (pDescriptor != NULL)
    {
       pDescriptor->setBands(bands);
-      validate();
+      validateEditDataset();
    }
 
    VERIFYNR(connect(mpDataPage, SIGNAL(modified()), this, SLOT(pagesModified())));
@@ -788,7 +1115,7 @@ void ImportOptionsDlg::updateMetadata()
    }
 
    VERIFYNR(connect(mpMetadataPage, SIGNAL(modified()), this, SLOT(updateMetadata())));
-   validate();
+   validateEditDataset();
 }
 
 void ImportOptionsDlg::pagesModified()
@@ -822,58 +1149,7 @@ void ImportOptionsDlg::pagesModified()
    VERIFYNR(connect(mpDataPage, SIGNAL(modified()), this, SLOT(pagesModified())));
    VERIFYNR(connect(mpFilePage, SIGNAL(modified()), this, SLOT(pagesModified())));
 
-   validate();
-}
-
-void ImportOptionsDlg::validate()
-{
-   QString strValidation;
-   bool bError = true;
-
-   // Validate the user inputs from the importer
-   if ((mpEditDescriptor != NULL) && (mpImporter != NULL))
-   {
-      string errorMessage;
-
-      bool bSuccess = mpImporter->validate(mpEditDescriptor, errorMessage);
-      bError = !bSuccess;
-      if (!errorMessage.empty())
-      {
-         strValidation = QString::fromStdString(errorMessage);
-      }
-   }
-
-   // Validate that there is at least one imported data set
-   if (!bError)
-   {
-      bool bNoDatasets = true;
-      for (map<ImportDescriptor*, QTreeWidgetItem*>::iterator item = mDatasets.begin(); item != mDatasets.end(); ++item)
-      {
-         QTreeWidgetItem* pItem = item->second;
-         if (pItem != NULL && pItem->checkState(0) != Qt::Unchecked)
-         {
-            bNoDatasets = false;
-            break;
-         }
-      }
-
-      if (bNoDatasets == true)
-      {
-         strValidation = "There are no data sets selected for import.";
-         bError = true;
-      }
-   }
-
-   QPalette validationPalette = mpValidationLabel->palette();
-   QColor validationColor = (bError ? Qt::red : Qt::blue);
-   validationPalette.setColor(QPalette::WindowText, validationColor);
-   mpValidationLabel->setPalette(validationPalette);
-
-   // Update the validation text
-   mpValidationLabel->setText(strValidation);
-
-   // Enable/disable the OK button
-   mpOkButton->setEnabled(!bError);
+   validateEditDataset();
 }
 
 bool ImportOptionsDlg::applyChanges()
@@ -892,41 +1168,6 @@ bool ImportOptionsDlg::applyChanges()
    }
 
    return false;
-}
-
-void ImportOptionsDlg::enforceSelections(QTreeWidgetItem *pItem)
-{
-   if (pItem == NULL)
-   {
-      return;
-   }
-   if (pItem->checkState(0) == Qt::Unchecked)
-   {
-      queue<QTreeWidgetItem*> toVisit;
-      toVisit.push(pItem);
-      for (; !toVisit.empty(); toVisit.pop())
-      {
-         pItem = toVisit.front();
-         pItem->setCheckState(0, Qt::Unchecked);
-         for (int i = 0; i < pItem->childCount(); i++)
-         {
-            if (pItem->child(i) != NULL)
-            {
-               toVisit.push(pItem->child(i));
-            }
-         }
-      }
-   }
-   else
-   {
-      for (; pItem != NULL; pItem = pItem->parent())
-      {
-         if (pItem->checkState(0) == Qt::Unchecked)
-         {
-            pItem->setCheckState(0, Qt::PartiallyChecked);
-         }
-      }
-   }
 }
 
 void ImportOptionsDlg::updateConnections(bool bConnect)

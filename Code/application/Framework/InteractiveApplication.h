@@ -11,6 +11,7 @@
 #define INTERACTIVEAPPLICATION_H
 
 #include "Application.h"
+#include "EnumWrapper.h"
 
 #include <string>
 
@@ -24,6 +25,16 @@ public:
 
    void reportWarning(const std::string& warningMessage) const;
    void reportError(const std::string& errorMessage) const;
+
+private:
+   enum FileTypeEnum
+   {
+      WIZARD_FILES,
+      SESSION_FILE,
+      DATASET_FILES
+   };
+
+   typedef EnumWrapper<FileTypeEnum> FileType;
 };
 
 #endif

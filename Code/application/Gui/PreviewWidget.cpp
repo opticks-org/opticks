@@ -10,43 +10,80 @@
 #include <QtCore/QFileInfo>
 #include <QtGui/QApplication>
 #include <QtGui/QLayout>
-#include <QtGui/QPushButton>
 
-#include "PreviewWidget.h"
-#include "ChippingWidget.h"
 #include "AppVerify.h"
+#include "ChippingWidget.h"
 #include "FileDescriptor.h"
 #include "ImportDescriptor.h"
 #include "Importer.h"
 #include "PlugIn.h"
 #include "PlugInManagerServices.h"
+#include "PreviewWidget.h"
 #include "Progress.h"
 #include "RasterDataDescriptor.h"
 #include "Slot.h"
 #include "SpatialDataView.h"
 
-#include <string>
 using namespace std;
 
 PreviewWidget::PreviewWidget(QWidget* pParent) :
    QWidget(pParent),
    mpStack(NULL),
+   mpFileLabel(NULL),
+   mpPreviousFileButton(NULL),
+   mpNextFileButton(NULL),
+   mpFileStack(NULL),
+   mpDatasetLabel(NULL),
+   mpPreviousDatasetButton(NULL),
+   mpNextDatasetButton(NULL),
+   mpDatasetStack(NULL),
    mpProgressLabel(NULL),
    mpProgressBar(NULL),
    mpPreview(NULL),
-   mpDatasetLabel(NULL),
-   mpAllDatasetsLabel(NULL),
-   mpPreviewDatasetsLabel(NULL),
-   mpBackButton(NULL),
-   mpNextButton(NULL),
    mpImporterWidget(NULL),
    mpImporter(NULL),
-   mpActiveDataset(NULL)
+   mpCurrentDataset(NULL)
 {
    // 'No preview available' widget
-   QLabel* pNoPreviewLabel = new QLabel("No preview is available.");
+   QLabel* pNoPreviewLabel = new QLabel("No preview available.");
    pNoPreviewLabel->setAlignment(Qt::AlignCenter);
    pNoPreviewLabel->setWordWrap(true);
+
+   // File widgets
+   QWidget* pFileWidget = new QWidget();
+   mpFileLabel = new QLabel("<b>File:</b>", pFileWidget);
+
+   mpPreviousFileButton = new QToolButton(pFileWidget);
+   mpPreviousFileButton->setArrowType(Qt::LeftArrow);
+   mpPreviousFileButton->setFixedSize(15, 15);
+   mpPreviousFileButton->setEnabled(false);
+
+   mpNextFileButton = new QToolButton(pFileWidget);
+   mpNextFileButton->setArrowType(Qt::RightArrow);
+   mpNextFileButton->setFixedSize(15, 15);
+   mpNextFileButton->setEnabled(false);
+
+   QLabel* pNoFilePreviewLabel = new QLabel("No preview available for this file.");
+   pNoFilePreviewLabel->setAlignment(Qt::AlignCenter);
+   pNoFilePreviewLabel->setWordWrap(true);
+
+   // Data set widgets
+   QWidget* pDatasetWidget = new QWidget();
+   mpDatasetLabel = new QLabel("<b>Data Set:</b>", pDatasetWidget);
+
+   mpPreviousDatasetButton = new QToolButton(pDatasetWidget);
+   mpPreviousDatasetButton->setArrowType(Qt::LeftArrow);
+   mpPreviousDatasetButton->setFixedSize(15, 15);
+   mpPreviousDatasetButton->setEnabled(false);
+
+   mpNextDatasetButton = new QToolButton(pDatasetWidget);
+   mpNextDatasetButton->setArrowType(Qt::RightArrow);
+   mpNextDatasetButton->setFixedSize(15, 15);
+   mpNextDatasetButton->setEnabled(false);
+
+   QLabel* pNoDatasetPreviewLabel = new QLabel("No preview available for this data set.");
+   pNoDatasetPreviewLabel->setAlignment(Qt::AlignCenter);
+   pNoDatasetPreviewLabel->setWordWrap(true);
 
    // Progress widget
    QFrame* pProgressBox = new QFrame();
@@ -64,40 +101,53 @@ PreviewWidget::PreviewWidget(QWidget* pParent) :
 
    // Preview widget
    mpPreview = new QWidget();
-   mpDatasetLabel = new QLabel(mpPreview);
-   mpAllDatasetsLabel = new QLabel(mpPreview);
-   mpPreviewDatasetsLabel = new QLabel(mpPreview);
-
-   mpBackButton = new QToolButton(mpPreview);
-   mpBackButton->setArrowType(Qt::LeftArrow);
-   mpBackButton->setFixedSize(14, 14);
-   mpBackButton->setEnabled(false);
-
-   mpNextButton = new QToolButton(mpPreview);
-   mpNextButton->setArrowType(Qt::RightArrow);
-   mpNextButton->setFixedSize(14, 14);
-   mpNextButton->setEnabled(false);
 
    QGridLayout* pPreviewGrid = new QGridLayout(mpPreview);
    pPreviewGrid->setMargin(0);
    pPreviewGrid->setSpacing(5);
-   pPreviewGrid->addWidget(mpDatasetLabel, 0, 0, 1, 3);
-   pPreviewGrid->addWidget(mpBackButton, 0, 3);
-   pPreviewGrid->addWidget(mpNextButton, 0, 4);
-   pPreviewGrid->addWidget(mpAllDatasetsLabel, 1, 0, Qt::AlignLeft);
-   pPreviewGrid->addWidget(mpPreviewDatasetsLabel, 1, 2, 1, 3, Qt::AlignRight);
-   pPreviewGrid->setRowStretch(2, 10);
-   pPreviewGrid->setColumnStretch(2, 10);
-   pPreviewGrid->setColumnMinimumWidth(1, 15);
+   pPreviewGrid->setRowStretch(0, 10);
+   pPreviewGrid->setColumnStretch(0, 10);
 
-   // Widget stack
+   // File widget stack
+   mpFileStack = new QStackedWidget(pFileWidget);
+   mpFileStack->addWidget(pNoFilePreviewLabel);
+   mpFileStack->addWidget(pDatasetWidget);
+   mpFileStack->setCurrentWidget(pNoFilePreviewLabel);
+
+   // Data set widget stack
+   mpDatasetStack = new QStackedWidget(pDatasetWidget);
+   mpDatasetStack->addWidget(pNoDatasetPreviewLabel);
+   mpDatasetStack->addWidget(pProgressBox);
+   mpDatasetStack->addWidget(mpPreview);
+   mpDatasetStack->setCurrentWidget(pNoDatasetPreviewLabel);
+
+   // Contents widget stack
    mpStack = new QStackedWidget(this);
    mpStack->addWidget(pNoPreviewLabel);
-   mpStack->addWidget(pProgressBox);
-   mpStack->addWidget(mpPreview);
+   mpStack->addWidget(pFileWidget);
    mpStack->setCurrentWidget(pNoPreviewLabel);
 
    // Layout
+   QGridLayout* pFileGrid = new QGridLayout(pFileWidget);
+   pFileGrid->setMargin(0);
+   pFileGrid->setSpacing(5);
+   pFileGrid->addWidget(mpFileLabel, 0, 0);
+   pFileGrid->addWidget(mpPreviousFileButton, 0, 1);
+   pFileGrid->addWidget(mpNextFileButton, 0, 2);
+   pFileGrid->addWidget(mpFileStack, 1, 0, 1, 3);
+   pFileGrid->setRowStretch(1, 10);
+   pFileGrid->setColumnStretch(0, 10);
+
+   QGridLayout* pDatasetGrid = new QGridLayout(pDatasetWidget);
+   pDatasetGrid->setMargin(0);
+   pDatasetGrid->setSpacing(5);
+   pDatasetGrid->addWidget(mpDatasetLabel, 0, 0);
+   pDatasetGrid->addWidget(mpPreviousDatasetButton, 0, 1);
+   pDatasetGrid->addWidget(mpNextDatasetButton, 0, 2);
+   pDatasetGrid->addWidget(mpDatasetStack, 1, 0, 1, 3);
+   pDatasetGrid->setRowStretch(1, 10);
+   pDatasetGrid->setColumnStretch(0, 10);
+
    QHBoxLayout* pLayout = new QHBoxLayout(this);
    pLayout->setMargin(0);
    pLayout->setSpacing(0);
@@ -108,13 +158,278 @@ PreviewWidget::PreviewWidget(QWidget* pParent) :
    setMinimumWidth(260);
 
    // Connections
-   VERIFYNR(connect(mpBackButton, SIGNAL(clicked()), this, SLOT(displayPreviousPreview())));
-   VERIFYNR(connect(mpNextButton, SIGNAL(clicked()), this, SLOT(displayNextPreview())));
+   VERIFYNR(connect(mpPreviousFileButton, SIGNAL(clicked()), this, SLOT(displayPreviousFile())));
+   VERIFYNR(connect(mpNextFileButton, SIGNAL(clicked()), this, SLOT(displayNextFile())));
+   VERIFYNR(connect(mpPreviousDatasetButton, SIGNAL(clicked()), this, SLOT(displayPreviousDataset())));
+   VERIFYNR(connect(mpNextDatasetButton, SIGNAL(clicked()), this, SLOT(displayNextDataset())));
 }
 
 PreviewWidget::~PreviewWidget()
 {
    destroyPreview();
+}
+
+void PreviewWidget::setImporter(Importer* pImporter)
+{
+   mpImporter = pImporter;
+}
+
+void PreviewWidget::setDatasets(const QMap<QString, vector<ImportDescriptor*> >& datasets)
+{
+   if (datasets == mDatasets)
+   {
+      return;
+   }
+
+   mDatasets = datasets;
+
+   // Enable the file buttons
+   unsigned int numFiles = datasets.size();
+   mpPreviousFileButton->setEnabled(numFiles > 1);
+   mpNextFileButton->setEnabled(numFiles > 1);
+
+   // Reset the preview if the current file is not in the map of new files
+   if ((mCurrentFile.isEmpty() == true) || (mDatasets.contains(mCurrentFile) == false))
+   {
+      QString filename;
+      if (mDatasets.empty() == false)
+      {
+         QMap<QString, vector<ImportDescriptor*> >::iterator iter = mDatasets.begin();
+         filename = iter.key();
+      }
+
+      setCurrentFile(filename);
+   }
+   else
+   {
+      // Set the preview to the first imported data set if the current data set is no longer in the map
+      QMap<QString, vector<ImportDescriptor*> >::iterator iter = mDatasets.find(mCurrentFile);
+      VERIFYNRV(iter != mDatasets.end());
+
+      vector<ImportDescriptor*> fileDatasets = iter.value();
+
+      vector<ImportDescriptor*>::iterator datasetIter =
+         std::find(fileDatasets.begin(), fileDatasets.end(), mpCurrentDataset);
+      if (datasetIter == fileDatasets.end())
+      {
+         QString filename = mCurrentFile;
+         mCurrentFile.clear();
+         setCurrentFile(filename);
+      }
+      else
+      {
+         // Update the file number
+         updateFileNumber();
+      }
+   }
+}
+
+void PreviewWidget::setCurrentFile(const QString& filename)
+{
+   // Always clear the current file even if the filename is the same as the current filename
+   // to ensure that the previous and next dataset buttons are enabled properly
+   mCurrentFile.clear();
+
+   // Activate the label indicating that no preview is available
+   mpStack->setCurrentIndex(0);
+
+   // Get a data set to activate
+   ImportDescriptor* pDataset = NULL;
+   if (filename.isEmpty() == false)
+   {
+      // Do not update the preview if the file does not exist in the map
+      QMap<QString, vector<ImportDescriptor*> >::iterator iter = mDatasets.find(filename);
+      if (iter != mDatasets.end())
+      {
+         mCurrentFile = filename;
+
+         // Activate the file widget
+         mpStack->setCurrentIndex(1);
+
+         // Update the file label
+         updateFileNumber();
+
+         // Activate the label indicating that no file preview is available
+         mpFileStack->setCurrentIndex(0);
+
+         // Update the preview with the first imported data set in the file
+         unsigned int numImportedDatasets = 0;
+
+         vector<ImportDescriptor*> fileDatasets = iter.value();
+         for (vector<ImportDescriptor*>::iterator datasetIter = fileDatasets.begin();
+            datasetIter != fileDatasets.end();
+            ++datasetIter)
+         {
+            ImportDescriptor* pCurrentDataset = *datasetIter;
+            if ((pCurrentDataset != NULL) && (pCurrentDataset->isImported() == true))
+            {
+               if (pDataset == NULL)
+               {
+                  pDataset = pCurrentDataset;
+               }
+
+               ++numImportedDatasets;
+
+               // Activate the data set widget
+               mpFileStack->setCurrentIndex(1);
+            }
+         }
+
+         // Enable the data set buttons
+         mpPreviousDatasetButton->setEnabled(numImportedDatasets > 1);
+         mpNextDatasetButton->setEnabled(numImportedDatasets > 1);
+      }
+   }
+
+   setCurrentDataset(pDataset);
+}
+
+QString PreviewWidget::getCurrentFile() const
+{
+   return mCurrentFile;
+}
+
+void PreviewWidget::setCurrentDataset(ImportDescriptor* pDataset)
+{
+   ImportDescriptor* pActiveDataset = getCurrentDataset();
+   if (pDataset == pActiveDataset)
+   {
+      return;
+   }
+
+   // Do nothing if the new current data set is not a data set in the current file
+   if (pDataset != NULL)
+   {
+      QMap<QString, vector<ImportDescriptor*> >::const_iterator iter = mDatasets.find(mCurrentFile);
+      if (iter != mDatasets.end())
+      {
+         vector<ImportDescriptor*> fileDatasets = iter.value();
+         if (std::find(fileDatasets.begin(), fileDatasets.end(), pDataset) == fileDatasets.end())
+         {
+            return;
+         }
+      }
+   }
+
+   mpCurrentDataset = pDataset;
+
+   // Delete the current preview
+   destroyPreview();
+
+   // Activate the label indicating that no data set preview is available
+   mpDatasetStack->setCurrentIndex(0);
+
+   // Check for no active data set
+   if (mpCurrentDataset == NULL)
+   {
+      emit currentDatasetChanged(mpCurrentDataset);
+      return;
+   }
+
+   // Only show the preview if the widget is visible or if the data set is imported
+   if ((isVisible() == false) || (mpCurrentDataset->isImported() == false))
+   {
+      if (pActiveDataset != NULL)
+      {
+         emit currentDatasetChanged(NULL);
+      }
+
+      return;
+   }
+
+   if (mpImporter != NULL)
+   {
+      Service<PlugInManagerServices> pManager;
+
+      Progress* pProgress = pManager->getProgress(dynamic_cast<PlugIn*>(mpImporter));
+      if (pProgress != NULL)
+      {
+         pProgress->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &PreviewWidget::progressUpdated));
+         pProgress->updateProgress("Getting preview...", 0, NORMAL);
+      }
+
+      // Activate the progress bar
+      mpDatasetStack->setCurrentIndex(1);
+
+      // Update the data set label
+      QMap<QString, vector<ImportDescriptor*> >::const_iterator iter = mDatasets.find(mCurrentFile);
+      VERIFYNRV(iter != mDatasets.end());
+
+      vector<ImportDescriptor*> fileDatasets = iter.value();
+
+      unsigned int iIndex = 0;
+      unsigned int numDatasets = fileDatasets.size();
+      for (iIndex = 0; iIndex < numDatasets; ++iIndex)
+      {
+         ImportDescriptor* pCurrentDataset = fileDatasets[iIndex];
+         if (pCurrentDataset == pDataset)
+         {
+            break;
+         }
+      }
+
+      VERIFYNRV(iIndex < numDatasets);
+
+      const DataDescriptor* pDescriptor = mpCurrentDataset->getDataDescriptor();
+      VERIFYNRV(pDescriptor != NULL);
+
+      mpDatasetLabel->setText("<b>Data Set (" + QString::number(iIndex + 1) + " of " +
+         QString::number(numDatasets) + "):</b>  " + QString::fromStdString(pDescriptor->getName()));
+
+      // Process events to erase the no preview available page
+      qApp->processEvents();
+
+      // Get the preview from the importer
+      mpImporterWidget = mpImporter->getPreview(pDescriptor, pProgress);
+      if (mpImporterWidget != NULL)
+      {
+         // Display the preview widget
+         SpatialDataView* pView = dynamic_cast<SpatialDataView*>(mpImporterWidget);
+         if (pView != NULL)
+         {
+            ChippingWidget* pChippingWidget = new ChippingWidget(pView, mpPreview);
+            VERIFYNRV(pChippingWidget != NULL);
+
+            VERIFYNR(connect(pChippingWidget, SIGNAL(chipChanged()), this, SLOT(updateCurrentDataset())));
+            mpImporterWidget = pChippingWidget;
+         }
+         else
+         {
+            mpImporterWidget->setParent(mpPreview);
+         }
+
+         QGridLayout* pGrid = dynamic_cast<QGridLayout*>(mpPreview->layout());
+         if (pGrid != NULL)
+         {
+            pGrid->addWidget(mpImporterWidget, 0, 0);
+         }
+
+         // Activate the preview widget
+         mpDatasetStack->setCurrentIndex(2);
+
+         // Notify of changes
+         emit currentDatasetChanged(mpCurrentDataset);
+      }
+      else
+      {
+         mpDatasetStack->setCurrentIndex(0);
+
+         if (pActiveDataset != NULL)
+         {
+            emit currentDatasetChanged(NULL);
+         }
+      }
+
+      if (pProgress != NULL)
+      {
+         pProgress->detach(SIGNAL_NAME(Subject, Modified), Slot(this, &PreviewWidget::progressUpdated));
+      }
+   }
+}
+
+ImportDescriptor* PreviewWidget::getCurrentDataset() const
+{
+   return mpCurrentDataset;
 }
 
 void PreviewWidget::progressUpdated(Subject &subject, const string &signal, const boost::any &data)
@@ -151,224 +466,61 @@ void PreviewWidget::progressUpdated(Subject &subject, const string &signal, cons
    }
 }
 
-void PreviewWidget::setImporter(Importer* pImporter)
+void PreviewWidget::displayPreviousFile()
 {
-   mpImporter = pImporter;
-}
-
-void PreviewWidget::setDatasets(const vector<ImportDescriptor*>& datasets)
-{
-   if (datasets != mDatasets)
-   {
-      mDatasets = datasets;
-
-      // Enable the buttons to cycle through the imported data sets
-      unsigned int numImportedDatasets = getNumImportedDatasets();
-      mpBackButton->setEnabled(numImportedDatasets > 1);
-      mpNextButton->setEnabled(numImportedDatasets > 1);
-
-      // Reset the active dataset
-      setActiveDataset(NULL);
-   }
-}
-
-void PreviewWidget::setActiveDataset(ImportDescriptor* pDataset)
-{
-   ImportDescriptor* pActiveDataset = getActiveDataset();
-   if (pDataset == pActiveDataset)
+   QMap<QString, vector<ImportDescriptor*> >::iterator iter = mDatasets.find(mCurrentFile);
+   if (iter == mDatasets.end())
    {
       return;
    }
 
-   mpActiveDataset = NULL;
-
-   // Delete the current preview
-   destroyPreview();
-
-   // Show label indicating no preview is available
-   mpStack->setCurrentIndex(0);
-
-   // Check for no active data set
-   if (pDataset == NULL)
+   if (iter == mDatasets.begin())
    {
-      emit activeDatasetChanged(NULL);
+      iter = --mDatasets.end();
+   }
+   else
+   {
+      --iter;
+   }
+
+   setCurrentFile(iter.key());
+}
+
+void PreviewWidget::displayNextFile()
+{
+   QMap<QString, vector<ImportDescriptor*> >::iterator iter = mDatasets.find(mCurrentFile);
+   if (iter == mDatasets.end())
+   {
       return;
    }
 
-   // Only show the preview if the widget is visible or if the data set is imported
-   RasterDataDescriptor* pDescriptor = dynamic_cast<RasterDataDescriptor*>(pDataset->getDataDescriptor());
-   if ((isVisible() == false) || (pDataset->isImported() == false) || (pDescriptor == NULL))
+   if (iter == --mDatasets.end())
    {
-      if (pActiveDataset != NULL)
-      {
-         emit activeDatasetChanged(NULL);
-      }
-
-      return;
+      iter = mDatasets.begin();
+   }
+   else
+   {
+      ++iter;
    }
 
-   if (mpImporter != NULL)
-   {
-      Service<PlugInManagerServices> pManager;
-
-      Progress* pProgress = pManager->getProgress(dynamic_cast<PlugIn*>(mpImporter));
-      if (pProgress != NULL)
-      {
-         pProgress->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &PreviewWidget::progressUpdated));
-         pProgress->updateProgress("Getting preview...", 0, NORMAL);
-      }
-
-      // Activate the progress bar
-      mpStack->setCurrentIndex(1);
-
-      // Proces events to erase the no preview available page
-      qApp->processEvents();
-
-      // Get the preview from the importer
-      mpImporterWidget = mpImporter->getPreview(pDescriptor, pProgress);
-      if (mpImporterWidget != NULL)
-      {
-         // Set the current data set location in the file
-         QString strDatasetLocation = "Data set location unavailable!";
-
-         const FileDescriptor* pFileDescriptor = pDescriptor->getFileDescriptor();
-         if (pFileDescriptor != NULL)
-         {
-            const string& datasetLocation = pFileDescriptor->getDatasetLocation();
-            if (datasetLocation.empty() == false)
-            {
-               strDatasetLocation = "Data set: " + QString::fromStdString(datasetLocation);
-            }
-            else
-            {
-               const string& filename = pFileDescriptor->getFilename();
-               if (filename.empty() == false)
-               {
-                  QFileInfo fileInfo(QString::fromStdString(filename));
-                  if ((fileInfo.isFile() == true) && (fileInfo.exists() == true))
-                  {
-                     strDatasetLocation = "Data set: " + fileInfo.fileName();
-                  }
-               }
-            }
-         }
-
-         mpDatasetLabel->setText(strDatasetLocation);
-
-         // Update the data set reference labels
-         unsigned int iIndex = 0;
-         unsigned int numDatasets = mDatasets.size();
-         for (iIndex = 0; iIndex < numDatasets; ++iIndex)
-         {
-            ImportDescriptor* pCurrentDataset = mDatasets[iIndex];
-            if (pCurrentDataset == pDataset)
-            {
-               break;
-            }
-         }
-
-         mpAllDatasetsLabel->setText("Data set in file: " + QString::number(iIndex + 1) + " of " +
-            QString::number(numDatasets));
-
-         numDatasets = getNumImportedDatasets();
-         iIndex = 0;
-         for (vector<ImportDescriptor*>::const_iterator iter = mDatasets.begin(); iter != mDatasets.end(); ++iter)
-         {
-            ImportDescriptor* pCurrentDataset = *iter;
-            if (pCurrentDataset != NULL)
-            {
-               if (pCurrentDataset == pDataset)
-               {
-                  break;
-               }
-
-               if (pCurrentDataset->isImported() == true)
-               {
-                  iIndex++;
-               }
-            }
-         }
-
-         mpPreviewDatasetsLabel->setText("Data set to import: " + QString::number(iIndex + 1) + " of " +
-            QString::number(numDatasets));
-
-         // Display the preview widget
-         SpatialDataView* pView = dynamic_cast<SpatialDataView*>(mpImporterWidget);
-         if (pView != NULL)
-         {
-            ChippingWidget* pChippingWidget = new ChippingWidget(pView, mpPreview);
-            VERIFYNRV(pChippingWidget != NULL);
-
-            VERIFYNR(connect(pChippingWidget, SIGNAL(chipChanged()), this, SLOT(updateActiveDataset())));
-            mpImporterWidget = pChippingWidget;
-         }
-         else
-         {
-            mpImporterWidget->setParent(mpPreview);
-         }
-
-         QGridLayout* pGrid = dynamic_cast<QGridLayout*>(mpPreview->layout());
-         if (pGrid != NULL)
-         {
-            pGrid->addWidget(mpImporterWidget, 2, 0, 1, 5);
-         }
-
-         // Activate the preview page in the widget stack
-         mpStack->setCurrentIndex(2);
-
-         mpActiveDataset = pDataset;
-         emit activeDatasetChanged(mpActiveDataset);
-      }
-      else
-      {
-         mpStack->setCurrentIndex(0);
-
-         if (pActiveDataset != NULL)
-         {
-            emit activeDatasetChanged(NULL);
-         }
-      }
-
-      if (pProgress != NULL)
-      {
-         pProgress->detach(SIGNAL_NAME(Subject, Modified), Slot(this, &PreviewWidget::progressUpdated));
-      }
-   }
+   setCurrentFile(iter.key());
 }
 
-ImportDescriptor* PreviewWidget::getActiveDataset() const
-{
-   return mpActiveDataset;
-}
-
-unsigned int PreviewWidget::getNumImportedDatasets() const
-{
-   unsigned int numImportedDatasets = 0;
-   for (vector<ImportDescriptor*>::const_iterator iter = mDatasets.begin(); iter != mDatasets.end(); ++iter)
-   {
-      ImportDescriptor* pDataset = *iter;
-      if (pDataset != NULL)
-      {
-         if (pDataset->isImported() == true)
-         {
-            numImportedDatasets++;
-         }
-      }
-   }
-
-   return numImportedDatasets;
-}
-
-void PreviewWidget::displayPreviousPreview()
+void PreviewWidget::displayPreviousDataset()
 {
    // Get the descriptor of the previous imported data set in the vector
-   ImportDescriptor* pActiveDataset = getActiveDataset();
+   ImportDescriptor* pCurrentDataset = getCurrentDataset();
    ImportDescriptor* pPreviousDataset = NULL;
    ImportDescriptor* pLastDataset = NULL;
-   bool bNextDataset = (pActiveDataset == NULL);
+   bool bNextDataset = (pCurrentDataset == NULL);
+
+   QMap<QString, vector<ImportDescriptor*> >::iterator fileIter = mDatasets.find(mCurrentFile);
+   VERIFYNRV(fileIter != mDatasets.end());
+
+   vector<ImportDescriptor*> fileDatasets = fileIter.value();
 
    vector<ImportDescriptor*>::reverse_iterator iter;
-   for (iter = mDatasets.rbegin(); iter != mDatasets.rend(); ++iter)
+   for (iter = fileDatasets.rbegin(); iter != fileDatasets.rend(); ++iter)
    {
       ImportDescriptor* pDataset = *iter;
       if ((pDataset != NULL) && (pDataset->isImported() == true))
@@ -384,7 +536,7 @@ void PreviewWidget::displayPreviousPreview()
             break;
          }
 
-         if (pDataset == pActiveDataset)
+         if (pDataset == pCurrentDataset)
          {
             bNextDataset = true;
          }
@@ -398,18 +550,22 @@ void PreviewWidget::displayPreviousPreview()
    }
 
    // Update the active data set
-   setActiveDataset(pPreviousDataset);
+   setCurrentDataset(pPreviousDataset);
 }
 
-void PreviewWidget::displayNextPreview()
+void PreviewWidget::displayNextDataset()
 {
    // Get the descriptor of the next imported data set in the vector
-   ImportDescriptor* pActiveDataset = getActiveDataset();
+   ImportDescriptor* pCurrentDataset = getCurrentDataset();
    ImportDescriptor* pNextDataset = NULL;
    ImportDescriptor* pFirstDataset = NULL;
-   bool bNextDataset = (pActiveDataset == NULL);
+   bool bNextDataset = (pCurrentDataset == NULL);
 
-   for (vector<ImportDescriptor*>::iterator iter = mDatasets.begin(); iter != mDatasets.end(); ++iter)
+   QMap<QString, vector<ImportDescriptor*> >::iterator fileIter = mDatasets.find(mCurrentFile);
+   VERIFYNRV(fileIter != mDatasets.end());
+
+   vector<ImportDescriptor*> fileDatasets = fileIter.value();
+   for (vector<ImportDescriptor*>::iterator iter = fileDatasets.begin(); iter != fileDatasets.end(); ++iter)
    {
       ImportDescriptor* pDataset = *iter;
       if ((pDataset != NULL) && (pDataset->isImported() == true))
@@ -425,7 +581,7 @@ void PreviewWidget::displayNextPreview()
             break;
          }
 
-         if (pDataset == pActiveDataset)
+         if (pDataset == pCurrentDataset)
          {
             bNextDataset = true;
          }
@@ -439,7 +595,7 @@ void PreviewWidget::displayNextPreview()
    }
 
    // Update the active data set
-   setActiveDataset(pNextDataset);
+   setCurrentDataset(pNextDataset);
 }
 
 void PreviewWidget::destroyPreview()
@@ -449,6 +605,40 @@ void PreviewWidget::destroyPreview()
    {
       delete mpImporterWidget;
       mpImporterWidget = NULL;
+   }
+}
+
+void PreviewWidget::updateFileNumber()
+{
+   if (mCurrentFile.isEmpty() == true)
+   {
+      return;
+   }
+
+   // Update the file label
+   QMap<QString, vector<ImportDescriptor*> >::iterator iter;
+   unsigned int i = 1;
+
+   for (iter = mDatasets.begin(); iter != mDatasets.end(); ++iter, ++i)
+   {
+      if (iter.key() == mCurrentFile)
+      {
+         break;
+      }
+   }
+
+   if (iter != mDatasets.end())
+   {
+      QString baseFilename = mCurrentFile;
+
+      QFileInfo fileInfo(baseFilename);
+      if ((fileInfo.isFile() == true) && (fileInfo.exists() == true))
+      {
+         baseFilename = fileInfo.fileName();
+      }
+
+      mpFileLabel->setText("<b>File (" + QString::number(i) + " of " + QString::number(mDatasets.size()) +
+         "):</b>  " + baseFilename);
    }
 }
 
@@ -464,7 +654,7 @@ public:
    }
 };
 
-void PreviewWidget::updateActiveDataset()
+void PreviewWidget::updateCurrentDataset()
 {
    ChippingWidget* pChippingWidget = dynamic_cast<ChippingWidget*>(mpImporterWidget);
    if (pChippingWidget == NULL)
@@ -472,7 +662,7 @@ void PreviewWidget::updateActiveDataset()
       return;
    }
 
-   ImportDescriptor* pActiveDataset = getActiveDataset();
+   ImportDescriptor* pActiveDataset = getCurrentDataset();
    if (pActiveDataset != NULL)
    {
       RasterDataDescriptor* pDescriptor = dynamic_cast<RasterDataDescriptor*>(pActiveDataset->getDataDescriptor());

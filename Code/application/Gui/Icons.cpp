@@ -739,6 +739,12 @@ Icons::Icons()
    mGcpBlank = QPixmap(IconImages::GcpBlankIcon);
    mGcpBlank.setMask(mGcpBlank.createMaskFromColor(Qt::white));
 
+   mOk = QPixmap(IconImages::OkIcon);
+   mOk.setMask(mOk.createHeuristicMask());
+
+   mCritical = QPixmap(IconImages::CriticalIcon);
+   mCritical.setMask(mCritical.createHeuristicMask());
+
    // Layers
    mRasterLayer = QPixmap(IconImages::RasterLayerIcon);
 

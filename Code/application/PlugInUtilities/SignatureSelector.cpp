@@ -359,67 +359,6 @@ int SignatureSelector::getNumSelectedSignatures() const
    return selectedItems.count();
 }
 
-vector<Signature*> SignatureSelector::loadSignatures(const QStringList& sigFilenames, Progress* pProgress)
-{
-   vector<Signature*> signatures;
-
-   int iFiles = 0;
-   iFiles = sigFilenames.count();
-   if (iFiles > 0)
-   {
-      if (pProgress != NULL)
-      {
-         pProgress->updateProgress("Loading signatures...", 0, NORMAL);
-      }
-
-      for (int i = 0; i < iFiles; i++)
-      {
-         QString strFilename = sigFilenames[i];
-         if (strFilename.isEmpty() == true)
-         {
-            continue;
-         }
-
-         ImporterResource importer("Auto Importer", strFilename.toStdString(), pProgress);
-
-         bool bSuccess = importer->execute();
-         if (bSuccess == true)
-         {
-            vector<DataElement*> currentSignatures = importer->getImportedElements();
-
-            vector<DataElement*>::iterator iter;
-            for (iter = currentSignatures.begin(); iter != currentSignatures.end(); ++iter)
-            {
-               Signature* pSignature = dynamic_cast<Signature*>(*iter);
-               if (pSignature != NULL)
-               {
-                  signatures.push_back(pSignature);
-               }
-            }
-         }
-         else if (pProgress != NULL)
-         {
-            string message = "Could not load the signature from the file:\n";
-            message += strFilename.toStdString();
-
-            pProgress->updateProgress(message, i * 100 / iFiles, WARNING);
-         }
-
-         if (pProgress != NULL)
-         {
-            pProgress->updateProgress("Loading signatures...", i * 100 / iFiles, NORMAL);
-         }
-      }
-
-      if (pProgress != NULL)
-      {
-         pProgress->updateProgress("Loading signatures complete!", 100, NORMAL);
-      }
-   }
-
-   return signatures;
-}
-
 QTreeWidgetItem* SignatureSelector::addSignatureItem(Signature* pSignature, QTreeWidgetItem* pParentItem)
 {
    if (pSignature == NULL)
@@ -958,7 +897,7 @@ void SignatureSelector::searchDirectories()
 
 void SignatureSelector::loadSignatures()
 {
-   QStringList loadList;
+   vector<string> filesToLoad;
    int iNumSelected = 0;
 
    QList<QListWidgetItem*> selectedItems = mpFilesList->selectedItems();
@@ -990,13 +929,13 @@ void SignatureSelector::loadSignatures()
 
             if (bLoad == true)
             {
-               loadList.append(strFilename);
+               filesToLoad.push_back(currentFilename);
             }
          }
       }
    }
 
-   if (loadList.empty() == true)
+   if (filesToLoad.empty() == true)
    {
       if (iNumSelected == 0)
       {
@@ -1010,8 +949,11 @@ void SignatureSelector::loadSignatures()
       return;
    }
 
-   loadSignatures(loadList, mpProgress);
-   updateSignatureList();
+   ImporterResource importer("Auto Importer", filesToLoad, mpProgress);
+   if (importer->execute() == true)
+   {
+      updateSignatureList();
+   }
 }
 
 void SignatureSelector::customButtonClicked()

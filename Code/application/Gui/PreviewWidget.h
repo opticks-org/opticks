@@ -10,6 +10,8 @@
 #ifndef PREVIEWWIDGET_H
 #define PREVIEWWIDGET_H
 
+#include <QtCore/QMap>
+#include <QtCore/QString>
 #include <QtGui/QLabel>
 #include <QtGui/QProgressBar>
 #include <QtGui/QStackedWidget>
@@ -32,38 +34,49 @@ public:
    ~PreviewWidget();
 
    void setImporter(Importer* pImporter);
-   void setDatasets(const std::vector<ImportDescriptor*>& datasets);
-   void setActiveDataset(ImportDescriptor* pDataset);
-   ImportDescriptor* getActiveDataset() const;
+   void setDatasets(const QMap<QString, std::vector<ImportDescriptor*> >& datasets);
+   void setCurrentFile(const QString& filename);
+   QString getCurrentFile() const;
+   void setCurrentDataset(ImportDescriptor* pDataset);
+   ImportDescriptor* getCurrentDataset() const;
 
 signals:
-   void activeDatasetChanged(ImportDescriptor* pDataset);
+   void currentDatasetChanged(ImportDescriptor* pDataset);
 
 protected:
    void progressUpdated(Subject& subject, const std::string& signal, const boost::any& data);
-   unsigned int getNumImportedDatasets() const;
 
 protected slots:
-   void displayPreviousPreview();
-   void displayNextPreview();
+   void displayPreviousFile();
+   void displayNextFile();
+   void displayPreviousDataset();
+   void displayNextDataset();
    void destroyPreview();
-   void updateActiveDataset();
+   void updateFileNumber();
+   void updateCurrentDataset();
 
 private:
    QStackedWidget* mpStack;
+
+   QLabel* mpFileLabel;
+   QToolButton* mpPreviousFileButton;
+   QToolButton* mpNextFileButton;
+   QStackedWidget* mpFileStack;
+
+   QLabel* mpDatasetLabel;
+   QToolButton* mpPreviousDatasetButton;
+   QToolButton* mpNextDatasetButton;
+   QStackedWidget* mpDatasetStack;
+
    QLabel* mpProgressLabel;
    QProgressBar* mpProgressBar;
    QWidget* mpPreview;
-   QLabel* mpDatasetLabel;
-   QLabel* mpAllDatasetsLabel;
-   QLabel* mpPreviewDatasetsLabel;
-   QToolButton* mpBackButton;
-   QToolButton* mpNextButton;
    QWidget* mpImporterWidget;
 
    Importer* mpImporter;
-   std::vector<ImportDescriptor*> mDatasets;
-   ImportDescriptor* mpActiveDataset;
+   QMap<QString, std::vector<ImportDescriptor*> > mDatasets;
+   QString mCurrentFile;
+   ImportDescriptor* mpCurrentDataset;
 };
 
 #endif

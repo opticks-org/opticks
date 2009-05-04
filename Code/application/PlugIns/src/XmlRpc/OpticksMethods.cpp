@@ -884,7 +884,6 @@ XmlRpcParam* Open::operator()(const XmlRpcParams& params)
       return NULL;
    }
    QString errors;
-   bool modified = false;
    bool cubePresent = false;
    std::vector<ImportDescriptor*> descriptors = pImporter->getImportDescriptors();
    for (std::vector<ImportDescriptor*>::iterator descriptor = descriptors.begin();
@@ -899,7 +898,6 @@ XmlRpcParam* Open::operator()(const XmlRpcParams& params)
          if (location.isValid() && (*descriptor)->getDataDescriptor()->getProcessingLocation() != location)
          {
             (*descriptor)->getDataDescriptor()->setProcessingLocation(location);
-            modified = true;
          }
          std::string errorMessage;
          if (!pImp->validate((*descriptor)->getDataDescriptor(), errorMessage) && !errorMessage.empty())
@@ -911,10 +909,6 @@ XmlRpcParam* Open::operator()(const XmlRpcParams& params)
             errors += QString::fromStdString(errorMessage);
          }
       }
-   }
-   if (modified)
-   {
-      pImporter->setImportDescriptors(descriptors);
    }
    if (!cubePresent)
    {

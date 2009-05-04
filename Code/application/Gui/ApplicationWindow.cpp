@@ -78,6 +78,7 @@
 #include "HistogramWindowAdapter.h"
 #include "Icons.h"
 #include "ImportDescriptor.h"
+#include "Importer.h"
 #include "InstallerServices.h"
 #include "InstallWizard.h"
 #include "LatLonLayer.h"
@@ -1951,36 +1952,92 @@ void ApplicationWindow::fileMenuActivated(QAction* pAction)
    }
    else
    {
-      // Copy the import descriptors to set into the importer resource since the resource takes ownership of them
+      // Set the import descriptors to load into the importer resource from the MRU file
       vector<ImportDescriptor*> resourceDescriptors;
       Service<ModelServices> pModel;
 
-      vector<ImportDescriptor*>::iterator iter;
-      for (iter = mruFile.mDescriptors.begin(); iter != mruFile.mDescriptors.end(); ++iter)
+      Qt::KeyboardModifiers modifiers = QApplication::keyboardModifiers();
+      if (modifiers & Qt::ShiftModifier)
       {
-         ImportDescriptor* pImportDescriptor = *iter;
-         if (pImportDescriptor != NULL)
+         // The import options dialog will be displayed so show all datasets in the file to the user, replacing
+         // the appropriate import descriptors from the importer with the descriptors from the MRU file
+         Importer* pImporter = dynamic_cast<Importer*>(importer->getPlugIn());
+         VERIFYNRV(pImporter != NULL);
+
+         resourceDescriptors = pImporter->getImportDescriptors(mruFile.mName);
+
+         vector<ImportDescriptor*>::iterator importerIter;
+         for (importerIter = resourceDescriptors.begin(); importerIter != resourceDescriptors.end(); ++importerIter)
          {
-            DataDescriptor* pDescriptor = pImportDescriptor->getDataDescriptor();
-            if (pDescriptor != NULL)
+            if (*importerIter != NULL)
             {
-               DataDescriptor* pResourceDescriptor = pDescriptor->copy();
-               if (pResourceDescriptor != NULL)
+               bool bImported = false;
+
+               vector<ImportDescriptor*>::iterator mruIter;
+               for (mruIter = mruFile.mDescriptors.begin(); mruIter != mruFile.mDescriptors.end(); ++mruIter)
                {
-                  ImportDescriptor* pResourceImportDescriptor =
-                     pModel->createImportDescriptor(pResourceDescriptor, pImportDescriptor->isImported());
-                  if (pResourceImportDescriptor != NULL)
+                  if (*mruIter != NULL)
                   {
-                     resourceDescriptors.push_back(pResourceImportDescriptor);
+                     DataDescriptor* pImporterDescriptor = (*importerIter)->getDataDescriptor();
+                     DataDescriptor* pMruDescriptor = (*mruIter)->getDataDescriptor();
+                     if ((pImporterDescriptor != NULL) && (pMruDescriptor != NULL))
+                     {
+                        if ((pImporterDescriptor->getName() == pMruDescriptor->getName()) &&
+                           (pImporterDescriptor->getType() == pMruDescriptor->getType()))
+                        {
+                           // Copy the MRU file data descriptor into the importer resource descriptors
+                           // since the resource takes ownership
+                           DataDescriptor* pNewResourceDataDescriptor = pMruDescriptor->copy();
+                           VERIFYNRV(pNewResourceDataDescriptor != NULL);
+
+                           // Set the MRU descriptor into the import descriptor obtained from the importer,
+                           // which destroys the data descriptor obtained from the importer
+                           (*importerIter)->setDataDescriptor(pNewResourceDataDescriptor);
+
+                           // Import this data set
+                           bImported = true;
+                           break;
+                        }
+                     }
+                  }
+               }
+
+               (*importerIter)->setImported(bImported);
+            }
+         }
+      }
+      else
+      {
+         // Copy the MRU file import descriptors into the resource since the resource takes ownership of them
+         vector<ImportDescriptor*>::iterator iter;
+         for (iter = mruFile.mDescriptors.begin(); iter != mruFile.mDescriptors.end(); ++iter)
+         {
+            ImportDescriptor* pImportDescriptor = *iter;
+            if (pImportDescriptor != NULL)
+            {
+               DataDescriptor* pDescriptor = pImportDescriptor->getDataDescriptor();
+               if (pDescriptor != NULL)
+               {
+                  DataDescriptor* pResourceDescriptor = pDescriptor->copy();
+                  if (pResourceDescriptor != NULL)
+                  {
+                     ImportDescriptor* pResourceImportDescriptor =
+                        pModel->createImportDescriptor(pResourceDescriptor, pImportDescriptor->isImported());
+                     if (pResourceImportDescriptor != NULL)
+                     {
+                        resourceDescriptors.push_back(pResourceImportDescriptor);
+                     }
                   }
                }
             }
          }
       }
 
-      importer->setImportDescriptors(resourceDescriptors);
-      importer->setEditType(QApplication::keyboardModifiers() == Qt::ShiftModifier ? ImportAgent::ALWAYS_EDIT :
-         ImportAgent::AS_NEEDED_EDIT);
+      map<string, vector<ImportDescriptor*> > resourceDatasets;
+      resourceDatasets[mruFile.mName] = resourceDescriptors;
+
+      importer->setDatasets(resourceDatasets);
+      importer->setEditType(modifiers & Qt::ShiftModifier ? ImportAgent::ALWAYS_EDIT : ImportAgent::AS_NEEDED_EDIT);
    }
 
    // Import the MRU file
@@ -5774,17 +5831,16 @@ bool ApplicationWindow::deserialize(SessionItemDeserializer &deserializer)
 
 void ApplicationWindow::importDroppedFiles()
 {
-   bool errorContinue = true;
-   bool displayContinueMessage = true;
+   // Separate the extension files from the other files
    QList<Aeb*> extensions;
    AebListResource extensionRes;
-   ProgressResource pProgress("Import files...");
-   vector<string>::iterator it;
-   for (it=mDroppedFilesList.begin(); it!=mDroppedFilesList.end(); ++it)
+   ProgressResource pProgress("Importing files...");
+   vector<string> droppedDataFiles;
+   for (vector<string>::iterator it = mDroppedFilesList.begin(); it != mDroppedFilesList.end(); ++it)
    {
       if ((*it).empty() == false)
       {
-         if(QFileInfo(QString::fromStdString(*it)).suffix() == "aeb")
+         if (QFileInfo(QString::fromStdString(*it)).suffix() == "aeb")
          {
             extensionRes.push_back(new Aeb());
             AebIo deserializer(*extensionRes.back());
@@ -5802,56 +5858,32 @@ void ApplicationWindow::importDroppedFiles()
             }
             continue;
          }
-         ImporterResource importer("Auto Importer", *it, pProgress.get(), false);
-         importer->setEditType(mDroppedFilesEditType);
-         importer->updateMruFileList(true);
 
-         if (!importer->execute())
-         {
-            if ((mDroppedFilesEditType != ImportAgent::NEVER_EDIT) && (it != mDroppedFilesList.end()-1) &&
-               (displayContinueMessage == true))
-            {
-               int continueButton = QMessageBox::question(this, "Import File(s)",
-                  "The " + QString::fromStdString(*it) + " file could not load.  "
-                  "Do you want to continue importing the remaining files?",
-                  QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No);
-               if (continueButton == QMessageBox::No)
-               {
-                  errorContinue = false;
-               }
-               else if (continueButton == QMessageBox::YesToAll)
-               {
-                  displayContinueMessage = false;
-               }
-            }
-
-            if (errorContinue == false)
-            {
-               return;
-            }
-
-            vector<DataElement*> importedDatasets = importer->getImportedElements();
-            if ((importedDatasets.empty() == true) && (pProgress.get() != NULL))
-            {
-               string msg = "Unable to import " + *it + ".\n";
-               pProgress->updateProgress(msg, 0, WARNING);
-            }
-         }
+         droppedDataFiles.push_back(*it);
       }
    }
 
+   // Import the data files
+   if (droppedDataFiles.empty() == false)
+   {
+      ImporterResource importer("Auto Importer", droppedDataFiles, pProgress.get(), false);
+      importer->setEditType(mDroppedFilesEditType);
+      importer->updateMruFileList(true);
 
-   if(!extensions.empty())
+      if ((importer->execute() == true) && (pProgress.get() != NULL))
+      {
+         pProgress->updateProgress("Finished importing", 100, NORMAL);
+      }
+   }
+
+   // Load the extensions
+   if (!extensions.empty())
    {
       InstallWizard wiz(extensions, pProgress.get(), this);
       wiz.exec();
    }
 
-   if (pProgress.get() != NULL)
-   {
-      pProgress->updateProgress("Finished importing", 100, NORMAL);
-   }
-
+   // Clear the dropped files list
    mDroppedFilesList.clear();
 }
 

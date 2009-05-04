@@ -33,8 +33,34 @@
 #include "PlugInManagerServices.h"
 #include "Progress.h"
 
+#include <algorithm>
+#include <map>
 #include <queue>
 using namespace std;
+
+namespace
+{
+   struct ElementDepthComparator : less<vector<string>::size_type>
+   {
+      bool operator()(ImportDescriptor* pImportDescriptor1, ImportDescriptor* pImportDescriptor2)
+      {
+         if (pImportDescriptor1 == NULL || pImportDescriptor2 == NULL)
+         {
+            return false;
+         }
+
+         DataDescriptor* pDataDescriptor1 = pImportDescriptor1->getDataDescriptor();
+         DataDescriptor* pDataDescriptor2 = pImportDescriptor2->getDataDescriptor();
+         if (pDataDescriptor1 == NULL || pDataDescriptor2 == NULL)
+         {
+            return false;
+         }
+
+         return less::operator()(pDataDescriptor1->getParentDesignator().size(),
+            pDataDescriptor2->getParentDesignator().size());
+      }
+   };
+};
 
 void ImportAgentImp::instantiate(Progress* pProgress, bool batch)
 {
@@ -71,8 +97,8 @@ void ImportAgentImp::instantiate(const string& importerName, const string& filen
    setFilename(filename);
 }
 
-void ImportAgentImp::instantiate(const string& importerName, const vector<ImportDescriptor*>& descriptors,
-                                 Progress* pProgress, bool batch)
+void ImportAgentImp::instantiate(const string& importerName, const vector<string>& filenames, Progress* pProgress,
+                                 bool batch)
 {
    if (getInstantiated())
    {
@@ -81,10 +107,24 @@ void ImportAgentImp::instantiate(const string& importerName, const vector<Import
 
    ExecutableAgentImp::instantiate(importerName, string(), pProgress, batch);
    mpElement = NULL;
-   mDescriptors = descriptors;
+   setFilenames(filenames);
 }
 
-void ImportAgentImp::instantiate(PlugIn* pPlugIn, const vector<ImportDescriptor*>& descriptors,
+void ImportAgentImp::instantiate(const string& importerName,
+                                 const map<string, vector<ImportDescriptor*> >& descriptors, Progress* pProgress,
+                                 bool batch)
+{
+   if (getInstantiated())
+   {
+      throw logic_error("ImportAgent can not be instantiated twice!");
+   }
+
+   ExecutableAgentImp::instantiate(importerName, string(), pProgress, batch);
+   mpElement = NULL;
+   setDatasets(descriptors);
+}
+
+void ImportAgentImp::instantiate(PlugIn* pPlugIn, const map<string, vector<ImportDescriptor*> >& descriptors,
                                  Progress* pProgress, bool batch)
 {
    if (getInstantiated())
@@ -94,24 +134,30 @@ void ImportAgentImp::instantiate(PlugIn* pPlugIn, const vector<ImportDescriptor*
 
    ExecutableAgentImp::instantiate(pPlugIn, string(), pProgress, batch);
    mpElement = NULL;
-   mDescriptors = descriptors;
+   setDatasets(descriptors);
 }
 
 ImportAgentImp::ImportAgentImp() :
    mEditType(ImportAgent::NEVER_EDIT),
    mUpdateMruList(false),
    mpElement(NULL)
-{
-}
+{}
 
 ImportAgentImp::~ImportAgentImp()
 {
    Service<ModelServices> pModel;
-   for (vector<ImportDescriptor*>::iterator iter = mDescriptors.begin(); iter != mDescriptors.end(); ++iter)
+
+   for (QMap<QString, vector<ImportDescriptor*> >::iterator fileIter = mDatasets.begin();
+      fileIter != mDatasets.end();
+      ++fileIter)
    {
-      if (*iter != NULL)
+      vector<ImportDescriptor*> descriptors = fileIter.value();
+      for (vector<ImportDescriptor*>::iterator iter = descriptors.begin(); iter != descriptors.end(); ++iter)
       {
-         pModel->destroyImportDescriptor(*iter);
+         if (*iter != NULL)
+         {
+            pModel->destroyImportDescriptor(*iter);
+         }
       }
    }
 }
@@ -136,12 +182,32 @@ string ImportAgentImp::getImporterSubtype() const
 void ImportAgentImp::setFilename(const string& filename)
 {
    checkInstantiate();
-   mDescriptors.clear();
+   setDatasets(map<string, vector<ImportDescriptor*> >());    // Delete any existing descriptors
 
    QString strFilename = QString::fromStdString(filename);
    strFilename.replace(QRegExp("\\\\"), "/");
 
-   mFilename = strFilename.toStdString();
+   if (strFilename.isEmpty() == false)
+   {
+      mDatasets[strFilename] = vector<ImportDescriptor*>();
+   }
+}
+
+void ImportAgentImp::setFilenames(const vector<string>& filenames)
+{
+   checkInstantiate();
+   setDatasets(map<string, vector<ImportDescriptor*> >());    // Delete any existing descriptors
+
+   for (vector<string>::const_iterator iter = filenames.begin(); iter != filenames.end(); ++iter)
+   {
+      QString filename = QString::fromStdString(*iter);
+      filename.replace(QRegExp("\\\\"), "/");
+
+      if (filename.isEmpty() == false)
+      {
+         mDatasets[filename] = vector<ImportDescriptor*>();
+      }
+   }
 }
 
 void ImportAgentImp::setEditType(ImportAgent::EditType editType)
@@ -173,39 +239,150 @@ bool ImportAgentImp::isMruFileListUpdated() const
    return mUpdateMruList;
 }
 
-void ImportAgentImp::setImportDescriptors(const vector<ImportDescriptor*>& descriptors)
+void ImportAgentImp::setDatasets(const map<string, vector<ImportDescriptor*> >& descriptors)
 {
    checkInstantiate();
-
    Service<ModelServices> pModel;
 
-   vector<ImportDescriptor*>::const_iterator descIter;
-   vector<ImportDescriptor*>::const_iterator foundIter;
-   for (descIter = mDescriptors.begin(); descIter != mDescriptors.end(); ++descIter)
+   // Destroy any descriptors not in the new descriptors
+   vector<ImportDescriptor*> originalDescriptors;
+   for (QMap<QString, vector<ImportDescriptor*> >::iterator iter = mDatasets.begin(); iter != mDatasets.end(); ++iter)
    {
-      foundIter = find(descriptors.begin(), descriptors.end(), *descIter);
-      if (foundIter == descriptors.end())
+      vector<ImportDescriptor*>& fileDescriptors = iter.value();
+      if (fileDescriptors.empty() == false)
       {
-         pModel->destroyImportDescriptor(*descIter);
+         copy(fileDescriptors.begin(), fileDescriptors.end(), back_inserter(originalDescriptors));
       }
    }
 
-   mDescriptors = descriptors;
+   vector<ImportDescriptor*> newDescriptors;
+   for (map<string, vector<ImportDescriptor*> >::const_iterator iter = descriptors.begin();
+      iter != descriptors.end();
+      ++iter)
+   {
+      vector<ImportDescriptor*> fileDescriptors = iter->second;
+      if (fileDescriptors.empty() == false)
+      {
+         copy(fileDescriptors.begin(), fileDescriptors.end(), back_inserter(newDescriptors));
+      }
+   }
+
+   for (vector<ImportDescriptor*>::iterator iter = originalDescriptors.begin();
+      iter != originalDescriptors.end();
+      ++iter)
+   {
+      ImportDescriptor* pImportDescriptor = *iter;
+      if (pImportDescriptor != NULL)
+      {
+         vector<ImportDescriptor*>::iterator newIter = find(newDescriptors.begin(), newDescriptors.end(),
+            pImportDescriptor);
+         if (newIter == newDescriptors.end())
+         {
+            pModel->destroyImportDescriptor(pImportDescriptor);
+         }
+      }
+   }
+
+   mDatasets.clear();
+
+   for (map<string, vector<ImportDescriptor*> >::const_iterator iter = descriptors.begin();
+      iter != descriptors.end();
+      ++iter)
+   {
+      QString filename = QString::fromStdString(iter->first);
+      filename.replace(QRegExp("\\\\"), "/");
+      mDatasets[filename] = iter->second;
+   }
 }
 
 vector<ImportDescriptor*> ImportAgentImp::getImportDescriptors()
 {
    checkInstantiate();
-   if (mDescriptors.empty())
+   vector<ImportDescriptor*> importDescriptors;
+
+   for (QMap<QString, vector<ImportDescriptor*> >::iterator iter = mDatasets.begin(); iter != mDatasets.end(); ++iter)
    {
-      Importer* pImporter = dynamic_cast<Importer*>(getPlugIn());
-      if (pImporter != NULL)
+      QString filename = iter.key();
+      VERIFYRV(filename.isEmpty() == false, vector<ImportDescriptor*>());
+
+      vector<ImportDescriptor*>& descriptors = iter.value();
+      if (descriptors.empty() == true)
       {
-         mDescriptors = pImporter->getImportDescriptors(mFilename);
+         Importer* pImporter = dynamic_cast<Importer*>(getPlugIn());
+         if (pImporter != NULL)
+         {
+            descriptors = pImporter->getImportDescriptors(filename.toStdString());
+         }
+      }
+
+      if (descriptors.empty() == false)
+      {
+         copy(descriptors.begin(), descriptors.end(), back_inserter(importDescriptors));
       }
    }
 
-   return mDescriptors;
+   return importDescriptors;
+}
+
+vector<ImportDescriptor*> ImportAgentImp::getImportDescriptors(const std::string& filename)
+{
+   checkInstantiate();
+
+   QString mapFilename = QString::fromStdString(filename);
+   mapFilename.replace(QRegExp("\\\\"), "/");
+
+   vector<ImportDescriptor*> importDescriptors;
+   if (mapFilename.isEmpty() == true)
+   {
+      return importDescriptors;
+   }
+
+   QMap<QString, vector<ImportDescriptor*> >::iterator iter = mDatasets.find(mapFilename);
+   if (iter != mDatasets.end())
+   {
+      vector<ImportDescriptor*>& currentDescriptors = iter.value();
+      if (currentDescriptors.empty() == true)
+      {
+         Importer* pImporter = dynamic_cast<Importer*>(getPlugIn());
+         if (pImporter != NULL)
+         {
+            currentDescriptors = pImporter->getImportDescriptors(mapFilename.toStdString());
+         }
+      }
+
+      importDescriptors = currentDescriptors;
+   }
+
+   return importDescriptors;
+}
+
+map<string, vector<ImportDescriptor*> > ImportAgentImp::getDatasets()
+{
+   checkInstantiate();
+
+   map<string, vector<ImportDescriptor*> > datasets;
+   for (QMap<QString, vector<ImportDescriptor*> >::iterator iter = mDatasets.begin(); iter != mDatasets.end(); ++iter)
+   {
+      QString filename = iter.key();
+      if (filename.isEmpty() == true)
+      {
+         return map<string, vector<ImportDescriptor*> >();
+      }
+
+      vector<ImportDescriptor*>& descriptors = iter.value();
+      if (descriptors.empty() == true)
+      {
+         Importer* pImporter = dynamic_cast<Importer*>(getPlugIn());
+         if (pImporter != NULL)
+         {
+            descriptors = pImporter->getImportDescriptors(filename.toStdString());
+         }
+      }
+
+      datasets[filename.toStdString()] = descriptors;
+   }
+
+   return datasets;
 }
 
 string ImportAgentImp::getDefaultExtensions() const
@@ -229,14 +406,14 @@ bool ImportAgentImp::execute()
    Service<ModelServices> pModel;
 
    Importer* pImporter = dynamic_cast<Importer*>(getPlugIn());
-   vector<ImportDescriptor*> descriptors = getImportDescriptors();
+   vector<ImportDescriptor*> importDescriptors = getImportDescriptors();
 
    if (pApp->isBatch() == true)
    {
       // Use the Auto Importer if an importer has not been set
       if (pImporter == NULL)
       {
-         if (descriptors.empty() == false)
+         if (importDescriptors.empty() == false)
          {
             return false;
          }
@@ -245,18 +422,15 @@ bool ImportAgentImp::execute()
          pImporter = dynamic_cast<Importer*>(getPlugIn());
 
          // Update the data sets to import if necessary
-         if ((pImporter != NULL) && (mFilename.empty() == false))
-         {
-            descriptors = getImportDescriptors();
-         }
+         importDescriptors = getImportDescriptors();
       }
    }
-   else if ((descriptors.empty() == true) && (mFilename.empty() == true))
+   else if (mDatasets.empty() == true)
    {
       Service<DesktopServices> pDesktop;
 
       // Get the import information from the user
-      string importerName;
+      string importerName;    // Will default to Auto Importer in the import dialog if no plug-in is available
 
       const PlugIn* pPlugIn = getPlugIn();
       if (pPlugIn != NULL)
@@ -272,32 +446,19 @@ bool ImportAgentImp::execute()
       }
 
       // Importer
-      PlugIn* pSelectedImporter = importDlg.getSelectedImporter();
-      pImporter = dynamic_cast<Importer*>(pSelectedImporter);
-      setPlugIn(pSelectedImporter);
+      pImporter = importDlg.getSelectedImporter();
+      setPlugIn(dynamic_cast<PlugIn*>(pImporter));
 
       // Data sets
-      descriptors = importDlg.getImportDescriptors();
-      mDescriptors = descriptors;
-
-      // Filename
-      QStringList filenames = importDlg.selectedFiles();
-      if (filenames.empty() == false)
-      {
-         QString strFilename = filenames.front();
-         if (strFilename.isEmpty() == false)
-         {
-            strFilename.replace(QRegExp("\\\\"), "/");
-            mFilename = strFilename.toStdString();
-         }
-      }
+      mDatasets = importDlg.getImportDescriptors();
+      importDescriptors = getImportDescriptors();
    }
    else
    {
       // Use the Auto Importer if an importer has not been set
       if (pImporter == NULL)
       {
-         if (descriptors.empty() == false)
+         if (importDescriptors.empty() == false)
          {
             return false;
          }
@@ -306,56 +467,56 @@ bool ImportAgentImp::execute()
          pImporter = dynamic_cast<Importer*>(getPlugIn());
 
          // Update the data sets to import if necessary
-         if ((pImporter != NULL) && (mFilename.empty() == false))
-         {
-            descriptors = getImportDescriptors();
-         }
+         importDescriptors = getImportDescriptors();
       }
 
       // Validate the descriptors
       string errorMessage;
-      unsigned int numValidDescriptors = validateImportDescriptors(descriptors, pImporter, errorMessage);
+      unsigned int numValidDescriptors = validateImportDescriptors(importDescriptors, pImporter, errorMessage);
 
       // Display the options dialog if necessary
+      unsigned int numImportedDatasets = 0;
+      for (vector<ImportDescriptor*>::iterator iter = importDescriptors.begin();
+         iter != importDescriptors.end();
+         ++iter)
+      {
+         ImportDescriptor* pImportDescriptor = *iter;
+         if ((pImportDescriptor != NULL) && (pImportDescriptor->isImported() == true))
+         {
+            ++numImportedDatasets;
+         }
+      }
+
       if ((pImporter != NULL) && ((mEditType == ImportAgent::ALWAYS_EDIT) ||
-         ((mEditType == ImportAgent::AS_NEEDED_EDIT) && (numValidDescriptors < descriptors.size()))))
+         ((mEditType == ImportAgent::AS_NEEDED_EDIT) && (numValidDescriptors < numImportedDatasets))))
       {
          Service<DesktopServices> pDesktop;
-         vector<ImportDescriptor*> importerDescriptors = descriptors;
+         vector<ImportDescriptor*> originalDescriptors = importDescriptors;
 
-         ImportOptionsDlg optionsDlg(pImporter, importerDescriptors, pDesktop->getMainWidget());
+         ImportOptionsDlg optionsDlg(pImporter, mDatasets, pDesktop->getMainWidget());
          if (optionsDlg.exec() == QDialog::Rejected)
          {
             return false;
          }
 
-         // Update the import descriptors to load and destroy all others
-         descriptors.clear();
+         // Update the import descriptors to load
+         importDescriptors.clear();
 
-         vector<ImportDescriptor*>::iterator iter;
-         for (iter = importerDescriptors.begin(); iter != importerDescriptors.end(); ++iter)
+         for (vector<ImportDescriptor*>::iterator iter = originalDescriptors.begin();
+            iter != originalDescriptors.end();
+            ++iter)
          {
             ImportDescriptor* pImportDescriptor = *iter;
             if (pImportDescriptor != NULL)
             {
                if (pImportDescriptor->isImported() == true)
                {
-                  descriptors.push_back(pImportDescriptor);
-               }
-               else
-               {
-                  pModel->destroyImportDescriptor(pImportDescriptor);
+                  importDescriptors.push_back(pImportDescriptor);
                }
             }
          }
-
-         mDescriptors = descriptors;
-
-         // Check for valid descriptors
-         numValidDescriptors = validateImportDescriptors(descriptors, pImporter, errorMessage);
       }
-
-      if (numValidDescriptors == 0)
+      else if (numValidDescriptors == 0)
       {
          Progress* pProgress = getProgress();
          if ((pProgress != NULL) && (errorMessage.empty() == false))
@@ -373,7 +534,7 @@ bool ImportAgentImp::execute()
       return false;
    }
 
-   if (descriptors.empty() == true)
+   if (importDescriptors.empty() == true)
    {
       return false;
    }
@@ -382,20 +543,21 @@ bool ImportAgentImp::execute()
    createProgressDialog();
 
    // Create the data elements for all the selected data sets
-   bool success = true;
-   vector<DataDescriptor*> selectedDescriptors;
-   for (vector<ImportDescriptor*>::iterator iter = descriptors.begin(); iter != descriptors.end(); ++iter)
+   vector<ImportDescriptor*> selectedDescriptors;
+   for (vector<ImportDescriptor*>::iterator iter = importDescriptors.begin(); iter != importDescriptors.end(); ++iter)
    {
       ImportDescriptor* pImportDescriptor = *iter;
       if (pImportDescriptor == NULL || !pImportDescriptor->isImported())
       {
          continue;
       }
+
       DataDescriptor* pDescriptor = pImportDescriptor->getDataDescriptor();
       if (pDescriptor == NULL)
       {
          continue;
       }
+
       // Allow the importer to modify the data descriptor if necessary
       pImporter->polishDataDescriptor(pDescriptor);
 
@@ -404,15 +566,24 @@ bool ImportAgentImp::execute()
       {
          if (pProgress != NULL)
          {
-            if (errorMessage.empty() == true)
+            if (errorMessage.empty() == false)
             {
-               errorMessage = "The data set cannot be loaded by the importer.";
+               errorMessage += "\n";
+            }
+
+            string datasetName = pDescriptor->getName();
+            if (datasetName.empty() == false)
+            {
+               errorMessage += "The '" + datasetName + "' data set cannot be loaded.\n";
+            }
+            else
+            {
+               errorMessage += "The data set cannot be loaded.\n";
             }
 
             pProgress->updateProgress(errorMessage, 0, ERRORS);
          }
 
-         success = false;
          continue;
       }
       else if (!errorMessage.empty())
@@ -427,9 +598,34 @@ bool ImportAgentImp::execute()
             pProgress->updateProgress(errorMessage, currentPercent, WARNING);
          }
       }
-      selectedDescriptors.push_back(pDescriptor);
+
+      selectedDescriptors.push_back(pImportDescriptor);
    }
-   vector<DataElement*> createdElementsVec = pModel->createElements(selectedDescriptors);
+
+   map<DataDescriptor*, ImportDescriptor*> selectedDatasets;
+   vector<DataElement*> createdElementsVec;
+
+   stable_sort(selectedDescriptors.begin(), selectedDescriptors.end(), ElementDepthComparator());
+   for (vector<ImportDescriptor*>::iterator iter = selectedDescriptors.begin();
+      iter != selectedDescriptors.end();
+      ++iter)
+   {
+      ImportDescriptor* pImportDescriptor = *iter;
+      if (pImportDescriptor != NULL)
+      {
+         DataElement* pElement = pModel->createElement(pImportDescriptor->getDataDescriptor());
+         if (pElement != NULL)
+         {
+            DataDescriptor* pDescriptor = pElement->getDataDescriptor();
+            if (pDescriptor != NULL)
+            {
+               selectedDatasets[pDescriptor] = pImportDescriptor;
+               createdElementsVec.push_back(pElement);
+            }
+         }
+      }
+   }
+
    if (createdElementsVec.size() < selectedDescriptors.size())
    {
       if (pProgress != NULL)
@@ -444,8 +640,8 @@ bool ImportAgentImp::execute()
             pProgress->updateProgress("Unable to create some of the data elements", 0, ERRORS);
          }
       }
-      success = false;
    }
+
    list<DataElement*> createdElements;
    copy(createdElementsVec.begin(), createdElementsVec.end(), back_inserter(createdElements));
 
@@ -466,15 +662,29 @@ bool ImportAgentImp::execute()
    }
 
    // Load the data sets
+   bool success = false;
+   map<ImportDescriptor*, bool> importedDescriptors;
+
    while (!toVisit.empty())
    {
       mpElement = toVisit.front();
       toVisit.pop();
       createdElements.remove(mpElement);
 
-      if (!ExecutableAgentImp::executePlugIn())
+      success = ExecutableAgentImp::executePlugIn();
+
+      DataDescriptor* pElementDescriptor = mpElement->getDataDescriptor();
+      if (pElementDescriptor != NULL)
       {
-         success = false;
+         map<DataDescriptor*, ImportDescriptor*>::iterator iter = selectedDatasets.find(pElementDescriptor);
+         if (iter != selectedDatasets.end())
+         {
+            importedDescriptors[iter->second] = success;
+         }
+      }
+
+      if (success == false)
+      {
          if (pProgress != NULL)
          {
             // If there isn't already an error message, post one to progress
@@ -510,9 +720,9 @@ bool ImportAgentImp::execute()
       mpElement = NULL;
    }
 
-   if ((success == true) && (mUpdateMruList == true))
+   if (success == true)
    {
-      updateMruFileList();
+      updateMruFileList(importedDescriptors);
    }
 
    return success;
@@ -554,7 +764,8 @@ unsigned int ImportAgentImp::validateImportDescriptors(const vector<ImportDescri
                   errorMessage += "\n\n";
                }
 
-               errorMessage += currentError;
+               const string& datasetName = pDescriptor->getName();
+               errorMessage += datasetName + string(":\n") + currentError;
             }
 
             if (validDescriptor == true)
@@ -588,60 +799,85 @@ void ImportAgentImp::populateArgValues(PlugInArgList *pArgList)
    }
 }
 
-void ImportAgentImp::updateMruFileList()
+void ImportAgentImp::updateMruFileList(const map<ImportDescriptor*, bool>& importedDescriptors)
 {
-   if (mFilename.empty() == true)
+   if (mUpdateMruList == false)
    {
       return;
    }
 
-   // Determine if the filename really is a file
-   QString strFilename = QString::fromStdString(mFilename);
-   strFilename.replace(QRegExp("\\\\"), "/");
-
-   if (QFile::exists(strFilename) == false)
+   for (QMap<QString, vector<ImportDescriptor*> >::iterator iter = mDatasets.begin(); iter != mDatasets.end(); ++iter)
    {
-      return;
-   }
-
-   // Remove the current file if it exists in the list
-   ConfigurationSettingsImp* pSettings = ConfigurationSettingsImp::instance();
-   pSettings->removeMruFile(strFilename.toStdString());
-
-   // Get the number of MRU files and subtract one to account for the file to add to the list
-   vector<MruFile> mruFiles = pSettings->getMruFiles();
-   unsigned int maxNumFiles = ConfigurationSettings::getSettingNumberOfMruFiles() - 1;
-   Service<ModelServices> pModel;
-
-   while (mruFiles.size() > maxNumFiles)
-   {
-      // Destroy the existing import descriptors in the MRU file
-      MruFile mruFile = mruFiles.back();
-
-      vector<ImportDescriptor*>::iterator iter;
-      for (iter = mruFile.mDescriptors.begin(); iter != mruFile.mDescriptors.end(); ++iter)
+      // Determine if the filename really is a file
+      QString filename = iter.key();
+      if (QFile::exists(filename) == false)
       {
-         ImportDescriptor* pImportDescriptor = *iter;
+         continue;
+      }
+
+      // If no data sets in the file were successfully imported, do nothing to the list
+      vector<ImportDescriptor*> fileDescriptors = iter.value();
+      bool fileHasImportedDatasets = false;
+
+      for (vector<ImportDescriptor*>::iterator descriptorIter = fileDescriptors.begin();
+         descriptorIter != fileDescriptors.end();
+         ++descriptorIter)
+      {
+         ImportDescriptor* pImportDescriptor = *descriptorIter;
          if (pImportDescriptor != NULL)
          {
-            pModel->destroyImportDescriptor(pImportDescriptor);
+            map<ImportDescriptor*, bool>::const_iterator successIter = importedDescriptors.find(pImportDescriptor);
+            if ((successIter != importedDescriptors.end()) && (successIter->second == true))
+            {
+               fileHasImportedDatasets = true;
+               break;
+            }
          }
       }
 
-      // Remove the MRU file from the vector
-      mruFiles.pop_back();
-   }
-
-   // Add only the descriptors that are imported to the MRU file
-   vector<ImportDescriptor*> mruDescriptors;
-
-   vector<ImportDescriptor*>::iterator descriptorIter;
-   for (descriptorIter = mDescriptors.begin(); descriptorIter != mDescriptors.end(); ++descriptorIter)
-   {
-      ImportDescriptor* pImportDescriptor = *descriptorIter;
-      if (pImportDescriptor != NULL)
+      if (fileHasImportedDatasets == false)
       {
-         if (pImportDescriptor->isImported() == true)
+         continue;
+      }
+
+      // Remove the current file if it exists in the list
+      ConfigurationSettingsImp* pSettings = ConfigurationSettingsImp::instance();
+      pSettings->removeMruFile(filename.toStdString());
+
+      // Get the number of MRU files and subtract one to account for the file to add to the list
+      vector<MruFile> mruFiles = pSettings->getMruFiles();
+      unsigned int maxNumFiles = ConfigurationSettings::getSettingNumberOfMruFiles() - 1;
+      Service<ModelServices> pModel;
+
+      while (mruFiles.size() > maxNumFiles)
+      {
+         // Destroy the existing import descriptors in the MRU file
+         MruFile mruFile = mruFiles.back();
+
+         for (vector<ImportDescriptor*>::iterator descriptorIter = mruFile.mDescriptors.begin();
+            descriptorIter != mruFile.mDescriptors.end();
+            ++descriptorIter)
+         {
+            ImportDescriptor* pImportDescriptor = *descriptorIter;
+            if (pImportDescriptor != NULL)
+            {
+               pModel->destroyImportDescriptor(pImportDescriptor);
+            }
+         }
+
+         // Remove the MRU file from the vector
+         mruFiles.pop_back();
+      }
+
+      // Add only the descriptors that are selected to import to the MRU file, regardless of the import success
+      vector<ImportDescriptor*> mruDescriptors;
+
+      for (vector<ImportDescriptor*>::iterator descriptorIter = fileDescriptors.begin();
+         descriptorIter != fileDescriptors.end();
+         ++descriptorIter)
+      {
+         ImportDescriptor* pImportDescriptor = *descriptorIter;
+         if ((pImportDescriptor != NULL) && (pImportDescriptor->isImported() == true))
          {
             // Copy the import descriptor to set in the MRU file since they are destroyed in the destructor
             DataDescriptor* pDescriptor = pImportDescriptor->getDataDescriptor();
@@ -659,32 +895,32 @@ void ImportAgentImp::updateMruFileList()
             }
          }
       }
+
+      // Add the file to the MRU file vector
+      string importer;
+
+      const PlugIn* pPlugIn = getPlugIn();
+      if (pPlugIn != NULL)
+      {
+         importer = pPlugIn->getName();
+      }
+
+      FilenameImp filenameImp(filename.toStdString());
+      string filePath = filenameImp.getPath();
+      string baseFilename = filenameImp.getFileName();
+
+      DateTimeImp modificationTime;
+
+      FileFinderImp fileFinder;
+      fileFinder.findFile(filePath, baseFilename);
+      if (fileFinder.findNextFile() == true)
+      {
+         fileFinder.getLastModificationTime(modificationTime);
+      }
+
+      mruFiles.insert(mruFiles.begin(), MruFile(filename.toStdString(), importer, mruDescriptors, modificationTime));
+
+      // Update the MRU file list in the configuration settings
+      pSettings->setMruFiles(mruFiles);
    }
-
-   // Add the file to the MRU file vector
-   string importer;
-
-   const PlugIn* pPlugIn = getPlugIn();
-   if (pPlugIn != NULL)
-   {
-      importer = pPlugIn->getName();
-   }
-
-   FilenameImp filename(strFilename.toStdString());
-   string filePath = filename.getPath();
-   string baseFilename = filename.getFileName();
-
-   DateTimeImp modificationTime;
-
-   FileFinderImp fileFinder;
-   fileFinder.findFile(filePath, baseFilename);
-   if (fileFinder.findNextFile() == true)
-   {
-      fileFinder.getLastModificationTime(modificationTime);
-   }
-
-   mruFiles.insert(mruFiles.begin(), MruFile(strFilename.toStdString(), importer, mruDescriptors, modificationTime));
-
-   // Update the MRU file list in the configuration settings
-   pSettings->setMruFiles(mruFiles);
 }

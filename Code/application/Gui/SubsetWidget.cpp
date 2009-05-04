@@ -18,13 +18,12 @@
 #include <QtGui/QPushButton>
 #include <QtGui/QRadioButton>
 
-#include "SubsetWidget.h"
-
 #include "AppAssert.h"
 #include "AppVerify.h"
-#include "Icons.h"
 #include "DimensionDescriptor.h"
+#include "Icons.h"
 #include "RasterUtilities.h"
+#include "SubsetWidget.h"
 
 using namespace std;
 
@@ -169,7 +168,7 @@ void SubsetWidget::setExportMode(bool enableExportMode)
 
 void SubsetWidget::setRows(const vector<DimensionDescriptor>& rows, const vector<DimensionDescriptor>& selectedRows)
 {
-   if (rows == mRows)
+   if ((rows == mRows) && (selectedRows == getSubsetRows()))
    {
       return;
    }
@@ -266,9 +265,17 @@ const vector<DimensionDescriptor>& SubsetWidget::getRows() const
 
 vector<DimensionDescriptor> SubsetWidget::getSubsetRows() const
 {
+   if (mRows.empty() == true)
+   {
+      return vector<DimensionDescriptor>();
+   }
+
    unsigned int startRow = mpStartRowCombo->currentIndex();
    unsigned int endRow = mpEndRowCombo->currentIndex();
    unsigned int rowSkip = mpRowSkipSpin->value();
+
+   VERIFYRV(startRow < mRows.size(), vector<DimensionDescriptor>());
+   VERIFYRV(endRow < mRows.size(), vector<DimensionDescriptor>());
 
    DimensionDescriptor startRowDim = mRows[startRow];
    DimensionDescriptor endRowDim = mRows[endRow];
@@ -286,7 +293,7 @@ unsigned int SubsetWidget::getSubsetRowCount() const
 void SubsetWidget::setColumns(const vector<DimensionDescriptor>& columns,
                               const vector<DimensionDescriptor>& selectedColumns)
 {
-   if (columns == mColumns)
+   if ((columns == mColumns) && (selectedColumns == getSubsetColumns()))
    {
       return;
    }
@@ -383,9 +390,17 @@ const vector<DimensionDescriptor>& SubsetWidget::getColumns() const
 
 vector<DimensionDescriptor> SubsetWidget::getSubsetColumns() const
 {
+   if (mColumns.empty() == true)
+   {
+      return vector<DimensionDescriptor>();
+   }
+
    unsigned int startColumn = mpStartColumnCombo->currentIndex();
    unsigned int endColumn = mpEndColumnCombo->currentIndex();
    unsigned int columnSkip = mpColumnSkipSpin->value();
+
+   VERIFYRV(startColumn < mColumns.size(), vector<DimensionDescriptor>());
+   VERIFYRV(endColumn < mColumns.size(), vector<DimensionDescriptor>());
 
    DimensionDescriptor startColumnDim = mColumns[startColumn];
    DimensionDescriptor endColumnDim = mColumns[endColumn];
@@ -403,7 +418,7 @@ unsigned int SubsetWidget::getSubsetColumnCount() const
 void SubsetWidget::setBands(const vector<DimensionDescriptor>& bands, const vector<string>& bandNames,
                             const vector<DimensionDescriptor>& selectedBands)
 {
-   if (bands == mBands)
+   if ((bands == mBands) && (selectedBands == getSubsetBands()))
    {
       return;
    }

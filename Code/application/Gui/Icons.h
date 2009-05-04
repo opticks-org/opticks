@@ -342,6 +342,8 @@ public:
    QPixmap mGcpX;
    QPixmap mGcpPlus;
    QPixmap mGcpBlank;
+   QPixmap mOk;
+   QPixmap mCritical;
 
    // Layers
    QPixmap mRasterLayer;

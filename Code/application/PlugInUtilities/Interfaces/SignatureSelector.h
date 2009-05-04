@@ -220,21 +220,6 @@ protected:
    int getNumSelectedSignatures() const;
 
    /**
-    *  Loads signatures from one or more signature files.
-    *
-    *  This method uses the Auto %Signature %Importer to load signatures from the given
-    *  signature files.
-    *
-    *  @param   sigFilenames
-    *           The list of signature files to load.
-    *  @param   pProgress
-    *           A Progress object to report import progress to the user.
-    *
-    *  @return  The loaded Signature objects.
-    */
-   std::vector<Signature*> loadSignatures(const QStringList& sigFilenames, Progress* pProgress);
-
-   /**
     *  Enables or disables the Apply button.
     *
     *  This method enables or disables the Apply button if the dialog is a modeless dialog.

@@ -20,14 +20,15 @@
 
 #include <algorithm>
 #include <string>
+#include <vector>
 
 /**
- * The %PlugInObject is a trait object for use with the %Resource template. 
+ *  The %PlugInObject is a trait object for use with the %Resource template.
  *
- * The %PlugInObject is a trait object for use with the %Resource template. It provides capability for
- * getting and destroying plug-in instances.
+ *  The %PlugInObject is a trait object for use with the %Resource template. It
+ *  provides capability for getting and destroying plug-in instances.
  * 
- * @see PlugInResource
+ *  @see        PlugInResource
  */
 class PlugInObject
 {
@@ -83,11 +84,11 @@ public:
 /**
  *  This is a %Resource class that wraps a plug-in.
  *
- *  This is a specialized %Resource class that wraps a plug-in to ensure
- *  proper creation and destruction of the plug-in.  When the %PlugInResource
- *  object goes out of scope, the plug-in will be destroyed.
+ *  This is a specialized %Resource class that wraps a plug-in to ensure proper
+ *  creation and destruction of the plug-in.  When the %PlugInResource object
+ *  goes out of scope, the plug-in will be destroyed.
  *
- *  @see     Resource, PlugInObject
+ *  @see        Resource, PlugInObject
  */
 class PlugInResource : public Resource<PlugIn, PlugInObject>
 {
@@ -96,17 +97,18 @@ public:
     *  Creates a plug-in resource which wraps no plug-in.
     */
    explicit PlugInResource() :
-      Resource<PlugIn, PlugInObject>(PlugInObject::Args()) {}
+      Resource<PlugIn, PlugInObject>(PlugInObject::Args())
+   {}
 
    /**
-    *  Creates a plug-in resource to create a plug-in with a given
-    *  name.
+    *  Creates a plug-in resource to create a plug-in with a given name.
     *
     *  @param   plugInName
     *           The name of the plug-in to create.
     */
    explicit PlugInResource(const std::string& plugInName) :
-      Resource<PlugIn, PlugInObject>(PlugInObject::Args(plugInName)) {}
+      Resource<PlugIn, PlugInObject>(PlugInObject::Args(plugInName))
+   {}
 
    /**
     *  Creates a plug-in resource to manage an existing plug-in.
@@ -117,27 +119,28 @@ public:
     *           destruction.
     */
    explicit PlugInResource(PlugIn* pPlugIn) :
-      Resource<PlugIn, PlugInObject>(pPlugIn, PlugInObject::Args(pPlugIn)) {}
+      Resource<PlugIn, PlugInObject>(pPlugIn, PlugInObject::Args(pPlugIn))
+   {}
 };
 
 /**
- *  This is helper class when using the Executable interface.  This
- *  class manages an instance of an ExecutableAgent that provides
- *  the actual helper methods when working with instances of
- *  Executable plug-ins.
+ *  This is a helper class when using the Executable interface.
  *
- *  @see ExecutableAgent, Executable
+ *  This class manages an instance of an ExecutableAgent that provides the
+ *  actual helper methods when working with instances of Executable plug-ins.
+ *
+ *  @see        ExecutableAgent, Executable
  */
 class ExecutableResource : public FactoryResource<ExecutableAgent>
 {
 public:
    /**
-    * @copydoc ExecutableAgent::instantiate(Progress*, bool)
-    * @par ExecutableAgent
-    * This class simply allocates and controls the 
-    * lifecycle of a ExecutableAgent object.  You can
-    * use -> to access any of the methods available
-    * on ExecutableAgent.
+    *  @copydoc ExecutableAgent::instantiate(Progress*, bool)
+    *
+    *  @par     ExecutableAgent
+    *           This class simply allocates and controls the lifecycle of an
+    *           ExecutableAgent object.  You can use -> to access any of the
+    *           methods available on ExecutableAgent.
     */
    explicit ExecutableResource(Progress* pProgress = NULL, bool batch = true)
    {
@@ -149,12 +152,12 @@ public:
    }
 
    /**
-    * @copydoc ExecutableAgent::instantiate(const std::string&, const std::string&, Progress*, bool)
-    * @par ExecutableAgent
-    * This class simply allocates and controls the 
-    * lifecycle of a ExecutableAgent object.  You can
-    * use -> to access any of the methods available
-    * on ExecutableAgent.
+    *  @copydoc ExecutableAgent::instantiate(const std::string&, const std::string&, Progress*, bool)
+    *
+    *  @par     ExecutableAgent
+    *           This class simply allocates and controls the lifecycle of an
+    *           ExecutableAgent object.  You can use -> to access any of the
+    *           methods available on ExecutableAgent.
     */
    explicit ExecutableResource(const std::string& plugInName, const std::string& menuCommand = std::string(),
                                Progress* pProgress = NULL, bool batch = true)
@@ -167,12 +170,12 @@ public:
    }
 
    /**
-    * @copydoc ExecutableAgent::instantiate(PlugIn*, const std::string&, Progress*, bool)
-    * @par ExecutableAgent
-    * This class simply allocates and controls the 
-    * lifecycle of a ExecutableAgent object.  You can
-    * use -> to access any of the methods available
-    * on ExecutableAgent.
+    *  @copydoc ExecutableAgent::instantiate(PlugIn*, const std::string&, Progress*, bool)
+    *
+    *  @par     ExecutableAgent
+    *           This class simply allocates and controls the lifecycle of an
+    *           ExecutableAgent object.  You can use -> to access any of the
+    *           methods available on ExecutableAgent.
     */
    explicit ExecutableResource(PlugIn* pPlugIn, const std::string& menuCommand = std::string(),
                                Progress* pProgress = NULL, bool batch = true)
@@ -186,23 +189,23 @@ public:
 };
 
 /**
- *  This is helper class when using the Importer interface.  This
- *  class manages an instance of an ImportAgent that provides
- *  the actual helper methods when working with instances of
- *  Importer plug-ins.
+ *  This is a helper class when using the Importer interface.
  *
- *  @see ImportAgent, Importer, \ref usingimporterresource "Using ImporterResource"
+ *  This class manages an instance of an ImportAgent that provides the actual
+ *  helper methods when working with instances of Importer plug-ins.
+ *
+ *  @see        ImportAgent, Importer, \ref usingimporterresource "Using ImporterResource"
  */
 class ImporterResource : public FactoryResource<ImportAgent>
 {
 public:
    /**
-    * @copydoc ImportAgent::instantiate(Progress*, bool)
-    * @par ImportAgent
-    * This class simply allocates and controls the 
-    * lifecycle of a ImportAgent object.  You can
-    * use -> to access any of the methods available
-    * on ImportAgent.
+    *  @copydoc ImportAgent::instantiate(Progress*, bool)
+    *
+    *  @par     ImportAgent
+    *           This class simply allocates and controls the lifecycle of an
+    *           ImportAgent object.  You can use -> to access any of the methods
+    *           available on ImportAgent.
     */
    ImporterResource(Progress* pProgress = NULL, bool batch = true)
    {
@@ -214,12 +217,12 @@ public:
    }
 
    /**
-    * @copydoc ImportAgent::instantiate(const std::string&, Progress*, bool)
-    * @par ImportAgent
-    * This class simply allocates and controls the 
-    * lifecycle of a ImportAgent object.  You can
-    * use -> to access any of the methods available
-    * on ImportAgent.
+    *  @copydoc ImportAgent::instantiate(const std::string&, Progress*, bool)
+    *
+    *  @par     ImportAgent
+    *           This class simply allocates and controls the lifecycle of an
+    *           ImportAgent object.  You can use -> to access any of the methods
+    *           available on ImportAgent.
     */
    ImporterResource(const std::string& importerName, Progress* pProgress = NULL, bool batch = true)
    {
@@ -231,12 +234,12 @@ public:
    }
 
    /**
-    * @copydoc ImportAgent::instantiate(const std::string&, const std::string&, Progress*, bool)
-    * @par ImportAgent
-    * This class simply allocates and controls the 
-    * lifecycle of a ImportAgent object.  You can
-    * use -> to access any of the methods available
-    * on ImportAgent.
+    *  @copydoc ImportAgent::instantiate(const std::string&, const std::string&, Progress*, bool)
+    *
+    *  @par     ImportAgent
+    *           This class simply allocates and controls the lifecycle of an
+    *           ImportAgent object.  You can use -> to access any of the methods
+    *           available on ImportAgent.
     */
    ImporterResource(const std::string& importerName, const std::string& filename, Progress* pProgress = NULL,
                     bool batch = true)
@@ -249,14 +252,33 @@ public:
    }
 
    /**
-    * @copydoc ImportAgent::instantiate(const std::string&, const std::vector<ImportDescriptor*>&, Progress*, bool)
-    * @par ImportAgent
-    * This class simply allocates and controls the
-    * lifecycle of a ImportAgent object.  You can
-    * use -> to access any of the methods available
-    * on ImportAgent.
+    *  @copydoc ImportAgent::instantiate(const std::string&, const std::vector<std::string>&, Progress*, bool)
+    *
+    *  @par     ImportAgent
+    *           This class simply allocates and controls the lifecycle of an
+    *           ImportAgent object.  You can use -> to access any of the methods
+    *           available on ImportAgent.
     */
-   ImporterResource(const std::string& importerName, const std::vector<ImportDescriptor*>& descriptors,
+   ImporterResource(const std::string& importerName, const std::vector<std::string>& filenames,
+                    Progress* pProgress = NULL, bool batch = true)
+   {
+      ImportAgent* pAgent = get();
+      if (pAgent != NULL)
+      {
+         pAgent->instantiate(importerName, filenames, pProgress, batch);
+      }
+   }
+
+   /**
+    *  @copydoc ImportAgent::instantiate(const std::string&, const std::map<std::string, std::vector<ImportDescriptor*> >&, Progress*, bool)
+    *
+    *  @par     ImportAgent
+    *           This class simply allocates and controls the lifecycle of an
+    *           ImportAgent object.  You can use -> to access any of the methods
+    *           available on ImportAgent.
+    */
+   ImporterResource(const std::string& importerName,
+                    const std::map<std::string, std::vector<ImportDescriptor*> >& descriptors,
                     Progress* pProgress = NULL, bool batch = true)
    {
       ImportAgent* pAgent = get();
@@ -267,15 +289,15 @@ public:
    }
 
    /**
-    * @copydoc ImportAgent::instantiate(PlugIn*, const std::vector<ImportDescriptor*>&, Progress*, bool)
-    * @par ImportAgent
-    * This class simply allocates and controls the 
-    * lifecycle of a ImportAgent object.  You can
-    * use -> to access any of the methods available
-    * on ImportAgent.
+    *  @copydoc ImportAgent::instantiate(PlugIn*, const std::map<std::string, std::vector<ImportDescriptor*> >&, Progress*, bool)
+    *
+    *  @par     ImportAgent
+    *           This class simply allocates and controls the lifecycle of an
+    *           ImportAgent object.  You can use -> to access any of the methods
+    *           available on ImportAgent.
     */
-   ImporterResource(PlugIn* pPlugIn, const std::vector<ImportDescriptor*>& descriptors, Progress* pProgress = NULL,
-                    bool batch = true)
+   ImporterResource(PlugIn* pPlugIn, const std::map<std::string, std::vector<ImportDescriptor*> >& descriptors,
+                    Progress* pProgress = NULL, bool batch = true)
    {
       ImportAgent* pAgent = get();
       if (pAgent != NULL)
@@ -286,23 +308,23 @@ public:
 };
 
 /**
- *  This is helper class when using the Exporter interface.  This
- *  class manages an instance of an ExportAgent that provides
- *  the actual helper methods when working with instances of
- *  Exporter plug-ins.
+ *  This is a helper class when using the Exporter interface.
  *
- *  @see ExportAgent, Exporter.
+ *  This class manages an instance of an ExportAgent that provides the actual
+ *  helper methods when working with instances of Exporter plug-ins.
+ *
+ *  @see        ExportAgent, Exporter
  */
 class ExporterResource : public FactoryResource<ExportAgent>
 {
 public:
    /**
-    * @copydoc ExportAgent::instantiate(Progress*, bool)
-    * @par ExportAgent
-    * This class simply allocates and controls the 
-    * lifecycle of a ExportAgent object.  You can
-    * use -> to access any of the methods available
-    * on ExportAgent.
+    *  @copydoc ExportAgent::instantiate(Progress*, bool)
+    *
+    *  @par     ExportAgent
+    *           This class simply allocates and controls the lifecycle of an
+    *           ExportAgent object.  You can use -> to access any of the methods
+    *           available on ExportAgent.
     */
    ExporterResource(Progress* pProgress = NULL, bool batch = true)
    {
@@ -314,12 +336,12 @@ public:
    }
 
    /**
-    * @copydoc ExportAgent::instantiate(std::string, Progress*, bool)
-    * @par ExportAgent
-    * This class simply allocates and controls the 
-    * lifecycle of a ExportAgent object.  You can
-    * use -> to access any of the methods available
-    * on ExportAgent.
+    *  @copydoc ExportAgent::instantiate(std::string, Progress*, bool)
+    *
+    *  @par     ExportAgent
+    *           This class simply allocates and controls the lifecycle of an
+    *           ExportAgent object.  You can use -> to access any of the methods
+    *           available on ExportAgent.
     */
    ExporterResource(std::string exporterName, Progress* pProgress = NULL, bool batch = true)
    {
@@ -331,12 +353,12 @@ public:
    }
 
    /**
-    * @copydoc ExportAgent::instantiate(PlugIn*, Progress*, bool)
-    * @par ExportAgent
-    * This class simply allocates and controls the 
-    * lifecycle of a ExportAgent object.  You can
-    * use -> to access any of the methods available
-    * on ExportAgent.
+    *  @copydoc ExportAgent::instantiate(PlugIn*, Progress*, bool)
+    *
+    *  @par     ExportAgent
+    *           This class simply allocates and controls the lifecycle of an
+    *           ExportAgent object.  You can use -> to access any of the methods
+    *           available on ExportAgent.
     */
    ExporterResource(PlugIn* pPlugIn, Progress* pProgress = NULL, bool batch = true)
    {
@@ -348,12 +370,12 @@ public:
    }
 
    /**
-    * @copydoc ExportAgent::instantiate(std::string, SessionItem*, FileDescriptor*, Progress*, bool)
-    * @par ExportAgent
-    * This class simply allocates and controls the 
-    * lifecycle of a ExportAgent object.  You can
-    * use -> to access any of the methods available
-    * on ExportAgent.
+    *  @copydoc ExportAgent::instantiate(std::string, SessionItem*, FileDescriptor*, Progress*, bool)
+    *
+    *  @par     ExportAgent
+    *           This class simply allocates and controls the lifecycle of an
+    *           ExportAgent object.  You can use -> to access any of the methods
+    *           available on ExportAgent.
     */
    ExporterResource(std::string exporterName, SessionItem* pItem, FileDescriptor* pFileDescriptor,
                     Progress* pProgress = NULL, bool batch = true)
@@ -366,12 +388,12 @@ public:
    }
 
    /**
-    * @copydoc ExportAgent::instantiate(PlugIn*, SessionItem*, FileDescriptor*, Progress*, bool)
-    * @par ExportAgent
-    * This class simply allocates and controls the 
-    * lifecycle of a ExportAgent object.  You can
-    * use -> to access any of the methods available
-    * on ExportAgent.
+    *  @copydoc ExportAgent::instantiate(PlugIn*, SessionItem*, FileDescriptor*, Progress*, bool)
+    *
+    *  @par     ExportAgent
+    *           This class simply allocates and controls the lifecycle of an
+    *           ExportAgent object.  You can use -> to access any of the methods
+    *           available on ExportAgent.
     */
    ExporterResource(PlugIn* pPlugIn, SessionItem* pItem, FileDescriptor* pFileDescriptor,
                     Progress* pProgress = NULL, bool batch = true)

@@ -10,12 +10,14 @@
 #ifndef IMPORTDLG_H
 #define IMPORTDLG_H
 
+#include <QtCore/QMap>
+
 #include "FilePlugInDlg.h"
 
 #include <vector>
 
 class ImportDescriptor;
-class PlugIn;
+class Importer;
 class PreviewWidget;
 
 class ImportDlg : public FilePlugInDlg
@@ -24,11 +26,11 @@ class ImportDlg : public FilePlugInDlg
 
 public:
    ImportDlg(const QString& strPlugInSubtype = QString(), const QString& strInitialPlugIn = QString(),
-      QWidget* pParent = 0);
+      QWidget* pParent = NULL);
    ~ImportDlg();
 
-   const std::vector<ImportDescriptor*>& getImportDescriptors() const;
-   PlugIn* getSelectedImporter() const;
+   QMap<QString, std::vector<ImportDescriptor*> > getImportDescriptors();
+   Importer* getSelectedImporter() const;
 
 public slots:
    void accept();
@@ -37,21 +39,19 @@ public slots:
 protected:
    void hideEvent(QHideEvent* pEvent);
    void updateDescriptorsIfNeeded();
+   void clearDescriptors(const QString& filename);
    void clearDescriptors();
-   ImportDescriptor* getFirstImportedDescriptor() const;
 
 protected slots:
-   bool eventFilter(QObject* o, QEvent* e);
-   virtual bool updateFromFile(const QString& strFilename);
-   virtual void updateFromImporter(const QString& strImporter);
-   virtual bool invokeOptionsDialog();
+   bool eventFilter(QObject* pObject, QEvent* pEvent);
+   bool updateFromFiles();
+   void updateFromImporter(const QString& strImporter);
+   bool invokeOptionsDialog();
    void updatePreviewDatasets();
 
 private:
-   std::string mFilename;
-   bool mFileChanged;
-   PlugIn* mpImporter;
-   std::vector<ImportDescriptor*> mDescriptors;
+   Importer* mpImporter;
+   QMap<QString, std::vector<ImportDescriptor*> > mFiles;
 
    PreviewWidget* mpPreview;
    bool mPreviewEnabled;

@@ -279,10 +279,7 @@ QWidget* AutoImporter::getPreview(const DataDescriptor* pDescriptor, Progress* p
       return NULL;
    }
 
-   if (mpPlugIn == NULL)
-   {
-      findImporter(pDescriptor);
-   }
+   findImporter(pDescriptor);
 
    QWidget* pPreviewWidget = NULL;
 
@@ -302,10 +299,7 @@ bool AutoImporter::validate(const DataDescriptor* pDescriptor, string& errorMess
       return NULL;
    }
 
-   if (mpPlugIn == NULL)
-   {
-      const_cast<AutoImporter*>(this)->findImporter(pDescriptor);
-   }
+   const_cast<AutoImporter*>(this)->findImporter(pDescriptor);
 
    bool bValid = false;
 
@@ -330,10 +324,7 @@ QWidget* AutoImporter::getImportOptionsWidget(DataDescriptor* pDescriptor)
       return NULL;
    }
 
-   if (mpPlugIn == NULL)
-   {
-      findImporter(pDescriptor);
-   }
+   findImporter(pDescriptor);
 
    QWidget* pWidget = NULL;
 
@@ -353,10 +344,7 @@ void AutoImporter::polishDataDescriptor(DataDescriptor* pDescriptor)
       return;
    }
 
-   if (mpPlugIn == NULL)
-   {
-      findImporter(pDescriptor);
-   }
+   findImporter(pDescriptor);
 
    Importer* pImporter = dynamic_cast<Importer*>(mpPlugIn);
    if (pImporter != NULL)
@@ -449,16 +437,13 @@ bool AutoImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
 
    VERIFY(mpElement != NULL);
 
+   string filename = mpElement->getFilename();
+   findImporter(filename);
+
+   // If no importer was found, return false.
    if (mpPlugIn == NULL)
    {
-      string filename = mpElement->getFilename();
-      findImporter(filename);
-
-      // If no importer was found, return false.
-      if (mpPlugIn == NULL)
-      {
-         return false;
-      }
+      return false;
    }
 
    ExecutableResource pExecutable(mpPlugIn, mMenuCommand, mpProgress, !mbInteractive);

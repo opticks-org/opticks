@@ -13,9 +13,9 @@
 #include "DesktopItems.h"
 
 #include <string>
+#include <vector>
 
 class DataDescriptor;
-class Filename;
 
 class ImportDataSet : public DesktopItems
 {
@@ -32,7 +32,7 @@ protected:
    bool extractInputArgs(PlugInArgList* pInArgList);
 
 private:
-   Filename* mpFilename;
+   std::vector<std::string> mFilenames;
    DataDescriptor* mpDescriptor;
    std::string mImporterName;
    bool mShowDialog;

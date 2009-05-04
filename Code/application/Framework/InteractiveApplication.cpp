@@ -234,89 +234,67 @@ int InteractiveApplication::run(int argc, char** argv)
       ArgumentList* pArgList(ArgumentList::instance());
       if (pArgList != NULL)
       {
-         bool validImport = true;
+         FileType fileType;
 
          vector<string> filenames(pArgList->getOptions(""));
-         if (filenames.size() > 1)
+         for (vector<string>::size_type i = 0; i < filenames.size(); ++i)
          {
-            bool wizardFiles = false;
-            bool datasetFiles = false;
+            FilenameImp filename(filenames[i]);
 
-            for (vector<string>::size_type i = 0; i < filenames.size(); ++i)
+            QString strFilename = QString::fromStdString(filename.getFullPathAndName());
+            if (strFilename.isEmpty() == false)
             {
-               FilenameImp filename(filenames[i]);
-
-               QString strFilename = QString::fromStdString(filename.getFullPathAndName());
-               if (strFilename.isEmpty() == false)
+               QFileInfo info(strFilename);
+               if ((info.suffix() == "wiz") || (info.suffix() == "batchwiz"))
                {
-                  QFileInfo info(strFilename);
-                  if ((info.suffix() == "wiz") || (info.suffix() == "batchwiz"))
+                  if ((fileType.isValid() == true) && (fileType != WIZARD_FILES))
                   {
-                     if (datasetFiles == true)
-                     {
-                        validImport = false;
-                        break;
-                     }
-
-                     wizardFiles = true;
-                  }
-                  else if (info.suffix() == "session")
-                  {
-                     validImport = false;
+                     fileType = EnumWrapper<FileTypeEnum>();
                      break;
                   }
-                  else
-                  {
-                     if (wizardFiles == true)
-                     {
-                        validImport = false;
-                        break;
-                     }
 
-                     datasetFiles = true;
+                  fileType = WIZARD_FILES;
+               }
+               else if (info.suffix() == "session")
+               {
+                  if (fileType.isValid() == true)
+                  {
+                     fileType = EnumWrapper<FileTypeEnum>();
+                     break;
                   }
+
+                  fileType = SESSION_FILE;
+               }
+               else
+               {
+                  if ((fileType.isValid() == true) && (fileType != DATASET_FILES))
+                  {
+                     fileType = EnumWrapper<FileTypeEnum>();
+                     break;
+                  }
+
+                  fileType = DATASET_FILES;
                }
             }
          }
 
-         if (validImport == true)
+         if (fileType.isValid() == true)
          {
+            // Check for valid filenames
+            vector<string> validFilenames;
             for (vector<string>::size_type i = 0; i < filenames.size(); ++i)
             {
                FilenameImp filename(filenames[i]);
-               string normalizedFilename = filename.getFullPathAndName();
 
-               QString strFilename = QString::fromStdString(normalizedFilename);
-               if (strFilename.isEmpty() == false)
+               string normalizedFilename = filename.getFullPathAndName();
+               if (normalizedFilename.empty() == false)
                {
+                  QString strFilename = QString::fromStdString(normalizedFilename);
+
                   QFileInfo info(strFilename);
                   if ((info.isFile() == true) && (info.exists() == true))
                   {
-                     if (info.suffix() == "wiz")
-                     {
-                        pAppWindow->runWizard(strFilename);
-                     }
-                     else if (info.suffix() == "batchwiz")
-                     {
-                        vector<string> batchFiles;
-                        batchFiles.push_back(normalizedFilename);
-                        WizardUtilities::runBatchFiles(batchFiles, mpProgress);
-                     }
-                     else if (info.suffix() == "session")
-                     {
-                        string saveKey = SessionManager::getSettingQueryForSaveKey();
-                        SessionSaveType saveType = SESSION_DONT_AUTO_SAVE;
-                        DataVariant dvSaveType(saveType);
-
-                        pConfigSettings->adoptSessionSetting(saveKey, dvSaveType);
-                        pAppWindow->openSession(strFilename);
-                        pConfigSettings->deleteSessionSetting(saveKey);
-                     }
-                     else
-                     {
-                        ImporterResource importer("Auto Importer", normalizedFilename, mpProgress, false);
-                        importer->execute();
-                     }
+                     validFilenames.push_back(normalizedFilename);
                   }
                   else
                   {
@@ -325,8 +303,68 @@ int InteractiveApplication::run(int argc, char** argv)
                   }
                }
             }
+
+            // Load the files
+            switch (fileType)
+            {
+               case WIZARD_FILES:
+               {
+                  for (vector<string>::size_type i = 0; i < validFilenames.size(); ++i)
+                  {
+                     string filename = validFilenames[i];
+                     QString strFilename = QString::fromStdString(filename);
+
+                     QFileInfo info(strFilename);
+                     if (info.suffix() == "wiz")
+                     {
+                        pAppWindow->runWizard(strFilename);
+                     }
+                     else if (info.suffix() == "batchwiz")
+                     {
+                        vector<string> batchFiles;
+                        batchFiles.push_back(filename);
+                        WizardUtilities::runBatchFiles(batchFiles, mpProgress);
+                     }
+                  }
+
+                  break;
+               }
+
+               case SESSION_FILE:
+               {
+                  if (validFilenames.empty() == false)
+                  {
+                     VERIFYRV(validFilenames.size() == 1, -1);
+                     string filename = validFilenames.front();
+
+                     string saveKey = SessionManager::getSettingQueryForSaveKey();
+                     SessionSaveType saveType = SESSION_DONT_AUTO_SAVE;
+                     DataVariant dvSaveType(saveType);
+
+                     pConfigSettings->adoptSessionSetting(saveKey, dvSaveType);
+                     pAppWindow->openSession(QString::fromStdString(filename));
+                     pConfigSettings->deleteSessionSetting(saveKey);
+                  }
+
+                  break;
+               }
+
+               case DATASET_FILES:
+               {
+                  if (validFilenames.empty() == false)
+                  {
+                     ImporterResource importer("Auto Importer", validFilenames, mpProgress, false);
+                     importer->execute();
+                  }
+
+                  break;
+               }
+
+               default:
+                  break;
+            }
          }
-         else if (mpProgress != NULL)
+         else if (filenames.empty() == false)
          {
             string msg = "Unable to import the files specified on the command line.  " + string(APP_NAME) +
                " supports loading one session file, one or more wizard files, or one or more data set files.";
