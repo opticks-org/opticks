@@ -600,7 +600,6 @@ EXCLUDE_SYMBOLS        =
 
 EXAMPLE_PATH           = "$(SOURCE)/PlugIns/src/Tutorial" \
                          "$(SOURCE)/PlugIns/src/PlugInSampler" \
-                         "$(SOURCE)/../Release/Toolkit/src" \
                          "$(SOURCE)/ApiDocs"
 
 # If the value of the EXAMPLE_PATH tag contains directories, you can use the 
