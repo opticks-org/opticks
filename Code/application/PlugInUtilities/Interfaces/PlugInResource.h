@@ -278,13 +278,13 @@ public:
     *           available on ImportAgent.
     */
    ImporterResource(const std::string& importerName,
-                    const std::map<std::string, std::vector<ImportDescriptor*> >& descriptors,
+                    const std::map<std::string, std::vector<ImportDescriptor*> >& datasets,
                     Progress* pProgress = NULL, bool batch = true)
    {
       ImportAgent* pAgent = get();
       if (pAgent != NULL)
       {
-         pAgent->instantiate(importerName, descriptors, pProgress, batch);
+         pAgent->instantiate(importerName, datasets, pProgress, batch);
       }
    }
 
