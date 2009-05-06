@@ -10,6 +10,7 @@
 #include "AebIo.h"
 
 #include "Aeb.h"
+#include "ApplicationServices.h"
 #include "Rdf.h"
 #include "StringUtilities.h"
 
@@ -315,7 +316,7 @@ bool AebIo::fromFile(const std::string& fname, std::string& errMsg)
    }
 
    // Load icon and licenses
-   if (!mObj.mIconURL.empty())
+   if (Service<ApplicationServices>()->isInteractive() && !mObj.mIconURL.empty())
    {
       bool wasValidPath = true;
       QByteArray bytes = getBytesFromAeb(QString::fromStdString(mObj.mIconURL), wasValidPath);
@@ -324,7 +325,7 @@ bool AebIo::fromFile(const std::string& fname, std::string& errMsg)
          QImage img;
          if (img.loadFromData(bytes))
          {
-            mObj.mIcon = QPixmap::fromImage(img).scaled(64, 64, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            mObj.mpIcon = new QPixmap(QPixmap::fromImage(img).scaled(64, 64, Qt::KeepAspectRatio, Qt::SmoothTransformation));
          }
          else
          {

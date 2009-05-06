@@ -23,8 +23,13 @@ namespace
    bool andAccum(bool a, bool b) { return a && b; }
 };
 
-Aeb::Aeb() : mHidden(false)
+Aeb::Aeb() : mHidden(false), mpIcon(NULL)
 {
+}
+
+Aeb::~Aeb()
+{
+   delete mpIcon;
 }
 
 bool Aeb::validate() const
@@ -221,7 +226,7 @@ std::map<std::string, std::string> Aeb::getHelpEntries() const
 
 QPixmap Aeb::getIcon() const
 {
-   return mIcon;
+   return (mpIcon != NULL) ? *mpIcon : QPixmap();
 }
 
 QStringList Aeb::getLicenses() const

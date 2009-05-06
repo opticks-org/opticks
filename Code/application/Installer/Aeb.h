@@ -32,6 +32,7 @@ class Aeb : private boost::noncopyable
 public:
 
    Aeb();
+   ~Aeb();
    bool validate() const;
    bool meetsRequirements(std::string& errMsg) const;
    bool isIncompatible(const Aeb& extension) const;
@@ -89,7 +90,7 @@ private:
    std::vector<std::string> mSplashScreenURLs;
    std::map<std::string,std::string> mHelpEntries;
 
-   QPixmap mIcon;
+   QPixmap* mpIcon;
    QStringList mLicenses;
    QFileInfo mAebFile;
 
