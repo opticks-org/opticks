@@ -241,6 +241,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
                <File Name="MovieExporter.dll" Id="F__MovieExporterPlugIn" DiskId="1" />
                <File Name="Nitf.dll" Id="F__NitfPlugIn" DiskId="1" />
                <File Name="NitfCommonTre.dll" Id="F__NitfCommonTrePlugIn" DiskId="1" />
+               <File Name="ObjectFinding.dll" Id="F__ObjectFindingPlugIn" DiskId="1" />
                <File Name="Pca.dll" Id="F__PcaPlugIn" DiskId="1" />
                <File Name="Pictures.dll" Id="F__PicturesPlugIn" DiskId="1" />
                <File Name="Results.dll" Id="F__ResultsPlugIn" DiskId="1" />
