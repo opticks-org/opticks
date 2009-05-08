@@ -32,7 +32,9 @@ ScriptingWindow::ScriptingWindow(const string& id, QWidget* pParent) :
    mErrorFont(QApplication::font()),
    mOutputColor(Qt::darkGreen),
    mErrorColor(Qt::darkRed),
-   mScrollBuffer(512)
+   mScrollBuffer(512),
+   mpSessionManager(Service<SessionManager>().get(),
+            SIGNAL_NAME(SessionManager, Closed), Slot(this, &ScriptingWindow::sessionClosed))
 {
    // Widget stack
    mpStack = new QStackedWidget(this);
@@ -261,8 +263,7 @@ void ScriptingWindow::updateInterpreters()
    vector<PlugInDescriptor*> plugIns = pManager->getPlugInDescriptors(PlugInManagerServices::InterpreterType());
 
    // Remove existing tabs for removed plug-ins
-   int tabs = mpTabWidget->count();
-   for (int i = 0; i < tabs; ++i)
+   for (int i = 0; i < mpTabWidget->count(); ++i)
    {
       QString strTabLabel = mpTabWidget->tabText(i);
       if (strTabLabel.isEmpty() == false)
@@ -287,7 +288,7 @@ void ScriptingWindow::updateInterpreters()
          if (plugInIter == plugIns.end())
          {
             ScriptingWidget* pWidget = static_cast<ScriptingWidget*> (mpTabWidget->widget(i));
-            mpTabWidget->removeTab(i);
+            mpTabWidget->removeTab(i--);
             delete pWidget;
          }
       }
@@ -328,5 +329,15 @@ void ScriptingWindow::updateInterpreters()
    else
    {
       mpStack->setCurrentWidget(mpEmptyLabel);
+   }
+}
+
+void ScriptingWindow::sessionClosed(Subject &subject, const std::string &signal, const boost::any &data)
+{
+   while (mpTabWidget->count() > 0)
+   {
+      ScriptingWidget* pWidget = static_cast<ScriptingWidget*>(mpTabWidget->widget(0));
+      mpTabWidget->removeTab(0);
+      delete pWidget;
    }
 }

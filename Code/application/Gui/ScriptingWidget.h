@@ -10,14 +10,16 @@
 #ifndef SCRIPTINGWIDGET_H
 #define SCRIPTINGWIDGET_H
 
+#include "AttachmentPtr.h"
+#include "PlugInManagerServices.h"
+#include "PlugInResource.h"
+
 #include <QtCore/QMap>
 #include <QtCore/QStringList>
 #include <QtGui/QTextEdit>
 
 #include <string>
 #include <boost/any.hpp>
-
-#include "PlugInResource.h"
 
 class Subject;
 
@@ -81,9 +83,9 @@ private:
 
    QString mInterpreterName;
    ExecutableResource mInterpreter;
+   AttachmentPtr<PlugInManagerServices> mpPims;
 
-   bool mPlugInManagerDestroyed;
-   void plugInManagerDestroyed(Subject &subject, const std::string &signal, const boost::any &data);
+   void plugInDestroyed(Subject &subject, const std::string &signal, const boost::any &data);
 };
 
 #endif

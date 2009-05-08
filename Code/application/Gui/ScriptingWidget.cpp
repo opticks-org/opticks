@@ -31,7 +31,8 @@ ScriptingWidget::ScriptingWidget(const QString& strPlugInName, QWidget* parent) 
    mMaxParagraphs(512),
    mInterpreterName(strPlugInName),
    mInterpreter(NULL, false),
-   mPlugInManagerDestroyed(false)
+   mpPims(Service<PlugInManagerServices>().get(), SIGNAL_NAME(PlugInManagerServices, PlugInDestroyed), 
+      Slot(this, &ScriptingWidget::plugInDestroyed))
 {
    // TODO: Add a syntax highlighter to set the command color
 
@@ -42,22 +43,10 @@ ScriptingWidget::ScriptingWidget(const QString& strPlugInName, QWidget* parent) 
    loadInterpreter();
    appendPrompt();
    setFocus();
-
-   Service<PlugInManagerServices>()->attach(SIGNAL_NAME(Subject, Deleted), 
-      Slot(this, &ScriptingWidget::plugInManagerDestroyed));
 }
 
 ScriptingWidget::~ScriptingWidget()
 {
-   if (mPlugInManagerDestroyed == false)
-   {
-      Service<PlugInManagerServices>()->detach(SIGNAL_NAME(Subject, Deleted), 
-         Slot(this, &ScriptingWidget::plugInManagerDestroyed));
-   }
-   else
-   {
-      mInterpreter->releasePlugIn(); //ie. PlugInManagerServices is already gone
-   }
 }
 
 void ScriptingWidget::setCommandFont(const QFont& commandFont)
@@ -508,9 +497,11 @@ void ScriptingWidget::loadInterpreter()
    }
 }
 
-void ScriptingWidget::plugInManagerDestroyed(Subject &subject, const std::string &signal, const boost::any &data)
+void ScriptingWidget::plugInDestroyed(Subject &subject, const std::string &signal, const boost::any &data)
 {
-   mPlugInManagerDestroyed = true;
-   mInterpreter->setPlugIn(NULL);
-   mCommandColors.clear();
+   if (boost::any_cast<PlugIn*>(data) == mInterpreter->getPlugIn())
+   {
+      mInterpreter->setPlugIn(NULL);
+      mCommandColors.clear();
+   }
 }

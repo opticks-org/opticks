@@ -10,12 +10,13 @@
 #ifndef SCRIPTINGWINDOW_H
 #define SCRIPTINGWINDOW_H
 
+#include "AttachmentPtr.h"
+#include "DockWindowAdapter.h"
+#include "SessionManager.h"
+
 #include <QtGui/QLabel>
 #include <QtGui/QTabWidget>
 #include <QtGui/QStackedWidget>
-
-#include "DockWindowAdapter.h"
-
 #include <string>
 
 class ScriptingWidget;
@@ -55,6 +56,8 @@ public slots:
    void updateInterpreters();
 
 private:
+   void sessionClosed(Subject &subject, const std::string &signal, const boost::any &data);
+
    QLabel* mpEmptyLabel;
    QTabWidget* mpTabWidget;
    QStackedWidget* mpStack;
@@ -67,6 +70,7 @@ private:
    QColor mErrorColor;
 
    int mScrollBuffer;
+   AttachmentPtr<SessionManager> mpSessionManager;
 };
 
 #endif
