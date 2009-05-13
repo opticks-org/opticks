@@ -19,6 +19,8 @@ subdirs = ["pthreads-wrapper"]
 srcs = map(lambda x,bd=build_dir: '%s/%s' % (bd,x), glob.glob("*.cpp"))
 mocfiles = map(lambda x,bd=build_dir,e=env: e.Moc('%s/Interfaces/%s' % (bd,x)),
                ["AlgorithmDialog.h",
+                "AnimationFrameSpinBox.h",
+                "AnimationFrameSubsetWidget.h",
                 "CustomColorButton.h",
                 "CustomTreeWidget.h",
                 "FileBrowser.h",
