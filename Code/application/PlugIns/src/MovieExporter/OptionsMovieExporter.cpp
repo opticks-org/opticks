@@ -8,6 +8,7 @@
  */
 
 #include "AnimationController.h"
+#include "AnimationFrameSubsetWidget.h"
 #include "LabeledSection.h"
 #include "OptionQWidgetWrapper.h"
 #include "OptionsMovieExporter.h"
@@ -324,22 +325,8 @@ OptionsMovieExporter::OptionsMovieExporter() :
    setFramerate(boost::rational<int>(1, 1));
 
    // subset options
-   QWidget* pSubsetLayoutWidget = new QWidget(this);
-   mpStartLabel = new QLabel("Start Time:", pSubsetLayoutWidget);
-   mpStopLabel = new QLabel("Stop Time:", pSubsetLayoutWidget);
-   mpStart = new QDoubleSpinBox(pSubsetLayoutWidget);
-   mpStart->setRange(0.0, 0.0);
-   mpStop = new QDoubleSpinBox(pSubsetLayoutWidget);
-   mpStop->setRange(0.0, 0.0);
-   QGridLayout* pSubsetLayout = new QGridLayout(pSubsetLayoutWidget);
-   pSubsetLayout->setMargin(0);
-   pSubsetLayout->setSpacing(5);
-   pSubsetLayout->addWidget(mpStartLabel, 0, 0);
-   pSubsetLayout->addWidget(mpStart, 0, 1);
-   pSubsetLayout->addWidget(mpStopLabel, 0, 2);
-   pSubsetLayout->addWidget(mpStop, 0, 3);
-   pSubsetLayout->setColumnStretch(5, 10);
-   LabeledSection* pSubsetSection = new LabeledSection(pSubsetLayoutWidget, "Export Subset Options", this);
+   mpFrameSubset = new AnimationFrameSubsetWidget(this);
+   LabeledSection* pSubsetSection = new LabeledSection(mpFrameSubset, "Export Subset Options", this);
 
    // Advanced Options
    QWidget* pAdvancedLayoutWidget = new QWidget(this);
@@ -472,7 +459,7 @@ OptionsMovieExporter::OptionsMovieExporter() :
    addSection(pAdvancedSection);
    addSection(mpSettingsSection);
    addStretch(10);
-   setSizeHint(400, 350);
+   setSizeHint(400, 450);
 }
 
 OptionsMovieExporter::~OptionsMovieExporter()
@@ -559,36 +546,29 @@ void OptionsMovieExporter::setBitrate(unsigned int bitrate)
    }
 }
 
-void OptionsMovieExporter::setRange(double start, double stop)
+void OptionsMovieExporter::setFrames(AnimationController* pController)
 {
-   mpStart->setRange(start, stop);
-   mpStop->setRange(start, stop);
+   mpFrameSubset->setFrames(pController);
 }
 
-double OptionsMovieExporter::getStart() const
+double OptionsMovieExporter::getStartFrame() const
 {
-   return mpStart->value();
+   return mpFrameSubset->getStartFrame();
 }
 
-void OptionsMovieExporter::setStart(double start)
+void OptionsMovieExporter::setStartFrame(double start)
 {
-   if (start >= mpStart->minimum() && start <= mpStart->maximum())
-   {
-      mpStart->setValue(start);
-   }
+   mpFrameSubset->setStartFrame(start);
 }
 
-double OptionsMovieExporter::getStop() const
+double OptionsMovieExporter::getStopFrame() const
 {
-   return mpStop->value();
+   return mpFrameSubset->getStopFrame();
 }
 
-void OptionsMovieExporter::setStop(double stop)
+void OptionsMovieExporter::setStopFrame(double stop)
 {
-   if (stop >= mpStop->minimum() && stop <= mpStop->maximum())
-   {
-      mpStop->setValue(stop);
-   }
+   mpFrameSubset->setStopFrame(stop);
 }
 
 boost::rational<int> OptionsMovieExporter::getFramerate() const
@@ -936,34 +916,5 @@ void OptionsMovieExporter::frameRateListChanged(const QString &value)
          mpFramerateNum->setEnabled(false);
          mpFramerateDen->setEnabled(false);
       }
-   }
-}
-
-void OptionsMovieExporter::setFrameType(FrameType eType)
-{
-   switch (eType)
-   {
-   case FRAME_ID:
-      mpStartLabel->setText("Start Frame");
-      mpStart->setToolTip("First frame to export, 1-based frame number");
-      mpStart->setSingleStep(1.0);
-      mpStart->setDecimals(0);
-      mpStopLabel->setText("Stop Frame");
-      mpStop->setToolTip("Last frame to export, 1-based frame number");
-      mpStop->setSingleStep(1.0);
-      mpStop->setDecimals(0);
-      break;
-   case FRAME_TIME:
-      mpStartLabel->setText("Start Time");
-      mpStart->setToolTip("Time of first frame to export");
-      mpStart->setSingleStep(0.001);
-      mpStart->setDecimals(3);
-      mpStopLabel->setText("Stop Time");
-      mpStop->setToolTip("Time of last frame to export");
-      mpStop->setSingleStep(0.001);
-      mpStop->setDecimals(3);
-      break;
-   default:
-      break;
    }
 }

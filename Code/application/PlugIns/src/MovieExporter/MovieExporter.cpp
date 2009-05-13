@@ -350,7 +350,7 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
       {
          if (mpOptionWidget.get() != NULL)
          {
-            startExport = mpOptionWidget->getStart();
+            startExport = mpOptionWidget->getStartFrame();
          }
          else
          {
@@ -376,7 +376,7 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
       {
          if (mpOptionWidget.get() != NULL)
          {
-            stopExport = mpOptionWidget->getStop();
+            stopExport = mpOptionWidget->getStopFrame();
          }
          else
          {
@@ -683,34 +683,20 @@ QWidget* MovieExporter::getExportOptionsWidget(const PlugInArgList* pInArgList)
          AnimationController* pController = pView->getAnimationController();
          if (pController != NULL)
          {
-            // Frame type
-            FrameType eType = pController->getFrameType();
-            mpOptionWidget->setFrameType(eType);
+            mpOptionWidget->setFrames(pController);
 
-            // set range to start and stop frames
             double start = pController->getStartFrame();
             double stop = pController->getStopFrame();
-            if (eType == FRAME_ID) // values are frame numbers so add 1 so first frame is 1 and not 0
-            {
-               ++start;
-               ++stop;
-            }
-            mpOptionWidget->setRange(start, stop);
 
             // now check if need to change start and stop to playback bumpers
             if (pController->getBumpersEnabled())
             {
                start = pController->getStartBumper();
                stop = pController->getStopBumper();
-               if (eType == FRAME_ID) // have to adjust playback bumpers if values are FRAME_ID
-               {
-                  ++start;
-                  ++stop;
-               }
             }
 
-            mpOptionWidget->setStart(start);
-            mpOptionWidget->setStop(stop);
+            mpOptionWidget->setStartFrame(start);
+            mpOptionWidget->setStopFrame(stop);
 
             // Frame rate
             rational<int> frameRate = pController->getMinimumFrameRate() * pController->getIntervalMultiplier();

@@ -10,18 +10,20 @@
 #include <sys/timeb.h>
 
 #include <QtCore/QString>
-#include <QtGui/QIcon>
 #include <QtGui/QApplication>
 #include <QtGui/QDialog>
 #include <QtGui/QDialogButtonBox>
 #include <QtGui/QDoubleSpinBox>
+#include <QtGui/QFrame>
 #include <QtGui/QGridLayout>
+#include <QtGui/QIcon>
 #include <QtGui/QLabel>
 #include <QtGui/QMessageBox>
 
 #include "AnimationAdapter.h"
 #include "AnimationController.h"
 #include "AnimationControllerImp.h"
+#include "AnimationFrameSubsetWidget.h"
 #include "AnimationServices.h"
 #include "ApplicationServices.h"
 #include "AppVerify.h"
@@ -1403,56 +1405,30 @@ void AnimationControllerImp::restoreBumpers()
 
 void AnimationControllerImp::adjustBumpers()
 {
-   double startFrame = mStartFrame;
-   double stopFrame = mStopFrame;
-   double startBumper = mStartBumper;
-   double stopBumper = mStopBumper;
-   if (getFrameType() == FRAME_ID)
-   {
-      ++startFrame;
-      ++stopFrame;
-      ++startBumper;
-      ++stopBumper;
-   }
    QDialog dlg(mpDesktop->getMainWidget());
    dlg.setWindowTitle("Adjust Bumpers");
    dlg.setModal(true);
-   QGridLayout* pGrid = new QGridLayout(&dlg);
-   QLabel* pLeftLabel = new QLabel("Left Bumper", &dlg);
-   QLabel* pRightLabel = new QLabel("Right Bumper", &dlg);
-   QDoubleSpinBox* pLeftSpin = new QDoubleSpinBox(&dlg);
-   pLeftSpin->setDecimals(6);
-   pLeftSpin->setRange(startFrame, stopFrame);
-   pLeftSpin->setValue(startBumper);
-   pLeftSpin->setMinimumWidth(80);
-   QDoubleSpinBox* pRightSpin = new QDoubleSpinBox(&dlg);
-   pRightSpin->setDecimals(6);
-   pRightSpin->setRange(startFrame, stopFrame);
-   pRightSpin->setValue(stopBumper);
-   pRightSpin->setMinimumWidth(80);
+   QVBoxLayout* pLayout = new QVBoxLayout(&dlg);
+   AnimationFrameSubsetWidget* pFrameSubset = new AnimationFrameSubsetWidget(&dlg);
+   pFrameSubset->setFrames(dynamic_cast<AnimationController*>(this));
+   pFrameSubset->setStartFrame(mStartBumper);
+   pFrameSubset->setStopFrame(mStopBumper);
    QDialogButtonBox* pButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
       Qt::Horizontal, &dlg);
-   pGrid->setMargin(10);
-   pGrid->setSpacing(10);
-   pGrid->addWidget(pLeftLabel, 0, 0);
-   pGrid->addWidget(pRightLabel, 0, 1);
-   pGrid->addWidget(pLeftSpin, 1, 0);
-   pGrid->addWidget(pRightSpin, 1, 1);
-   pGrid->addWidget(pButtonBox, 2, 0, 1, 2);
+   QFrame* pLine = new QFrame(&dlg);
+   pLine->setFrameStyle(QFrame::HLine | QFrame::Sunken);
+   pLayout->setMargin(10);
+   pLayout->setSpacing(10);
+   pLayout->addWidget(pFrameSubset);
+   pLayout->addStretch();
+   pLayout->addWidget(pLine);
+   pLayout->addWidget(pButtonBox);
    VERIFYNR(connect(pButtonBox, SIGNAL(accepted()), &dlg, SLOT(accept())));
    VERIFYNR(connect(pButtonBox, SIGNAL(rejected()), &dlg, SLOT(reject())));
-   dlg.setFixedSize(dlg.sizeHint());
 
    if (dlg.exec() == QDialog::Accepted)
    {
-      double newStartBumper = pLeftSpin->value();
-      double newStopBumper = pRightSpin->value();
-      if (getFrameType() == FRAME_ID)
-      {
-         --newStartBumper;
-         --newStopBumper;
-      }
-      setStartBumper(newStartBumper);
-      setStopBumper(newStopBumper);
+      setStartBumper(pFrameSubset->getStartFrame());
+      setStopBumper(pFrameSubset->getStopFrame());
    }
 }

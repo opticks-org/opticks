@@ -18,6 +18,7 @@
 #include <QtCore/QMetaType>
 
 class AnimationController;
+class AnimationFrameSubsetWidget;
 class LabeledSection;
 class QCheckBox;
 class QComboBox;
@@ -63,13 +64,12 @@ public:
    void getResolution(unsigned int &width, unsigned int &height) const;
    void setResolution(unsigned int width, unsigned int height);
 
-   void setRange(double start, double stop);
-   double getStart() const;
-   void setStart(double start);
-   double getStop() const;
-   void setStop(double stop);
+   void setFrames(AnimationController* pController);
+   double getStartFrame() const;
+   void setStartFrame(double start);
+   double getStopFrame() const;
+   void setStopFrame(double stop);
    unsigned int getBitrate() const;
-   void setFrameType(FrameType eType);
    void setBitrate(unsigned int bitrate);
    boost::rational<int> getFramerate() const;
    void setFramerate(boost::rational<int> frameRate);
@@ -175,10 +175,7 @@ private:
 
    QSlider* mpBitrate;
    QLabel* mpBitrateValue;
-   QLabel* mpStartLabel;
-   QDoubleSpinBox* mpStart;
-   QDoubleSpinBox* mpStop;
-   QLabel* mpStopLabel;
+   AnimationFrameSubsetWidget* mpFrameSubset;
    QSpinBox* mpFramerateNum;
    QSpinBox* mpFramerateDen;
    QComboBox* mpFramerateList;
