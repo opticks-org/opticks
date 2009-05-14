@@ -141,8 +141,8 @@ public:
    /**
     *  Sets a Resource object to another one.
     *
-    *  Sets a Resource object to another one. The object assigned to
-    *  takes ownership of the wrapped object from the source object.
+    *  The assigned object takes ownership of the wrapped object from the
+    *  source object.
     *
     *  @param   source
     *           The Resource object to assign from. After this call, the source no longer owns the wrapped object.
@@ -169,8 +169,8 @@ public:
    /**
     *  Destructs a %Resource object.
     *
-    *  Destructs a %Resource object. If the %Resource object owns the wrapped object, the wrapped object
-    *  will be freed via the SourceTrait's releaseResource method.
+    *  If the %Resource object owns the wrapped object, the wrapped object will
+    *  be freed via the SourceTrait's releaseResource method.
     */
    virtual ~Resource()
    {
@@ -178,8 +178,6 @@ public:
    }
 
    /**
-    *  Gets the args that were used when the %Resource was created.
-    *
     *  Gets the args that were used when the %Resource was created.
     *
     *  @return   The args that were used when the %Resource was created.
@@ -190,8 +188,16 @@ public:
    }
 
    /**
-    *  Gets a pointer to the underlying object.
+    *  Gets the args that were used when the %Resource was created.
     *
+    *  @return   The args that were used when the %Resource was created.
+    */
+   Args& getArgs()
+   {
+      return mArgs;
+   }
+
+   /**
     *  Gets a pointer to the underlying object.
     *
     *  @return   A pointer to the underlying object.
@@ -204,8 +210,6 @@ public:
    /**
     *  Gets a pointer to the underlying object.
     *
-    *  Gets a pointer to the underlying object.
-    *
     *  @return   A pointer to the underlying object.
     */
    T* get()
@@ -214,8 +218,6 @@ public:
    }
 
    /**
-    *  Gets a pointer to the underlying object.
-    *
     *  Gets a pointer to the underlying object.
     *
     *  @return   A pointer to the underlying object.
@@ -228,8 +230,6 @@ public:
    /**
     *  Gets a pointer to the underlying object.
     *
-    *  Gets a pointer to the underlying object.
-    *
     *  @return   A pointer to the underlying object.
     */
    T* operator->()
@@ -240,8 +240,6 @@ public:
    /**
     *  Gets a reference to the underlying object.
     *
-    *  Gets a reference to the underlying object.
-    *
     *  @return   A reference to the underlying object.
     */
    const T& operator*() const
@@ -250,8 +248,6 @@ public:
    }
 
    /**
-    *  Gets a reference to the underlying object.
-    *
     *  Gets a reference to the underlying object.
     *
     *  @return   A reference to the underlying object.
@@ -348,6 +344,7 @@ protected:
          mOwns = false;
       }
    }
+
 private:
    Args mArgs;
    mutable bool mOwns;

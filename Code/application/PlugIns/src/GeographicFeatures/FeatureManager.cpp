@@ -85,6 +85,7 @@ FeatureManager::FeatureManager() :
    setProductionStatus(APP_IS_PRODUCTION_RELEASE);
    destroyAfterExecute(false);
    executeOnStartup(true);
+   setWizardSupported(false);
 }
 
 FeatureManager::~FeatureManager()

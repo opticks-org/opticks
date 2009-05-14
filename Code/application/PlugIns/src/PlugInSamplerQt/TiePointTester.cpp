@@ -193,6 +193,7 @@ TiePointTester::TiePointTester() :
    setDescription("Tie Point Tester Plugin");
    setMenuLocation("[Demo]\\Tie Point Tester");
    setDescriptorId("{4923A4BC-8819-40cd-8372-E28AC27D6416}");
+   setWizardSupported(false);
 }
 
 /**

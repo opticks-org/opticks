@@ -7,10 +7,13 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include "DataVariant.h"
+#include "WizardObject.h"
 #include "WizardObjectImp.h"
 #include "WizardItemImp.h"
 #include "WizardNodeImp.h"
 
+#include <memory>
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
 
@@ -25,9 +28,10 @@ WizardObjectImp::~WizardObjectImp()
 
 void WizardObjectImp::setName(const string& name)
 {
-   if (name.empty() == false)
+   if ((name.empty() == false) && (name != mName))
    {
       mName = name;
+      notify(SIGNAL_NAME(WizardObjectImp, Renamed), boost::any(mName));
    }
 }
 
@@ -36,15 +40,54 @@ const string& WizardObjectImp::getName() const
    return mName;
 }
 
-WizardItem* WizardObjectImp::addItem(string itemName, string itemType)
+WizardItem* WizardObjectImp::addPlugInItem(const string& itemName, const string& itemType)
 {
-   WizardItem* pItem = new WizardItemImp(itemName, itemType);
-   if (pItem != NULL)
+   if ((itemName.empty() == true) || (itemType.empty() == true))
    {
-      mItems.push_back(pItem);
+      return NULL;
    }
 
+   WizardItem* pItem = new WizardItemImp(dynamic_cast<WizardObject*>(this), itemName, itemType);
+   addItem(pItem);
+
    return pItem;
+}
+
+WizardItem* WizardObjectImp::addValueItem(const string& itemName, const DataVariant& value)
+{
+   if (itemName.empty() == true)
+   {
+      return NULL;
+   }
+
+   WizardItemImp* pItem = new WizardItemImp(dynamic_cast<WizardObject*>(this), itemName, value);
+   addItem(pItem);
+
+   return pItem;
+}
+
+void WizardObjectImp::addItem(WizardItem* pItem)
+{
+   WizardItemImp* pItemImp = static_cast<WizardItemImp*>(pItem);
+   if (pItemImp == NULL)
+   {
+      return;
+   }
+
+   if (find(mItems.begin(), mItems.end(), pItem) != mItems.end())
+   {
+      return;
+   }
+
+   // Set the initial batch mode based on the wizard batch mode
+   pItemImp->setBatchMode(mbBatch);
+
+   // Add the item
+   mItems.push_back(pItem);
+   pItemImp->attach(SIGNAL_NAME(WizardItemImp, ItemConnected), Slot(this, &WizardObjectImp::itemConnected));
+
+   // Notify connected objects
+   notify(SIGNAL_NAME(WizardObjectImp, ItemAdded), boost::any(pItem));
 }
 
 const vector<WizardItem*>& WizardObjectImp::getItems() const
@@ -64,7 +107,10 @@ bool WizardObjectImp::removeItem(WizardItem* pItem)
       WizardItem* pCurrentItem = *iter;
       if (pCurrentItem == pItem)
       {
+         static_cast<WizardItemImp*>(pItem)->detach(SIGNAL_NAME(WizardItemImp, ItemConnected),
+            Slot(this, &WizardObjectImp::itemConnected));
          mItems.erase(iter);
+         notify(SIGNAL_NAME(WizardObjectImp, ItemRemoved), boost::any(pItem));
          delete static_cast<WizardItemImp*>(pItem);
          return true;
       }
@@ -113,6 +159,7 @@ bool WizardObjectImp::increaseItemOrder(WizardItem* pItem)
             {
                iter = mItems.erase(iter);
                mItems.insert(inputIter, pCurrentItem);
+               notify(SIGNAL_NAME(WizardObjectImp, ExecutionOrderChanged));
                return true;
             }
          }
@@ -183,6 +230,7 @@ bool WizardObjectImp::decreaseItemOrder(WizardItem* pItem)
       if (pCurrentItem == pItem)
       {
          mItems.insert(iter, pRemoveItem);
+         notify(SIGNAL_NAME(WizardObjectImp, ExecutionOrderChanged));
          return true;
       }
    }
@@ -190,9 +238,45 @@ bool WizardObjectImp::decreaseItemOrder(WizardItem* pItem)
    return false;
 }
 
+int WizardObjectImp::getExecutionOrder(WizardItem* pItem) const
+{
+   if (pItem == NULL)
+   {
+      return -1;
+   }
+
+   for (vector<WizardItem*>::size_type i = 0; i < mItems.size(); ++i)
+   {
+      WizardItem* pCurrentItem = mItems[i];
+      if (pCurrentItem == pItem)
+      {
+         return static_cast<int>(i + 1);
+      }
+   }
+
+   return -1;
+}
+
 void WizardObjectImp::setBatch(bool bBatch)
 {
-   mbBatch = bBatch;
+   if (bBatch != mbBatch)
+   {
+      mbBatch = bBatch;
+      if (mbBatch == true)
+      {
+         // Force all wizard items to be in batch mode
+         for (vector<WizardItem*>::iterator iter = mItems.begin(); iter != mItems.end(); ++iter)
+         {
+            WizardItemImp* pItem = static_cast<WizardItemImp*>(*iter);
+            if (pItem != NULL)
+            {
+               pItem->setBatchMode(true);
+            }
+         }
+      }
+
+      notify(SIGNAL_NAME(WizardObjectImp, BatchModeChanged), boost::any(mbBatch));
+   }
 }
 
 bool WizardObjectImp::isBatch() const
@@ -202,7 +286,11 @@ bool WizardObjectImp::isBatch() const
 
 void WizardObjectImp::setMenuLocation(const string& location)
 {
-   mMenuLocation = location;
+   if (location != mMenuLocation)
+   {
+      mMenuLocation = location;
+      notify(SIGNAL_NAME(WizardObjectImp, MenuLocationChanged), boost::any(mMenuLocation));
+   }
 }
 
 const string& WizardObjectImp::getMenuLocation() const
@@ -258,20 +346,20 @@ bool WizardObjectImp::fromXml(DOMNode* pDocument, unsigned int version)
    mbBatch = StringUtilities::fromXmlString<bool>(v);
    mMenuLocation = A(elmnt->getAttribute(X("menuLocation")));
 
-   mItems.clear();
+   clear();
    vector<WizardConnection> connections;
    for (DOMNode* pChld = pDocument->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
    {
       if (XMLString::equals(pChld->getNodeName(), X("item")))
       {
-         WizardItem* pItem(new WizardItemImp("", ""));
+         std::auto_ptr<WizardItemImp> pItem(new WizardItemImp(dynamic_cast<WizardObject*>(this), string(), string()));
          if (pItem->fromXml(pChld, version))
          {
-            mItems.push_back(pItem);
+            pItem->attach(SIGNAL_NAME(WizardItemImp, ItemConnected), Slot(this, &WizardObjectImp::itemConnected));
+            mItems.push_back(pItem.release());
          }
          else
          {
-            delete dynamic_cast<WizardItemImp*>(pItem);
             return false;
          }
       }
@@ -308,4 +396,46 @@ bool WizardObjectImp::isKindOf(const string& className) const
    }
 
    return SubjectImp::isKindOf(className);
+}
+
+void WizardObjectImp::itemConnected(Subject& subject, const string& signal, const boost::any& data)
+{
+   WizardItem* pItem = dynamic_cast<WizardItem*>(&subject);
+   VERIFYNRV(pItem != NULL);
+
+   WizardItem* pConnectedItem = boost::any_cast<WizardItem*>(data);
+   VERIFYNRV(pConnectedItem != NULL);
+
+   WizardItem* pInputItem = NULL;
+   WizardItem* pOutputItem = NULL;
+
+   if (pItem->isItemConnected(pConnectedItem, true) == true)
+   {
+      pInputItem = pItem;
+      pOutputItem = pConnectedItem;
+   }
+   else
+   {
+      pInputItem = pConnectedItem;
+      pOutputItem = pItem;
+   }
+
+   if ((pInputItem == NULL) || (pOutputItem == NULL))
+   {
+      return;
+   }
+
+   int outputOrder = getExecutionOrder(pOutputItem);
+   int inputOrder = getExecutionOrder(pInputItem);
+
+   while (outputOrder > inputOrder)
+   {
+      if (decreaseItemOrder(pOutputItem) == false)
+      {
+         break;
+      }
+
+      outputOrder = getExecutionOrder(pOutputItem);
+      inputOrder = getExecutionOrder(pInputItem);
+   }
 }

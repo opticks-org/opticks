@@ -31,6 +31,7 @@ LogContextMenuActions::LogContextMenuActions() :
    executeOnStartup(true);
    allowMultipleInstances(false);
    destroyAfterExecute(false);
+   setWizardSupported(false);
 }
 
 LogContextMenuActions::~LogContextMenuActions()

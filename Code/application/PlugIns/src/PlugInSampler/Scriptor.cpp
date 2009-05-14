@@ -30,6 +30,7 @@ Scriptor::Scriptor()
    setDescriptorId("{5E784B90-4E74-484e-8E2A-6F61F2E835DC}");
    allowMultipleInstances(false);
    destroyAfterExecute(false);
+   setWizardSupported(false);
 }
 
 Scriptor::~Scriptor()

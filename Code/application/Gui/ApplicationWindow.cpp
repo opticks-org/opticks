@@ -99,7 +99,6 @@
 #include "PlugInDescriptor.h"
 #include "PlugInManagerServicesImp.h"
 #include "PlugInResource.h"
-#include "PlugInSelectDlg.h"
 #include "ProductViewAdapter.h"
 #include "ProductWindowAdapter.h"
 #include "ProgressAdapter.h"

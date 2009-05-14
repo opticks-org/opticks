@@ -717,6 +717,9 @@ Icons::Icons()
    mDecrease = QPixmap(IconImages::DecreaseIcon);
    mDecrease.setMask(mDecrease.createHeuristicMask());
 
+   mWizardItem = QPixmap(IconImages::WizardItemIcon);
+   mWizardItem.setMask(mWizardItem.createMaskFromColor(Qt::white));
+
    // Modules
    mModule = QPixmap(IconImages::ModuleIcon);
    mModule.setMask(QPixmap(IconImages::ModuleMask));

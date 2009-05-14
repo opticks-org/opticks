@@ -136,6 +136,19 @@ bool WizardExecutor::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLi
       return false;
    }
 
+   const vector<WizardItem*>& wizardItems = mpWizard->getItems();
+   if (wizardItems.empty() == true)
+   {
+      mMessage = "There are no items in the wizard to execute.";
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(mMessage, 0, ERRORS);
+      }
+
+      pStep->finalize(Message::Failure, mMessage);
+      return false;
+   }
+
    pStep->addProperty("wizard", mpWizard->getName());
 
    mpWizard->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &WizardExecutor::wizardDeleted));
@@ -148,7 +161,6 @@ bool WizardExecutor::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLi
 
    pStep->addMessage(mMessage, "app", "2D53370C-DD0D-4160-9BD5-4D46C49A4B7E", true);
 
-   const vector<WizardItem*>& wizardItems = mpWizard->getItems();
    for (vector<WizardItem*>::const_iterator wiIter = wizardItems.begin(); wiIter != wizardItems.end(); ++wiIter)
    {
       WizardItem* pItem = *wiIter;

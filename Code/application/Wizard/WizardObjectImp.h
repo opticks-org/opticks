@@ -18,6 +18,7 @@
 #include <string>
 #include <vector>
 
+class DataVariant;
 class WizardItem;
 
 /**
@@ -52,6 +53,13 @@ public:
     */
    ~WizardObjectImp();
 
+   SIGNAL_METHOD(WizardObjectImp, Renamed);
+   SIGNAL_METHOD(WizardObjectImp, MenuLocationChanged);
+   SIGNAL_METHOD(WizardObjectImp, BatchModeChanged);
+   SIGNAL_METHOD(WizardObjectImp, ItemAdded);
+   SIGNAL_METHOD(WizardObjectImp, ItemRemoved);
+   SIGNAL_METHOD(WizardObjectImp, ExecutionOrderChanged);
+
    /**
     *  Sets the wizard name.
     *
@@ -68,18 +76,55 @@ public:
    const std::string& getName() const;
 
    /**
-    *  Adds a new item to the wizard.
+    *  Adds a new item to the wizard based on a plug-in.
+    *
+    *  @param   itemName
+    *           The name for the item, which is typically the plug-in name.
+    *  @param   itemType
+    *           The type of the item, which is typically the plug-in type.  See
+    *           the WizardItem documentation for a list of recognized item
+    *           types.
+    *
+    *  @return  A pointer to the created wizard item.  The wizard item is owned
+    *           by the wizard object and will be deleted when removeItem() or
+    *           clear() is called, or when the wizard object is destroyed.
+    *
+    *  @see     addValueItem(), addItem(), removeItem()
+    */
+   WizardItem* addPlugInItem(const std::string& itemName, const std::string& itemType);
+
+   /**
+    *  Adds a new item to the wizard containing a single output node.
     *
     *  @param   itemName
     *           The name for the item.
-    *  @param   itemType
-    *           The type of the item.  See the WizardItem documentation for the
-    *           available item types.
+    *  @param   value
+    *           The value for the output node.  The value type must be valid
+    *           to successfully create the wizard item.
     *
-    *  @see     WizardItem
-    *  @see     WizardObjectImp::removeItem
+    *  @return  A pointer to the created wizard item.  The wizard item is owned
+    *           by the wizard object and will be deleted when removeItem() or
+    *           clear() is called, or when the wizard object is destroyed.
+    *
+    *  @see     addPlugInItem(), addItem(), removeItem()
     */
-   WizardItem* addItem(std::string itemName, std::string itemType);
+   WizardItem* addValueItem(const std::string& itemName, const DataVariant& value);
+
+   /**
+    *  Adds an existing item to the wizard.
+    *
+    *  This method adds the given item to the wizard.  The item is set to run in
+    *  batch or interactive mode based on the value returned from isBatch().
+    *  The item is not added if it already exists in the wizard.
+    *
+    *  @param   pItem
+    *           The item to add.  The wizard object assumes ownership of the
+    *           wizard item.  It will be deleted when removeItem() or clear() is
+    *           called, or when the wizard object is destroyed.
+    *
+    *  @see     addPlugInItem(), addValueItem(), removeItem()
+    */
+   void addItem(WizardItem* pItem);
 
    /**
     *  Returns all items in the wizard.
@@ -150,6 +195,18 @@ public:
    bool decreaseItemOrder(WizardItem* pItem);
 
    /**
+    *  Returns the execution order of a wizard item.
+    *
+    *  @param   pItem
+    *           The wizard item to query for its execution order.
+    *
+    *  @return  The one-based execution order for the wizard item.  If \c NULL
+    *           is passed in or the given item does not exist in the wizard, a
+    *           value of -1 is returned.
+    */
+   int getExecutionOrder(WizardItem* pItem) const;
+
+   /**
     *  Sets the batch mode state of the entire wizard.
     *
     *  @param   bBatch
@@ -210,6 +267,9 @@ public:
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
 
+protected:
+   void itemConnected(Subject& subject, const std::string& signal, const boost::any& data);
+
 private:
    std::string mName;
    std::vector<WizardItem*> mItems;
@@ -219,7 +279,8 @@ private:
 
 #define WIZARDOBJECTADAPTEREXTENSION_CLASSES \
    SUBJECTADAPTEREXTENSION_CLASSES \
-   SERIALIZABLEADAPTEREXTENSION_CLASSES
+   SERIALIZABLEADAPTEREXTENSION_CLASSES \
+   , public WizardObjectExt1
 
 #define WIZARDOBJECTADAPTER_METHODS(impClass) \
    SUBJECTADAPTER_METHODS(impClass) \
@@ -244,5 +305,9 @@ private:
    { \
       return impClass::getMenuLocation(); \
    } \
+   int getExecutionOrder(WizardItem* pItem) const \
+   { \
+      return impClass::getExecutionOrder(pItem); \
+   }
 
 #endif

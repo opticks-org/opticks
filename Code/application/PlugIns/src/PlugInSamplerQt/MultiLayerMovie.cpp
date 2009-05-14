@@ -44,6 +44,7 @@ MultiLayerMovie::MultiLayerMovie() :
    setDescription("Creates 3 data cubes in a single window");
    setShortDescription( "Creates 3 data cubes in a single window" );
    setDescriptorId("{56DEB209-768F-4d34-BC97-5186AC1F580C}");
+   setWizardSupported(false);
 }
 
 bool MultiLayerMovie::getInputSpecification( PlugInArgList * &pArgList )

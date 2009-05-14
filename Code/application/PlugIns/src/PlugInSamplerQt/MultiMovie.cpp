@@ -45,6 +45,7 @@ MultiMovie::MultiMovie() :
    setDescription("Creates 3 data cubes in separate windows, all attached to a single animation controller");
    setShortDescription( "Creates 3 data cubes in separate windows, all attached to a single animation controller" );
    setDescriptorId("{C2E2BF33-F1E7-46a2-ABA4-63BDD351283E}");
+   setWizardSupported(false);
 }
 
 bool MultiMovie::getInputSpecification( PlugInArgList * &pArgList )

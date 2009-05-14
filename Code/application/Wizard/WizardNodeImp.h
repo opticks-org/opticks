@@ -60,37 +60,24 @@ public:
    /**
     *  Sets the values of this node to that of another node.
     *
-    *  This opertor sets the values of this node to the values of the given node.  The value
-    *  of the parent wizard item is not set and remains to be the original item.
+    *  This method sets the values of this node to the values of the given node.
+    *  The value of the parent wizard item is not set and remains to be the
+    *  original item.
     *
-    *  @param   node
+    *  @param   pNode
     *           The node whose values should be set in this node.
-    */
-   WizardNodeImp& operator=(const WizardNodeImp& node);
-
-   /**
-    *  Possible types of member data modifications.
     *
-    *  This enumerated type is used when calling notify() to indicate the type of change event
-    *  prompting the notify.  The address of the change type is set as the value parameter of
-    *  notify() call.
-    *
-    *  @see     WizardItemImp::WizardItemChangeType
+    *  @return  Returns \c true if this node's values are successfully set to
+    *           those of the given node, otherwise returns \c false.
     */
-   enum WizardNodeChangeTypeEnum
-   {
-      NodeName,
-      NodeType,
-      NodeDescription,
-      NodeValue,
-      ConnectedNodeAdded,
-      ConnectedNodeRemoved
-   };
+   bool copyNode(const WizardNodeImp* pNode);
 
-   /**
-    * @EnumWrapper WizardNodeImp::WizardNodeChangeTypeEnum.
-    */
-   typedef EnumWrapper<WizardNodeChangeTypeEnum> WizardNodeChangeType;
+   SIGNAL_METHOD(WizardNodeImp, Renamed)
+   SIGNAL_METHOD(WizardNodeImp, TypeChanged)
+   SIGNAL_METHOD(WizardNodeImp, DescriptionChanged)
+   SIGNAL_METHOD(WizardNodeImp, ValueChanged)
+   SIGNAL_METHOD(WizardNodeImp, NodeConnected)
+   SIGNAL_METHOD(WizardNodeImp, NodeDisconnected)
 
    /**
     *  Returns the parent wizard item.
@@ -310,6 +297,9 @@ public:
    bool isKindOf(const std::string& className) const;
 
 private:
+   WizardNodeImp(const WizardNodeImp& node);
+   WizardNodeImp& operator =(const WizardNodeImp& node);
+
    WizardItem* mpItem;
 
    static std::string mVersion;

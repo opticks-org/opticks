@@ -29,6 +29,7 @@ MessageLogTestPlugin::MessageLogTestPlugin()
    setDescription("MessageLogTest");
    setMenuLocation("[Tests]\\Message Log Test");
    setDescriptorId("{4E1D4266-D816-49a8-AAC5-ECCCF8FF2A50}");
+   setWizardSupported(false);
 }
 
 MessageLogTestPlugin::~MessageLogTestPlugin()

@@ -328,6 +328,7 @@ public:
    QPixmap mValueEdit;
    QPixmap mIncrease;
    QPixmap mDecrease;
+   QPixmap mWizardItem;
 
    // Modules
    QPixmap mModule;

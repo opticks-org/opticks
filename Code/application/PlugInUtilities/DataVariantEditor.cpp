@@ -40,81 +40,11 @@
 #include <vector>
 using namespace std;
 
+vector<DataVariantEditorDelegate> DataVariantEditor::sDelegates;
+
 DataVariantEditor::DataVariantEditor(QWidget* parent) :
    QWidget(parent)
 {
-   mDelegates.push_back(DataVariantEditorDelegate("char", DataVariantEditorDelegate::INTEGRAL));
-   mDelegates.push_back(DataVariantEditorDelegate("unsigned char", DataVariantEditorDelegate::INTEGRAL));
-   mDelegates.push_back(DataVariantEditorDelegate("short", DataVariantEditorDelegate::INTEGRAL));
-   mDelegates.push_back(DataVariantEditorDelegate("unsigned short", DataVariantEditorDelegate::INTEGRAL));
-   mDelegates.push_back(DataVariantEditorDelegate("int", DataVariantEditorDelegate::INTEGRAL));
-   mDelegates.push_back(DataVariantEditorDelegate("unsigned int", DataVariantEditorDelegate::INTEGRAL));
-   mDelegates.push_back(DataVariantEditorDelegate("long", DataVariantEditorDelegate::INTEGRAL));
-   mDelegates.push_back(DataVariantEditorDelegate("unsigned long", DataVariantEditorDelegate::INTEGRAL));
-   mDelegates.push_back(DataVariantEditorDelegate("int64_t", DataVariantEditorDelegate::INTEGRAL));
-   mDelegates.push_back(DataVariantEditorDelegate("Int64", DataVariantEditorDelegate::INTEGRAL));
-   mDelegates.push_back(DataVariantEditorDelegate("UInt64", DataVariantEditorDelegate::INTEGRAL));
-   mDelegates.push_back(DataVariantEditorDelegate("uint64_t", DataVariantEditorDelegate::INTEGRAL));
-   mDelegates.push_back(DataVariantEditorDelegate("float", DataVariantEditorDelegate::DOUBLE));
-   mDelegates.push_back(DataVariantEditorDelegate("double", DataVariantEditorDelegate::DOUBLE));
-   mDelegates.push_back(DataVariantEditorDelegate("bool", DataVariantEditorDelegate::BOOL));
-   mDelegates.push_back(DataVariantEditorDelegate("string", DataVariantEditorDelegate::TEXT));
-   mDelegates.push_back(DataVariantEditorDelegate("Filename", DataVariantEditorDelegate::TEXT, true));
-   mDelegates.push_back(DataVariantEditorDelegate("ColorType", DataVariantEditorDelegate::COLOR));
-   mDelegates.push_back(DataVariantEditorDelegate("DateTime", DataVariantEditorDelegate::DATE_TIME));
-   DataVariantEditorDelegate temp = DataVariantEditorDelegate("DisplayMode", DataVariantEditorDelegate::ENUMERATION);
-   temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<DisplayMode>());
-   mDelegates.push_back(temp);
-   temp = DataVariantEditorDelegate("EncodingType", DataVariantEditorDelegate::ENUMERATION);
-   temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<EncodingType>());
-   mDelegates.push_back(temp);
-   temp = DataVariantEditorDelegate("EndianType", DataVariantEditorDelegate::ENUMERATION);
-   temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<EndianType>());
-   mDelegates.push_back(temp);
-   temp = DataVariantEditorDelegate("GeocoordType", DataVariantEditorDelegate::ENUMERATION);
-   temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<GeocoordType>());
-   mDelegates.push_back(temp);
-   temp = DataVariantEditorDelegate("InterleaveFormatType", DataVariantEditorDelegate::ENUMERATION);
-   temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<InterleaveFormatType>());
-   mDelegates.push_back(temp);
-   temp = DataVariantEditorDelegate("LayerType", DataVariantEditorDelegate::ENUMERATION);
-   temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<LayerType>());
-   mDelegates.push_back(temp);
-   temp = DataVariantEditorDelegate("UnitType", DataVariantEditorDelegate::ENUMERATION);
-   temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<UnitType>());
-   mDelegates.push_back(temp);
-   temp = DataVariantEditorDelegate("PassArea", DataVariantEditorDelegate::ENUMERATION);
-   temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<PassArea>());
-   mDelegates.push_back(temp);
-   temp = DataVariantEditorDelegate("ProcessingLocation", DataVariantEditorDelegate::ENUMERATION);
-   temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<ProcessingLocation>());
-   mDelegates.push_back(temp);
-   temp = DataVariantEditorDelegate("RasterChannelType", DataVariantEditorDelegate::ENUMERATION);
-   temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<RasterChannelType>());
-   mDelegates.push_back(temp);
-   temp = DataVariantEditorDelegate("RegionUnits", DataVariantEditorDelegate::ENUMERATION);
-   temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<RegionUnits>());
-   mDelegates.push_back(temp);
-   mDelegates.push_back(DataVariantEditorDelegate("SymbolType", DataVariantEditorDelegate::SYMBOL_TYPE));
-   mDelegates.push_back(DataVariantEditorDelegate("vector<char>", DataVariantEditorDelegate::VECTOR));
-   mDelegates.push_back(DataVariantEditorDelegate("vector<unsigned char>", DataVariantEditorDelegate::VECTOR));
-   mDelegates.push_back(DataVariantEditorDelegate("vector<short>", DataVariantEditorDelegate::VECTOR));
-   mDelegates.push_back(DataVariantEditorDelegate("vector<unsigned short>", DataVariantEditorDelegate::VECTOR));
-   mDelegates.push_back(DataVariantEditorDelegate("vector<int>", DataVariantEditorDelegate::VECTOR));
-   mDelegates.push_back(DataVariantEditorDelegate("vector<unsigned int>", DataVariantEditorDelegate::VECTOR));
-   mDelegates.push_back(DataVariantEditorDelegate("vector<long>", DataVariantEditorDelegate::VECTOR));
-   mDelegates.push_back(DataVariantEditorDelegate("vector<unsigned long>", DataVariantEditorDelegate::VECTOR));
-   mDelegates.push_back(DataVariantEditorDelegate("vector<int64_t>", DataVariantEditorDelegate::VECTOR));
-   mDelegates.push_back(DataVariantEditorDelegate("vector<uint64_t>", DataVariantEditorDelegate::VECTOR));
-   mDelegates.push_back(DataVariantEditorDelegate("vector<Int64>", DataVariantEditorDelegate::VECTOR));
-   mDelegates.push_back(DataVariantEditorDelegate("vector<UInt64>", DataVariantEditorDelegate::VECTOR));
-   mDelegates.push_back(DataVariantEditorDelegate("vector<float>", DataVariantEditorDelegate::VECTOR));
-   mDelegates.push_back(DataVariantEditorDelegate("vector<double>", DataVariantEditorDelegate::VECTOR));
-   mDelegates.push_back(DataVariantEditorDelegate("vector<bool>", DataVariantEditorDelegate::VECTOR));
-   mDelegates.push_back(DataVariantEditorDelegate("vector<string>", DataVariantEditorDelegate::VECTOR));
-   mDelegates.push_back(DataVariantEditorDelegate("vector<Filename>", DataVariantEditorDelegate::VECTOR, true));
-   mDelegates.push_back(DataVariantEditorDelegate("DynamicObject", DataVariantEditorDelegate::DYNAMIC_OBJECT));
-
    // Value
    QLabel* pValueLabel = new QLabel("Value:", this);
 
@@ -224,9 +154,84 @@ DataVariantEditor::~DataVariantEditor()
 {
 }
 
-std::vector<DataVariantEditorDelegate> DataVariantEditor::getDelegates()
+const vector<DataVariantEditorDelegate>& DataVariantEditor::getDelegates()
 {
-   return mDelegates;
+   if (sDelegates.empty() == true)
+   {
+      sDelegates.push_back(DataVariantEditorDelegate("char", DataVariantEditorDelegate::INTEGRAL));
+      sDelegates.push_back(DataVariantEditorDelegate("unsigned char", DataVariantEditorDelegate::INTEGRAL));
+      sDelegates.push_back(DataVariantEditorDelegate("short", DataVariantEditorDelegate::INTEGRAL));
+      sDelegates.push_back(DataVariantEditorDelegate("unsigned short", DataVariantEditorDelegate::INTEGRAL));
+      sDelegates.push_back(DataVariantEditorDelegate("int", DataVariantEditorDelegate::INTEGRAL));
+      sDelegates.push_back(DataVariantEditorDelegate("unsigned int", DataVariantEditorDelegate::INTEGRAL));
+      sDelegates.push_back(DataVariantEditorDelegate("long", DataVariantEditorDelegate::INTEGRAL));
+      sDelegates.push_back(DataVariantEditorDelegate("unsigned long", DataVariantEditorDelegate::INTEGRAL));
+      sDelegates.push_back(DataVariantEditorDelegate("int64_t", DataVariantEditorDelegate::INTEGRAL));
+      sDelegates.push_back(DataVariantEditorDelegate("Int64", DataVariantEditorDelegate::INTEGRAL));
+      sDelegates.push_back(DataVariantEditorDelegate("UInt64", DataVariantEditorDelegate::INTEGRAL));
+      sDelegates.push_back(DataVariantEditorDelegate("uint64_t", DataVariantEditorDelegate::INTEGRAL));
+      sDelegates.push_back(DataVariantEditorDelegate("float", DataVariantEditorDelegate::DOUBLE));
+      sDelegates.push_back(DataVariantEditorDelegate("double", DataVariantEditorDelegate::DOUBLE));
+      sDelegates.push_back(DataVariantEditorDelegate("bool", DataVariantEditorDelegate::BOOL));
+      sDelegates.push_back(DataVariantEditorDelegate("string", DataVariantEditorDelegate::TEXT));
+      sDelegates.push_back(DataVariantEditorDelegate("Filename", DataVariantEditorDelegate::TEXT, true));
+      sDelegates.push_back(DataVariantEditorDelegate("ColorType", DataVariantEditorDelegate::COLOR));
+      sDelegates.push_back(DataVariantEditorDelegate("DateTime", DataVariantEditorDelegate::DATE_TIME));
+      DataVariantEditorDelegate temp = DataVariantEditorDelegate("DisplayMode", DataVariantEditorDelegate::ENUMERATION);
+      temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<DisplayMode>());
+      sDelegates.push_back(temp);
+      temp = DataVariantEditorDelegate("EncodingType", DataVariantEditorDelegate::ENUMERATION);
+      temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<EncodingType>());
+      sDelegates.push_back(temp);
+      temp = DataVariantEditorDelegate("EndianType", DataVariantEditorDelegate::ENUMERATION);
+      temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<EndianType>());
+      sDelegates.push_back(temp);
+      temp = DataVariantEditorDelegate("GeocoordType", DataVariantEditorDelegate::ENUMERATION);
+      temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<GeocoordType>());
+      sDelegates.push_back(temp);
+      temp = DataVariantEditorDelegate("InterleaveFormatType", DataVariantEditorDelegate::ENUMERATION);
+      temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<InterleaveFormatType>());
+      sDelegates.push_back(temp);
+      temp = DataVariantEditorDelegate("LayerType", DataVariantEditorDelegate::ENUMERATION);
+      temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<LayerType>());
+      sDelegates.push_back(temp);
+      temp = DataVariantEditorDelegate("UnitType", DataVariantEditorDelegate::ENUMERATION);
+      temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<UnitType>());
+      sDelegates.push_back(temp);
+      temp = DataVariantEditorDelegate("PassArea", DataVariantEditorDelegate::ENUMERATION);
+      temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<PassArea>());
+      sDelegates.push_back(temp);
+      temp = DataVariantEditorDelegate("ProcessingLocation", DataVariantEditorDelegate::ENUMERATION);
+      temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<ProcessingLocation>());
+      sDelegates.push_back(temp);
+      temp = DataVariantEditorDelegate("RasterChannelType", DataVariantEditorDelegate::ENUMERATION);
+      temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<RasterChannelType>());
+      sDelegates.push_back(temp);
+      temp = DataVariantEditorDelegate("RegionUnits", DataVariantEditorDelegate::ENUMERATION);
+      temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<RegionUnits>());
+      sDelegates.push_back(temp);
+      sDelegates.push_back(DataVariantEditorDelegate("SymbolType", DataVariantEditorDelegate::SYMBOL_TYPE));
+      sDelegates.push_back(DataVariantEditorDelegate("vector<char>", DataVariantEditorDelegate::VECTOR));
+      sDelegates.push_back(DataVariantEditorDelegate("vector<unsigned char>", DataVariantEditorDelegate::VECTOR));
+      sDelegates.push_back(DataVariantEditorDelegate("vector<short>", DataVariantEditorDelegate::VECTOR));
+      sDelegates.push_back(DataVariantEditorDelegate("vector<unsigned short>", DataVariantEditorDelegate::VECTOR));
+      sDelegates.push_back(DataVariantEditorDelegate("vector<int>", DataVariantEditorDelegate::VECTOR));
+      sDelegates.push_back(DataVariantEditorDelegate("vector<unsigned int>", DataVariantEditorDelegate::VECTOR));
+      sDelegates.push_back(DataVariantEditorDelegate("vector<long>", DataVariantEditorDelegate::VECTOR));
+      sDelegates.push_back(DataVariantEditorDelegate("vector<unsigned long>", DataVariantEditorDelegate::VECTOR));
+      sDelegates.push_back(DataVariantEditorDelegate("vector<int64_t>", DataVariantEditorDelegate::VECTOR));
+      sDelegates.push_back(DataVariantEditorDelegate("vector<uint64_t>", DataVariantEditorDelegate::VECTOR));
+      sDelegates.push_back(DataVariantEditorDelegate("vector<Int64>", DataVariantEditorDelegate::VECTOR));
+      sDelegates.push_back(DataVariantEditorDelegate("vector<UInt64>", DataVariantEditorDelegate::VECTOR));
+      sDelegates.push_back(DataVariantEditorDelegate("vector<float>", DataVariantEditorDelegate::VECTOR));
+      sDelegates.push_back(DataVariantEditorDelegate("vector<double>", DataVariantEditorDelegate::VECTOR));
+      sDelegates.push_back(DataVariantEditorDelegate("vector<bool>", DataVariantEditorDelegate::VECTOR));
+      sDelegates.push_back(DataVariantEditorDelegate("vector<string>", DataVariantEditorDelegate::VECTOR));
+      sDelegates.push_back(DataVariantEditorDelegate("vector<Filename>", DataVariantEditorDelegate::VECTOR, true));
+      sDelegates.push_back(DataVariantEditorDelegate("DynamicObject", DataVariantEditorDelegate::DYNAMIC_OBJECT));
+   }
+
+   return sDelegates;
 }
 
 void DataVariantEditor::setValue(const DataVariant& value, bool useVariantCurrentValue)
@@ -529,8 +534,9 @@ void DataVariantEditor::browse()
 DataVariantEditorDelegate DataVariantEditor::getDelegate(const string& type)
 {
    DataVariantEditorDelegate retVal;
-   for (vector<DataVariantEditorDelegate>::iterator iter = mDelegates.begin();
-        iter != mDelegates.end(); ++iter)
+
+   const vector<DataVariantEditorDelegate>& delegates = getDelegates();
+   for (vector<DataVariantEditorDelegate>::const_iterator iter = delegates.begin(); iter != delegates.end(); ++iter)
    {
       if (iter->getTypeName() == type)
       {

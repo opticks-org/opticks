@@ -105,6 +105,7 @@ SampleRasterElementImporter::SampleRasterElementImporter()
    setSubtype("Sample");
    setDescriptorId("{D1EBFE37-E365-4E49-92B5-B8DE0CA0B03D}");
    setProductionStatus(false);
+   setWizardSupported(false);
 }
 
 SampleRasterElementImporter::~SampleRasterElementImporter()

@@ -46,9 +46,8 @@ NameTypeValueDlg::NameTypeValueDlg(QWidget* parent) :
    mpValueEditor = new DataVariantEditor(this);
 
    mpTypeList = new QListWidget(this);
-   vector<DataVariantEditorDelegate> delegates = mpValueEditor->getDelegates();
-   for (vector<DataVariantEditorDelegate>::iterator iter = delegates.begin();
-        iter != delegates.end(); ++iter)
+   const vector<DataVariantEditorDelegate>& delegates = DataVariantEditor::getDelegates();
+   for (vector<DataVariantEditorDelegate>::const_iterator iter = delegates.begin(); iter != delegates.end(); ++iter)
    {
       mpTypeList->addItem(QString::fromStdString(iter->getTypeName()));
    }
@@ -102,6 +101,37 @@ NameTypeValueDlg::~NameTypeValueDlg()
 {
 }
 
+void NameTypeValueDlg::setEmptyValue(const QString& name, const QString& type)
+{
+    // Name
+   mpNameEdit->setText(name);
+
+   // Type
+   mCurrentType = type;
+   if (mCurrentType.isEmpty() == true)
+   {
+      return;
+   }
+
+   for (int i = 0; i < mpTypeList->count(); ++i)
+   {
+      QListWidgetItem* pItem = mpTypeList->item(i);
+      if (pItem != NULL)
+      {
+         QString currentType = pItem->text();
+         if (currentType == mCurrentType)
+         {
+            mpTypeList->setCurrentItem(pItem);
+            break;
+         }
+      }
+   }
+
+   // Value
+   DataVariant value(mCurrentType.toStdString(), NULL);
+   mpValueEditor->setValue(value, false);
+}
+
 void NameTypeValueDlg::setValue(const QString& strName, const DataVariant& value)
 {
    if (value.isValid() == false)
@@ -135,6 +165,7 @@ void NameTypeValueDlg::setValue(const QString& strName, const DataVariant& value
       }
    }
 
+   // Value
    mpValueEditor->setValue(value);
 }
 

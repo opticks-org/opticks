@@ -10,15 +10,18 @@
 #ifndef WIZARDITEMIMP_H
 #define WIZARDITEMIMP_H
 
-#include "EnumWrapper.h"
-#include "WizardItem.h"
+#include "LocationType.h"
 #include "SubjectAdapter.h"
-#include "WizardNode.h"
+#include "WizardItem.h"
 #include "XercesIncludes.h"
-#include "xmlwriter.h"
 
 #include <string>
 #include <vector>
+
+class DataVariant;
+class WizardNode;
+class WizardObject;
+class XMLWriter;
 
 /**
  *  Contains information about two nodes that comprise a connection in a wizard.
@@ -67,53 +70,69 @@ struct WizardConnection
  *
  *  @see    WizardItem
  */
-class WizardItemImp : public WizardItem, public SubjectAdapter
+class WizardItemImp : public WizardItem, public SubjectAdapter, public WizardItemExt1
 {
 public:
    /**
     *  Constructs the wizard item.
     *
+    *  @param   pWizard
+    *           The parent wizard containing the item.
     *  @param   name
     *           The item name.
     *  @param   type
     *           The item type.
     */
-   WizardItemImp(std::string name, std::string type);
+   WizardItemImp(WizardObject* pWizard, std::string name, std::string type);
+
+   /**
+    *  Constructs a Value wizard item.
+    *
+    *  This method creates a Value item with single output node.  The node type
+    *  is the same type as the value in the given DataVariant.
+    *
+    *  @param   pWizard
+    *           The parent wizard containing the item.
+    *  @param   name
+    *           The item name.
+    *  @param   value
+    *           The initial value for the output node.  The output node type is
+    *           derived from the type of the value.
+    */
+   WizardItemImp(WizardObject* pWizard, std::string name, const DataVariant& value);
 
    /**
     *  Destroys the wizard item.
     *
     *  The destructor destroys the wizard item and all input and output nodes.
     */
-   ~WizardItemImp();
+   virtual ~WizardItemImp();
 
    /**
     *  Sets the values of this item to that of another item.
     *
-    *  This opertor sets the values of this item to the values of the given item
+    *  This method sets the values of this item to the values of the given item
     *  by performing a deep copy.  This means that any existing nodes are destroyed
     *  and new nodes are created with values set to those of the given item's nodes.
     *
-    *  @param   item
+    *  @param   pItem
     *           The item whose values should be set in this item.
-    */
-   WizardItemImp& operator =(const WizardItemImp& item);
-
-   /**
-    *  Possible types of member data modifications.
     *
-    *  This enumerated type is used when calling notify() to indicate the type of change event
-    *  prompting the notify.  The address of the change type is set as the value parameter of
-    *  notify() call.
-    *
-    *  @see     WizardNodeImp::WizardNodeChangeType
+    *  @return  Returns \c true if this item's values are successfully set to
+    *           those of the given item, otherwise returns \c false.
     */
-   enum WizardItemChangeTypeEnum { ItemName, ItemPosition, ItemBatchMode, ItemNodeAdded, ItemNodeRemoved };
+   bool copyItem(const WizardItemImp* pItem);
 
-   /**
-    * @EnumWrapper WizardItemImp::WizardItemChangeTypeEnum.
-    */
-   typedef EnumWrapper<WizardItemChangeTypeEnum> WizardItemChangeType;
+   SIGNAL_METHOD(WizardItemImp, Renamed)
+   SIGNAL_METHOD(WizardItemImp, PositionChanged)
+   SIGNAL_METHOD(WizardItemImp, BatchModeChanged)
+   SIGNAL_METHOD(WizardItemImp, NodeAdded)
+   SIGNAL_METHOD(WizardItemImp, NodeRemoved)
+   SIGNAL_METHOD(WizardItemImp, ItemConnected)
+   SIGNAL_METHOD(WizardItemImp, ItemDisconnected)
+
+   WizardObject* getWizard();
+   const WizardObject* getWizard() const;
 
    /**
     *  Sets the item name.
@@ -147,13 +166,10 @@ public:
     *  @param   bBatch
     *           TRUE if the item should run in batch mode.  FALSE if the item should
     *           run in interactive mode.
-    *  @param   bModeSupported
-    *           TRUE if the item can support the given mode.  FALSE if the item does
-    *           not support the given mode.
     *
     *  @see     WizardItemImp::getBatchMode
     */
-   void setBatchMode(bool bBatch, bool bModeSupported);
+   void setBatchMode(bool bBatch);
 
    /**
     *  Returns the batch mode operation state of the item.
@@ -209,22 +225,6 @@ public:
    double getYPosition() const;
 
    /**
-    *  Adds a new input node.
-    *
-    *  @param   name
-    *           The input node name.
-    *  @param   type
-    *           The input node type.
-    *  @param   description
-    *           The input node description.
-    *
-    *  @return  A pointer to the new input node.
-    *
-    *  @see     WizardItemImp::addOutputNode
-    */
-   WizardNode* addInputNode(const std::string& name, const std::string& type, const std::string& description);
-
-   /**
     *  Returns the current number of input nodes.
     *
     *  This method is equivalent to getInputNodes().size().
@@ -276,44 +276,6 @@ public:
    bool isInputNode(WizardNode* pNode) const;
 
    /**
-    *  Removes a single input node.
-    *
-    *  @param   pNode
-    *           The input node.
-    *  @param   bDeleteValue
-    *           TRUE if the memory for the node should be deleted.  FALSE if the memory
-    *           should not be deleted.
-    *
-    *  @return  TRUE if the input node was successfully removed, otherwise FALSE.
-    *
-    *  @see     WizardItemImp::clearInputNodes
-    */
-   bool removeInputNode(WizardNode* pNode, bool bDeleteValue);
-
-   /**
-    *  Removes and deletes all input nodes.
-    *
-    *  @see     WizardItemImp::removeInputNode
-    */
-   void clearInputNodes();
-
-   /**
-    *  Adds a new output node.
-    *
-    *  @param   name
-    *           The output node name.
-    *  @param   type
-    *           The output node type.
-    *  @param   description
-    *           The output node description.
-    *
-    *  @return  A pointer to the new output node.
-    *
-    *  @see     WizardItemImp::addInputNode
-    */
-   WizardNode* addOutputNode(const std::string& name, const std::string& type, const std::string& description);
-
-   /**
     *  Returns the current number of output nodes.
     *
     *  This method is equivalent to getOutputNodes().size().
@@ -363,28 +325,6 @@ public:
     *  @see     WizardItemImp::isInputNode
     */
    bool isOutputNode(WizardNode* pNode) const;
-
-   /**
-    *  Removes a single output node.
-    *
-    *  @param   pNode
-    *           The output node.
-    *  @param   bDeleteValue
-    *           TRUE if the memory for the node should be deleted.  FALSE if the memory
-    *           should not be deleted.
-    *
-    *  @return  TRUE if the output node was successfully removed, otherwise FALSE.
-    *
-    *  @see     WizardItemImp::clearOutputNodes
-    */
-   bool removeOutputNode(WizardNode* pNode, bool bDeleteValue);
-
-   /**
-    *  Removes and deletes all output nodes.
-    *
-    *  @see     WizardItemImp::removeOutputNode
-    */
-   void clearOutputNodes();
 
    /**
     *  Queries whether an item is directly or indirectly connected to this item.
@@ -449,8 +389,7 @@ public:
     *  @see     WizardConnection
     *  @see     WizardItemImp::getConnections
     */
-   static void setConnections(std::vector<WizardItem*>& items,
-      const std::vector<WizardConnection>& connections);
+   static void setConnections(std::vector<WizardItem*>& items, const std::vector<WizardConnection>& connections);
 
    // These methods are documented in the Serializable and TypeAwareObject class documentation
    bool toXml(XMLWriter* pXml) const;
@@ -458,7 +397,19 @@ public:
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
 
+protected:
+   void nodeConnected(Subject& subject, const std::string& signal, const boost::any& data);
+   void nodeDisconnected(Subject& subject, const std::string& signal, const boost::any& data);
+
+   WizardNode* addNode(const std::string& name, const std::string& type, const std::string& description,
+      bool inputNode);
+   void clearNodes(bool inputNodes);
+
 private:
+   WizardItemImp(const WizardItemImp& item);
+   WizardItemImp& operator =(const WizardItemImp& item);
+
+   WizardObject* const mpWizard;
    std::string mName;
    std::string mType;
    bool mbBatch;

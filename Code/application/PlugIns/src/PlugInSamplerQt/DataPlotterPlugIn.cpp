@@ -31,6 +31,7 @@ DataPlotterPlugIn::DataPlotterPlugIn() :
    setMenuLocation("[Demo]\\Data Plotter");
    setDescriptorId("{69DD0E12-8D6B-4e23-A742-469447E4EC2F}");
    allowMultipleInstances(true);
+   setWizardSupported(false);
 }
 
 DataPlotterPlugIn::~DataPlotterPlugIn()

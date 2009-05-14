@@ -30,6 +30,7 @@ public:
    NameTypeValueDlg(QWidget* parent = 0);
    ~NameTypeValueDlg();
 
+   void setEmptyValue(const QString& name, const QString& type);
    void setValue(const QString& strName, const DataVariant& value);
 
    QString getName() const;

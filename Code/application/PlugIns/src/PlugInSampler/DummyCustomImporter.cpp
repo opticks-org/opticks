@@ -25,6 +25,7 @@ DummyCustomImporter::DummyCustomImporter()
    setName("Dummy Custom Importer");
    setDescription("DummyCustomImporter");
    setDescriptorId("{B5BC70E6-8159-4475-BFDC-5B59F77AFAE4}");
+   setWizardSupported(false);
 }
 
 DummyCustomImporter::~DummyCustomImporter()

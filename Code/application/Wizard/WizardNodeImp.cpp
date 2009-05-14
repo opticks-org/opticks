@@ -44,19 +44,21 @@ WizardNodeImp::~WizardNodeImp()
    deleteValue();
 }
 
-WizardNodeImp& WizardNodeImp::operator =(const WizardNodeImp& node)
+bool WizardNodeImp::copyNode(const WizardNodeImp* pNode)
 {
-   if (this != &node)
+   if ((pNode == NULL) || (pNode == this))
    {
-      mName = node.mName.c_str();
-      mType = node.mType.c_str();
-      mDescription = node.mDescription.c_str();
-      mOriginalType = node.mOriginalType.c_str();
-      setValidTypes(node.mValidTypes);
-      setValue(node.mpShallowCopyValue);
+      return false;
    }
 
-   return *this;
+   mName = pNode->mName;
+   mType = pNode->mType;
+   mDescription = pNode->mDescription;
+   mOriginalType = pNode->mOriginalType;
+   setValidTypes(pNode->mValidTypes);
+   setValue(pNode->mpShallowCopyValue);
+
+   return true;
 }
 
 WizardItem* WizardNodeImp::getItem() const
@@ -69,8 +71,7 @@ void WizardNodeImp::setName(const string& nodeName)
    if (nodeName != mName)
    {
       mName = nodeName;
-      WizardNodeChangeType eChange = NodeName;
-      notify(SIGNAL_NAME(Subject, Modified), boost::any(&eChange));
+      notify(SIGNAL_NAME(WizardNodeImp, Renamed), boost::any(mName));
    }
 }
 
@@ -89,8 +90,7 @@ void WizardNodeImp::setType(const string& nodeType)
       }
 
       mType = nodeType;
-      WizardNodeChangeType eChange = NodeType;
-      notify(SIGNAL_NAME(Subject, Modified), boost::any(&eChange));
+      notify(SIGNAL_NAME(WizardNodeImp, TypeChanged), boost::any(mType));
    }
 }
 
@@ -104,8 +104,7 @@ void WizardNodeImp::setDescription(const string& nodeDescription)
    if (nodeDescription != mDescription)
    {
       mDescription = nodeDescription;
-      WizardNodeChangeType eChange = NodeDescription;
-      notify(SIGNAL_NAME(Subject, Modified), boost::any(&eChange));
+      notify(SIGNAL_NAME(WizardNodeImp, DescriptionChanged), boost::any(mDescription));
    }
 }
 
@@ -116,10 +115,7 @@ const string& WizardNodeImp::getDescription() const
 
 void WizardNodeImp::setOriginalType(const string& originalType)
 {
-   if (originalType != mOriginalType)
-   {
-      mOriginalType = originalType;
-   }
+   mOriginalType = originalType;
 }
 
 const string& WizardNodeImp::getOriginalType() const
@@ -169,8 +165,8 @@ void WizardNodeImp::setValue(void* pValue)
             mpShallowCopyValue = pValue;
          }
       }
-      WizardNodeChangeType eChange = NodeValue;
-      notify(SIGNAL_NAME(Subject, Modified), boost::any(&eChange));
+
+      notify(SIGNAL_NAME(WizardNodeImp, ValueChanged), boost::any(mpShallowCopyValue));
    }
 }
 
@@ -207,8 +203,7 @@ bool WizardNodeImp::addConnectedNode(WizardNode* pNode)
    }
 
    mConnectedNodes.push_back(pNode);
-   WizardNodeChangeType eChange = ConnectedNodeAdded;
-   notify(SIGNAL_NAME(Subject, Modified), boost::any(&eChange));
+   notify(SIGNAL_NAME(WizardNodeImp, NodeConnected), boost::any(pNode));
 
    WizardNodeImp* pNodeImp = static_cast<WizardNodeImp*>(pNode);
    if (pNodeImp != NULL)
@@ -244,8 +239,7 @@ bool WizardNodeImp::removeConnectedNode(WizardNode* pNode)
       if (pCurrentNode == pNode)
       {
          mConnectedNodes.erase(iter);
-         WizardNodeChangeType eChange = ConnectedNodeRemoved;
-         notify(SIGNAL_NAME(Subject, Modified), boost::any(&eChange));
+         notify(SIGNAL_NAME(WizardNodeImp, NodeDisconnected), boost::any(pNode));
 
          WizardNodeImp* pNodeImp = static_cast<WizardNodeImp*>(pNode);
          if (pNodeImp != NULL)

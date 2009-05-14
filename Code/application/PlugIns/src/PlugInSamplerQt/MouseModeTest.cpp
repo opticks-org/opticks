@@ -30,6 +30,7 @@ MouseModeTest::MouseModeTest() :
    setShortDescription("Verifies MPR2 Requirement 215.");
    setMenuLocation("[Tests]\\Mouse Mode Test");
    setDescriptorId("{354DD7F9-5CB3-4faf-BA22-7F129AC3CB25}");
+   setWizardSupported(false);
 }
 
 MouseModeTest::~MouseModeTest()

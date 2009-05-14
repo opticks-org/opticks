@@ -9,30 +9,25 @@
 
 #include "WizardLine.h"
 
-WizardLine::WizardLine(WizardNode* pOutputNode, WizardNode* pInputNode, Q3Canvas* pCanvas) :
-   Q3CanvasLine(pCanvas),
+WizardLine::WizardLine(WizardNode* pOutputNode, WizardNode* pInputNode, QGraphicsItem* pParent) :
+   QGraphicsLineItem(pParent),
    mpInputNode(pInputNode),
    mpOutputNode(pOutputNode)
 {
+   setFlags(QGraphicsItem::ItemIsSelectable);
 }
 
 WizardLine::~WizardLine()
+{}
+
+void WizardLine::setInputPoint(const QPointF& scenePos)
 {
+   setLine(QLineF(line().p1(), scenePos));
 }
 
-void WizardLine::moveBy(double dX, double dY)
+void WizardLine::setOutputPoint(const QPointF& scenePos)
 {
-   // Prevent line from moving by doing nothing
-}
-
-void WizardLine::setInputPoint(int iX, int iY)
-{
-   setPoints(startPoint().x(), startPoint().y(), iX, iY);
-}
-
-void WizardLine::setOutputPoint(int iX, int iY)
-{
-   setPoints(iX, iY, endPoint().x(), endPoint().y());
+   setLine(QLineF(scenePos, line().p2()));
 }
 
 WizardNode* WizardLine::getInputNode() const
@@ -45,19 +40,19 @@ WizardNode* WizardLine::getOutputNode() const
    return mpOutputNode;
 }
 
-void WizardLine::drawShape(QPainter& p)
+void WizardLine::paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget)
 {
    // Draw the line
-   Q3CanvasLine::drawShape(p);
+   QGraphicsLineItem::paint(pPainter, pOption, pWidget);
 
    // Draw the selection nodes
-   if (isSelected() == true)
+   if ((isSelected() == true) && (pPainter != NULL))
    {
-      p.setBrush(Qt::yellow);
-      p.setPen(QPen(Qt::black, 1));
+      pPainter->setBrush(Qt::yellow);
+      pPainter->setPen(QPen(Qt::black, 1));
 
-      int iNodeWidth = 6;
-      p.drawRect(startPoint().x() - (iNodeWidth / 2), startPoint().y() - (iNodeWidth / 2), iNodeWidth, iNodeWidth);
-      p.drawRect(endPoint().x() - (iNodeWidth / 2), endPoint().y() - (iNodeWidth / 2), iNodeWidth, iNodeWidth);
+      const int nodeWidth = 6;
+      pPainter->drawRect(line().x1() - (nodeWidth / 2), line().y1() - (nodeWidth / 2), nodeWidth, nodeWidth);
+      pPainter->drawRect(line().x2() - (nodeWidth / 2), line().y2() - (nodeWidth / 2), nodeWidth, nodeWidth);
    }
 }

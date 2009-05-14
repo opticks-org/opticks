@@ -46,6 +46,7 @@ AspamManager::AspamManager()
    allowMultipleInstances(false);
    executeOnStartup(true);
    destroyAfterExecute(false);
+   setWizardSupported(false);
 }
 
 AspamManager::~AspamManager()

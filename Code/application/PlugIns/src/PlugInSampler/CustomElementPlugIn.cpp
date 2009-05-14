@@ -37,6 +37,7 @@ CustomElementPlugIn::CustomElementPlugIn()
    allowMultipleInstances(false);
    executeOnStartup(true);
    destroyAfterExecute(false);
+   setWizardSupported(false);
 }
 
 CustomElementPlugIn::~CustomElementPlugIn()

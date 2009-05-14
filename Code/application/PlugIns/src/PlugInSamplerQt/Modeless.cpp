@@ -127,6 +127,7 @@ ModelessPlugIn::ModelessPlugIn() :
    setShortDescription("Modeless dialog in a plug-in");
    setMenuLocation("[Demo]/Modeless Dialog");
    setProductionStatus(false);
+   setWizardSupported(false);
 }
 
 ModelessPlugIn::~ModelessPlugIn()

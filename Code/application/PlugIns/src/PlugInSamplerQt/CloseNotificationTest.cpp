@@ -26,6 +26,7 @@ CloseNotificationTest::CloseNotificationTest()
    setMenuLocation( "[Tests]\\Close Notification Test" );
    destroyAfterExecute(false);
    setDescriptorId("{35F7F8F9-474B-42f8-9B2D-AFDBEC121C94}");
+   setWizardSupported(false);
 
    mpAttachment.addSignal(SIGNAL_NAME(ApplicationServices, SessionClosed),
       Slot(this, &CloseNotificationTest::processSessionClosed));

@@ -7,16 +7,16 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#ifndef _WIZARDITEM
-#define _WIZARDITEM
+#ifndef WIZARDITEM_H
+#define WIZARDITEM_H
 
 #include "Serializable.h"
 #include "WizardNode.h"
 
 #include <string>
 #include <vector>
+
+class WizardObject;
 
 /**
  *  A single wizard task.
@@ -25,23 +25,18 @@
  *  item has a name and a type for the unique identifiers.  The available types are as
  *  follows:
  *
- * <pre>
- *    Type              %Description
- *    ===============   =======================================================================
- *    Algorithm         A plug-in typically used for processing data.
- *    Desktop           This item allows for a run-time selection and execution of a method in
- *                      the DesktopServices interface.  This type of item is only useful
- *                      in batch mode.
- *    Exporter          A plug-in to save data to a file.
- *    Georeference      A georeferencing algorithm.
- *    Importer          A plug-in to load data from a file.
- *    Interpreter       A plug-in for scripting language support.
- *    RasterPager       A plug-in to map data for a RasterElement.
- *    Value             A specific data value.  The available data types for a value item are
- *                      the types documented in the DynamicObject::set() method.
- *    Viewer            A plug-in to uniquely display data.
- *    Wizard            A plug-in used to execute other plug-ins and services.
- * </pre>
+ *  <table>
+ *  <tr><td><b>Type</b></td><td><b>%Description</b></td></tr>
+ *  <tr><td>Algorithm</td><td>A plug-in typically used for processing data.</td></tr>
+ *  <tr><td>%Exporter</td><td>A plug-in to save data to a file.</td></tr>
+ *  <tr><td>%Georeference</td><td>A georeferencing algorithm.</td></tr>
+ *  <tr><td>%Importer</td><td>A plug-in to load data from a file.</td></tr>
+ *  <tr><td>Value</td><td>A specific data value that is stored as a DataVariant.</td></tr>
+ *  <tr><td>Viewer</td><td>A plug-in to uniquely display data.</td></tr>
+ *  <tr><td>Wizard</td><td>A plug-in used to execute other plug-ins and services.  Many of these
+ *    items allow for a run-time selection and execution of a method in the DesktopServices
+ *    interface.</td></tr>
+ *  </table>
  *
  *  An item is designated to run either in batch mode or interactive mode.  The
  *  getBatchMode() method queries this state.
@@ -51,7 +46,7 @@
  *  getOutputNodes() or with getInputNode() and getOutputNode() if the name and type of
  *  the node are known.
  *
- *  @see        WizardNode
+ *  @see       WizardItemExt1, WizardNode
  */
 class WizardItem : public Serializable
 {
@@ -176,11 +171,49 @@ public:
 
 protected:
    /**
-    * A plug-in cannot create this object, it can only retrieve an already existing
+    * A plug-in cannot create this object; it can only retrieve an already existing
     * object from WizardObject.  The WizardObject will manage any instances
     * of this object.
     */
    virtual ~WizardItem() {}
+};
+
+/**
+ * Extends capability of the WizardItem interface.
+ *
+ * This class provides additional capability for the WizardItem interface
+ * class.  A pointer to this class can be obtained by performing a dynamic cast
+ * on a pointer to WizardItem.
+ *
+ * @warning A pointer to this class can only be used to call methods contained
+ *          in this extension class and cannot be used to call any methods in
+ *          WizardItem.
+ */
+class WizardItemExt1
+{
+public:
+   /**
+    * Returns the parent wizard containing this item.
+    *
+    * @return  The parent wizard.
+    */
+   virtual WizardObject* getWizard() = 0;
+
+   /**
+    * Returns the parent wizard containing this item.
+    *
+    * @return  The parent wizard.
+    */
+   virtual const WizardObject* getWizard() const = 0;
+
+protected:
+   /**
+    * A plug-in cannot create this object; it can only retrieve an already
+    * existing item from WizardObject.  The WizardObject will manage any
+    * instances of this object.
+    */
+   virtual ~WizardItemExt1()
+   {}
 };
 
 #endif

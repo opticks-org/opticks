@@ -34,31 +34,32 @@
 #endif
 
 /**
- * The %FileObject is a trait object for use with the %Resource template. 
+ * The %FileObject is a trait object for use with the %Resource template.
  *
- * The %FileObject is a trait object for use with the %Resource template. It provides capability for opening and
- * closing files.
- * 
- * @see FileResource
+ * It provides capability for opening and closing files.
+ *
+ * @see        FileResource
  */
 class FileObject
 {
 public:
    /**
-    * This is an implementation detail of the %FileObject class. 
+    * This is an implementation detail of the %FileObject class.
     *
-    * This is an implementation detail of the FileObject class. It is used 
-    * for passing the parameters required by fopen.
+    * It is used for passing the parameters required by fopen().
     */
    class Args
    {
    public:
-      Args(std::string filename, std::string access = "r") :
+      Args(std::string filename, std::string access = "r", bool deleteOnClose = false) :
          mFilename(filename),
-         mAccess(access) {}
+         mAccess(access),
+         mDeleteOnClose(deleteOnClose)
+      {}
 
       std::string mFilename;
       std::string mAccess;
+      bool mDeleteOnClose;
    };
 
    FILE* obtainResource(const Args& args) const
@@ -84,53 +85,83 @@ public:
       return pFile;
    }
    void releaseResource(const Args& args, FILE* pStream) const
-   { 
+   {
       if (pStream != NULL)
       {
          fclose(pStream);
+      }
+
+      if ((args.mDeleteOnClose) && (args.mFilename.empty() == false))
+      {
+         remove(args.mFilename.c_str());
       }
    }
 };
 
 /**
- *  This is a %Resource class that opens and closes files. 
+ * This is a %Resource class that opens and closes files and optionally deletes
+ * them after close.
  *
- *  This is a %Resource class that opens and closes files. It has a conversion
- *  operator to allow a %FileResource object to be used where ever a FILE*
- *  would normally be used.
+ * This class has a conversion operator to allow a %FileResource object to be
+ * used wherever a FILE* would normally be used.
 */
 class FileResource : public Resource<FILE, FileObject>
 {
 public:
    /**
-    *  Constructs a Resource object that wraps a FILE*.
+    * Constructs a Resource object that wraps a FILE*.
     *
-    *  Constructs a Resource object that wraps a FILE*.
-    *  Opens the specified file using the specified access
-    *  modes. The two arguments will ultimately be passed
-    *  unmodified to fopen.
+    * Opens the specified file using the specified access modes.
     *
-    *  @param   pFilename
-    *           The name of the file to open
-    *  @param   pAccess
-    *           The access mode to open the file with. These match
-    *           the modes used with fopen.
+    * @param   pFilename
+    *          The name of the file to open.
+    * @param   pAccess
+    *          The access mode to open the file with.  These match the modes
+    *          used with fopen().
+    * @param   deleteOnClose
+    *          If \c true, the file will be deleted from the file system after
+    *          it is closed.  If \c false, the file will simply be closed.
     */
-   FileResource(const char* pFilename, const char* pAccess) :
+   FileResource(const char* pFilename, const char* pAccess, bool deleteOnClose = false) :
       Resource<FILE, FileObject>(FileObject::Args(pFilename, pAccess)) {}
 
    /**
-    *  Returns a pointer to the underlying FILE. 
+    * Returns a pointer to the underlying FILE.
     *
-    *  Returns a pointer to the underlying FILE. This operator
-    *  allows the %FileResource object to be used where ever
-    *  a FILE* would normally be used.
+    * This operator allows the %FileResource object to be used wherever a
+    * FILE* would normally be used.
     *
-    *  @return   A pointer to the underlying FILE.
+    * @return  A pointer to the underlying FILE.
     */
    operator FILE*()
    {
       return get();
+   }
+
+   /**
+    * Returns whether the file will be deleted after it is closed.
+    *
+    * @return  Returns \c true if the file will be deleted after it is closed,
+    *          or \c false if the file will simply be closed.
+    */
+   bool getDeleteOnClose() const
+   {
+      const FileObject::Args& args = getArgs();
+      return args.mDeleteOnClose;
+   }
+
+   /**
+    * Sets whether the file will be deleted after it is closed.
+    *
+    * @param   deleteOnClose
+    *          If set to \c true, the file will be deleted after it is closed.
+    *          If set to \c false, the file will simply close without being
+    *          deleted.
+    */
+   void setDeleteOnClose(bool deleteOnClose)
+   {
+      FileObject::Args& args = getArgs();
+      args.mDeleteOnClose = deleteOnClose;
    }
 };
 

@@ -27,6 +27,7 @@ DesktopAPITest::DesktopAPITest() :
    setShortDescription("Verifies Requirement 324.");
    setMenuLocation("[Tests]\\Desktop API Test");
    setDescriptorId("{DF7B5AEF-B156-40ae-8DF6-6B3D5BC964E1}");
+   setWizardSupported(false);
 }
 
 DesktopAPITest::~DesktopAPITest()

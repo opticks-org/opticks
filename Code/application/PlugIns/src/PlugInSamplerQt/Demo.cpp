@@ -264,6 +264,7 @@ Demo::Demo() :
    setProductionStatus(false);
    setDescriptorId("{C94ED1C5-DC04-418b-84FC-E3BC2B3530C6}");
    allowMultipleInstances(true);
+   setWizardSupported(false);
 }
 
 /**

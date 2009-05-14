@@ -29,6 +29,7 @@ MenuAndToolBarTest::MenuAndToolBarTest() :
    setDescription( "Verifies MPR2 Requirements 6, 115, 259, and 260." );
    setMenuLocation( "[Tests]\\Menu And ToolBar Test" );
    setDescriptorId("{63BAC425-5CDC-4499-8F68-1C6C9A77C66A}");
+   setWizardSupported(false);
 }
 
 MenuAndToolBarTest::~MenuAndToolBarTest()

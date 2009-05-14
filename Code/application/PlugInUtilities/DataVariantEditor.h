@@ -47,7 +47,7 @@ public:
    {
    }
 
-   Type getType()
+   Type getType() const
    {
       return mType;
    }
@@ -57,7 +57,7 @@ public:
       mType = newType;
    }
 
-   const std::string& getTypeName()
+   const std::string& getTypeName() const
    {
       return mTypeName;
    }
@@ -67,7 +67,7 @@ public:
       mTypeName = newType;
    }
 
-   bool getNeedBrowseButton()
+   bool getNeedBrowseButton() const
    {
       return mNeedBrowseButton;
    }
@@ -77,7 +77,7 @@ public:
       mNeedBrowseButton = newValue;
    }
 
-   const std::vector<std::string>& getEnumValueStrings()
+   const std::vector<std::string>& getEnumValueStrings() const
    {
       return mEnumValues;
    }
@@ -104,7 +104,7 @@ public:
    void setValue(const DataVariant& value, bool useVariantCurrentValue = true);
    const DataVariant &getValue();
 
-   std::vector<DataVariantEditorDelegate> getDelegates();
+   static const std::vector<DataVariantEditorDelegate>& getDelegates();
 
 signals:
    void modified();
@@ -131,7 +131,7 @@ private:
    QDoubleValidator* mpDoubleValidator;
 
    DataVariant mValue;
-   std::vector<DataVariantEditorDelegate> mDelegates;
+   static std::vector<DataVariantEditorDelegate> sDelegates;
 };
 
 #endif

@@ -31,6 +31,7 @@ PixelAspectRatio::PixelAspectRatio() :
    setMenuLocation("[Tests]\\Pixel Aspect Ratio Test");
    setDescriptorId("{626E12E9-41C0-489e-B92A-1E495083E69C}");
    destroyAfterExecute(false);
+   setWizardSupported(false);
 }
 
 PixelAspectRatio::~PixelAspectRatio()

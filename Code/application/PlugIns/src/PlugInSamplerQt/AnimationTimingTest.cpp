@@ -38,6 +38,7 @@ AnimationTimingTestPlugIn::AnimationTimingTestPlugIn() :
    setDescriptorId("{65FB5539-B7EB-402a-9B7C-1F19F660F02D}");
    setMenuLocation("[Demo]/Animation Timing Test");
    setProductionStatus(false);
+   setWizardSupported(false);
 }
 
 AnimationTimingTestPlugIn::~AnimationTimingTestPlugIn()

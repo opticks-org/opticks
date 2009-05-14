@@ -27,6 +27,7 @@ namespace Nitf
          setType("Service");
          setDescriptorId("{FE6F67B0-2DC1-48d1-85EC-18DC62BE9980}");
          setProductionStatus(APP_IS_PRODUCTION_RELEASE);
+         setWizardSupported(false);
 
          ossimInit::instance()->initialize();
       }

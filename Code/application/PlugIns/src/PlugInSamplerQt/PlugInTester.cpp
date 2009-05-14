@@ -34,6 +34,7 @@ PlugInTester::PlugInTester()
    setProductionStatus(false);
    setDescriptorId("{F091EED9-436E-4908-8A23-C71E890F19E3}");
    allowMultipleInstances(false);
+   setWizardSupported(false);
 }
 
 bool PlugInTester::getInputSpecification(PlugInArgList *&pArgList)

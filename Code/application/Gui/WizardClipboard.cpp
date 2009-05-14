@@ -6,8 +6,6 @@
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
- 
-
 
 #include "WizardClipboard.h"
 #include "WizardItemImp.h"
@@ -28,8 +26,7 @@ WizardClipboard* WizardClipboard::instance()
 }
 
 WizardClipboard::WizardClipboard()
-{
-}
+{}
 
 WizardClipboard::~WizardClipboard()
 {
@@ -47,14 +44,11 @@ void WizardClipboard::setItems(const vector<WizardItem*>& items)
       WizardItemImp* pExistItem = static_cast<WizardItemImp*>(items.at(i));
       if (pExistItem != NULL)
       {
-         const string& itemName = pExistItem->getName();
-         const string& itemType = pExistItem->getType();
-
-         WizardItemImp* pItem = new WizardItemImp(itemName, itemType);
+         WizardItemImp* pItem = new WizardItemImp(NULL, string(), string());
          if (pItem != NULL)
          {
-            *pItem = *pExistItem;
-            mItems.push_back(static_cast<WizardItem*>(pItem));
+            pItem->copyItem(pExistItem);
+            mItems.push_back(pItem);
          }
       }
    }

@@ -45,6 +45,7 @@ SampleHdf4Importer::SampleHdf4Importer()
    setExtensions("MODIS Files (*.hdf *.HDF)");
    setDescriptorId("{1B1B1D52-B1DA-4247-92DF-324FE7EF8722}");
    setProductionStatus(false);
+   setWizardSupported(false);
 }
 
 vector<ImportDescriptor*> SampleHdf4Importer::getImportDescriptors(const string& filename)

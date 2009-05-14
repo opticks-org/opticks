@@ -40,6 +40,7 @@ AspamViewer::AspamViewer() : mpMainWindow(NULL), mbSessionClosing(false)
    setDescriptorId("{B2AD86B5-3234-4f10-B60D-C3E320B026C2}");
    allowMultipleInstances(false);
    setProductionStatus(APP_IS_PRODUCTION_RELEASE);
+   setWizardSupported(false);
 
    mpMgrAttachment.addSignal(SIGNAL_NAME(AspamManager, AspamInitialized), 
       Slot(this, &AspamViewer::updateAspams));

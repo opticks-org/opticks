@@ -55,6 +55,7 @@ AnimationTestPlugIn::AnimationTestPlugIn() :
    setDescriptorId("{6FA89EF4-6029-47db-B883-E02A3F23B2D0}");
    setMenuLocation("[Demo]/Animation Test");
    setProductionStatus(false);
+   setWizardSupported(false);
 }
 
 AnimationTestPlugIn::~AnimationTestPlugIn()

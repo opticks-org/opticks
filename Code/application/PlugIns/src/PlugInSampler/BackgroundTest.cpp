@@ -49,6 +49,7 @@ BackgroundTest::BackgroundTest() :
    setDescriptorId("{D5A8A298-FF83-4fcf-A059-0EAC7AB18E42}");
    allowMultipleInstances(true);
    destroyAfterExecute(false);
+   setWizardSupported(false);
 }
 
 BackgroundTest::~BackgroundTest()
