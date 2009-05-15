@@ -14,15 +14,24 @@
  *  The StringUtilitiesMacros.h file contains definitions for macros which simplify defining type to string mappings.
  *  Basic usage is as follows.
  *  \code
- *  STRINGSTREAM_MAPPING(int)
+ *  namespace StringUtilities
+ *  {
+ *     STRINGSTREAM_MAPPING(int)
+ *  };
  *
- *  STRINGSTREAM_MAPPING_PRECISION(float, numeric_limits<float>::digits10)
+ *  namespace StringUtilities
+ *  {
+ *     STRINGSTREAM_MAPPING_PRECISION(float, numeric_limits<float>::digits10)
+ *  };
  *
- *  BEGIN_ENUM_MAPPING(AoiAddMode)
- *  ADD_ENUM_MAPPING(APPEND_AOI, "Append", "Append")
- *  ADD_ENUM_MAPPING(REPLACE_AOI, "Replace", "Replace")
- *  ADD_ENUM_MAPPING(NEW_AOI, "New", "New")
- *  END_ENUM_MAPPING()
+ *  namespace StringUtilities
+ *  {
+ *     BEGIN_ENUM_MAPPING(AoiAddMode)
+ *     ADD_ENUM_MAPPING(APPEND_AOI, "Append", "Append")
+ *     ADD_ENUM_MAPPING(REPLACE_AOI, "Replace", "Replace")
+ *     ADD_ENUM_MAPPING(NEW_AOI, "New", "New")
+ *     END_ENUM_MAPPING()
+ *  };
  *  \endcode
  *
  *  Advanced configurations, such as using the macros for type to string conversion but specifying a custom string to type conversion are beyond the scope of this document.

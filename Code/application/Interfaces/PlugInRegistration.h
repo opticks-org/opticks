@@ -181,20 +181,90 @@ private:
 /// \endcond
 
 /**
- * KIP - Document this
+ * This class is used to perform dynamic plug-in registration.
+ * 
+ * To perform dynamic plug-in registration, a subclass of this
+ * class must be created that performs the actual dynamic plug-in
+ * registration.  The subclass must then be provided as the
+ * second argument to the REGISTER_DYNAMIC_MODULE macro.
+ * Please read \ref advanced_plugin_register for more details.
  */
 class DynamicPlugInFactory : public PlugInFactory
 {
 public:
+   /**
+    * Constructor.
+    *
+    * @warning Subclasses should NOT perform any logic
+    *          in their constructors.
+    */
    DynamicPlugInFactory() {}
 
+   /// \cond INTERNAL
    void setModuleId(const std::string& moduleId)
    {
       mModuleId = moduleId;
    }
+   /// \endcond
 
+   /**
+    * Subclasses should perform any dynamic plug-in lookup
+    * in this function.  This function will be called once
+    * per application run, with a \c true value passed for the
+    * \c locate parameter.  It is during this invocation, that
+    * this function should \c locate all dynamic plug-ins and insert
+    * unique string identifiers for each plug-in into
+    * the \c dynamicPlugIns vector.
+    * Every other time this function is invoked, the \c locate
+    * parameter will be passed a value of \c false.  When this is done
+    * the previously located identifiers (those found when
+    * this function was called with a value of \c true for \c locate)
+    * will be provided to the \c dynamicPlugIns argument.  The purpose
+    * of performing the additional calls to init() with \c locate having
+    * a value of \c false, is to allow the class instance to re-initialize
+    * any member state that might be necessary to implement the createPlugIn()
+    * function.
+    *
+    * \note %Any time this function is invoked, all the 
+    * %Opticks services will be constructed and valid.  For example,
+    * this function's implementation can use Service<ConfigurationSettings>().
+    *
+    * @param locate
+    *        When \c true, this function should perform dynamic plug-in
+    *        lookup and populate \c dynamicPlugIns with unique string
+    *        identifiers for each plug-in. When \c false, this class
+    *        can re-initialize any member state required for createPlugIn()
+    *        to work properly.  When \c false, the \c dynamicPlugIns argument
+    *        will be pre-populated with the string identifiers located when
+    *        function was called with this paramter having a value of \c true.
+    * @param dynamicPlugIns
+    *        The list of unique string identifiers for the dynamically
+    *        located plug-ins.  When the \c locate parameter is \c true, this list
+    *        should be populated.  When the \c locate parameter is \c false, this
+    *        list will be pre-populated with the earlier values.  When the
+    *        \c locate paramter is \c false, any changes to this vector will be
+    *        ignored by the invoking class.  The string identifiers populated
+    *        into this list, will be used when invoking createPlugIn().
+    *
+    * @see \ref advanced_plugin_register
+    */
    virtual void init(bool locate, std::vector<std::string>& dynamicPlugIns) = 0;
 
+   /**
+    * Construct the given PlugIn instance.
+    * 
+    * @param name
+    *        Construct the PlugIn instance associated with the
+    *        unique string identifier.  The string identifiers
+    *        provided will be those returned from the init() function.
+    *
+    * @return The PlugIn instance associated with the given string
+    *         identifier.  If the data required to construct the
+    *         dynamic plug-in is no longer available, please return \c NULL.
+    */
+   virtual PlugIn* createPlugIn(const std::string& name) = 0;
+
+   /// \cond INTERNAL
    std::vector<std::string> getPlugInNames()
    {
       Service<ConfigurationSettings> pSettings;
@@ -218,8 +288,11 @@ public:
       }
       return names;
    }
+   /// \endcond
 protected:
+   /// \cond INTERNAL
    std::string mModuleId;
+   /// \endcond
 };
 
 /**

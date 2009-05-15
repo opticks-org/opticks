@@ -86,7 +86,6 @@ Now that you have created a plug-in subclass, you need to register it with the a
 Please read \ref register_plugin for more details.
 */
 
-//KIP - Fix up the docs on registration
 /** \page register_plugin Registering your plug-in
 %Opticks discovers your plug-ins by loading your plug-in library and then querying for any registered plug-ins.
 If you haven't created a plug-in subclass to register, please read \ref plugin_subclass .
@@ -107,9 +106,58 @@ Attempting to use it twice inside a single plug-in library will cause compile an
 
 Now that your plug-in library has a registered module, you can actually register your individual plug-in subclasses.
 
-*/
+You can use one of two macros to register your individual plug-in subclasses.
+You can use either REGISTER_PLUGIN or REGISTER_PLUGIN_BASIC, see below for examples.
+\code
+REGISTER_PLUGIN(OpticksTutorial, Tutorial1);
+\endcode
+or
+\code
+REGISTER_PLUGIN_BASIC(OpticksTutorial, Tutorial1, Tutorial1);
+\endcode
+The first argument to either macro is the module id that was used in the REGISTER_MODULE() macro.
+The last argument to either macro is the constructor of your plug-in subclass.
+The REGISTER_PLUGIN_BASIC macro uses it second argument to uniquely identify the plug-in within the module.
+If your plug-in subclass is not templated and has a no-argument constructor, you can simply use the REGISTER_PLUGIN macro which will deduce the plug-in identifier from the plug-ins classname.
+If however, your plug-in subclass requires constructor arguments or is templated, you should instead use REGISTER_PLUGIN_BASIC and provide a unique identifier for plug-in as the second argument to the macro.
+The plug-in identifier provided must be a valid C++ identifier and needs only to be unique within the context of the module.
+Please see below for a more complete example.
+\code
+//assume there are two plug-in subclasses, that would constructed as follows:
+// PlugIn* pPlugIn1 = new TestPlugIn();
+// PlugIn* pPlugIn2 = new TestPlugIn2<int>(true);
+//see below for the plug-in registration code:
+REGISTER_MODULE(TestModule);
 
-//KIP - Mention the "Extensions" folder from AEB stuff here.
+REGISTER_PLUGIN(TestModule, TestPlugIn); //one could also use the commented out line below
+//REGISTER_PLUGIN(TestModule, TestPlugIn, TestPlugIn);
+
+//REGISTER_PLUGIN(TestModule, TestPlugIn2<int>(true)); // this will NOT compile, instead use the line below
+REGISTER_PLUGIN_BASIC(TestModule, TestPlugIn2, TestPlugIn2<int>(true));
+\endcode
+
+When using REGISTER_MODULE, REGISTER_PLUGIN and REGISTER_PLUGIN_BASIC, it's important to know that they can be put into any .cpp file that will included in your plug-in library (.dll, .so).
+This allows a developer to put the REGISTER_PLUGIN-* macro in the .cpp that is providing the implementation for that plug-in subclass.
+This completes the discussion on standard plug-in registration.
+If you'd like to learn more about a very advanced type of plug-in registration, you can continue reading the next section.
+
+\section advanced_plugin_register Advanced Plug-In Registration
+The above documentation has described how to do static (i.e. compile-time) plug-in registration.
+It is also possible to perform plug-in registration during %Opticks start-up the first time that %Opticks loads a plug-in library (.dll, .so).
+This is known as dynamic plug-in registration.
+It is possible to mix both static and dynamic plug-in registration together in a single module.
+
+In order to perform dynamic plug-in registration, you must first create a subclass of the DynamicPlugInFactory base class.
+It is this class that will perform all of the dynamic plug-in registration.
+You must then use the REGISTER_DYNAMIC_MODULE macro instead of the REGISTER_MODULE macro.
+Please keep in mind that you can still only use one use of this macro per plug-in library (.dll, .so).
+The REGISTER_DYNAMIC_MODULE macro has a second argument that must be the name of the DynamicPlugInFactory subclass you have created.
+See below for an example.
+\include PlugInSampler\ModuleManager.cpp
+The source code above comes from the PlugInSampler.
+You can read \ref plugintutorial_building for information on building and running the above code.
+It is also suggested you read the documentation for DynamicPlugInFactory.
+*/
 
 /** \page runningplugins Running your plug-ins
 This document will describe the options available to you when running your newly written plug-ins with %Opticks.
