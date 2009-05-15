@@ -108,6 +108,10 @@ ProductViewImp::ProductViewImp(const string& id, const string& viewName, QGLCont
    Icons* pIcons = NULL;
    pIcons = Icons::instance();
    REQUIRE(pIcons != NULL);
+   // Separator
+   QAction* pPropertiesSeparatorAction = new QAction(this);
+   pPropertiesSeparatorAction->setSeparator(true);
+   addContextMenuAction(ContextMenuAction(pPropertiesSeparatorAction, APP_PRODUCTVIEW_PROPERTIES_SEPARATOR_ACTION));
    setIcon(pIcons->mSpectralData);
    setWindowIcon(pIcons->mSpectralData);
    addMouseMode(new MouseModeImp("LayerMode", QCursor(Qt::ArrowCursor)));

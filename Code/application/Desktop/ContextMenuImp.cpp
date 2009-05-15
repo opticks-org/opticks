@@ -128,6 +128,11 @@ const QList<ContextMenuAction>& ContextMenuImp::getActions() const
    return mActions;
 }
 
+QList<ContextMenuAction>& ContextMenuImp::getActions()
+{
+   return mActions;
+}
+
 void ContextMenuImp::clear()
 {
    mActions.clear();
@@ -258,9 +263,7 @@ void ContextMenuImp::logActions(const string& stepName)
 
    if (mpStep == NULL)
    {
-      Service<MessageLogMgr> pManager;
-
-      MessageLog* pLog = pManager->getLog("app");
+      MessageLog* pLog = Service<MessageLogMgr>()->getLog();
       if (pLog != NULL)
       {
          mpStep = pLog->createStep("Context Menu", "app", "D076926C-856C-4423-9F3B-F3B2C5768CDC");

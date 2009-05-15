@@ -12,8 +12,7 @@
 
 #include "PicturesExporter.h"
 
-class OptionsJpegExporter;
-class QWidget;
+class JpegExportOptionsWidget;
 
 class JpegDetails : public PicturesDetails
 {
@@ -29,7 +28,8 @@ public:
    bool isProduction() const;
 
 private:
-   std::auto_ptr<OptionsJpegExporter> mpOptionsWidget;
+   void computeExportResolution(unsigned int& imageWidth, unsigned int& imageHeight);
+   std::auto_ptr<JpegExportOptionsWidget> mpOptionsWidget;
 };
 
 #endif

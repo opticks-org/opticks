@@ -16,6 +16,7 @@
 
 class QCheckBox;
 class QSpinBox;
+class ResolutionWidget;
 
 class OptionsTiffExporter : public LabeledSectionGroup
 {
@@ -27,8 +28,11 @@ public:
 
    SETTING(PackBitsCompression, TiffExporter, bool, false);
    SETTING(RowsPerStrip, TiffExporter, unsigned int, 1);
+   SETTING(UseViewResolution, TiffExporter, bool, true);
+   SETTING(AspectRatioLock, TiffExporter, bool, false);
+   SETTING(OutputWidth, TiffExporter, unsigned int, 0);
+   SETTING(OutputHeight, TiffExporter, unsigned int, 0);
 
-   void setPromptUserToSaveSettings(bool prompt);
    bool getPackBitsCompression();
    void applyChanges();
 
@@ -88,7 +92,7 @@ public:
 private:
    QCheckBox* mpPackBits;
    QSpinBox* mpRowsPerStrip;
-   QCheckBox* mpSaveSettings;
+   ResolutionWidget* mpResolutionWidget;
 };
 
 #endif

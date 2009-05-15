@@ -12,6 +12,10 @@
 
 #include "PicturesExporter.h"
 
+#include <memory>
+
+class ImageResolutionWidget;
+
 class PngDetails : public PicturesDetails
 {
 public:
@@ -20,7 +24,12 @@ public:
    std::string description();
    std::string extensions();
    bool savePict(QString strFilename, QImage img, const SessionItem *pItem);
+   QWidget* getExportOptionsWidget(const PlugInArgList* pInArgList);
    bool isProduction() const;
+
+private:
+   void computeExportResolution(unsigned int& imageWidth, unsigned int& imageHeight);
+   std::auto_ptr<ImageResolutionWidget> mpOptionsWidget;
 };
 
 #endif

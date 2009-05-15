@@ -333,6 +333,11 @@
  */
 #define APP_PRODUCTVIEW_LAYER_ACTIVATE_ACTION "APP_PRODUCTVIEW_LAYER_ACTIVATE_ACTION"
 
+/** 
+ *  Default menu separator.
+ */
+#define APP_PRODUCTVIEW_PROPERTIES_SEPARATOR_ACTION "APP_PRODUCTVIEW_PROPERTIES_SEPARATOR_ACTION"
+
 /**
  *  Sets the current display mode for the raster layer.
  */
@@ -488,6 +493,22 @@
  *  if the toolbar is hidden.
  */
 #define APP_TOOLBAR_SHOW_ACTION "APP_TOOLBAR_SHOW_ACTION"
+
+/**
+ *  Copies an image of the view to the clipboard.
+ */
+#define APP_VIEW_COPY_SNAPSHOT_ACTION "APP_VIEW_COPY_SNAPSHOT_ACTION"
+
+/**
+ *  Default menu separator.
+ */
+#define APP_VIEW_COPY_SNAPSHOT_SEPARATOR_ACTION "APP_VIEW_COPY_SNAPSHOT_SEPARATOR_ACTION"
+
+/**
+ *  Copies an image of the view to the clipboard.\   The user is prompted to
+ *  change the size of the copied image.
+ */
+#define APP_VIEW_COPY_SNAPSHOT_SIZED_ACTION "APP_VIEW_COPY_SNAPSHOT_SIZED_ACTION"
 
 /**
  *  Display the window on top of all other workspace windows.

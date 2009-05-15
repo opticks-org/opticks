@@ -203,6 +203,8 @@ public slots:
    virtual void setInsetPoint(const LocationType &worldCoord);
    virtual bool enableCrossHair(bool bEnable);
    virtual void refresh();
+   void snapshot();
+   void snapshotSized();
 
    void blockUndo();
    void unblockUndo();

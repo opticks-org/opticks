@@ -244,7 +244,6 @@ QWidget* GeoTIFFExporter::getExportOptionsWidget(const PlugInArgList *)
    if (mpOptionWidget.get() == NULL)
    {
       mpOptionWidget.reset(new OptionsTiffExporter());
-      mpOptionWidget->setPromptUserToSaveSettings(true);
    }
 
    return mpOptionWidget.get();

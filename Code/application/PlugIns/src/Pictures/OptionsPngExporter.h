@@ -7,55 +7,52 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef OPTIONSJPEGEXPORTER_H
-#define OPTIONSJPEGEXPORTER_H
+#ifndef OPTIONSPNGEXPORTER_H
+#define OPTIONSPNGEXPORTER_H
 
 #include "AppVersion.h"
 #include "ConfigurationSettings.h"
 #include "LabeledSectionGroup.h"
+#include "ResolutionWidget.h"
 
 class QCheckBox;
-class QSlider;
-class ResolutionWidget;
 
-class OptionsJpegExporter : public LabeledSectionGroup
+class OptionsPngExporter : public LabeledSectionGroup
 {
    Q_OBJECT
 
 public:
-   OptionsJpegExporter();
-   ~OptionsJpegExporter();
+   OptionsPngExporter();
+   ~OptionsPngExporter();
 
-   SETTING(CompressionQuality, JpegExporter, unsigned int, 0);
-   SETTING(UseViewResolution, JpegExporter, bool, true);
-   SETTING(AspectRatioLock, JpegExporter, bool, false);
-   SETTING(OutputWidth, JpegExporter, unsigned int, 0);
-   SETTING(OutputHeight, JpegExporter, unsigned int, 0);
+   SETTING(UseViewResolution, PngExporter, bool, true);
+   SETTING(AspectRatioLock, PngExporter, bool, false);
+   SETTING(OutputWidth, PngExporter, unsigned int, 0);
+   SETTING(OutputHeight, PngExporter, unsigned int, 0);
 
    void applyChanges();
-   unsigned int getCompressionQuality();
 
    static const std::string& getName()
    {
-      static std::string sName = "Jpeg Exporter Options";
+      static std::string sName = "Png Exporter Options";
       return sName;
    }
 
    static const std::string& getOptionName()
    {
-      static std::string sOptionName = "Export/Jpeg";
+      static std::string sOptionName = "Export/Png";
       return sOptionName;
    }
 
    static const std::string& getDescription()
    {
-      static std::string sDescription = "Widget to display jpeg exporter related options";
+      static std::string sDescription = "Widget to display Png exporter related options";
       return sDescription;
    }
 
    static const std::string& getShortDescription()
    {
-      static std::string sShortDescription = "Widget to display jpeg exporter related options";
+      static std::string sShortDescription = "Widget to display Png exporter related options";
       return sShortDescription;
    }
 
@@ -84,12 +81,11 @@ public:
 
    static const std::string& getDescriptorId()
    {
-      static std::string sId = "{1A0EF762-2C18-44b4-8D71-6396AB6A40C2}";
+      static std::string sId = "{ED1FB522-8104-443c-8FA3-E7FEB6D62F97}";
       return sId;
    }
 
 private:
-   QSlider* mpQualitySlider;
    ResolutionWidget* mpResolutionWidget;
 };
 

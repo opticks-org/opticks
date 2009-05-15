@@ -15,7 +15,7 @@
 
 #include "PicturesExporter.h"
 
-class OptionsTiffExporter;
+class TiffExportOptionsWidget;
 
 class TiffDetails : public PicturesDetails
 {
@@ -47,7 +47,8 @@ public:
    bool addGeoKeys(TIFF* pOut, int width, int height, const SessionItem *pItem);
 
 private:
-   std::auto_ptr<OptionsTiffExporter> mpOptionsWidget;
+   void computeExportResolution(unsigned int& imageWidth, unsigned int& imageHeight);
+   std::auto_ptr<TiffExportOptionsWidget> mpOptionsWidget;
 };
 
 #endif

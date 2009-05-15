@@ -150,7 +150,7 @@ SessionExplorerImp::SessionExplorerImp(const string& id, const string& windowNam
    mpElementTree->addAction(mpRenameAction);
    mpPlugInTree->addAction(mpRenameAction);
 
-   mpCopyNameToClipboardAction = new QAction("Copy name to clipboard", this);
+   mpCopyNameToClipboardAction = new QAction("Copy Name", this);
    mpCopyNameToClipboardAction->setAutoRepeat(false);
    mpCopyNameToClipboardAction->setShortcutContext(Qt::WidgetShortcut);
    mpCopyNameToClipboardAction->setStatusTip("Copy the full item name to the clipboard");

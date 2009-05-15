@@ -18,6 +18,7 @@ class QCheckBox;
 class QComboBox;
 class QSpinBox;
 class QRadioButton;
+class ResolutionWidget;
 
 class OptionsView : public QWidget
 {
@@ -95,6 +96,7 @@ private:
    CustomColorButton* mpBackgroundColor;
    QComboBox* mpOriginCombo;
    QCheckBox* mpConfirmClose;
+   ResolutionWidget* mpResolutionWidget;
 };
 
 #endif

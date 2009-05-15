@@ -220,7 +220,7 @@ protected slots:
    void generateFullImage();
    void toggleDisplayMode();
    void clearMarkings();
-   void snapshot();
+   void forwardSnapshot();
 
    // Rotate actions
    void rotateLeft();
@@ -331,7 +331,8 @@ private:
    QAction* mpGenerateImageAction;
    QAction* m_pDisplay_Mode_Action;
    QAction* m_pMeasurement_Edit_Action;
-   QAction *mpTakeSnapshotAction;
+   QAction* mpClipboardSizedAction;
+   QAction* mpClipboardAction;
 
    // Pan actions
    QAction* m_pPan_Action;

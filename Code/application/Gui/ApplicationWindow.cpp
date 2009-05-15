@@ -349,13 +349,6 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    mpClearMarkingsAction->setStatusTip("Clears all markings from the current view");
    VERIFYNR(connect(mpClearMarkingsAction, SIGNAL(triggered()), this, SLOT(clearMarkings())));
 
-   mpTakeSnapshotAction = new QAction("&Snapshot", this);
-   mpTakeSnapshotAction->setAutoRepeat(false);
-   mpTakeSnapshotAction->setShortcut(QKeySequence("Ctrl+Shift+C"));
-   mpTakeSnapshotAction->setToolTip("Take a snapshot");
-   mpTakeSnapshotAction->setStatusTip("Copies a snapshot of the current view into the clipboard");
-   VERIFYNR(connect(mpTakeSnapshotAction, SIGNAL(triggered()), this, SLOT(snapshot())));
-
    // Pan
    m_pPan_Action = m_pView_Mode_Group->addAction(pIcons->mPan, "Pa&n");
    m_pPan_Action->setAutoRepeat(false);
@@ -1015,7 +1008,6 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    mpMenuBar->insertCommand(mpGenerateImageAction, m_pView, viewContext);
    m_pView->addSeparator();
    mpMenuBar->insertCommand(mpClearMarkingsAction, m_pView, viewContext);
-   mpMenuBar->insertCommand(mpTakeSnapshotAction, m_pView, viewContext);
    mpMenuBar->insertCommand(pPropertiesAction, m_pView, viewContext);
 
    // Pan Mode popup menu
@@ -1175,6 +1167,25 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    mpSessionExplorer->initialize();
    qApp->installEventFilter(this);
 
+   Service<DesktopServices> pDesktop;
+   string shortcutContext = "View/Snapshot";
+   mpClipboardSizedAction = new QAction(QIcon(pIcons->mCopy), "Copy snapshot...", this);
+   mpClipboardSizedAction->setStatusTip
+      ("Presents the copy snapshot dialog and copies a snapshot of the current view into the clipboard");
+   mpClipboardSizedAction->setToolTip("Copy Snapshot With Dialog");
+   mpClipboardSizedAction->setAutoRepeat(false);
+   pDesktop->initializeAction(mpClipboardSizedAction, shortcutContext);
+   addAction(mpClipboardSizedAction);
+
+   mpClipboardAction = new QAction(QIcon(pIcons->mCopy), "Copy snapshot", this);
+   mpClipboardAction->setShortcut(QKeySequence("Ctrl+Shift+C"));
+   mpClipboardAction->setStatusTip
+      ("Copies a snapshot of the current view using the default resolution into the clipboard");
+   mpClipboardAction->setToolTip("Copy Snapshot");
+   mpClipboardAction->setAutoRepeat(false);
+   pDesktop->initializeAction(mpClipboardAction, shortcutContext);
+   addAction(mpClipboardAction);
+
    /////////////////
    // Connections //
    /////////////////
@@ -1205,8 +1216,9 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    VERIFYNR(connect(m_pScripting, SIGNAL(visibilityChanged(bool)), m_pScripting_Wnd_Action, SLOT(setChecked(bool))));
    VERIFYNR(connect(mpWorkspace, SIGNAL(windowActivated(QWidget*)), this, SLOT(updateActiveWindow(QWidget*))));
    VERIFYNR(connect(mpToolbarsMenu, SIGNAL(aboutToShow()), this, SLOT(showToolbarsMenu())));
+   VERIFYNR(connect(mpClipboardSizedAction, SIGNAL(triggered()), SLOT(forwardSnapshot())));
+   VERIFYNR(connect(mpClipboardAction, SIGNAL(triggered()), SLOT(forwardSnapshot())));
 
-   Service<DesktopServices> pDesktop;
    attach(SIGNAL_NAME(ApplicationWindow, WindowAdded),
       Signal(pDesktop.get(), SIGNAL_NAME(DesktopServices, WindowAdded)));
    attach(SIGNAL_NAME(ApplicationWindow, WindowRemoved),
@@ -3504,25 +3516,6 @@ void ApplicationWindow::registerPlugIns()
    m_pScripting->updateInterpreters();
 }
 
-void ApplicationWindow::snapshot()
-{
-   WorkspaceWindow* pWindow = getCurrentWorkspaceWindow();
-   if (pWindow != NULL)
-   {
-      View *pView = pWindow->getView();
-      if (pView != NULL)
-      {
-         QImage image;
-         pView->getCurrentImage(image);
-         if (image.isNull() == false)
-         {
-            QClipboard *pClipboard = QApplication::clipboard();
-            pClipboard->setImage(image);
-         }
-      }
-   }
-}
-
 ///////////////////////////////////////////////////////////////////////////////////////////
 // Options actions
 
@@ -4684,7 +4677,6 @@ void ApplicationWindow::enableActions(bool bEnable)
    m_pRefresh_Action->setEnabled(bEnable);
    m_pDisplay_Mode_Action->setEnabled(bEnable && bSpatialDataView);
    mpClearMarkingsAction->setEnabled(bEnable && bSpatialDataView);
-   mpTakeSnapshotAction->setEnabled(bEnable && bView);
 
    // Pan actions
    m_pPan_Action->setEnabled(bEnable);
@@ -5150,6 +5142,25 @@ void ApplicationWindow::clearMarkings()
       SpatialDataWindow *pSpatialDW = (SpatialDataWindow*)pWindow;
       SpatialDataViewAdapter *pSpatialDV = (SpatialDataViewAdapter*)pSpatialDW->getSpatialDataView();
       pSpatialDV->clearMarkings();
+   }
+}
+
+void ApplicationWindow::forwardSnapshot()
+{
+
+   ViewWindow* pViewWindow = getCurrentWorkspaceWindow();
+   ViewImp* pView = dynamic_cast<ViewImp*>((pViewWindow == NULL) ? NULL : pViewWindow->getView());
+   if (pView == NULL)
+   {
+      return;
+   }
+   if (sender() == mpClipboardSizedAction)
+   {
+      pView->snapshotSized();
+   }
+   else if (sender() == mpClipboardAction)
+   {
+      pView->snapshot();
    }
 }
 
@@ -5631,12 +5642,27 @@ void ApplicationWindow::updateContextMenu(Subject& subject, const string& signal
       pMenu->removeAction(APP_APPLICATIONWINDOW_PROPERTIES_ACTION);
    }
 
-   mpExportContextMenuAction->setData(QVariant::fromValue(pItem));
-   pMenu->addActionBefore(mpExportContextMenuAction, APP_APPLICATIONWINDOW_EXPORT_ACTION,
-      APP_APPLICATIONWINDOW_PROPERTIES_ACTION);
-   if (getAvailableExporters(pItem).empty())
+   if (dynamic_cast<SpatialDataView*>(pItem) != NULL || dynamic_cast<ProductView*>(pItem) != NULL)
    {
-      pMenu->removeAction(APP_APPLICATIONWINDOW_EXPORT_ACTION);
+      mpExportContextMenuAction->setData(QVariant::fromValue(pItem));
+      pMenu->addActionBefore(mpExportContextMenuAction, APP_APPLICATIONWINDOW_EXPORT_ACTION,
+         APP_APPLICATIONWINDOW_PROPERTIES_ACTION);
+      if (getAvailableExporters(pItem).empty())
+      {
+         pMenu->removeAction(APP_APPLICATIONWINDOW_EXPORT_ACTION);
+      }
+
+      // Copy Snapshot Actions
+      QAction* pViewSeparatorAction = new QAction(pMenu->getActionParent());
+      pViewSeparatorAction->setSeparator(true);
+      string beforeAction = APP_SPATIALDATAVIEW_PROPERTIES_SEPARATOR_ACTION;
+      if (dynamic_cast<ProductView*>(pItem) != NULL)
+      {
+         beforeAction = APP_PRODUCTVIEW_PROPERTIES_SEPARATOR_ACTION;
+      }
+      pMenu->addActionBefore(pViewSeparatorAction, APP_VIEW_COPY_SNAPSHOT_SEPARATOR_ACTION, beforeAction);
+      pMenu->addActionBefore(mpClipboardAction, APP_VIEW_COPY_SNAPSHOT_ACTION, beforeAction);
+      pMenu->addActionBefore(mpClipboardSizedAction, APP_VIEW_COPY_SNAPSHOT_SIZED_ACTION, beforeAction);
    }
 }
 

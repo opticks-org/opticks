@@ -12,6 +12,7 @@
 #include "CustomColorButton.h"
 #include "LabeledSection.h"
 #include "PerspectiveView.h"
+#include "ResolutionWidget.h"
 #include "View.h"
 #include "WorkspaceWindow.h"
 
@@ -95,6 +96,13 @@ OptionsView::OptionsView() :
    pInitialZoomLayout->setColumnStretch(2, 10);
    LabeledSection* pInitialZoomSection = new LabeledSection(pInitialZoomWidget, "Default Zoom", this);
 
+   // Copy Snapshot
+   mpResolutionWidget = new ResolutionWidget();
+   LabeledSection* pResolutionSection = new LabeledSection(mpResolutionWidget, "Copy Snapshot", this);
+   mpResolutionWidget->setAspectRatioLock(View::getSettingAspectRatioLock());
+   mpResolutionWidget->setResolution(View::getSettingOutputWidth(), View::getSettingOutputHeight());
+   mpResolutionWidget->setUseViewResolution(View::getSettingUseViewResolution());
+
    // Other Initial Options
    QLabel* pBackgroundLabel = new QLabel("Background Color:", this);
    mpBackgroundColor = new CustomColorButton(this);
@@ -126,6 +134,7 @@ OptionsView::OptionsView() :
    pLayout->setSpacing(10);
    pLayout->addWidget(pInitialSizeSection);
    pLayout->addWidget(pInitialZoomSection);
+   pLayout->addWidget(pResolutionSection);
    pLayout->addWidget(pOtherOptSection);
    pLayout->addStretch(10);
 
@@ -219,6 +228,14 @@ void OptionsView::applyChanges()
    View::setSettingDataOrigin(origin);
    View::setSettingBackgroundColor(mpBackgroundColor->getColorType());
    WorkspaceWindow::setSettingConfirmClose(mpConfirmClose->isChecked());
+
+   unsigned int width = 0;
+   unsigned int height = 0;
+   View::setSettingUseViewResolution(mpResolutionWidget->getUseViewResolution());
+   View::setSettingAspectRatioLock(mpResolutionWidget->getAspectRatioLock());
+   mpResolutionWidget->getResolution(width, height);
+   View::setSettingOutputWidth(width);
+   View::setSettingOutputHeight(height);
 }
 
 OptionsView::~OptionsView()

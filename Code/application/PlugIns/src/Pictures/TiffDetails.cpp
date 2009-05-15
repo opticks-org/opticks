@@ -23,11 +23,15 @@
 #include "OptionsTiffExporter.h"
 #include "PicturesPlotWidgetExporter.h"
 #include "PicturesViewExporter.h"
+#include "PlugInArg.h"
+#include "PlugInArgList.h"
 #include "PlugInRegistration.h"
 #include "ProductView.h"
 #include "RasterElement.h"
 #include "SpatialDataView.h"
 #include "TiffDetails.h"
+#include "TiffExportOptionsWidget.h"
+#include "View.h"
 
 #include <string>
 
@@ -58,16 +62,23 @@ std::string TiffDetails::extensions()
    return "TIFF Files (*.tif)";
 }
 
-QWidget* TiffDetails::getExportOptionsWidget(const PlugInArgList *)
+QWidget* TiffDetails::getExportOptionsWidget(const PlugInArgList* pInArgList)
 {
    if (mpOptionsWidget.get() == NULL)
    {
-      OptionsTiffExporter* pWidget = new (std::nothrow) OptionsTiffExporter();
-      mpOptionsWidget.reset(pWidget);
-      if (mpOptionsWidget.get() != NULL)
+      mpOptionsWidget.reset(new TiffExportOptionsWidget());
+      View* pView = dynamic_cast<View*>(pInArgList->getPlugInArgValue<View>(Exporter::ExportItemArg()));
+      unsigned int outputWidth = 0;
+      unsigned int outputHeight = 0;
+      if (pView != NULL)
       {
-         mpOptionsWidget->setPromptUserToSaveSettings(true);
+         QWidget* pViewWidget = pView->getWidget();
+         outputWidth = pViewWidget->width();
+         outputHeight = pViewWidget->height();
+         computeExportResolution(outputWidth, outputHeight);
       }
+
+      mpOptionsWidget->setResolution(outputWidth, outputHeight);
    }
 
    return mpOptionsWidget.get();
@@ -81,6 +92,19 @@ bool TiffDetails::savePict(QString strFilename, QImage img, const SessionItem *p
    }
 
    std::string filename = strFilename.toStdString();
+
+   unsigned int outputWidth = img.width();
+   unsigned int outputHeight = img.height();
+
+   if (mpOptionsWidget.get() == NULL)
+   {
+      computeExportResolution(outputWidth, outputHeight);
+   }
+   else
+   {
+      mpOptionsWidget->getResolution(outputWidth, outputHeight);
+   }
+   img = img.scaled(outputWidth, outputHeight);
 
 #if defined(WIN_API)
    // replace "/" with "\\" to accommodate the sgi specific code
@@ -105,7 +129,6 @@ bool TiffDetails::savePict(QString strFilename, QImage img, const SessionItem *p
    bool packBits = OptionsTiffExporter::getSettingPackBitsCompression();
    if (mpOptionsWidget.get() != NULL)
    {
-      mpOptionsWidget->applyChanges();
       packBits = mpOptionsWidget->getPackBitsCompression();
    }
 
@@ -294,4 +317,13 @@ bool TiffDetails::addGeoKeys(TIFF* pOut, int width, int height, const SessionIte
 bool TiffDetails::isProduction() const
 {
    return APP_IS_PRODUCTION_RELEASE;
+}
+
+void TiffDetails::computeExportResolution(unsigned int& imageWidth, unsigned int& imageHeight)
+{
+   calculateExportResolution(imageWidth, imageHeight, 
+      OptionsTiffExporter::getSettingAspectRatioLock(),
+      OptionsTiffExporter::getSettingUseViewResolution(),
+      OptionsTiffExporter::getSettingOutputWidth(),
+      OptionsTiffExporter::getSettingOutputHeight());
 }

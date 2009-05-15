@@ -60,6 +60,10 @@ public:
    SETTING(PixelValueMinimumFontSize, View, unsigned int, 5);
    SETTING(PixelValueMaximumFontSize, View, unsigned int, 20);
    SETTING(DisplayCrosshair, View, bool, false)
+   SETTING(UseViewResolution, View, bool, false);
+   SETTING(AspectRatioLock, View, bool, false);
+   SETTING(OutputWidth, View, unsigned int, 0);
+   SETTING(OutputHeight, View, unsigned int, 0);
 
    /**
     *  This class accesses portions of a view image.

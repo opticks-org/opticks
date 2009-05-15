@@ -37,6 +37,44 @@ public:
       return NULL;
    }
    virtual bool isProduction() const = 0;
+protected:
+   void calculateExportResolution(unsigned int& width, unsigned int& height, bool ratioLock, bool useViewResolution,
+      unsigned int desiredWidth, unsigned int desiredHeight)
+   {
+      if (useViewResolution)
+      {
+         return;
+      }
+      
+      if (ratioLock)
+      {
+         unsigned int newX = (desiredHeight * width) / static_cast<double>(height);
+         unsigned int newY = (desiredWidth * height) / static_cast<double>(width);
+         if (newX < desiredWidth)
+         {
+            if ((newX % 2) != 0)
+            {
+               newX++;
+            }
+            width = newX;
+            height = desiredHeight;
+         }
+         else
+         {
+            if ((newY % 2) != 0)
+            {
+               newY++;
+            }
+            width = desiredWidth;
+            height = newY;
+         }
+      }
+      else
+      {
+         width = desiredWidth;
+         height = desiredHeight;
+      }
+   }
 };
 
 class PicturesExporter : public ExporterShell

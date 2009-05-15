@@ -218,6 +218,7 @@
  *  <table>
  *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
  *    <tr><td>Activate</td><td>APP_PRODUCTVIEW_LAYER_ACTIVATE_ACTION()</td></tr>
+ *    <tr><td>Activate</td><td>APP_PRODUCTVIEW_PROPERTIES_SEPARATOR_ACTION()</td></tr>
  *  </table>
  *
  *  \subsection rasterlayer Raster Layer
@@ -271,6 +272,14 @@
  *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
  *    <tr><td>Hide</td><td>APP_TOOLBAR_HIDE_ACTION()</td></tr>
  *    <tr><td>Show</td><td>APP_TOOLBAR_SHOW_ACTION()</td></tr>
+ *  </table>
+ *
+ *  \subsection view View
+ *  <table>
+ *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
+ *    <tr><td>Separator</td><td>APP_VIEW_COPY_SNAPSHOT_SEPARATOR_ACTION()</td></tr>
+ *    <tr><td>Copy snapshot</td><td>APP_VIEW_COPY_SNAPSHOT_ACTION()</td></tr>
+ *    <tr><td>Copy snapshot</td><td>APP_VIEW_COPY_SNAPSHOT_SIZED_ACTION()</td></tr>
  *  </table>
  *
  *  \subsection workspacewindow Workspace Window

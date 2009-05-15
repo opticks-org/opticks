@@ -21,6 +21,7 @@
 #include "View.h"
 
 #include <QtGui/QPainter>
+#include <QtGui/QWidget>
 
 using namespace std;
 

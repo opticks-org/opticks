@@ -29,6 +29,7 @@ public:
       const std::list<ContextMenuAction>& actions, QWidget* pParent, QObject* pActionParent = NULL);
    ~ContextMenuImp();
 
+   using ContextMenu::getSessionItems;
    const std::vector<SessionItem*>& getSessionItems() const;
    const QPoint& getMouseLocation() const;
    QObject* getActionParent() const;
@@ -39,6 +40,7 @@ public:
    bool addActionAfter(QAction* pAction, const std::string& id, const std::string& afterId);
    void removeAction(const std::string& id);
    const QList<ContextMenuAction>& getActions() const;
+   QList<ContextMenuAction>& getActions();
    void clear();
 
    bool show();

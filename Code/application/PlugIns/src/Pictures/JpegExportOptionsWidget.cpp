@@ -8,35 +8,24 @@
  */
 
 #include "LabeledSection.h"
-#include "OptionQWidgetWrapper.h"
+#include "JpegExportOptionsWidget.h"
 #include "OptionsJpegExporter.h"
-#include "PlugInRegistration.h"
-#include "ResolutionWidget.h"
-#include "SessionManager.h"
+#include "ImageResolutionWidget.h"
 
 #include <QtGui/QCheckBox>
-#include <QtGui/QGridLayout>
-#include <QtGui/QHBoxLayout>
 #include <QtGui/QLabel>
+#include <QtGui/QLayout>
 #include <QtGui/QSlider>
-#include <QtGui/QVBoxLayout>
 
-#include <string>
-
-using namespace std;
-
-REGISTER_PLUGIN(OpticksPictures, OptionsJpegExporter, OptionQWidgetWrapper<OptionsJpegExporter>());
-
-OptionsJpegExporter::OptionsJpegExporter() :
+JpegExportOptionsWidget::JpegExportOptionsWidget() :
    LabeledSectionGroup(NULL)
 {
    // Resolution section
-   mpResolutionWidget = new ResolutionWidget(this);
+   mpResolutionWidget = new ImageResolutionWidget();
    LabeledSection* pResolutionSection = new LabeledSection(mpResolutionWidget, "Image Size", this);
    mpResolutionWidget->setAspectRatioLock(OptionsJpegExporter::getSettingAspectRatioLock());
    mpResolutionWidget->setResolution(OptionsJpegExporter::getSettingOutputWidth(),
       OptionsJpegExporter::getSettingOutputHeight());
-   mpResolutionWidget->setUseViewResolution(OptionsJpegExporter::getSettingUseViewResolution());
 
    // Compression Quality
    QWidget* pQualityLayoutWidget = new QWidget(this);
@@ -91,24 +80,21 @@ OptionsJpegExporter::OptionsJpegExporter() :
    connect(mpQualitySlider, SIGNAL(valueChanged(int)), pCurrentValue, SLOT(setNum(int)));
 }
 
-void OptionsJpegExporter::applyChanges()
-{
-   unsigned int outputWidth;
-   unsigned int outputHeight;
-
-   OptionsJpegExporter::setSettingCompressionQuality(mpQualitySlider->value());
-   OptionsJpegExporter::setSettingUseViewResolution(mpResolutionWidget->getUseViewResolution());
-   mpResolutionWidget->getResolution(outputWidth, outputHeight);
-   OptionsJpegExporter::setSettingAspectRatioLock(mpResolutionWidget->getAspectRatioLock());
-   OptionsJpegExporter::setSettingOutputWidth(outputWidth);
-   OptionsJpegExporter::setSettingOutputHeight(outputHeight);
-}
-
-OptionsJpegExporter::~OptionsJpegExporter()
+JpegExportOptionsWidget::~JpegExportOptionsWidget()
 {
 }
 
-unsigned int OptionsJpegExporter::getCompressionQuality()
+void JpegExportOptionsWidget::setResolution(unsigned int width, unsigned int height)
+{
+   mpResolutionWidget->setResolution(width, height);
+}
+
+void JpegExportOptionsWidget::getResolution(unsigned int& width, unsigned int& height)
+{
+   mpResolutionWidget->getResolution(width, height);
+}
+
+unsigned int JpegExportOptionsWidget::getCompressionQuality()
 {
    return mpQualitySlider->value();
 }

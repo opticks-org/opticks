@@ -9,21 +9,22 @@
 
 #include <math.h>
 
-#include "glCommon.h"
-#include "ViewImp.h"
 #include "AnimationController.h"
-#include "Classification.h"
-#include "ColorType.h"
-#include "AppConfig.h"
-#include "ConfigurationSettings.h"
-#include "ContextMenuImp.h"
 #include "AppConfig.h"
 #include "AppVerify.h"
+#include "Classification.h"
+#include "ColorType.h"
+#include "ConfigurationSettings.h"
+#include "ContextMenuActions.h"
+#include "ContextMenuImp.h"
 #include "DesktopServices.h"
 #include "DrawUtil.h"
 #include "Endian.h"
 #include "FontImp.h"
 #include "GeocoordLinkFunctor.h"
+#include "glCommon.h"
+#include "Icons.h"
+#include "ImageResolutionWidget.h"
 #include "MouseModeImp.h"
 #include "PropertiesView.h"
 #include "SessionItemDeserializer.h"
@@ -35,12 +36,17 @@
 #include "UndoStack.h"
 #include "UtilityServicesImp.h"
 #include "View.h"
+#include "ViewImp.h"
 #include "ViewUndo.h"
 #include "xmlreader.h"
 
-#include <QtGui/QContextMenuEvent>
 #include <QtCore/QEvent>
+#include <QtGui/QApplication>
+#include <QtGui/QClipboard>
+#include <QtGui/QContextMenuEvent>
 #include <QtGui/QCursor>
+#include <QtGui/QDialog>
+#include <QtGui/QDialogButtonBox>
 #include <QtGui/QFontMetrics>
 #include <QtOpenGL/QGLFramebufferObject>
 
@@ -1700,6 +1706,122 @@ bool ViewImp::canLinkWithView(View *pView, LinkType type)
    }
 
    return false;
+}
+
+void ViewImp::snapshotSized()
+{
+   QImage image;
+   getCurrentImage(image);
+   if (image.isNull() == true)
+   {
+      return;
+   }
+
+   QDialog snapshotDialog(this);
+
+   ImageResolutionWidget* pResolutionWidget = new ImageResolutionWidget(&snapshotDialog);
+   QDialogButtonBox* pButtonBox = new QDialogButtonBox(&snapshotDialog);
+   pButtonBox->setOrientation(Qt::Horizontal);
+   pButtonBox->setStandardButtons(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+
+   QVBoxLayout* pLayout = new QVBoxLayout(&snapshotDialog);
+   pLayout->setMargin(10);
+   pLayout->setSpacing(10);
+   pLayout->addWidget(pResolutionWidget);
+   pLayout->addStretch();
+   pLayout->addWidget(pButtonBox, 0, Qt::AlignRight);
+
+   snapshotDialog.setWindowTitle("Copy Snapshot");
+   snapshotDialog.resize(200, 200);
+   VERIFYNR(connect(pButtonBox, SIGNAL(accepted()), &snapshotDialog, SLOT(accept())));
+   VERIFYNR(connect(pButtonBox, SIGNAL(rejected()), &snapshotDialog, SLOT(reject())));
+
+   unsigned int iWidth = View::getSettingOutputWidth();
+   unsigned int iHeight = View::getSettingOutputHeight();
+   if (View::getSettingUseViewResolution())
+   {
+      pResolutionWidget->setResolution(image.width(), image.height());
+   }
+   else if (View::getSettingAspectRatioLock())
+   {
+      unsigned int newX = (iHeight * image.width()) / static_cast<double>(image.height());
+      unsigned int newY = (iWidth * image.height()) / static_cast<double>(image.width());
+      if (newX < iWidth)
+      {
+         if ((newX % 2) != 0)
+         {
+            newX++;
+         }
+         pResolutionWidget->setResolution(newX, iHeight);
+      }
+      else
+      {
+         if ((newY % 2) != 0)
+         {
+            newY++;
+         }
+         pResolutionWidget->setResolution(iWidth, newY);
+      }
+   }
+   else
+   {
+      pResolutionWidget->setResolution(iWidth, iHeight);
+   }
+
+   if (snapshotDialog.exec() == QDialog::Accepted)
+   {
+      pResolutionWidget->getResolution(iWidth, iHeight);
+      if ((iWidth != 0) && (iHeight != 0))
+      {
+         QClipboard* pClipboard = QApplication::clipboard();
+         pClipboard->setImage(image.scaled(iWidth, iHeight));
+      }
+   }
+}
+
+void ViewImp::snapshot()
+{
+   QImage image;
+   getCurrentImage(image);
+   if (image.isNull() == true)
+   {
+      return;
+   }
+
+   unsigned int iWidth = View::getSettingOutputWidth();
+   unsigned int iHeight = View::getSettingOutputHeight();
+   if (View::getSettingUseViewResolution())
+   {
+      iWidth = image.width();
+      iHeight = image.height();
+   }
+   else if (View::getSettingAspectRatioLock())
+   {
+      unsigned int newX = (iHeight * image.width()) / static_cast<double>(image.height());
+      unsigned int newY = (iWidth * image.height()) / static_cast<double>(image.width());
+      if (newX < iWidth)
+      {
+         if ((newX % 2) != 0)
+         {
+            newX++;
+         }
+         iWidth = newX;
+      }
+      else
+      {
+         if ((newY % 2) != 0)
+         {
+            newY++;
+         }
+         iHeight = newY;
+      }
+   }
+
+   if ((iWidth != 0) && (iHeight != 0))
+   {
+      QClipboard* pClipboard = QApplication::clipboard();
+      pClipboard->setImage(image.scaled(iWidth, iHeight));
+   }
 }
 
 UndoStack* ViewImp::getUndoStack() const

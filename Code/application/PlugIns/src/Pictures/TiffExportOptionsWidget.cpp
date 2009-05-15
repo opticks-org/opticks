@@ -12,28 +12,23 @@
 #include <QtGui/QGridLayout>
 #include <QtGui/QSpinBox>
 
+#include "ImageResolutionWidget.h"
 #include "LabeledSection.h"
-#include "OptionQWidgetWrapper.h"
 #include "OptionsTiffExporter.h"
-#include "PlugInRegistration.h"
-#include "ResolutionWidget.h"
+#include "TiffExportOptionsWidget.h"
 
 #include <limits>
-#include <string>
 using namespace std;
 
-REGISTER_PLUGIN(OpticksPictures, OptionsTiffExporter, OptionQWidgetWrapper<OptionsTiffExporter>());
-
-OptionsTiffExporter::OptionsTiffExporter() :
+TiffExportOptionsWidget::TiffExportOptionsWidget() :
    LabeledSectionGroup(NULL)
 {
    // Resolution section
-   mpResolutionWidget = new ResolutionWidget(this);
+   mpResolutionWidget = new ImageResolutionWidget();
    LabeledSection* pResolutionSection = new LabeledSection(mpResolutionWidget, "Image Size", this);
    mpResolutionWidget->setAspectRatioLock(OptionsTiffExporter::getSettingAspectRatioLock());
    mpResolutionWidget->setResolution(OptionsTiffExporter::getSettingOutputWidth(),
       OptionsTiffExporter::getSettingOutputHeight());
-   mpResolutionWidget->setUseViewResolution(OptionsTiffExporter::getSettingUseViewResolution());
 
    // Pack Bits
    QWidget* pPackBitsLayoutWidget = new QWidget(this);
@@ -52,7 +47,6 @@ OptionsTiffExporter::OptionsTiffExporter() :
    pLayout->addWidget(mpPackBits, 1, 1);
    pLayout->setColumnStretch(2, 10);
 
-
    LabeledSection* pPackBitsSection = new LabeledSection(pPackBitsLayoutWidget, "Compression Options", this);
 
    // Initialization
@@ -66,25 +60,21 @@ OptionsTiffExporter::OptionsTiffExporter() :
    mpRowsPerStrip->setValue(static_cast<int>(OptionsTiffExporter::getSettingRowsPerStrip()));
 }
 
-void OptionsTiffExporter::applyChanges()
-{
-   unsigned int outputWidth;
-   unsigned int outputHeight;
-
-   OptionsTiffExporter::setSettingPackBitsCompression(mpPackBits->isChecked());
-   OptionsTiffExporter::setSettingRowsPerStrip(static_cast<unsigned int>(mpRowsPerStrip->value()));
-   OptionsTiffExporter::setSettingUseViewResolution(mpResolutionWidget->getUseViewResolution());
-   mpResolutionWidget->getResolution(outputWidth, outputHeight);
-   OptionsTiffExporter::setSettingAspectRatioLock(mpResolutionWidget->getAspectRatioLock());
-   OptionsTiffExporter::setSettingOutputWidth(outputWidth);
-   OptionsTiffExporter::setSettingOutputHeight(outputHeight);
-}
-
-OptionsTiffExporter::~OptionsTiffExporter()
+TiffExportOptionsWidget::~TiffExportOptionsWidget()
 {
 }
 
-bool OptionsTiffExporter::getPackBitsCompression()
+void TiffExportOptionsWidget::setResolution(unsigned int width, unsigned int height)
+{
+   mpResolutionWidget->setResolution(width, height);
+}
+
+void TiffExportOptionsWidget::getResolution(unsigned int& width, unsigned int& height)
+{
+   mpResolutionWidget->getResolution(width, height);
+}
+
+bool TiffExportOptionsWidget::getPackBitsCompression()
 {
    return mpPackBits->isChecked();
 }

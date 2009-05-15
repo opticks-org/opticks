@@ -8,10 +8,14 @@
  */
 
 #include "JpegDetails.h"
+#include "JpegExportOptionsWidget.h"
 #include "OptionsJpegExporter.h"
 #include "PicturesPlotWidgetExporter.h"
 #include "PicturesViewExporter.h"
+#include "PlugInArg.h"
+#include "PlugInArgList.h"
 #include "PlugInRegistration.h"
+#include "View.h"
 
 REGISTER_PLUGIN(OpticksPictures, JpegPicturesPlotWidgetExporter, PicturesPlotWidgetExporter(new JpegDetails));
 REGISTER_PLUGIN(OpticksPictures, JpegPicturesViewExporter, PicturesViewExporter(new JpegDetails));
@@ -40,13 +44,22 @@ std::string JpegDetails::extensions()
    return "JPEG Files (*.jpg)";
 }
 
-QWidget* JpegDetails::getExportOptionsWidget(const PlugInArgList *)
+QWidget* JpegDetails::getExportOptionsWidget(const PlugInArgList* pInArgList)
 {
    if (mpOptionsWidget.get() == NULL)
    {
-      OptionsJpegExporter* pWidget = new OptionsJpegExporter();
-      mpOptionsWidget.reset(pWidget);
-      mpOptionsWidget->setPromptUserToSaveSettings(true);
+      mpOptionsWidget.reset(new JpegExportOptionsWidget());
+      View* pView = dynamic_cast<View*>(pInArgList->getPlugInArgValue<View>(Exporter::ExportItemArg()));
+      unsigned int computedWidth = 1;
+      unsigned int computedHeight = 1;
+      if (pView != NULL)
+      {
+         QWidget* pViewWidget = pView->getWidget();
+         computedWidth = pViewWidget->width();
+         computedHeight = pViewWidget->height();
+         computeExportResolution(computedWidth, computedHeight);
+      }
+      mpOptionsWidget->setResolution(computedWidth, computedHeight);
    }
 
    return mpOptionsWidget.get();
@@ -60,17 +73,31 @@ bool JpegDetails::savePict(QString strFilename, QImage img, const SessionItem *p
    }
 
    unsigned int quality = OptionsJpegExporter::getSettingCompressionQuality();
-   if (mpOptionsWidget.get() != NULL)
+   unsigned int outputWidth = img.width(); 
+   unsigned int outputHeight = img.height();
+   if (mpOptionsWidget.get() == NULL)
    {
-      mpOptionsWidget->applyChanges();
-      quality = mpOptionsWidget->getCompressionQuality();         
+      computeExportResolution(outputWidth, outputHeight);
    }
-
-   bool bSuccess = img.save(strFilename, "JPEG", quality);
-   return bSuccess;
+   else
+   {
+      mpOptionsWidget->getResolution(outputWidth, outputHeight);
+      quality = mpOptionsWidget->getCompressionQuality();
+   }
+   img = img.scaled(outputWidth, outputHeight);
+   return img.save(strFilename, "JPEG", quality);   
 }
 
 bool JpegDetails::isProduction() const
 {
    return APP_IS_PRODUCTION_RELEASE;
+}
+
+void JpegDetails::computeExportResolution(unsigned int& imageWidth, unsigned int& imageHeight)
+{
+   calculateExportResolution(imageWidth, imageHeight, 
+      OptionsJpegExporter::getSettingAspectRatioLock(),
+      OptionsJpegExporter::getSettingUseViewResolution(),
+      OptionsJpegExporter::getSettingOutputWidth(),
+      OptionsJpegExporter::getSettingOutputHeight());
 }
