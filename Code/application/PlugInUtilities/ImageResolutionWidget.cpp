@@ -254,11 +254,13 @@ void ImageResolutionWidget::setResolution(unsigned int width, unsigned int heigh
    const QValidator* pValidY = mpResolutionY->validator();
    int pos1 = 0;
    int pos2 = 0;
-   if ((pValidX == NULL || pValidX->validate(QString::number(width), pos1) == QValidator::Acceptable) &&
-      (pValidY == NULL || pValidY->validate(QString::number(height), pos2) == QValidator::Acceptable))
+   QString widthStr = QString::number(width);
+   QString heightStr = QString::number(height);
+   if ((pValidX == NULL || pValidX->validate(widthStr, pos1) == QValidator::Acceptable) &&
+      (pValidY == NULL || pValidY->validate(heightStr, pos2) == QValidator::Acceptable))
    {
-      mpResolutionX->setText(QString::number(width));
-      mpResolutionY->setText(QString::number(height));
+      mpResolutionX->setText(widthStr);
+      mpResolutionY->setText(heightStr);
       checkResolutionX(true);
       checkResolutionY(true);
       getResolution(mCurrentResolutionX, mCurrentResolutionY);
