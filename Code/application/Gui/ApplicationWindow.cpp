@@ -5660,9 +5660,9 @@ void ApplicationWindow::updateContextMenu(Subject& subject, const string& signal
       {
          beforeAction = APP_PRODUCTVIEW_PROPERTIES_SEPARATOR_ACTION;
       }
-      pMenu->addActionBefore(pViewSeparatorAction, APP_VIEW_COPY_SNAPSHOT_SEPARATOR_ACTION, beforeAction);
-      pMenu->addActionBefore(mpClipboardAction, APP_VIEW_COPY_SNAPSHOT_ACTION, beforeAction);
-      pMenu->addActionBefore(mpClipboardSizedAction, APP_VIEW_COPY_SNAPSHOT_SIZED_ACTION, beforeAction);
+      pMenu->addActionBefore(pViewSeparatorAction, APP_APPLICATIONWINDOW_COPY_SNAPSHOT_SEPARATOR_ACTION, beforeAction);
+      pMenu->addActionBefore(mpClipboardAction, APP_APPLICATIONWINDOW_COPY_SNAPSHOT_ACTION, beforeAction);
+      pMenu->addActionBefore(mpClipboardSizedAction, APP_APPLICATIONWINDOW_COPY_SNAPSHOT_SIZED_ACTION, beforeAction);
    }
 }
 

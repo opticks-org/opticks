@@ -112,6 +112,9 @@
  *  \subsection applicationwindow Application Window
  *  <table>
  *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
+ *    <tr><td>Copy snapshot</td><td>APP_APPLICATIONWINDOW_COPY_SNAPSHOT_ACTION()</td></tr>
+ *    <tr><td>Separator</td><td>APP_APPLICATIONWINDOW_COPY_SNAPSHOT_SEPARATOR_ACTION()</td></tr>
+ *    <tr><td>Copy snapshot</td><td>APP_APPLICATIONWINDOW_COPY_SNAPSHOT_SIZED_ACTION()</td></tr>
  *    <tr><td>Delete Data Element</td><td>APP_APPLICATIONWINDOW_DATAELEMENT_DELETE_ACTION()</td></tr>
  *    <tr><td>Export</td><td>APP_APPLICATIONWINDOW_EXPORT_ACTION()</td></tr>
  *    <tr><td>%Properties</td><td>APP_APPLICATIONWINDOW_PROPERTIES_ACTION()</td></tr>
@@ -272,14 +275,6 @@
  *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
  *    <tr><td>Hide</td><td>APP_TOOLBAR_HIDE_ACTION()</td></tr>
  *    <tr><td>Show</td><td>APP_TOOLBAR_SHOW_ACTION()</td></tr>
- *  </table>
- *
- *  \subsection view View
- *  <table>
- *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
- *    <tr><td>Separator</td><td>APP_VIEW_COPY_SNAPSHOT_SEPARATOR_ACTION()</td></tr>
- *    <tr><td>Copy snapshot</td><td>APP_VIEW_COPY_SNAPSHOT_ACTION()</td></tr>
- *    <tr><td>Copy snapshot</td><td>APP_VIEW_COPY_SNAPSHOT_SIZED_ACTION()</td></tr>
  *  </table>
  *
  *  \subsection workspacewindow Workspace Window

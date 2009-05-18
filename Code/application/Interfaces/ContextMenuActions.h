@@ -104,6 +104,22 @@
 #define APP_ANIMATIONSERVICES_SEPARATOR_ACTION "APP_ANIMATIONSERVICES_SEPARATOR_ACTION"
 
 /**
+ *  Copies an image of the active view to the clipboard.
+ */
+#define APP_APPLICATIONWINDOW_COPY_SNAPSHOT_ACTION "APP_APPLICATIONWINDOW_COPY_SNAPSHOT_ACTION"
+
+/**
+ *  Default menu separator.
+ */
+#define APP_APPLICATIONWINDOW_COPY_SNAPSHOT_SEPARATOR_ACTION "APP_APPLICATIONWINDOW_COPY_SNAPSHOT_SEPARATOR_ACTION"
+
+/**
+ *  Copies an image of the active view to the clipboard.\   The user is prompted
+ *  to change the size of the copied image.
+ */
+#define APP_APPLICATIONWINDOW_COPY_SNAPSHOT_SIZED_ACTION "APP_APPLICATIONWINDOW_COPY_SNAPSHOT_SIZED_ACTION"
+
+/**
  *  Destroys the selected DataElement.
  */
 #define APP_APPLICATIONWINDOW_DATAELEMENT_DELETE_ACTION "APP_APPLICATIONWINDOW_DATAELEMENT_DELETE_ACTION"
@@ -493,22 +509,6 @@
  *  if the toolbar is hidden.
  */
 #define APP_TOOLBAR_SHOW_ACTION "APP_TOOLBAR_SHOW_ACTION"
-
-/**
- *  Copies an image of the view to the clipboard.
- */
-#define APP_VIEW_COPY_SNAPSHOT_ACTION "APP_VIEW_COPY_SNAPSHOT_ACTION"
-
-/**
- *  Default menu separator.
- */
-#define APP_VIEW_COPY_SNAPSHOT_SEPARATOR_ACTION "APP_VIEW_COPY_SNAPSHOT_SEPARATOR_ACTION"
-
-/**
- *  Copies an image of the view to the clipboard.\   The user is prompted to
- *  change the size of the copied image.
- */
-#define APP_VIEW_COPY_SNAPSHOT_SIZED_ACTION "APP_VIEW_COPY_SNAPSHOT_SIZED_ACTION"
 
 /**
  *  Display the window on top of all other workspace windows.
