@@ -7,6 +7,5 @@ if (! $?LD_LIBRARY_PATH_64) then
 endif
 setenv LD_LIBRARY_PATH_64 /usr/lib:/usr/sfw/lib/sparcv9:/usr/java/jre/lib/sparcv9:/usr/java/jre/lib/sparcv9/server:$OPTICKS_HOME/Bin:$LD_LIBRARY_PATH_64
  
-umask 007
 limit coredumpsize 0
  
