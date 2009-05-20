@@ -7,6 +7,7 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include "AppConfig.h"
 #include "AebPlatform.h"
 
 AebPlatform::AebPlatform() : mPlatform(currentPlatform())
