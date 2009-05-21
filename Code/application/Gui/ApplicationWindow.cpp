@@ -5642,16 +5642,16 @@ void ApplicationWindow::updateContextMenu(Subject& subject, const string& signal
       pMenu->removeAction(APP_APPLICATIONWINDOW_PROPERTIES_ACTION);
    }
 
+   mpExportContextMenuAction->setData(QVariant::fromValue(pItem));
+   pMenu->addActionBefore(mpExportContextMenuAction, APP_APPLICATIONWINDOW_EXPORT_ACTION,
+      APP_APPLICATIONWINDOW_PROPERTIES_ACTION);
+   if (getAvailableExporters(pItem).empty())
+   {
+      pMenu->removeAction(APP_APPLICATIONWINDOW_EXPORT_ACTION);
+   }
+
    if (dynamic_cast<SpatialDataView*>(pItem) != NULL || dynamic_cast<ProductView*>(pItem) != NULL)
    {
-      mpExportContextMenuAction->setData(QVariant::fromValue(pItem));
-      pMenu->addActionBefore(mpExportContextMenuAction, APP_APPLICATIONWINDOW_EXPORT_ACTION,
-         APP_APPLICATIONWINDOW_PROPERTIES_ACTION);
-      if (getAvailableExporters(pItem).empty())
-      {
-         pMenu->removeAction(APP_APPLICATIONWINDOW_EXPORT_ACTION);
-      }
-
       // Copy Snapshot Actions
       QAction* pViewSeparatorAction = new QAction(pMenu->getActionParent());
       pViewSeparatorAction->setSeparator(true);
