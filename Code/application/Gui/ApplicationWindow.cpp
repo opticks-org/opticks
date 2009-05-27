@@ -5682,6 +5682,7 @@ void ApplicationWindow::sessionLoaded(Subject& subject, const string& signal, co
       mpWorkspace->setActiveWindow(NULL);
    }
    setCurrentWorkspaceWindow(pCurrentWindow);
+   clearUndoStacks();
    resize(mPreviousSize);
 }
 
