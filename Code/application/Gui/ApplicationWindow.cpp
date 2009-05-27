@@ -750,6 +750,8 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    mpSessionExplorer->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &ApplicationWindow::windowRemoved));
    mpSessionExplorer->attach(SIGNAL_NAME(SessionExplorer, AboutToShowSessionItemContextMenu), 
       Slot(this, &ApplicationWindow::updateContextMenu));
+   SessionManagerImp::instance()->attach(SIGNAL_NAME(SessionManager, AboutToRestore),
+      Slot(this, &ApplicationWindow::sessionAboutToRestore));
    SessionManagerImp::instance()->attach(SIGNAL_NAME(SessionManager, SessionRestored),
       Slot(this, &ApplicationWindow::sessionLoaded));
 
@@ -5666,6 +5668,11 @@ void ApplicationWindow::updateContextMenu(Subject& subject, const string& signal
    }
 }
 
+void ApplicationWindow::sessionAboutToRestore(Subject& subject, const string& signal, const boost::any& value)
+{
+   mPreviousSize = size();
+}
+
 void ApplicationWindow::sessionLoaded(Subject& subject, const string& signal, const boost::any& value)
 {
    // make sure that the zoom percentage toolbar item, etc. are properly connected to the window and view.
@@ -5675,6 +5682,7 @@ void ApplicationWindow::sessionLoaded(Subject& subject, const string& signal, co
       mpWorkspace->setActiveWindow(NULL);
    }
    setCurrentWorkspaceWindow(pCurrentWindow);
+   resize(mPreviousSize);
 }
 
 void ApplicationWindow::exportFileMenu()

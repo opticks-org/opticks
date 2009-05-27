@@ -180,6 +180,7 @@ public slots:
 
 protected:
    void updateContextMenu(Subject& subject, const std::string& signal, const boost::any& value);
+   void sessionAboutToRestore(Subject& subject, const std::string& signal, const boost::any& value);
    void sessionLoaded(Subject& subject, const std::string& signal, const boost::any& value);
 
    QTimer *mpSaveTimer;
@@ -440,6 +441,7 @@ private:
 
    // Session
    std::string mSessionFilename;
+   QSize mPreviousSize;
 
    // Undo
    QUndoGroup* mpUndoGroup;

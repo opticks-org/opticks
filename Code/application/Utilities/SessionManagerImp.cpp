@@ -1018,7 +1018,6 @@ void SessionManagerImp::newSession()
 
 bool SessionManagerImp::open(const string &filename, Progress *pProgress)
 {
-   bool success = true;
    string name = mName;
    try
    {
@@ -1068,7 +1067,6 @@ bool SessionManagerImp::open(const string &filename, Progress *pProgress)
    }
    catch (SessionManagerImp::Failure &e)
    {
-      success = false;
       mIsSaveLoad = false;
       if (pProgress)
       {
@@ -1077,9 +1075,10 @@ bool SessionManagerImp::open(const string &filename, Progress *pProgress)
       mName = name;
       Service<DesktopServices>()->showMessageBox("Session Load Failure", "The session load failed: \n" + e.mMessage, 
          "Ok");
+      return false;
    }
    notify(SIGNAL_NAME(SessionManager, SessionRestored));
-   return success;
+   return true;
 }
 
 void SessionManagerImp::populateItemMap(const vector<IndexFileItem> &items)
