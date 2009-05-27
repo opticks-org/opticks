@@ -376,8 +376,9 @@ void ConvolutionFilterShell::ConvolutionFilterThread::convolve(const T*)
       mInput.mpResult->getDataDescriptor());
 
    // account for AOIs which extend outside the dataset
+   int maxRowNum = static_cast<int>(mInput.mpDescriptor->getRowCount()) - 1;
    mRowRange.mFirst = std::max(0, mRowRange.mFirst);
-   mRowRange.mLast = std::min(mRowRange.mLast, static_cast<int>(mInput.mpDescriptor->getRowCount()) - 1);
+   mRowRange.mLast = std::min(mRowRange.mLast, maxRowNum);
 
    FactoryResource<DataRequest> pResultRequest;
    pResultRequest->setRows(pResultDescriptor->getActiveRow(mRowRange.mFirst),
@@ -406,8 +407,8 @@ void ConvolutionFilterShell::ConvolutionFilterThread::convolve(const T*)
 
    FactoryResource<DataRequest> pRequest;
    pRequest->setInterleaveFormat(BSQ);
-   pRequest->setRows(mInput.mpDescriptor->getActiveRow(startRow),
-      mInput.mpDescriptor->getActiveRow(stopRow));
+   pRequest->setRows(mInput.mpDescriptor->getActiveRow(std::max(0, startRow - yshift)),
+      mInput.mpDescriptor->getActiveRow(std::min(maxRowNum, stopRow + mInput.mKernel.Nrows() - yshift)));
    pRequest->setColumns(mInput.mpDescriptor->getActiveColumn(startColumn),
       mInput.mpDescriptor->getActiveColumn(stopColumn));
    pRequest->setBands(mInput.mpDescriptor->getActiveBand(mInput.mBand),
@@ -446,13 +447,21 @@ void ConvolutionFilterShell::ConvolutionFilterThread::convolve(const T*)
                int real_col = std::min(std::max(0, neighbor_col),
                   static_cast<int>(mInput.mpDescriptor->getColumnCount()) - 1);
                accessor->toPixel(real_row, real_col);
-               VERIFYNRV(accessor.isValid());
+               if (accessor.isValid() == false)
+               {
+                  return;
+               }
+
                double val = 0.0;
                pModel->getDataValue<T>(reinterpret_cast<T*>(accessor->getColumn()), COMPLEX_MAGNITUDE, 0, val);
                accum += mInput.mKernel(kernelrow+1, kernelcol+1) * val / mInput.mKernel.Storage();
             }
          }
-         VERIFYNRV(resultAccessor.isValid());
+         if (resultAccessor.isValid() == false)
+         {
+            return;
+         }
+
          switchOnEncoding(pResultDescriptor->getDataType(), assignResult, resultAccessor->getColumn(), accum);
          resultAccessor->nextColumn();
       }
