@@ -708,6 +708,7 @@ void GraphicGroupImp::removeAllObjects(bool bDelete)
       pLayer->completeInsertion();
       pLayer->deselectAllObjects();
 
+      // Use an undo group for improved performance on large graphic groups.
       if (bDelete == true)
       {
          pView = pLayer->getView();
@@ -720,25 +721,25 @@ void GraphicGroupImp::removeAllObjects(bool bDelete)
 
    for_each(mObjects.begin(), mObjects.end(), DisconnectObject(this));
 
-   for (list<GraphicObject*>::iterator iter = mObjects.begin(); iter != mObjects.end(); ++iter)
+   // Remove each object while iterating the loop to avoid stale pointers within mObjects.
+   // The stale pointers can cause crashes if code attached to GraphicGroup, ObjectRemoved calls methods on this class.
+   while (mObjects.empty() == false)
    {
-      notify(SIGNAL_NAME(GraphicGroup, ObjectRemoved), boost::any(*iter));
+      GraphicObject* pObject = mObjects.front();
+      mObjects.erase(mObjects.begin());
+      notify(SIGNAL_NAME(GraphicGroup, ObjectRemoved), boost::any(pObject));
       if (bDelete == true)
       {
          if (pView != NULL)
          {
-            pView->addUndoAction(new RemoveGraphicObject(dynamic_cast<GraphicGroup*>(this), *iter));
+            pView->addUndoAction(new RemoveGraphicObject(dynamic_cast<GraphicGroup*>(this), pObject));
          }
 
-         GraphicObjectImp* pObject = dynamic_cast<GraphicObjectImp*>(*iter);
-         if (pObject != NULL)
-         {
-            delete pObject;
-         }
+         // Need to cast to a GraphicObjectImp* to perform the deletion.
+         delete dynamic_cast<GraphicObjectImp*>(pObject);
       }
    }
 
-   mObjects.clear();
    delete pUndoGroup;
 
    updateBoundingBox();
