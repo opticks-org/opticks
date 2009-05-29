@@ -407,6 +407,7 @@ public: // Structures
          mAlternateSurfaceVisibility(b.mAlternateSurfaceVisibility),
          mAlternateBoundaryLayerAerosolParameter(b.mAlternateBoundaryLayerAerosolParameter),
          mAlternateAirParcelType(b.mAlternateAirParcelType),
+         mAerosol(b.mAerosol),
          mLoaded(b.mLoaded)
       {
       }

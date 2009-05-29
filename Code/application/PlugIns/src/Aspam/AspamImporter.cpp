@@ -116,8 +116,8 @@ inline void readNumOrNoData(stringstream& sstr, T& val)
 template <class T>
 inline void readFixedLength(stringstream& sstr, T& val, unsigned int length)
 {
-   string buf(length, ' ');
-   sstr.get(const_cast<char*>(buf.c_str()), length);
+   string buf(length + 1, ' ');
+   sstr.get(const_cast<char*>(buf.c_str()), length + 1);
    stringstream bufs(buf);
    bufs >> val;
 }
