@@ -16,6 +16,8 @@
 #include "Slot.h"
 #include "SpatialDataView.h"
 #include "SpatialDataWindow.h"
+#include "Undo.h"
+
 #include <QtCore/QUrl>
 #include <QtGui/QAction>
 #include <QtGui/QDirModel>
@@ -25,6 +27,7 @@
 #include <QtGui/QIcon>
 #include <QtGui/QImageReader>
 #include <QtGui/QListView>
+#include <QtGui/QMessageBox>
 
 namespace
 {
@@ -235,11 +238,21 @@ void AnnotationImagePaletteWidget::windowDragEnterEvent(SpatialDataView* pView, 
 void AnnotationImagePaletteWidget::windowDropEvent(SpatialDataView* pView, QDropEvent* pEvent)
 {
    VERIFYNRV(pEvent && pView);
-   
+
+   QString filename = QUrl(pEvent->mimeData()->data(dndMimeType)).toLocalFile();
+   if (filename.isEmpty())
+   {
+      return;
+   }
+
+   UndoGroup undoGroup(pView, "Drop Annotation Image");
+
    // Find an annotation layer.
    //  if the active layer is an AL, use it
    //  elif there is a top-most AL, activate and use it
    //  else create a new AL and use it
+   bool layerCreated = false;
+
    AnnotationLayer* pLayer = dynamic_cast<AnnotationLayer*>(pView->getActiveLayer());
    if (pLayer == NULL)
    {
@@ -248,22 +261,27 @@ void AnnotationImagePaletteWidget::windowDropEvent(SpatialDataView* pView, QDrop
    if (pLayer == NULL)
    {
       pLayer = static_cast<AnnotationLayer*>(pView->createLayer(ANNOTATION, NULL));
+      layerCreated = true;
    }
    VERIFYNRV(pLayer);
    pView->setActiveLayer(pLayer);
    pView->setMouseMode("LayerMode");
    pLayer->setCurrentGraphicObjectType(ROTATE_OBJECT);
 
-   QString filename = QUrl(pEvent->mimeData()->data(dndMimeType)).toLocalFile();
-   if (filename.isEmpty())
-   {
-      return;
-   }
    GraphicObject* pObject = pLayer->addObject(FILE_IMAGE_OBJECT);
    VERIFYNRV(pObject);
    if (!pObject->setImageFile(filename.toAscii()))
    {
       pLayer->removeObject(pObject, true);
+      if (layerCreated == true)
+      {
+         pView->deleteLayer(pLayer);
+      }
+
+      QMessageBox::critical(this, "Annotation Image Palette", "The image could not be loaded from the file.");
+
+      #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : The undo group is still added to the view.  This " \
+         "should be removed when capability exists to delay adding undo group actions to the stack. (dsulgrov)")
       return;
    }
    LocationType corner;

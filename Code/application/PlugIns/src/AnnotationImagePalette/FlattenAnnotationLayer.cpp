@@ -14,6 +14,7 @@
 #include "DataAccessor.h"
 #include "DataAccessorImpl.h"
 #include "DataRequest.h"
+#include "DesktopServices.h"
 #include "FileImageObject.h"
 #include "FlattenAnnotationLayer.h"
 #include "GraphicElement.h"
@@ -32,6 +33,7 @@
 #include "Undo.h"
 
 #include <QtGui/QImage>
+#include <QtGui/QMessageBox>
 
 REGISTER_PLUGIN_BASIC(OpticksAnnotationImagePalette, FlattenAnnotationLayer);
 
@@ -207,6 +209,18 @@ bool FlattenAnnotationLayer::execute(PlugInArgList* pInArgList, PlugInArgList* p
       channels.push_back(blueInfo);
    }
 
+   if (isBatch() == false)
+   {
+      Service<DesktopServices> pDesktop;
+
+      int clickedButton = QMessageBox::question(pDesktop->getMainWidget(), QString::fromStdString(getName()),
+         "This action will clear the undo history.  Do you wish to continue?", QMessageBox::Yes | QMessageBox::No);
+      if (clickedButton == QMessageBox::No)
+      {
+         return false;
+      }
+   }
+
    UndoLock undo(pView);
    std::list<GraphicObject*> objects;
    pAnnotationLayer->getObjects(FILE_IMAGE_OBJECT, objects);
@@ -298,6 +312,8 @@ bool FlattenAnnotationLayer::execute(PlugInArgList* pInArgList, PlugInArgList* p
    {
       pView->deleteLayer(pAnnotationLayer);
    }
+
+   pView->clearUndo();
    pRaster->updateData();
 
    progress.report("Flatten complete.", 100, NORMAL);
