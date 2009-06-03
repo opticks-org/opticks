@@ -149,12 +149,12 @@ namespace StringUtilities
     * Expand the variables in this string and return the expanded result.
     *
     * The syntax for referencing variables is $V(varname), $E(varname) or $C(varname).
-    * The $V(varname) syntax only recognizes the following two variables names,
-    * APP_HOME or APP_VERSION which be expanded to the location where this application
-    * was installed to and the version of this application that is running respectively.
-    * For example, $V(APP_HOME) would expand to "C:\Program Files\Application\4.0.0" and 
-    * $V(APP_VERSION) would expand to "4.0.0".  The $E(varname) syntax looks for
-    * an environment variable defined with the same name and if found substitute's in the value.
+    * The $V(varname) syntax only recognizes the following variable names:
+    * APP_HOME, APP_VERSION, or USER_DOCS.  These can be expanded to the location where this application
+    * was installed, the version of the application that is running, or the location of the user's documents folder.
+    * For example, $V(APP_HOME) could expand to "C:\Program Files\Application\4.0.0", 
+    * $V(APP_VERSION) could expand to "4.0.0", and $V(USER_DOCS) could expand to "C:\Documents and Settings\user".
+    * The $E(varname) syntax looks for an environment variable defined with the same name and substitutes the value.
     * If the environment variable cannot be found, the $E(varname) is left in the string.
     * The $C(varname) syntax looks for a setting in ConfigurationSettings with the same
     * name and if found substitute's in the value.  If the setting cannot be found, the
