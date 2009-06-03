@@ -209,7 +209,7 @@ typedef ModelObject::Args ModelArgs;
  *  @code
  *  void addPixels(AoiElement *pAoi)
  *  {
- *     ModelResource<AoiElement> pAoi2("MyAoi", pAoi->getDatasetName());
+ *     ModelResource<AoiElement> pAoi2("MyAoi");
  *     for (int i=0; i<100; ++i)
  *        for (int j=0; j<100; ++j)
  *           if ((i^j) & 0x1) pAoi2->addPoint (i, j);
@@ -224,7 +224,8 @@ class ModelResource : public Resource<T, ModelObject>
 {
 public:
    explicit ModelResource(std::string name, DataElement* pParent = NULL, std::string type = std::string()) :
-      Resource<T, ModelObject>(typename Resource<T, ModelObject>::Args(name, type.empty() ? TypeConverter::toString<T>() : type, pParent))
+      Resource<T, ModelObject>(
+         typename Resource<T, ModelObject>::Args(name, type.empty() ? TypeConverter::toString<T>() : type, pParent))
    {
    }
 
@@ -281,7 +282,8 @@ class DataDescriptorResource : public Resource<T, DataDescriptorObject>
 {
 public:
    explicit DataDescriptorResource(std::string name, std::string dataDescriptorType, DataElement* pParent = NULL) :
-      Resource<T, DataDescriptorObject>(typename Resource<T, DataDescriptorObject>::Args(name, dataDescriptorType, pParent))
+      Resource<T, DataDescriptorObject>(
+         typename Resource<T, DataDescriptorObject>::Args(name, dataDescriptorType, pParent))
    {
    }
 
@@ -422,8 +424,8 @@ public:
 /**
  * The %ObjectArray is a trait object for use with the %Resource template. 
  *
-* The %ObjectArray is a trait object for use with the %Resource template. It provides capability for creating and deleting
- * arrays of objects from the local heap.
+ * The %ObjectArray is a trait object for use with the %Resource template.
+ * It provides capability for creating and deleting arrays of objects from the local heap.
  * 
  * @see ArrayResource
  */

@@ -13,9 +13,9 @@
 #include <cstdlib>
 
 /**
- * The MemoryObject is a trait object for use with the Resource template. It provides capability for creating and deleting
- * objects from the local heap. A Resource using this trait behaves the same as an auto_ptr. This is the default
- * trait used if a Resource object is declared without specifying the trait class.
+ * The MemoryObject is a trait object for use with the Resource template. It provides capability for creating and
+ * deleting objects from the local heap. A Resource using this trait behaves the same as an auto_ptr. This is the
+ * default trait used if a Resource object is declared without specifying the trait class.
  */
 template<class T>
 class MemoryObject
@@ -42,9 +42,6 @@ public:
  * Factory and spectral elements created via ModelServices. The following examples show creation
  * (and upon exit from the code block - destruction) of each of these types.
  * 
- * The code will work in a plug-in or the Studio. Plug-ins must be compiled with _USRDLL defined. The
- * code will not compile otherwise.
- * 
  * @code
  * {
  *    // Allocate a PassThru object from the heap. The PassThru object will be deleted on destruction of the Resource
@@ -66,16 +63,16 @@ public:
  * 
  *    // Create a DataElement via ModelServices. On destruction of the ModelResource, the 
  *    // object will be destroyed via ModelServices.
- *    Resource<AoiElement,ModelObject> pMyAoi(ModelArgs("MyAoi", "AoiElement", mpRasterElement->getName()));
- *    ModelResource<AoiElement> pMyAoi2("MyAoi", mpRasterElement->getName()); // alternate syntax to the above line
- * } // closes all 3 files, deletes the Filename, deletes the vector, destroys the AOI and deletes both PassThru's
+ *    ModelResource<AoiElement> pMyAoi2("MyAoi", mpRasterElement);
+ * } // closes all 3 files and deletes the Filename, vector, AOI, and PassThru objects
  * @endcode
  *
  * Additional traits can be defined as needed. The requirements for a traits class are as follows.
  * 1) It must have a default constructor
  * 2) It must define a nested struct/class/typedef called Args
- * 3) It must define a method called obtainResource taking an Args object as its only non-default argument and returning a value that can be cast to a (T*)
- *     If this call fails, the obtainResource method should throw an exception to prevent the creation of an invalid Resource object.
+ * 3) It must define a method called obtainResource taking an Args object as its only non-default argument and
+ *     returning a value that can be cast to a (T*). If this call fails, the obtainResource method should throw an
+ *     exception to prevent the creation of an invalid Resource object.
  * 4) It must define a method called releaseResource taking an Args object and a T* as its only non-default arguments
  * The only requirement on the nested 'Args' struct/class is that it have a copy constructor.
  *
