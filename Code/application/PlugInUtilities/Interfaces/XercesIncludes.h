@@ -46,7 +46,21 @@
 #define XERCES_CPP_NAMESPACE_QUALIFIER xercesc_2_7::
 namespace xercesc_2_7
 {
+   class BinInputStream;
+   class DOMBuilder;
+   class DOMDocument;
+   class DOMElement;
+   class DOMError;
+   class DOMImplementation;
    class DOMNode;
+   class DOMText;
+   class InputSource;
+   class MemoryManager;
+   class SAXParseException;
+   class XMLException;
+   class XMLPlatformUtils;
+   class XMLString;
+   class XMLStringTokenizer;
 }
 /// \endcond
 #endif
