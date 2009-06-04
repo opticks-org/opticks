@@ -250,6 +250,7 @@ http://www.gnu.org/licenses/lgpl.html
          <xsd:element name="FileDescriptor" type="opticks:FileDescriptor" form="qualified" minOccurs="0" />
       </xsd:sequence>
       <xsd:attribute name="processingLocation" type="opticks:ProcessingLocation" use="required" />
+      <xsd:attribute name="importerName" type="xsd:string" use="optional" />
       <xsd:attributeGroup ref="opticks:idHeader" />
       <xsd:attributeGroup ref="opticks:versionHeader" />
    </xsd:complexType>

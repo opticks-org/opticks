@@ -415,7 +415,14 @@ bool DataDescriptorImp::fromXml(DOMNode* pDocument, unsigned int version)
       }
    }
 
-   mImporterName = A(pElement->getAttribute(X("importerName")));
+   if (pElement->hasAttribute(X("importerName")) == true)
+   {
+      mImporterName = A(pElement->getAttribute(X("importerName")));
+   }
+   else
+   {
+      mImporterName.clear();
+   }
 
    notify(SIGNAL_NAME(Subject, Modified));
    return true;
