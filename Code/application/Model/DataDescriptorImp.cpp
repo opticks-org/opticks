@@ -337,6 +337,12 @@ bool DataDescriptorImp::toXml(XMLWriter* pXml) const
       pXml->popAddPoint();
    }
 
+   // Importer name
+   if (bSuccess == true)
+   {
+      pXml->addAttr("importerName", mImporterName);
+   }
+
    return bSuccess;
 }
 
@@ -408,6 +414,8 @@ bool DataDescriptorImp::fromXml(DOMNode* pDocument, unsigned int version)
          }
       }
    }
+
+   mImporterName = A(pElement->getAttribute(X("importerName")));
 
    notify(SIGNAL_NAME(Subject, Modified));
    return true;
