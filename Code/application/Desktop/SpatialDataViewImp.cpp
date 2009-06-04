@@ -3627,7 +3627,9 @@ bool SpatialDataViewImp::toXml(XMLWriter* pXml) const
    }
 
    VERIFY(mpLayerList != NULL);
-   pXml->addAttr("primary", mpLayerList->getPrimaryRasterElement()->getId());
+   RasterElement* pElement = mpLayerList->getPrimaryRasterElement();
+   VERIFY(pElement != NULL);
+   pXml->addAttr("primary", pElement->getId());
    vector<Layer*> layers;
    mpLayerList->getLayers(layers);
    for (vector<Layer*>::const_iterator lit = layers.begin(); lit != layers.end(); ++lit)

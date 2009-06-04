@@ -56,6 +56,7 @@
 #include "SessionItemImp.h"
 #include "SessionItemSerializerImp.h"
 #include "SessionManagerImp.h"
+#include "SessionResource.h"
 #include "SignaturePlotAdapter.h"
 #include "SpatialDataViewAdapter.h"
 #include "SpatialDataViewImp.h"
@@ -162,6 +163,7 @@ bool SessionManagerImp::isKindOf(const string& className) const
 
 void SessionManagerImp::close()
 {
+   SessionSaveLock lock;
    notify(SIGNAL_NAME(SessionManager, Closed));
 
    AnimationServicesImp::instance()->clear();
@@ -999,6 +1001,7 @@ SessionItem* SessionManagerImp::IndexFileItem::getSessionItem() const
 
 void SessionManagerImp::newSession()
 {
+   SessionSaveLock lock;
    close();
    mName = SessionItemImp::generateUniqueId();
    MessageLogMgrImp::instance()->getLog(mName); //force the session log to be created.
@@ -1018,6 +1021,7 @@ void SessionManagerImp::newSession()
 
 bool SessionManagerImp::open(const string &filename, Progress *pProgress)
 {
+   SessionSaveLock lock;
    string name = mName;
    try
    {
