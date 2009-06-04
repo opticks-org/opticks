@@ -370,7 +370,10 @@ void WizardItemProperties::nodeTypeChanged(Subject& subject, const std::string& 
       QTreeWidgetItem* pTreeItem = iter.value();
       if (pTreeItem != NULL)
       {
+         QPixmap nodePix = WizardGraphicsItem::getNodePixmap(pNode);
          const std::string& nodeType = pNode->getType();
+
+         pTreeItem->setIcon(1, QIcon(nodePix));
          pTreeItem->setText(1, QString::fromStdString(nodeType));
       }
    }
