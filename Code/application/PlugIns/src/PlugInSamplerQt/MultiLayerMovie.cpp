@@ -67,16 +67,23 @@ bool MultiLayerMovie::execute( PlugInArgList* inputArgList, PlugInArgList* outpu
       ModelResource<RasterElement> pRes2(mpRaster2);
       ModelResource<RasterElement> pRes3(mpRaster3);
 
-      bool bSuccess = populateRasterElements() && createWindow() && setupAnimations();
+      bool bSuccess = populateRasterElements();
       if (bSuccess == true)
       {
-         pRes1.release();
-         pRes2.release();
-         pRes3.release();
-      }
-      else if (mpWindow != NULL)
-      {
-         Service<DesktopServices>()->deleteWindow(mpWindow);
+         bSuccess = createWindow();
+         if (bSuccess == true)
+         {
+            // Since the window was successfully created, it ultimately owns the raster elements via the raster layers
+            pRes1.release();
+            pRes2.release();
+            pRes3.release();
+
+            bSuccess = setupAnimations();
+            if ((bSuccess == false) && (mpWindow != NULL))
+            {
+               Service<DesktopServices>()->deleteWindow(mpWindow);
+            }
+         }
       }
 
       return bSuccess;
@@ -226,7 +233,13 @@ bool MultiLayerMovie::setupAnimations()
    // Create the controller
    Service<AnimationServices> pServices;
 
-   AnimationController* pController = pServices->createAnimationController("MultiLayerMovie", FRAME_TIME);
+   AnimationController* pController = pServices->getAnimationController("MultiLayerMovie");
+   if (pController != NULL)
+   {
+      pServices->destroyAnimationController(pController);
+   }
+
+   pController = pServices->createAnimationController("MultiLayerMovie", FRAME_TIME);
    if (pController == NULL)
    {
       return false;
