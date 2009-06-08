@@ -528,6 +528,9 @@ void ImageAdjustWidget::resetSliders()
             }
          }
 
+         VERIFYNR(disconnect(mpFlickerXSlider, SIGNAL(valueChanged(int)), this, SLOT(shift(int))));
+         VERIFYNR(disconnect(mpFlickerYSlider, SIGNAL(valueChanged(int)), this, SLOT(shift(int))));
+
          // widen the slider ranges to accomodate a new offset
          mpFlickerYSlider->setMinimum(min(-numRows, static_cast<int>(mpSecondaryLayer->getYOffset())));
          mpFlickerYSlider->setMaximum(max(numRows, static_cast<int>(mpSecondaryLayer->getYOffset())));
@@ -537,6 +540,9 @@ void ImageAdjustWidget::resetSliders()
          // fetch & set the offsets
          mpFlickerYSlider->setValue(mpSecondaryLayer->getYOffset());
          mpFlickerXSlider->setValue(mpSecondaryLayer->getXOffset());
+
+         VERIFYNR(connect(mpFlickerXSlider, SIGNAL(valueChanged(int)), this, SLOT(shift(int))));
+         VERIFYNR(connect(mpFlickerYSlider, SIGNAL(valueChanged(int)), this, SLOT(shift(int))));
       }
    }
 }
