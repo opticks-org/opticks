@@ -1,0 +1,171 @@
+# recreate the top level SConstruct so we can
+# build these independent of the core
+
+import os
+import os.path
+import subprocess
+import sys
+
+####
+# the default SConscript...will be created if none exist
+####
+default_sconscript = """import glob
+
+####
+# import the environment
+####
+Import('env build_dir')
+
+####
+# build sources
+####
+srcs = map(lambda x,bd=build_dir: '%%s/%%s' %% (bd,x), glob.glob("*.cpp"))
+objs = env.SharedObject(srcs)
+
+####
+# build the plug-in library and set up an alias
+####
+lib = env.SharedLibrary('%%s/%s' %% build_dir,objs)
+libInstall = env.Install(env["PLUGINDIR"], lib)
+env.Alias('%s', libInstall)
+
+####
+# return the plug-in library
+####
+Return("libInstall")
+"""
+
+
+####
+# END DEFAULT SCONSCRIPT
+####
+
+####
+# Set up the options and environment
+####
+vars = Variables()
+vars.Add(BoolVariable('RELEASE','False for debug, true for release',0))
+vars.Add('RELEASE_DIR','Point to the release directory','#/../../../release')
+vars.Add('ignore','List of plugins which should not be built','')
+vars.Add('BUILDDIR','Directory for build files','#/../../../Build')
+vars.Add('CACHEDIR','Directory for cache files. Default is not caching.','')
+
+TOOLPATH = Dir("#/../../CompileSettings").abspath
+PLATFORM = "unknown"
+if sys.platform.startswith("linux"):
+   PLATFORM = "linux-x86_64"
+   EXE_PREFIX='linux'
+else:
+   PLATFORM = "%s-%s" % (os.environ['OSTYPE'],os.environ['MACHTYPE'])
+   EXE_PREFIX='sol'
+
+env = Environment(variables=vars,
+                  PLATFORM=PLATFORM,
+                  ENV=os.environ,
+                  tools=["default","qt4","xercesc","boost"],
+                  toolpath=[TOOLPATH])
+if PLATFORM == "solaris-sparc":
+   env.Tool("suncc", toolpath=[TOOLPATH])
+   env.Tool("sunar", toolpath=[TOOLPATH])
+   env.Tool("sunlink", toolpath=[TOOLPATH])
+if env['RELEASE']:
+   MODE='release'
+else:
+   MODE='debug'
+BUILDDIR = env.Dir(env["BUILDDIR"]).abspath
+env["PLUGINDIR"] = '%s/Binaries-%s-%s/PlugIns' % (BUILDDIR,PLATFORM,MODE)
+env["BINDIR"] = '%s/Binaries-%s-%s/Bin' % (BUILDDIR,PLATFORM,MODE)
+env["LIBDIR"] = '%s/Binaries-%s-%s/Lib' % (BUILDDIR,PLATFORM,MODE)
+env["BUILDDIR"] = '%s/%s-%s/PlugIns' % (BUILDDIR,PLATFORM,MODE)
+env["COREDIR"] = "#/../.."
+
+
+Help(vars.GenerateHelpText(env))
+env["QT_MODULES"] = ["QtCore","QtGui","Qt3Support"]
+env.Qt4AddModules(env["QT_MODULES"])
+
+env['SHLIBPREFIX'] = ""
+if PLATFORM == "solaris-sparc":
+   env.Append(CXXFLAGS="-library=stlport4 -m64 -xcode=pic32 -erroff=nonewline",
+              SHLINKFLAGS="-library=stlport4 -m64 -xcode=pic32 -mt -L/usr/sfw/lib/sparcv9",
+              CPPDEFINES=["_USRDLL","APPLICATION_XERCES"],
+              LIBPATH=[env["LIBDIR"]],
+              LIBS=env["QT_MODULES"] + ["PlugInLib","PlugInUtilities","PlugInLib","nsl","dl","GLU","GL","Xm","Xext","X11","m"])
+else:
+   env.Append(CXXFLAGS="-m64 -fpic -pthread -w",
+              SHLINKFLAGS="-Wl,-E -melf_x86_64 -fpic",
+              CPPDEFINES=["_USRDLL","APPLICATION_XERCES"],
+              LIBPATH=[env["LIBDIR"]],
+              LIBS=env["QT_MODULES"] + ["PlugInLib","PlugInUtilities","PlugInLib","dl","GLU","GL","Xext","X11","m"])
+env.BuildDir(env["BUILDDIR"], "#", duplicate=0)
+
+if MODE == 'release':
+   if PLATFORM == "solaris-sparc":
+      env.Append(CXXFLAGS="-xO3")
+   else:
+      env.Append(CXXFLAGS="-O3")
+else:
+   env.Append(CXXFLAGS="-g")
+   env.Append(CPPDEFINES=["DEBUG"])
+
+ignore = Split(env['ignore'])
+if PLATFORM == "linux-x86_64":
+   ignore.append("LegacyModule")
+
+plugins = map(lambda x: x.split('./')[-1].split('/')[0],
+              map(lambda x: x[0],
+                  filter(lambda x: 'ModuleManager.cpp' in x[2] or 'modulemanager.cpp' in x[2],os.walk('.'))))
+
+# check for extra vars
+if os.path.exists(".extravars"):
+   fp=open(".extravars","r")
+   exec(fp.read())
+   fp.close()
+
+incdirs = [".",
+           "$COREDIR/Interfaces",
+           "$COREDIR/PlugInLib",
+           "$COREDIR/PlugInUtilities",
+           "$COREDIR/PlugInUtilities/MathUtilities",
+           "$COREDIR/PlugInUtilities/Interfaces",
+           "$COREDIR/PlugInUtilities/pthreads-wrapper"]
+env.Append(CPPPATH=incdirs)
+if len(env["CACHEDIR"]) > 0:
+   print "Enable caching to",env["CACHEDIR"]
+   env.CacheDir(env["CACHEDIR"])
+
+###
+# tell SCons this is a shared object
+###
+extra_obj_file = env.File("%s/ModuleShell.os" % env["LIBDIR"])
+class SharedObjectProxy:
+   def __init__(self):
+      self.shared = 1
+extra_obj_file.attributes = SharedObjectProxy()
+extra_obj = [extra_obj_file]
+
+libs = []
+Export('env','MODE','extra_obj','TOOLPATH','PLATFORM')
+
+for plugin in plugins:
+   if plugin in ignore:
+      continue
+   if not os.path.isfile('%s/SConscript' % plugin):
+      try:
+         fp = open('%s/SConscript' % plugin, 'w')
+         fp.write(default_sconscript % (plugin,plugin))
+         fp.close()
+         print 'Created a default SConscript for plugin %s..remember to check it in' % plugin
+      except:
+         continue
+   src_dir = '#/%s' % plugin
+   build_dir = '%s/%s' % (env["BUILDDIR"], plugin)
+   env.BuildDir(build_dir, src_dir, duplicate=0)
+   libs.append(env.SConscript('%s/SConscript' % plugin, exports='build_dir'))
+
+####
+# Install the plug-ins to the proper directories
+# and set up some useful aliases
+####
+all = env.Alias('all', libs)
+Default(all)

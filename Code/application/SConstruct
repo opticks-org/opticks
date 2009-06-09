@@ -1,0 +1,134 @@
+import os
+import sys
+import subprocess
+
+####
+# Set up the options and environment
+####
+vars = Variables()
+vars.Add(BoolVariable('RELEASE','False for debug, true for release',0))
+vars.Add('BUILDDIR','Directory for build files','#/../Build')
+vars.Add('CACHEDIR','Directory for cache files. Default is not caching.','')
+
+TOOLPATH = Dir("CompileSettings").abspath
+PLATFORM = "unknown"
+if sys.platform.startswith("linux"):
+   PLATFORM = "linux-x86_64"
+   EXE_PREFIX='linux'
+else:
+   PLATFORM = "%s-%s" % (os.environ['OSTYPE'],os.environ['MACHTYPE'])
+   EXE_PREFIX='sol'
+
+env = Environment(variables=vars,
+                  PLATFORM=PLATFORM,
+                  ENV=os.environ,
+                  tools=["default","qwt","qt4","xercesc","boost","java",
+                         "ehs","raptor","minizip","yaml-cpp"],
+                  toolpath=[TOOLPATH])
+if PLATFORM == "solaris-sparc":
+   env.Tool("suncc", toolpath=[TOOLPATH])
+   env.Tool("sunar", toolpath=[TOOLPATH])
+   env.Tool("sunlink", toolpath=[TOOLPATH])
+if env['RELEASE']:
+   MODE='release'
+else:
+   MODE='debug'
+BUILDDIR = env.Dir(env["BUILDDIR"]).abspath
+env["BINDIR"] = '%s/Binaries-%s-%s/Bin' % (BUILDDIR,PLATFORM,MODE)
+env["PLUGINDIR"] = '%s/Binaries-%s-%s/PlugIns' % (BUILDDIR,PLATFORM,MODE)
+env["LIBDIR"] = '%s/Binaries-%s-%s/Lib' % (BUILDDIR,PLATFORM,MODE)
+env["BUILDDIR"] = '%s/%s-%s' % (BUILDDIR,PLATFORM,MODE)
+
+
+Help(vars.GenerateHelpText(env))
+env["QT_MODULES"] = ["QtCore","QtGui","Qt3Support","QtOpenGL", "QtXml"]
+env.Qt4AddModules(env["QT_MODULES"])
+
+env['LINK'] = "$CXX"
+if PLATFORM == "solaris-sparc":
+   env.Append(CXXFLAGS="-library=stlport4 -m64 -xcode=pic32 -erroff=nonewline",
+              LINKFLAGS="-library=stlport4 -m64 -xcode=pic32 -mt -L/usr/sfw/lib/sparcv9",
+              CPPDEFINES=["APPLICATION_XERCES"],
+              LIBS=env["QT_MODULES"] + ["nsl","dl","GLU","GL","Xm","Xext","Xrender","X11","m"])
+else:
+   env.Append(CXXFLAGS="-m64 -fpic -pthread -w",
+              LINKFLAGS="-melf_x86_64 -Wl,-E",
+              CPPDEFINES=["APPLICATION_XERCES"],
+              LIBS=env["QT_MODULES"] + ["dl","GLU","GL","Xext","Xrender","X11","m"])
+env.BuildDir(env["BUILDDIR"], "#", duplicate=0)
+
+if MODE == 'release':
+   if PLATFORM == "solaris-sparc":
+      env.Append(CXXFLAGS="-xO3")
+   else:
+      env.Append(CXXFLAGS="-O3")
+else:
+   env.Append(CXXFLAGS="-g")
+   env.Append(CPPDEFINES=["DEBUG"])
+
+libdirs = ["Desktop", 
+           "Framework",
+           "Gui",
+           "HdfPlugInLib",
+           "Installer",
+           "Model",
+           "NitfPlugInLib",
+           "PlugInLib",
+           "PlugInManager",
+           "PlugInUtilities",
+           "Utilities",
+           "Wizard"]
+
+incdirs = map(lambda x: "#/" + x, libdirs) + \
+          ["#/Interfaces",
+           "#/PlugInUtilities/pthreads-wrapper",
+           "#/PlugInUtilities/MathUtilities",
+           "#/PlugInUtilities/Interfaces"]
+env.Append(CPPPATH=incdirs)
+if len(env["CACHEDIR"]) > 0:
+   print "Enable caching to",env["CACHEDIR"]
+   env.CacheDir(env["CACHEDIR"])
+
+####
+# Load the SConscript files for each library
+####
+libs = []
+libInstallTargets = []
+Export('env','libInstallTargets','MODE','TOOLPATH')
+
+for sub in libdirs:
+   src_dir = '#/%s' % sub
+   build_dir = '%s/%s' % (env["BUILDDIR"], sub)
+   env.BuildDir(build_dir, src_dir, duplicate=0)
+   libs.append(env.SConscript('%s/SConscript' % sub, exports='build_dir'))
+   libInstallTargets.append(libs[-1])
+
+####
+# Build the solOpticks binary
+####
+opticks = env.Object("%s/Main.cpp" % env['BUILDDIR'])
+opticksBin = env.Program('%s/%sOpticks' % (env['BUILDDIR'],EXE_PREFIX),opticks+libs+libs+libs)
+env.Alias('opticks',opticksBin)
+
+subprocess.Popen(["../update-build-revision.py"]).wait()
+####
+# Build the solBatch binary
+####
+src_dir=Dir('#/Batch').abspath
+build_dir = '%s/Batch' % env["BUILDDIR"]
+env.BuildDir(build_dir, src_dir, duplicate=0)
+batch = SConscript('Batch/SConscript', exports='build_dir')
+batchBin = env.Program('%s/%sBatch' % (env["BUILDDIR"],EXE_PREFIX),batch+libs+libs+libs+libs)
+env.Alias('batch',batchBin)
+
+####
+# Build the solArcProxy binary
+####
+# Install the binaries and libraries to the proper directories
+# and set up some useful aliases
+####
+libInstall = env.Install(env["LIBDIR"], libInstallTargets)
+binInstall = env.Install(env["BINDIR"], [opticksBin, batchBin])
+core = env.Alias('core', [libInstall, binInstall])
+all = env.Alias('all', [libInstall, binInstall])
+Default(core)
