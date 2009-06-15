@@ -133,7 +133,7 @@ ResponseCode MuHttpServer::HandleRequest(HttpRequest *pHttpRequest, HttpResponse
       Response rsp = (pHttpRequest->nRequestMethod == REQUESTMETHOD_GET) ?
          getRequest(uri, contentType, body, pHttpRequest->oFormValueMap) :
          postRequest(uri, contentType, body, pHttpRequest->oFormValueMap);
-      if (rsp.mCode != HTTPRESPONSECODE_INVALID)
+      if (rsp.mCode != HTTPRESPONSECODE_INVALID && rsp.mEncoding.isValid())
       {
          switch (rsp.mEncoding)
          {

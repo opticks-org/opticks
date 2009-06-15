@@ -165,12 +165,34 @@ public:
    virtual XmlRpcArrayParam *getSignature();
 };
 
+class CloseAll : public XmlRpcMethodCallImp
+{
+public:
+   CloseAll() {}
+   CloseAll(const CloseAll &other) {}
+   virtual ~CloseAll() {}
+   virtual XmlRpcParam *operator()(const XmlRpcParams &params);
+   virtual QString getHelp();
+   virtual XmlRpcArrayParam *getSignature();
+};
+
 class CreateView : public XmlRpcMethodCallImp
 {
 public:
    CreateView() {}
    CreateView(const CreateView &other) {}
    virtual ~CreateView() {}
+   virtual XmlRpcParam *operator()(const XmlRpcParams &params);
+   virtual QString getHelp();
+   virtual XmlRpcArrayParam *getSignature();
+};
+
+class ExportElement: public XmlRpcMethodCallImp
+{
+public:
+   ExportElement() {}
+   ExportElement(const ExportElement &other) {}
+   virtual ~ExportElement() {}
    virtual XmlRpcParam *operator()(const XmlRpcParams &params);
    virtual QString getHelp();
    virtual XmlRpcArrayParam *getSignature();
@@ -275,6 +297,17 @@ public:
    RotateTo() {}
    RotateTo(const RotateTo &other) {}
    virtual ~RotateTo() {}
+   virtual XmlRpcParam *operator()(const XmlRpcParams &params);
+   virtual QString getHelp();
+   virtual XmlRpcArrayParam *getSignature();
+};
+
+class SetWindowState : public XmlRpcMethodCallImp
+{
+public:
+   SetWindowState() {}
+   SetWindowState(const SetWindowState &other) {}
+   virtual ~SetWindowState() {}
    virtual XmlRpcParam *operator()(const XmlRpcParams &params);
    virtual QString getHelp();
    virtual XmlRpcArrayParam *getSignature();

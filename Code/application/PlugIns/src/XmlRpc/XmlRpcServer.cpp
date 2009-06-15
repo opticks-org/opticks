@@ -71,7 +71,9 @@ bool XmlRpcServer::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList
    registerMethodCall("opticks.aoi.getBoundingBox", new OpticksXmlRpcMethods::Aoi::GetBoundingBox);
    registerMethodCall("opticks.aoi.setMode", new OpticksXmlRpcMethods::Aoi::SetMode);
    registerMethodCall("opticks.close", new OpticksXmlRpcMethods::Close);
+   registerMethodCall("opticks.closeAll", new OpticksXmlRpcMethods::CloseAll);
    registerMethodCall("opticks.createView", new OpticksXmlRpcMethods::CreateView);
+   registerMethodCall("opticks.exportElement", new OpticksXmlRpcMethods::ExportElement);
    registerMethodCall("opticks.getViewInfo", new OpticksXmlRpcMethods::GetViewInfo);
    registerMethodCall("opticks.getViews", new OpticksXmlRpcMethods::GetViews);
    registerMethodCall("opticks.linkViews", new OpticksXmlRpcMethods::LinkViews);
@@ -81,6 +83,7 @@ bool XmlRpcServer::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList
    registerMethodCall("opticks.registerCallback", new OpticksXmlRpcMethods::RegisterCallback(*this));
    registerMethodCall("opticks.rotateBy", new OpticksXmlRpcMethods::RotateBy);
    registerMethodCall("opticks.rotateTo", new OpticksXmlRpcMethods::RotateTo);
+   registerMethodCall("opticks.setWindowState", new OpticksXmlRpcMethods::SetWindowState);
    registerMethodCall("opticks.unlinkViews", new OpticksXmlRpcMethods::UnlinkViews);
    registerMethodCall("opticks.version", new OpticksXmlRpcMethods::Version);
    registerMethodCall("opticks.zoom", new OpticksXmlRpcMethods::Zoom);

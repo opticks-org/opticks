@@ -37,12 +37,12 @@ public:
    struct Response
    {
       /**
-       * The body of the response message if the response in 8-bit safe. (i.e. ASCII)
+       * The body of the response message if the response is 8-bit safe. (i.e. ASCII)
        */
       QString mBody;
       
       /**
-       * The body of the response message if the response in not 8-bit safe. (i.e. a raw image)
+       * The body of the response message if the response is not 8-bit safe. (i.e. a raw image)
        */
       QByteArray mOctets;
 

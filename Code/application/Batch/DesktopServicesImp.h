@@ -29,7 +29,7 @@ class QObject;
  *
  *  @see   BatchProcessor
  */
-class DesktopServicesImp : public DesktopServices
+class DesktopServicesImp : public DesktopServices, public DesktopServicesExt1
 {
 public:
    /**

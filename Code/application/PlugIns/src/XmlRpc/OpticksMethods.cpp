@@ -21,6 +21,7 @@
 #include "ImportDescriptor.h"
 #include "Importer.h"
 #include "LayerList.h"
+#include "ObjectFactory.h"
 #include "OpticksCallbacks.h"
 #include "PerspectiveView.h"
 #include "PlugInManagerServices.h"
@@ -28,6 +29,7 @@
 #include "RasterDataDescriptor.h"
 #include "RasterFileDescriptor.h"
 #include "RasterElement.h"
+#include "RasterUtilities.h"
 #include "RectangleObject.h"
 #include "SessionManager.h"
 #include "SpatialDataView.h"
@@ -43,6 +45,7 @@
 #include <QtCore/QtDebug>
 #include <QtGui/QColor>
 #include <QtGui/QImage>
+#include <QtGui/QWidget>
 #include <string>
 #include <vector>
 
@@ -593,6 +596,43 @@ XmlRpcArrayParam* Close::getSignature()
    return pSignatures;
 }
 
+XmlRpcParam* CloseAll::operator()(const XmlRpcParams& params)
+{
+   Service<DesktopServices> pDesktop;
+   DesktopServicesExt1* pDesktopExt1 = dynamic_cast<DesktopServicesExt1*>(pDesktop.get());
+   if (pDesktopExt1 == NULL)
+   {
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove 4.3.0 compatibility code for 4.4.0 (dadkins)")
+      std::vector<Window*> windows;
+      pDesktop->getWindows(windows);
+      for (std::vector<Window*>::const_iterator iter = windows.begin(); iter != windows.end(); ++iter)
+      {
+         pDesktop->deleteWindow(*iter);
+      }
+   }
+   else
+   {
+      pDesktopExt1->deleteAllWindows();
+   }
+
+   return NULL;
+}
+
+QString CloseAll::getHelp()
+{
+   return "Closes all data sets and associated windows.";
+}
+
+XmlRpcArrayParam* CloseAll::getSignature()
+{
+   XmlRpcArrayParam* pSignatures = new XmlRpcArrayParam;
+
+   XmlRpcArrayParam* pParams = new XmlRpcArrayParam;
+   *pParams << new XmlRpcParam(STRING_PARAM, "null");
+   *pSignatures << pParams;
+   return pSignatures;
+}
+
 XmlRpcParam* CreateView::operator()(const XmlRpcParams& params)
 {
    if ((params.size() != 1) && (params.size() != 2))
@@ -651,6 +691,92 @@ XmlRpcArrayParam* CreateView::getSignature()
    *pParams << new XmlRpcParam(STRING_PARAM, "null");
    *pParams << new XmlRpcParam(STRING_PARAM, "string NewViewName");
    *pParams << new XmlRpcParam(STRING_PARAM, "string ViewID");
+   *pSignatures << pParams;
+
+   return pSignatures;
+}
+
+XmlRpcParam* ExportElement::operator()(const XmlRpcParams& params)
+{
+   if (params.size() < 1)
+   {
+      throw XmlRpcMethodFault(200);
+   }
+
+   const XmlRpcParam* pExporterName = params[0];
+   if ((pExporterName == NULL) || (pExporterName->type() != STRING_PARAM))
+   {
+      throw XmlRpcMethodFault(200);
+   }
+
+   const XmlRpcParam* pFilename = params[1];
+   if ((pFilename == NULL) || (pFilename->type() != STRING_PARAM))
+   {
+      throw XmlRpcMethodFault(200);
+   }
+
+   SpatialDataView* pView = dynamic_cast<SpatialDataView*>(getView(params, 2));
+   if (pView == NULL)
+   {
+      throw XmlRpcMethodFault(300);
+   }
+
+   LayerList* pLayerList = pView->getLayerList();
+   if (pLayerList == NULL)
+   {
+      throw XmlRpcMethodFault(305);
+   }
+
+   RasterElement* pElement = pLayerList->getPrimaryRasterElement();
+   if (pElement == NULL)
+   {
+      throw XmlRpcMethodFault(303);
+   }
+
+   FactoryResource<FileDescriptor> pFileDescriptor(
+      RasterUtilities::generateFileDescriptorForExport(pElement->getDataDescriptor(),
+      pFilename->value().toString().toStdString()));
+   if (pFileDescriptor.get() == NULL)
+   {
+      throw XmlRpcMethodFault(307);
+   }
+
+   // This is not a generic export method since not all exporters require the same parameters.
+   ExporterResource exporter(pExporterName->value().toString().toStdString(), pElement, pFileDescriptor.get());
+   if (exporter->getPlugIn() == NULL)
+   {
+      throw XmlRpcMethodFault(307);
+   }
+
+   if (exporter->execute() == false)
+   {
+      throw XmlRpcMethodFault(313);
+   }
+
+   return NULL;
+}
+
+QString ExportElement::getHelp()
+{
+   return "Export the primary raster element of a data set. "
+      "The arguments are the name of the exporter, output file and, optionally, the id of the view to use.";
+}
+
+XmlRpcArrayParam* ExportElement::getSignature()
+{
+   XmlRpcArrayParam* pSignatures = new XmlRpcArrayParam;
+
+   XmlRpcArrayParam* pParams = new XmlRpcArrayParam;
+   *pParams << new XmlRpcParam(STRING_PARAM, "null");
+   *pParams << new XmlRpcParam(STRING_PARAM, "string Exporter");
+   *pParams << new XmlRpcParam(STRING_PARAM, "string OutputFilename");
+   *pSignatures << pParams;
+   
+   pParams = new XmlRpcArrayParam;
+   *pParams << new XmlRpcParam(STRING_PARAM, "null");
+   *pParams << new XmlRpcParam(STRING_PARAM, "string Exporter");
+   *pParams << new XmlRpcParam(STRING_PARAM, "string OutputFilename");
+   *pParams << new XmlRpcParam(STRING_PARAM, "string ViewId");
    *pSignatures << pParams;
 
    return pSignatures;
@@ -923,6 +1049,7 @@ XmlRpcParam* Open::operator()(const XmlRpcParams& params)
    std::vector<DataElement*> elements = pImporter->getImportedElements();
    if (!elements.empty())
    {
+      Service<DesktopServices>()->getWindows(SPATIAL_DATA_WINDOW, windows);
       for (std::vector<Window*>::const_iterator wit = windows.begin(); wit != windows.end(); ++wit)
       {
          SpatialDataWindow* pWindow = static_cast<SpatialDataWindow*>(*wit);
@@ -1274,6 +1401,64 @@ XmlRpcArrayParam* RotateTo::getSignature()
    *pParams << new XmlRpcParam(STRING_PARAM, "null");
    *pParams << new XmlRpcParam(STRING_PARAM, "int RotateTo");
    *pParams << new XmlRpcParam(STRING_PARAM, "string ViewID");
+   *pSignatures << pParams;
+
+   return pSignatures;
+}
+
+XmlRpcParam* SetWindowState::operator()(const XmlRpcParams& params)
+{
+   if (params.size() != 2)
+   {
+      throw XmlRpcMethodFault(200);
+   }
+
+   const XmlRpcParam* pClearFlags = params[0];
+   if ((pClearFlags == NULL) || (pClearFlags->type() != INT_PARAM))
+   {
+      throw XmlRpcMethodFault(200);
+   }
+
+   const XmlRpcParam* pSetFlags = params[1];
+   if ((pSetFlags == NULL) || (pSetFlags->type() != INT_PARAM))
+   {
+      throw XmlRpcMethodFault(200);
+   }
+
+   QWidget* pWidget = Service<DesktopServices>()->getMainWidget();
+   if (pWidget == NULL)
+   {
+      throw XmlRpcMethodFault(303);
+   }
+
+   Qt::WindowStates clearFlags(pClearFlags->value().toInt());
+   Qt::WindowStates setFlags(pSetFlags->value().toInt());
+   pWidget->setWindowState(pWidget->windowState() & ~clearFlags | setFlags);
+
+   // If the caller requested the window to be active, make sure it is on top of other windows.
+   if (setFlags & Qt::WindowActive)
+   {
+      pWidget->raise();
+   }
+
+   return new XmlRpcParam(INT_PARAM, QVariant(pWidget->windowState()));
+}
+
+QString SetWindowState::getHelp()
+{
+   return "Change the window state of "APP_NAME" by specifying new Qt::WindowStates flags. "
+      "ClearFlags will be applied before SetFlags. If SetFlags specifies Qt::WindowActive the window will be raised. "
+      "Returns the new Qt::WindowStates.";
+}
+
+XmlRpcArrayParam* SetWindowState::getSignature()
+{
+   XmlRpcArrayParam* pSignatures = new XmlRpcArrayParam;
+
+   XmlRpcArrayParam* pParams = new XmlRpcArrayParam;
+   *pParams << new XmlRpcParam(STRING_PARAM, "int");
+   *pParams << new XmlRpcParam(STRING_PARAM, "int ClearFlags");
+   *pParams << new XmlRpcParam(STRING_PARAM, "int SetFlags");
    *pSignatures << pParams;
 
    return pSignatures;

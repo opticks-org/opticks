@@ -1176,4 +1176,35 @@ protected:
    virtual ~DesktopServices() {}
 };
 
+/**
+ * Extends capability of the DesktopServices interface.
+ *
+ * This class provides additional capability for the DesktopServices interface
+ * class.  A pointer to this class can be obtained by performing a dynamic cast
+ * on a pointer to DesktopServices.
+ *
+ * @warning A pointer to this class can only be used to call methods contained
+ *          in this extension class and cannot be used to call any methods in
+ *          DesktopServices.
+ */
+class DesktopServicesExt1
+{
+public:
+   /**
+    *  Deletes all windows.
+    *
+    *  WARNING: Windows or Toolbars provided by the application cannot
+    *  be deleted using this method; they will be cleaned up during
+    *  application close.
+    */
+   virtual void deleteAllWindows() = 0;
+
+protected:
+   /**
+    * This will be cleaned up during application close.  Plug-ins do not
+    * need to destroy it.
+    */
+   virtual ~DesktopServicesExt1() {}
+};
+
 #endif

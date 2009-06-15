@@ -266,6 +266,7 @@ void XmlRpcMethodFault::populateFaults()
       sFaults[310] = QString("Unable to Link Views");
       sFaults[311] = QString("Unable to Unlink Views");
       sFaults[312] = QString("Unable to Delete Object");
+      sFaults[313] = QString("Unable to Export Element");
    }
 }
 
