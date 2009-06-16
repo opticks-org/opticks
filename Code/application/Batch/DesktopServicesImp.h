@@ -11,7 +11,9 @@
 #define DESKTOPSERVICESIMP_H
 
 #include "DesktopServices.h"
+#include "SubjectImp.h"
 
+#include <string>
 #include <vector>
 
 class GpuResourceManager;
@@ -19,6 +21,8 @@ class ImageFilterManager;
 class ProductWindow;
 class ProgressDlg;
 class QObject;
+class QString;
+class QUrl;
 
 /**
  *  Batch Implementation of the Desktop Services interface.
@@ -29,14 +33,14 @@ class QObject;
  *
  *  @see   BatchProcessor
  */
-class DesktopServicesImp : public DesktopServices, public DesktopServicesExt1
+class DesktopServicesImp : public DesktopServices, public SubjectImp, public DesktopServicesExt1
 {
 public:
    /**
     *  Retrieves a pointer to the class.
     *
     *  @return   A pointer to the only instance of the class.
-    */ 
+    */
    static DesktopServicesImp* instance();
    static void destroy();
 
@@ -86,6 +90,7 @@ public:
    bool deleteWindow(Window* pWindow);
    void deleteAllWindows();
 
+   // Workspace window services
    bool setCurrentWorkspaceWindow(WorkspaceWindow* pWindow);
    WorkspaceWindow* getCurrentWorkspaceWindow() const;
    bool getCurrentWorkspaceWindowName(std::string& windowName) const;
@@ -95,20 +100,27 @@ public:
    bool tileWorkspaceWindows(const std::vector<WorkspaceWindow*>& windows, bool maxFirst = true,
       TilingType eType = TILE_GRID);
 
+   // Dock window services
+   DockWindowAreaType getDockWindowArea(const DockWindow& dockWindow) const;
+   bool setDockWindowArea(DockWindow* pDockWindow, DockWindowAreaType dockArea);
+
+   // View services
    View* createView(const std::string& viewName, ViewType viewType, QWidget* pParent = 0);
    PlotView* createPlot(const std::string& plotName, PlotType plotType, QWidget* pParent = 0);
-   void getViewTypes(const std::string& className, std::vector<std::string>& classList);
-   void getLayerTypes(const std::string& className, std::vector<std::string>& classList);
    void deleteView(View* pView);
    bool isKindOfView(const std::string& className, const std::string& viewName);
+   void getViewTypes(const std::string& className, std::vector<std::string>& classList);
    bool isKindOfLayer(const std::string& className, const std::string& layerName);
+   void getLayerTypes(const std::string& className, std::vector<std::string>& classList);
    ProductWindow* deriveProduct(View* pView);
 
+   // Plot services
    PlotWidget* createPlotWidget(const std::string& plotName, PlotType plotType, QWidget* pParent = 0);
    void deletePlotWidget(PlotWidget* pPlot);
    Axis* createAxis(AxisPosition position, QWidget* pParent = 0);
    void deleteAxis(Axis* pAxis);
 
+   // Mode services
    void initializeAction(QAction* pAction, const std::string& shortcutContext);
 
    MouseMode* createMouseMode(const std::string& modeName, const char* const mouseCursor[],
@@ -128,11 +140,13 @@ public:
    void setAnnotationObject(GraphicObjectType objectType);
    GraphicObjectType getAnnotationObject() const;
 
+   // Data services
    bool importFile(const std::string& importerSubtype = std::string(), Progress* pProgress = NULL);
    bool importFile(const std::string& importerSubtype, Progress* pProgress, std::vector<DataElement*>& importedElements);
    bool exportSessionItem(SessionItem* pItem, FileDescriptor* pNewFileDescriptor = NULL, Progress* pProgress = NULL);
    bool exportSessionItems(const std::vector<SessionItem*>& items, Progress* pProgress = NULL);
 
+   // Help services
    bool displayHelpHome() const;
    bool displayHelp(const std::string& filename) const;
    void displayProperties(SessionItem* pItem) const;
@@ -144,19 +158,17 @@ public:
    void showSuppressibleMsgDlg(const std::string& dialogTitle, const std::string& dialogMsg, MessageType type, 
       const std::string& id, QWidget* pParent = NULL);
    void useMessageBox(bool enable);
-   int showMessageBox(const std::string& caption, const std::string& text, const std::string& button0 = std::string(),
-      const std::string& button1 = std::string(), const std::string& button2 = std::string(), int defaultButton = 0,
-      int escapeButton = -1) const;
+   int showMessageBox(const std::string& caption, const std::string& text,
+      const std::string& button0 = std::string(), const std::string& button1 = std::string(),
+      const std::string& button2 = std::string(), int defaultButton = 0, int escapeButton = -1) const;
 
    virtual bool createProgressDialog(const std::string& caption, Progress* pProgress) const;
-   ProgressDlg* createProgressDialog(const std::string& caption, Progress* pProgress,
-      QObject* pObject, const char* pSlot) const;
+   ProgressDlg* createProgressDialog(const std::string& caption, Progress* pProgress, QObject* pObject,
+      const char* pSlot) const;
 
+   // Plug-in services
    void addBackgroundPlugIn(PlugIn* pPlugIn, Progress* pProgress) const;
    virtual bool registerCallback(PlugInCallbackType eType, PlugInCallback* pCallback) const;
-
-   DockWindowAreaType getDockWindowArea(const DockWindow& dockWindow) const;
-   bool setDockWindowArea(DockWindow* pDockWindow, DockWindowAreaType dockArea);
 
    const std::vector<std::string>& getAvailableSymbolNames() const;
    const QImage& getSymbolImage(const std::string& symbol) const;
