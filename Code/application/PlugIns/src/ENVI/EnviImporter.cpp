@@ -583,19 +583,6 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
                      mWavelengthUnits = strToType(pField->mValue);
                   }
 
-                  /*
-                  mField = mFields.find("spectra names");
-                  if (pField != NULL)
-                  {
-                     if (pMetadata != NULL)
-                     {
-                        string pNamesPath[] = { SPECIAL_METADATA_NAME, BAND_METADATA_NAME, 
-                           NAMES_METADATA_NAME, END_METADATA_NAME };
-                        pMetadata->setAttributeByPath(pNamesPath, bandNames);
-                     }
-                  }
-                  */
-
                   // Wavelengths
                   vector<double> centerWavelengths;
                   pField = mFields.find("wavelength");
