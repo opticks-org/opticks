@@ -178,7 +178,7 @@ void AnimationFrameSubsetWidget::setStartFrame(double start)
 
          double newStart = start + std::numeric_limits<double>::epsilon();
 
-         if (frames[i].mTime > newStart && frames[i+1].mTime < newStart)
+         if (frames[i].mTime < newStart && frames[i+1].mTime > newStart)
          {
             index = i;
             break;
@@ -234,7 +234,7 @@ void AnimationFrameSubsetWidget::setStopFrame(double stop)
 
          double newStop = stop + std::numeric_limits<double>::epsilon();
 
-         if ((frames[i].mTime > newStop) && (frames[i+1].mTime < newStop))
+         if ((frames[i].mTime < newStop) && (frames[i+1].mTime > newStop))
          {
             index = i;
             break;
