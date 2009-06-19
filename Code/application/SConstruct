@@ -41,7 +41,7 @@ env["BUILDDIR"] = '%s/%s-%s' % (BUILDDIR,PLATFORM,MODE)
 
 
 Help(vars.GenerateHelpText(env))
-env["QT_MODULES"] = ["QtCore","QtGui","Qt3Support","QtOpenGL", "QtXml"]
+env["QT_MODULES"] = ["QtCore","QtGui","Qt3Support","QtOpenGL", "QtXml","QtSql","QtNetwork"]
 env.Qt4AddModules(env["QT_MODULES"])
 
 env['LINK'] = "$CXX"
