@@ -66,11 +66,11 @@ XmlReader::XmlReader(MessageLog* pLog, bool bValidate) :
 }
 
 XmlReader::~XmlReader()
-{
-   if (mpDoc != NULL)
+{   
+   if (mpParser != NULL)
    {
-      mpDoc->release();
-   }
+      mpParser->release();
+   } 
 }
 
 XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* XmlReader::parse(const Filename* pFn, string endTag)
