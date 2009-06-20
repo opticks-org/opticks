@@ -11,6 +11,7 @@
 #include "CgContext.h"
 #include "ColorBuffer.h"
 #include "glCommon.h"
+#include "GpuResourceManager.h"
 #include "GpuTile.h"
 #include "ImageFilter.h"
 #include "ImageUtilities.h"
@@ -1555,40 +1556,41 @@ unsigned int GpuImage::readTiles(double xCoord, double yCoord, GLsizei width, GL
       }
 
       // get scale factor
-      float scaleFactor = 1.0f/3.0f;
+      float gpuFactor = Service<GpuResourceManager>()->getGpuScalingFactor();
+      float scaleFactor = 1.0f / gpuFactor;
       float offset = 0.0;
       switch (mInfo.mRawType[0])
       {
       case INT1SBYTE:
-         scaleFactor = getScale<signed char>() / 3.0f;
+         scaleFactor = getScale<signed char>() / gpuFactor;
          offset = static_cast<float>(getOffset<signed char>());
          break;
       case INT1UBYTE:
-         scaleFactor = getScale<unsigned char>() / 3.0f;
+         scaleFactor = getScale<unsigned char>() / gpuFactor;
          offset = static_cast<float>(getOffset<unsigned char>());
          break;
       case INT2SBYTES:
-         scaleFactor = getScale<signed short>() / 3.0f;
+         scaleFactor = getScale<signed short>() / gpuFactor;
          offset = static_cast<float>(getOffset<signed short>());
          break;
       case INT2UBYTES:
-         scaleFactor = getScale<unsigned short>() / 3.0f;
+         scaleFactor = getScale<unsigned short>() / gpuFactor;
          offset = static_cast<float>(getOffset<unsigned short>());
          break;
       case INT4SBYTES:
-         scaleFactor = getScale<signed int>() / 3.0f;
+         scaleFactor = getScale<signed int>() / gpuFactor;
          offset = static_cast<float>(getOffset<signed int>());
          break;
       case INT4UBYTES:
-         scaleFactor = getScale<unsigned int>() / 3.0f;
+         scaleFactor = getScale<unsigned int>() / gpuFactor;
          offset = static_cast<float>(getOffset<unsigned int>());
          break;
       case FLT4BYTES:
-         scaleFactor = getScale<float>() / 3.0f;
+         scaleFactor = getScale<float>() / gpuFactor;
          offset = static_cast<float>(getOffset<float>());
          break;
       case FLT8BYTES:
-         scaleFactor = getScale<double>() / 3.0f;
+         scaleFactor = getScale<double>() / gpuFactor;
          offset = static_cast<float>(getOffset<double>());
          break;
       default:
