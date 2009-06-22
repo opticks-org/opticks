@@ -103,7 +103,9 @@ bool DeriveLayer::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
       {
          if (!pView->getLayerList()->renameLayer(pNewLayer, mNewLayerName))
          {
-            reportError("Unable to rename the layer.", "{1e81e201-624f-4e96-83b5-8ceae01d7c1d}");
+            pView->deleteLayer(pNewLayer);
+            reportError("Unable to derive a layer with the given name, because another layer "
+               "with the same name already exists.", "{1e81e201-624f-4e96-83b5-8ceae01d7c1d}");
             return false;
          }
       }
