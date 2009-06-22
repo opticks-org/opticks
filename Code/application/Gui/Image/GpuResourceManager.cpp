@@ -236,6 +236,7 @@ bool GpuResourceManager::determineScalingFactor(float& scalingFactor)
    bool factorFound = false;
    scalingFactor = 3.0f;  // value for ForceWare versions 94.22 and earlier
 
+#ifdef CG_SUPPORTED
    unsigned int texWidth(64);
    unsigned int texHeight(64);
 
@@ -296,6 +297,10 @@ bool GpuResourceManager::determineScalingFactor(float& scalingFactor)
          factorFound = true;
       }
    }
+
+#else
+   factorFound = true;
+#endif
 
    return factorFound;
 }
