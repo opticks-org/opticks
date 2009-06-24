@@ -3,7 +3,7 @@
  * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
- * The license text is available from   
+ * The license text is available from
  * http://www.gnu.org/licenses/lgpl.html
  */
 
@@ -99,7 +99,7 @@ void DmsPoint::setValue(const string& valueText)
 
    format = formatStr.c_str();
 
-   fieldCount = sscanf(valueText.c_str(), format, &dirDelimiter, 
+   fieldCount = sscanf(valueText.c_str(), format, &dirDelimiter,
       &degValue, degDelimiter,
       &minValue, minDelimiter,
       &secValue, secDelimiter);
@@ -108,7 +108,7 @@ void DmsPoint::setValue(const string& valueText)
    {
       format = "%lg%[Dd°*\x20]%lg%[Mm'\x20]%lg%[Ss\"\x20]";
 
-      fieldCount = sscanf(valueText.c_str(), format, 
+      fieldCount = sscanf(valueText.c_str(), format,
          &degValue, degDelimiter,
          &minValue, minDelimiter,
          &secValue, secDelimiter);
@@ -299,8 +299,8 @@ string DmsPoint::getValueText(DmsFormatType format, int precision) const
       break;
 
    case DMS_FULL_DECIMAL:
-      
-      sprintf(buffer, "%c%c.%df%s", direction, formatChar, minutePrecision, DEG_CHAR.c_str());
+
+      sprintf(buffer, "%c%c.%df%s", direction, formatChar, degSecPrecision, DEG_CHAR.c_str());
       formatStr = buffer;
       sprintf(buffer, formatStr.c_str(), dPositiveValue);
       strVal = buffer;
@@ -314,7 +314,7 @@ string DmsPoint::getValueText(DmsFormatType format, int precision) const
          double dMinutes = 60.0 * (dPositiveValue - iDegrees);
          if (dMinutes > 0.0)
          {
-            sprintf(buffer, "%c.%df'", formatChar, degSecPrecision);
+            sprintf(buffer, "%c.%df'", formatChar, minutePrecision);
             formatStr = buffer;
             sprintf(buffer, formatStr.c_str(), dMinutes);
             strVal += buffer;

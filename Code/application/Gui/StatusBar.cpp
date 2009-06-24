@@ -175,7 +175,8 @@ void StatusBar::setGeoCoords(LocationType latLonCoord, GeocoordType type, DmsFor
    LatLonPoint latLonPoint(latLonCoord);
    if (type == GEOCOORD_LATLON)
    {
-      label = " Geo: (" + latLonPoint.getText(format) + ") ";
+      label = " Geo: (" +
+         (format == DMS_FULL_DECIMAL ? latLonPoint.getText(format, 6) : latLonPoint.getText(format)) + ")";
    }
    else if (type == GEOCOORD_UTM)
    {
