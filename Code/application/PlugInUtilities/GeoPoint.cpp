@@ -300,7 +300,7 @@ string DmsPoint::getValueText(DmsFormatType format, int precision) const
 
    case DMS_FULL_DECIMAL:
       
-      sprintf(buffer, "%c.%df%s", formatChar, minutePrecision, DEG_CHAR.c_str());
+      sprintf(buffer, "%c%c.%df%s", direction, formatChar, minutePrecision, DEG_CHAR.c_str());
       formatStr = buffer;
       sprintf(buffer, formatStr.c_str(), dPositiveValue);
       strVal = buffer;
