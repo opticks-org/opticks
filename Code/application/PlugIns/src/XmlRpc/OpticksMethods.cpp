@@ -1434,21 +1434,13 @@ XmlRpcParam* SetWindowState::operator()(const XmlRpcParams& params)
    Qt::WindowStates clearFlags(pClearFlags->value().toInt());
    Qt::WindowStates setFlags(pSetFlags->value().toInt());
    pWidget->setWindowState(pWidget->windowState() & ~clearFlags | setFlags);
-
-   // If the caller requested the window to be active, make sure it is on top of other windows.
-   if (setFlags & Qt::WindowActive)
-   {
-      pWidget->raise();
-   }
-
    return new XmlRpcParam(INT_PARAM, QVariant(pWidget->windowState()));
 }
 
 QString SetWindowState::getHelp()
 {
    return "Change the window state of "APP_NAME" by specifying new Qt::WindowStates flags. "
-      "ClearFlags will be applied before SetFlags. If SetFlags specifies Qt::WindowActive the window will be raised. "
-      "Returns the new Qt::WindowStates.";
+      "ClearFlags will be applied before SetFlags.";
 }
 
 XmlRpcArrayParam* SetWindowState::getSignature()
