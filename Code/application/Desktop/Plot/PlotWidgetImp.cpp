@@ -1363,8 +1363,8 @@ bool PlotWidgetImp::toXml(XMLWriter* pXml) const
    pXml->addAttr("name", getName());
    pXml->addAttr("displayName", getDisplayName());
    pXml->addAttr("displayText", getDisplayText());
+   pXml->addAttr("title", getTitle().toStdString());
    pXml->addAttr("type", getObjectType());
-
    pXml->addAttr("legendShown", isLegendShown());
    pXml->addAttr("classificationPosition", mClassificationPosition);
    pXml->addAttr("organizationPosition", mClassificationPosition);
@@ -1383,8 +1383,14 @@ bool PlotWidgetImp::toXml(XMLWriter* pXml) const
       pXml->addAttr("AnnotationToolbarId", mpAnnotationToolBar->getId());
    }
 
+   pXml->pushAddPoint(pXml->addElement("TitleFont"));
+   if (!mTitleFont.toXml(pXml))
+   {
+      return false;
+   }
+   pXml->popAddPoint();
+
    pXml->pushAddPoint(pXml->addElement("ClassificationFont"));
-   // no foul if font not stored - just keep defaults
    if (!mClassificationFont.toXml(pXml))
    {
       return false;
@@ -1392,7 +1398,6 @@ bool PlotWidgetImp::toXml(XMLWriter* pXml) const
    pXml->popAddPoint();
 
    pXml->pushAddPoint(pXml->addElement("OrganizationFont"));
-   // no foul if font not stored - just keep defaults
    if (!mOrganizationFont.toXml(pXml))
    {
       return false;
@@ -1432,6 +1437,7 @@ bool PlotWidgetImp::fromXml(DOMNode* pDocument, unsigned int version)
    setName(A(pElem->getAttribute(X("name"))));
    setDisplayName(A(pElem->getAttribute(X("displayName"))));
    setDisplayText(A(pElem->getAttribute(X("displayText"))));
+   setTitle(QString::fromStdString(A(pElem->getAttribute(X("title")))));
 
    PlotSet* pPlotSet = dynamic_cast<PlotSet*>(
       SessionManagerImp::instance()->getSessionItem(A(pElem->getAttribute(X("plotSetId")))));
@@ -1457,7 +1463,14 @@ bool PlotWidgetImp::fromXml(DOMNode* pDocument, unsigned int version)
 
    for (DOMNode* pChld = pDocument->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
    {
-      if (XMLString::equals(pChld->getNodeName(), X("ClassificationFont")))
+      if (XMLString::equals(pChld->getNodeName(), X("TitleFont")))
+      {
+         if (!mTitleFont.fromXml(pChld, version))
+         {
+            return false;
+         }
+      }
+      else if (XMLString::equals(pChld->getNodeName(), X("ClassificationFont")))
       {
          if (!mClassificationFont.fromXml(pChld, version))
          {

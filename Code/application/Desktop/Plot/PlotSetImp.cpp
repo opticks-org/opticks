@@ -786,9 +786,13 @@ bool PlotSetImp::fromXml(DOMNode* pDocument, unsigned int version)
          if (pWidget != NULL)
          {
             addPlot(pWidget);
+
             HistogramWindowImp* pHWI = dynamic_cast<HistogramWindowImp*>(mpPlotWindow);
             if (pHWI != NULL)
             {
+               VERIFYNR(pWidget->attach(SIGNAL_NAME(PlotWidget, AboutToShowContextMenu),
+                  Slot(pHWI, &HistogramWindowImp::updateContextMenu)));
+
                HistogramPlotImp* pPlotImp = dynamic_cast<HistogramPlotImp*>(pWidget->getPlot());
                if (pPlotImp != NULL)
                {
@@ -797,6 +801,8 @@ bool PlotSetImp::fromXml(DOMNode* pDocument, unsigned int version)
                   {
                      VERIFYNR(connect(pRasterImp, SIGNAL(displayModeChanged(const DisplayMode&)), pHWI,
                         SLOT(setCurrentPlot(const DisplayMode&))));
+                     VERIFYNR(connect(pRasterImp, SIGNAL(displayedBandChanged(RasterChannelType, DimensionDescriptor)),
+                        pHWI, SLOT(updatePlotInfo(RasterChannelType))));
                   }
                }
             }
