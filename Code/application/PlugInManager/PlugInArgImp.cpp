@@ -185,6 +185,7 @@ void PlugInArgImp::initArgTypes()
    if (mArgTypes.empty())
    {
       mArgTypes.push_back("char");
+      mArgTypes.push_back("signed char");
       mArgTypes.push_back("unsigned char");
       mArgTypes.push_back("short");
       mArgTypes.push_back("unsigned short");
@@ -201,6 +202,7 @@ void PlugInArgImp::initArgTypes()
       mArgTypes.push_back("bool");
       mArgTypes.push_back("string");
       mArgTypes.push_back("vector<char>");
+      mArgTypes.push_back("vector<signed char>");
       mArgTypes.push_back("vector<unsigned char>");
       mArgTypes.push_back("vector<short>");
       mArgTypes.push_back("vector<unsigned short>");

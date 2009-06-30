@@ -344,13 +344,16 @@ RasterPage* GeoTiffPager::getPage(DataRequest *pOriginalRequest,
          // Since it is acceptable to increment off the end of the data, do not report an error message
          throw string();
       }
-   
+
+      if ((interleave == BSQ) && (concurrentBands != 1))
+      {
+         throw string("BSQ data can only be accessed one band at a time.");
+      }
+
       /**
        * possibilities for load
        *
        * BIP with strips
-       *     with tiles
-       * BIL with strips
        *     with tiles
        * BSQ with strips
        *     with tiles
@@ -360,21 +363,9 @@ RasterPage* GeoTiffPager::getPage(DataRequest *pOriginalRequest,
       {
          // the data are stored as strips
          tsize_t stripSize(TIFFStripSize(mpTiff)); // columns * bands * rows in a strip (bands=1 for BSQ)
-         int stripCount(TIFFNumberOfStrips(mpTiff));
-
-         if ((stripSize == 0) || (stripCount == 0))
+         if (stripSize <= 0)
          {
-            throw string("TIFF is not tiled. Strip size or strip count = 0");
-         }
-
-         if (interleave == BIL)
-         {
-            // we don't do this in memory, so we don't do it on disk either
-            throw string("BIL interleave method not supported");
-         }
-         else if ((interleave == BSQ) && (concurrentBands != 1))
-         {
-            throw string("BSQ data can only be accessed one band at a time.");
+            throw string("TIFF file error. Strip size <= 0.");
          }
 
          // Load in a data block and create a GeoTiffPage for the data.
@@ -461,12 +452,136 @@ RasterPage* GeoTiffPager::getPage(DataRequest *pOriginalRequest,
       }
       else
       {
-         // the data are stored as tiles
-         throw string("Tiled tiffs are not supported.");
+         // The number of pixels in each tile from left to right
+         uint32 tileWidth;
+         if (TIFFGetField(mpTiff, TIFFTAG_TILEWIDTH, &tileWidth) == 0 || tileWidth == 0)
+         {
+            throw string("Cannot determine tileWidth");
+         }
+
+         // The number of pixels in each tile from top to bottom
+         uint32 tileLength;
+         if (TIFFGetField(mpTiff, TIFFTAG_TILELENGTH, &tileLength) == 0 || tileLength == 0)
+         {
+            throw string("Cannot determine tileLength");
+         }
+
+         // The number of bytes in each tile
+         const tsize_t tileSize(TIFFTileSize(mpTiff));
+         if (tileSize <= 0)
+         {
+            throw string("Cannot determine tileSize");
+         }
+
+         // Compute the first and last tile to load.
+         // This should ideally use TIFFComputeTile, but there are problems
+         // in that method (as of libtiff 3.8.1) so compute them manually here.
+
+         // The number of tiles from left to right
+         const uint32 tilesAcross((numColumns + tileWidth - 1) / tileWidth);
+         if (tilesAcross == 0)
+         {
+            throw string("Cannot determine tilesAcross");
+         }
+
+         // The number of tiles from top to bottom
+         const uint32 tilesDown((numRows + tileLength - 1) / tileLength);
+         if (tilesDown == 0)
+         {
+            throw string("Cannot determine tilesDown");
+         }
+
+         // The offset to the first tile in the requested band
+         // BIP: Tiles contain all bands, so this is 0
+         // BSQ: Tiles contain a single band, so this is number of tiles per band * bandNumber
+         // This is stated in the TIFF 6.0 spec on page 68 (in the TileOffsets definition)
+         const uint32 tileOffset(interleave == BIP ? 0 : bandNumber * tilesAcross * tilesDown);
+
+         // The 0-based index of the first desired tile
+         const ttile_t startTileIndex(rowNumber / tileLength);
+
+         // The tile containing the first column of the first requested row
+         const ttile_t startTile(tileOffset + startTileIndex * tilesAcross);
+         if (startTile < 0)
+         {
+            throw string("Cannot determine startTile");
+         }
+
+         // The 0-based index of the last desired tile
+         const ttile_t endTileIndex((rowNumber + concurrentRows - 1) / tileLength);
+
+         // The tile containing the last column of the last requested row
+         const ttile_t endTile(tileOffset + endTileIndex * tilesAcross + tilesAcross - 1);
+         if (endTile < 0)
+         {
+            throw string("Cannot determine endTile");
+         }
+
+         // Retrieve a block from the cache
+         GeoTiffOnDisk::CacheUnit* pCacheUnit(mBlockCache.getCacheUnit(startTile, endTile, tileSize));
+         if (pCacheUnit == NULL)
+         {
+            throw string("Cannot create a cache unit");
+         }
+
+         // The number of bands in pPage
+         const unsigned int bandSkip(interleave == BIP ? numBands : 1);
+
+         // The number of columns in pPage
+         const unsigned int columnSkip(numColumns);
+
+         // The offset of the first requested data within pPage
+         const size_t offset(bytesPerElement *
+            ((rowNumber % tileLength) * columnSkip * bandSkip + (interleave == BSQ ? 0 : bandNumber)));
+
+         // The number of rows in pPage
+         const unsigned int rowSkip(tileLength * ((endTile - startTile + 1) / tilesAcross));
+
+         // Create a GeoTiffPage based on the computed values
+         pPage = new GeoTiffPage(pCacheUnit, offset, rowSkip, columnSkip, bandSkip);
+         if (pCacheUnit->isEmpty())
+         {
+            // Temporary storage for the working tile
+            vector<unsigned char> tileData(tileSize);
+            for (ttile_t curTile = startTile, tileNum = 0; curTile <= endTile; ++curTile, ++tileNum)
+            {
+               if (TIFFReadEncodedTile(mpTiff, curTile, &tileData[0], tileSize) != tileSize)
+               {
+                  throw string("Error reading TIFF data");
+               }
+
+               // The starting address of this tile within pPage
+               char* pBlockPos(pCacheUnit->data());
+
+               // Increment by one or more rows of tiles
+               pBlockPos += tileSize * tilesAcross * bandSkip * bytesPerElement * (tileNum / tilesAcross);
+
+               // Increment by one or more tiles within a row
+               pBlockPos += tileWidth * bandSkip * bytesPerElement * (tileNum % tilesAcross);
+
+               // The number of bytes to copy - this might be different for partial tiles (e.g.: at the end of a row)
+               size_t numBytesToCopy = tileWidth;
+               if ((tileNum + 1) % tilesAcross == 0 && numColumns % tileWidth != 0)
+               {
+                  numBytesToCopy = numColumns % tileWidth;
+               }
+
+               numBytesToCopy *= bandSkip * bytesPerElement;
+               for (uint32 row = 0; row < tileLength; ++row)
+               {
+                  const size_t rowOffset = row * numColumns * bandSkip * bytesPerElement;
+                  const size_t tileOffset = row * tileWidth * bandSkip * bytesPerElement;
+                  memcpy(pBlockPos + rowOffset, &tileData[tileOffset], numBytesToCopy);
+               }
+            }
+
+            pCacheUnit->setIsEmpty(false);
+         }
       }
    }
-   catch (string &exc)
+   catch (const string& exc)
    {
+      delete pPage;
       pPage = NULL;
       if (exc.empty() == false)
       {

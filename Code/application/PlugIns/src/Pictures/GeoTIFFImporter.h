@@ -13,6 +13,7 @@
 #include "RasterElementImporterShell.h"
 
 #include <memory>
+#include <string>
 #include <vector>
 
 class OptionsTiffImporter;
@@ -22,7 +23,7 @@ class GeoTIFFImporter : public RasterElementImporterShell
 {
 public:
    GeoTIFFImporter();
-   ~GeoTIFFImporter();
+   virtual ~GeoTIFFImporter();
 
    std::vector<ImportDescriptor*> getImportDescriptors(const std::string& filename);
    unsigned char getFileAffinity(const std::string& filename);
@@ -32,6 +33,7 @@ public:
    QWidget *getImportOptionsWidget(DataDescriptor *pDescriptor);
 
    bool createRasterPager(RasterElement *pRasterElement) const;
+   bool validate(const DataDescriptor* pDescriptor, std::string& errorMessage) const;
 
 protected:
    bool populateDataDescriptor(RasterDataDescriptor* pDescriptor);
@@ -39,6 +41,7 @@ protected:
 
 private:
    std::auto_ptr<OptionsTiffImporter> mImportOptionsWidget;
+   std::string mMetadataMessage;
 };
 
 #endif

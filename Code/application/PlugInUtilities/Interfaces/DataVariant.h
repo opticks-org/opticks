@@ -30,6 +30,7 @@ class XMLWriter;
  * These template specializations are required to allow these types to be put into a DataVariant.
  */
 template <> class VariantTypeValidator<unsigned char> {};
+template <> class VariantTypeValidator<signed char> {};
 template <> class VariantTypeValidator<char> {};
 template <> class VariantTypeValidator<unsigned short> {};
 template <> class VariantTypeValidator<short> {};
@@ -46,6 +47,7 @@ template <> class VariantTypeValidator<double> {};
 template <> class VariantTypeValidator<bool> {};
 template <> class VariantTypeValidator<std::string> {};
 template <> class VariantTypeValidator<std::vector<unsigned char> > {};
+template <> class VariantTypeValidator<std::vector<signed char> > {};
 template <> class VariantTypeValidator<std::vector<char> > {};
 template <> class VariantTypeValidator<std::vector<unsigned short> > {};
 template <> class VariantTypeValidator<std::vector<short> > {};

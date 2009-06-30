@@ -667,6 +667,8 @@ void DataVariantFactoryImp::initializeMaps()
    registerType<DataVariantDynamicObject>();
    registerType<DataVariantValue<char> >();
    registerType<DataVariantVectorValue<char> >();
+   registerType<DataVariantValue<signed char> >();
+   registerType<DataVariantVectorValue<signed char> >();
    registerType<DataVariantValue<unsigned char> >();
    registerType<DataVariantVectorValue<unsigned char> >();
    registerType<DataVariantValue<short> >();

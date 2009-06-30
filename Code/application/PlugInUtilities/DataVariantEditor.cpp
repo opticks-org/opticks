@@ -159,6 +159,7 @@ const vector<DataVariantEditorDelegate>& DataVariantEditor::getDelegates()
    if (sDelegates.empty() == true)
    {
       sDelegates.push_back(DataVariantEditorDelegate("char", DataVariantEditorDelegate::INTEGRAL));
+      sDelegates.push_back(DataVariantEditorDelegate("signed char", DataVariantEditorDelegate::INTEGRAL));
       sDelegates.push_back(DataVariantEditorDelegate("unsigned char", DataVariantEditorDelegate::INTEGRAL));
       sDelegates.push_back(DataVariantEditorDelegate("short", DataVariantEditorDelegate::INTEGRAL));
       sDelegates.push_back(DataVariantEditorDelegate("unsigned short", DataVariantEditorDelegate::INTEGRAL));
@@ -212,6 +213,7 @@ const vector<DataVariantEditorDelegate>& DataVariantEditor::getDelegates()
       sDelegates.push_back(temp);
       sDelegates.push_back(DataVariantEditorDelegate("SymbolType", DataVariantEditorDelegate::SYMBOL_TYPE));
       sDelegates.push_back(DataVariantEditorDelegate("vector<char>", DataVariantEditorDelegate::VECTOR));
+      sDelegates.push_back(DataVariantEditorDelegate("vector<signed char>", DataVariantEditorDelegate::VECTOR));
       sDelegates.push_back(DataVariantEditorDelegate("vector<unsigned char>", DataVariantEditorDelegate::VECTOR));
       sDelegates.push_back(DataVariantEditorDelegate("vector<short>", DataVariantEditorDelegate::VECTOR));
       sDelegates.push_back(DataVariantEditorDelegate("vector<unsigned short>", DataVariantEditorDelegate::VECTOR));
