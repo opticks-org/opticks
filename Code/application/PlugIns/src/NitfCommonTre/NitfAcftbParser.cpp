@@ -135,6 +135,37 @@ bool Nitf::AcftbParser::runAllTests(Progress* pProgress, ostream& failure)
       "123"                         // MTI_TOT
       );
 
+   static const string data6(
+      "AC_MSN_IDX1234567890"        // AC_MSN_ID]
+      "AC_TAIL_NO"                  // AC_TAIL_NO
+      "200607301305"                // AC_TO
+      "IHFR"                        // SENSOR_ID_TYPE
+      "AIP   "                      // SENSOR_ID
+      " "                           // SCENE_SOURCE - set to spaces
+      "123456"                      // SCNUM
+      "20060730"                    // PDATE
+      "123456"                      // IMHOSTNO
+      "12345"                       // IMREQID
+      "123"                         // MPLAN
+      "-88.00000000-100.00000000"   // ENTLOC
+      "000.01"                      // LOC_ACCY
+      "      "                      // ENTELV - set to spaces
+      "m"                           // ELV_UNIT
+      "-88.00000000-100.00000000"   // EXITTLOC
+      "      "                      // EXITELV - set to spaces
+      "       "                     // TMAP - set to spaces
+      "01.0000"                     // ROW_SPACING
+      "m"                           // ROW_SPACING_UNITS
+      "01.0000"                     // COL_SPACING
+      "m"                           // COL_SPACING_UNITS
+      "000.01"                      //FOCAL_LENGTH
+      "      "                      // SENSERIAL - set to spaces
+      "1234.12"                     // ABSWVER
+      "20010911"                    // CAL_DATE
+      "1234"                        // PATCH_TOT
+      "123"                         // MTI_TOT
+      );
+
    FactoryResource<DynamicObject> treDO;
    size_t numBytes(0);
 
@@ -221,7 +252,43 @@ bool Nitf::AcftbParser::runAllTests(Progress* pProgress, ostream& failure)
 
    treDO->clear();
 
-   return (status != INVALID);
+   // Start of test 6 - blanks in optional fields
+   errorMessage.clear();
+   stringstream input6(data6);
+   success = toDynamicObject(input6, input6.str().size(), *treDO.get(), errorMessage);
+   if (success == false)
+   {
+      failure << errorMessage;
+      return false;
+   }
+   else
+   {
+      stringstream tmpStream;
+      status = isTreValid(*treDO.get(), tmpStream);
+      if (status != VALID)
+      {
+         failure << "Error: Test with blank data failed: did not return VALID\n";
+         failure << tmpStream.str();
+         return false;
+      }
+
+      tmpStream.str(string());
+      success = fromDynamicObject(*treDO.get(), tmpStream, numBytes, errorMessage);
+      if (success == false)
+      {
+         failure << errorMessage;
+         return false;
+      }
+
+      if (input6.str() != tmpStream.str())
+      {
+         failure << "Error: Test with blank data failed: fromDynamicObject returned an unexpected value\n";
+         return false;
+      }
+   }
+
+   treDO->clear();
+   return true;
 }
 
 
@@ -311,11 +378,8 @@ Nitf::TreState Nitf::AcftbParser::isTreValid(const DynamicObject& tre, ostream& 
    status = MaxState(status, testTagValidBcsASet(tre, reporter,
       &numFields, ACFTB::SENSOR_ID, testSet, false, true, true));
 
-   status = MaxState(status, testTagValueRange<int>(tre, reporter,
-      &numFields, ACFTB::SCENE_SOURCE, 0, 9));
-
-   status = MaxState(status, testTagValueRange<int>(tre, reporter,
-      &numFields, ACFTB::SCNUM, 0, 999999));
+   status = MaxState(status, testTagValueRange<int>(tre, reporter, &numFields, ACFTB::SCENE_SOURCE, 0, 9, true));
+   status = MaxState(status, testTagValueRange<int>(tre, reporter, &numFields, ACFTB::SCNUM, 0, 999999));
 
    // Just check that the field exists. Assume the DateTime class will contain a vaild date/time
    if (tre.getAttribute(ACFTB::PDATE).getPointerToValue<DateTime>() == NULL)
@@ -345,7 +409,7 @@ Nitf::TreState Nitf::AcftbParser::isTreValid(const DynamicObject& tre, ostream& 
       &numFields, ACFTB::LOC_ACCY, 0.0, 999.99));
 
    status = MaxState(status, testTagValueRange<int>(tre, reporter,
-      &numFields, ACFTB::ENTELV, -1000, 30000));
+      &numFields, ACFTB::ENTELV, -1000, 30000, true));
 
    testSet.clear();
    testSet.insert("f");
@@ -358,10 +422,10 @@ Nitf::TreState Nitf::AcftbParser::isTreValid(const DynamicObject& tre, ostream& 
       &numFields, ACFTB::EXITLOC, testSet, true, true, false));
 
    status = MaxState(status, testTagValueRange<int>(tre, reporter,
-      &numFields, ACFTB::EXITELV, -1000, 30000));
+      &numFields, ACFTB::EXITELV, -1000, 30000, true));
 
    status = MaxState(status, testTagValueRange<double>(tre, reporter,
-      &numFields, ACFTB::TMAP, 0.0, 180.00));
+      &numFields, ACFTB::TMAP, 0.0, 180.00, true));
 
    status = MaxState(status, testTagValueRange<double>(tre, reporter,
       &numFields, "ROW_SPACING", 0.0, 9999.99));
@@ -389,7 +453,7 @@ Nitf::TreState Nitf::AcftbParser::isTreValid(const DynamicObject& tre, ostream& 
       &numFields, ACFTB::FOCAL_LENGTH, 0.01, 999.99));
 
    status = MaxState(status, testTagValueRange<int>(tre, reporter,
-      &numFields, ACFTB::SENSERIAL, 0, 999999));
+      &numFields, ACFTB::SENSERIAL, 0, 999999, true));
 
    // The ABSWVER is the Version/Revision number in the form "VVVV.RR" so make it a string not a double
    testSet.clear();
@@ -603,7 +667,8 @@ bool Nitf::AcftbParser::fromDynamicObject(const DynamicObject& input, ostream& o
 
       output << sizeString(dv_cast<string>(input.getAttribute(ACFTB::SENSOR_ID_TYPE)), 4);
       output << sizeString(dv_cast<string>(input.getAttribute(ACFTB::SENSOR_ID)), 6);
-      output << toString(dv_cast<int>(input.getAttribute(ACFTB::SCENE_SOURCE)), 1);
+      output << toString(dv_cast<int>(input.getAttribute(ACFTB::SCENE_SOURCE)),
+         1, -1, ZERO_FILL, false, false, 3, true);
       output << toString(dv_cast<int>(input.getAttribute(ACFTB::SCNUM)), 6);
 
       // put date in form CCYYMMDD for this TAG
@@ -620,17 +685,19 @@ bool Nitf::AcftbParser::fromDynamicObject(const DynamicObject& input, ostream& o
       output << toString(dv_cast<int>(input.getAttribute(ACFTB::MPLAN)), 3);
       output << sizeString(dv_cast<string>(input.getAttribute(ACFTB::ENTLOC)), 25);
       output << toString(dv_cast<double>(input.getAttribute(ACFTB::LOC_ACCY)), 6, 2);
-      output << toString(dv_cast<int>(input.getAttribute(ACFTB::ENTELV)), 6, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<int>(input.getAttribute(ACFTB::ENTELV)),
+         6, -1, ZERO_FILL, POS_SIGN_TRUE, false, 3, true);
       output << sizeString(dv_cast<string>(input.getAttribute(ACFTB::ELV_UNIT)), 1);
       output << sizeString(dv_cast<string>(input.getAttribute(ACFTB::EXITLOC)), 25);
-      output << toString(dv_cast<int>(input.getAttribute(ACFTB::EXITELV)), 6, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output << toString(dv_cast<double>(input.getAttribute(ACFTB::TMAP)), 7, 3);
+      output << toString(dv_cast<int>(input.getAttribute(ACFTB::EXITELV)),
+         6, -1, ZERO_FILL, POS_SIGN_TRUE, false, 3, true);
+      output << toString(dv_cast<double>(input.getAttribute(ACFTB::TMAP)), 7, 3, ZERO_FILL, false, false, 3, true);
       output << toString(dv_cast<double>(input.getAttribute(ACFTB::ROW_SPACING)), 7, 4);
       output << sizeString(dv_cast<string>(input.getAttribute(ACFTB::ROW_SPACING_UNITS)), 1);
       output << toString(dv_cast<double>(input.getAttribute(ACFTB::COL_SPACING)), 7, 4);
       output << sizeString(dv_cast<string>(input.getAttribute(ACFTB::COL_SPACING_UNITS)), 1);
       output << toString(dv_cast<double>(input.getAttribute(ACFTB::FOCAL_LENGTH)), 6, 2);
-      output << toString(dv_cast<int>(input.getAttribute(ACFTB::SENSERIAL)), 6);
+      output << toString(dv_cast<int>(input.getAttribute(ACFTB::SENSERIAL)), 6, -1, ZERO_FILL, false, false, 3, true);
       output << sizeString(dv_cast<string>(input.getAttribute(ACFTB::ABSWVER)), 7);
 
       // put date in form CCYYMMDD for this TAG

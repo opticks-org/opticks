@@ -112,6 +112,30 @@ bool Nitf::AcftaParser::runAllTests(Progress* pProgress, ostream& failure)
       "1234.12"                  // ABSWVER
       );
 
+   static const string data6(
+      "AC_MSN_IDX"               // AC_MSN_ID
+      "C"                        // SCTYPE
+      "1234"                     // SCNUM
+      "ASR"                      // SENSOR_ID
+      "0234"                     // PATCH_TOT
+      "123"                      // MTI_TOT
+      "16JUN06"                  // PDATE
+      "123"                      // IMHOSTNO
+      "12345"                    // IMREQID
+      "1"                        // SCENE_SOURCE
+      "12"                       // MPLAN
+      "-88.000000-100.000000"    // ENTLOC
+      "+01000"                   // ENTELV
+      "-88.000000-100.000000"    // EXITLOC
+      "      "                   // EXITELV - set to spaces
+      "090.000"                  // TMAP
+      "   "                      // RCS - set to spaces
+      "01.0000"                  // ROW_SPACING
+      "01.0000"                  // COL_SPACING
+      "    "                     // SENSERIAL - set to spaces
+      "1234.12"                  // ABSWVER
+      );
+
    FactoryResource<DynamicObject> treDO;
    size_t numBytes(0);
 
@@ -196,7 +220,43 @@ bool Nitf::AcftaParser::runAllTests(Progress* pProgress, ostream& failure)
 
    treDO->clear();
 
-   return (status != INVALID);
+   // Start of test 6 - blanks in optional fields
+   errorMessage.clear();
+   stringstream input6(data6);
+   success = toDynamicObject(input6, input6.str().size(), *treDO.get(), errorMessage);
+   if (success == false)
+   {
+      failure << errorMessage;
+      return false;
+   }
+   else
+   {
+      stringstream tmpStream;
+      status = isTreValid(*treDO.get(), tmpStream);
+      if (status != VALID)
+      {
+         failure << "Error: Test with blank data failed: did not return VALID\n";
+         failure << tmpStream.str();
+         return false;
+      }
+
+      tmpStream.str(string());
+      success = fromDynamicObject(*treDO.get(), tmpStream, numBytes, errorMessage);
+      if (success == false)
+      {
+         failure << errorMessage;
+         return false;
+      }
+
+      if (input6.str() != tmpStream.str())
+      {
+         failure << "Error: Test with blank data failed: fromDynamicObject returned an unexpected value\n";
+         return false;
+      }
+   }
+
+   treDO->clear();
+   return true;
 }
 
 Nitf::TreState Nitf::AcftaParser::isTreValid(const DynamicObject& tre, ostream& reporter) const
@@ -255,7 +315,7 @@ Nitf::TreState Nitf::AcftaParser::isTreValid(const DynamicObject& tre, ostream& 
 
    testSet.clear();
    status = MaxState(status, testTagValidBcsASet(tre, reporter, &numFields, ACFTA::EXITLOC, testSet, true));
-   status = MaxState(status, testTagValueRange<int>(tre, reporter, &numFields, ACFTA::EXITELV, -1000, 30000));
+   status = MaxState(status, testTagValueRange<int>(tre, reporter, &numFields, ACFTA::EXITELV, -1000, 30000, true));
 
    // Valid values are 0.0 to 180.0 and 999.999 so need two tests.
    // Need to use tmpstatus because if status == SUSPECT then 2nd test will be called even if 1st test == VALID
@@ -271,10 +331,10 @@ Nitf::TreState Nitf::AcftaParser::isTreValid(const DynamicObject& tre, ostream& 
    }
    status = MaxState(status, tmpstatus);
 
-   status = MaxState(status, testTagValueRange<int>(tre, reporter, &numFields, ACFTA::RCS, 40, 80));
+   status = MaxState(status, testTagValueRange<int>(tre, reporter, &numFields, ACFTA::RCS, 40, 80, true));
    status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, ACFTA::ROW_SPACING, 0.0, 9999.99));
    status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, ACFTA::COL_SPACING, 0.0, 9999.99));
-   status = MaxState(status, testTagValueRange<int>(tre, reporter, &numFields, ACFTA::SENSERIAL, 1, 9999));
+   status = MaxState(status, testTagValueRange<int>(tre, reporter, &numFields, ACFTA::SENSERIAL, 1, 9999, true));
 
    // The ABSWVER is the Version/Revision number in the form "VVVV.RR" so test it as a string not a double
    testSet.clear();
@@ -404,12 +464,13 @@ bool Nitf::AcftaParser::fromDynamicObject(const DynamicObject& input, ostream& o
       output << sizeString(dv_cast<string>(input.getAttribute(ACFTA::ENTLOC)), 21);
       output << toString(dv_cast<int>(input.getAttribute(ACFTA::ENTELV)), 6, -1, ZERO_FILL, POS_SIGN_TRUE);
       output << sizeString(dv_cast<string>(input.getAttribute(ACFTA::EXITLOC)), 21);
-      output << toString(dv_cast<int>(input.getAttribute(ACFTA::EXITELV)), 6, -1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<int>(input.getAttribute(ACFTA::EXITELV)),
+         6, -1, ZERO_FILL, POS_SIGN_TRUE, false, 3, true);
       output << toString(dv_cast<double>(input.getAttribute(ACFTA::TMAP)), 7, 3);
-      output << toString(dv_cast<int>(input.getAttribute(ACFTA::RCS)), 3);
+      output << toString(dv_cast<int>(input.getAttribute(ACFTA::RCS)), 3, -1, ZERO_FILL, false, false, 3, true);
       output << toString(dv_cast<double>(input.getAttribute(ACFTA::ROW_SPACING)), 7, 4);
       output << toString(dv_cast<double>(input.getAttribute(ACFTA::COL_SPACING)), 7, 4);
-      output << toString(dv_cast<int>(input.getAttribute(ACFTA::SENSERIAL)), 4);
+      output << toString(dv_cast<int>(input.getAttribute(ACFTA::SENSERIAL)), 4, -1, ZERO_FILL, false, false, 3, true);
       output << sizeString(dv_cast<string>(input.getAttribute(ACFTA::ABSWVER)), 7);
    }
    catch (const bad_cast&)

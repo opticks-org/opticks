@@ -69,6 +69,20 @@ bool Nitf::BlockaParser::runAllTests(Progress* pProgress, ostream& failure)
       "010.0"                   // RESERVED2
       );
 
+   static const string data5(
+      "01"                      // BLOCK_INSTANCE
+      "99999"                   // N_GRAY
+      "99999"                   // L_LINES
+      "   "                     // LAYOVER_ANGLE - set to spaces
+      "   "                     // SHADOW_ANGLE - set to spaces
+      "                "        // RESERVED1
+      "+12.123456-123.123456"   // FRLC_LOC
+      "+00.000000+000.000000"   // LRLC_LOC
+      "-90.000000+359.999999"   // LRFC_LOC
+      "-90.000000-359.999999"   // FRFC_LOC
+      "010.0"                   // RESERVED2
+      );
+
    FactoryResource<DynamicObject> treDO;
    size_t numBytes(0);
 
@@ -138,7 +152,7 @@ bool Nitf::BlockaParser::runAllTests(Progress* pProgress, ostream& failure)
       status = isTreValid(*treDO.get(), tmpStream);
       if (status != SUSPECT)
       {
-         failure << "Error: Negative test with LNSTRT = data out of range failed: did not return SUSPECT\n";
+         failure << "Error: Negative test with data out of range failed: did not return SUSPECT\n";
          failure << tmpStream.str();
          treDO->clear();
          return false;
@@ -148,7 +162,43 @@ bool Nitf::BlockaParser::runAllTests(Progress* pProgress, ostream& failure)
 
    treDO->clear();
 
-   return (status != INVALID);
+   // Start of test 5 - blanks in optional fields
+   errorMessage.clear();
+   stringstream input5(data5);
+   success = toDynamicObject(input5, input5.str().size(), *treDO.get(), errorMessage);
+   if (success == false)
+   {
+      failure << errorMessage;
+      return false;
+   }
+   else
+   {
+      stringstream tmpStream;
+      status = isTreValid(*treDO.get(), tmpStream);
+      if (status != VALID)
+      {
+         failure << "Error: Test with blank data failed: did not return VALID\n";
+         failure << tmpStream.str();
+         return false;
+      }
+
+      tmpStream.str(string());
+      success = fromDynamicObject(*treDO.get(), tmpStream, numBytes, errorMessage);
+      if (success == false)
+      {
+         failure << errorMessage;
+         return false;
+      }
+
+      if (input5.str() != tmpStream.str())
+      {
+         failure << "Error: Test with blank data failed: fromDynamicObject returned an unexpected value\n";
+         return false;
+      }
+   }
+
+   treDO->clear();
+   return true;
 }
 
 bool Nitf::BlockaParser::toDynamicObject(istream& input, size_t numBytes, DynamicObject& output,
@@ -197,10 +247,10 @@ Nitf::TreState Nitf::BlockaParser::isTreValid(const DynamicObject& tre, ostream&
       &numFields, BLOCKA::L_LINES, 1U, 99999U));
 
    status = MaxState(status, testTagValueRange<unsigned int>(tre, reporter,
-      &numFields, BLOCKA::LAYOVER_ANGLE, 0U, 359U));
+      &numFields, BLOCKA::LAYOVER_ANGLE, 0U, 359U, true));
 
    status = MaxState(status, testTagValueRange<unsigned int>(tre, reporter,
-      &numFields, BLOCKA::SHADOW_ANGLE, 0U, 359U));
+      &numFields, BLOCKA::SHADOW_ANGLE, 0U, 359U, true));
 
    testSet.clear();
    status = MaxState(status, testTagValidBcsASet(tre, reporter,
@@ -252,8 +302,10 @@ bool Nitf::BlockaParser::fromDynamicObject(const DynamicObject& input, ostream& 
       output << toString(dv_cast<unsigned int>(input.getAttribute(BLOCKA::BLOCK_INSTANCE)), 2, -1);
       output << toString(dv_cast<unsigned int>(input.getAttribute(BLOCKA::N_GRAY)), 5, -1);
       output << toString(dv_cast<unsigned int>(input.getAttribute(BLOCKA::L_LINES)), 5, -1);
-      output << toString(dv_cast<unsigned int>(input.getAttribute(BLOCKA::LAYOVER_ANGLE)), 3, -1);
-      output << toString(dv_cast<unsigned int>(input.getAttribute(BLOCKA::SHADOW_ANGLE)), 3, -1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(BLOCKA::LAYOVER_ANGLE)),
+         3, -1, ZERO_FILL, false, false, 3, true);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(BLOCKA::SHADOW_ANGLE)),
+         3, -1, ZERO_FILL, false, false, 3, true);
       output << sizeString(dv_cast<string>(input.getAttribute(BLOCKA::RESERVED1)), 16);
       output << sizeString(dv_cast<string>(input.getAttribute(BLOCKA::FRLC_LOC)), 21);
       output << sizeString(dv_cast<string>(input.getAttribute(BLOCKA::LRLC_LOC)), 21);

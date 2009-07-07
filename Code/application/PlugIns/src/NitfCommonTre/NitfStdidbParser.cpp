@@ -37,9 +37,6 @@ Nitf::StdidbParser::StdidbParser()
 
 bool Nitf::StdidbParser::runAllTests(Progress* pProgress, ostream& failure)
 {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : TODO: The fields sizes and types " \
-   "from the stdidb.tbl file do not match the information in the JITC's MrBIIF DFF file. (lbeck)")
-
    static const string data(
       "11SEP01"                 // FIELD1
       "1234"                    // FIELD2

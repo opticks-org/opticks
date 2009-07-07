@@ -123,7 +123,7 @@ bool Nitf::Mod26aParser::runAllTests(Progress* pProgress, ostream& failure)
    success = toDynamicObject(input4, numBytes, *treDO.get(), errorMessage);
    if (success)
    {
-      failure << "Error: Negative test with LNSTRT = data out of range failed: did not return false\n";
+      failure << "Error: Negative test with data out of range failed: did not return false\n";
       treDO->clear();
       return false;
    }
@@ -145,8 +145,7 @@ bool Nitf::Mod26aParser::toDynamicObject(istream &input, size_t numBytes, Dynami
    bool ok(true);
    bool success(true);
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Allow all blanks for classified fields " \
-   "since we do not have descriptions of them (dadkins)")
+   // Allow all blanks for these fields since we do not have descriptions of them.
    readField<string>(input, output, success, MOD26A::FIELD1, 1, errorMessage, buf, true);
    readField<unsigned int>(input, output, success, MOD26A::FIELD2, 2, errorMessage, buf, true);
    readField<double>(input, output, success, MOD26A::FIELD3, 10, errorMessage, buf, true);

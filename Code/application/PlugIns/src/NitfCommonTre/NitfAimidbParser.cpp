@@ -198,8 +198,6 @@ Nitf::TreState Nitf::AimidbParser::isTreValid(const DynamicObject& tre, ostream&
    status = MaxState(status, testTagValidBcsASet(tre, reporter,
       &numFields, AIMIDB::REPLAY, testSet, true, true, false));
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This is a one char blank field in STDI-0002.  " \
-   "For Classified versions this may be something else. (lbeck)")
    testSet.clear();
    status = MaxState(status, testTagValidBcsASet(tre, reporter,
       &numFields, AIMIDB::RESERVED1, testSet, true, true, true));
@@ -224,8 +222,6 @@ Nitf::TreState Nitf::AimidbParser::isTreValid(const DynamicObject& tre, ostream&
    status = MaxState(status, testTagValidBcsASet(tre, reporter,
       &numFields, AIMIDB::COUNTRY, testSet, true, true, false));
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This is a four char blank field in STDI-0002.  " \
-   "For Classified versions this may be something else. (lbeck)")
    testSet.clear();
    status = MaxState(status, testTagValidBcsASet(tre, reporter,
       &numFields, AIMIDB::RESERVED2, testSet, true, true, true));

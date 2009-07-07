@@ -66,11 +66,11 @@ bool Nitf::Use00aParser::runAllTests(Progress* pProgress, ostream& failure)
       "270"                     // ANGLE_TO_NORTH
       "000.0"                   // MEAN_GSD
       " "                       // RESERVED1
-      "     "                   // DYNAMIC_RANGE   error: needs to be a number
+      "     "                   // DYNAMIC_RANGE
       "   "                     // RESERVED2
       " "                       // RESERVED3
       "   "                     // RESERVED4
-      "17.04"                   // OBL_ANG
+      "90.04"                   // OBL_ANG - error: needs to be a number from [0, 90]
       "      "                  // ROLL_ANG
       "            "            // RESERVED5
       "               "         // RESERVED6
@@ -83,6 +83,33 @@ bool Nitf::Use00aParser::runAllTests(Progress* pProgress, ostream& failure)
       "00001"                   // REV_NUM
       "001"                     // N_SEG
       "      "                  // MAX_LP_SEG
+      "      "                  // RESERVED12
+      "      "                  // RESERVED13
+      "+29.5"                   // SUN_EL
+      "151.5"                   // SUN_AZ
+      );
+
+   static const string data5(
+      "270"                     // ANGLE_TO_NORTH
+      "000.0"                   // MEAN_GSD
+      " "                       // RESERVED1
+      "     "                   // DYNAMIC_RANGE - set to all spaces
+      "   "                     // RESERVED2
+      " "                       // RESERVED3
+      "   "                     // RESERVED4
+      "     "                   // OBL_ANG - set to all spaces
+      "      "                  // ROLL_ANG - set to all spaces
+      "            "            // RESERVED5
+      "               "         // RESERVED6
+      "    "                    // RESERVED7
+      " "                       // RESERVED8
+      "   "                     // RESERVED9
+      " "                       // RESERVED10
+      " "                       // RESERVED11
+      "00"                      // N_REF
+      "00001"                   // REV_NUM
+      "001"                     // N_SEG
+      "      "                  // MAX_LP_SEG - set to all spaces
       "      "                  // RESERVED12
       "      "                  // RESERVED13
       "+29.5"                   // SUN_EL
@@ -155,7 +182,7 @@ bool Nitf::Use00aParser::runAllTests(Progress* pProgress, ostream& failure)
       status = isTreValid(*treDO.get(), tmpStream);
       if (status != SUSPECT)
       {
-         failure << "Error: Negative test with LNSTRT = data out of range failed: did not return SUSPECT\n";
+         failure << "Error: Negative test with data out of range failed: did not return SUSPECT\n";
          failure << tmpStream.str();
          treDO->clear();
          return false;
@@ -165,6 +192,42 @@ bool Nitf::Use00aParser::runAllTests(Progress* pProgress, ostream& failure)
 
    treDO->clear();
 
+   // Start of test 5 - blanks in optional fields
+   errorMessage.clear();
+   stringstream input5(data5);
+   success = toDynamicObject(input5, input5.str().size(), *treDO.get(), errorMessage);
+   if (success == false)
+   {
+      failure << errorMessage;
+      return false;
+   }
+   else
+   {
+      stringstream tmpStream;
+      status = isTreValid(*treDO.get(), tmpStream);
+      if (status != VALID)
+      {
+         failure << "Error: Test with blank data failed: did not return VALID\n";
+         failure << tmpStream.str();
+         return false;
+      }
+
+      tmpStream.str(string());
+      success = fromDynamicObject(*treDO.get(), tmpStream, numBytes, errorMessage);
+      if (success == false)
+      {
+         failure << errorMessage;
+         return false;
+      }
+
+      if (input5.str() != tmpStream.str())
+      {
+         failure << "Error: Test with blank data failed: fromDynamicObject returned an unexpected value\n";
+         return false;
+      }
+   }
+
+   treDO->clear();
    return true;
 }
 
@@ -227,7 +290,7 @@ Nitf::TreState Nitf::Use00aParser::isTreValid(const DynamicObject& tre, ostream&
       &numFields, USE00A::RESERVED1, testSet, true, true, false));
 
    status = MaxState(status, testTagValueRange<unsigned int>(tre, reporter,
-      &numFields, USE00A::DYNAMIC_RANGE, 0U, 99999U));
+      &numFields, USE00A::DYNAMIC_RANGE, 0U, 99999U, true));
 
    status = MaxState(status, testTagValidBcsASet(tre, reporter,
       &numFields, USE00A::RESERVED2, testSet, true, true, false));
@@ -239,10 +302,10 @@ Nitf::TreState Nitf::Use00aParser::isTreValid(const DynamicObject& tre, ostream&
       &numFields, USE00A::RESERVED4, testSet, true, true, false));
 
    status = MaxState(status, testTagValueRange<double>(tre, reporter,
-      &numFields, USE00A::OBL_ANG, 0.0F, 90.0F));
+      &numFields, USE00A::OBL_ANG, 0.0F, 90.0F, true));
 
    status = MaxState(status, testTagValueRange<double>(tre, reporter,
-      &numFields, USE00A::ROLL_ANG, -90.0F, 90.0F));
+      &numFields, USE00A::ROLL_ANG, -90.0F, 90.0F, true));
 
    status = MaxState(status, testTagValidBcsASet(tre, reporter,
       &numFields, USE00A::RESERVED5, testSet, true, true, false));
@@ -275,7 +338,7 @@ Nitf::TreState Nitf::Use00aParser::isTreValid(const DynamicObject& tre, ostream&
       &numFields, USE00A::N_SEG, 1U, 999U));
 
    status = MaxState(status, testTagValueRange<unsigned int>(tre, reporter,
-      &numFields, USE00A::MAX_LP_SEG, 1U, 999999U));
+      &numFields, USE00A::MAX_LP_SEG, 1U, 999999U, true));
 
    status = MaxState(status, testTagValidBcsASet(tre, reporter,
       &numFields, USE00A::RESERVED12, testSet, true, true, false));
@@ -321,12 +384,15 @@ bool Nitf::Use00aParser::fromDynamicObject(const DynamicObject& input, ostream& 
       output << toString(dv_cast<unsigned int>(input.getAttribute(USE00A::ANGLE_TO_NORTH)), 3, -1);
       output << toString(dv_cast<double>(input.getAttribute(USE00A::MEAN_GSD)), 5, 1);
       output << sizeString(dv_cast<string>(input.getAttribute(USE00A::RESERVED1)), 1);
-      output << toString(dv_cast<unsigned int>(input.getAttribute(USE00A::DYNAMIC_RANGE)), 5, -1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(USE00A::DYNAMIC_RANGE)),
+         5, -1, ZERO_FILL, false, false, 3, true);
       output << sizeString(dv_cast<string>(input.getAttribute(USE00A::RESERVED2)), 3);
       output << sizeString(dv_cast<string>(input.getAttribute(USE00A::RESERVED3)), 1);
       output << sizeString(dv_cast<string>(input.getAttribute(USE00A::RESERVED4)), 3);
-      output << toString(dv_cast<double>(input.getAttribute(USE00A::OBL_ANG)), 5, 2);
-      output << toString(dv_cast<double>(input.getAttribute(USE00A::ROLL_ANG)), 6, 2, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(USE00A::OBL_ANG)),
+         5, 2, ZERO_FILL, false, false, 3, true);
+      output << toString(dv_cast<double>(input.getAttribute(USE00A::ROLL_ANG)),
+         6, 2, ZERO_FILL, POS_SIGN_TRUE, false, 3, true);
       output << sizeString(dv_cast<string>(input.getAttribute(USE00A::RESERVED5)), 12);
       output << sizeString(dv_cast<string>(input.getAttribute(USE00A::RESERVED6)), 15);
       output << sizeString(dv_cast<string>(input.getAttribute(USE00A::RESERVED7)), 4);
@@ -337,7 +403,8 @@ bool Nitf::Use00aParser::fromDynamicObject(const DynamicObject& input, ostream& 
       output << toString(dv_cast<unsigned int>(input.getAttribute(USE00A::N_REF)), 2, -1);
       output << toString(dv_cast<unsigned int>(input.getAttribute(USE00A::REV_NUM)), 5, -1);
       output << toString(dv_cast<unsigned int>(input.getAttribute(USE00A::N_SEG)), 3, -1);
-      output << toString(dv_cast<unsigned int>(input.getAttribute(USE00A::MAX_LP_SEG)), 6, -1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(USE00A::MAX_LP_SEG)),
+         6, -1, ZERO_FILL, false, false, 3, true);
       output << sizeString(dv_cast<string>(input.getAttribute(USE00A::RESERVED12)), 6);
       output << sizeString(dv_cast<string>(input.getAttribute(USE00A::RESERVED13)), 6);
       output << toString(dv_cast<double>(input.getAttribute(USE00A::SUN_EL)), 5, 1, ZERO_FILL, POS_SIGN_TRUE);

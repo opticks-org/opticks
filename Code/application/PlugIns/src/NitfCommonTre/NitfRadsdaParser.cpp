@@ -1744,8 +1744,7 @@ bool Nitf::RadsdaParser::toDynamicObject(istream& input, size_t numBytes, Dynami
    bool ok(true);
    bool success(true);
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Allow all blanks for classified fields " \
-   "since we do not have descriptions of them (dadkins)")
+   // Allow all blanks for these fields since we do not have descriptions of them.
    readField<string>(input, output, success, RADSDA::FIELD1, 7, errorMessage, buf, true);
    readField<string>(input, output, success, RADSDA::FIELD2, 9, errorMessage, buf, true);
    readField<string>(input, output, success, RADSDA::FIELD3, 8, errorMessage, buf, true);

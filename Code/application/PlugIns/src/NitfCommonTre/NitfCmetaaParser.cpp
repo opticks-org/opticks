@@ -224,7 +224,6 @@ bool Nitf::CmetaaParser::runAllTests(Progress* pProgress, ostream& failure)
       "Y"                               // VPH_COND
       );
 
-
    static const string data_error4(
       "00"                              // NUM_RELATED_TRES
       "                                                                                                               "
@@ -788,6 +787,193 @@ bool Nitf::CmetaaParser::runAllTests(Progress* pProgress, ostream& failure)
       );
 
 
+   static const string data7(
+      "00"                              // NUM_RELATED_TRES
+      // RELATED_TRES
+      "                                                                                                               "
+      "         "
+      "            "                    // RD_RPC_NO
+      "PF  "                            // IF_PROCESS
+      "X   "                            // RD_CEN_FREQ
+      "1FG  "                           // RD_MODE
+      "0001"                            // RD_PATCH_NO
+      "M1P2 "                           // CMPLX_DOMAIN
+      "LLM "                            // CMPLX_MAG_REMAP_TYPE
+      "1.94369"                         // CMPLX_LIN_SCALE
+      "0000000"                         // CMPLX_AVG_POWER
+      "00117"                           // CMPLX_LINLOG_TP
+      "UQ1"                             // CMPLX_PHASE_QUANT_FLAG
+      "00"                              // CMPLX_PHASE_QUANT_BIT_DEPTH
+      "08"                              // CMPLX_SIZE_1
+      "NC"                              // CMPLX_IC_1
+      "08"                              // CMPLX_SIZE_2
+      "NC"                              // CMPLX_IC_2
+      "00000"                           // CMPLX_IC_BPP
+      "TAY"                             // CMPLX_WEIGHT
+      "40"                              // CMPLX_AZ_SLL
+      "40"                              // CMPLX_RNG_SLL
+      "12"                              // CMPLX_AZ_TAY_NBAR
+      "12"                              // CMPLX_RNG_TAY_NBAR
+      "   "                             // CMPLX_WEIGHT_NORM
+      "G"                               // CMPLX_SIGNAL_PLANE
+      "000000"                          // IF_DC_SF_ROW
+      "000000"                          // IF_DC_SF_COL
+      "      "                          // IF_PATCH_1_ROW - set to spaces
+      "      "                          // IF_PATCH_1_COL - set to spaces
+      "      "                          // IF_PATCH_2_ROW - set to spaces
+      "      "                          // IF_PATCH_2_COL - set to spaces
+      "      "                          // IF_PATCH_3_ROW - set to spaces
+      "      "                          // IF_PATCH_3_COL - set to spaces
+      "      "                          // IF_PATCH_4_ROW - set to spaces
+      "      "                          // IF_PATCH_4_COL - set to spaces
+      "00000000"                        // IF_DC_IS_ROW
+      "00000000"                        // IF_DC_IS_COL
+      "00000000"                        // IF_IMG_ROW_DC
+      "00000000"                        // IF_IMG_COL_DC
+      "      "                          // IF_TILE_1_ROW - set to spaces
+      "      "                          // IF_TILE_1_COL - set to spaces
+      "      "                          // IF_TILE_2_ROW - set to spaces
+      "      "                          // IF_TILE_2_COL - set to spaces
+      "      "                          // IF_TILE_3_ROW - set to spaces
+      "      "                          // IF_TILE_3_COL - set to spaces
+      "      "                          // IF_TILE_4_ROW - set to spaces
+      "      "                          // IF_TILE_4_COL - set to spaces
+      "N"                               // IF_RD
+      "O"                               // IF_RGWLK
+      "N"                               // IF_KEYSTN
+      "O"                               // IF_LINSFT
+      "O"                               // IF_SUBPATCH
+      "N"                               // IF_GEODIST
+      "N"                               // IF_RGFO
+      "N"                               // IF_BEAM_COMP
+      "0009.999"                        // IF_RGRES
+      "0009.999"                        // IF_AZRES
+      "09.99999"                        // IF_RSS
+      "09.99999"                        // IF_AZSS
+      "09.99999"                        // IF_RSR
+      "09.99999"                        // IF_AZSR
+      "0000256"                         // IF_RFFT_SAMP
+      "0000256"                         // IF_AZFFT_SAMP
+      "0000400"                         // IF_RFFT_TOT
+      "0000400"                         // IF_AZFFT_TOT
+      "000000"                          // IF_SUBP_ROW
+      "000000"                          // IF_SUBP_COL
+      "0000"                            // IF_SUB_RG
+      "0000"                            // IF_SUB_AZ
+      "+"                               // IF_RFFTS
+      "+"                               // IF_AFFTS
+      "ROW_INC"                         // IF_RANGE_DATA
+      "+"                               // IF_INCPH
+      "        "                        // IF_SR_NAME1
+      "01.00000"                        // IF_SR_AMOUNT1
+      "        "                        // IF_SR_NAME2
+      "01.00000"                        // IF_SR_AMOUNT2
+      "        "                        // IF_SR_NAME3
+      "01.00000"                        // IF_SR_AMOUNT
+      "N    "                           // AF_TYPE1
+      "N    "                           // AF_TYPE2
+      "N    "                           // AF_TYPE3
+      "V"                               // POL_TR
+      "V"                               // POL_RE
+      "                                        " // POL_REFERENCE
+      "P"                               // POL
+      "Y"                               // POL_REG
+      "00.00"                           // POL_ISO_1
+      "A"                               // POL_BAL
+      "0.000000"                        // POL_BAL_MAG
+      "+0.00000"                        // POL_BAL_PHS
+      " "                               // POL_HCOMP
+      "          "                      // P_HCOMP_BASIS
+      "000000000"                       // POL_HCOMP_COEF_1
+      "000000000"                       // POL_HCOMP_COEF_2
+      "000000000"                       // POL_HCOMP_COEF_3
+      "A"                               // POL_AFCOMP
+      "               "                 // POL_SPARE_A
+      "000000000"                       // POL_SPARE_N
+      "1999OCT31"                       // T_UTC_YYYYMMMDD
+      "003045"                          // T_HHMMSSUTC
+      "123045"                          // T_HHMMSSLOCAL
+      "09999999.99"                     // CG_SRAC
+      "0000.00"                         // CG_SLANT_CONFIDENCE
+      "00000000.00"                     // CG_CROSS
+      "0000.00"                         // CG_CROSS_CONFIDENCE
+      "+010.0000"                       // CG_CAAC
+      "0.0000"                          // CG_CONE_CONFIDENCE
+      "+00.0000"                        // CG_GPSAC
+      "0.0000"                          // CG_GPSAC_CONFIDENCE
+      "+09.9999"                        // CG_SQUINT
+      "09.9999"                         // CG_GAAC
+      "0.0000"                          // CG_GAAC_CONFIDENCE
+      "09.9999"                         // CG_INCIDENT
+      "0000000"                         // CG_SLOPE
+      "+09.9999"                        // CG_TILT
+      "R"                               // CG_LD
+      "009.9999"                        // CG_NORTH
+      "0.0000"                          // CG_NORTH_CONFIDENCE
+      "000.0000"                        // CG_EAST
+      "000.0000"                        // CG_RLOS
+      "0.0000"                          // CG_LOS_CONFIDENCE
+      "009.9999"                        // CG_LAYOVER
+      "000.0000"                        // CG_SHADOW
+      "000.000"                         // CG_OPM
+      "ECEF "                           // CG_MODEL
+      "+00000000.000"                   // CG_AMPT_X
+      "+00000000.000"                   // CG_AMPT_Y
+      "+00000000.000"                   // CG_AMPT_Z
+      "000000"                          // CG_AP_CONF_XY
+      "000000"                          // CG_AP_CONF_Z
+      "+00999999.999"                   // CG_APCEN_X
+      "+00999999.999"                   // CG_APCEN_Y
+      "+00999999.999"                   // CG_APCEN_Z
+      "000.00"                          // CG_APER_CONF_XY
+      "000.00"                          // CG_APER_CONF_Z
+      "-0.999999"                       // CG_FPNUV_X
+      "+0.999999"                       // CG_FPNUV_Y
+      "+0.999999"                       // CG_FPNUV_Z
+      "-0.999999"                       // CG_IDPNUVX
+      "+0.999999"                       // CG_IDPNUVY
+      "+0.999999"                       // CG_IDPNUVZ
+      "-00999999.999"                   // CG_SCECN_X
+      "+09999999.999"                   // CG_SCECN_Y
+      "+09999999.999"                   // CG_SCECN_Z
+      "000.00"                          // CG_SC_CONF_XY
+      "000.00"                          // CG_SC_CONF_Z
+      "00000.00"                        // CG_SWWD
+      "-09999.999"                      // CG_SNVEL_X
+      "-09999.999"                      // CG_SNVEL_Y
+      "+09999.999"                      // CG_SNVEL_Z
+      "+00.000000"                      // CG_SNACC_X
+      "+00.000000"                      // CG_SNACC_Y
+      "+00.000000"                      // CG_SNACC_Z
+      "        "                        // CG_SNATT_ROLL - set to spaces
+      "        "                        // CG_SNATT_PITCH - set to spaces
+      "        "                        // CG_SNATT_YAW - set to spaces
+      "+0.000000"                       // CG_GTP_X
+      "+0.000000"                       // CG_GTP_Y
+      "+0.000000"                       // CG_GTP_Z
+
+      "NA  "                            // CG_MAP_TYPE
+
+      // start conditional:  CG_MAP_TYPE == "NA"
+      "                                                                                                               "
+      "                      "       // CG_MAP_TYPE_BLANK
+      // end conditional:  CG_MAP_TYPE == "NA"
+      "                                                                                                               "
+      "                                 "   // CG_SPARE_A
+      "0000000"                         // CA_CALPA
+      "000000000000.0"                  // WF_SRTFR
+      "000000000000.0"                  // WF_ENDFR
+      "+00.000000"                      // WF_CHRPRT
+      "0.0000000"                       // WF_WIDTH
+      "09999999999.9"                   // WF_CENFRQ
+      "00000000000.0"                   // WF_BW
+      "00000.0"                         // WF_PRF
+      "0.0000000"                       // WF_PRI
+      "099.990"                         // WF_CDP
+      "000009999"                       // WF_NUMBER_OF_PULSES
+      "Y"                               // VPH_COND
+      );
+
    FactoryResource<DynamicObject> treDO;
    size_t numBytes(0);
 
@@ -889,6 +1075,36 @@ bool Nitf::CmetaaParser::runAllTests(Progress* pProgress, ostream& failure)
 
    treDO->clear();
 
+   // Start of test 7 - blanks in optional fields
+   errorMessage.clear();
+   stringstream input7(data7);
+   success = toDynamicObject(input7, input7.str().size(), *treDO.get(), errorMessage);
+   if (success == false)
+   {
+      failure << errorMessage;
+      return false;
+   }
+   else
+   {
+      stringstream tmpStream;
+      status = isTreValid(*treDO.get(), tmpStream);
+      if (status != VALID)
+      {
+         failure << "Error: Test with blank data failed: did not return VALID\n";
+         failure << tmpStream.str();
+         return false;
+      }
+
+      tmpStream.str(string());
+      success = fromDynamicObject(*treDO.get(), tmpStream, numBytes, errorMessage);
+      if (success == false)
+      {
+         failure << errorMessage;
+         return false;
+      }
+   }
+
+   treDO->clear();
    return true;
 }
 
@@ -931,26 +1147,26 @@ bool Nitf::CmetaaParser::toDynamicObject(istream& input, size_t numBytes, Dynami
    readField<string>(input, output, success, CMETAA::CMPLX_SIGNAL_PLANE, 1, errorMessage, buf);
    readField<int>(input, output, success, CMETAA::IF_DC_SF_ROW, 6, errorMessage, buf);
    readField<int>(input, output, success, CMETAA::IF_DC_SF_COL, 6, errorMessage, buf);
-   readField<int>(input, output, success, CMETAA::IF_PATCH_1_ROW, 6, errorMessage, buf);
-   readField<int>(input, output, success, CMETAA::IF_PATCH_1_COL, 6, errorMessage, buf);
-   readField<int>(input, output, success, CMETAA::IF_PATCH_2_ROW, 6, errorMessage, buf);
-   readField<int>(input, output, success, CMETAA::IF_PATCH_2_COL, 6, errorMessage, buf);
-   readField<int>(input, output, success, CMETAA::IF_PATCH_3_ROW, 6, errorMessage, buf);
-   readField<int>(input, output, success, CMETAA::IF_PATCH_3_COL, 6, errorMessage, buf);
-   readField<int>(input, output, success, CMETAA::IF_PATCH_4_ROW, 6, errorMessage, buf);
-   readField<int>(input, output, success, CMETAA::IF_PATCH_4_COL, 6, errorMessage, buf);
+   readField<int>(input, output, success, CMETAA::IF_PATCH_1_ROW, 6, errorMessage, buf, true);
+   readField<int>(input, output, success, CMETAA::IF_PATCH_1_COL, 6, errorMessage, buf, true);
+   readField<int>(input, output, success, CMETAA::IF_PATCH_2_ROW, 6, errorMessage, buf, true);
+   readField<int>(input, output, success, CMETAA::IF_PATCH_2_COL, 6, errorMessage, buf, true);
+   readField<int>(input, output, success, CMETAA::IF_PATCH_3_ROW, 6, errorMessage, buf, true);
+   readField<int>(input, output, success, CMETAA::IF_PATCH_3_COL, 6, errorMessage, buf, true);
+   readField<int>(input, output, success, CMETAA::IF_PATCH_4_ROW, 6, errorMessage, buf, true);
+   readField<int>(input, output, success, CMETAA::IF_PATCH_4_COL, 6, errorMessage, buf, true);
    readField<int>(input, output, success, CMETAA::IF_DC_IS_ROW, 8, errorMessage, buf);
    readField<int>(input, output, success, CMETAA::IF_DC_IS_COL, 8, errorMessage, buf);
    readField<int>(input, output, success, CMETAA::IF_IMG_ROW_DC, 8, errorMessage, buf);
    readField<int>(input, output, success, CMETAA::IF_IMG_COL_DC, 8, errorMessage, buf);
-   readField<int>(input, output, success, CMETAA::IF_TILE_1_ROW, 6, errorMessage, buf);
-   readField<int>(input, output, success, CMETAA::IF_TILE_1_COL, 6, errorMessage, buf);
-   readField<int>(input, output, success, CMETAA::IF_TILE_2_ROW, 6, errorMessage, buf);
-   readField<int>(input, output, success, CMETAA::IF_TILE_2_COL, 6, errorMessage, buf);
-   readField<int>(input, output, success, CMETAA::IF_TILE_3_ROW, 6, errorMessage, buf);
-   readField<int>(input, output, success, CMETAA::IF_TILE_3_COL, 6, errorMessage, buf);
-   readField<int>(input, output, success, CMETAA::IF_TILE_4_ROW, 6, errorMessage, buf);
-   readField<int>(input, output, success, CMETAA::IF_TILE_4_COL, 6, errorMessage, buf);
+   readField<int>(input, output, success, CMETAA::IF_TILE_1_ROW, 6, errorMessage, buf, true);
+   readField<int>(input, output, success, CMETAA::IF_TILE_1_COL, 6, errorMessage, buf, true);
+   readField<int>(input, output, success, CMETAA::IF_TILE_2_ROW, 6, errorMessage, buf, true);
+   readField<int>(input, output, success, CMETAA::IF_TILE_2_COL, 6, errorMessage, buf, true);
+   readField<int>(input, output, success, CMETAA::IF_TILE_3_ROW, 6, errorMessage, buf, true);
+   readField<int>(input, output, success, CMETAA::IF_TILE_3_COL, 6, errorMessage, buf, true);
+   readField<int>(input, output, success, CMETAA::IF_TILE_4_ROW, 6, errorMessage, buf, true);
+   readField<int>(input, output, success, CMETAA::IF_TILE_4_COL, 6, errorMessage, buf, true);
    readField<string>(input, output, success, CMETAA::IF_RD, 1, errorMessage, buf);
    readField<string>(input, output, success, CMETAA::IF_RGWLK, 1, errorMessage, buf);
    readField<string>(input, output, success, CMETAA::IF_KEYSTN, 1, errorMessage, buf, true);
@@ -1085,9 +1301,9 @@ bool Nitf::CmetaaParser::toDynamicObject(istream& input, size_t numBytes, Dynami
    readField<double>(input, output, success, CMETAA::CG_SNACC_X, 10, errorMessage, buf);
    readField<double>(input, output, success, CMETAA::CG_SNACC_Y, 10, errorMessage, buf);
    readField<double>(input, output, success, CMETAA::CG_SNACC_Z, 10, errorMessage, buf);
-   readField<double>(input, output, success, CMETAA::CG_SNATT_ROLL, 8, errorMessage, buf);
-   readField<double>(input, output, success, CMETAA::CG_SNATT_PITCH, 8, errorMessage, buf);
-   readField<double>(input, output, success, CMETAA::CG_SNATT_YAW, 8, errorMessage, buf);
+   readField<double>(input, output, success, CMETAA::CG_SNATT_ROLL, 8, errorMessage, buf, true);
+   readField<double>(input, output, success, CMETAA::CG_SNATT_PITCH, 8, errorMessage, buf, true);
+   readField<double>(input, output, success, CMETAA::CG_SNATT_YAW, 8, errorMessage, buf, true);
    readField<double>(input, output, success, CMETAA::CG_GTP_X, 9, errorMessage, buf);
    readField<double>(input, output, success, CMETAA::CG_GTP_Y, 9, errorMessage, buf);
    readField<double>(input, output, success, CMETAA::CG_GTP_Z, 9, errorMessage, buf);
@@ -1365,11 +1581,11 @@ Nitf::TreState Nitf::CmetaaParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID)
    {
       stringstream tempStream;
-      TreState tmpstatus = testTagValueRange<int>(tre, tempStream, NULL, "IF_PATCH_1_ROW", 0U, 999999U);
+      TreState tmpstatus = testTagValueRange<int>(tre, tempStream, NULL, "IF_PATCH_1_ROW", 0U, 999999U, true);
       if (tmpstatus != VALID)
       {
          tmpstatus = MaxState(tmpstatus,
-            testTagValueRange<int>(tre, tempStream, NULL, "IF_PATCH_1_ROW", -99999, -99999));
+            testTagValueRange<int>(tre, tempStream, NULL, "IF_PATCH_1_ROW", -99999, -99999, true));
       }
 
       status = MaxState(tmpstatus, status);
@@ -1385,11 +1601,11 @@ Nitf::TreState Nitf::CmetaaParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID)
    {
       stringstream tempStream;
-      TreState tmpstatus = testTagValueRange<int>(tre, tempStream, NULL, "IF_PATCH_1_COL", 0U, 999999U);
+      TreState tmpstatus = testTagValueRange<int>(tre, tempStream, NULL, "IF_PATCH_1_COL", 0U, 999999U, true);
       if (tmpstatus != VALID)
       {
          tmpstatus = MaxState(tmpstatus,
-            testTagValueRange<int>(tre, tempStream, NULL, "IF_PATCH_1_COL", -99999, -99999));
+            testTagValueRange<int>(tre, tempStream, NULL, "IF_PATCH_1_COL", -99999, -99999, true));
       }
 
       status = MaxState(tmpstatus, status);
@@ -1404,11 +1620,11 @@ Nitf::TreState Nitf::CmetaaParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID)
    {
       stringstream tempStream;
-      TreState tmpstatus = testTagValueRange<int>(tre, tempStream, NULL, "IF_PATCH_2_ROW", 0U, 999999U);
+      TreState tmpstatus = testTagValueRange<int>(tre, tempStream, NULL, "IF_PATCH_2_ROW", 0U, 999999U, true);
       if (tmpstatus != VALID)
       {
          tmpstatus = MaxState(tmpstatus,
-            testTagValueRange<int>(tre, tempStream, NULL, "IF_PATCH_2_ROW", -99999, -99999));
+            testTagValueRange<int>(tre, tempStream, NULL, "IF_PATCH_2_ROW", -99999, -99999, true));
       }
 
       status = MaxState(tmpstatus, status);
@@ -1423,11 +1639,11 @@ Nitf::TreState Nitf::CmetaaParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID)
    {
       stringstream tempStream;
-      TreState tmpstatus = testTagValueRange<int>(tre, tempStream, NULL, "IF_PATCH_2_COL", 0U, 999999U);
+      TreState tmpstatus = testTagValueRange<int>(tre, tempStream, NULL, "IF_PATCH_2_COL", 0U, 999999U, true);
       if (tmpstatus != VALID)
       {
          tmpstatus = MaxState(tmpstatus,
-            testTagValueRange<int>(tre, tempStream, NULL, "IF_PATCH_2_COL", -99999, -99999));
+            testTagValueRange<int>(tre, tempStream, NULL, "IF_PATCH_2_COL", -99999, -99999, true));
       }
 
       status = MaxState(tmpstatus, status);
@@ -1442,11 +1658,11 @@ Nitf::TreState Nitf::CmetaaParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID)
    {
       stringstream tempStream;
-      TreState tmpstatus = testTagValueRange<int>(tre, tempStream, NULL, "IF_PATCH_3_ROW", 0U, 999999U);
+      TreState tmpstatus = testTagValueRange<int>(tre, tempStream, NULL, "IF_PATCH_3_ROW", 0U, 999999U, true);
       if (tmpstatus != VALID)
       {
          tmpstatus = MaxState(tmpstatus,
-            testTagValueRange<int>(tre, tempStream, NULL, "IF_PATCH_3_ROW", -99999, -99999));
+            testTagValueRange<int>(tre, tempStream, NULL, "IF_PATCH_3_ROW", -99999, -99999, true));
       }
 
       status = MaxState(tmpstatus, status);
@@ -1461,11 +1677,11 @@ Nitf::TreState Nitf::CmetaaParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID)
    {
       stringstream tempStream;
-      TreState tmpstatus = testTagValueRange<int>(tre, tempStream, NULL, "IF_PATCH_3_COL", 0U, 999999U);
+      TreState tmpstatus = testTagValueRange<int>(tre, tempStream, NULL, "IF_PATCH_3_COL", 0U, 999999U, true);
       if (tmpstatus != VALID)
       {
          tmpstatus = MaxState(tmpstatus,
-            testTagValueRange<int>(tre, tempStream, NULL, "IF_PATCH_3_COL", -99999, -99999));
+            testTagValueRange<int>(tre, tempStream, NULL, "IF_PATCH_3_COL", -99999, -99999, true));
       }
 
       status = MaxState(tmpstatus, status);
@@ -1480,11 +1696,11 @@ Nitf::TreState Nitf::CmetaaParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID)
    {
       stringstream tempStream;
-      TreState tmpstatus = testTagValueRange<int>(tre, tempStream, NULL, "IF_PATCH_4_ROW", 0U, 999999U);
+      TreState tmpstatus = testTagValueRange<int>(tre, tempStream, NULL, "IF_PATCH_4_ROW", 0U, 999999U, true);
       if (tmpstatus != VALID)
       {
          tmpstatus = MaxState(tmpstatus,
-            testTagValueRange<int>(tre, tempStream, NULL, "IF_PATCH_4_ROW", -99999, -99999));
+            testTagValueRange<int>(tre, tempStream, NULL, "IF_PATCH_4_ROW", -99999, -99999, true));
       }
 
       status = MaxState(tmpstatus, status);
@@ -1499,11 +1715,11 @@ Nitf::TreState Nitf::CmetaaParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID)
    {
       stringstream tempStream;
-      TreState tmpstatus = testTagValueRange<int>(tre, tempStream, NULL, "IF_PATCH_4_COL", 0U, 999999U);
+      TreState tmpstatus = testTagValueRange<int>(tre, tempStream, NULL, "IF_PATCH_4_COL", 0U, 999999U, true);
       if (tmpstatus != VALID)
       {
          tmpstatus = MaxState(tmpstatus,
-            testTagValueRange<int>(tre, tempStream, NULL, "IF_PATCH_4_COL", -99999, -99999));
+            testTagValueRange<int>(tre, tempStream, NULL, "IF_PATCH_4_COL", -99999, -99999, true));
       }
 
       status = MaxState(tmpstatus, status);
@@ -1523,11 +1739,11 @@ Nitf::TreState Nitf::CmetaaParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID)
    {
       stringstream tempStream;
-      TreState tmpstatus = testTagValueRange<int>(tre, tempStream, NULL, "IF_TILE_1_ROW", 0U, 999999U);
+      TreState tmpstatus = testTagValueRange<int>(tre, tempStream, NULL, "IF_TILE_1_ROW", 0U, 999999U, true);
       if (tmpstatus != VALID)
       {
          tmpstatus = MaxState(tmpstatus,
-            testTagValueRange<int>(tre, tempStream, NULL, "IF_TILE_1_ROW", -99999, -99999));
+            testTagValueRange<int>(tre, tempStream, NULL, "IF_TILE_1_ROW", -99999, -99999, true));
       }
 
       status = MaxState(tmpstatus, status);
@@ -1542,11 +1758,11 @@ Nitf::TreState Nitf::CmetaaParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID)
    {
       stringstream tempStream;
-      TreState tmpstatus = testTagValueRange<int>(tre, tempStream, NULL, "IF_TILE_1_COL", 0U, 999999U);
+      TreState tmpstatus = testTagValueRange<int>(tre, tempStream, NULL, "IF_TILE_1_COL", 0U, 999999U, true);
       if (tmpstatus != VALID)
       {
          tmpstatus = MaxState(tmpstatus,
-            testTagValueRange<int>(tre, tempStream, NULL, "IF_TILE_1_COL", -99999, -99999));
+            testTagValueRange<int>(tre, tempStream, NULL, "IF_TILE_1_COL", -99999, -99999, true));
       }
 
       status = MaxState(tmpstatus, status);
@@ -1561,11 +1777,11 @@ Nitf::TreState Nitf::CmetaaParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID)
    {
       stringstream tempStream;
-      TreState tmpstatus = testTagValueRange<int>(tre, tempStream, NULL, "IF_TILE_2_ROW", 0U, 999999U);
+      TreState tmpstatus = testTagValueRange<int>(tre, tempStream, NULL, "IF_TILE_2_ROW", 0U, 999999U, true);
       if (tmpstatus != VALID)
       {
          tmpstatus = MaxState(tmpstatus,
-            testTagValueRange<int>(tre, tempStream, NULL, "IF_TILE_2_ROW", -99999, -99999));
+            testTagValueRange<int>(tre, tempStream, NULL, "IF_TILE_2_ROW", -99999, -99999, true));
       }
 
       status = MaxState(tmpstatus, status);
@@ -1580,11 +1796,11 @@ Nitf::TreState Nitf::CmetaaParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID)
    {
       stringstream tempStream;
-      TreState tmpstatus = testTagValueRange<int>(tre, tempStream, NULL, "IF_TILE_2_COL", 0U, 999999U);
+      TreState tmpstatus = testTagValueRange<int>(tre, tempStream, NULL, "IF_TILE_2_COL", 0U, 999999U, true);
       if (tmpstatus != VALID)
       {
          tmpstatus = MaxState(tmpstatus,
-            testTagValueRange<int>(tre, tempStream, NULL, "IF_TILE_2_COL", -99999, -99999));
+            testTagValueRange<int>(tre, tempStream, NULL, "IF_TILE_2_COL", -99999, -99999, true));
       }
 
       status = MaxState(tmpstatus, status);
@@ -1599,11 +1815,11 @@ Nitf::TreState Nitf::CmetaaParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID)
    {
       stringstream tempStream;
-      TreState tmpstatus = testTagValueRange<int>(tre, tempStream, NULL, "IF_TILE_3_ROW", 0U, 999999U);
+      TreState tmpstatus = testTagValueRange<int>(tre, tempStream, NULL, "IF_TILE_3_ROW", 0U, 999999U, true);
       if (tmpstatus != VALID)
       {
          tmpstatus = MaxState(tmpstatus,
-            testTagValueRange<int>(tre, tempStream, NULL, "IF_TILE_3_ROW", -99999, -99999));
+            testTagValueRange<int>(tre, tempStream, NULL, "IF_TILE_3_ROW", -99999, -99999, true));
       }
 
       status = MaxState(tmpstatus, status);
@@ -1618,11 +1834,11 @@ Nitf::TreState Nitf::CmetaaParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID)
    {
       stringstream tempStream;
-      TreState tmpstatus = testTagValueRange<int>(tre, tempStream, NULL, "IF_TILE_3_COL", 0U, 999999U);
+      TreState tmpstatus = testTagValueRange<int>(tre, tempStream, NULL, "IF_TILE_3_COL", 0U, 999999U, true);
       if (tmpstatus != VALID)
       {
          tmpstatus = MaxState(tmpstatus,
-            testTagValueRange<int>(tre, tempStream, NULL, "IF_TILE_3_COL", -99999, -99999));
+            testTagValueRange<int>(tre, tempStream, NULL, "IF_TILE_3_COL", -99999, -99999, true));
       }
 
       status = MaxState(tmpstatus, status);
@@ -1637,11 +1853,11 @@ Nitf::TreState Nitf::CmetaaParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID)
    {
       stringstream tempStream;
-      TreState tmpstatus = testTagValueRange<int>(tre, tempStream, NULL, "IF_TILE_4_ROW", 0U, 999999U);
+      TreState tmpstatus = testTagValueRange<int>(tre, tempStream, NULL, "IF_TILE_4_ROW", 0U, 999999U, true);
       if (tmpstatus != VALID)
       {
          tmpstatus = MaxState(tmpstatus,
-            testTagValueRange<int>(tre, tempStream, NULL, "IF_TILE_4_ROW", -99999, -99999));
+            testTagValueRange<int>(tre, tempStream, NULL, "IF_TILE_4_ROW", -99999, -99999, true));
       }
 
       status = MaxState(tmpstatus, status);
@@ -1656,11 +1872,11 @@ Nitf::TreState Nitf::CmetaaParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID)
    {
       stringstream tempStream;
-      TreState tmpstatus = testTagValueRange<int>(tre, tempStream, NULL, "IF_TILE_4_COL", 0U, 999999U);
+      TreState tmpstatus = testTagValueRange<int>(tre, tempStream, NULL, "IF_TILE_4_COL", 0U, 999999U, true);
       if (tmpstatus != VALID)
       {
          tmpstatus = MaxState(tmpstatus,
-            testTagValueRange<int>(tre, tempStream, NULL, "IF_TILE_4_COL", -99999, -99999));
+            testTagValueRange<int>(tre, tempStream, NULL, "IF_TILE_4_COL", -99999, -99999, true));
       }
 
       status = MaxState(tmpstatus, status);
@@ -2142,11 +2358,11 @@ Nitf::TreState Nitf::CmetaaParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID)
    {
       stringstream tempStream;
-      TreState tmpstatus = testTagValueRange<double>(tre, tempStream, NULL, "CG_SNATT_ROLL", -179.999, 179.999);
+      TreState tmpstatus = testTagValueRange<double>(tre, tempStream, NULL, "CG_SNATT_ROLL", -179.999, 179.999, true);
       if (tmpstatus != VALID)
       {
          tmpstatus = MaxState(tmpstatus,
-            testTagValueRange<double>(tre, tempStream, NULL, "CG_SNATT_ROLL", -9999999, -9999999));
+            testTagValueRange<double>(tre, tempStream, NULL, "CG_SNATT_ROLL", -9999999, -9999999, true));
       }
 
       status = MaxState(tmpstatus, status);
@@ -2161,11 +2377,11 @@ Nitf::TreState Nitf::CmetaaParser::isTreValid(const DynamicObject& tre, ostream&
    if (status != INVALID)
    {
       stringstream tempStream;
-      TreState tmpstatus = testTagValueRange<double>(tre, tempStream, NULL, "CG_SNATT_PITCH", -179.999, 179.999);
+      TreState tmpstatus = testTagValueRange<double>(tre, tempStream, NULL, "CG_SNATT_PITCH", -179.999, 179.999, true);
       if (tmpstatus != VALID)
       {
          tmpstatus = MaxState(tmpstatus,
-            testTagValueRange<double>(tre, tempStream, NULL, "CG_SNATT_ROLL", -9999999, -9999999));
+            testTagValueRange<double>(tre, tempStream, NULL, "CG_SNATT_ROLL", -9999999, -9999999, true));
       }
 
       status = MaxState(tmpstatus, status);
@@ -2177,7 +2393,8 @@ Nitf::TreState Nitf::CmetaaParser::isTreValid(const DynamicObject& tre, ostream&
       ++numFields;
    }
 
-   status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, "CG_SNATT_YAW", -359.999, 359.999));
+   status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, "CG_SNATT_YAW",
+      -359.999, 359.999, true));
    status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, "CG_GTP_X", -1.0, 1.0));
    status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, "CG_GTP_Y", -1.0, 1.0));
    status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, "CG_GTP_Z", -1.0, 1.0));
@@ -2360,26 +2577,42 @@ bool Nitf::CmetaaParser::fromDynamicObject(const DynamicObject& input, ostream& 
       output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::CMPLX_SIGNAL_PLANE)), 1);
       output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_DC_SF_ROW)), 6);
       output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_DC_SF_COL)), 6);
-      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_PATCH_1_ROW)), 6);
-      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_PATCH_1_COL)), 6);
-      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_PATCH_2_ROW)), 6);
-      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_PATCH_2_COL)), 6);
-      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_PATCH_3_ROW)), 6);
-      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_PATCH_3_COL)), 6);
-      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_PATCH_4_ROW)), 6);
-      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_PATCH_4_COL)), 6);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_PATCH_1_ROW)), 6,
+         -1, ZERO_FILL, false, false, 3, true);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_PATCH_1_COL)), 6,
+         -1, ZERO_FILL, false, false, 3, true);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_PATCH_2_ROW)), 6,
+         -1, ZERO_FILL, false, false, 3, true);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_PATCH_2_COL)), 6,
+         -1, ZERO_FILL, false, false, 3, true);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_PATCH_3_ROW)), 6,
+         -1, ZERO_FILL, false, false, 3, true);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_PATCH_3_COL)), 6,
+         -1, ZERO_FILL, false, false, 3, true);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_PATCH_4_ROW)), 6,
+         -1, ZERO_FILL, false, false, 3, true);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_PATCH_4_COL)), 6,
+         -1, ZERO_FILL, false, false, 3, true);
       output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_DC_IS_ROW)), 8);
       output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_DC_IS_COL)), 8);
       output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_IMG_ROW_DC)), 8);
       output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_IMG_COL_DC)), 8);
-      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_TILE_1_ROW)), 6);
-      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_TILE_1_COL)), 6);
-      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_TILE_2_ROW)), 6);
-      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_TILE_2_COL)), 6);
-      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_TILE_3_ROW)), 6);
-      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_TILE_3_COL)), 6);
-      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_TILE_4_ROW)), 6);
-      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_TILE_4_COL)), 6);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_TILE_1_ROW)), 6,
+         -1, ZERO_FILL, false, false, 3, true);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_TILE_1_COL)), 6,
+         -1, ZERO_FILL, false, false, 3, true);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_TILE_2_ROW)), 6,
+         -1, ZERO_FILL, false, false, 3, true);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_TILE_2_COL)), 6,
+         -1, ZERO_FILL, false, false, 3, true);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_TILE_3_ROW)), 6,
+         -1, ZERO_FILL, false, false, 3, true);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_TILE_3_COL)), 6,
+         -1, ZERO_FILL, false, false, 3, true);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_TILE_4_ROW)), 6,
+         -1, ZERO_FILL, false, false, 3, true);
+      output << toString(dv_cast<int>(input.getAttribute(CMETAA::IF_TILE_4_COL)), 6,
+         -1, ZERO_FILL, false, false, 3, true);
       output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::IF_RD)), 1);
       output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::IF_RGWLK)), 1);
       output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::IF_KEYSTN)), 1);
@@ -2501,9 +2734,12 @@ bool Nitf::CmetaaParser::fromDynamicObject(const DynamicObject& input, ostream& 
       output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_SNACC_X)), 10, 6, ZERO_FILL, POS_SIGN_TRUE);
       output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_SNACC_Y)), 10, 6, ZERO_FILL, POS_SIGN_TRUE);
       output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_SNACC_Z)), 10, 6, ZERO_FILL, POS_SIGN_TRUE);
-      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_SNATT_ROLL)), 8, 3, ZERO_FILL, POS_SIGN_TRUE);
-      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_SNATT_PITCH)), 8, 3, ZERO_FILL, POS_SIGN_TRUE);
-      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_SNATT_YAW)), 8, 3, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_SNATT_ROLL)), 8, 3, ZERO_FILL, POS_SIGN_TRUE,
+         false, 3, true);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_SNATT_PITCH)), 8, 3, ZERO_FILL, POS_SIGN_TRUE,
+         false, 3, true);
+      output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_SNATT_YAW)), 8, 3, ZERO_FILL, POS_SIGN_TRUE,
+         false, 3, true);
       output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_GTP_X)), 9, 6, ZERO_FILL, POS_SIGN_TRUE);
       output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_GTP_Y)), 9, 6, ZERO_FILL, POS_SIGN_TRUE);
       output << toString(dv_cast<double>(input.getAttribute(CMETAA::CG_GTP_Z)), 9, 6, ZERO_FILL, POS_SIGN_TRUE);

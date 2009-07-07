@@ -199,7 +199,7 @@ bool Nitf::Mpd26aParser::runAllTests(Progress* pProgress, ostream& failure)
       status = isTreValid(*treDO.get(), tmpStream);
       if (status != SUSPECT)
       {
-         failure << "Error: Negative test with LNSTRT = data out of range failed: did not return SUSPECT\n";
+         failure << "Error: Negative test with data out of range failed: did not return SUSPECT\n";
          failure << tmpStream.str();
          treDO->clear();
          return false;
@@ -219,8 +219,7 @@ bool Nitf::Mpd26aParser::toDynamicObject(istream& input, size_t numBytes, Dynami
    bool ok(true);
    bool success(true);
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Allow all blanks for classified fields " \
-   "since we do not have descriptions of them (dadkins)")
+   // Allow all blanks for these fields since we do not have descriptions of them.
    readField<string>(input, output, success, MPD26A::FIELD1, 11, errorMessage, buf, true);
    readField<string>(input, output, success, MPD26A::FIELD2, 2, errorMessage, buf, true);
    readField<unsigned int>(input, output, success, MPD26A::FIELD3, 7, errorMessage, buf, true);

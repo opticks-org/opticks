@@ -77,6 +77,27 @@ bool Nitf::ExoptaParser::runAllTests(Progress* pProgress, ostream& failure)
       "999.9"                   // SUN_AZ
       );
 
+   static const string data5(
+      "359"                     // ANGLE_TO_NORTH
+      "999.9"                   // MEAN_GSD
+      "1"                       // RESERVED
+      "65535"                   // DYNAMIC_RANGE
+      "       "                 // RESERVED2
+      "90.00"                   // OBL_ANG
+      "-90.00"                  // ROLL_ANG
+      "Prime_id    "            // PRIME_ID
+      "Prime_be       "         // PRIME_BE
+      "     "                   // RESERVED3
+      "250"                     // N_SEC
+      "  "                      // RESERVED4
+      "0000001"                 // RESERVED5
+      "999"                     // N_SEG
+      "199999"                  // MAX_LP_SEG
+      "            "            // RESERVED6
+      "-90.0"                   // SUN_EL
+      "999.9"                   // SUN_AZ
+      );
+
    FactoryResource<DynamicObject> treDO;
    size_t numBytes(0);
 
@@ -143,7 +164,7 @@ bool Nitf::ExoptaParser::runAllTests(Progress* pProgress, ostream& failure)
       status = isTreValid(*treDO.get(), tmpStream);
       if (status != SUSPECT)
       {
-         failure << "Error: Negative test with LNSTRT = data out of range failed: did not return SUSPECT\n";
+         failure << "Error: Negative test with data out of range failed: did not return SUSPECT\n";
          failure << tmpStream.str();
          treDO->clear();
          return false;
@@ -153,7 +174,43 @@ bool Nitf::ExoptaParser::runAllTests(Progress* pProgress, ostream& failure)
 
    treDO->clear();
 
-   return (status != INVALID);
+   // Start of test 5 - blanks in optional fields
+   errorMessage.clear();
+   stringstream input5(data5);
+   success = toDynamicObject(input5, input5.str().size(), *treDO.get(), errorMessage);
+   if (success == false)
+   {
+      failure << errorMessage;
+      return false;
+   }
+   else
+   {
+      stringstream tmpStream;
+      status = isTreValid(*treDO.get(), tmpStream);
+      if (status != VALID)
+      {
+         failure << "Error: Test with blank data failed: did not return VALID\n";
+         failure << tmpStream.str();
+         return false;
+      }
+
+      tmpStream.str(string());
+      success = fromDynamicObject(*treDO.get(), tmpStream, numBytes, errorMessage);
+      if (success == false)
+      {
+         failure << errorMessage;
+         return false;
+      }
+
+      if (input5.str() != tmpStream.str())
+      {
+         failure << "Error: Test with blank data failed: fromDynamicObject returned an unexpected value\n";
+         return false;
+      }
+   }
+
+   treDO->clear();
+   return true;
 }
 
 bool Nitf::ExoptaParser::toDynamicObject(istream& input, size_t numBytes, DynamicObject& output,
@@ -200,10 +257,10 @@ Nitf::TreState Nitf::ExoptaParser::isTreValid(const DynamicObject& tre, ostream&
    unsigned int numFields = 0;
 
    status = MaxState(status, testTagValueRange<unsigned int>(tre, reporter,
-      &numFields, EXOPTA::ANGLE_TO_NORTH, 0U, 359U));
+      &numFields, EXOPTA::ANGLE_TO_NORTH, 0U, 359U, true));
 
    status = MaxState(status, testTagValueRange<double>(tre, reporter,
-      &numFields, EXOPTA::MEAN_GSD, 0.0F, 999.9F));
+      &numFields, EXOPTA::MEAN_GSD, 0.0F, 999.9F, true));
 
    testSet.clear();
    testSet.insert("1");
@@ -211,17 +268,17 @@ Nitf::TreState Nitf::ExoptaParser::isTreValid(const DynamicObject& tre, ostream&
       &numFields, EXOPTA::RESERVED, testSet, true, true, false));
 
    status = MaxState(status, testTagValueRange<unsigned int>(tre, reporter,
-      &numFields, EXOPTA::DYNAMIC_RANGE, 0U, 65535U));
+      &numFields, EXOPTA::DYNAMIC_RANGE, 0U, 65535U, true));
 
    testSet.clear();
    status = MaxState(status, testTagValidBcsASet(tre, reporter,
       &numFields, EXOPTA::RESERVED2, testSet, true, true, false));
 
    status = MaxState(status, testTagValueRange<double>(tre, reporter,
-      &numFields, EXOPTA::OBL_ANG, 0.0F, 90.0F));
+      &numFields, EXOPTA::OBL_ANG, 0.0F, 90.0F, true));
 
    status = MaxState(status, testTagValueRange<double>(tre, reporter,
-      &numFields, EXOPTA::ROLL_ANG, -90.1F, 90.1F));
+      &numFields, EXOPTA::ROLL_ANG, -90.1F, 90.1F, true));
 
    status = MaxState(status, testTagValidBcsASet(tre, reporter,
       &numFields, EXOPTA::PRIME_ID, testSet, true, true, false));
@@ -245,7 +302,7 @@ Nitf::TreState Nitf::ExoptaParser::isTreValid(const DynamicObject& tre, ostream&
       &numFields, EXOPTA::N_SEG, 1U, 999U));
 
    status = MaxState(status, testTagValueRange<unsigned int>(tre, reporter,
-      &numFields, EXOPTA::MAX_LP_SEG, 1U, 199999U));
+      &numFields, EXOPTA::MAX_LP_SEG, 1U, 199999U, true));
 
    status = MaxState(status, testTagValidBcsASet(tre, reporter,
       &numFields, EXOPTA::RESERVED6, testSet, true, true, false));
@@ -285,17 +342,22 @@ bool Nitf::ExoptaParser::fromDynamicObject(const DynamicObject& input, ostream& 
 
    try
    {
-      output << toString(dv_cast<unsigned int>(input.getAttribute(EXOPTA::ANGLE_TO_NORTH)), 3, -1);
-      output << toString(dv_cast<double>(input.getAttribute(EXOPTA::MEAN_GSD)), 5, 1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(EXOPTA::ANGLE_TO_NORTH)), 3, -1,
+         ZERO_FILL, false, false, 3, true);
+      output << toString(dv_cast<double>(input.getAttribute(EXOPTA::MEAN_GSD)), 5, 1,
+         ZERO_FILL, false, false, 3, true);
 
       // RESERVED has a fixed value of "1" so hard code it for now
       // output << sizeString( dv_cast<string>(input.getAttribute (EXOPTA::RESERVED)), 1);
       output << "1";
 
-      output << toString(dv_cast<unsigned int>(input.getAttribute(EXOPTA::DYNAMIC_RANGE)), 5, -1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(EXOPTA::DYNAMIC_RANGE)), 5, -1,
+         ZERO_FILL, false, false, 3, true);
       output << sizeString(dv_cast<string>(input.getAttribute(EXOPTA::RESERVED2)), 7);
-      output << toString(dv_cast<double>(input.getAttribute(EXOPTA::OBL_ANG)), 5, 2);
-      output << toString(dv_cast<double>(input.getAttribute(EXOPTA::ROLL_ANG)), 6, 2, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(EXOPTA::OBL_ANG)), 5, 2,
+         ZERO_FILL, false, false, 3, true);
+      output << toString(dv_cast<double>(input.getAttribute(EXOPTA::ROLL_ANG)), 6, 2,
+         ZERO_FILL, POS_SIGN_TRUE, false, 3, true);
       output << sizeString(dv_cast<string>(input.getAttribute(EXOPTA::PRIME_ID)), 12);
       output << sizeString(dv_cast<string>(input.getAttribute(EXOPTA::PRIME_BE)), 15);
       output << sizeString(dv_cast<string>(input.getAttribute(EXOPTA::RESERVED3)), 5);
@@ -307,7 +369,8 @@ bool Nitf::ExoptaParser::fromDynamicObject(const DynamicObject& input, ostream& 
       output << "0000001";    // RESERVED5 has a fixed value of "0000001"
 
       output << toString(dv_cast<unsigned int>(input.getAttribute(EXOPTA::N_SEG)), 3, -1);
-      output << toString(dv_cast<unsigned int>(input.getAttribute(EXOPTA::MAX_LP_SEG)), 6, -1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(EXOPTA::MAX_LP_SEG)), 6, -1,
+         ZERO_FILL, false, false, 3, true);
       output << sizeString(dv_cast<string>(input.getAttribute(EXOPTA::RESERVED6)), 12);
       output << toString(dv_cast<double>(input.getAttribute(EXOPTA::SUN_EL)), 5, 1, ZERO_FILL, POS_SIGN_TRUE);
       output << toString(dv_cast<double>(input.getAttribute(EXOPTA::SUN_AZ)), 5, 1);

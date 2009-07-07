@@ -80,6 +80,28 @@ bool Nitf::ExpltaParser::runAllTests(Progress* pProgress, ostream& failure)
       "        "                  // RESERVED7
       );
 
+   static const string data5(
+      "090"                       // ANGLE_TO_NORTH
+      "-10"                       // SQUINT_ANGLE
+      "1GP"                       // MODE
+      "                "          // RESERVED1
+      "45"                        // GRAZE_ANG
+      "30"                        // SLOPE_ANG
+      "HV"                        // POLAR
+      "00020"                     // NSAMP
+      "0"                         // RESERVED2
+      " "                         // SEQ_NUM - set to spaces
+      "TARGET ID   "              // PRIME_ID
+      "ENCY ID        "           // PRIME_BE
+      "0"                         // RESERVED3
+      "  "                        // N_SEC - set to spaces
+      "  "                        // IPR - set to spaces
+      "01"                        // RESERVED4
+      "  "                        // RESERVED5
+      "00000"                     // RESERVED6
+      "        "                  // RESERVED7
+      );
+
    FactoryResource<DynamicObject> treDO;
    size_t numBytes(0);
 
@@ -158,7 +180,43 @@ bool Nitf::ExpltaParser::runAllTests(Progress* pProgress, ostream& failure)
 
    treDO->clear();
 
-   return (status != INVALID);
+   // Start of test 5 - blanks in optional fields
+   errorMessage.clear();
+   stringstream input5(data5);
+   success = toDynamicObject(input5, input5.str().size(), *treDO.get(), errorMessage);
+   if (success == false)
+   {
+      failure << errorMessage;
+      return false;
+   }
+   else
+   {
+      stringstream tmpStream;
+      status = isTreValid(*treDO.get(), tmpStream);
+      if (status != VALID)
+      {
+         failure << "Error: Test with blank data failed: did not return VALID\n";
+         failure << tmpStream.str();
+         return false;
+      }
+
+      tmpStream.str(string());
+      success = fromDynamicObject(*treDO.get(), tmpStream, numBytes, errorMessage);
+      if (success == false)
+      {
+         failure << errorMessage;
+         return false;
+      }
+
+      if (input5.str() != tmpStream.str())
+      {
+         failure << "Error: Test with blank data failed: fromDynamicObject returned an unexpected value\n";
+         return false;
+      }
+   }
+
+   treDO->clear();
+   return true;
 }
 
 Nitf::TreState Nitf::ExpltaParser::isTreValid(const DynamicObject& tre, ostream& reporter) const
@@ -199,7 +257,7 @@ Nitf::TreState Nitf::ExpltaParser::isTreValid(const DynamicObject& tre, ostream&
       &numFields, EXPLTA::RESERVED2, 0U, 0U));
 
    status = MaxState(status, testTagValueRange<int>(tre, reporter,
-      &numFields, EXPLTA::SEQ_NUM, 0U, 6U));
+      &numFields, EXPLTA::SEQ_NUM, 0U, 6U, true));
 
    testSet.clear();
    status = MaxState(status, testTagValidBcsASet(tre, reporter,
@@ -213,10 +271,10 @@ Nitf::TreState Nitf::ExpltaParser::isTreValid(const DynamicObject& tre, ostream&
       &numFields, EXPLTA::RESERVED3, 0U, 0U));
 
    status = MaxState(status, testTagValueRange<int>(tre, reporter,
-      &numFields, EXPLTA::N_SEC, 0U, 10U));
+      &numFields, EXPLTA::N_SEC, 0U, 10U, true));
 
    status = MaxState(status, testTagValueRange<int>(tre, reporter,
-      &numFields, EXPLTA::IPR, 0U, 99U));
+      &numFields, EXPLTA::IPR, 0U, 99U, true));
 
    status = MaxState(status, testTagValueRange<int>(tre, reporter,
       &numFields, EXPLTA::RESERVED4, 1U, 1U));
@@ -309,12 +367,12 @@ bool Nitf::ExpltaParser::fromDynamicObject(const DynamicObject& input, ostream& 
       output << sizeString(dv_cast<string>(input.getAttribute(EXPLTA::POLAR)), 2);
       output << toString(dv_cast<int>(input.getAttribute(EXPLTA::NSAMP)), 5);
       output << toString(dv_cast<int>(input.getAttribute(EXPLTA::RESERVED2)), 1);
-      output << toString(dv_cast<int>(input.getAttribute(EXPLTA::SEQ_NUM)), 1);
+      output << toString(dv_cast<int>(input.getAttribute(EXPLTA::SEQ_NUM)), 1, -1, ZERO_FILL, false, false, 3, true);
       output << sizeString(dv_cast<string>(input.getAttribute(EXPLTA::PRIME_ID)), 12);
       output << sizeString(dv_cast<string>(input.getAttribute(EXPLTA::PRIME_BE)), 15);
       output << toString(dv_cast<int>(input.getAttribute(EXPLTA::RESERVED3)), 1);
-      output << toString(dv_cast<int>(input.getAttribute(EXPLTA::N_SEC)), 2);
-      output << toString(dv_cast<int>(input.getAttribute(EXPLTA::IPR)), 2);
+      output << toString(dv_cast<int>(input.getAttribute(EXPLTA::N_SEC)), 2, -1, ZERO_FILL, false, false, 3, true);
+      output << toString(dv_cast<int>(input.getAttribute(EXPLTA::IPR)), 2, -1, ZERO_FILL, false, false, 3, true);
       output << toString(dv_cast<int>(input.getAttribute(EXPLTA::RESERVED4)), 2);
       output << sizeString(dv_cast<string>(input.getAttribute(EXPLTA::RESERVED5)), 2);
       output << toString(dv_cast<int>(input.getAttribute(EXPLTA::RESERVED6)), 5);

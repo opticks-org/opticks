@@ -82,6 +82,30 @@ bool Nitf::PatchaParser::runAllTests(Progress* pProgress, ostream& failure)
       "0.850000"             // SHEAR
       );
 
+   static const string data5(
+      "0001"                 // PAT_NO
+      "1"                    // LAST_PAT_FLAG
+      "1234567"              // LNSTRT
+      "1234567"              // LNSTOP
+      "12345"                // AZL
+      "     "                // NVL - set to spaces
+      "   "                  // FVL - set to spaces
+      "08160"                // NPIXEL
+      "07889"                // FVPIX
+      "   "                  // FRAME - set to spaces
+      "86399.99"             // UTC
+      "359.999"              // SHEAD
+      "       "              // GRAVITY - set to spaces
+      "+9999"                // INS_V_NC
+      "+9999"                // INS_V_EC
+      "-9999"                // INS_V_DC
+      "        "             // OFFLAT - set to spaces
+      "        "             // OFFLONG - set to spaces
+      "359"                  // TRACK
+      "120.00"               // GSWEEP
+      "        "             // SHEAR - set to spaces
+      );
+
    FactoryResource<DynamicObject> treDO;
    size_t numBytes(0);
 
@@ -160,7 +184,43 @@ bool Nitf::PatchaParser::runAllTests(Progress* pProgress, ostream& failure)
 
    treDO->clear();
 
-   return (status != INVALID);
+   // Start of test 5 - blanks in optional fields
+   errorMessage.clear();
+   stringstream input5(data5);
+   success = toDynamicObject(input5, input5.str().size(), *treDO.get(), errorMessage);
+   if (success == false)
+   {
+      failure << errorMessage;
+      return false;
+   }
+   else
+   {
+      stringstream tmpStream;
+      status = isTreValid(*treDO.get(), tmpStream);
+      if (status != VALID)
+      {
+         failure << "Error: Test with blank data failed: did not return VALID\n";
+         failure << tmpStream.str();
+         return false;
+      }
+
+      tmpStream.str(string());
+      success = fromDynamicObject(*treDO.get(), tmpStream, numBytes, errorMessage);
+      if (success == false)
+      {
+         failure << errorMessage;
+         return false;
+      }
+
+      if (input5.str() != tmpStream.str())
+      {
+         failure << "Error: Test with blank data failed: fromDynamicObject returned an unexpected value\n";
+         return false;
+      }
+   }
+
+   treDO->clear();
+   return true;
 }
 
 
@@ -217,22 +277,23 @@ Nitf::TreState Nitf::PatchaParser::isTreValid(const DynamicObject& tre, ostream&
    status = MaxState(status, testTagValueRange<int>(tre, reporter, &numFields, PATCHA::LNSTRT, 1, 9999999));
    status = MaxState(status, testTagValueRange<int>(tre, reporter, &numFields, PATCHA::LNSTOP, 20, 9999999));
    status = MaxState(status, testTagValueRange<int>(tre, reporter, &numFields, PATCHA::AZL, 20, 99999));
-   status = MaxState(status, testTagValueRange<int>(tre, reporter, &numFields, PATCHA::NVL, 20, 99999));
-   status = MaxState(status, testTagValueRange<int>(tre, reporter, &numFields, PATCHA::FVL, 1, 681));
+   status = MaxState(status, testTagValueRange<int>(tre, reporter, &numFields, PATCHA::NVL, 20, 99999, true));
+   status = MaxState(status, testTagValueRange<int>(tre, reporter, &numFields, PATCHA::FVL, 1, 681, true));
    status = MaxState(status, testTagValueRange<int>(tre, reporter, &numFields, PATCHA::NPIXEL, 170, 8160));
    status = MaxState(status, testTagValueRange<int>(tre, reporter, &numFields, PATCHA::FVPIX, 1, 7889));
-   status = MaxState(status, testTagValueRange<int>(tre, reporter, &numFields, PATCHA::FRAME, 1, 512));
+   status = MaxState(status, testTagValueRange<int>(tre, reporter, &numFields, PATCHA::FRAME, 1, 512, true));
    status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, PATCHA::UTC, 0.0, 86399.99));
    status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, PATCHA::SHEAD, 0.0, 359.999));
-   status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, PATCHA::GRAVITY, 31.0, 33.9999));
+   status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields,
+      PATCHA::GRAVITY, 31.0, 33.9999, true));
    status = MaxState(status, testTagValueRange<int>(tre, reporter, &numFields, PATCHA::INS_V_NC, -9999, 9999));
    status = MaxState(status, testTagValueRange<int>(tre, reporter, &numFields, PATCHA::INS_V_EC, -9999, 9999));
    status = MaxState(status, testTagValueRange<int>(tre, reporter, &numFields, PATCHA::INS_V_DC, -9999, 9999));
-   status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, PATCHA::OFFLAT, -80.0, 80.0));
-   status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, PATCHA::OFFLONG, -80.0, 80.0));
+   status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, PATCHA::OFFLAT, -80.0, 80.0, true));
+   status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, PATCHA::OFFLONG, -80.0, 80.0, true));
    status = MaxState(status, testTagValueRange<int>(tre, reporter, &numFields, PATCHA::TRACK, 0, 359));
    status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, PATCHA::GSWEEP, 0.0, 120.00));
-   status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, PATCHA::SHEAR, 0.85, 1.0));
+   status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, PATCHA::SHEAR, 0.85, 1.0, true));
 
    unsigned int totalFields = tre.getNumAttributes();
    if (status != INVALID && totalFields != numFields)
@@ -269,22 +330,29 @@ bool Nitf::PatchaParser::fromDynamicObject(const DynamicObject& input, ostream& 
       output << toString(dv_cast<int>(input.getAttribute(PATCHA::LNSTRT)), 7);
       output << toString(dv_cast<int>(input.getAttribute(PATCHA::LNSTOP)), 7);
       output << toString(dv_cast<int>(input.getAttribute(PATCHA::AZL)), 5);
-      output << toString(dv_cast<int>(input.getAttribute(PATCHA::NVL)), 5);
-      output << toString(dv_cast<int>(input.getAttribute(PATCHA::FVL)), 3);
+      output << toString(dv_cast<int>(input.getAttribute(PATCHA::NVL)), 5,
+         -1, ZERO_FILL, false, false, 3, true);
+      output << toString(dv_cast<int>(input.getAttribute(PATCHA::FVL)), 3,
+         -1, ZERO_FILL, false, false, 3, true);
       output << toString(dv_cast<int>(input.getAttribute(PATCHA::NPIXEL)), 5);
       output << toString(dv_cast<int>(input.getAttribute(PATCHA::FVPIX)), 5);
-      output << toString(dv_cast<int>(input.getAttribute(PATCHA::FRAME)), 3);
+      output << toString(dv_cast<int>(input.getAttribute(PATCHA::FRAME)), 3,
+         -1, ZERO_FILL, false, false, 3, true);
       output << toString(dv_cast<double>(input.getAttribute(PATCHA::UTC)), 8, 2);
       output << toString(dv_cast<double>(input.getAttribute(PATCHA::SHEAD)), 7, 3);
-      output << toString(dv_cast<double>(input.getAttribute(PATCHA::GRAVITY)), 7, 4);
+      output << toString(dv_cast<double>(input.getAttribute(PATCHA::GRAVITY)), 7, 4,
+         ZERO_FILL, false, false, 3, true);
       output << toString(dv_cast<int>(input.getAttribute(PATCHA::INS_V_NC)), 5, -1, ZERO_FILL, POS_SIGN_TRUE);
       output << toString(dv_cast<int>(input.getAttribute(PATCHA::INS_V_EC)), 5, -1, ZERO_FILL, POS_SIGN_TRUE);
       output << toString(dv_cast<int>(input.getAttribute(PATCHA::INS_V_DC)), 5, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output << toString(dv_cast<double>(input.getAttribute(PATCHA::OFFLAT)), 8, 4, ZERO_FILL, POS_SIGN_TRUE);
-      output << toString(dv_cast<double>(input.getAttribute(PATCHA::OFFLONG)), 8, 4, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(PATCHA::OFFLAT)), 8, 4, ZERO_FILL, POS_SIGN_TRUE,
+         false, 3, true);
+      output << toString(dv_cast<double>(input.getAttribute(PATCHA::OFFLONG)), 8, 4, ZERO_FILL, POS_SIGN_TRUE,
+         false, 3, true);
       output << toString(dv_cast<int>(input.getAttribute(PATCHA::TRACK)), 3);
       output << toString(dv_cast<double>(input.getAttribute(PATCHA::GSWEEP)), 6, 2);
-      output << toString(dv_cast<double>(input.getAttribute(PATCHA::SHEAR)), 8);
+      output << toString(dv_cast<double>(input.getAttribute(PATCHA::SHEAR)), 8,
+         -1, ZERO_FILL, false, false, 3, true);
    }
    catch (const bad_cast&)
    {

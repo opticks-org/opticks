@@ -89,6 +89,33 @@ bool Nitf::SensraParser::runAllTests(Progress* pProgress, ostream& failure)
         "999"                   // SPOT_NUM
       );
 
+   static const string data5(
+        "        "              // REF_ROW - set to spaces
+        "        "              // REF_COL - set to spaces
+        "abcdef"                // SENSOR_MODEL
+        "   "                   // SENSOR_MOUNT - set to spaces
+        "+33.653456-084.423456" // SENSOR_LOC
+        "M"                     // SENSOR_ALT_SOURCE
+        "      "                // SENSOR_ALT - set to spaces
+        "m"                     // SENSOR_ALT_UNIT
+        "     "                 // SENSOR_AGL - set to spaces
+        "       "               // SENSOR_PITCH - set to spaces
+        "        "              // SENSOR_ROLL - set to spaces
+        "        "              // SENSOR_YAW - set to spaces
+        "       "               // PLATFORM_PITCH - set to spaces
+        "        "              // PLATFORM_ROLL - set to spaces
+        "     "                 // PLATFORM_HDG - set to spaces
+        "N"                     // GROUND_SPD_SOURCE
+        "      "                // GROUND_SPD - set to spaces
+        "k"                     // GRND_SPD_UNIT
+        "     "                 // GROUND_TRACK - set to spaces
+        "     "                 // VERT_VEL - set to spaces
+        "m"                     // VERT_VEL_UNIT
+        "    "                  // SWATH_FRAMES - set to spaces
+        "    "                  // NUM_SWATHS - set to spaces
+        "   "                   // SPOT_NUM - set to spaces
+      );
+
    FactoryResource<DynamicObject> treDO;
    size_t numBytes(0);
 
@@ -157,7 +184,7 @@ bool Nitf::SensraParser::runAllTests(Progress* pProgress, ostream& failure)
       status = isTreValid(*treDO.get(), tmpStream);
       if (status != SUSPECT)
       {
-         failure << "Error: Negative test with LNSTRT = data out of range failed: did not return SUSPECT\n";
+         failure << "Error: Negative test with data out of range failed: did not return SUSPECT\n";
          failure << tmpStream.str();
          treDO->clear();
          return false;
@@ -167,7 +194,43 @@ bool Nitf::SensraParser::runAllTests(Progress* pProgress, ostream& failure)
 
    treDO->clear();
 
-   return (status != INVALID);
+   // Start of test 5 - blanks in optional fields
+   errorMessage.clear();
+   stringstream input5(data5);
+   success = toDynamicObject(input5, input5.str().size(), *treDO.get(), errorMessage);
+   if (success == false)
+   {
+      failure << errorMessage;
+      return false;
+   }
+   else
+   {
+      stringstream tmpStream;
+      status = isTreValid(*treDO.get(), tmpStream);
+      if (status != VALID)
+      {
+         failure << "Error: Test with blank data failed: did not return VALID\n";
+         failure << tmpStream.str();
+         return false;
+      }
+
+      tmpStream.str(string());
+      success = fromDynamicObject(*treDO.get(), tmpStream, numBytes, errorMessage);
+      if (success == false)
+      {
+         failure << errorMessage;
+         return false;
+      }
+
+      if (input5.str() != tmpStream.str())
+      {
+         failure << "Error: Test with blank data failed: fromDynamicObject returned an unexpected value\n";
+         return false;
+      }
+   }
+
+   treDO->clear();
+   return true;
 }
 
 bool Nitf::SensraParser::toDynamicObject(istream& input, size_t numBytes, DynamicObject& output,
@@ -220,16 +283,16 @@ Nitf::TreState Nitf::SensraParser::isTreValid(const DynamicObject& tre, ostream&
    unsigned int numFields = 0;
 
    status = MaxState(status, testTagValueRange<unsigned int>(tre, reporter,
-      &numFields, SENSRA::REF_ROW, 0U, 99999999U));
+      &numFields, SENSRA::REF_ROW, 0U, 99999999U, true));
 
    status = MaxState(status, testTagValueRange<unsigned int>(tre, reporter,
-      &numFields, SENSRA::REF_COL, 0U, 99999999U));
+      &numFields, SENSRA::REF_COL, 0U, 99999999U, true));
 
    status = MaxState(status, testTagValidBcsASet(tre, reporter,
       &numFields, SENSRA::SENSOR_MODEL, testSet, true, true, false));
 
    status = MaxState(status, testTagValueRange<int>(tre, reporter,
-      &numFields, SENSRA::SENSOR_MOUNT, -45, 45));
+      &numFields, SENSRA::SENSOR_MOUNT, -45, 45, true));
 
    status = MaxState(status, testTagValidBcsASet(tre, reporter,
       &numFields, SENSRA::SENSOR_LOC, testSet, true, true, false));
@@ -243,7 +306,7 @@ Nitf::TreState Nitf::SensraParser::isTreValid(const DynamicObject& tre, ostream&
       &numFields, SENSRA::SENSOR_ALT_SOURCE, testSet, ALL_BLANK_FALSE, NOT_IN_SET_FALSE, EMIT_MSG_NOT_IN_SET_TRUE));
 
    status = MaxState(status, testTagValueRange<int>(tre, reporter,
-      &numFields, SENSRA::SENSOR_ALT, -1000, 99000));
+      &numFields, SENSRA::SENSOR_ALT, -1000, 99000, true));
 
    testSet.clear();
    testSet.insert("f");
@@ -252,25 +315,25 @@ Nitf::TreState Nitf::SensraParser::isTreValid(const DynamicObject& tre, ostream&
       &numFields, SENSRA::SENSOR_ALT_UNIT, testSet, ALL_BLANK_FALSE, NOT_IN_SET_FALSE, EMIT_MSG_NOT_IN_SET_TRUE));
 
    status = MaxState(status, testTagValueRange<unsigned int>(tre, reporter,
-      &numFields, SENSRA::SENSOR_AGL, 10U, 99000U));
+      &numFields, SENSRA::SENSOR_AGL, 10U, 99000U, true));
 
    status = MaxState(status, testTagValueRange<double>(tre, reporter,
-      &numFields, SENSRA::SENSOR_PITCH, -90.1, 90.1));
+      &numFields, SENSRA::SENSOR_PITCH, -90.1, 90.1, true));
 
    status = MaxState(status, testTagValueRange<double>(tre, reporter,
-      &numFields, SENSRA::SENSOR_ROLL, -180.1, 180.1));
+      &numFields, SENSRA::SENSOR_ROLL, -180.1, 180.1, true));
 
    status = MaxState(status, testTagValueRange<double>(tre, reporter,
-      &numFields, SENSRA::SENSOR_YAW, -180.1, 180.1));
+      &numFields, SENSRA::SENSOR_YAW, -180.1, 180.1, true));
 
    status = MaxState(status, testTagValueRange<double>(tre, reporter,
-      &numFields, SENSRA::PLATFORM_PITCH, -90.1, 90.1));
+      &numFields, SENSRA::PLATFORM_PITCH, -90.1, 90.1, true));
 
    status = MaxState(status, testTagValueRange<double>(tre, reporter,
-      &numFields, SENSRA::PLATFORM_ROLL, -180.1, 180.1));
+      &numFields, SENSRA::PLATFORM_ROLL, -180.1, 180.1, true));
 
    status = MaxState(status, testTagValueRange<double>(tre, reporter,
-      &numFields, SENSRA::PLATFORM_HDG, 0.0, 360.0));
+      &numFields, SENSRA::PLATFORM_HDG, 0.0, 360.0, true));
 
    testSet.clear();
    testSet.insert("R");
@@ -281,7 +344,7 @@ Nitf::TreState Nitf::SensraParser::isTreValid(const DynamicObject& tre, ostream&
       &numFields, SENSRA::GROUND_SPD_SOURCE, testSet, ALL_BLANK_TRUE, NOT_IN_SET_FALSE, EMIT_MSG_NOT_IN_SET_TRUE));
 
    status = MaxState(status, testTagValueRange<double>(tre, reporter,
-      &numFields, SENSRA::GROUND_SPD, 0.0, 10000.0));
+      &numFields, SENSRA::GROUND_SPD, 0.0, 10000.0, true));
 
    testSet.clear();
    testSet.insert("k");
@@ -291,10 +354,10 @@ Nitf::TreState Nitf::SensraParser::isTreValid(const DynamicObject& tre, ostream&
       &numFields, SENSRA::GRND_SPD_UNIT, testSet, ALL_BLANK_FALSE, NOT_IN_SET_FALSE, EMIT_MSG_NOT_IN_SET_TRUE));
 
    status = MaxState(status, testTagValueRange<double>(tre, reporter,
-      &numFields, SENSRA::GROUND_TRACK, 0.0, 360.0));
+      &numFields, SENSRA::GROUND_TRACK, 0.0, 360.0, true));
 
    status = MaxState(status, testTagValueRange<int>(tre, reporter,
-      &numFields, SENSRA::VERT_VEL, -9999, 9999));
+      &numFields, SENSRA::VERT_VEL, -9999, 9999, true));
 
    testSet.clear();
    testSet.insert("f");
@@ -303,13 +366,13 @@ Nitf::TreState Nitf::SensraParser::isTreValid(const DynamicObject& tre, ostream&
       &numFields, SENSRA::VERT_VEL_UNIT, testSet, ALL_BLANK_FALSE, NOT_IN_SET_FALSE, EMIT_MSG_NOT_IN_SET_TRUE));
 
    status = MaxState(status, testTagValueRange<unsigned int>(tre, reporter,
-      &numFields, SENSRA::SWATH_FRAMES, 1U, 9999U));
+      &numFields, SENSRA::SWATH_FRAMES, 1U, 9999U, true));
 
    status = MaxState(status, testTagValueRange<unsigned int>(tre, reporter,
-      &numFields, SENSRA::NUM_SWATHS, 1U, 9999U));
+      &numFields, SENSRA::NUM_SWATHS, 1U, 9999U, true));
 
    status = MaxState(status, testTagValueRange<unsigned int>(tre, reporter,
-      &numFields, SENSRA::SPOT_NUM, 1U, 999U));
+      &numFields, SENSRA::SPOT_NUM, 1U, 999U, true));
 
    unsigned int totalFields = tre.getNumAttributes();
    if (status != INVALID && totalFields != numFields)
@@ -340,30 +403,47 @@ bool Nitf::SensraParser::fromDynamicObject(const DynamicObject& input, ostream& 
 
    try
    {
-      output << toString(dv_cast<unsigned int>(input.getAttribute(SENSRA::REF_ROW)), 8, -1);
-      output << toString(dv_cast<unsigned int>(input.getAttribute(SENSRA::REF_COL)), 8, -1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(SENSRA::REF_ROW)), 8, -1,
+         ZERO_FILL, false, false, 3, true);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(SENSRA::REF_COL)), 8, -1,
+         ZERO_FILL, false, false, 3, true);
       output << sizeString(dv_cast<string>(input.getAttribute(SENSRA::SENSOR_MODEL)), 6);
-      output << toString(dv_cast<int>(input.getAttribute(SENSRA::SENSOR_MOUNT)), 3, -1);
+      output << toString(dv_cast<int>(input.getAttribute(SENSRA::SENSOR_MOUNT)), 3, -1,
+         ZERO_FILL, false, false, 3, true);
       output << sizeString(dv_cast<string>(input.getAttribute(SENSRA::SENSOR_LOC)), 21);
       output << sizeString(dv_cast<string>(input.getAttribute(SENSRA::SENSOR_ALT_SOURCE)), 1);
-      output << toString(dv_cast<int>(input.getAttribute(SENSRA::SENSOR_ALT)), 6, -1);
+      output << toString(dv_cast<int>(input.getAttribute(SENSRA::SENSOR_ALT)), 6, -1,
+         ZERO_FILL, false, false, 3, true);
       output << sizeString(dv_cast<string>(input.getAttribute(SENSRA::SENSOR_ALT_UNIT)), 1);
-      output << toString(dv_cast<unsigned int>(input.getAttribute(SENSRA::SENSOR_AGL)), 5, -1);
-      output << toString(dv_cast<double>(input.getAttribute(SENSRA::SENSOR_PITCH)), 7, 3, ZERO_FILL, POS_SIGN_TRUE);
-      output << toString(dv_cast<double>(input.getAttribute(SENSRA::SENSOR_ROLL)), 8, 3, ZERO_FILL, POS_SIGN_TRUE);
-      output << toString(dv_cast<double>(input.getAttribute(SENSRA::SENSOR_YAW)), 8, 3, ZERO_FILL, POS_SIGN_TRUE);
-      output << toString(dv_cast<double>(input.getAttribute(SENSRA::PLATFORM_PITCH)), 7, 3, ZERO_FILL, POS_SIGN_TRUE);
-      output << toString(dv_cast<double>(input.getAttribute(SENSRA::PLATFORM_ROLL)), 8, 3, ZERO_FILL, POS_SIGN_TRUE);
-      output << toString(dv_cast<double>(input.getAttribute(SENSRA::PLATFORM_HDG)), 5, 1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(SENSRA::SENSOR_AGL)), 5, -1,
+         ZERO_FILL, false, false, 3, true);
+      output << toString(dv_cast<double>(input.getAttribute(SENSRA::SENSOR_PITCH)), 7, 3, ZERO_FILL, POS_SIGN_TRUE,
+         false, 3, true);
+      output << toString(dv_cast<double>(input.getAttribute(SENSRA::SENSOR_ROLL)), 8, 3, ZERO_FILL, POS_SIGN_TRUE,
+         false, 3, true);
+      output << toString(dv_cast<double>(input.getAttribute(SENSRA::SENSOR_YAW)), 8, 3, ZERO_FILL, POS_SIGN_TRUE,
+         false, 3, true);
+      output << toString(dv_cast<double>(input.getAttribute(SENSRA::PLATFORM_PITCH)), 7, 3, ZERO_FILL, POS_SIGN_TRUE,
+         false, 3, true);
+      output << toString(dv_cast<double>(input.getAttribute(SENSRA::PLATFORM_ROLL)), 8, 3, ZERO_FILL, POS_SIGN_TRUE,
+         false, 3, true);
+      output << toString(dv_cast<double>(input.getAttribute(SENSRA::PLATFORM_HDG)), 5, 1,
+         ZERO_FILL, false, false, 3, true);
       output << sizeString(dv_cast<string>(input.getAttribute(SENSRA::GROUND_SPD_SOURCE)), 1);
-      output << toString(dv_cast<double>(input.getAttribute(SENSRA::GROUND_SPD)), 6, 1);
+      output << toString(dv_cast<double>(input.getAttribute(SENSRA::GROUND_SPD)), 6, 1,
+         ZERO_FILL, false, false, 3, true);
       output << sizeString(dv_cast<string>(input.getAttribute(SENSRA::GRND_SPD_UNIT)), 1);
-      output << toString(dv_cast<double>(input.getAttribute(SENSRA::GROUND_TRACK)), 5, 1);
-      output << toString(dv_cast<int>(input.getAttribute(SENSRA::VERT_VEL)), 5, -1);
+      output << toString(dv_cast<double>(input.getAttribute(SENSRA::GROUND_TRACK)), 5, 1,
+         ZERO_FILL, false, false, 3, true);
+      output << toString(dv_cast<int>(input.getAttribute(SENSRA::VERT_VEL)), 5, -1,
+         ZERO_FILL, false, false, 3, true);
       output << sizeString(dv_cast<string>(input.getAttribute(SENSRA::VERT_VEL_UNIT)), 1);
-      output << toString(dv_cast<unsigned int>(input.getAttribute(SENSRA::SWATH_FRAMES)), 4, -1);
-      output << toString(dv_cast<unsigned int>(input.getAttribute(SENSRA::NUM_SWATHS)), 4, -1);
-      output << toString(dv_cast<unsigned int>(input.getAttribute(SENSRA::SPOT_NUM)), 3, -1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(SENSRA::SWATH_FRAMES)), 4, -1,
+         ZERO_FILL, false, false, 3, true);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(SENSRA::NUM_SWATHS)), 4, -1,
+         ZERO_FILL, false, false, 3, true);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(SENSRA::SPOT_NUM)), 3, -1,
+         ZERO_FILL, false, false, 3, true);
    }
    catch (const bad_cast&)
    {

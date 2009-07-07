@@ -76,6 +76,27 @@ bool Nitf::ExpltbParser::runAllTests(Progress* pProgress, ostream& failure)
       "00"                      // IPR
       );
 
+   static const string data5(
+      "045.000"                 // ANGLE_TO_NORTH
+      "20.000"                  // ANGLE_TO_NORTH_ACCY
+      "-30.000"                 // SQUINT_ANGLE
+      "44.999"                  // SQUINT_ANGLE_ACCY
+      "3SP"                     // MODE
+      "                "        // RESERVED1
+      "45.00"                   // GRAZE_ANG
+      "30.00"                   // GRAZE_ANG_ACCY
+      "60.00"                   // SLOPE_ANG
+      "HV"                      // POLAR
+      "12345"                   // NSAMP
+      "0"                       // RESERVED2
+      " "                       // SEQ_NUM - set to spaces
+      "Prime ID    "            // PRIME_ID
+      "Prime BE       "         // PRIME_BE
+      "0"                       // RESERVED3
+      "00"                      // N_SEC
+      "00"                      // IPR
+      );
+
    FactoryResource<DynamicObject> treDO;
    size_t numBytes(0);
 
@@ -154,7 +175,43 @@ bool Nitf::ExpltbParser::runAllTests(Progress* pProgress, ostream& failure)
 
    treDO->clear();
 
-   return (status != INVALID);
+   // Start of test 5 - blanks in optional fields
+   errorMessage.clear();
+   stringstream input5(data5);
+   success = toDynamicObject(input5, input5.str().size(), *treDO.get(), errorMessage);
+   if (success == false)
+   {
+      failure << errorMessage;
+      return false;
+   }
+   else
+   {
+      stringstream tmpStream;
+      status = isTreValid(*treDO.get(), tmpStream);
+      if (status != VALID)
+      {
+         failure << "Error: Test with blank data failed: did not return VALID\n";
+         failure << tmpStream.str();
+         return false;
+      }
+
+      tmpStream.str(string());
+      success = fromDynamicObject(*treDO.get(), tmpStream, numBytes, errorMessage);
+      if (success == false)
+      {
+         failure << errorMessage;
+         return false;
+      }
+
+      if (input5.str() != tmpStream.str())
+      {
+         failure << "Error: Test with blank data failed: fromDynamicObject returned an unexpected value\n";
+         return false;
+      }
+   }
+
+   treDO->clear();
+   return true;
 }
 
 bool Nitf::ExpltbParser::toDynamicObject(istream& input, size_t numBytes, DynamicObject& output,
@@ -244,7 +301,7 @@ Nitf::TreState Nitf::ExpltbParser::isTreValid(const DynamicObject& tre, ostream&
       &numFields, EXPLTB::RESERVED2, 0, 0));
 
    status = MaxState(status, testTagValueRange<int>(tre, reporter,
-      &numFields, EXPLTB::SEQ_NUM, 0, 6));
+      &numFields, EXPLTB::SEQ_NUM, 0, 6, true));
 
    testSet.clear();
    status = MaxState(status, testTagValidBcsASet(tre, reporter,
@@ -305,7 +362,7 @@ bool Nitf::ExpltbParser::fromDynamicObject(const DynamicObject& input, ostream& 
       output << sizeString(dv_cast<string>(input.getAttribute(EXPLTB::POLAR)), 2);
       output << toString(dv_cast<int>(input.getAttribute(EXPLTB::NSAMP)), 5);
       output << toString(dv_cast<int>(input.getAttribute(EXPLTB::RESERVED2)), 1);
-      output << toString(dv_cast<int>(input.getAttribute(EXPLTB::SEQ_NUM)), 1);
+      output << toString(dv_cast<int>(input.getAttribute(EXPLTB::SEQ_NUM)), 1, -1, ZERO_FILL, false, false, 3, true);
       output << sizeString(dv_cast<string>(input.getAttribute(EXPLTB::PRIME_ID)), 12);
       output << sizeString(dv_cast<string>(input.getAttribute(EXPLTB::PRIME_BE)), 15);
       output << toString(dv_cast<int>(input.getAttribute(EXPLTB::RESERVED3)), 1);

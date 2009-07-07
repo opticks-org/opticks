@@ -110,7 +110,7 @@ bool Nitf::SectgaParser::runAllTests(Progress* pProgress, ostream& failure)
    status = INVALID;
    if (success)
    {
-      failure << "Error: Negative test with LNSTRT = data out of range failed: did not return false\n";
+      failure << "Error: Negative test with data out of range failed: did not return false\n";
       treDO->clear();
       return false;
    }

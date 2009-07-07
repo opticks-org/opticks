@@ -204,8 +204,6 @@ bool Nitf::IchipbParser::toDynamicObject(const ossimNitfRegisteredTag& input, Dy
 bool Nitf::IchipbParser::toDynamicObject(istream& input, size_t numBytes, DynamicObject& output,
    string &errorMessage) const
 {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This method isn't ever being called.  " \
-   "Should it be removed? (leckels)")
    vector<char> buf;
    bool ok(true);
 

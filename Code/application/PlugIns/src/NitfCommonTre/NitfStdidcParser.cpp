@@ -74,7 +74,28 @@ bool Nitf::StdidcParser::runAllTests(Progress* pProgress, ostream& failure)
       "012"                             // END_COLUMN
       "00027"                           // END_ROW
       "US"                              // COUNTRY
-      "1867"                            // WAC        max == 1866
+      "1867"                            // WAC - max == 1866
+      "3251N11715W"                     // LOCATION
+      "     "                           // RESERVED2
+      "        "                        // RESERVED3
+      );
+
+   static const string data5(
+      "20000108180902"                  // ACQUISITION_DATE
+      "ABCXYZ_0123456"                  // MISSION
+      "01"                              // PASS
+      "528"                             // OP_NUM
+      "AA"                              // START_SEGMENT
+      "00"                              // REPRO_NUM
+      "000"                             // REPLAY_REGEN
+      " "                               // BLANK_FILL
+      "001"                             // START_COLUMN
+      "00001"                           // START_ROW
+      "AA"                              // END_SEGMENT
+      "012"                             // END_COLUMN
+      "00027"                           // END_ROW
+      "US"                              // COUNTRY
+      "    "                            // WAC - set to spaces
       "3251N11715W"                     // LOCATION
       "     "                           // RESERVED2
       "        "                        // RESERVED3
@@ -148,7 +169,7 @@ bool Nitf::StdidcParser::runAllTests(Progress* pProgress, ostream& failure)
       status = isTreValid(*treDO.get(), tmpStream);
       if (status != SUSPECT)
       {
-         failure << "Error: Negative test with LNSTRT = data out of range failed: did not return SUSPECT\n";
+         failure << "Error: Negative test with data out of range failed: did not return SUSPECT\n";
          failure << tmpStream.str();
          treDO->clear();
          return false;
@@ -158,7 +179,43 @@ bool Nitf::StdidcParser::runAllTests(Progress* pProgress, ostream& failure)
 
    treDO->clear();
 
-   return (status != INVALID);
+   // Start of test 5 - blanks in optional fields
+   errorMessage.clear();
+   stringstream input5(data5);
+   success = toDynamicObject(input5, input5.str().size(), *treDO.get(), errorMessage);
+   if (success == false)
+   {
+      failure << errorMessage;
+      return false;
+   }
+   else
+   {
+      stringstream tmpStream;
+      status = isTreValid(*treDO.get(), tmpStream);
+      if (status != VALID)
+      {
+         failure << "Error: Test with blank data failed: did not return VALID\n";
+         failure << tmpStream.str();
+         return false;
+      }
+
+      tmpStream.str(string());
+      success = fromDynamicObject(*treDO.get(), tmpStream, numBytes, errorMessage);
+      if (success == false)
+      {
+         failure << errorMessage;
+         return false;
+      }
+
+      if (input5.str() != tmpStream.str())
+      {
+         failure << "Error: Test with blank data failed: fromDynamicObject returned an unexpected value\n";
+         return false;
+      }
+   }
+
+   treDO->clear();
+   return true;
 }
 
 bool Nitf::StdidcParser::toDynamicObject(istream& input, size_t numBytes, DynamicObject& output,
@@ -295,7 +352,7 @@ Nitf::TreState Nitf::StdidcParser::isTreValid(const DynamicObject& tre, ostream&
       &numFields, STDIDC::COUNTRY, testSet, true, true, false));
 
    status = MaxState(status, testTagValueRange<unsigned int>(tre, reporter,
-      &numFields, STDIDC::WAC, 1U, 1866U));
+      &numFields, STDIDC::WAC, 1U, 1866U, true));
 
    status = MaxState(status, testTagValidBcsASet(tre, reporter,
       &numFields, STDIDC::LOCATION, testSet, true, true, false));
@@ -359,7 +416,8 @@ bool Nitf::StdidcParser::fromDynamicObject(const DynamicObject& input, ostream& 
       output << toString(dv_cast<unsigned int>(input.getAttribute(STDIDC::END_COLUMN)), 3, -1);
       output << toString(dv_cast<unsigned int>(input.getAttribute(STDIDC::END_ROW)), 5, -1);
       output << sizeString(dv_cast<string>(input.getAttribute(STDIDC::COUNTRY)), 2);
-      output << toString(dv_cast<unsigned int>(input.getAttribute(STDIDC::WAC)), 4, -1);
+      output << toString(dv_cast<unsigned int>(input.getAttribute(STDIDC::WAC)),
+         4, -1, ZERO_FILL, false, false, 3, true);
       output << sizeString(dv_cast<string>(input.getAttribute(STDIDC::LOCATION)), 11);
       output << sizeString(dv_cast<string>(input.getAttribute(STDIDC::RESERVED2)), 5);
       output << sizeString(dv_cast<string>(input.getAttribute(STDIDC::RESERVED3)), 8);

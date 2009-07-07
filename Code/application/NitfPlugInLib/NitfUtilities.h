@@ -109,6 +109,16 @@ namespace Nitf
    }
 
    /**
+    * Gets the sentinel value for a given field.
+    * @return The sentinel value.
+    */
+   template<typename T>
+   inline T getSentinel()
+   {
+      return std::numeric_limits<T>::max();
+   }
+
+   /**
     * Test a tag against a range
     *
     * @param reporter
@@ -136,32 +146,38 @@ namespace Nitf
    }
 
    /**
-    * Test a tag within a DynamicObject against a range
+    * Test a tag within a DynamicObject against a range.
     *
     * @param tre
-    *        The DynamicObject to get the value from
+    *        The DynamicObject from which to get the value.
     * @param reporter
-    *        ostream to report failures to
+    *        ostream To report failures.
     * @param pNumFields
     *        Number of fields currently read in by the calling parser.
-    *        If not NULL, this value is incremented if the field has been read.
+    *        If not \c NULL, this value is incremented if the field has been read.
     * @param name
-    *        The name of the tag within the DynamicObject
+    *        The name of the tag within the DynamicObject.
     * @param minValue
-    *        The minimum value of the range
+    *        The minimum value of the range.
     * @param maxValue
-    *        The maximum value of the range
-    *        
+    *        The maximum value of the range.
+    * @param optional
+    *        \c True if the field is considered to be optional (all spaces allowed).
     * @return INVALID if the tag is not found, SUSPECT if outside the range, VALID otherwise.
     */
    template<typename T>
-   TreState testTagValueRange(const DynamicObject& tre, std::ostream& reporter, 
-      unsigned int* pNumFields, const std::string& name, const T& minValue, const T& maxValue)
+   TreState testTagValueRange(const DynamicObject& tre, std::ostream& reporter, unsigned int* pNumFields,
+      const std::string& name, const T& minValue, const T& maxValue, bool optional = false)
    {
       try
       {
-         T testValue = dv_cast<T>(tre.getAttribute(name));
-         TreState state = testTagValueRange(reporter, testValue, minValue, maxValue);
+         const T& testValue = dv_cast<T>(tre.getAttribute(name));
+         TreState state = VALID;
+         if (optional == false || getSentinel<T>() != testValue)
+         {
+            state = testTagValueRange(reporter, testValue, minValue, maxValue);
+         }
+
          if (state != VALID)
          {
             reporter << ": field = " << name << ".\n";
@@ -656,22 +672,30 @@ namespace Nitf
     *         For floating point the number of digits after the decimal point. 
     *         Default == -1 which means to fit in the maximum within the allocated size.
     * @param  fillChar
-    *         The numeric fill character. Default == '0'
+    *         The numeric fill character. Default == '0'.
     * @param  posSign
     *         If true then output a leading "+" if the num is positive.
     * @param  sciNotation
     *         If true then force scientific notation in the form: "+0.123456E+001"
     * @param  expSize
-    *         The number of digets in the exponent. Where 1 <= expSize <= 3
+    *         The number of digits in the exponent (where 1 <= expSize <= 3).
+    * @param optional
+    *        \c True if field can be exported as all spaces if not present initially.
     * @return The numeric value converted to a string. Guaranteed to be num characters 
     *         long with a leading '-' if negative or a leading '+' if positive and posSign == true
     */
    template<typename T>
    std::string toString(T num, unsigned int size, int precision = -1,
-      char fillChar = '0', bool posSign = false, bool sciNotation = false, int expSize = 3)
+      char fillChar = '0', bool posSign = false, bool sciNotation = false, int expSize = 3, bool optional = false)
    {
       std::stringstream   outp;
       std::string         outStr;
+
+      if (optional == true && getSentinel<T>() == num)
+      {
+         outStr.resize(size, ' ');
+         return outStr;
+      }
 
       if (precision < 0)
       {
@@ -744,9 +768,10 @@ namespace Nitf
          }
       }
 
-      // char or unsigned char print out as the ASCII value instead of the numeric
+      // char types print out as the ASCII value instead of the numeric
       // so cast it to an int.
-      else if (typeid(num) == typeid(char)) 
+      else if (typeid(num) == typeid(char) ||
+         typeid(num) == typeid(unsigned char) || typeid(num) == typeid(signed char))
       {
          outp << static_cast<int>(num);
       }
@@ -755,12 +780,11 @@ namespace Nitf
       // so cast it to a signed int to force the "+" 
       // then use a int64 for the extra room to force it positive even 
       // if the sign bit was set.
-      else if (!std::numeric_limits<T>::is_signed) 
+      else if (!std::numeric_limits<T>::is_signed)
       {
          outp << static_cast<long long>(num);
       }
-
-      else 
+      else
       {
          outp << num;
       }
@@ -810,8 +834,7 @@ namespace Nitf
          if (temp.size() > 0 && temp[0] == '-')
          {
             ok = false;
-            T junk = 0;
-            return junk;
+            return getSentinel<T>();
          }
       }
 
@@ -832,8 +855,7 @@ namespace Nitf
          ok = false;
       }
 
-      T junk = 0;
-      return junk;
+      return getSentinel<T>();
    }
 
    // Specialization for the unusual ones

@@ -121,6 +121,45 @@ bool Nitf::BandsaParser::runAllTests(Progress* pProgress, ostream& failure)
       "99.99"                   // BANDGSD
       );
 
+   static const string data5(
+      "99.9999"                 // ROW_SPACING
+      "m"                       // ROW_SPACING_UNITS
+      "9999.99"                 // COL_SPACING
+      "r"                       // COL_SPACING_UNITS
+      "899.99"                  // FOCAL_LENGTH
+      "0003"                    // BANDCOUNT
+
+      "     "                   // BANDPEAK - set to spaces
+      "     "                   // BANDLBOUND - set to spaces
+      "     "                   // BANDUBOUND - set to spaces
+      "     "                   // BANDWIDTH - set to spaces
+      "      "                  // BANDCALDRK - set to spaces
+      "     "                   // BANDCALINC - set to spaces
+      "     "                   // BANDRESP - set to spaces
+      "     "                   // BANDASD - set to spaces
+      "     "                   // BANDGSD - set to spaces
+
+      "00.01"                   // BANDPEAK
+      "19.99"                   // BANDLBOUND
+      "00.01"                   // BANDUBOUND
+      "19.99"                   // BANDWIDTH
+      "0000.1"                  // BANDCALDRK
+      "00.01"                   // BANDCALINC
+      "000.1"                   // BANDRESP
+      "999.9"                   // BANDASD
+      "99.99"                   // BANDGSD
+
+      "00.01"                   // BANDPEAK
+      "19.99"                   // BANDLBOUND
+      "00.01"                   // BANDUBOUND
+      "19.99"                   // BANDWIDTH
+      "0000.1"                  // BANDCALDRK
+      "00.01"                   // BANDCALINC
+      "000.1"                   // BANDRESP
+      "999.9"                   // BANDASD
+      "99.99"                   // BANDGSD
+      );
+
    FactoryResource<DynamicObject> treDO;
    size_t numBytes(0);
 
@@ -190,7 +229,7 @@ bool Nitf::BandsaParser::runAllTests(Progress* pProgress, ostream& failure)
       status = this->isTreValid(*treDO.get(), tmpStream);
       if (status != SUSPECT)
       {
-         failure << "Error: Negative test with LNSTRT = data out of range failed: did not return SUSPECT\n";
+         failure << "Error: Negative test with data out of range failed: did not return SUSPECT\n";
          failure << tmpStream.str();
          treDO->clear();
          return false;
@@ -200,7 +239,43 @@ bool Nitf::BandsaParser::runAllTests(Progress* pProgress, ostream& failure)
 
    treDO->clear();
 
-   return (status != INVALID);
+   // Start of test 5 - blanks in optional fields
+   errorMessage.clear();
+   stringstream input5(data5);
+   success = toDynamicObject(input5, input5.str().size(), *treDO.get(), errorMessage);
+   if (success == false)
+   {
+      failure << errorMessage;
+      return false;
+   }
+   else
+   {
+      stringstream tmpStream;
+      status = isTreValid(*treDO.get(), tmpStream);
+      if (status != VALID)
+      {
+         failure << "Error: Test with blank data failed: did not return VALID\n";
+         failure << tmpStream.str();
+         return false;
+      }
+
+      tmpStream.str(string());
+      success = fromDynamicObject(*treDO.get(), tmpStream, numBytes, errorMessage);
+      if (success == false)
+      {
+         failure << errorMessage;
+         return false;
+      }
+
+      if (input5.str() != tmpStream.str())
+      {
+         failure << "Error: Test with blank data failed: fromDynamicObject returned an unexpected value\n";
+         return false;
+      }
+   }
+
+   treDO->clear();
+   return true;
 }
 
 bool Nitf::BandsaParser::toDynamicObject(istream& input, size_t numBytes, DynamicObject& output,
@@ -320,31 +395,40 @@ Nitf::TreState Nitf::BandsaParser::isTreValid(const DynamicObject& tre, ostream&
       // to the test range to allow for floating point round off
 
       fieldName = BANDSA::BANDPEAK + bandStr;
-      status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, fieldName, 0.005F, 19.995F));
+      status = MaxState(status, testTagValueRange<double>(tre, reporter,
+         &numFields, fieldName, 0.005F, 19.995F, true));
 
       fieldName = BANDSA::BANDLBOUND + bandStr;
-      status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, fieldName, 0.005F, 19.995F));
+      status = MaxState(status, testTagValueRange<double>(tre, reporter,
+         &numFields, fieldName, 0.005F, 19.995F, true));
 
       fieldName = BANDSA::BANDUBOUND + bandStr;
-      status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, fieldName, 0.005F, 19.995F));
+      status = MaxState(status, testTagValueRange<double>(tre, reporter,
+         &numFields, fieldName, 0.005F, 19.995F, true));
 
       fieldName = BANDSA::BANDWIDTH + bandStr;
-      status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, fieldName, 0.005F, 19.995F));
+      status = MaxState(status, testTagValueRange<double>(tre, reporter,
+         &numFields, fieldName, 0.005F, 19.995F, true));
 
       fieldName = BANDSA::BANDCALDRK + bandStr;
-      status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, fieldName, 0.05F, 9999.95F));
+      status = MaxState(status, testTagValueRange<double>(tre, reporter,
+         &numFields, fieldName, 0.05F, 9999.95F, true));
 
       fieldName = BANDSA::BANDCALINC + bandStr;
-      status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, fieldName, 0.005F, 19.995F));
+      status = MaxState(status, testTagValueRange<double>(tre, reporter,
+         &numFields, fieldName, 0.005F, 19.995F, true));
 
       fieldName = BANDSA::BANDRESP + bandStr;
-      status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, fieldName, 0.05F, 999.995F));
+      status = MaxState(status, testTagValueRange<double>(tre, reporter,
+         &numFields, fieldName, 0.05F, 999.995F, true));
 
       fieldName = BANDSA::BANDASD + bandStr;
-      status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, fieldName, 0.05F, 999.995F));
+      status = MaxState(status, testTagValueRange<double>(tre, reporter,
+         &numFields, fieldName, 0.05F, 999.995F, true));
 
       fieldName = BANDSA::BANDGSD + bandStr;
-      status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, fieldName, 0.005F, 99.995F));
+      status = MaxState(status, testTagValueRange<double>(tre, reporter,
+         &numFields, fieldName, 0.005F, 99.995F, true));
    }
 
    unsigned int totalFields = tre.getNumAttributes();
@@ -394,31 +478,31 @@ bool Nitf::BandsaParser::fromDynamicObject(const DynamicObject& input, ostream& 
          string fieldName;
 
          fieldName = BANDSA::BANDPEAK + bandStr;
-         output << toString(dv_cast<double>(input.getAttribute(fieldName)), 5, 2);
+         output << toString(dv_cast<double>(input.getAttribute(fieldName)), 5, 2, ZERO_FILL, false, false, 3, true);
 
          fieldName = BANDSA::BANDLBOUND + bandStr;
-         output << toString(dv_cast<double>(input.getAttribute(fieldName)), 5, 2);
+         output << toString(dv_cast<double>(input.getAttribute(fieldName)), 5, 2, ZERO_FILL, false, false, 3, true);
 
          fieldName = BANDSA::BANDUBOUND + bandStr;
-         output << toString(dv_cast<double>(input.getAttribute(fieldName)), 5, 2);
+         output << toString(dv_cast<double>(input.getAttribute(fieldName)), 5, 2, ZERO_FILL, false, false, 3, true);
 
          fieldName = BANDSA::BANDWIDTH + bandStr;
-         output << toString(dv_cast<double>(input.getAttribute(fieldName)), 5, 2);
+         output << toString(dv_cast<double>(input.getAttribute(fieldName)), 5, 2, ZERO_FILL, false, false, 3, true);
 
          fieldName = BANDSA::BANDCALDRK + bandStr;
-         output << toString(dv_cast<double>(input.getAttribute(fieldName)), 6, 1);
+         output << toString(dv_cast<double>(input.getAttribute(fieldName)), 6, 1, ZERO_FILL, false, false, 3, true);
 
          fieldName = BANDSA::BANDCALINC + bandStr;
-         output << toString(dv_cast<double>(input.getAttribute(fieldName)), 5, 2);
+         output << toString(dv_cast<double>(input.getAttribute(fieldName)), 5, 2, ZERO_FILL, false, false, 3, true);
 
          fieldName = BANDSA::BANDRESP + bandStr;
-         output << toString(dv_cast<double>(input.getAttribute(fieldName)), 5, 1);
+         output << toString(dv_cast<double>(input.getAttribute(fieldName)), 5, 1, ZERO_FILL, false, false, 3, true);
 
          fieldName = BANDSA::BANDASD + bandStr;
-         output << toString(dv_cast<double>(input.getAttribute(fieldName)), 5, 2);
+         output << toString(dv_cast<double>(input.getAttribute(fieldName)), 5, 2, ZERO_FILL, false, false, 3, true);
 
          fieldName = BANDSA::BANDGSD + bandStr;
-         output << toString(dv_cast<double>(input.getAttribute(fieldName)), 5, 2);
+         output << toString(dv_cast<double>(input.getAttribute(fieldName)), 5, 2, ZERO_FILL, false, false, 3, true);
       }
 
    }

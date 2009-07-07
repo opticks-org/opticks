@@ -75,8 +75,8 @@ bool Nitf::Use26aParser::runAllTests(Progress* pProgress, ostream& failure)
       " "                       // FIELD13
       "   "                     // FIELD14
       "  "                      // FIELD15
-      "  "                      // NR
-      "00000"                   // RN
+      "  "                      // FIELD16
+      "00000"                   // FIELD17
       "001"                     // FIELD18
       "000001"                  // FIELD19
       "      "                  // FIELD20
@@ -140,7 +140,7 @@ bool Nitf::Use26aParser::runAllTests(Progress* pProgress, ostream& failure)
    status = INVALID;
    if (success)
    {
-      failure << "Error: Negative test with LNSTRT = data out of range failed: did not return false\n";
+      failure << "Error: Negative test with data out of range failed: did not return false\n";
       treDO->clear();
       return false;
    }

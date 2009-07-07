@@ -88,6 +88,33 @@ bool Nitf::MensrbParser::runAllTests(Progress* pProgress, ostream& failure)
       "00001"                     // TOTAL_TILES_ROWS
       );
 
+   static const string data5(
+      "333030.1234X1023030.1234Y" // ACFT_LOC
+      "123.45"                    // ACFT_LOC_ACCY
+      "123456"                    // ACFT_ALT
+      "333030.1234X1023030.1234Y" // RP_LOC
+      "999.99"                    // RP_LOC_ACCY
+      "-01000"                    // RP_ELEV
+      "       "                   // OF_PC_R - set to spaces
+      "       "                   // OF_PC_A - set to spaces
+      "1.00000"                   // COSGRZ
+      "3000000"                   // RGCRP
+      "L"                         // RLMAP
+      "     "                     // RP_ROW - set to spaces
+      "     "                     // RP_COL - set to spaces
+      "+0.5000000"                // C_R_NC
+      "-0.5000000"                // C_R_EC
+      "+0.5000000"                // C_R_DC
+      "-0.500000"                 // C_AZ_NC
+      "+0.500000"                 // C_AZ_EC
+      "-0.500000"                 // C_AZ_DC
+      "+0.500000"                 // C_AL_NC
+      "-0.500000"                 // C_AL_EC
+      "+0.500000"                 // C_AL_DC
+      "   "                       // TOTAL_TILES_COLS - set to spaces
+      "     "                     // TOTAL_TILES_ROWS - set to spaces
+      );
+
    FactoryResource<DynamicObject> treDO;
    size_t numBytes(0);
 
@@ -166,7 +193,43 @@ bool Nitf::MensrbParser::runAllTests(Progress* pProgress, ostream& failure)
 
    treDO->clear();
 
-   return (status != INVALID);
+   // Start of test 5 - blanks in optional fields
+   errorMessage.clear();
+   stringstream input5(data5);
+   success = toDynamicObject(input5, input5.str().size(), *treDO.get(), errorMessage);
+   if (success == false)
+   {
+      failure << errorMessage;
+      return false;
+   }
+   else
+   {
+      stringstream tmpStream;
+      status = isTreValid(*treDO.get(), tmpStream);
+      if (status != VALID)
+      {
+         failure << "Error: Test with blank data failed: did not return VALID\n";
+         failure << tmpStream.str();
+         return false;
+      }
+
+      tmpStream.str(string());
+      success = fromDynamicObject(*treDO.get(), tmpStream, numBytes, errorMessage);
+      if (success == false)
+      {
+         failure << errorMessage;
+         return false;
+      }
+
+      if (input5.str() != tmpStream.str())
+      {
+         failure << "Error: Test with blank data failed: fromDynamicObject returned an unexpected value\n";
+         return false;
+      }
+   }
+
+   treDO->clear();
+   return true;
 }
 
 
@@ -241,10 +304,10 @@ Nitf::TreState Nitf::MensrbParser::isTreValid(const DynamicObject& tre, ostream&
       &numFields, MENSRB::RP_ELEV, -1000, 30000));
 
    status = MaxState(status, testTagValueRange<double>(tre, reporter,
-      &numFields, MENSRB::OF_PC_R, -9999.9, 9999.9));
+      &numFields, MENSRB::OF_PC_R, -9999.9, 9999.9, true));
 
    status = MaxState(status, testTagValueRange<double>(tre, reporter,
-      &numFields, MENSRB::OF_PC_A, -9999.9, 9999.9));
+      &numFields, MENSRB::OF_PC_A, -9999.9, 9999.9, true));
 
    status = MaxState(status, testTagValueRange<double>(tre, reporter,
       &numFields, MENSRB::COSGRZ, 0.0, 1.0));
@@ -259,10 +322,10 @@ Nitf::TreState Nitf::MensrbParser::isTreValid(const DynamicObject& tre, ostream&
       &numFields, MENSRB::RLMAP, testSet, false, false, true));
 
    status = MaxState(status, testTagValueRange<int>(tre, reporter,
-      &numFields, MENSRB::RP_ROW, 1, 99999));
+      &numFields, MENSRB::RP_ROW, 1, 99999, true));
 
    status = MaxState(status, testTagValueRange<int>(tre, reporter,
-      &numFields, MENSRB::RP_COL, 1, 99999));
+      &numFields, MENSRB::RP_COL, 1, 99999, true));
 
    status = MaxState(status, testTagValueRange<double>(tre, reporter,
       &numFields, MENSRB::C_R_NC, -1.0, 1.0));
@@ -292,10 +355,10 @@ Nitf::TreState Nitf::MensrbParser::isTreValid(const DynamicObject& tre, ostream&
       &numFields, MENSRB::C_AL_DC, -1.0, 1.0));
 
    status = MaxState(status, testTagValueRange<int>(tre, reporter,
-      &numFields, MENSRB::TOTAL_TILES_COLS, 1, 999));
+      &numFields, MENSRB::TOTAL_TILES_COLS, 1, 999, true));
 
    status = MaxState(status, testTagValueRange<int>(tre, reporter,
-      &numFields, MENSRB::TOTAL_TILES_ROWS, 1, 999));
+      &numFields, MENSRB::TOTAL_TILES_ROWS, 1, 999, true));
 
    unsigned int totalFields = tre.getNumAttributes();
    if (status != INVALID && totalFields != numFields)
@@ -331,13 +394,15 @@ bool Nitf::MensrbParser::fromDynamicObject(const DynamicObject& input, ostream& 
       output << sizeString(dv_cast<string>(input.getAttribute(MENSRB::RP_LOC)), 25);
       output << toString(dv_cast<double>(input.getAttribute(MENSRB::RP_LOC_ACCY)), 6, 2);
       output << toString(dv_cast<int>(input.getAttribute(MENSRB::RP_ELEV)), 6, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output << toString(dv_cast<double>(input.getAttribute(MENSRB::OF_PC_R)), 7, 1, ZERO_FILL, POS_SIGN_TRUE);
-      output << toString(dv_cast<double>(input.getAttribute(MENSRB::OF_PC_A)), 7, 1, ZERO_FILL, POS_SIGN_TRUE);
+      output << toString(dv_cast<double>(input.getAttribute(MENSRB::OF_PC_R)), 7, 1, ZERO_FILL, POS_SIGN_TRUE,
+         false, 3, true);
+      output << toString(dv_cast<double>(input.getAttribute(MENSRB::OF_PC_A)), 7, 1, ZERO_FILL, POS_SIGN_TRUE,
+         false, 3, true);
       output << toString(dv_cast<double>(input.getAttribute(MENSRB::COSGRZ)), 7);
       output << toString(dv_cast<int>(input.getAttribute(MENSRB::RGCRP)), 7);
       output << sizeString(dv_cast<string>(input.getAttribute(MENSRB::RLMAP)), 1);
-      output << toString(dv_cast<int>(input.getAttribute(MENSRB::RP_ROW)), 5);
-      output << toString(dv_cast<int>(input.getAttribute(MENSRB::RP_COL)), 5);
+      output << toString(dv_cast<int>(input.getAttribute(MENSRB::RP_ROW)), 5, -1, ZERO_FILL, false, false, 3, true);
+      output << toString(dv_cast<int>(input.getAttribute(MENSRB::RP_COL)), 5, -1, ZERO_FILL, false, false, 3, true);
       output << toString(dv_cast<double>(input.getAttribute(MENSRB::C_R_NC)), 10, -1, ZERO_FILL, POS_SIGN_TRUE);
       output << toString(dv_cast<double>(input.getAttribute(MENSRB::C_R_EC)), 10, -1, ZERO_FILL, POS_SIGN_TRUE);
       output << toString(dv_cast<double>(input.getAttribute(MENSRB::C_R_DC)), 10, -1, ZERO_FILL, POS_SIGN_TRUE);
@@ -347,8 +412,10 @@ bool Nitf::MensrbParser::fromDynamicObject(const DynamicObject& input, ostream& 
       output << toString(dv_cast<double>(input.getAttribute(MENSRB::C_AL_NC)), 9, -1, ZERO_FILL, POS_SIGN_TRUE);
       output << toString(dv_cast<double>(input.getAttribute(MENSRB::C_AL_EC)), 9, -1, ZERO_FILL, POS_SIGN_TRUE);
       output << toString(dv_cast<double>(input.getAttribute(MENSRB::C_AL_DC)), 9, -1, ZERO_FILL, POS_SIGN_TRUE);
-      output << toString(dv_cast<int>(input.getAttribute(MENSRB::TOTAL_TILES_COLS)), 3);
-      output << toString(dv_cast<int>(input.getAttribute(MENSRB::TOTAL_TILES_ROWS)), 5);
+      output << toString(dv_cast<int>(input.getAttribute(MENSRB::TOTAL_TILES_COLS)), 3,
+         -1, ZERO_FILL, false, false, 3, true);
+      output << toString(dv_cast<int>(input.getAttribute(MENSRB::TOTAL_TILES_ROWS)), 5,
+         -1, ZERO_FILL, false, false, 3, true);
    }
    catch (const bad_cast&)
    {
