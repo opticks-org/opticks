@@ -53,6 +53,7 @@ XmlReader::XmlReader(MessageLog* pLog, bool bValidate) :
    mpParser = mpImpl->createDOMBuilder(DOMImplementationLS::MODE_SYNCHRONOUS, 0);
    mpParser->setFeature(X("namespaces"), true);
    mpParser->setFeature(X("validate-if-schema"), true);
+   mpParser->setFeature(XMLUni::fgXercesUserAdoptsDOMDocument, true);
 
    if (bValidate == true)
    {
@@ -66,11 +67,15 @@ XmlReader::XmlReader(MessageLog* pLog, bool bValidate) :
 }
 
 XmlReader::~XmlReader()
-{
+{   
    if (mpDoc != NULL)
    {
       mpDoc->release();
    }
+   if (mpParser != NULL)
+   {
+      mpParser->release();
+   } 
 }
 
 XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* XmlReader::parse(const Filename* pFn, string endTag)
