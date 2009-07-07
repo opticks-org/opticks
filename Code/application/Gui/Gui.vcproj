@@ -368,10 +368,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Icons.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\ImportDlg.cpp"
 				>
 			</File>
@@ -1758,10 +1754,6 @@
 			</File>
 			<File
 				RelativePath=".\GuiFunctors.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Icons.h"
 				>
 			</File>
 			<File

@@ -13,11 +13,9 @@
 #include <QtGui/QHBoxLayout>
 
 #include "BrightnessToolBar.h"
-#include "AppAssert.h"
 #include "DesktopServices.h"
 #include "DimensionDescriptor.h"
 #include "HistogramWindowImp.h"
-#include "Icons.h"
 #include "LayerList.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
@@ -134,9 +132,7 @@ BrightnessToolBar::BrightnessToolBar(const string& id, QWidget* parent) :
    }
 
    // Reset button
-   Icons* pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
-   mpResetAction = new QAction(pIcons->mResetStretch, "Reset", this);
+   mpResetAction = new QAction(QIcon(":/icons/ResetStretch"), "Reset", this);
    mpResetAction->setAutoRepeat(false);
    mpResetAction->setStatusTip("Updates the current brightness and contrast to their default values");
    VERIFYNR(connect(mpResetAction, SIGNAL(triggered()), this, SLOT(reset())));

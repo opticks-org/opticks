@@ -11,13 +11,11 @@
 #include <QtGui/QToolButton>
 #include <QtGui/QWidgetAction>
 
-#include "AppAssert.h"
 #include "ColorMenu.h"
 #include "GcpLayer.h"
 #include "GcpLayerImp.h"
 #include "GcpSymbolGrid.h"
 #include "GcpToolBar.h"
-#include "Icons.h"
 #include "MenuBarImp.h"
 
 using namespace std;
@@ -29,13 +27,10 @@ GcpToolBar::GcpToolBar(const string& id, QWidget* parent) :
    mpColorMenu(NULL),
    mpGcpLayer(NULL)
 {
-   Icons* pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
-
    // Symbol button
    mpSymbol = new GcpSymbolButton(this);
    mpSymbol->setSyncIcon(false);
-   mpSymbol->setIcon(pIcons->mShape);
+   mpSymbol->setIcon(QIcon(":/icons/Shape"));
    mpSymbol->setStatusTip("Changes the pixel marker symbol for the current GCP layer");
    mpSymbol->setToolTip("GCP Marker Symbol");
    addWidget(mpSymbol);
@@ -48,7 +43,7 @@ GcpToolBar::GcpToolBar(const string& id, QWidget* parent) :
       mpColorAction = mpColorMenu->menuAction();
       if (mpColorAction != NULL)
       {
-         mpColorAction->setIcon(pIcons->mGCPColor);
+         mpColorAction->setIcon(QIcon(":/icons/GcpColor"));
          mpColorAction->setStatusTip("Changes the pixel marker color for the current GCP layer");
          mpColorAction->setToolTip("GCP Marker Color");
          connect(mpColorAction, SIGNAL(triggered()), mpColorMenu, SLOT(setCustomColor()));

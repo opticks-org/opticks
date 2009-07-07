@@ -18,7 +18,6 @@
 #include "GcpLayerUndo.h"
 #include "GcpList.h"
 #include "GcpListUndo.h"
-#include "Icons.h"
 #include "PerspectiveView.h"
 #include "PropertiesGcpLayer.h"
 #include "RasterElement.h"
@@ -40,11 +39,7 @@ GcpLayerImp::GcpLayerImp(const string& id, const string& layerName, DataElement*
    mSymbolSize = GcpLayer::getSettingMarkerSize();
 
    // Initialization
-   Icons* pIcons = Icons::instance();
-   if (pIcons != NULL)
-   {
-      setIcon(pIcons->mGCPMarker);
-   }
+   setIcon(QIcon(":/icons/GcpMarker"));
 
    addPropertiesPage(PropertiesGcpLayer::getName());
 
@@ -245,15 +240,7 @@ bool GcpLayerImp::acceptsMouseEvents() const
 
 QCursor GcpLayerImp::getMouseCursor() const
 {
-   QCursor mouseCursor;
-
-   Icons* pIcons = Icons::instance();
-   if (pIcons != NULL)
-   {
-      mouseCursor = QCursor(pIcons->mGcpCursor, pIcons->mGcpMask, 0, 17);
-   }
-
-   return mouseCursor;
+   return QCursor(QPixmap(":/icons/GcpMarkerCursor"), 1, 18);
 }
 
 bool GcpLayerImp::processMousePress(const QPoint& screenCoord, Qt::MouseButton button, Qt::MouseButtons buttons,

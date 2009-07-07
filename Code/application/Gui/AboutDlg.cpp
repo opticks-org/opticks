@@ -24,7 +24,6 @@
 #include "AppVersion.h"
 #include "ConfigurationSettingsImp.h"
 #include "DateTime.h"
-#include "Icons.h"
 #include "InstallerServices.h"
 #include "LabeledSection.h"
 #include "LabeledSectionGroup.h"
@@ -97,11 +96,7 @@ AboutDlg::AboutDlg(QWidget* parent) :
    pInfoLabel->setPalette(labelPalette);
 
    QLabel* pIconLabel = new QLabel(pAppInfo);
-   Icons* pIcons = Icons::instance();
-   if (pIcons != NULL)
-   {
-      pIconLabel->setPixmap(pIcons->mApplicationLarge);
-   }
+   pIconLabel->setPixmap(QPixmap(":/images/application-large"));
 
    // Copyright
    QLabel* pCopyrightLabel = new QLabel(APP_COPYRIGHT, pAppInfo);

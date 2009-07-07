@@ -23,7 +23,6 @@
 #include "FeatureManager.h"
 #include "FeatureMenuEditorDlg.h"
 #include "FeatureProxyConnector.h"
-#include "IconImages.h"
 #include "ImportDescriptor.h"
 #include "MenuBar.h"
 #include "MessageLogResource.h"
@@ -46,7 +45,6 @@
 #include <boost/bind.hpp>
 #include <boost/any.hpp>
 
-#include <QtGui/QBitmap>
 #include <QtGui/QDialog>
 #include <QtGui/QDialogButtonBox>
 #include <QtGui/QFileDialog>
@@ -298,9 +296,7 @@ void FeatureManager::updateContextMenu(Subject &subject, const string &signal, c
       pMenu->addActionAfter(pSeparatorAction, APP_FEATUREMANAGER_SEPARATOR_ACTION, APP_FEATUREMANAGER_REFRESH_ACTION);
 
       // Replace the default Export action
-      QPixmap exportPix(IconImages::SaveIcon);
-      exportPix.setMask(exportPix.createHeuristicMask());
-      QIcon exportIcon(exportPix);
+      QIcon exportIcon(":/icons/Save");
 
       QAction* pExportAction = new QAction(exportIcon, "Export", pMenu->getActionParent());
       pExportAction->setAutoRepeat(false);
@@ -310,10 +306,7 @@ void FeatureManager::updateContextMenu(Subject &subject, const string &signal, c
       pMenu->removeAction(APP_APPLICATIONWINDOW_EXPORT_ACTION);
 
       // Replace the default Properties action
-      QPixmap propertiesPix(IconImages::PropertiesIcon);
-      propertiesPix.setMask(propertiesPix.createHeuristicMask());
-      QIcon propertiesIcon(propertiesPix);
-
+      QIcon propertiesIcon(":/icons/Properties");
       QAction* pPropertiesAction = new QAction(propertiesIcon, "&Properties...", pMenu->getActionParent());
       pPropertiesAction->setAutoRepeat(false);
       VERIFYNR(connect(pPropertiesAction, SIGNAL(triggered()), this, SLOT(displayFeatureClassProperties())));

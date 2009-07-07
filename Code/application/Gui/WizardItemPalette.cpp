@@ -12,9 +12,7 @@
 #include <QtGui/QMenu>
 #include <QtGui/QPainter>
 
-#include "AppAssert.h"
 #include "DataVariantEditor.h"
-#include "Icons.h"
 #include "PlugInDescriptor.h"
 #include "PlugInManagerServices.h"
 #include "WizardGraphicsItem.h"
@@ -47,9 +45,6 @@ WizardItemPalette::WizardItemPalette(QWidget* pParent) :
    }
 
    // Add plug-ins
-   Icons* pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
-
    Service<PlugInManagerServices> pManager;
    multimap<string, pair<string, QIcon> > plugInItems;
 
@@ -79,12 +74,13 @@ WizardItemPalette::WizardItemPalette(QWidget* pParent) :
       QIcon plugInIcon = iter->second.second;
       if (plugInIcon.isNull() == true)
       {
-         QPixmap iconPixmap(pIcons->mWizardItem.size());
+         QPixmap tmpPixmap(":/icons/WizardItem");
+         QPixmap iconPixmap(tmpPixmap.size());
          QColor itemColor = WizardGraphicsItem::getItemBackgroundColor(type);
          iconPixmap.fill(itemColor);
 
          QPainter painter(&iconPixmap);
-         painter.drawPixmap(0, 0, pIcons->mWizardItem);
+         painter.drawPixmap(0, 0, tmpPixmap);
          painter.end();
 
          plugInIcon = QIcon(iconPixmap);
@@ -134,12 +130,13 @@ WizardItemPalette::WizardItemPalette(QWidget* pParent) :
    }
 
    // Add value items
-   QPixmap iconPixmap(pIcons->mWizardItem.size());
+   QPixmap tmpPixmap(":/icons/WizardItem");
+   QPixmap iconPixmap(tmpPixmap.size());
    QColor itemColor = WizardGraphicsItem::getItemBackgroundColor("Value");
    iconPixmap.fill(itemColor);
 
    QPainter painter(&iconPixmap);
-   painter.drawPixmap(0, 0, pIcons->mWizardItem);
+   painter.drawPixmap(0, 0, tmpPixmap);
    painter.end();
 
    QIcon itemIcon(iconPixmap);

@@ -14,6 +14,7 @@
 #include <QtCore/QUrl>
 #include <QtGui/QActionGroup>
 #include <QtGui/QApplication>
+#include <QtGui/QBitmap>
 #include <QtGui/QClipboard>
 #include <QtGui/QDialogButtonBox>
 #include <QtGui/QDragEnterEvent>
@@ -36,7 +37,6 @@
 #include "AnnotationToolBar.h"
 #include "AoiLayer.h"
 #include "AoiToolBar.h"
-#include "AppAssert.h"
 #include "AppConfig.h"
 #include "ApplicationServices.h"
 #include "ApplicationWindow.h"
@@ -76,7 +76,6 @@
 #include "GraphicObject.h"
 #include "GraphicObjectImp.h"
 #include "HistogramWindowAdapter.h"
-#include "Icons.h"
 #include "ImportDescriptor.h"
 #include "Importer.h"
 #include "InstallerServices.h"
@@ -201,24 +200,21 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    // User Actions //
    //////////////////
 
-   Icons* pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
-
    // File
-   m_pOpen_Action = new QAction(pIcons->mOpen, "&Import Data...", this);
+   m_pOpen_Action = new QAction(QIcon(":/icons/Open"), "&Import Data...", this);
    m_pOpen_Action->setAutoRepeat(false);
    m_pOpen_Action->setShortcut(QKeySequence("Ctrl+O"));
    m_pOpen_Action->setToolTip("Import Data");
    m_pOpen_Action->setStatusTip("Imports an existing data file into the current session");
    VERIFYNR(connect(m_pOpen_Action, SIGNAL(triggered()), this, SLOT(importFile())));
 
-   m_pClose_Action = new QAction(pIcons->mClose, "&Close", this);
+   m_pClose_Action = new QAction(QIcon(":/icons/Close"), "&Close", this);
    m_pClose_Action->setAutoRepeat(false);
    m_pClose_Action->setToolTip("Close");
    m_pClose_Action->setStatusTip("Closes the currently active data set");
    VERIFYNR(connect(m_pClose_Action, SIGNAL(triggered()), this, SLOT(closeWorkspaceWindow())));
 
-   m_pPrint_Setup_Action = new QAction(pIcons->mPrint, "&Print...", this);
+   m_pPrint_Setup_Action = new QAction(QIcon(":/icons/Print"), "&Print...", this);
    m_pPrint_Setup_Action->setAutoRepeat(false);
    m_pPrint_Setup_Action->setShortcut(QKeySequence("Ctrl+P"));
    m_pPrint_Setup_Action->setToolTip("Print Setup");
@@ -226,25 +222,25 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
       "currently active data set");
    VERIFYNR(connect(m_pPrint_Setup_Action, SIGNAL(triggered()), this, SLOT(printSetup())));
 
-   m_pPrint_Action = new QAction(pIcons->mPrint, "P&rint", this);
+   m_pPrint_Action = new QAction(QIcon(":/icons/Print"), "P&rint", this);
    m_pPrint_Action->setAutoRepeat(false);
    m_pPrint_Action->setToolTip("Print");
    m_pPrint_Action->setStatusTip("Prints the currently active data set");
    VERIFYNR(connect(m_pPrint_Action, SIGNAL(triggered()), this, SLOT(print())));
 
-   m_pNewSession_Action = new QAction(pIcons->mNew, "&New Session", this);
+   m_pNewSession_Action = new QAction(QIcon(":/icons/New"), "&New Session", this);
    m_pNewSession_Action->setAutoRepeat(false);
    m_pNewSession_Action->setToolTip("Create a new Session");
    m_pNewSession_Action->setStatusTip("Closes the current session and creates a new empty one");
    VERIFYNR(connect(m_pNewSession_Action, SIGNAL(triggered()), this, SLOT(newSession())));
 
-   m_pOpenSession_Action = new QAction(pIcons->mOpen, "&Open Session...", this);
+   m_pOpenSession_Action = new QAction(QIcon(":/icons/Open"), "&Open Session...", this);
    m_pOpenSession_Action->setAutoRepeat(false);
    m_pOpenSession_Action->setToolTip("Open Session");
    m_pOpenSession_Action->setStatusTip("Opens an existing session");
    VERIFYNR(connect(m_pOpenSession_Action, SIGNAL(triggered()), this, SLOT(openSession())));
 
-   m_pSaveSession_Action = new QAction(pIcons->mSave, "&Save Session", this);
+   m_pSaveSession_Action = new QAction(QIcon(":/icons/Save"), "&Save Session", this);
    m_pSaveSession_Action->setAutoRepeat(false);
    m_pSaveSession_Action->setToolTip("Save Session");
    m_pSaveSession_Action->setStatusTip("Saves the session");
@@ -256,7 +252,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    m_pSaveSessionAs_Action->setStatusTip("Saves the open session to a new file");
    VERIFYNR(connect(m_pSaveSessionAs_Action, SIGNAL(triggered()), this, SLOT(saveSessionAs())));
 
-   mpExportFileMenuAction = new QAction(pIcons->mSave, "&Export...", this);
+   mpExportFileMenuAction = new QAction(QIcon(":/icons/Save"), "&Export...", this);
    mpExportFileMenuAction->setAutoRepeat(false);
    mpExportFileMenuAction->setToolTip("Export");
    mpExportFileMenuAction->setStatusTip("Exports the current view");
@@ -266,21 +262,21 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    UndoButton* pUndoButton = new UndoButton(true, mpUndoGroup, this);
    UndoButton* pRedoButton = new UndoButton(false, mpUndoGroup, this);
 
-   m_pCut_Action = new QAction(pIcons->mCut, "Cu&t", this);
+   m_pCut_Action = new QAction(QIcon(":/icons/Cut"), "Cu&t", this);
    m_pCut_Action->setAutoRepeat(false);
    m_pCut_Action->setShortcut(QKeySequence("Ctrl+X"));
    m_pCut_Action->setToolTip("Cut");
    m_pCut_Action->setStatusTip("Cuts the current selection and moves it to the clipboard");
    VERIFYNR(connect(m_pCut_Action, SIGNAL(triggered()), this, SLOT(cut())));
 
-   m_pCopy_Action = new QAction(pIcons->mCopy, "&Copy", this);
+   m_pCopy_Action = new QAction(QIcon(":/icons/Copy"), "&Copy", this);
    m_pCopy_Action->setAutoRepeat(false);
    m_pCopy_Action->setShortcut(QKeySequence("Ctrl+C"));
    m_pCopy_Action->setToolTip("Copy");
    m_pCopy_Action->setStatusTip("Copies the current selection to the clipboard");
    VERIFYNR(connect(m_pCopy_Action, SIGNAL(triggered()), this, SLOT(copy())));
 
-   m_pPaste_Action = new QAction(pIcons->mPaste, "&Paste", this);
+   m_pPaste_Action = new QAction(QIcon(":/icons/Paste"), "&Paste", this);
    m_pPaste_Action->setAutoRepeat(false);
    m_pPaste_Action->setShortcut(QKeySequence("Ctrl+V"));
    m_pPaste_Action->setToolTip("Paste");
@@ -300,19 +296,19 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    m_pView_Mode_Group->setExclusive(true);
    VERIFYNR(connect(m_pView_Mode_Group, SIGNAL(triggered(QAction*)), this, SLOT(setMouseMode(QAction*))));
 
-   m_pNo_View_Mode_Action = m_pView_Mode_Group->addAction(pIcons->mEdit, "&Edit Mode Off");
+   m_pNo_View_Mode_Action = m_pView_Mode_Group->addAction(QIcon(":/icons/Edit"), "&Edit Mode Off");
    m_pNo_View_Mode_Action->setAutoRepeat(false);
    m_pNo_View_Mode_Action->setCheckable(true);
    m_pNo_View_Mode_Action->setToolTip("Edit Mode Off");
    m_pNo_View_Mode_Action->setStatusTip("Disables all mouse modes");
 
-   mpLayerEditAction = m_pView_Mode_Group->addAction(pIcons->mLayers, "&Layer Mode");
+   mpLayerEditAction = m_pView_Mode_Group->addAction(QIcon(":/icons/Layers"), "&Layer Mode");
    mpLayerEditAction->setAutoRepeat(false);
    mpLayerEditAction->setCheckable(true);
    mpLayerEditAction->setToolTip("Layer Edit Mode");
    mpLayerEditAction->setStatusTip("Toggles the edit mode for the active layer");
 
-   m_pMeasurement_Edit_Action = m_pView_Mode_Group->addAction(pIcons->mMeasurementMarker, "&Measurement Mode");
+   m_pMeasurement_Edit_Action = m_pView_Mode_Group->addAction(QIcon(":/icons/MeasurementMarker"), "&Measurement Mode");
    m_pMeasurement_Edit_Action->setAutoRepeat(false);
    m_pMeasurement_Edit_Action->setCheckable(true);
    m_pMeasurement_Edit_Action->setToolTip("Measurement Mode");
@@ -324,20 +320,20 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    mpCreateAnimationAction->setStatusTip("Creates an animation in the animation window for the current data set");
    VERIFYNR(connect(mpCreateAnimationAction, SIGNAL(triggered()), this, SLOT(createDataSetAnimation())));
 
-   m_pRefresh_Action = new QAction(pIcons->mRefresh, "&Refresh", this);
+   m_pRefresh_Action = new QAction(QIcon(":/icons/Refresh"), "&Refresh", this);
    m_pRefresh_Action->setAutoRepeat(false);
    m_pRefresh_Action->setShortcut(QKeySequence("Ctrl+R"));
    m_pRefresh_Action->setToolTip("Refresh");
    m_pRefresh_Action->setStatusTip("Redraws the data in the active spectral data window");
    VERIFYNR(connect(m_pRefresh_Action, SIGNAL(triggered()), this, SLOT(refresh())));
 
-   m_pDisplay_Mode_Action = new QAction(pIcons->mDisplayMode, "Toggle Display Mode", this);
+   m_pDisplay_Mode_Action = new QAction(QIcon(":/icons/DisplayMode"), "Toggle Display Mode", this);
    m_pDisplay_Mode_Action->setAutoRepeat(false);
    m_pDisplay_Mode_Action->setToolTip("Toggle Display Mode");
    m_pDisplay_Mode_Action->setStatusTip("Toggles the spectral data display between grayscale and RGB modes");
    VERIFYNR(connect(m_pDisplay_Mode_Action, SIGNAL(triggered()), this, SLOT(toggleDisplayMode())));
 
-   mpGenerateImageAction = new QAction(pIcons->mGenerate, "&Generate Full Image", this);
+   mpGenerateImageAction = new QAction(QIcon(":/icons/Generate"), "&Generate Full Image", this);
    mpGenerateImageAction->setAutoRepeat(false);
    mpGenerateImageAction->setToolTip("Generate Full Image");
    mpGenerateImageAction->setStatusTip("Prepares the full image for rendering");
@@ -350,7 +346,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    VERIFYNR(connect(mpClearMarkingsAction, SIGNAL(triggered()), this, SLOT(clearMarkings())));
 
    // Pan
-   m_pPan_Action = m_pView_Mode_Group->addAction(pIcons->mPan, "Pa&n");
+   m_pPan_Action = m_pView_Mode_Group->addAction(QIcon(":/icons/Pan"), "Pa&n");
    m_pPan_Action->setAutoRepeat(false);
    m_pPan_Action->setCheckable(true);
    m_pPan_Action->setToolTip("Pan");
@@ -373,43 +369,43 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    m_pPan_Instant_Action->setChecked(true);
 
    // Rotate
-   m_pRotate_Left_Action = new QAction(pIcons->mRotateLeft, "Rotate &Left 90 Degrees", this);
+   m_pRotate_Left_Action = new QAction(QIcon(":/icons/RotateLeft"), "Rotate &Left 90 Degrees", this);
    m_pRotate_Left_Action->setToolTip("Rotate Left 90 Degrees");
    m_pRotate_Left_Action->setStatusTip("Rotates the current data set 90 degrees counterclockwise");
    VERIFYNR(connect(m_pRotate_Left_Action, SIGNAL(triggered()), this, SLOT(rotateLeft())));
 
-   m_pRotate_Right_Action = new QAction(pIcons->mRotateRight, "Rotate &Right 90 Degrees", this);
+   m_pRotate_Right_Action = new QAction(QIcon(":/icons/RotateRight"), "Rotate &Right 90 Degrees", this);
    m_pRotate_Right_Action->setToolTip("Rotate Right 90 Degrees");
    m_pRotate_Right_Action->setStatusTip("Rotates the current data set 90 degrees clockwise");
    VERIFYNR(connect(m_pRotate_Right_Action, SIGNAL(triggered()), this, SLOT(rotateRight())));
 
-   m_pFlip_Horiz_Action = new QAction(pIcons->mFlipHoriz, "Flip &Horizontally", this);
+   m_pFlip_Horiz_Action = new QAction(QIcon(":/icons/FlipHorizontally"), "Flip &Horizontally", this);
    m_pFlip_Horiz_Action->setAutoRepeat(false);
    m_pFlip_Horiz_Action->setShortcut(QKeySequence(Qt::Key_H));
    m_pFlip_Horiz_Action->setToolTip("Flip Horizontally");
    m_pFlip_Horiz_Action->setStatusTip("Flips the data set from left to right");
    VERIFYNR(connect(m_pFlip_Horiz_Action, SIGNAL(triggered()), this, SLOT(flipHoriz())));
 
-   m_pFlip_Vert_Action = new QAction(pIcons->mFlipVert, "Flip &Vertically", this);
+   m_pFlip_Vert_Action = new QAction(QIcon(":/icons/FlipVertically"), "Flip &Vertically", this);
    m_pFlip_Vert_Action->setAutoRepeat(false);
    m_pFlip_Vert_Action->setShortcut(QKeySequence(Qt::Key_V));
    m_pFlip_Vert_Action->setToolTip("Flip Vertically");
    m_pFlip_Vert_Action->setStatusTip("Flips the data set from top to bottom");
    VERIFYNR(connect(m_pFlip_Vert_Action, SIGNAL(triggered()), this, SLOT(flipVert())));
 
-   m_pRotate_By_Action = new QAction(pIcons->mRotateBy, "Rotate &By", this);
+   m_pRotate_By_Action = new QAction(QIcon(":/icons/RotateBy"), "Rotate &By", this);
    m_pRotate_By_Action->setAutoRepeat(false);
    m_pRotate_By_Action->setToolTip("Rotate By");
    m_pRotate_By_Action->setStatusTip("Rotates the data set by a specified number of degrees");
    VERIFYNR(connect(m_pRotate_By_Action, SIGNAL(triggered()), this, SLOT(rotateBy())));
 
-   m_pFree_Rotate_Action = m_pView_Mode_Group->addAction(pIcons->mFreeRotate, "&Free Rotate");
+   m_pFree_Rotate_Action = m_pView_Mode_Group->addAction(QIcon(":/icons/FreeRotate"), "&Free Rotate");
    m_pFree_Rotate_Action->setAutoRepeat(false);
    m_pFree_Rotate_Action->setCheckable(true);
    m_pFree_Rotate_Action->setToolTip("Free Rotate");
    m_pFree_Rotate_Action->setStatusTip("Rotates the data set while clicking and dragging the mouse");
 
-   m_pReset_Action = new QAction(pIcons->mReset, "R&eset", this);
+   m_pReset_Action = new QAction(QIcon(":/icons/ResetOrientation"), "R&eset", this);
    m_pReset_Action->setAutoRepeat(false);
    m_pReset_Action->setShortcut(QKeySequence(Qt::Key_W));
    m_pReset_Action->setToolTip("Reset");
@@ -417,25 +413,25 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    VERIFYNR(connect(m_pReset_Action, SIGNAL(triggered()), this, SLOT(reset())));
 
    // Zoom
-   m_pZoom_In_Action = new QAction(pIcons->mZoomIn, "&In", this);
+   m_pZoom_In_Action = new QAction(QIcon(":/icons/ZoomIn"), "&In", this);
    m_pZoom_In_Action->setShortcut(QKeySequence(Qt::Key_Z));
    m_pZoom_In_Action->setToolTip("Zoom In");
    m_pZoom_In_Action->setStatusTip("Increases the zoom level in the active view about the window center");
    VERIFYNR(connect(m_pZoom_In_Action, SIGNAL(triggered()), this, SLOT(zoomIn())));
 
-   m_pZoom_Out_Action = new QAction(pIcons->mZoomOut, "&Out", this);
+   m_pZoom_Out_Action = new QAction(QIcon(":/icons/ZoomOut"), "&Out", this);
    m_pZoom_Out_Action->setShortcut(QKeySequence("Shift+Z"));
    m_pZoom_Out_Action->setToolTip("Zoom Out");
    m_pZoom_Out_Action->setStatusTip("Decreases the zoom level in the active view about the window center");
    VERIFYNR(connect(m_pZoom_Out_Action, SIGNAL(triggered()), this, SLOT(zoomOut())));
 
-   m_pZoom_Point_In_Action = m_pView_Mode_Group->addAction(pIcons->mZoomPointIn, "&In");
+   m_pZoom_Point_In_Action = m_pView_Mode_Group->addAction(QIcon(":/icons/ZoomPointIn"), "&In");
    m_pZoom_Point_In_Action->setAutoRepeat(false);
    m_pZoom_Point_In_Action->setCheckable(true);
    m_pZoom_Point_In_Action->setToolTip("Zoom In on Mouse");
    m_pZoom_Point_In_Action->setStatusTip("Increases the zoom level in the active view about a clicked point");
 
-   m_pZoom_Point_Out_Action = m_pView_Mode_Group->addAction(pIcons->mZoomPointOut, "&Out");
+   m_pZoom_Point_Out_Action = m_pView_Mode_Group->addAction(QIcon(":/icons/ZoomPointOut"), "&Out");
    m_pZoom_Point_Out_Action->setAutoRepeat(false);
    m_pZoom_Point_Out_Action->setCheckable(true);
    m_pZoom_Point_Out_Action->setToolTip("Zoom Out on Mouse");
@@ -489,27 +485,27 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    m_pZoom800_Action->setStatusTip("Zooms the active view to 800% of the data extents");
    VERIFYNR(connect(m_pZoom800_Action, SIGNAL(triggered()), this, SLOT(zoom800())));
 
-   m_pZoom_Rect_Action = m_pView_Mode_Group->addAction(pIcons->mZoomRect, "&Rectangle");
+   m_pZoom_Rect_Action = m_pView_Mode_Group->addAction(QIcon(":/icons/ZoomRect"), "&Rectangle");
    m_pZoom_Rect_Action->setAutoRepeat(false);
    m_pZoom_Rect_Action->setCheckable(true);
    m_pZoom_Rect_Action->setToolTip("Zoom Rectangle");
    m_pZoom_Rect_Action->setStatusTip("Zooms the active view to an area defined with the mouse");
 
-   m_pZoom_To_Fit_Action = new QAction(pIcons->mZoomToFit, "To &Fit", this);
+   m_pZoom_To_Fit_Action = new QAction(QIcon(":/icons/ZoomToFit"), "To &Fit", this);
    m_pZoom_To_Fit_Action->setAutoRepeat(false);
    m_pZoom_To_Fit_Action->setShortcut(QKeySequence(Qt::Key_E));
    m_pZoom_To_Fit_Action->setToolTip("Zoom to Fit");
    m_pZoom_To_Fit_Action->setStatusTip("Zooms the active view to the maximum extent of the data");
    VERIFYNR(connect(m_pZoom_To_Fit_Action, SIGNAL(triggered()), this, SLOT(zoomToFit())));
 
-   m_pZoom_And_Pan_To_Point_Action = new QAction(pIcons->mZoomAndPanToPoint, "Zoom and Pan To Point", this);
+   m_pZoom_And_Pan_To_Point_Action = new QAction(QIcon(":/icons/ZoomAndPanToPoint"), "Zoom and Pan To Point", this);
    m_pZoom_And_Pan_To_Point_Action->setAutoRepeat(false);
    m_pZoom_And_Pan_To_Point_Action->setToolTip("Zoom and Pan to Point");
    m_pZoom_And_Pan_To_Point_Action->setStatusTip("Zooms the active view to the point and zoom level specified");
    VERIFYNR(connect(m_pZoom_And_Pan_To_Point_Action, SIGNAL(triggered()), this, SLOT(showZapDlg())));
 
    // Properties
-   QAction* pPropertiesAction = new QAction(pIcons->mProperties, "&Properties...", this);
+   QAction* pPropertiesAction = new QAction(QIcon(":/icons/Properties"), "&Properties...", this);
    pPropertiesAction->setAutoRepeat(false);
    pPropertiesAction->setToolTip("Properties");
    pPropertiesAction->setStatusTip("Displays properties for application windows, plug-ins, and current "
@@ -557,64 +553,64 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    VERIFYNR(connect(m_pPaperSize_Action, SIGNAL(triggered()), this, SLOT(setPaperSize())));
 
    // Tools
-   mpSessionExplorerAction = new QAction(pIcons->mSessionExplorer, "Session E&xplorer", this);
+   mpSessionExplorerAction = new QAction(QIcon(":/icons/SessionExplorer"), "Session E&xplorer", this);
    mpSessionExplorerAction->setAutoRepeat(false);
    mpSessionExplorerAction->setCheckable(true);
    mpSessionExplorerAction->setToolTip("Session Explorer");
    mpSessionExplorerAction->setStatusTip("Toggles the display of the Session Explorer");
 
-   m_pHistogram_Wnd_Action = new QAction(pIcons->mHistogram, "&Histogram Window", this);
+   m_pHistogram_Wnd_Action = new QAction(QIcon(":/icons/HistogramWindow"), "&Histogram Window", this);
    m_pHistogram_Wnd_Action->setAutoRepeat(false);
    m_pHistogram_Wnd_Action->setCheckable(true);
    m_pHistogram_Wnd_Action->setToolTip("Histogram Window");
    m_pHistogram_Wnd_Action->setStatusTip("Toggles the display of the Histogram Window");
 
-   m_pMessage_Log_Wnd_Action = new QAction(pIcons->mMessageLog, "&Message Log Window", this);
+   m_pMessage_Log_Wnd_Action = new QAction(QIcon(":/icons/MessageLogWindow"), "&Message Log Window", this);
    m_pMessage_Log_Wnd_Action->setAutoRepeat(false);
    m_pMessage_Log_Wnd_Action->setCheckable(true);
    m_pMessage_Log_Wnd_Action->setToolTip("Message Log Window");
    m_pMessage_Log_Wnd_Action->setStatusTip("Toggles the display of the Message Log Window");
 
-   m_pBackground_Plugins_Wnd_Action = new QAction(pIcons->mBackgroundTask, "&Background Plugins Window", this);
+   m_pBackground_Plugins_Wnd_Action = new QAction(QIcon(":/icons/BackgroundTask"), "&Background Plugins Window", this);
    m_pBackground_Plugins_Wnd_Action->setAutoRepeat(false);
    m_pBackground_Plugins_Wnd_Action->setCheckable(true);
    m_pBackground_Plugins_Wnd_Action->setToolTip("Background Plug-Ins Window");
    m_pBackground_Plugins_Wnd_Action->setStatusTip("Toggles the display of the Background Plugin Window");
 
-   m_pScripting_Wnd_Action = new QAction(pIcons->mScript, "S&cripting Window", this);
+   m_pScripting_Wnd_Action = new QAction(QIcon(":/icons/Script"), "S&cripting Window", this);
    m_pScripting_Wnd_Action->setAutoRepeat(false);
    m_pScripting_Wnd_Action->setCheckable(true);
    m_pScripting_Wnd_Action->setToolTip("Scripting Window");
    m_pScripting_Wnd_Action->setStatusTip("Toggles the display of the Scripting Window");
 
-   m_pOverview_Wnd_Action = new QAction(pIcons->mOverview, "O&verview Window", this);
+   m_pOverview_Wnd_Action = new QAction(QIcon(":/icons/OverviewWindow"), "O&verview Window", this);
    m_pOverview_Wnd_Action->setAutoRepeat(false);
    m_pOverview_Wnd_Action->setCheckable(true);
    m_pOverview_Wnd_Action->setToolTip("Overview Window");
    m_pOverview_Wnd_Action->setStatusTip("Displays a small thumbnail of the active view");
    VERIFYNR(connect(m_pOverview_Wnd_Action, SIGNAL(toggled(bool)), this, SLOT(showOverviewWindow(bool))));
 
-   m_pChipping_Wnd_Action = new QAction(pIcons->mChipImage, "Image Chipping Window", this);
+   m_pChipping_Wnd_Action = new QAction(QIcon(":/icons/ChipImage"), "Image Chipping Window", this);
    m_pChipping_Wnd_Action->setAutoRepeat(false);
    m_pChipping_Wnd_Action->setToolTip("Image Chipping Window");
    m_pChipping_Wnd_Action->setStatusTip("Opens a thumbnail view of the active view for chipping a new image");
    VERIFYNR(connect(m_pChipping_Wnd_Action, SIGNAL(triggered()), this, SLOT(showChippingWindow())));
 
-   m_pGCP_Editor_Action = new QAction(pIcons->mGcpEditor, "&GCP Editor...", this);
+   m_pGCP_Editor_Action = new QAction(QIcon(":/icons/GcpEditor"), "&GCP Editor...", this);
    m_pGCP_Editor_Action->setAutoRepeat(false);
    m_pGCP_Editor_Action->setCheckable(true);
    m_pGCP_Editor_Action->setToolTip("GCP Editor");
    m_pGCP_Editor_Action->setStatusTip("Configures the GCPs in the current GCP list");
    VERIFYNR(connect(m_pGCP_Editor_Action, SIGNAL(toggled(bool)), this, SLOT(showGcpEditor(bool))));
 
-   m_pTiePoint_Editor_Action = new QAction(pIcons->mTiePointEditor, "&Tie Point Editor...", this);
+   m_pTiePoint_Editor_Action = new QAction(QIcon(":/icons/TiePointEditor"), "&Tie Point Editor...", this);
    m_pTiePoint_Editor_Action->setAutoRepeat(false);
    m_pTiePoint_Editor_Action->setCheckable(true);
    m_pTiePoint_Editor_Action->setToolTip("Tie Point Editor");
    m_pTiePoint_Editor_Action->setStatusTip("Configures the Tie Points in the current Tie Point list");
    VERIFYNR(connect(m_pTiePoint_Editor_Action, SIGNAL(toggled(bool)), this, SLOT(showTiePointEditor(bool))));
 
-   QAction* pWizard_Builder_Action = new QAction(pIcons->mWizard, "Wi&zard Builder...", this);
+   QAction* pWizard_Builder_Action = new QAction(QIcon(":/icons/WizardBuilder"), "Wi&zard Builder...", this);
    pWizard_Builder_Action->setAutoRepeat(false);
    pWizard_Builder_Action->setToolTip("Wizard Builder");
    pWizard_Builder_Action->setStatusTip("Invokes an editor to create and edit custom wizards");
@@ -626,7 +622,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    pBatch_Wizard_Editor_Action->setStatusTip("Invokes an editor to edit batch wizards");
    VERIFYNR(connect(pBatch_Wizard_Editor_Action, SIGNAL(triggered()), this, SLOT(showBatchEditor())));
 
-   m_pLink_Action = new QAction(pIcons->mLink, "Lin&k/Unlink...", this);
+   m_pLink_Action = new QAction(QIcon(":/icons/Link"), "Lin&k/Unlink...", this);
    m_pLink_Action->setAutoRepeat(false);
    m_pLink_Action->setToolTip("Link/Unlink");
    m_pLink_Action->setStatusTip("Connects layer and elements across multiple spectral data windows");
@@ -652,7 +648,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    VERIFYNR(connect(pOptions_Action, SIGNAL(triggered()), this, SLOT(invokeOptionsDlg())));
 
    // Window
-   mpCascadeAction = new QAction(pIcons->mCascade, "&Cascade", this);
+   mpCascadeAction = new QAction(QIcon(":/icons/Cascade"), "&Cascade", this);
    mpCascadeAction->setAutoRepeat(false);
    mpCascadeAction->setToolTip("Cascade");
    mpCascadeAction->setStatusTip("Arranges windows in an overlapping fashion");
@@ -661,17 +657,17 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    QActionGroup* pWinGroup = new QActionGroup(this);
    VERIFYNR(connect(pWinGroup, SIGNAL(triggered(QAction*)), this, SLOT(arrangeWorkspaceWindows(QAction*))));
 
-   mpTileAction = pWinGroup->addAction(pIcons->mTile, "Ti&le");
+   mpTileAction = pWinGroup->addAction(QIcon(":/icons/Tile"), "Ti&le");
    mpTileAction->setAutoRepeat(false);
    mpTileAction->setToolTip("Tile");
    mpTileAction->setStatusTip("Arranges windows as non-overlapping tiles");
 
-   mpTileHorizontalAction = pWinGroup->addAction(pIcons->mTileHoriz, "Tile Horizontally");
+   mpTileHorizontalAction = pWinGroup->addAction(QIcon(":/icons/TileHoriz"), "Tile Horizontally");
    mpTileHorizontalAction->setAutoRepeat(false);
    mpTileHorizontalAction->setToolTip("Tile horizontally");
    mpTileHorizontalAction->setStatusTip("Arranges windows as non-overlapping vertical tiles");
 
-   mpTileVerticalAction = pWinGroup->addAction(pIcons->mTileVert, "Tile Vertically");
+   mpTileVerticalAction = pWinGroup->addAction(QIcon(":/icons/TileVert"), "Tile Vertically");
    mpTileVerticalAction->setAutoRepeat(false);
    mpTileVerticalAction->setToolTip("Tile vertically");
    mpTileVerticalAction->setStatusTip("Arranges windows as non-overlapping horizontal tiles");
@@ -683,7 +679,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    VERIFYNR(connect(mpTileSelectedAction, SIGNAL(triggered()), this, SLOT(tileSelectedWindows())));
 
    // Help
-   QAction* pHelp_Topics_Action = new QAction(pIcons->mHelp, "Application &Help...", this);
+   QAction* pHelp_Topics_Action = new QAction(QIcon(":/icons/HelpTopics"), "Application &Help...", this);
    pHelp_Topics_Action->setAutoRepeat(false);
    pHelp_Topics_Action->setToolTip("Application Help");
    pHelp_Topics_Action->setStatusTip(QString("Lists available help topics for the %1 application").arg(APP_NAME));
@@ -695,20 +691,20 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    pExtensions_Action->setStatusTip(QString("Display information about extensions and check for updates."));
    VERIFYNR(connect(pExtensions_Action, SIGNAL(triggered()), this, SLOT(displayExtensions())));
 
-   QAction* pAbout_Action = new QAction(pIcons->mAbout, QString("&About %1...").arg(APP_NAME), this);
+   QAction* pAbout_Action = new QAction(QIcon(":/icons/About"), QString("&About %1...").arg(APP_NAME), this);
    pAbout_Action->setAutoRepeat(false);
    pAbout_Action->setToolTip(QString("About %1").arg(APP_NAME));
    pAbout_Action->setStatusTip(QString("Displays %1 application, version number, and copyright information").arg(APP_NAME));
    VERIFYNR(connect(pAbout_Action, SIGNAL(triggered()), this, SLOT(aboutApp())));
 
    // SessionItem context menu
-   mpExportContextMenuAction = new QAction(pIcons->mSave, "Export", this);
+   mpExportContextMenuAction = new QAction(QIcon(":/icons/Save"), "Export", this);
    mpExportContextMenuAction->setAutoRepeat(false);
    mpExportContextMenuAction->setToolTip("Export");
    mpExportContextMenuAction->setStatusTip("Export this session item");
    VERIFYNR(connect(mpExportContextMenuAction, SIGNAL(triggered()), this, SLOT(exportSessionItem())));
 
-   mpPropertiesAction = new QAction(QIcon(pIcons->mProperties), "Properties...", this);
+   mpPropertiesAction = new QAction(QIcon(QIcon(":/icons/Properties")), "Properties...", this);
    mpPropertiesAction->setAutoRepeat(false);
    mpPropertiesAction->setToolTip("Properties");
    mpPropertiesAction->setStatusTip("Displays the properties for the selected item");
@@ -1171,7 +1167,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
 
    Service<DesktopServices> pDesktop;
    string shortcutContext = "View/Snapshot";
-   mpClipboardSizedAction = new QAction(QIcon(pIcons->mCopy), "Copy snapshot...", this);
+   mpClipboardSizedAction = new QAction(QIcon(":/icons/Copy"), "Copy snapshot...", this);
    mpClipboardSizedAction->setStatusTip
       ("Presents the copy snapshot dialog and copies a snapshot of the current view into the clipboard");
    mpClipboardSizedAction->setToolTip("Copy Snapshot With Dialog");
@@ -1179,7 +1175,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    pDesktop->initializeAction(mpClipboardSizedAction, shortcutContext);
    addAction(mpClipboardSizedAction);
 
-   mpClipboardAction = new QAction(QIcon(pIcons->mCopy), "Copy snapshot", this);
+   mpClipboardAction = new QAction(QIcon(":/icons/Copy"), "Copy snapshot", this);
    mpClipboardAction->setShortcut(QKeySequence("Ctrl+Shift+C"));
    mpClipboardAction->setStatusTip
       ("Copies a snapshot of the current view using the default resolution into the clipboard");
@@ -5602,10 +5598,7 @@ void ApplicationWindow::updateContextMenu(Subject& subject, const string& signal
    // Delete element action
    if (dynamic_cast<DataElement*>(pItem) != NULL)
    {
-      Icons* pIcons = Icons::instance();
-      REQUIRE(pIcons != NULL);
-
-      QAction* pDeleteAction = new QAction(QIcon(pIcons->mDelete), "&Delete", pMenu->getActionParent());
+      QAction* pDeleteAction = new QAction(QIcon(":/icons/Delete"), "&Delete", pMenu->getActionParent());
       pDeleteAction->setAutoRepeat(false);
       pDeleteAction->setStatusTip("Destroys the selected data element");
       pDeleteAction->setData(QVariant::fromValue(pItem));

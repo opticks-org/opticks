@@ -14,14 +14,12 @@
 #include "CustomColorButton.h"
 #include "DateTimeImp.h"
 #include "FilenameImp.h"
-#include "IconImages.h"
 #include "StringUtilities.h"
 #include "DynamicObjectAdapter.h"
 #include "ObjectResource.h"
 #include "SymbolTypeGrid.h"
 
 #include <QtCore/QDateTime>
-#include <QtGui/QBitmap>
 #include <QtGui/QDateTimeEdit>
 #include <QtGui/QFileDialog>
 #include <QtGui/QGroupBox>
@@ -117,9 +115,7 @@ DataVariantEditor::DataVariantEditor(QWidget* parent) :
    mpStack->addWidget(pSymbolTypeWidget);
 
    // Browse button
-   QPixmap pixOpen(IconImages::OpenIcon);
-   pixOpen.setMask(pixOpen.createHeuristicMask());
-   QIcon icnBrowse(pixOpen);
+   QIcon icnBrowse(":/icons/Open");
 
    mpBrowseButton = new QPushButton(icnBrowse, QString(), this);
    mpBrowseButton->setFixedWidth(27);

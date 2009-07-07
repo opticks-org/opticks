@@ -9,7 +9,6 @@
 
 #include <QtCore/QDir>
 #include <QtCore/QRegExp>
-#include <QtGui/QBitmap>
 #include <QtGui/QFileDialog>
 #include <QtGui/QLabel>
 #include <QtGui/QLayout>
@@ -19,7 +18,6 @@
 #include <QtGui/QTabWidget>
 
 #include "SearchDlg.h"
-#include "IconImages.h"
 #include "Progress.h"
 
 SearchDlg::SearchDlg(Progress* pProgress, QWidget* parent) :
@@ -33,9 +31,7 @@ SearchDlg::SearchDlg(Progress* pProgress, QWidget* parent) :
    // Location tab
    QWidget* pLocationWidget = new QWidget(pTabWidget);
 
-   QPixmap pixOpen(IconImages::OpenIcon);
-   pixOpen.setMask(pixOpen.createHeuristicMask());
-   QIcon icnBrowse(pixOpen);
+   QIcon icnBrowse(":/icons/Open");
 
    QLabel* pDirectoryLabel = new QLabel("Search Directories:", pLocationWidget);
    mpDirectoryEdit = new QTextEdit(pLocationWidget);

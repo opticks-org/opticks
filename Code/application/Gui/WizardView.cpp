@@ -25,7 +25,6 @@
 #include "ConfigurationSettings.h"
 #include "DataVariant.h"
 #include "FileResource.h"
-#include "Icons.h"
 #include "NameTypeValueDlg.h"
 #include "ObjectResource.h"
 #include "Subject.h"
@@ -617,10 +616,7 @@ void WizardView::keyPressEvent(QKeyEvent* pEvent)
 
    if (QApplication::keyboardModifiers() == Qt::ShiftModifier)
    {
-      Icons* pIcons = Icons::instance();
-      VERIFYNRV(pIcons != NULL);
-
-      setCursor(QCursor(pIcons->mZoomRectCursor, pIcons->mZoomRectMask, 0, 0));
+      setCursor(QCursor(QPixmap(":/icons/ZoomRectCursor"), 0, 0));
    }
 
    QGraphicsView::keyPressEvent(pEvent);
@@ -738,10 +734,7 @@ void WizardView::enterEvent(QEvent* pEvent)
    QGraphicsView::enterEvent(pEvent);
    if (QApplication::keyboardModifiers() == Qt::ShiftModifier)
    {
-      Icons* pIcons = Icons::instance();
-      VERIFYNRV(pIcons != NULL);
-
-      setCursor(QCursor(pIcons->mZoomRectCursor, pIcons->mZoomRectMask, 0, 0));
+      setCursor(QCursor(QPixmap(":/icons/ZoomRectCursor"), 0, 0));
    }
 }
 
@@ -981,9 +974,6 @@ void WizardView::contextMenuEvent(QContextMenuEvent* pEvent)
    QGraphicsScene* pScene = scene();
    VERIFYNRV(pScene != NULL);
 
-   Icons* pIcons = Icons::instance();
-   VERIFYNRV(pIcons != NULL);
-
    vector<WizardGraphicsItem*> items = getGraphicsItems();
    vector<WizardItem*> selectedWizardItems = getSelectedItems();
    QList<QGraphicsItem*> selectedItems = pScene->selectedItems();
@@ -1032,7 +1022,7 @@ void WizardView::contextMenuEvent(QContextMenuEvent* pEvent)
          pRemoveConnectionsAction = contextMenu.addAction("&Remove Connections");
       }
 
-      QAction* pDeleteAction = contextMenu.addAction(pIcons->mDelete, "&Delete");
+      QAction* pDeleteAction = contextMenu.addAction(QIcon(":/icons/Delete"), "&Delete");
 
       // Invoke the menu
       QAction* pInvokedAction = contextMenu.exec(pEvent->globalPos());
@@ -1092,7 +1082,7 @@ void WizardView::contextMenuEvent(QContextMenuEvent* pEvent)
    {
       // Create the selected connections menu
       QMenu contextMenu(this);
-      QAction* pDeleteAction = contextMenu.addAction(pIcons->mDelete, "&Delete");
+      QAction* pDeleteAction = contextMenu.addAction(QIcon(":/icons/Delete"), "&Delete");
 
       // Invoke the menu
       QAction* pInvokedAction = contextMenu.exec(pEvent->globalPos());
@@ -1111,16 +1101,16 @@ void WizardView::contextMenuEvent(QContextMenuEvent* pEvent)
       QAction* pBatchAction = contextMenu.addAction("&Batch Mode");
       QAction* pInteractiveAction = contextMenu.addAction("&Interactive Mode");
       contextMenu.addSeparator();
-      QAction* pZoomInAction = contextMenu.addAction(pIcons->mZoomIn, "&Zoom In", this, SLOT(zoomIn()));
-      QAction* pZoomOutAction = contextMenu.addAction(pIcons->mZoomOut, "Zoom &Out", this, SLOT(zoomOut()));
-      QAction* pZoomToFitAction = contextMenu.addAction(pIcons->mZoomToFit, "Zoom to &Fit", this, SLOT(zoomToFit()));
+      QAction* pZoomInAction = contextMenu.addAction(QIcon(":/icons/ZoomIn"), "&Zoom In", this, SLOT(zoomIn()));
+      QAction* pZoomOutAction = contextMenu.addAction(QIcon(":/icons/ZoomOut"), "Zoom &Out", this, SLOT(zoomOut()));
+      QAction* pZoomToFitAction = contextMenu.addAction(QIcon(":/icons/ZoomToFit"), "Zoom to &Fit", this, SLOT(zoomToFit()));
       contextMenu.addSeparator();
       QAction* pExecuteAction = contextMenu.addAction("&Execute", this, SLOT(execute()));
       contextMenu.addSeparator();
       QAction* pClearAction = contextMenu.addAction("&Clear");
       contextMenu.addSeparator();
-      QAction* pSaveAction = contextMenu.addAction(pIcons->mSave, "&Save", this, SLOT(save()));
-      QAction* pPrintAction = contextMenu.addAction(pIcons->mPrint, "&Print", this, SLOT(print()));
+      QAction* pSaveAction = contextMenu.addAction(QIcon(":/icons/Save"), "&Save", this, SLOT(save()));
+      QAction* pPrintAction = contextMenu.addAction(QIcon(":/icons/Print"), "&Print", this, SLOT(print()));
 
       pBatchAction->setCheckable(true);
       pInteractiveAction->setCheckable(true);

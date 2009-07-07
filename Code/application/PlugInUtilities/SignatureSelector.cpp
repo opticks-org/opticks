@@ -8,7 +8,6 @@
  */
 
 #include <QtCore/QFileInfo>
-#include <QtGui/QBitmap>
 #include <QtGui/QFileDialog>
 #include <QtGui/QHeaderView>
 #include <QtGui/QLabel>
@@ -18,7 +17,6 @@
 #include "ApplicationServices.h"
 #include "DesktopServices.h"
 #include "DynamicObject.h"
-#include "IconImages.h"
 #include "Importer.h"
 #include "ModelServices.h"
 #include "NameValueDlg.h"
@@ -134,9 +132,7 @@ SignatureSelector::SignatureSelector(Progress* pProgress, QWidget* parent,
    mpFilesList->setMinimumHeight(110);
    mpFilesList->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
-   QPixmap pixOpen(IconImages::OpenIcon);
-   pixOpen.setMask(pixOpen.createHeuristicMask());
-   QIcon icnBrowse(pixOpen);
+   QIcon icnBrowse(":/icons/Open");
 
    QPushButton* pBrowseButton = new QPushButton(icnBrowse, "&Browse...", mpImportWidget);
    QPushButton* pSearchButton = new QPushButton("&Search...", mpImportWidget);

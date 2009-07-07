@@ -13,7 +13,6 @@
 #include "WizardWidget.h"
 #include "AppVerify.h"
 #include "DataVariantEditor.h"
-#include "IconImages.h"
 #include "BatchWizard.h"
 
 #include <string>

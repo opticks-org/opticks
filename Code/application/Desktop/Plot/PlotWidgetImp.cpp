@@ -33,7 +33,6 @@
 #include "DesktopServices.h"
 #include "FloatingLabel.h"
 #include "GridlinesImp.h"
-#include "Icons.h"
 #include "Legend.h"
 #include "Locator.h"
 #include "LocatorImp.h"
@@ -76,12 +75,10 @@ PlotWidgetImp::PlotWidgetImp(const string& id, const string& plotName, PlotType 
    mOrganizationPosition(TOP_RIGHT_BOTTOM_LEFT)
 {
    // Context menu actions
-   Icons* pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
    Service<DesktopServices> pDesktop;
    string shortcutContext = "Plot";
 
-   mpPrintAction = new QAction(pIcons->mPrint, "&Print...", this);
+   mpPrintAction = new QAction(QIcon(":/icons/Print"), "&Print...", this);
    mpPrintAction->setAutoRepeat(false);
    mpPrintAction->setShortcut(QKeySequence("Ctrl+P"));
    mpPrintAction->setStatusTip("Sends the displayed area of the current plot to the printer");

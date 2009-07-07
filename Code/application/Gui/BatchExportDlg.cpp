@@ -8,7 +8,6 @@
  */
 
 #include <QtCore/QDir>
-#include <QtGui/QBitmap>
 #include <QtGui/QDialogButtonBox>
 #include <QtGui/QFileDialog>
 #include <QtGui/QFrame>
@@ -18,7 +17,6 @@
 
 #include "AppVerify.h"
 #include "BatchExportDlg.h"
-#include "IconImages.h"
 #include "PlugInDescriptor.h"
 #include "PlugInResource.h"
 
@@ -33,9 +31,7 @@ BatchExportDlg::BatchExportDlg(ExporterResource& exporter, const vector<PlugInDe
    QLabel* pDirectoryLabel = new QLabel("Directory:", this);
    mpDirectoryEdit = new QLineEdit(this);
 
-   QPixmap pixBrowse(IconImages::OpenIcon);
-   pixBrowse.setMask(pixBrowse.createHeuristicMask());
-   QIcon icnBrowse(pixBrowse);
+   QIcon icnBrowse(":/icons/Open");
 
    QPushButton* pBrowseButton = new QPushButton(icnBrowse, QString(), this);
    pBrowseButton->setFixedWidth(27);

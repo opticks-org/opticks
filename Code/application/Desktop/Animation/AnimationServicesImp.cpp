@@ -16,7 +16,6 @@
 #include "ContextMenu.h"
 #include "ContextMenuActions.h"
 #include "DesktopServices.h"
-#include "Icons.h"
 
 #include <boost/bind.hpp>
 
@@ -300,11 +299,7 @@ void AnimationServicesImp::updateContextMenu(Subject& subject, const string& sig
 
       // Add a delete action
       QAction* pDeleteAction = new QAction("&Delete", pParent);
-      Icons* pIcons = Icons::instance();
-      if (pIcons != NULL)
-      {
-         pDeleteAction->setIcon(QIcon(pIcons->mDelete));
-      }
+      pDeleteAction->setIcon(QIcon(":/icons/Delete"));
       pDeleteAction->setAutoRepeat(false);
       pDeleteAction->setStatusTip("Destroys the selected animation controller(s)");
       connect(pDeleteAction, SIGNAL(triggered()), this, SLOT(destroySelectedControllers()));

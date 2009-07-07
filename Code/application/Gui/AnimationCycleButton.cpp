@@ -8,9 +8,7 @@
  */
 
 #include "AnimationCycleButton.h"
-#include "AppAssert.h"
 #include "AppVerify.h"
-#include "Icons.h"
 #include "StringUtilities.h"
 
 AnimationCycleGrid::AnimationCycleGrid(QWidget* pParent): PixmapGrid(pParent)
@@ -18,15 +16,13 @@ AnimationCycleGrid::AnimationCycleGrid(QWidget* pParent): PixmapGrid(pParent)
    setNumRows(1);
    setNumColumns(3);
 
-   Icons* pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
-   setPixmap(0, 0, pIcons->mPlayOnce,
+   setPixmap(0, 0, QPixmap(":/icons/PlayOnce"),
       QString::fromStdString(StringUtilities::toXmlString(PLAY_ONCE)),
       QString::fromStdString(StringUtilities::toDisplayString(PLAY_ONCE)));
-   setPixmap(0, 1, pIcons->mBouncePlay,
+   setPixmap(0, 1, QPixmap(":/icons/PlayBounce"),
       QString::fromStdString(StringUtilities::toXmlString(BOUNCE)),
       QString::fromStdString(StringUtilities::toDisplayString(BOUNCE)));
-   setPixmap(0, 2, pIcons->mRepeatPlay,
+   setPixmap(0, 2, QPixmap(":/icons/PlayRepeat"),
       QString::fromStdString(StringUtilities::toXmlString(REPEAT)),
       QString::fromStdString(StringUtilities::toDisplayString(REPEAT)));
 

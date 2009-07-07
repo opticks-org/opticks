@@ -7,7 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QBitmap>
 #include <QtGui/QFileDialog>
 #include <QtGui/QGroupBox>
 #include <QtGui/QLabel>
@@ -17,7 +16,6 @@
 #include <QtGui/QPushButton>
 
 #include "PcaDlg.h"
-#include "IconImages.h"
 #include "StringUtilities.h"
 
 using namespace std;
@@ -54,10 +52,7 @@ PcaDlg::PcaDlg(const vector<string> &aoiList, unsigned int ulBands, QWidget* par
    mpFileEdit = new QLineEdit(pTransformGroup);
    mpFileEdit->setMinimumWidth(250);
 
-   QPixmap pixOpen(IconImages::OpenIcon);
-   pixOpen.setMask(pixOpen.createHeuristicMask());
-   QIcon icnBrowse(pixOpen);
-
+   QIcon icnBrowse(":/icons/Open");
    QPushButton* pBrowseButton = new QPushButton(icnBrowse, QString(), pTransformGroup);
    pBrowseButton->setFixedWidth(27);
    connect(pBrowseButton, SIGNAL(clicked()), this, SLOT(browse()));

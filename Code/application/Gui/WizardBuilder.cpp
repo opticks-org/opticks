@@ -16,9 +16,7 @@
 #include <QtGui/QMenu>
 #include <QtGui/QToolBar>
 
-#include "AppAssert.h"
 #include "AppVerify.h"
-#include "Icons.h"
 #include "MenuBarImp.h"
 #include "WizardBuilder.h"
 #include "WizardClipboard.h"
@@ -87,25 +85,22 @@ WizardBuilder::WizardBuilder(QWidget* pParent) :
    // Actions //
    /////////////
 
-   Icons* pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
-
    // File
-   QAction* pNewAction = new QAction(pIcons->mNew, "&New", this);
+   QAction* pNewAction = new QAction(QIcon(":/icons/New"), "&New", this);
    pNewAction->setAutoRepeat(false);
    pNewAction->setShortcut(QKeySequence::New);
    pNewAction->setStatusTip("Creates a new, empty wizard");
    pNewAction->setToolTip("New");
    VERIFYNR(connect(pNewAction, SIGNAL(triggered()), this, SLOT(newWizard())));
 
-   QAction* pOpenAction = new QAction(pIcons->mOpen, "&Open...", this);
+   QAction* pOpenAction = new QAction(QIcon(":/icons/Open"), "&Open...", this);
    pOpenAction->setAutoRepeat(false);
    pOpenAction->setShortcut(QKeySequence::Open);
    pOpenAction->setStatusTip("Opens an existing wizard from a file");
    pOpenAction->setToolTip("Open");
    VERIFYNR(connect(pOpenAction, SIGNAL(triggered()), this, SLOT(openWizard())));
 
-   QAction* pSaveAction = new QAction(pIcons->mSave, "&Save", this);
+   QAction* pSaveAction = new QAction(QIcon(":/icons/Save"), "&Save", this);
    pSaveAction->setAutoRepeat(false);
    pSaveAction->setShortcut(QKeySequence::Save);
    pSaveAction->setStatusTip("Saves the current wizard to the current file");
@@ -119,7 +114,7 @@ WizardBuilder::WizardBuilder(QWidget* pParent) :
    pSaveAsAction->setToolTip("Save As");
    VERIFYNR(connect(pSaveAsAction, SIGNAL(triggered()), mpView, SLOT(saveAs())));
 
-   QAction* pPrintAction = new QAction(pIcons->mPrint, "&Print", this);
+   QAction* pPrintAction = new QAction(QIcon(":/icons/Print"), "&Print", this);
    pPrintAction->setAutoRepeat(false);
    pPrintAction->setShortcut(QKeySequence::Print);
    pPrintAction->setStatusTip("Prints the current wizard");
@@ -134,21 +129,21 @@ WizardBuilder::WizardBuilder(QWidget* pParent) :
    VERIFYNR(connect(pCloseAction, SIGNAL(triggered()), this, SLOT(close())));
 
    // Edit
-   QAction* pCutAction = new QAction(pIcons->mCut, "Cu&t", this);
+   QAction* pCutAction = new QAction(QIcon(":/icons/Cut"), "Cu&t", this);
    pCutAction->setAutoRepeat(false);
    pCutAction->setShortcut(QKeySequence::Cut);
    pCutAction->setStatusTip("Cuts the currently selected wizard items and moves them to the clipboard");
    pCutAction->setToolTip("Cut");
    VERIFYNR(connect(pCutAction, SIGNAL(triggered()), this, SLOT(cut())));
 
-   QAction* pCopyAction = new QAction(pIcons->mCopy, "&Copy", this);
+   QAction* pCopyAction = new QAction(QIcon(":/icons/Copy"), "&Copy", this);
    pCopyAction->setAutoRepeat(false);
    pCopyAction->setShortcut(QKeySequence::Copy);
    pCopyAction->setStatusTip("Copies the currently selected wizard items to the clipboard");
    pCopyAction->setToolTip("Copy");
    VERIFYNR(connect(pCopyAction, SIGNAL(triggered()), this, SLOT(copy())));
 
-   QAction* pPasteAction = new QAction(pIcons->mPaste, "&Paste", this);
+   QAction* pPasteAction = new QAction(QIcon(":/icons/Paste"), "&Paste", this);
    pPasteAction->setAutoRepeat(false);
    pPasteAction->setShortcut(QKeySequence::Paste);
    pPasteAction->setStatusTip("Adds the clipboard wizard items to the wizard");
@@ -156,21 +151,21 @@ WizardBuilder::WizardBuilder(QWidget* pParent) :
    VERIFYNR(connect(pPasteAction, SIGNAL(triggered()), this, SLOT(paste())));
 
    // View
-   QAction* pZoomInAction = new QAction(pIcons->mZoomIn, "Zoom In", this);
+   QAction* pZoomInAction = new QAction(QIcon(":/icons/ZoomIn"), "Zoom In", this);
    pZoomInAction->setAutoRepeat(true);
    pZoomInAction->setShortcut(QKeySequence::ZoomIn);
    pZoomInAction->setStatusTip("Increases the zoom level in the view about the window center");
    pZoomInAction->setToolTip("Zoom In");
    VERIFYNR(connect(pZoomInAction, SIGNAL(triggered()), mpView, SLOT(zoomIn())));
 
-   QAction* pZoomOutAction = new QAction(pIcons->mZoomOut, "Zoom Out", this);
+   QAction* pZoomOutAction = new QAction(QIcon(":/icons/ZoomOut"), "Zoom Out", this);
    pZoomOutAction->setAutoRepeat(true);
    pZoomOutAction->setShortcut(QKeySequence::ZoomOut);
    pZoomOutAction->setStatusTip("Decreases the zoom level in the view about the window center");
    pZoomOutAction->setToolTip("Zoom Out");
    VERIFYNR(connect(pZoomOutAction, SIGNAL(triggered()), mpView, SLOT(zoomOut())));
 
-   QAction* pZoomToFitAction = new QAction(pIcons->mZoomToFit, "Zoom to Fit", this);
+   QAction* pZoomToFitAction = new QAction(QIcon(":/icons/ZoomToFit"), "Zoom to Fit", this);
    pZoomToFitAction->setAutoRepeat(false);
    pZoomToFitAction->setShortcut(Qt::Key_E);
    pZoomToFitAction->setStatusTip("Zooms the view to the maximum extent of the wizard items");
@@ -191,25 +186,25 @@ WizardBuilder::WizardBuilder(QWidget* pParent) :
    pSelectAction->setToolTip("Select All Items");
    VERIFYNR(connect(pSelectAction, SIGNAL(triggered()), mpView, SLOT(selectAllItems())));
 
-   QAction* pRemoveAction = new QAction(pIcons->mDelete, "&Remove", this);
+   QAction* pRemoveAction = new QAction(QIcon(":/icons/Delete"), "&Remove", this);
    pRemoveAction->setAutoRepeat(false);
    pRemoveAction->setShortcut(QKeySequence("Ctrl+R"));
    pRemoveAction->setStatusTip("Removes the currently selected items");
    pRemoveAction->setToolTip("Remove Item");
    VERIFYNR(connect(pRemoveAction, SIGNAL(triggered()), mpView, SLOT(removeSelectedItems())));
 
-   QAction* pEditAction = new QAction(pIcons->mValueEdit, "&Edit...", this);
+   QAction* pEditAction = new QAction(QIcon(":/icons/ValueEdit"), "&Edit...", this);
    pEditAction->setAutoRepeat(false);
    pEditAction->setStatusTip("Edits the selected item");
    pEditAction->setToolTip("Edit Item");
    VERIFYNR(connect(pEditAction, SIGNAL(triggered()), this, SLOT(editItem())));
 
-   QAction* pIncreaseAction = new QAction(pIcons->mIncrease, "&Increase Order", this);
+   QAction* pIncreaseAction = new QAction(QIcon(":/icons/Increase"), "&Increase Order", this);
    pIncreaseAction->setStatusTip("Increases the execution order of the currently selected item by one");
    pIncreaseAction->setToolTip("Increase Order");
    VERIFYNR(connect(pIncreaseAction, SIGNAL(triggered()), this, SLOT(increaseCurrentItemOrder())));
 
-   QAction* pDecreaseAction = new QAction(pIcons->mDecrease, "&Decrease Order", this);
+   QAction* pDecreaseAction = new QAction(QIcon(":/icons/Decrease"), "&Decrease Order", this);
    pDecreaseAction->setStatusTip("Decreases the execution order of the currently selected item by one");
    pDecreaseAction->setToolTip("Decrease Order");
    VERIFYNR(connect(pDecreaseAction, SIGNAL(triggered()), this, SLOT(decreaseCurrentItemOrder())));

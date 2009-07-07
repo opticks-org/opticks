@@ -10,7 +10,6 @@
 #include "glCommon.h"
 #include "AnnotationElementAdapter.h"
 #include "AnnotationLayerAdapter.h"
-#include "AppAssert.h"
 #include "ApplicationWindow.h"
 #include "AppVerify.h"
 #include "AppVersion.h"
@@ -23,7 +22,6 @@
 #include "GraphicLayerUndo.h"
 #include "GraphicObject.h"
 #include "GraphicProperty.h"
-#include "Icons.h"
 #include "ModelServicesImp.h"
 #include "MouseModeImp.h"
 #include "ProductViewAdapter.h"
@@ -105,20 +103,17 @@ ProductViewImp::ProductViewImp(const string& id, const string& viewName, QGLCont
    addPropertiesPage(PropertiesProductView::getName());
    unblockUndo();
 
-   Icons* pIcons = NULL;
-   pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
    // Separator
    QAction* pPropertiesSeparatorAction = new QAction(this);
    pPropertiesSeparatorAction->setSeparator(true);
    addContextMenuAction(ContextMenuAction(pPropertiesSeparatorAction, APP_PRODUCTVIEW_PROPERTIES_SEPARATOR_ACTION));
-   setIcon(pIcons->mSpectralData);
-   setWindowIcon(pIcons->mSpectralData);
+   setIcon(QIcon(":/icons/SpectralData"));
+   setWindowIcon(QIcon(":/icons/SpectralData"));
    addMouseMode(new MouseModeImp("LayerMode", QCursor(Qt::ArrowCursor)));
    addMouseMode(new MouseModeImp("PanMode", QCursor(Qt::OpenHandCursor)));
-   addMouseMode(new MouseModeImp("ZoomInMode", QCursor(pIcons->mZoomInCursor, pIcons->mZoomInMask, 0, 0)));
-   addMouseMode(new MouseModeImp("ZoomOutMode", QCursor(pIcons->mZoomOutCursor, pIcons->mZoomOutMask, 0, 0)));
-   addMouseMode(new MouseModeImp("ZoomBoxMode", QCursor(pIcons->mZoomRectCursor, pIcons->mZoomRectMask, 0, 0)));
+   addMouseMode(new MouseModeImp("ZoomInMode", QCursor(QPixmap(":/icons/ZoomInCursor", 0, 0))));
+   addMouseMode(new MouseModeImp("ZoomOutMode", QCursor(QPixmap(":/icons/ZoomOutCursor", 0, 0))));
+   addMouseMode(new MouseModeImp("ZoomBoxMode", QCursor(QPixmap(":/icons/ZoomRectCursor", 0, 0))));
 
    // Connections
    connect(this, SIGNAL(mouseModeChanged(const MouseMode*)), this, SLOT(updateMouseCursor(const MouseMode*)));

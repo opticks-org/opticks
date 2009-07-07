@@ -8,18 +8,15 @@
  */
 
 #include <QtGui/QApplication>
-#include <QtGui/QBitmap>
 #include <QtGui/QCompleter>
 #include <QtGui/QDirModel>
 #include <QtGui/QFileDialog>
 #include <QtGui/QFocusEvent>
 #include <QtGui/QHBoxLayout>
 
-#include "AppAssert.h"
 #include "AppVerify.h"
 #include "FileBrowser.h"
 #include "Filename.h"
-#include "IconImages.h"
 
 FileBrowser::FileBrowser(QWidget* pParent) :
    QWidget(pParent),
@@ -36,9 +33,7 @@ FileBrowser::FileBrowser(QWidget* pParent) :
    mpFileEdit->installEventFilter(this);
 
    // Browse button
-   QPixmap pixOpen(IconImages::OpenIcon);
-   pixOpen.setMask(pixOpen.createHeuristicMask());
-   QIcon icnBrowse(pixOpen);
+   QIcon icnBrowse(":/icons/Open");
 
    mpBrowseButton = new QPushButton(icnBrowse, QString(), this);
    mpBrowseButton->setFixedWidth(27);

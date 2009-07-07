@@ -15,7 +15,6 @@
 #include "AppAssert.h"
 #include "DesktopServices.h"
 #include "ElementModel.h"
-#include "Icons.h"
 #include "PlugInModel.h"
 #include "SessionItem.h"
 #include "SessionItemModel.h"
@@ -166,9 +165,7 @@ SessionExplorerImp::SessionExplorerImp(const string& id, const string& windowNam
    pTabWidget->addTab(mpElementTree, "Elements");
    pTabWidget->addTab(mpPlugInTree, "Plug-Ins");
 
-   Icons* pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
-   setIcon(pIcons->mSessionExplorer);
+   setIcon(QIcon(":/icons/SessionExplorer"));
 
    setWidget(pTabWidget);
 

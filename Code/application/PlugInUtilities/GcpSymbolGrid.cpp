@@ -9,9 +9,7 @@
 
 #include "GcpSymbolGrid.h"
 
-#include "AppAssert.h"
 #include "AppVerify.h"
-#include "Icons.h"
 #include "StringUtilities.h"
 
 #include <QtGui/QBitmap>
@@ -28,15 +26,13 @@ GcpSymbolGrid::GcpSymbolGrid(QWidget* pParent)
    setNumRows(1);
    setNumColumns(3);
 
-   Icons* pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
-   setPixmap(0, 0, pIcons->mGcpX,
+   setPixmap(0, 0, QPixmap(":/icons/GcpX"),
       QString::fromStdString(StringUtilities::toXmlString(GCP_X)),
       QString::fromStdString(StringUtilities::toDisplayString(GCP_X)));
-   setPixmap(0, 1, pIcons->mGcpPlus,
+   setPixmap(0, 1, QPixmap(":/icons/GcpPlus"),
       QString::fromStdString(StringUtilities::toXmlString(GCP_PLUS)),
       QString::fromStdString(StringUtilities::toDisplayString(GCP_PLUS)));
-   setPixmap(0, 2, pIcons->mGcpBlank,
+   setPixmap(0, 2, QPixmap(":/icons/GcpBlank"),
       QString::fromStdString(StringUtilities::toXmlString(GCP_NODRAW)),
       QString::fromStdString(StringUtilities::toDisplayString(GCP_NODRAW)));
 

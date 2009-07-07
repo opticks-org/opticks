@@ -12,7 +12,6 @@
 #include "DataAccessorImpl.h"
 #include "DrawUtil.h"
 #include "glCommon.h"
-#include "Icons.h"
 #include "MathUtil.h"
 #include "ModelServices.h"
 #include "PropertiesThresholdLayer.h"
@@ -96,11 +95,7 @@ ThresholdLayerImp::ThresholdLayerImp(const string& id, const string& layerName, 
    addPropertiesPage(PropertiesThresholdLayer::getName());
 
    // Setting up the icon.
-   Icons* pIcons = Icons::instance();
-   if (pIcons != NULL)
-   {
-      setIcon(pIcons->mThresholdLayer);
-   }
+   setIcon(QIcon(":/icons/ThresholdLayer"));
 
    VERIFYNR(connect(this, SIGNAL(firstThresholdChanged(double)), this, SIGNAL(modified())));
    VERIFYNR(connect(this, SIGNAL(secondThresholdChanged(double)), this, SIGNAL(modified())));

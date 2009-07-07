@@ -30,7 +30,6 @@
 #include "DesktopServices.h"
 #include "GraphicGroupImp.h"
 #include "HistogramAdapter.h"
-#include "Icons.h"
 #include "LocatorAdapter.h"
 #include "MouseModeImp.h"
 #include "PlotGroupAdapter.h"
@@ -71,8 +70,6 @@ PlotViewImp::PlotViewImp(const string& id, const string& viewName, QGLContext* d
    mEnableShading(false),
    mExtentsMargin(0.0)
 {
-   Icons* pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
    Service<DesktopServices> pDesktop;
    string shortcutContext = "Plot";
    list<ContextMenuAction> menuActions;
@@ -86,31 +83,31 @@ PlotViewImp::PlotViewImp(const string& id, const string& viewName, QGLContext* d
       mpMouseModeGroup = new QActionGroup(mpMouseModeMenu);
       mpMouseModeGroup->setExclusive(true);
 
-      mpObjectSelectAction = mpMouseModeGroup->addAction(pIcons->mEdit, "&Object Selection");
+      mpObjectSelectAction = mpMouseModeGroup->addAction(QIcon(":/icons/Edit"), "&Object Selection");
       mpObjectSelectAction->setAutoRepeat(false);
       mpObjectSelectAction->setCheckable(true);
       mpObjectSelectAction->setStatusTip("Enables selection of objects within the plot area");
       pDesktop->initializeAction(mpObjectSelectAction, mouseModeContext);
 
-      mpPanAction = mpMouseModeGroup->addAction(pIcons->mPan, "&Pan");
+      mpPanAction = mpMouseModeGroup->addAction(QIcon(":/icons/Pan"), "&Pan");
       mpPanAction->setAutoRepeat(false);
       mpPanAction->setCheckable(true);
       mpPanAction->setStatusTip("Enables panning within the plot area");
       pDesktop->initializeAction(mpPanAction, mouseModeContext);
 
-      mpZoomAction = mpMouseModeGroup->addAction(pIcons->mZoomRect, "&Zoom");
+      mpZoomAction = mpMouseModeGroup->addAction(QIcon(":/icons/ZoomRect"), "&Zoom");
       mpZoomAction->setAutoRepeat(false);
       mpZoomAction->setCheckable(true);
       mpZoomAction->setStatusTip("Enables zooming within the plot area");
       pDesktop->initializeAction(mpZoomAction, mouseModeContext);
 
-      mpLocateAction = mpMouseModeGroup->addAction(pIcons->mDrawPixel, "&Locate Point");
+      mpLocateAction = mpMouseModeGroup->addAction(QIcon(":/icons/DrawPixel"), "&Locate Point");
       mpLocateAction->setAutoRepeat(false);
       mpLocateAction->setCheckable(true);
       mpLocateAction->setStatusTip("Enables display of plot values at a given point");
       pDesktop->initializeAction(mpLocateAction, mouseModeContext);
 
-      mpAnnotateAction = mpMouseModeGroup->addAction(pIcons->mAnnotation, "&Annotation");
+      mpAnnotateAction = mpMouseModeGroup->addAction(QIcon(":/icons/Annotation"), "&Annotation");
       mpAnnotateAction->setAutoRepeat(false);
       mpAnnotateAction->setCheckable(true);
       mpAnnotateAction->setStatusTip("Adds an annotation object (arrow with text) to the plot at a given point");
@@ -127,7 +124,7 @@ PlotViewImp::PlotViewImp(const string& id, const string& viewName, QGLContext* d
    }
 
    // Rescale axes
-   QAction* pRescaleAction = new QAction(pIcons->mZoomToFit, "&Rescale Axes", this);
+   QAction* pRescaleAction = new QAction(QIcon(":/icons/ZoomToFit"), "&Rescale Axes", this);
    pRescaleAction->setAutoRepeat(false);
    pRescaleAction->setStatusTip("Restores the plot axes to the original scale");
    VERIFYNR(connect(pRescaleAction, SIGNAL(triggered()), this, SLOT(zoomExtents())));
@@ -165,7 +162,7 @@ PlotViewImp::PlotViewImp(const string& id, const string& viewName, QGLContext* d
    addMouseMode(new MouseModeImp("LocatorMode", QCursor(Qt::CrossCursor), mpLocateAction));
    addMouseMode(new MouseModeImp("PanMode", QCursor(Qt::OpenHandCursor), mpPanAction));
    addMouseMode(new MouseModeImp("SelectionMode", QCursor(Qt::ArrowCursor), mpObjectSelectAction));
-   addMouseMode(new MouseModeImp("ZoomBoxMode", QCursor(pIcons->mZoomRectCursor, pIcons->mZoomRectMask, 0, 0),
+   addMouseMode(new MouseModeImp("ZoomBoxMode", QCursor(QPixmap(":/icons/ZoomRectCursor"), 0, 0),
       mpZoomAction));
    addMouseMode(new MouseModeImp("AnnotationMode", mpAnnotationLayer->getMouseCursor(), mpAnnotateAction));
 

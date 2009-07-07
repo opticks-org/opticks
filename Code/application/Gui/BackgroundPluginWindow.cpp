@@ -14,9 +14,7 @@
 #include <QtGui/QPushButton>
 
 #include "BackgroundPluginWindow.h"
-#include "AppAssert.h"
 #include "Executable.h"
-#include "Icons.h"
 #include "PlugIn.h"
 #include "PlugInCallback.h"
 #include "PlugInManagerServicesImp.h"
@@ -194,9 +192,7 @@ BackgroundPluginWindow::BackgroundPluginWindow(const string& id, QWidget* parent
    pLayout->addLayout(pButtonLayout);
 
    // Initialization
-   Icons* pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
-   setIcon(pIcons->mBackgroundTask);
+   setIcon(QIcon(":/icons/BackgroundTask"));
 
    setWidget(pWindowWidget);
    mpDismissButton->setEnabled(false);

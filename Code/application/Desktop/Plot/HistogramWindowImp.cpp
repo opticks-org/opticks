@@ -9,7 +9,6 @@
 
 #include <QtCore/QEvent>
 
-#include "AppAssert.h"
 #include "AppVerify.h"
 #include "ContextMenu.h"
 #include "ContextMenuActions.h"
@@ -17,7 +16,6 @@
 #include "HistogramPlotAdapter.h"
 #include "HistogramWindow.h"
 #include "HistogramWindowImp.h"
-#include "Icons.h"
 #include "InfoBar.h"
 #include "Layer.h"
 #include "LayerListAdapter.h"
@@ -54,16 +52,13 @@ HistogramWindowImp::HistogramWindowImp(const string& id, const string& windowNam
    pDesktop->initializeAction(mpSyncAutoZoomAction, "Histogram Plot");     // Use the plot context since the action
                                                                            // will appear on the plot menu
 
-   Icons* pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
-
    InfoBar* pInfoBar = getInfoBar();
    if (pInfoBar != NULL)
    {
-      pInfoBar->setInfoIcon(pIcons->mHistogram);
+      pInfoBar->setInfoIcon(QPixmap(":/icons/HistogramWindow"));
    }
 
-   setIcon(pIcons->mHistogram);
+   setIcon(QIcon(":/icons/HistogramWindow"));
 }
 
 HistogramWindowImp::~HistogramWindowImp()

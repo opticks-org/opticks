@@ -16,12 +16,10 @@
 
 #include "ChippingWindow.h"
 #include "ChippingWidget.h"
-#include "AppAssert.h"
 #include "AppVerify.h"
 #include "DesktopServicesImp.h"
 #include "DimensionDescriptor.h"
 #include "GcpList.h"
-#include "Icons.h"
 #include "LayerList.h"
 #include "ModelServices.h"
 #include "ObjectResource.h"
@@ -91,9 +89,7 @@ ChippingWindow::ChippingWindow(SpatialDataView* pView, QWidget* parent) :
    mpWindowRadio->setChecked(true);
 
    // Set the window icon
-   Icons* pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
-   setWindowIcon(QIcon(pIcons->mChipImage));
+   setWindowIcon(QIcon(":/icon/ChipImage"));
 
    // Set the caption of the dialog
    QString strCaption = "Create Image Chip";

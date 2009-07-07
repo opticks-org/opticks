@@ -11,7 +11,6 @@
 #include <QtGui/QWidgetAction>
 
 #include "AppVerify.h"
-#include "Icons.h"
 #include "UndoButton.h"
 
 UndoButton::UndoButton(bool bUndo, QUndoGroup* pGroup, QWidget* pParent) :
@@ -37,17 +36,15 @@ UndoButton::UndoButton(bool bUndo, QUndoGroup* pGroup, QWidget* pParent) :
    QAction* pAction = NULL;
    if (mpUndoGroup != NULL)
    {
-      Icons* pIcons = Icons::instance();
-
       if (mUndo == true)
       {
          pAction = mpUndoGroup->createUndoAction(this);
-         pAction->setIcon(pIcons->mUndo);
+         pAction->setIcon(QIcon(":/icons/Undo"));
       }
       else
       {
          pAction = mpUndoGroup->createRedoAction(this);
-         pAction->setIcon(pIcons->mRedo);
+         pAction->setIcon(QIcon(":/icons/Redo"));
       }
    }
 

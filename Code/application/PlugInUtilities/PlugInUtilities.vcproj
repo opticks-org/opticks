@@ -1208,10 +1208,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\IconImages.h"
-				>
-			</File>
-			<File
 				RelativePath=".\ImageResolutionWidget.h"
 				>
 				<FileConfiguration

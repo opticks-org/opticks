@@ -13,7 +13,6 @@
 #include "AnnotationLayerImp.h"
 #include "GraphicLayer.h"
 #include "GraphicObjectImp.h"
-#include "Icons.h"
 #include "PropertiesAnnotationLayer.h"
 
 #include <string>
@@ -55,13 +54,7 @@ AnnotationLayerImp::AnnotationLayerImp(const string& id, const string& layerName
    addAcceptableGraphicType(MEASUREMENT_OBJECT); // does not provide a gui to create
 
    setSnapToGrid(false);
-
-   Icons* pIcons = Icons::instance();
-   if (pIcons != NULL)
-   {
-      setIcon(pIcons->mAnnotation);
-   }
-
+   setIcon(QIcon(":/icons/Annotation"));
    addPropertiesPage(PropertiesAnnotationLayer::getName());
 
    connect(this, SIGNAL(objectAdded(GraphicObject *)), this, SLOT(objectWasAdded(GraphicObject *)));
@@ -212,15 +205,7 @@ LayerType AnnotationLayerImp::getLayerType() const
 
 QCursor AnnotationLayerImp::getMouseCursor() const
 {
-   QCursor mouseCursor;
-
-   Icons* pIcons = Icons::instance();
-   if (pIcons != NULL)
-   {
-      mouseCursor = QCursor(pIcons->mAnnoCursor, pIcons->mAnnoMask, 1, 15);
-   }
-
-   return mouseCursor;
+   return QCursor(QPixmap(":/icons/AnnotationCursor"), 1, 15);
 }
 
 LocationType AnnotationLayerImp::correctCoordinate(const LocationType &coord) const

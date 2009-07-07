@@ -7,14 +7,12 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QBitmap>
 #include <QtGui/QPainter>
 #include <QtGui/QPixmap>
 #include <QtGui/QStyle>
 
 #include "CustomColorButton.h"
 #include "ColorMenu.h"
-#include "IconImages.h"
 
 CustomColorButton::CustomColorButton(QWidget* parent) :
    QToolButton(parent)
@@ -83,9 +81,7 @@ void CustomColorButton::setColor(const QColor& clrNew)
    }
    else
    {
-      QPixmap invalidPixmap(IconImages::ForbiddenIcon);
-      invalidPixmap.setMask(invalidPixmap.createMaskFromColor(Qt::white));
-      setIcon(QIcon(invalidPixmap));
+      setIcon(QIcon(":/icons/Forbidden"));
    }
 
    emit colorChanged(clrNew);

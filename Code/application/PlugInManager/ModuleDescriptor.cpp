@@ -9,13 +9,13 @@
 
 #include <QtGui/QIcon>
 
+#include "ApplicationServices.h"
 #include "ModuleDescriptor.h"
 #include "ConnectionManager.h"
 #include "AppVerify.h"
 #include "External.h"
 #include "FileFinderImp.h"
 #include "FilenameImp.h"
-#include "Icons.h"
 #include "MessageLogResource.h"
 #include "PlugIn.h"
 #include "PlugInDescriptorImp.h"
@@ -41,12 +41,10 @@ ModuleDescriptor::ModuleDescriptor(const string& id) :
    mFileDate(0),
    mpModule(NULL)
 {
-   Icons* pIcons = Icons::instance();
-   if (pIcons != NULL)
+   if (Service<ApplicationServices>()->isInteractive())
    {
-      setIcon(pIcons->mModule);
+      setIcon(QIcon(":/icons/Module"));
    }
-
    addPropertiesPage(PropertiesModuleDescriptor::getName());
 }
 

@@ -46,7 +46,6 @@
 #include "GraphicGroup.h"
 #include "GraphicGroupImp.h"
 #include "GuiFunctors.h"
-#include "Icons.h"
 #include "LatLonInsertObject.h"
 #include "MultiLineTextDialog.h"
 #include "OrthographicView.h"
@@ -2097,9 +2096,6 @@ void GraphicLayerImp::updateContextMenu(Subject& subject, const string& signal, 
 
    QObject* pParent = pMenu->getActionParent();
 
-   Icons* pIcons = Icons::instance();
-   VERIFYNRV(pIcons != NULL);
-
    vector<SessionItem*> items = pMenu->getSessionItems();
 
    unsigned int numItems = items.size();
@@ -2115,7 +2111,7 @@ void GraphicLayerImp::updateContextMenu(Subject& subject, const string& signal, 
             APP_SESSIONEXPLORER_RENAME_ACTION);
 
          // Delete
-         QAction* pDeleteAction = new QAction(pIcons->mDelete, "Delete", pParent);
+         QAction* pDeleteAction = new QAction(QIcon(":/icons/Delete"), "Delete", pParent);
          pDeleteAction->setAutoRepeat(false);
          pDeleteAction->setData(QVariant::fromValue(pObject));
          connect(pDeleteAction, SIGNAL(triggered()), this, SLOT(deleteObject()));
@@ -2145,7 +2141,7 @@ void GraphicLayerImp::updateContextMenu(Subject& subject, const string& signal, 
          }
 
          // Delete
-         QAction* pDeleteAction = new QAction(pIcons->mDelete, "Delete", pParent);
+         QAction* pDeleteAction = new QAction(QIcon(":/icons/Delete"), "Delete", pParent);
          pDeleteAction->setAutoRepeat(false);
          pDeleteAction->setData(QVariant(objectList));
          connect(pDeleteAction, SIGNAL(triggered()), this, SLOT(deleteObject()));

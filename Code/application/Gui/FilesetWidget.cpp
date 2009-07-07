@@ -8,7 +8,6 @@
  */
 
 #include <QtCore/QRegExp>
-#include <QtGui/QBitmap>
 #include <QtGui/QFileDialog>
 #include <QtGui/QHeaderView>
 #include <QtGui/QLabel>
@@ -21,7 +20,6 @@
 #include "CustomTreeWidget.h"
 #include "FileBrowser.h"
 #include "FilesetWidget.h"
-#include "IconImages.h"
 
 #include <string>
 using namespace std;
@@ -39,9 +37,7 @@ FilesetWidget::FilesetWidget(QWidget* parent) :
 
    mpDirectoryEdit = new QLineEdit(this);
 
-   QPixmap pixOpen(IconImages::OpenIcon);
-   pixOpen.setMask(pixOpen.createHeuristicMask());
-   QIcon icnBrowse(pixOpen);
+   QIcon icnBrowse(":/icons/Open");
 
    mpBrowseButton = new QPushButton(icnBrowse, QString(), this);
    mpBrowseButton->setFixedWidth(27);

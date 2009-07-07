@@ -21,7 +21,6 @@
 #include "DataVariantEditor.h"
 #include "DateTimeImp.h"
 #include "FilenameImp.h"
-#include "IconImages.h"
 #include "StringUtilities.h"
 #include "DynamicObjectAdapter.h"
 #include "ObjectResource.h"

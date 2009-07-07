@@ -12,9 +12,7 @@
 #include <QtGui/QLayout>
 
 #include "ScriptingWindow.h"
-#include "AppAssert.h"
 #include "DesktopServicesImp.h"
-#include "Icons.h"
 #include "PlugInDescriptor.h"
 #include "PlugInManagerServicesImp.h"
 #include "PropertiesScriptingWindow.h"
@@ -52,10 +50,7 @@ ScriptingWindow::ScriptingWindow(const string& id, QWidget* pParent) :
    mpStack->addWidget(mpTabWidget);
 
    // Initialization
-   Icons* pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
-
-   setIcon(pIcons->mScript);
+   setIcon(QIcon(":/icons/Script"));
    setWidget(mpStack);
    addPropertiesPage(PropertiesScriptingWindow::getName());
    updateInterpreters();

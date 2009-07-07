@@ -19,11 +19,9 @@
 #include <QtGui/QSpinBox>
 #include <QtGui/QVBoxLayout>
 
-#include "AppAssert.h"
 #include "ColorType.h"
 #include "CustomColorButton.h"
 #include "FontSizeComboBox.h"
-#include "Icons.h"
 #include "LabeledSection.h"
 #include "LineStyleComboBox.h"
 #include "LineWidthComboBox.h"
@@ -39,9 +37,6 @@ using namespace std;
 
 OptionsMeasurementLayer::OptionsMeasurementLayer()
 {
-   Icons* pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
-
    // Line Properties
    QLabel* pLineWidthLabel = new QLabel("Line Width:", this);
    mpLineWidth = new LineWidthComboBox(this);

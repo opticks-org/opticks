@@ -12,12 +12,10 @@
 #include "ConfigurationSettings.h"
 #include "ConnectionParametersWidget.h"
 #include "Filename.h"
-#include "IconImages.h"
 #include "ShapeFileImporter.h"
 
 #include <QtGui/QCheckBox>
 #include <QtGui/QFileDialog>
-#include <QtGui/QBitmap>
 #include <QtGui/QIcon>
 #include <QtGui/QLabel>
 #include <QtGui/QLineEdit>
@@ -56,10 +54,7 @@ ConnectionParametersWidget::ConnectionParametersWidget(QWidget *pParent) : QWidg
    mpUseArcCheck = new QCheckBox("Use ArcGIS", this);
    // mpUseArcCheck gets special treatment in updateWidgets, don't need to add it to a vector
 
-   QPixmap openPix(IconImages::OpenIcon);
-   openPix.setMask(openPix.createHeuristicMask());
-
-   mpSelectFileButton = new QPushButton(QIcon(openPix), QString(), this);
+   mpSelectFileButton = new QPushButton(QIcon(":/icons/Open"), QString(), this);
    mFileWidgets.push_back(mpSelectFileButton);
 
    mpFilenameEdit = new QLineEdit(this);

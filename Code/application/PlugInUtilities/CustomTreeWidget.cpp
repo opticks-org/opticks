@@ -10,7 +10,6 @@
 #include <QtCore/QFileInfo>
 #include <QtCore/QRegExp>
 #include <QtGui/QApplication>
-#include <QtGui/QBitmap>
 #include <QtGui/QColorDialog>
 #include <QtGui/QCompleter>
 #include <QtGui/QDirModel>
@@ -25,7 +24,6 @@
 #include "AppVerify.h"
 #include "CustomTreeWidget.h"
 #include "FileBrowser.h"
-#include "IconImages.h"
 
 CustomTreeWidget::CustomTreeWidget(QWidget* parent) :
    QTreeWidget(parent),
@@ -325,9 +323,7 @@ void CustomTreeWidget::activateCellWidget(QTreeWidgetItem* pItem, int iColumn)
 
                if (mpBrowse == NULL)
                {
-                  QPixmap pixOpen(IconImages::OpenIcon);
-                  pixOpen.setMask(pixOpen.createHeuristicMask());
-                  QIcon icnBrowse(pixOpen);
+                  QIcon icnBrowse(":/icons/Open");
 
                   mpBrowse = new QPushButton(icnBrowse, QString(), viewport());
                   mpBrowse->setFixedWidth(25);
@@ -517,15 +513,15 @@ bool CustomTreeWidget::setCellCheckState(QTreeWidgetItem* pItem, int iColumn, Ch
    QPixmap checkStatePix;
    if (eState == CHECKED)
    {
-      checkStatePix = IconImages::CheckedIcon;
+      checkStatePix = QPixmap(":/icons/Checked");
    }
    else if (eState == SEMI_CHECKED)
    {
-      checkStatePix = IconImages::SemiCheckedIcon;
+      checkStatePix = QPixmap(":/icons/SemiChecked");
    }
    else
    {
-      checkStatePix = IconImages::UncheckedIcon;
+      checkStatePix = QPixmap(":/icons/Unchecked");
    }
 
    pItem->setIcon(iColumn, QIcon(checkStatePix));

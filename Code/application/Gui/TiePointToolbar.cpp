@@ -7,9 +7,7 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "AppAssert.h"
 #include "ColorMenu.h"
-#include "Icons.h"
 #include "MenuBarImp.h"
 #include "TiePointLayerAdapter.h"
 #include "TiePointToolbar.h"
@@ -24,8 +22,6 @@ TiePointToolBar::TiePointToolBar(const string& id, QWidget* parent) :
    mpColorMenu(NULL),
    mpTiePointLayer(NULL)
 {
-   Icons* pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
    string shortcutContext = windowTitle().toStdString();
 
    // Color
@@ -35,7 +31,7 @@ TiePointToolBar::TiePointToolBar(const string& id, QWidget* parent) :
       mpColorAction = mpColorMenu->menuAction();
       if (mpColorAction != NULL)
       {
-         mpColorAction->setIcon(pIcons->mTiePointColor);
+         mpColorAction->setIcon(QIcon(":/icons/TiePointColor"));
          mpColorAction->setStatusTip("Changes the pixel marker color for the current tie point layer");
          mpColorAction->setToolTip("Marker Color");
          connect(mpColorAction, SIGNAL(triggered()), mpColorMenu, SLOT(setCustomColor()));
@@ -48,7 +44,7 @@ TiePointToolBar::TiePointToolBar(const string& id, QWidget* parent) :
    }
 
    // Labels
-   mpLabelsEnabledAction = new QAction(pIcons->mTiePointLabels, "Labels Enabled", this);
+   mpLabelsEnabledAction = new QAction(QIcon(":/icons/TiePointLabels"), "Labels Enabled", this);
    mpLabelsEnabledAction->setAutoRepeat(false);
    mpLabelsEnabledAction->setStatusTip("Toggles the bold state of the selected text objects");
    mpLabelsEnabledAction->setCheckable(true);

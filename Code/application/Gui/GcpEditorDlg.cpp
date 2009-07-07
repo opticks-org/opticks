@@ -15,7 +15,6 @@
 #include <QtGui/QMessageBox>
 #include <QtGui/QRadioButton>
 
-#include "AppAssert.h"
 #include "AppVerify.h"
 #include "CustomTreeWidget.h"
 #include "DesktopServices.h"
@@ -24,7 +23,6 @@
 #include "GcpLayerImp.h"
 #include "GcpList.h"
 #include "GcpListUndo.h"
-#include "Icons.h"
 #include "LayerList.h"
 #include "RasterElement.h"
 #include "SpatialDataView.h"
@@ -148,9 +146,7 @@ GcpEditorDlg::GcpEditorDlg(QWidget* parent) :
    pGrid->setColumnStretch(1, 10);
 
    // Initialize
-   Icons* pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
-   setWindowIcon(pIcons->mGCPMarker);
+   setWindowIcon(QIcon(":/icons/GcpMarker"));
 
    setModal(false);
    setWindowTitle("GCP Editor");

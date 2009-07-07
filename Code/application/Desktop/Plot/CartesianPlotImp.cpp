@@ -13,9 +13,7 @@
 #include "CartesianPlotImp.h"
 #include "ContextMenuAction.h"
 #include "ContextMenuActions.h"
-#include "AppAssert.h"
 #include "DesktopServices.h"
-#include "Icons.h"
 #include "Undo.h"
 #include "xmlreader.h"
 #include "ZoomCustomDlg.h"
@@ -33,8 +31,6 @@ CartesianPlotImp::CartesianPlotImp(const string& id, const string& viewName, QGL
    mXScaleType(SCALE_LINEAR),
    mYScaleType(SCALE_LINEAR)
 {
-   Icons* pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
    Service<DesktopServices> pDesktop;
    string shortcutContext = "Cartesian Plot/Gridlines";
 
@@ -43,7 +39,7 @@ CartesianPlotImp::CartesianPlotImp(const string& id, const string& viewName, QGL
    if (pGridlinesMenu != NULL)
    {
       // Major
-      QAction* pMajorHorizGridAction = pGridlinesMenu->addAction(pIcons->mMajorHorizGrid, "Major &Horizontal");
+      QAction* pMajorHorizGridAction = pGridlinesMenu->addAction(QIcon(":/icons/MajorHorizontalGridlines"), "Major &Horizontal");
       pMajorHorizGridAction->setAutoRepeat(false);
       pMajorHorizGridAction->setCheckable(true);
       pMajorHorizGridAction->setStatusTip("Toggles the display of horizontal gridlines at the major tickmarks");
@@ -52,7 +48,7 @@ CartesianPlotImp::CartesianPlotImp(const string& id, const string& viewName, QGL
       connect(&mHorizontalGridlines, SIGNAL(visibilityChanged(bool)), pMajorHorizGridAction, SLOT(setChecked(bool)));
       pDesktop->initializeAction(pMajorHorizGridAction, shortcutContext);
 
-      QAction* pMajorVertGridAction = pGridlinesMenu->addAction(pIcons->mMajorVertGrid, "Major &Vertical");
+      QAction* pMajorVertGridAction = pGridlinesMenu->addAction(QIcon(":/icons/MajorVerticalGridlines"), "Major &Vertical");
       pMajorVertGridAction->setAutoRepeat(false);
       pMajorVertGridAction->setCheckable(true);
       pMajorVertGridAction->setStatusTip("Toggles the display of vertical gridlines at the major tickmarks");
@@ -65,7 +61,7 @@ CartesianPlotImp::CartesianPlotImp(const string& id, const string& viewName, QGL
       pGridlinesMenu->addSeparator();
 
       // Minor
-      QAction* pMinorHorizGridAction = pGridlinesMenu->addAction(pIcons->mMinorHorizGrid, "Minor Hori&zontal");
+      QAction* pMinorHorizGridAction = pGridlinesMenu->addAction(QIcon(":/icons/MinorHorizontalGridlines"), "Minor Hori&zontal");
       pMinorHorizGridAction->setAutoRepeat(false);
       pMinorHorizGridAction->setCheckable(true);
       pMinorHorizGridAction->setStatusTip("Toggles the display of horizontal gridlines at the minor tickmarks");
@@ -75,7 +71,7 @@ CartesianPlotImp::CartesianPlotImp(const string& id, const string& viewName, QGL
          SLOT(setChecked(bool)));
       pDesktop->initializeAction(pMinorHorizGridAction, shortcutContext);
 
-      QAction* pMinorVertGridAction = pGridlinesMenu->addAction(pIcons->mMinorVertGrid, "Minor Ver&tical");
+      QAction* pMinorVertGridAction = pGridlinesMenu->addAction(QIcon(":/icons/MinorVerticalGridlines"), "Minor Ver&tical");
       pMinorVertGridAction->setAutoRepeat(false);
       pMinorVertGridAction->setCheckable(true);
       pMinorVertGridAction->setStatusTip("Toggles the display of vertical gridlines at the minor tickmarks");

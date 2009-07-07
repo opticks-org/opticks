@@ -19,13 +19,11 @@
 #include "AoiLayerImp.h"
 #include "BitMaskImp.h"
 #include "ColorMenu.h"
-#include "AppAssert.h"
 #include "AppVerify.h"
 #include "DesktopServices.h"
 #include "GraphicObjectImp.h"
 #include "GraphicObjectTypeGrid.h"
 #include "GraphicGroup.h"
-#include "Icons.h"
 #include "LayerList.h"
 #include "ModelServices.h"
 #include "PixmapGrid.h"
@@ -60,8 +58,6 @@ AoiToolBar::AoiToolBar(const string& id, QWidget* parent) :
    mpColorMenu(NULL),
    mpAoiLayer(NULL)
 {
-   Icons* pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
    string shortcutContext = windowTitle().toStdString();
 
    QActionGroup* pSelectionGroup = new QActionGroup(this);
@@ -71,28 +67,28 @@ AoiToolBar::AoiToolBar(const string& id, QWidget* parent) :
 
       string mouseModeContext = shortcutContext + string("/Mouse Mode");
 
-      mpDraw = pSelectionGroup->addAction(pIcons->mDrawPixel, "Draw Mode");
+      mpDraw = pSelectionGroup->addAction(QIcon(":/icons/DrawPixel"), "Draw Mode");
       mpDraw->setAutoRepeat(false);
       mpDraw->setCheckable(true);
       mpDraw->setStatusTip("Sets the selection mode to add selected pixels to the AOI");
       addButton(mpDraw, mouseModeContext);
       VERIFYNR(connect(mpDraw, SIGNAL(triggered()), this, SLOT(selectionObjectChanged())));
 
-      mpErase = pSelectionGroup->addAction(pIcons->mErasePixel, "Erase Mode");
+      mpErase = pSelectionGroup->addAction(QIcon(":/icons/ErasePixel"), "Erase Mode");
       mpErase->setAutoRepeat(false);
       mpErase->setCheckable(true);
       mpErase->setStatusTip("Sets the selection mode to remove selected pixels from the AOI");
       addButton(mpErase, mouseModeContext);
       VERIFYNR(connect(mpErase, SIGNAL(triggered()), this, SLOT(selectionObjectChanged())));
 
-      mpToggle = pSelectionGroup->addAction(pIcons->mTogglePixel, "Toggle Mode");
+      mpToggle = pSelectionGroup->addAction(QIcon(":/icons/TogglePixel"), "Toggle Mode");
       mpToggle->setAutoRepeat(false);
       mpToggle->setCheckable(true);
       mpToggle->setStatusTip("Sets the selection mode to toggle the state of the selected pixel in the AOI");
       addButton(mpToggle, mouseModeContext);
       VERIFYNR(connect(mpToggle, SIGNAL(triggered()), this, SLOT(selectionObjectChanged())));
 
-      mpAoiMoveMode = pSelectionGroup->addAction(pIcons->mPan, "Move AOI Object");
+      mpAoiMoveMode = pSelectionGroup->addAction(QIcon(":/icons/Pan"), "Move AOI Object");
       mpAoiMoveMode->setAutoRepeat(false);
       mpAoiMoveMode->setCheckable(true);
       mpAoiMoveMode->setStatusTip("Moves the vector AOI object");
@@ -102,7 +98,7 @@ AoiToolBar::AoiToolBar(const string& id, QWidget* parent) :
 
    addSeparator();
 
-   mpAoiShowLabels = new QAction(pIcons->mAoiShowLabels, "Show Name Label", this);
+   mpAoiShowLabels = new QAction(QIcon(":/icons/AoiShowLabels"), "Show Name Label", this);
    mpAoiShowLabels->setAutoRepeat(false);
    mpAoiShowLabels->setCheckable(true);
    mpAoiShowLabels->setStatusTip("Displays the AOI name in the layer");
@@ -110,7 +106,7 @@ AoiToolBar::AoiToolBar(const string& id, QWidget* parent) :
    addButton(mpAoiShowLabels, shortcutContext);
    connect(mpAoiShowLabels, SIGNAL(toggled(bool)), this, SLOT(changeShowLabelState()));
 
-   mpAoiShowPointLabels = new QAction(pIcons->mAoiShowPointLabels, "Show Shape Label", this);
+   mpAoiShowPointLabels = new QAction(QIcon(":/icons/AoiShowPointLabels"), "Show Shape Label", this);
    mpAoiShowPointLabels->setAutoRepeat(false);
    mpAoiShowPointLabels->setCheckable(true);
    mpAoiShowPointLabels->setStatusTip("Displays the shape name in the layer");
@@ -134,13 +130,13 @@ AoiToolBar::AoiToolBar(const string& id, QWidget* parent) :
 
    addSeparator();
 
-   mpEraseAll = new QAction(pIcons->mEraseAll, "Erase All", this);
+   mpEraseAll = new QAction(QIcon(":/icons/EraseAll"), "Erase All", this);
    mpEraseAll->setAutoRepeat(false);
    mpEraseAll->setStatusTip("Deselects all pixels on the current area of interest");
    addButton(mpEraseAll, shortcutContext);
    connect(mpEraseAll, SIGNAL(triggered()), this, SLOT(clearAoi()));
 
-   mpToggleAll = new QAction(pIcons->mToggleAll, "Toggle All", this);
+   mpToggleAll = new QAction(QIcon(":/icons/ToggleAll"), "Toggle All", this);
    mpToggleAll->setAutoRepeat(false);
    mpToggleAll->setStatusTip("Selects or deselects all pixels on the current area of interest");
    addButton(mpToggleAll, shortcutContext);
@@ -148,7 +144,7 @@ AoiToolBar::AoiToolBar(const string& id, QWidget* parent) :
 
    addSeparator();
 
-   mpMerge = new QAction(pIcons->mMerge, "Merge", this);
+   mpMerge = new QAction(QIcon(":/icons/Merge"), "Merge", this);
    mpMerge->setAutoRepeat(false);
    mpMerge->setStatusTip("Combines selected pixels from multiple areas of interest");
    addButton(mpMerge, shortcutContext);
@@ -159,7 +155,7 @@ AoiToolBar::AoiToolBar(const string& id, QWidget* parent) :
    // Marker symbol
    mpSymbolButton = new SymbolTypeButton(this);
    mpSymbolButton->setSyncIcon(false);
-   mpSymbolButton->setIcon(pIcons->mShape);
+   mpSymbolButton->setIcon(QIcon(":/icons/Shape"));
    mpSymbolButton->setBorderedSymbols(true);
    mpSymbolButton->setStatusTip("Changes the pixel marker shape for the current area of interest");
    mpSymbolButton->setToolTip("Marker Symbol");
@@ -173,7 +169,7 @@ AoiToolBar::AoiToolBar(const string& id, QWidget* parent) :
       QAction* pColorAction = mpColorMenu->menuAction();
       if (pColorAction != NULL)
       {
-         pColorAction->setIcon(pIcons->mAOIColor);
+         pColorAction->setIcon(QIcon(":/icons/AoiColor"));
          pColorAction->setStatusTip("Changes the pixel marker color for the current area of interest");
          pColorAction->setToolTip("Marker Color");
          connect(pColorAction, SIGNAL(triggered()), mpColorMenu, SLOT(setCustomColor()));
@@ -602,15 +598,13 @@ AoiAddModeGrid::AoiAddModeGrid(QWidget* pParent)
    setNumRows(1);
    setNumColumns(3);
 
-   Icons* pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
-   setPixmap(0, 0, pIcons->mAoiAddAppend,
+   setPixmap(0, 0, QPixmap(":/icons/AoiAddAppend"),
       QString::fromStdString(StringUtilities::toXmlString(APPEND_AOI)),
       QString::fromStdString(StringUtilities::toDisplayString(APPEND_AOI)));
-   setPixmap(0, 1, pIcons->mAoiAddReplace,
+   setPixmap(0, 1, QPixmap(":/icons/AoiAddReplace"),
       QString::fromStdString(StringUtilities::toXmlString(REPLACE_AOI)),
       QString::fromStdString(StringUtilities::toDisplayString(REPLACE_AOI)));
-   setPixmap(0, 2, pIcons->mAoiAddNew,
+   setPixmap(0, 2, QPixmap(":/icons/AoiAddNew"),
       QString::fromStdString(StringUtilities::toXmlString(NEW_AOI)),
       QString::fromStdString(StringUtilities::toDisplayString(NEW_AOI)));
 

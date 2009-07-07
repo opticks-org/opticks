@@ -9,7 +9,6 @@
 
 #include <QtCore/QFileInfo>
 #include <QtGui/QApplication>
-#include <QtGui/QBitmap>
 #include <QtGui/QFileDialog>
 #include <QtGui/QHeaderView>
 #include <QtGui/QInputDialog>
@@ -25,7 +24,6 @@
 #include "DataElement.h"
 #include "DataVariant.h"
 #include "Feature.h"
-#include "IconImages.h"
 #include "RasterElement.h"
 #include "ShapeFile.h"
 #include "ShapeFileOptionsWidget.h"
@@ -64,10 +62,7 @@ ShapeFileOptionsWidget::ShapeFileOptionsWidget(ShapeFile* pShapefile, const vect
    mpDbfFileLabel = new QLabel(this);
 
    // Browse button
-   QPixmap pixOpen(IconImages::OpenIcon);
-   pixOpen.setMask(pixOpen.createHeuristicMask());
-   QIcon icnBrowse(pixOpen);
-
+   QIcon icnBrowse(":/icons/Open");
    QPushButton* pBrowseButton = new QPushButton(icnBrowse, QString(), this);
    pBrowseButton->setFixedWidth(27);
 

@@ -9,9 +9,7 @@
 
 #include "GraphicObjectTypeGrid.h"
 
-#include "AppAssert.h"
 #include "AppVerify.h"
-#include "Icons.h"
 #include "StringUtilities.h"
 
 #include <QtGui/QBitmap>
@@ -26,31 +24,29 @@ using namespace std;
 GraphicObjectTypeGrid::GraphicObjectTypeGrid(GraphicObjectTypeGrid::Mode modeValue, QWidget* pParent)
 : PixmapGrid(pParent)
 {
-   Icons* pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
-   mPixmaps[ARC_OBJECT] = pIcons->mArc;
-   mPixmaps[ARROW_OBJECT] = pIcons->mArrow;
-   mPixmaps[EASTARROW_OBJECT] = pIcons->mEastArrow;
-   mPixmaps[ELLIPSE_OBJECT] = pIcons->mEllipse;
-   mPixmaps[FILE_IMAGE_OBJECT] = pIcons->mInsertPict;
-   mPixmaps[LATLONINSERT_OBJECT] = pIcons->mLatLonInsert;
-   mPixmaps[LINE_OBJECT] = pIcons->mLine;
-   mPixmaps[NORTHARROW_OBJECT] = pIcons->mNorthArrow;
-   mPixmaps[POLYGON_OBJECT] = pIcons->mPolygon;
-   mPixmaps[POLYLINE_OBJECT] = pIcons->mPolyline;
-   mPixmaps[RECTANGLE_OBJECT] = pIcons->mRectangle;
-   mPixmaps[ROUNDEDRECTANGLE_OBJECT] = pIcons->mRoundedRect;
-   mPixmaps[SCALEBAR_OBJECT] = pIcons->mScaleBar;
-   mPixmaps[TEXT_OBJECT] = pIcons->mTextBox;
-   mPixmaps[FRAME_LABEL_OBJECT] = pIcons->mClock;
-   mPixmaps[MULTIPOINT_OBJECT] = pIcons->mPoint;
-   mPixmaps[HLINE_OBJECT] = pIcons->mHLine;
-   mPixmaps[VLINE_OBJECT] = pIcons->mVLine;
-   mPixmaps[ROW_OBJECT] = pIcons->mRow;
-   mPixmaps[COLUMN_OBJECT] = pIcons->mColumn;
-   mPixmaps[WIDGET_IMAGE_OBJECT] = pIcons->mSignature;
-   mPixmaps[VIEW_OBJECT] = pIcons->mInsertGLView;
-   mPixmaps[TRIANGLE_OBJECT] = pIcons->mTriangle;
+   mPixmaps[ARC_OBJECT] = QPixmap(":/icons/Arc");
+   mPixmaps[ARROW_OBJECT] = QPixmap(":/icons/Arrow");
+   mPixmaps[EASTARROW_OBJECT] = QPixmap(":/icons/EastArrow");
+   mPixmaps[ELLIPSE_OBJECT] = QPixmap(":/icons/Ellipse");
+   mPixmaps[FILE_IMAGE_OBJECT] = QPixmap(":/icons/InsertPicture");
+   mPixmaps[LATLONINSERT_OBJECT] = QPixmap(":/icons/LatLonInsert");
+   mPixmaps[LINE_OBJECT] = QPixmap(":/icons/Line");
+   mPixmaps[NORTHARROW_OBJECT] = QPixmap(":/icons/NorthArrow");
+   mPixmaps[POLYGON_OBJECT] = QPixmap(":/icons/Polygon");
+   mPixmaps[POLYLINE_OBJECT] = QPixmap(":/icons/Polyline");
+   mPixmaps[RECTANGLE_OBJECT] = QPixmap(":/icons/Rectangle");
+   mPixmaps[ROUNDEDRECTANGLE_OBJECT] = QPixmap(":/icons/RoundedRectangle");
+   mPixmaps[SCALEBAR_OBJECT] = QPixmap(":/icons/ScaleBar");
+   mPixmaps[TEXT_OBJECT] = QPixmap(":/icons/TextBox");
+   mPixmaps[FRAME_LABEL_OBJECT] = QPixmap(":/icons/Clock");
+   mPixmaps[MULTIPOINT_OBJECT] = QPixmap(":/icons/Point");
+   mPixmaps[HLINE_OBJECT] = QPixmap(":/icons/HLine");
+   mPixmaps[VLINE_OBJECT] = QPixmap(":/icons/VLine");
+   mPixmaps[ROW_OBJECT] = QPixmap(":/icons/Row");
+   mPixmaps[COLUMN_OBJECT] = QPixmap(":/icons/Column");
+   mPixmaps[WIDGET_IMAGE_OBJECT] = QPixmap(":/icons/SignatureWindow");
+   mPixmaps[VIEW_OBJECT] = QPixmap(":/icons/InsertGLView");
+   mPixmaps[TRIANGLE_OBJECT] = QPixmap(":/icons/Triangle");
 
    setMode(modeValue);
 

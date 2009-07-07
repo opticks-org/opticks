@@ -23,7 +23,6 @@
 #include "FontImp.h"
 #include "GeocoordLinkFunctor.h"
 #include "glCommon.h"
-#include "Icons.h"
 #include "ImageResolutionWidget.h"
 #include "MouseModeImp.h"
 #include "PropertiesView.h"

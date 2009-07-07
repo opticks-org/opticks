@@ -14,9 +14,7 @@
 #include <QtGui/QWidgetAction>
 
 #include "MeasurementToolBar.h"
-#include "AppAssert.h"
 #include "DesktopServicesImp.h"
-#include "Icons.h"
 #include "Layer.h"
 #include "LayerList.h"
 #include "MeasurementLayer.h"
@@ -43,9 +41,6 @@ MeasurementToolBar::MeasurementToolBar(const string& id, QWidget* parent) :
    mbToolbarEnabled(false),
    mpMeasurementsLayer(NULL)
 {
-   Icons* pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
-
    string shortcutContext = windowTitle().toStdString();
 
    DesktopServicesImp* pDesktop = DesktopServicesImp::instance();
@@ -55,7 +50,7 @@ MeasurementToolBar::MeasurementToolBar(const string& id, QWidget* parent) :
    mpObjectGroup->setExclusive(true);
 
    QToolButton* pMoveButton = new QToolButton(this);
-   mpMoveAction = new QAction(QIcon(pIcons->mPan), "Move Measurement Object", this);
+   mpMoveAction = new QAction(QIcon(":/icons/Pan"), "Move Measurement Object", this);
    pMoveButton->setDefaultAction(mpMoveAction);
    mpMoveAction->setAutoRepeat(false);
    mpMoveAction->setCheckable(true);
@@ -64,7 +59,7 @@ MeasurementToolBar::MeasurementToolBar(const string& id, QWidget* parent) :
    addWidget(pMoveButton);
 
    QToolButton* pDrawButton = new QToolButton(this);
-   mpDrawAction = new QAction(pIcons->mMeasurementMarker, "Add Measurement Object", this);
+   mpDrawAction = new QAction(QIcon(":/icons/MeasurementMarker"), "Add Measurement Object", this);
    pDrawButton->setDefaultAction(mpDrawAction);
    mpDrawAction->setAutoRepeat(false);
    mpDrawAction->setCheckable(true);
@@ -74,26 +69,26 @@ MeasurementToolBar::MeasurementToolBar(const string& id, QWidget* parent) :
    addSeparator();
 
    // Show/hide button
-   mpShowAction = new QAction(pIcons->mShowLayers, "Show/Hide Layer", this);
+   mpShowAction = new QAction(QIcon(":/icons/ShowLayers"), "Show/Hide Layer", this);
    mpShowAction->setAutoRepeat(false);
    mpShowAction->setCheckable(true);
    mpShowAction->setStatusTip("Toggles the display of all measurement objects");
    addButton(mpShowAction, shortcutContext);
 
    // Show label buttons
-   mpBearingLabelAction = new QAction(pIcons->mMeasurementBearingLabelOnOff, "Show/Hide Bearing Label", this);
+   mpBearingLabelAction = new QAction(QIcon(":/icons/MeasurementBearingLabelOnOff"), "Show/Hide Bearing Label", this);
    mpBearingLabelAction->setAutoRepeat(false);
    mpBearingLabelAction->setCheckable(true);
    mpBearingLabelAction->setStatusTip("Allows the bearing label display in the active view to be toggled on/off");
    addButton(mpBearingLabelAction, shortcutContext);
 
-   mpDistanceLabelAction = new QAction(pIcons->mMeasurementDistanceLabelOnOff, "Show/Hide Distance Label", this);
+   mpDistanceLabelAction = new QAction(QIcon(":/icons/MeasurementDistanceLabelOnOff"), "Show/Hide Distance Label", this);
    mpDistanceLabelAction->setAutoRepeat(false);
    mpDistanceLabelAction->setCheckable(true);
    mpDistanceLabelAction->setStatusTip("Allows the distance label display in the active view to be toggled on/off");
    addButton(mpDistanceLabelAction, shortcutContext);
 
-   mpEndPointsLabelAction = new QAction(pIcons->mMeasurementEndPtsLabelOnOff, "Show/Hide End Point Labels", this);
+   mpEndPointsLabelAction = new QAction(QIcon(":/icons/MeasurementEndPtsLabelOnOff"), "Show/Hide End Point Labels", this);
    mpEndPointsLabelAction->setAutoRepeat(false);
    mpEndPointsLabelAction->setCheckable(true);
    mpEndPointsLabelAction->setStatusTip("Allows the end point labels display in the active view to be toggled on/off");
@@ -420,27 +415,25 @@ DistanceUnitsGrid::DistanceUnitsGrid(QWidget* pParent)
    setNumRows(3);
    setNumColumns(3);
 
-   Icons* pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
-   setPixmap(0, 0, pIcons->mMeasurementNoDistUnit,
+   setPixmap(0, 0, QPixmap(":/icons/MeasurementNoDistUnit"),
       QString::fromStdString(StringUtilities::toXmlString(NO_DISTANCE_UNIT)),
       QString::fromStdString(StringUtilities::toDisplayString(NO_DISTANCE_UNIT)));
-   setPixmap(0, 1, pIcons->mMeasurementKm,
+   setPixmap(0, 1, QPixmap(":/icons/MeasurementKm"),
       QString::fromStdString(StringUtilities::toXmlString(KILOMETER)),
       QString::fromStdString(StringUtilities::toDisplayString(KILOMETER)));
-   setPixmap(0, 2, pIcons->mMeasurementStatMile,
+   setPixmap(0, 2, QPixmap(":/icons/MeasurementStatMile"),
       QString::fromStdString(StringUtilities::toXmlString(MILE)),
       QString::fromStdString(StringUtilities::toDisplayString(MILE)));
-   setPixmap(1, 0, pIcons->mMeasurementNautMile,
+   setPixmap(1, 0, QPixmap(":/icons/MeasurementNautMile"),
       QString::fromStdString(StringUtilities::toXmlString(NAUTICAL_MILE)),
       QString::fromStdString(StringUtilities::toDisplayString(NAUTICAL_MILE)));
-   setPixmap(1, 1, pIcons->mMeasurementMeter,
+   setPixmap(1, 1, QPixmap(":/icons/MeasurementMeter"),
       QString::fromStdString(StringUtilities::toXmlString(METER)),
       QString::fromStdString(StringUtilities::toDisplayString(METER)));
-   setPixmap(1, 2, pIcons->mMeasurementYard,
+   setPixmap(1, 2, QPixmap(":/icons/MeasurementYard"),
       QString::fromStdString(StringUtilities::toXmlString(YARD)),
       QString::fromStdString(StringUtilities::toDisplayString(YARD)));
-   setPixmap(2, 0, pIcons->mMeasurementFoot,
+   setPixmap(2, 0, QPixmap(":/icons/MeasurementFoot"),
       QString::fromStdString(StringUtilities::toXmlString(FOOT)),
       QString::fromStdString(StringUtilities::toDisplayString(FOOT)));
 
@@ -508,14 +501,12 @@ LocationUnitsGrid::LocationUnitsGrid(QWidget* pParent) :
    setNumRows(2);
    setNumColumns(3);
 
-   Icons* pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
-   setPixmap(0, 0, pIcons->mMeasurementNoLocUnit, "NoUnit", "No Unit");
-   setPixmap(0, 1, pIcons->mMeasurementDecDeg, "DecimalDegrees", "Decimal Degrees");
-   setPixmap(0, 2, pIcons->mMeasurementDecMin, "DecimalMinutes", "Decimal Minutes");
-   setPixmap(1, 0, pIcons->mMeasurementDms, "DMS", "DMS");
-   setPixmap(1, 1, pIcons->mMeasurementUtm, "UTM", "UTM");
-   setPixmap(1, 2, pIcons->mMeasurementMgrs, "MGRS", "MGRS");
+   setPixmap(0, 0, QPixmap(":/icons/MeasurementNoLocUnit"), "NoUnit", "No Unit");
+   setPixmap(0, 1, QPixmap(":/icons/MeasurementDecDeg"), "DecimalDegrees", "Decimal Degrees");
+   setPixmap(0, 2, QPixmap(":/icons/MeasurementDecMin"), "DecimalMinutes", "Decimal Minutes");
+   setPixmap(1, 0, QPixmap(":/icons/MeasurementDms"), "DMS", "DMS");
+   setPixmap(1, 1, QPixmap(":/icons/MeasurementUtm"), "UTM", "UTM");
+   setPixmap(1, 2, QPixmap(":/icons/MeasurementMgrs"), "MGRS", "MGRS");
 
    // Set the current symbol
    setSelectedPixmap("NoUnit");

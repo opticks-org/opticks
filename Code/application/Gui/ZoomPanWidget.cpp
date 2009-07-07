@@ -14,10 +14,8 @@
 
 #include "ZoomPanWidget.h"
 
-#include "AppAssert.h"
 #include "AppVerify.h"
 #include "DesktopServicesImp.h"
-#include "Icons.h"
 #include "Layer.h"
 #include "LayerList.h"
 #include "RasterElement.h"
@@ -488,12 +486,7 @@ void ZoomPanWidget::updateMouseCursor()
    }
    else
    {
-      Icons* pIcons = Icons::instance();
-      REQUIRE(pIcons != NULL);
-      QBitmap bmpCursor = pIcons->mZoomRectCursor;
-      QBitmap bmpMask = pIcons->mZoomRectMask;
-
-      mpView->setCursor(QCursor(bmpCursor, bmpMask, 0, 0));
+      mpView->setCursor(QCursor(QPixmap(":/icons/ZoomRectCursor"), 0, 0));
    }
 }
 

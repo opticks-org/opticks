@@ -11,10 +11,8 @@
 #include <QtGui/QPushButton>
 
 #include "ChippingWidget.h"
-#include "AppAssert.h"
 #include "AppVerify.h"
 #include "DimensionDescriptor.h"
-#include "Icons.h"
 #include "LayerList.h"
 #include "RasterElement.h"
 #include "RasterDataDescriptor.h"
@@ -53,9 +51,7 @@ ChippingWidget::ChippingWidget(SpatialDataView* pView, QWidget* parent) :
    QPushButton* pZoomButton = new QPushButton(this);
    QPushButton* pCenterButton = new QPushButton("&Center View", this);
 
-   Icons* pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
-   QIcon icnZoom(pIcons->mZoomToFit);
+   QIcon icnZoom(":/icons/ZoomToFit");
    pZoomButton->setIcon(icnZoom);
 
    // Pixel coordinate

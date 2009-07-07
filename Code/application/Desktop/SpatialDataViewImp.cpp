@@ -16,7 +16,6 @@
 #include "AoiLayer.h"
 #include "AoiLayerImp.h"
 #include "AoiToolBar.h"
-#include "AppAssert.h"
 #include "AppConfig.h"
 #include "ApplicationWindow.h"
 #include "AppVerify.h"
@@ -33,7 +32,6 @@
 #include "GraphicGroupImp.h"
 #include "HistogramWindow.h"
 #include "HistogramWindowImp.h"
-#include "Icons.h"
 #include "LatLonLayer.h"
 #include "LayerListAdapter.h"
 #include "LayerUndo.h"
@@ -111,9 +109,6 @@ SpatialDataViewImp::SpatialDataViewImp(const string& id, const string& viewName,
       new AnnotationElementAdapter(measurementsDescriptor, SessionItemImp::generateUniqueId()));
 
    // Context menu actions
-   Icons* pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
-
    Service<DesktopServices> pDesktop;
    string shortcutContext = "View/Spatial Data";
 
@@ -126,19 +121,19 @@ SpatialDataViewImp::SpatialDataViewImp(const string& id, const string& viewName,
       QActionGroup* pGroup = new QActionGroup(pNewLayerMenu);
       pGroup->setExclusive(true);
 
-      mpAnnotationAction = pGroup->addAction(pIcons->mAnnotation, "Annotation");
+      mpAnnotationAction = pGroup->addAction(QIcon(":/icons/Annotation"), "Annotation");
       mpAnnotationAction->setAutoRepeat(false);
       pDesktop->initializeAction(mpAnnotationAction, newLayerContext);
 
-      mpAoiAction = pGroup->addAction(pIcons->mDrawPixel, "AOI");
+      mpAoiAction = pGroup->addAction(QIcon(":/icons/DrawPixel"), "AOI");
       mpAoiAction->setAutoRepeat(false);
       pDesktop->initializeAction(mpAoiAction, newLayerContext);
 
-      mpGcpAction = pGroup->addAction(pIcons->mGCPMarker, "GCP List");
+      mpGcpAction = pGroup->addAction(QIcon(":/icons/GcpMarker"), "GCP List");
       mpGcpAction->setAutoRepeat(false);
       pDesktop->initializeAction(mpGcpAction, newLayerContext);
 
-      mpTiePointAction = pGroup->addAction(pIcons->mTiePointMarker, "Tie Point");
+      mpTiePointAction = pGroup->addAction(QIcon(":/icons/TiePointMarker"), "Tie Point");
       mpTiePointAction->setAutoRepeat(false);
       pDesktop->initializeAction(mpTiePointAction, newLayerContext);
 
@@ -282,19 +277,15 @@ SpatialDataViewImp::SpatialDataViewImp(const string& id, const string& viewName,
    DataOrigin origin = getDataOrigin();
    updateOriginAction(origin);
 
-   if (pIcons != NULL)
-   {
-      setIcon(pIcons->mSpectralData);
-      setWindowIcon(QIcon(pIcons->mSpectralData));
-      addMouseMode(new MouseModeImp("LayerMode", QCursor(Qt::ArrowCursor)));
-      addMouseMode(new MouseModeImp("MeasurementMode",
-         QCursor(pIcons->mMeasurementCursor, pIcons->mMeasurementMask, 2, 17)));
-      addMouseMode(new MouseModeImp("PanMode", QCursor(Qt::OpenHandCursor)));
-      addMouseMode(new MouseModeImp("RotateMode", QCursor(pIcons->mFreeRotateCursor, pIcons->mFreeRotateMask, 7, 9)));
-      addMouseMode(new MouseModeImp("ZoomInMode", QCursor(pIcons->mZoomInCursor, pIcons->mZoomInMask, 0, 0)));
-      addMouseMode(new MouseModeImp("ZoomOutMode", QCursor(pIcons->mZoomOutCursor, pIcons->mZoomOutMask, 0, 0)));
-      addMouseMode(new MouseModeImp("ZoomBoxMode", QCursor(pIcons->mZoomRectCursor, pIcons->mZoomRectMask, 0, 0)));
-   }
+   setIcon(QIcon(":/icons/SpectralData"));
+   setWindowIcon(QIcon(":/icons/SpectralData"));
+   addMouseMode(new MouseModeImp("LayerMode", QCursor(Qt::ArrowCursor)));
+   addMouseMode(new MouseModeImp("MeasurementMode", QCursor(QPixmap(":/icons/MeasurementCursor"), 1, 14)));
+   addMouseMode(new MouseModeImp("PanMode", QCursor(Qt::OpenHandCursor)));
+   addMouseMode(new MouseModeImp("RotateMode", QCursor(QPixmap(":/icons/FreeRotateCursor"), 7, 9)));
+   addMouseMode(new MouseModeImp("ZoomInMode", QCursor(QPixmap(":/icons/ZoomInCursor"), 0, 0)));
+   addMouseMode(new MouseModeImp("ZoomOutMode", QCursor(QPixmap(":/icons/ZoomOutCursor"), 0, 0)));
+   addMouseMode(new MouseModeImp("ZoomBoxMode", QCursor(QPixmap(":/icons/ZoomRectCursor"), 0, 0)));
 
    // Connections
    VERIFYNR(connect(this, SIGNAL(mouseModeChanged(const MouseMode*)),
@@ -3149,9 +3140,6 @@ void SpatialDataViewImp::updateContextMenu(Subject& subject, const string& signa
    }
    else if (dynamic_cast<SessionExplorer*>(&subject) != NULL)
    {
-      Icons* pIcons = Icons::instance();
-      REQUIRE(pIcons != NULL);
-
       vector<SessionItem*> items = pMenu->getSessionItems();
 
       unsigned int numItems = items.size();
@@ -3169,7 +3157,7 @@ void SpatialDataViewImp::updateContextMenu(Subject& subject, const string& signa
             beforeAction = APP_SPATIALDATAVIEW_LAYER_DELETE_SEPARATOR_ACTION;
 
             // Delete
-            QAction* pDeleteAction = new QAction(pIcons->mDelete, "Delete", pParent);
+            QAction* pDeleteAction = new QAction(QIcon(":/icons/Delete"), "Delete", pParent);
             pDeleteAction->setAutoRepeat(false);
             pDeleteAction->setData(QVariant::fromValue(pLayer));
             connect(pDeleteAction, SIGNAL(triggered()), this, SLOT(deleteLayer()));
@@ -3235,14 +3223,14 @@ void SpatialDataViewImp::updateContextMenu(Subject& subject, const string& signa
             }
 
             // Show all
-            QAction* pShowLayersAction = new QAction(pIcons->mShowLayers, "Show All Layers", pParent);
+            QAction* pShowLayersAction = new QAction(QIcon(":/icons/ShowLayers"), "Show All Layers", pParent);
             pShowLayersAction->setAutoRepeat(false);
             pShowLayersAction->setData(QVariant(layerList));
             connect(pShowLayersAction, SIGNAL(triggered()), this, SLOT(showLayers()));
             pMenu->addAction(pShowLayersAction, APP_SPATIALDATAVIEW_SHOW_LAYERS_ACTION);
 
             // Hide all
-            QAction* pHideLayersAction = new QAction(pIcons->mHideLayers, "Hide All Layers", pParent);
+            QAction* pHideLayersAction = new QAction(QIcon(":/icons/HideLayers"), "Hide All Layers", pParent);
             pHideLayersAction->setAutoRepeat(false);
             pHideLayersAction->setData(QVariant(layerList));
             connect(pHideLayersAction, SIGNAL(triggered()), this, SLOT(hideLayers()));

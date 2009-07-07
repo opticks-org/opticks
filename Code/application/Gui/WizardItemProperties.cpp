@@ -9,9 +9,7 @@
 
 #include <QtGui/QLayout>
 
-#include "AppAssert.h"
 #include "AppVerify.h"
-#include "Icons.h"
 #include "WizardGraphicsItem.h"
 #include "WizardItemProperties.h"
 #include "WizardNodeImp.h"
@@ -30,9 +28,6 @@ WizardItemProperties::WizardItemProperties(QWidget* pParent) :
    mpItemOutputsTree(NULL),
    mpItem(NULL)
 {
-   Icons* pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
-
    // Name
    QLabel* pItemName = new QLabel("Name:", this);
    mpItemNameLabel = new QLabel(this);
@@ -46,13 +41,13 @@ WizardItemProperties::WizardItemProperties(QWidget* pParent) :
    mpItemOrderLabel = new QLabel(this);
 
    mpIncreaseOrderButton = new QToolButton(this);
-   mpIncreaseOrderButton->setIcon(pIcons->mIncrease);
+   mpIncreaseOrderButton->setIcon(QIcon(":/icons/Increase"));
    mpIncreaseOrderButton->setAutoRaise(true);
    mpIncreaseOrderButton->setToolTip("Increase Order");
    mpIncreaseOrderButton->setEnabled(false);
 
    mpDecreaseOrderButton = new QToolButton(this);
-   mpDecreaseOrderButton->setIcon(pIcons->mDecrease);
+   mpDecreaseOrderButton->setIcon(QIcon(":/icons/Decrease"));
    mpDecreaseOrderButton->setAutoRaise(true);
    mpDecreaseOrderButton->setToolTip("Decrease Order");
    mpDecreaseOrderButton->setEnabled(false);

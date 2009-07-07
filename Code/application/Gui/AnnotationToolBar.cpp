@@ -16,7 +16,6 @@
 
 #include "AnnotationLayerAdapter.h"
 #include "AnnotationToolBar.h"
-#include "AppAssert.h"
 #include "AppVerify.h"
 #include "ClassificationLayer.h"
 #include "ColorMenu.h"
@@ -25,7 +24,6 @@
 #include "GraphicObjectImp.h"
 #include "GraphicObjectTypeGrid.h"
 #include "GraphicUtilities.h"
-#include "Icons.h"
 #include "MenuBarImp.h"
 #include "PixmapGrid.h"
 #include "PlotView.h"
@@ -62,8 +60,6 @@ AnnotationToolBar::AnnotationToolBar(const string& id, QWidget* parent) :
    pSettings->attach(SIGNAL_NAME(ConfigurationSettings, SettingModified),
       Slot(this, &AnnotationToolBar::optionsModified));
 
-   Icons* pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
    string shortcutContext = windowTitle().toStdString();
 
    // Add the annotation menu
@@ -81,7 +77,7 @@ AnnotationToolBar::AnnotationToolBar(const string& id, QWidget* parent) :
          if (pGroupMenu != NULL)
          {
             // Group
-            QAction* pGroupAction = new QAction(pIcons->mGroup, "&Group", this);
+            QAction* pGroupAction = new QAction(QIcon(":/icons/Group"), "&Group", this);
             pGroupAction->setAutoRepeat(false);
             pGroupAction->setToolTip("Group");
             pGroupAction->setStatusTip("Groups the selected objects");
@@ -89,7 +85,7 @@ AnnotationToolBar::AnnotationToolBar(const string& id, QWidget* parent) :
             pMenuBar->insertCommand(pGroupAction, pGroupMenu, shortcutContext);
 
             // Ungroup
-            QAction* pUngroupAction = new QAction(pIcons->mUngroup, "&Ungroup", this);
+            QAction* pUngroupAction = new QAction(QIcon(":/icons/Ungroup"), "&Ungroup", this);
             pUngroupAction->setAutoRepeat(false);
             pUngroupAction->setToolTip("Ungroup");
             pUngroupAction->setStatusTip("Ungroups the selected objects");
@@ -102,7 +98,7 @@ AnnotationToolBar::AnnotationToolBar(const string& id, QWidget* parent) :
          if (pOrderMenu != NULL)
          {
             // Pop to front
-            QAction* pFrontAction = new QAction(pIcons->mPopFront, "To &Front", this);
+            QAction* pFrontAction = new QAction(QIcon(":/icons/PopFront"), "To &Front", this);
             pFrontAction->setAutoRepeat(false);
             pFrontAction->setToolTip("Pop To Front");
             pFrontAction->setStatusTip("Moves the object to the front");
@@ -110,7 +106,7 @@ AnnotationToolBar::AnnotationToolBar(const string& id, QWidget* parent) :
             pMenuBar->insertCommand(pFrontAction, pOrderMenu, shortcutContext);
 
             // Push to back
-            QAction* pBackAction = new QAction(pIcons->mPushBack, "To &Back", this);
+            QAction* pBackAction = new QAction(QIcon(":/icons/PushBack"), "To &Back", this);
             pBackAction->setAutoRepeat(false);
             pBackAction->setToolTip("Push To Back");
             pBackAction->setStatusTip("Moves the object to the back");
@@ -125,28 +121,28 @@ AnnotationToolBar::AnnotationToolBar(const string& id, QWidget* parent) :
             string nudgeContext = shortcutContext + string("/Nudge");
 
             // Up
-            QAction* pUpAction = new QAction(pIcons->mNudgeUp, "&Up", this);
+            QAction* pUpAction = new QAction(QIcon(":/icons/NudgeUp"), "&Up", this);
             pUpAction->setShortcut(QKeySequence("Ctrl+Up"));
             pUpAction->setStatusTip("Moves the object up by a small amount");
             VERIFYNR(connect(pUpAction, SIGNAL(triggered()), this, SLOT(nudgeUp())));
             pMenuBar->insertCommand(pUpAction, pNudgeMenu, nudgeContext);
 
             // Down
-            QAction* pDownAction = new QAction(pIcons->mNudgeDown, "&Down", this);
+            QAction* pDownAction = new QAction(QIcon(":/icons/NudgeDown"), "&Down", this);
             pDownAction->setShortcut(QKeySequence("Ctrl+Down"));
             pDownAction->setStatusTip("Moves the object down by a small amount");
             VERIFYNR(connect(pDownAction, SIGNAL(triggered()), this, SLOT(nudgeDown())));
             pMenuBar->insertCommand(pDownAction, pNudgeMenu, nudgeContext);
 
             // Left
-            QAction* pLeftAction = new QAction(pIcons->mNudgeLeft, "&Left", this);
+            QAction* pLeftAction = new QAction(QIcon(":/icons/NudgeLeft"), "&Left", this);
             pLeftAction->setShortcut(QKeySequence("Ctrl+Left"));
             pLeftAction->setStatusTip("Moves the object left by a small amount");
             VERIFYNR(connect(pLeftAction, SIGNAL(triggered()), this, SLOT(nudgeLeft())));
             pMenuBar->insertCommand(pLeftAction, pNudgeMenu, nudgeContext);
 
             // Right
-            QAction* pRightAction = new QAction(pIcons->mNudgeRight, "&Right", this);
+            QAction* pRightAction = new QAction(QIcon(":/icons/NudgeRight"), "&Right", this);
             pRightAction->setShortcut(QKeySequence("Ctrl+Right"));
             pRightAction->setStatusTip("Moves the object right by a small amount");
             VERIFYNR(connect(pRightAction, SIGNAL(triggered()), this, SLOT(nudgeRight())));
@@ -160,19 +156,19 @@ AnnotationToolBar::AnnotationToolBar(const string& id, QWidget* parent) :
             string alignContext = shortcutContext + string("/Align and Distribute");
 
             // Left
-            QAction* pLeftAction = new QAction(pIcons->mAlignLeft, "Align &Left", this);
+            QAction* pLeftAction = new QAction(QIcon(":/icons/AlignLeft"), "Align &Left", this);
             pLeftAction->setAutoRepeat(false);
             VERIFYNR(connect(pLeftAction, SIGNAL(triggered()), this, SLOT(alignLeft())));
             pMenuBar->insertCommand(pLeftAction, pAlignMenu, alignContext);
 
             // Center
-            QAction* pCenterAction = new QAction(pIcons->mAlignCenter, "Align &Center", this);
+            QAction* pCenterAction = new QAction(QIcon(":/icons/AlignCenter"), "Align &Center", this);
             pCenterAction->setAutoRepeat(false);
             VERIFYNR(connect(pCenterAction, SIGNAL(triggered()), this, SLOT(alignCenter())));
             pMenuBar->insertCommand(pCenterAction, pAlignMenu, alignContext);
 
             // Right
-            QAction* pRightAction = new QAction(pIcons->mAlignRight, "Align &Right", this);
+            QAction* pRightAction = new QAction(QIcon(":/icons/AlignRight"), "Align &Right", this);
             pRightAction->setAutoRepeat(false);
             VERIFYNR(connect(pRightAction, SIGNAL(triggered()), this, SLOT(alignRight())));
             pMenuBar->insertCommand(pRightAction, pAlignMenu, alignContext);
@@ -180,19 +176,19 @@ AnnotationToolBar::AnnotationToolBar(const string& id, QWidget* parent) :
             pAlignMenu->addSeparator();
 
             // Top
-            QAction* pTopAction = new QAction(pIcons->mAlignTop, "Align &Top", this);
+            QAction* pTopAction = new QAction(QIcon(":/icons/AlignTop"), "Align &Top", this);
             pTopAction->setAutoRepeat(false);
             VERIFYNR(connect(pTopAction, SIGNAL(triggered()), this, SLOT(alignTop())));
             pMenuBar->insertCommand(pTopAction, pAlignMenu, alignContext);
 
             // Middle
-            QAction* pMiddleAction = new QAction(pIcons->mAlignMiddle, "Align &Middle", this);
+            QAction* pMiddleAction = new QAction(QIcon(":/icons/AlignMiddle"), "Align &Middle", this);
             pMiddleAction->setAutoRepeat(false);
             VERIFYNR(connect(pMiddleAction, SIGNAL(triggered()), this, SLOT(alignMiddle())));
             pMenuBar->insertCommand(pMiddleAction, pAlignMenu, alignContext);
 
             // Bottom
-            QAction* pBottomAction = new QAction(pIcons->mAlignBottom, "Align &Bottom", this);
+            QAction* pBottomAction = new QAction(QIcon(":/icons/AlignBottom"), "Align &Bottom", this);
             pBottomAction->setAutoRepeat(false);
             VERIFYNR(connect(pBottomAction, SIGNAL(triggered()), this, SLOT(alignBottom())));
             pMenuBar->insertCommand(pBottomAction, pAlignMenu, alignContext);
@@ -200,14 +196,14 @@ AnnotationToolBar::AnnotationToolBar(const string& id, QWidget* parent) :
             pAlignMenu->addSeparator();
 
             // Distribute horizontally
-            QAction* pHorizontalAction = new QAction(pIcons->mDistributeHorizontally,
+            QAction* pHorizontalAction = new QAction(QIcon(":/icons/DistributeHorizontally"),
                "Distribute &Horizontally", this);
             pHorizontalAction->setAutoRepeat(false);
             VERIFYNR(connect(pHorizontalAction, SIGNAL(triggered()), this, SLOT(distributeHorizontally())));
             pMenuBar->insertCommand(pHorizontalAction, pAlignMenu, alignContext);
 
             // Distribute vertically
-            QAction* pVerticalAction = new QAction(pIcons->mDistributeVertically, "Distribute &Vertically", this);
+            QAction* pVerticalAction = new QAction(QIcon(":/icons/DistributeVertically"), "Distribute &Vertically", this);
             pVerticalAction->setAutoRepeat(false);
             VERIFYNR(connect(pVerticalAction, SIGNAL(triggered()), this, SLOT(distributeVertically())));
             pMenuBar->insertCommand(pVerticalAction, pAlignMenu, alignContext);
@@ -227,7 +223,7 @@ AnnotationToolBar::AnnotationToolBar(const string& id, QWidget* parent) :
          pAnnotationMenu->addSeparator();
 
          // Properties action
-         QAction* pPropertiesAction = new QAction(pIcons->mProperties, "&Properties", this);
+         QAction* pPropertiesAction = new QAction(QIcon(":/icons/Properties"), "&Properties", this);
          pPropertiesAction->setAutoRepeat(false);
          pPropertiesAction->setShortcut(QKeySequence("Ctrl+P"));
          pPropertiesAction->setToolTip("Properties");
@@ -256,7 +252,7 @@ AnnotationToolBar::AnnotationToolBar(const string& id, QWidget* parent) :
          VERIFYNR(connect(mpObjectGroup, SIGNAL(buttonClicked(int)), this, SLOT(selectionObjectChanged())));
 
          QToolButton* pMoveButton = new QToolButton(this);
-         mpMove = new QAction(QIcon(pIcons->mPan), "Move Object", 0);
+         mpMove = new QAction(QIcon(":/icons/Pan"), "Move Object", 0);
          pDesktop->initializeAction(mpMove, mouseModeContext);
          pMoveButton->setDefaultAction(mpMove);
          mpMove->setAutoRepeat(false);
@@ -266,7 +262,7 @@ AnnotationToolBar::AnnotationToolBar(const string& id, QWidget* parent) :
          addWidget(pMoveButton);
 
          QToolButton* pRotateButton = new QToolButton(this);
-         mpRotate = new QAction(QIcon(pIcons->mFreeRotate), "Rotate Object", 0);
+         mpRotate = new QAction(QIcon(":/icons/FreeRotate"), "Rotate Object", 0);
          pDesktop->initializeAction(mpRotate, mouseModeContext);
          pRotateButton->setDefaultAction(mpRotate);
          mpRotate->setAutoRepeat(false);
@@ -320,21 +316,21 @@ AnnotationToolBar::AnnotationToolBar(const string& id, QWidget* parent) :
       addWidget(mpSize_Combo);
 
       // Font modifier buttons
-      mpBold = new QAction(pIcons->mBold, "Bold", this);
+      mpBold = new QAction(QIcon(":/icons/Bold"), "Bold", this);
       mpBold->setAutoRepeat(false);
       mpBold->setCheckable(true);
       mpBold->setStatusTip("Toggles the Bold state of the selected text objects");
       VERIFYNR(connect(mpBold, SIGNAL(triggered(bool)), this, SLOT(setFontBold(bool))));
       addButton(mpBold, shortcutContext);
 
-      mpItalic = new QAction(pIcons->mItalics, "Italic", this);
+      mpItalic = new QAction(QIcon(":/icons/Italics"), "Italic", this);
       mpItalic->setAutoRepeat(false);
       mpItalic->setCheckable(true);
       mpItalic->setStatusTip("Toggles the Italic state of the selected text objects");
       VERIFYNR(connect(mpItalic, SIGNAL(triggered(bool)), this, SLOT(setFontItalic(bool))));
       addButton(mpItalic, shortcutContext);
 
-      mpUnderline = new QAction(pIcons->mUnderline, "Underline", this);
+      mpUnderline = new QAction(QIcon(":/icons/Underline"), "Underline", this);
       mpUnderline->setAutoRepeat(false);
       mpUnderline->setCheckable(true);
       mpUnderline->setStatusTip("Toggles the Underline state of the selected text objects");
@@ -350,7 +346,7 @@ AnnotationToolBar::AnnotationToolBar(const string& id, QWidget* parent) :
          QAction* pTextColorAction = mpTextColorMenu->menuAction();
          if (pTextColorAction != NULL)
          {
-            pTextColorAction->setIcon(pIcons->mTextColor);
+            pTextColorAction->setIcon(QIcon(":/icons/TextColor"));
             pTextColorAction->setStatusTip("Changes the text color of the selected text boxes "
                "on the current annotation layer");
             pTextColorAction->setToolTip("Text Color");
@@ -377,7 +373,9 @@ AnnotationToolBar::AnnotationToolBar(const string& id, QWidget* parent) :
 
          for (int i = 1; i < 7; ++i)
          {
-            mpLineWidthGrid->setPixmap(i, 0, pIcons->getLineWidthPixmap(i),
+            QPixmap pix(100, i);
+            pix.fill(Qt::black);
+            mpLineWidthGrid->setPixmap(i, 0, pix,
                QString::number(i), "Line Width: " + QString::number(i));
          }
 
@@ -388,7 +386,7 @@ AnnotationToolBar::AnnotationToolBar(const string& id, QWidget* parent) :
          QAction* pLineWidthAction = mpLineWidthMenu->menuAction();
          if (pLineWidthAction != NULL)
          {
-            pLineWidthAction->setIcon(pIcons->mLineWidth);
+            pLineWidthAction->setIcon(QIcon(":/icons/LineWidth"));
             pLineWidthAction->setStatusTip("Changes the line width of the selected drawing objects on the "
                "current annotation layer");
             pLineWidthAction->setToolTip("Line Width");
@@ -409,7 +407,7 @@ AnnotationToolBar::AnnotationToolBar(const string& id, QWidget* parent) :
          QAction* pLineColorAction = mpLineColorMenu->menuAction();
          if (pLineColorAction != NULL)
          {
-            pLineColorAction->setIcon(pIcons->mLineColor);
+            pLineColorAction->setIcon(QIcon(":/icons/LineColor"));
             pLineColorAction->setStatusTip("Changes the line color of the selected drawing objects "
                "on the current annotation layer");
             pLineColorAction->setToolTip("Line Color");
@@ -449,7 +447,7 @@ AnnotationToolBar::AnnotationToolBar(const string& id, QWidget* parent) :
          QAction* pFillColorAction = mpFillColorMenu->menuAction();
          if (pFillColorAction != NULL)
          {
-            pFillColorAction->setIcon(pIcons->mFillColor);
+            pFillColorAction->setIcon(QIcon(":/icons/FillColor"));
             pFillColorAction->setStatusTip("Changes the fill color of the selected drawing objects "
                "on the current annotation layer");
             pFillColorAction->setToolTip("Fill Color");
@@ -466,7 +464,7 @@ AnnotationToolBar::AnnotationToolBar(const string& id, QWidget* parent) :
       addSeparator();
 
       // Snap-to-grid button
-      mpSnapToGrid = new QAction(pIcons->mSnapGrid, "Snap to Grid", this);
+      mpSnapToGrid = new QAction(QIcon(":/icons/SnapGrid"), "Snap to Grid", this);
       mpSnapToGrid->setAutoRepeat(false);
       mpSnapToGrid->setCheckable(true);
       mpSnapToGrid->setStatusTip("Forces moved objects to be at integer scene coordinates");

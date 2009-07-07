@@ -18,7 +18,6 @@
 #include "DataVariant.h"
 #include "DynamicObject.h"
 #include "FileDescriptorWidget.h"
-#include "Icons.h"
 #include "ImportDescriptorImp.h"
 #include "Importer.h"
 #include "ImportOptionsDlg.h"
@@ -714,16 +713,13 @@ bool ImportOptionsDlg::validateDataset(DataDescriptor* pDescriptor, QString& val
          disconnect(mpDatasetTree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
             SLOT(datasetItemChanged(QTreeWidgetItem*)));
 
-         Icons* pIcons = Icons::instance();
-         VERIFY(pIcons != NULL);
-
          if (validDataset == true)
          {
-            pItem->setIcon(0, QIcon(pIcons->mOk));
+            pItem->setIcon(0, QIcon(":/icons/Ok"));
          }
          else
          {
-            pItem->setIcon(0, QIcon(pIcons->mCritical));
+            pItem->setIcon(0, QIcon(":/icons/Critical"));
          }
 
          pItem->setData(0, Qt::UserRole, QVariant(validDataset));

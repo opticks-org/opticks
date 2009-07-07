@@ -30,7 +30,6 @@
 #include "ContextMenuAction.h"
 #include "ContextMenuActions.h"
 #include "FileResource.h"
-#include "Icons.h"
 #include "SessionItemDeserializer.h"
 #include "SessionItemSerializer.h"
 #include "SessionManager.h"
@@ -142,17 +141,13 @@ AnimationControllerImp::AnimationControllerImp(FrameType frameType, const string
    mpSeparator2Action->setSeparator(true);
 
    // Initialization
-   Icons* pIcons = Icons::instance();
-   if (pIcons != NULL)
-   {
-      mpPlayAction->setIcon(pIcons->mAnimationPlayForward);
-      mpPauseAction->setIcon(pIcons->mAnimationPause);
-      mpStopAction->setIcon(pIcons->mAnimationStop);
-      mpChangeDirectionAction->setIcon(pIcons->mAnimationChangeDirection);
-      mpStepBackwardAction->setIcon(pIcons->mAnimationAdvanceBackward);
-      mpStepForwardAction->setIcon(pIcons->mAnimationAdvanceForward);
-      setIcon(QIcon(pIcons->mAnimation));
-   }
+   mpPlayAction->setIcon(QIcon(":/icons/PlayForward"));
+   mpPauseAction->setIcon(QIcon(":/icons/Pause"));
+   mpStopAction->setIcon(QIcon(":/icons/Stop"));
+   mpChangeDirectionAction->setIcon(QIcon(":/icons/ChangeDirection"));
+   mpStepBackwardAction->setIcon(QIcon(":/icons/AdvanceBackward"));
+   mpStepForwardAction->setIcon(QIcon(":/icons/AdvanceForward"));
+   setIcon(QIcon(":/icons/Animation"));
 
    // Connections
    VERIFYNR(connect(mpPlayAction, SIGNAL(triggered()), this, SLOT(play())));

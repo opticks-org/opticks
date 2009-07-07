@@ -18,10 +18,8 @@
 #include <QtGui/QPushButton>
 #include <QtGui/QRadioButton>
 
-#include "AppAssert.h"
 #include "AppVerify.h"
 #include "DimensionDescriptor.h"
-#include "Icons.h"
 #include "RasterUtilities.h"
 #include "SubsetWidget.h"
 
@@ -733,9 +731,7 @@ BandCustomSelectionDialog::BandCustomSelectionDialog(QWidget* pParent, QStringLi
    QLabel* pBadBandFileLabel = new QLabel("File:", this);
    mpBadBandFile = new QLineEdit(this);
    mpBadBandFile->setEnabled(false);
-   Icons* pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
-   mpBadBandFileBtn = new QPushButton(pIcons->mOpen, "", this); 
+   mpBadBandFileBtn = new QPushButton(QIcon(":/icons/Open"), "", this); 
    mpBadBandFileBtn->setEnabled(false);
 
    mpSubsetSelection = new QRadioButton("Subset");

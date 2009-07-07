@@ -9,7 +9,6 @@
 
 #include <QtCore/QFileInfo>
 #include <QtCore/QRegExp>
-#include <QtGui/QBitmap>
 #include <QtGui/QCloseEvent>
 #include <QtGui/QFileDialog>
 #include <QtGui/QInputDialog>
@@ -30,7 +29,6 @@
 #include "ConfigurationSettings.h"
 #include "FilenameImp.h"
 #include "FilesetWidget.h"
-#include "IconImages.h"
 #include "ObjectResource.h"
 #include "WizardUtilities.h"
 #include "WizardWidget.h"
@@ -68,17 +66,9 @@ BatchEditorDlg::BatchEditorDlg(QWidget* parent) :
    if (pMenuBar != NULL)
    {
       // Icons
-      QPixmap pixNew(IconImages::NewIcon);
-      pixNew.setMask(pixNew.createHeuristicMask());
-      QIcon icnNew(pixNew);
-
-      QPixmap pixOpen(IconImages::OpenIcon);
-      pixOpen.setMask(pixOpen.createHeuristicMask());
-      QIcon icnOpen(pixOpen);
-
-      QPixmap pixSave(IconImages::SaveIcon);
-      pixSave.setMask(pixSave.createHeuristicMask());
-      QIcon icnSave(pixSave);
+      QIcon icnNew(":/icons/New");
+      QIcon icnOpen(":/icons/Open");
+      QIcon icnSave(":/icons/Save");
 
       // File menu
       QMenu* pFileMenu = new QMenu("&File", this);

@@ -13,7 +13,6 @@
 #include "PlugInDescriptorImp.h"
 #include "Executable.h"
 #include "Exporter.h"
-#include "Icons.h"
 #include "Importer.h"
 #include "Interpreter.h"
 #include "PlugIn.h"
@@ -55,10 +54,9 @@ PlugInDescriptorImp::PlugInDescriptorImp(const string& id, PlugIn* pPlugIn) :
    mTestableInterface(false),
    mTestable(false)
 {
-   Icons* pIcons = Icons::instance();
-   if (pIcons != NULL)
+   if (Service<ApplicationServices>()->isInteractive())
    {
-      setIcon(pIcons->mPlugIn);
+      setIcon(QIcon(":/icons/PlugIn"));
    }
 
    if (pPlugIn != NULL)

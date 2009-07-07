@@ -13,12 +13,10 @@
 
 #include "ContextMenu.h"
 #include "ContextMenuActions.h"
-#include "AppAssert.h"
 #include "AppVerify.h"
 #include "DesktopServices.h"
 #include "HistogramPlotImp.h"
 #include "HistogramWindowImp.h"
-#include "Icons.h"
 #include "PlotSet.h"
 #include "PlotSetImp.h"
 #include "PlotView.h"
@@ -225,10 +223,7 @@ void PlotSetImp::updateContextMenu(Subject& subject, const string& signal, const
    // Delete
    if (bAddDelete == true)
    {
-      Icons* pIcons = Icons::instance();
-      REQUIRE(pIcons != NULL);
-
-      QAction* pDeleteAction = new QAction(QIcon(pIcons->mDelete), "&Delete", pParent);
+      QAction* pDeleteAction = new QAction(QIcon(":/icons/Delete"), "&Delete", pParent);
       pDeleteAction->setAutoRepeat(false);
       VERIFYNR(connect(pDeleteAction, SIGNAL(triggered()), this, SLOT(destroyCurrentPlot())));
       pMenu->addActionAfter(pDeleteAction, APP_PLOTSET_DELETE_ACTION, afterId);

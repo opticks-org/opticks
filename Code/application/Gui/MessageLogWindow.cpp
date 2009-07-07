@@ -12,9 +12,7 @@
 
 #include "MessageLogWindow.h"
 
-#include "AppAssert.h"
 #include "DynamicObject.h"
-#include "Icons.h"
 #include "MessageLogMgrImp.h"
 #include "MessageLogAdapter.h"
 #include "SessionManager.h"
@@ -49,9 +47,7 @@ MessageLogWindow::MessageLogWindow(const string& id, QWidget* parent) :
    pTopLayout->addWidget(pTreeView, 10);
    pTopLayout->addWidget(mpLogs, 0);
 
-   Icons* pIcons = Icons::instance();
-   REQUIRE(pIcons != NULL);
-   setIcon(pIcons->mMessageLog);
+   setIcon(QIcon(":/icons/MessageLogWindow"));
 
    setWidget(pTopFrame);
 

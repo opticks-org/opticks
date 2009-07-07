@@ -14,7 +14,6 @@
 #include "AppVerify.h"
 #include "DrawUtil.h"
 #include "glCommon.h"
-#include "Icons.h"
 #include "PerspectiveView.h"
 #include "PropertiesTiePointLayer.h"
 #include "TiePointLayer.h"
@@ -58,11 +57,7 @@ TiePointLayerImp::TiePointLayerImp(const string& id, const string& layerName, Da
    mLabelsEnabled = TiePointLayer::getSettingLabelEnabled();
 
    // Initialization
-   Icons* pIcons = Icons::instance();
-   if (pIcons != NULL)
-   {
-      setIcon(pIcons->mTiePointMarker);
-   }
+   setIcon(QIcon(":/icons/TiePointMarker"));
 
    addPropertiesPage(PropertiesTiePointLayer::getName());
 
@@ -503,15 +498,7 @@ bool TiePointLayerImp::acceptsMouseEvents() const
 
 QCursor TiePointLayerImp::getMouseCursor() const
 {
-   QCursor mouseCursor;
-
-   Icons* pIcons = Icons::instance();
-   if (pIcons != NULL)
-   {
-      mouseCursor = QCursor(pIcons->mTiePointCursor, pIcons->mTiePointMask, 1, 15);
-   }
-
-   return mouseCursor;
+   return QCursor(QPixmap(":/icons/TiePointMarkerCursor"), 1, 14);
 }
 
 bool TiePointLayerImp::processMousePress(const QPoint& screenCoord, Qt::MouseButton button,
