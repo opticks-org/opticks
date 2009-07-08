@@ -158,7 +158,7 @@ bool PostScriptExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutA
    writePostScriptFooter();
    if (pProgress != NULL)
    {
-      pProgress->updateProgress("Saving product...", 99, NORMAL);
+      pProgress->updateProgress("PostScript Exporter completed", 100, NORMAL);
    }
    mpOutFile = NULL;
 
