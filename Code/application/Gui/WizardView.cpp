@@ -1338,6 +1338,7 @@ void WizardView::addItem(WizardItem* pItem)
 
    // Connections
    VERIFYNR(connect(pGraphicsItem, SIGNAL(selectionChanged()), this, SIGNAL(selectionChanged())));
+   VERIFYNR(pItemImp->attach(SIGNAL_NAME(WizardItemImp, Renamed), Slot(this, &WizardView::itemPositionChanged)));
    VERIFYNR(pItemImp->attach(SIGNAL_NAME(WizardItemImp, PositionChanged),
       Slot(this, &WizardView::itemPositionChanged)));
    VERIFYNR(pItemImp->attach(SIGNAL_NAME(WizardItemImp, NodeAdded), Slot(this, &WizardView::nodeAdded)));
@@ -1428,6 +1429,7 @@ void WizardView::removeItem(WizardItem* pItem)
    WizardItemImp* pItemImp = static_cast<WizardItemImp*>(pItem);
    VERIFYNRV(pItemImp != NULL);
 
+   VERIFYNR(pItemImp->detach(SIGNAL_NAME(WizardItemImp, Renamed), Slot(this, &WizardView::itemPositionChanged)));
    VERIFYNR(pItemImp->detach(SIGNAL_NAME(WizardItemImp, PositionChanged),
       Slot(this, &WizardView::itemPositionChanged)));
    VERIFYNR(pItemImp->detach(SIGNAL_NAME(WizardItemImp, NodeAdded), Slot(this, &WizardView::nodeAdded)));

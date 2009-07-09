@@ -327,6 +327,20 @@ public:
    bool isOutputNode(WizardNode* pNode) const;
 
    /**
+    *  Returns the index of a given wizard node.
+    *
+    *  @param   pNode
+    *           The node for which to get its index in the input node vector or
+    *           output node vector.
+    *
+    *  @return  The numerical index for the node based on its position in the
+    *           input node vector or output node vector.  Returns -1 if \em pNode
+    *           is \c NULL or if the given node is not an input or output node
+    *           for this item.
+    */
+   int getNodeIndex(WizardNode* pNode) const;
+
+   /**
     *  Queries whether an item is directly or indirectly connected to this item.
     *
     *  This method provides a recursive search for the connected item by searching the

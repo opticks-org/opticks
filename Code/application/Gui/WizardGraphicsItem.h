@@ -68,6 +68,7 @@ protected:
 
    QRectF getNodeRect(WizardNode* pNode) const;
    QString getNodeToolTip(WizardNode* pNode) const;
+   void updateGeometry();
    void updateBorder();
    void updateNodes();
 

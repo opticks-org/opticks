@@ -399,6 +399,34 @@ bool WizardItemImp::isOutputNode(WizardNode* pNode) const
    return false;
 }
 
+int WizardItemImp::getNodeIndex(WizardNode* pNode) const
+{
+   if (pNode == NULL)
+   {
+      return -1;
+   }
+
+   for (int i = 0; i < static_cast<int>(mInputNodes.size()); ++i)
+   {
+      WizardNode* pCurrentNode = mInputNodes.at(i);
+      if (pCurrentNode == pNode)
+      {
+         return i;
+      }
+   }
+
+   for (int i = 0; i < static_cast<int>(mOutputNodes.size()); ++i)
+   {
+      WizardNode* pCurrentNode = mOutputNodes.at(i);
+      if (pCurrentNode == pNode)
+      {
+         return i;
+      }
+   }
+
+   return -1;
+}
+
 bool WizardItemImp::isItemConnected(WizardItem* pItem, bool bInputNode) const
 {
    if (pItem == NULL)

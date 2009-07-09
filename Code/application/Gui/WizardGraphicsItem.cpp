@@ -559,8 +559,11 @@ void WizardGraphicsItem::itemRenamed(Subject& subject, const string& signal, con
    QString itemName = QString::fromStdString(boost::any_cast<string>(data));
    if (itemName != mpText->text())
    {
-      prepareGeometryChange();
+      // Set the text
       mpText->setText(itemName);
+
+      // Update the position of the rectangle and text items
+      updateGeometry();
    }
 }
 
@@ -756,6 +759,103 @@ QString WizardGraphicsItem::getNodeToolTip(WizardNode* pNode) const
    return tipText;
 }
 
+void WizardGraphicsItem::updateGeometry()
+{
+   // Rectangle size
+   int numInputNodes = mpItem->getNumInputNodes();
+   int numOutputNodes = mpItem->getNumOutputNodes();
+
+   int numNodes = std::max(numInputNodes, numOutputNodes);
+   numNodes = std::max(numNodes, 1);
+
+   double rectHeight = numNodes * (sNodeDiameter + sNodeMargin) + sNodeMargin + 1;
+
+   // Name size
+   QFontMetricsF nameMetrics(mpText->font());
+   QRectF nameRect = nameMetrics.boundingRect(mpText->text());
+   double nameWidth = nameRect.width();
+
+   // Order size
+   QFontMetricsF orderMetrics(mpOrder->font());
+   QRectF orderRect = orderMetrics.boundingRect(mpOrder->text());
+   double orderWidth = orderRect.width();
+
+   // Update the item rectangle and text positions
+   prepareGeometryChange();
+   if (sRectWidth < nameWidth)
+   {
+      mpRect->setRect((nameWidth / 2.0) - (sRectWidth / 2.0), 0.0, sRectWidth, rectHeight);
+      mpOrder->setPos((nameWidth / 2.0) - (orderWidth / 2.0), sTextMargin);
+      mpText->setPos(0.0, rectHeight + sTextMargin);
+   }
+   else
+   {
+      mpRect->setRect(0.0, 0.0, sRectWidth, rectHeight);
+      mpOrder->setPos((sRectWidth / 2.0) - (orderWidth / 2.0), sTextMargin);
+      mpText->setPos((sRectWidth / 2.0) - (nameWidth / 2.0), rectHeight + sTextMargin);
+   }
+
+   // Update the wizard node and button positions
+   map<WizardNode*, std::pair<QGraphicsEllipseItem*, QGraphicsPixmapItem*> >::iterator iter;
+   for (iter = mNodes.begin(); iter != mNodes.end(); ++iter)
+   {
+      WizardNode* pNode = iter->first;
+
+      int nodeIndex = mpItem->getNodeIndex(pNode);
+      if (nodeIndex == -1)
+      {
+         continue;
+      }
+
+      QGraphicsEllipseItem* pEllipse = iter->second.first;
+      if (pEllipse != NULL)
+      {
+         double xOffset = 0.5;   // Rounding value
+         double yOffset = sNodeMargin + (nodeIndex * (sNodeDiameter + sNodeMargin)) + 0.5;
+
+         if (sRectWidth < nameWidth)
+         {
+            xOffset += (nameWidth / 2.0) - (sRectWidth / 2.0);
+         }
+
+         if (mpItem->isInputNode(pNode) == true)
+         {
+            xOffset += sNodeMargin;
+         }
+         else
+         {
+            xOffset += sRectWidth - 1 - sNodeMargin - sNodeDiameter;
+         }
+
+         pEllipse->setRect(static_cast<int>(xOffset), static_cast<int>(yOffset), sNodeDiameter, sNodeDiameter);
+      }
+
+      // Down button item
+      QGraphicsPixmapItem* pPixmap = iter->second.second;
+      if (pPixmap != NULL)
+      {
+         double xOffset = 0.5;   // Rounding value
+         double yOffset = sNodeMargin + (nodeIndex * (sNodeDiameter + sNodeMargin)) + 0.5;
+
+         if (sRectWidth < nameWidth)
+         {
+            xOffset += (nameWidth / 2.0) - (sRectWidth / 2.0);
+         }
+
+         if (mpItem->isInputNode(pNode) == true)
+         {
+            xOffset += sNodeMargin + sNodeDiameter + sNodeMargin;
+         }
+         else
+         {
+            xOffset += sRectWidth - 1.0 - (sNodeMargin * 2.0) - (sNodeDiameter * 2.0);
+         }
+
+         pPixmap->setPos(static_cast<int>(xOffset), static_cast<int>(yOffset));
+      }
+   }
+}
+
 void WizardGraphicsItem::updateBorder()
 {
    if (mpItem.get() == NULL)
@@ -790,34 +890,12 @@ void WizardGraphicsItem::updateNodes()
       return;
    }
 
-   // Update the item rectangle and text position
+   // Add the nodes
    const vector<WizardNode*>& inputNodes = mpItem->getInputNodes();
    const vector<WizardNode*>& outputNodes = mpItem->getOutputNodes();
    unsigned int numInputNodes = inputNodes.size();
    unsigned int numOutputNodes = outputNodes.size();
 
-   unsigned int numNodes = std::max(numInputNodes, numOutputNodes);
-   numNodes = std::max(numNodes, 1u);
-
-   double rectHeight = numNodes * (sNodeDiameter + sNodeMargin) + sNodeMargin + 1;
-
-   QFontMetricsF nameMetrics(mpText->font());
-   QRectF nameRect = nameMetrics.boundingRect(mpText->text());
-   double nameWidth = nameRect.width();
-
-   prepareGeometryChange();
-   if (sRectWidth < nameWidth)
-   {
-      mpRect->setRect((nameWidth / 2.0) - (sRectWidth / 2.0), 0.0, sRectWidth, rectHeight);
-      mpText->setPos(0.0, rectHeight + sTextMargin);
-   }
-   else
-   {
-      mpRect->setRect(0.0, 0.0, sRectWidth, rectHeight);
-      mpText->setPos((sRectWidth / 2.0) - (nameWidth / 2.0), rectHeight + sTextMargin);
-   }
-
-   // Add the nodes
    for (unsigned int i = 0; i < (numInputNodes + numOutputNodes); ++i)
    {
       // Get the wizard node
@@ -847,26 +925,6 @@ void WizardGraphicsItem::updateNodes()
       QGraphicsEllipseItem* pEllipse = new QGraphicsEllipseItem(mpRect);
       if (pEllipse != NULL)
       {
-         // Rectangle
-         double xOffset = 0.5;   // Rounding value
-         double yOffset = sNodeMargin + (nodeIndex * (sNodeDiameter + sNodeMargin)) + 0.5;
-
-         if (sRectWidth < nameWidth)
-         {
-            xOffset += (nameWidth / 2.0) - (sRectWidth / 2.0);
-         }
-
-         if (i < numInputNodes)
-         {
-            xOffset += sNodeMargin;
-         }
-         else
-         {
-            xOffset += sRectWidth - 1 - sNodeMargin - sNodeDiameter;
-         }
-
-         pEllipse->setRect(static_cast<int>(xOffset), static_cast<int>(yOffset), sNodeDiameter, sNodeDiameter);
-
          // Pen
          QColor nodeColor = getNodeColor(pNode);
          QColor itemColor = mpRect->brush().color();
@@ -896,26 +954,6 @@ void WizardGraphicsItem::updateNodes()
       {
          pPixmap = new QGraphicsPixmapItem(mpRect);
 
-         // Position
-         double xOffset = 0.5;   // Rounding value
-         double yOffset = sNodeMargin + (nodeIndex * (sNodeDiameter + sNodeMargin)) + 0.5;
-
-         if (sRectWidth < nameWidth)
-         {
-            xOffset += (nameWidth / 2.0) - (sRectWidth / 2.0);
-         }
-
-         if (i < numInputNodes)
-         {
-            xOffset += sNodeMargin + sNodeDiameter + sNodeMargin;
-         }
-         else
-         {
-            xOffset += sRectWidth - 1.0 - (sNodeMargin * 2.0) - (sNodeDiameter * 2.0);
-         }
-
-         pPixmap->setPos(static_cast<int>(xOffset), static_cast<int>(yOffset));
-
          // Pixmap
          QPixmap pixButton = QPixmap::grabWidget(mpDownButton);
          pPixmap->setPixmap(pixButton);
@@ -929,4 +967,7 @@ void WizardGraphicsItem::updateNodes()
 
       mNodes[pNode] = pair<QGraphicsEllipseItem*, QGraphicsPixmapItem*>(pEllipse, pPixmap);
    }
+
+   // Update the item rectangle and text positions
+   updateGeometry();
 }
