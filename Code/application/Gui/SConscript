@@ -9,6 +9,8 @@ Import('env build_dir')
 # subdirectories to build objects from
 ####
 subdirs = ["GLView", "Graphic", "Undo"]
+if env["PLATFORM"].startsWith("linux"):
+   subdirs.append("Image")
 
 ####
 # build top-level sources

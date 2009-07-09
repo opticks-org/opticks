@@ -11,6 +11,7 @@
 #include "PixelBufferObject.h"
 
 #include "AppAssert.h"
+#include <string.h>
 
 PixelBufferObject::PixelBufferObject(int numBytes, GLenum accessMode) :
    mPixelBufferObjectId(0),

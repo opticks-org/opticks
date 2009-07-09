@@ -130,6 +130,9 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
         else:
             plat_dir = "linux-x86_64"
             la("gdal/lib/%s/libgdal.so.1" % (plat_dir))
+            la("Cg/lib/%s/libCg.so" % (plat_dir))
+            la("Cg/lib/%s/libCgGL.so" % (plat_dir))
+            la("glew/lib/%s/libGLEW.so.1.3" % (plat_dir))
         la("ffmpeg/%s/libavcodec/libavcodec.so.51" % (plat_dir))
         la("ffmpeg/%s/libavformat/libavformat.so.50" % (plat_dir))
         la("ffmpeg/%s/libavutil/libavutil.so.49" % (plat_dir))

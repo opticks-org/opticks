@@ -29,6 +29,10 @@ if PLATFORM == "solaris-sparc":
    env.Tool("suncc", toolpath=[TOOLPATH])
    env.Tool("sunar", toolpath=[TOOLPATH])
    env.Tool("sunlink", toolpath=[TOOLPATH])
+else:
+   env.Tool("glew", toolpath=[TOOLPATH])
+   env.Tool("cg", toolpath=[TOOLPATH])
+
 if env['RELEASE']:
    MODE='release'
 else:

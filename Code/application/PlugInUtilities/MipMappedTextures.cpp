@@ -13,6 +13,7 @@
 #include <windows.h>
 #endif
 
+#include "glCommon.h"
 #include <GL/gl.h>
 #include <GL/glu.h>
 

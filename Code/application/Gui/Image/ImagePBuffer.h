@@ -10,10 +10,12 @@
 #ifndef IMAGEPBUFFER_H
 #define IMAGEPBUFFER_H
 
-#include "AppConfig.h"
+// PBuffers are only supported on Windows. Should be fine
+// since most (all?) newer video cards support FBOs which
+// are preferred.
 #if defined(WIN_API)
+#include "AppConfig.h"
 #include <windows.h>
-#endif
 
 #include "ImageBuffer.h"
 
@@ -123,7 +125,6 @@ private:
    void destroyPixelBuffer();
 
 private:
-#if defined(WIN_API)
    HDC mDeviceContext;              // pbuffer's device context
    HGLRC mRenderContext;            // pbuffer's rendering context
    HDC mPrevDeviceContext;          // previous device context
@@ -131,7 +132,6 @@ private:
    HDC mOSDeviceContext;            // device context in which pbuffer was created
    HGLRC mOSRenderContext;          // rendering context in which pbuffer was created
    HPBUFFERARB mPBuffer;            // pbuffer object
-#endif
 
    GLenum mPrevBuffer;                       // previous color buffer attached
    unsigned int mMaxColorBufferAttachments;  // maximum number of color buffer attachments
@@ -139,5 +139,6 @@ private:
 
    ColorBuffer* mpPrevColorBuffer;
 };
+#endif
 
 #endif

@@ -7,6 +7,7 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 #include "GlContextSave.h"
+#include "glCommon.h"
 
 #include <QtOpenGL/QGLContext>
 

@@ -97,6 +97,7 @@
    #include <endian.h>
    #define UNIX_API
    #define LINUX
+   #define CG_SUPPORTED
 
    #if __BYTE_ORDER == __LITTLE_ENDIAN
       #define OPTICKS_BYTE_ORDER LITTLE_ENDIAN_BYTE_ORDER

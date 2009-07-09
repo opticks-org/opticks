@@ -456,10 +456,10 @@ private:
       std::vector<int>::const_iterator badEnd = mInfo.mKey.mBadValues.end();
       bool bBadValues = (badBegin != badEnd);
 
-      vector<Out>::iterator targetBase = texData.begin();
+      typename vector<Out>::iterator targetBase = texData.begin();
       for (unsigned int y1 = 0; y1 < tileSizeY; y1++, targetBase += (mInfo.mTileSizeX * totalChannels))
       {
-         vector<Out>::iterator target = targetBase;
+         typename vector<Out>::iterator target = targetBase;
          target += (currentChannel - 1);     // Subtract one since currentChannel is a one-based value
 
          for (unsigned int x1 = 0; x1 < tileSizeX; x1++)

@@ -88,7 +88,7 @@ ImageFilterDescriptor* ImageFilterManager::createFilterDescriptor(const string& 
 
 void ImageFilterManager::buildFilterList(const string& filterPath)
 {
-#if defined(WIN_API)
+#if defined(CG_SUPPORTED)
    // Get the default filter path if necessary
    string imageFiltersPath = filterPath;
    if (filterPath.empty())
@@ -126,7 +126,8 @@ void ImageFilterManager::buildFilterList(const string& filterPath)
       if (loadedIter == loadedDescriptors.end())
       {
          delete existingIter->second;
-         existingIter = mImageFilters.erase(existingIter);
+         map<string, ImageFilterDescriptorImp*>::iterator tmpIter = existingIter++;
+         mImageFilters.erase(tmpIter);
       }
       else
       {
@@ -172,7 +173,7 @@ vector<ImageFilterDescriptorImp*> ImageFilterManager::loadFilterDescriptors(cons
 {
    vector<ImageFilterDescriptorImp*> filters;
 
-#if defined(WIN_API)
+#if defined(CG_SUPPORTED)
    FileFinderImp fileFinder;
    fileFinder.findFile(filterPath, "*.gic");
 

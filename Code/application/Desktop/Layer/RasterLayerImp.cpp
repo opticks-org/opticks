@@ -3259,8 +3259,10 @@ bool RasterLayerImp::canApplyFastContrastStretch() const
 RasterLayerImp::GlBlendSubtractProc RasterLayerImp::getGlBlendSubtractProc()
 {
    static GlBlendSubtractProc proc = NULL;
-#if defined(CG_SUPPORTED)
-   bool isInitialized = false;
+
+// requires a Windows only call...might work with glX but this hasn't been explored yet
+#if defined(WIN_API)
+   static bool isInitialized = false;
    if (!isInitialized)
    {
       proc = (GlBlendSubtractProc)wglGetProcAddress("glBlendEquationEXT");

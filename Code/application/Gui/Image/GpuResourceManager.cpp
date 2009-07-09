@@ -37,7 +37,7 @@ GpuResourceManager* Service<GpuResourceManager>::get() const
 
 GpuResourceManager::~GpuResourceManager()
 {
-#if defined(WIN_API)
+#if defined(CG_SUPPORTED)
    vector<GLuint>::iterator textureIter = mTextures.begin();
    while (textureIter != mTextures.end())
    {
@@ -56,7 +56,7 @@ GpuResourceManager::GpuResourceManager() :
 
 PixelBufferObject *GpuResourceManager::getPixelBufferObject(int numBytes, GLenum accessMode)
 {
-   #if defined(WIN_API)
+   #if defined(CG_SUPPORTED)
    if (glewGetExtension("GL_ARB_pixel_buffer_object"))
    {
       try
@@ -77,16 +77,18 @@ PixelBufferObject *GpuResourceManager::getPixelBufferObject(int numBytes, GLenum
 ImageBuffer *GpuResourceManager::allocateImageBuffer()
 {
    ImageBuffer* pImageBuffer = NULL;
-#ifdef WIN_API
+#ifdef CG_SUPPORTED
    if (glewGetExtension("GL_EXT_framebuffer_object"))
    {
       pImageBuffer = new FrameBuffer();
    }
+#if defined(WIN_API)
    else if (wglewGetExtension("WGL_ARB_pixel_format") && wglewGetExtension("WGL_ARB_pbuffer") &&
             wglewGetExtension("WGL_ARB_render_texture") && glewGetExtension("GL_NV_float_buffer"))
    {
       pImageBuffer = new ImagePBuffer();
    }
+#endif
 #endif
    return pImageBuffer;
 }
@@ -95,7 +97,7 @@ GLuint GpuResourceManager::allocateTexture(GLenum textureTarget, GLint internalF
                                            GLsizei height, GLenum textureFormat, GLenum dataType)
 {
    GLuint textureObjectId = 0;
-#if defined(WIN_API)
+#if defined(CG_SUPPORTED)
    // check format and size of requested texture to see if it can be created
    if (!ImageUtilities::isTextureValid(textureTarget, internalFormat, width, height, textureFormat, dataType) )
    {
@@ -203,7 +205,7 @@ GLuint GpuResourceManager::allocateTexture(GLenum textureTarget, GLint internalF
 
 void GpuResourceManager::deallocateTexture(GLuint textureId)
 {
-#if defined(WIN_API)
+#if defined(CG_SUPPORTED)
    vector<GLuint>::iterator textureIter = mTextures.begin();
    while (textureIter != mTextures.end())
    {
