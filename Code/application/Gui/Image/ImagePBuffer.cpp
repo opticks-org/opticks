@@ -10,6 +10,7 @@
 // PBuffers are only supported on Windows. Should be fine
 // since most (all?) newer video cards support FBOs which
 // are preferred.
+#include "AppConfig.h"
 #if defined(WIN_API)
 #include "ColorBuffer.h"
 #include "AppConfig.h"

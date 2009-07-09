@@ -20,7 +20,7 @@
 		<Configuration
 			Name="Debug|Win32"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\CompileSettings\32bitSettings.vsprops;..\CompileSettings\pthreads.vsprops;..\CompileSettings\ehs.vsprops;..\CompileSettings\Qt.vsprops;..\CompileSettings\Xerces.vsprops;..\CompileSettings\ApplicationCommonSettings.vsprops;..\CompileSettings\AllCommonSettings-Debug-32bit.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\Qt-Debug.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\Ossim-Debug.vsprops;..\CompileSettings\raptor.vsprops"
+			InheritedPropertySheets="..\CompileSettings\32bitSettings.vsprops;..\CompileSettings\pthreads.vsprops;..\CompileSettings\ehs.vsprops;..\CompileSettings\Qt.vsprops;..\CompileSettings\Xerces.vsprops;..\CompileSettings\ApplicationCommonSettings.vsprops;..\CompileSettings\AllCommonSettings-Debug-32bit.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\Qt-Debug.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\Ossim-Debug.vsprops;..\CompileSettings\raptor.vsprops;..\CompileSettings\glew-debug.vsprops;..\CompileSettings\Cg.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -80,7 +80,7 @@
 		<Configuration
 			Name="Debug|x64"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\CompileSettings\pthreads.vsprops;..\CompileSettings\ehs.vsprops;..\CompileSettings\Qt.vsprops;..\CompileSettings\Xerces.vsprops;..\CompileSettings\ApplicationCommonSettings.vsprops;..\CompileSettings\AllCommonSettings-Debug-64bit.vsprops;..\CompileSettings\64bitSettings.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\Qt-Debug.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\Ossim-Debug.vsprops;..\CompileSettings\raptor.vsprops"
+			InheritedPropertySheets="..\CompileSettings\pthreads.vsprops;..\CompileSettings\ehs.vsprops;..\CompileSettings\Qt.vsprops;..\CompileSettings\Xerces.vsprops;..\CompileSettings\ApplicationCommonSettings.vsprops;..\CompileSettings\AllCommonSettings-Debug-64bit.vsprops;..\CompileSettings\64bitSettings.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\Qt-Debug.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\Ossim-Debug.vsprops;..\CompileSettings\raptor.vsprops;..\CompileSettings\glew-debug.vsprops;..\CompileSettings\Cg.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -141,7 +141,7 @@
 		<Configuration
 			Name="Release|Win32"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\CompileSettings\32bitSettings.vsprops;..\CompileSettings\ehs.vsprops;..\CompileSettings\pthreads.vsprops;..\CompileSettings\Qt.vsprops;..\CompileSettings\Xerces.vsprops;..\CompileSettings\ApplicationCommonSettings.vsprops;..\CompileSettings\AllCommonSettings-Release-32bit.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\Qt-Release.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\Ossim-Release.vsprops;..\CompileSettings\raptor.vsprops"
+			InheritedPropertySheets="..\CompileSettings\32bitSettings.vsprops;..\CompileSettings\ehs.vsprops;..\CompileSettings\pthreads.vsprops;..\CompileSettings\Qt.vsprops;..\CompileSettings\Xerces.vsprops;..\CompileSettings\ApplicationCommonSettings.vsprops;..\CompileSettings\AllCommonSettings-Release-32bit.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\Qt-Release.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\Ossim-Release.vsprops;..\CompileSettings\raptor.vsprops;..\CompileSettings\glew-release.vsprops;..\CompileSettings\Cg.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -201,7 +201,7 @@
 		<Configuration
 			Name="Release|x64"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\CompileSettings\pthreads.vsprops;..\CompileSettings\ehs.vsprops;..\CompileSettings\Qt.vsprops;..\CompileSettings\Xerces.vsprops;..\CompileSettings\ApplicationCommonSettings.vsprops;..\CompileSettings\AllCommonSettings-Release-64bit.vsprops;..\CompileSettings\64bitSettings.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\Qt-Release.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\Ossim-Release.vsprops;..\CompileSettings\raptor.vsprops"
+			InheritedPropertySheets="..\CompileSettings\pthreads.vsprops;..\CompileSettings\ehs.vsprops;..\CompileSettings\Qt.vsprops;..\CompileSettings\Xerces.vsprops;..\CompileSettings\ApplicationCommonSettings.vsprops;..\CompileSettings\AllCommonSettings-Release-64bit.vsprops;..\CompileSettings\64bitSettings.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\Qt-Release.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\Ossim-Release.vsprops;..\CompileSettings\raptor.vsprops;..\CompileSettings\glew-release.vsprops;..\CompileSettings\Cg.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -1216,7 +1216,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Moc&apos;ing $(InputName).h..."
-						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;"
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
 						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
 					/>
 				</FileConfiguration>
@@ -1226,7 +1226,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Moc&apos;ing $(InputName).h..."
-						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;"
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
 						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
 					/>
 				</FileConfiguration>
@@ -1236,7 +1236,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Moc&apos;ing $(InputName).h..."
-						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;"
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
 						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
 					/>
 				</FileConfiguration>
@@ -1246,7 +1246,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Moc&apos;ing $(InputName).h..."
-						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;"
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
 						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
 					/>
 				</FileConfiguration>
