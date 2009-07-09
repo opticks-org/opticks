@@ -22,6 +22,8 @@ public:
    PlugInModel(QObject* pParent = 0);
    ~PlugInModel();
 
+   virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
+
    void addPlugIn(Subject& subject, const std::string& signal, const boost::any& value);
    void removePlugIn(Subject& subject, const std::string& signal, const boost::any& value);
    void addModule(Subject& subject, const std::string& signal, const boost::any& value);

@@ -54,11 +54,6 @@ PlugInDescriptorImp::PlugInDescriptorImp(const string& id, PlugIn* pPlugIn) :
    mTestableInterface(false),
    mTestable(false)
 {
-   if (Service<ApplicationServices>()->isInteractive())
-   {
-      setIcon(QIcon(":/icons/PlugIn"));
-   }
-
    if (pPlugIn != NULL)
    {
       setName(pPlugIn->getName());

@@ -7,6 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtGui/QIcon>
+
 #include "ModuleDescriptor.h"
 #include "PlugIn.h"
 #include "PlugInDescriptorImp.h"
@@ -59,6 +61,29 @@ PlugInModel::~PlugInModel()
       }
    }
 }
+
+QVariant PlugInModel::data(const QModelIndex& index, int role) const
+{
+   QVariant value = SessionItemModel::data(index, role);
+   if (role == Qt::DecorationRole)
+   {
+      SessionItemWrapper* pWrapper = reinterpret_cast<SessionItemWrapper*>(index.internalPointer());
+      if (pWrapper != NULL)
+      {
+         if (dynamic_cast<PlugInDescriptor*>(pWrapper->getSessionItem()) != NULL)
+         {
+            QIcon plugInIcon = value.value<QIcon>();
+            if (plugInIcon.isNull() == true)
+            {
+               value = QIcon(":/icons/PlugIn");
+            }
+         }
+      }
+   }
+
+   return value;
+}
+
 void PlugInModel::addModule(Subject& subject, const string& signal, const boost::any& value)
 {
    ModuleDescriptor* pModule = boost::any_cast<ModuleDescriptor*>(value);
