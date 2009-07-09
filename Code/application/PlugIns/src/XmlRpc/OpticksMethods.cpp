@@ -741,7 +741,6 @@ XmlRpcParam* ExportElement::operator()(const XmlRpcParams& params)
       throw XmlRpcMethodFault(307);
    }
 
-   // This is not a generic export method since not all exporters require the same parameters.
    ExporterResource exporter(pExporterName->value().toString().toStdString(), pElement, pFileDescriptor.get());
    if (exporter->getPlugIn() == NULL)
    {
@@ -777,6 +776,119 @@ XmlRpcArrayParam* ExportElement::getSignature()
    *pParams << new XmlRpcParam(STRING_PARAM, "string Exporter");
    *pParams << new XmlRpcParam(STRING_PARAM, "string OutputFilename");
    *pParams << new XmlRpcParam(STRING_PARAM, "string ViewId");
+   *pSignatures << pParams;
+
+   return pSignatures;
+}
+
+XmlRpcParam* GetMetadata::operator()(const XmlRpcParams& params)
+{
+   if (params.size() != 2)
+   {
+      throw XmlRpcMethodFault(200);
+   }
+
+   const XmlRpcParam* pInputFilename = params[0];
+   if ((pInputFilename == NULL) || (pInputFilename->type() != STRING_PARAM))
+   {
+      throw XmlRpcMethodFault(200);
+   }
+
+   const std::string inputFilename = XmlBase::URLtoPath(X(pInputFilename->value().toString().toAscii()));
+   if (inputFilename.empty())
+   {
+      throw XmlRpcMethodFault(200);
+   }
+
+   const XmlRpcParam* pOutputFilename = params[1];
+   if ((pOutputFilename == NULL) || (pOutputFilename->type() != STRING_PARAM))
+   {
+      throw XmlRpcMethodFault(200);
+   }
+
+   const std::string outputFilename = XmlBase::URLtoPath(X(pOutputFilename->value().toString().toAscii()));
+   if (outputFilename.empty())
+   {
+      throw XmlRpcMethodFault(200);
+   }
+
+   ImporterResource pImporter("Auto Importer", inputFilename, NULL, false);
+   Importer* pImp = dynamic_cast<Importer*>(pImporter->getPlugIn());
+   if (pImp == NULL)
+   {
+      throw XmlRpcMethodFault(302);
+   }
+
+   std::string errorMessage;
+   std::vector<ImportDescriptor*> descriptors = pImporter->getImportDescriptors();
+   if (descriptors.size() != 1 || descriptors[0] == NULL || descriptors[0]->getDataDescriptor() == NULL)
+   {
+      errorMessage = "The file must contain exactly 1 image";
+   }
+   else
+   {
+      if (!pImp->validate(descriptors[0]->getDataDescriptor(), errorMessage) && errorMessage.empty())
+      {
+         errorMessage = "Validate returned false";
+      }
+   }
+
+   // If there were validation warnings or errors, return now
+   if (!errorMessage.empty())
+   {
+      return new XmlRpcParam("string", QString::fromStdString(errorMessage));
+   }
+
+   DataDescriptorResource<DataDescriptor> pDescriptor(descriptors[0]->getDataDescriptor()->copy());
+   if (!pDescriptor.get())
+   {
+      throw XmlRpcMethodFault(307);
+   }
+
+   // Mark this as on disk so that no memory is allocated
+   pDescriptor->setProcessingLocation(ON_DISK);
+   ModelResource<DataElement> pElement(pDescriptor.release());
+   if (!pElement.get())
+   {
+      throw XmlRpcMethodFault(307);
+   }
+
+   FactoryResource<FileDescriptor> pFileDescriptor(
+      RasterUtilities::generateFileDescriptorForExport(pElement->getDataDescriptor(), outputFilename));
+   if (pFileDescriptor.get() == NULL)
+   {
+      throw XmlRpcMethodFault(307);
+   }
+
+   // This is not a generic export method because the raster data is not present
+   // This is ok for this particular exporter
+   ExporterResource exporter("Metadata Exporter", pElement.get(), pFileDescriptor.get());
+   if (exporter->getPlugIn() == NULL)
+   {
+      throw XmlRpcMethodFault(307);
+   }
+
+   if (exporter->execute() == false)
+   {
+      throw XmlRpcMethodFault(313);
+   }
+
+   return new XmlRpcParam("string", QString::fromStdString("Success"));
+}
+
+QString GetMetadata::getHelp()
+{
+   return "Retrieve metadata from a file without importing the data.\n";
+}
+
+XmlRpcArrayParam* GetMetadata::getSignature()
+{
+   XmlRpcArrayParam* pSignatures = new XmlRpcArrayParam;
+
+   XmlRpcArrayParam* pParams = new XmlRpcArrayParam;
+   *pParams << new XmlRpcParam(STRING_PARAM, "string");
+   *pParams << new XmlRpcParam(STRING_PARAM, "string InputFilename");
+   *pParams << new XmlRpcParam(STRING_PARAM, "string OutputFilename");
    *pSignatures << pParams;
 
    return pSignatures;

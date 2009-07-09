@@ -198,6 +198,17 @@ public:
    virtual XmlRpcArrayParam *getSignature();
 };
 
+class GetMetadata : public XmlRpcMethodCallImp
+{
+public:
+   GetMetadata() {}
+   GetMetadata(const GetMetadata &other) {}
+   virtual ~GetMetadata() {}
+   virtual XmlRpcParam *operator()(const XmlRpcParams &params);
+   virtual QString getHelp();
+   virtual XmlRpcArrayParam *getSignature();
+};
+
 class GetViewInfo : public XmlRpcMethodCallImp
 {
 public:

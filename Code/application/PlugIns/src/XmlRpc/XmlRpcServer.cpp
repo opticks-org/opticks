@@ -74,6 +74,7 @@ bool XmlRpcServer::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList
    registerMethodCall("opticks.closeAll", new OpticksXmlRpcMethods::CloseAll);
    registerMethodCall("opticks.createView", new OpticksXmlRpcMethods::CreateView);
    registerMethodCall("opticks.exportElement", new OpticksXmlRpcMethods::ExportElement);
+   registerMethodCall("opticks.getMetadata", new OpticksXmlRpcMethods::GetMetadata);
    registerMethodCall("opticks.getViewInfo", new OpticksXmlRpcMethods::GetViewInfo);
    registerMethodCall("opticks.getViews", new OpticksXmlRpcMethods::GetViews);
    registerMethodCall("opticks.linkViews", new OpticksXmlRpcMethods::LinkViews);
