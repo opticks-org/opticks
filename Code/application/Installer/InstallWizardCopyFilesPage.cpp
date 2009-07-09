@@ -44,6 +44,7 @@ bool InstallWizardCopyFilesPage::validatePage()
    {
       mpProgress->updateProgress("Installing extensions", 1, NORMAL);
    }
+   bool success = false;
    foreach (Aeb* pDescriptor, mPackageDescriptors)
    {
       if (pDescriptor == NULL)
@@ -61,8 +62,12 @@ bool InstallWizardCopyFilesPage::validatePage()
             mpProgress->updateProgress("Unable to install " + pDescriptor->getName(), 0, ERRORS);
          }
       }
+      else
+      {
+         success = true;
+      }
    }
-   if (mpProgress != NULL)
+   if (success && mpProgress != NULL)
    {
       mpProgress->updateProgress("Installation has finished.\nInstalled extensions will be available the next time "
          + std::string(APP_NAME) + " starts.", 100, NORMAL);

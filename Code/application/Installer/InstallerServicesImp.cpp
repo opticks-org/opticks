@@ -166,7 +166,16 @@ bool InstallerServicesImp::installExtension(const std::string& aebFile, Progress
    // perform the install   
    QDir extensionDir = getExtensionDir(*pExtension.get());
    TransactionLog log(pProgress);
-   const QList<const AebEntry*>& contentPaths = io.getContentPaths();
+   errMsg.clear();
+   const QList<const AebEntry*>& contentPaths = io.getContentPaths(errMsg);
+   if (!errMsg.empty())
+   {
+      if (pProgress != NULL)
+      {
+         pProgress->updateProgress(errMsg, 0, ERRORS);
+      }
+      return false;
+   }
    QList<QString> contentDests;
    pExtension->getContentDestinations(contentPaths, contentDests);
    if (contentDests.empty())

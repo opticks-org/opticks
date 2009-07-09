@@ -46,7 +46,7 @@ public:
    virtual bool fromFile(const std::string& fname, std::string& errMsg);
    virtual bool toFile(const std::string& fname);
 
-   const QList<const AebEntry*>& getContentPaths() const;
+   const QList<const AebEntry*>& getContentPaths(std::string& errMsg) const;
    const AebEntry* getEntry(const QUrl& aebUrl) const;
 
    bool installFileFromAeb(const AebEntry* pSource, const std::string& destination) const;
@@ -59,7 +59,6 @@ private:
    static std::string sAeblPrefix;
    static std::string sAeblTopSubject;
    static std::string sOpticksPrefix;
-   bool mLoadedContentPaths;
    mutable QList<const AebEntry*> mContentPaths;
    Aeb& mObj;
    mutable ZipFileResource mZipFile;

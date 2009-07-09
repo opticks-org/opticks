@@ -5869,8 +5869,10 @@ void ApplicationWindow::importDroppedFiles()
    AebListResource extensionRes;
    ProgressResource pProgress("Importing files...");
    vector<string> droppedDataFiles;
+   int cnt = 0;
    for (vector<string>::iterator it = mDroppedFilesList.begin(); it != mDroppedFilesList.end(); ++it)
    {
+      pProgress->updateProgress("Checking for AEBs", ++cnt * 99 / mDroppedFilesList.size(), NORMAL);
       if ((*it).empty() == false)
       {
          if (QFileInfo(QString::fromStdString(*it)).suffix() == "aeb")
@@ -5880,10 +5882,7 @@ void ApplicationWindow::importDroppedFiles()
             std::string errMsg;
             if (!deserializer.fromFile(*it, errMsg))
             {
-               if (pProgress.get() != NULL)
-               {
-                  pProgress->updateProgress("Invalid extension bundle " + *it + "\n" + errMsg, 0, WARNING);
-               }
+               pProgress->updateProgress("Invalid extension bundle " + *it + "\n" + errMsg, 0, WARNING);
             }
             else
             {
@@ -5895,6 +5894,7 @@ void ApplicationWindow::importDroppedFiles()
          droppedDataFiles.push_back(*it);
       }
    }
+   pProgress->updateProgress("Finished checking for AEBs", 100, NORMAL);
 
    // Import the data files
    if (droppedDataFiles.empty() == false)

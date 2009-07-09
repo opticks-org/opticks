@@ -73,7 +73,7 @@ protected:
 };
 
 
-AebIo::AebIo(Aeb& obj) : mObj(obj), mLoadedContentPaths(false)
+AebIo::AebIo(Aeb& obj) : mObj(obj)
 {
    mBuf.resize(COPY_BUF_SIZE);
    mBuf2.resize(COPY_BUF_SIZE);
@@ -212,7 +212,7 @@ bool AebIo::fromFile(const std::string& fname, std::string& errMsg)
          mObj.mPlatforms.push_back(platform);
       }
    }
-   if (!objs.empty() && mObj.mPlatforms.empty())
+   if (!objs.empty() && mObj.mPlatforms.empty()) // targetPlatforms exists and current is not in the list
    {
       errMsg = "The current platform is not supported by this extension.";
       return false;
@@ -528,13 +528,8 @@ bool AebIo::openZipFileIfNeeded() const
    return true;
 }
 
-const QList<const AebEntry*>& AebIo::getContentPaths() const
+const QList<const AebEntry*>& AebIo::getContentPaths(std::string& errMsg) const
 {
-   if (mLoadedContentPaths)
-   {
-      return mContentPaths;
-   }
-
    QString platformStr = QString("platform/%1").arg(QString::fromStdString(AebPlatform().toString()));
    if (mObj.mAebFile.fileName() == "install.rdf")
    {
@@ -546,6 +541,12 @@ const QList<const AebEntry*>& AebIo::getContentPaths() const
       {
          QDir current = process.dequeue();
          QFileInfoList items = current.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
+         QString path = current.path();
+         if (mObj.mPlatforms.empty() && path.endsWith(platformStr))
+         {
+            errMsg = "Platform specific files exist but targetPlatform is not specified in AEB metadata.";
+            return mContentPaths;
+         }
          foreach (QFileInfo item, items)
          {
             if (item.isDir())
@@ -580,6 +581,11 @@ const QList<const AebEntry*>& AebIo::getContentPaths() const
          if (unzGetCurrentFileInfo(*mZipFile, NULL, filename.data(), filename.size(), NULL, 0, NULL, 0) == UNZ_OK)
          {
             QString path(filename);
+            if (mObj.mPlatforms.empty() && path.startsWith(platformStr))
+            {
+               errMsg = "Platform specific files exist but targetPlatform is not specified in AEB metadata.";
+               return mContentPaths;
+            }
             if ((path.startsWith("content") || path.startsWith(platformStr)) && !path.endsWith("/"))
             {
                unz_file_pos zipPosition;
