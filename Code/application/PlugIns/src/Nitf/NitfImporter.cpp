@@ -147,6 +147,12 @@ vector<ImportDescriptor*> Nitf::NitfImporter::getImportDescriptors(const string 
 
       pDd->setInterleaveFormat(BSQ);
       pDd->setDataType(appDataType);
+      RasterDataDescriptorExt1* pDescriptorExt1 = dynamic_cast<RasterDataDescriptorExt1*>(pDd);
+      if (pDescriptorExt1 != NULL)
+      {
+         pDescriptorExt1->setValidDataTypes(vector<EncodingType>(1, appDataType));
+      }
+
       pDd->setProcessingLocation(IN_MEMORY);
 
       RasterFileDescriptor* pFd = dynamic_cast<RasterFileDescriptor*>(

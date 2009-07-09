@@ -12,6 +12,7 @@
 #include "RasterDataDescriptorImp.h"
 #include "RasterFileDescriptorImp.h"
 #include "RasterUtilities.h"
+#include "StringUtilities.h"
 
 XERCES_CPP_NAMESPACE_USE
 using namespace std;
@@ -20,6 +21,7 @@ RasterDataDescriptorImp::RasterDataDescriptorImp(const string& name, const strin
    DataElement* pParent) :
    DataDescriptorImp(name, type, pParent),
    mDataType(INT1UBYTE),
+   mValidDataTypes(StringUtilities::getAllEnumValues<EncodingType>()),
    mInterleave(BIP),
    mRowSkipFactor(0),
    mColumnSkipFactor(0),
@@ -32,6 +34,7 @@ RasterDataDescriptorImp::RasterDataDescriptorImp(const string& name, const strin
 RasterDataDescriptorImp::RasterDataDescriptorImp(const string& name, const string& type, const vector<string>& parent) :
    DataDescriptorImp(name, type, parent),
    mDataType(INT1UBYTE),
+   mValidDataTypes(StringUtilities::getAllEnumValues<EncodingType>()),
    mInterleave(BIP),
    mRowSkipFactor(0),
    mColumnSkipFactor(0),
@@ -57,6 +60,20 @@ void RasterDataDescriptorImp::setDataType(EncodingType dataType)
 EncodingType RasterDataDescriptorImp::getDataType() const
 {
    return mDataType;
+}
+
+void RasterDataDescriptorImp::setValidDataTypes(const vector<EncodingType>& validDataTypes)
+{
+   if (validDataTypes != mValidDataTypes)
+   {
+      mValidDataTypes = validDataTypes;
+      notify(SIGNAL_NAME(Subject, Modified));
+   }
+}
+
+const vector<EncodingType>& RasterDataDescriptorImp::getValidDataTypes() const
+{
+   return mValidDataTypes;
 }
 
 void RasterDataDescriptorImp::setInterleaveFormat(InterleaveFormatType format)
@@ -571,6 +588,12 @@ DataDescriptor* RasterDataDescriptorImp::copy(const string& name, DataElement* p
       pDescriptor->setDisplayMode(mDisplayMode);
    }
 
+   RasterDataDescriptorExt1* pDescriptorExt1 = dynamic_cast<RasterDataDescriptorExt1*>(pDescriptor);
+   if (pDescriptor != NULL)
+   {
+      pDescriptorExt1->setValidDataTypes(mValidDataTypes);
+   }
+
    return pDescriptor;
 }
 
@@ -652,6 +675,14 @@ bool RasterDataDescriptorImp::toXml(XMLWriter* pXml) const
    if (bSuccess == true)
    {
       pXml->addAttr("dataType", mDataType);
+
+      // Valid data types
+      pXml->pushAddPoint(pXml->addElement("ValidDataTypes"));
+      for (vector<EncodingType>::const_iterator iter = mValidDataTypes.begin(); iter != mValidDataTypes.end(); ++iter)
+      {
+         pXml->addText(StringUtilities::toXmlString(*iter), pXml->addElement("value"));
+      }
+      pXml->popAddPoint();
 
       // Bad values
       pXml->pushAddPoint(pXml->addElement("BadValues"));
@@ -765,6 +796,8 @@ bool RasterDataDescriptorImp::fromXml(DOMNode* pDocument, unsigned int version)
       return false;
    }
 
+   mBadValues.clear();
+   mValidDataTypes.clear();
    mRows.clear();
    mColumns.clear();
    mBands.clear();
@@ -793,6 +826,22 @@ bool RasterDataDescriptorImp::fromXml(DOMNode* pDocument, unsigned int version)
          XmlReader::StrToLocation(pGchld->getNodeValue(), pixelSize);
          mXPixelSize = pixelSize.mX;
          mYPixelSize = pixelSize.mY;
+      }
+      else if (XMLString::equals(pChild->getNodeName(), X("ValidDataTypes")))
+      {
+         for (DOMNode* pGrandchild = pChild->getFirstChild(); pGrandchild != NULL;
+            pGrandchild = pGrandchild->getNextSibling())
+         {
+            if (XMLString::equals(pGrandchild->getNodeName(), X("value")))
+            {
+               DOMNode* pValue = pGrandchild->getFirstChild();
+               if (pValue != NULL)
+               {
+                  EncodingType value = StringUtilities::fromXmlString<EncodingType>(A(pValue->getNodeValue()));
+                  mValidDataTypes.push_back(value);
+               }
+            }
+         }
       }
       else if (XMLString::equals(pChild->getNodeName(), X("BadValues")))
       {
@@ -875,6 +924,11 @@ bool RasterDataDescriptorImp::fromXml(DOMNode* pDocument, unsigned int version)
       }
    }
 
+   // Allow any data type if no valid data types were explicitly set
+   if (mValidDataTypes.empty() == true)
+   {
+      mValidDataTypes = StringUtilities::getAllEnumValues<EncodingType>();
+   }
 
    return success;
 }

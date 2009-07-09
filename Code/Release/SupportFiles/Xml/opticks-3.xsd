@@ -939,6 +939,13 @@ http://www.gnu.org/licenses/lgpl.html
       <xsd:complexContent>
          <xsd:extension base="opticks:DataDescriptor">
             <xsd:sequence>
+               <xsd:element name="ValidDataTypes" minOccurs="0" maxOccurs="1" form="qualified">
+                  <xsd:complexType>
+                     <xsd:sequence>
+                        <xsd:element name="value" minOccurs="0" maxOccurs="unbounded" form="qualified" type="opticks:EncodingType" />
+                     </xsd:sequence>
+                  </xsd:complexType>
+               </xsd:element>
                <xsd:element name="BadValues" minOccurs="1" maxOccurs="1" form="qualified">
                   <xsd:complexType>
                      <xsd:sequence>

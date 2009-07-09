@@ -412,6 +412,12 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
 
                         pDescriptor->setBadValues(badValues);
                      }
+
+                     RasterDataDescriptorExt1* pDescriptorExt1 = dynamic_cast<RasterDataDescriptorExt1*>(pDescriptor);
+                     if (pDescriptorExt1 != NULL)
+                     {
+                        pDescriptorExt1->setValidDataTypes(vector<EncodingType>(1, dataType));
+                     }
                   }
 
                   // Interleave format

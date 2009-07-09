@@ -30,7 +30,7 @@ class Units;
  *    setUnits(), and setInterleaveFormat()
  *  - All notifications documented in DataDescriptor.
  *
- *  @see        RasterElement
+ *  @see        RasterDataDescriptorExt1, RasterElement
  */
 class RasterDataDescriptor : public DataDescriptor
 {
@@ -543,6 +543,53 @@ protected:
     * This should be destroyed by calling ModelServices::destroyDataDescriptor.
     */
    virtual ~RasterDataDescriptor() {}
+};
+
+/**
+ * Extends capability of the RasterDataDescriptor interface.
+ *
+ * This class provides additional capability for the RasterDataDescriptor interface
+ * class.  A pointer to this class can be obtained by performing a dynamic cast
+ * on a pointer to RasterDataDescriptor.
+ *
+ * @warning A pointer to this class can only be used to call methods contained
+ *          in this extension class and cannot be used to call any methods in
+ *          RasterDataDescriptor.
+ *
+ * @see RasterDataDescriptor
+ */
+class RasterDataDescriptorExt1
+{
+public:
+   /**
+    *  Sets the valid data types for the data set. The current data type may or may not be valid.
+    *  By default, all Encoding Types are valid.
+    *
+    *  @param   dataType
+    *           The valid data types for the data set.
+    *
+    *  @notify  This method notifies Subject::signalModified if the given
+    *           valid data types are different than the current valid data types.
+    *
+    *  @see RasterDataDescriptor::setDataType()
+    */
+   virtual void setValidDataTypes(const std::vector<EncodingType>& validDataTypes) = 0;
+
+   /**
+    *  Returns the valid data types for the data set. The current data type may or may not be valid.
+    *  By default, all Encoding Types are valid.
+    *
+    *  @return  The valid data types.
+    *
+    *  @see RasterDataDescriptor::getDataType()
+    */
+   virtual const std::vector<EncodingType>& getValidDataTypes() const = 0;
+
+protected:
+   /**
+    * This should be destroyed by calling ModelServices::destroyDataDescriptor.
+    */
+   virtual ~RasterDataDescriptorExt1() {}
 };
 
 #endif

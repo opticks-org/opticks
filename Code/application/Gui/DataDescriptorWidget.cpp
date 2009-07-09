@@ -311,16 +311,19 @@ void DataDescriptorWidget::initialize()
       {
          QComboBox* pDataTypeCombo = new QComboBox(mpTreeWidget);
          pDataTypeCombo->setEditable(false);
-         pDataTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(INT1SBYTE)));
-         pDataTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(INT1UBYTE)));
-         pDataTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(INT2SBYTES)));
-         pDataTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(INT2UBYTES)));
-         pDataTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(INT4SCOMPLEX)));
-         pDataTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(INT4SBYTES)));
-         pDataTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(INT4UBYTES)));
-         pDataTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(FLT4BYTES)));
-         pDataTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(FLT8COMPLEX)));
-         pDataTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(FLT8BYTES)));
+
+         RasterDataDescriptorExt1* pRasterDescriptorExt1 = dynamic_cast<RasterDataDescriptorExt1*>(pRasterDescriptor);
+         if (pRasterDescriptorExt1 != NULL)
+         {
+            const std::vector<EncodingType>& validDataTypes = pRasterDescriptorExt1->getValidDataTypes();
+            for (vector<EncodingType>::const_iterator iter = validDataTypes.begin();
+               iter != validDataTypes.end();
+               ++iter)
+            {
+               pDataTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(*iter)));
+            }
+         }
+
          pDataTypeCombo->hide();
 
          mpTreeWidget->setCellWidgetType(pDataTypeItem, 1, CustomTreeWidget::COMBO_BOX);

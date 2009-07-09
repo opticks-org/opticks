@@ -30,6 +30,8 @@ public:
 
    void setDataType(EncodingType dataType);
    EncodingType getDataType() const;
+   void setValidDataTypes(const std::vector<EncodingType>& validDataTypes);
+   const std::vector<EncodingType>& getValidDataTypes() const;
    unsigned int getBytesPerElement() const;
    void setInterleaveFormat(InterleaveFormatType format);
    InterleaveFormatType getInterleaveFormat() const;
@@ -89,6 +91,7 @@ public:
 
 private:
    EncodingType mDataType;
+   std::vector<EncodingType> mValidDataTypes;
    InterleaveFormatType mInterleave;
    std::vector<int> mBadValues;
 
@@ -112,7 +115,7 @@ private:
 };
 
 #define RASTERDATADESCRIPTORADAPTEREXTENSION_CLASSES \
-   DATADESCRIPTORADAPTEREXTENSION_CLASSES
+   DATADESCRIPTORADAPTEREXTENSION_CLASSES, public RasterDataDescriptorExt1
 
 #define RASTERDATADESCRIPTORADAPTER_METHODS(impClass) \
    DATADESCRIPTORADAPTER_METHODS(impClass) \
@@ -123,6 +126,14 @@ private:
    EncodingType getDataType() const \
    { \
       return impClass::getDataType(); \
+   } \
+   void setValidDataTypes(const std::vector<EncodingType>& validDataTypes) \
+   { \
+      impClass::setValidDataTypes(validDataTypes); \
+   } \
+   const std::vector<EncodingType>& getValidDataTypes() const \
+   { \
+      return impClass::getValidDataTypes(); \
    } \
    unsigned int getBytesPerElement() const \
    { \

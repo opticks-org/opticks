@@ -244,9 +244,15 @@ vector<ImportDescriptor*> HyperionImporter::getImportDescriptors(const string& f
                   }
 
                   // Data type
-                  EncodingType e;
-                  pPrimaryDataset->getDataEncoding(e);
-                  pDescriptor->setDataType(e);
+                  EncodingType encoding;
+                  pPrimaryDataset->getDataEncoding(encoding);
+                  pDescriptor->setDataType(encoding);
+                  RasterDataDescriptorExt1* pDescriptorExt1 = dynamic_cast<RasterDataDescriptorExt1*>(pDescriptor);
+                  if (pDescriptorExt1 != NULL)
+                  {
+                     pDescriptorExt1->setValidDataTypes(vector<EncodingType>(1, encoding));
+                  }
+
                   pFileDescriptor->setBitsPerElement(pDescriptor->getBytesPerElement() * 8);
 
                   // Center wavelengths
