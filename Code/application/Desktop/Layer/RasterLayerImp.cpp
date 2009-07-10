@@ -90,7 +90,6 @@ RasterLayerImp::RasterLayerImp(const string& id, const string& layerName, DataEl
    mpGrayscaleAction = pDisplayModeGroup->addAction("Grayscale");
    mpGrayscaleAction->setAutoRepeat(false);
    mpGrayscaleAction->setCheckable(true);
-   mpGrayscaleAction->setChecked(true);
    pDesktop->initializeAction(mpGrayscaleAction, displayModeContext);
 
    mpRgbAction = pDisplayModeGroup->addAction("RGB");
@@ -129,12 +128,11 @@ RasterLayerImp::RasterLayerImp(const string& id, const string& layerName, DataEl
    mpSeparatorAction = new QAction(this);
    mpSeparatorAction->setSeparator(true);
 
-   // Initialize the layer to the initial displayed bands and display mode
-   reset();
-   addPropertiesPage(PropertiesRasterLayer::getName());
-
-   // Setting up the icon.
+   // Initialization
    setIcon(QIcon(":/icons/RasterLayer"));
+   addPropertiesPage(PropertiesRasterLayer::getName());
+   reset();
+   updateDisplayModeAction(meDisplayMode);      // The member display mode is set in reset()
 
    // Connections
    connect(this, SIGNAL(gpuImageEnabled(bool)), this, SIGNAL(modified()));
