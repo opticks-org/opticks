@@ -637,14 +637,23 @@ void AnimationControllerImp::stepBackward()
       return;
    }
 
-   const double currentFrame = getCurrentFrame();
+   double currentFrame = getCurrentFrame();
+
+   // If type is FRAME_ID, need to adjust value to actual frame number in case animation was paused
+   // and currentFrame is not a whole number. If we don't adjust, then first step back will just set
+   // frame to the whole number for the frame, e.g., value = 37.335 and step back will set it to 37
+   // and not 36. Don't have to do this for step forward since value of 37.335 will be set to 38.
+   if (getFrameType() == FRAME_ID)
+   {
+      currentFrame = floor(currentFrame);
+   }
+
    double prevValue = numeric_limits<double>::min();
    for (vector<Animation*>::const_iterator iter = mAnimations.begin();
       iter != mAnimations.end(); ++iter)
    {
       Animation* pAnimation = *iter;
       VERIFYNRV(pAnimation != NULL);
-
       const double startValue = pAnimation->getStartValue();
       const double stopValue = pAnimation->getStopValue();
       double animationPrev;
