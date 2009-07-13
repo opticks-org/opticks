@@ -45,21 +45,25 @@ namespace ArcProxyLib
          QStringList featureArgs = featureString.split(" ", QString::SkipEmptyParts);
 
          mType = UNKNOWN;
-         if(featureArgs.front() == "MULTIPOINT")
+         if (featureArgs.front() == "POINT")
+         {
+            mType = POINT;
+         }
+         else if (featureArgs.front() == "MULTIPOINT")
          {
             mType = MULTIPOINT;
          }
-         else if(featureArgs.front() == "POLYLINE")
+         else if (featureArgs.front() == "POLYLINE")
          {
             mType = POLYLINE;
          }
-         else if(featureArgs.front() == "POLYGON")
+         else if (featureArgs.front() == "POLYGON")
          {
             mType = POLYGON;
          }
-         for(featureArgs.pop_front(); !featureArgs.empty(); featureArgs.pop_front())
+         for (featureArgs.pop_front(); !featureArgs.empty(); featureArgs.pop_front())
          {
-            if(featureArgs.front() == "PATH")
+            if (featureArgs.front() == "PATH")
             {
                startNewPath();
             }
@@ -74,7 +78,7 @@ namespace ArcProxyLib
             else
             {
                QStringList coords = featureArgs.front().split(",");
-               if(coords.size() == 2)
+               if (coords.size() == 2)
                {
                   addVertex(std::make_pair(coords[0].toDouble(), coords[1].toDouble()));
                }
