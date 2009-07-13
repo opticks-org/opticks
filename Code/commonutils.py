@@ -157,6 +157,7 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
         la("Qt/plugins/%s/imageformats/libqsvg.so" % (plat_dir), "imageformats")
         la("Qt/plugins/%s/imageformats/libqtiff.so" % (plat_dir), "imageformats")
         la("ossim/lib/%s/libossim.so.1" % (plat_dir))
+        la("gdal/lib/%s/libgdal.so.1" % (plat_dir))
         la("ehs/lib/%s/libehs.so.0" % (plat_dir))
     elif platform == "Windows":
         temp_list = list()

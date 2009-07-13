@@ -31,6 +31,7 @@ f none $APPDIR/Bin/libavcodec.so.51=$OpticksDependenciesDir/libavcodec.so.51 075
 f none $APPDIR/Bin/libavformat.so.50=$OpticksDependenciesDir/libavformat.so.50 0755 root $GROUP
 f none $APPDIR/Bin/libavutil.so.49=$OpticksDependenciesDir/libavutil.so.49 0755 root $GROUP
 f none $APPDIR/Bin/libehs.so.0=$OpticksDependenciesDir/libehs.so.0 0755 root $GROUP
+f none $APPDIR/Bin/libgdal.so.1=$OpticksDependenciesDir/libgdal.so.1 0755 root $GROUP
 f none $APPDIR/Bin/libhdf5.so.0=$OpticksDependenciesDir/libhdf5.so.0 0755 root $GROUP
 f none $APPDIR/Bin/libossim.so.1=$OpticksDependenciesDir/libossim.so.1 0755 root $GROUP
 f none $APPDIR/Bin/libqwt.so.5=$OpticksDependenciesDir/libqwt.so.5 0755 root $GROUP
