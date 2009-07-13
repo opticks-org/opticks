@@ -48,7 +48,7 @@ EnviLibraryImporter::EnviLibraryImporter() :
    setCreator("Ball Aerospace & Technologies Corp.");
    setCopyright(APP_COPYRIGHT);
    setVersion(APP_VERSION_NUMBER);
-   setExtensions("ENVI Signature Library Files (*.sli *.hdr)");
+   setExtensions("ENVI Signature Library Files (*.sli *.spl *.hdr)");
    setSubtype("Signature Set");
    setDescriptorId("{638DB32A-D6A5-43c9-A4DB-4E059C750367}");
    allowMultipleInstances(true);
@@ -502,62 +502,6 @@ bool EnviLibraryImporter::extractPlugInArgs(PlugInArgList* pArgList)
    return true;
 }
 
-string EnviLibraryImporter::findHeaderFile(const string& filename)
-{
-   if (filename.empty() == true)
-   {
-      return string();
-   }
-
-   // Check if the input filename is the header file
-   string headerFileExtension = ".hdr";
-
-   string::size_type pos = filename.rfind(headerFileExtension);
-   if (pos == (filename.length() - 4))
-   {
-      return filename;
-   }
-
-   // If the header file extension exists in the filename, truncate the filename
-   FILE* pFp = NULL;
-   string headerFile;
-
-   if (pos != string::npos)
-   {
-      headerFile = filename.substr(0, pos) + headerFileExtension;
-      pFp = fopen(headerFile.c_str(), "rt");
-   }
-
-   // Append the header file extension to the input filename
-   if (pFp == NULL)
-   {
-      headerFile = filename + headerFileExtension;
-      pFp = fopen(headerFile.c_str(), "rt");
-   }
-
-   // Truncate the input filename extension and append the header file extension
-   if (pFp == NULL)
-   {
-      pos = filename.rfind('.');
-      if (pos != string::npos)
-      {
-         headerFile = filename.substr(0, pos) + headerFileExtension;
-         pFp = fopen(headerFile.c_str(), "rt");
-      }
-   }
-
-   if (pFp != NULL)
-   {
-      fclose(pFp);
-   }
-   else
-   {
-      headerFile.erase();
-   }
-
-   return headerFile;
-}
-
 string EnviLibraryImporter::findDataFile(const string& filename)
 {
    // Check the fields from the header
@@ -574,46 +518,52 @@ string EnviLibraryImporter::findDataFile(const string& filename)
       }
    }
 
-   // Check for an invalid filename
+   string dataFile = matchDataFile(filename, ".sli", "rb");
+   if (dataFile.empty())
+   {
+      dataFile = matchDataFile(filename, ".spl", "rb");
+   }
+   return dataFile;
+}
+
+string EnviLibraryImporter::matchDataFile(const string& filename, const string& fileExtension,
+                                          const string& openMode)
+{
    if (filename.empty() == true)
    {
       return string();
    }
-
-   // Check if the input filename is the data file
-   string dataFileExtension = ".sli";
-
-   string::size_type pos = filename.rfind(dataFileExtension);
-   if (pos == (filename.length() - 4))
+   string::size_type pos = filename.rfind(fileExtension);
+   if (pos == (filename.length() - fileExtension.length()))
    {
       return filename;
    }
 
-   // If the data file extension exists in the filename, truncate the filename
+   // If the provided file extension exists in the filename, truncate the filename
    FILE* pFp = NULL;
-   string dataFile;
+   string matchFile;
 
    if (pos != string::npos)
    {
-      dataFile = filename.substr(0, pos) + dataFileExtension;
-      pFp = fopen(dataFile.c_str(), "rb");
+      matchFile = filename.substr(0, pos) + fileExtension;
+      pFp = fopen(matchFile.c_str(), openMode.c_str());
    }
 
-   // Append the data file extension to the input filename
+   // Append the provided file extension to the input filename
    if (pFp == NULL)
    {
-      dataFile = filename + dataFileExtension;
-      pFp = fopen(dataFile.c_str(), "rb");
+      matchFile = filename + fileExtension;
+      pFp = fopen(matchFile.c_str(), openMode.c_str());
    }
 
-   // Truncate the input filename extension and append the data file extension
+   // Truncate the input filename extension and append the provided file extension
    if (pFp == NULL)
    {
       pos = filename.rfind('.');
       if (pos != string::npos)
       {
-         dataFile = filename.substr(0, pos) + dataFileExtension;
-         pFp = fopen(dataFile.c_str(), "rb");
+         matchFile = filename.substr(0, pos) + fileExtension;
+         pFp = fopen(matchFile.c_str(), openMode.c_str());
       }
    }
 
@@ -623,10 +573,10 @@ string EnviLibraryImporter::findDataFile(const string& filename)
    }
    else
    {
-      dataFile.erase();
+      matchFile.erase();
    }
 
-   return dataFile;
+   return matchFile;
 }
 
 bool EnviLibraryImporter::parseHeader(const string& filename)
@@ -639,7 +589,7 @@ bool EnviLibraryImporter::parseHeader(const string& filename)
    bool bSuccess = mFields.populateFromHeader(filename);
    if (bSuccess == false)
    {
-      string headerFile = findHeaderFile(filename);
+      string headerFile = matchDataFile(filename, ".hdr", "rt");
       bSuccess = mFields.populateFromHeader(headerFile);
    }
 

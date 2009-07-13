@@ -42,8 +42,9 @@ public:
 
 protected:
    bool extractPlugInArgs(PlugInArgList* pArgList);
-   std::string findHeaderFile(const std::string& filename);
    std::string findDataFile(const std::string& filename);
+   std::string matchDataFile(const std::string& filename, const std::string& fileExtension,
+      const std::string& openMode);
    bool parseHeader(const std::string& filename);
 
 private:

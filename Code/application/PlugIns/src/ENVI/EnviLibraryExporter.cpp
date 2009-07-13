@@ -41,7 +41,7 @@ EnviLibraryExporter::EnviLibraryExporter() :
    setCreator("Ball Aerospace & Technologies Corp.");
    setCopyright(APP_COPYRIGHT);
    setVersion(APP_VERSION_NUMBER);
-   setExtensions("ENVI Signature Library Files (*.sli)");
+   setExtensions("ENVI Signature Library Files (*.sli *.spl)");
    setSubtype(TypeConverter::toString<SignatureSet>());
    setDescriptorId("{FB8D86B6-BD5D-4657-91B0-5B2797060C8E}");
    allowMultipleInstances(true);
