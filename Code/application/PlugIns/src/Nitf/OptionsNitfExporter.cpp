@@ -22,6 +22,7 @@
 #include "AppVerify.h"
 #include "Classification.h"
 #include "DateTime.h"
+#include "NitfUtilities.h"
 #include "OptionsNitfExporter.h"
 #include "UtilityServices.h"
 
@@ -59,6 +60,9 @@ OptionsNitfExporter::OptionsNitfExporterElement::OptionsNitfExporterElement(cons
 {
    mpLabel = new QLabel(mName);
    setValue(originalValue);
+
+   // mModified is not in the initializer list because it is changed by setValue
+   mModified = false;
 }
 
 void OptionsNitfExporter::OptionsNitfExporterElement::setValue(const string& newValue)
@@ -83,6 +87,8 @@ void OptionsNitfExporter::OptionsNitfExporterElement::setValue(const string& new
       mModifiedValue = newValue;
       mModifiedValueIsTruncated = false;
    }
+
+   mModified = true;
 }
 
 OptionsNitfExporter::OptionsNitfExporter(const Classification* const pClassification, QWidget* pParent) :
@@ -150,6 +156,22 @@ OptionsNitfExporter::~OptionsNitfExporter()
 bool OptionsNitfExporter::isValid(string& errorMessage)
 {
    bool isValid = true;
+   bool isModified = false;
+   for (vector<OptionsNitfExporterElement>::iterator iter = mElements.begin(); iter != mElements.end(); iter++)
+   {
+      if (iter->mModified == true)
+      {
+         isModified = true;
+         break;
+      }
+   }
+
+   if (isModified == false)
+   {
+      VERIFY(mpClassification != NULL);
+      isValid = Nitf::isClassificationValidForExport(*mpClassification, errorMessage);
+   }
+
    for (vector<OptionsNitfExporterElement>::iterator iter = mElements.begin(); iter != mElements.end(); iter++)
    {
       if (iter->mModifiedValueIsTruncated == true)

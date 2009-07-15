@@ -111,7 +111,7 @@ void ExportDlg::accept()
 
    // Validate with the exporter
    bool validating = true;
-   do
+   while (validating)
    {
       Service<DesktopServices> pDesktop;
       string errorMessage;
@@ -165,7 +165,6 @@ void ExportDlg::accept()
          VERIFYNRV_MSG(false, "An invalid verification type was returned.");
       }
    }
-   while (validating);
 
    FilePlugInDlg::accept();
 }

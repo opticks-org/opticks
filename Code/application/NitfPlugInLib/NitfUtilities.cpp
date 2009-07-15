@@ -876,6 +876,12 @@ bool Nitf::isClassificationValidForExport(const Classification& classification, 
 {
    using namespace Nitf;
    std::string err;
+
+   if (StringUtilities::toUpper(classification.getLevel()) == "U")
+   {
+      return true;
+   }
+
    if (classification.isValid(err) == false)
    {
       errorMessage = "Invalid parameter.";
@@ -908,6 +914,7 @@ bool Nitf::isClassificationValidForExport(const Classification& classification, 
       errorMessage += *iter + " ";
    }
 
+   errorMessage += ".\n";
    return false;
 }
 
@@ -920,6 +927,7 @@ bool Nitf::isClassificationFieldValidForExport(const Classification& classificat
    }
 
    string fieldValue;
+   bool optional = true;
    vector<string> allowedValues;
    unsigned int maxFieldValueLength = 0;
    if (fieldName == "Level")
@@ -936,6 +944,7 @@ bool Nitf::isClassificationFieldValidForExport(const Classification& classificat
    {
       fieldValue = StringUtilities::toUpper(classification.getSystem());
       maxFieldValueLength = 2;
+      optional = false;
    }
    else if (fieldName == "Codewords")
    {
@@ -955,7 +964,6 @@ bool Nitf::isClassificationFieldValidForExport(const Classification& classificat
    else if (fieldName == "ClassificationReason")
    {
       fieldValue = StringUtilities::toUpper(classification.getClassificationReason());
-      allowedValues.push_back("");
       allowedValues.push_back("A");
       allowedValues.push_back("B");
       allowedValues.push_back("C");
@@ -964,6 +972,7 @@ bool Nitf::isClassificationFieldValidForExport(const Classification& classificat
       allowedValues.push_back("F");
       allowedValues.push_back("G");
       maxFieldValueLength = 1;
+      optional = false;
    }
    else if (fieldName == "DeclassificationType")
    {
@@ -1032,11 +1041,11 @@ bool Nitf::isClassificationFieldValidForExport(const Classification& classificat
    else if (fieldName == "AuthorityType")
    {
       fieldValue = StringUtilities::toUpper(classification.getAuthorityType());
-      allowedValues.push_back("");
       allowedValues.push_back("O");
       allowedValues.push_back("D");
       allowedValues.push_back("M");
       maxFieldValueLength = 1;
+      optional = false;
    }
    else if (fieldName == "SecuritySourceDate")
    {
@@ -1047,6 +1056,7 @@ bool Nitf::isClassificationFieldValidForExport(const Classification& classificat
    {
       fieldValue = StringUtilities::toUpper(classification.getSecurityControlNumber());
       maxFieldValueLength = 15;
+      optional = false;
    }
    else if (fieldName == "FileCopyNumber")
    {
@@ -1057,6 +1067,11 @@ bool Nitf::isClassificationFieldValidForExport(const Classification& classificat
    {
       fieldValue = StringUtilities::toUpper(classification.getFileNumberOfCopies());
       maxFieldValueLength = 5;
+   }
+
+   if (fieldValue.empty() == true)
+   {
+      return optional;
    }
 
    if (fieldValue.length() > maxFieldValueLength)

@@ -59,6 +59,7 @@ private:
       std::string mOriginalValue;
       std::string mModifiedValue;
       QString mDefaultValue;
+      bool mModified;
       bool mModifiedValueIsTruncated;
       unsigned int mMaxLength;
       QLabel* mpLabel;
