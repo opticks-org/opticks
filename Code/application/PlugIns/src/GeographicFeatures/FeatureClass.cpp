@@ -18,6 +18,7 @@
 #include "Progress.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
+#include "SessionResource.h"
 #include "TypeConverter.h"
 #include "Undo.h"
 
@@ -249,6 +250,9 @@ const string &FeatureClass::getLayerName() const
 
 bool FeatureClass::update(Progress *pProgress, string &errorMessage)
 {
+   // prevent session auto save while updating features
+   SessionSaveLock lock;
+
    VERIFY(mpParentElement != NULL);
    GraphicGroup* pGroup = mpParentElement->getGroup();
    VERIFY(pGroup != NULL);
@@ -327,6 +331,9 @@ bool FeatureClass::update(Progress *pProgress, string &errorMessage)
 
 void FeatureClass::addFeature(const ArcProxyLib::Feature &feature)
 {
+   // prevent session auto save while adding feature
+   SessionSaveLock lock;
+
    VERIFYNRV(mpLoadGroup != NULL && mpLoadQueryOptions != NULL);
 
    if (mpLoadProgress != NULL)

@@ -36,6 +36,7 @@
 #include "PlugInRegistration.h"
 #include "Progress.h"
 #include "RasterElement.h"
+#include "SessionResource.h"
 #include "ShapeFileImporter.h"
 #include "SpatialDataView.h"
 #include "Undo.h"
@@ -183,6 +184,9 @@ bool ShapeFileImporter::getOutputSpecification(PlugInArgList*& pArgList)
 
 bool ShapeFileImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
+   // prevent session auto save while importing shape file
+   SessionSaveLock lock;
+
    StepResource pStep("Run Importer", "app", "F5264701-1D60-474b-AB62-C674A6AC1477");
    mpStep = pStep.get();
    pStep->addProperty("name", getName());
