@@ -20,6 +20,7 @@
 #include <string>
 #include <vector>
 
+#include <QtCore/QRegExp>
 #include <QtCore/QStringList>
 
 class DynamicObject;
@@ -48,6 +49,8 @@ public:
    virtual DataVariant &getAttributeByPath(const std::string pComponents[]);
    virtual void getAttributeNames(std::vector<std::string>& attributeNames) const;
    virtual unsigned int getNumAttributes() const;
+   virtual const DataVariant& findFirstOf(const QRegExp& name, const QRegExp& value) const;
+   virtual DataVariant& findFirstOf(const QRegExp& name, const QRegExp& value);
    virtual bool removeAttribute(const std::string& name);
    virtual bool removeAttributeByPath(const std::string pComponents[]);
    virtual bool removeAttributeByPath(const std::string& path);
@@ -82,7 +85,8 @@ protected:
 
 #define DYNAMICOBJECTADAPTEREXTENSION_CLASSES \
    SUBJECTADAPTEREXTENSION_CLASSES \
-   SERIALIZABLEADAPTEREXTENSION_CLASSES
+   SERIALIZABLEADAPTEREXTENSION_CLASSES \
+   , public DynamicObjectExt1
 
 #define DYNAMICOBJECTADAPTER_METHODS(impClass) \
    SUBJECTADAPTER_METHODS(impClass) \
@@ -142,6 +146,14 @@ protected:
    unsigned int getNumAttributes() const \
    { \
       return impClass::getNumAttributes(); \
+   } \
+   const DataVariant& findFirstOf(const QRegExp& name, const QRegExp& value) const \
+   { \
+      return impClass::findFirstOf(name, value); \
+   } \
+   DataVariant& findFirstOf(const QRegExp& name, const QRegExp& value) \
+   { \
+      return impClass::findFirstOf(name, value); \
    } \
    bool removeAttribute(const std::string& name) \
    { \

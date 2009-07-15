@@ -18,8 +18,8 @@
 #include "DesktopServices.h"
 #include "DynamicObject.h"
 #include "Importer.h"
+#include "MetadataFilterDlg.h"
 #include "ModelServices.h"
-#include "NameValueDlg.h"
 #include "ObjectFactory.h"
 #include "ObjectResource.h"
 #include "PlugIn.h"
@@ -430,39 +430,56 @@ QTreeWidgetItem* SignatureSelector::addSignatureItem(Signature* pSignature, QTre
    return pItem;
 }
 
-bool SignatureSelector::searchForMetadata(Signature* pSignature, const QString& strMetadataName,
-                                          const QString& strMetadataValue)
+bool SignatureSelector::searchForMetadata(const DynamicObject* pMetadata, const QRegExp& nameFilter,
+                                          const QRegExp& valueFilter)
 {
-   if (pSignature == NULL)
-   {
-      return false;
-   }
-
-   const DynamicObject* pMetadata = NULL;
-   pMetadata = pSignature->getMetadata();
    if (pMetadata == NULL)
    {
       return false;
    }
 
    // Return true if no metadata search is specified
-   bool bMatch = true;
-
-   if (strMetadataName.isEmpty() == false)
+   if ((nameFilter.isEmpty() == true) && (valueFilter.isEmpty() == true))
    {
-      const DataVariant& attrValue = pMetadata->getAttribute(strMetadataName.toStdString());
-      bMatch = attrValue.isValid();
-      if (bMatch == true)
+      return true;
+   }
+
+   // Search this object
+   const DynamicObjectExt1* pMetadataExt = dynamic_cast<const DynamicObjectExt1*>(pMetadata);
+   if (pMetadataExt == NULL)
+   {
+      return false;
+   }
+
+   const DataVariant& attribute = pMetadataExt->findFirstOf(nameFilter, valueFilter);
+   if (attribute.isValid() == true)
+   {
+      return true;
+   }
+
+   // Search this object's children
+   vector<string> attributeNames;
+   pMetadata->getAttributeNames(attributeNames);
+
+   for (vector<string>::iterator iter = attributeNames.begin(); iter != attributeNames.end(); ++iter)
+   {
+      string attributeName = *iter;
+      if (attributeName.empty() == false)
       {
-         if (strMetadataValue.isEmpty() == false)
+         const DataVariant& attributeValue = pMetadata->getAttribute(attributeName);
+         if ((attributeValue.isValid() == true) &&
+            (attributeValue.getTypeName() == TypeConverter::toString<DynamicObject>()))
          {
-            string curValue = attrValue.toDisplayString();
-            bMatch = (curValue == strMetadataValue.toStdString());
+            const DynamicObject* pChild = attributeValue.getPointerToValue<DynamicObject>();
+            if (searchForMetadata(pChild, nameFilter, valueFilter) == true)
+            {
+               return true;
+            }
          }
       }
    }
 
-   return bMatch;
+   return false;
 }
 
 void SignatureSelector::apply()
@@ -475,61 +492,87 @@ void SignatureSelector::setDisplayType(const QString& strFormat)
    if (strFormat == "Metadata...")
    {
       // Get the metadata filters from the user
-      QString strName;
-      QString strValue;
+      QString filterText = "All Signatures";
 
-      NameValueDlg metadataDlg(this);
-      metadataDlg.setWindowTitle("Metadata Search");
-
-      while (strName.isEmpty() == true)
+      MetadataFilterDlg filterDlg(this);
+      if (filterDlg.exec() == QDialog::Accepted)
       {
-         int iReturn = metadataDlg.exec();
-         if (iReturn == QDialog::Rejected)
+         // Name
+         QRegExp nameFilter = filterDlg.getNameFilter();
+
+         QString name = nameFilter.pattern();
+         if (name.isEmpty() == false)
          {
-            strName.clear();
-            break;
+            filterText = "Metadata: Name '" + name + "'";
+
+            // Add wildcard and case sensitivity to filter text
+            if (nameFilter.patternSyntax() == QRegExp::Wildcard)
+            {
+               filterText += " (wildcard, ";
+            }
+            else
+            {
+               filterText += " (exact match, ";
+            }
+
+            if (nameFilter.caseSensitivity() == Qt::CaseSensitive)
+            {
+               filterText += "case sensitive)";
+            }
+            else
+            {
+               filterText += "case insensitive)";
+            }
          }
 
-         strName = metadataDlg.getName();
-         strValue = metadataDlg.getValue();
+         // Value
+         QRegExp valueFilter = filterDlg.getValueFilter();
 
-         if (strName.isEmpty() == true)
+         QString value = valueFilter.pattern();
+         if (value.isEmpty() == false)
          {
-            QMessageBox::critical(this, metadataDlg.windowTitle(), "The metadata search must specify a name!");
-         }
-      }
+            if (name.isEmpty() == true)
+            {
+               filterText = "Metadata: ";
+            }
+            else
+            {
+               filterText += ",  ";
+            }
 
-      QString strText = "All Signatures";
-      if (strName.isEmpty() == false)
-      {
-         strText = "Metadata: Name '" + strName + "'";
-      }
+            filterText += "Value '" + value + "'";
 
-      if (strValue.isEmpty() == false)
-      {
-         if (strName.isEmpty() == true)
-         {
-            strText = "Metadata: ";
-         }
-         else
-         {
-            strText += ",  ";
-         }
+            // Add wildcard and case sensitivity to filter text
+            if (valueFilter.patternSyntax() == QRegExp::Wildcard)
+            {
+               filterText += " (wildcard, ";
+            }
+            else
+            {
+               filterText += " (exact match, ";
+            }
 
-         strText += "Value '" + strValue + "'";
+            if (valueFilter.caseSensitivity() == Qt::CaseSensitive)
+            {
+               filterText += "case sensitive)";
+            }
+            else
+            {
+               filterText += "case insensitive)";
+            }
+         }
       }
 
       int iIndex = 0;
-      if (strText != "All Signatures")
+      if (filterText != "All Signatures")
       {
          // Do not insert the item if it already exists
          bool bInsert = true;
 
-         int iCount = 0;
-         iCount = mpFormatCombo->count();
-         for (int i = 0; i < iCount; i++)
+         int iCount = mpFormatCombo->count();
+         for (int i = 0; i < iCount; ++i)
          {
-            if (mpFormatCombo->itemText(i) == strText)
+            if (mpFormatCombo->itemText(i) == filterText)
             {
                bInsert = false;
                break;
@@ -547,7 +590,7 @@ void SignatureSelector::setDisplayType(const QString& strFormat)
 
             // Insert the new metadata entry
             iIndex = 1;
-            mpFormatCombo->insertItem(iIndex, strText);
+            mpFormatCombo->insertItem(iIndex, filterText);
          }
       }
 
@@ -729,13 +772,14 @@ void SignatureSelector::updateSignatureList()
    mLoadedSignatures.clear();
    enableButtons();
 
-   QString strMetadataName;
-   QString strMetadataValue;
-
    // Get any metadata filter values
+   QRegExp nameFilter;
+   QRegExp valueFilter;
    QString strFilter = getCurrentFormatType();
 
    int namePos = strFilter.indexOf("Name");
+   int valuePos = strFilter.indexOf("Value");
+
    if (namePos != -1)
    {
       int startPos = strFilter.indexOf("'", namePos);
@@ -743,11 +787,30 @@ void SignatureSelector::updateSignatureList()
       if ((startPos != -1) && (endPos != -1))
       {
          ++startPos;
-         strMetadataName = strFilter.mid(startPos, endPos - startPos);
+         nameFilter.setPattern(strFilter.mid(startPos, endPos - startPos));
+      }
+
+      int wildcardPos = strFilter.indexOf("wildcard", endPos + 1, Qt::CaseSensitive);
+      if ((wildcardPos != -1) && ((valuePos == -1) || (wildcardPos < valuePos)))
+      {
+         nameFilter.setPatternSyntax(QRegExp::Wildcard);
+      }
+      else
+      {
+         nameFilter.setPatternSyntax(QRegExp::FixedString);
+      }
+
+      int casePos = strFilter.indexOf("case sensitive", endPos + 1, Qt::CaseSensitive);
+      if ((casePos != -1) && ((valuePos == -1) || (casePos < valuePos)))
+      {
+         nameFilter.setCaseSensitivity(Qt::CaseSensitive);
+      }
+      else
+      {
+         nameFilter.setCaseSensitivity(Qt::CaseInsensitive);
       }
    }
 
-   int valuePos = strFilter.indexOf("Value");
    if (valuePos != -1)
    {
       int startPos = strFilter.indexOf("'", valuePos);
@@ -755,7 +818,27 @@ void SignatureSelector::updateSignatureList()
       if ((startPos != -1) && (endPos != -1))
       {
          ++startPos;
-         strMetadataValue = strFilter.mid(startPos, endPos - startPos);
+         valueFilter.setPattern(strFilter.mid(startPos, endPos - startPos));
+      }
+
+      int wildcardPos = strFilter.indexOf("wildcard", endPos + 1, Qt::CaseSensitive);
+      if (wildcardPos != -1)
+      {
+         valueFilter.setPatternSyntax(QRegExp::Wildcard);
+      }
+      else
+      {
+         valueFilter.setPatternSyntax(QRegExp::FixedString);
+      }
+
+      int casePos = strFilter.indexOf("case sensitive", endPos + 1, Qt::CaseSensitive);
+      if (casePos != -1)
+      {
+         valueFilter.setCaseSensitivity(Qt::CaseSensitive);
+      }
+      else
+      {
+         valueFilter.setCaseSensitivity(Qt::CaseInsensitive);
       }
    }
 
@@ -768,10 +851,13 @@ void SignatureSelector::updateSignatureList()
       Signature* pSignature = static_cast<Signature*>(*iter);
       if (pSignature != NULL)
       {
-         bool bAdd = searchForMetadata(pSignature, strMetadataName, strMetadataValue);
-         if (bAdd == true)
+         const DynamicObject* pMetadata = pSignature->getMetadata();
+         if (pMetadata != NULL)
          {
-            addSignatureItem(pSignature);
+            if (searchForMetadata(pMetadata, nameFilter, valueFilter) == true)
+            {
+               addSignatureItem(pSignature);
+            }
          }
       }
 
@@ -787,10 +873,13 @@ void SignatureSelector::updateSignatureList()
       Signature* pSignature = static_cast<Signature*>(*iter);
       if (pSignature != NULL)
       {
-         bool bAdd = searchForMetadata(pSignature, strMetadataName, strMetadataValue);
-         if (bAdd == true)
+         const DynamicObject* pMetadata = pSignature->getMetadata();
+         if (pMetadata != NULL)
          {
-            addSignatureItem(pSignature);
+            if (searchForMetadata(pMetadata, nameFilter, valueFilter) == true)
+            {
+               addSignatureItem(pSignature);
+            }
          }
       }
 

@@ -7,11 +7,10 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #ifndef SIGNATURESELECTOR_H
 #define SIGNATURESELECTOR_H
 
+#include <QtCore/QRegExp>
 #include <QtCore/QStringList>
 #include <QtGui/QComboBox>
 #include <QtGui/QDialog>
@@ -29,6 +28,7 @@
 #include <map>
 #include <vector>
 
+class DynamicObject;
 class Progress;
 class SearchDlg;
 class Signature;
@@ -387,8 +387,7 @@ private:
 
 private:
    QTreeWidgetItem* addSignatureItem(Signature* pSignature, QTreeWidgetItem* pParentItem = NULL);
-   bool searchForMetadata(Signature* pSignature, const QString& strMetadataName,
-      const QString& strMetadataValue);
+   bool searchForMetadata(const DynamicObject* pMetadata, const QRegExp& nameFilter, const QRegExp& valueFilter);
 };
 
 #endif

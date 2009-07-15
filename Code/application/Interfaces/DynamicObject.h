@@ -19,6 +19,7 @@
 #include <vector>
 
 class DataVariant;
+class QRegExp;
 
 /**
  * Dynamic extension of class attributes
@@ -36,6 +37,8 @@ class DataVariant;
  *   These notifications will be passed on to any observers of the
  *   DynamicObject
  * - Everything else documented in Subject.
+ *
+ * @see     DynamicObjectExt1
  */
 class DynamicObject : public Subject, public Serializable
 {
@@ -455,6 +458,82 @@ protected:
     * This should be destroyed by calling ObjectFactory::destroyObject.
     */
    virtual ~DynamicObject() {}
+};
+
+/**
+ * Extends capability of the DynamicObject interface.
+ *
+ * This class provides additional capability for the DynamicObject interface class.
+ * A pointer to this class can be obtained by performing a dynamic cast on a
+ * pointer to DynamicObject or any of its subclasses.
+ *
+ * @warning A pointer to this class can only be used to call methods contained
+ *           in this extension class and cannot be used to call any methods in
+ *           DynamicObject or its subclasses.
+ */
+class DynamicObjectExt1
+{
+public:
+   /**
+    * Searches the object for an attribute with a given name and/or value.
+    *
+    * @warning This method only searches this object's attributes and not
+    *          any attributes of a child DynamicObject.
+    *
+    * @param   name
+    *          The name of the attribute for which to search, which can be a
+    *          fixed string or any regular expression supported by QRegExp.  If
+    *          \em name is empty, then the first attribute found with the given
+    *          value is returned.
+    * @param   value
+    *          The value of the attribute for which to search, which can be a
+    *          fixed string or any regular expression supported by QRegExp.  If
+    *          \em value is empty, then the first attribute found with the given
+    *          name is returned.
+    *
+    * @return  Returns a const reference to the first attribute found with the
+    *          given name and/or value.  A const reference to an invalid value
+    *          is returned if both \em name and \em value are empty, or if this
+    *          object does not have an attribute with the given name and/or
+    *          value.
+    *
+    * @see     DataVariant& findFirstOf(const QRegExp&, const QRegExp&)
+    */
+   virtual const DataVariant& findFirstOf(const QRegExp& name, const QRegExp& value) const = 0;
+
+   /**
+    * Searches the object for an attribute with a given name and/or value.
+    *
+    * @warning This method only searches this object's attributes and not
+    *          any attributes of a child DynamicObject.
+    *
+    * @param   name
+    *          The name of the attribute for which to search, which can be a
+    *          fixed string or any regular expression supported by QRegExp.  If
+    *          \em name is empty, then the first attribute found with the given
+    *          value is returned.
+    * @param   value
+    *          The value of the attribute for which to search, which can be a
+    *          fixed string or any regular expression supported by QRegExp.  If
+    *          \em value is empty, then the first attribute found with the given
+    *          name is returned.
+    *
+    * @return  Returns a non-const reference to the first attribute found with
+    *          the given name and/or value.  A non-const reference to an invalid
+    *          value is returned if both \em name and \em value are empty, or if
+    *          this object does not have an attribute with the given name and/or
+    *          value.
+    *
+    * @see     const DataVariant& findFirstOf(const QRegExp&, const QRegExp&) const
+    */
+   virtual DataVariant& findFirstOf(const QRegExp& name, const QRegExp& value) = 0;
+
+protected:
+   /**
+    * This should be destroyed by calling ObjectFactory::destroyObject().
+    */
+   virtual ~DynamicObjectExt1()
+   {}
 };
 
 /**

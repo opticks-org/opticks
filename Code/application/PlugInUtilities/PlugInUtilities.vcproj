@@ -1436,23 +1436,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Mgrs.h"
-				>
-			</File>
-			<File
-				RelativePath=".\MgrsDatum.h"
-				>
-			</File>
-			<File
-				RelativePath=".\MgrsEngine.h"
-				>
-			</File>
-			<File
-				RelativePath=".\MipMappedTextures.h"
-				>
-			</File>
-			<File
-				RelativePath=".\NameTypeValueDlg.h"
+				RelativePath=".\MetadataFilterDlg.h"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -1496,7 +1480,23 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\NameValueDlg.h"
+				RelativePath=".\Mgrs.h"
+				>
+			</File>
+			<File
+				RelativePath=".\MgrsDatum.h"
+				>
+			</File>
+			<File
+				RelativePath=".\MgrsEngine.h"
+				>
+			</File>
+			<File
+				RelativePath=".\MipMappedTextures.h"
+				>
+			</File>
+			<File
+				RelativePath=".\NameTypeValueDlg.h"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -2204,6 +2204,10 @@
 				>
 			</File>
 			<File
+				RelativePath="$(BuildDir)\Moc\$(ProjectName)\moc_MetadataFilterDlg.cpp"
+				>
+			</File>
+			<File
 				RelativePath="$(BuildDir)\Moc\$(ProjectName)\moc_Modifier.cpp"
 				>
 			</File>
@@ -2213,10 +2217,6 @@
 			</File>
 			<File
 				RelativePath="$(BuildDir)\Moc\$(ProjectName)\moc_NameTypeValueDlg.cpp"
-				>
-			</File>
-			<File
-				RelativePath="$(BuildDir)\Moc\$(ProjectName)\moc_NameValueDlg.cpp"
 				>
 			</File>
 			<File
@@ -3489,6 +3489,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\MetadataFilterDlg.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Mgrs.cpp"
 				>
 			</File>
@@ -3514,10 +3518,6 @@
 			</File>
 			<File
 				RelativePath=".\NameTypeValueDlg.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\NameValueDlg.cpp"
 				>
 			</File>
 			<File

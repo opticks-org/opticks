@@ -470,6 +470,61 @@ unsigned int DynamicObjectImp::getNumAttributes() const
    return mVariantAttributes.size();
 }
 
+const DataVariant& DynamicObjectImp::findFirstOf(const QRegExp& name, const QRegExp& value) const
+{
+   static DataVariant sEmptyVariant;
+
+   if ((name.isEmpty() == true) && (value.isEmpty() == true))
+   {
+      sEmptyVariant = DataVariant();
+      return sEmptyVariant;
+   }
+
+   for (map<string, DataVariant>::const_iterator iter = mVariantAttributes.begin();
+      iter != mVariantAttributes.end();
+      ++iter)
+   {
+      string attributeName = iter->first;
+      if (attributeName.empty() == false)
+      {
+         // Name
+         bool nameMatch = true;
+         if (name.isEmpty() == false)
+         {
+            nameMatch = name.exactMatch(QString::fromStdString(attributeName));
+         }
+
+         // Value
+         bool valueMatch = true;
+         if (value.isEmpty() == false)
+         {
+            if (iter->second.isValid() == true)
+            {
+               QString valueText = QString::fromStdString(iter->second.toDisplayString());
+               valueMatch = value.exactMatch(valueText);
+            }
+            else
+            {
+               valueMatch = false;
+            }
+         }
+
+         if ((nameMatch == true) && (valueMatch == true))
+         {
+            return iter->second;
+         }
+      }
+   }
+
+   sEmptyVariant = DataVariant();
+   return sEmptyVariant;
+}
+
+DataVariant& DynamicObjectImp::findFirstOf(const QRegExp& name, const QRegExp& value)
+{
+   return const_cast<DataVariant&>(const_cast<const DynamicObjectImp*>(this)->findFirstOf(name, value));
+}
+
 bool DynamicObjectImp::removeAttribute(const string& name)
 {
    map<string, DataVariant>::iterator iter = mVariantAttributes.find(name);
