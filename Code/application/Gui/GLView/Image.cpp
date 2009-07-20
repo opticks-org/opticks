@@ -1376,6 +1376,11 @@ const vector<Tile*>* Image::getActiveTiles() const
    return mpTiles;
 }
 
+const map<ImageKey, Image::TileSet>& Image::getTileSets() const
+{
+   return mTileSets;
+}
+
 void Image::drawTiles(const vector<Tile*>& tiles, GLint textureMode)
 {
    if (tiles.empty() == true)

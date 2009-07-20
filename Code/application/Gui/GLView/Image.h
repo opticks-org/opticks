@@ -503,6 +503,11 @@ public:
          return mId;
       }
 
+      const std::vector<Tile*>& getTiles() const
+      {
+         return mTiles;
+      }
+
       std::vector<Tile*>& getTiles()
       {
          return mTiles;
@@ -622,6 +627,7 @@ protected:
    const ImageData& getImageData() const;
    virtual Tile* createTile() const;
    const std::vector<Tile*>* getActiveTiles() const;
+   const std::map<ImageKey, TileSet>& getTileSets() const;
    virtual void updateTiles(std::vector<Tile*>& tilesToUpdate, std::vector<int>& tileZoomIndices);
    virtual void drawTiles(const std::vector<Tile*>& tiles, GLint textureMode);
    virtual void setActiveTileSet(const ImageKey &key);

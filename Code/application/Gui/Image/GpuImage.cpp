@@ -785,58 +785,57 @@ void GpuImage::initializeFilter(ImageFilterDescriptor *pDescriptor)
 {
    VERIFYNRV(pDescriptor != NULL);
 
-   const vector<Tile*>* pTiles = getActiveTiles();
-   if (pTiles == NULL)
+   const map<ImageKey, TileSet>& tileSets = getTileSets();
+   for (map<ImageKey, TileSet>::const_iterator iter = tileSets.begin(); iter != tileSets.end(); ++iter)
    {
-      return;
-   }
+      const vector<Tile*>& tiles = iter->second.getTiles();
 
-   unsigned int numTiles = pTiles->size();
-   vector<int> tileZoomIndices;
-   vector<Tile*> tilesToUpdate;
+      unsigned int numTiles = tiles.size();
+      vector<int> tileZoomIndices;
+      vector<Tile*> tilesToUpdate;
 
-   tileZoomIndices.reserve(numTiles);
-   tilesToUpdate.reserve(numTiles);
+      tileZoomIndices.reserve(numTiles);
+      tilesToUpdate.reserve(numTiles);
 
-   vector<Tile*>::const_iterator iter;
-   for (iter = pTiles->begin(); iter != pTiles->end(); ++iter)
-   {
-      GpuTile* pTile = dynamic_cast<GpuTile*>(*iter);
-      if (pTile != NULL)
+      for (vector<Tile*>::const_iterator tileIter = tiles.begin(); tileIter != tiles.end(); ++tileIter)
       {
-         pTile->createFilter(pDescriptor);
-         tilesToUpdate.push_back(pTile);
-         tileZoomIndices.push_back(pTile->getTextureIndex());
-      }
-   }
-
-   updateTiles(tilesToUpdate, tileZoomIndices);
-
-   // Initialize tile filters
-   if (pDescriptor->getType() == ImageFilterDescriptor::FEEDBACK_FILTER)
-   {
-      // number of iterations to use to initialize the feedback buffer
-      // filters can override this value through the gic file
-      unsigned int numInitFrames = 20;
-
-      const unsigned int* pInitFrames = dv_cast<unsigned int>(&pDescriptor->getParameter("initializationIterations"));
-      if (pInitFrames != NULL)
-      {
-         numInitFrames = *pInitFrames;
-      }
-
-      for (unsigned int j = 0; j < tilesToUpdate.size(); ++j)
-      {
-         GpuTile* pGpuTile = static_cast<GpuTile*>(tilesToUpdate[j]);
-         bool freeze = pGpuTile->getFilterFreezeFlag(pDescriptor);
-         pGpuTile->freezeFilter(pDescriptor, false);
-         for (unsigned int i = 0; i < numInitFrames; ++i)
+         GpuTile* pTile = dynamic_cast<GpuTile*>(*tileIter);
+         if (pTile != NULL)
          {
-            // Apply the filter repeatedly on the current frame on each tile
-            // to initialize the feedback buffer. This all happens in the GPU.
-            pGpuTile->applyFilters();
+            pTile->createFilter(pDescriptor);
+            tilesToUpdate.push_back(pTile);
+            tileZoomIndices.push_back(pTile->getTextureIndex());
          }
-         pGpuTile->freezeFilter(pDescriptor, freeze);
+      }
+
+      updateTiles(tilesToUpdate, tileZoomIndices);
+
+      // Initialize tile filters
+      if (pDescriptor->getType() == ImageFilterDescriptor::FEEDBACK_FILTER)
+      {
+         // number of iterations to use to initialize the feedback buffer
+         // filters can override this value through the gic file
+         unsigned int numInitFrames = 20;
+
+         const unsigned int* pInitFrames = dv_cast<unsigned int>(&pDescriptor->getParameter("initializationIterations"));
+         if (pInitFrames != NULL)
+         {
+            numInitFrames = *pInitFrames;
+         }
+
+         for (unsigned int j = 0; j < tilesToUpdate.size(); ++j)
+         {
+            GpuTile* pGpuTile = static_cast<GpuTile*>(tilesToUpdate[j]);
+            bool freeze = pGpuTile->getFilterFreezeFlag(pDescriptor);
+            pGpuTile->freezeFilter(pDescriptor, false);
+            for (unsigned int i = 0; i < numInitFrames; ++i)
+            {
+               // Apply the filter repeatedly on the current frame on each tile
+               // to initialize the feedback buffer. This all happens in the GPU.
+               pGpuTile->applyFilters();
+            }
+            pGpuTile->freezeFilter(pDescriptor, freeze);
+         }
       }
    }
 
@@ -907,21 +906,21 @@ void GpuImage::resetFilter(ImageFilterDescriptor *pDescriptor)
       return;
    }
 
-   const vector<Tile*>* pTiles = getActiveTiles();
-   if (pTiles == NULL)
+   const map<ImageKey, TileSet>& tileSets = getTileSets();
+   for (map<ImageKey, TileSet>::const_iterator iter = tileSets.begin(); iter != tileSets.end(); ++iter)
    {
-      return;
-   }
+      const vector<Tile*>& tiles = iter->second.getTiles();
 
-   vector<Tile*>::const_iterator tileIter = pTiles->begin();
-   while (tileIter != pTiles->end())
-   {
-      GpuTile* pTile = dynamic_cast<GpuTile*>(*tileIter);
-      if (pTile != NULL)
+      vector<Tile*>::const_iterator tileIter = tiles.begin();
+      while (tileIter != tiles.end())
       {
-         pTile->resetFilter(pDescriptor);
+         GpuTile* pTile = dynamic_cast<GpuTile*>(*tileIter);
+         if (pTile != NULL)
+         {
+            pTile->resetFilter(pDescriptor);
+         }
+         ++tileIter;
       }
-      ++tileIter;
    }
 
    initializeFilter(pDescriptor);
@@ -934,21 +933,21 @@ void GpuImage::freezeFilter(ImageFilterDescriptor *pDescriptor, bool toggle)
       return;
    }
 
-   const vector<Tile*>* pTiles = getActiveTiles();
-   if (pTiles == NULL)
+   const map<ImageKey, TileSet>& tileSets = getTileSets();
+   for (map<ImageKey, TileSet>::const_iterator iter = tileSets.begin(); iter != tileSets.end(); ++iter)
    {
-      return;
-   }
+      const vector<Tile*>& tiles = iter->second.getTiles();
 
-   vector<Tile*>::const_iterator tileIter = pTiles->begin();
-   while (tileIter != pTiles->end())
-   {
-      GpuTile* pTile = dynamic_cast<GpuTile*>(*tileIter);
-      if (pTile != NULL)
+      vector<Tile*>::const_iterator tileIter = tiles.begin();
+      while (tileIter != tiles.end())
       {
-         pTile->freezeFilter(pDescriptor, toggle);
+         GpuTile* pTile = dynamic_cast<GpuTile*>(*tileIter);
+         if (pTile != NULL)
+         {
+            pTile->freezeFilter(pDescriptor, toggle);
+         }
+         ++tileIter;
       }
-      ++tileIter;
    }
 }
 
@@ -959,18 +958,17 @@ void GpuImage::disableFilter(ImageFilterDescriptor *pDescriptor)
       return;
    }
 
-   const vector<Tile*>* pTiles = getActiveTiles();
-   if (pTiles == NULL)
+   const map<ImageKey, TileSet>& tileSets = getTileSets();
+   for (map<ImageKey, TileSet>::const_iterator iter = tileSets.begin(); iter != tileSets.end(); ++iter)
    {
-      return;
-   }
-
-   for (vector<Tile*>::const_iterator iter = pTiles->begin(); iter != pTiles->end(); ++iter)
-   {
-      GpuTile* pTile = dynamic_cast<GpuTile*>(*iter);
-      if (pTile != NULL)
+      const vector<Tile*>& tiles = iter->second.getTiles();
+      for (vector<Tile*>::const_iterator tileIter = tiles.begin(); tileIter != tiles.end(); ++tileIter)
       {
-         pTile->destroyFilter(pDescriptor);
+         GpuTile* pTile = dynamic_cast<GpuTile*>(*tileIter);
+         if (pTile != NULL)
+         {
+            pTile->destroyFilter(pDescriptor);
+         }
       }
    }
 }
