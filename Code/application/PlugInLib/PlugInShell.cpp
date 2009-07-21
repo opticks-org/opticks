@@ -8,6 +8,7 @@
  */
 
 #include "PlugInShell.h"
+#include "AppVerify.h"
 #include "AppVersion.h"
 #include "SettableSessionItem.h"
 
@@ -246,4 +247,20 @@ void PlugInShell::setSubtype(const string& subtype)
 void PlugInShell::allowMultipleInstances(bool bMultipleInstances)
 {
    mAllowMultipleInstances = bMultipleInstances;
+}
+
+bool PlugInShell::isValidSessionSaveItem() const
+{
+   const SessionItemExt1* pItemExt1 = dynamic_cast<const SessionItemExt1*>(mpSessionItem.get());
+   VERIFY(pItemExt1 != NULL);
+
+   return pItemExt1->isValidSessionSaveItem();
+}
+
+void PlugInShell::setValidSessionSaveItem(bool isValid)
+{
+   SettableSessionItemExt1* pItemExt1 = dynamic_cast<SettableSessionItemExt1*>(mpSessionItem.get());
+   VERIFYNRV(pItemExt1 != NULL);
+
+   pItemExt1->setValidSessionSaveItem(isValid);
 }

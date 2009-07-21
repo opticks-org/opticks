@@ -1026,7 +1026,7 @@ bool RasterElementImp::setPager(RasterPager* pPager)
 
    if (mpPager != NULL)
    {
-      //destory the old plugins first
+      //destroy the old plugins first
       Service<PlugInManagerServices> pServices;
       pServices->destroyPlugIn(dynamic_cast<PlugIn*>(mpPager));
    }

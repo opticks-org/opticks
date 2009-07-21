@@ -54,6 +54,7 @@ public:
    bool hasFilenameDisplay() const;
    virtual std::vector<std::string> getPropertiesPages() const;
 
+   virtual bool isValidSessionSaveItem() const;
    virtual bool serialize(SessionItemSerializer &serializer) const;
    virtual bool deserialize(SessionItemDeserializer &deserializer);
    virtual bool toXml(XMLWriter* pXml) const;
@@ -64,6 +65,7 @@ public:
 
 protected:
    virtual bool setId(const SessionItemId& id);
+   virtual void setValidSessionSaveItem(bool isValid);
    virtual void setIcon(const QIcon& icon);
    virtual void setName(const std::string& name);
    virtual void setDisplayName(const std::string& displayName);
@@ -88,10 +90,12 @@ private:
    bool mFilenameDisplay;
    std::vector<std::string> mPropertiesPages;
    mutable bool mIdLocked;
+   bool mValidSessionSaveItem;
 };
 
 #define SESSIONITEMADAPTEREXTENSION_CLASSES \
-   SERIALIZABLEADAPTEREXTENSION_CLASSES
+   SERIALIZABLEADAPTEREXTENSION_CLASSES \
+   , public SessionItemExt1
 
 #define SESSIONITEMACCESSOR_METHODS(impClass) \
    SERIALIZABLEADAPTER_METHODS(impClass) \
@@ -126,6 +130,10 @@ private:
    std::vector<std::string> getPropertiesPages() const \
    { \
       return impClass::getPropertiesPages(); \
+   } \
+   bool isValidSessionSaveItem() const \
+   { \
+      return impClass::isValidSessionSaveItem(); \
    }
 
 #define SESSIONITEMADAPTER_METHODS(impClass) \

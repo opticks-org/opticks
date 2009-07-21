@@ -1254,6 +1254,15 @@ SessionManagerImp::serialize(const string& filename, Progress* pProgress)
       {
          SessionItem* pItem = ppItem->getSessionItem();
          LOG_IF(pItem == NULL, continue);
+
+         // check for session items that should not be saved
+         SessionItemExt1* pItemExt1 = dynamic_cast<SessionItemExt1*>(pItem);
+         if (pItemExt1 != NULL && pItemExt1->isValidSessionSaveItem() == false)
+         {
+            // don't serialize this item
+            continue;
+         }
+
          string filePath = getPathForItem(sessionDirPath, *ppItem);
          if (pProgress)
          {

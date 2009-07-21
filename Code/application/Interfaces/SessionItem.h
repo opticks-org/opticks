@@ -25,6 +25,8 @@ class SessionItemDeserializer;
  *
  *  The SessionItem class is a base class for all objects that are included in
  *  a session.
+ *
+ *  @see    SessionItemExt1
  */
 class SessionItem
 {
@@ -164,6 +166,37 @@ protected:
     *  methods to destroy the specific subclass instance.
     */
    virtual ~SessionItem() {}
+};
+
+/**
+* Extends capability of the SessionItem interface.
+*
+* This class provides additional capability for the SessionItem interface
+* class.  A pointer to this class can be obtained by performing a dynamic cast
+* on a pointer to SessionItem or any of its subclasses.
+*
+* @warning A pointer to this class can only be used to call methods contained
+*          in this extension class and cannot be used to call any methods in
+*          SessionItem or any of its subclasses.
+*/
+class SessionItemExt1
+{
+public:
+   /**
+   *  Retrieves Session Save validity.
+   *
+   *  Method returns whether or not the item will be included in a Session Save.
+   *
+   *  @return   Returns \c true if the item will be saved during Session Save, or \c false otherwise.
+   */
+   virtual bool isValidSessionSaveItem() const = 0;
+
+protected:
+   /**
+   * This will be cleaned up when the session item is destroyed.  Plug-ins do not
+   * need to destroy it.
+   */
+   virtual ~SessionItemExt1() {}
 };
 
 #endif

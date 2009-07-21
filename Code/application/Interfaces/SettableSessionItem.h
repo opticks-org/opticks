@@ -24,7 +24,7 @@ class SessionItemId;
  *  SettableSessionItem is used internally and is typically not used by plug-in
  *  developers.
  *
- *  @see    SessionItem
+ *  @see    SessionItem, SettableSessionItemExt1
  */
 class SettableSessionItem : public SessionItem
 {
@@ -38,7 +38,7 @@ public:
     *  @param   id
     *           The new id for the SessionItem.
     *
-    *  @return   True if the id was successfully set, or false otherwise.
+    *  @return   Returns \c true if the id was successfully set, or \c false otherwise.
     */
    virtual bool setId(const SessionItemId& id) = 0;
 
@@ -194,6 +194,37 @@ protected:
     *  This object should be destroyed by calling ObjectFactory::destroyObject().
     */
    virtual ~SettableSessionItem() {}
+};
+
+/**
+* Extends capability of the SettableSessionItem interface.
+*
+* This class provides additional capability for the SettableSessionItem interface
+* class.  A pointer to this class can be obtained by performing a dynamic cast
+* on a pointer to SettableSessionItem or any of its subclasses.
+*
+* @warning A pointer to this class can only be used to call methods contained
+*          in this extension class and cannot be used to call any methods in
+*          SettableSessionItem or any of its subclasses.
+*/
+class SettableSessionItemExt1
+{
+public:
+   /**
+    *  Sets Session Save validity.
+    *
+    *  Method sets whether or not the item will be included in a Session Save.
+    *
+    *  @param   isValid
+    *           Session Save validity of the item.
+    */
+   virtual void setValidSessionSaveItem(bool isValid) = 0;
+
+protected:
+   /**
+    *  This object should be destroyed by calling ObjectFactory::destroyObject().
+    */
+   virtual ~SettableSessionItemExt1() {}
 };
 
 #endif

@@ -26,7 +26,8 @@ SessionItemImp::SessionItemImp(const string& id) :
    mId(id),
    mpIcon(new QIcon()),
    mFilenameDisplay(true),
-   mIdLocked(false)
+   mIdLocked(false),
+   mValidSessionSaveItem(true)
 {
    VERIFYNRV(mId.empty() == false);
 }
@@ -298,4 +299,14 @@ void SessionItemImp::updateSessionExplorer()
    {
       pExplorer->updateData(dynamic_cast<SessionItem*>(this));
    }
+}
+
+bool SessionItemImp::isValidSessionSaveItem() const
+{
+   return mValidSessionSaveItem;
+}
+
+void SessionItemImp::setValidSessionSaveItem(bool isValid)
+{
+   mValidSessionSaveItem = isValid;
 }

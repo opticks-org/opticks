@@ -18,6 +18,7 @@ RasterPagerShell::RasterPagerShell()
    allowMultipleInstances(true);
    destroyAfterExecute(false);
    setWizardSupported(false);
+   setValidSessionSaveItem(false);
 }
 
 RasterPagerShell::~RasterPagerShell()

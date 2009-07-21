@@ -13,10 +13,9 @@
 #include "SettableSessionItem.h"
 #include "SessionItemImp.h"
 
-class PlugInShell;
-
 #define SETTABLESESSIONITEMADAPTEREXTENSION_CLASSES \
-   SESSIONITEMADAPTEREXTENSION_CLASSES
+   SESSIONITEMADAPTEREXTENSION_CLASSES \
+   , public SettableSessionItemExt1
 
 #define SETTABLESESSIONITEMADAPTER_METHODS(impClass) \
    SESSIONITEMADAPTER_METHODS(impClass) \
@@ -63,6 +62,10 @@ class PlugInShell;
    void setPropertiesPages(const std::vector<std::string>& plugInNames) \
    { \
       impClass::setPropertiesPages(plugInNames); \
+   } \
+   void setValidSessionSaveItem(bool isValid) \
+   { \
+      impClass::setValidSessionSaveItem(isValid); \
    }
 
 class SettableSessionItemAdapter : public SettableSessionItem, public SessionItemImp
