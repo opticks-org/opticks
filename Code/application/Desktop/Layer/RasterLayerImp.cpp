@@ -3572,33 +3572,61 @@ void RasterLayerImp::movieUpdated(Subject& subject, const string& signal, const 
 
 void RasterLayerImp::updateFromMovie()
 {
-   if (mpAnimation != NULL)
+   if (mpAnimation == NULL)
    {
-      UndoLock lock(getView());
-      DimensionDescriptor bandDim;
+      return;
+   }
+   const AnimationFrame* pFrame = mpAnimation->getCurrentFrame();
+   if (pFrame == NULL)
+   {
+      setDisplayMode(GRAYSCALE_MODE);
+      setDisplayedBand(GRAY, DimensionDescriptor());
+      return;
+   }
+   UndoLock lock(getView());
 
-      const AnimationFrame* pFrame = mpAnimation->getCurrentFrame();
-      if (pFrame != NULL)
+   unsigned int frameNumber = pFrame->mFrameNumber;
+   if (getDisplayMode() == RGB_MODE)
+   {
+      const RasterDataDescriptor* pRedRasterDesc = mpRedRasterElement.get() == NULL ? NULL :
+         static_cast<const RasterDataDescriptor*>(mpRedRasterElement->getDataDescriptor());
+      const RasterDataDescriptor* pGreenRasterDesc = mpGreenRasterElement.get() == NULL ? NULL :
+         static_cast<const RasterDataDescriptor*>(mpGreenRasterElement->getDataDescriptor());
+      const RasterDataDescriptor* pBlueRasterDesc = mpBlueRasterElement.get() == NULL ? NULL :
+         static_cast<const RasterDataDescriptor*>(mpBlueRasterElement->getDataDescriptor());
+      if (pRedRasterDesc != NULL && frameNumber < pRedRasterDesc->getBandCount())
       {
-         // Ensure that grayscale mode is the current display mode
-         setDisplayMode(GRAYSCALE_MODE);
-
-         // Set the new displayed band
-         unsigned int frameNumber = pFrame->mFrameNumber;
-
-         DataElement* pElement = getDataElement();
-         if (pElement != NULL)
-         {
-            const RasterDataDescriptor* pDescriptor =
-               dynamic_cast<const RasterDataDescriptor*>(pElement->getDataDescriptor());
-            if (pDescriptor != NULL)
-            {
-               bandDim = pDescriptor->getActiveBand(frameNumber);
-            }
-         }
+         setDisplayedBand(RED, pRedRasterDesc->getActiveBand(frameNumber), mpRedRasterElement.get());
       }
-
-      setDisplayedBand(GRAY, bandDim);
+      else
+      {
+         setDisplayedBand(RED, DimensionDescriptor(), mpRedRasterElement.get());
+      }
+      if (pGreenRasterDesc != NULL && frameNumber < pGreenRasterDesc->getBandCount())
+      {
+         setDisplayedBand(GREEN, pGreenRasterDesc->getActiveBand(frameNumber), mpGreenRasterElement.get());
+      }
+      else
+      {
+         setDisplayedBand(GREEN, DimensionDescriptor(), mpGreenRasterElement.get());
+      }
+      if (pBlueRasterDesc != NULL && frameNumber < pBlueRasterDesc->getBandCount())
+      {
+         setDisplayedBand(BLUE, pBlueRasterDesc->getActiveBand(frameNumber), mpBlueRasterElement.get());
+      }
+      else
+      {
+         setDisplayedBand(BLUE, DimensionDescriptor(), mpBlueRasterElement.get());
+      }
+   }
+   else
+   {
+      const RasterDataDescriptor* pDescriptor = getDataElement() == NULL ? NULL :
+         static_cast<const RasterDataDescriptor*>(getDataElement()->getDataDescriptor());
+      if (pDescriptor != NULL)
+      {
+         setDisplayedBand(GRAY, pDescriptor->getActiveBand(frameNumber));
+      }
    }
 }
 

@@ -719,8 +719,12 @@ public:
     *
     *  This method associates an animation with the layer to automatically update the
     *  displayed band as the animation object is updated.  When the animation object is
-    *  updated, the display mode is changed to grayscale mode before changing the
-    *  displayed band.
+    *  updated, the layer will change based on the current display state. If the display
+    *  mode is grayscale, the displayed band will change to match the animation frame.
+    *  If the display mode is RGB, the band for each color component will change to match the
+    *  animation frame. If a component has no valid RasterElement attached, or that element
+    *  does not contain enough bands to display the animation frame, that component will be
+    *  disabled.
     *
     *  @param   pAnimation
     *           The animation object to associate.  The layer does not take ownership
