@@ -844,12 +844,12 @@ void ImportAgentImp::updateMruFileList(const map<ImportDescriptor*, bool>& impor
       ConfigurationSettingsImp* pSettings = ConfigurationSettingsImp::instance();
       pSettings->removeMruFile(filename.toStdString());
 
-      // Get the number of MRU files and subtract one to account for the file to add to the list
+      // Get the number of MRU files
       vector<MruFile> mruFiles = pSettings->getMruFiles();
-      unsigned int maxNumFiles = ConfigurationSettings::getSettingNumberOfMruFiles() - 1;
+      unsigned int maxNumFiles = ConfigurationSettings::getSettingNumberOfMruFiles();
       Service<ModelServices> pModel;
 
-      while (mruFiles.size() > maxNumFiles)
+      while ((mruFiles.size() >= maxNumFiles) && (mruFiles.empty() == false))
       {
          // Destroy the existing import descriptors in the MRU file
          MruFile mruFile = mruFiles.back();
@@ -870,55 +870,58 @@ void ImportAgentImp::updateMruFileList(const map<ImportDescriptor*, bool>& impor
       }
 
       // Add only the descriptors that are selected to import to the MRU file, regardless of the import success
-      vector<ImportDescriptor*> mruDescriptors;
-
-      for (vector<ImportDescriptor*>::iterator descriptorIter = fileDescriptors.begin();
-         descriptorIter != fileDescriptors.end();
-         ++descriptorIter)
+      if (maxNumFiles > 0)
       {
-         ImportDescriptor* pImportDescriptor = *descriptorIter;
-         if ((pImportDescriptor != NULL) && (pImportDescriptor->isImported() == true))
+         vector<ImportDescriptor*> mruDescriptors;
+
+         for (vector<ImportDescriptor*>::iterator descriptorIter = fileDescriptors.begin();
+            descriptorIter != fileDescriptors.end();
+            ++descriptorIter)
          {
-            // Copy the import descriptor to set in the MRU file since they are destroyed in the destructor
-            DataDescriptor* pDescriptor = pImportDescriptor->getDataDescriptor();
-            if (pDescriptor != NULL)
+            ImportDescriptor* pImportDescriptor = *descriptorIter;
+            if ((pImportDescriptor != NULL) && (pImportDescriptor->isImported() == true))
             {
-               DataDescriptor* pMruDescriptor = pDescriptor->copy();
-               if (pMruDescriptor != NULL)
+               // Copy the import descriptor to set in the MRU file since they are destroyed in the destructor
+               DataDescriptor* pDescriptor = pImportDescriptor->getDataDescriptor();
+               if (pDescriptor != NULL)
                {
-                  ImportDescriptor* pMruImportDescriptor = pModel->createImportDescriptor(pMruDescriptor, true);
-                  if (pMruImportDescriptor != NULL)
+                  DataDescriptor* pMruDescriptor = pDescriptor->copy();
+                  if (pMruDescriptor != NULL)
                   {
-                     mruDescriptors.push_back(pMruImportDescriptor);
+                     ImportDescriptor* pMruImportDescriptor = pModel->createImportDescriptor(pMruDescriptor, true);
+                     if (pMruImportDescriptor != NULL)
+                     {
+                        mruDescriptors.push_back(pMruImportDescriptor);
+                     }
                   }
                }
             }
          }
+
+         // Add the file to the MRU file vector
+         string importer;
+
+         const PlugIn* pPlugIn = getPlugIn();
+         if (pPlugIn != NULL)
+         {
+            importer = pPlugIn->getName();
+         }
+
+         FilenameImp filenameImp(filename.toStdString());
+         string filePath = filenameImp.getPath();
+         string baseFilename = filenameImp.getFileName();
+
+         DateTimeImp modificationTime;
+
+         FileFinderImp fileFinder;
+         fileFinder.findFile(filePath, baseFilename);
+         if (fileFinder.findNextFile() == true)
+         {
+            fileFinder.getLastModificationTime(modificationTime);
+         }
+
+         mruFiles.insert(mruFiles.begin(), MruFile(filename.toStdString(), importer, mruDescriptors, modificationTime));
       }
-
-      // Add the file to the MRU file vector
-      string importer;
-
-      const PlugIn* pPlugIn = getPlugIn();
-      if (pPlugIn != NULL)
-      {
-         importer = pPlugIn->getName();
-      }
-
-      FilenameImp filenameImp(filename.toStdString());
-      string filePath = filenameImp.getPath();
-      string baseFilename = filenameImp.getFileName();
-
-      DateTimeImp modificationTime;
-
-      FileFinderImp fileFinder;
-      fileFinder.findFile(filePath, baseFilename);
-      if (fileFinder.findNextFile() == true)
-      {
-         fileFinder.getLastModificationTime(modificationTime);
-      }
-
-      mruFiles.insert(mruFiles.begin(), MruFile(filename.toStdString(), importer, mruDescriptors, modificationTime));
 
       // Update the MRU file list in the configuration settings
       pSettings->setMruFiles(mruFiles);

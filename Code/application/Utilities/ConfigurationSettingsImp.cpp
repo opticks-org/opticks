@@ -933,11 +933,18 @@ void ConfigurationSettingsImp::deserializeMruFiles()
          {
             if (XERCES_CPP_NAMESPACE_QUALIFIER XMLString::equals(pMruFileNode->getNodeName(), X("attribute")))
             {
-               vector<ImportDescriptor*> descriptors;
+               unsigned maxNumFiles = ConfigurationSettings::getSettingNumberOfMruFiles();
+               if (mMruFiles.size() == maxNumFiles)
+               {
+                  break;
+               }
+
                if (!static_cast<XERCES_CPP_NAMESPACE_QUALIFIER DOMElement*>(pMruFileNode)->hasAttribute(X("name")))
                {
                   continue;
                }
+
+               vector<ImportDescriptor*> descriptors;
                for (XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pDescriptorNode = pMruFileNode->getFirstChild();
                   pDescriptorNode != NULL;
                   pDescriptorNode = pDescriptorNode->getNextSibling())
