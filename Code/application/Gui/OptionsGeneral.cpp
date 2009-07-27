@@ -7,10 +7,11 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "OptionsGeneral.h"
-
-#include "ConfigurationSettings.h"
+#include "AppVerify.h"
+#include "ConfigurationSettingsImp.h"
 #include "LabeledSection.h"
+#include "MruFile.h"
+#include "OptionsGeneral.h"
 #include "UtilityServices.h"
 
 #include <QtGui/QCheckBox>
@@ -18,11 +19,30 @@
 #include <QtGui/QSpinBox>
 #include <QtGui/QVBoxLayout>
 
+#include <vector>
 using namespace std;
 
 OptionsGeneral::OptionsGeneral() :
    QWidget(NULL)
 {
+   // MRU files
+   QLabel* pMruFilesLabel = new QLabel("MRU File Entries:", this);
+
+   mpMruFilesSpin = new QSpinBox(this);
+   mpMruFilesSpin->setMinimum(0);
+   mpMruFilesSpin->setMaximum(16);
+   mpMruFilesSpin->setSingleStep(1);
+
+   QWidget* pMruFilesWidget = new QWidget(this);
+   QHBoxLayout* pMruFilesLayout = new QHBoxLayout(pMruFilesWidget);
+   pMruFilesLayout->setMargin(0);
+   pMruFilesLayout->setSpacing(5);
+   pMruFilesLayout->addWidget(pMruFilesLabel);
+   pMruFilesLayout->addWidget(mpMruFilesSpin);
+   pMruFilesLayout->addStretch(10);
+
+   LabeledSection* pMruFilesSection = new LabeledSection(pMruFilesWidget, "Most Recently Used (MRU) Files", this);
+
    // Undo/redo
    QLabel* pBufferLabel = new QLabel("Buffer Size:", this);
    mpBufferSpin = new QSpinBox(this);
@@ -64,11 +84,14 @@ OptionsGeneral::OptionsGeneral() :
    QVBoxLayout* pLayout = new QVBoxLayout(this);
    pLayout->setMargin(0);
    pLayout->setSpacing(10);
+   pLayout->addWidget(pMruFilesSection);
    pLayout->addWidget(pUndoSection);
    pLayout->addWidget(pThreadingSection);
    pLayout->addWidget(pProgressSection);
    pLayout->addStretch(10);
 
+   // Initialization
+   mpMruFilesSpin->setValue(static_cast<int>(ConfigurationSettings::getSettingNumberOfMruFiles()));
    mpBufferSpin->setValue(static_cast<int>(ConfigurationSettings::getSettingUndoBufferSize()));
    mpThreadSpin->setValue(static_cast<int>(ConfigurationSettings::getSettingThreadCount()));
    mpProgressClose->setChecked(Progress::getSettingAutoClose());
@@ -76,11 +99,26 @@ OptionsGeneral::OptionsGeneral() :
 
 void OptionsGeneral::applyChanges()
 {
+   // MRU files
+   ConfigurationSettingsImp* pSettings = ConfigurationSettingsImp::instance();
+   VERIFYNRV(pSettings != NULL);
+
+   vector<MruFile> mruFiles = pSettings->getMruFiles();
+   unsigned int maxNumMruFiles = static_cast<unsigned int>(mpMruFilesSpin->value());
+
+   while ((mruFiles.size() > maxNumMruFiles) && (mruFiles.empty() == false))
+   {
+      mruFiles.pop_back();
+   }
+
+   pSettings->setMruFiles(mruFiles);
+
+   // Settings
+   ConfigurationSettings::setSettingNumberOfMruFiles(maxNumMruFiles);
    ConfigurationSettings::setSettingUndoBufferSize(static_cast<unsigned int>(mpBufferSpin->value()));
    ConfigurationSettings::setSettingThreadCount(static_cast<unsigned int>(mpThreadSpin->value()));
    Progress::setSettingAutoClose(mpProgressClose->isChecked());
 }
 
 OptionsGeneral::~OptionsGeneral()
-{
-}
+{}
