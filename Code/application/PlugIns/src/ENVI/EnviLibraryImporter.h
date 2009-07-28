@@ -10,18 +10,13 @@
 #ifndef ENVILIBRARYIMPORTER_H
 #define ENVILIBRARYIMPORTER_H
 
-#include "AppVerify.h"
-#include "Endian.h"
 #include "EnviField.h"
 #include "ImporterShell.h"
 
-#include <stdio.h>
 #include <string>
 #include <vector>
 
-class ModelServices;
 class PlugInArgList;
-class PlugInManagerServices;
 class Progress;
 class SignatureLibrary;
 class Step;
@@ -36,9 +31,7 @@ public:
    unsigned char getFileAffinity(const std::string& filename);
    bool getInputSpecification(PlugInArgList*& pArgList);
    bool getOutputSpecification(PlugInArgList*& pArgList);
-   bool hasAbort();
    bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
-   bool abort();
 
 protected:
    bool extractPlugInArgs(PlugInArgList* pArgList);
@@ -48,9 +41,6 @@ protected:
    bool parseHeader(const std::string& filename);
 
 private:
-   bool mbAbort;
-   Service<PlugInManagerServices> mpPlugInManager;
-   Service<ModelServices> mpModel;
    Step* mpStep;
 
    Progress* mpProgress;
@@ -59,4 +49,4 @@ private:
    EnviField mFields;
 };
 
-#endif   // ENVILIBRARYIMPORTER_H
+#endif

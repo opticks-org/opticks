@@ -7,39 +7,32 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "AppVersion.h"
-#include "EnviLibraryImporter.h"
 #include "AppVerify.h"
+#include "AppVersion.h"
 #include "DataDescriptor.h"
-#include "DataVariant.h"
 #include "DynamicObject.h"
-#include "Endian.h"
+#include "EnviLibraryImporter.h"
 #include "FileDescriptor.h"
 #include "ImportDescriptor.h"
 #include "MessageLogResource.h"
 #include "ModelServices.h"
-#include "ObjectFactory.h"
 #include "ObjectResource.h"
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
 #include "PlugInRegistration.h"
-#include "PlugInResource.h"
 #include "Progress.h"
-#include "RasterDataDescriptor.h"
 #include "Signature.h"
 #include "SignatureLibrary.h"
 #include "RasterElement.h"
 #include "SpecialMetadata.h"
 #include "StringUtilities.h"
 
-#include <sstream>
 using namespace std;
 
 REGISTER_PLUGIN_BASIC(OpticksENVI, EnviLibraryImporter);
 
 EnviLibraryImporter::EnviLibraryImporter() :
-   mbAbort(false),
    mpStep(NULL),
    mpProgress(NULL),
    mpSignatureLibrary(NULL)
@@ -142,6 +135,145 @@ vector<ImportDescriptor*> EnviLibraryImporter::getImportDescriptors(const string
                DataDescriptor* pDescriptor = pImportDescriptor->getDataDescriptor();
                if (pDescriptor != NULL)
                {
+                  // Metadata
+                  FactoryResource<DynamicObject> pMetadata;
+                  if (pDescriptionField != NULL)
+                  {
+                     vector<EnviField*>& children = pDescriptionField->mChildren;
+                     for (vector<EnviField*>::iterator iter = children.begin(); iter != children.end(); ++iter)
+                     {
+                        EnviField* pField = *iter;
+                        if (pField != NULL)
+                        {
+                           if ((pField->mTag.empty() == false) && (pField->mValue.empty() == false))
+                           {
+                              pMetadata->setAttribute(pField->mTag, pField->mValue);
+                           }
+                        }
+                     }
+                  }
+
+                  // Signature names
+                  EnviField* pSigNamesField = mFields.find("spectra names");
+                  if (pSigNamesField != NULL)
+                  {
+                     vector<string> sigNames;
+                     for (unsigned int i = 0; i < pSigNamesField->mChildren.size(); i++)
+                     {
+                        EnviField* pField = pSigNamesField->mChildren[i];
+                        if (pField != NULL)
+                        {
+                           vector<char> bufferVector(pField->mValue.size() + 1);
+                           char* pBuffer = &bufferVector.front();
+                           strcpy(pBuffer, pField->mValue.c_str());
+
+                           char* pPtr = strtok(pBuffer, ",");
+                           while (pPtr != NULL)
+                           {
+                              string sigName = StringUtilities::stripWhitespace(string(pPtr));
+                              sigNames.push_back(sigName);
+
+                              pPtr = strtok(NULL, ",");
+                           }
+                        }
+                     }
+
+                     if (sigNames.empty() == false)
+                     {
+                        pMetadata->setAttribute("Signature Names", sigNames);
+                     }
+                  }
+
+                  // Wavelengths
+                  EnviField* pSamplesField = mFields.find("samples");
+                  if (pSamplesField != NULL)
+                  {
+                     unsigned int numWavelengths = StringUtilities::fromXmlString<unsigned int>(pSamplesField->mValue);
+
+                     vector<double> wavelengths;
+                     unsigned int uiNanometerValues = 0;
+
+                     EnviField* pWavelengthField = mFields.find("wavelength");
+                     if (pWavelengthField != NULL)
+                     {
+                        for (unsigned int i = 0; i < pWavelengthField->mChildren.size(); i++)
+                        {
+                           EnviField* pField = pWavelengthField->mChildren[i];
+                           if (pField != NULL)
+                           {
+                              vector<char> bufferVector(pField->mValue.size() + 1);
+                              char* pBuffer = &(bufferVector.front());
+                              strcpy(pBuffer, pField->mValue.c_str());
+
+                              char* pPtr = strtok(pBuffer, ",");
+                              while (pPtr != NULL)
+                              {
+                                 double dWavelength = 0.0;
+                                 int count = sscanf(pPtr, "%lf", &dWavelength);
+                                 if (count == 1)
+                                 {
+                                    if (dWavelength > 50.0)    // Assumed to be in nanometers
+                                    {
+                                       uiNanometerValues++;
+                                    }
+
+                                    // Restrict the number of wavelengths to the number of samples in the header file
+                                    if (i < numWavelengths)
+                                    {
+                                       wavelengths.push_back(dWavelength);
+                                    }
+                                 }
+
+                                 pPtr = strtok(NULL, ",");
+                              }
+                           }
+                        }
+                     }
+
+                     // Wavelength units
+                     bool bConvertWavelengths = false;
+                     bool bDetermineUnits = true;
+
+                     EnviField* pUnitsField = mFields.find("wavelength units");
+                     if (pUnitsField != NULL)
+                     {
+                        if (pUnitsField->mValue == "Micrometers")
+                        {
+                           bDetermineUnits = false;
+                        }
+                        else if (pUnitsField->mValue == "Nanometers")
+                        {
+                           bDetermineUnits = false;
+                           bConvertWavelengths = true;
+                        }
+                     }
+
+                     if (bDetermineUnits)
+                     {
+                        if ((uiNanometerValues * 100) / wavelengths.size() > 50)
+                        {
+                           bConvertWavelengths = true;
+                        }
+                     }
+
+                     if (bConvertWavelengths == true)
+                     {
+                        for (vector<double>::size_type i = 0; i < wavelengths.size(); i++)
+                        {
+                           wavelengths[i] *= 0.001;
+                        }
+                     }
+
+                     string pCenterPath[] = { SPECIAL_METADATA_NAME, BAND_METADATA_NAME, 
+                        CENTER_WAVELENGTHS_METADATA_NAME, END_METADATA_NAME };
+                     pMetadata->setAttributeByPath(pCenterPath, wavelengths);
+                  }
+
+                  if (pMetadata->getNumAttributes() > 0)
+                  {
+                     pDescriptor->setMetadata(pMetadata.get());
+                  }
+
                   // Create the file descriptor
                   FactoryResource<FileDescriptor> pFileDescriptor;
                   if (pFileDescriptor.get() != NULL)
@@ -177,24 +309,18 @@ unsigned char EnviLibraryImporter::getFileAffinity(const string& filename)
 
 bool EnviLibraryImporter::getInputSpecification(PlugInArgList*& pArgList)
 {
-   pArgList = mpPlugInManager->getPlugInArgList();
+   Service<PlugInManagerServices> pPlugInManager;
+   pArgList = pPlugInManager->getPlugInArgList();
    VERIFY(pArgList != NULL);
 
    VERIFY(pArgList->addArg<Progress>(ProgressArg(), NULL));
    VERIFY(pArgList->addArg<SignatureLibrary>(ImportElementArg(), NULL));
-
    return true;
 }
 
 bool EnviLibraryImporter::getOutputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
-
-   return true;
-}
-
-bool EnviLibraryImporter::hasAbort()
-{
    return true;
 }
 
@@ -224,255 +350,35 @@ bool EnviLibraryImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
       return false;
    }
 
-   message = "Reading the values from the header file...";
+   message = "Mapping the library...";
    if (mpProgress != NULL)
    {
       mpProgress->updateProgress(message, 0, NORMAL);
    }
 
-   DynamicObject* pMetadata = mpSignatureLibrary->getMetadata();
-   VERIFY(pMetadata != NULL);
-
-   // Description
-   EnviField* pDescriptionField = mFields.find("description");
-   if (pDescriptionField != NULL)
+   bool success = mpSignatureLibrary->import(dataFile, "ENVI Importer");
+   if (success == true)
    {
-      EnviField* pDescriptionTextField = pDescriptionField->find("description");
-      if (pDescriptionTextField != NULL)
-      {
-         string description;
-         if (pDescriptionTextField->mValue.empty() == true)
-         {
-            if (pDescriptionField->mChildren.size() == 1)
-            {
-               pDescriptionTextField = pDescriptionField->mChildren.front();
-               if (pDescriptionTextField != NULL)
-               {
-                  if (pDescriptionTextField->mValue.empty() == false)
-                  {
-                     description = pDescriptionTextField->mValue;
-                  }
-               }
-            }
-         }
-         else
-         {
-            description = pDescriptionTextField->mValue;
-         }
-         pMetadata->setAttribute("Description", description);
-      }
-
-      // metadata
-      vector<EnviField*>& children = pDescriptionField->mChildren;
-      vector<EnviField*>::iterator it;
-      for (it = children.begin(); it != children.end(); ++it)
-      {
-         if ((*it) != NULL && (*it)->mTag.empty() == false && (*it)->mValue.empty() == false)
-         {
-            EnviField* pField = *it;
-            pMetadata->setAttribute(pField->mTag, pField->mValue);
-         }
-      }
-   }
-
-
-   if (mbAbort)
-   {
-      message = "ENVI signature library import aborted!";
+      message = "ENVI library import complete!";
       if (mpProgress != NULL)
       {
-         mpProgress->updateProgress(message, 0, ABORT);
+         mpProgress->updateProgress(message, 100, NORMAL);
       }
 
-      pStep->finalize(Message::Abort);
-      return false;
+      pStep->finalize(Message::Success);
    }
-
-   if (mpProgress != NULL)
+   else
    {
-      mpProgress->updateProgress(message, 10, NORMAL);
-   }
-
-   // Signature names
-   vector<string> sigNames;
-
-   EnviField* pSigNamesField = mFields.find("spectra names");
-   if (pSigNamesField != NULL)
-   {
-      for (unsigned int i = 0; i < pSigNamesField->mChildren.size(); i++)
-      {
-         if (mbAbort)
-         {
-            message = "ENVI signature library import aborted!";
-            if (mpProgress != NULL)
-            {
-               mpProgress->updateProgress(message, 0, ABORT);
-            }
-
-            pStep->finalize(Message::Abort);
-            return false;
-         }
-
-         EnviField* pField = pSigNamesField->mChildren[i];
-         if (pField != NULL)
-         {
-            vector<char> bufferVector(pField->mValue.size() + 1);
-            char* pBuffer = &bufferVector.front();
-            strcpy(pBuffer, pField->mValue.c_str());
-
-            char* pPtr = strtok(pBuffer, ",");
-            while (pPtr != NULL)
-            {
-               string sigName = StringUtilities::stripWhitespace(string(pPtr));
-               sigNames.push_back(sigName);
-
-               pPtr = strtok(NULL, ",");
-            }
-         }
-
-         if (mpProgress != NULL)
-         {
-            mpProgress->updateProgress(message,
-               10 + ((i + 1) * 100 / pSigNamesField->mChildren.size() / 4), NORMAL);
-         }
-      }
-   }
-
-   pMetadata->setAttribute("Signature Names", sigNames);
-
-   // Wavelengths
-   EnviField* pSamplesField = mFields.find("samples");
-   VERIFY(pSamplesField != NULL);
-
-   unsigned int numWavelengths = StringUtilities::fromXmlString<unsigned int>(pSamplesField->mValue);
-
-   vector<double> wavelengths;
-   unsigned int uiNanometerValues = 0;
-
-   EnviField* pWavelengthField = mFields.find("wavelength");
-   if (pWavelengthField != NULL)
-   {
-      for (unsigned int i = 0; i < pWavelengthField->mChildren.size(); i++)
-      {
-         if (mbAbort)
-         {
-            message = "ENVI signature library import aborted!";
-            if (mpProgress != NULL)
-            {
-               mpProgress->updateProgress(message, 0, ABORT);
-            }
-
-            pStep->finalize(Message::Abort);
-            return false;
-         }
-
-         EnviField* pField = pWavelengthField->mChildren[i];
-         if (pField != NULL)
-         {
-            vector<char> bufferVector(pField->mValue.size() + 1);
-            char* pBuffer = &(bufferVector.front());
-            strcpy(pBuffer, pField->mValue.c_str());
-
-            char* pPtr = strtok(pBuffer, ",");
-            while (pPtr != NULL)
-            {
-               double dWavelength = 0.0;
-               int count = sscanf(pPtr, "%lf", &dWavelength);
-               if (count == 1)
-               {
-                  if (dWavelength > 50.0)    // Assumed to be in nanometers
-                  {
-                     uiNanometerValues++;
-                  }
-
-                  // Restrict the number of wavelengths to the number of samples in the header file
-                  if (i < numWavelengths)
-                  {
-                     wavelengths.push_back(dWavelength);
-                  }
-               }
-
-               pPtr = strtok(NULL, ",");
-            }
-         }
-
-         if (mpProgress != NULL)
-         {
-            mpProgress->updateProgress(message,
-               35 + ((i + 1) * 15 / pWavelengthField->mChildren.size()), NORMAL);
-         }
-      }
-   }
-
-   // wavelength units
-   bool bConvertWavelengths = false;
-   bool bDetermineUnits = true;
-   EnviField* pUnitsField = NULL;
-   pUnitsField = mFields.find("wavelength units");
-   if (pUnitsField != NULL)
-   {
-      if (pUnitsField->mValue == "Micrometers")
-      {
-         bDetermineUnits = false;
-      }
-      else if (pUnitsField->mValue == "Nanometers")
-      {
-         bDetermineUnits = false;
-         bConvertWavelengths = true;
-      }
-   }
-
-   if (bDetermineUnits)
-   {
-      if ((uiNanometerValues * 100) / wavelengths.size() > 50)
-      {
-         bConvertWavelengths = true;
-      }
-   }
-
-   if (bConvertWavelengths == true)
-   {
-      for (vector<double>::size_type i = 0; i < wavelengths.size(); i++)
-      {
-         wavelengths[i] *= 0.001;
-      }
-
-      message = "Warning ENVI Library Importer002: The wavelengths for all signatures "
-         "were converted from nanometers to microns!";
+      message = "The ENVI library signatures could not be imported.";
       if (mpProgress != NULL)
       {
-         mpProgress->updateProgress(message, 60, WARNING);
+         mpProgress->updateProgress(message, 0, ERRORS);
       }
 
-      pStep->addMessage(message, "app", "31FAD3F3-78F7-49DE-A0A8-1211750F9141");
+      pStep->finalize(Message::Failure, message);
    }
 
-   string pCenterPath[] = { SPECIAL_METADATA_NAME, BAND_METADATA_NAME, 
-      CENTER_WAVELENGTHS_METADATA_NAME, END_METADATA_NAME };
-   pMetadata->setAttributeByPath(pCenterPath, wavelengths);
-
-   message = "Mapping the library...";
-   if (mpProgress != NULL)
-   {
-      mpProgress->updateProgress(message, 50, NORMAL);
-   }
-
-   bool cubeLoaded = mpSignatureLibrary->import(dataFile, "ENVI Importer");
-
-   message = "ENVI library import complete!";
-   if (mpProgress != NULL)
-   {
-      mpProgress->updateProgress(message, 100, NORMAL);
-   }
-
-   pStep->finalize(Message::Success);
-   return true;
-}
-
-bool EnviLibraryImporter::abort()
-{
-   mbAbort = true;
-   return true;
+   return success;
 }
 
 bool EnviLibraryImporter::extractPlugInArgs(PlugInArgList* pArgList)
