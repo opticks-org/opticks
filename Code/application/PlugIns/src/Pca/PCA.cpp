@@ -452,10 +452,9 @@ PCA::PCA() :
    mpRaster(NULL),
    mpPCARaster(NULL),
    mpSecondMomentMatrix(NULL),
+   mpCovarianceMatrix(NULL),
    mpStep(NULL),
-   m_CalcMethod(SECONDMOMENT),
-   mbInteractive(false),
-   mbAbort(false)
+   m_CalcMethod(SECONDMOMENT)
 {
    setName("Principal Component Analysis");
    setVersion(APP_VERSION_NUMBER);
@@ -466,6 +465,7 @@ PCA::PCA() :
    setMenuLocation("[General Algorithms]\\Principal Component Analysis");
    setDescriptorId("{7D2F39B3-31BA-4ef1-B326-7ADCD7F92186}");
    allowMultipleInstances(true);
+   setAbortSupported(true);
    setProductionStatus(APP_IS_PRODUCTION_RELEASE);
 }
 
@@ -477,23 +477,6 @@ PCA::~PCA()
    }
 }
 
-bool PCA::setBatch()
-{
-   mbInteractive = false;
-   return true;
-}
-
-bool PCA::setInteractive()
-{
-   mbInteractive = true;
-   return true;
-}
-
-bool PCA::hasAbort()
-{
-   return true;
-}
-
 bool PCA::getInputSpecification(PlugInArgList*& pArgList)
 {
    // Set up list
@@ -502,7 +485,7 @@ bool PCA::getInputSpecification(PlugInArgList*& pArgList)
    VERIFY(pArgList->addArg<Progress>(ProgressArg(), NULL));
    VERIFY(pArgList->addArg<RasterElement>(DataElementArg(), NULL));
 
-   if (!mbInteractive) // need additional info in batch mode
+   if (isBatch()) // need additional info in batch mode
    {
       /*
          Cases for batch mode:
@@ -528,6 +511,7 @@ bool PCA::getInputSpecification(PlugInArgList*& pArgList)
       VERIFY(pArgList->addArg<EncodingType>("Output Encoding Type", NULL));
       VERIFY(pArgList->addArg<int>("Max Scale Value", NULL));
       VERIFY(pArgList->addArg<RasterElement>("Second Moment Matrix", NULL));
+      VERIFY(pArgList->addArg<RasterElement>("Covariance Matrix", NULL));
       VERIFY(pArgList->addArg<bool>("Display Results", false));
    }
 
@@ -581,7 +565,7 @@ bool PCA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
       vector<string> aoiNames = mpModel->getElementNames(mpRaster, TypeConverter::toString<AoiElement>());
       int iResult = 0;
 
-      if (mbInteractive)
+      if (!isBatch())
       {
          PcaDlg dlg(aoiNames, m_NumBands, mpDesktop->getMainWidget());
 
@@ -817,6 +801,9 @@ bool PCA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
          // Second Moment RasterElement
          mpSecondMomentMatrix = pInArgList->getPlugInArgValue<RasterElement>("Second Moment Matrix");
 
+         // Covariance RasterElement
+         mpCovarianceMatrix = pInArgList->getPlugInArgValue<RasterElement>("Covariance Matrix");
+
          // Display Results
          VERIFY(pInArgList->getPlugInArgValue("Display Results", mDisplayResults));
       }
@@ -844,9 +831,9 @@ bool PCA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
       }
       if (bLoadFromFile)
       {
-         if (!m_ReadInPCAtransform(transformFilename))
+         if (!readInPCAtransform(transformFilename))
          {
-            if (mbAbort)
+            if (isAborted())
             {
                pStep->finalize(Message::Abort);
             }
@@ -861,9 +848,9 @@ bool PCA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
       else
       {
          // get statistics to use for PCA
-         if (!m_GetStatistics(aoiNames))
+         if (!getStatistics(aoiNames))
          {
-            if (mbAbort)
+            if (isAborted())
             {
                pStep->finalize(Message::Abort);
             }
@@ -876,8 +863,8 @@ bool PCA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
          }
 
          // Calculate PCA coefficients
-         m_CalculateEigenValues();
-         if (mbAbort)
+         calculateEigenValues();
+         if (isAborted())
          {
             if (mpProgress != NULL)
             {
@@ -906,21 +893,21 @@ bool PCA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
             filename += ".pca";
             break;
          }
-         if (mbInteractive)
+         if (!isBatch())
          {
             filename = QFileDialog::getSaveFileName(NULL, "Choose filename to save PCA Transform",
                filename, "PCA files (*.pca*);;All Files (*.*)");
          }
          if (!filename.isEmpty())
          {
-            m_WriteOutPCAtransform(filename);
+            writeOutPCAtransform(filename);
          }
       }
 
       // Create the PCA sensor data
-      if (!m_CreatePCACube())
+      if (!createPCACube())
       {
-         if (mbAbort)
+         if (isAborted())
          {
             pStep->finalize(Message::Abort);
          }
@@ -936,17 +923,17 @@ bool PCA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
       bool bSuccess;
       if (mb_UseAoi)
       {
-         bSuccess = m_ComputePCAaoi();
+         bSuccess = computePCAaoi();
       }
       else
       {
-         bSuccess = m_ComputePCAwhole();
+         bSuccess = computePCAwhole();
       }
 
       if (!bSuccess)
       {
          mpModel->destroyElement(mpPCARaster);
-         if (mbAbort)
+         if (isAborted())
          {
             pStep->finalize(Message::Abort);
          }
@@ -959,12 +946,12 @@ bool PCA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
       }
 
       // Create the spectral data window
-      if (!m_CreatePCAView())
+      if (!createPCAView())
       {
          if (mpPCARaster != NULL)
          {
             mpModel->destroyElement(mpPCARaster);
-            if (mbAbort)
+            if (isAborted())
             {
                pStep->finalize(Message::Abort);
             }
@@ -1007,13 +994,17 @@ bool PCA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 bool PCA::abort()
 {
    Executable* pSecondMoment = dynamic_cast<Executable*>(mpSecondMoment->getPlugIn());
+   Executable* pCovariance = dynamic_cast<Executable*>(mpCovariance->getPlugIn());
    if (pSecondMoment != NULL)
    {
       pSecondMoment->abort();
    }
+   if (pCovariance != NULL)
+   {
+      pCovariance->abort();
+   }
 
-   mbAbort = true;
-   return true;
+   return ExecutableShell::abort();
 }
 
 bool PCA::extractInputArgs(const PlugInArgList* pArgList)
@@ -1075,7 +1066,7 @@ bool PCA::extractInputArgs(const PlugInArgList* pArgList)
    return true;
 }
 
-bool PCA::m_CreatePCACube()
+bool PCA::createPCACube()
 {
    string outputName = mpRaster->getFilename();
    if (outputName.empty() == true)
@@ -1178,7 +1169,7 @@ bool PCA::m_CreatePCACube()
    return true;
 }
 
-bool PCA::m_ComputePCAwhole()
+bool PCA::computePCAwhole()
 {
    QString message;
 
@@ -1322,7 +1313,7 @@ bool PCA::m_ComputePCAwhole()
       }
 
       // check if aborted
-      if (!mbAbort)
+      if (!isAborted())
       {
          // scale component values and save in pPCACube
          scalefactor = static_cast<double>(m_MaxScaleValue) / (max - min);
@@ -1355,7 +1346,7 @@ bool PCA::m_ComputePCAwhole()
             pcaAccessor->nextRow();
             compValAccessor->nextRow();
 
-            if (mbAbort)
+            if (isAborted())
             {
                break;
             }
@@ -1369,7 +1360,7 @@ bool PCA::m_ComputePCAwhole()
       }
    }
 
-   if (mbAbort)
+   if (isAborted())
    {
       mpProgress->updateProgress("PCA aborted!", currentProgress, ABORT);
       mpStep->finalize(Message::Abort);
@@ -1383,7 +1374,7 @@ bool PCA::m_ComputePCAwhole()
    return true;
 }
 
-bool PCA::m_ComputePCAaoi()
+bool PCA::computePCAaoi()
 {
    const RasterDataDescriptor* pPcaDescriptor = dynamic_cast<const RasterDataDescriptor*>(
       mpPCARaster->getDataDescriptor());
@@ -1546,7 +1537,7 @@ bool PCA::m_ComputePCAaoi()
                   min = *pTempVal;
                }
 
-               if (mbAbort)
+               if (isAborted())
                {
                   break;
                }
@@ -1558,7 +1549,7 @@ bool PCA::m_ComputePCAaoi()
          compValAccessor->nextRow();
       }
 
-      if (!mbAbort)
+      if (!isAborted())
       {
          scalefactor = static_cast<double>(m_MaxScaleValue) / (max - min);
 
@@ -1609,7 +1600,7 @@ bool PCA::m_ComputePCAaoi()
             }
             pcaAccessor->nextRow();
             compValAccessor->nextRow();
-            if (mbAbort)
+            if (isAborted())
             {
                break;
             }
@@ -1623,7 +1614,7 @@ bool PCA::m_ComputePCAaoi()
       }
    }
 
-   if (mbAbort)
+   if (isAborted())
    {
       mpProgress->updateProgress("PCA aborted!", currentProgress, ABORT);
       mpStep->finalize(Message::Abort);
@@ -1638,7 +1629,7 @@ bool PCA::m_ComputePCAaoi()
    return true;
 }
 
-bool PCA::m_CreatePCAView()
+bool PCA::createPCAView()
 {
    if (mDisplayResults)
    {
@@ -1806,7 +1797,7 @@ bool PCA::m_CreatePCAView()
          }
       }
 
-      if (!mbAbort)
+      if (!isAborted())
       {
          if (mpProgress != NULL)
          {
@@ -1830,7 +1821,7 @@ bool PCA::m_CreatePCAView()
    return true;
 }
 
-void PCA::m_CalculateEigenValues()
+void PCA::calculateEigenValues()
 {
    StepResource pStep("Calculate Eigen Values", "app", "640DF72A-BBFC-4f17-877A-058C6B70B701");
 
@@ -1903,7 +1894,7 @@ void PCA::m_CalculateEigenValues()
    pStep->finalize(Message::Success);
 }
 
-bool PCA::m_GetStatistics(vector<string> aoiList)
+bool PCA::getStatistics(vector<string> aoiList)
 {
    double* pdTemp = NULL;
    QString strFilename;
@@ -1973,13 +1964,13 @@ bool PCA::m_GetStatistics(vector<string> aoiList)
             lOffset += m_NumBands;
 
             mpProgress->updateProgress("Reordering Second Moment Matrix...", 100 * row / m_NumBands, NORMAL);
-            if (mbAbort)
+            if (isAborted())
             {
                break;
             }
          }
 
-         if (!mbAbort)
+         if (!isAborted())
          {
             mpProgress->updateProgress("Matrix retrieval complete", 100, NORMAL);
             success = true;
@@ -1995,55 +1986,73 @@ bool PCA::m_GetStatistics(vector<string> aoiList)
 
    case COVARIANCE:
       {
-         strFilename += ".cvm";
-         if (mbInteractive)
+         if (mpCovarianceMatrix == NULL)
          {
-            if (QFile::exists(strFilename))
-            {
-               bLoadFromFile = !QMessageBox::information(NULL,
-                                             "Covariance Algorithm",
-                                             "A covariance matrix file has been found for this image.\n"
-                                                      "Do you want to use it?",
-                                             "Use",
-                                             "Don't Use");
-            }
-            if (bLoadFromFile)
-            {
-               if (!m_ReadMatrixFromFile(strFilename, mp_MatrixValues, m_NumBands, "Covariance"))
-               {
-                  // error logged in m_ReadMatrixFromFile routine
-                  return false;
-               }
-            }
-            else
-            {
-               StatisticsDlg sDlg("Covariance", aoiList, mpDesktop->getMainWidget());
-               if (sDlg.exec() == QDialog::Rejected)
-               {
-                  mpStep->finalize(Message::Abort);
-                  return false;
-               }
+            ExecutableResource covariance("Covariance", "", mpProgress);
+            VERIFY(covariance->getPlugIn() != NULL);
 
-               QString strAoiName = sDlg.getAoiName();
-               if (!strAoiName.isEmpty())
-               {
-                  success = m_ComputeCovarianceMatrix(strAoiName);
-               }
-               else // compute covariance over whole image using skip factors
-               {
-                  success = m_ComputeCovarianceMatrix(QString(), sDlg.getRowFactor(), sDlg.getColumnFactor());
-               }
+            bool recalculate = true;
+            bool computeInverse(false);
+            covariance->getInArgList().setPlugInArgValue(DataElementArg(), mpRaster);
+            covariance->getInArgList().setPlugInArgValue("Recalculate", &recalculate);
+            covariance->getInArgList().setPlugInArgValue("ComputeInverse", &computeInverse);
+            if (mb_UseAoi == true)
+            {
+               AoiElement* pAoi = getAoiElement(m_ROIname.toStdString());
+               covariance->getInArgList().setPlugInArgValue("AOI", pAoi);
             }
+            mpCovariance = covariance;
+            covariance->execute();
+            mpCovarianceMatrix = covariance->getOutArgList()
+               .getPlugInArgValue<RasterElement>("Covariance Matrix");
+            mpCovariance = ExecutableResource();
+
+            if (mpCovarianceMatrix == NULL)
+            {
+               message = "Could not obtain Covariance Matrix";
+               if (mpProgress != NULL)
+               {
+                  mpProgress->updateProgress(message.toStdString(), 0, ERRORS);
+               }
+               mpStep->finalize(Message::Failure, mMessage);
+               return false;
+            }
+         }
+
+         pdTemp = reinterpret_cast<double*>(mpCovarianceMatrix->getRawData());
+         if (pdTemp == NULL)
+         {
+            mMessage = "Unable to access data in Covariance Matrix";
+            if (mpProgress != NULL)
+            {
+               mpProgress->updateProgress(mMessage, 0, ERRORS);
+            }
+            mpStep->finalize(Message::Failure, mMessage);
+            return false;
+         }
+
+         int lOffset = 0;
+         for (unsigned int row = 0; row < m_NumBands; ++row)
+         {
+            memcpy(mp_MatrixValues[row], &pdTemp[lOffset], m_NumBands * sizeof(pdTemp[lOffset]));
+            lOffset += m_NumBands;
+
+            mpProgress->updateProgress("Reordering Covariance Matrix...", 100 * row / m_NumBands, NORMAL);
+            if (isAborted())
+            {
+               break;
+            }
+         }
+
+         if (!isAborted())
+         {
+            mpProgress->updateProgress("Matrix retrieval complete", 100, NORMAL);
+            success = true;
          }
          else
          {
-            // compute covariance over whole image using every pixel
-            success = m_ComputeCovarianceMatrix(QString(), 1, 1);
-         }
-
-         if (success && !bLoadFromFile)
-         {
-            m_WriteMatrixToFile(strFilename, const_cast<const double**>(mp_MatrixValues), m_NumBands, "Covariance");
+            mpProgress->updateProgress("Matrix retrieval aborted by user", 100, NORMAL);
+            success = false;
          }
 
          break;
@@ -2051,7 +2060,7 @@ bool PCA::m_GetStatistics(vector<string> aoiList)
    case CORRCOEF:
       {
          strFilename += ".ccm";
-         if (mbInteractive)
+         if (!isBatch())
          {
             if (QFile::exists(strFilename))
             {
@@ -2069,14 +2078,14 @@ bool PCA::m_GetStatistics(vector<string> aoiList)
 
          if (bLoadFromFile)
          {
-            if (!m_ReadMatrixFromFile(strFilename, mp_MatrixValues, m_NumBands, "Correlation Coefficient"))
+            if (!readMatrixFromFile(strFilename, mp_MatrixValues, m_NumBands, "Correlation Coefficient"))
             {
                return false; // error logged in m_ReadMatrixFromFile routine
             }
          }
          else
          {
-            if (mbInteractive)
+            if (!isBatch())
             {
                StatisticsDlg sDlg("Correlation Coefficient", aoiList, mpDesktop->getMainWidget());
                if (sDlg.exec() == QDialog::Rejected)
@@ -2088,16 +2097,16 @@ bool PCA::m_GetStatistics(vector<string> aoiList)
                QString strAoiName = sDlg.getAoiName();
                if (!strAoiName.isEmpty())
                {
-                  success = m_ComputeCovarianceMatrix(strAoiName);
+                  success = computeCovarianceMatrix(strAoiName);
                }
                else // compute covariance over whole image using skip factors
                {
-                  success = m_ComputeCovarianceMatrix(QString(), sDlg.getRowFactor(), sDlg.getColumnFactor());
+                  success = computeCovarianceMatrix(QString(), sDlg.getRowFactor(), sDlg.getColumnFactor());
                }
             }
             else // compute covariance over whole image using every pixel
             {
-               success = m_ComputeCovarianceMatrix(QString(), 1, 1);
+               success = computeCovarianceMatrix(QString(), 1, 1);
             }
 
             if (success)
@@ -2140,7 +2149,7 @@ bool PCA::m_GetStatistics(vector<string> aoiList)
 
                if (!bLoadFromFile)
                {
-                  m_WriteMatrixToFile(strFilename, const_cast<const double**>(mp_MatrixValues),
+                  writeMatrixToFile(strFilename, const_cast<const double**>(mp_MatrixValues),
                      m_NumBands, "Correlation Coefficient");
                }
             }
@@ -2156,7 +2165,7 @@ bool PCA::m_GetStatistics(vector<string> aoiList)
    return success;
 }
 
-bool PCA::m_WriteMatrixToFile(QString filename, const double **pData, int numBands, const string &caption)
+bool PCA::writeMatrixToFile(QString filename, const double **pData, int numBands, const string &caption)
 {
    FileResource pFile(filename.toStdString().c_str(), "wt");
    if (pFile.get() == NULL)
@@ -2191,7 +2200,7 @@ bool PCA::m_WriteMatrixToFile(QString filename, const double **pData, int numBan
    return true;
 }
 
-bool PCA::m_ReadMatrixFromFile(QString filename, double **pData, int numBands, const string &caption)
+bool PCA::readMatrixFromFile(QString filename, double **pData, int numBands, const string &caption)
 {
    FileResource pFile(filename.toStdString().c_str(), "rt");
    if (pFile.get() == NULL)
@@ -2263,7 +2272,7 @@ bool PCA::m_ReadMatrixFromFile(QString filename, double **pData, int numBands, c
    return true;
 }
 
-bool PCA::m_ComputeCovarianceMatrix(QString aoiName, int rowSkip, int colSkip)
+bool PCA::computeCovarianceMatrix(QString aoiName, int rowSkip, int colSkip)
 {
    const RasterDataDescriptor* pDescriptor = dynamic_cast<const RasterDataDescriptor*>(mpRaster->getDataDescriptor());
    if (pDescriptor == NULL)
@@ -2282,7 +2291,7 @@ bool PCA::m_ComputeCovarianceMatrix(QString aoiName, int rowSkip, int colSkip)
 
       switchOnEncoding(pDescriptor->getDataType(), ComputeFactoredCov,
                         pData, mpRaster, mp_MatrixValues, mpProgress,
-                        &mbAbort, rowSkip, colSkip);
+                        &mAborted, rowSkip, colSkip);
    }
    else  // compute over AOI
    {
@@ -2290,7 +2299,7 @@ bool PCA::m_ComputeCovarianceMatrix(QString aoiName, int rowSkip, int colSkip)
       input.mpMatrix = mp_MatrixValues;
       input.mpRaster = mpRaster;
       input.mpProgress = mpProgress;
-      input.mpAbortFlag = &mbAbort;
+      input.mpAbortFlag = &mAborted;
 
       AoiElement* pAoi = getAoiElement(aoiName.toStdString());
       if (pAoi == NULL)
@@ -2316,7 +2325,7 @@ bool PCA::m_ComputeCovarianceMatrix(QString aoiName, int rowSkip, int colSkip)
          }
 
          mpStep->finalize(Message::Failure, mMessage);
-         if (mbInteractive)
+         if (!isBatch())
          {
             QString message;
             message.sprintf("No pixels are currently selected in %s\nPCA is aborting.", aoiName);
@@ -2327,7 +2336,7 @@ bool PCA::m_ComputeCovarianceMatrix(QString aoiName, int rowSkip, int colSkip)
       switchOnEncoding(pDescriptor->getDataType(), ComputeMaskedCov, pData, &input);
    }
 
-   if (mbAbort)
+   if (isAborted())
    {
       if (mpProgress != NULL)
       {
@@ -2341,7 +2350,7 @@ bool PCA::m_ComputeCovarianceMatrix(QString aoiName, int rowSkip, int colSkip)
    return true;
 }
 
-bool PCA::m_ReadInPCAtransform(QString filename)
+bool PCA::readInPCAtransform(QString filename)
 {
    FileResource pFile(filename.toStdString().c_str(), "rt");
    if (pFile.get() == NULL)
@@ -2404,7 +2413,7 @@ bool PCA::m_ReadInPCAtransform(QString filename)
    bool success = true;
    if (lnumComponents < m_NumComponentsToUse)
    {
-      if (mbInteractive)
+      if (!isBatch())
       {
          QString message;
          message.sprintf("This file only contains definitions for %d components, not %d",
@@ -2477,7 +2486,7 @@ bool PCA::m_ReadInPCAtransform(QString filename)
    return success;
 }
 
-bool PCA::m_WriteOutPCAtransform(QString filename)
+bool PCA::writeOutPCAtransform(QString filename)
 {
    FileResource pFile(filename.toStdString().c_str(), "wt");
    if (pFile.get() == NULL)
