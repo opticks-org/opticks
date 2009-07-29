@@ -61,6 +61,8 @@ AboutDlg::AboutDlg(QWidget* parent) :
    strReleaseType = QString::fromStdString(
       StringUtilities::toDisplayString(pConfigSettings->getReleaseType()));
 
+   QString strReleaseDescription = QString::fromStdString(pConfigSettings->getReleaseDescription());
+
    QFont ftApp = QApplication::font();
    ftApp.setBold(true);
 
@@ -98,6 +100,15 @@ AboutDlg::AboutDlg(QWidget* parent) :
    QLabel* pIconLabel = new QLabel(pAppInfo);
    pIconLabel->setPixmap(QPixmap(":/images/application-large"));
 
+   // Release description
+   QLabel* pDescriptionLabel = new QLabel(strReleaseDescription, pAppInfo);
+   pDescriptionLabel->setFont(ftApp);
+   pDescriptionLabel->setWordWrap(true);
+
+   QPalette labelDescriptionPalette = pDescriptionLabel->palette();
+   labelDescriptionPalette.setColor(QPalette::WindowText, Qt::blue);
+   pDescriptionLabel->setPalette(labelDescriptionPalette);
+
    // Copyright
    QLabel* pCopyrightLabel = new QLabel(APP_COPYRIGHT, pAppInfo);
    pCopyrightLabel->setAlignment(Qt::AlignLeft);
@@ -106,16 +117,17 @@ AboutDlg::AboutDlg(QWidget* parent) :
    QGridLayout* pTextGrid = new QGridLayout(pAppInfo);
    pTextGrid->setMargin(0);
    pTextGrid->setSpacing(5);
-   pTextGrid->addWidget(pIconLabel, 0, 0, 5, 1, Qt::AlignVCenter);
+   pTextGrid->addWidget(pIconLabel, 0, 0, 6, 1, Qt::AlignVCenter);
    pTextGrid->addWidget(pVersionLabel, 0, 1);
    pTextGrid->addWidget(pVersion, 0, 2);
    pTextGrid->addWidget(pReleaseLabel, 1, 1);
    pTextGrid->addWidget(pRelease, 1, 2);
 
    pTextGrid->addWidget(pInfoLabel, 2, 1, 1, 2);
+   pTextGrid->addWidget(pDescriptionLabel, 3, 1, 1, 2);
 
-   pTextGrid->setRowMinimumHeight(3, 10);
-   pTextGrid->addWidget(pCopyrightLabel, 4, 1, 1, 2);
+   pTextGrid->setRowMinimumHeight(4, 10);
+   pTextGrid->addWidget(pCopyrightLabel, 5, 1, 1, 2);
    pTextGrid->setColumnStretch(2, 10);
    pTextGrid->setColumnMinimumWidth(0, 75);
 
@@ -739,7 +751,7 @@ AboutDlg::AboutDlg(QWidget* parent) :
    // Initialization
    setWindowTitle(QString("About %1").arg(APP_NAME));
    setModal(true);
-   resize(400, 425);
+   resize(400, 500);
 }
 
 AboutDlg::~AboutDlg()

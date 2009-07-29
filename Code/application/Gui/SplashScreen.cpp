@@ -44,6 +44,8 @@ SplashScreen::SplashScreen(Progress* pProgress) :
    strReleaseType = QString::fromStdString(
       StringUtilities::toDisplayString(pConfigSettings->getReleaseType()));
 
+   QString strReleaseDescription = QString::fromStdString(pConfigSettings->getReleaseDescription());
+
    QFont normalFont = QApplication::font();
    normalFont.setPointSize(10);
 
@@ -97,6 +99,19 @@ SplashScreen::SplashScreen(Progress* pProgress) :
    QLabel* pReleaseInfo = new QLabel("Not for Production Use", pReleaseWidget);
    pReleaseInfo->setFont(boldFont);
 
+   // Release description
+   QWidget* pReleaseDescriptionWidget = new QWidget(pInfoFrame);
+   pReleaseDescriptionWidget->setAutoFillBackground(true);
+
+   QPalette releaseDescriptionPalette = pReleaseDescriptionWidget->palette();
+   releaseDescriptionPalette.setColor(QPalette::Window, Qt::blue);
+   releaseDescriptionPalette.setColor(QPalette::WindowText, Qt::white);
+   pReleaseDescriptionWidget->setPalette(releaseDescriptionPalette);
+
+   QLabel* pReleaseDescriptionInfo = new QLabel(strReleaseDescription, pReleaseDescriptionWidget);
+   pReleaseDescriptionInfo->setFont(boldFont);
+   pReleaseDescriptionInfo->setWordWrap(true);
+
    // Layout
    QHBoxLayout* pVersionLayout = new QHBoxLayout();
    pVersionLayout->setMargin(0);
@@ -123,10 +138,18 @@ SplashScreen::SplashScreen(Progress* pProgress) :
    pReleaseLayout->addWidget(pReleaseInfo);
    pReleaseLayout->addSpacing(5);
 
+   QHBoxLayout* pReleaseDescriptionLayout = new QHBoxLayout(pReleaseDescriptionWidget);
+   pReleaseDescriptionLayout->setMargin(0);
+   pReleaseDescriptionLayout->setSpacing(5);
+   pReleaseDescriptionLayout->addSpacing(5);
+   pReleaseDescriptionLayout->addWidget(pReleaseDescriptionInfo);
+   pReleaseDescriptionLayout->addSpacing(5);
+
    QVBoxLayout* pInfoLayout = new QVBoxLayout(pInfoFrame);
    pInfoLayout->setMargin(0);
-   pInfoLayout->setSpacing(1);
+   pInfoLayout->setSpacing(0);
    pInfoLayout->addWidget(pReleaseWidget);
+   pInfoLayout->addWidget(pReleaseDescriptionWidget);
    pInfoLayout->addLayout(pVersionLayout);
    pInfoLayout->addLayout(pProgressLayout);
 
@@ -139,6 +162,7 @@ SplashScreen::SplashScreen(Progress* pProgress) :
    // Initialization
    pDeveloperInfo->setHidden(strReleaseType.isEmpty());
    pReleaseInfo->setHidden(bProductionRelease);
+   pReleaseDescriptionInfo->setHidden(strReleaseDescription.isEmpty());
 
    mpRotateImageTimer = new QTimer(this);
    mpRotateImageTimer->setInterval(750);

@@ -149,6 +149,7 @@ void ConfigurationSettingsImp::validateInitialization()
    }
 
    mReleaseType = getSettingReleaseType();
+   mReleaseDescription = getSettingReleaseDescription();
 
    // Set Internal Path -  Note that this only affects the environment
    // variable of the current process. 
@@ -650,6 +651,11 @@ bool ConfigurationSettingsImp::isProductionRelease() const
 ReleaseType ConfigurationSettingsImp::getReleaseType() const
 {
    return mReleaseType;
+}
+
+string ConfigurationSettingsImp::getReleaseDescription() const
+{
+   return mReleaseDescription;
 }
 
 bool ConfigurationSettingsImp::isInitialized()
@@ -1241,7 +1247,8 @@ DynamicObject* ConfigurationSettingsImp::deserialize(const Filename* pFilename) 
 
 void ConfigurationSettingsImp::updateProductionStatus()
 {
-   if (mReleaseType != RT_NORMAL && mReleaseType != RT_PROTO)
+   if (mReleaseType.isValid() == false || mReleaseType == RT_DEMO ||
+      mReleaseType == RT_TRAINING || mReleaseType == RT_TEST)
    {
       mProductionRelease = false;
       return;

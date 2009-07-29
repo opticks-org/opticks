@@ -38,10 +38,11 @@ class XMLWriter;
  *
  *  @see    ConfigurationSettings
  */
-class ConfigurationSettingsImp : public ConfigurationSettings, public SubjectImp
+class ConfigurationSettingsImp : public ConfigurationSettings, public SubjectImp, public ConfigurationSettingsExt1
 {
 public:
    SETTING(ReleaseType, General, ReleaseType, RT_NORMAL); 
+   SETTING(ReleaseDescription, General, std::string, std::string()); 
    /**
     *  Returns the instance of this singleton class.
     *
@@ -72,6 +73,7 @@ public:
    const DateTime* getReleaseDate() const;
    bool isProductionRelease() const;
    ReleaseType getReleaseType() const;
+   std::string getReleaseDescription() const;
 
    bool isInitialized();
    const char* getInitializationErrorMsg();
@@ -176,6 +178,7 @@ private:
    std::auto_ptr<DateTimeImp> mpReleaseDate;
    bool mProductionRelease;
    ReleaseType mReleaseType;
+   std::string mReleaseDescription;
 
    FactoryResource<DynamicObject> mpUserSettings;
    FactoryResource<DynamicObject> mpSessionSettings;

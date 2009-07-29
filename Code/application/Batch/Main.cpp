@@ -123,6 +123,12 @@ int main(int argc, char** argv)
 
    cout << endl;
 
+   string releaseDescription = pSettings->getReleaseDescription();
+   if (releaseDescription.empty() == false)
+   {
+      cout << releaseDescription << endl;
+   }
+
    bool showHidden = pArgumentList->exists("showHiddenExtensions");
    list<const Aeb*> aebs = InstallerServicesImp::instance()->getAebs();
    if(!aebs.empty())
@@ -183,6 +189,11 @@ int main(int argc, char** argv)
    if (bProductionRelease == false)
    {
       cout << releaseType << " - Not for Production Use" << endl;
+   }
+
+   if (releaseDescription.empty() == false)
+   {
+      cout << releaseDescription << endl;
    }
 
    SystemServicesImp::instance()->WriteLogInfo(string(APP_NAME) + " Batch Shutdown");
