@@ -51,44 +51,44 @@ namespace Nitf
 
       // TreParser
       /**
-       * @copydoc TreParser::isTreValid()
+       * @copydoc Nitf::TreParser::isTreValid()
        *
        * @default The default implementation returns TreState::UNTESTED.
        */
       TreState isTreValid(const DynamicObject& tre, std::ostream& reporter) const;
 
       /**
-       * @copydoc TreParser::toDynamicObject(const ossimNitfRegisteredTag&, DynamicObject&) const
+       * @copydoc Nitf::TreParser::toDynamicObject(const ossimNitfRegisteredTag&, DynamicObject&, std::string&) const
        *
        * @default The default implementation returns false,
        *          so that developers only need to override
        *          those methods they wish to implement.
        */
       bool toDynamicObject(const ossimNitfRegisteredTag& input, DynamicObject& output, 
-         std::string &errorMessage) const;
+         std::string& errorMessage) const;
 
       /**
-       * @copydoc TreParser::toDynamicObject(std::istream&, size_t, DynamicObject&) const
+       * @copydoc Nitf::TreParser::toDynamicObject(std::istream&, size_t, DynamicObject&, std::string&) const
        *
        * @default The default implementation returns false,
        *          so that developers only need to override
        *          those methods they wish to implement.
        */
       bool toDynamicObject(std::istream& input, size_t numBytes, DynamicObject& output, 
-         std::string &errorMessage) const;
+         std::string& errorMessage) const;
 
       /**
-       * @copydoc TreParser::fromDynamicObject(const DynamicObject&, ossimNitfRegisteredTag&) const
+       * @copydoc Nitf::TreParser::fromDynamicObject(const DynamicObject&, ossimNitfRegisteredTag&, std::string&) const
        *
        * @default The default implementation returns false,
        *          so that developers only need to override
        *          those methods they wish to implement.
        */
       bool fromDynamicObject(const DynamicObject& input, ossimNitfRegisteredTag& tre, 
-         std::string &errorMessage) const;
+         std::string& errorMessage) const;
 
       /**
-       * @copydoc TreParser::fromDynamicObject(const DynamicObject&, std::ostream&, size_t&) const
+       * @copydoc Nitf::TreParser::fromDynamicObject(const DynamicObject&, std::ostream&, size_t&, std::string&) const
        *
        * @default The default implementation returns false,
        *          so that developers only need to override
@@ -98,17 +98,17 @@ namespace Nitf
          std::string &errorMessage) const;
 
       /**
-       * @copydoc TreParser::importMetadata(const DynamicObject &, RasterDataDescriptor &) const
+       * @copydoc Nitf::TreParser::importMetadata(const DynamicObject&, RasterDataDescriptor&, std::string&) const
        *
        * @default The default implementation returns false,
        *          so that developers only need to override
        *          those methods they wish to implement.
        */
-      bool importMetadata(const DynamicObject &tre, RasterDataDescriptor &descriptor, 
-         std::string &errorMessage) const;
+      bool importMetadata(const DynamicObject& tre, RasterDataDescriptor& descriptor, 
+         std::string& errorMessage) const;
 
       /**
-       * @copydoc TreParser::exportMetadata(const RasterDataDescriptor &, DynamicObject &) const
+       * @copydoc Nitf::TreParser::exportMetadata(const RasterDataDescriptor&, const RasterFileDescriptor&, DynamicObject&, unsigned int&, std::string&, std::string&) const
        *
        * @default The default implementation returns #UNCHANGED,
        *          so that developers only need to override
@@ -116,9 +116,9 @@ namespace Nitf
        *          if a subclass wishes to reimplement this function,
        *          the subclass should use CreateOnExportSubtype().
        */
-      TreExportStatus exportMetadata(const RasterDataDescriptor &descriptor, 
-         const RasterFileDescriptor &exportDescriptor, DynamicObject &tre,
-         unsigned int &ownerIndex, std::string &tagType, std::string &errorMessage) const;
+      TreExportStatus exportMetadata(const RasterDataDescriptor& descriptor, 
+         const RasterFileDescriptor& exportDescriptor, DynamicObject& tre,
+         unsigned int& ownerIndex, std::string& tagType, std::string& errorMessage) const;
    };
 }
 

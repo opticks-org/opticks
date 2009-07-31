@@ -1,0 +1,1040 @@
+/** \page upgrade_sdk Upgrading From Earlier SDK
+
+This document will describe the changes present in each version of the SDK.
+This document should be used to help upgrade any plug-ins to a particular version of the SDK.
+There is a page dedicated to each version of the SDK and if you are upgrading a plug-in by more than one version of the SDK, you MUST read all relevant pages for versions that you are skipping.
+- \subpage changes430
+*/
+
+/** \page changes430 4.3.0 Changes
+\section contents430 Contents
+- \ref u425_to_430_deps
+- \ref u425_to_430_newmodule
+- \ref u425_to_430_compiler
+- \ref u425_to_430_breaking
+<br><br>
+
+\subsection u425_to_430_deps Dependencies
+<HR>
+
+\subsubsection u425_to_430_deps_Qt Qt
+Qt has been upgraded from 4.3.4 to 4.5.0.
+If you are using Qt in your plug-in, you must upgrade your plug-in from Qt 4.3.4 to Qt 4.5.0 in order to properly work with %Opticks 4.3.0 and later.
+You can find additional details on the Qt change on the qtsoftware.com site, see http://www.qtsoftware.com/developer/changes for more details.
+This upgrade was done so that plug-in developers now have the option of using either the GPL, commercial or LGPL licensed version of Qt.
+The LGPL license option is a new option that was made available to developers with the 4.5.0 release.
+Please read http://www.qtsoftware.com/developer/faqs/licensing?hotspoturl=None for more details.
+%Opticks has been switched to exclusively use the LGPL licensed version of Qt.
+This means that you can now use "dependencies.py" to fetch a binary build of Qt for all the platforms that %Opticks is supported on.
+See \ref dependencies for more details.
+
+\subsubsection u425_to_430_deps_ossim ossim
+ossim has been updated in a binary breaking manner.
+The ossim that is used by %Opticks includes %Opticks specific patches.
+You should upgrade from our "https://opticks.ballforge.net/files/documents/8/240/ossim-10682-Mar03-2009.zip" to "https://opticks.ballforge.net/files/documents/8/279/ossim-10682-May13-2009.zip".
+ossim was updated in order to better support the import/export of NITF files.
+See \ref dependencies for more details on getting the updated ossim dependency.
+
+\subsubsection u425_to_430_deps_Hdf4 Hdf4
+Hdf4 has been upgraded from 4.2r1 to 4.2r3.
+If you are using HdfPlugInLib or Hdf4 in your plug-in, you must upgrade your plug-in from Hdf4 4.2r1 to Hdf4 4.2r3.
+The Hdf4 library was upgraded so that %Opticks could support Hdf4 on Windows 64-bit, previously only Windows 32-bit and Solaris SPARC 64-bit were supported in %Opticks.
+If you are using the Visual Studio property sheets provided in the SDK, you will need to use the new "hdf4-debug.vsprops" and "hdf4-release.vsprops" as appropriate instead of using "hdf4.vsprops".
+See \ref dependencies for more details on getting the updated Hdf4 dependency.
+<br><br><br><br>
+
+\subsection u425_to_430_newmodule Module Loading Mechanism
+<HR>
+%Opticks 4.3.0 provides a new module loading mechanism.
+The module loading mechanism refers to how %Opticks loads plug-in libraries (.dll, .so) and locates the individual plug-in subclasses located within the library (.dll, .so).
+In order to minimize plug-in developer disruptions, %Opticks 4.3.0 simultaneously supports the new module loading mechanism (4.3.%X and later) and the legacy module loading mechanism (4.2.%X and earlier).
+For details on the new loading mechanism, please read \ref register_plugin.
+
+The legacy loading mechanism (4.2.%X and earlier) will be supported throughout the 4.3.%X line of %Opticks development, but is considered deprecated and will be removed in a future release (no earlier than 4.4.%X).
+It is highly encouraged that plug-in developers take 4.3.0 as the opportunity to update their modules and plug-ins to use the new module loading mechanism.
+The reason that the new module loading mechanism was developed is because the legacy loading mechanism could not be made to work on other platforms (e.g. Linux).
+In addition, the new loading mechanism is more compact for plug-in developers to write and provides additional flexibility to plug-in developers.
+
+Even though %Opticks supports the legacy module loading mechanism, you will need to make a change before your plug-in will properly compile and link against 4.3.0 if you wish to continue using the legacy module loading mechanism.
+In order to continue using the old mechanism, you will need to define the preprocessor symbol of DEPRECATED_MODULE_TYPE.
+You can do this any number of ways.
+You can add a "#define DEPRECATED_MODULE_TYPE" before any '\#include "ModuleManager.h"'.
+You can also add the preprocessor symbol definition to compiler (Visual Studio, Sun Studio) invocation line.
+
+If you are using the Visual Studio property sheets provided in the SDK, you will need to add "DeprecatedPlugInSettings.vsprops" to your project.
+This property sheet defines DEPRECATED_MODULE_TYPE and also ensures the "PlugInModule.DEF" file is used when linking your plug-in DLL.
+
+It should also be noted that any plug-in libraries (e.g. .dll, .so) using the legacy module loading mechanism that are loaded by %Opticks will appear in the "Plug-Ins" tab of the "Session Explorer" dock window with blue text.
+Plug-in libraries that are using the new module loading mechanism will appear in black text.
+<br><br><br><br>
+\subsection u425_to_430_compiler Compiler
+<HR>
+On Solaris, we are now requiring plug-in developers to compile plug-ins using "Sun Studio 12" instead of "Sun Studio 11". The upgrade of the "Sun Studio" is available from Sun Microsystems free of charge. The compiler upgrade was done because there were compatibility problems compiling Qt 4.5.0 with Sun Studio 11 that were resolved by upgrading the compiler to Sun Studio 12. The entire %Opticks source code base was upgraded to the new compiler without requiring any source code changes. This compiler change causes AEBs to need a target platform of "solaris-sparc-studio12-debug" and "solaris-sparc-studio12-release" instead of "solaris-sparc-studio11-debug" and "solaris-sparc-studio11-release".
+<br><br><br><br>
+\subsection u425_to_430_breaking API
+<HR>
+\subsubsection u425_to_430_allplugins All Plug-Ins
+<div style="margin-left: 3em">
+<b>Description:</b>
+%Opticks has been changed to determine its production status based upon the production status of its plug-ins.
+If a release candidate version of %Opticks is run, then it will always consider itself, "not for production", and will display the appropriate banners on the top and bottom of every image.
+Previously, if a final version of %Opticks (e.g. 4.2.2, 4.2.3) was run, it will always consider itself, "production", and <b>NEVER</b> display the "not for production" banners on the top and bottom of images.
+With %Opticks 4.3.0, any final version of %Opticks (e.g. 4.2.2, 4.2.3) will now query all plug-ins and call PlugIn::isProduction().
+If any plug-in in the application returns false from PlugIn::isProduction(), then the entire application will consider itself, "not for production", and will display the "not for production" banners on the top and bottom of every image.
+
+<b>Procedure:</b>
+To determine if your plug-in is returning false from PlugIn::isProduction(), you can start up %Opticks and then go to the "Plug-Ins" tab of the "Session Explorer" dock window.
+If you "right-click" in the bottom of the "Plug-Ins" tab and select "Expand All", any plug-ins that have their name rendered in "red" have returned false from PlugIn::isProduction().
+In order to change the return value, you should call PlugInShell::setProductionStatus(bool value) in the constructor of your plug-in subclass.
+Calling PlugInShell::setProductionStatus(true) will cause your plug-in to return true from PlugIn::isProduction() and calling PlugInShell::setProductionStatus(false) will cause your plug-in to return false from PlugIn::isProduction().
+If you do not specifically call setProductionStatus() in the constructor of your plug-in subclass, it will default to false.
+</div>
+
+\subsubsection u425_to_430_AlgorithPattern AlgorithmPattern
+<div style="margin-left: 3em">
+<b>Description:</b>
+The mergePseudocolorResults() function has been removed and has not been replaced.
+
+<b>Procedure:</b>
+If you still require this function, you will need to provide your own implementation.
+</div>
+
+\subsubsection u425_to_430_AnyData AnyData, AnyDataExt1
+<div style="margin-left: 3em">
+<b>Description:</b>
+The AnyDataExt1 class was removed.
+The two virtual functions on AnyDataExt1, serialize() and deserialize() have been moved onto the AnyData class and made non-virtual.
+The arguments have stayed the same.
+
+<b>Procedure:</b>
+- If you have any classes that are subclassing both AnyData and AnyDataExt1, you can remove the AnyDataExt1 from your inheritance line.
+  No other changes are required.
+- Existing subclasses of AnyData but not AnyDataExt1 do NOT need to be changed in any way.
+
+</div>
+
+\subsubsection u425_to_430_BYTE_ORDER BYTE_ORDER
+<div style="margin-left: 3em">
+<b>Description:</b>
+The \#define BYTE_ORDER was renamed to \#define OPTICKS_BYTE_ORDER.
+This was to prevent overlap with certain system includes that define BYTE_ORDER.
+
+<b>Procedure:</b>
+If you were relying on the %Opticks version of BYTE_ORDER, please change your code to use OPTICKS_BYTE_ORDER.
+</div>
+
+\subsubsection u425_to_430_Classification Classification::isValid()
+<div style="margin-left: 3em">
+<b>Description:</b>
+The signature of Classification::isValid() was changed.
+Previously the errorMessage argument could be omitted because a default argument value was defined.
+The default argument value for the errorMessage parameter was removed.
+This was because the code was improperly following the C++ standard by providing a default argument value for a non-const reference argument.
+%Any code relying on the default argument value, must now provide an explicit value for the errorMessage argument before calling Classification::isValid().
+
+<b>Procedure:</b>
+
+The following code:
+\code
+Classification* pClassification;
+bool isValid = pClassification->isValid();
+\endcode
+must be changed to:
+\code
+std::string errorMessage;
+bool isValid = pClassification->isValid(errorMessage);
+\endcode
+</div>
+
+\subsubsection u425_to_430_ConfigSettingsExt1 ConfigurationSettingsExt1
+<div style="margin-left: 3em">
+<b>Description:</b>
+The ConfigurationSettingsExt1 class was removed.
+The getUserDocs() function was moved to ConfigurationSettings.
+
+<b>Procedure:</b>
+
+The following code:
+\code
+string userDocPath = dynamic_cast<ConfigurationSettingsExt1*>(Service<ConfigurationSettings>())->getUserDocs();
+\endcode
+must be changed to:
+\code
+string userDocPath = Service<ConfigurationSettings>()->getUserDocs();
+\endcode
+</div>
+
+\subsubsection u425_to_430_ConfigSettingsExt2 ConfigurationSettingsExt2
+<div style="margin-left: 3em">
+<b>Description:</b>
+The ConfigurationSettingsExt2 class was removed.
+The getPlugInPath() function was moved to ConfigurationSettings
+
+<b>Procedure:</b>
+
+The following code:
+\code
+string plugInPath = dynamic_cast<ConfigurationSettingsExt1*>(Service<ConfigurationSettings>())->getPlugInPath();
+\endcode
+must be changed to:
+\code
+string plugInPath = Service<ConfigurationSettings>()->getPlugInPath();
+\endcode
+</div>
+
+\subsubsection u425_to_430_ImportExport ConfigurationSettings - "FileLocations/ImportExportPath"
+<div style="margin-left: 3em">
+<b>Description:</b>
+The "FileLocations/ImportExportPath" setting has been fully removed.
+This setting was removed during %Opticks 4.2.%X, but a shim was left in to maintain functional/binary compatibility during %Opticks 4.2.%X.
+For %Opticks 4.3.%X, this shim has been removed.
+%Any attempts to get the value for the "FileLocations/ImportExportPath" will result in invalid data being returned.
+
+<b>Procedure:</b>
+
+The following code:
+\code
+DataVariant dv = Service<ConfigurationSettings>()->getSetting("FileLocations/ImportExportPath");
+const Filename* pFilename = dv_cast<Filename>(&dv);
+\endcode
+must be changed to either:
+\code
+const Filename* pFilename = ConfigurationSettings::getSettingImportPath();
+\endcode
+or:
+\code
+const Filename* pFilename = ConfigurationSettings::getSettingExportPath();
+\endcode
+</div>
+
+\subsubsection u425_to_430_DockWindowExt1 DockWindowExt1
+<div style="margin-left: 3em">
+<b>Description:</b>
+The DockWindowExt1 class was removed.
+The isShown() function was moved to DockWindow.
+
+<b>Procedure:</b>
+
+The following code:
+\code
+DockWindow* pWin;
+bool shown = dynamic_cast<DockWindowExt1*>(pWin)->isShown();
+\endcode
+must be changed to:
+\code
+bool shown = pWin->isShown();
+\endcode
+</div>
+
+\subsubsection u425_to_430_DynamicModule DynamicModule
+<div style="margin-left: 3em">
+<b>Description:</b>
+The signature for the load() and getProcedureAddress() functions have changed.
+These functions previously took arguments of type "const char*" and now take arguments of type "const std::string&".
+
+<b>Procedure:</b>
+
+The following code:
+\code
+DynamicModule* pDynModule;
+pDynModule->load(NULL);
+pDynModule->getProcedureAddress(NULL);
+\endcode
+must be changed to:
+\code
+pDynModule->load("");
+pDynModule->getProcedureAddress(string());
+\endcode
+</div>
+
+\subsubsection u425_to_430_EncodingType EncodingType - UNKNOWN
+<div style="margin-left: 3em">
+<b>Description:</b>
+The UNKNOWN value for the EncodingType enumeration was removed.
+It has <b>NOT</b> been replaced.
+It was removed because it conflicted with code in the HDF4 library.
+In addition, now that the application is using EnumWrapper, it was no longer needed.
+
+<b>Procedure:</b>
+
+The following code:
+\code
+EncodingType defaultValue = UNKNOWN;
+if (/* some condition */) defaultValue = INT1SBYTE;
+if (defaultValue == UNKNOWN) /* do something */
+\endcode
+must be changed to:
+\code
+EncodingType defaultValue;
+if (/* some condition */) defaultValue = INT1SBYTE;
+if (defaultValue.isValid() == false) /* do something */
+\endcode
+</div>
+
+\subsubsection u425_to_430_EndianType EndianType - BIG_ENDIAN, LITTLE_ENDIAN
+<div style="margin-left: 3em">
+<b>Description:</b>
+The BIG_ENDIAN and LITTLE_ENDIAN enum values of the EndianType enumeration have been renamed.
+They were renamed to avoid conflicts with system defines provided by certain compilers.
+
+<b>Procedure:</b>
+
+The following code:
+\code
+EndianType temp = BIG_ENDIAN;
+EndianType temp2 = LITTLE_ENDIAN;
+\endcode
+must be changed to:
+\code
+EndianType temp = BIG_ENDIAN_ORDER;
+EndianType temp2 = LITTLE_ENDIAN_ORDER;
+\endcode
+</div>
+
+\subsubsection u425_to_430_MenuIcon Executable, ExecutableShell - MenuIcon.
+<div style="margin-left: 3em">
+<b>Description:</b>
+The Executable::getMenuIcon(), ExecutableShell::getMenuIcon() and ExecutableShell::setMenuIcon() was removed.
+It you were using any of these functions to provide a menu icon for your executable plug-in, you must now provide an implementation of SessionItem::getIcon() in your plug-in subclass.
+
+<b>Procedure:</b>
+
+The following code:
+\code
+static const char* sMyXpm[] = /* Assume this is XPM content */;
+class MyExecutable : public ExecutableShell
+{
+public:
+   MyExecutable() : ExecutableShell()
+   {
+      setMenuIcon(sMyXpm);
+      // other plug-in construction code here...
+   }
+};
+\endcode
+must be changed to:
+\code
+#include <memory>
+#include <QtGui/QIcon>
+static const char* sMyXpm[] = /* Assume this is XPM content */;
+class MyExecutable : public ExecutableShell
+{
+public:
+   MyExecutable() : ExecutableShell()
+   {
+      // other plug-in construction code here...
+   }
+   const QIcon& getIcon() const
+   {
+      if (mMenuIcon.get() == NULL)
+      {
+         mMenuIcon.reset(new QIcon(QPixmap(sMyXpm)));
+      }
+      return *mMenuIcon.get();
+   }
+private:
+   mutable std::auto_ptr<QIcon> mMenuIcon;
+};
+\endcode
+</div>
+
+\subsubsection u425_to_430_ExecAgent ExecutableAgentExt1, ExecutableAgentExt2
+<div style="margin-left: 3em">
+<b>Description:</b>
+The ExecutableAgentExt1 and ExecutableAgentExt1 classes were removed.
+The functions on those classes were moved to ExecutableAgent.
+</div>
+
+\subsubsection u425_to_430_ExecutableResource ExecutableResource
+<div style="margin-left: 3em">
+<b>Description:</b>
+The type returned from ExecutableResource::get() and ExecutableResource::release() was changed from ExecutableAgentCommon1 to ExecutableAgent.
+
+<b>Procedure:</b>
+The functions available from ExecutableResource have <b>NOT</b> changed at all.
+If you encounter a compilation problem with your use of ExecutableResource you will need to change your usage of the types ExecutableAgentCommon or ExecutableAgentCommon1 to instead use ExecutableAgent.
+</div>
+
+\subsubsection u425_to_430_ExporterResource ExporterResource
+<div style="margin-left: 3em">
+<b>Description:</b>
+The type returned from ExporterResource::get() and ExporterResource::release() was changed from ExportAgentCommon to ExportAgent.
+
+<b>Procedure:</b>
+The functions available from ExporterResource have <b>NOT</b> changed at all.
+If you encounter a compilation problem with your use of ExporterResource you will need to change your usage of the type ExportAgentCommon to instead use ExportAgent.
+</div>
+
+\subsubsection u425_to_430_GeoreferenceExt1 GeoreferenceExt1
+<div style="margin-left: 3em">
+<b>Description:</b>
+The GeoreferenceExt1 class was removed.
+The canExtrapolate() function was removed.
+It has been replaced by adding an additional argument to the pixelToGeo(), pixelToGeoQuick(), geoToPixel() and geoToPixelQuick() functions.
+The additional argument is optional, so any existing code that calls those four functions does not need to be changed.
+
+<b>Procedure:</b>
+
+The following code:
+\code
+Georeference* pTemp;
+bool extrapolate = dynamic_cast<GeoreferenceExt1*>(pTemp)->canExtrapolate();
+\endcode
+must be changed to:
+\code
+LocationType pixelLocation(0.0, 0.0);
+bool accurate = false;
+LocationType geoLocation = pTemp->pixelToGeo(pixelLocation, &accurate);
+// accurate = !extrapolate
+LocationType pixelLocation2 = pTemp->geoToPixel(geoLocation, &accurate);
+\endcode
+</div>
+
+\subsubsection u425_to_430_GeoreferenceShell GeoreferenceShell
+<div style="margin-left: 3em">
+<b>Description:</b>
+If you are providing a Georeference implementation by subclassing GeoreferenceShell, you must update your implementation to account for the fact that canExtrapolate() has been removed.
+
+<b>Procedure:</b>
+
+The following code:
+\code
+class MyGeoRef : public GeoreferenceShell
+{
+public:
+   bool canExtrapolate() const
+   {
+      return true;
+   }
+   LocationType pixelToGeo(LocationType pixel) const
+   {
+      LocationType geo = /* calculation here */;
+      return geo;
+   }
+   LocationType geoToPixel(LocationType geo) const
+   {
+      LocationType pixel = /* calculation here */;
+      return pixel;
+   }
+};
+\endcode
+must be changed to:
+\code
+class MyGeoRef : public GeoreferenceShell
+{
+public:
+   LocationType pixelToGeo(LocationType pixel, bool* pAccurate) const
+   {
+      if (pAccurate != NULL)
+      {
+         *pAccurate = true; // this can be more complex and determine whether the calculation can be performed with accuracy or not
+      }
+      LocationType geo = /* calculation here */;
+      return geo;
+   }
+   LocationType geoToPixel(LocationType geo, bool* pAccurate) const
+   {
+      if (pAccurate != NULL)
+      {
+         *pAccurate = true; // this can be more complex and determine whether the calculation can be performed with accuracy or not
+      }
+      LocationType pixel = /* calculation here */;
+      return pixel;
+   }
+};
+\endcode
+</div>
+
+\subsubsection u425_to_430_GraphicObjectExt1 GraphicObjectExt1
+<div style="margin-left: 3em">
+<b>Description:</b>
+The GraphicObjectExt1 class was removed.
+The getLayer() function was moved to GraphicObject.
+
+<b>Procedure:</b>
+
+The following code:
+\code
+GraphicObject* pTemp;
+GraphicLayer* pLayer = dynamic_cast<GraphicObjectExt1*>(pTemp)->getLayer();
+\endcode
+must be changed to:
+\code
+GraphicLayer* pLayer = pTemp->getLayer();
+\endcode
+</div>
+
+\subsubsection u425_to_430_HDF4_SUPPORT HDF4_SUPPORT
+<div style="margin-left: 3em">
+<b>Description:</b>
+The \#define HDF4_SUPPORT was removed.
+It was used before to identify those platforms that we supported HDF4 on (Solaris, Win32).
+%Opticks now supports Hdf4 on all available platforms (Solaris, Win32, Win64), so the \#define was removed.
+
+<b>Procedure:</b>
+If you were relying on the HDF4_SUPPORT define, please remove it from your code.
+</div>
+
+\subsubsection u425_to_430_HistogramPlotExt1 HistogramPlotExt1
+<div style="margin-left: 3em">
+<b>Description:</b>
+The HistogramPlotExt1 class was removed.
+The enableAutoZoom() and isAutoZoomEnabled() functions were moved to HistogramPlot.
+
+<b>Procedure:</b>
+
+The following code:
+\code
+HistogramPlot* pTemp;
+dynamic_cast<HistogramPlotExt1*>(pTemp)->enableAutoZoom();
+bool autoZoom = dynamic_cast<HistogramPlotExt1*>(pTemp)->isAutoZoomEnabled();
+\endcode
+must be changed to:
+\code
+pTemp->enableAutoZoom();
+bool autoZoom = pTemp->isAutoZoomEnabled();
+\endcode
+</div>
+
+\subsubsection u425_to_430_ImageFilterDescriptorExt1 ImageFilterDescriptorExt1
+<div style="margin-left: 3em">
+<b>Description:</b>
+The ImageFilterDescriptorExt1 class was removed.
+The setParameter(), getParameter(), getParameters() and removeParameter() functions were moved to ImageFilterDescriptor.
+
+<b>Procedure:</b>
+
+The following code:
+\code
+ImageFilterDescriptor* pTemp;
+bool isSet = dynamic_cast<ImageFilterDescriptorExt1*>(pTemp)->setParameter("foo", static_cast<int>(3));
+DataVariant dv = dynamic_cast<ImageFilterDescriptorExt1*>(pTemp)->getParameter("foo");
+DynamicObject* pParams = dynamic_cast<ImageFilterDescriptorExt1*>(pTemp)->getParameters();
+bool isRemoved = dynamic_cast<ImageFilterDescriptorExt1*>(pTemp)->removeParameter("foo");
+\endcode
+must be changed to:
+\code
+bool isSet = pTemp->setParameter("foo", static_cast<int>(3));
+DataVariant dv = pTemp->getParameter("foo");
+DynamicObject* pParams = pTemp->getParameters();
+bool isRemoved = pTemp->removeParameter("foo");
+\endcode
+</div>
+
+\subsubsection u425_to_430_ImportAgentExt1 ImportAgentExt1
+<div style="margin-left: 3em">
+<b>Description:</b>
+The ImportAgentExt1 class was removed.
+The functions on this class were moved to ImportAgent.
+</div>
+
+\subsubsection u425_to_430_ImportAgentCommon ImportAgentCommon
+<div style="margin-left: 3em">
+<b>Description:</b>
+The ImportAgentCommon class was removed.
+The functions on this class were moved to ImportAgent.
+</div>
+
+\subsubsection u425_to_430_EditType ImportAgentExt1::EditType
+<div style="margin-left: 3em">
+<b>Description:</b>
+The EditType enum has moved from the ImportAgentExt1 class to the ImportAgent class.
+
+<b>Procedure:</b>
+
+The following code:
+\code
+ImporterResource res;
+res->setEditType(ImportAgentExt1::ALWAYS_EDIT);
+\endcode
+must be changed to:
+\code
+res->setEditType(ImportAgent::ALWAYS_EDIT);
+\endcode
+</div>
+
+\subsubsection u425_to_430_ImpResAndAgent ImporterResource and ImportAgent
+<div style="margin-left: 3em">
+<b>Description:</b>
+The ability to import multiple files at a time instead of a single file was added to ImporterResource and ImportAgent for 4.3.0.
+This change resulted in the following:
+- Two changed constructors for ImporterResource (this includes two changed instantiate functions for ImportAgent).
+- setImportDescriptors() was replaced with setDatasets(), see the specific section for more details.
+- Removal of showOptionsDialog() and isOptionsDialogShown(), see the specific section for more details.
+- Addition of new functions and constructors, see ImporterResource and ImportAgent for complete documentation.
+
+<b>Procedure:</b>
+Two of the constructors for ImporterResource have changed, see below for upgrade procedures.
+
+The following code:
+\code
+std::vector<ImportDescriptor*> descriptors; //assume this was populated elsewhere
+ImporterResource res2("Auto Importer", descriptors, NULL, true);
+\endcode
+must be changed to:
+\code
+std::map<std::string, std::vector<ImportDescriptor*> > descriptors; //the key of the map is the filename, for each filename is a list of the datasets located in the file.
+ImporterResource res("Auto Importer", descriptors, NULL, true);
+\endcode
+
+The following code:
+\code
+PlugInResource pPlugIn("Auto Importer");
+std::vector<ImportDescriptor*> descriptors; //assume this was populated elsewhere
+ImporterResource res(pPlugIn.release(), descriptors, NULL, true);
+\endcode
+must be changed to:
+\code
+PlugInResource pPlugIn("Auto Importer");
+std::map<std::string, std::vector<ImportDescriptor*> > descriptors; //the key of the map is the filename, for each filename is a list of the datasets located in the file.
+ImporterResource res(pPlugIn.release(), descriptors);
+\endcode
+</div>
+
+\subsubsection u425_to_430_showOptionsDialog ImportAgent - showOptionsDialog
+<div style="margin-left: 3em">
+<b>Description:</b>
+The showOptionsDialog() function has been removed from ImportAgent.
+It was deprecated and was removed during the upgrade to 4.3.%X.
+
+<b>Procedure:</b>
+
+The following code:
+\code
+ImporterResource res;
+res->showOptionsDialog(true);
+res->showOptionsDialog(false);
+\endcode
+must be changed to:
+\code
+res->setEditType(ImportAgent::ALWAYS_EDIT); //equiv to res->showOptionsDialog(true);
+res->setEditType(ImportAgent::NEVER_EDIT); //equiv to res->showOptionsDialog(false);
+\endcode
+</div>
+
+\subsubsection u425_to_430_isOptionsDialogShown ImportAgent - isOptionsDialogShown
+<div style="margin-left: 3em">
+<b>Description:</b>
+The isOptionsDialogShown() function has been removed from ImportAgent.
+It was deprecated and was removed during the upgrade to 4.3.%X.
+
+<b>Procedure:</b>
+
+The following code:
+\code
+ImporterResource res;
+bool shown = res->isOptionsDialogShown();
+\endcode
+must be changed to:
+\code
+bool shown = (res->getEditType() == ImportAgent::ALWAYS_EDIT); //equiv to res->isOptionsDialogShown();
+\endcode
+</div>
+
+\subsubsection u425_to_430_setImportDescriptors ImportAgent - setImportDescriptors
+<div style="margin-left: 3em">
+<b>Description:</b>
+The setImportDescriptors() function has been removed from ImportAgent.
+It was replaced with setDatasets().
+
+<b>Procedure:</b>
+
+The following code:
+\code
+ImporterResource res;
+std::vector<ImportDescriptor*> descriptors = res->getImportDescriptors();
+// make changes to vector
+res->setImportDescriptors(descriptors);
+\endcode
+must be changed to:
+\code
+std::map<std::string, std::vector<ImportDescriptor*> > descriptors = res->getDatasets();
+// the getDatasets() return a map, the key is the filename and value for the filename is all of the datasets located in
+// the given file.
+// make changes to map
+res->setDatasets(descriptors);
+\endcode
+</div>
+
+\subsubsection u425_to_430_createMatrix MatrixFunctions::createMatrix
+<div style="margin-left: 3em">
+<b>Description:</b>
+The signature of MatrixFunctions::createMatrix() was changed.
+Previously the pInitialData argument could be omitted because a default argument value was defined.
+The default argument value for the pInitialData parameter was removed.
+This was because the code was improperly following the C++ standard by providing a default argument value for a const T* argument.
+%Any code relying on the default argument value, must now provide an explicit value for the pInitialData argument before calling MatrixFunctions::createMatrix().
+
+<b>Procedure:</b>
+
+The following code:
+\code
+int** pTemp = MatrixFunctions::createMatrix<int>(2, 2);
+\endcode
+must be changed to:
+\code
+int** pTemp = MatrixFunctions::createMatrix<int>(2, 2, NULL);
+\endcode
+</div>
+
+\subsubsection u425_to_430_MenuBar MenuBar
+<div style="margin-left: 3em">
+<b>Description:</b>
+The MenuBar destructor was made protected.
+
+<b>Procedure:</b>
+If you have any affected code, it was improperly written because the lifetime of MenuBar has always been managed exclusively by the application.
+</div>
+
+\subsubsection u425_to_430_isValidForExport Nitf::isClassificationValidForExport
+<div style="margin-left: 3em">
+<b>Description:</b>
+The signature of Nitf::isClassificationValidForExport() was changed.
+Previously the errorMessage argument could be omitted because a default argument value was defined.
+The default argument value for the errorMessage parameter was removed.
+This was because the code was improperly following the C++ standard by providing a default argument value for a non-const reference argument.
+%Any code relying on the default argument value, must now provide an explicit value for the errorMessage argument before calling Nitf::isClassificationValidForExport().
+
+<b>Procedure:</b>
+
+The following code:
+\code
+Classification classification;
+bool isValid = Nitf::isClassificationValidForExport(classification);
+\endcode
+must be changed to:
+\code
+std::string errorMessage;
+bool isValid = Nitf::isClassificationValidForExport(classification, errorMessage);
+\endcode
+</div>
+
+\subsubsection u425_to_430_PageCache PageCache
+<div style="margin-left: 3em">
+<b>Description:</b>
+The PageCache constructor was changed from taking a "const int" parameter to taking a "const size_t" parameter.
+
+<b>Procedure:</b>
+If you have any code that depends on the type being int, your code will need to be changed.
+</div>
+
+\subsubsection u425_to_430_PlotViewExt1 PlotViewExt1
+<div style="margin-left: 3em">
+<b>Description:</b>
+The PlotViewExt1 class was removed.
+The setExtentsMargin() and getExtentsMargin() functions were moved to PlotView.
+
+<b>Procedure:</b>
+
+The following code:
+\code
+PlotView* pTemp;
+dynamic_cast<PlotViewExt1*>(pTemp)->setExtentsMargin(1.0);
+double margin = dynamic_cast<PlotViewExt1*>(pTemp)->getExtentsMargin();
+\endcode
+must be changed to:
+\code
+pTemp->setExtentsMargin(1.0);
+double margin = pTemp->getExtentsMargin();
+\endcode
+</div>
+
+\subsubsection u425_to_430_PlugInDescriptor PlugInDescriptor
+<div style="margin-left: 3em">
+<b>Description:</b>
+The getMenuIcon() function was removed.
+Since PlugInDescriptor inherits SessionItem, SessionItem::getIcon() can be used as a replacement.
+
+<b>Procedure:</b>
+
+The following code:
+\code
+PlugInDescriptor* pTemp;
+const char** pIcon = pTemp->getMenuIcon();
+\endcode
+must be changed to:
+\code
+const QIcon& icon = pTemp->getIcon();
+\endcode
+</div>
+
+\subsubsection u425_to_430_PlugInFactory PlugInFactory
+<div style="margin-left: 3em">
+<b>Description:</b>
+The "PlugInFactory.h" and corresponding macro's (PLUGINFACTORY, PLUGINFACTORY_OPTIONWRAPPER, PLUGINFACTORY_PROPERTIESWRAPPER) were removed.
+They have been replaced by the "PlugInRegistration.h" and new macro's.
+
+<b>Procedure:</b>
+The following code:
+\code
+#include "PlugInFactory.h"
+PLUGINFACTORY(MyPlugIn);
+PLUGINFACTORY_OPTIONWRAPPER(MyOptionPlugIn);
+PLUGINFACTORY_PROPERTIESWRAPPER(MyPropertyPlugIn);
+\endcode
+must be changed to:
+\code
+#include "PlugInRegistration.h"
+#include "OptionQWidgetWrapper.h"
+#include "PropertiesQWidgetWrapper.h"
+
+//Assume REGISTER_MODULE(MyModule) has been elsewhere in the plug-in library (.dll, .so)
+REGISTER_PLUGIN_BASIC(MyModule, MyPlugIn);
+REGISTER_PLUGIN(MyModule, MyOptionPlugIn, OptionQWidgetWrapper<MyOptionPlugIn>());
+REGISTER_PLUGIN(MyModule, MyPropertyPlugIn, PropertiesQWidgetWrapper<MyPropertyPlugIn>());
+\endcode
+</div>
+
+\subsubsection u425_to_430_rotateAndFlip RasterElement::rotateAndFlip
+<div style="margin-left: 3em">
+<b>Description:</b>
+The rotateAndFlip function of RasterElement was removed.
+It has <b>not</b> been replaced.
+
+<b>Procedure:</b>
+%Any code calling RasterElement::rotateAndFlip() must implement it's own rotate and flip.
+</div>
+
+\subsubsection u425_to_430_transpose RasterElement::transpose
+<div style="margin-left: 3em">
+<b>Description:</b>
+The transpose function of RasterElement was removed.
+It has <b>not</b> been replaced.
+
+<b>Procedure:</b>
+%Any code calling RasterElement::transpose() must implement it's own transpose.
+</div>
+
+\subsubsection u425_to_430_SessionItemDeserializerExt1 SessionItemDeserializerExt1
+<div style="margin-left: 3em">
+<b>Description:</b>
+The SessionItemDeserializerExt1 class was removed.
+The getCurrentBlock() function was moved to SessionItemDeserializer.
+
+<b>Procedure:</b>
+
+The following code:
+\code
+SessionItemDeserializer* pTemp;
+int block = dynamic_cast<SessionItemDeserializerExt1*>(pTemp)->getCurrentBlock();
+\endcode
+must be changed to:
+\code
+int block = pTemp->getCurrentBlock();
+\endcode
+</div>
+
+\subsubsection u425_to_430_SessionItemDeserializer SessionItemDeserializer
+<div style="margin-left: 3em">
+<b>Description:</b>
+The destructor of SessionItemDeserializer was made protected.
+
+<b>Procedure:</b>
+If you have any affected code, it was improperly written because the lifetime of SessionItemDeserializer has always been managed exclusively by the SessionManager.
+</div>
+
+\subsubsection u425_to_430_SessionItemSerializer SessionItemSerializer
+<div style="margin-left: 3em">
+<b>Description:</b>
+The destructor of SessionItemSerializer was made protected.
+
+<b>Procedure:</b>
+If you have any affected code, it was improperly written because the lifetime of SessionItemSerializer has always been managed exclusively by the SessionManager.
+</div>
+
+\subsubsection u425_to_430_SignatureSelector SignatureSelector
+<div style="margin-left: 3em">
+<b>Description:</b>
+The loadSignatures() function of SignatureSelector was removed.
+You can replace the capability using ImporterResource.
+
+<b>Procedure:</b>
+
+The following code:
+\code
+SignatureSelector selector(NULL);
+QStringList filenames;
+filenames << "test1.sig";
+std::vector<Signature*> sigs = selector.loadSignatures(filenames, NULL);
+\endcode
+must be changed to:
+\code
+std::vector<std::string> filenames;
+filenames.push_back("test1.sig");
+ImporterResource res("Auto Importer", filenames);
+res.execute();
+std::vector<DataElement*> elems = res.getImportedElements();
+std::vector<Signature*> sigs;
+for (std::vector<DataElement*>::iterator iter = elems.begin(); iter != elems.end(); ++iter)
+{
+   if (dynamic_cast<Signature*>(*iter) != NULL)
+   {
+      sigs.push_back(dynamic_cast<Signature*>(*iter));
+   }
+}
+\endcode
+</div>
+
+\subsubsection u425_to_430_StringUtilitiesMacros StringUtilitiesMacros.h
+<div style="margin-left: 3em">
+<b>Description:</b>
+The macros provided in StringUtilitiesMacros.h are now required to be surrounded by a namespace declaration for StringUtilities.
+The list of affected macros is listed below:
+
+- ENUM_MAPPING_TO_DISPLAY_STRING
+- ENUM_MAPPING_TO_DISPLAY_STRING_VEC
+- ENUM_MAPPING_TO_XML_STRING
+- ENUM_MAPPING_TO_XML_STRING_VEC
+- ENUM_MAPPING_FROM_DISPLAY_STRING
+- ENUM_MAPPING_FROM_DISPLAY_STRING_VEC
+- ENUM_MAPPING_FROM_XML_STRING
+- ENUM_MAPPING_FROM_XML_STRING_VEC
+- ENUM_GET_ALL_VALUES
+- ENUM_GET_ALL_VALUES_DISPLAY_STRING
+- ENUM_GET_ALL_VALUES_XML_STRING
+- BEGIN_ENUM_MAPPING_ALIAS
+- BEGIN_ENUM_MAPPING
+- STRINGSTREAM_MAPPING_TO_XML_STRING
+- STRINGSTREAM_MAPPING_TO_XML_STRING_CAST
+- STRINGSTREAM_MAPPING_TO_XML_STRING_VEC
+- STRINGSTREAM_MAPPING_TO_DISPLAY_STRING
+- STRINGSTREAM_MAPPING_TO_DISPLAY_STRING_CAST
+- STRINGSTREAM_MAPPING_TO_DISPLAY_STRING_VEC
+- STRINGSTREAM_MAPPING_FROM_XML_STRING
+- STRINGSTREAM_MAPPING_FROM_XML_STRING_CAST
+- STRINGSTREAM_MAPPING_FROM_XML_STRING_VEC
+- STRINGSTREAM_MAPPING_FROM_DISPLAY_STRING
+- STRINGSTREAM_MAPPING_FROM_DISPLAY_STRING_CAST
+- STRINGSTREAM_MAPPING_FROM_DISPLAY_STRING_VEC
+- STRINGSTREAM_MAPPING_PRECISION
+- STRINGSTREAM_MAPPING
+- STRINGSTREAM_MAPPING_PRECISION_CAST
+- STRINGSTREAM_MAPPING_CAST
+- TO_DISPLAY_POINTER_VARIATIONS
+- TO_XML_POINTER_VARIATIONS
+
+This change is required to better support other compilers.
+
+<b>Procedure:</b>
+
+The following code:
+\code
+BEGIN_ENUM_MAPPING(AoiAddMode)
+ADD_ENUM_MAPPING(APPEND_AOI, "Append", "Append")
+ADD_ENUM_MAPPING(REPLACE_AOI, "Replace", "Replace")
+ADD_ENUM_MAPPING(NEW_AOI, "New", "New")
+END_ENUM_MAPPING()
+\endcode
+must be changed to:
+\code
+namespace StringUtilities
+{
+BEGIN_ENUM_MAPPING(AoiAddMode)
+ADD_ENUM_MAPPING(APPEND_AOI, "Append", "Append")
+ADD_ENUM_MAPPING(REPLACE_AOI, "Replace", "Replace")
+ADD_ENUM_MAPPING(NEW_AOI, "New", "New")
+END_ENUM_MAPPING()
+};
+\endcode
+</div>
+
+\subsubsection u425_to_430_ToolBarExt1 ToolBarExt1
+<div style="margin-left: 3em">
+<b>Description:</b>
+The ToolBarExt1 class was removed.
+The isShown(), show(), and hide() functions were moved to ToolBar.
+
+<b>Procedure:</b>
+
+The following code:
+\code
+ToolBar* pTemp;
+bool isShown = dynamic_cast<ToolBarExt1*>(pTemp)->isShown();
+dynamic_cast<ToolBarExt1*>(pTemp)->show();
+dynamic_cast<ToolBarExt1*>(pTemp)->hide();
+\endcode
+must be changed to:
+\code
+bool isShown = pTemp->isShown();
+pTemp->show();
+pTemp->hide();
+\endcode
+</div>
+
+\subsubsection u425_to_430_UtilityServicesExt1 UtilityServicesExt1
+<div style="margin-left: 3em">
+<b>Description:</b>
+The UtilityServicesExt1 class was removed.
+The getFileControls(), getFileDowngrades(), getDeclassificationTypes(), getClassificationReasons(), getDeclassificationExemptions(), getFileReleasing(), getCountryCodes(), getSystems(), and getCodewords() functions have been moved to UtilityServices.
+
+<b>Procedure:</b>
+
+The following code:
+\code
+Service<UtilityServices> pServices;
+std::vector<std::string> controls = dynamic_cast<UtilityServicesExt1*>(pServices.get())->getFileControls();
+std::vector<std::string> downgrades = dynamic_cast<UtilityServicesExt1*>(pServices.get())->getFileDowngrades();
+std::vector<std::string> declassTypes = dynamic_cast<UtilityServicesExt1*>(pServices.get())->getDeclassificationTypes();
+std::vector<std::string> classReasons = dynamic_cast<UtilityServicesExt1*>(pServices.get())->getClassificationReasons();
+std::vector<std::string> declassEx = dynamic_cast<UtilityServicesExt1*>(pServices.get())->getDeclassificationExemptions();
+std::vector<std::string> fileRelease = dynamic_cast<UtilityServicesExt1*>(pServices.get())->getFileReleasing();
+std::vector<std::string> countryCodes = dynamic_cast<UtilityServicesExt1*>(pServices.get())->getCountryCodes();
+std::vector<std::string> systems = dynamic_cast<UtilityServicesExt1*>(pServices.get())->getSystems();
+std::vector<std::string> codewords = dynamic_cast<UtilityServicesExt1*>(pServices.get())->getCodewords();
+\endcode
+must be changed to:
+\code
+Service<UtilityServices> pServices;
+std::vector<std::string> controls = pServices->getFileControls();
+std::vector<std::string> downgrades = pServices->getFileDowngrades();
+std::vector<std::string> declassTypes = pServices->getDeclassificationTypes();
+std::vector<std::string> classReasons = pServices->getClassificationReasons();
+std::vector<std::string> declassEx = pServices->getDeclassificationExemptions();
+std::vector<std::string> fileRelease = pServices->getFileReleasing();
+std::vector<std::string> countryCodes = pServices->getCountryCodes();
+std::vector<std::string> systems = pServices->getSystems();
+std::vector<std::string> codewords = pServices->getCodewords();
+\endcode
+</div>
+
+\subsubsection u425_to_430_ViewExt1 ViewExt1
+<div style="margin-left: 3em">
+<b>Description:</b>
+The ViewExt1 class was removed.
+The enableClassification() function has been moved to View.
+
+<b>Procedure:</b>
+
+The following code:
+\code
+View* pTemp;
+dynamic_cast<ViewExt1*>(pTemp)->enableClassification(true);
+dynamic_cast<ViewExt1*>(pTemp)->enableClassification(false);
+\endcode
+must be changed to:
+\code
+pTemp->enableClassification(true);
+pTemp->enableClassification(false);
+\endcode
+</div>
+
+\subsubsection u425_to_430_WizardNodeExt1 WizardNodeExt1
+<div style="margin-left: 3em">
+<b>Description:</b>
+The WizardNodeExt1 class was removed.
+The getDescription() function has been moved to WizardNode.
+
+<b>Procedure:</b>
+
+The following code:
+\code
+WizardNode* pTemp;
+string desc = dynamic_cast<WizardNodeExt1*>(pTemp)->getDescription();
+\endcode
+must be changed to:
+\code
+string desc = pTemp->getDescription();
+\endcode
+</div>
+
+*/

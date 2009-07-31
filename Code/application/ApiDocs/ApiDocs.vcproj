@@ -181,6 +181,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\upgrade_sdk.txt"
+				>
+			</File>
+			<File
 				RelativePath=".\usingimporterresource.txt"
 				>
 			</File>

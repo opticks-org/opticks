@@ -26,6 +26,7 @@
 - \subpage howto_customdraganddrop
 
 \section overview_detailed Detailed Docs 
+- \subpage upgrade_sdk
 - \subpage coordinate_systems
 - \subpage iceformat
 - \subpage specialmetadata

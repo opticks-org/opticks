@@ -31,6 +31,9 @@ When creating your own plug-in, you'll need to:
  -# Register your plug-in with the application, see \ref register_plugin.
  -# Compile your plug-in, see \ref howto_compileplugins.
  -# Run your plug-in with %Opticks, see \ref runningplugins.
+ 
+\section main_upgrading_sdk Upgrading From an Earlier SDK
+If you have already written a plug-in for an earlier version of the SDK, please read \ref upgrade_sdk for details on upgrading to this version of the SDK.
 
 \section main_more_help More Help
 

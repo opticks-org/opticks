@@ -11,11 +11,11 @@
  Depending on the message type, there will be an icon displayed to the left of the message telling the user its type. 
  
  If a plug-in developer wanted to give the user more control on whether the message dialog is displayed, an option can be added to a custom Option plug-in.
- For a example on how this would be done, take a look at the OptionsSuppressibleMsgDlg class located in PlugInSamplerQt.
+ For an example on how this would be done, take a look at the OptionsSuppressibleMsgDlg class located in PlugInSamplerQt.
  
  To use this suppressible message dialog in Opticks, you can just call the DesktopServices::showSuppressibleMsgDlg method.
  
- Here's a example on creating a suppressible message dialog:
+ Here's an example on creating a suppressible message dialog:
  \code
  Service<DesktopServices> pDesktop;
  pDesktop->showSuppressibleMsgDlg("Test Dialog", "This is a test.", MESSAGE_INFO, "{CD378586-534C-4fdc-9AC5-325241C688E0}", this);
