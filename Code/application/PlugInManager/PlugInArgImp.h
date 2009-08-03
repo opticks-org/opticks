@@ -17,6 +17,8 @@
 #include <string>
 #include <vector>
 
+class QDataStream;
+
 /**
  * PlugIn Argument
  *
@@ -141,6 +143,9 @@ public:
     *  @return   A vector of strings specifying the name of each known arg type.
     */
    static const std::vector<std::string>& getArgTypes();
+
+   static PlugInArgImp* fromSettings(QDataStream& reader);
+   bool updateSettings(QDataStream& writer) const;
 
 protected:
    static void initArgTypes();

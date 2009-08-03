@@ -20,6 +20,11 @@
 
 class PlugIn;
 
+#define MOD_ZERO 0
+#define MOD_ONE 1
+#define MOD_TWO 2
+#define MOD_THREE 3
+
 #if defined(DEPRECATED_MODULE_TYPE)
 
 #define REGISTER_MODULE_BASIC(name__, moduleNamespace__) \
@@ -28,6 +33,7 @@ class PlugIn;
       sizeof(YouCannotUseThisMacroWith_DEPRECATED_MODULE_TYPE_defined);
 
 #define REGISTER_MODULE(name__) REGISTER_MODULE_BASIC(1, 1)
+#define REGISTER_NON_CACHED_MODULE REGISTER_MODULE_BASIC(1, 1)
 #define REGISTER_DYNAMIC_MODULE(name__, dynamicFactoryClass__) REGISTER_MODULE_BASIC(1, 1)
 #define REGISTER_PLUGIN(moduleNamespace__, pluginname__, className__) REGISTER_MODULE_BASIC(1, 1)
 #define REGISTER_PLUGIN_BASIC(moduleNamespace__, name__) REGISTER_MODULE_BASIC(1, 1)
@@ -38,11 +44,11 @@ class PlugIn;
 
 /**
  * \cond INTERNAL
- * This struct contains information about a version 2 plug-in module.
+ * This struct contains information about a version 3 plug-in module.
  */
 struct OpticksModuleDescriptor
 {
-   unsigned int version;           /**< The version of this descriptor structure. This should be 2. */
+   unsigned int version;           /**< The version of this descriptor structure. This should be 3. */
    const char* pModuleId;          /**< A globally unique ID that identifies this module. this
                                         should be guarenteed unique to an instance of the application
                                         and it should not change between runs of the application for
@@ -51,6 +57,8 @@ struct OpticksModuleDescriptor
    bool debug;                     /**< True if this module contains debug plug-ins and
                                         false if thaey are release plug-ins. Certains systems may
                                         refuse to load plug-ins with mismatched debug flags. */
+   bool cacheable;                  /**< True if the information about this module and it's plug-ins
+                                         can be cached between application runs. */
 };
 /// \endcond
 
@@ -73,13 +81,16 @@ typedef bool(*OpticksInstantiateType)(External*, unsigned int, PlugIn**);
 #else
 #define DEBUG_BOOL false
 #endif
-#define REGISTER_MODULE_BASIC(name__, moduleNamespace__) \
-   extern "C" { \
-      struct OpticksModuleDescriptor name__##Descriptor = { \
-         2, \
+#define REGISTER_MODULE_BASIC(name__, moduleNamespace__, canCache__, modVersion__) \
+   extern "C" \
+   { \
+      struct OpticksModuleDescriptor name__##Descriptor = \
+      { \
+         modVersion__, \
          #name__, \
          #name__ "InstantiatePlugIn", \
-         DEBUG_BOOL \
+         DEBUG_BOOL, \
+         canCache__ \
       }; \
       LINKAGE struct OpticksModuleDescriptor* opticks_get_module_descriptor(External*) \
       { \
@@ -98,15 +109,27 @@ typedef bool(*OpticksInstantiateType)(External*, unsigned int, PlugIn**);
    const char* ModuleManager::mspValidationKey = NULL; \
    const char* ModuleManager::mspUniqueId = NULL; \
    unsigned int ModuleManager::getTotalPlugIns() { return 0; } \
-   PlugIn* ModuleManager::getPlugIn(unsigned int) { return NULL; } \
+   PlugIn* ModuleManager::getPlugIn(unsigned int) { return NULL; }
+
+#define REGISTER_NON_CACHED_MODULE(name__) \
+   GENERATE_FACTORY(name__) \
+   REGISTER_MODULE_BASIC(name__, name__, false, MOD_THREE)
 
 #define REGISTER_MODULE(name__) \
    GENERATE_FACTORY(name__) \
-   REGISTER_MODULE_BASIC(name__, name__)
+   REGISTER_MODULE_BASIC(name__, name__, true, MOD_THREE)
 
 #define REGISTER_DYNAMIC_MODULE(name__, dynamicFactoryClass__) \
    GENERATE_DYNAMIC_FACTORY(name__, dynamicFactoryClass__) \
-   REGISTER_MODULE_BASIC(name__, name__) 
+   REGISTER_MODULE_BASIC(name__, name__, false, MOD_THREE) 
+
+#define REGISTER_V2_MODULE(name__) \
+   GENERATE_FACTORY(name__) \
+   REGISTER_MODULE_BASIC(name__, name__, true, MOD_TWO)
+
+#define REGISTER_V2_DYNAMIC_MODULE(name__, dynamicFactoryClass__) \
+   GENERATE_DYNAMIC_FACTORY(name__, dynamicFactoryClass__) \
+   REGISTER_MODULE_BASIC(name__, name__, false, MOD_TWO) 
 
 class PlugIn;
 class PlugInFactory;
@@ -562,7 +585,6 @@ public:
     *  to plug-ins for each time the module is queried for its plug-in count.
     *  If this module has dynamically defined plug-ins, the mapping of plug-in
     *  number to plug-in must remain constant until getTotalPlugIns() is called
-
     *
     *  @param   plugInNumber
     *           The plug-in to create within the module.  The number of the

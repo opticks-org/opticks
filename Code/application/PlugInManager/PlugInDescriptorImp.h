@@ -17,10 +17,12 @@
 #include <string>
 #include <vector>
 
+class DynamicObject;
 class PlugIn;
 class PlugInArgList;
 class Progress;
 class ProgressAdapter;
+class QDataStream;
 
 /**
  *  Describes a plug-in.
@@ -160,8 +162,13 @@ public:
     */
    virtual bool deserialize(SessionItemDeserializer& deserializer);
 
+   static PlugInDescriptorImp* fromSettings(QDataStream& reader);
+   bool updateSettings(QDataStream& writer) const;
+
 private:
    void destroyPlugIns();
+
+   bool populateFromSettings(QDataStream& reader);
 
    std::string mModuleName;
    std::string mModuleFilename;

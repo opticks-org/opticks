@@ -7,16 +7,20 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtCore/QDataStream>
+#include <QtCore/QString>
 #include <QtGui/QIcon>
 
 #include "ApplicationServices.h"
-#include "PlugInDescriptorImp.h"
+#include "DynamicObjectAdapter.h"
 #include "Executable.h"
 #include "Exporter.h"
 #include "Importer.h"
 #include "Interpreter.h"
+#include "ModuleDescriptor.h"
 #include "PlugIn.h"
-#include "PlugInArgList.h"
+#include "PlugInArgListImp.h"
+#include "PlugInDescriptorImp.h"
 #include "PlugInManagerServices.h"
 #include "ProgressAdapter.h"
 #include "PropertiesPlugInDescriptor.h"
@@ -492,6 +496,173 @@ void PlugInDescriptorImp::destroyPlugIns()
 
    // Clear the map
    mPlugIns.clear();
+}
+
+bool PlugInDescriptorImp::updateSettings(QDataStream& writer) const
+{
+   if (!getIcon().isNull())
+   {
+      //since the state of a non NULL QIcon cannot
+      //be serialized/de-serialized, we can't
+      //write it to the QDataStream, therefore
+      //we can't cache this PlugInDescriptorImp,
+      //so return false.
+      return false;
+   }
+
+   writer << QString::fromStdString(getId());
+   writer << QString::fromStdString(getName());
+   writer << QString::fromStdString(mModuleName);
+   writer << QString::fromStdString(mModuleFilename);
+   writer << mPlugInNumber;
+   writer << QString::fromStdString(mVersion);
+   writer << mProductionStatus;
+   writer << QString::fromStdString(mCreator);
+   writer << QString::fromStdString(mCopyright);
+   writer << QString::fromStdString(mDescription);
+   writer << QString::fromStdString(mShortDescription);
+   writer << QString::fromStdString(mType);
+   writer << QString::fromStdString(mSubtype);
+   writer << mAllowMultipleInstances;
+   writer << mExecutableInterface;
+   writer << mExecuteOnStartup;
+   writer << mDestroyAfterExecute;
+   writer << static_cast<quint64>(mMenuLocations.size());
+   for (vector<string>::const_iterator locationIter = mMenuLocations.begin();
+        locationIter != mMenuLocations.end(); ++locationIter)
+   {
+      writer << QString::fromStdString(*locationIter);
+   }
+   writer << mAbort;
+   writer << mWizardSupport;
+   writer << mBatchSupport;
+   writer << mInteractiveSupport;
+   writer << mImporterInterface;
+   writer << mExporterInterface;
+   writer << mInterpreterInterface;
+   writer << QString::fromStdString(mFileExtensions);
+   writer << mTestableInterface;
+   writer << mTestable;
+
+   writer << static_cast<quint64>(mDependencyCopyright.size());
+   map<string,string>::const_iterator pCopyrights;
+   for (pCopyrights = mDependencyCopyright.begin(); pCopyrights != mDependencyCopyright.end(); ++pCopyrights)
+   {
+      writer << QString::fromStdString(pCopyrights->first);
+      writer << QString::fromStdString(pCopyrights->second);
+   }
+
+   vector<PlugInArgList*> lists(4);
+   lists[0] = mpBatchInArgList;
+   lists[1] = mpInteractiveInArgList;
+   lists[2] = mpBatchOutArgList;
+   lists[3] = mpInteractiveOutArgList;
+   for (vector<PlugInArgList*>::iterator pListIter = lists.begin();
+        pListIter != lists.end(); ++pListIter)
+   {
+      if (*pListIter == NULL)
+      {
+         writer << false;
+      }
+      else
+      {
+         writer << true;
+         if (!static_cast<PlugInArgListImp*>(*pListIter)->updateSettings(writer))
+         {
+            return false;
+         }
+      }
+   }
+
+   return true;
+}
+
+PlugInDescriptorImp* PlugInDescriptorImp::fromSettings(QDataStream& reader)
+{
+   QString id;
+   READ_FROM_STREAM(id);
+   auto_ptr<PlugInDescriptorImp> pDescriptor (new PlugInDescriptorImp(id.toStdString(), NULL));
+   bool success = pDescriptor->populateFromSettings(reader);
+   if (success)
+   {
+      return pDescriptor.release();
+   }
+   return NULL;
+}
+
+
+bool PlugInDescriptorImp::populateFromSettings(QDataStream& reader)
+{
+   string name;
+   READ_STR_FROM_STREAM(name);
+   setName(name);
+   READ_STR_FROM_STREAM(mModuleName);
+   READ_STR_FROM_STREAM(mModuleFilename);
+   READ_FROM_STREAM(mPlugInNumber);
+   READ_STR_FROM_STREAM(mVersion);
+   READ_FROM_STREAM(mProductionStatus);
+   READ_STR_FROM_STREAM(mCreator);
+   READ_STR_FROM_STREAM(mCopyright);
+   READ_STR_FROM_STREAM(mDescription);
+   READ_STR_FROM_STREAM(mShortDescription);
+   READ_STR_FROM_STREAM(mType);
+   READ_STR_FROM_STREAM(mSubtype);
+   READ_FROM_STREAM(mAllowMultipleInstances);
+   READ_FROM_STREAM(mExecutableInterface);
+   READ_FROM_STREAM(mExecuteOnStartup);
+   READ_FROM_STREAM(mDestroyAfterExecute);
+   quint64 numMenuLocations;
+   READ_FROM_STREAM(numMenuLocations);
+   for (quint64 count = 0; count < numMenuLocations; ++count)
+   {
+      string menuLocation;
+      READ_STR_FROM_STREAM(menuLocation);
+      mMenuLocations.push_back(menuLocation);
+   }
+   READ_FROM_STREAM(mAbort);
+   READ_FROM_STREAM(mWizardSupport);
+   READ_FROM_STREAM(mBatchSupport);
+   READ_FROM_STREAM(mInteractiveSupport);
+   READ_FROM_STREAM(mImporterInterface);
+   READ_FROM_STREAM(mExporterInterface);
+   READ_FROM_STREAM(mInterpreterInterface);
+   READ_STR_FROM_STREAM(mFileExtensions);
+   READ_FROM_STREAM(mTestableInterface);
+   READ_FROM_STREAM(mTestable);
+   quint64 numCopyrights;
+   READ_FROM_STREAM(numCopyrights);
+   for (quint64 count = 0; count < numCopyrights; ++count)
+   {
+      string key;
+      string value;
+      READ_STR_FROM_STREAM(key);
+      READ_STR_FROM_STREAM(value);
+      mDependencyCopyright.insert(make_pair(key, value));
+   }
+   vector<PlugInArgList**> lists(4);
+   lists[0] = &mpBatchInArgList;
+   lists[1] = &mpInteractiveInArgList;
+   lists[2] = &mpBatchOutArgList;
+   lists[3] = &mpInteractiveOutArgList;
+
+   for (vector<PlugInArgList**>::iterator pListIter = lists.begin();
+        pListIter != lists.end(); ++pListIter)
+   {
+      PlugInArgList** pVal = *pListIter;
+      *pVal = NULL;
+      bool haveArgList;
+      READ_FROM_STREAM(haveArgList);
+      if (!haveArgList)
+      {
+         continue;
+      }
+      *pVal = PlugInArgListImp::fromSettings(reader);
+      if (*pVal == NULL)
+      {
+         return false;
+      }
+   }
+   return true;
 }
 
 bool PlugInDescriptorImp::serialize(SessionItemSerializer& serializer) const

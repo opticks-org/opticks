@@ -14,6 +14,7 @@
 #include "PlugInDescriptorImp.h"
 #include "PlugInManagerServicesImp.h"
 #include "PlugInModel.h"
+#include "PlugInRegistration.h"
 #include "Slot.h"
 
 using namespace std;
@@ -161,7 +162,7 @@ void PlugInModel::addModuleItem(ModuleDescriptor* pModule)
    SessionItemWrapper* pModuleWrapper = pRootWrapper->addChild(pModule);
    if (pModuleWrapper != NULL)
    {
-      if (pModule->getModuleVersion() == 1)
+      if (pModule->getModuleVersion() == MOD_ONE)
       {
          pModuleWrapper->setDisplayColor(Qt::blue);
       }

@@ -13,13 +13,17 @@
 #include "CoreModuleDescriptor.h"
 #include "DataVariant.h"
 #include "DynamicModuleImp.h"
+#include "DynamicObjectAdapter.h"
 #include "FileFinderImp.h"
 #include "FilenameImp.h"
+#include "FileResource.h"
 #include "ModuleDescriptor.h"
+#include "ObjectResource.h"
 #include "PlugIn.h"
 #include "PlugInArgImp.h"
 #include "PlugInArgListImp.h"
 #include "PlugInDescriptorImp.h"
+#include "PlugInRegistration.h"
 #include "PlugInResource.h"
 #include "Progress.h"
 #include "StringUtilities.h"
@@ -27,6 +31,11 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+
+#include <QtCore/QDateTime>
+#include <QtCore/QFileInfo>
+#include <QtCore/QString>
+
 using namespace std;
 
 class SettableSessionItem;
@@ -340,16 +349,24 @@ void PlugInManagerServicesImp::buildPlugInList(const string& plugInPath)
       return;
    }
 
-   FileFinderImp finder;
+   FactoryResource<DynamicObject> pPlugInCache;
+   if (PlugInManagerServicesImp::getSettingCachePlugInInformation())
+   {
+      pPlugInCache = loadPlugInListCache();
+   }
 
-   // Search plug-in directory for modules
 #if defined(WIN_API)
-   finder.findFile(plugInPath, "*.dll");
+   string dlExtension = ".dll";
 #elif defined(UNIX_API)
-   finder.findFile(plugInPath, "*.so");
+   string dlExtension = ".so";
 #else
 #error "Unsupported platform"
 #endif
+
+   FileFinderImp finder;
+
+   // Search plug-in directory for modules
+   finder.findFile(plugInPath, "*"+ dlExtension);
 
    // Remove modules from the list that no longer exist
    vector<ModuleDescriptor*> removedModules;
@@ -397,15 +414,8 @@ void PlugInManagerServicesImp::buildPlugInList(const string& plugInPath)
    }
 
    // Add new modules and update existing modules
-#if defined(WIN_API)
-   string autoImporter = "AutoImporter.dll";
-   finder.findFile(plugInPath, "*.dll");
-#elif defined(UNIX_API)
-   string autoImporter = "AutoImporter.so";
-   finder.findFile(plugInPath, "*.so");
-#else
-#error "Unsupported platform"
-#endif
+   string autoImporter = "AutoImporter" + dlExtension;
+   finder.findFile(plugInPath, "*" + dlExtension);
 
    bool bSuccess = finder.findNextFile();
 
@@ -469,7 +479,7 @@ void PlugInManagerServicesImp::buildPlugInList(const string& plugInPath)
       // Add the module if necessary
       if (bAddModule == true)
       {
-         pModule = addModule(moduleFilename, plugInIds);
+         pModule = addModule(moduleFilename, pPlugInCache.get(), plugInIds);
          if (pModule != NULL)
          {
             // disallow multiple modules with the same id
@@ -491,7 +501,7 @@ void PlugInManagerServicesImp::buildPlugInList(const string& plugInPath)
    }
 
    //load AutoImporter as the last plug-in, so that it can
-   //properly determine it's extensions based upon extensions
+   //properly determine its extensions based upon extensions
    //of all other importers.
    if (finder.findFile(plugInPath, autoImporter) == true)
    {
@@ -505,10 +515,15 @@ void PlugInManagerServicesImp::buildPlugInList(const string& plugInPath)
          {
             removeModule(pModule, plugInIds);
          }
-
-         addModule(autoImporterPath, plugInIds);
+         //can't use cache because AutoImporter determines
+         //its extensions by querying all of the other
+         //loaded importers
+         addModule(autoImporterPath, NULL, plugInIds);
       }
    }
+
+   savePlugInListCache();
+
    ConfigurationSettingsImp::instance()->updateProductionStatus();
 }
 
@@ -764,20 +779,6 @@ bool PlugInManagerServicesImp::destroyPlugInArgList(PlugInArgList* pArgList)
       return false;
    }
 
-   int iCount = pArgList->getCount();
-   for (int i = 0; i < iCount; i++)
-   {
-      PlugInArg* pArg = NULL;
-      if (pArgList->getArg(i, pArg) == true)
-      {
-         delete static_cast<PlugInArgImp*>(pArg);
-      }
-      else
-      {
-         return false;
-      }
-   }
-
    delete static_cast<PlugInArgListImp*>(pArgList);
    return true;
 }
@@ -787,7 +788,9 @@ const vector<string>& PlugInManagerServicesImp::getArgTypes()
    return PlugInArgImp::getArgTypes();
 }
 
-ModuleDescriptor* PlugInManagerServicesImp::addModule(const string& moduleFilename, map<string, string>& plugInIds)
+ModuleDescriptor* PlugInManagerServicesImp::addModule(const string& moduleFilename,
+                                                      DynamicObject* pPlugInCache,
+                                                      map<string, string>& plugInIds)
 {
    if (moduleFilename.empty() == true)
    {
@@ -801,7 +804,27 @@ ModuleDescriptor* PlugInManagerServicesImp::addModule(const string& moduleFilena
       return NULL;
    }
 
-   pModule = ModuleDescriptor::getModule(moduleFilename, plugInIds);
+   // Read the module information, either from the cache or by loading the shared library
+   // Check the cache first
+   if (pPlugInCache != NULL)
+   {
+      const DynamicObject* pModuleSettings = pPlugInCache->getAttribute(
+         moduleFilename).getPointerToValue<DynamicObject>();
+      if (pModuleSettings != NULL)
+      {
+         pModule = ModuleDescriptor::fromSettings(*pModuleSettings);
+         if (pModule != NULL && pModule->getFileName() != moduleFilename)
+         {
+            delete pModule;
+            pModule = NULL;
+         }
+      }
+   }
+   if (pModule == NULL)
+   {
+      // couldn't find in cache, so load the shared library
+      pModule = ModuleDescriptor::getModule(moduleFilename, plugInIds);
+   }
    if (pModule == NULL)
    {
       return NULL;
@@ -817,9 +840,11 @@ ModuleDescriptor* PlugInManagerServicesImp::addModule(const string& moduleFilena
       delete pModule;
       return NULL;
    }
+
    // Make sure the module is a valid version
-   if (pModule->getModuleVersion() != 1 && // legacy module
-       pModule->getModuleVersion() != 2)   // version 2 is the current version
+   int moduleVersion = pModule->getModuleVersion();
+   if (moduleVersion < MOD_ONE || // legacy module
+       moduleVersion > MOD_THREE)   // version 3 is the current version
    {
       delete pModule;
       return NULL;
@@ -928,4 +953,81 @@ bool PlugInManagerServicesImp::removeModule(ModuleDescriptor* pModule, map<strin
    }
 
    return true;
+}
+
+FactoryResource<DynamicObject> PlugInManagerServicesImp::loadPlugInListCache()
+{
+   FactoryResource<DynamicObject> pCache;
+   string plugInCacheFile = getPlugInCacheFilePath();
+   if (plugInCacheFile.empty())
+   {
+      return pCache;
+   }
+   XmlReader xmlReader(Service<MessageLogMgr>()->getLog(), false);
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* pDomDoc(NULL);
+   pDomDoc = xmlReader.parse(plugInCacheFile);
+   if (pDomDoc == NULL)
+   {
+      return pCache;
+   }
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMNodeList* pConfList(NULL);
+   pConfList = pDomDoc->getElementsByTagName(X("DynamicObject"));
+   if (pConfList == NULL || pConfList->getLength() != 1)
+   {
+      return pCache;
+   }
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pCacheNode = pConfList->item(0);
+
+   if (!pCache->fromXml(pCacheNode, XmlBase::VERSION))
+   {
+      pCache->clear();
+   }
+   return pCache;
+}
+
+void PlugInManagerServicesImp::savePlugInListCache() const
+{
+   string plugInCacheFile = getPlugInCacheFilePath();
+   if (plugInCacheFile.empty())
+   {
+      return;
+   }
+   vector<ModuleDescriptor*>::const_iterator ppModule;
+   DynamicObjectAdapter settingsAdapter;
+   DynamicObject& settings = settingsAdapter;
+   bool moduleSettingsSaved = true;
+   for (ppModule = mModules.begin(); ppModule != mModules.end(); ++ppModule)
+   {
+      ModuleDescriptor* pModule = *ppModule;
+      if (pModule != NULL && pModule->canCache())
+      {
+         DynamicObjectAdapter moduleSettingsAdapter;
+         DynamicObject& moduleSettings = moduleSettingsAdapter;
+         moduleSettingsSaved = pModule->updateSettings(moduleSettings);
+         if (moduleSettingsSaved)
+         {
+            settings.setAttribute(pModule->getFileName(), moduleSettings);
+         }
+      }
+   }
+   XMLWriter xmlWriter("PlugInCache");
+   if (!settings.toXml(&xmlWriter))
+   {
+      return;
+   }
+   FileResource pFile(plugInCacheFile.c_str(), "wt");
+   if (pFile.get() != NULL)
+   {
+      xmlWriter.writeToFile(pFile.get());
+   }
+   if (ferror(pFile.get()))
+   {
+      pFile.setDeleteOnClose(true);
+   }
+}
+
+string PlugInManagerServicesImp::getPlugInCacheFilePath()
+{
+   ConfigurationSettingsImp* pSettings = dynamic_cast<ConfigurationSettingsImp*>(Service<ConfigurationSettings>().get());
+   return pSettings->getUserStorageFilePath("PlugInCache", "xml");
 }

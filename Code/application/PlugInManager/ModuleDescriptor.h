@@ -19,9 +19,11 @@
 #include <string>
 #include <vector>
 
+class DynamicObject;
+struct OpticksModuleDescriptor;
 class PlugIn;
 class PlugInDescriptorImp;
-struct OpticksModuleDescriptor;
+class QDataStream;
 
 class ModuleDescriptor : public SessionItem, public SessionItemImp
 {
@@ -83,15 +85,24 @@ public:
       return mpModule->isLoaded();
    }
 
-   virtual std::string getModuleId()
-   {
-      return mModuleId;
-   }
-
    virtual int getModuleVersion() const
    {
       return mModuleVersion;
    }
+
+    /**
+    *  Return a flag indicating if the descriptor should be stored in the
+    *  plug-in list cache to speed up future startup of the application.
+    *
+    *  @return  \c true if the module should be cached or \c false otherwise.
+    */
+   bool canCache() const
+   {
+      return mCanCache;
+   }
+
+   static ModuleDescriptor* fromSettings(const DynamicObject& settings);
+   bool updateSettings(DynamicObject& settings) const;
 
    SESSIONITEMACCESSOR_METHODS(SessionItemImp)
 
@@ -101,12 +112,14 @@ public:
 protected:
    ModuleDescriptor(const std::string& id);
 
+   bool populateFromSettings(QDataStream& reader);
+
    std::string mVersion;
    std::string mDescription;
    unsigned int mPlugInTotal;
    std::string mValidationKey;
+   bool mCanCache;
 
-   std::string mModuleId;
    std::string mInstantiateSymbol;
    int mModuleVersion;
 
@@ -117,5 +130,8 @@ protected:
    std::vector<PlugInDescriptorImp*> mPlugins;
    DynamicModule* mpModule;
 };
+
+#define READ_FROM_STREAM(var) reader >> var; if (reader.status() != QDataStream::Ok) { return false; }
+#define READ_STR_FROM_STREAM(var) QString qStr##var; READ_FROM_STREAM(qStr##var) var = qStr##var.toStdString();
 
 #endif

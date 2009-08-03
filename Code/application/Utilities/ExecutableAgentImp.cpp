@@ -409,6 +409,18 @@ void ExecutableAgentImp::setupArgList()
    Executable* pExecutable = dynamic_cast<Executable*>(getPlugIn());
    if (pExecutable == NULL)
    {
+      Service<PlugInManagerServices> pPims;
+      if (mpInArgList == NULL)
+      {
+         mpInArgList = pPims->getPlugInArgList();
+      }
+      if (mpOutArgList == NULL)
+      {
+         mpOutArgList = pPims->getPlugInArgList();
+      }
+
+      VERIFYNRV(mpInArgList != NULL);
+      VERIFYNRV(mpOutArgList != NULL);
       return;
    }
 

@@ -7,11 +7,15 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <memory>
 #include <stdio.h>
 #include <string.h>
 
+#include "ModuleDescriptor.h"
 #include "PlugInArgImp.h"
 #include "PlugInArgListImp.h"
+
+#include <QtCore/QDataStream>
 
 using namespace std;
 
@@ -25,7 +29,16 @@ PlugInArgListImp::PlugInArgListImp()
  */
 PlugInArgListImp::~PlugInArgListImp()
 {
-   emptyList();
+   int iCount = mArgList.size();
+   for (int i = 0; i < iCount; i++)
+   {
+      PlugInArg* pArg = mArgList[i];
+      if (pArg != NULL)
+      {
+         delete static_cast<PlugInArgImp*>(pArg);
+      }
+   }
+   mArgList.clear();
 }
 
 /**
@@ -183,6 +196,56 @@ bool PlugInArgListImp::catenateLists(const PlugInArgList& plugInArg)
       if (!success)
       {
          return false;
+      }
+   }
+   return true;
+}
+
+PlugInArgListImp* PlugInArgListImp::fromSettings(QDataStream& reader)
+{
+   unsigned short count;
+   READ_FROM_STREAM(count);
+   auto_ptr<PlugInArgListImp> pList(new PlugInArgListImp());
+   for (unsigned short i = 0; i < count; ++i)
+   {
+      bool haveArg;
+      READ_FROM_STREAM(haveArg);
+      if (!haveArg)
+      {
+         pList->mArgList.push_back(NULL);
+      }
+      else
+      {
+         PlugInArgImp* pArg = PlugInArgImp::fromSettings(reader);
+         if (pArg == NULL)
+         {
+            return NULL;
+         }
+         pList->addArg(*pArg);
+      }
+   }
+   return pList.release();
+}
+
+bool PlugInArgListImp::updateSettings(QDataStream& writer) const
+{
+   unsigned short count = getCount();
+   writer << count;
+   for (unsigned short i = 0; i < count; ++i)
+   {
+      PlugInArgImp* pArg = mArgList[i];
+      if (pArg == NULL)
+      {
+         writer << false;
+         continue;
+      }
+      else
+      {
+         writer << true;
+         if (!pArg->updateSettings(writer))
+         {
+            return false;
+         }
       }
    }
    return true;

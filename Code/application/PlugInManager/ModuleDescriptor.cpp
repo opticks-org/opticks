@@ -7,16 +7,23 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtCore/QByteArray>
+#include <QtCore/QDataStream>
+#include <QtCore/QDateTime>
+#include <QtCore/QFileInfo>
+#include <QtCore/QString>
 #include <QtGui/QIcon>
 
 #include "ApplicationServices.h"
-#include "ModuleDescriptor.h"
+#include "ConfigurationSettings.h"
 #include "ConnectionManager.h"
 #include "AppVerify.h"
+#include "DynamicObjectAdapter.h"
 #include "External.h"
 #include "FileFinderImp.h"
 #include "FilenameImp.h"
 #include "MessageLogResource.h"
+#include "ModuleDescriptor.h"
 #include "PlugIn.h"
 #include "PlugInDescriptorImp.h"
 #include "PlugInManagerServices.h"
@@ -35,7 +42,8 @@ ModuleDescriptor::ModuleDescriptor(const string& id) :
    mDescription(""),
    mPlugInTotal(0),
    mValidationKey(""),
-   mModuleVersion(0),
+   mCanCache(false),
+   mModuleVersion(MOD_ZERO),
    mFileName(""),
    mFileSize(0),
    mFileDate(0),
@@ -86,7 +94,7 @@ ModuleDescriptor* ModuleDescriptor::getModule(const std::string& filename, map<s
       struct OpticksModuleDescriptor* pDescriptor = pProcAddr(ConnectionManager::instance());
       if (pDescriptor != NULL)
       {
-         VERIFY(pDescriptor->version == 2);
+         VERIFY(pDescriptor->version >= MOD_TWO);
 #if defined(WIN_API)
          if (pDescriptor->debug == DEBUG_BOOL)
          {
@@ -108,14 +116,20 @@ ModuleDescriptor* ModuleDescriptor::getModule(const std::string& filename, map<s
             pModule->mpModule = pDynMod;
             pModule->mModuleVersion = pDescriptor->version;
             pModule->mInstantiateSymbol = pDescriptor->pInstantiateSymbol;
+            pModule->mCanCache = false;
+            if (pDescriptor->version >= MOD_THREE)
+            {
+               pModule->mCanCache = pDescriptor->cacheable;
+            }
             pModule->initializePlugInInformation(plugInIds);
+            // pDescriptor is no longer valid at this point
 
             return pModule;
 #if defined(WIN_API)
          }
          else
          {
-            std::string errorMessage("Error loading plug-in from PlugIns folder, the plug-in was ");
+            std::string errorMessage("Error loading plug-in from PlugIns folder. The plug-in was ");
             if (DEBUG_BOOL)
             {
                errorMessage += "built in release mode, but this a debug mode version of the application.";
@@ -136,7 +150,8 @@ ModuleDescriptor* ModuleDescriptor::getModule(const std::string& filename, map<s
       }
       else
       {
-         std::string errorMessage("Error loading plug-in from PlugIns folder, the plug-in did not return the proper struct.");
+         std::string errorMessage("Error loading plug-in from PlugIns folder. The plug-in did not "
+            "return the proper struct.");
          MessageResource message("PlugInError", "app", "B63EB55A-2881-4A2A-AE8B-C8FE7E9C4080");
          message->addProperty("message", errorMessage);
          message->addProperty("filename", filename);
@@ -215,6 +230,7 @@ ModuleDescriptor* ModuleDescriptor::getModule(const std::string& filename, map<s
    pModule->mDescription = pModuleDescription;
    pModule->mPlugInTotal = totalPlugIns;
    pModule->mValidationKey = pValidationKey;
+   pModule->mCanCache = false;
    pModule->mpModule = pDynMod;
    pModule->mModuleVersion = version;
    pModule->initializePlugInInformation(plugInIds);
@@ -227,7 +243,7 @@ ModuleDescriptor* ModuleDescriptor::getModule(const std::string& filename, map<s
 
 bool ModuleDescriptor::load()
 {
-   VERIFY(mModuleVersion > 0);
+   VERIFY(mModuleVersion > MOD_ZERO);
    if (isLoaded())
    {
       return true;
@@ -242,7 +258,7 @@ bool ModuleDescriptor::load()
    //
    // Attempt to call Module's initialize routine if it is a legacy module.
    //
-   if (mModuleVersion == 1)
+   if (mModuleVersion == MOD_ONE)
    {
       bool(*moduleProcedure)(External*) =
          reinterpret_cast<bool(*)(External*)>(mpModule->getProcedureAddress("initialize"));
@@ -274,12 +290,12 @@ bool ModuleDescriptor::initializePlugInInformation(map<string, string>& plugInId
 
    // TODO : Update Plug-Ins currently in the list.
 
-   for (unsigned int plugInNumber = 0; mModuleVersion > 1 || plugInNumber < getNumPlugIns(); plugInNumber++)
+   for (unsigned int plugInNumber = 0; mModuleVersion > MOD_ONE || plugInNumber < getNumPlugIns(); ++plugInNumber)
    {
       PlugIn* pPlugIn = createInterface(plugInNumber);
-      if (mModuleVersion > 1 && pPlugIn == NULL)
+      if (mModuleVersion > MOD_ONE && pPlugIn == NULL)
       {
-         mPlugInTotal = plugInNumber + 1;
+         mPlugInTotal = plugInNumber;
          break;
       }
       else if (pPlugIn == NULL)
@@ -336,7 +352,7 @@ PlugIn* ModuleDescriptor::createInterface(unsigned int plugInNumber)
 
    PlugIn* pPlugIn = NULL;
 
-   if (mModuleVersion == 1)
+   if (mModuleVersion == MOD_ONE)
    {
       bool(*moduleProcedure)(unsigned int, PlugIn**) =
          reinterpret_cast<bool(*)(unsigned int, PlugIn**)>(mpModule->getProcedureAddress("instantiate_interface"));
@@ -346,7 +362,7 @@ PlugIn* ModuleDescriptor::createInterface(unsigned int plugInNumber)
          moduleProcedure(plugInNumber, &pPlugIn);
       }
    }
-   else if (mModuleVersion > 1)
+   else if (mModuleVersion > MOD_ONE)
    {
       OpticksInstantiateType moduleProcedure =
          reinterpret_cast<OpticksInstantiateType>(mpModule->getProcedureAddress(mInstantiateSymbol));
@@ -377,7 +393,114 @@ const bool ModuleDescriptor::isValidatedModule() const
    // TODO : Come up with test that uses name, version, and description 
    // to generate a checksum that is tested against validationKey.
 
-   return (mModuleVersion != 1) || (mValidationKey == "YES");
+   return (mModuleVersion != MOD_ONE) || (mValidationKey == "YES");
+}
+
+bool ModuleDescriptor::updateSettings(DynamicObject& settings) const
+{
+   VERIFY(mCanCache);
+   QByteArray moduleBlob;
+   QDataStream moduleStream(&moduleBlob, QIODevice::WriteOnly);
+   moduleStream << QString::fromStdString(getId());
+   moduleStream << static_cast<quint64>(mFileDate.getStructured());
+   moduleStream << mFileSize;
+   moduleStream << QString::fromStdString(mFileName);
+   moduleStream << QString::fromStdString(getName());
+   moduleStream << QString::fromStdString(mVersion);
+   moduleStream << QString::fromStdString(mDescription);
+   moduleStream << mPlugInTotal;
+   moduleStream << QString::fromStdString(mValidationKey);
+   moduleStream << mModuleVersion;
+   moduleStream << QString::fromStdString(mInstantiateSymbol);
+   vector<PlugInDescriptorImp*>::const_iterator ppDescriptor;
+   bool plugInSettingsSaved = true;
+   for (ppDescriptor=mPlugins.begin(); ppDescriptor!=mPlugins.end(); ++ppDescriptor)
+   {
+      PlugInDescriptorImp* pDescriptor = *ppDescriptor;
+      if (pDescriptor == NULL)
+      {
+         return false;
+      }
+      plugInSettingsSaved = pDescriptor->updateSettings(moduleStream);
+      if (!plugInSettingsSaved)
+      {
+         return false;
+      }
+   }
+   settings.setAttribute("details", string(moduleBlob.toBase64().constData()));
+   //NOTE: not serializing mCanCache on purpose, since calling this function means it's being cached.
+   return true;
+}
+
+ModuleDescriptor* ModuleDescriptor::fromSettings(const DynamicObject& settings)
+{
+   string details;
+   bool hasSetting = settings.getAttribute("details").getValue(details);
+   if (hasSetting == false)
+   {
+      return false;
+   }
+   QByteArray moduleBlob = QByteArray::fromBase64(QByteArray::fromRawData(details.c_str(), details.size()));
+   QDataStream reader(&moduleBlob, QIODevice::ReadOnly);
+   string id;
+   READ_STR_FROM_STREAM(id);
+   auto_ptr<ModuleDescriptor> pDescriptor(new ModuleDescriptor(id));
+   if (!pDescriptor->populateFromSettings(reader))
+   {
+      return NULL;
+   }
+
+   return pDescriptor.release();
+}
+
+bool ModuleDescriptor::populateFromSettings(QDataStream& reader)
+{
+   quint64 cacheDate;
+   READ_FROM_STREAM(cacheDate);
+   READ_FROM_STREAM(mFileSize);
+   READ_STR_FROM_STREAM(mFileName);
+   QFileInfo file(QString::fromStdString(mFileName));
+   VERIFYRV(file.exists(), NULL);
+   quint64 modDate = file.lastModified().toTime_t();
+   if (cacheDate != modDate)
+   {
+      return false;
+   }
+   if (mFileSize != file.size())
+   {
+      return false;
+   }
+   string name;
+   READ_STR_FROM_STREAM(name);
+   READ_STR_FROM_STREAM(mVersion);
+   READ_STR_FROM_STREAM(mDescription);
+   READ_FROM_STREAM(mPlugInTotal);
+   READ_STR_FROM_STREAM(mValidationKey);
+   READ_FROM_STREAM(mModuleVersion);
+   READ_STR_FROM_STREAM(mInstantiateSymbol);
+   setName(name);
+   mCanCache = true;
+   mFileDate.setStructured(cacheDate);
+   if (mModuleVersion < MOD_THREE || mModuleVersion > MOD_THREE)
+   {
+      return false;
+   }
+
+   for (unsigned int i = 0; i < mPlugInTotal; ++i)
+   {
+      PlugInDescriptorImp* pDescriptor = 
+         PlugInDescriptorImp::fromSettings(reader);
+      if (pDescriptor == NULL)
+      {
+         return false;
+      }
+      else
+      {
+         mPlugins.push_back(pDescriptor);
+      }
+   }
+
+   return true;
 }
 
 bool ModuleDescriptor::serialize(SessionItemSerializer& serializer) const

@@ -71,8 +71,7 @@ CoreModuleDescriptor::CoreModuleDescriptor(const string& id, map<string, string>
    setName("Application");
    mVersion = APP_VERSION_NUMBER;
    mDescription = "Plug-ins built into the application";
-   mModuleId = "{9CAC2C29-6528-4871-8D54-23AD807F0546}";
-   mModuleVersion = 2;
+   mModuleVersion = MOD_THREE;
    mFileName = "This module is built into the application and does not have a separate file.";
    mFileDate.set(APP_RELEASE_DATE_YEAR, APP_RELEASE_DATE_MONTH, APP_RELEASE_DATE_DAY);
    initializePlugInInformation(plugInIds);

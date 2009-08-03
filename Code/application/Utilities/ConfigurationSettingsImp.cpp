@@ -1013,7 +1013,8 @@ void ConfigurationSettingsImp::applicationClosed(Subject& subject, const string&
    serialize();
 }
 
-string ConfigurationSettingsImp::getUserSettingsFileName() const
+string ConfigurationSettingsImp::getUserStorageFileName(const string& filePrefix,
+                                                        const string& fileExtension) const
 {
    string os = getOperatingSystemName();
    string arch = getArchitectureName();
@@ -1021,10 +1022,11 @@ string ConfigurationSettingsImp::getUserSettingsFileName() const
    #if defined(DEBUG)
       mode = "Debug";
    #endif
-   return "UserSettings-" + mVersion + "-" + os + "-" + arch + mode + ".cfg";
+   return filePrefix + "-" + mVersion + "-" + os + "-" + arch + mode + "." + fileExtension;
 }
 
-string ConfigurationSettingsImp::getUserSettingsFilePath() const
+string ConfigurationSettingsImp::getUserStorageFilePath(const string& filePrefix,
+                                                        const string& fileExtension) const
 {
    QDir configDirectory = QDir(QString::fromStdString(mUserConfigPath));
    if (!configDirectory.exists())
@@ -1032,8 +1034,19 @@ string ConfigurationSettingsImp::getUserSettingsFilePath() const
       return "";
    }
 
-   QString cfgFilePath = configDirectory.absoluteFilePath(QString::fromStdString(getUserSettingsFileName()));
+   QString cfgFilePath = configDirectory.absoluteFilePath(QString::fromStdString(getUserStorageFileName(filePrefix,
+      fileExtension)));
    return QDir::toNativeSeparators(cfgFilePath).toStdString();
+}
+
+string ConfigurationSettingsImp::getUserSettingsFileName() const
+{
+   return getUserStorageFileName("UserSettings", "cfg");
+}
+
+string ConfigurationSettingsImp::getUserSettingsFilePath() const
+{
+   return getUserStorageFilePath("UserSettings", "cfg");
 }
 
 string ConfigurationSettingsImp::locateUserDocs()

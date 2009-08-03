@@ -16,6 +16,8 @@
 #include <string>
 #include <vector>
 
+class QDataStream;
+
 /**
  *  Plug-In Argument List.
  *
@@ -134,6 +136,9 @@ public:
     *           successfully added to this list, otherwise returns false.
     */
    virtual bool catenateLists(const PlugInArgList& plugInArg);
+
+   static PlugInArgListImp* fromSettings(QDataStream& reader);
+   bool updateSettings(QDataStream& writer) const;
 
 private:
    PlugInArgListImp(const PlugInArgList& rhs) {}

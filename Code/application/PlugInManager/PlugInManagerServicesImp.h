@@ -10,6 +10,8 @@
 #ifndef PLUGINMANAGERSERVICESIMP_H
 #define PLUGINMANAGERSERVICESIMP_H
 
+#include "ConfigurationSettings.h"
+#include "ObjectResource.h"
 #include "PlugInManagerServices.h"
 #include "SubjectImp.h"
 
@@ -20,6 +22,7 @@
 
 class DataElement;
 class DynamicModule;
+class DynamicObject;
 class Layer;
 class ModuleDescriptor;
 class PlotWidget;
@@ -35,6 +38,7 @@ class WorkspaceWindow;
 class PlugInManagerServicesImp : public PlugInManagerServices, public SubjectImp
 {
 public:
+   SETTING(CachePlugInInformation, PlugInManagerServices, bool, true);
    static PlugInManagerServicesImp* instance();
    static void destroy();
 
@@ -74,9 +78,13 @@ protected:
    PlugInManagerServicesImp();
    virtual ~PlugInManagerServicesImp();
 
-   ModuleDescriptor* addModule(const std::string& moduleFilename, std::map<std::string, std::string>& plugInIds);
+   ModuleDescriptor* addModule(const std::string& moduleFilename, DynamicObject* pPlugInCache,
+      std::map<std::string, std::string>& plugInIds);
    bool containsModule(ModuleDescriptor* pModule);
    bool removeModule(ModuleDescriptor* pModule, std::map<std::string, std::string>& plugInIds);
+   static FactoryResource<DynamicObject> loadPlugInListCache();
+   void savePlugInListCache() const;
+   static std::string getPlugInCacheFilePath();
 
 private:
    static PlugInManagerServicesImp* spInstance;

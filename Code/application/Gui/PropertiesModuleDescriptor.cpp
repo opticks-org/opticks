@@ -13,6 +13,7 @@
 #include "DateTime.h"
 #include "LabeledSection.h"
 #include "ModuleDescriptor.h"
+#include "PlugInRegistration.h"
 #include "PropertiesModuleDescriptor.h"
 
 using namespace std;
@@ -83,7 +84,7 @@ bool PropertiesModuleDescriptor::initialize(SessionItem* pSessionItem)
 
    // Module
    mpNameLabel->setText(QString::fromStdString(pModule->getName()));
-   if (pModule->getModuleVersion() == 1)
+   if (pModule->getModuleVersion() == MOD_ONE)
    {
       pFormLayout->addRow("Version:", mpVersionLabel);
       mpVersionLabel->setText(QString::fromStdString(pModule->getVersion()));
@@ -92,14 +93,14 @@ bool PropertiesModuleDescriptor::initialize(SessionItem* pSessionItem)
    }
    pFormLayout->addRow("Number of Plug-Ins:", mpPlugInsLabel);
    mpPlugInsLabel->setText(QString::number(pModule->getNumPlugIns()));
-   if (pModule->getModuleVersion() == 1)
+   if (pModule->getModuleVersion() == MOD_ONE)
    {
       mpValidatedLabel->setText(pModule->isValidatedModule() ? "Yes" : "No");
       pFormLayout->addRow("Validated:", mpValidatedLabel);
    }
    pFormLayout->addRow("Loaded:", mpLoadedLabel);
    mpLoadedLabel->setText(pModule->isLoaded() ? "Yes" : "No");
-   if (pModule->getModuleVersion() == 1)
+   if (pModule->getModuleVersion() == MOD_ONE)
    {
       QLabel* pLegacyWarning = new QLabel("This is a legacy module", mpModuleWidget);
       pLegacyWarning->setStyleSheet("color: blue");

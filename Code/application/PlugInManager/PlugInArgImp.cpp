@@ -7,9 +7,14 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include "ModuleDescriptor.h"
 #include "PlugInArgImp.h"
 
 #include <algorithm>
+
+#include <QtCore/QDataStream>
+#include <QtCore/QString>
+
 using namespace std;
 
 class Filename;
@@ -280,4 +285,101 @@ bool PlugInArgImp::isArgType(const string& type)
 const vector<string>& PlugInArgImp::getArgTypes()
 {
    return mArgTypes;
+}
+
+PlugInArgImp* PlugInArgImp::fromSettings(QDataStream& reader)
+{
+   auto_ptr<PlugInArgImp> pArg(new PlugInArgImp());
+   string name;
+   READ_STR_FROM_STREAM(name);
+   pArg->mName = name;
+   string type;
+   READ_STR_FROM_STREAM(type);
+   pArg->mType = type;
+   string description;
+   READ_STR_FROM_STREAM(description);
+   pArg->mDescription = description;
+   bool haveDefaultDeepCopy;
+   READ_FROM_STREAM(haveDefaultDeepCopy);
+   if (haveDefaultDeepCopy)
+   {
+      string type;
+      string xmlValue;
+      READ_STR_FROM_STREAM(type);
+      READ_STR_FROM_STREAM(xmlValue);
+      DataVariant var(type, NULL, false);
+      var.fromXmlString(type, xmlValue);
+      pArg->mDefaultValueDeepCopy = var;
+      pArg->mpDefaultValueShallowCopy = pArg->mDefaultValueDeepCopy.getPointerToValueAsVoid();
+   }
+   else
+   {
+      pArg->mDefaultValueDeepCopy = DataVariant();
+      pArg->mpDefaultValueShallowCopy = NULL;
+   }
+   READ_FROM_STREAM(pArg->mDefaultSet);
+   bool haveShallowDeepCopy;
+   READ_FROM_STREAM(haveShallowDeepCopy);
+   if (haveShallowDeepCopy)
+   {
+      string type;
+      string xmlValue;
+      READ_STR_FROM_STREAM(type);
+      READ_STR_FROM_STREAM(xmlValue);
+      DataVariant var(type, NULL, false);
+      var.fromXmlString(type, xmlValue);
+      pArg->mActualValueDeepCopy = var;
+      pArg->mpActualValueShallowCopy = pArg->mActualValueDeepCopy.getPointerToValueAsVoid();
+   }
+   else
+   {
+      pArg->mActualValueDeepCopy = DataVariant();
+      pArg->mpActualValueShallowCopy = NULL;
+   }
+   READ_FROM_STREAM(pArg->mActualSet);
+   return pArg.release();
+}
+
+bool PlugInArgImp::updateSettings(QDataStream& writer) const
+{
+   writer << QString::fromStdString(mName);
+   writer << QString::fromStdString(mType);
+   writer << QString::fromStdString(mDescription);
+   if (mpDefaultValueShallowCopy)
+   {
+      if (mDefaultValueDeepCopy.isValid())
+      {
+         writer << true;
+         writer << QString::fromStdString(mType);
+         writer << QString::fromStdString(mDefaultValueDeepCopy.toXmlString());
+      }
+      else
+      {
+         writer << false;
+      }
+   }
+   else
+   {
+      writer << false;
+   }
+   writer << mDefaultSet;
+   if (mpActualValueShallowCopy)
+   {
+      if (mActualValueDeepCopy.isValid())
+      {
+         writer << true;
+         writer << QString::fromStdString(mType);
+         writer << QString::fromStdString(mActualValueDeepCopy.toXmlString());
+      }
+      else
+      {
+         writer << false;
+      }
+   }
+   else
+   {
+      writer << false;
+   }
+   writer << mActualSet;
+   return true;
 }

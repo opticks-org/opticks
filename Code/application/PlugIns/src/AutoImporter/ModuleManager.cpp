@@ -9,4 +9,4 @@
 
 #include "PlugInRegistration.h"
 
-REGISTER_MODULE(OpticksAutoImporter);
+REGISTER_NON_CACHED_MODULE(OpticksAutoImporter);
