@@ -95,6 +95,7 @@ SpatialDataViewImp::SpatialDataViewImp(const string& id, const string& viewName,
    mPanLimit(SpatialDataView::getSettingPanLimit()),
    mMinZoom(SpatialDataView::getSettingMinimumZoomPixels()),
    mMaxZoom(SpatialDataView::getSettingMaximumZoomRatio()),
+   mpOldMouseMode(NULL),
    mpAnnotationAction(NULL),
    mpAoiAction(NULL),
    mpGcpAction(NULL),
@@ -257,6 +258,13 @@ SpatialDataViewImp::SpatialDataViewImp(const string& id, const string& viewName,
    pDesktop->initializeAction(pPreviousBandAction, shortcutContext);
    addAction(pPreviousBandAction);
 
+   QAction* pMousePanAction = new QAction("Toggle Mouse Pan", this);
+   pMousePanAction->setAutoRepeat(false);
+   pMousePanAction->setShortcut(QKeySequence("Ctrl+Shift+E"));
+   pMousePanAction->setShortcutContext(Qt::WidgetShortcut);
+   pDesktop->initializeAction(pMousePanAction, shortcutContext);
+   addAction(pMousePanAction);
+
    // Initialization
    if (mpMeasurementsLayer != NULL)
    {
@@ -277,6 +285,8 @@ SpatialDataViewImp::SpatialDataViewImp(const string& id, const string& viewName,
    DataOrigin origin = getDataOrigin();
    updateOriginAction(origin);
 
+   mMousePanTimer.setInterval(0);
+
    setIcon(QIcon(":/icons/SpectralData"));
    setWindowIcon(QIcon(":/icons/SpectralData"));
    addMouseMode(new MouseModeImp("LayerMode", QCursor(Qt::ArrowCursor)));
@@ -290,6 +300,8 @@ SpatialDataViewImp::SpatialDataViewImp(const string& id, const string& viewName,
    // Connections
    VERIFYNR(connect(this, SIGNAL(mouseModeChanged(const MouseMode*)),
       this, SLOT(updateMouseCursor(const MouseMode*))));
+   VERIFYNR(connect(this, SIGNAL(mouseModeChanged(const MouseMode*)),
+      this, SLOT(disableMousePan())));
    VERIFYNR(connect(this, SIGNAL(originChanged(const DataOrigin&)), this, SLOT(updateOriginAction(const DataOrigin&))));
    VERIFYNR(connect(pCrossHairAction, SIGNAL(toggled(bool)), this, SLOT(setCrossHair(bool))));
    VERIFYNR(connect(this, SIGNAL(crossHairDisplayed(bool)), pCrossHairAction, SLOT(setChecked(bool))));
@@ -306,6 +318,8 @@ SpatialDataViewImp::SpatialDataViewImp(const string& id, const string& viewName,
    VERIFYNR(connect(pRgbAction, SIGNAL(triggered()), this, SLOT(setRgbMode())));
    VERIFYNR(connect(pNextBandAction, SIGNAL(triggered()), this, SLOT(nextBand())));
    VERIFYNR(connect(pPreviousBandAction, SIGNAL(triggered()), this, SLOT(previousBand())));
+   VERIFYNR(connect(pMousePanAction, SIGNAL(triggered()), this, SLOT(toggleMousePanByKey())));
+   VERIFYNR(connect(&mMousePanTimer, SIGNAL(timeout()), this, SLOT(mousePanTimeout())));
 
    if (mpLayerList != NULL)
    {
@@ -2269,6 +2283,8 @@ void SpatialDataViewImp::drawContents()
    drawAxis(viewPort[0] + 31, viewPort[1] + viewPort[3] - 31);
    qglColor(Qt::white);
    drawAxis(viewPort[0] + 30, viewPort[1] + viewPort[3] - 30);
+
+   drawMousePanAnchor();
 }
 
 void SpatialDataViewImp::drawLayers()
@@ -2441,6 +2457,55 @@ void SpatialDataViewImp::drawAxis(float fX, float fY)
    glPopMatrix();
 }
 
+void SpatialDataViewImp::drawMousePanAnchor()
+{
+   if (!isMousePanEnabled())
+   {
+      return;
+   }
+   setupScreenMatrices();
+
+   int viewPort[4];
+   glGetIntegerv(GL_VIEWPORT, viewPort);
+
+   const int boxSize = 6;
+   const int crossSize = 12;
+   ViewImp* pView = this;
+   ViewImp* pProductView = dynamic_cast<ViewImp*>(parentWidget());
+   if (pProductView != NULL)
+   {
+      pView = pProductView;
+   }
+   QPoint anchorPos = pView->mapFromGlobal(mMousePanAnchor);
+   anchorPos.setY(pView->height() - anchorPos.y());
+
+   int centerX = anchorPos.x();
+   int centerY = anchorPos.y();
+
+   glLineWidth(1.0);
+   glColor3ub(0xff, 0xaf, 0x7f);
+   glPushAttrib(GL_COLOR_BUFFER_BIT);
+   glEnable(GL_BLEND);
+   glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ZERO);
+   glBegin(GL_LINES);
+   glVertex2f(centerX - boxSize, centerY - boxSize);
+   glVertex2f(centerX + boxSize, centerY - boxSize);
+   glVertex2f(centerX + boxSize, centerY - boxSize);
+   glVertex2f(centerX + boxSize, centerY + boxSize);
+   glVertex2f(centerX - boxSize, centerY - boxSize);
+   glVertex2f(centerX - boxSize, centerY + boxSize);
+   glVertex2f(centerX - boxSize, centerY + boxSize);
+   glVertex2f(centerX + boxSize, centerY + boxSize);
+   glVertex2f(centerX, centerY + crossSize);
+   glVertex2f(centerX, centerY - crossSize);
+   glVertex2f(centerX + crossSize, centerY);
+   glVertex2f(centerX - crossSize, centerY);
+   glEnd();
+   glDisable(GL_BLEND);
+   glPopAttrib();
+}
+
+
 bool SpatialDataViewImp::isListLayer(Layer* pLayer) const
 {
    if ((pLayer == NULL) || (mpLayerList == NULL))
@@ -2464,6 +2529,44 @@ bool SpatialDataViewImp::event(QEvent* pEvent)
    }
 
    return PerspectiveViewImp::event(pEvent);
+}
+
+bool SpatialDataViewImp::eventFilter(QObject* pWatched, QEvent* pEvent)
+{
+   if (isMousePanEnabled())
+   {
+      if (pEvent->type() == QEvent::FocusOut)
+      {
+         enableMousePan(false);
+      }
+      if (pEvent->type() != QEvent::MouseMove &&
+          pEvent->type() != QEvent::MouseButtonPress &&
+          pEvent->type() != QEvent::MouseButtonRelease)
+      {
+         return PerspectiveViewImp::eventFilter(pWatched, pEvent);
+      }
+      QMouseEvent* pOrgEvent = static_cast<QMouseEvent*>(pEvent);
+      QPoint globalPos = QCursor::pos();
+      QPoint widgetPos = mapFromGlobal(globalPos);
+      QMouseEvent newMouseEvent(pOrgEvent->type(), widgetPos,
+         pOrgEvent->button(), pOrgEvent->buttons(), pOrgEvent->modifiers());
+      if (pEvent->type() == QEvent::MouseMove)
+      {
+         mouseMoveEvent(&newMouseEvent);
+         return true;
+      }
+      else if (pEvent->type() == QEvent::MouseButtonPress)
+      {
+         mousePressEvent(&newMouseEvent);
+         return true;
+      }
+      else if (pEvent->type() == QEvent::MouseButtonRelease)
+      {
+         mouseReleaseEvent(&newMouseEvent);
+         return true;
+      }
+   }
+   return PerspectiveViewImp::eventFilter(pWatched, pEvent);
 }
 
 void SpatialDataViewImp::toolTipEvent(QHelpEvent* pEvent)
@@ -2696,7 +2799,16 @@ void SpatialDataViewImp::mousePressEvent(QMouseEvent* pEvent)
       }
 
       LayerImp* pActiveLayer = dynamic_cast<LayerImp*>(mpActiveLayer.get());
-      if ((mouseMode == "LayerMode") && (pActiveLayer != NULL))
+      if (pEvent->button() == Qt::MidButton)
+      {
+         mMousePanEngagePos = pEvent->globalPos();
+      }
+      else if (isMousePanEnabled())
+      {
+         enableMousePan(false);
+         bSuccess = true;
+      }
+      else if ((mouseMode == "LayerMode") && (pActiveLayer != NULL))
       {
          bSuccess = pActiveLayer->processMousePress(ptMouse, pEvent->button(), pEvent->buttons(),
             pEvent->modifiers());
@@ -2773,7 +2885,13 @@ void SpatialDataViewImp::mouseMoveEvent(QMouseEvent* pEvent)
       }
 
       LayerImp* pActiveLayer = dynamic_cast<LayerImp*>(mpActiveLayer.get());
-      if ((mouseMode == "LayerMode") && (pActiveLayer != NULL))
+      if (isMousePanEnabled())
+      {
+         setMousePanPos(pEvent->globalPos());
+         pEvent->accept();
+         return;
+      }
+      else if ((mouseMode == "LayerMode") && (pActiveLayer != NULL))
       {
          bSuccess = pActiveLayer->processMouseMove(ptMouse, pEvent->button(), pEvent->buttons(), pEvent->modifiers());
       }
@@ -2814,7 +2932,26 @@ void SpatialDataViewImp::mouseReleaseEvent(QMouseEvent* pEvent)
       }
 
       LayerImp* pActiveLayer = dynamic_cast<LayerImp*>(mpActiveLayer.get());
-      if ((mouseMode == "LayerMode") && (pActiveLayer != NULL))
+      if (pEvent->button() == Qt::MidButton)
+      {
+         if (isMousePanEnabled())
+         {
+            enableMousePan(false);
+            bSuccess = true;
+         }
+         else
+         {
+            double deltaX = mMousePanEngagePos.x() - pEvent->globalPos().x();
+            double deltaY = mMousePanEngagePos.y() - pEvent->globalPos().y();
+            if (fabs(deltaX) < 3 && fabs(deltaY) < 3)
+            {
+               setMousePanPos(pEvent->globalPos());
+               enableMousePan(true);
+               bSuccess = true;
+            }
+         }
+      }
+      else if ((mouseMode == "LayerMode") && (pActiveLayer != NULL))
       {
          bSuccess = pActiveLayer->processMouseRelease(ptMouse, pEvent->button(), pEvent->buttons(),
             pEvent->modifiers());
@@ -2835,6 +2972,10 @@ void SpatialDataViewImp::mouseReleaseEvent(QMouseEvent* pEvent)
    if (bSuccess == false)
    {
       PerspectiveViewImp::mouseReleaseEvent(pEvent);
+      if (pEvent->button() == Qt::MidButton && !isMousePanEnabled())
+      {
+         updateMouseCursor(getCurrentMouseMode());
+      }
    }
 }
 
@@ -3259,6 +3400,14 @@ void SpatialDataViewImp::updateMouseCursor(const MouseMode* pMouseMode)
 
          setCursor(mouseCursor);
       }
+   }
+}
+
+void SpatialDataViewImp::disableMousePan()
+{
+   if (isMousePanEnabled())
+   {
+      enableMousePan(false);
    }
 }
 
@@ -3942,4 +4091,112 @@ void SpatialDataViewImp::setAoiMode()
    {
       pToolbar->setSelectionTool(pToolbar->getSelectionTool(), DRAW);
    }
+}
+
+void SpatialDataViewImp::toggleMousePanByKey()
+{
+   ViewImp* pProductView = dynamic_cast<ViewImp*>(parentWidget());
+   if (pProductView != NULL)
+   {
+      //this is being drawn in a product, and currently
+      //this keyboard shortcut isn't triggering in product mode.
+      //Even if code is fixed so that this keyboard shortcut can
+      //be made to trigger properly, the coordinate transforms
+      //below are more than likely incorrect when being drawn
+      //in a product.
+      //so, for now, disable the keyboard shortcut when this
+      //is being drawn in a product.
+      return;
+   }
+   if (isMousePanEnabled() == false)
+   {
+      QPoint globalPos = QCursor::pos();
+      QPoint widgetPos = mapFromGlobal(globalPos);
+      if (widgetPos.x() < 0 || widgetPos.x() > width() ||
+          widgetPos.y() < 0 || widgetPos.y() > height())
+      {
+         //since mouse pan was toggled on using keyboard
+         //while mouse was outside the view, we can't properly
+         //drawn the anchor point, so do nothing
+         //i.e. leave the mouse pan turned off.
+         return;
+      }
+      setMousePanPos(globalPos);
+   }
+   enableMousePan(!isMousePanEnabled());
+}
+
+void SpatialDataViewImp::enableMousePan(bool enabled)
+{
+   if (enabled == mMousePanTimer.isActive())
+   {
+      return;
+   }
+
+   if (enabled)
+   {
+      mMousePanAnchor = QCursor::pos();
+      mpOldMouseMode = getCurrentMouseMode();
+      setMouseMode(NULL);
+      setCursor(Qt::SizeAllCursor);
+      enableInset(false);
+      QApplication::instance()->installEventFilter(this);
+      startUndoGroup("Pan");
+      mMousePanTimer.start();
+      notify(SIGNAL_NAME(SpatialDataView, MousePanEnabled), true);
+   }
+   else
+   {
+      QApplication::instance()->removeEventFilter(this);
+      mMousePanTimer.stop();
+      endUndoGroup();
+      setMouseMode(mpOldMouseMode);
+      if (mpOldMouseMode == NULL)
+      {
+         setCursor(Qt::ArrowCursor);
+      }
+      updateStatusBar();
+      refresh();
+      notify(SIGNAL_NAME(SpatialDataView, MousePanEnabled), false);
+   }
+}
+
+bool SpatialDataViewImp::isMousePanEnabled() const
+{
+   return mMousePanTimer.isActive();
+}
+
+void SpatialDataViewImp::setMousePanPos(const QPoint& globalScreenCoord)
+{
+   mMousePanCurrentPos = globalScreenCoord;
+}
+
+void SpatialDataViewImp::mousePanTimeout()
+{
+   ViewImp* pView = this;
+   ViewImp* pProductView = dynamic_cast<ViewImp*>(parentWidget());
+   if (pProductView != NULL)
+   {
+      pView = pProductView;
+   }
+   if (abs(mMousePanAnchor.x() - mMousePanCurrentPos.x()) < 6 &&
+       abs(mMousePanAnchor.y() -  mMousePanCurrentPos.y()) < 6)
+   {
+      //create dead space based upon screen pixels
+      return;
+   }
+   double zoomFactor = getZoomPercentage() / 100.0;
+   double magicFactor = 0.05; //determined by trial and error
+   const double scaleFactor = magicFactor *
+      (SpatialDataView::getSettingMousePanSensitivity() / 100.0) * sqrt(zoomFactor);
+   double anchorX;
+   double anchorY;
+   double currentX;
+   double currentY;
+   translateScreenToWorld(mMousePanAnchor.x(), mMousePanAnchor.y(), anchorX, anchorY);
+   translateScreenToWorld(mMousePanCurrentPos.x(), mMousePanCurrentPos.y(), currentX, currentY);
+   double deltaX = (anchorX - currentX) * scaleFactor * -1;
+   double deltaY = (anchorY - currentY) * scaleFactor;
+   panBy(deltaX, deltaY);
+   pView->refresh();
 }

@@ -20,6 +20,8 @@
 #include "SpatialDataView.h"
 #include "TypesFile.h"
 
+#include <QtCore/QTimer>
+
 #include <string>
 #include <vector>
 
@@ -140,14 +142,20 @@ signals:
    void layerDisplayIndexesChanged();
 
 protected:
+   void enableMousePan(bool enabled);
+   bool isMousePanEnabled() const;
+   void setMousePanPos(const QPoint& globalScreenCoord);
+
    void updateStatusBar(const QPoint& screenCoord);
    void drawContents();
    void drawLayers();
    void drawOrigin();
    void drawAxis(float fX, float fY);
+   void drawMousePanAnchor();
    bool isListLayer(Layer* pLayer) const;
 
    bool event(QEvent* pEvent);
+   bool eventFilter(QObject* pWatched, QEvent* pEvent);
    void toolTipEvent(QHelpEvent* pEvent);
    void keyPressEvent(QKeyEvent* pEvent);
    void keyReleaseEvent(QKeyEvent* pEvent);
@@ -166,6 +174,7 @@ protected:
 protected slots:
    void keyPan();
    void updateMouseCursor(const MouseMode* pMouseMode);
+   void disableMousePan();
    void updateStatusBar();
    void notifyLayerModified();
    void createLayer(QAction* pAction);
@@ -183,6 +192,7 @@ protected slots:
    void changeBkgColor();
    void displayMeasurementProperties();
    void setAoiMode();
+   void toggleMousePanByKey();
 
 private:
    AttachmentPtr<SessionExplorer> mpExplorer;
@@ -200,6 +210,11 @@ private:
    PanLimitType mPanLimit;
    double mMinZoom;
    double mMaxZoom;
+   QPoint mMousePanAnchor;
+   QPoint mMousePanCurrentPos;
+   QTimer mMousePanTimer;
+   QPoint mMousePanEngagePos;
+   const MouseMode* mpOldMouseMode;
 
    // Context menu actions
    QAction* mpAnnotationAction;
@@ -220,6 +235,7 @@ private slots:
    void setRgbMode();
    void nextBand();
    void previousBand();
+   void mousePanTimeout();
 };
 
 #define SPATIALDATAVIEWADAPTEREXTENSION_CLASSES \

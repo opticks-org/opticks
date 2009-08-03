@@ -82,6 +82,7 @@ public:
    SETTING(MinimumZoomPixels, SpatialDataView, double, 1.0)
    SETTING(PanLimit, SpatialDataView, PanLimitType, CUBE_EXTENTS)
    SETTING(SlowPanSpeed, SpatialDataView, int, 10)
+   SETTING(MousePanSensitivity, SpatialDataView, int, 100)
 
    /**
     *  Emitted with boost::any<TextureMode> when the texture mode is changed.
@@ -112,6 +113,12 @@ public:
     *  @see     setActiveLayer()
     */
    SIGNAL_METHOD(SpatialDataView, LayerActivated)
+
+   /**
+    *  Emitted with boost::any<bool> when mouse pan is enabled or
+    *  disabled by the user.
+    */
+   SIGNAL_METHOD(SpatialDataView, MousePanEnabled)
 
    /**
     *  @copydoc SessionItem::getContextMenuActions()

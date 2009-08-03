@@ -91,6 +91,7 @@ private:
    QCheckBox* mpDisplayCrosshair;
    QSpinBox* mpFastPanSpeedSpin;
    QSpinBox* mpSlowPanSpeedSpin;
+   QSpinBox* mpMousePanSensitivitySpin;
    PanLimitTypeComboBox* mpPanLimit;
    QDoubleSpinBox* mpMinZoom;
    QSpinBox* mpMaxZoom;

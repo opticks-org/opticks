@@ -69,12 +69,15 @@ OptionsSpatialDataView::OptionsSpatialDataView() :
    // Pan Speed
    QLabel* pFastPanSpeedLabel = new QLabel("Fast:", this);
    QLabel* pSlowPanSpeedLabel = new QLabel("Slow:", this);
+   QLabel* pMousePanSensitivityLabel = new QLabel("Mouse Pan Sensitivity:", this);
    mpFastPanSpeedSpin = new QSpinBox(this);
    mpFastPanSpeedSpin->setSuffix(" Pixel(s)");
    mpFastPanSpeedSpin->setRange(1, numeric_limits<int>::max());
    mpSlowPanSpeedSpin = new QSpinBox(this);
    mpSlowPanSpeedSpin->setSuffix(" Pixel(s)");
    mpSlowPanSpeedSpin->setRange(1, numeric_limits<int>::max());
+   mpMousePanSensitivitySpin = new QSpinBox(this);
+   mpMousePanSensitivitySpin->setRange(1, 10000);
 
    QWidget* pPanSpeedWidget = new QWidget(this);
    QGridLayout* pPanSpeedLayout = new QGridLayout(pPanSpeedWidget);
@@ -84,6 +87,8 @@ OptionsSpatialDataView::OptionsSpatialDataView() :
    pPanSpeedLayout->addWidget(mpFastPanSpeedSpin, 0, 1);
    pPanSpeedLayout->addWidget(pSlowPanSpeedLabel, 1, 0);
    pPanSpeedLayout->addWidget(mpSlowPanSpeedSpin, 1, 1);
+   pPanSpeedLayout->addWidget(pMousePanSensitivityLabel, 2, 0);
+   pPanSpeedLayout->addWidget(mpMousePanSensitivitySpin, 2, 1);
    pPanSpeedLayout->setColumnStretch(2, 10);
    LabeledSection* pPanSpeedSection = new LabeledSection(pPanSpeedWidget, "Pan Speed", this);
 
@@ -163,6 +168,7 @@ OptionsSpatialDataView::OptionsSpatialDataView() :
    mpShowCoordinates->setChecked(View::getSettingInsetShowCoordinates());
    mpFastPanSpeedSpin->setValue(SpatialDataView::getSettingFastPanSpeed());
    mpSlowPanSpeedSpin->setValue(SpatialDataView::getSettingSlowPanSpeed());
+   mpMousePanSensitivitySpin->setValue(SpatialDataView::getSettingMousePanSensitivity());
    mpPanLimit->setCurrentValue(SpatialDataView::getSettingPanLimit());
    mpMinZoom->setValue(SpatialDataView::getSettingMinimumZoomPixels());
    double zoomRatio = SpatialDataView::getSettingMaximumZoomRatio();
@@ -191,6 +197,7 @@ void OptionsSpatialDataView::applyChanges()
    View::setSettingInsetShowCoordinates(mpShowCoordinates->isChecked());
    SpatialDataView::setSettingFastPanSpeed(mpFastPanSpeedSpin->value());
    SpatialDataView::setSettingSlowPanSpeed(mpSlowPanSpeedSpin->value());
+   SpatialDataView::setSettingMousePanSensitivity(mpMousePanSensitivitySpin->value());
    SpatialDataView::setSettingPanLimit(mpPanLimit->getCurrentValue());
    SpatialDataView::setSettingMinimumZoomPixels(mpMinZoom->value());
    int zoomPercent = mpMaxZoom->value();
