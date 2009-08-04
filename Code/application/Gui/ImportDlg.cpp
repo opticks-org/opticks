@@ -143,7 +143,7 @@ ImportDlg::ImportDlg(const QString& strPlugInSubtype, const QString& strInitialP
    // Connections
 #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Change the selectionChanged() signal to " \
    "filesSelected() and remove the mFilename member when the filesSelected() signal is emitted when the " \
-   "selection changes but before the dialog is accepted. (Qt 4.5.0) (dsulgrov)")
+   "selection changes but before the dialog is accepted. (Qt 4.5.2) (dsulgrov)")
    QListView* pListView = findChild<QListView*>("listView");
    VERIFYNRV(pListView != NULL);
 
