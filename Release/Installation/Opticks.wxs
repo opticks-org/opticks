@@ -227,6 +227,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
                <File Name="BandMath.dll" Id="F__BandMathPlugIn" DiskId="1" />
                <File Name="ConvolutionFilter.dll" Id="F__ConvolutionFilterPlugIn" DiskId="1" />
                <File Name="CoreIo.dll" Id="F__CoreIoPlugIn" DiskId="1" />
+               <File Name="Covariance.dll" Id="F__CovariancePlugIn" DiskId="1" />
                <File Name="DataFusion.dll" Id="F__DataFusionPlugIn" DiskId="1" />
                <File Name="Dted.dll" Id="F__DtedPlugIn" DiskId="1" />
                <File Name="Envi.dll" Id="F__EnviPlugIn" DiskId="1" />

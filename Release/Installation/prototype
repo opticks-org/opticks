@@ -60,6 +60,7 @@ f none $APPDIR/PlugIns/AutoImporter.so=$OpticksBinariesDir/PlugIns/AutoImporter.
 f none $APPDIR/PlugIns/BandMath.so=$OpticksBinariesDir/PlugIns/BandMath.so 644 root $GROUP
 f none $APPDIR/PlugIns/ConvolutionFilter.so=$OpticksBinariesDir/PlugIns/ConvolutionFilter.so 644 root $GROUP
 f none $APPDIR/PlugIns/CoreIo.so=$OpticksBinariesDir/PlugIns/CoreIo.so 644 root $GROUP
+f none $APPDIR/PlugIns/Covariancs.so=$OpticksBinariesDir/PlugIns/Covariance.so 644 root $GROUP
 f none $APPDIR/PlugIns/DataFusion.so=$OpticksBinariesDir/PlugIns/DataFusion.so 644 root $GROUP
 f none $APPDIR/PlugIns/Dted.so=$OpticksBinariesDir/PlugIns/Dted.so 644 root $GROUP
 f none $APPDIR/PlugIns/ENVI.so=$OpticksBinariesDir/PlugIns/ENVI.so 644 root $GROUP
