@@ -11,6 +11,7 @@
 #include "PlugInArgImp.h"
 
 #include <algorithm>
+#include <memory>
 
 #include <QtCore/QDataStream>
 #include <QtCore/QString>
