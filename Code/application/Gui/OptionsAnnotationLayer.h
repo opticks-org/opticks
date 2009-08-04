@@ -17,13 +17,14 @@ class ArcRegionComboBox;
 class CustomColorButton;
 class FillStyleComboBox;
 class FontSizeComboBox;
+class GraphicUnitsWidget;
+class LineStyleComboBox;
+class LineWidthComboBox;
 class QCheckBox;
 class QComboBox;
 class QDoubleSpinBox;
 class QFontComboBox;
 class QSpinBox;
-class LineStyleComboBox;
-class LineWidthComboBox;
 class SymbolTypeButton;
 
 class OptionsAnnotationLayer : public QWidget
@@ -109,6 +110,7 @@ private:
    ArcRegionComboBox* mpArcRegion;
    QSpinBox* mpApex;
    QSpinBox* mpAlpha;
+   GraphicUnitsWidget* mpUnitsWidget;
 };
 
 #endif

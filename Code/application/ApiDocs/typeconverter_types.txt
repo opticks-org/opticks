@@ -48,6 +48,7 @@
  *    - StretchType
  *    - SymbolType
  *    - ThresholdType
+ *    - UnitSystem
  *    - UnitType
  *    - WindowSizeType
  *    - WindowType

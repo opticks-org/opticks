@@ -27,6 +27,7 @@ class GraphicScaleWidget;
 class GraphicSymbolWidget;
 class GraphicTextWidget;
 class GraphicTriangleWidget;
+class GraphicUnitsWidget;
 class GraphicViewWidget;
 class LabeledSection;
 class SessionItem;
@@ -127,6 +128,11 @@ private:
    GraphicViewWidget* mpViewWidget;
    LabeledSection* mpViewSection;
    Modifier mViewModifier;
+
+   // Units
+   GraphicUnitsWidget* mpUnitsWidget;
+   LabeledSection* mpUnitsSection;
+   Modifier mUnitsModifier;
 };
 
 #endif

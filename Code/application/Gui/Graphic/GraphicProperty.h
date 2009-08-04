@@ -527,4 +527,21 @@ private:
    unsigned int mSymbolSize;
 };
 
+class GraphicUnitsProperty : public GraphicProperty
+{
+public:
+   GraphicUnitsProperty(UnitSystem units);
+
+   UnitSystem getUnitSystem() const;
+   bool set(const GraphicProperty* pProp);
+   bool compare(const GraphicProperty* pProp) const;
+   GraphicProperty* copy() const;
+
+   bool toXml(XMLWriter* pXml) const;
+   bool fromXml(DOMNode* pDocument, unsigned int version);
+
+private:
+   UnitSystem mUnits;
+};
+
 #endif

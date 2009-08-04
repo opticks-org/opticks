@@ -2423,3 +2423,95 @@ bool GraphicSymbolSizeProperty::set(const GraphicProperty* pProp)
    mSymbolSize = pSymbolProp->mSymbolSize;
    return true;
 }
+
+//////////////////////////
+// GraphicUnitsProperty //
+//////////////////////////
+
+GraphicUnitsProperty::GraphicUnitsProperty(UnitSystem units) :
+   GraphicProperty("UnitSystem"),
+   mUnits(units)
+{}
+
+UnitSystem GraphicUnitsProperty::getUnitSystem() const
+{
+   return mUnits;
+}
+
+bool GraphicUnitsProperty::compare(const GraphicProperty* pProp) const
+{
+   const GraphicUnitsProperty* pUnitsProp = dynamic_cast<const GraphicUnitsProperty*>(pProp);
+   if (pUnitsProp == NULL)
+   {
+      return false;
+   }
+
+   return mUnits == pUnitsProp->getUnitSystem();
+}
+
+GraphicProperty* GraphicUnitsProperty::copy() const
+{
+   return new GraphicUnitsProperty(mUnits);
+}
+
+bool GraphicUnitsProperty::toXml(XMLWriter* pXml) const
+{
+   pXml->pushAddPoint(pXml->addElement("UnitSystem"));
+   GraphicProperty::toXml(pXml);
+   switch (mUnits)
+   {
+      case UNIT_KM:
+         pXml->addAttr("system", "m-km");
+         break;
+      case UNIT_KFT:
+         pXml->addAttr("system", "f-kft");
+         break;
+      case UNIT_MI:
+         pXml->addAttr("system", "f-mi");
+         break;
+      default:
+         return false;
+   }
+
+   pXml->popAddPoint();
+   return true;
+}
+
+bool GraphicUnitsProperty::fromXml(DOMNode* pDocument, unsigned int version)
+{
+   GraphicProperty::fromXml(pDocument, version);
+
+   DOMElement* elmnt(static_cast<DOMElement*>(pDocument));
+   string system(A(elmnt->getAttribute(X("system"))));
+
+   if (system == "m-km")
+   {
+      mUnits = UNIT_KM;
+   }
+   else if (system == "f-kft")
+   {
+      mUnits = UNIT_KFT;
+   }
+   else if (system == "f-mi")
+   {
+      mUnits = UNIT_MI;
+   }
+   else
+   {
+      return false;
+   }
+
+   return true;
+}
+
+bool GraphicUnitsProperty::set(const GraphicProperty* pProp)
+{
+   const GraphicUnitsProperty* pUnitsProp = dynamic_cast<const GraphicUnitsProperty*>(pProp);
+   if (pUnitsProp == NULL)
+   {
+      return false;
+   }
+
+   mUnits = pUnitsProp->mUnits;
+   return true;
+}

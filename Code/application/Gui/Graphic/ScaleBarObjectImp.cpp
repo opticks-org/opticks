@@ -17,6 +17,7 @@
 #include "DataElement.h"
 #include "DrawUtil.h"
 #include "GeoAlgorithms.h"
+#include "GeoConversions.h"
 #include "GraphicGroup.h"
 #include "GraphicLayer.h"
 #include "LayerList.h"
@@ -29,6 +30,7 @@
 #include "TextObjectImp.h"
 
 #include <string>
+#include <sstream>
 #include <list>
 using namespace std;
 
@@ -43,10 +45,12 @@ ScaleBarObjectImp::ScaleBarObjectImp(const string& id, GraphicObjectType type, G
                                      LocationType pixelCoord) :
    FilledObjectImp(id, type, pLayer, pixelCoord),
    mXgsd(1.0),
-   mYgsd(1.0),
+   mHaveGeo(false),
    mNeedsLayout(true),
    mpGroup(GROUP_OBJECT, pLayer, pixelCoord)
 {
+   addProperty("UnitSystem");
+
    mpGeoreference.addSignal(SIGNAL_NAME(RasterElement, GeoreferenceModified),
       Slot(this, &ScaleBarObjectImp::georeferenceModified));
 
@@ -171,7 +175,7 @@ ScaleBarObjectImp::ScaleBarObjectImp(const string& id, GraphicObjectType type, G
          if (pRaster != NULL && pRaster->isGeoreferenced())
          {
             mXgsd = GeoAlgorithms::getXaxisGSD(pRaster);
-            mYgsd = GeoAlgorithms::getYaxisGSD(pRaster);
+            mHaveGeo = true;
          }
       }
 
@@ -240,59 +244,91 @@ void ScaleBarObjectImp::updateLayout()
    double barWidth = urCorner.mX - llCorner.mX;
    double barHeight = urCorner.mY - llCorner.mY;
 
-   double unitScale = 1.0;
-   string units = "m";
+   double spacingScale = 1.0;
+   string unitsText = "pix";
+   double unitScale = 1.0; //mXgsd is calculated in meters
+   if (mHaveGeo)
+   {
+      if (getUnitSystem() == UNIT_KFT)
+      {
+         unitsText = "ft";
+      }
+      else if (getUnitSystem() == UNIT_KM)
+      {
+         unitsText = "m";
+      }
+      else if (getUnitSystem() == UNIT_MI)
+      {
+         unitsText = "mi";
+      }
 
-   // if the scalebar is an object in the layout layer, we need to scale the
-   // scalebar length to scene pixels from page coordinates
-   double gsdScale = 1.0;
+      // if the scalebar is an object in the layout layer, we need to scale the
+      // scalebar length to scene pixels from page coordinates
+      if (getUnitSystem() == UNIT_KFT)
+      {
+         unitScale = GeoConversions::convertMetersToFeet(1);
+      }
+      else if (getUnitSystem() == UNIT_MI)
+      {
+         unitScale = GeoConversions::convertMetersToMiles(1);
+      }
+   }
 
    double deltaX = urCorner.mX - llCorner.mX;
    double deltaY = urCorner.mY - llCorner.mY;
-   double lengthBar = fabs(deltaX * mXgsd * gsdScale);
+   double lengthBar = fabs(deltaX * mXgsd * unitScale);
    double totalLengthPixels = fabs(deltaX);
-   //loc5
-   double ticksize = 0.0;
-   double ticksizeMeters = 0.0;
-   ticksizeMeters = lengthBar;
-   ticksizeMeters = pow(10.0, floor(log10(lengthBar / 5.0)));
+   double ticksize = 0.0; //ticksize in pixels
+   double ticksizeDistance = pow(10.0, floor(log10(lengthBar / 5.0))); //ticksize in specific units (feet or meters)
 
-   if (ticksizeMeters * 5.0 * 5.0 > lengthBar)
+   if (ticksizeDistance * 5.0 * 5.0 > lengthBar)
    {
-      if (ticksizeMeters * 2.0 * 5.0 > lengthBar)
+      if (ticksizeDistance * 2.0 * 5.0 > lengthBar)
       {
          // times 1.0;
       }
       else
       {
-         ticksizeMeters *= 2.0;
+         ticksizeDistance *= 2.0;
       }
    }
    else
    {
-      ticksizeMeters *= 5.0;
+      ticksizeDistance *= 5.0;
    }
 
-   if (ticksizeMeters >= 200.0) // 5 ticks >= 1km
+   if (!mHaveGeo || getUnitSystem() == UNIT_KM || getUnitSystem() == UNIT_KFT)
    {
-      unitScale = 1.0 / 1000.0;
-      units = "km";
+      if (ticksizeDistance >= (1000 / 5.0)) // 5 ticks >= 1000 base units (either meters or feet)
+      {
+         spacingScale /= 1000.0; //meters to kilometers, feet to kilofeet
+         unitsText = "k" + unitsText;
+      }
+   }
+   else if (getUnitSystem() == UNIT_MI)
+   {
+      if (ticksizeDistance < (0.25 / 5.0)) //5 ticks is less than 1/4 mile, convert to feet.
+      {
+         spacingScale = GeoConversions::convertMilesToFeet(spacingScale);
+         unitsText = "ft";
+      }
    }
 
    // need to divide ticksize by gsd here
    if (lengthBar != 0.0)
    {
-      ticksize = DrawUtil::sign(deltaX) * ticksizeMeters * totalLengthPixels / lengthBar; // ticksize in pixels
+      ticksize = DrawUtil::sign(deltaX) * ticksizeDistance * totalLengthPixels / lengthBar; // ticksize in pixels
    }
 
-   char buf[100];
-   sprintf(buf, "%g", (ticksizeMeters * 5.0) * unitScale);
-   TextStringProperty centerText((string)buf + units);
-   char rightEnd[100];
-   sprintf(rightEnd, "%g", lengthBar*unitScale);
+   ostringstream center;
+   center << (ticksizeDistance * 5.0) * spacingScale << unitsText;
+   TextStringProperty centerText(center.str());
 
-   TextStringProperty rightText((string)rightEnd + units);
-   TextStringProperty leftText("0" + units);
+   ostringstream right;
+   right << lengthBar * spacingScale << unitsText;
+   string newRightVal = right.str();
+   TextStringProperty rightText(right.str());
+   TextStringProperty leftText("0" + unitsText);
 
    double width = 0.0;
    double height = 0.0;
@@ -488,7 +524,7 @@ bool ScaleBarObjectImp::setProperty(const GraphicProperty* pProp)
    it = objects.begin();
    string name = pProp->getName();
 
-   if ((name == "Rotation") || (name == "BoundingBox"))
+   if ((name == "Rotation") || (name == "BoundingBox") || (name =="UnitSystem"))
    {
       bool bSuccess = false;
       bSuccess = FilledObjectImp::setProperty(pProp);
@@ -556,7 +592,7 @@ bool ScaleBarObjectImp::setProperty(const GraphicProperty* pProp)
 GraphicProperty* ScaleBarObjectImp::getProperty(const string& name) const
 {
    GraphicProperty* pProperty = NULL;
-   if ((name == "Rotation") || (name == "BoundingBox"))
+   if ((name == "Rotation") || (name == "BoundingBox") || (name == "UnitSystem"))
    {
       pProperty = FilledObjectImp::getProperty(name);
       if (pProperty != NULL)

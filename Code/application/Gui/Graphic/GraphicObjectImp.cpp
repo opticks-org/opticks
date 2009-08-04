@@ -271,6 +271,10 @@ GraphicProperty* GraphicObjectImp::createProperty(const string& propertyName)
    {
       pProperty = new LineScaledProperty(GraphicLayer::getSettingLineScaled());
    }
+   else if (propertyName == "UnitSystem")
+   {
+      pProperty = new GraphicUnitsProperty(GraphicLayer::getSettingUnitSystem());
+   }
 
    return pProperty;
 }
@@ -1715,6 +1719,31 @@ View* GraphicObjectImp::getObjectView() const
    }
 
    return NULL;
+}
+
+
+bool GraphicObjectImp::setUnitSystem(UnitSystem units)
+{
+   if (hasProperty("UnitSystem") == false)
+   {
+      return false;
+   }
+
+   GraphicUnitsProperty unitsProp(units);
+   return setProperty(&unitsProp);
+}
+
+UnitSystem GraphicObjectImp::getUnitSystem() const
+{
+   UnitSystem units;
+
+   GraphicUnitsProperty* pUnits = dynamic_cast<GraphicUnitsProperty*>(getProperty("UnitSystem"));
+   if (pUnits != NULL)
+   {
+      units = pUnits->getUnitSystem();
+   }
+
+   return units;
 }
 
 GraphicLayer* GraphicObjectImp::getLayer() const

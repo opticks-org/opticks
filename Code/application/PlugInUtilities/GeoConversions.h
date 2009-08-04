@@ -145,6 +145,19 @@ namespace GeoConversions
    {
       return aMiles * 1609.3412196;
    }
+
+   /** 
+    *   Converts statute miles to feet.
+    *
+    *   @param miles
+    *     A value in statute miles that is to be converted to feet.
+    *   @return
+    *     The input value converted to feet.
+    */
+   inline double convertMilesToFeet(double miles)
+   {
+      return miles * 5280.0f;
+   }
    
    /**
     *   Converts nautical miles to radians

@@ -785,6 +785,12 @@ ADD_ENUM_MAPPING(TEXTURE_LINEAR, "Linear", "Linear")
 ADD_ENUM_MAPPING(TEXTURE_NEAREST_NEIGHBOR, "NearestNeighbor", "NearestNeighbor")
 END_ENUM_MAPPING()
 
+BEGIN_ENUM_MAPPING(UnitSystem)
+ADD_ENUM_MAPPING(UNIT_KM, "meters/kilometers", "m-km")
+ADD_ENUM_MAPPING(UNIT_KFT, "feet/kilofeet", "f-kft")
+ADD_ENUM_MAPPING(UNIT_MI, "feet/miles", "f-mi")
+END_ENUM_MAPPING()
+
 BEGIN_ENUM_MAPPING(UnitType)
 ADD_ENUM_MAPPING(RADIANCE, "Radiance", "Radiance")
 ADD_ENUM_MAPPING(REFLECTANCE, "Reflectance", "Reflectance")

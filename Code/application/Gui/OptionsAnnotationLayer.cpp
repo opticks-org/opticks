@@ -15,6 +15,7 @@
 #include "FillStyleComboBox.h"
 #include "FontSizeComboBox.h"
 #include "GraphicLayer.h"
+#include "GraphicUnitsWidget.h"
 #include "LabeledSection.h"
 #include "LineStyleComboBox.h"
 #include "LineWidthComboBox.h"
@@ -174,6 +175,10 @@ OptionsAnnotationLayer::OptionsAnnotationLayer() :
    LabeledSection* pTrianglePropertiesSection = new LabeledSection(pTrianglePropertiesWidget,
       "Default Triangle Properties", this);
 
+   // Units
+   mpUnitsWidget = new GraphicUnitsWidget(this);
+   LabeledSection* pUnitsSection = new LabeledSection(mpUnitsWidget, "Default Unit System", this);
+
    // Dialog layout
    QVBoxLayout* pLayout = new QVBoxLayout(this);
    pLayout->setMargin(0);
@@ -182,8 +187,9 @@ OptionsAnnotationLayer::OptionsAnnotationLayer() :
    pLayout->addWidget(pTextPropertiesSection);
    pLayout->addWidget(pArcPropertiesSection);
    pLayout->addWidget(pTrianglePropertiesSection);
+   pLayout->addWidget(pUnitsSection);
    pLayout->addStretch(10);
-      
+
    // Initialize From Settings
    mpTextColor->setColor(GraphicLayer::getSettingTextColor());
    mpStartAngle->setValue(GraphicLayer::getSettingStartAngle());
@@ -214,6 +220,7 @@ OptionsAnnotationLayer::OptionsAnnotationLayer() :
    double alpha = GraphicLayer::getSettingAlpha();
    int opacity = static_cast<int>(alpha / 2.550f + 0.5f); 
    mpAlpha->setValue(opacity);
+   mpUnitsWidget->setUnitSystem(GraphicLayer::getSettingUnitSystem());
 }
 
 void OptionsAnnotationLayer::applyChanges()
@@ -248,6 +255,7 @@ void OptionsAnnotationLayer::applyChanges()
       alpha = 255;
    }
    GraphicLayer::setSettingAlpha(alpha);
+   GraphicLayer::setSettingUnitSystem(mpUnitsWidget->getUnitSystem());
 }
 
 OptionsAnnotationLayer::~OptionsAnnotationLayer()

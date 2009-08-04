@@ -133,6 +133,10 @@ namespace GraphicUtilities
    // View
    bool setObjectView(const std::list<GraphicObject*>& objects, View* pView);
    View* getObjectView(const std::list<GraphicObject*>& objects);
+
+   // Units
+   bool setUnitSystem(const std::list<GraphicObject*>& objects, UnitSystem units);
+   UnitSystem getUnitSystem(const std::list<GraphicObject*>& objects);
 };
 
 #endif

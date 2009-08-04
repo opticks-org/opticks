@@ -39,7 +39,7 @@ class View;
  *    the object is modified.
  *  - All notifications documented in Subject.
  *
- *  @see     GraphicLayer, GraphicObjectType
+ *  @see     GraphicObjectExt1, GraphicLayer, GraphicObjectType
  */
 class GraphicObject : public SessionItem, public Subject, public Serializable
 {
@@ -96,8 +96,8 @@ public:
     *           The new upper right corner position for the object in pixel
     *           coordinates.
     *
-    *  @return  TRUE if the value was set successfully, otherwise FALSE.
-    *           FALSE is also returned if an error occurs.
+    *  @return  Returns \c true if the value was set successfully, otherwise \c false.
+    *           It will return \c false if an error occurs.
     */
    virtual bool setBoundingBox(LocationType llCorner, LocationType urCorner) = 0;
 
@@ -126,8 +126,8 @@ public:
     *           Values outside this range are automatically adjusted to fall
     *           within the range.
     *
-    *  @return  TRUE if the value was set successfully, otherwise FALSE.
-    *           FALSE is also returned if an error occurs.
+    *  @return  Returns \c true if the value was set successfully, otherwise \c false.
+    *           It will return \c false if an error occurs.
     */
    virtual bool setRotation(double dAngle) = 0;
 
@@ -144,13 +144,13 @@ public:
     *  Sets the line state for an object.
     *
     *  @param   bLine
-    *           TRUE if the object should be displayed, FALSE if the object
+    *           Provide \c true if the object should be displayed, or \c false if the object
     *           line should not be displayed.  This pertains primarily to
     *           filled objects where line state indicates whether the object
     *           border is visible.
     *
-    *  @return  TRUE if the value was set successfully, otherwise FALSE.
-    *           FALSE is also returned if an error occurs.
+    *  @return  Returns \c true if the value was set successfully, otherwise \c false.
+    *           It will return \c false if an error occurs.
     */
    virtual bool setLineState(bool bLine) = 0;
 
@@ -159,9 +159,9 @@ public:
     *
     *  @param   pSuccess
     *           A valid bool pointer will be populated with the success of the
-    *           method.  FALSE is populated if an error occurs.
+    *           method.  \em pSuccess is populated with \c false if an error occurs.
     *
-    *  @return  TRUE if the object line is displayed, otherwise FALSE.  This pertains
+    *  @return  Returns \c true if the object line is displayed, otherwise \c false.  This pertains
     *           primarily to filled objects where line state indicates whether
     *           the object border is visible.
     */
@@ -173,8 +173,8 @@ public:
     *  @param   lineColor
     *           The new line color.
     *
-    *  @return  TRUE if the value was set successfully, otherwise FALSE.
-    *           FALSE is also returned if an error occurs.
+    *  @return  Returns \c true if the value was set successfully, otherwise \c false.
+    *           It will return \c false if an error occurs.
     */
    virtual bool setLineColor(ColorType lineColor) = 0;
 
@@ -194,8 +194,8 @@ public:
     *  @param   dWidth
     *           The line width.
     *
-    *  @return  TRUE if the value was set successfully, otherwise FALSE.
-    *           FALSE is also returned if an error occurs.
+    *  @return  Returns \c true if the value was set successfully, otherwise \c false.
+    *           It will return \c false if an error occurs.
     */
    virtual bool setLineWidth(double dWidth) = 0;
 
@@ -213,8 +213,8 @@ public:
     *  @param   eLine
     *           The line style.
     *
-    *  @return  TRUE if the value was set successfully, otherwise FALSE.
-    *           FALSE is also returned if an error occurs.
+    *  @return  Returns \c true if the value was set successfully, otherwise \c false.
+    *           It will return \c false if an error occurs.
     */
    virtual bool setLineStyle(LineStyle eLine) = 0;
 
@@ -230,16 +230,16 @@ public:
     * Set the whether the lines should be scaled with the zoom level.
     *
     * @param scaled
-    *        True if the line widths should be scaled, false otherwise.
+    *        Provide \c true if the line widths should be scaled, \c false otherwise.
     *
-    * @return True if the operation succeeded, false otherwise.
+    * @return Returns \c true if the operation succeeded, \c false otherwise.
     */
    virtual bool setLineScaled(bool scaled) = 0;
 
    /**
     * Get the whether the lines should be scaled with the zoom level.
     *
-    * @return True if the line widths should be scaled, false otherwise.
+    * @return Returns \c true if the line widths should be scaled, \c false otherwise.
     */
    virtual bool getLineScaled() const = 0;
 
@@ -251,8 +251,8 @@ public:
     *  @param   eRegion
     *           The new region type.
     *
-    *  @return  TRUE if the region was set successfully, otherwise FALSE.
-    *           FALSE is also returned if the object is not an arc object.
+    *  @return  Returns \c true if the region was set successfully, otherwise \c false.
+    *           It will return \c false if the object is not an arc object.
     */
    virtual bool setArcRegion(ArcRegion eRegion) = 0;
 
@@ -278,9 +278,8 @@ public:
     *           The stop angle.  Values are automatically adjusted to be
     *           between 0 and 360.
     *
-    *  @return  TRUE if the value was set successfully, otherwise FALSE.
-    *           FALSE is also returned if the object is not an arc
-    *           object.
+    *  @return  Returns \c true if the value was set successfully, otherwise \c false.
+    *           It will return \c false if the object is not an arc object.
     */
    virtual bool setAngles(double dStart, double dStop) = 0;
 
@@ -291,9 +290,8 @@ public:
     *           The start angle.  Values are automatically adjusted to be
     *           between 0 and 360.
     *
-    *  @return  TRUE if the value was set successfully, otherwise FALSE.
-    *           FALSE is also returned if the object is not an arc
-    *           object.
+    *  @return  Returns \c true if the value was set successfully, otherwise \c false.
+    *           It will return \c false if the object is not an arc object.
     *
     *  @see     setAngles()
     */
@@ -306,9 +304,8 @@ public:
     *           The stop angle.  Values are automatically adjusted to be
     *           between 0 and 360.
     *
-    *  @return  TRUE if the value was set successfully, otherwise FALSE.
-    *           FALSE is also returned if the object is not an arc
-    *           object.
+    *  @return  Returns \c true if the value was set successfully, otherwise \c false.
+    *           It will return \c false if the object is not an arc object.
     *
     *  @see     setAngles()
     */
@@ -343,12 +340,12 @@ public:
     *  whether the object have any fill or should be empty.
     *
     *  @param   bFill
-    *           TRUE if the object should be filled, FALSE if the object
-    *           should have an empty fill.  Passing in TRUE fills the object
+    *           Provide \c true if the object should be filled, or \c false if the object
+    *           should have an empty fill.  Passing in \c true fills the object
     *           according to it fill style.
     *
-    *  @return  TRUE if the value was set successfully, otherwise FALSE.
-    *           FALSE is also returned if the object is not a filled object.
+    *  @return  Returns \c true if the value was set successfully, otherwise \c false.
+    *           It will return \c false if the object is not a filled object.
     *
     *  @see     setFillStyle()
     */
@@ -362,9 +359,9 @@ public:
     *
     *  @param   pSuccess
     *           A valid bool pointer will be populated with the success of the
-    *           method.  FALSE is populated if the object is not a filled object.
+    *           method.  \em pSuccess will be populated with \c false if the object is not a filled object.
     *
-    *  @return  TRUE if the object is filled, FALSE if the object fill is empty.
+    *  @return  Returns \c true if the object is filled, or \c false if the object fill is empty.
     *
     *  @see     getFillStyle()
     */
@@ -376,8 +373,8 @@ public:
     *  @param   fillColor
     *           The new fill color.
     *
-    *  @return  TRUE if the value was set successfully, otherwise FALSE.
-    *           FALSE is also returned if the object is not a filled object.
+    *  @return  Returns \c true if the value was set successfully, otherwise \c false.
+    *           It will return \c false if the object is not a filled object.
     */
    virtual bool setFillColor(ColorType fillColor) = 0;
 
@@ -397,9 +394,8 @@ public:
     *  @param   eFill
     *           The fill style.
     *
-    *  @return  TRUE if the value was set successfully, otherwise FALSE.
-    *           FALSE is also returned if the object is not a filled
-    *           object.
+    *  @return  Returns \c true if the value was set successfully, otherwise \c false.
+    *           It will return \c false if the object is not a filled object.
     */
    virtual bool setFillStyle(FillStyle eFill) = 0;
 
@@ -422,9 +418,8 @@ public:
     *  @param   eHatch
     *           The hatch style.
     *
-    *  @return  TRUE if the value was set successfully, otherwise FALSE.
-    *           FALSE is also returned if the object is not a filled
-    *           object.
+    *  @return  Returns \c true if the value was set successfully, otherwise \c false.
+    *           It will return \c false if the object is not a filled object.
     */
    virtual bool setHatchStyle(SymbolType eHatch) = 0;
 
@@ -448,9 +443,8 @@ public:
     *  @param   dApex
     *           The apex value.  Valid values range from 0.0 to 1.0.
     *
-    *  @return  TRUE if the value was set successfully, otherwise FALSE.
-    *           FALSE is also returned if the object is not a triangle
-    *           object.
+    *  @return  Returns \c true if the value was set successfully, otherwise \c false.
+    *           It will return \c false if the object is not a triangle object.
     */
    virtual bool setApex(double dApex) = 0;
 
@@ -470,8 +464,8 @@ public:
     *  @param   objectText
     *           The text string.
     *
-    *  @return  TRUE if the value was set successfully, otherwise FALSE.
-    *           FALSE is also returned if the object is not a text object.
+    *  @return  Returns \c true if the value was set successfully, otherwise \c false.
+    *           It will return \c false if the object is not a text object.
     */
    virtual bool setText(const std::string& objectText) = 0;
 
@@ -509,8 +503,8 @@ public:
     *  @param   textColor
     *           The new text color.
     *
-    *  @return  TRUE if the value was set successfully, otherwise FALSE.
-    *           FALSE is also returned if the object is not a text object.
+    *  @return  Returns \c true if the value was set successfully, otherwise \c false.
+    *           It will return \c false if the object is not a text object.
     */
    virtual bool setTextColor(ColorType textColor) = 0;
 
@@ -531,8 +525,8 @@ public:
     *           The new text alignment.  Valid values are defined to be
     *           the same values as the Qt::AlignmentFlags enumeration.
     *
-    *  @return  True if the value was set successfully, otherwise false.
-    *           False is also returned if the object is not a text object.
+    *  @return  Returns \c true if the value was set successfully, otherwise \c false.
+    *           It will return \c false if the object is not a text object.
     */
    virtual bool setTextAlignment(int iAlignment) = 0;
 
@@ -556,9 +550,8 @@ public:
     *  @param   dScale
     *           The new scale value.
     *
-    *  @return  TRUE if the value was set successfully, otherwise FALSE.
-    *           FALSE is also returned if the object is not one of the valid
-    *           objects.
+    *  @return  Returns \c true if the value was set successfully, otherwise \c false.
+    *           It will return \c false if the object is not one of the valid objects.
     */
    virtual bool setScale(double dScale) = 0;
 
@@ -579,9 +572,9 @@ public:
     *           The name of the file containing the image to display in the
     *           object.  Cannot be \c NULL.
     *
-    *  @return  TRUE if the image was set successfully from the file, otherwise
-    *           FALSE.  FALSE is also returned if the object is not a file
-    *           image object.
+    *  @return  Returns \c true if the image was set successfully from the file, otherwise
+    *           \c false.
+    *           It will return \c false if the object is not a file image object.
     *
     *  @see     setObjectImage(), setAlpha()
     */
@@ -602,8 +595,8 @@ public:
     *           transparent pixels.  This value is separate from the object's
     *           alpha value.
     *
-    *  @return  TRUE if the image was set successfully, otherwise FALSE.
-    *           FALSE is also returned if the object is not an image object.
+    *  @return  Returns \c true if the image was set successfully, otherwise \c false.
+    *           It will return \c false if the object is not an image object.
     *
     *  @see     setImageFile(), setAlpha()
     */
@@ -645,8 +638,8 @@ public:
     *           The new alpha value.  Valid values range from 0
     *           to 255, with 0 being transparent and 255 being opaque.
     *
-    *  @return  TRUE if the value was set successfully, otherwise FALSE.
-    *           FALSE is also returned if the object is not an image object.
+    *  @return  Returns \c true if the value was set successfully, otherwise \c false.
+    *           It will return \c false if the object is not an image object.
     */
    virtual bool setAlpha(double alpha) = 0;
 
@@ -665,8 +658,8 @@ public:
     *           is a valid input, where the view object displays a message
     *           indicating that no view is available.
     *
-    *  @return  TRUE if the value was set successfully, otherwise FALSE.
-    *           FALSE is also returned if the object is not a view object.
+    *  @return  Returns \c true if the value was set successfully, otherwise \c false.
+    *           It will return \c false if the object is not a view object.
     *
     *  @notify  This method will notify ViewObject::signalViewCreated() with
     *           any<View*> and/or ViewObject::signalViewDeleted() with
@@ -688,7 +681,7 @@ public:
     *  @param   vertices
     *           The vertices to add to the object.
     *
-    *  @return  True if the vertices have been successfully added.
+    *  @return  Returns \c true if the vertices have been successfully added.
     */
    virtual bool addVertices(const std::vector<LocationType>& vertices) = 0;
 
@@ -698,7 +691,7 @@ public:
     *  @param   geoVertices
     *           The lat/long vertices to add to the object.
     *
-    *  @return  True if the vertices have been successfully added.
+    *  @return  Returns \c true if the vertices have been successfully added.
     */
    virtual bool addGeoVertices(const std::vector<LocationType>& geoVertices) = 0;
 
@@ -710,7 +703,7 @@ public:
     * a doughnut shape.  The vertices added between calls to
     * newPath() make a single path.
     *
-    * @return True if a new path was successfully added, false
+    * @return Returns \c true if a new path was successfully added, \c false
     *         otherwise.  This method will fail if no vertices
     *         have been added since the last call to newPath().
     */
@@ -722,7 +715,7 @@ public:
     * This method determines whether the object is a shape, 
     * like RECTANGLE_OBJECT or a tool, like MOVE_OBJECT.
     *
-    * @return True if the object is a visible shape, false if
+    * @return Returns \c true if the object is a visible shape, \c false if
     *         it is a non-visible tool.
     */
    virtual bool isVisible() const = 0;
@@ -749,7 +742,7 @@ public:
     * @param symbolName
     *        The name of the symbol to draw
     *
-    * @return True if the operation succeeded, false otherwise.
+    * @return Returns \c true if the operation succeeded, \c false otherwise.
     */
    virtual bool setSymbolName(const std::string &symbolName) = 0;
 
@@ -768,7 +761,7 @@ public:
     * @param symbolSize
     *        The size of the symbol to draw.  This is in screen pixels.
     *
-    * @return True if the operation succeeded, false otherwise.
+    * @return Returns \c true if the operation succeeded, \c false otherwise.
     */
    virtual bool setSymbolSize(unsigned int symbolSize) = 0;
 
@@ -800,6 +793,44 @@ protected:
     * This should be destroyed by calling GraphicLayer::removeObject.
     */
    virtual ~GraphicObject() {}
+};
+
+/**
+ * Extends capability of the GraphicObject interface.
+ *
+ * This class provides additional capability for the GraphicObject interface class.
+ * A pointer to this class can be obtained by performing a dynamic cast on a
+ * pointer to GraphicObject or any of its subclasses.
+ *
+ * @warning A pointer to this class can only be used to call methods contained
+ *           in this extension class and cannot be used to call any methods in
+ *           GraphicObject or its subclasses.
+ */
+class GraphicObjectExt1
+{
+public:
+   /**
+    *  Sets the unit system for a graphic object.
+    *
+    *  @param   units
+    *           The system of units to use.
+    *
+    *  @return  Returns \c true if the value was set successfully, otherwise \c false.
+    */
+   virtual bool setUnitSystem(UnitSystem units) = 0;
+
+   /**
+    *  Returns the unit system of a graphic object.
+    *
+    *  @return  The units.
+    */
+   virtual UnitSystem getUnitSystem() const = 0;
+
+protected:
+   /**
+    * This should be destroyed by calling GraphicLayer::removeObject.
+    */
+   virtual ~GraphicObjectExt1() {}
 };
 
 #endif

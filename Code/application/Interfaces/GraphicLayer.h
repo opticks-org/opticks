@@ -68,6 +68,7 @@ public:
    SETTING(TextBold, GraphicLayer, bool, false)
    SETTING(TextItalics, GraphicLayer, bool, false)
    SETTING(TextUnderline, GraphicLayer, bool, false)
+   SETTING(UnitSystem, GraphicLayer, UnitSystem, UNIT_KM)
 
    /**
     *  Emitted with any<list<GraphicObject*> > when the list of selected objects changes.

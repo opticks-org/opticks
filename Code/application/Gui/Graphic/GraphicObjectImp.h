@@ -169,6 +169,10 @@ public:
    bool setObjectView(View* pView);
    View* getObjectView() const;
 
+   // Units
+   bool setUnitSystem(UnitSystem units);
+   UnitSystem getUnitSystem() const;
+
    // Polyline / polygon
    virtual bool addVertices(const std::vector<LocationType>& vertices);
    virtual bool addGeoVertices(const std::vector<LocationType>& geoVertices);
@@ -297,7 +301,8 @@ private:
 
 #define GRAPHICOBJECTADAPTEREXTENSION_CLASSES \
    SESSIONITEMADAPTEREXTENSION_CLASSES \
-   SUBJECTADAPTEREXTENSION_CLASSES
+   SUBJECTADAPTEREXTENSION_CLASSES \
+   , public GraphicObjectExt1
 
 #define GRAPHICOBJECTADAPTER_METHODS(impClass) \
    SESSIONITEMADAPTER_METHODS(impClass) \
@@ -516,6 +521,14 @@ private:
    View* getObjectView() const \
    { \
       return impClass::getObjectView(); \
+   } \
+   bool setUnitSystem(UnitSystem units) \
+   { \
+      return impClass::setUnitSystem(units); \
+   } \
+   UnitSystem getUnitSystem() const \
+   { \
+      return impClass::getUnitSystem(); \
    } \
    bool addVertices(const std::vector<LocationType>& vertices) \
    { \

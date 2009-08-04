@@ -835,3 +835,21 @@ View* GraphicUtilities::getObjectView(const list<GraphicObject*>& objects)
 
    return pView;
 }
+
+bool GraphicUtilities::setUnitSystem(const list<GraphicObject*>& objects, UnitSystem units)
+{
+   GraphicUnitsProperty unitsProperty(units);
+   return setProperty(objects, &unitsProperty);
+}
+
+UnitSystem GraphicUtilities::getUnitSystem(const list<GraphicObject*>& objects)
+{
+   const GraphicUnitsProperty* pProperty = dynamic_cast<const GraphicUnitsProperty*>(getProperty(objects,
+      "UnitSystem"));
+   if (pProperty != NULL)
+   {
+      return pProperty->getUnitSystem();
+   }
+
+   return UnitSystem();
+}

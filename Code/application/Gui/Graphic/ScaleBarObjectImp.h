@@ -54,7 +54,7 @@ protected:
 
 private:
    double mXgsd;
-   double mYgsd;   // variables for the georeference GSDs
+   bool mHaveGeo;
    bool mNeedsLayout;
    AttachmentPtr<PerspectiveView> mpView;
    AttachmentPtr<RasterElement> mpGeoreference;

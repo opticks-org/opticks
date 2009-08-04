@@ -763,6 +763,26 @@ enum TilingTypeEnum
 typedef EnumWrapper<TilingTypeEnum> TilingType;
 
 /**
+ *  %System of units to use.
+ *
+ *  The UnitSystem enumeration indicates the system of units to use when displaying values
+ *  to the user.
+ *
+ *  @see     Units
+ */
+enum UnitSystemEnum
+{
+   UNIT_KM = 100, /**< Use meters or kilometers as appropriate */
+   UNIT_KFT, /**< Use feet or kilofeet (1000 feet) as appropriate */
+   UNIT_MI /**< Use feet or miles as appropriate */
+};
+
+/**
+ * @EnumWrapper ::UnitTypeEnum.
+ */
+typedef EnumWrapper<UnitSystemEnum> UnitSystem;
+
+/**
  *  %Units of the values in a data set.
  *
  *  The UnitType enumeration indicates the format of values ins a data set.
@@ -882,6 +902,7 @@ template <> class VariantTypeValidator<RegionUnits> {};
 template <> class VariantTypeValidator<ReleaseType> {};
 template <> class VariantTypeValidator<StretchType> {};
 template <> class VariantTypeValidator<SymbolType> {};
+template <> class VariantTypeValidator<UnitSystem> {};
 template <> class VariantTypeValidator<UnitType> {};
 template <> class VariantTypeValidator<WindowSizeType> {};
 template <> class VariantTypeValidator<WindowType> {};

@@ -677,7 +677,7 @@ string MeasurementObjectImp::generateGeoStrings() const
       azimuthVal = algs.getPythagoreanAzimuth(llCorner.mX, llCorner.mY, urCorner.mX, urCorner.mY);
       azimuthVal = GeoConversions::convertRadToDeg(azimuthVal);
       distanceVal = algs.getPythagoreanDistance(urCorner.mX, urCorner.mY, llCorner.mX, llCorner.mY);
-      distanceUnit = "";
+      distanceUnit = "pix";
    }
 
    bearing = QString::number(azimuthVal, 'f', mBearingPrecision).toStdString();

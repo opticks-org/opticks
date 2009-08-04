@@ -733,6 +733,7 @@ void DataVariantFactoryImp::initializeMaps()
    registerType<DataVariantValue<SymbolType> >();
    registerType<DataVariantValue<Point::PointSymbolType> >();
    registerType<DataVariantValue<RegionUnits> >();
+   registerType<DataVariantValue<UnitSystem> >();
    registerType<DataVariantValue<UnitType> >();
    registerType<DataVariantValue<WindowSizeType> >();
    registerType<DataVariantValue<WindowType> >();

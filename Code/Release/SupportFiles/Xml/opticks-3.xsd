@@ -718,6 +718,26 @@ http://www.gnu.org/licenses/lgpl.html
          <xsd:element name="string" minOccurs="1" maxOccurs="1" type="xsd:string" form="qualified" />
       </xsd:all>
    </xsd:complexType>
+   <xsd:complexType name="unitSystemProperty">
+      <xsd:annotation>
+         <xsd:documentation xml:lang="en">
+            A unit system graphic object property.
+         </xsd:documentation>
+      </xsd:annotation>
+      <xsd:complexContent>
+         <xsd:extension base="opticks:graphicProperty">
+            <xsd:attribute name="system" use="required">
+               <xsd:simpleType>
+                  <xsd:restriction base="xsd:string">
+                     <xsd:enumeration value="m-km" />
+                     <xsd:enumeration value="f-kft" />
+                     <xsd:enumeration value="f-mi" />
+                  </xsd:restriction>
+               </xsd:simpleType>
+            </xsd:attribute>
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
    <xsd:complexType name="wedgeProperty">
       <xsd:annotation>
          <xsd:documentation xml:lang="en">
@@ -811,6 +831,7 @@ http://www.gnu.org/licenses/lgpl.html
          <xsd:element name="TextAlignment" type="opticks:textAlignmentProperty" minOccurs="0" maxOccurs="1" form="qualified" />
          <xsd:element name="TextColor" type="opticks:textColorProperty" minOccurs="0" maxOccurs="1" form="qualified" />
          <xsd:element name="TextString" type="opticks:textStringProperty" minOccurs="0" maxOccurs="1" form="qualified" />
+         <xsd:element name="UnitSystem" type="opticks:unitSystemProperty" minOccurs="0" maxOccurs="1" form="qualified" />
          <xsd:element name="Wedge" type="opticks:wedgeProperty" minOccurs="0" maxOccurs="1" form="qualified" />
          <xsd:element name="PaperSize" type="opticks:paperSizeProperty" minOccurs="0" maxOccurs="1" form="qualified" />
          <xsd:element name="Filename" type="opticks:filenameProperty" minOccurs="0" maxOccurs="1" form="qualified" />

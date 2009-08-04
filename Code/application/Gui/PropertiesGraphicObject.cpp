@@ -23,6 +23,7 @@
 #include "GraphicSymbolWidget.h"
 #include "GraphicTextWidget.h"
 #include "GraphicTriangleWidget.h"
+#include "GraphicUnitsWidget.h"
 #include "GraphicUtilities.h"
 #include "GraphicViewWidget.h"
 #include "LabeledSection.h"
@@ -77,6 +78,10 @@ PropertiesGraphicObject::PropertiesGraphicObject() :
    mpViewWidget = new GraphicViewWidget();
    mpViewSection = new LabeledSection(mpViewWidget, "View");
 
+   // Units
+   mpUnitsWidget = new GraphicUnitsWidget();
+   mpUnitsSection = new LabeledSection(mpUnitsWidget, "Unit System");
+
    // Initialization
    setSizeHint(450, 450);
 
@@ -106,6 +111,7 @@ PropertiesGraphicObject::PropertiesGraphicObject() :
    VERIFYNR(mTextColorModifier.attachSignal(mpTextWidget, SIGNAL(colorChanged(const QColor&))));
    VERIFYNR(mApexModifier.attachSignal(mpTriangleWidget, SIGNAL(apexChanged(int))));
    VERIFYNR(mViewModifier.attachSignal(mpViewWidget, SIGNAL(viewChanged(View*))));
+   VERIFYNR(mUnitsModifier.attachSignal(mpUnitsWidget, SIGNAL(unitSystemChanged(UnitSystem))));
 
    VERIFYNR(connect(&mLowerLeftModifier, SIGNAL(modified()), this, SIGNAL(modified())));
    VERIFYNR(connect(&mUpperRightModifier, SIGNAL(modified()), this, SIGNAL(modified())));
@@ -132,6 +138,7 @@ PropertiesGraphicObject::PropertiesGraphicObject() :
    VERIFYNR(connect(&mTextColorModifier, SIGNAL(modified()), this, SIGNAL(modified())));
    VERIFYNR(connect(&mApexModifier, SIGNAL(modified()), this, SIGNAL(modified())));
    VERIFYNR(connect(&mViewModifier, SIGNAL(modified()), this, SIGNAL(modified())));
+   VERIFYNR(connect(&mUnitsModifier, SIGNAL(modified()), this, SIGNAL(modified())));
 }
 
 PropertiesGraphicObject::~PropertiesGraphicObject()
@@ -150,6 +157,7 @@ PropertiesGraphicObject::~PropertiesGraphicObject()
    delete mpTextSection;
    delete mpTriangleSection;
    delete mpViewSection;
+   delete mpUnitsSection;
 }
 
 bool PropertiesGraphicObject::initialize(SessionItem* pSessionItem)
@@ -195,6 +203,7 @@ bool PropertiesGraphicObject::initialize(const list<GraphicObject*>& graphicObje
    bool bEditText = false;
    bool bTriangle = false;
    bool bView = false;
+   bool bUnits = false;
 
    clear();
    for (list<GraphicObject*>::iterator iter = mObjects.begin(); iter != mObjects.end(); ++iter)
@@ -275,6 +284,10 @@ bool PropertiesGraphicObject::initialize(const list<GraphicObject*>& graphicObje
          {
             bEditText = true;
          }
+         if (pGraphicObject->hasProperty("UnitSystem") == true)
+         {
+            bUnits = true;
+         }
       }
    }
 
@@ -322,6 +335,11 @@ bool PropertiesGraphicObject::initialize(const list<GraphicObject*>& graphicObje
    if (bView == true)
    {
       addSection(mpViewSection);
+   }
+
+   if (bUnits == true)
+   {
+      addSection(mpUnitsSection);
    }
 
    addStretch(1);
@@ -378,6 +396,9 @@ bool PropertiesGraphicObject::initialize(const list<GraphicObject*>& graphicObje
 
    // View
    mpViewWidget->setView(GraphicUtilities::getObjectView(mObjects));
+
+   // Unit System
+   mpUnitsWidget->setUnitSystem(GraphicUtilities::getUnitSystem(mObjects));
 
    // Reset the modification flags
    resetModifiers();
@@ -552,6 +573,12 @@ bool PropertiesGraphicObject::applyChanges()
          {
             pGraphicObject->setObjectView(mpViewWidget->getView());
          }
+
+         // Units
+         if (mUnitsModifier.isModified() == true)
+         {
+            pGraphicObject->setUnitSystem(mpUnitsWidget->getUnitSystem());
+         }
       }
    }
 
@@ -639,4 +666,5 @@ void PropertiesGraphicObject::resetModifiers()
    mTextColorModifier.setModified(false);
    mApexModifier.setModified(false);
    mViewModifier.setModified(false);
+   mUnitsModifier.setModified(false);
 }

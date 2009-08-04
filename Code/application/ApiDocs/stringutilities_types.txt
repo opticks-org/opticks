@@ -44,6 +44,7 @@
  *   - string
  *   - SymbolType
  *   - TextureMode
+ *   - UnitSystem
  *   - UnitType
  *   - WindowSizeType
  *   - WindowType
@@ -112,6 +113,7 @@
  *   - vector<SymbolType>
  *   - vector<TextureMode>
  *   - vector<uint64_t>
+ *   - vector<UnitSystem>
  *   - vector<UnitType>
  *   - vector<unsigned char>
  *   - vector<unsigned int>
