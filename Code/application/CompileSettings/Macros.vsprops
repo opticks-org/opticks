@@ -116,4 +116,8 @@
 		Name="RAPTOR"
 		Value="$(OPTICKSDEPENDENCIES)\raptor"
 	/>
+	<UserMacro
+		Name="OPENJPEG"
+		Value="$(OPTICKSDEPENDENCIES)\OpenJpeg"
+	/>
 </VisualStudioPropertySheet>

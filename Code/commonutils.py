@@ -190,6 +190,7 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
         ds(r"raptor\bin", ["raptor"], ".dll", ".dll")
         ds(r"expat\bin", ["libexpat"], ".dll", ".dll")
         ds(r"gdal\bin", ["gdal15"], ".dll", ".dll")
+        ds(r"OpenJpeg\bin", [], "d.dll", ".dll", ["OpenJpeg"])
 
         for depend in temp_list:
             cur_list = depend.get_list_for(arch, is_debug)

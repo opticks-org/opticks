@@ -31,6 +31,7 @@
       #define BROKEN_INLINE_HINT __declspec(noinline)
    #elif defined(_WIN32)
       #define PTR_SIZE 4
+      #define JPEG2000_SUPPORT
    #endif
 
    #define CG_SUPPORTED

@@ -20,7 +20,7 @@
 		<Configuration
 			Name="Release|Win32"
 			ConfigurationType="2"
-			InheritedPropertySheets="..\..\..\CompileSettings\32bitSettings.vsprops;..\..\..\CompileSettings\PlugInCommonSettings.vsprops;..\..\..\CompileSettings\Qt-Release.vsprops;..\..\..\CompileSettings\libtiff.vsprops;..\..\..\CompileSettings\pthreads.vsprops;..\..\..\CompileSettings\proj4.vsprops;..\..\..\CompileSettings\geotiff.vsprops;..\..\..\CompileSettings\AllCommonSettings-Release-32bit.vsprops;..\..\..\CompileSettings\Macros.vsprops;..\..\..\CompileSettings\Xerces-Release.vsprops;..\..\..\CompileSettings\UpdateBuildRevision.vsprops"
+			InheritedPropertySheets="..\..\..\CompileSettings\32bitSettings.vsprops;..\..\..\CompileSettings\PlugInCommonSettings.vsprops;..\..\..\CompileSettings\Qt-Release.vsprops;..\..\..\CompileSettings\libtiff.vsprops;..\..\..\CompileSettings\OpenJpeg.vsprops;..\..\..\CompileSettings\pthreads.vsprops;..\..\..\CompileSettings\proj4.vsprops;..\..\..\CompileSettings\geotiff.vsprops;..\..\..\CompileSettings\AllCommonSettings-Release-32bit.vsprops;..\..\..\CompileSettings\Macros.vsprops;..\..\..\CompileSettings\Xerces-Release.vsprops;..\..\..\CompileSettings\UpdateBuildRevision.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -172,7 +172,7 @@
 		<Configuration
 			Name="Debug|Win32"
 			ConfigurationType="2"
-			InheritedPropertySheets="..\..\..\CompileSettings\32bitSettings.vsprops;..\..\..\CompileSettings\PlugInCommonSettings.vsprops;..\..\..\CompileSettings\Qt-Debug.vsprops;..\..\..\CompileSettings\libtiff.vsprops;..\..\..\CompileSettings\pthreads.vsprops;..\..\..\CompileSettings\proj4.vsprops;..\..\..\CompileSettings\geotiff.vsprops;..\..\..\CompileSettings\AllCommonSettings-Debug-32bit.vsprops;..\..\..\CompileSettings\Macros.vsprops;..\..\..\CompileSettings\Xerces-Debug.vsprops;..\..\..\CompileSettings\UpdateBuildRevision.vsprops"
+			InheritedPropertySheets="..\..\..\CompileSettings\32bitSettings.vsprops;..\..\..\CompileSettings\PlugInCommonSettings.vsprops;..\..\..\CompileSettings\Qt-Debug.vsprops;..\..\..\CompileSettings\libtiff.vsprops;..\..\..\CompileSettings\pthreads.vsprops;..\..\..\CompileSettings\proj4.vsprops;..\..\..\CompileSettings\geotiff.vsprops;..\..\..\CompileSettings\AllCommonSettings-Debug-32bit.vsprops;..\..\..\CompileSettings\Macros.vsprops;..\..\..\CompileSettings\Xerces-Debug.vsprops;..\..\..\CompileSettings\UpdateBuildRevision.vsprops;..\..\..\CompileSettings\OpenJpeg-Debug.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -350,6 +350,18 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Jpeg2000Importer.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Jpeg2000Page.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Jpeg2000Pager.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\JpegDetails.cpp"
 				>
 			</File>
@@ -440,6 +452,18 @@
 			</File>
 			<File
 				RelativePath=".\GeoTiffPager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Jpeg2000Importer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Jpeg2000Page.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Jpeg2000Pager.h"
 				>
 			</File>
 			<File
