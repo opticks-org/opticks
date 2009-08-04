@@ -175,6 +175,9 @@ are defined in Opticks-Version.wxi, so include that file now -->
             <Component Id="C__glut32_Dependency" Guid="$(var.C__glut32_DependencyGuid)" Win64="no">
                <File Name="glut32.dll" Id="F__glut32_Dependency" DiskId="1" KeyPath="yes" />
             </Component>
+            <Component Id="C__openjpeg_Dependency" Guid="$(var.C__openjpeg_DependencyGuid)" Win64="no">
+               <File Name="openjpeg.dll" Id="F__openjpeg_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
             <?endif?>
          </Directory>
          <Directory Id="D__DefaultSettings" Name="DefaultSettings" FileSource="$(var.OpticksCodeDir)\Release\DefaultSettings" DiskId="1">
@@ -470,6 +473,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
          <?ifdef Is32Bit ?>
          <ComponentRef Id="C__cgD3D8_Dependency" />
          <ComponentRef Id="C__glut32_Dependency" />
+         <ComponentRef Id="C__openjpeg_Dependency" />
          <?endif?>
 
          <Feature Id="FT__Shortcuts" Title="Start Menu Shortcuts" Level="1"

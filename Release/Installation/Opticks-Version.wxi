@@ -150,6 +150,7 @@
    <?define C__hm423m_DependencyGuid = "104ee41e-872d-4077-8b1c-b8935f99f059" ?>
    <?define C__szlibdll_DependencyGuid = "fc951641-858e-464e-b020-97d479223a61" ?>
    <?define C__libexpat_DependencyGuid = "be00f815-8a59-44b1-bb1d-ba3e8e95efd4" ?>
+   <?define C__openjpeg_DependencyGuid = "d1e5f691-591f-4e61-a91d-5eae67919889" ?>
    <?define C__ossim_DependencyGuid = "c894281a-e5c1-453f-96f2-317b7d3398eb" ?>
    <?define C__pthreadVC2_DependencyGuid = "f1580516-7fbb-4951-b1fc-ab5e30f33084" ?>
    <?define C__raptor_DependencyGuid = "b7e6446d-c726-4a62-aa9a-cda5aa45565c" ?>
