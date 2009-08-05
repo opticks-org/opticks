@@ -254,12 +254,13 @@ bool GpuResourceManager::determineScalingFactor(float& scalingFactor)
    {
       auto_ptr<ImageLoader> pImageLoader(new (nothrow) ImageLoader(pColorBuffer.get()));
 
-      vector<float> testData(texHeight * texWidth);
+      vector<float> testData(texHeight * texWidth * ImageUtilities::getNumColorChannels(textureFormat), alpha);
       for (unsigned int row = 0; row < texHeight; ++row)
       {
          for (unsigned int col = 0; col < texWidth; ++col)
          {
-            testData[row * texWidth + col] = static_cast<float>(col + 1);
+            const unsigned int offset = (row * texWidth + col) * ImageUtilities::getNumColorChannels(textureFormat);
+            testData[offset] = static_cast<float>(col + 1);
          }
       }
       void* pData = reinterpret_cast<void*>(&testData.front());
@@ -299,7 +300,6 @@ bool GpuResourceManager::determineScalingFactor(float& scalingFactor)
          factorFound = true;
       }
    }
-
 #else
    factorFound = true;
 #endif
