@@ -1019,10 +1019,10 @@ void PlugInManagerServicesImp::savePlugInListCache() const
    if (pFile.get() != NULL)
    {
       xmlWriter.writeToFile(pFile.get());
-   }
-   if (ferror(pFile.get()))
-   {
-      pFile.setDeleteOnClose(true);
+      if (ferror(pFile.get()))
+      {
+         pFile.setDeleteOnClose(true);
+      }
    }
 }
 
