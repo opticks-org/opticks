@@ -123,7 +123,8 @@ public:
     *          it is closed.  If \c false, the file will simply be closed.
     */
    FileResource(const char* pFilename, const char* pAccess, bool deleteOnClose = false) :
-      Resource<FILE, FileObject>(FileObject::Args(pFilename, pAccess)) {}
+      Resource<FILE, FileObject>(FileObject::Args(pFilename, pAccess, deleteOnClose))
+   {}
 
    /**
     * Returns a pointer to the underlying FILE.
