@@ -4367,6 +4367,7 @@ void ApplicationWindow::updateActiveWindow(QWidget* pWindow)
    Layer* pGcpLayer = NULL;
    Layer* pTiePointLayer = NULL;
    Layer* pMeasurementsLayer = NULL;
+   const MouseMode* pMouseMode = NULL;
 
    if (pWorkspaceWindow != NULL)
    {
@@ -4495,6 +4496,8 @@ void ApplicationWindow::updateActiveWindow(QWidget* pWindow)
          {
             pAnnotationLayer = ((ProductView*) pView)->getActiveLayer();
          }
+
+         pMouseMode = pView->getCurrentMouseMode();
       }
    }
    else
@@ -4513,6 +4516,7 @@ void ApplicationWindow::updateActiveWindow(QWidget* pWindow)
    mpTiePointToolBar->setTiePointLayer(pTiePointLayer);
    mpBrightnessToolbar->updateForNewView();
    mpMeasurementToolBar->setMeasurementsLayer(pMeasurementsLayer);
+   updateMouseAction(pMouseMode);
 
    // Update the current undo stack
    UndoStack* pUndoStack = NULL;
