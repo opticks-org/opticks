@@ -157,9 +157,17 @@ bool ScriptPlugIn::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList
       if (pFilename != NULL)
       {
          scriptPath = pFilename->getFullPathAndName().c_str();
-         pStep->addProperty("Script File", scriptPath);
       }
    }
+
+   if (scriptPath.empty() == true)
+   {
+      pStep->finalize(Message::Failure, "No script file was specified.");
+      return false;
+   }
+
+   pStep->addProperty("Script File", scriptPath);
+
    setEnvironmentOption(ConfigurationSettings::getSettingExportPath(), "EXPORT_PATH");
    setEnvironmentOption(ConfigurationSettings::getSettingImportPath(), "IMPORT_PATH");
    setEnvironmentOption(ConfigurationSettings::getSettingMessageLogPath(), "MESSAGE_LOG_PATH");

@@ -191,6 +191,19 @@ bool WizardExecutor::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLi
             mMessage = "Wizard Exector Aborted!";
             pStep->finalize(Message::Abort, mMessage);
 
+            if (mpProgress != NULL)
+            {
+               string progressMessage;
+               int percent = 0;
+               ReportingLevel level;
+               mpProgress->getProgress(progressMessage, percent, level);
+
+               if (level != ABORT)
+               {
+                  mpProgress->updateProgress(mMessage, 0, ABORT);
+               }
+            }
+
             if (mbDeleteWizard)
             {
                mpObjFact->destroyObject(mpWizard, "WizardObject");
@@ -218,6 +231,19 @@ bool WizardExecutor::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLi
          if (!bSuccess)
          {
             resetAllNodeValues();
+
+            if (mpProgress != NULL)
+            {
+               string progressMessage;
+               int percent = 0;
+               ReportingLevel level;
+               mpProgress->getProgress(progressMessage, percent, level);
+
+               if (level != ERRORS)
+               {
+                  mpProgress->updateProgress("The wizard failed to complete successfully.", 0, ERRORS);
+               }
+            }
 
             if (mbDeleteWizard)
             {
