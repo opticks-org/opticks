@@ -640,8 +640,21 @@ void SessionManagerImp::deleteObsoleteFiles(const string &dir, const vector<Inde
 
 void SessionManagerImp::destroyFailedSessionItem(const string &type, SessionItem* pItem)
 {
-   VERIFYNRV(pItem != NULL);
-   mItems.erase(mItems.find(pItem->getId()));
+   if (pItem == NULL)
+   {
+      return;
+   }
+
+   map<string, SessionItem*>::iterator iter = mItems.find(pItem->getId());
+   if (iter != mItems.end())
+   {
+      mItems.erase(iter);
+   }
+
+   if (type.empty() == true)
+   {
+      return;
+   }
 
    map<string, DestroyerProc> destroyers;
    destroyers["PlotWidget"] = &SessionManagerImp::destroyPlotWidget;
@@ -1031,6 +1044,18 @@ bool SessionManagerImp::open(const string &filename, Progress *pProgress)
       }
       mRestoreSessionPath = filename + "Dir";
 
+      QDir sessionDir(QString::fromStdString(mRestoreSessionPath));
+      if (sessionDir.exists() == false)
+      {
+         if (pProgress != NULL)
+         {
+            pProgress->updateProgress("The '" + mRestoreSessionPath +
+               "' session directory does not exist.  The session will not be loaded.", 0, ERRORS);
+         }
+
+         return false;
+      }
+
       if (pProgress)
       {
          pProgress->updateProgress("Closing current session...", 1, NORMAL);
@@ -1229,7 +1254,7 @@ SessionManagerImp::serialize(const string& filename, Progress* pProgress)
    vector<IndexFileItem> successItems;
    QFileInfo fileInfo(filename.c_str());
    string sessionDirPath = fileInfo.absoluteDir().absolutePath().toStdString() + "/" +
-      fileInfo.baseName().toStdString() + ".sessionDir";
+      fileInfo.completeBaseName().toStdString() + ".sessionDir";
    QDir sessionDir(QString::fromStdString(sessionDirPath));
    if (sessionDir.exists() == false)
    {
