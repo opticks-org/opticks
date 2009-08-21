@@ -574,51 +574,57 @@ bool DesktopServicesImp::isKindOfLayer(const string& className, const string& la
 {
    bool bSuccess = false;
 
-   if (className.find("GcpLayer") == 0)
+   if ((className == "GcpLayer") || (className == "GcpLayerAdapter") || (className == "GcpLayerImp"))
    {
       bSuccess = GcpLayerImp::isKindOfLayer(layerName);
    }
-   else if (className.find("GraphicLayer") == 0)
+   else if ((className == "GraphicLayer") || (className == "GraphicLayerAdapter") || (className == "GraphicLayerImp"))
    {
       bSuccess = GraphicLayerImp::isKindOfLayer(layerName);
    }
-   else if (className.find("AoiLayer") == 0)
+   else if ((className == "AoiLayer") || (className == "AoiLayerAdapter") || (className == "AoiLayerImp"))
    {
       bSuccess = AoiLayerImp::isKindOfLayer(layerName);
    }
-   else if (className.find("AnnotationLayer") == 0)
+   else if ((className == "AnnotationLayer") || (className == "AnnotationLayerAdapter") ||
+      (className == "AnnotationLayerImp"))
    {
       bSuccess = AnnotationLayerImp::isKindOfLayer(layerName);
    }
-   else if (className.find("ClassificationLayer") == 0)
+   else if ((className == "ClassificationLayer") || (className == "ClassificationLayerAdapter") ||
+      (className == "ClassificationLayerImp"))
    {
       bSuccess = ClassificationLayerImp::isKindOfLayer(layerName);
    }
-   else if (className.find("MeasurementLayer") == 0)
+   else if ((className == "MeasurementLayer") || (className == "MeasurementLayerAdapter") ||
+      (className == "MeasurementLayerImp"))
    {
       bSuccess = MeasurementLayerImp::isKindOfLayer(layerName);
    }
-   else if (className.find("LatLonLayer") == 0)
+   else if ((className == "LatLonLayer") || (className == "LatLonLayerAdapter") || (className == "LatLonLayerImp"))
    {
       bSuccess = LatLonLayerImp::isKindOfLayer(layerName);
    }
-   else if (className.find("PseudocolorLayer") == 0)
+   else if ((className == "PseudocolorLayer") || (className == "PseudocolorLayerAdapter") ||
+      (className == "PseudocolorLayerImp"))
    {
       bSuccess = PseudocolorLayerImp::isKindOfLayer(layerName);
    }
-   else if (className.find("RasterLayer") == 0)
+   else if ((className == "RasterLayer") || (className == "RasterLayerAdapter") || (className == "RasterLayerImp"))
    {
       bSuccess = RasterLayerImp::isKindOfLayer(layerName);
    }
-   else if (className.find("ThresholdLayer") == 0)
+   else if ((className == "ThresholdLayer") || (className == "ThresholdLayerAdapter") ||
+      (className == "ThresholdLayerImp"))
    {
       bSuccess = ThresholdLayerImp::isKindOfLayer(layerName);
    }
-   else if (className.find("TiePointLayer") == 0)
+   else if ((className == "TiePointLayer") || (className == "TiePointLayerAdapter") ||
+      (className == "TiePointLayerImp"))
    {
       bSuccess = TiePointLayerImp::isKindOfLayer(layerName);
    }
-   else if (className.find("Layer") == 0)
+   else if ((className == "Layer") || (className == "LayerImp"))
    {
       bSuccess = LayerImp::isKindOfLayer(layerName);
    }
@@ -628,51 +634,57 @@ bool DesktopServicesImp::isKindOfLayer(const string& className, const string& la
 
 void DesktopServicesImp::getLayerTypes(const string& className, vector<string>& classList)
 {
-   if (className.find("GcpLayer") == 0)
+   if ((className == "GcpLayer") || (className == "GcpLayerAdapter") || (className == "GcpLayerImp"))
    {
       GcpLayerImp::getLayerTypes(classList);
    }
-   else if (className.find("GraphicLayer") == 0)
+   else if ((className == "GraphicLayer") || (className == "GraphicLayerAdapter") || (className == "GraphicLayerImp"))
    {
       GraphicLayerImp::getLayerTypes(classList);
    }
-   else if (className.find("AoiLayer") == 0)
+   else if ((className == "AoiLayer") || (className == "AoiLayerAdapter") || (className == "AoiLayerImp"))
    {
       AoiLayerImp::getLayerTypes(classList);
    }
-   else if (className.find("AnnotationLayer") == 0)
+   else if ((className == "AnnotationLayer") || (className == "AnnotationLayerAdapter") ||
+      (className == "AnnotationLayerImp"))
    {
       AnnotationLayerImp::getLayerTypes(classList);
    }
-   else if (className.find("ClassificationLayer") == 0)
+   else if ((className == "ClassificationLayer") || (className == "ClassificationLayerAdapter") ||
+      (className == "ClassificationLayerImp"))
    {
       ClassificationLayerImp::getLayerTypes(classList);
    }
-   else if (className.find("MeasurementLayer") == 0)
+   else if ((className == "MeasurementLayer") || (className == "MeasurementLayerAdapter") ||
+      (className == "MeasurementLayerImp"))
    {
       MeasurementLayerImp::getLayerTypes(classList);
    }
-   else if (className.find("LatLonLayer") == 0)
+   else if ((className == "LatLonLayer") || (className == "LatLonLayerAdapter") || (className == "LatLonLayerImp"))
    {
       LatLonLayerImp::getLayerTypes(classList);
    }
-   else if (className.find("PseudocolorLayer") == 0)
+   else if ((className == "PseudocolorLayer") || (className == "PseudocolorLayerAdapter") ||
+      (className == "PseudocolorLayerImp"))
    {
       PseudocolorLayerImp::getLayerTypes(classList);
    }
-   else if (className.find("RasterLayer") == 0)
+   else if ((className == "RasterLayer") || (className == "RasterLayerAdapter") || (className == "RasterLayerImp"))
    {
       RasterLayerImp::getLayerTypes(classList);
    }
-   else if (className.find("ThresholdLayer") == 0)
+   else if ((className == "ThresholdLayer") || (className == "ThresholdLayerAdapter") ||
+      (className == "ThresholdLayerImp"))
    {
       ThresholdLayerImp::getLayerTypes(classList);
    }
-   else if (className.find("TiePointLayer") == 0)
+   else if ((className == "TiePointLayer") || (className == "TiePointLayerAdapter") ||
+      (className == "TiePointLayerImp"))
    {
       TiePointLayerImp::getLayerTypes(classList);
    }
-   else if (className.find("Layer") == 0)
+   else if ((className == "Layer") || (className == "LayerImp"))
    {
       LayerImp::getLayerTypes(classList);
    }

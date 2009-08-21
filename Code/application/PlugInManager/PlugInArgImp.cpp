@@ -32,7 +32,6 @@ PlugInArgImp::PlugInArgImp() :
 }
 
 PlugInArgImp::PlugInArgImp(const string& type, const string& name) :
-   mType(type),
    mName(name),
    mDefaultSet(false),
    mpDefaultValueShallowCopy(NULL),
@@ -40,10 +39,10 @@ PlugInArgImp::PlugInArgImp(const string& type, const string& name) :
    mpActualValueShallowCopy(NULL)
 {
    initArgTypes();
+   setType(type);
 }
 
 PlugInArgImp::PlugInArgImp(const string& type, const string& name, const void* pDefaultValue) :
-   mType(type),
    mName(name),
    mDefaultSet(false),
    mpDefaultValueShallowCopy(NULL),
@@ -51,12 +50,12 @@ PlugInArgImp::PlugInArgImp(const string& type, const string& name, const void* p
    mpActualValueShallowCopy(NULL)
 {
    initArgTypes();
+   setType(type);
    setDefaultValue(pDefaultValue);
 }
 
 PlugInArgImp::PlugInArgImp(const string& type, const string& name, const void* pDefaultValue,
                            const void* pActualValue) :
-   mType(type),
    mName(name),
    mDefaultSet(false),
    mpDefaultValueShallowCopy(NULL),
@@ -64,6 +63,7 @@ PlugInArgImp::PlugInArgImp(const string& type, const string& name, const void* p
    mpActualValueShallowCopy(NULL)
 {
    initArgTypes();
+   setType(type);
    setDefaultValue(pDefaultValue);
    setActualValue(pActualValue);
 }
@@ -234,10 +234,12 @@ void PlugInArgImp::initArgTypes()
       mArgTypes.push_back("AoiLayer");
       mArgTypes.push_back("CartesianPlot");
       mArgTypes.push_back("ClassificationLayer");
+      mArgTypes.push_back("ColorType");
       mArgTypes.push_back("DataDescriptor");
       mArgTypes.push_back("DataElement");
       mArgTypes.push_back("DateTime");
       mArgTypes.push_back("DisplayMode");
+      mArgTypes.push_back("DynamicObject");
       mArgTypes.push_back("EncodingType");
       mArgTypes.push_back("EndianType");
       mArgTypes.push_back("FileDescriptor");
@@ -251,6 +253,7 @@ void PlugInArgImp::initArgTypes()
       mArgTypes.push_back("InterleaveFormatType");
       mArgTypes.push_back("LatLonLayer");
       mArgTypes.push_back("Layer");
+      mArgTypes.push_back("LayerType");
       mArgTypes.push_back("MeasurementLayer");
       mArgTypes.push_back("OrthographicView");
       mArgTypes.push_back("PassArea");
@@ -260,20 +263,28 @@ void PlugInArgImp::initArgTypes()
       mArgTypes.push_back("PolarPlot");
       mArgTypes.push_back("ProcessingLocation");
       mArgTypes.push_back("ProductView");
+      mArgTypes.push_back("ProductWindow");
       mArgTypes.push_back("Progress");
       mArgTypes.push_back("PseudocolorLayer");
       mArgTypes.push_back("RasterDataDescriptor");
+      mArgTypes.push_back("RasterChannelType");
       mArgTypes.push_back("RasterElement");
       mArgTypes.push_back("RasterFileDescriptor");
       mArgTypes.push_back("RasterLayer");
+      mArgTypes.push_back("RegionUnits");
       mArgTypes.push_back("Signature");
+      mArgTypes.push_back("SignatureLibrary");
       mArgTypes.push_back("SignaturePlot");
       mArgTypes.push_back("SignatureSet");
       mArgTypes.push_back("SpatialDataView");
+      mArgTypes.push_back("SpatialDataWindow");
+      mArgTypes.push_back("SymbolType");
       mArgTypes.push_back("ThresholdLayer");
+      mArgTypes.push_back("TiePointList");
       mArgTypes.push_back("TiePointLayer");
       mArgTypes.push_back("UnitType");
       mArgTypes.push_back("View");
+      mArgTypes.push_back("Window");
       mArgTypes.push_back("WizardObject");
    }
 }
@@ -290,13 +301,13 @@ const vector<string>& PlugInArgImp::getArgTypes()
 
 PlugInArgImp* PlugInArgImp::fromSettings(QDataStream& reader)
 {
-   auto_ptr<PlugInArgImp> pArg(new PlugInArgImp());
    string name;
    READ_STR_FROM_STREAM(name);
-   pArg->mName = name;
    string type;
    READ_STR_FROM_STREAM(type);
-   pArg->mType = type;
+
+   auto_ptr<PlugInArgImp> pArg(new PlugInArgImp(type, name));
+
    string description;
    READ_STR_FROM_STREAM(description);
    pArg->mDescription = description;
