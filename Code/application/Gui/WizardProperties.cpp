@@ -132,7 +132,7 @@ void WizardProperties::wizardRenamed(Subject& subject, const std::string& signal
    VERIFYNRV(pWizard != NULL);
    VERIFYNRV(pWizard == mpWizard.get());
 
-   QString& wizardName = QString::fromStdString(mpWizard->getName());
+   QString wizardName = QString::fromStdString(mpWizard->getName());
    if (wizardName != mpNameEdit->text())
    {
       mpNameEdit->setText(wizardName);
@@ -145,7 +145,7 @@ void WizardProperties::menuLocationChanged(Subject& subject, const std::string& 
    VERIFYNRV(pWizard != NULL);
    VERIFYNRV(pWizard == mpWizard.get());
 
-   QString& menuLocation = QString::fromStdString(mpWizard->getMenuLocation());
+   QString menuLocation = QString::fromStdString(mpWizard->getMenuLocation());
    if (menuLocation != mpMenuEdit->text())
    {
       mpMenuEdit->setText(menuLocation);
