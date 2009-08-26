@@ -37,7 +37,8 @@ SessionItemImp::SessionItemImp(const string& id, const string& name) :
    mpIcon(new QIcon()),
    mName(name),
    mFilenameDisplay(true),
-   mIdLocked(false)
+   mIdLocked(false),
+   mValidSessionSaveItem(true)
 {
    VERIFYNRV(mId.empty() == false);
    updateFilenameDisplay();
@@ -58,6 +59,7 @@ SessionItemImp& SessionItemImp::operator= (const SessionItemImp& sessionItem)
       setDisplayText(sessionItem.mDisplayText);
       setFilenameDisplay(sessionItem.mFilenameDisplay);
       setPropertiesPages(sessionItem.mPropertiesPages);
+      setValidSessionSaveItem(sessionItem.mValidSessionSaveItem);
       mIdLocked = sessionItem.mIdLocked;
    }
 
@@ -142,6 +144,7 @@ bool SessionItemImp::toXml(XMLWriter* pXml) const
    pXml->addAttr("displayName", mDisplayName);
    pXml->addAttr("displayText", mDisplayText);
    pXml->addAttr("filenameDisplay", mFilenameDisplay);
+   pXml->addAttr("validSessionSaveItem", mValidSessionSaveItem);
    return true;
 }
 
@@ -157,6 +160,14 @@ bool SessionItemImp::fromXml(DOMNode* pDocument, unsigned int version)
    setDisplayText(A(pElem->getAttribute(X("displayText"))));
    setFilenameDisplay(StringUtilities::fromXmlString<bool>(
       A(pElem->getAttribute(X("filenameDisplay")))));
+
+   // This check ensures backward compatibility with files existing before the validSessionSaveItem implementation.
+   if (pElem->hasAttribute(X("validSessionSaveItem")))
+   {
+      setValidSessionSaveItem(StringUtilities::fromXmlString<bool>(
+         A(pElem->getAttribute(X("validSessionSaveItem")))));
+   }
+
    return true;
 }
 

@@ -565,7 +565,7 @@ public:
     *  Sets the valid data types for the data set. The current data type may or may not be valid.
     *  By default, all Encoding Types are valid.
     *
-    *  @param   dataType
+    *  @param   validDataTypes
     *           The valid data types for the data set.
     *
     *  @notify  This method notifies Subject::signalModified if the given

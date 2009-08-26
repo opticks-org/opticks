@@ -43,13 +43,20 @@ bool SetThresholdOptions::setBatch()
 bool SetThresholdOptions::getInputSpecification(PlugInArgList*& pArgList)
 {
    VERIFY(DesktopItems::getInputSpecification(pArgList) && pArgList != NULL);
-   VERIFY(pArgList->addArg<ThresholdLayer>(Executable::LayerArg()));
-   VERIFY(pArgList->addArg<double>("First Threshold"));
-   VERIFY(pArgList->addArg<double>("Second Threshold"));
-   VERIFY(pArgList->addArg<PassArea>("Pass Area", PassArea()));
-   VERIFY(pArgList->addArg<RegionUnits>("Region Units", RegionUnits()));
-   VERIFY(pArgList->addArg<SymbolType>("Symbol", SymbolType()));
-   VERIFY(pArgList->addArg<ColorType>("Color", ColorType()));
+   VERIFY(pArgList->addArg<ThresholdLayer>(Executable::LayerArg(), "The threshold layer for which to set its "
+      "properties."));
+   VERIFY(pArgList->addArg<double>("First Threshold", "The first threshold value is used as the sole threshold "
+      "value for the lower and upper pass areas. It is also used as the lower threshold value for the middle and "
+      "outside pass areas.  If no region units are provided, the threshold value is assumed to be a raw value."));
+   VERIFY(pArgList->addArg<double>("Second Threshold", "The second threshold value is used as the upper threshold "
+      "value for the middle and outside pass areas. It is ignored for the lower and upper pass areas.  If no "
+      "region units are provided, the threshold value is assumed to be a raw value."));
+   VERIFY(pArgList->addArg<PassArea>("Pass Area", PassArea(), "The region based on the threshold values in which "
+      "data will be considered to pass the threshold."));
+   VERIFY(pArgList->addArg<RegionUnits>("Region Units", RegionUnits(), "The units of the threshold values."));
+   VERIFY(pArgList->addArg<SymbolType>("Symbol", SymbolType(), "The symbol that is used to mark the pixels that "
+      "pass the threshold value(s)."));
+   VERIFY(pArgList->addArg<ColorType>("Color", ColorType(), "The color that is used to draw the pixel symbols."));
 
    return true;
 }
@@ -79,11 +86,39 @@ bool SetThresholdOptions::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
 
    if (mHasFirst)
    {
-      mpLayer->setFirstThreshold(mFirstThreshold);
+      double threshold = mFirstThreshold;
+      if (mRegionUnits.isValid())
+      {
+         if (mRegionUnits != RAW_VALUE)
+         {
+            threshold = mpLayer->convertThreshold(mRegionUnits, mFirstThreshold, RAW_VALUE);
+         }
+      }
+      else
+      {
+         reportWarning("The region units were not provided, so the threshold value will be set into "
+            "the layer as raw value units.", "2B4E6C81-0AA7-4036-93AF-4F8397EA8D96");
+      }
+
+      mpLayer->setFirstThreshold(threshold);
    }
    if (mHasSecond)
    {
-      mpLayer->setSecondThreshold(mSecondThreshold);
+      double threshold = mSecondThreshold;
+      if (mRegionUnits.isValid())
+      {
+         if (mRegionUnits != RAW_VALUE)
+         {
+            threshold = mpLayer->convertThreshold(mRegionUnits, mSecondThreshold, RAW_VALUE);
+         }
+      }
+      else
+      {
+         reportWarning("The region units were not provided, so the threshold value will be set into "
+            "the layer as raw value units.", "9423280D-260E-476F-B1EB-3472377ED284");
+      }
+
+      mpLayer->setSecondThreshold(threshold);
    }
    if (mPassArea.isValid())
    {

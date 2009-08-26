@@ -3,7 +3,48 @@
 This document will describe the changes present in each version of the SDK.
 This document should be used to help upgrade any plug-ins to a particular version of the SDK.
 There is a page dedicated to each version of the SDK and if you are upgrading a plug-in by more than one version of the SDK, you MUST read all relevant pages for versions that you are skipping.
+- \subpage changes431
 - \subpage changes430
+*/
+
+/** \page changes431 4.3.1 Changes
+\section contents431 Contents
+- \ref u430_to_431_deps
+- \ref u431_module_caching
+<br><br>
+
+\subsection u430_to_431_deps Dependencies
+<HR>
+
+\subsubsection u430_to_431_deps_Qt Qt
+Qt has been upgraded from 4.5.0 to 4.5.2.
+You are NOT required to upgrade your plug-in to use Qt 4.5.2, you can continue to use Qt 4.5.0.
+It is recommended however, to upgrade to Qt 4.5.2.
+You can find additional details on the Qt change on the qtsoftware.com site, see http://www.qtsoftware.com/developer/changes for more details.
+This upgrade was done because a plug-in developer requested we upgrade to a version of Qt that included the ActiveQt component in the LGPL licensed version of Qt.
+You should upgrade our "https://opticks.ballforge.net/files/documents/8/255/Qt-4.5.0-opensource.zip" to "https://opticks.ballforge.net/files/documents/8/301/Qt-4.5.2-opensource.zip".
+See \ref dependencies for more details on getting the updated Qt dependency.
+
+\subsubsection u430_to_431_deps_gdal gdal
+gdal is now being built as a shared library on Solaris.
+Previously, it was being built as a static library.
+This change was made to correct a problem with importing JPEG files on Solaris.
+You should upgrade from our "https://opticks.ballforge.net/files/documents/8/194/gdal-1.5.zip" to "https://opticks.ballforge.net/files/documents/8/300/gdal-1.5-so.zip".
+See \ref dependencies for more details on getting the updated gdal dependency.
+<br><br><br><br>
+
+\subsection u431_module_caching New Module and Plug-In Caching
+<HR>
+%Opticks 4.3.1 provides a new module caching mechanism designed to improve application start-up time.
+If a module declares that it can be cached, then %Opticks will not load the module (.so, .dll) or construct any of the plug-ins in the module during start-up unless the module contains plug-ins that are configured to be executed at start-up (see Executable::isExecutedOnStartup).
+More precisely, %Opticks will load the module one start-up (.so, .dll) and will store the details in a cache file.
+On subsequent starts, it will compare the module (.so, .dll) size and last modified date/time against the values it has stored in the cache and if the module has not changed, it will read all of the required information directly from the cache instead of loading the module (.dll, .so) and querying plug-in instances.
+%Any module built using an earlier SDK than 4.3.1rc1 will never be eligible for caching, this was done to maintain functional compatibility.
+If a module is re-built against the 4.3.1rc1 SDK, it will automatically be cached if the REGISTER_MODULE macro was used.
+If it was using the REGISTER_DYNAMIC_MODULE macro or legacy registration method (see \ref u425_to_430_newmodule "4.3.0 Module Loading Mechanism") it will not be eligible for caching.
+If a developer wishes to use the REGISTER_MODULE macro, but does not want their module to be cached, they can replace the REGISTER_MODULE macro with the new REGISTER_NON_CACHED_MODULE macro.
+The arguments to both macro's are identical.
+
 */
 
 /** \page changes430 4.3.0 Changes
