@@ -15,19 +15,17 @@
 
 #include <string>
 
-class QObject;
-
 /**
  *  \ingroup ShellModule
  *  %Interpreter Shell
  *
  *  This class represents the shell for an interpreter plug-in.  %Interpreter
- *  developers would take this class and extend it to support thier 
+ *  developers would take this class and extend it to support their 
  *  interpreter specific code.
  *
- *  @see     ExecutableShell, Interpreter
+ *  @see     ExecutableShell, Interpreter, InterpreterExt1
  */
-class InterpreterShell : public ExecutableShell, public Interpreter
+class InterpreterShell : public ExecutableShell, public Interpreter, public InterpreterExt1
 {
 public:
    /**
@@ -43,7 +41,57 @@ public:
    /**
     *  Destroys the interpreter plug-in.
     */
-   ~InterpreterShell();
+   virtual ~InterpreterShell();
+
+   /**
+    *  @copydoc Executable::getInputSpecification()
+    *
+    *  @default Adds the Interpreter::CommandArg() string argument.
+    */
+   virtual bool getInputSpecification(PlugInArgList*& pArgList);
+
+   /**
+    *  @copydoc Executable::getOutputSpecification()
+    *
+    *  @default Adds the Interpreter::OutputTextArg() string argument
+    *           and the Interpeter::ReturnTypeArg() string argument with a default value of "Output".
+    */
+   virtual bool getOutputSpecification(PlugInArgList*& pArgList);
+
+   /**
+    *  @copydoc InterpreterExt1::getPrompt()
+    *
+    *  @default Returns "interpreter_name> ".
+    */
+   virtual std::string getPrompt() const;
+
+   /**
+    *  @copydoc Interpreter::getKeywordList()
+    *
+    *  @default Clears the list for interpreters without special keywords.
+    */
+   virtual void getKeywordList(std::vector<std::string>& list) const;
+
+   /**
+    *  @copydoc Interpreter::getKeywordDescription()
+    *
+    *  @default Returns false.
+    */
+   virtual bool getKeywordDescription(const std::string& keyword, std::string& description) const;
+
+   /**
+    *  @copydoc Interpreter::getUserDefinedTypes()
+    *
+    *  @default Clears the list for interpreters without user defined types.
+    */
+   virtual void getUserDefinedTypes(std::vector<std::string>& list) const;
+
+   /**
+    *  @copydoc Interpreter::getKeywordDescription()
+    *
+    *  @default Returns false.
+    */
+   virtual bool getTypeDescription(const std::string& type, std::string& description) const;
 
    /**
     *  @copydoc Interpreter::getFileExtensions()
@@ -52,11 +100,7 @@ public:
     *           was passed into setFileExtensions().  If setFileExtensions()
     *           has not yet been called, an empty string is returned.
     */
-   std::string getFileExtensions() const;
-
-#ifdef HAVE_QSCINTILLA
-   virtual QextScintillaLexer *getLexer(QObject *parent) = 0;
-#endif
+   virtual std::string getFileExtensions() const;
 
 protected:
    /**
@@ -67,7 +111,7 @@ protected:
     *           should consist of a description followed by one or more
     *           extensions separated by a space.  Multiple file types may
     *           be specified with a double semicolon.  Examples include
-    *           "Landsat Header Files (*.hdr)", "TIFF Files (*.tif *.tiff)",
+    *           "ENVI Header Files (*.hdr)", "TIFF Files (*.tif *.tiff)",
     *           and "Source Files (*.c*);;Header Files (*.h)".
     */
    void setFileExtensions(const std::string& extensions);

@@ -12,140 +12,52 @@
 #include "PlugInRegistration.h"
 #include "Scriptor.h"
 #include "SessionItemSerializer.h"
+#include "StringUtilities.h"
 
 using namespace std;
 
 REGISTER_PLUGIN_BASIC(OpticksPlugInSampler, Scriptor);
 
-Scriptor::Scriptor()
+Scriptor::Scriptor() : mCommandNumber(0)
 {
    // Initialization
    setName("Sample Scriptor");
    setCreator("Opticks Community");
    setVersion("Sample");
    setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
-   setDescription("Provides command line utilities to execute IDL commands.");
+   setDescription("Demonstrate how to write an interpreter plug-in.");
    setFileExtensions("Sample Scripting Files (*.scr)");
    setProductionStatus(false);
    setDescriptorId("{5E784B90-4E74-484e-8E2A-6F61F2E835DC}");
    allowMultipleInstances(false);
    destroyAfterExecute(false);
    setWizardSupported(false);
+   setAbortSupported(false);
 }
 
-Scriptor::~Scriptor()
+string Scriptor::getPrompt() const
 {
-}
-
-bool Scriptor::setBatch()
-{
-   return true;
-}
-
-bool Scriptor::setInteractive()
-{
-   return true;
-}
-
-bool Scriptor::hasAbort()
-{
-   return false;
-}
-
-bool Scriptor::getInputSpecification(PlugInArgList*& pArgList)
-{
-   pArgList = NULL;
-
-   // Set up list
-   pArgList = mpPlugInManager->getPlugInArgList();
-   if (pArgList == NULL)
-   {
-      return false;
-   }
-
-   PlugInArg* pArg = NULL;
-   pArg = mpPlugInManager->getPlugInArg();      // Command
-   if (pArg != NULL)
-   {
-      pArg->setName(CommandArg());
-      pArg->setType("string");
-      pArg->setDefaultValue(NULL);
-      pArgList->addArg(*pArg);
-   }
-
-   return true;
-}
-
-bool Scriptor::getOutputSpecification(PlugInArgList*& pArgList)
-{
-   pArgList = NULL;
-
-   // Set up list
-   pArgList = mpPlugInManager->getPlugInArgList();
-   if (pArgList == NULL)
-   {
-      return false;
-   }
-
-   // Output text
-   PlugInArg* pArg = NULL;
-   pArg = mpPlugInManager->getPlugInArg();
-   if (pArg != NULL)
-   {
-      pArg->setName(OutputTextArg());
-      pArg->setType("string");
-      pArg->setDefaultValue(NULL);
-      pArgList->addArg(*pArg);
-   }
-
-   // Return type
-   pArg = mpPlugInManager->getPlugInArg();
-   if (pArg != NULL)
-   {
-      pArg->setName(ReturnTypeArg());
-      pArg->setType("string");
-      pArg->setDefaultValue(NULL);
-      pArgList->addArg(*pArg);
-   }
-
-   return true;
+   return getName() + "[" + StringUtilities::toDisplayString(mCommandNumber) + "]> ";
 }
 
 bool Scriptor::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
-   bool bSuccess = extractInputArgs(pInArgList);
-   if (bSuccess == false)
+   if (pInArgList == NULL)
    {
       return false;
    }
-
-   if (mCommand.empty() == true)
+   if (!pInArgList->getPlugInArgValue<string>(CommandArg(), mCommand) || mCommand.empty())
    {
       return false;
    }
 
    // TODO: Execute the command here
-//   bSuccess = runCommand(mCommand);
+   // bSuccess = runCommand(mCommand);
+   ++mCommandNumber;
 
    // Generate the output text
-   bool bValidCommand = false;
-
-   vector<string> commands;
-   getKeywordList(commands);
-
-   vector<string>::iterator iter = commands.begin();
-   while (iter != commands.end())
-   {
-      string currentCommand = *iter;
-      string temp = mCommand.substr(0, currentCommand.length());
-      if (temp == currentCommand)
-      {
-         bValidCommand = true;
-         break;
-      }
-
-      ++iter;
-   }
+   // For this example, a valid command begins with an upper or lowercase letter
+   bool bValidCommand = (mCommand[0] >= 'a' && mCommand[0] <= 'z') || (mCommand[0] >= 'A' && mCommand[0] <= 'Z');
 
    string returnText = "";
    string returnType = "";
@@ -164,115 +76,8 @@ bool Scriptor::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
    // Populate the output arg list
    if (pOutArgList != NULL)
    {
-      PlugInArg* pArg = NULL;
-
-      bSuccess = pOutArgList->getArg(OutputTextArg(), pArg);
-      if ((bSuccess == true) && (pArg != NULL))
-      {
-         pArg->setActualValue(&returnText);
-      }
-
-      bSuccess = pOutArgList->getArg(ReturnTypeArg(), pArg);
-      if ((bSuccess == true) && (pArg != NULL))
-      {
-         pArg->setActualValue(&returnType);
-      }
-   }
-
-   return bSuccess;
-}
-
-void Scriptor::getKeywordList(vector<string>& list) const
-{
-   list.push_back("create");
-   list.push_back("load");
-   list.push_back("add");
-   list.push_back("modify");
-   list.push_back("remove");
-   list.push_back("close");
-   list.push_back("save");
-   list.push_back("delete");
-}
-
-bool Scriptor::getKeywordDescription(const string& keyword, string& description) const
-{
-   if (keyword == "create")
-   {
-      description = "sample create keyword";
-   }
-   else if (keyword == "load")
-   {
-      description = "sample load keyword";
-   }
-   else if (keyword == "add")
-   {
-      description = "sample add keyword";
-   }
-   else if (keyword == "modify")
-   {
-      description = "sample modify keyword";
-   }
-   else if (keyword == "remove")
-   {
-      description = "sample remove keyword";
-   }
-   else if (keyword == "close")
-   {
-      description = "sample close keyword";
-   }
-   else if (keyword == "save")
-   {
-      description = "sample save keyword";
-   }
-   else if (keyword == "delete")
-   {
-      description = "sample delete keyword";
-   }
-   else
-   {
-      return false;
-   }
-
-   return true;
-}
-
-void Scriptor::getUserDefinedTypes(vector<string>& list) const
-{
-}
-
-bool Scriptor::getTypeDescription(const string& type, string& description) const
-{
-   return false;
-}
-
-bool Scriptor::isBackground() const
-{
-   return false;
-}
-
-bool Scriptor::extractInputArgs(PlugInArgList* pArgList)
-{
-   if (pArgList == NULL)
-   {
-      return false;
-   }
-
-   PlugInArg* pArg = NULL;
-
-   // Command
-   mCommand.erase();
-
-   bool bSuccess = pArgList->getArg(CommandArg(), pArg);
-   if ((bSuccess == true) && (pArg != NULL))
-   {
-      if (pArg->isActualSet() == true)
-      {
-         string* pCommand = reinterpret_cast<string*>(pArg->getActualValue());
-         if (pCommand != NULL)
-         {
-            mCommand = *pCommand;
-         }
-      }
+      pOutArgList->setPlugInArgValue(OutputTextArg(), &returnText);
+      pOutArgList->setPlugInArgValue(ReturnTypeArg(), &returnType);
    }
 
    return true;

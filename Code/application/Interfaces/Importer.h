@@ -60,7 +60,7 @@ public:
     *           The string consists of a description followed by one or more
     *           file extensions separated by a space.  Multiple file
     *           types may be specified with a double semicolon.  Examples
-    *           include "Landsat Header Files (*.hdr)", "TIFF Files (*.tif *.tiff)",
+    *           include "ENVI Header Files (*.hdr)", "TIFF Files (*.tif *.tiff)",
     *           and "Source Files (*.c*);;Header Files (*.h)".
     */
    virtual std::string getDefaultExtensions() const = 0;

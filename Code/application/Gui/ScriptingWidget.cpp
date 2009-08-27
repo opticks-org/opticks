@@ -334,6 +334,12 @@ void ScriptingWidget::clipToMaxParagraphs()
 
 void ScriptingWidget::appendPrompt()
 {
+   InterpreterExt1* pInterpreter = dynamic_cast<InterpreterExt1*>(mInterpreter->getPlugIn());
+   if (pInterpreter != NULL)
+   {
+      mPrompt = QString::fromStdString(pInterpreter->getPrompt());
+   }
+
    setCurrentFont(font());
    append(mPrompt);
 
@@ -360,99 +366,96 @@ void ScriptingWidget::executeCommand()
 
 void ScriptingWidget::executeCommand(const QString& strCommand)
 {
-   if (strCommand.isEmpty() == false)
+   // Load the interpreter in case the user unloaded it from the properties dialog
+   loadInterpreter();
+
+   if (mInterpreter->getPlugIn() == NULL)
    {
-      // Load the interpreter in case the user unloaded it from the properties dialog
-      loadInterpreter();
+      QMessageBox::critical(this, "Scripting Window", "Could not get the interpreter plug-in!");
+      return;
+   }
 
-      if (mInterpreter->getPlugIn() == NULL)
+   // Process the command
+   if (strCommand == "clear")
+   {
+      // Clear the text
+      clear();
+
+      // Clear the command stack
+      mCommandStack.clear();
+      mCommandIndex = 0;
+   }
+   else if (strCommand == "commands")
+   {
+      vector<string> keywords;
+
+      Interpreter* pInterpreter = dynamic_cast<Interpreter*>(mInterpreter->getPlugIn());
+      if (pInterpreter != NULL)
       {
-         QMessageBox::critical(this, "Scripting Window", "Could not get the interpreter plug-in!");
-         return;
+         pInterpreter->getKeywordList(keywords);
       }
 
-      // Process the command
-      if (strCommand == "clear")
+      for (unsigned int i = 0; i < keywords.size(); i++)
       {
-         // Clear the text
-         clear();
-
-         // Clear the command stack
-         mCommandStack.clear();
-         mCommandIndex = 0;
-      }
-      else if (strCommand == "commands")
-      {
-         vector<string> keywords;
-
-         Interpreter* pInterpreter = dynamic_cast<Interpreter*>(mInterpreter->getPlugIn());
-         if (pInterpreter != NULL)
+         string keyword = keywords.at(i);
+         if (keyword.empty() == false)
          {
-            pInterpreter->getKeywordList(keywords);
-         }
-
-         for (unsigned int i = 0; i < keywords.size(); i++)
-         {
-            string keyword = keywords.at(i);
-            if (keyword.empty() == false)
-            {
-               addOutputText(QString::fromStdString(keyword));
-            }
+            addOutputText(QString::fromStdString(keyword));
          }
       }
-      else
+   }
+   else
+   {
+      // Set the input values for the plug-in
+      string command = strCommand.toStdString();
+      mInterpreter->getInArgList().setPlugInArgValue(Interpreter::CommandArg(), &command);
+
+      Service<DesktopServices> pDesktop;
+
+      SpatialDataView* pView = dynamic_cast<SpatialDataView*>(pDesktop->getCurrentWorkspaceWindowView());
+      if (pView != NULL)
       {
-         // Set the input values for the plug-in
-         string command = strCommand.toStdString();
-         mInterpreter->getInArgList().setPlugInArgValue(Interpreter::CommandArg(), &command);
-
-         Service<DesktopServices> pDesktop;
-
-         SpatialDataView* pView = dynamic_cast<SpatialDataView*>(pDesktop->getCurrentWorkspaceWindowView());
-         if (pView != NULL)
+         LayerList* pLayerList = pView->getLayerList();
+         if (pLayerList != NULL)
          {
-            LayerList* pLayerList = pView->getLayerList();
-            if (pLayerList != NULL)
+            RasterElement* pRaster = pLayerList->getPrimaryRasterElement();
+            if (pRaster != NULL)
             {
-               RasterElement* pRaster = pLayerList->getPrimaryRasterElement();
-               if (pRaster != NULL)
-               {
-                  mInterpreter->getInArgList().setPlugInArgValue(Executable::DataElementArg(), pRaster);
-               }
+               mInterpreter->getInArgList().setPlugInArgValue(Executable::DataElementArg(), pRaster);
             }
          }
+      }
 
-         string outputText = "";
-         string returnType = "";
+      string outputText = "";
+      string returnType = "";
 
-         // Run the command in the plug-in
-         bool bSuccess = mInterpreter->execute();
-         if (bSuccess == true)
+      // Run the command in the plug-in
+      bool bSuccess = mInterpreter->execute();
+      if (bSuccess == true)
+      {
+         mInterpreter->getOutArgList().getPlugInArgValue(Interpreter::OutputTextArg(), outputText);
+         mInterpreter->getOutArgList().getPlugInArgValue(Interpreter::ReturnTypeArg(), returnType);
+      }
+
+      // Add the output text to the window
+      if (outputText.empty() == false)
+      {
+         // Set the font and color based on the return type
+         QColor currentTextColor = textColor();
+
+         if (returnType == "Output")
          {
-            mInterpreter->getOutArgList().getPlugInArgValue(Interpreter::OutputTextArg(), outputText);
-            mInterpreter->getOutArgList().getPlugInArgValue(Interpreter::ReturnTypeArg(), returnType);
+            setCurrentFont(mOutputFont);
+            setTextColor(mOutputColor);
+         }
+         else if (returnType == "Error")
+         {
+            setCurrentFont(mErrorFont);
+            setTextColor(mErrorColor);
          }
 
-         // Add the output text to the window
-         if (outputText.empty() == false)
-         {
-            // Set the font and color based on the return type
-            QColor currentTextColor = textColor();
-
-            if (returnType == "Output")
-            {
-               setCurrentFont(mOutputFont);
-               setTextColor(mOutputColor);
-            }
-            else if (returnType == "Error")
-            {
-               setCurrentFont(mErrorFont);
-               setTextColor(mErrorColor);
-            }
-
-            addOutputText(QString::fromStdString(outputText));
-            setTextColor(currentTextColor);
-         }
+         addOutputText(QString::fromStdString(outputText));
+         setTextColor(currentTextColor);
       }
    }
 

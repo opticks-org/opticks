@@ -96,7 +96,7 @@ protected:
     *           should consist of a description followed by one or more
     *           extensions separated by a space.  Multiple file types may
     *           be specified with a double semicolon.  Examples include
-    *           "Landsat Header Files (*.hdr)", "TIFF Files (*.tif *.tiff)",
+    *           "ENVI Header Files (*.hdr)", "TIFF Files (*.tif *.tiff)",
     *           and "Source Files (*.c*);;Header Files (*.h)".
     */
    void setExtensions(const std::string& extensions);
