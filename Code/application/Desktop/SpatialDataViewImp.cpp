@@ -31,7 +31,6 @@
 #include "glCommon.h"
 #include "GraphicGroupImp.h"
 #include "HistogramWindow.h"
-#include "HistogramWindowImp.h"
 #include "LatLonLayer.h"
 #include "LayerListAdapter.h"
 #include "LayerUndo.h"
@@ -338,15 +337,6 @@ SpatialDataViewImp::SpatialDataViewImp(const string& id, const string& viewName,
    {
       VERIFYNR(connect(this, SIGNAL(mouseModeAdded(const MouseMode*)),
          pAppWindow, SLOT(addMouseModeToGroup(const MouseMode*))));
-   }
-
-   HistogramWindowImp* pHistWindow =
-      dynamic_cast<HistogramWindowImp*>(pDesktop->getWindow("Histogram Window", PLOT_WINDOW));
-   if (pHistWindow != NULL)
-   {
-      VERIFYNR(connect(this, SIGNAL(layerAdded(Layer*)), pHistWindow, SLOT(createPlot(Layer*))));
-      VERIFYNR(connect(this, SIGNAL(layerActivated(Layer*)), pHistWindow, SLOT(setCurrentPlot(Layer*))));
-      VERIFYNR(connect(this, SIGNAL(layerDeleted(Layer*)), pHistWindow, SLOT(deletePlot(Layer*))));
    }
 }
 
