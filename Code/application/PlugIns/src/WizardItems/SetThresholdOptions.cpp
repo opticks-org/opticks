@@ -51,12 +51,12 @@ bool SetThresholdOptions::getInputSpecification(PlugInArgList*& pArgList)
    VERIFY(pArgList->addArg<double>("Second Threshold", "The second threshold value is used as the upper threshold "
       "value for the middle and outside pass areas. It is ignored for the lower and upper pass areas.  If no "
       "region units are provided, the threshold value is assumed to be a raw value."));
-   VERIFY(pArgList->addArg<PassArea>("Pass Area", PassArea(), "The region based on the threshold values in which "
-      "data will be considered to pass the threshold."));
-   VERIFY(pArgList->addArg<RegionUnits>("Region Units", RegionUnits(), "The units of the threshold values."));
-   VERIFY(pArgList->addArg<SymbolType>("Symbol", SymbolType(), "The symbol that is used to mark the pixels that "
-      "pass the threshold value(s)."));
-   VERIFY(pArgList->addArg<ColorType>("Color", ColorType(), "The color that is used to draw the pixel symbols."));
+   VERIFY(pArgList->addArg<PassArea>("Pass Area", "The region based on the threshold values in which data will be "
+      "considered to pass the threshold."));
+   VERIFY(pArgList->addArg<RegionUnits>("Region Units", "The units of the threshold values."));
+   VERIFY(pArgList->addArg<SymbolType>("Symbol", "The symbol that is used to mark the pixels that pass the "
+      "threshold value(s)."));
+   VERIFY(pArgList->addArg<ColorType>("Color", "The color that is used to draw the pixel symbols."));
 
    return true;
 }
@@ -152,26 +152,10 @@ bool SetThresholdOptions::extractInputArgs(PlugInArgList* pInArgList)
    mpLayer = pInArgList->getPlugInArgValue<ThresholdLayer>(Executable::LayerArg());
    mHasFirst = pInArgList->getPlugInArgValue("First Threshold", mFirstThreshold);
    mHasSecond = pInArgList->getPlugInArgValue("Second Threshold", mSecondThreshold);
-   if (!pInArgList->getPlugInArgValue("Pass Area", mPassArea))
-   {
-      reportError("Invalid pass area.", "{f2128d5e-6de5-493d-a959-adcbca640785}");
-      return false;
-   }
-   if (!pInArgList->getPlugInArgValue("Region Units", mRegionUnits))
-   {
-      reportError("Invalid region units.", "{255b1442-bfcf-4eca-a778-1233077d19e6}");
-      return false;
-   }
-   if (!pInArgList->getPlugInArgValue("Symbol", mSymbol))
-   {
-      reportError("Invalid symbol.", "{56f2762f-49fc-48f0-ad99-3c324e8839d6}");
-      return false;
-   }
-   if (!pInArgList->getPlugInArgValue("Color", mColor))
-   {
-      reportError("Invalid color.", "{63cf1c3a-27b5-4c77-b5ed-d090a6251d55}");
-      return false;
-   }
+   pInArgList->getPlugInArgValue("Pass Area", mPassArea);
+   pInArgList->getPlugInArgValue("Region Units", mRegionUnits);
+   pInArgList->getPlugInArgValue("Symbol", mSymbol);
+   pInArgList->getPlugInArgValue("Color", mColor);
 
    return true;
 }
