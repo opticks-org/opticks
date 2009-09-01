@@ -72,8 +72,7 @@ void FilenameImp::setFullPathAndName(const string& filename)
 
 string FilenameImp::getFullPathAndName() const
 {
-   string pathAndName = "";
-   pathAndName.erase();
+   string pathAndName;
 
    const QFileInfo& fileInfo = getQFileInfo();
    QString strFilePath = fileInfo.filePath();
@@ -102,8 +101,7 @@ string FilenameImp::getFullPathAndName() const
 
 string FilenameImp::getPath() const
 {
-   string path = "";
-   path.erase();
+   string path;
 
    QString strPath = getQFileInfo().absolutePath();
    if (strPath.isEmpty() == false)
@@ -116,8 +114,7 @@ string FilenameImp::getPath() const
 
 string FilenameImp::getFileName() const
 {
-   string filename = "";
-   filename.erase();
+   string filename;
 
    QString strFileName = getQFileInfo().fileName();
    if (strFileName.isEmpty() == false)
@@ -130,8 +127,7 @@ string FilenameImp::getFileName() const
 
 string FilenameImp::getTitle() const
 {
-   string fileTitle = "";
-   fileTitle.erase();
+   string fileTitle;
 
    QString strBaseName = getQFileInfo().baseName();
    if (strBaseName.isEmpty() == false)
@@ -144,8 +140,7 @@ string FilenameImp::getTitle() const
 
 string FilenameImp::getExtension() const
 {
-   string extension = "";
-   extension.erase();
+   string extension;
 
    QString strExtension = getQFileInfo().completeSuffix();
    if (strExtension.isEmpty() == false)
@@ -158,8 +153,7 @@ string FilenameImp::getExtension() const
 
 bool FilenameImp::isDirectory() const
 {
-   bool bDirectory = false;
-   bDirectory = getQFileInfo().isDir();
+   bool bDirectory = getQFileInfo().isDir();
 
    return bDirectory;
 }

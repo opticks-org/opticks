@@ -35,8 +35,6 @@ public:
     *  @param   pathAndName
     *           A string with the file path information.
     *
-    *  @return  True if the file specification information is valid for the current
-    *           platform.
     */
    virtual void setFullPathAndName(const std::string& pathAndName) = 0;
 

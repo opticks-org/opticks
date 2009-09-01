@@ -7,6 +7,7 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtCore/QString>
 #include <QtGui/QLabel>
 #include <QtGui/QLayout>
 #include <QtGui/QRadioButton>
@@ -322,7 +323,7 @@ bool EnviExporter::exportHeaderFile() const
    }
 
    // Get the header filename from the export file descriptor
-   const string& headerFilename = mpFileDescriptor->getFilename();
+   string headerFilename = mpFileDescriptor->getFilename();
    if (headerFilename.empty() == true)
    {
       string message = "The header filename is invalid.";
@@ -333,6 +334,12 @@ bool EnviExporter::exportHeaderFile() const
 
       pStep->finalize(Message::Failure, message);
       return false;
+   }
+
+   const string ext = ".hdr";
+   if (QString::fromStdString(headerFilename).endsWith(QString::fromStdString(ext), Qt::CaseInsensitive) == false)
+   {
+      headerFilename += ext;
    }
 
    pStep->addProperty("Header filename", headerFilename);
@@ -1037,20 +1044,11 @@ bool EnviExporter::exportDataFile() const
    const string& headerFilename = mpFileDescriptor->getFilename();
    VERIFY(headerFilename.empty() == false);
 
+   const string ext = ".hdr";
    string dataFilename = headerFilename;
-
-   string::size_type pos = headerFilename.rfind(".");
-   if (pos != string::npos)
+   if (QString::fromStdString(dataFilename).endsWith(QString::fromStdString(ext), Qt::CaseInsensitive) == true)
    {
-      dataFilename = headerFilename.substr(0, pos);
-   }
-
-   InterleaveFormatType interleave = mpFileDescriptor->getInterleaveFormat();
-
-   string extension = convertInterleaveToText(interleave);
-   if (extension.empty() == false)
-   {
-      dataFilename += "." + extension;
+      dataFilename.resize(dataFilename.length() - ext.length());
    }
 
    StepResource pStep("Export data file", "app", "90DD1ADE-7CFD-4A81-B52E-6AA918A0945F");
@@ -1085,6 +1083,7 @@ bool EnviExporter::exportDataFile() const
    }
 
    int rowIndex = 0;
+   InterleaveFormatType interleave = mpFileDescriptor->getInterleaveFormat();
    if (interleave == BIP)
    {
       if (exportBands.size() == pDescriptor->getBandCount())   // All bands
