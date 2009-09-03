@@ -338,7 +338,13 @@ bool Nitf::NitfImporter::createRasterPager(RasterElement *pRaster) const
    FileDescriptor* pFd = pDd->getFileDescriptor();
    VERIFY(pFd != NULL);
 
-   stringstream imageNameStream(pFd->getDatasetLocation().substr(1));
+   const string& datasetLocation = pFd->getDatasetLocation();
+   if (datasetLocation.empty() == true)
+   {
+      return false;
+   }
+
+   stringstream imageNameStream(datasetLocation.substr(1));
    int imageSegment;
    imageNameStream >> imageSegment;
 
