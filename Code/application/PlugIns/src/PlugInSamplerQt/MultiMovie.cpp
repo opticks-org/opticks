@@ -212,7 +212,13 @@ bool MultiMovie::setupAnimations()
    // Create the controller
    Service<AnimationServices> pServices;
 
-   AnimationController* pController = pServices->createAnimationController("MultiMovie", FRAME_TIME);
+   AnimationController* pController = pServices->getAnimationController("MultiMovie");
+   if (pController != NULL)
+   {
+      pServices->destroyAnimationController(pController);
+   }
+
+   pController = pServices->createAnimationController("MultiMovie", FRAME_TIME);
    if (pController == NULL)
    {
       return false;
