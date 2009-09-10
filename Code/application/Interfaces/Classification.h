@@ -361,7 +361,7 @@ public:
     *  Access the classification authority for the file dependent upon the value in 
     *  the Authority Type. Values are free-form text which should contain the following
     *  information: original classification authority name and position or personal
-    *  identifier if the value in Authority Type is O; title of the the document or
+    *  identifier if the value in Authority Type is O; title of the document or
     *  security classification guide used to classify the file if the value in Authority
     *  Type is D; and Derive-Multiple if the file classification was derived from
     *  multiple sources. In the latter case, the file originator will maintain a record
@@ -376,7 +376,7 @@ public:
     *  Set the classification authority for the file dependent upon the value in 
     *  the Authority Type. Values are free-form text which should contain the following
     *  information: original classification authority name and position or personal
-    *  identifier if the value in Authority Type is O; title of the the document or
+    *  identifier if the value in Authority Type is O; title of the document or
     *  security classification guide used to classify the file if the value in Authority
     *  Type is D; and Derive-Multiple if the file classification was derived from
     *  multiple sources. In the latter case, the file originator will maintain a record

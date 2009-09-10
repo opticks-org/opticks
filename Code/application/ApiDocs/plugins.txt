@@ -175,7 +175,7 @@ In order to use this approach on either Windows or Solaris, you need to perform 
  -# Copy your compiled plug-in (i.e. .dll or .so) into the PlugIns folder of the %Opticks installation.
  -# Copy any third party dependency libraries (i.e. .dll or .so's that are not plug-ins) into the Bin folder of the installation.
  -# Copy any custom settings default files (i.e. *.cfg, see ConfigurationSettings) into the DefaultSettings folder of the installation.
- -# Copy any plug-in on-line help into the the Help folder of the installation.
+ -# Copy any plug-in on-line help into the Help folder of the installation.
  -# Copy any product templates into the Templates folder of the installation.
  -# Copy any wizard files into either the Wizards folder of the installation or the SupportFiles/Wizards folder of the installation.
  -# Copy any other custom supporting data files into the SupportFiles folder of the installation.

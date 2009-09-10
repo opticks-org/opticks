@@ -97,7 +97,7 @@ These lines will move the destination DataAccessor to the next row and column.
 \skip (!isBatch())
 \until pView->createLayer
 Once we get the edge detection results, we'll check to see what mode we are running in.
-If we're running in interactive mode, we'll create a a new SpatialDataWindow that will show the new edge detected cube to the user.
+If we're running in interactive mode, we'll create a new SpatialDataWindow that will show the new edge detected cube to the user.
 
 \skipline pOutArgList->setPlugInArgValue
 This line will set the result RasterElement as a output argument.

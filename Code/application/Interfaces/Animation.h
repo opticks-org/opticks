@@ -21,11 +21,11 @@
 /**
  *  A collection of animation frame objects with a current frame.
  *
- *  A animation object provides the means by which other objects can be animated by
+ *  An animation object provides the means by which other objects can be animated by
  *  providing a set of animation frames, one of which is identified as the current
- *  frame.  A animation by itself does not provide a lot of functionality but simply
+ *  frame.  An animation by itself does not provide a lot of functionality but simply
  *  notifies attached objects when its current frame is changed.  The real work
- *  of a displaying a animation is therefore in those objects that attach to the
+ *  of a displaying an animation is therefore in those objects that attach to the
  *  animation object.
  *
  *  To create a useful animation, first create a class with a Slot method.  This class
@@ -34,10 +34,10 @@
  *  animation by calling AnimationController::createAnimation().  Attach the class to the
  *  animation.  Then in the class's Slot method, whenever signalFrameChanged() is the
  *  signal with a non-NULL value, this indicates that the current frame has
- *  changed.  any_cast the value to a AnimationFrame pointer and perform any
+ *  changed.  any_cast the value to an AnimationFrame pointer and perform any
  *  specific updates based on the new frame values.
  *
- *  A animation is both created and destroyed from a animation controller.
+ *  An animation is both created and destroyed from an animation controller.
  *
  *  This subclass of Subject will notify upon the following conditions:
  *    - The object is deleted.
@@ -153,7 +153,7 @@ public:
    /**
     *  Sets the current frame in the animation.
     *
-    *  This is a convenience method that allows a animation frame to be set as the current
+    *  This is a convenience method that allows an animation frame to be set as the current
     *  frame by specifying just the data value.  The method identifies the first frame
     *  in the animation that is greater than or equal to the given frame value.  The given frame
     *  value is compared with the internal frame values according to the animation's frame

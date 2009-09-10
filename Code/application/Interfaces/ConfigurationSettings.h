@@ -489,7 +489,7 @@ class Filename;
  * will be persisted between runs of the application.
  *
  * The configuration settings allow data values to be stored per-user and
- * during a application run.  Settings which are saved per-user and persist
+ * during an application run.  Settings which are saved per-user and persist
  * between application runs are called per-user settings.  Settings which
  * only exist during one application run are called per-session settings.
  *

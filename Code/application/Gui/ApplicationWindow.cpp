@@ -549,7 +549,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    m_pPaperSize_Action = new QAction("Pape&r Size...", this);
    m_pPaperSize_Action->setAutoRepeat(false);
    m_pPaperSize_Action->setToolTip("Paper Size");
-   m_pPaperSize_Action->setStatusTip("Sets the paper size of of the current product");
+   m_pPaperSize_Action->setStatusTip("Sets the paper size of the current product");
    VERIFYNR(connect(m_pPaperSize_Action, SIGNAL(triggered()), this, SLOT(setPaperSize())));
 
    // Tools
@@ -4253,7 +4253,7 @@ void ApplicationWindow::setPaperSize()
 
 void ApplicationWindow::updateActiveWindow(QWidget* pWindow)
 {
-   // Check for the the currently active window
+   // Check for the currently active window
    WorkspaceWindowImp* pWorkspaceWindow = dynamic_cast<WorkspaceWindowImp*>(pWindow);
    if (pWorkspaceWindow == mpCurrentWnd)
    {

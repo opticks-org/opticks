@@ -21,7 +21,7 @@ class XMLWriter;
  *  Objects that can save/restore themselves from a file inherit this
  *  interface. Each class that ultimately derives from Serializable 
  *  must implement an override of these interfaces, even if an intermediate
- *  parent already has an an implementation.
+ *  parent already has an implementation.
  *
  *  The structure of the serialized output generally has the form of a
  *  string with the class name, followed by the data comprising the

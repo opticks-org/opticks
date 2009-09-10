@@ -87,7 +87,7 @@ public:
    virtual void getUserDefinedTypes(std::vector<std::string>& list) const;
 
    /**
-    *  @copydoc Interpreter::getKeywordDescription()
+    *  @copydoc Interpreter::getTypeDescription()
     *
     *  @default Returns false.
     */

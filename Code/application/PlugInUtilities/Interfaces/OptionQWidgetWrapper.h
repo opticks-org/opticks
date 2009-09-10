@@ -42,7 +42,7 @@
  *    <li>Provide a static getCopyright() method. @see PlugIn::getCopyright()</li>
  *    <li>Provide a static getShortDescription() method. @see PlugIn::getShortDescription()</li>
  *    <li>Provide a static isProduction() method. @see PlugIn::isProduction()</li>
- *    <li>Provide a applyChanges() method. @see Option::applyChanges()</li>
+ *    <li>Provide an applyChanges() method. @see Option::applyChanges()</li>
  *  </ul>
  */
 template <typename OptionWidget>

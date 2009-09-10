@@ -28,7 +28,7 @@ class Animation;
  *  An animation controller allows multiple animations to be played synchronously at a particular
  *  rate.  This can be particularly useful with time-based controllers.  In addition to
  *  the animations, the controller stores a start value, stop value, and current value.  These
- *  values are updated automatically when the frames in a animation change, or when an
+ *  values are updated automatically when the frames in an animation change, or when an
  *  animation is destroyed.  The start value is defined as the minimum value across all
  *  frames in all animations according to the frame value type specified at the creation
  *  of the controller.  Similarly, the stop value is defined as the maximum value across
@@ -47,7 +47,7 @@ class Animation;
  *  this occurs, frames will be dropped when playing through the animations to preserve the
  *  integrity of the frame rate.
  *
- *  An animation controller is created and destroyed from the animation window.  When a animation controller
+ *  An animation controller is created and destroyed from the animation window.  When an animation controller
  *  is destroyed, all animations contained in the controller are also destroyed.
  *
  *  This subclass of Subject will notify upon the following conditions:

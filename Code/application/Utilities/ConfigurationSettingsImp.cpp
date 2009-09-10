@@ -501,7 +501,7 @@ bool ConfigurationSettingsImp::parseDeploymentFile(string& errorMessage, string&
    else
    {
       deploymentInfoMsg += QString("All of the settings were resolved using the "
-         "application defaults because the the /deployment: command-line argument "
+         "application defaults because the /deployment: command-line argument "
          "was not used and an opticks.dep file was not present in the same directory "
          "as the Opticks executable.\n");
    }

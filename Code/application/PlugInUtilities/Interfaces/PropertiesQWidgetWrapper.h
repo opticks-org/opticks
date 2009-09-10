@@ -40,7 +40,7 @@
  *  - Provides a static getCopyright() method.  @see PlugIn::getCopyright()
  *  - Provides a static getShortDescription() method.  @see PlugIn::getShortDescription()
  *  - Provides a static isProduction() method.  @see PlugIn::isProduction()
- *  - Provides a applyChanges() method.  @see Properties::applyChanges()
+ *  - Provides an applyChanges() method.  @see Properties::applyChanges()
  */
 template <typename PropertiesWidget>
 class PropertiesQWidgetWrapper : public PropertiesShell

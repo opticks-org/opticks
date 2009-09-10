@@ -107,7 +107,7 @@ public:
    /**
     *  Creates a command on a menu in the menu bar.
     *
-    *  This method creates a command on a menu in the the menu bar and creates
+    *  This method creates a command on a menu in the menu bar and creates
     *  menus and submenus as necessary.  The command is added directly to a
     *  menu and the user will not be able to edit and save a keyboard shortcut
     *  in the user-defined configuration settings.  To allow the user to edit
@@ -140,7 +140,7 @@ public:
    /**
     *  Creates a command on a menu in the menu bar.
     *
-    *  This method creates a command on a menu in the the menu bar and creates
+    *  This method creates a command on a menu in the menu bar and creates
     *  menus and submenus as necessary.  The command is added directly to a
     *  menu and a given shortcut context allows the user to edit and save the
     *  keyboard shortcut in the user-defined configuration settings.  If the
@@ -181,7 +181,7 @@ public:
    /**
     *  Adds an existing command to a given menu on the menu bar.
     *
-    *  This method adds an existing command to a menu in the the menu bar and
+    *  This method adds an existing command to a menu in the menu bar and
     *  allows the user to edit and save a keyboard shortcut based on a given
     *  context.  If the should not be able to edit the shortcut, call the
     *  QMenu::insertAction() method instead.

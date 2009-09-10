@@ -27,7 +27,7 @@ class RasterPage;
  *
  * This class provides an efficient, generic interface to the raw dataset.  To 
  * provide efficient access to the raw data, range checking can not occur 
- * within this class.  It is up the the user of the DataAcessor to make 
+ * within this class.  It is up to the user of the DataAcessor to make 
  * sure the bounds of the dataset are not exceeded.  This class provides 
  * row-major access to the data.  All of the standard interleaves (BIP, 
  * BIL, or BSQ) are row-major, so this class doesn't provide column-major access. 
@@ -350,7 +350,7 @@ private:
    }
 
    /**
-    *  Calculate the column and row size depending on the the interleave
+    *  Calculate the column and row size depending on the interleave format
     *  and number of concurrentColumns, concurrentRows and concurrentBands.
     *
     *  @param elementSize

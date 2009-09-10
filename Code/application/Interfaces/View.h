@@ -917,7 +917,7 @@ public:
     *           action can be properly deleted.
     *
     *  @param   pAction
-    *           The action to add the the undo stack.  The view assumes
+    *           The action to add to the undo stack.  The view assumes
     *           ownership of the action and will delete it when necessary.  If
     *           isUndoBlocked() returns \c true, this method deletes the given
     *           action immediately.

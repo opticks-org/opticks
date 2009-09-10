@@ -121,9 +121,9 @@ public:
     *           removed from the set. Signatures not found in the set will
     *           not be deleted regardless of the value of this parameter.
     *
-    *  @return  true if the the list of signaturess to remove was non-empty and 
-    *           all of the specified sigs were found in the set, 
-    *           otherwise false.
+    *  @return  Returns \c true if the list of signatures to remove was not
+    *           empty and all of the specified signatures were found in the
+    *           set; otherwise returns \c false.
     *
     *  @notify  This method will notify Subject::signalModified after the 
     *           signatures are done being removed from the list. Only one 

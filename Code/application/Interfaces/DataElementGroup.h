@@ -141,9 +141,9 @@ public:
     *           removed from the group. Elements not found in the group will
     *           not be deleted regardless of the value of this parameter.
     *
-    *  @return  true if the the list of elements to remove was non-empty and 
-    *           all of the specified elements were found in the group, 
-    *           otherwise false.
+    *  @return  Returns \c true if the list of elements to remove was not empty
+    *           and all of the specified elements were found in the group;
+    *           otherwise returns \c false.
     *
     *  @notify  Subject::signalModified after the 
     *           elements are done being removed from the list. Only one 

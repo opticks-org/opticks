@@ -267,7 +267,7 @@ public:
    /**
     *  Sets both the start and stop angles for an arc object.
     *
-    *  A arc object is composed of a portion of an elliptical arc.  The
+    *  An arc object is composed of a portion of an elliptical arc.  The
     *  ellipse is divided into 360 sections, and the start and stop angles
     *  represent the location on the ellipse where the arc is defined.
     *

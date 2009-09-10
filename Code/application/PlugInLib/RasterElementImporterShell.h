@@ -258,8 +258,8 @@ protected:
     *           importer cannot load the given data descriptor.  This message
     *           will be displayed to the user.
     *
-    *  @return  Returns <b>true</b> if the the basic checks succeed;
-    *           otherwise returns <b>false</b>.
+    *  @return  Returns \c true if the basic checks succeed; otherwise returns
+    *           \c false.
     *
     *  @see     DataDescriptor, FileDescriptor
     */
