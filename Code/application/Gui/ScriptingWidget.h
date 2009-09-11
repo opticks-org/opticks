@@ -21,6 +21,7 @@
 #include <string>
 #include <boost/any.hpp>
 
+class PlugIn;
 class Subject;
 
 class ScriptingWidget : public QTextEdit
@@ -49,10 +50,16 @@ public:
    void setMaxNumParagraphs(unsigned int numParagraphs);
    unsigned int getMaxNumParagraphs() const;
 
+   const PlugIn* getInterpreter() const;
+
+   bool toXml(XMLWriter* pXml) const;
+   bool fromXml(DOMNode* pDocument, unsigned int version);
+
 public slots:
    void executeCommand(const QString& strCommand);
 
 protected:
+   void showEvent(QShowEvent* pEvent);
    void keyPressEvent(QKeyEvent* e);
 
    unsigned int getNumParagraphs() const;
@@ -64,9 +71,9 @@ protected slots:
    void appendPrompt();
    void executeCommand();
    void addOutputText(const QString& strMessage);
-   void loadInterpreter();
 
 private:
+   bool mDisplayedOnce;
    QString mPrompt;
    QStringList mCommandStack;
    int mCommandIndex;

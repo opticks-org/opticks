@@ -11,13 +11,15 @@
 #include <QtGui/QFrame>
 #include <QtGui/QLayout>
 
-#include "ScriptingWindow.h"
-#include "DesktopServicesImp.h"
+#include "PlugIn.h"
 #include "PlugInDescriptor.h"
-#include "PlugInManagerServicesImp.h"
+#include "PlugInManagerServices.h"
 #include "PropertiesScriptingWindow.h"
 #include "ScriptingWidget.h"
+#include "ScriptingWindow.h"
+#include "xmlwriter.h"
 
+XERCES_CPP_NAMESPACE_USE
 using namespace std;
 
 ScriptingWindow::ScriptingWindow(const string& id, QWidget* pParent) :
@@ -327,7 +329,7 @@ void ScriptingWindow::updateInterpreters()
    }
 }
 
-void ScriptingWindow::sessionClosed(Subject &subject, const std::string &signal, const boost::any &data)
+void ScriptingWindow::clear()
 {
    while (mpTabWidget->count() > 0)
    {
@@ -335,4 +337,160 @@ void ScriptingWindow::sessionClosed(Subject &subject, const std::string &signal,
       mpTabWidget->removeTab(0);
       delete pWidget;
    }
+}
+
+void ScriptingWindow::sessionClosed(Subject &subject, const std::string &signal, const boost::any &data)
+{
+   clear();
+}
+
+bool ScriptingWindow::toXml(XMLWriter* pXml) const
+{
+   if ((pXml == NULL) || (DockWindowImp::toXml(pXml) == false))
+   {
+      return false;
+   }
+
+   pXml->addAttr("commandFont", mCommandFont.toString().toStdString());
+   pXml->addAttr("outputFont", mOutputFont.toString().toStdString());
+   pXml->addAttr("errorFont", mErrorFont.toString().toStdString());
+   pXml->addAttr("outputColor", mOutputColor.name().toStdString());
+   pXml->addAttr("errorColor", mErrorColor.name().toStdString());
+   pXml->addAttr("scrollBuffer", mScrollBuffer);
+
+   ScriptingWidget* pCurrentInterpreter = getCurrentInterpreter();
+   if (pCurrentInterpreter != NULL)
+   {
+      const PlugIn* pPlugIn = pCurrentInterpreter->getInterpreter();
+      if (pPlugIn != NULL)
+      {
+         pXml->addAttr("currentInterpreterId", pPlugIn->getId());
+      }
+   }
+
+   for (int i = 0; i < mpTabWidget->count(); ++i)
+   {
+      ScriptingWidget* pInterpreter = static_cast<ScriptingWidget*>(mpTabWidget->widget(i));
+      if (pInterpreter != NULL)
+      {
+         pXml->pushAddPoint(pXml->addElement("Interpreter"));
+         pXml->addAttr("name", mpTabWidget->tabText(i).toStdString());
+
+         if (pInterpreter->toXml(pXml) == false)
+         {
+            return false;
+         }
+
+         pXml->popAddPoint();
+      }
+   }
+
+   return true;
+}
+
+bool ScriptingWindow::fromXml(DOMNode* pDocument, unsigned int version)
+{
+   if (pDocument == NULL)
+   {
+      return false;
+   }
+
+   // Clear any existing tabs
+   clear();
+
+   if (DockWindowImp::fromXml(pDocument, version) == false)
+   {
+      return false;
+   }
+
+   DOMElement* pElement = static_cast<DOMElement*>(pDocument);
+   if (pElement == NULL)
+   {
+      return false;
+   }
+
+   // Restore the attributes
+   string fontText = A(pElement->getAttribute(X("commandFont")));
+   if (fontText.empty() == false)
+   {
+      if (mCommandFont.fromString(QString::fromStdString(fontText)) == false)
+      {
+         return false;
+      }
+   }
+
+   fontText = A(pElement->getAttribute(X("outputFont")));
+   if (fontText.empty() == false)
+   {
+      if (mOutputFont.fromString(QString::fromStdString(fontText)) == false)
+      {
+         return false;
+      }
+   }
+
+   fontText = A(pElement->getAttribute(X("errorFont")));
+   if (fontText.empty() == false)
+   {
+      if (mErrorFont.fromString(QString::fromStdString(fontText)) == false)
+      {
+         return false;
+      }
+   }
+
+   string colorText = A(pElement->getAttribute(X("outputColor")));
+   if (colorText.empty() == false)
+   {
+      mOutputColor.setNamedColor(QString::fromStdString(colorText));
+   }
+
+   colorText = A(pElement->getAttribute(X("errorColor")));
+   if (colorText.empty() == false)
+   {
+      mErrorColor.setNamedColor(QString::fromStdString(colorText));
+   }
+
+   mScrollBuffer = StringUtilities::fromXmlString<int>(A(pElement->getAttribute(X("scrollBuffer"))));
+
+   // Restore the interpreters
+   for (DOMNode* pChild = pDocument->getFirstChild(); pChild != NULL; pChild = pChild->getNextSibling())
+   {
+      if (XMLString::equals(pChild->getNodeName(), X("Interpreter")))
+      {
+         DOMElement* pChildElement = static_cast<DOMElement*>(pChild);
+
+         QString nodeName = QString::fromStdString(A(pChildElement->getAttribute(X("name"))));
+         if (nodeName.isEmpty() == false)
+         {
+            ScriptingWidget* pWidget = new ScriptingWidget(nodeName);
+            if (pWidget->fromXml(pChild, version) == false)
+            {
+               delete pWidget;
+               return false;
+            }
+
+            mpTabWidget->addTab(pWidget, nodeName);
+         }
+      }
+   }
+
+   // Set the current tab
+   string currentInterpreterId = A(pElement->getAttribute(X("currentInterpreterId")));
+   if (currentInterpreterId.empty() == false)
+   {
+      for (int i = 0; i < mpTabWidget->count(); ++i)
+      {
+         ScriptingWidget* pWidget = static_cast<ScriptingWidget*>(mpTabWidget->widget(i));
+         if (pWidget != NULL)
+         {
+            const SessionItem* pSessionItem = dynamic_cast<const SessionItem*>(pWidget->getInterpreter());
+            if ((pSessionItem != NULL) && (pSessionItem->getId() == currentInterpreterId))
+            {
+               mpTabWidget->setCurrentIndex(i);
+               break;
+            }
+         }
+      }
+   }
+
+   return true;
 }

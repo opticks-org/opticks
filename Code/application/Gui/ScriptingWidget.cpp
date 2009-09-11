@@ -19,13 +19,17 @@
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "RasterElement.h"
+#include "SessionManager.h"
 #include "Slot.h"
 #include "SpatialDataView.h"
+#include "xmlwriter.h"
 
+XERCES_CPP_NAMESPACE_USE
 using namespace std;
 
 ScriptingWidget::ScriptingWidget(const QString& strPlugInName, QWidget* parent) :
    QTextEdit(parent),
+   mDisplayedOnce(false),
    mPrompt(strPlugInName + "> "),
    mCommandIndex(0),
    mMaxParagraphs(512),
@@ -40,8 +44,6 @@ ScriptingWidget::ScriptingWidget(const QString& strPlugInName, QWidget* parent) 
    setFrameStyle(QFrame::NoFrame);
    setMinimumWidth(150);
    setUndoRedoEnabled(false);
-   loadInterpreter();
-   appendPrompt();
    setFocus();
 }
 
@@ -108,11 +110,6 @@ QColor ScriptingWidget::getCommandColor(const QString& command) const
 
 const QMap<QString, QColor>& ScriptingWidget::getCommandColors() const
 {
-   if (mCommandColors.empty() == true)
-   {
-      (const_cast<ScriptingWidget*>(this))->loadInterpreter();
-   }
-
    return mCommandColors;
 }
 
@@ -158,6 +155,171 @@ void ScriptingWidget::setMaxNumParagraphs(unsigned int numParagraphs)
 unsigned int ScriptingWidget::getMaxNumParagraphs() const
 {
    return mMaxParagraphs;
+}
+
+const PlugIn* ScriptingWidget::getInterpreter() const
+{
+   return mInterpreter->getPlugIn();
+}
+
+bool ScriptingWidget::toXml(XMLWriter* pXml) const
+{
+   if (pXml == NULL)
+   {
+      return false;
+   }
+
+   // Attributes
+   pXml->addAttr("commandFont", mCommandFont.toString().toStdString());
+   pXml->addAttr("outputFont", mOutputFont.toString().toStdString());
+   pXml->addAttr("errorFont", mErrorFont.toString().toStdString());
+   pXml->addAttr("outputColor", mOutputColor.name().toStdString());
+   pXml->addAttr("errorColor", mErrorColor.name().toStdString());
+   pXml->addAttr("maxParagraphs", mMaxParagraphs);
+
+   // Interpreter
+   const PlugIn* pInterpreter = getInterpreter();
+   if (pInterpreter != NULL)
+   {
+      const string& interpreterId = pInterpreter->getId();
+      pXml->addAttr("interpreterId", interpreterId);
+   }
+
+   // Command colors
+   for (QMap<QString, QColor>::const_iterator iter = mCommandColors.begin(); iter != mCommandColors.end(); ++iter)
+   {
+      pXml->pushAddPoint(pXml->addElement("CommandColor"));
+      pXml->addAttr("name", iter.key().toStdString());
+      pXml->addAttr("color", iter.value().name().toStdString());
+      pXml->popAddPoint();
+   }
+
+   return true;
+}
+
+bool ScriptingWidget::fromXml(DOMNode* pDocument, unsigned int version)
+{
+   DOMElement* pElement = static_cast<DOMElement*>(pDocument);
+   if (pElement == NULL)
+   {
+      return false;
+   }
+
+   // Attributes
+   string fontText = A(pElement->getAttribute(X("commandFont")));
+   if (fontText.empty() == false)
+   {
+      if (mCommandFont.fromString(QString::fromStdString(fontText)) == false)
+      {
+         return false;
+      }
+   }
+
+   fontText = A(pElement->getAttribute(X("outputFont")));
+   if (fontText.empty() == false)
+   {
+      if (mOutputFont.fromString(QString::fromStdString(fontText)) == false)
+      {
+         return false;
+      }
+   }
+
+   fontText = A(pElement->getAttribute(X("errorFont")));
+   if (fontText.empty() == false)
+   {
+      if (mErrorFont.fromString(QString::fromStdString(fontText)) == false)
+      {
+         return false;
+      }
+   }
+
+   string colorText = A(pElement->getAttribute(X("outputColor")));
+   if (colorText.empty() == false)
+   {
+      mOutputColor.setNamedColor(QString::fromStdString(colorText));
+   }
+
+   colorText = A(pElement->getAttribute(X("errorColor")));
+   if (colorText.empty() == false)
+   {
+      mErrorColor.setNamedColor(QString::fromStdString(colorText));
+   }
+
+   mMaxParagraphs = StringUtilities::fromXmlString<int>(A(pElement->getAttribute(X("maxParagraphs"))));
+
+   // Interpreter
+   string interpreterId = A(pElement->getAttribute(X("interpreterId")));
+   if (interpreterId.empty() == false)
+   {
+      Service<SessionManager> pManager;
+
+      PlugIn* pInterpreter = dynamic_cast<PlugIn*>(pManager->getSessionItem(interpreterId));
+      if (pInterpreter == NULL)
+      {
+         return false;
+      }
+
+      mpPims.reset(NULL);
+      mInterpreter->setPlugIn(pInterpreter);
+      mpPims.reset(Service<PlugInManagerServices>().get());
+   }
+
+   // Command colors
+   mCommandColors.clear();
+   for (DOMNode* pChild = pDocument->getFirstChild(); pChild != NULL; pChild = pChild->getNextSibling())
+   {
+      if (XMLString::equals(pChild->getNodeName(), X("CommandColor")))
+      {
+         DOMElement* pChildElement = static_cast<DOMElement*>(pChild);
+
+         QString commandName = QString::fromStdString(A(pChildElement->getAttribute(X("name"))));
+         QColor commandColor;
+
+         colorText = A(pChildElement->getAttribute(X("color")));
+         if (colorText.empty() == false)
+         {
+            commandColor.setNamedColor(QString::fromStdString(colorText));
+         }
+
+         mCommandColors.insert(commandName, commandColor);
+      }
+   }
+
+   return true;
+}
+
+void ScriptingWidget::showEvent(QShowEvent* pEvent)
+{
+   // Load the interpreter plug-in
+   if ((mInterpreter->getPlugIn() == NULL) && (mInterpreterName.isEmpty() == false))
+   {
+      mInterpreter->setPlugIn(mInterpreterName.toStdString());
+
+      Interpreter* pInterpreter = dynamic_cast<Interpreter*>(mInterpreter->getPlugIn());
+      if (pInterpreter != NULL)
+      {
+         vector<string> keywords;
+         pInterpreter->getKeywordList(keywords);
+         for (unsigned int i = 0; i < keywords.size(); i++)
+         {
+            string keyword = keywords.at(i);
+            if (keyword.empty() == false)
+            {
+               mCommandColors.insert(QString::fromStdString(keyword), Qt::blue);
+            }
+         }
+      }
+   }
+
+   // Append a prompt if the widget is shown for the first time
+   if (mDisplayedOnce == false)
+   {
+      appendPrompt();
+      mDisplayedOnce = true;
+   }
+
+   // Show the widget
+   QTextEdit::showEvent(pEvent);
 }
 
 void ScriptingWidget::keyPressEvent(QKeyEvent* e)
@@ -366,11 +528,9 @@ void ScriptingWidget::executeCommand()
 
 void ScriptingWidget::executeCommand(const QString& strCommand)
 {
-   // Load the interpreter in case the user unloaded it from the properties dialog
-   loadInterpreter();
-
    if (mInterpreter->getPlugIn() == NULL)
    {
+      appendPrompt();
       QMessageBox::critical(this, "Scripting Window", "Could not get the interpreter plug-in!");
       return;
    }
@@ -467,36 +627,6 @@ void ScriptingWidget::addOutputText(const QString& strMessage)
    if (strMessage.isEmpty() == false)
    {
       append(strMessage);
-   }
-}
-
-void ScriptingWidget::loadInterpreter()
-{
-   if (mInterpreter->getPlugIn() != NULL)
-   {
-      return;
-   }
-
-   if (mInterpreterName.isEmpty() == true)
-   {
-      return;
-   }
-
-   mInterpreter->setPlugIn(mInterpreterName.toStdString());
-
-   Interpreter* pInterpreter = dynamic_cast<Interpreter*>(mInterpreter->getPlugIn());
-   if (pInterpreter != NULL)
-   {
-      vector<string> keywords;
-      pInterpreter->getKeywordList(keywords);
-      for (unsigned int i = 0; i < keywords.size(); i++)
-      {
-         string keyword = keywords.at(i);
-         if (keyword.empty() == false)
-         {
-            mCommandColors.insert(QString::fromStdString(keyword), Qt::blue);
-         }
-      }
    }
 }
 

@@ -52,8 +52,14 @@ public:
    ScriptingWidget* getInterpreter(const QString& strName) const;
    ScriptingWidget* getCurrentInterpreter() const;
 
+   bool toXml(XMLWriter* pXml) const;
+   bool fromXml(DOMNode* pDocument, unsigned int version);
+
 public slots:
    void updateInterpreters();
+
+protected slots:
+   void clear();
 
 private:
    void sessionClosed(Subject &subject, const std::string &signal, const boost::any &data);
