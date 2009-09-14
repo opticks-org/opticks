@@ -98,10 +98,9 @@ GraphicObjectImp::GraphicObjectImp(const string& id, GraphicObjectType type, Gra
 
 GraphicObjectImp::~GraphicObjectImp()
 {
-   vector<GraphicProperty*>::iterator it;
-   for (it = mProperties.begin(); it != mProperties.end(); it++)
+   for (map<string, GraphicProperty*>::iterator iter = mProperties.begin(); iter != mProperties.end(); ++iter)
    {
-      delete *it;
+      delete iter->second;
    }
 }
 
@@ -128,7 +127,15 @@ bool GraphicObjectImp::replicateObject(const GraphicObject* pObject)
       setName(objectName);
 
       vector<GraphicProperty*> properties = pExistingObject->getProperties();
-      setProperties(properties);
+      for (vector<GraphicProperty*>::const_iterator iter = properties.begin(); iter != properties.end(); ++iter)
+      {
+         GraphicProperty* pProperty = *iter;
+         if (pProperty != NULL)
+         {
+            setProperty(pProperty);
+         }
+      }
+
       updateHandles();
    }
 
@@ -315,12 +322,17 @@ bool GraphicObjectImp::addProperty(GraphicProperty* pProperty)
    }
 
    string propertyName = pProperty->getName();
+   if (propertyName.empty() == true)
+   {
+      return false;
+   }
+
    if (hasProperty(propertyName) == true)
    {
       return false;
    }
 
-   mProperties.push_back(pProperty);
+   mProperties[propertyName] = pProperty;
    return true;
 }
 
@@ -402,30 +414,33 @@ bool GraphicObjectImp::setProperty(const GraphicProperty* pProp)
 
 GraphicProperty* GraphicObjectImp::getProperty(const string& name) const
 {
-   vector<GraphicProperty*>::const_iterator it;
-   for (it = mProperties.begin(); it != mProperties.end(); ++it)
+   if (name.empty() == true)
    {
-      if ((*it)->getName() == name)
-      {
-         return *it;
-      }
+      return NULL;
+   }
+
+   map<string, GraphicProperty*>::const_iterator iter = mProperties.find(name);
+   if (iter != mProperties.end())
+   {
+      return iter->second;
    }
 
    return NULL;
 }
 
-void GraphicObjectImp::setProperties(const vector<GraphicProperty*>& properties)
+vector<GraphicProperty*> GraphicObjectImp::getProperties() const
 {
-   vector<GraphicProperty*>::const_iterator it;
-   for (it = properties.begin(); it != properties.end(); it++)
+   vector<GraphicProperty*> properties;
+   for (map<string, GraphicProperty*>::const_iterator iter = mProperties.begin(); iter != mProperties.end(); ++iter)
    {
-      setProperty(*it);
+      GraphicProperty* pProperty = iter->second;
+      if (pProperty != NULL)
+      {
+         properties.push_back(pProperty);
+      }
    }
-}
 
-const vector<GraphicProperty*>& GraphicObjectImp::getProperties() const
-{
-   return mProperties;
+   return properties;
 }
 
 void GraphicObjectImp::updateGeo()
@@ -1299,11 +1314,6 @@ bool GraphicObjectImp::toXml(XMLWriter* pXml) const
 
    pXml->addAttr("version", XmlBase::VERSION);
 
-   if (mProperties.size() == 0)
-   {
-      return true;
-   }
-
    // Name
    string objectName = getName();
    pXml->addAttr("name", objectName);
@@ -1315,26 +1325,20 @@ bool GraphicObjectImp::toXml(XMLWriter* pXml) const
 
    pXml->addAttr("type", objectType);
 
-   
    // Properties
-   pXml->setSingleChildInstance(true);
-
-   vector<GraphicProperty*>::const_iterator it;
-   for (it = mProperties.begin(); it != mProperties.end(); it++)
+   for (map<string, GraphicProperty*>::const_iterator iter = mProperties.begin(); iter != mProperties.end(); ++iter)
    {
-      if (*it == NULL)
+      if (iter->second == NULL)
       {
          continue;
       }
 
-      if (!(*it)->toXml(pXml))
+      if (!(iter->second)->toXml(pXml))
       {
-         pXml->setSingleChildInstance(false);
          return false;
       }
    }
 
-   pXml->setSingleChildInstance(false);
    return true;
 }
 

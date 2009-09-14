@@ -242,10 +242,9 @@ bool XMLWriter::elementExists(const char* pName, DOMNode* pOwner)
       pOwner = static_cast<DOMElement*>(mpAddPoint.top());
    }
 
-   const XMLCh* nodeName(X(pName));
    for (DOMNode* chld = pOwner->getFirstChild(); chld != NULL; chld = chld->getNextSibling())
    {
-      if (XMLString::equals(chld->getNodeName(), nodeName))
+      if (XMLString::equals(chld->getNodeName(), X(pName)))
       {
          return true;
       }
@@ -265,10 +264,9 @@ void XMLWriter::removeElement(const char* pName, DOMNode* pOwner)
       pOwner = static_cast<DOMElement*>(mpAddPoint.top());
    }
 
-   const XMLCh* nodeName(X(pName));
    for (DOMNode* chld = pOwner->getFirstChild(); chld != NULL; chld = chld->getNextSibling())
    {
-      if (XMLString::equals(chld->getNodeName(), nodeName))
+      if (XMLString::equals(chld->getNodeName(), X(pName)))
       {
          pOwner->removeChild(chld);
       }

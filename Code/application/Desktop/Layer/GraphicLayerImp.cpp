@@ -1458,33 +1458,6 @@ void GraphicLayerImp::cleanUpBadObject(GraphicObject* pObj)
    mSelectedObjects.remove(pObj);
 }
 
-void GraphicLayerImp::updateHandles(GraphicProperty* pProperty)
-{
-   if (pProperty == NULL)
-   {
-      return;
-   }
-
-   if (getGroup() != NULL)
-   {
-      list<GraphicObject*> objects = getObjects();
-      for (list<GraphicObject*>::iterator iter = objects.begin(); iter != objects.end(); ++iter)
-      {
-         GraphicObjectImp* pObject = dynamic_cast<GraphicObjectImp*>(*iter);
-         if (pObject != NULL)
-         {
-            vector<GraphicProperty*> properties = pObject->getProperties();
-
-            vector<GraphicProperty*>::iterator propIter = find(properties.begin(), properties.end(), pProperty);
-            if (propIter != properties.end())
-            {
-               pObject->updateHandles();
-            }
-         }
-      }
-   }
-}
-
 void GraphicLayerImp::cloneSelection(GraphicLayer* pDest)
 {
    GraphicLayerImp* pDestImp = dynamic_cast<GraphicLayerImp*>(pDest);

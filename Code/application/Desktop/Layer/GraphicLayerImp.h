@@ -30,7 +30,6 @@ class GraphicGroup;
 class GraphicLayer;
 class GraphicObject;
 class GraphicObjectImp;
-class GraphicProperty;
 class UndoLock;
 
 /**
@@ -232,7 +231,6 @@ protected:
 
 protected slots:
    void deleteObject();
-   void updateHandles(GraphicProperty* pProperty);
 
 signals:
    void objectAdded(GraphicObject* pObject);

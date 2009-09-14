@@ -24,6 +24,7 @@
 #include "TypesFile.h"
 #include "xmlreader.h"
 
+#include <map>
 #include <string>
 #include <vector>
 #include <sstream>
@@ -80,8 +81,7 @@ public:
    virtual bool hasProperty(const std::string& name) const;
    virtual bool setProperty(const GraphicProperty* pProp);
    virtual GraphicProperty* getProperty(const std::string &name) const;
-   void setProperties(const std::vector<GraphicProperty*>& properties);
-   virtual const std::vector<GraphicProperty*>& getProperties() const;
+   std::vector<GraphicProperty*> getProperties() const;
    virtual void updateGeo();
    virtual void enableGeo();
 
@@ -179,7 +179,6 @@ public:
    virtual bool newPath();
    bool setLineScaled(bool scaled);
    bool getLineScaled() const;
-   
 
    // Lat/Lon
    virtual bool setLatLon(LatLonPoint latLonPoint);
@@ -268,17 +267,14 @@ signals:
    void modified();
    void nameChanged(const QString& strName);
 
-
 protected slots:
    void subjectModified();
 
 protected:
    GraphicElement *getElement() const;
-
    const RasterElement *getGeoreferenceElement() const;
 
 protected:
-   std::vector<GraphicProperty*> mProperties;
    std::vector<LocationType> mHandles;
    BitMaskImp mPixelMask;
 
@@ -296,6 +292,7 @@ protected:
 private:
    void adjustHandles(int handle, LocationType point, bool bMaintainAspect);
 
+   std::map<std::string, GraphicProperty*> mProperties;
    GraphicObjectType mType;
 };
 
