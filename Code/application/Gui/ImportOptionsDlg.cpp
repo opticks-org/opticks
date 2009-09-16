@@ -710,7 +710,7 @@ bool ImportOptionsDlg::validateDataset(DataDescriptor* pDescriptor, QString& val
       QTreeWidgetItem* pItem = iter->second;
       if (pItem != NULL)
       {
-         disconnect(mpDatasetTree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
+         bool disconnected = disconnect(mpDatasetTree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
             SLOT(datasetItemChanged(QTreeWidgetItem*)));
 
          if (validDataset == true)
@@ -724,8 +724,12 @@ bool ImportOptionsDlg::validateDataset(DataDescriptor* pDescriptor, QString& val
 
          pItem->setData(0, Qt::UserRole, QVariant(validDataset));
 
-         VERIFYNR(connect(mpDatasetTree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
-            SLOT(datasetItemChanged(QTreeWidgetItem*))));
+         if (disconnected)
+         {
+            //only connect, if the signal was originally connected
+            VERIFYNR(connect(mpDatasetTree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
+               SLOT(datasetItemChanged(QTreeWidgetItem*))));
+         }
       }
    }
 
@@ -745,9 +749,14 @@ void ImportOptionsDlg::selectCurrentDatasetItem()
       QTreeWidgetItem* pItem = iter->second;
       if (pItem != NULL)
       {
-         disconnect(mpDatasetTree, SIGNAL(itemSelectionChanged()), this, SLOT(updateEditDataset()));
+         bool disconnected = disconnect(mpDatasetTree, SIGNAL(itemSelectionChanged()),
+            this, SLOT(updateEditDataset()));
          mpDatasetTree->setCurrentItem(pItem);     // Also selects the item
-         VERIFYNR(connect(mpDatasetTree, SIGNAL(itemSelectionChanged()), this, SLOT(updateEditDataset())));
+         if (disconnected)
+         {
+            //only connect, if the signal was originally connected
+            VERIFYNR(connect(mpDatasetTree, SIGNAL(itemSelectionChanged()), this, SLOT(updateEditDataset())));
+         }
       }
    }
 }
