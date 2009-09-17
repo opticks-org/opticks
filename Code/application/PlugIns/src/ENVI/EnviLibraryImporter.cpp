@@ -62,7 +62,8 @@ vector<ImportDescriptor*> EnviLibraryImporter::getImportDescriptors(const string
       EnviField* pField = mFields.find("file type");
       if (pField != NULL)
       {
-         if (pField->mValue == "ENVI Spectral Library")
+         if (pField->mValue == "ENVI Spectral Library" || 
+             pField->mValue == "Spectral Library")
          {
             // Get the name and dataset from the header values
             string name;
