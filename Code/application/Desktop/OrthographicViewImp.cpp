@@ -368,8 +368,7 @@ void OrthographicViewImp::updateMatrices(int width, int height)
    }
 
    { // save the context for a time
-      GlContextSave contextSave;
-      makeCurrent();
+      GlContextSave contextSave(this);
 
       // Save current matrices
       double lmodelMatrix[16];

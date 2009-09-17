@@ -205,8 +205,6 @@ public:
    void drawSymbols(const std::string &symbolName, const std::vector<LocationType> &points, 
                    double screenSize, double objectRotation);
 
-   virtual void temporaryGlContextChange();
-
 public slots:
    void setCurrentGraphicObjectType(GraphicObjectType type);
    void cleanUpBadObject(GraphicObject *pObj);

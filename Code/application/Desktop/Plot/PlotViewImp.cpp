@@ -203,9 +203,7 @@ PlotViewImp::~PlotViewImp()
    // Destroy the display lists
    if (mDisplayListIndex != 0)
    {
-      GlContextSave contextSave;
-      makeCurrent();
-
+      GlContextSave contextSave(this);
       glDeleteLists(mDisplayListIndex, DISPLAY_LIST_SIZE);
    }
 
@@ -1341,14 +1339,6 @@ void PlotViewImp::draw()
 {
    drawContents();
    drawSelectionBox();
-}
-
-void PlotViewImp::temporaryGlContextChange()
-{
-   if (mpAnnotationLayer != NULL)
-   {
-      mpAnnotationLayer->temporaryGlContextChange();
-   }
 }
 
 void PlotViewImp::drawContents()

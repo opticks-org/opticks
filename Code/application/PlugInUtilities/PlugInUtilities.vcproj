@@ -2656,6 +2656,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Interfaces\GlTextureResource.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Interfaces\ImageHandler.h"
 				>
 				<FileConfiguration

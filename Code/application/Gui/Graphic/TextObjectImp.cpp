@@ -7,9 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QImage>
-#include <QtGui/QPainter>
-
 #include "DataDescriptor.h"
 #include "DataVariant.h"
 #include "DynamicObject.h"
@@ -30,8 +27,11 @@
 #include "TypeConverter.h"
 #include "View.h"
 
-#include <math.h>
+#include <QtGui/QImage>
+#include <QtGui/QPainter>
+#include <QtOpenGL/QGLContext>
 
+#include <math.h>
 #include <string>
 #include <vector>
 using namespace std;
@@ -39,13 +39,15 @@ using namespace std;
 TextObjectImp::TextObjectImp(const string& id, GraphicObjectType type, GraphicLayer* pLayer,
                              LocationType pixelCoord) :
    RectangleObjectImp(id, type, pLayer, pixelCoord),
-   mTextureId(0),
+   mpDrawContext(NULL),
    mTextureWidth(1),
    mTextureHeight(1),
    mDataWidth(0),
    mDataHeight(0),
    mUpdateTexture(true),
-   mUpdateBoundingBox(true)
+   mUpdateBoundingBox(true),
+   mTextureResource(0),
+   mTempTextureResource(0)
 {
    addProperty("Font");
    addProperty("TextAlignment");
@@ -63,54 +65,33 @@ TextObjectImp::~TextObjectImp()
    {
       delete it->second;
    }
-
-   while (!mTextureIdStack.empty())
-   {
-      // this does not attempt to delete any textures
-      // except the top level texture since the GLContext
-      // for other textures is likely to be invalid.
-      // This shouldn't occur if callers are pairing
-      // a temp context change with a draw...this just
-      // prevents a possible crash due to an invalid texture id
-      mTextureId = mTextureIdStack.top();
-      mTextureIdStack.pop();
-   }
-   if (mTextureId != 0)
-   {
-      glDeleteTextures(1, &mTextureId);
-   }
 }
 
 void TextObjectImp::draw(double zoomFactor) const
 {
-   if (mUpdateTexture == true)
-   {
-      (const_cast<TextObjectImp*> (this))->updateTexture();
-   }
-
    RectangleObjectImp::draw(zoomFactor);
-   drawTexture();
-}
-
-void TextObjectImp::drawTexture() const
-{
-   if (mUpdateTexture == true)
+   if (QGLContext::currentContext() != mpDrawContext || mUpdateTexture == true)
    {
       (const_cast<TextObjectImp*> (this))->updateTexture();
    }
 
-   if (mTextureId == 0)
+   if (mpDrawContext == NULL)
    {
       return;
    }
 
    LocationType llCorner = getLlCorner();
    LocationType urCorner = getUrCorner();
-
    glEnable(GL_TEXTURE_2D);
 
    // switch to using this tile's texture
-   glBindTexture(GL_TEXTURE_2D, mTextureId);
+   GLuint textureId = mTextureResource;
+   if (mpDrawContext == mTempTextureResource.getContext())
+   {
+      textureId = mTempTextureResource;
+   }
+
+   glBindTexture(GL_TEXTURE_2D, textureId);
 
    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -203,15 +184,14 @@ void TextObjectImp::drawTexture() const
    glDisable(GL_TEXTURE_2D);
    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-   if (!mTextureIdStack.empty())
+   // mTempTextureResource is allocated by the updateTexture method when the gl context has changed
+   // Free the texture here; more importantly set mpDrawContext to mTextureResource so that the next
+   // draw operation completes successfully without the need to recreate the texture.
+   if (mTempTextureResource.get() != NULL)
    {
       TextObjectImp* pNonConst = const_cast<TextObjectImp*>(this);
-      if (mTextureId != 0)
-      {
-         glDeleteTextures(1, &mTextureId);
-      }
-      pNonConst->mTextureId = mTextureIdStack.top();
-      pNonConst->mTextureIdStack.pop();
+      pNonConst->mTempTextureResource = GlTextureResource(0);
+      pNonConst->mpDrawContext = mTextureResource.getContext();
    }
 }
 
@@ -222,13 +202,8 @@ void TextObjectImp::updateTexture()
    {
       delete it->second;
    }
-   mMetadataObjects.clear();
 
-   if (mTextureId != 0)
-   {
-      glDeleteTextures(1, &mTextureId);
-      mTextureId = 0;
-   }
+   mMetadataObjects.clear();
 
    // Get the text to display
    string text = getSubstitutedText();
@@ -237,8 +212,22 @@ void TextObjectImp::updateTexture()
       return;
    }
 
-   glGenTextures(1, &mTextureId);
-   if (mTextureId == 0)
+   // Reallocate the existing texture or create a temporary texture if the context has changed.
+   GLuint textureId;
+   if (mTextureResource.get() == NULL || mTextureResource.getContext() == QGLContext::currentContext())
+   {
+      mTextureResource = GlTextureResource(1);
+      textureId = mTextureResource;
+      mpDrawContext = mTextureResource.getContext();
+   }
+   else
+   {
+      mTempTextureResource = GlTextureResource(1);
+      textureId = mTempTextureResource;
+      mpDrawContext = mTempTextureResource.getContext();
+   }
+
+   if (mpDrawContext == NULL || textureId == 0)
    {
       return;
    }
@@ -311,11 +300,10 @@ void TextObjectImp::updateTexture()
    }
 
    glEnable(GL_TEXTURE_2D);
-   glBindTexture(GL_TEXTURE_2D, mTextureId);
+   glBindTexture(GL_TEXTURE_2D, textureId);
    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
    gluBuild2DMipmaps(GL_TEXTURE_2D, 4, mTextureWidth, mTextureHeight, GL_RGBA, GL_UNSIGNED_BYTE, &texData[0]);
@@ -510,14 +498,6 @@ bool TextObjectImp::processMouseRelease(LocationType screenCoord, Qt::MouseButto
    pLayer->completeInsertion(false);
 
    VERIFY(false);
-}
-
-void TextObjectImp::temporaryGlContextChange()
-{
-   mUpdateTexture = true;
-   mUpdateBoundingBox = true;
-   mTextureIdStack.push(mTextureId);
-   mTextureId = 0;
 }
 
 bool TextObjectImp::edit()

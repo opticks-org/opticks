@@ -109,6 +109,11 @@ ViewImp::ViewImp(const string& id, const string& viewName, QGLContext* drawConte
 
 ViewImp::~ViewImp()
 {
+   // Clear the undo stack so that undo objects with pointers to this object
+   // have a chance to be deleted gracefully while it is still valid.
+   // e.g.: Any objects with a GlTextureResource need the QGLContext* to still be valid.
+   clearUndo();
+
    // Detach all linked views
    vector<pair<View*, LinkType> >::iterator iter;
    for (iter = mLinkedViews.begin(); iter != mLinkedViews.end(); ++iter)
@@ -592,9 +597,7 @@ bool ViewImp::isCrossHairEnabled() const
 
 void ViewImp::draw()
 {
-   GlContextSave contextSave;
-
-   makeCurrent();
+   GlContextSave contextSave(this);
    drawContents();
    drawCrossHair();
    drawSelectionBox();
@@ -651,8 +654,7 @@ bool ViewImp::getCurrentImage(QImage &image)
          zoomToBox(ll, ur);
       }
 
-      GlContextSave contextSave;
-      makeCurrent();
+      GlContextSave contextSave(this);
       QGLFramebufferObject fbo(iWidth, iHeight, QGLFramebufferObject::CombinedDepthStencil);
       fbo.bind();
       drawImage(iWidth, iHeight);
@@ -703,8 +705,7 @@ bool ViewImp::getCurrentImage(QImage &image)
          zoomToBox(ll, ur);
       }
 
-      GlContextSave contextSave;
-      makeCurrent();
+      GlContextSave contextSave(this);
 
       // Draw the current image in the back buffer
       glDrawBuffer(GL_BACK);

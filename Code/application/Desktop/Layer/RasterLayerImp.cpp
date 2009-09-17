@@ -1763,8 +1763,7 @@ void RasterLayerImp::enableFilters(const vector<string>& filterNames)
 
             if ((pGpuImage != NULL) && (pViewImp != NULL))
             {
-               GlContextSave contextSave;
-               pViewImp->makeCurrent();
+               GlContextSave contextSave(pViewImp);
                pGpuImage->disableFilter(pDescriptor);
             }
 #endif
@@ -1839,8 +1838,7 @@ void RasterLayerImp::disableFilter(const string& filterName)
 
             if ((pGpuImage != NULL) && (pViewImp != NULL))
             {
-               GlContextSave contextSave;
-               pViewImp->makeCurrent();
+               GlContextSave contextSave(pViewImp);
                pGpuImage->disableFilter(pDescriptor);
             }
 #endif
@@ -1957,9 +1955,7 @@ void RasterLayerImp::resetFilter(const string& filterName)
 
          if ((pGpuImage != NULL) && (pViewImp != NULL))
          {
-            GlContextSave contextSave;
-            pViewImp->makeCurrent();
-
+            GlContextSave contextSave(pViewImp);
             pGpuImage->resetFilter(pDescriptor);
             mbRegenerate = true;
          }
@@ -2000,9 +1996,7 @@ void RasterLayerImp::freezeFilter(const string& filterName, bool toggle)
 
          if ((pGpuImage != NULL) && (pViewImp != NULL))
          {
-            GlContextSave contextSave;
-            pViewImp->makeCurrent();
-
+            GlContextSave contextSave(pViewImp);
             pGpuImage->freezeFilter(pDescriptor, toggle);
             mbRegenerate = true;
          }
@@ -2836,8 +2830,7 @@ void RasterLayerImp::generateImage()
       ViewImp* pViewImp = dynamic_cast<ViewImp*>(getView());
       if (pViewImp != NULL)
       {
-         GlContextSave contextSave;
-         pViewImp->makeCurrent();
+         GlContextSave contextSave(pViewImp);
          pGpuImage->enableFilters(mEnabledFilters);
       }
    }
@@ -3667,8 +3660,7 @@ unsigned int RasterLayerImp::readFilterBuffer(double xCoord, double yCoord, int 
    ViewImp* pViewImp = dynamic_cast<ViewImp*>(getView());
    if (pViewImp != NULL)
    {
-      GlContextSave contextSave;
-      pViewImp->makeCurrent();
+      GlContextSave contextSave(pViewImp);
 
       // make sure the image has been drawn before trying to read from it
       draw();

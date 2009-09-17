@@ -34,5 +34,6 @@
 #endif
 
 #include "GlContextSave.h"
+#include "GlTextureResource.h"
 
 #endif

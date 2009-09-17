@@ -105,7 +105,7 @@ private:
 
    // Colormap display program
    CGprogram mColormapProgram;
-   GLuint mColormapTexture;
+   GlTextureResource mColormapTexture;
    ImageKey mColormapImageKey;
 
    // RGB display program

@@ -21,6 +21,7 @@
 #include <map>
 
 class GraphicLayer;
+class QGLContext;
 
 class TextObjectImp : public RectangleObjectImp
 {
@@ -47,8 +48,6 @@ public:
    bool processMouseRelease(LocationType screenCoord, Qt::MouseButton button, Qt::MouseButtons buttons,
       Qt::KeyboardModifiers modifiers);
 
-   void temporaryGlContextChange();
-
    bool edit();
    void moveHandle(int handle, LocationType point, bool bMaintainAspect);
 
@@ -61,19 +60,22 @@ public slots:
 protected:
    void invalidateTexture(Subject& subject, const std::string& signal, const boost::any& v);
    QFont getScaledFont(double minSize = -1.0, double maxSize = 256.0);
-   void drawTexture() const;
 
 private:
    static QBitmap* sBitmap;
-   GLuint mTextureId;
+   QGLContext* mpDrawContext;
    int mTextureWidth;
    int mTextureHeight;
    int mDataWidth;
    int mDataHeight;
    bool mUpdateTexture;
    bool mUpdateBoundingBox;
-   std::stack<GLuint> mTextureIdStack;
    std::map<DynamicObject*, AttachmentPtr<DynamicObject>* > mMetadataObjects;
+   GlTextureResource mTextureResource;
+   GlTextureResource mTempTextureResource;
+
+   TextObjectImp& operator= (const TextObjectImp& textObject);
+   TextObjectImp(const TextObjectImp& textObject);
 };
 
 #define TEXTOBJECTADAPTEREXTENSION_CLASSES \

@@ -444,7 +444,6 @@ bool PlotWidgetImp::getCurrentImage(QImage& image)
    // Get the pixmap for the plot view
    int iWidth = image.width();
    int iHeight = image.height();
-   mpPlot->temporaryGlContextChange();
    QPixmap pixPlotView = mpPlot->renderPixmap(iWidth, iHeight);
 
    // Restore the original plot view display list

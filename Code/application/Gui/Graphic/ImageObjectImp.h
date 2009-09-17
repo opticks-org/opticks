@@ -15,16 +15,16 @@
 #include "glCommon.h"
 #include "RectangleObjectImp.h"
 
+#include <vector>
+
 class GraphicLayer;
+class QGLContext;
 
 class ImageObjectImp : public RectangleObjectImp
 {
 public:
-   ~ImageObjectImp();
-
    // publicly accessible through AnnotationObject interface
-   const unsigned int* getObjectImage(int &width, int &height, ColorType &transparent) const;
-   const unsigned int* getImage(int &iWidth, int &iHeight, ColorType &transparent) const;
+   const unsigned int* getObjectImage(int& width, int& height, ColorType& transparent) const;
    void draw(double zoomFactor) const;
 
    virtual bool processMouseMove(LocationType screenCoord, 
@@ -39,8 +39,6 @@ public:
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
 
-   void temporaryGlContextChange();
-
 protected:
    ImageObjectImp(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer, LocationType pixelCoord);
 
@@ -51,34 +49,17 @@ protected:
    void updateBoundingBox();
 
 private:
-   class ImageData
-   {
-   public:
-      ImageData(const unsigned int* pData, int iWidth, int iHeight, ColorType transparent);
-      ~ImageData();
+   void generateTextures();
 
-      const unsigned int* getImageData(int &iWidth, int &iHeight, ColorType& transparent) const;
-      unsigned int getTexture(int& iWidth, int& iHeight) const;
-      void generateTextures();
-
-      void glContextPush();
-      void glContextPop();
-
-   private:
-      mutable std::auto_ptr<unsigned int> mpData;
-      int mWidth;
-      int mHeight;
-      int mTextureWidth;
-      int mTextureHeight;
-      int mReferenceCount;
-      ColorType mTransparent;
-      GLuint mTextureId;
-      std::stack<GLuint> mTextureIdStack;
-   };
-
-private:
-   ImageData* mpImageData;
-   mutable bool mNeedUpdate;
+   std::vector<unsigned int> mData;
+   int mWidth;
+   int mHeight;
+   int mTextureWidth;
+   int mTextureHeight;
+   ColorType mTransparent;
+   QGLContext* mpDrawContext;
+   GlTextureResource mTextureResource;
+   GlTextureResource mTempTextureResource;
 };
 
 #define IMAGEOBJECTADAPTEREXTENSION_CLASSES \

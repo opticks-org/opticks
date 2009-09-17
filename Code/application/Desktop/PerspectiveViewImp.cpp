@@ -1055,8 +1055,7 @@ void PerspectiveViewImp::updateMatrices(int width, int height)
       return;
    }
 
-   GlContextSave contextSave;
-   makeCurrent();
+   GlContextSave contextSave(this);
 
    // Save current matrices
    double modelMatrix[16];

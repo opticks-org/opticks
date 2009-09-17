@@ -6,14 +6,33 @@
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
+
 #include "GlContextSave.h"
 #include "glCommon.h"
 
 #include <QtOpenGL/QGLContext>
+#include <QtOpenGL/QGLWidget>
 
 GlContextSave::GlContextSave() :
    mpCurrentContext(const_cast<QGLContext*>(QGLContext::currentContext()))
+{}
+
+GlContextSave::GlContextSave(QGLWidget* pWidget) :
+   mpCurrentContext(const_cast<QGLContext*>(QGLContext::currentContext()))
 {
+   if (pWidget != NULL && pWidget->context() != mpCurrentContext)
+   {
+      pWidget->makeCurrent();
+   }
+}
+
+GlContextSave::GlContextSave(QGLContext* pContext) :
+   mpCurrentContext(const_cast<QGLContext*>(QGLContext::currentContext()))
+{
+   if (pContext != NULL && pContext != mpCurrentContext)
+   {
+      pContext->makeCurrent();
+   }
 }
 
 GlContextSave::~GlContextSave()

@@ -1111,18 +1111,6 @@ void GraphicGroupImp::setLayer(GraphicLayer* pLayer)
    }
 }
 
-void GraphicGroupImp::temporaryGlContextChange()
-{
-   for (list<GraphicObject*>::const_iterator object = mObjects.begin(); object != mObjects.end(); ++object)
-   {
-      GraphicObjectImp* pObject = dynamic_cast<GraphicObjectImp*>(*object);
-      if (pObject != NULL)
-      {
-         pObject->temporaryGlContextChange();
-      }
-   }
-}
-
 void GraphicGroupImp::updateFromProperty(GraphicProperty* pProperty)
 {
    if (dynamic_cast<BoundingBoxProperty*>(pProperty) != NULL)

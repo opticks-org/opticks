@@ -50,12 +50,6 @@ GpuImage::GpuImage() :
 
 GpuImage::~GpuImage()
 {
-   // Delete the colormap texture
-   if (mColormapTexture != 0)
-   {
-      glDeleteTextures(1, &mColormapTexture);
-   }
-
    // Unload and destroy Cg programs
    CgContext* pCgContext = CgContext::instance();
    if (pCgContext != NULL)
@@ -1036,14 +1030,7 @@ void GpuImage::initializeColormap(const vector<ColorType>& colorMap)
       }
    }
 
-   // Update the colormap texture
-   if (mColormapTexture != 0)
-   {
-      glDeleteTextures(1, &mColormapTexture);
-   }
-
    unsigned int numColors = colorMap.size();
-
    vector<unsigned char> colors(numColors * 4);
    for (unsigned int i = 0, textureIndex = 0; i < numColors; ++i)
    {
@@ -1054,8 +1041,9 @@ void GpuImage::initializeColormap(const vector<ColorType>& colorMap)
       colors[textureIndex++] = color.mAlpha;
    }
 
-   glGenTextures(1, &mColormapTexture);
-   if (mColormapTexture != 0)
+   // Update the colormap texture
+   mColormapTexture = GlTextureResource(1);
+   if (static_cast<GLuint>(mColormapTexture) != 0)
    {
       glBindTexture(GL_TEXTURE_RECTANGLE_NV, mColormapTexture);
       glTexParameterf(GL_TEXTURE_RECTANGLE_NV, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -1063,7 +1051,7 @@ void GpuImage::initializeColormap(const vector<ColorType>& colorMap)
       glTexParameterf(GL_TEXTURE_RECTANGLE_NV, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
       glTexParameterf(GL_TEXTURE_RECTANGLE_NV, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
       glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-      glTexImage2D(GL_TEXTURE_RECTANGLE_NV, 0, GL_RGBA, numColors, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &colors[0]);   
+      glTexImage2D(GL_TEXTURE_RECTANGLE_NV, 0, GL_RGBA, numColors, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &colors[0]);
    }
 }
 

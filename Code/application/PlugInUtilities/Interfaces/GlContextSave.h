@@ -11,6 +11,7 @@
 #define GLCONTEXTSAVE_H
 
 class QGLContext;
+class QGLWidget;
 
 /**
  * A class for saving and restoring the current OpenGL context.
@@ -27,13 +28,30 @@ public:
    GlContextSave();
 
    /**
+    * Records the current OpenGL context and makes the specified context current.
+    *
+    * @param   pWidget
+    *          The widget containing the context to make current.
+    *          If \c NULL is specified, the current context will not be changed.
+    */
+   GlContextSave(QGLWidget* pContext);
+
+   /**
+    * Records the current OpenGL context and makes the specified context current.
+    *
+    * @param   pContext
+    *          The context to make current. If \c NULL is specified, the current context will not be changed.
+    */
+   GlContextSave(QGLContext* pContext);
+
+   /**
     * Restores the current OpenGL context to the one that the constructor
     * recorded.
     */
    ~GlContextSave();
 
 private:
-   QGLContext* mpCurrentContext;
+   QGLContext* const mpCurrentContext;
 };
 
 #endif

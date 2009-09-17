@@ -68,8 +68,6 @@ public:
 
    virtual void setLayer(GraphicLayer *pLayer);
 
-   void temporaryGlContextChange();
-
 signals:
    void abortedAdd(GraphicObject *pObj);
 

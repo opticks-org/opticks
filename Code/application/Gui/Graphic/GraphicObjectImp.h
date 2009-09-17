@@ -258,8 +258,6 @@ public:
    virtual GraphicLayer* getLayer() const;
    virtual void setLayer(GraphicLayer *pLayer);
 
-   virtual void temporaryGlContextChange() {}
-
    virtual bool canRename() const;
 
 signals:

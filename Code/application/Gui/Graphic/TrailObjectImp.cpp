@@ -201,9 +201,6 @@ void TrailObjectImp::updateStencil()
       return;
    }
 
-   // Set the current GL context to the overview context
-   GlContextSave contextSave;
-
    // Setup screen matrices
    int viewPort[4];
    int unpackAlignment = 0;

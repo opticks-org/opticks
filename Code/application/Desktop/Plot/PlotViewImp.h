@@ -93,7 +93,6 @@ public:
    virtual void translateDataToScreen(double dataX, double dataY, double& screenX, double& screenY) const;
 
    void draw();
-   void temporaryGlContextChange();
 
    void useTemporaryDisplayList(bool bTempList);
    GLuint getDisplayListIndex() const;
