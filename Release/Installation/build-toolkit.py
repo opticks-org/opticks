@@ -237,7 +237,7 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir,
     cp_file3("README-sdk.txt", join(out_dir, "README.txt"))
     s_app = os.path.abspath(join(opticks_code_dir, "application"))
     s_release = os.path.abspath(join(opticks_code_dir, "Release"))
-    d_app = join(out_dir,"Application")
+    d_app = join(out_dir,"application")
 
     interface_suffixes = [".h"]
     cp_dir2(s_app, d_app, "Interfaces", suffixes_to_match=interface_suffixes)
@@ -397,6 +397,9 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir,
         for the_plugin in sample_plugins:
             cp_file2(opticks_code_dir, out_dir,
                 join(binaries_dir,"PlugIns"), "%s.so" % (the_plugin))
+        #Make copy of the "application" dir but with an upper-case
+        #first letter to maintain compatibility with earlier SDKs
+        cp_dir(d_app, join(out_dir, "Application"), recursive_copy = True)
     if verbosity > 1:
         print "Done acquiring Opticks binaries"
     if verbosity >= 1:
