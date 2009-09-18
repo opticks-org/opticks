@@ -145,19 +145,6 @@ bool ImportDataSet::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
    importer->setEditType(mShowDialog ? ImportAgent::ALWAYS_EDIT : ImportAgent::AS_NEEDED_EDIT);
    importer->updateMruFileList((mpDescriptor == NULL) && (mFilenames.empty() == true));
 
-   // Get the number of data sets to import
-   unsigned int numDatasetsToImport = 0;
-
-   vector<ImportDescriptor*> importDescriptors = importer->getImportDescriptors();
-   for (vector<ImportDescriptor*>::iterator iter = importDescriptors.begin(); iter != importDescriptors.end(); ++iter)
-   {
-      ImportDescriptor* pImportDescriptor = *iter;
-      if ((pImportDescriptor != NULL) && (pImportDescriptor->isImported() == true))
-      {
-         ++numDatasetsToImport;
-      }
-   }
-
    // Import the data sets
    if (importer->execute() == false)
    {
@@ -168,6 +155,20 @@ bool ImportDataSet::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
    // If specific data sets were given check to make sure that all data sets were successfully imported
    if ((mpDescriptor != NULL) || (mFilenames.empty() == false))
    {
+      unsigned int numDatasetsToImport = 0;
+
+      vector<ImportDescriptor*> importDescriptors = importer->getImportDescriptors();
+      for (vector<ImportDescriptor*>::iterator iter = importDescriptors.begin();
+         iter != importDescriptors.end();
+         ++iter)
+      {
+         ImportDescriptor* pImportDescriptor = *iter;
+         if ((pImportDescriptor != NULL) && (pImportDescriptor->isImported() == true))
+         {
+            ++numDatasetsToImport;
+         }
+      }
+
       vector<DataElement*> importedElements = importer->getImportedElements();
       if (importedElements.size() < numDatasetsToImport)
       {

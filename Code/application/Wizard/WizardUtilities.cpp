@@ -190,6 +190,12 @@ bool WizardUtilities::runBatchFiles(const vector<string>& batchWizardFiles, Prog
    Service<ApplicationServices> pApp;
 
    ExecutableResource batchWizardExecutor("Batch Wizard Executor", string(), pProgress, pApp->isBatch());
+   if (pProgress == NULL)
+   {
+      batchWizardExecutor->createProgressDialog(true);
+      pProgress = batchWizardExecutor->getProgress();
+   }
+
    if (batchWizardExecutor->getPlugIn() == NULL)
    {
       if (pProgress != NULL)
