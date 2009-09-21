@@ -29,7 +29,7 @@ public:
    ~GpuTile();
 
    void setupTile(void* pData, EncodingType encodingType, unsigned int index);
-   void draw(CGparameter outputCgTextureParam, GLint textureMode);
+   void draw(CGparameter outputCgTextureParam, GLfloat textureMode);
 
    ImageFilter *createFilter(ImageFilterDescriptor *pDescriptor);
    ImageFilter *getFilter(ImageFilterDescriptor *pDescriptor) const;

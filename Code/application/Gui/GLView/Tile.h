@@ -71,7 +71,7 @@ public:
 
    virtual void setupTexture(unsigned int index, unsigned char* pTextureData);
    bool computeTexture(unsigned int index, unsigned char *pTextureData);
-   void draw(GLint textureMode);
+   void draw(GLfloat textureMode);
    unsigned int getTextureIndex() const;
    Texture *getTextureToDeAllocate();
    bool hasHigherResTexture(unsigned int index)

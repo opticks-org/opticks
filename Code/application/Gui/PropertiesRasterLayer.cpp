@@ -432,24 +432,28 @@ bool PropertiesRasterLayer::initialize(SessionItem* pSessionItem)
    // Graphics acceleration
    mpAccelerationCheck->setChecked(mpRasterLayer->isGpuImageEnabled());
    mpFilterCheck->setEnabled(mpRasterLayer->isGpuImageEnabled());
-
-   vector<string> filters = mpRasterLayer->getEnabledFilterNames();
-   mpFilterCheck->setChecked(!(filters.empty()));
-   mpFilterList->setEnabled(!(filters.empty()));
-
+   mpFilterList->setEnabled(false);
    mpFilterList->clearSelection();
-   for (vector<string>::iterator iter = filters.begin(); iter != filters.end(); ++iter)
+
+   if (mpFilterCheck->isEnabled())
    {
-      QString filterName = QString::fromStdString(*iter);
-      if (filterName.isEmpty() == false)
+      vector<string> filters = mpRasterLayer->getEnabledFilterNames();
+      mpFilterCheck->setChecked(!(filters.empty()));
+      mpFilterList->setEnabled(!(filters.empty()));
+
+      for (vector<string>::iterator iter = filters.begin(); iter != filters.end(); ++iter)
       {
-         QList<QListWidgetItem*> filterItems = mpFilterList->findItems(filterName, Qt::MatchExactly);
-         for (int i = 0; i < filterItems.count(); ++i)
+         QString filterName = QString::fromStdString(*iter);
+         if (filterName.isEmpty() == false)
          {
-            QListWidgetItem* pItem = filterItems[i];
-            if (pItem != NULL)
+            QList<QListWidgetItem*> filterItems = mpFilterList->findItems(filterName, Qt::MatchExactly);
+            for (int i = 0; i < filterItems.count(); ++i)
             {
-               pItem->setSelected(true);
+               QListWidgetItem* pItem = filterItems[i];
+               if (pItem != NULL)
+               {
+                  pItem->setSelected(true);
+               }
             }
          }
       }
@@ -973,13 +977,15 @@ void PropertiesRasterLayer::enableFilterCombo(bool bEnable)
 {
    if ((mInitializing == false) && (bEnable == true))
    {
-      Service<DesktopServices> pDesktop;
-      
-      pDesktop->showSuppressibleMsgDlg(APP_NAME,  "<b>This is an EXPERIMENTAL feature!</b><br/>"
+      Service<DesktopServices>()->showSuppressibleMsgDlg(APP_NAME,  "<b>This is an EXPERIMENTAL feature!</b><br/>"
          "Enabling image filtering uses additional system resources when generating the image for display.<br/>"
          "For large data sets it is possible for the system to run out of resources, which could have adverse "
          "effects including application shutdown or system reboot.", MESSAGE_WARNING, 
          getFilterWarningDialogId(), this);
+   }
+   else if (bEnable == false)
+   {
+      mpFilterList->clearSelection();
    }
 
    mpFilterList->setEnabled(bEnable);

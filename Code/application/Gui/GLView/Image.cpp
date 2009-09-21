@@ -397,7 +397,7 @@ void Image::createTiles()
    }
 }
 
-void Image::draw(GLint textureMode)
+void Image::draw(GLfloat textureMode)
 {
    setActiveTileSet(mInfo.mKey);
    VERIFYNRV(mpTiles != NULL);
@@ -1381,7 +1381,7 @@ const map<ImageKey, Image::TileSet>& Image::getTileSets() const
    return mTileSets;
 }
 
-void Image::drawTiles(const vector<Tile*>& tiles, GLint textureMode)
+void Image::drawTiles(const vector<Tile*>& tiles, GLfloat textureMode)
 {
    if (tiles.empty() == true)
    {

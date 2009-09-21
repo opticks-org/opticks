@@ -1041,17 +1041,13 @@ void GpuImage::initializeColormap(const vector<ColorType>& colorMap)
       colors[textureIndex++] = color.mAlpha;
    }
 
-   // Update the colormap texture
    mColormapTexture = GlTextureResource(1);
    if (static_cast<GLuint>(mColormapTexture) != 0)
    {
-      glBindTexture(GL_TEXTURE_RECTANGLE_NV, mColormapTexture);
-      glTexParameterf(GL_TEXTURE_RECTANGLE_NV, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-      glTexParameterf(GL_TEXTURE_RECTANGLE_NV, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-      glTexParameterf(GL_TEXTURE_RECTANGLE_NV, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-      glTexParameterf(GL_TEXTURE_RECTANGLE_NV, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+      glBindTexture(GL_TEXTURE_RECTANGLE_ARB, mColormapTexture);
       glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-      glTexImage2D(GL_TEXTURE_RECTANGLE_NV, 0, GL_RGBA, numColors, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &colors[0]);
+      glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA, numColors, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &colors[0]);
+      glBindTexture(GL_TEXTURE_RECTANGLE_ARB, 0);
    }
 }
 
@@ -1142,7 +1138,7 @@ Tile* GpuImage::createTile() const
    return (new GpuTile());
 }
 
-void GpuImage::drawTiles(const vector<Tile*>& tiles, GLint textureMode)
+void GpuImage::drawTiles(const vector<Tile*>& tiles, GLfloat textureMode)
 {
    if (tiles.empty() == true)
    {
@@ -1192,8 +1188,8 @@ void GpuImage::setCgParameterValues()
             else if (strcmp(pParameterName, "numColors") == 0)
             {
                GLint numColors = 0;
-               glBindTexture(GL_TEXTURE_RECTANGLE_NV, mColormapTexture);
-               glGetTexLevelParameteriv(GL_TEXTURE_RECTANGLE_NV, 0, GL_TEXTURE_WIDTH, &numColors);
+               glBindTexture(GL_TEXTURE_RECTANGLE_ARB, mColormapTexture);
+               glGetTexLevelParameteriv(GL_TEXTURE_RECTANGLE_ARB, 0, GL_TEXTURE_WIDTH, &numColors);
 
                cgGLSetParameter1f(mCgParameters.at(i), static_cast<float>(numColors));
             }

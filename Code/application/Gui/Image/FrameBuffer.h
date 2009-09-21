@@ -33,7 +33,7 @@ class FrameBuffer : public ImageBuffer
 {
 public:
    FrameBuffer();
-   ~FrameBuffer();
+   virtual ~FrameBuffer();
 
    /**
     *  Assigns the color buffer as the buffer to render.

@@ -152,7 +152,6 @@ void ColorBuffer::clear()
    int height = getHeight();
    unsigned int numChannels = ImageUtilities::getNumColorChannels(textureFormat);
 
-   // bind texture object id
    glEnable(textureTarget);
    glBindTexture(textureTarget, textureObjectId);
 
@@ -160,50 +159,43 @@ void ColorBuffer::clear()
    {
    case GL_UNSIGNED_BYTE:
       {
-         vector<unsigned char> data(width * height * numChannels);
-         memset(&data[0], 0, (width * height * numChannels * sizeof(unsigned char)));
+         vector<unsigned char> data(width * height * numChannels, 0);
          glTexSubImage2D(textureTarget, 0, 0, 0, width, height, textureFormat, dataType, &data[0]);
       }
       break;
    case GL_BYTE:
       {
-         vector<char> data(width * height * numChannels);
-         memset(&data[0], 0, (width * height * numChannels * sizeof(char)));
+         vector<char> data(width * height * numChannels, 0);
          glTexSubImage2D(textureTarget, 0, 0, 0, width, height, textureFormat, dataType, &data[0]);
       }
       break;
    case GL_UNSIGNED_SHORT:
       {
-         vector<unsigned short> data(width * height * numChannels);
-         memset(&data[0], 0, (width * height * numChannels * sizeof(unsigned short)));
+         vector<unsigned short> data(width * height * numChannels, 0);
          glTexSubImage2D(textureTarget, 0, 0, 0, width, height, textureFormat, dataType, &data[0]);
       }
       break;
    case GL_SHORT:
       {
-         vector<short> data(width * height * numChannels);
-         memset(&data[0], 0, (width * height * numChannels * sizeof(short)));
+         vector<short> data(width * height * numChannels, 0);
          glTexSubImage2D(textureTarget, 0, 0, 0, width, height, textureFormat, dataType, &data[0]);
       }
       break;
    case GL_UNSIGNED_INT:
       {
-         vector<unsigned int> data(width * height * numChannels);
-         memset(&data[0], 0, (width * height * numChannels * sizeof(unsigned int)));
+         vector<unsigned int> data(width * height * numChannels, 0);
          glTexSubImage2D(textureTarget, 0, 0, 0, width, height, textureFormat, dataType, &data[0]);
       }
       break;
    case GL_INT:
       {
-         vector<int> data(width * height * numChannels);
-         memset(&data[0], 0, (width * height * numChannels * sizeof(int)));
+         vector<int> data(width * height * numChannels, 0);
          glTexSubImage2D(textureTarget, 0, 0, 0, width, height, textureFormat, dataType, &data[0]);
       }
       break;
    case GL_FLOAT:
       {
-         vector<float> data(width * height * numChannels);
-         memset(&data[0], 0, (width * height * numChannels * sizeof(float)));
+         vector<float> data(width * height * numChannels, 0);
          glTexSubImage2D(textureTarget, 0, 0, 0, width, height, textureFormat, dataType, &data[0]);
       }
       break;

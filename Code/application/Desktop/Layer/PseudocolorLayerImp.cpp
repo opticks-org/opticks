@@ -787,7 +787,7 @@ void PseudocolorLayerImp::generateImage()
 
    if (mpImage == NULL)
    {
-#if defined(WIN_API)
+#if defined(CG_SUPPORTED)
       bool useGpuImage = RasterLayer::getSettingGpuImage();
       if (useGpuImage)
       {
@@ -867,7 +867,7 @@ void PseudocolorLayerImp::invalidateImage()
 
 bool PseudocolorLayerImp::isGpuImageSupported() const
 {
-#ifdef WIN_API
+#if defined(CG_SUPPORTED)
    // Check if the hardware supports the GPU image
    if (CgContext::instance() == NULL)
    {

@@ -111,7 +111,7 @@ void GpuTile::setupTile(void *pData, EncodingType encodingType, unsigned int ind
    applyFilters();
 }
 
-void GpuTile::draw(CGparameter outputCgTextureParam, GLint textureMode)
+void GpuTile::draw(CGparameter outputCgTextureParam, GLfloat textureMode)
 {
    const vector<GLfloat>& xCoords = getXCoords();
    const vector<GLfloat>& yCoords = getYCoords();
@@ -130,15 +130,15 @@ void GpuTile::draw(CGparameter outputCgTextureParam, GLint textureMode)
    glMatrixMode(GL_MODELVIEW);
    glPushMatrix();
 
-   // Move the tile into it's correct position in the image
+   // Move the tile into its correct position in the image
    LocationType pos = getPos();
    glTranslatef(static_cast<GLfloat>(pos.mX), static_cast<GLfloat>(pos.mY), 0.0);
 
    // Set the texture mode
    glEnable(GL_TEXTURE_RECTANGLE_ARB);
    glBindTexture(GL_TEXTURE_RECTANGLE_ARB, textureId);
-   glTexParameterf(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, static_cast<GLfloat>(textureMode));
-   glTexParameterf(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, static_cast<GLfloat>(textureMode));
+   glTexParameterf(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, textureMode);
+   glTexParameterf(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, textureMode);
    glTexParameterf(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
    glTexParameterf(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
@@ -382,12 +382,12 @@ unsigned int GpuTile::readFilterBuffer(GLint xCoord, GLint yCoord, GLsizei width
       {
          // Initialize the reader to the size of the texture to accommodate all possible reads (i.e. later reads)
          LocationType texSize = getTexSize();
-         ColorBuffer* pColorBuffer(new ColorBuffer(GL_TEXTURE_RECTANGLE_ARB, internalFormat, 
-                                                   texSize.mX, texSize.mY, textureFormat, dataType, alpha));
+         ColorBuffer* pColorBuffer(new ColorBuffer(GL_TEXTURE_RECTANGLE_ARB, internalFormat,
+            static_cast<int>(texSize.mX), static_cast<int>(texSize.mY), textureFormat, dataType, alpha));
          if ((pColorBuffer != NULL) && (pColorBuffer->getTextureObjectId() != 0))
          {
-            int numBytes = texSize.mX * texSize.mY * ImageUtilities::sizeOf(dataType) * 
-                           ImageUtilities::getNumColorChannels(textureFormat);
+            int numBytes = static_cast<int>(texSize.mX) * static_cast<int>(texSize.mY) *
+               ImageUtilities::sizeOf(dataType) * ImageUtilities::getNumColorChannels(textureFormat);
             PixelBufferObject* pPixelBufferObject = pResourceManager->getPixelBufferObject(numBytes, GL_READ_ONLY);
             if (pPixelBufferObject != NULL)
             {

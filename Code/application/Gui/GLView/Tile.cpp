@@ -80,7 +80,7 @@ bool Tile::isTextureReady() const
    return isTextureReady(getTextureIndex());
 }
 
-void Tile::draw(GLint textureMode)
+void Tile::draw(GLfloat textureMode)
 {
    unsigned int index = getTextureIndex();
    if (mTextures.size() <= index)

@@ -83,7 +83,7 @@ protected:
 
    Tile* createTile() const;
    void updateTiles(std::vector<Tile*>& tilesToUpdate, std::vector<int>& tileZoomIndices);
-   void drawTiles(const std::vector<Tile*>& tiles, GLint textureMode);
+   void drawTiles(const std::vector<Tile*>& tiles, GLfloat textureMode);
    void setActiveTileSet(const ImageKey &key);
    unsigned int getMaxNumTileSets() const;
    std::vector<Tile*> getTilesToUpdate(const std::vector<Tile*>& tilesToDraw,

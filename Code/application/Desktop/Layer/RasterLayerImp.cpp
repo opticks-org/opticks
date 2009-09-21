@@ -364,7 +364,7 @@ void RasterLayerImp::draw()
 
    if (mpImage != NULL)
    {
-      GLint textureMode = GL_NEAREST;
+      GLfloat textureMode = GL_NEAREST;
 
       SpatialDataView* pSpatialDataView = dynamic_cast<SpatialDataView*>(getView());
       if (pSpatialDataView != NULL)
@@ -2069,6 +2069,16 @@ void RasterLayerImp::enableGpuImage(bool bEnable)
       if (pView != NULL)
       {
          pView->addUndoAction(new SetRasterGpuImage(dynamic_cast<RasterLayer*>(this), mUseGpuImage, bEnable));
+      }
+
+      if (bEnable)
+      {
+         // Disable smoothing if a layer is using gpu images since it does not work on GL_FLOAT with NV extensions
+         SpatialDataView* pSpatialDataView = dynamic_cast<SpatialDataView*>(pView);
+         if (pSpatialDataView != NULL)
+         {
+            pSpatialDataView->setTextureMode(TEXTURE_NEAREST_NEIGHBOR);
+         }
       }
 
       mUseGpuImage = bEnable;

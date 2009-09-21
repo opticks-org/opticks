@@ -33,7 +33,7 @@ public:
    /**
     *  Returns a pointer to the PixelBufferObject.
     *
-    *  This method creates an PixelBufferObject from the specified parameters.
+    *  This method creates a PixelBufferObject from the specified parameters.
     *  The caller takes ownership of the PixelBufferObject.
     *
     *    @param   numBytes

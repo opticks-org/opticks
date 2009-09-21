@@ -312,12 +312,6 @@ ColorBuffer *ImageFilter::copyColorBuffer(ColorBuffer *pColorBuffer)
    }
 #endif
 
-   if (pNewColorBuffer != NULL)
-   {
-      // clear color buffer by setting values to zero
-      pNewColorBuffer->clear();
-   }
-
    return pNewColorBuffer;
 }
 

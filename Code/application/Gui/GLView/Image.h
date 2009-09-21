@@ -574,7 +574,7 @@ public:
       mpTiles->push_back (tile);
    }
 
-   void draw(GLint textureMode);
+   void draw(GLfloat textureMode);
 
    void setAlpha(unsigned int alpha); // 0-255
    unsigned int getAlpha() const;
@@ -629,7 +629,7 @@ protected:
    const std::vector<Tile*>* getActiveTiles() const;
    const std::map<ImageKey, TileSet>& getTileSets() const;
    virtual void updateTiles(std::vector<Tile*>& tilesToUpdate, std::vector<int>& tileZoomIndices);
-   virtual void drawTiles(const std::vector<Tile*>& tiles, GLint textureMode);
+   virtual void drawTiles(const std::vector<Tile*>& tiles, GLfloat textureMode);
    virtual void setActiveTileSet(const ImageKey &key);
    virtual unsigned int getMaxNumTileSets() const;
    std::vector<Tile*> getTilesToDraw();
