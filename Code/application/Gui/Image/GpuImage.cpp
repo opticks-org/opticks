@@ -273,18 +273,18 @@ In getFromSource(In src)
 class GpuTileProcessor
 {
 public:
-   GpuTileProcessor(const vector<GpuTile*>& tiles, vector<int>& tileZoomIndices, const Image::ImageData& info) :
+   GpuTileProcessor(const vector<GpuTile*>& tiles,
+      vector<unsigned int>& tileZoomIndices, const Image::ImageData& info) :
       mTiles(tiles),
       mTileZoomIndices(tileZoomIndices),
       mInfo(info)
-      {
-      }
+   {}
 
    void run();
 
 private:
    const vector<GpuTile*>& mTiles;
-   vector<int>& mTileZoomIndices;
+   vector<unsigned int>& mTileZoomIndices;
    const Image::ImageData& mInfo;
 
    template <typename In, typename Out>
@@ -705,7 +705,7 @@ private:
    }
 };    // End of GpuTileProcessor class declaration
 
-void GpuImage::updateTiles(vector<Tile*>& tilesToUpdate, vector<int>& tileZoomIndices)
+void GpuImage::updateTiles(vector<Tile*>& tilesToUpdate, vector<unsigned int>& tileZoomIndices)
 {
    vector<GpuTile*> tiles;
    for (unsigned int i = 0; i < tilesToUpdate.size(); ++i)
@@ -785,7 +785,7 @@ void GpuImage::initializeFilter(ImageFilterDescriptor *pDescriptor)
       const vector<Tile*>& tiles = iter->second.getTiles();
 
       unsigned int numTiles = tiles.size();
-      vector<int> tileZoomIndices;
+      vector<unsigned int> tileZoomIndices;
       vector<Tile*> tilesToUpdate;
 
       tileZoomIndices.reserve(numTiles);
@@ -1331,7 +1331,7 @@ unsigned int GpuImage::getMaxNumTileSets() const
    return 3;
 }
 
-vector<Tile*> GpuImage::getTilesToUpdate(const vector<Tile*>& tilesToDraw, vector<int>& tileZoomIndices)
+vector<Tile*> GpuImage::getTilesToUpdate(const vector<Tile*>& tilesToDraw, vector<unsigned int>& tileZoomIndices)
 {
    const Image::ImageData imageInfo = Image::getImageData();
 

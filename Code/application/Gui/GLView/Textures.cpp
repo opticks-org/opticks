@@ -50,8 +50,8 @@ void TextureImpl::genTexture(int size)
    static int sGenCount = 0;
    deleteTexture(); 
 
-   sGenCount++;
-   if (sGenCount % 20)
+   ++sGenCount;
+   if (sGenCount % 20 == 0)
    {
       deleteOldTextures();
    }

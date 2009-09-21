@@ -628,13 +628,13 @@ protected:
    virtual Tile* createTile() const;
    const std::vector<Tile*>* getActiveTiles() const;
    const std::map<ImageKey, TileSet>& getTileSets() const;
-   virtual void updateTiles(std::vector<Tile*>& tilesToUpdate, std::vector<int>& tileZoomIndices);
+   virtual void updateTiles(std::vector<Tile*>& tilesToUpdate, std::vector<unsigned int>& tileZoomIndices);
    virtual void drawTiles(const std::vector<Tile*>& tiles, GLfloat textureMode);
    virtual void setActiveTileSet(const ImageKey &key);
    virtual unsigned int getMaxNumTileSets() const;
    std::vector<Tile*> getTilesToDraw();
    virtual std::vector<Tile*> getTilesToUpdate(const std::vector<Tile*>& tilesToDraw,
-      std::vector<int>& tileZoomIndices);
+      std::vector<unsigned int>& tileZoomIndices);
 
    ImageData mInfo;
 
