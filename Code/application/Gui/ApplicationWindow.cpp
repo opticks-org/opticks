@@ -2611,16 +2611,15 @@ bool ApplicationWindow::saveSession()
    {
       ProgressAdapter progress;
       Service<DesktopServices>()->createProgressDialog("Save Session", &progress);
-      pair<SessionManager::SerializationStatus,vector<pair<SessionItem*, string> > > status = pManager->serialize(mSessionFilename, &progress);
+      pair<SessionManager::SerializationStatus,vector<pair<SessionItem*, string> > > status =
+         pManager->serialize(mSessionFilename, &progress);
       if (status.first == SessionManager::FAILURE) 
       {
-         remove(mSessionFilename.c_str());
          progress.updateProgress("Session saving failed.", 0, ERRORS);
          return false;
       }
       else if (status.first == SessionManager::LOCKED)
       {
-         remove(mSessionFilename.c_str());
          progress.updateProgress("Session saving is temporarily locked.", 0, ERRORS);
          return false;
       }
@@ -2632,7 +2631,8 @@ bool ApplicationWindow::saveSession()
       }
       else if(pLog != NULL && status.first == SessionManager::PARTIAL_SUCCESS)
       {
-         pLog->createMessage("Session saved. Not all session items were successfully loaded: " + mSessionFilename,"app","C85E14F3-69B0-4495-AD91-F3E1B7013A8E");
+         pLog->createMessage("Session saved. Not all session items were successfully loaded: " +
+            mSessionFilename, "app", "C85E14F3-69B0-4495-AD91-F3E1B7013A8E");
       }
       return true;
    }

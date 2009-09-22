@@ -17,6 +17,7 @@
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
 #include "PlugInRegistration.h"
+#include "SessionResource.h"
 
 #include <string>
 
@@ -203,6 +204,7 @@ void BackgroundTest::runWorkerThread(void *pArg)
 
 bool BackgroundTest::workerThread()
 {
+   SessionSaveLock lock;
    for (int tick = 0; tick < 50; ++tick)
    {
       if (mAbort)

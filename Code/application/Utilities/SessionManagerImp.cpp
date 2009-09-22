@@ -82,6 +82,8 @@
 #include <errno.h>
 #include <QtCore/QDir>
 #include <QtCore/QFileInfo>
+#include <QtCore/QString>
+#include <QtCore/QStringList>
 #include <QtCore/QUuid>
 #include <QtGui/QWidget>
 
@@ -1263,14 +1265,21 @@ SessionManagerImp::serialize(const string& filename, Progress* pProgress)
          status = FAILURE;
       }
    }
+
    if (status != FAILURE)
    {
       mIsSaveLoad = true;
       deleteObsoleteFiles(sessionDirPath, items);
 
       SessionItemSerializerImp sis(getPathForItem(sessionDirPath, ModelServicesImp::instance()));
-      ModelServicesImp::instance()->serialize(sis);
+      if (ModelServicesImp::instance()->serialize(sis) == false)
+      {
+         status = FAILURE;
+      }
+   }
 
+   if (status != FAILURE)
+   {
       int count = items.size();
       int i = 0;
       for (vector<IndexFileItem>::iterator ppItem = items.begin();
@@ -1312,7 +1321,6 @@ SessionManagerImp::serialize(const string& filename, Progress* pProgress)
             successItems.push_back(*ppItem);
          }
       }
-      mIsSaveLoad = false;
 
       if (successItems.size() == 0 || writeIndexFile(filename, successItems) == false)
       {
@@ -1325,6 +1333,19 @@ SessionManagerImp::serialize(const string& filename, Progress* pProgress)
       }
    }
 
+   if (status == FAILURE)
+   {
+      remove(filename.c_str());
+      QStringList files(sessionDir.entryList());
+      foreach(QString file, files)
+      {
+         sessionDir.remove(file);
+      }
+
+      sessionDir.rmdir(sessionDir.absolutePath());
+   }
+
+   mIsSaveLoad = false;
    return make_pair(status, failedItems);
 }
 
