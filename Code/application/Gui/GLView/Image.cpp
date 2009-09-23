@@ -10,7 +10,6 @@
 #include <limits>
 #include <math.h>
 
-#include "AppConfig.h"
 #include "AppVerify.h"
 #include "DataAccessorImpl.h"
 #include "DrawUtil.h"
@@ -984,14 +983,8 @@ void Image::updateTiles(vector<Tile*>& tilesToUpdate, vector<unsigned int>& tile
    {
       pReporter = &barReporter;
    }
-   unsigned int threadCount = ConfigurationSettings::getSettingThreadCount();
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Multi-threaded tile generation is not working on " \
-   "Solaris. This disables it until a real fix can be devised. (tclarke)")
-#if defined(SOLARIS)
-   threadCount = 1;
-#endif
    mta::MultiThreadedAlgorithm<TileInput, TileOutput, TileThread> tilingAlgorithm
-      (threadCount, tileInput, tileOutput, pReporter);
+      (ConfigurationSettings::getSettingThreadCount(), tileInput, tileOutput, pReporter);
    tilingAlgorithm.run();
 }
 

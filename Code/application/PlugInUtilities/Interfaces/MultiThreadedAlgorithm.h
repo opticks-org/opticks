@@ -639,7 +639,7 @@ private:
    const AlgInput& mInput;
    AlgOutput& mOutput;
    std::vector<AlgThread*> mThreads;
-   MultiThreadReporter mThreadReporter;
+   MultiThreadReporter* mpThreadReporter;
    ProgressReporter* mpProgressReporter;
    DMutex mMutexA;
    DThreadSignal mSignalA;
@@ -654,9 +654,10 @@ MultiThreadedAlgorithm<AlgInput, AlgOutput, AlgThread>::MultiThreadedAlgorithm(i
    mCurrentStatus(SUCCESS),
    mInput(algInput),
    mOutput(algOutput),
-   mThreadReporter(threadCount, &mCurrentStatus, mMutexA, mSignalA, mMutexB, mSignalB),
+   mpThreadReporter(NULL),
    mpProgressReporter(pReporter)
 {
+   mpThreadReporter = new MultiThreadReporter(threadCount, &mCurrentStatus, mMutexA, mSignalA, mMutexB, mSignalB);
    createThreads(threadCount);
 }
 
@@ -674,6 +675,7 @@ MultiThreadedAlgorithm<AlgInput, AlgOutput, AlgThread>::~MultiThreadedAlgorithm(
    }
 
    mThreads.clear();
+   delete mpThreadReporter;
 }
 
 template<class AlgInput, class AlgOutput, class AlgThread>
@@ -683,7 +685,7 @@ Result MultiThreadedAlgorithm<AlgInput, AlgOutput, AlgThread>::createThreads(int
    for (i = 0; i < threadCount; ++i)
    {
       AlgThread* pThread = NULL;
-      pThread = new AlgThread(mInput, threadCount, i, mThreadReporter);
+      pThread = new AlgThread(mInput, threadCount, i, *mpThreadReporter);
       if (pThread != NULL)
       {
          pThread->setAlgorithmMutex(&mMutexA);
@@ -741,7 +743,7 @@ int MultiThreadedAlgorithm<AlgInput, AlgOutput, AlgThread>::processCurrentReport
 {
    mMutexB.MutexLock();
 
-   int type = mThreadReporter.getReportType();
+   int type = mpThreadReporter->getReportType();
    unsigned int currentType = MultiThreadReporter::THREAD_WORK;
    while (currentType != 0)
    {
@@ -752,7 +754,7 @@ int MultiThreadedAlgorithm<AlgInput, AlgOutput, AlgThread>::processCurrentReport
       currentType /= 2;
    }
 
-   mThreadReporter.setReportType(MultiThreadReporter::THREAD_NO_REPORT);
+   mpThreadReporter->setReportType(MultiThreadReporter::THREAD_NO_REPORT);
 
    mSignalB.ThreadSignalActivate();
    mMutexB.MutexUnlock();
@@ -769,7 +771,7 @@ int MultiThreadedAlgorithm<AlgInput, AlgOutput, AlgThread>::processReport(unsign
          break;
       case MultiThreadReporter::THREAD_COMPLETE:
       case MultiThreadReporter::THREAD_PROGRESS:
-         percentDone = mThreadReporter.getProgress();
+         percentDone = mpThreadReporter->getProgress();
          if (mpProgressReporter != NULL)
          {
             mpProgressReporter->reportProgress(percentDone);
@@ -778,15 +780,15 @@ int MultiThreadedAlgorithm<AlgInput, AlgOutput, AlgThread>::processReport(unsign
       case MultiThreadReporter::THREAD_ERROR:
          if (mpProgressReporter != NULL)
          {
-            mpProgressReporter->reportError(mThreadReporter.getErrorText().c_str());
+            mpProgressReporter->reportError(mpThreadReporter->getErrorText().c_str());
          }
-         mErrorText = mThreadReporter.getErrorText().c_str();
+         mErrorText = mpThreadReporter->getErrorText().c_str();
          mCurrentStatus = FAILURE;
          break;
       case MultiThreadReporter::THREAD_WORK:
-         if (mThreadReporter.getThreadCommand() != NULL)
+         if (mpThreadReporter->getThreadCommand() != NULL)
          {
-            mThreadReporter.getThreadCommand()->run();
+            mpThreadReporter->getThreadCommand()->run();
          }
          break;
       default:

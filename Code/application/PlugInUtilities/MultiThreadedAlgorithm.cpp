@@ -136,8 +136,7 @@ Result MultiThreadReporter::reportCompletion(int threadIndex)
 void MultiThreadReporter::runInMainThread(ThreadCommand &command)
 {
    WorkFunctor cmd(mpThreadCommand, command);
-   Result result = signalMainThread(cmd, THREAD_WORK);
-   mpThreadCommand = NULL;
+   signalMainThread(cmd, THREAD_WORK);
 }
 
 void MultiThreadReporter::setReportType(ReportType type)
@@ -207,6 +206,12 @@ Result MultiThreadReporter::signalMainThread(ThreadCommand& reportStatus, Report
          {
             mSignalB.ThreadSignalWait(&mMutexB); // wait for main thread to say its done
          }
+      }
+
+      // clear the work command - this must be done while mSignalMutex is owned
+      if (type == THREAD_WORK)
+      {
+         mpThreadCommand = NULL;
       }
    }
 
