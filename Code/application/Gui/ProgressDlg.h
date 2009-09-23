@@ -36,6 +36,9 @@ public:
    bool hasAbort();
    bool isAborted();
 
+public slots:
+   virtual void reject();
+
 signals:
    void aborted();
 

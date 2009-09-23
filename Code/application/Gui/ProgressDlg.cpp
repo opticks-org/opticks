@@ -281,6 +281,11 @@ bool ProgressDlg::isAborted()
    return mbAborted;
 }
 
+void ProgressDlg::reject()
+{
+   close();
+}
+
 void ProgressDlg::closeEvent(QCloseEvent* e)
 {
    if (mbComplete == false)
