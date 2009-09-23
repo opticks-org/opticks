@@ -34,7 +34,7 @@ public:
     *          The widget containing the context to make current.
     *          If \c NULL is specified, the current context will not be changed.
     */
-   GlContextSave(QGLWidget* pContext);
+   GlContextSave(QGLWidget* pWidget);
 
    /**
     * Records the current OpenGL context and makes the specified context current.
