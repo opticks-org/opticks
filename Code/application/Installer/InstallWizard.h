@@ -30,6 +30,13 @@ public slots:
 
 protected:
    virtual void closeEvent(QCloseEvent* pEvent);
+
+private slots:
+   void install();
+
+private:
+   QList<Aeb*> mPackageDescriptors;
+   Progress* mpProgress;
 };
 
 #endif

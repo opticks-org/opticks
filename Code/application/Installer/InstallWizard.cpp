@@ -13,13 +13,17 @@
 #include "Aeb.h"
 #include "AppAssert.h"
 #include "AppVerify.h"
+#include "AppVersion.h"
 #include "InstallWizard.h"
-#include "InstallWizardCopyFilesPage.h"
 #include "InstallWizardInfoPage.h"
 #include "InstallWizardLicensePage.h"
+#include "InstallerServices.h"
+#include "Progress.h"
 
 InstallWizard::InstallWizard(QList<Aeb*>& packageDescriptors, Progress* pProgress, QWidget* pParent) :
-   QWizard(pParent)
+   QWizard(pParent),
+   mPackageDescriptors(packageDescriptors),
+   mpProgress(pProgress)
 {
    setWindowTitle("Installation Wizard");
    setModal(true);
@@ -36,7 +40,7 @@ InstallWizard::InstallWizard(QList<Aeb*>& packageDescriptors, Progress* pProgres
       }
       QStringList licenses = pDescriptor->getLicenses();
       std::vector<std::string> licenseUrls = pDescriptor->getLicenseURLs();
-      for (unsigned int licenseNum = 0; licenseNum < licenses.size(); licenseNum++)
+      for (int licenseNum = 0; licenseNum < licenses.size(); ++licenseNum)
       {
          QString url = QString::fromStdString(licenseUrls[licenseNum]).toLower();
          bool isHtml = url.endsWith(".html") || url.endsWith(".htm");
@@ -45,11 +49,56 @@ InstallWizard::InstallWizard(QList<Aeb*>& packageDescriptors, Progress* pProgres
    }
 
    // CopyFiles page
-   addPage(new InstallWizardCopyFilesPage(packageDescriptors, pProgress, this));
+   QWizardPage* pCopyFilesPage = new QWizardPage(this);
+   pCopyFilesPage->setTitle("Install Files");
+   pCopyFilesPage->setSubTitle("Click Finish to complete the installation.");
+   addPage(pCopyFilesPage);
+
+   VERIFYNRV(connect(this, SIGNAL(accepted()), this, SLOT(install())));
 }
 
 InstallWizard::~InstallWizard()
+{}
+
+void InstallWizard::install()
 {
+   if (mPackageDescriptors.isEmpty())
+   {
+      return;
+   }
+   int count = 0;
+   if (mpProgress != NULL)
+   {
+      mpProgress->updateProgress("Installing extensions", 1, NORMAL);
+   }
+   bool success = false;
+   foreach (Aeb* pDescriptor, mPackageDescriptors)
+   {
+      if (pDescriptor == NULL)
+      {
+         continue;
+      }
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress("Installing " + pDescriptor->getName(), 100 * count++ / mPackageDescriptors.size(), NORMAL);
+      }
+      if (!Service<InstallerServices>()->installExtension(pDescriptor->getFilename(), mpProgress))
+      {
+         if (mpProgress != NULL)
+         {
+            mpProgress->updateProgress("Unable to install " + pDescriptor->getName(), 0, ERRORS);
+         }
+      }
+      else
+      {
+         success = true;
+      }
+   }
+   if (success && mpProgress != NULL)
+   {
+      mpProgress->updateProgress("Installation has finished.\nInstalled extensions will be available the next time "
+         + std::string(APP_NAME) + " starts.", 100, NORMAL);
+   }
 }
 
 void InstallWizard::reject()
