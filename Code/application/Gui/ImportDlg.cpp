@@ -250,7 +250,8 @@ void ImportDlg::accept()
    }
 
    string errorMessage;
-   if (ImportAgentImp::validateImportDescriptors(descriptors, mpImporter, errorMessage) != numImportedDatasets)
+   if ((numImportedDatasets == 0) ||
+      (ImportAgentImp::validateImportDescriptors(descriptors, mpImporter, errorMessage) != numImportedDatasets))
    {
       if (invokeOptionsDialog() == false)
       {
