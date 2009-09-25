@@ -671,7 +671,7 @@ bool ImportAgentImp::execute()
       toVisit.pop();
       createdElements.remove(mpElement);
 
-      success = ExecutableAgentImp::executePlugIn();
+      bool plugInSuccess = ExecutableAgentImp::executePlugIn();
 
       DataDescriptor* pElementDescriptor = mpElement->getDataDescriptor();
       if (pElementDescriptor != NULL)
@@ -679,23 +679,22 @@ bool ImportAgentImp::execute()
          map<DataDescriptor*, ImportDescriptor*>::iterator iter = selectedDatasets.find(pElementDescriptor);
          if (iter != selectedDatasets.end())
          {
-            importedDescriptors[iter->second] = success;
+            importedDescriptors[iter->second] = plugInSuccess;
          }
       }
 
-      if (success == false)
+      if (plugInSuccess == false)
       {
          if (pProgress != NULL)
          {
-            // If there isn't already an error message, post one to progress
             string text;
             int percent;
             ReportingLevel gran;
             pProgress->getProgress(text, percent, gran);
-            if (gran != ABORT && gran != ERRORS)
+            if (gran != ABORT)
             {
                string message = "The '" + mpElement->getName() + "' data set failed to load!";
-               pProgress->updateProgress(message, 0, ERRORS);
+               pProgress->updateProgress(message, 0, WARNING);
             }
          }
          pModel->destroyElement(mpElement);
@@ -715,6 +714,8 @@ bool ImportAgentImp::execute()
                toVisit.push(*elmnt);
             }
          }
+
+         success = true;
       }
 
       mpElement = NULL;
