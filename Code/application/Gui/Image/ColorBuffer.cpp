@@ -10,7 +10,6 @@
 #include "ColorBuffer.h"
 #include "GpuResourceManager.h"
 #include "ImageUtilities.h"
-#include "MessageLogResource.h"
 
 #include <vector>
 using namespace std;
@@ -30,12 +29,6 @@ ColorBuffer::ColorBuffer(GLenum textureTarget, GLint internalFormat, int width, 
    Service<GpuResourceManager> pGpuResourceManager;
    mTextureObjectId = pGpuResourceManager->allocateTexture(textureTarget, internalFormat, width, height,
       textureFormat, dataType);
-
-   if (isTextureResident() == false)
-   {
-      MessageResource("Unable to allocate sufficient texture memory on the graphics card.", "app",
-         "6944D2F4-3C6D-4457-B8D7-AAF5BDAD6B7F");
-   }
 }
 
 ColorBuffer::ColorBuffer(int width, int height, GLenum textureFormat, GLenum dataType, unsigned int alpha) :
@@ -111,30 +104,6 @@ GLenum ColorBuffer::getDataType() const
 GLuint ColorBuffer::getTextureObjectId() const
 {
    return mTextureObjectId;
-}
-
-bool ColorBuffer::isTextureResident() const
-{
-   bool bResident = false;
-   if (mTextureObjectId != 0)
-   {
-      GLenum textureTarget = getTextureTarget();
-
-      glEnable(textureTarget);
-      glBindTexture(textureTarget, mTextureObjectId);
-
-      GLint resident;
-      glGetTexParameteriv(textureTarget, GL_TEXTURE_RESIDENT, &resident);
-      if (resident == GL_TRUE)
-      {
-         bResident = true;
-      }
-
-      glBindTexture(textureTarget, 0);
-      glDisable(textureTarget);
-   }
-
-   return bResident;
 }
 
 void ColorBuffer::clear()

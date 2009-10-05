@@ -146,7 +146,6 @@ public:
     */
    GLuint getTextureObjectId() const;
 
-   bool isTextureResident() const;
    void clear();
 
 private: // member variables
