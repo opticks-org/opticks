@@ -116,7 +116,8 @@ ProductViewImp::ProductViewImp(const string& id, const string& viewName, QGLCont
    addMouseMode(new MouseModeImp("ZoomBoxMode", QCursor(QPixmap(":/icons/ZoomRectCursor", 0, 0))));
 
    // Connections
-   connect(this, SIGNAL(mouseModeChanged(const MouseMode*)), this, SLOT(updateMouseCursor(const MouseMode*)));
+   VERIFYNR(connect(this, SIGNAL(mouseModeChanged(const MouseMode*)), this, SLOT(updateMouseCursor(const MouseMode*))));
+   VERIFYNR(connect(mpLayoutLayer, SIGNAL(extentsModified()), this, SLOT(updateExtents())));
    connectLayers();
 }
 
@@ -690,15 +691,7 @@ void ProductViewImp::setPaperSize(double dWidth, double dHeight)
       updateClassificationLocation();
 
       // Update the view extents
-      double dMinX = 0.0;
-      double dMinY = 0.0;
-      double dMaxX = mPaperWidth * mDpi;
-      double dMaxY = mPaperHeight * mDpi;
-
-      double dMarginX = (dMaxX - dMinX) * 0.03;
-      double dMarginY = (dMaxY - dMinY) * 0.03;
-
-      setExtents(dMinX - dMarginX, dMinY - dMarginY, dMaxX + dMarginX, dMaxY + dMarginY);
+      updateExtents();
       zoomExtents();
 
       // Notify connected and attached objects
@@ -1686,4 +1679,29 @@ bool ProductViewImp::fromXml(DOMNode* pDocument, unsigned int version)
    connectLayers();
    
    return true;
+}
+
+void ProductViewImp::updateExtents()
+{
+   double dPaperMinX = 0.0;
+   double dPaperMinY = 0.0;
+   double dPaperMaxX = mPaperWidth * mDpi;
+   double dPaperMaxY = mPaperHeight * mDpi;
+
+   double dLayerMinX = 0.0;
+   double dLayerMinY = 0.0;
+   double dLayerMaxX = 0.0;
+   double dLayerMaxY = 0.0;
+
+   mpLayoutLayer->getExtents(dLayerMinX, dLayerMinY, dLayerMaxX, dLayerMaxY);
+
+   double dMinX = min(dLayerMinX, dPaperMinX);
+   double dMinY = min(dLayerMinY, dPaperMinY);
+   double dMaxX = max(dLayerMaxX, dPaperMaxX);
+   double dMaxY = max(dLayerMaxY, dPaperMaxY);
+
+   double dMarginX = (dMaxX - dMinX) * 0.03;
+   double dMarginY = (dMaxY - dMinY) * 0.03;
+
+   setExtents(dMinX - dMarginX, dMinY - dMarginY, dMaxX + dMarginX, dMaxY + dMarginY);
 }

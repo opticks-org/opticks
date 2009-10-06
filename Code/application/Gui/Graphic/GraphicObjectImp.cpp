@@ -407,6 +407,10 @@ bool GraphicObjectImp::setProperty(const GraphicProperty* pProp)
 
       pOldProp->set(pProp);
       emit propertyModified(pOldProp);
+      if (propertyName == "BoundingBox")
+      {
+         emit extentsModified();
+      }
    }
 
    return true;

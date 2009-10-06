@@ -264,6 +264,7 @@ signals:
    void propertyModified(GraphicProperty* pProperty);
    void modified();
    void nameChanged(const QString& strName);
+   void extentsModified();
 
 protected slots:
    void subjectModified();

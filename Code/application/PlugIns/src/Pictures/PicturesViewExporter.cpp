@@ -8,7 +8,6 @@
  */
 
 #include "AppVerify.h"
-#include "ColorType.h"
 #include "PicturesViewExporter.h"
 #include "PlugInArgList.h"
 #include "ProductView.h"
@@ -20,7 +19,6 @@
 #include <QtCore/QSize>
 #include <QtGui/QImage>
 #include <QtGui/QPainter>
-#include <QtGui/QRgb>
 
 PicturesViewExporter::PicturesViewExporter(PicturesDetails *pDetails) : PicturesExporter(pDetails)
 {
@@ -73,50 +71,63 @@ bool PicturesViewExporter::generateImage(QImage &image)
       ProductView* pProductView = dynamic_cast<ProductView*>(pView);
       if (pProductView != NULL)
       {
-         // For Product View, crop the background if the background is different from the paper color.
-         QSize imageSize = image.size();
-         QRgb paperColor = COLORTYPE_TO_QCOLOR(pProductView->getPaperColor()).rgb();
-         QRgb backgroundColor = COLORTYPE_TO_QCOLOR(pProductView->getBackgroundColor()).rgb();
-         if (paperColor != backgroundColor)
+         double dMinX = 0.0;
+         double dMinY = 0.0;
+         double dMaxX = 0.0;
+         double dMaxY = 0.0;
+
+         bool topFound = false;
+         bool bottomFound = false;
+         bool leftFound = false;
+         bool rightFound = false;
+
+         double dExtentXMin;
+         double dExtentYMin;
+         double dExtentXMax;
+         double dExtentYMax;
+
+         pProductView->getExtents(dMinX, dMinY, dMaxX, dMaxY);
+
+         // In order to export the product view image correctly, we must first remove the view's extents.
+         // We can do this by multiplying the difference between the max and min values by the value
+         // we get from using this formula.
+         double dOffset = 0.03 / 1.03;
+         double dMarginX = (dMaxX - dMinX) * dOffset;
+         double dMarginY = (dMaxY - dMinY) * dOffset;
+
+         QPoint topLeft(0, 0);
+         QPoint bottomRight(image.width(), image.height());
+
+         pProductView->translateWorldToScreen(dMinX + dMarginX, dMinY + dMarginY, dExtentXMin, dExtentYMin);
+         pProductView->translateWorldToScreen(dMaxX - dMarginX, dMaxY - dMarginY, dExtentXMax, dExtentYMax);
+
+         dExtentYMin = image.height() - dExtentYMin;
+         dExtentYMax = image.height() - dExtentYMax;
+
+         if (dExtentXMin > 0.0)
          {
-            // Find the upper left corner of the paper (or image).
-            QPoint upperLeft;
-            bool upperLeftFound = false;
-            for (int row = 0; row < imageSize.height() && upperLeftFound == false; ++row)
-            {
-               for (int col = 0; col < imageSize.width() && upperLeftFound == false; ++col)
-               {
-                  QRgb currentPixel = image.pixel(col, row);
-                  if (currentPixel != backgroundColor)
-                  {
-                     upperLeft.setX(col);
-                     upperLeft.setY(row);
-                     upperLeftFound = true;
-                  }
-               }
-            }
+            topLeft.setX(dExtentXMin);
+            leftFound = true;
+         }
+         if (dExtentXMax < image.width())
+         {
+            bottomRight.setX(dExtentXMax);
+            rightFound = true;
+         }
+         if (dExtentYMin > 0.0)
+         {
+            topLeft.setY(dExtentYMin);
+            topFound = true;
+         }
+         if (dExtentYMax < image.height())
+         {
+            bottomRight.setY(dExtentYMax);
+            bottomFound = true;
+         }
 
-            // Find the lower right corner of the paper (or image).
-            QPoint lowerRight;
-            bool lowerRightFound = false;
-            for (int row = imageSize.height() - 1; row != 0 && lowerRightFound == false; --row)
-            {
-               for (int col = imageSize.width() -1; col != 0 && lowerRightFound == false; --col)
-               {
-                  QRgb currentPixel = image.pixel(col, row);
-                  if (currentPixel != backgroundColor)
-                  {
-                     lowerRight.setX(col);
-                     lowerRight.setY(row);
-                     lowerRightFound = true;
-                  }
-               }
-            }
-
-            if (upperLeftFound && lowerRightFound)
-            {
-               image = image.copy(QRect(upperLeft, lowerRight));
-            }
+         if (topFound || leftFound || bottomFound || rightFound)
+         {
+            image = image.copy(QRect(topLeft, bottomRight));
          }
       }
    }

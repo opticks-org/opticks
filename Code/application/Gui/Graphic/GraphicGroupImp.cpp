@@ -217,11 +217,6 @@ void GraphicGroupImp::updateBoundingBox()
    double dMaxY = -1e30;
    double dMinY = 1e30;
 
-   if (mObjects.empty())
-   {
-      return;
-   }
-
    for (list<GraphicObject*>::iterator iter = mObjects.begin(); iter != mObjects.end(); ++iter)
    {
       GraphicObject* pObject = *iter;
@@ -275,8 +270,15 @@ void GraphicGroupImp::updateBoundingBox()
       }
    }
 
-   LocationType groupLlCorner(dMinX, dMinY);
-   LocationType groupUrCorner(dMaxX, dMaxY);
+   LocationType groupLlCorner;
+   LocationType groupUrCorner;
+   if (!mObjects.empty())
+   {
+      groupLlCorner.mX = dMinX;
+      groupLlCorner.mY = dMinY;
+      groupUrCorner.mX = dMaxX;
+      groupUrCorner.mY = dMaxY;
+   }
 
    setBoundingBox(groupLlCorner, groupUrCorner);
    updateHandles();

@@ -84,6 +84,7 @@ public slots:
    void setActiveLayer(GraphicLayer* pLayer);
    bool setActiveEditObject(GraphicObject* pObject);
    bool setActiveEditView(View* pView);
+   void updateExtents();
 
 signals:
    void paperSizeChanged(double dWidth, double dHeight);

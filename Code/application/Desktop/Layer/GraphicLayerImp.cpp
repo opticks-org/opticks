@@ -98,6 +98,7 @@ GraphicLayerImp::GraphicLayerImp(const string& id, const string& layerName, Data
       {
          pGroup->addProperty("PaperSize");
          VERIFYNR(connect(pGroup, SIGNAL(abortedAdd(GraphicObject*)), this, SLOT(cleanUpBadObject(GraphicObject*))));
+         VERIFYNR(connect(pGroup, SIGNAL(extentsModified()), this, SIGNAL(extentsModified())));
          VERIFYNR(connect(pGroup, SIGNAL(modified()), this, SIGNAL(modified())));
       }
    }
