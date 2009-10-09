@@ -213,22 +213,31 @@ public:
    virtual void toggleDisplayMode() = 0;
 
    /**
-    *  Sets a single band to display in the cube layer.
+    *  Sets a single band to display in a color channel.
     *
-    *  This method replaces the existing list of bands to display with the single input
-    *  band.  The stretch for the color stays the same if the stretch units is not
-    *  RegionUnits::RAW_VALUE.
+    *  This method replaces the existing displayed band in the given color
+    *  channel with the given band.  The contrast stretch for the channel
+    *  is not changed, regardless of the given raster element.
     *
     *  @param   eColor
-    *           The color for the new displayed bands.
+    *           The color channel for the new displayed band.
     *  @param   band
-    *           The band to display.
+    *           The band to display.  Pass in an invalid band to not display
+    *           any band in the given channel.
     *  @param   pRasterElement
-    *           The raster element on which the band is located.  Defaults to the loaded cube.
+    *           The raster element on which the band is located.  If \c NULL is
+    *           passed in (the default), the layer's raster element is used.
+    *           If the raster element does not have a band with the same active
+    *           number as the given band, the displayed band is not changed.
+    *           Also, the raster element must have the same number of rows and
+    *           columns as the layer's raster element; otherwise the displayed
+    *           band is not changed.
     *
-    *  @notify  signalDisplayedBandChanged() with boost::any<std::pair<RasterChannelType,const DimensionDescriptor*> >
+    *  @notify  The signalDisplayedBandChanged() signal is emitted with
+    *           boost::any<std::pair<RasterChannelType, const DimensionDescriptor*> >
+    *           containing the color channel and the new displayed band.
     *
-    *  @see     getDisplayedBand()
+    *  @see     getDisplayedBand(), DimensionDescriptor::isValid()
     */
    virtual void setDisplayedBand(RasterChannelType eColor, DimensionDescriptor band,
       RasterElement* pRasterElement = NULL) = 0;

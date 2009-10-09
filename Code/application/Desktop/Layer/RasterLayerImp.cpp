@@ -1213,6 +1213,8 @@ bool RasterLayerImp::isBandDisplayed(RasterChannelType eColor, DimensionDescript
    return false;
 }
 
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : The setDisplayedBand() methods should return a bool " \
+   "when breaking binary compatibility. (dsulgrov)")
 void RasterLayerImp::setDisplayedBand(RasterChannelType eColor, DimensionDescriptor band)
 {
    setDisplayedBand(eColor, band, NULL);
@@ -1239,9 +1241,39 @@ void RasterLayerImp::setDisplayedBand(RasterChannelType eColor, DimensionDescrip
       return;
    }
 
-   DisplayMode eMode = GRAYSCALE_MODE;
+   // Make sure the given raster element has the same number of rows and columns as the layer's raster element
+   RasterElement* pLayerElement = dynamic_cast<RasterElement*>(getDataElement());
+   if ((pLayerElement != NULL) && (pRasterElement != NULL) && (pRasterElement != pLayerElement))
+   {
+      unsigned int layerRows = 0;
+      unsigned int layerColumns = 0;
 
-   //make sure band descriptor came from raster element
+      const RasterDataDescriptor* pLayerDescriptor =
+         dynamic_cast<const RasterDataDescriptor*>(pLayerElement->getDataDescriptor());
+      if (pLayerDescriptor != NULL)
+      {
+         layerRows = pLayerDescriptor->getRowCount();
+         layerColumns = pLayerDescriptor->getColumnCount();
+      }
+
+      unsigned int elementRows = 0;
+      unsigned int elementColumns = 0;
+
+      const RasterDataDescriptor* pElementDescriptor =
+         dynamic_cast<const RasterDataDescriptor*>(pRasterElement->getDataDescriptor());
+      if (pElementDescriptor != NULL)
+      {
+         elementRows = pElementDescriptor->getRowCount();
+         elementColumns = pElementDescriptor->getColumnCount();
+      }
+
+      if ((elementRows != layerRows) || (elementColumns != layerColumns))
+      {
+         return;
+      }
+   }
+
+   // Make sure band descriptor came from the given raster element
    if (pRasterElement != NULL)
    {
       const RasterDataDescriptor* pDescriptor =
@@ -1301,6 +1333,7 @@ void RasterLayerImp::setDisplayedBand(RasterChannelType eColor, DimensionDescrip
          }
       }
 
+      DisplayMode eMode = GRAYSCALE_MODE;
       switch (eColor)
       {
          case GRAY:
