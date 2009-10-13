@@ -1683,8 +1683,12 @@ bool PCA::createPCAView()
          mpProgress->updateProgress("Creating view...", 50, NORMAL);
       }
 
-      UndoLock lock(mpView);
-      if (mpView->createLayer(RASTER, mpPCARaster) == NULL)
+      Layer* pLayer = NULL;
+      {
+         UndoLock lock(mpView);
+         pLayer = mpView->createLayer(RASTER, mpPCARaster);
+      }
+      if (pLayer == NULL)
       {
          mpDesktop->deleteWindow(pWindow);
          mpPCARaster = NULL;
@@ -1706,6 +1710,7 @@ bool PCA::createPCAView()
       // Create a GCP layer if available
       if (mpRaster != NULL)
       {
+         UndoLock lock(mpView);
          const RasterDataDescriptor* pDescriptor =
             dynamic_cast<const RasterDataDescriptor*>(mpRaster->getDataDescriptor());
          if (pDescriptor != NULL)
