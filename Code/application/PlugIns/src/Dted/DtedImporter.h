@@ -15,6 +15,10 @@
 #include "RasterElementImporterShell.h"
 #include "UhlHeader.h"
 
+#include <string>
+
+class RasterElement;
+
 class DtedImporter: public RasterElementImporterShell
 {
 public:
@@ -23,7 +27,7 @@ public:
 
    std::vector<ImportDescriptor*> getImportDescriptors(const std::string& filename);
    unsigned char getFileAffinity(const std::string& filename);
-   bool validate(const DataDescriptor* pDescriptor, std::string& errorMessage) const;
+   bool createRasterPager(RasterElement *pRasterElement) const;
 
 private:
    UhlHeader mUhl_h;

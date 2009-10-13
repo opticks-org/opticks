@@ -88,6 +88,7 @@ GdalRasterPager::GdalRasterPager() : mpDataset(NULL)
    setVersion(APP_VERSION_NUMBER);
    setProductionStatus(APP_IS_PRODUCTION_RELEASE);
    setShortDescription("GDAL pager");
+   GDALAllRegister();
 }
 
 GdalRasterPager::~GdalRasterPager()

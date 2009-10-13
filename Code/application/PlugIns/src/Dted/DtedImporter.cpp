@@ -9,20 +9,24 @@
 
 #include "AppVersion.h"
 #include "DtedImporter.h"
+#include "CachedPager.h"
 #include "Classification.h"
-#include "AppConfig.h"
 #include "Endian.h"
 #include "ImportDescriptor.h"
 #include "ModelServices.h"
-#include "PlugInRegistration.h"
 #include "ObjectResource.h"
+#include "PlugInArgList.h"
+#include "PlugInRegistration.h"
+#include "PlugInResource.h"
 #include "RasterDataDescriptor.h"
+#include "RasterElement.h"
 #include "RasterFileDescriptor.h"
 #include "RasterUtilities.h"
 #include "TypesFile.h"
 
 #include <string>
 using namespace std;
+
 
 REGISTER_PLUGIN_BASIC(OpticksDTED, DtedImporter);
 
@@ -118,33 +122,33 @@ vector<ImportDescriptor*> DtedImporter::getImportDescriptors(const string& filen
                // GCPs
                list<GcpPoint> gcps;
 
-               GcpPoint lowerLeft;
-               lowerLeft.mPixel.mX = 0.0;
-               lowerLeft.mPixel.mY = 0.0;
-               lowerLeft.mCoordinate.mX = mDsi_h.getSWLatCorner();
-               lowerLeft.mCoordinate.mY = mDsi_h.getSWLongCorner();
-               gcps.push_back(lowerLeft);
-
-               GcpPoint lowerRight;
-               lowerRight.mPixel.mX = mUhl_h.getLongCount() - 1.0;
-               lowerRight.mPixel.mY = 0.0;
-               lowerRight.mCoordinate.mX = mDsi_h.getSELatCorner();
-               lowerRight.mCoordinate.mY = mDsi_h.getSELongCorner();
-               gcps.push_back(lowerRight);
-
                GcpPoint upperLeft;
                upperLeft.mPixel.mX = 0.0;
-               upperLeft.mPixel.mY = mUhl_h.getLatCount() - 1.0;
+               upperLeft.mPixel.mY = 0.0;
                upperLeft.mCoordinate.mX = mDsi_h.getNWLatCorner();
                upperLeft.mCoordinate.mY = mDsi_h.getNWLongCorner();
                gcps.push_back(upperLeft);
 
                GcpPoint upperRight;
                upperRight.mPixel.mX = mUhl_h.getLongCount() - 1.0;
-               upperRight.mPixel.mY = mUhl_h.getLatCount() - 1.0;
+               upperRight.mPixel.mY = 0.0;
                upperRight.mCoordinate.mX = mDsi_h.getNELatCorner();
                upperRight.mCoordinate.mY = mDsi_h.getNELongCorner();
                gcps.push_back(upperRight);
+
+               GcpPoint lowerLeft;
+               lowerLeft.mPixel.mX = 0.0;
+               lowerLeft.mPixel.mY = mUhl_h.getLatCount() - 1.0;
+               lowerLeft.mCoordinate.mX = mDsi_h.getSWLatCorner();
+               lowerLeft.mCoordinate.mY = mDsi_h.getSWLongCorner();
+               gcps.push_back(lowerLeft);
+
+               GcpPoint lowerRight;
+               lowerRight.mPixel.mX = mUhl_h.getLongCount() - 1.0;
+               lowerRight.mPixel.mY = mUhl_h.getLatCount() - 1.0;
+               lowerRight.mCoordinate.mX = mDsi_h.getSELatCorner();
+               lowerRight.mCoordinate.mY = mDsi_h.getSELongCorner();
+               gcps.push_back(lowerRight);
 
                GcpPoint center;
                center.mPixel.mX = mUhl_h.getLongCount() / 2.0 - 0.5;
@@ -186,28 +190,37 @@ unsigned char DtedImporter::getFileAffinity(const string& filename)
    }
 }
 
-bool DtedImporter::validate(const DataDescriptor* pDescriptor, string& errorMessage) const
+bool DtedImporter::createRasterPager(RasterElement* pRaster) const
 {
-   bool bValid = RasterElementImporterShell::validate(pDescriptor, errorMessage);
-   if (bValid == false)
+   VERIFY(pRaster != NULL);
+   DataDescriptor *pDescriptor = pRaster->getDataDescriptor();
+   VERIFY(pDescriptor != NULL);
+   FileDescriptor *pFileDescriptor = pDescriptor->getFileDescriptor();
+   VERIFY(pFileDescriptor != NULL);
+
+   string filename = pRaster->getFilename();
+   Progress *pProgress = getProgress();
+
+   FactoryResource<Filename> pFilename;
+   pFilename->setFullPathAndName(filename);
+
+   ExecutableResource pagerPlugIn("GDAL Raster Pager", string(), pProgress);
+   pagerPlugIn->getInArgList().setPlugInArgValue(CachedPager::PagedElementArg(), pRaster);
+   pagerPlugIn->getInArgList().setPlugInArgValue(CachedPager::PagedFilenameArg(), pFilename.get());
+
+   bool success = pagerPlugIn->execute();
+
+   RasterPager *pPager = dynamic_cast<RasterPager*>(pagerPlugIn->getPlugIn());
+   if (!success || pPager == NULL)
    {
+      string message = "Execution of GDAL Raster Pager failed!";
+      if (pProgress != NULL) pProgress->updateProgress(message, 0, ERRORS);
       return false;
    }
 
-   const RasterDataDescriptor* pRasterDescriptor = dynamic_cast<const RasterDataDescriptor*>(pDescriptor);
-   if (pRasterDescriptor == NULL)
-   {
-      errorMessage = "The data descriptor is invalid!";
-      return false;
-   }
-
-   // Multiple bands
-   unsigned int numBands = pRasterDescriptor->getBandCount();
-   if (numBands > 1)
-   {
-      errorMessage = "The data must only have one band!";
-      return false;
-   }
+   pRaster->setPager(pPager);
+   pagerPlugIn->releasePlugIn();
 
    return true;
 }
+
