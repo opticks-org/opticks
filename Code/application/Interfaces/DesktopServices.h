@@ -1090,25 +1090,24 @@ public:
    /**
     *  Registers a callback to the core.
     *
-    *  Valid callback types are enumerated in TypesFile.h.
-    *  Currently, only callbacks signaling background processing
-    *  are supported.
+    *  Valid callback types are enumerated in TypesFile.h.  Currently, only
+    *  callbacks signaling background processing are supported.
     *
     *  @param   eType
     *           The type of callback to register.
-    *  @param   callback
-    *           The callback being registered.
-    *           The plug-in owns this pointer and should
-    *           delete it when finished with it.
+    *  @param   pCallback
+    *           The callback being registered.  The application assumes
+    *           ownership of the callback object and deletes it after executing
+    *           the callback.  The plug-in should not attempt to delete the
+    *           callback object itself.
     *
-    *  @return  TRUE if the callback was registered properly
-    *           FALSE if there was an error registering or if
-    *                an invalid callback type was specified
+    *  @return  Returns \c true if the callback was registered properly; returns
+    *           \c false if there was an error registering or if an invalid
+    *           callback type was specified.
     *
-    *  @see     PlugInCallbackType
-    *  @see     Executable::isBackground()
+    *  @see     PlugInCallbackType, Executable::isBackground()
     */
-   virtual bool registerCallback(PlugInCallbackType eType, PlugInCallback *callback) const = 0;
+   virtual bool registerCallback(PlugInCallbackType eType, PlugInCallback* pCallback) const = 0;
 
    /**
     *  Query the dock location of the specified DockWindow
