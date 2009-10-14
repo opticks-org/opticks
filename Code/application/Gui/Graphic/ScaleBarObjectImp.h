@@ -13,7 +13,6 @@
 #include "AttachmentPtr.h"
 #include "FilledObjectImp.h"
 #include "GraphicGroupImp.h"
-#include "GraphicProperty.h"
 #include "GraphicObjectFactory.h"
 #include "PerspectiveView.h"
 #include "RasterElement.h"
@@ -22,6 +21,7 @@
 
 class GraphicLayer;
 class GraphicGroup;
+class GraphicProperty;
 
 class ScaleBarObjectImp : public FilledObjectImp
 {
@@ -48,13 +48,12 @@ public:
 
 protected:
    void updateLayout();
-   void updateGeoreferenceAttachment();
+   void updateAttachments();
    void viewModified(Subject& subject, const std::string& signal, const boost::any& value);
    void georeferenceModified(Subject &subject, const std::string &signal, const boost::any &v);
 
 private:
    double mXgsd;
-   bool mHaveGeo;
    bool mNeedsLayout;
    AttachmentPtr<PerspectiveView> mpView;
    AttachmentPtr<RasterElement> mpGeoreference;

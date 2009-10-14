@@ -9,25 +9,22 @@
 
 #include <math.h>
 
-#include "XercesIncludes.h"
-
-#include "ScaleBarObjectImp.h"
 #include "AppAssert.h"
 #include "AppVerify.h"
-#include "DataElement.h"
 #include "DrawUtil.h"
 #include "GeoAlgorithms.h"
 #include "GeoConversions.h"
 #include "GraphicGroup.h"
 #include "GraphicLayer.h"
-#include "LayerList.h"
+#include "GraphicProperty.h"
 #include "LineObjectImp.h"
 #include "RasterElement.h"
 #include "RectangleObjectImp.h"
-#include "SpatialDataView.h"
+#include "ScaleBarObjectImp.h"
 #include "StringUtilities.h"
 #include "TextObject.h"
 #include "TextObjectImp.h"
+#include "XercesIncludes.h"
 
 #include <string>
 #include <sstream>
@@ -45,12 +42,12 @@ ScaleBarObjectImp::ScaleBarObjectImp(const string& id, GraphicObjectType type, G
                                      LocationType pixelCoord) :
    FilledObjectImp(id, type, pLayer, pixelCoord),
    mXgsd(1.0),
-   mHaveGeo(false),
    mNeedsLayout(true),
    mpGroup(GROUP_OBJECT, pLayer, pixelCoord)
 {
    addProperty("UnitSystem");
 
+   mpView.addSignal(SIGNAL_NAME(PerspectiveView, PitchChanged), Slot(this, &ScaleBarObjectImp::viewModified));
    mpGeoreference.addSignal(SIGNAL_NAME(RasterElement, GeoreferenceModified),
       Slot(this, &ScaleBarObjectImp::georeferenceModified));
 
@@ -161,31 +158,6 @@ ScaleBarObjectImp::ScaleBarObjectImp(const string& id, GraphicObjectType type, G
    mpGroup->updateBoundingBox();
    setBoundingBox(llCorner, urCorner);
    updateHandles();
-
-   // Set GSD
-   if (pLayer != NULL)
-   {
-      SpatialDataView* pView = dynamic_cast<SpatialDataView*>(pLayer->getView());
-      if (pView != NULL)
-      {
-         LayerList* pLayerList = pView->getLayerList();
-         VERIFYNRV(pLayerList != NULL);
-
-         RasterElement* pRaster = pLayerList->getPrimaryRasterElement();
-         if (pRaster != NULL && pRaster->isGeoreferenced())
-         {
-            mXgsd = GeoAlgorithms::getXaxisGSD(pRaster);
-            mHaveGeo = true;
-         }
-      }
-
-      PerspectiveView* pPerspectiveView = dynamic_cast<PerspectiveView*>(pLayer->getView());
-      if (pPerspectiveView != NULL)
-      {
-         mpView.addSignal(SIGNAL_NAME(PerspectiveView, PitchChanged), Slot(this, &ScaleBarObjectImp::viewModified));
-         mpView.reset(pPerspectiveView);
-      }
-   }
 }
 
 ScaleBarObjectImp::~ScaleBarObjectImp()
@@ -200,6 +172,7 @@ void ScaleBarObjectImp::setLayer(GraphicLayer* pLayer)
 
 void ScaleBarObjectImp::draw(double zoomFactor) const 
 {
+   const_cast<ScaleBarObjectImp*>(this)->updateAttachments();
    if (mNeedsLayout)
    {
       const_cast<ScaleBarObjectImp*>(this)->updateLayout();
@@ -247,7 +220,7 @@ void ScaleBarObjectImp::updateLayout()
    double spacingScale = 1.0;
    string unitsText = "pix";
    double unitScale = 1.0; //mXgsd is calculated in meters
-   if (mHaveGeo)
+   if (mpGeoreference.get() != NULL)
    {
       if (getUnitSystem() == UNIT_KFT)
       {
@@ -273,6 +246,10 @@ void ScaleBarObjectImp::updateLayout()
          unitScale = GeoConversions::convertMetersToMiles(1);
       }
    }
+   else
+   {
+      mXgsd = 1.0;
+   }
 
    double deltaX = urCorner.mX - llCorner.mX;
    double deltaY = urCorner.mY - llCorner.mY;
@@ -297,7 +274,7 @@ void ScaleBarObjectImp::updateLayout()
       ticksizeDistance *= 5.0;
    }
 
-   if (!mHaveGeo || getUnitSystem() == UNIT_KM || getUnitSystem() == UNIT_KFT)
+   if (mpGeoreference.get() == NULL || getUnitSystem() == UNIT_KM || getUnitSystem() == UNIT_KFT)
    {
       if (ticksizeDistance >= (1000 / 5.0)) // 5 ticks >= 1000 base units (either meters or feet)
       {
@@ -801,10 +778,10 @@ void ScaleBarObjectImp::viewModified(Subject& subject, const string& signal, con
 
 void ScaleBarObjectImp::georeferenceModified(Subject &subject, const std::string &signal, const boost::any &v)
 {
-   mNeedsLayout = true;
+   mpGeoreference.reset(NULL);
 }
 
-void ScaleBarObjectImp::updateGeoreferenceAttachment()
+void ScaleBarObjectImp::updateAttachments()
 {
    if (mpGeoreference.get() == NULL)
    {
@@ -812,7 +789,22 @@ void ScaleBarObjectImp::updateGeoreferenceAttachment()
       if (pGeoreference != NULL)
       {
          mpGeoreference.reset(const_cast<RasterElement*>(pGeoreference));
+         mXgsd = GeoAlgorithms::getXaxisGSD(pGeoreference);
          mNeedsLayout = true;
+      }
+   }
+
+   if (mpView.get() == NULL)
+   {
+      GraphicLayer* pLayer = getLayer();
+      if (pLayer != NULL)
+      {
+         PerspectiveView* pPerspectiveView = dynamic_cast<PerspectiveView*>(pLayer->getView());
+         if (pPerspectiveView != NULL)
+         {
+            mpView.reset(pPerspectiveView);
+            mNeedsLayout = true;
+         }
       }
    }
 }
