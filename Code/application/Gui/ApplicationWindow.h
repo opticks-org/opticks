@@ -18,6 +18,7 @@
 
 #include "ConfigurationSettings.h"
 #include "DynamicObject.h"
+#include "EnumWrapper.h"
 #include "GraphicGroupAdapter.h"
 #include "ImportAgent.h"
 #include "MruFile.h"
@@ -447,8 +448,21 @@ private:
    QUndoGroup* mpUndoGroup;
 
    // Drag and Drop File Import
-   std::vector<std::string> mDroppedFilesList;
-   ImportAgent::EditType mDroppedFilesEditType;
+   enum DropFilesTypeEnum
+   {
+      EXTENSION_FILE,
+      SESSION_FILE,
+      WIZARD_FILE,
+      BATCH_WIZARD_FILE,
+      DATASET_FILE
+   };
+
+   typedef EnumWrapper<DropFilesTypeEnum> DropFilesType;
+
+   std::vector<std::string> mDropFiles;
+   DropFilesType mDropFilesType;
+   ImportAgent::EditType mDropEditType;
+   bool mDropNewSession;
 
 private:
    bool isDefaultWindow(Window* pWindow) const;
@@ -467,7 +481,7 @@ private slots:
    void constructWindowMenu();
    void windowMenuActivated(QAction* pAction);
    void updateUndoActions(const std::string& oldId, const std::string& newId);
-   void importDroppedFiles();
+   void processDropFiles();
    void showToolbarsMenu();
 };
 

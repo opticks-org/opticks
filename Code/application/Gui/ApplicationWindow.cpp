@@ -168,7 +168,8 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    mpCurrentWnd(NULL),
    mpCurrentEditView(NULL),
    mpGcpEditor(NULL),
-   mpUndoGroup(new QUndoGroup(this))
+   mpUndoGroup(new QUndoGroup(this)),
+   mDropNewSession(false)
 {
    // make sure we have enough colors
    checkColorDepth(pSplash);
@@ -5164,7 +5165,6 @@ void ApplicationWindow::clearMarkings()
 
 void ApplicationWindow::forwardSnapshot()
 {
-
    ViewWindow* pViewWindow = getCurrentWorkspaceWindow();
    ViewImp* pView = dynamic_cast<ViewImp*>((pViewWindow == NULL) ? NULL : pViewWindow->getView());
    if (pView == NULL)
@@ -5222,9 +5222,18 @@ void ApplicationWindow::pregenerateTexture()
    }
 }
 
-void ApplicationWindow::dragEnterEvent(QDragEnterEvent *pEvent)
+void ApplicationWindow::dragEnterEvent(QDragEnterEvent* pEvent)
 {
-   vector<string> files;
+   if (pEvent == NULL)
+   {
+      return;
+   }
+
+   if ((pEvent->proposedAction() != Qt::CopyAction) && (pEvent->proposedAction() != Qt::MoveAction))
+   {
+      return;
+   }
+
    if (pEvent->mimeData()->hasUrls())
    {
       const QList<QUrl> urls = pEvent->mimeData()->urls();
@@ -5234,7 +5243,8 @@ void ApplicationWindow::dragEnterEvent(QDragEnterEvent *pEvent)
          string filename = url.toLocalFile().toStdString();
          if (filename.empty() == false)
          {
-            files.push_back(filename);
+            pEvent->acceptProposedAction();
+            return;
          }
       }
    }
@@ -5243,44 +5253,8 @@ void ApplicationWindow::dragEnterEvent(QDragEnterEvent *pEvent)
       QString filename = pEvent->mimeData()->text();
       if (filename.isEmpty() == false)
       {
-         QByteArray charArray = filename.toAscii();
-         for (int i=0; i<filename.length(); ++i)
-         {
-            if (charArray[i] == '\\')
-            {
-               charArray[i] = '/';
-            }
-            else if (charArray[i] == '\n' || charArray[i] == '\r')
-            {
-               charArray[i] = 0;
-               break;
-            }
-         }
-         files.push_back(charArray.data());
+         pEvent->acceptProposedAction();
       }
-   }
-   else
-   {
-      return;
-   }
-
-   if ((pEvent->proposedAction() == Qt::CopyAction) || (pEvent->proposedAction() == Qt::MoveAction))
-   {
-      if (files.size() > 1)
-      {
-         for (unsigned int i = 0; i < files.size(); ++i)
-         {
-            QFileInfo info(QString::fromStdString(files[i]));
-            QString currentSuffix = info.suffix();
-
-            if ((currentSuffix == "wiz") || (currentSuffix == "batchwiz") || (currentSuffix == "session"))
-            {
-               return;
-            }
-         }
-      }
-
-      pEvent->acceptProposedAction();
    }
 }
 
@@ -5296,7 +5270,8 @@ void ApplicationWindow::dropEvent(QDropEvent *pEvent)
       return;
    }
 
-   mDroppedFilesList.clear();
+   // Get the list of dropped files
+   mDropFiles.clear();
 
    if (pEvent->mimeData()->hasUrls())
    {
@@ -5307,7 +5282,7 @@ void ApplicationWindow::dropEvent(QDropEvent *pEvent)
          string filename = url.toLocalFile().toStdString();
          if (filename.empty() == false)
          {
-            mDroppedFilesList.push_back(filename);
+            mDropFiles.push_back(filename);
          }
       }
    }
@@ -5329,11 +5304,88 @@ void ApplicationWindow::dropEvent(QDropEvent *pEvent)
                break;
             }
          }
-         mDroppedFilesList.push_back(charArray.data());
+         mDropFiles.push_back(charArray.data());
       }
    }
 
-   pEvent->acceptProposedAction();
+   if (mDropFiles.empty() == true)
+   {
+      return;
+   }
+
+   // Get the type of files being dropped
+   mDropFilesType = DropFilesType();
+   for (vector<string>::iterator iter = mDropFiles.begin(); iter != mDropFiles.end(); ++iter)
+   {
+      QString strFilename = QString::fromStdString(*iter);
+      if (strFilename.isEmpty() == false)
+      {
+         QFileInfo info(strFilename);
+         if (info.suffix() == "aeb")            // One or more extension files
+         {
+            if ((mDropFilesType.isValid() == true) && (mDropFilesType != EXTENSION_FILE))
+            {
+               mDropFilesType = DropFilesType();
+               break;
+            }
+
+            mDropFilesType = EXTENSION_FILE;
+         }
+         else if (info.suffix() == "session")   // One session file
+         {
+            if (mDropFilesType.isValid() == true)
+            {
+               mDropFilesType = DropFilesType();
+               break;
+            }
+
+            mDropFilesType = SESSION_FILE;
+         }
+         else if (info.suffix() == "wiz")       // One wizard file
+         {
+            if (mDropFilesType.isValid() == true)
+            {
+               mDropFilesType = DropFilesType();
+               break;
+            }
+
+            mDropFilesType = WIZARD_FILE;
+         }
+         else if (info.suffix() == "batchwiz")  // One batch wizard file
+         {
+            if (mDropFilesType.isValid() == true)
+            {
+               mDropFilesType = DropFilesType();
+               break;
+            }
+
+            mDropFilesType = BATCH_WIZARD_FILE;
+         }
+         else                                   // One or more data sets
+         {
+            if ((mDropFilesType.isValid() == true) && (mDropFilesType != DATASET_FILE))
+            {
+               mDropFilesType = DropFilesType();
+               break;
+            }
+
+            mDropFilesType = DATASET_FILE;
+         }
+      }
+   }
+
+   if (mDropFilesType.isValid() == false)
+   {
+      QString msg = "Unable to load the dropped files.\n\nOnly one of the following may be dropped:\n"
+         "- One or more extension files (*.aeb)\n- One session file (*.session)\n- One wizard file (*.wiz)\n"
+         "- One batch wizard file (*.batchwiz)\n- One or more data set files (*)";
+      QMessageBox::warning(this, APP_NAME, msg);
+      return;
+   }
+
+   // Get context menu options
+   mDropEditType = ImportAgent::NEVER_EDIT;
+   mDropNewSession = false;
 
 #if defined(WIN_API)
    Qt::MouseButton contextMenuButton = Qt::RightButton;
@@ -5341,104 +5393,89 @@ void ApplicationWindow::dropEvent(QDropEvent *pEvent)
    Qt::MouseButton contextMenuButton = Qt::MidButton;
 #endif
 
-   if (mDroppedFilesList.size() == 1)
-   {
-      QString filename = QString::fromStdString(mDroppedFilesList.front());
-
-      QFileInfo info(filename);
-      if ((info.suffix() == "wiz") || (info.suffix() == "batchwiz"))
-      {
-         if (pEvent->mouseButtons() == contextMenuButton)
-         {
-            QMenu contextMenu(this);
-            QAction* pRunWizardAction = contextMenu.addAction("Run wizard in current session");
-            QAction* pRunWizardActionNewSession = contextMenu.addAction("Run wizard in new session");
-            contextMenu.addSeparator();
-            QAction *pCancel = contextMenu.addAction("Cancel");
-            contextMenu.setDefaultAction(pRunWizardAction);
-
-            QAction *pSelection = contextMenu.exec(mapToGlobal(pEvent->pos()));
-            if ((pSelection == pCancel) || (pSelection == NULL)) 
-            {
-               return;
-            }
-
-            if (pSelection == pRunWizardActionNewSession)
-            {
-               if (newSession() == false)
-               {
-                  return;
-               }
-            }
-         }
-
-         if (info.suffix() == "wiz")
-         {
-            runWizard(filename);
-         }
-         else if (info.suffix() == "batchwiz")
-         {
-            vector<string> batchFile;
-            batchFile.push_back(mDroppedFilesList.front());
-            WizardUtilities::runBatchFiles(batchFile, NULL);
-         }
-
-         return;
-      }
-      else if (info.suffix() == "session")
-      {
-         if (pEvent->mouseButtons() == contextMenuButton)
-         {
-            QMenu contextMenu(this);
-            QAction* pOpenSessionAction = contextMenu.addAction("Open session");
-            contextMenu.addSeparator();
-            contextMenu.addAction("Cancel");
-            contextMenu.setDefaultAction(pOpenSessionAction);
-
-            if (contextMenu.exec(mapToGlobal(pEvent->pos())) != pOpenSessionAction)
-            {
-               return;
-            }
-         }
-
-         openSession(filename);
-         return;
-      }
-   }
-
-   mDroppedFilesEditType = ImportAgent::NEVER_EDIT;
-
    if (pEvent->mouseButtons() == contextMenuButton)
    {
-      // Query the user for how to import the files
-      QMenu contextMenu(this);
-      QAction* pAlwaysAction = contextMenu.addAction("Import and show options dialog");
-      QAction* pAsNeededAction = contextMenu.addAction("Import and show options dialog only if needed");
-      QAction* pNeverAction = contextMenu.addAction("Import and do not show options dialog");
-      contextMenu.addSeparator();
-      contextMenu.addAction("Cancel");
-      contextMenu.setDefaultAction(pNeverAction);
+      if (mDropFilesType == EXTENSION_FILE)
+      {
+         QMenu contextMenu(this);
+         QAction* pInstallExtensionsAction = contextMenu.addAction("Install extensions");
+         contextMenu.addSeparator();
+         contextMenu.addAction("Cancel");
+         contextMenu.setDefaultAction(pInstallExtensionsAction);
 
-      QAction* pSelectedAction = contextMenu.exec(mapToGlobal(pEvent->pos()));
-      if (pSelectedAction == pAlwaysAction)
-      {
-         mDroppedFilesEditType = ImportAgent::ALWAYS_EDIT;
+         if (contextMenu.exec(mapToGlobal(pEvent->pos())) != pInstallExtensionsAction)
+         {
+            return;
+         }
       }
-      else if (pSelectedAction == pAsNeededAction)
+      else if (mDropFilesType == SESSION_FILE)
       {
-         mDroppedFilesEditType = ImportAgent::AS_NEEDED_EDIT;
+         QMenu contextMenu(this);
+         QAction* pOpenSessionAction = contextMenu.addAction("Open session");
+         contextMenu.addSeparator();
+         contextMenu.addAction("Cancel");
+         contextMenu.setDefaultAction(pOpenSessionAction);
+
+         if (contextMenu.exec(mapToGlobal(pEvent->pos())) != pOpenSessionAction)
+         {
+            return;
+         }
       }
-      else if (pSelectedAction == pNeverAction)
+      else if ((mDropFilesType == WIZARD_FILE) || (mDropFilesType == BATCH_WIZARD_FILE))
       {
-         mDroppedFilesEditType = ImportAgent::NEVER_EDIT;
+         QMenu contextMenu(this);
+         QAction* pRunWizardAction = contextMenu.addAction("Run wizard in current session");
+         QAction* pRunWizardNewSessionAction = contextMenu.addAction("Run wizard in new session");
+         contextMenu.addSeparator();
+         QAction* pCancelAction = contextMenu.addAction("Cancel");
+         contextMenu.setDefaultAction(pRunWizardAction);
+
+         QAction* pSelectedAction = contextMenu.exec(mapToGlobal(pEvent->pos()));
+         if ((pSelectedAction == pCancelAction) || (pSelectedAction == NULL))
+         {
+            return;
+         }
+
+         if (pSelectedAction == pRunWizardNewSessionAction)
+         {
+            mDropNewSession = true;
+         }
       }
-      else
+      else if (mDropFilesType == DATASET_FILE)
       {
-         return;
+         QMenu contextMenu(this);
+         QAction* pAlwaysAction = contextMenu.addAction("Import and show options dialog");
+         QAction* pAsNeededAction = contextMenu.addAction("Import and show options dialog only if needed");
+         QAction* pNeverAction = contextMenu.addAction("Import and do not show options dialog");
+         contextMenu.addSeparator();
+         contextMenu.addAction("Cancel");
+         contextMenu.setDefaultAction(pNeverAction);
+
+         QAction* pSelectedAction = contextMenu.exec(mapToGlobal(pEvent->pos()));
+         if (pSelectedAction == pAlwaysAction)
+         {
+            mDropEditType = ImportAgent::ALWAYS_EDIT;
+         }
+         else if (pSelectedAction == pAsNeededAction)
+         {
+            mDropEditType = ImportAgent::AS_NEEDED_EDIT;
+         }
+         else if (pSelectedAction == pNeverAction)
+         {
+            mDropEditType = ImportAgent::NEVER_EDIT;
+         }
+         else
+         {
+            return;
+         }
       }
    }
 
-   QTimer::singleShot(0, this, SLOT(importDroppedFiles()));
+   // Accept the drop action
+   pEvent->acceptProposedAction();
+
+   // Invoke an immediate timer so that any currently queued events are processed first
+   QTimer::singleShot(0, this, SLOT(processDropFiles()));
 }
 
 void ApplicationWindow::removeMenuCommands(const QList<QAction*>& commands)
@@ -5881,62 +5918,80 @@ bool ApplicationWindow::deserialize(SessionItemDeserializer &deserializer)
    return true;
 }
 
-void ApplicationWindow::importDroppedFiles()
+void ApplicationWindow::processDropFiles()
 {
-   // Separate the extension files from the other files
-   QList<Aeb*> extensions;
-   AebListResource extensionRes;
-   ProgressResource pProgress("Importing files...");
-   vector<string> droppedDataFiles;
-   int cnt = 0;
-   for (vector<string>::iterator it = mDroppedFilesList.begin(); it != mDroppedFilesList.end(); ++it)
+   VERIFYNRV(mDropFiles.empty() == false);
+
+   if (mDropFilesType == EXTENSION_FILE)
    {
-      pProgress->updateProgress("Checking for AEBs", ++cnt * 99 / mDroppedFilesList.size(), NORMAL);
-      if ((*it).empty() == false)
+      QList<Aeb*> extensions;
+      AebListResource extensionRes;
+      ProgressResource pProgress(APP_NAME);
+
+      for (vector<string>::size_type i = 0; i < mDropFiles.size(); ++i)
       {
-         if (QFileInfo(QString::fromStdString(*it)).suffix() == "aeb")
+         string filename = mDropFiles[i];
+         if (filename.empty() == false)
          {
+            pProgress->updateProgress("Processing extension files...", i * 100 / mDropFiles.size(), NORMAL);
+
             extensionRes.push_back(new Aeb());
             AebIo deserializer(*extensionRes.back());
-            std::string errMsg;
-            if (!deserializer.fromFile(*it, errMsg))
+
+            string errorMessage;
+            if (deserializer.fromFile(filename, errorMessage) == false)
             {
-               pProgress->updateProgress("Invalid extension bundle " + *it + "\n" + errMsg, 0, WARNING);
+               pProgress->updateProgress("Invalid extension bundle: " + filename + "\n" + errorMessage, 0, WARNING);
             }
             else
             {
                extensions.push_back(extensionRes.back());
             }
-            continue;
          }
-
-         droppedDataFiles.push_back(*it);
       }
-   }
-   pProgress->updateProgress("Finished checking for AEBs", 100, NORMAL);
 
-   // Import the data files
-   if (droppedDataFiles.empty() == false)
-   {
-      ImporterResource importer("Auto Importer", droppedDataFiles, pProgress.get(), false);
-      importer->setEditType(mDroppedFilesEditType);
-      importer->updateMruFileList(true);
+      pProgress->updateProgress("Finished processing extension files", 100, NORMAL);
 
-      if ((importer->execute() == true) && (pProgress.get() != NULL))
+      if (extensions.empty() == false)
       {
-         pProgress->updateProgress("Finished importing", 100, NORMAL);
+         InstallWizard wiz(extensions, pProgress.get(), this);
+         wiz.exec();
       }
    }
-
-   // Load the extensions
-   if (!extensions.empty())
+   else if (mDropFilesType == SESSION_FILE)
    {
-      InstallWizard wiz(extensions, pProgress.get(), this);
-      wiz.exec();
+      VERIFYNRV(mDropFiles.size() == 1);
+      openSession(QString::fromStdString(mDropFiles.front()));
    }
+   else if ((mDropFilesType == WIZARD_FILE) || (mDropFilesType == BATCH_WIZARD_FILE))
+   {
+      VERIFYNRV(mDropFiles.size() == 1);
 
-   // Clear the dropped files list
-   mDroppedFilesList.clear();
+      if (mDropNewSession == true)
+      {
+         if (newSession() == false)
+         {
+            return;
+         }
+      }
+
+      if (mDropFilesType == WIZARD_FILE)
+      {
+         runWizard(QString::fromStdString(mDropFiles.front()));
+      }
+      else
+      {
+         WizardUtilities::runBatchFiles(mDropFiles, NULL);
+      }
+   }
+   else if (mDropFilesType == DATASET_FILE)
+   {
+      ImporterResource importer("Auto Importer", mDropFiles, NULL, false);
+      importer->setEditType(mDropEditType);
+      importer->createProgressDialog(true);
+      importer->updateMruFileList(true);
+      importer->execute();
+   }
 }
 
 void ApplicationWindow::showToolbarsMenu()
