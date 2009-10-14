@@ -1265,12 +1265,12 @@ void ParagraphHgui::setData(const Aspam::ParagraphH& data, QTabWidget* pTabWidge
       pTabWidget->setTabEnabled(pTabWidget->indexOf(this), data.mLoaded);
    }
    mpLevels->setText(QString::number(data.mLevels));
-   mpSeasonalDependence->setCurrentIndex(data.mSeasonalDependence);
-   mpStratosphericAerosol->setCurrentIndex(data.mStratosphericAerosol);
-   mpOzoneProfile->setCurrentIndex(data.mOzoneProfile);
+   mpSeasonalDependence->setCurrentIndex(data.mSeasonalDependence - 1);
+   mpStratosphericAerosol->setCurrentIndex(data.mStratosphericAerosol - 1);
+   mpOzoneProfile->setCurrentIndex(data.mOzoneProfile - 1);
    mpBlpqi->setText(QString::number(data.mBoundaryLayerParameterQualityIndex));
 
-   mpPrimaryBlap->setCurrentIndex(data.mPrimaryBoundaryLayerAerosolParameter);
+   mpPrimaryBlap->setCurrentIndex(data.mPrimaryBoundaryLayerAerosolParameter - 1);
    if (data.mPrimaryBoundaryLayerAerosolParameter == 3)
    {
       mpAirParcelType->setText(QString::number(data.mAirParcelType));
@@ -1283,7 +1283,7 @@ void ParagraphHgui::setData(const Aspam::ParagraphH& data, QTabWidget* pTabWidge
    }
    mpSurfaceVisibility->setText(QString::number(data.mSurfaceVisibility));
 
-   mpAlternateBlap->setCurrentIndex(data.mAlternateBoundaryLayerAerosolParameter);
+   mpAlternateBlap->setCurrentIndex(data.mAlternateBoundaryLayerAerosolParameter - 1);
    if (data.mAlternateBoundaryLayerAerosolParameter == 3)
    {
       mpAlternateAirParcelType->setText(QString::number(data.mAlternateAirParcelType));
@@ -1301,7 +1301,7 @@ void ParagraphHgui::setData(const Aspam::ParagraphH& data, QTabWidget* pTabWidge
    int row = 0;
    for (vector<Aspam::Aerosol>::const_iterator ait = data.mAerosol.begin(); ait != data.mAerosol.end(); ++ait, ++row)
    {
-      QTableWidgetItem* pItem0 = new QTableWidgetItem(QString::number(ait->mHeight * 100) + " km MSL");
+      QTableWidgetItem* pItem0 = new QTableWidgetItem(QString::number(ait->mHeight / 100.0, 'f', 2) + " km MSL");
       QTableWidgetItem* pItem1 = new QTableWidgetItem(QString::number(ait->mPressure / 10.0) + " mb");
       QTableWidgetItem* pItem2 = new QTableWidgetItem(QString::number(ait->mTemperature / 10.0) + "°C");
       QTableWidgetItem* pItem3 = new QTableWidgetItem(QString::number(ait->mWaterVaporDensity) + " g/m^3");

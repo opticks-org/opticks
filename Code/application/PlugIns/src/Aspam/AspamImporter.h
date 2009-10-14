@@ -37,7 +37,7 @@ private:
    const char* parseParagraphA(const char* pStart);
    const char* parseParagraphB(const char* pStart);
    const char* parseParagraphD(const char* pStart);
-   const char* parseParagraphF(const char* pStart);
+   const char* parseParagraphF(const char* pStart, bool isReallyI = false);
    const char* parseParagraphG(const char* pStart);
    const char* parseParagraphH(const char* pStart);
    const char* parseParagraphJ(const char* pStart);

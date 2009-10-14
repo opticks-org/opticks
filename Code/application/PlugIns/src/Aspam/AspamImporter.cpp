@@ -606,13 +606,13 @@ const char* AspamImporter::parseParagraphD(const char* pStart)
    return pStop;
 }
 
-const char* AspamImporter::parseParagraphF(const char* pStart)
+const char* AspamImporter::parseParagraphF(const char* pStart, bool isReallyI)
 {
    Aspam::ParagraphF paragraphF;
    MessageResource pMsg("Paragraph F", "app", "293B5D84-CE8D-4891-8E3E-DC7B67F11878");
    bool success = false;
 
-   const char* pParagraphStart = findParagraphStart(pStart, "F.");
+   const char* pParagraphStart = findParagraphStart(pStart, isReallyI ? "I." : "F.");
    if (pParagraphStart != NULL)
    {
       pStart = pParagraphStart;
@@ -624,7 +624,7 @@ const char* AspamImporter::parseParagraphF(const char* pStart)
 
    stringstream sstr(pStart);
 
-   if (checkForToken(sstr, "F.", true) && 
+   if (checkForToken(sstr, isReallyI ? "I." : "F.", true) && 
      (checkForToken(sstr, "WINDS, TEMPERATURE, ABS HUMIDITY, DENSITY, PRESSURE -", true) ||
       checkForToken(sstr, "WINDS, TEMPERATURE, ABS HUMIDITY. DENSITY, PRESSURE -", true) ||
       checkForToken(sstr, "WINDS, TEMPERATURE, ABS HUMIDITY, DENSITY, PRESSURE")))
@@ -639,7 +639,7 @@ const char* AspamImporter::parseParagraphF(const char* pStart)
          string buf;
          getline(sstr, buf);
 
-         if (checkForToken(sstr, "F", true))
+         if (checkForToken(sstr, "F", true) || checkForToken(sstr, "M", true))
          {
             //need to check for MSL as well as AGL
             sstr >> paragraphF.mLevel;
@@ -657,6 +657,11 @@ const char* AspamImporter::parseParagraphF(const char* pStart)
             {
                data.mHeight = 0;
                data.mUnits = 'M';
+            }
+            else if (checkForToken(sstr, "0H", true))
+            {
+               data.mHeight = 0;
+               data.mUnits = 'H';
             }
             else
             {
@@ -784,7 +789,7 @@ const char* AspamImporter::parseParagraphH(const char* pStart)
    {
       streampos sstrPosition(sstr.tellg());
       char dummy;
-      const char pCheckString[] = "VERTICALPROFILEINFORMATION";
+      const char pCheckString[] = "TARGETVERTICALPROFILEINFORMATION";
       for (size_t i = 0; foundH && i < strlen(pCheckString); i++)
       {
          sstr >> dummy;
@@ -807,9 +812,16 @@ const char* AspamImporter::parseParagraphH(const char* pStart)
       {
          readFixedLength(sstr, paragraphH.mAirParcelType, 2);
       }
-      else if (sstr.get() != ' ') // get the space
+      else
       {
-         sstr.unget();
+         if (sstr.get() != ' ') // get the space
+         {
+            sstr.unget();
+         }
+         if (sstr.get() != ' ') // get the space
+         {
+            sstr.unget();
+         }
       }
       readFixedLength(sstr, paragraphH.mSeasonalDependence, 1);
       readFixedLength(sstr, paragraphH.mStratosphericAerosol, 1);
@@ -841,7 +853,18 @@ const char* AspamImporter::parseParagraphH(const char* pStart)
             {
                stringstream lineStr(line);
                Aspam::Aerosol aerosol;
-               lineStr >> aerosol.mHeight >> aerosol.mPressure >> aerosol.mTemperature >>
+               // eat a space if it exists
+               if (lineStr.get() != ' ')
+               {
+                  lineStr.unget();
+               }
+               // read a fixed length field...this must be a fixed length
+               // read as this may butt against the next column without
+               // a space. I don't currently know the length of the other
+               // fields (the standard is ambiguous) so they remain numeric
+               // reads until we have more information
+               readFixedLength(lineStr, aerosol.mHeight, 5);
+               lineStr >> aerosol.mPressure >> aerosol.mTemperature >>
                   aerosol.mWaterVaporDensity >> aerosol.mAlternateTemperature >> aerosol.mAlternateWaterVaporDensity;
                long location;
                lineStr >> location;
@@ -1041,6 +1064,13 @@ bool AspamImporter::deserialize(FILE* pFp)
    pParseLocation = parseParagraphF(pParseLocation);
    pParseLocation = parseParagraphG(pParseLocation);
    pParseLocation = parseParagraphH(pParseLocation);
+   if (!mpAspam->getParagraphF().mLoaded)
+   {
+      // attempt to load paragraph I
+      // I and F are identical and should be mutually exclusive
+      // if for some reason both are present, F takes pecedent
+      pParseLocation = parseParagraphF(pParseLocation, true);
+   }
    pParseLocation = parseParagraphJ(pParseLocation);
 
    // Skip any remaining whitespace
