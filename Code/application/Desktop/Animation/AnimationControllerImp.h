@@ -118,6 +118,7 @@ signals:
    void bumperStopChanged(double newValue);
 
 protected:
+   bool insertAnimation(Animation* pAnimation);
    void removeAnimation(Animation* pAnimation);
 
 protected slots:

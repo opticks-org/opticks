@@ -38,6 +38,7 @@
 #include "xmlreader.h"
 #include "xmlwriter.h"
 
+#include <algorithm>
 #include <limits>
 #include <list>
 #include <fstream>
@@ -278,12 +279,11 @@ Animation* AnimationControllerImp::createAnimation(const QString& strName)
       string movieName = strName.toStdString();
       pAnimation->setName(movieName);
 
-      connect(pAnimation, SIGNAL(framesChanged(const std::vector<AnimationFrame>&)), this, SLOT(updateFrameData()));
-      connect(pAnimation, SIGNAL(objectDetached()), this, SLOT(destroyAnimation()));
-      mAnimations.push_back(pAnimation);
-      pAnimation->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &AnimationControllerImp::movieDeleted));
-      emit animationAdded(pAnimation);
-      notify(SIGNAL_NAME(AnimationController, AnimationAdded), boost::any(static_cast<Animation*>(pAnimation)));
+      if (insertAnimation(pAnimation) == false)
+      {
+         delete pAnimation;
+         pAnimation = NULL;
+      }
    }
 
    return pAnimation;
@@ -703,6 +703,38 @@ void AnimationControllerImp::fastRewind(double multiplier)
    setIntervalMultiplier(multiplier);
    setAnimationState(PLAY_BACKWARD);
    play();
+}
+
+bool AnimationControllerImp::insertAnimation(Animation* pAnimation)
+{
+   if (pAnimation == NULL)
+   {
+      return false;
+   }
+
+   if (find(mAnimations.begin(), mAnimations.end(), pAnimation) != mAnimations.end())
+   {
+      return false;
+   }
+
+   QString animationName = QString::fromStdString(pAnimation->getName());
+   if (hasAnimation(animationName) == true)
+   {
+      return false;
+   }
+
+   AnimationImp* pAnimationImp = dynamic_cast<AnimationImp*>(pAnimation);
+   VERIFY(pAnimationImp != NULL);
+
+   VERIFY(connect(pAnimationImp, SIGNAL(framesChanged(const std::vector<AnimationFrame>&)), this,
+      SLOT(updateFrameData())));
+   VERIFY(connect(pAnimationImp, SIGNAL(objectDetached()), this, SLOT(destroyAnimation())));
+   mAnimations.push_back(pAnimation);
+   pAnimation->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &AnimationControllerImp::movieDeleted));
+   emit animationAdded(pAnimation);
+   notify(SIGNAL_NAME(AnimationController, AnimationAdded), boost::any(pAnimation));
+
+   return true;
 }
 
 void AnimationControllerImp::removeAnimation(Animation* pAnimation)
@@ -1168,15 +1200,11 @@ bool AnimationControllerImp::deserialize(SessionItemDeserializer &deserializer)
       {
          DOMElement* pElement(static_cast<DOMElement*>(pNode));
          string id = A(pElement->getAttribute(X("id")));
-         AnimationImp* pAnimation = dynamic_cast<AnimationImp*>(Service<SessionManager>()->getSessionItem(id));
-         if (pAnimation == NULL)
+         Animation* pAnimation = dynamic_cast<Animation*>(Service<SessionManager>()->getSessionItem(id));
+         if ((pAnimation == NULL) || (insertAnimation(pAnimation) == false))
          {
             return false;
          }
-         connect(pAnimation, SIGNAL(framesChanged(const std::vector<AnimationFrame>&)), this, SLOT(updateFrameData()));
-         connect(pAnimation, SIGNAL(objectDetached()), this, SLOT(destroyAnimation()));
-         mAnimations.push_back(dynamic_cast<Animation*>(pAnimation));
-         pAnimation->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &AnimationControllerImp::movieDeleted));
       }
    }
    setCurrentFrame(mCurrentFrame);
