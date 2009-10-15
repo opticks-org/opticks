@@ -693,8 +693,15 @@ bool ImportAgentImp::execute()
             pProgress->getProgress(text, percent, gran);
             if (gran != ABORT)
             {
-               string message = "The '" + mpElement->getName() + "' data set failed to load!";
-               pProgress->updateProgress(message, 0, WARNING);
+               if (gran == NORMAL)
+               {
+                  // Set at least a warning to keep the message visible.
+                  // If ERRORS use that instead because changing it to WARNING will cause the dialog to not close.
+                  gran = WARNING;
+               }
+
+               string message = "The '" + mpElement->getName() + "' data set failed to load.";
+               pProgress->updateProgress(message, 0, gran);
             }
          }
          pModel->destroyElement(mpElement);
@@ -724,6 +731,10 @@ bool ImportAgentImp::execute()
    if (success == true)
    {
       updateMruFileList(importedDescriptors);
+      if (pProgress != NULL)
+      {
+         pProgress->updateProgress("Finished importing", 100, NORMAL);
+      }
    }
 
    return success;
