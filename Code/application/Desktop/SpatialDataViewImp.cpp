@@ -343,46 +343,8 @@ SpatialDataViewImp::SpatialDataViewImp(const string& id, const string& viewName,
 SpatialDataViewImp::~SpatialDataViewImp()
 {
    // Clean up the layers
-   if (mpLayerList != NULL)
-   {
-      // Disconnect and detach the layers and their elements but do not
-      // delete the layers to prevent default layers from being created
-      vector<Layer*> layers;
-      mpLayerList->getLayers(layers);
-
-      for (unsigned int i = 0; i < layers.size(); i++)
-      {
-         Layer* pLayer = layers[i];
-         if (pLayer != NULL)
-         {
-            // Disconnect
-            LayerImp* pLayerImp = dynamic_cast<LayerImp*> (pLayer);
-            if (pLayerImp != NULL)
-            {
-               VERIFYNR(disconnect(pLayerImp, SIGNAL(modified()), this, SLOT(refresh())));
-               VERIFYNR(disconnect(pLayerImp, SIGNAL(modified()), this, SLOT(notifyLayerModified())));
-            }
-
-            RasterLayerImp* pRasterLayer = dynamic_cast<RasterLayerImp*>(pLayer);
-            if (pRasterLayer != NULL)
-            {
-               VERIFYNR(disconnect(pRasterLayer, SIGNAL(displayedBandChanged(RasterChannelType, DimensionDescriptor)),
-                  this, SLOT(updateStatusBar())));
-            }
-
-            // Detach the element
-            DataElement* pElement = pLayer->getDataElement();
-            if (pElement != NULL)
-            {
-               pElement->detach(SIGNAL_NAME(Subject, Modified), Slot(this, &SpatialDataViewImp::elementModified));
-               pElement->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &SpatialDataViewImp::elementDeleted));
-            }
-         }
-      }
-
-      // Destroy the layer list, which destroys the layers
-      delete mpLayerList;
-   }
+   clear();
+   delete mpLayerList;
 
    // Destroy the measurements layer
    if (mpMeasurementsLayer != NULL)
@@ -1257,14 +1219,28 @@ void SpatialDataViewImp::clear()
    vector<Layer*> layers;
    mpLayerList->getLayers(layers);
 
-   for (unsigned int i = 0; i < layers.size(); i++)
+   // Delete the primary raster element last in case other layers are deleted as a result
+   Layer* pPrimaryRasterLayer = NULL;
+   for (vector<Layer*>::iterator iter = layers.begin(); iter != layers.end(); ++iter)
    {
-      Layer* pLayer = NULL;
-      pLayer = layers.at(i);
+      Layer* pLayer = *iter;
       if (pLayer != NULL)
       {
-         deleteLayer(pLayer);
+         DataElement* pElement = pLayer->getDataElement();
+         if (pElement != mpLayerList->getPrimaryRasterElement())
+         {
+            deleteLayer(pLayer);
+         }
+         else
+         {
+            pPrimaryRasterLayer = pLayer;
+         }
       }
+   }
+
+   if (pPrimaryRasterLayer != NULL)
+   {
+      deleteLayer(pPrimaryRasterLayer);
    }
 }
 
