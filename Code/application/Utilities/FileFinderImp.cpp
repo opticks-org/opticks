@@ -11,7 +11,6 @@
 #include "DateTimeImp.h"
 #include "FileFinderImp.h"
 #include "FilenameImp.h"
-#include "TimeStruct.h"
 #include <QtCore/QDateTime>
 
 #if defined(WIN_API)

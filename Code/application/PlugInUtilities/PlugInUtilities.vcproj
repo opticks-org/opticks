@@ -2087,10 +2087,6 @@
 				RelativePath=".\TestDataPath.h"
 				>
 			</File>
-			<File
-				RelativePath=".\TimeStruct.h"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="moc"
@@ -3180,6 +3176,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Interfaces\TimeUtilities.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Interfaces\TypeConverter.h"
 				>
 			</File>
@@ -3689,7 +3689,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\TimeStruct.cpp"
+				RelativePath=".\TimeUtilities.cpp"
 				>
 			</File>
 			<File

@@ -9,7 +9,7 @@
 
 #include "AppConfig.h"
 #include "DateTimeImp.h"
-#include "TimeStruct.h"
+#include "TimeUtilities.h"
 
 #include <locale>
 #include <sstream>
@@ -29,7 +29,7 @@ DateTimeImp::DateTimeImp(const DateTimeImp& rhs)
 }
 
 DateTimeImp::DateTimeImp(const time_t& fromTime) :
-   mTime(static_cast<unsigned int>(fromTime) + TimeStruct::TimeScaleOffset),
+   mTime(static_cast<unsigned int>(fromTime) + TimeUtilities::TimeScaleOffset),
    mOnlyDateIsValid(false)
 {
 }
@@ -82,7 +82,7 @@ string DateTimeImp::getFormattedLocal(const string& fmt) const
    int64_t timezoneOffset = 0;
 
    time_t utc1970Time = 0;
-   if (mTime >= TimeStruct::TimeScaleOffset)
+   if (mTime >= TimeUtilities::TimeScaleOffset)
    {
       utc1970Time = getStructured();
    }
@@ -95,33 +95,32 @@ string DateTimeImp::getFormattedLocal(const string& fmt) const
       utc1970Time = tempDate.getStructured();
    }
 
-   struct tm* pLocalTime = NULL;
-   pLocalTime = localtime(&utc1970Time);
+   struct tm* pLocalTime = localtime(&utc1970Time);
    if (pLocalTime != NULL)
    {
-      int64_t local1970Time = TimeStruct::ToSam(pLocalTime) - TimeStruct::TimeScaleOffset;
+      int64_t local1970Time = TimeUtilities::timeStructToSecondsFrom1940(*pLocalTime) - TimeUtilities::TimeScaleOffset;
       timezoneOffset = local1970Time - utc1970Time;
    }
 
-   struct tm* pTimeStruct = TimeStruct::FromSam(static_cast<unsigned int> (mTime + timezoneOffset));
+   struct tm timeStruct = TimeUtilities::secondsFrom1940ToTimeStruct(static_cast<unsigned int>(mTime + timezoneOffset));
    char buff[255];
 
-   strftime(buff, sizeof(buff), fmt.c_str(), pTimeStruct);
+   strftime(buff, sizeof(buff), fmt.c_str(), &timeStruct);
    return string(buff);
 }
 
 string DateTimeImp::getFormattedUtc(const string& fmt) const
 {
-   struct tm* pTimeStruct = TimeStruct::FromSam(mTime);
+   struct tm timeStruct = TimeUtilities::secondsFrom1940ToTimeStruct(mTime);
    char buff[255];
 
-   strftime(buff, sizeof(buff), fmt.c_str(), pTimeStruct);
+   strftime(buff, sizeof(buff), fmt.c_str(), &timeStruct);
    return string(buff);
 }
 
 time_t DateTimeImp::getStructured() const
 {
-   return mTime - TimeStruct::TimeScaleOffset;
+   return mTime - TimeUtilities::TimeScaleOffset;
 }
 
 double DateTimeImp::getSecondsSince(const DateTime& other) const
@@ -132,7 +131,7 @@ double DateTimeImp::getSecondsSince(const DateTime& other) const
 
 void DateTimeImp::setStructured(time_t fromTime)
 {
-   mTime = static_cast<unsigned int>(fromTime) + TimeStruct::TimeScaleOffset;
+   mTime = static_cast<unsigned int>(fromTime) + TimeUtilities::TimeScaleOffset;
    mOnlyDateIsValid = false;
 }
 
@@ -141,7 +140,7 @@ void DateTimeImp::setToCurrentTime()
    time_t lTime = mTime;
    time(&lTime);
 
-   mTime = static_cast<unsigned int>(lTime + TimeStruct::TimeScaleOffset);
+   mTime = static_cast<unsigned int>(lTime + TimeUtilities::TimeScaleOffset);
    mOnlyDateIsValid = false;
 }
 
@@ -194,7 +193,7 @@ bool DateTimeImp::set(unsigned short year, unsigned short month, unsigned short 
    tStruct.tm_wday = 0;
    tStruct.tm_yday = 0;
 
-   mTime = TimeStruct::ToSam(&tStruct);
+   mTime = TimeUtilities::timeStructToSecondsFrom1940(tStruct);
    mOnlyDateIsValid = false;
    return true;
 }
