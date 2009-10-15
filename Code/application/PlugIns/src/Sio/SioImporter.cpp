@@ -10,7 +10,6 @@
 #include <sys/stat.h>
 
 #include "AppVersion.h"
-#include "SioImporter.h"
 #include "DimensionDescriptor.h"
 #include "Endian.h"
 #include "FileResource.h"
@@ -28,9 +27,10 @@
 #include "RasterFileDescriptor.h"
 #include "RasterUtilities.h"
 #include "Sio.h"
+#include "SioImporter.h"
 #include "SpecialMetadata.h"
 #include "Statistics.h"
-#include "TestDataPath.h"
+#include "TestUtilities.h"
 #include "Units.h"
 
 using namespace std;
@@ -585,21 +585,6 @@ bool SioImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
    return RasterElementImporterShell::execute(pInArgList, pOutArgList);
 }
 
-bool assertionLogger(std::ostream &outputer, std::string code, std::string file, int line)
-{
-   outputer << "Assertion failed: '" << code << "', File: " << file << ", Line: " << line << std::endl;
-   return false;
-}
-
-#define testableAssert(outputer,code) \
-((code) ? true : assertionLogger(outputer, #code, __FILE__, __LINE__))
-
-#define issea(outputer,x) \
-   if (success) \
-   { \
-      success &= testableAssert(outputer, x); \
-   }
-
 bool SioImporter::runOperationalTests(Progress *pProgress, std::ostream& failure)
 {
    return true;
@@ -611,12 +596,12 @@ bool SioImporter::ensureStatisticsReadProperly(Progress *pProgress, std::ostream
    success &= setBatch();
    PlugInArgList* pInList = NULL;
    PlugInArgList* pOutList = NULL;
-   issea(failure, getInputSpecification(pInList) != false);
-   issea(failure, getOutputSpecification(pOutList) != false);
+   isseas(getInputSpecification(pInList) != false, failure);
+   isseas(getOutputSpecification(pOutList) != false, failure);
    PlugInArg* pRasterElementArg = NULL;
-   issea(failure, pInList->getArg(ImportElementArg(), pRasterElementArg) != false);
+   isseas(pInList->getArg(ImportElementArg(), pRasterElementArg) != false, failure);
 
-   string testFilePath = getTestDataPath() + "tipjul5bands.sio";
+   string testFilePath = TestUtilities::getTestDataPath() + "tipjul5bands.sio";
 
    RasterElement* pRasterElement = NULL;
    if (success)
@@ -641,15 +626,15 @@ bool SioImporter::ensureStatisticsReadProperly(Progress *pProgress, std::ostream
       }
    }
 
-   issea(failure, execute(pInList, pOutList) != false);
-   issea(failure, pRasterElement != NULL);
+   isseas(execute(pInList, pOutList) != false, failure);
+   isseas(pRasterElement != NULL, failure);
    if (success)
    {
       RasterDataDescriptor* pDescriptor = dynamic_cast<RasterDataDescriptor*>(pRasterElement->getDataDescriptor());
-      issea(failure, pDescriptor != NULL);
+      isseas(pDescriptor != NULL, failure);
 
       const vector<DimensionDescriptor>& loadedBands = pDescriptor->getBands();
-      issea(failure, loadedBands.size() == 5);
+      isseas(loadedBands.size() == 5, failure);
       int iNumBandsWithStats = 0;
       for (int i = 0; i < 5; ++i)
       {
@@ -668,7 +653,7 @@ bool SioImporter::ensureStatisticsReadProperly(Progress *pProgress, std::ostream
       }
 
       // success of the band computation is dependent on 4 bands with statistics
-      issea(failure, iNumBandsWithStats == 3);
+      isseas(iNumBandsWithStats == 3, failure);
    }
    if (pRasterElement != NULL)
    {

@@ -10,8 +10,8 @@
 #include <hdf5.h>
 
 #include "ApplicationServices.h"
-#include "AppVerify.h"
 #include "AppConfig.h"
+#include "AppVerify.h"
 #include "AppVersion.h"
 #include "DesktopServices.h"
 #include "DynamicObject.h"
@@ -31,7 +31,7 @@
 #include "RasterElement.h"
 #include "RasterFileDescriptor.h"
 #include "RasterUtilities.h"
-#include "TestDataPath.h"
+#include "TestUtilities.h"
 #include "TypesFile.h"
 #include "UInt64.h"
 
@@ -215,7 +215,7 @@ bool GenericHdf5Importer::runAllTests(Progress* pProgress, std::ostream& failure
    VERIFY(pModel.get() != NULL);
 
    // test accessing an HDF4/HDF4-EOS file
-   string testFile = getTestDataPath() + "EO1H1690362003147110PM.L1R";
+   string testFile = TestUtilities::getTestDataPath() + "EO1H1690362003147110PM.L1R";
 
    auto_ptr<Hdf5File> pFile(new Hdf5File(testFile));
    VERIFY(pFile.get() != NULL);
@@ -224,7 +224,7 @@ bool GenericHdf5Importer::runAllTests(Progress* pProgress, std::ostream& failure
    Hdf5FileResource h5f(testFile);
    VERIFY(h5f.get() != NULL && *h5f == -1); // not HDF5!
 
-   testFile = getTestDataPath() + "Hdf/small.h5";
+   testFile = TestUtilities::getTestDataPath() + "Hdf/small.h5";
 
    Hdf5File* pHdfFile = new Hdf5File(testFile);
    pFile = auto_ptr<Hdf5File>(pHdfFile);

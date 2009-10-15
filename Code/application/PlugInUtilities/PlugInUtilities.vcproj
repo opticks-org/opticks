@@ -2083,10 +2083,6 @@
 				RelativePath=".\SystemServicesImp.h"
 				>
 			</File>
-			<File
-				RelativePath=".\TestDataPath.h"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="moc"
@@ -3176,6 +3172,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Interfaces\TestUtilities.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Interfaces\TimeUtilities.h"
 				>
 			</File>
@@ -3686,6 +3686,10 @@
 			</File>
 			<File
 				RelativePath=".\SystemServicesImp.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\TestUtilities.cpp"
 				>
 			</File>
 			<File

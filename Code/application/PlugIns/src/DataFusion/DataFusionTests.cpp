@@ -10,11 +10,10 @@
 #include <QtCore/QString>
 
 #include "AppConfig.h"
-#include "DataFusionTests.h"
-#include "Classification.h"
 #include "AppVerify.h"
-#include "ConfigurationSettings.h"
+#include "Classification.h"
 #include "DataFusion.h"
+#include "DataFusionTests.h"
 #include "DataFusionTools.h"
 #include "DateTime.h"
 #include "DimensionDescriptor.h"
@@ -24,9 +23,9 @@
 #include "Polywarp.h"
 #include "Progress.h"
 #include "ProgressTracker.h"
-#include "RasterElement.h"
 #include "RasterDataDescriptor.h"
-#include "TestDataPath.h"
+#include "RasterElement.h"
+#include "TestUtilities.h"
 
 #include <iostream>
 #include <fstream>
@@ -449,7 +448,7 @@ bool Poly2DTests::runTest(string inputFile, string outputFile, string testName,
                           const Vector<double>& kX, const Vector<double>& kY,
                           unsigned int nx, unsigned int ny, unsigned int newx, unsigned int newy)
 {
-   string fullPath = getTestDataPath() + "/DataFusion/";
+   string fullPath = TestUtilities::getTestDataPath() + "DataFusion/";
    inputFile = fullPath + inputFile;
 
    Service<ModelServices> pModel;

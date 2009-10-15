@@ -8,9 +8,8 @@
  */
 
 #include "AppConfig.h"
-
-#include "AppVersion.h"
 #include "AppVerify.h"
+#include "AppVersion.h"
 #include "DimensionDescriptor.h"
 #include "DynamicObject.h"
 #include "Endian.h"
@@ -31,11 +30,10 @@
 #include "SpecialMetadata.h"
 #include "StringUtilities.h"
 #include "switchOnEncoding.h"
-#include "TestDataPath.h"
+#include "TestUtilities.h"
 
 #include <algorithm>
 #include <vector>
-
 using namespace std;
 
 template <class T>
@@ -407,7 +405,7 @@ bool HyperionImporter::runOperationalTests(Progress* pProgress, ostream& failure
 bool HyperionImporter::runAllTests(Progress* pProgress, ostream& failure)
 {
    // test accessing an HDF4/HDF4-EOS file
-   const string testFile = getTestDataPath() + "EO1H1690362003147110PM.L1R";
+   const string testFile = TestUtilities::getTestDataPath() + "EO1H1690362003147110PM.L1R";
 
    Hdf4File file(testFile);
    VERIFY(getFileData(file));

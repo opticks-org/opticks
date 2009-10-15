@@ -39,7 +39,6 @@
 #include "SpatialDataView.h"
 #include "SpecialMetadata.h"
 #include "StringUtilities.h"
-#include "TestDataPath.h"
 #include "TypesFile.h"
 
 #include <ossim/base/ossimConstants.h>
