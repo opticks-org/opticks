@@ -801,12 +801,6 @@ string ResultsExporter::getLocationString(unsigned int uiRow, unsigned int uiCol
    return location;
 }
 
-bool assertionLogger(ostream &outputer, string code, string file, int line)
-{
-   outputer << "Assertion failed: '" << code << "', File: " << file << ", Line: " << line << endl;
-   return false;
-}
-
 bool ResultsExporter::runOperationalTests(Progress* pProgress, ostream& failure)
 {
    return runAllTests(pProgress, failure);

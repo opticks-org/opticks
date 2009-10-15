@@ -1476,10 +1476,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\mathVector.h"
-				>
-			</File>
-			<File
 				RelativePath=".\MetadataFilterDlg.h"
 				>
 				<FileConfiguration
@@ -2093,10 +2089,6 @@
 			</File>
 			<File
 				RelativePath=".\TimeStruct.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ValueRange.h"
 				>
 			</File>
 		</Filter>

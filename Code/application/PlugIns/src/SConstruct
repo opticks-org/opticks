@@ -126,7 +126,6 @@ incdirs = [".",
            "$COREDIR/Interfaces",
            "$COREDIR/PlugInLib",
            "$COREDIR/PlugInUtilities",
-           "$COREDIR/PlugInUtilities/MathUtilities",
            "$COREDIR/PlugInUtilities/Interfaces",
            "$COREDIR/PlugInUtilities/pthreads-wrapper"]
 env.Append(CPPPATH=incdirs)

@@ -86,7 +86,6 @@ libdirs = ["Desktop",
 incdirs = map(lambda x: "#/" + x, libdirs) + \
           ["#/Interfaces",
            "#/PlugInUtilities/pthreads-wrapper",
-           "#/PlugInUtilities/MathUtilities",
            "#/PlugInUtilities/Interfaces"]
 env.Append(CPPPATH=incdirs)
 if len(env["CACHEDIR"]) > 0:

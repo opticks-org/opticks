@@ -24,7 +24,6 @@
 #include "ThresholdLayerImp.h"
 #include "ThresholdLayerUndo.h"
 #include "UtilityServices.h"
-#include "ValueRange.h"
 #include "View.h"
 
 #include <vector>
@@ -34,22 +33,56 @@ XERCES_CPP_NAMESPACE_USE
 
 unsigned int ThresholdLayerImp::msThresholdLayers = 0;
 
-template<class PassArea, class T>
-class PixelOper
+template<class T>
+class ThresholdPixelOper
 {
 public:
-   PixelOper(const T* pData, int rows, int cols, const PassArea& passArea,
+   ThresholdPixelOper(const T* pData, int rows, int cols, double lower, double upper, PassArea passArea,
              const vector<int>& badValues = vector<int>()) :
       mpData(pData),
       mRows(rows),
       mCols(cols),
+      mLower(lower),
+      mUpper(upper),
       mPassArea(passArea),
-      mBadValues(badValues) {}
+      mBadValues(badValues)
+   {}
 
    inline bool operator()(int row, int col) const
    {
       double value = ModelServices::getDataValue(*const_cast<T*>(mpData + (row * mCols + col)), COMPLEX_MAGNITUDE);
-      bool passed = mPassArea.contains(value);
+
+      bool passed = false;
+      switch (mPassArea)
+      {
+      case LOWER:
+         if (value <= mLower)
+         {
+            passed = true;
+         }
+         break;
+      case UPPER:
+         if (value >= mLower)
+         {
+            passed = true;
+         }
+         break;
+      case MIDDLE:
+         if ((value >= mLower) && (value <= mUpper))
+         {
+            passed = true;
+         }
+         break;
+      case OUTSIDE:
+         if ((value <= mLower) || (value >= mUpper))
+         {
+            passed = true;
+         }
+         break;
+      default:
+         break;
+      }
+
       if (passed)
       {
          if (find(mBadValues.begin(), mBadValues.end(), roundDouble(value)) != mBadValues.end())
@@ -64,7 +97,9 @@ private:
    const T* mpData;
    int mRows;
    int mCols;
-   const PassArea& mPassArea;
+   double mLower;
+   double mUpper;
+   PassArea mPassArea;
    vector<int> mBadValues;
 };
 
@@ -177,20 +212,20 @@ vector<ColorType> ThresholdLayerImp::getColors() const
    return colors;
 }
 
-template<class T, class PassArea>
+template<class T>
 void drawMarkers(T* pData, int stopColumn, int stopRow, int visStartColumn, int visStartRow, int visEndColumn,
-                 int visEndRow, SymbolType eSymbol, QColor clrMarker, const PassArea& area,
+                 int visEndRow, SymbolType eSymbol, QColor clrMarker, double lower, double upper, PassArea passArea,
                  const vector<int>& badValues, int row = -1)
 {
    if (row < 0) // in memory so process all rows
    {
-      PixelOper<PassArea, T> oper(pData, stopRow + 1, stopColumn + 1, area, badValues);
+      ThresholdPixelOper<T> oper(pData, stopRow + 1, stopColumn + 1, lower, upper, passArea, badValues);
       SymbolRegionDrawer::drawMarkers(0, 0, stopColumn, stopRow, visStartColumn, visStartRow, visEndColumn,
          visEndRow, eSymbol, clrMarker, oper);
    }
    else // on disk so being processed one row at a time
    {
-      PixelOper<PassArea, T> oper(pData, 1, 0, area, badValues);
+      ThresholdPixelOper<T> oper(pData, 1, 0, lower, upper, passArea, badValues);
       SymbolRegionDrawer::drawMarkers(0, row, stopColumn, row, visStartColumn, visStartRow, visEndColumn,
          visEndRow, eSymbol, clrMarker, oper);
    }
@@ -262,77 +297,15 @@ void ThresholdLayerImp::draw()
             }
 
             pData = accessor->getColumn();
-            switch (mePassArea)
-            {
-            case LOWER:
-               {
-                  PassAreaType::Below passArea(firstThreshold);
-                  switchOnEncoding(eType, drawMarkers, pData, columns - 1, row, visStartColumn, row, visEndColumn,
-                     row, eSymbol, clrMarker, passArea, badValues, row);
-                  break;
-               }
-            case UPPER:
-               {
-                  PassAreaType::Above passArea(firstThreshold);
-                  switchOnEncoding(eType, drawMarkers, pData, columns - 1, row, visStartColumn, row, visEndColumn,
-                     row, eSymbol, clrMarker, passArea, badValues, row);
-                  break;
-               }
-            case MIDDLE:
-               {
-                  PassAreaType::Between passArea(firstThreshold, secondThreshold);
-                  switchOnEncoding(eType, drawMarkers, pData, columns - 1, row, visStartColumn, row, visEndColumn,
-                     row, eSymbol, clrMarker, passArea, badValues, row);
-                  break;
-               }
-            case OUTSIDE:
-               {
-                  PassAreaType::Outside passArea(firstThreshold, secondThreshold);
-                  switchOnEncoding(eType, drawMarkers, pData, columns - 1, row, visStartColumn, row, visEndColumn,
-                     row, eSymbol, clrMarker, passArea, badValues, row);
-                  break;
-               }
-            default:
-               break;
-            }
+            switchOnEncoding(eType, drawMarkers, pData, columns - 1, row, visStartColumn, row, visEndColumn,
+               row, eSymbol, clrMarker, firstThreshold, secondThreshold, mePassArea, badValues, row);
             accessor->nextRow();
          }
       }
       else
       {
-         switch (mePassArea)
-         {
-            case LOWER:
-            {
-               PassAreaType::Below passArea(firstThreshold);
-               switchOnEncoding(eType, drawMarkers, pData, columns - 1, rows - 1, visStartColumn, visStartRow,
-                  visEndColumn, visEndRow, eSymbol, clrMarker, passArea, badValues);
-               break;
-            }
-            case UPPER:
-            {
-               PassAreaType::Above passArea(firstThreshold);
-               switchOnEncoding(eType, drawMarkers, pData, columns - 1, rows - 1, visStartColumn, visStartRow,
-                  visEndColumn, visEndRow, eSymbol, clrMarker, passArea, badValues);
-               break;
-            }
-            case MIDDLE:
-            {
-               PassAreaType::Between passArea(firstThreshold, secondThreshold);
-               switchOnEncoding(eType, drawMarkers, pData, columns - 1, rows - 1, visStartColumn, visStartRow,
-                  visEndColumn, visEndRow, eSymbol, clrMarker, passArea, badValues);
-               break;
-            }
-            case OUTSIDE:
-            {
-               PassAreaType::Outside passArea(firstThreshold, secondThreshold);
-               switchOnEncoding(eType, drawMarkers, pData, columns - 1, rows - 1, visStartColumn, visStartRow,
-                  visEndColumn, visEndRow, eSymbol, clrMarker, passArea, badValues);
-               break;
-            }
-            default:
-               break;
-         }
+         switchOnEncoding(eType, drawMarkers, pData, columns - 1, rows - 1, visStartColumn, visStartRow,
+            visEndColumn, visEndRow, eSymbol, clrMarker, firstThreshold, secondThreshold, mePassArea, badValues);
       }
    }
 }
@@ -739,16 +712,48 @@ void ThresholdLayerImp::getBoundingBox(int& x1, int& y1, int& x2, int& y2) const
    }
 }
 
-template<class T, class Drawer, class PassArea>
+template<class T, class Drawer>
 void fillRegion(T* pData, DataAccessor& da, Drawer drawer, double firstThreshold, double secondThreshold,
-                unsigned int numRows, unsigned int numColumns, const PassArea& area, const vector<int>& badValues)
+                unsigned int numRows, unsigned int numColumns, PassArea passArea, const vector<int>& badValues)
 {
    for (unsigned int uiRow = 0; uiRow < numRows; ++uiRow)
    {
       for (unsigned int uiColumn = 0; uiColumn < numColumns; ++uiColumn)
       {
          double value = ModelServices::getDataValue(*(reinterpret_cast<T*>(da->getColumn())), COMPLEX_MAGNITUDE);
-         if (area.contains(value))
+
+         bool passed = false;
+         switch (passArea)
+         {
+         case LOWER:
+            if (value <= firstThreshold)
+            {
+               passed = true;
+            }
+            break;
+         case UPPER:
+            if (value >= firstThreshold)
+            {
+               passed = true;
+            }
+            break;
+         case MIDDLE:
+            if ((value >= firstThreshold) && (value <= secondThreshold))
+            {
+               passed = true;
+            }
+            break;
+         case OUTSIDE:
+            if ((value <= firstThreshold) || (value >= secondThreshold))
+            {
+               passed = true;
+            }
+            break;
+         default:
+            break;
+         }
+
+         if (passed)
          {
             if (find(badValues.begin(), badValues.end(), static_cast<int>(value + 0.5)) == badValues.end())
             {
@@ -799,40 +804,8 @@ const BitMask* ThresholdLayerImp::getSelectedPixels() const
             }
 
             DrawUtil::BitMaskPixelDrawer drawer(mpMask.get());
-            switch (mePassArea)
-            {
-               case LOWER:
-               {
-                  PassAreaType::Below passArea(dFirstThreshold);
-                  switchOnEncoding(eType, fillRegion, pData, da, drawer, dFirstThreshold, dSecondThreshold, uiNumRows,
-                     uiNumColumns, passArea, badValues);
-                  break;
-               }
-               case UPPER:
-               {
-                  PassAreaType::Above passArea(dFirstThreshold);
-                  switchOnEncoding(eType, fillRegion, pData, da, drawer, dFirstThreshold, dSecondThreshold, uiNumRows,
-                     uiNumColumns, passArea, badValues);
-                  break;
-               }
-               case MIDDLE:
-               {
-                  PassAreaType::Between passArea(dFirstThreshold, dSecondThreshold);
-                  switchOnEncoding(eType, fillRegion, pData, da, drawer, dFirstThreshold, dSecondThreshold, uiNumRows,
-                     uiNumColumns, passArea, badValues);
-                  break;
-               }
-               case OUTSIDE:
-               {
-                  PassAreaType::Outside passArea(dFirstThreshold, dSecondThreshold);
-                  switchOnEncoding(eType, fillRegion, pData, da, drawer, dFirstThreshold, dSecondThreshold, uiNumRows,
-                     uiNumColumns, passArea, badValues);
-                  break;
-               }
-
-               default:
-                  break;
-            }
+            switchOnEncoding(eType, fillRegion, pData, da, drawer, dFirstThreshold, dSecondThreshold, uiNumRows,
+               uiNumColumns, mePassArea, badValues);
          }
       }
 
