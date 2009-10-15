@@ -734,7 +734,7 @@ bool SecondMomentAlgorithm::processAll()
       }
       else
       {
-         reportProgress(ERRORS, 0, "Could not compute the inverse of the Second Moment matrix.");
+         reportProgress(ERRORS, 0, "Could not compute the inverse of the Second Moment matrix.  One possible cause is that bad bands exist in the data set.");
          return false;
       }
    }
