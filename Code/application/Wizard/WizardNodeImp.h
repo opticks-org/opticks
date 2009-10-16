@@ -302,7 +302,6 @@ private:
 
    WizardItem* mpItem;
 
-   static std::string mVersion;
    std::string mName;
    std::string mType;
    std::string mDescription;

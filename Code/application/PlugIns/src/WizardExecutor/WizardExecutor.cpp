@@ -7,19 +7,19 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtCore/QDir>
-#include <QtGui/QFileDialog>
-
 #include "AppVersion.h"
 #include "AppAssert.h"
 #include "AppVerify.h"
 #include "DataDescriptor.h"
 #include "DataElement.h"
+#include "DataVariantEditor.h"
 #include "DesktopServices.h"
 #include "Executable.h"
 #include "FileDescriptor.h"
 #include "Filename.h"
 #include "Layer.h"
+#include "LabeledSection.h"
+#include "LabeledSectionGroup.h"
 #include "MessageLogResource.h"
 #include "ModelServices.h"
 #include "ObjectFactory.h"
@@ -38,6 +38,12 @@
 #include "WizardNode.h"
 #include "WizardObject.h"
 #include "xmlreader.h"
+
+#include <QtCore/QDir>
+#include <QtGui/QDialog>
+#include <QtGui/QDialogButtonBox>
+#include <QtGui/QFileDialog>
+#include <QtGui/QVBoxLayout>
 
 using namespace std;
 
@@ -161,103 +167,134 @@ bool WizardExecutor::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLi
 
    pStep->addMessage(mMessage, "app", "2D53370C-DD0D-4160-9BD5-4D46C49A4B7E", true);
 
+   vector<WizardItem*> populateList;
    for (vector<WizardItem*>::const_iterator wiIter = wizardItems.begin(); wiIter != wizardItems.end(); ++wiIter)
    {
+      bool bSuccess = false;
+
       WizardItem* pItem = *wiIter;
-      if (pItem != NULL)
+      VERIFY(pItem);
+      string itemName = pItem->getName();
+      string itemType = pItem->getType();
+
+      // build a list of all interactive mode Value items in a row
+      // then prompt the user for values on all these items at once
+      // finally, continue execution normally
+      if (itemType == "Value" && !pItem->getBatchMode())
       {
-         bool bSuccess = false;
-
-         string itemName = pItem->getName();
-         string itemType = pItem->getType();
-
-         if (itemType == "Value")
+         populateList.push_back(*wiIter);
+         continue;
+      }
+      if (!queryValueItems(populateList))
+      {
+         if (mbDeleteWizard)
          {
-            mMessage = "Executing " + itemType + " Item: " + itemName;
+            mpObjFact->destroyObject(mpWizard, "WizardObject");
+         }
+         else if (mpWizard != NULL)
+         {
+            mpWizard->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &WizardExecutor::wizardDeleted));
+         }
+         if (mpProgress != NULL)
+         {
+            mpProgress->updateProgress(mMessage, 0, ABORT);
+         }
+         pStep->finalize(Message::Abort, mMessage);
+         return false;
+      }
+      populateList.push_back(*wiIter);
+      for (vector<WizardItem*>::const_iterator plIter = populateList.begin(); plIter != populateList.end(); ++plIter)
+      {
+         if ((*plIter)->getType() == "Value")
+         {
+            mMessage = "Executing Value Item: " + (*plIter)->getName();
             pStep->addMessage(mMessage, "app", "9FC4024E-00FA-42cd-8EC3-2AAE84843BA7", true);
             bSuccess = true;
-            setConnectedNodeValues(pItem);
+            setConnectedNodeValues(*plIter);
          }
          else
          {
-            bSuccess = launchPlugIn(pItem);
-            resetNodeValues(pItem);
-         }
-
-         if (mbAbort)
-         {
-            resetAllNodeValues();
-
-            mMessage = "Wizard Exector Aborted!";
-            pStep->finalize(Message::Abort, mMessage);
-
-            if (mpProgress != NULL)
-            {
-               string progressMessage;
-               int percent = 0;
-               ReportingLevel level;
-               mpProgress->getProgress(progressMessage, percent, level);
-
-               if (level != ABORT)
-               {
-                  mpProgress->updateProgress(mMessage, 0, ABORT);
-               }
-            }
-
-            if (mbDeleteWizard)
-            {
-               mpObjFact->destroyObject(mpWizard, "WizardObject");
-            }
-            else if (mpWizard != NULL)
-            {
-               mpWizard->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &WizardExecutor::wizardDeleted));
-            }
-
-            return false;
-         }
-
-         if (mpWizard == NULL)
-         {
-            mMessage = "The wizard is no longer valid!  Execution will be terminated.";
-            if (mpProgress != NULL)
-            {
-               mpProgress->updateProgress(mMessage, 0, ERRORS);
-            }
-
-            pStep->finalize(Message::Failure, mMessage);
-            return false;
-         }
-
-         if (!bSuccess)
-         {
-            resetAllNodeValues();
-
-            if (mpProgress != NULL)
-            {
-               string progressMessage;
-               int percent = 0;
-               ReportingLevel level;
-               mpProgress->getProgress(progressMessage, percent, level);
-
-               if (level != ERRORS)
-               {
-                  mpProgress->updateProgress("The wizard failed to complete successfully.", 0, ERRORS);
-               }
-            }
-
-            if (mbDeleteWizard)
-            {
-               mpObjFact->destroyObject(mpWizard, "WizardObject");
-            }
-            else if (mpWizard != NULL)
-            {
-               mpWizard->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &WizardExecutor::wizardDeleted));
-            }
-
-            pStep->finalize(Message::Failure);
-            return false;
+            bSuccess = launchPlugIn(*plIter);
+            resetNodeValues(*plIter);
          }
       }
+      populateList.clear();
+
+      if (mbAbort)
+      {
+         resetAllNodeValues();
+
+         mMessage = "Wizard Exector Aborted!";
+         pStep->finalize(Message::Abort, mMessage);
+         if (mpProgress != NULL)
+         {
+            string progressMessage;
+            int percent = 0;
+            ReportingLevel level;
+            mpProgress->getProgress(progressMessage, percent, level);
+
+            if (level != ABORT)
+            {
+               mpProgress->updateProgress(mMessage, 0, ABORT);
+            }
+         }
+         if (mbDeleteWizard)
+         {
+            mpObjFact->destroyObject(mpWizard, "WizardObject");
+         }
+         else if (mpWizard != NULL)
+         {
+            mpWizard->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &WizardExecutor::wizardDeleted));
+         }
+
+         return false;
+      }
+
+      if (mpWizard == NULL)
+      {
+         mMessage = "The wizard is no longer valid!  Execution will be terminated.";
+         if (mpProgress != NULL)
+         {
+            mpProgress->updateProgress(mMessage, 0, ERRORS);
+         }
+
+         pStep->finalize(Message::Failure, mMessage);
+         return false;
+      }
+      if (!bSuccess)
+      {
+         resetAllNodeValues();
+
+         if (mpProgress != NULL)
+         {
+            string progressMessage;
+            int percent = 0;
+            ReportingLevel level;
+            mpProgress->getProgress(progressMessage, percent, level);
+
+            if (level != ERRORS)
+            {
+               mpProgress->updateProgress("The wizard failed to complete successfully.", 0, ERRORS);
+            }
+         }
+
+         if (mbDeleteWizard)
+         {
+            mpObjFact->destroyObject(mpWizard, "WizardObject");
+         }
+         else if (mpWizard != NULL)
+         {
+            mpWizard->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &WizardExecutor::wizardDeleted));
+         }
+
+         pStep->finalize(Message::Failure);
+         return false;
+      }
+   }
+   if (!populateList.empty() && mpProgress != NULL)
+   {
+      mpProgress->updateProgress(QString("%1 value item(s) ignored. They are not connected to any wizard items.")
+         .arg(populateList.size()).toStdString(), 0, WARNING);
    }
 
    mMessage = "Wizard complete.";
@@ -769,4 +806,96 @@ void WizardExecutor::resetAllNodeValues()
          }
       }
    }
+}
+
+bool WizardExecutor::queryValueItems(const vector<WizardItem*>& valueItems)
+{
+   if (valueItems.empty() || Service<ApplicationServices>()->isBatch())
+   {
+      return true;
+   }
+
+   QDialog input(Service<DesktopServices>()->getMainWidget());
+
+   // Edit widgets
+   LabeledSectionGroup* pGroup = new LabeledSectionGroup(&input);
+   for (size_t idx = 0; idx < valueItems.size(); ++idx)
+   {
+      DataVariantEditor* pEditor = new DataVariantEditor(&input, false);
+      WizardNode* pValNode = valueItems[idx]->getOutputNodes().front();
+      DataVariant val(pValNode->getType(), pValNode->getValue());
+      pEditor->setValue(val);
+
+      LabeledSection* pSection = new LabeledSection(pEditor, QString::fromStdString(pValNode->getName()), &input);
+      string connectionInfo = "<table width=470 cellspacing=0>"
+         "<tr><td width=90><b>Name:</b></td><td>" + pValNode->getName() + "</td></tr>"
+         "<tr><td width=90><b>Type:</b></td><td>" + pValNode->getType() + "</td></tr>"
+         "<tr/><tr/>"
+         "<tr><td width=90><b>Connections:</b></tr></table>";
+
+      const vector<WizardNode*>& connectedNodes = pValNode->getConnectedNodes();
+      for (vector<WizardNode*>::const_iterator iter = connectedNodes.begin(); iter != connectedNodes.end(); ++iter)
+      {
+         WizardNode* pCurrNode = *iter;
+         VERIFY(pCurrNode != NULL);
+
+         WizardItem* pCurrItem = pCurrNode->getItem();
+         VERIFY(pCurrItem != NULL);
+
+         connectionInfo += "<hr>"
+            "<table width=470 cellspacing=0>"
+            "<tr><td width=90><b>Item:</b></td><td>" + pCurrItem->getName() + "</td></tr>"
+            "<tr><td width=90><b>Name:</b></td><td>" + pCurrNode->getName() + "</td></tr>"
+            "<tr><td width=90><b>Description:</b></td><td>" + pCurrNode->getDescription() + "</td></tr>"
+            "</table>";
+      }
+      pSection->setWhatsThis(QString::fromStdString(connectionInfo));
+
+      DataVariantEditorDelegate valueDelegate = DataVariantEditor::getDelegate(pValNode->getType());
+      if ((valueDelegate.getType() != DataVariantEditorDelegate::ENUMERATION) &&
+         (valueDelegate.getType() != DataVariantEditorDelegate::VECTOR))
+      {
+         pEditor->setFixedHeight(pEditor->sizeHint().height());
+         pGroup->addSection(pSection);
+      }
+      else
+      {
+         pGroup->addSection(pSection, 1000);
+      }
+   }
+
+   pGroup->addStretch(1);
+
+   // Horizontal line
+   QFrame* pHLine = new QFrame(&input);
+   pHLine->setFrameStyle(QFrame::HLine | QFrame::Sunken);
+
+   // Buttons
+   QDialogButtonBox* pButtons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
+      Qt::Horizontal, &input);
+
+   // Layout
+   QVBoxLayout* pLayout = new QVBoxLayout(&input);
+   pLayout->setMargin(10);
+   pLayout->setSpacing(10);
+   pLayout->addWidget(pGroup, 10);
+   pLayout->addWidget(pHLine);
+   pLayout->addWidget(pButtons);
+
+   // Initialization
+   input.setWindowTitle("Enter wizard values");
+   input.resize(500, 500);
+
+   // Connections
+   VERIFYNR(input.connect(pButtons, SIGNAL(accepted()), &input, SLOT(accept())));
+   VERIFYNR(input.connect(pButtons, SIGNAL(rejected()), &input, SLOT(reject())));
+
+   // Execute the dialog
+   if (input.exec() != QDialog::Accepted)
+   {
+      mMessage = "Wizard cancelled by user.";
+      return false;
+   }
+
+   return true;
 }

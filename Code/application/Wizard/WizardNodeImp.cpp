@@ -12,14 +12,13 @@
 #include "DynamicObjectAdapter.h"
 #include "FilenameImp.h"
 #include "StringUtilities.h"
+#include "WizardItemImp.h"
 #include "xmlreader.h"
 #include "xmlwriter.h"
 
 #include <sstream>
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
-
-string WizardNodeImp::mVersion = "Wizard Node Version 3.0";
 
 WizardNodeImp::WizardNodeImp(WizardItem* pItem, string name, string type, string description) : 
    mpItem(pItem),
@@ -298,7 +297,8 @@ bool WizardNodeImp::toXml(XMLWriter* pXml) const
 {
    // This will get all of the infomation for the wizard node
    // except the description.
-   pXml->addAttr("version", mVersion);
+   // version will always be the latest since conversion should happen at deserialization time
+   pXml->addAttr("version", "4");
    pXml->addAttr("name", mName);
    pXml->addAttr("originalType", mOriginalType);
    pXml->addAttr("type", mType);
@@ -331,7 +331,24 @@ bool WizardNodeImp::fromXml(DOMNode* pDocument, unsigned int version)
 {
    DOMElement* elmnt(static_cast<DOMElement*>(pDocument));
 
-   mVersion = A(elmnt->getAttribute(X("version")));
+   string itemVersion = A(elmnt->getAttribute(X("version")));
+   if (itemVersion == "4") // the current version
+   {
+      // do nothing special
+   }
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : The || true preserves a loophole in previous " \
+"parsing code where anything could be put in this field by another app generating a wizard file. We want to " \
+"preserve this behavior in 4.3.0 but in 4.4.0 add an else {return false;} and remove the || true (tclarke)")
+   else if (itemVersion == "Wizard Node Version 3.0" || true)
+   {
+      // set compatible behavior for older wizard files
+      WizardItemImp* pItemImp = dynamic_cast<WizardItemImp*>(mpItem);
+      VERIFY(pItemImp);
+      if (pItemImp->getType() == "Value")
+      {
+         pItemImp->setBatchMode(true);
+      }
+   }
    mName = A(elmnt->getAttribute(X("name")));
    mOriginalType = A(elmnt->getAttribute(X("originalType")));
    mType = A(elmnt->getAttribute(X("type")));

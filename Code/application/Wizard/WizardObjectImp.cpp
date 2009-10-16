@@ -62,7 +62,9 @@ WizardItem* WizardObjectImp::addValueItem(const string& itemName, const DataVari
    }
 
    WizardItemImp* pItem = new WizardItemImp(dynamic_cast<WizardObject*>(this), itemName, value);
-   pItem->setBatchMode(mbBatch);
+   // default to batch otherwise user will be prompted to input every
+   // value item every time the wizard is executed
+   pItem->setBatchMode(true);
    addItem(pItem);
 
    return pItem;

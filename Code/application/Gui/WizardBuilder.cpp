@@ -214,6 +214,7 @@ WizardBuilder::WizardBuilder(QWidget* pParent) :
    /////////////
 
    QToolBar* pToolbar = new QToolBar("Wizard", this);
+   pToolbar->setObjectName("Wizard Toolbar");
    pToolbar->setIconSize(QSize(16, 16));
    pToolbar->addAction(pNewAction);
    pToolbar->addAction(pOpenAction);

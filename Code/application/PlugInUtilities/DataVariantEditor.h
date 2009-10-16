@@ -98,13 +98,17 @@ class DataVariantEditor : public QWidget
    Q_OBJECT
 
 public:
-   DataVariantEditor(QWidget* parent = 0);
+   DataVariantEditor(QWidget* pParent = NULL, bool includeValueLabel = true);
    ~DataVariantEditor();
 
    void setValue(const DataVariant& value, bool useVariantCurrentValue = true);
    const DataVariant &getValue();
 
    static const std::vector<DataVariantEditorDelegate>& getDelegates();
+   static DataVariantEditorDelegate getDelegate(const std::string& type);
+   static bool hasDelegate(const std::string& type);
+
+   virtual QSize sizeHint() const;
 
 signals:
    void modified();
@@ -114,8 +118,6 @@ protected slots:
    void browse();
 
 private:
-   DataVariantEditorDelegate getDelegate(const std::string& type);
-
    QStackedWidget* mpStack;
    QLineEdit* mpValueLineEdit;
    QPushButton* mpBrowseButton;

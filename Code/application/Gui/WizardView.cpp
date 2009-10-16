@@ -24,9 +24,13 @@
 #include "BatchWizard.h"
 #include "ConfigurationSettings.h"
 #include "DataVariant.h"
+#include "DataVariantEditor.h"
 #include "FileResource.h"
 #include "NameTypeValueDlg.h"
 #include "ObjectResource.h"
+#include "PlugInArgList.h"
+#include "PlugInDescriptor.h"
+#include "PlugInManagerServices.h"
 #include "Subject.h"
 #include "SystemServicesImp.h"
 #include "WizardGraphicsItem.h"
@@ -246,25 +250,25 @@ bool WizardView::isItemSelected(WizardItem* pItem) const
    return false;
 }
 
-void WizardView::editItem(WizardItem* pItem)
+bool WizardView::editItem(WizardItem* pItem)
 {
    WizardItemImp* pItemImp = static_cast<WizardItemImp*>(pItem);
    if (pItem == NULL)
    {
-      return;
+      return false;
    }
 
    const string& itemType = pItem->getType();
    if (itemType != "Value")
    {
-      return;
+      return false;
    }
 
    const vector<WizardNode*>& outputNodes = pItemImp->getOutputNodes();
-   VERIFYNRV(outputNodes.empty() == false);
+   VERIFY(outputNodes.empty() == false);
 
    WizardNodeImp* pNode = static_cast<WizardNodeImp*>(outputNodes.front());
-   VERIFYNRV(pNode != NULL);
+   VERIFY(pNode != NULL);
 
    const string& nodeName = pNode->getName();
    const string& nodeType = pNode->getType();
@@ -280,7 +284,7 @@ void WizardView::editItem(WizardItem* pItem)
       QString strType = dlgValue.getType();
       if ((strName.isEmpty() == true) || (strType.isEmpty() == true))
       {
-         return;
+         return false;
       }
 
       string newNodeName = strName.toStdString();
@@ -308,7 +312,9 @@ void WizardView::editItem(WizardItem* pItem)
       {
          pNode->setValue(newNodeValue.getPointerToValueAsVoid());
       }
+      return true;
    }
+   return false;
 }
 
 bool WizardView::isModified() const
@@ -909,7 +915,7 @@ void WizardView::mouseReleaseEvent(QMouseEvent* pEvent)
                   // Check for multiple output nodes connected to the same input node
                   if ((connectNodes == true) && (pInputNode->getNumConnectedNodes() > 0))
                   {
-                     QMessageBox::warning(this, "Wizard Builder", "The input node already has a valid input.  "
+                     QMessageBox::warning(this, "Wizard Builder", "This node already has a connection. "
                         "The connection will not be made.");
                      connectNodes = false;
                   }
@@ -949,17 +955,101 @@ void WizardView::mouseDoubleClickEvent(QMouseEvent* pEvent)
 
    if (pEvent->button() == Qt::LeftButton)
    {
-      WizardItem* pItem = pGraphicsItem->getWizardItem();
+      WizardItemImp* pItem = static_cast<WizardItemImp*>(pGraphicsItem->getWizardItem());
       if (pItem != NULL)
       {
          const string& itemType = pItem->getType();
          if (itemType != "Value")
          {
-            QMessageBox::warning(this, "Wizard Builder", "You can only edit a Value item.");
-            return;
-         }
+            QPointF scenePos = mapToScene(viewPos);
+            WizardNodeImp* pNode = static_cast<WizardNodeImp*>(pGraphicsItem->getNode(scenePos));
+            if (pNode != NULL && pItem->isInputNode(pNode))
+            {
+               if (!pNode->getConnectedNodes().empty())
+               {
+                  QMessageBox::warning(this, "Wizard Builder",
+                     "This node already has a connection. Unable to create a Value item.");
+                  return;
+               }
+               if (!DataVariantEditor::hasDelegate(pNode->getType()))
+               {
+                  QMessageBox::warning(this, "Wizard Builder",
+                     QString("Value items of type %1 are not supported.").arg(
+                        QString::fromStdString(pNode->getType())));
+                  return;
+               }
+               // create a new value item
+               DataVariant initialValue(pNode->getType(), pNode->getValue());
+               if (pNode->getValue() == NULL)
+               {
+#pragma message(__FILE__ "(" STRING(__LINE__) \
+") : warning : This should error, fix this when we can have a DataVariant with a type and an invalid value (tclarke)")
+                  QString type = QString::fromStdString(pNode->getType());
+                  if ((type.contains("char") ||
+                       type.contains("short") ||
+                       type.contains("int") ||
+                       type.contains("long") ||
+                       type.contains("float") ||
+                       type.contains("double")) && !type.contains("vector"))
+                  {
+                     initialValue.fromDisplayString(pNode->getType(), "0");
+                  }
+               }
+               PlugInDescriptor* pPlugInDesc = Service<PlugInManagerServices>()->getPlugInDescriptor(pItem->getName());
+               if (pPlugInDesc != NULL)
+               {
+                  const PlugInArgList* pList = pItem->getBatchMode() ?
+                                 pPlugInDesc->getBatchInputArgList() :
+                                 pPlugInDesc->getInteractiveInputArgList();
+                  if (pList != NULL)
+                  {
+                     PlugInArg* pArg = NULL;
+                     if (pList->getArg(pNode->getName(), pArg) && pArg != NULL && pArg->isDefaultSet())
+                     {
+                        initialValue = DataVariant(pArg->getType(), pArg->getDefaultValue());
+                     }
+                  }
+               }
+               WizardItemImp* pValueItem = static_cast<WizardItemImp*>(mpWizard->addValueItem(pNode->getName(),
+                  initialValue));
+               if (pValueItem == NULL)
+               {
+                  QMessageBox::warning(this, "Wizard Builder", "Unable to automatically create a Value item.");
+                  return;
+               }
+               WizardGraphicsItem* pValueGraphicsItem = getGraphicsItem(pValueItem);
+               WizardGraphicsItem* pGraphicsItem = getGraphicsItem(pItem);
+               VERIFYNRV(pValueGraphicsItem && pGraphicsItem);
+               QPointF nodeSceneLocation = pGraphicsItem->getNodeConnectionPoint(pNode);
+               QPointF valueNodeOffset = pValueGraphicsItem->mapFromScene(
+                  pValueGraphicsItem->getNodeConnectionPoint(pValueItem->getOutputNodes().front()));
+               valueNodeOffset += QPointF(60, 0); // magic number based on visual trials
+               nodeSceneLocation -= valueNodeOffset;
+               pValueItem->setPosition(nodeSceneLocation.x(), nodeSceneLocation.y());
 
-         editItem(pItem);
+               // edit the item
+               if (editItem(pValueItem))
+               {
+                  // connect the value item output node to the input node
+                  WizardNodeImp* pValueNode = static_cast<WizardNodeImp*>(pValueItem->getOutputNodes().front());
+                  VERIFYNRV(pValueNode);
+                  pNode->addConnectedNode(pValueNode);
+                  pValueNode->addConnectedNode(pNode);
+               }
+               else
+               {
+                  mpWizard->removeItem(pValueItem);
+               }
+            }
+            else
+            {
+               QGraphicsView::mouseDoubleClickEvent(pEvent);
+            }
+         }
+         else
+         {
+            editItem(pItem);
+         }
       }
    }
 }
@@ -1103,7 +1193,8 @@ void WizardView::contextMenuEvent(QContextMenuEvent* pEvent)
       contextMenu.addSeparator();
       QAction* pZoomInAction = contextMenu.addAction(QIcon(":/icons/ZoomIn"), "&Zoom In", this, SLOT(zoomIn()));
       QAction* pZoomOutAction = contextMenu.addAction(QIcon(":/icons/ZoomOut"), "Zoom &Out", this, SLOT(zoomOut()));
-      QAction* pZoomToFitAction = contextMenu.addAction(QIcon(":/icons/ZoomToFit"), "Zoom to &Fit", this, SLOT(zoomToFit()));
+      QAction* pZoomToFitAction = contextMenu.addAction(QIcon(":/icons/ZoomToFit"), "Zoom to &Fit",
+         this, SLOT(zoomToFit()));
       contextMenu.addSeparator();
       QAction* pExecuteAction = contextMenu.addAction("&Execute", this, SLOT(execute()));
       contextMenu.addSeparator();

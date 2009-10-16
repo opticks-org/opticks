@@ -40,11 +40,11 @@ using namespace std;
 
 vector<DataVariantEditorDelegate> DataVariantEditor::sDelegates;
 
-DataVariantEditor::DataVariantEditor(QWidget* parent) :
-   QWidget(parent)
+DataVariantEditor::DataVariantEditor(QWidget* pParent, bool includeValueLabel) :
+   QWidget(pParent)
 {
    // Value
-   QLabel* pValueLabel = new QLabel("Value:", this);
+   QLabel* pValueLabel = includeValueLabel ? new QLabel("Value:", this) : NULL;
 
    mpStack = new QStackedWidget(this);
 
@@ -125,10 +125,14 @@ DataVariantEditor::DataVariantEditor(QWidget* parent) :
    QGridLayout* pGrid = new QGridLayout(this);
    pGrid->setMargin(0);
    pGrid->setSpacing(5);
-   pGrid->addWidget(pValueLabel, 0, 0, 1, 2);
-   pGrid->addWidget(mpStack, 1, 0);
-   pGrid->addWidget(mpBrowseButton, 1, 1, Qt::AlignTop);
-   pGrid->setRowStretch(1, 10);
+   int row = 0;
+   if (includeValueLabel)
+   {
+      pGrid->addWidget(pValueLabel, row++, 0, 1, 2);
+   }
+   pGrid->addWidget(mpStack, row, 0);
+   pGrid->addWidget(mpBrowseButton, row, 1, Qt::AlignTop);
+   pGrid->setRowStretch(row, 10);
    pGrid->setColumnStretch(0, 10);
 
    // Initialization
@@ -230,6 +234,40 @@ const vector<DataVariantEditorDelegate>& DataVariantEditor::getDelegates()
    }
 
    return sDelegates;
+}
+
+DataVariantEditorDelegate DataVariantEditor::getDelegate(const string& type)
+{
+   DataVariantEditorDelegate retVal;
+
+   const vector<DataVariantEditorDelegate>& delegates = getDelegates();
+   for (vector<DataVariantEditorDelegate>::const_iterator iter = delegates.begin(); iter != delegates.end(); ++iter)
+   {
+      if (iter->getTypeName() == type)
+      {
+         retVal = *iter;
+         break;
+      }
+   }
+   return retVal;
+}
+
+bool DataVariantEditor::hasDelegate(const string& type)
+{
+   const vector<DataVariantEditorDelegate>& delegates = getDelegates();
+   for (vector<DataVariantEditorDelegate>::const_iterator iter = delegates.begin(); iter != delegates.end(); ++iter)
+   {
+      if (iter->getTypeName() == type)
+      {
+         return true;
+      }
+   }
+   return false;
+}
+
+QSize DataVariantEditor::sizeHint() const
+{
+   return mpStack->currentWidget()->sizeHint();
 }
 
 void DataVariantEditor::setValue(const DataVariant& value, bool useVariantCurrentValue)
@@ -421,7 +459,23 @@ const DataVariant& DataVariantEditor::getValue()
    {
       string valueText = strValue.toStdString();
 
-      mValue.fromDisplayString(mValue.getTypeName(), valueText);
+      if (mValue.fromDisplayString(mValue.getTypeName(), valueText) == DataVariant::FAILURE)
+      {
+#pragma message(__FILE__ "(" STRING(__LINE__) \
+") : warning : This should error, fix this when we can have a DataVariant with a type and an invalid value (tclarke)")
+         // if possible, put a reasonable default in the variant so we don't get garbage
+         // types not in this list either have a reasonable value already or we can't determine one at this point
+         switch (curDelegate.getType())
+         {
+         case DataVariantEditorDelegate::INTEGRAL:
+         case DataVariantEditorDelegate::DOUBLE:
+            mValue.fromDisplayString(mValue.getTypeName(), "0");
+            break;
+         default:
+            // do nothing
+            break;
+         }
+      }
    }
 
    return mValue;
@@ -527,22 +581,6 @@ void DataVariantEditor::browse()
          mpValueLineEdit->setText(strFilename);
       }
    }
-}
-
-DataVariantEditorDelegate DataVariantEditor::getDelegate(const string& type)
-{
-   DataVariantEditorDelegate retVal;
-
-   const vector<DataVariantEditorDelegate>& delegates = getDelegates();
-   for (vector<DataVariantEditorDelegate>::const_iterator iter = delegates.begin(); iter != delegates.end(); ++iter)
-   {
-      if (iter->getTypeName() == type)
-      {
-         retVal = *iter;
-         break;
-      }
-   }
-   return retVal;
 }
 
 #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Use a QListView to allow editing of vector data, " \

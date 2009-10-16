@@ -57,7 +57,7 @@ public:
     *  This method returns pointers to all of the items stored in the wizard.  The order
     *  within the returned vector defines the execution order for each item.
     *
-    *  @return  The vector of WizardItem pointers.
+    *  @return  The vector of WizardItem pointers. The pointers in this vector will never be \c NULL.
     *
     *  @see     WizardItem
     */

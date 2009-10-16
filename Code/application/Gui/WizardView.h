@@ -42,7 +42,7 @@ public:
    std::vector<WizardItem*> getSelectedItems() const;
    bool isItemSelected(WizardItem* pItem) const;
 
-   void editItem(WizardItem* pItem);
+   bool editItem(WizardItem* pItem);
 
    bool isModified() const;
 
