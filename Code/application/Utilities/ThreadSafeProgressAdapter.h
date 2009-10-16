@@ -18,7 +18,10 @@ class ThreadSafeProgressAdapter : public Progress, public ThreadSafeProgressImp
 {
 public:
    ThreadSafeProgressAdapter() {};
-   virtual ~ThreadSafeProgressAdapter() {};
+   virtual ~ThreadSafeProgressAdapter()
+   {
+      notify(SIGNAL_NAME(Subject, Deleted));
+   }
 
    virtual const std::string& getObjectType() const
    {

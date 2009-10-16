@@ -11,6 +11,14 @@
 
 using namespace std;
 
+ClassificationAdapter::ClassificationAdapter()
+{}
+
+ClassificationAdapter::~ClassificationAdapter()
+{
+   notify(SIGNAL_NAME(Subject, Deleted));
+}
+
 const string& ClassificationAdapter::getObjectType() const
 {
    static string sType("ClassificationAdapter");

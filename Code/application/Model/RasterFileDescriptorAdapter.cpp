@@ -12,11 +12,11 @@
 using namespace std;
 
 RasterFileDescriptorAdapter::RasterFileDescriptorAdapter()
-{
-}
+{}
 
 RasterFileDescriptorAdapter::~RasterFileDescriptorAdapter()
 {
+   notify(SIGNAL_NAME(Subject, Deleted));
 }
 
 // TypeAwareObject

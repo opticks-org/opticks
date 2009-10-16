@@ -7,19 +7,17 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #include "MessageLogAdapter.h"
 
 using namespace std;
 
 MessageLogAdapter::MessageLogAdapter(const char* name, const char* path, QFile *journal) :
    MessageLogImp(name, path, journal)
-{
-}
+{}
 
 MessageLogAdapter::~MessageLogAdapter()
 {
+   notify(SIGNAL_NAME(Subject, Deleted));
 }
 
 const string& MessageLogAdapter::getObjectType() const
@@ -44,11 +42,11 @@ MessageAdapter::MessageAdapter(const string &action,
                                const string &key,
                                DateTime *timestamp,
                                Step *pParent) : MessageImp(action, component, key, timestamp, pParent)
-{
-}
+{}
 
 MessageAdapter::~MessageAdapter()
 {
+   notify(SIGNAL_NAME(Subject, Deleted));
 }
 
 
@@ -57,9 +55,9 @@ StepAdapter::StepAdapter(const string &action,
                          const string &key,
                          DateTime *timestamp,
                          Step *pParent) : StepImp(action, component, key, timestamp, pParent)
-{
-}
+{}
 
 StepAdapter::~StepAdapter()
 {
+   notify(SIGNAL_NAME(Subject, Deleted));
 }

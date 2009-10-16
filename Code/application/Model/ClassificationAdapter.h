@@ -16,8 +16,8 @@
 class ClassificationAdapter  : public Classification, public ClassificationImp CLASSIFICATIONADAPTEREXTENSION_CLASSES
 {
 public:
-   ClassificationAdapter() {}
-   ~ClassificationAdapter() {}
+   ClassificationAdapter();
+   ~ClassificationAdapter();
 
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;

@@ -12,11 +12,11 @@
 using namespace std;
 
 FileDescriptorAdapter::FileDescriptorAdapter()
-{
-}
+{}
 
 FileDescriptorAdapter::~FileDescriptorAdapter()
 {
+   notify(SIGNAL_NAME(Subject, Deleted));
 }
 
 // TypeAwareObject

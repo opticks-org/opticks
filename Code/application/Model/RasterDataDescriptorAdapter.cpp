@@ -14,17 +14,16 @@ using namespace std;
 RasterDataDescriptorAdapter::RasterDataDescriptorAdapter(const string& name, const string& type,
    DataElement* pParent) :
    RasterDataDescriptorImp(name, type, pParent)
-{
-}
+{}
 
 RasterDataDescriptorAdapter::RasterDataDescriptorAdapter(const string& name, const string& type,
    const vector<string>& parent) :
    RasterDataDescriptorImp(name, type, parent)
-{
-}
+{}
 
 RasterDataDescriptorAdapter::~RasterDataDescriptorAdapter()
 {
+   notify(SIGNAL_NAME(Subject, Deleted));
 }
 
 // TypeAwareObject
