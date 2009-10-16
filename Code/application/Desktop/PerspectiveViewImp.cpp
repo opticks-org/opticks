@@ -904,7 +904,11 @@ void PerspectiveViewImp::mouseMoveEvent(QMouseEvent* e)
       {
          QPoint diff = ptMouse - mMouseCurrent;
          double mag = diff.x() + diff.y();
-         mag = -mag;
+         if (ConfigurationSettings::getSettingAlternateMouseWheelZoom())
+         {
+            mag = -mag;
+         }
+
          // prevent extreme changes in zoom when tile generation occurs
          // during direct zoom
          if (fabs(mag) > 50.0)
@@ -1011,14 +1015,19 @@ void PerspectiveViewImp::wheelEvent(QWheelEvent* e)
 {
    if (e != NULL)
    {
+      bool zoomIn = e->delta() > 0;
+      if (ConfigurationSettings::getSettingAlternateMouseWheelZoom())
+      {
+         zoomIn = !zoomIn;
+      }
       if (isInsetEnabled())
       {
-         zoomInset(e->delta() < 0);
+         zoomInset(zoomIn);
       }
       else
       {
          double dZoom = getZoomPercentage();
-         if (e->delta() < 0)
+         if (zoomIn)
          {
             dZoom *= 1.25;
          }

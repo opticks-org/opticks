@@ -20,6 +20,7 @@
 #include "AppVerify.h"
 #include "ArrowAdapter.h"
 #include "CartesianGridlinesAdapter.h"
+#include "ConfigurationSettings.h"
 #include "ContextMenuAction.h"
 #include "ContextMenuActions.h"
 #include "AppAssert.h"
@@ -1152,7 +1153,13 @@ void PlotViewImp::mouseMoveEvent(QMouseEvent* e)
       }
       else if (strMouseMode == "ZoomBoxMode")
       {
-         zoomOnPoint(mMouseStart, ptMouse - mMouseCurrent);
+         QPoint diff = mMouseCurrent - ptMouse;
+         if (ConfigurationSettings::getSettingAlternateMouseWheelZoom())
+         {
+            diff = -diff;
+         }
+
+         zoomOnPoint(mMouseStart, diff);
          updateGL();
       }
    }

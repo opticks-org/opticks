@@ -80,6 +80,10 @@ OptionsGeneral::OptionsGeneral() :
    mpProgressClose = new QCheckBox("Automatically close on process completion", this);
    LabeledSection* pProgressSection = new LabeledSection(mpProgressClose, "Progress Dialog", this);
 
+   // Mouse Wheel Zoom Dialog
+   mpMouseWheelZoom = new QCheckBox("Alternate mouse wheel zoom direction", this);
+   LabeledSection* pMouseWheelZoomSection = new LabeledSection(mpMouseWheelZoom, "Mouse Wheel Zoom Direction", this);
+
    // Dialog layout
    QVBoxLayout* pLayout = new QVBoxLayout(this);
    pLayout->setMargin(0);
@@ -88,6 +92,7 @@ OptionsGeneral::OptionsGeneral() :
    pLayout->addWidget(pUndoSection);
    pLayout->addWidget(pThreadingSection);
    pLayout->addWidget(pProgressSection);
+   pLayout->addWidget(pMouseWheelZoomSection);
    pLayout->addStretch(10);
 
    // Initialization
@@ -95,6 +100,7 @@ OptionsGeneral::OptionsGeneral() :
    mpBufferSpin->setValue(static_cast<int>(ConfigurationSettings::getSettingUndoBufferSize()));
    mpThreadSpin->setValue(static_cast<int>(ConfigurationSettings::getSettingThreadCount()));
    mpProgressClose->setChecked(Progress::getSettingAutoClose());
+   mpMouseWheelZoom->setChecked(ConfigurationSettings::getSettingAlternateMouseWheelZoom());
 }
 
 void OptionsGeneral::applyChanges()
@@ -118,6 +124,7 @@ void OptionsGeneral::applyChanges()
    ConfigurationSettings::setSettingUndoBufferSize(static_cast<unsigned int>(mpBufferSpin->value()));
    ConfigurationSettings::setSettingThreadCount(static_cast<unsigned int>(mpThreadSpin->value()));
    Progress::setSettingAutoClose(mpProgressClose->isChecked());
+   ConfigurationSettings::setSettingAlternateMouseWheelZoom(mpMouseWheelZoom->isChecked());
 }
 
 OptionsGeneral::~OptionsGeneral()

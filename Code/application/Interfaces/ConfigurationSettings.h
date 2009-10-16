@@ -554,6 +554,7 @@ public:
    SETTING_PTR(WizardPath, FileLocations, Filename)
    SETTING_PTR(JvmLoaderLibraryPath, FileLocations, Filename)
    CUSTOM_SETTING_PTR(PluginWorkingDirectory, FileLocations, Filename)
+   SETTING(AlternateMouseWheelZoom, Edit, bool, true)
 
    /**
     * Gets the root directory for the main application.

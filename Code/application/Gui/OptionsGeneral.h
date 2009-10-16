@@ -85,6 +85,7 @@ private:
    QSpinBox* mpBufferSpin;
    QSpinBox* mpThreadSpin;
    QCheckBox* mpProgressClose;
+   QCheckBox* mpMouseWheelZoom;
 };
 
 #endif

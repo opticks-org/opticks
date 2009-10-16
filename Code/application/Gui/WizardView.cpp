@@ -1157,11 +1157,25 @@ void WizardView::wheelEvent(QWheelEvent* pEvent)
    double factor = pEvent->delta() / 120.0;
    if (factor < 0.0)
    {
-      factor *= -sZoomIn;
+      if (ConfigurationSettings::getSettingAlternateMouseWheelZoom())
+      {
+         factor *= -sZoomIn;
+      }
+      else
+      {
+         factor *= -sZoomOut;
+      }
    }
    else
    {
-      factor *= sZoomOut;
+      if (ConfigurationSettings::getSettingAlternateMouseWheelZoom())
+      {
+         factor *= sZoomOut;
+      }
+      else
+      {
+         factor *= sZoomIn;
+      }
    }
 
    zoomBy(factor);
