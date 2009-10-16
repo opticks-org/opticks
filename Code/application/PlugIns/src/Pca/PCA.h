@@ -39,7 +39,7 @@ class PCA : public AlgorithmShell
 {
 public:
    PCA();
-   ~PCA();
+   virtual ~PCA();
 
    bool getInputSpecification(PlugInArgList*& pArgList);
    bool getOutputSpecification(PlugInArgList*& pArgList);
@@ -57,9 +57,9 @@ protected:
 private:
    ExecutableResource mpSecondMoment;
    ExecutableResource mpCovariance;
-   bool mbUseEigenValPlot;
-   int m_MaxScaleValue;
-   EncodingType m_OutputDataType;
+   bool mUseEigenValPlot;
+   int mMaxScaleValue;
+   EncodingType mOutputDataType;
    std::string mMessage;
    AoiElement* getAoiElement(const std::string& aoiName);
    bool writeOutPCAtransform(QString filename);
@@ -68,16 +68,16 @@ private:
    bool readMatrixFromFile(QString filename, double **pData, int numBands, const std::string &caption);
    bool writeMatrixToFile(QString filename, const double **pData, int numBands, const std::string &caption);
    bool getStatistics(std::vector<std::string> aoiList);
-   BitMask* mp_AOIbitmask;
-   bool mb_UseAoi;
+   BitMask* mpAoiBitMask;
+   bool mUseAoi;
    bool mDisplayResults;
 
-   unsigned int m_NumRows;
-   unsigned int m_NumColumns;
-   unsigned int m_NumBands;
-   double** mp_MatrixValues;
-   QString m_ROIname;
-   unsigned int m_NumComponentsToUse;
+   unsigned int mNumRows;
+   unsigned int mNumColumns;
+   unsigned int mNumBands;
+   double** mpMatrixValues;
+   QString mRoiName;
+   unsigned int mNumComponentsToUse;
    Service<PlugInManagerServices> mpPlugInMgr;
    Service<ModelServices> mpModel;
    Service<ObjectFactory> mpObjFact;
@@ -98,7 +98,7 @@ private:
     * @EnumWrapper PCA::CalcMethodTypeEnum.
     */
    typedef EnumWrapper<CalcMethodTypeEnum> CalcMethodType;
-   CalcMethodType m_CalcMethod;
+   CalcMethodType mCalcMethod;
    std::vector<unsigned int> mSelectedBands;
 };
 

@@ -13,6 +13,7 @@
 #include "AppVersion.h"
 #include "AppVerify.h"
 #include "BitMask.h"
+#include "BitMaskIterator.h"
 #include "DataAccessorImpl.h"
 #include "DataDescriptor.h"
 #include "DesktopServices.h"
@@ -184,6 +185,7 @@ struct MaskInput
    int boundingBoxY1;
    int boundingBoxX2;
    int boundingBoxY2;
+   const BitMask* mpMask;
 };
 
 template<class T>
@@ -194,88 +196,67 @@ void ComputeMaskedSmm(T* pData, MaskInput* pInput, RasterElement* pRaster)
       return;
    }
 
-   const RasterDataDescriptor* pDescriptor = dynamic_cast<RasterDataDescriptor*>(pRaster->getDataDescriptor());
-   if (pDescriptor == NULL)
-   {
-      return;
-   }
-   int numRows = pDescriptor->getRowCount();
-   int numCols = pDescriptor->getColumnCount();
-   int numBands = pDescriptor->getBandCount();
-   int i = 0, j = 0;
    int lRow = 0, lColumn = 0;
-   //int lLocalIndex;
    int lCount = 0;
    T* pBand1 = NULL;
    T* pBand2 = NULL;
-   int boundingBoxXSize = pInput->boundingBoxX2 - pInput->boundingBoxX1 + 1;
-   int boundingBoxYSize = pInput->boundingBoxY2 - pInput->boundingBoxY1 + 1;
-
    memset(pInput->pMatrix, 0, sizeof(double) * pInput->numBands * pInput->numBands);
-
    FactoryResource<DataRequest> pRequest;
    pRequest->setInterleaveFormat(BIP);
-   pRequest->setRows(pDescriptor->getActiveRow(pInput->boundingBoxY1), 
-      pDescriptor->getActiveRow(pInput->boundingBoxY2));
-   pRequest->setColumns(pDescriptor->getActiveColumn(pInput->boundingBoxX1), 
-      pDescriptor->getActiveColumn(pInput->boundingBoxX2));
    DataAccessor accessor = pRaster->getDataAccessor(pRequest.release());
-   for (j = 0; j < boundingBoxYSize; ++j)
+   BitMaskIterator it(pInput->mpMask, pRaster);
+   int numPixels = it.getCount();
+   LocationType loc;
+   float progScale = 100.0f / numPixels;
+   int progSave = 0;
+   while (it != it.end())
    {
+      it.getPixelLocation(loc);
+      accessor->toPixel(loc.mY, loc.mX);
       VERIFYNRV(accessor.isValid());
-      if (pInput->pProgress != NULL)
+      if (pInput->pProgress != NULL && 
+          progSave != static_cast<int>(progScale * lCount))
       {
          if ((pInput->pAbortFlag == NULL) || !(*pInput->pAbortFlag))
          {
-            int iPercent = (100 * j) / boundingBoxYSize;
-            if (iPercent == 100)
-            {
-               iPercent = 99;
-            }
-
-            pInput->pProgress->updateProgress("Computing Second Moment Matrix...", iPercent, NORMAL);
+            progSave = static_cast<int>(progScale * lCount);
+            pInput->pProgress->updateProgress("Computing Second Moment Matrix...",
+               progSave, NORMAL);
          }
          else
          {
             break;
          }
       }
-      for (i = 0; i < boundingBoxXSize; ++i)
+      ++lCount;
+      ++it;
+      pData = static_cast<T*>(accessor->getColumn());
+      pBand2 = pData;
+      for (lRow = 0; lRow < pInput->numBands; ++lRow)
       {
-         if (pInput->pSelectedPixels[j][i])
+         pBand1 = pBand2;
+         int index = lRow * pInput->numBands + lRow;
+         for (lColumn = lRow; lColumn < pInput->numBands; ++lColumn, ++index)
          {
-            ++lCount;
-            pData = static_cast<T*>(accessor->getColumn());
-            pBand2 = pData;
-            for (lRow = 0; lRow < pInput->numBands; ++lRow)
-            {
-               pBand1 = pBand2;
-               int index = lRow * pInput->numBands + lRow;
-               for (lColumn = lRow; lColumn < pInput->numBands; ++lColumn, ++index)
-               {
-                  pInput->pMatrix[index] += (*pBand1) * (*pBand2);
-                  ++pBand1;
-               }
-               ++pBand2;
-            }
+            pInput->pMatrix[index] += (*pBand1) * (*pBand2);
+            ++pBand1;
          }
-         accessor->nextColumn();
+         ++pBand2;
       }
-      accessor->nextRow();
    }
 
-   for (i = 0; i < pInput->numBands; ++i)
+   for (int i = 0; i < pInput->numBands; ++i)
    {
       int index = i * pInput->numBands + i;
-      for (j = i; j < pInput->numBands; ++j, ++index)
+      for (int j = i; j < pInput->numBands; ++j, ++index)
       {
          pInput->pMatrix[index] /= lCount;
       }
    }
 
-   for (i = 0; i < pInput->numBands; ++i)
+   for (int i = 0; i < pInput->numBands; ++i)
    {
-      for (j = i; j < pInput->numBands; ++j)
+      for (int j = i; j < pInput->numBands; ++j)
       {
          pInput->pMatrix[j * pInput->numBands + i] = pInput->pMatrix[i * pInput->numBands + j];
       }
@@ -625,20 +606,21 @@ bool SecondMomentAlgorithm::processAll()
             }
             else // pMask != NULL
             {
-               int x1 = 0;
-               int y1 = 0;
-               int x2 = 0;
-               int y2 = 0;
-               pMask->getBoundingBox(x1, y1, x2, y2);
+               BitMaskIterator it(pMask, pRasterElement);
 
-               const bool** pSelectedPixels = const_cast<BitMask*>(pMask)->getRegion(x1, y1, x2, y2);
-               if (pSelectedPixels == NULL)
+               if (it.getCount() == 0)
                {
                   reportProgress(ERRORS, 0, "Error getting selected pixels from AOI");
                   return false;
                }
-               else // pSelectedPixels != NULL
+               else
                {
+                  int x1 = 0;
+                  int y1 = 0;
+                  int x2 = 0;
+                  int y2 = 0;
+                  pMask->getBoundingBox(x1, y1, x2, y2);
+                  const bool** pSelectedPixels = const_cast<BitMask*>(pMask)->getRegion(x1, y1, x2, y2);
                   MaskInput input;
                   input.pMatrix = static_cast<double*>(pSmmElement->getRawData());
                   input.numRows = numRows;
@@ -647,6 +629,7 @@ bool SecondMomentAlgorithm::processAll()
                   input.pProgress = getProgress();
                   input.pAbortFlag = &mAbortFlag;
                   input.pSelectedPixels = pSelectedPixels;
+                  input.mpMask = pMask;
                   input.boundingBoxX1 = x1;
                   input.boundingBoxX2 = x2;
                   input.boundingBoxY1 = y1;

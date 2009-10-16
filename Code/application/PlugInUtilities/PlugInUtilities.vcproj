@@ -2468,6 +2468,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Interfaces\BitMaskIterator.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Interfaces\CachedPage.h"
 				>
 			</File>
@@ -3322,6 +3326,10 @@
 			</File>
 			<File
 				RelativePath=".\ArcRegionComboBox.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\BitMaskIterator.cpp"
 				>
 			</File>
 			<File

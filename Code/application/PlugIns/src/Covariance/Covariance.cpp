@@ -13,6 +13,7 @@
 #include "AppVersion.h"
 #include "AppVerify.h"
 #include "BitMask.h"
+#include "BitMaskIterator.h"
 #include "DataAccessorImpl.h"
 #include "DataDescriptor.h"
 #include "DesktopServices.h"
@@ -86,9 +87,8 @@ void ComputeFactoredCov(T* pData, RasterElement* pRaster, double* pMatrix,
    unsigned int lCount = 0;
 
    T *pPixel = NULL;
-   vector<double> averages(numBands);
+   vector<double> averages(numBands, 0);
    double* pAverage = &averages.front();
-   fill(averages.begin(), averages.end(), 0);
 
    if (rowFactor < 1)
    {
@@ -234,74 +234,48 @@ void ComputeMaskedCvm(T* pData, MaskInput* pInput, RasterElement* pRaster)
    {
       return;
    }
-   unsigned int numRows = pDescriptor->getRowCount();
-   unsigned int numCols = pDescriptor->getColumnCount();
    unsigned int numBands = pDescriptor->getBandCount();
-   unsigned int i = 0, j = 0;
-   unsigned int lRow = 0, lColumn = 0;
    int lCount = 0;
-   T* pBand1 = NULL;
-   T* pBand2 = NULL;
    T* pPixel = NULL;
 
-   pInput->boundingBoxX1 = pInput->boundingBoxX1 < 0 ? 0 : pInput->boundingBoxX1;
-   pInput->boundingBoxY1 = pInput->boundingBoxY1 < 0 ? 0 : pInput->boundingBoxY1;
-   pInput->boundingBoxX2 = 
-      pInput->boundingBoxX2 > static_cast<int>(numCols) ? static_cast<int>(numCols) : pInput->boundingBoxX2;
-   pInput->boundingBoxY2 = 
-      pInput->boundingBoxY2 > static_cast<int>(numRows) ? static_cast<int>(numRows) : pInput->boundingBoxY2;
-   unsigned int boundingBoxXSize = pInput->boundingBoxX2 - pInput->boundingBoxX1 + 1;
-   boundingBoxXSize = boundingBoxXSize > numCols ? numCols : boundingBoxXSize;
-   unsigned int boundingBoxYSize = pInput->boundingBoxY2 - pInput->boundingBoxY1 + 1;
-   boundingBoxYSize = boundingBoxYSize > numRows ? numRows : boundingBoxYSize;
-   vector<double> averages(numBands);
+   vector<double> averages(numBands, 0);
    double* pAverage = &averages.front();
-   fill(averages.begin(), averages.end(), 0);
-   T* pDataColumn(NULL);
    memset(pInput->pMatrix, 0, sizeof(double) * pInput->numBands * pInput->numBands);
    FactoryResource<DataRequest> pRequest;
    pRequest->setInterleaveFormat(BIP);
-   pRequest->setRows(pDescriptor->getActiveRow(pInput->boundingBoxY1), 
-      pDescriptor->getActiveRow(pInput->boundingBoxY2));
-   pRequest->setColumns(pDescriptor->getActiveColumn(pInput->boundingBoxX1), 
-      pDescriptor->getActiveColumn(pInput->boundingBoxX2));
    DataAccessor accessor = pRaster->getDataAccessor(pRequest.release());
-   for (j = 0; j < boundingBoxYSize; ++j)
+   BitMaskIterator it(pInput->mpMask, pRaster);
+   int numPixels = it.getCount();
+   LocationType loc;
+   float progScale = 100.0f / numPixels;
+   int progSave = 0;
+   while (it != it.end())
    {
+      it.getPixelLocation(loc);
+      accessor->toPixel(loc.mY, loc.mX);
       VERIFYNRV(accessor.isValid());
-      if (pInput->pProgress != NULL)
+      if (pInput->pProgress != NULL &&
+          progSave != static_cast<int>(progScale * lCount))
       {
          if ((pInput->pAbortFlag == NULL) || !(*pInput->pAbortFlag))
          {
-            int iPercent = (100 * j) / boundingBoxYSize;
-            if (iPercent == 100)
-            {
-               iPercent = 99;
-            }
-
-            pInput->pProgress->updateProgress("Computing Covariance Matrix...", iPercent, NORMAL);
+            progSave = static_cast<int>(progScale * lCount);
+            pInput->pProgress->updateProgress("Computing Covariance Matrix...",
+               progSave, NORMAL);
          }
          else
          {
             break;
          }
       }
-      for (i = 0; i < boundingBoxXSize; ++i)
+      pPixel = reinterpret_cast<T*>(accessor->getColumn());
+      ++lCount;
+      ++it;
+      for (unsigned int band1 = 0; band1 < numBands; ++band1)
       {
-         if (pInput->pSelectedPixels[j][i])
-         {
-            VERIFYNRV(accessor.isValid());
-            pPixel = reinterpret_cast<T*>(accessor->getColumn());
-            ++lCount;
-            for (unsigned int band1 = 0; band1 < numBands; ++band1)
-            {
-               pAverage[band1] += *pPixel;
-               ++pPixel;
-            }
-         }
-         accessor->nextColumn();
+         pAverage[band1] += *pPixel;
+         ++pPixel;
       }
-      accessor->nextRow();
    }
 
    for (unsigned int band1 = 0; band1 < numBands; ++band1)
@@ -312,50 +286,47 @@ void ComputeMaskedCvm(T* pData, MaskInput* pInput, RasterElement* pRaster)
 
    // calculate covariance matrix
    accessor = pRaster->getDataAccessor(pRequest->copy());
-   for (unsigned int row = 0; row < boundingBoxYSize; ++row)
+   it.firstPixel();
+   lCount = 0;
+   progSave = 0;
+   while (it != it.end())
    {
-      if (pInput->pProgress != NULL)
+      if (pInput->pProgress != NULL &&
+          progSave != static_cast<int>(progScale * lCount))
       {
          if ((pInput->pAbortFlag == NULL) || !(*pInput->pAbortFlag))
          {
-            int iPercent = (100 * row) / boundingBoxYSize;
-            if (iPercent == 100)
-            {
-               iPercent = 99;
-            }
-            pInput->pProgress->updateProgress("Computing Covariance Matrix...", iPercent, NORMAL);
+            progSave = static_cast<int>(progScale * lCount);
+            pInput->pProgress->updateProgress("Computing Covariance Matrix...",
+               progSave, NORMAL);
          }
          else
          {
             break;
          }
       }
+      it.getPixelLocation(loc);
+      accessor->toPixel(loc.mY, loc.mX);
 
-      for (unsigned int col = 0; col < boundingBoxXSize; ++col)
+      VERIFYNRV(accessor.isValid());
+      double* pMatrixRow = pInput->pMatrix;
+      double* pMatrixColumn = NULL;
+      pPixel = reinterpret_cast<T*>(accessor->getColumn());
+
+      for (unsigned int band2 = 0; band2 < numBands; ++band2, pMatrixRow += (numBands + 1))
       {
-         if (pInput->pSelectedPixels[row][col])
+         pData = pPixel;
+         pMatrixColumn = pMatrixRow;
+         for (unsigned int band1 = band2; band1 < numBands; ++band1)
          {
-            VERIFYNRV(accessor.isValid());
-            double* pMatrixRow = pInput->pMatrix;
-            double* pMatrixColumn = NULL;
-            pPixel = reinterpret_cast<T*>(accessor->getColumn());
-
-            for (unsigned int band2 = 0; band2 < numBands; ++band2, pMatrixRow += (numBands + 1))
-            {
-               pData = pPixel;
-               pMatrixColumn = pMatrixRow;
-               for (unsigned int band1 = band2; band1 < numBands; ++band1)
-               {
-                  *pMatrixColumn += (*pData - pAverage[band1]) * (*pPixel - pAverage[band2]);
-                  ++pData;
-                  ++pMatrixColumn;
-               }
-               ++pPixel;
-            }
+            *pMatrixColumn += (*pData - pAverage[band1]) * (*pPixel - pAverage[band2]);
+            ++pData;
+            ++pMatrixColumn;
          }
-         accessor->nextColumn();
+         ++pPixel;
       }
-      accessor->nextRow();
+      ++lCount;
+      ++it;
    }
 
    // check if aborted
@@ -721,20 +692,20 @@ bool CovarianceAlgorithm::processAll()
             }
             else // pMask != NULL
             {
-               int x1 = 0;
-               int y1 = 0;
-               int x2 = 0;
-               int y2 = 0;
-               pMask->getBoundingBox(x1, y1, x2, y2);
-
-               const bool** pSelectedPixels = const_cast<BitMask*>(pMask)->getRegion(x1, y1, x2, y2);
-               if (pSelectedPixels == NULL)
+               BitMaskIterator it(pMask, pRasterElement);
+               if (it.getCount() == 0)
                {
                   reportProgress(ERRORS, 0, "Error getting selected pixels from AOI");
                   return false;
                }
-               else // pSelectedPixels != NULL
+               else
                {
+                  int x1 = 0;
+                  int y1 = 0;
+                  int x2 = 0;
+                  int y2 = 0;
+                  pMask->getBoundingBox(x1, y1, x2, y2);
+                  const bool** pSelectedPixels = const_cast<BitMask*>(pMask)->getRegion(x1, y1, x2, y2);
                   MaskInput input;
                   input.pMatrix = static_cast<double*>(pCvmElement->getRawData());
                   input.numRows = numRows;
@@ -743,6 +714,7 @@ bool CovarianceAlgorithm::processAll()
                   input.pProgress = getProgress();
                   input.pAbortFlag = &mAbortFlag;
                   input.pSelectedPixels = pSelectedPixels;
+                  input.mpMask = pMask;
                   input.boundingBoxX1 = x1;
                   input.boundingBoxX2 = x2;
                   input.boundingBoxY1 = y1;
@@ -764,7 +736,7 @@ bool CovarianceAlgorithm::processAll()
    }
    else
    {
-      // check that existing smm is right size and data type
+      // check that existing cvm is right size and data type
       const RasterDataDescriptor* pDesc = static_cast<const RasterDataDescriptor*>(pCvmElement->getDataDescriptor());
       VERIFY(pDesc != NULL);
       unsigned int rows = pDesc->getRowCount();
