@@ -1665,6 +1665,11 @@ Animation* SpatialDataViewImp::createDefaultAnimation()
 
 void SpatialDataViewImp::setTextureMode(const TextureMode& textureMode)
 {
+   if (textureMode == TEXTURE_LINEAR && isSmoothingAvailable() == false)
+   {
+      return;
+   }
+
    if (textureMode != mTextureMode)
    {
       mTextureMode = textureMode;
@@ -3204,7 +3209,9 @@ void SpatialDataViewImp::updateContextMenu(Subject& subject, const string& signa
       return;
    }
 
-   mpSmoothAction->setEnabled(true);
+   // Disable smoothing if a layer is using gpu images since it does not work on GL_FLOAT with NV extensions
+   mpSmoothAction->setEnabled(isSmoothingAvailable());
+
    QObject* pParent = pMenu->getActionParent();
 
    // Check if the user clicked in this view
@@ -3224,13 +3231,6 @@ void SpatialDataViewImp::updateContextMenu(Subject& subject, const string& signa
          Layer* pLayer = *iter;
          if (pLayer != NULL)
          {
-            // Disable smoothing if a layer is using gpu images since it does not work on GL_FLOAT with NV extensions
-            RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(pLayer);
-            if (pRasterLayer != NULL && pRasterLayer->isGpuImageEnabled())
-            {
-               mpSmoothAction->setEnabled(false);
-            }
-
             list<ContextMenuAction> layerActions = pLayer->getContextMenuActions();
             if (layerActions.empty() == false)
             {
@@ -3670,7 +3670,7 @@ void SpatialDataViewImp::setSmoothing(bool enabled)
 {
    TextureMode currentMode = getTextureMode();
    TextureMode newMode;
-   if (enabled)
+   if (enabled && isSmoothingAvailable())
    {
       newMode = TEXTURE_LINEAR;
    }
@@ -4173,4 +4173,21 @@ void SpatialDataViewImp::mousePanTimeout()
    double deltaY = (anchorY - currentY) * scaleFactor;
    panBy(deltaX, deltaY);
    pView->refresh();
+}
+
+bool SpatialDataViewImp::isSmoothingAvailable() const
+{
+   VERIFY(mpLayerList != NULL);
+   vector<Layer*> layers;
+   mpLayerList->getLayers(RASTER, layers);
+   for (vector<Layer*>::iterator iter = layers.begin(); iter != layers.end(); ++iter)
+   {
+      RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(*iter);
+      if (pRasterLayer != NULL && pRasterLayer->isGpuImageEnabled())
+      {
+         return false;
+      }
+   }
+
+   return true;
 }
