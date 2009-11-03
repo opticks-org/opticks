@@ -120,7 +120,6 @@ public:
    bool fromXml(DOMNode* pDocument, unsigned int version);
 
    bool linkView(View *pView, LinkType type);
-   bool isSmoothingAvailable() const;
 
 public slots:
    void setTextureMode(const TextureMode& textureMode);

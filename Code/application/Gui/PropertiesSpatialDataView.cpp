@@ -16,7 +16,7 @@
 #include "LabeledSection.h"
 #include "PanLimitTypeComboBox.h"
 #include "PropertiesSpatialDataView.h"
-#include "SpatialDataViewImp.h"
+#include "SpatialDataView.h"
 #include "SpatialDataWindow.h"
 #include "Undo.h"
 #include "Window.h"
@@ -100,11 +100,6 @@ bool PropertiesSpatialDataView::initialize(SessionItem* pSessionItem)
 
    // Image
    mpSmoothCheck->setChecked(mpView->getTextureMode() == TEXTURE_LINEAR);
-   SpatialDataViewImp* pViewImp = dynamic_cast<SpatialDataViewImp*>(mpView);
-   if (pViewImp != NULL)
-   {
-      mpSmoothCheck->setEnabled(pViewImp->isSmoothingAvailable());
-   }
 
    return true;
 }
