@@ -1,0 +1,19 @@
+
+if [ $CLASSIFICATIONLEVEL = "Unclassified" ]; then
+   lines=1
+elif [ $CLASSIFICATIONLEVEL = "Confidential" ]; then
+   lines=2
+elif [ $CLASSIFICATIONLEVEL = "Secret" ]; then
+   lines=3
+else
+   lines=4
+fi
+
+while read src dest
+do
+  if [ $lines != 4 ]; then
+     cat "$src" | tail -${lines} > "$dest"
+  else
+     cat "$src" > "$dest"
+  fi
+done
