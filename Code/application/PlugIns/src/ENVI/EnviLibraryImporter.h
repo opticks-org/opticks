@@ -35,10 +35,10 @@ public:
 
 protected:
    bool extractPlugInArgs(PlugInArgList* pArgList);
-   std::string findDataFile(const std::string& filename);
-   std::string matchDataFile(const std::string& filename, const std::string& fileExtension,
-      const std::string& openMode);
-   bool parseHeader(const std::string& filename);
+   std::string findDataFile(const std::string& headerFilename);
+   std::string findHeaderFile(const std::string& dataFilename);
+   std::string findFileByExtension(const std::string& filename, const std::string& fileExtension,
+                                   const std::string& openMode);
 
 private:
    Step* mpStep;

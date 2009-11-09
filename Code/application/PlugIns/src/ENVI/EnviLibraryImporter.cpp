@@ -56,9 +56,30 @@ vector<ImportDescriptor*> EnviLibraryImporter::getImportDescriptors(const string
 {
    vector<ImportDescriptor*> descriptors;
 
-   bool bSuccess = parseHeader(filename);
+   string headerFile = filename;
+   string dataFile;
+   // assume filename is a header file and try to parse
+   bool bSuccess = mFields.populateFromHeader(filename);
+   if (bSuccess == false)
+   {
+      dataFile = filename;           // was passed data file name instead of header file name
+      headerFile = findHeaderFile(dataFile);
+      if (headerFile.empty() == false)
+      {
+         bSuccess = mFields.populateFromHeader(headerFile);
+      }
+   }
    if (bSuccess == true)
    {
+      if (dataFile.empty())  // was passed header file name and now need to find the data file name
+      {
+         dataFile = findDataFile(headerFile);
+      }
+      if (dataFile.empty())  // no data file found for the header
+      {
+         return descriptors;
+      }
+
       EnviField* pField = mFields.find("file type");
       if (pField != NULL)
       {
@@ -279,14 +300,10 @@ vector<ImportDescriptor*> EnviLibraryImporter::getImportDescriptors(const string
                   FactoryResource<FileDescriptor> pFileDescriptor;
                   if (pFileDescriptor.get() != NULL)
                   {
-                     // Set the filename as the data file
-                     string dataFile = findDataFile(filename);
-
                      pFileDescriptor->setFilename(dataFile);
                      pDescriptor->setFileDescriptor(pFileDescriptor.get());
                   }
                }
-
                descriptors.push_back(pImportDescriptor);
             }
          }
@@ -339,7 +356,8 @@ bool EnviLibraryImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
 
    // Populate the header fields member
    string dataFile = mpSignatureLibrary->getFilename();
-   if (parseHeader(dataFile) == false)
+   string headerFile = findHeaderFile(dataFile);
+   if (!mFields.populateFromHeader(headerFile))
    {
       message = "Cannot access the spectral library file!";
       if (mpProgress != NULL)
@@ -409,7 +427,7 @@ bool EnviLibraryImporter::extractPlugInArgs(PlugInArgList* pArgList)
    return true;
 }
 
-string EnviLibraryImporter::findDataFile(const string& filename)
+string EnviLibraryImporter::findDataFile(const string& headerFilename)
 {
    // Check the fields from the header
    EnviField* pField = mFields.find("description");
@@ -425,16 +443,21 @@ string EnviLibraryImporter::findDataFile(const string& filename)
       }
    }
 
-   string dataFile = matchDataFile(filename, ".sli", "rb");
+   string dataFile = findFileByExtension(headerFilename, ".sli", "rb");
    if (dataFile.empty())
    {
-      dataFile = matchDataFile(filename, ".spl", "rb");
+      dataFile = findFileByExtension(headerFilename, ".spl", "rb");
    }
    return dataFile;
 }
 
-string EnviLibraryImporter::matchDataFile(const string& filename, const string& fileExtension,
-                                          const string& openMode)
+string EnviLibraryImporter::findHeaderFile(const string& dataFilename)
+{
+   return findFileByExtension(dataFilename, ".hdr", "rt");
+}
+
+string EnviLibraryImporter::findFileByExtension(const string& filename, const string& fileExtension,
+                                                const string& openMode)
 {
    if (filename.empty() == true)
    {
@@ -484,21 +507,4 @@ string EnviLibraryImporter::matchDataFile(const string& filename, const string& 
    }
 
    return matchFile;
-}
-
-bool EnviLibraryImporter::parseHeader(const string& filename)
-{
-   if (filename.empty() == true)
-   {
-      return false;
-   }
-
-   bool bSuccess = mFields.populateFromHeader(filename);
-   if (bSuccess == false)
-   {
-      string headerFile = matchDataFile(filename, ".hdr", "rt");
-      bSuccess = mFields.populateFromHeader(headerFile);
-   }
-
-   return bSuccess;
 }

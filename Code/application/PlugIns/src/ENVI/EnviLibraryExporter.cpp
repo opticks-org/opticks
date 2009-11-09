@@ -324,7 +324,7 @@ bool EnviLibraryExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
    fprintf(pFp, "description = {\n");
    // TODO: get from metadata
    //fprintf(pFp, "    DESCRIPTION = %s\n", mpSignatureSet->getDescription().c_str());
-   fprintf(pFp, "    FILENAME = %s }\n", filename.c_str());
+   fprintf(pFp, "}\n");
    fprintf(pFp, "samples = %u\n", numValues);
    fprintf(pFp, "lines = %u\n", numSignatures);
    fprintf(pFp, "bands = 1\n");
