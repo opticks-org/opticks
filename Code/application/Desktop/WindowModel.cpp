@@ -298,12 +298,10 @@ Qt::ItemFlags WindowModel::WindowSourceModel::flags(const QModelIndex& index) co
       Layer* pLayer = dynamic_cast<Layer*>(index.data(SessionItemModel::SessionItemRole).value<SessionItem*>());
       if (pLayer != NULL)
       {
-         itemFlags |= Qt::ItemIsDragEnabled;
-
          SpatialDataView* pView = dynamic_cast<SpatialDataView*>(pLayer->getView());
          if (pView != NULL)
          {
-            itemFlags |= Qt::ItemIsUserCheckable;
+            itemFlags |= Qt::ItemIsDragEnabled | Qt::ItemIsUserCheckable;
          }
       }
       else if (rowCount(index) > 0)
