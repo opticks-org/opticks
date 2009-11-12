@@ -898,8 +898,18 @@ void WizardView::mouseReleaseEvent(QMouseEvent* pEvent)
 
                   bool connectNodes = true;
 
+                  // Check for connections between two input nodes or two output nodes
+                  if ((pInputItem->isInputNode(pInputNode) == false) ||
+                     (pOutputItem->isOutputNode(pOutputNode) == false))
+                  {
+                     QMessageBox::warning(this, "Wizard Builder", "An input node cannot be connected to another "
+                        "input node and an output node cannot be connected to another output node.  Please connect "
+                        "an input node to an output node.");
+                     connectNodes = false;
+                  }
+
                   // Check for circular connections between the two items
-                  if (pOutputItem->isItemConnected(pInputItem, true) == true)
+                  if ((connectNodes == true) && (pOutputItem->isItemConnected(pInputItem, true) == true))
                   {
                      QMessageBox::warning(this, "Wizard Builder", "These nodes cannot be connected "
                         "since a circular connection between the two items would be created.");
