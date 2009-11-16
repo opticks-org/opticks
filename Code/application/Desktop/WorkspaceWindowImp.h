@@ -65,8 +65,7 @@ protected:
    virtual void closeEvent(QCloseEvent* pEvent);
 
 private:
-   bool mSessionClosedReceived;
-
+   bool mConfirmOnClose;
    QAction* mpActiveAction;
 
    WINDOWIMPDROP_METHODS(ViewWindowImp);

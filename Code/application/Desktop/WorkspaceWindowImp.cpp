@@ -35,7 +35,7 @@ WorkspaceWindowImp::WorkspaceWindowImp(const string& id, const string& windowNam
    ViewWindowImp(id, windowName),
    mpApplicationServices(Service<ApplicationServices>().get(), SIGNAL_NAME(ApplicationServices, SessionClosed),
       Slot(this, &WorkspaceWindowImp::sessionClosed)),
-   mSessionClosedReceived(false)
+   mConfirmOnClose(true)
 {
    setWindowTitle(QString::fromStdString(windowName));
    setAttribute(Qt::WA_DeleteOnClose);
@@ -113,6 +113,7 @@ void WorkspaceWindowImp::viewDeleted(Subject& subject, const string& signal, con
          pAppWindow->removeWindow(dynamic_cast<Window*>(this));
       }
 
+      mConfirmOnClose = false;
       close();
    }
 }
@@ -122,7 +123,7 @@ void WorkspaceWindowImp::sessionClosed(Subject& subject, const string& signal, c
    Q_UNUSED(subject);
    Q_UNUSED(signal);
    Q_UNUSED(value);
-   mSessionClosedReceived = true;
+   mConfirmOnClose = false;
 }
 
 void WorkspaceWindowImp::setName(const string& windowName)
@@ -262,7 +263,7 @@ QSize WorkspaceWindowImp::sizeHint() const
 
 void WorkspaceWindowImp::closeEvent(QCloseEvent* pEvent)
 {
-   if (WorkspaceWindow::getSettingConfirmClose() == true && mSessionClosedReceived == false)
+   if (WorkspaceWindow::getSettingConfirmClose() == true && mConfirmOnClose == true)
    {
       int button = QMessageBox::question(this, "Confirm Close", "Are you sure that you want to close \"" +
          windowTitle() + "\"?", "Yes", "No", QString(), 0, 1);
