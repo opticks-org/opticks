@@ -25,6 +25,7 @@
 #include "GraphicLayerImp.h"
 #include "GraphicLayerUndo.h"
 #include "GraphicObjectFactory.h"
+#include "SessionManager.h"
 #include "StringUtilities.h"
 #include "TextObject.h"
 #include "TextObjectImp.h"
@@ -996,7 +997,11 @@ bool GraphicGroupImp::fromXml(DOMNode* pDocument, unsigned int version)
                      }
                      else if (pView != NULL)
                      {
-                        pView->addUndoAction(new AddGraphicObject(dynamic_cast<GraphicGroup*>(this), pObject));
+                        Service<SessionManager> pManager;
+                        if (pManager->isSessionLoading() == false)
+                        {
+                           pView->addUndoAction(new AddGraphicObject(dynamic_cast<GraphicGroup*>(this), pObject));
+                        }
                      }
                   }
                   catch (XmlReader::DomParseException& exc)

@@ -877,7 +877,8 @@ bool ProductViewImp::event(QEvent* pEvent)
 
    // Initialize the paper size in the Polish event instead of the constructor since
    // a virtual function is called in the classification layer's text objects
-   if (pEvent->type() == QEvent::Polish)
+   Service<SessionManager> pManager;
+   if ((pManager->isSessionLoading() == false) && (pEvent->type() == QEvent::Polish))
    {
       if ((mPaperWidth == 0.0) || (mPaperHeight == 0.0))
       {
