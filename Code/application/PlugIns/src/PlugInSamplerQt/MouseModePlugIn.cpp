@@ -11,6 +11,7 @@
 #include <QtGui/QMessageBox>
 #include <QtGui/QMouseEvent>
 
+#include "AppVerify.h"
 #include "DesktopServices.h"
 #include "DimensionDescriptor.h"
 #include "Layer.h"
@@ -20,12 +21,16 @@
 #include "PlugInRegistration.h"
 #include "RasterElement.h"
 #include "RasterDataDescriptor.h"
+#include "SessionManager.h"
 #include "Slot.h"
 #include "SpatialDataView.h"
 #include "SpatialDataWindow.h"
 #include "ToolBar.h"
+#include "xmlreader.h"
+#include "xmlwriter.h"
 
 using namespace std;
+XERCES_CPP_NAMESPACE_USE
 
 static const char* const MouseModeIcon[] =
 {
@@ -171,6 +176,93 @@ bool MouseModePlugIn::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
    pDesktop->attach(SIGNAL_NAME(DesktopServices, WindowAdded), Slot(this, &MouseModePlugIn::windowAdded));
    pDesktop->attach(SIGNAL_NAME(DesktopServices, WindowActivated), Slot(this, &MouseModePlugIn::windowActivated));
    pDesktop->attach(SIGNAL_NAME(DesktopServices, WindowRemoved), Slot(this, &MouseModePlugIn::windowRemoved));
+
+   return true;
+}
+
+bool MouseModePlugIn::serialize(SessionItemSerializer& serializer) const
+{
+   if (mpMouseModeAction != NULL)
+   {
+      QString windowName = QString::fromStdString(getName());
+      windowName.remove(" ");
+
+      XMLWriter writer(windowName.toUtf8());
+      writer.addAttr("batch", isBatch());
+
+      vector<Window*> windows;
+      Service<DesktopServices>()->getWindows(SPATIAL_DATA_WINDOW, windows);
+      for (vector<Window*>::iterator iter = windows.begin(); iter != windows.end(); ++iter)
+      {
+         SpatialDataWindow* pWindow = dynamic_cast<SpatialDataWindow*>(*iter);
+         if (pWindow != NULL)
+         {
+            SpatialDataView* pView = pWindow->getSpatialDataView();
+            if (pView != NULL)
+            {
+               writer.pushAddPoint(writer.addElement("view"));
+               writer.addAttr("id", pView->getId());
+               writer.popAddPoint();
+            }
+         }
+      }
+
+      return serializer.serialize(writer);
+   }
+
+   return false;
+}
+
+bool MouseModePlugIn::deserialize(SessionItemDeserializer& deserializer)
+{
+   QString windowName = QString::fromStdString(getName());
+   windowName.remove(" ");
+
+   XmlReader reader(NULL, false);
+   DOMElement* pRootElement = deserializer.deserialize(reader, windowName.toUtf8());
+   if (pRootElement != NULL)
+   {
+      bool batch = StringUtilities::fromXmlString<bool>(A(pRootElement->getAttribute(X("batch"))));
+      if (batch == true)
+      {
+         setBatch();
+      }
+      else
+      {
+         setInteractive();
+      }
+   }
+
+   // Create the toolbar button and action
+   if (execute(NULL, NULL) == false)
+   {
+      return false;
+   }
+
+   VERIFY(mpMouseModeAction != NULL);
+
+   // Add the mouse mode to the spatial data views
+   for (DOMNode* pNode = pRootElement->getFirstChild(); pNode != NULL; pNode = pNode->getNextSibling())
+   {
+      if (XMLString::equals(pNode->getNodeName(), X("view")))
+      {
+         DOMElement* pViewElement = static_cast<DOMElement*>(pNode);
+         Service<SessionManager> pSession;
+
+         SpatialDataView* pView =
+            dynamic_cast<SpatialDataView*>(pSession->getSessionItem(A(pViewElement->getAttribute(X("id")))));
+         if (pView != NULL)
+         {
+            QWidget* pViewWidget = pView->getWidget();
+            if (pViewWidget != NULL)
+            {
+               pViewWidget->installEventFilter(this);
+            }
+
+            addMouseMode(pView);
+         }
+      }
+   }
 
    return true;
 }

@@ -14,6 +14,8 @@
 #include <QtGui/QAction>
 
 #include "AlgorithmShell.h"
+#include "SessionItemDeserializer.h"
+#include "SessionItemSerializer.h"
 
 #include <boost/any.hpp>
 #include <string>
@@ -31,6 +33,9 @@ public:
    bool getInputSpecification(PlugInArgList*& pArgList);
    bool getOutputSpecification(PlugInArgList*& pArgList);
    bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
+
+   virtual bool serialize(SessionItemSerializer& serializer) const;
+   virtual bool deserialize(SessionItemDeserializer& deserializer);
 
 protected:
    bool eventFilter(QObject* pObject, QEvent* pEvent);
