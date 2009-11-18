@@ -473,8 +473,14 @@ bool TextObjectImp::processMousePress(LocationType screenCoord, Qt::MouseButton 
 
    mUpdateTexture = bValidText;
    mUpdateBoundingBox = bValidText;
-   pLayer->completeInsertion(bValidText);
 
+   if (bValidText == true)
+   {
+      // Update the texture here to ensure a correct bounding box when the undo action is added
+      updateTexture();
+   }
+
+   pLayer->completeInsertion(bValidText);
    return bValidText;
 }
 

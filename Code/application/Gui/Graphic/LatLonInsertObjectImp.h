@@ -18,7 +18,6 @@
 #include "GraphicObjectImp.h"
 #include "GeoPoint.h"
 #include "RasterElement.h"
-#include "TypesFile.h"
 
 class GraphicLayer;
 class ArrowObjectImp;
@@ -85,8 +84,6 @@ protected:
 private:
    GraphicResource<GraphicGroupImp> mpGroup;
    AttachmentPtr<RasterElement> mpGeoreference;
-   GeocoordType mGeocoordType;
-   DmsFormatType mFormatType;
 };
 
 #define LATLONINSERTOBJECTADAPTEREXTENSION_CLASSES \

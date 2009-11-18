@@ -391,7 +391,15 @@ bool BoundingBoxProperty::compare(const GraphicProperty* pProp) const
 
 GraphicProperty* BoundingBoxProperty::copy() const
 {
-   return new BoundingBoxProperty(mLlCorner, mUrCorner, mLlLatLong, mUrLatLong, mGeoCoordsMatchPixelCoords);
+   BoundingBoxProperty* pProperty = new BoundingBoxProperty(mLlCorner, mUrCorner, mLlLatLong, mUrLatLong,
+      mGeoCoordsMatchPixelCoords);
+   if (pProperty != NULL)
+   {
+      pProperty->mHasGeoCoords = mHasGeoCoords;
+      pProperty->mHasPixelCoords = mHasPixelCoords;
+   }
+
+   return pProperty;
 }
 
 bool BoundingBoxProperty::toXml(XMLWriter* pXml) const

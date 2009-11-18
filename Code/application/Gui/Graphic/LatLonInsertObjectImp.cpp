@@ -102,12 +102,6 @@ LatLonInsertObjectImp::LatLonInsertObjectImp(const string& id, GraphicObjectType
    setBoundingBox( mpGroup->getLlCorner(), mpGroup->getUrCorner() );
    updateHandles();
    updateLatLon();
-
-   GraphicLayerImp* pLayerImp = dynamic_cast<GraphicLayerImp*>(getLayer());
-   if (pLayerImp != NULL)
-   {
-      pLayerImp->completeInsertion();
-   }
 }
 
 LatLonInsertObjectImp::~LatLonInsertObjectImp()
@@ -284,10 +278,7 @@ void LatLonInsertObjectImp::moveHandle(int handle, LocationType pixel, bool bMai
 
 bool LatLonInsertObjectImp::hit(LocationType pixelCoord) const
 {
-   bool bHit = false;
-   bHit = mpGroup->hit(pixelCoord);
-
-   return bHit;
+   return mpGroup->hit(pixelCoord);
 }
 
 bool LatLonInsertObjectImp::replicateObject(const GraphicObject* pObject)
@@ -298,12 +289,9 @@ bool LatLonInsertObjectImp::replicateObject(const GraphicObject* pObject)
       return false;
    }
 
-   bool bSuccess = false;
-
    const GraphicGroup& group = pLLIObject->getGroup();
-   
-   bSuccess = mpGroup->replicateObject(&group);
 
+   bool bSuccess = mpGroup->replicateObject(&group);
    if (bSuccess == true)
    {
       bSuccess = GraphicObjectImp::replicateObject(pObject);
@@ -415,45 +403,48 @@ LocationType LatLonInsertObjectImp::getLatLonLoc() const
 
 void LatLonInsertObjectImp::updateLatLon()
 {
-   // Get the spatial data view and the scene coordinate at the arrow tip location
-   LocationType sceneCoord;
+   if (mpGeoreference.get() == NULL)
+   {
+      return;
+   }
 
    GraphicLayerImp* pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
-   if (pLayer != NULL)
+   if (pLayer == NULL)
    {
-      View* pView = pLayer->getView();
-      if (pView != NULL)
+      return;
+   }
+
+   // Get the scene coordinate at the arrow tip location
+   LocationType sceneCoord;
+   if (dynamic_cast<SpatialDataView*>(pLayer->getView()) != NULL)
+   {
+      sceneCoord = getLatLonLoc();
+   }
+   else
+   {
+      ProductView* pProductView = dynamic_cast<ProductView*>(pLayer->getView());
+      if (pProductView != NULL)
       {
-         if (dynamic_cast<SpatialDataView*>(pView) != NULL)
+         if (pLayer == dynamic_cast<GraphicLayerImp*>(pProductView->getLayoutLayer()))
          {
-            sceneCoord = getLatLonLoc();
-         }
+            LocationType paperCoord = getLatLonLoc();
+            LocationType worldCoord;
+            pLayer->translateDataToWorld(paperCoord.mX, paperCoord.mY, worldCoord.mX, worldCoord.mY);
+            LocationType screenCoord;
+            pProductView->translateWorldToScreen(worldCoord.mX, worldCoord.mY, screenCoord.mX, screenCoord.mY);
 
-         ProductView* pProductView = dynamic_cast<ProductView*>(pView);
-         if (pProductView != NULL)
-         {
-            if (pLayer == dynamic_cast<GraphicLayerImp*>(pProductView->getLayoutLayer()))
+            GraphicObject* pViewObject = NULL;
+            pViewObject = pProductView->getActiveEditObject();
+            if (pViewObject != NULL)
             {
-               LocationType paperCoord = getLatLonLoc();
-               LocationType worldCoord;
-               pLayer->translateDataToWorld(paperCoord.mX, paperCoord.mY, worldCoord.mX, worldCoord.mY);
-               LocationType screenCoord;
-               pProductView->translateWorldToScreen(worldCoord.mX, worldCoord.mY,
-                  screenCoord.mX, screenCoord.mY);
-
-               GraphicObject* pViewObject = NULL;
-               pViewObject = pProductView->getActiveEditObject();
-               if (pViewObject != NULL)
+               QPoint screenPoint(static_cast<int>(screenCoord.mX), static_cast<int>(screenCoord.mY));
+               if (pLayer->hit(screenPoint) == pViewObject)
                {
-                  QPoint screenPoint(static_cast<int>(screenCoord.mX), static_cast<int>(screenCoord.mY));
-                  if (pLayer->hit(screenPoint) == pViewObject)
+                  SpatialDataView* pSpatialDataView = dynamic_cast<SpatialDataView*>(pViewObject->getObjectView());
+                  if (pSpatialDataView != NULL)
                   {
-                     SpatialDataView* pSpatialDataView = dynamic_cast<SpatialDataView*>(pViewObject->getObjectView());
-                     if (pSpatialDataView != NULL)
-                     {
-                        pSpatialDataView->translateScreenToWorld(screenCoord.mX, screenCoord.mY,
-                           sceneCoord.mX, sceneCoord.mY);
-                     }
+                     pSpatialDataView->translateScreenToWorld(screenCoord.mX, screenCoord.mY,
+                        sceneCoord.mX, sceneCoord.mY);
                   }
                }
             }
@@ -462,20 +453,11 @@ void LatLonInsertObjectImp::updateLatLon()
    }
 
    // Update the lat/long value
+   LocationType dataCoord;
+   pLayer->translateWorldToData(sceneCoord.mX, sceneCoord.mY, dataCoord.mX, dataCoord.mY);
 
-   bool bSuccess = false;
-   if (mpGeoreference.get() != NULL)
-   {
-      if (pLayer != NULL)
-      {
-         LocationType dataCoord;
-         pLayer->translateWorldToData(sceneCoord.mX, sceneCoord.mY, dataCoord.mX, dataCoord.mY);
-         LatLonPoint latLonPoint = mpGeoreference->convertPixelToGeocoord(dataCoord);
-         bSuccess = setLatLon(latLonPoint);
-      }
-   }
-
-   if (bSuccess == true)
+   LatLonPoint latLonPoint = mpGeoreference->convertPixelToGeocoord(dataCoord);
+   if (setLatLon(latLonPoint) == true)
    {
       updateLatLonText();
    }
@@ -483,85 +465,85 @@ void LatLonInsertObjectImp::updateLatLon()
 
 void LatLonInsertObjectImp::updateLatLonText()
 {
-   string latLonText = UNAVAILABLE;
-
-   // Get the text format from the current lat/long layer
-   GeocoordType eGeocoord = LatLonLayer::getSettingGeocoordType();
-   DmsFormatType eDmsFormat = LatLonLayer::getSettingFormat();
-
-   GraphicLayer* pLayer = NULL;
-   pLayer = getLayer();
-   if (pLayer != NULL)
+   TextObjectImp* pLatLonText = getTextObject();
+   if (pLatLonText == NULL)
    {
-      View* pView = pLayer->getView();
-      if (pView != NULL)
-      {
-         SpatialDataView* pSpatialView = dynamic_cast<SpatialDataView*>(pView);
-         if (pSpatialView == NULL)
-         {
-            ProductView* pProductView = dynamic_cast<ProductView*>(pView);
-            pSpatialView = dynamic_cast<SpatialDataView*>(pProductView->getActiveEditView());
-         }
+      return;
+   }
 
-         if (pSpatialView != NULL)
+   string latLonText = UNAVAILABLE;
+   if (mpGeoreference.get() != NULL)
+   {
+      // Get the text format from the current lat/long layer
+      GeocoordType eGeocoord = LatLonLayer::getSettingGeocoordType();
+      DmsFormatType eDmsFormat = LatLonLayer::getSettingFormat();
+
+      GraphicLayer* pLayer = getLayer();
+      if (pLayer != NULL)
+      {
+         View* pView = pLayer->getView();
+         if (pView != NULL)
          {
-            LatLonLayer* pLatLonLayer = dynamic_cast<LatLonLayer*>(pSpatialView->getTopMostLayer(LAT_LONG));
-            if (pLatLonLayer != NULL)
+            SpatialDataView* pSpatialView = dynamic_cast<SpatialDataView*>(pView);
+            if (pSpatialView == NULL)
             {
-               eGeocoord = pLatLonLayer->getGeocoordType();
-               eDmsFormat = pLatLonLayer->getLatLonFormat();
+               ProductView* pProductView = dynamic_cast<ProductView*>(pView);
+               pSpatialView = dynamic_cast<SpatialDataView*>(pProductView->getActiveEditView());
+            }
+
+            if (pSpatialView != NULL)
+            {
+               LatLonLayer* pLatLonLayer = dynamic_cast<LatLonLayer*>(pSpatialView->getTopMostLayer(LAT_LONG));
+               if (pLatLonLayer != NULL)
+               {
+                  eGeocoord = pLatLonLayer->getGeocoordType();
+                  eDmsFormat = pLatLonLayer->getLatLonFormat();
+               }
             }
          }
       }
-   }
 
-   // Get the lat/long text in the current text format
-   LatLonPoint latLonPoint = getLatLon();
-   if (eGeocoord == GEOCOORD_LATLON)
-   {
-      latLonText = latLonPoint.getText(eDmsFormat);
-   }
-   else if (eGeocoord == GEOCOORD_UTM)
-   {
-      UtmPoint utmPoint(latLonPoint);
-      latLonText = utmPoint.getText();
-   }
-   else if (eGeocoord == GEOCOORD_MGRS)
-   {
-      MgrsPoint mgrsPoint(latLonPoint);
-      latLonText = mgrsPoint.getText();
-   }
-
-   // Update the text object
-   TextObjectImp* pLatLonText = getTextObject();
-   if (pLatLonText != NULL)
-   {
-      // Only update the text if it has changed
-      string currentText = pLatLonText->getText();
-
-      if (latLonText != currentText)
+      // Get the lat/long text in the current text format
+      LatLonPoint latLonPoint = getLatLon();
+      if (eGeocoord == GEOCOORD_LATLON)
       {
-         // Set the text
-         if (pLatLonText->setText(latLonText))
-         {
-            pLatLonText->updateTexture();
-         }
-
-         // Update the arrow handle
-         ArrowObjectImp* pArrow = getArrowObject();
-         if (pArrow != NULL)
-         {
-            pArrow->moveHandle(BOTTOM_LEFT, 
-               LocationType((pLatLonText->getLlCorner().mX + pLatLonText->getUrCorner().mX) / 2.0,
-               pLatLonText->getUrCorner().mY));
-         }
-
-         // Update the bounding box
-         setBoundingBox(mpGroup->getLlCorner(), mpGroup->getUrCorner());
-
-         // Update the handles
-         updateHandles();
+         latLonText = latLonPoint.getText(eDmsFormat);
       }
+      else if (eGeocoord == GEOCOORD_UTM)
+      {
+         UtmPoint utmPoint(latLonPoint);
+         latLonText = utmPoint.getText();
+      }
+      else if (eGeocoord == GEOCOORD_MGRS)
+      {
+         MgrsPoint mgrsPoint(latLonPoint);
+         latLonText = mgrsPoint.getText();
+      }
+   }
+
+   // Only update the text object if the text has changed
+   if (latLonText != pLatLonText->getText())
+   {
+      // Set the text
+      if (pLatLonText->setText(latLonText))
+      {
+         pLatLonText->updateTexture();
+      }
+
+      // Update the arrow handle
+      ArrowObjectImp* pArrow = getArrowObject();
+      if (pArrow != NULL)
+      {
+         pArrow->moveHandle(BOTTOM_LEFT,
+            LocationType((pLatLonText->getLlCorner().mX + pLatLonText->getUrCorner().mX) / 2.0,
+            pLatLonText->getUrCorner().mY));
+      }
+
+      // Update the bounding box
+      setBoundingBox(mpGroup->getLlCorner(), mpGroup->getUrCorner());
+
+      // Update the handles
+      updateHandles();
    }
 }
 
