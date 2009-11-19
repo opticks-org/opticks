@@ -114,6 +114,7 @@ ProductViewImp::ProductViewImp(const string& id, const string& viewName, QGLCont
    addMouseMode(new MouseModeImp("ZoomInMode", QCursor(QPixmap(":/icons/ZoomInCursor", 0, 0))));
    addMouseMode(new MouseModeImp("ZoomOutMode", QCursor(QPixmap(":/icons/ZoomOutCursor", 0, 0))));
    addMouseMode(new MouseModeImp("ZoomBoxMode", QCursor(QPixmap(":/icons/ZoomRectCursor", 0, 0))));
+   setMouseMode("LayerMode");
 
    // Connections
    VERIFYNR(connect(this, SIGNAL(mouseModeChanged(const MouseMode*)), this, SLOT(updateMouseCursor(const MouseMode*))));
