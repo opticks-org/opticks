@@ -50,6 +50,7 @@
 #include "PseudocolorLayerAdapter.h"
 #include "RasterLayerAdapter.h"
 #include "RasterDataDescriptor.h"
+#include "ScriptingWindow.h"
 #include "SessionInfoItem.h"
 #include "SessionItem.h"
 #include "SessionItemDeserializerImp.h"
@@ -1024,6 +1025,15 @@ void SessionManagerImp::newSession()
    VERIFYNRV(pAppWindow != NULL);
    pAppWindow->registerPlugIns();
    pAppWindow->updateWizardCommands();
+
+   Service<DesktopServices> pDesktop;
+
+   ScriptingWindow* pScriptingWindow = dynamic_cast<ScriptingWindow*>(pDesktop->getWindow("Scripting Window",
+      DOCK_WINDOW));
+   if (pScriptingWindow != NULL)
+   {
+      pScriptingWindow->updateInterpreters();
+   }
 
    PlugInManagerServicesImp* pManager = PlugInManagerServicesImp::instance();
    if (pManager != NULL)

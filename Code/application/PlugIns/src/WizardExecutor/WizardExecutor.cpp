@@ -818,11 +818,17 @@ bool WizardExecutor::queryValueItems(const vector<WizardItem*>& valueItems)
    QDialog input(Service<DesktopServices>()->getMainWidget());
 
    // Edit widgets
+   vector<DataVariantEditor*> editors;
+   editors.reserve(valueItems.size());
    LabeledSectionGroup* pGroup = new LabeledSectionGroup(&input);
    for (size_t idx = 0; idx < valueItems.size(); ++idx)
    {
       DataVariantEditor* pEditor = new DataVariantEditor(&input, false);
-      WizardNode* pValNode = valueItems[idx]->getOutputNodes().front();
+      editors.push_back(pEditor);
+      const vector<WizardNode*>& nodes = valueItems[idx]->getOutputNodes();
+      VERIFY(nodes.size() == 1);
+      WizardNode* pValNode = nodes.front();
+      VERIFY(pValNode != NULL);
       DataVariant val(pValNode->getType(), pValNode->getValue());
       pEditor->setValue(val);
 
@@ -895,6 +901,22 @@ bool WizardExecutor::queryValueItems(const vector<WizardItem*>& valueItems)
    {
       mMessage = "Wizard cancelled by user.";
       return false;
+   }
+
+   for (size_t idx = 0; idx < valueItems.size(); ++idx)
+   {
+      DataVariantEditor* pEditor = editors[idx];
+      const vector<WizardNode*>& nodes = valueItems[idx]->getOutputNodes();
+      VERIFY(nodes.size() == 1);
+      WizardNode* pValNode = nodes.front();
+      VERIFY(pValNode != NULL);
+      const DataVariant& val(pEditor->getValue());
+      if (pValNode->getType() != val.getTypeName())
+      {
+         mMessage = "Invalid value for " + pValNode->getName();
+         return false;
+      }
+      pValNode->setValue(val.getPointerToValueAsVoid());
    }
 
    return true;

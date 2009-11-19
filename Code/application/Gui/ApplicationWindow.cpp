@@ -3525,9 +3525,6 @@ void ApplicationWindow::registerPlugIns()
 
    // Update the menus
    updatePlugInCommands();
-
-   // Update the scripting window interpreters
-   m_pScripting->updateInterpreters();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////

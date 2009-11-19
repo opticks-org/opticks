@@ -3,8 +3,21 @@
 This document will describe the changes present in each version of the SDK.
 This document should be used to help upgrade any plug-ins to a particular version of the SDK.
 There is a page dedicated to each version of the SDK and if you are upgrading a plug-in by more than one version of the SDK, you MUST read all relevant pages for versions that you are skipping.
+- \subpage changes432
 - \subpage changes431
 - \subpage changes430
+*/
+
+/** \page changes432 4.3.2 Changes
+\section contents432 Contents
+- \ref u431_to_432_solaris
+<br><br>
+
+\subsection u431_to_432_solaris Solaris Compilation
+<HR>
+The Solaris SDK now includes a lower-case "application" and upper-case "Application" directory that contains the necessary include files.
+All plug-in build environments should be upgraded to use the lower-case version of "application", because the upper-case version "Application" will be removed in a future release.
+
 */
 
 /** \page changes431 4.3.1 Changes
