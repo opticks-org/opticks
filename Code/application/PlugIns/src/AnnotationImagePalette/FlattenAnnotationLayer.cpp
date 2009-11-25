@@ -224,7 +224,6 @@ bool FlattenAnnotationLayer::execute(PlugInArgList* pInArgList, PlugInArgList* p
    UndoLock undo(pView);
    std::list<GraphicObject*> objects;
    pAnnotationLayer->getObjects(FILE_IMAGE_OBJECT, objects);
-   bool isGeocentric = static_cast<GraphicElement*>(pAnnotationLayer->getDataElement())->getGeocentric();
    float curProgress = 0.0;
    float progressInc = 99.0  / (objects.empty() ? 1 : objects.size());
    for (std::list<GraphicObject*>::iterator object = objects.begin(); object != objects.end(); ++object)
@@ -250,15 +249,7 @@ bool FlattenAnnotationLayer::execute(PlugInArgList* pInArgList, PlugInArgList* p
       bool horizontalFlip(false);
       bool verticalFlip(false);
       pRasterLayer->isFlipped(llCorner, urCorner, horizontalFlip, verticalFlip);
-      if (isGeocentric)
-      {
-         std::vector<LocationType> geos, pixels;
-         geos.push_back(llCorner);
-         geos.push_back(urCorner);
-         pRaster->convertGeocoordsToPixels(geos);
-         llCorner = pixels[0];
-         urCorner = pixels[1];
-      }
+
       int startRow = static_cast<int>(std::min(llCorner.mY, urCorner.mY));
       int startCol = static_cast<int>(std::min(llCorner.mX, urCorner.mX));
       int endRow = static_cast<int>(std::max(llCorner.mY, urCorner.mY) + 0.5);

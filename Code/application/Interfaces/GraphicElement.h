@@ -65,30 +65,40 @@ public:
    virtual bool getInteractive() const = 0;
 
    /**
-    *  Sets whether the GraphicObjects within this GraphicElement are
-    *  geocentric in nature.  This object's parent will be used
-    *  for georeferencing.
+    *  Sets whether graphic objects within this graphic element are geocentric
+    *  in nature.
     *
-    *  @param geocentric
-    *         Whether the GraphicObjects are geocentric.
+    *  This method obtains georeferencing information from the element's parent
+    *  and updates the bounding box locations of all graphic objects in the
+    *  element to include latitude/longitude coordinates in addition to pixel
+    *  coordinates.
     *
-    *  @return True if the operation succeeded, false otherwise.
-    *          The operation will fail if this object's parent
-    *          is not a georeferenced  RasterElement.
+    *  After calling this method GraphicObject::getLlCorner() and
+    *  GraphicObject::getUrCorner() will continue to return pixel coordinate
+    *  locations.
     *
-    *  @notify  This method will notify with Subject::signalModified.
+    *  @param  geocentric
+    *          Whether the GraphicObjects are geocentric.
     *
-    *  @see getGeocentric()
+    *  @return Returns \c true if the operation succeeded; \c false otherwise.
+    *          The operation will fail if this element's parent is not a
+    *          georeferenced RasterElement.
+    *
+    *  @notify This method will notify with Subject::signalModified() if the
+    *          graphic objects are successfully set as geocentric.
+    *
+    *  @see    getGeocentric()
     */
    virtual bool setGeocentric(bool geocentric) = 0;
 
    /**
-    *  Gets whether the GraphicObjects within this GraphicElement are
-    *  geocentric in nature.
+    *  Gets whether graphic objects within this graphic element are geocentric
+    *  in nature.
     *
-    *  @return True if the objects are geocentric, false otherwise.
+    *  @return Returns \c true if the graphic objects is this element are
+    *          geocentric; \c false otherwise.
     *
-    *  @see setGeocentric()
+    *  @see    setGeocentric()
     */
    virtual bool getGeocentric() const = 0;
 
