@@ -7,16 +7,16 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "DataVariantEditor.h"
-
 #include "AppVerify.h"
 #include "ColorType.h"
 #include "CustomColorButton.h"
-#include "DateTimeImp.h"
-#include "FilenameImp.h"
-#include "StringUtilities.h"
-#include "DynamicObjectAdapter.h"
+#include "DataVariantEditor.h"
+#include "DateTime.h"
+#include "DynamicObject.h"
+#include "Filename.h"
+#include "ObjectFactory.h"
 #include "ObjectResource.h"
+#include "StringUtilities.h"
 #include "SymbolTypeGrid.h"
 
 #include <QtCore/QDateTime>
@@ -27,13 +27,12 @@
 #include <QtGui/QLayout>
 #include <QtGui/QLineEdit>
 #include <QtGui/QListWidget>
-#include <QtGui/QMessageBox>
-#include <QtGui/QPixmap>
 #include <QtGui/QPushButton>
 #include <QtGui/QRadioButton>
 #include <QtGui/QStackedWidget>
 #include <QtGui/QTextEdit>
 #include <QtGui/QValidator>
+
 #include <string>
 #include <vector>
 using namespace std;
@@ -272,33 +271,27 @@ QSize DataVariantEditor::sizeHint() const
 
 void DataVariantEditor::setValue(const DataVariant& value, bool useVariantCurrentValue)
 {
-   // Type
-   string type = value.getTypeName();
-
-   // Value
-   mpValueLineEdit->clear();
-   mpValueTextEdit->clear();
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : The useVariantCurrentValue parameter is used to not " \
+   "initialize a widget with a default value only when it would otherwise initialize to an undefined value.  The " \
+   "parameter can be removed when DataVariant supports a valid type with an invalid value. (dsulgrov)")
 
    if (value.isValid() == false)
    {
       return;
    }
 
-   // Get the value string
-   string valueText = value.toDisplayString();
-
-   QString strValue = QString::fromStdString(valueText);
-
    // Update the widgets
+   string type = value.getTypeName();
+
    DataVariantEditorDelegate curDelegate = getDelegate(type);
    if (curDelegate.getType() == DataVariantEditorDelegate::BOOL)
    {
-      string value = strValue.toStdString();
-      if (value == StringUtilities::toDisplayString(true) || (!useVariantCurrentValue))
+      bool boolValue = dv_cast<bool>(value, true);
+      if (boolValue)
       {
          mpTrueRadio->setChecked(true);
       }
-      else if (value == StringUtilities::toDisplayString(false))
+      else
       {
          mpFalseRadio->setChecked(true);
       }
@@ -308,94 +301,97 @@ void DataVariantEditor::setValue(const DataVariant& value, bool useVariantCurren
       QDateTime dateTime;
       if (useVariantCurrentValue)
       {
-         char month[128];
-         int iMonth = 0;
-         int iDay = 0;
-         int iYear = 0;
-         int iHour = 0;
-         int iMinute = 0;
-         int iSecond = 0;
-
-         int iValues = sscanf(valueText.c_str(), "%s %d, %d, %d:%d:%d", &month, &iDay, &iYear,
-            &iHour, &iMinute, &iSecond);
-         if (iValues > 0)
+         const DateTime* pDateTime = dv_cast<DateTime>(&value);
+         if (pDateTime != NULL)
          {
-            iMonth = DateTimeImp::getMonth(string(month));
+            time_t timeValue = pDateTime->getStructured();
+            dateTime = QDateTime::fromTime_t(timeValue);
          }
-         dateTime = QDateTime(QDate(iYear, iMonth, iDay), QTime(iHour, iMinute, iSecond));
       }
+
       mpDateTimeEdit->setDateTime(dateTime);
    }
    else if (curDelegate.getType() == DataVariantEditorDelegate::ENUMERATION)
    {
+      // Populate the list widget with the enumerated values
       mpValueList->clear();
-      QStringList items;
-      vector<string> enumValues = curDelegate.getEnumValueStrings();
-      for (vector<string>::iterator iter = enumValues.begin();
-           iter != enumValues.end(); ++iter)
-      {
-         items.append(QString::fromStdString(*iter));
-      }
-      mpValueList->addItems(items);
+      string valueText = value.toDisplayString();
 
-      int iValue = 0;
-      if (useVariantCurrentValue)
+      const vector<string>& enumValues = curDelegate.getEnumValueStrings();
+      for (vector<string>::size_type i = 0; i < enumValues.size(); ++i)
       {
-         QList<QListWidgetItem*> listItems = mpValueList->findItems(strValue, Qt::MatchExactly);
-         if (listItems.empty() == false)
+         string enumValue = enumValues[i];
+         if (enumValue.empty() == false)
          {
-            QListWidgetItem* pItem = listItems.front();
-            if (pItem != NULL)
+            mpValueList->addItem(QString::fromStdString(enumValue));
+            if (enumValue == valueText)
             {
-               iValue = mpValueList->row(pItem);
+               mpValueList->setCurrentRow(static_cast<int>(i));
             }
          }
       }
 
-      mpValueList->setCurrentRow(iValue);
+      if ((mpValueList->currentRow() == -1) && (mpValueList->count() > 0))
+      {
+         mpValueList->setCurrentRow(0);
+      }
    }
    else if (curDelegate.getType() == DataVariantEditorDelegate::VECTOR)
    {
+      mpValueTextEdit->clear();
       if (useVariantCurrentValue)
       {
-         QStringList strlValues = strValue.split(", ");
-         for (int j = 0; j < strlValues.count(); j++)
+         if (curDelegate.getTypeName() == "vector<string>")
          {
-            QString strLine = strlValues[j];
-            if (strLine.isEmpty() == false)
+            vector<string> values = dv_cast<vector<string> >(value);
+            for (vector<string>::const_iterator iter = values.begin(); iter != values.end(); ++iter)
             {
-               mpValueTextEdit->append(strLine);
+               QString valueText = QString::fromStdString(*iter);
+               mpValueTextEdit->append(valueText);
+            }
+         }
+         else if (curDelegate.getTypeName() == "vector<Filename>")
+         {
+            vector<Filename*> values = dv_cast<vector<Filename*> >(value);
+            for (vector<Filename*>::const_iterator iter = values.begin(); iter != values.end(); ++iter)
+            {
+               Filename* pFilename = *iter;
+               if (pFilename != NULL)
+               {
+                  QString valueText = QString::fromStdString(pFilename->getFullPathAndName());
+                  mpValueTextEdit->append(valueText);
+               }
+            }
+         }
+         else
+         {
+            QString valueText = QString::fromStdString(value.toDisplayString());
+
+            QStringList strlValues = valueText.split(", ");
+            for (int i = 0; i < strlValues.count(); ++i)
+            {
+               mpValueTextEdit->append(strlValues[i]);
             }
          }
       }
    }
    else if (curDelegate.getType() == DataVariantEditorDelegate::COLOR)
    {
-      if (useVariantCurrentValue)
-      {
-         mpColorEdit->setColor(dv_cast<ColorType>(value));
-      }
-      else
-      {
-         mpColorEdit->setColor(ColorType());
-      }
+      ColorType color = dv_cast<ColorType>(value, ColorType());
+      mpColorEdit->setColor(color);
    }
    else if (curDelegate.getType() == DataVariantEditorDelegate::SYMBOL_TYPE)
    {
-      if (useVariantCurrentValue)
-      {
-         mpSymbolTypeEdit->setCurrentValue(dv_cast<SymbolType>(value));
-      }
-      else
-      {
-         mpSymbolTypeEdit->setCurrentValue(SymbolType());
-      }
+      SymbolType symbol = dv_cast<SymbolType>(value, SymbolType());
+      mpSymbolTypeEdit->setCurrentValue(symbol);
    }
    else
    {
+      mpValueLineEdit->clear();
       if (useVariantCurrentValue)
       {
-         mpValueLineEdit->setText(strValue);
+         QString valueText = QString::fromStdString(value.toDisplayString());
+         mpValueLineEdit->setText(valueText);
       }
    }
 
@@ -405,32 +401,38 @@ void DataVariantEditor::setValue(const DataVariant& value, bool useVariantCurren
 
 const DataVariant& DataVariantEditor::getValue()
 {
-   QString strValue;
-
    DataVariantEditorDelegate curDelegate = getDelegate(mValue.getTypeName());
    if (curDelegate.getType() == DataVariantEditorDelegate::BOOL)
    {
+      bool boolValue = false;
       if (mpTrueRadio->isChecked() == true)
       {
-         strValue = QString::fromStdString(StringUtilities::toDisplayString(true));
+         boolValue = true;
       }
-      else if (mpFalseRadio->isChecked() == true)
-      {
-         strValue = QString::fromStdString(StringUtilities::toDisplayString(false));
-      }
+
+      mValue = boolValue;
    }
    else if (curDelegate.getType() == DataVariantEditorDelegate::DATE_TIME)
    {
       QDateTime dateTimeValue = mpDateTimeEdit->dateTime();
-      strValue = dateTimeValue.toString("MMMM d, yyyy, hh:mm:ss");
+      time_t timeValue = dateTimeValue.toTime_t();
+
+      FactoryResource<DateTime> pDateTime;
+      pDateTime->setStructured(timeValue);
+
+      mValue = *pDateTime.get();
    }
    else if (curDelegate.getType() == DataVariantEditorDelegate::ENUMERATION)
    {
+      QString valueText;
+
       QListWidgetItem* pItem = mpValueList->currentItem();
       if (pItem != NULL)
       {
-         strValue = pItem->text();
+         valueText = pItem->text();
       }
+
+      mValue.fromDisplayString(mValue.getTypeName(), valueText.toStdString());
    }
    else if (curDelegate.getType() == DataVariantEditorDelegate::DYNAMIC_OBJECT)
    {
@@ -439,8 +441,49 @@ const DataVariant& DataVariantEditor::getValue()
    }
    else if (curDelegate.getType() == DataVariantEditorDelegate::VECTOR)
    {
-      strValue = mpValueTextEdit->toPlainText();
-      strValue.replace("\n", ", ");
+      QString valueText = mpValueTextEdit->toPlainText();
+      if (curDelegate.getTypeName() == "vector<string>")
+      {
+         vector<string> values;
+
+         QStringList items = valueText.split("\n");
+         for (int i = 0; i < items.count(); ++i)
+         {
+            QString itemText = items[i];
+            values.push_back(itemText.toStdString());
+         }
+
+         mValue = values;
+      }
+      else if (curDelegate.getTypeName() == "vector<Filename>")
+      {
+         vector<Filename*> values;
+
+         QStringList items = valueText.split("\n");
+         for (int i = 0; i < items.count(); ++i)
+         {
+            FactoryResource<Filename> pFilename;
+            pFilename->setFullPathAndName(items[i].toStdString());
+            values.push_back(pFilename.release());
+         }
+
+         mValue = values;
+
+         Service<ObjectFactory> pFactory;
+         for (vector<Filename*>::iterator iter = values.begin(); iter != values.end(); ++iter)
+         {
+            Filename* pFilename = *iter;
+            if (pFilename != NULL)
+            {
+               pFactory->destroyObject(pFilename, "Filename");
+            }
+         }
+      }
+      else
+      {
+         valueText.replace("\n", ", ");
+         mValue.fromDisplayString(mValue.getTypeName(), valueText.toStdString());
+      }
    }
    else if (curDelegate.getType() == DataVariantEditorDelegate::COLOR)
    {
@@ -452,17 +495,11 @@ const DataVariant& DataVariantEditor::getValue()
    }
    else
    {
-      strValue = mpValueLineEdit->text();
-   }
-
-   if (mValue.isValid())
-   {
-      string valueText = strValue.toStdString();
-
+      string valueText = mpValueLineEdit->text().toStdString();
       if (mValue.fromDisplayString(mValue.getTypeName(), valueText) == DataVariant::FAILURE)
       {
-#pragma message(__FILE__ "(" STRING(__LINE__) \
-") : warning : This should error, fix this when we can have a DataVariant with a type and an invalid value (tclarke)")
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This should error, fix this when we can have a " \
+   "DataVariant with a type and an invalid value (tclarke)")
          // if possible, put a reasonable default in the variant so we don't get garbage
          // types not in this list either have a reasonable value already or we can't determine one at this point
          switch (curDelegate.getType())

@@ -64,7 +64,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="Wizard.lib Utilities.lib"
+				AdditionalDependencies="Wizard.lib"
 				Version=""
 				AdditionalLibraryDirectories=""
 				IgnoreDefaultLibraryNames=""
@@ -141,7 +141,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="Wizard.lib Utilities.lib"
+				AdditionalDependencies="Wizard.lib"
 				Version=""
 				AdditionalLibraryDirectories=""
 				IgnoreDefaultLibraryNames=""
@@ -218,7 +218,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="Wizard.lib Utilities.lib"
+				AdditionalDependencies="Wizard.lib"
 				Version=""
 				AdditionalLibraryDirectories=""
 				IgnoreDefaultLibraryNames=""
@@ -295,7 +295,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="Wizard.lib Utilities.lib"
+				AdditionalDependencies="Wizard.lib"
 				Version=""
 				AdditionalLibraryDirectories=""
 				IgnoreDefaultLibraryNames=""
