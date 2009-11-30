@@ -503,6 +503,7 @@ void ScriptingWidget::appendPrompt()
    }
 
    setCurrentFont(font());
+   setTextColor(Qt::black);
    append(mPrompt);
 
    QTextCursor cursorPosition = textCursor();
@@ -601,8 +602,6 @@ void ScriptingWidget::executeCommand(const QString& strCommand)
       if (outputText.empty() == false)
       {
          // Set the font and color based on the return type
-         QColor currentTextColor = textColor();
-
          if (returnType == "Output")
          {
             setCurrentFont(mOutputFont);
@@ -615,7 +614,6 @@ void ScriptingWidget::executeCommand(const QString& strCommand)
          }
 
          addOutputText(QString::fromStdString(outputText));
-         setTextColor(currentTextColor);
       }
    }
 
