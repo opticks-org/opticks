@@ -20,7 +20,6 @@ class Step;
 class WizardItems : public WizardShell
 {
 public:
-   virtual bool hasAbort();
    virtual bool getInputSpecification(PlugInArgList*& pArgList);
 
 protected:

@@ -24,6 +24,8 @@
 #include "SpatialDataView.h"
 #include "xmlwriter.h"
 
+#include <vector>
+
 XERCES_CPP_NAMESPACE_USE
 using namespace std;
 
@@ -293,7 +295,15 @@ void ScriptingWidget::showEvent(QShowEvent* pEvent)
    // Load the interpreter plug-in
    if ((mInterpreter->getPlugIn() == NULL) && (mInterpreterName.isEmpty() == false))
    {
-      mInterpreter->setPlugIn(mInterpreterName.toStdString());
+      vector<PlugIn*> plugIns = mpPims->getPlugInInstances(mInterpreterName.toStdString());
+      if (plugIns.empty() == false && dynamic_cast<Interpreter*>(plugIns.front()) != NULL)
+      {
+         mInterpreter->setPlugIn(plugIns.front());
+      }
+      else
+      {
+         mInterpreter->setPlugIn(mInterpreterName.toStdString());
+      }
 
       Interpreter* pInterpreter = dynamic_cast<Interpreter*>(mInterpreter->getPlugIn());
       if (pInterpreter != NULL)

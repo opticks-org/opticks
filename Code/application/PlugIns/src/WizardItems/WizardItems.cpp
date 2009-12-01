@@ -19,15 +19,11 @@ using namespace std;
 
 WizardItems::WizardItems() : mbInteractive(false), mpStep(NULL), mpProgress(NULL)
 {
+   setAbortSupported(false);
 }
 
 WizardItems::~WizardItems()
 {
-}
-
-bool WizardItems::hasAbort()
-{
-   return false;
 }
 
 bool WizardItems::getInputSpecification(PlugInArgList*& pArgList)

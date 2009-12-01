@@ -406,6 +406,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\RunInterpreterCommands.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\SaveLayer.cpp"
 				>
 			</File>
@@ -508,6 +512,10 @@
 			</File>
 			<File
 				RelativePath=".\PrintView.h"
+				>
+			</File>
+			<File
+				RelativePath=".\RunInterpreterCommands.h"
 				>
 			</File>
 			<File
