@@ -16,10 +16,10 @@
 #include <QtGui/QSlider>
 #include <QtCore/QString>
 
-#include "ToolBarImp.h"
-
 #include "PixmapGrid.h"
 #include "PixmapGridButton.h"
+#include "Serializable.h"
+#include "ToolBarImp.h"
 #include "TypesFile.h"
 
 #include <vector>
@@ -49,6 +49,9 @@ public:
    bool getHideTimestamp() const;
 
    void cleanUpItems();
+
+   virtual bool serialize(SessionItemSerializer& serializer) const;
+   virtual bool deserialize(SessionItemDeserializer& deserializer);
 
 protected slots:
    // animation control buttons
@@ -95,7 +98,7 @@ private:
    * WheelEventSlider is a subclass of QSlider to avoid
    * a bug in QSlider's mouse wheel event handling.
    */
-   class WheelEventSlider : public QSlider
+   class WheelEventSlider : public QSlider, public Serializable
    {
    public:
       WheelEventSlider(Qt::Orientation orientation, QWidget *parent = 0);
@@ -105,6 +108,9 @@ private:
       void setBumpersEnabled(bool enabled);
       bool getBumpersEnabled() const;
       void getPlaybackRange(int& start, int& stop) const;
+
+      virtual bool toXml(XMLWriter* pXml) const;
+      virtual bool fromXml(DOMNode* pDocument, unsigned int version);
 
    protected:
       /**

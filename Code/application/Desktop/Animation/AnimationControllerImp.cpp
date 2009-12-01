@@ -21,10 +21,8 @@
 #include <QtGui/QMessageBox>
 
 #include "AnimationAdapter.h"
-#include "AnimationController.h"
 #include "AnimationControllerImp.h"
 #include "AnimationFrameSubsetWidget.h"
-#include "AnimationServices.h"
 #include "ApplicationServices.h"
 #include "AppVerify.h"
 #include "ContextMenuAction.h"
@@ -1130,12 +1128,6 @@ bool AnimationControllerImp::serialize(SessionItemSerializer& serializer) const
    xml.addAttr("cycle", mCycle);
    xml.addAttr("dropframes", mCanDropFrames);
 
-   Service<AnimationServices> pServices;
-   if (dynamic_cast<const AnimationController*>(this) == pServices->getCurrentAnimationController())
-   {
-      xml.addAttr("selected", true);
-   }
-
    for (vector<Animation*>::const_iterator it = mAnimations.begin(); it != mAnimations.end(); ++it)
    {
       xml.addAttr("id", (*it)->getId(), xml.addElement("animation"));
@@ -1152,21 +1144,15 @@ bool AnimationControllerImp::deserialize(SessionItemDeserializer &deserializer)
    {
       return false;
    }
-   mFrameType = StringUtilities::fromXmlString<FrameType>(
-      A(pRoot->getAttribute(X("frametype"))));
-   mStartFrame = StringUtilities::fromXmlString<double>(
-      A(pRoot->getAttribute(X("startframe"))));
-   mStopFrame = StringUtilities::fromXmlString<double>(
-      A(pRoot->getAttribute(X("stopframe"))));
-   mCurrentFrame = StringUtilities::fromXmlString<double>(
-      A(pRoot->getAttribute(X("currentframe"))));
-   resetBumpers();  // initialize to start and stop frames
-   setStartBumper(StringUtilities::fromXmlString<double>(
-      A(pRoot->getAttribute(X("startbumper")))));
-   setStopBumper(StringUtilities::fromXmlString<double>(
-      A(pRoot->getAttribute(X("stopbumper")))));
-   setBumpersEnabled(StringUtilities::fromXmlString<bool>(
-      A(pRoot->getAttribute(X("bumpersenabled")))));
+
+   mFrameType = StringUtilities::fromXmlString<FrameType>(A(pRoot->getAttribute(X("frametype"))));
+   mStartFrame = StringUtilities::fromXmlString<double>(A(pRoot->getAttribute(X("startframe"))));
+   mStopFrame = StringUtilities::fromXmlString<double>(A(pRoot->getAttribute(X("stopframe"))));
+   mCurrentFrame = StringUtilities::fromXmlString<double>(A(pRoot->getAttribute(X("currentframe"))));
+   mStartBumper = StringUtilities::fromXmlString<double>(A(pRoot->getAttribute(X("startbumper"))));
+   mStopBumper = StringUtilities::fromXmlString<double>(A(pRoot->getAttribute(X("stopbumper"))));
+   mBumpersEnabled = StringUtilities::fromXmlString<bool>(A(pRoot->getAttribute(X("bumpersenabled"))));
+   mpBumpersEnabledAction->setChecked(mBumpersEnabled);
 
    if (mBumpersEnabled)
    {
@@ -1207,14 +1193,7 @@ bool AnimationControllerImp::deserialize(SessionItemDeserializer &deserializer)
          }
       }
    }
-   setCurrentFrame(mCurrentFrame);
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Should this be moved into the tool bar? (mconsidine)")
-   if (pRoot->hasAttribute(X("selected")))
-   {
-      Service<AnimationServices> pServices;
-      pServices->setCurrentAnimationController(dynamic_cast<AnimationController*>(this));
-   }
    return true;
 }
 

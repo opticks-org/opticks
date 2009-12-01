@@ -26,12 +26,19 @@
 #include "AppVerify.h"
 #include "DesktopServices.h"
 #include "PixmapGrid.h"
+#include "SessionItemDeserializer.h"
+#include "SessionItemSerializer.h"
+#include "SessionManager.h"
 #include "StringUtilities.h"
+#include "xmlreader.h"
+#include "xmlwriter.h"
 
 #include <math.h>
 
 #include <boost/rational.hpp>
 #include <string>
+
+XERCES_CPP_NAMESPACE_USE
 
 AnimationToolBarImp::AnimationToolBarImp(const std::string& id, QWidget* parent) :
    ToolBarImp(id, "Animation", parent),
@@ -230,6 +237,59 @@ bool AnimationToolBarImp::isKindOf(const std::string& className) const
    }
 
    return ToolBarImp::isKindOf(className);
+}
+
+bool AnimationToolBarImp::serialize(SessionItemSerializer& serializer) const
+{
+   XMLWriter xml("AnimationToolBar");
+   if (toXml(&xml) == false)
+   {
+      return false;
+   }
+
+   if (mpController != NULL)
+   {
+      xml.addAttr("controllerId", mpController->getId());
+   }
+
+   xml.addAttr("animationState", mPrevAnimationState);
+   xml.addAttr("hideTimestamp", mHideTimestamp);
+
+   if (mpFrameSlider->toXml(&xml) == false)
+   {
+      return false;
+   }
+
+   return serializer.serialize(xml);
+}
+
+bool AnimationToolBarImp::deserialize(SessionItemDeserializer& deserializer)
+{
+   XmlReader reader(NULL, false);
+
+   DOMElement* pRoot = deserializer.deserialize(reader, "AnimationToolBar");
+   if ((pRoot == NULL) || (fromXml(pRoot, XmlBase::VERSION) == false))
+   {
+      return false;
+   }
+
+   AnimationController* pController = NULL;
+   if (pRoot->hasAttribute(X("controllerId")))
+   {
+      Service<SessionManager> pManager;
+      pController = dynamic_cast<AnimationController*>(
+         pManager->getSessionItem(A(pRoot->getAttribute(X("controllerId")))));
+   }
+
+   // Restore the animation controller by calling setAnimationController() to perform all of the necessary
+   // connections.  This also resets the state of the slider, so the slider must be restored after this
+   // call in case the animation controller has not yet been restored.
+   setAnimationController(pController);
+
+   mPrevAnimationState = StringUtilities::fromXmlString<AnimationState>(A(pRoot->getAttribute(X("animationState"))));
+   mHideTimestamp = StringUtilities::fromXmlString<bool>(A(pRoot->getAttribute(X("hideTimestamp"))));
+
+   return mpFrameSlider->fromXml(pRoot, XmlBase::VERSION);
 }
 
 void AnimationToolBarImp::speedUp()
@@ -980,4 +1040,33 @@ void AnimationToolBarImp::WheelEventSlider::getPlaybackRange(int& start, int& st
       start = minimum();
       stop = maximum();
    }
+}
+
+bool AnimationToolBarImp::WheelEventSlider::toXml(XMLWriter* pXml) const
+{
+   if (pXml == NULL)
+   {
+      return false;
+   }
+
+   pXml->addAttr("bumpersEnabled", mBumpersEnabled);
+   pXml->addAttr("leftBumper", mLeftBumper);
+   pXml->addAttr("rightBumper", mRightBumper);
+
+   return true;
+}
+
+bool AnimationToolBarImp::WheelEventSlider::fromXml(DOMNode* pDocument, unsigned int version)
+{
+   if (pDocument == NULL)
+   {
+      return false;
+   }
+
+   DOMElement* pElement = static_cast<DOMElement*>(pDocument);
+   mBumpersEnabled = StringUtilities::fromXmlString<bool>(A(pElement->getAttribute(X("bumpersEnabled"))));
+   mLeftBumper = StringUtilities::fromXmlString<int>(A(pElement->getAttribute(X("leftBumper"))));
+   mRightBumper = StringUtilities::fromXmlString<int>(A(pElement->getAttribute(X("rightBumper"))));
+
+   return true;
 }
