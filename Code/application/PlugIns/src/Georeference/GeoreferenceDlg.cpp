@@ -7,8 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #include <QtGui/QFrame>
 #include <QtGui/QLayout>
 #include <QtGui/QMessageBox>
@@ -135,13 +133,7 @@ GeoreferenceDlg::GeoreferenceDlg(const QString& title,
       }
 
       mpStack->addWidget(pNoUILabel);
-
-      QListWidgetItem* pItem = mpGeoList->item(defaultGeorefPlugInIndex);
-      if (pItem != NULL)
-      {
-         mpGeoList->setItemSelected(pItem, true);
-      }
-
+      mpGeoList->setCurrentRow(defaultGeorefPlugInIndex);
       setPlugin(defaultGeorefPlugInIndex);
    }
 
