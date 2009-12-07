@@ -104,6 +104,8 @@ GLuint GpuResourceManager::allocateTexture(GLenum textureTarget, GLint internalF
       return 0;
    }
 
+   unsigned int numChannels = ImageUtilities::getNumColorChannels(textureFormat);
+
    // generate texture object id
    glGenTextures(1, &textureObjectId);
    if (textureObjectId != 0)
@@ -122,7 +124,57 @@ GLuint GpuResourceManager::allocateTexture(GLenum textureTarget, GLint internalF
          glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
       }
 
-      glTexImage2D(textureTarget, 0, internalFormat, width, height, 0, textureFormat, dataType, NULL);
+      switch (dataType)
+      {
+      case GL_UNSIGNED_BYTE:
+         {
+            vector<unsigned char> data(width*height*numChannels, 0);
+            glTexImage2D(textureTarget, 0, internalFormat, width, height, 0, textureFormat, dataType, &data[0]);
+         }
+         break;
+      case GL_BYTE:
+         {
+            vector<char> data(width*height*numChannels, 0);
+            glTexImage2D(textureTarget, 0, internalFormat, width, height, 0, textureFormat, dataType, &data[0]);
+         }
+         break;
+      case GL_UNSIGNED_SHORT:
+         {
+            vector<unsigned short> data(width*height*numChannels, 0);
+            glTexImage2D(textureTarget, 0, internalFormat, width, height, 0, textureFormat, dataType, &data[0]);
+         }
+         break;
+      case GL_SHORT:
+         {
+            vector<short> data(width*height*numChannels, 0);
+            glTexImage2D(textureTarget, 0, internalFormat, width, height, 0, textureFormat, dataType, &data[0]);
+         }
+         break;
+      case GL_UNSIGNED_INT:
+         {
+            vector<unsigned int> data(width*height*numChannels, 0);
+            glTexImage2D(textureTarget, 0, internalFormat, width, height, 0, textureFormat, dataType, &data[0]);
+         }
+         break;
+      case GL_INT:
+         {
+            vector<int> data(width*height*numChannels, 0);
+            glTexImage2D(textureTarget, 0, internalFormat, width, height, 0, textureFormat, dataType, &data[0]);
+         }
+         break;
+      case GL_FLOAT:
+         {
+            vector<float> data(width*height*numChannels, 0.0);
+            glTexImage2D(textureTarget, 0, internalFormat, width, height, 0, textureFormat, dataType, &data[0]);
+         }
+         break;
+      default:
+         {
+            vector<unsigned char> data(width*height*numChannels, 0);
+            glTexImage2D(textureTarget, 0, internalFormat, width, height, 0, textureFormat, GL_UNSIGNED_BYTE, &data[0]);
+         }
+         break;
+      }
 
       // unbind texture object id
       glBindTexture(textureTarget, 0);
