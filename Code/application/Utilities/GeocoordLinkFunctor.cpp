@@ -21,7 +21,7 @@
 
 using namespace std;
 
-const int GeocoordLinkFunctor::LINK_TIGHTNESS = 5;
+const int GeocoordLinkFunctor::LINK_TIGHTNESS = 50;
 const int GeocoordLinkFunctor::NUM_POINTS = 4;
 
 GeocoordLinkFunctor::GeocoordLinkFunctor(const ViewImp *pSrcView) :

@@ -26,8 +26,9 @@
 #include "ViewUndo.h"
 #include "xmlreader.h"
 
-#include <math.h>
 
+#include <math.h>
+#include <limits>
 #include <boost/bind.hpp>
 
 #include <sstream>
@@ -1309,7 +1310,13 @@ double PerspectiveViewImp::getPixelAspect() const
 
 void PerspectiveViewImp::setPixelAspect(double aspect)
 {
-   if (mPixelAspect != aspect)
+   // Before updating the matrices, we must check if the absolute value of the difference between 
+   // the old pixel aspect and the new one is less than an epsilon which happens to be 0.001 aka 1e-3. 
+   // This if check must be done to minimize the amount of zooming and panning that occur when linking 
+   // two views via a two-way link. 1e-3 was chosen because it seems to be the best value to make the 
+   // previously mentioned zooming and panning less noticeable. However, there is no found value that 
+   // will prevent it completely. 
+   if (fabs(mPixelAspect - aspect) < 1e-3)
    {
       if (mbLinking == false)
       {
