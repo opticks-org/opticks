@@ -213,8 +213,8 @@ LocationType AnnotationLayerImp::correctCoordinate(const LocationType &coord) co
    LocationType loc = coord;
    if (mSnapToGrid)
    {
-      loc.mX = static_cast<int>(coord.mX+0.5);
-      loc.mY = static_cast<int>(coord.mY+0.5);
+      loc.mX = floor(coord.mX + 0.5);
+      loc.mY = floor(coord.mY + 0.5);
    }
    return loc;
 }

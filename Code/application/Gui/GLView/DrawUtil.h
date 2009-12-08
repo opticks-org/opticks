@@ -376,10 +376,10 @@ private:
 template<typename T>
 void drawPixelLine(LocationType p0, LocationType p1, T &drawer)
 {
-   int x0 = p0.mX;
-   int y0 = p0.mY;
-   int x1 = p1.mX;
-   int y1 = p1.mY;
+   int x0 = floor(p0.mX);
+   int y0 = floor(p0.mY);
+   int x1 = floor(p1.mX);
+   int y1 = floor(p1.mY);
 
    int dx = x1 - x0;
    int dy = y1 - y0;
@@ -388,7 +388,7 @@ void drawPixelLine(LocationType p0, LocationType p1, T &drawer)
    {
       int miny = std::min(y0, y1);
       int maxy = std::max(y0, y1);
-      for (int y = miny; y < maxy; ++y)
+      for (int y = miny; y <= maxy; ++y)
       {
          drawer(x0, y);
       }
@@ -398,7 +398,7 @@ void drawPixelLine(LocationType p0, LocationType p1, T &drawer)
    {
       int minx = std::min(x0, x1);
       int maxx = std::max(x0, x1);
-      for (int x = minx; x < maxx; ++x)
+      for (int x = minx; x <= maxx; ++x)
       {
          drawer(x, y0);
       }

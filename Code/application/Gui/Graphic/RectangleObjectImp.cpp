@@ -145,10 +145,10 @@ void RectangleObjectImp::drawPixels(double zoomFactor) const
    LocationType ll = getLlCorner();
    LocationType ur = getUrCorner();
 
-   int minX = min(ll.mX, ur.mX);
-   int maxX = max(ll.mX, ur.mX);
-   int minY = min(ll.mY, ur.mY);
-   int maxY = max(ll.mY, ur.mY);
+   int minX = floor(min(ll.mX, ur.mX));
+   int maxX = floor(max(ll.mX, ur.mX));
+   int minY = floor(min(ll.mY, ur.mY));
+   int maxY = floor(max(ll.mY, ur.mY));
 
    vector<LocationType> vertices(4);
    vertices[0] = LocationType(minX, minY);

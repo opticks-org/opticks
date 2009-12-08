@@ -203,7 +203,7 @@ void MultipointObjectImp::drawPixels(double zoomFactor) const
    DrawUtil::PixelDrawer drawer(getPixelSymbol());
    for (unsigned int i = 0; i < mVertices.size(); ++i)
    {
-      drawer(mVertices[i].mX, mVertices[i].mY);
+      drawer(floor(mVertices[i].mX), floor(mVertices[i].mY));
    }
 }
 

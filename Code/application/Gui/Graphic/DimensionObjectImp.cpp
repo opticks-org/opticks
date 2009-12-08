@@ -40,11 +40,11 @@ int DimensionObjectImp::DimensionSwitcher::mainDimension(const LocationType &loc
 {
    if (mType == ROW_OBJECT)
    {
-      return location.mY;
+      return floor(location.mY);
    }
    else
    {
-      return location.mX;
+      return floor(location.mX);
    }
 }
 
@@ -52,11 +52,11 @@ int DimensionObjectImp::DimensionSwitcher::secondDimension(const LocationType &l
 {
    if (mType == ROW_OBJECT)
    {
-      return location.mX;
+      return floor(location.mX);
    }
    else
    {
-      return location.mY;
+      return floor(location.mY);
    }
 }
 

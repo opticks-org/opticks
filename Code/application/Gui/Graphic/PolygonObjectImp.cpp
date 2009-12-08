@@ -136,10 +136,10 @@ void PolygonObjectImp::drawPixels(double zoomFactor) const
    LocationType llCorner = getLlCorner();
    LocationType urCorner = getUrCorner();
 
-   int startCol = min(llCorner.mX, urCorner.mX);
-   int startRow = min(llCorner.mY, urCorner.mY);
-   int endCol = max(llCorner.mX, urCorner.mX);
-   int endRow = max(llCorner.mY, urCorner.mY);
+   int startCol = floor(min(llCorner.mX, urCorner.mX));
+   int startRow = floor(min(llCorner.mY, urCorner.mY));
+   int endCol = floor(max(llCorner.mX, urCorner.mX));
+   int endRow = floor(max(llCorner.mY, urCorner.mY));
 
    DrawUtil::PixelDrawer drawer(getPixelSymbol());
    DrawUtil::drawPixelPolygon(vertices, mPaths, startCol, startRow, endCol, endRow, drawer);
