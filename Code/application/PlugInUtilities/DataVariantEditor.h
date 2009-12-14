@@ -13,6 +13,8 @@
 #include "DataVariant.h"
 #include "EnumWrapper.h"
 
+#include <QtCore/QFileSystemWatcher>
+#include <QtCore/QString>
 #include <QtGui/QWidget>
 
 #include <string>
@@ -35,17 +37,17 @@ public:
    enum TypeEnum { INTEGRAL, DOUBLE, BOOL, DATE_TIME, ENUMERATION, VECTOR, DYNAMIC_OBJECT, TEXT, COLOR, SYMBOL_TYPE };
    typedef EnumWrapper<TypeEnum> Type;
 
-   DataVariantEditorDelegate() :
-      mNeedBrowseButton(false)
-   {
-   }
+   enum ButtonTypeEnum { BROWSE, EDIT };
+   typedef EnumWrapper<ButtonTypeEnum> ButtonType;
 
-   DataVariantEditorDelegate(std::string typeName, Type theType, bool needBrowseButton = false) :
+   DataVariantEditorDelegate()
+   {}
+
+   DataVariantEditorDelegate(std::string typeName, Type theType, ButtonType buttonType = ButtonType()) :
       mType(theType),
       mTypeName(typeName),
-      mNeedBrowseButton(needBrowseButton)
-   {
-   }
+      mButtonType(buttonType)
+   {}
 
    Type getType() const
    {
@@ -67,14 +69,9 @@ public:
       mTypeName = newType;
    }
 
-   bool getNeedBrowseButton() const
+   ButtonType getButtonType() const
    {
-      return mNeedBrowseButton;
-   }
-
-   void setNeedBrowseButton(bool newValue)
-   {
-      mNeedBrowseButton = newValue;
+      return mButtonType;
    }
 
    const std::vector<std::string>& getEnumValueStrings() const
@@ -86,10 +83,11 @@ public:
    {
       mEnumValues = newValues;
    }
+
 private:
    Type mType;
    std::string mTypeName;
-   bool mNeedBrowseButton;
+   ButtonType mButtonType;
    std::vector<std::string> mEnumValues;
 };
 
@@ -98,8 +96,8 @@ class DataVariantEditor : public QWidget
    Q_OBJECT
 
 public:
-   DataVariantEditor(QWidget* pParent = NULL, bool includeValueLabel = true);
-   ~DataVariantEditor();
+   DataVariantEditor(QWidget* pParent = NULL);
+   virtual ~DataVariantEditor();
 
    void setValue(const DataVariant& value, bool useVariantCurrentValue = true);
    const DataVariant &getValue();
@@ -116,11 +114,14 @@ signals:
 protected slots:
    void setStackWidget(std::string type);
    void browse();
+   void edit();
+   void tempFileChanged();
 
 private:
    QStackedWidget* mpStack;
    QLineEdit* mpValueLineEdit;
    QPushButton* mpBrowseButton;
+   QPushButton* mpEditButton;
    QListWidget* mpValueList;
    QTextEdit* mpValueTextEdit;
    QRadioButton* mpFalseRadio;
@@ -134,6 +135,9 @@ private:
 
    DataVariant mValue;
    static std::vector<DataVariantEditorDelegate> sDelegates;
+
+   QString mTempFilename;
+   QFileSystemWatcher mTempFileWatcher;
 };
 
 #endif

@@ -110,7 +110,7 @@ void OptionsDlg::populateDialogWithOptions()
             mOptionPlugIns.push_back(pOptionPlugIn);               
             pPlugInRes.release();
             mpOptionStack->addWidget(pWidget);
-            //In the optionName, '/' is used to separate the tree heirarchy, but
+            //In the optionName, '/' is used to separate the tree hierarchy, but
             //'//' should be used to display a '/'
             //So first replace '//' with a highly unlikely sequence, then split on '/'
             //then replace the highly unlikely sequence with '/'.

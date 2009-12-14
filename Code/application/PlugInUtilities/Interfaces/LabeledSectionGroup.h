@@ -29,7 +29,9 @@ class LabeledSection;
  *  separate the sections.
  *
  *  For size purposes, each LabeledSection can be expanded or collapsed to
- *  display the entire section widget or just its header label.
+ *  display the entire section widget or just its header label. For adjacent sections,
+ *  call addSection() with a very large stretch value (e.g.: 1000) for each section
+ *  followed by addStretch() with a relatively small value (e.g.: 1) to obtain optimal results.
  *
  *  @see     LabeledSection
  */

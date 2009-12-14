@@ -10,32 +10,28 @@
 #ifndef NAMETYPEVALUEDLG_H
 #define NAMETYPEVALUEDLG_H
 
-#include "DataVariant.h"
-
 #include <QtCore/QString>
 #include <QtGui/QDialog>
 
+class DataVariant;
 class DataVariantEditor;
 class QLineEdit;
 class QListWidget;
-class QWidget;
-
-#include <string>
 
 class NameTypeValueDlg : public QDialog
 {
    Q_OBJECT
 
 public:
-   NameTypeValueDlg(QWidget* parent = 0);
-   ~NameTypeValueDlg();
+   NameTypeValueDlg(QWidget* pParent = 0);
+   virtual ~NameTypeValueDlg();
 
    void setEmptyValue(const QString& name, const QString& type);
    void setValue(const QString& strName, const DataVariant& value);
 
    QString getName() const;
    QString getType() const;
-   const DataVariant &getValue();
+   const DataVariant& getValue() const;
 
 protected slots:
    void changeType(int newTypeRowIndex);

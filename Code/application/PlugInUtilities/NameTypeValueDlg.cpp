@@ -29,11 +29,9 @@
 #include <vector>
 using namespace std;
 
-NameTypeValueDlg::NameTypeValueDlg(QWidget* parent) :
-   QDialog(parent)
+NameTypeValueDlg::NameTypeValueDlg(QWidget* pParent) :
+   QDialog(pParent)
 {
-   mCurrentType = QString();
-
    // Name
    QLabel* pNameLabel = new QLabel("Name:", this);
    mpNameEdit = new QLineEdit(this);
@@ -42,6 +40,7 @@ NameTypeValueDlg::NameTypeValueDlg(QWidget* parent) :
    QLabel* pTypeLabel = new QLabel("Type:", this);
 
    // Editor
+   QLabel* pValueLabel = new QLabel("Value:", this);
    mpValueEditor = new DataVariantEditor(this);
 
    mpTypeList = new QListWidget(this);
@@ -77,7 +76,8 @@ NameTypeValueDlg::NameTypeValueDlg(QWidget* parent) :
    pGrid->setRowMinimumHeight(2, 5);
    pGrid->addWidget(pTypeLabel, 3, 0);
    pGrid->addWidget(mpTypeList, 4, 0);
-   pGrid->addWidget(mpValueEditor, 3, 1, 2, 1);
+   pGrid->addWidget(pValueLabel, 3, 1);
+   pGrid->addWidget(mpValueEditor, 4, 1);
    pGrid->addWidget(pHLine, 5, 0, 1, 2);
    pGrid->setRowMinimumHeight(5, 12);
    pGrid->addLayout(pButtonLayout, 6, 0, 1, 2);
@@ -187,7 +187,7 @@ QString NameTypeValueDlg::getType() const
    return strType;
 }
 
-const DataVariant &NameTypeValueDlg::getValue()
+const DataVariant& NameTypeValueDlg::getValue() const
 {
    return mpValueEditor->getValue();
 }

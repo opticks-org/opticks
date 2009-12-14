@@ -57,6 +57,7 @@ private:
 
    QStackedWidget* mpValueStack;
    DataVariantEditor* mpValueEditor;
+   QWidget* mpValueEditorWidget;
    QWidget* mpFilesetWidget;
    QComboBox* mpValueFilesetCombo;
 

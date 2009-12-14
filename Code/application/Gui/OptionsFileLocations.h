@@ -10,18 +10,22 @@
 #ifndef OPTIONSFILELOCATIONS_H
 #define OPTIONSFILELOCATIONS_H
 
-#include <QtGui/QWidget>
 #include "AppVersion.h"
+#include "LabeledSectionGroup.h"
+
+#include <string>
+#include <vector>
 
 class CustomTreeWidget;
+class FileBrowser;
 
-class OptionsFileLocations : public QWidget
+class OptionsFileLocations : public LabeledSectionGroup
 {
    Q_OBJECT
 
 public:
    OptionsFileLocations();
-   ~OptionsFileLocations();
+   virtual ~OptionsFileLocations();
 
    void applyChanges();
 
@@ -79,10 +83,50 @@ public:
    }
 
 private:
+   class FileLocationDescriptor
+   {
+   public:
+      FileLocationDescriptor(const std::string& text, const std::string& key,
+         FileBrowser* pFileBrowser = NULL, const std::string& argumentKey = std::string()) :
+         mText(text),
+         mKey(key),
+         mpFileBrowser(pFileBrowser),
+         mArgumentKey(argumentKey)
+      {}
+
+      ~FileLocationDescriptor() {}
+
+      const std::string& getText() const
+      {
+         return mText;
+      }
+
+      const std::string& getKey() const
+      {
+         return mKey;
+      }
+
+      FileBrowser* getFileBrowser() const
+      {
+         return mpFileBrowser;
+      }
+
+      const std::string& getArgumentKey() const
+      {
+         return mArgumentKey;
+      }
+
+   private:
+      std::string mText;
+      std::string mKey;
+      FileBrowser* mpFileBrowser;
+      std::string mArgumentKey;
+   };
+
    static const QString sBookmarkListSentinal;
-   std::vector<std::pair<std::string, std::string> > mFileLocations;
-   std::string mPlugInPath;
+   std::vector<FileLocationDescriptor> mFileLocations;
    std::string mWizardPath;
+   CustomTreeWidget* mpPathTree;
    CustomTreeWidget* mpFileTree;
 };
 

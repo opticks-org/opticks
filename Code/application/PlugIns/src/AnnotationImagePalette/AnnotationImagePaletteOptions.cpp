@@ -86,7 +86,7 @@ AnnotationImagePaletteOptions::AnnotationImagePaletteOptions() : mDirty(false)
 
    // Initialization
    addSection(pPalettePathsSection, 1000);
-   addSection(pInitialWidthSection, 100);
+   addSection(pInitialWidthSection);
    addStretch(1);
 }
 

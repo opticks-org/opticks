@@ -38,7 +38,7 @@ MessageLogMgrImp::MessageLogMgrImp() : mLogPath()
          mLogPath = pTempPath->getFullPathAndName();
       }
    }
-   char* tmpname(tempnam(mLogPath.c_str(), "journ"));
+
    mpJournal = new QTemporaryFile(QString::fromStdString(mLogPath) + "/journ");
    mpJournal->open(QIODevice::WriteOnly);
    mpJournal->setPermissions(QFile::WriteOwner);

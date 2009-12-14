@@ -823,7 +823,7 @@ bool WizardExecutor::queryValueItems(const vector<WizardItem*>& valueItems)
    LabeledSectionGroup* pGroup = new LabeledSectionGroup(&input);
    for (size_t idx = 0; idx < valueItems.size(); ++idx)
    {
-      DataVariantEditor* pEditor = new DataVariantEditor(&input, false);
+      DataVariantEditor* pEditor = new DataVariantEditor(&input);
       editors.push_back(pEditor);
       const vector<WizardNode*>& nodes = valueItems[idx]->getOutputNodes();
       VERIFY(nodes.size() == 1);

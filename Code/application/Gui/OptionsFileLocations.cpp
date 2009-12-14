@@ -10,9 +10,7 @@
 #include <QtCore/QDir>
 #include <QtCore/QRegExp>
 #include <QtGui/QHeaderView>
-#include <QtGui/QLabel>
 #include <QtGui/QMessageBox>
-#include <QtGui/QVBoxLayout>
 
 #include "ApplicationWindow.h"
 #include "AppVersion.h"
@@ -33,94 +31,137 @@ using namespace std;
 
 const QString OptionsFileLocations::sBookmarkListSentinal = "Enter path...";
 
-OptionsFileLocations::OptionsFileLocations() :
-   QWidget(NULL)
+namespace
 {
-   // File Locations
+   LabeledSection* createLabeledSection(CustomTreeWidget* pTree,
+      const QStringList& columnNames, const QString& text, QWidget* pParent)
+   {
+      VERIFYRV(pTree != NULL, NULL);
+      pTree->setColumnCount(columnNames.count());
+      pTree->setHeaderLabels(columnNames);
+      pTree->setRootIsDecorated(false);
+      pTree->setSelectionMode(QAbstractItemView::SingleSelection);
+      pTree->setGridlinesShown(Qt::Horizontal | Qt::Vertical, true);
+
+      QHeaderView* pHeader = pTree->header();
+      if (pHeader != NULL)
+      {
+         pHeader->setSortIndicatorShown(true);
+         pHeader->setMovable(false);
+         pHeader->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+      }
+
+      return new LabeledSection(pTree, text, pParent);
+   }
+}
+
+OptionsFileLocations::OptionsFileLocations() :
+   LabeledSectionGroup(NULL)
+{
+   // Path locations
    QStringList columnNames;
    columnNames.append("Type");
    columnNames.append("Location");
 
+   mpPathTree = new CustomTreeWidget(this);
+   addSection(createLabeledSection(mpPathTree, columnNames, "Default Paths", this), 1000);
+
+   // File locations
+   columnNames.append("Arguments");
    mpFileTree = new CustomTreeWidget(this);
-   mpFileTree->setColumnCount(columnNames.count());
-   mpFileTree->setHeaderLabels(columnNames);
-   mpFileTree->setRootIsDecorated(false);
-   mpFileTree->setSelectionMode(QAbstractItemView::SingleSelection);
-   mpFileTree->setGridlinesShown(Qt::Horizontal | Qt::Vertical, true);
+   addSection(createLabeledSection(mpFileTree, columnNames, "Default Files", this), 1000);
+   addStretch(1);
 
-   QHeaderView* pHeader = mpFileTree->header();
-   if (pHeader != NULL)
-   {
-      pHeader->setSortIndicatorShown(true);
-      pHeader->setMovable(false);
-      pHeader->setResizeMode(1, QHeaderView::Stretch);
-      pHeader->setStretchLastSection(false);
-      pHeader->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-   }
-   LabeledSection *pFileSection = new LabeledSection(mpFileTree, "Default File Locations", this);
-   
-   // Dialog layout
-   QVBoxLayout* pLayout = new QVBoxLayout(this);
-   pLayout->setMargin(0);
-   pLayout->setSpacing(10);
-   pLayout->addWidget(pFileSection, 10);
-
-   mFileLocations.push_back(pair<string,string>("Default Export Path",
+   mFileLocations.push_back(FileLocationDescriptor("Default Export Path",
       ConfigurationSettings::getSettingExportPathKey()));
-   mFileLocations.push_back(pair<string,string>("Default Import Path",
+
+   mFileLocations.push_back(FileLocationDescriptor("Default Import Path",
       ConfigurationSettings::getSettingImportPathKey()));
-   mFileLocations.push_back(pair<string,string>("Default Session Save/Open Path",
+
+   mFileLocations.push_back(FileLocationDescriptor("Default Session Save/Open Path",
       ConfigurationSettings::getSettingSaveOpenSessionPathKey()));
-   mFileLocations.push_back(pair<string,string>("Default Product Template", ProductView::getSettingTemplateFileKey()));
-   mFileLocations.push_back(pair<string,string>("Message Log Path",
+
+   FileBrowser* pTemplateFileBrowser = new FileBrowser(mpFileTree);
+   pTemplateFileBrowser->setBrowseCaption("Select Template File");
+   pTemplateFileBrowser->setBrowseFileFilters("Template Files (*.spg);;All Files (*)");
+   pTemplateFileBrowser->hide();
+   mFileLocations.push_back(FileLocationDescriptor("Default Product Template",
+      ProductView::getSettingTemplateFileKey(), pTemplateFileBrowser));
+
+   mFileLocations.push_back(FileLocationDescriptor("Message Log Path",
       ConfigurationSettings::getSettingMessageLogPathKey()));
-   mFileLocations.push_back(pair<string,string>("Product Template Path", ProductView::getSettingTemplatePathKey()));
-   mFileLocations.push_back(pair<string,string>("Temp Path", ConfigurationSettings::getSettingTempPathKey()));
-   mFileLocations.push_back(pair<string,string>("Support Files Path",
+
+   mFileLocations.push_back(FileLocationDescriptor("Product Template Path",
+      ProductView::getSettingTemplatePathKey()));
+
+   mFileLocations.push_back(FileLocationDescriptor("Temp Path",
+      ConfigurationSettings::getSettingTempPathKey()));
+
+   mFileLocations.push_back(FileLocationDescriptor("Support Files Path",
       ConfigurationSettings::getSettingSupportFilesPathKey()));
-   mFileLocations.push_back(pair<string,string>("Wizard Path", ConfigurationSettings::getSettingWizardPathKey()));
+
+   mFileLocations.push_back(FileLocationDescriptor("Wizard Path",
+      ConfigurationSettings::getSettingWizardPathKey()));
+
+   FileBrowser* pTextEditorBrowser = new FileBrowser(mpFileTree);
+   pTextEditorBrowser->setBrowseCaption("Select Text Editor");
+   pTextEditorBrowser->setToolTip(
+      "If %1 is specified as an argument it will be replaced by the name of the file to be edited at run time.\n"
+      "Otherwise the name of the file will be appended to the command line after all of the specified arguments.");
+#if defined(WIN_API)
+   pTextEditorBrowser->setBrowseFileFilters("Text Editors (*.exe);;All Files (*)");
+#endif
+
+   pTextEditorBrowser->hide();
+   mFileLocations.push_back(FileLocationDescriptor("Text Editor", ConfigurationSettings::getSettingTextEditorKey(),
+      pTextEditorBrowser, ConfigurationSettings::getSettingTextEditorArgumentsKey()));
 
    Service<ConfigurationSettings> pSettings;
-   for (vector<pair<string,string> >::iterator iter = mFileLocations.begin(); iter != mFileLocations.end(); ++iter)
+   for (vector<FileLocationDescriptor>::iterator iter = mFileLocations.begin(); iter != mFileLocations.end(); ++iter)
    {
-      const Filename* pFilename = dv_cast<Filename>(&pSettings->getSetting(iter->second));
-      QString dir = "";
+      QString dir;
+      const Filename* pFilename = dv_cast<Filename>(&pSettings->getSetting(iter->getKey()));
       if (pFilename != NULL)
       {
          dir = QString::fromStdString(pFilename->getFullPathAndName());
          dir.replace(QRegExp("\\\\"), "/");
       }
-      QTreeWidgetItem* pItem = new QTreeWidgetItem(mpFileTree);
+
+      QTreeWidgetItem* pItem = new QTreeWidgetItem(iter->getFileBrowser() == NULL ? mpPathTree : mpFileTree);
       if (pItem != NULL)
       {
-         pItem->setText(0, QString::fromStdString(iter->first));
+         pItem->setText(0, QString::fromStdString(iter->getText()));
          pItem->setText(1, dir);
 
-         if (iter->first != "Default Product Template")
+         if (iter->getFileBrowser() == NULL)
          {
-            mpFileTree->setCellWidgetType(pItem, 1, CustomTreeWidget::BROWSE_DIR_EDIT);
+             mpPathTree->setCellWidgetType(pItem, 1, CustomTreeWidget::BROWSE_DIR_EDIT);
          }
          else
          {
-            FileBrowser* pFileBrowser = new FileBrowser(mpFileTree);
-            pFileBrowser->setBrowseCaption("Select Template File");
-            pFileBrowser->setBrowseFileFilters("Template Files (*.spg);;All Files (*)");
-            pFileBrowser->hide();
-
             mpFileTree->setCellWidgetType(pItem, 1, CustomTreeWidget::BROWSE_FILE_EDIT);
-            mpFileTree->setFileBrowser(pItem, 1, pFileBrowser);
+            mpFileTree->setFileBrowser(pItem, 1, iter->getFileBrowser());
+            if (iter->getArgumentKey().empty())
+            {
+               pItem->setBackgroundColor(2, QColor(235, 235, 235));
+            }
+            else
+            {
+               const string& arguments = dv_cast<string>(pSettings->getSetting(iter->getArgumentKey()));
+               mpFileTree->setCellWidgetType(pItem, 2, CustomTreeWidget::LINE_EDIT);
+               pItem->setText(2, QString::fromStdString(arguments));
+            }
          }
       }
 
-      if (iter->first == "Plug-In Path")
-      {
-         mPlugInPath = pFilename->getFullPathAndName();
-      }
-      else if (iter->first == "Wizard Path")
+      if (iter->getText() == "Wizard Path")
       {
          mWizardPath = pFilename->getFullPathAndName();
       }
    }
+
+   mpPathTree->resizeColumnToContents(0);
+   mpFileTree->resizeColumnToContents(0);
 }
 
 void OptionsFileLocations::applyChanges()
@@ -133,14 +174,16 @@ void OptionsFileLocations::applyChanges()
       if (pItem != NULL)
       {
          string type = pItem->text(0).toStdString();
-         string confSettingsKey = "";
-         for (vector<pair<string,string> >::iterator iter2 = mFileLocations.begin();
+         string confSettingsKey;
+         string confSettingsArgumentKey;
+         for (vector<FileLocationDescriptor>::iterator iter2 = mFileLocations.begin();
             iter2 != mFileLocations.end();
             ++iter2)
          {
-            if (iter2->first == type)
+            if (iter2->getText() == type)
             {
-               confSettingsKey = iter2->second;
+               confSettingsKey = iter2->getKey();
+               confSettingsArgumentKey = iter2->getArgumentKey();
                break;
             }
          }
@@ -166,6 +209,10 @@ void OptionsFileLocations::applyChanges()
                   pAppWindow->updateWizardCommands();
                }
             }
+         }
+         if (!confSettingsArgumentKey.empty())
+         {
+            pSettings->setSetting(confSettingsArgumentKey, pItem->text(2).toStdString());
          }
       }
       ++iter;

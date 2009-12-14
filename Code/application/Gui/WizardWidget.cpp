@@ -9,6 +9,7 @@
 
 #include <QtGui/QLayout>
 #include <QtGui/QSplitter>
+#include <QtGui/QVBoxLayout>
 
 #include "WizardWidget.h"
 #include "AppVerify.h"
@@ -74,8 +75,16 @@ WizardWidget::WizardWidget(QWidget* parent) :
    mpValueStack = new QStackedWidget(pValueWidget);
 
    // Value editor
-   mpValueEditor = new DataVariantEditor(mpValueStack);
-   mpValueStack->addWidget(mpValueEditor);
+   mpValueEditorWidget = new QWidget(mpValueStack);
+   QLabel* pValueEditorLabel = new QLabel("Value:", mpValueEditorWidget);
+   mpValueEditor = new DataVariantEditor(mpValueEditorWidget);
+   mpValueStack->addWidget(mpValueEditorWidget);
+
+   QVBoxLayout* pValueEditorLayout = new QVBoxLayout(mpValueEditorWidget);
+   pValueEditorLayout->setMargin(0);
+   pValueEditorLayout->setSpacing(5);
+   pValueEditorLayout->addWidget(pValueEditorLabel);
+   pValueEditorLayout->addWidget(mpValueEditor);
 
    // File set widget
    mpFilesetWidget = new QWidget(mpValueStack);
@@ -381,7 +390,7 @@ void WizardWidget::showSelectedValues()
 void WizardWidget::setValueWidgets(const QString& strNodeType)
 {
    QWidget* pTypeWidget = mpTypeLabel;
-   QWidget* pEditWidget = mpValueEditor;
+   QWidget* pEditWidget = mpValueEditorWidget;
 
    if (strNodeType == "Filename")
    {
@@ -452,7 +461,7 @@ void WizardWidget::updateBatchWizardValues()
 
          pValue->setValue(value);
       }
-      else if (pCurrentWidget == mpValueEditor)
+      else if (pCurrentWidget == mpValueEditorWidget)
       {
          // Node type
          if (mpTypeStack->currentWidget() == mpTypeCombo)

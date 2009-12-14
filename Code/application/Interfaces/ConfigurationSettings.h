@@ -552,6 +552,8 @@ public:
    SETTING(ThreadCount, Edit, unsigned int, 1)
    SETTING(UndoBufferSize, Edit, unsigned int, 10)
    SETTING_PTR(WizardPath, FileLocations, Filename)
+   SETTING_PTR(TextEditor, FileLocations, Filename)
+   SETTING(TextEditorArguments, FileLocations, std::string, std::string())
    SETTING_PTR(JvmLoaderLibraryPath, FileLocations, Filename)
    CUSTOM_SETTING_PTR(PluginWorkingDirectory, FileLocations, Filename)
    SETTING(AlternateMouseWheelZoom, Edit, bool, true)

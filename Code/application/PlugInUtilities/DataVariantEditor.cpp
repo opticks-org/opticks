@@ -9,6 +9,7 @@
 
 #include "AppVerify.h"
 #include "ColorType.h"
+#include "ConfigurationSettings.h"
 #include "CustomColorButton.h"
 #include "DataVariantEditor.h"
 #include "DateTime.h"
@@ -19,14 +20,22 @@
 #include "StringUtilities.h"
 #include "SymbolTypeGrid.h"
 
+#include <QtCore/QByteArray>
 #include <QtCore/QDateTime>
+#include <QtCore/QFile>
+#include <QtCore/QFileSystemWatcher>
+#include <QtCore/QProcess>
+#include <QtCore/QString>
+#include <QtCore/QTemporaryFile>
+#include <QtCore/QUrl>
 #include <QtGui/QDateTimeEdit>
+#include <QtGui/QDesktopServices>
 #include <QtGui/QFileDialog>
 #include <QtGui/QGroupBox>
-#include <QtGui/QLabel>
 #include <QtGui/QLayout>
 #include <QtGui/QLineEdit>
 #include <QtGui/QListWidget>
+#include <QtGui/QMessageBox>
 #include <QtGui/QPushButton>
 #include <QtGui/QRadioButton>
 #include <QtGui/QStackedWidget>
@@ -35,15 +44,44 @@
 
 #include <string>
 #include <vector>
+
 using namespace std;
 
 vector<DataVariantEditorDelegate> DataVariantEditor::sDelegates;
 
-DataVariantEditor::DataVariantEditor(QWidget* pParent, bool includeValueLabel) :
+DataVariantEditor::DataVariantEditor(QWidget* pParent) :
    QWidget(pParent)
 {
-   // Value
-   QLabel* pValueLabel = includeValueLabel ? new QLabel("Value:", this) : NULL;
+   // Create the temporary file used with external editors.
+   // Use the temp path in ConfigurationSettings if available.
+   // Otherwise let QTemporaryFile determine the path based on system settings.
+   const Filename* pTempPath = ConfigurationSettings::getSettingTempPath();
+   if (pTempPath != NULL)
+   {
+      mTempFilename = QString::fromStdString(pTempPath->getFullPathAndName() + "/");
+   }
+
+   mTempFilename += "DVE-XXXXXX.txt";
+
+   // Create the temporary file.
+   // Use a QTemporaryFile for a guaranteed unique filename.
+   // Note: The QTemporaryFile could have been made a member variable but was not because as of Qt 4.5
+   // QTemporaryFile keeps its file open as long as the object is in scope. This is not desirable because some
+   // (poorly designed) editors might require exclusive access to the file and be unable to open the file if
+   // the QTemporaryFile has it open. The QTemporaryFile was not made a member of this class due to this behavior.
+   QTemporaryFile tempFile(mTempFilename);
+   if (tempFile.open() == false)
+   {
+      // Clear the member file name if the file cannot be created.
+      // Edit capabilities must be disabled.
+      mTempFilename.clear();
+   }
+   else
+   {
+      // Clear the autoRemove flag so that the file is not deleted from the disk when the QTemporaryFile leaves scope.
+      tempFile.setAutoRemove(false);
+      mTempFilename = tempFile.fileName();
+   }
 
    mpStack = new QStackedWidget(this);
 
@@ -118,27 +156,26 @@ DataVariantEditor::DataVariantEditor(QWidget* pParent, bool includeValueLabel) :
 
    mpBrowseButton = new QPushButton(icnBrowse, QString(), this);
    mpBrowseButton->setFixedWidth(27);
-   mpBrowseButton->hide();
+
+   // Edit button
+   mpEditButton = new QPushButton("Edit...", this);
 
    // Layout
    QGridLayout* pGrid = new QGridLayout(this);
    pGrid->setMargin(0);
    pGrid->setSpacing(5);
-   int row = 0;
-   if (includeValueLabel)
-   {
-      pGrid->addWidget(pValueLabel, row++, 0, 1, 2);
-   }
-   pGrid->addWidget(mpStack, row, 0);
-   pGrid->addWidget(mpBrowseButton, row, 1, Qt::AlignTop);
-   pGrid->setRowStretch(row, 10);
+   pGrid->setRowStretch(0, 10);
    pGrid->setColumnStretch(0, 10);
+   pGrid->addWidget(mpStack, 0, 0);
+   pGrid->addWidget(mpBrowseButton, 0, 1, Qt::AlignTop);
+   pGrid->addWidget(mpEditButton, 1, 0, Qt::AlignLeft);
 
    // Initialization
    setStackWidget("");
 
    // Connections
    VERIFYNR(connect(mpBrowseButton, SIGNAL(clicked()), this, SLOT(browse())));
+   VERIFYNR(connect(mpEditButton, SIGNAL(clicked()), this, SLOT(edit())));
    VERIFYNR(connect(mpValueLineEdit, SIGNAL(textChanged(const QString&)), this, SIGNAL(modified())));
    VERIFYNR(connect(mpValueList, SIGNAL(itemSelectionChanged()), this, SIGNAL(modified())));
    VERIFYNR(connect(mpValueTextEdit, SIGNAL(textChanged()), this, SIGNAL(modified())));
@@ -151,6 +188,7 @@ DataVariantEditor::DataVariantEditor(QWidget* pParent, bool includeValueLabel) :
 
 DataVariantEditor::~DataVariantEditor()
 {
+   QFile::remove(mTempFilename);
 }
 
 const vector<DataVariantEditorDelegate>& DataVariantEditor::getDelegates()
@@ -174,7 +212,8 @@ const vector<DataVariantEditorDelegate>& DataVariantEditor::getDelegates()
       sDelegates.push_back(DataVariantEditorDelegate("double", DataVariantEditorDelegate::DOUBLE));
       sDelegates.push_back(DataVariantEditorDelegate("bool", DataVariantEditorDelegate::BOOL));
       sDelegates.push_back(DataVariantEditorDelegate("string", DataVariantEditorDelegate::TEXT));
-      sDelegates.push_back(DataVariantEditorDelegate("Filename", DataVariantEditorDelegate::TEXT, true));
+      sDelegates.push_back(DataVariantEditorDelegate("Filename",
+         DataVariantEditorDelegate::TEXT, DataVariantEditorDelegate::BROWSE));
       sDelegates.push_back(DataVariantEditorDelegate("ColorType", DataVariantEditorDelegate::COLOR));
       sDelegates.push_back(DataVariantEditorDelegate("DateTime", DataVariantEditorDelegate::DATE_TIME));
       DataVariantEditorDelegate temp = DataVariantEditorDelegate("DisplayMode", DataVariantEditorDelegate::ENUMERATION);
@@ -227,8 +266,10 @@ const vector<DataVariantEditorDelegate>& DataVariantEditor::getDelegates()
       sDelegates.push_back(DataVariantEditorDelegate("vector<float>", DataVariantEditorDelegate::VECTOR));
       sDelegates.push_back(DataVariantEditorDelegate("vector<double>", DataVariantEditorDelegate::VECTOR));
       sDelegates.push_back(DataVariantEditorDelegate("vector<bool>", DataVariantEditorDelegate::VECTOR));
-      sDelegates.push_back(DataVariantEditorDelegate("vector<string>", DataVariantEditorDelegate::VECTOR));
-      sDelegates.push_back(DataVariantEditorDelegate("vector<Filename>", DataVariantEditorDelegate::VECTOR, true));
+      sDelegates.push_back(DataVariantEditorDelegate("vector<string>",
+         DataVariantEditorDelegate::VECTOR, DataVariantEditorDelegate::EDIT));
+      sDelegates.push_back(DataVariantEditorDelegate("vector<Filename>",
+         DataVariantEditorDelegate::VECTOR, DataVariantEditorDelegate::BROWSE));
       sDelegates.push_back(DataVariantEditorDelegate("DynamicObject", DataVariantEditorDelegate::DYNAMIC_OBJECT));
    }
 
@@ -522,6 +563,7 @@ void DataVariantEditor::setStackWidget(string type)
 {
    mpValueLineEdit->setEnabled(true);
    mpBrowseButton->hide();
+   mpEditButton->hide();
 
    DataVariantEditorDelegate curDelegate = getDelegate(type);
    if (curDelegate.getTypeName().empty())
@@ -529,9 +571,16 @@ void DataVariantEditor::setStackWidget(string type)
       return;
    }
 
-   if (curDelegate.getNeedBrowseButton() == true)
+   switch (curDelegate.getButtonType())
    {
+   case DataVariantEditorDelegate::BROWSE:
       mpBrowseButton->show();
+      break;
+   case DataVariantEditorDelegate::EDIT:
+      mpEditButton->show();
+      break;
+   default:
+      break;
    }
 
    if (curDelegate.getType() == DataVariantEditorDelegate::BOOL)
@@ -618,6 +667,101 @@ void DataVariantEditor::browse()
          mpValueLineEdit->setText(strFilename);
       }
    }
+}
+
+void DataVariantEditor::edit()
+{
+   if (mTempFilename.isEmpty() == true)
+   {
+      QMessageBox::warning(this, "Error", "Unable to create a file in the temporary directory.");
+      return;
+   }
+
+   // Attempt to write the current contents of mpValueTextEdit into the temporary file.
+   // Ignore this step if the file cannot be opened (it is probably already open in an editor).
+   QFile file(mTempFilename);
+   if (file.open(QIODevice::WriteOnly | QIODevice::Text) == true)
+   {
+      disconnect(&mTempFileWatcher, SIGNAL(fileChanged(const QString&)), this, SLOT(tempFileChanged()));
+      file.write(mpValueTextEdit->toPlainText().toAscii());
+      VERIFYNR(connect(&mTempFileWatcher, SIGNAL(fileChanged(const QString&)), this, SLOT(tempFileChanged())));
+      file.close();
+   }
+
+   // If the file was deleted it is no longer watched.
+   // If the file was not deleted adding a duplicate does nothing.
+   // Even though not documented, these behaviors can be confirmed by calling mTempFileWatcher.files().
+   mTempFileWatcher.addPath(mTempFilename);
+
+   // Use a custom editor if that setting has been set.
+   bool success;
+   const Filename* pTextEditor = ConfigurationSettings::getSettingTextEditor();
+   if (pTextEditor == NULL || pTextEditor->getFullPathAndName().empty() == true)
+   {
+      // Aynchronously invoke the default system editor on the file.
+      success = QDesktopServices::openUrl(QUrl(mTempFilename));
+   }
+   else
+   {
+      QString command = "\"" + QString::fromStdString(pTextEditor->getFullPathAndName()) + "\"";
+      QString arguments = QString::fromStdString(ConfigurationSettings::getSettingTextEditorArguments());
+      if (arguments.contains("%1") == true)
+      {
+         arguments.replace("%1", mTempFilename);
+      }
+      else
+      {
+         arguments += " " + mTempFilename;
+      }
+
+      // Create the process without a parent so that destruction of this widget does not close it.
+      // This behavior is desirable when using a tabbed editor (so that other tabs are not arbitrarily closed).
+      QProcess* pProcess = new QProcess;
+
+      // Start the process and wait a short amount of time for it to respond.
+      // Confirming that the process started helps detect when an invalid command was entered (in the Options dialog).
+      pProcess->start(command + " " + arguments);
+      success = pProcess->waitForStarted(1000);
+   }
+
+   if (success == false)
+   {
+      if (mTempFilename.contains(' ') == true)
+      {
+         // Spaces in paths are generally a very bad thing and cause lots of
+         // issues when dealing with QDesktopServices and QProcess objects.
+         QMessageBox::warning(this, "Error", "Unable to start the text editor. "
+            "The temporary path contains spaces. Remove all spaces from the temporary path and try again.");
+      }
+      else
+      {
+         QMessageBox::warning(this, "Error", "Unable to start the text editor. "
+            "Use the File Locations page in the Options dialog to set one manually.");
+      }
+   }
+}
+
+void DataVariantEditor::tempFileChanged()
+{
+   if (QFile::exists(mTempFilename) == false)
+   {
+      return;
+   }
+
+   QFile file(mTempFilename);
+   if (file.open(QIODevice::ReadOnly | QIODevice::Text) == false)
+   {
+      if (QMessageBox::warning(this, "Error",
+         "The file changed but could not be opened. The editor may have locked the file. Do you want to try again?",
+         QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+      {
+         tempFileChanged();
+      }
+
+      return;
+   }
+
+   mpValueTextEdit->setPlainText(QString(file.readAll()));
 }
 
 #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Use a QListView to allow editing of vector data, " \
