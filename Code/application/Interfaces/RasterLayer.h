@@ -431,7 +431,7 @@ public:
    virtual void setStretchValues(const RasterChannelType& eColor, double dLower, double dUpper) = 0;
 
    /**
-    *  Retreives the stretch values for the given display color.
+    *  Retrieves the stretch values for the given display color.
     *
     *  @param   eColor
     *           The display color.

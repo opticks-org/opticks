@@ -435,13 +435,14 @@ public:
     *  @see     model_cast(), DataElement::getParentDesignator()
     */
    virtual DataElement* getElement(const std::vector<std::string>& designator, const std::string& type) const = 0;
+
    /**
     *  Retrieves elements of a given type.
     *
     *  @param   type
     *           The string name corresponding to the element type to retrieve.
     *           If an empty string is passed in, all elements in the model are
-    *           retreived.
+    *           retrieved.
     *
     *  @return  A vector containing pointers to the data elements of the given
     *           type.
@@ -461,7 +462,7 @@ public:
     *  @param   type
     *           An optional type string for retreiving elements of a particular
     *           type from the given parent.  If an empty string is passed in,
-    *           all elements with the given parent are retreived.
+    *           all elements with the given parent are retrieved.
     *
     *  @return  A vector containing pointers to the data elements with the
     *           given parent.
@@ -476,12 +477,12 @@ public:
     *
     *  @param   filename
     *           The filename for which all elements with the same filename
-    *           should be retrieved.  Passing in an empty string retreives
+    *           should be retrieved.  Passing in an empty string retrieves
     *           all elements that have no associated file.
     *  @param   type
     *           An optional type string for retreiving elements of a particular
     *           type within the given file.  If an empty string is passed in,
-    *           all elements within the given file are retreived.
+    *           all elements within the given file are retrieved.
     *
     *  @return  A vector containing pointers to the data elements within the
     *           given file.
@@ -497,7 +498,7 @@ public:
     *  @param   type
     *           The string name corresponding to the element type for which to
     *           retrieve the names.  If an empty string is passed in, the names
-    *           of all elements in the model are retreived.
+    *           of all elements in the model are retrieved.
     *
     *  @return  A vector containing the names of the data elements of the given
     *           type.
@@ -518,7 +519,7 @@ public:
     *           An optional type string for retreiving the names of elements
     *           of a particular type from the given parent.  If an empty
     *           string is passed in, the names of all elements with the given
-    *           parent are retreived.
+    *           parent are retrieved.
     *
     *  @return  A vector containing the names of the data elements with the
     *           given parent.
@@ -534,12 +535,12 @@ public:
     *  @param   filename
     *           The filename for which the names of all elements with the same
     *           filename should be retrieved.  Passing in an empty string
-    *           retreives the name of all elements that have no associated file.
+    *           retrieves the name of all elements that have no associated file.
     *  @param   type
     *           An optional type string for retreiving the names of elements of
     *           a particular type within the given file.  If an empty string is
     *           passed in, the names of all elements within the given file are
-    *           retreived.
+    *           retrieved.
     *
     *  @return  A vector containing the names of the data elements with the
     *           given file.

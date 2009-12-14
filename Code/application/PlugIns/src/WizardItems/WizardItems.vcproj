@@ -374,6 +374,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GetSessionItem.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\GetView.cpp"
 				>
 			</File>
@@ -488,6 +492,10 @@
 			</File>
 			<File
 				RelativePath=".\GetPrimaryRasterLayer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GetSessionItem.h"
 				>
 			</File>
 			<File

@@ -61,6 +61,7 @@
  *    - AoiElement
  *    - AoiLayer
  *    - BitMask
+ *    - CartesianPlot
  *    - Classification
  *    - ClassificationLayer
  *    - ColorType
@@ -83,15 +84,21 @@
  *    - GeocoordMatrix
  *    - GraphicElement
  *    - GraphicLayer
+ *    - HistogramPlot
  *    - ImportAgent
  *    - IntegerComplex
  *    - LatLonLayer
  *    - Layer
  *    - LocationType
+ *    - MeasurementLayer
+ *    - OrthographicView
+ *    - PerspectiveView
  *    - Opticks::PixelLocation
  *    - Opticks::PixelOffset
+ *    - PlotView
  *    - PlotWidget
  *    - PlotWindow
+ *    - PolarPlot
  *    - ProductView
  *    - ProductWindow
  *    - Progress
@@ -104,6 +111,7 @@
  *    - SettableSessionItem
  *    - Signature
  *    - SignatureLibrary
+ *    - SignaturePlot
  *    - SignatureSet
  *    - SpatialDataView
  *    - SpatialDataWindow

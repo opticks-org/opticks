@@ -43,7 +43,6 @@
 #include "WizardView.h"
 
 #include <algorithm>
-using namespace std;
 
 int WizardView::sItemZ = 1000;
 int WizardView::sLineZ = 2000;
@@ -94,7 +93,7 @@ WizardView::~WizardView()
    {
       QString name = "Untitled";
 
-      const string& wizardName = mpWizard->getName();
+      const std::string& wizardName = mpWizard->getName();
       if (wizardName.empty() == false)
       {
          name = QString::fromStdString(wizardName);
@@ -174,7 +173,7 @@ void WizardView::setWizard(WizardObject* pWizard)
    // Add the new wizard items
    if (mpWizard.get() != NULL)
    {
-      const vector<WizardItem*>& wizardItems = mpWizard->getItems();
+      const std::vector<WizardItem*>& wizardItems = mpWizard->getItems();
       addItems(wizardItems);
    }
 
@@ -219,9 +218,9 @@ void WizardView::deselectItem(WizardItem* pItem)
    }
 }
 
-vector<WizardItem*> WizardView::getSelectedItems() const
+std::vector<WizardItem*> WizardView::getSelectedItems(const std::string& type) const
 {
-   vector<WizardItem*> selectedItems;
+   std::vector<WizardItem*> selectedItems;
 
    QList<QGraphicsItem*> allItems = items();
    for (int i = 0; i < allItems.count(); ++i)
@@ -230,9 +229,11 @@ vector<WizardItem*> WizardView::getSelectedItems() const
       if ((pGraphicsItem != NULL) && (pGraphicsItem->isSelected() == true))
       {
          WizardItem* pItem = pGraphicsItem->getWizardItem();
-         VERIFYRV(pItem != NULL, vector<WizardItem*>());
-
-         selectedItems.push_back(pItem);
+         VERIFYRV(pItem != NULL, std::vector<WizardItem*>());
+         if (type.empty() == true || type == pItem->getType())
+         {
+            selectedItems.push_back(pItem);
+         }
       }
    }
 
@@ -250,6 +251,23 @@ bool WizardView::isItemSelected(WizardItem* pItem) const
    return false;
 }
 
+bool WizardView::editItems()
+{
+   std::vector<WizardItem*> selectedItems = getSelectedItems("Value");
+   if (selectedItems.empty() == true)
+   {
+      QMessageBox::warning(this, "Error", "Please select one or more value items to edit.");
+      return false;
+   }
+
+   if (selectedItems.size() == 1)
+   {
+      return editItem(selectedItems.front());
+   }
+
+   return WizardUtilities::editItems(selectedItems, this);
+}
+
 bool WizardView::editItem(WizardItem* pItem)
 {
    WizardItemImp* pItemImp = static_cast<WizardItemImp*>(pItem);
@@ -258,20 +276,20 @@ bool WizardView::editItem(WizardItem* pItem)
       return false;
    }
 
-   const string& itemType = pItem->getType();
+   const std::string& itemType = pItem->getType();
    if (itemType != "Value")
    {
       return false;
    }
 
-   const vector<WizardNode*>& outputNodes = pItemImp->getOutputNodes();
+   const std::vector<WizardNode*>& outputNodes = pItemImp->getOutputNodes();
    VERIFY(outputNodes.empty() == false);
 
    WizardNodeImp* pNode = static_cast<WizardNodeImp*>(outputNodes.front());
    VERIFY(pNode != NULL);
 
-   const string& nodeName = pNode->getName();
-   const string& nodeType = pNode->getType();
+   const std::string& nodeName = pNode->getName();
+   const std::string& nodeType = pNode->getType();
    void* pValue = pNode->getValue();
 
    NameTypeValueDlg dlgValue(this);
@@ -287,8 +305,8 @@ bool WizardView::editItem(WizardItem* pItem)
          return false;
       }
 
-      string newNodeName = strName.toStdString();
-      string newNodeType = strType.toStdString();
+      std::string newNodeName = strName.toStdString();
+      std::string newNodeType = strType.toStdString();
       const DataVariant& newNodeValue = dlgValue.getValue();
 
       if (newNodeName != nodeName)
@@ -299,7 +317,7 @@ bool WizardView::editItem(WizardItem* pItem)
 
       if (newNodeType != nodeType)
       {
-         vector<string> validTypes;
+         std::vector<std::string> validTypes;
          validTypes.push_back(newNodeType);
 
          pNode->setOriginalType(newNodeType);
@@ -324,8 +342,8 @@ bool WizardView::isModified() const
 
 void WizardView::selectAllItems()
 {
-   vector<WizardGraphicsItem*> items = getGraphicsItems();
-   for (vector<WizardGraphicsItem*>::iterator iter = items.begin(); iter != items.end(); ++iter)
+   std::vector<WizardGraphicsItem*> items = getGraphicsItems();
+   for (std::vector<WizardGraphicsItem*>::iterator iter = items.begin(); iter != items.end(); ++iter)
    {
       WizardGraphicsItem* pGraphicsItem = *iter;
       if (pGraphicsItem != NULL)
@@ -337,8 +355,8 @@ void WizardView::selectAllItems()
 
 void WizardView::deselectAllItems()
 {
-   vector<WizardGraphicsItem*> items = getGraphicsItems();
-   for (vector<WizardGraphicsItem*>::iterator iter = items.begin(); iter != items.end(); ++iter)
+   std::vector<WizardGraphicsItem*> items = getGraphicsItems();
+   for (std::vector<WizardGraphicsItem*>::iterator iter = items.begin(); iter != items.end(); ++iter)
    {
       WizardGraphicsItem* pGraphicsItem = *iter;
       if (pGraphicsItem != NULL)
@@ -370,8 +388,8 @@ void WizardView::removeSelectedItems()
    // Items
    if (mpWizard.get() != NULL)
    {
-      vector<WizardItem*> selectedItems = getSelectedItems();
-      for (vector<WizardItem*>::iterator iter = selectedItems.begin(); iter != selectedItems.end(); ++iter)
+      std::vector<WizardItem*> selectedItems = getSelectedItems();
+      for (std::vector<WizardItem*>::iterator iter = selectedItems.begin(); iter != selectedItems.end(); ++iter)
       {
          WizardItem* pItem = *iter;
          if (pItem != NULL)
@@ -477,7 +495,7 @@ void WizardView::print()
    }
 
    QPrinter wizardPrinter(QPrinter::ScreenResolution);
-   SystemServicesImp::instance()->WriteLogInfo(string(APP_NAME) + " is printing a wizard");
+   SystemServicesImp::instance()->WriteLogInfo(std::string(APP_NAME) + " is printing a wizard");
 
    QPrintDialog dlg(&wizardPrinter, this);
    if (dlg.exec() == QDialog::Accepted)
@@ -565,7 +583,7 @@ bool WizardView::saveAs()
          defaultDir = QString::fromStdString(pWizardPath->getFullPathAndName());
       }
 
-      string wizardName = mpWizard->getName();
+      std::string wizardName = mpWizard->getName();
       if (wizardName.empty() == false)
       {
          defaultFile = QString::fromStdString(wizardName);
@@ -968,7 +986,7 @@ void WizardView::mouseDoubleClickEvent(QMouseEvent* pEvent)
       WizardItemImp* pItem = static_cast<WizardItemImp*>(pGraphicsItem->getWizardItem());
       if (pItem != NULL)
       {
-         const string& itemType = pItem->getType();
+         const std::string& itemType = pItem->getType();
          if (itemType != "Value")
          {
             QPointF scenePos = mapToScene(viewPos);
@@ -978,77 +996,89 @@ void WizardView::mouseDoubleClickEvent(QMouseEvent* pEvent)
                if (!pNode->getConnectedNodes().empty())
                {
                   QMessageBox::warning(this, "Wizard Builder",
-                     "This node already has a connection. Unable to create a Value item.");
+                     "Unable to create a connection since the node already has an existing connection.");
                   return;
                }
-               if (!DataVariantEditor::hasDelegate(pNode->getType()))
+
+               WizardNodeImp* pNewNode = NULL;
+               WizardItemImp* pNewItem = NULL;
+               if (DataVariantEditor::hasDelegate(pNode->getType()))
                {
-                  QMessageBox::warning(this, "Wizard Builder",
-                     QString("Value items of type %1 are not supported.").arg(
-                        QString::fromStdString(pNode->getType())));
-                  return;
-               }
-               // create a new value item
-               DataVariant initialValue(pNode->getType(), pNode->getValue());
-               if (pNode->getValue() == NULL)
-               {
+                  // create a new value item
+                  DataVariant initialValue(pNode->getType(), pNode->getValue());
+                  if (pNode->getValue() == NULL)
+                  {
 #pragma message(__FILE__ "(" STRING(__LINE__) \
 ") : warning : This should error, fix this when we can have a DataVariant with a type and an invalid value (tclarke)")
-                  QString type = QString::fromStdString(pNode->getType());
-                  if ((type.contains("char") ||
-                       type.contains("short") ||
-                       type.contains("int") ||
-                       type.contains("long") ||
-                       type.contains("float") ||
-                       type.contains("double")) && !type.contains("vector"))
-                  {
-                     initialValue.fromDisplayString(pNode->getType(), "0");
-                  }
-               }
-               PlugInDescriptor* pPlugInDesc = Service<PlugInManagerServices>()->getPlugInDescriptor(pItem->getName());
-               if (pPlugInDesc != NULL)
-               {
-                  const PlugInArgList* pList = pItem->getBatchMode() ?
-                                 pPlugInDesc->getBatchInputArgList() :
-                                 pPlugInDesc->getInteractiveInputArgList();
-                  if (pList != NULL)
-                  {
-                     PlugInArg* pArg = NULL;
-                     if (pList->getArg(pNode->getName(), pArg) && pArg != NULL && pArg->isDefaultSet())
+                     QString type = QString::fromStdString(pNode->getType());
+                     if ((type.contains("char") ||
+                          type.contains("short") ||
+                          type.contains("int") ||
+                          type.contains("long") ||
+                          type.contains("float") ||
+                          type.contains("double")) && !type.contains("vector"))
                      {
-                        initialValue = DataVariant(pArg->getType(), pArg->getDefaultValue());
+                        initialValue.fromDisplayString(pNode->getType(), "0");
                      }
                   }
-               }
-               WizardItemImp* pValueItem = static_cast<WizardItemImp*>(mpWizard->addValueItem(pNode->getName(),
-                  initialValue));
-               if (pValueItem == NULL)
-               {
-                  QMessageBox::warning(this, "Wizard Builder", "Unable to automatically create a Value item.");
-                  return;
-               }
-               WizardGraphicsItem* pValueGraphicsItem = getGraphicsItem(pValueItem);
-               WizardGraphicsItem* pGraphicsItem = getGraphicsItem(pItem);
-               VERIFYNRV(pValueGraphicsItem && pGraphicsItem);
-               QPointF nodeSceneLocation = pGraphicsItem->getNodeConnectionPoint(pNode);
-               QPointF valueNodeOffset = pValueGraphicsItem->mapFromScene(
-                  pValueGraphicsItem->getNodeConnectionPoint(pValueItem->getOutputNodes().front()));
-               valueNodeOffset += QPointF(60, 0); // magic number based on visual trials
-               nodeSceneLocation -= valueNodeOffset;
-               pValueItem->setPosition(nodeSceneLocation.x(), nodeSceneLocation.y());
-
-               // edit the item
-               if (editItem(pValueItem))
-               {
-                  // connect the value item output node to the input node
-                  WizardNodeImp* pValueNode = static_cast<WizardNodeImp*>(pValueItem->getOutputNodes().front());
-                  VERIFYNRV(pValueNode);
-                  pNode->addConnectedNode(pValueNode);
-                  pValueNode->addConnectedNode(pNode);
+                  PlugInDescriptor* pPlugInDesc = Service<PlugInManagerServices>()->getPlugInDescriptor(pItem->getName());
+                  if (pPlugInDesc != NULL)
+                  {
+                     const PlugInArgList* pList = pItem->getBatchMode() ?
+                                    pPlugInDesc->getBatchInputArgList() :
+                                    pPlugInDesc->getInteractiveInputArgList();
+                     if (pList != NULL)
+                     {
+                        PlugInArg* pArg = NULL;
+                        if (pList->getArg(pNode->getName(), pArg) && pArg != NULL && pArg->isDefaultSet())
+                        {
+                           initialValue = DataVariant(pArg->getType(), pArg->getDefaultValue());
+                        }
+                     }
+                  }
+                  pNewItem = static_cast<WizardItemImp*>(mpWizard->addValueItem(pNode->getName(), initialValue));
+                  if (pNewItem != NULL)
+                  {
+                     pNewNode = static_cast<WizardNodeImp*>(pNewItem->getOutputNodes().front());
+                  }
                }
                else
                {
-                  mpWizard->removeItem(pValueItem);
+                  // create a GetSessionItem
+                  pNewItem = static_cast<WizardItemImp*>(mpWizard->addPlugInItem("Get " + pNode->getType(), "Wizard"));
+                  if (pNewItem != NULL)
+                  {
+                     pNewNode = static_cast<WizardNodeImp*>(pNewItem->getOutputNode("Session Item", pNode->getType()));
+                  }
+               }
+
+               if (pNewItem == NULL || pNewNode == NULL)
+               {
+                  mpWizard->removeItem(pNewItem);
+                  QMessageBox::warning(this, "Wizard Builder", "Unable to automatically create a connection.");
+               }
+               else
+               {
+                  WizardGraphicsItem* pNewGraphicsItem = getGraphicsItem(pNewItem);
+                  WizardGraphicsItem* pGraphicsItem = getGraphicsItem(pItem);
+                  VERIFYNRV(pNewGraphicsItem && pGraphicsItem);
+
+                  QPointF nodeSceneLocation = pGraphicsItem->getNodeConnectionPoint(pNode);
+                  QPointF valueNodeOffset = pNewGraphicsItem->mapFromScene(
+                     pNewGraphicsItem->getNodeConnectionPoint(pNewNode));
+                  valueNodeOffset += QPointF(60, 0); // magic number based on visual trials
+                  nodeSceneLocation -= valueNodeOffset;
+                  pNewItem->setPosition(nodeSceneLocation.x(), nodeSceneLocation.y());
+
+                  // connect the value item output node to the input node
+                  pNode->addConnectedNode(pNewNode);
+                  pNewNode->addConnectedNode(pNode);
+
+                  // edit value items now that the wizard item is in place and connected
+                  if (pNewItem->getType() == "Value" && editItem(pNewItem) == false)
+                  {
+                     mpWizard->removeItem(pNewItem);
+                  }
                }
             }
             else
@@ -1074,8 +1104,8 @@ void WizardView::contextMenuEvent(QContextMenuEvent* pEvent)
    QGraphicsScene* pScene = scene();
    VERIFYNRV(pScene != NULL);
 
-   vector<WizardGraphicsItem*> items = getGraphicsItems();
-   vector<WizardItem*> selectedWizardItems = getSelectedItems();
+   std::vector<WizardGraphicsItem*> items = getGraphicsItems();
+   std::vector<WizardItem*> selectedWizardItems = getSelectedItems();
    QList<QGraphicsItem*> selectedItems = pScene->selectedItems();
 
    if (selectedWizardItems.empty() == false)
@@ -1093,27 +1123,52 @@ void WizardView::contextMenuEvent(QContextMenuEvent* pEvent)
          pInteractiveAction->setEnabled(false);
       }
 
+      bool valueItems = false;
       bool connections = false;
-      for (vector<WizardItem*>::iterator iter = selectedWizardItems.begin(); iter != selectedWizardItems.end(); ++iter)
+      for (std::vector<WizardItem*>::iterator iter = selectedWizardItems.begin();
+         iter != selectedWizardItems.end();
+         ++iter)
       {
          WizardItemImp* pItem = static_cast<WizardItemImp*>(*iter);
          if (pItem != NULL)
          {
-            vector<WizardItem*> connectedItems;
+            if (pItem->getType() == "Value")
+            {
+               valueItems = true;
+               if (connections == true)
+               {
+                  break;
+               }
+            }
+
+            std::vector<WizardItem*> connectedItems;
             pItem->getConnectedItems(true, connectedItems);
             if (connectedItems.empty() == false)
             {
                connections = true;
-               break;
+               if (valueItems == true)
+               {
+                  break;
+               }
             }
 
             pItem->getConnectedItems(false, connectedItems);
             if (connectedItems.empty() == false)
             {
                connections = true;
-               break;
+               if (valueItems == true)
+               {
+                  break;
+               }
             }
          }
+      }
+
+      QAction* pEditAction = NULL;
+      if (valueItems == true)
+      {
+         pEditAction = contextMenu.addAction(QIcon(":/icons/ValueEdit"), "&Edit...");
+         contextMenu.addSeparator();
       }
 
       QAction* pRemoveConnectionsAction = NULL;
@@ -1132,9 +1187,13 @@ void WizardView::contextMenuEvent(QContextMenuEvent* pEvent)
          {
             removeSelectedItems();
          }
+         else if (pInvokedAction == pEditAction)
+         {
+            editItems();
+         }
          else
          {
-            for (vector<WizardItem*>::iterator iter = selectedWizardItems.begin();
+            for (std::vector<WizardItem*>::iterator iter = selectedWizardItems.begin();
                iter != selectedWizardItems.end();
                ++iter)
             {
@@ -1152,7 +1211,7 @@ void WizardView::contextMenuEvent(QContextMenuEvent* pEvent)
                   else if (pInvokedAction == pRemoveConnectionsAction)
                   {
                      // Input nodes
-                     vector<WizardNode*> inputNodes = pItem->getInputNodes();
+                     std::vector<WizardNode*> inputNodes = pItem->getInputNodes();
                      for (unsigned int i = 0; i < inputNodes.size(); i++)
                      {
                         WizardNodeImp* pNode = static_cast<WizardNodeImp*>(inputNodes[i]);
@@ -1163,7 +1222,7 @@ void WizardView::contextMenuEvent(QContextMenuEvent* pEvent)
                      }
 
                      // Output nodes
-                     vector<WizardNode*> outputNodes = pItem->getOutputNodes();
+                     std::vector<WizardNode*> outputNodes = pItem->getOutputNodes();
                      for (unsigned int i = 0; i < outputNodes.size(); i++)
                      {
                         WizardNodeImp* pNode = static_cast<WizardNodeImp*>(outputNodes[i]);
@@ -1287,7 +1346,7 @@ void WizardView::drawItems(QPainter* pPainter, int numItems, QGraphicsItem* item
 {
    if (numItems > 0)
    {
-      vector<QStyleOptionGraphicsItem> styleOptions(numItems);
+      std::vector<QStyleOptionGraphicsItem> styleOptions(numItems);
       for (int i = 0; i < numItems; ++i)
       {
          QStyleOptionGraphicsItem option = options[i];
@@ -1303,7 +1362,7 @@ void WizardView::drawItems(QPainter* pPainter, int numItems, QGraphicsItem* item
    QGraphicsView::drawItems(pPainter, numItems, items, options);
 }
 
-void WizardView::itemAdded(Subject& subject, const string& signal, const boost::any& data)
+void WizardView::itemAdded(Subject& subject, const std::string& signal, const boost::any& data)
 {
    WizardObjectImp* pWizard = dynamic_cast<WizardObjectImp*>(&subject);
    VERIFYNRV(pWizard != NULL);
@@ -1316,7 +1375,7 @@ void WizardView::itemAdded(Subject& subject, const string& signal, const boost::
    addItem(pItem);
 }
 
-void WizardView::itemRemoved(Subject& subject, const string& signal, const boost::any& data)
+void WizardView::itemRemoved(Subject& subject, const std::string& signal, const boost::any& data)
 {
    WizardObjectImp* pWizard = dynamic_cast<WizardObjectImp*>(&subject);
    VERIFYNRV(pWizard != NULL);
@@ -1329,7 +1388,7 @@ void WizardView::itemRemoved(Subject& subject, const string& signal, const boost
    removeItem(pItem);
 }
 
-void WizardView::executionOrderChanged(Subject& subject, const string& signal, const boost::any& data)
+void WizardView::executionOrderChanged(Subject& subject, const std::string& signal, const boost::any& data)
 {
    WizardObjectImp* pWizard = dynamic_cast<WizardObjectImp*>(&subject);
    VERIFYNRV(pWizard != NULL);
@@ -1339,7 +1398,7 @@ void WizardView::executionOrderChanged(Subject& subject, const string& signal, c
    updateExecutionOrder();
 }
 
-void WizardView::itemPositionChanged(Subject& subject, const string& signal, const boost::any& data)
+void WizardView::itemPositionChanged(Subject& subject, const std::string& signal, const boost::any& data)
 {
    WizardItem* pItem = dynamic_cast<WizardItem*>(&subject);
    if (pItem != NULL)
@@ -1348,7 +1407,7 @@ void WizardView::itemPositionChanged(Subject& subject, const string& signal, con
    }
 }
 
-void WizardView::nodeAdded(Subject& subject, const string& signal, const boost::any& data)
+void WizardView::nodeAdded(Subject& subject, const std::string& signal, const boost::any& data)
 {
    WizardNodeImp* pNode = static_cast<WizardNodeImp*>(boost::any_cast<WizardNode*>(data));
    if (pNode != NULL)
@@ -1359,7 +1418,7 @@ void WizardView::nodeAdded(Subject& subject, const string& signal, const boost::
    }
 }
 
-void WizardView::nodeRemoved(Subject& subject, const string& signal, const boost::any& data)
+void WizardView::nodeRemoved(Subject& subject, const std::string& signal, const boost::any& data)
 {
    WizardNodeImp* pNode = static_cast<WizardNodeImp*>(boost::any_cast<WizardNode*>(data));
    if (pNode != NULL)
@@ -1368,8 +1427,8 @@ void WizardView::nodeRemoved(Subject& subject, const string& signal, const boost
       VERIFYNR(pNode->detach(SIGNAL_NAME(WizardNodeImp, NodeDisconnected), Slot(this, &WizardView::nodeDisconnected)));
       VERIFYNR(pNode->detach(SIGNAL_NAME(Subject, Modified), Slot(this, &WizardView::setModified)));
 
-      const vector<WizardNode*>& connectedNodes = pNode->getConnectedNodes();
-      for (vector<WizardNode*>::const_iterator iter = connectedNodes.begin(); iter != connectedNodes.end(); ++iter)
+      const std::vector<WizardNode*>& connectedNodes = pNode->getConnectedNodes();
+      for (std::vector<WizardNode*>::const_iterator iter = connectedNodes.begin(); iter != connectedNodes.end(); ++iter)
       {
          WizardNode* pConnectedNode = *iter;
          if (pConnectedNode != NULL)
@@ -1391,7 +1450,7 @@ void WizardView::nodeRemoved(Subject& subject, const string& signal, const boost
    }
 }
 
-void WizardView::nodeConnected(Subject& subject, const string& signal, const boost::any& data)
+void WizardView::nodeConnected(Subject& subject, const std::string& signal, const boost::any& data)
 {
    WizardNode* pNode = dynamic_cast<WizardNode*>(&subject);
    WizardNode* pConnectedNode = boost::any_cast<WizardNode*>(data);
@@ -1402,7 +1461,7 @@ void WizardView::nodeConnected(Subject& subject, const string& signal, const boo
    }
 }
 
-void WizardView::nodeDisconnected(Subject& subject, const string& signal, const boost::any& data)
+void WizardView::nodeDisconnected(Subject& subject, const std::string& signal, const boost::any& data)
 {
    WizardNode* pNode = dynamic_cast<WizardNode*>(&subject);
    WizardNode* pConnectedNode = boost::any_cast<WizardNode*>(data);
@@ -1424,7 +1483,7 @@ void WizardView::nodeDisconnected(Subject& subject, const string& signal, const 
    }
 }
 
-void WizardView::setModified(Subject& subject, const string& signal, const boost::any& data)
+void WizardView::setModified(Subject& subject, const std::string& signal, const boost::any& data)
 {
    mModified = true;
 }
@@ -1460,10 +1519,10 @@ void WizardView::addItem(WizardItem* pItem)
    VERIFYNR(pItemImp->attach(SIGNAL_NAME(WizardItemImp, NodeRemoved), Slot(this, &WizardView::nodeRemoved)));
    VERIFYNR(pItemImp->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &WizardView::setModified)));
 
-   const vector<WizardNode*>& inputNodes = pItem->getInputNodes();
-   const vector<WizardNode*>& outputNodes = pItem->getOutputNodes();
+   const std::vector<WizardNode*>& inputNodes = pItem->getInputNodes();
+   const std::vector<WizardNode*>& outputNodes = pItem->getOutputNodes();
 
-   for (vector<WizardNode*>::size_type i = 0; i < inputNodes.size() + outputNodes.size(); ++i)
+   for (std::vector<WizardNode*>::size_type i = 0; i < inputNodes.size() + outputNodes.size(); ++i)
    {
       WizardNodeImp* pNode = NULL;
       if (i < inputNodes.size())
@@ -1485,7 +1544,7 @@ void WizardView::addItem(WizardItem* pItem)
    }
 }
 
-void WizardView::addItems(const vector<WizardItem*>& wizardItems)
+void WizardView::addItems(const std::vector<WizardItem*>& wizardItems)
 {
    if (wizardItems.empty() == true)
    {
@@ -1493,7 +1552,7 @@ void WizardView::addItems(const vector<WizardItem*>& wizardItems)
    }
 
    // Items
-   for (vector<WizardItem*>::const_iterator iter = wizardItems.begin(); iter != wizardItems.end(); ++iter)
+   for (std::vector<WizardItem*>::const_iterator iter = wizardItems.begin(); iter != wizardItems.end(); ++iter)
    {
       WizardItem* pItem = *iter;
       if (pItem != NULL)
@@ -1503,21 +1562,21 @@ void WizardView::addItems(const vector<WizardItem*>& wizardItems)
    }
 
    // Node connections
-   for (vector<WizardItem*>::const_iterator iter = wizardItems.begin(); iter != wizardItems.end(); ++iter)
+   for (std::vector<WizardItem*>::const_iterator iter = wizardItems.begin(); iter != wizardItems.end(); ++iter)
    {
       WizardItem* pItem = *iter;
       if (pItem != NULL)
       {
-         const vector<WizardNode*>& outputNodes = pItem->getOutputNodes();
-         for (vector<WizardNode*>::const_iterator outputIter = outputNodes.begin();
+         const std::vector<WizardNode*>& outputNodes = pItem->getOutputNodes();
+         for (std::vector<WizardNode*>::const_iterator outputIter = outputNodes.begin();
             outputIter != outputNodes.end();
             ++outputIter)
          {
             WizardNode* pOutputNode = *outputIter;
             if (pOutputNode != NULL)
             {
-               const vector<WizardNode*>& connectedNodes = pOutputNode->getConnectedNodes();
-               for (vector<WizardNode*>::const_iterator connectedIter = connectedNodes.begin();
+               const std::vector<WizardNode*>& connectedNodes = pOutputNode->getConnectedNodes();
+               for (std::vector<WizardNode*>::const_iterator connectedIter = connectedNodes.begin();
                   connectedIter != connectedNodes.end();
                   ++connectedIter)
                {
@@ -1552,10 +1611,10 @@ void WizardView::removeItem(WizardItem* pItem)
    VERIFYNR(pItemImp->detach(SIGNAL_NAME(Subject, Modified), Slot(this, &WizardView::setModified)));
 
    // Remove the node connection items
-   const vector<WizardNode*>& inputNodes = pItem->getInputNodes();
-   const vector<WizardNode*>& outputNodes = pItem->getOutputNodes();
+   const std::vector<WizardNode*>& inputNodes = pItem->getInputNodes();
+   const std::vector<WizardNode*>& outputNodes = pItem->getOutputNodes();
 
-   for (vector<WizardNode*>::size_type i = 0; i < inputNodes.size() + outputNodes.size(); ++i)
+   for (std::vector<WizardNode*>::size_type i = 0; i < inputNodes.size() + outputNodes.size(); ++i)
    {
       WizardNodeImp* pNode = NULL;
       if (i < inputNodes.size())
@@ -1574,8 +1633,8 @@ void WizardView::removeItem(WizardItem* pItem)
             Slot(this, &WizardView::nodeDisconnected)));
          VERIFYNR(pNode->detach(SIGNAL_NAME(Subject, Modified), Slot(this, &WizardView::setModified)));
 
-         const vector<WizardNode*>& connectedNodes = pNode->getConnectedNodes();
-         for (vector<WizardNode*>::const_iterator iter = connectedNodes.begin(); iter != connectedNodes.end(); ++iter)
+         const std::vector<WizardNode*>& connectedNodes = pNode->getConnectedNodes();
+         for (std::vector<WizardNode*>::const_iterator iter = connectedNodes.begin(); iter != connectedNodes.end(); ++iter)
          {
             WizardNode* pConnectedNode = *iter;
             if (pConnectedNode != NULL)
@@ -1606,14 +1665,14 @@ void WizardView::removeItem(WizardItem* pItem)
 
 unsigned int WizardView::getNumItems() const
 {
-   vector<WizardGraphicsItem*> items = getGraphicsItems();
+   std::vector<WizardGraphicsItem*> items = getGraphicsItems();
    return items.size();
 }
 
 void WizardView::clear()
 {
-   vector<WizardGraphicsItem*> items = getGraphicsItems();
-   for (vector<WizardGraphicsItem*>::iterator iter = items.begin(); iter != items.end(); ++iter)
+   std::vector<WizardGraphicsItem*> items = getGraphicsItems();
+   for (std::vector<WizardGraphicsItem*>::iterator iter = items.begin(); iter != items.end(); ++iter)
    {
       WizardGraphicsItem* pGraphicsItem = *iter;
       if (pGraphicsItem != NULL)
@@ -1652,13 +1711,13 @@ void WizardView::addConnection(WizardNode* pOutputNode, WizardNode* pInputNode)
       return;
    }
 
-   const vector<WizardNode*>& outputNodes = pOutputItem->getOutputNodes();
+   const std::vector<WizardNode*>& outputNodes = pOutputItem->getOutputNodes();
    if (std::find(outputNodes.begin(), outputNodes.end(), pOutputNode) == outputNodes.end())
    {
       return;
    }
 
-   const vector<WizardNode*>& inputNodes = pInputItem->getInputNodes();
+   const std::vector<WizardNode*>& inputNodes = pInputItem->getInputNodes();
    if (std::find(inputNodes.begin(), inputNodes.end(), pInputNode) == inputNodes.end())
    {
       return;
@@ -1707,10 +1766,10 @@ void WizardView::updateConnectionPosition(WizardItem* pItem)
       return;
    }
 
-   const vector<WizardNode*>& inputNodes = pItem->getInputNodes();
-   const vector<WizardNode*>& outputNodes = pItem->getOutputNodes();
+   const std::vector<WizardNode*>& inputNodes = pItem->getInputNodes();
+   const std::vector<WizardNode*>& outputNodes = pItem->getOutputNodes();
 
-   for (vector<WizardNode*>::size_type i = 0; i < inputNodes.size() + outputNodes.size(); ++i)
+   for (std::vector<WizardNode*>::size_type i = 0; i < inputNodes.size() + outputNodes.size(); ++i)
    {
       WizardNode* pNode = NULL;
       if (i < inputNodes.size())
@@ -1724,8 +1783,8 @@ void WizardView::updateConnectionPosition(WizardItem* pItem)
 
       if (pNode != NULL)
       {
-         const vector<WizardNode*>& connectedNodes = pNode->getConnectedNodes();
-         for (vector<WizardNode*>::const_iterator iter = connectedNodes.begin(); iter != connectedNodes.end(); ++iter)
+         const std::vector<WizardNode*>& connectedNodes = pNode->getConnectedNodes();
+         for (std::vector<WizardNode*>::const_iterator iter = connectedNodes.begin(); iter != connectedNodes.end(); ++iter)
          {
             WizardNode* pConnectedNode = *iter;
             if (pConnectedNode != NULL)
@@ -1794,8 +1853,8 @@ void WizardView::updateExecutionOrder()
       return;
    }
 
-   const vector<WizardItem*>& items = mpWizard->getItems();
-   for (vector<WizardItem*>::size_type i = 0; i < items.size(); ++i)
+   const std::vector<WizardItem*>& items = mpWizard->getItems();
+   for (std::vector<WizardItem*>::size_type i = 0; i < items.size(); ++i)
    {
       WizardItem* pItem = items[i];
       if (pItem != NULL)
@@ -1832,7 +1891,7 @@ WizardGraphicsItem* WizardView::getGraphicsItem(WizardItem* pItem) const
       return NULL;
    }
 
-   vector<WizardGraphicsItem*> items = getGraphicsItems();
+   std::vector<WizardGraphicsItem*> items = getGraphicsItems();
    for (unsigned int i = 0; i < items.size(); i++)
    {
       WizardGraphicsItem* pGraphicsItem = items[i];
@@ -1856,7 +1915,7 @@ WizardGraphicsItem* WizardView::getGraphicsItem(WizardNode* pNode) const
       return NULL;
    }
 
-   vector<WizardGraphicsItem*> items = getGraphicsItems();
+   std::vector<WizardGraphicsItem*> items = getGraphicsItems();
    for (unsigned int i = 0; i < items.size(); i++)
    {
       WizardGraphicsItem* pGraphicsItem = items[i];
@@ -1882,9 +1941,9 @@ WizardGraphicsItem* WizardView::getGraphicsItem(WizardNode* pNode) const
    return NULL;
 }
 
-vector<WizardGraphicsItem*> WizardView::getGraphicsItems() const
+std::vector<WizardGraphicsItem*> WizardView::getGraphicsItems() const
 {
-   vector<WizardGraphicsItem*> graphicsItems;
+   std::vector<WizardGraphicsItem*> graphicsItems;
 
    QList<QGraphicsItem*> allItems = items();
    for (int i = 0; i < allItems.count(); ++i)
@@ -1930,14 +1989,14 @@ bool WizardView::save(const QString& filename)
    }
    else
    {
-      string batchFilename = WizardUtilities::deriveBatchWizardFilename(filename.toStdString());
+      std::string batchFilename = WizardUtilities::deriveBatchWizardFilename(filename.toStdString());
       bool createdBatchWizard = false;
 
-      auto_ptr<BatchWizard> pBatchWizard(WizardUtilities::createBatchWizardFromWizard(mpWizard.get(),
+      std::auto_ptr<BatchWizard> pBatchWizard(WizardUtilities::createBatchWizardFromWizard(mpWizard.get(),
          filename.toStdString()));
       if (pBatchWizard.get() != NULL)
       {
-         vector<BatchWizard*> batchWizards;
+         std::vector<BatchWizard*> batchWizards;
          batchWizards.push_back(pBatchWizard.get());
          createdBatchWizard = WizardUtilities::writeBatchWizard(batchWizards, batchFilename);
       }

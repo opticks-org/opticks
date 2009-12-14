@@ -12,14 +12,11 @@
 #include "AppVerify.h"
 #include "DataDescriptor.h"
 #include "DataElement.h"
-#include "DataVariantEditor.h"
 #include "DesktopServices.h"
 #include "Executable.h"
 #include "FileDescriptor.h"
 #include "Filename.h"
 #include "Layer.h"
-#include "LabeledSection.h"
-#include "LabeledSectionGroup.h"
 #include "MessageLogResource.h"
 #include "ModelServices.h"
 #include "ObjectFactory.h"
@@ -37,13 +34,11 @@
 #include "WizardItem.h"
 #include "WizardNode.h"
 #include "WizardObject.h"
+#include "WizardUtilities.h"
 #include "xmlreader.h"
 
 #include <QtCore/QDir>
-#include <QtGui/QDialog>
-#include <QtGui/QDialogButtonBox>
 #include <QtGui/QFileDialog>
-#include <QtGui/QVBoxLayout>
 
 using namespace std;
 
@@ -185,8 +180,9 @@ bool WizardExecutor::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLi
          populateList.push_back(*wiIter);
          continue;
       }
-      if (!queryValueItems(populateList))
+      if (!WizardUtilities::editItems(populateList, Service<DesktopServices>()->getMainWidget()))
       {
+         mMessage = "Wizard cancelled by user.";
          if (mbDeleteWizard)
          {
             mpObjFact->destroyObject(mpWizard, "WizardObject");
@@ -806,118 +802,4 @@ void WizardExecutor::resetAllNodeValues()
          }
       }
    }
-}
-
-bool WizardExecutor::queryValueItems(const vector<WizardItem*>& valueItems)
-{
-   if (valueItems.empty() || Service<ApplicationServices>()->isBatch())
-   {
-      return true;
-   }
-
-   QDialog input(Service<DesktopServices>()->getMainWidget());
-
-   // Edit widgets
-   vector<DataVariantEditor*> editors;
-   editors.reserve(valueItems.size());
-   LabeledSectionGroup* pGroup = new LabeledSectionGroup(&input);
-   for (size_t idx = 0; idx < valueItems.size(); ++idx)
-   {
-      DataVariantEditor* pEditor = new DataVariantEditor(&input);
-      editors.push_back(pEditor);
-      const vector<WizardNode*>& nodes = valueItems[idx]->getOutputNodes();
-      VERIFY(nodes.size() == 1);
-      WizardNode* pValNode = nodes.front();
-      VERIFY(pValNode != NULL);
-      DataVariant val(pValNode->getType(), pValNode->getValue());
-      pEditor->setValue(val);
-
-      LabeledSection* pSection = new LabeledSection(pEditor, QString::fromStdString(pValNode->getName()), &input);
-      string connectionInfo = "<table width=470 cellspacing=0>"
-         "<tr><td width=90><b>Name:</b></td><td>" + pValNode->getName() + "</td></tr>"
-         "<tr><td width=90><b>Type:</b></td><td>" + pValNode->getType() + "</td></tr>"
-         "<tr/><tr/>"
-         "<tr><td width=90><b>Connections:</b></tr></table>";
-
-      const vector<WizardNode*>& connectedNodes = pValNode->getConnectedNodes();
-      for (vector<WizardNode*>::const_iterator iter = connectedNodes.begin(); iter != connectedNodes.end(); ++iter)
-      {
-         WizardNode* pCurrNode = *iter;
-         VERIFY(pCurrNode != NULL);
-
-         WizardItem* pCurrItem = pCurrNode->getItem();
-         VERIFY(pCurrItem != NULL);
-
-         connectionInfo += "<hr>"
-            "<table width=470 cellspacing=0>"
-            "<tr><td width=90><b>Item:</b></td><td>" + pCurrItem->getName() + "</td></tr>"
-            "<tr><td width=90><b>Name:</b></td><td>" + pCurrNode->getName() + "</td></tr>"
-            "<tr><td width=90><b>Description:</b></td><td>" + pCurrNode->getDescription() + "</td></tr>"
-            "</table>";
-      }
-      pSection->setWhatsThis(QString::fromStdString(connectionInfo));
-
-      DataVariantEditorDelegate valueDelegate = DataVariantEditor::getDelegate(pValNode->getType());
-      if ((valueDelegate.getType() != DataVariantEditorDelegate::ENUMERATION) &&
-         (valueDelegate.getType() != DataVariantEditorDelegate::VECTOR))
-      {
-         pEditor->setFixedHeight(pEditor->sizeHint().height());
-         pGroup->addSection(pSection);
-      }
-      else
-      {
-         pGroup->addSection(pSection, 1000);
-      }
-   }
-
-   pGroup->addStretch(1);
-
-   // Horizontal line
-   QFrame* pHLine = new QFrame(&input);
-   pHLine->setFrameStyle(QFrame::HLine | QFrame::Sunken);
-
-   // Buttons
-   QDialogButtonBox* pButtons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
-      Qt::Horizontal, &input);
-
-   // Layout
-   QVBoxLayout* pLayout = new QVBoxLayout(&input);
-   pLayout->setMargin(10);
-   pLayout->setSpacing(10);
-   pLayout->addWidget(pGroup, 10);
-   pLayout->addWidget(pHLine);
-   pLayout->addWidget(pButtons);
-
-   // Initialization
-   input.setWindowTitle("Enter wizard values");
-   input.resize(500, 500);
-
-   // Connections
-   VERIFYNR(input.connect(pButtons, SIGNAL(accepted()), &input, SLOT(accept())));
-   VERIFYNR(input.connect(pButtons, SIGNAL(rejected()), &input, SLOT(reject())));
-
-   // Execute the dialog
-   if (input.exec() != QDialog::Accepted)
-   {
-      mMessage = "Wizard cancelled by user.";
-      return false;
-   }
-
-   for (size_t idx = 0; idx < valueItems.size(); ++idx)
-   {
-      DataVariantEditor* pEditor = editors[idx];
-      const vector<WizardNode*>& nodes = valueItems[idx]->getOutputNodes();
-      VERIFY(nodes.size() == 1);
-      WizardNode* pValNode = nodes.front();
-      VERIFY(pValNode != NULL);
-      const DataVariant& val(pEditor->getValue());
-      if (pValNode->getType() != val.getTypeName())
-      {
-         mMessage = "Invalid value for " + pValNode->getName();
-         return false;
-      }
-      pValNode->setValue(val.getPointerToValueAsVoid());
-   }
-
-   return true;
 }

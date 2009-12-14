@@ -160,15 +160,6 @@ protected slots:
    void paste();
 
    /**
-    *  Modifies the user-defined value of a Value item.
-    *
-    *  This method invokes a dialog to allow the user to modify the specific value of a
-    *  selected Value item.  Only one item can be selected.  If the value type is changed,
-    *  all connections with other items are broken.
-    */
-   void editItem();
-
-   /**
     *  Increases the execution order of the selected item.
     *
     *  This method sets the execution order of a single selected item to occur later in the

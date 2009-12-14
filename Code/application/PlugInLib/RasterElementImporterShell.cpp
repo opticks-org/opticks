@@ -668,7 +668,7 @@ bool RasterElementImporterShell::performImport() const
 
    string message;
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Re-evalutate this code when plug-ins " \
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Re-evaluate this code when plug-ins " \
    "are being loaded into the global symbol space (tclarke)")
    // This was changed from a try/catch due to a problem with the exceptions 
    // not being caught and propagating up to QApplication::notify on solaris.

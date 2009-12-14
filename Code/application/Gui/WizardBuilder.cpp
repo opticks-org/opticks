@@ -190,14 +190,15 @@ WizardBuilder::WizardBuilder(QWidget* pParent) :
    pRemoveAction->setAutoRepeat(false);
    pRemoveAction->setShortcut(QKeySequence("Ctrl+R"));
    pRemoveAction->setStatusTip("Removes the currently selected items");
-   pRemoveAction->setToolTip("Remove Item");
+   pRemoveAction->setToolTip("Remove Items");
    VERIFYNR(connect(pRemoveAction, SIGNAL(triggered()), mpView, SLOT(removeSelectedItems())));
 
    QAction* pEditAction = new QAction(QIcon(":/icons/ValueEdit"), "&Edit...", this);
    pEditAction->setAutoRepeat(false);
-   pEditAction->setStatusTip("Edits the selected item");
-   pEditAction->setToolTip("Edit Item");
-   VERIFYNR(connect(pEditAction, SIGNAL(triggered()), this, SLOT(editItem())));
+   pEditAction->setShortcut(QKeySequence("Ctrl+E"));
+   pEditAction->setStatusTip("Edits the selected items");
+   pEditAction->setToolTip("Edit Items");
+   VERIFYNR(connect(pEditAction, SIGNAL(triggered()), mpView, SLOT(editItems())));
 
    QAction* pIncreaseAction = new QAction(QIcon(":/icons/Increase"), "&Increase Order", this);
    pIncreaseAction->setStatusTip("Increases the execution order of the currently selected item by one");
@@ -612,36 +613,6 @@ void WizardBuilder::paste()
 
    // Ensure the pasted items are visible in the view
    mpView->centerOn(lowerLeft.x() + upperRight.x() / 2.0, lowerLeft.y() + upperRight.y() / 2.0);
-}
-
-void WizardBuilder::editItem()
-{
-   vector<WizardItem*> selectedItems = mpView->getSelectedItems();
-
-   vector<WizardItem*>::size_type numItems = selectedItems.size();
-   if (numItems > 1)
-   {
-      QMessageBox::warning(this, "Wizard Builder", "Please select only one item.");
-   }
-   else if (numItems == 1)
-   {
-      WizardItem* pItem = selectedItems.front();
-      if (pItem != NULL)
-      {
-         const string& itemType = pItem->getType();
-         if (itemType != "Value")
-         {
-            QMessageBox::warning(this, "Wizard Builder", "You can only edit a Value item.");
-            return;
-         }
-
-         mpView->editItem(pItem);
-      }
-   }
-   else
-   {
-      QMessageBox::warning(this, "Wizard Builder", "Please select a Value item to edit.");
-   }
 }
 
 void WizardBuilder::increaseCurrentItemOrder()

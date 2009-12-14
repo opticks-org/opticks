@@ -69,7 +69,7 @@ public:
    virtual bool containsLayer(Layer* pLayer) const = 0;
 
    /**
-    *  Retreives a layer in the list.
+    *  Retrieves a layer in the list.
     *
     *  @param   layerType
     *           The layer type.
@@ -86,7 +86,7 @@ public:
    virtual Layer* getLayer(const LayerType& layerType, const DataElement* pElement) const = 0;
 
    /**
-    *  Retreives a layer in the list.
+    *  Retrieves a layer in the list.
     *
     *  @param   layerType
     *           The layer type.

@@ -87,7 +87,7 @@ public:
       bool bDisplayed = true) = 0;
 
    /**
-    *  Retreives the unique IDs for all classes.
+    *  Retrieves the unique IDs for all classes.
     *
     *  @param   classIds
     *           A reference to a vector in which to put the class IDs.

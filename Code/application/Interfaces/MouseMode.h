@@ -36,7 +36,7 @@ class MouseMode
 {
 public:
    /**
-    *  Retreives mouse mode name.
+    *  Retrieves mouse mode name.
     *
     *  @param   modeName
     *           A string populated with the mouse mode name.
@@ -44,7 +44,7 @@ public:
    virtual void getName(std::string& modeName) const = 0;
 
    /**
-    *  Retreives the action associated with the mouse mode.
+    *  Retrieves the action associated with the mouse mode.
     *
     *  If the mouse mode has an associated action, it is added to the main mouse
     *  mode action group when the mode is added to a view.  This allows the action

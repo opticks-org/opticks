@@ -41,8 +41,11 @@ bool PicturesPlotWidgetExporter::getInputSpecification(PlugInArgList*& pArgList)
 
 bool PicturesPlotWidgetExporter::extractInputArgs(const PlugInArgList* pInArgList)
 {
-   VERIFY(PicturesExporter::extractInputArgs(pInArgList));
    VERIFY(pInArgList != NULL);
+   if (PicturesExporter::extractInputArgs(pInArgList) == false)
+   {
+      return false;
+   }
 
    mpItem = pInArgList->getPlugInArgValue<PlotWidget>(ExportItemArg());
    return (mpItem != NULL);

@@ -39,7 +39,7 @@ public:
 
    void selectItem(WizardItem* pItem);
    void deselectItem(WizardItem* pItem);
-   std::vector<WizardItem*> getSelectedItems() const;
+   std::vector<WizardItem*> getSelectedItems(const std::string& type = std::string()) const;
    bool isItemSelected(WizardItem* pItem) const;
 
    bool editItem(WizardItem* pItem);
@@ -61,6 +61,7 @@ public slots:
    void execute();
    bool save();
    bool saveAs();
+   bool editItems();
 
 signals:
    void filenameChanged(const QString& filename);

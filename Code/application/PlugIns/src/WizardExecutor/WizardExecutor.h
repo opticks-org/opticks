@@ -49,7 +49,6 @@ protected:
    void setConnectedNodeValues(WizardItem* pItem, PlugInArgList* pOutArgList = NULL);
    void resetNodeValues(WizardItem* pItem);
    void resetAllNodeValues();
-   bool queryValueItems(const std::vector<WizardItem*>& valueItems);
 
 private:
    bool mbInteractive;

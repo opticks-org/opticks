@@ -205,7 +205,7 @@ public:
    virtual void getWindows(const std::string& windowType, std::vector<Window*>& windows) const = 0;
 
    /**
-    *  Retreives all available windows of all types.
+    *  Retrieves all available windows of all types.
     *
     *  @param   windows
     *           A reference to a vector that will be filled with pointers

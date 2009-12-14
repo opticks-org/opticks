@@ -79,7 +79,7 @@ public:
    virtual PlotSet* createPlotSet(const std::string& plotSet) = 0;
 
    /**
-    *  Retreives the plot set with a given name.
+    *  Retrieves the plot set with a given name.
     *
     *  @param   plotSet
     *           The name of the plot set to retrieve.  Cannot be empty.
@@ -92,7 +92,7 @@ public:
    virtual PlotSet* getPlotSet(const std::string& plotSet) const = 0;
 
    /**
-    *  Retreives the plot set that contains a given plot.
+    *  Retrieves the plot set that contains a given plot.
     *
     *  @param   pPlot
     *           The plot for which to retrieve its parent plot set.  Cannot be NULL.
@@ -105,7 +105,7 @@ public:
    virtual PlotSet* getPlotSet(PlotWidget* pPlot) const = 0;
 
    /**
-    *  Retreives all plot sets in the window.
+    *  Retrieves all plot sets in the window.
     *
     *  @param   plotSets
     *           A vector that is populated with pointers to the plot sets currently
@@ -146,7 +146,7 @@ public:
    virtual bool setCurrentPlotSet(PlotSet* pPlotSet) = 0;
 
    /**
-    *  Retreives the current plot set.
+    *  Retrieves the current plot set.
     *
     *  @return  A pointer to the current plot set.  NULL is returned if the window does
     *           not contain any plots.

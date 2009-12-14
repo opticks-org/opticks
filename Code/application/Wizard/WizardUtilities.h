@@ -15,6 +15,8 @@
 
 class BatchWizard;
 class Progress;
+class QWidget;
+class WizardItem;
 class WizardObject;
 
 namespace WizardUtilities
@@ -49,7 +51,7 @@ namespace WizardUtilities
     *        The full path to the .wiz file for which a BatchWizard object should be created.
     *
     * @return Returns a created BatchWizard object that was derived from the given wizard file
-    *         or NULL if unsuccessful.
+    *         or \c NULL if unsuccessful.
     */
    BatchWizard* createBatchWizardFromWizard(const std::string& wizardFilename);
 
@@ -70,7 +72,7 @@ namespace WizardUtilities
     * @param wizardFilename
     *        The full path to the .wiz file to parse.
     *
-    * @return Returns the parsed wizard file or NULL if there
+    * @return Returns the parsed wizard file or \c NULL if there
     *         was a parsing error.
     */
    WizardObject* readWizard(const std::string& wizardFilename);
@@ -93,12 +95,28 @@ namespace WizardUtilities
     *        The list of .batchwiz files that should be executed.
     * @param pProgress
     *        The progress object that should be used to report progress
-    *        on the batch wizard execution.  NULL can be provided in which
+    *        on the batch wizard execution.  \c NULL can be provided in which
     *        case no progress will be reported.
     * 
     * @return Returns true if execution of the batch wizard files could be started, false otherwise.
     */
    bool runBatchFiles(const std::vector<std::string>& batchWizardFiles, Progress* pProgress);
+
+   /**
+    * Invokes a dialog querying the user for changes to Wizard Value Items.  This method does nothing if the
+    * application is running in Batch mode.
+    *
+    * @param valueItems
+    *        The WizardItem objects to edit. If the type of an item is not "Value" it will be silently ignored.
+    * @param pParent
+    *        The parent widget of the dialog to be invoked.
+    *
+    * @return Returns \c true if the user accepted the dialog or the application is in batch mode.
+    *         Returns \c false if the user cancelled the dialog or an error occurred (e.g.: no valid items were given).
+    *
+    * @see DesktopServices::getMainWidget(), ApplicationServices::isBatch()
+    */
+    bool editItems(const std::vector<WizardItem*>& valueItems, QWidget* pParent = NULL);
 };
 
 #endif

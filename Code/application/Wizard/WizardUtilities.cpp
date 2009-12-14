@@ -7,23 +7,32 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "WizardUtilities.h"
+#include <QtGui/QDialog>
+#include <QtGui/QDialogButtonBox>
+#include <QtGui/QFrame>
+#include <QtGui/QMessageBox>
+#include <QtGui/QVBoxLayout>
+
+#include "ApplicationServices.h"
 #include "BatchWizard.h"
 #include "DataVariant.h"
+#include "DataVariantEditor.h"
 #include "DateTime.h"
-#include "DesktopServices.h"
 #include "Filename.h"
 #include "FileResource.h"
+#include "LabeledSection.h"
+#include "LabeledSectionGroup.h"
 #include "ObjectResource.h"
 #include "PlugInArgList.h"
 #include "PlugInResource.h"
 #include "Progress.h"
 #include "WizardItem.h"
+#include "WizardNode.h"
 #include "WizardObject.h"
+#include "WizardUtilities.h"
+#include "XercesIncludes.h"
 #include "xmlreader.h"
 #include "xmlwriter.h"
-
-#include "XercesIncludes.h"
 
 #include <fstream>
 using namespace std;
@@ -252,4 +261,127 @@ bool WizardUtilities::runBatchFiles(const vector<string>& batchWizardFiles, Prog
    }
 
    return bOverallSuccess;
+}
+
+bool WizardUtilities::editItems(const vector<WizardItem*>& valueItems, QWidget* pParent)
+{
+   if (valueItems.empty() == true || Service<ApplicationServices>()->isBatch() == true)
+   {
+      return true;
+   }
+
+   QDialog input(pParent);
+
+   // Edit widgets
+   vector<DataVariantEditor*> editors;
+   editors.reserve(valueItems.size());
+   LabeledSectionGroup* pGroup = new LabeledSectionGroup(&input);
+   for (size_t idx = 0; idx < valueItems.size(); ++idx)
+   {
+      DataVariantEditor* pEditor = new DataVariantEditor(&input);
+      editors.push_back(pEditor);
+      const vector<WizardNode*>& nodes = valueItems[idx]->getOutputNodes();
+      VERIFY(nodes.size() == 1);
+      WizardNode* pValNode = nodes.front();
+      VERIFY(pValNode != NULL);
+      DataVariant val(pValNode->getType(), pValNode->getValue());
+      pEditor->setValue(val);
+
+      LabeledSection* pSection = new LabeledSection(pEditor, QString::fromStdString(pValNode->getName()), &input);
+      string connectionInfo = "<table width=100%>"
+         "<tr><td width=20%><b>Name:</b></td><td>" + pValNode->getName() + "</td></tr>"
+         "<tr><td width=20%><b>Type:</b></td><td>" + pValNode->getType() + "</td></tr>";
+
+      const vector<WizardNode*>& connectedNodes = pValNode->getConnectedNodes();
+      if (connectedNodes.empty() == true)
+      {
+         connectionInfo += "</table>";
+      }
+      else
+      {
+         connectionInfo += "<tr/><tr/><tr><td><b>Connections:</b></td></tr>"
+            "<tr><td colspan=2><hr></td></tr></table>";
+         for (vector<WizardNode*>::const_iterator iter = connectedNodes.begin(); iter != connectedNodes.end(); ++iter)
+         {
+            WizardNode* pCurrNode = *iter;
+            VERIFY(pCurrNode != NULL);
+
+            WizardItem* pCurrItem = pCurrNode->getItem();
+            VERIFY(pCurrItem != NULL);
+
+            connectionInfo +=
+               "<table width=100%>"
+               "<tr><td width=20%><b>Item:</b></td><td>" + pCurrItem->getName() + "</td></tr>"
+               "<tr><td width=20%><b>Name:</b></td><td>" + pCurrNode->getName() + "</td></tr>"
+               "<tr><td width=20%><b>Description:</b></td><td>" + pCurrNode->getDescription() + "</td></tr>"
+               "<tr/></table>";
+         }
+      }
+
+      pSection->setWhatsThis(QString::fromStdString(connectionInfo));
+
+      DataVariantEditorDelegate valueDelegate = DataVariantEditor::getDelegate(pValNode->getType());
+      if ((valueDelegate.getType() != DataVariantEditorDelegate::ENUMERATION) &&
+         (valueDelegate.getType() != DataVariantEditorDelegate::VECTOR))
+      {
+         pEditor->setFixedHeight(pEditor->sizeHint().height());
+         pGroup->addSection(pSection);
+      }
+      else
+      {
+         pGroup->addSection(pSection, 1000);
+      }
+   }
+
+   pGroup->addStretch(1);
+
+   // Horizontal line
+   QFrame* pHLine = new QFrame(&input);
+   pHLine->setFrameStyle(QFrame::HLine | QFrame::Sunken);
+
+   // Buttons
+   QDialogButtonBox* pButtons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
+      Qt::Horizontal, &input);
+
+   // Layout
+   QVBoxLayout* pLayout = new QVBoxLayout(&input);
+   pLayout->setMargin(10);
+   pLayout->setSpacing(10);
+   pLayout->addWidget(pGroup, 10);
+   pLayout->addWidget(pHLine);
+   pLayout->addWidget(pButtons);
+
+   // Initialization
+   input.setWindowTitle("Enter wizard values");
+   input.resize(500, 500);
+
+   // Connections
+   VERIFYNR(input.connect(pButtons, SIGNAL(accepted()), &input, SLOT(accept())));
+   VERIFYNR(input.connect(pButtons, SIGNAL(rejected()), &input, SLOT(reject())));
+
+   // Execute the dialog
+   if (input.exec() != QDialog::Accepted)
+   {
+      return false;
+   }
+
+   // Write the values to the nodes.
+   for (size_t idx = 0; idx < valueItems.size(); ++idx)
+   {
+      DataVariantEditor* pEditor = editors[idx];
+      const vector<WizardNode*>& nodes = valueItems[idx]->getOutputNodes();
+      VERIFY(nodes.size() == 1);
+      WizardNode* pValNode = nodes.front();
+      VERIFY(pValNode != NULL);
+      const DataVariant& val(pEditor->getValue());
+      if (pValNode->getType() != val.getTypeName())
+      {
+         QMessageBox::warning(pParent, "Error", "The type cannot be changed.");
+         return false;
+      }
+
+      pValNode->setValue(val.getPointerToValueAsVoid());
+   }
+
+   return true;
 }

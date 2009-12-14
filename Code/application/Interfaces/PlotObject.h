@@ -133,7 +133,7 @@ public:
    /**
     *  Retrieves the bounding box of the object.
     *
-    *  This method retreives the minimum and maximum coordinates of the object at its
+    *  This method retrieves the minimum and maximum coordinates of the object at its
     *  current location in the plot.  These are provided as world coordinates.
     *
     *  @param   dMinX
