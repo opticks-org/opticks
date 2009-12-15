@@ -15,6 +15,7 @@
 #include "InstallerServices.h"
 #include "ProductView.h"
 
+#include <QtCore/QCoreApplication>
 #include <QtCore/QDir>
 #include <QtCore/QUrl>
 
@@ -262,7 +263,11 @@ void Aeb::getContentDestinations(const QList<const AebEntry*>& sources, QList<QS
 
       QString top = parts.takeFirst();
       QDir dest;
-      if (top == "Bin" || top == "Doc" || top == "Help" || top == "DefaultSettings")
+      if (top == "Bin")
+      {
+         dest = QDir(QCoreApplication::applicationDirPath());
+      }
+      else if (top == "Doc" || top == "Help" || top == "DefaultSettings")
       {
          dest = appHomePath;
          dest.setPath(dest.absoluteFilePath(top));
