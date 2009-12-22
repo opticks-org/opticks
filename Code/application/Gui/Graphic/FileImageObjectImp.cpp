@@ -13,6 +13,7 @@
 #include "GraphicLayer.h"
 #include "GraphicLayerImp.h"
 #include "GraphicProperty.h"
+#include "Resource.h"
 #include "View.h"
 
 #include <QtGui/QFileDialog>
@@ -33,7 +34,7 @@ using namespace std;
 FileImageObjectImp::FileImageObjectImp(const string& id, GraphicObjectType type, GraphicLayer* pLayer,
                                        LocationType pixelCoord) :
    ImageObjectImp(id, type, pLayer, pixelCoord),
-   mLoading(false)
+   mUpdateBoundingBox(true)
 {
    addProperty("Filename");
 }
@@ -55,7 +56,7 @@ bool FileImageObjectImp::setProperty(const GraphicProperty *pProp)
          QImage image(QString::fromStdString(filename));
          setImageData(image);
 
-         if (mLoading == false)
+         if (mUpdateBoundingBox == true)
          {
             updateBoundingBox();
          }
@@ -104,16 +105,9 @@ bool FileImageObjectImp::processMousePress(LocationType screenCoord,
 
 bool FileImageObjectImp::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   if (pDocument == NULL)
-   {
-      return false;
-   }
+   ResetVariableOnDestroy<bool> setter(mUpdateBoundingBox, false);
 
-   mLoading = true;
-   bool bSuccess = ImageObjectImp::fromXml(pDocument, version);
-   mLoading = false;
-
-   return bSuccess;
+   return ImageObjectImp::fromXml(pDocument, version);
 }
 
 const string& FileImageObjectImp::getObjectType() const
@@ -130,4 +124,11 @@ bool FileImageObjectImp::isKindOf(const string& className) const
    }
 
    return ImageObjectImp::isKindOf(className);
+}
+
+bool FileImageObjectImp::replicateObject(const GraphicObject* pObject)
+{
+   ResetVariableOnDestroy<bool> setter(mUpdateBoundingBox, false);
+
+   return ImageObjectImp::replicateObject(pObject);
 }

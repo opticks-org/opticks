@@ -30,9 +30,10 @@ public:
    bool fromXml(DOMNode* pDocument, unsigned int version);
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
+   virtual bool replicateObject(const GraphicObject* pObject);
 
 private:
-   bool mLoading;
+   bool mUpdateBoundingBox;
 };
 
 #define FILEIMAGEOBJECTADAPTEREXTENSION_CLASSES \
