@@ -149,7 +149,7 @@ protected slots:
    void initializeColorMenu();
    void setAoiColor(const QColor& markerColor);
    void changeShowLabelState();
-   void changeShowPointLabelState();
+   void setShowPointLabelState(bool showPointLabel);
 
 private:
    // Draw mode actions

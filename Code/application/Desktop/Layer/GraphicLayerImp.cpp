@@ -1803,7 +1803,11 @@ bool GraphicLayerImp::getShowLabels() const
 
 void GraphicLayerImp::setShowLabels(bool bShowLabels)
 {
-   mShowLabels = bShowLabels;
+   if (bShowLabels != mShowLabels)
+   {
+      mShowLabels = bShowLabels;
+      emit showLabelsChanged(mShowLabels);
+   }
 }
 
 bool GraphicLayerImp::canContainGraphicObjectType(GraphicObjectType type)

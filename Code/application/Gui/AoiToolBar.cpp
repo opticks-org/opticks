@@ -17,9 +17,9 @@
 #include "AoiMergeDlg.h"
 #include "AoiLayer.h"
 #include "AoiLayerImp.h"
+#include "AppVerify.h"
 #include "BitMaskImp.h"
 #include "ColorMenu.h"
-#include "AppVerify.h"
 #include "DesktopServices.h"
 #include "GraphicObjectImp.h"
 #include "GraphicObjectTypeGrid.h"
@@ -104,7 +104,7 @@ AoiToolBar::AoiToolBar(const string& id, QWidget* parent) :
    mpAoiShowLabels->setStatusTip("Displays the AOI name in the layer");
    mpAoiShowLabels->setChecked(true);
    addButton(mpAoiShowLabels, shortcutContext);
-   connect(mpAoiShowLabels, SIGNAL(toggled(bool)), this, SLOT(changeShowLabelState()));
+   VERIFYNR(connect(mpAoiShowLabels, SIGNAL(toggled(bool)), this, SLOT(changeShowLabelState())));
 
    mpAoiShowPointLabels = new QAction(QIcon(":/icons/AoiShowPointLabels"), "Show Shape Label", this);
    mpAoiShowPointLabels->setAutoRepeat(false);
@@ -112,21 +112,21 @@ AoiToolBar::AoiToolBar(const string& id, QWidget* parent) :
    mpAoiShowPointLabels->setStatusTip("Displays the shape name in the layer");
    mpAoiShowPointLabels->setChecked(true);
    addButton(mpAoiShowPointLabels, shortcutContext);
-   connect(mpAoiShowPointLabels, SIGNAL(toggled(bool)), this, SLOT(changeShowPointLabelState()));
+   VERIFYNR(connect(mpAoiShowPointLabels, SIGNAL(triggered(bool)), this, SLOT(setShowPointLabelState(bool))));
 
    // AOI add mode
    mpAddMode = new AoiAddModeButton(this);
    mpAddMode->setStatusTip("Specifies how new AOI shapes are added to the view");
    mpAddMode->setToolTip("Add Mode");
    addWidget(mpAddMode);
-   connect(mpAddMode, SIGNAL(valueChanged(AoiAddMode)), this, SLOT(setAddMode(AoiAddMode)));
+   VERIFYNR(connect(mpAddMode, SIGNAL(valueChanged(AoiAddMode)), this, SLOT(setAddMode(AoiAddMode))));
 
    // Selection tool
    mpTool = new GraphicObjectTypeButton(GraphicObjectTypeGrid::VIEW_AOI, this);
    mpTool->setStatusTip("Specifies how pixels are selected or deselected in the AOI");
    mpTool->setToolTip("AOI Pixel Selection Tool");
    addWidget(mpTool);
-   connect(mpTool, SIGNAL(valueChanged(GraphicObjectType)), this, SLOT(setSelectionTool(GraphicObjectType)));
+   VERIFYNR(connect(mpTool, SIGNAL(valueChanged(GraphicObjectType)), this, SLOT(setSelectionTool(GraphicObjectType))));
 
    addSeparator();
 
@@ -134,13 +134,13 @@ AoiToolBar::AoiToolBar(const string& id, QWidget* parent) :
    mpEraseAll->setAutoRepeat(false);
    mpEraseAll->setStatusTip("Deselects all pixels on the current area of interest");
    addButton(mpEraseAll, shortcutContext);
-   connect(mpEraseAll, SIGNAL(triggered()), this, SLOT(clearAoi()));
+   VERIFYNR(connect(mpEraseAll, SIGNAL(triggered()), this, SLOT(clearAoi())));
 
    mpToggleAll = new QAction(QIcon(":/icons/ToggleAll"), "Toggle All", this);
    mpToggleAll->setAutoRepeat(false);
    mpToggleAll->setStatusTip("Selects or deselects all pixels on the current area of interest");
    addButton(mpToggleAll, shortcutContext);
-   connect(mpToggleAll, SIGNAL(triggered()), this, SLOT(invertAoi()));
+   VERIFYNR(connect(mpToggleAll, SIGNAL(triggered()), this, SLOT(invertAoi())));
 
    addSeparator();
 
@@ -148,7 +148,7 @@ AoiToolBar::AoiToolBar(const string& id, QWidget* parent) :
    mpMerge->setAutoRepeat(false);
    mpMerge->setStatusTip("Combines selected pixels from multiple areas of interest");
    addButton(mpMerge, shortcutContext);
-   connect(mpMerge, SIGNAL(triggered()), this, SLOT(mergeAoi()));
+   VERIFYNR(connect(mpMerge, SIGNAL(triggered()), this, SLOT(mergeAoi())));
 
    addSeparator();
 
@@ -159,7 +159,7 @@ AoiToolBar::AoiToolBar(const string& id, QWidget* parent) :
    mpSymbolButton->setBorderedSymbols(true);
    mpSymbolButton->setStatusTip("Changes the pixel marker shape for the current area of interest");
    mpSymbolButton->setToolTip("Marker Symbol");
-   connect(mpSymbolButton, SIGNAL(valueChanged(SymbolType)), this, SLOT(setAoiSymbol(SymbolType)));
+   VERIFYNR(connect(mpSymbolButton, SIGNAL(valueChanged(SymbolType)), this, SLOT(setAoiSymbol(SymbolType))));
    addWidget(mpSymbolButton);
 
    // Marker color
@@ -172,13 +172,13 @@ AoiToolBar::AoiToolBar(const string& id, QWidget* parent) :
          pColorAction->setIcon(QIcon(":/icons/AoiColor"));
          pColorAction->setStatusTip("Changes the pixel marker color for the current area of interest");
          pColorAction->setToolTip("Marker Color");
-         connect(pColorAction, SIGNAL(triggered()), mpColorMenu, SLOT(setCustomColor()));
+         VERIFYNR(connect(pColorAction, SIGNAL(triggered()), mpColorMenu, SLOT(setCustomColor())));
 
          addAction(pColorAction);
       }
 
-      connect(mpColorMenu, SIGNAL(aboutToShow()), this, SLOT(initializeColorMenu()));
-      connect(mpColorMenu, SIGNAL(colorSelected(const QColor&)), this, SLOT(setAoiColor(const QColor&)));
+      VERIFYNR(connect(mpColorMenu, SIGNAL(aboutToShow()), this, SLOT(initializeColorMenu())));
+      VERIFYNR(connect(mpColorMenu, SIGNAL(colorSelected(const QColor&)), this, SLOT(setAoiColor(const QColor&))));
    }
 
    setSelectionTool(MULTIPOINT_OBJECT, DRAW);
@@ -213,12 +213,13 @@ bool AoiToolBar::setAoiLayer(Layer* pLayer)
       AoiLayerImp* pAoiLayerImp = dynamic_cast<AoiLayerImp*>(mpAoiLayer);
       if (pAoiLayerImp != NULL)
       {
-         disconnect(this, SIGNAL(graphicObjectTypeChanged(GraphicObjectType)), 
-            pAoiLayerImp, SLOT(setCurrentGraphicObjectType(GraphicObjectType)));
-         disconnect(this, SIGNAL(modeChanged(ModeType)), pAoiLayerImp, SLOT(setMode(ModeType)));
-         disconnect(pAoiLayerImp, SIGNAL(currentTypeChanged(GraphicObjectType)), this,
-            SLOT(setSelectionTool(GraphicObjectType)));
-         disconnect(pAoiLayerImp, SIGNAL(modeChanged(ModeType)), this, SLOT(setSelectionMode(ModeType)));
+         VERIFYNR(disconnect(this, SIGNAL(graphicObjectTypeChanged(GraphicObjectType)),
+            pAoiLayerImp, SLOT(setCurrentGraphicObjectType(GraphicObjectType))));
+         VERIFYNR(disconnect(this, SIGNAL(modeChanged(ModeType)), pAoiLayerImp, SLOT(setMode(ModeType))));
+         VERIFYNR(disconnect(pAoiLayerImp, SIGNAL(currentTypeChanged(GraphicObjectType)), this,
+            SLOT(setSelectionTool(GraphicObjectType))));
+         VERIFYNR(disconnect(pAoiLayerImp, SIGNAL(modeChanged(ModeType)), this, SLOT(setSelectionMode(ModeType))));
+         VERIFYNR(disconnect(pAoiLayerImp, SIGNAL(showLabelsChanged(bool)), this, SLOT(setShowPointLabelState(bool))));
       }
 
       mpAoiLayer->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &AoiToolBar::aoiLayerDeleted));
@@ -231,12 +232,13 @@ bool AoiToolBar::setAoiLayer(Layer* pLayer)
       AoiLayerImp* pAoiLayerImp = dynamic_cast<AoiLayerImp*>(mpAoiLayer);
       if (pAoiLayerImp != NULL)
       {
-         connect(this, SIGNAL(graphicObjectTypeChanged(GraphicObjectType)),
-            pAoiLayerImp, SLOT(setCurrentGraphicObjectType(GraphicObjectType)));
-         connect(this, SIGNAL(modeChanged(ModeType)), pAoiLayerImp, SLOT(setMode(ModeType)));
-         connect(pAoiLayerImp, SIGNAL(currentTypeChanged(GraphicObjectType)), this,
-            SLOT(setSelectionTool(GraphicObjectType)));
-         connect(pAoiLayerImp, SIGNAL(modeChanged(ModeType)), this, SLOT(setSelectionMode(ModeType)));
+         VERIFYNR(connect(this, SIGNAL(graphicObjectTypeChanged(GraphicObjectType)),
+            pAoiLayerImp, SLOT(setCurrentGraphicObjectType(GraphicObjectType))));
+         VERIFYNR(connect(this, SIGNAL(modeChanged(ModeType)), pAoiLayerImp, SLOT(setMode(ModeType))));
+         VERIFYNR(connect(pAoiLayerImp, SIGNAL(currentTypeChanged(GraphicObjectType)), this,
+            SLOT(setSelectionTool(GraphicObjectType))));
+         VERIFYNR(connect(pAoiLayerImp, SIGNAL(modeChanged(ModeType)), this, SLOT(setSelectionMode(ModeType))));
+         VERIFYNR(connect(pAoiLayerImp, SIGNAL(showLabelsChanged(bool)), this, SLOT(setShowPointLabelState(bool))));
 
          pAoiLayerImp->setShowLabels(mpAoiShowPointLabels->isChecked());
       }
@@ -244,7 +246,7 @@ bool AoiToolBar::setAoiLayer(Layer* pLayer)
       mpAoiLayer->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &AoiToolBar::aoiLayerDeleted));
       disconnect(mpSymbolButton, SIGNAL(valueChanged(SymbolType)), this, SLOT(setAoiSymbol(SymbolType)));
       mpSymbolButton->setCurrentValue(pAoiLayerImp->getSymbol());
-      connect(mpSymbolButton, SIGNAL(valueChanged(SymbolType)), this, SLOT(setAoiSymbol(SymbolType)));
+      VERIFYNR(connect(mpSymbolButton, SIGNAL(valueChanged(SymbolType)), this, SLOT(setAoiSymbol(SymbolType))));
    }
 
    selectionObjectChanged();
@@ -563,8 +565,7 @@ void AoiToolBar::changeShowLabelState()
 {
    if (mpAoiLayer != NULL)
    {
-      View* pView = NULL;
-      pView = mpAoiLayer->getView();
+      View* pView = mpAoiLayer->getView();
       if (pView != NULL)
       {
          pView->refresh();
@@ -572,13 +573,15 @@ void AoiToolBar::changeShowLabelState()
    }
 }
 
-void AoiToolBar::changeShowPointLabelState()
+void AoiToolBar::setShowPointLabelState(bool showPointLabel)
 {
+   mpAoiShowPointLabels->setChecked(showPointLabel);
+
    if (mpAoiLayer != NULL)
    {
-      mpAoiLayer->setShowLabels(getAoiShowPointLabels());
-      View* pView = NULL;
-      pView = mpAoiLayer->getView();
+      mpAoiLayer->setShowLabels(showPointLabel);
+
+      View* pView = mpAoiLayer->getView();
       if (pView != NULL)
       {
          pView->refresh();

@@ -236,6 +236,7 @@ signals:
    void selectionChanged();
    void objectsSelected(std::list<GraphicObject*>& selectedObjects);
    void currentTypeChanged(GraphicObjectType newType);
+   void showLabelsChanged(bool showLabels);
 
 private:
    AttachmentPtr<SessionExplorer> mpExplorer;
