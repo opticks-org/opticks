@@ -244,4 +244,7 @@
    <file alias="ZoomToFit">icons/ZoomToFitIcon.png</file>
    <file alias="ZoomUndo">icons/ZoomUndoIcon.png</file>
 </qresource>
+<qresource prefix="/licenses">
+   <file alias="cfitsio">CfitsioLicense.txt</file>
+</qresource>
 </RCC>

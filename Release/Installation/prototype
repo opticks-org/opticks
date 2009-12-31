@@ -64,6 +64,7 @@ f none $APPDIR/PlugIns/Covariance.so=$OpticksBinariesDir/PlugIns/Covariance.so 6
 f none $APPDIR/PlugIns/DataFusion.so=$OpticksBinariesDir/PlugIns/DataFusion.so 644 root $GROUP
 f none $APPDIR/PlugIns/Dted.so=$OpticksBinariesDir/PlugIns/Dted.so 644 root $GROUP
 f none $APPDIR/PlugIns/ENVI.so=$OpticksBinariesDir/PlugIns/ENVI.so 644 root $GROUP
+f none $APPDIR/PlugIns/Fits.so=$OpticksBinariesDir/PlugIns/Fits.so 644 root $GROUP
 f none $APPDIR/PlugIns/GdalImporter.so=$OpticksBinariesDir/PlugIns/GdalImporter.so 644 root $GROUP
 f none $APPDIR/PlugIns/Generic.so=$OpticksBinariesDir/PlugIns/Generic.so 644 root $GROUP
 f none $APPDIR/PlugIns/GeographicFeatures.so=$OpticksBinariesDir/PlugIns/GeographicFeatures.so 644 root $GROUP

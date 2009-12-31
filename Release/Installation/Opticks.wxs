@@ -234,6 +234,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
                <File Name="DataFusion.dll" Id="F__DataFusionPlugIn" DiskId="1" />
                <File Name="Dted.dll" Id="F__DtedPlugIn" DiskId="1" />
                <File Name="Envi.dll" Id="F__EnviPlugIn" DiskId="1" />
+               <File Name="Fits.dll" Id="F__FitsPlugIn" DiskId="1" />
                <File Name="GdalImporter.dll" Id="F__GdalImporterPlugIn" DiskId="1" />
                <File Name="Generic.dll" Id="F__GenericPlugIn" KeyPath="yes" DiskId="1" />
                <File Name="GeographicFeatures.dll" Id="F__GeographicFeaturesPlugIn" DiskId="1" />

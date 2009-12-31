@@ -9,6 +9,10 @@
 		Value="$(OPTICKSDEPENDENCIES)\Boost"
 	/>
 	<UserMacro
+		Name="CFITSIO"
+		Value="$(OPTICKSDEPENDENCIES)\cfitsio"
+	/>
+	<UserMacro
 		Name="XERCES"
 		Value="$(OPTICKSDEPENDENCIES)\Xerces"
 	/>
