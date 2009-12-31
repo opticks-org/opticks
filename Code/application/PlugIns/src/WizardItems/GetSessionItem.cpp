@@ -57,6 +57,7 @@
 #include <QtCore/QObject>
 #include <QtCore/QString>
 #include <QtCore/QStringList>
+#include <QtCore/QVariant>
 #include <QtGui/QDialog>
 #include <QtGui/QDialogButtonBox>
 #include <QtGui/QFrame>
@@ -189,8 +190,9 @@ bool GetSessionItemBase<T>::execute(PlugInArgList* pInArgList, PlugInArgList* pO
 
    std::auto_ptr<QTreeWidgetItem> pRoot(new QTreeWidgetItem);
    pRoot->setFlags(Qt::NoItemFlags);
-   pRoot->setText(NameColumn, "No items available");
-   pRoot->setData(NameColumn, SessionItemRole, QVariant::fromValue<void*>(NULL));
+   pRoot->setText(GetSessionItemBase<T>::NameColumn, "No items available");
+   pRoot->setData(GetSessionItemBase<T>::NameColumn,
+      GetSessionItemBase<T>::SessionItemRole, QVariant::fromValue<void*>(NULL));
    populateTreeWidgetItem(pRoot.get());
 
    if (pRoot->childCount() > 0)
@@ -237,8 +239,9 @@ bool GetSessionItemBase<T>::execute(PlugInArgList* pInArgList, PlugInArgList* pO
       return false;
    }
 
-   mpSessionItem = dynamic_cast<T*>(reinterpret_cast<SessionItem*>(
-      pItem->data(NameColumn, SessionItemRole).value<void*>()));
+   QVariant value = pItem->data(GetSessionItemBase<T>::NameColumn, GetSessionItemBase<T>::SessionItemRole);
+   SessionItem* pSessionItem = reinterpret_cast<SessionItem*>(value.value<void*>());
+   mpSessionItem = dynamic_cast<T*>(pSessionItem);
    if (mpSessionItem == NULL)
    {
       reportError("Wrong item type selected.", "{E6D3E131-4E71-4989-9D34-BC9A1157AB8E}");
@@ -276,7 +279,7 @@ GetSessionItemBase<T>::~GetSessionItemBase()
 
 template<class T>
 GetDataElement<T>::GetDataElement(const std::string& descriptorId) :
-   GetSessionItemBase(descriptorId)
+   GetSessionItemBase<T>(descriptorId)
 {}
 
 template<class T>
@@ -287,8 +290,9 @@ template<class T>
 void GetDataElement<T>::populateTreeWidgetItem(QTreeWidgetItem* pRoot)
 {
    VERIFYNR(pRoot != NULL);
-   DataElement* const pRootElement =
-      reinterpret_cast<DataElement*>(pRoot->data(NameColumn, SessionItemRole).value<void*>());
+   QVariant value = pRoot->data(GetSessionItemBase<T>::NameColumn, GetSessionItemBase<T>::SessionItemRole);
+   void* pValue = value.value<void*>();
+   DataElement* const pRootElement = reinterpret_cast<DataElement*>(pValue);
    const std::vector<DataElement*> elements = Service<ModelServices>()->getElements(pRootElement, std::string());
    for (std::vector<DataElement*>::const_iterator iter = elements.begin(); iter != elements.end(); ++iter)
    {
@@ -306,9 +310,10 @@ void GetDataElement<T>::populateTreeWidgetItem(QTreeWidgetItem* pRoot)
          name = pChildElement->getName();
       }
 
-      pChild->setText(NameColumn, QString::fromStdString(name));
-      pChild->setData(NameColumn, SessionItemRole, QVariant::fromValue<void*>(pChildElement));
-      pChild->setText(TypeColumn, QString::fromStdString(pChildElement->getType()));
+      pChild->setText(GetSessionItemBase<T>::NameColumn, QString::fromStdString(name));
+      pChild->setData(GetSessionItemBase<T>::NameColumn,
+         GetSessionItemBase<T>::SessionItemRole, QVariant::fromValue<void*>(pChildElement));
+      pChild->setText(GetSessionItemBase<T>::TypeColumn, QString::fromStdString(pChildElement->getType()));
       populateTreeWidgetItem(pChild.get());
 
       const bool isValid = pChildElement->isKindOf(TypeConverter::toString<T>());
@@ -322,7 +327,7 @@ void GetDataElement<T>::populateTreeWidgetItem(QTreeWidgetItem* pRoot)
 
 template<class T>
 GetLayer<T>::GetLayer(const std::string& descriptorId) :
-   GetSessionItemBase(descriptorId)
+   GetSessionItemBase<T>(descriptorId)
 {}
 
 template<class T>
@@ -350,9 +355,10 @@ void GetLayer<T>::populateTreeWidgetItem(QTreeWidgetItem* pRoot)
       Service<DesktopServices>()->getViewTypes(pView->getObjectType(), classList);
       VERIFYNR(classList.empty() == false);
 
-      pChild->setText(NameColumn, QString::fromStdString(name));
-      pChild->setData(NameColumn, SessionItemRole, QVariant::fromValue<void*>(pView));
-      pChild->setText(TypeColumn, QString::fromStdString(classList.front()));
+      pChild->setText(GetSessionItemBase<T>::NameColumn, QString::fromStdString(name));
+      pChild->setData(GetSessionItemBase<T>::NameColumn,
+         GetSessionItemBase<T>::SessionItemRole, QVariant::fromValue<void*>(pView));
+      pChild->setText(GetSessionItemBase<T>::TypeColumn, QString::fromStdString(classList.front()));
       pChild->setFlags(Qt::NoItemFlags);
 
       populateTreeWidgetItemWithLayers(pChild.get());
@@ -367,7 +373,9 @@ template<class T>
 void GetLayer<T>::populateTreeWidgetItemWithLayers(QTreeWidgetItem* pRoot)
 {
    VERIFYNR(pRoot != NULL);
-   View* const pView = reinterpret_cast<View*>(pRoot->data(NameColumn, SessionItemRole).value<void*>());
+   QVariant value = pRoot->data(GetSessionItemBase<T>::NameColumn, GetSessionItemBase<T>::SessionItemRole);
+   void* pValue = value.value<void*>();
+   View* const pView = reinterpret_cast<View*>(pValue);
    VERIFYNR(pView != NULL);
 
    std::vector<Layer*> layers;
@@ -410,9 +418,10 @@ void GetLayer<T>::populateTreeWidgetItemWithLayers(QTreeWidgetItem* pRoot)
          name = pLayer->getName();
       }
 
-      pChild->setText(NameColumn, QString::fromStdString(name));
-      pChild->setData(NameColumn, SessionItemRole, QVariant::fromValue<void*>(pLayer));
-      pChild->setText(TypeColumn, QString::fromStdString(StringUtilities::toDisplayString(pLayer->getLayerType())));
+      pChild->setText(GetSessionItemBase<T>::NameColumn, QString::fromStdString(name));
+      pChild->setData(GetSessionItemBase<T>::NameColumn,
+         GetSessionItemBase<T>::SessionItemRole, QVariant::fromValue<void*>(pLayer));
+      pChild->setText(GetSessionItemBase<T>::TypeColumn, QString::fromStdString(StringUtilities::toDisplayString(pLayer->getLayerType())));
       pChild->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
       pRoot->addChild(pChild);
    }
@@ -420,7 +429,7 @@ void GetLayer<T>::populateTreeWidgetItemWithLayers(QTreeWidgetItem* pRoot)
 
 template<class T>
 GetView<T>::GetView(const std::string& descriptorId) :
-   GetSessionItemBase(descriptorId)
+   GetSessionItemBase<T>(descriptorId)
 {}
 
 template<class T>
@@ -452,16 +461,17 @@ void GetView<T>::populateTreeWidgetItem(QTreeWidgetItem* pRoot)
       Service<DesktopServices>()->getViewTypes(pView->getObjectType(), classList);
       VERIFYNR(classList.empty() == false);
 
-      pChild->setText(NameColumn, QString::fromStdString(name));
-      pChild->setData(NameColumn, SessionItemRole, QVariant::fromValue<void*>(pView));
-      pChild->setText(TypeColumn, QString::fromStdString(classList.front()));
+      pChild->setText(GetSessionItemBase<T>::NameColumn, QString::fromStdString(name));
+      pChild->setData(GetSessionItemBase<T>::NameColumn,
+         GetSessionItemBase<T>::SessionItemRole, QVariant::fromValue<void*>(pView));
+      pChild->setText(GetSessionItemBase<T>::TypeColumn, QString::fromStdString(classList.front()));
       pChild->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
       pRoot->addChild(pChild);
    }
 }
 
 GetPlotWidget::GetPlotWidget(const std::string& descriptorId) :
-   GetSessionItemBase(descriptorId)
+   GetSessionItemBase<PlotWidget>(descriptorId)
 {}
 
 GetPlotWidget::~GetPlotWidget()
@@ -497,9 +507,11 @@ void GetPlotWidget::populateTreeWidgetItem(QTreeWidgetItem* pRoot)
             name = pPlotWidget->getName();
          }
 
-         pChild->setText(NameColumn, QString::fromStdString(name));
-         pChild->setData(NameColumn, SessionItemRole, QVariant::fromValue<void*>(pPlotWidget));
-         pChild->setText(TypeColumn, QString::fromStdString(TypeConverter::toString<PlotWidget>()));
+         pChild->setText(GetSessionItemBase<PlotWidget>::NameColumn, QString::fromStdString(name));
+         pChild->setData(GetSessionItemBase<PlotWidget>::NameColumn,
+            GetSessionItemBase<PlotWidget>::SessionItemRole, QVariant::fromValue<void*>(pPlotWidget));
+         pChild->setText(GetSessionItemBase<PlotWidget>::TypeColumn,
+            QString::fromStdString(TypeConverter::toString<PlotWidget>()));
          pChild->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
          pRoot->addChild(pChild);
       }

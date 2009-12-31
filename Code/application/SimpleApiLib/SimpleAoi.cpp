@@ -13,6 +13,7 @@
 #include "RasterElement.h"
 #include "SimpleAoi.h"
 #include "SimpleApiErrors.h"
+#include <memory>
 
 extern "C"
 {
