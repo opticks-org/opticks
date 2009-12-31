@@ -1678,6 +1678,113 @@ void *RasterElementImp::getRawData()
    return NULL;
 }
 
+bool RasterElementImp::writeRawData(void* pData, InterleaveFormatType interleaveType,
+   unsigned int startRow, unsigned int numRows, unsigned int startColumn, unsigned int numColumns,
+   unsigned int startBand, unsigned int numBands)
+{
+   char* pSrc = reinterpret_cast<char*>(pData);
+   RasterDataDescriptor* pDesc = dynamic_cast<RasterDataDescriptor*>(getDataDescriptor());
+   if (pSrc == NULL || pDesc == NULL || interleaveType.isValid() == false)
+   {
+      return false;
+   }
+
+   unsigned int stopRow = startRow + numRows - 1;
+   unsigned int stopColumn = startColumn + numColumns - 1;
+   unsigned int stopBand = startBand + numBands - 1;
+   if (stopRow < startRow || stopRow > pDesc->getRowCount() ||
+      stopColumn < startColumn || stopColumn > pDesc->getColumnCount() ||
+      stopBand < startBand || stopBand > pDesc->getBandCount())
+   {
+      return false;
+   }
+
+   unsigned int bytesPerElement = pDesc->getBytesPerElement();
+   if (interleaveType == BSQ)
+   {
+      for (unsigned int band = 0; band < numBands; ++band)
+      {
+         FactoryResource<DataRequest> pRequest;
+         pRequest->setInterleaveFormat(BSQ);
+         pRequest->setRows(pDesc->getActiveRow(startRow), pDesc->getActiveRow(stopRow), 1);
+         pRequest->setColumns(pDesc->getActiveColumn(startColumn), pDesc->getActiveColumn(stopColumn), numColumns);
+         pRequest->setBands(pDesc->getActiveBand(startBand + band), pDesc->getActiveBand(startBand + band), 1);
+         pRequest->setWritable(true);
+         DataAccessor daImage = getDataAccessor(pRequest.release());
+         VERIFY(daImage.isValid());
+
+         for (unsigned int row = 0; row < numRows; ++row)
+         {
+            for (unsigned int column = 0; column < numColumns; ++column)
+            {
+               daImage->toPixel(startRow + row, startColumn + column);
+               VERIFY(daImage.isValid());
+
+               unsigned int offset = (numColumns * numRows * band * bytesPerElement) +
+                  (numColumns * row * bytesPerElement) + (column * bytesPerElement);
+               memcpy(daImage->getColumn(), pSrc + offset, bytesPerElement);
+            }
+         }
+      }
+   }
+   else if (interleaveType == BIP)
+   {
+      FactoryResource<DataRequest> pRequest;
+      pRequest->setInterleaveFormat(BIP);
+      pRequest->setRows(pDesc->getActiveRow(startRow), pDesc->getActiveRow(stopRow), 1);
+      pRequest->setColumns(pDesc->getActiveColumn(startColumn), pDesc->getActiveColumn(stopColumn), numColumns);
+      pRequest->setWritable(true);
+      DataAccessor daImage = getDataAccessor(pRequest.release());
+      VERIFY(daImage.isValid());
+
+      for (unsigned int row = 0; row < numRows; ++row)
+      {
+         for (unsigned int column = 0; column < numColumns; ++column)
+         {
+            daImage->toPixel(startRow + row, startColumn + column);
+            VERIFY(daImage.isValid());
+
+            for (unsigned int band = 0; band < numBands; ++band)
+            {
+               memcpy(static_cast<unsigned char*>(daImage->getColumn()) + ((band + startBand) * bytesPerElement),
+                  pSrc + (row * numColumns * numBands * bytesPerElement) +
+                  (column * numBands * bytesPerElement) + (band * bytesPerElement),
+                  bytesPerElement);
+            }
+         }
+      }
+   }
+   else if (interleaveType == BIL)
+   {
+      for (unsigned int row = 0; row < numRows; ++row)
+      {
+         for (unsigned int band = 0; band < numBands; ++band)
+         {
+            FactoryResource<DataRequest> pRequest;
+            pRequest->setInterleaveFormat(BIL);
+            pRequest->setRows(pDesc->getActiveRow(startRow + row), pDesc->getActiveRow(startRow + row), 1);
+            pRequest->setColumns(pDesc->getActiveColumn(startColumn), pDesc->getActiveColumn(stopColumn), numColumns);
+            pRequest->setBands(pDesc->getActiveBand(startBand + band), pDesc->getActiveBand(startBand + band), 1);
+            pRequest->setWritable(true);
+            DataAccessor daImage = getDataAccessor(pRequest.release());
+            VERIFY(daImage.isValid());
+
+            for (unsigned int column = 0; column < numColumns; ++column)
+            {
+               daImage->toPixel(startRow + row, startColumn + column);
+               VERIFY(daImage.isValid());
+
+               unsigned int offset = (row * numColumns * numBands * bytesPerElement) +
+                  (band * numColumns * bytesPerElement) + (column * bytesPerElement);
+               memcpy(daImage->getColumn(), pSrc + offset, bytesPerElement);
+            }
+         }
+      }
+   }
+
+   return true;
+}
+
 LocationType RasterElementImp::convertPixelToGeocoord(LocationType pixel, bool quick, bool* pAccurate) const
 {
    LocationType geocoord;

@@ -80,6 +80,7 @@ libdirs = ["Desktop",
            "PlugInLib",
            "PlugInManager",
            "PlugInUtilities",
+           "SimpleApiLib",
            "Utilities",
            "Wizard"]
 

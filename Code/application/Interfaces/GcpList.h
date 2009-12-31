@@ -10,6 +10,7 @@
 #ifndef GCPLIST_H
 #define GCPLIST_H
 
+#include "AppConfig.h"
 #include "DataElement.h"
 #include "LocationType.h"
 

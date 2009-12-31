@@ -804,6 +804,12 @@ ADD_ENUM_MAPPING(ABSORBANCE, "Absorbance", "Absorbance")
 ADD_ENUM_MAPPING(DISTANCE, "Distance", "Distance")
 END_ENUM_MAPPING()
 
+BEGIN_ENUM_MAPPING(ViewType)
+ADD_ENUM_MAPPING(SPATIAL_DATA_VIEW, "Spatial Data View", "Spatial Data View")
+ADD_ENUM_MAPPING(PRODUCT_VIEW, "Product View", "Product View")
+ADD_ENUM_MAPPING(PLOT_VIEW, "Plot View", "Plot View")
+END_ENUM_MAPPING()
+
 BEGIN_ENUM_MAPPING(WindowSizeType)
 ADD_ENUM_MAPPING(FIXED_SIZE, "Fixed", "Fixed")
 ADD_ENUM_MAPPING(MAXIMIZED, "Maximized", "Maximized")

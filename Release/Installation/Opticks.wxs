@@ -67,6 +67,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
             <Component Id="C__AppFiles" Guid="$(var.C__AppFilesGuid)" Win64="$(var.64Bit)">
                <File Name="Opticks.exe" Id="F__Opticks" DiskId="1" KeyPath="yes" Source="$(var.OpticksBinariesDir)\Bin\Opticks.exe" />
                <File Name="OpticksBatch.exe" Id="F__OpticksBatch"  DiskId="1"  Source="$(var.OpticksBinariesDir)\Bin\OpticksBatch.exe" />
+               <File Name="SimpleApiLib.dll" Id="F__SimpleApi"  DiskId="1"  Source="$(var.OpticksBinariesDir)\Lib\SimpleApiLib.dll" />
             </Component>
             <Component Id="C__avcodec_Dependency" Guid="$(var.C__avcodec_DependencyGuid)" Win64="$(var.64Bit)">
                <File Name="avcodec.dll" Id="F__avcodec_Dependency" DiskId="1" KeyPath="yes" />

@@ -15,6 +15,7 @@
 
 #if defined(_MSC_VER)
    #define WIN_API
+   #define EXPORT_SYMBOL __declspec(dllexport)
 
    #define OPTICKS_BYTE_ORDER LITTLE_ENDIAN_BYTE_ORDER
    #define LONG_SIZE 4
@@ -54,6 +55,7 @@
 
    #define UNIX_API
    #define SOLARIS
+   #define EXPORT_SYMBOL 
 
    #ifdef _BIG_ENDIAN
       #define OPTICKS_BYTE_ORDER BIG_ENDIAN_BYTE_ORDER
@@ -99,6 +101,7 @@
    #define UNIX_API
    #define LINUX
    #define CG_SUPPORTED
+   #define EXPORT_SYMBOL 
 
    #if __BYTE_ORDER == __LITTLE_ENDIAN
       #define OPTICKS_BYTE_ORDER LITTLE_ENDIAN_BYTE_ORDER

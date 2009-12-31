@@ -541,7 +541,8 @@ INPUT                  = "$(SOURCE)/PlugInLib" \
                          "$(SOURCE)/Interfaces" \
                          "$(SOURCE)/HdfPlugInLib" \
                          "$(SOURCE)/ApiDocs" \
-                         "$(SOURCE)/NitfPlugInLib"
+                         "$(SOURCE)/NitfPlugInLib" \
+                         "$(SOURCE)/SimpleApiLib"
 
 # This tag can be used to specify the character encoding of the source files 
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding, which is 

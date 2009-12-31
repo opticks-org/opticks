@@ -16,6 +16,7 @@
 #include "DataElement.h"
 #include "DimensionDescriptor.h"
 #include "LocationType.h"
+#include "TypesFile.h"
 
 #include <string>
 #include <vector>
@@ -36,7 +37,7 @@ class Statistics;
  *  - The following method is called: updateData().
  *  - Everything else documented in DataElement.
  *
- *  @see   DataElement
+ *  @see   RasterElementExt1, DataElement
  */
 class RasterElement : public DataElement
 {
@@ -175,17 +176,23 @@ public:
     *  @param   appendName
     *           What to append to the name of the RasterElement.
     *           ie. "_chip" would transform the name "A.sio" to "A_chip.sio".
-    *           Passing an empty string as the appendName will result in using the RasterElement's
+    *           Passing an empty string will result in using the RasterElement's
     *           name as the chipped name.
     *  @param   selectedRows
     *           The DimensionDescriptors (unmodified from this object) for the rows
     *           which should be included in this chip.
+    *           Passing an empty vector will result in using the RasterElement's
+    *           rows as the chipped rows.
     *  @param   selectedColumns
     *           The DimensionDescriptors (unmodified from this object) for the rows
     *           which should be included in this chip.
+    *           Passing an empty vector will result in using the RasterElement's
+    *           columns as the chipped columns.
     *  @param   selectedBands
     *           The DimensionDescriptors (unmodified from this object) for the rows
     *           which should be included in this chip.
+    *           Passing an empty vector will result in using the RasterElement's
+    *           bands as the chipped bands.
     * 
     *  @return  A pointer to the created RasterElement
     *
@@ -532,6 +539,54 @@ protected:
     * This should be destroyed by calling ModelServices::destroyElement.
     */
    virtual ~RasterElement() {}
+};
+
+/**
+ * Extends capability of the RasterElement interface.
+ *
+ * This class provides additional capability for the RasterElement interface class.
+ * A pointer to this class can be obtained by performing a dynamic cast on a
+ * pointer to RasterElement or any of its subclasses.
+ *
+ * @warning A pointer to this class can only be used to call methods contained
+ *           in this extension class and cannot be used to call any methods in
+ *           RasterElement or its subclasses.
+ */
+class RasterElementExt1
+{
+public:
+   /**
+    * Copies data from a buffer of the specified format.
+    *
+    * @param pData
+    *        A buffer containing the data to write.
+    *
+    * @param interleaveType
+    *        The interleave of the given data.
+    *
+    * @param startRow
+    *        The first row to write.
+    *
+    * @param numRows
+    *        The number of rows to write.
+    *
+    * @param startColumn
+    *        The first column to write.
+    *
+    * @param numColumns
+    *        The number of columns to write.
+    *
+    * @param startBand
+    *        The first bands to write.
+    *
+    * @param numBands
+    *        The number of bands to write.
+    *
+    * @return \c True on success ,\c false otherwise.
+    */
+   virtual bool writeRawData(void* pData, InterleaveFormatType interleaveType,
+      unsigned int startRow, unsigned int numRows, unsigned int startColumn, unsigned int numColumns,
+      unsigned int startBand, unsigned int numBands) = 0;
 };
 
 #endif

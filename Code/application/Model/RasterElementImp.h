@@ -76,6 +76,9 @@ public:
 
    const void *getRawData() const;
    void *getRawData();
+   bool writeRawData(void* pData, InterleaveFormatType interleaveType,
+      unsigned int startRow, unsigned int numRows, unsigned int startColumn, unsigned int numColumns,
+      unsigned int startBand, unsigned int numBands);
 
    // Georeferencing
    LocationType convertPixelToGeocoord(LocationType pixel, bool quick = false, bool* pAccurate = NULL) const;
@@ -214,7 +217,8 @@ private:
 };
 
 #define RASTERELEMENTADAPTEREXTENSION_CLASSES \
-   DATAELEMENTADAPTEREXTENSION_CLASSES
+   DATAELEMENTADAPTEREXTENSION_CLASSES \
+   , public RasterElementExt1
 
 #define RASTERELEMENTADAPTER_METHODS(impClass) \
    DATAELEMENTADAPTER_METHODS(impClass) \
@@ -345,6 +349,13 @@ private:
    void updateGeoreferenceData() \
    { \
       return impClass::updateGeoreferenceData(); \
+   } \
+   bool writeRawData(void* pData, InterleaveFormatType interleaveType, \
+      unsigned int startRow, unsigned int numRows, unsigned int startColumn, unsigned int numColumns, \
+      unsigned int startBand, unsigned int numBands) \
+   { \
+      return impClass::writeRawData(pData, interleaveType, startRow, numRows, \
+         startColumn, numColumns, startBand, numBands); \
    }
 
 #endif
