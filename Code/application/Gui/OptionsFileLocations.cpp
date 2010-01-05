@@ -166,8 +166,15 @@ OptionsFileLocations::OptionsFileLocations() :
 
 void OptionsFileLocations::applyChanges()
 {
+   applyChanges(mpFileTree);
+   applyChanges(mpPathTree);
+}
+
+void OptionsFileLocations::applyChanges(CustomTreeWidget* pTree)
+{
+   VERIFYNR(pTree != NULL);
    Service<ConfigurationSettings> pSettings;
-   QTreeWidgetItemIterator iter(mpFileTree);
+   QTreeWidgetItemIterator iter(pTree);
    while (*iter != NULL)
    {
       QTreeWidgetItem* pItem = *iter;

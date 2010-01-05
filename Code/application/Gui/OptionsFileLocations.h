@@ -128,6 +128,7 @@ private:
    std::string mWizardPath;
    CustomTreeWidget* mpPathTree;
    CustomTreeWidget* mpFileTree;
+   void applyChanges(CustomTreeWidget* pTree);
 };
 
 #endif
