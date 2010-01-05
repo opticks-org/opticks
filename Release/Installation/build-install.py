@@ -286,6 +286,98 @@ class CommonBuilder:
                 "source code does not exist %s, see -c or "\
                 "--code-dir" % (self.opticks_code_dir))
 
+    def update_version(self, new_version):
+        """Updates the version number that is used when generating the .msi.
+
+        Updates the Opticks-Version.wxi file to have the new version number
+        and also updates the product and upgrades codes for the 32-bit and
+        64-bit version of the .msi package.
+
+        @param new_version: The version in the format of major.minor.
+        For the MSI, the version # provided is used for display purposes.  The internal
+        MSI version # will always be 1.0.0 since the GUIDs will be updated.
+        For the Solaris package, the version # provided will be the actual
+        version # of the generated package.
+        @type new_version: L{str}
+
+        @rtype: L{int}
+
+        """
+        msi_version = "1.0.0"
+        if new_version == "current":
+            self.require_code_dir()
+            sys.path.append(self.opticks_code_dir)
+            import commonutils
+            new_version = \
+                commonutils.get_app_version_only(self.opticks_code_dir)
+            if self.verbosity >= 1:
+                print "Detected application version as %s" % (new_version)
+
+        if self.verbosity > 1:
+            print "Updating MSI version #..."
+        if self.verbosity > 1:
+            print "Setting MSI Display Version # to %s" % (new_version)
+        if self.verbosity > 1:
+            print "Setting MSI Internal Version # to %s" % (msi_version)
+        version_file = open("Opticks-Version.wxi", "r")
+        version_file_contents = version_file.read()
+        version_file.close()
+
+        version_file_contents = \
+            re.sub(r'(PublicVersionNumber\s*?\=\s*?").*?(")',
+            r"\g<1>%s\g<2>" % (new_version), version_file_contents)
+        version_file_contents = \
+            re.sub(r'(InternalVersionNumber\s*?\=\s*?").*?(")',
+            r"\g<1>%s\g<2>" % (msi_version), version_file_contents)
+        guid_matcher = \
+            re.compile('<\?\s*?define\s*?\S+?Guid\s*?\=\s*?"(?P<guid>.*?)"')
+        current_pos = 0
+        if self.verbosity > 1:
+            print "Updating GUID's..."
+        while True:
+            match_obj = guid_matcher.search(version_file_contents, current_pos)
+            if match_obj:
+                new_uuid = str(uuid.uuid4())
+                version_file_contents = \
+                    version_file_contents[:match_obj.start(1)] + \
+                    new_uuid + version_file_contents[match_obj.end(1):]
+                current_pos = match_obj.start(1)
+            else:
+                break
+        if self.verbosity > 1:
+            print "Done updating GUIDs"
+
+        version_file = open("Opticks-Version.wxi", "w")
+        version_file.write(version_file_contents)
+        version_file.close()
+
+        if self.verbosity >= 1:
+            print "Opticks-Version.wxi has been updated to reference "\
+                "the new version. You must re-run this script with "\
+                "--32 or --64 to generate a .msi that uses the "\
+                "new version number.  Please commit the "\
+                "Opticks-Version.wxi change to Subversion."
+        if self.verbosity > 1:
+            print "Done updating MSI version #"
+
+        if self.verbosity > 1:
+            print "Updating pkg version #..."
+        pkginfo_file = open("pkginfo", "r")
+        pkginfo = pkginfo_file.read()
+        pkginfo_file.close()
+        pkginfo = re.sub(r"VERSION=.+?\n", "VERSION=%s\n" % (new_version),
+            pkginfo)
+        pkginfo_file = open("pkginfo", "w")
+        pkginfo_file.write(pkginfo)
+        pkginfo_file.close()
+        if self.verbosity >= 1:
+            print "pkginfo has been updated to reference the new version. "\
+            "You must re-run this script to generate a Solaris Package "\
+            "that uses the new version number.  Please commit the pkginfo "\
+            "change to Subversion."
+        if self.verbosity > 1:
+            print "Done updating pkg version #"
+
 
 class WixBuilder(CommonBuilder):
     def __init__(self, wix_path, opticks_code_dir, opticks_dependencies_dir,
@@ -470,78 +562,6 @@ class WixBuilder(CommonBuilder):
             count = count - 1
         output.close()
 
-    def update_version(self, display_version):
-        """Updates the version number that is used when generating the .msi.
-
-        Updates the Opticks-Version.wxi file to have the new version number
-        and also updates the product and upgrades codes for the 32-bit and
-        64-bit version of the .msi package.
-
-        @param display_version: The version in the format of major.minor.
-        The version # provided is used for display purposes.  The internal
-        MSI version # will always be 1.0.0 since the GUIDs will be updated.
-        @type display_version: L{str}
-
-        @rtype: L{int}
-
-        """
-        if self.verbosity > 1:
-            print "Updating MSI version #..."
-        msi_version = "1.0.0"
-        if display_version == "current":
-            self.require_code_dir()
-            sys.path.append(self.opticks_code_dir)
-            import commonutils
-            display_version = \
-                commonutils.get_app_version_only(self.opticks_code_dir)
-            if self.verbosity >= 1:
-                print "Detected application version as %s" % (display_version)
-
-        if self.verbosity > 1:
-            print "Setting MSI Display Version # to %s" % (display_version)
-        if self.verbosity > 1:
-            print "Setting MSI Internal Version # to %s" % (msi_version)
-        version_file = open("Opticks-Version.wxi", "r")
-        version_file_contents = version_file.read()
-        version_file.close()
-
-        version_file_contents = \
-            re.sub(r'(PublicVersionNumber\s*?\=\s*?").*?(")',
-            r"\g<1>%s\g<2>" % (display_version), version_file_contents)
-        version_file_contents = \
-            re.sub(r'(InternalVersionNumber\s*?\=\s*?").*?(")',
-            r"\g<1>%s\g<2>" % (msi_version), version_file_contents)
-        guid_matcher = \
-            re.compile('<\?\s*?define\s*?\S+?Guid\s*?\=\s*?"(?P<guid>.*?)"')
-        current_pos = 0
-        if self.verbosity > 1:
-            print "Updating GUID's..."
-        while True:
-            match_obj = guid_matcher.search(version_file_contents, current_pos)
-            if match_obj:
-                new_uuid = str(uuid.uuid4())
-                version_file_contents = \
-                    version_file_contents[:match_obj.start(1)] + \
-                    new_uuid + version_file_contents[match_obj.end(1):]
-                current_pos = match_obj.start(1)
-            else:
-                break
-        if self.verbosity > 1:
-            print "Done updating GUIDs"
-
-        version_file = open("Opticks-Version.wxi", "w")
-        version_file.write(version_file_contents)
-        version_file.close()
-
-        if self.verbosity >= 1:
-            print "Opticks-Version.wxi has been updated to reference "\
-                "the new version. You must re-run this script with "\
-                "--32 or --64 to generate a .msi that uses the "\
-                "new version number.  Please commit the "\
-                "Opticks-Version.wxi change to Subversion."
-        if self.verbosity > 1:
-            print "Done updating MSI version #"
-
     def get_dependencies(self, is_64_bit, output_path):
         if is_64_bit:
             platform = "64"
@@ -651,34 +671,6 @@ class PackageBuilder(CommonBuilder):
 
     def clean(self):
         shutil.rmtree(self.output_dir, True)
-
-    def update_version(self, new_version):
-        if self.verbosity > 1:
-            print "Updating pkg version #..."
-        if new_version == "current":
-            self.require_code_dir()
-            sys.path.append(self.opticks_code_dir)
-            import commonutils
-            new_version = \
-                commonutils.get_app_version_only(self.opticks_code_dir)
-            if self.verbosity >= 1:
-                print "Detected application version as %s" % (new_version)
-
-        pkginfo_file = open("pkginfo", "r")
-        pkginfo = pkginfo_file.read()
-        pkginfo_file.close()
-        pkginfo = re.sub(r"VERSION=.+?\n", "VERSION=%s\n" % (new_version),
-            pkginfo)
-        pkginfo_file = open("pkginfo", "w")
-        pkginfo_file.write(pkginfo)
-        pkginfo_file.close()
-        if self.verbosity >= 1:
-            print "pkginfo has been updated to reference the new version. "\
-            "You must re-run this script to generate a Solaris Package "\
-            "that uses the new version number.  Please commit the pkginfo "\
-            "change to Subversion."
-        if self.verbosity > 1:
-            print "Done updating pkg version #"
 
     def get_data_from_pkginfo(self, param):
         pkginfo_file = open("pkginfo", "r")
