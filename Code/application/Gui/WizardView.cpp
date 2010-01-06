@@ -1000,28 +1000,20 @@ void WizardView::mouseDoubleClickEvent(QMouseEvent* pEvent)
                   return;
                }
 
+               const std::string& nodeName = pNode->getName();
+               const std::string& nodeType = pNode->getType();
+
                WizardNodeImp* pNewNode = NULL;
                WizardItemImp* pNewItem = NULL;
-               if (DataVariantEditor::hasDelegate(pNode->getType()))
+               if (DataVariantEditor::hasDelegate(nodeType))
                {
                   // create a new value item
-                  DataVariant initialValue(pNode->getType(), pNode->getValue());
-                  if (pNode->getValue() == NULL)
-                  {
-#pragma message(__FILE__ "(" STRING(__LINE__) \
-") : warning : This should error, fix this when we can have a DataVariant with a type and an invalid value (tclarke)")
-                     QString type = QString::fromStdString(pNode->getType());
-                     if ((type.contains("char") ||
-                          type.contains("short") ||
-                          type.contains("int") ||
-                          type.contains("long") ||
-                          type.contains("float") ||
-                          type.contains("double")) && !type.contains("vector"))
-                     {
-                        initialValue.fromDisplayString(pNode->getType(), "0");
-                     }
-                  }
-                  PlugInDescriptor* pPlugInDesc = Service<PlugInManagerServices>()->getPlugInDescriptor(pItem->getName());
+                  void* pNodeValue = pNode->getValue();
+
+                  // If the wizard has already been executed, the node value will be reset to NULL,
+                  // so use the default value from the plug-in arg as the initial value for the new value item
+                  PlugInDescriptor* pPlugInDesc =
+                     Service<PlugInManagerServices>()->getPlugInDescriptor(pItem->getName());
                   if (pPlugInDesc != NULL)
                   {
                      const PlugInArgList* pList = pItem->getBatchMode() ?
@@ -1030,13 +1022,31 @@ void WizardView::mouseDoubleClickEvent(QMouseEvent* pEvent)
                      if (pList != NULL)
                      {
                         PlugInArg* pArg = NULL;
-                        if (pList->getArg(pNode->getName(), pArg) && pArg != NULL && pArg->isDefaultSet())
+                        if (pList->getArg(nodeName, pArg) && pArg != NULL && pArg->isDefaultSet())
                         {
-                           initialValue = DataVariant(pArg->getType(), pArg->getDefaultValue());
+                           pNodeValue = pArg->getDefaultValue();
                         }
                      }
                   }
-                  pNewItem = static_cast<WizardItemImp*>(mpWizard->addValueItem(pNode->getName(), initialValue));
+
+                  DataVariant initialValue(nodeType, pNodeValue);
+                  if (pNodeValue == NULL)
+                  {
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This should error; " \
+   "fix this when we can have a DataVariant with a type and an invalid value (tclarke)")
+                     QString type = QString::fromStdString(nodeType);
+                     if ((type.contains("char") ||
+                          type.contains("short") ||
+                          type.contains("int") ||
+                          type.contains("long") ||
+                          type.contains("float") ||
+                          type.contains("double")) && !type.contains("vector"))
+                     {
+                        initialValue.fromDisplayString(nodeType, "0");
+                     }
+                  }
+
+                  pNewItem = static_cast<WizardItemImp*>(mpWizard->addValueItem(nodeName, initialValue));
                   if (pNewItem != NULL)
                   {
                      pNewNode = static_cast<WizardNodeImp*>(pNewItem->getOutputNodes().front());
@@ -1045,10 +1055,10 @@ void WizardView::mouseDoubleClickEvent(QMouseEvent* pEvent)
                else
                {
                   // create a GetSessionItem
-                  pNewItem = static_cast<WizardItemImp*>(mpWizard->addPlugInItem("Get " + pNode->getType(), "Wizard"));
+                  pNewItem = static_cast<WizardItemImp*>(mpWizard->addPlugInItem("Get " + nodeType, "Wizard"));
                   if (pNewItem != NULL)
                   {
-                     pNewNode = static_cast<WizardNodeImp*>(pNewItem->getOutputNode("Session Item", pNode->getType()));
+                     pNewNode = static_cast<WizardNodeImp*>(pNewItem->getOutputNode("Session Item", nodeType));
                   }
                }
 
