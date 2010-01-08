@@ -108,12 +108,9 @@ bool PicturesExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
       outputSize = QSize(outputWidth, outputHeight);
    }
 
-   if (mpProgress != NULL)
-   {
-      mpProgress->updateProgress("Begin image export.", 0, NORMAL);
-   }
-
    // Get the current image from the viewer
+   // Do not display the progress before calling generateImage
+   // because the progress dialog is exported as part of the image on Solaris.
    QImage image(outputSize, QImage::Format_ARGB32);
    FAIL_IF(!generateImage(image), "Could not generate image", return false);
 
