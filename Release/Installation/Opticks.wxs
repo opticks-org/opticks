@@ -20,11 +20,11 @@ are defined in Opticks-Version.wxi, so include that file now -->
    <?define ProductCode = $(var.ProductCode32BitGuid) ?>
    <?define 64Bit = "no" ?>
    <?define InstallFolder = "ProgramFilesFolder" ?>
-   <?define MsiPlatform = "Intel" ?>
+   <?define MsiPlatform = "x86" ?>
 <?endif?>
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:Util="http://schemas.microsoft.com/wix/UtilExtension" RequiredVersion="3.0.2925.0">
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:Util="http://schemas.microsoft.com/wix/UtilExtension" RequiredVersion="3.0.5419.0">
    <Product Id="$(var.ProductCode)" Name="Opticks $(var.PublicVersionNumber) $(var.UserPlatform)" Language="1033" Version="$(var.InternalVersionNumber)" Manufacturer="Ball Aerospace &amp; Technologies Corp." UpgradeCode="$(var.UpgradeCode)">
-      <Package InstallerVersion="200" Compressed="yes" Platforms="$(var.MsiPlatform)"
+      <Package InstallerVersion="200" Compressed="yes" Platform="$(var.MsiPlatform)"
                Description="Opticks"
                Comments="Opticks is an open-source application that enables the viewing, processing and annotating of imagery and video data."
                />
