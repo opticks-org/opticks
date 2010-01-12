@@ -19,6 +19,7 @@ using namespace std;
 ImporterShell::ImporterShell()
 {
    setType(PlugInManagerServices::ImporterType());
+   setWizardSupported(false);
 }
 
 ImporterShell::~ImporterShell()
