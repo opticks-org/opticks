@@ -83,6 +83,7 @@ private:
    QTextStream mStream;
    QMap<QUuid, ComWrap<IFeatureClassPtr> > mFeatureClasses;
    QString mPartialRequest;
+   bool mArcLicense;
 };
 
 #endif

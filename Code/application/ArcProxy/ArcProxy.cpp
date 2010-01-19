@@ -109,7 +109,10 @@ namespace
 
 }
 
-ArcProxy::ArcProxy(QObject *pParent) : QObject(pParent), mState(INITIALIZE)
+ArcProxy::ArcProxy(QObject *pParent) :
+   QObject(pParent),
+   mArcLicense(false),
+   mState(INITIALIZE)
 {
    QTimer::singleShot(0, this, SLOT(connectToServer()));
 
@@ -125,7 +128,10 @@ ArcProxy::ArcProxy(QObject *pParent) : QObject(pParent), mState(INITIALIZE)
 
 ArcProxy::~ArcProxy()
 {
-   ShutdownApp();
+   if (mArcLicense)
+   {
+      ShutdownApp();
+   }
    exit(0);
 }
 
@@ -152,7 +158,7 @@ void ArcProxy::initialize(const QString &data)
 {
    if(data == APP_VERSION_NUMBER)
    {
-      InitializeApp();
+      mArcLicense = InitializeApp();
       ISpatialReferenceFactory2Ptr pSpatialFactory(CLSID_SpatialReferenceEnvironment);
       IGeographicCoordinateSystemPtr pSystem;
       pSpatialFactory->CreateGeographicCoordinateSystem(esriSRGeoCS_WGS1984, &pSystem);
