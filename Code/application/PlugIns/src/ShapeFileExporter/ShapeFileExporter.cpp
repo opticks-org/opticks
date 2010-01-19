@@ -14,6 +14,7 @@
 #include "AoiLayer.h"
 #include "AppVersion.h"
 #include "AppVerify.h"
+#include "BitMask.h"
 #include "DesktopServices.h"
 #include "FileDescriptor.h"
 #include "Filename.h"
@@ -227,7 +228,16 @@ bool ShapeFileExporter::extractInputs(const PlugInArgList* pInArgList, string& m
       return false;
    }
 
-   if (mpAoi->getGroup()->getObjects().empty() == true)
+   // The BitMaskIterator does not support negative extents and
+   // the BitMask does not correctly handle the outside flag so
+   // the BitMaskIterator is used for cases when the outside flag is true and
+   // the BitMask is used for cases when the outside flag is false.
+   // This is the case when the outside flag is false. The case where the
+   // outside flag is true for this condition is handled in
+   // ShapeFile::addFeatures()
+   const BitMask* pMask = mpAoi->getSelectedPoints();
+   if (mpAoi->getGroup()->getObjects().empty() == true && 
+      pMask->isOutsideSelected() == false)
    {
       message = "The AOI does not contain any points to export.";
       return false;

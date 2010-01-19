@@ -13,6 +13,7 @@
 #include "AoiLayer.h"
 #include "AppVersion.h"
 #include "BitMask.h"
+#include "BitMaskIterator.h"
 #include "DataAccessor.h"
 #include "DataAccessorImpl.h"
 #include "DesktopServices.h"
@@ -37,6 +38,7 @@
 #include <QtCore/QList>
 #include <QtCore/QPoint>
 #include <QtGui/QApplication>
+#include <limits>
 #include <math.h>
 #if !defined(DEBUG)
 // boost optimizations on
@@ -132,6 +134,7 @@ bool QtCluster::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
    AoiElement* pAoiElement = NULL;
    DataElement* pParentElement = NULL;
    SpatialDataView* pView = NULL;
+   BitMaskIterator* pOrigMaskIt = NULL;
    if (isBatch())
    {
       pAoiElement = pInArgList->getPlugInArgValue<AoiElement>(DataElementArg());
@@ -166,10 +169,34 @@ bool QtCluster::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
    }
    const BitMask* pOrigMask = pAoiElement->getSelectedPoints();
    VERIFY(pOrigMask);
-   if (pOrigMask->getCount() == 0)
+   RasterElement* pPrimaryRaster = dynamic_cast<RasterElement*>(pParentElement);
+   if (pPrimaryRaster != NULL)
    {
-      progress.report("No points in the AOI.", 0, ERRORS, true);
-      return false;
+      pOrigMaskIt = new BitMaskIterator(pOrigMask, pPrimaryRaster);
+      VERIFY(pOrigMaskIt != NULL);
+      if (pOrigMaskIt->getCount() == 0)
+      {
+         progress.report("No points in the AOI.", 0, ERRORS, true);
+         return false;
+      }
+      if (pOrigMaskIt->getCount() > sqrt(static_cast<double>(std::numeric_limits<unsigned int>::max())))
+      {
+         progress.report("Too many points in the AOI.", 0, ERRORS, true);
+         return false;
+      }
+   }
+   else
+   {
+      if (pOrigMask->getCount() == 0)
+      {
+         progress.report("No points in the AOI.", 0, ERRORS, true);
+         return false;
+      }
+      if (pOrigMask->getCount() > sqrt(static_cast<double>(std::numeric_limits<unsigned int>::max())))
+      {
+         progress.report("Too many points in the AOI.", 0, ERRORS, true);
+         return false;
+      }
    }
    if (!isBatch() && pOrigMask->getCount() > 10000)
    {
@@ -278,7 +305,14 @@ bool QtCluster::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
     **********/
    PointsType points;
    int bx1, bx2, by1, by2;
-   pOrigMask->getMinimalBoundingBox(bx1, by1, bx2, by2);
+   if (pView != NULL)
+   {
+      pOrigMaskIt->getBoundingBox(bx1, by1, bx2, by2);
+   }
+   else
+   {
+      pOrigMask->getMinimalBoundingBox(bx1, by1, bx2, by2);
+   }
    int numToIncPercentage = (bx2-bx1+1) / 99;
    progress.report("Scanning AOI", 0, NORMAL);
    for (int x = bx1; x <= bx2; ++x)
@@ -294,13 +328,23 @@ bool QtCluster::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
       }
       for (int y = by1; y <= by2; ++y)
       {
-         if (pOrigMask->getPixel(x, y))
+         if (pView != NULL)
          {
-            points.push_back(QPoint(x, y));
+            if (pOrigMaskIt->getPixel(x, y))
+            {
+               points.push_back(QPoint(x, y));
+            }
+         }
+         else
+         {
+            if (pOrigMask->getPixel(x, y))
+            {
+               points.push_back(QPoint(x, y));
+            }
          }
       }
    }
-
+   delete pOrigMaskIt;
    /**********
     * Calculate in range points
     **********/

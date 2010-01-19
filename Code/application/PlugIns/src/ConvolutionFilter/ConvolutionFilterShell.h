@@ -17,9 +17,9 @@
 #include <ossim/matrix/newmat.h>
 
 class AoiElement;
+class BitMaskIterator;
 class RasterDataDescriptor;
 class RasterElement;
-struct CheckWithBitMask;
 
 class ConvolutionFilterShell : public AlgorithmShell
 {
@@ -50,7 +50,7 @@ protected:
             mpDescriptor(NULL),
             mpResult(NULL),
             mpAbortFlag(NULL),
-            mpCheck(NULL),
+            mpIterCheck(NULL),
             mBand(0)
       {}
 
@@ -58,7 +58,7 @@ protected:
       const RasterDataDescriptor* mpDescriptor;
       RasterElement* mpResult;
       const bool* mpAbortFlag;
-      const CheckWithBitMask* mpCheck;
+      const BitMaskIterator* mpIterCheck;
       unsigned int mBand;
       NEWMAT::Matrix mKernel;
    };

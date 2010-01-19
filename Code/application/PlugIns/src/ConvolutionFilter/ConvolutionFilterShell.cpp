@@ -12,6 +12,7 @@
 #include "AppVerify.h"
 #include "AppVersion.h"
 #include "BitMask.h"
+#include "BitMaskIterator.h"
 #include "ConfigurationSettings.h"
 #include "ConvolutionFilterShell.h"
 #include "LayerList.h"
@@ -38,77 +39,6 @@ namespace
       *pPixel = static_cast<T>(value);
    }
 }
-
-struct CheckWithBitMask
-{
-   CheckWithBitMask(const BitMask* pMask, unsigned int totalSizeX, unsigned int totalSizeY) :
-            mpMask(pMask), mTotalX(totalSizeX), mTotalY(totalSizeY)
-   {
-   }
-
-   bool operator()(int x_index, int y_index) const
-   {
-      return mpMask == NULL ? true : mpMask->getPixel(x_index, y_index);
-   }
-
-   int getNumRows() const
-   {
-      if (mpMask == NULL)
-      {
-         return mTotalY;
-      }
-      int x1 = 0, x2 = 0, y1 = 0, y2 = 0;
-      bool outside = mpMask->isOutsideSelected();
-      mpMask->getBoundingBox(x1, y1, x2, y2);
-      if (outside)
-      {
-         return mTotalY;
-      }
-      return (y2 - y1 + 1);
-   }
-
-   int getNumColumns() const
-   {
-      if (mpMask == NULL)
-      {
-         return mTotalX;
-      }
-      int x1 = 0, x2 = 0, y1 = 0, y2 = 0;
-      bool outside = mpMask->isOutsideSelected();
-      mpMask->getBoundingBox(x1, y1, x2, y2);
-      if (outside)
-      {
-         return mTotalX;
-      }
-      return (x2 - x1 + 1);
-   }
-
-   LocationType getOffset() const
-   {
-      if (mpMask == NULL)
-      {
-         return LocationType(0, 0);
-      }
-      int x1 = 0, x2 = 0, y1 = 0, y2 = 0;
-      bool outside = mpMask->isOutsideSelected();
-      mpMask->getBoundingBox(x1, y1, x2, y2);
-      if (outside)
-      {
-         return LocationType(0, 0);
-      }
-      return LocationType(x1, y1);
-   }
-
-   bool useAllPixels() const
-   {
-      return (mpMask == NULL) || ((mpMask->getCount() == 0) && (mpMask->getPixel(0,0)));
-   }
-
-private:
-   const BitMask* mpMask;
-   unsigned int mTotalX;
-   unsigned int mTotalY;
-};
 
 ConvolutionFilterShell::ConvolutionFilterShell() : mpAoi(NULL)
 {
@@ -162,9 +92,8 @@ bool ConvolutionFilterShell::execute(PlugInArgList* pInArgList, PlugInArgList* p
       mProgress.report("Invalid kernel.", 0, ERRORS, true);
       return false;
    }
-   CheckWithBitMask checker((mpAoi == NULL) ? NULL : mpAoi->getSelectedPoints(),
-      mInput.mpDescriptor->getColumnCount(), mInput.mpDescriptor->getRowCount());
-
+   BitMaskIterator iterChecker((mpAoi == NULL) ? NULL : mpAoi->getSelectedPoints(), 0, 0,
+      mInput.mpDescriptor->getColumnCount() - 1, mInput.mpDescriptor->getRowCount() - 1);
    EncodingType resultType = mInput.mpDescriptor->getDataType();
    if (resultType == INT4SCOMPLEX)
    {
@@ -192,7 +121,7 @@ bool ConvolutionFilterShell::execute(PlugInArgList* pInArgList, PlugInArgList* p
    mProgress.report("Begin convolution matrix execution.", 0, NORMAL);
 
    ModelResource<RasterElement> pResult(RasterUtilities::createRasterElement(
-      mResultName, checker.getNumRows(), checker.getNumColumns(),
+      mResultName, iterChecker.getNumSelectedRows(), iterChecker.getNumSelectedColumns(),
       resultType, mInput.mpDescriptor->getProcessingLocation() == IN_MEMORY));
    mInput.mpResult = pResult.get();
    if (mInput.mpResult == NULL)
@@ -201,7 +130,7 @@ bool ConvolutionFilterShell::execute(PlugInArgList* pInArgList, PlugInArgList* p
       return false;
    }
    mInput.mpAbortFlag = &mAborted;
-   mInput.mpCheck = &checker;
+   mInput.mpIterCheck = &iterChecker;
    ConvolutionFilterThreadOutput outputData;
    mta::ProgressObjectReporter reporter("Convolving", mProgress.getCurrentProgress());
    mta::MultiThreadedAlgorithm<ConvolutionFilterThreadInput,
@@ -348,9 +277,9 @@ ConvolutionFilterShell::ConvolutionFilterThread::ConvolutionFilterThread(const C
                                                                          mta::ThreadReporter &reporter) :
                mta::AlgorithmThread(threadIndex, reporter),
                mInput(input),
-               mRowRange(getThreadRange(threadCount, input.mpCheck->getNumRows()))
+               mRowRange(getThreadRange(threadCount, input.mpIterCheck->getNumSelectedRows()))
 {
-   if (input.mpCheck->useAllPixels())
+   if (input.mpIterCheck->useAllPixels())
    {
       mRowRange = getThreadRange(threadCount, input.mpDescriptor->getRowCount());
    }
@@ -366,7 +295,7 @@ void ConvolutionFilterShell::ConvolutionFilterThread::run()
 template<class T>
 void ConvolutionFilterShell::ConvolutionFilterThread::convolve(const T*)
 {
-   int numResultsCols = mInput.mpCheck->getNumColumns();
+   int numResultsCols = mInput.mpIterCheck->getNumSelectedColumns();
    if (mInput.mpResult == NULL)
    {
       return;
@@ -394,11 +323,11 @@ void ConvolutionFilterShell::ConvolutionFilterThread::convolve(const T*)
 
    int index = numResultsCols * mRowRange.mFirst;
    int oldPercentDone = -1;
-   int rowOffset = static_cast<int>(mInput.mpCheck->getOffset().mY);
+   int rowOffset = static_cast<int>(mInput.mpIterCheck->getOffset().mY);
    int startRow = mRowRange.mFirst + rowOffset;
    int stopRow = mRowRange.mLast + rowOffset;
 
-   int columnOffset = static_cast<int>(mInput.mpCheck->getOffset().mX);
+   int columnOffset = static_cast<int>(mInput.mpIterCheck->getOffset().mX);
    int startColumn = columnOffset;
    int stopColumn = numResultsCols + columnOffset - 1;
 
@@ -436,25 +365,28 @@ void ConvolutionFilterShell::ConvolutionFilterThread::convolve(const T*)
       for (int col_index = startColumn; col_index <= stopColumn; ++col_index)
       {
          double accum = 0.0;
-         for (int kernelrow = 0; kernelrow < mInput.mKernel.Nrows(); kernelrow++)
+         if (mInput.mpIterCheck->getPixel(col_index, row_index))
          {
-            int neighbor_row = row_index - yshift + kernelrow;
-            int real_row = std::min(std::max(0, neighbor_row),
-               static_cast<int>(mInput.mpDescriptor->getRowCount()) - 1);
-            for (int kernelcol = 0; kernelcol < mInput.mKernel.Ncols(); kernelcol++)
+            for (int kernelrow = 0; kernelrow < mInput.mKernel.Nrows(); kernelrow++)
             {
-               int neighbor_col = col_index - xshift + kernelcol;
-               int real_col = std::min(std::max(0, neighbor_col),
-                  static_cast<int>(mInput.mpDescriptor->getColumnCount()) - 1);
-               accessor->toPixel(real_row, real_col);
-               if (accessor.isValid() == false)
+               int neighbor_row = row_index - yshift + kernelrow;
+               int real_row = std::min(std::max(0, neighbor_row),
+                  static_cast<int>(mInput.mpDescriptor->getRowCount()) - 1);
+               for (int kernelcol = 0; kernelcol < mInput.mKernel.Ncols(); kernelcol++)
                {
-                  return;
-               }
+                  int neighbor_col = col_index - xshift + kernelcol;
+                  int real_col = std::min(std::max(0, neighbor_col),
+                     static_cast<int>(mInput.mpDescriptor->getColumnCount()) - 1);
+                  accessor->toPixel(real_row, real_col);
+                  if (accessor.isValid() == false)
+                  {
+                     return;
+                  }
 
-               double val = 0.0;
-               pModel->getDataValue<T>(reinterpret_cast<T*>(accessor->getColumn()), COMPLEX_MAGNITUDE, 0, val);
-               accum += mInput.mKernel(kernelrow+1, kernelcol+1) * val / mInput.mKernel.Storage();
+                  double val = 0.0;
+                  pModel->getDataValue<T>(reinterpret_cast<T*>(accessor->getColumn()), COMPLEX_MAGNITUDE, 0, val);
+                  accum += mInput.mKernel(kernelrow+1, kernelcol+1) * val / mInput.mKernel.Storage();
+               }
             }
          }
          if (resultAccessor.isValid() == false)

@@ -21,7 +21,6 @@
 
 #include "AlgorithmShell.h"
 #include "ApplicationServices.h"
-#include "BitMask.h"
 #include "DataDescriptor.h"
 #include "DesktopServices.h"
 #include "ModelServices.h"

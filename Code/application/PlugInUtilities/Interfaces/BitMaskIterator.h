@@ -17,7 +17,6 @@ class RasterElement;
 
 /**
  * Traverses selected pixels within a BitMask.
- *
  * This class provides a convenient way to traverse selected pixels within a
  * given area of a BitMask object.  The iteration extents can be either custom
  * values or the extents of a RasterElement.
@@ -29,6 +28,7 @@ class RasterElement;
  * This class is intended to be used in place of directly traversing the
  * BitMask.
  *
+ *  \image html BitMaskIterator.JPG
  * @warning    The iterator does not assume ownership over the BitMask.  It is
  *             intended to be used in place of directly traversing the BitMask.
  *             Also for efficiency purposes, this class assumes that the BitMask
@@ -46,41 +46,50 @@ public:
     * location is (-1, -1), which is equivalent to end().
     *
     * @param   pBitMask
-    *          The BitMask to traverse.
+    *          The BitMask to traverse. \c NULL is a valid value for the BitMask.
+    *          Use of a \c NULL BitMask may allow algorithms to be designed with
+    *          a single code path.
     * @param   x1
     *          The first column of the area of the BitMask to be traversed. This
-    *          value must be non-negative and this is enforced by setting any negative
-    *          values to 0.
+    *          value must be less than or equal to the maximum value that the int
+    *          type will support on the platform and this is enforced by setting
+    *          larger values to that maximum value.
     * @param   y1
     *          The first row of the area of the BitMask to be traversed. This
-    *          value must be non-negative and this is enforced by setting any negative
-    *          values to 0.
+    *          value must be less than or equal to the maximum value that the int
+    *          type will support on the platform and this is enforced by setting
+    *          larger values to that maximum value.
     * @param   x2
     *          The last column of the area of the BitMask to be traversed. This
-    *          value must be non-negative and this is enforced by setting any negative
-    *          values to 0.
+    *          value must be less than or equal to the maximum value that the int
+    *          type will support on the platform and this is enforced by setting
+    *          larger values to that maximum value.
     * @param   y2
     *          The last row of the area of the BitMask to be traversed. This
-    *          value must be non-negative and this is enforced by setting any negative
-    *          values to 0.
+    *          value must be less than or equal to the maximum value that the int
+    *          type will support on the platform and this is enforced by setting
+    *          larger values to that maximum value.
     */
-   BitMaskIterator(const BitMask* pBitMask, int x1, int y1, int x2, int y2);
+   BitMaskIterator(const BitMask* pBitMask, unsigned int x1, unsigned int y1,
+                   unsigned int x2, unsigned int y2);
 
    /**
     * Constructs a BitMaskIterator taking extents from a given RasterElement.
     *
-    * All parameters are zero-based and inclusive.  Upon construction, the pixel
-    * location is the first selected pixel. If no pixels are selected, the pixel
-    * location is (-1, -1), which is equivalent to end().
+    * Upon construction, the pixel location is the first selected pixel.
+    * If no pixels are selected, the pixel location is (-1, -1), which is
+    * equivalent to end().
     *
     * @param   pBitMask
-    *          The BitMask to traverse.
+    *          The BitMask to traverse. \c NULL is a valid value for the BitMask.
+    *          Use of a \c NULL BitMask may allow algorithms to be designed with
+    *          a single code path.
     * @param   pRasterElement
     *          The RasterElement over which the BitMask will be traversed.  The
     *          extents are defined as the number of rows and columns in the
     *          RasterElement.  %Any offset to other elements is ignored.
     */
-   BitMaskIterator(const BitMask* pBitMask, RasterElement* pRasterElement);
+   BitMaskIterator(const BitMask* pBitMask, const RasterElement* pRasterElement);
 
    /**
     * Resets the pixel location to the first pixel.
@@ -101,15 +110,15 @@ public:
     * this method is called once, the selected pixel count is stored internally,
     * so subsequent calls to getCount() are much faster.
     *
-    * @return  The number of selected pixels within the extents.
+    * @return  Returns the number of selected pixels within the extents.
     */
-   int getCount();
+   int getCount() const;
 
    /**
     * Queries whether the current pixel is selected.
     *
-    * @return  Returns \c true if the current pixel is selected; otherwise
-    *          returns \c false.
+    * @return  Returns \c true if the current pixel is selected or the BitMask is \c NULL;
+    *          otherwise returns \c false.
     *
     * @see     getPixel(int,int) const, getPixelLocation(), operator*()
     */
@@ -123,9 +132,9 @@ public:
     * @param   row
     *          The zero-based row number of the pixel to query.
     *
-    * @return  Returns \c true if the given pixel is selected; otherwise returns
-    *          \c false.  Also returns \c false if the given pixel is outside
-    *          the extents.
+    * @return  Returns \c true if the given pixel is selected or the BitMask is \c NULL;
+    *          otherwise returns \c false.  Also returns \c false if the given pixel
+    *          is outside the extents.
     *
     * @see     getPixel(), getPixelLocation()
     */
@@ -136,7 +145,7 @@ public:
     *
     * @param   pixelLocation
     *          Populated with the current pixel location.  When an iterator is
-    *          constructed, its pixel location is the first selected pixel. If 
+    *          constructed, its pixel location is the first selected pixel. If
     *          no pixels are selected, the pixel location is (-1, -1),
     *          which is equivalent to end().
     */
@@ -150,13 +159,15 @@ public:
     * parameter values are zero-based and inclusive.
     *
     * @param   x1
-    *          The column of the lower-left corner.
+    *          The starting column for iteration.
     * @param   y1
-    *          The row of the lower-left corner.
+    *          The starting row for iteration.
     * @param   x2
-    *          The column of the upper-right corner.
+    *          The ending column for iteration.
     * @param   y2
-    *          The row of the upper-right corner.
+    *          The ending row for iteration.
+    *
+    * @see     getNumSelectedRows() getNumSelectedColumns()
     */
    void getBoundingBox(int& x1, int& y1, int& x2, int& y2) const;
 
@@ -174,9 +185,9 @@ public:
     * Advances the pixel location to the next selected pixel.
     *
     * @return  Returns \c true if the iterator advanced to the next selected
-    *          pixel.  If there are no more selected pixels within the extents,
-    *          the state of the iterator is equivalent to end() and \c false is
-    *          returned.
+    *          pixel or the BitMask is \c NULL.  If there are no more selected
+    *          pixels within the extents, the state of the iterator is equivalent
+    *          to end() and \c false is returned.
     *
     * @see     nextPixel(), operator++(int)
     */
@@ -186,9 +197,9 @@ public:
     * Advances the pixel location to the next selected pixel.
     *
     * @return  Returns \c true if the iterator advanced to the next selected
-    *          pixel.  If there are no more selected pixels within the extents,
-    *          the state of the iterator is equivalent to end() and \c false is
-    *          returned.
+    *          pixel or the BitMask is \c NULL.  If there are no more selected
+    *          pixels within the extents, the state of the iterator is equivalent
+    *          to end() and \c false is returned.
     *
     * @see     nextPixel(), operator++()
     */
@@ -197,7 +208,7 @@ public:
    /**
     * Creates an iterator that is ready to start traversing the BitMask.
     *
-    * @return  A valid iterator with the conditions set to the initial
+    * @return  Returns a valid iterator with the conditions set to the initial
     *          conditions of this iterator.
     */
    BitMaskIterator begin();
@@ -205,16 +216,57 @@ public:
    /**
     * Creates an iterator that has finished traversing the BitMask.
     *
-    * @return  An invalid iterator with invalid conditions to represent the end
+    * @return  Returns an invalid iterator with invalid conditions to represent the end
     *          of the BitMask.
     */
    BitMaskIterator end();
 
    /**
+    * Gets the number of rows contained within the extents over which the iterator iterates.
+    *
+    * @return  Returns the number of rows spanning the range of the bounding box.
+    *
+    * @see     getBoundingBox()
+    */
+   int getNumSelectedRows() const;
+
+   /**
+    * Gets the number of columns contained within the extents over which the iterator iterates.
+    *
+    * @return  Returns the number of columns spanning the range of the bounding box.
+    *
+    * @see     getBoundingBox()
+    */
+   int getNumSelectedColumns() const;
+
+   /**
+    * Gets the distance in pixels from the beginning of the extents to the first selected pixel in the BitMask.
+    *
+    * @return  Returns the offset in (column, row) coordinates from the beginning of the
+    *          extents to the first selected pixel in the BitMask. A default constructed
+    *          LocationType indicating no offset is returned in the following cases:
+    *             - The BitMask is \c NULL.
+    *             - The method BitMask::isOutsideSelected() returns \c true.
+    *
+    * @see     getBoundingBox()
+    */
+   LocationType getOffset() const;
+
+   /**
+    * Determines if the entire extents must be iterated over.
+    *
+    * @return  Returns \c true if every pixel within the extents is selected; otherwise
+    *          returns \c false.
+    *
+    * @see     getBoundingBox()
+    */
+   bool useAllPixels() const;
+
+   /**
     * Queries whether the current pixel is selected.
     *
-    * @return  Returns \c true if the current pixel is selected; otherwise
-    *          returns \c false.
+    * @return  Returns \c true if the current pixel is selected or the BitMask is \c NULL;
+    *          otherwise returns \c false.
     *
     * @see     getPixel(int,int) const, getPixel()
     */
@@ -246,6 +298,122 @@ public:
     */
    bool operator!=(const BitMaskIterator& other) const;
 
+   /**
+    * Gets the number of rows contained within the extents.
+    *
+    * @return  Returns the number of rows within the extents.
+    *
+    * @see     getNumSelectedRows(), getNumSelectedColumns()
+    */
+   int BitMaskIterator::getNumRows() const;
+
+   /**
+    * Gets the number of columns contained within the extents.
+    *
+    * @return  Returns the number of columns within the extents.
+    *
+    * @see     getNumSelectedRows(), getNumSelectedColumns()
+    */
+   int BitMaskIterator::getNumColumns() const;
+
+   /**
+    * Gets the starting row of the extents over which the iterator iterates.
+    *
+    * @return  Returns the starting row for iteration.  If the outside flag in
+    *          the underlying BitMask is on, this method returns the given parameter
+    *          of the extents set in the constructor.  The return value is zero-based
+    *          and inclusive.
+    *
+    * @see     getBoundingBox(), getBoundingBoxStartColumn()
+    */
+   int BitMaskIterator::getBoundingBoxStartRow() const;
+
+   /**
+    * Gets the starting column of the extents over which the iterator iterates.
+    *
+    * @return  Returns the starting column for iteration.  If the outside flag in
+    *          the underlying BitMask is on, this method returns the given parameter
+    *          of the extents set in the constructor.  The return value is zero-based
+    *          and inclusive.
+    *
+    * @see     getBoundingBox(), getBoundingBoxStartRow()
+    */
+   int BitMaskIterator::getBoundingBoxStartColumn() const;
+
+   /**
+    * Gets the ending row of the extents over which the iterator iterates.
+    *
+    * @return  Returns the ending row for iteration.  If the outside flag in
+    *          the underlying BitMask is on, this method returns the given parameter
+    *          of the extents set in the constructor.  The return value is zero-based
+    *          and inclusive.
+    *
+    * @see     getBoundingBox(), getBoundingBoxEndColumn()
+    */
+   int BitMaskIterator::getBoundingBoxEndRow() const;
+
+   /**
+    * Gets the ending column of the extents over which the iterator iterates.
+    *
+    * @return  Returns the ending column for iteration.  If the outside flag in
+    *          the underlying BitMask is on, this method returns the given parameter
+    *          of the extents set in the constructor.  The return value is zero-based
+    *          and inclusive.
+    *
+    * @see     getBoundingBox(), getBoundingBoxEndRow()
+    */
+   int BitMaskIterator::getBoundingBoxEndColumn() const;
+
+   /**
+    * Gets the distance in pixels from the beginning of the extents to the first selected pixel in the BitMask.
+    *
+    * @return  Returns the offset in row coordinates from the beginning of the
+    *          extents to the first selected pixel in the BitMask. A value of zero
+    *          indicating no offset is returned in the following cases:
+    *             - The BitMask is \c NULL.
+    *             - The method BitMask::isOutsideSelected() returns \c true.
+    *
+    * @see     getOffset(), getColumnOffset()
+    */
+   int BitMaskIterator::getRowOffset() const;
+
+   /**
+    * Gets the distance in pixels from the beginning of the extents to the first selected pixel in the BitMask.
+    *
+    * @return  Returns the offset in column coordinates from the beginning of the
+    *          extents to the first selected pixel in the BitMask. A value of zero
+    *          indicating no offset is returned in the following cases:
+    *             - The BitMask is \c NULL.
+    *             - The method BitMask::isOutsideSelected() returns \c true.
+    *
+    * @see     getOffset(), getRowOffset()
+    */
+   int BitMaskIterator::getColumnOffset() const;
+
+   /**
+    * Gets the row of the current pixel.
+    *
+    * @return  Returns the row of the current pixel location.  When an iterator is
+    *          constructed, its pixel row location is the row of the first selected
+    *          pixel. If no pixels are selected, the pixel row and column are -1,
+    *          which is equivalent to end().
+    *
+    * @see     getPixelColumnLocation()
+    */
+   int BitMaskIterator::getPixelRowLocation() const;
+
+   /**
+    * Gets the column of the current pixel.
+    *
+    * @return  Returns the column of the current pixel location.  When an iterator is
+    *          constructed, its pixel column location is the column of the first selected
+    *          pixel. If no pixels are selected, the pixel row and column are -1,
+    *          which is equivalent to end().
+    *
+    * @see     getPixelRowLocation()
+    */
+   int BitMaskIterator::getPixelColumnLocation() const;
+
 private:
    BitMaskIterator(BitMaskIterator, bool);
    void computeCount();
@@ -261,6 +429,10 @@ private:
    int mFirstPixelY;
    unsigned int mCurrentPixelCount;
    int mPixelCount;
+   int mMinX;
+   int mMinY;
+   int mMaxX;
+   int mMaxY;
 };
 
 #endif

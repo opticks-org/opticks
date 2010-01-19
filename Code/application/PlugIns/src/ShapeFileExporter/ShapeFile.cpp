@@ -17,6 +17,7 @@
 
 #include "AoiElement.h"
 #include "BitMask.h"
+#include "BitMaskIterator.h"
 #include "AppVerify.h"
 #include "DataElement.h"
 #include "DesktopServices.h"
@@ -27,6 +28,7 @@
 #include "PolygonObject.h"
 #include "PolylineObject.h"
 #include "Progress.h"
+#include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "ShapeFile.h"
 #include "UtilityServices.h"
@@ -142,52 +144,68 @@ vector<Feature*> ShapeFile::addFeatures(DataElement* pElement, RasterElement* pG
    {
       if (mShape == POINT_SHAPE)
       {
+         // The BitMaskIterator does not support negative extents and
+         // the BitMask does not correctly handle the outside flag so
+         // the BitMaskIterator is used for cases when the outside flag is true and
+         // the BitMask is used for cases when the outside flag is false
          const BitMask* pMask = pAoi->getSelectedPoints();
-         if ((pMask != NULL) && (pMask->getCount() > 0))
+         if (pMask != NULL)
          {
-            // Add features for each selected pixel
-            int startColumn = 0;
-            int endColumn = 0;
-            int startRow = 0;
-            int endRow = 0;
-            pMask->getBoundingBox(startColumn, startRow, endColumn, endRow);
-
-            LocationType pixel;
-            for (int i = startColumn; i <= endColumn; i++)
+            BitMaskIterator maskIt(pMask, pGeoref);
+            if ((maskIt.getCount() > 0 && pMask->isOutsideSelected() == true) ||
+               (pMask->getCount() > 0 && pMask->isOutsideSelected() == false))
             {
-               for (int j = startRow; j <= endRow; j++)
+               // Add features for each selected pixel
+               int startColumn = 0;
+               int endColumn = 0;
+               int startRow = 0;
+               int endRow = 0;
+               if (pMask->isOutsideSelected() == true)
                {
-                  if (pMask->getPixel(i, j))
+                  maskIt.getBoundingBox(startColumn, startRow, endColumn, endRow);
+               }
+               else
+               {
+                  pMask->getBoundingBox(startColumn, startRow, endColumn, endRow);
+               }
+               LocationType pixel;
+               for (int i = startColumn; i <= endColumn; i++)
+               {
+                  for (int j = startRow; j <= endRow; j++)
                   {
-                     // Add the feature
-                     Feature* pFeature = new Feature(mShape);
-                     if (pFeature != NULL)
+                     if ((maskIt.getPixel(i, j) && pMask->isOutsideSelected() == true) ||
+                           (pMask->getPixel(i, j) && pMask->isOutsideSelected() == false))
                      {
-                        features.push_back(pFeature);
-                        mFeatures.push_back(pFeature);
-                        pFeature->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &ShapeFile::shapeModified));
-
-                        pixel.mX = i + 0.5;
-                        pixel.mY = j + 0.5;
-
-                        // Fields
-                        pFeature->addField("Name", string());
-                        pFeature->addField("Pixel", string());
-
-                        if (!elementName.empty())
+                        // Add the feature
+                        Feature* pFeature = new Feature(mShape);
+                        if (pFeature != NULL)
                         {
-                           pFeature->setFieldValue("Name", elementName);
-                        }
+                           features.push_back(pFeature);
+                           mFeatures.push_back(pFeature);
+                           pFeature->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &ShapeFile::shapeModified));
 
-                        string pixelName = "";
-                        if (!pixelName.empty())
-                        {
-                           pFeature->setFieldValue("Pixel", pixelName);
-                        }
+                           pixel.mX = i + 0.5;
+                           pixel.mY = j + 0.5;
 
-                        // Vertex
-                        pixel = pGeoref->convertPixelToGeocoord(pixel);
-                        pFeature->addVertex(pixel.mY, pixel.mX);    // Longitude as x-coord
+                           // Fields
+                           pFeature->addField("Name", string());
+                           pFeature->addField("Pixel", string());
+
+                           if (!elementName.empty())
+                           {
+                              pFeature->setFieldValue("Name", elementName);
+                           }
+
+                           string pixelName = "";
+                           if (!pixelName.empty())
+                           {
+                              pFeature->setFieldValue("Pixel", pixelName);
+                           }
+
+                           // Vertex
+                           pixel = pGeoref->convertPixelToGeocoord(pixel);
+                           pFeature->addVertex(pixel.mY, pixel.mX);    // Longitude as x-coord
+                        }
                      }
                   }
                }
@@ -288,43 +306,59 @@ vector<Feature*> ShapeFile::addFeatures(DataElement* pElement, RasterElement* pG
       }
       else if (mShape == MULTIPOINT_SHAPE)
       {
+         // The BitMaskIterator does not support negative extents and
+         // the BitMask does not correctly handle the outside flag so
+         // the BitMaskIterator is used for cases when the outside flag is true and
+         // the BitMask is used for cases when the outside flag is false
          const BitMask* pMask = pAoi->getSelectedPoints();
-         if ((pMask != NULL) && (pMask->getCount() > 0))
+         if (pMask != NULL)
          {
-            // Add the feature
-            Feature* pFeature = new Feature(mShape);
-            if (pFeature != NULL)
+            BitMaskIterator maskIt(pMask, pGeoref);
+            if ((maskIt.getCount() > 0 && pMask->isOutsideSelected() == true) ||
+               (pMask->getCount() > 0 && pMask->isOutsideSelected() == false))
             {
-               features.push_back(pFeature);
-               mFeatures.push_back(pFeature);
-               pFeature->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &ShapeFile::shapeModified));
-
-               // Fields
-               pFeature->addField("Name", string());
-               if (!elementName.empty())
+               // Add the feature
+               Feature* pFeature = new Feature(mShape);
+               if (pFeature != NULL)
                {
-                  pFeature->setFieldValue("Name", elementName);
-               }
+                  features.push_back(pFeature);
+                  mFeatures.push_back(pFeature);
+                  pFeature->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &ShapeFile::shapeModified));
 
-               // Vertices
-               int startColumn = 0;
-               int endColumn = 0;
-               int startRow = 0;
-               int endRow = 0;
-               pMask->getBoundingBox(startColumn, startRow, endColumn, endRow);
-
-               LocationType pixel;
-               for (int i = startColumn; i <= endColumn; i++)
-               {
-                  for (int j = startRow; j <= endRow; j++)
+                  // Fields
+                  pFeature->addField("Name", string());
+                  if (!elementName.empty())
                   {
-                     if (pMask->getPixel(i, j))
-                     {
-                        pixel.mX = i + 0.5;
-                        pixel.mY = j + 0.5;
-                        pixel = pGeoref->convertPixelToGeocoord(pixel);
+                     pFeature->setFieldValue("Name", elementName);
+                  }
 
-                        pFeature->addVertex(pixel.mY, pixel.mX);    // Longitude as x-coord
+                  // Vertices
+                  int startColumn = 0;
+                  int endColumn = 0;
+                  int startRow = 0;
+                  int endRow = 0;
+                  if (pMask->isOutsideSelected() == true)
+                  {
+                     maskIt.getBoundingBox(startColumn, startRow, endColumn, endRow);
+                  }
+                  else
+                  {
+                     pMask->getBoundingBox(startColumn, startRow, endColumn, endRow);
+                  }
+                  LocationType pixel;
+                  for (int i = startColumn; i <= endColumn; i++)
+                  {
+                     for (int j = startRow; j <= endRow; j++)
+                     {
+                        if ((maskIt.getPixel(i, j) && pMask->isOutsideSelected() == true) ||
+                           (pMask->getPixel(i, j) && pMask->isOutsideSelected() == false))
+                        {
+                           pixel.mX = i + 0.5;
+                           pixel.mY = j + 0.5;
+                           pixel = pGeoref->convertPixelToGeocoord(pixel);
+
+                           pFeature->addVertex(pixel.mY, pixel.mX);    // Longitude as x-coord
+                        }
                      }
                   }
                }

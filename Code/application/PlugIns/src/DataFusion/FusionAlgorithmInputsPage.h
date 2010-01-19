@@ -47,7 +47,8 @@ public:
    bool flicker() const;
    bool openOverlayTools() const;
 
-   bool getRoiBoundingBox(int& x1, int& y1, int& x2, int& y2) const;
+   bool getRoiBoundingBox(int& x1, int& y1, int& x2, int& y2,
+      int rasterBbX1, int rasterBbY1, int rasterBbX2, int rasterBbY2) const;
 
    bool inMemory() const;
 

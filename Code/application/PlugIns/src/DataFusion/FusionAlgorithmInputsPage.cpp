@@ -17,6 +17,7 @@
 #include "AoiLayer.h"
 #include "AppVerify.h"
 #include "BitMask.h"
+#include "BitMaskIterator.h"
 #include "ColorType.h"
 #include "DesktopServices.h"
 #include "FusionAlgorithmInputsPage.h"
@@ -274,7 +275,9 @@ bool FusionAlgorithmInputsPage::openOverlayTools() const
    return mpRunOverlayOption != NULL && mpRunOverlayOption->isChecked();
 }
 
-bool FusionAlgorithmInputsPage::getRoiBoundingBox(int& x1, int& y1, int& x2, int& y2) const
+bool FusionAlgorithmInputsPage::getRoiBoundingBox(int& x1, int& y1, int& x2, int& y2,
+                                                  int rasterBbX1, int rasterBbY1,
+                                                  int rasterBbX2, int rasterBbY2) const
 {
    bool success = false;
    if (mpAoiLayer != NULL)
@@ -283,7 +286,8 @@ bool FusionAlgorithmInputsPage::getRoiBoundingBox(int& x1, int& y1, int& x2, int
       VERIFY(pAoi != NULL); // the AOI's DataElement should always be an AOI
       const BitMask* pMask = pAoi->getSelectedPoints();
       VERIFY(pMask != NULL); // an AOI should always have a valid BitMask
-      pMask->getBoundingBox(x1, y1, x2, y2);
+      BitMaskIterator maskIter(pMask, rasterBbX1, rasterBbY1, rasterBbX2, rasterBbY2);
+      maskIter.getBoundingBox(x1, y1, x2, y2);
       success = true;
    }
    return success;

@@ -646,11 +646,16 @@ void DataFusionDlg::fuse()
          zoomFactor = 10;
       }
 
+      const RasterDataDescriptor* pDescriptor =
+         dynamic_cast<const RasterDataDescriptor*>(pPrimaryRaster->getDataDescriptor());
+      VERIFYNR(pDescriptor != NULL);
       int x1;
       int y1;
       int x2;
       int y2;
-      if (mpInputsPage->getRoiBoundingBox(x1, y1, x2, y2) == false)
+      if (mpInputsPage->getRoiBoundingBox(x1, y1, x2, y2,
+         0, 0, pDescriptor->getColumnCount() - 1,
+         pDescriptor->getRowCount() - 1) == false)
       {
          string msg = "ERROR DataFusionDlg: No AOI Layer or AOI was found for the primary image."
             " Perhaps you deleted or hid the layer?";
@@ -1132,7 +1137,12 @@ bool DataFusionDlg::copyLayersToView(SpatialDataView& view, int scaleFactor) con
    int y1;
    int x2;
    int y2;
-   mpInputsPage->getRoiBoundingBox(x1, y1, x2, y2);
+   const RasterDataDescriptor* pDescriptor = 
+      dynamic_cast<const RasterDataDescriptor*>
+      (pPrimaryView->getLayerList()->getPrimaryRasterElement()->getDataDescriptor());
+   VERIFY(pDescriptor != NULL);
+   mpInputsPage->getRoiBoundingBox(x1, y1, x2, y2, 0, 0, pDescriptor->getColumnCount() - 1,
+      pDescriptor->getRowCount() - 1);
 
    LocationType delta(x1, y1);
 
