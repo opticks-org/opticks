@@ -15,7 +15,9 @@
 
 #include <string>
 
+class OverviewWindow;
 class SpatialDataView;
+class View;
 
 class SpatialDataWindowImp : public WorkspaceWindowImp
 {
@@ -33,7 +35,6 @@ public:
    WindowType getWindowType() const;
    using WorkspaceWindowImp::setName;
 
-   View* createView(const QString& strViewName, const ViewType& viewType);
    void setWidget(QWidget* pWidget);
 
    SpatialDataView* getSpatialDataView() const;
@@ -44,6 +45,9 @@ public:
 
 signals:
    void overviewVisibilityChanged(bool bVisible);
+
+protected:
+   virtual bool setView(View* pView);
 
 private:
    OverviewWindow* mpOverview;

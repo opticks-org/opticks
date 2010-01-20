@@ -9,28 +9,25 @@
 
 #include "ApplicationServices.h"
 #include "AppVersion.h"
-#include "ViewWindowImp.h"
-#include "DesktopServicesImp.h"
+#include "DesktopServices.h"
 #include "PrintPixmap.h"
 #include "SessionManagerImp.h"
 #include "SystemServicesImp.h"
 #include "View.h"
 #include "ViewImp.h"
+#include "ViewWindowImp.h"
 #include "xmlreader.h"
 
 XERCES_CPP_NAMESPACE_USE
-
 using namespace std;
 
 ViewWindowImp::ViewWindowImp(const string& id, const string& windowName) :
-   WindowImp(id, windowName)
-{
-   mpView = NULL;
-}
+   WindowImp(id, windowName),
+   mpView(NULL)
+{}
 
 ViewWindowImp::~ViewWindowImp()
-{
-}
+{}
 
 const string& ViewWindowImp::getObjectType() const
 {
@@ -55,13 +52,20 @@ View* ViewWindowImp::createView(const QString& strViewName, const ViewType& view
       return NULL;
    }
 
-   DesktopServices* pDesktop = DesktopServicesImp::instance();
-   if (pDesktop != NULL)
+   Service<DesktopServices> pDesktop;
+
+   View* pView = pDesktop->createView(strViewName.toStdString(), viewType);
+   if (pView != NULL)
    {
-      mpView = pDesktop->createView(strViewName.toStdString(), viewType);
+      if (setView(pView) == true)
+      {
+         return pView;
+      }
+
+      pDesktop->deleteView(pView);
    }
 
-   return mpView;
+   return NULL;
 }
 
 View* ViewWindowImp::getView() const
@@ -97,21 +101,15 @@ void ViewWindowImp::print(bool bSetupDialog)
    // Print the image
    if (windowPixmap.isNull() == false)
    {
-      QWidget* pParent = NULL;
-
-      DesktopServices* pDesktop = DesktopServicesImp::instance();
-      if (pDesktop != NULL)
-      {
-         pParent = pDesktop->getMainWidget();
-      }
-
-      PrintPixmap(windowPixmap, bSetupDialog, pParent);
+      Service<DesktopServices> pDesktop;
+      PrintPixmap(windowPixmap, bSetupDialog, pDesktop->getMainWidget());
    }
 }
 
-void ViewWindowImp::setView(View *pView)
+bool ViewWindowImp::setView(View* pView)
 {
    mpView = pView;
+   return true;
 }
 
 bool ViewWindowImp::toXml(XMLWriter* pXml) const
@@ -145,9 +143,10 @@ bool ViewWindowImp::fromXml(DOMNode* pDocument, unsigned int version)
    DOMElement* pElement = static_cast<DOMElement*>(pDocument);
    if (pElement->hasAttribute(X("viewId")))
    {
-      Service<DesktopServices>()->deleteView(mpView);
+      View* pOldView = mpView;
       setView(dynamic_cast<View*>(SessionManagerImp::instance()->getSessionItem(
          A(pElement->getAttribute(X("viewId"))))));
+      Service<DesktopServices>()->deleteView(pOldView);
    }
    else
    {

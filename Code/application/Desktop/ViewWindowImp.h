@@ -41,7 +41,7 @@ public:
    bool fromXml(DOMNode* pDocument, unsigned int version);
 
 protected:
-   void setView(View *pView);
+   virtual bool setView(View* pView);
 
 private:
    View* mpView;

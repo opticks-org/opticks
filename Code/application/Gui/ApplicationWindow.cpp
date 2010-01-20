@@ -1413,21 +1413,6 @@ bool ApplicationWindow::addWindow(Window* pWindow)
       setMouseMode(pMouseModeAction);
    }
 
-   SpatialDataWindow* pSpatialDataWindow = dynamic_cast<SpatialDataWindow*>(pWindow);
-   if (pSpatialDataWindow != NULL)
-   {
-      SpatialDataViewImp* pView = dynamic_cast<SpatialDataViewImp*>(pSpatialDataWindow->getSpatialDataView());
-      if ((pView != NULL) && (m_pHistogram != NULL))
-      {
-         VERIFYNR(connect(pView, SIGNAL(layerAdded(Layer*)), static_cast<HistogramWindowImp*>(m_pHistogram),
-            SLOT(createPlot(Layer*))));
-         VERIFYNR(connect(pView, SIGNAL(layerActivated(Layer*)), static_cast<HistogramWindowImp*>(m_pHistogram),
-            SLOT(setCurrentPlot(Layer*))));
-         VERIFYNR(connect(pView, SIGNAL(layerDeleted(Layer*)), static_cast<HistogramWindowImp*>(m_pHistogram),
-            SLOT(deletePlot(Layer*))));
-      }
-   }
-
    ViewWindow* pViewWindow = dynamic_cast<ViewWindow*>(pWindow);
    if (pViewWindow != NULL)
    {

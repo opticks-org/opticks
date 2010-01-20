@@ -7,10 +7,12 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "SpatialDataWindowImp.h"
 #include "ChippingWindow.h"
+#include "DesktopServices.h"
+#include "HistogramWindowImp.h"
 #include "OverviewWindow.h"
 #include "SpatialDataViewImp.h"
+#include "SpatialDataWindowImp.h"
 #include "View.h"
 
 using namespace std;
@@ -49,16 +51,6 @@ bool SpatialDataWindowImp::isKindOf(const string& className) const
 WindowType SpatialDataWindowImp::getWindowType() const
 {
    return SPATIAL_DATA_WINDOW;
-}
-
-View* SpatialDataWindowImp::createView(const QString& strViewName, const ViewType& viewType)
-{
-   if (getView() == NULL)
-   {
-      return WorkspaceWindowImp::createView(strViewName, viewType);
-   }
-
-   return NULL;
 }
 
 void SpatialDataWindowImp::setWidget(QWidget* pWidget)
@@ -117,4 +109,35 @@ bool SpatialDataWindowImp::isOverviewWindowShown() const
    }
 
    return bShown;
+}
+
+bool SpatialDataWindowImp::setView(View* pView)
+{
+   SpatialDataViewImp* pOldView = dynamic_cast<SpatialDataViewImp*>(getView());
+
+   bool success = WorkspaceWindowImp::setView(pView);
+   if (success == true)
+   {
+      Service<DesktopServices> pDesktop;
+      HistogramWindowImp* pHistWindow =
+         dynamic_cast<HistogramWindowImp*>(pDesktop->getWindow("Histogram Window", PLOT_WINDOW));
+      VERIFY(pHistWindow != NULL);
+
+      if (pOldView != NULL)
+      {
+         VERIFYNR(disconnect(pOldView, SIGNAL(layerAdded(Layer*)), pHistWindow, SLOT(createPlot(Layer*))));
+         VERIFYNR(disconnect(pOldView, SIGNAL(layerActivated(Layer*)), pHistWindow, SLOT(setCurrentPlot(Layer*))));
+         VERIFYNR(disconnect(pOldView, SIGNAL(layerDeleted(Layer*)), pHistWindow, SLOT(deletePlot(Layer*))));
+      }
+
+      SpatialDataViewImp* pNewView = dynamic_cast<SpatialDataViewImp*>(pView);
+      if (pNewView != NULL)
+      {
+         VERIFYNR(connect(pNewView, SIGNAL(layerAdded(Layer*)), pHistWindow, SLOT(createPlot(Layer*))));
+         VERIFYNR(connect(pNewView, SIGNAL(layerActivated(Layer*)), pHistWindow, SLOT(setCurrentPlot(Layer*))));
+         VERIFYNR(connect(pNewView, SIGNAL(layerDeleted(Layer*)), pHistWindow, SLOT(deletePlot(Layer*))));
+      }
+   }
+
+   return success;
 }
