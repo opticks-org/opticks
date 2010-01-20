@@ -1511,6 +1511,11 @@ bool PlotWidgetImp::fromXml(DOMNode* pDocument, unsigned int version)
       }
    }
 
+   if ((mpAnnotationToolBar->getAnnotationLayer() != NULL) && (mpAnnotationToolBar->isEnabled() == false))
+   {
+      mpAnnotationToolBar->setEnabled(true);
+   }
+
    return true;
 }
 
