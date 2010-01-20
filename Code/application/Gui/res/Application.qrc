@@ -53,10 +53,12 @@
    <file alias="Close">icons/CloseIcon.png</file>
    <file alias="Column">icons/ColumnIcon.png</file>
    <file alias="Copy">icons/CopyIcon.png</file>
+   <file alias="CreateFilter">icons/CreateFilterIcon.png</file>
    <file alias="Critical">icons/CriticalIcon.png</file>
    <file alias="Cut">icons/CutIcon.png</file>
    <file alias="DataProperties">icons/DataPropertiesIcon.png</file>
    <file alias="Decrease">icons/DecreaseIcon.png</file>
+   <file alias="DeleteFilter">icons/DeleteFilterIcon.png</file>
    <file alias="Delete">icons/DeleteIcon.png</file>
    <file alias="Desktop">icons/DesktopIcon.png</file>
    <file alias="DirectionBackward">icons/DirectionBackwardIcon.png</file>
@@ -66,6 +68,7 @@
    <file alias="DistributeVertically">icons/DistributeVerticallyIcon.png</file>
    <file alias="DrawPixel">icons/DrawPixelIcon.png</file>
    <file alias="EastArrow">icons/EastArrowIcon.png</file>
+   <file alias="EditFilter">icons/EditFilterIcon.png</file>
    <file alias="Edit">icons/EditIcon.png</file>
    <file alias="Ellipse">icons/EllipseIcon.png</file>
    <file alias="EraseAll">icons/EraseAllIcon.png</file>

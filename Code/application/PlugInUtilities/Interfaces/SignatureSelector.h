@@ -12,7 +12,7 @@
 
 #include <QtCore/QRegExp>
 #include <QtCore/QStringList>
-#include <QtGui/QComboBox>
+#include <QtGui/QAction>
 #include <QtGui/QDialog>
 #include <QtGui/QLayout>
 #include <QtGui/QListWidget>
@@ -21,53 +21,62 @@
 #include <QtGui/QTreeWidgetItem>
 
 #include "ModelServices.h"
-#include "ObjectFactory.h"
 #include "PlugInManagerServices.h"
 #include "UtilityServices.h"
 
-#include <map>
+#include <string>
 #include <vector>
 
 class DynamicObject;
 class Progress;
 class SearchDlg;
 class Signature;
+class SignatureSet;
 
 /**
  *  A dialog to import and select signatures.
  *
- *  The signature selector is a dialog that allows users to select one or more Signature
- *  objects from a list.  The dialog displays a list of signatures that the user can
- *  adjust to filter out some of the signature methods.  The available filters are as
- *  follows:
- *  - <b>All Signatures:</b>  All Signature objects loaded into the data model are
- *    displayed.
- *  - <b>%AOI:</b>  All AOI objects loaded into the data model are displayed, since a
- *    Signature object can be derived from an AOI object.
- *  - <b>Metadata:</b>  Signature objects loaded into the data model that pass user
- *    specified metadata search parameters are displayed.
+ *  The signature selector is a dialog that allows users to select one or more
+ *  signatures from a list.  The dialog displays a list of signatures containing
+ *  all Signature objects currently loaded into the data model. The user has the
+ *  option of creating one or more filters that will reduce the number of
+ *  signatures displayed in the list.  Filters can be created based on any
+ *  combination of the following signature attributes:
+ *  - %Signature Name
+ *  - Metadata Attribute Name
+ *  - Metadata Attribute Value
  *
- *  The first two filters are automatically populated when the filter is activated.  If
- *  the user does not find the desired signature(s) in the list, an Import button is
- *  provided for the user to import one or more signatures while the dialog remains
- *  active.
+ *  When creating the filter, wildcarding and case sensitivity options can be
+ *  set separately on each of the filter criteria listed above.  The filter can
+ *  also be applied to signature libraries as a whole, or to the individual
+ *  signatures contained within the library.
  *
- *  When the user clicks the Import button, the dialog is expanded to contain a separate
- *  list of signature files from which the user can select one or more signatures to
- *  import.  After import, the main signature list is updated appropriately.
+ *  If the user does not find the desired signature(s) in the list, an Import
+ *  button is provided for the user to import one or more signatures while the
+ *  dialog remains active.
  *
- *  On signature import, the user can browse the disk for one or more signature files in
- *  a single directory or the user can search one or more directories for recognized
- *  signature files.  The user can also apply a metadata filter when searching directories
- *  for signatures to import.
+ *  When the user clicks the Import button, the dialog is expanded to contain a
+ *  separate list of signature files from which the user can select one or more
+ *  signatures to import.  After import, the main signature list is updated
+ *  appropriately.
  *
- *  When a single signature in the main signature list is selected, the user can view
- *  the signature's properties by clicking on the Properties button in the dialog.
+ *  On signature import, the user can browse the disk for one or more signature
+ *  files in a single directory or the user can search one or more directories
+ *  for recognized signature files.
  *
- *  The dialog contains an Apply button so that the dialog can be modal or modeless as
- *  necessary.  The Apply button is only added to a modeless instantiation of the dialog.
+ *  When a single signature in the main signature list is selected, the user can
+ *  view the signature's properties by clicking on the %Properties button in the
+ *  dialog.
  *
- *  @see        AoiElement, Signature
+ *  By default, the dialog contains OK and Cancel buttons.  For modeless
+ *  instantiations of the dialog an Apply button can be added by setting the
+ *  appropriate parameter in the constructor.  When the dialog contains an Apply
+ *  button, it can be enabled and disabled by calling enableApplyButton().  A
+ *  custom button can also be added to the dialog by passing the button text
+ *  into the constructor.  When the dialog contains a custom button, it can be
+ *  enabled and displayed by calling enableCustomButton().
+ *
+ *  @see        Signature, SignatureSet
  */
 class SignatureSelector : public QDialog
 {
@@ -77,23 +86,24 @@ public:
    /**
     *  Creates the signature selector dialog.
     *
-    *  The constructor creates the widgets and initializes signature list based on the
-    *  "All Signatures" filter.
+    *  The constructor creates the widgets and initializes the signature list
+    *  based on all loaded signatures in the data model.
     *
     *  @param   pProgress
-    *           An optional Progress object that is used when searching for signatures
-    *           to import.
-    *  @param   parent
-    *           The parent widget.
+    *           An optional Progress object that is used when searching for
+    *           signatures to import.
+    *  @param   pParent
+    *           The dialog's parent widget.
     *  @param   mode
     *           The selection mode to be used for the list of signatures.
     *  @param   addApply
     *           If \c true, an Apply button will appear.
     *  @param   customButtonLabel
-    *           Label that will appear on the custom button. The custom button will only be
-    *           added to the dialog if \c customButtonLabel is not empty.
+    *           Label that will appear on the custom button.  The custom button
+    *           will only be added to the dialog if \c customButtonLabel is not
+    *           empty.
     */
-   SignatureSelector(Progress* pProgress, QWidget* parent = 0,
+   SignatureSelector(Progress* pProgress, QWidget* pParent = NULL,
       QAbstractItemView::SelectionMode mode = QAbstractItemView::ExtendedSelection, bool addApply = false,
       const std::string& customButtonLabel = std::string());
 
@@ -105,10 +115,13 @@ public:
    /**
     *  Returns a vector of currently selected signatures.
     *
-    *  This method returns a vector of all selected signature objects in the list view.
-    *  If a signature set is selected, only the SignatureSet object is added to the
-    *  vector.  To obtain a vector of all Signature objects inside a selected SignatureSet
-    *  object, use the getExtractedSignatures() method instead.
+    *  This method returns a vector of all selected signatures in the list view.
+    *  If a signature set is selected, only the SignatureSet object is added to
+    *  the vector.  %Any selected signatures contained in the selected signature
+    *  set are not added to the vector.
+    *
+    *  To obtain a vector that includes Signature objects inside a selected
+    *  SignatureSet object, call getExtractedSignatures() instead.
     *
     *  @return  A vector of the selected Signature objects.
     */
@@ -117,14 +130,21 @@ public:
    /**
     *  Returns a vector of currently selected signatures.
     *
-    *  This method returns a vector of each individual Signature object based on the
-    *  selected items in the list view.  If a signature set is selected, the SignatureSet
-    *  object is not added to the vector, but all individual Signature objects inside the
-    *  SignatureSet object.  To obtain a vector of just the selected signature objects,
-    *  use the getSignatures() method instead.
+    *  This method returns a vector of each individual signature based on the
+    *  selected items in the list view.  If a signature set is selected, the
+    *  SignatureSet object is not added to the vector, but each individual
+    *  signature contained in the SignatureSet object is added.  Signatures
+    *  contained inside a selected signature set are only added to the vector
+    *  once, regardless of whether or not the signature inside the selected
+    *  signature set is also selected.  If signatures are filtered out of a
+    *  selected signature set object, only the signatures in the set that pass
+    *  the filter are added to the vector.
     *
-    *  @return  A vector containing the individual Signature objects from the selected
-    *           signature items in the list view.
+    *  To obtain a vector of just the selected signature and signature set
+    *  objects, call getSignatures() instead.
+    *
+    *  @return  A vector containing the individual Signature objects based on
+    *           the selected items in the list view.
     */
    std::vector<Signature*> getExtractedSignatures() const;
 
@@ -162,17 +182,18 @@ signals:
 
 protected:
    /**
-    *  Add an entry to the signature format combo box.
+    *  Adds a top-level item to the signature display format tree widget.
     *
     *  This is used by subclasses to add custom signature types. In addition to
-    *  calling this method, a subclass will usually need to implement updateSignatureList() to
-    *  populate the signature list when the custom type is selected. Second, getSignatures() will
-    *  need to be implemented to return the selected signature when the custom type is selected.
+    *  calling this method, a subclass will usually need to implement
+    *  updateSignatureList() to populate the signature list when the custom type
+    *  is selected. Also, getSignatures() will need to be implemented to return
+    *  the selected signature when the custom type is selected.
     *
     *  @param type
     *         The type name to add.
     */
-   void addCustomType(const QString &type);
+   void addCustomType(const QString& type);
 
    /**
     *  Access the current signature format type.
@@ -183,11 +204,12 @@ protected:
 
    /**
     *  Access the signature list.
+    *
     *  Used to add items to the signature list when a custom format type is selected.
     *
     *  @return The signature list.
     */
-   QTreeWidget *getSignatureList() const;
+   QTreeWidget* getSignatureList() const;
 
    /**
     *  Returns the widget layout in the dialog.
@@ -209,7 +231,7 @@ protected:
    void setNameText(const QString& strName);
 
    /**
-    *  Returns the number of selected items in the list view.
+    *  Returns the number of selected items in the signature list.
     *
     *  This method returns the current number of selected items in the list view.  This
     *  does not necessarily equal the number of selected signatures returned by
@@ -222,27 +244,31 @@ protected:
    /**
     *  Enables or disables the Apply button.
     *
-    *  This method enables or disables the Apply button if the dialog is a modeless dialog.
-    *  This method does nothing if the dialog is created as a modal dialog.
+    *  This method enables or disables the Apply button if the dialog was
+    *  set to contain an Apply button in the constructor.  When the dialog is
+    *  created with an Apply button, it is disabled by default.  This method
+    *  does nothing if the dialog is created without an Apply button.
     *
     *  @param   enable
-    *           Set this parameter to \c true to enable the Apply button or to \c false to
-    *           disable the Apply button.
+    *           Set this parameter to \c true to enable the Apply button or to
+    *           \c false to disable the Apply button.
     *
     *  @see     isApplyButtonEnabled()
     */
    void enableApplyButton(bool enable);
 
    /**
-   *  Enables or disables the custom button.
-   *
-   *  This method enables or disables the custom button. It allows a derived class to control
-   *  enabling/disabling of the custom button. The button is initially enabled by default.
-   *
-   *  @param   enable
-   *           Set this parameter to \c true to enable the custom button or to \c false to
-   *           disable the custom button.
-   */
+    *  Enables or disables the custom button.
+    *
+    *  This method enables or disables the custom button if the dialog was
+    *  set to contain a custom button in the constructor.  When the dialog is
+    *  created with a custom button, it is enabled by default.  This method does
+    *  nothing if the dialog is created without a custom button.
+    *
+    *  @param   enable
+    *           Set this parameter to \c true to enable the custom button or to
+    *           \c false to disable the custom button.
+    */
    void enableCustomButton(bool enable);
 
 protected slots:
@@ -260,25 +286,33 @@ protected slots:
    virtual void apply();
 
    /**
-    *  Sets the display filter for the signature list view.
+    *  Sets the format type that is used to display signatures in the list.
     *
-    *  This method updates the signature list view to display different signature items.  See
-    *  the SignatureSelector class documentation for a description of the items that are
-    *  displayed in each type.
+    *  This method updates the signature list to display different sets of
+    *  signatures.  By default, "Signatures" and the names of any created
+    *  filters are available format types.  Custom format types are also
+    *  available if they have been added by calling addCustomType().
+    *
+    *  @warning To maintain compatibility with earlier versions, the following
+    *           strings are special types that perform special behavior.
+    *           Support for these strings may be removed in a future release, so
+    *           they should not be used in any new code.
+    *           - "Metadata..." - Invokes a dialog to create a new filter.  This
+    *             is identical to clicking on the Create Filter button.
+    *           - "-----------------------" - Sets the current display type to
+    *             the top-level "Signatures" item.  This is identical to
+    *             selecting the "Signatures" item directly.
     *
     *  @param   strFormat
-    *           The new format type for the signature list view.  Valid strings are as follows:
-    *           - "All Signatures"
-    *           - "AOI"
-    *           - "Metadata..."
+    *           The display format type for the signature list.
     */
    void setDisplayType(const QString& strFormat);
 
    /**
-    *  Enables or disables the Properties and Unload buttons.
+    *  Enables or disables the %Properties, Export, and Delete buttons.
     *
-    *  This method enables or disabled the Properties and Unload buttons based on the number
-    *  of selected signature items in the list view.
+    *  This method enables or disables the %Properties, Export, and Delete
+    *  buttons based on the number of selected signature items in the list.
     */
    void enableButtons();
 
@@ -287,7 +321,7 @@ protected slots:
     *
     *  This method invokes an instance of a SignaturePropertiesDlg for the first selected
     *  signature item in the list view.  This method is called automatically when the user
-    *  clicks the Properties button.
+    *  clicks the %Properties button.
     */
    void displaySignatureProperties();
 
@@ -299,9 +333,9 @@ protected slots:
    /**
     *  Destroys currently selected signatures.
     *
-    *  This method destroys all Signature objects in the data model from all currently
-    *  selected signature items in the list view.  This method is called automatically when
-    *  the user clicks the Unload button.
+    *  This method destroys Signature objects in the data model from all
+    *  currently selected signature items in the list view.  This method is
+    *  called automatically when the user clicks the Delete button.
     */
    void unloadSignatures();
 
@@ -357,8 +391,8 @@ protected slots:
     *  Performs tasks associated with the custom button.
     *
     *  This slot method displays a QMessageBox stating that the actions for the custom
-    *  button have not been set up. Classes derived from SignatureSelector need to overload
-    *  this method with the actions for their custom button. 
+    *  button have not been set up. Classes derived from SignatureSelector need to override
+    *  this method with the actions for their custom button.
     */
    virtual void customButtonClicked();
 
@@ -366,15 +400,20 @@ private:
    Progress* mpProgress;
    Service<PlugInManagerServices> mpManager;
    Service<ModelServices> mpModel;
-   Service<ObjectFactory> mpObjFact;
-   Service<UtilityServices> mpUtilities;
 
-   QComboBox* mpFormatCombo;
+   static const QString sMetadataType;
+   static const QString sDashType;
+
+   QTreeWidget* mpFormatTree;
+   QTreeWidgetItem* mpSignaturesItem;
    QTreeWidget* mpSignatureList;
+   QAction* mpCreateFilterAction;
+   QAction* mpEditFilterAction;
+   QAction* mpDeleteFilterAction;
+   QAction* mpPropertiesAction;
+   QAction* mpExportAction;
+   QAction* mpDeleteAction;
    QGridLayout* mpEmptyLayout;
-   QPushButton* mpPropertiesButton;
-   QPushButton* mpExportButton;
-   QPushButton* mpUnloadButton;
    QPushButton* mpImportButton;
    QPushButton* mpApplyButton;
    QPushButton* mpCustomButton;
@@ -382,12 +421,29 @@ private:
    QListWidget* mpFilesList;
 
    QStringList mImporterFilters;
-   std::map<QTreeWidgetItem*, Signature*> mLoadedSignatures;
    SearchDlg* mpSearchDlg;
 
-private:
-   QTreeWidgetItem* addSignatureItem(Signature* pSignature, QTreeWidgetItem* pParentItem = NULL);
-   bool searchForMetadata(const DynamicObject* pMetadata, const QRegExp& nameFilter, const QRegExp& valueFilter);
+   void addSignature(Signature* pSignature);
+   QTreeWidgetItem* createSignatureItem(Signature* pSignature, QTreeWidgetItem* pParentItem = NULL,
+      bool createLibraryItems = false);
+   void createLibraryItems(SignatureSet* pSignatureSet, QTreeWidgetItem* pParentItem,
+      const QRegExp& signatureNameFilter, const QRegExp& metadataNameFilter, const QRegExp& metadataValueFilter);
+   bool matchLibrarySignatures(const SignatureSet* pSignatureSet, const QRegExp& signatureNameFilter,
+      const QRegExp& metadataNameFilter, const QRegExp& metadataValueFilter);
+   bool matchSignature(const Signature* pSignature, const QRegExp& signatureNameFilter,
+      const QRegExp& metadataNameFilter, const QRegExp& metadataValueFilter);
+   bool matchMetadata(const DynamicObject* pMetadata, const QRegExp& nameFilter, const QRegExp& valueFilter);
+   void extractFromSigSets(const std::vector<Signature*>& sourceSigs, std::vector<Signature*>& destSigs) const;
+   bool isFilterNameUnique(const QString& filterName, QTreeWidgetItem* pIgnoreItem = NULL) const;
+
+private slots:
+   void createFilter();
+   void editFilter();
+   void checkFilterName(QTreeWidgetItem* pItem, int column);
+   void deleteFilter();
+   void formatChanged();
+   void displayFormatContextMenu(const QPoint& menuPoint);
+   void displaySignatureContextMenu(const QPoint& menuPoint);
 };
 
 #endif

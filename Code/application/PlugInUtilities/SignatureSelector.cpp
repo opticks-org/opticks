@@ -8,52 +8,56 @@
  */
 
 #include <QtCore/QFileInfo>
+#include <QtCore/QMap>
 #include <QtGui/QFileDialog>
 #include <QtGui/QHeaderView>
 #include <QtGui/QLabel>
+#include <QtGui/QMenu>
 #include <QtGui/QMessageBox>
-#include <QtGui/QPixmap>
+#include <QtGui/QSplitter>
+#include <QtGui/QToolButton>
 
-#include "ApplicationServices.h"
 #include "DesktopServices.h"
 #include "DynamicObject.h"
-#include "Importer.h"
-#include "MetadataFilterDlg.h"
-#include "ModelServices.h"
-#include "ObjectFactory.h"
 #include "ObjectResource.h"
-#include "PlugIn.h"
 #include "PlugInDescriptor.h"
-#include "PlugInManagerServices.h"
 #include "PlugInResource.h"
 #include "Progress.h"
 #include "SearchDlg.h"
 #include "Signature.h"
+#include "SignatureFilterDlg.h"
 #include "SignaturePropertiesDlg.h"
 #include "SignatureSelector.h"
 #include "SignatureSet.h"
-#include "UtilityServices.h"
 
-#include <string>
 using namespace std;
 
-SignatureSelector::SignatureSelector(Progress* pProgress, QWidget* parent,
-                                     QAbstractItemView::SelectionMode mode,
-                                     bool addApply,
-                                     const string& customButtonLabel) :
-   QDialog(parent),
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : These special cases for the display format type " \
+   "should be removed when functional compatibility can be broken (dsulgrov)")
+const QString SignatureSelector::sMetadataType = "Metadata...";
+const QString SignatureSelector::sDashType = "-----------------------";
+
+SignatureSelector::SignatureSelector(Progress* pProgress, QWidget* pParent, QAbstractItemView::SelectionMode mode,
+                                     bool addApply, const string& customButtonLabel) :
+   QDialog(pParent),
    mpProgress(pProgress),
    mpApplyButton(NULL),
-   mpCustomButton(NULL),
-   mpSearchDlg(NULL)
+   mpCustomButton(NULL)
 {
    // Display format
-   QLabel* pSignaturesLabel = new QLabel("Signatures:", this);
-   mpFormatCombo = new QComboBox(this);
-   mpFormatCombo->setEditable(false);
-   mpFormatCombo->addItem("All Signatures");
-   mpFormatCombo->addItem("-----------------------");
-   mpFormatCombo->addItem("Metadata...");
+   mpFormatTree = new QTreeWidget(this);
+   mpFormatTree->setContextMenuPolicy(Qt::CustomContextMenu);
+   mpFormatTree->setSelectionMode(QAbstractItemView::SingleSelection);
+   mpFormatTree->setSelectionBehavior(QAbstractItemView::SelectItems);
+   mpFormatTree->setEditTriggers(QAbstractItemView::EditKeyPressed);
+   mpFormatTree->setRootIsDecorated(true);
+   mpFormatTree->setSortingEnabled(false);
+   mpFormatTree->setHeaderHidden(true);
+
+   mpSignaturesItem = new QTreeWidgetItem(mpFormatTree);
+   mpSignaturesItem->setText(0, "Signatures");
+   mpSignaturesItem->setSelected(true);
+   mpFormatTree->setCurrentItem(mpSignaturesItem);
 
    // Signature list
    QStringList columnNames;
@@ -61,6 +65,7 @@ SignatureSelector::SignatureSelector(Progress* pProgress, QWidget* parent,
    columnNames.append("Location");
 
    mpSignatureList = new QTreeWidget(this);
+   mpSignatureList->setContextMenuPolicy(Qt::CustomContextMenu);
    mpSignatureList->setColumnCount(columnNames.count());
    mpSignatureList->setHeaderLabels(columnNames);
    mpSignatureList->setSelectionMode(mode);
@@ -74,26 +79,92 @@ SignatureSelector::SignatureSelector(Progress* pProgress, QWidget* parent,
       pHeader->resizeSection(0, 125);
    }
 
+   // Splitter widget
+   QSplitter* pSplitter = new QSplitter(Qt::Horizontal, this);
+   pSplitter->setOpaqueResize(true);
+   pSplitter->insertWidget(0, mpFormatTree);
+   pSplitter->insertWidget(1, mpSignatureList);
+
+   QList<int> splitterSizes;
+   splitterSizes.append(125);
+   splitterSizes.append(325);
+   pSplitter->setSizes(splitterSizes);
+
+   // Toolbar
+   mpCreateFilterAction = new QAction(QIcon(":/icons/CreateFilter"), "Create Filter", this);
+   mpCreateFilterAction->setToolTip("Create Filter");
+   mpEditFilterAction = new QAction(QIcon(":/icons/EditFilter"), "Edit Filter", this);
+   mpEditFilterAction->setToolTip("Edit Filter");
+   mpEditFilterAction->setEnabled(false);
+   mpDeleteFilterAction = new QAction(QIcon(":/icons/DeleteFilter"), "Delete Filter", this);
+   mpDeleteFilterAction->setToolTip("Delete Filter");
+   mpDeleteFilterAction->setEnabled(false);
+
+   mpPropertiesAction = new QAction(QIcon(":/icons/Properties"), "Properties", this);
+   mpPropertiesAction->setToolTip("Properties");
+   mpExportAction = new QAction(QIcon(":/icons/Save"), "Export Signature(s)", this);
+   mpExportAction->setToolTip("Export Signature(s)");
+   mpDeleteAction = new QAction(QIcon(":/icons/Delete"), "Delete Signature(s)", this);
+   mpDeleteAction->setToolTip("Delete Signature(s)");
+
+   QToolButton* pCreateFilterButton = new QToolButton(this);
+   pCreateFilterButton->setAutoRaise(true);
+   pCreateFilterButton->setDefaultAction(mpCreateFilterAction);
+
+   QToolButton* pEditFilterButton = new QToolButton(this);
+   pEditFilterButton->setAutoRaise(true);
+   pEditFilterButton->setDefaultAction(mpEditFilterAction);
+
+   QToolButton* pDeleteFilterButton = new QToolButton(this);
+   pDeleteFilterButton->setAutoRaise(true);
+   pDeleteFilterButton->setDefaultAction(mpDeleteFilterAction);
+
+   QToolButton* pPropertiesButton = new QToolButton(this);
+   pPropertiesButton->setAutoRaise(true);
+   pPropertiesButton->setDefaultAction(mpPropertiesAction);
+
+   QToolButton* pExportButton = new QToolButton(this);
+   pExportButton->setAutoRaise(true);
+   pExportButton->setDefaultAction(mpExportAction);
+
+   QToolButton* pDeleteButton = new QToolButton(this);
+   pDeleteButton->setAutoRaise(true);
+   pDeleteButton->setDefaultAction(mpDeleteAction);
+
+   QHBoxLayout* pToolBarLayout = new QHBoxLayout();
+   pToolBarLayout->setMargin(0);
+   pToolBarLayout->setSpacing(0);
+   pToolBarLayout->addWidget(pCreateFilterButton);
+   pToolBarLayout->addWidget(pEditFilterButton);
+   pToolBarLayout->addWidget(pDeleteFilterButton);
+   pToolBarLayout->addSpacing(15);
+   pToolBarLayout->addWidget(pPropertiesButton);
+   pToolBarLayout->addWidget(pExportButton);
+   pToolBarLayout->addWidget(pDeleteButton);
+   pToolBarLayout->addStretch(10);
+
+   // Empty layout
+   mpEmptyLayout = new QGridLayout();
+
    // Buttons
    QPushButton* pOkButton = new QPushButton("&OK", this);
-   QPushButton* pCancelButton = new QPushButton("&Cancel", this);
-   mpPropertiesButton = new QPushButton("&Properties", this);
-   mpExportButton = new QPushButton("&Export", this);
-   mpUnloadButton = new QPushButton("&Unload", this);
-   mpImportButton = new QPushButton("&Import >>", this);
 
    if (addApply)
    {
       mpApplyButton = new QPushButton("&Apply", this);
-      connect(mpApplyButton, SIGNAL(clicked()), this, SLOT(apply()));
+      VERIFYNR(connect(mpApplyButton, SIGNAL(clicked()), this, SLOT(apply())));
       mpApplyButton->setEnabled(false);
    }
+
+   QPushButton* pCancelButton = new QPushButton("&Cancel", this);
 
    if (customButtonLabel.empty() == false)
    {
       mpCustomButton = new QPushButton(QString::fromStdString(customButtonLabel), this);
-      VERIFYNRV(connect(mpCustomButton, SIGNAL(clicked()), this, SLOT(customButtonClicked())));
+      VERIFYNR(connect(mpCustomButton, SIGNAL(clicked()), this, SLOT(customButtonClicked())));
    }
+
+   mpImportButton = new QPushButton("&Import >>", this);
 
    QVBoxLayout* pButtonLayout = new QVBoxLayout();
    pButtonLayout->setMargin(0);
@@ -113,13 +184,7 @@ SignatureSelector::SignatureSelector(Progress* pProgress, QWidget* parent,
    }
 
    pButtonLayout->addStretch(10);
-   pButtonLayout->addWidget(mpPropertiesButton);
-   pButtonLayout->addWidget(mpExportButton);
-   pButtonLayout->addWidget(mpUnloadButton);
    pButtonLayout->addWidget(mpImportButton);
-
-   // Empty layout
-   mpEmptyLayout = new QGridLayout();
 
    // Import widget
    mpImportWidget = new QWidget(this);
@@ -169,13 +234,12 @@ SignatureSelector::SignatureSelector(Progress* pProgress, QWidget* parent,
    QGridLayout* pGrid = new QGridLayout(this);
    pGrid->setMargin(10);
    pGrid->setSpacing(10);
-   pGrid->addWidget(pSignaturesLabel, 0, 0);
-   pGrid->addWidget(mpFormatCombo, 0, 1);
-   pGrid->addWidget(mpSignatureList, 1, 0, 1, 2);
-   pGrid->addLayout(mpEmptyLayout, 2, 0, 1, 2);
-   pGrid->addLayout(pButtonLayout, 0, 2, 3, 1);
-   pGrid->setRowStretch(1, 10);
-   pGrid->setColumnStretch(1, 10);
+   pGrid->addWidget(pSplitter, 0, 0);
+   pGrid->addLayout(pToolBarLayout, 1, 0);
+   pGrid->addLayout(mpEmptyLayout, 2, 0);
+   pGrid->addLayout(pButtonLayout, 0, 1, 3, 1);
+   pGrid->setRowStretch(0, 10);
+   pGrid->setColumnStretch(0, 10);
 
    // Initialization
    setWindowTitle("Signature Selector");
@@ -185,16 +249,14 @@ SignatureSelector::SignatureSelector(Progress* pProgress, QWidget* parent,
    resize(470, 215);
 
    vector<PlugInDescriptor*> importerPlugIns = mpManager->getPlugInDescriptors(PlugInManagerServices::ImporterType());
-      
-   
-   for (vector<PlugInDescriptor*>::iterator iter = importerPlugIns.begin();
-        iter != importerPlugIns.end(); ++iter)
+   for (vector<PlugInDescriptor*>::const_iterator iter = importerPlugIns.begin(); iter != importerPlugIns.end(); ++iter)
    {
       PlugInDescriptor* pDescriptor = *iter;
       if (pDescriptor == NULL)
       {
          continue;
       }
+
       string subtype = pDescriptor->getSubtype();
       if ((subtype == "Signature") || (subtype == "Signature Set"))
       {
@@ -210,23 +272,37 @@ SignatureSelector::SignatureSelector(Progress* pProgress, QWidget* parent,
    updateSignatureList();
 
    // Connections
-   connect(mpFormatCombo, SIGNAL(activated(const QString&)), this, SLOT(setDisplayType(const QString&)));
-   connect(mpSignatureList, SIGNAL(itemSelectionChanged()), this, SLOT(enableButtons()));
-   connect(mpSignatureList, SIGNAL(itemSelectionChanged()), this, SIGNAL(selectionChanged()));
-   connect(pOkButton, SIGNAL(clicked()), this, SLOT(accept()));
-   connect(pCancelButton, SIGNAL(clicked()), this, SLOT(reject()));
-   connect(mpPropertiesButton, SIGNAL(clicked()), this, SLOT(displaySignatureProperties()));
-   connect(mpExportButton, SIGNAL(clicked()), this, SLOT(exportSignatures()));
-   connect(mpUnloadButton, SIGNAL(clicked()), this, SLOT(unloadSignatures()));
-   connect(mpImportButton, SIGNAL(clicked()), this, SLOT(importSignatures()));
-   connect(pBrowseButton, SIGNAL(clicked()), this, SLOT(browseFiles()));
-   connect(pSearchButton, SIGNAL(clicked()), this, SLOT(searchDirectories()));
-   connect(pLoadButton, SIGNAL(clicked()), this, SLOT(loadSignatures()));
+   VERIFYNR(connect(mpFormatTree, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this,
+      SLOT(formatChanged())));
+   VERIFYNR(connect(mpFormatTree, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this,
+      SLOT(updateSignatureList())));
+   VERIFYNR(connect(mpFormatTree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
+      SLOT(checkFilterName(QTreeWidgetItem*, int))));
+   VERIFYNR(connect(mpFormatTree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(editFilter())));
+   VERIFYNR(connect(mpFormatTree, SIGNAL(customContextMenuRequested(const QPoint&)), this,
+      SLOT(displayFormatContextMenu(const QPoint&))));
+   VERIFYNR(connect(mpSignatureList, SIGNAL(itemSelectionChanged()), this, SLOT(enableButtons())));
+   VERIFYNR(connect(mpSignatureList, SIGNAL(itemSelectionChanged()), this, SIGNAL(selectionChanged())));
+   VERIFYNR(connect(mpSignatureList, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this,
+      SLOT(displaySignatureProperties())));
+   VERIFYNR(connect(mpSignatureList, SIGNAL(customContextMenuRequested(const QPoint&)), this,
+      SLOT(displaySignatureContextMenu(const QPoint&))));
+   VERIFYNR(connect(mpCreateFilterAction, SIGNAL(triggered()), this, SLOT(createFilter())));
+   VERIFYNR(connect(mpEditFilterAction, SIGNAL(triggered()), this, SLOT(editFilter())));
+   VERIFYNR(connect(mpDeleteFilterAction, SIGNAL(triggered()), this, SLOT(deleteFilter())));
+   VERIFYNR(connect(mpPropertiesAction, SIGNAL(triggered()), this, SLOT(displaySignatureProperties())));
+   VERIFYNR(connect(mpExportAction, SIGNAL(triggered()), this, SLOT(exportSignatures())));
+   VERIFYNR(connect(mpDeleteAction, SIGNAL(triggered()), this, SLOT(unloadSignatures())));
+   VERIFYNR(connect(pOkButton, SIGNAL(clicked()), this, SLOT(accept())));
+   VERIFYNR(connect(pCancelButton, SIGNAL(clicked()), this, SLOT(reject())));
+   VERIFYNR(connect(mpImportButton, SIGNAL(clicked()), this, SLOT(importSignatures())));
+   VERIFYNR(connect(pBrowseButton, SIGNAL(clicked()), this, SLOT(browseFiles())));
+   VERIFYNR(connect(pSearchButton, SIGNAL(clicked()), this, SLOT(searchDirectories())));
+   VERIFYNR(connect(pLoadButton, SIGNAL(clicked()), this, SLOT(loadSignatures())));
 }
 
 SignatureSelector::~SignatureSelector()
-{
-}
+{}
 
 void SignatureSelector::enableApplyButton(bool enable)
 {
@@ -258,37 +334,67 @@ vector<Signature*> SignatureSelector::getSignatures() const
 {
    vector<Signature*> signatures;
 
-   map<QTreeWidgetItem*, Signature*>::const_iterator iter = mLoadedSignatures.begin();
-   while (iter != mLoadedSignatures.end())
+   QList<QTreeWidgetItem*> signatureItems = mpSignatureList->selectedItems();
+   for (int i = 0; i < signatureItems.count(); ++i)
    {
-      QTreeWidgetItem* pItem = iter->first;
+      QTreeWidgetItem* pItem = signatureItems[i];
       if (pItem != NULL)
       {
-         bool bSelected = mpSignatureList->isItemSelected(pItem);
-         if (bSelected == true)
+         QTreeWidgetItem* pParentItem = pItem->parent();
+         if (pParentItem != NULL)
          {
-            Signature* pSignature = iter->second;
-            if (pSignature != NULL)
+            if (pParentItem->isSelected())
             {
-               signatures.push_back(pSignature);
+               continue;
             }
          }
-      }
 
-      iter++;
+         Signature* pSignature = reinterpret_cast<Signature*>(pItem->data(0, Qt::UserRole).value<void*>());
+         if (pSignature != NULL)
+         {
+            signatures.push_back(pSignature);
+         }
+      }
    }
 
    return signatures;
 }
 
-static void extractFromSigSets(const vector<Signature*>& sourceSigs, vector<Signature*>& destSigs)
+void SignatureSelector::extractFromSigSets(const vector<Signature*>& sourceSigs, vector<Signature*>& destSigs) const
 {
    vector<Signature*>::const_iterator ppSig;
    for (ppSig = sourceSigs.begin(); ppSig != sourceSigs.end(); ++ppSig)
    {
       if ((*ppSig)->isKindOf("SignatureSet"))
       {
-         const vector<Signature*>& subSigs = ((SignatureSet*)(*ppSig))->getSignatures();
+         vector<Signature*> subSigs;
+
+         QTreeWidgetItemIterator itemIter(mpSignatureList);
+         while (*itemIter != NULL)
+         {
+            Signature* pItemSignature = reinterpret_cast<Signature*>((*itemIter)->data(0, Qt::UserRole).value<void*>());
+            if (pItemSignature == (*ppSig))
+            {
+               for (int i = 0; i < (*itemIter)->childCount(); ++i)
+               {
+                  QTreeWidgetItem* pChildItem = (*itemIter)->child(i);
+                  if (pChildItem != NULL)
+                  {
+                     Signature* pChildSignature =
+                        reinterpret_cast<Signature*>(pChildItem->data(0, Qt::UserRole).value<void*>());
+                     if (pChildSignature != NULL)
+                     {
+                        subSigs.push_back(pChildSignature);
+                     }
+                  }
+               }
+
+               break;
+            }
+
+            ++itemIter;
+         }
+
          extractFromSigSets(subSigs, destSigs);
       }
       else
@@ -314,20 +420,41 @@ void SignatureSelector::abortSearch()
    }
 }
 
-void SignatureSelector::addCustomType(const QString &type)
+void SignatureSelector::addCustomType(const QString& type)
 {
-   if (!type.isEmpty() && mpFormatCombo->findText(type) == -1)
+   if (type.isEmpty() == true)
    {
-      mpFormatCombo->addItem(type);
+      return;
    }
+
+   for (int i = 0; i < mpFormatTree->topLevelItemCount(); ++i)
+   {
+      QTreeWidgetItem* pItem = mpFormatTree->topLevelItem(i);
+      if (pItem != NULL)
+      {
+         if (pItem->text(0) == type)
+         {
+            return;
+         }
+      }
+   }
+
+   QTreeWidgetItem* pItem = new QTreeWidgetItem(mpFormatTree);
+   pItem->setText(0, type);
 }
 
 QString SignatureSelector::getCurrentFormatType() const
 {
-   return mpFormatCombo->currentText();
+   QTreeWidgetItem* pItem = mpFormatTree->currentItem();
+   if (pItem != NULL)
+   {
+      return pItem->text(0);
+   }
+
+   return QString();
 }
 
-QTreeWidget *SignatureSelector::getSignatureList() const
+QTreeWidget* SignatureSelector::getSignatureList() const
 {
    return mpSignatureList;
 }
@@ -355,24 +482,52 @@ int SignatureSelector::getNumSelectedSignatures() const
    return selectedItems.count();
 }
 
-QTreeWidgetItem* SignatureSelector::addSignatureItem(Signature* pSignature, QTreeWidgetItem* pParentItem)
+void SignatureSelector::addSignature(Signature* pSignature)
+{
+   if (pSignature == NULL)
+   {
+      return;
+   }
+
+   bool librarySignatures = false;
+   QRegExp signatureNameFilter;
+   QRegExp metadataNameFilter;
+   QRegExp metadataValueFilter;
+
+   QTreeWidgetItem* pItem = mpFormatTree->currentItem();
+   if (pItem != NULL)
+   {
+      QVariant filter = pItem->data(0, Qt::UserRole);
+      QMap<QString, QVariant> filterMap = filter.toMap();
+      if (filterMap.isEmpty() == false)
+      {
+         librarySignatures = filterMap["Library Signatures"].toBool();
+         signatureNameFilter = filterMap["Signature Name"].toRegExp();
+         metadataNameFilter = filterMap["Metadata Name"].toRegExp();
+         metadataValueFilter = filterMap["Metadata Value"].toRegExp();
+      }
+   }
+
+   if (matchSignature(pSignature, signatureNameFilter, metadataNameFilter, metadataValueFilter) == true)
+   {
+      createSignatureItem(pSignature, NULL, true);
+   }
+   else if (librarySignatures == true)
+   {
+      SignatureSet* pSignatureSet = dynamic_cast<SignatureSet*>(pSignature);
+      if (pSignatureSet != NULL)
+      {
+         createLibraryItems(pSignatureSet, NULL, signatureNameFilter, metadataNameFilter, metadataValueFilter);
+      }
+   }
+}
+
+QTreeWidgetItem* SignatureSelector::createSignatureItem(Signature* pSignature, QTreeWidgetItem* pParentItem,
+                                                        bool createLibraryItems)
 {
    if (pSignature == NULL)
    {
       return NULL;
-   }
-
-   // Do not add a single signature if it is already contained in at least one sig set
-   map<QTreeWidgetItem*, Signature*>::iterator iter = mLoadedSignatures.begin();
-   while (iter != mLoadedSignatures.end())
-   {
-      Signature* pItemSignature = iter->second;
-      if ((pItemSignature == pSignature) && (pParentItem == NULL))
-      {
-         return NULL;
-      }
-
-      iter++;
    }
 
    // Name
@@ -403,26 +558,21 @@ QTreeWidgetItem* SignatureSelector::addSignatureItem(Signature* pSignature, QTre
       pItem = new QTreeWidgetItem(pParentItem);
    }
 
-   if (pItem != NULL)
+   pItem->setText(0, strName);
+   pItem->setData(0, Qt::UserRole, QVariant::fromValue(reinterpret_cast<void*>(pSignature)));
+   pItem->setText(1, strLocation);
+
+   if (createLibraryItems == true)
    {
-      pItem->setText(0, strName);
-      pItem->setText(1, strLocation);
-
-      mLoadedSignatures[pItem] = pSignature;
-
       SignatureSet* pSignatureSet = dynamic_cast<SignatureSet*>(pSignature);
       if (pSignatureSet != NULL)
       {
          vector<Signature*> signatures = pSignatureSet->getSignatures();
-
-         int iCount = signatures.size();
-         for (int i = 0; i < iCount; i++)
+         for (vector<Signature*>::const_iterator iter = signatures.begin(); iter != signatures.end(); ++iter)
          {
-            Signature* pCurrentSignature = signatures.at(i);
-            if (pCurrentSignature != NULL)
-            {
-               addSignatureItem(pCurrentSignature, pItem);
-            }
+            Signature* pCurrentSignature = *iter;
+            VERIFYNR(pCurrentSignature != NULL);
+            createSignatureItem(pCurrentSignature, pItem, createLibraryItems);
          }
       }
    }
@@ -430,8 +580,126 @@ QTreeWidgetItem* SignatureSelector::addSignatureItem(Signature* pSignature, QTre
    return pItem;
 }
 
-bool SignatureSelector::searchForMetadata(const DynamicObject* pMetadata, const QRegExp& nameFilter,
-                                          const QRegExp& valueFilter)
+void SignatureSelector::createLibraryItems(SignatureSet* pSignatureSet, QTreeWidgetItem* pParentItem,
+                                           const QRegExp& signatureNameFilter, const QRegExp& metadataNameFilter,
+                                           const QRegExp& metadataValueFilter)
+{
+   if (pSignatureSet == NULL)
+   {
+      return;
+   }
+
+   QTreeWidgetItem* pSignatureSetItem = NULL;
+
+   vector<Signature*> signatures = pSignatureSet->getSignatures();
+   for (vector<Signature*>::const_iterator iter = signatures.begin(); iter != signatures.end(); ++iter)
+   {
+      Signature* pSignature = *iter;
+      VERIFYNR(pSignature != NULL);
+
+      if (matchSignature(pSignature, signatureNameFilter, metadataNameFilter, metadataValueFilter) == true)
+      {
+         // Create this library's item if necessary
+         if (pSignatureSetItem == NULL)
+         {
+            pSignatureSetItem = createSignatureItem(pSignatureSet, pParentItem);
+         }
+
+         // Create the signature item
+         createSignatureItem(pSignature, pSignatureSetItem, true);   // If the signature to add is a library,
+                                                                     // add all of its child items as well
+      }
+      else
+      {
+         // If the signature is a library, check its child signatures
+         SignatureSet* pCurrentSignatureSet = dynamic_cast<SignatureSet*>(pSignature);
+         if (pCurrentSignatureSet != NULL)
+         {
+            if (matchLibrarySignatures(pCurrentSignatureSet, signatureNameFilter, metadataNameFilter,
+               metadataValueFilter) == true)
+            {
+               // Create this library's item if necessary
+               if (pSignatureSetItem == NULL)
+               {
+                  pSignatureSetItem = createSignatureItem(pSignatureSet, pParentItem);
+               }
+
+               // Create the items in the child library
+               createLibraryItems(pCurrentSignatureSet, pSignatureSetItem, signatureNameFilter, metadataNameFilter,
+                  metadataValueFilter);
+            }
+         }
+      }
+   }
+}
+
+bool SignatureSelector::matchLibrarySignatures(const SignatureSet* pSignatureSet, const QRegExp& signatureNameFilter,
+                                               const QRegExp& metadataNameFilter, const QRegExp& metadataValueFilter)
+{
+   if (pSignatureSet == NULL)
+   {
+      return false;
+   }
+
+   // Check if at least one signature in this library or contained libraries matches the filter
+   vector<Signature*> signatures = pSignatureSet->getSignatures();
+   for (vector<Signature*>::const_iterator iter = signatures.begin(); iter != signatures.end(); ++iter)
+   {
+      Signature* pSignature = *iter;
+      if (pSignature != NULL)
+      {
+         SignatureSet* pCurrentSignatureSet = dynamic_cast<SignatureSet*>(pSignature);
+         if (pCurrentSignatureSet != NULL)
+         {
+            if (matchLibrarySignatures(pCurrentSignatureSet, signatureNameFilter, metadataNameFilter,
+               metadataValueFilter) == true)
+            {
+               return true;
+            }
+         }
+         else if (matchSignature(pSignature, signatureNameFilter, metadataNameFilter, metadataValueFilter) == true)
+         {
+            return true;
+         }
+      }
+   }
+
+   return false;
+}
+
+bool SignatureSelector::matchSignature(const Signature* pSignature, const QRegExp& signatureNameFilter,
+                                       const QRegExp& metadataNameFilter, const QRegExp& metadataValueFilter)
+{
+   if (pSignature == NULL)
+   {
+      return false;
+   }
+
+   if (signatureNameFilter.isEmpty() == false)
+   {
+      const string& sigName = pSignature->getName();
+      VERIFY(sigName.empty() == false);
+      if (signatureNameFilter.exactMatch(QString::fromStdString(sigName)) == false)
+      {
+         return false;
+      }
+   }
+
+   if ((metadataNameFilter.isEmpty() == false) || (metadataValueFilter.isEmpty() == false))
+   {
+      const DynamicObject* pMetadata = pSignature->getMetadata();
+      VERIFY(pMetadata != NULL);
+      if (matchMetadata(pMetadata, metadataNameFilter, metadataValueFilter) == false)
+      {
+         return false;
+      }
+   }
+
+   return true;
+}
+
+bool SignatureSelector::matchMetadata(const DynamicObject* pMetadata, const QRegExp& nameFilter,
+                                      const QRegExp& valueFilter)
 {
    if (pMetadata == NULL)
    {
@@ -461,9 +729,9 @@ bool SignatureSelector::searchForMetadata(const DynamicObject* pMetadata, const 
    vector<string> attributeNames;
    pMetadata->getAttributeNames(attributeNames);
 
-   for (vector<string>::iterator iter = attributeNames.begin(); iter != attributeNames.end(); ++iter)
+   for (vector<string>::const_iterator iter = attributeNames.begin(); iter != attributeNames.end(); ++iter)
    {
-      string attributeName = *iter;
+      const string& attributeName = *iter;
       if (attributeName.empty() == false)
       {
          const DataVariant& attributeValue = pMetadata->getAttribute(attributeName);
@@ -471,7 +739,7 @@ bool SignatureSelector::searchForMetadata(const DynamicObject* pMetadata, const 
             (attributeValue.getTypeName() == TypeConverter::toString<DynamicObject>()))
          {
             const DynamicObject* pChild = attributeValue.getPointerToValue<DynamicObject>();
-            if (searchForMetadata(pChild, nameFilter, valueFilter) == true)
+            if (matchMetadata(pChild, nameFilter, valueFilter) == true)
             {
                return true;
             }
@@ -489,155 +757,63 @@ void SignatureSelector::apply()
 
 void SignatureSelector::setDisplayType(const QString& strFormat)
 {
-   if (strFormat == "Metadata...")
+   if (strFormat == sMetadataType)
    {
-      // Get the metadata filters from the user
-      QString filterText = "All Signatures";
-
-      MetadataFilterDlg filterDlg(this);
-      if (filterDlg.exec() == QDialog::Accepted)
+      createFilter();
+   }
+   else if (strFormat == sDashType)
+   {
+      mpFormatTree->setCurrentItem(mpSignaturesItem);
+   }
+   else
+   {
+      QTreeWidgetItemIterator iter(mpFormatTree);
+      while (*iter != NULL)
       {
-         // Name
-         QRegExp nameFilter = filterDlg.getNameFilter();
-
-         QString name = nameFilter.pattern();
-         if (name.isEmpty() == false)
+         QTreeWidgetItem* pItem = *iter;
+         if (pItem != NULL)
          {
-            filterText = "Metadata: Name '" + name + "'";
-
-            // Add wildcard and case sensitivity to filter text
-            if (nameFilter.patternSyntax() == QRegExp::Wildcard)
+            QString filterName = pItem->text(0);
+            if (filterName == strFormat)
             {
-               filterText += " (wildcard, ";
-            }
-            else
-            {
-               filterText += " (exact match, ";
-            }
-
-            if (nameFilter.caseSensitivity() == Qt::CaseSensitive)
-            {
-               filterText += "case sensitive)";
-            }
-            else
-            {
-               filterText += "case insensitive)";
-            }
-         }
-
-         // Value
-         QRegExp valueFilter = filterDlg.getValueFilter();
-
-         QString value = valueFilter.pattern();
-         if (value.isEmpty() == false)
-         {
-            if (name.isEmpty() == true)
-            {
-               filterText = "Metadata: ";
-            }
-            else
-            {
-               filterText += ",  ";
-            }
-
-            filterText += "Value '" + value + "'";
-
-            // Add wildcard and case sensitivity to filter text
-            if (valueFilter.patternSyntax() == QRegExp::Wildcard)
-            {
-               filterText += " (wildcard, ";
-            }
-            else
-            {
-               filterText += " (exact match, ";
-            }
-
-            if (valueFilter.caseSensitivity() == Qt::CaseSensitive)
-            {
-               filterText += "case sensitive)";
-            }
-            else
-            {
-               filterText += "case insensitive)";
-            }
-         }
-      }
-
-      int iIndex = 0;
-      if (filterText != "All Signatures")
-      {
-         // Do not insert the item if it already exists
-         bool bInsert = true;
-
-         int iCount = mpFormatCombo->count();
-         for (int i = 0; i < iCount; ++i)
-         {
-            if (mpFormatCombo->itemText(i) == filterText)
-            {
-               bInsert = false;
+               mpFormatTree->setCurrentItem(pItem);
                break;
             }
          }
 
-         if (bInsert == true)
-         {
-            // Limit the combo box to five metadata entries
-            if (iCount == 8)
-            {
-               mpFormatCombo->removeItem(5);
-               iCount--;
-            }
-
-            // Insert the new metadata entry
-            iIndex = 1;
-            mpFormatCombo->insertItem(iIndex, filterText);
-         }
+         ++iter;
       }
-
-      mpFormatCombo->setCurrentIndex(iIndex);
    }
-   else if (strFormat == "-----------------------")
-   {
-      mpFormatCombo->setCurrentIndex(0);
-   }
-
-   QString strCurrentFormat = getCurrentFormatType();
-   if (strCurrentFormat == "All Signatures")
-   {
-      mpImportButton->setEnabled(true);
-      mpImportWidget->setEnabled(true);
-   }
-   else
-   {
-      mpImportButton->setEnabled(false);
-      mpImportWidget->setEnabled(false);
-   }
-
-   updateSignatureList();
 }
 
 void SignatureSelector::enableButtons()
 {
-   int iSelected = getNumSelectedSignatures();
+   QTreeWidgetItem* pItem = mpFormatTree->currentItem();
+   if ((pItem != NULL) && (pItem->parent() != NULL))
+   {
+      pItem = pItem->parent();
+   }
 
-   mpPropertiesButton->setEnabled(iSelected == 1);
-   mpExportButton->setEnabled(iSelected > 0);
-   mpUnloadButton->setEnabled(iSelected > 0);
+   int numSignatures = getNumSelectedSignatures();
+   mpPropertiesAction->setEnabled(numSignatures == 1 && pItem == mpSignaturesItem);
+   mpExportAction->setEnabled(numSignatures > 0 && pItem == mpSignaturesItem);
+   mpDeleteAction->setEnabled(numSignatures > 0 && pItem == mpSignaturesItem);
 }
 
 void SignatureSelector::displaySignatureProperties()
 {
+   QList<QTreeWidgetItem*> selectedItems = mpSignatureList->selectedItems();
+   if (selectedItems.count() != 1)
+   {
+      return;
+   }
+
    Signature* pSignature = NULL;
 
-   QList<QTreeWidgetItem*> selectedItems = mpSignatureList->selectedItems();
-   for (int i = 0; i < selectedItems.count(); ++i)
+   QTreeWidgetItem* pItem = selectedItems.front();
+   if (pItem != NULL)
    {
-      QTreeWidgetItem* pItem = selectedItems[i];
-      if (pItem != NULL)
-      {
-         pSignature = mLoadedSignatures[pItem];
-         break;
-      }
+      pSignature = reinterpret_cast<Signature*>(pItem->data(0, Qt::UserRole).value<void*>());
    }
 
    if (pSignature != NULL)
@@ -668,32 +844,26 @@ void SignatureSelector::exportSignatures()
       QTreeWidgetItem* pItem = selectedSignatures.front();
       if (pItem != NULL)
       {
-         map<QTreeWidgetItem*, Signature*>::iterator iter = mLoadedSignatures.find(pItem);
-         if (iter != mLoadedSignatures.end())
-         {
-            pSignature = iter->second;
-         }
+         pSignature = reinterpret_cast<Signature*>(pItem->data(0, Qt::UserRole).value<void*>());
       }
    }
    else if (selectedSignatures.count() > 1)
    {
-      map<QTreeWidgetItem*, Signature*>::iterator iter;
-      for (iter = mLoadedSignatures.begin(); iter != mLoadedSignatures.end(); ++iter)
+      for (int i = 0; i < selectedSignatures.count(); ++i)
       {
-         QTreeWidgetItem* pItem = iter->first;
+         QTreeWidgetItem* pItem = selectedSignatures[i];
          if (pItem != NULL)
          {
-            if (mpSignatureList->isItemSelected(pItem))
+            SignatureSet* pSet = dynamic_cast<SignatureSet*>(reinterpret_cast<Signature*>(pItem->data(0,
+               Qt::UserRole).value<void*>()));
+            if (pSet != NULL)
             {
-               SignatureSet* pSet = dynamic_cast<SignatureSet*>(iter->second);
-               if (pSet != NULL)
-               {
-                  pExportSet->insertSignatures(pSet->getSignatures());
-               }
-               else
-               {
-                  pExportSet->insertSignature(iter->second);
-               }
+               pExportSet->insertSignatures(pSet->getSignatures());
+            }
+            else
+            {
+               pExportSet->insertSignature(reinterpret_cast<Signature*>(pItem->data(0,
+                  Qt::UserRole).value<void*>()));
             }
          }
       }
@@ -717,34 +887,26 @@ void SignatureSelector::exportSignatures()
 
 void SignatureSelector::unloadSignatures()
 {
-   int iDeleted = 0;
+   bool updateList = false;
 
-   map<QTreeWidgetItem*, Signature*>::iterator iter;
-   iter = mLoadedSignatures.begin();
-   while (iter != mLoadedSignatures.end())
+   QList<QTreeWidgetItem*> signatureItems = mpSignatureList->selectedItems();
+   for (int i = 0; i < signatureItems.count(); ++i)
    {
-      QTreeWidgetItem* pItem = iter->first;
+      QTreeWidgetItem* pItem = signatureItems[i];
       if (pItem != NULL)
       {
-         bool bSelected = mpSignatureList->isItemSelected(pItem);
-         if (bSelected == true)
+         Signature* pSignature = reinterpret_cast<Signature*>(pItem->data(0, Qt::UserRole).value<void*>());
+         if (pSignature != NULL)
          {
-            Signature* pSignature = iter->second;
-            if (pSignature != NULL)
+            if (mpModel->destroyElement(pSignature) == true)
             {
-               bool bDeleted = mpModel->destroyElement(pSignature);
-               if (bDeleted == true)
-               {
-                  iDeleted++;
-               }
+               updateList = true;
             }
          }
       }
-
-      ++iter;
    }
 
-   if (iDeleted > 0)
+   if (updateList == true)
    {
       updateSignatureList();
    }
@@ -769,121 +931,38 @@ void SignatureSelector::importSignatures()
 void SignatureSelector::updateSignatureList()
 {
    mpSignatureList->clear();
-   mLoadedSignatures.clear();
    enableButtons();
 
-   // Get any metadata filter values
-   QRegExp nameFilter;
-   QRegExp valueFilter;
-   QString strFilter = getCurrentFormatType();
-
-   int namePos = strFilter.indexOf("Name");
-   int valuePos = strFilter.indexOf("Value");
-
-   if (namePos != -1)
-   {
-      int startPos = strFilter.indexOf("'", namePos);
-      int endPos = strFilter.indexOf("'", startPos + 1);
-      if ((startPos != -1) && (endPos != -1))
-      {
-         ++startPos;
-         nameFilter.setPattern(strFilter.mid(startPos, endPos - startPos));
-      }
-
-      int wildcardPos = strFilter.indexOf("wildcard", endPos + 1, Qt::CaseSensitive);
-      if ((wildcardPos != -1) && ((valuePos == -1) || (wildcardPos < valuePos)))
-      {
-         nameFilter.setPatternSyntax(QRegExp::Wildcard);
-      }
-      else
-      {
-         nameFilter.setPatternSyntax(QRegExp::FixedString);
-      }
-
-      int casePos = strFilter.indexOf("case sensitive", endPos + 1, Qt::CaseSensitive);
-      if ((casePos != -1) && ((valuePos == -1) || (casePos < valuePos)))
-      {
-         nameFilter.setCaseSensitivity(Qt::CaseSensitive);
-      }
-      else
-      {
-         nameFilter.setCaseSensitivity(Qt::CaseInsensitive);
-      }
-   }
-
-   if (valuePos != -1)
-   {
-      int startPos = strFilter.indexOf("'", valuePos);
-      int endPos = strFilter.indexOf("'", startPos + 1);
-      if ((startPos != -1) && (endPos != -1))
-      {
-         ++startPos;
-         valueFilter.setPattern(strFilter.mid(startPos, endPos - startPos));
-      }
-
-      int wildcardPos = strFilter.indexOf("wildcard", endPos + 1, Qt::CaseSensitive);
-      if (wildcardPos != -1)
-      {
-         valueFilter.setPatternSyntax(QRegExp::Wildcard);
-      }
-      else
-      {
-         valueFilter.setPatternSyntax(QRegExp::FixedString);
-      }
-
-      int casePos = strFilter.indexOf("case sensitive", endPos + 1, Qt::CaseSensitive);
-      if (casePos != -1)
-      {
-         valueFilter.setCaseSensitivity(Qt::CaseSensitive);
-      }
-      else
-      {
-         valueFilter.setCaseSensitivity(Qt::CaseInsensitive);
-      }
-   }
-
-   // Add the signature sets before the signatures so that signatures will appear in the set
+   vector<DataElement*> signatures = mpModel->getElements("Signature");
    vector<DataElement*> signatureSets = mpModel->getElements("SignatureSet");
 
-   vector<DataElement*>::iterator iter = signatureSets.begin();
-   while (iter != signatureSets.end())
+   for (vector<DataElement*>::const_iterator iter = signatures.begin(); iter != signatures.end(); ++iter)
    {
       Signature* pSignature = static_cast<Signature*>(*iter);
       if (pSignature != NULL)
       {
-         const DynamicObject* pMetadata = pSignature->getMetadata();
-         if (pMetadata != NULL)
+         // Only add the signature or signature set if it is not contained in at least one signature set
+         bool setSignature = false;
+         for (vector<DataElement*>::const_iterator setIter = signatureSets.begin();
+            setIter != signatureSets.end();
+            ++setIter)
          {
-            if (searchForMetadata(pMetadata, nameFilter, valueFilter) == true)
+            SignatureSet* pSignatureSet = static_cast<SignatureSet*>(*setIter);
+            if ((pSignatureSet != NULL) && (static_cast<Signature*>(pSignatureSet) != pSignature))
             {
-               addSignatureItem(pSignature);
+               if (pSignatureSet->hasSignature(pSignature) == true)
+               {
+                  setSignature = true;
+                  break;
+               }
             }
          }
-      }
 
-      ++iter;
-   }
-
-   // Add the signatures
-   vector<DataElement*> signatures = mpModel->getElements("Signature");
-
-   iter = signatures.begin();
-   while (iter != signatures.end())
-   {
-      Signature* pSignature = static_cast<Signature*>(*iter);
-      if (pSignature != NULL)
-      {
-         const DynamicObject* pMetadata = pSignature->getMetadata();
-         if (pMetadata != NULL)
+         if (setSignature == false)
          {
-            if (searchForMetadata(pMetadata, nameFilter, valueFilter) == true)
-            {
-               addSignatureItem(pSignature);
-            }
+            addSignature(pSignature);
          }
       }
-
-      ++iter;
    }
 
    emit selectionChanged();
@@ -1045,4 +1124,286 @@ void SignatureSelector::customButtonClicked()
 {
    // Overload this method in derived classes
    QMessageBox::warning(this, "Custom Button Clicked", "No actions have been setup for this button");
+}
+
+bool SignatureSelector::isFilterNameUnique(const QString& filterName, QTreeWidgetItem* pIgnoreItem) const
+{
+   if (filterName.isEmpty() == true)
+   {
+      return false;
+   }
+
+   QTreeWidgetItemIterator iter(mpSignaturesItem);
+   while (*iter != NULL)
+   {
+      QTreeWidgetItem* pFilterItem = *iter;
+      if ((pFilterItem != NULL) && (pFilterItem != pIgnoreItem))
+      {
+         if (pFilterItem->text(0) == filterName)
+         {
+            return false;
+         }
+      }
+
+      ++iter;
+   }
+
+   return true;
+}
+
+void SignatureSelector::createFilter()
+{
+   QTreeWidgetItem* pCurrentItem = mpFormatTree->currentItem();
+   VERIFYNRV(pCurrentItem != NULL);
+
+   QTreeWidgetItem* pParentItem = pCurrentItem->parent();
+   if (pParentItem == NULL)
+   {
+      pParentItem = pCurrentItem;
+   }
+
+   if (pParentItem != mpSignaturesItem)
+   {
+      return;
+   }
+
+   VERIFYNRV(pParentItem != NULL);
+
+   SignatureFilterDlg filterDlg(this);
+   filterDlg.setWindowTitle("Create Signature Filter");
+   filterDlg.setFilterName("Filter " + QString::number(pParentItem->childCount() + 1));
+
+   QString filterName;
+
+   bool uniqueName = false;
+   while (uniqueName == false)
+   {
+      if (filterDlg.exec() == QDialog::Rejected)
+      {
+         return;
+      }
+
+      filterName = filterDlg.getFilterName();   // The dialog ensures that the filter name is not empty
+      uniqueName = isFilterNameUnique(filterName);
+      if (uniqueName == false)
+      {
+         QMessageBox::warning(this, windowTitle(), "Another filter exists with the same name.  "
+            "Please select a unique name for the filter.");
+      }
+      else if ((filterName == sMetadataType) || (filterName == sDashType))
+      {
+         QMessageBox::warning(this, windowTitle(), "The \"" + filterName + "\" filter name is reserved "
+            "for internal use.  Please select a different name for the filter.");
+         uniqueName = false;
+      }
+   }
+
+   QMap<QString, QVariant> filter;
+   filter.insert("Library Signatures", QVariant(filterDlg.getLibrarySignatures()));
+   filter.insert("Signature Name", QVariant(filterDlg.getSignatureNameFilter()));
+   filter.insert("Metadata Name", QVariant(filterDlg.getMetadataNameFilter()));
+   filter.insert("Metadata Value", QVariant(filterDlg.getMetadataValueFilter()));
+
+   QTreeWidgetItem* pFilterItem = new QTreeWidgetItem(pParentItem);
+   pFilterItem->setText(0, filterName);      // Must set the text first to prevent checkFilterName()
+                                             // from prompting the user when the data and flags change
+   pFilterItem->setData(0, Qt::UserRole, QVariant(filter));
+   pFilterItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable);
+
+   // Setting the current item automatically causes the updateSignatureList() slot to be called
+   mpFormatTree->setCurrentItem(pFilterItem);
+}
+
+void SignatureSelector::editFilter()
+{
+   QTreeWidgetItem* pItem = mpFormatTree->currentItem();
+   if ((pItem == NULL) || (pItem->parent() == NULL))
+   {
+      return;
+   }
+
+   QString filterName = pItem->text(0);
+   QMap<QString, QVariant> filter = pItem->data(0, Qt::UserRole).toMap();
+   VERIFYNRV(filter.isEmpty() == false);
+
+   SignatureFilterDlg filterDlg(this);
+   filterDlg.setWindowTitle("Edit Signature Filter");
+   filterDlg.setFilterName(filterName);
+   filterDlg.setLibrarySignatures(filter["Library Signatures"].toBool());
+   filterDlg.setSignatureNameFilter(filter["Signature Name"].toRegExp());
+   filterDlg.setMetadataNameFilter(filter["Metadata Name"].toRegExp());
+   filterDlg.setMetadataValueFilter(filter["Metadata Value"].toRegExp());
+
+   bool uniqueName = false;
+   while (uniqueName == false)
+   {
+      if (filterDlg.exec() == QDialog::Rejected)
+      {
+         return;
+      }
+
+      filterName = filterDlg.getFilterName();   // The dialog ensures that the filter name is not empty
+      uniqueName = isFilterNameUnique(filterName, pItem);
+      if (uniqueName == false)
+      {
+         QMessageBox::warning(this, windowTitle(), "Another filter exists with the same name.  "
+            "Please select a unique name for the filter.");
+      }
+      else if ((filterName == sMetadataType) || (filterName == sDashType))
+      {
+         QMessageBox::warning(this, windowTitle(), "The \"" + filterName + "\" filter name is reserved "
+            "for internal use.  Please select a different name for the filter.");
+         uniqueName = false;
+      }
+   }
+
+   filter["Library Signatures"] = QVariant(filterDlg.getLibrarySignatures());
+   filter["Signature Name"] = QVariant(filterDlg.getSignatureNameFilter());
+   filter["Metadata Name"] = QVariant(filterDlg.getMetadataNameFilter());
+   filter["Metadata Value"] = QVariant(filterDlg.getMetadataValueFilter());
+
+   pItem->setText(0, filterName);
+   pItem->setData(0, Qt::UserRole, QVariant(filter));
+
+   updateSignatureList();
+}
+
+void SignatureSelector::checkFilterName(QTreeWidgetItem* pItem, int column)
+{
+   if ((pItem == NULL) || (column != 0))
+   {
+      return;
+   }
+
+   if (pItem->parent() != mpSignaturesItem)
+   {
+      return;
+   }
+
+   QString filterName = pItem->text(0);
+   if (filterName.isEmpty() == true)
+   {
+      QMessageBox::warning(this, windowTitle(), "Please enter a valid name for the filter.");
+   }
+   else if (isFilterNameUnique(filterName, pItem) == false)
+   {
+      QMessageBox::warning(this, windowTitle(), "Another filter exists with the same name.  "
+         "Please select a unique name for the filter.");
+   }
+   else if ((filterName == sMetadataType) || (filterName == sDashType))
+   {
+      QMessageBox::warning(this, windowTitle(), "The \"" + filterName + "\" filter name is reserved "
+         "for internal use.  Please select a different name for the filter.");
+   }
+   else
+   {
+      return;
+   }
+
+   mpFormatTree->closePersistentEditor(pItem, 0);
+   mpFormatTree->editItem(pItem, 0);
+}
+
+void SignatureSelector::deleteFilter()
+{
+   QTreeWidgetItem* pItem = mpFormatTree->currentItem();
+   if (pItem == NULL)
+   {
+      return;
+   }
+
+   // Do not allow the top-level items to be deleted
+   QTreeWidgetItem* pParentItem = pItem->parent();
+   if (pParentItem == NULL)
+   {
+      return;
+   }
+
+   // Delete the item
+   delete pItem;
+
+   // Make the parent item the current item, which updates the signature list
+   mpFormatTree->setCurrentItem(pParentItem);
+}
+
+void SignatureSelector::formatChanged()
+{
+   QTreeWidgetItem* pCurrentItem = mpFormatTree->currentItem();
+   QTreeWidgetItem* pParentItem = NULL;
+   if (pCurrentItem != NULL)
+   {
+      pParentItem = pCurrentItem->parent();
+   }
+
+   mpCreateFilterAction->setEnabled(pParentItem == mpSignaturesItem || pCurrentItem == mpSignaturesItem);
+   mpEditFilterAction->setEnabled(pParentItem == mpSignaturesItem);
+   mpDeleteFilterAction->setEnabled(pParentItem == mpSignaturesItem);
+   mpImportButton->setEnabled(pCurrentItem == mpSignaturesItem);
+   mpImportWidget->setEnabled(pCurrentItem == mpSignaturesItem);
+}
+
+void SignatureSelector::displayFormatContextMenu(const QPoint& menuPoint)
+{
+   QTreeWidgetItem* pCurrentItem = mpFormatTree->currentItem();
+   QTreeWidgetItem* pParentItem = NULL;
+   if (pCurrentItem != NULL)
+   {
+      pParentItem = pCurrentItem->parent();
+   }
+
+   QMenu contextMenu(mpFormatTree);
+   if (pCurrentItem == mpSignaturesItem || pParentItem == mpSignaturesItem)
+   {
+      contextMenu.addAction(mpCreateFilterAction);
+   }
+
+   QAction* pRenameFilterAction = NULL;
+   if (pParentItem == mpSignaturesItem)
+   {
+      contextMenu.addSeparator();
+      pRenameFilterAction = contextMenu.addAction("Rename");
+      contextMenu.addAction(mpEditFilterAction);
+      contextMenu.addAction(mpDeleteFilterAction);
+   }
+
+   if (contextMenu.actions().empty() == true)
+   {
+      return;
+   }
+
+   QAction* pInvokedAction = contextMenu.exec(mpFormatTree->viewport()->mapToGlobal(menuPoint));
+   if (pInvokedAction == pRenameFilterAction && pRenameFilterAction != NULL)
+   {
+      mpFormatTree->editItem(pCurrentItem);
+   }
+}
+
+void SignatureSelector::displaySignatureContextMenu(const QPoint& menuPoint)
+{
+   QTreeWidgetItem* pItem = mpFormatTree->currentItem();
+   if ((pItem != NULL) && (pItem->parent() != NULL))
+   {
+      pItem = pItem->parent();
+   }
+
+   if (pItem != mpSignaturesItem)
+   {
+      return;
+   }
+
+   int numSignatures = getNumSelectedSignatures();
+   if (numSignatures == 0)
+   {
+      return;
+   }
+
+   QMenu contextMenu(mpFormatTree);
+   if (numSignatures == 1)
+   {
+      contextMenu.addAction(mpPropertiesAction);
+   }
+
+   contextMenu.addAction(mpExportAction);
+   contextMenu.addAction(mpDeleteAction);
+   contextMenu.exec(mpSignatureList->viewport()->mapToGlobal(menuPoint));
 }
