@@ -305,7 +305,7 @@ public:
     *
     * @see     getNumSelectedRows(), getNumSelectedColumns()
     */
-   int BitMaskIterator::getNumRows() const;
+   int getNumRows() const;
 
    /**
     * Gets the number of columns contained within the extents.
@@ -314,7 +314,7 @@ public:
     *
     * @see     getNumSelectedRows(), getNumSelectedColumns()
     */
-   int BitMaskIterator::getNumColumns() const;
+   int getNumColumns() const;
 
    /**
     * Gets the starting row of the extents over which the iterator iterates.
@@ -326,7 +326,7 @@ public:
     *
     * @see     getBoundingBox(), getBoundingBoxStartColumn()
     */
-   int BitMaskIterator::getBoundingBoxStartRow() const;
+   int getBoundingBoxStartRow() const;
 
    /**
     * Gets the starting column of the extents over which the iterator iterates.
@@ -338,7 +338,7 @@ public:
     *
     * @see     getBoundingBox(), getBoundingBoxStartRow()
     */
-   int BitMaskIterator::getBoundingBoxStartColumn() const;
+   int getBoundingBoxStartColumn() const;
 
    /**
     * Gets the ending row of the extents over which the iterator iterates.
@@ -350,7 +350,7 @@ public:
     *
     * @see     getBoundingBox(), getBoundingBoxEndColumn()
     */
-   int BitMaskIterator::getBoundingBoxEndRow() const;
+   int getBoundingBoxEndRow() const;
 
    /**
     * Gets the ending column of the extents over which the iterator iterates.
@@ -362,7 +362,7 @@ public:
     *
     * @see     getBoundingBox(), getBoundingBoxEndRow()
     */
-   int BitMaskIterator::getBoundingBoxEndColumn() const;
+   int getBoundingBoxEndColumn() const;
 
    /**
     * Gets the distance in pixels from the beginning of the extents to the first selected pixel in the BitMask.
@@ -375,7 +375,7 @@ public:
     *
     * @see     getOffset(), getColumnOffset()
     */
-   int BitMaskIterator::getRowOffset() const;
+   int getRowOffset() const;
 
    /**
     * Gets the distance in pixels from the beginning of the extents to the first selected pixel in the BitMask.
@@ -388,7 +388,7 @@ public:
     *
     * @see     getOffset(), getRowOffset()
     */
-   int BitMaskIterator::getColumnOffset() const;
+   int getColumnOffset() const;
 
    /**
     * Gets the row of the current pixel.
@@ -400,7 +400,7 @@ public:
     *
     * @see     getPixelColumnLocation()
     */
-   int BitMaskIterator::getPixelRowLocation() const;
+   int getPixelRowLocation() const;
 
    /**
     * Gets the column of the current pixel.
@@ -412,7 +412,7 @@ public:
     *
     * @see     getPixelRowLocation()
     */
-   int BitMaskIterator::getPixelColumnLocation() const;
+   int getPixelColumnLocation() const;
 
 private:
    BitMaskIterator(BitMaskIterator, bool);
