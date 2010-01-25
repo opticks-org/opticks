@@ -2996,7 +2996,6 @@ bool HistogramPlotImp::fromXml(DOMNode* pDocument, unsigned int version)
       }
    }
 
-   draw();
    return true;
 }
 
