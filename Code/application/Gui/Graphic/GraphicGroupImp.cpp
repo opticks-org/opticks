@@ -915,7 +915,7 @@ bool GraphicGroupImp::toXml(XMLWriter* pXml) const
                      pParentWidget = dynamic_cast<ViewImp*>(pLayer->getView());
                   }
 
-                  int iReturn = QMessageBox::question(pParentWidget, APP_NAME, "An graphic object cannot be "
+                  int iReturn = QMessageBox::question(pParentWidget, APP_NAME, "A graphic object cannot be "
                      "saved.  Do you want to continue saving?", QMessageBox::Yes, QMessageBox::YesAll,
                      QMessageBox::No);
                   if (iReturn == QMessageBox::No)

@@ -34,6 +34,7 @@
 #include <limits>
 #include <list>
 #include <math.h>
+#include <memory>
 
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
@@ -1353,7 +1354,7 @@ bool GraphicObjectImp::fromXml(DOMNode* pDocument, unsigned int version)
       return false;
    }
 
-   DOMElement* pElement = static_cast<DOMElement*> (pDocument);
+   DOMElement* pElement = static_cast<DOMElement*>(pDocument);
    if (pElement != NULL)
    {
       // Check the object type
@@ -1383,21 +1384,12 @@ bool GraphicObjectImp::fromXml(DOMNode* pDocument, unsigned int version)
    {
       string propertyName(A(pChild->getNodeName()));
 
-      GraphicProperty* pProperty = createProperty(propertyName);
-      if (pProperty != NULL)
+      auto_ptr<GraphicProperty> pProperty(createProperty(propertyName));
+      if (pProperty.get() != NULL)
       {
-         try
+         if (!pProperty->fromXml(pChild, version))
          {
-            if (!pProperty->fromXml(pChild, version))
-            {
-               delete pProperty;
-               throw XmlReader::DomParseException("Can't deserialize property", pChild);
-            }
-         }
-         catch (XmlReader::DomParseException& exc)
-         {
-            delete pProperty;
-            throw exc;
+            return false;
          }
 
          if (hasProperty(propertyName) == false)
@@ -1405,12 +1397,10 @@ bool GraphicObjectImp::fromXml(DOMNode* pDocument, unsigned int version)
             addProperty(propertyName);
          }
 
-         if (setProperty(pProperty) == true)
+         if (setProperty(pProperty.get()) == true)
          {
             updateHandles();
          }
-
-         delete pProperty;
       }
    }
 
