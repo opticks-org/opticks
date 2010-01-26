@@ -464,7 +464,8 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
                                  "Frames may be dropped.", 0, WARNING);
    }
 
-   double interval = rational_cast<double>(frameSpeed / framerate);
+   // do not use the boost::rational<int> overloaded operator '/' since it truncates type double to int
+   double interval = frameSpeed * framerate.denominator() / framerate.numerator();
 
    // export the frames
    AVFrame* pTmpPicture = alloc_picture(PIX_FMT_RGBA32, pCodecContext->width, pCodecContext->height);
