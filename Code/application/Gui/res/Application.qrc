@@ -8,6 +8,8 @@
 </qresource>
 <qresource prefix="/icons">
    <file alias="About">icons/AboutIcon.png</file>
+   <file alias="AddMetadataChild">icons/AddMetadataChildIcon.png</file>
+   <file alias="AddMetadataSibling">icons/AddMetadataSiblingIcon.png</file>
    <file alias="AdvanceBackward">icons/AdvanceBackwardIcon.png</file>
    <file alias="AdvanceForward">icons/AdvanceForwardIcon.png</file>
    <file alias="AlignBottom">icons/AlignBottomIcon.png</file>
@@ -49,6 +51,7 @@
    <file alias="ChipImage">icons/ChipImageIcon.png</file>
    <file alias="CircleArc">icons/CircleArcIcon.png</file>
    <file alias="Circle">icons/CircleIcon.png</file>
+   <file alias="ClearMetadata">icons/ClearMetadataIcon.png</file>
    <file alias="Clock">icons/ClockIcon.png</file>
    <file alias="Close">icons/CloseIcon.png</file>
    <file alias="Column">icons/ColumnIcon.png</file>
@@ -60,6 +63,7 @@
    <file alias="Decrease">icons/DecreaseIcon.png</file>
    <file alias="DeleteFilter">icons/DeleteFilterIcon.png</file>
    <file alias="Delete">icons/DeleteIcon.png</file>
+   <file alias="DeleteMetadataValue">icons/DeleteMetadataValueIcon.png</file>
    <file alias="Desktop">icons/DesktopIcon.png</file>
    <file alias="DirectionBackward">icons/DirectionBackwardIcon.png</file>
    <file alias="DirectionForward">icons/DirectionForwardIcon.png</file>
@@ -70,6 +74,7 @@
    <file alias="EastArrow">icons/EastArrowIcon.png</file>
    <file alias="EditFilter">icons/EditFilterIcon.png</file>
    <file alias="Edit">icons/EditIcon.png</file>
+   <file alias="EditMetadataValue">icons/EditMetadataValueIcon.png</file>
    <file alias="Ellipse">icons/EllipseIcon.png</file>
    <file alias="EraseAll">icons/EraseAllIcon.png</file>
    <file alias="EraseColumn">icons/EraseColumnIcon.png</file>
@@ -144,6 +149,7 @@
    <file alias="MessageLogWindow">icons/MessageLogWindowIcon.png</file>
    <file alias="MinorHorizontalGridlines">icons/MinorHorizontalGridlinesIcon.png</file>
    <file alias="MinorVerticalGridlines">icons/MinorVerticalGridlinesIcon.png</file>
+   <file alias="ModifyMetadata">icons/ModifyMetadataIcon.png</file>
    <file alias="Module">icons/ModuleIcon.png</file>
    <file alias="New">icons/NewIcon.png</file>
    <file alias="NorthArrow">icons/NorthArrowIcon.png</file>

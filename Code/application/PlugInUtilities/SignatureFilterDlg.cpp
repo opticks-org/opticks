@@ -183,5 +183,5 @@ void SignatureFilterDlg::showEvent(QShowEvent* pEvent)
 {
    mpFilterNameEdit->selectAll();
    mpFilterNameEdit->setFocus();
-   return QDialog::showEvent(pEvent);
+   QDialog::showEvent(pEvent);
 }

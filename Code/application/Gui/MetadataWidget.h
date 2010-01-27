@@ -10,14 +10,20 @@
 #ifndef METADATAWIDGET_H
 #define METADATAWIDGET_H
 
-#include <QtGui/QPushButton>
-#include <QtGui/QTreeView>
 #include <QtGui/QWidget>
+
+#include <string>
 
 class DynamicObject;
 class DynamicObjectAdapter;
 class DynamicObjectItemModel;
+class QCheckBox;
+class QComboBox;
+class QModelIndex;
+class QRegExp;
 class QSortFilterProxyModel;
+class QToolButton;
+class QTreeView;
 
 class MetadataWidget : public QWidget
 {
@@ -38,6 +44,11 @@ signals:
    void modified();
 
 protected slots:
+   void enableFilters(bool enable);
+   void applyFilter(int filterIndex);
+   void createFilter();
+   void editFilter();
+   void deleteFilter();
    void modifyValues();
    void addKey();
    void editCurrentValue();
@@ -55,20 +66,29 @@ protected:
    };
 
 private:
+   bool applyFilter(int row, const QModelIndex& parent, const QRegExp& nameFilter, const QRegExp& valueFilter,
+      bool parentMatch = false);
+   bool isFilterNameUnique(const QString& filterName, int ignoreIndex = -1) const;
+
    QTreeView* mpMetadataTree;
+   QCheckBox* mpFilterCheck;
+   QComboBox* mpFilterCombo;
+   QToolButton* mpCreateFilterButton;
+   QToolButton* mpEditFilterButton;
+   QToolButton* mpDeleteFilterButton;
+   QToolButton* mpModifyButton;
+   QToolButton* mpAddChildButton;
+   QToolButton* mpAddSiblingButton;
+   QToolButton* mpEditButton;
+   QToolButton* mpDeleteButton;
+   QToolButton* mpClearButton;
+
    DynamicObjectAdapter* mpObject;
    DynamicObject* mpMetadata;
    DynamicObjectItemModel* mpMetadataModel;
    QSortFilterProxyModel* mpMetadataSortingModel;
 
    bool mModified;
-
-   QPushButton* mpModifyButton;
-   QPushButton* mpAddChildButton;
-   QPushButton* mpAddSiblingButton;
-   QPushButton* mpEditButton;
-   QPushButton* mpDeleteButton;
-   QPushButton* mpClearButton;
 };
 
 #endif
