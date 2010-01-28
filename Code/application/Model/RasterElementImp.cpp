@@ -1259,7 +1259,7 @@ bool RasterElementImp::deserialize(SessionItemDeserializer& deserializer)
          mpGeoPlugin = NULL;
       }
    }
-   catch (const XmlReader::DomParseException&)
+   catch (const XmlBase::XmlException&)
    {
       return false;
    }
