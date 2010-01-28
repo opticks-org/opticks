@@ -57,7 +57,7 @@ void vectorFromField(EnviField* pField, vector<T>& vec, const char* pFormat)
 
       pPtr = strtok (NULL, ",");
    }
-   delete pBuffer;
+   delete [] pBuffer;
 }
 
 EnviImporter::EnviImporter() :
@@ -152,12 +152,12 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
                      pDescriptor->setRows(rows);
                      pFileDescriptor->setRows(rows);
                   }
-                 
+
                   // Columns
                   vector<DimensionDescriptor> columns;
                   pField = mFields.find("samples");
                   if (pField != NULL)
-                  {                  
+                  {
                      int numColumns = atoi(pField->mValue.c_str());
                      for (int i = 0; i < numColumns; ++i)
                      {
@@ -535,23 +535,31 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
 
                   // Bad bands
                   pField = mFields.find("bbl");
-                  vector<unsigned int> goodBandNumbers;
                   if (pField != NULL)
                   {
-                     parseBbl(pField, &goodBandNumbers);
-
-                     vector<DimensionDescriptor> bandsToLoad;
-                     for (vector<unsigned int>::size_type i = 0; i < goodBandNumbers.size(); ++i)
+                     // Special case: if the file type is an ENVI Spectral Library,
+                     // then bbl describes column subsetting, not band subsetting.
+                     // If no file type field exists, assume this is a normal ENVI header (not a Spectral Library).
+                     EnviField* pFileTypeField = mFields.find("file type");
+                     if (pFileTypeField == NULL || (pFileTypeField->mValue !=
+                        "ENVI Spectral Library" && pFileTypeField->mValue != "Spectral Library"))
                      {
-                        unsigned int onDiskNumber = goodBandNumbers[i];
-                        DimensionDescriptor bandDim = pFileDescriptor->getOnDiskBand(onDiskNumber);
-                        if (bandDim.isValid())
-                        {
-                           bandsToLoad.push_back(bandDim);
-                        }
-                     }
+                        vector<unsigned int> goodBandNumbers;
+                        parseBbl(pField, &goodBandNumbers);
 
-                     pDescriptor->setBands(bandsToLoad);
+                        vector<DimensionDescriptor> bandsToLoad;
+                        for (vector<unsigned int>::size_type i = 0; i < goodBandNumbers.size(); ++i)
+                        {
+                           unsigned int onDiskNumber = goodBandNumbers[i];
+                           DimensionDescriptor bandDim = pFileDescriptor->getOnDiskBand(onDiskNumber);
+                           if (bandDim.isValid())
+                           {
+                              bandsToLoad.push_back(bandDim);
+                           }
+                        }
+
+                        pDescriptor->setBands(bandsToLoad);
+                     }
                   }
 
                   DynamicObject* pMetadata = pDescriptor->getMetadata();
@@ -561,7 +569,7 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
                   if (pField != NULL)
                   {
                      vector<string> bandNames;
-                     bandNames.reserve(bands.size());  
+                     bandNames.reserve(bands.size());
                      vector<string> strNames;
                      for (vector<EnviField*>::size_type i = 0; i < pField->mChildren.size(); ++i)
                      {
@@ -576,7 +584,7 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
 
                      if (pMetadata != NULL)
                      {
-                        string pNamesPath[] = { SPECIAL_METADATA_NAME, BAND_METADATA_NAME, 
+                        string pNamesPath[] = { SPECIAL_METADATA_NAME, BAND_METADATA_NAME,
                            NAMES_METADATA_NAME, END_METADATA_NAME };
                         pMetadata->setAttributeByPath(pNamesPath, bandNames);
                      }
@@ -596,7 +604,7 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
                   {
                      if ((parseWavelengths(pField, &centerWavelengths) == true) && (pMetadata != NULL))
                      {
-                        string pCenterPath[] = { SPECIAL_METADATA_NAME, BAND_METADATA_NAME, 
+                        string pCenterPath[] = { SPECIAL_METADATA_NAME, BAND_METADATA_NAME,
                            CENTER_WAVELENGTHS_METADATA_NAME, END_METADATA_NAME };
                         pMetadata->setAttributeByPath(pCenterPath, centerWavelengths);
                      }
@@ -612,10 +620,10 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
                      if ((parseFwhm(pField, &startWavelengths, &centerWavelengths, &endWavelengths) == true) &&
                         (pMetadata != NULL))
                      {
-                        string pStartPath[] = { SPECIAL_METADATA_NAME, BAND_METADATA_NAME, 
+                        string pStartPath[] = { SPECIAL_METADATA_NAME, BAND_METADATA_NAME,
                            START_WAVELENGTHS_METADATA_NAME, END_METADATA_NAME };
                         pMetadata->setAttributeByPath(pStartPath, startWavelengths);
-                        string pEndPath[] = { SPECIAL_METADATA_NAME, BAND_METADATA_NAME, 
+                        string pEndPath[] = { SPECIAL_METADATA_NAME, BAND_METADATA_NAME,
                            END_WAVELENGTHS_METADATA_NAME, END_METADATA_NAME };
                         pMetadata->setAttributeByPath(pEndPath, endWavelengths);
                      }
@@ -1009,6 +1017,18 @@ bool EnviImporter::validate(const DataDescriptor* pDescriptor, string& errorMess
 
          errorMessage += "Possible problem in ENVI header file: The number of band "
             "names did not match the number of bands.";
+      }
+   }
+
+   // check for bbl in ENVI Spectral Library
+   if (mFields.find("bbl") != NULL)
+   {
+      EnviField* pFileTypeField = mFields.find("file type");
+      if (pFileTypeField != NULL && (pFileTypeField->mValue ==
+         "ENVI Spectral Library" || pFileTypeField->mValue == "Spectral Library"))
+      {
+         errorMessage += "Detected bad bands in ENVI Spectral Library. "
+            "Bad bands for this file type are not currently supported and will be ignored.";
       }
    }
 

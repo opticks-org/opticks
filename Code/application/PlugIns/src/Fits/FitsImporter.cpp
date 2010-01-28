@@ -657,8 +657,20 @@ bool FitsImporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList
    }
    else if (pLibrary != NULL)
    {
-      if (!pLibrary->import(pLibrary->getFilename() + "[" +
-               pLibrary->getDataDescriptor()->getFileDescriptor()->getDatasetLocation() + "]", "FITS Importer"))
+      const std::string filename = pLibrary->getFilename() + "[" +
+         pLibrary->getDataDescriptor()->getFileDescriptor()->getDatasetLocation() + "]";
+
+      bool success;
+      SignatureLibraryExt1* pLibraryExt1 = dynamic_cast<SignatureLibraryExt1*>(pLibrary);
+      if (pLibraryExt1 != NULL)
+      {
+         success = pLibraryExt1->import(filename, "FITS Importer", progress.getCurrentProgress());
+      }
+      else
+      {
+         success = pLibrary->import(filename, "FITS Importer");
+      }
+      if (!success)
       {
          progress.report("Unable to import signature library.", 0, ERRORS, true);
          return false;

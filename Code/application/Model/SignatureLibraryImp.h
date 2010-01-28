@@ -38,7 +38,7 @@ public:
    const std::string& getAbscissaName() const;
    bool resample(const std::vector<double> &abscissa);
    void desample();
-   bool import(const std::string &filename, const std::string &importerName);
+   bool import(const std::string& filename, const std::string& importerName, Progress* pProgress = NULL);
 
    bool insertSignature(Signature* pSignature);
    bool insertSignatures(const std::vector<Signature*>& signatures);
@@ -74,7 +74,7 @@ private:
 };
 
 #define SIGNATURELIBRARYADAPTEREXTENSION_CLASSES \
-   SIGNATURESETADAPTEREXTENSION_CLASSES
+   SIGNATURESETADAPTEREXTENSION_CLASSES , public SignatureLibraryExt1
 
 #define SIGNATURELIBRARYADAPTER_METHODS(impClass) \
    SIGNATURESETADAPTER_METHODS(impClass) \
@@ -130,9 +130,13 @@ private:
    { \
       impClass::desample(); \
    } \
-   bool import(const std::string &filename, const std::string &importerName) \
+   bool import(const std::string& filename, const std::string& importerName) \
    { \
       return impClass::import(filename, importerName); \
+   } \
+   bool import(const std::string& filename, const std::string& importerName, Progress* pProgress) \
+   { \
+      return impClass::import(filename, importerName, pProgress); \
    }
 
 

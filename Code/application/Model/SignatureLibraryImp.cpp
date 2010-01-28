@@ -264,9 +264,9 @@ void SignatureLibraryImp::desample()
    }
 }
 
-bool SignatureLibraryImp::import(const string &filename, const string &importerName)
+bool SignatureLibraryImp::import(const string &filename, const string &importerName, Progress* pProgress)
 {
-   ImporterResource importer(importerName, filename);
+   ImporterResource importer(importerName, filename, pProgress);
    vector<ImportDescriptor*> descs = importer->getImportDescriptors();
 
    RasterDataDescriptor* pCubeDescriptor = NULL;

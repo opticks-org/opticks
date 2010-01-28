@@ -17,6 +17,7 @@
 #include <string>
 #include <vector>
 
+class Progress;
 class RasterElement;
 
 /**
@@ -41,7 +42,7 @@ class RasterElement;
  *    resample(), desample(), import(), insertSignature(), insertSignatures(), clear().
  *  - Everything else documented in SignatureSet.
  *
- *  @see    SignatureSet
+ *  @see SignatureLibraryExt1, SignatureSet
  */
 class SignatureLibrary : public SignatureSet
 {
@@ -51,10 +52,11 @@ public:
     *  to.
     *
     *  Returns the values that the signature ordinate data is currently sampled
-    *  to. If the library has not been resampled, this will return an empty
-    *  vector.
+    *  to. If the library has not been resampled, this will return getOriginalAbscissa().
     *
     *  @return  The active abscissa of the library.
+    *
+    *  @see getOriginalAbscissa()
     */
    virtual const std::vector<double>& getAbscissa() const = 0;
 
@@ -91,7 +93,7 @@ public:
     *  with each signature's ordinate data being contiguous. The number of 
     *  ordinate samples for each signature will be the same as the number of
     *  abscissa values returned from getAbscissa(). If the library has not been
-    *  resampled, this returns NULL.
+    *  resampled, this returns \c NULL.
     *
     *  @return  The entire resampled signature library's ordinate data.
     */
@@ -103,13 +105,13 @@ public:
     *  The resampled ordinate data is returned as a single array of doubles. 
     *  The number of ordinate samples for the signature will be the same as the
     *  number of abscissa values returned from getAbscissa(). If the library 
-    *  has not been resampled, this returns NULL.
+    *  has not been resampled, this returns \c NULL.
     *
     *  @param   index
     *           The index of the signature for which the ordinate data is to be
     *           retrieved.
     *
-    *  @return  The signature's resampled ordinate data, or NULL of the library
+    *  @return  The signature's resampled ordinate data, or \c NULL of the library
     *         has not been resampled or the index is invalid.
     */
    virtual const double *getOrdinateData(unsigned int index) const = 0;
@@ -139,7 +141,7 @@ public:
     *  @param   index
     *           The index of the signature to be retrieved.
     *
-    *  @return  The specified signature, or NULL if the index is invalid.
+    *  @return  The specified signature, or \c NULL if the index is invalid.
     */
    virtual const Signature *getSignature(unsigned int index) const = 0;
 
@@ -149,7 +151,7 @@ public:
     *  @param   name
     *           The name of the signature to be retrieved.
     *
-    *  @return  The specified signature or NULL if the specified signature does
+    *  @return  The specified signature or \c NULL if the specified signature does
     *           not exist in the library.
     */
    virtual const Signature* getSignature(const std::string& name) const = 0;
@@ -165,7 +167,7 @@ public:
     *  Resamples the raw ordinate data to the specified abscissa.
     *
     *  Resamples the entire raw ordinate data set to the specified abscissa.
-    *  After calling this, the getOrdinateData() methods will return non-NULL
+    *  After calling this, the getOrdinateData() methods will return non-\c NULL
     *  pointers to the resampled ordinate data. If the range of the abscissa
     *  is greater than the range of the original abscissa, or if the resampling
     *  fails for any other reason, this method will fail and will leave the
@@ -174,9 +176,9 @@ public:
     *  @param   abscissa
     *           The abscissa values to resample the ordinate data to. If this 
     *           is empty, the ordinate data will not be resampled and 
-    *           getOrdinateData() will return NULL.
+    *           getOrdinateData() will return \c NULL.
     *
-    *  @return  True if resampling was successful, or false otherwise.
+    *  @return  \c True if resampling was successful, or \c false otherwise.
     *
     *  @notify  This method will notify Subject::signalModified.
     */
@@ -196,10 +198,11 @@ public:
    /**
     *  Imports a new signature library file into the library object.
     *
+    *  @deprecated This method is deprecated and will be replaced by SignatureLibraryExt1::import.
+    *
     *  This method clears the SignatureLibrary and then imports a new library
     *  file into it. The library will be imported as an on-disk RasterElement
-    *  and will be available via getOriginalOrdinateData(). This method will
-    *  fail if the library is not empty.
+    *  and will be available via getOriginalOrdinateData().
     *
     *  @param filename
     *         The full pathname of the file to import.
@@ -208,12 +211,11 @@ public:
     *         The name of the importer to use to import the library as an on-
     *         disk RasterElement.
     *
-    *  @return  True if the import succeeded and false otherwise.
+    *  @return  \c True if the import succeeded and \c false otherwise.
     *
     *  @notify  This method will notify Subject::signalModified.
     *
-    *  @see clear()
-    *  @see getOriginalOrdinateData()
+    *  @see clear(), getOriginalOrdinateData()
     */
    virtual bool import(const std::string &filename, const std::string &importerName) = 0;
 
@@ -226,7 +228,7 @@ public:
     *  @param   pSignature
     *           The signature to add to the library.
     *
-    *  @return  TRUE if the signature was successfully added to the library, otherwise FALSE.
+    *  @return  \c True if the signature was successfully added to the library, otherwise \c false.
     *
     *  @notify  This method will notify Subject::signalModified.
     */
@@ -236,13 +238,13 @@ public:
     *  Adds several signatures to the library. 
     *
     *  Adds several signatures into any empty library. The signatures must be 
-    *  unique. If any of the sigs to add are NULL, the method will fail, 
+    *  unique. If any of the sigs to add are \c NULL, the method will fail,
     *  having done nothing. If the library is not empty, this method will fail.
     *
     *  @param   signatures
     *           A vector of signatures to add to the library
     *
-    *  @return  true if the signatures were added, otherwise false.
+    *  @return  \c true if the signatures were added, otherwise \c false.
     *
     *  @notify  This method will notify Subject::signalModified after the 
     *           sigs are done being added to the list. Only one notification 
@@ -263,8 +265,8 @@ public:
     *           This value is ignored. If the method succeeds, the signatures
     *           will be deleted.
     *
-    *  @return  TRUE if the signature successfully removed from the library, otherwise
-    *           FALSE.  FALSE is also returned if the given signature does not exist
+    *  @return  \c True if the signature successfully removed from the library, otherwise
+    *           \c false.  \c False is also returned if the given signature does not exist
     *           in the library.
     *
     *  @notify  This method will notify Subject::signalModified.
@@ -316,6 +318,54 @@ protected:
     * This should be destroyed by calling ModelServices::destroyElement.
     */
    virtual ~SignatureLibrary() {}
+};
+
+/**
+ * Extends capability of the SignatureLibrary interface.
+ *
+ * This class provides additional capability for the SignatureLibrary interface
+ * class.  A pointer to this class can be obtained by performing a dynamic cast
+ * on a pointer to SignatureLibrary.
+ *
+ * @warning A pointer to this class can only be used to call methods contained
+ *          in this extension class and cannot be used to call any methods in
+ *          SignatureLibrary.
+ */
+class SignatureLibraryExt1
+{
+public:
+   /**
+    *  Imports a new signature library file into the library object.
+    *
+    *  This method clears the SignatureLibrary and then imports a new library
+    *  file into it. The library will be imported as an on-disk RasterElement
+    *  and will be available via SignatureLibrary::getOriginalOrdinateData().
+    *
+    *  @param filename
+    *         The full pathname of the file to import.
+    *
+    *  @param importerName
+    *         The name of the importer to use to import the library as an on-
+    *         disk RasterElement.
+    *
+    *  @param pProgress
+    *         The progress object to pass into the importer.  If \c NULL is
+    *         passed in, a progress object is obtained by calling
+    *         PlugInManagerServices::getProgress().
+    *
+    *  @return  \c True if the import succeeded and \c false otherwise.
+    *
+    *  @notify  This method will notify Subject::signalModified.
+    *
+    *  @see SignatureLibrary::clear(), SignatureLibrary::getOriginalOrdinateData()
+    */
+   virtual bool import(const std::string& filename, const std::string& importerName, Progress* pProgress) = 0;
+
+protected:
+   /**
+    * This should be destroyed by calling ModelServices::destroyElement.
+    */
+   virtual ~SignatureLibraryExt1() {}
 };
 
 #endif
