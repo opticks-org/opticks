@@ -18,6 +18,7 @@
 #include "PlugInResource.h"
 #include "ProgressTracker.h"
 #include "RunInterpreterCommands.h"
+#include "StringUtilities.h"
 
 #include <QtCore/QDateTime>
 #include <QtCore/QFile>
@@ -58,7 +59,10 @@ bool RunInterpreterCommands::getInputSpecification(PlugInArgList*& pArgList)
       "A file with commands for the interpreter to run. May not be used with any other command argument."));
    VERIFY(pArgList->addArg<Filename>("Log File",
       "An optional file for interpreter output. This file will be overwritten if it exists."));
-
+   VERIFY(pArgList->addArg<std::string>("Command File Location",
+      "A file with commands for the interpreter to run.  You can use $V(APP_HOME) inside this "
+      "string and it will auto-expand to the application install location.  May not be used with any other "
+      "command argument."));
    return true;
 }
 
@@ -82,12 +86,20 @@ bool RunInterpreterCommands::execute(PlugInArgList* pInArgList, PlugInArgList* p
    std::vector<std::string> commandList;
    const bool hasCommandList = pInArgList->getPlugInArgValue("Command List", commandList);
 
+   std::string commandFileLocation;
+   const bool hasCommandFileLocation = pInArgList->getPlugInArgValue("Command File Location" , commandFileLocation);
+
    Filename* const pCommandFile = pInArgList->getPlugInArgValue<Filename>("Command File");
    const bool hasCommandFile = pCommandFile != NULL;
 
    // Check that exactly one command type was specified by the user.
-   if ((hasCommand && hasCommandList) || (hasCommand && hasCommandFile) || (hasCommandList && hasCommandFile) ||
-      (hasCommand == false && hasCommandList == false && hasCommandFile == false))
+   if ((hasCommand && hasCommandList) ||
+       (hasCommand && hasCommandFile) ||
+       (hasCommandList && hasCommandFile) ||
+       (hasCommand && hasCommandFileLocation) ||
+       (hasCommandList && hasCommandFileLocation) ||
+       (hasCommandFile && hasCommandFileLocation) ||
+       (hasCommand == false && hasCommandList == false && hasCommandFile == false && hasCommandFileLocation == false))
    {
       progress.report("Exactly one type of command must be specified.", 0, ERRORS, true);
       return false;
@@ -99,17 +111,26 @@ bool RunInterpreterCommands::execute(PlugInArgList* pInArgList, PlugInArgList* p
       commandList.push_back(command);
    }
 
-   if (hasCommandFile)
+   if (hasCommandFile || hasCommandFileLocation)
    {
       // Read the file, putting each line (including empty lines) into its own command.
       // This is done to close the source file as quickly as possible so that the file can be edited while commands
       // are being processed even though it requires more memory and errors early in the file will not appear as
       // quickly because the whole file is read before any commands are sent to the interpreter.
-      QFile commandFile(QString::fromStdString(pCommandFile->getFullPathAndName()));
+      std::string commandFilePath;
+      if (hasCommandFile)
+      {
+         commandFilePath = pCommandFile->getFullPathAndName();
+      }
+      else
+      {
+         commandFilePath = StringUtilities::expandVariables(commandFileLocation);
+      }
+      QFile commandFile(QString::fromStdString(commandFilePath));
       if (commandFile.open(QIODevice::ReadOnly | QIODevice::Text) == false)
       {
          progress.report("Unable to read from the command file at: \"" +
-            pCommandFile->getFullPathAndName() + "\".", 0, ERRORS, true);
+            commandFilePath + "\".", 0, ERRORS, true);
          return false;
       }
 
@@ -174,7 +195,7 @@ bool RunInterpreterCommands::execute(PlugInArgList* pInArgList, PlugInArgList* p
 
    // Check that the plug-in either exists or was created successfully.
    // If not, report an error and exit immediately.
-   InterpreterExt1* const pInterpreter = dynamic_cast<InterpreterExt1*>(pInterpreterResource->getPlugIn());
+   Interpreter* const pInterpreter = dynamic_cast<Interpreter*>(pInterpreterResource->getPlugIn());
    if (pInterpreter == NULL)
    {
       std::string errorMessage;
@@ -249,7 +270,12 @@ bool RunInterpreterCommands::execute(PlugInArgList* pInArgList, PlugInArgList* p
       }
 
       progress.report("Running interpreter commands.", static_cast<int>(percent), NORMAL);
-      const std::string prompt = pInterpreter->getPrompt();
+      std::string prompt = interpreterName + "> ";
+      InterpreterExt1* pInterpreterExt1 = dynamic_cast<InterpreterExt1*>(pInterpreter);
+      if (pInterpreterExt1 != NULL) //don't require a InterpreterExt1* pointer to work.
+      {
+         prompt = pInterpreterExt1->getPrompt();
+      }
       pInterpreterResource->getInArgList().setPlugInArgValue<std::string>(Interpreter::CommandArg(), &(*iter));
       const bool success = pInterpreterResource->execute();
       percent += step;
