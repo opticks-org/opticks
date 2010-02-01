@@ -214,6 +214,8 @@ void MetadataWidget::setMetadata(DynamicObject* pMetadata)
       }
    }
 
+   mModified = false;
+
    if (mpFilterCheck->isChecked() == true)
    {
       int filterIndex = mpFilterCombo->currentIndex();
@@ -236,8 +238,6 @@ bool MetadataWidget::applyChanges()
    if (mpMetadata != NULL)
    {
       *(dynamic_cast<DynamicObjectImp*>(mpMetadata)) = *mpObject;
-
-      mModified = false;
       return true;
    }
 
