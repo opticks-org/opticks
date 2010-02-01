@@ -89,7 +89,7 @@ BitMaskIterator::BitMaskIterator(const BitMask* pBitMask, const RasterElement* p
    mMaxX(-1),
    mMaxY(-1)
 {
-   if (mpBitMask == NULL || pRasterElement == NULL)
+   if (pRasterElement == NULL)
    {
       return;
    }
@@ -102,7 +102,7 @@ BitMaskIterator::BitMaskIterator(const BitMask* pBitMask, const RasterElement* p
 
    mMaxY = pDescriptor->getRowCount() - 1;
    mMaxX = pDescriptor->getColumnCount() - 1;
-   if (mpBitMask->isOutsideSelected())
+   if ((mpBitMask == NULL) || mpBitMask->isOutsideSelected())
    {
       mX1 = mMinX;
       mY1 = mMinY;
