@@ -25,6 +25,7 @@ MeasurementLayerImp::MeasurementLayerImp(const string& id, const string& layerNa
    clearAcceptableGraphicTypes();
    addAcceptableGraphicType(MOVE_OBJECT);
    addAcceptableGraphicType(MEASUREMENT_OBJECT);
+   setCurrentGraphicObjectType(MEASUREMENT_OBJECT);
 
    mbDisplayDistanceText = MeasurementLayer::getSettingDisplayDistanceLabel();
    mbDisplayBearingText = MeasurementLayer::getSettingDisplayBearingLabel();
@@ -39,8 +40,7 @@ MeasurementLayerImp::MeasurementLayerImp(const string& id, const string& layerNa
 }
 
 MeasurementLayerImp::~MeasurementLayerImp()
-{
-}
+{}
 
 const string& MeasurementLayerImp::getObjectType() const
 {
@@ -196,4 +196,15 @@ bool MeasurementLayerImp::fromXml(DOMNode* pDocument, unsigned int version)
    }
 
    return true;
+}
+
+bool MeasurementLayerImp::removeObject(GraphicObject* pObject, bool bDelete)
+{
+   const bool success = AnnotationLayerImp::removeObject(pObject, bDelete);
+   if (getNumObjects() == 0)
+   {
+      setCurrentGraphicObjectType(MEASUREMENT_OBJECT);
+   }
+
+   return success;
 }

@@ -117,7 +117,6 @@ MeasurementToolBar::MeasurementToolBar(const string& id, QWidget* parent) :
    mpDistanceLabelAction->setChecked(MeasurementLayer::getSettingDisplayDistanceLabel());
    mpEndPointsLabelAction->setChecked(MeasurementLayer::getSettingDisplayEndPointsLabel());
 
-   setDrawMode(true);
    setLocationUnit(GEOCOORD_GENERAL, DMS_FULL);
    setDistanceUnit(NO_DISTANCE_UNIT);
 
@@ -208,6 +207,15 @@ bool MeasurementToolBar::setMeasurementsLayer(Layer* pLayer)
       mpBearingLabelAction->setChecked(mpMeasurementsLayer->getDisplayBearing());
       mpDistanceLabelAction->setChecked(mpMeasurementsLayer->getDisplayDistance());
       mpEndPointsLabelAction->setChecked(mpMeasurementsLayer->getDisplayEndPoints());
+
+      if (mpMeasurementsLayer->getCurrentGraphicObjectType() == MEASUREMENT_OBJECT)
+      {
+         mpDrawAction->setChecked(true);
+      }
+      else
+      {
+         mpMoveAction->setChecked(true);
+      }
 
       updateGeoreference();
 

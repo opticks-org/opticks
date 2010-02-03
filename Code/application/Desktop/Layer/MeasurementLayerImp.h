@@ -49,6 +49,8 @@ public:
    bool toXml(XMLWriter* pXml) const;
    bool fromXml(DOMNode* pDocument, unsigned int version);
 
+   virtual bool removeObject(GraphicObject* pObject, bool bDelete);
+
 signals:
    void distanceDisplayChanged(bool bDisplay);
    void distancePrecisionChanged(int precision);
