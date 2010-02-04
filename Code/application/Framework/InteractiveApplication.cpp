@@ -8,7 +8,9 @@
  */
 
 #include <QtCore/QDirIterator>
+#include <QtCore/QFile>
 #include <QtCore/QFileInfo>
+#include <QtCore/QString>
 #include <QtCore/QTimer>
 #include <QtGui/QApplication>
 #include <QtGui/QMessageBox>
@@ -34,7 +36,10 @@
 #include "SessionManager.h"
 #include "SessionResource.h"
 #include "SplashScreen.h"
+#include "TypesFile.h"
 #include "WizardUtilities.h"
+
+#include <vector>
 
 using namespace std;
 
@@ -128,7 +133,7 @@ int InteractiveApplication::run(int argc, char** argv)
 
       // process pending extension uninstalls
       InstallerServicesImp::instance()->processPending(mpProgress);
-      std::string errMsg;
+      string errMsg;
       if(!ConfigurationSettingsImp::instance()->loadSettings(errMsg))
       {
          if (QMessageBox::warning(pSplash, "Error loading configuration settings",
@@ -155,20 +160,29 @@ int InteractiveApplication::run(int argc, char** argv)
       // process auto-installs
       QDirIterator autos(QString::fromStdString(ConfigurationSettingsImp::instance()->getSettingExtensionFilesPath()->getFullPathAndName())
          + "/AutoInstall", QStringList() << "*.aeb", QDir::Files);
+      vector<string> pendingInstall;
+      while (autos.hasNext())
+      {
+         pendingInstall.push_back(autos.next().toStdString());
+      }
       int numExtFailed = 0;
       bool autoInstallOccurred = false;
-      while(autos.hasNext())
+      InstallerServicesImp::instance()->setPendingInstall(pendingInstall);
+      for (vector<string>::iterator autoIter = pendingInstall.begin();
+           autoIter != pendingInstall.end();
+           ++autoIter)
       {
-         bool success = InstallerServicesImp::instance()->installExtension(autos.next().toStdString(), mpProgress);
+         bool success = InstallerServicesImp::instance()->installExtension(*autoIter, mpProgress);
          if(!success)
          {
+            QFileInfo autoInfo(QString::fromStdString(*autoIter));
             // Attempt to parse the AEB so we can get a better name
-            std::string extName = autos.fileName().toStdString();
+            string extName = autoInfo.fileName().toStdString();
             { // scope the AebIo so we don't hold a handle to the aeb file and can delete it below
                Aeb extension;
                AebIo io(extension);
-               std::string errMsg; // ignored
-               if (io.fromFile(autos.filePath().toStdString(), errMsg))
+               string errMsg; // ignored
+               if (io.fromFile(autoInfo.filePath().toStdString(), errMsg))
                {
                   extName = extension.getName();
                }
@@ -176,16 +190,17 @@ int InteractiveApplication::run(int argc, char** argv)
             if(DesktopServicesImp::instance()->showMessageBox("Installation error", "Unable to install " + extName
                + "\nWould you like to delete the file?", "Yes", "No") == 0)
             {
-               QDir().remove(autos.filePath());
+               QFile::remove(QString::fromStdString(*autoIter));
             }
             numExtFailed++;
          }
          else
          {
             autoInstallOccurred = true;
-            QDir().remove(autos.filePath());
+            QFile::remove(QString::fromStdString(*autoIter));
          }
       }
+      InstallerServicesImp::instance()->setPendingInstall();
       if (numExtFailed != 0)
       {
          return -numExtFailed;

@@ -71,8 +71,18 @@ bool Aeb::meetsRequirements(std::string& errMsg) const
       const Aeb* pExt = iservices->getAeb(req->second.getId());
       if (pExt == NULL || !pExt->validate())
       {
-         errMsg = "A required extension [" + static_cast<std::string>(req->second.getId()) + "] is not installed.";
-         return false;
+         const Aeb* pPendingExt = iservices->getPendingAebInstall(req->second.getId());
+         if (pPendingExt == NULL || !pPendingExt->validate())
+         {
+            errMsg = "A required extension [" + static_cast<std::string>(req->second.getId()) + "] is not installed.";
+            return false;
+         }
+         else if (!req->second.meets(pPendingExt->getVersion()))
+         {
+            errMsg = "A required extension [" + pPendingExt->getName() +
+               "] is scheduled for install but does not meet the version requirements. [" + pPendingExt->getVersion().toString() + "]";
+            return false;
+         }
       }
       else if (!req->second.meets(pExt->getVersion()))
       {

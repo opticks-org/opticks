@@ -26,6 +26,9 @@ public:
 
    virtual bool installExtension(const std::string& aebFile, Progress* pProgress = NULL);
    virtual bool uninstallExtension(const std::string& extensionId, std::string& errMsg);
+   virtual void setPendingInstall(const std::vector<std::string>& aebFilenames = std::vector<std::string>());
+   virtual std::list<const Aeb*> getPendingInstall() const;
+   virtual const Aeb* getPendingAebInstall(const std::string& aebId) const;
    virtual const Aeb* getAeb(const std::string& aebId) const;
    virtual std::list<const Aeb*> getAebs() const;
    virtual bool processPending(Progress* pProgress = NULL);
@@ -44,6 +47,7 @@ private:
    bool performUninstall(const std::string& extensionId, Progress* pProgress);
 
    std::map<AebId, Aeb*> mExtensions;
+   std::map<AebId, Aeb*> mPendingInstall;
    ReferenceCountDatabase mRefCount;
    std::set<AebId> mPendingUninstall;
 

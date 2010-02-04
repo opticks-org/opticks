@@ -10,6 +10,7 @@
 #include "AebIo.h"
 #include "ConfigurationSettings.h"
 #include "InstallerServicesImp.h"
+#include "ObjectResource.h"
 #include "Progress.h"
 #include "Transaction.h"
 #include "TransactionLog.h"
@@ -102,6 +103,12 @@ InstallerServicesImp::~InstallerServicesImp()
 {
    for (std::map<AebId, Aeb*>::const_iterator iter = mExtensions.begin();
         iter != mExtensions.end();
+        ++iter)
+   {
+      delete iter->second;
+   }
+   for (std::map<AebId, Aeb*>::const_iterator iter = mPendingInstall.begin();
+        iter != mPendingInstall.end();
         ++iter)
    {
       delete iter->second;
@@ -457,6 +464,54 @@ bool InstallerServicesImp::performUninstall(const std::string& extensionId, Prog
       mExtensions.erase(extension);
    }
    return true;
+}
+
+void InstallerServicesImp::setPendingInstall(const std::vector<std::string>& aebFilenames)
+{
+   for (std::map<AebId, Aeb*>::const_iterator iter = mPendingInstall.begin();
+        iter != mPendingInstall.end();
+        ++iter)
+   {
+      delete iter->second;
+   }
+   mPendingInstall.clear();
+   for (std::vector<std::string>::const_iterator aebIter = aebFilenames.begin();
+        aebIter != aebFilenames.end();
+        ++aebIter)
+   {
+      Resource<Aeb> pExtension;
+      AebIo io(*pExtension.get());
+      std::string errMsg;
+      bool success = io.fromFile(*aebIter, errMsg);
+      if (success && pExtension->validate())
+      {
+         pExtension.release();
+         mPendingInstall.insert(std::make_pair(pExtension->getId(), pExtension.get()));
+      }
+   }
+}
+
+std::list<const Aeb*> InstallerServicesImp::getPendingInstall() const
+{
+   std::list<const Aeb*> aebs;
+   for (std::map<AebId, Aeb*>::const_iterator iter = mPendingInstall.begin();
+        iter != mPendingInstall.end();
+        ++iter)
+   {
+      aebs.push_back(iter->second);
+   }
+   return aebs;
+}
+
+const Aeb* InstallerServicesImp::getPendingAebInstall(const std::string& aebId) const
+{
+   AebId id(aebId);
+   std::map<AebId, Aeb*>::const_iterator iter = mPendingInstall.find(id);
+   if (iter == mPendingInstall.end())
+   {
+      return NULL;
+   }
+   return iter->second;
 }
 
 const Aeb* InstallerServicesImp::getAeb(const std::string& aebId) const

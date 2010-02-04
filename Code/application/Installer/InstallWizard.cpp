@@ -72,6 +72,16 @@ void InstallWizard::install()
       mpProgress->updateProgress("Installing extensions", 1, NORMAL);
    }
    bool success = false;
+   std::vector<std::string> pendingInstall;
+   foreach (Aeb* pDescriptor, mPackageDescriptors)
+   {
+      if (pDescriptor == NULL)
+      {
+         continue;
+      }
+      pendingInstall.push_back(pDescriptor->getFilename());
+   }
+   Service<InstallerServices>()->setPendingInstall(pendingInstall);
    foreach (Aeb* pDescriptor, mPackageDescriptors)
    {
       if (pDescriptor == NULL)
@@ -94,6 +104,7 @@ void InstallWizard::install()
          success = true;
       }
    }
+   Service<InstallerServices>()->setPendingInstall();
    if (success && mpProgress != NULL)
    {
       mpProgress->updateProgress("Installation has finished.\nInstalled extensions will be available the next time "

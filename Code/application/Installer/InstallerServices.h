@@ -24,6 +24,9 @@ class InstallerServices
 public:
    virtual bool installExtension(const std::string& aebFile, Progress* pProgress = NULL) = 0;
    virtual bool uninstallExtension(const std::string& extensionId, std::string& errMsg) = 0;
+   virtual void setPendingInstall(const std::vector<std::string>& aebFilenames = std::vector<std::string>()) = 0;
+   virtual std::list<const Aeb*> getPendingInstall() const = 0;
+   virtual const Aeb* getPendingAebInstall(const std::string& aebId) const = 0;
    virtual const Aeb* getAeb(const std::string& aebId) const = 0;
    virtual std::list<const Aeb*> getAebs() const = 0;
    virtual bool processPending(Progress* pProgress = NULL) = 0;
