@@ -127,7 +127,7 @@ bool Aeb::isIncompatible(const Aeb& extension) const
          continue;
       }
       // if the incompatible extension is present and meets the version requirements then fail
-      if (inc->second.meets(extension.getVersion()))
+      if (inc->second.getId() == extension.getId() && inc->second.meets(extension.getVersion()))
       {
           return true;
       }
