@@ -131,7 +131,7 @@ def cp_dir(source_dir, destination_dir, suffixes_to_match = [],
                 shutil.copy2(source_file, dst_path)
 
 def copy_windows_build(opticks_code_dir, sdk_dest_dir,
-                       win_debug_dest_dir, libs, plugins,
+                       win_debug_dest_dir, static_libs, plugins,
                        is_32_bit, is_debug, verbosity):
     if is_32_bit:
         arch = "Win32"
@@ -143,12 +143,12 @@ def copy_windows_build(opticks_code_dir, sdk_dest_dir,
         mode = "release"
     binaries_dir = join("Build", "Binaries-%s-%s" % (arch, mode))
 
-    executables = ["Opticks", "OpticksBatch"]
+    executables = ["Opticks.exe", "OpticksBatch.exe", "SimpleApiLib.dll"]
     for the_exec in executables:
         cp_file2(opticks_code_dir, sdk_dest_dir,
-            join(binaries_dir, "Bin"), the_exec+".exe")
+            join(binaries_dir, "Bin"), the_exec)
 
-    for the_lib in libs:
+    for the_lib in static_libs:
         cp_file2(opticks_code_dir, sdk_dest_dir,
             join(binaries_dir, "Lib"), the_lib + ".lib")
 
@@ -161,10 +161,10 @@ def copy_windows_build(opticks_code_dir, sdk_dest_dir,
         suffixes_to_match = [".dll", ".exe"])
 
     if is_debug:
-        #Copy the pdbs for the libs
+        #Copy the pdbs for the static_libs
         if verbosity > 1:
             print "Gathering pdb's for %s..." % (arch)
-        all_pdbs = executables + libs + plugins
+        all_pdbs = map(lambda x: os.path.splitext(x)[0], executables) + static_libs + plugins
         for the_file in all_pdbs:
             pdbs_dir = join(binaries_dir,"pdbs")
             cp_file2(opticks_code_dir, win_debug_dest_dir,
@@ -244,6 +244,8 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir,
     cp_dir2(s_app, d_app, join("PlugInUtilities", "Interfaces"),
         suffixes_to_match=interface_suffixes)
     cp_dir2(s_app, d_app, join("PlugInUtilities", "pthreads-wrapper"),
+        suffixes_to_match=interface_suffixes)
+    cp_dir2(s_app, d_app, "SimpleApiLib",
         suffixes_to_match=interface_suffixes)
     if is_windows():
         compile_settings_suffix = [".vsprops"]
@@ -340,7 +342,9 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir,
 
     if verbosity > 1:
         print "Acquiring Opticks binaries..."
-    libs = ["PlugInLib", "PlugInUtilities", "HdfPlugInLib", "NitfPlugInLib"]
+    static_libs = ["PlugInLib", "PlugInUtilities", "HdfPlugInLib", "NitfPlugInLib"]
+    if is_windows():
+       static_libs.append("SimpleApiLib")
     plugins = [ "AnnotationImagePalette", "Aspam", "AutoImporter", "BandMath", "ConvolutionFilter",
         "CoreIo", "Covariance", "DataFusion", "Dted", "ENVI", "GdalImporter", "Generic",
         "GeographicFeatures", "Georeference", "Hdf", "Ice", "ImageComparison", "Kml",
@@ -357,14 +361,14 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir,
         #Win32 Build
         if debug32:
             copy_windows_build(opticks_code_dir, out_dir,
-                win_debug_code_dir, libs,plugins, True, True, verbosity)
+                win_debug_code_dir, static_libs,plugins, True, True, verbosity)
             dp_list = commonutils.get_dependencies(opticks_dependencies_dir,
                 "Windows", True, "32")
             bin_dir = join(out_dir, "Build", "Binaries-win32-debug", "Bin")
             commonutils.copy_dependencies(dp_list, bin_dir)
         if release32:
             copy_windows_build(opticks_code_dir, out_dir,
-                win_debug_code_dir, libs, plugins, True, False, verbosity)
+                win_debug_code_dir, static_libs, plugins, True, False, verbosity)
             dp_list = commonutils.get_dependencies(opticks_dependencies_dir,
                 "Windows", False, "32")
             bin_dir = join(out_dir, "Build", "Binaries-win32-release", "Bin")
@@ -373,14 +377,14 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir,
         #Win64 Build
         if debug64:
             copy_windows_build(opticks_code_dir, out_dir,
-                win_debug_code_dir, libs, plugins, False, True, verbosity)
+                win_debug_code_dir, static_libs, plugins, False, True, verbosity)
             dp_list = commonutils.get_dependencies(opticks_dependencies_dir,
                 "Windows", True, "64")
             bin_dir = join(out_dir, "Build", "Binaries-x64-debug", "Bin")
             commonutils.copy_dependencies(dp_list, bin_dir)
         if release64:
             copy_windows_build(opticks_code_dir, out_dir,
-                win_debug_code_dir, libs, plugins, False, False, verbosity)
+                win_debug_code_dir, static_libs, plugins, False, False, verbosity)
             dp_list = commonutils.get_dependencies(opticks_dependencies_dir,
                 "Windows", False, "64")
             bin_dir = join(out_dir, "Build", "Binaries-x64-release", "Bin")
@@ -390,8 +394,9 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir,
 
         binaries_dir = join("Build", "Binaries-solaris-sparc-release")
         lib_dir = join(binaries_dir,"Lib")
-        for the_lib in libs:
+        for the_lib in static_libs:
             cp_file2(opticks_code_dir, out_dir, lib_dir, "lib%s.a" % (the_lib))
+        cp_file2(opticks_code_dir, out_dir, lib_dir, "libSimpleApiLib.so")
         cp_file2(opticks_code_dir, out_dir, lib_dir, "ModuleShell.os")
 
         for the_plugin in sample_plugins:

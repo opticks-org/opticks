@@ -54,7 +54,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(BuildDir)\Binaries-$(PlatformName)-$(ConfigurationName)\Lib\$(ProjectName).dll"
+				OutputFile="$(BuildDir)\Binaries-$(PlatformName)-$(ConfigurationName)\Bin\$(ProjectName).dll"
+				ImportLibrary="$(BuildDir)\Binaries-$(PlatformName)-$(ConfigurationName)\Lib\$(TargetName).lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -118,7 +119,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(BuildDir)\Binaries-$(PlatformName)-$(ConfigurationName)\Lib\$(ProjectName).dll"
+				OutputFile="$(BuildDir)\Binaries-$(PlatformName)-$(ConfigurationName)\Bin\$(ProjectName).dll"
+				ImportLibrary="$(BuildDir)\Binaries-$(PlatformName)-$(ConfigurationName)\Lib\$(TargetName).lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -182,7 +184,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(BuildDir)\Binaries-$(PlatformName)-$(ConfigurationName)\Lib\$(ProjectName).dll"
+				OutputFile="$(BuildDir)\Binaries-$(PlatformName)-$(ConfigurationName)\Bin\$(ProjectName).dll"
+				ImportLibrary="$(BuildDir)\Binaries-$(PlatformName)-$(ConfigurationName)\Lib\$(TargetName).lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -246,7 +249,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(BuildDir)\Binaries-$(PlatformName)-$(ConfigurationName)\Lib\$(ProjectName).dll"
+				OutputFile="$(BuildDir)\Binaries-$(PlatformName)-$(ConfigurationName)\Bin\$(ProjectName).dll"
+				ImportLibrary="$(BuildDir)\Binaries-$(PlatformName)-$(ConfigurationName)\Lib\$(TargetName).lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
