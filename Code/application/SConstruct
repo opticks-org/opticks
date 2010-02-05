@@ -106,6 +106,8 @@ for sub in libdirs:
    env.BuildDir(build_dir, src_dir, duplicate=0)
    libs.append(env.SConscript('%s/SConscript' % sub, exports='build_dir'))
    libInstallTargets.append(libs[-1])
+   if sub == "SimpleApiLib": # special case, build it but don't link to it
+      libs.pop(-1)
 
 ####
 # Build the solOpticks binary
