@@ -15,6 +15,7 @@
 #include "GraphicGroup.h"
 #include "GraphicObjectFactory.h"
 #include "RasterElement.h"
+#include "SpatialDataView.h"
 
 class GraphicElementImp : public DataElementImp
 {
@@ -51,6 +52,7 @@ private:
    GraphicResource<GraphicGroup> mpGroup;
    bool mInteractive;
    AttachmentPtr<RasterElement> mpGeocentricSource;
+   AttachmentPtr<SpatialDataView> mpView;
 };
 
 #define GRAPHICELEMENTADAPTEREXTENSION_CLASSES \

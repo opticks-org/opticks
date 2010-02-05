@@ -24,6 +24,7 @@ GraphicElementImp::GraphicElementImp(const DataDescriptorImp& descriptor, const 
 {
    Subject* pSub = dynamic_cast<Subject*>(mpGroup.get());
    pSub->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &GraphicElementImp::groupModified));
+   mpView.addSignal(SIGNAL_NAME(SpatialDataView, LayerShown), Slot(this, &GraphicElementImp::georeferenceModified));
 }
 
 GraphicElementImp::~GraphicElementImp()
@@ -219,6 +220,20 @@ void GraphicElementImp::georeferenceModified(Subject &subject, const std::string
    GraphicGroupImp* pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
    VERIFYNRV(pGroup != NULL);
 
+   // If the layer is hidden, do not force an update.
+   // This is done to ensure that updateGeo is not called needlessly as it has large performance implications.
+   Layer* pLayer = pGroup->getLayer();
+   if (pLayer != NULL)
+   {
+      SpatialDataView* pView = dynamic_cast<SpatialDataView*>(pLayer->getView());
+      if (pView != NULL && pView->isLayerDisplayed(pLayer) == false)
+      {
+         mpView.reset(pView);
+         return;
+      }
+   }
+
+   mpView.reset(NULL);
    bool interactive = getInteractive();
    setInteractive(false);
    pGroup->updateGeo();
