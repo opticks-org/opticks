@@ -7,6 +7,7 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include "ApiUtilities.h"
 #include "DataAccessor.h"
 #include "DataAccessorImpl.h"
 #include "DataElement.h"
@@ -19,6 +20,7 @@
 #include "RasterUtilities.h"
 #include "SimpleApiErrors.h"
 #include "switchOnEncoding.h"
+#include "TypeConverter.h"
 
 #include <vector>
 
@@ -235,9 +237,16 @@ extern "C"
 
    DataElement* createRasterElement(const char* pName, RasterElementArgs args)
    {
-      if (pName == NULL)
+      if (pName == NULL || args.location > 2)
       {
          setLastError(SIMPLE_BAD_PARAMS);
+         return NULL;
+      }
+
+      // Check for an existing element with the name
+      if (getDataElement(pName, TypeConverter::toString<RasterElement>(), 0) != NULL)
+      {
+         setLastError(SIMPLE_EXISTS);
          return NULL;
       }
 
@@ -254,9 +263,10 @@ extern "C"
                static_cast<InterleaveFormatTypeEnum>(args.interleaveFormat), false, args.pParent);
             if (pElement == NULL)
             {
-               setLastError(SIMPLE_EXISTS);
+               setLastError(SIMPLE_OTHER_FAILURE);
                return NULL;
             }
+            break;
          case 1:
             setLastError(SIMPLE_NO_MEM);
             return NULL;
@@ -266,6 +276,20 @@ extern "C"
          default:
             setLastError(SIMPLE_BAD_PARAMS);
             return NULL;
+         }
+      }
+      if (args.pBadValues != NULL && args.numBadValues > 0)
+      {
+         RasterDataDescriptor* pDesc = static_cast<RasterDataDescriptor*>(pElement->getDataDescriptor());
+         if (pDesc != NULL)
+         {
+            std::vector<int> badValues;
+            badValues.reserve(args.numBadValues);
+            for (uint32_t idx = 0; idx < args.numBadValues; ++idx)
+            {
+               badValues.push_back(args.pBadValues[idx]);
+            }
+            pDesc->setBadValues(badValues);
          }
       }
 
