@@ -357,8 +357,8 @@ bool InstallerServicesImp::uninstallExtension(const std::string& extensionId, st
       {
          continue;
       }
-      const std::multimap<AebRequirement, AebRequirement>& reqs = checkAeb->second->getRequires();
-      for (std::multimap<AebRequirement, AebRequirement>::const_iterator req = reqs.begin(); req != reqs.end(); ++req)
+      const std::vector<std::pair<AebRequirement, AebRequirement> >& reqs = checkAeb->second->getRequires();
+      for (std::vector<std::pair<AebRequirement, AebRequirement> >::const_iterator req = reqs.begin(); req != reqs.end(); ++req)
       {
          if ((!req->first.isValid() || req->first.meets(AebVersion::appVersion()))
                && req->second.meets(pAeb->getVersion()))

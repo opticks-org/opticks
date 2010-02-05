@@ -59,7 +59,7 @@ bool Aeb::meetsRequirements(std::string& errMsg) const
 {
    Service<InstallerServices> iservices;
    // validate requires
-   for (std::multimap<AebRequirement, AebRequirement>::const_iterator req = mRequires.begin(); req != mRequires.end(); ++req)
+   for (std::vector<std::pair<AebRequirement, AebRequirement> >::const_iterator req = mRequires.begin(); req != mRequires.end(); ++req)
    {
       // first is the target application...if the is the target application and the extension requirement is valid
       if (!req->second.isValid() || (req->first.isValid() &&
@@ -92,7 +92,7 @@ bool Aeb::meetsRequirements(std::string& errMsg) const
       }
    }
    // validate incompatibles
-   for (std::multimap<AebRequirement, AebRequirement>::const_iterator inc = mIncompatibles.begin(); inc != mIncompatibles.end(); ++inc)
+   for (std::vector<std::pair<AebRequirement, AebRequirement> >::const_iterator inc = mIncompatibles.begin(); inc != mIncompatibles.end(); ++inc)
    {
       // first is the target application...if the is the target application and the extension requirement is valid
       if (!inc->second.isValid() || (inc->first.isValid() &&
@@ -118,7 +118,7 @@ bool Aeb::isIncompatible(const Aeb& extension) const
       return false;
    }
    // validate incompatibles
-   for (std::multimap<AebRequirement, AebRequirement>::const_iterator inc = mIncompatibles.begin(); inc != mIncompatibles.end(); ++inc)
+   for (std::vector<std::pair<AebRequirement, AebRequirement> >::const_iterator inc = mIncompatibles.begin(); inc != mIncompatibles.end(); ++inc)
    {
       // first is the target application...if the is the target application and the extension requirement is valid
       if (!inc->second.isValid() || (inc->first.isValid() &&
@@ -146,12 +146,12 @@ AebId Aeb::getId() const
 }
 
 AebVersion Aeb::getVersion() const
-{ 
+{
    return mVersion;
 }
 
 std::string Aeb::getName() const
-{ 
+{
    return mName;
 }
 
@@ -170,7 +170,7 @@ const std::vector<std::string>& Aeb::getDevelopers() const
    return mDevelopers;
 }
 
-const std::vector<std::string>& Aeb::getTranslators() const 
+const std::vector<std::string>& Aeb::getTranslators() const
 {
    return mTranslators;
 }
@@ -182,57 +182,57 @@ const std::vector<std::string>& Aeb::getContributors() const
 
 std::string Aeb::getHomepageURL() const
 {
-   return mHomepageURL; 
+   return mHomepageURL;
 }
 
-std::string Aeb::getIconURL() const 
+std::string Aeb::getIconURL() const
 {
    return mIconURL;
 }
 
 std::vector<std::string> Aeb::getLicenseURLs() const
 {
-   return mLicenseURLs; 
+   return mLicenseURLs;
 }
 
-bool Aeb::isHidden() const 
+bool Aeb::isHidden() const
 {
-   return mHidden; 
+   return mHidden;
 }
 
 const std::vector<AebPlatform>& Aeb::getPlatforms() const
 {
-   return mPlatforms; 
+   return mPlatforms;
 }
 
-const std::multimap<AebRequirement, AebRequirement>& Aeb::getRequires() const 
+const std::vector<std::pair<AebRequirement, AebRequirement> >& Aeb::getRequires() const
 {
-   return mRequires; 
+   return mRequires;
 }
 
-const std::multimap<AebRequirement, AebRequirement>& Aeb::getIncompatibles() const 
+const std::vector<std::pair<AebRequirement, AebRequirement> >& Aeb::getIncompatibles() const
 {
-   return mIncompatibles; 
+   return mIncompatibles;
 }
 
 std::string Aeb::getUpdateURL() const
 {
-   return mUpdateURL; 
+   return mUpdateURL;
 }
 
 std::string Aeb::getUpdateKey() const
 {
-   return mUpdateKey; 
+   return mUpdateKey;
 }
 
 std::vector<std::string> Aeb::getSplashScreenURLs() const
-{ 
-   return mSplashScreenURLs; 
+{
+   return mSplashScreenURLs;
 }
 
-std::map<std::string, std::string> Aeb::getHelpEntries() const 
+std::map<std::string, std::string> Aeb::getHelpEntries() const
 {
-   return mHelpEntries; 
+   return mHelpEntries;
 }
 
 QPixmap Aeb::getIcon() const

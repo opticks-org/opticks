@@ -248,7 +248,7 @@ bool AebIo::fromFile(const std::string& fname, std::string& errMsg)
          targetApp = AebRequirement(id, min, max);
          V(targetApp.isValid(), "Invalid requirement target application.");
       }
-      mObj.mRequires.insert(std::make_pair(targetApp, req));
+      mObj.mRequires.push_back(std::make_pair(targetApp, req));
    }
 
    // incompatible
@@ -281,7 +281,7 @@ bool AebIo::fromFile(const std::string& fname, std::string& errMsg)
          targetApp = AebRequirement(id, min, max);
          V(targetApp.isValid(), "Invalid incompatible target application.");
       }
-      mObj.mIncompatibles.insert(std::make_pair(targetApp, incomp));
+      mObj.mIncompatibles.push_back(std::make_pair(targetApp, incomp));
    }
 
    // updateKey
@@ -412,7 +412,7 @@ bool AebIo::toFile(const std::string& fname)
    {
       rdf.addTriple(sAeblTopSubject, sAeblPrefix+"targetPlatform", platform->toString());
    }
-   for (std::multimap<AebRequirement, AebRequirement>::const_iterator require = mObj.mRequires.begin();
+   for (std::vector<std::pair<AebRequirement, AebRequirement> >::const_iterator require = mObj.mRequires.begin();
             require != mObj.mRequires.end(); ++require)
    {
       std::string requireSubject = "_:" + StringUtilities::toDisplayString(tmpCounter++);
@@ -429,7 +429,7 @@ bool AebIo::toFile(const std::string& fname)
          rdf.addTriple(targetAppSubject, sAeblPrefix+"maxVersion", require->first.getMax().toString());
       }
    }
-   for (std::multimap<AebRequirement, AebRequirement>::const_iterator incompat = mObj.mIncompatibles.begin();
+   for (std::vector<std::pair<AebRequirement, AebRequirement> >::const_iterator incompat = mObj.mIncompatibles.begin();
             incompat != mObj.mIncompatibles.end(); ++incompat)
    {
       std::string incompatSubject = "_:" + StringUtilities::toDisplayString(tmpCounter++);

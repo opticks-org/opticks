@@ -24,9 +24,6 @@ public:
    AebVersion getMin() const;
    AebVersion getMax() const;
    bool meets(AebVersion version) const;
-   bool operator==(const AebRequirement& other) const;
-   bool operator!=(const AebRequirement& other) const;
-   bool operator<(const AebRequirement& other) const;
 
 private:
    AebId mId;

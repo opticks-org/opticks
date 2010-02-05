@@ -55,8 +55,8 @@ public:
    void getContentDestinations(const QList<const AebEntry*>& sources, QList<QString>& contentDests) const;
    bool isHidden() const;
    const std::vector<AebPlatform>& getPlatforms() const;
-   const std::multimap<AebRequirement, AebRequirement>& getRequires() const;
-   const std::multimap<AebRequirement, AebRequirement>& getIncompatibles() const;
+   const std::vector<std::pair<AebRequirement, AebRequirement> >& getRequires() const;
+   const std::vector<std::pair<AebRequirement, AebRequirement> >& getIncompatibles() const;
    std::string getUpdateURL() const;
    std::string getUpdateKey() const;
 
@@ -81,8 +81,8 @@ private:
    std::vector<std::string> mLicenseURLs;
    bool mHidden;
    std::vector<AebPlatform> mPlatforms;
-   std::multimap<AebRequirement, AebRequirement> mRequires; // targetApp to requirement
-   std::multimap<AebRequirement, AebRequirement> mIncompatibles; // targetApp to incompatible
+   std::vector<std::pair<AebRequirement, AebRequirement> > mRequires; // targetApp to requirement
+   std::vector<std::pair<AebRequirement, AebRequirement> > mIncompatibles; // targetApp to incompatible
    std::string mUpdateURL;
    std::string mUpdateKey;
 

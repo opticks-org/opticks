@@ -57,30 +57,3 @@ bool AebRequirement::meets(AebVersion version) const
    }
    return mMin <= version && version <= mMax;
 }
-
-bool AebRequirement::operator==(const AebRequirement& other) const
-{
-   if (!isValid() || !other.isValid())
-   {
-      return false;
-   }
-   return mId == other.mId && mMin == other.mMin && mMax == other.mMax;
-}
-
-bool AebRequirement::operator!=(const AebRequirement& other) const
-{
-   return !operator==(other);
-}
-
-bool AebRequirement::operator<(const AebRequirement& other) const
-{
-   if (!isValid() || !other.isValid())
-   {
-      return !isValid();
-   }
-   if (mId != other.mId)
-   {
-      return mId < other.mId;
-   }
-   return mMin < other.mMin;
-}
