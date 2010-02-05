@@ -1108,6 +1108,10 @@ void HistogramOutput::computeResultHistogram(const vector<unsigned int>& totalHi
    int sourceBin = 0;
    int destBin = 0;
 
+   // If the RasterElement contains any data with a value of NaN (Not a Number), Opticks
+   // will crash when the following lines of code are executed. The RasterElement's
+   // sanitizeData method must be called prior to calling this method to prevent the
+   // crash.
    for (sourceBin = 0; sourceBin < HISTOGRAM_SIZE; ++sourceBin)
    {
       destBin = static_cast<int>(sourceBin * binConversion);

@@ -33,6 +33,9 @@ class Statistics;
  *  The RasterElement class is commonly used for three dimensional data sets that
  *  are processed by the user.
  *
+ *  When dealing with RasterElements that have NaN(Not a number) values, be sure to sanitize the data
+ *  before doing anything with the dataset. Failure to do so may lead to unexpected results.
+ *
  *  This subclass of Subject will notify upon the following conditions:
  *  - The following method is called: updateData().
  *  - Everything else documented in DataElement.

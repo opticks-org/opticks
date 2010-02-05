@@ -23,12 +23,17 @@
  *  for each band of a RasterElement object.
  *
  *  The data used in the calculation of the statistics is set automatically by
- *  the  RasterElement.  The values are not calculated until one of the get 
- *  methods are called.  If the specific statistics values for the data are 
+ *  the  RasterElement.  The values are not calculated until one of the get
+ *  methods are called.  If the specific statistics values for the data are
  *  known, the set methods can be called to avoid calculating the
  *  values, which could take some time.  All values in the object need to be
  *  set to avoid calculations when calling one of the get methods.  Typically
  *  the values would only be directly set by an importer.
+ *
+ *  @warning Be careful when dealing with RasterElements that have NaN(Not a number) 
+ *           values. Before doing anything with the dataset, be sure to sanitize the data
+ *           first. Failure to do this may lead to Opticks crashing when you attempt to 
+ *           calculate the statistics.
  *
  *  @see    RasterElement::getStatistics()
  */
