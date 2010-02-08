@@ -115,16 +115,6 @@ public:
    int getCount() const;
 
    /**
-    * Queries whether the current pixel is selected.
-    *
-    * @return  Returns \c true if the current pixel is selected or the BitMask is \c NULL;
-    *          otherwise returns \c false.
-    *
-    * @see     getPixel(int,int) const, getPixelLocation(), operator*()
-    */
-   bool getPixel() const;
-
-   /**
     * Queries whether a given pixel is selected.
     *
     * @param   col
@@ -416,6 +406,7 @@ public:
 
 private:
    BitMaskIterator(BitMaskIterator, bool);
+   bool getPixel() const;
    void computeCount();
 
    const BitMask* mpBitMask;
