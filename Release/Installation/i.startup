@@ -1,0 +1,5 @@
+
+while read src dest
+do
+  sed -e s:%%%OPTICKS_INSTALL_DIR%%%:${PKG_INSTALL_ROOT}$BASEDIR/$APPDIR/: "$src" > "$dest"
+done
