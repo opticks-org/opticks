@@ -222,9 +222,9 @@ bool EnviLibraryExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
    }
    headerFile += ".hdr";
 
-// Check for overwriting hdr file – 
-//    If the header belongs to another file, it will exist but the .sli file will not
-//    All other times we can overwrite the .hdr file
+   // Check for overwriting hdr file – 
+   //    If the header belongs to another file, it will exist but the .sli file will not
+   //    All other times we can overwrite the .hdr file
    if (QFile::exists(QString::fromStdString(headerFile)) && !QFile::exists(QString::fromStdString(filename)))
    {
       message = "Header file exists in the current directory and may describe another unrelated data file!";
@@ -317,8 +317,6 @@ bool EnviLibraryExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
       mpProgress->updateProgress(message, 50, NORMAL);
    }
 
-   pStep->finalize(Message::Failure, message);
-
    // Write the header information
    fprintf(pFp, "ENVI\n");
    fprintf(pFp, "description = {\n");
@@ -332,7 +330,7 @@ bool EnviLibraryExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
    fprintf(pFp, "file type = ENVI Spectral Library\n");
    fprintf(pFp, "data type = 4\n");
    fprintf(pFp, "interleave = bsq\n");
-   fprintf(pFp, "byte order = %d\n", Endian::getSystemEndian() == BIG_ENDIAN_ORDER);    
+   fprintf(pFp, "byte order = %d\n", Endian::getSystemEndian() == BIG_ENDIAN_ORDER);
    fprintf(pFp, "wavelength units = Micrometers\n");
    if (unitType == REFLECTANCE)
    {
