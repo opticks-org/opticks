@@ -137,8 +137,8 @@ bool Nitf::AcftbParser::runAllTests(Progress* pProgress, ostream& failure)
 
    static const string data6(
       "AC_MSN_IDX1234567890"        // AC_MSN_ID]
-      "AC_TAIL_NO"                  // AC_TAIL_NO
-      "200607301305"                // AC_TO
+      "          "                  // AC_TAIL_NO - set to spaces
+      "            "                // AC_TO - set to spaces
       "IHFR"                        // SENSOR_ID_TYPE
       "AIP   "                      // SENSOR_ID
       " "                           // SCENE_SOURCE - set to spaces
@@ -147,11 +147,11 @@ bool Nitf::AcftbParser::runAllTests(Progress* pProgress, ostream& failure)
       "123456"                      // IMHOSTNO
       "12345"                       // IMREQID
       "123"                         // MPLAN
-      "-88.00000000-100.00000000"   // ENTLOC
-      "000.01"                      // LOC_ACCY
+      "                         "   // ENTLOC - set to spaces
+      "      "                      // LOC_ACCY - set to spaces
       "      "                      // ENTELV - set to spaces
-      "m"                           // ELV_UNIT
-      "-88.00000000-100.00000000"   // EXITTLOC
+      " "                           // ELV_UNIT - set to spaces
+      "                         "   // EXITTLOC - set to spaces
       "      "                      // EXITELV - set to spaces
       "       "                     // TMAP - set to spaces
       "01.0000"                     // ROW_SPACING
@@ -160,8 +160,8 @@ bool Nitf::AcftbParser::runAllTests(Progress* pProgress, ostream& failure)
       "m"                           // COL_SPACING_UNITS
       "000.01"                      //FOCAL_LENGTH
       "      "                      // SENSERIAL - set to spaces
-      "1234.12"                     // ABSWVER
-      "20010911"                    // CAL_DATE
+      "       "                     // ABSWVER - set to spaces
+      "        "                    // CAL_DATE - set to spaces
       "1234"                        // PATCH_TOT
       "123"                         // MTI_TOT
       );
@@ -406,7 +406,7 @@ Nitf::TreState Nitf::AcftbParser::isTreValid(const DynamicObject& tre, ostream& 
       &numFields, ACFTB::ENTLOC, testSet, true, true, false));
 
    status = MaxState(status, testTagValueRange<double>(tre, reporter,
-      &numFields, ACFTB::LOC_ACCY, 0.0, 999.99));
+      &numFields, ACFTB::LOC_ACCY, 0.0, 999.99, true));
 
    status = MaxState(status, testTagValueRange<int>(tre, reporter,
       &numFields, ACFTB::ENTELV, -1000, 30000, true));
@@ -656,15 +656,18 @@ bool Nitf::AcftbParser::fromDynamicObject(const DynamicObject& input, ostream& o
       output << sizeString( dv_cast<string>(input.getAttribute(ACFTB::AC_TAIL_NO)), 10);
 
       // put date in form CCYYMMDDhhmm for this TAG    see: strftime() for format info
+      string CCYYMMDDhhmm;
       const DateTime* pAppDtgAcTo = dv_cast<DateTime>(&input.getAttribute(ACFTB::AC_TO));
       if (pAppDtgAcTo == NULL)
       {
-         return false;
+         CCYYMMDDhhmm = "            ";
+      }
+      else
+      {
+         CCYYMMDDhhmm = pAppDtgAcTo->getFormattedUtc("%Y%m%d%H%M");
       }
 
-      string CCYYMMDDhhmm = pAppDtgAcTo->getFormattedUtc("%Y%m%d%H%M");
       output << sizeString(CCYYMMDDhhmm, 12);
-
       output << sizeString(dv_cast<string>(input.getAttribute(ACFTB::SENSOR_ID_TYPE)), 4);
       output << sizeString(dv_cast<string>(input.getAttribute(ACFTB::SENSOR_ID)), 6);
       output << toString(dv_cast<int>(input.getAttribute(ACFTB::SCENE_SOURCE)),
@@ -684,7 +687,7 @@ bool Nitf::AcftbParser::fromDynamicObject(const DynamicObject& input, ostream& o
       output << toString(dv_cast<int>(input.getAttribute(ACFTB::IMREQID)), 5);
       output << toString(dv_cast<int>(input.getAttribute(ACFTB::MPLAN)), 3);
       output << sizeString(dv_cast<string>(input.getAttribute(ACFTB::ENTLOC)), 25);
-      output << toString(dv_cast<double>(input.getAttribute(ACFTB::LOC_ACCY)), 6, 2);
+      output << toString(dv_cast<double>(input.getAttribute(ACFTB::LOC_ACCY)), 6, 2, ZERO_FILL, false, false, 3, true);
       output << toString(dv_cast<int>(input.getAttribute(ACFTB::ENTELV)),
          6, -1, ZERO_FILL, POS_SIGN_TRUE, false, 3, true);
       output << sizeString(dv_cast<string>(input.getAttribute(ACFTB::ELV_UNIT)), 1);
