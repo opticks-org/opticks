@@ -434,9 +434,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
          <ComponentRef Id="C__Help_opticks" />
          <ComponentRef Id="C__Help_properties" />
          <ComponentRef Id="C__Help_export_product_options" />
-         <ComponentRef Id="C__Help_scenario5_files" />
          <ComponentRef Id="C__Help_aoi" />
-         <ComponentRef Id="C__Help_scenario10_files" />
          <ComponentRef Id="C__Help_importers_exporters" />
          <ComponentRef Id="C__Help_options1" />
          <ComponentRef Id="C__Help_skinnewwindow" />
@@ -463,12 +461,10 @@ are defined in Opticks-Version.wxi, so include that file now -->
          <ComponentRef Id="C__Help_animation" />
          <ComponentRef Id="C__Help_products" />
          <ComponentRef Id="C__Help_wizard_builder" />
-         <ComponentRef Id="C__Help_scenario9_files" />
          <ComponentRef Id="C__Help_skinbluegov" />
          <ComponentRef Id="C__Help_skin" />
          <ComponentRef Id="C__Help_toolbars" />
          <ComponentRef Id="C__Help_skinopticksskin" />
-         <ComponentRef Id="C__Help_scenario6_files" />
          <ComponentRef Id="C__Help_message_log_window" />
          <ComponentRef Id="C__Help_content" />
 
