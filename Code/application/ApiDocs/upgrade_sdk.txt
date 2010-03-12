@@ -3,9 +3,40 @@
 This document will describe the changes present in each version of the SDK.
 This document should be used to help upgrade any plug-ins to a particular version of the SDK.
 There is a page dedicated to each version of the SDK and if you are upgrading a plug-in by more than one version of the SDK, you MUST read all relevant pages for versions that you are skipping.
+- \subpage changes433
 - \subpage changes432
 - \subpage changes431
 - \subpage changes430
+*/
+
+/** \page changes433 4.3.3 Changes
+\section contents433 Contents
+- \ref u432_to_433_breaking
+<br><br>
+
+
+\subsection u432_to_433_breaking API
+<HR>
+
+\subsubsection u432_to_433_BitMaskIterator BitMaskIterator
+<div style="margin-left: 3em">
+<b>Description:</b>
+- The constructors of BitMaskIterator were changed.
+  - One of the constructors was changed from "const BitMask*, int, int, int, int" to "const BitMask*, unsigned int, unsigned int, unsigned int, unsigned int.".
+  - The other constructor was changed from "const BitMask*, RasterElement*" to "const BitMask*, const RasterElement*".
+- The "int getCount()" was made a const method so that it can be called on a const BitMaskIterator object.
+- The "getPixel()" method that takes no arguments has been removed. It was of little utility and was never intended to be in the public interface.
+</div>
+
+\subsection u432_to_433_importer ImporterShell
+<div style="margin-left: 3em">
+<b>Description:</b>
+If you compile against this version of the SDK, the behavior of any Importer you have will change.
+The ImporterShell now calls setWizardSupported(false), which means your importer will no longer show up in the Wizard Builder.
+This change was made because in general users should be using the "Import Data Set" wizard item instead of adding the importer plug-in directly to a wizard.
+If your users have existing wizards that used your importer plug-in directly that will continue to work.
+If you insist on making your importer plug-ins visible to users in the Wizard Builder, simply add setWizardSupported(true) to the constructor of your Importer subclass.
+</div>
 */
 
 /** \page changes432 4.3.2 Changes
