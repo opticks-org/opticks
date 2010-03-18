@@ -183,33 +183,55 @@ public:
    /**
     *  Adds a new layer to the view.
     *
+    *  This method creates a new layer of a given type based on a given element
+    *  and adds it to this view.  The layer is created with a name based on the
+    *  name of the data element.  If a layer already exists with the same name
+    *  as the element, then the layer is created with a unique name based on the
+    *  given layer type.  In this case, the element name will not necessarily
+    *  match the layer name.
+    *
     *  @param   layerType
     *           The layer type.
     *  @param   pElement
-    *           The data element used as the basis for drawing the layer.
+    *           The data element used as the basis for drawing the layer.  If
+    *           \c NULL is passed in, an element is created with a unique
+    *           default name based on the element type associated with the given
+    *           layer type.
     *
     *  @return  A pointer to the created layer, which can be safely cast to a
-    *           derived layer class according to the layer type.  NULL is
-    *           returned if the layer could not be created or if a layer with
-    *           the same name and type already exists in the view.
+    *           derived layer class according to the layer type.  \c NULL is
+    *           returned if the layer or data element could not be created.
+    *
+    *  @see     createLayer(const LayerType&, DataElement*, const std::string&)
     */
    virtual Layer* createLayer(const LayerType& layerType, DataElement* pElement) = 0;
 
    /**
     *  Adds a new layer to the view.
     *
+    *  This method creates a new layer of a given type with a given name based
+    *  on a given element and adds it to this view.  The layer is created with
+    *  a name based on the name of the data element.  If a layer already exists
+    *  with the same name as the element, then the layer is created with a
+    *  unique name based on the given layer type.  In this case, the element
+    *  name will not necessarily match the layer name.
+    *
     *  @param   layerType
     *           The layer type.
     *  @param   pElement
-    *           The data element used as the basis for drawing the layer.
+    *           The data element used as the basis for drawing the layer.  If
+    *           \c NULL is passed in, an element is created with a unique
+    *           default name based on the element type associated with the given
+    *           layer type.
     *  @param   layerName
-    *           The layer name.  If the name is empty, the name of the data
-    *           element is used.
+    *           The name to assign to the created layer.  If the given name is
+    *           empty, the name of the data element is used.
     *
     *  @return  A pointer to the created layer, which can be safely cast to a
-    *           derived layer class according to the layer type.  NULL is
-    *           returned if the layer could not be created or if a layer with
-    *           the same name and type already exists in the view.
+    *           derived layer class according to the layer type.  \c NULL is
+    *           returned if the layer or data element could not be created.
+    *
+    *  @see     createLayer(const LayerType&, DataElement*)
     */
    virtual Layer* createLayer(const LayerType& layerType, DataElement* pElement, const std::string& layerName) = 0;
 

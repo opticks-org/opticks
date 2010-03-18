@@ -31,6 +31,7 @@
 #include "StringUtilities.h"
 #include "ThresholdLayerAdapter.h"
 #include "TiePointLayerAdapter.h"
+#include "TypeConverter.h"
 
 #include <algorithm>
 #include <sstream>
@@ -95,80 +96,90 @@ QString LayerListImp::getPrimaryRasterElementName() const
 Layer* LayerListImp::newLayer(const LayerType& layerType, DataElement* pElement, const QString& strLayerName)
 {
    QString strName = strLayerName;
-
-   // Get the layer name from the element
-   if ((strName.isEmpty() == true) && (pElement != NULL))
-   {
-      string elementName = pElement->getName();
-      if (elementName.empty() == false)
-      {
-         strName = QString::fromStdString(elementName);
-      }
-   }
-
-   // Ensure that the layer name is unique
-   QString strLayerType;
-
-   string layerTypeText = StringUtilities::toDisplayString(layerType);
-   if (layerTypeText.empty() == false)
-   {
-      strLayerType = QString::fromStdString(layerTypeText);
-   }
-
+   QString strLayerType = QString::fromStdString(StringUtilities::toDisplayString(layerType));
    unsigned int numLayers = getNumLayers(layerType);
-   while (isLayerNameUnique(strName, layerType) == false)
-   {
-      strName = strLayerType + " " + QString::number(++numLayers);
-   }
-
-   if (strName.isEmpty() == true)
-   {
-      return NULL;
-   }
 
    // Create the element if necessary
    if (pElement == NULL)
    {
-      QString strModelType;
+      string elementTypeName;
+      string elementType;
+
       if (layerType == ANNOTATION)
       {
-         strModelType = "AnnotationElement";
+         elementTypeName = "Annotation Element";
+         elementType = TypeConverter::toString<AnnotationElement>();
       }
-      if (layerType == AOI_LAYER)
+      else if (layerType == AOI_LAYER)
       {
-         strModelType = "AoiElement";
+         elementTypeName = "AOI Element";
+         elementType = TypeConverter::toString<AoiElement>();
       }
       else if (layerType == GCP_LAYER)
       {
-         strModelType = "GcpList";
+         elementTypeName = "GCP List";
+         elementType = TypeConverter::toString<GcpList>();
       }
       else if (layerType == TIEPOINT_LAYER)
       {
-         strModelType = "TiePointList";
+         elementTypeName = "Tie Point List";
+         elementType = TypeConverter::toString<TiePointList>();
       }
       else if (layerType == PSEUDOCOLOR)
       {
-         strModelType = "RasterElement";
+         elementTypeName = "Raster Element";
+         elementType = TypeConverter::toString<RasterElement>();
       }
-
-      if (strModelType.isEmpty() == false)
+      else
       {
-         string elementName = strName.toStdString();
-         string elementType = strModelType.toStdString();
-
-         Service<ModelServices> pModel;
-         pElement = pModel->createElement(elementName, elementType, mpRasterElement.get());
+         return NULL;
       }
 
+      Service<ModelServices> pModel;
+      vector<DataElement*> elements = pModel->getElements(mpRasterElement.get(), elementType);
+      unsigned int numElements = elements.size();
+
+      string elementName = strName.toStdString();
+      if (elementName.empty() == true)
+      {
+         elementName = elementTypeName + " " + StringUtilities::toDisplayString(++numElements);
+      }
+
+      while (pModel->getElement(elementName, elementType, mpRasterElement.get()) != NULL)
+      {
+         elementName = elementTypeName + " " + StringUtilities::toDisplayString(++numElements);
+      }
+
+      if (strName.isEmpty() == true)
+      {
+         strName = strLayerType + " " + QString::number(++numLayers);
+      }
+
+      pElement = pModel->createElement(elementName, elementType, mpRasterElement.get());
       if (pElement == NULL)
       {
          return NULL;
       }
    }
 
+   // Get the layer name from the element
+   if (strName.isEmpty() == true)
+   {
+      strName = QString::fromStdString(pElement->getName());
+      if (strName.isEmpty() == true)
+      {
+         return NULL;
+      }
+   }
+
+   // Ensure that the layer name is unique
+   while (isLayerNameUnique(strName, layerType) == false)
+   {
+      strName = strLayerType + " " + QString::number(++numLayers);
+   }
+
    // Do not create the layer if it already exists
-   Layer* pLayer = NULL;
-   pLayer = getLayer(layerType, pElement, strName);
+   Layer* pLayer = getLayer(layerType, pElement, strName);
    if (pLayer != NULL)
    {
       return NULL;
