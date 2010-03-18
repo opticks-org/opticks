@@ -25,6 +25,7 @@
 #include <boost/rational.hpp>
 #include <memory>
 
+class AnimationController;
 class OptionsMovieExporter;
 class Progress;
 class QWidget;
@@ -193,6 +194,7 @@ protected:
 
    virtual AVOutputFormat* getOutputFormat() const = 0;
 
+   boost::rational<int> getFrameRate(const AnimationController* pController) const;
    virtual boost::rational<int> convertToValidFrameRate(const boost::rational<int>& frameRate) const;
 
 private:

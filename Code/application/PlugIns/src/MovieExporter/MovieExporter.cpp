@@ -304,7 +304,7 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
          }
          else
          {
-            framerate = pController->getMinimumFrameRate() * pController->getIntervalMultiplier();
+            framerate = getFrameRate(pController);
          }
       }
 
@@ -457,15 +457,14 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
    av_write_header(pFormat);
 
    // calculate time interval
-   double frameSpeed = pController->getIntervalMultiplier();
-   if ((framerate < pController->getMinimumFrameRate() * frameSpeed) && (mpProgress != NULL))
+   if ((framerate < getFrameRate(pController)) && (mpProgress != NULL))
    {
       mpProgress->updateProgress("The selected output frame rate may not encode all the frames in the movie.  "
                                  "Frames may be dropped.", 0, WARNING);
    }
 
    // do not use the boost::rational<int> overloaded operator '/' since it truncates type double to int
-   double interval = frameSpeed * framerate.denominator() / framerate.numerator();
+   double interval = pController->getIntervalMultiplier() * framerate.denominator() / framerate.numerator();
 
    // export the frames
    AVFrame* pTmpPicture = alloc_picture(PIX_FMT_RGBA32, pCodecContext->width, pCodecContext->height);
@@ -596,7 +595,7 @@ ValidationResultType MovieExporter::validate(const PlugInArgList* pArgList, stri
       }
       if (expectedFrameRate == 0)
       {
-         expectedFrameRate = pController->getMinimumFrameRate() * pController->getIntervalMultiplier();
+         expectedFrameRate = getFrameRate(pController);
       }
       if (expectedFrameRate == 0)
       {
@@ -608,7 +607,7 @@ ValidationResultType MovieExporter::validate(const PlugInArgList* pArgList, stri
    boost::rational<int> actualFrameRate = convertToValidFrameRate(expectedFrameRate);
    if (actualFrameRate != 0)
    {
-      if (actualFrameRate < pController->getMinimumFrameRate() * pController->getIntervalMultiplier())
+      if (actualFrameRate < getFrameRate(pController))
       {
          errorMessage = "The selected output frame rate may not encode all the frames in the movie.  "
                         "Frames may be dropped.";
@@ -700,7 +699,7 @@ QWidget* MovieExporter::getExportOptionsWidget(const PlugInArgList* pInArgList)
             mpOptionWidget->setStopFrame(stop);
 
             // Frame rate
-            rational<int> frameRate = pController->getMinimumFrameRate() * pController->getIntervalMultiplier();
+            rational<int> frameRate = getFrameRate(pController);
             frameRate = convertToValidFrameRate(frameRate);
             mpOptionWidget->setFramerate(frameRate);
          }
@@ -864,6 +863,30 @@ bool MovieExporter::write_video_frame(AVFormatContext* pFormat, AVStream* pVideo
    }
    ++mFrameCount;
    return true;
+}
+
+boost::rational<int> MovieExporter::getFrameRate(const AnimationController* pController) const
+{
+   VERIFYRV(pController != NULL, boost::rational<int>());
+
+   boost::rational<int> minFrameRate = pController->getMinimumFrameRate();
+   double frameSpeed = pController->getIntervalMultiplier();
+
+   boost::rational<int> frameRate;
+   if (frameSpeed <= 0.0)
+   {
+      frameRate.assign(0, 1);
+   }
+   else if (frameSpeed < 1.0)
+   {
+      frameRate.assign(minFrameRate.numerator(), static_cast<int>(minFrameRate.denominator() / frameSpeed));
+   }
+   else
+   {
+      frameRate.assign(static_cast<int>(minFrameRate.numerator() * frameSpeed), minFrameRate.denominator());
+   }
+
+   return frameRate;
 }
 
 boost::rational<int> MovieExporter::convertToValidFrameRate(const boost::rational<int>& frameRate) const
