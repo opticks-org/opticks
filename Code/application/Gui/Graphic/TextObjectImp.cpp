@@ -519,20 +519,26 @@ bool TextObjectImp::edit()
       pWidget = pView->getWidget();
    }
 
-   MultiLineTextDialog dialog(pWidget);
-
-   string text = getText();
-   if (text.empty() == false)
+   // If the text object is displayed in a plot, deleting the text edit dialog may cause another view to receive the
+   // drawing context.  So scope the text edit dialog and restore the drawing context when the dialog is deleted to
+   // ensure that the plot continues to have the current drawing context.
+   GlContextSave contextSave(dynamic_cast<QGLWidget*>(pView));
    {
-      dialog.setText(QString::fromStdString(text));
-   }
+      MultiLineTextDialog dialog(pWidget);
 
-   dialog.exec();
+      string text = getText();
+      if (text.empty() == false)
+      {
+         dialog.setText(QString::fromStdString(text));
+      }
 
-   text = dialog.getText().toStdString();
-   if (text.empty() == false)
-   {
-      setText(text);
+      dialog.exec();
+
+      text = dialog.getText().toStdString();
+      if (text.empty() == false)
+      {
+         setText(text);
+      }
    }
 
    return true;
