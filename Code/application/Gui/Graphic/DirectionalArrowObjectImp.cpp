@@ -242,7 +242,15 @@ bool DirectionalArrowObjectImp::fromXml(DOMNode* pDocument, unsigned int version
    bool bSuccess = GraphicObjectImp::fromXml(pDocument, version);
    if (bSuccess == true)
    {
-      mpGroup->removeAllObjects(true);
+      const list<GraphicObject*>& groupObjects = mpGroup->getObjects();
+      if (groupObjects.empty() == false)
+      {
+         // Only call removeAllObjects() if objects exist because it calls completeInsertion() on the graphic layer,
+         // which removes the undo lock when the user adds this object into the layer.  This then adds numerous
+         // actions to the undo stack which should not be added.
+         mpGroup->removeAllObjects(true);
+      }
+
       mbOriented = false;
 
       DOMNode* pObjectNode = pDocument->getFirstChild();
