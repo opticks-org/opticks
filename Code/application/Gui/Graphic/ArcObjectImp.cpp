@@ -248,13 +248,11 @@ bool ArcObjectImp::setProperty(const GraphicProperty* pProperty)
       {
          return setBoundingBox(ll, ur);
       }
-      mbNeedsLayout = true;
 
+      mbNeedsLayout = true;
    }
 
-
-   bool bSuccess = false;
-   bSuccess = GraphicObjectImp::setProperty(pProperty);
+   bool bSuccess = FilledObjectImp::setProperty(pProperty);
    if (bSuccess == true)
    {
       if (pProperty->getName() == "Wedge")
@@ -678,19 +676,23 @@ bool ArcObjectImp::replicateObject(const GraphicObject* pObject)
    }
 
    bool bSuccess = false;
-   bSuccess = GraphicObjectImp::replicateObject(pObject);
-   if (bSuccess == false)
-   {
-      return false;
-   }
 
+   // Update the ellipse properties before the arc properties so that the ellipse bounding box
+   // will be correct when calculating the arc bounding box after setting the start and stop angles
    const GraphicObjectImp* pEllipse = dynamic_cast<const ArcObjectImp*>(pObject)->mpEllipse.get();
    if (pEllipse != NULL)
    {
       bSuccess = mpEllipse->replicateObject(dynamic_cast<const GraphicObject*>(pEllipse));
+   }
+
+   // Update the arc properties
+   if (bSuccess == true)
+   {
+      bSuccess = FilledObjectImp::replicateObject(pObject);
       if (bSuccess == true)
       {
-         updateBoundingBox();
+         updateHandles();
+         mbNeedsLayout = true;
       }
    }
 

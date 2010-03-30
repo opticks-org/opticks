@@ -1793,9 +1793,10 @@ bool WedgeProperty::compare(const GraphicProperty* pProp) const
    }
 
    double start = pWedgeProp->getStartAngle();
-   double stop = pWedgeProp->getStartAngle();
+   double stop = pWedgeProp->getStopAngle();
 
-   return mStartAngle == start && mStopAngle == stop;
+   const double compareTolerance = 0.001;
+   return (fabs(mStartAngle - start) < compareTolerance) && (fabs(mStopAngle - stop) < compareTolerance);
 }
 
 GraphicProperty* WedgeProperty::copy() const
