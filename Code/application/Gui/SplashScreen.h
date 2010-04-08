@@ -50,6 +50,7 @@ private:
    QLabel* mpProgressLabel;
    QProgressBar* mpProgressBar;
    QLabel* mpPixmapLabel;
+   QLabel* mpReleaseInfo;
    std::list<std::string> mImagePaths;
    QTimer* mpRotateImageTimer;
 };

@@ -28,11 +28,11 @@ SplashScreen::SplashScreen(Progress* pProgress) :
    QWidget(NULL, Qt::SplashScreen),
    mpProgress(pProgress),
    mpProgressLabel(NULL),
-   mpProgressBar(NULL)
+   mpProgressBar(NULL),
+   mpReleaseInfo(NULL)
 {
    // Get the version and build date
    QString strVersion;
-   bool bProductionRelease = false;
    QString strReleaseType;
 
    ConfigurationSettingsImp* pConfigSettings =
@@ -40,7 +40,6 @@ SplashScreen::SplashScreen(Progress* pProgress) :
    strVersion = QString::fromStdString(pConfigSettings->getVersion());
    strVersion += " Build " + QString::fromStdString(pConfigSettings->getBuildRevision());
 
-   bProductionRelease = pConfigSettings->isProductionRelease();
    strReleaseType = QString::fromStdString(
       StringUtilities::toDisplayString(pConfigSettings->getReleaseType()));
 
@@ -96,8 +95,8 @@ SplashScreen::SplashScreen(Progress* pProgress) :
    QLabel* pDeveloperInfo = new QLabel(strReleaseType, pReleaseWidget);
    pDeveloperInfo->setFont(boldFont);
 
-   QLabel* pReleaseInfo = new QLabel("Not for Production Use", pReleaseWidget);
-   pReleaseInfo->setFont(boldFont);
+   mpReleaseInfo = new QLabel("Not for Production Use", pReleaseWidget);
+   mpReleaseInfo->setFont(boldFont);
 
    // Release description
    QWidget* pReleaseDescriptionWidget = new QWidget(pInfoFrame);
@@ -135,7 +134,7 @@ SplashScreen::SplashScreen(Progress* pProgress) :
    pReleaseLayout->addSpacing(5);
    pReleaseLayout->addWidget(pDeveloperInfo);
    pReleaseLayout->addStretch();
-   pReleaseLayout->addWidget(pReleaseInfo);
+   pReleaseLayout->addWidget(mpReleaseInfo);
    pReleaseLayout->addSpacing(5);
 
    QHBoxLayout* pReleaseDescriptionLayout = new QHBoxLayout(pReleaseDescriptionWidget);
@@ -161,7 +160,7 @@ SplashScreen::SplashScreen(Progress* pProgress) :
 
    // Initialization
    pDeveloperInfo->setHidden(strReleaseType.isEmpty());
-   pReleaseInfo->setHidden(bProductionRelease);
+   mpReleaseInfo->setHidden(pConfigSettings->isProductionRelease());
    pReleaseDescriptionInfo->setHidden(strReleaseDescription.isEmpty());
 
    mpRotateImageTimer = new QTimer(this);
@@ -252,6 +251,17 @@ void SplashScreen::update(Subject &subject, const string &signal, const boost::a
       {
          mpProgressBar->setValue(iPercent);
          mpProgressBar->show();
+      }
+
+      // Production status
+      if (mpReleaseInfo->isHidden() == true)
+      {
+         ConfigurationSettingsImp* pConfigSettings =
+            dynamic_cast<ConfigurationSettingsImp*>(Service<ConfigurationSettings>().get());
+         if (pConfigSettings->isProductionRelease() == false)
+         {
+            mpReleaseInfo->setVisible(true);
+         }
       }
 
       // Force a repaint since there is no event loop yet to process events
