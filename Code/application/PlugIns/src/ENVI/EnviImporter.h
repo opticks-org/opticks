@@ -26,6 +26,7 @@ public:
    std::vector<ImportDescriptor*> getImportDescriptors(const std::string& filename);
    unsigned char getFileAffinity(const std::string& filename);
    bool validate(const DataDescriptor* pDescriptor, std::string& errorMessage) const;
+   static bool parseBbl(EnviField* pField, std::vector<unsigned int>& goodBands);
 
 protected:
    enum WavelengthUnitsEnum

@@ -37,7 +37,6 @@ using namespace std;
 REGISTER_PLUGIN_BASIC(OpticksENVI, EnviImporter);
 
 static bool parseDefaultBands(EnviField* pField, vector<unsigned int>* pBandNumbers);
-static bool parseBbl(EnviField* pField, vector<unsigned int>* pBadBands);
 
 template <class T>
 void vectorFromField(EnviField* pField, vector<T>& vec, const char* pFormat)
@@ -153,9 +152,29 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
                      pFileDescriptor->setRows(rows);
                   }
 
+                  string samplesStr = "samples";
+                  string bandsStr = "bands";
+
+                  // Special case: if the file type is an ENVI Spectral Library, then swap samples with bands
+                  // If no file type field exists, assume this is a normal ENVI header (not a Spectral Library)
+                  EnviField* pFileTypeField = mFields.find("file type");
+                  if (pFileTypeField != NULL && (pFileTypeField->mValue ==
+                     "ENVI Spectral Library" || pFileTypeField->mValue == "Spectral Library"))
+                  {
+                     samplesStr = "bands";
+                     bandsStr = "samples";
+
+                     // Since bands and samples are swapped, force the interleave to BIP
+                     pField = mFields.find("interleave");
+                     if (pField != NULL)
+                     {
+                        pField->mValue = "bip";
+                     }
+                  }
+
                   // Columns
                   vector<DimensionDescriptor> columns;
-                  pField = mFields.find("samples");
+                  pField = mFields.find(samplesStr);
                   if (pField != NULL)
                   {
                      int numColumns = atoi(pField->mValue.c_str());
@@ -173,7 +192,7 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
 
                   // Bands
                   vector<DimensionDescriptor> bands;
-                  pField = mFields.find("bands");
+                  pField = mFields.find(bandsStr);
                   if (pField != NULL)
                   {
                      int numBands = atoi(pField->mValue.c_str());
@@ -537,29 +556,23 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
                   pField = mFields.find("bbl");
                   if (pField != NULL)
                   {
-                     // Special case: if the file type is an ENVI Spectral Library,
-                     // then bbl describes column subsetting, not band subsetting.
-                     // If no file type field exists, assume this is a normal ENVI header (not a Spectral Library).
-                     EnviField* pFileTypeField = mFields.find("file type");
-                     if (pFileTypeField == NULL || (pFileTypeField->mValue !=
-                        "ENVI Spectral Library" && pFileTypeField->mValue != "Spectral Library"))
+                     vector<unsigned int> validBands;
+                     parseBbl(pField, validBands);
+
+                     vector<DimensionDescriptor> bandsToLoad;
+                     for (vector<unsigned int>::const_iterator iter = validBands.begin();
+                        iter != validBands.end();
+                        ++iter)
                      {
-                        vector<unsigned int> goodBandNumbers;
-                        parseBbl(pField, &goodBandNumbers);
-
-                        vector<DimensionDescriptor> bandsToLoad;
-                        for (vector<unsigned int>::size_type i = 0; i < goodBandNumbers.size(); ++i)
+                        const unsigned int onDiskNumber = *iter;
+                        const DimensionDescriptor dim = pFileDescriptor->getOnDiskBand(onDiskNumber);
+                        if (dim.isValid())
                         {
-                           unsigned int onDiskNumber = goodBandNumbers[i];
-                           DimensionDescriptor bandDim = pFileDescriptor->getOnDiskBand(onDiskNumber);
-                           if (bandDim.isValid())
-                           {
-                              bandsToLoad.push_back(bandDim);
-                           }
+                           bandsToLoad.push_back(dim);
                         }
-
-                        pDescriptor->setBands(bandsToLoad);
                      }
+
+                     pDescriptor->setBands(bandsToLoad);
                   }
 
                   DynamicObject* pMetadata = pDescriptor->getMetadata();
@@ -797,31 +810,32 @@ bool EnviImporter::parseFwhm(EnviField* pField, vector<double>* pWavelengthStart
    return true;
 }
 
-static bool parseBbl(EnviField* pField, vector<unsigned int>* pBadBands)
+bool EnviImporter::parseBbl(EnviField* pField, vector<unsigned int>& goodBands)
 {
+   VERIFY(pField != NULL);
    int band = 0;
 
    for (vector<EnviField*>::size_type i = 0; i < pField->mChildren.size(); ++i)
    {
       int fields = 1;
-      char* line = strdup(pField->mChildren.at(i)->mValue.c_str());
-      char* ptr = strtok(line, ",");
+      char* pLine = strdup(pField->mChildren.at(i)->mValue.c_str());
+      char* pCurr = strtok(pLine, ",");
       float f1 = 0.0;
-      while (fields == 1 && ptr != NULL)
+      while (fields == 1 && pCurr != NULL)
       {
-         fields = sscanf (ptr, "%f", &f1);
-         ptr = strtok (NULL, ",");
+         fields = sscanf(pCurr, "%f", &f1);
+         pCurr = strtok(NULL, ",");
          if (fields == 1)
          {
             if (f1 == 1.0f)
             {
-               pBadBands->push_back (band);
+               goodBands.push_back(band);
             }
-            band++;
+            ++band;
          }
       }
 
-      free (line);
+      free(pLine);
    }
    return true;
 }
@@ -999,36 +1013,29 @@ bool EnviImporter::validate(const DataDescriptor* pDescriptor, string& errorMess
       return false;
    }
 
-   // check metadata
-   const DynamicObject* pMetadata = pRasterDesc->getMetadata();
-   if (pMetadata != NULL)
+   // check metadata for data files
+   EnviField* pFileTypeField = mFields.find("file type");
+   if (pFileTypeField == NULL || (pFileTypeField->mValue !=
+      "ENVI Spectral Library" && pFileTypeField->mValue != "Spectral Library"))
    {
-      string pNamesPath[] = { SPECIAL_METADATA_NAME, BAND_METADATA_NAME, 
-         NAMES_METADATA_NAME, END_METADATA_NAME };
-      const vector<string>* pBandNames(NULL);
-      pBandNames = dv_cast<vector<string> >(&pMetadata->getAttributeByPath(pNamesPath));
-
-      if (pBandNames != NULL && pBandNames->size() != pRasterDesc->getBandCount())
+      const DynamicObject* pMetadata = pRasterDesc->getMetadata();
+      if (pMetadata != NULL)
       {
-         if (errorMessage.empty() == false)
+         string pNamesPath[] = { SPECIAL_METADATA_NAME, BAND_METADATA_NAME, 
+            NAMES_METADATA_NAME, END_METADATA_NAME };
+         const vector<string>* pBandNames(NULL);
+         pBandNames = dv_cast<vector<string> >(&pMetadata->getAttributeByPath(pNamesPath));
+
+         if (pBandNames != NULL && pBandNames->size() != pRasterDesc->getBandCount())
          {
-            errorMessage += "\n";
+            if (errorMessage.empty() == false)
+            {
+               errorMessage += "\n";
+            }
+
+            errorMessage += "Possible problem in ENVI header file: The number of band "
+               "names did not match the number of bands.";
          }
-
-         errorMessage += "Possible problem in ENVI header file: The number of band "
-            "names did not match the number of bands.";
-      }
-   }
-
-   // check for bbl in ENVI Spectral Library
-   if (mFields.find("bbl") != NULL)
-   {
-      EnviField* pFileTypeField = mFields.find("file type");
-      if (pFileTypeField != NULL && (pFileTypeField->mValue ==
-         "ENVI Spectral Library" || pFileTypeField->mValue == "Spectral Library"))
-      {
-         errorMessage += "Detected bad bands in ENVI Spectral Library. "
-            "Bad bands for this file type are not currently supported and will be ignored.";
       }
    }
 

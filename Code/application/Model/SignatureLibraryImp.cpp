@@ -96,6 +96,9 @@ const double *SignatureLibraryImp::getOrdinateData(unsigned int index) const
          if (pDesc != NULL)
          {
             FactoryResource<DataRequest> pRequest;
+            pRequest->setInterleaveFormat(BIP);
+            pRequest->setBands(pDesc->getActiveBand(0),
+               pDesc->getActiveBand(pDesc->getBandCount() - 1), pDesc->getBandCount());
             pRequest->setRows(pDesc->getActiveRow(index), pDesc->getActiveRow(index), 1);
             DataAccessor da = mpOdre->getDataAccessor(pRequest.release());
             if (da.isValid())

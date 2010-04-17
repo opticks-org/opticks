@@ -11,6 +11,7 @@
 #include "AppVersion.h"
 #include "DataDescriptor.h"
 #include "DynamicObject.h"
+#include "EnviImporter.h"
 #include "EnviLibraryImporter.h"
 #include "FileDescriptor.h"
 #include "ImportDescriptor.h"
@@ -218,9 +219,24 @@ vector<ImportDescriptor*> EnviLibraryImporter::getImportDescriptors(const string
                      EnviField* pWavelengthField = mFields.find("wavelength");
                      if (pWavelengthField != NULL)
                      {
-                        for (unsigned int i = 0; i < pWavelengthField->mChildren.size(); i++)
+                        vector<unsigned int> goodBands;
+                        EnviField* pBblField = mFields.find("bbl");
+                        if (pBblField != NULL)
                         {
-                           EnviField* pField = pWavelengthField->mChildren[i];
+                           // Parse the bad bands list. This method puts the indices of good bands in ascending order.
+                           EnviImporter::parseBbl(pBblField, goodBands);
+
+                           // Sort in descending order so that the last one can be popped later
+                           // A pop_back is much faster than an erase on the first element
+                           reverse(goodBands.begin(), goodBands.end());
+                        }
+
+                        unsigned int numWavelengthsRead = 0;
+                        for (std::vector<EnviField*>::const_iterator iter = pWavelengthField->mChildren.begin();
+                           iter != pWavelengthField->mChildren.end();
+                           ++iter)
+                        {
+                           EnviField* pField = *iter;
                            if (pField != NULL)
                            {
                               vector<char> bufferVector(pField->mValue.size() + 1);
@@ -231,8 +247,7 @@ vector<ImportDescriptor*> EnviLibraryImporter::getImportDescriptors(const string
                               while (pPtr != NULL)
                               {
                                  double dWavelength = 0.0;
-                                 int count = sscanf(pPtr, "%lf", &dWavelength);
-                                 if (count == 1)
+                                 if (sscanf(pPtr, "%lf", &dWavelength) == 1)
                                  {
                                     if (dWavelength > 50.0)    // Assumed to be in nanometers
                                     {
@@ -240,16 +255,32 @@ vector<ImportDescriptor*> EnviLibraryImporter::getImportDescriptors(const string
                                     }
 
                                     // Restrict the number of wavelengths to the number of samples in the header file
-                                    if (i < numWavelengths)
+                                    if (numWavelengthsRead < numWavelengths)
                                     {
-                                       wavelengths.push_back(dWavelength);
+                                       // Only write the wavelength if the value is valid
+                                       // Since the bands are in descending order,
+                                       // goodBands.back() always holds the next good band.
+                                       if (pBblField == NULL ||
+                                          (goodBands.empty() == false && goodBands.back() == numWavelengthsRead))
+                                       {
+                                          if (goodBands.empty() == false)
+                                          {
+                                             goodBands.pop_back();
+                                          }
+
+                                          wavelengths.push_back(dWavelength);
+                                       }
                                     }
+
+                                    ++numWavelengthsRead;
                                  }
 
                                  pPtr = strtok(NULL, ",");
                               }
                            }
                         }
+
+                        VERIFYNR(goodBands.empty() == true);
                      }
 
                      // Wavelength units
