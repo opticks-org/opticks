@@ -361,7 +361,7 @@ bool InstallerServicesImp::uninstallExtension(const std::string& extensionId, st
       for (std::vector<std::pair<AebRequirement, AebRequirement> >::const_iterator req = reqs.begin(); req != reqs.end(); ++req)
       {
          if ((!req->first.isValid() || req->first.meets(AebVersion::appVersion()))
-               && req->second.meets(pAeb->getVersion()))
+               && req->second.getId() == pAeb->getId() && req->second.meets(pAeb->getVersion()))
          {
             errMsg = "Another extension [" + checkAeb->second->getName() + "] requires this extension. Remove the other first.";
             return false;
