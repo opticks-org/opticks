@@ -338,7 +338,7 @@ extern "C"
       unsigned int rowCount = pArgs->rowEnd - pArgs->rowStart + 1;
       unsigned int columnCount = pArgs->columnEnd - pArgs->columnStart + 1;
       unsigned int bandCount = pArgs->bandEnd - pArgs->bandStart + 1;
-      pRawData = new char[rowCount * columnCount * bandCount * pDesc->getBytesPerElement()];
+      pRawData = new (std::nothrow) char[rowCount * columnCount * bandCount * pDesc->getBytesPerElement()];
       if (pRawData == NULL)
       {
          setLastError(SIMPLE_NO_MEM);
