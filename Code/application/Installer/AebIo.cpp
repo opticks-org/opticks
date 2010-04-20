@@ -541,6 +541,10 @@ const QList<const AebEntry*>& AebIo::getContentPaths(std::string& errMsg) const
       {
          QDir current = process.dequeue();
          QFileInfoList items = current.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
+         if (items.empty())
+         {
+            continue; //empty directory, skip to next directory
+         }
          QString path = current.path();
          if (mObj.mPlatforms.empty() && path.endsWith(platformStr))
          {
