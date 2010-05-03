@@ -16,10 +16,12 @@ DataDescriptorAdapter::DataDescriptorAdapter(const string& name, const string& t
 {
 }
 
+/*
 DataDescriptorAdapter::DataDescriptorAdapter(const string& name, const string& type, const vector<string>& parent) :
    DataDescriptorImp(name, type, parent)
 {
 }
+*/
 
 DataDescriptorAdapter::~DataDescriptorAdapter()
 {

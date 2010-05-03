@@ -13,9 +13,18 @@ def generate(env):
     if not path:
        SCons.Warnings.warn(Hdf5NotFound,"Could not detect Hdf5")
     else:
-       env.AppendUnique(CXXFLAGS="-I%s/include/%s" % (path,env["PLATFORM"]),
-                        LIBPATH=['%s/lib/%s' % (path,env["PLATFORM"])],
-                        LIBS=["hdf5","sz","z"])
+       include_platform = env["OPTICKSPLATFORM"]
+       hdf5_libs = ["hdf5", "sz"]
+       if env["OS"] == "windows":
+          include_platform = env["OS"]
+          env.AppendUnique(CPPDEFINES=["_HDF5USEDLL_"])
+          if env["MODE"] == "release":
+             hdf5_libs = ["hdf5dll"]
+          else:
+             hdf5_libs = ["hdf5ddll"]
+       env.AppendUnique(CXXFLAGS="-I%s/include/%s" % (path,include_platform),
+                        LIBPATH=['%s/lib/%s' % (path,env["OPTICKSPLATFORM"])],
+                        LIBS=hdf5_libs)
 
 def exists(env):
     return env.Detect('hdf5')

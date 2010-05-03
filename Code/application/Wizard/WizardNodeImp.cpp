@@ -336,11 +336,11 @@ bool WizardNodeImp::fromXml(DOMNode* pDocument, unsigned int version)
    {
       // do nothing special
    }
+   else if (itemVersion == "Wizard Node Version 3.0" || true)
+   {
 #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : The || true preserves a loophole in previous " \
 "parsing code where anything could be put in this field by another app generating a wizard file. We want to " \
 "preserve this behavior in 4.3.0 but in 4.4.0 add an else {return false;} and remove the || true (tclarke)")
-   else if (itemVersion == "Wizard Node Version 3.0" || true)
-   {
       // set compatible behavior for older wizard files
       WizardItemImp* pItemImp = dynamic_cast<WizardItemImp*>(mpItem);
       VERIFY(pItemImp);

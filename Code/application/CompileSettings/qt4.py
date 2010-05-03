@@ -217,7 +217,10 @@ def generate(env):
     Builder = SCons.Builder.Builder
     splitext = SCons.Util.splitext
 
-    platform = env["PLATFORM"]
+    platform = env["OPTICKSPLATFORM"]
+    include_platform = platform
+    if env["OS"] == "windows":
+       include_platform = env["OS"] 
     path = os.environ.get('OPTICKSDEPENDENCIES',None)
     if path:
        path = os.path.join(path, "Qt")
@@ -225,7 +228,7 @@ def generate(env):
        SCons.Warnings.warn(QtdirNotFound,"Could not detect Qt")
     else:
        env.AppendUnique(QT_BINPATH = os.path.join(path, 'bin', platform),
-                      QT_CPPPATH = os.path.join(path, 'include', platform),
+                      QT_CPPPATH = os.path.join(path, 'include', include_platform),
                       QT_LIBPATH = os.path.join(path, 'lib', platform),
                       QT_MOC = os.path.join('$QT_BINPATH','moc'),
                       QT_UIC = os.path.join('$QT_BINPATH','uic'),

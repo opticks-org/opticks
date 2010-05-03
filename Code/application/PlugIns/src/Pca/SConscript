@@ -3,8 +3,8 @@ import glob
 ####
 # import the environment
 ####
-Import('env build_dir TOOLPATH PLATFORM')
-env = env.Clone(PLATFORM=PLATFORM)
+Import('env build_dir TOOLPATH')
+env = env.Clone()
 env.Tool("ossim",toolpath=[TOOLPATH])
 env.Tool("qwt",toolpath=[TOOLPATH])
 

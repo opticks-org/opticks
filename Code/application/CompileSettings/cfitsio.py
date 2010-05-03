@@ -14,7 +14,7 @@ def generate(env):
        SCons.Warnings.warn(CfitsioNotFound,"Could not detect cfitsio")
     else:
        env.AppendUnique(CXXFLAGS=["-I%s/include" % (path,)],
-                        LIBPATH=['%s/lib/%s' % (path,env["PLATFORM"])],
+                        LIBPATH=['%s/lib/%s' % (path,env["OPTICKSPLATFORM"])],
                         LIBS=["cfitsio"])
 
 def exists(env):

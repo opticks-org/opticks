@@ -7,14 +7,17 @@ class ArcGISNotFound(SCons.Warnings.Warning):
 SCons.Warnings.enableWarningClass(ArcGISNotFound)
 
 def generate(env):
+    if env["OS"] != "windows":
+       SCons.Warnings.warn(ArcGISNotFound,"ArcGIS only supported on Windows platform")
+
     path = os.environ.get('ARCSDK',None)
     if not path:
        SCons.Warnings.warn(ArcGISNotFound,"Could not detect ArcGIS")
     else:
-       env.AppendUnique(CXXFLAGS=["-I%s/include" % (path), "-I%s/com" % (path)],
-                        LIBPATH=["%s/bin" % path],
-                        LIBS=["arcsdk"])
-    env.Append(CPPDEFINES=["ESRI_UNIX"])
+       env.AppendUnique(CXXFLAGS=["-I%s/include" % (path), "-I%s/com" % (path)])
+       if env["OS"] == "windows":
+          env.AppendUnique(CXXFLAGS=["/wd4192", "/wd4278"])
+          env.Append(CPPDEFINES=["ESRI_WINDOWS"])
 
 def exists(env):
     return env.Detect('ArcGIS')

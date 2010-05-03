@@ -13,9 +13,16 @@ def generate(env):
     if not path:
        SCons.Warnings.warn(GlewNotFound,"Could not detect glew")
     else:
-       env.AppendUnique(CXXFLAGS="-I%s/include/%s" % (path,env['PLATFORM']),
-                        LIBPATH=['%s/lib/%s' % (path,env['PLATFORM'])],
-                        LIBS=['GLEW'])
+       lib = "GLEW"
+       platform = env["OPTICKSPLATFORM"]
+       if env["OS"] == "windows":
+          lib = "glew32"
+          if env["MODE"] == "debug":
+             lib = "glew32d"
+          platform = ""
+       env.AppendUnique(CXXFLAGS="-I%s/include/%s" % (path,platform),
+                        LIBPATH=['%s/lib/%s' % (path,env['OPTICKSPLATFORM'])],
+                        LIBS=[lib])
 
 def exists(env):
     return env.Detect('glew')

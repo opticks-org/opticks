@@ -36,13 +36,13 @@ public:
 
    DataDescriptor* createDataDescriptor(const std::string& name, const std::string& type,
       DataElement* pParent) const;
-   DataDescriptor* createDataDescriptor(const std::string& name, const std::string& type,
-      const std::vector<std::string> &parent) const;
+   //DataDescriptor* createDataDescriptor(const std::string& name, const std::string& type,
+   //   const std::vector<std::string> &parent) const;
    void destroyDataDescriptor(DataDescriptor* pDescriptor) const;
    ImportDescriptor* createImportDescriptor(const std::string& name, const std::string& type,
       DataElement* pParent, bool bImported = true) const;
-   ImportDescriptor* createImportDescriptor(const std::string& name, const std::string& type,
-      const std::vector<std::string> &parent, bool bImported = true) const;
+   //ImportDescriptor* createImportDescriptor(const std::string& name, const std::string& type,
+   //   const std::vector<std::string> &parent, bool bImported = true) const;
    ImportDescriptor* createImportDescriptor(DataDescriptor* pDescriptor, bool bImported = true) const;
    void destroyImportDescriptor(ImportDescriptor* pImportDescriptor) const;
 

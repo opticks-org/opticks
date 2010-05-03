@@ -13,9 +13,14 @@ def generate(env):
     if not path:
        SCons.Warnings.warn(LibTiffNotFound,"Could not detect LibTiff")
     else:
-       env.AppendUnique(CXXFLAGS="-I%s/include/%s" % (path,env["PLATFORM"]),
-                        LIBPATH=['%s/lib/%s' % (path,env["PLATFORM"])],
-                        LIBS=['tiff'])
+       include_platform = env["OPTICKSPLATFORM"]
+       lib = "tiff"
+       if env["OS"] == "windows":
+          include_platform = env["OS"]
+          lib = "libtiff"
+       env.AppendUnique(CXXFLAGS="-I%s/include/%s" % (path,include_platform),
+                        LIBPATH=['%s/lib/%s' % (path,env["OPTICKSPLATFORM"])],
+                        LIBS=[lib])
 
 def exists(env):
     return env.Detect('libtiff')

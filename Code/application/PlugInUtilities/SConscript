@@ -16,7 +16,9 @@ subdirs = ["pthreads-wrapper"]
 ####
 # build top-level sources and extra moc files
 ####
-srcs = map(lambda x,bd=build_dir: '%s/%s' % (bd,x), glob.glob("*.cpp"))
+cpps = glob.glob("*.cpp") 
+cpps.remove("StringUtilities.cpp") #remove StringUtilities.cpp, it needs special compile flags on Windows
+srcs = map(lambda x,bd=build_dir: '%s/%s' % (bd,x), cpps)
 mocfiles = map(lambda x,bd=build_dir,e=env: e.Moc('%s/Interfaces/%s' % (bd,x)),
                ["AlgorithmDialog.h",
                 "AnimationFrameSpinBox.h",
@@ -36,6 +38,12 @@ mocfiles = map(lambda x,bd=build_dir,e=env: e.Moc('%s/Interfaces/%s' % (bd,x)),
                 "SuppressibleMsgDlg.h",    
                 "UndoAction.h"])
 objs = env.Object(srcs + mocfiles)
+
+#Compile StringUtilities.cpp
+env2 = env.Clone()
+if env2["OS"] == "windows":
+   env2.AppendUnique(CXXFLAGS="/bigobj")
+objs += env2.Object('%s/%s' % (build_dir, "StringUtilities.cpp"))
 
 ####
 # build subdirectory sources

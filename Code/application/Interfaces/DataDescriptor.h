@@ -341,7 +341,7 @@ public:
     *
     *  @see copy(const std::string&,DataElement*)
     */
-   virtual DataDescriptor* copy(const std::string& name, const std::vector<std::string>& parent) const = 0;
+   //virtual DataDescriptor* copy(const std::string& name, const std::vector<std::string>& parent) const = 0;
 
    /**
     *  Adds the current values in this data descriptor to a given message.
