@@ -213,16 +213,11 @@ bool RasterElementImporterShell::validateBasic(const DataDescriptor* pDescriptor
    }
 
    // Data type
-   const RasterDataDescriptorExt1* pRasterDescriptorExt1 =
-      dynamic_cast<const RasterDataDescriptorExt1*>(pRasterDescriptor);
-   if (pRasterDescriptorExt1 != NULL)
+   const std::vector<EncodingType>& validDataTypes = pRasterDescriptor->getValidDataTypes();
+   if (find(validDataTypes.begin(), validDataTypes.end(), pRasterDescriptor->getDataType()) == validDataTypes.end())
    {
-      const std::vector<EncodingType>& validDataTypes = pRasterDescriptorExt1->getValidDataTypes();
-      if (find(validDataTypes.begin(), validDataTypes.end(), pRasterDescriptor->getDataType()) == validDataTypes.end())
-      {
-         errorMessage = "The data type is not valid for this data set.";
-         return false;
-      }
+      errorMessage = "The data type is not valid for this data set.";
+      return false;
    }
 
    // Invalid pre-band and post-band bytes

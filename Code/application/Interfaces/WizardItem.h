@@ -46,7 +46,7 @@ class WizardObject;
  *  getOutputNodes() or with getInputNode() and getOutputNode() if the name and type of
  *  the node are known.
  *
- *  @see       WizardItemExt1, WizardNode
+ *  @see       WizardNode
  */
 class WizardItem : public Serializable
 {
@@ -169,29 +169,6 @@ public:
     */
    virtual void getConnectedItems(bool bInputNode, std::vector<WizardItem*>& connectedItems) const = 0;
 
-protected:
-   /**
-    * A plug-in cannot create this object; it can only retrieve an already existing
-    * object from WizardObject.  The WizardObject will manage any instances
-    * of this object.
-    */
-   virtual ~WizardItem() {}
-};
-
-/**
- * Extends capability of the WizardItem interface.
- *
- * This class provides additional capability for the WizardItem interface
- * class.  A pointer to this class can be obtained by performing a dynamic cast
- * on a pointer to WizardItem.
- *
- * @warning A pointer to this class can only be used to call methods contained
- *          in this extension class and cannot be used to call any methods in
- *          WizardItem.
- */
-class WizardItemExt1
-{
-public:
    /**
     * Returns the parent wizard containing this item.
     *
@@ -208,12 +185,11 @@ public:
 
 protected:
    /**
-    * A plug-in cannot create this object; it can only retrieve an already
-    * existing item from WizardObject.  The WizardObject will manage any
-    * instances of this object.
+    * A plug-in cannot create this object; it can only retrieve an already existing
+    * object from WizardObject.  The WizardObject will manage any instances
+    * of this object.
     */
-   virtual ~WizardItemExt1()
-   {}
+   virtual ~WizardItem() {}
 };
 
 #endif

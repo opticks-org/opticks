@@ -1300,8 +1300,7 @@ SessionManagerImp::serialize(const string& filename, Progress* pProgress)
          LOG_IF(pItem == NULL, continue);
 
          // check for session items that should not be saved
-         SessionItemExt1* pItemExt1 = dynamic_cast<SessionItemExt1*>(pItem);
-         if (pItemExt1 != NULL && pItemExt1->isValidSessionSaveItem() == false)
+         if (pItem->isValidSessionSaveItem() == false)
          {
             // don't serialize this item
             continue;

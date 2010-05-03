@@ -666,16 +666,8 @@ RasterDataDescriptor *RasterUtilities::generateUnchippedRasterDataDescriptor(
    pNewDescriptor->setBands(bands);
    pNewDescriptor->setInterleaveFormat(pOrigFileDescriptor->getInterleaveFormat());
    pNewDescriptor->setDataType(pOrigDescriptor->getDataType());
+   pNewDescriptor->setValidDataTypes(pOrigDescriptor->getValidDataTypes());
    pNewDescriptor->setProcessingLocation(ON_DISK_READ_ONLY);
-
-   RasterDataDescriptorExt1* pNewDescriptorExt1 =
-      dynamic_cast<RasterDataDescriptorExt1*>(pNewDescriptor.get());
-   const RasterDataDescriptorExt1* pOrigDescriptorExt1 =
-      dynamic_cast<const RasterDataDescriptorExt1*>(pOrigDescriptor);
-   if (pNewDescriptorExt1 != NULL && pOrigDescriptorExt1 != NULL)
-   {
-      pNewDescriptorExt1->setValidDataTypes(pOrigDescriptorExt1->getValidDataTypes());
-   }
 
    FactoryResource<RasterFileDescriptor> pNewFileDescriptor(
       dynamic_cast<RasterFileDescriptor*>(pOrigFileDescriptor->copy()));

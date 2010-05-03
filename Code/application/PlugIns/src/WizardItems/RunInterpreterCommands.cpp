@@ -270,12 +270,7 @@ bool RunInterpreterCommands::execute(PlugInArgList* pInArgList, PlugInArgList* p
       }
 
       progress.report("Running interpreter commands.", static_cast<int>(percent), NORMAL);
-      std::string prompt = interpreterName + "> ";
-      InterpreterExt1* pInterpreterExt1 = dynamic_cast<InterpreterExt1*>(pInterpreter);
-      if (pInterpreterExt1 != NULL) //don't require a InterpreterExt1* pointer to work.
-      {
-         prompt = pInterpreterExt1->getPrompt();
-      }
+      std::string prompt = pInterpreter->getPrompt();
       pInterpreterResource->getInArgList().setPlugInArgValue<std::string>(Interpreter::CommandArg(), &(*iter));
       const bool success = pInterpreterResource->execute();
       percent += step;

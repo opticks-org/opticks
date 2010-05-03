@@ -57,7 +57,7 @@ class SettableSessionItem;
  *
  *  @see     PlugIn
  */
-class PlugInShell : public PlugIn, public SessionItemExt1
+class PlugInShell : public PlugIn
 {
 public:
    /**
@@ -80,8 +80,6 @@ public:
 
    // SessionItem
    const std::string& getId() const;
-
-   // SessionItemExt1
    bool isValidSessionSaveItem() const;
 
    /**
@@ -132,7 +130,7 @@ protected:
    void setName(const std::string& name);
 
    /**
-    *  @copydoc SettableSessionItemExt1::setValidSessionSaveItem()
+    *  @copydoc SettableSessionItem::setValidSessionSaveItem()
     */
    void setValidSessionSaveItem(bool isValid);
 

@@ -20,11 +20,17 @@
  *  This interface contains all interpreter specific operations.
  *
  *  @deprecated A new interpreter interface is being designed to replace the use of Executable.
- *  @see InterpreterExt1
  */
 class Interpreter
 {
 public:
+   /**
+    *  Retrieves the current prompt.
+    *
+    *  @return The current prompt that will be displayed to the user.
+    */
+   virtual std::string getPrompt() const = 0;
+
    /**
     * The name to use for the command argument.
     *
@@ -126,36 +132,6 @@ protected:
     * This should be destroyed by calling PlugInManagerServices::destroyPlugIn.
     */
    virtual ~Interpreter() {}
-};
-
-
-
-/**
- * Extends capability of the Interpreter interface.
- *
- * This class provides additional capability for the Interpreter interface
- * class.  A pointer to this class can be obtained by performing a dynamic cast
- * on a pointer to Interpreter.
- *
- * @warning A pointer to this class can only be used to call methods contained
- *          in this extension class and cannot be used to call any methods in
- *          Interpreter.
- */
-class InterpreterExt1
-{
-public:
-   /**
-    *  Retrieves the current prompt.
-    *
-    *  @return The current prompt that will be displayed to the user.
-    */
-   virtual std::string getPrompt() const = 0;
-
-protected:
-   /**
-    * This should be destroyed by calling PlugInManagerServices::destroyPlugIn.
-    */
-   virtual ~InterpreterExt1() {}
 };
 
 #endif

@@ -575,6 +575,7 @@ DataDescriptor* RasterDataDescriptorImp::copy(const string& name, DataElement* p
    if (pDescriptor != NULL)
    {
       pDescriptor->setDataType(mDataType);
+      pDescriptor->setValidDataTypes(mValidDataTypes);
       pDescriptor->setInterleaveFormat(mInterleave);
       pDescriptor->setBadValues(mBadValues);
       pDescriptor->setRows(mRows);
@@ -588,12 +589,6 @@ DataDescriptor* RasterDataDescriptorImp::copy(const string& name, DataElement* p
       pDescriptor->setDisplayBand(GREEN, mGreenBand);
       pDescriptor->setDisplayBand(BLUE, mBlueBand);
       pDescriptor->setDisplayMode(mDisplayMode);
-   }
-
-   RasterDataDescriptorExt1* pDescriptorExt1 = dynamic_cast<RasterDataDescriptorExt1*>(pDescriptor);
-   if (pDescriptor != NULL)
-   {
-      pDescriptorExt1->setValidDataTypes(mValidDataTypes);
    }
 
    return pDescriptor;

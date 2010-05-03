@@ -1129,19 +1129,15 @@ void PlotWidgetImp::setLabelText(const QString& strClassification, const QString
    strTopCenterText.append(QString::fromStdString(
       StringUtilities::toDisplayString(pConfigSettings->getReleaseType())));
 
-   ConfigurationSettingsExt1* pConfigSettingsExt1 = dynamic_cast<ConfigurationSettingsExt1*>(pConfigSettings.get());
-   if (pConfigSettingsExt1 != NULL)
+   QString strReleaseDescription = QString::fromStdString(pConfigSettings->getReleaseDescription());
+   if (strReleaseDescription.isEmpty() == false)
    {
-      QString strReleaseDescription = QString::fromStdString(pConfigSettingsExt1->getReleaseDescription());
-      if (strReleaseDescription.isEmpty() == false)
+      if (strTopCenterText.isEmpty() == false)
       {
-         if (strTopCenterText.isEmpty() == false)
-         {
-            strTopCenterText.append("\n");
-         }
-
-         strTopCenterText.append(strReleaseDescription);
+         strTopCenterText.append("\n");
       }
+
+      strTopCenterText.append(strReleaseDescription);
    }
 
    if (pConfigSettings->isProductionRelease() == false)

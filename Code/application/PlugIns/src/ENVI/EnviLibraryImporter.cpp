@@ -406,17 +406,7 @@ bool EnviLibraryImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
       mpProgress->updateProgress(message, 0, NORMAL);
    }
 
-   bool success;
-   SignatureLibraryExt1* pSignatureLibraryExt1 = dynamic_cast<SignatureLibraryExt1*>(mpSignatureLibrary);
-   if (pSignatureLibraryExt1 != NULL)
-   {
-      success = pSignatureLibraryExt1->import(dataFile, "ENVI Importer", mpProgress);
-   }
-   else
-   {
-      success = mpSignatureLibrary->import(dataFile, "ENVI Importer");
-   }
-
+   bool success = mpSignatureLibrary->import(dataFile, "ENVI Importer", mpProgress);
    if (success == true)
    {
       message = "ENVI library import complete!";

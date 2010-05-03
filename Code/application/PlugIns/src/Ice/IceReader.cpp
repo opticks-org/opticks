@@ -246,11 +246,7 @@ ImportDescriptor* IceReader::getImportDescriptor(const Hdf5Group* pCube)
    pData->getDataEncoding(encoding);
    pFileDescriptor->setBitsPerElement(RasterUtilities::bytesInEncoding(encoding)*8);
    pDescriptor->setDataType(encoding);
-   RasterDataDescriptorExt1* pDescriptorExt1 = dynamic_cast<RasterDataDescriptorExt1*>(pDescriptor);
-   if (pDescriptorExt1 != NULL)
-   {
-      pDescriptorExt1->setValidDataTypes(vector<EncodingType>(1, encoding));
-   }
+   pDescriptor->setValidDataTypes(vector<EncodingType>(1, encoding));
 
    string fullPathAndName = pData->getFullPathAndName();
    pFileDescriptor->setDatasetLocation(fullPathAndName);

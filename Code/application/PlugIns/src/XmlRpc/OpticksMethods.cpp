@@ -599,21 +599,7 @@ XmlRpcArrayParam* Close::getSignature()
 XmlRpcParam* CloseAll::operator()(const XmlRpcParams& params)
 {
    Service<DesktopServices> pDesktop;
-   DesktopServicesExt1* pDesktopExt1 = dynamic_cast<DesktopServicesExt1*>(pDesktop.get());
-   if (pDesktopExt1 == NULL)
-   {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove 4.3.0 compatibility code for 4.4.0 (dadkins)")
-      std::vector<Window*> windows;
-      pDesktop->getWindows(windows);
-      for (std::vector<Window*>::const_iterator iter = windows.begin(); iter != windows.end(); ++iter)
-      {
-         pDesktop->deleteWindow(*iter);
-      }
-   }
-   else
-   {
-      pDesktopExt1->deleteAllWindows();
-   }
+   pDesktop->deleteAllWindows();
 
    return NULL;
 }

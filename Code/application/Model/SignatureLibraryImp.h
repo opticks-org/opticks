@@ -74,7 +74,7 @@ private:
 };
 
 #define SIGNATURELIBRARYADAPTEREXTENSION_CLASSES \
-   SIGNATURESETADAPTEREXTENSION_CLASSES , public SignatureLibraryExt1
+   SIGNATURESETADAPTEREXTENSION_CLASSES
 
 #define SIGNATURELIBRARYADAPTER_METHODS(impClass) \
    SIGNATURESETADAPTER_METHODS(impClass) \
@@ -130,14 +130,9 @@ private:
    { \
       impClass::desample(); \
    } \
-   bool import(const std::string& filename, const std::string& importerName) \
-   { \
-      return impClass::import(filename, importerName); \
-   } \
-   bool import(const std::string& filename, const std::string& importerName, Progress* pProgress) \
+   bool import(const std::string& filename, const std::string& importerName, Progress* pProgress = NULL) \
    { \
       return impClass::import(filename, importerName, pProgress); \
    }
-
 
 #endif

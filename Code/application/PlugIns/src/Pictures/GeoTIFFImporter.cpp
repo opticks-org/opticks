@@ -800,11 +800,7 @@ bool GeoTIFFImporter::populateDataDescriptor(RasterDataDescriptor* pDescriptor)
    }
 
    pDescriptor->setDataType(dataType);
-   RasterDataDescriptorExt1* pDescriptorExt1 = dynamic_cast<RasterDataDescriptorExt1*>(pDescriptor);
-   if (pDescriptorExt1 != NULL)
-   {
-      pDescriptorExt1->setValidDataTypes(vector<EncodingType>(1, dataType));
-   }
+   pDescriptor->setValidDataTypes(vector<EncodingType>(1, dataType));
 
    // Interleave format
    unsigned short planarConfig = 0;

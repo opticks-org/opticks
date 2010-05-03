@@ -33,7 +33,7 @@ class QUrl;
  *
  *  @see   BatchProcessor
  */
-class DesktopServicesImp : public DesktopServices, public SubjectImp, public DesktopServicesExt1
+class DesktopServicesImp : public DesktopServices, public SubjectImp
 {
 public:
    /**

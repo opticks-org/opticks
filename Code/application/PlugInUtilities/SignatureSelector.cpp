@@ -713,13 +713,7 @@ bool SignatureSelector::matchMetadata(const DynamicObject* pMetadata, const QReg
    }
 
    // Search this object
-   const DynamicObjectExt1* pMetadataExt = dynamic_cast<const DynamicObjectExt1*>(pMetadata);
-   if (pMetadataExt == NULL)
-   {
-      return false;
-   }
-
-   const DataVariant& attribute = pMetadataExt->findFirstOf(nameFilter, valueFilter);
+   const DataVariant& attribute = pMetadata->findFirstOf(nameFilter, valueFilter);
    if (attribute.isValid() == true)
    {
       return true;

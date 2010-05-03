@@ -39,7 +39,7 @@ class View;
  *    the object is modified.
  *  - All notifications documented in Subject.
  *
- *  @see     GraphicObjectExt1, GraphicLayer, GraphicObjectType
+ *  @see     GraphicLayer, GraphicObjectType
  */
 class GraphicObject : public SessionItem, public Subject, public Serializable
 {
@@ -563,6 +563,25 @@ public:
     */
    virtual double getScale() const = 0;
 
+   // Scale bar
+
+   /**
+    *  Sets the unit system for a graphic object.
+    *
+    *  @param   units
+    *           The system of units to use.
+    *
+    *  @return  Returns \c true if the value was set successfully, otherwise \c false.
+    */
+   virtual bool setUnitSystem(UnitSystem units) = 0;
+
+   /**
+    *  Returns the unit system of a graphic object.
+    *
+    *  @return  The units.
+    */
+   virtual UnitSystem getUnitSystem() const = 0;
+
    // Image
 
    /**
@@ -793,44 +812,6 @@ protected:
     * This should be destroyed by calling GraphicLayer::removeObject.
     */
    virtual ~GraphicObject() {}
-};
-
-/**
- * Extends capability of the GraphicObject interface.
- *
- * This class provides additional capability for the GraphicObject interface class.
- * A pointer to this class can be obtained by performing a dynamic cast on a
- * pointer to GraphicObject or any of its subclasses.
- *
- * @warning A pointer to this class can only be used to call methods contained
- *           in this extension class and cannot be used to call any methods in
- *           GraphicObject or its subclasses.
- */
-class GraphicObjectExt1
-{
-public:
-   /**
-    *  Sets the unit system for a graphic object.
-    *
-    *  @param   units
-    *           The system of units to use.
-    *
-    *  @return  Returns \c true if the value was set successfully, otherwise \c false.
-    */
-   virtual bool setUnitSystem(UnitSystem units) = 0;
-
-   /**
-    *  Returns the unit system of a graphic object.
-    *
-    *  @return  The units.
-    */
-   virtual UnitSystem getUnitSystem() const = 0;
-
-protected:
-   /**
-    * This should be destroyed by calling GraphicLayer::removeObject.
-    */
-   virtual ~GraphicObjectExt1() {}
 };
 
 #endif

@@ -23,9 +23,9 @@
  *  developers would take this class and extend it to support their 
  *  interpreter specific code.
  *
- *  @see     ExecutableShell, Interpreter, InterpreterExt1
+ *  @see     ExecutableShell, Interpreter
  */
-class InterpreterShell : public ExecutableShell, public Interpreter, public InterpreterExt1
+class InterpreterShell : public ExecutableShell, public Interpreter
 {
 public:
    /**
@@ -59,7 +59,7 @@ public:
    virtual bool getOutputSpecification(PlugInArgList*& pArgList);
 
    /**
-    *  @copydoc InterpreterExt1::getPrompt()
+    *  @copydoc Interpreter::getPrompt()
     *
     *  @default Returns "interpreter_name> ".
     */

@@ -312,16 +312,10 @@ void DataDescriptorWidget::initialize()
          QComboBox* pDataTypeCombo = new QComboBox(mpTreeWidget);
          pDataTypeCombo->setEditable(false);
 
-         RasterDataDescriptorExt1* pRasterDescriptorExt1 = dynamic_cast<RasterDataDescriptorExt1*>(pRasterDescriptor);
-         if (pRasterDescriptorExt1 != NULL)
+         const std::vector<EncodingType>& validDataTypes = pRasterDescriptor->getValidDataTypes();
+         for (vector<EncodingType>::const_iterator iter = validDataTypes.begin(); iter != validDataTypes.end(); ++iter)
          {
-            const std::vector<EncodingType>& validDataTypes = pRasterDescriptorExt1->getValidDataTypes();
-            for (vector<EncodingType>::const_iterator iter = validDataTypes.begin();
-               iter != validDataTypes.end();
-               ++iter)
-            {
-               pDataTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(*iter)));
-            }
+            pDataTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(*iter)));
          }
 
          pDataTypeCombo->hide();

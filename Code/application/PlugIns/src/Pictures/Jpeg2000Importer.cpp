@@ -146,16 +146,12 @@ vector<ImportDescriptor*> Jpeg2000Importer::getImportDescriptors(const string& f
    if (pImportDescriptor != NULL)
    {
       RasterDataDescriptor* pDescriptor = dynamic_cast<RasterDataDescriptor*>(pImportDescriptor->getDataDescriptor());
-      // INT4UBYTES is currently the only supported type;
-      pDescriptor->setDataType(INT4UBYTES);
-      RasterDataDescriptorExt1* pDescriptorExt1 = dynamic_cast<RasterDataDescriptorExt1*>(pDescriptor);
       if (pDescriptor != NULL)
       {
-         if (pDescriptorExt1 != NULL)
-         {
-            pDescriptorExt1->setValidDataTypes(vector<EncodingType>(1, INT4UBYTES));
-         }
+         pDescriptor->setDataType(INT4UBYTES);     // INT4UBYTES is currently the only supported type
+         pDescriptor->setValidDataTypes(vector<EncodingType>(1, INT4UBYTES));
          pDescriptor->setProcessingLocation(IN_MEMORY);
+
          // Create and set a file descriptor in the data descriptor
          FactoryResource<RasterFileDescriptor> pFileDescriptor;
          pFileDescriptor->setEndian(BIG_ENDIAN_ORDER);

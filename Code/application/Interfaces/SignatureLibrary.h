@@ -42,7 +42,7 @@ class RasterElement;
  *    resample(), desample(), import(), insertSignature(), insertSignatures(), clear().
  *  - Everything else documented in SignatureSet.
  *
- *  @see SignatureLibraryExt1, SignatureSet
+ *  @see        SignatureSet
  */
 class SignatureLibrary : public SignatureSet
 {
@@ -198,26 +198,27 @@ public:
    /**
     *  Imports a new signature library file into the library object.
     *
-    *  @deprecated This method is deprecated and will be replaced by SignatureLibraryExt1::import.
-    *
     *  This method clears the SignatureLibrary and then imports a new library
     *  file into it. The library will be imported as an on-disk RasterElement
     *  and will be available via getOriginalOrdinateData().
     *
-    *  @param filename
-    *         The full pathname of the file to import.
-    *
-    *  @param importerName
-    *         The name of the importer to use to import the library as an on-
-    *         disk RasterElement.
+    *  @param   filename
+    *           The full pathname of the file to import.
+    *  @param   importerName
+    *           The name of the importer to use to import the library as an
+    *           on-disk RasterElement.
+    *  @param   pProgress
+    *           The progress object to pass into the importer.  If \c NULL is
+    *           passed in, a progress object is obtained by calling
+    *           PlugInManagerServices::getProgress().
     *
     *  @return  \c True if the import succeeded and \c false otherwise.
     *
     *  @notify  This method will notify Subject::signalModified.
     *
-    *  @see clear(), getOriginalOrdinateData()
+    *  @see     clear(), getOriginalOrdinateData()
     */
-   virtual bool import(const std::string &filename, const std::string &importerName) = 0;
+   virtual bool import(const std::string& filename, const std::string& importerName, Progress* pProgress = NULL) = 0;
 
    /**
     *  Adds an existing signature into the library. 
@@ -318,54 +319,6 @@ protected:
     * This should be destroyed by calling ModelServices::destroyElement.
     */
    virtual ~SignatureLibrary() {}
-};
-
-/**
- * Extends capability of the SignatureLibrary interface.
- *
- * This class provides additional capability for the SignatureLibrary interface
- * class.  A pointer to this class can be obtained by performing a dynamic cast
- * on a pointer to SignatureLibrary.
- *
- * @warning A pointer to this class can only be used to call methods contained
- *          in this extension class and cannot be used to call any methods in
- *          SignatureLibrary.
- */
-class SignatureLibraryExt1
-{
-public:
-   /**
-    *  Imports a new signature library file into the library object.
-    *
-    *  This method clears the SignatureLibrary and then imports a new library
-    *  file into it. The library will be imported as an on-disk RasterElement
-    *  and will be available via SignatureLibrary::getOriginalOrdinateData().
-    *
-    *  @param filename
-    *         The full pathname of the file to import.
-    *
-    *  @param importerName
-    *         The name of the importer to use to import the library as an on-
-    *         disk RasterElement.
-    *
-    *  @param pProgress
-    *         The progress object to pass into the importer.  If \c NULL is
-    *         passed in, a progress object is obtained by calling
-    *         PlugInManagerServices::getProgress().
-    *
-    *  @return  \c True if the import succeeded and \c false otherwise.
-    *
-    *  @notify  This method will notify Subject::signalModified.
-    *
-    *  @see SignatureLibrary::clear(), SignatureLibrary::getOriginalOrdinateData()
-    */
-   virtual bool import(const std::string& filename, const std::string& importerName, Progress* pProgress) = 0;
-
-protected:
-   /**
-    * This should be destroyed by calling ModelServices::destroyElement.
-    */
-   virtual ~SignatureLibraryExt1() {}
 };
 
 #endif

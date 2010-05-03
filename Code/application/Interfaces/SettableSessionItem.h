@@ -24,7 +24,7 @@ class SessionItemId;
  *  SettableSessionItem is used internally and is typically not used by plug-in
  *  developers.
  *
- *  @see    SessionItem, SettableSessionItemExt1
+ *  @see    SessionItem
  */
 class SettableSessionItem : public SessionItem
 {
@@ -189,34 +189,14 @@ public:
     */
    virtual void setPropertiesPages(const std::vector<std::string>& plugInNames) = 0;
 
-protected:
    /**
-    *  This object should be destroyed by calling ObjectFactory::destroyObject().
-    */
-   virtual ~SettableSessionItem() {}
-};
-
-/**
-* Extends capability of the SettableSessionItem interface.
-*
-* This class provides additional capability for the SettableSessionItem interface
-* class.  A pointer to this class can be obtained by performing a dynamic cast
-* on a pointer to SettableSessionItem or any of its subclasses.
-*
-* @warning A pointer to this class can only be used to call methods contained
-*          in this extension class and cannot be used to call any methods in
-*          SettableSessionItem or any of its subclasses.
-*/
-class SettableSessionItemExt1
-{
-public:
-   /**
-    *  Sets Session Save validity.
+    *  Sets session save validity.
     *
-    *  Method sets whether or not the item will be included in a Session Save.
+    *  Method sets whether or not the item will be included when saving a
+    *  session.
     *
     *  @param   isValid
-    *           Session Save validity of the item.
+    *           Session save validity of the item.
     */
    virtual void setValidSessionSaveItem(bool isValid) = 0;
 
@@ -224,7 +204,7 @@ protected:
    /**
     *  This object should be destroyed by calling ObjectFactory::destroyObject().
     */
-   virtual ~SettableSessionItemExt1() {}
+   virtual ~SettableSessionItem() {}
 };
 
 #endif

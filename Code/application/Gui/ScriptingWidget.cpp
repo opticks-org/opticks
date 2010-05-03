@@ -506,7 +506,7 @@ void ScriptingWidget::clipToMaxParagraphs()
 
 void ScriptingWidget::appendPrompt()
 {
-   InterpreterExt1* pInterpreter = dynamic_cast<InterpreterExt1*>(mInterpreter->getPlugIn());
+   Interpreter* pInterpreter = dynamic_cast<Interpreter*>(mInterpreter->getPlugIn());
    if (pInterpreter != NULL)
    {
       mPrompt = QString::fromStdString(pInterpreter->getPrompt());

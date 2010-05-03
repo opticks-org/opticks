@@ -83,11 +83,8 @@ vector<ImportDescriptor*> DtedImporter::getImportDescriptors(const string& filen
             mUhl_h.getLongCount(), mUhl_h.getLatCount(), 1, BIP, dataType, IN_MEMORY);
          if (pDescriptor != NULL)
          {
-            RasterDataDescriptorExt1* pDescriptorExt1 = dynamic_cast<RasterDataDescriptorExt1*>(pDescriptor);
-            if (pDescriptorExt1 != NULL)
-            {
-               pDescriptorExt1->setValidDataTypes(vector<EncodingType>(1, dataType));
-            }
+            // Data types
+            pDescriptor->setValidDataTypes(vector<EncodingType>(1, dataType));
 
             // Classification
             FactoryResource<Classification> pClassification;

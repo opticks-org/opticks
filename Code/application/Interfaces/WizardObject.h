@@ -31,7 +31,7 @@ class WizardItem;
  *  - The wizard is populated from an XML file.
  *  - Everything documented in Subject.
  *
- *  @see       WizardObjectExt1, WizardItem
+ *  @see       WizardItem
  */
 class WizardObject : public Subject, public Serializable
 {
@@ -96,45 +96,23 @@ public:
     */
    virtual const std::string& getMenuLocation() const = 0;
 
-protected:
    /**
-    * This should be destroyed by calling ObjectFactory::destroyObject.
-    */
-   virtual ~WizardObject() {}
-};
-
-/**
- * Extends capability of the WizardObject interface.
- *
- * This class provides additional capability for the WizardObject interface
- * class.  A pointer to this class can be obtained by performing a dynamic cast
- * on a pointer to WizardObject.
- *
- * @warning A pointer to this class can only be used to call methods contained
- *          in this extension class and cannot be used to call any methods in
- *          WizardObject.
- */
-class WizardObjectExt1
-{
-public:
-   /**
-    * Returns the execution order of a wizard item.
+    *  Returns the execution order of a wizard item.
     *
-    * @param   pItem
-    *          The wizard item to query for its execution order.
+    *  @param   pItem
+    *           The wizard item to query for its execution order.
     *
-    * @return  The one-based execution order for the wizard item.  If \c NULL
-    *          is passed in or the given item does not exist in the wizard, a
-    *          value of -1 is returned.
+    *  @return  The one-based execution order for the wizard item.  If \c NULL
+    *           is passed in or the given item does not exist in the wizard, a
+    *           value of -1 is returned.
     */
    virtual int getExecutionOrder(WizardItem* pItem) const = 0;
 
 protected:
    /**
-    * This should be destroyed by calling ObjectFactory::destroyObject().
+    * This should be destroyed by calling ObjectFactory::destroyObject.
     */
-   virtual ~WizardObjectExt1()
-   {}
+   virtual ~WizardObject() {}
 };
 
 #endif

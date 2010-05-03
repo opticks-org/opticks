@@ -70,7 +70,7 @@ struct WizardConnection
  *
  *  @see    WizardItem
  */
-class WizardItemImp : public WizardItem, public SubjectAdapter, public WizardItemExt1
+class WizardItemImp : public WizardItem, public SubjectAdapter
 {
 public:
    /**

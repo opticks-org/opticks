@@ -618,19 +618,15 @@ void ProductViewImp::updateClassificationMarks(const QString &newClassification)
    }
    strTopText.append(QString::fromStdString(StringUtilities::toDisplayString(pConfigSettings->getReleaseType())));
 
-   ConfigurationSettingsExt1* pConfigSettingsExt1 = dynamic_cast<ConfigurationSettingsExt1*>(pConfigSettings.get());
-   if (pConfigSettingsExt1 != NULL)
+   QString strReleaseDescription = QString::fromStdString(pConfigSettings->getReleaseDescription());
+   if (!strReleaseDescription.isEmpty())
    {
-      QString strReleaseDescription = QString::fromStdString(pConfigSettingsExt1->getReleaseDescription());
-      if (!strReleaseDescription.isEmpty())
+      if (!strTopText.isEmpty())
       {
-         if (!strTopText.isEmpty())
-         {
-            strTopText.append("\n");
-         }
-
-         strTopText.append(strReleaseDescription);
+         strTopText.append("\n");
       }
+
+      strTopText.append(strReleaseDescription);
    }
 
    if (!pConfigSettings->isProductionRelease())

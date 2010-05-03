@@ -1585,15 +1585,11 @@ void ViewImp::drawClassification()
       // Calculate the screen width and height of the release info
       QStringList strRelease(QString::fromStdString(
          StringUtilities::toDisplayString(pConfigSettings->getReleaseType())));
-      ConfigurationSettingsExt1* pConfigSettingsExt1 =
-         dynamic_cast<ConfigurationSettingsExt1*>(pConfigSettings.get());
-      if (pConfigSettingsExt1 != NULL)
+
+      QString strReleaseDescription = QString::fromStdString(pConfigSettings->getReleaseDescription());
+      if (strReleaseDescription.isEmpty() == false)
       {
-         QString strReleaseDescription = QString::fromStdString(pConfigSettingsExt1->getReleaseDescription());
-         if (strReleaseDescription.isEmpty() == false)
-         {
-            strRelease << strReleaseDescription.split('\n');
-         }
+         strRelease << strReleaseDescription.split('\n');
       }
 
       int iTotalReleaseHeight = 0;

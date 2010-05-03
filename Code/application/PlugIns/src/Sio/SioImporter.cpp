@@ -165,11 +165,7 @@ vector<ImportDescriptor*> SioImporter::getImportDescriptors(const string& filena
 
                // Data type
                pDescriptor->setDataType(sioFile.mDataType);
-               RasterDataDescriptorExt1* pDescriptorExt1 = dynamic_cast<RasterDataDescriptorExt1*>(pDescriptor);
-               if (pDescriptorExt1 != NULL)
-               {
-                  pDescriptorExt1->setValidDataTypes(vector<EncodingType>(1, sioFile.mDataType));
-               }
+               pDescriptor->setValidDataTypes(vector<EncodingType>(1, sioFile.mDataType));
 
                // Interleave format
                pDescriptor->setInterleaveFormat(BIP);

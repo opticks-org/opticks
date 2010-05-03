@@ -33,7 +33,7 @@ class View;
 /**
  *  Implementation of the Desktop Services interface.
  */
-class DesktopServicesImp : public DesktopServices, public SubjectImp, public DesktopServicesExt1
+class DesktopServicesImp : public DesktopServices, public SubjectImp
 {
 public:
    /**
