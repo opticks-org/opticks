@@ -13,12 +13,9 @@ def generate(env):
     if not path:
        SCons.Warnings.warn(OssimNotFound,"Could not detect Ossim")
     else:
-       ossim_lib = "ossim"
-       if env["OS"] == "windows" and env["MODE"] == "debug":
-          ossim_lib = ossim_lib + "d"
        env.AppendUnique(CXXFLAGS=["-I%s/include" % (path), "-I%s/include/ossim" % (path)],
-                        LIBPATH=['%s/lib/%s' % (path,env["OPTICKSPLATFORM"])],
-                        LIBS=[ossim_lib])
+                        LIBPATH=['%s/lib/%s' % (path,env["PLATFORM"])],
+                        LIBS=["ossim"])
     path = os.environ.get('OPTICKSDEPENDENCIES',None)
     if path:
        path = os.path.join(path, "OpenThreads")

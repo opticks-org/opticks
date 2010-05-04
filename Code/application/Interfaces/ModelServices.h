@@ -129,8 +129,8 @@ public:
     *
     *  @see     createElement()
     */
-   //virtual DataDescriptor* createDataDescriptor(const std::string& name, const std::string& type,
-   //   const std::vector<std::string> &parent) const = 0;
+   virtual DataDescriptor* createDataDescriptor(const std::string& name, const std::string& type,
+      const std::vector<std::string> &parent) const = 0;
 
    /**
     *  Destroys a data descriptor.
@@ -210,8 +210,8 @@ public:
     *  @see     createImportDescriptor(DataDescriptor*, bool) const,
     *           createDataDescriptor(const std::string& name, const std::string& type, const std::vector<std::string> &parent) const
     */
-   //virtual ImportDescriptor* createImportDescriptor(const std::string& name, const std::string& type,
-   //   const std::vector<std::string> &parent, bool bImported = true) const = 0;
+   virtual ImportDescriptor* createImportDescriptor(const std::string& name, const std::string& type,
+      const std::vector<std::string> &parent, bool bImported = true) const = 0;
 
    /**
     *  Creates an import descriptor.

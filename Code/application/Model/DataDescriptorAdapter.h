@@ -17,7 +17,7 @@ class DataDescriptorAdapter : public DataDescriptor, public DataDescriptorImp DA
 {
 public:
    DataDescriptorAdapter(const std::string& name, const std::string& type, DataElement* pParent);
-   //DataDescriptorAdapter(const std::string& name, const std::string& type, const std::vector<std::string>& parent);
+   DataDescriptorAdapter(const std::string& name, const std::string& type, const std::vector<std::string>& parent);
    ~DataDescriptorAdapter();
 
    // TypeAwareObject

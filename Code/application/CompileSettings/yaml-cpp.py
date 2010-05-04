@@ -13,11 +13,8 @@ def generate(env):
     if not path:
        SCons.Warnings.warn(YamlCppNotFound,"Could not detect yaml-cpp")
     else:
-       lib_path = "%s/lib/%s" % (path, env["OPTICKSPLATFORM"])
-       if env["OS"] == "windows":
-          lib_path = lib_path + "/%s" % env["MODE"]
        env.AppendUnique(CXXFLAGS="-I%s/include" % (path),
-                        LIBPATH=[lib_path],
+                        LIBPATH=["%s/lib/%s" % (path, env["PLATFORM"])],
                         LIBS=["yaml-cpp"])
 
 def exists(env):

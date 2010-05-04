@@ -317,7 +317,6 @@ public:
       {
       }
 
-         /*
       Args(std::string name, std::string type, const std::vector<std::string>& parent, bool imported) :
          mpDescriptor(NULL),
          mpDataDescriptor(NULL),
@@ -328,7 +327,6 @@ public:
          mImported(imported)
       {
       }
-      */
 
       Args(ImportDescriptor* pDescriptor) :
          mpDescriptor(pDescriptor),
@@ -359,14 +357,11 @@ public:
    {
       if (args.mpDescriptor == NULL && args.mpDataDescriptor == NULL)
       {
-         /*
          if (args.mpParent == NULL && !args.mParent.empty())
          {
             return Service<ModelServices>()->createImportDescriptor(args.mName, args.mType,
                                                                      args.mParent, args.mImported);
-                                                                     
          }
-         */
          return Service<ModelServices>()->createImportDescriptor(args.mName, args.mType,
                                                                      args.mpParent, args.mImported);
       }
@@ -392,13 +387,11 @@ public:
    {
    }
 
-      /*
    explicit ImportDescriptorResource(std::string name, std::string dataDescriptorType,
                                      const std::vector<std::string>& parent, bool imported = true) :
       Resource<ImportDescriptor, ImportDescriptorObject>(Args(name, dataDescriptorType, parent, imported))
    {
    }
-   */
 
    explicit ImportDescriptorResource(ImportDescriptor* pDescriptor) :
       Resource<ImportDescriptor, ImportDescriptorObject>(Args(pDescriptor))

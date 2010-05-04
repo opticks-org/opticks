@@ -18,8 +18,8 @@ class RasterDataDescriptorAdapter : public RasterDataDescriptor, public RasterDa
 {
 public:
    RasterDataDescriptorAdapter(const std::string& name, const std::string& type, DataElement* pParent);
-   //RasterDataDescriptorAdapter(const std::string& name, const std::string& type,
-   //   const std::vector<std::string>& parent);
+   RasterDataDescriptorAdapter(const std::string& name, const std::string& type,
+      const std::vector<std::string>& parent);
    ~RasterDataDescriptorAdapter();
 
    // TypeAwareObject

@@ -31,7 +31,6 @@ RasterDataDescriptorImp::RasterDataDescriptorImp(const string& name, const strin
 {
 }
 
-   /*
 RasterDataDescriptorImp::RasterDataDescriptorImp(const string& name, const string& type, const vector<string>& parent) :
    DataDescriptorImp(name, type, parent),
    mDataType(INT1UBYTE),
@@ -44,7 +43,6 @@ RasterDataDescriptorImp::RasterDataDescriptorImp(const string& name, const strin
    mDisplayMode(GRAYSCALE_MODE)
 {
 }
-*/
 
 RasterDataDescriptorImp::~RasterDataDescriptorImp()
 {

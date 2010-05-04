@@ -20,8 +20,6 @@
 #include "Progress.h"
 #include "View.h"
 
-#include <stdio.h>
-
 #include <QtGui/QPainter>
 #include <QtGui/QWidget>
 

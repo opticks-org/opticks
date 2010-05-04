@@ -16,12 +16,10 @@ RasterDataDescriptorAdapter::RasterDataDescriptorAdapter(const string& name, con
    RasterDataDescriptorImp(name, type, pParent)
 {}
 
-   /*
 RasterDataDescriptorAdapter::RasterDataDescriptorAdapter(const string& name, const string& type,
    const vector<string>& parent) :
    RasterDataDescriptorImp(name, type, parent)
 {}
-*/
 
 RasterDataDescriptorAdapter::~RasterDataDescriptorAdapter()
 {

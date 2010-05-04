@@ -14,12 +14,9 @@ def generate(env):
     if not raptor_path:
        SCons.Warnings.warn(RaptorsNotFound,"Could not detect raptor")
     else:
-       raptor_libs = ["raptor", "expat"]
-       if env["OS"] == "windows":
-          raptor_libs = ["raptor"]
        env.AppendUnique(CXXFLAGS="-I%s/include" % raptor_path,
-                        LIBPATH=['%s/lib/%s' % (raptor_path,env["OPTICKSPLATFORM"])],
-                        LIBS=raptor_libs)
+                        LIBPATH=['%s/lib/%s' % (raptor_path,env["PLATFORM"])],
+                        LIBS=['raptor','expat'])
 
 def exists(env):
     return env.Detect('raptor')

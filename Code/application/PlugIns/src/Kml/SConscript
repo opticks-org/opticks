@@ -8,8 +8,6 @@ env = env.Clone()
 env.Tool("ehs",toolpath=[TOOLPATH])
 env.Tool("minizip",toolpath=[TOOLPATH])
 env.Tool("zip",toolpath=[TOOLPATH])
-if env["OS"] == "windows":
-   env.Tool("zlib", toolpath=[TOOLPATH])
 
 ####
 # build sources

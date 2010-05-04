@@ -16,12 +16,9 @@ def generate(env):
     if not path:
        SCons.Warnings.warn(EhsNotFound,"Could not detect ehs")
     else:
-       ehs_lib = "ehs"
-       if env["OS"] == "windows" and env["MODE"] == "debug":
-          ehs_lib = ehs_lib + "D"
        env.AppendUnique(CXXFLAGS=["-I%s/include" % (ehspath), "-I%s/include" % (pcrepath), "-I%s/include" % (pmepath)],
-                        LIBPATH=['%s/lib/%s' % (ehspath,env["OPTICKSPLATFORM"])],
-                        LIBS=[ehs_lib])
+                        LIBPATH=['%s/lib/%s' % (ehspath,env["PLATFORM"])],
+                        LIBS=["ehs"])
 
 def exists(env):
     return env.Detect('ehs')

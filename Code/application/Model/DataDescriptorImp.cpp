@@ -33,7 +33,6 @@ DataDescriptorImp::DataDescriptorImp(const string& name, const string& type, Dat
    generateParentDesignator();
 }
 
-   /*
 DataDescriptorImp::DataDescriptorImp(const string& name, const string& type, const vector<string>& parent) :
    mName(name),
    mType(type),
@@ -48,7 +47,6 @@ DataDescriptorImp::DataDescriptorImp(const string& name, const string& type, con
    mClassification.attach(SIGNAL_NAME(Subject, Modified), Signal(dynamic_cast<Subject*>(this),
       SIGNAL_NAME(Subject, Modified)));
 }
-*/
 
 DataDescriptorImp::~DataDescriptorImp()
 {
@@ -92,9 +90,7 @@ DataElement* DataDescriptorImp::getParent() const
 
 vector<string> DataDescriptorImp::getParentDesignator() const
 {
-   //return mParentDesignator;
-   vector<string> temp;
-   return temp;
+   return mParentDesignator;
 }
 
 void DataDescriptorImp::setParent(DataElement *pParent)
@@ -194,12 +190,10 @@ FileDescriptorImp* DataDescriptorImp::getFileDescriptor()
 
 DataDescriptor* DataDescriptorImp::copy() const
 {
-   /*
    if ((mpParent.get() == NULL) && (!mParentDesignator.empty()))
    {
       return copy(mName, mParentDesignator);
    }
-   */
 
    return copy(mName, const_cast<DataElement*>(mpParent.get()));
 }
@@ -224,7 +218,6 @@ DataDescriptor* DataDescriptorImp::copy(const string& name, DataElement* pParent
    return pDescriptor;
 }
 
-/*
 DataDescriptor* DataDescriptorImp::copy(const string& name, const vector<string>& parent) const
 {
    ModelServicesImp* pModel = ModelServicesImp::instance();
@@ -244,7 +237,6 @@ DataDescriptor* DataDescriptorImp::copy(const string& name, const vector<string>
 
    return pDescriptor;
 }
-*/
 
 void DataDescriptorImp::addToMessageLog(Message* pMessage) const
 {
@@ -267,7 +259,6 @@ void DataDescriptorImp::addToMessageLog(Message* pMessage) const
    }
    else
    {
-      /*
       for (vector<string>::const_iterator part = mParentDesignator.begin(); part != mParentDesignator.end(); ++part)
       {
          if (part != mParentDesignator.begin())
@@ -279,7 +270,6 @@ void DataDescriptorImp::addToMessageLog(Message* pMessage) const
             parentElement = *part;
          }
       }
-      */
    }
 
    pMessage->addProperty("Parent Element", parentElement);
@@ -471,14 +461,12 @@ bool DataDescriptorImp::isKindOfDataDescriptor(const string& className)
 
 void DataDescriptorImp::generateParentDesignator()
 {
-   /*
    mParentDesignator.clear();
    if (mpParent.get() != NULL)
    {
       mParentDesignator = mpParent->getParentDesignator();
       mParentDesignator.push_back(mpParent->getName());
    }
-   */
 }
 
 void DataDescriptorImp::setImporterName(const string& name)

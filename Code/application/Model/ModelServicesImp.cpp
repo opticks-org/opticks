@@ -125,7 +125,6 @@ DataDescriptor* ModelServicesImp::createDataDescriptor(const string& name, const
    return pDescriptor;
 }
 
-/*
 DataDescriptor* ModelServicesImp::createDataDescriptor(const string& name, const string& type,
                                                        const vector<string>& parent) const
 {
@@ -140,7 +139,6 @@ DataDescriptor* ModelServicesImp::createDataDescriptor(const string& name, const
    }
    return pDescriptor;
 }
-*/
 
 void ModelServicesImp::destroyDataDescriptor(DataDescriptor* pDescriptor) const
 {
@@ -165,7 +163,6 @@ ImportDescriptor* ModelServicesImp::createImportDescriptor(const string& name, c
    return pImportDescriptor;
 }
 
-/*
 ImportDescriptor* ModelServicesImp::createImportDescriptor(const string& name, const string& type,
                                                            const vector<string> &parent, bool bImported) const
 {
@@ -179,7 +176,6 @@ ImportDescriptor* ModelServicesImp::createImportDescriptor(const string& name, c
 
    return pImportDescriptor;
 }
-*/
 
 ImportDescriptor* ModelServicesImp::createImportDescriptor(DataDescriptor* pDescriptor, bool bImported) const
 {

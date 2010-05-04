@@ -16,16 +16,11 @@ def generate(env):
     if not gdalpath or not jpegpath:
        SCons.Warnings.warn(GdalNotFound,"Could not detect gdal")
     else:
-       include_platform = env["OPTICKSPLATFORM"]
-       libs = ["gdal", "jpeg"]
-       if env["OS"] == "windows":
-          include_platform = env["OS"]
-          libs = ["gdal_i"]
-       env.AppendUnique(CXXFLAGS=["-I%s/include/%s" % (gdalpath,include_platform),
+       env.AppendUnique(CXXFLAGS=["-I%s/include/%s" % (gdalpath,env["PLATFORM"]),
                                   "-I%s/include" % jpegpath],
-                        LIBPATH=['%s/lib/%s' % (gdalpath,env["OPTICKSPLATFORM"]),
-                                 '%s/lib/%s' % (jpegpath,env["OPTICKSPLATFORM"])],
-                        LIBS=[libs])
+                        LIBPATH=['%s/lib/%s' % (gdalpath,env["PLATFORM"]),
+                                 '%s/lib/%s' % (jpegpath,env["PLATFORM"])],
+                        LIBS=["gdal","jpeg"])
 
 def exists(env):
     return env.Detect('gdal')

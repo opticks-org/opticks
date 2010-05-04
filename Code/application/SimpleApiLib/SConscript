@@ -3,15 +3,13 @@ import glob
 ####
 # import the environment and set up a unique sub-environment
 ####
-Import('env build_dir pluginTargets')
+Import('env build_dir')
 
 ####
 # build sources
 ####
 srcs = map(lambda x,bd=build_dir: '%s/%s' % (bd,x), glob.glob("*.cpp"))
 objs = env.SharedObject(srcs)
-if env["OS"] == "windows":
-   objs = objs + pluginTargets
 
 ####
 # build the library and set up an alias to ease building it later

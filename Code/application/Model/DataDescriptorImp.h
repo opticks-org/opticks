@@ -34,7 +34,7 @@ class DataDescriptorImp : public SubjectImp
 {
 public:
    DataDescriptorImp(const std::string& name, const std::string& type, DataElement* pParent);
-   //DataDescriptorImp(const std::string& name, const std::string& type, const std::vector<std::string>& parent);
+   DataDescriptorImp(const std::string& name, const std::string& type, const std::vector<std::string>& parent);
    ~DataDescriptorImp();
 
    void metadataModified(Subject &subject, const std::string &signal, const boost::any &data);
@@ -60,7 +60,7 @@ public:
 
    virtual DataDescriptor* copy() const;
    virtual DataDescriptor* copy(const std::string& name, DataElement* pParent) const;
-   //virtual DataDescriptor* copy(const std::string& name, const std::vector<std::string>& parent) const;
+   virtual DataDescriptor* copy(const std::string& name, const std::vector<std::string>& parent) const;
 
    virtual void addToMessageLog(Message* pMessage) const;
 
@@ -80,7 +80,7 @@ private:
    std::string mName;
    std::string mType;
    SafePtr<DataElement> mpParent;
-   //std::vector<std::string> mParentDesignator;
+   std::vector<std::string> mParentDesignator;
    ClassificationAdapter mClassification;
    DynamicObjectAdapter mMetadata;
    ProcessingLocation mProcessingLocation;
@@ -162,6 +162,10 @@ private:
    DataDescriptor* copy(const std::string& name, DataElement* pParent) const \
    { \
       return dynamic_cast<DataDescriptor*>(impClass::copy(name, pParent)); \
+   } \
+   DataDescriptor* copy(const std::string& name, const std::vector<std::string>& parent) const \
+   { \
+      return dynamic_cast<DataDescriptor*>(impClass::copy(name, parent)); \
    } \
    void addToMessageLog(Message* pMessage) const \
    { \

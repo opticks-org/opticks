@@ -23,8 +23,6 @@
 #include "RasterFileDescriptor.h"
 #include "Units.h"
 
-#include <stdio.h>
-
 using namespace std;
 
 REGISTER_PLUGIN_BASIC(OpticksWizardItems, EditDataDescriptor);

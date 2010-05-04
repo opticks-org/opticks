@@ -8,233 +8,133 @@ import subprocess
 vars = Variables()
 vars.Add(BoolVariable('RELEASE','False for debug, true for release',0))
 vars.Add('BUILDDIR','Directory for build files','#/../Build')
-default_bits = '64'
-if sys.platform.startswith("win"):
-   default_bits = '32'
-vars.Add(EnumVariable("BITS", '32 for 32-bit build, 64 for 64-bit build',default_bits,['32','64']))
+vars.Add('CACHEDIR','Directory for cache files. Default is not caching.','')
 
 TOOLPATH = Dir("CompileSettings").abspath
-OPTICKSPLATFORM = "unknown"
-TARGET_ARCH = ""
-temp_env = Environment(variables=vars)
+PLATFORM = "unknown"
 if sys.platform.startswith("linux"):
-   OPTICKSPLATFORM = "linux-x86_64"
-   OS = "linux"
+   PLATFORM = "linux-x86_64"
    EXE_PREFIX='linux'
-elif sys.platform.startswith("win"):
-   if temp_env["BITS"] == "32":
-      OPTICKSPLATFORM = "Win32"
-      TARGET_ARCH = "x86"
-   else:
-      OPTICKSPLATFORM = "x64"
-      TARGET_ARCH = "x86_64"
-   OS = "windows"
-   EXE_PREFIX=''
 else:
-   OPTICKSPLATFORM = "%s-%s" % (os.environ['OSTYPE'],os.environ['MACHTYPE'])
-   OS = "solaris"
+   PLATFORM = "%s-%s" % (os.environ['OSTYPE'],os.environ['MACHTYPE'])
    EXE_PREFIX='sol'
 
-if temp_env['RELEASE']:
+env = Environment(variables=vars,
+                  PLATFORM=PLATFORM,
+                  ENV=os.environ,
+                  tools=["default","qwt","qt4","xercesc","boost","java",
+                         "ehs","raptor","minizip","yaml-cpp"],
+                  toolpath=[TOOLPATH])
+if PLATFORM == "solaris-sparc":
+   env.Tool("suncc", toolpath=[TOOLPATH])
+   env.Tool("sunar", toolpath=[TOOLPATH])
+   env.Tool("sunlink", toolpath=[TOOLPATH])
+else:
+   env.Tool("glew", toolpath=[TOOLPATH])
+   env.Tool("cg", toolpath=[TOOLPATH])
+
+if env['RELEASE']:
    MODE='release'
 else:
    MODE='debug'
-env = Environment(variables=vars,
-                  OPTICKSPLATFORM=OPTICKSPLATFORM,
-                  OS=OS,
-                  MODE=MODE,
-                  ENV=os.environ,
-                  TARGET_ARCH=TARGET_ARCH,
-                  MSVC_VERSION="8.0",
-                  tools=["default", "boost", "java", "qwt",
-                         "xercesc", "ehs", "minizip", "yaml-cpp",
-                         "raptor", "zlib", "pthreads", "qt4"],
-                  toolpath=[TOOLPATH])
-
 BUILDDIR = env.Dir(env["BUILDDIR"]).abspath
-env["BINDIR"] = '%s/Binaries-%s-%s/Bin' % (BUILDDIR,OPTICKSPLATFORM,MODE)
-env["PLUGINDIR"] = '%s/Binaries-%s-%s/PlugIns' % (BUILDDIR,OPTICKSPLATFORM,MODE)
-env["LIBDIR"] = '%s/Binaries-%s-%s/Lib' % (BUILDDIR,OPTICKSPLATFORM,MODE)
-env["PDBDIR"] = '%s/Binaries-%s-%s/Pdbs' % (BUILDDIR,OPTICKSPLATFORM,MODE)
-if OS == "windows":
-   env["BUILDDIR"] = '%s/%s/%s' % (BUILDDIR,OPTICKSPLATFORM,MODE)
-else:
-   env["BUILDDIR"] = '%s/%s-%s' % (BUILDDIR,OPTICKSPLATFORM,MODE)
+env["BINDIR"] = '%s/Binaries-%s-%s/Bin' % (BUILDDIR,PLATFORM,MODE)
+env["PLUGINDIR"] = '%s/Binaries-%s-%s/PlugIns' % (BUILDDIR,PLATFORM,MODE)
+env["LIBDIR"] = '%s/Binaries-%s-%s/Lib' % (BUILDDIR,PLATFORM,MODE)
+env["BUILDDIR"] = '%s/%s-%s' % (BUILDDIR,PLATFORM,MODE)
 
-if OPTICKSPLATFORM != "solaris-sparc":
-   env.Tool("glew", toolpath=[TOOLPATH])
-   env.Tool("cg", toolpath=[TOOLPATH])
 
 Help(vars.GenerateHelpText(env))
 env["QT_MODULES"] = ["QtCore","QtGui","Qt3Support","QtOpenGL", "QtXml","QtSql","QtNetwork"]
 env.Qt4AddModules(env["QT_MODULES"])
 
-if OS != "windows":
-   env['LINK'] = "$CXX"
-if OPTICKSPLATFORM == "solaris-sparc":
+env['LINK'] = "$CXX"
+if PLATFORM == "solaris-sparc":
    env.Append(CXXFLAGS="-library=stlport4 -m64 -xcode=pic32 -erroff=nonewline",
               LINKFLAGS="-library=stlport4 -m64 -xcode=pic32 -mt -L/usr/sfw/lib/sparcv9",
               CPPDEFINES=["APPLICATION_XERCES"],
               LIBS=env["QT_MODULES"] + ["nsl","dl","GLU","GL","Xm","Xext","Xrender","X11","m"])
-elif OPTICKSPLATFORM == "linux-x86_64":
-   env.Append(CXXFLAGS="-m64 -fpic -w",
+else:
+   env.Append(CXXFLAGS="-m64 -fpic -pthread -w",
               LINKFLAGS="-melf_x86_64 -Wl,-E",
               CPPDEFINES=["APPLICATION_XERCES"],
               LIBS=env["QT_MODULES"] + ["dl","GLU","GL","Xext","Xrender","X11","m"])
-elif OS == "windows":
-   if OPTICKSPLATFORM == "Win32":
-      env.AppendUnique(CXXFLAGS=["/arch:SSE"], LINKFLAGS=['/MACHINE:X86'])
-   else:
-      env.AppendUnique(LINKFLAGS=['/MACHINE:X64'])
-   env["PDB"] ="${PDBDIR}/${TARGET.filebase}.pdb"
-   if MODE == "debug" and OPTICKSPLATFORM == "Win32":
-      env.AppendUnique(CXXFLAGS=['/Gy'])
-   else:
-      pass
-   env['LINKCOM'] = [env['LINKCOM'], 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;1']
-   env['SHLINKCOM'] = [env['SHLINKCOM'], 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;2']
-   env.AppendUnique(CXXFLAGS=['/EHsc', '/W3', '/Wp64', '/wd4996', '/wd4267', '/wd4250', '/errorReport:prompt', '/GR'],
-              CPPDEFINES=["WIN32", "NOMINMAX"],
-              LINKFLAGS=['/MAPINFO:EXPORTS', '/MAP', '/DEBUG', '/LARGEADDRESSAWARE', '/OPT:NOWIN98'],
-              LIBS=["opengl32", "glu32", "advapi32", "shell32"])
-   if MODE == 'release':
-      env.AppendUnique(CXXFLAGS=['/O2', '/Ob2', '/Oi', '/Ot', '/Oy', '/GF', '/GS-', '/MD'])
-      env.AppendUnique(LIBS=["qtmain", "Qt3Support4", "QtCore4", "QtGui4", "QtOpenGL4", "QtXml4"])
-      env.AppendUnique(LINKFLAGS=['/OPT:NOREF', '/OPT:NOICF', '/INCREMENTAL:NO', '/NODEFAULTLIB:"libc.lib"', '/NODEFAULTLIB:"libcmt.lib"', '/NODEFAULTLIB:"msvcrtd.lib"', '/NODEFAULTLIB:"libcd.lib"', '/NODEFAULTLIB:"libcmtd.lib"'])
-   else:
-      env.AppendUnique(CXXFLAGS=['/Od', '/RTC1', '/RTCc', '/MDd']) 
-      env.AppendUnique(CPPDEFINES=["DEBUG"])
-      env.AppendUnique(LIBS=["qtmaind", "Qt3Supportd4", "QtCored4", "QtGuid4", "QtOpenGLd4", "QtXmld4"])
-      env.AppendUnique(LINKFLAGS=['/INCREMENTAL', '/NODEFAULTLIB:"libc.lib"', '/NODEFAULTLIB:"libcmt.lib"', '/NODEFAULTLIB:"msvcrt.lib"', '/NODEFAULTLIB:"libcd.lib"', '/NODEFAULTLIB:"libcmtd.lib"'])
-
 env.BuildDir(env["BUILDDIR"], "#", duplicate=0)
 
-if OS != "windows":
-   if MODE == 'release':
-      if OPTICKSPLATFORM == "solaris-sparc":
-         env.Append(CXXFLAGS="-xO3")
-      else:
-         env.Append(CXXFLAGS="-O3")
+if MODE == 'release':
+   if PLATFORM == "solaris-sparc":
+      env.Append(CXXFLAGS="-xO3")
    else:
-      env.Append(CXXFLAGS="-g")
-      env.Append(CPPDEFINES=["DEBUG"])
+      env.Append(CXXFLAGS="-O3")
+else:
+   env.Append(CXXFLAGS="-g")
+   env.Append(CPPDEFINES=["DEBUG"])
 
-pluginlibdirs = ["HdfPlugInLib",
-                 "NitfPlugInLib",
-                 "PlugInLib",
-                 "PlugInUtilities",
-                 "Wizard"]
 libdirs = ["Desktop", 
            "Framework",
            "Gui",
+           "HdfPlugInLib",
            "Installer",
            "Model",
+           "NitfPlugInLib",
+           "PlugInLib",
            "PlugInManager",
-           "Utilities"]
+           "PlugInUtilities",
+           "SimpleApiLib",
+           "Utilities",
+           "Wizard"]
 
-alldirs = pluginlibdirs + libdirs + ["SimpleApiLib"]
-incdirs = map(lambda x: "#/" + x, alldirs) + \
+incdirs = map(lambda x: "#/" + x, libdirs) + \
           ["#/Interfaces",
            "#/PlugInUtilities/pthreads-wrapper",
            "#/PlugInUtilities/Interfaces"]
 env.Append(CPPPATH=incdirs)
+if len(env["CACHEDIR"]) > 0:
+   print "Enable caching to",env["CACHEDIR"]
+   env.CacheDir(env["CACHEDIR"])
 
 ####
 # Load the SConscript files for each library
 ####
 libs = []
 libInstallTargets = []
-binInstallTargets = []
-pluginTargets = []
-Export('env','libInstallTargets','MODE','TOOLPATH','pluginTargets')
+Export('env','libInstallTargets','MODE','TOOLPATH')
 
 for sub in libdirs:
    src_dir = '#/%s' % sub
    build_dir = '%s/%s' % (env["BUILDDIR"], sub)
    env.BuildDir(build_dir, src_dir, duplicate=0)
    libs.append(env.SConscript('%s/SConscript' % sub, exports='build_dir'))
-   env.Alias("%s-Install" % (sub), env.Install(env["LIBDIR"], libs[-1]))
    libInstallTargets.append(libs[-1])
-
-for sub in pluginlibdirs:
-   src_dir = '#/%s' % sub
-   build_dir = '%s/%s' % (env["BUILDDIR"], sub)
-   env.BuildDir(build_dir, src_dir, duplicate=0)
-   libs.append(env.SConscript('%s/SConscript' % sub, exports='build_dir'))
-   libInstallTargets.append(libs[-1])
-   pluginTargets.append(libs[-1])
-
-build_dir = '%s/SimpleApiLib' % env["BUILDDIR"]
-simpleapi = env.SConscript("SimpleApiLib/SConscript", exports='build_dir')
-if OS == "windows":
-   binInstallTargets.append(simpleapi)
-else:
-   libInstallTargets.append(simpleapi)
+   if sub == "SimpleApiLib": # special case, build it but don't link to it
+      libs.pop(-1)
 
 ####
-# Executable specific bits
+# Build the solOpticks binary
 ####
-appIcon = None
-if OS == "windows":
-   appIcon = env.RES('App.rc')
-
-####
-# Build the Opticks binary
-####
-opticksEnv = env.Clone()
-if OS == "windows":
-   opticksEnv.AppendUnique(LINKFLAGS=["/SUBSYSTEM:WINDOWS"])
-opticks = opticksEnv.Object("%s/Main.cpp" % env['BUILDDIR'])
-if OS == "windows":
-   env.Tool("mc", toolpath=[TOOLPATH])
-   mc_h, mc_rc = env.MessageCatalog("PlugInUtilities/EventMessages")
-   opticks = [opticks,appIcon,env.RES(mc_rc)]
-opticksBin = opticksEnv.Program('%s/%sOpticks' % (env['BUILDDIR'],EXE_PREFIX),opticks+libs+libs+libs)
-binInstallTargets.append(opticksBin)
+opticks = env.Object("%s/Main.cpp" % env['BUILDDIR'])
+opticksBin = env.Program('%s/%sOpticks' % (env['BUILDDIR'],EXE_PREFIX),opticks+libs+libs+libs)
 env.Alias('opticks',opticksBin)
 
-update_build_rev_args = ["../update-build-revision.py"]
-if OS == "windows":
-   update_build_rev_args.insert(0, "python")
-subprocess.Popen(update_build_rev_args).wait()
+subprocess.Popen(["../update-build-revision.py"]).wait()
 ####
-# Build the Batch binary
+# Build the solBatch binary
 ####
-if OS == "windows":
-   EXE_PREFIX = "Opticks" #generate OpticksBatch.exe on Windows
 src_dir=Dir('#/Batch').abspath
 build_dir = '%s/Batch' % env["BUILDDIR"]
 env.BuildDir(build_dir, src_dir, duplicate=0)
 batch = SConscript('Batch/SConscript', exports='build_dir')
-batchEnv = env.Clone()
-if OS == "windows":
-   batchEnv.AppendUnique(LINKFLAGS=["/SUBSYSTEM:CONSOLE"])
-   batch = [batch,appIcon]
-batchBin = batchEnv.Program('%s/%sBatch' % (env["BUILDDIR"],EXE_PREFIX),batch+libs+libs+libs+libs)
-binInstallTargets.append(batchBin)
+batchBin = env.Program('%s/%sBatch' % (env["BUILDDIR"],EXE_PREFIX),batch+libs+libs+libs+libs)
 env.Alias('batch',batchBin)
 
 ####
-# Build the ArcProxy binary
-####
-if OS == "windows":
-   if OPTICKSPLATFORM == "Win32":
-      src_dir = Dir("#/ArcProxy").abspath
-      build_dir = "%s/ArcProxy" % env["BUILDDIR"] 
-      env.BuildDir(build_dir, src_dir, duplicate=0)
-      arcBin = SConscript("ArcProxy/SConscript", exports='build_dir')
-      arcProxyInstall = env.Install("%s/ArcProxy" % env["PLUGINDIR"], arcBin)
-   else:
-      #copy from 32-bit build, requires 32-bit compilations happen first
-      arcProxyInstall = env.Install("%s/ArcProxy" % env["PLUGINDIR"], env.File("%s/Binaries-%s-%s/PlugIns/ArcProxy/ArcProxy.exe" % (BUILDDIR,"Win32",MODE)))
-   env.Alias("arcProxy", arcProxyInstall)
-
+# Build the solArcProxy binary
 ####
 # Install the binaries and libraries to the proper directories
 # and set up some useful aliases
 ####
 libInstall = env.Install(env["LIBDIR"], libInstallTargets)
-binInstall = env.Install(env["BINDIR"], binInstallTargets)
+binInstall = env.Install(env["BINDIR"], [opticksBin, batchBin])
 core = env.Alias('core', [libInstall, binInstall])
 all = env.Alias('all', [libInstall, binInstall])
 Default(core)

@@ -24,7 +24,7 @@ class RasterDataDescriptorImp : public DataDescriptorImp
 {
 public:
    RasterDataDescriptorImp(const std::string& name, const std::string& type, DataElement* pParent);
-   //RasterDataDescriptorImp(const std::string& name, const std::string& type, const std::vector<std::string>& parent);
+   RasterDataDescriptorImp(const std::string& name, const std::string& type, const std::vector<std::string>& parent);
    RasterDataDescriptorImp(DOMNode *pDocument, unsigned int version, DataElement *pParent);
    ~RasterDataDescriptorImp();
 
