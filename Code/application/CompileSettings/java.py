@@ -11,11 +11,11 @@ def generate(env):
     if not path:
        SCons.Warnings.warn(JavaNotFound,"Could not detect Java")
     else:
-       if env["PLATFORM"] == "solaris-sparc":
+       if env["OPTICKSPLATFORM"] == "solaris-sparc":
           env.AppendUnique(CXXFLAGS=["-I%s/include" % (path), "-I%s/include/solaris" % (path)],
                            LIBPATH=['%s/jre/lib/sparcv9' % (path), '%s/jre/lib/sparcv9/server' % (path)],
                            LIBS=["java", "jvm"])
-       elif env["PLATFORM"] == "linux-x86_64":
+       elif env["OPTICKSPLATFORM"] == "linux-x86_64":
           env.AppendUnique(CXXFLAGS=["-I%s/include" % path, "-I%s/include/linux" % path],
                            LIBPATH=["%s/jre/lib/amd64" % path, "%s/jre/lib/amd64/server" % path],
                            LIBS=["jvm"])

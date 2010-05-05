@@ -14,7 +14,7 @@ def generate(env):
        SCons.Warnings.warn(CgNotFound,"Could not detect Cg")
     else:
        env.AppendUnique(CXXFLAGS="-I%s/include" % (path,),
-                        LIBPATH=['%s/lib/%s' % (path,env['PLATFORM'])],
+                        LIBPATH=['%s/lib/%s' % (path,env['OPTICKSPLATFORM'])],
                         LIBS=['Cg','CgGL'])
 
 def exists(env):

@@ -3,18 +3,31 @@ import glob
 ####
 # import the environment
 ####
-Import('env arcenv build_dir TOOLPATH')
-env = env.Clone()
-env.Tool("ArcProxyLib",toolpath=[TOOLPATH])
-arcenv.Append(CPPDEFINES=["ARC_PROXY"])
+Import('env build_dir TOOLPATH')
 
-####
-# build sources
-####
-srcs = map(lambda x,bd=build_dir: '%s/%s' % (bd,x), glob.glob("*.cpp"))
-objs = arcenv.Object(srcs)
+if env["OS"] != "windows":
+   arcBin = None
+else:
+   env = env.Clone()
+   env.Tool("ArcGIS",toolpath=[TOOLPATH])
+   env.Tool("ArcProxyLib",toolpath=[TOOLPATH])
+   env.Append(CPPDEFINES=["ARC_PROXY"])
+   if env["OS"] == "windows":
+      env.AppendUnique(LINKFLAGS=["/SUBSYSTEM:CONSOLE"])
+      if env["MODE"] == "debug":
+         env.AppendUnique(LIBS=["QtNetworkd4"])
+      else:
+         env.AppendUnique(LIBS=["QtNetwork4"])
+
+   ####
+   # build sources
+   ####
+   srcs = map(lambda x,bd=build_dir: '%s/%s' % (bd,x), glob.glob("*.cpp"))
+   objs = env.Object(srcs)
+   arcBin = env.Program("%s/ArcProxy" % env["BUILDDIR"], objs)
+
 
 ####
 # return the objects
 ####
-Return('objs')
+Return('arcBin')

@@ -9,7 +9,7 @@ Import('env build_dir')
 # subdirectories to build objects from
 ####
 subdirs = ["GLView", "Graphic", "Undo"]
-if env["PLATFORM"].startswith("linux"):
+if env["OS"] == "linux" or env["OS"] == "windows":
    subdirs.append("Image")
 
 ####

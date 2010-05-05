@@ -6,6 +6,11 @@ import glob
 Import('env build_dir TOOLPATH')
 env = env.Clone()
 env.Tool("ehs",toolpath=[TOOLPATH])
+if env["OS"] == "windows":
+   if env["MODE"] == "debug":
+      env.AppendUnique(LIBS=["QtNetworkd4"])
+   else:
+      env.AppendUnique(LIBS=["QtNetwork4"])
 
 ####
 # build sources

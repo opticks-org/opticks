@@ -13,9 +13,17 @@ def generate(env):
     if not path:
        SCons.Warnings.warn(Hdf4NotFound,"Could not detect Hdf4")
     else:
-       env.AppendUnique(CXXFLAGS="-I%s/include/%s" % (path,env["PLATFORM"]),
-                        LIBPATH=['%s/lib/%s' % (path,env["PLATFORM"])],
-                        LIBS=["mfhdf", "df", "jpeg"])
+       include_platform = env["OPTICKSPLATFORM"]
+       hdf_libs = ["mfhdf", "df", "jpeg"]
+       if env["OS"] == "windows":
+          include_platform = env["OS"] 
+          if env["MODE"] == "release":
+             hdf_libs = ["hm423m", "hd423m"]
+          else:
+             hdf_libs = ["hm423md", "hd423md"]
+       env.AppendUnique(CXXFLAGS="-I%s/include/%s" % (path,include_platform),
+                        LIBPATH=['%s/lib/%s' % (path,env["OPTICKSPLATFORM"])],
+                        LIBS=hdf_libs)
 
 
 

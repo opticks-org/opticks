@@ -19,9 +19,16 @@ def generate(env):
        if not qtpath:
           SCons.Warnings.warn(QwtNotFound,"Could not detect Qt")
        else:
-          env.AppendUnique(CXXFLAGS=["-I%s/include" % (path), "-I%s/include/%s/QtCore" % (qtpath,env["PLATFORM"]), "-I%s/include/%s/QtGui" % (qtpath,env["PLATFORM"])],
-                           LIBPATH=['%s/lib/%s' % (path,env["PLATFORM"])],
-                           LIBS=['qwt'])
+          libpath = '%s/lib/%s' % (path,env["OPTICKSPLATFORM"])
+          lib = "qwt"
+          include_platform = env["OPTICKSPLATFORM"]
+          if env["OS"] == "windows":
+             libpath = '%s/lib/%s/%s' % (path,env["OPTICKSPLATFORM"],env["MODE"])
+             lib = "qwt5"
+             include_platform = env["OS"]
+          env.AppendUnique(CXXFLAGS=["-I%s/include" % (path), "-I%s/include/%s/QtCore" % (qtpath,include_platform), "-I%s/include/%s/QtGui" % (qtpath,include_platform)],
+                           LIBPATH=libpath,
+                           LIBS=[lib])
 
 def exists(env):
     return env.Detect('qwt')

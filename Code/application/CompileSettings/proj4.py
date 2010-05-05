@@ -13,9 +13,12 @@ def generate(env):
     if not path:
        SCons.Warnings.warn(Proj4Found,"Could not detect Proj4")
     else:
+       lib = "proj4"
+       if env["OS"] == "windows":
+          lib = "proj"
        env.AppendUnique(CXXFLAGS="-I%s/includes" % (path),
-                        LIBPATH=['%s/lib/%s' % (path,env["PLATFORM"])],
-                        LIBS=['proj4'])
+                        LIBPATH=['%s/lib/%s' % (path,env["OPTICKSPLATFORM"])],
+                        LIBS=[lib])
 
 def exists(env):
     return env.Detect('proj4')
