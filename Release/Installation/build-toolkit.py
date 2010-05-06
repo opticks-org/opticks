@@ -250,7 +250,6 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir,
     compile_settings_suffix = [".py"]
     if is_windows():
         compile_settings_suffix.append(".vsprops")
-    else:
     cp_dir2(s_app, d_app, "CompileSettings",
         suffixes_to_match=compile_settings_suffix)
     cp_dir2(s_app, d_app, "PlugInLib", suffixes_to_match=interface_suffixes)
