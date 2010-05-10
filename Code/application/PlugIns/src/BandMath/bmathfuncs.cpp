@@ -1065,8 +1065,16 @@ int eval(Progress* pProgress, vector<DataAccessor>& dataCubes, const vector<Enco
                }
                else
                {
-                  strcpy(error, "The band math operation attempted to divide by zero.");
-                  return -1;
+                  if (dispDZMes)
+                  {
+                     if (pProgress != NULL)
+                     {
+                        pProgress->updateProgress("The band math operation attempted to divide by zero. "
+                                                  "Operation will contine and bad values will be set to 0.",
+                                                  100 * i / rows, WARNING);
+                     }
+                     dispDZMes = false;
+                  }
                }
 
                memset(pReturnValue, 0, bandCount * sizeof(float)); // clear the point
