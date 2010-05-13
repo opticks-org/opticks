@@ -710,6 +710,9 @@ bool BandMath::createReturnValue(string partialResultsName)
 
    if (!mbAsLayerOnExistingView)
    {
+      // need to copy classification since parent was NULL in call to createRasterElement
+      pRaster->copyClassification(mpCube);
+
       // make copies of existing GcpLists only if going into a new view
       vector<DataElement*> gcps = mpDataModel->getElements(mpCube, "GcpList");
       if (!gcps.empty())
@@ -729,9 +732,6 @@ bool BandMath::createReturnValue(string partialResultsName)
       (mpResultData->getDataDescriptor());
    if (pDescriptor != NULL)
    {
-      // Classification
-      pDescriptor->setClassification(mpCube->getClassification());
-
       // Rows
       vector<DimensionDescriptor> rows = pDescriptor->getRows();
       for (unsigned int i = 0; i < origRows.size(); ++i)

@@ -24,6 +24,12 @@ DataDescriptorImp::DataDescriptorImp(const string& name, const string& type, Dat
    mProcessingLocation(IN_MEMORY),
    mpFileDescriptor(NULL)
 {
+   // copy non-NULL parent classification
+   if (pParent != NULL)
+   {
+      setClassification(pParent->getClassification());
+   }
+
    // Attach to the metadata object, classification to notify when the metadata changes
    mMetadata.attach(SIGNAL_NAME(Subject, Modified), Signal(dynamic_cast<Subject*>(this),
       SIGNAL_NAME(Subject, Modified)));

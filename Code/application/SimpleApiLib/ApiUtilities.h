@@ -229,6 +229,16 @@ extern "C"
     */
    EXPORT_SYMBOL void* castLayer(Layer* pLayer, const char* pType);
 
+   /**
+    * Copy the classification from a data element to another data element.
+    *
+    * @param pCopyFrom
+    *        The DataElement from which the classification is to be copied.
+    * @param pCopyTo
+    *        The DataElement to which the classification is to be copied.
+    */
+   EXPORT_SYMBOL void copyClassification(DataElement* pCopyFrom, DataElement* pCopyTo);
+
    /*@}*/
 #ifdef __cplusplus
 }

@@ -26,7 +26,7 @@ class Message;
 /**
  *  Describes a data element.
  *
- *  A data descriptor contains all anscillary data for a DataElement that is
+ *  A data descriptor contains all ancillary data for a DataElement that is
  *  not part of the raw data.  ModelServices stores elements based on a key
  *  that is comprised of a name, type, and parent element, which are all stored
  *  here.  For this reason, the data descriptor must be created by calling
@@ -300,7 +300,8 @@ public:
     *  This is typically used to deep copy a data descriptor when a non-shared
     *  copy is required. If the data element for this data descriptor already
     *  exists, the copy data descriptor should not be used to create a new data element
-    *  as the element already exists.
+    *  as the element already exists. The copy data descriptor contains the same classification
+    *  settings as this data descriptor.
     *
     *  @return A duplicate copy of this data descriptor or \c NULL if there was an error.
     */
@@ -315,7 +316,9 @@ public:
     *  name and parent element as unique identifiers, a new name and/or
     *  parent should be passed into this method for the call to
     *  ModelServices::createDataDescriptor() to succeed.  The type of this
-    *  descriptor is used as the type for the new descriptor.
+    *  descriptor is used as the type for the new descriptor. The returned data descriptor
+    *  will have the same classification settings as this data descriptor and not the
+    *  classification settings of the passed in parent element.
     *
     *  @param   name
     *           The name for the new element that would be created with the
@@ -337,7 +340,9 @@ public:
    /**
     *  This version specifies the new parent as a vector of element names
     *  which specify a parent such that the first name is a top level element,
-    *  the second name is a child of that element, and so on.
+    *  the second name is a child of that element, and so on. The returned data descriptor
+    *  will have the same classification settings as this data descriptor and not the
+    *  classification settings of the passed in parent element.
     *
     *  @see copy(const std::string&,DataElement*)
     */

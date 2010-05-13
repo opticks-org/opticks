@@ -123,6 +123,7 @@ bool ConvolutionFilterShell::execute(PlugInArgList* pInArgList, PlugInArgList* p
    ModelResource<RasterElement> pResult(RasterUtilities::createRasterElement(
       mResultName, iterChecker.getNumSelectedRows(), iterChecker.getNumSelectedColumns(),
       resultType, mInput.mpDescriptor->getProcessingLocation() == IN_MEMORY));
+   pResult->copyClassification(mInput.mpRaster);
    mInput.mpResult = pResult.get();
    if (mInput.mpResult == NULL)
    {

@@ -135,6 +135,41 @@ public:
    virtual const Classification* getClassification() const = 0;
 
    /**
+    *  Sets the element's classification object.
+    *
+    *  The classification object documents how the data in element is to be handled and/or
+    *  restricted.
+    *
+    *  This is a convenience method that makes a deep copy of the given classification object
+    *  that is stored in its DataDescriptor object, so it is the responsibility of the calling object
+    *  to delete the classification object when necessary.
+    *
+    *  @param   pClassification
+    *           The classification for the element.  A deep copy is performed
+    *           so it is the responsibility of the calling object to delete
+    *           the given classification object when necessary.  This method
+    *           does nothing if \c NULL is passed in.
+    *
+    *  @see     DataDescriptor::setClassification(), Classification
+    */
+   virtual void setClassification(const Classification* pClassification) = 0;
+
+   /**
+    *  Copies the classification settings from a DataElement.
+    *
+    *  This is a convenience method that deep copies the Classification object that is stored
+    *  in the DataDescriptor object of another DataElement into the DataDescriptor object of
+    *  this DataElement. The existing classification settings for this DataElement are replaced
+    *  by the settings from the passed DataElement. No attempt is made to merge the settings.
+    *
+    *  @param   pElement
+    *           The DataElement from which the Classification object will be copied.
+    *
+    *  @see     DataDescriptor::getClassification(), DataDescriptor::setClassification(), Classification
+    */
+   virtual void copyClassification(const DataElement* pElement) = 0;
+
+   /**
     *  Returns a pointer to the element's metadata values.
     *
     *  This is a convenience method that returns the metadata object that is stored in the

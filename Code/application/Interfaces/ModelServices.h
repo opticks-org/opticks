@@ -91,10 +91,13 @@ public:
     *           DataDescriptor is created.
     *  @param   pParent
     *           An optional parent element to which the new element will be
-    *           associated.  Passing in \b NULL indicates that the new element
+    *           associated.  Passing in \c NULL indicates that the new element
     *           is not associated with another element.  If the parent is
     *           non-\b NULL, the returned element is automatically destroyed
-    *           when the parent element is destroyed.
+    *           when the parent element is destroyed. The new DataDescriptor
+    *           inherits the parent's classification unless the parent is \c NULL,
+    *           in which case the classification will be set to the system's
+    *           highest level of classification.
     *
     *  @return  Returns a pointer to the newly created data descriptor.
     *
@@ -107,6 +110,10 @@ public:
     *  Creates an empty data descriptor.
     *
     *  This method creates a DataDescriptor with a parent specified as a vector of strings.
+    *  It should not be called if the parent data element already exists. It is to be used when the
+    *  parent has not yet been created. Since the parent should not exist, the classification will
+    *  be set to the highest level of the system. It is the responsibility of the caller to set
+    *  the proper classification settings.
     *
     *  @param   name
     *           The name for the data element.
@@ -122,8 +129,8 @@ public:
     *           A parent element to which the new element will be associated.
     *           This parent is specified as a vector of names of elements. The
     *           first name in the vector is the top-level element, the next name
-    *           is a child of that element, and so on. If the parent does not exist
-    *           this method will fail. Passing an empty vector will create a top-level element.
+    *           is a child of that element, and so on. Passing an empty vector
+    *           will create a top-level element.
     *
     *  @return  Returns a pointer to the newly created data descriptor.
     *
@@ -168,7 +175,10 @@ public:
     *           associated.  Passing in \c NULL indicates that the new element
     *           is not associated with another element.  If the parent is
     *           non-\c NULL, the returned element is automatically destroyed
-    *           when the parent element is destroyed.
+    *           when the parent element is destroyed. The created data descriptor
+    *           in the new import descriptor inherits the parent's classification
+    *           unless the parent is \c NULL, in which case the classification
+    *           will be set to the system's highest level of classification.
     *  @param   bImported
     *           Set this parameter to \c true to import the element or to
     *           \c false to not create the data element on import.
@@ -183,7 +193,12 @@ public:
    /**
     *  Creates an import descriptor.
     *
-    *  This method creates an import descriptor whose parent is specified as a vector of names.
+    *  This method creates an import descriptor whose parent is specified as a vector of names. 
+    *  It should not be called if the parent data element already exists. It is to be used when the
+    *  parent has not yet been created, e.g., in an importer to display the hierarchy of data elements
+    *  to be imported in the import options widget. Since the parent should not exist, the classification
+    *  will be set to the highest level of the system. It is the responsibility of the caller to set the
+    *  proper classification settings.
     *
     *  @param   name
     *           The name for the data element.
@@ -199,8 +214,8 @@ public:
     *           A parent element to which the new element will be associated.
     *           This parent is specified as a vector of names of elements. The
     *           first name in the vector is the top-level element, the next name
-    *           is a child of that element, and so on. If the parent does not exist
-    *           this method will fail. Passing an empty vector will create a top-level element.
+    *           is a child of that element, and so on. Passing an empty vector will
+    *           create a top-level element.
     *  @param   bImported
     *           Set this parameter to \c true to import the element or to
     *           \c false to not create the data element on import.
@@ -319,7 +334,7 @@ public:
     *
     *  This method creates a data element for each DataDescriptor. When created,
     *  each element will have the parentage specified in the DataDescriptor. The
-    *  group will be created in an order that guarentees a new element's parent exists
+    *  group will be created in an order that guarantees a new element's parent exists
     *  before it is created as long as that parent exists before the call to createElements()
     *  or is part of the group of new elements. If a new element requests a parent that does
     *  not already exist and is not in the vector of DataDescriptors, that element will not be created.
@@ -343,7 +358,8 @@ public:
     *
     *  The memory for the element is created and maintained by the studio.  A
     *  deep copy of the given data descriptor is made so the calling object
-    *  should destroy the data descriptor after calling this method.
+    *  should destroy the data descriptor after calling this method. The new
+    *  element inherits the classification settings of the passed in data descriptor.
     *
     *  @param   pDescriptor
     *           The data descriptor from which to create the data element.  The
@@ -371,7 +387,9 @@ public:
     *  This is a convenience method that creates a data element without needing
     *  to first create a data descriptor and then destroy the data descriptor
     *  after the element is created.  It is typically used to create simple
-    *  data elements such as AOIs and GCP lists.
+    *  data elements such as AOIs and GCP lists. The new element inherits the classification
+    *  settings of the parent element unless the parent is \c NULL, in which case
+    *  the new element's classification will be set to the system's highest level. 
     *
     *  @param   name
     *           The string name for the data element to create.
@@ -567,7 +585,8 @@ public:
    virtual bool setElementName(DataElement* pElement, const std::string& name) = 0;
 
    /**
-    *  Reparents a data element.
+    *  Reparents a data element. The classification settings of the reparented
+    *  element will not be changed, i.e., they will not be set to the new parent's settings.
     *
     *  @param   pElement
     *           The existing element in the session to reparent.  This method

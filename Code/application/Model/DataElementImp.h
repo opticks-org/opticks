@@ -42,6 +42,8 @@ public:
    DataElement* getParent() const;
    std::vector<std::string> getParentDesignator() const;
    const Classification* getClassification() const;
+   void setClassification(const Classification* pClassification);
+   void copyClassification(const DataElement* pElement);
    DynamicObject* getMetadata();
    const DynamicObject* getMetadata() const;
 
@@ -99,6 +101,14 @@ private:
    const Classification* getClassification() const \
    { \
       return impClass::getClassification();\
+   } \
+   void setClassification(const Classification* pClassification) \
+   { \
+      return impClass::setClassification(pClassification);\
+   } \
+   void copyClassification(const DataElement* pElement) \
+   { \
+      return impClass::copyClassification(pElement); \
    } \
    DynamicObject* getMetadata() \
    { \

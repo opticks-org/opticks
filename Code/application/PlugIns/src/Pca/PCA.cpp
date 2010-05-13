@@ -1124,6 +1124,10 @@ bool PCA::createPCACube()
       return false;
    }
 
+   // copy classification from mpRaster since mpPCARaster was created with NULL parent
+   mpPCARaster->copyClassification(mpRaster);
+
+   // Bad values
    RasterDataDescriptor* pRdd = dynamic_cast<RasterDataDescriptor*>(mpPCARaster->getDataDescriptor());
    if (pRdd == NULL)
    {
@@ -1136,13 +1140,6 @@ bool PCA::createPCACube()
       pStep->finalize(Message::Failure, mMessage);
       return false;
    }
-   const Classification* pClass = mpRaster->getClassification();
-   if (pClass != NULL)
-   {
-      pRdd->setClassification(pClass);
-   }
-
-   // Bad values
    vector<int>badValue(1);
    badValue[0] = 0;
    pRdd->setBadValues(badValue);

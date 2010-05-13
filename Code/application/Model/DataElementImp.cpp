@@ -187,6 +187,22 @@ const Classification* DataElementImp::getClassification() const
    return pClassification;
 }
 
+void DataElementImp::setClassification(const Classification* pClassification)
+{
+   if (mpDataDescriptor != NULL)
+   {
+       mpDataDescriptor->setClassification(pClassification);
+   }
+}
+
+void DataElementImp::copyClassification(const DataElement* pElement)
+{
+   if (mpDataDescriptor != NULL && pElement != NULL)
+   {
+      mpDataDescriptor->setClassification(pElement->getClassification());
+   }
+}
+
 DynamicObject* DataElementImp::getMetadata()
 {
    DynamicObject* pMetadata = NULL;

@@ -339,7 +339,10 @@ namespace RasterUtilities
 
    /**
     * Generate a populated RasterDataDescriptor to match the given 
-    * parameters.
+    * parameters. The new RasterDataDescriptor will inherit the
+    * classification settings of the parent DataElement unless the
+    * parent element is \c NULL, in which case the classification will
+    * be set to the system's highest level.
     *
     * @param name
     *        The name for the new RasterDataDescriptor.
@@ -368,7 +371,10 @@ namespace RasterUtilities
 
    /**
     * Generate a populated RasterDataDescriptor to match the given 
-    * parameters assuming the data only has one band.
+    * parameters assuming the data only has one band. The new
+    * RasterDataDescriptor will inherit the classification settings
+    * of the parent DataElement unless the parent element is \c NULL, in
+    * which case the classification will be set to the system's highest level.
     *
     * @param name
     *        The name for the new RasterDataDescriptor.
@@ -395,7 +401,7 @@ namespace RasterUtilities
     * to match the given RasterElement without any chipping.
     *
     * This method will retain any interesting original DimensionDescriptor
-    * numbers, but not copy any metadata or classification
+    * numbers, inherit the classification from the original element but not copy any metadata.
     *
     * @param pOrigElement
     *        The RasterElement to copy.  There must be a valid RasterFileDescriptor
@@ -539,6 +545,10 @@ namespace RasterUtilities
     * should only be used by plug-ins that need to programmatically create a RasterElement to store
     * results of an algorithm.  It should NOT be used by importers or exporters to create a RasterElement.
     * It should also NOT be used to create a RasterElement that corresponds to a data file on the filesystem.
+    * The created element will inherit the parent's classification unless the parent is \c NULL, in which case
+    * the classification will be set to the system's highest level of classification. Use the DataElement convenience
+    * method copyClassification or setClassification if the parent is \c NULL or if you require different
+    * classification settings.
     *
     * @param name
     *        The name for the new RasterDataDescriptor.
@@ -557,6 +567,8 @@ namespace RasterUtilities
     *
     * @return A RasterElement created with the given parameters
     *         and that assumes a single band that requires no additional initialization.
+    *
+    * @see DataElement::copyClassification, DataElement::setClassification
     */
    RasterElement* createRasterElement(const std::string& name, unsigned int rows, unsigned int columns,
       EncodingType encoding, bool inMemory = true, DataElement* pParent = 0 );
@@ -566,6 +578,10 @@ namespace RasterUtilities
     * should only be used by plug-ins that need to programmatically create a RasterElement to store
     * results of an algorithm.  It should NOT be used by importers or exporters to create a RasterElement.
     * It should also NOT be used to create a RasterElement that corresponds to a data file on the filesystem.
+    * The created element will inherit the parent's classification unless the parent is \c NULL, in which case
+    * the classification will be set to the system's highest level of classification. Use the DataElement convenience
+    * method copyClassification or setClassification if the parent is \c NULL or if you require different
+    * classification settings.
     *
     * @param name
     *        The name for the new RasterDataDescriptor.
@@ -587,6 +603,8 @@ namespace RasterUtilities
     *        The parent element for the new RasterDataDescriptor.
     *
     * @return A RasterElement created with the given parameters that requires no additional initialization.
+    *
+    * @see DataElement::copyClassification, DataElement::setClassification
     */
    RasterElement* createRasterElement(const std::string& name, unsigned int rows, unsigned int columns,
       unsigned int bands, EncodingType encoding, InterleaveFormatType interleave = BIP, bool inMemory = true,

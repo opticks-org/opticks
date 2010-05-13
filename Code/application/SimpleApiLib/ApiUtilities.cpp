@@ -389,4 +389,15 @@ extern "C"
       setLastError(SIMPLE_NO_ERROR);
       return pSubtype;
    }
+
+   void copyClassification(DataElement* pCopyFrom, DataElement* pCopyTo)
+   {
+      if (pCopyTo == NULL)
+      {
+         setLastError(SIMPLE_BAD_PARAMS);
+         return;
+      }
+      pCopyTo->copyClassification(pCopyFrom);
+      setLastError(SIMPLE_NO_ERROR);
+   }
 };
