@@ -73,12 +73,12 @@ extern "C"
    {
       AoiElement* pAoi = dynamic_cast<AoiElement*>(pElement);
       RasterElement* pRasterElement = dynamic_cast<RasterElement*>(pRaster);
-      if (pAoi == NULL || pRasterElement == NULL)
+      if ((pAoi == NULL && pElement != NULL) || pRasterElement == NULL)
       {
          setLastError(SIMPLE_BAD_PARAMS);
          return NULL;
       }
-      std::auto_ptr<BitMaskIterator> pIter(new BitMaskIterator(pAoi->getSelectedPoints(), pRasterElement));
+      std::auto_ptr<BitMaskIterator> pIter(new BitMaskIterator(pAoi == NULL ? NULL : pAoi->getSelectedPoints(), pRasterElement));
       if (pIter.get() == NULL)
       {
          setLastError(SIMPLE_OTHER_FAILURE);
@@ -92,12 +92,12 @@ extern "C"
       int32_t x1, int32_t y1, int32_t x2, int32_t y2)
    {
       AoiElement* pAoi = dynamic_cast<AoiElement*>(pElement);
-      if (pAoi == NULL)
+      if (pAoi == NULL && pElement != NULL)
       {
          setLastError(SIMPLE_BAD_PARAMS);
          return NULL;
       }
-      std::auto_ptr<BitMaskIterator> pIter(new BitMaskIterator(pAoi->getSelectedPoints(), x1, y1, x2, y2));
+      std::auto_ptr<BitMaskIterator> pIter(new BitMaskIterator(pAoi == NULL ? NULL : pAoi->getSelectedPoints(), x1, y1, x2, y2));
       if (pIter.get() == NULL)
       {
          setLastError(SIMPLE_OTHER_FAILURE);

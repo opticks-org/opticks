@@ -80,7 +80,7 @@ extern "C"
     * Get an iterator over an AOI.
     *
     * @param pElement
-    *        The AoiElement to access.
+    *        The AoiElement to access. If this is \c NULL, create an iterator over the entire raster element.
     * @param pRaster
     *        A raster element whose size will determine the bounding box.
     * @return A BitMaskIterator.
@@ -91,7 +91,7 @@ extern "C"
     * Get an iterator over an AOI.
     *
     * @param pElement
-    *        The AoiElement to access.
+    *        The AoiElement to access. If this is \c NULL, create an iterator over the entire bounding box.
     * @param x1
     *        The starting X value for the bounding box.
     * @param y1
