@@ -251,8 +251,8 @@ extern "C"
     */
    struct ThresholdLayerInfo
    {
-      double firstThreshold;     /**< The first threshold value */
-      double secondThreshold;    /**< The second threshold value.
+      double firstThreshold;     /**< The first threshold value in the specified regionUnits. */
+      double secondThreshold;    /**< The second threshold value in the specified regionUnits.
                                       Certain pass area values ignore the second threshold */
       uint32_t passArea;         /**< The pass area. 0 -> Below 1st threshold value.
                                                      1 -> Above 1st threshold value.

@@ -459,8 +459,11 @@ extern "C"
          setLastError(SIMPLE_BAD_PARAMS);
          return 1;
       }
-      pInfo->firstThreshold = pThresh->getFirstThreshold();
-      pInfo->secondThreshold = pThresh->getSecondThreshold();
+      // convert the threshold values to the current threshold region units
+      pInfo->firstThreshold = pThresh->convertThreshold(RAW_VALUE,
+         pThresh->getFirstThreshold(), pThresh->getRegionUnits());
+      pInfo->secondThreshold = pThresh->convertThreshold(RAW_VALUE,
+         pThresh->getSecondThreshold(), pThresh->getRegionUnits());
       switch(pThresh->getPassArea())
       {
       case LOWER:
@@ -509,8 +512,6 @@ extern "C"
          setLastError(SIMPLE_BAD_PARAMS);
          return 1;
       }
-      pThresh->setFirstThreshold(pInfo->firstThreshold);
-      pThresh->setSecondThreshold(pInfo->secondThreshold);
       switch(pInfo->passArea)
       {
       case 0:
@@ -547,6 +548,10 @@ extern "C"
          setLastError(SIMPLE_BAD_PARAMS);
          return 1;
       }
+      // convert the thresholds to raw from the specified units
+      pThresh->setFirstThreshold(pThresh->convertThreshold(pInfo->firstThreshold, RAW_VALUE));
+      pThresh->setSecondThreshold(pThresh->convertThreshold(pInfo->secondThreshold, RAW_VALUE));
+
       setLastError(SIMPLE_NO_ERROR);
       return 0;
    }
