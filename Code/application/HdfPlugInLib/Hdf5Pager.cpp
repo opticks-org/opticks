@@ -318,7 +318,7 @@ CachedPage::UnitPtr Hdf5Pager::fetchUnit(DataRequest *pOriginalRequest)
    }
 
    CachedPage::CacheUnit* pCacheUnit = new CachedPage::CacheUnit(pData.release(), startRow, concurrentRows,
-      pageSize, startBand);
+      pageSize, (fileInterleave == BSQ ? startBand : CachedPage::CacheUnit::ALL_BANDS));
    pUnit.reset(pCacheUnit);
    return pUnit;
 }

@@ -190,5 +190,5 @@ CachedPage::UnitPtr GdalRasterPager::fetchUnit(DataRequest* pOriginalRequest)
    }
 
    return CachedPage::UnitPtr(new CachedPage::CacheUnit(
-      pBuffer.release(), pOriginalRequest->getStartRow(), numRows, bufSize));
+      pBuffer.release(), pOriginalRequest->getStartRow(), numRows, bufSize, pOriginalRequest->getStartBand()));
 }
