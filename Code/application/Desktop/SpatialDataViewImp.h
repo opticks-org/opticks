@@ -116,6 +116,8 @@ public:
 
    Animation* createDefaultAnimation();
 
+   void resetStretch();
+
    bool toXml(XMLWriter* pXml) const;
    bool fromXml(DOMNode* pDocument, unsigned int version);
 
@@ -453,6 +455,10 @@ private slots:
    Animation* createDefaultAnimation() \
    { \
       return impClass::createDefaultAnimation(); \
+   } \
+   void resetStretch() \
+   { \
+      impClass::resetStretch(); \
    }
 
 #endif

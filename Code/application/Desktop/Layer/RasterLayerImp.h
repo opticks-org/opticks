@@ -159,9 +159,14 @@ public slots:
    bool enableFastContrastStretch(bool enable);
    void setComplexComponent(const ComplexComponent& eComponent);
    void setStretchType(const DisplayMode& eMode, const StretchType& eType);
+   void resetStretchType(const DisplayMode& eMode);
    void setStretchUnits(const DisplayMode& eMode, const RegionUnits& eUnits);
    void setStretchUnits(const RasterChannelType& eColor, const RegionUnits& eUnits);
+   void resetStretchUnits(const DisplayMode& eMode);
+   void resetStretchUnits(const RasterChannelType& eColor);
    void setStretchValues(const RasterChannelType& eColor, double dLower, double dUpper);
+   void resetStretchValues(const RasterChannelType& eColor);
+   void resetStretch();
    void setAlpha(unsigned int alpha);
    void reset();
    void displayAsTrueColor();
@@ -236,6 +241,29 @@ private:
    unsigned int mAlpha;
    bool mEnableFastContrastStretch;
 
+   StretchType mOriginalGrayStretchType;
+   StretchType mOriginalRgbStretchType;
+
+   RegionUnits mOriginalGrayscaleStretchUnits;
+   RegionUnits mOriginalRedStretchUnits;
+   RegionUnits mOriginalGreenStretchUnits;
+   RegionUnits mOriginalBlueStretchUnits;
+
+   DimensionDescriptor mOriginalGrayBand;
+   DimensionDescriptor mOriginalRedBand;
+   DimensionDescriptor mOriginalGreenBand;
+   DimensionDescriptor mOriginalBlueBand;
+
+   AttachmentPtr<RasterElement> mpOriginalGrayRasterElement;
+   AttachmentPtr<RasterElement> mpOriginalRedRasterElement;
+   AttachmentPtr<RasterElement> mpOriginalGreenRasterElement;
+   AttachmentPtr<RasterElement> mpOriginalBlueRasterElement;
+
+   std::vector<double> mOriginalGrayStretchValues;
+   std::vector<double> mOriginalRedStretchValues;
+   std::vector<double> mOriginalGreenStretchValues;
+   std::vector<double> mOriginalBlueStretchValues;
+
    std::vector<ImageFilterDescriptor*> mEnabledFilters;
    Animation* mpAnimation;
 
@@ -249,6 +277,7 @@ private:
    QAction* mpLinear2Action;
    QAction* mpLinear5Action;
    QAction* mpEqualAction;
+   QAction* mpResetStretchAction;
    QAction* mpTrueColorAction;
 
    bool channelToXml(XMLWriter* pXml, const RasterElement* pElem, const RegionUnits &units,
@@ -315,6 +344,10 @@ private:
    { \
       return impClass::getStretchType(eMode); \
    } \
+   void resetStretchType(const DisplayMode& eMode) \
+   { \
+      return impClass::resetStretchType(eMode); \
+   } \
    void setStretchUnits(const DisplayMode& eMode, const RegionUnits& eUnits) \
    { \
       impClass::setStretchUnits(eMode, eUnits); \
@@ -327,6 +360,14 @@ private:
    { \
       return impClass::getStretchUnits(eColor); \
    } \
+   void resetStretchUnits(const DisplayMode& eMode) \
+   { \
+      return impClass::resetStretchUnits(eMode); \
+   } \
+   void resetStretchUnits(const RasterChannelType& eColor) \
+   { \
+      return impClass::resetStretchUnits(eColor); \
+   } \
    void setStretchValues(const RasterChannelType& eColor, double dLower, double dUpper) \
    { \
       impClass::setStretchValues(eColor, dLower, dUpper); \
@@ -334,6 +375,14 @@ private:
    void getStretchValues(const RasterChannelType& eColor, double& dLower, double& dUpper) const \
    { \
       impClass::getStretchValues(eColor, dLower, dUpper); \
+   } \
+   void resetStretchValues(const RasterChannelType& eColor) \
+   { \
+      return impClass::resetStretchValues(eColor); \
+   } \
+   void resetStretch() \
+   { \
+      return impClass::resetStretch(); \
    } \
    double convertStretchValue(const RasterChannelType& eColor, const RegionUnits& eUnits, \
                                                 double dStretchValue, const RegionUnits& eNewUnits) const \

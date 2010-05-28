@@ -325,13 +325,19 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    m_pRefresh_Action->setAutoRepeat(false);
    m_pRefresh_Action->setShortcut(QKeySequence("Ctrl+R"));
    m_pRefresh_Action->setToolTip("Refresh");
-   m_pRefresh_Action->setStatusTip("Redraws the data in the active spectral data window");
+   m_pRefresh_Action->setStatusTip("Redraws the data in the active spatial data window");
    VERIFYNR(connect(m_pRefresh_Action, SIGNAL(triggered()), this, SLOT(refresh())));
+
+   mpResetStretchAction = new QAction(QIcon(":/icons/ResetStretch"), "R&eset", this);
+   mpResetStretchAction->setAutoRepeat(false);
+   mpResetStretchAction->setShortcut(QKeySequence("Ctrl+E"));
+   mpResetStretchAction->setStatusTip("Reset all stretch changes for visible layers in the active spatial data window");
+   VERIFYNR(connect(mpResetStretchAction, SIGNAL(triggered()), this, SLOT(resetStretch())));
 
    m_pDisplay_Mode_Action = new QAction(QIcon(":/icons/DisplayMode"), "Toggle Display Mode", this);
    m_pDisplay_Mode_Action->setAutoRepeat(false);
    m_pDisplay_Mode_Action->setToolTip("Toggle Display Mode");
-   m_pDisplay_Mode_Action->setStatusTip("Toggles the spectral data display between grayscale and RGB modes");
+   m_pDisplay_Mode_Action->setStatusTip("Toggles the spatial data display between grayscale and RGB modes");
    VERIFYNR(connect(m_pDisplay_Mode_Action, SIGNAL(triggered()), this, SLOT(toggleDisplayMode())));
 
    mpGenerateImageAction = new QAction(QIcon(":/icons/Generate"), "&Generate Full Image", this);
@@ -626,7 +632,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    m_pLink_Action = new QAction(QIcon(":/icons/Link"), "Lin&k/Unlink...", this);
    m_pLink_Action->setAutoRepeat(false);
    m_pLink_Action->setToolTip("Link/Unlink");
-   m_pLink_Action->setStatusTip("Connects layer and elements across multiple spectral data windows");
+   m_pLink_Action->setStatusTip("Connects layer and elements across multiple spatial data windows");
    VERIFYNR(connect(m_pLink_Action, SIGNAL(triggered()), this, SLOT(linkWindows())));
 
    QAction* pUpdate_Wizards_Action = new QAction("Update &Wizard List", this);
@@ -857,6 +863,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
       mpDisplayToolBar->addSeparator();
       mpDisplayToolBar->addAction(m_pDisplay_Mode_Action);
       mpDisplayToolBar->addSeparator();
+      mpDisplayToolBar->addAction(mpResetStretchAction);
       mpDisplayToolBar->addAction(m_pRefresh_Action);
       mpDisplayToolBar->addAction(mpGenerateImageAction);
 
@@ -1157,7 +1164,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    updatePlugInCommands();
    updateWizardCommands();
 
-   // Disable the actions and toolbar buttons that are dependent on a spectral data window
+   // Disable the actions and toolbar buttons that are dependent on a spatial data window
    enableActions(false);
    enableToolBars(false);
 
@@ -3057,6 +3064,15 @@ void ApplicationWindow::refresh()
    }
 }
 
+void ApplicationWindow::resetStretch()
+{
+   SpatialDataView* pView = dynamic_cast<SpatialDataView*> (getCurrentWorkspaceWindowView());
+   if (pView != NULL)
+   {
+      pView->resetStretch();
+   }
+}
+
 void ApplicationWindow::generateFullImage()
 {
    SpatialDataViewImp* pSpatialDataView = dynamic_cast<SpatialDataViewImp*>(getCurrentWorkspaceWindowView());
@@ -4675,6 +4691,7 @@ void ApplicationWindow::enableActions(bool bEnable)
    m_pMeasurement_Edit_Action->setEnabled(bEnable && bSpatialDataView);
    mpCreateAnimationAction->setEnabled(bEnable && bSpatialDataView);
    m_pRefresh_Action->setEnabled(bEnable);
+   m_pReset_Action->setEnabled(bEnable && bSpatialDataView);
    m_pDisplay_Mode_Action->setEnabled(bEnable && bSpatialDataView);
    mpClearMarkingsAction->setEnabled(bEnable && bSpatialDataView);
 

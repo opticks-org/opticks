@@ -134,7 +134,7 @@ BrightnessToolBar::BrightnessToolBar(const string& id, QWidget* parent) :
    // Reset button
    mpResetAction = new QAction(QIcon(":/icons/ResetStretch"), "Reset", this);
    mpResetAction->setAutoRepeat(false);
-   mpResetAction->setStatusTip("Updates the current brightness and contrast to their default values");
+   mpResetAction->setStatusTip("Updates the current brightness and contrast to their imported values");
    VERIFYNR(connect(mpResetAction, SIGNAL(triggered()), this, SLOT(reset())));
    addButton(mpResetAction, windowTitle().toStdString());
 
@@ -713,56 +713,9 @@ void BrightnessToolBar::adjustLayerStretch()
 
 void BrightnessToolBar::reset()
 {
-   if (mpRasterLayer == NULL)
+   if (mpRasterLayer != NULL)
    {
-      return;
-   }
-
-   DisplayMode eDisplayMode = mpRasterLayer->getDisplayMode();
-   StretchType eType;
-   if (eDisplayMode == GRAYSCALE_MODE)
-   {
-      eType = RasterLayer::getSettingGrayscaleStretchType();
-   }
-   else if (eDisplayMode == RGB_MODE)
-   {
-      eType = RasterLayer::getSettingRgbStretchType();
-   }
-   RegionUnits eUnits = RasterLayer::getSettingGrayscaleStretchUnits();
-   double dLower = 0.0;
-   double dUpper = 0.0;
-
-   UndoGroup undoGroup(mpRasterLayer->getView(), "Reset");
-
-   mpRasterLayer->setStretchType(eDisplayMode, eType);
-   mpRasterLayer->setStretchUnits(eDisplayMode, eUnits);
-
-   enableSliders();
-
-   if (mRgb == true)
-   {
-      disconnect(dynamic_cast<RasterLayerImp*>(mpRasterLayer),
-         SIGNAL(stretchValuesChanged(const RasterChannelType&, double, double)),
-         this, SLOT(updateValues(const RasterChannelType&, double, double)));
-
-      RasterLayerImp::getDefaultStretchValues(RED, dLower, dUpper);
-      mpRasterLayer->setStretchValues(RED, dLower, dUpper);
-      updateValues(RED, dLower, dUpper);
-
-      RasterLayerImp::getDefaultStretchValues(GREEN, dLower, dUpper);
-      mpRasterLayer->setStretchValues(GREEN, dLower, dUpper);
-
-      RasterLayerImp::getDefaultStretchValues(BLUE, dLower, dUpper);
-      mpRasterLayer->setStretchValues(BLUE, dLower, dUpper);
-
-      VERIFYNR(connect(dynamic_cast<RasterLayerImp*>(mpRasterLayer),
-         SIGNAL(stretchValuesChanged(const RasterChannelType&, double, double)),
-         this, SLOT(updateValues(const RasterChannelType&, double, double))));
-   }
-   else
-   {
-      RasterLayerImp::getDefaultStretchValues(mRasterChannelType, dLower, dUpper);
-      mpRasterLayer->setStretchValues(mRasterChannelType, dLower, dUpper);
+      mpRasterLayer->resetStretch();
    }
 }
 

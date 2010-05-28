@@ -219,6 +219,7 @@ protected slots:
    void setMouseMode(View* pView, const QString& strMouseMode);
    void updateMouseAction(const MouseMode* pMouseMode);
    void refresh();
+   void resetStretch();
    void generateFullImage();
    void toggleDisplayMode();
    void clearMarkings();
@@ -330,6 +331,7 @@ private:
    QAction* mpLayerEditAction;
    QAction* mpCreateAnimationAction;
    QAction* m_pRefresh_Action;
+   QAction* mpResetStretchAction;
    QAction* mpGenerateImageAction;
    QAction* m_pDisplay_Mode_Action;
    QAction* m_pMeasurement_Edit_Action;

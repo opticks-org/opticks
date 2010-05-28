@@ -64,6 +64,10 @@ RasterLayerImp::RasterLayerImp(const string& id, const string& layerName, DataEl
    mlstRedStretchValues(2),
    mlstGreenStretchValues(2),
    mlstBlueStretchValues(2),
+   mOriginalGrayStretchValues(2),
+   mOriginalRedStretchValues(2),
+   mOriginalGreenStretchValues(2),
+   mOriginalBlueStretchValues(2),
    mpAnimation(NULL),
    mpSeparatorAction(NULL),
    mpDisplayModeMenu(NULL),
@@ -119,6 +123,11 @@ RasterLayerImp::RasterLayerImp(const string& id, const string& layerName, DataEl
    mpEqualAction->setAutoRepeat(false);
    pDesktop->initializeAction(mpEqualAction, stretchContext);
 
+   mpStretchMenu->addSeparator();
+   mpResetStretchAction = mpStretchMenu->addAction(QIcon(":/icons/ResetStretch"), "Reset");
+   mpResetStretchAction->setAutoRepeat(false);
+   pDesktop->initializeAction(mpResetStretchAction, stretchContext);
+
    // True color display
    mpTrueColorAction = new QAction("Display as True Color", this);
    mpTrueColorAction->setAutoRepeat(false);
@@ -134,22 +143,72 @@ RasterLayerImp::RasterLayerImp(const string& id, const string& layerName, DataEl
    reset();
    updateDisplayModeAction(meDisplayMode);      // The member display mode is set in reset()
 
+   // Record initial values for resetStretch -- must be done after reset()
+   mOriginalGrayStretchType = getStretchType(GRAYSCALE_MODE);
+   mOriginalRgbStretchType = getStretchType(RGB_MODE);
+
+   mOriginalGrayscaleStretchUnits = getStretchUnits(GRAY);
+   mOriginalRedStretchUnits = getStretchUnits(RED);
+   mOriginalGreenStretchUnits = getStretchUnits(GREEN);
+   mOriginalBlueStretchUnits = getStretchUnits(BLUE);
+
+   mOriginalGrayBand = getDisplayedBand(GRAY);
+   mOriginalRedBand = getDisplayedBand(RED);
+   mOriginalGreenBand = getDisplayedBand(GREEN);
+   mOriginalBlueBand = getDisplayedBand(BLUE);
+
+   mpOriginalGrayRasterElement.reset(getDisplayedRasterElement(GRAY));
+   mpOriginalRedRasterElement.reset(getDisplayedRasterElement(RED));
+   mpOriginalGreenRasterElement.reset(getDisplayedRasterElement(GREEN));
+   mpOriginalBlueRasterElement.reset(getDisplayedRasterElement(BLUE));
+
+   double lower;
+   double upper;
+   getStretchValues(GRAY, lower, upper);
+   mOriginalGrayStretchValues[0] = convertStretchValue(GRAY, lower, RAW_VALUE);
+   mOriginalGrayStretchValues[1] = convertStretchValue(GRAY, upper, RAW_VALUE);
+
+   getStretchValues(RED, lower, upper);
+   mOriginalRedStretchValues[0] = convertStretchValue(RED, lower, RAW_VALUE);
+   mOriginalRedStretchValues[1] = convertStretchValue(RED, upper, RAW_VALUE);
+
+   getStretchValues(GREEN, lower, upper);
+   mOriginalGreenStretchValues[0] = convertStretchValue(GREEN, lower, RAW_VALUE);
+   mOriginalGreenStretchValues[1] = convertStretchValue(GREEN, upper, RAW_VALUE);
+
+   getStretchValues(BLUE, lower, upper);
+   mOriginalBlueStretchValues[0] = convertStretchValue(BLUE, lower, RAW_VALUE);
+   mOriginalBlueStretchValues[1] = convertStretchValue(BLUE, upper, RAW_VALUE);
+
    // Connections
-   connect(this, SIGNAL(gpuImageEnabled(bool)), this, SIGNAL(modified()));
-   connect(this, SIGNAL(displayedBandChanged(RasterChannelType, DimensionDescriptor)), this, SIGNAL(modified()));
-   connect(this, SIGNAL(displayModeChanged(const DisplayMode&)), this, SIGNAL(modified()));
-   connect(this, SIGNAL(complexComponentChanged(const ComplexComponent&)), this, SIGNAL(modified()));
-   connect(this, SIGNAL(stretchTypeChanged(const DisplayMode&, const StretchType&)), this, SIGNAL(modified()));
-   connect(this, SIGNAL(stretchUnitsChanged(const RasterChannelType&, const RegionUnits&)), this, SIGNAL(modified()));
-   connect(this, SIGNAL(stretchValuesChanged(const RasterChannelType&, double, double)), this, SIGNAL(modified()));
-   connect(this, SIGNAL(alphaChanged(unsigned int)), this, SIGNAL(modified()));
-   connect(this, SIGNAL(colorMapChanged(const ColorMap&)), this, SIGNAL(modified()));
-   connect(this, SIGNAL(filtersChanged(const std::vector<ImageFilterDescriptor*>&)), this, SIGNAL(modified()));
-   connect(pDisplayModeGroup, SIGNAL(triggered(QAction*)), this, SLOT(setDisplayMode(QAction*)));
-   connect(this, SIGNAL(displayModeChanged(const DisplayMode&)), this,
-      SLOT(updateDisplayModeAction(const DisplayMode&)));
-   connect(mpStretchMenu, SIGNAL(triggered(QAction*)), this, SLOT(changeStretch(QAction*)));
-   connect(mpTrueColorAction, SIGNAL(triggered()), this, SLOT(displayAsTrueColor()));
+   VERIFYNR(connect(this, SIGNAL(gpuImageEnabled(bool)),
+      this, SIGNAL(modified())));
+   VERIFYNR(connect(this, SIGNAL(displayedBandChanged(RasterChannelType, DimensionDescriptor)),
+      this, SIGNAL(modified())));
+   VERIFYNR(connect(this, SIGNAL(displayModeChanged(const DisplayMode&)),
+      this, SIGNAL(modified())));
+   VERIFYNR(connect(this, SIGNAL(complexComponentChanged(const ComplexComponent&)),
+      this, SIGNAL(modified())));
+   VERIFYNR(connect(this, SIGNAL(stretchTypeChanged(const DisplayMode&, const StretchType&)),
+      this, SIGNAL(modified())));
+   VERIFYNR(connect(this, SIGNAL(stretchUnitsChanged(const RasterChannelType&, const RegionUnits&)),
+      this, SIGNAL(modified())));
+   VERIFYNR(connect(this, SIGNAL(stretchValuesChanged(const RasterChannelType&, double, double)),
+      this, SIGNAL(modified())));
+   VERIFYNR(connect(this, SIGNAL(alphaChanged(unsigned int)),
+      this, SIGNAL(modified())));
+   VERIFYNR(connect(this, SIGNAL(colorMapChanged(const ColorMap&)),
+      this, SIGNAL(modified())));
+   VERIFYNR(connect(this, SIGNAL(filtersChanged(const std::vector<ImageFilterDescriptor*>&)),
+      this, SIGNAL(modified())));
+   VERIFYNR(connect(pDisplayModeGroup, SIGNAL(triggered(QAction*)),
+      this, SLOT(setDisplayMode(QAction*))));
+   VERIFYNR(connect(this, SIGNAL(displayModeChanged(const DisplayMode&)),
+      this, SLOT(updateDisplayModeAction(const DisplayMode&))));
+   VERIFYNR(connect(mpStretchMenu, SIGNAL(triggered(QAction*)),
+      this, SLOT(changeStretch(QAction*))));
+   VERIFYNR(connect(mpTrueColorAction, SIGNAL(triggered()),
+      this, SLOT(displayAsTrueColor())));
 
    // Force redraws when a remote element changes
    mpGrayRasterElement.addSignal(SIGNAL_NAME(Subject, Modified), Slot(this, &RasterLayerImp::elementModifiedGray));
@@ -310,6 +369,29 @@ RasterLayerImp& RasterLayerImp::operator= (const RasterLayerImp& rasterLayer)
       mlstRedStretchValues = rasterLayer.mlstRedStretchValues;
       mlstGreenStretchValues = rasterLayer.mlstGreenStretchValues;
       mlstBlueStretchValues = rasterLayer.mlstBlueStretchValues;
+
+      mOriginalGrayStretchType = rasterLayer.mOriginalGrayStretchType;
+      mOriginalRgbStretchType = rasterLayer.mOriginalRgbStretchType;
+
+      mpOriginalGrayRasterElement.reset(const_cast<RasterElement*>(rasterLayer.mpOriginalGrayRasterElement.get()));
+      mOriginalGrayscaleStretchUnits = rasterLayer.mOriginalGrayscaleStretchUnits;
+      mOriginalGrayBand = rasterLayer.mOriginalGrayBand;
+      mOriginalGrayStretchValues = rasterLayer.mOriginalGrayStretchValues;
+
+      mpOriginalRedRasterElement.reset(const_cast<RasterElement*>(rasterLayer.mpOriginalRedRasterElement.get()));
+      mOriginalRedStretchUnits = rasterLayer.mOriginalRedStretchUnits;
+      mOriginalRedBand = rasterLayer.mOriginalRedBand;
+      mOriginalRedStretchValues = rasterLayer.mOriginalRedStretchValues;
+
+      mpOriginalGreenRasterElement.reset(const_cast<RasterElement*>(rasterLayer.mpOriginalGreenRasterElement.get()));
+      mOriginalGreenStretchUnits = rasterLayer.mOriginalGreenStretchUnits;
+      mOriginalGreenBand = rasterLayer.mOriginalGreenBand;
+      mOriginalGreenStretchValues = rasterLayer.mOriginalGreenStretchValues;
+
+      mpOriginalBlueRasterElement.reset(const_cast<RasterElement*>(rasterLayer.mpOriginalBlueRasterElement.get()));
+      mOriginalBlueStretchUnits = rasterLayer.mOriginalBlueStretchUnits;
+      mOriginalBlueBand = rasterLayer.mOriginalBlueBand;
+      mOriginalBlueStretchValues = rasterLayer.mOriginalBlueStretchValues;
 
       mColorMap = rasterLayer.mColorMap;
       mAlpha = rasterLayer.mAlpha;
@@ -1399,7 +1481,7 @@ bool RasterLayerImp::setColorMap(const string& name, const vector<ColorType>& co
    {
       return setColorMap(ColorMap(name.c_str(), colorTable));
    }
-   catch (exception& exc)
+   catch (const exception& exc)
    {
       QMessageBox::warning(NULL, "Bad ColorMap", exc.what());
       return false;
@@ -3015,6 +3097,8 @@ bool RasterLayerImp::toXml(XMLWriter* pXml) const
    pXml->addAttr("complexComponent", mComplexComponent);
    pXml->addAttr("stretchTypeGray", meGrayStretchType);
    pXml->addAttr("stretchTypeRgb", meRgbStretchType);
+   pXml->addAttr("originalStretchTypeGray", mOriginalGrayStretchType);
+   pXml->addAttr("originalStretchTypeRgb", mOriginalRgbStretchType);
    pXml->addAttr("alpha", mAlpha);
    pXml->addAttr("enableFastStretch", mEnableFastContrastStretch);
 
@@ -3034,6 +3118,7 @@ bool RasterLayerImp::toXml(XMLWriter* pXml) const
    }
    pXml->popAddPoint();
 
+   // Add several ChannelInfo elements, one each for GRAY, RED, GREEN, and BLUE with a "channel" attribute.
    pXml->pushAddPoint(pXml->addElement("ChannelInfo"));
    pXml->addAttr("channel", RasterChannelType(GREEN));
    if (!channelToXml(pXml, getDisplayedRasterElement(GREEN), meGreenStretchUnits, mGreenBand, mlstGreenStretchValues))
@@ -3045,6 +3130,43 @@ bool RasterLayerImp::toXml(XMLWriter* pXml) const
    pXml->pushAddPoint(pXml->addElement("ChannelInfo"));
    pXml->addAttr("channel", RasterChannelType(BLUE));
    if (!channelToXml(pXml, getDisplayedRasterElement(BLUE), meBlueStretchUnits, mBlueBand, mlstBlueStretchValues))
+   {
+      return false;
+   }
+   pXml->popAddPoint();
+
+   // Add several ChannelInfo elements, one each for GRAY, RED, GREEN, and BLUE with an "originalChannel" attribute.
+   pXml->pushAddPoint(pXml->addElement("ChannelInfo"));
+   pXml->addAttr("originalChannel", RasterChannelType(GRAY));
+   if (!channelToXml(pXml, mpOriginalGrayRasterElement.get(), mOriginalGrayscaleStretchUnits,
+      mOriginalGrayBand, mOriginalGrayStretchValues))
+   {
+      return false;
+   }
+   pXml->popAddPoint();
+
+   pXml->pushAddPoint(pXml->addElement("ChannelInfo"));
+   pXml->addAttr("originalChannel", RasterChannelType(RED));
+   if (!channelToXml(pXml, mpOriginalRedRasterElement.get(), mOriginalRedStretchUnits,
+      mOriginalRedBand, mOriginalRedStretchValues))
+   {
+      return false;
+   }
+   pXml->popAddPoint();
+
+   pXml->pushAddPoint(pXml->addElement("ChannelInfo"));
+   pXml->addAttr("originalChannel", RasterChannelType(GREEN));
+   if (!channelToXml(pXml, mpOriginalGreenRasterElement.get(), mOriginalGreenStretchUnits,
+      mOriginalGreenBand, mOriginalGreenStretchValues))
+   {
+      return false;
+   }
+   pXml->popAddPoint();
+
+   pXml->pushAddPoint(pXml->addElement("ChannelInfo"));
+   pXml->addAttr("originalChannel", RasterChannelType(BLUE));
+   if (!channelToXml(pXml, mpOriginalBlueRasterElement.get(), mOriginalBlueStretchUnits,
+      mOriginalBlueBand, mOriginalBlueStretchValues))
    {
       return false;
    }
@@ -3083,6 +3205,10 @@ bool RasterLayerImp::fromXml(DOMNode* pDocument, unsigned int version)
       A(pDocElmnt->getAttribute(X("stretchTypeGray")))));
    setStretchType(RGB_MODE, StringUtilities::fromXmlString<StretchType>(
       A(pDocElmnt->getAttribute(X("stretchTypeRgb")))));
+   mOriginalGrayStretchType = StringUtilities::fromXmlString<StretchType>(
+      A(pDocElmnt->getAttribute(X("originalStretchTypeGray"))));
+   mOriginalRgbStretchType = StringUtilities::fromXmlString<StretchType>(
+      A(pDocElmnt->getAttribute(X("originalStretchTypeRgb"))));
    setAlpha(StringUtilities::fromXmlString<unsigned int>(A(pDocElmnt->getAttribute(X("alpha")))));
    enableFastContrastStretch(StringUtilities::fromXmlString<bool>(A(pDocElmnt->getAttribute(X("enableFastStretch")))));
    mpAnimation = NULL;
@@ -3108,13 +3234,64 @@ bool RasterLayerImp::fromXml(DOMNode* pDocument, unsigned int version)
          }
          RasterChannelType channel = StringUtilities::fromXmlString<RasterChannelType>(
             A(pElmnt->getAttribute(X("channel"))));
-         if (!channel.isValid())
+         if (channel.isValid())
          {
-            return false;
+            setDisplayedBand(channel, band, pDataElement);
+            setStretchUnits(channel, stretchUnits);
+            setStretchValues(channel, stretchValueMin, stretchValueMax);
          }
-         setDisplayedBand(channel, band, pDataElement);
-         setStretchUnits(channel, stretchUnits);
-         setStretchValues(channel, stretchValueMin, stretchValueMax);
+         else
+         {
+            // Not a valid "channel" attribute, so check if this is instead an "originalChannel".
+            channel = StringUtilities::fromXmlString<RasterChannelType>(A(pElmnt->getAttribute(X("originalChannel"))));
+            switch (channel)
+            {
+               case GRAY:
+               {
+                  mpOriginalGrayRasterElement.reset(pDataElement);
+                  mOriginalGrayscaleStretchUnits = stretchUnits;
+                  mOriginalGrayBand = band;
+                  mOriginalGrayStretchValues[0] = stretchValueMin;
+                  mOriginalGrayStretchValues[1] = stretchValueMax;
+                  break;
+               }
+
+               case RED:
+               {
+                  mpOriginalRedRasterElement.reset(pDataElement);
+                  mOriginalRedStretchUnits = stretchUnits;
+                  mOriginalRedBand = band;
+                  mOriginalRedStretchValues[0] = stretchValueMin;
+                  mOriginalRedStretchValues[1] = stretchValueMax;
+                  break;
+               }
+
+               case GREEN:
+               {
+                  mpOriginalGreenRasterElement.reset(pDataElement);
+                  mOriginalGreenStretchUnits = stretchUnits;
+                  mOriginalGreenBand = band;
+                  mOriginalGreenStretchValues[0] = stretchValueMin;
+                  mOriginalGreenStretchValues[1] = stretchValueMax;
+                  break;
+               }
+
+               case BLUE:
+               {
+                  mpOriginalBlueRasterElement.reset(pDataElement);
+                  mOriginalBlueStretchUnits = stretchUnits;
+                  mOriginalBlueBand = band;
+                  mOriginalBlueStretchValues[0] = stretchValueMin;
+                  mOriginalBlueStretchValues[1] = stretchValueMax;
+                  break;
+               }
+
+               default:
+               {
+                  return false;
+               }
+            }
+         }
       }
    }
 
@@ -3519,6 +3696,12 @@ void RasterLayerImp::changeStretch(QAction* pAction)
       return;
    }
 
+   if (pAction == mpResetStretchAction)
+   {
+      resetStretch();
+      return;
+   }
+
    RegionUnits eUnits = PERCENTILE;
    StretchType eType = LINEAR;
    double lower = 5.0;
@@ -3530,7 +3713,7 @@ void RasterLayerImp::changeStretch(QAction* pAction)
       lower = 0.0;
       upper = 100.0;
    }
-   else if (pAction == mpLinear2Action) 
+   else if (pAction == mpLinear2Action)
    {
       eType = LINEAR;
       lower = 2.0;
@@ -3716,4 +3899,116 @@ unsigned int RasterLayerImp::readFilterBuffer(double xCoord, double yCoord, int 
    }
 #endif
    return numElements;
+}
+
+void RasterLayerImp::resetStretchType(const DisplayMode& eMode)
+{
+   UndoGroup group(getView(), "Reset Stretch Type");
+   if (eMode.isValid() == false || eMode == GRAYSCALE_MODE)
+   {
+      setDisplayedBand(GRAY, mOriginalGrayBand, mpOriginalGrayRasterElement.get());
+      setStretchType(GRAYSCALE_MODE, mOriginalGrayStretchType);
+   }
+
+   if (eMode.isValid() == false || eMode == RGB_MODE)
+   {
+      setDisplayedBand(RED, mOriginalRedBand, mpOriginalRedRasterElement.get());
+      setDisplayedBand(GREEN, mOriginalGreenBand, mpOriginalGreenRasterElement.get());
+      setDisplayedBand(BLUE, mOriginalBlueBand, mpOriginalBlueRasterElement.get());
+      setStretchType(RGB_MODE, mOriginalRgbStretchType);
+   }
+}
+
+void RasterLayerImp::resetStretchUnits(const DisplayMode& eMode)
+{
+   UndoGroup group(getView(), "Reset Stretch Units");
+   if (eMode.isValid() == false || eMode == GRAYSCALE_MODE)
+   {
+      setDisplayedBand(GRAY, mOriginalGrayBand, mpOriginalGrayRasterElement.get());
+      setStretchUnits(GRAY, mOriginalGrayscaleStretchUnits);
+   }
+
+   if (eMode.isValid() == false || eMode == RGB_MODE)
+   {
+      setDisplayedBand(RED, mOriginalRedBand, mpOriginalRedRasterElement.get());
+      setStretchUnits(RED, mOriginalRedStretchUnits);
+
+      setDisplayedBand(GREEN, mOriginalGreenBand, mpOriginalGreenRasterElement.get());
+      setStretchUnits(GREEN, mOriginalGreenStretchUnits);
+
+      setDisplayedBand(BLUE, mOriginalBlueBand, mpOriginalBlueRasterElement.get());
+      setStretchUnits(BLUE, mOriginalBlueStretchUnits);
+   }
+}
+
+void RasterLayerImp::resetStretchUnits(const RasterChannelType& eColor)
+{
+   UndoGroup group(getView(), "Reset Stretch Units");
+   if (eColor.isValid() == false || eColor == GRAY)
+   {
+      setDisplayedBand(GRAY, mOriginalGrayBand, mpOriginalGrayRasterElement.get());
+      setStretchUnits(GRAY, mOriginalGrayscaleStretchUnits);
+   }
+
+   if (eColor.isValid() == false || eColor == RED)
+   {
+      setDisplayedBand(RED, mOriginalRedBand, mpOriginalRedRasterElement.get());
+      setStretchUnits(RED, mOriginalRedStretchUnits);
+   }
+
+   if (eColor.isValid() == false || eColor == GREEN)
+   {
+      setDisplayedBand(GREEN, mOriginalGreenBand, mpOriginalGreenRasterElement.get());
+      setStretchUnits(GREEN, mOriginalGreenStretchUnits);
+   }
+
+   if (eColor.isValid() == false || eColor == BLUE)
+   {
+      setDisplayedBand(BLUE, mOriginalBlueBand, mpOriginalBlueRasterElement.get());
+      setStretchUnits(BLUE, mOriginalBlueStretchUnits);
+   }
+}
+
+void RasterLayerImp::resetStretchValues(const RasterChannelType& eColor)
+{
+   UndoGroup group(getView(), "Reset Stretch Values");
+   if (eColor.isValid() == false || eColor == GRAY)
+   {
+      double lower = convertStretchValue(GRAY, RAW_VALUE, mOriginalGrayStretchValues[0], getStretchUnits(GRAY));
+      double upper = convertStretchValue(GRAY, RAW_VALUE, mOriginalGrayStretchValues[1], getStretchUnits(GRAY));
+      setDisplayedBand(GRAY, mOriginalGrayBand);
+      setStretchValues(GRAY, lower, upper);
+   }
+
+   if (eColor.isValid() == false || eColor == RED)
+   {
+      double lower = convertStretchValue(RED, RAW_VALUE, mOriginalRedStretchValues[0], getStretchUnits(RED));
+      double upper = convertStretchValue(RED, RAW_VALUE, mOriginalRedStretchValues[1], getStretchUnits(RED));
+      setDisplayedBand(RED, mOriginalRedBand, mpOriginalRedRasterElement.get());
+      setStretchValues(RED, lower, upper);
+   }
+
+   if (eColor.isValid() == false || eColor == GREEN)
+   {
+      double lower = convertStretchValue(GREEN, RAW_VALUE, mOriginalGreenStretchValues[0], getStretchUnits(GREEN));
+      double upper = convertStretchValue(GREEN, RAW_VALUE, mOriginalGreenStretchValues[1], getStretchUnits(GREEN));
+      setDisplayedBand(GREEN, mOriginalGreenBand, mpOriginalGreenRasterElement.get());
+      setStretchValues(GREEN, lower, upper);
+   }
+
+   if (eColor.isValid() == false || eColor == BLUE)
+   {
+      double lower = convertStretchValue(BLUE, RAW_VALUE, mOriginalBlueStretchValues[0], getStretchUnits(BLUE));
+      double upper = convertStretchValue(BLUE, RAW_VALUE, mOriginalBlueStretchValues[1], getStretchUnits(BLUE));
+      setDisplayedBand(BLUE, mOriginalBlueBand, mpOriginalBlueRasterElement.get());
+      setStretchValues(BLUE, lower, upper);
+   }
+}
+
+void RasterLayerImp::resetStretch()
+{
+   UndoGroup group(getView(), "Reset Stretch");
+   resetStretchType(DisplayMode());
+   resetStretchUnits(RasterChannelType());
+   resetStretchValues(RasterChannelType());
 }

@@ -4191,3 +4191,19 @@ bool SpatialDataViewImp::isSmoothingAvailable() const
 
    return true;
 }
+
+void SpatialDataViewImp::resetStretch()
+{
+   VERIFYNR(mpLayerList != NULL);
+   UndoGroup group(dynamic_cast<View*>(this), "Reset Stretch for Visible Layers");
+   vector<Layer*> layers;
+   mpLayerList->getLayers(RASTER, layers);
+   for (vector<Layer*>::iterator iter = layers.begin(); iter != layers.end(); ++iter)
+   {
+      RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(*iter);
+      if (pRasterLayer != NULL && isLayerDisplayed(pRasterLayer) == true)
+      {
+         pRasterLayer->resetStretch();
+      }
+   }
+}

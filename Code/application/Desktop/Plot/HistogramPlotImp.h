@@ -117,6 +117,8 @@ protected slots:
    void setThresholdMode(QAction* pAction);
    void setStretchMode(QAction* pAction);
    void setStretchUnits(QAction* pAction);
+   void stretchResetThisChannel();
+   void stretchResetAllChannels();
    void setComplexComponent(QAction* pAction);
    void setDisplayedElement(QListWidgetItem* pItem);
    void updateElement();
@@ -189,6 +191,7 @@ private:
    QMenu* mpPassAreaMenu;
    QMenu* mpStretchUnitsMenu;
    QMenu* mpStretchTypeMenu;
+   QMenu* mpStretchResetMenu;
    QMenu* mpElementMenu;
    MenuListWidget* mpElementList;
    QMenu* mpBandMenu;

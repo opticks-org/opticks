@@ -11,6 +11,7 @@
 
 #include <QtGui/QApplication>
 #include <QtGui/QFileDialog>
+#include <QtGui/QIcon>
 #include <QtGui/QInputDialog>
 #include <QtGui/QLayout>
 #include <QtGui/QMessageBox>
@@ -88,6 +89,7 @@ HistogramPlotImp::HistogramPlotImp(const string& id, const string& viewName, QGL
    mpPassAreaMenu(NULL),
    mpStretchUnitsMenu(NULL),
    mpStretchTypeMenu(NULL),
+   mpStretchResetMenu(NULL),
    mpElementMenu(NULL),
    mpElementList(NULL),
    mpBandMenu(NULL),
@@ -110,212 +112,193 @@ HistogramPlotImp::HistogramPlotImp(const string& id, const string& viewName, QGL
 
    // Pass area menu
    mpPassAreaMenu = new QMenu("&PassArea", this);
-   if (mpPassAreaMenu != NULL)
-   {
-      QActionGroup* pPassAreaGroup = new QActionGroup(mpPassAreaMenu);
-      if (pPassAreaGroup != NULL)
-      {
-         pPassAreaGroup->setExclusive(true);
+   QActionGroup* pPassAreaGroup = new QActionGroup(mpPassAreaMenu);
+   pPassAreaGroup->setExclusive(true);
 
-         string passAreaContext = shortcutContext + string("/Threshold Pass Area");
+   string passAreaContext = shortcutContext + string("/Threshold Pass Area");
 
-         mpBelowAction = pPassAreaGroup->addAction("&Below");
-         mpBelowAction->setAutoRepeat(false);
-         mpBelowAction->setCheckable(true);
-         pDesktop->initializeAction(mpBelowAction, passAreaContext);
+   mpBelowAction = pPassAreaGroup->addAction("&Below");
+   mpBelowAction->setAutoRepeat(false);
+   mpBelowAction->setCheckable(true);
+   pDesktop->initializeAction(mpBelowAction, passAreaContext);
 
-         mpAboveAction = pPassAreaGroup->addAction("&Above");
-         mpAboveAction->setAutoRepeat(false);
-         mpAboveAction->setCheckable(true);
-         pDesktop->initializeAction(mpAboveAction, passAreaContext);
+   mpAboveAction = pPassAreaGroup->addAction("&Above");
+   mpAboveAction->setAutoRepeat(false);
+   mpAboveAction->setCheckable(true);
+   pDesktop->initializeAction(mpAboveAction, passAreaContext);
 
-         mpBetweenAction = pPassAreaGroup->addAction("Be&tween");
-         mpBetweenAction->setAutoRepeat(false);
-         mpBetweenAction->setCheckable(true);
-         pDesktop->initializeAction(mpBetweenAction, passAreaContext);
+   mpBetweenAction = pPassAreaGroup->addAction("Be&tween");
+   mpBetweenAction->setAutoRepeat(false);
+   mpBetweenAction->setCheckable(true);
+   pDesktop->initializeAction(mpBetweenAction, passAreaContext);
 
-         mpOutsideAction = pPassAreaGroup->addAction("&Outside");
-         mpOutsideAction->setAutoRepeat(false);
-         mpOutsideAction->setCheckable(true);
-         pDesktop->initializeAction(mpOutsideAction, passAreaContext);
+   mpOutsideAction = pPassAreaGroup->addAction("&Outside");
+   mpOutsideAction->setAutoRepeat(false);
+   mpOutsideAction->setCheckable(true);
+   pDesktop->initializeAction(mpOutsideAction, passAreaContext);
 
-         mpPassAreaMenu->addActions(pPassAreaGroup->actions());
-         VERIFYNR(connect(pPassAreaGroup, SIGNAL(triggered(QAction*)), this, SLOT(setThresholdMode(QAction*))));
-      }
-   }
+   mpPassAreaMenu->addActions(pPassAreaGroup->actions());
+   VERIFYNR(connect(pPassAreaGroup, SIGNAL(triggered(QAction*)), this, SLOT(setThresholdMode(QAction*))));
 
    // Stretch type menu
    mpStretchTypeMenu = new QMenu("Stretch &Type", this);
-   if (mpStretchTypeMenu != NULL)
-   {
-      QActionGroup* pStretchTypeGroup = new QActionGroup(mpStretchTypeMenu);
-      if (pStretchTypeGroup != NULL)
-      {
-         pStretchTypeGroup->setExclusive(true);
+   QActionGroup* pStretchTypeGroup = new QActionGroup(mpStretchTypeMenu);
+   pStretchTypeGroup->setExclusive(true);
 
-         string stretchTypeContext = shortcutContext + string("/Stretch Type");
+   string stretchTypeContext = shortcutContext + string("/Stretch Type");
 
-         mpLinearAction = pStretchTypeGroup->addAction("&Linear");
-         mpLinearAction->setAutoRepeat(false);
-         mpLinearAction->setCheckable(true);
-         pDesktop->initializeAction(mpLinearAction, stretchTypeContext);
+   mpLinearAction = pStretchTypeGroup->addAction("&Linear");
+   mpLinearAction->setAutoRepeat(false);
+   mpLinearAction->setCheckable(true);
+   pDesktop->initializeAction(mpLinearAction, stretchTypeContext);
 
-         mpExponentialAction = pStretchTypeGroup->addAction("&Exponential");
-         mpExponentialAction->setAutoRepeat(false);
-         mpExponentialAction->setCheckable(true);
-         pDesktop->initializeAction(mpExponentialAction, stretchTypeContext);
+   mpExponentialAction = pStretchTypeGroup->addAction("&Exponential");
+   mpExponentialAction->setAutoRepeat(false);
+   mpExponentialAction->setCheckable(true);
+   pDesktop->initializeAction(mpExponentialAction, stretchTypeContext);
 
-         mpLogarithmicAction = pStretchTypeGroup->addAction("L&ogarithmic");
-         mpLogarithmicAction->setAutoRepeat(false);
-         mpLogarithmicAction->setCheckable(true);
-         pDesktop->initializeAction(mpLogarithmicAction, stretchTypeContext);
+   mpLogarithmicAction = pStretchTypeGroup->addAction("L&ogarithmic");
+   mpLogarithmicAction->setAutoRepeat(false);
+   mpLogarithmicAction->setCheckable(true);
+   pDesktop->initializeAction(mpLogarithmicAction, stretchTypeContext);
 
-         mpEqualizationAction = pStretchTypeGroup->addAction("H&istogram Equalization");
-         mpEqualizationAction->setAutoRepeat(false);
-         mpEqualizationAction->setCheckable(true);
-         pDesktop->initializeAction(mpEqualizationAction, stretchTypeContext);
+   mpEqualizationAction = pStretchTypeGroup->addAction("H&istogram Equalization");
+   mpEqualizationAction->setAutoRepeat(false);
+   mpEqualizationAction->setCheckable(true);
+   pDesktop->initializeAction(mpEqualizationAction, stretchTypeContext);
 
-         mpStretchTypeMenu->addActions(pStretchTypeGroup->actions());
-         VERIFYNR(connect(pStretchTypeGroup, SIGNAL(triggered(QAction*)), this, SLOT(setStretchMode(QAction*))));
-      }
-   }
+   mpStretchTypeMenu->addActions(pStretchTypeGroup->actions());
+   VERIFYNR(connect(pStretchTypeGroup, SIGNAL(triggered(QAction*)), this, SLOT(setStretchMode(QAction*))));
 
    // Stretch units menu
    mpStretchUnitsMenu = new QMenu("Stretch &Units", this);
-   if (mpStretchUnitsMenu != NULL)
-   {
-      QActionGroup* pStretchUnitsGroup = new QActionGroup(mpStretchUnitsMenu);
-      if (pStretchUnitsGroup != NULL)
-      {
-         pStretchUnitsGroup->setExclusive(true);
+   QActionGroup* pStretchUnitsGroup = new QActionGroup(mpStretchUnitsMenu);
+   pStretchUnitsGroup->setExclusive(true);
 
-         string stretchUnitsContext = shortcutContext + string("/Stretch Units");
+   string stretchUnitsContext = shortcutContext + string("/Stretch Units");
 
-         mpRawAction = pStretchUnitsGroup->addAction("&Raw Values");
-         mpRawAction->setAutoRepeat(false);
-         mpRawAction->setCheckable(true);
-         pDesktop->initializeAction(mpRawAction, stretchUnitsContext);
+   mpRawAction = pStretchUnitsGroup->addAction("&Raw Values");
+   mpRawAction->setAutoRepeat(false);
+   mpRawAction->setCheckable(true);
+   pDesktop->initializeAction(mpRawAction, stretchUnitsContext);
 
-         mpPercentageAction = pStretchUnitsGroup->addAction("Percenta&ge");
-         mpPercentageAction->setAutoRepeat(false);
-         mpPercentageAction->setCheckable(true);
-         pDesktop->initializeAction(mpPercentageAction, stretchUnitsContext);
+   mpPercentageAction = pStretchUnitsGroup->addAction("Percenta&ge");
+   mpPercentageAction->setAutoRepeat(false);
+   mpPercentageAction->setCheckable(true);
+   pDesktop->initializeAction(mpPercentageAction, stretchUnitsContext);
 
-         mpPercentileAction = pStretchUnitsGroup->addAction("Percenti&le");
-         mpPercentileAction->setAutoRepeat(false);
-         mpPercentileAction->setCheckable(true);
-         pDesktop->initializeAction(mpPercentileAction, stretchUnitsContext);
+   mpPercentileAction = pStretchUnitsGroup->addAction("Percenti&le");
+   mpPercentileAction->setAutoRepeat(false);
+   mpPercentileAction->setCheckable(true);
+   pDesktop->initializeAction(mpPercentileAction, stretchUnitsContext);
 
-         mpStdDevAction = pStretchUnitsGroup->addAction("&Standard Deviation");
-         mpStdDevAction->setAutoRepeat(false);
-         mpStdDevAction->setCheckable(true);
-         pDesktop->initializeAction(mpStdDevAction, stretchUnitsContext);
+   mpStdDevAction = pStretchUnitsGroup->addAction("&Standard Deviation");
+   mpStdDevAction->setAutoRepeat(false);
+   mpStdDevAction->setCheckable(true);
+   pDesktop->initializeAction(mpStdDevAction, stretchUnitsContext);
 
-         mpStretchUnitsMenu->addActions(pStretchUnitsGroup->actions());
-         VERIFYNR(connect(pStretchUnitsGroup, SIGNAL(triggered(QAction*)), this, SLOT(setStretchUnits(QAction*))));
-      }
-   }
+   mpStretchUnitsMenu->addActions(pStretchUnitsGroup->actions());
+   VERIFYNR(connect(pStretchUnitsGroup, SIGNAL(triggered(QAction*)), this, SLOT(setStretchUnits(QAction*))));
+
+   // Stretch menu
+   mpStretchResetMenu = new QMenu("Stretch &Reset", this);
+   string stretchResetContext = shortcutContext + string("/Stretch Reset");
+
+   QAction* pResetThisChannelAction = mpStretchResetMenu->addAction("&This Channel");
+   pResetThisChannelAction->setAutoRepeat(false);
+   pDesktop->initializeAction(pResetThisChannelAction, stretchResetContext);
+   VERIFYNR(connect(pResetThisChannelAction, SIGNAL(triggered()), this, SLOT(stretchResetThisChannel())));
+
+   QAction* pResetAllChannelsAction = mpStretchResetMenu->addAction(QIcon(":/icons/ResetStretch"), "&All Channels");
+   pResetAllChannelsAction->setAutoRepeat(false);
+   pDesktop->initializeAction(pResetAllChannelsAction, stretchResetContext);
+   VERIFYNR(connect(pResetAllChannelsAction, SIGNAL(triggered()), this, SLOT(stretchResetAllChannels())));
 
    // Complex data menu
    mpComplexDataMenu = new QMenu("Comple&x Data", this);
-   if (mpComplexDataMenu != NULL)
-   {
-      QActionGroup* pComplexDataGroup = new QActionGroup(mpComplexDataMenu);
-      if (pComplexDataGroup != NULL)
-      {
-         pComplexDataGroup->setExclusive(true);
+   QActionGroup* pComplexDataGroup = new QActionGroup(mpComplexDataMenu);
+   pComplexDataGroup->setExclusive(true);
 
-         string complexDataContext = shortcutContext + string("/Complex Data");
+   string complexDataContext = shortcutContext + string("/Complex Data");
 
-         mpMagnitudeAction = pComplexDataGroup->addAction("&Magnitude");
-         mpMagnitudeAction->setAutoRepeat(false);
-         mpMagnitudeAction->setCheckable(true);
-         pDesktop->initializeAction(mpMagnitudeAction, complexDataContext);
+   mpMagnitudeAction = pComplexDataGroup->addAction("&Magnitude");
+   mpMagnitudeAction->setAutoRepeat(false);
+   mpMagnitudeAction->setCheckable(true);
+   pDesktop->initializeAction(mpMagnitudeAction, complexDataContext);
 
-         mpPhaseAction = pComplexDataGroup->addAction("&Phase");
-         mpPhaseAction->setAutoRepeat(false);
-         mpPhaseAction->setCheckable(true);
-         pDesktop->initializeAction(mpPhaseAction, complexDataContext);
+   mpPhaseAction = pComplexDataGroup->addAction("&Phase");
+   mpPhaseAction->setAutoRepeat(false);
+   mpPhaseAction->setCheckable(true);
+   pDesktop->initializeAction(mpPhaseAction, complexDataContext);
 
-         mpInPhaseAction = pComplexDataGroup->addAction("&In-Phase");
-         mpInPhaseAction->setAutoRepeat(false);
-         mpInPhaseAction->setCheckable(true);
-         pDesktop->initializeAction(mpInPhaseAction, complexDataContext);
+   mpInPhaseAction = pComplexDataGroup->addAction("&In-Phase");
+   mpInPhaseAction->setAutoRepeat(false);
+   mpInPhaseAction->setCheckable(true);
+   pDesktop->initializeAction(mpInPhaseAction, complexDataContext);
 
-         mpQuadratureAction = pComplexDataGroup->addAction("&Quadrature");
-         mpQuadratureAction->setAutoRepeat(false);
-         mpQuadratureAction->setCheckable(true);
-         pDesktop->initializeAction(mpQuadratureAction, complexDataContext);
+   mpQuadratureAction = pComplexDataGroup->addAction("&Quadrature");
+   mpQuadratureAction->setAutoRepeat(false);
+   mpQuadratureAction->setCheckable(true);
+   pDesktop->initializeAction(mpQuadratureAction, complexDataContext);
 
-         mpComplexDataMenu->addActions(pComplexDataGroup->actions());
-         VERIFYNR(connect(pComplexDataGroup, SIGNAL(triggered(QAction*)), this, SLOT(setComplexComponent(QAction*))));
-      }
-   }
+   mpComplexDataMenu->addActions(pComplexDataGroup->actions());
+   VERIFYNR(connect(pComplexDataGroup, SIGNAL(triggered(QAction*)), this, SLOT(setComplexComponent(QAction*))));
 
    // Colormap menu
    mpColorMapMenu = new QMenu("&Color Map", this);
-   if (mpColorMapMenu != NULL)
-   {
-      QAction* pColorMapLoadAction = mpColorMapMenu->addAction("&Load Color Map...", this, SLOT(setColorMapFromFile()));
-      pColorMapLoadAction->setAutoRepeat(false);
-      pColorMapLoadAction->setStatusTip("Sets the color map of a raster layer from a file");
-      pDesktop->initializeAction(pColorMapLoadAction, shortcutContext);
+   QAction* pColorMapLoadAction = mpColorMapMenu->addAction("&Load Color Map...", this, SLOT(setColorMapFromFile()));
+   pColorMapLoadAction->setAutoRepeat(false);
+   pColorMapLoadAction->setStatusTip("Sets the color map of a raster layer from a file");
+   pDesktop->initializeAction(pColorMapLoadAction, shortcutContext);
 
-      QAction* pColorMapSaveAction = mpColorMapMenu->addAction("&Save Color Map...", this,
-         SLOT(saveColorMapToFile()));
-      pColorMapSaveAction->setAutoRepeat(false);
-      pColorMapSaveAction->setStatusTip("Saves the color map of a raster layer to a file");
-      pDesktop->initializeAction(pColorMapSaveAction, shortcutContext);
+   QAction* pColorMapSaveAction = mpColorMapMenu->addAction("&Save Color Map...", this,
+      SLOT(saveColorMapToFile()));
+   pColorMapSaveAction->setAutoRepeat(false);
+   pColorMapSaveAction->setStatusTip("Saves the color map of a raster layer to a file");
+   pDesktop->initializeAction(pColorMapSaveAction, shortcutContext);
 
-      QAction* pColorMapCreateAction = mpColorMapMenu->addAction("&Create/Edit Color Map...", this,
-         SLOT(createColorMap()));
-      pColorMapCreateAction->setAutoRepeat(false);
-      pColorMapCreateAction->setStatusTip("Creates a new color map or edits an existing one");
-      pDesktop->initializeAction(pColorMapCreateAction, shortcutContext);
+   QAction* pColorMapCreateAction = mpColorMapMenu->addAction("&Create/Edit Color Map...", this,
+      SLOT(createColorMap()));
+   pColorMapCreateAction->setAutoRepeat(false);
+   pColorMapCreateAction->setStatusTip("Creates a new color map or edits an existing one");
+   pDesktop->initializeAction(pColorMapCreateAction, shortcutContext);
 
-      mpColorMapMenu->addSeparator();
+   mpColorMapMenu->addSeparator();
 
-      mpColorMapList = new MenuListWidget(mpColorMapMenu);
-      mpColorMapList->setSelectionMode(QAbstractItemView::SingleSelection);
-      preloadColormaps();
-      VERIFYNR(connect(mpColorMapList, SIGNAL(itemClicked(QListWidgetItem*)), this,
-         SLOT(setPreloadedColorMap(QListWidgetItem*))));
+   mpColorMapList = new MenuListWidget(mpColorMapMenu);
+   mpColorMapList->setSelectionMode(QAbstractItemView::SingleSelection);
+   preloadColormaps();
+   VERIFYNR(connect(mpColorMapList, SIGNAL(itemClicked(QListWidgetItem*)), this,
+      SLOT(setPreloadedColorMap(QListWidgetItem*))));
 
-      QWidgetAction* pListAction = new QWidgetAction(mpColorMapMenu);
-      pListAction->setDefaultWidget(mpColorMapList);
-      mpColorMapMenu->addAction(pListAction);
-   }
+   QWidgetAction* pColorMapListAction = new QWidgetAction(mpColorMapMenu);
+   pColorMapListAction->setDefaultWidget(mpColorMapList);
+   mpColorMapMenu->addAction(pColorMapListAction);
 
    // Displayed element menu
    mpElementMenu = new QMenu("Displayed &Element", this);
-   if (mpElementMenu != NULL)
-   {
-      mpElementList = new MenuListWidget(mpElementMenu);
-      mpElementList->setSelectionMode(QAbstractItemView::SingleSelection);
-      VERIFYNR(connect(mpElementList, SIGNAL(itemClicked(QListWidgetItem*)), this,
-         SLOT(setDisplayedElement(QListWidgetItem*))));
+   mpElementList = new MenuListWidget(mpElementMenu);
+   mpElementList->setSelectionMode(QAbstractItemView::SingleSelection);
+   VERIFYNR(connect(mpElementList, SIGNAL(itemClicked(QListWidgetItem*)), this,
+      SLOT(setDisplayedElement(QListWidgetItem*))));
 
-      QWidgetAction* pListAction = new QWidgetAction(mpElementMenu);
-      pListAction->setDefaultWidget(mpElementList);
-      mpElementMenu->addAction(pListAction);
+   QWidgetAction* pElementListAction = new QWidgetAction(mpElementMenu);
+   pElementListAction->setDefaultWidget(mpElementList);
+   mpElementMenu->addAction(pElementListAction);
 
-      VERIFYNR(connect(mpElementMenu, SIGNAL(aboutToShow()), this, SLOT(initializeElementList())));
-   }
+   VERIFYNR(connect(mpElementMenu, SIGNAL(aboutToShow()), this, SLOT(initializeElementList())));
 
    // Band menu
    mpBandMenu = new QMenu("Displayed &Band", this);
-   if (mpBandMenu != NULL)
-   {
-      mpBandList = new MenuListWidget(mpBandMenu);
-      mpBandList->setSelectionMode(QAbstractItemView::SingleSelection);
-      VERIFYNR(connect(mpBandList, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(setBand(QListWidgetItem*))));
+   mpBandList = new MenuListWidget(mpBandMenu);
+   mpBandList->setSelectionMode(QAbstractItemView::SingleSelection);
+   VERIFYNR(connect(mpBandList, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(setBand(QListWidgetItem*))));
 
-      QWidgetAction* pListAction = new QWidgetAction(mpBandMenu);
-      pListAction->setDefaultWidget(mpBandList);
-      mpBandMenu->addAction(pListAction);
+   QWidgetAction* pBandListAction = new QWidgetAction(mpBandMenu);
+   pBandListAction->setDefaultWidget(mpBandList);
+   mpBandMenu->addAction(pBandListAction);
 
-      VERIFYNR(connect(mpBandMenu, SIGNAL(aboutToShow()), this, SLOT(initializeBandList())));
-   }
+   VERIFYNR(connect(mpBandMenu, SIGNAL(aboutToShow()), this, SLOT(initializeBandList())));
 
    // Save histogram action
    mpSaveAction = new QAction(QIcon(":/icons/SaveHistogram"), "&Save...", this);
@@ -518,6 +501,12 @@ list<ContextMenuAction> HistogramPlotImp::getContextMenuActions() const
       regionUnitsAction.mBuddyType = ContextMenuAction::BEFORE;
       regionUnitsAction.mBuddyId = beforeId;
       menuActions.push_back(regionUnitsAction);
+
+      ContextMenuAction stretchResetAction(mpStretchResetMenu->menuAction(),
+         APP_HISTOGRAMPLOT_STRETCH_RESET_MENU_ACTION);
+      stretchResetAction.mBuddyType = ContextMenuAction::BEFORE;
+      stretchResetAction.mBuddyId = beforeId;
+      menuActions.push_back(stretchResetAction);
 
       ContextMenuAction elementMenuAction(mpElementMenu->menuAction(), APP_HISTOGRAMPLOT_ELEMENT_MENU_ACTION);
       elementMenuAction.mBuddyType = ContextMenuAction::BEFORE;
@@ -2052,7 +2041,7 @@ bool HistogramPlotImp::setColorMapFromFile(const QString& filename)
       pRasterLayer->setColorMap(colorMap.getName(), colorMap.getTable());
       return true;
    }
-   catch (std::exception)
+   catch (const std::exception&)
    {
       QMessageBox::critical(this, "Bad Color Table",
          QString("The file selected was not a valid %1 color table file").arg(APP_NAME));
@@ -2216,6 +2205,26 @@ void HistogramPlotImp::setStretchUnits(QAction* pAction)
       }
 
       pThresholdLayer->setRegionUnits(regionUnits);
+   }
+}
+
+void HistogramPlotImp::stretchResetThisChannel()
+{
+   RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(mpLayer.get());
+   if (pRasterLayer != NULL)
+   {
+      pRasterLayer->resetStretchType(mRasterChannelType == GRAY ? GRAYSCALE_MODE : RGB_MODE);
+      pRasterLayer->resetStretchUnits(mRasterChannelType);
+      pRasterLayer->resetStretchValues(mRasterChannelType);
+   }
+}
+
+void HistogramPlotImp::stretchResetAllChannels()
+{
+   RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(mpLayer.get());
+   if (pRasterLayer != NULL)
+   {
+      pRasterLayer->resetStretch();
    }
 }
 

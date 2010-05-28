@@ -828,6 +828,16 @@ public:
     */
    virtual Animation* createDefaultAnimation() = 0;
 
+   /**
+    *  Resets the stretch type, units, values, and displayed band(s)
+    *  for all channels in all visible raster layers back to those used when the layer was created.
+    *
+    *  @notify This method may notify the same signals as RasterLayer::resetStretch() for each visible RasterLayer.
+    *
+    *  @see    RasterLayer::resetStretch()
+    */
+   virtual void resetStretch() = 0;
+
 protected:
    /**
     * This should be destroyed by calling DesktopServices::deleteView.

@@ -162,6 +162,7 @@
  *    <tr><td>Separator</td><td>APP_HISTOGRAMPLOT_RASTER_SEPARATOR_ACTION()</td></tr>
  *    <tr><td>Spatial Sampling</td><td>APP_HISTOGRAMPLOT_SAMPLING_ACTION()</td></tr>
  *    <tr><td>Save</td><td>APP_HISTOGRAMPLOT_SAVE_ACTION()</td></tr>
+ *    <tr><td>Stretch reset menu</td><td>APP_HISTOGRAMPLOT_STRETCH_RESET_MENU_ACTION()</td></tr>
  *    <tr><td>Stretch type menu</td><td>APP_HISTOGRAMPLOT_STRETCH_TYPE_MENU_ACTION()</td></tr>
  *    <tr><td>Synchronize auto zoom</td><td>APP_HISTOGRAMPLOT_SYNCHRONIZE_AUTO_ZOOM_ACTION()</td></tr>
  *    <tr><td>Separator</td><td>APP_HISTOGRAMPLOT_THRESHOLD_SEPARATOR_ACTION()</td></tr>
