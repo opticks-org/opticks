@@ -18,12 +18,15 @@ class GdalRasterPager : public CachedPager
 public:
    GdalRasterPager();
    virtual ~GdalRasterPager();
+   virtual bool getInputSpecification(PlugInArgList*& pArgList);
+   virtual bool parseInputArgs(PlugInArgList* pInputArgList);
 
 private:
    virtual bool openFile(const std::string& filename);
    virtual CachedPage::UnitPtr fetchUnit(DataRequest* pOriginalRequest);
 
    std::auto_ptr<GDALDataset> mpDataset;
+   std::string mDatasetName;
 };
 
 #endif

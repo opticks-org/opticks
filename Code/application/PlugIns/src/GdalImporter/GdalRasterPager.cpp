@@ -95,9 +95,33 @@ GdalRasterPager::~GdalRasterPager()
 {
 }
 
+bool GdalRasterPager::getInputSpecification(PlugInArgList*& pArgList)
+{
+   if (!CachedPager::getInputSpecification(pArgList))
+   {
+      return false;
+   }
+   VERIFY(pArgList->addArg<std::string>("DatasetName"));
+
+   return true;
+}
+
+bool GdalRasterPager::parseInputArgs(PlugInArgList *pInputArgList)
+{
+   if (!CachedPager::parseInputArgs(pInputArgList))
+   {
+      return false;
+   }
+   if (!pInputArgList->getPlugInArgValue("DatasetName", mDatasetName))
+   {
+      return false;
+   }
+   return true;
+}
+
 bool GdalRasterPager::openFile(const std::string& filename)
 {
-   mpDataset.reset(reinterpret_cast<GDALDataset*>(GDALOpen(filename.c_str(), GA_ReadOnly)));
+   mpDataset.reset(reinterpret_cast<GDALDataset*>(GDALOpen(mDatasetName.c_str(), GA_ReadOnly)));
    return mpDataset.get() != NULL;
 }
 

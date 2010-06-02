@@ -77,15 +77,31 @@ FilePlugInDlg::FilePlugInDlg(const vector<PlugInDescriptor*>& availablePlugins, 
       QString strPlugIn = QString::fromStdString(pDescriptor->getName());
       QStringList filterList;
 
-      // Add the file filters to the list
+      // Add the file filters to the list.
+      // This will remove duplicate entries and sort alphanumerically.
+      // An "All Files" entry will be added to the end of the list.
+      // If a special "All Opticks Files" entry is at the beginning, it will
+      // stay there instead of being sorted.
+      QString initialFilter;
       string filters = pDescriptor->getFileExtensions();
       if (filters.empty() == false)
       {
          QString strFilters = QString::fromStdString(filters);
          filterList = strFilters.split(";;", QString::SkipEmptyParts);
+         filterList.removeDuplicates();
+         if (filterList[0].startsWith("All Opticks Files"))
+         {
+            initialFilter = filterList[0];
+            filterList.pop_front();
+         }
+         filterList.sort();
       }
 
       filterList.append("All Files (*)");
+      if (!initialFilter.isEmpty())
+      {
+         filterList.prepend(initialFilter);
+      }
       mPlugInFilters.insert(strPlugIn, filterList);
 
       // Add the plug-in to the combo

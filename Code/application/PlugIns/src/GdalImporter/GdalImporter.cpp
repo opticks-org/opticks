@@ -109,9 +109,26 @@ GdalImporter::GdalImporter()
 "LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING"
 "FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER"
 "DEALINGS IN THE SOFTWARE.</p>");
+   addDependencyCopyright("CURL", "<p>COPYRIGHT AND PERMISSION NOTICE</p>"
+"<p>Copyright (c) 1996 - 2010, Daniel Stenberg, <daniel@haxx.se>.</p>"
+"<p>All rights reserved.</p>"
+"<p>Permission to use, copy, modify, and distribute this software for any purpose"
+"with or without fee is hereby granted, provided that the above copyright"
+"notice and this permission notice appear in all copies.</p>"
+"<p>THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR"
+"IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,"
+"FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF THIRD PARTY RIGHTS. IN"
+"NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,"
+"DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR"
+"OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE"
+"OR OTHER DEALINGS IN THE SOFTWARE.</p>"
+"<p>Except as contained in this notice, the name of a copyright holder shall not"
+"be used in advertising or otherwise to promote the sale, use or other dealings"
+"in this Software without prior written authorization of the copyright holder.</p>");
 
    GDALAllRegister();
    std::string desc = "Import files using the GDAL library. The following file types are supported:\n";
+   std::string extensions;
    GDALDriverManager* pManager = GetGDALDriverManager();
    if (pManager != NULL)
    {
@@ -129,10 +146,29 @@ GdalImporter::GdalImporter()
                desc += ", ";
             }
             desc += pDriver->GetDescription();
+
+            const char* pExt = pDriver->GetMetadataItem("DMD_EXTENSION");
+            const char* pLongName = pDriver->GetMetadataItem("DMD_LONGNAME");
+            if (pExt != NULL && pExt[0] != '\0')
+            {
+               if (!extensions.empty())
+               {
+                  extensions += ";;";
+               }
+               if (pLongName != NULL)
+               {
+                  extensions += std::string(pLongName) + " Files (*." + std::string(pExt) + ")";
+               }
+               else
+               {
+                  extensions += std::string(pDriver->GetDescription()) + " Files (*." + std::string(pExt) + ")";
+               }
+            }
          }
       }
    }
    setDescription(desc);
+   setExtensions(extensions);
 }
 
 GdalImporter::~GdalImporter()
@@ -145,79 +181,113 @@ std::vector<ImportDescriptor*> GdalImporter::getImportDescriptors(const std::str
    mWarnings.clear();
    std::vector<ImportDescriptor*> descriptors;
 
-   std::auto_ptr<GDALDataset> pDataset(reinterpret_cast<GDALDataset*>(GDALOpen(filename.c_str(), GA_ReadOnly)));
-   if (pDataset.get() == NULL)
-   {
-      mErrors.push_back("GDAL does not recognize the dataset");
-      return descriptors;
-   }
-   ImportDescriptorResource pImportDescriptor(filename, TypeConverter::toString<RasterElement>());
-   descriptors.push_back(pImportDescriptor.release());
-
-   GDALDataType rawType = pDataset->GetRasterBand(1)->GetRasterDataType();
-   EncodingType encoding = gdalDataTypeToEncodingType(rawType);
-   if (!encoding.isValid())
-   {
-      mErrors.push_back(std::string("Unsupported data type ") + GDALGetDataTypeName(rawType));
-      // continue so we get more errors and have an ImportDescriptor so this error is displayed to the user
-   }
-   else if (rawType == GDT_CFloat64)
-   {
-      mWarnings.push_back("64-bit Complex float not fully supported. Data will be loaded but may be truncated.");
-   }
-   pImportDescriptor->setDataDescriptor(RasterUtilities::generateRasterDataDescriptor(
-      filename, NULL, pDataset->GetRasterYSize(), pDataset->GetRasterXSize(), pDataset->GetRasterCount(),
-      BSQ, encoding, IN_MEMORY));
-   RasterFileDescriptor* pFileDesc = 
-      dynamic_cast<RasterFileDescriptor*>(RasterUtilities::generateAndSetFileDescriptor(
-      pImportDescriptor->getDataDescriptor(), filename, "", Endian::getSystemEndian()));
-
-   if (pFileDesc != NULL && pDataset->GetGCPCount() > 0)
-   {
-      std::list<GcpPoint> gcps;
-      const GDAL_GCP *pGcps = pDataset->GetGCPs();
-      for (int gcpnum = 0; gcpnum < pDataset->GetGCPCount(); gcpnum++)
+   std::vector<std::string> datasetNames;
+   { // scope auto_ptr
+      std::auto_ptr<GDALDataset> pDataset(reinterpret_cast<GDALDataset*>(GDALOpen(filename.c_str(), GA_ReadOnly)));
+      if (pDataset.get() == NULL)
       {
-         GcpPoint gcp;
-         gcp.mPixel.mX = pGcps[gcpnum].dfGCPPixel;
-         gcp.mPixel.mY = pGcps[gcpnum].dfGCPLine;
-         gcp.mCoordinate.mX = pGcps[gcpnum].dfGCPX;
-         gcp.mCoordinate.mY = pGcps[gcpnum].dfGCPY;
-         gcps.push_back(gcp);
+         mErrors.push_back("GDAL does not recognize the dataset");
+         return descriptors;
       }
-      pFileDesc->setGcps(gcps);
-   }
-
-   DynamicObject* pMetadata = pImportDescriptor->getDataDescriptor()->getMetadata();
-   VERIFYRV(pMetadata, descriptors);
-   char** pDatasetMetadata = pDataset->GetMetadata();
-   if (pDatasetMetadata != NULL)
-   {
-      for (size_t idx = 0; pDatasetMetadata[idx] != NULL; idx++)
+      char** pSubdatasetMetadata = pDataset->GetMetadata("SUBDATASETS");
+      if (pSubdatasetMetadata != NULL)
       {
-         std::string entry(pDatasetMetadata[idx]);
-         std::vector<std::string> kvpair = StringUtilities::split(entry, '=');
-         if (kvpair.size() == 1)
+         for (size_t idx = 0; pSubdatasetMetadata[idx] != NULL; idx++)
          {
-            kvpair.push_back("");
-         }
-         if (kvpair.front() == SPECIAL_METADATA_NAME)
-         {
-            // don't want to accidentally set the special metadata dynamic object to some other type
-            pMetadata->setAttribute(std::string("GDAL ") + SPECIAL_METADATA_NAME, kvpair.back());
-         }
-         else if (kvpair.front() == "Projection")
-         {
-            // we explicitly add this below...don't overwrite it
-            pMetadata->setAttribute("GDAL Projection", kvpair.back());
-         }
-         else
-         {
-            pMetadata->setAttribute(kvpair.front(), kvpair.back());
+            std::string entry(pSubdatasetMetadata[idx]);
+            std::vector<std::string> kvpair = StringUtilities::split(entry, '=');
+            if (kvpair.size() == 1)
+            {
+               kvpair.push_back("");
+            }
+            if (kvpair.front().substr(kvpair.front().size() - 4) == "NAME")
+            {
+               datasetNames.push_back(kvpair.back());
+            }
          }
       }
+      if (datasetNames.empty())
+      {
+         datasetNames.push_back(filename);
+      }
    }
-   pMetadata->setAttribute("Projection", std::string(pDataset->GetProjectionRef()));
+   for (std::vector<std::string>::const_iterator dsname = datasetNames.begin();
+        dsname != datasetNames.end(); ++dsname)
+   {
+      std::auto_ptr<GDALDataset> pDataset(reinterpret_cast<GDALDataset*>(GDALOpen(dsname->c_str(), GA_ReadOnly)));
+      if (pDataset.get() == NULL)
+      {
+         mWarnings.push_back("GDAL does not recognize the dataset");
+         continue;
+      }
+
+      ImportDescriptorResource pImportDescriptor(*dsname, TypeConverter::toString<RasterElement>());
+      descriptors.push_back(pImportDescriptor.release());
+
+      GDALDataType rawType = pDataset->GetRasterBand(1)->GetRasterDataType();
+      EncodingType encoding = gdalDataTypeToEncodingType(rawType);
+      if (!encoding.isValid())
+      {
+         mWarnings.push_back(std::string("Unsupported data type ") + GDALGetDataTypeName(rawType));
+         // continue so we get more errors and have an ImportDescriptor so this error is displayed to the user
+      }
+      else if (rawType == GDT_CFloat64)
+      {
+         mWarnings.push_back("64-bit Complex float not fully supported. Data will be loaded but may be truncated.");
+      }
+      pImportDescriptor->setDataDescriptor(RasterUtilities::generateRasterDataDescriptor(
+         *dsname, NULL, pDataset->GetRasterYSize(), pDataset->GetRasterXSize(), pDataset->GetRasterCount(),
+         BSQ, encoding, IN_MEMORY));
+      RasterFileDescriptor* pFileDesc = 
+         dynamic_cast<RasterFileDescriptor*>(RasterUtilities::generateAndSetFileDescriptor(
+         pImportDescriptor->getDataDescriptor(), filename, *dsname, Endian::getSystemEndian()));
+      if (pFileDesc != NULL && pDataset->GetGCPCount() > 0)
+      {
+         std::list<GcpPoint> gcps;
+         const GDAL_GCP *pGcps = pDataset->GetGCPs();
+         for (int gcpnum = 0; gcpnum < pDataset->GetGCPCount(); gcpnum++)
+         {
+            GcpPoint gcp;
+            gcp.mPixel.mX = pGcps[gcpnum].dfGCPPixel;
+            gcp.mPixel.mY = pGcps[gcpnum].dfGCPLine;
+            gcp.mCoordinate.mX = pGcps[gcpnum].dfGCPX;
+            gcp.mCoordinate.mY = pGcps[gcpnum].dfGCPY;
+            gcps.push_back(gcp);
+         }
+         pFileDesc->setGcps(gcps);
+      }
+
+      DynamicObject* pMetadata = pImportDescriptor->getDataDescriptor()->getMetadata();
+      VERIFYRV(pMetadata, descriptors);
+      char** pDatasetMetadata = pDataset->GetMetadata();
+      if (pDatasetMetadata != NULL)
+      {
+         for (size_t idx = 0; pDatasetMetadata[idx] != NULL; idx++)
+         {
+            std::string entry(pDatasetMetadata[idx]);
+            std::vector<std::string> kvpair = StringUtilities::split(entry, '=');
+            if (kvpair.size() == 1)
+            {
+               kvpair.push_back("");
+            }
+            if (kvpair.front() == SPECIAL_METADATA_NAME)
+            {
+               // don't want to accidentally set the special metadata dynamic object to some other type
+               pMetadata->setAttribute(std::string("GDAL ") + SPECIAL_METADATA_NAME, kvpair.back());
+            }
+            else if (kvpair.front() == "Projection")
+            {
+               // we explicitly add this below...don't overwrite it
+               pMetadata->setAttribute("GDAL Projection", kvpair.back());
+            }
+            else
+            {
+               pMetadata->setAttribute(kvpair.front(), kvpair.back());
+            }
+         }
+      }
+      pMetadata->setAttribute("Projection", std::string(pDataset->GetProjectionRef()));
+   }
 
    return descriptors;
 }
@@ -299,6 +369,7 @@ bool GdalImporter::createRasterPager(RasterElement* pRaster) const
    VERIFY(pFileDescriptor != NULL);
 
    std::string filename = pRaster->getFilename();
+   std::string datasetName = pFileDescriptor->getDatasetLocation();
    Progress *pProgress = getProgress();
 
    FactoryResource<Filename> pFilename;
@@ -307,6 +378,7 @@ bool GdalImporter::createRasterPager(RasterElement* pRaster) const
    ExecutableResource pagerPlugIn("GDAL Raster Pager", std::string(), pProgress);
    pagerPlugIn->getInArgList().setPlugInArgValue(CachedPager::PagedElementArg(), pRaster);
    pagerPlugIn->getInArgList().setPlugInArgValue(CachedPager::PagedFilenameArg(), pFilename.get());
+   pagerPlugIn->getInArgList().setPlugInArgValue("DatasetName", &datasetName);
 
    bool success = pagerPlugIn->execute();
 

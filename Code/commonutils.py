@@ -129,7 +129,6 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
             plat_dir = "solaris-sparc"
         else:
             plat_dir = "linux-x86_64"
-            la("gdal/lib/%s/libgdal.so.1" % (plat_dir))
             la("Cg/lib/%s/libCg.so" % (plat_dir))
             la("Cg/lib/%s/libCgGL.so" % (plat_dir))
             la("glew/lib/%s/libGLEW.so.1.3" % (plat_dir))
@@ -189,14 +188,15 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
         ds(r"ehs\bin", ["ehs"], "d.dll", ".dll")
         ds(r"raptor\bin", ["raptor"], ".dll", ".dll")
         ds(r"expat\bin", ["libexpat"], ".dll", ".dll")
-        ds(r"gdal\bin", ["gdal15"], ".dll", ".dll")
+        dd(r"gdal\bin", ["gdal17.dll"], False)
+        dd(r"Xerces\bin", ["xerces-c_2_7.dll"], False) # needed by gdal
+        dd(r"Hdf4\bin",["hd423m.dll","hm423m.dll"], False) # needed by gdal
         ds(r"OpenJpeg\bin", [], "d.dll", ".dll", ["OpenJpeg"])
 
         for depend in temp_list:
             cur_list = depend.get_list_for(arch, is_debug)
             for item, dest in cur_list:
                 la(item, dest)
-
     return dp_list
 
 #the depedencies are dir\[Platform]\dll_name[modesuffix]
