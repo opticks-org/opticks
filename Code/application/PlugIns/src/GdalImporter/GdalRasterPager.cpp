@@ -101,7 +101,7 @@ bool GdalRasterPager::getInputSpecification(PlugInArgList*& pArgList)
    {
       return false;
    }
-   VERIFY(pArgList->addArg<std::string>("DatasetName"));
+   VERIFY(pArgList->addArg<std::string>("DatasetName", std::string(), std::string()));
 
    return true;
 }
@@ -121,6 +121,10 @@ bool GdalRasterPager::parseInputArgs(PlugInArgList *pInputArgList)
 
 bool GdalRasterPager::openFile(const std::string& filename)
 {
+   if (mDatasetName.empty())
+   {
+      mDatasetName = filename;
+   }
    mpDataset.reset(reinterpret_cast<GDALDataset*>(GDALOpen(mDatasetName.c_str(), GA_ReadOnly)));
    return mpDataset.get() != NULL;
 }
