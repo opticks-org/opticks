@@ -118,22 +118,25 @@ class Builder:
             if self.verbosity > 1:
                 print "Done compressing Doxygen"
 
-    def __update_app_version_h(self, fields_to_replace):
-        app_version_path = join("application", "PlugInUtilities",
-            "AppVersion.h")
-        app_version = open(app_version_path, "rt")
-        version_info = app_version.readlines()
-        app_version.close()
-        app_version = open(app_version_path, "wt")
-        for vline in version_info:
+    def __update_h_file(self, h_file, fields_to_replace):
+        h_handle = open(h_file, "rt")
+        contents = h_handle.readlines()
+        h_handle.close()
+        h_handle = open(h_file, "wt")
+        for vline in contents:
             fields = vline.strip().split()
             if len(fields) >= 3 and fields[0] == '#define' and \
                     fields[1] in fields_to_replace:
-                app_version.write('#define %s %s\n' % (fields[1],
+                h_handle.write('#define %s %s\n' % (fields[1],
                     fields_to_replace[fields[1]]))
             else:
-                app_version.write(vline)
-        app_version.close()
+                h_handle.write(vline)
+        h_handle.close()
+
+    def __update_app_version_h(self, fields_to_replace):
+        app_version_path = join("application", "PlugInUtilities",
+            "AppVersion.h")
+        self.__update_h_file(app_version_path, fields_to_replace)
 
         #update modification time to force compilation to occur
         #even in incremental mode
@@ -216,6 +219,11 @@ class Builder:
                 print "The release date has not been updated"
 
         self.__update_app_version_h(fields_to_replace)
+
+        opticks_version_fields = dict()
+        opticks_version_fields["OPTICKS_VERSION"] = fields_to_replace["APP_VERSION_NUMBER"]
+        self.__update_h_file(join("application", "Interfaces", "OpticksVersion.h"),
+            opticks_version_fields)
 
     def populate_environ_for_dependencies(self, env):
         env["OPTICKSDEPENDENCIES"] = self.depend_path
