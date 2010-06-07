@@ -31,15 +31,24 @@ class FileBrowser;
  *  following edit capabilities are provided:
  *
  *  <pre>
- *  Edit Capability     %Description
+ *  Edit Capability     Description
  *  ==================  =======================================================
  *  None                The cell cannot be edited by the user.
- *  Check Box           A plug-in typically used for processing data.
+ *  Check Box           The cell contains a check box that the user can toggle
+ *                      on and off.  %Text can optionally be displayed next to
+ *                      the check box.
  *  Color               The cell contains a colored pixmap indicating the
  *                      selected color for the cell.  %Text can optionally be
  *                      displayed next to the colored pixmap.
  *  Line Edit           A single-line edit is invoked for the user to enter
  *                      text when the user activates the cell.
+ *  Custom Line Edit    A single-line edit is invoked for the user to enter
+ *                      text when the user activates the cell.  Enhancements
+ *                      or restrictions may be placed on the line edit such as
+ *                      a custom alignment or echo mode, or a validator or
+ *                      completer by creating a QLineEdit independently from
+ *                      the tree widget and calling the setCustomLineEdit()
+ *                      method.
  *  File Browser        A single-line edit box with a browse button is invoked
  *                      when the user activates the cell.  When the user clicks
  *                      the browse button, a file selection dialog is invoked
@@ -96,7 +105,16 @@ public:
    {
       NO_WIDGET = 0,     /**< A read-only cell that contains no edit widget. */
       LINE_EDIT,         /**< A single-line edit box is invoked when the user
-                              activates the cell. */
+                              activates the cell.\  The line edit is
+                              automatically created and managed by the custom
+                              tree widget. */
+      CUSTOM_LINE_EDIT,  /**< A single-line edit box is invoked when the user
+                              activates the cell.\  The line edit is created
+                              externally to the tree widget, and any
+                              enhancements or restrictions are added by the
+                              object creating the line edit.\  It is set into
+                              the tree widget with the setCustomLineEdit()
+                              method. */
       BROWSE_FILE_EDIT,  /**< A single-line edit box with a browse button is
                               invoked when the user activates the cell.\  When
                               the user clicks the browse button, a file
@@ -334,6 +352,46 @@ public:
     *           cover the cell icon..
     */
    bool getFullCellEdit(QTreeWidgetItem* pItem, int iColumn) const;
+
+   /**
+    *  Sets a custom line edit to use as the edit widget for a given cell.
+    *
+    *  This method sets a custom line edit as the edit widget for the given
+    *  cell.  The cell edit widget type must be set to
+    *  CustomTreeWidget::CUSTOM_LINE_EDIT before this method is called.
+    *
+    *  @param   pItem
+    *           The item in which to set the custom line edit as a cell edit
+    *           widget.
+    *  @param   iColumn
+    *           The item column in which to set the custom line edit as its edit
+    *           widget.
+    *  @param   pLineEdit
+    *           The line edit to use as the edit widget.  The line edit is
+    *           reparented to the viewport widget, so it will automatically be
+    *           deleted when the tree widget is deleted.
+    *
+    *  @return  Returns \c true if the line edit was successfully set as the
+    *           edit widget; otherwise returns \c false.
+    *
+    *  @see     setCellWidgetType()
+    */
+   bool setCustomLineEdit(QTreeWidgetItem* pItem, int iColumn, QLineEdit* pLineEdit);
+
+   /**
+    *  Returns the custom line edit used as the edit widget for a given cell.
+    *
+    *  @param   pItem
+    *           The item in which to get a cell custom line edit widget.
+    *  @param   iColumn
+    *           The item column in which to get the custom line edit widget.
+    *
+    *  @return  The custom line edit widget.  A valid line edit pointer is
+    *           returned regardless of the current edit widget if a line edit
+    *           has been previously set as the edit widget but not reset to
+    *           \c NULL.
+    */
+   QLineEdit* getCustomLineEdit(QTreeWidgetItem* pItem, int iColumn) const;
 
    /**
     *  Sets the file browser to use as the edit widget for a given cell.
@@ -780,6 +838,21 @@ protected slots:
    void closeEdit();
 
    /**
+    *  Accepts the changes in the active custom line edit widget.
+    *
+    *  This method sets the cell text to the current text in the active custom
+    *  line edit widget.
+    */
+   void acceptCustomEditText();
+
+   /**
+    *  Hides the active custom line edit widget.
+    *
+    *  @see     closeActiveCellWidget()
+    */
+   void closeCustomEdit();
+
+   /**
     *  Accepts the changes in the active file browser edit widget.
     *
     *  This method sets the cell text to the current text in the active file
@@ -878,6 +951,7 @@ private:
    bool mVerticalGridlines;
 
    QLineEdit* mpEdit;
+   QLineEdit* mpCustomEdit;
    FileBrowser* mpFileBrowser;
    QPushButton* mpBrowse;
    QString mBrowseDir;
@@ -886,6 +960,7 @@ private:
    QKeySequence mShortcut;
 
    QMap<CellLocation, WidgetType> mCellWidgets;
+   QMap<CellLocation, QLineEdit*> mCustomLineEdits;
    QMap<CellLocation, FileBrowser*> mFileBrowsers;
    QMap<CellLocation, QComboBox*> mComboBoxes;
    QMap<CellLocation, QSpinBox*> mSpinBoxes;

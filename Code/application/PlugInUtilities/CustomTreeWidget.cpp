@@ -32,6 +32,7 @@ CustomTreeWidget::CustomTreeWidget(QWidget* parent) :
    mHorizontalGridlines(false),
    mVerticalGridlines(false),
    mpEdit(NULL),
+   mpCustomEdit(NULL),
    mpFileBrowser(NULL),
    mpBrowse(NULL),
    mpCombo(NULL),
@@ -345,6 +346,24 @@ void CustomTreeWidget::activateCellWidget(QTreeWidgetItem* pItem, int iColumn)
          break;
       }
 
+      case CUSTOM_LINE_EDIT:
+      {
+         mpCustomEdit = getCustomLineEdit(pItem, iColumn);
+         if (mpCustomEdit != NULL)
+         {
+            mpCustomEdit->setText(strCellText);
+
+            mpCustomEdit->setGeometry(rcWidget);
+            mpCustomEdit->show();
+            mpCustomEdit->setFocus();
+            mpCustomEdit->selectAll();
+            mpCustomEdit->installEventFilter(this);
+            viewport()->setFocusProxy(mpCustomEdit);
+         }
+
+         break;
+      }
+
       case BROWSE_FILE_EDIT:
       {
          mpFileBrowser = getFileBrowser(pItem, iColumn);
@@ -461,6 +480,12 @@ void CustomTreeWidget::columnWidthChanged(int iColumn, int iOldWidth, int iNewWi
                }
             }
          }
+      }
+
+      // Resize the custom line edit
+      if (mpCustomEdit != NULL)
+      {
+         mpCustomEdit->setGeometry(rcWidget);
       }
 
       // Resize the file browser
@@ -720,6 +745,53 @@ bool CustomTreeWidget::getFullCellEdit(QTreeWidgetItem* pItem, int iColumn) cons
    return bFullCell;
 }
 
+bool CustomTreeWidget::setCustomLineEdit(QTreeWidgetItem* pItem, int iColumn, QLineEdit* pLineEdit)
+{
+   if ((pItem == NULL) || (pLineEdit == NULL))
+   {
+      return false;
+   }
+
+   WidgetType eType = getCellWidgetType(pItem, iColumn);
+   if (eType != CUSTOM_LINE_EDIT)
+   {
+      return false;
+   }
+
+   CellLocation cell;
+   cell.pItem = pItem;
+   cell.iColumn = iColumn;
+
+   pLineEdit->setFrame(false);
+   pLineEdit->setParent(viewport());
+   pLineEdit->hide();
+   mCustomLineEdits[cell] = pLineEdit;
+
+   return true;
+}
+
+QLineEdit* CustomTreeWidget::getCustomLineEdit(QTreeWidgetItem* pItem, int iColumn) const
+{
+   if (pItem == NULL)
+   {
+      return NULL;
+   }
+
+   CellLocation cell;
+   cell.pItem = pItem;
+   cell.iColumn = iColumn;
+
+   QLineEdit* pCustomEdit = NULL;
+
+   QMap<CellLocation, QLineEdit*>::const_iterator iter = mCustomLineEdits.find(cell);
+   if (iter != mCustomLineEdits.end())
+   {
+      pCustomEdit = iter.value();
+   }
+
+   return pCustomEdit;
+}
+
 bool CustomTreeWidget::setFileBrowser(QTreeWidgetItem* pItem, int iColumn, FileBrowser* pFileBrowser)
 {
    if ((pItem == NULL) || (pFileBrowser == NULL))
@@ -949,7 +1021,7 @@ bool CustomTreeWidget::eventFilter(QObject* pObject, QEvent* pEvent)
                closeActiveCellWidget(true);
             }
          }
-         else if ((pObject == mpFileBrowser) || (pObject == mpSpin))
+         else if ((pObject == mpCustomEdit) || (pObject == mpFileBrowser) || (pObject == mpSpin))
          {
             closeActiveCellWidget(true);
          }
@@ -1049,6 +1121,18 @@ void CustomTreeWidget::closeActiveCellWidget(bool bAcceptEdit)
          {
             closeEdit();
          }
+      }
+   }
+
+   if (mpCustomEdit != NULL)
+   {
+      if (bAcceptEdit == true)
+      {
+         acceptCustomEditText();
+      }
+      else
+      {
+         closeCustomEdit();
       }
    }
 
@@ -1348,6 +1432,32 @@ void CustomTreeWidget::closeEdit()
          mpBrowse->hide();
       }
    }
+
+   viewport()->setFocusProxy(this);
+   viewport()->setFocus();
+}
+
+void CustomTreeWidget::acceptCustomEditText()
+{
+   if (mpCustomEdit == NULL)
+   {
+      return;
+   }
+
+   setCurrentCellText(mpCustomEdit->text());
+   closeCustomEdit();
+}
+
+void CustomTreeWidget::closeCustomEdit()
+{
+   if (mpCustomEdit == NULL)
+   {
+      return;
+   }
+
+   mpCustomEdit->removeEventFilter(this);
+   mpCustomEdit->hide();
+   mpCustomEdit = NULL;
 
    viewport()->setFocusProxy(this);
    viewport()->setFocus();
