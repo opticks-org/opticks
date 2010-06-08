@@ -122,11 +122,11 @@ public:
     * @param   row
     *          The zero-based row number of the pixel to query.
     *
-    * @return  Returns \c true if the given pixel is selected or the BitMask is \c NULL;
-    *          otherwise returns \c false.  Also returns \c false if the given pixel
-    *          is outside the extents.
+    * @return  Returns \c true if the given pixel is selected or if the BitMask is \c NULL
+    *          and the pixel is contained within the extents; otherwise returns \c false.
+    *          Also returns \c false if the given pixel is outside the extents.
     *
-    * @see     getPixel(), getPixelLocation()
+    * @see     getPixelLocation()
     */
    bool getPixel(int col, int row) const;
 
@@ -175,9 +175,9 @@ public:
     * Advances the pixel location to the next selected pixel.
     *
     * @return  Returns \c true if the iterator advanced to the next selected
-    *          pixel or the BitMask is \c NULL.  If there are no more selected
-    *          pixels within the extents, the state of the iterator is equivalent
-    *          to end() and \c false is returned.
+    *          pixel or the BitMask is \c NULL and the pixel is contained within the extents.
+    *          If there are no more selected pixels within the extents, the state of the
+    *          iterator is equivalent to end() and \c false is returned.
     *
     * @see     nextPixel(), operator++(int)
     */
@@ -187,9 +187,9 @@ public:
     * Advances the pixel location to the next selected pixel.
     *
     * @return  Returns \c true if the iterator advanced to the next selected
-    *          pixel or the BitMask is \c NULL.  If there are no more selected
-    *          pixels within the extents, the state of the iterator is equivalent
-    *          to end() and \c false is returned.
+    *          pixel or the BitMask is \c NULL and the pixel is contained within the extents.
+    *          If there are no more selected pixels within the extents, the state of the
+    *          iterator is equivalent to end() and \c false is returned.
     *
     * @see     nextPixel(), operator++()
     */
@@ -255,10 +255,10 @@ public:
    /**
     * Queries whether the current pixel is selected.
     *
-    * @return  Returns \c true if the current pixel is selected or the BitMask is \c NULL;
-    *          otherwise returns \c false.
+    * @return  Returns \c true if the current pixel is selected or the BitMask is \c NULL
+    *           and the pixel is contained within the extents; otherwise returns \c false.
     *
-    * @see     getPixel(int,int) const, getPixel()
+    * @see     getPixel(int,int) const
     */
    bool operator*() const;
 

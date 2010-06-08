@@ -126,10 +126,6 @@ BitMaskIterator::BitMaskIterator(const BitMask* pBitMask, const RasterElement* p
 
 inline bool BitMaskIterator::getPixel() const
 {
-   if (mpBitMask == NULL)
-   {
-      return true;
-   }
    if (mCurrentPixelX < mX1 || mCurrentPixelX > mX2 ||
        mCurrentPixelY < mY1 || mCurrentPixelY > mY2)
    {
@@ -137,22 +133,26 @@ inline bool BitMaskIterator::getPixel() const
    }
    else
    {
+      if (mpBitMask == NULL)
+      {
+         return true;
+      }
       return mpBitMask->getPixel(mCurrentPixelX, mCurrentPixelY);
    }
 }
 
 bool BitMaskIterator::getPixel(int col, int row) const
 {
-   if (mpBitMask == NULL)
-   {
-      return true;
-   }
    if (col < mX1 || col > mX2 || row < mY1 || row > mY2)
    {
       return false;
    }
    else
    {
+      if (mpBitMask == NULL)
+      {
+         return true;
+      }
       return mpBitMask->getPixel(col, row);
    }
 }
@@ -163,6 +163,10 @@ void BitMaskIterator::nextPixel()
    {
       if (mCurrentPixelX == mX2)
       {
+         if (mCurrentPixelY == mY2)
+         {
+            break;
+         }
          ++mCurrentPixelY;
          mCurrentPixelX = mX1;
       }
