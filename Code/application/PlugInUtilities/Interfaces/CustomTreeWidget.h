@@ -12,6 +12,7 @@
 
 #include <QtCore/QMap>
 #include <QtGui/QComboBox>
+#include <QtGui/QDoubleSpinBox>
 #include <QtGui/QItemDelegate>
 #include <QtGui/QLineEdit>
 #include <QtGui/QPushButton>
@@ -70,6 +71,10 @@ class FileBrowser;
  *                      The step size and range of values in the spin box are
  *                      set by creating a QSpinBox independently from the tree
  *                      widget and calling the setSpinBox() method.
+ *  Double Spin Box     A double precision floating-point spin box is invoked when
+ *                      the user activates the cell.  The step size and range of values
+ *                      in the spin box are set by creating a QDoubleSpinBox independently
+ *                      from the tree widget and calling the setDoubleSpinBox() method.
  *  </pre>
  *
  *  The default row height of tree widget items that are added to a custom tree
@@ -94,7 +99,7 @@ public:
    /**
     *  Destroys the custom tree widget and all child tree widget items.
     */
-   ~CustomTreeWidget();
+   virtual ~CustomTreeWidget();
 
    /**
     *  Specifies the edit widget used in a cell of the tree widget.
@@ -134,11 +139,16 @@ public:
                               and populated by the object creating the tree
                               widget.\  It is set into the tree widget with the
                               setComboBox() method. */
-      SPIN_BOX           /**< A spin box is invoked when the user activates the
-                              cell.\  The spin box is created and its step size
-                              and range of values are determined by the object
-                              creating the tree widget.\  It is set into the
+      SPIN_BOX,          /**< A spin box for integer values is invoked when the user
+                              activates the cell.\  The spin box is created and its
+                              step size and range of values are determined by the
+                              object creating the tree widget.\  It is set into the
                               tree widget with the setSpinBox() method. */
+      DOUBLE_SPIN_BOX    /**< A spin box for double precision floating-point values is
+                              invoked when the user activates the cell.\  The spin box
+                              is created and its step size and range of values are determined
+                              by the object creating the tree widget.\  It is set into the
+                              tree widget with the setDoubleSpinBox() method. */
    };
 
    /**
@@ -184,8 +194,8 @@ public:
     *  @param   eState
     *           The check state to set as the cell value.
     *
-    *  @return  Returns \b true if the check box was successfully displayed and
-    *           the value set; otherwise returns \b false.
+    *  @return  Returns \c true if the check box was successfully displayed and
+    *           the value set; otherwise returns \c false.
     */
    bool setCellCheckState(QTreeWidgetItem* pItem, int iColumn, CheckState eState);
 
@@ -215,8 +225,8 @@ public:
     *           The color to set as the cell value.  If an invalid color is
     *           given, the pixmap is removed from the cell.
     *
-    *  @return  Returns \b true if the color pixmap is successfully displayed;
-    *           otherwise returns \b false.
+    *  @return  Returns \c true if the color pixmap is successfully displayed;
+    *           otherwise returns \c false.
     */
    bool setCellColor(QTreeWidgetItem* pItem, int iColumn, QColor clrCell);
 
@@ -257,8 +267,8 @@ public:
    /**
     *  Queries whether the size of a color pixmap adjusts to the column width.
     *
-    *  @return  Returns \b true if the width of color pixmaps adjust to the
-    *           column width.  Returns \b false if the color pixmaps use a
+    *  @return  Returns \c true if the width of color pixmaps adjust to the
+    *           column width.  Returns \c false if the color pixmaps use a
     *           fixed width.
     */
    bool getFullCellColor() const;
@@ -333,8 +343,8 @@ public:
     *  @param   iColumn
     *           The item column to set its edit widget width format.
     *  @param   bFullCell
-    *           Set this value to \b true to automatically adjust the edit
-    *           widget size to the column width.  Set this value to \b false
+    *           Set this value to \c true to automatically adjust the edit
+    *           widget size to the column width.  Set this value to \c false
     *           for the edit widget to not cover the cell icon.
     */
    void setFullCellEdit(QTreeWidgetItem* pItem, int iColumn, bool bFullCell);
@@ -347,8 +357,8 @@ public:
     *  @param   iColumn
     *           The item column to query its edit widget width format.
     *
-    *  @return  Returns \b true if the edit widget of the given cell covers
-    *           the entire cell.  Returns \b false if the edit widget does not
+    *  @return  Returns \c true if the edit widget of the given cell covers
+    *           the entire cell.  Returns \c false if the edit widget does not
     *           cover the cell icon..
     */
    bool getFullCellEdit(QTreeWidgetItem* pItem, int iColumn) const;
@@ -448,8 +458,8 @@ public:
     *           box is reparented to the viewport widget, so it will
     *           automatically be deleted when the tree widget is deleted.
     *
-    *  @return  Returns \b true if the combo box was successfully set as the
-    *           edit widget; otherwise returns \b false.
+    *  @return  Returns \c true if the combo box was successfully set as the
+    *           edit widget; otherwise returns \c false.
     *
     *  @see     setCellWidgetType()
     */
@@ -465,7 +475,7 @@ public:
     *
     *  @return  The combo box edit widget.  A valid item is returned regardless
     *           of the current edit widget if a combo box has been previously
-    *           set as the edit widget but not reset to \b NULL.
+    *           set as the edit widget but not reset to \c NULL.
     */
    QComboBox* getComboBox(QTreeWidgetItem* pItem, int iColumn) const;
 
@@ -473,7 +483,7 @@ public:
     *  Sets the spin box to use as the edit widget for a given cell.
     *
     *  This method sets a spin box as the edit widget for the given cell.  The
-    *  cell edit widget type must be set to SpinBox before this method is
+    *  cell edit widget type must be set to CustomTreeWidget::SPIN_BOX before this method is
     *  called.
     *
     *  @param   pItem
@@ -486,10 +496,10 @@ public:
     *           reparented to the viewport widget, so it will automatically be
     *           deleted when the tree widget is deleted.
     *
-    *  @return  Returns \b true if the spin box was successfully set as the
-    *           edit widget; otherwise returns \b false.
+    *  @return  Returns \c true if the spin box was successfully set as the
+    *           edit widget; otherwise returns \c false.
     *
-    *  @see     setCellWidgetType()
+    *  @see     setDoubleSpinBox(), setCellWidgetType()
     */
    bool setSpinBox(QTreeWidgetItem* pItem, int iColumn, QSpinBox* pSpin);
 
@@ -503,9 +513,51 @@ public:
     *
     *  @return  The spin box edit widget.  A valid item is returned regardless
     *           of the current edit widget if a spin box has been previously
-    *           set as the edit widget but not reset to \b NULL.
+    *           set as the edit widget but not reset to \c NULL.
+    *
+    *  @see     getDoubleSpinBox()
     */
    QSpinBox* getSpinBox(QTreeWidgetItem* pItem, int iColumn) const;
+
+   /**
+    *  Sets the double spin box to use as the edit widget for a given cell.
+    *
+    *  This method sets a double spin box as the edit widget for the given cell.  The
+    *  cell edit widget type must be set to CustomTreeWidget::DOUBLE_SPIN_BOX before this method is
+    *  called.
+    *
+    *  @param   pItem
+    *           The item in which to set the double spin box as a cell edit widget.
+    *  @param   iColumn
+    *           The item column in which to set the double spin box as its edit
+    *           widget.
+    *  @param   pSpin
+    *           The double spin box to use as the edit widget.  The double spin box is
+    *           reparented to the viewport widget, so it will automatically be
+    *           deleted when the tree widget is deleted.
+    *
+    *  @return  Returns \c true if the double spin box was successfully set as the
+    *           edit widget; otherwise returns \c false.
+    *
+    *  @see     setSpinBox(), setCellWidgetType()
+    */
+   bool setDoubleSpinBox(QTreeWidgetItem* pItem, int iColumn, QDoubleSpinBox* pSpin);
+
+   /**
+    *  Returns the double spin box used as the edit widget for a given cell.
+    *
+    *  @param   pItem
+    *           The item in which to get a cell double spin box edit widget.
+    *  @param   iColumn
+    *           The item column in which to get its double spin box edit widget.
+    *
+    *  @return  The double spin box edit widget.  A valid item is returned regardless
+    *           of the current edit widget if a double spin box has been previously
+    *           set as the edit widget but not reset to \c NULL.
+    *
+    *  @see     getSpinBox()
+    */
+   QDoubleSpinBox* getDoubleSpinBox(QTreeWidgetItem* pItem, int iColumn) const;
 
    /**
     *  Invokes the edit widget for a given cell.
@@ -532,8 +584,8 @@ public:
     *  @param   iColumn
     *           The item column to test for the coordinate.
     *
-    *  @return  Returns \b true if the given coordinate is contained within the
-    *           given item cell, otherwise returns \b false.
+    *  @return  Returns \c true if the given coordinate is contained within the
+    *           given item cell, otherwise returns \c false.
     */
    bool hitTest(QPoint ptCoord, QTreeWidgetItem* pItem, int iColumn);
 
@@ -544,8 +596,8 @@ public:
     *           Indicates whether to show or hide horizontal or vertical
     *           gridlines, or both.
     *  @param   bShow
-    *           Set this value to \b true to display the gridlines, or to
-    *           \b false to hide the gridlines.
+    *           Set this value to \c true to display the gridlines, or to
+    *           \c false to hide the gridlines.
     */
    void setGridlinesShown(Qt::Orientations orientations, bool bShow);
 
@@ -556,8 +608,8 @@ public:
     *           Indicates whether to show or hide either horizontal or vertical
     *           gridlines.
     *
-    *  @return  Returns \b true if gridlines are displayed for the given
-    *           orientation; otherwise returns \b false.
+    *  @return  Returns \c true if gridlines are displayed for the given
+    *           orientation; otherwise returns \c false.
     */
    bool areGridlinesShown(Qt::Orientation orientation) const;
 
@@ -570,8 +622,8 @@ public:
     *  @param   pEvent
     *           The event invoked by the object.
     *
-    *  @return  Returns \b true if a keyboard shortcut conversion was
-    *           successfully performed; otherwise returns \b false.
+    *  @return  Returns \c true if a keyboard shortcut conversion was
+    *           successfully performed; otherwise returns \c false.
     */
    bool eventFilter(QObject* pObject, QEvent* pEvent);
 
@@ -584,8 +636,8 @@ public slots:
     *  inside a dialog and the user has clicked on the OK or Cancel buttons.
     *
     *  @param   bAcceptEdit
-    *           Set this value to \b true to accept any changes the user made
-    *           in the edit widget before closing.  Set this value to \b false
+    *           Set this value to \c true to accept any changes the user made
+    *           in the edit widget before closing.  Set this value to \c false
     *           to ignore any user changes.
     */
    void closeActiveCellWidget(bool bAcceptEdit);
@@ -897,6 +949,21 @@ protected slots:
     */
    void closeSpin();
 
+   /**
+    *  Accepts the changes in the active double spin box edit widget.
+    *
+    *  This method sets the cell text to the current value in the active double spin
+    *  box edit widget.
+    */
+   void acceptDoubleSpinText();
+
+   /**
+    *  Hides the active double spin box edit widget.
+    *
+    *  @see     closeActiveCellWidget()
+    */
+   void closeDoubleSpin();
+
 private:
    class CellLocation
    {
@@ -957,6 +1024,7 @@ private:
    QString mBrowseDir;
    QComboBox* mpCombo;
    QSpinBox* mpSpin;
+   QDoubleSpinBox* mpDoubleSpin;
    QKeySequence mShortcut;
 
    QMap<CellLocation, WidgetType> mCellWidgets;
@@ -964,6 +1032,7 @@ private:
    QMap<CellLocation, FileBrowser*> mFileBrowsers;
    QMap<CellLocation, QComboBox*> mComboBoxes;
    QMap<CellLocation, QSpinBox*> mSpinBoxes;
+   QMap<CellLocation, QDoubleSpinBox*> mDoubleSpinBoxes;
    QMap<CellLocation, CheckState> mChecks;
    QMap<CellLocation, QColor> mColors;
    QMap<CellLocation, bool> mFullCellEdit;

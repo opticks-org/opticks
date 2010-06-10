@@ -36,7 +36,8 @@ CustomTreeWidget::CustomTreeWidget(QWidget* parent) :
    mpFileBrowser(NULL),
    mpBrowse(NULL),
    mpCombo(NULL),
-   mpSpin(NULL)
+   mpSpin(NULL),
+   mpDoubleSpin(NULL)
 {
    // Initialization
    setUniformRowHeights(true);
@@ -436,15 +437,30 @@ void CustomTreeWidget::activateCellWidget(QTreeWidgetItem* pItem, int iColumn)
          mpSpin = getSpinBox(pItem, iColumn);
          if (mpSpin != NULL)
          {
-            int iValue = 0;
-            iValue = strCellText.toInt();
-            mpSpin->setValue(iValue);
+            mpSpin->setValue(strCellText.toInt());
 
             mpSpin->setGeometry(rcWidget);
             mpSpin->show();
             mpSpin->setFocus();
             mpSpin->installEventFilter(this);
             viewport()->setFocusProxy(mpSpin);
+         }
+
+         break;
+      }
+
+      case DOUBLE_SPIN_BOX:
+      {
+         mpDoubleSpin = getDoubleSpinBox(pItem, iColumn);
+         if (mpDoubleSpin != NULL)
+         {
+            mpDoubleSpin->setValue(strCellText.toDouble());
+
+            mpDoubleSpin->setGeometry(rcWidget);
+            mpDoubleSpin->show();
+            mpDoubleSpin->setFocus();
+            mpDoubleSpin->installEventFilter(this);
+            viewport()->setFocusProxy(mpDoubleSpin);
          }
 
          break;
@@ -504,6 +520,12 @@ void CustomTreeWidget::columnWidthChanged(int iColumn, int iOldWidth, int iNewWi
       if (mpSpin != NULL)
       {
          mpSpin->setGeometry(rcWidget);
+      } 
+
+      // Resize the double spin box
+      if (mpDoubleSpin != NULL)
+      {
+         mpDoubleSpin->setGeometry(rcWidget);
       }
    }
 
@@ -937,6 +959,52 @@ QSpinBox* CustomTreeWidget::getSpinBox(QTreeWidgetItem* pItem, int iColumn) cons
    return pSpin;
 }
 
+bool CustomTreeWidget::setDoubleSpinBox(QTreeWidgetItem* pItem, int iColumn, QDoubleSpinBox* pSpin)
+{
+   if ((pItem == NULL) || (pSpin == NULL))
+   {
+      return false;
+   }
+
+   WidgetType eType = getCellWidgetType(pItem, iColumn);
+   if (eType != DOUBLE_SPIN_BOX)
+   {
+      return false;
+   }
+
+   CellLocation cell;
+   cell.pItem = pItem;
+   cell.iColumn = iColumn;
+
+   pSpin->setParent(viewport());
+   pSpin->hide();
+   mDoubleSpinBoxes[cell] = pSpin;
+
+   return true;
+}
+
+QDoubleSpinBox* CustomTreeWidget::getDoubleSpinBox(QTreeWidgetItem* pItem, int iColumn) const
+{
+   if (pItem == NULL)
+   {
+      return NULL;
+   }
+
+   CellLocation cell;
+   cell.pItem = pItem;
+   cell.iColumn = iColumn;
+
+   QDoubleSpinBox* pSpin = NULL;
+
+   QMap<CellLocation, QDoubleSpinBox*>::const_iterator iter = mDoubleSpinBoxes.find(cell);
+   if (iter != mDoubleSpinBoxes.end())
+   {
+      pSpin = iter.value();
+   }
+
+   return pSpin;
+}
+
 bool CustomTreeWidget::hitTest(QPoint ptCoord, QTreeWidgetItem* pItem, int iColumn)
 {
    QTreeWidgetItem* pPointItem = itemAt(ptCoord);
@@ -1021,7 +1089,7 @@ bool CustomTreeWidget::eventFilter(QObject* pObject, QEvent* pEvent)
                closeActiveCellWidget(true);
             }
          }
-         else if ((pObject == mpCustomEdit) || (pObject == mpFileBrowser) || (pObject == mpSpin))
+         else if (pObject == mpCustomEdit || pObject == mpFileBrowser || pObject == mpSpin || pObject == mpDoubleSpin)
          {
             closeActiveCellWidget(true);
          }
@@ -1169,6 +1237,18 @@ void CustomTreeWidget::closeActiveCellWidget(bool bAcceptEdit)
       else
       {
          closeSpin();
+      }
+   }
+
+   if (mpDoubleSpin != NULL)
+   {
+      if (bAcceptEdit == true)
+      {
+         acceptDoubleSpinText();
+      }
+      else
+      {
+         closeDoubleSpin();
       }
    }
 }
@@ -1536,6 +1616,32 @@ void CustomTreeWidget::closeSpin()
    mpSpin->removeEventFilter(this);
    mpSpin->hide();
    mpSpin = NULL;
+
+   viewport()->setFocusProxy(this);
+   viewport()->setFocus();
+}
+
+void CustomTreeWidget::acceptDoubleSpinText()
+{
+   if (mpDoubleSpin == NULL)
+   {
+      return;
+   }
+
+   setCurrentCellText(mpDoubleSpin->text());
+   closeDoubleSpin();
+}
+
+void CustomTreeWidget::closeDoubleSpin()
+{
+   if (mpDoubleSpin == NULL)
+   {
+      return;
+   }
+
+   mpDoubleSpin->removeEventFilter(this);
+   mpDoubleSpin->hide();
+   mpDoubleSpin = NULL;
 
    viewport()->setFocusProxy(this);
    viewport()->setFocus();
