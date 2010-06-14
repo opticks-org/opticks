@@ -268,10 +268,15 @@ DataElement* ModelServicesImp::createElement(const DataDescriptor* pDescriptor, 
    }
    if (pDescriptorImp->getParent() == NULL && !pDescriptorImp->getParentDesignator().empty())
    {
-      // const_cast since the designator and parent pointer are usually in synch except before creation
-      // this synchs them back up...this is an implementation detail
-      const_cast<DataDescriptorImp*>(pDescriptorImp)->setParent(getElement(pDescriptorImp->getParentDesignator(),
-         string()));
+      // Set the parent element pointer into the data descriptor if the descriptor was created with the designator
+      DataElement* pParent = getElement(pDescriptorImp->getParentDesignator(), string());
+      if (pParent == NULL)
+      {
+         // The parent element does not exist, so do not create the element
+         return NULL;
+      }
+
+      const_cast<DataDescriptorImp*>(pDescriptorImp)->setParent(pParent);
    }
 
    // Check if an element with the same name, type, and parent already exists

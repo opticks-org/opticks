@@ -346,6 +346,8 @@ public:
     *          not fail fast. A partial error can be detected by comparing the size of the return value
     *          with the size of descriptors. Only successfully created elements will be returned. If an element
     *          can not be created and has children in descriptors, those children will also fail to be created.
+    *
+    *  @see     createElement(const DataDescriptor*)
     */
    virtual std::vector<DataElement*> createElements(const std::vector<DataDescriptor*> &descriptors) = 0;
 
@@ -366,16 +368,21 @@ public:
     *           type in the data descriptor is used to determine the kind of
     *           element to create and must be one of the types returned from
     *           getValidElementTypes().  If a valid custom type is specified,
-    *           an Any element is created.  This method does nothing if \b NULL
+    *           an Any element is created.  This method does nothing if \c NULL
     *           is passed in.
     *
     *  @return  This method returns a pointer to the newly created data
-    *           element.  \b NULL is returned if the type in the data
-    *           descriptor is not a valid element type returned from
-    *           getValidElementTypes() or if the element could not be created
-    *           (i.e. the element already exists).
+    *           element.  \c NULL is returned in the following conditions:
+    *           - The type in the data descriptor is not a valid element type
+    *             returned from getValidElementTypes().
+    *           - The parent element specified by the parent designator in the
+    *             data descriptor (see DataDescriptor::getParentDesignator())
+    *             does not exist.
+    *           - The element could not be created (i.e. the element already
+    *             exists).
     *
-    *  @notify  This method will notify signalElementCreated with any<DataElement*>.
+    *  @notify  This method will notify signalElementCreated() with
+    *           boost::any<DataElement*>.
     *
     *  @see     createElement(const std::string&, const std::string&, DataElement*)
     */
