@@ -1883,67 +1883,6 @@ void WedgeProperty::normalizeAngles()
    }
 }
 
-///////////////////////
-// PaperSizeProperty //
-///////////////////////
-
-PaperSizeProperty::PaperSizeProperty(LocationType size) :
-   GraphicProperty("PaperSize"),
-   mSize(size)
-{
-}
-
-bool PaperSizeProperty::set(const GraphicProperty* pProperty)
-{
-   const PaperSizeProperty* pSizeProp = dynamic_cast<const PaperSizeProperty*>(pProperty);
-   if (pSizeProp == NULL)
-   {
-      return false;
-   }
-
-   *this = *pSizeProp;
-   return true;
-}
-
-bool PaperSizeProperty::compare(const GraphicProperty* pProp) const
-{
-   const PaperSizeProperty* pSizeProp = dynamic_cast<const PaperSizeProperty*>(pProp);
-   if (pSizeProp == NULL)
-   {
-      return false;
-   }
-
-   return mSize == pSizeProp->getSize();
-}
-
-GraphicProperty* PaperSizeProperty::copy() const
-{
-   return new PaperSizeProperty(mSize);
-}
-
-LocationType PaperSizeProperty::getSize() const
-{
-   return mSize;
-}
-
-bool PaperSizeProperty::toXml(XMLWriter* pXml) const
-{
-   pXml->pushAddPoint(pXml->addElement("PaperSize"));
-   GraphicProperty::toXml(pXml);
-   stringstream buf;
-   buf << mSize.mX << ' ' << mSize.mY;
-   pXml->addText(buf.str(), pXml->addElement("size"));
-   pXml->popAddPoint();
-
-   return true;
-}
-
-bool PaperSizeProperty::fromXml(DOMNode* pDocument, unsigned int version)
-{
-   DOMNodeList* elmnts(static_cast<DOMElement*>(pDocument)->getElementsByTagName(X("size")));
-   return XmlReader::StrToLocation(elmnts->item(0)->getTextContent(), mSize);
-}
-
 //////////////////////
 // FileNameProperty //
 //////////////////////

@@ -15,7 +15,6 @@
 #include "AppVerify.h"
 #include "DataElementImp.h"
 #include "DrawUtil.h"
-#include "FilenameImp.h"
 #include "GcpList.h"
 #include "LayerList.h"
 #include "LayerUndo.h"
@@ -295,41 +294,6 @@ bool LayerImp::unlinkLayer(Layer* pLayer)
    return false;
 }
 
-bool LayerImp::load(const QString& strFilename)
-{
-   DataElement* pElement = getDataElement();
-   if (pElement == NULL)
-   {
-      return false;
-   }
-
-   // Deserialize the element as an XML file
-   bool bSuccess = false;
-   MessageLog* pLog = Service<MessageLogMgr>()->getLog();
-
-   XmlReader xml(pLog);
-
-   string filename = strFilename.toStdString();
-   FilenameImp fn(filename);
-
-   XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* pDoc = xml.parse(&fn);
-   if (pDoc != NULL)
-   {
-      DOMElement* pRootElement = pDoc->getDocumentElement();
-      if (pRootElement != NULL)
-      {
-         string elementType = A(pRootElement->getAttribute(X("type")));
-         unsigned int version = atoi(A(pRootElement->getAttribute(X("version"))));
-         if (pElement->isKindOf(elementType) == true)
-         {
-            bSuccess = pElement->fromXml(pRootElement, version);
-         }
-      }
-   }
-
-   return bSuccess;
-}
-
 bool LayerImp::serialize(SessionItemSerializer& serializer) const
 {
    XMLWriter xml(getObjectType().c_str());
@@ -562,7 +526,6 @@ bool LayerImp::hasUniqueElement() const
 
    return iter.value() == 1;
 }
-
 
 void LayerImp::setXScaleFactor(double xScaleFactor)
 {

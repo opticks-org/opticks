@@ -754,7 +754,7 @@ http://www.gnu.org/licenses/lgpl.html
    <xsd:complexType name="paperSizeProperty">
       <xsd:annotation>
          <xsd:documentation xml:lang="en">
-            A paper size graphic object property.
+            Deprecated since 4.4.0 - A paper size graphic object property.
          </xsd:documentation>
       </xsd:annotation>
       <xsd:all>
@@ -1062,6 +1062,17 @@ http://www.gnu.org/licenses/lgpl.html
       </xsd:complexContent>
    </xsd:complexType>
    <xsd:element name="AnnotationLayer" type="opticks:AnnotationLayer" />
+   <xsd:complexType name="ProductTemplate">
+      <xsd:complexContent>
+         <xsd:extension base="opticks:AnnotationLayer">
+            <xsd:attribute name="paperWidth" type="xsd:double" use="required" />
+            <xsd:attribute name="paperHeight" type="xsd:double" use="required" />
+            <xsd:attribute name="paperColor" type="opticks:ColorTripleType" use="required" />
+            <xsd:attribute name="dpi" type="xsd:nonNegativeInteger" use="required" />
+         </xsd:extension>
+      </xsd:complexContent>
+   </xsd:complexType>
+   <xsd:element name="ProductTemplate" type="opticks:ProductTemplate" />
    <xsd:complexType name="AoiLayer">
       <xsd:complexContent>
          <xsd:extension base="opticks:GraphicLayer">

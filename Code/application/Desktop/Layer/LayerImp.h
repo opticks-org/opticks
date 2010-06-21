@@ -94,8 +94,6 @@ public:
    bool isLayerLinked(Layer* pLayer) const;
    bool unlinkLayer(Layer* pLayer);
 
-   virtual bool load(const QString& strFilename);
-
    bool serialize(SessionItemSerializer& serializer) const;
    bool deserialize(SessionItemDeserializer& deserializer);
    virtual bool toXml(XMLWriter* pXml) const;

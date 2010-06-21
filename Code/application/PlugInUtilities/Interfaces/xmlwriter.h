@@ -88,7 +88,7 @@ public:
     *        Optional MessageLog to be passed to XmlBase
     *
     * @param useNamespace
-    *        If true, the app namespace will be exporter, if false, no namespace will be exported.
+    *        If true, the app namespace will be exported, if false, no namespace will be exported.
     *
     * @throw XmlBase::XmlException
     *        When unable to create the Xerces DOM document.

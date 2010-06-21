@@ -20,16 +20,12 @@
 #include "AnnotationLayerImp.h"
 #include "AppAssert.h"
 #include "AppVerify.h"
-#include "AppVersion.h"
-#include "CgmObject.h"
-#include "CgmObjectImp.h"
 #include "ContextMenu.h"
 #include "ContextMenuActions.h"
 #include "DataElement.h"
 #include "DesktopServicesImp.h"
 #include "DirectionalArrowObjectImp.h"
 #include "DrawUtil.h"
-#include "FilenameImp.h"
 #include "glCommon.h"
 #include "GraphicElement.h"
 #include "GraphicElementImp.h"
@@ -48,15 +44,14 @@
 #include "PolygonObject.h"
 #include "PolylineObject.h"
 #include "PolylineObjectImp.h"
-#include "ProductView.h"
 #include "ScaleBarObject.h"
 #include "SymbolManager.h"
 #include "Undo.h"
 #include "View.h"
 #include "ViewImp.h"
 #include "WidgetImageObjectImp.h"
-#include "xmlreader.h"
 
+#include <QtCore/QString>
 #include <QtGui/QApplication>
 #include <QtGui/QFileDialog>
 #include <QtGui/QInputDialog>
@@ -96,7 +91,6 @@ GraphicLayerImp::GraphicLayerImp(const string& id, const string& layerName, Data
       GraphicGroupImp* pGroup = dynamic_cast<GraphicGroupImp*>(pGraphicElement->getGroup());
       if (pGroup != NULL)
       {
-         pGroup->addProperty("PaperSize");
          VERIFYNR(connect(pGroup, SIGNAL(abortedAdd(GraphicObject*)), this, SLOT(cleanUpBadObject(GraphicObject*))));
          VERIFYNR(connect(pGroup, SIGNAL(extentsModified()), this, SIGNAL(extentsModified())));
          VERIFYNR(connect(pGroup, SIGNAL(modified()), this, SIGNAL(modified())));
@@ -161,31 +155,6 @@ GraphicLayerImp& GraphicLayerImp::operator= (const GraphicLayerImp& graphicLayer
 LayerType GraphicLayerImp::getLayerType() const
 {
    return GRAPHIC_LAYER;
-}
-
-void GraphicLayerImp::setPaperSize(LocationType size)
-{
-   PaperSizeProperty prop(size);
-   GraphicGroupImp* pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
-   if (pGroup != NULL)
-   {
-      pGroup->setProperty(&prop);
-   }
-}
-
-LocationType GraphicLayerImp::getPaperSize() const
-{
-   LocationType size(11.0, 8.5);
-   GraphicGroupImp* pGroup = dynamic_cast<GraphicGroupImp*>(getGroup());
-   if (pGroup != NULL)
-   {
-      PaperSizeProperty* pProp = static_cast<PaperSizeProperty*>(pGroup->getProperty("PaperSize"));
-      if (pProp != NULL)
-      {
-         size = pProp->getSize();
-      }
-   }
-   return size;
 }
 
 vector<ColorType> GraphicLayerImp::getColors() const
@@ -663,8 +632,6 @@ bool GraphicLayerImp::fromXml(DOMNode* pDocument, unsigned int version)
    DOMElement* pElement = static_cast<DOMElement*> (pDocument);
    mShowLabels = StringUtilities::fromXmlString<bool>(A(pElement->getAttribute(X("showLabels"))));
    setLayerLocked(StringUtilities::fromXmlString<bool>(A(pElement->getAttribute(X("layerLocked")))));
-   initializeFromGroup();
-
    return true;
 }
 
@@ -1362,72 +1329,6 @@ void GraphicLayerImp::setObjectStackingIndex(GraphicObject* pObject, int index)
    }
 }
 
-bool GraphicLayerImp::load(const QString& strFilename)
-{
-   if (strFilename.isEmpty() == true)
-   {
-      return false;
-   }
-
-   bool bSuccess = false;
-   ViewImp* pView = dynamic_cast<ViewImp*>(getView());
-
-   // Try to load as XML
-   string fileName = strFilename.toStdString();
-
-   FilenameImp filename(fileName);
-   Service<MessageLogMgr> pLogMgr;
-   MessageLog* pLog = pLogMgr->getLog();
-   XmlReader xml(pLog);
-
-   XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* pDocument = NULL;
-   pDocument = xml.parse(&filename);
-   if (pDocument != NULL)
-   {
-      DOMElement* pRootElement = pDocument->getDocumentElement();
-      if (pRootElement != NULL)
-      {
-         unsigned int version = atoi(A(pRootElement->getAttribute(X("version"))));
-         try
-         {
-            bSuccess = fromXml(pRootElement, version);
-         }
-         catch (XmlReader::DomParseException& exc)
-         {
-            QMessageBox::critical(pView, APP_NAME, QString::fromStdString(exc.str()));
-            return false;
-         }
-      }
-   }
-
-   // Try to load in CGM format
-   if (bSuccess == false)
-   {
-      GraphicObject* pObject = getGroup()->addObject(CGM_OBJECT);
-      CgmObjectImp* pCgm = dynamic_cast<CgmObjectImp*>(pObject);
-      if (pObject != NULL && pCgm != NULL)
-      {
-         bSuccess = pCgm->deserializeCgm(fileName);
-         if (bSuccess == false)
-         {
-            getGroup()->removeObject(pObject, true);
-         }
-      }
-   }
-
-   if (bSuccess == true)
-   {
-      deselectAllObjects();
-      initializeFromGroup();
-   }
-   else
-   {
-      QMessageBox::critical(pView, APP_NAME, "The file '" + strFilename + "' could not be loaded!");
-   }
-
-   return bSuccess;
-}
-
 void GraphicLayerImp::cleanUpBadObject(GraphicObject* pObj)
 {
    // this stuff will move to a slot method that is connected to a Group's signal stating that something went wrong
@@ -1783,17 +1684,6 @@ void GraphicLayerImp::distributeSelectedObjects(GraphicDistribution distribution
 void GraphicLayerImp::setHideSelectionBox(bool hide)
 {
    mbHideSelectionBox = hide;
-}
-
-void GraphicLayerImp::initializeFromGroup()
-{
-   // Set the paper size
-   ProductView* pProductView = dynamic_cast<ProductView*>(getView());
-   if (pProductView != NULL)
-   {
-      LocationType paperSize = getPaperSize();
-      pProductView->setPaperSize(paperSize.mX, paperSize.mY);
-   }
 }
 
 bool GraphicLayerImp::getShowLabels() const

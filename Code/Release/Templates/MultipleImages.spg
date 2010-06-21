@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<AnnotationLayer xmlns="https://comet.balldayton.com/standards/namespaces/2005/v1/comet.xsd" layerLocked="false" name="Layout" showLabels="false" snapToGrid="false" type="AnnotationLayer" version="3">
+<ProductTemplate xmlns="https://comet.balldayton.com/standards/namespaces/2005/v1/comet.xsd" dpi="100" layerLocked="false" name="Layout" paperColor="#ffffffff" paperHeight="7.5" paperWidth="10" showLabels="false" snapToGrid="false" type="AnnotationLayer" version="3">
 
   <AnnotationElement geocentric="false" name="Layout" type="AnnotationElement" version="3">
-    <DataDescriptor name="Layout" processingLocation="inMemory" type="AnnotationElement" version="3">
+    <DataDescriptor importerName="" name="Layout" processingLocation="inMemory" type="AnnotationElement" version="3">
       <classification level="U" version="3"/>
       <metadata version="3"/>
     </DataDescriptor>
@@ -11,50 +11,47 @@
         <boundingBox>0 0 971.829147161 691.823122745</boundingBox>
       </BoundingBox>
       <Rotation rotation="0"/>
-      <PaperSize>
-        <size>10 7.5</size>
-      </PaperSize>
       <objects>
         <Graphic name="View3" type="View" version="3">
           <BoundingBox>
             <boundingBox>28.8298999675 393.223936081 276.636671277 691.281211484</boundingBox>
           </BoundingBox>
-          <Rotation rotation="0"/>
           <DrawMode mode="draw"/>
-          <FillStyle style="solid"/>
-          <HatchStyle boxed="false" style="solid"/>
           <FillColor>
             <color>128 128 128</color>
           </FillColor>
-          <LineOn on="true"/>
-          <LineWidth width="1"/>
+          <FillStyle style="solid"/>
+          <HatchStyle boxed="false" style="solid"/>
           <LineColor>
             <color>0 0 0</color>
           </LineColor>
+          <LineOn on="true"/>
           <LineScaled scaled="false"/>
           <LineStyle style="solid"/>
+          <LineWidth width="1"/>
           <PixelSymbol boxed="false" symbol="solid"/>
+          <Rotation rotation="0"/>
           <objects>
             <Graphic name="Text" type="Text" version="3">
               <BoundingBox>
                 <boundingBox>106.623284079 570.872577531 198.843287166 513.632570034</boundingBox>
               </BoundingBox>
-              <Rotation rotation="0"/>
               <DrawMode mode="draw"/>
-              <FillStyle style="empty"/>
-              <HatchStyle boxed="false" style="solid"/>
               <FillColor>
                 <color>255 0 0</color>
               </FillColor>
-              <LineOn on="false"/>
-              <LineWidth width="1"/>
+              <FillStyle style="empty"/>
+              <Font bold="false" face="Tahoma" italic="false" size="12" underline="false"/>
+              <HatchStyle boxed="false" style="solid"/>
               <LineColor>
                 <color>0 0 255</color>
               </LineColor>
+              <LineOn on="false"/>
               <LineScaled scaled="false"/>
               <LineStyle style="solid"/>
+              <LineWidth width="1"/>
               <PixelSymbol boxed="false" symbol="solid"/>
-              <Font bold="false" face="Tahoma" italic="false" size="12" underline="false"/>
+              <Rotation rotation="0"/>
               <TextAlignment alignment="1"/>
               <TextColor>
                 <color>0 0 0</color>
@@ -70,42 +67,42 @@ available</string>
           <BoundingBox>
             <boundingBox>632.22685588 691.823122745 388.127179429 388.346618052</boundingBox>
           </BoundingBox>
-          <Rotation rotation="0"/>
           <DrawMode mode="draw"/>
-          <FillStyle style="solid"/>
-          <HatchStyle boxed="false" style="solid"/>
           <FillColor>
             <color>128 128 128</color>
           </FillColor>
-          <LineOn on="true"/>
-          <LineWidth width="1"/>
+          <FillStyle style="solid"/>
+          <HatchStyle boxed="false" style="solid"/>
           <LineColor>
             <color>0 0 0</color>
           </LineColor>
+          <LineOn on="true"/>
           <LineScaled scaled="false"/>
           <LineStyle style="solid"/>
+          <LineWidth width="1"/>
           <PixelSymbol boxed="false" symbol="solid"/>
+          <Rotation rotation="0"/>
           <objects>
             <Graphic name="Text" type="Text" version="3">
               <BoundingBox>
                 <boundingBox>464.067016375 568.704874144 556.287018934 511.464866653</boundingBox>
               </BoundingBox>
-              <Rotation rotation="0"/>
               <DrawMode mode="draw"/>
-              <FillStyle style="empty"/>
-              <HatchStyle boxed="false" style="solid"/>
               <FillColor>
                 <color>255 0 0</color>
               </FillColor>
-              <LineOn on="false"/>
-              <LineWidth width="1"/>
+              <FillStyle style="empty"/>
+              <Font bold="false" face="Tahoma" italic="false" size="12" underline="false"/>
+              <HatchStyle boxed="false" style="solid"/>
               <LineColor>
                 <color>0 0 255</color>
               </LineColor>
+              <LineOn on="false"/>
               <LineScaled scaled="false"/>
               <LineStyle style="solid"/>
+              <LineWidth width="1"/>
               <PixelSymbol boxed="false" symbol="solid"/>
-              <Font bold="false" face="Tahoma" italic="false" size="12" underline="false"/>
+              <Rotation rotation="0"/>
               <TextAlignment alignment="1"/>
               <TextColor>
                 <color>0 0 0</color>
@@ -121,42 +118,42 @@ available</string>
           <BoundingBox>
             <boundingBox>272.729072937 73.4897852788 31.0003494298 374.256656324</boundingBox>
           </BoundingBox>
-          <Rotation rotation="0"/>
           <DrawMode mode="draw"/>
-          <FillStyle style="solid"/>
-          <HatchStyle boxed="false" style="solid"/>
           <FillColor>
             <color>128 128 128</color>
           </FillColor>
-          <LineOn on="true"/>
-          <LineWidth width="1"/>
+          <FillStyle style="solid"/>
+          <HatchStyle boxed="false" style="solid"/>
           <LineColor>
             <color>0 0 0</color>
           </LineColor>
+          <LineOn on="true"/>
           <LineScaled scaled="false"/>
           <LineStyle style="solid"/>
+          <LineWidth width="1"/>
           <PixelSymbol boxed="false" symbol="solid"/>
+          <Rotation rotation="0"/>
           <objects>
             <Graphic name="Text" type="Text" version="3">
               <BoundingBox>
                 <boundingBox>105.754710012 252.493224088 197.974712355 195.253217515</boundingBox>
               </BoundingBox>
-              <Rotation rotation="0"/>
               <DrawMode mode="draw"/>
-              <FillStyle style="empty"/>
-              <HatchStyle boxed="false" style="solid"/>
               <FillColor>
                 <color>255 0 0</color>
               </FillColor>
-              <LineOn on="false"/>
-              <LineWidth width="1"/>
+              <FillStyle style="empty"/>
+              <Font bold="false" face="Tahoma" italic="false" size="12" underline="false"/>
+              <HatchStyle boxed="false" style="solid"/>
               <LineColor>
                 <color>0 0 255</color>
               </LineColor>
+              <LineOn on="false"/>
               <LineScaled scaled="false"/>
               <LineStyle style="solid"/>
+              <LineWidth width="1"/>
               <PixelSymbol boxed="false" symbol="solid"/>
-              <Font bold="false" face="Tahoma" italic="false" size="12" underline="false"/>
+              <Rotation rotation="0"/>
               <TextAlignment alignment="1"/>
               <TextColor>
                 <color>0 0 0</color>
@@ -172,42 +169,42 @@ available</string>
           <BoundingBox>
             <boundingBox>388.127164598 68.6124674467 630.924311266 372.088949308</boundingBox>
           </BoundingBox>
-          <Rotation rotation="0"/>
           <DrawMode mode="draw"/>
-          <FillStyle style="solid"/>
-          <HatchStyle boxed="false" style="solid"/>
           <FillColor>
             <color>128 128 128</color>
           </FillColor>
-          <LineOn on="true"/>
-          <LineWidth width="1"/>
+          <FillStyle style="solid"/>
+          <HatchStyle boxed="false" style="solid"/>
           <LineColor>
             <color>0 0 0</color>
           </LineColor>
+          <LineOn on="true"/>
           <LineScaled scaled="false"/>
           <LineStyle style="solid"/>
+          <LineWidth width="1"/>
           <PixelSymbol boxed="false" symbol="solid"/>
+          <Rotation rotation="0"/>
           <objects>
             <Graphic name="Text" type="Text" version="3">
               <BoundingBox>
                 <boundingBox>463.415737025 248.970711659 555.635738839 191.730705096</boundingBox>
               </BoundingBox>
-              <Rotation rotation="0"/>
               <DrawMode mode="draw"/>
-              <FillStyle style="empty"/>
-              <HatchStyle boxed="false" style="solid"/>
               <FillColor>
                 <color>255 0 0</color>
               </FillColor>
-              <LineOn on="false"/>
-              <LineWidth width="1"/>
+              <FillStyle style="empty"/>
+              <Font bold="false" face="Tahoma" italic="false" size="12" underline="false"/>
+              <HatchStyle boxed="false" style="solid"/>
               <LineColor>
                 <color>0 0 255</color>
               </LineColor>
+              <LineOn on="false"/>
               <LineScaled scaled="false"/>
               <LineStyle style="solid"/>
+              <LineWidth width="1"/>
               <PixelSymbol boxed="false" symbol="solid"/>
-              <Font bold="false" face="Tahoma" italic="false" size="12" underline="false"/>
+              <Rotation rotation="0"/>
               <TextAlignment alignment="1"/>
               <TextColor>
                 <color>0 0 0</color>
@@ -223,22 +220,22 @@ available</string>
           <BoundingBox>
             <boundingBox>711.706438455 687.132254249 971.829147161 645.946147687</boundingBox>
           </BoundingBox>
-          <Rotation rotation="0"/>
           <DrawMode mode="draw"/>
-          <FillStyle style="empty"/>
-          <HatchStyle boxed="false" style="solid"/>
           <FillColor>
             <color>255 0 0</color>
           </FillColor>
-          <LineOn on="false"/>
-          <LineWidth width="1"/>
+          <FillStyle style="empty"/>
+          <Font bold="false" face="Tahoma" italic="false" size="18" underline="false"/>
+          <HatchStyle boxed="false" style="solid"/>
           <LineColor>
             <color>0 0 255</color>
           </LineColor>
+          <LineOn on="false"/>
           <LineScaled scaled="false"/>
           <LineStyle style="solid"/>
+          <LineWidth width="1"/>
           <PixelSymbol boxed="false" symbol="solid"/>
-          <Font bold="false" face="Tahoma" italic="false" size="18" underline="false"/>
+          <Rotation rotation="0"/>
           <TextAlignment alignment="1"/>
           <TextColor>
             <color>0 0 0</color>
@@ -251,67 +248,67 @@ available</string>
           <BoundingBox>
             <boundingBox>278.599442993 263.309607801 384.816216812 258.974224296</boundingBox>
           </BoundingBox>
-          <Rotation rotation="0"/>
           <DrawMode mode="draw"/>
-          <LineWidth width="1"/>
           <LineColor>
             <color>0 0 255</color>
           </LineColor>
           <LineScaled scaled="false"/>
           <LineStyle style="solid"/>
+          <LineWidth width="1"/>
           <PixelSymbol boxed="false" symbol="solid"/>
+          <Rotation rotation="0"/>
           <Scale scale="1"/>
         </Graphic>
         <Graphic name="Arrow3" type="Arrow" version="3">
           <BoundingBox>
             <boundingBox>386.983910102 345.681791064 280.767138905 415.047849998</boundingBox>
           </BoundingBox>
-          <Rotation rotation="0"/>
           <DrawMode mode="draw"/>
-          <LineWidth width="1"/>
           <LineColor>
             <color>0 0 255</color>
           </LineColor>
           <LineScaled scaled="false"/>
           <LineStyle style="solid"/>
+          <LineWidth width="1"/>
           <PixelSymbol boxed="false" symbol="solid"/>
+          <Rotation rotation="0"/>
           <Scale scale="1"/>
         </Graphic>
         <Graphic name="Arrow2" type="Arrow" version="3">
           <BoundingBox>
             <boundingBox>276.431764431 508.258485326 376.145471253 508.258480473</boundingBox>
           </BoundingBox>
-          <Rotation rotation="0"/>
           <DrawMode mode="draw"/>
-          <LineWidth width="1"/>
           <LineColor>
             <color>0 0 255</color>
           </LineColor>
           <LineScaled scaled="false"/>
           <LineStyle style="solid"/>
+          <LineWidth width="1"/>
           <PixelSymbol boxed="false" symbol="solid"/>
+          <Rotation rotation="0"/>
           <Scale scale="1"/>
         </Graphic>
         <Graphic name="Arrow1Text" type="Text" version="3">
           <BoundingBox>
             <boundingBox>297.680852039 257.243906221 349.781976389 228.588287157</boundingBox>
           </BoundingBox>
-          <Rotation rotation="0"/>
           <DrawMode mode="draw"/>
-          <FillStyle style="empty"/>
-          <HatchStyle boxed="false" style="solid"/>
           <FillColor>
             <color>255 0 0</color>
           </FillColor>
-          <LineOn on="false"/>
-          <LineWidth width="1"/>
+          <FillStyle style="empty"/>
+          <Font bold="false" face="Tahoma" italic="false" size="12" underline="false"/>
+          <HatchStyle boxed="false" style="solid"/>
           <LineColor>
             <color>0 0 255</color>
           </LineColor>
+          <LineOn on="false"/>
           <LineScaled scaled="false"/>
           <LineStyle style="solid"/>
+          <LineWidth width="1"/>
           <PixelSymbol boxed="false" symbol="solid"/>
-          <Font bold="false" face="Tahoma" italic="false" size="12" underline="false"/>
+          <Rotation rotation="0"/>
           <TextAlignment alignment="1"/>
           <TextColor>
             <color>0 0 255</color>
@@ -324,22 +321,22 @@ available</string>
           <BoundingBox>
             <boundingBox>299.667537675 369.16916517 351.768662178 340.513545933</boundingBox>
           </BoundingBox>
-          <Rotation rotation="0"/>
           <DrawMode mode="draw"/>
-          <FillStyle style="empty"/>
-          <HatchStyle boxed="false" style="solid"/>
           <FillColor>
             <color>255 0 0</color>
           </FillColor>
-          <LineOn on="false"/>
-          <LineWidth width="1"/>
+          <FillStyle style="empty"/>
+          <Font bold="false" face="Tahoma" italic="false" size="12" underline="false"/>
+          <HatchStyle boxed="false" style="solid"/>
           <LineColor>
             <color>0 0 255</color>
           </LineColor>
+          <LineOn on="false"/>
           <LineScaled scaled="false"/>
           <LineStyle style="solid"/>
+          <LineWidth width="1"/>
           <PixelSymbol boxed="false" symbol="solid"/>
-          <Font bold="false" face="Tahoma" italic="false" size="12" underline="false"/>
+          <Rotation rotation="0"/>
           <TextAlignment alignment="1"/>
           <TextColor>
             <color>0 0 255</color>
@@ -352,22 +349,22 @@ available</string>
           <BoundingBox>
             <boundingBox>297.778599143 506.393192999 349.879723727 477.737573677</boundingBox>
           </BoundingBox>
-          <Rotation rotation="0"/>
           <DrawMode mode="draw"/>
-          <FillStyle style="empty"/>
-          <HatchStyle boxed="false" style="solid"/>
           <FillColor>
             <color>255 0 0</color>
           </FillColor>
-          <LineOn on="false"/>
-          <LineWidth width="1"/>
+          <FillStyle style="empty"/>
+          <Font bold="false" face="Tahoma" italic="false" size="12" underline="false"/>
+          <HatchStyle boxed="false" style="solid"/>
           <LineColor>
             <color>0 0 255</color>
           </LineColor>
+          <LineOn on="false"/>
           <LineScaled scaled="false"/>
           <LineStyle style="solid"/>
+          <LineWidth width="1"/>
           <PixelSymbol boxed="false" symbol="solid"/>
-          <Font bold="false" face="Tahoma" italic="false" size="12" underline="false"/>
+          <Rotation rotation="0"/>
           <TextAlignment alignment="1"/>
           <TextColor>
             <color>0 0 255</color>
@@ -380,42 +377,42 @@ available</string>
           <BoundingBox>
             <boundingBox>651.228540448 647.701504884 703.038317435 685.508634</boundingBox>
           </BoundingBox>
-          <Rotation rotation="0"/>
           <DrawMode mode="draw"/>
-          <FillStyle style="empty"/>
-          <HatchStyle boxed="false" style="solid"/>
           <FillColor>
             <color>255 0 0</color>
           </FillColor>
-          <LineOn on="true"/>
-          <LineWidth width="1"/>
+          <FillStyle style="empty"/>
+          <HatchStyle boxed="false" style="solid"/>
           <LineColor>
             <color>255 0 0</color>
           </LineColor>
+          <LineOn on="true"/>
           <LineScaled scaled="false"/>
           <LineStyle style="solid"/>
+          <LineWidth width="1"/>
           <PixelSymbol boxed="false" symbol="solid"/>
+          <Rotation rotation="0"/>
         </Graphic>
         <Graphic name="Date/Originator/Comments" type="Text" version="3">
           <BoundingBox>
             <boundingBox>651.024295149 221.312916051 768.29642115 72.5348361889</boundingBox>
           </BoundingBox>
-          <Rotation rotation="0"/>
           <DrawMode mode="draw"/>
-          <FillStyle style="empty"/>
-          <HatchStyle boxed="false" style="solid"/>
           <FillColor>
             <color>255 0 0</color>
           </FillColor>
-          <LineOn on="false"/>
-          <LineWidth width="1"/>
+          <FillStyle style="empty"/>
+          <Font bold="true" face="Tahoma" italic="false" size="12" underline="false"/>
+          <HatchStyle boxed="false" style="solid"/>
           <LineColor>
             <color>0 0 255</color>
           </LineColor>
+          <LineOn on="false"/>
           <LineScaled scaled="false"/>
           <LineStyle style="solid"/>
+          <LineWidth width="1"/>
           <PixelSymbol boxed="false" symbol="solid"/>
-          <Font bold="true" face="Tahoma" italic="false" size="12" underline="false"/>
+          <Rotation rotation="0"/>
           <TextAlignment alignment="1"/>
           <TextColor>
             <color>0 0 0</color>
@@ -428,26 +425,26 @@ Originator
 Comments</string>
           </TextString>
         </Graphic>
-        <Graphic name="Text" type="Text" version="3">
+        <Graphic name="Text 6" type="Text" version="3">
           <BoundingBox>
             <boundingBox>0 0 0 0</boundingBox>
           </BoundingBox>
-          <Rotation rotation="0"/>
           <DrawMode mode="draw"/>
-          <FillStyle style="empty"/>
-          <HatchStyle boxed="false" style="solid"/>
           <FillColor>
             <color>255 0 0</color>
           </FillColor>
-          <LineOn on="false"/>
-          <LineWidth width="1"/>
+          <FillStyle style="empty"/>
+          <Font bold="false" face="Tahoma" italic="false" size="8" underline="false"/>
+          <HatchStyle boxed="false" style="solid"/>
           <LineColor>
             <color>0 0 255</color>
           </LineColor>
+          <LineOn on="false"/>
           <LineScaled scaled="false"/>
           <LineStyle style="solid"/>
+          <LineWidth width="1"/>
           <PixelSymbol boxed="false" symbol="solid"/>
-          <Font bold="false" face="Tahoma" italic="false" size="8" underline="false"/>
+          <Rotation rotation="0"/>
           <TextAlignment alignment="4"/>
           <TextColor>
             <color>0 0 0</color>
@@ -460,4 +457,4 @@ Comments</string>
     </group>
   </AnnotationElement>
 
-</AnnotationLayer>
+</ProductTemplate>

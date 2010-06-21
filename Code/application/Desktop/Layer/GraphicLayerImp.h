@@ -20,7 +20,6 @@
 #include <set>
 #include <memory>
 
-#include <QtCore/QString>
 #include <QtCore/QPoint>
 #include <QtGui/QColor>
 #include <QtGui/QFont>
@@ -57,11 +56,6 @@ public:
    virtual LayerType getLayerType() const;
    using LayerImp::setName;
 
-   void setPaperSize(LocationType size);
-   LocationType getPaperSize() const;
-
-   virtual bool load(const QString& strFilename);
-
    virtual void groupSelection();
    virtual void ungroupSelection();
    virtual void popSelectedObjectToFront();
@@ -83,7 +77,7 @@ public:
    std::vector<ColorType> getColors() const;
 
    void draw();
-   
+
    bool insertingObjectNull() const;
 
    virtual GraphicObject* addObject(const GraphicObjectType& objectType, LocationType point);
@@ -271,8 +265,6 @@ private:
     *  Determines if the object type is a physical object that is seen on the layer
     */
    bool isVisibleObjectType(GraphicObjectType eType) const;
-
-   void initializeFromGroup();
 };
 
 #define GRAPHICLAYERADAPTEREXTENSION_CLASSES \

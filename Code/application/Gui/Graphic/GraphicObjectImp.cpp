@@ -24,6 +24,7 @@
 #include "LayerList.h"
 #include "OrthographicView.h"
 #include "PerspectiveView.h"
+#include "ProductView.h"
 #include "PropertiesGraphicObject.h"
 #include "RasterElement.h"
 #include "StringUtilities.h"
@@ -246,10 +247,6 @@ GraphicProperty* GraphicObjectImp::createProperty(const string& propertyName)
    else if (propertyName == "ArcRegion")
    {
       pProperty = new ArcRegionProperty(GraphicLayer::getSettingArcRegion());
-   }
-   else if (propertyName == "PaperSize")
-   {
-      pProperty = new PaperSizeProperty(LocationType(11.0, 8.5));
    }
    else if (propertyName == "Alpha")
    {
@@ -1400,6 +1397,27 @@ bool GraphicObjectImp::fromXml(DOMNode* pDocument, unsigned int version)
          if (setProperty(pProperty.get()) == true)
          {
             updateHandles();
+         }
+      }
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove PaperSize special case and xsd entry when " \
+"no longer supporting template files from 4.3.X. (dadkins)")
+      else if (propertyName == "PaperSize")
+      {
+         Layer* pLayer = getLayer();
+         if (pLayer != NULL)
+         {
+            ProductView* pProductView = dynamic_cast<ProductView*>(pLayer->getView());
+            if (pProductView != NULL)
+            {
+               LocationType paperSize;
+               DOMNodeList* elmnts(static_cast<DOMElement*>(pChild)->getElementsByTagName(X("size")));
+               if (!XmlReader::StrToLocation(elmnts->item(0)->getTextContent(), paperSize))
+               {
+                  return false;
+               }
+
+               pProductView->setPaperSize(paperSize.mX, paperSize.mY);
+            }
          }
       }
    }

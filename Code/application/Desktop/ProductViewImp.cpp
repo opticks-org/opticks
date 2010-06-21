@@ -19,6 +19,7 @@
 #include "ContextMenuActions.h"
 #include "DataDescriptorAdapter.h"
 #include "DesktopServices.h"
+#include "FileResource.h"
 #include "GraphicLayerUndo.h"
 #include "GraphicObject.h"
 #include "GraphicProperty.h"
@@ -418,15 +419,44 @@ bool ProductViewImp::loadTemplate(const QString& strTemplateFile)
 
    UndoGroup group(dynamic_cast<View*>(this), "Load Template");
 
-   // Clear the layout layer
-   mpLayoutLayer->selectAllObjects();
-   mpLayoutLayer->deleteSelectedObjects();
-
-   // Load the annotation objects from the template file into the layout layer
    bool bSuccess = false;
-   bSuccess = mpLayoutLayer->load(strTemplateFile);
+   XmlReader xml(Service<MessageLogMgr>()->getLog());
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* pDocument = xml.parse(strTemplateFile.toStdString());
+   if (pDocument != NULL)
+   {
+      DOMElement* pRootElement = pDocument->getDocumentElement();
+      if (pRootElement != NULL)
+      {
+         // Clear the layout layer
+         mpLayoutLayer->selectAllObjects();
+         mpLayoutLayer->deleteSelectedObjects();
+
+         try
+         {
+            // Older template files (4.3.X and prior) had "AnnotationLayer", not "ProductTemplate"
+            if (XMLString::equals(pRootElement->getNodeName(), X("ProductTemplate")))
+            {
+               setPaperSize(StringUtilities::fromXmlString<double>(A(pRootElement->getAttribute(X("paperWidth")))),
+                  StringUtilities::fromXmlString<double>(A(pRootElement->getAttribute(X("paperHeight")))));
+               setPaperColor(COLORTYPE_TO_QCOLOR(
+                  StringUtilities::fromXmlString<ColorType>(A(pRootElement->getAttribute(X("paperColor"))))));
+               setDpi(StringUtilities::fromXmlString<unsigned int>(A(pRootElement->getAttribute(X("dpi")))));
+            }
+
+            bSuccess = mpLayoutLayer->fromXml(pRootElement, atoi(A(pRootElement->getAttribute(X("version")))));
+         }
+         catch (XmlReader::DomParseException& exc)
+         {
+            QMessageBox::critical(this, APP_NAME, QString::fromStdString(exc.str()));
+            return false;
+         }
+
+      }
+   }
+
    if (bSuccess == false)
    {
+      QMessageBox::critical(this, APP_NAME, "The file '" + strTemplateFile + "' could not be loaded!");
       return false;
    }
 
@@ -497,6 +527,15 @@ bool ProductViewImp::saveTemplate(const QString& strTemplateFile) const
       return false;
    }
 
+   string filename = strTemplateFile.toStdString();
+   FileResource pFile(filename.c_str(), "wt", true);
+   if (pFile.get() == NULL)
+   {
+      QString strError = "Could not open the template file for writing:\n" + strTemplateFile;
+      QMessageBox::critical(const_cast<ProductViewImp*>(this), APP_NAME, strError);
+      return false;
+   }
+
    // Add a text object to the layout layer to store the classification text font
    TextObjectImp* pClassificationObject = 
       dynamic_cast<TextObjectImp*>(mpLayoutLayer->addObject(TEXT_OBJECT, LocationType()));
@@ -528,34 +567,10 @@ bool ProductViewImp::saveTemplate(const QString& strTemplateFile) const
       pClassificationObject->setBoundingBox(noSize, noSize);
    }
 
-   // Save the layout layer
-   bool bSuccess = false;
-   string templateFile = strTemplateFile.toStdString();
-
-   FILE* fp = fopen(templateFile.c_str(), "wt");
-   if (fp != NULL)
-   {
-      XMLWriter xml("AnnotationLayer");
-
-      bSuccess = mpLayoutLayer->toXml(&xml);
-      if (bSuccess == true)
-      {
-         xml.writeToFile(fp);
-      }
-
-      fclose(fp);
-
-      if (bSuccess == false)
-      {
-         QMessageBox::critical(const_cast<ProductViewImp*>(this), APP_NAME, "Could not save the template file!");
-         remove(templateFile.c_str());
-      }
-   }
-   else
-   {
-      QString strError = "Could not open the template file for writing:\n" + strTemplateFile;
-      QMessageBox::critical(const_cast<ProductViewImp*>(this), APP_NAME, strError);
-   }
+   XMLWriter xml("ProductTemplate");
+   bool success = xml.addAttr("paperWidth", mPaperWidth) && xml.addAttr("paperHeight", mPaperHeight) &&
+      xml.addAttr("paperColor", QCOLOR_TO_COLORTYPE(mPaperColor)) && xml.addAttr("dpi", mDpi) &&
+      mpLayoutLayer->toXml(&xml);
 
    // Remove the classification label
    if (pClassificationObject != NULL)
@@ -563,7 +578,15 @@ bool ProductViewImp::saveTemplate(const QString& strTemplateFile) const
       mpLayoutLayer->removeObject(dynamic_cast<GraphicObject*>(pClassificationObject), true);
    }
 
-   return bSuccess;
+   if (success)
+   {
+      xml.writeToFile(pFile);
+      pFile.setDeleteOnClose(false);
+      return true;
+   }
+
+   QMessageBox::critical(const_cast<ProductViewImp*>(this), APP_NAME, "Could not save the template file.");
+   return false;
 }
 
 AnnotationLayer* ProductViewImp::getLayoutLayer() const
@@ -679,12 +702,6 @@ void ProductViewImp::setPaperSize(double dWidth, double dHeight)
       mPaperHeight = dHeight;
 
       UndoLock lock(dynamic_cast<View*>(this));
-
-      // Update the paper size property of the annotation layers
-      LocationType paperSize(mPaperWidth, mPaperHeight);
-
-      mpLayoutLayer->setPaperSize(paperSize);
-      mpClassificationLayer->setPaperSize(paperSize);
 
       // Update the classification object position
       updateClassificationLocation();
@@ -1559,7 +1576,7 @@ void ProductViewImp::setActiveLayer()
 
 bool ProductViewImp::toXml(XMLWriter* pXml) const
 {
-   if (!PerspectiveViewImp::toXml(pXml))
+   if (pXml == NULL || PerspectiveViewImp::toXml(pXml) == false)
    {
       return false;
    }
@@ -1568,7 +1585,6 @@ bool ProductViewImp::toXml(XMLWriter* pXml) const
    pXml->addAttr("paperHeight", mPaperHeight);
    pXml->addAttr("paperColor", mPaperColor.name().toStdString());
    pXml->addAttr("dpi", mDpi);
-   pXml->addAttr("viewEvent", mbViewEvent);
    if (mpLayoutLayer != NULL)
    {
       DOMElement* pElement = pXml->addElement("LayoutLayer");
@@ -1577,6 +1593,8 @@ bool ProductViewImp::toXml(XMLWriter* pXml) const
       mpLayoutLayer->toXml(pXml);
       pXml->popAddPoint();
 
+      // LayerImp::toXml does not save the data elements during a session save
+      // This kludge saves the DataElement manually because it is not stored in ModelServices
       DataElement* pAnno = mpLayoutLayer->getDataElement();
       if (pAnno != NULL)
       {
@@ -1595,6 +1613,8 @@ bool ProductViewImp::toXml(XMLWriter* pXml) const
       mpClassificationLayer->toXml(pXml);
       pXml->popAddPoint();
 
+      // LayerImp::toXml does not save the data elements during a session save
+      // This kludge saves the DataElement manually because it is not stored in ModelServices
       DataElement* pAnno = mpClassificationLayer->getDataElement();
       if (pAnno != NULL)
       {
@@ -1605,18 +1625,7 @@ bool ProductViewImp::toXml(XMLWriter* pXml) const
          pXml->popAddPoint();
       }
    }
-   if (mpActiveLayer != NULL)
-   {
-      pXml->pushAddPoint(pXml->addElement("ActiveLayer"));
-      pXml->addAttr("id", mpActiveLayer->getId());
-      pXml->popAddPoint();
-   }
-   if (mpEditObject != NULL)
-   {
-      pXml->pushAddPoint(pXml->addElement("EditObject"));
-      pXml->addAttr("id", mpEditObject->getId());
-      pXml->popAddPoint();
-   }
+
    return true;
 }
 
@@ -1677,7 +1686,6 @@ bool ProductViewImp::fromXml(DOMNode* pDocument, unsigned int version)
    mpActiveLayer = NULL;
 
    connectLayers();
-   
    return true;
 }
 

@@ -419,25 +419,6 @@ private:
    double mStopAngle;
 };
 
-
-class PaperSizeProperty : public GraphicProperty
-{
-public:
-   PaperSizeProperty(LocationType size);
-
-   LocationType getSize() const;
-   bool set(const GraphicProperty* pProperty);
-   bool compare(const GraphicProperty* pProp) const;
-   GraphicProperty* copy() const;
-
-   bool toXml(XMLWriter* pXml) const;
-   bool fromXml(DOMNode* pDocument, unsigned int version);
-
-private:
-   LocationType mSize;
-};
-
-
 class FileNameProperty : public GraphicProperty
 {
 public:
