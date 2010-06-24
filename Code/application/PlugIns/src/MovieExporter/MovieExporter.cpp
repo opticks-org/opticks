@@ -7,18 +7,24 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include "AdvancedOptionsWidget.h"
 #include "AnimationController.h"
+#include "AnimationFrameSubsetWidget.h"
 #include "AppConfig.h"
 #include "AppVerify.h"
 #include "AppVersion.h"
+#include "BitrateWidget.h"
 #include "FileDescriptor.h"
+#include "FramerateWidget.h"
 #include "MovieExporter.h"
+#include "MovieExportOptionsWidget.h"
 #include "OptionsMovieExporter.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
 #include "Progress.h"
 #include "StringUtilities.h"
 #include "View.h"
+#include "ViewResolutionWidget.h"
 
 #include <QtCore/QString>
 #include <QtGui/QImage>
@@ -170,11 +176,6 @@ void MovieExporter::log_error(const string& msg)
 
 bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
-   if (mpOptionWidget.get() != NULL)
-   {
-      mpOptionWidget->applyChanges();
-   }
-
    FileDescriptor* pFileDescriptor(NULL);
    string filename;
    View* pView(NULL);
@@ -235,7 +236,17 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
       {
          if (mpOptionWidget.get() != NULL)
          {
-            mpOptionWidget->getResolution(resolutionX, resolutionY);
+            ViewResolutionWidget* pResolutionWidget = mpOptionWidget->getResolutionWidget();
+            VERIFY(pResolutionWidget != NULL);
+
+            QSize resolution = pResolutionWidget->getResolution();
+            resolutionX = resolution.width();
+            resolutionY = resolution.height();
+         }
+         else
+         {
+            resolutionX = OptionsMovieExporter::getSettingWidth();
+            resolutionY = OptionsMovieExporter::getSettingHeight();
          }
       }
       else
@@ -300,7 +311,10 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
       {
          if (mpOptionWidget.get() != NULL)
          {
-            framerate = mpOptionWidget->getFramerate();
+            FramerateWidget* pFramerateWidget = mpOptionWidget->getFramerateWidget();
+            VERIFY(pFramerateWidget != NULL);
+
+            framerate = pFramerateWidget->getFramerate();
          }
          else
          {
@@ -336,7 +350,10 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
       {
          if (mpOptionWidget.get() != NULL)
          {
-            bitrate = mpOptionWidget->getBitrate();
+            BitrateWidget* pBitrateWidget = mpOptionWidget->getBitrateWidget();
+            VERIFY(pBitrateWidget != NULL);
+
+            bitrate = pBitrateWidget->getBitrate();
          }
          else
          {
@@ -350,7 +367,10 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
       {
          if (mpOptionWidget.get() != NULL)
          {
-            startExport = mpOptionWidget->getStartFrame();
+            AnimationFrameSubsetWidget* pSubsetWidget = mpOptionWidget->getSubsetWidget();
+            VERIFY(pSubsetWidget != NULL);
+
+            startExport = pSubsetWidget->getStartFrame();
          }
          else
          {
@@ -376,7 +396,10 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
       {
          if (mpOptionWidget.get() != NULL)
          {
-            stopExport = mpOptionWidget->getStopFrame();
+            AnimationFrameSubsetWidget* pSubsetWidget = mpOptionWidget->getSubsetWidget();
+            VERIFY(pSubsetWidget != NULL);
+
+            stopExport = pSubsetWidget->getStopFrame();
          }
          else
          {
@@ -591,7 +614,10 @@ ValidationResultType MovieExporter::validate(const PlugInArgList* pArgList, stri
    {
       if (mpOptionWidget.get() != NULL)
       {
-         expectedFrameRate = mpOptionWidget->getFramerate();
+         FramerateWidget* pFramerateWidget = mpOptionWidget->getFramerateWidget();
+         VERIFYRV(pFramerateWidget != NULL, VALIDATE_FAILURE);
+
+         expectedFrameRate = pFramerateWidget->getFramerate();
       }
       if (expectedFrameRate == 0)
       {
@@ -637,11 +663,25 @@ QWidget* MovieExporter::getExportOptionsWidget(const PlugInArgList* pInArgList)
 {
    if (mpOptionWidget.get() == NULL)
    {
-      OptionsMovieExporter* pOptionWidget = new OptionsMovieExporter();
-      mpOptionWidget = auto_ptr<OptionsMovieExporter>(pOptionWidget);
+      // Create the options widget
+      MovieExportOptionsWidget* pOptionWidget = new MovieExportOptionsWidget();
+      mpOptionWidget = auto_ptr<MovieExportOptionsWidget>(pOptionWidget);
       VERIFYRV(mpOptionWidget.get() != NULL, NULL);
-      mpOptionWidget->setPromptUserToSaveSettings(true);
 
+      // Resolution
+      ViewResolutionWidget* pResolutionWidget = mpOptionWidget->getResolutionWidget();
+      VERIFYRV(pResolutionWidget != NULL, NULL);
+
+      QSize resolution(OptionsMovieExporter::getSettingWidth(), OptionsMovieExporter::getSettingHeight());
+      pResolutionWidget->setResolution(resolution);
+
+      // Bitrate
+      BitrateWidget* pBitrateWidget = mpOptionWidget->getBitrateWidget();
+      VERIFYRV(pBitrateWidget != NULL, NULL);
+
+      pBitrateWidget->setBitrate(OptionsMovieExporter::getSettingBitrate());
+
+      // Framerates
       AVOutputFormat* pOutFormat = getOutputFormat();
       VERIFYRV(pOutFormat, NULL);
       AVCodec* pCodec = avcodec_find_encoder(pOutFormat->video_codec);
@@ -668,42 +708,64 @@ QWidget* MovieExporter::getExportOptionsWidget(const PlugInArgList* pInArgList)
             // intentionally left blank
          }
 
-         mpOptionWidget->setFramerates(frameRates);
+         FramerateWidget* pFramerateWidget = mpOptionWidget->getFramerateWidget();
+         VERIFYRV(pFramerateWidget != NULL, NULL);
+
+         pFramerateWidget->setFramerates(frameRates);
       }
 
       View* pView = pInArgList->getPlugInArgValue<View>(ExportItemArg());
       if (pView != NULL)
       {
-         QWidget* pWidget = pView->getWidget();
-         if (pWidget != NULL)
-         {
-            mpOptionWidget->setResolution(pWidget->width(), pWidget->height());
-         }
-
          AnimationController* pController = pView->getAnimationController();
          if (pController != NULL)
          {
-            mpOptionWidget->setFrames(pController);
+            // Subset
+            AnimationFrameSubsetWidget* pSubsetWidget = mpOptionWidget->getSubsetWidget();
+            VERIFYRV(pSubsetWidget != NULL, NULL);
+
+            pSubsetWidget->setFrames(pController);
 
             double start = pController->getStartFrame();
             double stop = pController->getStopFrame();
 
-            // now check if need to change start and stop to playback bumpers
             if (pController->getBumpersEnabled())
             {
+               // Need to change start and stop to playback bumpers
                start = pController->getStartBumper();
                stop = pController->getStopBumper();
             }
 
-            mpOptionWidget->setStartFrame(start);
-            mpOptionWidget->setStopFrame(stop);
+            pSubsetWidget->setStartFrame(start);
+            pSubsetWidget->setStopFrame(stop);
 
-            // Frame rate
+            // Framerate
             rational<int> frameRate = getFrameRate(pController);
             frameRate = convertToValidFrameRate(frameRate);
-            mpOptionWidget->setFramerate(frameRate);
+
+            FramerateWidget* pFramerateWidget = mpOptionWidget->getFramerateWidget();
+            VERIFYRV(pFramerateWidget != NULL, NULL);
+
+            pFramerateWidget->setFramerate(frameRate);
          }
       }
+
+      // Advanced options
+      AdvancedOptionsWidget* pAdvancedWidget = mpOptionWidget->getAdvancedWidget();
+      VERIFYRV(pAdvancedWidget != NULL, NULL);
+
+      pAdvancedWidget->setMeMethod(OptionsMovieExporter::getSettingMeMethod());
+      pAdvancedWidget->setGopSize(OptionsMovieExporter::getSettingGopSize());
+      pAdvancedWidget->setQCompress(OptionsMovieExporter::getSettingQCompress());
+      pAdvancedWidget->setQBlur(OptionsMovieExporter::getSettingQBlur());
+      pAdvancedWidget->setQMinimum(OptionsMovieExporter::getSettingQMinimum());
+      pAdvancedWidget->setQMaximum(OptionsMovieExporter::getSettingQMaximum());
+      pAdvancedWidget->setQDiffMaximum(OptionsMovieExporter::getSettingQDiffMaximum());
+      pAdvancedWidget->setMaxBFrames(OptionsMovieExporter::getSettingMaxBFrames());
+      pAdvancedWidget->setBQuantFactor(OptionsMovieExporter::getSettingBQuantFactor());
+      pAdvancedWidget->setBQuantOffset(OptionsMovieExporter::getSettingBQuantOffset());
+      pAdvancedWidget->setDiaSize(OptionsMovieExporter::getSettingDiaSize());
+      pAdvancedWidget->setFlags(OptionsMovieExporter::getSettingFlags());
    }
 
    return mpOptionWidget.get();
@@ -729,18 +791,21 @@ bool MovieExporter::setAvCodecOptions(AVCodecContext* pContext)
    int newFlags = OptionsMovieExporter::getSettingFlags();
    if (mpOptionWidget.get() != NULL)
    {
-      meMethod = mpOptionWidget->getMeMethod();
-      pContext->gop_size = mpOptionWidget->getGopSize();
-      pContext->qcompress = mpOptionWidget->getQCompress();
-      pContext->qblur = mpOptionWidget->getQBlur();
-      pContext->qmin = mpOptionWidget->getQMinimum();
-      pContext->qmax = mpOptionWidget->getQMaximum();
-      pContext->max_qdiff = mpOptionWidget->getQDiffMaximum();
-      pContext->max_b_frames = mpOptionWidget->getMaxBFrames();
-      pContext->b_quant_factor = mpOptionWidget->getBQuantFactor();
-      pContext->b_quant_offset = mpOptionWidget->getBQuantOffset();
-      pContext->dia_size = mpOptionWidget->getDiaSize();
-      newFlags = mpOptionWidget->getFlags();
+      AdvancedOptionsWidget* pAdvancedWidget = mpOptionWidget->getAdvancedWidget();
+      VERIFY(pAdvancedWidget != NULL);
+
+      meMethod = pAdvancedWidget->getMeMethod();
+      pContext->gop_size = pAdvancedWidget->getGopSize();
+      pContext->qcompress = pAdvancedWidget->getQCompress();
+      pContext->qblur = pAdvancedWidget->getQBlur();
+      pContext->qmin = pAdvancedWidget->getQMinimum();
+      pContext->qmax = pAdvancedWidget->getQMaximum();
+      pContext->max_qdiff = pAdvancedWidget->getQDiffMaximum();
+      pContext->max_b_frames = pAdvancedWidget->getMaxBFrames();
+      pContext->b_quant_factor = pAdvancedWidget->getBQuantFactor();
+      pContext->b_quant_offset = pAdvancedWidget->getBQuantOffset();
+      pContext->dia_size = pAdvancedWidget->getDiaSize();
+      newFlags = pAdvancedWidget->getFlags();
    }
    pContext->me_method = StringUtilities::fromXmlString<Motion_Est_ID>(meMethod);
    pContext->flags |= newFlags;

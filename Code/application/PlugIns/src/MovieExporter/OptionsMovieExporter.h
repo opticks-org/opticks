@@ -14,36 +14,20 @@
 #include "ConfigurationSettings.h"
 #include "LabeledSectionGroup.h"
 
-#include <boost/rational.hpp>
-#include <QtCore/QMetaType>
+#include <string>
 
-class AnimationController;
-class AnimationFrameSubsetWidget;
-class LabeledSection;
-class QCheckBox;
-class QComboBox;
-class QDoubleSpinBox;
-class QGroupBox;
-class QIcon;
-class QLabel;
-class QLineEdit;
-class QPushButton;
-class QSlider;
-class QSpinBox;
-
-Q_DECLARE_METATYPE(boost::rational<int>);
+class AdvancedOptionsWidget;
+class BitrateWidget;
+class ViewResolutionWidget;
 
 class OptionsMovieExporter : public LabeledSectionGroup
 {
-   Q_OBJECT
-
 public:
    OptionsMovieExporter();
    ~OptionsMovieExporter();
 
-   /**
-    * The video stream bitrate in kbps
-    */
+   SETTING(Width, MovieExporter, unsigned int, 0);
+   SETTING(Height, MovieExporter, unsigned int, 0);
    SETTING(Bitrate, MovieExporter, unsigned int, 0);
    SETTING(MeMethod, MovieExporter, std::string, std::string());
    SETTING(GopSize, MovieExporter, int, 0);
@@ -59,46 +43,6 @@ public:
    SETTING(Flags, MovieExporter, int, 0);
 
    void applyChanges();
-   void setPromptUserToSaveSettings(bool prompt);
-
-   void getResolution(unsigned int &width, unsigned int &height) const;
-   void setResolution(unsigned int width, unsigned int height);
-
-   void setFrames(AnimationController* pController);
-   double getStartFrame() const;
-   void setStartFrame(double start);
-   double getStopFrame() const;
-   void setStopFrame(double stop);
-   unsigned int getBitrate() const;
-   void setBitrate(unsigned int bitrate);
-   boost::rational<int> getFramerate() const;
-   void setFramerate(boost::rational<int> frameRate);
-   void setFramerates(std::vector<boost::rational<int> > frameRates);
-
-   std::string getMeMethod() const;
-   void setMeMethod(const std::string &method);
-   int getGopSize() const;
-   void setGopSize(int size);
-   float getQCompress() const;
-   void setQCompress(float val);
-   float getQBlur() const;
-   void setQBlur(float val);
-   int getQMinimum() const;
-   void setQMinimum(int val);
-   int getQMaximum() const;
-   void setQMaximum(int val);
-   int getQDiffMaximum() const;
-   void setQDiffMaximum(int val);
-   int getMaxBFrames() const;
-   void setMaxBFrames(int val);
-   float getBQuantFactor() const;
-   void setBQuantFactor(float val);
-   float getBQuantOffset() const;
-   void setBQuantOffset(float val);
-   int getDiaSize() const;
-   void setDiaSize(int val);
-   int getFlags() const;
-   void setFlags(int val);
 
    static const std::string& getName()
    {
@@ -153,57 +97,10 @@ public:
       return var;
    }
 
-public slots:
-   void setUseViewResolution(bool v);
-
-private slots:
-   void checkResolutionX(bool ignoreAspectRatio = false);
-   void checkResolutionY(bool ignoreAspectRatio = false);
-   void aspectLockToggled(bool state);
-   void updateBitrate(int value);
-   void frameRateListChanged(const QString &value);
-
 private:
-   QCheckBox* mpUseViewResolution;
-   QLineEdit* mpResolutionX;
-   QLineEdit* mpResolutionY;
-   QPushButton* mpResolutionAspectLock;
-   QIcon* mpLockIcon;
-   QIcon* mpUnlockIcon;
-   unsigned int mCurrentResolutionX;
-   unsigned int mCurrentResolutionY;
-
-   QSlider* mpBitrate;
-   QLabel* mpBitrateValue;
-   AnimationFrameSubsetWidget* mpFrameSubset;
-   QSpinBox* mpFramerateNum;
-   QSpinBox* mpFramerateDen;
-   QComboBox* mpFramerateList;
-
-   QComboBox* mpMeMethod;
-   QSpinBox* mpGopSize;
-   QDoubleSpinBox* mpQCompress;
-   QDoubleSpinBox* mpQBlur;
-   QSpinBox* mpQMinimum;
-   QSpinBox* mpQMaximum;
-   QSpinBox* mpQDiffMaximum;
-   QSpinBox* mpMaxBFrames;
-   QDoubleSpinBox* mpBQuantFactor;
-   QDoubleSpinBox* mpBQuantOffset;
-   QSpinBox* mpDiaSize;
-   QCheckBox* mpQScale;
-   QCheckBox* mpQPel;
-   QCheckBox* mpGmc;
-   QCheckBox* mpNormalizeAqp;
-   QCheckBox* mpTrellis;
-   QCheckBox* mpAcPred;
-   QCheckBox* mpCbpRd;
-   QCheckBox* mpQpRd;
-   QCheckBox* mpObmc;
-   QCheckBox* mpClosedGop;
-
-   LabeledSection* mpSettingsSection;
-   QCheckBox* mpSaveSettings;
+   ViewResolutionWidget* mpResolutionWidget;
+   BitrateWidget* mpBitrateWidget;
+   AdvancedOptionsWidget* mpAdvancedWidget;
 };
 
 #endif

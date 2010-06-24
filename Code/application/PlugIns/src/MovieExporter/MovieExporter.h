@@ -26,7 +26,7 @@
 #include <memory>
 
 class AnimationController;
-class OptionsMovieExporter;
+class MovieExportOptionsWidget;
 class Progress;
 class QWidget;
 
@@ -207,7 +207,7 @@ private:
    int mFrameCount;
    int mVideoOutbufSize;
 
-   std::auto_ptr<OptionsMovieExporter> mpOptionWidget;
+   std::auto_ptr<MovieExportOptionsWidget> mpOptionWidget;
 };
 
 #endif
