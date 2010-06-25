@@ -95,7 +95,10 @@ OptionsSpatialDataView::OptionsSpatialDataView() :
    // Other Options
    mpGeoCoordTooltip = new QCheckBox("Geo Coordinate Tool Tip", this);
    mpConfirmLayerDelete = new QCheckBox("Confirm non-undoable layer delete", this);
-   mpActiveLayer = new QCheckBox("Activate Layer When Histogram Selected", this);
+   mpActiveLayer = new QCheckBox("Link Layer and Histogram Activation", this);
+   mpActiveLayer->setToolTip("Selecting a threshold or raster layer histogram will activate the layer and make it visible.\n"
+                             "Showing a threshold layer in the session explorer will make the histogram plot active.\n"
+                             "The primary raster layer will never be activated and pulled to the top of the layer stack.");
    mpShowCoordinates = new QCheckBox("Show Pixel Coordinates When Zoomed In", this);
    mpShowCoordinates->setToolTip("Show pixel coordinates instead of raw values when zoomed in.");
    mpDisplayCrosshair = new QCheckBox("Display Crosshair", this);

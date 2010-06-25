@@ -186,6 +186,7 @@ protected slots:
    void setActiveLayer();
    void showLayers();
    void hideLayers();
+   void selectLayersOfType();
    void deleteLayer();
    void setOrigin(QAction* pAction);
    void updateOriginAction(const DataOrigin& origin);
@@ -218,6 +219,11 @@ private:
    QTimer mMousePanTimer;
    QPoint mMousePanEngagePos;
    const MouseMode* mpOldMouseMode;
+
+   // Session explorer context menu actions
+   QAction* mpShowLayersAction;
+   QAction* mpHideLayersAction;
+   QAction* mpSelectLayersOfTypeAction;
 
    // Context menu actions
    QAction* mpAnnotationAction;

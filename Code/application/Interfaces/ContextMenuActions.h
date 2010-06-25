@@ -492,6 +492,12 @@
 #define APP_SPATIALDATAVIEW_PROPERTIES_SEPARATOR_ACTION "APP_SPATIALDATAVIEW_PROPERTIES_SEPARATOR_ACTION"
 
 /**
+ *  Select all layers in the Session Explorer which are of the same type as any currently
+ *  selected layer.
+ */
+#define APP_SPATIALDATAVIEW_SELECT_LAYERS_OF_TYPE_ACTION "APP_SPATIALDATAVIEW_SELECT_LAYERS_OF_TYPE_ACTION"
+
+/**
  *  Shows all selected layers in the Session Explorer.\   This action only
  *  appears when multiple layers in the same view are selected.
  */

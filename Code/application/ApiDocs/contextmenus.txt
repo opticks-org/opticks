@@ -255,6 +255,7 @@
  *    <tr><td>Crosshair</td><td>APP_SPATIALDATAVIEW_CROSSHAIR_ACTION()</td></tr>
  *    <tr><td>Separator</td><td>APP_SPATIALDATAVIEW_CROSSHAIR_SEPARATOR_ACTION()</td></tr>
  *    <tr><td>Hide layers</td><td>APP_SPATIALDATAVIEW_HIDE_LAYERS_ACTION()</td></tr>
+ *    <tr><td>Select Layers of Type</td><td>APP_SPATIALDATAVIEW_SELECT_LAYERS_OF_TYPE_ACTION()</td></tr>
  *    <tr><td>Activate</td><td>APP_SPATIALDATAVIEW_LAYER_ACTIVATE_ACTION()</td></tr>
  *    <tr><td>Convert</td><td>APP_SPATIALDATAVIEW_LAYER_CONVERT_ACTION()</td></tr>
  *    <tr><td>Copy</td><td>APP_SPATIALDATAVIEW_LAYER_COPY_ACTION()</td></tr>

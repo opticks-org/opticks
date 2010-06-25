@@ -33,6 +33,7 @@ public:
 
    using SessionItemImp::setIcon;
    void updateContextMenu(Subject& subject, const std::string& signal, const boost::any& value);
+   void activateLayerPlot(Subject& subject, const std::string& signal, const boost::any& value);
 
    PlotSet* createPlotSet(const QString& strPlotSet);
    bool deletePlotSet(PlotSet* pPlotSet);

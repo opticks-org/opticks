@@ -109,8 +109,32 @@ SpatialDataViewImp::SpatialDataViewImp(const string& id, const string& viewName,
       new AnnotationElementAdapter(measurementsDescriptor, SessionItemImp::generateUniqueId()));
 
    // Context menu actions
-   Service<DesktopServices> pDesktop;
    string shortcutContext = "View/Spatial Data";
+   Service<DesktopServices> pDesktop;
+
+   // Session explorer context menu actions
+   mpShowLayersAction = new QAction(QIcon(":/icons/ShowLayers"), "Show All Layers", this);
+   mpShowLayersAction->setAutoRepeat(false);
+   mpShowLayersAction->setShortcutContext(Qt::WidgetShortcut);
+   VERIFYNR(connect(mpShowLayersAction, SIGNAL(triggered()), this, SLOT(showLayers())));
+   pDesktop->initializeAction(mpShowLayersAction, shortcutContext);
+   addAction(mpShowLayersAction);
+
+   // Hide all
+   mpHideLayersAction = new QAction(QIcon(":/icons/HideLayers"), "Hide All Layers", this);
+   mpHideLayersAction->setAutoRepeat(false);
+   mpHideLayersAction->setShortcutContext(Qt::WidgetShortcut);
+   VERIFYNR(connect(mpHideLayersAction, SIGNAL(triggered()), this, SLOT(hideLayers())));
+   pDesktop->initializeAction(mpHideLayersAction, shortcutContext);
+   addAction(mpHideLayersAction);
+
+   // Select layers of type
+   mpSelectLayersOfTypeAction = new QAction("Select Layers of Type", this);
+   mpSelectLayersOfTypeAction->setAutoRepeat(false);
+   mpSelectLayersOfTypeAction->setShortcutContext(Qt::WidgetShortcut);
+   VERIFYNR(connect(mpSelectLayersOfTypeAction, SIGNAL(triggered()), this, SLOT(selectLayersOfType())));
+   pDesktop->initializeAction(mpSelectLayersOfTypeAction, shortcutContext);
+   addAction(mpSelectLayersOfTypeAction);
 
    // New layer
    QMenu* pNewLayerMenu = new QMenu("New Layer", this);
@@ -3312,6 +3336,11 @@ void SpatialDataViewImp::updateContextMenu(Subject& subject, const string& signa
                   beforeAction = APP_SPATIALDATAVIEW_LAYER_ACTIVATE_ACTION;
                }
             }
+
+            // Select layers of type
+            pMenu->addActionAfter(mpSelectLayersOfTypeAction, APP_SPATIALDATAVIEW_SELECT_LAYERS_OF_TYPE_ACTION,
+               beforeAction);
+            beforeAction = APP_SPATIALDATAVIEW_SELECT_LAYERS_OF_TYPE_ACTION;
          }
       }
       else if (numItems > 1)
@@ -3319,38 +3348,16 @@ void SpatialDataViewImp::updateContextMenu(Subject& subject, const string& signa
          vector<Layer*> layers = pMenu->getSessionItems<Layer>();
          if (layers.size() == numItems)
          {
-            QList<QVariant> layerList;
-
-            vector<Layer*>::iterator iter;
-            for (iter = layers.begin(); iter != layers.end(); ++iter)
-            {
-               Layer* pLayer = *iter;
-               if (pLayer != NULL)
-               {
-                  if (mpLayerList->containsLayer(pLayer) == false)
-                  {
-                     return;
-                  }
-
-                  QVariant layer = QVariant::fromValue(pLayer);
-                  layerList.append(layer);
-               }
-            }
-
             // Show all
-            QAction* pShowLayersAction = new QAction(QIcon(":/icons/ShowLayers"), "Show All Layers", pParent);
-            pShowLayersAction->setAutoRepeat(false);
-            pShowLayersAction->setData(QVariant(layerList));
-            connect(pShowLayersAction, SIGNAL(triggered()), this, SLOT(showLayers()));
-            pMenu->addAction(pShowLayersAction, APP_SPATIALDATAVIEW_SHOW_LAYERS_ACTION);
+            pMenu->addAction(mpShowLayersAction, APP_SPATIALDATAVIEW_SHOW_LAYERS_ACTION);
 
             // Hide all
-            QAction* pHideLayersAction = new QAction(QIcon(":/icons/HideLayers"), "Hide All Layers", pParent);
-            pHideLayersAction->setAutoRepeat(false);
-            pHideLayersAction->setData(QVariant(layerList));
-            connect(pHideLayersAction, SIGNAL(triggered()), this, SLOT(hideLayers()));
-            pMenu->addActionAfter(pHideLayersAction, APP_SPATIALDATAVIEW_HIDE_LAYERS_ACTION,
+            pMenu->addActionAfter(mpHideLayersAction, APP_SPATIALDATAVIEW_HIDE_LAYERS_ACTION,
                APP_SPATIALDATAVIEW_SHOW_LAYERS_ACTION);
+
+            // Select layers of type
+            pMenu->addActionAfter(mpSelectLayersOfTypeAction, APP_SPATIALDATAVIEW_SELECT_LAYERS_OF_TYPE_ACTION,
+               APP_SPATIALDATAVIEW_HIDE_LAYERS_ACTION);
          }
       }
    }
@@ -3523,60 +3530,63 @@ void SpatialDataViewImp::setActiveLayer()
 
 void SpatialDataViewImp::showLayers()
 {
-   QList<QVariant> layers;
-
-   QAction* pAction = dynamic_cast<QAction*>(sender());
-   if (pAction != NULL)
-   {
-      layers = pAction->data().toList();
-   }
-
-   if (layers.empty() == true)
-   {
-      return;
-   }
-
    UndoGroup group(dynamic_cast<View*>(this), "Show Layers");
-
-   for (int i = 0; i < layers.count(); ++i)
+   std::vector<Layer*> layers = Service<SessionExplorer>()->getSelectedSessionItems<Layer>();
+   for (std::vector<Layer*>::iterator iter = layers.begin(); iter != layers.end(); ++iter)
    {
-      Layer* pLayer = layers[i].value<Layer*>();
-      if (pLayer != NULL)
+      Layer* pLayer = *iter;
+      if (pLayer != NULL && mpLayerList->containsLayer(pLayer))
       {
          showLayer(pLayer);
       }
    }
-
    refresh();
 }
 
 void SpatialDataViewImp::hideLayers()
 {
-   QList<QVariant> layers;
-
-   QAction* pAction = dynamic_cast<QAction*>(sender());
-   if (pAction != NULL)
-   {
-      layers = pAction->data().toList();
-   }
-
-   if (layers.empty() == true)
-   {
-      return;
-   }
-
    UndoGroup group(dynamic_cast<View*>(this), "Hide Layers");
-
-   for (int i = 0; i < layers.count(); ++i)
+   std::vector<Layer*> layers = Service<SessionExplorer>()->getSelectedSessionItems<Layer>();
+   for (std::vector<Layer*>::iterator iter = layers.begin(); iter != layers.end(); ++iter)
    {
-      Layer* pLayer = layers[i].value<Layer*>();
-      if (pLayer != NULL)
+      Layer* pLayer = *iter;
+      if (pLayer != NULL && mpLayerList->containsLayer(pLayer))
       {
          hideLayer(pLayer);
       }
    }
-
    refresh();
+}
+
+void SpatialDataViewImp::selectLayersOfType()
+{
+   std::vector<Layer*> layers = Service<SessionExplorer>()->getSelectedSessionItems<Layer>();
+   std::set<std::pair<SpatialDataView*, LayerType> > layerTypes;
+   for (std::vector<Layer*>::iterator iter = layers.begin(); iter != layers.end(); ++iter)
+   {
+      Layer* pLayer = *iter;
+      if (pLayer != NULL && mpLayerList->containsLayer(pLayer))
+      {
+         SpatialDataView* pSdv = dynamic_cast<SpatialDataView*>(pLayer->getView());
+         if (pSdv != NULL)
+         {
+            layerTypes.insert(std::make_pair(pSdv, pLayer->getLayerType()));
+         }
+      }
+   }
+   std::vector<SessionItem*> newLayerSelection;
+   for (std::set<std::pair<SpatialDataView*, LayerType> >::iterator typeIter = layerTypes.begin();
+        typeIter != layerTypes.end();
+        ++typeIter)
+   {
+      std::vector<Layer*> curLayers;
+      typeIter->first->getLayerList()->getLayers(typeIter->second, curLayers);
+      for (std::vector<Layer*>::iterator curIter = curLayers.begin(); curIter != curLayers.end(); ++curIter)
+      {
+         newLayerSelection.push_back(*curIter);
+      }
+   }
+   Service<SessionExplorer>()->setSelectedSessionItems(newLayerSelection);
 }
 
 void SpatialDataViewImp::deleteLayer()

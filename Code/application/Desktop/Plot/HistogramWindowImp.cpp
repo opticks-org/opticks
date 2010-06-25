@@ -31,6 +31,7 @@
 #include "SpatialDataView.h"
 #include "SpatialDataWindow.h"
 #include "StringUtilities.h"
+#include "ThresholdLayer.h"
 #include "WorkspaceWindow.h"
 
 #include <vector>
@@ -160,6 +161,24 @@ void HistogramWindowImp::updateContextMenu(Subject& subject, const string& signa
    if (bRemoveActions == true)
    {
       pMenu->removeAction(APP_PLOTSET_DELETE_ACTION);
+   }
+}
+
+void HistogramWindowImp::activateLayerPlot(Subject& subject, const std::string& signal, const boost::any& value)
+{
+   if (isHidden() || !HistogramWindow::getSettingLayerActivation())
+   {
+      return;
+   }
+   ThresholdLayer* pLayer = dynamic_cast<ThresholdLayer*>(boost::any_cast<Layer*>(value));
+   if (pLayer == NULL)
+   {
+      return;
+   }
+   PlotWidget* pPlot = getPlot(pLayer);
+   if (pPlot != NULL)
+   {
+      setCurrentPlot(pPlot);
    }
 }
 
@@ -335,6 +354,13 @@ PlotWidget* HistogramWindowImp::createPlot(Layer* pLayer, PlotSet* pPlotSet)
             if (pPlotSet == NULL)
             {
                pPlotSet = createPlotSet(strViewName);
+            }
+
+            // Attach layer shown signals
+            SpatialDataView* pSdv = dynamic_cast<SpatialDataView*>(pView);
+            if (pSdv != NULL)
+            {
+               pSdv->attach(SIGNAL_NAME(SpatialDataView, LayerShown), Slot(this, &HistogramWindowImp::activateLayerPlot));
             }
          }
       }
@@ -606,6 +632,13 @@ void HistogramWindowImp::deletePlot(Layer* pLayer)
          if (pPlotSet->getNumPlots() == 0)
          {
             deletePlotSet(pPlotSet);
+
+            // Detach layer shown signals
+            SpatialDataView* pSdv = static_cast<SpatialDataView*>(pLayer->getView());
+            if (pSdv != NULL)
+            {
+               pSdv->detach(SIGNAL_NAME(SpatialDataView, LayerShown), Slot(this, &HistogramWindowImp::activateLayerPlot));
+            }
          }
       }
    }
@@ -745,6 +778,7 @@ void HistogramWindowImp::activateLayer(PlotWidget* pPlot)
    if (pLayer != NULL)
    {
       bool activate = HistogramWindow::getSettingLayerActivation();
+      bool isPrimary = false;
       if (activate)
       {
          // Don't activate the primary raster element
@@ -755,9 +789,16 @@ void HistogramWindowImp::activateLayer(PlotWidget* pPlot)
             LayerList* pLayerList = pView->getLayerList();
             if (pLayerList != NULL)
             {
-               if (pLayerList->getPrimaryRasterElement() == pElement)
+               /**
+                This prevents the "primary raster layer" from moving to the top of the stack
+                when activating a histogram. The "primary raster layer" is a raster layer
+                containing the primary raster element.
+                **/
+               if (pLayerList->getPrimaryRasterElement() == pElement &&
+                   pLayer->getLayerType() == RASTER &&
+                   pView->getLayerDisplayIndex(pLayer) == (pLayerList->getNumLayers() - 1))
                {
-                  activate = false;
+                  isPrimary = true;
                }
             }
          }
@@ -791,7 +832,12 @@ void HistogramWindowImp::activateLayer(PlotWidget* pPlot)
 
             if (pView != NULL)
             {
-               pView->setFrontLayer(pLayer);
+               if (!isPrimary)
+               {
+                  pView->setFrontLayer(pLayer);
+               }
+               // ensure the layer is visible
+               pView->showLayer(pLayer);
             }
          }
       }
