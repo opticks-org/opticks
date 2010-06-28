@@ -14,11 +14,15 @@
 #include "AppVersion.h"
 
 class ComplexComponentComboBox;
+class CustomTreeWidget;
+class DynamicObject;
 class QCheckBox;
 class QComboBox;
 class QDoubleSpinBox;
 class RegionUnitsComboBox;
 class StretchTypeComboBox;
+
+#include <string>
 
 class OptionsRasterLayer : public QWidget
 {
@@ -85,23 +89,30 @@ public:
 
 private:
    QCheckBox* mpUseGpuImage;
-   QDoubleSpinBox* mpRedUpperValue;
+   QDoubleSpinBox* mpRedUpperStretchValue;
    RegionUnitsComboBox* mpRedStretch;
-   QDoubleSpinBox* mpRedLowerValue;
-   QDoubleSpinBox* mpGreenUpperValue;
+   QDoubleSpinBox* mpRedLowerStretchValue;
+   QDoubleSpinBox* mpGreenUpperStretchValue;
    RegionUnitsComboBox* mpGreenStretch;
-   QDoubleSpinBox* mpGreenLowerValue;
-   QDoubleSpinBox* mpBlueUpperValue;
+   QDoubleSpinBox* mpGreenLowerStretchValue;
+   QDoubleSpinBox* mpBlueUpperStretchValue;
    RegionUnitsComboBox* mpBlueStretch;
-   QDoubleSpinBox* mpBlueLowerValue;
-   QDoubleSpinBox* mpGrayUpperValue;
+   QDoubleSpinBox* mpBlueLowerStretchValue;
+   QDoubleSpinBox* mpGrayUpperStretchValue;
    RegionUnitsComboBox* mpGrayStretch;
-   QDoubleSpinBox* mpGrayLowerValue;
+   QDoubleSpinBox* mpGrayLowerStretchValue;
    QCheckBox* mpFastContrast;
    ComplexComponentComboBox* mpComplexComponent;
    QCheckBox* mpBackgroundTileGen;
    StretchTypeComboBox* mpRgbStretch;
    StretchTypeComboBox* mpGrayscaleStretch;
+   CustomTreeWidget* mpColorCompositesTree;
+
+   void addColorCompositeToTree(const std::string& name, const DynamicObject* pObject);
+
+private slots:
+   void addColorComposite();
+   void removeColorComposite();
 };
 
 #endif

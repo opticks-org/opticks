@@ -21,6 +21,7 @@
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "RasterFileDescriptor.h"
+#include "RasterLayer.h"
 #include "RasterUtilities.h"
 #include "SpecialMetadata.h"
 #include "switchOnEncoding.h"
@@ -32,13 +33,6 @@
 
 namespace
 {
-   const double BlueCenter = 0.45;
-   const double BlueTolerance = 0.04;
-   const double GreenCenter = 0.55;
-   const double GreenTolerance = 0.04;
-   const double RedCenter = 0.65;
-   const double RedTolerance = 0.04;
-
    void calculateNewPoints(Opticks::PixelLocation point0,
                            Opticks::PixelLocation point1,
                            std::vector<Opticks::PixelLocation>& endPoints)
@@ -731,89 +725,243 @@ std::string RasterUtilities::getBandName(const RasterDataDescriptor* pDescriptor
    return ::getBandName(pBandNames, pBandPrefix, band);
 }
 
-namespace
+bool RasterUtilities::findColorCompositeDimensionDescriptors(const RasterDataDescriptor* pDescriptor,
+   const std::string& name, DimensionDescriptor& redBand, DimensionDescriptor& greenBand, DimensionDescriptor& blueBand)
 {
-   bool findTrueColorDimensionDescriptors(const RasterDataDescriptor *pDescriptor,
-      DimensionDescriptor &red, DimensionDescriptor &green, DimensionDescriptor &blue)
+   redBand = DimensionDescriptor();
+   greenBand = DimensionDescriptor();
+   blueBand = DimensionDescriptor();
+
+   const DynamicObject* pColorComposites = RasterLayer::getSettingColorComposites();
+   if (pDescriptor == NULL || pColorComposites == NULL)
    {
-      if (pDescriptor == NULL)
-      {
-         return false;
-      }
-
-      const DynamicObject* pMeta = pDescriptor->getMetadata();
-      if (pMeta == NULL)
-      {
-         return false;
-      }
-
-      std::string pWavelengthPath[] = { SPECIAL_METADATA_NAME, BAND_METADATA_NAME, 
-         CENTER_WAVELENGTHS_METADATA_NAME, END_METADATA_NAME };
-      const std::vector<double>* pWaveLengths = dv_cast<std::vector<double> >(
-         &pMeta->getAttributeByPath(pWavelengthPath));
-      if (pWaveLengths == NULL)
-      {
-         return false;
-      }
-
-      if (pWaveLengths->size() < 3)   // need at least 3 bands for true color
-      {
-         return false;
-      }
-
-      int redIndex(-1);
-      int greenIndex(-1);
-      int blueIndex(-1);
-
-      // get best blue band match
-      blueIndex = RasterUtilities::findBestMatch(*pWaveLengths, BlueCenter, BlueTolerance);
-      if (blueIndex == -1)
-      {
-         return false;
-      }
-
-      // get best green band match
-      greenIndex = RasterUtilities::findBestMatch(*pWaveLengths, GreenCenter, GreenTolerance, blueIndex+1);
-      if (greenIndex == -1)
-      {
-         return false;
-      }
-
-      // get best red band match
-      redIndex = RasterUtilities::findBestMatch(*pWaveLengths, RedCenter, RedTolerance, greenIndex+1);
-      if (redIndex == -1)
-      {
-         return false;
-      }
-
-      red = pDescriptor->getActiveBand(redIndex);
-      green = pDescriptor->getActiveBand(greenIndex);
-      blue = pDescriptor->getActiveBand(blueIndex);
-
-      return true;
+      return false;
    }
-}
-bool RasterUtilities::canBeDisplayedInTrueColor(const RasterDataDescriptor* pDescriptor)
-{
-   DimensionDescriptor dummy;
-   return findTrueColorDimensionDescriptors(pDescriptor, dummy, dummy, dummy);
-}
 
-bool RasterUtilities::setDisplayBandsToTrueColor(RasterDataDescriptor* pDescriptor)
-{
-   DimensionDescriptor red;
-   DimensionDescriptor green;
-   DimensionDescriptor blue;
-
-   if (findTrueColorDimensionDescriptors(pDescriptor, red, green, blue))
+   try
    {
-      pDescriptor->setDisplayBand(BLUE, blue);
-      pDescriptor->setDisplayBand(GREEN, green);
-      pDescriptor->setDisplayBand(RED, red);
-      pDescriptor->setDisplayMode(RGB_MODE);
-      return true;
+      // Get the ColorComposite from ConfigurationSettings based on the name.
+      const DynamicObject* const pObject = dv_cast<DynamicObject>(&pColorComposites->getAttribute(name));
+      if (pObject == NULL)
+      {
+         return false;
+      }
+
+      // Red
+      const double redLower = dv_cast<double>(pObject->getAttribute("redLower"));
+      const double redUpper = dv_cast<double>(pObject->getAttribute("redUpper"));
+      redBand = findBandWavelengthMatch(redLower, redUpper, pDescriptor);
+      if (redBand.isValid() == false)
+      {
+         unsigned int redBandOnesBasedIndex = dv_cast<unsigned int>(pObject->getAttribute("redBand"));
+         if (redBandOnesBasedIndex != 0)
+         {
+            redBand = pDescriptor->getOriginalBand(redBandOnesBasedIndex - 1);
+         }
+      }
+
+      // Green
+      const double greenLower = dv_cast<double>(pObject->getAttribute("greenLower"));
+      const double greenUpper = dv_cast<double>(pObject->getAttribute("greenUpper"));
+      greenBand = findBandWavelengthMatch(greenLower, greenUpper, pDescriptor);
+      if (greenBand.isValid() == false)
+      {
+         unsigned int greenBandOnesBasedIndex = dv_cast<unsigned int>(pObject->getAttribute("greenBand"));
+         if (greenBandOnesBasedIndex != 0)
+         {
+            greenBand = pDescriptor->getOriginalBand(greenBandOnesBasedIndex - 1);
+         }
+      }
+
+      // Blue
+      const double blueLower = dv_cast<double>(pObject->getAttribute("blueLower"));
+      const double blueUpper = dv_cast<double>(pObject->getAttribute("blueUpper"));
+      blueBand = findBandWavelengthMatch(blueLower, blueUpper, pDescriptor);
+      if (blueBand.isValid() == false)
+      {
+         unsigned int blueBandOnesBasedIndex = dv_cast<unsigned int>(pObject->getAttribute("blueBand"));
+         if (blueBandOnesBasedIndex != 0)
+         {
+            blueBand = pDescriptor->getOriginalBand(blueBandOnesBasedIndex - 1);
+         }
+      }
    }
-   return false;
+   catch (const std::bad_cast&)
+   {}
+
+   return redBand.isValid() && greenBand.isValid() && blueBand.isValid();
+}
+
+int RasterUtilities::findBandWavelengthMatch(double lowTarget, double highTarget,
+   const std::vector<double>& lowWavelengths, const std::vector<double>& highWavelengths, bool allowPartialMatch)
+{
+   std::vector<unsigned int> matches =
+      findBandWavelengthMatches(lowTarget, highTarget, lowWavelengths, highWavelengths, allowPartialMatch);
+   if (matches.empty() || matches[matches.size() / 2] < 0)
+   {
+      return -1;
+   }
+
+   return static_cast<int>(matches[matches.size() / 2]);
+}
+
+std::vector<unsigned int> RasterUtilities::findBandWavelengthMatches(double lowTarget, double highTarget,
+   const std::vector<double>& lowWavelengths, const std::vector<double>& highWavelengths, bool allowPartialMatch)
+{
+   if (!highWavelengths.empty() && highWavelengths.size() != lowWavelengths.size())
+   {
+      return std::vector<unsigned int>();
+   }
+
+   // Filter wavelength data and select appropriate band
+   typedef std::pair<std::pair<double, double>, unsigned int> wavelength_item;
+   std::vector<wavelength_item> candidateBands;
+   for (unsigned int bandNumber = 0; bandNumber < lowWavelengths.size(); ++bandNumber)
+   {
+      if (highWavelengths.empty())
+      {
+         // Check center wavelength and if it's in range, add it as a candidate.
+         if (lowWavelengths[bandNumber] >= lowTarget && lowWavelengths[bandNumber] <= highTarget)
+         {
+            candidateBands.push_back(std::make_pair(
+               std::make_pair(lowWavelengths[bandNumber], lowWavelengths[bandNumber]), bandNumber));
+         }
+      }
+      else if (allowPartialMatch)
+      {
+         // Check for any overlap and if in range, add it as a candidate.
+         if ((lowWavelengths[bandNumber] >= lowTarget && lowWavelengths[bandNumber] <= highTarget) ||
+             (highWavelengths[bandNumber] >= lowTarget && highWavelengths[bandNumber] <= highTarget))
+         {
+            candidateBands.push_back(std::make_pair(
+               std::make_pair(lowWavelengths[bandNumber], highWavelengths[bandNumber]), bandNumber));
+         }
+      }
+      else if (lowWavelengths[bandNumber] >= lowTarget && highWavelengths[bandNumber] <= highTarget)
+      {
+         // If the entire band is in range, add it as a candidate
+         candidateBands.push_back(std::make_pair(
+            std::make_pair(lowWavelengths[bandNumber], highWavelengths[bandNumber]), bandNumber));
+      }
+   }
+   if (!candidateBands.empty())
+   {
+      // Sort by low band range
+      std::stable_sort(candidateBands.begin(), candidateBands.end());
+
+      // Build the vector for return
+      std::vector<unsigned int> bands(candidateBands.size());
+      for (unsigned int band = 0; band < candidateBands.size(); ++band)
+      {
+         bands[band] = candidateBands[band].second;
+      }
+
+      return bands;
+   }
+   // No bands fall in range.
+   return std::vector<unsigned int>();
+}
+
+DimensionDescriptor RasterUtilities::findBandWavelengthMatch(double lowTarget, double highTarget,
+   const RasterDataDescriptor* pDescriptor, bool allowPartialMatch)
+{
+   if (pDescriptor == NULL)
+   {
+      return DimensionDescriptor();
+   }
+
+   const RasterFileDescriptor* pFileDescriptor =
+      dynamic_cast<const RasterFileDescriptor*>(pDescriptor->getFileDescriptor());
+   const DynamicObject* pMetadata = pDescriptor->getMetadata();
+   if (pMetadata == NULL)
+   {
+      return DimensionDescriptor();
+   }
+
+   const std::string centerWavelengthsPath[] = {SPECIAL_METADATA_NAME, BAND_METADATA_NAME,
+      CENTER_WAVELENGTHS_METADATA_NAME, END_METADATA_NAME};
+   const std::vector<double>* pCenterWavelengths =
+      dv_cast<std::vector<double> >(&pMetadata->getAttributeByPath(centerWavelengthsPath));
+
+   const std::string startWavelengthsPath[] = {SPECIAL_METADATA_NAME, BAND_METADATA_NAME,
+      START_WAVELENGTHS_METADATA_NAME, END_METADATA_NAME};
+   const std::vector<double>* pStartWavelengths = 
+      dv_cast<std::vector<double> >(&pMetadata->getAttributeByPath(startWavelengthsPath));
+
+   const std::string endWavelengthsPath[] = {SPECIAL_METADATA_NAME, BAND_METADATA_NAME,
+      END_WAVELENGTHS_METADATA_NAME, END_METADATA_NAME};
+   const std::vector<double>* pEndWavelengths = 
+      dv_cast<std::vector<double> >(&pMetadata->getAttributeByPath(endWavelengthsPath));
+
+   bool useOriginalNumbers;
+   std::vector<unsigned int> bands;
+   if ((pStartWavelengths != NULL && pStartWavelengths->empty() == false) &&
+      (pEndWavelengths != NULL && pEndWavelengths->empty() == false))
+   {
+      // Start and end wavelengths available. Use those as the targets.
+      bands = findBandWavelengthMatches(lowTarget, highTarget,
+         *pStartWavelengths, *pEndWavelengths, allowPartialMatch);
+      useOriginalNumbers = pFileDescriptor != NULL && pStartWavelengths->size() == pFileDescriptor->getBandCount();
+   }
+   else if (pCenterWavelengths != NULL && pCenterWavelengths->empty() == false)
+   {
+      // Centers are available so we use those as the targets.
+      bands = findBandWavelengthMatches(lowTarget, highTarget,
+         *pCenterWavelengths, *pCenterWavelengths, allowPartialMatch);
+      useOriginalNumbers = pFileDescriptor != NULL && pCenterWavelengths->size() == pFileDescriptor->getBandCount();
+   }
+   else if (pStartWavelengths != NULL && pStartWavelengths->empty() == false)
+   {
+      // Only start wavelengths are available, so use those as the targets.
+      bands = findBandWavelengthMatches(lowTarget, highTarget,
+         *pStartWavelengths, *pStartWavelengths, allowPartialMatch);
+      useOriginalNumbers = pFileDescriptor != NULL && pStartWavelengths->size() == pFileDescriptor->getBandCount();
+   }
+   else if (pEndWavelengths != NULL && pEndWavelengths->empty() == false)
+   {
+      // Only end wavelengths are available, so use those as the targets.
+      bands = findBandWavelengthMatches(lowTarget, highTarget,
+         *pEndWavelengths, *pEndWavelengths, allowPartialMatch);
+      useOriginalNumbers = pFileDescriptor != NULL && pEndWavelengths->size() == pFileDescriptor->getBandCount();
+   }
+
+   if (useOriginalNumbers)
+   {
+      class OriginalBandChecker
+      {
+      public:
+         OriginalBandChecker(const RasterDataDescriptor* pDescriptor) :
+            mpDescriptor(pDescriptor)
+         {}
+
+         bool operator()(unsigned int band)
+         {
+            return (mpDescriptor->getOriginalBand(band).isValid() == false);
+         }
+
+      private:
+         const RasterDataDescriptor* mpDescriptor;
+      };
+
+      std::vector<unsigned int>::iterator iter =
+         std::remove_if(bands.begin(), bands.end(), OriginalBandChecker(pDescriptor));
+      if (iter != bands.end())
+      {
+         bands.erase(iter);
+      }
+   }
+
+   if (bands.empty())
+   {
+      return DimensionDescriptor();
+   }
+
+   if (useOriginalNumbers)
+   {
+      return pDescriptor->getOriginalBand(bands[bands.size() / 2]);
+   }
+
+   return pDescriptor->getActiveBand(bands[bands.size() / 2]);
 }
 
 int RasterUtilities::findBestMatch(const std::vector<double> &values, double value, 

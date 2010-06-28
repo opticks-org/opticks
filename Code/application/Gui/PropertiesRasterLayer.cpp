@@ -8,6 +8,7 @@
  */
 
 #include <QtGui/QLayout>
+#include <QtGui/QMenu>
 #include <QtGui/QMessageBox>
 #include <QtGui/QStackedWidget>
 
@@ -15,6 +16,7 @@
 #include "AppConfig.h"
 #include "ComplexComponentComboBox.h"
 #include "DesktopServices.h"
+#include "DynamicObject.h"
 #include "ImageFilterManager.h"
 #include "LabeledSection.h"
 #include "ModelServices.h"
@@ -163,6 +165,27 @@ PropertiesRasterLayer::PropertiesRasterLayer() :
    mpGreenUnitsCombo = new RegionUnitsComboBox(pRgbWidget);
    mpBlueUnitsCombo = new RegionUnitsComboBox(pRgbWidget);
 
+   mpDisplayBandButton = new QPushButton("Presets", pRgbWidget);
+   mpDisplayBandButton->setEnabled(false);
+   QMenu* pMenu = new QMenu(mpDisplayBandButton);
+   mpDisplayBandButton->setMenu(pMenu);
+
+   const DynamicObject* pColorComposites = RasterLayer::getSettingColorComposites();
+   if (pColorComposites != NULL)
+   {
+      vector<string> names;
+      pColorComposites->getAttributeNames(names);
+      if (names.empty() == false)
+      {
+         for (vector<string>::const_iterator iter = names.begin(); iter != names.end(); ++iter)
+         {
+            pMenu->addAction(QString::fromStdString(*iter));
+         }
+
+         mpDisplayBandButton->setEnabled(true);
+      }
+   }
+
    QLabel* pRgbStretchTypeLabel = new QLabel("Stretch Type:", pRgbWidget);
    mpRgbStretchTypeCombo = new StretchTypeComboBox(pRgbWidget);
 
@@ -182,6 +205,7 @@ PropertiesRasterLayer::PropertiesRasterLayer() :
    pRgbGrid->addWidget(mpRedBandCombo, 2, 1);
    pRgbGrid->addWidget(mpGreenBandCombo, 2, 2);
    pRgbGrid->addWidget(mpBlueBandCombo, 2, 3);
+   pRgbGrid->addWidget(mpDisplayBandButton, 2, 4);
    pRgbGrid->addWidget(pRgbLowerLabel, 3, 0);
    pRgbGrid->addWidget(mpRedLowerSpin, 3, 1, Qt::AlignLeft);
    pRgbGrid->addWidget(mpGreenLowerSpin, 3, 2, Qt::AlignLeft);
@@ -195,7 +219,7 @@ PropertiesRasterLayer::PropertiesRasterLayer() :
    pRgbGrid->addWidget(mpGreenUnitsCombo, 5, 2, Qt::AlignLeft);
    pRgbGrid->addWidget(mpBlueUnitsCombo, 5, 3, Qt::AlignLeft);
    pRgbGrid->addWidget(pRgbStretchTypeLabel, 6, 0);
-   pRgbGrid->addWidget(mpRgbStretchTypeCombo, 6, 1, 1, 3, Qt::AlignLeft);
+   pRgbGrid->addWidget(mpRgbStretchTypeCombo, 6, 1, Qt::AlignLeft);
    pRgbGrid->setRowStretch(7, 10);
    pRgbGrid->setColumnStretch(1, 10);
    pRgbGrid->setColumnStretch(2, 10);
@@ -264,7 +288,7 @@ PropertiesRasterLayer::PropertiesRasterLayer() :
    addSection(pGrayscaleSection);
    addSection(pRgbSection);
    addSection(pAccelerationSection, 10);
-   setSizeHint(550, 600);
+   setSizeHint(600, 600);
 
    // Connections
    VERIFYNR(connect(mpGrayElementCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateDisplayedBandCombo(int))));
@@ -283,13 +307,13 @@ PropertiesRasterLayer::PropertiesRasterLayer() :
       SLOT(updateStretchValuesFromUnits(RegionUnits))));
    VERIFYNR(connect(mpBlueUnitsCombo, SIGNAL(valueChanged(RegionUnits)), this,
       SLOT(updateStretchValuesFromUnits(RegionUnits))));
+   VERIFYNR(connect(pMenu, SIGNAL(triggered(QAction*)), this, SLOT(setDisplayBands(QAction*))));
    VERIFYNR(connect(mpAccelerationCheck, SIGNAL(toggled(bool)), this, SLOT(enableFilterCheck(bool))));
    VERIFYNR(connect(mpFilterCheck, SIGNAL(toggled(bool)), this, SLOT(enableFilterCombo(bool))));
 }
 
 PropertiesRasterLayer::~PropertiesRasterLayer()
-{
-}
+{}
 
 bool PropertiesRasterLayer::initialize(SessionItem* pSessionItem)
 {
@@ -598,6 +622,12 @@ const string& PropertiesRasterLayer::getFilterWarningDialogId()
 {
    static string filterWarningDialog = "{98E390BE-2D58-4e89-9DFE-506412BD59C1}";
    return filterWarningDialog;
+}
+
+const string& PropertiesRasterLayer::getDisplayAsWarningDialogId()
+{
+   static string displayAsWarningDialog = "{528FD510-D05B-46ef-9F48-3BEBD20A5F7D}";
+   return displayAsWarningDialog;
 }
 
 bool PropertiesRasterLayer::isProduction()
@@ -989,4 +1019,47 @@ void PropertiesRasterLayer::enableFilterCombo(bool bEnable)
    }
 
    mpFilterList->setEnabled(bEnable);
+}
+
+void PropertiesRasterLayer::setDisplayBands(QAction* pAction)
+{
+   if (mpRasterLayer == NULL)
+   {
+      return;
+   }
+
+   RasterElement* pRasterElement = dynamic_cast<RasterElement*>(mpRasterLayer->getDataElement());
+   if (pRasterElement == NULL)
+   {
+      return;
+   }
+
+   const RasterDataDescriptor* pDescriptor =
+      dynamic_cast<const RasterDataDescriptor*>(pRasterElement->getDataDescriptor());
+   if (pDescriptor == NULL)
+   {
+      return;
+   }
+
+   const std::string name = pAction->text().toStdString();
+   DimensionDescriptor redBand;
+   DimensionDescriptor greenBand;
+   DimensionDescriptor blueBand;
+   if (RasterUtilities::findColorCompositeDimensionDescriptors(
+      pDescriptor, name, redBand, greenBand, blueBand) == false)
+   {
+      Service<DesktopServices>()->showSuppressibleMsgDlg("Error",
+         "Unable to display " + name + ": required wavelengths do not exist for all bands. "
+         "Broaden the wavelength region or specify band numbers in the Raster Layers section of the Options dialog.",
+         MESSAGE_ERROR, PropertiesRasterLayer::getDisplayAsWarningDialogId());
+   }
+
+   // If at least one of red, green, or blue is valid set display mode to RGB and update the combo boxes appropriately
+   if (redBand.isActiveNumberValid() || greenBand.isActiveNumberValid() || blueBand.isActiveNumberValid())
+   {
+      mpDisplayModeCombo->setCurrentIndex(1);
+      mpRedBandCombo->setCurrentIndex(redBand.isActiveNumberValid() ? redBand.getActiveNumber() : -1);
+      mpGreenBandCombo->setCurrentIndex(greenBand.isActiveNumberValid() ? greenBand.getActiveNumber() : -1);
+      mpBlueBandCombo->setCurrentIndex(blueBand.isActiveNumberValid() ? blueBand.getActiveNumber() : -1);
+   }
 }

@@ -318,7 +318,8 @@ public:
     *  box.
     *
     *  @param   pItem
-    *           The item to set a cell edit widget type.
+    *           The item to set a cell edit widget type. This item can either be present
+    *           in the tree at the time this method is called or added at a later time.
     *  @param   iColumn
     *           The item column to set its edit widget type.
     *  @param   eType

@@ -159,17 +159,12 @@ public slots:
    bool enableFastContrastStretch(bool enable);
    void setComplexComponent(const ComplexComponent& eComponent);
    void setStretchType(const DisplayMode& eMode, const StretchType& eType);
-   void resetStretchType(const DisplayMode& eMode);
    void setStretchUnits(const DisplayMode& eMode, const RegionUnits& eUnits);
    void setStretchUnits(const RasterChannelType& eColor, const RegionUnits& eUnits);
-   void resetStretchUnits(const DisplayMode& eMode);
-   void resetStretchUnits(const RasterChannelType& eColor);
    void setStretchValues(const RasterChannelType& eColor, double dLower, double dUpper);
-   void resetStretchValues(const RasterChannelType& eColor);
-   void resetStretch();
+   void resetStretch(const RasterChannelType& eColor = RasterChannelType());
    void setAlpha(unsigned int alpha);
    void reset();
-   void displayAsTrueColor();
 
 signals:
    void gpuImageEnabled(bool bEnabled);
@@ -208,6 +203,7 @@ protected slots:
    void setDisplayMode(QAction* pAction);
    void updateDisplayModeAction(const DisplayMode& displayMode);
    void changeStretch(QAction* pAction);
+   void displayAs(QAction* pAction);
 
 private:
    Image* mpImage;
@@ -278,7 +274,7 @@ private:
    QAction* mpLinear5Action;
    QAction* mpEqualAction;
    QAction* mpResetStretchAction;
-   QAction* mpTrueColorAction;
+   QMenu* mpDisplayAsMenu;
 
    bool channelToXml(XMLWriter* pXml, const RasterElement* pElem, const RegionUnits &units,
       const DimensionDescriptor &descriptor, const std::vector<double> &values) const;
@@ -344,10 +340,6 @@ private:
    { \
       return impClass::getStretchType(eMode); \
    } \
-   void resetStretchType(const DisplayMode& eMode) \
-   { \
-      return impClass::resetStretchType(eMode); \
-   } \
    void setStretchUnits(const DisplayMode& eMode, const RegionUnits& eUnits) \
    { \
       impClass::setStretchUnits(eMode, eUnits); \
@@ -360,14 +352,6 @@ private:
    { \
       return impClass::getStretchUnits(eColor); \
    } \
-   void resetStretchUnits(const DisplayMode& eMode) \
-   { \
-      return impClass::resetStretchUnits(eMode); \
-   } \
-   void resetStretchUnits(const RasterChannelType& eColor) \
-   { \
-      return impClass::resetStretchUnits(eColor); \
-   } \
    void setStretchValues(const RasterChannelType& eColor, double dLower, double dUpper) \
    { \
       impClass::setStretchValues(eColor, dLower, dUpper); \
@@ -376,13 +360,9 @@ private:
    { \
       impClass::getStretchValues(eColor, dLower, dUpper); \
    } \
-   void resetStretchValues(const RasterChannelType& eColor) \
+   void resetStretch(const RasterChannelType& eColor = RasterChannelType()) \
    { \
-      return impClass::resetStretchValues(eColor); \
-   } \
-   void resetStretch() \
-   { \
-      return impClass::resetStretch(); \
+      return impClass::resetStretch(eColor); \
    } \
    double convertStretchValue(const RasterChannelType& eColor, const RegionUnits& eUnits, \
                                                 double dStretchValue, const RegionUnits& eNewUnits) const \

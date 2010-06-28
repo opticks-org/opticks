@@ -80,6 +80,7 @@ public:
 
 private:
    QCheckBox* mpEditMetadataDialogState;
+   QCheckBox* mpEnableDisplayAsDialogState;
    QCheckBox* mpEnableTextureGenerationDialogState;
 };
 

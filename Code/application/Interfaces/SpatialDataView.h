@@ -75,7 +75,6 @@ class SpatialDataView : public PerspectiveView
 {
 public:
    SETTING(GeoCoordTooltip, SpatialDataView, bool, false)
-   SETTING(LoadTrueColor, SpatialDataView, bool, true)
    SETTING(ConfirmLayerDelete, SpatialDataView, bool, true)
    SETTING(FastPanSpeed, SpatialDataView, int, 20)
    SETTING(MaximumZoomRatio, SpatialDataView, double, 1.5)

@@ -2213,9 +2213,7 @@ void HistogramPlotImp::stretchResetThisChannel()
    RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(mpLayer.get());
    if (pRasterLayer != NULL)
    {
-      pRasterLayer->resetStretchType(mRasterChannelType == GRAY ? GRAYSCALE_MODE : RGB_MODE);
-      pRasterLayer->resetStretchUnits(mRasterChannelType);
-      pRasterLayer->resetStretchValues(mRasterChannelType);
+      pRasterLayer->resetStretch(mRasterChannelType);
    }
 }
 

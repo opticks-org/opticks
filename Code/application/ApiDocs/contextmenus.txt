@@ -230,10 +230,10 @@
  *  also includes all Layer \ref layer "actions".\n\n
  *  <table>
  *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
+ *    <tr><td>Display as menu</td><td>APP_RASTERLAYER_DISPLAY_AS_MENU_ACTION()</td></tr>
  *    <tr><td>Display mode menu</td><td>APP_RASTERLAYER_DISPLAY_MODE_MENU_ACTION()</td></tr>
  *    <tr><td>Separator</td><td>APP_RASTERLAYER_SEPARATOR_ACTION()</td></tr>
  *    <tr><td>Image stretch menu</td><td>APP_RASTERLAYER_STRETCH_MENU_ACTION()</td></tr>
- *    <tr><td>Display as true color</td><td>APP_RASTERLAYER_TRUE_COLOR_ACTION()</td></tr>
  *  </table>
  *
  *  \subsection sessionexplorer Session Explorer

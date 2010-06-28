@@ -9,6 +9,7 @@
 
 #include <QtGui/QHeaderView>
 #include <QtGui/QLayout>
+#include <QtGui/QMenu>
 #include <QtGui/QMessageBox>
 #include <QtGui/QPushButton>
 
@@ -18,9 +19,13 @@
 #include "DataDescriptor.h"
 #include "DataDescriptorWidget.h"
 #include "DataElement.h"
+#include "DesktopServices.h"
 #include "DimensionDescriptor.h"
+#include "DynamicObject.h"
 #include "ObjectResource.h"
+#include "PropertiesRasterLayer.h"
 #include "RasterDataDescriptor.h"
+#include "RasterLayer.h"
 #include "RasterUtilities.h"
 #include "Service.h"
 #include "StringUtilities.h"
@@ -76,8 +81,10 @@ DataDescriptorWidget::DataDescriptorWidget(QWidget* parent) :
    mpProcessingLocationCombo->setEditable(false);
    mpProcessingLocationCombo->hide();
 
-   // Set True Color pushbutton
-   mpTrueColorButton = new QPushButton("Set True Color Display", this);
+   // Set Display pushbutton
+   mpSetDisplayButton = new QPushButton("Set Display Bands", this);
+   QMenu* pMenu = new QMenu(mpSetDisplayButton);
+   mpSetDisplayButton->setMenu(pMenu);
 
    // Layout
    QVBoxLayout* pLayout = new QVBoxLayout(this);
@@ -85,17 +92,16 @@ DataDescriptorWidget::DataDescriptorWidget(QWidget* parent) :
    pLayout->setSpacing(10);
    pLayout->addWidget(mpClassificationLabel);
    pLayout->addWidget(mpTreeWidget);
-   pLayout->addWidget(mpTrueColorButton, 0, Qt::AlignRight);
+   pLayout->addWidget(mpSetDisplayButton, 0, Qt::AlignRight);
 
    // Connections
    VERIFYNR(connect(mpTreeWidget, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
       SLOT(descriptorItemChanged(QTreeWidgetItem*, int))));
-   VERIFYNR(connect(mpTrueColorButton, SIGNAL(clicked()), this, SLOT(setDisplayBandsToTrueColor())));
+   VERIFYNR(connect(pMenu, SIGNAL(triggered(QAction*)), this, SLOT(setDisplayBands(QAction*))));
 }
 
 DataDescriptorWidget::~DataDescriptorWidget()
-{
-}
+{}
 
 void DataDescriptorWidget::setDataDescriptor(DataDescriptor* pDescriptor, bool editAll)
 {
@@ -150,8 +156,8 @@ QString DataDescriptorWidget::getDescriptorValue(const QString& strValueName) co
 void DataDescriptorWidget::initialize()
 {
    mpTreeWidget->clear();
-   mpTrueColorButton->setEnabled(false);
-   mpTrueColorButton->setVisible(mEditAll);
+   mpSetDisplayButton->setEnabled(false);
+   mpSetDisplayButton->setVisible(mEditAll);
 
    if (mpDescriptor == NULL)
    {
@@ -272,10 +278,24 @@ void DataDescriptorWidget::initialize()
       return;
    }
 
-   // True color button
-   if (RasterUtilities::canBeDisplayedInTrueColor(pRasterDescriptor) == true)
+   // Display As button
+   const DynamicObject* pColorComposites = RasterLayer::getSettingColorComposites();
+   if (pColorComposites != NULL)
    {
-      mpTrueColorButton->setEnabled(true);
+      QMenu* pMenu = mpSetDisplayButton->menu();
+      VERIFYNR(pMenu != NULL);
+      pMenu->clear();
+      vector<string> names;
+      pColorComposites->getAttributeNames(names);
+      if (names.empty() == false)
+      {
+         for (vector<string>::const_iterator iter = names.begin(); iter != names.end(); ++iter)
+         {
+            pMenu->addAction(QString::fromStdString(*iter));
+         }
+
+         mpSetDisplayButton->setEnabled(true);
+      }
    }
 
    // Rows
@@ -925,74 +945,50 @@ void DataDescriptorWidget::descriptorItemChanged(QTreeWidgetItem* pItem, int iCo
    emit modified();
 }
 
-void DataDescriptorWidget::setDisplayBandsToTrueColor()
+void DataDescriptorWidget::setDisplayBands(QAction* pAction)
 {
-   VERIFYNRV(mpDescriptor != NULL);
+   RasterDataDescriptor* pDescriptor = dynamic_cast<RasterDataDescriptor*>(mpDescriptor);
+   VERIFYNRV(pDescriptor != NULL && pAction != NULL);
 
-   RasterDataDescriptor* pRaster = dynamic_cast<RasterDataDescriptor*>(mpDescriptor);
-   bool success = (pRaster != NULL);
+   const std::string name = pAction->text().toStdString();
+   DimensionDescriptor redBand;
+   DimensionDescriptor greenBand;
+   DimensionDescriptor blueBand;
 
-   if (success)
+   // Ignore the return value of RasterUtilities::findColorCompositeIndices; each band will be individually checked
+   RasterUtilities::findColorCompositeDimensionDescriptors(pDescriptor, name, redBand, greenBand, blueBand);
+   if (redBand.isOriginalNumberValid() || greenBand.isOriginalNumberValid() || blueBand.isOriginalNumberValid())
    {
-      success = RasterUtilities::setDisplayBandsToTrueColor(pRaster);
+      pDescriptor->setDisplayBand(RED, redBand);
+      pDescriptor->setDisplayBand(GREEN, greenBand);
+      pDescriptor->setDisplayBand(BLUE, blueBand);
+      pDescriptor->setDisplayMode(RGB_MODE);
+
+      // block mpTreeWidget signals till last change made
+      mpTreeWidget->blockSignals(true);
+
+      QTreeWidgetItem* pItem = getDescriptorItem("Red Band");
+      pItem->setText(1, redBand.isOriginalNumberValid() ?
+         QString::number(redBand.getOriginalNumber() + 1) : QString());
+
+      pItem = getDescriptorItem("Green Band");
+      pItem->setText(1, greenBand.isOriginalNumberValid() ?
+         QString::number(greenBand.getOriginalNumber() + 1) : QString());
+
+      pItem = getDescriptorItem("Blue Band");
+      pItem->setText(1, blueBand.isOriginalNumberValid() ?
+         QString::number(blueBand.getOriginalNumber() + 1) : QString());
+
+      // unblock
+      mpTreeWidget->blockSignals(false);
+      QTreeWidgetItem* pDisplayModeItem = getDescriptorItem("Display Mode");
+      pDisplayModeItem->setText(1, QString::fromStdString(StringUtilities::toDisplayString(RGB_MODE)));
    }
-
-   if (success)
+   else
    {
-      QString strRedBand;
-      QString strGreenBand;
-      QString strBlueBand;
-      DimensionDescriptor bandDim = pRaster->getDisplayBand(RED);
-      if (bandDim.isValid())
-      {
-         strRedBand = QString::number(bandDim.getOriginalNumber() + 1);
-      }
-      else
-      {
-         success = false;
-      }
-      bandDim = pRaster->getDisplayBand(GREEN);
-      if (bandDim.isValid())
-      {
-         strGreenBand = QString::number(bandDim.getOriginalNumber() + 1);
-      }
-      else
-      {
-         success = false;
-      }
-      bandDim = pRaster->getDisplayBand(BLUE);
-      if (bandDim.isValid())
-      {
-         strBlueBand = QString::number(bandDim.getOriginalNumber() + 1);
-      }
-      else
-      {
-         success = false;
-      }
-
-      if (success)
-      {
-         // block mpTreeWidget signals till till last change made
-         mpTreeWidget->blockSignals(true);
-
-         QTreeWidgetItem* pItem = getDescriptorItem("Red Band");
-         pItem->setText(1, strRedBand);
-         pItem = getDescriptorItem("Green Band");
-         pItem->setText(1, strGreenBand);
-         pItem = getDescriptorItem("Blue Band");
-         pItem->setText(1, strBlueBand);
-
-         // unblock
-         mpTreeWidget->blockSignals(false);
-         DisplayMode displayMode = pRaster->getDisplayMode();
-         string displayModeText = StringUtilities::toDisplayString(displayMode);
-         pItem = getDescriptorItem("Display Mode");
-         pItem->setText(1, displayModeText.c_str());
-      }
-   }
-
-   if (success == false)
-   {
-      QMessageBox::warning(this, "True Color Display", "Unable to set display bands for true color.");
+      Service<DesktopServices>()->showSuppressibleMsgDlg("Error",
+         "Unable to display " + name + ": required wavelengths do not exist for all bands. "
+         "Broaden the wavelength region or specify band numbers in the Raster Layers section of the Options dialog.",
+         MESSAGE_ERROR, PropertiesRasterLayer::getDisplayAsWarningDialogId());
    }
 }

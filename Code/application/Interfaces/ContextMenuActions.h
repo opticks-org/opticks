@@ -360,6 +360,11 @@
 #define APP_PRODUCTVIEW_PROPERTIES_SEPARATOR_ACTION "APP_PRODUCTVIEW_PROPERTIES_SEPARATOR_ACTION"
 
 /**
+ *  Sets the display mode to RGB and sets the displayed bands for the raster layer.
+ */
+#define APP_RASTERLAYER_DISPLAY_AS_MENU_ACTION "APP_RASTERLAYER_DISPLAY_AS_MENU_ACTION"
+
+/**
  *  Sets the current display mode for the raster layer.
  */
 #define APP_RASTERLAYER_DISPLAY_MODE_MENU_ACTION "APP_RASTERLAYER_DISPLAY_MODE_MENU_ACTION"
@@ -373,12 +378,6 @@
  *  Indicates the current contrast stretch type for the raster layer.
  */
 #define APP_RASTERLAYER_STRETCH_MENU_ACTION "APP_RASTERLAYER_STRETCH_MENU_ACTION"
-
-/**
- *  Sets the display mode to RGB and sets the displayed bands based on the
- *  wavelengths.
- */
-#define APP_RASTERLAYER_TRUE_COLOR_ACTION "APP_RASTERLAYER_TRUE_COLOR_ACTION"
 
 /**
  *  Collapses all nodes in the current tree view.

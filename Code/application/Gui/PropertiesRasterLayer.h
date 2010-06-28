@@ -10,11 +10,13 @@
 #ifndef PROPERTIESRASTERLAYER_H
 #define PROPERTIESRASTERLAYER_H
 
+#include <QtGui/QAction>
 #include <QtGui/QCheckBox>
 #include <QtGui/QComboBox>
 #include <QtGui/QDoubleSpinBox>
 #include <QtGui/QLabel>
 #include <QtGui/QListWidget>
+#include <QtGui/QPushButton>
 #include <QtGui/QSpinBox>
 
 #include "DimensionDescriptor.h"
@@ -51,6 +53,7 @@ public:
    static const std::string& getVersion();
    static const std::string& getDescriptorId();
    static const std::string& getFilterWarningDialogId();
+   static const std::string& getDisplayAsWarningDialogId();
    static bool isProduction();
 
 protected:
@@ -65,6 +68,7 @@ protected slots:
    void updateStretchValuesFromUnits(RegionUnits units);
    void enableFilterCheck(bool bEnable);
    void enableFilterCombo(bool bEnable);
+   void setDisplayBands(QAction* pAction);
 
 private:
    bool mInitializing;
@@ -108,6 +112,7 @@ private:
    RegionUnits mBlueUnits;
    RegionUnitsComboBox* mpBlueUnitsCombo;
 
+   QPushButton* mpDisplayBandButton;
    StretchTypeComboBox* mpRgbStretchTypeCombo;
 
    // Graphics acceleration

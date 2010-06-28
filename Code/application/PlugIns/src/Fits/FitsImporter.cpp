@@ -34,6 +34,7 @@
 #include "TypeConverter.h"
 
 #include <fitsio.h>
+#include <limits>
 #include <QtCore/QFile>
 
 REGISTER_PLUGIN_BASIC(Fits, FitsImporter);

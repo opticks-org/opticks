@@ -22,6 +22,7 @@ OptionsSuppressibleMsg::OptionsSuppressibleMsg() :
    QWidget(NULL)
 {
    mpEditMetadataDialogState = new QCheckBox("Edit metadata", this);
+   mpEnableDisplayAsDialogState = new QCheckBox("Warn when \"Display As\" menu commands fail", this);
    mpEnableTextureGenerationDialogState = new QCheckBox("Enable dynamic texture generation", this);
 
    QWidget* pOptionalMessagesWidget = new QWidget(this);
@@ -29,6 +30,7 @@ OptionsSuppressibleMsg::OptionsSuppressibleMsg() :
    pOptionalMessagesLayout->setMargin(0);
    pOptionalMessagesLayout->setSpacing(5);
    pOptionalMessagesLayout->addWidget(mpEditMetadataDialogState);
+   pOptionalMessagesLayout->addWidget(mpEnableDisplayAsDialogState);
    pOptionalMessagesLayout->addWidget(mpEnableTextureGenerationDialogState);
    pOptionalMessagesLayout->addStretch(10);
    LabeledSection* pOptionalMessagesSection = new LabeledSection(pOptionalMessagesWidget, 
@@ -38,13 +40,15 @@ OptionsSuppressibleMsg::OptionsSuppressibleMsg() :
    QVBoxLayout* pLayout = new QVBoxLayout(this);
    pLayout->setMargin(0);
    pLayout->setSpacing(10);
-   pLayout->addWidget(pOptionalMessagesSection);   
+   pLayout->addWidget(pOptionalMessagesSection);
    pLayout->addStretch(10);
 
    Service<DesktopServices> pDesktop;
 
    mpEditMetadataDialogState->setChecked(!(pDesktop->getSuppressibleMsgDlgState(
       MetadataWidget::getEditWarningDialogId())));
+   mpEnableDisplayAsDialogState->setChecked(!(pDesktop->getSuppressibleMsgDlgState(
+      PropertiesRasterLayer::getDisplayAsWarningDialogId())));
    mpEnableTextureGenerationDialogState->setChecked(!(pDesktop->getSuppressibleMsgDlgState(
       PropertiesRasterLayer::getFilterWarningDialogId())));
 }
@@ -53,9 +57,11 @@ void OptionsSuppressibleMsg::applyChanges()
 {
    Service<DesktopServices> pDesktop;
 
-   pDesktop->setSuppressibleMsgDlgState(MetadataWidget::getEditWarningDialogId(), 
+   pDesktop->setSuppressibleMsgDlgState(MetadataWidget::getEditWarningDialogId(),
       !(mpEditMetadataDialogState->isChecked()));
-   pDesktop->setSuppressibleMsgDlgState(PropertiesRasterLayer::getFilterWarningDialogId(), 
+   pDesktop->setSuppressibleMsgDlgState(PropertiesRasterLayer::getDisplayAsWarningDialogId(),
+      !(mpEnableDisplayAsDialogState->isChecked()));
+   pDesktop->setSuppressibleMsgDlgState(PropertiesRasterLayer::getFilterWarningDialogId(),
       !(mpEnableTextureGenerationDialogState->isChecked()));
 }
 

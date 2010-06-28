@@ -29,7 +29,6 @@
    #define FINITE finite
 #endif
 
-#include <limits>
 #include <string>
 #include <vector>
 
@@ -154,8 +153,7 @@ namespace RasterUtilities
     */
    FileDescriptor *generateFileDescriptor(DataDescriptor *pDd, 
       const std::string &filename, const std::string &datasetLocation, 
-      EndianType endian);   
-
+      EndianType endian);
 
    /**
     * Returns a FileDescriptor to go with a passed in DataDescriptor and sets
@@ -178,8 +176,8 @@ namespace RasterUtilities
     *         preline bytes, etc) must be set manually.  The returned
     *         FileDescriptor is set into the DataDescriptor.
     */
-   FileDescriptor *generateAndSetFileDescriptor(DataDescriptor *pDd, 
-      const std::string &filename, const std::string &datasetLocation, 
+   FileDescriptor *generateAndSetFileDescriptor(DataDescriptor *pDd,
+      const std::string &filename, const std::string &datasetLocation,
       EndianType endian);
 
    /**
@@ -652,20 +650,6 @@ namespace RasterUtilities
    std::string getBandName(const RasterDataDescriptor* pDescriptor, DimensionDescriptor band);
 
    /**
-   * Returns whether or not raster image can be displayed in true color.  This
-   * method will query the #SPECIAL_METADATA_NAME / #BAND_METADATA_NAME / 
-   * #CENTER_WAVELENGTHS_METADATA_NAME key of the metadata to 
-   * determine if necessary wavelengths are present to display a true color image.
-   *
-   * @param pDescriptor
-   *        the descriptor to return the ability to display true true for.
-   * 
-   * @return \c True if the raster image can be displayed in true color and \c false otherwise.
-   */
-   bool canBeDisplayedInTrueColor(const RasterDataDescriptor* pDescriptor);
-
-
-   /**
    * Returns whether or not raster image is a subcube.
    *
    * @param pDescriptor
@@ -681,20 +665,115 @@ namespace RasterUtilities
    */
    bool isSubcube(const RasterDataDescriptor* pDescriptor, bool checkBands);
 
-
    /**
-   * Sets the display bands to true color equivalents.  This method will query 
-   * the #SPECIAL_METADATA_NAME / #BAND_METADATA_NAME / 
-   * #CENTER_WAVELENGTHS_METADATA_NAME key of the metadata to 
-   * determine the best bands to use for displaying a true color image.
+   * Find the appropriate red, green, and blue bands for a color composite.
    *
    * @param pDescriptor
-   *        the descriptor to return the ability to display true true for.
-   * 
-   * @return True if the raster image display bands were set to display in true color 
-   * and false otherwise.
+   *        RasterDataDescriptor containing the band and wavelength information.
+   * @param name
+   *        The name of the user-defined color composite to set.
+   *        This is typically chosen from a menu.
+   * @param redBand
+   *        The band to be displayed in the red channel.
+   * @param greenBand
+   *        The band to be displayed in the green channel.
+   * @param blueBand
+   *        The band to be displayed in the blue channel.
+   *
+   * @return \c True if red, green, and blue bands are successfully set and are valid, \c false otherwise.
+   *
+   * @see RasterLayer::getSettingColorComposites(), DimensionDescriptor::isValid()
    */
-   bool setDisplayBandsToTrueColor(RasterDataDescriptor* pDescriptor);
+   bool findColorCompositeDimensionDescriptors(const RasterDataDescriptor* pDescriptor, const std::string& name,
+      DimensionDescriptor& redBand, DimensionDescriptor& greenBand, DimensionDescriptor& blueBand);
+
+   /**
+    * Find the band which matches a wavelength region.
+    *
+    * This searches the wavelengths vectors for all bands which fall within the
+    * (\em lowTarget, \em highTarget) region. The \em allowPartialMatch variable determines if
+    * the entire band must fall in the region or if a partial overlap is allowed.
+    * Once all the bands have been found, they are sorted by lower wavelength and the
+    * index of the median value is returned. The parameters \em lowTarget, \em highTarget, \em lowWavelengths, and
+    * \em highWavelengths must all have the same units. If \em highWavelengths is empty, \em lowWavelengths
+    * should contain wave centers which will be matched instead of a continuous region.
+    *
+    * @param lowTarget
+    *        The lower bound of the wavelength region.
+    * @param highTarget
+    *        The upper bound of the wavelength region.
+    * @param lowWavelengths
+    *        The lower bound of the wavelengths for each band.
+    * @param highWavelengths
+    *        The upper bound of the wavelengths for each band. Must be either empty
+    *        of the same length as \em lowWavelengths.
+    * @param allowPartialMatch
+    *        Set to \c false to require entire band range to fall within requested wavelength region.
+    *        Set to \c true to allow partial inclusion.
+    * @return The band number found or -1 if no bands were found. This corresponds to an
+    *         index into the \em lowWavelengths and \em highWavelengths vectors.
+    */
+   int findBandWavelengthMatch(double lowTarget, double highTarget,
+      const std::vector<double>& lowWavelengths, const std::vector<double>& highWavelengths = std::vector<double>(),
+      bool allowPartialMatch = true);
+
+   /**
+    * Find the bands which match a wavelength region.
+    *
+    * This searches the wavelengths vectors for all bands which fall within the
+    * (\em lowTarget, \em highTarget) region. The \em allowPartialMatch variable determines if
+    * the entire band must fall in the region or if a partial overlap is allowed.
+    * Once all the bands have been found, they are sorted by lower wavelength.
+    * The parameters \em lowTarget, \em highTarget, \em lowWavelengths, and
+    * \em highWavelengths must all have the same units. If \em highWavelengths is empty, \em lowWavelengths
+    * should contain wave centers which will be matched instead of a continuous region.
+    *
+    * @param lowTarget
+    *        The lower bound of the wavelength region.
+    * @param highTarget
+    *        The upper bound of the wavelength region.
+    * @param lowWavelengths
+    *        The lower bound of the wavelengths for each band.
+    * @param highWavelengths
+    *        The upper bound of the wavelengths for each band. Must be either empty
+    *        of the same length as \em lowWavelengths.
+    * @param allowPartialMatch
+    *        Set to \c false to require entire band range to fall within requested wavelength region.
+    *        Set to \c true to allow partial inclusion.
+    * @return The band numbers found or an empty vector if no bands were found. These correspond to
+    *         indices into the \em lowWavelengths and \em highWavelengths vectors.
+    */
+   std::vector<unsigned int> findBandWavelengthMatches(double lowTarget, double highTarget,
+      const std::vector<double>& lowWavelengths, const std::vector<double>& highWavelengths = std::vector<double>(),
+      bool allowPartialMatch = true);
+
+   /**
+    * Find the band which matches a wavelength region.
+    *
+    * This searches the wavelengths stored in the metadata for all bands which fall within the
+    * (\em lowTarget, \em highTarget) region. The preferred order of the wavelengths to use is:
+    *    - Start and End (if both are available)
+    *    - Center only
+    *    - Start only
+    *    - End only
+    *
+    * The \em allowPartialMatch variable determines if
+    * the entire band must fall in the region or if a partial overlap is allowed.
+    * Both \em lowTarget and \em highTarget must be in microns.
+    *
+    * @param lowTarget
+    *        The lower bound of the wavelength region.
+    * @param highTarget
+    *        The upper bound of the wavelength region.
+    * @param pDescriptor
+    *        The RasterDataDescriptor to search for wavelength regions.
+    * @param allowPartialMatch
+    *        Set to \c false to require entire band range to fall within requested wavelength region.
+    *        Set to \c true to allow partial inclusion.
+    * @return The band found or an invalid DimensionDescriptor if no bands were found.
+    */
+   DimensionDescriptor findBandWavelengthMatch(double lowTarget, double highTarget,
+      const RasterDataDescriptor* pDescriptor, bool allowPartialMatch = true);
 
    /**
    * Finds the closest match in vector of values to a value within the tolerance specified.  
@@ -711,7 +790,7 @@ namespace RasterUtilities
    *        the index at which to start search. Defaults to first element.
    * @return the index of best match or -1 if no match found.
    */
-   int findBestMatch(const std::vector<double> &values, double value, 
+   int findBestMatch(const std::vector<double> &values, double value,
                      double tolerance, int startAt = 0);
 
    /**
@@ -756,7 +835,7 @@ namespace RasterUtilities
     *
     * @return True if the operation succeeded, false otherwise.
     */
-   bool chipMetadata(DynamicObject* pMetadata, 
+   bool chipMetadata(DynamicObject* pMetadata,
       const std::vector<DimensionDescriptor> &selectedRows,
       const std::vector<DimensionDescriptor> &selectedColumns,
       const std::vector<DimensionDescriptor> &selectedBands);

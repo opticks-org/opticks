@@ -19,8 +19,9 @@
 
 #include <vector>
 
-class DataDescriptor;
 class CustomTreeWidget;
+class DataDescriptor;
+class QAction;
 class QPushButton;
 
 class DataDescriptorWidget : public QWidget
@@ -54,7 +55,7 @@ protected:
 
 protected slots:
    void descriptorItemChanged(QTreeWidgetItem* pItem, int iColumn);
-   void setDisplayBandsToTrueColor();
+   void setDisplayBands(QAction* pAction);
 
 private:
    bool mEditAll;
@@ -63,7 +64,7 @@ private:
 
    QLabel* mpClassificationLabel;
    CustomTreeWidget* mpTreeWidget;
-   QPushButton* mpTrueColorButton;
+   QPushButton* mpSetDisplayButton;
 
    std::vector<ProcessingLocation> mProcessingLocations;
    QComboBox* mpProcessingLocationCombo;

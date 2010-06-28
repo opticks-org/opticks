@@ -15,6 +15,7 @@
 #include "ComplexData.h"
 #include "ConfigurationSettings.h"
 #include "DimensionDescriptor.h"
+#include "DynamicObject.h"
 #include "TypesFile.h"
 
 #include <string>
@@ -39,8 +40,8 @@ class Statistics;
  *
  *  This subclass of Subject will notify upon the following conditions:
  *  - The following methods are called: setColorMap(), setComplexComponent(),
- *    setDisplayedBand(), setStretchType(), resetStretchType(), setStretchUnits(), resetStretchUnits(),
- *    setStretchValues(), resetStretchValues(), resetStretch(), setAlpha(), setAnimation(),
+ *    setDisplayedBand(), setStretchType(), setStretchUnits(),
+ *    setStretchValues(), resetStretch(), setAlpha(), setAnimation(),
  *    enableFilter(), enableFilters(), disableFilter().
  *  - Everything else documented in Layer.
  *
@@ -67,6 +68,7 @@ public:
    SETTING(BlueStretchUnits, RasterLayer, RegionUnits, PERCENTILE)
    SETTING(RgbStretchType, RasterLayer, StretchType, EXPONENTIAL)
    SETTING(FastContrastStretch, RasterLayer, bool, false)
+   SETTING_PTR(ColorComposites, RasterLayer, DynamicObject)
 
    /**
     *  Emitted with boost::any<ComplexComponent> when the component is changed.
@@ -355,7 +357,7 @@ public:
     *
     *  @notify This method will notify signalStretchTypeChanged() with boost::any<std::pair<DisplayMode, StretchType> >.
     *
-    *  @see    getStretchType(), resetStretchType()
+    *  @see    getStretchType()
     */
    virtual void setStretchType(const DisplayMode& eMode, const StretchType& eType) = 0;
 
@@ -367,22 +369,9 @@ public:
     *
     *  @return  The current stretch type.
     *
-    *  @see     setStretchType(), resetStretchType()
+    *  @see     setStretchType()
     */
    virtual StretchType getStretchType(const DisplayMode& eMode) const = 0;
-
-   /**
-    *  Resets the stretch type and displayed band(s) back to that used when the layer was created.
-    *
-    *  @param  eMode
-    *          The mode to reset.  If an invalid enum is specified, then all modes are reset.
-    *
-    *  @notify This method will notify signalStretchTypeChanged() with boost::any<std::pair<DisplayMode, StretchType> >
-    *          for each RasterChannelType in the specified DisplayMode.
-    *
-    *  @see    setStretchType(), getStretchType()
-    */
-   virtual void resetStretchType(const DisplayMode& eMode) = 0;
 
    /**
     *  Sets the stretch units for the given display mode.
@@ -396,7 +385,7 @@ public:
     *           boost::any<std::pair<RasterChannelType, RegionUnits> > for each RasterChannelType
     *           in the specified DisplayMode.
     *
-    *  @see     getStretchUnits(), resetStretchUnits()
+    *  @see     getStretchUnits()
     */
    virtual void setStretchUnits(const DisplayMode& eMode, const RegionUnits& eUnits) = 0;
 
@@ -411,7 +400,7 @@ public:
     *  @notify  This method will notify signalStretchUnitsChanged() with 
     *           boost::any<std::pair<RasterChannelType, RegionUnits> >.
     *
-    *  @see     getStretchUnits(), resetStretchUnits()
+    *  @see     getStretchUnits()
     */
    virtual void setStretchUnits(const RasterChannelType& eColor, const RegionUnits& eUnits) = 0;
 
@@ -423,36 +412,9 @@ public:
     *
     *  @return  The current stretch units.
     *
-    *  @see     setStretchUnits(), resetStretchUnits()
+    *  @see     setStretchUnits()
     */
    virtual RegionUnits getStretchUnits(const RasterChannelType& eColor) const = 0;
-
-   /**
-    *  Resets the stretch units and displayed band(s) back to that used when the layer was created.
-    *
-    *  @param  eMode
-    *          The mode to reset.  If an invalid enum is specified, then all modes are reset.
-    *
-    *  @notify This method will notify signalStretchUnitsChanged() with 
-    *          boost::any<std::pair<RasterChannelType, RegionUnits> > for each RasterChannelType
-    *          in the specified DisplayMode.
-    *
-    *  @see    setStretchUnits(), getStretchUnits(), resetStretchUnits(const RasterChannelType&)
-    */
-   virtual void resetStretchUnits(const DisplayMode& eMode) = 0;
-
-   /**
-    *  Resets the stretch units and displayed band(s) back to that used when the layer was created.
-    *
-    *  @param  eColor
-    *          The color to reset.  If an invalid enum is specified, then GRAY, RED, GREEN, and BLUE colors are reset.
-    *
-    *  @notify This method will notify signalStretchUnitsChanged() with
-    *          boost::any<std::pair<RasterChannelType, RegionUnits> > for each affected RasterChannelType.
-    *
-    *  @see    setStretchUnits(), getStretchUnits(), resetStretchUnits(const DisplayMode&)
-    */
-   virtual void resetStretchUnits(const RasterChannelType& eColor) = 0;
 
    /**
     *  Sets the stretch values for the given display color.
@@ -467,7 +429,7 @@ public:
     *  @notify  This method will notify signalStretchValuesChanged() with 
     *           boost::any<boost::tuple<RasterChannelType, double, double> >.
     *
-    *  @see     getStretchValues(), resetStretchValues()
+    *  @see     getStretchValues()
     */
    virtual void setStretchValues(const RasterChannelType& eColor, double dLower, double dUpper) = 0;
 
@@ -481,33 +443,23 @@ public:
     *  @param   dUpper
     *           A double value to contain the upper stretch value.
     *
-    *  @see     getStretchValues(), resetStretchValues()
+    *  @see     getStretchValues()
     */
    virtual void getStretchValues(const RasterChannelType& eColor, double& dLower, double& dUpper) const = 0;
 
    /**
-    *  Resets the stretch values and displayed band(s) back to those used when the layer was created.
-    *
-    *  @param  eColor
-    *          The color to reset.  If an invalid enum is specified, then GRAY, RED, GREEN, and BLUE colors are reset.
-    *
-    *  @notify This method will notify signalStretchValuesChanged() with
-    *          boost::any<boost::tuple<RasterChannelType, double, double> > for each affected RasterChannelType.
-    *
-    *  @see    setStretchValues(), getStretchValues()
-    */
-   virtual void resetStretchValues(const RasterChannelType& eColor) = 0;
-
-   /**
     *  Resets the stretch type, units, values, and displayed band(s)
-    *  for all channels back to those used when the layer was created.
+    *  for the specified channel(s) back to those used when the layer was created.
+    *
+    *  @param   eColor
+    *           The color to reset or an invalid enum to reset all colors.
     *
     *  @notify This method will notify the same signals as
-    *          resetStretchType(), resetStretchUnits(), and resetStretchValues().
+    *          setDisplayedBand(), setStretchType(), setStretchUnits(), and setStretchValues().
     *
-    *  @see    resetStretchType(), resetStretchUnits(), resetStretchValues()
+    *  @see    setDisplayedBand(), setStretchType(), setStretchUnits(), setStretchValues()
     */
-   virtual void resetStretch() = 0;
+   virtual void resetStretch(const RasterChannelType& eColor = RasterChannelType()) = 0;
 
    /**
     *  Converts a stretch value from one stretch units to another.
