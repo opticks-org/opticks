@@ -862,6 +862,25 @@ std::vector<unsigned int> RasterUtilities::findBandWavelengthMatches(double lowT
    return std::vector<unsigned int>();
 }
 
+namespace
+{
+   class OriginalBandChecker
+   {
+   public:
+      OriginalBandChecker(const RasterDataDescriptor* pDescriptor) :
+         mpDescriptor(pDescriptor)
+      {}
+
+      bool operator()(unsigned int band)
+      {
+         return (mpDescriptor->getOriginalBand(band).isValid() == false);
+      }
+
+   private:
+      const RasterDataDescriptor* mpDescriptor;
+   };
+}
+
 DimensionDescriptor RasterUtilities::findBandWavelengthMatch(double lowTarget, double highTarget,
    const RasterDataDescriptor* pDescriptor, bool allowPartialMatch)
 {
@@ -927,22 +946,6 @@ DimensionDescriptor RasterUtilities::findBandWavelengthMatch(double lowTarget, d
 
    if (useOriginalNumbers)
    {
-      class OriginalBandChecker
-      {
-      public:
-         OriginalBandChecker(const RasterDataDescriptor* pDescriptor) :
-            mpDescriptor(pDescriptor)
-         {}
-
-         bool operator()(unsigned int band)
-         {
-            return (mpDescriptor->getOriginalBand(band).isValid() == false);
-         }
-
-      private:
-         const RasterDataDescriptor* mpDescriptor;
-      };
-
       std::vector<unsigned int>::iterator iter =
          std::remove_if(bands.begin(), bands.end(), OriginalBandChecker(pDescriptor));
       if (iter != bands.end())
