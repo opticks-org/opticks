@@ -7,19 +7,19 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "ConvertToBsqPager.h"
-#include "ConvertToBsqPage.h"
 #include "AppVerify.h"
+#include "ConvertToBsqPage.h"
+#include "ConvertToBsqPager.h"
 #include "DataAccessorImpl.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 
 #include <limits>
+#include <memory>
 
 ConvertToBsqPager::ConvertToBsqPager(RasterElement* pRaster) :
    mpRaster(pRaster),
-   mBytesPerElement(0),
-   mSkipBytes(std::numeric_limits<unsigned int>::max())
+   mBytesPerElement(0)
 {
    if (mpRaster != NULL)
    {
@@ -27,28 +27,28 @@ ConvertToBsqPager::ConvertToBsqPager(RasterElement* pRaster) :
       if (pDd != NULL)
       {
          mBytesPerElement = pDd->getBytesPerElement();
-         InterleaveFormatType interleave = pDd->getInterleaveFormat();
-         if (interleave == BIP)
-         {
-            mSkipBytes = mBytesPerElement * (pDd->getBandCount());
-         }
-         else if (interleave == BIL)
-         {
-            mSkipBytes = 0;
-         }
       }
    }
 }
 
 ConvertToBsqPager::~ConvertToBsqPager()
+{}
+
+void ConvertToBsqPager::releasePage(RasterPage* pPage)
 {
+   // Check that pPage is the correct type before deleting it.
+   delete dynamic_cast<ConvertToBsqPage*>(pPage);
 }
 
-RasterPage *ConvertToBsqPager::getPage(DataRequest* pOriginalRequest, DimensionDescriptor startRow,
-                                       DimensionDescriptor startColumn, DimensionDescriptor startBand)
+int ConvertToBsqPager::getSupportedRequestVersion() const
+{
+   return 1;
+}
+
+RasterPage* ConvertToBsqPager::getPage(DataRequest* pOriginalRequest, DimensionDescriptor startRow,
+   DimensionDescriptor startColumn, DimensionDescriptor startBand)
 {
    VERIFYRV(pOriginalRequest != NULL, NULL);
-
    if (pOriginalRequest->getWritable())
    {
       return NULL;
@@ -59,7 +59,8 @@ RasterPage *ConvertToBsqPager::getPage(DataRequest* pOriginalRequest, DimensionD
    DimensionDescriptor stopColumn = pOriginalRequest->getStopColumn();
    DimensionDescriptor stopBand = pOriginalRequest->getStopBand();
 
-   unsigned int concurrentRows = pOriginalRequest->getConcurrentRows();
+   unsigned int concurrentRows = std::min(pOriginalRequest->getConcurrentRows(),
+      stopRow.getActiveNumber() - startRow.getActiveNumber() + 1);
    unsigned int concurrentBands = pOriginalRequest->getConcurrentBands();
 
    VERIFY(requestedType == BSQ);
@@ -71,7 +72,6 @@ RasterPage *ConvertToBsqPager::getPage(DataRequest* pOriginalRequest, DimensionD
    InterleaveFormatType interleave = pDd->getInterleaveFormat();
 
    VERIFY(interleave == BIL || interleave == BIP);
-   VERIFY(mSkipBytes != std::numeric_limits<unsigned int>::max());
 
    unsigned int numRows = pDd->getRowCount();
    unsigned int numCols = pDd->getColumnCount();
@@ -84,42 +84,53 @@ RasterPage *ConvertToBsqPager::getPage(DataRequest* pOriginalRequest, DimensionD
       return NULL;
    }
 
-   unsigned int cols = stopColumn.getActiveNumber()-startColumn.getActiveNumber()+1;
-   ConvertToBsqPage* pPage = new ConvertToBsqPage(concurrentRows, cols, mBytesPerElement);
+   unsigned int cols = stopColumn.getActiveNumber() - startColumn.getActiveNumber() + 1;
+   std::auto_ptr<ConvertToBsqPage> pPage(new ConvertToBsqPage(concurrentRows, cols, mBytesPerElement));
+   unsigned char* pDst = reinterpret_cast<unsigned char*>(pPage->getRawData());
+   if (pDst == NULL)
+   {
+      return NULL;
+   }
 
    FactoryResource<DataRequest> pRequest;
-   pRequest->setRows(startRow, stopRow, concurrentRows);
+   pRequest->setRows(startRow, stopRow);
    pRequest->setColumns(startColumn, stopColumn, cols);
    pRequest->setBands(startBand, startBand, 1);
-
    DataAccessor da = mpRaster->getDataAccessor(pRequest.release());
 
-   for (unsigned int j = 0; j < concurrentRows; ++j)
+   if (interleave == BIP)
    {
-      if (da.isValid())
+      for (unsigned int row = 0; row < concurrentRows; ++row)
       {
-         pPage->feed(j, mSkipBytes, da->getRow());
-      }
-      else
-      {
-         delete pPage;
-         return NULL;
-      }
-      da->nextRow();
-   }
-   return pPage;
-}
+         for (unsigned int col = 0; col < cols; ++col)
+         {
+            if (da.isValid() == false)
+            {
+               return NULL;
+            }
 
-void ConvertToBsqPager::releasePage(RasterPage* pPage)
-{
-   ConvertToBsqPage* pConvertPage = dynamic_cast<ConvertToBsqPage*>(pPage);
-   if (pConvertPage != NULL)
+            memcpy(pDst, da->getColumn(), mBytesPerElement);
+            pDst += mBytesPerElement;
+            da->nextColumn();
+         }
+
+         da->nextRow();
+      }
+   }
+   else if (interleave == BIL)
    {
-      delete pConvertPage;
-   }
-}
+      for (unsigned int row = 0; row < concurrentRows; ++row)
+      {
+         if (da.isValid() == false)
+         {
+            return NULL;
+         }
 
-int ConvertToBsqPager::getSupportedRequestVersion() const
-{
-   return 1;
+         memcpy(pDst, da->getRow(), mBytesPerElement * cols);
+         pDst += mBytesPerElement * cols;
+         da->nextRow();
+      }
+   }
+
+   return pPage.release();
 }

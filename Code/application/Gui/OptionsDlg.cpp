@@ -318,7 +318,7 @@ OptionsDlg::~OptionsDlg()
    saveState();
 
    //NOTE: The QWidget* returned by Option::getWidget() is not being re-parented
-   //This is intentional, this causes a crash if the implementor of the Option interface
+   //This is intentional, this causes a crash if the implementer of the Option interface
    //does not destroy the widget that they created in their destructor.
    vector<Option*>::iterator iter;
    Service<PlugInManagerServices> pPlugMgr;

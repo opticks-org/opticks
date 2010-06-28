@@ -89,33 +89,6 @@ bool Nitf::SensraParser::runAllTests(Progress* pProgress, ostream& failure)
         "999"                   // SPOT_NUM
       );
 
-   static const string data5(
-        "        "              // REF_ROW - set to spaces
-        "        "              // REF_COL - set to spaces
-        "abcdef"                // SENSOR_MODEL
-        "   "                   // SENSOR_MOUNT - set to spaces
-        "+33.653456-084.423456" // SENSOR_LOC
-        "M"                     // SENSOR_ALT_SOURCE
-        "      "                // SENSOR_ALT - set to spaces
-        "m"                     // SENSOR_ALT_UNIT
-        "     "                 // SENSOR_AGL - set to spaces
-        "       "               // SENSOR_PITCH - set to spaces
-        "        "              // SENSOR_ROLL - set to spaces
-        "        "              // SENSOR_YAW - set to spaces
-        "       "               // PLATFORM_PITCH - set to spaces
-        "        "              // PLATFORM_ROLL - set to spaces
-        "     "                 // PLATFORM_HDG - set to spaces
-        "N"                     // GROUND_SPD_SOURCE
-        "      "                // GROUND_SPD - set to spaces
-        "k"                     // GRND_SPD_UNIT
-        "     "                 // GROUND_TRACK - set to spaces
-        "     "                 // VERT_VEL - set to spaces
-        "m"                     // VERT_VEL_UNIT
-        "    "                  // SWATH_FRAMES - set to spaces
-        "    "                  // NUM_SWATHS - set to spaces
-        "   "                   // SPOT_NUM - set to spaces
-      );
-
    FactoryResource<DynamicObject> treDO;
    size_t numBytes(0);
 
@@ -194,8 +167,9 @@ bool Nitf::SensraParser::runAllTests(Progress* pProgress, ostream& failure)
 
    treDO->clear();
 
-   // Start of test 5 - blanks in optional fields
+   // Start of test 5 - blanks in all fields (this is permitted by STDI-0002)
    errorMessage.clear();
+   string data5(data.length(), ' ');
    stringstream input5(data5);
    success = toDynamicObject(input5, input5.str().size(), *treDO.get(), errorMessage);
    if (success == false)
@@ -303,7 +277,7 @@ Nitf::TreState Nitf::SensraParser::isTreValid(const DynamicObject& tre, ostream&
    testSet.insert("M");
    testSet.insert("R");
    status = MaxState(status, testTagValidBcsASet(tre, reporter,
-      &numFields, SENSRA::SENSOR_ALT_SOURCE, testSet, ALL_BLANK_FALSE, NOT_IN_SET_FALSE, EMIT_MSG_NOT_IN_SET_TRUE));
+      &numFields, SENSRA::SENSOR_ALT_SOURCE, testSet, ALL_BLANK_TRUE, NOT_IN_SET_FALSE, EMIT_MSG_NOT_IN_SET_TRUE));
 
    status = MaxState(status, testTagValueRange<int>(tre, reporter,
       &numFields, SENSRA::SENSOR_ALT, -1000, 99000, true));
@@ -312,7 +286,7 @@ Nitf::TreState Nitf::SensraParser::isTreValid(const DynamicObject& tre, ostream&
    testSet.insert("f");
    testSet.insert("m");
    status = MaxState(status, testTagValidBcsASet(tre, reporter,
-      &numFields, SENSRA::SENSOR_ALT_UNIT, testSet, ALL_BLANK_FALSE, NOT_IN_SET_FALSE, EMIT_MSG_NOT_IN_SET_TRUE));
+      &numFields, SENSRA::SENSOR_ALT_UNIT, testSet, ALL_BLANK_TRUE, NOT_IN_SET_FALSE, EMIT_MSG_NOT_IN_SET_TRUE));
 
    status = MaxState(status, testTagValueRange<unsigned int>(tre, reporter,
       &numFields, SENSRA::SENSOR_AGL, 10U, 99000U, true));
@@ -351,7 +325,7 @@ Nitf::TreState Nitf::SensraParser::isTreValid(const DynamicObject& tre, ostream&
    testSet.insert("f");
    testSet.insert("m");
    status = MaxState(status, testTagValidBcsASet(tre, reporter,
-      &numFields, SENSRA::GRND_SPD_UNIT, testSet, ALL_BLANK_FALSE, NOT_IN_SET_FALSE, EMIT_MSG_NOT_IN_SET_TRUE));
+      &numFields, SENSRA::GRND_SPD_UNIT, testSet, ALL_BLANK_TRUE, NOT_IN_SET_FALSE, EMIT_MSG_NOT_IN_SET_TRUE));
 
    status = MaxState(status, testTagValueRange<double>(tre, reporter,
       &numFields, SENSRA::GROUND_TRACK, 0.0, 360.0, true));
@@ -363,7 +337,7 @@ Nitf::TreState Nitf::SensraParser::isTreValid(const DynamicObject& tre, ostream&
    testSet.insert("f");
    testSet.insert("m");
    status = MaxState(status, testTagValidBcsASet(tre, reporter,
-      &numFields, SENSRA::VERT_VEL_UNIT, testSet, ALL_BLANK_FALSE, NOT_IN_SET_FALSE, EMIT_MSG_NOT_IN_SET_TRUE));
+      &numFields, SENSRA::VERT_VEL_UNIT, testSet, ALL_BLANK_TRUE, NOT_IN_SET_FALSE, EMIT_MSG_NOT_IN_SET_TRUE));
 
    status = MaxState(status, testTagValueRange<unsigned int>(tre, reporter,
       &numFields, SENSRA::SWATH_FRAMES, 1U, 9999U, true));

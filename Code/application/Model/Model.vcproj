@@ -316,6 +316,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ConvertToBilPage.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ConvertToBilPager.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ConvertToBipPage.cpp"
 				>
 			</File>
@@ -526,6 +534,14 @@
 			</File>
 			<File
 				RelativePath=".\ClassificationImp.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ConvertToBilPage.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ConvertToBilPager.h"
 				>
 			</File>
 			<File

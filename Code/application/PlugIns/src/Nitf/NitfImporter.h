@@ -17,6 +17,8 @@
 #include <string>
 #include <map>
 
+class ossimNitfImageHeaderV2_X;
+
 namespace Nitf
 {
    class NitfImporter : public RasterElementImporterShell, public Testable
@@ -27,13 +29,12 @@ namespace Nitf
 
       std::vector<ImportDescriptor*> getImportDescriptors(const std::string &filename);
       unsigned char getFileAffinity(const std::string& filename);
-      bool execute(PlugInArgList* pInArgs, PlugInArgList* pOutArgs);
       bool validate(const DataDescriptor* pDescriptor, std::string& errorMessage) const;
       SpatialDataView* createView() const;
       bool createRasterPager(RasterElement *pRaster) const;
       bool validateDefaultOnDiskReadOnly(const DataDescriptor* pDescriptor, std::string& errorMessage) const;
 
-      static EncodingType ossimEncodingToEncodingType(ossimScalarType scalar);
+      static EncodingType ossimImageHeaderToEncodingType(ossimNitfImageHeaderV2_X* pImgHeader);
 
       virtual bool runOperationalTests(Progress* pProgress, std::ostream& failure);
       virtual bool runAllTests(Progress* pProgress, std::ostream& failure);

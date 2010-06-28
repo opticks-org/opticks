@@ -277,7 +277,11 @@ void* Hdf4ImporterShell::loadDatasetFromFile(const Hdf4File& parsedFile, const H
                numBytes *= dimSizes[i];
             }
 
-            pBlock = ArrayResource<char>(static_cast<size_t>(numBytes));
+            pBlock = ArrayResource<char>(static_cast<size_t>(numBytes), true);
+            if (pBlock.get() == NULL)
+            {
+               throw HdfUtilities::Exception("Memory allocation failed!");
+            }
          }
          catch (const HdfUtilities::Exception& exc)
          {

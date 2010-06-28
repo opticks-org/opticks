@@ -753,7 +753,7 @@ char* ModelServicesImp::getMemoryBlock(size_t size)
 
 void ModelServicesImp::deleteMemoryBlock(char* memory)
 {
-   delete memory;
+   delete [] memory;
 }
 
 double ModelServicesImp::getDataValue(EncodingType type, void* pData, int iIndex) const

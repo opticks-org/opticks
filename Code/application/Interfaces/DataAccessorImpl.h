@@ -321,9 +321,21 @@ public:
     *
     *  @return The number of bytes in a row of data excluding preline and postline bytes.
     */
-   inline int getRowSize() const
+   inline size_t getRowSize() const
    {
       return mRowSize - mInterlineBytes;
+   }
+
+   /**
+    *  Access the number of columns available concurrently.
+    *
+    *  @return The number of concurrent columns.
+    *
+    *  @see getRow()
+    */
+   inline size_t getConcurrentColumns() const
+   {
+      return mConcurrentColumns;
    }
 
 private:

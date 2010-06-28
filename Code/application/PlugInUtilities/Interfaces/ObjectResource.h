@@ -413,12 +413,14 @@ public:
 class ObjectArrayArgs
 {
 public:
-   ObjectArrayArgs(int size) :
-      mSize(size)
+   ObjectArrayArgs(int size, bool noThrow) :
+      mSize(size),
+      mNoThrow(noThrow)
    {
    }
 
    int mSize;
+   bool mNoThrow;
 };
 
 /**
@@ -438,6 +440,11 @@ public:
    {
       if (args.mSize != 0)
       {
+         if (args.mNoThrow)
+         {
+            return new (std::nothrow) T[args.mSize];
+         }
+
          return new T[args.mSize];
       }
 
@@ -446,7 +453,7 @@ public:
 
    void releaseResource(const Args& args, T* pObject) const
    {
-      delete[] pObject;
+      delete [] pObject;
    }
 };
 
@@ -480,26 +487,47 @@ template<class T>
 class ArrayResource : public Resource<T, ObjectArray<T> >
 {
 public:
+   /**
+    *  Constructs the %Resource object based on a newly allocated heap array.
+    *
+    *  Essentially, this allocates and wraps an array
+    *  in the Resource and assigns the Resource object the responsibility for freeing the array.
+    *
+    *  @param   args
+    *           The arguments that would have been provided to the obtainResource method of the ObjectArray class.
+    */
    explicit ArrayResource(const typename Resource<T, ObjectArray<T> >::Args& args) :
       Resource<T, ObjectArray<T> >(args)
    {
    }
 
-   explicit ArrayResource(int size) :
-      Resource<T, ObjectArray<T> >(typename Resource<T, ObjectArray<T> >::Args(size))
+   /**
+    *  Constructs the %Resource object based on a newly allocated heap array.
+    *
+    *  Essentially, this allocates and wraps an array
+    *  in the Resource and assigns the Resource object the responsibility for freeing the array.
+    *
+    *  @param   size
+    *           The number of objects in the array.
+    *  @param   noThrow
+    *           The behavior for a failed allocation.
+    *           \c True to return \c NULL from get(), \c false to throw \c std::bad_alloc from this constructor.
+    */
+   explicit ArrayResource(int size, bool noThrow = false) :
+      Resource<T, ObjectArray<T> >(typename Resource<T, ObjectArray<T> >::Args(size, noThrow))
    {
    }
 
    /**
-    *  Constructs the %Resource object based on an existing heap array. 
+    *  Constructs the %Resource object based on an existing heap array.
     *
-    *  Constructs the %Resource object based on an existing heap array. Essentially, this wraps the array
+    *  Essentially, this wraps the array
     *  in the Resource and assigns the Resource object the responsibility for freeing the array.
     *
     *  @param   pObject
     *           The array to wrap in the Resource.
     *  @param   args
-    *           The arguments that would have been provided to the obtainResource method of the ArrayObject class.
+    *           The arguments that would have been provided to the obtainResource method of the ObjectArray class.
     */
    ArrayResource(T* pObject, const typename Resource<T, ObjectArray<T> >::Args& args) :
       Resource<T, ObjectArray<T> >(pObject, args)
@@ -507,18 +535,21 @@ public:
    }
 
    /**
-    *  Constructs the %Resource object based on an existing heap array. 
+    *  Constructs the %Resource object based on an existing heap array.
     *
-    *  Constructs the %Resource object based on an existing heap array. Essentially, this wraps the array
+    *  Essentially, this wraps the array
     *  in the Resource and assigns the Resource object the responsibility for freeing the array.
     *
     *  @param   pObject
     *           The array to wrap in the Resource.
     *  @param   size
     *           The number of objects in the array.
+    *  @param   noThrow
+    *           The behavior for a failed allocation.
+    *           \c True to return \c NULL from get(), \c false to throw \c std::bad_alloc from this constructor.
     */
-   ArrayResource(T* pObject, int size) :
-      Resource<T, ObjectArray<T> >(pObject, typename Resource<T, ObjectArray<T> >::Args(size))
+   ArrayResource(T* pObject, int size, bool noThrow = false) :
+      Resource<T, ObjectArray<T> >(pObject, typename Resource<T, ObjectArray<T> >::Args(size, noThrow))
    {
    }
 
@@ -540,7 +571,7 @@ public:
    /**
     *  Returns a reference to the indexed object.
     *
-    *  Indexes into the underlying array and returns a 
+    *  Indexes into the underlying array and returns a
     *  reference to the indexed object. If the index is out
     *  of bounds, based on the Args object, it will throw
     *  an exception.

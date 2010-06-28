@@ -1055,7 +1055,7 @@ bool EnviExporter::exportDataFile() const
    pStep->addProperty("Data filename", dataFilename);
 
    LargeFileResource dataFile;
-   if (dataFile.open(dataFilename, O_RDWR | O_CREAT | O_BINARY, S_IREAD | S_IWRITE | S_IEXEC) == false)
+   if (dataFile.open(dataFilename, O_WRONLY | O_CREAT | O_BINARY | O_TRUNC, S_IREAD | S_IWRITE | S_IEXEC) == false)
    {
       string message = "Could not open the data file for writing.";
       if (mpProgress != NULL)
@@ -1475,8 +1475,8 @@ bool EnviExporter::exportDataFile() const
    }
    else if (interleave == BIL)
    {
-      if ((exportBands.size() == pDescriptor->getBandCount()) &&
-         (exportColumns.size() == pDescriptor->getColumnCount()))
+      if (exportColumns.size() == pDescriptor->getColumnCount() &&
+         (exportBands.size() == exportBands.back().getActiveNumber() - exportBands.front().getActiveNumber() + 1))
       {
          // Export a full contiguous row at a time
          FactoryResource<DataRequest> pDataRequest;

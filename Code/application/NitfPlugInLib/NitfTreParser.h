@@ -60,20 +60,22 @@ namespace Nitf
    typedef EnumWrapper<TreExportStatusEnum> TreExportStatus;
 
    /**
-    * A plug-in interface use to read and write TREs while importing or exporting a NITF file.
+    * A plug-in interface used to read and write TREs while importing or exporting a NITF file.
     *
-    * In order for the NITF importer and exporter to find your plug-in, you should insure that the
+    * In order for the NITF importer and exporter to find your plug-in, you should ensure that the
     * plug-in name is the same 6-character string as the CETAG as the TRE.
     *
-    * Implementors of this interface can use an existing OSSIM TRE plug-in by implementing 
+    * Implementers of this interface can use an existing OSSIM TRE plug-in by implementing 
     * toDynamicObject(ossimNitfRegisteredTag&, DynamicObject&) const and 
     * fromDynamicObject(const DynamicObject&, ossimNitfRegisteredTag&) const.  The ossimNitfRegisteredTag
     * object will be that registered with OSSIM.
     *
-    * Implementors can also simply perform stream operations for TRE import and export.  In that case,
+    * Implementers can also simply perform stream operations for TRE import and export.  In that case,
     * implement toDynamicObject(std::istream&, size_t, DynamicObject&) const and
     * fromDynamicObject(const DynamicObject&, std::ostream&, size_t&) const.
     *
+    * @warning
+    *    The toDynamicObject and fromDynamicObject methods may be called multiple times during the life of the object.
     */
    class TreParser
    {
@@ -133,7 +135,7 @@ namespace Nitf
       /**
        * Load the TRE directly from an ossimNitfRegisteredTag.
        *
-       * Implementors should implement either this function or toDynamicObject(std::istream&, size_t, DynamicObject&) const
+       * Implementers should implement either this function or toDynamicObject(std::istream&, size_t, DynamicObject&) const
        * to load the TRE.
        *
        * @param input
@@ -144,6 +146,8 @@ namespace Nitf
        *        If this is modified by the function, it will be displayed to the
        *        user as a warning that imported TREs might be incomplete, missing, etc.
        *
+       * @warning This method may be called multiple times during the life of the object.
+       *
        * @return True if the operation succeeded, false otherwise.
        */
       virtual bool toDynamicObject(const ossimNitfRegisteredTag& input, DynamicObject& output, 
@@ -152,7 +156,7 @@ namespace Nitf
       /**
        * Load the TRE from an istream.
        *
-       * Implementors should implement either this function or toDynamicObject(ossimNitfRegisteredTag&, DynamicObject&) const
+       * Implementers should implement either this function or toDynamicObject(ossimNitfRegisteredTag&, DynamicObject&) const
        * to load the TRE.  This function will only be called if the other returned false.
        *
        * @param input
@@ -165,6 +169,8 @@ namespace Nitf
        *        If this is modified by the function, it will be displayed to the
        *        user as a warning that imported TREs might be incomplete, missing, etc.
        *
+       * @warning This method may be called multiple times during the life of the object.
+       *
        * @return True if the operation succeeded, false otherwise.
        */
       virtual bool toDynamicObject(std::istream& input, size_t numBytes, DynamicObject& output,
@@ -173,7 +179,7 @@ namespace Nitf
       /**
        * Write the TRE directly to an ossimNitfRegisteredTag.
        *
-       * Implementors should implement either this function or fromDynamicObject(const DynamicObject&, std::ostream&, size_t&) const
+       * Implementers should implement either this function or fromDynamicObject(const DynamicObject&, std::ostream&, size_t&) const
        * to write the TRE.
        *
        * @param input
@@ -184,6 +190,8 @@ namespace Nitf
        *        If this is modified by the function, it will be displayed to the
        *        user as a warning that exported TREs might be incomplete, missing, etc.
        *
+       * @warning This method may be called multiple times during the life of the object.
+       *
        * @return True if the operation succeeded, false otherwise.
        */
       virtual bool fromDynamicObject(const DynamicObject& input, ossimNitfRegisteredTag& tre, 
@@ -192,7 +200,7 @@ namespace Nitf
       /**
        * Write the TRE directly to an ossimNitfRegisteredTag.
        *
-       * Implementors should implement either this function or fromDynamicObject(const DynamicObject&, ossimNitfRegisteredTag&) const
+       * Implementers should implement either this function or fromDynamicObject(const DynamicObject&, ossimNitfRegisteredTag&) const
        * to write the TRE.  This function will only be called if the other returned false.
        *
        * @param input
@@ -204,6 +212,8 @@ namespace Nitf
        * @param errorMessage
        *        If this is modified by the function, it will be displayed to the
        *        user as a warning that exported TREs might be incomplete, missing, etc.
+       *
+       * @warning This method may be called multiple times during the life of the object.
        *
        * @return True if the operation succeeded, false otherwise.
        */

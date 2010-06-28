@@ -26,6 +26,7 @@
 #include <ossim/imaging/ossimImageWriterFactoryRegistry.h>
 #include <ossim/imaging/ossimBandSelector.h>
 #include <ossim/init/ossimInit.h>
+#include <ossim/support_data/ossimNitfImageHeader.h>
 
 #include <QtCore/QString>
 
@@ -44,46 +45,18 @@ Nitf::Pager::Pager() :
 }
 
 Nitf::Pager::~Pager()
-{
-   // Do nothing
-}
+{}
 
 bool Nitf::Pager::getInputSpecification(PlugInArgList*& pArgList)
 {
-   Service<PlugInManagerServices> pPims;
-   VERIFY(pPims.get() != NULL);
-
-   if (CachedPager::getInputSpecification(pArgList) == true)
-   {
-      VERIFY(pArgList != NULL);
-
-      if (pArgList->addArg<int>("Segment Number", 1) == false)
-      {
-         pPims->destroyPlugInArgList(pArgList);
-         pArgList = NULL;
-         return false;
-      }
-
-      return true;
-   }
-
-   return false;
+   return (CachedPager::getInputSpecification(pArgList) &&
+      pArgList != NULL && pArgList->addArg<int>("Segment Number", 1));
 }
 
 bool Nitf::Pager::parseInputArgs(PlugInArgList* pInputArgList)
 {
-   bool success = CachedPager::parseInputArgs(pInputArgList) == true;
-   if (success)
-   {
-      int* pSegment = pInputArgList->getPlugInArgValue<int>("Segment Number");
-      if (pSegment == NULL)
-      {
-         return false;
-      }
-      mSegment = *pSegment; // guaranteed to be good since has a default value set
-   }
-
-   return success;
+   return (CachedPager::parseInputArgs(pInputArgList) &&
+      pInputArgList != NULL && pInputArgList->getPlugInArgValue<int>("Segment Number", mSegment));
 }
 
 bool Nitf::Pager::openFile(const string& filename)
@@ -94,72 +67,41 @@ bool Nitf::Pager::openFile(const string& filename)
 
 CachedPage::UnitPtr Nitf::Pager::fetchUnit(DataRequest *pOriginalRequest)
 {
-   CachedPage::UnitPtr pUnit;
-
-   VERIFYRV(pOriginalRequest != NULL, pUnit);
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : TODO currently fails if startColumn != 0 (leckels)")
-
-   InterleaveFormatType requestedFormat = pOriginalRequest->getInterleaveFormat();
+   VERIFYRV(pOriginalRequest != NULL, CachedPage::UnitPtr());
    DimensionDescriptor startRow = pOriginalRequest->getStartRow();
    DimensionDescriptor stopRow = pOriginalRequest->getStopRow();
-   unsigned int concurrentRows = pOriginalRequest->getConcurrentRows();
    DimensionDescriptor startColumn = pOriginalRequest->getStartColumn();
    DimensionDescriptor stopColumn = pOriginalRequest->getStopColumn();
-   unsigned int concurrentColumns = pOriginalRequest->getConcurrentColumns();
    DimensionDescriptor startBand = pOriginalRequest->getStartBand();
    DimensionDescriptor stopBand = pOriginalRequest->getStopBand();
+   unsigned int concurrentRows = pOriginalRequest->getConcurrentRows();
+   unsigned int concurrentColumns = getColumnCount();
    unsigned int concurrentBands = pOriginalRequest->getConcurrentBands();
 
-   unsigned int rowNumber = startRow.getActiveNumber();
-   unsigned int colNumber = startColumn.getActiveNumber();
-   unsigned int bandNumber = startBand.getActiveNumber();
+   unsigned int rowNumber = startRow.getOnDiskNumber();
+   unsigned int colNumber = startColumn.getOnDiskNumber();
+   unsigned int bandNumber = startBand.getOnDiskNumber();
 
-   if (requestedFormat != BSQ)
-   {
-      return pUnit;
-   }
-
-   if (rowNumber > stopRow.getActiveNumber() ||
-      colNumber > stopColumn.getActiveNumber() ||
-      bandNumber > stopBand.getActiveNumber())
-   {
-      return pUnit;
-   }
-
-   // give the entire row & bands of data
-   if (concurrentColumns != getColumnCount())
-   {
-      concurrentColumns = getColumnCount();
-   }
-
-   if (requestedFormat == BSQ)
-   {
-      concurrentBands = 1;
-   }
-   else if (concurrentBands != getBandCount())
-   {
-      concurrentBands = getBandCount();
-   }
-
-   // can't give more data than there is in the cube
-   concurrentRows = min(concurrentRows, stopRow.getActiveNumber() - startRow.getActiveNumber() + 1);
-
-   VERIFYRV(mpImageHandler.get() != NULL, pUnit);
-
+   VERIFYRV(mpImageHandler.get() != NULL, CachedPage::UnitPtr());
    if (mpImageHandler->canCastTo("ossimNitfTileSource") == false)
    {
-      return pUnit;
+      return CachedPage::UnitPtr();
    }
+
    ossimNitfTileSource* pTileSource = PTR_CAST(ossimNitfTileSource, mpImageHandler.get());
-   if (pTileSource == NULL)
+   VERIFYRV(pTileSource != NULL, CachedPage::UnitPtr());
+   pTileSource->setExpandLut(false);
+   mpImageHandler->setCurrentEntry(mSegment - 1);
+
+   vector<ossim_uint32> bandList(concurrentBands);
+   for (unsigned int band = 0; band < concurrentBands; ++band)
    {
-      return pUnit;
+      bandList[band] = bandNumber + band;
    }
 
-   pTileSource->setExpandLut(false);
+   VERIFYRV(mpImageHandler->setOutputBandList(bandList), CachedPage::UnitPtr());
 
-   mpImageHandler->setCurrentEntry(mSegment-1);
-   // the Bounding Rectangle contains NITF Chipping Information.
+   // The Bounding Rectangle contains NITF Chipping Information.
    ossimIrect br = mpImageHandler->getBoundingRect();
 
    int minx;
@@ -171,21 +113,38 @@ CachedPage::UnitPtr Nitf::Pager::fetchUnit(DataRequest *pOriginalRequest)
    ossimIrect region(colNumber + minx, rowNumber + miny,
                      colNumber + minx + concurrentColumns-1, rowNumber + miny + concurrentRows-1);
 
-   ossimRefPtr<ossimImageData> cubeData = mpImageHandler->getTile(region);
-   if (cubeData == NULL || cubeData->getBuf(bandNumber) == NULL)
+   const int dstSize = concurrentRows * concurrentColumns * concurrentBands * getBytesPerBand();
+   ArrayResource<char> pData(dstSize, true);
+   if (pData.get() == NULL)
    {
-      return pUnit;
+      return CachedPage::UnitPtr();
    }
 
-   size_t srcSize = static_cast<size_t>(cubeData->getSizePerBandInBytes()) * concurrentBands;
-   size_t dstSize = static_cast<size_t>(concurrentRows)*concurrentColumns*concurrentBands*getBytesPerBand();
-   VERIFYRV(srcSize >= dstSize && dstSize > 0, pUnit);
+   ossimRefPtr<ossimImageData> cubeData = mpImageHandler->getTile(region);
+   if (cubeData == NULL || cubeData->getBuf() == NULL)
+   {
+      return CachedPage::UnitPtr();
+   }
 
-   char* pData = new char[dstSize];
-   memcpy(pData, cubeData->getBuf(bandNumber), dstSize);
+   ossimInterleaveType interleave;
+   if (pOriginalRequest->getInterleaveFormat() == BSQ)
+   {
+      interleave = OSSIM_BSQ;
+   }
+   else if (pOriginalRequest->getInterleaveFormat() == BIL)
+   {
+      interleave = OSSIM_BIL;
+   }
+   else if (pOriginalRequest->getInterleaveFormat() == BIP)
+   {
+      interleave = OSSIM_BIP;
+   }
+   else
+   {
+      return CachedPage::UnitPtr();
+   }
 
-   CachedPage::CacheUnit* pCacheUnit = new CachedPage::CacheUnit(pData, startRow, concurrentRows,
-      static_cast<int>(dstSize), startBand);
-   pUnit.reset(pCacheUnit);
-   return pUnit;
+   cubeData->unloadTile(pData.get(), region, interleave);
+   return CachedPage::UnitPtr(new CachedPage::CacheUnit(pData.release(), startRow, concurrentRows,
+      dstSize, concurrentBands == 1 ? startBand : CachedPage::CacheUnit::ALL_BANDS));
 }

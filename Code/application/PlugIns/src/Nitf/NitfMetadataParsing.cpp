@@ -28,6 +28,8 @@
 
 #include <iostream>
 #include <map>
+#include <memory>
+#include <utility>
 
 #include <ossim/base/ossimRtti.h>
 #include <ossim/base/ossimConstants.h>
@@ -35,7 +37,6 @@
 #include <ossim/base/ossimDateProperty.h>
 #include <ossim/base/ossimContainerProperty.h>
 #include <ossim/base/ossimProperty.h>
-#include <ossim/imaging/ossimNitfTileSource.h>
 #include <ossim/imaging/ossimNitfWriter.h>
 
 #include <ossim/support_data/ossimNitfDataExtensionSegment.h>
@@ -51,8 +52,8 @@ using namespace Nitf;
 using namespace Nitf::TRE;
 using namespace std;
 
-bool Nitf::TrePlugInResource::parseTag(const ossimNitfRegisteredTag& input, DynamicObject& output, 
-                                       RasterDataDescriptor &descriptor, string &errorMessage) const
+bool Nitf::TrePlugInResource::parseTag(const ossimNitfRegisteredTag& input, DynamicObject& output,
+   RasterDataDescriptor& descriptor, string& errorMessage) const
 {
    bool parsed = false;
    const TreParser* pParser = dynamic_cast<const TreParser*>(get());
@@ -72,34 +73,27 @@ bool Nitf::TrePlugInResource::parseTag(const ossimNitfRegisteredTag& input, Dyna
       {
          pParser->importMetadata(output, descriptor, errorMessage2);
       }
-      bool either = !errorMessage1.empty() || !errorMessage2.empty();
-      bool both = !errorMessage1.empty() && !errorMessage2.empty();
 
-      if (either)
+      if (!errorMessage1.empty() || !errorMessage2.empty())
       {
-         errorMessage = getArgs().mPlugInName + ": ";
+         errorMessage += getArgs().mPlugInName + ": ";
 
          if (!errorMessage1.empty())
          {
             errorMessage += errorMessage1;
          }
 
-         if (both)
-         {
-            errorMessage += "\n";
-         }
-
          if (!errorMessage2.empty())
          {
-            errorMessage += errorMessage2;
+            errorMessage += errorMessage2 + "\n";
          }
       }
    }
    return parsed;
 }
 
-bool Nitf::TrePlugInResource::writeTag(const DynamicObject &input, const ossim_uint32& ownerIndex,
-   const ossimString& tagType, ossimNitfWriter &writer, string &errorMessage) const
+bool Nitf::TrePlugInResource::writeTag(const DynamicObject& input, const ossim_uint32& ownerIndex,
+   const ossimString& tagType, ossimNitfWriter& writer, string& errorMessage) const
 {
    bool success = false;
    bool skipped = false;
@@ -163,8 +157,8 @@ bool Nitf::TrePlugInResource::writeTag(const DynamicObject &input, const ossim_u
    return false;
 }
 
-bool Nitf::TrePlugInResource::exportMetadata(const RasterDataDescriptor &descriptor, 
-   const RasterFileDescriptor &exportDescriptor, ossimNitfWriter &writer, string &errorMessage) const
+bool Nitf::TrePlugInResource::exportMetadata(const RasterDataDescriptor& descriptor,
+   const RasterFileDescriptor& exportDescriptor, ossimNitfWriter& writer, string& errorMessage) const
 {
    const TreParser* pParser = dynamic_cast<const TreParser*>(get());
    VERIFY(pParser != NULL);
@@ -209,68 +203,44 @@ TreState Nitf::TrePlugInResource::validateTag(const DynamicObject& tag, ostream&
    return pParser->isTreValid(tag, reporter);
 }
 
-namespace
-{
-   class SetStringFromStream
-   {
-   public:
-      SetStringFromStream(string &str, ostringstream &stream) : mStr(str), mStream(stream)
-      {
-      }
-
-      ~SetStringFromStream()
-      {
-         mStr = mStream.str();
-      }
-   private:
-      string& mStr;
-      ostringstream& mStream;
-   };
-}
-
 bool Nitf::importMetadata(const unsigned int& currentImage, const Nitf::OssimFileResource& pFile,
    const ossimNitfFileHeaderV2_X* pFileHeader, const ossimNitfImageHeaderV2_X* pImageSubheader,
-   RasterDataDescriptor *pDescriptor, string &errorMessage)
+   RasterDataDescriptor* pDescriptor, map<string, TrePlugInResource>& parsers, string& errorMessage)
 {
 #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Separate the file header parsing " \
    "from the subheader parsing (dadkins)")
 
    VERIFY(pFileHeader != NULL && pImageSubheader != NULL && pDescriptor != NULL);
 
-   DynamicObject* pMetadata = pDescriptor->getMetadata();
-   VERIFY(pMetadata != NULL);
-
-   ostringstream errorStream;
-   SetStringFromStream stringSetter(errorMessage, errorStream);
-
    // Add metadata for the NITF File Header and the supported subheaders
    const string fileVersion = pFileHeader->getVersion();
    Nitf::FileHeader fileHeader(fileVersion);
    if (fileHeader.importMetadata(pFileHeader, pDescriptor) == false)
    {
+      errorMessage += "Unable to import metadata from the file header.\n";
       return false;
    }
 
    unsigned int numDes = pFileHeader->getNumberOfDataExtSegments();
    for (unsigned int i = 0; i < numDes; ++i)
    {
-      ossimNitfDataExtensionSegment* pDes = pFile->getNewDataExtensionSegment(i);
-      if (pDes != NULL)
+      auto_ptr<ossimNitfDataExtensionSegment> pDes(pFile->getNewDataExtensionSegment(i));
+      if (pDes.get() != NULL)
       {
          Nitf::DesSubheader desSubheader(fileVersion, i);
-         if (desSubheader.importMetadata(pDes, pDescriptor) == false)
+         if (desSubheader.importMetadata(pDes.get(), pDescriptor) == false)
          {
-            delete pDes;
-            return false;
+            stringstream errorStream;
+            errorStream << "Unable to retrieve DES subheader #" << i << "." << endl;
+            errorMessage += errorStream.str();
          }
-
-         delete pDes;
       }
    }
 
    Nitf::ImageSubheader imageSubheader(fileVersion);
    if (imageSubheader.importMetadata(pImageSubheader, pDescriptor) == false)
    {
+      errorMessage += "Unable to import metadata from the image subheader.\n";
       return false;
    }
 
@@ -284,11 +254,13 @@ bool Nitf::importMetadata(const unsigned int& currentImage, const Nitf::OssimFil
       ossimNitfTagInformation tagInfo;
       if (pImageSubheader->getTagInformation(tagInfo, imageTag) == false)
       {
+         stringstream errorStream;
          errorStream << "Unable to retrieve tag #" << imageTag << " from the image subheader." << endl;
+         errorMessage += errorStream.str();
       }
       else
       {
-         addTagToMetadata(currentImage, tagInfo, pDescriptor, pTres.get(), pTreInfo.get(), errorMessage);
+         addTagToMetadata(currentImage, tagInfo, pDescriptor, pTres.get(), pTreInfo.get(), parsers, errorMessage);
       }
    }
 
@@ -298,16 +270,20 @@ bool Nitf::importMetadata(const unsigned int& currentImage, const Nitf::OssimFil
       ossimNitfTagInformation tagInfo;
       if (pFileHeader->getTagInformation(tagInfo, fileTag) == false)
       {
+         stringstream errorStream;
          errorStream << "Unable to retrieve tag #" << fileTag << " from the file header." << endl;
+         errorMessage += errorStream.str();
       }
       else
       {
          // For file headers, currentImage is always 0.
-         addTagToMetadata(0, tagInfo, pDescriptor, pTres.get(), pTreInfo.get(), errorMessage);
+         addTagToMetadata(0, tagInfo, pDescriptor, pTres.get(), pTreInfo.get(), parsers, errorMessage);
       }
    }
 
    // FTITLE parsing requires the metadata object to be populated first
+   DynamicObject* pMetadata = pDescriptor->getMetadata();
+   VERIFY(pMetadata != NULL);
    pMetadata->setAttributeByPath(Nitf::NITF_METADATA + "/" + Nitf::TRE_METADATA, *pTres.get());
    pMetadata->setAttributeByPath(Nitf::NITF_METADATA + "/" + Nitf::TRE_INFO_METADATA, *pTreInfo.get());
 
@@ -432,14 +408,15 @@ bool Nitf::importMetadata(const unsigned int& currentImage, const Nitf::OssimFil
       }
 
       pIchipb->setAttribute("0", *pInstance.get()); // first instance of ICHIPB
-
       pTres->setAttribute("ICHIPB", *pIchipb.get());
    }
+
    return true;
 }
 
 bool Nitf::addTagToMetadata(const unsigned int& ownerIndex, const ossimNitfTagInformation& tagInfo,
-   RasterDataDescriptor* pDescriptor, DynamicObject* pTres, DynamicObject* pTreInfo, string& errorMessage)
+   RasterDataDescriptor* pDescriptor, DynamicObject* pTres, DynamicObject* pTreInfo,
+   map<string, TrePlugInResource>& parsers, string& errorMessage)
 {
    // Verify that input is valid
    ossimString tagName = tagInfo.getTagName();
@@ -454,15 +431,28 @@ bool Nitf::addTagToMetadata(const unsigned int& ownerIndex, const ossimNitfTagIn
    ossimRefPtr<ossimNitfRegisteredTag> pRegTag = tagInfo.getTagData();
    VERIFY(pRegTag.get() != NULL);
 
-   TrePlugInResource pPlugIn(tagName);
-   if (pPlugIn.parseTag(*pRegTag.get(), *pTag.get(), *pDescriptor, errorMessage) == false)
+   // Do NOT make a copy of pParser as it has ownership which gets transferred when the assignment operator is used.
+   // Doing so would cause a stale pointer to remain in the map and could cause a subsequent crash if it is used later.
+   map<string, TrePlugInResource>::iterator pParser = parsers.find(tagName);
+   if (pParser == parsers.end())
+   {
+      pParser = parsers.insert(make_pair(tagName, TrePlugInResource(tagName))).first;
+   }
+
+   if (pParser->second.parseTag(*pRegTag.get(), *pTag.get(), *pDescriptor, errorMessage) == false)
    {
       // Failing that, use UnknownTreParser.
       pTag->clear();
-      TrePlugInResource pUnknownPlugIn(UnknownTreParser::PLUGIN_NAME);
-      VERIFY(pUnknownPlugIn.get() != NULL);
 
-      if (pUnknownPlugIn.parseTag(*pRegTag.get(), *pTag.get(), *pDescriptor, errorMessage) == false)
+      // Again, do NOT make a copy of pParser.
+      pParser = parsers.find(UnknownTreParser::PLUGIN_NAME);
+      if (pParser == parsers.end())
+      {
+         pParser = parsers.insert(make_pair(UnknownTreParser::PLUGIN_NAME,
+            TrePlugInResource(UnknownTreParser::PLUGIN_NAME))).first;
+      }
+
+      if (pParser->second.parseTag(*pRegTag.get(), *pTag.get(), *pDescriptor, errorMessage) == false)
       {
          errorMessage += tagName + " has not been imported.\n";
          return false;

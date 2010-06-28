@@ -133,7 +133,6 @@ RasterPage* CachedPager::getPage(DataRequest *pOriginalRequest,
 
    InterleaveFormatType requestedFormat = pOriginalRequest->getInterleaveFormat();
    DimensionDescriptor stopRow = pOriginalRequest->getStopRow();
-   unsigned int concurrentRows = pOriginalRequest->getConcurrentRows();
    DimensionDescriptor stopBand = pOriginalRequest->getStopBand();
    unsigned int concurrentBands = pOriginalRequest->getConcurrentBands();
 
@@ -156,17 +155,9 @@ RasterPage* CachedPager::getPage(DataRequest *pOriginalRequest,
       }
 
       // get a bunch more rows if you can to prevent a cache miss
-      if (startRow.getActiveNumber() + concurrentRows < stopRow.getActiveNumber())
-      {
-         double CHUNK_SIZE = getChunkSize();
-         concurrentRows =
-            static_cast<unsigned int>(std::max(static_cast<double>(concurrentRows),
-                                      CHUNK_SIZE/(concurrentBands*mColumnCount*mBytesPerBand)));
-         if (concurrentRows > static_cast<unsigned int>(mRowCount))
-         {
-            concurrentRows = static_cast<unsigned int>(mRowCount);
-         }
-      }
+      unsigned int concurrentRows = std::max(pOriginalRequest->getConcurrentRows(),
+         static_cast<unsigned int>(getChunkSize() / (concurrentBands * mColumnCount * mBytesPerBand)));
+      concurrentRows = std::min(concurrentRows, stopRow.getActiveNumber() - startRow.getActiveNumber() + 1);
 
       FactoryResource<DataRequest> pNewRequest;
       pNewRequest->setInterleaveFormat(requestedFormat);
@@ -175,7 +166,10 @@ RasterPage* CachedPager::getPage(DataRequest *pOriginalRequest,
       pNewRequest->setBands(cacheStartBand, cacheStopBand);
 
       pNewRequest->polish(mpDescriptor);
-      pUnit = fetchUnit(pNewRequest.get());
+      if (pNewRequest->validate(mpDescriptor) == true)
+      {
+         pUnit = fetchUnit(pNewRequest.get());
+      }
    }
 
    return mCache.createPage(pUnit, requestedFormat, startRow, startColumn, startBand);

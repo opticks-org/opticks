@@ -209,9 +209,9 @@ bool Nitf::IchipbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
 
    bool success(true);
 
-   readField<unsigned int>(input, output, success, ICHIPB::XFRM_FLAG, 2, errorMessage, buf);
+   readField<bool>(input, output, success, ICHIPB::XFRM_FLAG, 2, errorMessage, buf);
    readField<double>(input, output, success, ICHIPB::SCALE_FACTOR, 10, errorMessage, buf);
-   readField<unsigned int>(input, output, success, ICHIPB::ANAMRPH_CORR, 2, errorMessage, buf);
+   readField<bool>(input, output, success, ICHIPB::ANAMRPH_CORR, 2, errorMessage, buf);
    readField<unsigned int>(input, output, success, ICHIPB::SCANBLK_NUM, 2, errorMessage, buf);
    readField<double>(input, output, success, ICHIPB::OP_ROW_11, 12, errorMessage, buf);
    readField<double>(input, output, success, ICHIPB::OP_COL_11, 12, errorMessage, buf);
@@ -249,14 +249,14 @@ Nitf::TreState Nitf::IchipbParser::isTreValid(const DynamicObject& tre, ostream&
    set<string>             testSet;
    unsigned int numFields = 0;
 
-   status = MaxState(status, testTagValueRange<unsigned int>(tre, reporter,
-      &numFields, ICHIPB::XFRM_FLAG, 0U, 99U));
+   status = MaxState(status, testTagValueRange<bool>(tre, reporter,
+      &numFields, ICHIPB::XFRM_FLAG, false, true));
 
    status = MaxState(status, testTagValueRange<double>(tre, reporter,
       &numFields, ICHIPB::SCALE_FACTOR, 0.0, 99999999.999));
 
-   status = MaxState(status, testTagValueRange<unsigned int>(tre, reporter,
-      &numFields, ICHIPB::ANAMRPH_CORR, 0U, 99U));
+   status = MaxState(status, testTagValueRange<bool>(tre, reporter,
+      &numFields, ICHIPB::ANAMRPH_CORR, false, true));
 
    status = MaxState(status, testTagValueRange<unsigned int>(tre, reporter,
       &numFields, ICHIPB::SCANBLK_NUM, 0U, 99U));
@@ -334,8 +334,6 @@ Nitf::TreState Nitf::IchipbParser::isTreValid(const DynamicObject& tre, ostream&
 
    return status;
 }
-
-
 
 bool Nitf::IchipbParser::fromDynamicObject(const DynamicObject& input, ostream& output, size_t& numBytesWritten,
    string &errorMessage) const

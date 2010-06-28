@@ -43,8 +43,6 @@ TreState Nitf::TreParserShell::isTreValid(const DynamicObject& tre, ostream& rep
 bool Nitf::TreParserShell::toDynamicObject(const ossimNitfRegisteredTag& input, DynamicObject& output, 
    string &errorMessage) const
 {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Consider whether the OSSIM-dependant methods " \
-   "are needed (leckels)")
    return false;
 }
 
@@ -63,8 +61,6 @@ bool Nitf::TreParserShell::fromDynamicObject(const DynamicObject& input, ostream
 bool Nitf::TreParserShell::fromDynamicObject(const DynamicObject& input, ossimNitfRegisteredTag& tre, 
    string &errorMessage) const
 {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Consider whether the OSSIM-dependant methods " \
-   "are needed (leckels)")
    return false;
 }
 

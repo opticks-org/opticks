@@ -265,7 +265,7 @@ CachedPage::UnitPtr Hdf5Pager::fetchUnit(DataRequest *pOriginalRequest)
 
    size_t pageSize = static_cast<size_t>(bpp*counts[0]*counts[1]*counts[2]);
 
-   ArrayResource<char> pData(pageSize);
+   ArrayResource<char> pData(pageSize, true);
    if (pData.get() == NULL)
    {
       return pUnit;

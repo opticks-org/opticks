@@ -64,10 +64,9 @@ Nitf::NitfImporter::NitfImporter()
    setDescriptorId("{2130D292-2647-4e98-BEF1-BA743234148C}");
    setProductionStatus(APP_IS_PRODUCTION_RELEASE);
 }
- 
+
 Nitf::NitfImporter::~NitfImporter()
-{
-}
+{}
 
 vector<ImportDescriptor*> Nitf::NitfImporter::getImportDescriptors(const string &filename)
 {
@@ -103,12 +102,16 @@ vector<ImportDescriptor*> Nitf::NitfImporter::getImportDescriptors(const string 
    vector<ossim_uint32> importableImageSegments;
    pHandler->getEntryList(importableImageSegments);
 
+   // Create map of TRE parsers.
+   // The sole purpose of this map is to force DLLs to stay loaded while the metadata is being imported.
+   std::map<std::string, TrePlugInResource> parsers;
+
    for (vector<ossim_uint32>::iterator segmentIter = importableImageSegments.begin();
         segmentIter != importableImageSegments.end(); ++segmentIter)
    {
+      // Do not call pHandler->setCurrentEntry as it is a very expensive operation
+      // which causes up to a several second delay on files with many large images.
       const ossim_uint32& currentIndex = *segmentIter;
-      pHandler->setCurrentEntry(currentIndex);
-
       ossimNitfImageHeaderV2_X* pImgHeader =
          PTR_CAST(ossimNitfImageHeaderV2_X, pFile->getNewImageHeader(currentIndex));
       if (pImgHeader == NULL)
@@ -116,9 +119,8 @@ vector<ImportDescriptor*> Nitf::NitfImporter::getImportDescriptors(const string 
          continue;
       }
 
-      ossimScalarType dataType = pHandler->getOutputScalarType();
-      EncodingType appDataType = ossimEncodingToEncodingType(dataType);
-      if (appDataType.isValid() == false)
+      EncodingType dataType = ossimImageHeaderToEncodingType(pImgHeader);
+      if (dataType.isValid() == false)
       {
          continue;
       }
@@ -144,16 +146,28 @@ vector<ImportDescriptor*> Nitf::NitfImporter::getImportDescriptors(const string 
          RasterUtilities::generateDimensionVector(pImgHeader->getNumberOfCols(), true, false, true);
       pDd->setColumns(cols);
 
-      pDd->setInterleaveFormat(BSQ);
-      pDd->setDataType(appDataType);
-      pDd->setValidDataTypes(vector<EncodingType>(1, appDataType));
+      if (pImgHeader->getIMode() == "P")
+      {
+         pDd->setInterleaveFormat(BIP);
+      }
+      else if (pImgHeader->getIMode() == "R")
+      {
+         pDd->setInterleaveFormat(BIL);
+      }
+      else
+      {
+         pDd->setInterleaveFormat(BSQ);
+      }
+
+      pDd->setDataType(dataType);
+      pDd->setValidDataTypes(vector<EncodingType>(1, dataType));
       pDd->setProcessingLocation(IN_MEMORY);
 
       RasterFileDescriptor* pFd = dynamic_cast<RasterFileDescriptor*>(
          RasterUtilities::generateAndSetFileDescriptor(pDd, filename, imageName, LITTLE_ENDIAN_ORDER));
 
       string errorMessage;
-      if (Nitf::importMetadata(currentIndex + 1, pFile, pFileHeader, pImgHeader, pDd, errorMessage) == true)
+      if (Nitf::importMetadata(currentIndex + 1, pFile, pFileHeader, pImgHeader, pDd, parsers, errorMessage) == true)
       {
          if (pImgHeader->hasTransparentCode() == true)
          {
@@ -198,8 +212,8 @@ vector<ImportDescriptor*> Nitf::NitfImporter::getImportDescriptors(const string 
          mParseMessages[imageName] = errorMessage;
          retval.push_back(pImportDescriptor.release());
       }
-
    }
+
    return retval;
 }
 
@@ -224,77 +238,6 @@ unsigned char Nitf::NitfImporter::getFileAffinity(const string& filename)
    }
 
    return Importer::CAN_NOT_LOAD;
-}
-
-bool Nitf::NitfImporter::execute(PlugInArgList* pInArgs, PlugInArgList* pOutArgs)
-{
-   if (!RasterElementImporterShell::execute(pInArgs, pOutArgs))
-   {
-      return false;
-   }
-
-   RasterElement* pRaster = getRasterElement();
-   VERIFY(pRaster != NULL);
-
-   DataDescriptor* pDd = pRaster->getDataDescriptor();
-   VERIFY(pDd != NULL);
-
-   FileDescriptor* pFd = pDd->getFileDescriptor();
-   VERIFY(pFd != NULL);
-
-   Classification* pClassification = pDd->getClassification();
-   VERIFY(pClassification != NULL);
-
-   Progress* pProgress = getProgress();
-   if (pProgress != NULL)
-   {
-      map<string, string>::const_iterator msgIter = mParseMessages.find(pFd->getDatasetLocation());
-      if (msgIter != mParseMessages.end())
-      {
-         pProgress->updateProgress(msgIter->second, 0, WARNING);
-      }
-   }
-
-   // validate the metadata
-   stringstream strm;
-   Nitf::TreState state = VALID;
-   DynamicObject* pMeta = pDd->getMetadata();
-   if (pMeta != NULL)
-   {
-      DynamicObject* pNitf = dv_cast<DynamicObject>(&pMeta->getAttribute(Nitf::NITF_METADATA));
-      if (pNitf != NULL)
-      {
-         // NITF/TRE
-         DynamicObject* pTres = dv_cast<DynamicObject>(&pNitf->getAttribute(Nitf::TRE_METADATA));
-         if (pTres != NULL)
-         {
-            vector<string> treNames;
-            pTres->getAttributeNames(treNames);
-            // NITF/TRE/RPC00A
-            for (vector<string>::iterator it = treNames.begin(); it != treNames.end(); ++it)
-            {
-               DynamicObject* pTre = dv_cast<DynamicObject>(&pTres->getAttribute(*it));
-               TrePlugInResource p(*it);
-               if (p.get() != NULL && pTre != NULL)
-               {
-                  vector<string> treInstances;
-                  pTre->getAttributeNames(treInstances);
-
-                  for (vector<string>::iterator t = treInstances.begin(); t != treInstances.end(); ++t)
-                  {
-                     DynamicObject* pInstance = dv_cast<DynamicObject>(&pTre->getAttribute(*t));
-                     if (pInstance != NULL && state == VALID)
-                     {
-                        state = p.validateTag(*pInstance, strm);
-                     }
-                  }
-               }
-            }
-         }
-      }
-   }
-
-   return true;
 }
 
 SpatialDataView* Nitf::NitfImporter::createView() const
@@ -422,46 +365,96 @@ bool Nitf::NitfImporter::validateDefaultOnDiskReadOnly(const DataDescriptor* pDe
    return true;
 }
 
-EncodingType Nitf::NitfImporter::ossimEncodingToEncodingType(ossimScalarType scalar)
+EncodingType Nitf::NitfImporter::ossimImageHeaderToEncodingType(ossimNitfImageHeaderV2_X* pImgHeader)
 {
-   switch (scalar)
+   VERIFYRV(pImgHeader != NULL, EncodingType());
+
+   // Use NBPP not ABPP as is done in ossimNitfTileSource.cpp.
+   const ossim_int32 bitsPerPixel = pImgHeader->getBitsPerPixelPerBand();
+   const ossimString pixelValueType = pImgHeader->getPixelValueType().upcase();
+   switch (bitsPerPixel)
    {
-   case OSSIM_UINT8:
-      return INT1UBYTE;
-      break;
-   case OSSIM_SINT8:
-      return INT1SBYTE;
-      break;
-   case OSSIM_UINT16:
-      return INT2UBYTES;
-      break;
-   case OSSIM_USHORT11: // fall through, deprecated - 11 bit data stored in 16 bit values
-   case OSSIM_SINT16:
-      return INT2SBYTES;
-      break;
-   case OSSIM_UINT32:
-      return INT4UBYTES;
-      break;
-   case OSSIM_SINT32:
-      return INT4SBYTES;
-      break;
-   case OSSIM_NORMALIZED_FLOAT: // fall through, deprecated
-   case OSSIM_FLOAT32:
-      return FLT4BYTES;
-      break;
-   case OSSIM_NORMALIZED_DOUBLE: // fall through, deprecated
-   case OSSIM_FLOAT64:
-      return FLT8BYTES;
-      break;
+      case 8:
+      {
+         if (pixelValueType == "INT")
+         {
+            return INT1UBYTE;
+         }
 
-      // OSSIM_CINT16:
-      // OSSIM_CINT32:
-      // OSSIM_CFLOAT32:
-      // OSSIM_CFLOAT64:
+         if (pixelValueType == "SI")
+         {
+            return INT1SBYTE;
+         }
 
-   default:
-      return EncodingType();
+         break;
+      }
+      case 16:
+      {
+         if (pixelValueType == "INT")
+         {
+            return INT2UBYTES;
+         }
+
+         if (pixelValueType == "SI")
+         {
+            return INT2SBYTES;
+         }
+
+         break;
+      }
+      case 32:
+      {
+         if(pixelValueType == "R")
+         {
+            return FLT4BYTES;
+         }
+
+         if (pixelValueType == "INT")
+         {
+            return INT4UBYTES;
+         }
+
+         if (pixelValueType == "SI")
+         {
+            return INT4SBYTES;
+         }
+
+         break;
+      }
+      case 64:
+      {
+         if (pixelValueType == "R")
+         {
+            return FLT8BYTES;
+         }
+
+         break;
+      }
+      default:
+      {
+         if (pImgHeader->isCompressed())
+         {
+            if (bitsPerPixel < 8)
+            {
+               return INT1UBYTE;
+            }
+
+            if (bitsPerPixel < 16)
+            {
+               return INT2UBYTES;
+            }
+
+            if (bitsPerPixel < 32)
+            {
+               return FLT4BYTES;
+            }
+         }
+
+         break;
+      }
    }
+
+   return EncodingType();
 }
 
 bool Nitf::NitfImporter::validate(const DataDescriptor* pDescriptor, string& errorMessage) const
@@ -489,6 +482,12 @@ bool Nitf::NitfImporter::validate(const DataDescriptor* pDescriptor, string& err
    {
       errorMessage += "No file descriptor available.";
       return false;
+   }
+
+   map<string, string>::const_iterator iter = mParseMessages.find(pFileDescriptor->getDatasetLocation());
+   if (iter != mParseMessages.end() && iter->second.empty() == false)
+   {
+      errorMessage += iter->second;
    }
 
    const qint64 actualSize = QFile(QString::fromStdString(pFileDescriptor->getFilename().getFullPathAndName())).size();

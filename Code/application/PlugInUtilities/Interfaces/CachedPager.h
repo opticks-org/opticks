@@ -191,7 +191,7 @@ public:
     *         </li>
     *       </ul>
     *  This method may be called simultaneously by multiple threads and is up to
-    *  the implementor of this method to guarantee thread-safety in that case.
+    *  the implementer of this method to guarantee thread-safety in that case.
     *
     *  @param pOriginalRequest
     *         The request as originally made.  The fields on this object
@@ -231,7 +231,7 @@ public:
     *  RasterPage* that were returned by the getPage() method of the same
     *  instance of the RasterPager.
     *  This method may be called simultaneously by multiple threads and is up to
-    *  the implementor of this method to guarantee thread-safety in that case.
+    *  the implementer of this method to guarantee thread-safety in that case.
     *
     *  @param  pPage
     *          the RasterPage that should be released.

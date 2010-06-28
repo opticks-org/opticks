@@ -120,13 +120,6 @@ bool DataRequestImp::polish(const RasterDataDescriptor *pDescriptor)
       mInterleave = nativeInterleave;
    }
 
-   if (mInterleave == BSQ && nativeInterleave == BIL && 
-      (mConcurrentRows == 0 || mConcurrentRows == 1) &&
-      (mConcurrentBands == 0 || mConcurrentBands == 1))
-   {
-      mInterleave = BIL; // single row of BIL is the same as a single row of BSQ
-   }
-
    // rows
    if (!mStartRow.isValid())
    {
@@ -183,7 +176,6 @@ int DataRequestImp::getRequestVersion(const RasterDataDescriptor *pDescriptor) c
 {
    return 1;
 }
-
 
 InterleaveFormatType DataRequestImp::getInterleaveFormat() const
 {

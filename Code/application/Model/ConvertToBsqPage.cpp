@@ -8,13 +8,11 @@
  */
 
 #include "ConvertToBsqPage.h"
-#include <string.h>
 
 ConvertToBsqPage::ConvertToBsqPage(unsigned int rows, unsigned int columns, unsigned int bytesPerElement) :
-   mCache(rows * columns * bytesPerElement),
+   mCache(rows * columns * bytesPerElement, true),
    mRows(rows),
-   mColumns(columns),
-   mBytesPerElement(bytesPerElement)
+   mColumns(columns)
 {
 }
 
@@ -44,30 +42,5 @@ unsigned int ConvertToBsqPage::getInterlineBytes()
 
 void* ConvertToBsqPage::getRawData()
 {
-   return &mCache.front();
-}
-
-bool ConvertToBsqPage::feed(unsigned int row, size_t skipBytes, void* pData)
-{
-   if (row > mRows)
-   {
-      return false;
-   }
-
-   if (skipBytes == mBytesPerElement) // BIL
-   {
-      unsigned int cachePos = row * mColumns * mBytesPerElement;
-      memcpy(&mCache[cachePos], reinterpret_cast<unsigned char*>(pData), mBytesPerElement * mColumns);
-   }
-   else
-   {
-      for (unsigned int cachePos = mBytesPerElement * mColumns * row, sourcePos = 0;
-         sourcePos < mColumns*(skipBytes); 
-         cachePos += mBytesPerElement, sourcePos += skipBytes)
-      {
-         memcpy(&mCache[cachePos], reinterpret_cast<unsigned char*>(pData) + sourcePos, mBytesPerElement);
-      }
-   }
-
-   return true;
+   return mCache.get();
 }

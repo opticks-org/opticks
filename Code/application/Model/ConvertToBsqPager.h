@@ -15,37 +15,27 @@
 class RasterElement;
 
 /**
- * This class converts BIP/BIL formatted data to BSQ on the fly.
- * It subclasses RasterPager, but is itself not a plug-in
- * and therefore cannot be accessed using PlugInServices.
- *
- * When a page is requested, it gets a DataAccessor for the band
- * of data requested.  The RasterPage is fed the BIP data and reformats
- * it to BSQ.  There is no attempt at optimization through caching.
+ * This class converts BIP or BIL formatted data to BSQ on the fly.
  */
 class ConvertToBsqPager : public RasterPager
 {
 public:
-   ConvertToBsqPager(RasterElement *pRaster);
+   ConvertToBsqPager(RasterElement* pRaster);
 
    virtual ~ConvertToBsqPager(void);
 
-   // RasterPage methods
-   RasterPage *getPage(DataRequest *pOriginalRequest, 
-      DimensionDescriptor startRow,
-      DimensionDescriptor startColumn,
-      DimensionDescriptor startBand);
-
-   void releasePage(RasterPage *pPage);
+   void releasePage(RasterPage* pPage);
 
    int getSupportedRequestVersion() const;
+
+   RasterPage* getPage(DataRequest* pOriginalRequest, DimensionDescriptor startRow,
+      DimensionDescriptor startColumn, DimensionDescriptor startBand);
 
 private:
    ConvertToBsqPager();
 
-   RasterElement* mpRaster;
+   RasterElement* const mpRaster;
    unsigned int mBytesPerElement;
-   unsigned int mSkipBytes; //< Number of bytes between data in a single band.
 };
 
 #endif

@@ -15,6 +15,7 @@
 #include "NitfResource.h"
 #include "NitfTreParser.h"
 
+#include <map>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -33,42 +34,44 @@ class ossimProperty;
 
 namespace Nitf
 {
-  /**
-   *  Adds tag data that is already pre-parsed by OSSIM.
-   */
-   bool importMetadata(const unsigned int& currentImage, const Nitf::OssimFileResource& pFile,
-      const ossimNitfFileHeaderV2_X* pFileHeader, const ossimNitfImageHeaderV2_X* pImageSubheader,
-      RasterDataDescriptor *pDescriptor, std::string &errorMessage);
-
-   bool addTagToMetadata(const unsigned int& ownerIndex,
-      const ossimNitfTagInformation& tagInfo, RasterDataDescriptor* pDescriptor, DynamicObject* pTres,
-      DynamicObject* pTreInfo, std::string& errorMessage);
-
-   bool exportMetadata(const RasterDataDescriptor *pDescriptor,
-      const RasterFileDescriptor *pExportDescriptor,
-      ossimNitfWriter *pNitf, Progress *pProgress);
-
    class TrePlugInResource : public PlugInResource
    {
    public:
       TrePlugInResource(std::string plugInName) : PlugInResource(plugInName)
-      {
-      }
+      {}
 
-      bool parseTag(const ossimNitfRegisteredTag& input, DynamicObject& output, 
-         RasterDataDescriptor &descriptor, std::string &errorMessage) const;
-      bool writeTag(const DynamicObject &input, const ossim_uint32& ownerIndex, const ossimString& tagType,
-         ossimNitfWriter &writer, std::string &errorMessage) const;
+      TrePlugInResource() : PlugInResource()
+      {}
 
-      bool exportMetadata(const RasterDataDescriptor &descriptor, 
-         const RasterFileDescriptor &exportDescriptor, ossimNitfWriter &writer,
-         std::string &errorMessage) const;
+      bool parseTag(const ossimNitfRegisteredTag& input, DynamicObject& output,
+         RasterDataDescriptor& descriptor, std::string& errorMessage) const;
+      bool writeTag(const DynamicObject& input, const ossim_uint32& ownerIndex, const ossimString& tagType,
+         ossimNitfWriter& writer, std::string& errorMessage) const;
+
+      bool exportMetadata(const RasterDataDescriptor& descriptor,
+         const RasterFileDescriptor& exportDescriptor, ossimNitfWriter& writer,
+         std::string& errorMessage) const;
 
       TreState validateTag(const DynamicObject& tag, std::ostream& reporter) const;
 
    private:
       SETTING(ExcludedTres, TrePlugInResource, std::vector<std::string>, std::vector<std::string>());
    };
+
+  /**
+   *  Adds tag data that is already pre-parsed by OSSIM.
+   */
+   bool importMetadata(const unsigned int& currentImage, const Nitf::OssimFileResource& pFile,
+      const ossimNitfFileHeaderV2_X* pFileHeader, const ossimNitfImageHeaderV2_X* pImageSubheader,
+      RasterDataDescriptor* pDescriptor, std::map<std::string, TrePlugInResource>& parsers, std::string& errorMessage);
+
+   bool addTagToMetadata(const unsigned int& ownerIndex,
+      const ossimNitfTagInformation& tagInfo, RasterDataDescriptor* pDescriptor, DynamicObject* pTres,
+      DynamicObject* pTreInfo, std::map<std::string, TrePlugInResource>& parsers, std::string& errorMessage);
+
+   bool exportMetadata(const RasterDataDescriptor *pDescriptor,
+      const RasterFileDescriptor *pExportDescriptor,
+      ossimNitfWriter *pNitf, Progress *pProgress);
 }
 
 #endif

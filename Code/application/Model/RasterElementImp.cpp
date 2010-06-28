@@ -10,6 +10,7 @@
 #include "AppConfig.h"
 #include "AppVerify.h"
 #include "ConfigurationSettings.h"
+#include "ConvertToBilPager.h"
 #include "ConvertToBipPager.h"
 #include "ConvertToBsqPager.h"
 #include "DataAccessorImpl.h"
@@ -47,8 +48,14 @@ using namespace std;
 XERCES_CPP_NAMESPACE_USE
 
 RasterElementImp::RasterElementImp(const DataDescriptorImp& descriptor, const string& id) :
-   DataElementImp(descriptor, id), mpTerrain(NULL), mpPager(NULL),
-   mpConverterPager(NULL), mCubePointerAccessor(NULL, NULL), mModified(false),
+   DataElementImp(descriptor, id),
+   mpTerrain(NULL),
+   mpPager(NULL),
+   mpBipConverterPager(NULL),
+   mpBilConverterPager(NULL),
+   mpBsqConverterPager(NULL),
+   mCubePointerAccessor(NULL, NULL),
+   mModified(false),
    mpGeoPlugin(NULL)
 {
    RasterDataDescriptorImp* pDescriptor = dynamic_cast<RasterDataDescriptorImp*>(getDataDescriptor());
@@ -154,10 +161,9 @@ RasterElementImp::~RasterElementImp()
    }
 
    mCubePointerAccessor = DataAccessor(NULL, NULL);
-   if (mpConverterPager != NULL)
-   {
-      delete mpConverterPager;
-   }
+   delete mpBipConverterPager;
+   delete mpBilConverterPager;
+   delete mpBsqConverterPager;
 
    Service<PlugInManagerServices> pPluginManager;
    if (mpPager != NULL)
@@ -587,9 +593,11 @@ bool RasterElementImp::copyDataToChip(RasterElement *pRasterChip,
    case BIP:
       success = copyDataBip(pRasterChip, selectedRows, selectedColumns, selectedBands, abort, pProgress);
       break;
-   case BSQ: // fall through
-   case BIL:
+   case BSQ:
       success = copyDataBsq(pRasterChip, selectedRows, selectedColumns, selectedBands, abort, pProgress);
+      break;
+   case BIL:
+      success = copyDataBil(pRasterChip, selectedRows, selectedColumns, selectedBands, abort, pProgress);
       break;
    default:
       break;
@@ -606,6 +614,7 @@ bool RasterElementImp::copyDataBip(RasterElement* pChipElement, const vector<Dim
 {
    VERIFY(pProgress != NULL);
    string progressText = "Copying data";
+   pProgress->updateProgress(progressText, 0, NORMAL);
 
    const RasterDataDescriptor* pSrcDd = dynamic_cast<const RasterDataDescriptor*>(getDataDescriptor());
    VERIFY(pSrcDd != NULL);
@@ -763,6 +772,167 @@ bool RasterElementImp::copyDataBip(RasterElement* pChipElement, const vector<Dim
    return true;
 }
 
+bool RasterElementImp::copyDataBil(RasterElement* pChipElement, const vector<DimensionDescriptor>& selectedRows,
+                                   const vector<DimensionDescriptor>& selectedColumns,
+                                   const vector<DimensionDescriptor>& selectedBands, bool& abort,
+                                   Progress* pProgress) const
+{
+   VERIFY(pChipElement != NULL);
+   VERIFY(pProgress != NULL);
+   string progressText = "Copying data";
+   pProgress->updateProgress(progressText, 0, NORMAL);
+
+   const RasterDataDescriptor* pSrcDd = dynamic_cast<const RasterDataDescriptor*>(getDataDescriptor());
+   VERIFY(pSrcDd != NULL);
+   const RasterDataDescriptor* pChipDd = dynamic_cast<const RasterDataDescriptor*>(pChipElement->getDataDescriptor());
+   VERIFY(pChipDd != NULL);
+
+   const vector<DimensionDescriptor>& srcActiveRows = pSrcDd->getRows();
+   const vector<DimensionDescriptor>& srcActiveCols = pSrcDd->getColumns();
+   const vector<DimensionDescriptor>& srcActiveBands = pSrcDd->getBands();
+
+   unsigned int bytesPerElement = pSrcDd->getBytesPerElement();
+
+   if (selectedColumns.size() == srcActiveCols.size() && selectedBands.size() ==
+      selectedBands.back().getActiveNumber() - selectedBands.front().getActiveNumber() + 1)
+   {
+      // copy a full row at a time
+      unsigned int step = 0;
+      unsigned int steps = selectedRows.size();
+
+      FactoryResource<DataRequest> pSrcRequest;
+      pSrcRequest->setInterleaveFormat(BIL);
+      pSrcRequest->setRows(selectedRows.front(), selectedRows.back());
+      pSrcRequest->setBands(selectedBands.front(), selectedBands.back(), selectedBands.size());
+      DataAccessor srcDa = getDataAccessor(pSrcRequest.release());
+
+      FactoryResource<DataRequest> pChipRequest;
+      pChipRequest->setInterleaveFormat(BIL);
+      pChipRequest->setWritable(true);
+      DataAccessor chipDa = pChipElement->getDataAccessor(pChipRequest.release());
+
+      VERIFY(chipDa.isValid() && srcDa.isValid());
+      for (vector<DimensionDescriptor>::const_iterator rowIter = selectedRows.begin();
+         rowIter != selectedRows.end();
+         ++rowIter)
+      {
+         srcDa->toPixel(rowIter->getActiveNumber(), selectedColumns.front().getActiveNumber());
+         VERIFY(chipDa.isValid());
+         VERIFY(srcDa.isValid());
+         char* pChip = reinterpret_cast<char*>(chipDa->getRow());
+         char* pSrc = reinterpret_cast<char*>(srcDa->getRow());
+         memcpy(pChip, pSrc, selectedColumns.size() * selectedBands.size() * bytesPerElement);
+         chipDa->nextRow();
+         pProgress->updateProgress(progressText, (step++ * 100)/steps, NORMAL);
+         if (abort)
+         {
+            return false;
+         }
+      }
+   }
+   else if (selectedColumns.size() ==
+      selectedColumns.back().getActiveNumber() - selectedColumns.front().getActiveNumber() + 1)
+   {
+      // copy a full row one band at a time
+      unsigned int step = 0;
+      unsigned int steps = selectedBands.size() * selectedRows.size();
+
+      FactoryResource<DataRequest> pChipRequest;
+      pChipRequest->setInterleaveFormat(BIL);
+      pChipRequest->setWritable(true);
+      DataAccessor chipDa = pChipElement->getDataAccessor(pChipRequest.release());
+
+      for (vector<DimensionDescriptor>::const_iterator rowIter = selectedRows.begin();
+         rowIter != selectedRows.end();
+         ++rowIter)
+      {
+         VERIFY(chipDa.isValid());
+         char* pChip = reinterpret_cast<char*>(chipDa->getRow());
+
+         for (vector<DimensionDescriptor>::const_iterator bandIter = selectedBands.begin();
+            bandIter != selectedBands.end();
+            ++bandIter)
+         {
+            FactoryResource<DataRequest> pSrcRequest;
+            pSrcRequest->setInterleaveFormat(BIL);
+            pSrcRequest->setRows(*rowIter, *rowIter, 1);
+            pSrcRequest->setBands(*bandIter, *bandIter, 1);
+            pSrcRequest->setColumns(selectedColumns.front(), selectedColumns.back(), selectedColumns.size());
+            DataAccessor srcDa = getDataAccessor(pSrcRequest.release());
+            srcDa->toPixel(rowIter->getActiveNumber(), selectedColumns.front().getActiveNumber());
+            VERIFY(srcDa.isValid());
+
+            char* pSrc = reinterpret_cast<char*>(srcDa->getRow());
+            memcpy(pChip, pSrc, selectedColumns.size() * bytesPerElement);
+            pChip += selectedColumns.size() * bytesPerElement;
+            pProgress->updateProgress(progressText, (step++ * 100)/steps, NORMAL);
+            if (abort)
+            {
+               return false;
+            }
+         }
+
+         chipDa->nextRow();
+      }
+   }
+   else
+   {
+      // slowest possible copy, per pixel, but it works for any BIL data
+      unsigned int chipRow = 0;
+      unsigned int step = 0;
+      unsigned int steps = selectedBands.size() * selectedRows.size();
+
+      FactoryResource<DataRequest> pChipRequest;
+      pChipRequest->setInterleaveFormat(BIL);
+      pChipRequest->setWritable(true);
+      DataAccessor chipDa = pChipElement->getDataAccessor(pChipRequest.release());
+
+      for (vector<DimensionDescriptor>::const_iterator rowIter = selectedRows.begin();
+         rowIter != selectedRows.end();
+         ++rowIter)
+      {
+         unsigned int chipOffset = 0;
+         VERIFY(chipDa.isValid());
+         char* pChip = reinterpret_cast<char*>(chipDa->getRow());
+
+         for (vector<DimensionDescriptor>::const_iterator bandIter = selectedBands.begin();
+            bandIter != selectedBands.end();
+            ++bandIter)
+         {
+            FactoryResource<DataRequest> pSrcRequest;
+            pSrcRequest->setInterleaveFormat(BIL);
+            pSrcRequest->setRows(*rowIter, *rowIter, 1);
+            pSrcRequest->setBands(*bandIter, *bandIter, 1);
+            pSrcRequest->setColumns(selectedColumns.front(), selectedColumns.back(), 1);
+            DataAccessor srcDa = getDataAccessor(pSrcRequest.release());
+            VERIFY(srcDa.isValid());
+
+            for (vector<DimensionDescriptor>::const_iterator columnIter = selectedColumns.begin();
+               columnIter != selectedColumns.end();
+               ++columnIter)
+            {
+               srcDa->toPixel(rowIter->getActiveNumber(), columnIter->getActiveNumber());
+               VERIFY(srcDa.isValid());
+               char* pSrc = reinterpret_cast<char*>(srcDa->getColumn());
+
+               memcpy(pChip + chipOffset, pSrc, bytesPerElement);
+               chipOffset += bytesPerElement;
+            }
+
+            pProgress->updateProgress(progressText, (step++ * 100)/steps, NORMAL);
+            if (abort)
+            {
+               return false;
+            }
+         }
+
+         chipDa->nextRow();
+      }
+   }
+
+   return true;
+}
+
 bool RasterElementImp::copyDataBsq(RasterElement* pChipElement, const vector<DimensionDescriptor>& selectedRows,
                                    const vector<DimensionDescriptor>& selectedColumns,
                                    const vector<DimensionDescriptor>& selectedBands, bool& abort,
@@ -771,6 +941,7 @@ bool RasterElementImp::copyDataBsq(RasterElement* pChipElement, const vector<Dim
    VERIFY(pChipElement != NULL);
    VERIFY(pProgress != NULL);
    string progressText = "Copying data";
+   pProgress->updateProgress(progressText, 0, NORMAL);
 
    const RasterDataDescriptor* pSrcDd = dynamic_cast<const RasterDataDescriptor*>(getDataDescriptor());
    VERIFY(pSrcDd != NULL);
@@ -887,12 +1058,9 @@ bool RasterElementImp::copyDataBsq(RasterElement* pChipElement, const vector<Dim
          ++chipBand;
       }
       copyCompleted = true;
-
-
    }
-   return copyCompleted;
 
-   return false;
+   return copyCompleted;
 }
 
 DataElement* RasterElementImp::copy(const string& name, DataElement* pParent) const
@@ -1400,23 +1568,30 @@ DataAccessor RasterElementImp::getDataAccessor(DataRequest* pRequestIn)
    RasterPager* pPager = mpPager;
    if (interleave == BIP && (sourceInterleave == BSQ || sourceInterleave == BIL))
    {
-      if (mpConverterPager == NULL)
+      if (mpBipConverterPager == NULL)
       {
-         mpConverterPager = new ConvertToBipPager(dynamic_cast<RasterElement*>(this));
+         mpBipConverterPager = new ConvertToBipPager(dynamic_cast<RasterElement*>(this));
       }
-      pPager = mpConverterPager;
+      pPager = mpBipConverterPager;
    }
    else if (interleave == BSQ && (sourceInterleave == BIP || sourceInterleave == BIL))
    {
-      if (mpConverterPager == NULL)
+      if (mpBsqConverterPager == NULL)
       {
-         mpConverterPager = new ConvertToBsqPager(dynamic_cast<RasterElement*>(this));
+         mpBsqConverterPager = new ConvertToBsqPager(dynamic_cast<RasterElement*>(this));
       }
-      pPager = mpConverterPager;
+      pPager = mpBsqConverterPager;
+   }
+   else if (interleave == BIL && (sourceInterleave == BIP || sourceInterleave == BSQ))
+   {
+      if (mpBilConverterPager == NULL)
+      {
+         mpBilConverterPager = new ConvertToBilPager(dynamic_cast<RasterElement*>(this));
+      }
+      pPager = mpBilConverterPager;
    }
    else if ( interleave != sourceInterleave )
    {
-      // Current conversions supported are BIP or BIL to BSQ and BSQ or BIL to BIP.
       return DataAccessor(NULL, NULL);
    }
 

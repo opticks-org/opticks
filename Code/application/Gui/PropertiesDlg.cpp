@@ -158,7 +158,7 @@ PropertiesDlg::PropertiesDlg(SessionItem* pSessionItem, const vector<string>& di
 PropertiesDlg::~PropertiesDlg()
 {
    // NOTE: The QWidget* returned by Properties::getWidget() is not being re-parented
-   // because this causes a crash if the implementor of the Properties interface does
+   // because this causes a crash if the implementer of the Properties interface does
    // not destroy the widget that they created in their destructor
 
    Service<PlugInManagerServices> pManager;

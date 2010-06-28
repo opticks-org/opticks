@@ -707,7 +707,12 @@ bool FitsImporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList
 
       long startPix = 1;
       size_t bufsize = length * RasterUtilities::bytesInEncoding(encoding);
-      ArrayResource<char> pBuffer(bufsize);
+      ArrayResource<char> pBuffer(bufsize, true);
+      if (pBuffer.get() == NULL)
+      {
+         progress.report("Memory allocation failed.", 0, ERRORS, true);
+         return false;
+      }
       if (fits_read_pix(pFits, encodingToDtype(encoding), &startPix, length, NULL, pBuffer.get(), NULL, &status))
       {
          if (status == NUM_OVERFLOW)
@@ -840,7 +845,11 @@ CachedPage::UnitPtr FitsRasterPager::fetchUnit(DataRequest* pOriginalRequest)
    int status = 0;
 
    size_t bufsize = pixcnt * pDesc->getBytesPerElement();
-   ArrayResource<char> pBuffer(bufsize);
+   ArrayResource<char> pBuffer(bufsize, true);
+   if (pBuffer.get() == NULL)
+   {
+      return CachedPage::UnitPtr();
+   }
    if (fits_read_pix(mpFile, encodingToDtype(pDesc->getDataType()), pStartPix, pixcnt, NULL,
                      pBuffer.get(), NULL, &status))
    {

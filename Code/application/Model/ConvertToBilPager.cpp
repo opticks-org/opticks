@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2010 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -8,15 +8,15 @@
  */
 
 #include "AppVerify.h"
-#include "ConvertToBipPage.h"
-#include "ConvertToBipPager.h"
+#include "ConvertToBilPage.h"
+#include "ConvertToBilPager.h"
 #include "DataAccessorImpl.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 
 #include <memory>
 
-ConvertToBipPager::ConvertToBipPager(RasterElement* pRaster) :
+ConvertToBilPager::ConvertToBilPager(RasterElement* pRaster) :
    mpRaster(pRaster),
    mBytesPerElement(0)
 {
@@ -30,21 +30,21 @@ ConvertToBipPager::ConvertToBipPager(RasterElement* pRaster) :
    }
 }
 
-ConvertToBipPager::~ConvertToBipPager()
+ConvertToBilPager::~ConvertToBilPager()
 {}
 
-void ConvertToBipPager::releasePage(RasterPage* pPage)
+void ConvertToBilPager::releasePage(RasterPage* pPage)
 {
    // Check that pPage is the correct type before deleting it.
-   delete dynamic_cast<ConvertToBipPage*>(pPage);
+   delete dynamic_cast<ConvertToBilPage*>(pPage);
 }
 
-int ConvertToBipPager::getSupportedRequestVersion() const
+int ConvertToBilPager::getSupportedRequestVersion() const
 {
    return 1;
 }
 
-RasterPage *ConvertToBipPager::getPage(DataRequest* pOriginalRequest, DimensionDescriptor startRow,
+RasterPage* ConvertToBilPager::getPage(DataRequest* pOriginalRequest, DimensionDescriptor startRow,
    DimensionDescriptor startColumn, DimensionDescriptor startBand)
 {
    VERIFY(pOriginalRequest != NULL);
@@ -53,15 +53,16 @@ RasterPage *ConvertToBipPager::getPage(DataRequest* pOriginalRequest, DimensionD
       return NULL;
    }
 
+   DimensionDescriptor stopRow = pOriginalRequest->getStopRow();
+   DimensionDescriptor stopColumn = pOriginalRequest->getStopColumn();
+   DimensionDescriptor stopBand = pOriginalRequest->getStopBand();
+   VERIFY(pOriginalRequest->getInterleaveFormat() == BIL);
+
    VERIFY(mpRaster != NULL);
    const RasterDataDescriptor* pDd = dynamic_cast<const RasterDataDescriptor*>(mpRaster->getDataDescriptor());
    VERIFY(pDd != NULL);
    InterleaveFormatType interleave = pDd->getInterleaveFormat();
-   VERIFY(interleave == BIL || interleave == BSQ);
-
-   DimensionDescriptor stopRow = pOriginalRequest->getStopRow();
-   DimensionDescriptor stopColumn = pOriginalRequest->getStopColumn();
-   DimensionDescriptor stopBand = pOriginalRequest->getStopBand();
+   VERIFY(interleave == BIP || interleave == BSQ);
 
    unsigned int numRows = pDd->getRowCount();
    unsigned int numCols = pDd->getColumnCount();
@@ -91,9 +92,8 @@ RasterPage *ConvertToBipPager::getPage(DataRequest* pOriginalRequest, DimensionD
    unsigned int rows = std::min(pOriginalRequest->getConcurrentRows(),
       stopRow.getActiveNumber() - startRow.getActiveNumber() + 1);
    unsigned int bands = stopBand.getActiveNumber() - startBand.getActiveNumber() + 1;
-   std::auto_ptr<ConvertToBipPage> pPage(new ConvertToBipPage(rows, cols, bands, mBytesPerElement));
-   unsigned char* pDst = reinterpret_cast<unsigned char*>(pPage->getRawData());
-   if (pDst == NULL)
+   std::auto_ptr<ConvertToBilPage> pPage(new ConvertToBilPage(rows, cols, bands, mBytesPerElement));
+   if (pPage->getRawData() == NULL)
    {
       return NULL;
    }
@@ -105,9 +105,10 @@ RasterPage *ConvertToBipPager::getPage(DataRequest* pOriginalRequest, DimensionD
          FactoryResource<DataRequest> pRequest;
          pRequest->setRows(startRow, stopRow, 1);
          pRequest->setColumns(startColumn, stopColumn, cols);
-         pRequest->setBands(*iter, *iter, 1);
+         pRequest->setBands(*iter, DimensionDescriptor());
 
          DataAccessor da = mpRaster->getDataAccessor(pRequest.release());
+         unsigned char* pDst = reinterpret_cast<unsigned char*>(pPage->getRawData()) + (band * cols * mBytesPerElement);
          for (unsigned int row = 0; row < rows; ++row)
          {
             if (da.isValid() == false)
@@ -115,22 +116,15 @@ RasterPage *ConvertToBipPager::getPage(DataRequest* pOriginalRequest, DimensionD
                return NULL;
             }
 
-            unsigned int cachePos = (row * cols * bands + band) * mBytesPerElement;
-            unsigned char* pSrc = reinterpret_cast<unsigned char*>(da->getRow());
-            for (unsigned int col = 0; col < cols; ++col)
-            {
-               memcpy(pDst + cachePos, pSrc, mBytesPerElement);
-               cachePos += bands * mBytesPerElement;
-               pSrc += mBytesPerElement;
-            }
-
+            memcpy(pDst, da->getRow(), mBytesPerElement * cols);
+            pDst += bands * cols * mBytesPerElement;
             da->nextRow();
          }
       }
    }
-   else if (interleave == BIL)
+   else if (interleave == BIP)
    {
-      // Optimize for CachedPager subclasses by iterating row, band, column instead of band, row, column.
+      // Optimize for CachedPager subclasses by iterating row, column, band instead of band, row, column.
       FactoryResource<DataRequest> pRequest;
       pRequest->setRows(startRow, stopRow, 1);
       pRequest->setColumns(startColumn, stopColumn, cols);
@@ -139,22 +133,24 @@ RasterPage *ConvertToBipPager::getPage(DataRequest* pOriginalRequest, DimensionD
       DataAccessor da = mpRaster->getDataAccessor(pRequest.release());
       for (unsigned int row = 0; row < rows; ++row)
       {
-         if (da.isValid() == false)
+         for (unsigned int col = 0; col < cols; ++col)
          {
-            return NULL;
-         }
-
-         for (unsigned int band = 0; band < bands; ++band)
-         {
-            unsigned char* pSrc = reinterpret_cast<unsigned char*>(da->getRow()) +
-               (band * da->getConcurrentColumns() * mBytesPerElement);
-            unsigned int cachePos = (row * cols * bands + band) * mBytesPerElement;
-            for (unsigned int col = 0; col < cols; ++col)
+            if (da.isValid() == false)
             {
-               memcpy(pDst + cachePos, pSrc, mBytesPerElement);
-               cachePos += bands * mBytesPerElement;
+               return NULL;
+            }
+
+            unsigned char* pDst = reinterpret_cast<unsigned char*>(pPage->getRawData()) +
+               (row * cols * bands + col) * mBytesPerElement;
+            unsigned char* pSrc = reinterpret_cast<unsigned char*>(da->getColumn());
+            for (unsigned int band = 0; band < bands; ++band)
+            {
+               memcpy(pDst, pSrc, mBytesPerElement);
+               pDst += cols * mBytesPerElement;
                pSrc += mBytesPerElement;
             }
+
+            da->nextColumn();
          }
 
          da->nextRow();

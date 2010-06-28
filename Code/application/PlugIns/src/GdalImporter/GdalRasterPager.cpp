@@ -11,6 +11,7 @@
 #include "ComplexData.h"
 #include "DataRequest.h"
 #include "GdalRasterPager.h"
+#include "ObjectResource.h"
 #include "PlugInArgList.h"
 #include "PlugInRegistration.h"
 #include "RasterDataDescriptor.h"
@@ -158,7 +159,11 @@ CachedPage::UnitPtr GdalRasterPager::fetchUnit(DataRequest* pOriginalRequest)
    }
 
    size_t bufSize = numCols * numRows * pDesc->getBytesPerElement();
-   std::auto_ptr<char> pBuffer(new char[bufSize]);
+   ArrayResource<char> pBuffer(bufSize, true);
+   if (pBuffer.get() == NULL)
+   {
+      return CachedPage::UnitPtr();
+   }
 
    GDALRasterBand* pBand = mpDataset->GetRasterBand(pOriginalRequest->getStartBand().getOnDiskNumber() + 1); // 1 based band number
    if (pBand == NULL)

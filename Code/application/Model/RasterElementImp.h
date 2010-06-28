@@ -107,48 +107,14 @@ protected:
       const std::vector<DimensionDescriptor> &selectedBands,
       bool &abort, Progress *pProgress = NULL) const;
 
-   /**
-    * Copy data from this object to pChipRaster, using the DimensionDescriptors
-    * of selected... to determine what data to copy.
-    *
-    * This method is optimized for BIP data, and requires that a BIP
-    * accessor can be obtained for this object, and a writable BIP
-    * accessor with one concurrent row can be obtained for pChipSensor.
-    *
-    * @param pChipElement
-    *        The Raster to copy data into.
-    * @param selectedRows
-    *        The rows of this object to copy
-    * @param selectedColumns
-    *        The columns of this object to copy
-    * @param selectedBands
-    *        The bands of this object to copy
-    *
-    * @return True if the operation was successful, false otherwise.
-    */
    bool copyDataBip(RasterElement* pChipElement, const std::vector<DimensionDescriptor>& selectedRows,
       const std::vector<DimensionDescriptor>& selectedColumns, const std::vector<DimensionDescriptor>& selectedBands,
       bool& abort, Progress* pProgress) const;
 
-   /**
-    * Copy data from this object to pChipRaster, using the DimensionDescriptors
-    * of selected... to determine what data to copy.
-    *
-    * This method is optimized for BSQ data, and requires that a BSQ
-    * accessor can be obtained for this object, and a writable BSQ
-    * accessor with one concurrent row can be obtained for pChipRaster.
-    *
-    * @param pChipElement
-    *        The RasterElement to copy data into.
-    * @param selectedRows
-    *        The rows of this object to copy
-    * @param selectedColumns
-    *        The columns of this object to copy
-    * @param selectedBands
-    *        The bands of this object to copy
-    *
-    * @return True if the operation was successful, false otherwise.
-    */
+   bool copyDataBil(RasterElement* pChipElement, const std::vector<DimensionDescriptor>& selectedRows,
+      const std::vector<DimensionDescriptor>& selectedColumns, const std::vector<DimensionDescriptor>& selectedBands,
+      bool& abort, Progress* pProgress) const;
+
    bool copyDataBsq(RasterElement* pChipElement, const std::vector<DimensionDescriptor>& selectedRows,
       const std::vector<DimensionDescriptor>& selectedColumns, const std::vector<DimensionDescriptor>& selectedBands,
       bool& abort, Progress* pProgress) const;
@@ -207,7 +173,9 @@ private:
    std::string mTempFilename;
 
    RasterPager* mpPager;
-   RasterPager* mpConverterPager;
+   RasterPager* mpBipConverterPager;
+   RasterPager* mpBilConverterPager;
+   RasterPager* mpBsqConverterPager;
 
    DataAccessor mCubePointerAccessor;
 

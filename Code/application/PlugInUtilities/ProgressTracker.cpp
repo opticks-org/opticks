@@ -181,7 +181,7 @@ void ProgressTracker::report(const string &text, int percent, ReportingLevel gra
          oldPercent = percent;
       }
    }
-   if (log)
+   if (log && currentStage.getStep() != NULL)
    {
       switch (gran)
       {

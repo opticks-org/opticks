@@ -358,7 +358,7 @@ bool Nitf::RpcParser::toDynamicObject(istream& input, size_t numBytes, DynamicOb
    unsigned int u;
    bool ok = true;
 
-   readField<unsigned int>(input, output, success, SUCCESS, 1, errorMessage, buf);
+   readField<bool>(input, output, success, SUCCESS, 1, errorMessage, buf);
    readField<double>(input, output, success, ERR_BIAS, 7, errorMessage, buf);
    readField<double>(input, output, success, ERR_RAND, 7, errorMessage, buf);
    readField<unsigned int>(input, output, success, LINE_OFFSET, 6, errorMessage, buf);
@@ -413,7 +413,7 @@ Nitf::TreState Nitf::RpcParser::isTreValid(const DynamicObject& tre, ostream& re
    static const double minCoef(-9.999999E9);
    static const double maxCoef(9.999999E9);
 
-   status = MaxState(status, testTagValueRange<unsigned int>(tre, reporter, &numFields, SUCCESS, 0U, 1U));
+   status = MaxState(status, testTagValueRange<bool>(tre, reporter, &numFields, SUCCESS, false, true));
    status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, ERR_BIAS, 0.0, 9999.99));
    status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields, ERR_RAND, 0.0, 9999.99));
    status = MaxState(status, testTagValueRange<unsigned int>(tre, reporter, &numFields, LINE_OFFSET, 0U, 999999U));
@@ -476,27 +476,12 @@ Nitf::TreState Nitf::RpcParser::isTreValid(const DynamicObject& tre, ostream& re
 bool Nitf::RpcParser::fromDynamicObject(const DynamicObject& input, ostream& output, size_t& numBytesWritten,
    string &errorMessage) const
 {
-   bool ossimImported = true;
    size_t sizeIn = max(static_cast<ostream::pos_type>(0), output.tellp());
    size_t sizeOut(sizeIn);
 
-   // need to find out which importer was used to read the RPC tag because the var
-   // types are different for SUCCESS. OSSIM == bool, ours == unsigned int
    try
    {
-      string temp = toString(dv_cast<unsigned int>(input.getAttribute(SUCCESS)), 1);
-   }
-   catch (const bad_cast&)
-   {
-      ossimImported = false;
-   }
-
-   try
-   {
-      if (!ossimImported)
-      {
-         output << toString(dv_cast<bool>(input.getAttribute(SUCCESS)), 1);
-      }
+      output << toString(dv_cast<bool>(input.getAttribute(SUCCESS)), 1);
       output << toString(dv_cast<double>(input.getAttribute(ERR_BIAS)), 7, 2);
       output << toString(dv_cast<double>(input.getAttribute(ERR_RAND)), 7, 2);
       output << toString(dv_cast<unsigned int>(input.getAttribute(LINE_OFFSET)), 6);

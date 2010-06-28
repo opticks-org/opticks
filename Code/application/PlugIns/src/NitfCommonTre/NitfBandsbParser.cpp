@@ -57,10 +57,10 @@ parameters in their own extension.
 NOTE:
 -----
 The following changes have been made to the field names from the standard:
-1) Embeded blanks are replaced with "_"
+1) Embedded blanks are replaced with "_"
 2) The Auxiliary Band Parameter data has two numbers, the "auxiliary"
-   counter and the "band" counter, that need to be seperated in the field
-   name to allow it to be parsed. Therefore, the numbers are seperated with
+   counter and the "band" counter, that need to be separated in the field
+   name to allow it to be parsed. Therefore, the numbers are separated with
    a "#"
 
 ***************************************************************************/
@@ -71,7 +71,6 @@ namespace
    {
       return (bitMask >> bit & 0x01);
    }
-
 }
 
 Nitf::BandsbParser::BandsbParser() :
@@ -1366,7 +1365,7 @@ bool Nitf::BandsbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
          errorMessage += "Read Error " + BANDSB::EXISTENCE_MASK + "\n";
       }
    }
-   unsigned int existmask = convertBinary<unsigned int>(&buf[0], BIG_ENDIAN_ORDER);
+   const unsigned int existmask = convertBinary<unsigned int>(&buf[0], BIG_ENDIAN_ORDER);
    if (success)
    {
       success = output.setAttribute(BANDSB::EXISTENCE_MASK, existmask);
@@ -1425,6 +1424,38 @@ bool Nitf::BandsbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
       }
    }
 
+   // b24 signals the CWAVE field.
+   if (success && bitTest(existmask, 24))
+   {
+      mCenterWavelengths.resize(count);
+   }
+   else
+   {
+      mCenterWavelengths.clear();
+   }
+
+   // b23 signals the FWHM field.
+   if (success && bitTest(existmask, 23))
+   {
+      mFwhms.resize(count);
+   }
+   else
+   {
+      mFwhms.clear();
+   }
+
+   // b19 signals the LBOUNDn, UBOUNDn field.
+   if (success && bitTest(existmask, 19))
+   {
+      mStartWavelengths.resize(count);
+      mEndWavelengths.resize(count);
+   }
+   else
+   {
+      mStartWavelengths.clear();
+      mEndWavelengths.clear();
+   }
+
    for (unsigned int bandNum = 0; bandNum < count; ++bandNum)
    {
       stringstream bandStreamStr;
@@ -1466,7 +1497,7 @@ bool Nitf::BandsbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
       {
          fieldName = BANDSB::CWAVE + bandNumStr;
          readField<double>(input, output, success, fieldName, 7, errorMessage, buf);
-         mCenterWavelengths.push_back(boost::lexical_cast<double>(&buf[0]));
+         mCenterWavelengths[bandNum] = boost::lexical_cast<double>(&buf[0]);
       }
 
       // b23 signals the FWHM field.
@@ -1474,7 +1505,7 @@ bool Nitf::BandsbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
       {
          fieldName = BANDSB::FWHM + bandNumStr;
          readField<double>(input, output, success, fieldName, 7, errorMessage, buf);
-         mFwhms.push_back(boost::lexical_cast<double>(&buf[0]));
+         mFwhms[bandNum] = boost::lexical_cast<double>(&buf[0]);
       }
 
       // b22 signals the FWHM_UNC field.
@@ -1503,11 +1534,11 @@ bool Nitf::BandsbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
       {
          fieldName = BANDSB::LBOUND + bandNumStr;
          readField<double>(input, output, success, fieldName, 7, errorMessage, buf);
-         mStartWavelengths.push_back(boost::lexical_cast<double>(&buf[0]));
+         mStartWavelengths[bandNum] = boost::lexical_cast<double>(&buf[0]);
 
          fieldName = BANDSB::UBOUND + bandNumStr;
          readField<double>(input, output, success, fieldName, 7, errorMessage, buf);
-         mEndWavelengths.push_back(boost::lexical_cast<double>(&buf[0]));
+         mEndWavelengths[bandNum] = boost::lexical_cast<double>(&buf[0]);
       }
 
       // b18 signals the SCALE FACTORn, and ADDITIVE FACTORn fields.
@@ -2109,6 +2140,54 @@ Nitf::TreState Nitf::BandsbParser::isTreValid(const DynamicObject& tre, ostream&
                                     // all blank and extra strings in set not allowed
       status = MaxState(status, testTagValidBcsASet(tre, reporter,
          &numFields, "WAVE_LENGTH_UNIT", testSet, false, false));
+   }
+
+   // b24 signals the CWAVE field.
+   if (status != INVALID)
+   {
+      if (bitTest(existmask, 24))
+      {
+         if (mCenterWavelengths.size() != count)
+         {
+            status = INVALID;
+         }
+      }
+      else if (mCenterWavelengths.empty() == false)
+      {
+         status = INVALID;
+      }
+   }
+
+   // b23 signals the FWHM field.
+   if (status != INVALID)
+   {
+      if (bitTest(existmask, 23))
+      {
+         if (mFwhms.size() != count)
+         {
+            status = INVALID;
+         }
+      }
+      else if (mFwhms.empty() == false)
+      {
+         status = INVALID;
+      }
+   }
+
+   // b19 signals the LBOUNDn, UBOUNDn field.
+   if (status != INVALID)
+   {
+      if (bitTest(existmask, 19))
+      {
+         if (mStartWavelengths.size() != count || mEndWavelengths.size() != count)
+         {
+            status = INVALID;
+         }
+      }
+      else if (mStartWavelengths.empty() == false || mEndWavelengths.empty() == false)
+      {
+         status = INVALID;
+      }
    }
 
    for (unsigned int bandNum = 0; (bandNum < count) && status != INVALID; ++bandNum)

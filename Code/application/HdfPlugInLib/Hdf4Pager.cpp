@@ -178,7 +178,7 @@ CachedPage::UnitPtr Hdf4Pager::fetchUnit(DataRequest *pOriginalRequest)
 
    int pageSize = static_cast<int>(bpp*lNumValues[0]*lNumValues[1]*lNumValues[2]);
 
-   ArrayResource<char> pData(pageSize);
+   ArrayResource<char> pData(pageSize, true);
    if (pData.get() == NULL)
    {
       return pUnit;
