@@ -54,25 +54,25 @@ public:
    DataElement* createElement(const DataDescriptor* pDescriptor);
    DataElement* createElement(const DataDescriptor* pDescriptor, const std::string &id);
    DataElement* createElement(const std::string& name, const std::string& type, DataElement* pParent);
-   DataElement* getElement(const std::string& name, const std::string& type, DataElement* pParent) const;
+   DataElement* getElement(const std::string& name, const std::string& type, const DataElement* pParent) const;
    DataElement* getElement(const std::vector<std::string>& designator, const std::string& type) const;
    std::vector<DataElement*> getElements(const std::string& type) const;
-   std::vector<DataElement*> getElements(DataElement* pParent, const std::string& type) const;
+   std::vector<DataElement*> getElements(const DataElement* pParent, const std::string& type) const;
    std::vector<DataElement*> getElements(const std::string& filename, const std::string& type) const;
    std::vector<std::string> getElementNames(const std::string& type) const;
-   std::vector<std::string> getElementNames(DataElement* pParent, const std::string& type) const;
+   std::vector<std::string> getElementNames(const DataElement* pParent, const std::string& type) const;
    std::vector<std::string> getElementNames(const std::string& filename, const std::string& type) const;
    bool setElementName(DataElement* pElement, const std::string& name);
    bool setElementParent(DataElement* pElement, DataElement *pParent);
-   bool removeElement(DataElement* pElement);
+   bool removeElement(const DataElement* pElement);
    bool destroyElement(DataElement* pElement);
    void clear();
 
    char* getMemoryBlock(size_t size);
    void deleteMemoryBlock(char* memory); 
 
-   double getDataValue(EncodingType type, void* pData, int iIndex) const;
-   double getDataValue(EncodingType type, void* pData, ComplexComponent component, int iIndex) const;
+   double getDataValue(EncodingType type, const void* pData, int iIndex) const;
+   double getDataValue(EncodingType type, const void* pData, ComplexComponent component, int iIndex) const;
 
    bool isKindOfElement(const std::string& className, const std::string& elementName) const;
    void getElementTypes(const std::string& className, std::vector<std::string>& classList) const;
@@ -94,13 +94,13 @@ private:
    class Key
    {
    public:
-      Key(const std::string& name, DataElement* pParent) :
+      Key(const std::string& name, const DataElement* pParent) :
          mName(StringUtilities::toLower(name)),
          mpParent(pParent)
       {
       }
 
-      explicit Key(DataElement& element) :
+      explicit Key(const DataElement& element) :
          mName(StringUtilities::toLower(element.getName())),
          mpParent(element.getParent())
       {
@@ -152,7 +152,7 @@ private:
    std::vector<std::string> mElementTypes;
    std::multimap<Key, DataElement*> mElements;
 
-   std::multimap<Key, DataElement*>::iterator findElement(DataElement* pElement);
+   std::multimap<Key, DataElement*>::iterator findElement(const DataElement* pElement);
    std::multimap<Key, DataElement*>::iterator findElement(const Key& key, const std::string& type);
    std::multimap<Key, DataElement*>::const_iterator findElement(const Key& key, const std::string& type) const;
 };

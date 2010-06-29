@@ -443,7 +443,7 @@ public:
     *  @see     model_cast()
     */
    virtual DataElement* getElement(const std::string& name, const std::string& type,
-      DataElement* pParent) const = 0;
+      const DataElement* pParent) const = 0;
 
    /**
     *  Retrieves a data element.
@@ -472,7 +472,7 @@ public:
     *  @return  A vector containing pointers to the data elements of the given
     *           type.
     *
-    *  @see     getElements(DataElement*, const std::string&) const,
+    *  @see     getElements(const DataElement*, const std::string&) const,
     *           getElements(const std::string&, const std::string&) const
     */
    virtual std::vector<DataElement*> getElements(const std::string& type) const = 0;
@@ -495,7 +495,7 @@ public:
     *  @see     getElements(const std::string&) const,
     *           getElements(const std::string&, const std::string&) const
     */
-   virtual std::vector<DataElement*> getElements(DataElement* pParent, const std::string& type) const = 0;
+   virtual std::vector<DataElement*> getElements(const DataElement* pParent, const std::string& type) const = 0;
 
    /**
     *  Retrieves elements with a given file.
@@ -513,7 +513,7 @@ public:
     *           given file.
     *
     *  @see     getElements(const std::string&) const,
-    *           getElements(DataElement*, const std::string&) const
+    *           getElements(const DataElement*, const std::string&) const
     */
    virtual std::vector<DataElement*> getElements(const std::string& filename, const std::string& type) const = 0;
 
@@ -528,7 +528,7 @@ public:
     *  @return  A vector containing the names of the data elements of the given
     *           type.
     *
-    *  @see     getElementNames(DataElement*, const std::string&) const,
+    *  @see     getElementNames(const DataElement*, const std::string&) const,
     *           getElementNames(const std::string&, const std::string&) const
     */
    virtual std::vector<std::string> getElementNames(const std::string& type) const = 0;
@@ -552,7 +552,7 @@ public:
     *  @see     getElementNames(const std::string&) const,
     *           getElementNames(const std::string&, const std::string&) const
     */
-   virtual std::vector<std::string> getElementNames(DataElement* pParent, const std::string& type) const = 0;
+   virtual std::vector<std::string> getElementNames(const DataElement* pParent, const std::string& type) const = 0;
 
    /**
     *  Retrieves the names of elements with a given file.
@@ -571,7 +571,7 @@ public:
     *           given file.
     *
     *  @see     getElementNames(const std::string&) const,
-    *           getElementNames(DataElement*, const std::string&) const
+    *           getElementNames(const DataElement*, const std::string&) const
     */
    virtual std::vector<std::string> getElementNames(const std::string& filename, const std::string& type) const = 0;
 
@@ -625,7 +625,7 @@ public:
     *  @return  Returns \b true if element was successfully removed; otherwise
     *           returns \b false.
     */
-   virtual bool removeElement(DataElement* pElement) = 0;
+   virtual bool removeElement(const DataElement* pElement) = 0;
 
    /**
     *  Removes a data element from the session and deletes it.
@@ -706,7 +706,7 @@ public:
     *  @return  The data value.  A value of 0.0 is returned if the given type
     *           is not recognized.
     */
-   virtual double getDataValue(EncodingType type, void* pData, int iIndex) const = 0;
+   virtual double getDataValue(EncodingType type, const void* pData, int iIndex) const = 0;
 
    /**
     *  Retrieves an individual data value from a block of memory.
@@ -728,7 +728,7 @@ public:
     *
     *  @see     ComplexComponent
     */
-   virtual double getDataValue(EncodingType type, void* pData, ComplexComponent component, int iIndex) const = 0;
+   virtual double getDataValue(EncodingType type, const void* pData, ComplexComponent component, int iIndex) const = 0;
 
    /**
     *  Retrieves an individual data value from a block of memory independent
@@ -752,7 +752,7 @@ public:
     *           Populated with the data value.
     */
    template<class T>
-   static inline void getDataValue(T* pData, ComplexComponent component, int iIndex, double& dValue)
+   static inline void getDataValue(const T* pData, ComplexComponent component, int iIndex, double& dValue)
    {
       if (pData != NULL)
       {
@@ -770,7 +770,7 @@ public:
     *
     *  @return   The given data value.
     */
-   static inline unsigned char getDataValue(unsigned char &data, ComplexComponent component)
+   static inline unsigned char getDataValue(const unsigned char& data, ComplexComponent component)
    {
       return data;
    }
@@ -785,7 +785,7 @@ public:
     *
     *  @return   The given data value.
     */
-   static inline signed char getDataValue(signed char &data, ComplexComponent component)
+   static inline signed char getDataValue(const signed char& data, ComplexComponent component)
    {
       return data;
    }
@@ -800,7 +800,7 @@ public:
     *
     *  @return   The given data value.
     */
-   static inline unsigned short getDataValue(unsigned short &data, ComplexComponent component)
+   static inline unsigned short getDataValue(const unsigned short& data, ComplexComponent component)
    {
       return data;
    }
@@ -815,68 +815,7 @@ public:
     *
     *  @return   The given data value.
     */
-   static inline signed short getDataValue(signed short &data, ComplexComponent component)
-   {
-      return data;
-   }
-
-   /**
-    *  Returns a data value according to a given complex data component.
-    *
-    *  @param    data
-    *            The data value from which to extract the complex component value.
-    *  @param    component
-    *            For complex data, this specifies the component of the complex data whose
-    *            value should be returned.
-    *
-    *  @return   The data value corresponding to the given complex data component.
-    */
-   static inline double getDataValue(IntegerComplex &data, ComplexComponent component)
-   {
-      return data[component];
-   }
-
-   /**
-    *  Provided for convenience for template methods, this method simply returns the given value.
-    *
-    *  @param    data
-    *            The data value from which to extract the complex component value.
-    *  @param    component
-    *            This value is ignored since the given data value is non-complex.
-    *
-    *  @return   The given data value.
-    */
-   static inline unsigned int getDataValue(unsigned int &data, ComplexComponent component)
-   {
-      return data;
-   }
-
-   /**
-    *  Provided for convenience for template methods, this method simply returns the given value.
-    *
-    *  @param    data
-    *            The data value from which to extract the complex component value.
-    *  @param    component
-    *            This value is ignored since the given data value is non-complex.
-    *
-    *  @return   The given data value.
-    */
-   static inline signed int getDataValue(signed int &data, ComplexComponent component)
-   {
-      return data;
-   }
-
-   /**
-    *  Provided for convenience for template methods, this method simply returns the given value.
-    *
-    *  @param    data
-    *            The data value from which to extract the complex component value.
-    *  @param    component
-    *            This value is ignored since the given data value is non-complex.
-    *
-    *  @return   The given data value.
-    */
-   static inline float getDataValue(float &data, ComplexComponent component)
+   static inline signed short getDataValue(const signed short& data, ComplexComponent component)
    {
       return data;
    }
@@ -892,7 +831,7 @@ public:
     *
     *  @return   The data value corresponding to the given complex data component.
     */
-   static inline double getDataValue(FloatComplex &data, ComplexComponent component)
+   static inline double getDataValue(const IntegerComplex& data, ComplexComponent component)
    {
       return data[component];
    }
@@ -907,7 +846,68 @@ public:
     *
     *  @return   The given data value.
     */
-   static inline double getDataValue(double &data, ComplexComponent component)
+   static inline unsigned int getDataValue(const unsigned int& data, ComplexComponent component)
+   {
+      return data;
+   }
+
+   /**
+    *  Provided for convenience for template methods, this method simply returns the given value.
+    *
+    *  @param    data
+    *            The data value from which to extract the complex component value.
+    *  @param    component
+    *            This value is ignored since the given data value is non-complex.
+    *
+    *  @return   The given data value.
+    */
+   static inline signed int getDataValue(const signed int& data, ComplexComponent component)
+   {
+      return data;
+   }
+
+   /**
+    *  Provided for convenience for template methods, this method simply returns the given value.
+    *
+    *  @param    data
+    *            The data value from which to extract the complex component value.
+    *  @param    component
+    *            This value is ignored since the given data value is non-complex.
+    *
+    *  @return   The given data value.
+    */
+   static inline float getDataValue(const float& data, ComplexComponent component)
+   {
+      return data;
+   }
+
+   /**
+    *  Returns a data value according to a given complex data component.
+    *
+    *  @param    data
+    *            The data value from which to extract the complex component value.
+    *  @param    component
+    *            For complex data, this specifies the component of the complex data whose
+    *            value should be returned.
+    *
+    *  @return   The data value corresponding to the given complex data component.
+    */
+   static inline double getDataValue(const FloatComplex& data, ComplexComponent component)
+   {
+      return data[component];
+   }
+
+   /**
+    *  Provided for convenience for template methods, this method simply returns the given value.
+    *
+    *  @param    data
+    *            The data value from which to extract the complex component value.
+    *  @param    component
+    *            This value is ignored since the given data value is non-complex.
+    *
+    *  @return   The given data value.
+    */
+   static inline double getDataValue(const double& data, ComplexComponent component)
    {
       return data;
    }

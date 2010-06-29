@@ -388,7 +388,7 @@ DataElement* ModelServicesImp::createElement(const string& name, const string& t
    return pElement;
 }
 
-multimap<ModelServicesImp::Key, DataElement*>::iterator ModelServicesImp::findElement(DataElement* pElement)
+multimap<ModelServicesImp::Key, DataElement*>::iterator ModelServicesImp::findElement(const DataElement* pElement)
 {
    if (pElement == NULL)
    {
@@ -447,7 +447,7 @@ multimap<ModelServicesImp::Key, DataElement*>::const_iterator ModelServicesImp::
    return mElements.end();
 }
 
-DataElement* ModelServicesImp::getElement(const string& name, const string& type, DataElement* pParent) const
+DataElement* ModelServicesImp::getElement(const string& name, const string& type, const DataElement* pParent) const
 {
    if (name.empty() == true)
    {
@@ -499,7 +499,7 @@ vector<DataElement*> ModelServicesImp::getElements(const string& type) const
    return elements;
 }
 
-vector<DataElement*> ModelServicesImp::getElements(DataElement* pParent, const string& type) const
+vector<DataElement*> ModelServicesImp::getElements(const DataElement* pParent, const string& type) const
 {
    vector<DataElement*> elements;
 
@@ -570,7 +570,7 @@ vector<string> ModelServicesImp::getElementNames(const string& type) const
    return elementNames;
 }
 
-vector<string> ModelServicesImp::getElementNames(DataElement* pParent, const string& type) const
+vector<string> ModelServicesImp::getElementNames(const DataElement* pParent, const string& type) const
 {
    vector<string> elementNames;
 
@@ -656,7 +656,7 @@ bool ModelServicesImp::setElementParent(DataElement* pElement, DataElement *pPar
    return true;
 }
 
-bool ModelServicesImp::removeElement(DataElement* pElement)
+bool ModelServicesImp::removeElement(const DataElement* pElement)
 {
    if (pElement == NULL)
    {
@@ -756,12 +756,12 @@ void ModelServicesImp::deleteMemoryBlock(char* memory)
    delete [] memory;
 }
 
-double ModelServicesImp::getDataValue(EncodingType type, void* pData, int iIndex) const
+double ModelServicesImp::getDataValue(EncodingType type, const void* pData, int iIndex) const
 {
    return getDataValue(type, pData, COMPLEX_MAGNITUDE, iIndex);
 }
 
-double ModelServicesImp::getDataValue(EncodingType type, void* pData, ComplexComponent component, int iIndex) const
+double ModelServicesImp::getDataValue(EncodingType type, const void* pData, ComplexComponent component, int iIndex) const
 {
    double dValue = 0.0;
    switchOnComplexEncoding(type, ModelServices::getDataValue, pData, component, iIndex, dValue);
