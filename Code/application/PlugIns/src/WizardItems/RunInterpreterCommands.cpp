@@ -63,6 +63,9 @@ bool RunInterpreterCommands::getInputSpecification(PlugInArgList*& pArgList)
       "A file with commands for the interpreter to run.  You can use $V(APP_HOME) inside this "
       "string and it will auto-expand to the application install location.  May not be used with any other "
       "command argument."));
+   VERIFY(pArgList->addArg<bool>("Verbose", false,
+      "If true, normal output from the interpreter will be reported to the progress object as a warning. "
+      "If false, which is the default, normal output from the interpreter will not appear as progress."));
    return true;
 }
 
@@ -77,6 +80,9 @@ bool RunInterpreterCommands::execute(PlugInArgList* pInArgList, PlugInArgList* p
    VERIFY(pInArgList != NULL);
    ProgressTracker progress(pInArgList->getPlugInArgValue<Progress>(ProgressArg()),
       "Run Interpreter Commands.", "app", "FBA8DDA3-9EA4-40da-BC78-CCD55E867297");
+
+   bool verbose = false;
+   pInArgList->getPlugInArgValue<bool>("Verbose", verbose);
 
    // Get the command(s) to send to the interpreter.
    // Commands should be validated before Interpreter Name to avoid potentially creating a plug-in without need.
@@ -302,6 +308,19 @@ bool RunInterpreterCommands::execute(PlugInArgList* pInArgList, PlugInArgList* p
 
          progress.report(message, 0, ERRORS, true);
          return false;
+      }
+
+      if (verbose && pReturnType != NULL && *pReturnType != "Error" && pOutputText != NULL && !pOutputText->empty())
+      {
+         std::string ignoreText;
+         int currentProgress;
+         ReportingLevel ignoreLevel;
+         Progress* pProgress = progress.getCurrentProgress();
+         if (pProgress != NULL)
+         {
+            pProgress->getProgress(ignoreText, currentProgress, ignoreLevel);
+            pProgress->updateProgress(*pOutputText, currentProgress, WARNING);
+         }
       }
    }
 
