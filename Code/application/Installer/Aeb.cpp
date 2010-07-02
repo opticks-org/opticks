@@ -43,16 +43,8 @@ bool Aeb::validate() const
    {
       return false;
    }
-   bool appFound = false;
-   for (std::vector<AebRequirement>::const_iterator app = mTargetApplication.begin(); app != mTargetApplication.end(); ++app)
-   {
-      if (app->isValid() && app->getId() == AebId::applicationId() && app->meets(AebVersion::appVersion()))
-      {
-         appFound = true;
-         break;
-      }
-   }
-   return appFound;
+   std::string ignoreMsg;
+   return checkTargetApplication(ignoreMsg);
 }
 
 bool Aeb::meetsRequirements(std::string& errMsg) const
@@ -133,6 +125,35 @@ bool Aeb::isIncompatible(const Aeb& extension) const
       }
    }
    return false;
+}
+
+bool Aeb::checkTargetApplication(std::string& errMsg) const
+{
+   errMsg.clear();
+   bool appFound = false;
+   for (std::vector<AebRequirement>::const_iterator app = mTargetApplication.begin(); app != mTargetApplication.end(); ++app)
+   {
+      if (app->isValid() && app->getId() == AebId::applicationId())
+      {
+         appFound = app->meets(AebVersion::appVersion());
+         if (!appFound)
+         {
+            errMsg = "Extension will not install on this version of Opticks.  Extension can only be "
+               "installed on Opticks versions between " + app->getMin().toString() +
+               " and " + app->getMax().toString() + ". The application version number is " + 
+               AebVersion::appVersion().toString() + ".";
+         }
+         else
+         {
+            break;
+         }
+      }
+   }
+   if (!appFound && errMsg.empty())
+   {
+      errMsg = "Extension does not list Opticks as a valid target application.";
+   }
+   return appFound;
 }
 
 std::string Aeb::getFilename() const

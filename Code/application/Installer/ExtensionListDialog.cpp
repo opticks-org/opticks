@@ -100,11 +100,19 @@ void ExtensionListDialog::install()
       if (!deserializer.fromFile(filename.toStdString(), errMsg))
       {
          QMessageBox::critical(Service<DesktopServices>()->getMainWidget(), "Extension Error",
-            "Invalid extension bundle.\n" + QString::fromStdString(errMsg));
+            "Invalid extension bundle: " + filename + ".\n" + QString::fromStdString(errMsg));
       }
       else
       {
-         extensions.push_back(extensionRes.back());
+         if (!extensionRes.back()->checkTargetApplication(errMsg))
+         {
+            QMessageBox::critical(Service<DesktopServices>()->getMainWidget(), "Extension Error",
+               "Invalid extension bundle: " + QString::fromStdString(extensionRes.back()->getName()) + ".\n" + QString::fromStdString(errMsg));
+         }
+         else
+         {
+            extensions.push_back(extensionRes.back());
+         }
       }
    }
    if (!extensions.empty())

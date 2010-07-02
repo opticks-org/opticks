@@ -36,6 +36,7 @@ public:
    bool validate() const;
    bool meetsRequirements(std::string& errMsg) const;
    bool isIncompatible(const Aeb& extension) const;
+   bool checkTargetApplication(std::string& errMsg) const;
 
    std::string getFilename() const;
    AebId getId() const;

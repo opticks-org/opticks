@@ -143,7 +143,8 @@ bool InstallerServicesImp::installExtension(const std::string& aebFile, Progress
    {
       if (pProgress != NULL)
       {
-         pProgress->updateProgress("This extension is invalid.", 0, ERRORS);
+         pExtension->checkTargetApplication(errMsg); 
+         pProgress->updateProgress("This extension is invalid. " + errMsg, 0, ERRORS);
       }
       return false;
    }

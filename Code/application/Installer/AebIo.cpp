@@ -204,17 +204,25 @@ bool AebIo::fromFile(const std::string& fname, std::string& errMsg)
 
    // targetPlatform
    objs = pRdf->getAllObjects(sAeblTopSubject, sAeblPrefix+"targetPlatform");
+   std::string msgTargetPlatforms;
    for (std::vector<std::string>::const_iterator obj = objs.begin(); obj != objs.end(); ++obj)
    {
       AebPlatform platform(*obj);
+      msgTargetPlatforms += "   " + *obj + "\n";
       if (platform.isValid())
       {
          mObj.mPlatforms.push_back(platform);
       }
    }
-   if (!objs.empty() && mObj.mPlatforms.empty()) // targetPlatforms exists and current is not in the list
+   if (!msgTargetPlatforms.empty())
    {
-      errMsg = "The current platform is not supported by this extension.";
+      msgTargetPlatforms = msgTargetPlatforms.substr(0, msgTargetPlatforms.size() - 1);
+   }
+   if (!objs.empty() && mObj.mPlatforms.empty()) // target platforms exists and current is not in the list
+   {
+      errMsg = "Extension does not support the current platform of " +
+         AebPlatform::currentPlatform() + ". Extension supports the following platforms:\n" +
+         msgTargetPlatforms;
       return false;
    }
 

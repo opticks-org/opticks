@@ -5944,7 +5944,14 @@ void ApplicationWindow::processDropFiles()
             }
             else
             {
-               extensions.push_back(extensionRes.back());
+               if (!extensionRes.back()->checkTargetApplication(errorMessage))
+               {
+                  pProgress->updateProgress("Invalid extension bundle: " + extensionRes.back()->getName() + "\n" + errorMessage, 0, WARNING);
+               }
+               else
+               {
+                  extensions.push_back(extensionRes.back());
+               }
             }
          }
       }

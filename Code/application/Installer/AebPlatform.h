@@ -22,10 +22,10 @@ public:
    bool operator==(const AebPlatform& other) const;
    bool operator!=(const AebPlatform& other) const;
    std::string toString() const;
+   static std::string currentPlatform();
 
 private:
    std::string mPlatform;
-   static std::string currentPlatform();
 };
 
 #endif
