@@ -25,6 +25,8 @@
 #include <io.h>
 #include <fcntl.h>
 #include <limits>
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 #else
 #define O_BINARY 0x0000 // make UNIX stop complaining when given O_BINARY!
 #include <fcntl.h>
@@ -262,6 +264,58 @@ public:
 #endif
 
       return validHandle();
+   }
+
+   /**
+    * Reserve a file of the requested size with the requested name.
+    * This file will be open after being reserved and will close any
+    * open file that is owned by this object.
+    *
+    * The file will be reserved using the following open and permission flags:
+    *   - O_RDWR | O_CREAT | O_BINARY
+    *   - S_IREAD | S_IWRITE | S_IEXEC
+    *
+    * @param filename
+    *        The name of the file to reserve.
+    * @param reserveSize
+    *        The size of the file in bytes to reserve.
+    *
+    * @return \c True if the file was successfully reserved, \c false otherwise.
+    */
+   bool reserve(std::string filename, int64_t reserveSize)
+   {
+      if (!open(filename, O_RDWR | O_CREAT | O_BINARY, S_IREAD | S_IWRITE | S_IEXEC))
+      {
+         return false;
+      }
+
+#if defined(UNIX_API)
+      struct statvfs sbuf;
+      if (statvfs(filename.c_str(), &sbuf) ==0)
+      {
+         // Be sure there is enough space in the file system
+         if ((reserveSize + sbuf.f_bsize - 1) / sbuf.f_bsize < sbuf.f_bfree)
+         {
+            // seek here
+            if (seek(reserveSize - 1, SEEK_SET) != (reserveSize - 1) || // seek failed, OR
+                write(filename.c_str(), 1) != 1)  // write failed
+            {
+               return false;
+            }
+         }
+      }
+#elif defined(WIN_API)
+      if (seek(reserveSize, SEEK_SET) != (reserveSize))
+      {
+         return false;
+      }
+      HANDLE winHandle = reinterpret_cast<HANDLE>(_get_osfhandle(mHandle));
+      if (!::SetEndOfFile(winHandle))
+      {
+         return false;
+      }
+#endif
+      return true;
    }
 
    /**

@@ -1135,34 +1135,14 @@ bool RasterElementImp::createTemporaryFile()
    mTempFilename = pTempFilename;
    free(pTempFilename);
 
-   LargeFileResource tempFile(false);
-   if (!tempFile.open(mTempFilename, O_RDWR | O_CREAT | O_BINARY, S_IREAD | S_IWRITE | S_IEXEC))
-   {
-      return false;
-   }
-
    uint64_t totalSize = static_cast<uint64_t>(rows) * columns * bands * size;
-
-#if defined(UNIX_API)
-   struct statvfs sbuf;
-   if (statvfs(mTempFilename.c_str(), &sbuf) ==0)
-   {
-      // Be sure there is enough space in the file system
-      if ((totalSize + sbuf.f_bsize - 1) / sbuf.f_bsize < sbuf.f_bfree)
+   { 
+      LargeFileResource tempFile;
+      if (!tempFile.reserve(mTempFilename, totalSize))
       {
-#endif
-         // seek here
-         if (tempFile.seek(totalSize - 1, SEEK_SET) != (totalSize - 1) || // seek failed, OR
-            tempFile.write(mTempFilename.c_str(), 1) != 1)  // write failed
-         {
-            return false;
-         }
-#if defined(UNIX_API)
+         return false;
       }
-   }
-#endif
-
-   tempFile.close();
+   } //scoped block so that LargeFileResource closes when exiting here
 
    return createMemoryMappedPager(true);
 }
