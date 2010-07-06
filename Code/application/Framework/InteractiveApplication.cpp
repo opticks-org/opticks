@@ -165,7 +165,6 @@ int InteractiveApplication::run(int argc, char** argv)
       {
          pendingInstall.push_back(autos.next().toStdString());
       }
-      int numExtFailed = 0;
       bool autoInstallOccurred = false;
       InstallerServicesImp::instance()->setPendingInstall(pendingInstall);
       for (vector<string>::iterator autoIter = pendingInstall.begin();
@@ -192,7 +191,6 @@ int InteractiveApplication::run(int argc, char** argv)
             {
                QFile::remove(QString::fromStdString(*autoIter));
             }
-            numExtFailed++;
          }
          else
          {
@@ -201,11 +199,6 @@ int InteractiveApplication::run(int argc, char** argv)
          }
       }
       InstallerServicesImp::instance()->setPendingInstall();
-      if (numExtFailed != 0)
-      {
-         return -numExtFailed;
-      }
-
       if (autoInstallOccurred)
       {
          // rescan the plug-ins
