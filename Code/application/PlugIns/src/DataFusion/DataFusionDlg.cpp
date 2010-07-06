@@ -967,7 +967,7 @@ void DataFusionDlg::fuse()
 void DataFusionDlg::copyColorMap(RasterLayer& destination, const RasterLayer& source) const
 {
    // copy parameters from source into destination
-   destination.setColorMap(source.getColorMapName(), source.getColorMap());
+   destination.setColorMap(source.getColorMap());
    destination.setDisplayMode(source.getDisplayMode());
 
    destination.setStretchType(GRAYSCALE_MODE, source.getStretchType(GRAYSCALE_MODE));

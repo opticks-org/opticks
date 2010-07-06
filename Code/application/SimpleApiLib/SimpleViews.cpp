@@ -832,7 +832,7 @@ extern "C"
          setLastError(SIMPLE_BAD_PARAMS);
          return 0;
       }
-      std::string name = pRaster->getColorMapName();
+      std::string name = pRaster->getColorMap().getName();
       if (nameSize == 0)
       {
          return name.size() + 1;
@@ -892,7 +892,7 @@ extern "C"
             }
          }
       }
-      pRaster->setColorMap(map.getName(), map.getTable());
+      pRaster->setColorMap(map);
       setLastError(SIMPLE_NO_ERROR);
       return 0;
    }
@@ -905,7 +905,7 @@ extern "C"
          setLastError(SIMPLE_BAD_PARAMS);
          return 1;
       }
-      const std::vector<ColorType>& colormap = pRaster->getColorMap();
+      const std::vector<ColorType>& colormap = pRaster->getColorMap().getTable();
       if (colormap.size() != 256)
       {
          setLastError(SIMPLE_NO_MEM);
@@ -933,7 +933,16 @@ extern "C"
       {
          colormap.push_back(decodeColor(pColormap[idx]));
       }
-      pRaster->setColorMap(std::string((pName == NULL) ? "" : pName), colormap);
+      try
+      {
+         pRaster->setColorMap(ColorMap(std::string((pName == NULL) ? "" : pName), colormap));
+      }
+      catch (const std::exception&)
+      {
+         setLastError(SIMPLE_BAD_PARAMS);
+         return 1;
+      }
+
       setLastError(SIMPLE_NO_ERROR);
       return 0;
    }

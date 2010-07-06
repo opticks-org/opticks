@@ -9,7 +9,6 @@
 
 #include "ColorMap.h"
 #include "ImageFilterDescriptor.h"
-#include "RasterElement.h"
 #include "RasterLayer.h"
 #include "RasterLayerUndo.h"
 #include "SessionManager.h"
@@ -93,7 +92,7 @@ void SetRasterColorMap::executeUndo()
    RasterLayer* pLayer = dynamic_cast<RasterLayer*>(getSessionItem());
    if (pLayer != NULL)
    {
-      pLayer->setColorMap(mOldColorMap.getName(), mOldColorMap.getTable());
+      pLayer->setColorMap(mOldColorMap);
    }
 }
 
@@ -102,7 +101,7 @@ void SetRasterColorMap::executeRedo()
    RasterLayer* pLayer = dynamic_cast<RasterLayer*>(getSessionItem());
    if (pLayer != NULL)
    {
-      pLayer->setColorMap(mNewColorMap.getName(), mNewColorMap.getTable());
+      pLayer->setColorMap(mNewColorMap);
    }
 }
 
@@ -403,7 +402,6 @@ RasterLayerMemento::RasterLayerMemento(RasterLayer* pLayer) :
    pLayer->getStretchValues(RED, mRedLower, mRedUpper);
    pLayer->getStretchValues(GREEN, mGreenLower, mGreenUpper);
    pLayer->getStretchValues(BLUE, mBlueLower, mBlueUpper);
-   mColorMapName = pLayer->getColorMapName();
    mColorMap = pLayer->getColorMap();
    mAlpha = pLayer->getAlpha();
    mEnableFastContrastStretch = pLayer->canApplyFastContrastStretch();
@@ -433,7 +431,7 @@ void RasterLayerMemento::toLayer(Layer* pLayer) const
       pRasterLayer->setStretchValues(RED, mRedLower, mRedUpper);
       pRasterLayer->setStretchValues(GREEN, mGreenLower, mGreenUpper);
       pRasterLayer->setStretchValues(BLUE, mBlueLower, mBlueUpper);
-      pRasterLayer->setColorMap(mColorMapName, mColorMap);
+      pRasterLayer->setColorMap(mColorMap);
       pRasterLayer->setAlpha(mAlpha);
       pRasterLayer->enableFilters(mEnabledFilters);
       pRasterLayer->setAnimation(mpAnimation);

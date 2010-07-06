@@ -1629,7 +1629,7 @@ void HistogramPlotImp::updateStretchUnitAction()
    }
 }
 
-void HistogramPlotImp::setAlternateColormap(const std::vector<ColorType>* pColormap)
+void HistogramPlotImp::setAlternateColormap(const ColorMap* pColormap)
 {
    mpAlternateColormap = pColormap;
    updateHistogramRegions();
@@ -1666,12 +1666,7 @@ void HistogramPlotImp::updateHistogramRegions(double lowerLimit, double upperLim
       if (pRasterLayer != NULL)
       {
          bUseColorGradient = true;
-
-         RasterLayerImp* pRasterImp =
-            dynamic_cast<RasterLayerImp*> (pRasterLayer);
-
-         if ((mpAlternateColormap ? ColorMap("Custom", *mpAlternateColormap) : pRasterImp->getColorMap()).isDefault() 
-            == false)
+         if ((mpAlternateColormap ? *mpAlternateColormap : pRasterLayer->getColorMap()).isDefault() == false)
          {
             bUseColorMap = true;
          }
@@ -1689,7 +1684,8 @@ void HistogramPlotImp::updateHistogramRegions(double lowerLimit, double upperLim
          if (pRasterLayerImp != NULL)
          {
             const ColorMap& colormap = pRasterLayerImp->getColorMap();
-            const vector<ColorType> colors = mpAlternateColormap ? *mpAlternateColormap : colormap.getTable();
+            const vector<ColorType>& colors = mpAlternateColormap ?
+               mpAlternateColormap->getTable() : colormap.getTable();
 
             int opacity = 0;
             for (unsigned int i = 0; i < colors.size(); ++i)
@@ -2037,8 +2033,7 @@ bool HistogramPlotImp::setColorMapFromFile(const QString& filename)
 
    try
    {
-      ColorMap colorMap(filename.toStdString());
-      pRasterLayer->setColorMap(colorMap.getName(), colorMap.getTable());
+      pRasterLayer->setColorMap(ColorMap(filename.toStdString()));
       return true;
    }
    catch (const std::exception&)

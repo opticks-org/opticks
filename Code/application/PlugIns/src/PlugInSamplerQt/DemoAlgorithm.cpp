@@ -7,17 +7,20 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "DemoAlgorithm.h"
 #include "AppAssert.h"
-#include "RasterElement.h"
+#include "ColorMap.h"
+#include "DemoAlgorithm.h"
 #include "DesktopServices.h"
-#include "RasterLayer.h"
-#include "SpatialDataWindow.h"
-#include "SpatialDataView.h"
-#include "MessageLogResource.h"
 #include "LayerList.h"
+#include "MessageLogResource.h"
 #include "ModelServices.h"
+#include "RasterElement.h"
+#include "RasterLayer.h"
+#include "SpatialDataView.h"
+#include "SpatialDataWindow.h"
 #include "WorkspaceWindow.h"
+
+#include <vector>
 
 /**
  *  A baseclass obligation. Performs any necessary preprocessing steps
@@ -47,9 +50,7 @@ bool DemoAlgorithm::processAll()
    pStep->addProperty("Cube", getRasterElement()->getName());
    mpStep = pStep.get();
 
-   std::vector<ColorType> colormap;
-   populateColormapFromNodes(colormap);
-
+   ColorMap colormap = createColormapFromNodes();
    applyColormap(*(getRasterElement()), colormap);
 
    reportProgress(NORMAL, 100, "Demo Complete");
@@ -80,10 +81,10 @@ bool DemoAlgorithm::postprocess()
  *       A reference to the cube being displayed with the colormap. 
  *  @param colormap
  *       The colormap to use when displaying the cube. Typically created by
- *       populateColormapFromNodes.
+ *       createColormapFromNodes.
  *  @return a pointer to the algorithm's GUI, or NULL if it has none
  */
-void DemoAlgorithm::applyColormap(RasterElement &cube, std::vector<ColorType>& colormap) const
+void DemoAlgorithm::applyColormap(RasterElement& cube, ColorMap& colormap) const
 {
    Service<DesktopServices> pDesktop;
 
@@ -117,7 +118,7 @@ void DemoAlgorithm::applyColormap(RasterElement &cube, std::vector<ColorType>& c
    if (pRasterLayer != NULL)
    {
       pRasterLayer->setDisplayMode(GRAYSCALE_MODE);
-      pRasterLayer->setColorMap("Dynamic Colormap", colormap);
+      pRasterLayer->setColorMap(colormap);
    }
 }
 
@@ -129,15 +130,14 @@ void DemoAlgorithm::applyColormap(RasterElement &cube, std::vector<ColorType>& c
  *  ENSURES that the number of cells in the output vector matches the number
  *     requested.
  *
- *  @param colormap
- *       An empty colormap to be populated with the results.
+ *  @return A colormap populated with the results.
  */
-void DemoAlgorithm::populateColormapFromNodes(std::vector<ColorType>& colormap) const
+ColorMap DemoAlgorithm::createColormapFromNodes() const
 {
    REQUIRE(mInputs.mNumberOfCells > 0);
    REQUIRE(mInputs.mNodes.size() >= 2);
 
-   colormap.clear();
+   std::vector<ColorType> colors;
 
    unsigned int j = 0;
    for (int i = 0; i < mInputs.mNumberOfCells; ++i)
@@ -153,11 +153,11 @@ void DemoAlgorithm::populateColormapFromNodes(std::vector<ColorType>& colormap) 
       // compute color and insert it into the colormap
       if (j == 0)
       {
-         colormap.push_back(mInputs.mNodes.front().second);
+         colors.push_back(mInputs.mNodes.front().second);
       }
       else if (j == mInputs.mNodes.size())
       {
-         colormap.push_back(mInputs.mNodes.back().second);
+         colors.push_back(mInputs.mNodes.back().second);
       }
       else
       {
@@ -175,11 +175,19 @@ void DemoAlgorithm::populateColormapFromNodes(std::vector<ColorType>& colormap) 
          color.mRed = static_cast<int>(red);
          color.mGreen = static_cast<int>(green);
          color.mBlue = static_cast<int>(blue);
-         colormap.push_back(color);
+         colors.push_back(color);
       }
    }
 
-   ENSURE(colormap.size() == mInputs.mNumberOfCells);
+   ENSURE(colors.size() == mInputs.mNumberOfCells);
+   try
+   {
+      return ColorMap("Dynamic Colormap", colors);
+   }
+   catch (const std::exception&)
+   {
+      return ColorMap();
+   }
 }
 
 /**

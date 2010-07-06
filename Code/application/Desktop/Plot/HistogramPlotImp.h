@@ -27,6 +27,7 @@
 
 #include <map>
 
+class ColorMap;
 class HistogramImp;
 class Layer;
 class PlotWindow;
@@ -75,7 +76,7 @@ public:
    RasterChannelType getRasterChannelType() const;
    Layer* getLayer() const;
 
-   void setAlternateColormap(const std::vector<ColorType>* pColormap);
+   void setAlternateColormap(const ColorMap* pColormap);
 
    bool toXml(XMLWriter* pXml) const;
    bool fromXml(DOMNode* pDocument, unsigned int version);
@@ -162,7 +163,7 @@ private:
    HistogramImp* mpHistogram;
    RegionObjectAdapter* mpRegion;
    RegionObjectAdapter* mpRegion2;
-   const std::vector<ColorType>* mpAlternateColormap;
+   const ColorMap* mpAlternateColormap;
    HistogramUpdater mUpdater;
 
    ValuesType meSelectedValue;

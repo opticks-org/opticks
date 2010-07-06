@@ -11,7 +11,6 @@
 #define COLORMAPEDITOR_H
 
 #include "ColorMap.h"
-#include "ColorType.h"
 
 #include <QtGui/QDialog>
 #include <QtGui/QFrame>
@@ -93,7 +92,7 @@ private:
    HistogramPlotImp& mHistogram;
    static const int mInitialIndices = 250;
    static const int mSliderRange = 10000;
-   std::vector<ColorType> mColormap;
+   ColorMap mColormap;
    std::string mName;
    bool mIsApplied;
    bool mNeedDetach;

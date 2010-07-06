@@ -1486,19 +1486,6 @@ void RasterLayerImp::setDisplayedBand(RasterChannelType eColor, DimensionDescrip
    }
 }
 
-bool RasterLayerImp::setColorMap(const string& name, const vector<ColorType>& colorTable)
-{
-   try
-   {
-      return setColorMap(ColorMap(name.c_str(), colorTable));
-   }
-   catch (const exception& exc)
-   {
-      QMessageBox::warning(NULL, "Bad ColorMap", exc.what());
-      return false;
-   }
-}
-
 bool RasterLayerImp::setColorMap(const ColorMap& colorMap)
 {
    if (colorMap == mColorMap)

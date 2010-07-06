@@ -10,14 +10,10 @@
 #ifndef DEMOALGORITHM_H
 #define DEMOALGORITHM_H
 
-#include <math.h>
-
 #include "AlgorithmPattern.h"
-
+#include "ColorMap.h"
 #include "DemoInputs.h"
 #include "Node.h"
-
-#include <vector>
 
 class Progress;
 class RasterElement;
@@ -41,8 +37,8 @@ private:
    bool doAbort();
 
    // local private methods
-   void applyColormap(RasterElement &cube, std::vector<ColorType> &colormap) const;
-   void populateColormapFromNodes(std::vector<ColorType> & colormap) const;
+   void applyColormap(RasterElement& cube, ColorMap& colormap) const;
+   ColorMap createColormapFromNodes() const;
 
    /**
     *    The values that the algorithm will run on 

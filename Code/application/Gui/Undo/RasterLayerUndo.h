@@ -206,8 +206,7 @@ private:
    double mBlueLower;
    double mBlueUpper;
 
-   std::string mColorMapName;
-   std::vector<ColorType> mColorMap;
+   ColorMap mColorMap;
    unsigned int mAlpha;
    bool mEnableFastContrastStretch;
 

@@ -11,7 +11,6 @@
 #define RASTERLAYER_H
 
 #include "Layer.h"
-#include "ColorType.h"
 #include "ComplexData.h"
 #include "ConfigurationSettings.h"
 #include "DimensionDescriptor.h"
@@ -22,6 +21,7 @@
 #include <vector>
 
 class Animation;
+class ColorMap;
 class ImageFilterDescriptor;
 class RasterElement;
 class Statistics;
@@ -300,28 +300,19 @@ public:
    /**
     *  Sets the current colormap that will be used for the GRAY RasterChannelType.
     *
-    *  @param   name
-    *           The name of the color map.
     *  @param   colorMap
-    *           A vector containing 256 colors.
+    *           The new colormap to use.
     *
     *  @notify  This method will notify Subject::signalModified.
     */
-   virtual void setColorMap(const std::string& name, const std::vector<ColorType>& colorMap) = 0;
+   virtual void setColorMap(const ColorMap& colorMap) = 0;
 
    /**
-    *  Retrieves the current color table.
+    *  Retrieves the current colormap.
     *
-    *  @return  The current color table.
+    *  @return  The current colormap.
     */
-   virtual const std::vector<ColorType>& getColorMap() const = 0;
-
-   /**
-    *  Retrieves the name of the current color map.
-    *
-    *  @return  The current color map name.
-    */
-   virtual const std::string& getColorMapName() const = 0;
+   virtual const ColorMap& getColorMap() const = 0;
 
    /**
     *  Sets the display component for complex raster data.

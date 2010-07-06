@@ -20,7 +20,7 @@ using namespace std;
 
 ColormapEditor::ColormapEditor(HistogramPlotImp& parent) :
    QDialog(&parent),
-   mHistogram (parent),
+   mHistogram(parent),
    mIsApplied(false),
    mNeedDetach(true)
 {
@@ -242,7 +242,19 @@ void ColormapEditor::applyColormap()
       {
          name = mName;
       }
-      pLayer->setColorMap(name, mColormap);
+
+      try
+      {
+         // Need a try/catch block because ColorMap constructor throws on failure.
+         // Need to create a ColorMap instead of using mColormap because mColormap's
+         // name does not match the name to use and ColorMap does not have a setName method.
+         pLayer->setColorMap(ColorMap(name, mColormap.getTable()));
+      }
+      catch (const std::runtime_error&)
+      {
+         VERIFYNRV_MSG(false, "Invalid colormap creation attempted");
+      }
+
       mIsApplied = true;
    }
 }
@@ -456,22 +468,22 @@ void ColormapEditor::updateColormap()
 {
    try
    {
-      ColorMap colorMap("Custom", makeGradient());
-
-      mColormap = colorMap.getTable();
+      mColormap = ColorMap("Custom", makeGradient());
    }
-   catch (std::runtime_error&)
+   catch (const std::runtime_error&)
    {
       VERIFYNRV_MSG(false, "Invalid colormap creation attempted");
    }
-   int size = mColormap.size();
+
+   const vector<ColorType>& colorMap = mColormap.getTable();
+   int size = colorMap.size();
 
    // Create the display of the colormap
    QImage image(size, 1, QImage::Format_ARGB32);
    vector<unsigned int> data(size);
    for (int i = 0; i < size; ++i)
    {
-      data[i] = qRgb(mColormap[i].mRed, mColormap[i].mGreen, mColormap[i].mBlue);
+      data[i] = qRgb(colorMap[i].mRed, colorMap[i].mGreen, colorMap[i].mBlue);
    }
    memcpy(image.bits(), &data[0], size * sizeof(unsigned int));
 

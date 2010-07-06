@@ -97,7 +97,6 @@ public:
    bool isBandDisplayed(RasterChannelType eColor, DimensionDescriptor band,
       const RasterElement* pRasterElement = NULL) const;
 
-   bool setColorMap(const std::string& name, const std::vector<ColorType>& colorTable);
    bool setColorMap(const ColorMap& colorMap);
    const ColorMap& getColorMap() const;
 
@@ -312,17 +311,13 @@ private:
    { \
       impClass::toggleDisplayMode(); \
    } \
-   void setColorMap(const std::string& name, const std::vector<ColorType>& colorMap) \
+   void setColorMap(const ColorMap& colorMap) \
    { \
-      impClass::setColorMap(name, colorMap); \
+      impClass::setColorMap(colorMap); \
    } \
-   const std::vector<ColorType>& getColorMap() const \
+   const ColorMap& getColorMap() const \
    { \
-      return impClass::getColorMap().getTable(); \
-   } \
-   const std::string& getColorMapName() const \
-   { \
-      return impClass::getColorMap().getName(); \
+      return impClass::getColorMap(); \
    } \
    void setComplexComponent(const ComplexComponent& eComponent) \
    { \
