@@ -163,6 +163,20 @@
 #define SENSOR_ALTITUDE_METADATA_PATH (SPECIAL_METADATA_NAME + "/" + SENSOR_ALTITUDE_METADATA_NAME)
 
 /**
+* The key for a double which specifies how many degrees a DataElement must be rotated counterclockwise
+* such that the sensor flight line is pointing at the top of the screen.
+*/
+#define SENSOR_UP_ANGLE_METADATA_NAME (std::string("SensorUpAngle"))
+
+/**
+* The full path for a double which specifies how many degrees a DataElement must be rotated counterclockwise
+* such that the sensor flight line is pointing at the top of the screen.
+*
+* @see SENSOR_UP_ANGLE_METADATA_NAME
+*/
+#define SENSOR_UP_ANGLE_METADATA_PATH (SPECIAL_METADATA_NAME + "/" + SENSOR_UP_ANGLE_METADATA_NAME)
+
+/**
 * The key for a double which specifies the altitude of the target when the associated DataElement was
 * captured.
 */

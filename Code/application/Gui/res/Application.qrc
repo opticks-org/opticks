@@ -153,6 +153,7 @@
    <file alias="Module">icons/ModuleIcon.png</file>
    <file alias="New">icons/NewIcon.png</file>
    <file alias="NorthArrow">icons/NorthArrowIcon.png</file>
+   <file alias="NorthUp">icons/NorthUpIcon.png</file>
    <file alias="NudgeDown">icons/NudgeDownIcon.png</file>
    <file alias="NudgeLeft">icons/NudgeLeftIcon.png</file>
    <file alias="NudgeRight">icons/NudgeRightIcon.png</file>
@@ -197,6 +198,7 @@
    <file alias="ScaleBar">icons/ScaleBarIcon.png</file>
    <file alias="Script">icons/ScriptIcon.png</file>
    <file alias="SemiChecked">icons/SemiCheckedIcon.png</file>
+   <file alias="SensorUp">icons/SensorUpIcon.png</file>
    <file alias="SessionExplorer">icons/SessionExplorerIcon.png</file>
    <file alias="ShadowColor">icons/ShadowColorIcon.png</file>
    <file alias="Shadow">icons/ShadowIcon.png</file>

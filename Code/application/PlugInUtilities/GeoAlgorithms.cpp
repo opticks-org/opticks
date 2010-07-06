@@ -533,3 +533,36 @@ double GeoAlgorithms::getYaxisGSD(const RasterElement* pRaster)
 
    return distance / point.mY;
 }
+
+bool GeoAlgorithms::getAngleToNorth(const RasterElement* pRaster, double& angle, LocationType pixelStart)
+{
+   if (pRaster == NULL || !pRaster->isGeoreferenced())
+   {
+      return false;
+   }
+
+   LocationType geocoordStart = pRaster->convertPixelToGeocoord(pixelStart);
+   LocationType oneUpPixel(pixelStart.mX, pixelStart.mY - 1.0);
+   LocationType oneUpGeo = pRaster->convertPixelToGeocoord(oneUpPixel);
+   double degLatPerPixel = abs(oneUpGeo.mX - geocoordStart.mX);
+
+   // degLatPerPixel can be extremely small for high spatial resolution data. This can result
+   // in unreliable orientation, especially when the scene coordinate and Lat/Lon coordinate
+   // systems are closely aligned. We'll avoid this problem by ensuring that a value of at
+   // least 0.001 degree (roughly 100 meters between points) is used for the calculation.
+   degLatPerPixel = max(0.001, degLatPerPixel);
+
+   LocationType geocoordEnd = LocationType(geocoordStart.mX + degLatPerPixel, geocoordStart.mY);
+   LocationType pixelEnd = pRaster->convertGeocoordToPixel(geocoordEnd);
+
+   double dDeltaX = pixelEnd.mX - pixelStart.mX;
+   double dDeltaY = pixelEnd.mY - pixelStart.mY;
+   if (dDeltaX == 0.0)
+   {
+      return false;
+   }
+
+   // atan2 uses positive x as 0 degrees and we want positive y so offset by PI/2 radians = 90 degrees
+   angle = 90 + GeoConversions::convertRadToDeg(atan2(dDeltaY, dDeltaX));
+   return true;
+}

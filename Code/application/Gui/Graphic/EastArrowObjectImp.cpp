@@ -7,14 +7,13 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <math.h>
-
-#include "EastArrowObjectImp.h"
 #include "AnnotationLayer.h"
-#include "GraphicLayer.h"
-#include "GraphicObject.h"
 #include "AppConfig.h"
 #include "AppAssert.h"
+#include "EastArrowObjectImp.h"
+#include "GeoAlgorithms.h"
+#include "GraphicLayer.h"
+#include "GraphicObject.h"
 #include "LayerList.h"
 #include "ProductView.h"
 #include "RasterElement.h"
@@ -175,27 +174,10 @@ void EastArrowObjectImp::orient()
       pLayer->translateWorldToData(pixelStart.mX, pixelStart.mY, pixelStart.mX, pixelStart.mY);
    }
 
-   LocationType geocoordStart = pRaster->convertPixelToGeocoord(pixelStart);
-   LocationType oneRightPixel(pixelStart.mX, pixelStart.mY + 1.0);
-   LocationType oneRightGeo = pRaster->convertPixelToGeocoord(oneRightPixel);
-   double degLonPerPixel = abs(oneRightGeo.mY - geocoordStart.mY);
-
-   // degLonPerPixel can be extremely small for high spatial resolution data. This can result
-   // in unreliable orientation of the arrow, especially when the scene coordinate and Lat/Lon
-   // coordinate systems are closely aligned. We'll avoid this problem by insuring that a value
-   // of at least 0.001 degree (roughly 100 meters between points) is used for the calculation.
-   degLonPerPixel = max(0.001, degLonPerPixel);
-
-   LocationType geocoordEnd = LocationType(geocoordStart.mX, geocoordStart.mY + degLonPerPixel);
-   LocationType pixelEnd = pRaster->convertGeocoordToPixel(geocoordEnd);
-
-   double dDeltaX = pixelEnd.mX - pixelStart.mX;
-   double dDeltaY = pixelEnd.mY - pixelStart.mY;
-
-   double dAngle = 0.0;
-   if (dDeltaX != 0.0)
+   double dAngle;
+   if (GeoAlgorithms::getAngleToNorth(pRaster, dAngle, pixelStart) == false)
    {
-      dAngle = atan2(dDeltaY, dDeltaX) * 180.0 / PI;
+      return;
    }
 
    // Update the angle if the object is in the layout layer
@@ -206,7 +188,7 @@ void EastArrowObjectImp::orient()
 
       // Pitch
       double dPitch = pSpatialDataView->getPitch();
-      if (dPitch < 0.0)
+      if (dPitch > 0.0)
       {
          dAngle *= -1.0;
       }

@@ -11,6 +11,8 @@
 #ifndef GEOALGORITHMS_H
 #define GEOALGORITHMS_H
 
+#include "LocationType.h"
+
 class RasterElement;
 
 /**
@@ -213,7 +215,7 @@ public:
     *
     *  @param   pRaster
     *           The RasterElement to compute the GSD for
-    *          
+    *
     *  @return  This method returns the distance between the origin
     *           and the number of columns in the cube.
     */
@@ -224,11 +226,26 @@ public:
     *
     *  @param   pRaster
     *           The RasterElement to compute the GSD for
-    *          
+    *
     *  @return  This method returns the distance between the origin
     *           and the number of rows in the cube.
     */
    static double getYaxisGSD(const RasterElement *pRaster);
+
+   /**
+    *  Calculates the angle to north.
+    *
+    *  @param  pRaster
+    *          The RasterElement to use for the calculation.
+    *  @param  angle
+    *          The counterclockwise angle to north in degrees. This is only valid when the method returns \c true.
+    *  @param  pixelStart
+    *          The coordinate from which to compute the angle to north. The angle to north is computed by comparing
+    *          the latitude of this pixel to the latitude of the pixel directly above it.
+    *
+    *  @return \c True on success, \c false otherwise.
+    */
+   static bool getAngleToNorth(const RasterElement* pRaster, double& angle, LocationType pixelStart);
 
 private:
    // Calculation Variables used only by Vincenty Algorithms

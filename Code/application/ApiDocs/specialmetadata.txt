@@ -17,6 +17,10 @@
  *     - #NAMES_METADATA_NAME
  *   - #BAND_NAME_PREFIX_METADATA_NAME
  *   - #COLLECTION_DATE_TIME_METADATA_NAME
+ *   - #SENSOR_ALTITUDE_METADATA_NAME
+ *   - #SENSOR_UP_ANGLE_METADATA_NAME
+ *   - #TARGET_ALTITUDE_METADATA_NAME
+ *   - #OFF_NADIR_ANGLE_METADATA_NAME
  *
  * To get and set the attributes of the metadata, you should be able to use code
  * like the following: 

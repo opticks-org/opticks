@@ -60,6 +60,7 @@
 #include "DimensionDescriptor.h"
 #include "DisplayToolBar.h"
 #include "DockWindowAdapter.h"
+#include "DynamicObject.h"
 #include "Endian.h"
 #include "ExportDlg.h"
 #include "ExtensionListDialog.h"
@@ -72,6 +73,7 @@
 #include "GcpLayer.h"
 #include "GcpList.h"
 #include "GcpToolBar.h"
+#include "GeoAlgorithms.h"
 #include "GraphicLayer.h"
 #include "GraphicObject.h"
 #include "GraphicObjectImp.h"
@@ -84,6 +86,7 @@
 #include "Layer.h"
 #include "LayerList.h"
 #include "LinkDlg.h"
+#include "LocationType.h"
 #include "MeasurementToolBar.h"
 #include "MenuBarImp.h"
 #include "MessageLogResource.h"
@@ -119,6 +122,7 @@
 #include "SignatureSet.h"
 #include "SpatialDataViewAdapter.h"
 #include "SpatialDataWindowAdapter.h"
+#include "SpecialMetadata.h"
 #include "StatusBar.h"
 #include "TiePointEditor.h"
 #include "TiePointLayer.h"
@@ -411,6 +415,20 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    m_pFree_Rotate_Action->setCheckable(true);
    m_pFree_Rotate_Action->setToolTip("Free Rotate");
    m_pFree_Rotate_Action->setStatusTip("Rotates the data set while clicking and dragging the mouse");
+
+   mpNorthUpAction = new QAction(QIcon(":/icons/NorthUp"), "North Up", this);
+   mpNorthUpAction->setAutoRepeat(false);
+   mpNorthUpAction->setShortcut(QKeySequence(Qt::Key_U));
+   mpNorthUpAction->setToolTip("North Up");
+   mpNorthUpAction->setStatusTip("Rotates the data set such that North is up");
+   VERIFYNR(connect(mpNorthUpAction, SIGNAL(triggered()), this, SLOT(northUp())));
+
+   mpSensorUpAction = new QAction(QIcon(":/icons/SensorUp"), "Sensor Up", this);
+   mpSensorUpAction->setAutoRepeat(false);
+   mpSensorUpAction->setShortcut(QKeySequence(Qt::Key_S));
+   mpSensorUpAction->setToolTip("Sensor Up");
+   mpSensorUpAction->setStatusTip("Rotates the data set such that the sensor flight line is up");
+   VERIFYNR(connect(mpSensorUpAction, SIGNAL(triggered()), this, SLOT(sensorUp())));
 
    m_pReset_Action = new QAction(QIcon(":/icons/ResetOrientation"), "R&eset", this);
    m_pReset_Action->setAutoRepeat(false);
@@ -859,6 +877,8 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
       mpDisplayToolBar->addAction(m_pFlip_Vert_Action);
       mpDisplayToolBar->addAction(m_pRotate_By_Action);
       mpDisplayToolBar->addButton(m_pFree_Rotate_Action);
+      mpDisplayToolBar->addButton(mpNorthUpAction);
+      mpDisplayToolBar->addButton(mpSensorUpAction);
       mpDisplayToolBar->addAction(m_pReset_Action);
       mpDisplayToolBar->addSeparator();
       mpDisplayToolBar->addAction(m_pDisplay_Mode_Action);
@@ -1010,6 +1030,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    mpMenuBar->insertMenu(pZoomMenu, m_pView);
    m_pView->addSeparator();
    mpMenuBar->insertCommand(mpCreateAnimationAction, m_pView, viewContext);
+   mpMenuBar->insertCommand(mpResetStretchAction, m_pView, viewContext);
    mpMenuBar->insertCommand(m_pRefresh_Action, m_pView, viewContext);
    mpMenuBar->insertCommand(mpGenerateImageAction, m_pView, viewContext);
    m_pView->addSeparator();
@@ -1031,6 +1052,9 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    pRotateMenu->addSeparator();
    mpMenuBar->insertCommand(m_pRotate_By_Action, pRotateMenu, rotateContext);
    mpMenuBar->insertCommand(m_pFree_Rotate_Action, pRotateMenu, mouseModeContext);
+   pRotateMenu->addSeparator();
+   mpMenuBar->insertCommand(mpNorthUpAction, pRotateMenu, rotateContext);
+   mpMenuBar->insertCommand(mpSensorUpAction, pRotateMenu, rotateContext);
    pRotateMenu->addSeparator();
    mpMenuBar->insertCommand(m_pReset_Action, pRotateMenu, rotateContext);
 
@@ -1261,7 +1285,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    {
       QString errorMessage("Unable to access log files\n");
       errorMessage += tempFile.errorString();
-      QMessageBox::warning(NULL,
+      QMessageBox::warning(this,
                            "Log File Error",
                            errorMessage,
                            QMessageBox::Ignore,
@@ -3155,6 +3179,74 @@ void ApplicationWindow::rotateBy()
    }
 }
 
+void ApplicationWindow::northUp()
+{
+   SpatialDataView* pView = dynamic_cast<SpatialDataView*>(getCurrentWorkspaceWindowView());
+   if (pView == NULL)
+   {
+      QMessageBox::warning(this, "Error", "No view available");
+      return;
+   }
+
+   LayerList* pLayerList = pView->getLayerList();
+   if (pLayerList == NULL)
+   {
+      QMessageBox::warning(this, "Error", "No layer list available");
+      return;
+   }
+
+   double angle;
+   if (GeoAlgorithms::getAngleToNorth(pLayerList->getPrimaryRasterElement(), angle, pView->getVisibleCenter()) == false)
+   {
+      QMessageBox::warning(this, "Error", "No georeferencing information available");
+      return;
+   }
+
+   if (pView->getPitch() > 0)
+   {
+      // Reverse if the image is flipped
+      angle += 180.0;
+   }
+
+   UndoGroup group(pView, "North Up");
+   pView->rotateTo(angle);
+   pView->refresh();
+}
+
+void ApplicationWindow::sensorUp()
+{
+   SpatialDataView* pView = dynamic_cast<SpatialDataView*>(getCurrentWorkspaceWindowView());
+   if (pView == NULL)
+   {
+      QMessageBox::warning(this, "Error", "No view available");
+      return;
+   }
+
+   LayerList* pLayerList = pView->getLayerList();
+   if (pLayerList == NULL)
+   {
+      QMessageBox::warning(this, "Error", "No layer list available");
+      return;
+   }
+
+   RasterElement* pRasterElement = pLayerList->getPrimaryRasterElement();
+   VERIFYNRV(pRasterElement != NULL);
+
+   DynamicObject* pMetadata = pRasterElement->getMetadata();
+   VERIFYNRV(pMetadata != NULL);
+
+   double* pAngle = dv_cast<double>(&pMetadata->getAttributeByPath(SENSOR_UP_ANGLE_METADATA_PATH));
+   if (pAngle == NULL)
+   {
+      QMessageBox::warning(this, "Error", "Metadata does not contain sensor up information");
+      return;
+   }
+
+   UndoGroup group(pView, "Sensor Up");
+   pView->rotateTo(pView->getPitch() > 0 ? *pAngle + 180.0 : *pAngle); // Reverse if the image is flipped
+   pView->refresh();
+}
+
 void ApplicationWindow::reset()
 {
    PerspectiveView* pView = dynamic_cast<PerspectiveView*>(getCurrentWorkspaceWindowView());
@@ -4692,6 +4784,7 @@ void ApplicationWindow::enableActions(bool bEnable)
    mpCreateAnimationAction->setEnabled(bEnable && bSpatialDataView);
    m_pRefresh_Action->setEnabled(bEnable);
    m_pReset_Action->setEnabled(bEnable && bSpatialDataView);
+   mpResetStretchAction->setEnabled(bEnable && bSpatialDataView);
    m_pDisplay_Mode_Action->setEnabled(bEnable && bSpatialDataView);
    mpClearMarkingsAction->setEnabled(bEnable && bSpatialDataView);
 
@@ -4706,6 +4799,8 @@ void ApplicationWindow::enableActions(bool bEnable)
    m_pRotate_By_Action->setEnabled(bEnable && bSpatialDataView);
    m_pFree_Rotate_Action->setEnabled(bEnable && bSpatialDataView);
    m_pReset_Action->setEnabled(bEnable && bSpatialDataView);
+   mpNorthUpAction->setEnabled(bEnable && bSpatialDataView);
+   mpSensorUpAction->setEnabled(bEnable && bSpatialDataView);
 
    // Zoom actions
    m_pZoom_In_Action->setEnabled(bEnable && bView);

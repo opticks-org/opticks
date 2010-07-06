@@ -231,6 +231,8 @@ protected slots:
    void flipHoriz();
    void flipVert();
    void rotateBy();
+   void northUp();
+   void sensorUp();
    void reset();
 
    // Zoom actions
@@ -351,6 +353,8 @@ private:
    QAction* m_pFlip_Vert_Action;
    QAction* m_pRotate_By_Action;
    QAction* m_pFree_Rotate_Action;
+   QAction* mpNorthUpAction;
+   QAction* mpSensorUpAction;
    QAction* m_pReset_Action;
 
    // Zoom actions
