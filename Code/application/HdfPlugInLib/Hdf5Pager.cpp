@@ -229,7 +229,7 @@ CachedPage::UnitPtr Hdf5Pager::fetchUnit(DataRequest *pOriginalRequest)
    case BSQ:
       {
          // the offsets change the 'origin' of the read
-         offset[0] = startBand.getActiveNumber();
+         offset[0] = startBand.getOnDiskNumber();
          offset[1] = startRow.getActiveNumber();
          offset[2] = 0;
 

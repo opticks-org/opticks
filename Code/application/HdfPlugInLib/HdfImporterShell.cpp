@@ -87,7 +87,7 @@ bool HdfImporterShell::validateDefaultOnDiskReadOnly(const DataDescriptor* pDesc
       unsigned int fileColumns = pFileDescriptor->getColumnCount();
       unsigned int fileBands = pFileDescriptor->getBandCount();
 
-      if ((loadedRows != fileRows) || (loadedColumns != fileColumns) || (loadedBands != fileBands))
+      if ((loadedRows != fileRows) || (loadedColumns != fileColumns) || (fileInterleave != BSQ && loadedBands != fileBands))
       {
          errorMessage = "Subsets are not supported with on-disk read-only processing!";
          return false;

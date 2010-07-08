@@ -150,7 +150,7 @@ CachedPage::UnitPtr Hdf4Pager::fetchUnit(DataRequest *pOriginalRequest)
       }
    case BSQ:
       {
-         lStartValue[0] = startBand.getActiveNumber();
+         lStartValue[0] = startBand.getOnDiskNumber();
          lStartValue[1] = startRow.getActiveNumber();
          lStartValue[2] = 0;
 

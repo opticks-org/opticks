@@ -38,6 +38,27 @@
 #include <limits>
 using namespace std;
 
+namespace
+{
+   vector<DimensionDescriptor> getSelectedDims(const vector<DimensionDescriptor>& srcDims,
+      const vector<DimensionDescriptor>& chipDims)
+   {
+      vector<DimensionDescriptor> selectedDims;
+
+      for (vector<DimensionDescriptor>::const_iterator srcIter = srcDims.begin(), chipIter = chipDims.begin();
+         srcIter != srcDims.end() && chipIter != chipDims.end(); ++srcIter)
+      {
+         if (srcIter->getOriginalNumber() == chipIter->getOriginalNumber())
+         {
+            selectedDims.push_back(*srcIter);
+            ++chipIter;
+         }
+      }
+
+      return selectedDims;
+   }
+}
+
 RasterElementImporterShell::RasterElementImporterShell() :
    mUsingMemoryMappedPager(false),
    mpProgress(NULL),
@@ -672,6 +693,42 @@ bool RasterElementImporterShell::performImport() const
    // re-evaluate the try/catch model.
    if (pDescriptor->getProcessingLocation() == ON_DISK_READ_ONLY)
    {
+      Service<SessionManager> pSessionManager;
+      if (pSessionManager->isSessionLoading() == false)
+      {
+         RasterFileDescriptor* pOrigFileDescriptor = dynamic_cast<RasterFileDescriptor*>(pDescriptor->getFileDescriptor());
+         std::vector<DimensionDescriptor> orgRows = pOrigFileDescriptor->getRows();
+         std::vector<DimensionDescriptor> orgColumns = pOrigFileDescriptor->getColumns();
+         std::vector<DimensionDescriptor> orgBands = pOrigFileDescriptor->getBands();
+
+         std::vector<DimensionDescriptor>::iterator iter;
+         unsigned int i = 0;
+         for (iter = orgRows.begin(), i = 0; iter != orgRows.end(); ++iter, ++i)
+         {
+            iter->setActiveNumber(i);
+         }
+         for (iter = orgColumns.begin(), i = 0; iter != orgColumns.end(); ++iter, ++i)
+         {
+            iter->setActiveNumber(i);
+         }
+         for (iter = orgBands.begin(), i = 0; iter != orgBands.end(); ++iter, ++i)
+         {
+            iter->setActiveNumber(i);
+         }
+         vector<DimensionDescriptor> selectedRows = getSelectedDims(orgRows,
+            pDescriptor->getRows());
+         vector<DimensionDescriptor> selectedColumns = getSelectedDims(orgColumns,
+            pDescriptor->getColumns());
+         vector<DimensionDescriptor> selectedBands = getSelectedDims(orgBands,
+            pDescriptor->getBands());
+
+         if (!RasterUtilities::chipMetadata(mpRasterElement->getMetadata(),
+            selectedRows, selectedColumns, selectedBands))
+         {
+            return checkAbortOrError("Could not chip metadata", pStep.get());
+         }
+      }
+
       if (createRasterPager(mpRasterElement) == false)
       {
          return checkAbortOrError("Could not create pager for RasterElement", pStep.get());
@@ -979,26 +1036,6 @@ bool RasterElementImporterShell::createRasterPager(RasterElement* pRaster) const
    return mUsingMemoryMappedPager;
 }
 
-namespace
-{
-   vector<DimensionDescriptor> getSelectedDims(const vector<DimensionDescriptor>& srcDims,
-      const vector<DimensionDescriptor>& chipDims)
-   {
-      vector<DimensionDescriptor> selectedDims;
-
-      for (vector<DimensionDescriptor>::const_iterator srcIter = srcDims.begin(), chipIter = chipDims.begin();
-         srcIter != srcDims.end() && chipIter != chipDims.end(); ++srcIter)
-      {
-         if (srcIter->getOriginalNumber() == chipIter->getOriginalNumber())
-         {
-            selectedDims.push_back(*srcIter);
-            ++chipIter;
-         }
-      }
-
-      return selectedDims;
-   }
-}
 bool RasterElementImporterShell::copyData(const RasterElement* pSrcElement) const
 {
    VERIFY(pSrcElement != NULL && mpRasterElement != NULL);
