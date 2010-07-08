@@ -12,10 +12,10 @@
 
 #include <QtGui/QDialog>
 #include <QtGui/QComboBox>
-#include <QtGui/QLineEdit>
 #include <QtGui/QCheckBox>
 
 class CustomColorButton;
+class GraphicTextWidget;
 class PlotWidget;
 
 class PlotPropertiesDlg : public QDialog
@@ -34,10 +34,10 @@ private:
    PlotWidget* mpPlot;
 
    QComboBox* mpClassPositionCombo;
+   GraphicTextWidget* mpClassText;
 
-   QLineEdit* mpOrgTextEdit;
    QComboBox* mpOrgPositionCombo;
-   CustomColorButton* mpOrgColorButton;
+   GraphicTextWidget* mpOrgText;
 
    QComboBox* mpGridlineStyleCombo;
    QComboBox* mpGridlineWidthCombo;
@@ -49,7 +49,7 @@ private:
 
    QComboBox* mpXScaleCombo;
    QComboBox* mpYScaleCombo;
-   
+
    QComboBox* mpSymbolSizeCombo;
    QComboBox* mpDisplayMethodCombo;
    QComboBox* mpSelectionModeCombo;

@@ -12,24 +12,27 @@
 #include <QtGui/QPainter>
 #include <QtGui/QPushButton>
 
-#include "PlotPropertiesDlg.h"
-#include "CartesianGridlines.h"
-#include "CartesianPlot.h"
-#include "ColorType.h"
 #include "AppAssert.h"
 #include "AppVerify.h"
+#include "CartesianGridlines.h"
+#include "CartesianPlot.h"
+#include "ColorMap.h"
+#include "ColorType.h"
 #include "CustomColorButton.h"
+#include "Font.h"
+#include "GraphicTextWidget.h"
 #include "HistogramPlot.h"
+#include "ObjectResource.h"
 #include "PlotObject.h"
+#include "PlotPropertiesDlg.h"
 #include "PlotView.h"
 #include "PlotWidget.h"
+#include "Point.h"
 #include "PointSet.h"
 #include "PolarGridlines.h"
 #include "PolarPlot.h"
 #include "StringUtilities.h"
 #include "TypesFile.h"
-#include "Point.h"
-#include "ColorMap.h"
 
 #include <string>
 #include <vector>
@@ -39,9 +42,9 @@ PlotPropertiesDlg::PlotPropertiesDlg(PlotWidget* pPlot, QWidget* pParent) :
    QDialog(pParent),
    mpPlot(pPlot),
    mpClassPositionCombo(NULL),
-   mpOrgTextEdit(NULL),
+   mpClassText(NULL),
    mpOrgPositionCombo(NULL),
-   mpOrgColorButton(NULL),
+   mpOrgText(NULL),
    mpGridlineStyleCombo(NULL),
    mpGridlineWidthCombo(NULL),
    mpGridlineColorButton(NULL),
@@ -66,16 +69,17 @@ PlotPropertiesDlg::PlotPropertiesDlg(PlotWidget* pPlot, QWidget* pParent) :
    classFont.setBold(true);
    pClassLabel->setFont(classFont);
 
-   // Classification position
    QLabel* pClassPositionLabel = new QLabel("Position:", this);
 
    mpClassPositionCombo = new QComboBox(this);
-   mpClassPositionCombo->setEditable(false);   
+   mpClassPositionCombo->setEditable(false);
    mpClassPositionCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(TOP_LEFT_BOTTOM_LEFT)));
    mpClassPositionCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(TOP_LEFT_BOTTOM_RIGHT)));
    mpClassPositionCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(CENTER)));
    mpClassPositionCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(TOP_RIGHT_BOTTOM_LEFT)));
    mpClassPositionCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(TOP_RIGHT_BOTTOM_RIGHT)));
+
+   mpClassText = new GraphicTextWidget(this);
 
    // Organization
    QLabel* pOrgLabel = new QLabel("Organization", this);
@@ -86,11 +90,6 @@ PlotPropertiesDlg::PlotPropertiesDlg(PlotWidget* pPlot, QWidget* pParent) :
    orgFont.setBold(true);
    pOrgLabel->setFont(orgFont);
 
-   // Origanization text
-   QLabel* pOrgTextLabel = new QLabel("Text:", this);
-   mpOrgTextEdit = new QLineEdit(this);
-
-   // Organization position
    QLabel* pOrgPositionLabel = new QLabel("Position:", this);
 
    mpOrgPositionCombo = new QComboBox(this);
@@ -101,9 +100,7 @@ PlotPropertiesDlg::PlotPropertiesDlg(PlotWidget* pPlot, QWidget* pParent) :
    mpOrgPositionCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(TOP_RIGHT_BOTTOM_LEFT)));
    mpOrgPositionCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(TOP_RIGHT_BOTTOM_RIGHT)));
 
-   // Organization color
-   mpOrgColorButton = new CustomColorButton("Color...", this);
-   mpOrgColorButton->usePopupGrid(true);
+   mpOrgText = new GraphicTextWidget(this);
 
    // Gridlines
    QLabel* pGridlineLabel = new QLabel("Gridlines", this);
@@ -421,40 +418,40 @@ PlotPropertiesDlg::PlotPropertiesDlg(PlotWidget* pPlot, QWidget* pParent) :
    pGrid->addLayout(pClassLayout, 0, 0, 1, 2);
    pGrid->addWidget(pClassPositionLabel, 1, 0);
    pGrid->addWidget(mpClassPositionCombo, 1, 1, Qt::AlignLeft);
+   pGrid->addWidget(mpClassText, 2, 0, 1, 2);
    pGrid->setColumnMinimumWidth(2, 15);
    pGrid->addLayout(pOrgLayout, 0, 3, 1, 2);
-   pGrid->addWidget(pOrgTextLabel, 1, 3);
-   pGrid->addWidget(mpOrgTextEdit, 1, 4);
-   pGrid->addWidget(pOrgPositionLabel, 2, 3);
-   pGrid->addWidget(mpOrgPositionCombo, 2, 4, Qt::AlignLeft);
-   pGrid->addWidget(mpOrgColorButton, 3, 3, 1, 2, Qt::AlignLeft);
-   pGrid->setRowMinimumHeight(4, 15);
-   pGrid->addLayout(pGridlineLayout, 5, 0, 1, 2);
-   pGrid->addWidget(pGridlineStyleLabel, 6, 0);
-   pGrid->addWidget(mpGridlineStyleCombo, 6, 1, Qt::AlignLeft);
-   pGrid->addWidget(pGridlineWidthLabel, 7, 0);
-   pGrid->addWidget(mpGridlineWidthCombo, 7, 1, Qt::AlignLeft);
-   pGrid->addWidget(mpGridlineColorButton, 8, 0, 1, 2, Qt::AlignLeft);
+   pGrid->addWidget(pOrgPositionLabel, 1, 3);
+   pGrid->addWidget(mpOrgPositionCombo, 1, 4, Qt::AlignLeft);
+   pGrid->addWidget(mpOrgText, 2, 3, 1, 2);
+   pGrid->setRowMinimumHeight(3, 15);
+   pGrid->addLayout(pGridlineLayout, 4, 0, 1, 2);
+   pGrid->addWidget(pGridlineStyleLabel, 5, 0);
+   pGrid->addWidget(mpGridlineStyleCombo, 5, 1, Qt::AlignLeft);
+   pGrid->addWidget(pGridlineWidthLabel, 6, 0);
+   pGrid->addWidget(mpGridlineWidthCombo, 6, 1, Qt::AlignLeft);
+   pGrid->addWidget(mpGridlineColorButton, 7, 0, 1, 2, Qt::AlignLeft);
 
    if (ePlotType != POLAR_PLOT)
    {
-      pGrid->setRowMinimumHeight(9, 15);
-      pGrid->addLayout(pAxesLayout, 10, 0, 1, 2);
-      pGrid->addWidget(pXScaleLabel, 11, 0);
-      pGrid->addWidget(mpXScaleCombo, 11, 1, Qt::AlignLeft);
-      pGrid->addWidget(pYScaleLabel, 12, 0);
-      pGrid->addWidget(mpYScaleCombo, 12, 1, Qt::AlignLeft);
+      pGrid->setRowMinimumHeight(8, 15);
+      pGrid->addLayout(pAxesLayout, 9, 0, 1, 2);
+      pGrid->addWidget(pXScaleLabel, 10, 0);
+      pGrid->addWidget(mpXScaleCombo, 10, 1, Qt::AlignLeft);
+      pGrid->addWidget(pYScaleLabel, 11, 0);
+      pGrid->addWidget(mpYScaleCombo, 11, 1, Qt::AlignLeft);
    }
 
    if (pPlotWidget != NULL)
    {
-      pGrid->addWidget(pPlotWidget, 5, 3, 8, 2, Qt::AlignTop);
+      pGrid->addWidget(pPlotWidget, 4, 3, 8, 2, Qt::AlignTop);
    }
 
-   pGrid->addWidget(pHLine, 13, 0, 1, 5, Qt::AlignBottom);
-   pGrid->setRowMinimumHeight(13, 12);
-   pGrid->addLayout(pButtonLayout, 14, 0, 1, 5);
-   pGrid->setRowStretch(13, 10);
+   pGrid->addWidget(pHLine, 12, 0, 1, 5, Qt::AlignBottom);
+   pGrid->setRowMinimumHeight(12, 12);
+   pGrid->addLayout(pButtonLayout, 13, 0, 1, 5);
+   pGrid->setRowStretch(2, 10);
+   pGrid->setColumnStretch(1, 10);
    pGrid->setColumnStretch(4, 10);
 
    // Initialization
@@ -476,16 +473,12 @@ PlotPropertiesDlg::PlotPropertiesDlg(PlotWidget* pPlot, QWidget* pParent) :
          }
       }
 
+      mpClassText->setText(QString::fromStdString(mpPlot->getClassificationText()));
+      mpClassText->setTextFont(mpPlot->getClassificationFont().getQFont());
+      mpClassText->setColor(COLORTYPE_TO_QCOLOR(mpPlot->getClassificationColor()));
+
       // Organization
-      string orgText = mpPlot->getOrganizationText();
       PositionType eOrgPosition = mpPlot->getOrganizationPosition();
-      ColorType orgColor = mpPlot->getOrganizationColor();
-
-      if (orgText.empty() == false)
-      {
-         mpOrgTextEdit->setText(QString::fromStdString(orgText));
-      }
-
       string orgPosition = StringUtilities::toDisplayString(eOrgPosition);
       if (orgPosition.empty() == false)
       {
@@ -496,7 +489,9 @@ PlotPropertiesDlg::PlotPropertiesDlg(PlotWidget* pPlot, QWidget* pParent) :
          }
       }
 
-      mpOrgColorButton->setColor(orgColor);
+      mpOrgText->setText(QString::fromStdString(mpPlot->getOrganizationText()));
+      mpOrgText->setTextFont(mpPlot->getOrganizationFont().getQFont());
+      mpOrgText->setColor(COLORTYPE_TO_QCOLOR(mpPlot->getOrganizationColor()));
 
       // Selection mode
       if (mpSelectionModeCombo != NULL)
@@ -913,6 +908,13 @@ void PlotPropertiesDlg::applyChanges()
 
    mpPlot->setClassificationPosition(eClassPosition);
 
+   // Classification text
+   FactoryResource<Font> pClassFont;
+   pClassFont->setQFont(mpClassText->getTextFont());
+   mpPlot->setClassificationFont(*pClassFont.get());
+   mpPlot->setClassificationText(mpClassText->getText().toStdString());
+   mpPlot->setClassificationColor(QCOLOR_TO_COLORTYPE(mpClassText->getColor()));
+
    // Organization position
    PositionType eOrgPosition = TOP_RIGHT_BOTTOM_LEFT;
 
@@ -925,18 +927,11 @@ void PlotPropertiesDlg::applyChanges()
    mpPlot->setOrganizationPosition(eOrgPosition);
 
    // Organization text
-   string orgText = "";
-
-   QString strOrgText = mpOrgTextEdit->text();
-   if (strOrgText.isEmpty() == false)
-   {
-      orgText = strOrgText.toStdString();
-   }
-
-   mpPlot->setOrganizationText(orgText);
-
-   // Organization color
-   mpPlot->setOrganizationColor(mpOrgColorButton->getColorType());
+   FactoryResource<Font> pOrgFont;
+   pOrgFont->setQFont(mpOrgText->getTextFont());
+   mpPlot->setOrganizationFont(*pOrgFont.get());
+   mpPlot->setOrganizationText(mpOrgText->getText().toStdString());
+   mpPlot->setOrganizationColor(QCOLOR_TO_COLORTYPE(mpOrgText->getColor()));
 
    // Gridlines
    LineStyle lineStyle = DOT;

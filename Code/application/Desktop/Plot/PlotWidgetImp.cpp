@@ -528,7 +528,7 @@ void PlotWidgetImp::setClassificationText(const Classification* pClassification)
       std::string tmp;
       if (pClassification->isValid(tmp) == true)
       {
-         string classificationText = "";
+         string classificationText;
          pClassification->getClassificationText(classificationText);
          if (classificationText.empty() == false)
          {
@@ -542,62 +542,17 @@ void PlotWidgetImp::setClassificationText(const Classification* pClassification)
 
 void PlotWidgetImp::setClassificationText(const QString& strClassification)
 {
-   QString strOrganization = getOrganizationText();
-   setLabelText(strClassification, strOrganization);
+   setLabelText(strClassification, getOrganizationText());
 }
 
 QString PlotWidgetImp::getClassificationText() const
 {
-   // The top and bottom classification text is the same, so just get the top label text
-   QString strClassification;
-   switch (mClassificationPosition)
-   {
-      case TOP_LEFT_BOTTOM_LEFT:
-      case TOP_LEFT_BOTTOM_RIGHT:
-         strClassification = mpTopLeftLabel->text();
-         break;
-
-      case TOP_RIGHT_BOTTOM_LEFT:
-      case TOP_RIGHT_BOTTOM_RIGHT:
-         strClassification = mpTopRightLabel->text();
-         break;
-
-      case CENTER:
-         strClassification = mpTopCenterLabel->text();
-         break;
-
-      default:
-         break;
-   }
-
-   // Remove any release info
-   Service<ConfigurationSettings> pConfigSettings;
-
-   QString releaseType = QString::fromStdString(StringUtilities::toDisplayString(pConfigSettings->getReleaseType()));
-   if (releaseType.isEmpty() == false)
-   {
-      int iPos = strClassification.lastIndexOf(releaseType);
-      if (iPos != -1)
-      {
-         strClassification.truncate(iPos);
-      }
-   }
-
-   int iPos = strClassification.lastIndexOf("\n");
-   if (iPos != -1)
-   {
-      strClassification.truncate(iPos);
-   }
-
-   return strClassification;
+   return mClassificationText;
 }
 
 void PlotWidgetImp::setClassificationFont(const QFont& ftClassification)
 {
-   mClassificationFont = ftClassification;
-
-   QFont ftOrganization = getOrganizationFont();
-   setLabelFont(ftClassification, ftOrganization);
+   setLabelFont(ftClassification, getOrganizationFont());
 }
 
 QFont PlotWidgetImp::getClassificationFont() const
@@ -607,40 +562,16 @@ QFont PlotWidgetImp::getClassificationFont() const
 
 void PlotWidgetImp::setClassificationColor(const QColor& clrClassification)
 {
-   if (clrClassification.isValid() == false)
+   if (clrClassification.isValid())
    {
-      return;
+      setLabelColor(clrClassification, getOrganizationColor());
    }
 
-   QColor clrOrganization = getOrganizationColor();
-   setLabelColor(clrClassification, clrOrganization);
 }
 
 QColor PlotWidgetImp::getClassificationColor() const
 {
-   // The top and bottom classification color is the same, so just get the top label color
-   QColor clrClassification;
-   switch (mClassificationPosition)
-   {
-      case TOP_LEFT_BOTTOM_LEFT:
-      case TOP_LEFT_BOTTOM_RIGHT:
-         clrClassification = mpTopLeftLabel->palette().color(QPalette::WindowText);
-         break;
-
-      case TOP_RIGHT_BOTTOM_LEFT:
-      case TOP_RIGHT_BOTTOM_RIGHT:
-         clrClassification = mpTopRightLabel->palette().color(QPalette::WindowText);
-         break;
-
-      case CENTER:
-         clrClassification = mpTopCenterLabel->palette().color(QPalette::WindowText);
-         break;
-
-      default:
-         break;
-   }
-
-   return clrClassification;
+   return mClassificationColor;
 }
 
 void PlotWidgetImp::setOrganizationPosition(PositionType ePosition)
@@ -678,62 +609,17 @@ PositionType PlotWidgetImp::getOrganizationPosition() const
 
 void PlotWidgetImp::setOrganizationText(const QString& strOrganization)
 {
-   QString strClassification = getClassificationText();
-   setLabelText(strClassification, strOrganization);
+   setLabelText(getClassificationText(), strOrganization);
 }
 
 QString PlotWidgetImp::getOrganizationText() const
 {
-   // The top and bottom organization text is the same, so just get the top label text
-   QString strOrganization;
-   switch (mOrganizationPosition)
-   {
-      case TOP_LEFT_BOTTOM_LEFT:
-      case TOP_LEFT_BOTTOM_RIGHT:
-         strOrganization = mpTopLeftLabel->text();
-         break;
-
-      case TOP_RIGHT_BOTTOM_LEFT:
-      case TOP_RIGHT_BOTTOM_RIGHT:
-         strOrganization = mpTopRightLabel->text();
-         break;
-
-      case CENTER:
-         strOrganization = mpTopCenterLabel->text();
-         break;
-
-      default:
-         break;
-   }
-
-   // Remove any release info
-   Service<ConfigurationSettings> pConfigSettings;
-
-   QString releaseType = QString::fromStdString(StringUtilities::toDisplayString(pConfigSettings->getReleaseType()));
-   if (releaseType.isEmpty() == false)
-   {
-      int iPos = strOrganization.lastIndexOf(releaseType);
-      if (iPos != -1)
-      {
-         strOrganization.truncate(iPos);
-      }
-   }
-
-   int iPos = strOrganization.lastIndexOf("\n");
-   if (iPos != -1)
-   {
-      strOrganization.truncate(iPos);
-   }
-
-   return strOrganization;
+   return mOrganizationText;
 }
 
 void PlotWidgetImp::setOrganizationFont(const QFont& ftOrganization)
 {
-   mOrganizationFont = ftOrganization;
-
-   QFont ftClassification = getClassificationFont();
-   setLabelFont(ftClassification, ftOrganization);
+   setLabelFont(getClassificationFont(), ftOrganization);
 }
 
 QFont PlotWidgetImp::getOrganizationFont() const
@@ -743,40 +629,16 @@ QFont PlotWidgetImp::getOrganizationFont() const
 
 void PlotWidgetImp::setOrganizationColor(const QColor& clrOrganization)
 {
-   if (clrOrganization.isValid() == false)
+   if (clrOrganization.isValid())
    {
-      return;
+      setLabelColor(getClassificationColor(), clrOrganization);
    }
 
-   QColor clrClassification = getClassificationColor();
-   setLabelColor(clrClassification, clrOrganization);
 }
 
 QColor PlotWidgetImp::getOrganizationColor() const
 {
-   // The top and bottom organization color is the same, so just get the top label color
-   QColor clrOrganization;
-   switch (mOrganizationPosition)
-   {
-      case TOP_LEFT_BOTTOM_LEFT:
-      case TOP_LEFT_BOTTOM_RIGHT:
-         clrOrganization = mpTopLeftLabel->palette().color(QPalette::WindowText);
-         break;
-
-      case TOP_RIGHT_BOTTOM_LEFT:
-      case TOP_RIGHT_BOTTOM_RIGHT:
-         clrOrganization = mpTopRightLabel->palette().color(QPalette::WindowText);
-         break;
-
-      case CENTER:
-         clrOrganization = mpTopCenterLabel->palette().color(QPalette::WindowText);
-         break;
-
-      default:
-         break;
-   }
-
-   return clrOrganization;
+   return mOrganizationColor;
 }
 
 void PlotWidgetImp::setTitle(const QString& strTitle)
@@ -853,8 +715,7 @@ Axis* PlotWidgetImp::getAxis(AxisPosition axis) const
 
 bool PlotWidgetImp::isLegendShown() const
 {
-   bool bShown = mpLegend->isVisible();
-   return bShown;
+   return mpLegend->isVisible();
 }
 
 Legend* PlotWidgetImp::getLegend() const
@@ -1054,7 +915,7 @@ void PlotWidgetImp::setLabelText(const QString& strClassification, const QString
    QString strBottomCenterText;
    QString strBottomRightText;
 
-   // Set the organization text first so that the classification text takes prescedence
+   // Set the organization text first so that the classification text can be appended/prepended
    switch (mOrganizationPosition)
    {
       case TOP_LEFT_BOTTOM_LEFT:
@@ -1086,35 +947,89 @@ void PlotWidgetImp::setLabelText(const QString& strClassification, const QString
          break;
    }
 
-   switch (mClassificationPosition)
+   // Do not add stray newlines if there is no classification text
+   if (strClassification.isEmpty() == false)
    {
-      case TOP_LEFT_BOTTOM_LEFT:
-         strTopLeftText = strClassification;
-         strBottomLeftText = strClassification;
-         break;
+      switch (mClassificationPosition)
+      {
+         case TOP_LEFT_BOTTOM_LEFT:
+            if (strTopLeftText.isEmpty() == false)
+            {
+               strTopLeftText.prepend("\n");
+            }
+            strTopLeftText.prepend(strClassification);
 
-      case TOP_LEFT_BOTTOM_RIGHT:
-         strTopLeftText = strClassification;
-         strBottomRightText = strClassification;
-         break;
+            if (strBottomLeftText.isEmpty() == false)
+            {
+               strBottomLeftText.append("\n");
+            }
+            strBottomLeftText.append(strClassification);
 
-      case TOP_RIGHT_BOTTOM_LEFT:
-         strTopRightText = strClassification;
-         strBottomLeftText = strClassification;
-         break;
+            break;
 
-      case TOP_RIGHT_BOTTOM_RIGHT:
-         strTopRightText = strClassification;
-         strBottomRightText = strClassification;
-         break;
+         case TOP_LEFT_BOTTOM_RIGHT:
+            if (strTopLeftText.isEmpty() == false)
+            {
+               strTopLeftText.prepend("\n");
+            }
+            strTopLeftText.prepend(strClassification);
 
-      case CENTER:
-         strTopCenterText = strClassification;
-         strBottomCenterText = strClassification;
-         break;
+            if (strBottomRightText.isEmpty() == false)
+            {
+               strBottomRightText.append("\n");
+            }
+            strBottomRightText.append(strClassification);
 
-      default:
-         break;
+            break;
+
+         case TOP_RIGHT_BOTTOM_LEFT:
+            if (strTopRightText.isEmpty() == false)
+            {
+               strTopRightText.prepend("\n");
+            }
+            strTopRightText.prepend(strClassification);
+
+            if (strBottomLeftText.isEmpty() == false)
+            {
+               strBottomLeftText.append("\n");
+            }
+            strBottomLeftText.append(strClassification);
+
+            break;
+
+         case TOP_RIGHT_BOTTOM_RIGHT:
+            if (strTopRightText.isEmpty() == false)
+            {
+               strTopRightText.prepend("\n");
+            }
+            strTopRightText.prepend(strClassification);
+
+            if (strBottomRightText.isEmpty() == false)
+            {
+               strBottomRightText.append("\n");
+            }
+            strBottomRightText.append(strClassification);
+
+            break;
+
+         case CENTER:
+            if (strTopCenterText.isEmpty() == false)
+            {
+               strTopCenterText.prepend("\n");
+            }
+            strTopCenterText.prepend(strClassification);
+
+            if (strBottomCenterText.isEmpty() == false)
+            {
+               strBottomCenterText.append("\n");
+            }
+            strBottomCenterText.append(strClassification);
+
+            break;
+
+         default:
+            break;
+      }
    }
 
    // Add the release info
@@ -1160,6 +1075,8 @@ void PlotWidgetImp::setLabelText(const QString& strClassification, const QString
    mpBottomLeftLabel->setText(strBottomLeftText);
    mpBottomCenterLabel->setText(strBottomCenterText);
    mpBottomRightLabel->setText(strBottomRightText);
+   mClassificationText = strClassification;
+   mOrganizationText = strOrganization;
 
    notify(SIGNAL_NAME(Subject, Modified));
 }
@@ -1173,7 +1090,7 @@ void PlotWidgetImp::setLabelFont(const QFont& ftClassification, const QFont& ftO
    QFont ftBottomCenter;
    QFont ftBottomRight;
 
-   // Set the organization font first so that the classification font takes prescedence
+   // Set the organization font first so that the classification font takes precedence
    switch (mOrganizationPosition)
    {
       case TOP_LEFT_BOTTOM_LEFT:
@@ -1243,6 +1160,8 @@ void PlotWidgetImp::setLabelFont(const QFont& ftClassification, const QFont& ftO
    mpBottomCenterLabel->setFont(ftBottomCenter);
    mpBottomRightLabel->setFont(ftBottomRight);
 
+   mClassificationFont = ftClassification;
+   mOrganizationFont = ftOrganization;
    notify(SIGNAL_NAME(Subject, Modified));
 }
 
@@ -1255,7 +1174,7 @@ void PlotWidgetImp::setLabelColor(const QColor& clrClassification, const QColor&
    QColor clrBottomCenter;
    QColor clrBottomRight;
 
-   // Set the organization color first so that the classification color takes prescedence
+   // Set the organization color first so that the classification color takes precedence
    switch (mOrganizationPosition)
    {
       case TOP_LEFT_BOTTOM_LEFT:
@@ -1342,6 +1261,8 @@ void PlotWidgetImp::setLabelColor(const QColor& clrClassification, const QColor&
    bottomRightPalette.setColor(QPalette::WindowText, clrBottomRight);
    mpBottomRightLabel->setPalette(bottomRightPalette);
 
+   mClassificationColor = clrClassification;
+   mOrganizationColor = clrOrganization;
    notify(SIGNAL_NAME(Subject, Modified));
 }
 
@@ -1374,7 +1295,7 @@ bool PlotWidgetImp::toXml(XMLWriter* pXml) const
    pXml->addAttr("type", getObjectType());
    pXml->addAttr("legendShown", isLegendShown());
    pXml->addAttr("classificationPosition", mClassificationPosition);
-   pXml->addAttr("organizationPosition", mClassificationPosition);
+   pXml->addAttr("organizationPosition", mOrganizationPosition);
 
    if (mpPlotSet != NULL)
    {

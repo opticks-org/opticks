@@ -166,6 +166,12 @@ private:
    PositionType mClassificationPosition;
    PositionType mOrganizationPosition;
 
+   QString mClassificationText;
+   QString mOrganizationText;
+
+   QColor mClassificationColor;
+   QColor mOrganizationColor;
+
    void setLabelText(const QString& strClassification, const QString& strOrganization);
    void setLabelFont(const QFont& ftClassification, const QFont& ftOrganization);
    void setLabelColor(const QColor& clrClassification, const QColor& clrOrganization);

@@ -190,6 +190,12 @@ public:
     *  @notify  This method will notify Subject::signalModified() if the
     *           position is different from the previous position.
     *
+    *  @warning   If the classification text label position and the organization
+    *             text label position contain an overlap (i.e.: both labels are
+    *             set to appear in the same location), the color and font of the
+    *             classification text will be used for display in the overlapping
+    *             areas (the color and font of the organization text will be ignored).
+    *
     *  @see     PositionType
     */
    virtual void setClassificationPosition(PositionType ePosition) = 0;
@@ -288,6 +294,12 @@ public:
     *
     *  @notify  This method will notify Subject::signalModified() if the
     *           position is different from the previous position.
+    *
+    *  @warning   If the classification text label position and the organization
+    *             text label position contain an overlap (i.e.: both labels are
+    *             set to appear in the same location), the color and font of the
+    *             classification text will be used for display in the overlapping
+    *             areas (the color and font of the organization text will be ignored).
     *
     *  @see     PositionType
     */
