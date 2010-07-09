@@ -7,15 +7,15 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "AppVersion.h"
 #include "AppVerify.h"
+#include "AppVersion.h"
 #include "DataElement.h"
 #include "MetadataWidget.h"
-#include "PropertiesDataElement.h"
+#include "PropertiesMetadata.h"
 
-PropertiesDataElement::PropertiesDataElement()
+PropertiesMetadata::PropertiesMetadata()
 {
-   setName("Data Element Properties");
+   setName("Metadata Properties");
    setPropertiesName("Metadata");
    setDescription("General setting properties of a data element");
    setCreator("Ball Aerospace & Technologies Corp.");
@@ -25,11 +25,10 @@ PropertiesDataElement::PropertiesDataElement()
    setProductionStatus(APP_IS_PRODUCTION_RELEASE);
 }
 
-PropertiesDataElement::~PropertiesDataElement()
-{
-}
+PropertiesMetadata::~PropertiesMetadata()
+{}
 
-bool PropertiesDataElement::initialize(SessionItem* pSessionItem)
+bool PropertiesMetadata::initialize(SessionItem* pSessionItem)
 {
    MetadataWidget* pMetadataPage = dynamic_cast<MetadataWidget*>(getWidget());
    if (pMetadataPage == NULL)
@@ -37,13 +36,33 @@ bool PropertiesDataElement::initialize(SessionItem* pSessionItem)
       return false;
    }
 
+   mMetadata.clear();
+
    DataElement* pElement = dynamic_cast<DataElement*>(pSessionItem);
+   if (pElement != NULL)
+   {
+      const DynamicObject* pMetadata = pElement->getMetadata();
+      if (pMetadata != NULL)
+      {
+         mMetadata.merge(pMetadata);
+         pMetadataPage->setMetadata(&mMetadata);
+         return PropertiesShell::initialize(pSessionItem);
+      }
+   }
+
+   return false;
+}
+
+bool PropertiesMetadata::applyChanges()
+{
+   DataElement* pElement = dynamic_cast<DataElement*>(getSessionItem());
    if (pElement != NULL)
    {
       DynamicObject* pMetadata = pElement->getMetadata();
       if (pMetadata != NULL)
       {
-         pMetadataPage->setMetadata(pMetadata);
+         pMetadata->clear();
+         pMetadata->adoptiveMerge(&mMetadata);
          return true;
       }
    }
@@ -51,15 +70,7 @@ bool PropertiesDataElement::initialize(SessionItem* pSessionItem)
    return false;
 }
 
-bool PropertiesDataElement::applyChanges()
-{
-   MetadataWidget* pMetadataPage = dynamic_cast<MetadataWidget*>(getWidget());
-   VERIFY(pMetadataPage != NULL);
-
-   return pMetadataPage->applyChanges();
-}
-
-QWidget* PropertiesDataElement::createWidget()
+QWidget* PropertiesMetadata::createWidget()
 {
    QWidget* pWidget = new MetadataWidget();
    return pWidget;

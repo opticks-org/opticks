@@ -299,6 +299,106 @@ public:
     *  type names.  If an arg type exists that is not in this list, the wizard builder
     *  indicates it as an unknown type.
     *
+    *  The default known types are as follows:
+    *  - char
+    *  - signed char
+    *  - unsigned char
+    *  - short
+    *  - unsigned short
+    *  - int
+    *  - unsigned int
+    *  - long
+    *  - unsigned long
+    *  - Int64
+    *  - int64_t
+    *  - UInt64
+    *  - uint64_t
+    *  - float
+    *  - double
+    *  - bool
+    *  - string
+    *  - vector<char>
+    *  - vector<signed char>
+    *  - vector<unsigned char>
+    *  - vector<short>
+    *  - vector<unsigned short>
+    *  - vector<int>
+    *  - vector<unsigned int>
+    *  - vector<long>
+    *  - vector<unsigned long>
+    *  - vector<Int64>
+    *  - vector<int64_t>
+    *  - vector<UInt64>
+    *  - vector<uint64_t>
+    *  - vector<float>
+    *  - vector<double>
+    *  - vector<bool>
+    *  - vector<string>
+    *  - vector<Filename>
+    *  - Animation
+    *  - AnimationController
+    *  - AnnotationElement
+    *  - AnnotationLayer
+    *  - Any
+    *  - AoiElement
+    *  - AoiLayer
+    *  - CartesianPlot
+    *  - ClassificationLayer
+    *  - ColorType
+    *  - DataDescriptor
+    *  - DataElement
+    *  - DateTime
+    *  - #DisplayMode
+    *  - DynamicObject
+    *  - #EncodingType
+    *  - #EndianType
+    *  - FileDescriptor
+    *  - Filename
+    *  - GcpLayer
+    *  - GcpList
+    *  - #GeocoordType
+    *  - GraphicElement
+    *  - GraphicLayer
+    *  - HistogramPlot
+    *  - #InterleaveFormatType
+    *  - LatLonLayer
+    *  - Layer
+    *  - #LayerType
+    *  - MeasurementLayer
+    *  - OrthographicView
+    *  - #PassArea
+    *  - PerspectiveView
+    *  - PlotView
+    *  - PlotWidget
+    *  - PolarPlot
+    *  - #ProcessingLocation
+    *  - ProductView
+    *  - ProductWindow
+    *  - Progress
+    *  - PseudocolorLayer
+    *  - RasterDataDescriptor
+    *  - #RasterChannelType
+    *  - RasterElement
+    *  - RasterFileDescriptor
+    *  - RasterLayer
+    *  - #RegionUnits
+    *  - Signature
+    *  - SignatureLibrary
+    *  - SignaturePlot
+    *  - SignatureSet
+    *  - SpatialDataView
+    *  - SpatialDataWindow
+    *  - #SymbolType
+    *  - ThresholdLayer
+    *  - TiePointList
+    *  - TiePointLayer
+    *  - #UnitType
+    *  - View
+    *  - Wavelengths
+    *  - #WavelengthUnitsType
+    *  - Window
+    *  - WizardObject
+    *
     *  @return  A vector of strings specifying the name of each known arg type.
     */
    virtual const std::vector<std::string>& getArgTypes() = 0;

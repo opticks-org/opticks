@@ -59,6 +59,7 @@ public:
     *           - RasterFileDescriptor
     *           - SettableSessionItem
     *           - Units
+    *           - Wavelengths
     *           - WizardObject
     *           .
     *           Vectors may also be created with a string of the form "vector<int>"
@@ -128,6 +129,7 @@ public:
     *           - Layer
     *           - RasterFileDescriptor
     *           - Units
+    *           - Wavelengths
     *           - WizardObject
     *
     *  @return  A pointer to the instantiated vector if successful, or NULL.

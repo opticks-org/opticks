@@ -74,10 +74,15 @@ SuppressibleMsgDlg::SuppressibleMsgDlg(const std::string& dialogTitle, const std
    pGrid->addWidget(pMessage, 0, 1);
    pGrid->addWidget(mpDontShow, 1, 1);
 
+   // Initialization
+   resize(350, 200);
+
+   // Connections
    VERIFYNRV(connect(pOk, SIGNAL(clicked()), this, SLOT(accept())));
 }
 
-SuppressibleMsgDlg::~SuppressibleMsgDlg() { }
+SuppressibleMsgDlg::~SuppressibleMsgDlg()
+{}
 
 bool SuppressibleMsgDlg::getDontShowAgain() const
 {

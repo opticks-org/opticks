@@ -7,24 +7,28 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef PROPERTIESDATAELEMENT_H
-#define PROPERTIESDATAELEMENT_H
+#ifndef PROPERTIESMETADATA_H
+#define PROPERTIESMETADATA_H
 
+#include "DynamicObjectAdapter.h"
 #include "PropertiesShell.h"
 
 class SessionItem;
 
-class PropertiesDataElement : public PropertiesShell
+class PropertiesMetadata : public PropertiesShell
 {
 public:
-   PropertiesDataElement();
-   ~PropertiesDataElement();
+   PropertiesMetadata();
+   virtual ~PropertiesMetadata();
 
-   bool initialize(SessionItem* pSessionItem);
-   bool applyChanges();
+   virtual bool initialize(SessionItem* pSessionItem);
+   virtual bool applyChanges();
 
 protected:
    QWidget* createWidget();
+
+private:
+   DynamicObjectAdapter mMetadata;
 };
 
 #endif

@@ -12,10 +12,10 @@
 
 #include <QtGui/QWidget>
 
+#include <boost/any.hpp>
 #include <string>
 
 class DynamicObject;
-class DynamicObjectAdapter;
 class DynamicObjectItemModel;
 class QCheckBox;
 class QComboBox;
@@ -24,6 +24,7 @@ class QRegExp;
 class QSortFilterProxyModel;
 class QToolButton;
 class QTreeView;
+class Subject;
 
 class MetadataWidget : public QWidget
 {
@@ -34,14 +35,9 @@ public:
    ~MetadataWidget();
 
    void setMetadata(DynamicObject* pMetadata);
-   bool isModified() const;
-   bool applyChanges();
    static const std::string& getEditWarningDialogId();
 
    QSize sizeHint() const;
-
-signals:
-   void modified();
 
 protected slots:
    void enableFilters(bool enable);
@@ -65,6 +61,8 @@ protected:
       DataVariantRole = Qt::UserRole,
    };
 
+   void metadataDeleted(Subject& subject, const std::string& signal, const boost::any& value);
+
 private:
    bool applyFilter(int row, const QModelIndex& parent, const QRegExp& nameFilter, const QRegExp& valueFilter,
       bool parentMatch = false);
@@ -83,12 +81,9 @@ private:
    QToolButton* mpDeleteButton;
    QToolButton* mpClearButton;
 
-   DynamicObjectAdapter* mpObject;
    DynamicObject* mpMetadata;
    DynamicObjectItemModel* mpMetadataModel;
    QSortFilterProxyModel* mpMetadataSortingModel;
-
-   bool mModified;
 };
 
 #endif

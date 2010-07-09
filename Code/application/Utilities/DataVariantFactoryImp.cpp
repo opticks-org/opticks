@@ -735,6 +735,7 @@ void DataVariantFactoryImp::initializeMaps()
    registerType<DataVariantValue<RegionUnits> >();
    registerType<DataVariantValue<UnitSystem> >();
    registerType<DataVariantValue<UnitType> >();
+   registerType<DataVariantValue<WavelengthUnitsType> >();
    registerType<DataVariantValue<WindowSizeType> >();
    registerType<DataVariantValue<WindowType> >();
 }

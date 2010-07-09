@@ -20,7 +20,9 @@
 
 #include "DimensionDescriptor.h"
 
+#include <boost/any.hpp>
 #include <map>
+#include <string>
 #include <vector>
 
 class DataDescriptor;
@@ -29,7 +31,9 @@ class FileDescriptorWidget;
 class ImportDescriptor;
 class Importer;
 class MetadataWidget;
+class Subject;
 class SubsetWidget;
+class WavelengthsWidget;
 
 class ImportOptionsDlg : public QDialog
 {
@@ -61,6 +65,8 @@ protected:
    void enforceSelections(QTreeWidgetItem* pItem);
    void removeImporterPage();
 
+   void editDescriptorModified(Subject& subject, const std::string& signal, const boost::any& value);
+
 protected slots:
    void datasetItemChanged(QTreeWidgetItem* pItem);
    void updateEditDataset();
@@ -70,7 +76,6 @@ protected slots:
    void updateDataRows(const std::vector<DimensionDescriptor>& rows);
    void updateDataColumns(const std::vector<DimensionDescriptor>& columns);
    void updateDataBands(const std::vector<DimensionDescriptor>& bands);
-   void updateMetadata();
    void pagesModified();
    bool applyChanges();
 
@@ -82,6 +87,7 @@ private:
    std::map<ImportDescriptor*, QTreeWidgetItem*> mDatasets;
    ImportDescriptor* mpCurrentDataset;
    DataDescriptor* mpEditDescriptor;    // Contains un-applied user changes
+   bool mEditDescriptorModified;
    bool mPromptForChanges;
    bool mAllowDeselectedFiles;
 
@@ -91,6 +97,7 @@ private:
    FileDescriptorWidget* mpFilePage;
    SubsetWidget* mpSubsetPage;
    MetadataWidget* mpMetadataPage;
+   WavelengthsWidget* mpWavelengthsPage;
    QWidget* mpImporterPage;
    QLabel* mpValidationLabel;
    QPushButton* mpOkButton;

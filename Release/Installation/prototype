@@ -86,6 +86,7 @@ f none $APPDIR/PlugIns/Scripts.so=$OpticksBinariesDir/PlugIns/Scripts.so 644 roo
 f none $APPDIR/PlugIns/SecondMoment.so=$OpticksBinariesDir/PlugIns/SecondMoment.so 644 root $GROUP
 f none $APPDIR/PlugIns/ShapeFileExporter.so=$OpticksBinariesDir/PlugIns/ShapeFileExporter.so 644 root $GROUP
 f none $APPDIR/PlugIns/Sio.so=$OpticksBinariesDir/PlugIns/Sio.so 644 root $GROUP
+f none $APPDIR/PlugIns/Wavelength.so=$OpticksBinariesDir/PlugIns/Wavelength.so 644 root $GROUP
 f none $APPDIR/PlugIns/WizardExecutor.so=$OpticksBinariesDir/PlugIns/WizardExecutor.so 644 root $GROUP
 f none $APPDIR/PlugIns/WizardItems.so=$OpticksBinariesDir/PlugIns/WizardItems.so 644 root $GROUP
 d none $APPDIR/SupportFiles 2755 root $GROUP

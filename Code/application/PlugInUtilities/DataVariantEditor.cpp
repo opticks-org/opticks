@@ -249,6 +249,9 @@ const vector<DataVariantEditorDelegate>& DataVariantEditor::getDelegates()
       temp = DataVariantEditorDelegate("RegionUnits", DataVariantEditorDelegate::ENUMERATION);
       temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<RegionUnits>());
       sDelegates.push_back(temp);
+      temp = DataVariantEditorDelegate("WavelengthUnitsType", DataVariantEditorDelegate::ENUMERATION);
+      temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<WavelengthUnitsType>());
+      sDelegates.push_back(temp);
       sDelegates.push_back(DataVariantEditorDelegate("SymbolType", DataVariantEditorDelegate::SYMBOL_TYPE));
       sDelegates.push_back(DataVariantEditorDelegate("vector<char>", DataVariantEditorDelegate::VECTOR));
       sDelegates.push_back(DataVariantEditorDelegate("vector<signed char>", DataVariantEditorDelegate::VECTOR));

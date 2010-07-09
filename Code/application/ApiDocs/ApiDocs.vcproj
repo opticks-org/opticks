@@ -188,6 +188,10 @@
 				RelativePath=".\usingimporterresource.txt"
 				>
 			</File>
+			<File
+				RelativePath=".\wavelengthfileformat.txt"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Doxygen Configuration"

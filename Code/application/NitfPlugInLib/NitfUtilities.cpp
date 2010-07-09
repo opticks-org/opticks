@@ -10,8 +10,9 @@
 #include "Classification.h"
 #include "DateTime.h"
 #include "NitfUtilities.h"
-#include "SpecialMetadata.h"
+#include "ObjectResource.h"
 #include "StringUtilities.h"
+#include "Wavelengths.h"
 
 #include <algorithm>
 #include <string>
@@ -1097,18 +1098,6 @@ bool Nitf::updateSpecialMetadata(DynamicObject* pMetadata, vector<double>& cente
       return false;
    }
 
-   const string centerWavelengthsPath[] = {SPECIAL_METADATA_NAME, BAND_METADATA_NAME,
-      CENTER_WAVELENGTHS_METADATA_NAME, END_METADATA_NAME};
-   const string startWavelengthsPath[] = {SPECIAL_METADATA_NAME, BAND_METADATA_NAME,
-      START_WAVELENGTHS_METADATA_NAME, END_METADATA_NAME};
-   const string endWavelengthsPath[] = {SPECIAL_METADATA_NAME, BAND_METADATA_NAME,
-      END_WAVELENGTHS_METADATA_NAME, END_METADATA_NAME};
-
-   // Remove any existing wavelength information.
-   pMetadata->removeAttributeByPath(centerWavelengthsPath);
-   pMetadata->removeAttributeByPath(startWavelengthsPath);
-   pMetadata->removeAttributeByPath(endWavelengthsPath);
-
    vector<double>::const_iterator centerIter;
    vector<double>::const_iterator startIter;
    vector<double>::const_iterator endIter;
@@ -1244,48 +1233,30 @@ bool Nitf::updateSpecialMetadata(DynamicObject* pMetadata, vector<double>& cente
    }
 
    // Write all values to the appropriate special metadata sections.
-   bool success = true;
+   FactoryResource<Wavelengths> pWavelengths;
+
+   WavelengthUnitsType units = MICRONS;
+   if (convertFromInverseCentimeters)
+   {
+      units = INVERSE_CENTIMETERS;
+   }
+
+   pWavelengths->setUnits(units);
+
    if (centerWavelengths.empty() == false)
    {
-      // Convert all values to microns if necessary.
-      if (convertFromInverseCentimeters)
-      {
-         for (vector<double>::iterator iter = centerWavelengths.begin(); iter != centerWavelengths.end(); ++iter)
-         {
-            *iter = 10000.0 / *iter;
-         }
-      }
-
-      success = pMetadata->setAttributeByPath(centerWavelengthsPath, centerWavelengths) && success;
+      pWavelengths->setCenterValues(centerWavelengths, units);
    }
 
    if (startWavelengths.empty() == false)
    {
-      // Convert all values to microns if necessary.
-      if (convertFromInverseCentimeters)
-      {
-         for (vector<double>::iterator iter = startWavelengths.begin(); iter != startWavelengths.end(); ++iter)
-         {
-            *iter = 10000.0 / *iter;
-         }
-      }
-
-      success = pMetadata->setAttributeByPath(startWavelengthsPath, startWavelengths) && success;
+      pWavelengths->setStartValues(startWavelengths, units);
    }
 
    if (endWavelengths.empty() == false)
    {
-      // Convert all values to microns if necessary.
-      if (convertFromInverseCentimeters)
-      {
-         for (vector<double>::iterator iter = endWavelengths.begin(); iter != endWavelengths.end(); ++iter)
-         {
-            *iter = 10000.0 / *iter;
-         }
-      }
-
-      success = pMetadata->setAttributeByPath(endWavelengthsPath, endWavelengths) && success;
+      pWavelengths->setEndValues(endWavelengths, units);
    }
 
-   return success;
+   return pWavelengths->applyToDynamicObject(pMetadata);
 }

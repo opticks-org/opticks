@@ -305,6 +305,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SimpleApiLib", "SimpleApiLi
 		{83190CFF-A185-412D-82F0-B3E39954E8F3} = {83190CFF-A185-412D-82F0-B3E39954E8F3}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Wavelength", "PlugIns\src\Wavelength\Wavelength.vcproj", "{2CD6BFF6-12A2-464B-9A6A-4442C8994C4D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{BFAA94F6-8CA1-4159-B0E1-90B09D9C3056} = {BFAA94F6-8CA1-4159-B0E1-90B09D9C3056}
+		{4831B6DF-AEAC-4F12-A0B5-CE3CA703FB88} = {4831B6DF-AEAC-4F12-A0B5-CE3CA703FB88}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -749,6 +755,14 @@ Global
 		{AE80D210-0F03-4CC0-940F-B68DDC231CB7}.Release|Win32.Build.0 = Release|Win32
 		{AE80D210-0F03-4CC0-940F-B68DDC231CB7}.Release|x64.ActiveCfg = Release|x64
 		{AE80D210-0F03-4CC0-940F-B68DDC231CB7}.Release|x64.Build.0 = Release|x64
+		{2CD6BFF6-12A2-464B-9A6A-4442C8994C4D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2CD6BFF6-12A2-464B-9A6A-4442C8994C4D}.Debug|Win32.Build.0 = Debug|Win32
+		{2CD6BFF6-12A2-464B-9A6A-4442C8994C4D}.Debug|x64.ActiveCfg = Debug|x64
+		{2CD6BFF6-12A2-464B-9A6A-4442C8994C4D}.Debug|x64.Build.0 = Debug|x64
+		{2CD6BFF6-12A2-464B-9A6A-4442C8994C4D}.Release|Win32.ActiveCfg = Release|Win32
+		{2CD6BFF6-12A2-464B-9A6A-4442C8994C4D}.Release|Win32.Build.0 = Release|Win32
+		{2CD6BFF6-12A2-464B-9A6A-4442C8994C4D}.Release|x64.ActiveCfg = Release|x64
+		{2CD6BFF6-12A2-464B-9A6A-4442C8994C4D}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

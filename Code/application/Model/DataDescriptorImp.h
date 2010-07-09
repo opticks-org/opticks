@@ -37,8 +37,6 @@ public:
    DataDescriptorImp(const std::string& name, const std::string& type, const std::vector<std::string>& parent);
    ~DataDescriptorImp();
 
-   void metadataModified(Subject &subject, const std::string &signal, const boost::any &data);
-
    void setName(const std::string& name);
    const std::string& getName() const;
    const std::string& getType() const;
@@ -74,6 +72,9 @@ public:
 
    void setImporterName(const std::string& name);
    std::string getImporterName() const;
+
+protected:
+   void notifyModified(Subject& subject, const std::string& signal, const boost::any& data);
 
 private:
    void generateParentDesignator();

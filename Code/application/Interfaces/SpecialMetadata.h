@@ -110,6 +110,22 @@
 #define END_WAVELENGTHS_METADATA_PATH (SPECIAL_METADATA_NAME + "/" + BAND_METADATA_NAME + "/" + END_WAVELENGTHS_METADATA_NAME)
 
 /**
+ *  The key for an attribute of type #WavelengthUnitsType that contains the
+ *  wavelength units that should be displayed to the user.
+ *
+ *  @see     WAVELENGTH_DISPLAY_UNITS_METADATA_PATH
+ */
+#define WAVELENGTH_DISPLAY_UNITS_METADATA_NAME (std::string("WavelengthDisplayUnits"))
+
+/**
+ *  The complete path for an attribute of type #WavelengthUnitsType that
+ *  contains the wavelength units that should be displayed to the user.
+ *
+ *  @see     WAVELENGTH_DISPLAY_UNITS_METADATA_NAME
+ */
+#define WAVELENGTH_DISPLAY_UNITS_METADATA_PATH (SPECIAL_METADATA_NAME + "/" + BAND_METADATA_NAME + "/" + WAVELENGTH_DISPLAY_UNITS_METADATA_NAME)
+
+/**
  * The key for a vector<string> which contains the names of the associated 
  * RasterElement's bands.
  *

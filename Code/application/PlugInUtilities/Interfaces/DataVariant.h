@@ -137,7 +137,85 @@ public:
     *
     *  It performs a deep copy on the value and stores the result
     *  in the variant. The deep copy is performed by the DataVariantFactory. 
-    *  The valid types are those specialized under VariantTypeValidator.
+    *  The valid types are as follows:
+    *  - unsigned char
+    *  - signed char
+    *  - char
+    *  - unsigned short
+    *  - short
+    *  - unsigned int
+    *  - int
+    *  - unsigned long
+    *  - long
+    *  - uint64_t (Windows only)
+    *  - int64_t (Windows only)
+    *  - UInt64
+    *  - Int64
+    *  - float
+    *  - double
+    *  - bool
+    *  - std::string
+    *  - std::vector<unsigned char>
+    *  - std::vector<signed char>
+    *  - std::vector<char>
+    *  - std::vector<unsigned short>
+    *  - std::vector<short>
+    *  - std::vector<unsigned int>
+    *  - std::vector<int>
+    *  - std::vector<unsigned long>
+    *  - std::vector<long>
+    *  - std::vector<uint64_t> (Windows only)
+    *  - std::vector<int64_t> (Windows only)
+    *  - std::vector<UInt64>
+    *  - std::vector<Int64>
+    *  - std::vector<float>
+    *  - std::vector<double>
+    *  - std::vector<bool>
+    *  - std::vector<std::string>
+    *  - #AnimationCycle
+    *  - #AnimationState
+    *  - #ArcRegion
+    *  - ColorType
+    *  - #ComplexComponent
+    *  - #DataOrigin
+    *  - DateTime (const and non-const)
+    *  - #DisplayMode
+    *  - #DistanceUnits
+    *  - #DmsFormatType
+    *  - DynamicObject (const and non-const)
+    *  - #EncodingType
+    *  - #EndianType
+    *  - Filename (const and non-const)
+    *  - std::vector<Filename*> (const and non-const pointers)
+    *  - #FillStyle
+    *  - FloatComplex
+    *  - #GcpSymbol
+    *  - #GeocoordType
+    *  - #GraphicObjectType
+    *  - #InsetZoomMode
+    *  - IntegerComplex
+    *  - #InterleaveFormatType
+    *  - #LatLonStyle
+    *  - #LayerType
+    *  - #LineStyle
+    *  - #LocationType
+    *  - #PanLimitType
+    *  - #PassArea
+    *  - #PlotObjectType
+    *  - Point::PointSymbolType
+    *  - #PositionType
+    *  - #ProcessingLocation
+    *  - #SessionSaveType
+    *  - #RasterChannelType
+    *  - #RegionUnits
+    *  - #ReleaseType
+    *  - #StretchType
+    *  - #SymbolType
+    *  - #UnitSystem
+    *  - #UnitType
+    *  - #WavelengthUnitsType
+    *  - #WindowSizeType
+    *  - #WindowType
     *
     *  @param   value
     *           The value to copy into the variant. If the type of value isn't

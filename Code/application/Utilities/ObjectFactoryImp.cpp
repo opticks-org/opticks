@@ -31,6 +31,7 @@
 #include "SettableSessionItemAdapter.h"
 #include "TypeConverter.h"
 #include "UnitsImp.h"
+#include "WavelengthsImp.h"
 #include "WizardObjectAdapter.h"
 
 #include <stdexcept>
@@ -112,6 +113,11 @@ namespace
    void DestroyUnits(void* pObj);
    void* CreateVectorUnits();
    void DestroyVectorUnits(void* pObj);
+
+   Wavelengths* CreateWavelengths();
+   void DestroyWavelengths(void* pObj);
+   void* CreateVectorWavelengths();
+   void DestroyVectorWavelengths(void* pObj);
 
    static WizardObject* CreateWizardObject();
    static void DestroyWizardObject(void* pObj);
@@ -265,6 +271,7 @@ ObjectFactoryImp* ObjectFactoryImp::instance()
       sCreateObjectMap.insert(ObjectMapType::value_type("ImportAgent", (void*(*)())CreateImportAgent));
       sCreateObjectMap.insert(ObjectMapType::value_type("ExportAgent", (void*(*)())CreateExportAgent));
       sCreateObjectMap.insert(ObjectMapType::value_type("Units", (void*(*)())CreateUnits));
+      sCreateObjectMap.insert(ObjectMapType::value_type("Wavelengths", (void*(*)())CreateWavelengths));
       sCreateObjectMap.insert(ObjectMapType::value_type("WizardObject", (void*(*)())CreateWizardObject));
       sCreateObjectMap.insert(ObjectMapType::value_type(typeid(unsigned char).name(), (void*(*)())CreateUnsignedChar));
       sCreateObjectMap.insert(ObjectMapType::value_type(typeid(char).name(), (void*(*)())CreateChar));
@@ -320,6 +327,7 @@ ObjectFactoryImp* ObjectFactoryImp::instance()
       sDestroyObjectMap.insert(ObjectMapType2::value_type("ImportAgent", (void(*)(void*))DestroyImportAgent));
       sDestroyObjectMap.insert(ObjectMapType2::value_type("ExportAgent", (void(*)(void*))DestroyExportAgent));
       sDestroyObjectMap.insert(ObjectMapType2::value_type("Units", (void(*)(void*))DestroyUnits));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("Wavelengths", (void(*)(void*))DestroyWavelengths));
       sDestroyObjectMap.insert(ObjectMapType2::value_type("WizardObject", (void(*)(void*))DestroyWizardObject));
 
       sCreateObjectVectorMap.insert(VectorMapType::value_type("unsigned char", (void*(*)())CreateVectorUnsignedChar));
@@ -364,6 +372,7 @@ ObjectFactoryImp* ObjectFactoryImp::instance()
       sCreateObjectVectorMap.insert(VectorMapType::value_type("RasterFileDescriptor",
          (void*(*)())CreateVectorRasterFileDescriptor));
       sCreateObjectVectorMap.insert(VectorMapType::value_type("Units", (void*(*)())CreateVectorUnits));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("Wavelengths", (void*(*)())CreateVectorWavelengths));
       sCreateObjectVectorMap.insert(VectorMapType::value_type("WizardObject", (void*(*)())CreateVectorWizardObject));
 
       sDestroyObjectVectorMap.insert(VectorMapType2::value_type("unsigned char",
@@ -414,6 +423,8 @@ ObjectFactoryImp* ObjectFactoryImp::instance()
       sDestroyObjectVectorMap.insert(VectorMapType2::value_type("Layer", (void(*)(void*))DestroyVectorLayer));
       sDestroyObjectVectorMap.insert(VectorMapType2::value_type("RasterFileDescriptor",
          (void(*)(void*))DestroyVectorRasterFileDescriptor));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("Wavelengths",
+         (void(*)(void*))DestroyVectorWavelengths));
       sDestroyObjectVectorMap.insert(VectorMapType2::value_type("Units", (void(*)(void*))DestroyVectorUnits));
       sDestroyObjectVectorMap.insert(VectorMapType2::value_type("WizardObject",
          (void(*)(void*))DestroyVectorWizardObject));
@@ -822,6 +833,28 @@ void* CreateVectorUnits()
 void DestroyVectorUnits(void* pObj)
 {
    delete reinterpret_cast<vector<Units*>*>(pObj);
+}
+
+//=============================
+// Wavelengths
+Wavelengths* CreateWavelengths()
+{
+   return new WavelengthsImp();
+}
+
+void DestroyWavelengths(void* pObj)
+{
+   delete reinterpret_cast<WavelengthsImp*>(pObj);
+}
+
+void* CreateVectorWavelengths()
+{
+   return new vector<Wavelengths*>();
+}
+
+void DestroyVectorWavelengths(void* pObj)
+{
+   delete reinterpret_cast<vector<Wavelengths*>*>(pObj);
 }
 
 //=============================

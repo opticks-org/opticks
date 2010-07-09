@@ -348,7 +348,7 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir,
         "CoreIo", "Covariance", "DataFusion", "Dted", "ENVI", "GdalImporter", "Generic",
         "GeographicFeatures", "Georeference", "Hdf", "Ice", "ImageComparison", "Kml",
         "MovieExporter", "Nitf", "NitfCommonTre", "ObjectFinding", "Pca", "Pictures", "Results",
-        "Scripts", "SecondMoment", "ShapeFileExporter", "Sio",
+        "Scripts", "SecondMoment", "ShapeFileExporter", "Sio", "Wavelength",
         "WizardExecutor", "WizardItems" ]
     sample_plugins = ["PlugInSampler", "PlugInSamplerQt",
         "PlugInSamplerHdf", "Tutorial" ]

@@ -35,8 +35,9 @@ mocfiles = map(lambda x,bd=build_dir,e=env: e.Moc('%s/Interfaces/%s' % (bd,x)),
                 "SecurityMarkingsDlg.h",
                 "SignaturePropertiesDlg.h",
                 "SignatureSelector.h",
-                "SuppressibleMsgDlg.h",    
-                "UndoAction.h"])
+                "SuppressibleMsgDlg.h",
+                "UndoAction.h",
+                "WavelengthUnitsComboBox.h"])
 objs = env.Object(srcs + mocfiles)
 
 #Compile StringUtilities.cpp

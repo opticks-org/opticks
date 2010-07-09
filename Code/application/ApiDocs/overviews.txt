@@ -29,6 +29,7 @@
 - \subpage upgrade_sdk
 - \subpage coordinate_systems
 - \subpage iceformat
+- \subpage wavelengthfileformat
 - \subpage specialmetadata
 - \subpage stringutilities_types
 - \subpage typeconverter_types

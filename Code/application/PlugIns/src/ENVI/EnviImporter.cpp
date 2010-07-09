@@ -29,6 +29,7 @@
 #include "SpecialMetadata.h"
 #include "StringUtilities.h"
 #include "Units.h"
+#include "Wavelengths.h"
 
 #include <sstream>
 
@@ -680,6 +681,7 @@ bool EnviImporter::parseWavelengths(EnviField* pField, vector<double>* pWaveleng
       }
    }
 
+   // Convert the wavelength values to micrometers
    switch (mWavelengthUnits)
    {
    case WU_MICROMETERS:  // already in micrometers, nothing further to do
@@ -688,14 +690,14 @@ bool EnviImporter::parseWavelengths(EnviField* pField, vector<double>* pWaveleng
    case WU_NANOMETERS:
       for (i = 0; i < pWavelengthCenters->size(); ++i)
       {
-         pWavelengthCenters->at(i) *= 0.001;  // convert to micrometers
+         pWavelengthCenters->at(i) = Wavelengths::convertValue(pWavelengthCenters->at(i), NANOMETERS, MICRONS);
       }
       break;
 
    case WU_WAVENUMBER:
       for (i = 0; i < pWavelengthCenters->size(); ++i)
       {
-         pWavelengthCenters->at(i) = 10000.0/pWavelengthCenters->at(i);  // convert to micrometers
+         pWavelengthCenters->at(i) = Wavelengths::convertValue(pWavelengthCenters->at(i), INVERSE_CENTIMETERS, MICRONS);
       }
       break;
 
@@ -711,7 +713,7 @@ bool EnviImporter::parseWavelengths(EnviField* pField, vector<double>* pWaveleng
       {
          for (i = 0; i < pWavelengthCenters->size(); ++i)
          {
-            pWavelengthCenters->at(i) *= 0.001;  // convert to micrometers
+            pWavelengthCenters->at(i) = Wavelengths::convertValue(pWavelengthCenters->at(i), NANOMETERS, MICRONS);
          }
 
          mWavelengthUnits = WU_NANOMETERS;
@@ -756,6 +758,7 @@ bool EnviImporter::parseFwhm(EnviField* pField, vector<double>* pWavelengthStart
       return false;
    }
 
+   // Convert the values to micrometers
    switch (mWavelengthUnits)
    {
    case WU_MICROMETERS:  // Already in micrometers, nothing further to do
@@ -764,7 +767,7 @@ bool EnviImporter::parseFwhm(EnviField* pField, vector<double>* pWavelengthStart
    case WU_NANOMETERS:
       for (vector<double>::size_type i = 0; i < fwhmValues.size(); ++i)
       {
-         fwhmValues[i] *= 0.001;  // Convert to micrometers
+         fwhmValues[i] = Wavelengths::convertValue(fwhmValues[i], NANOMETERS, MICRONS);
       }
       break;
 
@@ -772,15 +775,15 @@ bool EnviImporter::parseFwhm(EnviField* pField, vector<double>* pWavelengthStart
       for (vector<double>::size_type i = 0; i < fwhmValues.size(); ++i)
       {
          // Convert the center wavelength to wave number
-         double centerValue = 10000.0 / pWavelengthCenters->at(i);
+         double centerValue = Wavelengths::convertValue(pWavelengthCenters->at(i), MICRONS, INVERSE_CENTIMETERS);
 
          // Find the start and stop wave numbers
          double startValue = centerValue - (fwhmValues[i] / 2);
          double endValue = centerValue + (fwhmValues[i] / 2);
 
          // Convert the start and stop wave numbers to micrometers
-         double startConverted = 10000.0 / startValue;
-         double endConverted = 10000.0 / endValue;
+         double startConverted = Wavelengths::convertValue(startValue, INVERSE_CENTIMETERS, MICRONS);
+         double endConverted = Wavelengths::convertValue(endValue, INVERSE_CENTIMETERS, MICRONS);
 
          // Update the FWHM value
          fwhmValues[i] = endConverted - startConverted;

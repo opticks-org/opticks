@@ -1079,6 +1079,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Interfaces\Wavelengths.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Interfaces\WidgetImageObject.h"
 				>
 			</File>

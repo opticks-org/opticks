@@ -61,6 +61,8 @@ RasterElementImp::RasterElementImp(const DataDescriptorImp& descriptor, const st
    RasterDataDescriptorImp* pDescriptor = dynamic_cast<RasterDataDescriptorImp*>(getDataDescriptor());
    if (pDescriptor != NULL)
    {
+      addPropertiesPage("Wavelength Properties");
+
       RasterFileDescriptorImp* pFileDescriptor = dynamic_cast<RasterFileDescriptorImp*>(
          pDescriptor->getFileDescriptor());
       vector<DimensionDescriptor> bands = pDescriptor->getBands();

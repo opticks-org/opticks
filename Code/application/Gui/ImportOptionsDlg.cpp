@@ -26,13 +26,14 @@
 #include "RasterDataDescriptor.h"
 #include "RasterFileDescriptor.h"
 #include "RasterUtilities.h"
+#include "Slot.h"
 #include "SpecialMetadata.h"
 #include "SubsetWidget.h"
+#include "WavelengthsWidget.h"
 
 #include <algorithm>
 #include <queue>
 #include <sstream>
-#include <string>
 using namespace std;
 
 namespace
@@ -67,6 +68,7 @@ ImportOptionsDlg::ImportOptionsDlg(Importer* pImporter, const QMap<QString, vect
    mpImporter(pImporter),
    mpCurrentDataset(NULL),
    mpEditDescriptor(NULL),
+   mEditDescriptorModified(false),
    mPromptForChanges(true),
    mAllowDeselectedFiles(true),
    mpDatasetTree(NULL),
@@ -75,6 +77,7 @@ ImportOptionsDlg::ImportOptionsDlg(Importer* pImporter, const QMap<QString, vect
    mpFilePage(NULL),
    mpSubsetPage(NULL),
    mpMetadataPage(NULL),
+   mpWavelengthsPage(NULL),
    mpImporterPage(NULL),
    mpValidationLabel(NULL)
 {
@@ -98,9 +101,10 @@ ImportOptionsDlg::ImportOptionsDlg(Importer* pImporter, const QMap<QString, vect
    // Tab widget
    mpTabWidget = new QTabWidget(pSplitter);
    mpDataPage = new DataDescriptorWidget();
-   mpSubsetPage = new SubsetWidget();
    mpFilePage = new FileDescriptorWidget();
+   mpSubsetPage = new SubsetWidget();
    mpMetadataPage = new MetadataWidget();
+   mpWavelengthsPage = new WavelengthsWidget();
 
    mpTabWidget->addTab(mpDataPage, "Data");
    mpTabWidget->addTab(mpFilePage, "File");
@@ -126,22 +130,28 @@ ImportOptionsDlg::ImportOptionsDlg(Importer* pImporter, const QMap<QString, vect
       pDataLayout->setMargin(10);
    }
 
-   QLayout* pSubsetLayout = mpSubsetPage->layout();
-   if (pSubsetLayout != NULL)
-   {
-      pSubsetLayout->setMargin(10);
-   }
-
    QLayout* pFileLayout = mpFilePage->layout();
    if (pFileLayout != NULL)
    {
       pFileLayout->setMargin(10);
    }
 
+   QLayout* pSubsetLayout = mpSubsetPage->layout();
+   if (pSubsetLayout != NULL)
+   {
+      pSubsetLayout->setMargin(10);
+   }
+
    QLayout* pMetadataLayout = mpMetadataPage->layout();
    if (pMetadataLayout != NULL)
    {
       pMetadataLayout->setMargin(10);
+   }
+
+   QLayout* pWavelengthsLayout = mpWavelengthsPage->layout();
+   if (pWavelengthsLayout != NULL)
+   {
+      pWavelengthsLayout->setMargin(10);
    }
 
    QGridLayout* pDatasetLayout = new QGridLayout(pDatasetWidget);
@@ -357,7 +367,7 @@ void ImportOptionsDlg::setCurrentDataset(ImportDescriptor* pImportDescriptor)
    if (mpCurrentDataset != NULL)
    {
       if ((mpDataPage->isModified() == true) || (mpFilePage->isModified() == true) ||
-         (mpMetadataPage->isModified() == true))
+         (mEditDescriptorModified == true))
       {
          if (mPromptForChanges == true)
          {
@@ -401,8 +411,10 @@ void ImportOptionsDlg::setCurrentDataset(ImportDescriptor* pImportDescriptor)
    Service<ModelServices> pModel;
    if (mpEditDescriptor != NULL)
    {
+      mpEditDescriptor->detach(SIGNAL_NAME(Subject, Modified), Slot(this, &ImportOptionsDlg::editDescriptorModified));
       pModel->destroyDataDescriptor(mpEditDescriptor);
       mpEditDescriptor = NULL;
+      mEditDescriptorModified = false;
    }
 
    // Create a new data descriptor to validate the user inputs
@@ -413,6 +425,7 @@ void ImportOptionsDlg::setCurrentDataset(ImportDescriptor* pImportDescriptor)
    }
 
    VERIFYNRV(mpEditDescriptor != NULL);
+   mpEditDescriptor->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &ImportOptionsDlg::editDescriptorModified));
 
    // Select the tree widget item for the current data set
    selectCurrentDatasetItem();
@@ -545,6 +558,38 @@ void ImportOptionsDlg::setCurrentDataset(ImportDescriptor* pImportDescriptor)
 
    // Metadata page
    mpMetadataPage->setMetadata(mpEditDescriptor->getMetadata());
+
+   // Wavelengths page
+   bool bWavelengthsPageActive = false;
+   if (mpTabWidget->currentWidget() == mpWavelengthsPage)
+   {
+      bWavelengthsPageActive = true;
+   }
+
+   int index = mpTabWidget->indexOf(mpWavelengthsPage);
+   if (index != -1)
+   {
+      mpTabWidget->removeTab(index);
+   }
+
+   if (pRasterFileDescriptor != NULL)
+   {
+      // Populate the wavelengths with the file descriptor bands since the metadata wavelengths
+      // apply to all bands in the file
+      mpWavelengthsPage->setWavelengths(pRasterFileDescriptor->getBands(), mpEditDescriptor->getMetadata());
+
+      if (pRasterDescriptor != NULL)
+      {
+         mpWavelengthsPage->highlightActiveBands(pRasterDescriptor->getBands());
+      }
+
+      mpTabWidget->addTab(mpWavelengthsPage, "Wavelengths");
+
+      if (bWavelengthsPageActive == true)
+      {
+         mpTabWidget->setCurrentWidget(mpWavelengthsPage);
+      }
+   }
 
    // Importer page
    bool bImporterPageActive = false;
@@ -932,6 +977,12 @@ void ImportOptionsDlg::removeImporterPage()
    mpImporterPage = NULL;
 }
 
+void ImportOptionsDlg::editDescriptorModified(Subject& subject, const string& signal, const boost::any& value)
+{
+   mEditDescriptorModified = true;
+   validateEditDataset();
+}
+
 void ImportOptionsDlg::datasetItemChanged(QTreeWidgetItem* pItem)
 {
    if (pItem == NULL)
@@ -1034,7 +1085,7 @@ void ImportOptionsDlg::generateDimensionVector(const QString& strValueName)
    updateConnections(false);
 
    // The user entered rows, columns, or bands on the file page
-   // so update the data page and the subset page
+   // so update the data page, subset page, and wavelengths page
 
    QString strValue = mpFilePage->getDescriptorValue(strValueName);
    mpDataPage->setDescriptorValue(strValueName, strValue);
@@ -1088,6 +1139,14 @@ void ImportOptionsDlg::generateDimensionVector(const QString& strValueName)
          if (pFileDescriptor != NULL)
          {
             pFileDescriptor->setBands(values);
+         }
+
+         // Update the number of band items on the wavelengths page
+         mpWavelengthsPage->setWavelengths(values, mpEditDescriptor->getMetadata());
+
+         if (pDescriptor != NULL)
+         {
+            mpWavelengthsPage->highlightActiveBands(values);
          }
       }
    }
@@ -1143,25 +1202,6 @@ void ImportOptionsDlg::updateDataBands(const vector<DimensionDescriptor>& bands)
    VERIFYNR(connect(mpDataPage, SIGNAL(modified()), this, SLOT(pagesModified())));
 }
 
-void ImportOptionsDlg::updateMetadata()
-{
-   if (mpEditDescriptor == NULL)
-   {
-      return;
-   }
-
-   disconnect(mpMetadataPage, SIGNAL(modified()), this, SLOT(updateMetadata()));
-
-   bool bSuccess = mpMetadataPage->applyChanges();
-   if (bSuccess == false)
-   {
-      mpTabWidget->setCurrentWidget(mpMetadataPage);
-   }
-
-   VERIFYNR(connect(mpMetadataPage, SIGNAL(modified()), this, SLOT(updateMetadata())));
-   validateEditDataset();
-}
-
 void ImportOptionsDlg::pagesModified()
 {
    if (mpEditDescriptor == NULL)
@@ -1206,8 +1246,10 @@ bool ImportOptionsDlg::applyChanges()
    ImportDescriptorImp* pDataset = dynamic_cast<ImportDescriptorImp*>(getCurrentDataset());
    if (pDataset != NULL)
    {
+      mpEditDescriptor->detach(SIGNAL_NAME(Subject, Modified), Slot(this, &ImportOptionsDlg::editDescriptorModified));
       pDataset->setDataDescriptor(mpEditDescriptor);
       mpEditDescriptor = NULL;
+      mEditDescriptorModified = false;
       return true;
    }
 
@@ -1228,7 +1270,8 @@ void ImportOptionsDlg::updateConnections(bool bConnect)
          SLOT(updateDataColumns(const std::vector<DimensionDescriptor>&))));
       VERIFYNR(connect(mpSubsetPage, SIGNAL(subsetBandsChanged(const std::vector<DimensionDescriptor>&)), this,
          SLOT(updateDataBands(const std::vector<DimensionDescriptor>&))));
-      VERIFYNR(connect(mpMetadataPage, SIGNAL(modified()), this, SLOT(updateMetadata())));
+      VERIFYNR(connect(mpSubsetPage, SIGNAL(subsetBandsChanged(const std::vector<DimensionDescriptor>&)),
+         mpWavelengthsPage, SLOT(highlightActiveBands(const std::vector<DimensionDescriptor>&))));
    }
    else
    {
@@ -1242,6 +1285,7 @@ void ImportOptionsDlg::updateConnections(bool bConnect)
          SLOT(updateDataColumns(const std::vector<DimensionDescriptor>&)));
       disconnect(mpSubsetPage, SIGNAL(subsetBandsChanged(const std::vector<DimensionDescriptor>&)), this,
          SLOT(updateDataBands(const std::vector<DimensionDescriptor>&)));
-      disconnect(mpMetadataPage, SIGNAL(modified()), this, SLOT(updateMetadata()));
+      disconnect(mpSubsetPage, SIGNAL(subsetBandsChanged(const std::vector<DimensionDescriptor>&)),
+         mpWavelengthsPage, SLOT(highlightActiveBands(const std::vector<DimensionDescriptor>&)));
    }
 }

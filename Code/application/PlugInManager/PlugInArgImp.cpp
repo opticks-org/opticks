@@ -284,6 +284,8 @@ void PlugInArgImp::initArgTypes()
       mArgTypes.push_back("TiePointLayer");
       mArgTypes.push_back("UnitType");
       mArgTypes.push_back("View");
+      mArgTypes.push_back("Wavelengths");
+      mArgTypes.push_back("WavelengthUnitsType");
       mArgTypes.push_back("Window");
       mArgTypes.push_back("WizardObject");
    }

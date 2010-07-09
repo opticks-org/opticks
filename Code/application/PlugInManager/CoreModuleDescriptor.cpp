@@ -39,7 +39,6 @@
 #include "PropertiesAnnotationLayer.h"
 #include "PropertiesAoiLayer.h"
 #include "PropertiesDataDescriptor.h"
-#include "PropertiesDataElement.h"
 #include "PropertiesFileDescriptor.h"
 #include "PropertiesGcpLayer.h"
 #include "PropertiesGraphicObject.h"
@@ -47,6 +46,7 @@
 #include "PropertiesLatLonLayer.h"
 #include "PropertiesMeasurementLayer.h"
 #include "PropertiesMeasurementObject.h"
+#include "PropertiesMetadata.h"
 #include "PropertiesModuleDescriptor.h"
 #include "PropertiesPlotView.h"
 #include "PropertiesPlugInDescriptor.h"
@@ -59,6 +59,7 @@
 #include "PropertiesThresholdLayer.h"
 #include "PropertiesTiePointLayer.h"
 #include "PropertiesView.h"
+#include "PropertiesWavelengths.h"
 
 #include <string>
 #include <vector>
@@ -116,8 +117,9 @@ REGISTER_PLUGIN(OpticksCore, OptionsThresholdLayer, OptionQWidgetWrapper<Options
 REGISTER_PLUGIN(OpticksCore, OptionsTiePointLayer, OptionQWidgetWrapper<OptionsTiePointLayer>());
 REGISTER_PLUGIN(OpticksCore, OptionsView, OptionQWidgetWrapper<OptionsView>());
 REGISTER_PLUGIN_BASIC(OpticksCore, PropertiesDataDescriptor);
-REGISTER_PLUGIN_BASIC(OpticksCore, PropertiesDataElement);
 REGISTER_PLUGIN_BASIC(OpticksCore, PropertiesFileDescriptor);
+REGISTER_PLUGIN_BASIC(OpticksCore, PropertiesMetadata);
+REGISTER_PLUGIN_BASIC(OpticksCore, PropertiesWavelengths);
 REGISTER_PLUGIN(OpticksCore, PropertiesAnnotationLayer, PropertiesQWidgetWrapper<PropertiesAnnotationLayer>());
 REGISTER_PLUGIN(OpticksCore, PropertiesAoiLayer, PropertiesQWidgetWrapper<PropertiesAoiLayer>());
 REGISTER_PLUGIN(OpticksCore, PropertiesGcpLayer, PropertiesQWidgetWrapper<PropertiesGcpLayer>());
@@ -137,7 +139,6 @@ REGISTER_PLUGIN(OpticksCore, PropertiesSpatialDataView, PropertiesQWidgetWrapper
 REGISTER_PLUGIN(OpticksCore, PropertiesThresholdLayer, PropertiesQWidgetWrapper<PropertiesThresholdLayer>());
 REGISTER_PLUGIN(OpticksCore, PropertiesTiePointLayer, PropertiesQWidgetWrapper<PropertiesTiePointLayer>());
 REGISTER_PLUGIN(OpticksCore, PropertiesView, PropertiesQWidgetWrapper<PropertiesView>());
-
 
 PlugIn* CoreModuleDescriptor::createInterface(unsigned int plugInNumber)
 {

@@ -367,6 +367,10 @@
 				RelativePath=".\UtilityServicesImp.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\WavelengthsImp.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -510,6 +514,10 @@
 			</File>
 			<File
 				RelativePath=".\UtilityServicesImp.h"
+				>
+			</File>
+			<File
+				RelativePath=".\WavelengthsImp.h"
 				>
 			</File>
 		</Filter>

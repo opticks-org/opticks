@@ -30,11 +30,9 @@ DataDescriptorImp::DataDescriptorImp(const string& name, const string& type, Dat
       setClassification(pParent->getClassification());
    }
 
-   // Attach to the metadata object, classification to notify when the metadata changes
-   mMetadata.attach(SIGNAL_NAME(Subject, Modified), Signal(dynamic_cast<Subject*>(this),
-      SIGNAL_NAME(Subject, Modified)));
-   mClassification.attach(SIGNAL_NAME(Subject, Modified), Signal(dynamic_cast<Subject*>(this),
-      SIGNAL_NAME(Subject, Modified)));
+   // Attach to the metadata and classification objects to notify when the they change
+   mMetadata.attach(SIGNAL_NAME(Subject, Modified), Slot(this, &DataDescriptorImp::notifyModified));
+   mClassification.attach(SIGNAL_NAME(Subject, Modified), Slot(this, &DataDescriptorImp::notifyModified));
 
    generateParentDesignator();
 }
@@ -47,11 +45,9 @@ DataDescriptorImp::DataDescriptorImp(const string& name, const string& type, con
    mProcessingLocation(IN_MEMORY),
    mpFileDescriptor(NULL)
 {
-   // Attach to the metadata object, classification to notify when the metadata changes
-   mMetadata.attach(SIGNAL_NAME(Subject, Modified), Signal(dynamic_cast<Subject*>(this),
-      SIGNAL_NAME(Subject, Modified)));
-   mClassification.attach(SIGNAL_NAME(Subject, Modified), Signal(dynamic_cast<Subject*>(this),
-      SIGNAL_NAME(Subject, Modified)));
+   // Attach to the metadata and classification objects to notify when the they change
+   mMetadata.attach(SIGNAL_NAME(Subject, Modified), Slot(this, &DataDescriptorImp::notifyModified));
+   mClassification.attach(SIGNAL_NAME(Subject, Modified), Slot(this, &DataDescriptorImp::notifyModified));
 }
 
 DataDescriptorImp::~DataDescriptorImp()
@@ -62,7 +58,7 @@ DataDescriptorImp::~DataDescriptorImp()
    }
 }
 
-void DataDescriptorImp::metadataModified(Subject &subject, const string &signal, const boost::any &data)
+void DataDescriptorImp::notifyModified(Subject &subject, const string &signal, const boost::any &data)
 {
    if (&subject == &mMetadata || &subject == &mClassification)
    {

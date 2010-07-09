@@ -9,11 +9,12 @@
 
 #include "AppVersion.h"
 #include "DesktopServices.h"
-#include "DynamicObjectAdapter.h"
+#include "DynamicObject.h"
 #include "DynamicObjectItemModel.h"
 #include "MetadataFilterDlg.h"
 #include "MetadataWidget.h"
 #include "NameTypeValueDlg.h"
+#include "Slot.h"
 
 #include <QtCore/QRegExp>
 #include <QtGui/QAction>
@@ -29,14 +30,11 @@
 #include <QtGui/QToolButton>
 #include <QtGui/QTreeView>
 
-#include <string>
 using namespace std;
 
 MetadataWidget::MetadataWidget(QWidget* parent) :
    QWidget(parent),
-   mpObject(new DynamicObjectAdapter),
-   mpMetadata(NULL),
-   mModified(false)
+   mpMetadata(NULL)
 {
    // Metadata
    QLabel* pMetadataLabel = new QLabel("Metadata:", this);
@@ -46,7 +44,7 @@ MetadataWidget::MetadataWidget(QWidget* parent) :
    columnNames.append("Type");
    columnNames.append("Value");
 
-   mpMetadataModel = new DynamicObjectItemModel(this, mpObject);
+   mpMetadataModel = new DynamicObjectItemModel(this, NULL);
    mpMetadataSortingModel = new QSortFilterProxyModel(this);
    mpMetadataSortingModel->setSortCaseSensitivity(Qt::CaseInsensitive);
    mpMetadataSortingModel->setSourceModel(mpMetadataModel);
@@ -192,56 +190,34 @@ MetadataWidget::MetadataWidget(QWidget* parent) :
 
 MetadataWidget::~MetadataWidget()
 {
-   if (mpObject != NULL)
-   {
-      delete mpObject;
-   }
+   setMetadata(NULL);
 }
 
 void MetadataWidget::setMetadata(DynamicObject* pMetadata)
 {
-   mpMetadata = pMetadata;
-
-   if (mpObject != NULL)
+   if (pMetadata == mpMetadata)
    {
-      if (mpMetadata != NULL)
-      {
-         *(static_cast<DynamicObjectImp*>(mpObject)) = *(dynamic_cast<DynamicObjectImp*>(mpMetadata));
-      }
-      else
-      {
-         mpObject->clear();
-      }
+      return;
    }
 
-   mModified = false;
+   if (mpMetadata != NULL)
+   {
+      mpMetadata->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &MetadataWidget::metadataDeleted));
+   }
+
+   mpMetadata = pMetadata;
+   mpMetadataModel->setDynamicObject(mpMetadata);
+
+   if (mpMetadata != NULL)
+   {
+      mpMetadata->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &MetadataWidget::metadataDeleted));
+   }
 
    if (mpFilterCheck->isChecked() == true)
    {
       int filterIndex = mpFilterCombo->currentIndex();
       applyFilter(filterIndex);
    }
-}
-
-bool MetadataWidget::isModified() const
-{
-   return mModified;
-}
-
-bool MetadataWidget::applyChanges()
-{
-   if (mModified == false)
-   {
-      return true;
-   }
-
-   if (mpMetadata != NULL)
-   {
-      *(dynamic_cast<DynamicObjectImp*>(mpMetadata)) = *mpObject;
-      return true;
-   }
-
-   return false;
 }
 
 const string& MetadataWidget::getEditWarningDialogId()
@@ -478,8 +454,9 @@ void MetadataWidget::modifyValues()
 {
    Service<DesktopServices> pDesktop;
 
-   pDesktop->showSuppressibleMsgDlg(APP_NAME, "Modifying the metadata values could have adverse effects since"
-         " some plug-ins may require the existence of specific metadata key-value pairs.", MESSAGE_WARNING, 
+   pDesktop->showSuppressibleMsgDlg(APP_NAME, "Modifying the metadata values could have adverse effects since "
+         "some plug-ins may require the existence of specific metadata key-value pairs.  Also, other widgets in "
+         "this same dialog displaying portions of the metadata contents may not update properly.", MESSAGE_WARNING,
          getEditWarningDialogId(), this);
 
    mpMetadataTree->selectionModel()->clear();
@@ -489,8 +466,8 @@ void MetadataWidget::modifyValues()
    mpDeleteButton->setEnabled(false);
    mpClearButton->setEnabled(mpMetadata != NULL);
 
-   VERIFYNR(connect(mpMetadataTree->selectionModel(), SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)), this,
-      SLOT(currentChanged(const QModelIndex&, const QModelIndex&))));
+   VERIFYNR(connect(mpMetadataTree->selectionModel(), SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)),
+      this, SLOT(currentChanged(const QModelIndex&, const QModelIndex&))));
    VERIFYNR(connect(mpMetadataTree, SIGNAL(doubleClicked(const QModelIndex&)), this,
       SLOT(editSelectedValue(const QModelIndex&))));
 }
@@ -524,7 +501,7 @@ void MetadataWidget::addKey()
    }
    else
    {
-      pDynamicObject = mpObject;
+      pDynamicObject = mpMetadata;
    }
 
    if (pDynamicObject == NULL)
@@ -548,10 +525,6 @@ void MetadataWidget::addKey()
       {
          mpMetadataTree->expand(mpMetadataSortingModel->mapFromSource(parent));
       }
-
-      // Mark the page as modified
-      mModified = true;
-      emit modified();
    }
 }
 
@@ -580,7 +553,7 @@ void MetadataWidget::deleteKey()
    }
    else
    {
-      pDynamicObject = mpObject;
+      pDynamicObject = mpMetadata;
    }
 
    if (pDynamicObject == NULL)
@@ -608,15 +581,11 @@ void MetadataWidget::deleteKey()
    // Remove the attribute
    string key = index.data(Qt::DisplayRole).toString().toStdString();
    pDynamicObject->removeAttribute(key);
-
-   // Update the modified flag
-   mModified = true;
-   emit modified();
 }
 
 void MetadataWidget::clearKeys()
 {
-   if (mpObject != NULL)
+   if (mpMetadata != NULL)
    {
       if ((mpFilterCheck->isChecked() == true) && (mpFilterCombo->currentText().isEmpty() == false))
       {
@@ -628,9 +597,7 @@ void MetadataWidget::clearKeys()
          }
       }
 
-      mpObject->clear();
-      mModified = true;
-      emit modified();
+      mpMetadata->clear();
    }
 }
 
@@ -698,7 +665,7 @@ void MetadataWidget::editSelectedValue(const QModelIndex& selectedItem)
    }
    else
    {
-      pDynamicObject = mpObject;
+      pDynamicObject = mpMetadata;
    }
 
    if (pDynamicObject == NULL)
@@ -725,10 +692,6 @@ void MetadataWidget::editSelectedValue(const QModelIndex& selectedItem)
          // Update the value
          const DataVariant& newValue = dlg.getValue();
          pDynamicObject->setAttribute(newName.toStdString(), newValue);
-
-         // Update the modified flag
-         mModified = true;
-         emit modified();
       }
    }
 }
@@ -766,4 +729,9 @@ void MetadataWidget::copyValueToClipboard()
          }
       }
    }
+}
+
+void MetadataWidget::metadataDeleted(Subject& subject, const string& signal, const boost::any& value)
+{
+   setMetadata(NULL);
 }

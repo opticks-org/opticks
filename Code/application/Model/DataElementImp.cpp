@@ -33,7 +33,7 @@ DataElementImp::DataElementImp(const DataDescriptorImp& descriptor, const string
          addPropertiesPage("File Descriptor Properties");
       }
 
-      addPropertiesPage("Data Element Properties");
+      addPropertiesPage("Metadata Properties");
    }
 
    // Attach to the data descriptor to notify when the descriptor changes

@@ -4,6 +4,7 @@
  *    - bool
  *    - char
  *    - unsigned char
+ *    - signed char
  *    - short
  *    - unsigned short
  *    - int
@@ -15,43 +16,46 @@
  *    - float
  *    - double
  *    - void
- *    - string
+ *    - std::string
  *    - Int64 (this is a class that wraps 64-bit signed integers on all platforms)
  *    - UInt64 (this is a class that wraps 64-bit unsigned integers on all platforms)
  *  - Enumerated types
- *    - AnimationCycle
- *    - AnimationState
- *    - ArcRegion
- *    - ComplexComponent
- *    - DataOrigin
- *    - DisplayMode
- *    - DmsFormatType
- *    - EncodingType
- *    - EndianType
- *    - FillStyle
- *    - GcpSymbol
- *    - GeocoordType
- *    - GraphicObjectType
- *    - InterleaveFormatType
- *    - LatLonStyle
- *    - LayerType
- *    - LineStyle
- *    - PanLimitType
- *    - PassArea
- *    - PlotObjectType
+ *    - #AnimationCycle
+ *    - #AnimationState
+ *    - #ArcRegion
+ *    - #ComplexComponent
+ *    - #DataOrigin
+ *    - #DisplayMode
+ *    - #DistanceUnits
+ *    - #DmsFormatType
+ *    - #EncodingType
+ *    - #EndianType
+ *    - #FillStyle
+ *    - #GcpSymbol
+ *    - #GeocoordType
+ *    - #GraphicObjectType
+ *    - #InsetZoomMode
+ *    - #InterleaveFormatType
+ *    - #LatLonStyle
+ *    - #LayerType
+ *    - #LineStyle
+ *    - #PanLimitType
+ *    - #PassArea
+ *    - #PlotObjectType
  *    - Point::PointSymbolType
- *    - PositionType
- *    - ProcessingLocation
- *    - SessionSaveType
- *    - ResamplerAlgorithmType
- *    - StretchMethod
- *    - StretchType
- *    - SymbolType
- *    - ThresholdType
- *    - UnitSystem
- *    - UnitType
- *    - WindowSizeType
- *    - WindowType
+ *    - #PositionType
+ *    - #ProcessingLocation
+ *    - #SessionSaveType
+ *    - #RasterChannelType
+ *    - #RegionUnits
+ *    - #ReleaseType
+ *    - #StretchType
+ *    - #SymbolType
+ *    - #UnitSystem
+ *    - #UnitType
+ *    - #WavelengthUnitsType
+ *    - #WindowSizeType
+ *    - #WindowType
  *  - Classes
  *    - Animation
  *    - AnimationController
@@ -79,9 +83,9 @@
  *    - FileFinder
  *    - Filename
  *    - FloatComplex
+ *    - Font
  *    - GcpLayer
  *    - GcpList
- *    - GeocoordMatrix
  *    - GraphicElement
  *    - GraphicLayer
  *    - HistogramPlot
@@ -89,12 +93,11 @@
  *    - IntegerComplex
  *    - LatLonLayer
  *    - Layer
- *    - LocationType
+ *    - #LocationType
  *    - MeasurementLayer
  *    - OrthographicView
  *    - PerspectiveView
  *    - Opticks::PixelLocation
- *    - Opticks::PixelOffset
  *    - PlotView
  *    - PlotWidget
  *    - PlotWindow
@@ -120,6 +123,7 @@
  *    - TiePointList
  *    - Units
  *    - View
+ *    - Wavelengths
  *    - Window
  *    - WizardObject
  *    - WorkspaceWindow

@@ -810,6 +810,12 @@ ADD_ENUM_MAPPING(PRODUCT_VIEW, "Product View", "Product View")
 ADD_ENUM_MAPPING(PLOT_VIEW, "Plot View", "Plot View")
 END_ENUM_MAPPING()
 
+BEGIN_ENUM_MAPPING(WavelengthUnitsType)
+ADD_ENUM_MAPPING(MICRONS, "Microns", "Microns")
+ADD_ENUM_MAPPING(NANOMETERS, "Nanometers", "Nanometers")
+ADD_ENUM_MAPPING(INVERSE_CENTIMETERS, "Inverse Centimeters", "InverseCentimeters")
+END_ENUM_MAPPING()
+
 BEGIN_ENUM_MAPPING(WindowSizeType)
 ADD_ENUM_MAPPING(FIXED_SIZE, "Fixed", "Fixed")
 ADD_ENUM_MAPPING(MAXIMIZED, "Maximized", "Maximized")

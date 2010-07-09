@@ -832,6 +832,27 @@ enum ViewTypeEnum
 typedef EnumWrapper<ViewTypeEnum> ViewType;
 
 /**
+ *  %Units for spectral data wavelengths.
+ *
+ *  Wavelength values are defined and stored as microns in special metadata
+ *  attributes in a DynamicObject.  However, they can be displayed to the user
+ *  in several different units.
+ *
+ *  @see        \ref specialmetadata
+ */
+enum WavelengthUnitsTypeEnum
+{
+   MICRONS,
+   NANOMETERS,
+   INVERSE_CENTIMETERS
+};
+
+/**
+ * @EnumWrapper ::WavelengthUnitsTypeEnum.
+ */
+typedef EnumWrapper<WavelengthUnitsTypeEnum> WavelengthUnitsType;
+
+/**
  *  Specifies the default size for a WorkspaceWindow when it is displayed.
  */
 enum WindowSizeTypeEnum
@@ -904,6 +925,7 @@ template <> class VariantTypeValidator<StretchType> {};
 template <> class VariantTypeValidator<SymbolType> {};
 template <> class VariantTypeValidator<UnitSystem> {};
 template <> class VariantTypeValidator<UnitType> {};
+template <> class VariantTypeValidator<WavelengthUnitsType> {};
 template <> class VariantTypeValidator<WindowSizeType> {};
 template <> class VariantTypeValidator<WindowType> {};
 /// \endcond
