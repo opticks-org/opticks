@@ -99,6 +99,7 @@ public slots:
    void resetBumpers();
    void storeBumpers();
    void restoreBumpers();
+   void changeCanDropFrames(bool enabled);
 
    bool serialize(SessionItemSerializer& serializer) const;
    bool deserialize(SessionItemDeserializer &deserializer);
@@ -168,8 +169,10 @@ private:
    QAction* mpResetBumpersAction;
    QAction* mpSeparatorAction;
    QAction* mpSeparator2Action;
+   QAction* mpSeparator3Action;
    QAction* mpStoreBumpersAction;
    QAction* mpRestoreBumpersAction;
+   QAction* mpCanDropFramesAction;
    static std::list<AnimationControllerImp*> mRunningControllers;
    static std::list<AnimationControllerImp*>::iterator mppActiveController;
 };

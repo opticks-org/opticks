@@ -58,7 +58,6 @@ AnimationToolBarImp::AnimationToolBarImp(const std::string& id, QWidget* parent)
    mpResetBumpersAction(NULL),
    mpStoreBumpersAction(NULL),
    mpRestoreBumpersAction(NULL),
-   mpDropFramesAction(NULL),
    mpCycle(NULL),
    mpTimestampLabel(NULL),
    mpController(NULL),
@@ -201,16 +200,6 @@ AnimationToolBarImp::AnimationToolBarImp(const std::string& id, QWidget* parent)
    mpTimestampLabel = new QLabel(this);
    mpTimestampLabel->setAlignment(Qt::AlignCenter);
    addWidget(mpTimestampLabel);
-
-   addSeparator();
-
-   // Drop frames
-   mpDropFramesAction = addAction(QIcon(":/icons/Clock"), QString());
-   mpDropFramesAction->setAutoRepeat(false);
-   mpDropFramesAction->setToolTip("Drop Frames");
-   mpDropFramesAction->setCheckable(true);
-   pDesktop->initializeAction(mpDropFramesAction, shortcutContext);
-   VERIFYNR(connect(mpDropFramesAction, SIGNAL(toggled(bool)), this, SLOT(setCanDropFrames(bool))));
 
    // Initialization
    setFocusPolicy(Qt::ClickFocus);     // Required to set the frame speed if the user edits the value
@@ -677,8 +666,6 @@ void AnimationToolBarImp::setAnimationController(AnimationController* pControlle
          SLOT(updateAnimationControls())));
       VERIFYNR(disconnect(mpController, SIGNAL(animationRemoved(Animation*)), this,
          SLOT(updateAnimationControls())));
-      VERIFYNR(disconnect(mpController, SIGNAL(canDropFramesChanged(bool)), this,
-         SLOT(setCanDropFrames(bool))));
       VERIFYNR(disconnect(mpController, SIGNAL(bumpersEnabledChanged(bool)), this,
          SLOT(bumpersEnabled(bool))));
       VERIFYNR(disconnect(mpController, SIGNAL(bumperStartChanged(double)), this,
@@ -718,8 +705,6 @@ void AnimationToolBarImp::setAnimationController(AnimationController* pControlle
          SLOT(updateFrameSpeed(double))));
       VERIFYNR(connect(mpController, SIGNAL(animationAdded(Animation*)), this, SLOT(updateAnimationControls())));
       VERIFYNR(connect(mpController, SIGNAL(animationRemoved(Animation*)), this, SLOT(updateAnimationControls())));
-      VERIFYNR(connect(mpController, SIGNAL(canDropFramesChanged(bool)), this,
-         SLOT(setCanDropFrames(bool))));
       VERIFYNR(connect(mpController, SIGNAL(bumpersEnabledChanged(bool)), this,
          SLOT(bumpersEnabled(bool))));
       VERIFYNR(connect(mpController, SIGNAL(bumperStartChanged(double)), this,
@@ -740,7 +725,6 @@ void AnimationToolBarImp::setAnimationController(AnimationController* pControlle
          SLOT(restoreBumpers())));
 
       mpBumperButton->defaultAction()->setChecked(mpController->getBumpersEnabled());
-      mpDropFramesAction->setChecked(mpController->getCanDropFrames());
    }
 
    updateAnimationControls();
@@ -790,7 +774,6 @@ void AnimationToolBarImp::updateAnimationControls()
    mpFrameSlider->setEnabled(bEnable);
    mpFrameSpeedCombo->setEnabled(bEnable);
    mpCycle->setEnabled(bEnable);
-   mpDropFramesAction->setEnabled(bEnable);
    mpChangeDirectionAction->setEnabled(bEnable);
    mpBumperButton->setEnabled(bEnable);
 }
@@ -819,15 +802,6 @@ void AnimationToolBarImp::releaseSlider()
    {
       playPause();
    }
-}
-
-void AnimationToolBarImp::setCanDropFrames(bool canDropFrames)
-{
-   if (mpController != NULL)
-   {
-      mpController->setCanDropFrames(canDropFrames);
-   }
-   mpDropFramesAction->setChecked(canDropFrames);
 }
 
 void AnimationToolBarImp::setHideTimestamp(bool hideTimestamp)

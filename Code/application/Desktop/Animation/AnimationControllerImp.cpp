@@ -74,7 +74,7 @@ AnimationControllerImp::AnimationControllerImp(FrameType frameType, const string
    mState(STOP),
    mCycle(AnimationController::getSettingAnimationCycleSelection()),
    mStartTime(0.0),
-   mCanDropFrames(true),
+   mCanDropFrames(AnimationController::getSettingCanDropFrames()),
    mBumpersEnabled(false),
    mpPlayAction(NULL),
    mpPauseAction(NULL),
@@ -89,8 +89,10 @@ AnimationControllerImp::AnimationControllerImp(FrameType frameType, const string
    mpResetBumpersAction(NULL),
    mpSeparatorAction(NULL),
    mpSeparator2Action(NULL),
+   mpSeparator3Action(NULL),
    mpStoreBumpersAction(NULL),
-   mpRestoreBumpersAction(NULL)
+   mpRestoreBumpersAction(NULL),
+   mpCanDropFramesAction(NULL)
 {
    // Context menu actions
    mpPlayAction = new QAction("Play", this);
@@ -134,10 +136,17 @@ AnimationControllerImp::AnimationControllerImp(FrameType frameType, const string
    mpRestoreBumpersAction = new QAction("Restore Bumpers", this);
    mpRestoreBumpersAction->setAutoRepeat(false);
 
+   mpCanDropFramesAction = new QAction("Can Drop Frames", this);
+   mpCanDropFramesAction->setAutoRepeat(false);
+   mpCanDropFramesAction->setCheckable(true);
+   mpCanDropFramesAction->setChecked(mCanDropFrames);
+
    mpSeparatorAction = new QAction("", this);
    mpSeparatorAction->setSeparator(true);
    mpSeparator2Action = new QAction("", this);
    mpSeparator2Action->setSeparator(true);
+   mpSeparator3Action = new QAction("", this);
+   mpSeparator3Action->setSeparator(true);
 
    // Initialization
    mpPlayAction->setIcon(QIcon(":/icons/PlayForward"));
@@ -162,6 +171,7 @@ AnimationControllerImp::AnimationControllerImp(FrameType frameType, const string
    VERIFYNR(connect(mpResetBumpersAction, SIGNAL(triggered()), this, SLOT(resetBumpers())));
    VERIFYNR(connect(mpStoreBumpersAction, SIGNAL(triggered()), this, SLOT(storeBumpers())));
    VERIFYNR(connect(mpRestoreBumpersAction, SIGNAL(triggered()), this, SLOT(restoreBumpers())));
+   VERIFYNR(connect(mpCanDropFramesAction, SIGNAL(triggered(bool)), this, SLOT(changeCanDropFrames(bool))));
 }
 
 AnimationControllerImp::~AnimationControllerImp()
@@ -235,6 +245,9 @@ list<ContextMenuAction> AnimationControllerImp::getContextMenuActions() const
       DataVariant bumpersEnabled = pSettings->getSetting(bumperPath);
       mpRestoreBumpersAction->setEnabled(bumpersEnabled.isValid());
       menuActions.push_back(ContextMenuAction(mpRestoreBumpersAction, APP_ANIMATIONCONTROLLER_RESTORE_BUMPERS_ACTION));
+      menuActions.push_back(ContextMenuAction(mpSeparator3Action,
+         APP_ANIMATIONCONTROLLER_DROP_FRAMES_SEPARATOR_ACTION));
+      menuActions.push_back(ContextMenuAction(mpCanDropFramesAction, APP_ANIMATIONCONTROLLER_DROP_FRAMES_ACTION));
    }
 
    return menuActions;
@@ -1412,6 +1425,11 @@ void AnimationControllerImp::restoreBumpers()
             "Could not retrieve valid bumper set from Configuration Settings");
       }
    }
+}
+
+void AnimationControllerImp::changeCanDropFrames(bool enabled)
+{
+   setCanDropFrames(enabled);
 }
 
 void AnimationControllerImp::adjustBumpers()
