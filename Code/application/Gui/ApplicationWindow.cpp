@@ -169,6 +169,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    mpCurrentEditView(NULL),
    mpGcpEditor(NULL),
    mpUndoGroup(new QUndoGroup(this)),
+   mClearingUndoStacks(false),
    mDropNewSession(false)
 {
    // make sure we have enough colors
@@ -2775,6 +2776,12 @@ void ApplicationWindow::paste()
 
 void ApplicationWindow::clearUndoStacks()
 {
+   if (mClearingUndoStacks)
+   {
+      return;
+   }
+
+   mClearingUndoStacks = true;
    for (vector<Window*>::iterator iter = mWindows.begin(); iter != mWindows.end(); ++iter)
    {
       ViewWindow* pViewWindow = dynamic_cast<ViewWindow*>(*iter);
@@ -2787,6 +2794,8 @@ void ApplicationWindow::clearUndoStacks()
          }
       }
    }
+
+   mClearingUndoStacks = false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
