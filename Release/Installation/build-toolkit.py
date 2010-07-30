@@ -345,7 +345,7 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir,
     if is_windows():
        static_libs.append("SimpleApiLib")
     plugins = [ "AnnotationImagePalette", "Aspam", "AutoImporter", "BandMath", "ConvolutionFilter",
-        "CoreIo", "Covariance", "DataFusion", "Dted", "ENVI", "GdalImporter", "Generic",
+        "CoreIo", "Covariance", "DataFusion", "Dted", "ENVI", "Fits", "GdalImporter", "Generic",
         "GeographicFeatures", "Georeference", "Hdf", "Ice", "ImageComparison", "Kml",
         "MovieExporter", "Nitf", "NitfCommonTre", "ObjectFinding", "Pca", "Pictures", "Results",
         "Scripts", "SecondMoment", "ShapeFileExporter", "Sio", "Wavelength",
