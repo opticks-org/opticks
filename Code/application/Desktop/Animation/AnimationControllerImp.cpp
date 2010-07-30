@@ -1054,6 +1054,7 @@ void AnimationControllerImp::setCanDropFrames(bool drop)
    if (mCanDropFrames != drop)
    {
       mCanDropFrames = drop;
+      mpCanDropFramesAction->setChecked(mCanDropFrames);
       emit canDropFramesChanged(drop);
    }
 }
