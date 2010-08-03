@@ -62,7 +62,7 @@ bool PropertiesMetadata::applyChanges()
       if (pMetadata != NULL)
       {
          pMetadata->clear();
-         pMetadata->adoptiveMerge(&mMetadata);
+         pMetadata->merge(&mMetadata);
          return true;
       }
    }
