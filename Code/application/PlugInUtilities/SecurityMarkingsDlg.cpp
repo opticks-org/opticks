@@ -113,6 +113,7 @@ void populateListFromFile(T* box, const QString& strFilename, bool addBlank)
 SecurityMarkingsDlg::SecurityMarkingsDlg(QWidget* parent, const QString& strInitialMarkings,
                                          Classification* pClassification) :
    QDialog(parent),
+   mFavoritesAttributePrefix("favorite"),
    mDeclassDateIsValid(false),
    mDowngradeDateIsValid(false)
 {
@@ -1020,10 +1021,7 @@ void SecurityMarkingsDlg::removeFavoriteItem()
    {
       vector<Classification*>::iterator itr = mlstFavorites.begin()+iRemoveClass;
 
-      // track the removed favorites for later sync with ConfigurationSettings
-      mlstRemovedFavorites.push_back(mpFavoritesCombo->currentText().toStdString());
-
-      // vector owns the classification, needs to delete it
+      // vector owns the classification, need to delete it
       Classification* pClassification = (*itr);
       if (pClassification != NULL)
       {
@@ -1052,19 +1050,10 @@ void SecurityMarkingsDlg::favoriteSelected()
 
 bool SecurityMarkingsDlg::serializeFavorites()
 {
-   const DynamicObject* pFavorites = SecurityMarkingsDlg::getSettingFavorites();
    FactoryResource<DynamicObject> pNewFavorites;
    VERIFY(pNewFavorites.get() != NULL);
-   pNewFavorites->merge(pFavorites);
 
-   unsigned int i = 0;
-   for (i = 0; i < mlstRemovedFavorites.size(); ++i)
-   {
-      string strRemoved = mlstRemovedFavorites[i];
-      pNewFavorites->removeAttribute(strRemoved);
-   }
-
-   for (i = 0; i < mlstFavorites.size(); ++i)
+   for (unsigned int i = 0; i < mlstFavorites.size(); ++i)
    {
       string level = mlstFavorites[i]->getLevel();
       string codewords = mlstFavorites[i]->getCodewords();
@@ -1074,8 +1063,7 @@ bool SecurityMarkingsDlg::serializeFavorites()
       string exemption = mlstFavorites[i]->getDeclassificationExemption();
       const DateTime* pDeclassificationDate = mlstFavorites[i]->getDeclassificationDate();
 
-      string classText;
-      mlstFavorites[i]->getClassificationText(classText);
+      string attributeName = mFavoritesAttributePrefix + StringUtilities::toDisplayString<unsigned int>(i);
 
       FactoryResource<DynamicObject> pClassificationObject;
       pClassificationObject->setAttribute("level", level);
@@ -1088,7 +1076,13 @@ bool SecurityMarkingsDlg::serializeFavorites()
       {
          pClassificationObject->setAttribute("declassificationDate", *pDeclassificationDate);
       }
-      pNewFavorites->setAttribute(classText, *pClassificationObject.get());
+
+      // add attribute with the classification text to use for validation when favorites are deserialized
+      string classificationText;
+      mlstFavorites[i]->getClassificationText(classificationText);
+      pClassificationObject->setAttribute("classificationText", classificationText);
+
+      pNewFavorites->setAttribute(attributeName, *pClassificationObject.get());
    }
    SecurityMarkingsDlg::setSettingFavorites(pNewFavorites.get());
    return true;
@@ -1121,6 +1115,7 @@ bool SecurityMarkingsDlg::deserializeFavorites()
       const string* pCountries = dv_cast<string>(&pFavDynObj->getAttribute("countries"));
       const string* pExemption = dv_cast<string>(&pFavDynObj->getAttribute("exemption"));
       const DateTime* pDeclassDate = dv_cast<DateTime>(&pFavDynObj->getAttribute("declassificationDate"));
+      const string* pClassificationText = dv_cast<string>(&pFavDynObj->getAttribute("classificationText"));
 
       FactoryResource<Classification> pClass;
       if (pLevel != NULL)
@@ -1155,7 +1150,7 @@ bool SecurityMarkingsDlg::deserializeFavorites()
       // sanity check - make sure our new classification matches the old favorite
       string classText;
       pClass->getClassificationText(classText);
-      if (classText != previews[i])
+      if (pClassificationText == NULL || classText != *pClassificationText)
       {
          // if not, kill the old setting, do not add our own
          const DynamicObject* pOriginalFavorites = SecurityMarkingsDlg::getSettingFavorites();
