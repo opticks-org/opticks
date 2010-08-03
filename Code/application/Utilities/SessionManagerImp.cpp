@@ -7,6 +7,7 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include "AebPlatform.h"
 #include "Animation.h"
 #include "AnimationAdapter.h"
 #include "AnimationController.h"
@@ -1161,6 +1162,14 @@ vector<SessionManagerImp::IndexFileItem> SessionManagerImp::readIndexFile(const 
             msg += "\nThis session was saved with " + string(APP_NAME) + " " + savedVersion;
             throw Failure(msg); 
          }
+         string savedPlatform = A(pRootElement->getAttribute(X("platform")));
+         if (savedPlatform != AebPlatform::currentPlatform())
+         {
+            string msg = "Can only load sessions saved with platform " + AebPlatform::currentPlatform();
+            msg += "\nThis session was saved with platform " + savedPlatform;
+            throw Failure(msg); 
+         }
+
          mName = A(pRootElement->getAttribute(X("id")));
          if (mName.empty())
          {
@@ -1369,6 +1378,7 @@ bool SessionManagerImp::writeIndexFile(const string &filename, const vector<Inde
    XMLWriter xml("Session");
    xml.addAttr("version", APP_VERSION_NUMBER);
    xml.addAttr("id", mName);
+   xml.addAttr("platform", AebPlatform::currentPlatform());
    vector<IndexFileItem>::const_iterator ppItem;
    for (ppItem = items.begin(); ppItem != items.end(); ++ppItem)
    {
