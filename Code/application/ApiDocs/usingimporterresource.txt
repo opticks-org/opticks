@@ -1,0 +1,176 @@
+/** \page usingimporterresource Using ImporterResource
+The ImporterResource contains functionality needed to import data of any type with different execution behavior
+based on the given data to import.\   The table below shows all possible combinations of the three import data
+values (filename(s), import descriptors, and importer) and how the ImportAgent::execute() method works based on the
+given import data.
+
+<b>Import Data</b><br>
+The %Filename(s), Import Descriptors, and %Importer columns indicate the import data that is either passed into the
+ImporterResource constructor or set by calling ImportAgent::setFilename(), ImportAgent::setFilenames(),
+ImportAgent::setDatasets(), and ImportAgent::setPlugIn().
+
+<b>Execution Mode</b><br>
+The Application Mode column indicates the operating mode of the application as determined by
+ApplicationServices::isBatch().  This is different than the batch mode parameter that is passed into the resource
+constructor.  The constructor parameter is passed into the importer being executed and is not used internally by
+the resource or the agent.
+
+<b>Execution Behavior</b><br>
+The %Resource Execution Behavior column describes what will happen when executing the resource based on the
+various combinations of data specified in the import data columns.
+
+<b>Execution Options</b><br>
+The %Importer Subtype, Edit Type, and Update MRU File List columns pertain to optional settings that affect
+execution behavior.  The text describes how the setting is used when the resource is executed.
+
+<table align="center">
+<tr>
+   <td colspan="3" align="center"><b>Import Data</b></td>
+   <td align="center"><b>Execution Mode</b></td>
+   <td align="center"><b>Execution Behavior</b></td>
+   <td colspan="3" align="center"><b>Execution Options</b></td>
+</tr>
+<tr>
+   <td><b>\link ImportAgent::setFilename() %Filename(s) \endlink</b></td>
+   <td><b>\link ImportAgent::setDatasets() Import Descriptors \endlink</b></td>
+   <td><b>\link ImportAgent::setPlugIn() %Importer \endlink</b></td>
+   <td><b>\link ApplicationServices::isBatch() Application Mode \endlink</b></td>
+   <td><b>\link ImportAgent::execute() %Resource Execution Behavior \endlink</b></td>
+   <td><b>\link ImportAgent::setImporterSubtype() %Importer Subtype \endlink</b></td>
+   <td><b>\link ImportAgent::setEditType() Edit Type \endlink</b></td>
+   <td><b>\link ImportAgent::updateMruFileList() Update MRU File List \endlink</b></td>
+</tr>
+<tr>
+   <td>&nbsp;</td>
+   <td>&nbsp;</td>
+   <td>&nbsp;</td>
+   <td>Interactive</td>
+   <td>The import dialog is invoked for the user to select an importer, filename(s), and the imported data sets
+      from the file(s).</td>
+   <td>Used - Filters the available importers shown in the import dialog.</td>
+   <td>Ignored - The user can invoke the import options dialog from the import dialog.</td>
+   <td>Used</td>
+</tr>
+<tr>
+   <td>&nbsp;</td>
+   <td>&nbsp;</td>
+   <td>X</td>
+   <td>Interactive</td>
+   <td>The import dialog is invoked for the user to select an importer, filename(s), and the imported data sets
+      from the file(s).  The importer set in the importer resource is used as the default selected importer in the
+      dialog.</td>
+   <td>Used - Filters the available importers shown in the import dialog.</td>
+   <td>Ignored - The user can invoke the import options dialog from the import dialog.</td>
+   <td>Used</td>
+</tr>
+<tr>
+   <td>X</td>
+   <td>&nbsp;</td>
+   <td>&nbsp;</td>
+   <td>Interactive</td>
+   <td>The Auto %Importer is used to import the default data sets in the file(s) obtained from
+      Importer::getImportDescriptors().</td>
+   <td>Ignored</td>
+   <td>Used</td>
+   <td>Used</td>
+</tr>
+<tr>
+   <td>X</td>
+   <td>&nbsp;</td>
+   <td>X</td>
+   <td>Interactive</td>
+   <td>The given importer is used to import the default data sets in the file(s) obtained from
+      Importer::getImportDescriptors().</td>
+   <td>Ignored</td>
+   <td>Used</td>
+   <td>Used</td>
+</tr>
+<tr>
+   <td>X</td>
+   <td>X</td>
+   <td>&nbsp;</td>
+   <td>Interactive</td>
+   <td>The resource fails to execute because specific import descriptors were set without an importer being set.</td>
+   <td>Ignored</td>
+   <td>Ignored</td>
+   <td>Ignored</td>
+</tr>
+<tr>
+   <td>X</td>
+   <td>X</td>
+   <td>X</td>
+   <td>Interactive</td>
+   <td>The importer set in the importer resource is used to import the data sets represented by the import descriptors
+      set in the importer resource.</td>
+   <td>Ignored</td>
+   <td>Used</td>
+   <td>Used</td>
+</tr>
+<tr>
+   <td>&nbsp;</td>
+   <td>&nbsp;</td>
+   <td>&nbsp;</td>
+   <td>Batch</td>
+   <td>The resource fails to execute because no filenames (either with or without specific import descriptors) were
+      set.</td>
+   <td>Ignored</td>
+   <td>Ignored</td>
+   <td>Ignored</td>
+</tr>
+<tr>
+   <td>&nbsp;</td>
+   <td>&nbsp;</td>
+   <td>X</td>
+   <td>Batch</td>
+   <td>The resource fails to execute because no filenames (either with or without specific import descriptors) were
+      set.</td>
+   <td>Ignored</td>
+   <td>Ignored</td>
+   <td>Ignored</td>
+</tr>
+<tr>
+   <td>X</td>
+   <td>&nbsp;</td>
+   <td>&nbsp;</td>
+   <td>Batch</td>
+   <td>The Auto %Importer is used to import the default data sets in the file(s) obtained from
+      Importer::getImportDescriptors().</td>
+   <td>Ignored</td>
+   <td>Ignored</td>
+   <td>Used</td>
+</tr>
+<tr>
+   <td>X</td>
+   <td>&nbsp;</td>
+   <td>X</td>
+   <td>Batch</td>
+   <td>The given importer is used to import the default data sets in the file(s) obtained from
+      Importer::getImportDescriptors().</td>
+   <td>Ignored</td>
+   <td>Ignored</td>
+   <td>Used</td>
+</tr>
+<tr>
+   <td>X</td>
+   <td>X</td>
+   <td>&nbsp;</td>
+   <td>Batch</td>
+   <td>The resource fails to execute because specific import descriptors were set without an importer being set.</td>
+   <td>Ignored</td>
+   <td>Ignored</td>
+   <td>Ignored</td>
+</tr>
+<tr>
+   <td>X</td>
+   <td>X</td>
+   <td>X</td>
+   <td>Batch</td>
+   <td>The importer set in the importer resource is used to import the data sets represented by the import descriptors
+      set in the importer resource.</td>
+   <td>Ignored</td>
+   <td>Ignored</td>
+   <td>Used</td>
+</tr>
+</table>
+
+ */

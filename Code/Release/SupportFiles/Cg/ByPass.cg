@@ -1,0 +1,6 @@
+float4 main(in float2 coords : TEXCOORD0,
+            uniform samplerRECT inputImage) : COLOR
+{   
+   // return the original value of the input image at the specified coordinates
+   return texRECT(inputImage, coords);
+}
