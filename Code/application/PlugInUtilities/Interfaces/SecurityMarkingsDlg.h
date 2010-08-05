@@ -272,7 +272,7 @@ private:
    Classification* mpClass;
 
    std::vector<Classification*> mlstFavorites;
-   std::vector<std::string> mlstRemovedFavorites;
+   std::string mFavoritesAttributePrefix;
 
    bool mDeclassDateIsValid;
    bool mDowngradeDateIsValid;
