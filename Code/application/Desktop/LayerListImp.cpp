@@ -38,8 +38,7 @@
 using namespace std;
 
 LayerListImp::LayerListImp()
-{
-}
+{}
 
 LayerListImp::~LayerListImp()
 {
@@ -555,14 +554,14 @@ bool LayerListImp::deleteLayer(Layer* pLayer)
 
 void LayerListImp::clear()
 {
-   vector<Layer*> layers = getLayers();
-   for (unsigned int i = 0; i < layers.size(); i++)
+   // We can't simply iterate over the list of layers and delete them one at a time because the
+   // deletion of a layer could also cause the deletion of the associated data element. This
+   // could cause the deletion of a child element which could cause the deletion of a layer in
+   // the list before the iterator reaches the now invalid layer pointer. The attempt to delete the 
+   // invalid pointer would cause Opticks to crash.
+   while (mLayers.empty()== false)
    {
-      Layer* pLayer = layers[i];
-      if (pLayer != NULL)
-      {
-         deleteLayer(pLayer);
-      }
+      deleteLayer(mLayers.front());
    }
 }
 
