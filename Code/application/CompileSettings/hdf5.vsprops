@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="hdf5"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+		AdditionalIncludeDirectories="$(HDF5)\include\windows"
+		PreprocessorDefinitions="_HDF5USEDLL_"
+	/>
+	<Tool
+		Name="VCLinkerTool"
+		AdditionalLibraryDirectories="$(HDF5)\lib\$(PlatformName)"
+	/>
+</VisualStudioPropertySheet>
