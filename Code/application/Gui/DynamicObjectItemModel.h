@@ -45,7 +45,8 @@ protected:
    class AttributeWrapper
    {
    public:
-      AttributeWrapper(const std::string& name, DataVariant* pValue, AttributeWrapper* pParent = NULL);
+      AttributeWrapper(DynamicObjectItemModel* pModel, const std::string& name, DataVariant* pValue,
+         AttributeWrapper* pParent = NULL);
       ~AttributeWrapper();
 
       const std::string& getName() const;
@@ -55,10 +56,14 @@ protected:
       const std::vector<AttributeWrapper*>& getChildren() const;
 
       void addChild(AttributeWrapper* pWrapper);
+      AttributeWrapper* addChild(const std::string& name, DataVariant* pValue);
+      AttributeWrapper* getChild(const std::string& name, DataVariant* pValue) const;
       bool removeChild(AttributeWrapper* pWrapper);
+      bool removeChild(const std::string& name, DataVariant* pValue);
       void clear();
 
    private:
+      DynamicObjectItemModel* mpModel;
       std::string mName;
       DataVariant* mpValue;
       AttributeWrapper* mpParent;

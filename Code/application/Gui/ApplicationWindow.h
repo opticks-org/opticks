@@ -452,6 +452,7 @@ private:
 
    // Undo
    QUndoGroup* mpUndoGroup;
+   bool mClearingUndoStacks;
 
    // Drag and Drop File Import
    enum DropFilesTypeEnum
