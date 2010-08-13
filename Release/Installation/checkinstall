@@ -1,0 +1,4 @@
+if [ $UPDATE ]; then
+   echo "This package does not support updates, please run pkgrm, followed by pkgadd" 
+   exit 3
+fi
