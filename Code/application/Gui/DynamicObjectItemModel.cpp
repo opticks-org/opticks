@@ -17,7 +17,7 @@ using namespace std;
 DynamicObjectItemModel::DynamicObjectItemModel(QObject* pParent, DynamicObject* pDynamicObject) :
    QAbstractItemModel(pParent),
    mpDynamicObject(NULL),
-   mpRootWrapper(new AttributeWrapper("Root", NULL, NULL))
+   mpRootWrapper(new AttributeWrapper(this, "Root", NULL, NULL))
 {
    // Initialization
    setDynamicObject(pDynamicObject);
@@ -223,24 +223,13 @@ void DynamicObjectItemModel::setDynamicObject(DynamicObject* pDynamicObject)
       return;
    }
 
+   // Clear the attribute items and the dynamic object map
    clear();
 
+   // Detach from the previous dynamic object
    if (mpDynamicObject != NULL)
    {
-      map<DynamicObject*, AttributeWrapper*>::iterator iter = mDynamicObjects.find(pDynamicObject);
-      if (iter != mDynamicObjects.end())
-      {
-         mDynamicObjects.erase(iter);
-      }
-
-      mpDynamicObject->detach(SIGNAL_NAME(DynamicObject, AttributeAdded),
-         Slot(this, &DynamicObjectItemModel::addAttribute));
-      mpDynamicObject->detach(SIGNAL_NAME(DynamicObject, AttributeModified),
-         Slot(this, &DynamicObjectItemModel::modifyAttribute));
-      mpDynamicObject->detach(SIGNAL_NAME(DynamicObject, AttributeRemoved),
-         Slot(this, &DynamicObjectItemModel::removeAttribute));
-      mpDynamicObject->detach(SIGNAL_NAME(DynamicObject, Cleared),
-         Slot(this, &DynamicObjectItemModel::removeAllAttributes));
+      // All other signal/slot connections were detached when the dynamic object map was cleared
       mpDynamicObject->detach(SIGNAL_NAME(Subject, Deleted),
          Slot(this, &DynamicObjectItemModel::dynamicObjectDeleted));
    }
@@ -249,6 +238,7 @@ void DynamicObjectItemModel::setDynamicObject(DynamicObject* pDynamicObject)
 
    if (mpDynamicObject != NULL)
    {
+      // Add the attribute items
       vector<string> attributeNames;
       mpDynamicObject->getAttributeNames(attributeNames);
       for (vector<string>::size_type i = 0; i < attributeNames.size(); ++i)
@@ -264,6 +254,7 @@ void DynamicObjectItemModel::setDynamicObject(DynamicObject* pDynamicObject)
          }
       }
 
+      // Add the dynamic object to the map
       map<DynamicObject*, AttributeWrapper*>::iterator iter = mDynamicObjects.find(pDynamicObject);
       if (iter == mDynamicObjects.end())
       {
@@ -430,37 +421,11 @@ DynamicObjectItemModel::addAttributeItem(AttributeWrapper* pParentWrapper, const
       return NULL;
    }
 
-   // Get the parent dynamic object index
-   QModelIndex parent;
-
-   DataVariant* pParentValue = pParentWrapper->getValue();
-   if ((pParentValue != NULL) && (pParentValue->isValid() == true))
-   {
-      if (pParentValue->getTypeName() == "DynamicObject")
-      {
-         DynamicObject* pDynamicObject = dv_cast<DynamicObject>(pParentValue);
-         if (pDynamicObject != NULL)
-         {
-            parent = index(pDynamicObject);
-         }
-      }
-   }
-
    // Add the attribute item
-   int row = static_cast<int>(pParentWrapper->getChildren().size());
-   beginInsertRows(parent, row, row);
-
-   AttributeWrapper* pWrapper = new AttributeWrapper(name, pValue, pParentWrapper);
-   if (pWrapper != NULL)
-   {
-      pParentWrapper->addChild(pWrapper);
-   }
-
-   endInsertRows();
-
-   // Initialize a DynamicObject item
+   AttributeWrapper* pWrapper = pParentWrapper->addChild(name, pValue);
    if ((pWrapper != NULL) && (pValue->isValid() == true))
    {
+      // Initialize a DynamicObject item
       string attributeType = pValue->getTypeName();
       if (attributeType == "DynamicObject")
       {
@@ -530,28 +495,8 @@ void DynamicObjectItemModel::removeAttributeItem(AttributeWrapper* pParentWrappe
       }
    }
 
-   // Get the attribute wrapper and the row of the attribute to remove
-   AttributeWrapper* pWrapper = NULL;
-   int row = 0;
-
-   const vector<AttributeWrapper*>& wrappers = pParentWrapper->getChildren();
-   for (vector<AttributeWrapper*>::size_type i = 0; i < wrappers.size(); ++i)
-   {
-      AttributeWrapper* pCurrentWrapper = wrappers[i];
-      if (pCurrentWrapper != NULL)
-      {
-         const string& currentName = pCurrentWrapper->getName();
-         DataVariant* pCurrentValue = pCurrentWrapper->getValue();
-         if ((currentName == name) && (pCurrentValue != NULL) &&
-            ((pCurrentValue == pValue) || (*pCurrentValue == *pValue)))
-         {
-            pWrapper = pCurrentWrapper;
-            row = static_cast<int>(i);
-            break;
-         }
-      }
-   }
-
+   // Get the attribute wrapper of the attribute to remove
+   AttributeWrapper* pWrapper = pParentWrapper->getChild(name, pValue);
    if (pWrapper == NULL)
    {
       return;
@@ -604,9 +549,7 @@ void DynamicObjectItemModel::removeAttributeItem(AttributeWrapper* pParentWrappe
    }
 
    // Remove the attribute
-   beginRemoveRows(parent, row, row);
    pParentWrapper->removeChild(pWrapper);
-   endRemoveRows();
 }
 
 DynamicObjectItemModel::AttributeWrapper* DynamicObjectItemModel::getWrapper(DynamicObject* pDynamicObject) const
@@ -622,7 +565,29 @@ DynamicObjectItemModel::AttributeWrapper* DynamicObjectItemModel::getWrapper(Dyn
 
 void DynamicObjectItemModel::clear()
 {
+   // Delete all attribute items
    mpRootWrapper->clear();
+
+   // Detach from DynamicObject items
+   for (map<DynamicObject*, AttributeWrapper*>::const_iterator iter = mDynamicObjects.begin();
+      iter != mDynamicObjects.end();
+      ++iter)
+   {
+      DynamicObject* pDynamicObject = iter->first;
+      if (pDynamicObject != NULL)
+      {
+         pDynamicObject->detach(SIGNAL_NAME(DynamicObject, AttributeAdded),
+            Slot(this, &DynamicObjectItemModel::addAttribute));
+         pDynamicObject->detach(SIGNAL_NAME(DynamicObject, AttributeModified),
+            Slot(this, &DynamicObjectItemModel::modifyAttribute));
+         pDynamicObject->detach(SIGNAL_NAME(DynamicObject, AttributeRemoved),
+            Slot(this, &DynamicObjectItemModel::removeAttribute));
+         pDynamicObject->detach(SIGNAL_NAME(DynamicObject, Cleared),
+            Slot(this, &DynamicObjectItemModel::removeAllAttributes));
+      }
+   }
+
+   // Clear the map
    mDynamicObjects.clear();
 }
 
@@ -630,13 +595,13 @@ void DynamicObjectItemModel::clear()
 // AttributeWrapper //
 //////////////////////
 
-DynamicObjectItemModel::AttributeWrapper::AttributeWrapper(const string& name, DataVariant* pValue,
-                                                           AttributeWrapper* pParent) :
+DynamicObjectItemModel::AttributeWrapper::AttributeWrapper(DynamicObjectItemModel* pModel, const string& name,
+                                                           DataVariant* pValue, AttributeWrapper* pParent) :
+   mpModel(pModel),
    mName(name),
    mpValue(pValue),
    mpParent(pParent)
-{
-}
+{}
 
 DynamicObjectItemModel::AttributeWrapper::~AttributeWrapper()
 {
@@ -670,29 +635,127 @@ const vector<DynamicObjectItemModel::AttributeWrapper*>& DynamicObjectItemModel:
 
 void DynamicObjectItemModel::AttributeWrapper::addChild(AttributeWrapper* pWrapper)
 {
-   if (pWrapper != NULL)
+   if ((pWrapper == NULL) || (mpModel == NULL))
    {
-      vector<AttributeWrapper*>::iterator iter = find(mChildren.begin(), mChildren.end(), pWrapper);
-      if (iter == mChildren.end())
+      return;
+   }
+
+   QModelIndex parent;
+   if (mpParent != NULL)
+   {
+      const vector<AttributeWrapper*>& siblings = mpParent->getChildren();
+      for (vector<AttributeWrapper*>::size_type i = 0; i < siblings.size(); ++i)
       {
-         mChildren.push_back(pWrapper);
+         AttributeWrapper* pCurrentWrapper = siblings[i];
+         if (pCurrentWrapper == this)
+         {
+            parent = mpModel->createIndex(static_cast<int>(i), 0, this);
+            break;
+         }
       }
    }
+
+   int row = static_cast<int>(mChildren.size());
+   mpModel->beginInsertRows(parent, row, row);
+   mChildren.push_back(pWrapper);
+   mpModel->endInsertRows();
+}
+
+DynamicObjectItemModel::AttributeWrapper* DynamicObjectItemModel::AttributeWrapper::addChild(const string& name,
+                                                                                             DataVariant* pValue)
+{
+   if ((name.empty() == true) || (pValue == NULL) || (mpModel == NULL))
+   {
+      return NULL;
+   }
+
+   if (getChild(name, pValue) != NULL)
+   {
+      return NULL;
+   }
+
+   AttributeWrapper* pChildWrapper = new AttributeWrapper(mpModel, name, pValue, this);
+   if (pChildWrapper != NULL)
+   {
+      addChild(pChildWrapper);
+   }
+
+   return pChildWrapper;
+}
+
+DynamicObjectItemModel::AttributeWrapper* DynamicObjectItemModel::AttributeWrapper::getChild(const string& name,
+                                                                                             DataVariant* pValue) const
+{
+   if ((name.empty() == true) || (pValue == NULL))
+   {
+      return NULL;
+   }
+
+   for (vector<AttributeWrapper*>::const_iterator iter = mChildren.begin(); iter != mChildren.end(); ++iter)
+   {
+      AttributeWrapper* pWrapper = *iter;
+      VERIFYRV(pWrapper != NULL, NULL);
+
+      const string& currentName = pWrapper->getName();
+      DataVariant* pCurrentValue = pWrapper->getValue();
+      if ((currentName == name) && (pCurrentValue != NULL) &&
+         ((pCurrentValue == pValue) || (*pCurrentValue == *pValue)))
+      {
+         return pWrapper;
+      }
+   }
+
+   return NULL;
 }
 
 bool DynamicObjectItemModel::AttributeWrapper::removeChild(AttributeWrapper* pWrapper)
 {
-   if (pWrapper == NULL)
+   if ((pWrapper == NULL) || (mpModel == NULL))
    {
       return false;
    }
 
-   for (vector<AttributeWrapper*>::iterator iter = mChildren.begin(); iter != mChildren.end(); ++iter)
+   int row = 0;
+   vector<AttributeWrapper*>::reverse_iterator iter;
+   for (iter = mChildren.rbegin(), row = static_cast<int>(mChildren.size()) - 1;
+        iter != mChildren.rend();
+        ++iter, --row)
    {
       AttributeWrapper* pCurrentWrapper = *iter;
       if (pCurrentWrapper == pWrapper)
       {
-         mChildren.erase(iter);
+         // Remove any child items
+         vector<AttributeWrapper*> children = pWrapper->getChildren();
+         for (vector<AttributeWrapper*>::size_type i = 0; i < children.size(); ++i)
+         {
+            AttributeWrapper* pChildWrapper = children[i];
+            if (pChildWrapper != NULL)
+            {
+               pWrapper->removeChild(pChildWrapper);
+            }
+         }
+
+         // Get the parent index
+         QModelIndex parent;
+         if (mpParent != NULL)
+         {
+            const vector<AttributeWrapper*>& siblings = mpParent->getChildren();
+            for (vector<AttributeWrapper*>::size_type i = 0; i < siblings.size(); ++i)
+            {
+               AttributeWrapper* pSiblingWrapper = siblings[i];
+               if (pSiblingWrapper == this)
+               {
+                  parent = mpModel->createIndex(static_cast<int>(i), 0, this);
+                  break;
+               }
+            }
+         }
+
+         // Remove the item
+         mpModel->beginRemoveRows(parent, row, row);
+         vector<AttributeWrapper*>::iterator fwdIter = iter.base();
+         mChildren.erase(--fwdIter);
+         mpModel->endRemoveRows();
          delete pWrapper;
          return true;
       }
@@ -701,17 +764,30 @@ bool DynamicObjectItemModel::AttributeWrapper::removeChild(AttributeWrapper* pWr
    return false;
 }
 
+bool DynamicObjectItemModel::AttributeWrapper::removeChild(const string& name, DataVariant* pValue)
+{
+   if ((name.empty() == true) || (pValue == NULL))
+   {
+      return false;
+   }
+
+   AttributeWrapper* pWrapper = getChild(name, pValue);
+   if (pWrapper != NULL)
+   {
+      return removeChild(pWrapper);
+   }
+
+   return false;
+}
+
 void DynamicObjectItemModel::AttributeWrapper::clear()
 {
    // Delete the child wrappers
-   for (vector<AttributeWrapper*>::iterator iter = mChildren.begin(); iter != mChildren.end(); ++iter)
+   while (mChildren.empty() == false)
    {
-      AttributeWrapper* pWrapper = *iter;
-      if (pWrapper != NULL)
-      {
-         delete pWrapper;
-      }
-   }
+      AttributeWrapper* pWrapper = mChildren.back();
+      VERIFYNRV(pWrapper != NULL);
 
-   mChildren.clear();
+      removeChild(pWrapper);
+   }
 }
