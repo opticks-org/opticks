@@ -40,7 +40,10 @@ public:
  *  for the sole purpose of managing the lifespan of the DataAccessorImpl.  This
  *  class is used to create a wrapper around the DataAccessorImpl class to provide
  *  safe reference counting.  When the %DataAccessor loses scope the DataAccessorImpl
- *  class is deleted.
+ *  class is deleted, causing its associated RasterPager to release its held RasterPage.
+ *  If the RasterPager has already been deleted (e.g.: by deleting its RasterElement),
+ *  the destruction of the DataAccessorImpl will cause undefined behavior. Therefore,
+ *  the deletion of a RasterElement must occur after the deletion of its associated %DataAccessors.
  *
  *  @see        DataAccessorDeleter, DataAccessorImpl
  */

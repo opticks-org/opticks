@@ -86,6 +86,8 @@ public:
    /**
     * Get a DataAccessor with the parameters contained within the given request.
     *
+    * @warning The returned DataAccessor must be deleted prior to the deletion of this RasterElement.
+    *
     * @param pRequest
     *        Requested access parameters.  If NULL, then the default parameters will
     *        be used.  This method takes ownership of the DataRequest object.
@@ -98,9 +100,10 @@ public:
 
    /**
     * Get a DataAccessor with the parameters contained within the given request.
-    *
     * This const overloaded method is exactly like the non-const version, except that
     * it cannot be used with a writable DataRequest.
+    *
+    * @warning The returned DataAccessor must be deleted prior to the deletion of this RasterElement.
     *
     * @param pRequest
     *        Requested access parameters.  If NULL, then the default parameters will
