@@ -64,11 +64,12 @@ ZoomAndPanToPointDlg::ZoomAndPanToPointDlg(RasterElement* pRaster, GeocoordType 
       {
          tipStrLat += "   Space delimited: DD MM SS.SSS (e.g. 40 06 31.982)\n";
          tipStrLat += "   DMS delimited: DDdMMmSS.SSSs (e.g. 40d06m31.982s)\n";
-         tipStrLat += "   Symbol delimited: DD°MM'SS.SSS (e.g. 40°06'31.982)\n";
+         tipStrLat += "   Symbol delimited: DD°MM'SS.SSS\" (e.g. 40°06'31.982\")\n";
          tipStrLat += "   Decimal degrees: DD.DDDDDD (e.g. 40.108884)\n";
          tipStrLat += "   Concatenated: DDMMSS.SSS (e.g. 400631.982)\n";
          tipStrLat += "\nNotes:\n";
-         tipStrLat += "   Two characters are required for minutes and seconds (e.g. 06, not 6).\n";
+         tipStrLat += "   For the concatenated format, two characters are required for degrees, minutes,\n";
+         tipStrLat += "       and seconds (e.g. 06, not 6).\n";
          tipStrLat += "   To designate the southern hemisphere, preface the value with 'S', 's', or '-'.";
          mpLatitudeEdit->setToolTip(tipStrLat);
       }
@@ -78,11 +79,12 @@ ZoomAndPanToPointDlg::ZoomAndPanToPointDlg(RasterElement* pRaster, GeocoordType 
       {
          tipStrLon += "   Space delimited: DDD MM SS.SSS (e.g. -114 06 31.982)\n";
          tipStrLon += "   DMS delimited: DDDdMMmSS.SSSs (e.g. -114d06m31.982s)\n";
-         tipStrLon += "   Symbol delimited: DDD°MM'SS.SSS (e.g. -114°06'31.982)\n";
+         tipStrLon += "   Symbol delimited: DDD°MM'SS.SSS\" (e.g. -114°06'31.982\")\n";
          tipStrLon += "   Decimal degrees: DDD.DDDDDD (e.g. -114.108884)\n";
          tipStrLon += "   Concatenated: DDDMMSS.SSS (e.g. -1140631.982)\n";
          tipStrLon += "\nNotes:\n";
-         tipStrLon += "   Two characters are required for minutes and seconds (e.g. 06, not 6).\n";
+         tipStrLon += "   For the concatenated format, a minimum of two characters are required for degrees,\n";
+         tipStrLon += "       and two characters are required for minutes and seconds (e.g. 06, not 6).\n";
          tipStrLon += "   To designate the western hemisphere, preface the value with 'W', 'w', or '-'.";
          mpLongitudeEdit->setToolTip(tipStrLon);
       }

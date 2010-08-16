@@ -11,10 +11,14 @@
 #include <stdio.h>
 
 #include "AppConfig.h"
+#include "AppVerify.h"
 #include "GeoPoint.h"
 #include "MgrsEngine.h"
-#include <string.h>
+#include "StringUtilities.h"
 
+#include <boost/lexical_cast.hpp>
+
+#include <string>
 using namespace std;
 
 #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This should really be a Location<double, 3> " \
@@ -52,8 +56,6 @@ void DmsPoint::setValue(double dValue)
 void DmsPoint::setValue(const string& valueText)
 {
    mValue = 0.0;
-   bool finished(false);
-
    if (valueText.empty() == true)
    {
       return;
@@ -70,8 +72,6 @@ void DmsPoint::setValue(const string& valueText)
    char negCapIndicator[2] = "S";
    char posLcIndicator[2] = "n";
    char negLcIndicator[2] = "s";
-   int fieldCount = 0;
-   const char* format = "%lg";
 
    if (mType == DMS_DECIMAL)
    {
@@ -89,91 +89,92 @@ void DmsPoint::setValue(const string& valueText)
       negCapIndicator[0] = 'W';
    }
 
-   posLcIndicator[0] = posCapIndicator[0]-'A'+'a';
-   negLcIndicator[0] = negCapIndicator[0]-'A'+'a';
+   posLcIndicator[0] = posCapIndicator[0] - 'A' + 'a';
+   negLcIndicator[0] = negCapIndicator[0] - 'A' + 'a';
 
-   string formatStr = string("%[") +
-      posCapIndicator + negCapIndicator +
-      posLcIndicator + negLcIndicator +
-      "]%lg%[Dd°*\x20]%lg%[Mm'\x20]%lg%[Ss\"\x20]";
+   string format = string("%1[") + posCapIndicator + negCapIndicator + posLcIndicator + negLcIndicator +
+      "]%lg%1[Dd°*\x20]%lg%1[Mm'\x20]%lg%1[Ss\"\x20]";
 
-   format = formatStr.c_str();
-
-   fieldCount = sscanf(valueText.c_str(), format, &dirDelimiter,
-      &degValue, degDelimiter,
-      &minValue, minDelimiter,
-      &secValue, secDelimiter);
+   int fieldCount = sscanf(valueText.c_str(), format.c_str(), dirDelimiter, &degValue, degDelimiter,
+      &minValue, minDelimiter, &secValue, secDelimiter);
 
    if (fieldCount < 2)
    {
-      format = "%lg%[Dd°*\x20]%lg%[Mm'\x20]%lg%[Ss\"\x20]";
+      format = "%lg%1[Dd°*\x20]%lg%1[Mm'\x20]%lg%1[Ss\"\x20]";
 
-      fieldCount = sscanf(valueText.c_str(), format,
-         &degValue, degDelimiter,
-         &minValue, minDelimiter,
+      fieldCount = sscanf(valueText.c_str(), format.c_str(), &degValue, degDelimiter, &minValue, minDelimiter,
          &secValue, secDelimiter);
 
-      if (fieldCount <= 1)
+      if (fieldCount < 1)
       {
-         mValue = degValue;
-         finished = true;
-      }
-      else
-      {
-         fieldCount++;
-         if (degValue >= 0.0)
-         {
-            dirDelimiter[0] = posCapIndicator[0];
-         }
-         else
-         {
-            dirDelimiter[0] = negCapIndicator[0];
-         }
-      }
-   }
-
-   if (!finished)
-   {
-      mValue = fabs(degValue);
-      if (fieldCount >= 4)
-      {
-         mValue += minValue / 60.0;
-      }
-
-      if (fieldCount >= 6)
-      {
-         mValue += secValue / 3600.0;
-      }
-
-      if ((dirDelimiter[0] == negCapIndicator[0] || dirDelimiter[0] == negLcIndicator[0]))
-      {
-         mValue = -mValue;
-      }
-   }
-
-   // check for concatenated format
-   if (fabs(mValue) > 1000.0) // concatenated format parsed as decimal degrees
-   {
-      string strVal = valueText;
-      int firstLoc = strVal.find_first_of('.');
-      int lastLoc = strVal.find_last_of('.');
-
-      if (firstLoc != lastLoc)  // bad entry, should only be one decimal point
-      {
-         mValue = 0.0;
          return;
       }
 
-      if (lastLoc == string::npos) // no decimal point
+      if (degValue >= 0.0)
       {
-         lastLoc = strVal.length();
+         dirDelimiter[0] = posCapIndicator[0];
+      }
+      else
+      {
+         dirDelimiter[0] = negCapIndicator[0];
+      }
+   }
+
+   VERIFYNRV(fieldCount >= 1);
+
+   if (fieldCount == 1 || fieldCount == 2)    // Decimal degrees or concatenated format
+   {
+      // Check for concatenated format
+      string::size_type pos = valueText.find('.');
+      if (pos == string::npos)
+      {
+         pos = valueText.length();
       }
 
-      lastLoc -= 2; // back up to tens of seconds digit;
-      strVal.insert(lastLoc, "m");
-      lastLoc -= 2; // back up to tens of minutes digit
-      strVal.insert(lastLoc, "d");
-      setValue(strVal);
+      string::size_type startPos = fieldCount - 1;
+      if (degValue < 0.0)
+      {
+         ++startPos;
+      }
+
+      if (pos - startPos > 5)      // Must have at least six numeric digits
+      {
+         string degText = valueText.substr(startPos, pos - 4 - startPos);
+         string minText = valueText.substr(pos - 4, 2);
+         string secText = valueText.substr(pos - 2);
+
+         try
+         {
+            degValue = boost::lexical_cast<double>(degText);
+            minValue = boost::lexical_cast<double>(minText);
+            secValue = boost::lexical_cast<double>(secText);
+         }
+         catch (boost::bad_lexical_cast)
+         {
+            return;
+         }
+      }
+   }
+
+   // Check for invalid degrees, minutes, or seconds
+   if ((mType == DMS_LATITUDE && fabs(degValue) > 90.0) || (mType != DMS_LATITUDE && fabs(degValue) > 180.0) ||
+      (minValue >= 60.0) || (secValue >= 60.0))
+   {
+      return;
+   }
+
+   double value = fabs(degValue) + (minValue / 60.0) + (secValue / 3600.0);
+   if ((mType == DMS_LATITUDE && fabs(value) > 90.0) || (mType != DMS_LATITUDE && fabs(value) > 180.0))
+   {
+      return;
+   }
+
+   // Set the value
+   mValue = value;
+
+   if ((dirDelimiter[0] == negCapIndicator[0] || dirDelimiter[0] == negLcIndicator[0]))
+   {
+      mValue = -mValue;
    }
 }
 
