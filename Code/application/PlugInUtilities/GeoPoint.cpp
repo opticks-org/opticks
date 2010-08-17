@@ -9,6 +9,7 @@
 
 #include <math.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "AppConfig.h"
 #include "AppVerify.h"
@@ -18,7 +19,6 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include <string>
 using namespace std;
 
 #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This should really be a Location<double, 3> " \
