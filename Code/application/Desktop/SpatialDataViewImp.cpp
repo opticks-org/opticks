@@ -69,12 +69,12 @@
 #include <QtGui/QToolTip>
 #include <QtOpenGL/QGLFramebufferObject>
 
-#include <math.h>
-
 #include <boost/bind.hpp>
 
 #include <algorithm>
 #include <limits>
+#include <math.h>
+
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
 
@@ -1243,28 +1243,23 @@ void SpatialDataViewImp::clear()
    vector<Layer*> layers;
    mpLayerList->getLayers(layers);
 
-   // Delete the primary raster element last in case other layers are deleted as a result
-   Layer* pPrimaryRasterLayer = NULL;
-   for (vector<Layer*>::iterator iter = layers.begin(); iter != layers.end(); ++iter)
+   // We can't simply iterate over the list of layers and delete them one at a time because the
+   // deletion of a layer could also cause the deletion of the associated data element. This
+   // could cause the deletion of a child element which could cause the deletion of a layer in
+   // the list before the iterator reaches the now invalid layer pointer. The attempt to delete the 
+   // invalid pointer would cause Opticks to crash.
+   while (layers.empty() == false)
    {
-      Layer* pLayer = *iter;
-      if (pLayer != NULL)
+      // delete the primary raster layer last
+      if (layers.front() == mpPrimaryRasterLayer.get())
       {
-         DataElement* pElement = pLayer->getDataElement();
-         if (pElement != mpLayerList->getPrimaryRasterElement())
-         {
-            deleteLayer(pLayer);
-         }
-         else
-         {
-            pPrimaryRasterLayer = pLayer;
-         }
+         deleteLayer(layers.back());
       }
-   }
-
-   if (pPrimaryRasterLayer != NULL)
-   {
-      deleteLayer(pPrimaryRasterLayer);
+      else
+      {
+         deleteLayer(layers.front());
+      }
+      mpLayerList->getLayers(layers);
    }
 }
 
