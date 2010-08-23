@@ -19,6 +19,7 @@
 #include "RasterElement.h"
 #include "RasterUtilities.h"
 #include "SimpleApiErrors.h"
+#include "Statistics.h"
 #include "switchOnEncoding.h"
 #include "TypeConverter.h"
 
@@ -290,6 +291,22 @@ extern "C"
                badValues.push_back(args.pBadValues[idx]);
             }
             pDesc->setBadValues(badValues);
+
+            // set on the statistics objects
+            const std::vector<DimensionDescriptor>& allBands = pDesc->getBands();
+            for (std::vector<DimensionDescriptor>::const_iterator band = allBands.begin();
+                 band != allBands.end(); ++band)
+            {
+               if (band->isValid())
+               {
+                  Statistics* pStats = pElement->getStatistics(*band);
+                  if (pStats != NULL)
+                  {
+                     pStats->setBadValues(badValues);
+                  }
+               }
+            }
+            pElement->updateData();
          }
       }
 
