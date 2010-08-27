@@ -631,8 +631,13 @@ bool ProductViewImp::enableInset(bool bEnable)
 
 void ProductViewImp::updateClassificationMarks(const QString &newClassification)
 {
-   QString strTopText = newClassification;
-   QString strBottomText = newClassification;
+   QString strTopText;
+   QString strBottomText;
+   if (ConfigurationSettings::getSettingDisplayClassificationMarkings())
+   {
+      strTopText = newClassification;
+      strBottomText = newClassification;
+   }
 
    Service<ConfigurationSettings> pConfigSettings;
    if (!strTopText.isEmpty())

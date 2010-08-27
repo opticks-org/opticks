@@ -57,7 +57,11 @@ MultiLineTextDialog::MultiLineTextDialog(QWidget *pParent) :
       "Examples:<ul>"
       "<li>$M(NITF/File Header/ONAME)"
       "<li>$M(//C:/Data/mydata.ntf-I1//NITF/File Header/ONAME)"
-      "<li>$M(//[View 1]//NITF/File Header/ONAME)</ul>");
+      "<li>$M(//[View 1]//NITF/File Header/ONAME)</ul><hr/>"
+      "Other special replacements are specified with $S(specification) where "
+      "specification uses the same rules as $M() but instead of a metadata "
+      "path, use a variable name. The only variable currently supported is:<ul>"
+      "<li>CLASSIFICATION - Replace with the classification string of the specified dataset</ul>");
 
    const string geometry = MultiLineTextDialog::getSettingGeometry();
    if (geometry.empty() == false)

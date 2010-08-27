@@ -64,7 +64,7 @@ ViewImp::ViewImp(const string& id, const string& viewName, QGLContext* drawConte
    SessionItemImp(id, viewName),
    mbLinking(false),
    mClassificationColor(Qt::white),
-   mClassificationEnabled(true),
+   mClassificationEnabled(ConfigurationSettings::getSettingDisplayClassificationMarkings()),
    mReleaseInfoEnabled(true),
    mpMouseMode(NULL),
    mMinX(0.0),

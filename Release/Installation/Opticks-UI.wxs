@@ -637,7 +637,7 @@
             <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
             <Control Id="Title" Type="Text" X="11" Y="7" Width="240" Height="15" Transparent="yes" NoPrefix="yes" Text="{\Title_Font}System Classification" />
             <Control Id="Description" Type="Text" X="17" Y="22" Width="280" Height="20" Transparent="yes" NoPrefix="yes" Text="Please select the classification level of this system." />
-            <Control Id="ClassificationRadio" Type="RadioButtonGroup" X="11" Y="56" Width="335" Height="120" Property="CLASSIFICATIONLEVEL">
+            <Control Id="ClassificationRadio" Type="RadioButtonGroup" X="11" Y="56" Width="335" Height="84" Property="CLASSIFICATIONLEVEL">
                <RadioButtonGroup Property="CLASSIFICATIONLEVEL">
                   <RadioButton Value="Unclassified" X="0" Y="0" Width="295" Height="15" Text="Unclassified" />
                   <RadioButton Value="Confidential" X="0" Y="20" Width="295" Height="15" Text="Confidential" />
@@ -645,6 +645,7 @@
                   <RadioButton Value="TopSecret" X="0" Y="60" Width="295" Height="15" Text="Top Secret" />
                </RadioButtonGroup>
             </Control>
+            <Control Id="ClassificationDisplay" Type="CheckBox" X="11" Y="150" Width="295" Height="15" Text="Display Classification Banners" Property="CLASSIFICATIONDISPLAY" CheckBoxValue="1" />
          </Dialog>
 
          <Dialog Id="TempDataBrowseDlg" Width="370" Height="270" Title="$(var.DialogTitle)">
