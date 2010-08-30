@@ -248,6 +248,10 @@ RasterLayerImp::~RasterLayerImp()
    setAnimation(NULL);
    reset();
 
+   decrementElementReference(mpGrayRasterElement.get());
+   decrementElementReference(mpRedRasterElement.get());
+   decrementElementReference(mpGreenRasterElement.get());
+   decrementElementReference(mpBlueRasterElement.get());
    delete mpStretchMenu;
 }
 
@@ -1430,25 +1434,33 @@ void RasterLayerImp::setDisplayedBand(RasterChannelType eColor, DimensionDescrip
       switch (eColor)
       {
          case GRAY:
+            decrementElementReference(mpGrayRasterElement.get());
             mpGrayRasterElement.reset(pRasterElement);
+            incrementElementReference(mpGrayRasterElement.get());
             mGrayBand = band;
             eMode = GRAYSCALE_MODE;
             break;
 
          case RED:
+            decrementElementReference(mpRedRasterElement.get());
             mpRedRasterElement.reset(pRasterElement);
+            incrementElementReference(mpRedRasterElement.get());
             mRedBand = band;
             eMode = RGB_MODE;
             break;
 
          case GREEN:
+            decrementElementReference(mpGreenRasterElement.get());
             mpGreenRasterElement.reset(pRasterElement);
+            incrementElementReference(mpGreenRasterElement.get());
             mGreenBand = band;
             eMode = RGB_MODE;
             break;
 
          case BLUE:
+            decrementElementReference(mpBlueRasterElement.get());
             mpBlueRasterElement.reset(pRasterElement);
+            incrementElementReference(mpBlueRasterElement.get());
             mBlueBand = band;
             eMode = RGB_MODE;
             break;
