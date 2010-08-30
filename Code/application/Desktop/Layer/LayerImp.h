@@ -133,6 +133,8 @@ signals:
 protected:
    LayerImp(const std::string& id, const std::string& layerName, DataElement* pElement);
    void removeLinkedLayer(Subject& subject, const std::string& signal, const boost::any& value);
+   static void incrementElementReference(DataElement* pElement);
+   static void decrementElementReference(DataElement* pElement);
 
 protected:
    bool mbLinking;

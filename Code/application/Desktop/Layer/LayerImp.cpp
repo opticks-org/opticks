@@ -481,36 +481,42 @@ void LayerImp::removeLinkedLayer(Subject& subject, const string& signal, const b
 
 void LayerImp::setDataElement(DataElement* pElement)
 {
-   if (mpElement.get() != NULL)
-   {
-      // Decrement the number of layers displaying the element
-      if (mElementLayers.contains(mpElement.get()))
-      {
-         if (--mElementLayers[mpElement.get()] == 0)
-         {
-            // Remove the element from the map
-            mElementLayers.remove(mpElement.get());
-
-            // Delete the element
-            ModelServicesImp* pModel(ModelServicesImp::instance());
-            pModel->destroyElement(mpElement.get());
-         }
-      }
-   }
-
-   // now set the new element with reference counting
+   decrementElementReference(mpElement.get());
    mpElement.reset(pElement);
+   incrementElementReference(mpElement.get());
+}
 
-   if (mpElement.get() != NULL)
+void LayerImp::incrementElementReference(DataElement* pElement)
+{
+   if (pElement != NULL)
    {
       // Increment the number of layers displaying the element
-      if (mElementLayers.contains(mpElement.get()))
+      if (mElementLayers.contains(pElement))
       {
-         mElementLayers[mpElement.get()]++;
+         ++mElementLayers[pElement];
       }
       else
       {
-         mElementLayers.insert(mpElement.get(), 1);
+         mElementLayers.insert(pElement, 1);
+      }
+   }
+}
+
+void LayerImp::decrementElementReference(DataElement* pElement)
+{
+   if (pElement != NULL)
+   {
+      // Decrement the number of layers displaying the element
+      if (mElementLayers.contains(pElement))
+      {
+         if (--mElementLayers[pElement] == 0)
+         {
+            // Remove the element from the map
+            mElementLayers.remove(pElement);
+
+            // Delete the element
+            Service<ModelServices>()->destroyElement(pElement);
+         }
       }
    }
 }
