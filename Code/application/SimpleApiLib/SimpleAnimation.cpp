@@ -40,9 +40,12 @@ public:
    {
       Animation& animation = dynamic_cast<Animation&>(subject);
       AnimationFrame* pFrame = boost::any_cast<AnimationFrame*>(v);
-      std::string animName = animation.getName();
-      mpCallback(animName.c_str(), pFrame->mName.c_str(),
-         pFrame->mFrameNumber, pFrame->mTime, mpUser);
+      if (pFrame != NULL)
+      {
+         std::string animName = animation.getName();
+         mpCallback(animName.c_str(), pFrame->mName.c_str(),
+            pFrame->mFrameNumber, pFrame->mTime, mpUser);
+      }
    }
 
 private:
