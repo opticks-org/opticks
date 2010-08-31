@@ -584,20 +584,13 @@ void WindowModel::WindowSourceModel::updateLayerDisplay(Subject& subject, const 
       SessionItemWrapper* pWrapper = getWrapper(pLayer);
       if (pWrapper != NULL)
       {
-         bool bHidden = false;
          Qt::CheckState checkState = Qt::Checked;
-
          if (signal == "SpatialDataView::LayerHidden")
          {
-            bHidden = true;
             checkState = Qt::Unchecked;
          }
 
-         QFont itemFont = pWrapper->getDisplayFont();
-         itemFont.setItalic(bHidden);
-
          pWrapper->setCheckState(checkState);
-         pWrapper->setDisplayFont(itemFont);
 
          QModelIndex layerIndex = index(pLayer);
          emit dataChanged(layerIndex, layerIndex);
@@ -613,21 +606,13 @@ void WindowModel::WindowSourceModel::updateToolbarDisplay(Subject& subject, cons
       SessionItemWrapper* pWrapper = getWrapper(pToolbar);
       if (pWrapper != NULL)
       {
-
-         bool bHidden = false;
          Qt::CheckState checkState = Qt::Checked;
-
          if (signal == "ToolBar::Hidden")
          {
-            bHidden = true;
             checkState = Qt::Unchecked;
          }
 
-         QFont itemFont = pWrapper->getDisplayFont();
-         itemFont.setItalic(bHidden);
-
          pWrapper->setCheckState(checkState);
-         pWrapper->setDisplayFont(itemFont);
 
          QModelIndex toolbarIndex = index(pToolbar);
          emit dataChanged(toolbarIndex, toolbarIndex);
@@ -643,20 +628,13 @@ void WindowModel::WindowSourceModel::updateDockDisplay(Subject& subject, const s
       SessionItemWrapper* pWrapper = getWrapper(pPlot);
       if (pWrapper != NULL)
       {
-         bool bHidden = false;
          Qt::CheckState checkState = Qt::Checked;
-
          if (signal == "DockWindow::Hidden")
          {
-            bHidden = true;
             checkState = Qt::Unchecked;
          }
 
-         QFont itemFont = pWrapper->getDisplayFont();
-         itemFont.setItalic(bHidden);
-
          pWrapper->setCheckState(checkState);
-         pWrapper->setDisplayFont(itemFont);
 
          QModelIndex plotIndex = index(pPlot);
          emit dataChanged(plotIndex, plotIndex);
@@ -876,11 +854,6 @@ WindowModel::WindowSourceModel::SessionItemWrapper* WindowModel::WindowSourceMod
       if (pToolbar != NULL)
       {
          bool toolbarDisplayed = pToolbar->isShown();
-
-         QFont itemFont = pWindowWrapper->getDisplayFont();
-         itemFont.setItalic(!toolbarDisplayed);
-
-         pWindowWrapper->setDisplayFont(itemFont);
          pWindowWrapper->setCheckState(toolbarDisplayed ? Qt::Checked : Qt::Unchecked);
 
          // Connections
@@ -892,11 +865,6 @@ WindowModel::WindowSourceModel::SessionItemWrapper* WindowModel::WindowSourceMod
       if (pDockWindow != NULL)
       {
          bool dockWindowDisplayed = pDockWindow->isShown();
-
-         QFont itemFont = pWindowWrapper->getDisplayFont();
-         itemFont.setItalic(!dockWindowDisplayed);
-
-         pWindowWrapper->setDisplayFont(itemFont);
          pWindowWrapper->setCheckState(dockWindowDisplayed ? Qt::Checked : Qt::Unchecked);
 
          // Connections
@@ -1219,34 +1187,33 @@ WindowModel::WindowSourceModel::addLayerItem(SessionItemWrapper* pViewWrapper, L
       }
 
       // Initialize the wrapper
-      QFont itemFont = pLayerWrapper->getDisplayFont();
       bool layerActive = false;
 
       SpatialDataView* pSpatialDataView = dynamic_cast<SpatialDataView*>(pLayer->getView());
       if (pSpatialDataView != NULL)
       {
-         // Font
-         bool layerDisplayed = pSpatialDataView->isLayerDisplayed(pLayer);
-         itemFont.setItalic(!layerDisplayed);
-
+         // Determine the active layer to bold the layer name if necessary
          if (pSpatialDataView->getActiveLayer() == pLayer)
          {
             layerActive = true;
          }
 
          // Check state
+         bool layerDisplayed = pSpatialDataView->isLayerDisplayed(pLayer);
          pLayerWrapper->setCheckState(layerDisplayed ? Qt::Checked : Qt::Unchecked);
       }
 
       ProductView* pProductView = dynamic_cast<ProductView*>(pLayer->getView());
       if (pProductView != NULL)
       {
+         // Determine the active layer to bold the layer name if necessary
          if (pProductView->getActiveLayer() == pLayer)
          {
             layerActive = true;
          }
       }
 
+      QFont itemFont = pLayerWrapper->getDisplayFont();
       itemFont.setBold(layerActive);
       pLayerWrapper->setDisplayFont(itemFont);
    }
