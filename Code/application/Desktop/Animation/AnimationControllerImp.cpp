@@ -74,7 +74,6 @@ AnimationControllerImp::AnimationControllerImp(FrameType frameType, const string
    mState(STOP),
    mCycle(AnimationController::getSettingAnimationCycleSelection()),
    mStartTime(0.0),
-   mCanDropFrames(true),
    mBumpersEnabled(false),
    mpPlayAction(NULL),
    mpPauseAction(NULL),
@@ -89,8 +88,10 @@ AnimationControllerImp::AnimationControllerImp(FrameType frameType, const string
    mpResetBumpersAction(NULL),
    mpSeparatorAction(NULL),
    mpSeparator2Action(NULL),
+   mpSeparator3Action(NULL),
    mpStoreBumpersAction(NULL),
-   mpRestoreBumpersAction(NULL)
+   mpRestoreBumpersAction(NULL),
+   mpCanDropFramesAction(NULL)
 {
    // Context menu actions
    mpPlayAction = new QAction("Play", this);
@@ -134,10 +135,17 @@ AnimationControllerImp::AnimationControllerImp(FrameType frameType, const string
    mpRestoreBumpersAction = new QAction("Restore Bumpers", this);
    mpRestoreBumpersAction->setAutoRepeat(false);
 
+   mpCanDropFramesAction = new QAction("Can Drop Frames", this);
+   mpCanDropFramesAction->setAutoRepeat(false);
+   mpCanDropFramesAction->setCheckable(true);
+   mpCanDropFramesAction->setChecked(AnimationController::getSettingCanDropFrames());
+
    mpSeparatorAction = new QAction("", this);
    mpSeparatorAction->setSeparator(true);
    mpSeparator2Action = new QAction("", this);
    mpSeparator2Action->setSeparator(true);
+   mpSeparator3Action = new QAction("", this);
+   mpSeparator3Action->setSeparator(true);
 
    // Initialization
    mpPlayAction->setIcon(QIcon(":/icons/PlayForward"));
@@ -235,6 +243,9 @@ list<ContextMenuAction> AnimationControllerImp::getContextMenuActions() const
       DataVariant bumpersEnabled = pSettings->getSetting(bumperPath);
       mpRestoreBumpersAction->setEnabled(bumpersEnabled.isValid());
       menuActions.push_back(ContextMenuAction(mpRestoreBumpersAction, APP_ANIMATIONCONTROLLER_RESTORE_BUMPERS_ACTION));
+      menuActions.push_back(ContextMenuAction(mpSeparator3Action,
+         APP_ANIMATIONCONTROLLER_DROP_FRAMES_SEPARATOR_ACTION));
+      menuActions.push_back(ContextMenuAction(mpCanDropFramesAction, APP_ANIMATIONCONTROLLER_DROP_FRAMES_ACTION));
    }
 
    return menuActions;
@@ -1038,16 +1049,15 @@ void AnimationControllerImp::destroyAnimation()
 
 void AnimationControllerImp::setCanDropFrames(bool drop)
 {
-   if (mCanDropFrames != drop)
+   if (getCanDropFrames() != drop)
    {
-      mCanDropFrames = drop;
-      emit canDropFramesChanged(drop);
+      mpCanDropFramesAction->setChecked(drop);
    }
 }
 
 bool AnimationControllerImp::getCanDropFrames() const
 {
-   return mCanDropFrames;
+   return mpCanDropFramesAction->isChecked();
 }
 
 double AnimationControllerImp::getNextValue(double value) const
@@ -1126,7 +1136,7 @@ bool AnimationControllerImp::serialize(SessionItemSerializer& serializer) const
                                                    .arg(mMinimumFrameRate.denominator()).toStdString());
    xml.addAttr("interval", mInterval);
    xml.addAttr("cycle", mCycle);
-   xml.addAttr("dropframes", mCanDropFrames);
+   xml.addAttr("dropframes", getCanDropFrames());
 
    for (vector<Animation*>::const_iterator it = mAnimations.begin(); it != mAnimations.end(); ++it)
    {
@@ -1174,8 +1184,7 @@ bool AnimationControllerImp::deserialize(SessionItemDeserializer &deserializer)
       A(pRoot->getAttribute(X("interval"))));
    mCycle = StringUtilities::fromXmlString<AnimationCycle>(
       A(pRoot->getAttribute(X("cycle"))));
-   mCanDropFrames = StringUtilities::fromXmlString<bool>(
-      A(pRoot->getAttribute(X("dropframes"))));
+   setCanDropFrames(StringUtilities::fromXmlString<bool>(A(pRoot->getAttribute(X("dropframes")))));
    for (DOMNode *pNode = pRoot->getFirstChild(); pNode != NULL; pNode = pNode->getNextSibling())
    {
       if (XMLString::equals(pNode->getNodeName(), X("DisplayText")))

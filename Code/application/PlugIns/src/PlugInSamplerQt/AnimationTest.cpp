@@ -168,11 +168,13 @@ AnimationTestDlg::AnimationTestDlg(PlugIn* pPlugIn, QWidget* pParent) :
 
    // Misc
    QPushButton* pToggleTimeDisplayButton = new QPushButton("Toggle Time Display", this);
+   QPushButton* pToggleCanDropFramesButton = new QPushButton("Toggle Can Drop Frames", this);
    QPushButton* pDestroyAnimationsButton = new QPushButton("Destroy All Animations", this);
    QPushButton* pCloseButton = new QPushButton("Close");
 
    QHBoxLayout* pMiscLayout = new QHBoxLayout;
    pMiscLayout->addWidget(pToggleTimeDisplayButton);
+   pMiscLayout->addWidget(pToggleCanDropFramesButton);
    pMiscLayout->addWidget(pDestroyAnimationsButton);
    pMiscLayout->addWidget(pCloseButton);
 
@@ -197,6 +199,7 @@ AnimationTestDlg::AnimationTestDlg(PlugIn* pPlugIn, QWidget* pParent) :
    VERIFYNRV(connect(pViewFramesButton, SIGNAL(clicked()), this, SLOT(viewFrames())));
    VERIFYNRV(connect(pViewAllFramesButton, SIGNAL(clicked()), this, SLOT(viewAllFrames())));
    VERIFYNRV(connect(pToggleTimeDisplayButton, SIGNAL(clicked()), this, SLOT(toggleTimeDisplay())));
+   VERIFYNRV(connect(pToggleCanDropFramesButton, SIGNAL(clicked()), this, SLOT(toggleCanDropFrames())));
    VERIFYNRV(connect(pDestroyAnimationsButton, SIGNAL(clicked()), this, SLOT(destroyAnimations())));
    VERIFYNRV(connect(pCloseButton, SIGNAL(clicked()), this, SLOT(close())));
 
@@ -412,6 +415,14 @@ void AnimationTestDlg::toggleTimeDisplay()
    if (pToolBar != NULL)
    {
       pToolBar->setHideTimestamp(pToolBar->getHideTimestamp() == false);
+   }
+}
+
+void AnimationTestDlg::toggleCanDropFrames()
+{
+   if (mpController.get() != NULL)
+   {
+      mpController->setCanDropFrames(!mpController->getCanDropFrames());
    }
 }
 

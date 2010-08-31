@@ -18,6 +18,7 @@
 #include <vector>
 
 class AnimationCycleButton;
+class QCheckBox;
 
 class OptionsAnimation : public QWidget
 {
@@ -88,6 +89,7 @@ protected slots:
    void editFrameSpeedFinished(QListWidgetItem *pCurrentItem);
 
 private:
+   QCheckBox* mpCanDropFrames;
    AnimationCycleButton* mpCycle;
    QListWidget* mpFrameSpeedList;
    std::vector<double> mFrameSpeeds;

@@ -14,6 +14,7 @@
 #include "AnimationToolBar.h"
 #include "LabeledSection.h"
 
+#include <QtGui/QCheckBox>
 #include <QtGui/QLabel>
 #include <QtGui/QPushButton>
 #include <QtGui/QLayout>
@@ -24,6 +25,11 @@ OptionsAnimation::OptionsAnimation() :
    QWidget(NULL)
 {
    // Animation
+   mpCanDropFrames = new QCheckBox("Can Drop Frames", this);
+   mpCanDropFrames->setStatusTip("Determines if frames should be dropped to preserve the frame speed");
+   mpCanDropFrames->setToolTip("Determines if frames should be dropped to preserve the frame speed");
+   mpCanDropFrames->setChecked(AnimationController::getSettingCanDropFrames());
+
    QLabel* pAnimationCycleSettingLabel = new QLabel("Default Animation Cycle:", this);
    mpCycle = new AnimationCycleButton(this);
    mpCycle->setStatusTip("Specifies the play behavior when the end of the animation is reached");
@@ -45,14 +51,15 @@ OptionsAnimation::OptionsAnimation() :
    QGridLayout* pAnimationLayout = new QGridLayout(pAnimationLayoutWidget);
    pAnimationLayout->setMargin(0);
    pAnimationLayout->setSpacing(5);
-   pAnimationLayout->addWidget(pAnimationCycleSettingLabel, 0, 0);
-   pAnimationLayout->addWidget(mpCycle, 0, 1, Qt::AlignLeft);
-   pAnimationLayout->addWidget(pFrameSpeedLabel, 1, 0);
-   pAnimationLayout->addWidget(mpFrameSpeedList, 2, 0, 2, 2);
-   pAnimationLayout->addWidget(pAddButton, 2, 2);
-   pAnimationLayout->addWidget(pRemoveButton, 3, 2, Qt::AlignTop);
+   pAnimationLayout->addWidget(mpCanDropFrames, 0, 0, 1, 2);
+   pAnimationLayout->addWidget(pAnimationCycleSettingLabel, 1, 0);
+   pAnimationLayout->addWidget(mpCycle, 1, 1, Qt::AlignLeft);
+   pAnimationLayout->addWidget(pFrameSpeedLabel, 2, 0, 1, 2);
+   pAnimationLayout->addWidget(mpFrameSpeedList, 3, 0, 2, 2);
+   pAnimationLayout->addWidget(pAddButton, 3, 2);
+   pAnimationLayout->addWidget(pRemoveButton, 4, 2, Qt::AlignTop);
    pAnimationLayout->setColumnStretch(1, 20);
-   pAnimationLayout->setRowStretch(3, 20);
+   pAnimationLayout->setRowStretch(4, 20);
    LabeledSection* pAnimationSection = new LabeledSection(pAnimationLayoutWidget, "Animation", this);
 
    VERIFYNR(connect(pAddButton, SIGNAL(clicked()), this, SLOT(addFrameSpeed())));
@@ -70,6 +77,7 @@ OptionsAnimation::OptionsAnimation() :
 
 void OptionsAnimation::applyChanges()
 {
+   AnimationController::setSettingCanDropFrames(mpCanDropFrames->isChecked());
    AnimationController::setSettingAnimationCycleSelection(mpCycle->getCurrentValue());
    AnimationToolBar::setSettingFrameSpeeds(mFrameSpeeds);
 }

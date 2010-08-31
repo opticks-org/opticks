@@ -99,6 +99,8 @@
  *    <tr><td>Separator</td><td>APP_ANIMATIONCONTROLLER_STORE_BUMPERS_SEPARATOR_ACTION()</td></tr>
  *    <tr><td>Store Bumpers</td><td>APP_ANIMATIONCONTROLLER_STORE_BUMPERS_ACTION()</td></tr>
  *    <tr><td>Restore Bumpers</td><td>APP_ANIMATIONCONTROLLER_RESTORE_BUMPERS_ACTION()</td></tr>
+ *    <tr><td>Separator</td><td>APP_ANIMATIONCONTROLLER_DROP_FRAMES_SEPARATOR_ACTION()</td></tr>
+ *    <tr><td>Can Drop Frames</td><td>APP_ANIMATIONCONTROLLER_DROP_FRAMES_ACTION()</td></tr>
  *  </table>
  *
  *  \subsection animationservices Animation Services

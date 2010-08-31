@@ -84,8 +84,6 @@ protected slots:
    void activateSlider();
    void releaseSlider();
 
-   void setCanDropFrames(bool canDropFrames);
-
 protected:
    void removeAnimationController(AnimationController* pController);
 
@@ -142,7 +140,6 @@ private:
    QAction* mpResetBumpersAction;        // menu action to reset the bumpers
    QAction* mpStoreBumpersAction;        // menu action to store mpController's set of bumpers
    QAction* mpRestoreBumpersAction;      // menu action to restore a set of bumpers to mpController
-   QAction* mpDropFramesAction;          // button to determine if frames can be dropped or not
    AnimationCycleButton* mpCycle;
    QLabel* mpTimestampLabel;
 

@@ -60,6 +60,7 @@ protected slots:
    void viewFrames();
    void viewAllFrames();
    void toggleTimeDisplay();
+   void toggleCanDropFrames();
    void destroyAnimations();
 
 protected:

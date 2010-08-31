@@ -112,7 +112,6 @@ signals:
    void animationStateChanged(AnimationState state);
    void animationCycleChanged(AnimationCycle cycle);
    void intervalMultiplierChanged(double multiplier);
-   void canDropFramesChanged(bool canDropFrames);
    void bumpersEnabledChanged(bool enabled);
    void bumperStartChanged(double newValue);
    void bumperStopChanged(double newValue);
@@ -152,7 +151,6 @@ private:
    AnimationCycle mCycle;
 
    double mStartTime;
-   bool mCanDropFrames;
    bool mBumpersEnabled;
 
    QAction* mpPlayAction;
@@ -168,8 +166,10 @@ private:
    QAction* mpResetBumpersAction;
    QAction* mpSeparatorAction;
    QAction* mpSeparator2Action;
+   QAction* mpSeparator3Action;
    QAction* mpStoreBumpersAction;
    QAction* mpRestoreBumpersAction;
+   QAction* mpCanDropFramesAction;
    static std::list<AnimationControllerImp*> mRunningControllers;
    static std::list<AnimationControllerImp*>::iterator mppActiveController;
 };
