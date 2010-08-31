@@ -7,14 +7,15 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include "ConfigurationSettings.h"
 #include "Textures.h"
 #include "glCommon.h"
 
 #include <algorithm>
 
 std::vector<TextureImpl*> TextureImpl::sAllTextures;
-int TextureImpl::sMaxOldTextureSize = 200000000;
-int TextureImpl::sTotalSize = 0;
+uint64_t TextureImpl::sTextureCacheSize = 0;
+uint64_t TextureImpl::sTotalSize = 0;
 
 TextureImpl::TextureImpl() :
    mHandle(0),
@@ -45,6 +46,20 @@ void TextureImpl::updateTimestamp() const
    mTimestamp = time(NULL);
 }
 
+uint64_t TextureImpl::getTextureCacheSize()
+{
+   if (sTextureCacheSize == 0)
+   {
+      sTextureCacheSize = static_cast<uint64_t>(ConfigurationSettings::getSettingGpuTextureCacheSize()) * 1024 * 1024;
+   }
+   return sTextureCacheSize;
+}
+
+void TextureImpl::downsizeTextureCache()
+{
+   sTextureCacheSize /= 2;
+}
+
 void TextureImpl::genTexture(int size)
 {
    static int sGenCount = 0;
@@ -55,14 +70,18 @@ void TextureImpl::genTexture(int size)
    {
       deleteOldTextures();
    }
-
-   while (mHandle == 0 && sMaxOldTextureSize > 100000)
+ 
+   glGenTextures(1, &mHandle); 
+   if (mHandle == 0)
    {
+      const uint64_t minTextureCache = 100 * 1024 * 1024; //100 MB, no particular reason this was chosen as the min
+      deleteOldTextures();
       glGenTextures(1, &mHandle); 
-      if (mHandle == 0)
+      while (mHandle == 0 && getTextureCacheSize() > minTextureCache)
       {
-         sMaxOldTextureSize /= 2;
+         downsizeTextureCache();
          deleteOldTextures();
+         glGenTextures(1, &mHandle); 
       }
    }
 
@@ -126,9 +145,10 @@ bool TextureImplGr(const TextureImpl *pLhs, const TextureImpl *pRhs)
 
 void TextureImpl::deleteOldTextures()
 {
-   int sum = 0;
+   uint64_t sum = 0;
 
-   if (sTotalSize > sMaxOldTextureSize)
+   uint64_t textureCacheSize = getTextureCacheSize();
+   if (sTotalSize > textureCacheSize)
    {
       std::sort(sAllTextures.begin(), sAllTextures.end(), TextureImplGr);
 
@@ -136,7 +156,7 @@ void TextureImpl::deleteOldTextures()
       for (it = sAllTextures.begin(); it != sAllTextures.end(); ++it)
       {
          sum += (*it)->getSize();
-         if (sum > sMaxOldTextureSize)
+         if (sum > textureCacheSize)
          {
             break;
          }

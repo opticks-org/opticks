@@ -32,13 +32,15 @@ public:
 private:
    void updateTimestamp() const;
    static void deleteOldTextures();
+   static uint64_t getTextureCacheSize(); 
+   static void downsizeTextureCache();
    unsigned int mHandle;
    unsigned int mSize;
    mutable time_t mTimestamp;
    mutable unsigned int mReferenceCount;
    static std::vector<TextureImpl*> sAllTextures;
-   static int sMaxOldTextureSize;
-   static int sTotalSize;
+   static uint64_t sTextureCacheSize;
+   static uint64_t sTotalSize;
 };
 
 class Texture
