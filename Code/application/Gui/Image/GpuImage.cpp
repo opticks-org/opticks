@@ -72,9 +72,7 @@ void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor channel, uns
 
    initializeGrayscale();
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : If no alpha, this should be GL_LUMINANCE. " \
-   "Fix when GpuTile can change format. (tjohnson)")
-   GLenum texFormat = ((format == GL_RGBA || format == GL_LUMINANCE_ALPHA) ? GL_LUMINANCE_ALPHA : GL_LUMINANCE_ALPHA);
+   GLenum texFormat = ((format == GL_RGBA || format == GL_LUMINANCE_ALPHA) ? GL_LUMINANCE_ALPHA : GL_LUMINANCE);
    Image::initialize(tileSizeX, tileSizeY, channel, imageSizeX, imageSizeY, channels, texFormat, type, pData,
       stretchType, stretchPoints, pRasterElement, badValues);
 }
@@ -90,9 +88,7 @@ void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor channel, uns
 
    initializeGrayscale();
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : If no alpha, this should be GL_LUMINANCE. " \
-   "Fix when GpuTile can change format. (tjohnson)")
-   GLenum texFormat = ((format == GL_RGBA || format == GL_LUMINANCE_ALPHA) ? GL_LUMINANCE_ALPHA : GL_LUMINANCE_ALPHA);
+   GLenum texFormat = ((format == GL_RGBA || format == GL_LUMINANCE_ALPHA) ? GL_LUMINANCE_ALPHA : GL_LUMINANCE);
    Image::initialize(tileSizeX, tileSizeY, channel, imageSizeX, imageSizeY, channels, texFormat, type, component,
       pData, stretchType, stretchPoints, pRasterElement, badValues);
 }
@@ -110,9 +106,7 @@ void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor channel, uns
 
    initializeColormap(colorMap);
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : If no alpha, this should be GL_LUMINANCE. " \
-   "Fix when GpuTile can change format. (tjohnson)")
-   GLenum texFormat = ((format == GL_RGBA || format == GL_LUMINANCE_ALPHA) ? GL_LUMINANCE_ALPHA : GL_LUMINANCE_ALPHA);
+   GLenum texFormat = ((format == GL_RGBA || format == GL_LUMINANCE_ALPHA) ? GL_LUMINANCE_ALPHA : GL_LUMINANCE);
    Image::initialize(tileSizeX, tileSizeY, channel, imageSizeX, imageSizeY, channels, texFormat, type, pData,
       stretchType, stretchPoints, pRasterElement, colorMap, badValues);
 }
@@ -129,9 +123,7 @@ void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor channel, uns
 
    initializeColormap(colorMap);
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : If no alpha, this should be GL_LUMINANCE. " \
-   "Fix when GpuTile can change format. (tjohnson)")
-   GLenum texFormat = ((format == GL_RGBA || format == GL_LUMINANCE_ALPHA) ? GL_LUMINANCE_ALPHA : GL_LUMINANCE_ALPHA);
+   GLenum texFormat = ((format == GL_RGBA || format == GL_LUMINANCE_ALPHA) ? GL_LUMINANCE_ALPHA : GL_LUMINANCE);
    Image::initialize(tileSizeX, tileSizeY, channel, imageSizeX, imageSizeY, channels, texFormat, type, component,
       pData, stretchType, stretchPoints, pRasterElement, colorMap, badValues);
 }
@@ -270,6 +262,67 @@ In getFromSource(In src)
    return src - getOffset<In>();
 }
 
+template<typename In, typename Out>
+void copyLineFromSource(In* pSource, Out* pTarget, unsigned int count)
+{
+   memcpy(pTarget, pSource, count*sizeof(Out));
+}
+
+template<>
+void copyLineFromSource<signed char, unsigned char>(signed char* pSource, unsigned char* pTarget, unsigned int count)
+{
+   for (unsigned int i=0; i<count; ++i)
+   {
+      *pTarget = getFromSource(*pSource);
+      ++pTarget;
+      ++pSource;
+   }
+}
+
+template<>
+void copyLineFromSource<signed short, unsigned short>(signed short* pSource, unsigned short* pTarget, unsigned int count)
+{
+   for (unsigned int i=0; i<count; ++i)
+   {
+      *pTarget = getFromSource(*pSource);
+      ++pTarget;
+      ++pSource;
+   }
+}
+
+template<>
+void copyLineFromSource<signed int, float>(signed int* pSource, float* pTarget, unsigned int count)
+{
+   for (unsigned int i=0; i<count; ++i)
+   {
+      *pTarget = static_cast<float>(getFromSource(*pSource));
+      ++pTarget;
+      ++pSource;
+   }
+}
+
+template<>
+void copyLineFromSource<unsigned int, float>(unsigned int* pSource, float* pTarget, unsigned int count)
+{
+   for (unsigned int i=0; i<count; ++i)
+   {
+      *pTarget = static_cast<float>(getFromSource(*pSource));
+      ++pTarget;
+      ++pSource;
+   }
+}
+
+template<>
+void copyLineFromSource<double, float>(double* pSource, float* pTarget, unsigned int count)
+{
+   for (unsigned int i=0; i<count; ++i)
+   {
+      *pTarget = static_cast<float>(getFromSource(*pSource));
+      ++pTarget;
+      ++pSource;
+   }
+}
+
 class GpuTileProcessor
 {
 public:
@@ -289,7 +342,8 @@ private:
 
    template <typename In, typename Out>
    void populateTextureData(Out* pTexData, unsigned int tileSizeX, unsigned int tileSizeY,
-      DataAccessor da, int currentChannel, int totalChannels, EncodingType outputType)
+      DataAccessor da, InterleaveFormatType interleave, int currentChannel, int totalChannels, 
+      EncodingType outputType)
    {
       std::vector<int>::const_iterator badBegin = mInfo.mKey.mBadValues.begin();
       std::vector<int>::const_iterator badEnd = mInfo.mKey.mBadValues.end();
@@ -367,21 +421,29 @@ private:
             {
                Out* pTarget = pTargetBase;
                pTarget += channelMinus1;
-               for (unsigned int x1 = 0; x1 < tileSizeX; x1++)
+               if (interleave != BIP && totalChannels == 1)
                {
-                  *pTarget = static_cast<Out>(getFromSource(*static_cast<In*>(da->getColumn())));
+                  unsigned int width = min(tileSizeX, static_cast<unsigned int>(mInfo.mTileSizeX));
+                  copyLineFromSource(static_cast<In*>(da->getRow()), pTarget, width);
+               }
+               else
+               {
+                  for (unsigned int x1 = 0; x1 < tileSizeX; x1++)
+                  {
+                     *pTarget = static_cast<Out>(getFromSource(*static_cast<In*>(da->getColumn())));
 
-                  if (totalChannels == 2)
-                  {
-                     ++pTarget;
-                     *pTarget = numeric_limits<Out>::max();
-                     ++pTarget;
+                     if (totalChannels == 2)
+                     {
+                        ++pTarget;
+                        *pTarget = numeric_limits<Out>::max();
+                        ++pTarget;
+                     }
+                     else if (static_cast<int>(x1) < mInfo.mTileSizeX - 1)
+                     {
+                        pTarget += totalChannels;
+                     }
+                     da->nextColumn();
                   }
-                  else if (static_cast<int>(x1) < mInfo.mTileSizeX - 1)
-                  {
-                     pTarget += totalChannels;
-                  }
-                  da->nextColumn();
                }
                da->nextRow();
             }
@@ -391,47 +453,48 @@ private:
 
    template <typename Out>
    void populateTextureData(Out* pTexData, EncodingType inputType, unsigned int tileSizeX,
-      unsigned int tileSizeY, DataAccessor da, int currentChannel, int totalChannels, EncodingType outputType)
+      unsigned int tileSizeY, DataAccessor da, InterleaveFormatType interleave, 
+      int currentChannel, int totalChannels, EncodingType outputType)
    {
       switch (inputType)
       {
          case INT1UBYTE:
-            populateTextureData<unsigned char>(pTexData, tileSizeX, tileSizeY, da,
+            populateTextureData<unsigned char>(pTexData, tileSizeX, tileSizeY, da, interleave,
                currentChannel, totalChannels, outputType);
             break;
 
          case INT1SBYTE:
-            populateTextureData<signed char>(pTexData, tileSizeX, tileSizeY, da,
+            populateTextureData<signed char>(pTexData, tileSizeX, tileSizeY, da, interleave,
                currentChannel, totalChannels, outputType);
             break;
 
          case INT2UBYTES:
-            populateTextureData<unsigned short>(pTexData, tileSizeX, tileSizeY, da,
+            populateTextureData<unsigned short>(pTexData, tileSizeX, tileSizeY, da, interleave,
                currentChannel, totalChannels, outputType);
             break;
 
          case INT2SBYTES:
-            populateTextureData<signed short>(pTexData, tileSizeX, tileSizeY, da,
+            populateTextureData<signed short>(pTexData, tileSizeX, tileSizeY, da, interleave,
                currentChannel, totalChannels, outputType);
             break;
 
          case INT4UBYTES:
-            populateTextureData<unsigned int>(pTexData, tileSizeX, tileSizeY, da,
+            populateTextureData<unsigned int>(pTexData, tileSizeX, tileSizeY, da, interleave,
                currentChannel, totalChannels, outputType);
             break;
 
          case INT4SBYTES:
-            populateTextureData<signed int>(pTexData, tileSizeX, tileSizeY, da,
+            populateTextureData<signed int>(pTexData, tileSizeX, tileSizeY, da, interleave,
                currentChannel, totalChannels, outputType);
             break;
 
          case FLT4BYTES:
-            populateTextureData<float>(pTexData, tileSizeX, tileSizeY, da,
+            populateTextureData<float>(pTexData, tileSizeX, tileSizeY, da, interleave,
                currentChannel, totalChannels, outputType);
             break;
 
          case FLT8BYTES:
-            populateTextureData<double>(pTexData, tileSizeX, tileSizeY, da,
+            populateTextureData<double>(pTexData, tileSizeX, tileSizeY, da, interleave,
                currentChannel, totalChannels, outputType);
             break;
 
@@ -581,7 +644,8 @@ private:
             }
 
             Out *pTexData = static_cast<Out*>(pTile->getTexData(bufSize * sizeof(Out)));
-            populateTextureData(pTexData, mInfo.mRawType[0], geomSizeX, geomSizeY, da, 1, channels, outputType);
+            populateTextureData(pTexData, mInfo.mRawType[0], geomSizeX, geomSizeY, da, 
+               pDescriptor->getInterleaveFormat(), 1, channels, outputType);
             pTile->setupTile(pTexData, outputType, mTileZoomIndices[i]);
          }
       }
@@ -637,7 +701,8 @@ private:
                {
                   return;
                }
-               populateTextureData(&texData.front(), mInfo.mRawType[0], geomSizeX, geomSizeY, daRed, 1, 3, outputType);
+               populateTextureData(&texData.front(), mInfo.mRawType[0], geomSizeX, geomSizeY, daRed, 
+                  pRedRasterDescriptor->getInterleaveFormat(), 1, 3, outputType);
             }
             else
             {
@@ -664,8 +729,8 @@ private:
                   return;
                }
 
-               populateTextureData(&texData.front(), mInfo.mRawType[1], geomSizeX, geomSizeY, daGreen, 2, 3,
-                  outputType);
+               populateTextureData(&texData.front(), mInfo.mRawType[1], geomSizeX, geomSizeY, daGreen, 
+                  pGreenRasterDescriptor->getInterleaveFormat(), 2, 3, outputType);
             }
             else
             {
@@ -692,7 +757,8 @@ private:
                   return;
                }
 
-               populateTextureData(&texData.front(), mInfo.mRawType[2], geomSizeX, geomSizeY, daBlue, 3, 3, outputType);
+               populateTextureData(&texData.front(), mInfo.mRawType[2], geomSizeX, geomSizeY, daBlue, 
+                  pBlueRasterDescriptor->getInterleaveFormat(), 3, 3, outputType);
             }
             else
             {
@@ -1408,6 +1474,8 @@ unsigned int GpuImage::readTiles(double xCoord, double yCoord, GLsizei width, GL
 
    unsigned int counter = 0;
    unsigned int numElements = 0;
+   unsigned int destElements = 0;
+
    size_t tileNum = 0;
    size_t numTiles = tiles.size();
 
@@ -1442,9 +1510,17 @@ unsigned int GpuImage::readTiles(double xCoord, double yCoord, GLsizei width, GL
    }
 
    unsigned int numChannels = ImageUtilities::getNumColorChannels(pColorBuffer->getTextureFormat());
-   if (values.size() < width * height * numChannels)
+
+   unsigned int destChannels = numChannels;
+   if (destChannels == 1 /* GL_LUMINANCE */ || 
+      destChannels == 3 /* GL_RGB */) // incoming data has no alpha
    {
-      values.resize(width * height * numChannels);
+      ++destChannels; // add space for alpha
+   }
+
+   if (values.size() < width * height * destChannels)
+   {
+      values.resize(width * height * destChannels);
    }
 
    if (values.empty() == true)
@@ -1452,6 +1528,9 @@ unsigned int GpuImage::readTiles(double xCoord, double yCoord, GLsizei width, GL
       return 0;
    }
 
+   // The data will be read into pValueData. Down below we may point this
+   // to a different memory buffer if we determine that we need to reorder the
+   // data before returning it.
    float* pValueData = &values[0];
 
    tileWidths.reserve(numTiles);
@@ -1459,20 +1538,32 @@ unsigned int GpuImage::readTiles(double xCoord, double yCoord, GLsizei width, GL
    sourceOffsets.reserve(numTiles);
    destinationOffsets.reserve(numTiles);
 
+   // The values in the vector are ordered according to rows, so if the tiles 
+   // are side-by-side, we will need to reorder the values later. 
+
+   // If there are greater than 2 tiles, it is hard to test for the need to
+   // reorder the data, so we will simply assume that we do.
    if (numTiles > 2)
    {
       dataVector.resize(width * height * numChannels);
    }
    else
    {
-      // The values in the vector are ordered according to rows, so if the tiles are side-by-side,
-      // we will need to reorder the values later
-      if (tileLocations.front().mY == tileLocations.back().mY)
+      // If there is exactly 1 tile, we will not need to reorder the data, 
+      // however tileLocations will have 1 element so front and back will
+      // return the same LocationType, resulting in the dataVector being
+      // allocated unnecessarily.
+      // If there are 2 tiles, they may be above or along side each other.
+      // If they are above, we don't need to reorder. If they are side-by-
+      // side, we do need to reorder.
+      if (numTiles > 1 && tileLocations.front().mY == tileLocations.back().mY)
       {
          dataVector.resize(width * height * numChannels);
       }
    }
 
+   // If dataVector is not empty, we need to load into it and then reorder the
+   // data later. Otherwise, we can load directly into values.
    if (dataVector.capacity() != 0)
    {
       pValueData = &dataVector[0];
@@ -1520,20 +1611,84 @@ unsigned int GpuImage::readTiles(double xCoord, double yCoord, GLsizei width, GL
       tileIter++;
    }
 
+   float alpha = static_cast<float>(getAlpha()) / 255.0f;
+
    // Reorder the data into the destination vector to be row order
-   if (dataVector.empty() == false)
+   // Also, add the alpha if missing
+   if (dataVector.empty() == true) // data did not need reordering
+   {
+      switch (numChannels)
+      {
+         case 1: // GL_LUMINANCE: need to interleave alpha
+         {
+            for (int i=values.size()-1; i>0; i-=2)
+            {
+               values[i] = alpha;
+               values[i-1] = values[(i-1)/2];
+            }
+            break;
+         }
+         case 3: // GL_RGB: need to interleave alpha
+         {
+            for (int i=values.size()-1; i>0; i-=4)
+            {
+               values[i] = alpha;
+               values[i-1] = values[3*(i+1)/4-1];
+               values[i-2] = values[3*(i+1)/4-2];
+               values[i-3] = values[3*(i+1)/4-3];
+            }
+            break;
+         }
+         default: // do not need to add alpha
+            break;
+      }
+   }
+   else
    {
       pValueData = &values[0];
       for (tileNum = 0; tileNum < numTiles; tileNum++)
       {
          for (int row = 0; row < tileHeights[tileNum]; ++row)
          {
-            memcpy((pValueData + destinationOffsets[tileNum]), &dataVector[sourceOffsets[tileNum]],
-               (sizeof(float) * tileWidths[tileNum]));
+            switch (numChannels)
+            {
+               case 1: // GL_LUMINANCE
+               {
+                  for (int i=0; i<tileWidths[tileNum]/static_cast<int>(numChannels); ++i)
+                  {
+                     pValueData[2*i+destinationOffsets[tileNum]] = 
+                        dataVector[i+sourceOffsets[tileNum]];
+                     pValueData[1+2*i+destinationOffsets[tileNum]] = alpha;
+                  }
+                  break;
+               }
+               case 3: // GL_RGB
+               {
+                  int destChannels = numChannels+1;
+                  for (int i=0; i<tileWidths[tileNum]/static_cast<int>(numChannels); ++i)
+                  {
+                     pValueData[destChannels*i+destinationOffsets[tileNum]] = 
+                        dataVector[numChannels*i+sourceOffsets[tileNum]];
+                     pValueData[1+destChannels*i+destinationOffsets[tileNum]] = 
+                        dataVector[1+numChannels*i+sourceOffsets[tileNum]];
+                     pValueData[2+destChannels*i+destinationOffsets[tileNum]] = 
+                        dataVector[2+numChannels*i+sourceOffsets[tileNum]];
+                     pValueData[3+destChannels*i+destinationOffsets[tileNum]] = alpha;
+                  }
+                  break;
+               }
+               case 2: // GL_LUMINANCE_ALPHA
+                  // fall through
+               case 4: // GL_RGBA
+                  memcpy((pValueData + destinationOffsets[tileNum]), &dataVector[sourceOffsets[tileNum]],
+                     (sizeof(float) * tileWidths[tileNum]));
+               default:
+                  break;
+            }
 
             // set source and destination offsets for next pass
             sourceOffsets[tileNum] += tileWidths[tileNum];
-            destinationOffsets[tileNum] += width * numChannels;
+            destinationOffsets[tileNum] += width * destChannels;
          }
       }
 
@@ -1580,14 +1735,15 @@ unsigned int GpuImage::readTiles(double xCoord, double yCoord, GLsizei width, GL
       }
 
       // scale the filtered results
-      for (unsigned int element = 0; element < numElements; element++)
+      destElements = destChannels*numElements/numChannels;
+      for (unsigned int element = 0; element < destElements; element++)
       {
          pValueData[element] *= scaleFactor;
          pValueData[element] += offset;
       }
    }
 
-   return numElements;
+   return destElements;
 }
 
 void GpuImage::getTilesToRead(int xCoord, int yCoord, GLsizei width, GLsizei height, 
