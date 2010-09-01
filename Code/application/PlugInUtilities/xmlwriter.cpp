@@ -11,6 +11,8 @@
 #include "XercesIncludes.h"
 #include "xmlwriter.h"
 
+#include <memory>
+
 XERCES_CPP_NAMESPACE_USE
 
 XMLWriter::XMLWriter(const char* pRootElementName, MessageLog* pLog, bool useNamespace) :
@@ -298,54 +300,92 @@ void XMLWriter::writeToFile(FILE* pFp)
 
 std::string XMLWriter::writeToString()
 {
+   DOMLSSerializer* pSerializer = NULL;
+   DOMLSOutput* pOutput = NULL;
+
    try
    {
-      DOMWriter* serializer(mpImpl->createDOMWriter());
-      if (serializer->canSetFeature(XMLUni::fgDOMWRTDiscardDefaultContent, false))
+      pSerializer = mpImpl->createLSSerializer();
+      DOMConfiguration* pConfig = pSerializer->getDomConfig();
+
+      pOutput = mpImpl->createLSOutput();
+      pOutput->setEncoding(XMLUni::fgUTF8EncodingString);
+
+      std::auto_ptr<MemBufFormatTarget> pByteStream(new MemBufFormatTarget);
+      pOutput->setByteStream(pByteStream.get());
+
+      if (pConfig->canSetParameter(XMLUni::fgDOMWRTDiscardDefaultContent, false))
       {
-         serializer->setFeature(XMLUni::fgDOMWRTDiscardDefaultContent, false);
+         pConfig->setParameter(XMLUni::fgDOMWRTDiscardDefaultContent, false);
       }
 
-      if (serializer->canSetFeature(XMLUni::fgDOMNamespaceDeclarations, true))
+      if (pConfig->canSetParameter(XMLUni::fgDOMNamespaceDeclarations, true))
       {
-         serializer->setFeature(XMLUni::fgDOMNamespaceDeclarations, true);
+         pConfig->setParameter(XMLUni::fgDOMNamespaceDeclarations, true);
       }
 
-      if (serializer->canSetFeature(XMLUni::fgDOMWRTFormatPrettyPrint, true))
+      if (pConfig->canSetParameter(XMLUni::fgDOMWRTFormatPrettyPrint, true))
       {
-         serializer->setFeature(XMLUni::fgDOMWRTFormatPrettyPrint, true);
+         pConfig->setParameter(XMLUni::fgDOMWRTFormatPrettyPrint, true);
       }
 
-      if (serializer->canSetFeature(XMLUni::fgDOMXMLDeclaration, true))
+      if (pConfig->canSetParameter(XMLUni::fgDOMXMLDeclaration, true))
       {
-         serializer->setFeature(XMLUni::fgDOMXMLDeclaration, true);
+         pConfig->setParameter(XMLUni::fgDOMXMLDeclaration, true);
       }
 
-      MemBufFormatTarget target;
-      serializer->writeNode(&target, *mpDoc);
-
-      if (sizeof(char) != sizeof(XMLByte))
+      std::string buf;
+      if (pSerializer->write(mpDoc, pOutput) && pByteStream->getRawBuffer() != NULL)
       {
-         throw XmlBase::XmlException("XMLWriter: XMLByte is not a char");
+         buf = std::string(reinterpret_cast<const char*>(pByteStream->getRawBuffer()));
       }
 
-      std::string buf(reinterpret_cast<const char*>(target.getRawBuffer()), static_cast<int>(target.getLen()));
-      serializer->release();
-
+      pOutput->release();
+      pSerializer->release();
       return buf;
    }
    catch (const XMLException& exc)
    {
+      if (pOutput != NULL)
+      {
+         pOutput->release();
+      }
+
+      if (pSerializer != NULL)
+      {
+         pSerializer->release();
+      }
+
       logException(&exc);
       throw XmlBase::XmlException(A(exc.getMessage()));
    }
    catch (const DOMException& exc)
    {
+      if (pOutput != NULL)
+      {
+         pOutput->release();
+      }
+
+      if (pSerializer != NULL)
+      {
+         pSerializer->release();
+      }
+
       logException(&exc);
       throw XmlBase::XmlException(A(exc.msg));
    }
    catch (...)
    {
+      if (pOutput != NULL)
+      {
+         pOutput->release();
+      }
+
+      if (pSerializer != NULL)
+      {
+         pSerializer->release();
+      }
+
       logSimpleMessage(std::string("XMLWriter unexpected exception"));
       throw XmlBase::XmlException("XMLWriter unexpected exception");
    }

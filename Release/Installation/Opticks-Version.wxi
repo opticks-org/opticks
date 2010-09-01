@@ -32,7 +32,7 @@
    <?define C__cgD3D9_DependencyGuid = "a902d250-09b3-4c2b-a7e4-7ac21a4757ec" ?>
    <?define C__cgGL_DependencyGuid = "db4c23cc-5b45-472a-8f24-47ba2b8f865b" ?>
    <?define C__ehs_DependencyGuid = "45ca86b2-8f6e-4778-8d6b-72176b3fe794" ?>
-   <?define C__gdal_DependencyGuid = "1f8e350a-62c9-4fc0-92bb-df4e4816aabe" ?>
+   <?define C__gdal_DependencyGuid = "2C3CFD2B-D822-477d-804A-1D0B2517C545" ?>
    <?define C__glew32_DependencyGuid = "1301f593-6f05-486e-b8b6-3bc6dc85c81d" ?>
    <?define C__hdf5dll_DependencyGuid = "d82e2a1c-d4cd-4d9b-bd1d-f48f03f72d7d" ?>
    <?define C__hd423m_DependencyGuid = "b5378940-ba11-4298-bbbc-1f06bb09c039" ?>
@@ -54,8 +54,8 @@
    <?define C__QtXml4_DependencyGuid = "422d70e0-3c66-4f60-8489-878f547ed27d" ?>
    <?define C__qwt5_DependencyGuid = "befb493c-7707-4868-9ee2-072ba0580feb" ?>
    <?define C__shapelib_DependencyGuid = "402c93a5-f54a-4fa0-839c-e2e49bc8cd7f" ?>
-   <?define C__xercesc_2_7_DependencyGuid = "36bc7baa-3579-47bb-91bd-b9aca05d365f" ?>
-   <?define C__xqilla10_DependencyGuid = "4a6a7f2f-a0f6-4f0f-abd9-3eaa1a8ba042" ?>
+   <?define C__xercesc_3_1_DependencyGuid = "9696B17B-9420-46ad-8D19-54FDE8685888" ?>
+   <?define C__xqilla224_DependencyGuid = "F70A62AB-91B1-4ce1-B10D-E3D7860D7543" ?>
    <?define C__zlib1_DependencyGuid = "32cbe16f-bfab-4695-851e-000575bd7b90" ?>
    <?define C__QtImageFormatGifGuid = "8ec218bc-f87f-4237-a4b6-30dfd33f658d" ?>
    <?define C__QtImageFormatJpegGuid = "48c3d07c-b7df-4542-8061-e35572cb9f8d" ?>
@@ -139,7 +139,7 @@
    <?define C__cgD3D9_DependencyGuid = "13bdf8bd-d9cb-4620-8fae-b48ee85cfb2e" ?>
    <?define C__cgGL_DependencyGuid = "f554987f-8f9c-4db5-9c46-faf04a0dd6ee" ?>
    <?define C__ehs_DependencyGuid = "fc8ab4ea-b1ae-45d8-8040-07ad29b9fb43" ?>
-   <?define C__gdal_DependencyGuid = "cf2f4880-71d4-4238-ba2d-4ebcffe28ca3" ?>
+   <?define C__gdal_DependencyGuid = "AA26EFDA-831D-4b45-9EF8-A0C382151C41" ?>
    <?define C__glew32_DependencyGuid = "2b2c4c56-b8c7-46b3-b314-4d489c0877cf" ?>
    <?define C__hdf5dll_DependencyGuid = "080ea050-db0e-4af3-bcea-919804e3032d" ?>
    <?define C__hd423m_DependencyGuid = "14de05bd-bef8-44d5-9f82-e30ad3e6201c" ?>
@@ -162,8 +162,8 @@
    <?define C__QtXml4_DependencyGuid = "cf8c1dc3-b9a1-44c8-ab5d-5b76653a7a7d" ?>
    <?define C__qwt5_DependencyGuid = "a2d5aff3-a184-4228-9fe8-a49c3abe1f82" ?>
    <?define C__shapelib_DependencyGuid = "0a80d949-0aee-4d42-8e43-1c71850547f7" ?>
-   <?define C__xercesc_2_7_DependencyGuid = "04239c74-9113-4ef0-a5d8-5dd2941eeec2" ?>
-   <?define C__xqilla10_DependencyGuid = "5f39f88c-da62-413a-b30b-5fd81f8759aa" ?>
+   <?define C__xercesc_3_1_DependencyGuid = "3D9081B8-F147-4002-9260-C93E4F504314" ?>
+   <?define C__xqilla224_DependencyGuid = "8A8B75A6-7DC0-4d66-8060-B745B3C2401B" ?>
    <?define C__zlib1_DependencyGuid = "1f7c976c-0b44-4149-8245-a885d31173be" ?>
    <?define C__QtImageFormatGifGuid = "f5732edc-b48b-4638-a28e-028983006403" ?>
    <?define C__QtImageFormatJpegGuid = "83df0e6b-98ff-4762-9f95-e4c7de6980e4" ?>

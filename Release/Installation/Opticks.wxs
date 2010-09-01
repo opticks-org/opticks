@@ -150,11 +150,11 @@ are defined in Opticks-Version.wxi, so include that file now -->
             <Component Id="C__shapelib_Dependency" Guid="$(var.C__shapelib_DependencyGuid)" Win64="$(var.64Bit)">
                <File Name="shapelib.dll" Id="F__shapelib_Dependency" DiskId="1" KeyPath="yes" />
             </Component>
-            <Component Id="C__xercesc_2_7_Dependency" Guid="$(var.C__xercesc_2_7_DependencyGuid)" Win64="$(var.64Bit)">
-               <File Name="xerces-c_2_7.dll" Id="F__xercesc_2_7_Dependency" DiskId="1" KeyPath="yes" />
+            <Component Id="C__xercesc_3_1_Dependency" Guid="$(var.C__xercesc_3_1_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="xerces-c_3_1.dll" Id="F__xercesc_3_1_Dependency" DiskId="1" KeyPath="yes" />
             </Component>
-            <Component Id="C__xqilla10_Dependency" Guid="$(var.C__xqilla10_DependencyGuid)" Win64="$(var.64Bit)">
-               <File Name="xqilla10.dll" Id="F__xqilla10_Dependency" DiskId="1" KeyPath="yes" />
+            <Component Id="C__xqilla224_Dependency" Guid="$(var.C__xqilla224_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="xqilla22.dll" Id="F__xqilla224_Dependency" DiskId="1" KeyPath="yes" />
             </Component>
             <Component Id="C__zlib1_Dependency" Guid="$(var.C__zlib1_DependencyGuid)" Win64="$(var.64Bit)">
                <File Name="zlib1.dll" Id="F__zlib1_Dependency" DiskId="1" KeyPath="yes" />
@@ -408,8 +408,8 @@ are defined in Opticks-Version.wxi, so include that file now -->
          <ComponentRef Id="C__qwt5_Dependency" />
          <ComponentRef Id="C__raptor_Dependency" />
          <ComponentRef Id="C__shapelib_Dependency" />
-         <ComponentRef Id="C__xercesc_2_7_Dependency" />
-         <ComponentRef Id="C__xqilla10_Dependency" />
+         <ComponentRef Id="C__xercesc_3_1_Dependency" />
+         <ComponentRef Id="C__xqilla224_Dependency" />
          <ComponentRef Id="C__zlib1_Dependency" />
          <ComponentRef Id="C__QtImageFormatGif" />
          <ComponentRef Id="C__QtImageFormatJpeg" />

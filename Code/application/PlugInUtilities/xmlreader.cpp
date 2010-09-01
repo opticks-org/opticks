@@ -47,13 +47,17 @@ XmlReader::XmlReader(MessageLog* pLog, bool bValidate) :
    mpDoc(NULL),
    mpResult(NULL)
 {
-   mpImpl = DOMImplementationRegistry::getDOMImplementation(XStr("XPath2 3.0 LS").unicodeForm());
+   mpImpl = DOMImplementationRegistry::getDOMImplementation(X("XPath2 3.0 LS"));
    ENSURE(mpImpl != NULL);
 
-   mpParser = mpImpl->createDOMBuilder(DOMImplementationLS::MODE_SYNCHRONOUS, 0);
-   mpParser->setFeature(X("namespaces"), true);
-   mpParser->setFeature(X("validate-if-schema"), true);
-   mpParser->setFeature(XMLUni::fgXercesUserAdoptsDOMDocument, true);
+   mpParser = mpImpl->createLSParser(DOMImplementationLS::MODE_SYNCHRONOUS, 0);
+   ENSURE(mpParser != NULL);
+
+   DOMConfiguration* pConfig = mpParser->getDomConfig();
+   ENSURE(pConfig != NULL);
+   pConfig->setParameter(XMLUni::fgDOMNamespaces, true);
+   pConfig->setParameter(XMLUni::fgDOMValidateIfSchema, true);
+   pConfig->setParameter(XMLUni::fgXercesUserAdoptsDOMDocument, true);
 
    if (bValidate == true)
    {
@@ -64,10 +68,15 @@ XmlReader::XmlReader(MessageLog* pLog, bool bValidate) :
          mXmlSchemaLocation = pSupportFilesPath->getFullPathAndName() + SLASH + "Xml" + SLASH;
       }
    }
+   else
+   {
+      pConfig->setParameter(XMLUni::fgXercesSchema, false);
+      pConfig->setParameter(XMLUni::fgXercesSchemaFullChecking, false);
+   }
 }
 
 XmlReader::~XmlReader()
-{   
+{
    if (mpDoc != NULL)
    {
       mpDoc->release();
@@ -75,7 +84,7 @@ XmlReader::~XmlReader()
    if (mpParser != NULL)
    {
       mpParser->release();
-   } 
+   }
 }
 
 XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* XmlReader::parse(const Filename* pFn, string endTag)
@@ -94,17 +103,13 @@ XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* XmlReader::parse(string fn, string e
       mpDoc->release();
       mpDoc = NULL;
    }
-   DOMErrorHandler* pOldError = mpParser->getErrorHandler();
+   DOMConfiguration* pConfig = mpParser->getDomConfig();
+   const void* pOldError = pConfig->getParameter(XMLUni::fgDOMErrorHandler);
    try
    {
       string uri = XmlBase::PathToURL(fn);
 
-      if (mXmlSchemaLocation.empty())
-      {
-         mpParser->setFeature(X("http://apache.org/xml/features/validation/schema"), false);
-         mpParser->setFeature(X("validation"), false);
-      }
-      else
+      if (!mXmlSchemaLocation.empty())
       {
          string esl("https://comet.balldayton.com/standards/namespaces/2005/v1/comet.xsd ");
          for (unsigned int version = XmlBase::VERSION; version > 0; version--)
@@ -119,10 +124,10 @@ XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* XmlReader::parse(string fn, string e
                break;
             }
          }
-         mpParser->setProperty(XMLUni::fgXercesSchemaExternalSchemaLocation, const_cast<XMLCh*>(X(esl.c_str())));
-         mpParser->setFeature(X("http://apache.org/xml/features/validation/schema"), true);
-         mpParser->setFeature(X("validation"), true);
-         mpParser->setFeature(X("http://apache.org/xml/features/validation-error-as-fatal"), true);
+         pConfig->setParameter(XMLUni::fgXercesSchemaExternalSchemaLocation, const_cast<XMLCh*>(X(esl.c_str())));
+         pConfig->setParameter(XMLUni::fgXercesSchema, true);
+         pConfig->setParameter(XMLUni::fgXercesSchemaFullChecking, true);
+         pConfig->setParameter(XMLUni::fgXercesValidationErrorAsFatal, true);
       }
 
       if (!endTag.empty())
@@ -130,7 +135,7 @@ XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* XmlReader::parse(string fn, string e
          logSimpleMessage("Partial parse is not available...performing complete parse.");
       }
       XmlReaderErrorHandler errors(this);
-      mpParser->setErrorHandler(&errors);
+      pConfig->setParameter(XMLUni::fgDOMErrorHandler, &errors);
       mpDoc = mpParser->parseURI(uri.c_str());
    }
    catch (const XMLException& exc)
@@ -150,7 +155,7 @@ XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* XmlReader::parse(string fn, string e
       logSimpleMessage("XmlReader unexpected parse error");
    }
 
-   mpParser->setErrorHandler(pOldError);
+   pConfig->setParameter(XMLUni::fgDOMErrorHandler, pOldError);
    return mpDoc;
 }
 
@@ -168,11 +173,10 @@ XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* XmlReader::parseString(const string&
          logSimpleMessage("String parsing does not support schema validation.");
          return NULL;
       }
-      mpParser->setFeature(X("http://apache.org/xml/features/validation/schema"), false);
-      mpParser->setFeature(X("validation"), false);
+
       MemBufInputSource isrc(reinterpret_cast<const XMLByte*>(str.c_str()), str.size(), X(sNamespaceId));
       Wrapper4InputSource wrapper(&isrc, false);
-      mpDoc = mpParser->parse(wrapper);
+      mpDoc = mpParser->parse(&wrapper);
    }
    catch (const XMLException& exc)
    {
@@ -194,7 +198,8 @@ XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* XmlReader::parseString(const string&
    return mpDoc;
 }
 
-XPath2Result* XmlReader::query(const string& expression, unsigned short type, bool reuse)
+XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult* XmlReader::query(const string& expression,
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::ResultType type, bool reuse)
 {
    if (mpDoc == NULL)
    {
@@ -216,7 +221,8 @@ XPath2Result* XmlReader::query(const string& expression, unsigned short type, bo
    {
       return NULL;
    }
-   XPath2Result* pResult = reinterpret_cast<XPath2Result*>(pExpr->evaluate(mpDoc, type, reuse ? mpResult : NULL));
+
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult* pResult = pExpr->evaluate(mpDoc, type, reuse ? mpResult : NULL);
    if (reuse)
    {
       mpResult = pResult;

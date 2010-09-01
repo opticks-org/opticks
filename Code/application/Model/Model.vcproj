@@ -290,22 +290,6 @@
 			<File
 				RelativePath=".\BitMaskImp.cpp"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						SmallerTypeCheck="false"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						SmallerTypeCheck="false"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\ClassificationAdapter.cpp"

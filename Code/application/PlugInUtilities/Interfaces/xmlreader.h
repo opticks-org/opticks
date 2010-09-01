@@ -12,15 +12,14 @@
 
 #include <stdio.h>
 
-#include "XercesIncludes.h"
 #include "Filename.h"
 #include "LocationType.h"
 #include "MessageLogMgr.h"
 #include "MessageLog.h"
+#include "XercesIncludes.h"
 #include "xmlbase.h"
 
 class Font;
-class XPath2Result;
 
 /** @file xmlreader.h
  *  @brief XML utilities and functionality for reading and parsing
@@ -31,7 +30,7 @@ class XPath2Result;
  * @ingroup app_xml
  *
  * @par requirements
- * Apache Xerces-C++ verion 2.4.0
+ * Apache Xerces-C++ version 3.1.1
  */
 class XmlReader : public XmlBase
 {
@@ -40,7 +39,7 @@ public:
     * Create an %XmlReader.
     *
     * @param pLog
-    *        Optional MessageLog to be passed to XmlBase
+    *        Optional MessageLog to be passed to XmlBase.
     *
     * @param bValidate
     *        Should the %XmlReader perform validation? It is strongly
@@ -59,15 +58,12 @@ public:
     * Parse a file.
     *
     * @param pFn
-    *        The file to parse, as a Filename.
+    *        The file to parse, as a Filename. Should not be \c NULL.
     *
     * @param endTag
     *        If not empty, the parse will halt when this end tag is reached.
     *
-    * @return The root element and NULL for certain failures.
-    *
-    * @throw XmlBase::XmlException
-    *        When there is a parse exception.
+    * @return The root element. Returns \c NULL for failure.
     */
    XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* parse(const Filename* pFn, std::string endTag = "");
 
@@ -80,10 +76,7 @@ public:
     * @param endTag
     *        If not empty, the parse will halt when this end tag is reached.
     *
-    * @return The root element and NULL for certain failures.
-    *
-    * @throw XmlBase::XmlException
-    *        When there is a parse exception.
+    * @return The root element. Returns \c NULL for failure.
     */
    XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* parse(std::string fn, std::string endTag = "");
 
@@ -94,10 +87,7 @@ public:
     * @param str
     *        The string to parse.
     *
-    * @return The root element and NULL for certain failures.
-    *
-    * @throw XmlBase::XmlException
-    *        When there is a parse exception.
+    * @return The root element. Returns \c NULL for failure.
     */
    XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* parseString(const std::string& str);
 
@@ -109,17 +99,18 @@ public:
     *        A valid XPath 2.0 expression.
     *
     * @param type
-    *        The type of result requested. Allowed values: XPath2Result::FIRST_RESULT,
-    *        XPath2Result::ITERATOR_RESULT, or XPath2Result::SNAPSHOT_RESULT.
+    *        The type of result requested. Allowed values: DOMXPathResult::FIRST_RESULT_TYPE,
+    *        DOMXPathResult::ITERATOR_RESULT_TYPE, or DOMXPathResult::SNAPSHOT_RESULT_TYPE.
     *
     * @param reuse
-    *        If this is true, the XPath2Result will be reused for each query. If this
+    *        If this is true, the DOMXPathResult will be reused for each query. If this
     *        is false, a new result will be generated. If true, the XmlReader retains
-    *        ownership of the result. If false, the called takes ownership of the result.
+    *        ownership of the result. If false, the caller takes ownership of the result.
     *
     * @return The result of the XPath query. \c NULL if the query failed or no document is loaded.
     */
-   XPath2Result* query(const std::string& expression, unsigned short type, bool reuse = true);
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult* query(const std::string& expression,
+      XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::ResultType type, bool reuse = true);
 
 public: // struct and static utility functions
    /**
@@ -217,7 +208,7 @@ public: // struct and static utility functions
     * Example:
     *  @code
     *    vector<int> *pIntVec(NULL);
-    *    pIntVec = reinterpret_cast<vector<int> >(StrToVector<int,StringStreamAssigner<int> >(X("1 2 3 4")));
+    *    pIntVec = reinterpret_cast<vector<int>* >(StrToVector<int, StringStreamAssigner<int> >(X("1 2 3 4")));
     *  @endcode
     *
     * @param pStr
@@ -485,11 +476,11 @@ public: // struct and static utility functions
    };
 
 private:
-   XERCES_CPP_NAMESPACE_QUALIFIER DOMImplementation* mpImpl;
-   XERCES_CPP_NAMESPACE_QUALIFIER DOMBuilder* mpParser;
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMImplementationLS* mpImpl;
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMLSParser* mpParser;
    std::string mXmlSchemaLocation;
    XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* mpDoc;
-   XPath2Result* mpResult;
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult* mpResult;
 };
 
 /**
@@ -529,14 +520,19 @@ public:
 
    ~BinFILEInputStream() {}
 
-   virtual unsigned int curPos() const
+   virtual XMLFilePos curPos() const
    {
-      return static_cast<unsigned int>(ftell(mpFp));
+      return static_cast<XMLFilePos>(ftell(mpFp));
    }
 
-   virtual unsigned int readBytes(XMLByte* const pToFill, const unsigned int maxToRead)
+   virtual XMLSize_t readBytes(XMLByte* const pToFill, const XMLSize_t maxToRead)
    {
-      return static_cast<unsigned int>(fread(pToFill, sizeof(XMLByte), maxToRead, mpFp));
+      return static_cast<XMLSize_t>(fread(pToFill, sizeof(XMLByte), maxToRead, mpFp));
+   }
+
+   virtual const XMLCh* getContentType() const
+   {
+      return 0;
    }
 
 private:
@@ -636,7 +632,7 @@ private:
  *  DOMNode *pNode = findChildNode(pParent, "foo/bar/baz");
  *  @endcode
  *
- *  @return The found node, or \c NULL if the node is not found.
+ *  @return The found node or \c NULL if the node is not found.
  */
 XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* findChildNode(XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pParent,
    const char* pName);
@@ -675,7 +671,7 @@ std::string findAttribute(XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pParent, const
  *  @param font
  *            A font to read the data into.
  *
- *  @return The DOMElement the data was read from, or NULL if the element was
+ *  @return The DOMElement the data was read from or \c NULL if the element was
  *            not found.
  */
 XERCES_CPP_NAMESPACE_QUALIFIER DOMElement* readFontElement(const char* pName,

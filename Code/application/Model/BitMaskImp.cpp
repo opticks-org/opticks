@@ -10,17 +10,13 @@
 #include "AppVerify.h"
 #include "BitMaskImp.h"
 #include "XercesIncludes.h"
+#include "xmlbase.h"
 #include "xmlreader.h"
 
 #include <limits>
 #include <memory.h>
 #include <stdlib.h>
 #include <sstream>
-
-#if !defined(__SUNPRO_CC) || __SUNPRO_CC > 0x550
-# include <boost/crc.hpp>
-# include <boost/cstdint.hpp>
-#endif
 
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
@@ -1479,42 +1475,17 @@ bool BitMaskImp::toXml(XMLWriter* xml) const
 
    xml->addAttr("outside", (mOutside) ? "true" : "false");
 
-#if !defined(__SUNPRO_CC) || __SUNPRO_CC > 0x550
-   boost::crc_ccitt_type crc;
-#endif
    if (mpMask != NULL)
    {
-      int numBytes((mxSize * sizeof(unsigned int)) * mySize);
-      XMLByte* bytes(new XMLByte[numBytes]);
-      int bytesIndex(0);
-      unsigned int tmp;
-      for (int i = 0; i < mSize; ++i)
-      {
-         tmp = mpMask[0][i];
-         for (int j = 0; j < sizeof(tmp); ++j)
-         {
-            bytes[bytesIndex] = (tmp >> (8 * j)) & 0xff;
-#if !defined(__SUNPRO_CC) || __SUNPRO_CC > 0x550
-            crc(bytes[bytesIndex]);
-#endif
-            bytesIndex++;
-         }
-      }
-
-      unsigned int outlen;
-      XMLByte* b64repr(Base64::encode(bytes, numBytes, &outlen));
+      std::string checksum;
+      XMLByte* b64repr = XmlBase::encodeBase64(mpMask[0], mxSize * mySize, NULL, &checksum);
       xml->pushAddPoint(xml->addElement("mask"));
       xml->addText(reinterpret_cast<char*>(b64repr));
       xml->popAddPoint();
+      xml->addAttr("ecc", "ccitt:" + checksum);
 
-#if !defined(__SUNPRO_CC) || __SUNPRO_CC > 0x550
-      stringstream crcString;
-      crcString << "ccitt:" << crc();
-      xml->addAttr("ecc", crcString.str());
-#endif
-
-      XMLString::release(&b64repr);
-      delete [] bytes;
+      // Use ::operator delete() per Xerces documentation
+      ::operator delete(b64repr);
    }
 
    return true;
@@ -1523,9 +1494,7 @@ bool BitMaskImp::toXml(XMLWriter* xml) const
 bool BitMaskImp::fromXml(DOMNode* document, unsigned int version)
 {
    string outsideVal(A(static_cast<DOMElement*>(document)->getAttribute(X("outside"))));
-#if !defined(__SUNPRO_CC) || __SUNPRO_CC > 0x550
    string crcString(A(static_cast<DOMElement*>(document)->getAttribute(X("ecc"))));
-#endif
    if (outsideVal == "1" || outsideVal == "t" || outsideVal == "true")
    {
       mOutside = true;
@@ -1581,58 +1550,31 @@ bool BitMaskImp::fromXml(DOMNode* document, unsigned int version)
       }
       else if (XMLString::equals(pChld->getNodeName(), X("mask")))
       {
-         unsigned int dlen;
-         DOMNode* pGchld(pChld->getFirstChild());
-         const XMLCh* b64(pGchld->getNodeValue());
-         XMLByte* bytes(Base64::decode((const XMLByte*)A(b64), &dlen));
-
          mpMask = new (nothrow) unsigned int*[mySize];
          if (mpMask == NULL)
          {
             throw XmlReader::DomParseException("Can't create a new unsigned int array", pChld);
          }
 
-         mpMask[0] = new (nothrow) unsigned int[mSize];
+         std::string checksum;
+         if (crcString.find("ccitt:") != string::npos)
+         {
+            checksum = crcString.substr(crcString.find(":") + 1);
+         }
+
+         DOMNode* pGchld(pChld->getFirstChild());
+         mpMask[0] = XmlBase::decodeBase64(reinterpret_cast<const XMLByte*>(A(pGchld->getNodeValue())), 0, checksum);
          if (mpMask[0] == NULL)
          {
             delete [] mpMask;
             mpMask = NULL;
-            throw XmlReader::DomParseException("Can't create a new unsigned int array", pChld);
+            throw XmlReader::DomParseException("Can't decode the bitmask", pChld);
          }
 
          for (int i = 1; i < mySize; ++i)
          {
             mpMask[i] = mpMask[i - 1] + mxSize;
          }
-
-#if !defined(__SUNPRO_CC) || __SUNPRO_CC > 0x550
-         boost::crc_ccitt_type crc;
-#endif
-         int bytesIndex(0);
-         unsigned int tmp;
-         for (int i = 0; i < mSize; ++i)
-         {
-            tmp = 0;
-            for (int j = 0; j < sizeof(tmp); ++j)
-            {
-               tmp |= bytes[bytesIndex] << (8 * j);
-#if !defined(__SUNPRO_CC) || __SUNPRO_CC > 0x550
-               crc(bytes[bytesIndex]);
-#endif
-               bytesIndex++;
-            }
-            mpMask[0][i] = tmp;
-         }
-
-#if !defined(__SUNPRO_CC) || __SUNPRO_CC > 0x550
-         if (crcString.find("ccitt:") != string::npos)
-         {
-            XmlReader::StringStreamAssigner<boost::crc_ccitt_type::value_type> parser;
-            boost::crc_ccitt_type::value_type storedCrc(parser(crcString.substr(crcString.find(":") + 1).c_str()));
-            VERIFYRV_MSG(crc() == storedCrc, false, "Bitmask checksum failure!");
-         }
-#endif
-         XMLString::release(&bytes);
       }
    }
 

@@ -13,13 +13,8 @@
 #include "AppConfig.h"
 
 #ifdef APPLICATION_XERCES
-//Ignore Warning Only for Xerces
-#if defined(WIN_API)
-#pragma warning( push, 1 )
-#endif
 
 #include <xercesc/dom/DOM.hpp>
-#include <xercesc/dom/DOMNode.hpp>
 #include <xercesc/framework/MemBufFormatTarget.hpp>
 #include <xercesc/framework/MemBufInputSource.hpp>
 #include <xercesc/framework/Wrapper4InputSource.hpp>
@@ -36,24 +31,22 @@
 #include <xercesc/util/PlatformUtils.hpp>
 #include <xqilla/xqilla-dom3.hpp>
 
-#if defined(WIN_API)
-#pragma warning( pop )
-#endif
 #else
 /**
  *  \cond INTERNAL
  */
-#define XERCES_CPP_NAMESPACE_QUALIFIER xercesc_2_7::
-namespace xercesc_2_7
+#define XERCES_CPP_NAMESPACE_QUALIFIER xercesc_3_1::
+namespace xercesc_3_1
 {
    class BinInputStream;
-   class DOMBuilder;
+   class DOMLSParser;
    class DOMDocument;
    class DOMElement;
    class DOMError;
-   class DOMImplementation;
+   class DOMImplementationLS;
    class DOMNode;
    class DOMText;
+   class DOMXPathResult;
    class InputSource;
    class MemoryManager;
    class SAXParseException;

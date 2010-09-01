@@ -1,3 +1,4 @@
 __doc__ = """XERCES XML parser library."""
-package = {'url':"https://opticks.ballforge.net/files/documents/8/26/xerces.zip",
-           'downloadLocation':'xerces-2.7.0.zip'}
+package = {'url':"https://opticks.ballforge.net/files/documents/8/434/xerces-3.1.1.zip",
+           'downloadLocation':'xerces-3.1.1.zip',
+           'targetDirectory':'Xerces'}

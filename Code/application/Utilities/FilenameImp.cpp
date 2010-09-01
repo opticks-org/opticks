@@ -64,7 +64,7 @@ void FilenameImp::setFullPathAndName(const string& filename)
    string parsedFilename = filename;
    if (filename.substr(0, 7) == "file://")
    {
-      parsedFilename = XmlReader::URLtoPath(X(XStr(filename.c_str())));
+      parsedFilename = XmlReader::URLtoPath(X(filename.c_str()));
    }
 
    mFilename = parsedFilename;

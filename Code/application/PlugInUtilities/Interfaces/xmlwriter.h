@@ -72,7 +72,7 @@ class Font;
  * @ingroup app_xml
  *
  * @par requirements
- * Apache Xerces-C++ verion 2.4.0
+ * Apache Xerces-C++ version 3.1.1
  */
 class XMLWriter : public XmlBase
 {
@@ -88,7 +88,7 @@ public:
     *        Optional MessageLog to be passed to XmlBase
     *
     * @param useNamespace
-    *        If true, the app namespace will be exported, if false, no namespace will be exported.
+    *        If \c true, the app namespace will be exported, if \c false, no namespace will be exported.
     *
     * @throw XmlBase::XmlException
     *        When unable to create the Xerces DOM document.
@@ -108,7 +108,7 @@ public:
     *        Optional MessageLog to be passed to XmlBase
     *
     * @param useNamespace
-    *        If true, the app namespace will be exported, if false, no namespace will be exported.
+    *        If \c true, the app namespace will be exported, if \c false, no namespace will be exported.
     *
     * @throw XmlBase::XmlException
     *        When unable to create the Xerces DOM document.
@@ -136,10 +136,7 @@ public:
     *        must have \e operator<< defined for
     *        a std::stringstream.
     *
-    * @return true on success, false on failure
-    *
-    * @throw XmlBase::XmlException
-    *        When Xerces fails to add the attribute.
+    * @return Returns \c true on success and \c false on failure.
     *
     * @see std::stringstream
     */
@@ -162,10 +159,7 @@ public:
     *        must have \e operator<< defined for
     *        a std::stringstream.
     *
-    * @return true on success, false on failure
-    *
-    * @throw XmlBase::XmlException
-    *        When Xerces fails to add the attribute.
+    * @return Returns \c true on success and \c false on failure.
     *
     * @see std::stringstream
     */
@@ -189,10 +183,7 @@ public:
     * @param pOwner
     *        The DOM node which will have the attribute.
     *
-    * @return true on success, false on failure
-    *
-    * @throw XmlBase::XmlException
-    *        When Xerces fails to add the attribute.
+    * @return Returns \c true on success and \c false on failure.
     */
    bool addAttr(const char* pName, const char* pValue, XERCES_CPP_NAMESPACE_QUALIFIER DOMElement* pOwner);
 
@@ -208,10 +199,7 @@ public:
     * @param pOwner
     *        The DOM node which will have the attribute.
     *
-    * @return true on success, false on failure
-    *
-    * @throw XmlBase::XmlException
-    *        When Xerces fails to add the attribute.
+    * @return Returns \c true on success and \c false on failure.
     */
    bool addAttr(const char* pName, const std::string value, XERCES_CPP_NAMESPACE_QUALIFIER DOMElement* pOwner)
    {
@@ -230,10 +218,7 @@ public:
     *        of this element. If not specified, the current
     *        DOM node is used as the parent.
     *
-    * @return The new DOM element or NULL on failure.
-    *
-    * @throw XmlBase::XmlException
-    *        When Xerces fails to add the element.
+    * @return The new DOM element or \c NULL on failure.
     */
    XERCES_CPP_NAMESPACE_QUALIFIER DOMElement* addElement(const char* pName,
       XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pOwner = NULL);
@@ -251,10 +236,7 @@ public:
     *        of this element. If not specified, the current
     *        DOM node is used as the parent.
     *
-    * @return The new DOM element or NULL on failure.
-    *
-    * @throw XmlBase::XmlException
-    *        When Xerces fails to add the element.
+    * @return The new DOM element or \c NULL on failure.
     */
    XERCES_CPP_NAMESPACE_QUALIFIER DOMElement* addElement(const std::string& name,
       XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pOwner = NULL)
@@ -278,10 +260,7 @@ public:
     *        of this element. If not specified, the current
     *        DOM node is used as the parent.
     *
-    * @return The new DOM element or NULL on failure.
-    *
-    * @throw XmlBase::XmlException
-    *        When Xerces fails to add the element.
+    * @return The new DOM element or \c NULL on failure.
     */
    XERCES_CPP_NAMESPACE_QUALIFIER DOMElement* addFontElement(const char* pName, const Font& font,
       XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pOwner = NULL);
@@ -304,10 +283,7 @@ public:
     *
     * @see std::stringstream
     *
-    * @return The new DOM text node or NULL on failure.
-    *
-    * @throw XmlBase::XmlException
-    *        When Xerces fails to add the text node.
+    * @return The new DOM text node or \c NULL on failure.
     */
    template<class T>
    XERCES_CPP_NAMESPACE_QUALIFIER DOMText* addText(T value, XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pOwner = NULL)
@@ -331,10 +307,7 @@ public:
     *        of this element. If not specified, the current
     *        DOM node is used as the parent.
     *
-    * @return The new DOM text node or NULL on failure.
-    *
-    * @throw XmlBase::XmlException
-    *        When Xerces fails to add the text node.
+    * @return The new DOM text node or \c NULL on failure.
     *
     * @see std::stringstream
     */
@@ -358,10 +331,7 @@ public:
     *        of this element. If not specified, the current
     *        DOM node is used as the parent.
     *
-    * @return The new DOM text node or NULL on failure.
-    *
-    * @throw XmlBase::XmlException
-    *        When Xerces fails to add the text node.
+    * @return The new DOM text node or \c NULL on failure.
     */
    XERCES_CPP_NAMESPACE_QUALIFIER DOMText* addText(const char* pValue,
       XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pOwner = NULL);
@@ -377,10 +347,7 @@ public:
     *        of this element. If not specified, the current
     *        DOM node is used as the parent.
     *
-    * @return The new DOM text node or NULL on failure.
-    *
-    * @throw XmlBase::XmlException
-    *        When Xerces fails to add the text node.
+    * @return The new DOM text node or \c NULL on failure.
     */
    XERCES_CPP_NAMESPACE_QUALIFIER DOMText* addText(const std::string value,
       XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pOwner = NULL)
@@ -403,7 +370,7 @@ public:
     *        If not specified, the current DOM node is used
     *        as the parent.
     *
-    * @return true if the element exists, false if it does not exist
+    * @return Returns \c true if the element exists and \c false if it does not exist.
     */
    bool elementExists(const char* pName, XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pOwner = NULL);
 
@@ -493,7 +460,7 @@ public:
     * information on add points.
     *
     * @param pNode
-    *        The new current DOM node. If this is NULL, the document
+    *        The new current DOM node. If this is \c NULL, the document
     *        root is pushed onto the stack.
     *
     * @see XMLWriter

@@ -8,12 +8,18 @@
  */
 
 #include "Endian.h"
-#include "Int64.h"
+#include "UInt64.h"
 #include "XercesIncludes.h"
 #include "xmlbase.h"
+#include "xmlreader.h"
 
-#include <cctype>
 #include <algorithm>
+#include <cctype>
+#include <sstream>
+#include <string.h>
+
+#include <boost/crc.hpp>
+#include <boost/cstdint.hpp>
 
 XERCES_CPP_NAMESPACE_USE
 
@@ -70,7 +76,7 @@ std::string XmlBase::URLtoPath(const XMLCh* pUrl)
       while (sTransMap[mapPos].mpC != NULL)
       {
          std::string::size_type pos(0);
-         while ((pos = path.find(sTransMap[mapPos].mpH, pos)) != -1)
+         while ((pos = path.find(sTransMap[mapPos].mpH, pos)) != std::string::npos)
          {
             // all %xx reprs are 3 characters so we
             // replace them with the single character
@@ -86,10 +92,10 @@ std::string XmlBase::URLtoPath(const XMLCh* pUrl)
       // catch any exceptions that xerces might throw
    }
    // if there's an exception give something back
-   return std::string("");
+   return std::string();
 }
 
-std::string XmlBase::PathToURL(std::string path)
+std::string XmlBase::PathToURL(const std::string& path)
 {
    if (path.empty())
    {
@@ -99,25 +105,25 @@ std::string XmlBase::PathToURL(std::string path)
    {
       // check for absolute vs. relative url
       bool isPathAbsolute = false;
-      if (path[0] == '/')
-      {
-         isPathAbsolute = true;
-      }
-      else if ((path.size() > 1) && (path[1] == ':') && (std::isalpha(path[0])))
-      {
-         isPathAbsolute = true;
-         path.insert(0, "/");
-         std::replace(path.begin(), path.end(), '\\', '/');
-      }
       std::string pth(path);
+      if (pth[0] == '/')
+      {
+         isPathAbsolute = true;
+      }
+      else if ((pth.size() > 1) && (pth[1] == ':') && (std::isalpha(pth[0])))
+      {
+         isPathAbsolute = true;
+         pth.insert(0, "/");
+         std::replace(pth.begin(), pth.end(), '\\', '/');
+      }
       int mapPos(0);
       while (sTransMap[mapPos].mpC != NULL)
       {
          std::string::size_type pos(0);
-         while ((pos = pth.find(sTransMap[mapPos].mpC, pos)) != -1)
+         while ((pos = pth.find(sTransMap[mapPos].mpC, pos)) != std::string::npos)
          {
             // all replacements are 1 character so we
-            // replace them with the 3 chracter %xx repr
+            // replace them with the 3 character %xx repr
             pth.replace(pos, 1, sTransMap[mapPos].mpH);
             pos++;
          }
@@ -139,7 +145,7 @@ std::string XmlBase::PathToURL(std::string path)
       // catch any exceptions that xerces might throw
    }
    // if there's an exception give something back
-   return std::string("");
+   return std::string();
 }
 
 XmlBase::XmlBase(MessageLog* pLog) :
@@ -151,9 +157,9 @@ XmlBase::~XmlBase()
 
 void XmlBase::logException(const XMLException* pExc)
 {
-   if (mpLog != NULL)
+   if (mpLog != NULL && pExc != NULL)
    {
-      Message* msg(mpLog->createMessage("XmlReader DOMBuilder error", "app", "F4E4B705-352C-48bc-96AA-2DEB56966C45"));
+      Message* msg(mpLog->createMessage("XmlReader DOMLSParser error", "app", "F4E4B705-352C-48bc-96AA-2DEB56966C45"));
       switch (pExc->getErrorType())
       {
          case XMLErrorReporter::ErrType_Warning:
@@ -168,7 +174,7 @@ void XmlBase::logException(const XMLException* pExc)
          default:
             break;
       }
-      msg->addProperty("line", pExc->getSrcLine());
+      msg->addProperty("line", UInt64(pExc->getSrcLine()));
       msg->addProperty("type", std::string(A(pExc->getType())));
       msg->addProperty("message", std::string(A(pExc->getMessage())));
       if (pExc->getSrcFile() != NULL)
@@ -181,12 +187,12 @@ void XmlBase::logException(const XMLException* pExc)
 
 void XmlBase::logException(const SAXParseException* pExc, std::string severity)
 {
-   if (mpLog != NULL)
+   if (mpLog != NULL && pExc != NULL)
    {
       Message* msg(mpLog->createMessage("XmlReader SAXParserException", "app", "EC355E3E-03CA-4081-9006-5F45D6A488B3"));
       msg->addProperty("severity", severity);
-      msg->addProperty("line", Int64(pExc->getLineNumber()));
-      msg->addProperty("column", Int64(pExc->getColumnNumber()));
+      msg->addProperty("line", UInt64(pExc->getLineNumber()));
+      msg->addProperty("column", UInt64(pExc->getColumnNumber()));
       msg->addProperty("message", std::string(A(pExc->getMessage())));
       if (pExc->getPublicId() != NULL)
       {
@@ -202,7 +208,7 @@ void XmlBase::logException(const SAXParseException* pExc, std::string severity)
 
 void XmlBase::logException(const DOMException* pExc)
 {
-   if (mpLog != NULL)
+   if (mpLog != NULL && pExc != NULL)
    {
       Message* msg(mpLog->createMessage("XmlReader DOMException", "app", "3620CAD7-3535-4716-9686-E024E201481F"));
       msg->addProperty("message", std::string(A(pExc->msg)));
@@ -221,9 +227,9 @@ void XmlBase::logError(const XERCES_CPP_NAMESPACE_QUALIFIER DOMError& exc)
       if (pLoc != NULL)
       {
          pMsg->addProperty("file", A(pLoc->getURI()));
-         pMsg->addProperty("line", Int64(pLoc->getLineNumber()));
-         pMsg->addProperty("column", Int64(pLoc->getColumnNumber()));
-         pMsg->addProperty("offset", Int64(pLoc->getOffset()));
+         pMsg->addProperty("line", UInt64(pLoc->getLineNumber()));
+         pMsg->addProperty("column", UInt64(pLoc->getColumnNumber()));
+         pMsg->addProperty("offset", UInt64(pLoc->getByteOffset()));
       }
       switch (exc.getSeverity())
       {
@@ -251,9 +257,10 @@ void XmlBase::logSimpleMessage(std::string msg)
    }
 }
 
-XMLByte* XmlBase::encodeBase64(unsigned int* pData, unsigned int size, std::string encoding, unsigned int* pOutLen)
+XMLByte* XmlBase::encodeBase64(const unsigned int* pData, XMLSize_t size, XMLSize_t* pOutLen, std::string* pChecksum)
 {
-   int numBytes(size * sizeof(unsigned int));
+   boost::crc_ccitt_type crc;
+   XMLSize_t numBytes(size * sizeof(unsigned int));
 
    XMLByte* bytes(new (std::nothrow) XMLByte[numBytes]);
    if (bytes == NULL)
@@ -270,26 +277,39 @@ XMLByte* XmlBase::encodeBase64(unsigned int* pData, unsigned int size, std::stri
       tmp = pData[i];
       for (int j = 0; j < sizeof(tmp); j++)
       {
-         bytes[bytesIndex++] = (tmp >> (8 * j)) & 0xff;
+         bytes[bytesIndex] = (tmp >> (8 * j)) & 0xff;
+         if (pChecksum != NULL)
+         {
+            crc(bytes[bytesIndex]);
+         }
+
+         ++bytesIndex;
       }
    }
 
-   unsigned int outlen;
+   XMLSize_t outlen;
    XMLByte* b64repr(Base64::encode(bytes, numBytes, &outlen));
    if (pOutLen != NULL)
    {
       *pOutLen = outlen;
    }
 
+   if (pChecksum != NULL)
+   {
+      std::stringstream crcString;
+      crcString << crc();
+      *pChecksum = crcString.str();
+   }
+
    delete [] bytes;
    return b64repr;
 }
 
-unsigned int* XmlBase::decodeBase64(const XMLByte* pData, unsigned int size, std::string encoding)
+unsigned int* XmlBase::decodeBase64(const XMLByte* pData, XMLSize_t size, const std::string& checksum)
 {
-   unsigned int dlen;
+   XMLSize_t dlen;
    XMLByte* bytes(Base64::decode(pData, &dlen));
-   if (dlen < (size * 4))
+   if (bytes == NULL || dlen < (size * sizeof(unsigned int)))
    {
       return NULL;
    }
@@ -302,17 +322,36 @@ unsigned int* XmlBase::decodeBase64(const XMLByte* pData, unsigned int size, std
 
    int bytesIndex(0);
    unsigned int tmp;
-   for (unsigned int i = 0; i < dlen; i++)
+   boost::crc_ccitt_type crc;
+   for (unsigned int i = 0; i < dlen / sizeof(unsigned int); i++)
    {
       tmp = 0;
       for (int j = 0; j < sizeof(tmp); j++)
       {
-         tmp |= bytes[bytesIndex++] << (8 * j);
+         tmp |= bytes[bytesIndex] << (8 * j);
+         if (checksum.empty() == false)
+         {
+            crc(bytes[bytesIndex]);
+         }
+
+         ++bytesIndex;
       }
 
       decoded[i] = tmp;
    }
 
-   XMLString::release(&bytes);
+   // Use ::operator delete() per Xerces documentation
+   ::operator delete(bytes);
+   if (checksum.empty() == false)
+   {
+      XmlReader::StringStreamAssigner<boost::crc_ccitt_type::value_type> parser;
+      boost::crc_ccitt_type::value_type storedCrc(parser(checksum.c_str()));
+      if (crc() != storedCrc)
+      {
+         delete [] decoded;
+         return NULL;
+      }
+   }
+
    return decoded;
 }

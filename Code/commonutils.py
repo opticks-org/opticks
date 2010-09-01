@@ -135,9 +135,9 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
         la("ffmpeg/%s/libavcodec/libavcodec.so.51" % (plat_dir))
         la("ffmpeg/%s/libavformat/libavformat.so.50" % (plat_dir))
         la("ffmpeg/%s/libavutil/libavutil.so.49" % (plat_dir))
-        la("xqilla/lib/%s/libxqilla.so.1" % (plat_dir))
+        la("xqilla/lib/%s/libxqilla.so.5" % (plat_dir))
         la("qwt/lib/%s/libqwt.so.5" % (plat_dir))
-        la("Xerces/lib/%s/libxerces-c.so.27" % (plat_dir))
+        la("Xerces/lib/%s/libxerces-c-3.1.so" % (plat_dir))
         la("Qt/lib/%s/libQt3Support.so.4" % (plat_dir))
         la("Qt/lib/%s/libQtCore.so.4" % (plat_dir))
         la("Qt/lib/%s/libQtGui.so.4" % (plat_dir))
@@ -161,8 +161,8 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
         la("ehs/lib/%s/libehs.so.0" % (plat_dir))
     elif platform == "Windows":
         temp_list = list()
-        ds(r"Xerces\bin", ["xerces-c_2_7"], "D.dll", ".dll")
-        ds(r"xqilla\bin", ["xqilla10"], "d.dll", ".dll")
+        ds(r"Xerces\bin", ["xerces-c_3_1"], "D.dll", ".dll")
+        ds(r"xqilla\bin", ["xqilla22"], "d.dll", ".dll")
         ds(r"glew\bin", ["glew32"], "d.dll", ".dll")
         ds(r"Qt\bin",
             ["Qt3Support", "QtCore", "QtGui", "QtNetwork",
@@ -190,7 +190,7 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
         ds(r"raptor\bin", ["raptor"], ".dll", ".dll")
         ds(r"expat\bin", ["libexpat"], ".dll", ".dll")
         dd(r"gdal\bin", ["gdal17.dll"], False)
-        dd(r"Xerces\bin", ["xerces-c_2_7.dll"], False) # needed by gdal
+        dd(r"Xerces\bin", ["xerces-c_3_1.dll"], False) # needed by gdal
         dd(r"Hdf4\bin",["hd423m.dll","hm423m.dll"], False) # needed by gdal
         ds(r"OpenJpeg\bin", [], "d.dll", ".dll", ["OpenJpeg"])
 

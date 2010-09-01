@@ -7,6 +7,6 @@
 	>
 	<Tool
 		Name="VCLinkerTool"
-		AdditionalDependencies="xerces-c_2.lib xqilla10.lib"
+		AdditionalDependencies="xerces-c_3.lib xqilla22.lib"
 	/>
 </VisualStudioPropertySheet>
