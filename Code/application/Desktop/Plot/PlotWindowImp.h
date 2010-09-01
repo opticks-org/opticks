@@ -10,10 +10,7 @@
 #ifndef PLOTWINDOWIMP_H
 #define PLOTWINDOWIMP_H
 
-#include <QtGui/QStackedWidget>
-
 #include "DockWindowImp.h"
-#include "PlotSetAdapter.h"
 #include "TypesFile.h"
 
 #include <vector>
@@ -21,7 +18,10 @@
 class DataVariant;
 class DynamicObject;
 class InfoBar;
+class PlotSet;
 class PlotWidget;
+class QAction;
+class QStackedWidget;
 class Signature;
 
 /**
@@ -100,13 +100,7 @@ protected:
    InfoBar* getInfoBar() const;
 
 protected slots:
-   /**
-    *  Sets the active plot set.
-    *
-    *  @param   strPlotSet
-    *           The name of the plot set to activate.  Cannot be empty.
-    */
-   void setCurrentPlotSet(const QString& strPlotSet);
+   void setCurrentPlotSet(QAction* pAction);
 
 private:
    InfoBar* mpInfoBar;

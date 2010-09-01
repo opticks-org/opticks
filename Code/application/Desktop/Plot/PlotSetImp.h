@@ -25,11 +25,14 @@
 
 #include "XercesIncludes.h"
 
+class PlotSet;
 class PlotWidget;
 class PlotWindow;
 class SessionItemDeserializer;
 class SessionItemSerializer;
 class View;
+
+Q_DECLARE_METATYPE(PlotSet*)
 
 class PlotSetImp : public QTabWidget, public SessionItemImp, public SubjectImp, public Observer
 {

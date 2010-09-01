@@ -10,6 +10,7 @@
 #include <QtCore/QEvent>
 #include <QtGui/QHeaderView>
 #include <QtGui/QInputDialog>
+#include <QtGui/QLabel>
 #include <QtGui/QLayout>
 #include <QtGui/QMessageBox>
 #include <QtGui/QPushButton>
@@ -21,6 +22,7 @@
 #include "CartesianGridlines.h"
 #include "CartesianPlot.h"
 #include "DesktopServices.h"
+#include "ElidedLabel.h"
 #include "PlotManager.h"
 #include "PlotPropertiesDlg.h"
 #include "PlotSet.h"
@@ -88,7 +90,8 @@ DockWindowWidget::DockWindowWidget(QWidget* pParent) :
 
    // Workspace window
    QLabel* pActiveWindowLabel = new QLabel("Active Workspace Window:", this);
-   mpActiveWindowLabel = new QLabel(this);
+   mpActiveWindowLabel = new ElidedLabel(this);
+   mpActiveWindowLabel->setMinimumWidth(100);
 
    // Layout
    QVBoxLayout* pWindowLayout = new QVBoxLayout();
@@ -132,11 +135,21 @@ DockWindowWidget::DockWindowWidget(QWidget* pParent) :
    pGrid->setColumnStretch(2, 10);
 
    // Initialization
-   string windowName = "";
-   mpDesktop->getCurrentWorkspaceWindowName(windowName);
+   string windowName;
+
+   WorkspaceWindow* pWindow = mpDesktop->getCurrentWorkspaceWindow();
+   if (pWindow != NULL)
+   {
+      windowName = pWindow->getDisplayName();
+      if (windowName.empty() == true)
+      {
+         windowName = pWindow->getName();
+      }
+   }
+
    if (windowName.empty() == false)
    {
-      mpActiveWindowLabel->setText(QString::fromLatin1(windowName.c_str()));
+      mpActiveWindowLabel->setText(QString::fromStdString(windowName));
    }
 
    mpDesktop->attach(SIGNAL_NAME(DesktopServices, WindowAdded), Slot(this, &DockWindowWidget::windowAdded));
@@ -200,19 +213,19 @@ void DockWindowWidget::windowActivated(Subject& subject, const string& signal, c
 {
    if (dynamic_cast<DesktopServices*>(&subject) == mpDesktop.get())
    {
-      QString strWindow;
+      string windowName;
 
       WorkspaceWindow* pWindow = boost::any_cast<WorkspaceWindow*>(value);
       if (pWindow != NULL)
       {
-         string windowName = pWindow->getName();
-         if (windowName.empty() == false)
+         windowName = pWindow->getDisplayName();
+         if (windowName.empty() == true)
          {
-            strWindow = QString::fromStdString(windowName);
+            windowName = pWindow->getName();
          }
       }
 
-      mpActiveWindowLabel->setText(strWindow);
+      mpActiveWindowLabel->setText(QString::fromStdString(windowName));
    }
 }
 

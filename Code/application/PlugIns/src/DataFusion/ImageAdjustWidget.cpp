@@ -20,6 +20,7 @@
 
 #include "AttachmentPtr.h"
 #include "AppVerify.h"
+#include "ElidedLabel.h"
 #include "ImageAdjustWidget.h"
 #include "Layer.h"
 #include "LayerList.h"
@@ -68,19 +69,21 @@ ImageAdjustWidget::ImageAdjustWidget(WorkspaceWindow* pWindow, QWidget* pParent)
    pLayout->setSpacing(10);
 
    QGridLayout* pCurrentLayerLayout = new QGridLayout();
-   pCurrentLayerLayout->setRowStretch(0, 10);
+   pCurrentLayerLayout->setColumnStretch(1, 10);
    pLayout->addLayout(pCurrentLayerLayout);
   
    QLabel* pLayerLabel = new QLabel("Current Flicker Layer: ", this);
    pCurrentLayerLayout->addWidget(pLayerLabel, 1, 0);
 
-   mpCurrentLayerLabel = new QLabel(NO_LAYER, this);
+   mpCurrentLayerLabel = new ElidedLabel(NO_LAYER, this);
+   mpCurrentLayerLabel->setMinimumWidth(100);
    pCurrentLayerLayout->addWidget(mpCurrentLayerLabel, 1, 1, Qt::AlignLeft);
 
    QLabel* pCubeLayerLabel = new QLabel("Data Cube Layer: ", this);
    pCurrentLayerLayout->addWidget(pCubeLayerLabel, 2, 0);
 
-   mpCurrentCubeLayerLabel = new QLabel(NO_LAYER, this);
+   mpCurrentCubeLayerLabel = new ElidedLabel(NO_LAYER, this);
+   mpCurrentCubeLayerLabel->setMinimumWidth(100);
    pCurrentLayerLayout->addWidget(mpCurrentCubeLayerLabel, 2, 1, Qt::AlignLeft);
 
    QGroupBox* pFlickerBox = new QGroupBox("Flicker / Blend Tools", this);

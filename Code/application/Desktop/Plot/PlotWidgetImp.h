@@ -28,6 +28,7 @@ class AnnotationToolBar;
 class Axis;
 class AxisImp;
 class Classification;
+class ElidedLabel;
 class FloatingLabel;
 class Legend;
 class MouseMode;
@@ -153,7 +154,7 @@ private:
    FontImp mClassificationFont;
    FontImp mOrganizationFont;
 
-   QLabel* mpTitleLabel;
+   ElidedLabel* mpTitleLabel;
    FontImp mTitleFont;
 
    PlotSet* mpPlotSet;

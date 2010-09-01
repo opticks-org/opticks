@@ -12,13 +12,13 @@
 
 #include <boost/any.hpp>
 #include <QtGui/QCheckBox>
-#include <QtGui/QLabel>
 #include <QtGui/QListWidget>
 #include <QtGui/QTreeWidget>
 #include <QtGui/QWidget>
 
 #include "DesktopServices.h"
 
+class ElidedLabel;
 class PlotSet;
 class PlotWidget;
 class PlotWindow;
@@ -62,7 +62,7 @@ private:
    QListWidget* mpWindowList;
    QCheckBox* mpDeleteWindowCheck;
    QTreeWidget* mpPlotTree;
-   QLabel* mpActiveWindowLabel;
+   ElidedLabel* mpActiveWindowLabel;
 };
 
 #endif

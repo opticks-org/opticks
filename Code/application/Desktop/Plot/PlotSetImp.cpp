@@ -624,10 +624,14 @@ void PlotSetImp::addPlot(PlotWidget* pPlot)
    }
 
    // Get the plot name
-   QString strPlotName = QString::fromStdString(pView->getName());
-   if (strPlotName.isEmpty() == true)
+   string plotName = pView->getDisplayName();
+   if (plotName.empty() == true)
    {
-      return;
+      plotName = pView->getName();
+      if (plotName.empty() == true)
+      {
+         return;
+      }
    }
 
    // Add the new tab
@@ -635,7 +639,7 @@ void PlotSetImp::addPlot(PlotWidget* pPlot)
    if (pPlotImp != NULL)
    {
       VERIFYNR(connect(pView, SIGNAL(renamed(const QString&)), this, SLOT(updatePlotName())));
-      addTab(pPlotImp, strPlotName);
+      addTab(pPlotImp, QString::fromStdString(plotName));
       emit plotAdded(pPlot);
       notify(SIGNAL_NAME(PlotSet, PlotAdded), boost::any(pPlot));
       setCurrentPlot(pPlot);

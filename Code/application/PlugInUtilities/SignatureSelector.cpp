@@ -531,13 +531,19 @@ QTreeWidgetItem* SignatureSelector::createSignatureItem(Signature* pSignature, Q
    }
 
    // Name
-   QString strName;
+   QString toolTipName;
 
-   string elementName = pSignature->getName();
-   if (elementName.empty() == false)
+   string elementName = pSignature->getDisplayName();
+   if (elementName.empty() == true)
    {
-      strName = QString::fromStdString(elementName);
+      elementName = pSignature->getName();
    }
+   else
+   {
+      toolTipName = QString::fromStdString(pSignature->getName());
+   }
+
+   QString strName = QString::fromStdString(elementName);
 
    // Location
    QString strLocation;
@@ -561,6 +567,11 @@ QTreeWidgetItem* SignatureSelector::createSignatureItem(Signature* pSignature, Q
    pItem->setText(0, strName);
    pItem->setData(0, Qt::UserRole, QVariant::fromValue(reinterpret_cast<void*>(pSignature)));
    pItem->setText(1, strLocation);
+
+   if (toolTipName.isEmpty() == false)
+   {
+      pItem->setToolTip(0, toolTipName);
+   }
 
    if (createLibraryItems == true)
    {
