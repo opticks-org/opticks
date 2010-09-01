@@ -636,6 +636,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\WavelengthModel.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\WavelengthsWidget.cpp"
 				>
 			</File>
@@ -4159,6 +4163,10 @@
 						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\WavelengthModel.h"
+				>
 			</File>
 			<File
 				RelativePath=".\WavelengthsWidget.h"

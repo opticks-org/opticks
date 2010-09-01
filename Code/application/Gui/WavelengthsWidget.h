@@ -10,6 +10,8 @@
 #ifndef WAVELENGTHSWIDGET_H
 #define WAVELENGTHSWIDGET_H
 
+#include <QtCore/QModelIndex>
+#include <QtGui/QStyledItemDelegate>
 #include <QtGui/QWidget>
 
 #include "DimensionDescriptor.h"
@@ -19,11 +21,10 @@
 #include <string>
 #include <vector>
 
-class CustomTreeWidget;
 class DynamicObject;
 class QPushButton;
-class QTreeWidgetItem;
 class Subject;
+class WavelengthModel;
 class Wavelengths;
 class WavelengthUnitsComboBox;
 
@@ -54,7 +55,7 @@ protected slots:
    void initializeWavelengthsFromElement();
    void loadWavelengths();
    void saveWavelengths();
-   void wavelengthChanged(QTreeWidgetItem* pItem, int column);
+   void wavelengthChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
    void calculateFwhm();
    void applyScaleFactor();
    void convertWavelengths(WavelengthUnitsType newUnits);
@@ -64,7 +65,7 @@ private:
    DynamicObject* mpWavelengthData;
    Wavelengths* mpWavelengths;
 
-   CustomTreeWidget* mpWavelengthTree;
+   WavelengthModel* mpWavelengthModel;
    QPushButton* mpSaveButton;
    QPushButton* mpFwhmButton;
    QPushButton* mpScaleButton;
@@ -72,6 +73,18 @@ private:
 
    static const QString mMetadataFilter;
    static const QString mTextFilter;
+};
+
+class WavelengthItemDelegate : public QStyledItemDelegate
+{
+public:
+   WavelengthItemDelegate(QObject* pParent = NULL);
+   ~WavelengthItemDelegate();
+
+   QWidget* createEditor(QWidget* pParent, const QStyleOptionViewItem& option, const QModelIndex& index) const;
+   void setEditorData(QWidget* pEditor, const QModelIndex& index) const;
+   void setModelData(QWidget* pEditor, QAbstractItemModel* pModel, const QModelIndex& index) const;
+   void updateEditorGeometry(QWidget* pEditor, const QStyleOptionViewItem& option, const QModelIndex& index) const;
 };
 
 #endif
