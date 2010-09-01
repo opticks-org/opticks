@@ -93,7 +93,7 @@ void TextureImpl::genTexture(int size)
 
    if (mHandle != 0)
    {
-      if (find(sAllTextures.begin(), sAllTextures.end(), this) == sAllTextures.end())
+      if (std::find(sAllTextures.begin(), sAllTextures.end(), this) == sAllTextures.end())
       {
          sAllTextures.push_back(this);
       }
@@ -159,12 +159,12 @@ void TextureImpl::deleteOldTextures()
    uint64_t textureCacheSize = getTextureCacheSize();
    if (sTotalSize > textureCacheSize)
    {
-      make_heap(sAllTextures.begin(), sAllTextures.end(), TextureImplGr);
+      std::make_heap(sAllTextures.begin(), sAllTextures.end(), TextureImplGr);
 
       while (sTotalSize > textureCacheSize)
       {
          TextureImpl* pTexture = sAllTextures.front();
-         pop_heap(sAllTextures.begin(), sAllTextures.end(), TextureImplGr);
+         std::pop_heap(sAllTextures.begin(), sAllTextures.end(), TextureImplGr);
          sAllTextures.pop_back();
          pTexture->deleteTexture();
       }
