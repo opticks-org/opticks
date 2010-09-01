@@ -16,15 +16,14 @@
 std::vector<TextureImpl*> TextureImpl::sAllTextures;
 uint64_t TextureImpl::sTextureCacheSize = 0;
 uint64_t TextureImpl::sTotalSize = 0;
+uint64_t TextureImpl::sLastUsedCounter = 0;
 
 TextureImpl::TextureImpl() :
    mHandle(0),
    mSize(0),
-   mTimestamp(0),
+   mLastUsed(0),
    mReferenceCount(1)
-{
-   sAllTextures.push_back(this);
-}
+{}
 
 TextureImpl::~TextureImpl()
 {
@@ -38,12 +37,14 @@ TextureImpl::~TextureImpl()
 
 bool TextureImpl::isAllocated() const
 {
+   updateLastUsed();
    return mHandle != 0;
 }
 
-void TextureImpl::updateTimestamp() const
+void TextureImpl::updateLastUsed() const
 {
-   mTimestamp = time(NULL);
+   ++sLastUsedCounter; //the start value of sLastUsedCounter, 0, is reserved.
+   mLastUsed = sLastUsedCounter;
 }
 
 uint64_t TextureImpl::getTextureCacheSize()
@@ -63,13 +64,18 @@ void TextureImpl::downsizeTextureCache()
 void TextureImpl::genTexture(int size)
 {
    static int sGenCount = 0;
-   deleteTexture(); 
-
    ++sGenCount;
    if (sGenCount % 20 == 0)
    {
       deleteOldTextures();
    }
+   //call this after deleteOldTextures because doing
+   //it before causes it to be the oldest texture
+   //in the heap. Putting this here also ensures
+   //this texture isn't the reason we go over the
+   //cache limit.
+   deleteTexture();
+
  
    glGenTextures(1, &mHandle); 
    if (mHandle == 0)
@@ -87,7 +93,11 @@ void TextureImpl::genTexture(int size)
 
    if (mHandle != 0)
    {
-      updateTimestamp(); 
+      if (find(sAllTextures.begin(), sAllTextures.end(), this) == sAllTextures.end())
+      {
+         sAllTextures.push_back(this);
+      }
+      updateLastUsed(); 
       mSize = size;
       sTotalSize += size;
    }
@@ -101,7 +111,7 @@ void TextureImpl::deleteTexture()
       sTotalSize -= mSize;
    }
    mHandle = 0; 
-   mTimestamp = 0;
+   mLastUsed = 0;
    mSize = 0;
 }
 
@@ -110,13 +120,13 @@ void TextureImpl::bind() const
    if (mHandle != 0)
    {
       glBindTexture(GL_TEXTURE_2D, mHandle);
-      updateTimestamp();
+      updateLastUsed();
    }
 }
 
-time_t TextureImpl::timestamp() const
+uint64_t TextureImpl::lastUsed() const
 {
-   return mTimestamp;
+   return mLastUsed;
 }
 
 int TextureImpl::getSize() const
@@ -140,31 +150,23 @@ void TextureImpl::decrementRefCount()
 
 bool TextureImplGr(const TextureImpl *pLhs, const TextureImpl *pRhs)
 {
-   return pLhs->timestamp() > pRhs->timestamp();
+   return pLhs->lastUsed() > pRhs->lastUsed();
 }
 
 void TextureImpl::deleteOldTextures()
 {
-   uint64_t sum = 0;
 
    uint64_t textureCacheSize = getTextureCacheSize();
    if (sTotalSize > textureCacheSize)
    {
-      std::sort(sAllTextures.begin(), sAllTextures.end(), TextureImplGr);
+      make_heap(sAllTextures.begin(), sAllTextures.end(), TextureImplGr);
 
-      std::vector<TextureImpl*>::iterator it;
-      for (it = sAllTextures.begin(); it != sAllTextures.end(); ++it)
+      while (sTotalSize > textureCacheSize)
       {
-         sum += (*it)->getSize();
-         if (sum > textureCacheSize)
-         {
-            break;
-         }
-      }
-
-      for (; it!= sAllTextures.end(); ++it)
-      {
-         (*it)->deleteTexture();
+         TextureImpl* pTexture = sAllTextures.front();
+         pop_heap(sAllTextures.begin(), sAllTextures.end(), TextureImplGr);
+         sAllTextures.pop_back();
+         pTexture->deleteTexture();
       }
    }
 }
@@ -203,17 +205,12 @@ void Texture::genTexture(int size)
    mpImpl->genTexture(size);
 }
 
-void Texture::deleteTexture()
-{
-   mpImpl->deleteTexture();
-}
-
 void Texture::bind()
 {
    mpImpl->bind();
 }
 
-time_t Texture::timestamp() const
+uint64_t Texture::lastUsed() const
 {
-   return mpImpl->timestamp();
+   return mpImpl->lastUsed();
 }
