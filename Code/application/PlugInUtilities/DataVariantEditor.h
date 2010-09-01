@@ -12,6 +12,7 @@
 
 #include "DataVariant.h"
 #include "EnumWrapper.h"
+#include "IntValidator.h"
 
 #include <QtCore/QFileSystemWatcher>
 #include <QtCore/QString>
@@ -22,7 +23,6 @@
 class CustomColorButton;
 class QDateTimeEdit;
 class QDoubleValidator;
-class QIntValidator;
 class QLineEdit;
 class QListWidget;
 class QPushButton;
@@ -130,7 +130,8 @@ private:
    CustomColorButton* mpColorEdit;
    SymbolTypeGrid* mpSymbolTypeEdit;
 
-   QIntValidator* mpIntValidator;
+   IntValidator<int64_t>* mpIntValidator;
+   IntValidator<uint64_t>* mpUIntValidator;
    QDoubleValidator* mpDoubleValidator;
 
    DataVariant mValue;

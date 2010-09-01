@@ -42,6 +42,7 @@
 #include <QtGui/QTextEdit>
 #include <QtGui/QValidator>
 
+#include <limits>
 #include <string>
 #include <vector>
 
@@ -123,8 +124,10 @@ DataVariantEditor::DataVariantEditor(QWidget* pParent) :
    pDateTimeLayout->addWidget(mpDateTimeEdit);
    pDateTimeLayout->addStretch(10);
 
-   mpIntValidator = new QIntValidator(NULL);
-   mpDoubleValidator = new QDoubleValidator(NULL);
+   mpIntValidator = new IntValidator<int64_t>(this);
+   mpUIntValidator = new IntValidator<uint64_t>(this);
+   mpDoubleValidator = new QDoubleValidator(this);
+   mpDoubleValidator->setNotation(QDoubleValidator::ScientificNotation);
 
    QWidget* pColorWidget = new QWidget(mpStack);
    mpColorEdit = new CustomColorButton(pColorWidget);
@@ -431,7 +434,9 @@ void DataVariantEditor::setValue(const DataVariant& value, bool useVariantCurren
    }
    else
    {
-      mpValueLineEdit->clear();
+      mpValueLineEdit->setText(QString());   // Cannot call QLineEdit::clear() because it does not clear
+                                             // the line edit's undo stack, which could allow users to undo
+                                             // to a value that may now be invalid with the current type
       if (useVariantCurrentValue)
       {
          QString valueText = QString::fromStdString(value.toDisplayString());
@@ -596,13 +601,81 @@ void DataVariantEditor::setStackWidget(string type)
    }
    else if (curDelegate.getType() == DataVariantEditorDelegate::INTEGRAL)
    {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Consider using one or more custom QValidator subclasses "\
-   "and removing mpIntValidator when implementing OPTICKS-588 (dadkins)")
-      mpValueLineEdit->setValidator(NULL);
+      const string& typeName = curDelegate.getTypeName();
+      if (typeName == "char")
+      {
+         mpIntValidator->setRange(numeric_limits<char>::min(), numeric_limits<char>::max());
+         mpValueLineEdit->setValidator(mpIntValidator);
+      }
+      else if (typeName == "signed char")
+      {
+         mpIntValidator->setRange(numeric_limits<signed char>::min(), numeric_limits<signed char>::max());
+         mpValueLineEdit->setValidator(mpIntValidator);
+      }
+      else if (typeName == "unsigned char")
+      {
+         mpUIntValidator->setRange(numeric_limits<unsigned char>::min(), numeric_limits<unsigned char>::max());
+         mpValueLineEdit->setValidator(mpUIntValidator);
+      }
+      else if (typeName == "short")
+      {
+         mpIntValidator->setRange(numeric_limits<short>::min(), numeric_limits<short>::max());
+         mpValueLineEdit->setValidator(mpIntValidator);
+      }
+      else if (typeName == "unsigned short")
+      {
+         mpUIntValidator->setRange(numeric_limits<unsigned short>::min(), numeric_limits<unsigned short>::max());
+         mpValueLineEdit->setValidator(mpUIntValidator);
+      }
+      else if (typeName == "int")
+      {
+         mpIntValidator->setRange(numeric_limits<int>::min(), numeric_limits<int>::max());
+         mpValueLineEdit->setValidator(mpIntValidator);
+      }
+      else if (typeName == "unsigned int")
+      {
+         mpUIntValidator->setRange(numeric_limits<unsigned int>::min(), numeric_limits<unsigned int>::max());
+         mpValueLineEdit->setValidator(mpUIntValidator);
+      }
+      else if (typeName == "long")
+      {
+         mpIntValidator->setRange(numeric_limits<long>::min(), numeric_limits<long>::max());
+         mpValueLineEdit->setValidator(mpIntValidator);
+      }
+      else if (typeName == "unsigned long")
+      {
+         mpUIntValidator->setRange(numeric_limits<unsigned long>::min(), numeric_limits<unsigned long>::max());
+         mpValueLineEdit->setValidator(mpUIntValidator);
+      }
+      else if ((typeName == "int64_t") || (typeName == "Int64"))
+      {
+         mpIntValidator->setRange(numeric_limits<int64_t>::min(), numeric_limits<int64_t>::max());
+         mpValueLineEdit->setValidator(mpIntValidator);
+      }
+      else if ((typeName == "uint64_t") || (typeName == "UInt64"))
+      {
+         mpUIntValidator->setRange(numeric_limits<uint64_t>::min(), numeric_limits<uint64_t>::max());
+         mpValueLineEdit->setValidator(mpUIntValidator);
+      }
+      else
+      {
+         mpValueLineEdit->setValidator(NULL);
+      }
+
       mpStack->setCurrentIndex(0);
    }
    else if (curDelegate.getType() == DataVariantEditorDelegate::DOUBLE)
    {
+      const string& typeName = curDelegate.getTypeName();
+      if (typeName == "float")
+      {
+         mpDoubleValidator->setRange(-numeric_limits<float>::max(), numeric_limits<float>::max(), 1000);
+      }
+      else if (typeName == "double")
+      {
+         mpDoubleValidator->setRange(-numeric_limits<double>::max(), numeric_limits<double>::max(), 1000);
+      }
+
       mpValueLineEdit->setValidator(mpDoubleValidator);
       mpStack->setCurrentIndex(0);
    }
