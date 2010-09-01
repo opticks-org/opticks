@@ -8,30 +8,27 @@
  */
 
 #include <QtCore/QDir>
-#include <QtCore/QFileInfo>
-#include <QtCore/QRegExp>
 #include <QtCore/QStringList>
 
+#include "AppVerify.h"
 #include "AppVersion.h"
 #include "AutoImporter.h"
-#include "AppVerify.h"
 #include "DataDescriptor.h"
 #include "DataElement.h"
 #include "FileDescriptor.h"
 #include "Filename.h"
 #include "Importer.h"
 #include "MessageLogResource.h"
-#include "ModelServices.h"
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInDescriptor.h"
-#include "PlugInManagerServices.h"
 #include "PlugInRegistration.h"
 #include "PlugInResource.h"
 #include "Progress.h"
 
 #include <algorithm>
-
+#include <list>
+#include <utility>
 using namespace std;
 
 REGISTER_PLUGIN_BASIC(OpticksAutoImporter, AutoImporter);
@@ -40,8 +37,7 @@ AutoImporter::AutoImporter() :
    mbInteractive(false),
    mpProgress(NULL),
    mpElement(NULL),
-   mpPlugIn(NULL),
-   mFileAffinity(Importer::CAN_NOT_LOAD)
+   mpPlugIn(NULL)
 {
    setName("Auto Importer");
    setCreator("Ball Aerospace & Technologies Corp.");
@@ -56,9 +52,13 @@ AutoImporter::AutoImporter() :
 
 AutoImporter::~AutoImporter()
 {
-   if (mpPlugIn != NULL)
+   for (map<string, PlugIn*>::iterator iter = mPlugIns.begin(); iter != mPlugIns.end(); ++iter)
    {
-      mpPlugInManager->destroyPlugIn(mpPlugIn);
+      PlugIn* pPlugIn = iter->second;
+      if (pPlugIn != NULL)
+      {
+         mpPlugInManager->destroyPlugIn(pPlugIn);
+      }
    }
 }
 
@@ -255,7 +255,7 @@ vector<ImportDescriptor*> AutoImporter::getImportDescriptors(const string& filen
 {
    vector<ImportDescriptor*> descriptors;
 
-   Importer* pImporter = dynamic_cast<Importer*>(findImporter(filename));
+   Importer* pImporter = findImporter(filename);
    if (pImporter != NULL)
    {
       descriptors = pImporter->getImportDescriptors(filename);
@@ -266,10 +266,12 @@ vector<ImportDescriptor*> AutoImporter::getImportDescriptors(const string& filen
 
 unsigned char AutoImporter::getFileAffinity(const string& filename)
 {
-   Importer* pImporter = dynamic_cast<Importer*>(findImporter(filename));
-   if (pImporter != NULL)
+   findImporter(filename);
+
+   map<string, pair<string, unsigned char> >::iterator iter = mFilenames.find(filename);
+   if (iter != mFilenames.end())
    {
-      return mFileAffinity;
+      return iter->second.second;
    }
 
    return Importer::CAN_NOT_LOAD;
@@ -282,11 +284,9 @@ QWidget* AutoImporter::getPreview(const DataDescriptor* pDescriptor, Progress* p
       return NULL;
    }
 
-   findImporter(pDescriptor);
-
    QWidget* pPreviewWidget = NULL;
 
-   Importer* pImporter = dynamic_cast<Importer*>(mpPlugIn);
+   Importer* pImporter = findImporter(pDescriptor);
    if (pImporter != NULL)
    {
       pPreviewWidget = pImporter->getPreview(pDescriptor, pProgress);
@@ -302,16 +302,15 @@ bool AutoImporter::validate(const DataDescriptor* pDescriptor, string& errorMess
       return NULL;
    }
 
-   const_cast<AutoImporter*>(this)->findImporter(pDescriptor);
-
    bool bValid = false;
 
-   Importer* pImporter = dynamic_cast<Importer*>(mpPlugIn);
+   Importer* pImporter = const_cast<AutoImporter*>(this)->findImporter(pDescriptor);
    if (pImporter != NULL)
    {
       bValid = pImporter->validate(pDescriptor, errorMessage);
       if (errorMessage.empty() == false)
       {
+         VERIFY(mpPlugIn != NULL);
          string importerName = mpPlugIn->getName();
          errorMessage.insert(0, importerName + ":\n");
       }
@@ -327,11 +326,9 @@ QWidget* AutoImporter::getImportOptionsWidget(DataDescriptor* pDescriptor)
       return NULL;
    }
 
-   findImporter(pDescriptor);
-
    QWidget* pWidget = NULL;
 
-   Importer* pImporter = dynamic_cast<Importer*>(mpPlugIn);
+   Importer* pImporter = findImporter(pDescriptor);
    if (pImporter != NULL)
    {
       pWidget = pImporter->getImportOptionsWidget(pDescriptor);
@@ -347,9 +344,7 @@ void AutoImporter::polishDataDescriptor(DataDescriptor* pDescriptor)
       return;
    }
 
-   findImporter(pDescriptor);
-
-   Importer* pImporter = dynamic_cast<Importer*>(mpPlugIn);
+   Importer* pImporter = findImporter(pDescriptor);
    if (pImporter != NULL)
    {
       pImporter->polishDataDescriptor(pDescriptor);
@@ -420,13 +415,7 @@ bool AutoImporter::getOutputSpecification(PlugInArgList*& pArgList)
 
 bool AutoImporter::hasAbort()
 {
-   Executable* pExecutable = dynamic_cast<Executable*>(mpPlugIn);
-   if (pExecutable != NULL)
-   {
-      return pExecutable->hasAbort();
-   }
-
-   return false;
+   return true;
 }
 
 bool AutoImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
@@ -481,7 +470,10 @@ bool AutoImporter::abort()
    Executable* pExecutable = dynamic_cast<Executable*>(mpPlugIn);
    if (pExecutable != NULL)
    {
-      return pExecutable->abort();
+      if (pExecutable->hasAbort() == true)
+      {
+         return pExecutable->abort();
+      }
    }
 
    return false;
@@ -576,7 +568,7 @@ bool AutoImporter::checkExtension(const PlugInDescriptor* pDescriptor, const str
    return bUse;
 }
 
-PlugIn* AutoImporter::findImporter(const DataDescriptor* pDescriptor)
+Importer* AutoImporter::findImporter(const DataDescriptor* pDescriptor)
 {
    string filename;
    if (pDescriptor != NULL)
@@ -591,26 +583,27 @@ PlugIn* AutoImporter::findImporter(const DataDescriptor* pDescriptor)
    return findImporter(filename);
 }
 
-PlugIn* AutoImporter::findImporter(const string& filename)
+Importer* AutoImporter::findImporter(const string& filename)
 {
-   if (mpPlugIn != NULL)
+   map<string, pair<string, unsigned char> >::iterator fileIter = mFilenames.find(filename);
+   if (fileIter != mFilenames.end())
    {
-      if (filename == mFilename)
+      map<string, PlugIn*>::iterator plugInIter = mPlugIns.find(fileIter->second.first);
+      if (plugInIter != mPlugIns.end())
       {
-         return mpPlugIn;
+         mpPlugIn = plugInIter->second;
+         return dynamic_cast<Importer*>(mpPlugIn);
       }
-
-      mpPlugInManager->destroyPlugIn(mpPlugIn);
-      mpPlugIn = NULL;
    }
-   mFileAffinity = Importer::CAN_NOT_LOAD;
 
-   mFilename = filename;
-   if (mFilename.empty() == true)
+   mpPlugIn = NULL;
+
+   if (filename.empty() == true)
    {
       return NULL;
    }
 
+   // Create the list of importers to search
    vector<PlugInDescriptor*> importers = mpPlugInManager->getPlugInDescriptors(PlugInManagerServices::ImporterType());
 
    //remove self from list of importers
@@ -618,78 +611,109 @@ PlugIn* AutoImporter::findImporter(const string& filename)
       remove_if(importers.begin(), importers.end(), FindDescriptor(getName()));
    importers.erase(newEnd, importers.end());
 
+   // Check importers first based on file extension
    list<PlugInDescriptor*> remainingImporters;
-   copy(importers.begin(), importers.end(), back_insert_iterator< list<PlugInDescriptor*> >(remainingImporters));
-
-   PlugInResource foundImporter;
+   PlugIn* pPlugIn = NULL;
    unsigned char maxFileAffinity = Importer::CAN_NOT_LOAD;
-   for (vector<PlugInDescriptor*>::iterator iter = importers.begin();
-        iter != importers.end(); ++iter)
+
+   for (vector<PlugInDescriptor*>::iterator iter = importers.begin(); iter != importers.end(); ++iter)
    {
       PlugInDescriptor* pDescriptor = *iter;
       if (pDescriptor == NULL)
       {
          continue;
       }
-      if (checkExtension(pDescriptor, mFilename))
+
+      if (checkExtension(pDescriptor, filename))
       {
-         PlugInResource pImporterRes(pDescriptor->getName());
-         Importer* pImporter = dynamic_cast<Importer*>(pImporterRes.get());
+         PlugIn* pCurrentPlugIn = NULL;
+         const string& plugInName = pDescriptor->getName();
+
+         map<string, PlugIn*>::iterator plugInIter = mPlugIns.find(plugInName);
+         if (plugInIter != mPlugIns.end())
+         {
+            pCurrentPlugIn = plugInIter->second;
+         }
+         else
+         {
+            PlugInResource pImporterRes(plugInName);
+            pCurrentPlugIn = pImporterRes.release();
+            if (pCurrentPlugIn != NULL)
+            {
+               mPlugIns[plugInName] = pCurrentPlugIn;
+            }
+         }
+
+         Importer* pImporter = dynamic_cast<Importer*>(pCurrentPlugIn);
          if (pImporter != NULL)
          {
-            unsigned char fileAffinity = pImporter->getFileAffinity(mFilename);
+            unsigned char fileAffinity = pImporter->getFileAffinity(filename);
             if (fileAffinity > maxFileAffinity)
             {
                maxFileAffinity = fileAffinity;
-               foundImporter = pImporterRes;
-            }
-            list<PlugInDescriptor*>::iterator removeIter =
-               find(remainingImporters.begin(), remainingImporters.end(), pDescriptor);
-            if (removeIter != remainingImporters.end())
-            {
-               remainingImporters.erase(removeIter);
+               pPlugIn = pCurrentPlugIn;
             }
          }
       }
-   }
-
-   if ((foundImporter.get() != NULL) && (maxFileAffinity >= Importer::CAN_LOAD))
-   {
-      mpPlugIn = foundImporter.release();
-      mFileAffinity = maxFileAffinity;
-      return mpPlugIn;
-   }
-
-   if (mpPlugIn == NULL)
-   {
-      for (list<PlugInDescriptor*>::iterator iter2 = remainingImporters.begin();
-           iter2 != remainingImporters.end(); ++iter2)
+      else
       {
-         PlugInDescriptor* pDescriptor = *iter2;
-         if (pDescriptor == NULL)
+         remainingImporters.push_back(pDescriptor);
+      }
+   }
+
+   if ((pPlugIn != NULL) && (maxFileAffinity >= Importer::CAN_LOAD))
+   {
+      mpPlugIn = pPlugIn;
+      mFilenames[filename] = make_pair(mpPlugIn->getName(), maxFileAffinity);
+      return dynamic_cast<Importer*>(mpPlugIn);
+   }
+
+   // Check the remaining importers
+   for (list<PlugInDescriptor*>::iterator iter = remainingImporters.begin(); iter != remainingImporters.end(); ++iter)
+   {
+      PlugInDescriptor* pDescriptor = *iter;
+      if (pDescriptor == NULL)
+      {
+         continue;
+      }
+
+      PlugIn* pCurrentPlugIn = NULL;
+      const string& plugInName = pDescriptor->getName();
+
+      map<string, PlugIn*>::iterator plugInIter = mPlugIns.find(plugInName);
+      if (plugInIter != mPlugIns.end())
+      {
+         pCurrentPlugIn = plugInIter->second;
+      }
+      else
+      {
+         PlugInResource pImporterRes(plugInName);
+         pCurrentPlugIn = pImporterRes.release();
+         if (pCurrentPlugIn != NULL)
          {
-            continue;
+            mPlugIns[plugInName] = pCurrentPlugIn;
          }
-         PlugInResource pImporterRes(pDescriptor->getName());
-         Importer* pImporter = dynamic_cast<Importer*>(pImporterRes.get());
-         if (pImporter != NULL)
+      }
+
+      Importer* pImporter = dynamic_cast<Importer*>(pCurrentPlugIn);
+      if (pImporter != NULL)
+      {
+         unsigned char fileAffinity = pImporter->getFileAffinity(filename);
+         if (fileAffinity > maxFileAffinity)
          {
-            unsigned char fileAffinity = pImporter->getFileAffinity(mFilename);
-            if (fileAffinity > maxFileAffinity)
-            {
-               maxFileAffinity = fileAffinity;
-               foundImporter = pImporterRes;
-            }
+            maxFileAffinity = fileAffinity;
+            pPlugIn = pCurrentPlugIn;
          }
       }
    }
 
    // If an importer was found, assign it.
-   if ((foundImporter.get() != NULL) && (maxFileAffinity > Importer::CAN_NOT_LOAD))
+   if ((pPlugIn != NULL) && (maxFileAffinity > Importer::CAN_NOT_LOAD))
    {
-      mpPlugIn = foundImporter.release();
+      mpPlugIn = pPlugIn;
+      mFilenames[filename] = make_pair(mpPlugIn->getName(), maxFileAffinity);
+      return dynamic_cast<Importer*>(mpPlugIn);
    }
 
-   mFileAffinity = maxFileAffinity;
-   return mpPlugIn;
+   return NULL;
 }

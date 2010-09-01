@@ -13,6 +13,7 @@
 #include "ImporterShell.h"
 #include "PlugInManagerServices.h"
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -47,8 +48,8 @@ public:
 protected:
    bool extractPlugInArgs(const PlugInArgList* pArgList);
    bool checkExtension(const PlugInDescriptor* pDescriptor, const std::string& filename) const;
-   PlugIn* findImporter(const DataDescriptor* pDescriptor);
-   PlugIn* findImporter(const std::string& filename);
+   Importer* findImporter(const DataDescriptor* pDescriptor);
+   Importer* findImporter(const std::string& filename);
 
 private:
    bool mbInteractive;
@@ -59,8 +60,8 @@ private:
    DataElement* mpElement;
 
    PlugIn* mpPlugIn;
-   std::string mFilename;
-   unsigned char mFileAffinity;
+   std::map<std::string, std::pair<std::string, unsigned char> > mFilenames;
+   std::map<std::string, PlugIn*> mPlugIns;
 };
 
 #endif
