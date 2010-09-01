@@ -140,8 +140,6 @@ void CurveImp::draw()
 
    if (isSelected() == true)
    {
-      glColor3ub(0, 0, 0);
-
       for (i = 0; i < numPoints; i++)
       {
          LocationType point = mPoints.at(i);
@@ -314,8 +312,7 @@ const QPixmap& CurveImp::getLegendPixmap(bool bSelected) const
          QPainter p(&selectedPix);
          p.setPen(QPen(mColor, 1));
          p.drawLine(rcPixmap.left() + 2, rcPixmap.center().y(), rcPixmap.right() - 2, rcPixmap.center().y());
-         p.setBrush(Qt::black);
-         p.setPen(QPen(Qt::black, 1));
+         p.setBrush(QBrush(selectedPixColor));
          p.drawPolygon(points);
          p.end();
       }

@@ -609,8 +609,7 @@ const QPixmap& PointSetImp::getLegendPixmap(bool bSelected) const
          QPainter p(&selectedPix);
          p.setPen(QPen(mLineColor, 1));
          p.drawLine(rcPixmap.left() + 2, rcPixmap.center().y(), rcPixmap.right() - 2, rcPixmap.center().y());
-         p.setBrush(Qt::black);
-         p.setPen(QPen(Qt::black, 1));
+         p.setBrush(selectedPixColor);
          p.drawPolygon(points);
          p.end();
       }
