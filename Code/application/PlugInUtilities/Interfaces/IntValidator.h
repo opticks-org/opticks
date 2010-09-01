@@ -27,10 +27,10 @@
  *  - unsigned int
  *  - long
  *  - unsigned long
- *  - Int64
  *  - int64_t
- *  - UInt64
  *  - uint64_t
+ *  - Int64
+ *  - UInt64
  *
  *  The behavior of IntValidator is similar to that of QIntValidator, except
  *  integer types larger than int are supported.  The class defines a validation

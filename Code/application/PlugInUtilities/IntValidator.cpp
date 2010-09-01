@@ -212,12 +212,7 @@ unsigned long IntValidator<unsigned long>::textToValue(const QString& input, boo
    return input.toULong(pSuccess);
 }
 
-template<>
-Int64 IntValidator<Int64>::textToValue(const QString& input, bool* pSuccess) const
-{
-   return Int64(input.toLongLong(pSuccess));
-}
-
+#ifdef WIN_API
 template<>
 int64_t IntValidator<int64_t>::textToValue(const QString& input, bool* pSuccess) const
 {
@@ -225,15 +220,22 @@ int64_t IntValidator<int64_t>::textToValue(const QString& input, bool* pSuccess)
 }
 
 template<>
-UInt64 IntValidator<UInt64>::textToValue(const QString& input, bool* pSuccess) const
-{
-   return UInt64(input.toULongLong(pSuccess));
-}
-
-template<>
 uint64_t IntValidator<uint64_t>::textToValue(const QString& input, bool* pSuccess) const
 {
    return input.toULongLong(pSuccess);
+}
+#endif
+
+template<>
+Int64 IntValidator<Int64>::textToValue(const QString& input, bool* pSuccess) const
+{
+   return Int64(input.toLongLong(pSuccess));
+}
+
+template<>
+UInt64 IntValidator<UInt64>::textToValue(const QString& input, bool* pSuccess) const
+{
+   return UInt64(input.toULongLong(pSuccess));
 }
 
 template class IntValidator<char>;
@@ -245,7 +247,9 @@ template class IntValidator<int>;
 template class IntValidator<unsigned int>;
 template class IntValidator<long>;
 template class IntValidator<unsigned long>;
-template class IntValidator<Int64>;
+#ifdef WIN_API
 template class IntValidator<int64_t>;
-template class IntValidator<UInt64>;
 template class IntValidator<uint64_t>;
+#endif
+template class IntValidator<Int64>;
+template class IntValidator<UInt64>;
