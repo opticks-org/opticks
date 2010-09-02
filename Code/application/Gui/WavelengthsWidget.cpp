@@ -153,6 +153,10 @@ void WavelengthsWidget::setWavelengths(const vector<DimensionDescriptor>& bands,
       {
          delete dynamic_cast<WavelengthsImp*>(mpWavelengths);
          mpWavelengths = NULL;
+
+         // Reset the wavelength model, which ensures the wavelengths are properly set into
+         // the model if memory for the WavelengthsImp is allocated at the same address
+         mpWavelengthModel->setWavelengths(vector<DimensionDescriptor>(), NULL);
       }
    }
 
