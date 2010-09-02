@@ -40,6 +40,9 @@ public slots:
 signals:
    void itemSelected(PlotObject* pObject, bool bSelected);
 
+protected:
+   virtual void mousePressEvent(QMouseEvent* pEvent);
+
 protected slots:
    void selectObject(QTreeWidgetItem* pItem);
    void updateItemText(const QString& strObjectName);

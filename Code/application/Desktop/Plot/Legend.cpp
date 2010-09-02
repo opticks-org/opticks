@@ -9,6 +9,7 @@
 
 #include <QtGui/QHeaderView>
 #include <QtGui/QImage>
+#include <QtGui/QMouseEvent>
 
 #include "Legend.h"
 #include "PlotObject.h"
@@ -31,8 +32,6 @@ Legend::Legend(QWidget* parent) :
       pHeader->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
       pHeader->hide();
    }
-
-   connect(this, SIGNAL(itemPressed(QTreeWidgetItem*, int)), this, SLOT(selectObject(QTreeWidgetItem*)));
 }
 
 Legend::~Legend()
@@ -210,38 +209,25 @@ void Legend::selectObject(QTreeWidgetItem* pItem)
 {
    if (pItem == NULL)
    {
-      QMap<PlotObject*, QTreeWidgetItem*>::Iterator iter = mObjects.begin();
-      while (iter != mObjects.end())
+      return;
+   }
+   QMap<PlotObject*, QTreeWidgetItem*>::Iterator iter = mObjects.begin();
+   while (iter != mObjects.end())
+   {
+      QTreeWidgetItem* pCurrentItem = iter.value();
+      if (pCurrentItem == pItem)
       {
          PlotObject* pObject = iter.key();
          if (pObject != NULL)
          {
-            setItemSelected(pObject, false);
+            bool bSelected = pObject->isSelected();
+            setItemSelected(pObject, !bSelected);
          }
-
-         ++iter;
+         
+         break;
       }
-   }
-   else
-   {
-      QMap<PlotObject*, QTreeWidgetItem*>::Iterator iter = mObjects.begin();
-      while (iter != mObjects.end())
-      {
-         QTreeWidgetItem* pCurrentItem = iter.value();
-         if (pCurrentItem == pItem)
-         {
-            PlotObject* pObject = iter.key();
-            if (pObject != NULL)
-            {
-               bool bSelected = pObject->isSelected();
-               setItemSelected(pObject, !bSelected);
-            }
-
-            break;
-         }
-
-         ++iter;
-      }
+      
+      ++iter;
    }
 }
 
@@ -286,4 +272,20 @@ void Legend::updateItemPixmap()
          }
       }
    }
+}
+
+void Legend::mousePressEvent(QMouseEvent* pEvent)
+{
+   if (pEvent != NULL)
+   {
+      if (pEvent->button() == Qt::LeftButton)
+      {
+         QTreeWidgetItem* pSelectedItem = itemAt(pEvent->pos());
+         if (pSelectedItem != NULL)
+         {
+            selectObject(pSelectedItem);
+         }
+      }
+   }
+   QTreeWidget::mousePressEvent(pEvent);
 }
