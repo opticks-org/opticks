@@ -21,12 +21,11 @@
 #include <QtGui/QLineEdit>
 #include <QtGui/QMessageBox>
 #include <QtGui/QPushButton>
-#include <QtGui/QTreeWidget>
+#include <QtGui/QTableView>
 
 #include "AppVerify.h"
 #include "AppVersion.h"
 #include "ConfigurationSettings.h"
-#include "CustomTreeWidget.h"
 #include "DesktopServices.h"
 #include "DynamicObject.h"
 #include "Filename.h"
@@ -36,6 +35,7 @@
 #include "Progress.h"
 #include "RasterElement.h"
 #include "Slot.h"
+#include "WavelengthModel.h"
 #include "WavelengthsImp.h"
 #include "WavelengthsWidget.h"
 #include "WavelengthUnitsComboBox.h"
@@ -53,27 +53,34 @@ WavelengthsWidget::WavelengthsWidget(QWidget* pParent) :
 {
    // Wavelengths
    QLabel* pWavelengthLabel = new QLabel("Wavelengths:", this);
-   mpWavelengthTree = new CustomTreeWidget(this);
+   QTableView* pWavelengthTable = new QTableView(this);
 
-   QHeaderView* pHeader = mpWavelengthTree->header();
-   if (pHeader != NULL)
+   mpWavelengthModel = new WavelengthModel(this);
+   pWavelengthTable->setModel(mpWavelengthModel);
+
+   QAbstractItemDelegate* pWavelengthDelegate = new WavelengthItemDelegate(pWavelengthTable);
+   pWavelengthTable->setItemDelegate(pWavelengthDelegate);
+
+   QHeaderView* pHorizontalHeader = pWavelengthTable->horizontalHeader();
+   if (pHorizontalHeader != NULL)
    {
-      pHeader->setDefaultSectionSize(85);
-      pHeader->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-      pHeader->setStretchLastSection(false);
+      pHorizontalHeader->setDefaultSectionSize(85);
+      pHorizontalHeader->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+      pHorizontalHeader->setStretchLastSection(false);
+      pHorizontalHeader->setHighlightSections(false);
    }
 
-   QStringList columnNames;
-   columnNames << "Band" << "Start" << "Center" << "End";
+   QHeaderView* pVerticalHeader = pWavelengthTable->verticalHeader();
+   if (pVerticalHeader != NULL)
+   {
+      pVerticalHeader->setDefaultSectionSize(20);
+      pVerticalHeader->hide();
+   }
 
-   mpWavelengthTree->setColumnCount(columnNames.count());
-   mpWavelengthTree->setHeaderLabels(columnNames);
-   mpWavelengthTree->setRootIsDecorated(false);
-   mpWavelengthTree->setGridlinesShown(Qt::Horizontal | Qt::Vertical, true);
-   mpWavelengthTree->setSelectionMode(QAbstractItemView::SingleSelection);
-   mpWavelengthTree->setAllColumnsShowFocus(true);
-   mpWavelengthTree->setSortingEnabled(false);
-   mpWavelengthTree->setColumnWidth(0, 45);
+   pWavelengthTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+   pWavelengthTable->setSelectionMode(QAbstractItemView::SingleSelection);
+   pWavelengthTable->setSortingEnabled(false);
+   pWavelengthTable->setColumnWidth(0, 45);
 
    // Wavelength buttons
    QPushButton* pElementButton = new QPushButton("From Element...", this);
@@ -98,7 +105,7 @@ WavelengthsWidget::WavelengthsWidget(QWidget* pParent) :
    pGrid->setMargin(0);
    pGrid->setSpacing(5);
    pGrid->addWidget(pWavelengthLabel, 0, 0);
-   pGrid->addWidget(mpWavelengthTree, 1, 0, 5, 2);
+   pGrid->addWidget(pWavelengthTable, 1, 0, 5, 2);
    pGrid->addWidget(pElementButton, 1, 2);
    pGrid->addWidget(pLoadButton, 2, 2);
    pGrid->addWidget(mpSaveButton, 3, 2, Qt::AlignTop);
@@ -110,8 +117,8 @@ WavelengthsWidget::WavelengthsWidget(QWidget* pParent) :
    pGrid->setColumnStretch(1, 10);
 
    // Connections
-   VERIFYNR(connect(mpWavelengthTree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
-      SLOT(wavelengthChanged(QTreeWidgetItem*, int))));
+   VERIFYNR(connect(mpWavelengthModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this,
+      SLOT(wavelengthChanged(const QModelIndex&, const QModelIndex&))));
    VERIFYNR(connect(pElementButton, SIGNAL(clicked()), this, SLOT(initializeWavelengthsFromElement())));
    VERIFYNR(connect(pLoadButton, SIGNAL(clicked()), this, SLOT(loadWavelengths())));
    VERIFYNR(connect(mpSaveButton, SIGNAL(clicked()), this, SLOT(saveWavelengths())));
@@ -146,6 +153,10 @@ void WavelengthsWidget::setWavelengths(const vector<DimensionDescriptor>& bands,
       {
          delete dynamic_cast<WavelengthsImp*>(mpWavelengths);
          mpWavelengths = NULL;
+
+         // Reset the wavelength model, which ensures the wavelengths are properly set into
+         // the model if memory for the WavelengthsImp is allocated at the same address
+         mpWavelengthModel->setWavelengths(vector<DimensionDescriptor>(), NULL);
       }
    }
 
@@ -159,47 +170,10 @@ void WavelengthsWidget::setWavelengths(const vector<DimensionDescriptor>& bands,
       mpWavelengths->initializeFromDynamicObject(mpWavelengthData, true);
    }
 
-   // Update the number of tree widget items
-   VERIFYNR(disconnect(mpWavelengthTree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
-      SLOT(wavelengthChanged(QTreeWidgetItem*, int))));
+   // Set the wavelengths into the model
+   mpWavelengthModel->setWavelengths(bands, mpWavelengths);
 
-   mpWavelengthTree->clear();
-
-   for (unsigned int i = 0; i < bands.size(); ++i)
-   {
-      QTreeWidgetItem* pItem = new QTreeWidgetItem(mpWavelengthTree);
-
-      // Band number
-      unsigned int bandNumber = bands[i].getOriginalNumber();
-      pItem->setText(0, QString::number(bandNumber + 1));
-
-      // Wavelength values
-      QLineEdit* pStartEdit = new QLineEdit(mpWavelengthTree);
-      pStartEdit->setValidator(new QDoubleValidator(0.0, numeric_limits<double>::max(), 8, pStartEdit));
-      pStartEdit->hide();
-
-      mpWavelengthTree->setCellWidgetType(pItem, 1, CustomTreeWidget::CUSTOM_LINE_EDIT);
-      mpWavelengthTree->setCustomLineEdit(pItem, 1, pStartEdit);
-
-      QLineEdit* pCenterEdit = new QLineEdit(mpWavelengthTree);
-      pCenterEdit->setValidator(new QDoubleValidator(0.0, numeric_limits<double>::max(), 8, pCenterEdit));
-      pCenterEdit->hide();
-
-      mpWavelengthTree->setCellWidgetType(pItem, 2, CustomTreeWidget::CUSTOM_LINE_EDIT);
-      mpWavelengthTree->setCustomLineEdit(pItem, 2, pCenterEdit);
-
-      QLineEdit* pEndEdit = new QLineEdit(mpWavelengthTree);
-      pEndEdit->setValidator(new QDoubleValidator(0.0, numeric_limits<double>::max(), 8, pEndEdit));
-      pEndEdit->hide();
-
-      mpWavelengthTree->setCellWidgetType(pItem, 3, CustomTreeWidget::CUSTOM_LINE_EDIT);
-      mpWavelengthTree->setCustomLineEdit(pItem, 3, pEndEdit);
-   }
-
-   VERIFYNR(connect(mpWavelengthTree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
-      SLOT(wavelengthChanged(QTreeWidgetItem*, int))));
-
-   // Populate the tree widget items with the wavelength values and the units combo
+   // Populate the widgets
    updateWidgetsFromWavelengths();
 }
 
@@ -210,54 +184,10 @@ QSize WavelengthsWidget::sizeHint() const
 
 void WavelengthsWidget::highlightActiveBands(const vector<DimensionDescriptor>& bands)
 {
-   QFont itemFont = mpWavelengthTree->font();
-
-   QFont activeFont = itemFont;
-   activeFont.setBold(true);
-
-   VERIFYNR(disconnect(mpWavelengthTree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
-      SLOT(wavelengthChanged(QTreeWidgetItem*, int))));
-
-   for (unsigned int i = 0; i < static_cast<unsigned int>(mpWavelengthTree->topLevelItemCount()); ++i)
-   {
-      QTreeWidgetItem* pItem = mpWavelengthTree->topLevelItem(i);
-      if (pItem != NULL)
-      {
-         unsigned int bandNumber = pItem->text(0).toUInt() - 1;
-         bool activeBand = false;
-
-         for (vector<DimensionDescriptor>::const_iterator iter = bands.begin(); iter != bands.end(); ++iter)
-         {
-            unsigned int currentBandNumber = iter->getOriginalNumber();
-            if (currentBandNumber == bandNumber)
-            {
-               activeBand = true;
-               break;
-            }
-         }
-
-         if (activeBand == true)
-         {
-            pItem->setFont(0, activeFont);
-            pItem->setFont(1, activeFont);
-            pItem->setFont(2, activeFont);
-            pItem->setFont(3, activeFont);
-         }
-         else
-         {
-            pItem->setFont(0, itemFont);
-            pItem->setFont(1, itemFont);
-            pItem->setFont(2, itemFont);
-            pItem->setFont(3, itemFont);
-         }
-      }
-   }
-
-   VERIFYNR(connect(mpWavelengthTree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
-      SLOT(wavelengthChanged(QTreeWidgetItem*, int))));
+   mpWavelengthModel->updateActiveWavelengths(bands);
 }
 
-void WavelengthsWidget::wavelengthDataDeleted(Subject& subject, const string& signal, const boost::any& value)\
+void WavelengthsWidget::wavelengthDataDeleted(Subject& subject, const string& signal, const boost::any& value)
 {
    setWavelengths(vector<DimensionDescriptor>(), NULL, NULL);
 }
@@ -285,7 +215,7 @@ void WavelengthsWidget::initializeWavelengthsFromElement()
       return;
    }
 
-   int numBands = mpWavelengthTree->topLevelItemCount();
+   int numBands = mpWavelengthModel->rowCount();
 
    // Get the raster elements with valid wavelengths and at least the same number of bands
    Service<ModelServices> pModel;
@@ -411,7 +341,7 @@ void WavelengthsWidget::loadWavelengths()
          bool applyWavelengths = true;
 
          unsigned int numWavelengths = pWavelengths->getNumWavelengths();
-         unsigned int numBands = static_cast<unsigned int>(mpWavelengthTree->topLevelItemCount());
+         unsigned int numBands = static_cast<unsigned int>(mpWavelengthModel->rowCount());
 
          if (numWavelengths > numBands)
          {
@@ -648,102 +578,18 @@ void WavelengthsWidget::saveWavelengths()
    }
 }
 
-void WavelengthsWidget::wavelengthChanged(QTreeWidgetItem* pItem, int column)
+void WavelengthsWidget::wavelengthChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)
 {
-   if ((pItem == NULL) || (mpWavelengths == NULL))
+   if ((mpWavelengths == NULL) || (topLeft.isValid() == false) || (bottomRight.isValid() == false))
    {
       return;
    }
 
-   // Get the wavelength vector containing the value that was edited and the value units
-   vector<double> wavelengthValues;
-   if (column == 1)
-   {
-      wavelengthValues = mpWavelengths->getStartValues();
-   }
-   else if (column == 2)
-   {
-      wavelengthValues = mpWavelengths->getCenterValues();
-   }
-   else if (column == 3)
-   {
-      wavelengthValues = mpWavelengths->getEndValues();
-   }
-
-   WavelengthUnitsType units = mpWavelengths->getUnits();
-
-   // Get the edited wavelength value
-   double wavelength = 0.0;
-   bool validWavelengths = false;
-
-   QString valueText = pItem->text(column);
-   if (valueText.isEmpty() == true)
-   {
-      for (int i = 0; i < mpWavelengthTree->topLevelItemCount(); ++i)
-      {
-         QTreeWidgetItem* pCurrentItem = mpWavelengthTree->topLevelItem(i);
-         if (pCurrentItem != NULL)
-         {
-            QString currentValueText = pCurrentItem->text(column);
-            if (currentValueText.isEmpty() == false)
-            {
-               validWavelengths = true;
-               break;
-            }
-         }
-      }
-
-      if (validWavelengths == false)
-      {
-         wavelengthValues.clear();
-      }
-   }
-   else
-   {
-      wavelength = valueText.toDouble();
-      validWavelengths = true;
-   }
-
-   // Update the wavelength value in the vector
-   int valueIndex = mpWavelengthTree->indexOfTopLevelItem(pItem);
-   if (wavelengthValues.empty() == false)
-   {
-      if ((valueIndex != -1) && (valueIndex < static_cast<int>(wavelengthValues.size())))
-      {
-         wavelengthValues[valueIndex] = wavelength;
-      }
-   }
-   else if (validWavelengths == true)
-   {
-      for (int i = 0; i < mpWavelengthTree->topLevelItemCount(); ++i)
-      {
-         if (i == valueIndex)
-         {
-            wavelengthValues.push_back(wavelength);
-         }
-         else
-         {
-            wavelengthValues.push_back(0.0);
-         }
-      }
-   }
-
-   // Update the vector in the member wavelengths
-   if (column == 1)
-   {
-      mpWavelengths->setStartValues(wavelengthValues, units);
-   }
-   else if (column == 2)
-   {
-      mpWavelengths->setCenterValues(wavelengthValues, units);
-   }
-   else if (column == 3)
-   {
-      mpWavelengths->setEndValues(wavelengthValues, units);
-   }
-
    // Apply the changes back to the dynamic object
-   mpWavelengths->applyToDynamicObject(mpWavelengthData);
+   if (bottomRight.column() > 0)
+   {
+      mpWavelengths->applyToDynamicObject(mpWavelengthData);
+   }
 }
 
 void WavelengthsWidget::calculateFwhm()
@@ -849,61 +695,70 @@ void WavelengthsWidget::updateWidgetsFromWavelengths()
       return;
    }
 
-   VERIFYNR(disconnect(mpWavelengthTree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
-      SLOT(wavelengthChanged(QTreeWidgetItem*, int))));
-
-   // Values
-   const vector<double>& startValues = mpWavelengths->getStartValues();
-   const vector<double>& centerValues = mpWavelengths->getCenterValues();
-   const vector<double>& endValues = mpWavelengths->getEndValues();
-
-   for (unsigned int i = 0; i < static_cast<unsigned int>(mpWavelengthTree->topLevelItemCount()); ++i)
-   {
-      QTreeWidgetItem* pItem = mpWavelengthTree->topLevelItem(i);
-      if (pItem != NULL)
-      {
-         // Start value
-         QString startValue;
-         if (i < startValues.size())
-         {
-            if (startValues[i] > 0.0)
-            {
-               startValue = QString::number(startValues[i]);
-            }
-         }
-
-         pItem->setText(1, startValue);
-
-         // Center value
-         QString centerValue;
-         if (i < centerValues.size())
-         {
-            if (centerValues[i] > 0.0)
-            {
-               centerValue = QString::number(centerValues[i]);
-            }
-         }
-
-         pItem->setText(2, centerValue);
-
-         // End value
-         QString endValue;
-         if (i < endValues.size())
-         {
-            if (endValues[i] > 0.0)
-            {
-               endValue = QString::number(endValues[i]);
-            }
-         }
-
-         pItem->setText(3, endValue);
-      }
-   }
+   // Wavelengths
+   mpWavelengthModel->updateData();
 
    // Units
    WavelengthUnitsType units = mpWavelengths->getUnits();
    mpUnitsCombo->setUnits(units);
+}
 
-   VERIFYNR(connect(mpWavelengthTree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
-      SLOT(wavelengthChanged(QTreeWidgetItem*, int))));
+WavelengthItemDelegate::WavelengthItemDelegate(QObject* pParent) :
+   QStyledItemDelegate(pParent)
+{}
+
+WavelengthItemDelegate::~WavelengthItemDelegate()
+{}
+
+QWidget* WavelengthItemDelegate::createEditor(QWidget* pParent, const QStyleOptionViewItem& option,
+                                              const QModelIndex& index) const
+{
+   if ((index.isValid() == false) || (index.column() == 0))
+   {
+      return NULL;
+   }
+
+   QLineEdit* pWavelengthEdit = new QLineEdit(pParent);
+   pWavelengthEdit->setFrame(false);
+   pWavelengthEdit->setValidator(new QDoubleValidator(0.0, numeric_limits<double>::max(), 8, pWavelengthEdit));
+
+   return pWavelengthEdit;
+}
+
+void WavelengthItemDelegate::setEditorData(QWidget* pEditor, const QModelIndex& index) const
+{
+   QLineEdit* pWavelengthEdit = dynamic_cast<QLineEdit*>(pEditor);
+   if (pWavelengthEdit == NULL)
+   {
+      return;
+   }
+
+   QString wavelengthText = index.model()->data(index, Qt::EditRole).toString();
+   pWavelengthEdit->setText(wavelengthText);
+}
+
+void WavelengthItemDelegate::setModelData(QWidget* pEditor, QAbstractItemModel* pModel, const QModelIndex& index) const
+{
+   if (pModel == NULL)
+   {
+      return;
+   }
+
+   QLineEdit* pWavelengthEdit = dynamic_cast<QLineEdit*>(pEditor);
+   if (pWavelengthEdit == NULL)
+   {
+      return;
+   }
+
+   QString wavelengthText = pWavelengthEdit->text();
+   pModel->setData(index, QVariant(wavelengthText), Qt::EditRole);
+}
+
+void WavelengthItemDelegate::updateEditorGeometry(QWidget* pEditor, const QStyleOptionViewItem& option,
+                                                  const QModelIndex& index) const
+{
+   if (pEditor != NULL)
+   {
+      pEditor->setGeometry(option.rect);
+   }
 }
