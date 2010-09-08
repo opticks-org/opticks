@@ -13,6 +13,7 @@
 #include "glCommon.h"
 #include "Service.h"
 
+#include <map>
 #include <vector>
 
 class ImageBuffer;
@@ -108,7 +109,7 @@ public:
     *
     *  @return  The value of the scaling factor.
     */
-   float getGpuScalingFactor();
+   float getGpuScalingFactor(GLenum textureFormat);
 
 private:
    GpuResourceManager();
@@ -116,9 +117,8 @@ private:
 
    friend class DesktopServicesImp;
    std::vector<GLuint> mTextures;
-   bool mGpuScalingFactorInitialized;
-   float mGpuScalingFactor;
-   bool determineScalingFactor(float& scalingFactor);
+   std::map<GLenum,float> mGpuScalingFactors;
+   bool determineScalingFactor(float& scalingFactor, GLenum textureFormat);
 };
 
 template<>

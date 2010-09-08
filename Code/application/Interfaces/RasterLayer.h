@@ -57,6 +57,7 @@ public:
    SETTING(BlueLowerStretchValue, RasterLayer, double, 0.0)
    SETTING(BlueUpperStretchValue, RasterLayer, double, 0.0)
    SETTING(GpuImage, RasterLayer, bool, false)
+   SETTING(GpuImageAlwaysAlpha, RasterLayer, bool, true)
    SETTING(GrayLowerStretchValue, RasterLayer, double, 0.0)
    SETTING(GrayUpperStretchValue, RasterLayer, double, 0.0)
    SETTING(GreenLowerStretchValue, RasterLayer, double, 0.0)

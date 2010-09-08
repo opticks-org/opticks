@@ -10,6 +10,7 @@
 #include "GpuImage.h"
 #include "CgContext.h"
 #include "ColorBuffer.h"
+#include "ConfigurationSettings.h"
 #include "glCommon.h"
 #include "GpuResourceManager.h"
 #include "GpuTile.h"
@@ -18,6 +19,7 @@
 #include "MathUtil.h"
 #include "MultiThreadedAlgorithm.h"
 #include "RasterDataDescriptor.h"
+#include "RasterLayer.h"
 #include "RasterUtilities.h"
 #include "UtilityServicesImp.h"
 
@@ -26,6 +28,8 @@ using namespace mta;
 using namespace std;
 
 GLint GpuImage::mMaxTextureSize = 0;
+bool GpuImage::mAlwaysAlpha = true;
+bool GpuImage::mAlphaConfigChecked = false;
 
 GpuImage::GpuImage() :
    mGrayscaleProgram(0),
@@ -45,6 +49,12 @@ GpuImage::GpuImage() :
       mColormapProgram = pCgContext->loadFragmentProgram("ColormapDisplay.cg");
       mRgbProgram = pCgContext->loadFragmentProgram("RgbDisplay.cg");
       mFragmentProfile = pCgContext->getFragmentProfile();
+   }
+   
+   if (mAlphaConfigChecked == false)
+   {
+      mAlwaysAlpha = RasterLayer::getSettingGpuImageAlwaysAlpha();
+      mAlphaConfigChecked = true;
    }
 }
 
@@ -72,7 +82,7 @@ void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor channel, uns
 
    initializeGrayscale();
 
-   GLenum texFormat = ((format == GL_RGBA || format == GL_LUMINANCE_ALPHA) ? GL_LUMINANCE_ALPHA : GL_LUMINANCE);
+   GLenum texFormat = (mAlwaysAlpha || (format == GL_RGBA || format == GL_LUMINANCE_ALPHA) ? GL_LUMINANCE_ALPHA : GL_LUMINANCE);
    Image::initialize(tileSizeX, tileSizeY, channel, imageSizeX, imageSizeY, channels, texFormat, type, pData,
       stretchType, stretchPoints, pRasterElement, badValues);
 }
@@ -88,7 +98,7 @@ void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor channel, uns
 
    initializeGrayscale();
 
-   GLenum texFormat = ((format == GL_RGBA || format == GL_LUMINANCE_ALPHA) ? GL_LUMINANCE_ALPHA : GL_LUMINANCE);
+   GLenum texFormat = (mAlwaysAlpha || (format == GL_RGBA || format == GL_LUMINANCE_ALPHA) ? GL_LUMINANCE_ALPHA : GL_LUMINANCE);
    Image::initialize(tileSizeX, tileSizeY, channel, imageSizeX, imageSizeY, channels, texFormat, type, component,
       pData, stretchType, stretchPoints, pRasterElement, badValues);
 }
@@ -106,7 +116,7 @@ void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor channel, uns
 
    initializeColormap(colorMap);
 
-   GLenum texFormat = ((format == GL_RGBA || format == GL_LUMINANCE_ALPHA) ? GL_LUMINANCE_ALPHA : GL_LUMINANCE);
+   GLenum texFormat = (mAlwaysAlpha || (format == GL_RGBA || format == GL_LUMINANCE_ALPHA) ? GL_LUMINANCE_ALPHA : GL_LUMINANCE);
    Image::initialize(tileSizeX, tileSizeY, channel, imageSizeX, imageSizeY, channels, texFormat, type, pData,
       stretchType, stretchPoints, pRasterElement, colorMap, badValues);
 }
@@ -123,7 +133,7 @@ void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor channel, uns
 
    initializeColormap(colorMap);
 
-   GLenum texFormat = ((format == GL_RGBA || format == GL_LUMINANCE_ALPHA) ? GL_LUMINANCE_ALPHA : GL_LUMINANCE);
+   GLenum texFormat = (mAlwaysAlpha || (format == GL_RGBA || format == GL_LUMINANCE_ALPHA) ? GL_LUMINANCE_ALPHA : GL_LUMINANCE);
    Image::initialize(tileSizeX, tileSizeY, channel, imageSizeX, imageSizeY, channels, texFormat, type, component,
       pData, stretchType, stretchPoints, pRasterElement, colorMap, badValues);
 }
@@ -1509,7 +1519,8 @@ unsigned int GpuImage::readTiles(double xCoord, double yCoord, GLsizei width, GL
       return 0;
    }
 
-   unsigned int numChannels = ImageUtilities::getNumColorChannels(pColorBuffer->getTextureFormat());
+   GLenum textureFormat = pColorBuffer->getTextureFormat();
+   unsigned int numChannels = ImageUtilities::getNumColorChannels(textureFormat);
 
    unsigned int destChannels = numChannels;
    if (destChannels == 1 /* GL_LUMINANCE */ || 
@@ -1590,11 +1601,11 @@ unsigned int GpuImage::readTiles(double xCoord, double yCoord, GLsizei width, GL
          // check to see if current tile is on the same row as the previous tile
          if (tileLocations.at(tileNum).mY == tileLocations.at(tileNum-1).mY)
          {
-            destinationOffsets.push_back(tileWidths.at(tileNum-1) + destinationOffsets.at(tileNum-1));
+            destinationOffsets.push_back(destChannels*tileWidths.at(tileNum-1)/numChannels + destinationOffsets.at(tileNum-1));
          }
          else
          {
-            destinationOffsets.push_back(numElements);
+            destinationOffsets.push_back(numElements*destChannels/numChannels);
          }
       }
 
@@ -1691,56 +1702,56 @@ unsigned int GpuImage::readTiles(double xCoord, double yCoord, GLsizei width, GL
             destinationOffsets[tileNum] += width * destChannels;
          }
       }
+   }
 
-      // get scale factor
-      float gpuFactor = Service<GpuResourceManager>()->getGpuScalingFactor();
-      float scaleFactor = 1.0f / gpuFactor;
-      float offset = 0.0;
-      switch (mInfo.mRawType[0])
-      {
-      case INT1SBYTE:
-         scaleFactor = getScale<signed char>() / gpuFactor;
-         offset = static_cast<float>(getOffset<signed char>());
-         break;
-      case INT1UBYTE:
-         scaleFactor = getScale<unsigned char>() / gpuFactor;
-         offset = static_cast<float>(getOffset<unsigned char>());
-         break;
-      case INT2SBYTES:
-         scaleFactor = getScale<signed short>() / gpuFactor;
-         offset = static_cast<float>(getOffset<signed short>());
-         break;
-      case INT2UBYTES:
-         scaleFactor = getScale<unsigned short>() / gpuFactor;
-         offset = static_cast<float>(getOffset<unsigned short>());
-         break;
-      case INT4SBYTES:
-         scaleFactor = getScale<signed int>() / gpuFactor;
-         offset = static_cast<float>(getOffset<signed int>());
-         break;
-      case INT4UBYTES:
-         scaleFactor = getScale<unsigned int>() / gpuFactor;
-         offset = static_cast<float>(getOffset<unsigned int>());
-         break;
-      case FLT4BYTES:
-         scaleFactor = getScale<float>() / gpuFactor;
-         offset = static_cast<float>(getOffset<float>());
-         break;
-      case FLT8BYTES:
-         scaleFactor = getScale<double>() / gpuFactor;
-         offset = static_cast<float>(getOffset<double>());
-         break;
-      default:
-         break;
-      }
+   // get scale factor
+   float gpuFactor = Service<GpuResourceManager>()->getGpuScalingFactor(textureFormat);
+   float scaleFactor = 1.0f / gpuFactor;
+   float offset = 0.0;
+   switch (mInfo.mRawType[0])
+   {
+   case INT1SBYTE:
+      scaleFactor = getScale<signed char>() / gpuFactor;
+      offset = static_cast<float>(getOffset<signed char>());
+      break;
+   case INT1UBYTE:
+      scaleFactor = getScale<unsigned char>() / gpuFactor;
+      offset = static_cast<float>(getOffset<unsigned char>());
+      break;
+   case INT2SBYTES:
+      scaleFactor = getScale<signed short>() / gpuFactor;
+      offset = static_cast<float>(getOffset<signed short>());
+      break;
+   case INT2UBYTES:
+      scaleFactor = getScale<unsigned short>() / gpuFactor;
+      offset = static_cast<float>(getOffset<unsigned short>());
+      break;
+   case INT4SBYTES:
+      scaleFactor = getScale<signed int>() / gpuFactor;
+      offset = static_cast<float>(getOffset<signed int>());
+      break;
+   case INT4UBYTES:
+      scaleFactor = getScale<unsigned int>() / gpuFactor;
+      offset = static_cast<float>(getOffset<unsigned int>());
+      break;
+   case FLT4BYTES:
+      scaleFactor = getScale<float>() / gpuFactor;
+      offset = static_cast<float>(getOffset<float>());
+      break;
+   case FLT8BYTES:
+      scaleFactor = getScale<double>() / gpuFactor;
+      offset = static_cast<float>(getOffset<double>());
+      break;
+   default:
+      break;
+   }
 
-      // scale the filtered results
-      destElements = destChannels*numElements/numChannels;
-      for (unsigned int element = 0; element < destElements; element++)
-      {
-         pValueData[element] *= scaleFactor;
-         pValueData[element] += offset;
-      }
+   // scale the filtered results
+   destElements = destChannels*numElements/numChannels;
+   for (unsigned int element = 0; element < destElements; element++)
+   {
+      values[element] *= scaleFactor;
+      values[element] += offset;
    }
 
    return destElements;

@@ -122,6 +122,8 @@ private:
    unsigned int mPreviousBand;
 
    static GLint mMaxTextureSize;
+   static bool mAlwaysAlpha;
+   static bool mAlphaConfigChecked;
 };
 
 #endif
