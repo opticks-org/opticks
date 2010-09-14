@@ -456,6 +456,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
          <ComponentRef Id="C__Help_histogram_window" />
          <ComponentRef Id="C__Help_tutorials" />
          <ComponentRef Id="C__Help_skinsupport" />
+         <ComponentRef Id="C__Help_wavelengths" />
          <ComponentRef Id="C__Help_skinrobin" />
          <ComponentRef Id="C__Help_options" />
          <ComponentRef Id="C__Help_geo" />
