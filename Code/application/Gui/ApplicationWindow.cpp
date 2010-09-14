@@ -3205,16 +3205,10 @@ void ApplicationWindow::northUp()
    }
 
    double angle;
-   if (GeoAlgorithms::getAngleToNorth(pLayerList->getPrimaryRasterElement(), angle, pView->getVisibleCenter()) == false)
+   if (GeoAlgorithms::getAngleToNorth(pLayerList->getPrimaryRasterElement(),pView, angle) == false)
    {
       QMessageBox::warning(this, "Error", "No georeferencing information available");
       return;
-   }
-
-   if (pView->getPitch() > 0)
-   {
-      // Reverse if the image is flipped
-      angle += 180.0;
    }
 
    UndoGroup group(pView, "North Up");

@@ -8,15 +8,14 @@
  */
 
 #include "GeoAlgorithms.h"
-
-#include <complex>
-#include <math.h>
 #include "GeoConversions.h"
 #include "MgrsDatum.h"
+#include "PerspectiveView.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 
-using namespace std;
+#include <complex>
+#include <math.h>
 
 GeoAlgorithms::GeoAlgorithms()
 {
@@ -550,7 +549,7 @@ bool GeoAlgorithms::getAngleToNorth(const RasterElement* pRaster, double& angle,
    // in unreliable orientation, especially when the scene coordinate and Lat/Lon coordinate
    // systems are closely aligned. We'll avoid this problem by ensuring that a value of at
    // least 0.001 degree (roughly 100 meters between points) is used for the calculation.
-   degLatPerPixel = max(0.001, degLatPerPixel);
+   degLatPerPixel = std::max(0.001, degLatPerPixel);
 
    LocationType geocoordEnd = LocationType(geocoordStart.mX + degLatPerPixel, geocoordStart.mY);
    LocationType pixelEnd = pRaster->convertGeocoordToPixel(geocoordEnd);
@@ -565,4 +564,20 @@ bool GeoAlgorithms::getAngleToNorth(const RasterElement* pRaster, double& angle,
    // atan2 uses positive x as 0 degrees and we want positive y so offset by PI/2 radians = 90 degrees
    angle = 90 + GeoConversions::convertRadToDeg(atan2(dDeltaY, dDeltaX));
    return true;
+}
+
+bool GeoAlgorithms::getAngleToNorth(const RasterElement* pRaster, const PerspectiveView* pView, double& angle)
+{
+   VERIFY(pView != NULL);
+   LocationType pixelStart = pView->getVisibleCenter();
+   if (getAngleToNorth(pRaster, angle, pixelStart))
+   {
+      if (pView->getPitch() > 0.0)  // image flipped so need to reverse angle
+      {
+         angle += 180.00;
+      }
+      return true;
+   }
+
+   return false;
 }

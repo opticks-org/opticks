@@ -12,6 +12,7 @@
 #include "DesktopServices.h"
 #include "FileResource.h"
 #include "GcpList.h"
+#include "GeoAlgorithms.h"
 #include "GraphicLayer.h"
 #include "GraphicObject.h"
 #include "ImageHandler.h"
@@ -20,6 +21,7 @@
 #include "Layer.h"
 #include "LayerList.h"
 #include "MultipointObject.h"
+#include "PerspectiveView.h"
 #include "PolygonObject.h"
 #include "PolylineObject.h"
 #include "RasterDataDescriptor.h"
@@ -27,6 +29,7 @@
 #include "RasterLayer.h"
 #include "SpatialDataView.h"
 #include "SpatialDataWindow.h"
+#include "Undo.h"
 #include <QtCore/QBuffer>
 #include <QtCore/QByteArray>
 #include <QtCore/QDateTime>
@@ -442,6 +445,29 @@ void Kml::generatePolygonalLayer(const GraphicLayer* pGraphicLayer, bool visible
 void Kml::generateGroundOverlayLayer(Layer* pLayer, bool visible, int order, const Layer* pGeoLayer, int frame)
 {
    VERIFYNRV(pGeoLayer != NULL && pLayer != NULL);
+   PerspectiveView* pView = dynamic_cast<PerspectiveView*>(pLayer->getView());
+   VERIFYNRV(pView != NULL);
+
+   // block adding current actions to the view's undo buffer
+   UndoLock lock(pView);
+   double originalAngle = pView->getRotation();
+
+   // get rotation for north up
+   double angle(0.0);
+   RasterElement* pRaster = dynamic_cast<RasterElement*>(pGeoLayer->getDataElement());  // get the primary raster element
+   VERIFYNRV(GeoAlgorithms::getAngleToNorth(pRaster, pView, angle) != false);
+   pView->rotateTo(angle);
+
+   // since north up only rotates, check for left-right reversed
+   LocationType ll, ul, ur, lr;
+   pView->getVisibleCorners(ll, ul, ur, lr);
+   bool imageFlipped(ll.mX > ur.mX);
+   if (imageFlipped)
+   {
+      pView->flipHorizontal();
+   }
+   pView->refresh();
+
    mXml.pushAddPoint(mXml.addElement("GroundOverlay"));
    string name = pLayer->getDisplayName();
    if (name.empty())
@@ -501,6 +527,14 @@ void Kml::generateGroundOverlayLayer(Layer* pLayer, bool visible, int order, con
    }
    generateBoundingBox(pGeoLayer, bbox);
    mXml.popAddPoint(); // GroundOverlay
+
+   // restore original rotation
+   if (imageFlipped)
+   {
+      pView->flipHorizontal();
+   }
+   pView->rotateTo(originalAngle);
+   pView->refresh();
 }
 
 const QMap<QString,QByteArray> Kml::getImages() const

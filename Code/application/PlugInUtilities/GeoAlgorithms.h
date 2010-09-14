@@ -13,6 +13,7 @@
 
 #include "LocationType.h"
 
+class PerspectiveView;
 class RasterElement;
 
 /**
@@ -235,6 +236,9 @@ public:
    /**
     *  Calculates the angle to north.
     *
+    *  This method only calculates the counterclockwise rotation to north from a pixel. It does not account for
+    *  the view being upside down. The caller is responsible for any needed adjustments due to origin or orientation.
+    *
     *  @param  pRaster
     *          The RasterElement to use for the calculation.
     *  @param  angle
@@ -244,8 +248,30 @@ public:
     *          the latitude of this pixel to the latitude of the pixel directly above it.
     *
     *  @return \c True on success, \c false otherwise.
+    *
+    *  @see    getAngleToNorth(const RasterElement*, const PerspectiveView*, double&)
     */
    static bool getAngleToNorth(const RasterElement* pRaster, double& angle, LocationType pixelStart);
+
+   /**
+    *  Calculates the angle to north.
+    *
+    *  This method calculates the counterclockwise rotation to north from the visible center of the view. It checks if the
+    *  view is upside down and adjusts the angle accordingly.
+    *
+    *  @param  pRaster
+    *          The RasterElement to use for the calculation.
+    *  @param  pView
+    *          The PerspectiveView to use in checking if the image is flipped.
+    *  @param  angle
+    *          The counterclockwise angle to north in degrees. If the image in the view is flipped, the angle is
+    *          adjusted by adding 180 degrees. The value is only valid when the method returns \c true.
+    *
+    *  @return \c True on success, \c false otherwise.
+    *
+    *  @see    getAngleToNorth(const RasterElement*, double&, LocationType)
+    */
+   static bool getAngleToNorth(const RasterElement* pRaster, const PerspectiveView* pView, double& angle);
 
 private:
    // Calculation Variables used only by Vincenty Algorithms
