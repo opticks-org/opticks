@@ -2700,6 +2700,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\Interfaces\IntValidator.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Interfaces\LabeledSection.h"
 				>
 				<FileConfiguration
@@ -3570,6 +3574,10 @@
 			</File>
 			<File
 				RelativePath=".\InfoBar.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\IntValidator.cpp"
 				>
 			</File>
 			<File
