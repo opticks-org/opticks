@@ -32,6 +32,7 @@ InstallWizard::InstallWizard(QList<Aeb*>& packageDescriptors, Progress* pProgres
    addPage(new InstallWizardInfoPage(packageDescriptors, this));
 
    // License pages
+   int licenseId = 0;
    foreach (Aeb* pDescriptor, packageDescriptors)
    {
       if (pDescriptor == NULL)
@@ -44,7 +45,8 @@ InstallWizard::InstallWizard(QList<Aeb*>& packageDescriptors, Progress* pProgres
       {
          QString url = QString::fromStdString(licenseUrls[licenseNum]).toLower();
          bool isHtml = url.endsWith(".html") || url.endsWith(".htm");
-         addPage(new InstallWizardLicensePage(pDescriptor, licenseNum, licenses[licenseNum], isHtml, this));
+         addPage(new InstallWizardLicensePage(pDescriptor, licenseId, licenses[licenseNum], isHtml, this));
+         ++licenseId;
       }
    }
 
