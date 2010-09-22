@@ -1025,7 +1025,7 @@ bool EnviImporter::validate(const DataDescriptor* pDescriptor, string& errorMess
          const vector<string>* pBandNames(NULL);
          pBandNames = dv_cast<vector<string> >(&pMetadata->getAttributeByPath(pNamesPath));
 
-         if (pBandNames != NULL && pBandNames->size() != pRasterDesc->getBandCount())
+         if (pBandNames != NULL && pBandNames->size() != pFileDescriptor->getBandCount())
          {
             if (errorMessage.empty() == false)
             {

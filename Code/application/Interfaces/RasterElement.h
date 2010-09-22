@@ -190,12 +190,12 @@ public:
     *           Passing an empty vector will result in using the RasterElement's
     *           rows as the chipped rows.
     *  @param   selectedColumns
-    *           The DimensionDescriptors (unmodified from this object) for the rows
+    *           The DimensionDescriptors (unmodified from this object) for the columns
     *           which should be included in this chip.
     *           Passing an empty vector will result in using the RasterElement's
     *           columns as the chipped columns.
     *  @param   selectedBands
-    *           The DimensionDescriptors (unmodified from this object) for the rows
+    *           The DimensionDescriptors (unmodified from this object) for the bands
     *           which should be included in this chip.
     *           Passing an empty vector will result in using the RasterElement's
     *           bands as the chipped bands.
@@ -225,10 +225,10 @@ public:
     *           The DimensionDescriptors (unmodified from this object) for the rows
     *           which should be included in this chip.
     *  @param   selectedColumns
-    *           The DimensionDescriptors (unmodified from this object) for the rows
+    *           The DimensionDescriptors (unmodified from this object) for the columns
     *           which should be included in this chip.
     *  @param   selectedBands
-    *           The DimensionDescriptors (unmodified from this object) for the rows
+    *           The DimensionDescriptors (unmodified from this object) for the bands
     *           which should be included in this chip.
     *  @param   abort
     *           A flag which can be set externally to abort.

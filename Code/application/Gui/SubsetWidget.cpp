@@ -288,6 +288,11 @@ unsigned int SubsetWidget::getSubsetRowCount() const
    return subsetRows.size();
 }
 
+unsigned int SubsetWidget::getSubsetRowSkipFactor() const
+{
+   return static_cast<unsigned int>(mpRowSkipSpin->value());
+}
+
 void SubsetWidget::setColumns(const vector<DimensionDescriptor>& columns,
                               const vector<DimensionDescriptor>& selectedColumns)
 {
@@ -411,6 +416,11 @@ unsigned int SubsetWidget::getSubsetColumnCount() const
 {
    vector<DimensionDescriptor> subsetColumns = getSubsetColumns();
    return subsetColumns.size();
+}
+
+unsigned int SubsetWidget::getSubsetColumnSkipFactor() const
+{
+   return static_cast<unsigned int>(mpColumnSkipSpin->value());
 }
 
 void SubsetWidget::setBands(const vector<DimensionDescriptor>& bands, const vector<string>& bandNames,

@@ -387,7 +387,8 @@ void PreviewWidget::setCurrentDataset(ImportDescriptor* pDataset)
          SpatialDataView* pView = dynamic_cast<SpatialDataView*>(mpImporterWidget);
          if (pView != NULL)
          {
-            ChippingWidget* pChippingWidget = new ChippingWidget(pView, mpPreview);
+            ChippingWidget* pChippingWidget = new ChippingWidget(pView,
+               dynamic_cast<const RasterDataDescriptor*>(pDescriptor), mpPreview);
             VERIFYNRV(pChippingWidget != NULL);
 
             VERIFYNR(connect(pChippingWidget, SIGNAL(chipChanged()), this, SLOT(updateCurrentDataset())));
@@ -677,6 +678,14 @@ void PreviewWidget::updateCurrentDataset()
          vector<DimensionDescriptor> columns = pChippingWidget->getChipColumns();
          transform(columns.begin(), columns.end(), columns.begin(), UnsetActiveNumber());
          pDescriptor->setColumns(columns);
+
+         // Bands -- ignore if the user deselected all bands
+         vector<DimensionDescriptor> bands = pChippingWidget->getChipBands();
+         if (bands.empty() == false)
+         {
+            transform(bands.begin(), bands.end(), bands.begin(), UnsetActiveNumber());
+            pDescriptor->setBands(bands);
+         }
       }
    }
 }

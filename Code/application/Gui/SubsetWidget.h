@@ -38,12 +38,14 @@ public:
    const std::vector<DimensionDescriptor>& getRows() const;
    std::vector<DimensionDescriptor> getSubsetRows() const;
    unsigned int getSubsetRowCount() const;
+   unsigned int getSubsetRowSkipFactor() const;
 
    void setColumns(const std::vector<DimensionDescriptor>& columns,
                    const std::vector<DimensionDescriptor>& selectedColumns);
    const std::vector<DimensionDescriptor>& getColumns() const;
    std::vector<DimensionDescriptor> getSubsetColumns() const;
    unsigned int getSubsetColumnCount() const;
+   unsigned int getSubsetColumnSkipFactor() const;
 
    void setBands(const std::vector<DimensionDescriptor>& bands,
       const std::vector<std::string>& bandNames = std::vector<std::string>(),
@@ -114,7 +116,7 @@ private slots:
 private:
    QComboBox* mpStartBandCombo;
    QComboBox* mpEndBandCombo;
-   QSpinBox* mpBandSkipSpin;  
+   QSpinBox* mpBandSkipSpin;
    QLineEdit* mpBadBandFile;
    QPushButton* mpBadBandFileBtn;
 

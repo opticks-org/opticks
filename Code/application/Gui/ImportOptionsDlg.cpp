@@ -457,6 +457,14 @@ void ImportOptionsDlg::setCurrentDataset(ImportDescriptor* pImportDescriptor)
       mpSubsetPage->setColumns(columns, loadedColumns);
 
       // Bands
+      // Note: The band names here cannot use the RasterUtilities::getBandNames() method because that method uses a
+      // RasterDataDescriptor (cf. a RasterFileDescriptor) to determine band names, meaning that bad bands will not
+      // have their names included in the list of band names. If bad bands are not included in the list of band names,
+      // then the SubsetWidget will have a mismatch between the number of band names and the number of bands specified
+      // if bad bands are set by the importer. If SubsetWidget has a mismatch between these two numbers, then no band
+      // names are displayed to the user.
+      // In summary, if we change this to use RasterUtilities::getBandNames(), then the SubsetWidget will ignore band
+      // names and replace them with "Band 1", ..., "Band n" for any image with bad bands set by its importer.
       const vector<DimensionDescriptor>& bands = pRasterFileDescriptor->getBands();
       vector<string> bandNames;
       const DynamicObject* pMetadata = pRasterDescriptor->getMetadata();

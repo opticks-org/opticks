@@ -181,7 +181,6 @@ std::vector<DimensionDescriptor> RasterUtilities::subsetDimensionVector(
    const DimensionDescriptor& stop,
    unsigned int skipFactor)
 {
-   std::vector<DimensionDescriptor> newValues = origValues;
    unsigned int theStartValue = 0;
    if (start.isOriginalNumberValid())
    {
@@ -202,7 +201,8 @@ std::vector<DimensionDescriptor> RasterUtilities::subsetDimensionVector(
       theEndValue = origValues.back().getOriginalNumber();
    }
 
-   newValues.clear();
+   std::vector<DimensionDescriptor> newValues;
+   newValues.reserve(origValues.size() / (skipFactor + 1));
    for (unsigned int i = 0; i < origValues.size(); ++i)
    {
       DimensionDescriptor dim = origValues[i];

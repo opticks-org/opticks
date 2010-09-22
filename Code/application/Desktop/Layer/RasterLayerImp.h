@@ -92,6 +92,7 @@ public:
    DisplayMode getDisplayMode() const;
 
    // Displayed bands
+   void setCurrentStretchAsOriginalStretch();
    DimensionDescriptor getDisplayedBand(RasterChannelType eColor) const;
    RasterElement* getDisplayedRasterElement(RasterChannelType eColor) const;
    bool isBandDisplayed(RasterChannelType eColor, DimensionDescriptor band,

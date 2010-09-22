@@ -148,41 +148,7 @@ RasterLayerImp::RasterLayerImp(const string& id, const string& layerName, DataEl
    updateDisplayModeAction(meDisplayMode);      // The member display mode is set in reset()
 
    // Record initial values for resetStretch -- must be done after reset()
-   mOriginalGrayStretchType = getStretchType(GRAYSCALE_MODE);
-   mOriginalRgbStretchType = getStretchType(RGB_MODE);
-
-   mOriginalGrayscaleStretchUnits = getStretchUnits(GRAY);
-   mOriginalRedStretchUnits = getStretchUnits(RED);
-   mOriginalGreenStretchUnits = getStretchUnits(GREEN);
-   mOriginalBlueStretchUnits = getStretchUnits(BLUE);
-
-   mOriginalGrayBand = getDisplayedBand(GRAY);
-   mOriginalRedBand = getDisplayedBand(RED);
-   mOriginalGreenBand = getDisplayedBand(GREEN);
-   mOriginalBlueBand = getDisplayedBand(BLUE);
-
-   mpOriginalGrayRasterElement.reset(getDisplayedRasterElement(GRAY));
-   mpOriginalRedRasterElement.reset(getDisplayedRasterElement(RED));
-   mpOriginalGreenRasterElement.reset(getDisplayedRasterElement(GREEN));
-   mpOriginalBlueRasterElement.reset(getDisplayedRasterElement(BLUE));
-
-   double lower;
-   double upper;
-   getStretchValues(GRAY, lower, upper);
-   mOriginalGrayStretchValues[0] = convertStretchValue(GRAY, lower, RAW_VALUE);
-   mOriginalGrayStretchValues[1] = convertStretchValue(GRAY, upper, RAW_VALUE);
-
-   getStretchValues(RED, lower, upper);
-   mOriginalRedStretchValues[0] = convertStretchValue(RED, lower, RAW_VALUE);
-   mOriginalRedStretchValues[1] = convertStretchValue(RED, upper, RAW_VALUE);
-
-   getStretchValues(GREEN, lower, upper);
-   mOriginalGreenStretchValues[0] = convertStretchValue(GREEN, lower, RAW_VALUE);
-   mOriginalGreenStretchValues[1] = convertStretchValue(GREEN, upper, RAW_VALUE);
-
-   getStretchValues(BLUE, lower, upper);
-   mOriginalBlueStretchValues[0] = convertStretchValue(BLUE, lower, RAW_VALUE);
-   mOriginalBlueStretchValues[1] = convertStretchValue(BLUE, upper, RAW_VALUE);
+   setCurrentStretchAsOriginalStretch();
 
    // Connections
    VERIFYNR(connect(this, SIGNAL(gpuImageEnabled(bool)),
@@ -1218,6 +1184,45 @@ void RasterLayerImp::toggleDisplayMode()
    {
       setDisplayMode(GRAYSCALE_MODE);
    }
+}
+
+void RasterLayerImp::setCurrentStretchAsOriginalStretch()
+{
+   mOriginalGrayStretchType = getStretchType(GRAYSCALE_MODE);
+   mOriginalRgbStretchType = getStretchType(RGB_MODE);
+
+   mOriginalGrayscaleStretchUnits = getStretchUnits(GRAY);
+   mOriginalRedStretchUnits = getStretchUnits(RED);
+   mOriginalGreenStretchUnits = getStretchUnits(GREEN);
+   mOriginalBlueStretchUnits = getStretchUnits(BLUE);
+
+   mOriginalGrayBand = getDisplayedBand(GRAY);
+   mOriginalRedBand = getDisplayedBand(RED);
+   mOriginalGreenBand = getDisplayedBand(GREEN);
+   mOriginalBlueBand = getDisplayedBand(BLUE);
+
+   mpOriginalGrayRasterElement.reset(getDisplayedRasterElement(GRAY));
+   mpOriginalRedRasterElement.reset(getDisplayedRasterElement(RED));
+   mpOriginalGreenRasterElement.reset(getDisplayedRasterElement(GREEN));
+   mpOriginalBlueRasterElement.reset(getDisplayedRasterElement(BLUE));
+
+   double lower;
+   double upper;
+   getStretchValues(GRAY, lower, upper);
+   mOriginalGrayStretchValues[0] = convertStretchValue(GRAY, lower, RAW_VALUE);
+   mOriginalGrayStretchValues[1] = convertStretchValue(GRAY, upper, RAW_VALUE);
+
+   getStretchValues(RED, lower, upper);
+   mOriginalRedStretchValues[0] = convertStretchValue(RED, lower, RAW_VALUE);
+   mOriginalRedStretchValues[1] = convertStretchValue(RED, upper, RAW_VALUE);
+
+   getStretchValues(GREEN, lower, upper);
+   mOriginalGreenStretchValues[0] = convertStretchValue(GREEN, lower, RAW_VALUE);
+   mOriginalGreenStretchValues[1] = convertStretchValue(GREEN, upper, RAW_VALUE);
+
+   getStretchValues(BLUE, lower, upper);
+   mOriginalBlueStretchValues[0] = convertStretchValue(BLUE, lower, RAW_VALUE);
+   mOriginalBlueStretchValues[1] = convertStretchValue(BLUE, upper, RAW_VALUE);
 }
 
 DimensionDescriptor RasterLayerImp::getDisplayedBand(RasterChannelType eColor) const

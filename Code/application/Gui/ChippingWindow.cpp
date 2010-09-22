@@ -17,7 +17,7 @@
 #include "ChippingWindow.h"
 #include "ChippingWidget.h"
 #include "AppVerify.h"
-#include "DesktopServicesImp.h"
+#include "DesktopServices.h"
 #include "DimensionDescriptor.h"
 #include "GcpList.h"
 #include "LayerList.h"
@@ -34,6 +34,7 @@
 #include "Undo.h"
 
 #include <string>
+#include <vector>
 using namespace std;
 
 ChippingWindow::ChippingWindow(SpatialDataView* pView, QWidget* parent) :
@@ -46,7 +47,8 @@ ChippingWindow::ChippingWindow(SpatialDataView* pView, QWidget* parent) :
    // View widget
    SpatialDataView* pChipView = createChipView();
    pChipView->getWidget()->installEventFilter(this);
-   mpChippingWidget = new ChippingWidget(pChipView, this);
+   mpChippingWidget = new ChippingWidget(pChipView, NULL, this);
+   mpChippingWidget->setExportMode(true);
 
    // Chip mode
    QGroupBox* pModeGroup = new QGroupBox("Chipping Mode", this);
@@ -115,8 +117,7 @@ ChippingWindow::ChippingWindow(SpatialDataView* pView, QWidget* parent) :
 }
 
 ChippingWindow::~ChippingWindow()
-{
-}
+{}
 
 SpatialDataView* ChippingWindow::createChipView() const
 {
@@ -188,13 +189,11 @@ void ChippingWindow::createFile()
    const DimensionDescriptor startCol = columns.front();
    const DimensionDescriptor stopCol = columns.back();
 
-   // Create a file descriptor based on the sensor data with the chip rows and columns
-   FactoryResource<FileDescriptor> fileDescriptor( 
-                   RasterUtilities::generateFileDescriptorForExport(pDescriptor, "", 
-                   startRow, stopRow, 0, startCol, stopCol, 0));
+   // Create a file descriptor based on the data with the chip rows and columns
+   FactoryResource<FileDescriptor> fileDescriptor(RasterUtilities::generateFileDescriptorForExport(pDescriptor,
+      string(), startRow, stopRow, 0, startCol, stopCol, 0, mpChippingWidget->getChipBands()));
 
-   Service<DesktopServices> pDesktop;
-   pDesktop->exportSessionItem(pRaster, fileDescriptor.get());
+   Service<DesktopServices>()->exportSessionItem(pRaster, fileDescriptor.get());
 }
 
 void ChippingWindow::createView()
@@ -209,11 +208,12 @@ void ChippingWindow::createView()
    {
       return;
    }
-   std::vector<DimensionDescriptor> bands;
 
-   // Create the new sensor data
-   RasterElement* pRasterChip = pRaster->createChip(pRaster->getParent(), 
-      "_chip", mpChippingWidget->getChipRows(), mpChippingWidget->getChipColumns(), bands);
+   // Create the new raster element from the primary element of the source.
+   // Note that this does not chip displayed elements if they differ from the primary element.
+   // This causes a special case below where the stretch values are being applied to the chipped layer.
+   RasterElement* pRasterChip = pRaster->createChip(pRaster->getParent(), "_chip",
+      mpChippingWidget->getChipRows(), mpChippingWidget->getChipColumns(), mpChippingWidget->getChipBands());
    if (pRasterChip == NULL)
    {
       QMessageBox::critical(this, windowTitle(), "Unable to create a new cube!");
@@ -224,15 +224,9 @@ void ChippingWindow::createView()
       dynamic_cast<const RasterDataDescriptor*>(pRasterChip->getDataDescriptor());
    VERIFYNRV(pDescriptor != NULL);
 
-   // Create a view for the new sensor data
-   DesktopServicesImp* pDesktop = DesktopServicesImp::instance();
-   if (pDesktop == NULL)
-   {
-      return;
-   }
-
-   SpatialDataWindow* pWindow = static_cast<SpatialDataWindow*>(pDesktop->createWindow(pRasterChip->getName(),
-      SPATIAL_DATA_WINDOW));
+   // Create a view for the new chip
+   SpatialDataWindow* pWindow = dynamic_cast<SpatialDataWindow*>(
+      Service<DesktopServices>()->createWindow(pRasterChip->getName(), SPATIAL_DATA_WINDOW));
    if (pWindow == NULL)
    {
       return;
@@ -241,29 +235,29 @@ void ChippingWindow::createView()
    SpatialDataView* pView = pWindow->getSpatialDataView();
    if (pView == NULL)
    {
-      pDesktop->deleteWindow(pWindow);
+      Service<DesktopServices>()->deleteWindow(pWindow);
       return;
    }
 
    UndoLock lock(pView);
-   bool bSuccess = pView->setPrimaryRasterElement(pRasterChip);
-   if (bSuccess == false)
+   if (pView->setPrimaryRasterElement(pRasterChip) == false)
    {
-      pDesktop->deleteWindow(pWindow);
+      Service<DesktopServices>()->deleteWindow(pWindow);
       return;
    }
 
-   RasterLayer* pLayer = static_cast<RasterLayer*>(pView->createLayer(RASTER, pRasterChip));
+   // RasterLayerImp is needed for the call to setCurrentStretchAsOriginalStretch().
+   RasterLayerImp* pLayer = dynamic_cast<RasterLayerImp*>(pView->createLayer(RASTER, pRasterChip));
    if (pLayer == NULL)
    {
-      pDesktop->deleteWindow(pWindow);
+      Service<DesktopServices>()->deleteWindow(pWindow);
       return;
    }
 
    string origName = pRaster->getName();
 
-   SpatialDataWindow* pOrigWindow = static_cast<SpatialDataWindow*>(pDesktop->getWindow(origName,
-      SPATIAL_DATA_WINDOW));
+   SpatialDataWindow* pOrigWindow = dynamic_cast<SpatialDataWindow*>(
+      Service<DesktopServices>()->getWindow(origName, SPATIAL_DATA_WINDOW));
    if (pOrigWindow != NULL)
    {
       SpatialDataView* pOrigView = pOrigWindow->getSpatialDataView();
@@ -275,92 +269,48 @@ void ChippingWindow::createView()
             RasterLayer* pOrigLayer = static_cast<RasterLayer*>(pLayerList->getLayer(RASTER, pRaster));
             if (pOrigLayer != NULL)
             {
-               DimensionDescriptor grayBand = pOrigLayer->getDisplayedBand(GRAY);
-               DimensionDescriptor redBand = pOrigLayer->getDisplayedBand(RED);
-               DimensionDescriptor greenBand = pOrigLayer->getDisplayedBand(GREEN);
-               DimensionDescriptor blueBand = pOrigLayer->getDisplayedBand(BLUE);
-
-               RasterElement* pGrayRaster = pOrigLayer->getDisplayedRasterElement(GRAY);
-               RasterElement* pRedRaster = pOrigLayer->getDisplayedRasterElement(RED);
-               RasterElement* pGreenRaster = pOrigLayer->getDisplayedRasterElement(GREEN);
-               RasterElement* pBlueRaster = pOrigLayer->getDisplayedRasterElement(BLUE);
-
-               // Set the properties of the cube layer in the new view
-               pLayer->setDisplayedBand(GRAY, grayBand);
-               pLayer->setDisplayedBand(RED, redBand);
-               pLayer->setDisplayedBand(GREEN, greenBand);
-               pLayer->setDisplayedBand(BLUE, blueBand);
-               pLayer->setDisplayMode(pOrigLayer->getDisplayMode());
-
-               double dGrayLower = 0.0;
-               double dGrayUpper = 0.0;
-               double dRedLower = 0.0;
-               double dRedUpper = 0.0;
-               double dGreenLower = 0.0;
-               double dGreenUpper = 0.0;
-               double dBlueLower = 0.0;
-               double dBlueUpper = 0.0;
-
-               if (pRedRaster != pRaster)
-               {
-                  RegionUnits redUnits = RasterLayer::getSettingRedStretchUnits();
-                  pLayer->setStretchUnits(RED, redUnits);
-
-                  RasterLayerImp::getDefaultStretchValues(RED, dRedLower, dRedUpper);
-               }
-               else
-               {
-                  pOrigLayer->getStretchValues(RED, dRedLower, dRedUpper);
-                  pLayer->setStretchUnits(RED, pOrigLayer->getStretchUnits(RED));
-               }
-
-               if (pGreenRaster != pRaster)
-               {
-                  RegionUnits greenUnits = RasterLayer::getSettingGreenStretchUnits();
-                  pLayer->setStretchUnits(GREEN, greenUnits);
-
-                  RasterLayerImp::getDefaultStretchValues(GREEN, dGreenLower, dGreenUpper);
-               }
-               else
-               {
-                  pOrigLayer->getStretchValues(GREEN, dGreenLower, dGreenUpper);
-                  pLayer->setStretchUnits(GREEN, pOrigLayer->getStretchUnits(GREEN));
-               }
-
-               if (pBlueRaster != pRaster)
-               {
-                  RegionUnits blueUnits = RasterLayer::getSettingBlueStretchUnits();
-                  pLayer->setStretchUnits(BLUE, blueUnits);
-
-                  RasterLayerImp::getDefaultStretchValues(BLUE, dBlueLower, dBlueUpper);
-               }
-               else
-               {
-                  pOrigLayer->getStretchValues(BLUE, dBlueLower, dBlueUpper);
-                  pLayer->setStretchUnits(BLUE, pOrigLayer->getStretchUnits(BLUE));
-               }
-
-               if (pGrayRaster != pRaster)
-               {
-                  RegionUnits grayUnits = RasterLayer::getSettingGrayscaleStretchUnits();
-                  pLayer->setStretchUnits(GRAY, grayUnits);
-
-                  RasterLayerImp::getDefaultStretchValues(GRAY, dGrayLower, dGrayUpper);
-               }
-               else
-               {
-                  pOrigLayer->getStretchValues(GRAY, dGrayLower, dGrayUpper);
-                  pLayer->setStretchUnits(GRAY, pOrigLayer->getStretchUnits(GRAY));
-               }
-
+               // Set the stretch type first so that stretch values are interpreted correctly.
                pLayer->setStretchType(GRAYSCALE_MODE, pOrigLayer->getStretchType(GRAYSCALE_MODE));
                pLayer->setStretchType(RGB_MODE, pOrigLayer->getStretchType(RGB_MODE));
+               pLayer->setDisplayMode(pOrigLayer->getDisplayMode());
 
-               pLayer->setStretchValues(GRAY, dGrayLower, dGrayUpper);
-               pLayer->setStretchValues(RED, dRedLower, dRedUpper);
-               pLayer->setStretchValues(GREEN, dGreenLower, dGreenUpper);
-               pLayer->setStretchValues(BLUE, dBlueLower, dBlueUpper);
+               // Set the properties of the cube layer in the new view.
+               // For each channel, display the first band if the previously displayed band was chipped.
+               vector<RasterChannelType> channels = StringUtilities::getAllEnumValues<RasterChannelType>();
+               for (vector<RasterChannelType>::const_iterator iter = channels.begin(); iter != channels.end(); ++iter)
+               {
+                  bool bandCopied = true;
+                  DimensionDescriptor newBand;
+                  DimensionDescriptor oldBand = pOrigLayer->getDisplayedBand(*iter);
+                  if (oldBand.isOriginalNumberValid() == true)
+                  {
+                     newBand = pDescriptor->getOriginalBand(oldBand.getOriginalNumber());
+                  }
 
+                  if (newBand.isValid() == false)
+                  {
+                     bandCopied = false;
+                     newBand = pDescriptor->getBands().front();
+                  }
+
+                  // No need to explicitly set the RasterElement here since the new view only has one RasterElement.
+                  pLayer->setDisplayedBand(*iter, newBand);
+
+                  // Use the default stretch properties if the displayed band was removed from the view or
+                  // if the non-primary raster element was displayed. Otherwise, copy the stretch properties.
+                  if (bandCopied && pRaster == pOrigLayer->getDisplayedRasterElement(*iter))
+                  {
+                     // Set the stretch units first so that stretch values are interpreted correctly.
+                     pLayer->setStretchUnits(*iter, pOrigLayer->getStretchUnits(*iter));
+
+                     double lower;
+                     double upper;
+                     pOrigLayer->getStretchValues(*iter, lower, upper);
+                     pLayer->setStretchValues(*iter, lower, upper);
+                  }
+               }
+
+               pLayer->setCurrentStretchAsOriginalStretch();
                pView->refresh();
             }
          }
