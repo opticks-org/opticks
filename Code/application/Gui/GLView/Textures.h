@@ -24,21 +24,24 @@ public:
    void genTexture(int size);
    void deleteTexture();
    void bind() const;
-   time_t timestamp() const;
+   uint64_t lastUsed() const;
    int getSize() const;
    void incrementRefCount() const;
    void decrementRefCount();
 
 private:
-   void updateTimestamp() const;
+   void updateLastUsed() const;
    static void deleteOldTextures();
+   static uint64_t getTextureCacheSize(); 
+   static void downsizeTextureCache();
    unsigned int mHandle;
    unsigned int mSize;
-   mutable time_t mTimestamp;
+   mutable uint64_t mLastUsed;
    mutable unsigned int mReferenceCount;
    static std::vector<TextureImpl*> sAllTextures;
-   static int sMaxOldTextureSize;
-   static int sTotalSize;
+   static uint64_t sTextureCacheSize;
+   static uint64_t sTotalSize;
+   static uint64_t sLastUsedCounter;
 };
 
 class Texture
@@ -51,9 +54,8 @@ public:
 
    bool isAllocated() const;
    void genTexture(int size);
-   void deleteTexture();
    void bind();
-   time_t timestamp() const;
+   uint64_t lastUsed() const;
 
 private:
    TextureImpl* mpImpl;
