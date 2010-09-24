@@ -79,6 +79,7 @@ public:
    bool getCanDropFrames() const;
 
    double getNextValue(double value) const;
+   virtual bool event(QEvent* pEvent);
 
 public slots:
    void moveToBeginning();

@@ -896,7 +896,15 @@ void AnimationControllerImp::updateFrameData()
 
 void AnimationControllerImp::runAnimations()
 {
-   while (mRunningControllers.empty() == false)
+   if (!mRunningControllers.empty())
+   {
+      QApplication::postEvent(this, new QEvent(QEvent::User), Qt::HighEventPriority);
+   }
+}
+
+bool AnimationControllerImp::event(QEvent* pEvent)
+{
+   if (pEvent != NULL && pEvent->type() == QEvent::User)
    {
       mppActiveController = mRunningControllers.begin();
       while (mppActiveController != mRunningControllers.end())
@@ -912,7 +920,13 @@ void AnimationControllerImp::runAnimations()
          }
          // else, it was already incremented when being removed from the list in ACI::stop
       }
+      if (!mRunningControllers.empty())
+      {
+         QApplication::postEvent(this, new QEvent(QEvent::User), Qt::HighEventPriority);
+      }
+      return true;
    }
+   return QObject::event(pEvent);
 }
 
 void AnimationControllerImp::advance()
