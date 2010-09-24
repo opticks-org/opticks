@@ -2,6 +2,7 @@ i pkginfo
 i copyright
 i request
 i i.classification
+i i.classdisplay
 i i.tempdir
 i i.startup
 i checkinstall
@@ -47,6 +48,7 @@ f none $APPDIR/Bin/solBatch=$OpticksBinariesDir/Bin/solBatch 0755 root $GROUP
 f none $APPDIR/Bin/libSimpleApiLib.so=$OpticksBinariesDir/Lib/libSimpleApiLib.so 0755 root $GROUP 
 d none $APPDIR/DefaultSettings 2755 root $GROUP
 f tempdir $APPDIR/DefaultSettings/3-ApplicationTempDir.cfg=$currentDir/3-ApplicationTempDir.cfg 0644 root $GROUP
+f classdisplay $APPDIR/DefaultSettings/4-ClassificationSettings.cfg=$currentDir/4-ClassificationSettings.cfg 0644 root $GROUP
 f none $APPDIR/DefaultSettings/1-ApplicationDefaults.cfg=$OpticksCodeDir/Release/DefaultSettings/1-ApplicationDefaults.cfg 0644 root $GROUP
 f none $APPDIR/DefaultSettings/2-ApplicationMode.cfg=$OpticksCodeDir/Release/DefaultSettings/2-ApplicationMode.cfg 0644 root $GROUP
 f none $APPDIR/DefaultSettings/40-PicturesExporters.cfg=$OpticksCodeDir/Release/DefaultSettings/40-PicturesExporters.cfg 644 root $GROUP

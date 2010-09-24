@@ -85,6 +85,7 @@ public slots:
    bool setActiveEditObject(GraphicObject* pObject);
    bool setActiveEditView(View* pView);
    void updateExtents();
+   virtual void enableClassification(bool bEnable);
 
 signals:
    void paperSizeChanged(double dWidth, double dHeight);
@@ -136,6 +137,7 @@ private:
    GraphicObject* mpEditObject;
    bool mbViewEvent;
    bool mbZoomInitialized;
+   bool mProductClassificationEnabled;
 };
 
 #define PRODUCTVIEWADAPTEREXTENSION_CLASSES \

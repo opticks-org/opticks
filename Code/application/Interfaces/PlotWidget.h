@@ -211,7 +211,8 @@ public:
     *  Sets the classification text for this plot widget.
     *
     *  This method replaces the current classification text of the widget to
-    *  the string populated by Classification::getClassificationText().
+    *  the string populated by Classification::getClassificationText(). If classification
+    *  markings display has been disabled on installation, this will have no effect.
     *
     *  @param   pClassification
     *           A pointer to the classification object from which to set the

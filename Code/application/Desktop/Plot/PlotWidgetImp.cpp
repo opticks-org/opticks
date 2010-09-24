@@ -948,7 +948,8 @@ void PlotWidgetImp::setLabelText(const QString& strClassification, const QString
    }
 
    // Do not add stray newlines if there is no classification text
-   if (strClassification.isEmpty() == false)
+   // or if classification display is disabled
+   if (!strClassification.isEmpty() && ConfigurationSettings::getSettingDisplayClassificationMarkings())
    {
       switch (mClassificationPosition)
       {

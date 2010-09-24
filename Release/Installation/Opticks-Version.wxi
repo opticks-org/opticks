@@ -17,6 +17,7 @@
    <?define C__ConfidentialLevelFileGuid = "bd317490-cd61-4f22-9ecb-0fa31d20e425" ?>
    <?define C__SecretLevelFileGuid = "3cfd7025-61f2-459b-a886-fdc8b8bc761a" ?>
    <?define C__TopSecretLevelFileGuid = "f7f16422-c72d-408f-a83a-5e2691df321d" ?>
+   <?define C__ClassSettingsGuid = "82d8ae5a-817c-47cc-a6e7-abf6e0a03a6f" ?>
    <?define C__PlugInsGuid = "98597da4-4854-43b4-afd2-091500ddc8b8" ?>
    <?define C__AnnotationGuid = "4b807d52-0809-463a-b8ec-3a3a0bd6385d" ?>
    <?define C__CgGuid = "cb9bc5d3-3bdc-4a68-a7a9-b150d18a492b" ?>
@@ -125,6 +126,7 @@
    <?define C__ConfidentialLevelFileGuid = "65fa190e-54a0-4f44-bc05-4112ad760a28" ?>
    <?define C__SecretLevelFileGuid = "c16d024e-4703-4637-bdeb-85fb538b1b5e" ?>
    <?define C__TopSecretLevelFileGuid = "ac86b82a-d09e-41eb-a531-e9ec62e186c2" ?>
+   <?define C__ClassSettingsGuid = "b7b4ad11-920b-4790-9e20-7335db38d58e" ?>
    <?define C__PlugInsGuid = "a5617c38-34b3-40a6-9848-b19549cbde92" ?>
    <?define C__AnnotationGuid = "cac34fbe-15f0-4580-bdbb-115bb413593e" ?>
    <?define C__CgGuid = "daac7068-9859-418e-9176-8112eb997205" ?>

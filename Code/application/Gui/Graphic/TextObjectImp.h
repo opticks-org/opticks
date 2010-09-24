@@ -20,6 +20,7 @@
 #include "TypesFile.h"
 #include <map>
 
+class Classification;
 class GraphicLayer;
 class QGLContext;
 
@@ -71,6 +72,7 @@ private:
    bool mUpdateTexture;
    bool mUpdateBoundingBox;
    std::map<DynamicObject*, AttachmentPtr<DynamicObject>* > mMetadataObjects;
+   std::map<Classification*, AttachmentPtr<Classification>* > mClassificationObjects;
    GlTextureResource mTextureResource;
    GlTextureResource mTempTextureResource;
 

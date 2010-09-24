@@ -197,6 +197,10 @@ are defined in Opticks-Version.wxi, so include that file now -->
             <Component Id="C__SaveTempDataDirSelection" Guid="$(var.C__SaveTempDataDirSelectionGuid)" Win64="no">
                <RegistryValue Key="Software\Opticks\$(var.PublicVersionNumber) $(var.UserPlatform)\StoredTempDataDirSelection" Value="[TEMPDATADIR]" Root="HKMU" Action="write" Id="R__StoredTempDataDirSelection" Type="string" KeyPath="yes" />
             </Component>
+            <Component Id="C__ClassSettings" Guid="$(var.C__ClassSettingsGuid)" Win64="no">
+               <Condition><![CDATA[CLASSIFICATIONDISPLAY <> "1"]]></Condition>
+               <File Name="4-ClassificationSettings.cfg" Id="F__ClassSettingsFile" DiskId="1" Source="$(sys.SOURCEFILEDIR)" />
+            </Component>
          </Directory>
          <Directory Id="D__PlugIns" Name="PlugIns" FileSource="$(var.OpticksBinariesDir)\PlugIns">
             <Directory Id="D__ArcProxy" Name="ArcProxy" FileSource="$(var.OpticksBinariesDir)\PlugIns\ArcProxy">
@@ -421,6 +425,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
          <ComponentRef Id="C__ArcProxyQtNetwork" />
          <ComponentRef Id="C__OpticksEventLogKeys" />
          <ComponentRef Id="C__SaveTempDataDirSelection" />
+         <ComponentRef Id="C__ClassSettings" />
          <ComponentRef Id="C__VC80_CRT_For_Bin"/>
          <ComponentRef Id="C__VC80_OpenMP_For_Bin"/>
          <ComponentRef Id="C__VC80_CRT_For_imageformats"/>
@@ -498,6 +503,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
       <Property Id="ALLUSERS" Value="1" />
       <Property Id="ARPPRODUCTICON" Value="OpticksIcon" />
       <Property Id="CLASSIFICATIONLEVEL" Value="TopSecret" Secure="yes" />
+      <Property Id="CLASSIFICATIONDISPLAY" Value="1" Secure="yes" />
       <Property Id="TEMPDATADIR" Value="NotSet" Secure="yes" />
       <Property Id="__STOREDTEMPDATADIRSELECTION" Value="NotFound" Secure="yes">
          <RegistrySearch Root="HKCU" Key="Software\Opticks\$(var.PublicVersionNumber) $(var.UserPlatform)\StoredTempDataDirSelection" Type="raw" Id="RS__FindStoredTempDataDirSelectionInCurrentUser" />

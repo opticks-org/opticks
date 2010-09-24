@@ -7,6 +7,7 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include "Classification.h"
 #include "DataDescriptor.h"
 #include "DataVariant.h"
 #include "DynamicObject.h"
@@ -62,6 +63,11 @@ TextObjectImp::~TextObjectImp()
 {
    for (std::map<DynamicObject*, AttachmentPtr<DynamicObject>* >::iterator it = mMetadataObjects.begin();
       it != mMetadataObjects.end(); ++it)
+   {
+      delete it->second;
+   }
+   for (std::map<Classification*, AttachmentPtr<Classification>* >::iterator it = mClassificationObjects.begin();
+      it != mClassificationObjects.end(); ++it)
    {
       delete it->second;
    }
@@ -202,8 +208,13 @@ void TextObjectImp::updateTexture()
    {
       delete it->second;
    }
-
    mMetadataObjects.clear();
+   for (std::map<Classification*, AttachmentPtr<Classification>* >::iterator it = mClassificationObjects.begin();
+      it != mClassificationObjects.end(); ++it)
+   {
+      delete it->second;
+   }
+   mClassificationObjects.clear();
 
    // Get the text to display
    string text = getSubstitutedText();
@@ -629,8 +640,9 @@ string TextObjectImp::getSubstitutedText()
                   }
                   string variableName = txt.substr(pos+3, closeParen-(pos+2)-1);
                   string replacementString;
-                  if (type == "M")
+                  if (type == "M" || type == "S")
                   {
+                     DataElement* pElmnt = pParent;
                      DynamicObject* pMetadata = pParentMetadata;
                      if (variableName.substr(0, 2) == "//")
                      {
@@ -655,7 +667,7 @@ string TextObjectImp::getSubstitutedText()
                                        SpatialDataView* pSdv = dynamic_cast<SpatialDataView*>(pObj->getObjectView());
                                        if (pSdv != NULL)
                                        {
-                                          DataElement* pElmnt = pSdv->getLayerList()->getPrimaryRasterElement();
+                                          pElmnt = pSdv->getLayerList()->getPrimaryRasterElement();
                                           DataDescriptor* pDesc =
                                              (pElmnt == NULL) ? NULL : pElmnt->getDataDescriptor();
                                           pMetadata = (pDesc == NULL) ? NULL : pDesc->getMetadata();
@@ -666,7 +678,7 @@ string TextObjectImp::getSubstitutedText()
                               }
                               else
                               {
-                                 DataElement* pElmnt = Service<ModelServices>()->getElement(elementName,
+                                 pElmnt = Service<ModelServices>()->getElement(elementName,
                                     TypeConverter::toString<RasterElement>(), NULL);
                                  DataDescriptor* pDesc = (pElmnt == NULL) ? NULL : pElmnt->getDataDescriptor();
                                  pMetadata = (pDesc == NULL) ? NULL : pDesc->getMetadata();
@@ -674,12 +686,13 @@ string TextObjectImp::getSubstitutedText()
                            }
                            else
                            {
+                              pElmnt = NULL;
                               pMetadata = NULL;
                            }
                         }
                      }
                      bool success = false;
-                     if (pMetadata != NULL)
+                     if (type == "M" && pMetadata != NULL)
                      {
                         DataVariant var = pMetadata->getAttributeByPath(variableName);
                         if (var.isValid())
@@ -693,6 +706,18 @@ string TextObjectImp::getSubstitutedText()
                                  pMetadata, SIGNAL_NAME(Subject, Modified),
                                  Slot(this, &TextObjectImp::invalidateTexture))));
                            }
+                        }
+                     }
+                     else if (type == "S" && pElmnt != NULL && variableName == "CLASSIFICATION")
+                     {
+                        Classification* pClass = pElmnt->getDataDescriptor()->getClassification();
+                        pClass->getClassificationText(replacementString);
+                        success = true;
+                        if (mClassificationObjects.find(pClass) == mClassificationObjects.end())
+                        {
+                           mClassificationObjects.insert(make_pair(pClass, new AttachmentPtr<Classification>(
+                              pClass, SIGNAL_NAME(Subject, Modified),
+                              Slot(this, &TextObjectImp::invalidateTexture))));
                         }
                      }
                      if (!success)

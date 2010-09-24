@@ -556,6 +556,7 @@ public:
    CUSTOM_SETTING_PTR(PluginWorkingDirectory, FileLocations, Filename)
    SETTING(AlternateMouseWheelZoom, Edit, bool, true)
    SETTING(GpuTextureCacheSize, General, unsigned int, 0)
+   SETTING(DisplayClassificationMarkings, General, bool, true)
 
    /**
     * Gets the root directory for the main application.

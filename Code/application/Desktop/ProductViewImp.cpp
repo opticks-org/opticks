@@ -67,7 +67,8 @@ ProductViewImp::ProductViewImp(const string& id, const string& viewName, QGLCont
    mpActiveLayer(NULL),
    mpEditObject(NULL),
    mbViewEvent(false),
-   mbZoomInitialized(false)
+   mbZoomInitialized(false),
+   mProductClassificationEnabled(ConfigurationSettings::getSettingDisplayClassificationMarkings())
 {
    DataDescriptorAdapter layoutDescriptor("Layout", "AnnotationElement", NULL);
    mpLayoutLayer = new AnnotationLayerAdapter(SessionItemImp::generateUniqueId(), "Layout",
@@ -97,7 +98,7 @@ ProductViewImp::ProductViewImp(const string& id, const string& viewName, QGLCont
    setClassificationFont(QApplication::font());
    setClassificationColor(Qt::black);
 
-   enableClassification(false);
+   PerspectiveViewImp::enableClassification(false);
    enableReleaseInfo(false);
    enableCrossHair(false);
    setActiveLayer(dynamic_cast<GraphicLayer*>(mpLayoutLayer));
@@ -631,8 +632,13 @@ bool ProductViewImp::enableInset(bool bEnable)
 
 void ProductViewImp::updateClassificationMarks(const QString &newClassification)
 {
-   QString strTopText = newClassification;
-   QString strBottomText = newClassification;
+   QString strTopText;
+   QString strBottomText;
+   if (mProductClassificationEnabled)
+   {
+      strTopText = newClassification;
+      strBottomText = newClassification;
+   }
 
    Service<ConfigurationSettings> pConfigSettings;
    if (!strTopText.isEmpty())
@@ -1712,4 +1718,10 @@ void ProductViewImp::updateExtents()
    double dMarginY = (dMaxY - dMinY) * 0.03;
 
    setExtents(dMinX - dMarginX, dMinY - dMarginY, dMaxX + dMarginX, dMaxY + dMarginY);
+}
+
+void ProductViewImp::enableClassification(bool bEnable)
+{
+   mProductClassificationEnabled = bEnable;
+   updateClassificationMarks(getClassificationText());
 }
