@@ -73,8 +73,8 @@ OptionsDlg::OptionsDlg(QWidget* pParent) :
    // Initialization
    setWindowTitle("Options");
    setModal(true);
-
    populateDialogWithOptions();
+   resize(minimumSizeHint());
 
    // Connections
    VERIFYNR(connect(mpOptionSelection, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this,

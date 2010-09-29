@@ -10,6 +10,7 @@
 #ifndef RASTERELEMENTIMPORTERSHELL_H
 #define RASTERELEMENTIMPORTERSHELL_H
 
+#include "ConfigurationSettings.h"
 #include "DesktopServices.h"
 #include "ImporterShell.h"
 #include "ModelServices.h"
@@ -17,8 +18,12 @@
 #include "TypesFile.h"
 #include "UtilityServices.h"
 
+#include <string>
+#include <vector>
+
 class DataDescriptor;
 class GcpList;
+class PlugIn;
 class Progress;
 class RasterElement;
 class SpatialDataView;
@@ -72,6 +77,11 @@ public:
     *  Destroys the raster element importer plug-in.
     */
    ~RasterElementImporterShell();
+
+   SETTING(AutoGeoreference, RasterElementImporter, bool, true)
+   SETTING(ImporterGeoreferencePlugIn, RasterElementImporter, bool, true)
+   SETTING(GeoreferencePlugIns, RasterElementImporter, std::vector<std::string>, std::vector<std::string>())
+   SETTING(DisplayLatLonLayer, RasterElementImporter, bool, false)
 
    /**
     *  @copydoc ImporterShell::getInputSpecification()
@@ -313,6 +323,38 @@ protected:
     *  @see     getRasterElement()
     */
    virtual GcpList* createGcpList() const;
+
+   /**
+    *  Creates a Georeference plug-in that can be used to georeference the
+    *  raster data.
+    *
+    *  This method is called from within execute() if the configuration settings
+    *  to auto-georeference and to get the georeference plug-in from the
+    *  importer are enabled.  The method is called after calling createGcpList(),
+    *  regardless of whether a valid GCP list is returned.
+    *
+    *  The default implementation of this method creates an instance of the
+    *  GCP %Georeference plug-in and calls Georeference::canHandleRasterElement()
+    *  to see if it can georeference the raster data.  If the plug-in supports
+    *  the raster data, it is returned.  Otherwise the plug-in is destroyed and
+    *  \c NULL is returned.
+    *
+    *  Derived importers should override this method if a better Georeference
+    *  plug-in is available for the raster data.
+    *
+    *  @return  A pointer to the Georeference plug-in that will be used to
+    *           georeference the raster data.  The plug-in should support the
+    *           raster element returned by getRasterElement() such that
+    *           Georeference::canHandleRasterElement() returns \c true.
+    *           Ownership of the plug-in is transferred to the shell and will
+    *           be destroyed automatically.  \c NULL is returned if no plug-in
+    *           is available to georeference the raster data, or if the raster
+    *           data does not contain georeference information.
+    *
+    *  @see     getRasterElement(), getSettingAutoGeoreference(),
+    *           getSettingImporterGeoreferencePlugIn()
+    */
+   virtual PlugIn* getGeoreferencePlugIn() const;
 
    /**
     *  Create and set a RasterPager for a given RasterElement.

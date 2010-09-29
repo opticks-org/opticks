@@ -12,6 +12,8 @@
 
 #include "LocationType.h"
 
+#include <string>
+
 class QWidget;
 class RasterElement;
 
@@ -28,6 +30,19 @@ class RasterElement;
 class Georeference
 {
 public:
+   /**
+    *  The name for a GcpList argument.
+    *
+    *  Input arguments with this name will be automatically populated with a
+    *  GcpList pointer when the plug-in is executed as part of the
+    *  auto-georeferencing capability of RasterElementImporterShell.  Arguments
+    *  with this name should be of the type GcpList.
+    */
+   static std::string GcpListArg()
+   {
+      return std::string("GCP List");
+   }
+
    /**
     *  Takes a scene pixel coordinate and returns the corresponding 
     *  geocoordinate value.

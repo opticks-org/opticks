@@ -7,31 +7,28 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "AppVersion.h"
-#include "GeoTIFFImporter.h"
-#include "AppConfig.h"
 #include "AppVerify.h"
-#include "DataAccessorImpl.h"
+#include "AppVersion.h"
 #include "DimensionDescriptor.h"
 #include "DynamicObject.h"
 #include "Endian.h"
 #include "FileResource.h"
+#include "Georeference.h"
+#include "GeoTIFFImporter.h"
 #include "ImportDescriptor.h"
 #include "MessageLogResource.h"
-#include "ModelServices.h"
-#include "ObjectFactory.h"
 #include "ObjectResource.h"
 #include "OptionsTiffImporter.h"
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
-#include "PlugInManagerServices.h"
 #include "PlugInRegistration.h"
 #include "PlugInResource.h"
 #include "QuickbirdIsd.h"
 #include "RasterDataDescriptor.h"
+#include "RasterElement.h"
 #include "RasterFileDescriptor.h"
+#include "RasterPager.h"
 #include "RasterUtilities.h"
-#include "SpatialDataView.h"
 
 #include <stdio.h>
 
@@ -45,7 +42,7 @@
 #include <errno.h>
 #include <QtCore/QFileInfo>
 #include <QtCore/QString>
-#include <QtCore/QVariant>
+
 using namespace std;
 
 REGISTER_PLUGIN_BASIC(OpticksPictures, GeoTIFFImporter);
@@ -1002,62 +999,6 @@ bool GeoTIFFImporter::validateDefaultOnDiskReadOnly(const DataDescriptor* pDescr
    return true;
 }
 
-bool GeoTIFFImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
-{
-   if (pInArgList == NULL)
-   {
-      return false;
-   }
-
-   // Create a message log step
-   StepResource pStep("Execute GeoTIFF Importer", "app", "76793666-5219-499f-9d2c-8accc11b32fc", "Execute failed");
-
-   // Extract the input args
-   bool bSuccess = parseInputArgList(pInArgList);
-   if (!bSuccess)
-   {
-      return false;
-   }
-
-   // Update the log and progress with the start of the import
-   Progress* pProgress = getProgress();
-   if (pProgress != NULL)
-   {
-      pProgress->updateProgress("GeoTIFF Importer Started", 1, NORMAL);
-   }
-
-   loadIsdMetadata(getRasterElement()->getDataDescriptor());
-   if (!performImport())
-   {
-      return false;
-   }
-
-   // Create the view
-   if (!isBatch() && !Service<SessionManager>()->isSessionLoading())
-   {
-      SpatialDataView* pView = createView();
-      if (pView == NULL)
-      {
-         pStep->finalize(Message::Failure, "The view could not be created.");
-         return false;
-      }
-
-      // Add the view to the output arg list
-      if (pOutArgList != NULL)
-      {
-         pOutArgList->setPlugInArgValue("View", pView);
-      }
-   }
-
-   if (pProgress != NULL)
-   {
-      pProgress->updateProgress("GeoTIFF Import Complete.", 100, NORMAL);
-   }
-
-   pStep->finalize(Message::Success);
-   return true;
-}
-
 QWidget *GeoTIFFImporter::getImportOptionsWidget(DataDescriptor *pDescriptor)
 {
    if (mImportOptionsWidget.get() == NULL)
@@ -1083,7 +1024,40 @@ QWidget *GeoTIFFImporter::getImportOptionsWidget(DataDescriptor *pDescriptor)
    return mImportOptionsWidget.get();
 }
 
-void GeoTIFFImporter::loadIsdMetadata(DataDescriptor *pDescriptor)
+bool GeoTIFFImporter::performImport() const
+{
+   RasterElement* pRaster = getRasterElement();
+   if (pRaster != NULL)
+   {
+      loadIsdMetadata(pRaster->getDataDescriptor());
+   }
+
+   return RasterElementImporterShell::performImport();
+}
+
+PlugIn* GeoTIFFImporter::getGeoreferencePlugIn() const
+{
+   RasterElement* pRaster = getRasterElement();
+   if (pRaster != NULL)
+   {
+      // Check if the RPC Georeference plug-in supports the raster data
+      // in case RPC metadata was loaded in loadIsdMetadata()
+      ExecutableResource geoPlugIn("RPC Georeference", string(), getProgress(), true);
+
+      const Georeference* pGeoPlugIn = dynamic_cast<const Georeference*>(geoPlugIn->getPlugIn());
+      if (pGeoPlugIn != NULL)
+      {
+         if (pGeoPlugIn->canHandleRasterElement(pRaster) == true)
+         {
+            return geoPlugIn->releasePlugIn();
+         }
+      }
+   }
+
+   return RasterElementImporterShell::getGeoreferencePlugIn();
+}
+
+void GeoTIFFImporter::loadIsdMetadata(DataDescriptor* pDescriptor) const
 {
    QString isdFilename;
    if (mImportOptionsWidget.get() != NULL)

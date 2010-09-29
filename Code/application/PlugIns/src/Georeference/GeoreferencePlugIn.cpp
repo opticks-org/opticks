@@ -270,6 +270,11 @@ bool GeoreferencePlugIn::execute(PlugInArgList* pInParam, PlugInArgList* pOutPar
          if (pLatLonLayer != NULL)
          {
             pLatLonLayer->setGeocoordType(eType);
+
+            if (pOutParam != NULL)
+            {
+               pOutParam->setPlugInArgValue<LatLonLayer>("Latitude/Longitude Layer", pLatLonLayer);
+            }
          }
       }
    }
@@ -305,7 +310,9 @@ bool GeoreferencePlugIn::getInputSpecification(PlugInArgList*& pArgList)
 
 bool GeoreferencePlugIn::getOutputSpecification(PlugInArgList*& pArgList)
 {
-   pArgList = NULL;
+   pArgList = mpPluginManager->getPlugInArgList();
+   VERIFY(pArgList != NULL);
+   VERIFY(pArgList->addArg<LatLonLayer>("Latitude/Longitude Layer", NULL));
    return true;
 }
 

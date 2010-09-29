@@ -31,6 +31,7 @@ namespace Nitf
       unsigned char getFileAffinity(const std::string& filename);
       bool validate(const DataDescriptor* pDescriptor, std::string& errorMessage) const;
       SpatialDataView* createView() const;
+      PlugIn* getGeoreferencePlugIn() const;
       bool createRasterPager(RasterElement *pRaster) const;
       bool validateDefaultOnDiskReadOnly(const DataDescriptor* pDescriptor, std::string& errorMessage) const;
 

@@ -14,6 +14,7 @@
 #include "GcpGeoreference.h"
 #include "GcpGui.h"
 #include "GcpList.h"
+#include "Georeference.h"
 #include "MatrixFunctions.h"
 #include "MessageLogResource.h"
 #include "ModelServices.h"
@@ -25,6 +26,7 @@
 #include "RasterDataDescriptor.h"
 #include "SessionItemDeserializer.h"
 #include "SessionItemSerializer.h"
+#include "TypeConverter.h"
 #include "XercesIncludes.h"
 #include "xmlreader.h"
 #include "xmlwriter.h"
@@ -80,7 +82,7 @@ bool GcpGeoreference::setInteractive()
 bool GcpGeoreference::getInputSpecification(PlugInArgList*& pArgList)
 {
    bool success = GeoreferenceShell::getInputSpecification(pArgList);
-   success = success && pArgList->addArg<string>("GCP List", string("Corner Coordinates"));
+   success = success && pArgList->addArg<GcpList>(Georeference::GcpListArg(), string("Corner Coordinates"));
    success = success && pArgList->addArg<int>("Order", 1);
    return success;
 }
@@ -100,21 +102,24 @@ bool GcpGeoreference::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
    mpRaster = pInArgList->getPlugInArgValue<RasterElement>(DataElementArg());
    FAIL_IF(mpRaster == NULL, "Unable to find raster element input", return false);
 
-   string strGcpName;
    GcpList* pGcpList = NULL;
-
    if (mpGui != NULL)
    {
       mOrder = mpGui->getOrder();
-      strGcpName = mpGui->getGcpListName();
+
+      string gcpListName = mpGui->getGcpListName();
+      if (gcpListName.empty() == false)
+      {
+         pGcpList = static_cast<GcpList*>(mpDataModel->getElement(gcpListName,
+            TypeConverter::toString<GcpList>(), mpRaster));
+      }
    }
    else
    {
       pInArgList->getPlugInArgValue<int>("Order", mOrder);
-      pInArgList->getPlugInArgValue<string>("GCP List", strGcpName);
+      pGcpList = pInArgList->getPlugInArgValue<GcpList>(Georeference::GcpListArg());
    }
 
-   pGcpList = static_cast<GcpList*>(mpDataModel->getElement(strGcpName, "GcpList", mpRaster));
    if (pGcpList != NULL)
    {
       pStep->addProperty("gcpList", pGcpList->getName());

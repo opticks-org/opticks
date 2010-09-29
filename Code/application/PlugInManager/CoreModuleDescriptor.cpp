@@ -23,6 +23,7 @@
 #include "OptionsMeasurementLayer.h"
 #include "OptionsOverviewWindow.h"
 #include "OptionsPseudocolorLayer.h"
+#include "OptionsRasterElementImporter.h"
 #include "OptionsRasterLayer.h"
 #include "OptionsSession.h"
 #include "OptionsShortcuts.h"
@@ -107,6 +108,7 @@ REGISTER_PLUGIN(OpticksCore, OptionsLatLonLayer, OptionQWidgetWrapper<OptionsLat
 REGISTER_PLUGIN(OpticksCore, OptionsMeasurementLayer, OptionQWidgetWrapper<OptionsMeasurementLayer>());
 REGISTER_PLUGIN(OpticksCore, OptionsOverviewWindow, OptionQWidgetWrapper<OptionsOverviewWindow>());
 REGISTER_PLUGIN(OpticksCore, OptionsPseudocolorLayer, OptionQWidgetWrapper<OptionsPseudocolorLayer>());
+REGISTER_PLUGIN(OpticksCore, OptionsRasterElementImporter, OptionQWidgetWrapper<OptionsRasterElementImporter>());
 REGISTER_PLUGIN(OpticksCore, OptionsRasterLayer, OptionQWidgetWrapper<OptionsRasterLayer>());
 REGISTER_PLUGIN(OpticksCore, OptionsSession, OptionQWidgetWrapper<OptionsSession>());
 REGISTER_PLUGIN(OpticksCore, OptionsShortcuts, OptionQWidgetWrapper<OptionsShortcuts>());

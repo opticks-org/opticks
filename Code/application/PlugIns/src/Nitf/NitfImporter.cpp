@@ -19,6 +19,7 @@
 #include "DynamicObject.h"
 #include "FileDescriptor.h"
 #include "FileResource.h"
+#include "Georeference.h"
 #include "ImportDescriptor.h"
 #include "NitfConstants.h"
 #include "NitfImageSubheader.h"
@@ -264,6 +265,26 @@ SpatialDataView* Nitf::NitfImporter::createView() const
    }
 
    return pView;
+}
+
+PlugIn* Nitf::NitfImporter::getGeoreferencePlugIn() const
+{
+   RasterElement* pRaster = getRasterElement();
+   if (pRaster != NULL)
+   {
+      ExecutableResource geoPlugIn("RPC Georeference", string(), getProgress(), true);
+
+      const Georeference* pGeoPlugIn = dynamic_cast<const Georeference*>(geoPlugIn->getPlugIn());
+      if (pGeoPlugIn != NULL)
+      {
+         if (pGeoPlugIn->canHandleRasterElement(pRaster) == true)
+         {
+            return geoPlugIn->releasePlugIn();
+         }
+      }
+   }
+
+   return RasterElementImporterShell::getGeoreferencePlugIn();
 }
 
 bool Nitf::NitfImporter::createRasterPager(RasterElement *pRaster) const

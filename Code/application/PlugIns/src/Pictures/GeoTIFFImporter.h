@@ -28,16 +28,15 @@ public:
    std::vector<ImportDescriptor*> getImportDescriptors(const std::string& filename);
    unsigned char getFileAffinity(const std::string& filename);
    bool validateDefaultOnDiskReadOnly(const DataDescriptor* pDescriptor, std::string& errorMessage) const;
-   bool execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList);
-
    QWidget *getImportOptionsWidget(DataDescriptor *pDescriptor);
-
+   bool performImport() const;
+   PlugIn* getGeoreferencePlugIn() const;
    bool createRasterPager(RasterElement *pRasterElement) const;
    bool validate(const DataDescriptor* pDescriptor, std::string& errorMessage) const;
 
 protected:
    bool populateDataDescriptor(RasterDataDescriptor* pDescriptor);
-   void loadIsdMetadata(DataDescriptor *pDescriptor);
+   void loadIsdMetadata(DataDescriptor* pDescriptor) const;
 
 private:
    std::auto_ptr<OptionsTiffImporter> mImportOptionsWidget;
