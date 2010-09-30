@@ -7,26 +7,27 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtGui/QAction>
 #include <QtGui/QContextMenuEvent>
 #include <QtGui/QMenu>
 #include <QtGui/QMessageBox>
+#include <QtGui/QStackedWidget>
 #include <QtGui/QVBoxLayout>
 
 #include "Axis.h"
 #include "ContextMenuImp.h"
 #include "DataVariant.h"
-#include "DesktopServices.h"
 #include "DynamicObject.h"
-#include "PlotWindowImp.h"
 #include "InfoBar.h"
 #include "Int64.h"
 #include "MessageLogResource.h"
+#include "PlotSetAdapter.h"
 #include "PlotView.h"
 #include "PlotWidget.h"
 #include "PlotWindow.h"
 #include "PlotWindowImp.h"
 #include "PointSet.h"
-#include "SessionItemSerializer.h"
+#include "SessionItemImp.h"
 #include "Signature.h"
 #include "UInt64.h"
 
@@ -68,12 +69,17 @@ PlotWindowImp::PlotWindowImp(const string& id, const string& windowName, QWidget
    pWindowWidget->show();    // Must call show() to show the dock window widget if a plug-in creates the window
 
    // Connections
-   connect(mpInfoBar, SIGNAL(titleChanged(const QString&)), this, SLOT(setCurrentPlotSet(const QString&)));
+   VERIFYNR(connect(pMenu, SIGNAL(triggered(QAction*)), this, SLOT(setCurrentPlotSet(QAction*))));
 }
 
 PlotWindowImp::~PlotWindowImp()
 {
-   disconnect(mpInfoBar, SIGNAL(titleChanged(const QString&)), this, SLOT(setCurrentPlotSet(const QString&)));
+   QMenu* pMenu = mpInfoBar->getMenu();
+   if (pMenu != NULL)
+   {
+      VERIFYNR(disconnect(pMenu, SIGNAL(triggered(QAction*)), this, SLOT(setCurrentPlotSet(QAction*))));
+   }
+
    clear();
 }
 
@@ -155,7 +161,12 @@ PlotSet* PlotWindowImp::createPlotSet(const QString& strPlotSet)
    QMenu* pMenu = mpInfoBar->getMenu();
    if (pMenu != NULL)
    {
-      pMenu->addAction(QString::fromStdString(pPlotSet->getName()));
+      const string& actionName = pPlotSet->getDisplayName(true);
+
+      QAction* pAction = new QAction(QString::fromStdString(actionName), this);
+      pAction->setData(QVariant::fromValue(pPlotSet));
+      pAction->setStatusTip(QString::fromStdString(pPlotSet->getName()));
+      pMenu->addAction(pAction);
    }
 
    // Notify connected and attached objects
@@ -278,7 +289,7 @@ bool PlotWindowImp::setCurrentPlotSet(PlotSet* pPlotSet)
    }
 
    // Set the new title
-   string plotSetName = pPlotSet->getName();
+   const string& plotSetName = pPlotSet->getDisplayName(true);
    if (plotSetName.empty() == false)
    {
       mpInfoBar->setTitle(QString::fromStdString(plotSetName));
@@ -335,6 +346,8 @@ bool PlotWindowImp::renamePlotSet(PlotSet* pPlotSet, const QString& strNewName)
    pPlotSet->setName(newName);
 
    // Update the info bar
+   const string& actionName = pPlotSet->getDisplayName(true);
+
    QMenu* pMenu = mpInfoBar->getMenu();
    if (pMenu != NULL)
    {
@@ -344,16 +357,22 @@ bool PlotWindowImp::renamePlotSet(PlotSet* pPlotSet, const QString& strNewName)
          QAction* pAction = menuActions[i];
          if (pAction != NULL)
          {
-            QString strAction = pAction->text();
-            if (strAction == QString::fromStdString(currentName))
+            PlotSet* pCurrentPlotSet = pAction->data().value<PlotSet*>();
+            if (pCurrentPlotSet == pPlotSet)
             {
-               pAction->setText(strNewName);
+               pAction->setStatusTip(QString::fromStdString(pPlotSet->getName()));
+               pAction->setText(QString::fromStdString(actionName));
+               break;
             }
          }
       }
    }
 
-   mpInfoBar->setTitle(strNewName);
+   if (getCurrentPlotSet() == pPlotSet)
+   {
+      mpInfoBar->setTitle(QString::fromStdString(actionName));
+   }
+
    return true;
 }
 
@@ -410,10 +429,11 @@ bool PlotWindowImp::deletePlotSet(PlotSet* pPlotSet)
          QAction* pAction = menuActions[i];
          if (pAction != NULL)
          {
-            QString strAction = pAction->text();
-            if (strAction == strPlotSetName)
+            PlotSet* pCurrentPlotSet = pAction->data().value<PlotSet*>();
+            if (pCurrentPlotSet == pPlotSet)
             {
                pMenu->removeAction(pAction);
+               break;
             }
          }
       }
@@ -617,14 +637,14 @@ InfoBar* PlotWindowImp::getInfoBar() const
    return mpInfoBar;
 }
 
-void PlotWindowImp::setCurrentPlotSet(const QString& strPlotSet)
+void PlotWindowImp::setCurrentPlotSet(QAction* pAction)
 {
-   if (strPlotSet.isEmpty() == true)
+   if (pAction == NULL)
    {
       return;
    }
 
-   PlotSet* pPlotSet = getPlotSet(strPlotSet);
+   PlotSet* pPlotSet = pAction->data().value<PlotSet*>();
    if (pPlotSet != NULL)
    {
       setCurrentPlotSet(pPlotSet);

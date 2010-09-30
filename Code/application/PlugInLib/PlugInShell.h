@@ -98,7 +98,7 @@ public:
     */
    const QIcon& getIcon() const;
    const std::string& getName() const;
-   const std::string& getDisplayName() const;
+   const std::string& getDisplayName(bool fullName = false) const;
    const std::string& getDisplayText() const;
    std::list<ContextMenuAction> getContextMenuActions() const;
    bool hasFilenameDisplay() const;

@@ -66,9 +66,15 @@ public:
     *  as a filename that does not include the full path.  To get the full name
     *  of the session item, call getName() instead.
     *
-    *  @return  The session item display name.
+    *  @param   fullName
+    *           If set to \c true and no display name has been set, then the
+    *           full session item name is returned instead.
+    *
+    *  @return  The session item display name.  If no display name has been set
+    *           and the \em fullName parameter is set to \c true, then the full
+    *           item name is returned, which is equivalent to calling getName().
     */
-   virtual const std::string& getDisplayName() const = 0;
+   virtual const std::string& getDisplayName(bool fullName = false) const = 0;
 
    /**
     *  Returns the additional text about the session item that can be displayed

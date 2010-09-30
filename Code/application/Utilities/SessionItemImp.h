@@ -48,7 +48,7 @@ public:
 
    virtual const QIcon& getIcon() const;
    virtual const std::string& getName() const;
-   virtual const std::string& getDisplayName() const;
+   virtual const std::string& getDisplayName(bool fullName = false) const;
    virtual const std::string& getDisplayText() const;
    virtual std::list<ContextMenuAction> getContextMenuActions() const;
    bool hasFilenameDisplay() const;
@@ -110,9 +110,9 @@ private:
    { \
       return impClass::getName(); \
    } \
-   const std::string& getDisplayName() const \
+   const std::string& getDisplayName(bool fullName = false) const \
    { \
-      return impClass::getDisplayName(); \
+      return impClass::getDisplayName(fullName); \
    } \
    const std::string& getDisplayText() const \
    { \

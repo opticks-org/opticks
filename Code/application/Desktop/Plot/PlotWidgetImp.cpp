@@ -15,10 +15,10 @@
 #include <QtGui/QPixmap>
 #include <QtGui/QSplitter>
 
+#include "AppAssert.h"
 #include "ApplicationServices.h"
 #include "AppVerify.h"
 #include "AppVersion.h"
-#include "PlotWidgetImp.h"
 #include "AnnotationLayer.h"
 #include "AnnotationToolBar.h"
 #include "AxisAdapter.h"
@@ -29,8 +29,8 @@
 #include "ContextMenuAction.h"
 #include "ContextMenuActions.h"
 #include "ContextMenuImp.h"
-#include "AppAssert.h"
 #include "DesktopServices.h"
+#include "ElidedLabel.h"
 #include "FloatingLabel.h"
 #include "GridlinesImp.h"
 #include "Legend.h"
@@ -40,6 +40,7 @@
 #include "PlotSet.h"
 #include "PlotViewImp.h"
 #include "PlotWidget.h"
+#include "PlotWidgetImp.h"
 #include "PrintPixmap.h"
 #include "SessionItemDeserializer.h"
 #include "SessionItemSerializer.h"
@@ -136,7 +137,8 @@ void PlotWidgetImp::initialize(PlotViewImp *pPlotView, const string& plotName, P
    mpBottomCenterLabel->setAlignment(Qt::AlignHCenter);
 
    // Title
-   mpTitleLabel = new QLabel(mpPlotWidget);
+   mpTitleLabel = new ElidedLabel(mpPlotWidget);
+   mpTitleLabel->setMinimumWidth(100);
    mpTitleLabel->setAlignment(Qt::AlignHCenter);
    mpTitleLabel->hide();
 
@@ -370,28 +372,6 @@ void PlotWidgetImp::setName(const std::string& name)
 
       notify(SIGNAL_NAME(Subject, Modified));
    }
-}
-
-const string& PlotWidgetImp::getDisplayName() const
-{
-   const string& displayName = SessionItemImp::getDisplayName();
-   if (displayName.empty() == false)
-   {
-      return displayName;
-   }
-
-   return mpPlot->getDisplayName();
-}
-
-const string& PlotWidgetImp::getDisplayText() const
-{
-   const string& displayText = SessionItemImp::getDisplayText();
-   if (displayText.empty() == false)
-   {
-      return displayText;
-   }
-
-   return mpPlot->getDisplayText();
 }
 
 list<ContextMenuAction> PlotWidgetImp::getContextMenuActions() const

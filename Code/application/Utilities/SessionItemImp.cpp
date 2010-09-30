@@ -101,8 +101,13 @@ const string& SessionItemImp::getName() const
    return mName;
 }
 
-const string& SessionItemImp::getDisplayName() const
+const string& SessionItemImp::getDisplayName(bool fullName) const
 {
+   if ((mDisplayName.empty() == true) && (fullName == true))
+   {
+      return getName();
+   }
+
    return mDisplayName;
 }
 

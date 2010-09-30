@@ -40,9 +40,9 @@ const string& PlugInShell::getName() const
    return mpSessionItem->getName();
 }
 
-const string& PlugInShell::getDisplayName() const
+const string& PlugInShell::getDisplayName(bool fullName) const
 {
-   return mpSessionItem->getDisplayName();
+   return mpSessionItem->getDisplayName(fullName);
 }
 
 const string& PlugInShell::getDisplayText() const

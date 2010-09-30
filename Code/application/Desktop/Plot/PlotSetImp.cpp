@@ -314,10 +314,14 @@ PlotWidget* PlotSetImp::getPlot(const QString& strPlotName) const
 
    for (int i = 0; i < count(); i++)
    {
-      QString strCurrentName = tabText(i);
-      if (strCurrentName == strPlotName)
+      PlotWidget* pPlotWidget = dynamic_cast<PlotWidget*>(widget(i));
+      if (pPlotWidget != NULL)
       {
-         return (dynamic_cast<PlotWidget*>(widget(i)));
+         QString strCurrentName = QString::fromStdString(pPlotWidget->getName());
+         if (strCurrentName == strPlotName)
+         {
+            return pPlotWidget;
+         }
       }
    }
 
@@ -624,8 +628,8 @@ void PlotSetImp::addPlot(PlotWidget* pPlot)
    }
 
    // Get the plot name
-   QString strPlotName = QString::fromStdString(pView->getName());
-   if (strPlotName.isEmpty() == true)
+   const string& plotName = pView->getDisplayName(true);
+   if (plotName.empty() == true)
    {
       return;
    }
@@ -635,7 +639,7 @@ void PlotSetImp::addPlot(PlotWidget* pPlot)
    if (pPlotImp != NULL)
    {
       VERIFYNR(connect(pView, SIGNAL(renamed(const QString&)), this, SLOT(updatePlotName())));
-      addTab(pPlotImp, strPlotName);
+      addTab(pPlotImp, QString::fromStdString(plotName));
       emit plotAdded(pPlot);
       notify(SIGNAL_NAME(PlotSet, PlotAdded), boost::any(pPlot));
       setCurrentPlot(pPlot);
@@ -655,12 +659,7 @@ void PlotSetImp::updatePlotName()
             PlotViewImp* pCurrentPlot = dynamic_cast<PlotViewImp*>(pPlotWidget->getPlot());
             if (pCurrentPlot == pPlot)
             {
-               string name = pPlot->getDisplayName();
-               if (name.empty() == true)
-               {
-                  name = pPlot->getName();
-               }
-
+               const string& name = pPlot->getDisplayName(true);
                if (name.empty() == false)
                {
                   int index = indexOf(pPlotWidget);

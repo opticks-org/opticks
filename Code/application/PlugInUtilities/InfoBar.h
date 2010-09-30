@@ -10,18 +10,19 @@
 #ifndef INFOBAR_H
 #define INFOBAR_H
 
-#include <QtGui/QAction>
-#include <QtGui/QLabel>
-#include <QtGui/QMenu>
-#include <QtGui/QPushButton>
 #include <QtGui/QWidget>
+
+class ElidedButton;
+class ElidedLabel;
+class QAction;
+class QLabel;
+class QMenu;
 
 /**
  *  A widget to provide information to the user.
  *
  *  The InfoBar widget is a gorizontal, rectangular widget that can give information
- *  to the user.  The widget has three major components: title, descrption, and
- *  identifying icon.
+ *  to the user.  The widget has two major components: title and identifying icon.
  *
  *  The title is a string displayed at the far left end of the widget.  The text color
  *  and font can be set using setTitleColor() and setTitleFont().  The title can also
@@ -29,14 +30,11 @@
  *  the setMenu() method to set the desired menu.  Internally, the title label is replaced
  *  with a flat push button using the setTitleButton() method.
  *
- *  The description is a string displayed in the center of the widget.  Like the title,
- *  the text color and font can be set using setDescriptionColor() and setDescriptionFont().
- *
  *  The icon is displayed at the far right end of the widget.  It can be set with the
  *  setInfoIcon() method.
  *
- *  In addition to the title, description, and icon, the background color of the widget
- *  can be set with the setBackgroundColor() method.
+ *  In addition to the title and icon, the background color of the widget can be
+ *  set with the setBackgroundColor() method.
  */
 class InfoBar : public QWidget
 {
@@ -61,8 +59,8 @@ public:
    /**
     *  Sets the background color for the entire widget.
     *
-    *  This method sets the background color for the entire widget, including the title,
-    *  description, and icon mask.
+    *  This method sets the background color for the entire widget, including the title
+    *  and icon mask.
     *
     *  @param    clrBackground
     *            The new background color.  Must be a valid QColor.
@@ -127,60 +125,6 @@ public:
     */
    QMenu* getMenu() const;
 
-   // Description
-
-   /**
-    *  Returns the current description text.
-    *
-    *  @return  The current description.  An empty string is returned if no description
-    *           has been set.
-    *
-    *  @see     InfoBar::setDescription
-    */
-   QString getDescription() const;
-
-   /**
-    *  Returns the current description color.
-    *
-    *  @return  The current description text color.  A valid color is returned even if
-    *           no description has been set.
-    *
-    *  @see     InfoBar::setDescriptionColor
-    *  @see     InfoBar::setDescription
-    */
-   QColor getDescriptionColor() const;
-
-   /**
-    *  Returns the current description font.
-    *
-    *  @return  The current description text font.  A valid font is returned even if no
-    *           description has been set.
-    *
-    *  @see     InfoBar::setDescriptionFont
-    *  @see     InfoBar::setDescription
-    */
-   QFont getDescriptionFont() const;
-
-   /**
-    *  Returns the description text alignment.
-    *
-    *  @return  The alignment flags for the current description.
-    *
-    *  @see     InfoBar::setDescriptionAlignment
-    */
-   int getDescriptionAlignment() const;
-
-   /**
-    *  Sets the description text alignment.
-    *
-    *  @param   iAlignment
-    *           The alignment flags.  The value is a bitwise OR of Qt::AlignmentFlags
-    *           and Qt::TextFlags values.
-    *
-    *  @see     InfoBar::getDescriptionFont
-    */
-   void setDescriptionAlignment(int iAlignment);
-
    // Icon
 
    /**
@@ -240,36 +184,6 @@ public slots:
     */
    void setTitleFont(QFont fntTitle);
 
-   /**
-    *  Sets the description text.
-    *
-    *  @param   strDescription
-    *           The new description text.
-    *
-    *  @see     InfoBar::getDescription
-    */
-   void setDescription(const QString& strDescription);
-
-   /**
-    *  Sets the description text color.
-    *
-    *  @param   clrDescription
-    *           The new description text color.
-    *
-    *  @see     InfoBar::getDescriptionColor
-    */
-   void setDescriptionColor(QColor clrDescription);
-
-   /**
-    *  Sets the description text font.
-    *
-    *  @param   fntDescription
-    *           The new description text font.
-    *
-    *  @see     InfoBar::getDescriptionFont
-    */
-   void setDescriptionFont(QFont fntDescription);
-
 signals:
    /**
     *  Indicates a change in the title text.
@@ -327,9 +241,8 @@ protected slots:
    void setTitle(QAction* pAction);
 
 private:
-   QLabel* mpTitle;
-   QPushButton* mpButton;
-   QLabel* mpDescription;
+   ElidedLabel* mpTitle;
+   ElidedButton* mpButton;
    QLabel* mpIconLabel;
 };
 

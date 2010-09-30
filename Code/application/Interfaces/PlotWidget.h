@@ -88,24 +88,6 @@ public:
    SIGNAL_METHOD(PlotWidget, AboutToShowContextMenu)
 
    /**
-    *  @copydoc SessionItem::getDisplayName()
-    *
-    *  @default The default implementation returns the display name of the plot
-    *           widget.  If the display name is empty, the display name of the
-    *           PlotView contained in the widget is returned instead.
-    */
-   virtual const std::string& getDisplayName() const = 0;
-
-   /**
-    *  @copydoc SessionItem::getDisplayText()
-    *
-    *  @default The default implementation returns the display text of the plot
-    *           widget.  If the display text is empty, the display text of the
-    *           PlotView contained in the widget is returned instead.
-    */
-   virtual const std::string& getDisplayText() const = 0;
-
-   /**
     *  @copydoc SessionItem::getContextMenuActions()
     *
     *  @default The default implementation returns the context menu actions

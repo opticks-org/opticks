@@ -17,6 +17,7 @@
 #include <boost/any.hpp>
 #include <QtGui/QWidget>
 
+class ElidedLabel;
 class QGroupBox;
 class QLabel;
 class QPushButton;
@@ -58,8 +59,8 @@ private:
    QGroupBox* mpAutomatedFlickerBox;
    QGroupBox* mpManualFlickerBox;
    QLabel* mpFlickerMax;
-   QLabel* mpCurrentCubeLayerLabel;
-   QLabel* mpCurrentLayerLabel;
+   ElidedLabel* mpCurrentCubeLayerLabel;
+   ElidedLabel* mpCurrentLayerLabel;
    QLabel* mpCurrentFlickerSpeed;
    QSlider* mpFlickerSlider;
    QSlider* mpOpacitySlider;

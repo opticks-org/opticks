@@ -28,6 +28,7 @@ class AnnotationToolBar;
 class Axis;
 class AxisImp;
 class Classification;
+class ElidedLabel;
 class FloatingLabel;
 class Legend;
 class MouseMode;
@@ -56,8 +57,6 @@ public:
    PlotView* getPlot() const;
 
    void setName(const std::string& name);
-   const std::string& getDisplayName() const;
-   const std::string& getDisplayText() const;
    std::list<ContextMenuAction> getContextMenuActions() const;
    std::vector<std::string> getPropertiesPages() const;
 
@@ -153,7 +152,7 @@ private:
    FontImp mClassificationFont;
    FontImp mOrganizationFont;
 
-   QLabel* mpTitleLabel;
+   ElidedLabel* mpTitleLabel;
    FontImp mTitleFont;
 
    PlotSet* mpPlotSet;

@@ -7,36 +7,36 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtGui/QAction>
+#include <QtGui/QLabel>
+#include <QtGui/QMenu>
 #include <QtGui/QHBoxLayout>
 
+#include "ElidedButton.h"
+#include "ElidedLabel.h"
 #include "InfoBar.h"
 
 InfoBar::InfoBar(QWidget* parent) :
    QWidget(parent),
-   mpTitle(new QLabel(this)),
-   mpButton(new QPushButton(this)),
-   mpDescription(new QLabel(this)),
+   mpTitle(new ElidedLabel(this)),
+   mpButton(new ElidedButton(this)),
    mpIconLabel(new QLabel(this))
 {
    // Initialization
    setAutoFillBackground(true);
 
-   if (mpButton != NULL)
-   {
-      mpButton->setFlat(true);
-      mpButton->hide();
-   }
+   mpTitle->setMinimumWidth(100);
+   mpButton->setMinimumWidth(100);
+   mpButton->setFlat(true);
+   mpButton->hide();
 
    // Layout
    QHBoxLayout* pLayout = new QHBoxLayout(this);
    pLayout->setMargin(2);
-   pLayout->setSpacing(5);
+   pLayout->setSpacing(10);
    pLayout->addSpacing(5);
-   pLayout->addWidget(mpTitle);
-   pLayout->addWidget(mpButton);
-   pLayout->addSpacing(10);
-   pLayout->addWidget(mpDescription, 10);
-   pLayout->addSpacing(10);
+   pLayout->addWidget(mpTitle, 10, Qt::AlignLeft);
+   pLayout->addWidget(mpButton, 10, Qt::AlignLeft);
    pLayout->addWidget(mpIconLabel);
    pLayout->addSpacing(5);
 }
@@ -111,37 +111,6 @@ QMenu* InfoBar::getMenu() const
    return pMenu;
 }
 
-QString InfoBar::getDescription() const
-{
-   QString strDescription = mpDescription->text();
-   return strDescription;
-}
-
-QColor InfoBar::getDescriptionColor() const
-{
-   QPalette descriptionPalette = mpDescription->palette();
-   QColor clrDescription = descriptionPalette.color(QPalette::WindowText);
-
-   return clrDescription;
-}
-
-QFont InfoBar::getDescriptionFont() const
-{
-   QFont fntDescription = mpDescription->font();
-   return fntDescription;
-}
-
-int InfoBar::getDescriptionAlignment() const
-{
-   int iAlignment = mpDescription->alignment();
-   return iAlignment;
-}
-
-void InfoBar::setDescriptionAlignment(int iAlignment)
-{
-   mpDescription->setAlignment(static_cast<Qt::AlignmentFlag>(iAlignment));
-}
-
 void InfoBar::setInfoIcon(const QPixmap& pixInfo)
 {
    mpIconLabel->setPixmap(pixInfo);
@@ -178,20 +147,6 @@ QSize InfoBar::sizeHint() const
       QFontMetrics titleMetrics(ftTitle);
       iWidth = titleMetrics.width(strText);
       iHeight = titleMetrics.height();
-   }
-
-   // Description
-   strText = mpDescription->text();
-   if (strText.isEmpty() == false)
-   {
-      QFont ftDescription = mpDescription->font();
-
-      QFontMetrics descriptionMetrics(ftDescription);
-      iWidth += descriptionMetrics.width(strText);
-      if (descriptionMetrics.height() > iHeight)
-      {
-         iHeight = descriptionMetrics.height();
-      }
    }
 
    // Icon
@@ -272,23 +227,6 @@ void InfoBar::setTitleFont(QFont fntTitle)
    resizeTitleButton(fntTitle);
 }
 
-void InfoBar::setDescription(const QString& strDescription)
-{
-   mpDescription->setText(strDescription);
-}
-
-void InfoBar::setDescriptionColor(QColor clrDescription)
-{
-   QPalette descriptionPalette = mpDescription->palette();
-   descriptionPalette.setColor(QPalette::WindowText, clrDescription);
-   mpDescription->setPalette(descriptionPalette);
-}
-
-void InfoBar::setDescriptionFont(QFont fntDescription)
-{
-   mpDescription->setFont(fntDescription);
-}
-
 void InfoBar::setTitleButton(bool bButton)
 {
    mpTitle->setVisible(!bButton);
@@ -303,7 +241,7 @@ void InfoBar::resizeTitleButton(QFont fntTitle)
    int iWidth = fntMetrics.width(strTitle);
    int iHeight = fntMetrics.height();
 
-   mpButton->setFixedWidth(iWidth + 30);   // Account for width of popup arrow
+   mpButton->setMaximumWidth(iWidth + 30);   // Account for width of popup arrow
    mpButton->setFixedHeight(iHeight + 2);
 }
 
