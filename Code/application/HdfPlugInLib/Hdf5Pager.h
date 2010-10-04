@@ -19,8 +19,12 @@
  * This class is an on-disk accessor for HDF5 files.
  *
  * Under current conditions, no one will need to derive from Hdf5Pager unless
- * multiple HDF datasets correspond to a single data cube or the
- * data interleave is BIL, which is not currently natively supported.
+ * multiple HDF datasets correspond to a single data cube.
+ *
+ * This pager should only be used with datasets that have two
+ * or three dimensions.  If used with datasets having two
+ * dimensions, the band count must be 1 and the interleave format
+ * must be BIP.
  */
 class Hdf5Pager : public HdfPager, public Hdf5PagerFileHandle
 {

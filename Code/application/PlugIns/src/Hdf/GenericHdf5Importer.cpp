@@ -65,16 +65,14 @@ namespace
       FactoryResource<DynamicObject> pDimensions;
       if (pDimensions.get() != NULL)
       {
-         hid_t dataSpaceId = H5Dget_space(dataDescriptor);
-         hid_t dataTypeId = H5Dget_type(dataDescriptor);
-
-         int dimSize = H5Sget_simple_extent_ndims(dataSpaceId);
+         Hdf5DataSpaceResource dataSpaceId(H5Dget_space(dataDescriptor));
+         int dimSize = H5Sget_simple_extent_ndims(*dataSpaceId);
          if (dimSize > 0)
          {
             vector<hsize_t> dims(dimSize);
             vector<hsize_t> maxdims(dimSize);
 
-            hsize_t numDims = H5Sget_simple_extent_dims(dataSpaceId, &dims.front(), &maxdims.front());
+            hsize_t numDims = H5Sget_simple_extent_dims(*dataSpaceId, &dims.front(), &maxdims.front());
             for (hsize_t i = 0; i < numDims; ++i)
             {
                stringstream strm;
@@ -152,50 +150,82 @@ vector<ImportDescriptor*> GenericHdf5Importer::getImportDescriptors(const string
             else
             {
                Hdf5Dataset* pDataset = dynamic_cast<Hdf5Dataset*>(pFirst);
-               if (pDataset != NULL)
+               if (pDataset == NULL)
                {
-                  const string fpan = pDataset->getFullPathAndName();
-                  pFileDescriptor->setDatasetLocation(fpan);
-
-                  FactoryResource<DynamicObject> pMetadata;
-                  VERIFYRV(pMetadata.get() != NULL, descriptors);
-
-                  FactoryResource<DynamicObject> pAttributes;
-                  VERIFYRV(pAttributes.get() != NULL, descriptors);
-
-                  Hdf5DataSetResource dataId(*fileId, fpan);
-                  VERIFYRV(dataId.get() != NULL, descriptors);
-
-                  Service<ModelServices> pModel;
-
-                  ImportDescriptor* pImportDescriptor =
-                     pModel->createImportDescriptor(fpan, "RasterElement", NULL, false);
-                  if (pImportDescriptor != NULL)
-                  {
-                     RasterDataDescriptor* pDescriptor =
-                        dynamic_cast<RasterDataDescriptor*>(pImportDescriptor->getDataDescriptor());
-                     if (pDescriptor != NULL)
-                     {
-                        EncodingType encoding;
-                        pDataset->getDataEncoding(encoding);
-                        pDescriptor->setDataType(encoding);
-                        pFileDescriptor->setBitsPerElement(RasterUtilities::bytesInEncoding(encoding) * 8);
-
-                        FactoryResource<DynamicObject> pDimensions = getDimensionData(*dataId);
-                        herr_t status = H5Aiterate(*dataId, NULL, populateMetadata, pAttributes.get());
-                        if (status == 0)
-                        {
-                           pMetadata->setAttribute("Attributes", *pAttributes.get());
-                        }
-                        pMetadata->setAttribute("Dimensions", *pDimensions.get());
-                        pDescriptor->setMetadata(pMetadata.get());
-
-                        pDescriptor->setFileDescriptor(pFileDescriptor.get());
-                     }
-
-                     descriptors.push_back(pImportDescriptor);
-                  }
+                  continue;
                }
+               const string fpan = pDataset->getFullPathAndName();
+               Hdf5DataSetResource dataId(*fileId, fpan);
+               VERIFYRV(dataId.get() != NULL, descriptors);
+               Hdf5DataSpaceResource dataSpaceId(H5Dget_space(*dataId));
+               int dimSize = H5Sget_simple_extent_ndims(*dataSpaceId);
+               if (dimSize < 2 || dimSize > 3)
+               {
+                  continue;
+               }
+
+               pFileDescriptor->setDatasetLocation(fpan);
+
+               FactoryResource<DynamicObject> pMetadata;
+               VERIFYRV(pMetadata.get() != NULL, descriptors);
+
+               FactoryResource<DynamicObject> pAttributes;
+               VERIFYRV(pAttributes.get() != NULL, descriptors);
+
+               Service<ModelServices> pModel;
+
+               ImportDescriptor* pImportDescriptor =
+                  pModel->createImportDescriptor(fpan, "RasterElement", NULL, false);
+               if (pImportDescriptor == NULL)
+               {
+                  continue;
+               }
+               RasterDataDescriptor* pDescriptor =
+                  dynamic_cast<RasterDataDescriptor*>(pImportDescriptor->getDataDescriptor());
+               VERIFYRV(pDescriptor != NULL, descriptors);
+               EncodingType encoding;
+               pDataset->getDataEncoding(encoding);
+               pDescriptor->setDataType(encoding);
+               pFileDescriptor->setBitsPerElement(RasterUtilities::bytesInEncoding(encoding) * 8);
+
+               if (dimSize == 2)
+               {
+                  vector<hsize_t> dims(2);
+                  vector<hsize_t> maxdims(2);
+
+                  H5Sget_simple_extent_dims(*dataSpaceId, &dims.front(), &maxdims.front());
+                  //the HDF5 file specification defines row-major order
+                  //since we are dealing with 2 dimensions, we can therefore assume
+                  //that dimension 0 is rows and dimension 1 is columns
+                  //because the RasterElement also uses row-major order
+                  pFileDescriptor->setRows(RasterUtilities::generateDimensionVector(static_cast<unsigned int>(dims[0]),
+                     true, false, true));
+                  pFileDescriptor->setColumns(RasterUtilities::generateDimensionVector(static_cast<unsigned int>(dims[1]),
+                     true, false, true));
+                  pFileDescriptor->setBands(RasterUtilities::generateDimensionVector(1, true, false, true));
+                  pFileDescriptor->setInterleaveFormat(BIP);
+                  pDescriptor->setRows(RasterUtilities::generateDimensionVector(static_cast<unsigned int>(dims[0]),
+                     true, false, true));
+                  pDescriptor->setColumns(RasterUtilities::generateDimensionVector(static_cast<unsigned int>(dims[1]),
+                     true, false, true));
+                  pDescriptor->setBands(RasterUtilities::generateDimensionVector(1, true, false, true));
+                  pDescriptor->setInterleaveFormat(BIP);
+               }
+               else
+               {
+                  FactoryResource<DynamicObject> pDimensions = getDimensionData(*dataId);
+                  pMetadata->setAttribute("Dimensions", *pDimensions.get());
+               }
+
+               herr_t status = H5Aiterate(*dataId, NULL, populateMetadata, pAttributes.get());
+               if (status == 0)
+               {
+                  pMetadata->setAttribute("Attributes", *pAttributes.get());
+               }
+               pDescriptor->setMetadata(pMetadata.get());
+
+               pDescriptor->setFileDescriptor(pFileDescriptor.get());
+               descriptors.push_back(pImportDescriptor);
             }
          }
       }
