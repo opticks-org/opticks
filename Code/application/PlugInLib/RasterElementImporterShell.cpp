@@ -170,8 +170,8 @@ bool RasterElementImporterShell::execute(PlugInArgList* pInArgList, PlugInArgLis
       if (pGeoPlugIn != NULL)
       {
          ExecutableResource geoPlugIn(pGeoPlugIn, string(), mpProgress, true);
-         VERIFY(geoPlugIn->getInArgList().setPlugInArgValue(Executable::DataElementArg(), mpRasterElement));
-         VERIFY(geoPlugIn->getInArgList().setPlugInArgValue(Georeference::GcpListArg(), pGcpList));
+         geoPlugIn->getInArgList().setPlugInArgValue(Executable::DataElementArg(), mpRasterElement);
+         geoPlugIn->getInArgList().setPlugInArgValue(Georeference::GcpListArg(), pGcpList);
          if (geoPlugIn->execute() == false)
          {
             string message = "Could not georeference the data set.";
