@@ -223,55 +223,16 @@ void DynamicObjectItemModel::setDynamicObject(DynamicObject* pDynamicObject)
       return;
    }
 
-   // Clear the attribute items and the dynamic object map
+   // Clear the attribute items and the dynamic object map, which detaches all signals from mpDynamicObject
    clear();
 
-   // Detach from the previous dynamic object
-   if (mpDynamicObject != NULL)
-   {
-      // All other signal/slot connections were detached when the dynamic object map was cleared
-      mpDynamicObject->detach(SIGNAL_NAME(Subject, Deleted),
-         Slot(this, &DynamicObjectItemModel::dynamicObjectDeleted));
-   }
-
+   // Update the dynamic object
    mpDynamicObject = pDynamicObject;
 
+   // Initialize all items in the dynamic object
    if (mpDynamicObject != NULL)
    {
-      // Add the attribute items
-      vector<string> attributeNames;
-      mpDynamicObject->getAttributeNames(attributeNames);
-      for (vector<string>::size_type i = 0; i < attributeNames.size(); ++i)
-      {
-         string attributeName = attributeNames[i];
-         if (attributeName.empty() == false)
-         {
-            DataVariant& attributeValue = mpDynamicObject->getAttribute(attributeName);
-            if (attributeValue.isValid() == true)
-            {
-               addAttributeItem(mpRootWrapper, attributeName, &attributeValue);
-            }
-         }
-      }
-
-      // Add the dynamic object to the map
-      map<DynamicObject*, AttributeWrapper*>::iterator iter = mDynamicObjects.find(pDynamicObject);
-      if (iter == mDynamicObjects.end())
-      {
-         mDynamicObjects[pDynamicObject] = mpRootWrapper;
-      }
-
-      // Connections
-      mpDynamicObject->attach(SIGNAL_NAME(DynamicObject, AttributeAdded),
-         Slot(this, &DynamicObjectItemModel::addAttribute));
-      mpDynamicObject->attach(SIGNAL_NAME(DynamicObject, AttributeModified),
-         Slot(this, &DynamicObjectItemModel::modifyAttribute));
-      mpDynamicObject->attach(SIGNAL_NAME(DynamicObject, AttributeRemoved),
-         Slot(this, &DynamicObjectItemModel::removeAttribute));
-      mpDynamicObject->attach(SIGNAL_NAME(DynamicObject, Cleared),
-         Slot(this, &DynamicObjectItemModel::removeAllAttributes));
-      mpDynamicObject->attach(SIGNAL_NAME(Subject, Deleted),
-         Slot(this, &DynamicObjectItemModel::dynamicObjectDeleted));
+      initializeDynamicObjectItem(mpRootWrapper, mpDynamicObject);
    }
 }
 
@@ -407,9 +368,20 @@ void DynamicObjectItemModel::removeAllAttributes(Subject& subject, const string&
 void DynamicObjectItemModel::dynamicObjectDeleted(Subject& subject, const string& signal, const boost::any& value)
 {
    DynamicObject* pDynamicObject = dynamic_cast<DynamicObject*>(&subject);
-   if ((pDynamicObject != NULL) && (pDynamicObject == mpDynamicObject))
+   if (pDynamicObject != NULL)
    {
-      setDynamicObject(NULL);
+      if (pDynamicObject == mpDynamicObject)
+      {
+         setDynamicObject(NULL);
+      }
+      else
+      {
+         AttributeWrapper* pWrapper = getWrapper(pDynamicObject);
+         if (pWrapper != NULL)
+         {
+            cleanupDynamicObjectItem(pWrapper, pDynamicObject);
+         }
+      }
    }
 }
 
@@ -432,38 +404,7 @@ DynamicObjectItemModel::addAttributeItem(AttributeWrapper* pParentWrapper, const
          DynamicObject* pDynamicObject = dv_cast<DynamicObject>(pValue);
          if (pDynamicObject != NULL)
          {
-            // Add the object to the map
-            map<DynamicObject*, AttributeWrapper*>::iterator iter = mDynamicObjects.find(pDynamicObject);
-            if (iter == mDynamicObjects.end())
-            {
-               mDynamicObjects[pDynamicObject] = pWrapper;
-            }
-
-            // Add items for the children
-            vector<string> attributeNames;
-            pDynamicObject->getAttributeNames(attributeNames);
-            for (vector<string>::size_type i = 0; i < attributeNames.size(); ++i)
-            {
-               string attributeName = attributeNames[i];
-               if (attributeName.empty() == false)
-               {
-                  DataVariant& attributeValue = pDynamicObject->getAttribute(attributeName);
-                  if (attributeValue.isValid() == true)
-                  {
-                     addAttributeItem(pWrapper, attributeName, &attributeValue);
-                  }
-               }
-            }
-
-            // Connections
-            pDynamicObject->attach(SIGNAL_NAME(DynamicObject, AttributeAdded),
-               Slot(this, &DynamicObjectItemModel::addAttribute));
-            pDynamicObject->attach(SIGNAL_NAME(DynamicObject, AttributeModified),
-               Slot(this, &DynamicObjectItemModel::modifyAttribute));
-            pDynamicObject->attach(SIGNAL_NAME(DynamicObject, AttributeRemoved),
-               Slot(this, &DynamicObjectItemModel::removeAttribute));
-            pDynamicObject->attach(SIGNAL_NAME(DynamicObject, Cleared),
-               Slot(this, &DynamicObjectItemModel::removeAllAttributes));
+            initializeDynamicObjectItem(pWrapper, pDynamicObject);
          }
       }
    }
@@ -511,39 +452,7 @@ void DynamicObjectItemModel::removeAttributeItem(AttributeWrapper* pParentWrappe
          DynamicObject* pDynamicObject = dv_cast<DynamicObject>(pValue);
          if (pDynamicObject != NULL)
          {
-            // Detach from the object
-            pDynamicObject->detach(SIGNAL_NAME(DynamicObject, AttributeAdded),
-               Slot(this, &DynamicObjectItemModel::addAttribute));
-            pDynamicObject->detach(SIGNAL_NAME(DynamicObject, AttributeModified),
-               Slot(this, &DynamicObjectItemModel::modifyAttribute));
-            pDynamicObject->detach(SIGNAL_NAME(DynamicObject, AttributeRemoved),
-               Slot(this, &DynamicObjectItemModel::removeAttribute));
-            pDynamicObject->detach(SIGNAL_NAME(DynamicObject, Cleared),
-               Slot(this, &DynamicObjectItemModel::removeAllAttributes));
-
-            // Remove any children items
-            vector<AttributeWrapper*> children = pWrapper->getChildren();
-            for (vector<AttributeWrapper*>::size_type i = 0; i < children.size(); ++i)
-            {
-               AttributeWrapper* pCurrentWrapper = children[i];
-               if (pCurrentWrapper != NULL)
-               {
-                  const string& currentName = pCurrentWrapper->getName();
-                  DataVariant* pCurrentValue = pCurrentWrapper->getValue();
-
-                  if ((currentName.empty() == false) && (pCurrentValue != NULL) && (pCurrentValue->isValid() == true))
-                  {
-                     removeAttributeItem(pWrapper, currentName, pCurrentValue);
-                  }
-               }
-            }
-
-            // Remove the object from the map
-            map<DynamicObject*, AttributeWrapper*>::iterator iter = mDynamicObjects.find(pDynamicObject);
-            if (iter != mDynamicObjects.end())
-            {
-               mDynamicObjects.erase(iter);
-            }
+            cleanupDynamicObjectItem(pWrapper, pDynamicObject);
          }
       }
    }
@@ -584,11 +493,100 @@ void DynamicObjectItemModel::clear()
             Slot(this, &DynamicObjectItemModel::removeAttribute));
          pDynamicObject->detach(SIGNAL_NAME(DynamicObject, Cleared),
             Slot(this, &DynamicObjectItemModel::removeAllAttributes));
+         pDynamicObject->detach(SIGNAL_NAME(Subject, Deleted),
+            Slot(this, &DynamicObjectItemModel::dynamicObjectDeleted));
       }
    }
 
    // Clear the map
    mDynamicObjects.clear();
+}
+
+void DynamicObjectItemModel::initializeDynamicObjectItem(AttributeWrapper* pWrapper, DynamicObject* pDynamicObject)
+{
+   if ((pWrapper == NULL) || (pDynamicObject == NULL))
+   {
+      return;
+   }
+
+   // Add the dynamic object to the map
+   map<DynamicObject*, AttributeWrapper*>::iterator iter = mDynamicObjects.find(pDynamicObject);
+   if (iter == mDynamicObjects.end())
+   {
+      mDynamicObjects[pDynamicObject] = pWrapper;
+   }
+
+   // Add items for the children
+   vector<string> attributeNames;
+   pDynamicObject->getAttributeNames(attributeNames);
+   for (vector<string>::size_type i = 0; i < attributeNames.size(); ++i)
+   {
+      string attributeName = attributeNames[i];
+      if (attributeName.empty() == false)
+      {
+         DataVariant& attributeValue = pDynamicObject->getAttribute(attributeName);
+         if (attributeValue.isValid() == true)
+         {
+            addAttributeItem(pWrapper, attributeName, &attributeValue);
+         }
+      }
+   }
+
+   // Connections
+   pDynamicObject->attach(SIGNAL_NAME(DynamicObject, AttributeAdded),
+      Slot(this, &DynamicObjectItemModel::addAttribute));
+   pDynamicObject->attach(SIGNAL_NAME(DynamicObject, AttributeModified),
+      Slot(this, &DynamicObjectItemModel::modifyAttribute));
+   pDynamicObject->attach(SIGNAL_NAME(DynamicObject, AttributeRemoved),
+      Slot(this, &DynamicObjectItemModel::removeAttribute));
+   pDynamicObject->attach(SIGNAL_NAME(DynamicObject, Cleared),
+      Slot(this, &DynamicObjectItemModel::removeAllAttributes));
+   pDynamicObject->attach(SIGNAL_NAME(Subject, Deleted),
+      Slot(this, &DynamicObjectItemModel::dynamicObjectDeleted));
+}
+
+void DynamicObjectItemModel::cleanupDynamicObjectItem(AttributeWrapper* pWrapper, DynamicObject* pDynamicObject)
+{
+   if ((pWrapper == NULL) || (pDynamicObject == NULL))
+   {
+      return;
+   }
+
+   // Detach from the dynamic object
+   pDynamicObject->detach(SIGNAL_NAME(DynamicObject, AttributeAdded),
+      Slot(this, &DynamicObjectItemModel::addAttribute));
+   pDynamicObject->detach(SIGNAL_NAME(DynamicObject, AttributeModified),
+      Slot(this, &DynamicObjectItemModel::modifyAttribute));
+   pDynamicObject->detach(SIGNAL_NAME(DynamicObject, AttributeRemoved),
+      Slot(this, &DynamicObjectItemModel::removeAttribute));
+   pDynamicObject->detach(SIGNAL_NAME(DynamicObject, Cleared),
+      Slot(this, &DynamicObjectItemModel::removeAllAttributes));
+   pDynamicObject->detach(SIGNAL_NAME(Subject, Deleted),
+      Slot(this, &DynamicObjectItemModel::dynamicObjectDeleted));
+
+   // Remove any children items
+   vector<AttributeWrapper*> children = pWrapper->getChildren();
+   for (vector<AttributeWrapper*>::size_type i = 0; i < children.size(); ++i)
+   {
+      AttributeWrapper* pChildWrapper = children[i];
+      if (pChildWrapper != NULL)
+      {
+         const string& childName = pChildWrapper->getName();
+         DataVariant* pChildValue = pChildWrapper->getValue();
+
+         if ((childName.empty() == false) && (pChildValue != NULL) && (pChildValue->isValid() == true))
+         {
+            removeAttributeItem(pWrapper, childName, pChildValue);
+         }
+      }
+   }
+
+   // Remove the dynamic object from the map
+   map<DynamicObject*, AttributeWrapper*>::iterator iter = mDynamicObjects.find(pDynamicObject);
+   if (iter != mDynamicObjects.end())
+   {
+      mDynamicObjects.erase(iter);
+   }
 }
 
 //////////////////////

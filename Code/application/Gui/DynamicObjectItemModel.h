@@ -84,6 +84,9 @@ protected:
    void clear();
 
 private:
+   void initializeDynamicObjectItem(AttributeWrapper* pWrapper, DynamicObject* pDynamicObject);
+   void cleanupDynamicObjectItem(AttributeWrapper* pWrapper, DynamicObject* pDynamicObject);
+
    DynamicObject* mpDynamicObject;
    AttributeWrapper* mpRootWrapper;
    std::map<DynamicObject*, AttributeWrapper*> mDynamicObjects;
