@@ -983,8 +983,9 @@ void Image::updateTiles(vector<Tile*>& tilesToUpdate, vector<unsigned int>& tile
    {
       pReporter = &barReporter;
    }
+
    mta::MultiThreadedAlgorithm<TileInput, TileOutput, TileThread> tilingAlgorithm
-      (ConfigurationSettings::getSettingThreadCount(), tileInput, tileOutput, pReporter);
+      (getNumRequiredThreads(tilesToUpdate.size()), tileInput, tileOutput, pReporter);
    tilingAlgorithm.run();
 }
 

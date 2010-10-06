@@ -624,16 +624,8 @@ void StatisticsImp::calculateStatistics(ComplexComponent component)
    phaseWeights.push_back(80);
    mta::MultiPhaseProgressReporter progressReporter(barReporter, phaseWeights);
 
-   unsigned int threadCount = ConfigurationSettings::getSettingThreadCount();
-   // if there are more threads than rows in the data set, we need to clamp
-   // the number of threads so we don't have idle threads.
-   if (pDescriptor != NULL)
-   {
-      threadCount = std::min(threadCount, pDescriptor->getRowCount());
-   }
-
    mta::MultiThreadedAlgorithm<StatisticsInput, StatisticsOutput, StatisticsThread> statisticsAlgorithm
-      (threadCount, statInput, statOutput, &progressReporter);
+      (getNumRequiredThreads(pDescriptor->getRowCount()), statInput, statOutput, &progressReporter);
    statisticsAlgorithm.run();
 
    bool bInteger = true;
@@ -650,7 +642,7 @@ void StatisticsImp::calculateStatistics(ComplexComponent component)
    progressReporter.setCurrentPhase(1);
 
    mta::MultiThreadedAlgorithm<HistogramInput, HistogramOutput, HistogramThread> histogramAlgorithm
-      (threadCount, histInput, histOutput, &progressReporter);
+      (getNumRequiredThreads(pDescriptor->getRowCount()), histInput, histOutput, &progressReporter);
 
    if (histogramAlgorithm.run() == mta::SUCCESS)
    {

@@ -14,6 +14,26 @@
 
 using namespace mta;
 
+unsigned int mta::getNumRequiredThreads(unsigned int dataSize)
+{
+   unsigned int threadCount = ConfigurationSettings::getSettingThreadCount();
+   // if there are more threads than rows in the data set, we need to clamp
+   // the number of threads so we don't have idle threads.
+   threadCount = std::min(threadCount, dataSize);
+
+   // safeguard to prevent creating more threads than necessary on >2 core machines, 
+   // since empty worker threads cause a crash.
+   unsigned int countPerThread = static_cast<int>(ceil(static_cast<double>(dataSize) / 
+      static_cast<double>(threadCount)));
+   unsigned int totalThreadsNeeded = static_cast<int>(ceil(static_cast<double>(dataSize) / 
+      static_cast<double>(countPerThread)));
+   if (totalThreadsNeeded < threadCount)
+   {
+      threadCount = totalThreadsNeeded;
+   }
+   return threadCount;
+}
+
 //------------ MultiThreadReporter ---------------//
 
 /*

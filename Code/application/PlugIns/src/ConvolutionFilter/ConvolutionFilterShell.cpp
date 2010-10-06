@@ -137,7 +137,7 @@ bool ConvolutionFilterShell::execute(PlugInArgList* pInArgList, PlugInArgList* p
    mta::MultiThreadedAlgorithm<ConvolutionFilterThreadInput,
                                ConvolutionFilterThreadOutput,
                                ConvolutionFilterThread>
-          alg(Service<ConfigurationSettings>()->getSettingThreadCount(), mInput, outputData, &reporter);
+          alg(mta::getNumRequiredThreads(iterChecker.getNumSelectedRows()), mInput, outputData, &reporter);
    switch(alg.run())
    {
    case mta::SUCCESS:

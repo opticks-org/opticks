@@ -37,6 +37,16 @@ namespace mta // Multi-Threaded Algorithm
 {
 
 /**
+* Calculate the required number of threads for the data to be processed.
+* Using this prevents some oddities involving empty worker threads.
+*
+* @param dataSize
+*        Size of the data to be processed by multiple threads.
+* @return The number of threads required to process the data.
+*/
+unsigned int getNumRequiredThreads(unsigned int dataSize);
+
+/**
  * Represents the result of algorithm execution.
  */
 enum ResultEnum { SUCCESS, FAILURE, ABORT };
