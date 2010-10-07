@@ -363,14 +363,11 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
                   pField = mFields.find("data type");
                   if (pField != NULL)
                   {
-                     vector<EncodingType> validDataTypes;
                      switch (atoi(pField->mValue.c_str()))
                      {
                         case 1:     // char
                            pDescriptor->setDataType(INT1UBYTE);
                            pFileDescriptor->setBitsPerElement(8);
-                           
-                           validDataTypes.push_back(INT1SBYTE);
                            break;
 
                         case 2:     // short
@@ -436,8 +433,7 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
                         pDescriptor->setBadValues(badValues);
                      }
 
-                     validDataTypes.push_back(dataType);
-                     pDescriptor->setValidDataTypes(validDataTypes);
+                     pDescriptor->setValidDataTypes(vector<EncodingType>(1, dataType));
                   }
 
                   // Interleave format
