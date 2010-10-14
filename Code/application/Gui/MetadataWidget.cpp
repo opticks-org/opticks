@@ -455,7 +455,9 @@ void MetadataWidget::modifyValues()
    Service<DesktopServices> pDesktop;
 
    pDesktop->showSuppressibleMsgDlg(APP_NAME, "Modifying the metadata values could have adverse effects since "
-         "some plug-ins may require the existence of specific metadata key-value pairs.  Also, other widgets in "
+         "some plug-ins may require the existence of specific metadata key-value pairs or may ignore changes made "
+         "in this dialog. For example, the NITF exporter will not export any changes made in this dialog to the "
+         "security marking values in the metadata. Also, other widgets in "
          "this same dialog displaying portions of the metadata contents may not update properly.", MESSAGE_WARNING,
          getEditWarningDialogId(), this);
 
