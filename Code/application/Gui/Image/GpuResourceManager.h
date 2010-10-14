@@ -13,6 +13,7 @@
 #include "glCommon.h"
 #include "Service.h"
 
+#include <map>
 #include <vector>
 
 class ImageBuffer;
@@ -106,9 +107,13 @@ public:
     *  This method returns the scaling factor used by the video driver when writing values to the frame buffer.
     *  The value was 3.0 for ForceWare versions 94.22 and earlier. The value is 2.0 for more current versions (so far). 
     *
+    *  @param   textureFormat
+    *           The texture format, including alpha, for which the scaling
+    *           factor is to be determined.
+    *
     *  @return  The value of the scaling factor.
     */
-   float getGpuScalingFactor();
+   float getGpuScalingFactor(GLenum textureFormat);
 
 private:
    GpuResourceManager();
@@ -116,9 +121,8 @@ private:
 
    friend class DesktopServicesImp;
    std::vector<GLuint> mTextures;
-   bool mGpuScalingFactorInitialized;
-   float mGpuScalingFactor;
-   bool determineScalingFactor(float& scalingFactor);
+   std::map<GLenum,float> mGpuScalingFactors;
+   bool determineScalingFactor(float& scalingFactor, GLenum textureFormat);
 };
 
 template<>

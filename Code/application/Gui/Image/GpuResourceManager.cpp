@@ -48,9 +48,7 @@ GpuResourceManager::~GpuResourceManager()
 #endif
 }
 
-GpuResourceManager::GpuResourceManager() :
-   mGpuScalingFactorInitialized(false),
-   mGpuScalingFactor(3.0f)    // value for ForceWare versions 94.22 and earlier
+GpuResourceManager::GpuResourceManager()
 {
 }
 
@@ -207,17 +205,26 @@ void GpuResourceManager::deallocateTexture(GLuint textureId)
 #endif
 }
 
-float GpuResourceManager::getGpuScalingFactor()
+float GpuResourceManager::getGpuScalingFactor(GLenum textureFormat)
 {
-   if (mGpuScalingFactorInitialized == false)
+   float gpuScalingFactor = 3.0; // value for ForceWare versions 94.22 and earlier
+   map<GLenum, float>::iterator pMatch = mGpuScalingFactors.find(textureFormat);
+   if (pMatch == mGpuScalingFactors.end())
    {
-      mGpuScalingFactorInitialized = determineScalingFactor(mGpuScalingFactor);
+      if(determineScalingFactor(gpuScalingFactor, textureFormat))
+      {
+         mGpuScalingFactors[textureFormat] = gpuScalingFactor;
+      }
+   }
+   else
+   {
+      gpuScalingFactor = pMatch->second;
    }
 
-   return mGpuScalingFactor;
+   return gpuScalingFactor;
 }
 
-bool GpuResourceManager::determineScalingFactor(float& scalingFactor)
+bool GpuResourceManager::determineScalingFactor(float& scalingFactor, GLenum textureFormat)
 {
    bool factorFound = false;
    scalingFactor = 3.0f;  // value for ForceWare versions 94.22 and earlier
@@ -227,7 +234,6 @@ bool GpuResourceManager::determineScalingFactor(float& scalingFactor)
    unsigned int texHeight(64);
 
    // create color buffer object to be used to load data to the graphics card
-   GLenum textureFormat(GL_LUMINANCE_ALPHA);
    GLenum dataType = ImageUtilities::convertEncodingType(FLT4BYTES);
    GLint internalFormat = ImageUtilities::getInternalFormat(dataType, textureFormat);
    unsigned int alpha(255);

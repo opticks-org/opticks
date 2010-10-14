@@ -3901,7 +3901,7 @@ void RasterLayerImp::displayAs(QAction* pAction)
 }
 
 unsigned int RasterLayerImp::readFilterBuffer(double xCoord, double yCoord, int width, int height,
-                                              vector<float>& values)
+                                              vector<float>& values, bool& hasAlphas)
 {
    unsigned int numElements = 0;
 
@@ -3917,7 +3917,7 @@ unsigned int RasterLayerImp::readFilterBuffer(double xCoord, double yCoord, int 
       GpuImage* pGpuImage = dynamic_cast<GpuImage*>(getImage());
       if (pGpuImage != NULL)
       {
-         numElements = pGpuImage->readTiles(xCoord, yCoord, width, height, values);
+         numElements = pGpuImage->readTiles(xCoord, yCoord, width, height, values, hasAlphas);
       }
    }
 #endif

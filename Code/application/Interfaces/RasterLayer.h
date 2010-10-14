@@ -57,6 +57,7 @@ public:
    SETTING(BlueLowerStretchValue, RasterLayer, double, 0.0)
    SETTING(BlueUpperStretchValue, RasterLayer, double, 0.0)
    SETTING(GpuImage, RasterLayer, bool, false)
+   SETTING(GpuImageAlwaysAlpha, RasterLayer, bool, true)
    SETTING(GrayLowerStretchValue, RasterLayer, double, 0.0)
    SETTING(GrayUpperStretchValue, RasterLayer, double, 0.0)
    SETTING(GreenLowerStretchValue, RasterLayer, double, 0.0)
@@ -723,13 +724,17 @@ public:
     *           results image buffer.
     *  @param   values
     *           A vector populated with the filtered results.
+    *  @param   hasAlphas
+    *           A bool value to contain a flag indicating whether the results 
+    *           contain interleaved alpha values or not.
     *
     *  @return  Number of elements read.  Zero is returned if
     *           isGpuImageEnabled() returns \c false or if getEnabledFilters()
-    *           returns an empty vector.
+    *           returns an empty vector. If alpha values are present, they will
+    *           be included in this value.
     */
    virtual unsigned int readFilterBuffer(double xCoord, double yCoord, int width, int height,
-      std::vector<float>& values) = 0;
+      std::vector<float>& values, bool& hasAlphas) = 0;
 
    /**
     *  Associates an animation object with the layer.

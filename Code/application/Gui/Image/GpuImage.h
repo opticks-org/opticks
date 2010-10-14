@@ -69,7 +69,7 @@ public:
    bool isFilterEnabled(ImageFilterDescriptor *pDescriptor) const;
    void resetFilter(ImageFilterDescriptor *pDescriptor);
    void freezeFilter(ImageFilterDescriptor *pDescriptor, bool toggle = true);
-   unsigned int readTiles(double xCoord, double yCoord, GLsizei width, GLsizei height, std::vector<float>& values);
+   unsigned int readTiles(double xCoord, double yCoord, GLsizei width, GLsizei height, std::vector<float>& values, bool& hasAlphas);
 
    static void setMaxTextureSize(GLint maxSize = 0);
    static GLint getMaxTextureSize();
@@ -121,7 +121,11 @@ private:
    // Member variable to keep track of whether or not there was a band change
    unsigned int mPreviousBand;
 
+   friend class FeedbackBufferTestCase;
+
    static GLint mMaxTextureSize;
+   static bool mAlwaysAlpha;
+   static bool mAlphaConfigChecked;
 };
 
 #endif

@@ -125,7 +125,7 @@ public:
    void resetFilter(const std::string& filterName);
    void freezeFilter(const std::string& filterName, bool toggle = true);
 
-   unsigned int readFilterBuffer(double xCoord, double yCoord, int width, int height, std::vector<float>& values);
+   unsigned int readFilterBuffer(double xCoord, double yCoord, int width, int height, std::vector<float>& values, bool& hasAlphas);
 
    bool generateFullResTexture();
    void generateFullImage();
@@ -430,9 +430,9 @@ private:
    { \
       impClass::freezeFilter(filterName, toggle); \
    } \
-   unsigned int readFilterBuffer(double xCoord, double yCoord, int width, int height, std::vector<float>& values) \
+   unsigned int readFilterBuffer(double xCoord, double yCoord, int width, int height, std::vector<float>& values, bool& hasAlphas) \
    { \
-      return impClass::readFilterBuffer(xCoord, yCoord, width, height, values); \
+      return impClass::readFilterBuffer(xCoord, yCoord, width, height, values, hasAlphas); \
    } \
    void setDisplayedBand(RasterChannelType eColor, DimensionDescriptor pBand, RasterElement* pRasterElement = NULL) \
    { \
