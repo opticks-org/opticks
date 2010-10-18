@@ -68,7 +68,8 @@
 
 
    //platform defines
-   #define O_TEXT O_BINARY
+   #define O_TEXT 0x0000 
+   #define O_BINARY 0x0000
    #define SLASH std::string("/")
    #define EXE_EXTENSION std::string("")
    #define FILENO fileno
@@ -113,6 +114,8 @@
    #define LONG_SIZE __SIZEOF_LONG__
 
    //platform defines
+   #define O_TEXT 0x0000 
+   #define O_BINARY 0x0000
    #define SLASH std::string("/")
    #define EXE_EXTENSION std::string("")
    #define FILENO fileno

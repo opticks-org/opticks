@@ -28,7 +28,6 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #else
-#define O_BINARY 0x0000 // make UNIX stop complaining when given O_BINARY!
 #include <fcntl.h>
 #include <sys/fcntl.h>
 #include <sys/statvfs.h>
@@ -242,9 +241,14 @@ public:
     * @param filename
     *        The file to be opened.
     * @param openType
-    *        Please see the documentation on _open or open64 for details.
+    *        This method does not support opening with type flag \b O_TEXT on Windows due to
+    *        problems implementing a cross-platform readLine() method. Therefore \em openType
+    *        should always include \b O_BINARY on Windows.
+    *        Please see the documentation on _open or open64 for details on other
+    *        open type flags.
     * @param permissionFlag
-    *        Please see the documentation on _open or open64 for details.
+    *        Please see the documentation on _open or open64 for details on
+    *        permission flags.
     *
     * @return true if the file could be opened with the requested settings,
     *         false otherwise.
@@ -258,6 +262,12 @@ public:
       }
 
 #if defined(WIN_API)
+      // check for attempt to open in text mode under windows
+      if (openType & O_TEXT)
+      {
+         return false;
+      }
+
       mHandle = _open(filename.c_str(), openType, permissionFlag );
 #else
       mHandle = open64(filename.c_str(), openType, permissionFlag | O_LARGEFILE );
