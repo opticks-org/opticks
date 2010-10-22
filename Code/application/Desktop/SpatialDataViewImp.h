@@ -188,6 +188,8 @@ protected slots:
    void hideLayers();
    void selectLayersOfType();
    void deleteLayer();
+   void exportLayer();
+   void displayLayerProperties();
    void setOrigin(QAction* pAction);
    void updateOriginAction(const DataOrigin& origin);
    void setCrossHair(bool bEnabled);

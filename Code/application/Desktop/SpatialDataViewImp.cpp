@@ -3256,6 +3256,7 @@ void SpatialDataViewImp::updateContextMenu(Subject& subject, const string& signa
                QMenu* pLayerMenu = new QMenu(QString::fromStdString(pLayer->getName()),
                   const_cast<SpatialDataViewImp*>(this));
 
+               // Layer actions
                list<ContextMenuAction>::iterator actionIter;
                for (actionIter = layerActions.begin(); actionIter != layerActions.end(); ++actionIter)
                {
@@ -3266,6 +3267,66 @@ void SpatialDataViewImp::updateContextMenu(Subject& subject, const string& signa
                   }
                }
 
+               // Separator
+               pLayerMenu->addSeparator();
+
+               // Activate
+               if (pLayer != getActiveLayer())
+               {
+                  LayerImp* pLayerImp = dynamic_cast<LayerImp*>(pLayer);
+                  if ((pLayerImp != NULL) && (pLayerImp->acceptsMouseEvents() == true))
+                  {
+                     QAction* pActivateAction = new QAction("Activate", pParent);
+                     pActivateAction->setAutoRepeat(false);
+                     pActivateAction->setData(QVariant::fromValue(pLayer));
+                     VERIFYNR(connect(pActivateAction, SIGNAL(triggered()), this, SLOT(setActiveLayer())));
+                     pLayerMenu->addAction(pActivateAction);
+                     pLayerMenu->addSeparator();
+                  }
+               }
+
+               // Copy
+               QAction* pCopyAction = new QAction("Copy", pParent);
+               pCopyAction->setAutoRepeat(false);
+               pCopyAction->setData(QVariant::fromValue(pLayer));
+               VERIFYNR(connect(pCopyAction, SIGNAL(triggered()), this, SLOT(copyLayer())));
+               pLayerMenu->addAction(pCopyAction);
+
+               // Convert
+               if (getDerivedLayerTypes(pLayer).empty() == false)
+               {
+                  QAction* pConvertAction = new QAction("Convert...", pParent);
+                  pConvertAction->setAutoRepeat(false);
+                  pConvertAction->setData(QVariant::fromValue(pLayer));
+                  VERIFYNR(connect(pConvertAction, SIGNAL(triggered()), this, SLOT(convertLayer())));
+                  pLayerMenu->addAction(pConvertAction);
+               }
+
+               // Delete
+               QAction* pDeleteAction = new QAction(QIcon(":/icons/Delete"), "Delete", pParent);
+               pDeleteAction->setAutoRepeat(false);
+               pDeleteAction->setData(QVariant::fromValue(pLayer));
+               VERIFYNR(connect(pDeleteAction, SIGNAL(triggered()), this, SLOT(deleteLayer())));
+               pLayerMenu->addAction(pDeleteAction);
+
+               // Separator
+               pLayerMenu->addSeparator();
+
+               // Export
+               QAction* pExportAction = new QAction(QIcon(":/icons/Save"), "Export", pParent);
+               pExportAction->setAutoRepeat(false);
+               pExportAction->setData(QVariant::fromValue(pLayer));
+               VERIFYNR(connect(pExportAction, SIGNAL(triggered()), this, SLOT(exportLayer())));
+               pLayerMenu->addAction(pExportAction);
+
+               // Properties
+               QAction* pPropertiesAction = new QAction(QIcon(QIcon(":/icons/Properties")), "Properties...", pParent);
+               pPropertiesAction->setAutoRepeat(false);
+               pPropertiesAction->setData(QVariant::fromValue(pLayer));
+               VERIFYNR(connect(pPropertiesAction, SIGNAL(triggered()), this, SLOT(displayLayerProperties())));
+               pLayerMenu->addAction(pPropertiesAction);
+
+               // Add the layer submenu to the context menu
                pMenu->addActionBefore(pLayerMenu->menuAction(), APP_SPATIALDATAVIEW_LAYER_MENU_ACTION(pLayer),
                   APP_SPATIALDATAVIEW_LAYER_SEPARATOR_ACTION);
             }
@@ -3282,7 +3343,7 @@ void SpatialDataViewImp::updateContextMenu(Subject& subject, const string& signa
          Layer* pLayer = dynamic_cast<Layer*>(items.front());
          if ((pLayer != NULL) && (mpLayerList->containsLayer(pLayer) == true))
          {
-            string beforeAction(APP_LAYER_DISPLAYED_ACTION);
+            string beforeAction = APP_SESSIONEXPLORER_RENAME_ACTION;
 
             // Separator
             QAction* pSeparatorAction = new QAction(pParent);
@@ -3294,7 +3355,7 @@ void SpatialDataViewImp::updateContextMenu(Subject& subject, const string& signa
             QAction* pDeleteAction = new QAction(QIcon(":/icons/Delete"), "Delete", pParent);
             pDeleteAction->setAutoRepeat(false);
             pDeleteAction->setData(QVariant::fromValue(pLayer));
-            connect(pDeleteAction, SIGNAL(triggered()), this, SLOT(deleteLayer()));
+            VERIFYNR(connect(pDeleteAction, SIGNAL(triggered()), this, SLOT(deleteLayer())));
             pMenu->addActionBefore(pDeleteAction, APP_SPATIALDATAVIEW_LAYER_DELETE_ACTION, beforeAction);
             beforeAction = APP_SPATIALDATAVIEW_LAYER_DELETE_ACTION;
 
@@ -3304,7 +3365,7 @@ void SpatialDataViewImp::updateContextMenu(Subject& subject, const string& signa
                QAction* pConvertAction = new QAction("Convert...", pParent);
                pConvertAction->setAutoRepeat(false);
                pConvertAction->setData(QVariant::fromValue(pLayer));
-               connect(pConvertAction, SIGNAL(triggered()), this, SLOT(convertLayer()));
+               VERIFYNR(connect(pConvertAction, SIGNAL(triggered()), this, SLOT(convertLayer())));
                pMenu->addActionBefore(pConvertAction, APP_SPATIALDATAVIEW_LAYER_CONVERT_ACTION, beforeAction);
                beforeAction = APP_SPATIALDATAVIEW_LAYER_CONVERT_ACTION;
             }
@@ -3313,9 +3374,14 @@ void SpatialDataViewImp::updateContextMenu(Subject& subject, const string& signa
             QAction* pCopyAction = new QAction("Copy", pParent);
             pCopyAction->setAutoRepeat(false);
             pCopyAction->setData(QVariant::fromValue(pLayer));
-            connect(pCopyAction, SIGNAL(triggered()), this, SLOT(copyLayer()));
+            VERIFYNR(connect(pCopyAction, SIGNAL(triggered()), this, SLOT(copyLayer())));
             pMenu->addActionBefore(pCopyAction, APP_SPATIALDATAVIEW_LAYER_COPY_ACTION, beforeAction);
             beforeAction = APP_SPATIALDATAVIEW_LAYER_COPY_ACTION;
+
+            // Select layers of type
+            pMenu->addActionBefore(mpSelectLayersOfTypeAction, APP_SPATIALDATAVIEW_SELECT_LAYERS_OF_TYPE_ACTION,
+               beforeAction);
+            beforeAction = APP_SPATIALDATAVIEW_SELECT_LAYERS_OF_TYPE_ACTION;
 
             // Activate
             if (pLayer != getActiveLayer())
@@ -3323,19 +3389,27 @@ void SpatialDataViewImp::updateContextMenu(Subject& subject, const string& signa
                LayerImp* pLayerImp = dynamic_cast<LayerImp*>(pLayer);
                if ((pLayerImp != NULL) && (pLayerImp->acceptsMouseEvents() == true))
                {
+                  // Separator
+                  QAction* pActivateSeparatorAction = new QAction(pParent);
+                  pActivateSeparatorAction->setSeparator(true);
+                  pMenu->addActionBefore(pActivateSeparatorAction, APP_SPATIALDATAVIEW_LAYER_ACTIVATE_SEPARATOR_ACTION,
+                     beforeAction);
+                  beforeAction = APP_SPATIALDATAVIEW_LAYER_ACTIVATE_SEPARATOR_ACTION;
+
+                  // Activate
                   QAction* pActivateAction = new QAction("Activate", pParent);
                   pActivateAction->setAutoRepeat(false);
                   pActivateAction->setData(QVariant::fromValue(pLayer));
-                  connect(pActivateAction, SIGNAL(triggered()), this, SLOT(setActiveLayer()));
+                  VERIFYNR(connect(pActivateAction, SIGNAL(triggered()), this, SLOT(setActiveLayer())));
                   pMenu->addActionBefore(pActivateAction, APP_SPATIALDATAVIEW_LAYER_ACTIVATE_ACTION, beforeAction);
                   beforeAction = APP_SPATIALDATAVIEW_LAYER_ACTIVATE_ACTION;
                }
             }
 
-            // Select layers of type
-            pMenu->addActionAfter(mpSelectLayersOfTypeAction, APP_SPATIALDATAVIEW_SELECT_LAYERS_OF_TYPE_ACTION,
-               beforeAction);
-            beforeAction = APP_SPATIALDATAVIEW_SELECT_LAYERS_OF_TYPE_ACTION;
+            // Separator
+            QAction* pLayerSeparatorAction = new QAction(pParent);
+            pLayerSeparatorAction->setSeparator(true);
+            pMenu->addActionBefore(pLayerSeparatorAction, APP_SPATIALDATAVIEW_LAYER_SEPARATOR_ACTION, beforeAction);
          }
       }
       else if (numItems > 1)
@@ -3626,6 +3700,54 @@ void SpatialDataViewImp::deleteLayer()
 
    // Delete the layer
    deleteLayer(pLayer);
+}
+
+void SpatialDataViewImp::exportLayer()
+{
+   Layer* pLayer = NULL;
+
+   QAction* pAction = dynamic_cast<QAction*>(sender());
+   if (pAction != NULL)
+   {
+      pLayer = pAction->data().value<Layer*>();
+   }
+
+   if (pLayer == NULL)
+   {
+      return;
+   }
+
+   Service<DesktopServices> pDesktop;
+
+   ApplicationWindow* pAppWindow = dynamic_cast<ApplicationWindow*>(pDesktop->getMainWidget());
+   if (pAppWindow != NULL)
+   {
+      pAppWindow->exportSessionItem(pLayer);
+   }
+}
+
+void SpatialDataViewImp::displayLayerProperties()
+{
+   Layer* pLayer = NULL;
+
+   QAction* pAction = dynamic_cast<QAction*>(sender());
+   if (pAction != NULL)
+   {
+      pLayer = pAction->data().value<Layer*>();
+   }
+
+   if (pLayer == NULL)
+   {
+      return;
+   }
+
+   Service<DesktopServices> pDesktop;
+
+   ApplicationWindow* pAppWindow = dynamic_cast<ApplicationWindow*>(pDesktop->getMainWidget());
+   if (pAppWindow != NULL)
+   {
+      pAppWindow->displayProperties(pLayer);
+   }
 }
 
 void SpatialDataViewImp::setOrigin(QAction* pAction)
