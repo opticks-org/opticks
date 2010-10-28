@@ -243,7 +243,8 @@ public:
     * @param openType
     *        This method does not support opening with type flag \b O_TEXT on Windows due to
     *        problems implementing a cross-platform readLine() method. Therefore \em openType
-    *        should always include \b O_BINARY on Windows.
+    *        should not include \b O_TEXT on Windows. The file will be opened in binary mode 
+    *        by default on Windows platforms.
     *        Please see the documentation on _open or open64 for details on other
     *        open type flags.
     * @param permissionFlag
@@ -267,6 +268,9 @@ public:
       {
          return false;
       }
+      
+      // be sure openType has O_BINARY set so open mode isn't dependent on value of global variable _fmode
+      openType |= O_BINARY;
 
       mHandle = _open(filename.c_str(), openType, permissionFlag );
 #else
