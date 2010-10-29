@@ -14,7 +14,6 @@
 #include "PlugInManagerServices.h"
 #include "PlugInResource.h"
 
-#include <QtCore/QMap>
 #include <QtCore/QStringList>
 #include <QtGui/QTextEdit>
 
@@ -22,6 +21,7 @@
 #include <boost/any.hpp>
 
 class PlugIn;
+class QAction;
 class Subject;
 
 class ScriptingWidget : public QTextEdit
@@ -39,9 +39,6 @@ public:
    void setErrorFont(const QFont& errorFont);
    QFont getErrorFont() const;
 
-   void setCommandColor(const QString& command, const QColor& commandColor);
-   QColor getCommandColor(const QString& command) const;
-   const QMap<QString, QColor>& getCommandColors() const;
    void setOutputColor(const QColor& outputColor);
    QColor getOutputColor() const;
    void setErrorColor(const QColor& errorColor);
@@ -61,18 +58,22 @@ public slots:
 protected:
    void showEvent(QShowEvent* pEvent);
    void keyPressEvent(QKeyEvent* e);
+   void contextMenuEvent(QContextMenuEvent* pEvent);
 
    unsigned int getNumParagraphs() const;
    QString getCommandText() const;
-   void getCommandPosition(int& iCommandStart, int& iCommandEnd) const;
+   int getCommandPosition() const;
 
 protected slots:
    void clipToMaxParagraphs();
    void appendPrompt();
    void executeCommand();
-   void addOutputText(const QString& strMessage);
+   void addOutputText(const QString& strMessage, bool error);
+   void clearOutput();
+   void globalOutputChanged(bool newValue);
 
 private:
+   bool mDropOccurring;
    bool mDisplayedOnce;
    QString mPrompt;
    QStringList mCommandStack;
@@ -82,17 +83,26 @@ private:
    QFont mOutputFont;
    QFont mErrorFont;
 
-   QMap<QString, QColor> mCommandColors;
    QColor mOutputColor;
    QColor mErrorColor;
+   QAction* mpClearAction;
+   QAction* mpGlobalOutputAction;
 
    unsigned int mMaxParagraphs;
 
    QString mInterpreterName;
-   ExecutableResource mInterpreter;
+   PlugInResource mInterpreter;
+   int mCommandStartPos;
+   bool mExecutingCommand;
+   bool mInteractive;
    AttachmentPtr<PlugInManagerServices> mpPims;
 
-   void plugInDestroyed(Subject &subject, const std::string &signal, const boost::any &data);
+   virtual bool canInsertFromMimeData(const QMimeData* pSource) const;
+   virtual void dropEvent(QDropEvent* pEvent);
+   virtual void insertFromMimeData(const QMimeData* pSource);
+   void receiveOutput(Subject& subject, const std::string& signal, const boost::any& data);
+   void interpreterStarted(Subject& subject, const std::string& signal, const boost::any& data);
+   void plugInDestroyed(Subject& subject, const std::string& signal, const boost::any& data);
 };
 
 #endif

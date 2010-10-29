@@ -11,6 +11,7 @@
 #include "AppVerify.h"
 #include "Filename.h"
 #include "Interpreter.h"
+#include "InterpreterManager.h"
 #include "PlugInArgList.h"
 #include "PlugInDescriptor.h"
 #include "PlugInManagerServices.h"
@@ -18,11 +19,15 @@
 #include "PlugInResource.h"
 #include "ProgressTracker.h"
 #include "RunInterpreterCommands.h"
+#include "Slot.h"
 #include "StringUtilities.h"
 
+#include <boost/any.hpp>
 #include <QtCore/QDateTime>
+#include <QtCore/QDir>
 #include <QtCore/QFile>
 #include <QtCore/QString>
+#include <QtCore/QStringList>
 #include <QtCore/QTextStream>
 
 #include <string>
@@ -30,7 +35,7 @@
 
 REGISTER_PLUGIN_BASIC(OpticksWizardItems, RunInterpreterCommands);
 
-RunInterpreterCommands::RunInterpreterCommands()
+RunInterpreterCommands::RunInterpreterCommands() : mpStream(NULL), mVerbose(false), mpProgress(NULL)
 {
    setName("Run Interpreter Commands");
    setVersion(APP_VERSION_NUMBER);
@@ -81,8 +86,8 @@ bool RunInterpreterCommands::execute(PlugInArgList* pInArgList, PlugInArgList* p
    ProgressTracker progress(pInArgList->getPlugInArgValue<Progress>(ProgressArg()),
       "Run Interpreter Commands.", "app", "FBA8DDA3-9EA4-40da-BC78-CCD55E867297");
 
-   bool verbose = false;
-   pInArgList->getPlugInArgValue<bool>("Verbose", verbose);
+   mVerbose = false;
+   pInArgList->getPlugInArgValue<bool>("Verbose", mVerbose);
 
    // Get the command(s) to send to the interpreter.
    // Commands should be validated before Interpreter Name to avoid potentially creating a plug-in without need.
@@ -117,13 +122,13 @@ bool RunInterpreterCommands::execute(PlugInArgList* pInArgList, PlugInArgList* p
       commandList.push_back(command);
    }
 
+   std::string commandFilePath;
    if (hasCommandFile || hasCommandFileLocation)
    {
       // Read the file, putting each line (including empty lines) into its own command.
       // This is done to close the source file as quickly as possible so that the file can be edited while commands
       // are being processed even though it requires more memory and errors early in the file will not appear as
       // quickly because the whole file is read before any commands are sent to the interpreter.
-      std::string commandFilePath;
       if (hasCommandFile)
       {
          commandFilePath = pCommandFile->getFullPathAndName();
@@ -162,51 +167,87 @@ bool RunInterpreterCommands::execute(PlugInArgList* pInArgList, PlugInArgList* p
       return false;
    }
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Should this create instances (OPTICKS-815)? (dadkins)")
+   // Execute each command.
+   std::string totalCommand;
+   for (std::vector<std::string>::iterator iter = commandList.begin(); iter != commandList.end(); ++iter)
+   {
+      totalCommand += *iter;
+      if (iter != commandList.end())
+      {
+         totalCommand += "\n";
+      }
+   }
+
+   // Check for log file presence.
+   mpStream = NULL;
+   QFile logFile;
+   QTextStream logStream;
+   Filename* const pLogFile = pInArgList->getPlugInArgValue<Filename>("Log File");
+   if (pLogFile != NULL)
+   {
+      // Open the log file.
+      logFile.setFileName(QString::fromStdString(pLogFile->getFullPathAndName()));
+      if (logFile.open(QIODevice::WriteOnly | QIODevice::Text) == true)
+      {
+         // Use the insertion operator for convenience.
+         logStream.setDevice(&logFile);
+
+         // Write the current date and time along with the total number of commands to process.
+         logStream << QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate) << " (local time).<br>\n<br>\n";
+         mpStream = &logStream;
+      }
+      else
+      {
+         // If the file cannot be opened for writing, log a warning and continue.
+         progress.report("Unable to write to the log file at: \"" +
+            pLogFile->getFullPathAndName() + "\". Logging is disabled.", 0, WARNING, true);
+      }
+   }
+
    // Get the name of the interpreter and either use an existing instance or create one.
    // If ScriptingWindow has ever been opened, then it will have loaded all interpreter plug-ins.
    // In this case, latch onto an existing instance of the plug-in. Otherwise, create one for this wizard item to use.
    // Disallow an empty interpreter name as some non-interpreter plug-ins have an empty name.
    std::string interpreterName;
    std::vector<PlugIn*> plugIns;
-   if (pInArgList->getPlugInArgValue("Interpreter Name", interpreterName) == true && interpreterName.empty() == false)
+   InterpreterManager* pInterMgr = NULL;
+   if (!pInArgList->getPlugInArgValue("Interpreter Name", interpreterName) && !commandFilePath.empty())
+   {
+      //no interpreter name provided, deduce from commandFilePath
+      std::vector<PlugInDescriptor*> descriptors = Service<PlugInManagerServices>()->getPlugInDescriptors(
+         PlugInManagerServices::InterpreterManagerType());
+      std::string foundInterpreter;
+      for (std::vector<PlugInDescriptor*>::iterator iter = descriptors.begin();
+         iter != descriptors.end();
+         ++iter)
+      {
+         if (checkExtension(*iter, commandFilePath))
+         {
+            interpreterName = (*iter)->getName();
+            break;
+         }
+      }
+   }
+   if (interpreterName.empty() == false)
    {
       plugIns = Service<PlugInManagerServices>()->getPlugInInstances(interpreterName);
-   }
-
-   ExecutableResource pInterpreterResource(plugIns.empty() == true ? NULL : plugIns.front(),
-      std::string(), progress.getCurrentProgress(), isBatch());
-   if (pInterpreterResource->getPlugIn() != NULL)
-   {
-      // If the plug-in was found, then it is owned by another object (most likely ScriptingWidget).
-      // If this instance is not released here the plug-in will be unloaded twice, resulting in a crash.
-      pInterpreterResource->releasePlugIn();
-
-      // Interpreters that support multiple instances may not work correctly in all cases.
-      if (pInterpreterResource->getPlugIn()->areMultipleInstancesAllowed() == true)
+      if (!plugIns.empty())
       {
-         progress.report("The plug-in specified supports multiple instances. "
-            "An existing instance was chosen.", 0, WARNING, true);
+         pInterMgr = dynamic_cast<InterpreterManager*>(plugIns.front());
       }
-   }
-   else
-   {
-      // If the plug-in was not found, then create it for this wizard item, destroying it upon completion.
-      // Disallow an empty interpreter name as some non-interpreter plug-ins have an empty name.
-      if (interpreterName.empty() == false)
+      else
       {
-         pInterpreterResource->setPlugIn(interpreterName);
+         PlugInResource res(interpreterName);
+         pInterMgr = dynamic_cast<InterpreterManager*>(res.get());
+         res.release();
       }
    }
 
-   // Check that the plug-in either exists or was created successfully.
-   // If not, report an error and exit immediately.
-   Interpreter* const pInterpreter = dynamic_cast<Interpreter*>(pInterpreterResource->getPlugIn());
-   if (pInterpreter == NULL)
+   if (pInterMgr == NULL)
    {
       std::string errorMessage;
       std::vector<PlugInDescriptor*> plugInDescriptors =
-         Service<PlugInManagerServices>()->getPlugInDescriptors(PlugInManagerServices::InterpreterType());
+         Service<PlugInManagerServices>()->getPlugInDescriptors(PlugInManagerServices::InterpreterManagerType());
       if (plugInDescriptors.empty() == true)
       {
          errorMessage = "No interpreters exist. Please check your installation and try again.";
@@ -239,92 +280,132 @@ bool RunInterpreterCommands::execute(PlugInArgList* pInArgList, PlugInArgList* p
       return false;
    }
 
-   // Check for log file presence.
-   QFile logFile;
-   QTextStream logStream;
-   Filename* const pLogFile = pInArgList->getPlugInArgValue<Filename>("Log File");
-   if (pLogFile != NULL)
+   if (!pInterMgr->isStarted())
    {
-      // Open the log file.
-      logFile.setFileName(QString::fromStdString(pLogFile->getFullPathAndName()));
-      if (logFile.open(QIODevice::WriteOnly | QIODevice::Text) == true)
-      {
-         // Use the insertion operator for convenience.
-         logStream.setDevice(&logFile);
-
-         // Write the current date and time along with the total number of commands to process.
-         logStream << QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate) << " (local time).<br>\n" <<
-            "Number of commands: " << commandList.size() << "<br>\n<br>\n";
-      }
-      else
-      {
-         // If the file cannot be opened for writing, log a warning and continue.
-         progress.report("Unable to write to the log file at: \"" +
-            pLogFile->getFullPathAndName() + "\". Logging is disabled.", 0, WARNING, true);
-      }
-   }
-
-   // Execute each command.
-   double percent = 0;
-   const double step = 99.0 / commandList.size();
-   for (std::vector<std::string>::iterator iter = commandList.begin(); iter != commandList.end(); ++iter)
-   {
-      if (isAborted() == true)
-      {
-         progress.report("Aborted", 0, ABORT, true);
-         return false;
-      }
-
-      progress.report("Running interpreter commands.", static_cast<int>(percent), NORMAL);
-      std::string prompt = pInterpreter->getPrompt();
-      pInterpreterResource->getInArgList().setPlugInArgValue<std::string>(Interpreter::CommandArg(), &(*iter));
-      const bool success = pInterpreterResource->execute();
-      percent += step;
-
-      const PlugInArgList& outArgList = pInterpreterResource->getOutArgList();
-      const std::string* const pOutputText = outArgList.getPlugInArgValue<std::string>(Interpreter::OutputTextArg());
-      const std::string* const pReturnType = outArgList.getPlugInArgValue<std::string>(Interpreter::ReturnTypeArg());
+      pInterMgr->start();
+      std::string startupMsg = pInterMgr->getStartupMessage();
       if (logStream.device() != NULL)
       {
-         // Write the results of this command to the log file.
-         logStream << QString::fromStdString(prompt) << QString::fromStdString(*iter) << "<br>\n";
-         if (pOutputText != NULL && pOutputText->empty() == false)
-         {
-            const QString color((pReturnType != NULL && *pReturnType == "Error") ? "red" : "green");
-            logStream << "<font color=\"" << color << "\">" << QString::fromStdString(*pOutputText) << "</font><br>\n";
-         }
-
-         // Flush after each command.
-         logStream.flush();
+         logStream << QString::fromStdString(startupMsg) << "<br>\n";
       }
+      progress.report(startupMsg, 0, WARNING, true);
+   }
+   Interpreter* pInterpreter = pInterMgr->getInterpreter();
 
-      if (success == false || (pReturnType != NULL && *pReturnType == "Error"))
+   mpProgress = progress.getCurrentProgress();
+   if (pInterpreter == NULL)
+   {
+      std::string errorMessage = "Interpreter could not be started.";
+      if (logStream.device() != NULL)
       {
-         std::string message = "Error running command \"" + *iter + "\". ";
-         if (pOutputText != NULL)
-         {
-            message += *pOutputText;
-         }
-
-         progress.report(message, 0, ERRORS, true);
-         return false;
+         logStream << QString::fromStdString(errorMessage) << "<br>\n";
       }
 
-      if (verbose && pReturnType != NULL && *pReturnType != "Error" && pOutputText != NULL && !pOutputText->empty())
-      {
-         std::string ignoreText;
-         int currentProgress;
-         ReportingLevel ignoreLevel;
-         Progress* pProgress = progress.getCurrentProgress();
-         if (pProgress != NULL)
-         {
-            pProgress->getProgress(ignoreText, currentProgress, ignoreLevel);
-            pProgress->updateProgress(*pOutputText, currentProgress, WARNING);
-         }
-      }
+      progress.report(errorMessage, 0, ERRORS, true);
+      return false;
+   }
+   if (logStream.device() != NULL)
+   {
+      std::string prompt = pInterpreter->getPrompt();
+      logStream << QString::fromStdString(prompt) << QString::fromStdString(totalCommand) << "<br>\n";
+   }
+
+   bool retValue = pInterpreter->executeScopedCommand(totalCommand,
+      Slot(this, &RunInterpreterCommands::receiveStandardOutput),
+      Slot(this, &RunInterpreterCommands::receiveErrorOutput),
+      mpProgress);
+
+   mpStream = NULL;
+   mpProgress = NULL;
+
+   if (retValue == false)
+   {
+      std::string message = "Error running command";
+
+      progress.report(message, 0, ERRORS, true);
+      progress.upALevel();
+      return false;
    }
 
    progress.report("Running interpreter commands.", 100, NORMAL);
    progress.upALevel();
    return true;
+}
+
+void RunInterpreterCommands::receiveStandardOutput(Subject& subject, const std::string& signal, const boost::any& data)
+{
+   receiveOutput(data, false);
+}
+
+void RunInterpreterCommands::receiveErrorOutput(Subject& subject, const std::string& signal, const boost::any& data)
+{
+   receiveOutput(data, true);
+}
+
+void RunInterpreterCommands::receiveOutput(const boost::any& data, bool isErrorText)
+{
+   std::string text = boost::any_cast<std::string>(data);
+
+   if (text.empty())
+   {
+      return;
+   }
+   if (mpStream != NULL)
+   {
+      const QString color(isErrorText ? "red" : "green");
+      *mpStream << "<font color=\"" << color << "\">" << QString::fromStdString(text) << "</font><br>\n";
+
+      // Flush after each command.
+      mpStream->flush();
+   }
+
+   if (mpProgress != NULL && (isErrorText || mVerbose))
+   {
+      std::string ignoreText;
+      int currentProgress;
+      ReportingLevel ignoreLevel;
+      mpProgress->getProgress(ignoreText, currentProgress, ignoreLevel);
+      mpProgress->updateProgress(text, currentProgress, WARNING);
+   }
+}
+
+bool RunInterpreterCommands::checkExtension(PlugInDescriptor* pDescriptor, const std::string& filename)
+{
+   bool bMatch = false;
+   if (pDescriptor == NULL)
+   {
+      return false;
+   }
+   QString filePath = QString::fromStdString(filename);
+   QString strInterpreterExtensions = QString::fromStdString(pDescriptor->getFileExtensions());
+   if (!strInterpreterExtensions.isEmpty())
+   {
+      QStringList filterListCandidates = strInterpreterExtensions.split(";;", QString::SkipEmptyParts);
+      QStringList filterList;
+      for (int i = 0; i < filterListCandidates.count(); i++)
+      {
+         QString strExtensions = filterListCandidates[i];
+         if (strExtensions.isEmpty() == false)
+         {
+            int iOpenPos = strExtensions.indexOf("(");
+            int iClosePos = strExtensions.lastIndexOf(")");
+            strExtensions = strExtensions.mid(iOpenPos + 1, iClosePos - iOpenPos - 1);
+
+            QStringList globPatterns = strExtensions.split(QString(" "), QString::SkipEmptyParts);
+            QString catchAll = QString::fromStdString("*");
+            QString catchAll2 = QString::fromStdString("*.*");
+            for (int globCount = 0; globCount < globPatterns.count(); ++globCount)
+            {
+               QString pattern = globPatterns[globCount];
+               if ((pattern != catchAll) && (pattern != catchAll2))
+               {
+                  filterList << pattern;
+               }
+            }
+         }
+      }
+
+      bMatch = QDir::match(filterList, filePath);
+   }
+   return bMatch;
 }

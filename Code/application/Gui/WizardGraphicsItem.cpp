@@ -414,7 +414,7 @@ QColor WizardGraphicsItem::getItemBackgroundColor(const QString& itemType)
    {
       itemColor.setRgb(255, 200, 200);
    }
-   else if (itemTypeString == PlugInManagerServices::InterpreterType())
+   else if (itemTypeString == PlugInManagerServices::InterpreterManagerType())
    {
       itemColor.setRgb(255, 225, 175);
    }

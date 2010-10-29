@@ -257,7 +257,7 @@ void ScriptingWindow::updateInterpreters()
 {
    // Get the list of interpreter plug-ins
    Service<PlugInManagerServices> pManager;
-   vector<PlugInDescriptor*> plugIns = pManager->getPlugInDescriptors(PlugInManagerServices::InterpreterType());
+   vector<PlugInDescriptor*> plugIns = pManager->getPlugInDescriptors(PlugInManagerServices::InterpreterManagerType());
 
    // Remove existing tabs for removed plug-ins
    for (int i = 0; i < mpTabWidget->count(); ++i)

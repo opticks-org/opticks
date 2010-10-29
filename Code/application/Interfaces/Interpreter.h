@@ -10,20 +10,46 @@
 #ifndef INTERPRETER_H
 #define INTERPRETER_H
 
+#include "Subject.h"
+
 #include <string>
-#include <vector>
+
+class Progress;
+class Slot;
 
 /**
- *  Interface specific to interpreter plug-ins.
+ *  Command interface specific to interpreter plug-ins.
  *
- *  Defines the interpreter specific interface to all interpreter plug-ins.
- *  This interface contains all interpreter specific operations.
+ *  Interpreter implementations implement this interface
+ *  and this interface is used to execute commands
+ *  for a given interpreter implementation.
  *
- *  @deprecated A new interpreter interface is being designed to replace the use of Executable.
+ *  An instance of this class should be retrieved
+ *  by calling InterpreterManager::getInterpreter()
+ *  on a InterpreterManager plug-in instance or
+ *  using InterpreterUtilities::getInterpreter().
  */
-class Interpreter
+class Interpreter : public Subject
 {
 public:
+   /**
+    *  Emitted with boost::any<std::string> with output text generated
+    *  from executing commands provided to executeCommand().  May
+    *  also be emitted with output text generated from executing
+    *  commands provided to executeScopedCommand() if
+    *  isGlobalOutputShown() returns \c true.
+    */
+   SIGNAL_METHOD(Interpreter, OutputText);
+
+   /**
+    *  Emitted with boost::any<std::string> with error text generated
+    *  from executing commands provided to executeCommand().  May
+    *  also be emitted with error text generated from executing
+    *  commands provided to executeScopedCommand() if
+    *  isGlobalOutputShown() returns \c true.
+    */
+   SIGNAL_METHOD(Interpreter, ErrorText);
+
    /**
     *  Retrieves the current prompt.
     *
@@ -32,104 +58,111 @@ public:
    virtual std::string getPrompt() const = 0;
 
    /**
-    * The name to use for the command argument.
+    *  Execute the given command.
+    *  Regardless of the return value, future calls can be made to this
+    *  function. This function blocks and will not return until all provided
+    *  statements have been executed to completion.
+    * 
+    *  Variables created while executing the command persist after command
+    *  execution in a global scope. This global scope should persist for
+    *  an Interpreter instance so that later commands can access variables
+    *  created during execution of earlier commands.  Please read
+    *  executeScopedCommand() which supports different scoping rules.
     *
-    * This argument will be populated with the command to run.
-    * Arguments with this name should be of the type string.
+    *  @notify Output and error text from executing this command will cause
+    *          SIGNAL_NAME(Interpreter, OutputText) and SIGNAL_NAME(Interpreter, ErrorText)
+    *          to be emitted.  The output and error text is still valid regardless
+    *          of the return value of this function.
     *
-    * @deprecated A new interpreter interface is being designed to replace the use of Executable.
+    *  @param command
+    *         The command to execute, this command can be a single statement
+    *         or multi-statements. The syntax for single statements and
+    *         multi-statements is defined by the given interpreter
+    *         implementation.
+    *
+    *  @return \c False if there was a syntatic problem with the given command,
+    *          the interpreter is not running, or an exception.
+    *          was thrown from the interpreter. \c True will be returned otherwise.
     */
-   static std::string CommandArg() { return "Command"; }
+   virtual bool executeCommand(const std::string& command) = 0;
 
    /**
-    * The name to use for the output text argument in the output argument list.
+    *  Execute the given command.
+    *  Regardless of the return value, future calls can be made to this
+    *  function. This function blocks and will not return until all provided
+    *  statements have been executed to completion.
+    * 
+    *  Output and error text from executing this command will be be sent
+    *  to the provided output and error Slot instances. The output and
+    *  error text is still valid regardless of the return value of this function.
     *
-    * This argument should be populated with the output text from running the
-    * command specified in CommandArg(). Arguments with this name should be 
-    * of the type string.
+    *  Variables created while executing the provided command can be
+    *  created in a nested scope that is closed at command completion
+    *  causing local variables to be freed.
+    *  A given interpreter implementation can support
+    *  this nested scope behavior or can share the global and persistent
+    *  scope used by executeCommand().
     *
-    * @deprecated A new interpreter interface is being designed to replace the use of Executable.
+    *  @notify Output and error text from executing this command will cause
+    *          SIGNAL_NAME(Interpreter, OutputText) and SIGNAL_NAME(Interpreter, ErrorText)
+    *          to be emitted if isGlobalOutputShown() returns \c true.
+    *
+    *  @param command
+    *         The command to execute, this command can be a single statement
+    *         or multi-statements. The syntax for single statements and
+    *         multi-statements is defined by the given interpreter
+    *         implementation.
+    *
+    *  @param output
+    *         This Slot will be called as output text is generated from
+    *         executing this command. The boost::any provided to the
+    *         slot will contain a std::string with the output text.
+    *
+    *  @param error
+    *         This Slot will be called as error text is generated from
+    *         executing this command. The boost::any provided to the
+    *         slot will contain a std::string with the error text.
+    *
+    *  @param pProgress
+    *         If a non-NULL progress is provided, the execution of the provided
+    *         command may report progress to this instance. A given
+    *         interpreter implementation is permitted to ignore this parameter.
+    *         An interpreter will only report progress to this progress instance
+    *         while executing the provided command.
+    *
+    *  @return \c False if there was a syntatic problem with the given command,
+    *          the interpreter is not running, or an exception.
+    *          was thrown from the interpreter. \c True will be returned otherwise.
     */
-   static std::string OutputTextArg() { return "Output Text"; }
+   virtual bool executeScopedCommand(const std::string& command, const Slot& output,
+      const Slot& error, Progress* pProgress) = 0;
 
    /**
-    * The name to use for the return type argument in the output argument list.
+    *  Returns the last value provided to showGlobalOutput(). The default
+    *  value for a given interpreter implementation may be \c true or \c false.
     *
-    * This argument should be populated with the type of return from running the
-    * command specified in CommandArg(). Arguments with this name should be 
-    * of the type string.
-    *
-    * @deprecated A new interpreter interface is being designed to replace the use of Executable.
+    *  @return The last value provided to showGlobalOutput().
     */
-   static std::string ReturnTypeArg() { return "Return Type"; }
+   virtual bool isGlobalOutputShown() const = 0;
 
    /**
-    *  Retrieves the list of keywords for the interpreter.
+    *  Controls whether output from executeScopedCommand() is emitted
+    *  from SIGNAL_NAME(Interpreter, OutputText) and SIGNAL_NAME(Interpreter, ErrorText).
     *
-    *  @param   list
-    *           A list that is populated with the keywords for the interpreter.
-    *
-    *  @deprecated A new interpreter interface is being designed to replace the use of Executable.
+    *  @param newValue
+    *         A value of \c true will cause any ouput or error text
+    *         generated from calling executeScopedCommand() to also be
+    *         emitted from SIGNAL_NAME(Interpreter, OutputText) and
+    *         SIGNAL_NAME(Interpreter, ErrorText).  A value of \c false
+    *         causes output or error text generated from calling
+    *         executeScopedCommand() to only be sent to the Slot instances
+    *         passed to executeScopedCommand().
     */
-   virtual void getKeywordList(std::vector<std::string>& list) const = 0;
-
-   /**
-    *  Retrieves a description for a given keyword.
-    *
-    *  @param   keyword
-    *           The keyword to lookup.
-    *  @param   description
-    *           The description of the keyword.
-    *
-    *  @return  Returns \b true if the description was successfully retrieved,
-    *           otherwise returns \b false.
-    *
-    *  @deprecated A new interpreter interface is being designed to replace the use of Executable.
-    */
-   virtual bool getKeywordDescription(const std::string& keyword, std::string& description) const = 0;
-
-   /**
-    *  Retrieves a list of user-defined types.
-    *
-    *  @param   list
-    *           A list that is populated with the user-defined types.
-    *
-    *  @deprecated A new interpreter interface is being designed to replace the use of Executable.
-    */
-   virtual void getUserDefinedTypes(std::vector<std::string>& list) const = 0;
-
-   /**
-    *  Retrieves a description for a given type.
-    *
-    *  @param   type
-    *           The type to lookup.
-    *  @param   description
-    *           The description of the type.
-    *
-    *  @return  Returns \b true if the description was successfully retrieved,
-    *           otherwise returns \b false.
-    *
-    *  @deprecated A new interpreter interface is being designed to replace the use of Executable.
-    */
-   virtual bool getTypeDescription(const std::string& type, std::string& description) const = 0;
-
-   /**
-    *  Returns the default scripting file extensions recognized by the interpreter.
-    *
-    *  @return  The file extensions recognized by the interpreter as a string.
-    *           The string consists of a description followed by one or more
-    *           file extensions separated by a space.  Multiple file
-    *           types may be specified with a double semicolon.  Examples
-    *           include "ENVI Header Files (*.hdr)", "TIFF Files (*.tif *.tiff)",
-    *           and "Source Files (*.c*);;Header Files (*.h)".
-    *
-    *  @deprecated A new interpreter interface is being designed to replace the use of Executable.
-    */
-   virtual std::string getFileExtensions() const = 0;
+   virtual void showGlobalOutput(bool newValue) = 0;
 
 protected:
    /**
-    * This should be destroyed by calling PlugInManagerServices::destroyPlugIn.
+    * This Interpreter instance is owned by a InterpreterManager instance.
     */
    virtual ~Interpreter() {}
 };

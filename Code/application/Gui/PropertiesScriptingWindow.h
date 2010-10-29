@@ -18,7 +18,6 @@
 #include <string>
 
 class CustomColorButton;
-class CustomTreeWidget;
 class ScriptingWindow;
 class SessionItem;
 
@@ -55,7 +54,6 @@ private:
    QSpinBox* mpScrollSpin;
 
    // Input text
-   CustomTreeWidget* mpCommandColorTree;
    QFont mCommandFont;
 
    // Output text

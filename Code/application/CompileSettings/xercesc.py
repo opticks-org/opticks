@@ -23,11 +23,11 @@ def generate(env):
        if env["OS"] == "windows":
           include_platform = env["OS"] 
           if env["MODE"] == "release":
-             xerces_lib = "xerces-c_2"
-             xqilla_lib = "xqilla10"
+             xerces_lib = "xerces-c_3"
+             xqilla_lib = "xqilla22"
           else:
-             xerces_lib = "xerces-c_2D"
-             xqilla_lib = "xqilla10d"
+             xerces_lib = "xerces-c_3D"
+             xqilla_lib = "xqilla22d"
        env.AppendUnique(CXXFLAGS=["-I%s/include/%s" % (xerces_path,include_platform), "-I%s/include" % (xqilla_path)],
                         CPPDEFINES="APPLICATION_XERCES",
                         LIBPATH=['%s/lib/%s' % (xerces_path,env["OPTICKSPLATFORM"]),'%s/lib/%s' % (xqilla_path,env["OPTICKSPLATFORM"])],

@@ -296,7 +296,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\InterpreterShell.cpp"
+				RelativePath=".\InterpreterManagerShell.cpp"
 				>
 			</File>
 			<File
@@ -405,7 +405,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\InterpreterShell.h"
+				RelativePath=".\InterpreterManagerShell.h"
 				>
 			</File>
 			<File

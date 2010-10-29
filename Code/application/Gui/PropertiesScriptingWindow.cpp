@@ -8,17 +8,14 @@
  */
 
 #include <QtGui/QFontDialog>
-#include <QtGui/QHeaderView>
 #include <QtGui/QLabel>
 #include <QtGui/QLayout>
 #include <QtGui/QPushButton>
 
 #include "AppVersion.h"
 #include "CustomColorButton.h"
-#include "CustomTreeWidget.h"
 #include "LabeledSection.h"
 #include "PropertiesScriptingWindow.h"
-#include "ScriptingWidget.h"
 #include "ScriptingWindow.h"
 
 using namespace std;
@@ -53,21 +50,6 @@ PropertiesScriptingWindow::PropertiesScriptingWindow() :
    columnNames.append("Command");
    columnNames.append("Color");
 
-   mpCommandColorTree = new CustomTreeWidget(pInputWidget);
-   mpCommandColorTree->setHeaderLabels(columnNames);
-   mpCommandColorTree->setSelectionMode(QAbstractItemView::SingleSelection);
-   mpCommandColorTree->setRootIsDecorated(false);
-   mpCommandColorTree->setSortingEnabled(true);
-   mpCommandColorTree->setFullCellColor(false);
-   mpCommandColorTree->setMinimumHeight(100);
-
-   QHeaderView* pHeader = mpCommandColorTree->header();
-   if (pHeader != NULL)
-   {
-      pHeader->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-      pHeader->setSortIndicatorShown(true);
-   }
-
    QPushButton* pCommandFontButton = new QPushButton("Font...", pInputWidget);
 
    LabeledSection* pInputSection = new LabeledSection(pInputWidget, "Input Text", this);
@@ -75,7 +57,6 @@ PropertiesScriptingWindow::PropertiesScriptingWindow() :
    QVBoxLayout* pInputLayout = new QVBoxLayout(pInputWidget);
    pInputLayout->setMargin(0);
    pInputLayout->setSpacing(5);
-   pInputLayout->addWidget(mpCommandColorTree, 10);
    pInputLayout->addWidget(pCommandFontButton, 0, Qt::AlignLeft);
 
    // Output text
@@ -112,8 +93,9 @@ PropertiesScriptingWindow::PropertiesScriptingWindow() :
 
    // Initialization
    addSection(pGeneralSection);
-   addSection(pInputSection, 10);
+   addSection(pInputSection);
    addSection(pOutputSection);
+   addStretch(10);
    setSizeHint(450, 400);
 
    // Connections
@@ -138,28 +120,6 @@ bool PropertiesScriptingWindow::initialize(SessionItem* pSessionItem)
    mpScrollSpin->setValue(mpScriptingWindow->getScrollBuffer());
 
    // Input text
-   mpCommandColorTree->clear();
-
-   ScriptingWidget* pWidget = mpScriptingWindow->getCurrentInterpreter();
-   if (pWidget != NULL)
-   {
-      const QMap<QString, QColor>& commandColors = pWidget->getCommandColors();
-
-      QMap<QString, QColor>::const_iterator iter;
-      for (iter = commandColors.begin(); iter != commandColors.end(); ++iter)
-      {
-         QString strCommand = iter.key();
-         QColor commandColor = iter.value();
-
-         QTreeWidgetItem* pItem = new QTreeWidgetItem(mpCommandColorTree);
-         if (pItem != NULL)
-         {
-            pItem->setText(0, strCommand);
-            mpCommandColorTree->setCellColor(pItem, 1, commandColor);
-         }
-      }
-   }
-
    mCommandFont = mpScriptingWindow->getCommandFont();
 
    // Output text
@@ -182,24 +142,6 @@ bool PropertiesScriptingWindow::applyChanges()
    mpScriptingWindow->setScrollBuffer(mpScrollSpin->value());
 
    // Input text
-   ScriptingWidget* pWidget = mpScriptingWindow->getCurrentInterpreter();
-   if (pWidget != NULL)
-   {
-      QTreeWidgetItemIterator iter(mpCommandColorTree);
-      while (*iter != NULL)
-      {
-         QTreeWidgetItem* pItem = *iter;
-         if (pItem != NULL)
-         {
-            QString strCommand = pItem->text(0);
-            QColor commandColor = mpCommandColorTree->getCellColor(pItem, 1);
-            pWidget->setCommandColor(strCommand, commandColor);
-         }
-
-         ++iter;
-      }
-   }
-
    mpScriptingWindow->setCommandFont(mCommandFont);
 
    // Output text

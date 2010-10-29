@@ -112,13 +112,13 @@ public:
 
    /**
     * The type that should be returned from PlugIn::getType()
-    * for types of plug-in that implement the Interpreter interface.
+    * for types of plug-in that implement the InterpreterManager interface.
     *
     * @return Returns the type used for interpreter plug-ins.
     */
-   static std::string InterpreterType()
+   static std::string InterpreterManagerType()
    {
-      return "Interpreter";
+      return "InterpreterManager";
    }
 
    /**

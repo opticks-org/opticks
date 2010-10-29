@@ -7,46 +7,54 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QKeyEvent>
-#include <QtGui/QMessageBox>
-#include <QtGui/QTextCursor>
-
 #include "ScriptingWidget.h"
-#include "DesktopServices.h"
-#include "Executable.h"
 #include "Interpreter.h"
-#include "LayerList.h"
-#include "PlugInArg.h"
-#include "PlugInArgList.h"
-#include "RasterElement.h"
+#include "InterpreterManager.h"
 #include "SessionManager.h"
 #include "Slot.h"
-#include "SpatialDataView.h"
 #include "xmlwriter.h"
+
+#include <QtCore/QDir>
+#include <QtCore/QFile>
+#include <QtCore/QList>
+#include <QtCore/QTextStream>
+#include <QtCore/QUrl>
+#include <QtGui/QAction>
+#include <QtGui/QKeyEvent>
+#include <QtGui/QMessageBox>
+#include <QtGui/QMenu>
+#include <QtGui/QTextCursor>
 
 #include <vector>
 
 XERCES_CPP_NAMESPACE_USE
-using namespace std;
 
 ScriptingWidget::ScriptingWidget(const QString& strPlugInName, QWidget* parent) :
    QTextEdit(parent),
+   mDropOccurring(false),
    mDisplayedOnce(false),
    mPrompt(strPlugInName + "> "),
    mCommandIndex(0),
    mMaxParagraphs(512),
    mInterpreterName(strPlugInName),
-   mInterpreter(NULL, false),
+   mInterpreter(),
+   mCommandStartPos(0),
+   mExecutingCommand(false),
+   mInteractive(false),
    mpPims(Service<PlugInManagerServices>().get(), SIGNAL_NAME(PlugInManagerServices, PlugInDestroyed), 
       Slot(this, &ScriptingWidget::plugInDestroyed))
 {
-   // TODO: Add a syntax highlighter to set the command color
-
    // Initialization
    setFrameStyle(QFrame::NoFrame);
    setMinimumWidth(150);
    setUndoRedoEnabled(false);
    setFocus();
+
+   mpClearAction = new QAction("Clear", this);
+   VERIFYNR(connect(mpClearAction, SIGNAL(triggered(bool)), this, SLOT(clearOutput())));
+   mpGlobalOutputAction = new QAction("Global Output Shown", this);
+   mpGlobalOutputAction->setCheckable(true);
+   VERIFYNR(connect(mpGlobalOutputAction, SIGNAL(triggered(bool)), this, SLOT(globalOutputChanged(bool))));
 }
 
 ScriptingWidget::~ScriptingWidget()
@@ -81,38 +89,6 @@ void ScriptingWidget::setErrorFont(const QFont& errorFont)
 QFont ScriptingWidget::getErrorFont() const
 {
    return mErrorFont;
-}
-
-void ScriptingWidget::setCommandColor(const QString& command, const QColor& commandColor)
-{
-   if ((command.isEmpty() == true) || (commandColor.isValid() == false))
-   {
-      return;
-   }
-
-   QMap<QString, QColor>::iterator iter = mCommandColors.find(command);
-   if (iter != mCommandColors.end())
-   {
-      mCommandColors[command] = commandColor;
-   }
-}
-
-QColor ScriptingWidget::getCommandColor(const QString& command) const
-{
-   QColor commandColor;
-
-   QMap<QString, QColor>::const_iterator iter = mCommandColors.find(command);
-   if (iter != mCommandColors.end())
-   {
-      commandColor = iter.value();
-   }
-
-   return commandColor;
-}
-
-const QMap<QString, QColor>& ScriptingWidget::getCommandColors() const
-{
-   return mCommandColors;
 }
 
 void ScriptingWidget::setOutputColor(const QColor& outputColor)
@@ -161,7 +137,7 @@ unsigned int ScriptingWidget::getMaxNumParagraphs() const
 
 const PlugIn* ScriptingWidget::getInterpreter() const
 {
-   return mInterpreter->getPlugIn();
+   return mInterpreter.get();
 }
 
 bool ScriptingWidget::toXml(XMLWriter* pXml) const
@@ -183,17 +159,8 @@ bool ScriptingWidget::toXml(XMLWriter* pXml) const
    const PlugIn* pInterpreter = getInterpreter();
    if (pInterpreter != NULL)
    {
-      const string& interpreterId = pInterpreter->getId();
+      const std::string& interpreterId = pInterpreter->getId();
       pXml->addAttr("interpreterId", interpreterId);
-   }
-
-   // Command colors
-   for (QMap<QString, QColor>::const_iterator iter = mCommandColors.begin(); iter != mCommandColors.end(); ++iter)
-   {
-      pXml->pushAddPoint(pXml->addElement("CommandColor"));
-      pXml->addAttr("name", iter.key().toStdString());
-      pXml->addAttr("color", iter.value().name().toStdString());
-      pXml->popAddPoint();
    }
 
    return true;
@@ -208,7 +175,7 @@ bool ScriptingWidget::fromXml(DOMNode* pDocument, unsigned int version)
    }
 
    // Attributes
-   string fontText = A(pElement->getAttribute(X("commandFont")));
+   std::string fontText = A(pElement->getAttribute(X("commandFont")));
    if (fontText.empty() == false)
    {
       if (mCommandFont.fromString(QString::fromStdString(fontText)) == false)
@@ -235,7 +202,7 @@ bool ScriptingWidget::fromXml(DOMNode* pDocument, unsigned int version)
       }
    }
 
-   string colorText = A(pElement->getAttribute(X("outputColor")));
+   std::string colorText = A(pElement->getAttribute(X("outputColor")));
    if (colorText.empty() == false)
    {
       mOutputColor.setNamedColor(QString::fromStdString(colorText));
@@ -250,7 +217,7 @@ bool ScriptingWidget::fromXml(DOMNode* pDocument, unsigned int version)
    mMaxParagraphs = StringUtilities::fromXmlString<int>(A(pElement->getAttribute(X("maxParagraphs"))));
 
    // Interpreter
-   string interpreterId = A(pElement->getAttribute(X("interpreterId")));
+   std::string interpreterId = A(pElement->getAttribute(X("interpreterId")));
    if (interpreterId.empty() == false)
    {
       Service<SessionManager> pManager;
@@ -262,29 +229,8 @@ bool ScriptingWidget::fromXml(DOMNode* pDocument, unsigned int version)
       }
 
       mpPims.reset(NULL);
-      mInterpreter->setPlugIn(pInterpreter);
+      mInterpreter = PlugInResource(pInterpreter);
       mpPims.reset(Service<PlugInManagerServices>().get());
-   }
-
-   // Command colors
-   mCommandColors.clear();
-   for (DOMNode* pChild = pDocument->getFirstChild(); pChild != NULL; pChild = pChild->getNextSibling())
-   {
-      if (XMLString::equals(pChild->getNodeName(), X("CommandColor")))
-      {
-         DOMElement* pChildElement = static_cast<DOMElement*>(pChild);
-
-         QString commandName = QString::fromStdString(A(pChildElement->getAttribute(X("name"))));
-         QColor commandColor;
-
-         colorText = A(pChildElement->getAttribute(X("color")));
-         if (colorText.empty() == false)
-         {
-            commandColor.setNamedColor(QString::fromStdString(colorText));
-         }
-
-         mCommandColors.insert(commandName, commandColor);
-      }
    }
 
    return true;
@@ -292,32 +238,36 @@ bool ScriptingWidget::fromXml(DOMNode* pDocument, unsigned int version)
 
 void ScriptingWidget::showEvent(QShowEvent* pEvent)
 {
-   // Load the interpreter plug-in
-   if ((mInterpreter->getPlugIn() == NULL) && (mInterpreterName.isEmpty() == false))
+   if ((mInterpreter.get() == NULL) && (mInterpreterName.isEmpty() == false))
    {
-      vector<PlugIn*> plugIns = mpPims->getPlugInInstances(mInterpreterName.toStdString());
-      if (plugIns.empty() == false && dynamic_cast<Interpreter*>(plugIns.front()) != NULL)
+      Interpreter* pInterpreter = NULL;
+      setReadOnly(true);
+      std::vector<PlugIn*> plugIns = mpPims->getPlugInInstances(mInterpreterName.toStdString());
+      if (plugIns.empty() == false && dynamic_cast<InterpreterManager*>(plugIns.front()) != NULL)
       {
-         mInterpreter->setPlugIn(plugIns.front());
+         mInterpreter = PlugInResource(plugIns.front());
       }
       else
       {
-         mInterpreter->setPlugIn(mInterpreterName.toStdString());
+         mInterpreter = PlugInResource(mInterpreterName.toStdString());
       }
 
-      Interpreter* pInterpreter = dynamic_cast<Interpreter*>(mInterpreter->getPlugIn());
+      InterpreterManager* pInterMgr = dynamic_cast<InterpreterManager*>(mInterpreter.get());
+      if (pInterMgr != NULL)
+      {
+         mInteractive = pInterMgr->isInteractiveEnabled();
+         pInterMgr->start();
+         QString startupMsg = QString::fromStdString(pInterMgr->getStartupMessage());
+         addOutputText(startupMsg, false);
+         pInterMgr->attach(SIGNAL_NAME(InterpreterManager, InterpreterStarted), Slot(this, &ScriptingWidget::interpreterStarted));
+         pInterpreter = pInterMgr->getInterpreter();
+      }
+
       if (pInterpreter != NULL)
       {
-         vector<string> keywords;
-         pInterpreter->getKeywordList(keywords);
-         for (unsigned int i = 0; i < keywords.size(); i++)
-         {
-            string keyword = keywords.at(i);
-            if (keyword.empty() == false)
-            {
-               mCommandColors.insert(QString::fromStdString(keyword), Qt::blue);
-            }
-         }
+         pInterpreter->attach(SIGNAL_NAME(Interpreter, OutputText), Slot(this, &ScriptingWidget::receiveOutput));
+         pInterpreter->attach(SIGNAL_NAME(Interpreter, ErrorText), Slot(this, &ScriptingWidget::receiveOutput));
+         setReadOnly(!mInteractive);
       }
    }
 
@@ -340,9 +290,7 @@ void ScriptingWidget::keyPressEvent(QKeyEvent* e)
       int iStartSelection = currentSelection.selectionStart();
       int iEndSelection = currentSelection.selectionEnd();
 
-      int iCommandStart = -1;
-      int iCommandEnd = -1;
-      getCommandPosition(iCommandStart, iCommandEnd);
+      int iCommandStart = getCommandPosition();
 
       if ((e->key() == Qt::Key_Backspace) || (e->key() == Qt::Key_Left))
       {
@@ -358,7 +306,7 @@ void ScriptingWidget::keyPressEvent(QKeyEvent* e)
          {
             // Remove the current command text
             currentSelection.setPosition(iCommandStart);
-            currentSelection.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
+            currentSelection.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor, toPlainText().size() - iCommandStart);
             currentSelection.removeSelectedText();
 
             // Get the next command in the stack
@@ -429,6 +377,33 @@ void ScriptingWidget::keyPressEvent(QKeyEvent* e)
    QTextEdit::keyPressEvent(e);
 }
 
+void ScriptingWidget::contextMenuEvent(QContextMenuEvent* pEvent)
+{
+   Interpreter* pInterpreter = NULL;
+   InterpreterManager* pInterMgr = dynamic_cast<InterpreterManager*>(mInterpreter.get());
+   if (pInterMgr != NULL)
+   {
+      pInterpreter = pInterMgr->getInterpreter();
+   }
+   if (pInterpreter == NULL)
+   {
+      mpGlobalOutputAction->setDisabled(true);
+      mpGlobalOutputAction->setChecked(false);
+   }
+   else
+   {
+      bool globalOutput = pInterpreter->isGlobalOutputShown();
+      mpGlobalOutputAction->setEnabled(true);
+      mpGlobalOutputAction->setChecked(globalOutput);
+   }
+   QMenu* pMenu = createStandardContextMenu(pEvent->globalPos());
+   pMenu->addSeparator();
+   pMenu->addAction(mpClearAction);
+   pMenu->addAction(mpGlobalOutputAction);
+   pMenu->exec(pEvent->globalPos());
+   delete pMenu;
+}
+
 unsigned int ScriptingWidget::getNumParagraphs() const
 {
    unsigned int numParagraphs = 0;
@@ -449,33 +424,15 @@ QString ScriptingWidget::getCommandText() const
    QString strText = toPlainText();
    if (strText.isEmpty() == false)
    {
-      strCommand = strText.section("\n", -1, -1);
-      if (strCommand.startsWith(mPrompt) == true)
-      {
-         strCommand = strCommand.mid(mPrompt.length(), strCommand.length() - mPrompt.length());
-      }
+      strCommand = strText.mid(getCommandPosition());
    }
 
    return strCommand;
 }
 
-void ScriptingWidget::getCommandPosition(int& iCommandStart, int& iCommandEnd) const
+int ScriptingWidget::getCommandPosition() const
 {
-   iCommandStart = 0;
-   iCommandEnd = 0;
-
-   QString strText = toPlainText();
-   if (strText.isEmpty() == false)
-   {
-      iCommandStart = strText.length();
-      iCommandEnd = strText.length();
-
-      QString strCommand = getCommandText();
-      if (strCommand.isEmpty() == false)
-      {
-         iCommandStart = strText.lastIndexOf(strCommand);
-      }
-   }
+   return mCommandStartPos;
 }
 
 void ScriptingWidget::clipToMaxParagraphs()
@@ -498,6 +455,7 @@ void ScriptingWidget::clipToMaxParagraphs()
       paragraphSelection.setPosition(0);
       paragraphSelection.setPosition(iPos + 1, QTextCursor::KeepAnchor);
       paragraphSelection.removeSelectedText();
+      mCommandStartPos -= iPos + 1;
       paragraphSelection.movePosition(QTextCursor::End);
 
       setTextCursor(paragraphSelection);
@@ -506,20 +464,36 @@ void ScriptingWidget::clipToMaxParagraphs()
 
 void ScriptingWidget::appendPrompt()
 {
-   Interpreter* pInterpreter = dynamic_cast<Interpreter*>(mInterpreter->getPlugIn());
-   if (pInterpreter != NULL)
+   QString prompt;
+   InterpreterManager* pInterMgr = dynamic_cast<InterpreterManager*>(mInterpreter.get());
+   if (pInterMgr != NULL)
    {
-      mPrompt = QString::fromStdString(pInterpreter->getPrompt());
+      Interpreter* pInterpreter = pInterMgr->getInterpreter();
+      if (pInterMgr->isStarted() && pInterpreter != NULL && mInteractive)
+      {
+         prompt = QString::fromStdString(pInterpreter->getPrompt());
+      }
    }
+   mPrompt = prompt;
 
    setCurrentFont(font());
    setTextColor(Qt::black);
-   append(mPrompt);
-
-   QTextCursor cursorPosition = textCursor();
-   cursorPosition.movePosition(QTextCursor::End);
-   setTextCursor(cursorPosition);
-
+   if (!prompt.isEmpty())
+   {
+      QTextCursor cursorPosition = textCursor();
+      cursorPosition.movePosition(QTextCursor::End);
+      int endPos = cursorPosition.position();
+      cursorPosition.movePosition(QTextCursor::StartOfLine);
+      int startLinePos = cursorPosition.position();
+      cursorPosition.movePosition(QTextCursor::End);
+      if (startLinePos != endPos)
+      {
+         cursorPosition.insertText("\n", currentCharFormat());
+      }
+      cursorPosition.insertText(mPrompt, currentCharFormat());
+      setTextCursor(cursorPosition);
+   }
+   mCommandStartPos = toPlainText().size();
    setCurrentFont(mCommandFont);
 }
 
@@ -534,115 +508,239 @@ void ScriptingWidget::executeCommand()
       mCommandIndex = mCommandStack.count();
    }
 
+   QTextCursor cursor = textCursor();
+   cursor.movePosition(QTextCursor::End);
+   cursor.insertText("\n", currentCharFormat());
    executeCommand(strCommand);
 }
 
 void ScriptingWidget::executeCommand(const QString& strCommand)
 {
-   if (mInterpreter->getPlugIn() == NULL)
+   Interpreter* pInterpreter = NULL;
+   InterpreterManager* pInterMgr = dynamic_cast<InterpreterManager*>(mInterpreter.get());
+   if (pInterMgr != NULL)
+   {
+      pInterpreter = pInterMgr->getInterpreter();
+   }
+   if (pInterpreter == NULL)
    {
       appendPrompt();
       QMessageBox::critical(this, "Scripting Window", "Could not get the interpreter plug-in!");
       return;
    }
 
-   // Process the command
-   if (strCommand == "clear")
-   {
-      // Clear the text
-      clear();
-
-      // Clear the command stack
-      mCommandStack.clear();
-      mCommandIndex = 0;
-   }
-   else if (strCommand == "commands")
-   {
-      vector<string> keywords;
-
-      Interpreter* pInterpreter = dynamic_cast<Interpreter*>(mInterpreter->getPlugIn());
-      if (pInterpreter != NULL)
-      {
-         pInterpreter->getKeywordList(keywords);
-      }
-
-      for (unsigned int i = 0; i < keywords.size(); i++)
-      {
-         string keyword = keywords.at(i);
-         if (keyword.empty() == false)
-         {
-            addOutputText(QString::fromStdString(keyword));
-         }
-      }
-   }
-   else
-   {
-      // Set the input values for the plug-in
-      string command = strCommand.toStdString();
-      mInterpreter->getInArgList().setPlugInArgValue(Interpreter::CommandArg(), &command);
-
-      Service<DesktopServices> pDesktop;
-
-      SpatialDataView* pView = dynamic_cast<SpatialDataView*>(pDesktop->getCurrentWorkspaceWindowView());
-      if (pView != NULL)
-      {
-         LayerList* pLayerList = pView->getLayerList();
-         if (pLayerList != NULL)
-         {
-            RasterElement* pRaster = pLayerList->getPrimaryRasterElement();
-            if (pRaster != NULL)
-            {
-               mInterpreter->getInArgList().setPlugInArgValue(Executable::DataElementArg(), pRaster);
-            }
-         }
-      }
-
-      string outputText = "";
-      string returnType = "";
-
-      // Run the command in the plug-in
-      bool bSuccess = mInterpreter->execute();
-      if (bSuccess == true)
-      {
-         mInterpreter->getOutArgList().getPlugInArgValue(Interpreter::OutputTextArg(), outputText);
-         mInterpreter->getOutArgList().getPlugInArgValue(Interpreter::ReturnTypeArg(), returnType);
-      }
-
-      // Add the output text to the window
-      if (outputText.empty() == false)
-      {
-         // Set the font and color based on the return type
-         if (returnType == "Output")
-         {
-            setCurrentFont(mOutputFont);
-            setTextColor(mOutputColor);
-         }
-         else if (returnType == "Error")
-         {
-            setCurrentFont(mErrorFont);
-            setTextColor(mErrorColor);
-         }
-
-         addOutputText(QString::fromStdString(outputText));
-      }
-   }
+   // Set the input values for the plug-in
+   mExecutingCommand = true;
+   pInterpreter->executeCommand(strCommand.toStdString());
+   mExecutingCommand = false;
 
    appendPrompt();
 }
 
-void ScriptingWidget::addOutputText(const QString& strMessage)
+void ScriptingWidget::addOutputText(const QString& strMessage, bool error)
 {
    if (strMessage.isEmpty() == false)
    {
-      append(strMessage);
+      QTextCharFormat newTextFormat = currentCharFormat();
+      if (error)
+      {
+         newTextFormat.setFont(mErrorFont);
+         newTextFormat.setForeground(QBrush(mErrorColor));
+      }
+      else
+      {
+         newTextFormat.setFont(mOutputFont);
+         newTextFormat.setForeground(QBrush(mOutputColor));
+      }
+      QTextCursor cursor = textCursor();
+      cursor.clearSelection();
+      if (mExecutingCommand)
+      {
+         cursor.movePosition(QTextCursor::End);
+      }
+      else
+      {
+         int pos = std::max(mCommandStartPos - mPrompt.size(), 0);
+         cursor.setPosition(pos);
+         mCommandStartPos += strMessage.size();
+      }
+      cursor.insertText(strMessage, newTextFormat);
+      if (mExecutingCommand)
+      {
+         setTextCursor(cursor);
+      }
+   }
+}
+
+void ScriptingWidget::clearOutput()
+{
+   clear();
+   appendPrompt();
+}
+
+void ScriptingWidget::globalOutputChanged(bool newValue)
+{
+   InterpreterManager* pInterMgr = dynamic_cast<InterpreterManager*>(mInterpreter.get());
+   if (pInterMgr == NULL)
+   {
+      return;
+   }
+   Interpreter* pInterpreter = pInterMgr->getInterpreter();
+   if (pInterpreter == NULL)
+   {
+      return;
+   }
+   pInterpreter->showGlobalOutput(newValue);
+}
+
+bool ScriptingWidget::canInsertFromMimeData(const QMimeData* pSource) const
+{
+   if (pSource->hasUrls() || pSource->hasText())
+   {
+      return true;
+   }
+   return false;
+}
+
+void ScriptingWidget::dropEvent(QDropEvent* pEvent)
+{
+   mDropOccurring = true;
+   QTextEdit::dropEvent(pEvent);
+   mDropOccurring = false;
+}
+
+void ScriptingWidget::insertFromMimeData(const QMimeData* pSource)
+{
+   QString filePath;
+   QString text;
+   if (mDropOccurring && pSource->hasUrls())
+   {
+      QList<QUrl> urls = pSource->urls();
+      if (!urls.empty())
+      {
+         filePath = urls.front().toLocalFile();
+      }
+   }
+   if (pSource->hasText())
+   {
+      text = pSource->text();
+      int numNewlines = text.count("\n");
+      QString trimmedText = text.trimmed();
+      bool haveFile = false;
+      if (mDropOccurring && numNewlines <= 1 && QFile::exists(trimmedText))
+      {
+         filePath = trimmedText;
+      }
+   }
+   if (!filePath.isEmpty())
+   {
+      //don't get here if mDropOccurring == false
+      InterpreterManager* pInterMgr = dynamic_cast<InterpreterManager*>(mInterpreter.get());
+      bool bMatch = false;
+      if (pInterMgr != NULL)
+      {
+         QString strInterpreterExtensions = QString::fromStdString(pInterMgr->getFileExtensions());
+         if (!strInterpreterExtensions.isEmpty())
+         {
+            QStringList filterListCandidates = strInterpreterExtensions.split(";;", QString::SkipEmptyParts);
+            QStringList filterList;
+            for (int i = 0; i < filterListCandidates.count(); i++)
+            {
+               QString strExtensions = filterListCandidates[i];
+               if (strExtensions.isEmpty() == false)
+               {
+                  int iOpenPos = strExtensions.indexOf("(");
+                  int iClosePos = strExtensions.lastIndexOf(")");
+                  strExtensions = strExtensions.mid(iOpenPos + 1, iClosePos - iOpenPos - 1);
+
+                  QStringList globPatterns = strExtensions.split(QString(" "), QString::SkipEmptyParts);
+                  QString catchAll = QString::fromStdString("*");
+                  QString catchAll2 = QString::fromStdString("*.*");
+                  for (int globCount = 0; globCount < globPatterns.count(); ++globCount)
+                  {
+                     QString pattern = globPatterns[globCount];
+                     if ((pattern != catchAll) && (pattern != catchAll2))
+                     {
+                        filterList << pattern;
+                     }
+                  }
+               }
+            }
+
+            bMatch = QDir::match(filterList, filePath);
+         }
+      }
+
+      QFile file(filePath);
+      if (bMatch && file.open(QIODevice::ReadOnly | QIODevice::Text))
+      {
+         QTextStream reader(&file);
+         QString fileContent = reader.readAll();
+         QTextCursor cursor = textCursor();
+         cursor.movePosition(QTextCursor::End);
+         cursor.insertText("\n");
+         executeCommand(fileContent);
+         return;
+      }
+   }
+   if (!text.isEmpty())
+   {
+      bool insertText = true;
+      if (mDropOccurring)
+      {
+         if (getCommandText().isEmpty())
+         {
+            insertText = false;
+            QTextCursor cursor = textCursor();
+            cursor.movePosition(QTextCursor::End);
+            cursor.insertText("\n");
+            executeCommand(text);
+         }
+      }
+      if (insertText)
+      {
+         QTextCursor cursor = textCursor();
+         cursor.insertText(text, currentCharFormat());
+      }
+   }
+}
+
+void ScriptingWidget::interpreterStarted(Subject& subject, const std::string& signal, const boost::any& data)
+{
+   Interpreter* pInterpreter = NULL;
+   InterpreterManager* pInterMgr = dynamic_cast<InterpreterManager*>(mInterpreter.get());
+   if (pInterMgr != NULL)
+   {
+      pInterpreter = pInterMgr->getInterpreter();
+      QString startupMsg = QString::fromStdString(pInterMgr->getStartupMessage());
+      addOutputText(startupMsg, false);
+   }
+   if (pInterpreter != NULL)
+   {
+      pInterpreter->attach(SIGNAL_NAME(Interpreter, OutputText), Slot(this, &ScriptingWidget::receiveOutput));
+      pInterpreter->attach(SIGNAL_NAME(Interpreter, ErrorText), Slot(this, &ScriptingWidget::receiveOutput));
+      setReadOnly(!mInteractive);
+      appendPrompt();
+   }
+}
+
+void ScriptingWidget::receiveOutput(Subject& subject, const std::string& signal, const boost::any& data)
+{
+   std::string text = boost::any_cast<std::string>(data);
+   if (signal == SIGNAL_NAME(Interpreter, OutputText))
+   {
+      addOutputText(QString::fromStdString(text), false);
+   }
+   else if (signal == SIGNAL_NAME(Interpreter, ErrorText))
+   {
+      addOutputText(QString::fromStdString(text), true);
    }
 }
 
 void ScriptingWidget::plugInDestroyed(Subject &subject, const std::string &signal, const boost::any &data)
 {
-   if (boost::any_cast<PlugIn*>(data) == mInterpreter->getPlugIn())
+   if (boost::any_cast<PlugIn*>(data) == mInterpreter.get())
    {
-      mInterpreter->setPlugIn(NULL);
-      mCommandColors.clear();
+      mInterpreter = PlugInResource();
    }
 }

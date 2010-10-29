@@ -102,87 +102,6 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Debug|Win32"
-			ConfigurationType="1"
-			InheritedPropertySheets=".\CompileSettings\32bitSettings.vsprops;.\CompileSettings\pthreads.vsprops;.\CompileSettings\qwt-debug.vsprops;.\CompileSettings\Qt-Debug.vsprops;.\CompileSettings\Xerces-Debug.vsprops;.\CompileSettings\ApplicationCommonSettings-Debug.vsprops;.\CompileSettings\Cg.vsprops;.\CompileSettings\AllCommonSettings-Debug-32bit.vsprops;.\CompileSettings\Macros.vsprops;.\CompileSettings\glew-debug.vsprops;.\CompileSettings\UpdateBuildRevision.vsprops;.\CompileSettings\raptor.vsprops;.\CompileSettings\minizip-debug.vsprops;.\CompileSettings\yaml-cpp.vsprops"
-			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="false"
-			CharacterSet="2"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="MASM"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				PreprocessorDefinitions="_DEBUG"
-				MkTypLibCompatible="true"
-				SuppressStartupBanner="true"
-				TargetEnvironment="1"
-				TypeLibraryName=".\Debug/Opticks.tlb"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories=""
-				AssemblerListingLocation=""
-				BrowseInformationFile=""
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				Culture="1033"
-				ResourceOutputFileName="$(IntDir)\$(InputName).res"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalLibraryDirectories=""
-				AdditionalManifestDependencies=""
-				IgnoreDefaultLibraryNames=""
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-				Description="Prepping for Run..."
-				CommandLine="python.exe &quot;$(CODE_DIR)\build.py&quot; --prep --mode=debug --arch=32 -v"
-			/>
-		</Configuration>
-		<Configuration
 			Name="Release|x64"
 			ConfigurationType="1"
 			InheritedPropertySheets=".\CompileSettings\pthreads.vsprops;.\CompileSettings\qwt-release.vsprops;.\CompileSettings\Qt-Release.vsprops;.\CompileSettings\Xerces-Release.vsprops;.\CompileSettings\ApplicationCommonSettings-Release.vsprops;.\CompileSettings\Cg.vsprops;.\CompileSettings\AllCommonSettings-Release-64bit.vsprops;.\CompileSettings\64bitSettings.vsprops;.\CompileSettings\Macros.vsprops;.\CompileSettings\glew-release.vsprops;.\CompileSettings\UpdateBuildRevision.vsprops;.\CompileSettings\raptor.vsprops;.\CompileSettings\minizip-release.vsprops;.\CompileSettings\yaml-cpp.vsprops"
@@ -261,6 +180,87 @@
 				Name="VCPostBuildEventTool"
 				Description="Prepping for Run..."
 				CommandLine="python.exe &quot;$(CODE_DIR)\build.py&quot; --prep --mode=release --arch=64 -v"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Debug|Win32"
+			ConfigurationType="1"
+			InheritedPropertySheets=".\CompileSettings\32bitSettings.vsprops;.\CompileSettings\pthreads.vsprops;.\CompileSettings\qwt-debug.vsprops;.\CompileSettings\Qt-Debug.vsprops;.\CompileSettings\Xerces-Debug.vsprops;.\CompileSettings\ApplicationCommonSettings-Debug.vsprops;.\CompileSettings\Cg.vsprops;.\CompileSettings\AllCommonSettings-Debug-32bit.vsprops;.\CompileSettings\Macros.vsprops;.\CompileSettings\glew-debug.vsprops;.\CompileSettings\UpdateBuildRevision.vsprops;.\CompileSettings\raptor.vsprops;.\CompileSettings\minizip-debug.vsprops;.\CompileSettings\yaml-cpp.vsprops"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="MASM"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="_DEBUG"
+				MkTypLibCompatible="true"
+				SuppressStartupBanner="true"
+				TargetEnvironment="1"
+				TypeLibraryName=".\Debug/Opticks.tlb"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalIncludeDirectories=""
+				AssemblerListingLocation=""
+				BrowseInformationFile=""
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				Culture="1033"
+				ResourceOutputFileName="$(IntDir)\$(InputName).res"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalLibraryDirectories=""
+				AdditionalManifestDependencies=""
+				IgnoreDefaultLibraryNames=""
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				Description="Prepping for Run..."
+				CommandLine="python.exe &quot;$(CODE_DIR)\build.py&quot; --prep --mode=debug --arch=32 -v"
 			/>
 		</Configuration>
 		<Configuration
@@ -696,6 +696,10 @@
 			</File>
 			<File
 				RelativePath=".\Interfaces\Interpreter.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Interfaces\InterpreterManager.h"
 				>
 			</File>
 			<File

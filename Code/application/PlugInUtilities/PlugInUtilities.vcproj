@@ -2800,6 +2800,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\Interfaces\InterpreterUtilities.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Interfaces\IntValidator.h"
 				>
 			</File>
@@ -3726,6 +3730,10 @@
 			</File>
 			<File
 				RelativePath=".\InfoBar.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\InterpreterUtilities.cpp"
 				>
 			</File>
 			<File

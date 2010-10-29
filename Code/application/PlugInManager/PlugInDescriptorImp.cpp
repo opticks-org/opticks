@@ -16,7 +16,7 @@
 #include "Executable.h"
 #include "Exporter.h"
 #include "Importer.h"
-#include "Interpreter.h"
+#include "InterpreterManager.h"
 #include "ModuleDescriptor.h"
 #include "PlugIn.h"
 #include "PlugInArgListImp.h"
@@ -117,7 +117,7 @@ PlugInDescriptorImp::PlugInDescriptorImp(const string& id, PlugIn* pPlugIn) :
          mFileExtensions = pExporter->getDefaultExtensions();
       }
 
-      Interpreter* pInterpreter = dynamic_cast<Interpreter*>(pPlugIn);
+      InterpreterManager* pInterpreter = dynamic_cast<InterpreterManager*>(pPlugIn);
       if (pInterpreter != NULL)
       {
          mInterpreterInterface = true;
