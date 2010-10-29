@@ -240,8 +240,9 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
             VERIFY(pResolutionWidget != NULL);
 
             QSize resolution = pResolutionWidget->getResolution();
-            resolutionX = resolution.width();
-            resolutionY = resolution.height();
+            // prevent cast from -1 to unsigned int
+            resolutionX = max<int>(resolution.width(), 0);
+            resolutionY = max<int>(resolution.height(), 0);
          }
          else
          {
