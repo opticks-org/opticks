@@ -227,6 +227,12 @@ void InfoBar::setTitleFont(QFont fntTitle)
    resizeTitleButton(fntTitle);
 }
 
+void InfoBar::setElideMode(Qt::TextElideMode mode)
+{
+   mpTitle->setElideMode(mode);
+   mpButton->setElideMode(mode);
+}
+
 void InfoBar::setTitleButton(bool bButton)
 {
    mpTitle->setVisible(!bButton);

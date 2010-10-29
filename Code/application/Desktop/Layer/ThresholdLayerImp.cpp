@@ -9,6 +9,8 @@
 
 #include "AppVerify.h"
 #include "BitMask.h"
+#include "ContextMenuAction.h"
+#include "ContextMenuActions.h"
 #include "DataAccessorImpl.h"
 #include "DrawUtil.h"
 #include "glCommon.h"
@@ -140,6 +142,8 @@ ThresholdLayerImp::ThresholdLayerImp(const string& id, const string& layerName, 
    VERIFYNR(connect(this, SIGNAL(symbolChanged(SymbolType)), this, SIGNAL(modified())));
 
    msThresholdLayers++;
+
+   addContextMenuAction(ContextMenuAction(mpSubsetStatisticsAction, APP_LAYER_CALCULATE_SUBSET_STATISTICS_ACTION));
 }
 
 ThresholdLayerImp::~ThresholdLayerImp()

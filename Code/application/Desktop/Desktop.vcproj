@@ -20,7 +20,7 @@
 		<Configuration
 			Name="Release|Win32"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\CompileSettings\32bitSettings.vsprops;..\CompileSettings\Qt.vsprops;..\CompileSettings\ApplicationCommonSettings.vsprops;..\CompileSettings\qwt.vsprops;..\CompileSettings\Xerces.vsprops;..\CompileSettings\glew.vsprops;..\CompileSettings\Cg.vsprops;..\CompileSettings\AllCommonSettings-Release-32bit.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops"
+			InheritedPropertySheets="..\CompileSettings\32bitSettings.vsprops;..\CompileSettings\Qt.vsprops;..\CompileSettings\ApplicationCommonSettings.vsprops;..\CompileSettings\qwt.vsprops;..\CompileSettings\Xerces.vsprops;..\CompileSettings\glew.vsprops;..\CompileSettings\Cg.vsprops;..\CompileSettings\AllCommonSettings-Release-32bit.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\pthreads.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -79,7 +79,7 @@
 		<Configuration
 			Name="Release|x64"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\CompileSettings\Qt.vsprops;..\CompileSettings\ApplicationCommonSettings.vsprops;..\CompileSettings\qwt.vsprops;..\CompileSettings\Xerces.vsprops;..\CompileSettings\glew.vsprops;..\CompileSettings\Cg.vsprops;..\CompileSettings\AllCommonSettings-Release-64bit.vsprops;..\CompileSettings\64bitSettings.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops"
+			InheritedPropertySheets="..\CompileSettings\Qt.vsprops;..\CompileSettings\ApplicationCommonSettings.vsprops;..\CompileSettings\qwt.vsprops;..\CompileSettings\Xerces.vsprops;..\CompileSettings\glew.vsprops;..\CompileSettings\Cg.vsprops;..\CompileSettings\AllCommonSettings-Release-64bit.vsprops;..\CompileSettings\64bitSettings.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\pthreads.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -139,7 +139,7 @@
 		<Configuration
 			Name="Debug|Win32"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\CompileSettings\32bitSettings.vsprops;..\CompileSettings\Qt.vsprops;..\CompileSettings\ApplicationCommonSettings.vsprops;..\CompileSettings\qwt.vsprops;..\CompileSettings\Xerces.vsprops;..\CompileSettings\glew.vsprops;..\CompileSettings\Cg.vsprops;..\CompileSettings\AllCommonSettings-Debug-32bit.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops"
+			InheritedPropertySheets="..\CompileSettings\32bitSettings.vsprops;..\CompileSettings\Qt.vsprops;..\CompileSettings\ApplicationCommonSettings.vsprops;..\CompileSettings\qwt.vsprops;..\CompileSettings\Xerces.vsprops;..\CompileSettings\glew.vsprops;..\CompileSettings\Cg.vsprops;..\CompileSettings\AllCommonSettings-Debug-32bit.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\pthreads.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -198,7 +198,7 @@
 		<Configuration
 			Name="Debug|x64"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\CompileSettings\Qt.vsprops;..\CompileSettings\ApplicationCommonSettings.vsprops;..\CompileSettings\qwt.vsprops;..\CompileSettings\Xerces.vsprops;..\CompileSettings\glew.vsprops;..\CompileSettings\Cg.vsprops;..\CompileSettings\AllCommonSettings-Debug-64bit.vsprops;..\CompileSettings\64bitSettings.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops"
+			InheritedPropertySheets="..\CompileSettings\Qt.vsprops;..\CompileSettings\ApplicationCommonSettings.vsprops;..\CompileSettings\qwt.vsprops;..\CompileSettings\Xerces.vsprops;..\CompileSettings\glew.vsprops;..\CompileSettings\Cg.vsprops;..\CompileSettings\AllCommonSettings-Debug-64bit.vsprops;..\CompileSettings\64bitSettings.vsprops;..\CompileSettings\Macros.vsprops;..\CompileSettings\boost.vsprops;..\CompileSettings\UpdateBuildRevision.vsprops;..\CompileSettings\pthreads.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -3245,6 +3245,54 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\Plot\StatisticsWidget.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Plot\StatisticsWidget.h"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing $(InputName).h..."
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
+						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing $(InputName).h..."
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
+						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing $(InputName).h..."
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
+						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing $(InputName).h..."
+						CommandLine="&quot;$(QTBIN)\moc.exe&quot; &quot;$(InputPath)&quot; -o &quot;$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
+						Outputs="$(BuildDir)\Moc\$(ProjectName)\moc_$(InputName).cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\Plot\TextAdapter.cpp"
 				>
 			</File>
@@ -3490,6 +3538,10 @@
 			</File>
 			<File
 				RelativePath="$(BuildDir)\Moc\$(ProjectName)\moc_SpatialDataWindowImp.cpp"
+				>
+			</File>
+			<File
+				RelativePath="$(BuildDir)\Moc\$(ProjectName)\moc_StatisticsWidget.cpp"
 				>
 			</File>
 			<File

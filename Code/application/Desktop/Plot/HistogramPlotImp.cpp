@@ -31,7 +31,6 @@
 #include "HistogramAdapter.h"
 #include "HistogramPlotImp.h"
 #include "HistogramPlotAdapter.h"
-#include "LocatorAdapter.h"
 #include "MouseMode.h"
 #include "PropertiesHistogramPlot.h"
 #include "RasterDataDescriptor.h"
@@ -42,6 +41,7 @@
 #include "SecurityMarkingsDlg.h"
 #include "SessionManager.h"
 #include "Statistics.h"
+#include "StatisticsImp.h"
 #include "StringUtilities.h"
 #include "ThresholdLayerAdapter.h"
 #include "Undo.h"
@@ -70,6 +70,7 @@ HistogramPlotImp::HistogramPlotImp(const string& id, const string& viewName, QGL
    mpLayer(NULL),
    mpElement(NULL),
    mAutoZoom(true),
+   mpStats(NULL),
    mpBelowAction(NULL),
    mpAboveAction(NULL),
    mpBetweenAction(NULL),
@@ -337,6 +338,12 @@ HistogramPlotImp::HistogramPlotImp(const string& id, const string& viewName, QGL
    mpEndSeparatorAction = new QAction(this);
    mpEndSeparatorAction->setSeparator(true);
 
+   mpStatisticsRefreshAction = new QAction("Refresh Statistics", this);
+   mpStatisticsRefreshAction->setAutoRepeat(false);
+   mpStatisticsRefreshAction->setStatusTip("Force recalculation of the statistics and histogram.");
+   VERIFYNR(connect(mpStatisticsRefreshAction, SIGNAL(triggered()), this, SLOT(refreshStatistics())));
+   pDesktop->initializeAction(mpStatisticsRefreshAction, shortcutContext);
+
    // Plot objects
    mpRegion = static_cast<RegionObjectAdapter*>(addObject(REGION, false));
    mpRegion2 = static_cast<RegionObjectAdapter*>(addObject(REGION, false));
@@ -417,6 +424,11 @@ HistogramPlotImp::~HistogramPlotImp()
 list<ContextMenuAction> HistogramPlotImp::getContextMenuActions() const
 {
    list<ContextMenuAction> menuActions = CartesianPlotImp::getContextMenuActions();
+
+   ContextMenuAction refreshAction(mpStatisticsRefreshAction, APP_HISTOGRAMPLOT_REFRESH_STATISTICS_ACTION);
+   refreshAction.mBuddyType = ContextMenuAction::BEFORE;
+   refreshAction.mBuddyId = APP_PLOTWIDGET_LEGEND_SEPARATOR_ACTION;
+   menuActions.push_back(refreshAction);
 
    ContextMenuAction saveAction(mpSaveAction, APP_HISTOGRAMPLOT_SAVE_ACTION);
    saveAction.mBuddyType = ContextMenuAction::BEFORE;
@@ -714,7 +726,7 @@ void HistogramPlotImp::setName(const string& name)
    string displayText;
    string nameExtension;
 
-   if (mpLayer.get() != NULL)
+   if (mpStats == NULL && mpLayer.get() != NULL)
    {
       displayName = mpLayer->getDisplayName();
       displayText = mpLayer->getDisplayText();
@@ -734,6 +746,11 @@ void HistogramPlotImp::setName(const string& name)
 
    if (plotName == getName())
    {
+      if (mpHistogram != NULL)
+      {
+         mpHistogram->setObjectName(QString::fromStdString(plotName));
+      }
+
       return;
    }
 
@@ -779,7 +796,12 @@ bool HistogramPlotImp::setHistogram(Layer* pLayer)
 
 bool HistogramPlotImp::setHistogram(Layer* pLayer, RasterChannelType color)
 {
-   if ((pLayer == mpLayer.get()) && (color == mRasterChannelType))
+   return setHistogram(pLayer, NULL, color);
+}
+
+bool HistogramPlotImp::setHistogram(Layer* pLayer, Statistics* pStatistics, RasterChannelType color)
+{
+   if ((pLayer == mpLayer.get()) && color == mRasterChannelType)
    {
       return true;
    }
@@ -793,21 +815,35 @@ bool HistogramPlotImp::setHistogram(Layer* pLayer, RasterChannelType color)
    }
 
    // Disconnect the current layer and element
+
+   // if this monitored a specific statistics object, delete it
+   delete dynamic_cast<StatisticsImp*>(mpStats);
+   if ((mpStats = pStatistics) == NULL)
+   {
+      enableMouseMode(getMouseMode("LocatorMode"), true);
+   }
+   else
+   {
+      enableMouseMode(getMouseMode("LocatorMode"), false);
+   }
+
    LayerImp* pLayerImp = dynamic_cast<LayerImp*>(mpLayer.get());
    if (pLayerImp != NULL)
    {
-      VERIFYNR(disconnect(pLayerImp, SIGNAL(nameChanged(const QString&)), this, SLOT(updateHistogramName())));
-      VERIFYNR(disconnect(pLayerImp, SIGNAL(modified()), this, SLOT(updateHistogramRegions())));
+      // don't VERIFY, these may not have been connected in which case this is a noop
+      disconnect(pLayerImp, SIGNAL(nameChanged(const QString&)), this, SLOT(updateHistogramName()));
+      disconnect(pLayerImp, SIGNAL(modified()), this, SLOT(updateHistogramRegions()));
 
       RasterLayerImp* pRasterLayer = dynamic_cast<RasterLayerImp*>(pLayerImp);
       if (pRasterLayer != NULL)
       {
          VERIFYNR(disconnect(pRasterLayer, SIGNAL(complexComponentChanged(const ComplexComponent&)), this,
             SLOT(setComplexComponent(const ComplexComponent&))));
-         VERIFYNR(disconnect(pRasterLayer, SIGNAL(displayedBandChanged(RasterChannelType, DimensionDescriptor)), this,
-            SLOT(updateElement())));
-         VERIFYNR(disconnect(pRasterLayer, SIGNAL(colorMapChanged(const ColorMap&)), this,
-            SLOT(updateSelectedColorMap())));
+         // don't VERIFY, these may not have been connected in which case this is a noop
+         disconnect(pRasterLayer, SIGNAL(displayedBandChanged(RasterChannelType, DimensionDescriptor)), this,
+            SLOT(updateElement()));
+         disconnect(pRasterLayer, SIGNAL(colorMapChanged(const ColorMap&)), this,
+            SLOT(updateSelectedColorMap()));
       }
    }
 
@@ -821,8 +857,17 @@ bool HistogramPlotImp::setHistogram(Layer* pLayer, RasterChannelType color)
    if (mpLayer.get() != NULL)
    {
       // Update the name
-      const string& name = mpLayer->getName();
-      if (name.empty() == false)
+      string name;
+      if (ownsStatistics())
+      {
+         name = getName();
+      }
+      else
+      {
+         name = mpLayer->getName();
+      }
+
+      if (!name.empty())
       {
          setName(name);
       }
@@ -887,7 +932,7 @@ bool HistogramPlotImp::setHistogram(Layer* pLayer, RasterChannelType color)
 
       // Connections
       LayerImp* pNewLayerImp = dynamic_cast<LayerImp*>(mpLayer.get());
-      if (pNewLayerImp != NULL)
+      if (mpStats == NULL && pNewLayerImp != NULL)
       {
          VERIFYNR(connect(pNewLayerImp, SIGNAL(nameChanged(const QString&)), this, SLOT(updateHistogramName())));
          VERIFYNR(connect(pNewLayerImp, SIGNAL(modified()), this, SLOT(updateHistogramRegions())));
@@ -897,15 +942,23 @@ bool HistogramPlotImp::setHistogram(Layer* pLayer, RasterChannelType color)
       {
          VERIFYNR(connect(pRasterLayer, SIGNAL(complexComponentChanged(const ComplexComponent&)), this,
             SLOT(setComplexComponent(const ComplexComponent&))));
-         VERIFYNR(connect(pRasterLayer, SIGNAL(displayedBandChanged(RasterChannelType, DimensionDescriptor)), this,
-            SLOT(updateElement())));
-         VERIFYNR(connect(pRasterLayer, SIGNAL(colorMapChanged(const ColorMap&)), this,
-            SLOT(updateSelectedColorMap())));
+         if (mpStats == NULL)
+         {
+            VERIFYNR(connect(pRasterLayer, SIGNAL(displayedBandChanged(RasterChannelType, DimensionDescriptor)), this,
+               SLOT(updateElement())));
+            VERIFYNR(connect(pRasterLayer, SIGNAL(colorMapChanged(const ColorMap&)), this,
+               SLOT(updateSelectedColorMap())));
+         }
       }
    }
 
    notify(SIGNAL_NAME(Subject, Modified));
    return true;
+}
+
+bool HistogramPlotImp::setHistogram(Layer* pLayer, Statistics* pStatistics)
+{
+   return setHistogram(pLayer, pStatistics, GRAY);
 }
 
 void HistogramPlotImp::showEvent(QShowEvent* pEvent)
@@ -938,6 +991,7 @@ bool HistogramPlotImp::setHistogram(unsigned int binCount, const double* pBinCen
 
          // Notify attached objects of the change
          notify(SIGNAL_NAME(Subject, Modified));
+         emit histogramUpdated();
       }
    }
 
@@ -1002,6 +1056,12 @@ void HistogramPlotImp::setComplexComponent(const ComplexComponent& eComponent)
    else if (eComponent == COMPLEX_QUADRATURE)
    {
       mpQuadratureAction->activate(QAction::Trigger);
+   }
+
+   StatisticsImp* pStatsImp = dynamic_cast<StatisticsImp*>(mpStats);
+   if (pStatsImp != NULL)
+   {
+      pStatsImp->reset(eComponent);
    }
 
    updateHistogramValues();
@@ -1453,6 +1513,10 @@ bool HistogramPlotImp::getDataLowerUpper(double& lowerLimit, double& upperLimit)
 
 Statistics* HistogramPlotImp::getStatistics() const
 {
+   if (mpStats != NULL)
+   {
+      return mpStats;
+   }
    if (mpElement.get() != NULL)
    {
       const RasterLayer* pRasterLayer = dynamic_cast<const RasterLayer*>(mpLayer.get());
@@ -1472,6 +1536,11 @@ Statistics* HistogramPlotImp::getStatistics() const
    }
 
    return NULL;
+}
+
+bool HistogramPlotImp::ownsStatistics() const
+{
+   return mpStats != NULL;
 }
 
 PassArea HistogramPlotImp::getLayerPassArea() const
@@ -2291,6 +2360,18 @@ void HistogramPlotImp::setComplexComponent(QAction* pAction)
    pRasterLayer->setComplexComponent(component);
 }
 
+void HistogramPlotImp::refreshStatistics()
+{
+   RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(mpLayer.get());
+   StatisticsImp* pStats = dynamic_cast<StatisticsImp*>(getStatistics());
+   if (pRasterLayer == NULL || pStats == NULL)
+   {
+      return;
+   }
+   pStats->resetAll();
+   updateHistogramValues();
+}
+
 void HistogramPlotImp::setDisplayedElement(QListWidgetItem* pItem)
 {
    if (pItem == NULL)
@@ -2651,7 +2732,7 @@ void HistogramPlotImp::updateHistogramRegions(bool force)
 
       PassArea ePassArea = getLayerPassArea();
       QColor regionColor = getLayerColor();
-      bool showRegions = true;
+      bool showRegions = mpStats == NULL;
 
       RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(mpLayer.get());
       if (pRasterLayer != NULL)

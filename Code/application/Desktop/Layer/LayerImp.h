@@ -138,9 +138,11 @@ protected:
    bool mbLinking;
    AttachmentPtr<DataElement> mpElement;
    virtual void layerActivated(bool activated) { }
+   QAction* mpSubsetStatisticsAction;
 
 protected slots:
    void showLayer(bool show);
+   void calculateSubsetStatistics();
    void updateDisplayedAction(Layer* pLayer);
    void layerActivated(Layer* pLayer);
 

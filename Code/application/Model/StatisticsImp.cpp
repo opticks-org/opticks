@@ -7,27 +7,64 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "StatisticsImp.h"
+#include "AoiElement.h"
 #include "AppVerify.h"
+#include "BitMaskIterator.h"
+#include "DataAccessor.h"
+#include "DataAccessorImpl.h"
+#include "DataRequest.h"
 #include "DimensionDescriptor.h"
 #include "MathUtil.h"
 #include "ModelServices.h"
+#include "RasterElement.h"
 #include "RasterElementImp.h"
 #include "RasterDataDescriptor.h"
+#include "StatisticsImp.h"
 #include "switchOnEncoding.h"
 #include "UtilityServicesImp.h"
+#include "xmlreader.h"
+#include "xmlwriter.h"
 
 #include <algorithm>
 #include <limits>
-using namespace std;
 using namespace mta;
 XERCES_CPP_NAMESPACE_USE
 
-StatisticsImp::StatisticsImp(const RasterElementImp* pRasterElement, DimensionDescriptor band) :
+StatisticsImp::StatisticsImp(const RasterElementImp* pRasterElement,
+                             DimensionDescriptor band,
+                             AoiElement* pAoi) :
    mpRasterElement(pRasterElement),
-   mBand(band),
+   mpAoi(NULL),
+   mpOriginalAoi(pAoi),
    mStatisticsResolution(0)
-{}
+{
+   if (pAoi != NULL)
+   {
+      mpAoi = FactoryResource<BitMask>();
+      const BitMask* pBitMask = pAoi->getSelectedPoints();
+      ENSURE(pBitMask);
+      mpAoi->merge(*(pBitMask));
+   }
+   mBands.push_back(band);
+}
+
+StatisticsImp::StatisticsImp(const RasterElementImp* pRasterElement,
+                             const std::vector<DimensionDescriptor>& bands,
+                             AoiElement* pAoi) :
+   mpRasterElement(pRasterElement),
+   mBands(bands),
+   mpAoi(NULL),
+   mpOriginalAoi(pAoi),
+   mStatisticsResolution(0)
+{
+   if (pAoi != NULL)
+   {
+      mpAoi = FactoryResource<BitMask>();
+      const BitMask* pBitMask = pAoi->getSelectedPoints();
+      ENSURE(pBitMask);
+      mpAoi->merge(*(pBitMask));
+   }
+}
 
 StatisticsImp::~StatisticsImp()
 {}
@@ -55,7 +92,7 @@ double StatisticsImp::getMin()
 
 double StatisticsImp::getMin(ComplexComponent component)
 {
-   map<ComplexComponent, double>::iterator iter;
+   std::map<ComplexComponent, double>::iterator iter;
    iter = mMinValues.find(component);
    if (iter == mMinValues.end())
    {
@@ -94,7 +131,7 @@ double StatisticsImp::getMax()
 
 double StatisticsImp::getMax(ComplexComponent component)
 {
-   map<ComplexComponent, double>::iterator iter;
+   std::map<ComplexComponent, double>::iterator iter;
    iter = mMaxValues.find(component);
    if (iter == mMaxValues.end())
    {
@@ -133,7 +170,7 @@ double StatisticsImp::getAverage()
 
 double StatisticsImp::getAverage(ComplexComponent component)
 {
-   map<ComplexComponent, double>::iterator iter;
+   std::map<ComplexComponent, double>::iterator iter;
    iter = mAverageValues.find(component);
    if (iter == mAverageValues.end())
    {
@@ -172,7 +209,7 @@ double StatisticsImp::getStandardDeviation()
 
 double StatisticsImp::getStandardDeviation(ComplexComponent component)
 {
-   map<ComplexComponent, double>::iterator iter;
+   std::map<ComplexComponent, double>::iterator iter;
    iter = mStandardDeviationValues.find(component);
    if (iter == mStandardDeviationValues.end())
    {
@@ -201,7 +238,7 @@ void StatisticsImp::setPercentiles(const double* pPercentiles, ComplexComponent 
       return;
    }
 
-   vector<double> percentileValues;
+   std::vector<double> percentileValues;
    for (int i = 0; i < 1001; i++)
    {
       percentileValues.push_back(pPercentiles[i]);
@@ -217,7 +254,7 @@ const double* StatisticsImp::getPercentiles()
 
 const double* StatisticsImp::getPercentiles(ComplexComponent component)
 {
-   map<ComplexComponent, vector<double> >::iterator iter;
+   std::map<ComplexComponent, std::vector<double> >::iterator iter;
    iter = mPercentileValues.find(component);
    if (iter == mPercentileValues.end())
    {
@@ -230,7 +267,7 @@ const double* StatisticsImp::getPercentiles(ComplexComponent component)
       }
    }
 
-   vector<double>& percentileValues = mPercentileValues[component];
+   std::vector<double>& percentileValues = mPercentileValues[component];
    return &percentileValues[0];
 }
 
@@ -249,8 +286,8 @@ void StatisticsImp::setHistogram(const double* pBinCenters, const unsigned int* 
       return;
    }
 
-   vector<double> binCenterValues;
-   vector<unsigned int> histogramValues;
+   std::vector<double> binCenterValues;
+   std::vector<unsigned int> histogramValues;
    for (int i = 0; i < 256; i++)
    {
       binCenterValues.push_back(pBinCenters[i]);
@@ -273,7 +310,7 @@ void StatisticsImp::getHistogram(const double*& pBinCenters, const unsigned int*
    pHistogramCounts = NULL;
 
    // Bin centers
-   map<ComplexComponent, vector<double> >::iterator dIter;
+   std::map<ComplexComponent, std::vector<double> >::iterator dIter;
    dIter = mBinCenterValues.find(component);
    if (dIter == mBinCenterValues.end())
    {
@@ -287,7 +324,7 @@ void StatisticsImp::getHistogram(const double*& pBinCenters, const unsigned int*
    }
 
    // Counts
-   map<ComplexComponent, vector<unsigned int> >::iterator uiIter;
+   std::map<ComplexComponent, std::vector<unsigned int> >::iterator uiIter;
    uiIter = mHistogramValues.find(component);
    if (uiIter == mHistogramValues.end())
    {
@@ -300,8 +337,8 @@ void StatisticsImp::getHistogram(const double*& pBinCenters, const unsigned int*
       }
    }
 
-   vector<double>& binCenterValues = mBinCenterValues[component];
-   vector<unsigned int>& histogramValues = mHistogramValues[component];
+   std::vector<double>& binCenterValues = mBinCenterValues[component];
+   std::vector<unsigned int>& histogramValues = mHistogramValues[component];
 
    pBinCenters = &binCenterValues[0];
    pHistogramCounts = &histogramValues[0];
@@ -328,7 +365,7 @@ void StatisticsImp::setBadValues(const std::vector<int>& badValues)
    resetAll();
 }
 
-const vector<int>& StatisticsImp::getBadValues() const
+const std::vector<int>& StatisticsImp::getBadValues() const
 {
    return mBadValues;
 }
@@ -341,7 +378,7 @@ bool StatisticsImp::areStatisticsCalculated() const
 bool StatisticsImp::areStatisticsCalculated(ComplexComponent component) const
 {
    // Min
-   map<ComplexComponent, double>::const_iterator iter;
+   std::map<ComplexComponent, double>::const_iterator iter;
    iter = mMinValues.find(component);
    if (iter == mMinValues.end())
    {
@@ -370,7 +407,7 @@ bool StatisticsImp::areStatisticsCalculated(ComplexComponent component) const
    }
 
    // Percentiles
-   map<ComplexComponent, vector<double> >::const_iterator dIter;
+   std::map<ComplexComponent, std::vector<double> >::const_iterator dIter;
    dIter = mPercentileValues.find(component);
    if (dIter == mPercentileValues.end())
    {
@@ -384,7 +421,7 @@ bool StatisticsImp::areStatisticsCalculated(ComplexComponent component) const
       return false;
    }
 
-   map<ComplexComponent, vector<unsigned int> >::const_iterator uiIter;
+   std::map<ComplexComponent, std::vector<unsigned int> >::const_iterator uiIter;
    uiIter = mHistogramValues.find(component);
    if (uiIter == mHistogramValues.end())
    {
@@ -419,28 +456,28 @@ void StatisticsImp::resetAll()
 bool StatisticsImp::toXml(XMLWriter* pXml) const
 {
    pXml->addAttr("resolution", mStatisticsResolution);
-   for (map<ComplexComponent, double>::const_iterator it = mMinValues.begin(); it != mMinValues.end(); ++it)
+   for (std::map<ComplexComponent, double>::const_iterator it = mMinValues.begin(); it != mMinValues.end(); ++it)
    {
       pXml->pushAddPoint(pXml->addElement("minimum"));
       pXml->addAttr("component", it->first);
       pXml->addAttr("value", it->second);
       pXml->popAddPoint();
    }
-   for (map<ComplexComponent, double>::const_iterator it = mMaxValues.begin(); it != mMaxValues.end(); ++it)
+   for (std::map<ComplexComponent, double>::const_iterator it = mMaxValues.begin(); it != mMaxValues.end(); ++it)
    {
       pXml->pushAddPoint(pXml->addElement("maximum"));
       pXml->addAttr("component", it->first);
       pXml->addAttr("value", it->second);
       pXml->popAddPoint();
    }
-   for (map<ComplexComponent, double>::const_iterator it = mAverageValues.begin(); it != mAverageValues.end(); ++it)
+   for (std::map<ComplexComponent, double>::const_iterator it = mAverageValues.begin(); it != mAverageValues.end(); ++it)
    {
       pXml->pushAddPoint(pXml->addElement("average"));
       pXml->addAttr("component", it->first);
       pXml->addAttr("value", it->second);
       pXml->popAddPoint();
    }
-   for (map<ComplexComponent, double>::const_iterator it = mStandardDeviationValues.begin();
+   for (std::map<ComplexComponent, double>::const_iterator it = mStandardDeviationValues.begin();
       it != mStandardDeviationValues.end(); ++it)
    {
       pXml->pushAddPoint(pXml->addElement("stddev"));
@@ -448,7 +485,7 @@ bool StatisticsImp::toXml(XMLWriter* pXml) const
       pXml->addAttr("value", it->second);
       pXml->popAddPoint();
    }
-   for (map<ComplexComponent, std::vector<double> >::const_iterator it = mPercentileValues.begin();
+   for (std::map<ComplexComponent, std::vector<double> >::const_iterator it = mPercentileValues.begin();
       it != mPercentileValues.end(); ++it)
    {
       pXml->pushAddPoint(pXml->addElement("percentile"));
@@ -456,7 +493,7 @@ bool StatisticsImp::toXml(XMLWriter* pXml) const
       pXml->addText(it->second);
       pXml->popAddPoint();
    }
-   for (map<ComplexComponent, std::vector<double> >::const_iterator it = mBinCenterValues.begin();
+   for (std::map<ComplexComponent, std::vector<double> >::const_iterator it = mBinCenterValues.begin();
       it != mBinCenterValues.end(); ++it)
    {
       pXml->pushAddPoint(pXml->addElement("center"));
@@ -464,7 +501,7 @@ bool StatisticsImp::toXml(XMLWriter* pXml) const
       pXml->addText(it->second);
       pXml->popAddPoint();
    }
-   for (map<ComplexComponent, std::vector<unsigned int> >::const_iterator it = mHistogramValues.begin();
+   for (std::map<ComplexComponent, std::vector<unsigned int> >::const_iterator it = mHistogramValues.begin();
       it != mHistogramValues.end(); ++it)
    {
       pXml->pushAddPoint(pXml->addElement("histogram"));
@@ -530,7 +567,7 @@ bool StatisticsImp::fromXml(DOMNode* pDocument, unsigned int version)
          DOMElement* pElement = static_cast<DOMElement*>(pNode);
          ComplexComponent component = StringUtilities::fromXmlString<ComplexComponent>(
             A(pElement->getAttribute(X("component"))));
-         vector<double> values;
+         std::vector<double> values;
          XmlReader::StrToVector<double, XmlReader::StringStreamAssigner<double> >(values, pElement->getTextContent());
          mPercentileValues[component] = values;
       }
@@ -539,7 +576,7 @@ bool StatisticsImp::fromXml(DOMNode* pDocument, unsigned int version)
          DOMElement* pElement = static_cast<DOMElement*>(pNode);
          ComplexComponent component = StringUtilities::fromXmlString<ComplexComponent>(
             A(pElement->getAttribute(X("component"))));
-         vector<double> values;
+         std::vector<double> values;
          XmlReader::StrToVector<double, XmlReader::StringStreamAssigner<double> >(values, pElement->getTextContent());
          mBinCenterValues[component] = values;
       }
@@ -548,7 +585,7 @@ bool StatisticsImp::fromXml(DOMNode* pDocument, unsigned int version)
          DOMElement* pElement = static_cast<DOMElement*>(pNode);
          ComplexComponent component = StringUtilities::fromXmlString<ComplexComponent>(
             A(pElement->getAttribute(X("component"))));
-         vector<unsigned int> values;
+         std::vector<unsigned int> values;
          XmlReader::StrToVector<unsigned int, XmlReader::StringStreamAssigner<unsigned int> >(values,
             pElement->getTextContent());
          mHistogramValues[component] = values;
@@ -573,20 +610,10 @@ void StatisticsImp::calculateStatistics(ComplexComponent component)
 
    const RasterDataDescriptor* pDescriptor =
       dynamic_cast<const RasterDataDescriptor*>(mpRasterElement->getDataDescriptor());
-   if (pDescriptor == NULL)
-   {
-      return;
-   }
-
-   EncodingType eType = pDescriptor->getDataType();
+   VERIFYNRV(pDescriptor);
 
    int rowNum = pDescriptor->getRowCount();
    int colNum = pDescriptor->getColumnCount();
-   int bandNum = pDescriptor->getBandCount();
-
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This is deprecated and should be changed (tclarke)")
-   mta::Cube cube(reinterpret_cast<void*>(NULL), eType, rowNum, colNum, bandNum);
-
    if (mStatisticsResolution == 0)
    {
       if (rowNum < colNum)
@@ -604,22 +631,19 @@ void StatisticsImp::calculateStatistics(ComplexComponent component)
       }
    }
 
-   unsigned int originalNumber = 0;
-   unsigned int activeNumber = 0;
-   if (mBand.isValid())
+   if (mpOriginalAoi.get() != NULL)
    {
-      originalNumber = mBand.getOriginalNumber();
-      activeNumber = mBand.getActiveNumber();
+      mpAoi->clear();
+      mpAoi->merge(*(mpOriginalAoi->getSelectedPoints()));
    }
 
-   StatisticsInput statInput(cube, activeNumber, mpRasterElement, component, mStatisticsResolution, mBadValues);
+   StatisticsInput statInput(mBands, dynamic_cast<const RasterElement*>(mpRasterElement),
+      component, mStatisticsResolution, mBadValues, mpAoi.get());
    StatisticsOutput statOutput;
 
-   char buffer[256];
-   sprintf(buffer, "Computing statistics of band %d", originalNumber + 1);
-   mta::StatusBarReporter barReporter(buffer, "app", "CF884AA2-A1BF-468d-9609-795DE0F7B7A4");
+   mta::StatusBarReporter barReporter("Computing statistics", "app", "CF884AA2-A1BF-468d-9609-795DE0F7B7A4");
 
-   vector<int> phaseWeights;
+   std::vector<int> phaseWeights;
    phaseWeights.push_back(20);
    phaseWeights.push_back(80);
    mta::MultiPhaseProgressReporter progressReporter(barReporter, phaseWeights);
@@ -629,9 +653,10 @@ void StatisticsImp::calculateStatistics(ComplexComponent component)
    statisticsAlgorithm.run();
 
    bool bInteger = true;
-   if ((eType == FLT4BYTES) || (eType == FLT8COMPLEX) || (eType == FLT8BYTES) ||
-      ((eType == INT4SCOMPLEX) && (component == COMPLEX_MAGNITUDE)) ||
-      ((eType == INT4SCOMPLEX) && (component == COMPLEX_PHASE)))
+   EncodingType encoding = pDescriptor->getDataType();
+   if ((encoding == FLT4BYTES) || (encoding == FLT8COMPLEX) || (encoding == FLT8BYTES) ||
+      ((encoding == INT4SCOMPLEX) && (component == COMPLEX_MAGNITUDE)) ||
+      ((encoding == INT4SCOMPLEX) && (component == COMPLEX_PHASE)))
    {
       bInteger = false;
    }
@@ -658,29 +683,139 @@ void StatisticsImp::calculateStatistics(ComplexComponent component)
 StatisticsThread::StatisticsThread(const StatisticsInput& input, int threadCount, int threadIndex,
                                    ThreadReporter& reporter) :
    AlgorithmThread(threadIndex, reporter),
-   mCube(input.mCube),
-   mBandToCalculate(input.mBandToCalculate),
-   mComplexComponent(input.mComplexComponent),
-   mpRasterElement(input.mpRasterElement),
-   mResolution(input.mResolution),
-   mRowRange(getThreadRange(threadCount, mCube.getRowCount())),
-   mMaximum(-1e38),
-   mMinimum(1e38),
+   mInput(input),
+   mRowRange(getThreadRange(threadCount, static_cast<const RasterDataDescriptor*>(
+                                 input.mpRasterElement->getDataDescriptor())->getRowCount())),
+   mMaximum(-std::numeric_limits<double>::max()),
+   mMinimum(std::numeric_limits<double>::max()),
    mSum(0.0),
    mSumSquared(0.0),
-   mCount(0),
-   mBadValues(input.mBadValues)
+   mCount(0)
 {}
 
 void StatisticsThread::run()
 {
-   switchOnComplexEncoding(mCube.getType(), StatisticsThread::calculateStatistics, mCube.getData(),
-      mComplexComponent);
-}
+   const RasterDataDescriptor* pDescriptor = static_cast<const RasterDataDescriptor*>(
+      mInput.mpRasterElement->getDataDescriptor());
+   VERIFYNRV(pDescriptor != NULL);
 
-const Cube& StatisticsThread::getCube() const
-{
-   return mCube;
+   BitMaskIterator diter(mInput.mpAoi, 0, mRowRange.mFirst, pDescriptor->getColumnCount() - 1, mRowRange.mLast);
+
+   bool maxMinSet = false;
+   mSum = 0.0;
+   mSumSquared = 0.0;
+   mCount = 0;
+
+   EncodingType encoding = pDescriptor->getDataType();
+   ComplexComponent component = mInput.mComplexComponent;
+   unsigned int badValueCount = mInput.mBadValues.size();
+   int firstBadValue = 0;
+   if (badValueCount != 0)
+   {
+      firstBadValue = mInput.mBadValues.front();
+   }
+   std::vector<int>::const_iterator badBegin = mInput.mBadValues.begin();
+   std::vector<int>::const_iterator badEnd = mInput.mBadValues.end();
+
+   int oldPercentDone = -1;
+
+   bool isBip = pDescriptor->getInterleaveFormat() == BIP;
+   // Outer band loop not for BIP, will break if BIP
+   for (std::vector<DimensionDescriptor>::const_iterator bandIt = mInput.mBandsToCalculate.begin();
+        bandIt != mInput.mBandsToCalculate.end(); ++bandIt)
+   {
+      FactoryResource<DataRequest> pRequest;
+      pRequest->setRows(pDescriptor->getActiveRow(diter.getBoundingBoxStartRow()),
+                        pDescriptor->getActiveRow(diter.getBoundingBoxEndRow()), 0);
+      pRequest->setColumns(pDescriptor->getActiveColumn(diter.getBoundingBoxStartColumn()),
+                           pDescriptor->getActiveColumn(diter.getBoundingBoxEndColumn()), 0);
+      if (isBip)
+      {
+         // request native accessor for efficiency
+         pRequest->setBands(pDescriptor->getActiveBand(0),
+                            pDescriptor->getActiveBand(pDescriptor->getBandCount() - 1),
+                            pDescriptor->getBandCount());
+      }
+      else
+      {
+         // BIL is really tricky to use with BitMaskIterator so we convert to BSQ
+         pRequest->setBands(*bandIt, *bandIt, 1);
+         pRequest->setInterleaveFormat(BSQ);
+      }
+      DataAccessor da(mInput.mpRasterElement->getDataAccessor(pRequest.release()));
+      if (!da.isValid())
+      {
+         return;
+      }
+
+      // Iterate the band over the AOI or all bands in the case of BIP
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This should be changed to for (; fiter != diter.end(); diter += mInput.mResolution)  if/when BitMaskIterator is modified to be an STL iterator (tclarke)")
+      while (diter != diter.end())
+      {
+         LocationType loc;
+         diter.getPixelLocation(loc);
+         int percentDone = mRowRange.computePercent(static_cast<int>(loc.mY));
+         if (percentDone >= oldPercentDone + 25)
+         {
+            oldPercentDone = percentDone;
+            getReporter().reportProgress(getThreadIndex(), percentDone);
+         }
+
+         da->toPixel(static_cast<int>(loc.mY), static_cast<int>(loc.mX));
+         VERIFYNRV(da.isValid());
+
+         // Inner band loop for BIP, will break for other interleaves
+         for (std::vector<DimensionDescriptor>::const_iterator bipBandIt = mInput.mBandsToCalculate.begin();
+              bipBandIt != mInput.mBandsToCalculate.end(); ++bipBandIt)
+         {
+            double temp = ModelServices::getDataValue(encoding,
+               da->getColumn(), component, isBip ? bipBandIt->getActiveNumber() : 0);
+
+            int tempInt = roundDouble(temp);
+            if (badValueCount == 0 || (badValueCount == 1 && tempInt != firstBadValue) || 
+               !std::binary_search(badBegin, badEnd, tempInt))
+            {
+               if (!maxMinSet)
+               {
+                  mMinimum = mMaximum = temp;
+                  maxMinSet = true;
+               }
+               else
+               {
+                  if (temp < mMinimum)
+                  {
+                     mMinimum = temp;
+                  }
+
+                  if (temp > mMaximum)
+                  {
+                     mMaximum = temp;
+                  }
+               }
+
+               mSumSquared += temp*temp;
+               mSum += temp;
+               mCount++;
+               if (!isBip)
+               {
+                  // this inner band loop is only for BIP
+                  break;
+               }
+            }
+         }
+
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove this if BitMaskIterator becomes an STL iterator or change it if BitMaskIterator::operator+=(int) is created (tclarke)")
+         for (int cnt = 0; diter != diter.end() && cnt < mInput.mResolution; ++cnt)
+         {
+            diter.nextPixel();
+         }
+      }
+      if (isBip)
+      {
+         // this outer band loop is not for BIP
+         break;
+      }
+   }
 }
 
 double StatisticsThread::getMaximum() const
@@ -703,124 +838,22 @@ double StatisticsThread::getSumSquared() const
    return mSumSquared;
 }
 
-int StatisticsThread::getResolution() const
-{
-   return mResolution;
-}
-
 unsigned int StatisticsThread::getCount() const
 {
    return mCount;
 }
 
-template<class T>
-void StatisticsThread::calculateStatistics(T* pData, ComplexComponent component)
-{
-   int oldPercentDone = -1;
-
-   unsigned int posY = mRowRange.mFirst;
-   unsigned int posX = 0;
-   unsigned int geomSizeY = mRowRange.mLast - mRowRange.mFirst + 1;
-   unsigned int geomSizeX = mCube.getColumnCount();
-
-   // TODO: Remove the const_cast when a const DataAccessor is available
-   const RasterDataDescriptor *pDescriptor = dynamic_cast<const RasterDataDescriptor*>(
-      mpRasterElement->getDataDescriptor());
-   VERIFYNRV(pDescriptor != NULL);
-
-   FactoryResource<DataRequest> pRequest;
-   pRequest->setRows(pDescriptor->getActiveRow(posY), 
-      pDescriptor->getActiveRow(posY+geomSizeY-1), 1);
-   pRequest->setColumns(pDescriptor->getActiveColumn(posX), 
-      pDescriptor->getActiveColumn(posX+geomSizeX-1), geomSizeX);
-   pRequest->setBands(pDescriptor->getActiveBand(mBandToCalculate),
-      pDescriptor->getActiveBand(mBandToCalculate), 1);
-   DataAccessor da = mpRasterElement->getDataAccessor(pRequest.release());
-   if (!da.isValid())
-   {
-      return;
-   }
-
-   T* source = static_cast<T*>(da->getColumn());
-   bool maxMinSet = false;
-
-   mSum = 0.0;
-   mSumSquared = 0.0;
-   mCount = 0;
-
-   unsigned int badValueCount = mBadValues.size();
-   int firstBadValue = 0;
-   if (badValueCount != 0)
-   {
-      firstBadValue = mBadValues.front();
-   }
-   std::vector<int>::iterator badBegin = mBadValues.begin();
-   std::vector<int>::iterator badEnd = mBadValues.end();
-
-   for (unsigned int y1 = 0; y1 < geomSizeY; y1 += mResolution)
-   {
-      int percentDone = mRowRange.computePercent(y1 + mRowRange.mFirst);
-      if (percentDone >= oldPercentDone + 25)
-      {
-         oldPercentDone = percentDone;
-         getReporter().reportProgress(getThreadIndex(), percentDone);
-      }
-
-      VERIFYNRV(da.isValid());
-      for (unsigned int x1 = 0; x1 < geomSizeX; x1 += mResolution)
-      {
-         source = static_cast<T*>(da->getColumn());
-         double temp = ModelServices::getDataValue(*source, component);
-
-         int tempInt = roundDouble(temp);
-         if (badValueCount == 0 || (badValueCount == 1 && tempInt != firstBadValue) || 
-            !std::binary_search(badBegin, badEnd, tempInt))
-         {
-            if (!maxMinSet)
-            {
-               mMinimum = mMaximum = temp;
-               maxMinSet = true;
-            }
-            else
-            {
-               if (temp < mMinimum)
-               {
-                  mMinimum = temp;
-               }
-
-               if (temp > mMaximum)
-               {
-                  mMaximum = temp;
-               }
-            }
-
-            mSumSquared += temp*temp;
-            mSum += temp;
-            mCount++;
-         }
-
-         da->nextColumn(mResolution);
-      }
-
-      da->nextRow(mResolution);
-   }
-   if (!maxMinSet)
-   {
-      mMinimum = mMaximum = 0.0;
-   }
-}
-
 StatisticsOutput::StatisticsOutput() :
-   mMaximum(-1e38),
-   mMinimum(1e38),
+   mMaximum(-std::numeric_limits<double>::max()),
+   mMinimum(std::numeric_limits<double>::max()),
    mAverage(0.0),
    mStandardDeviation(0.0)
 {}
 
-bool StatisticsOutput::compileOverallResults(const vector<StatisticsThread*>& threads)
+bool StatisticsOutput::compileOverallResults(const std::vector<StatisticsThread*>& threads)
 {
-   mMaximum = -numeric_limits<double>::max();
-   mMinimum = numeric_limits<double>::max();
+   mMaximum = -std::numeric_limits<double>::max();
+   mMinimum = std::numeric_limits<double>::max();
    mAverage = 0.0;
    mStandardDeviation = 0.0;
 
@@ -833,15 +866,13 @@ bool StatisticsOutput::compileOverallResults(const vector<StatisticsThread*>& th
    double totalSquaredSum = 0.0;
    unsigned int pointCount = 0;
 
-   vector<StatisticsThread*>::const_iterator iter;
-   for (iter = threads.begin(); iter != threads.end(); ++iter)
+   for (std::vector<StatisticsThread*>::const_iterator iter = threads.begin(); iter != threads.end(); ++iter)
    {
-      StatisticsThread* pThread = NULL;
-      pThread = *iter;
+      StatisticsThread* pThread = *iter;
       if (pThread != NULL)
       {
-         mMaximum = max(mMaximum, pThread->getMaximum());
-         mMinimum = min(mMinimum, pThread->getMinimum());
+         mMaximum = std::max(mMaximum, pThread->getMaximum());
+         mMinimum = std::min(mMinimum, pThread->getMinimum());
          totalSum += pThread->getSum();
          totalSquaredSum += pThread->getSumSquared();
          pointCount += pThread->getCount();
@@ -864,142 +895,148 @@ bool StatisticsOutput::compileOverallResults(const vector<StatisticsThread*>& th
    return true;
 }
 
-HistogramThread::HistogramThread(const HistogramInput &input, int threadCount, int threadIndex,
-   mta::ThreadReporter &reporter) :
+HistogramThread::HistogramThread(const HistogramInput& input,
+                                 int threadCount,
+                                 int threadIndex,
+                                 mta::ThreadReporter& reporter) :
    AlgorithmThread(threadIndex, reporter),
-   mCube(input.mStatInput.mCube),
-   mBandToCalculate(input.mStatInput.mBandToCalculate),
-   mComplexComponent(input.mStatInput.mComplexComponent),
-   mpRasterElement(input.mStatInput.mpRasterElement),
-   mResolution(input.mStatInput.mResolution),
+   mInput(input),
    mCount(0),
-   mMinimum(input.mStatistics.mMinimum),
-   mMaximum(input.mStatistics.mMaximum),
-   mRowRange(getThreadRange(threadCount, mCube.getRowCount())),
-   mBinCounts(HISTOGRAM_SIZE),
-   mBadValues(input.mStatInput.mBadValues)
+   mRowRange(getThreadRange(threadCount, static_cast<const RasterDataDescriptor*>(
+                                 input.mStatInput.mpRasterElement->getDataDescriptor())->getRowCount())),
+   mBinCounts(HISTOGRAM_SIZE)
 {}
 
 void HistogramThread::run()
 {
-   switchOnComplexEncoding(mCube.getType(), HistogramThread::calculateHistogram, mCube.getData(),
-      mComplexComponent);
+   double range = 1.0;
+   double toBin = 0.0;
+   
+   if (mInput.mStatistics.mMaximum != mInput.mStatistics.mMinimum)
+   {
+      range = mInput.mStatistics.mMaximum - mInput.mStatistics.mMinimum;
+      toBin = 0.999999999 * (HISTOGRAM_SIZE)/range;
+   }
+
+   std::vector<unsigned int>& binCounts = getBinCounts();
+
+   const RasterDataDescriptor* pDescriptor = static_cast<const RasterDataDescriptor*>(
+      mInput.mStatInput.mpRasterElement->getDataDescriptor());
+   VERIFYNRV(pDescriptor != NULL);
+
+   BitMaskIterator diter(mInput.mStatInput.mpAoi, 0, mRowRange.mFirst,
+      pDescriptor->getColumnCount() - 1, mRowRange.mLast);
+
+   bool isBip = pDescriptor->getInterleaveFormat() == BIP;
+   // Outer band loop not for BIP, will break if BIP
+   for (std::vector<DimensionDescriptor>::const_iterator bandIt = mInput.mStatInput.mBandsToCalculate.begin();
+      bandIt != mInput.mStatInput.mBandsToCalculate.end(); ++bandIt)
+   {
+      FactoryResource<DataRequest> pRequest;
+      pRequest->setRows(pDescriptor->getActiveRow(diter.getBoundingBoxStartRow()),
+         pDescriptor->getActiveRow(diter.getBoundingBoxEndRow()), 0);
+      pRequest->setColumns(pDescriptor->getActiveColumn(diter.getBoundingBoxStartColumn()),
+         pDescriptor->getActiveColumn(diter.getBoundingBoxEndColumn()), 0);
+      if (isBip)
+      {
+         // request native accessor for efficiency
+         pRequest->setBands(pDescriptor->getActiveBand(0),
+                            pDescriptor->getActiveBand(pDescriptor->getBandCount() - 1),
+                            pDescriptor->getBandCount());
+      }
+      else
+      {
+         // BIL is really tricky to use with BitMaskIterator so we convert to BSQ
+         pRequest->setBands(*bandIt, *bandIt, 1);
+         pRequest->setInterleaveFormat(BSQ);
+      }
+      DataAccessor da(mInput.mStatInput.mpRasterElement->getDataAccessor(pRequest.release()));
+      if (!da.isValid())
+      {
+         return;
+      }
+
+      EncodingType encoding = pDescriptor->getDataType();
+      ComplexComponent component = mInput.mStatInput.mComplexComponent;
+      unsigned int badValueCount = mInput.mStatInput.mBadValues.size();
+      int firstBadValue = 0;
+      if (badValueCount != 0)
+      {
+         firstBadValue = mInput.mStatInput.mBadValues.front();
+      }
+      std::vector<int>::const_iterator badBegin = mInput.mStatInput.mBadValues.begin();
+      std::vector<int>::const_iterator badEnd = mInput.mStatInput.mBadValues.end();
+
+      int oldPercentDone = -1;
+      // Iterate the band over the AOI or all bands in the case of BIP
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This should be changed to for (; fiter != diter.end(); diter += mInput.mResolution)  if/when BitMaskIterator is modified to be an STL iterator (tclarke)")
+      while (diter != diter.end())
+      {
+         LocationType loc;
+         diter.getPixelLocation(loc);
+         int percentDone = mRowRange.computePercent(static_cast<int>(loc.mY));
+         if (percentDone >= oldPercentDone + 25)
+         {
+            oldPercentDone = percentDone;
+            getReporter().reportProgress(getThreadIndex(), percentDone);
+         }
+
+         da->toPixel(static_cast<int>(loc.mY), static_cast<int>(loc.mX));
+         VERIFYNRV(da.isValid());
+
+         // Inner band loop for BIP, will break for other interleaves
+         for (std::vector<DimensionDescriptor>::const_iterator bipBandIt = mInput.mStatInput.mBandsToCalculate.begin();
+              bipBandIt != mInput.mStatInput.mBandsToCalculate.end(); ++bipBandIt)
+         {
+            double temp = ModelServices::getDataValue(encoding,
+               da->getColumn(), mInput.mStatInput.mComplexComponent,
+               isBip ? bipBandIt->getActiveNumber() : 0);
+
+            int tempInt = roundDouble(temp);
+            if (badValueCount == 0 || (badValueCount == 1 && tempInt != firstBadValue) || 
+               !std::binary_search(badBegin, badEnd, tempInt))
+            {
+               int bin = static_cast<int>((temp-mInput.mStatistics.mMinimum) * toBin);
+               if (bin >= HISTOGRAM_SIZE)
+               {
+                  bin = HISTOGRAM_SIZE - 1;
+               }
+               else if (bin < 0)
+               {
+                  bin = 0;
+               }
+
+               binCounts[bin]++;
+               mCount++;
+            }
+            if (!isBip)
+            {
+               // this inner band loop is only for BIP
+               break;
+            }
+         }
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove this if BitMaskIterator becomes an STL iterator or change it if BitMaskIterator::operator+=(int) is created (tclarke)")
+         for (int cnt = 0; diter != diter.end() && cnt < mInput.mStatInput.mResolution; ++cnt)
+         {
+            diter.nextPixel();
+         }
+      }
+      if (isBip)
+      {
+         // this outer band loop is not for BIP
+         break;
+      }
+   }
 }
 
-const Cube& HistogramThread::getCube() const
-{
-   return mCube;
-}
-
-vector<unsigned int>& HistogramThread::getBinCounts()
+std::vector<unsigned int>& HistogramThread::getBinCounts()
 {
    return mBinCounts;
 }
 
-double HistogramThread::getMaximum() const
+bool HistogramOutput::compileOverallResults(const std::vector<HistogramThread*>& threads)
 {
-   return mMaximum;
-}
-
-double HistogramThread::getMinimum() const
-{
-   return mMinimum;
-}
-
-template<class T>
-void HistogramThread::calculateHistogram(T* pData, ComplexComponent component)
-{
-   double range = 1.0;
-   double toBin = 0.0;
-   double minimum;
-
-   if (getMaximum() != getMinimum())
-   {
-      range = getMaximum() - getMinimum();
-      toBin = 0.999999999 * (HISTOGRAM_SIZE)/range;
-   }
-
-   std::vector<unsigned int> &binCounts = getBinCounts();
-
-   int oldPercentDone = -1;
-
-   unsigned int posY = mRowRange.mFirst;
-   unsigned int posX = 0;
-   unsigned int geomSizeY = mRowRange.mLast - mRowRange.mFirst + 1;
-   unsigned int geomSizeX = mCube.getColumnCount();
-
-   const RasterDataDescriptor *pDescriptor = dynamic_cast<const RasterDataDescriptor*>(
-      mpRasterElement->getDataDescriptor());
-   VERIFYNRV(pDescriptor != NULL);
-
-   FactoryResource<DataRequest> pRequest;
-   pRequest->setRows(pDescriptor->getActiveRow(posY), 
-      pDescriptor->getActiveRow(posY+geomSizeY-1), 1);
-   pRequest->setColumns(pDescriptor->getActiveColumn(posX), 
-      pDescriptor->getActiveColumn(posX+geomSizeX-1), geomSizeX);
-   pRequest->setBands(pDescriptor->getActiveBand(mBandToCalculate),
-      pDescriptor->getActiveBand(mBandToCalculate), 1);
-
-   DataAccessor da = mpRasterElement->getDataAccessor(pRequest.release());
-   if (!da.isValid())
-   {
-      return;
-   }
-
-   unsigned int badValueCount = mBadValues.size();
-   int firstBadValue = 0;
-   if (badValueCount != 0)
-   {
-      firstBadValue = mBadValues.front();
-   }
-   std::vector<int>::iterator badBegin = mBadValues.begin();
-   std::vector<int>::iterator badEnd = mBadValues.end();
-
-   minimum = getMinimum();
-   for (unsigned int y1 = 0; y1 < geomSizeY; y1 += mResolution)
-   {
-      VERIFYNRV(da.isValid());
-      int percentDone = mRowRange.computePercent(y1 + mRowRange.mFirst);
-      if (percentDone >= oldPercentDone + 25)
-      {
-         oldPercentDone = percentDone;
-         getReporter().reportProgress(getThreadIndex(), percentDone);
-      }
-
-      for (unsigned int x1 = 0; x1 < geomSizeX; x1 += mResolution)
-      {
-         T* source = static_cast<T*>(da->getColumn());
-
-         double temp = ModelServices::getDataValue(*source, component);
-
-         int tempInt = roundDouble(temp);
-         if (badValueCount == 0 || (badValueCount == 1 && tempInt != firstBadValue) || 
-            !std::binary_search(badBegin, badEnd, tempInt))
-         {
-            int bin = static_cast<int>((temp-minimum) * toBin);
-            if (bin >= HISTOGRAM_SIZE)
-            {
-               bin = HISTOGRAM_SIZE - 1;
-            }
-            else if (bin < 0)
-            {
-               bin = 0;
-            }
-
-            binCounts[bin]++;
-            mCount++;
-         }
-
-         da->nextColumn(mResolution);
-      }
-
-      da->nextRow(mResolution);
-   }
-}
-
-bool HistogramOutput::compileOverallResults(const vector<HistogramThread*>& threads)
-{
-   vector<unsigned int> totalBinCounts(HISTOGRAM_SIZE);
+   std::vector<unsigned int> totalBinCounts(HISTOGRAM_SIZE);
 
    sumAllThreads(threads, totalBinCounts);
    computeBinCenters();
@@ -1024,21 +1061,22 @@ const double* HistogramOutput::getPercentiles() const
    return mPercentiles;
 }
 
-void HistogramOutput::sumAllThreads(const vector<HistogramThread*>& threads, vector<unsigned int>& totalBinCounts)
+void HistogramOutput::sumAllThreads(const std::vector<HistogramThread*>& threads,
+                                    std::vector<unsigned int>& totalBinCounts)
 {
    memset(&totalBinCounts[0], 0, HISTOGRAM_SIZE * sizeof(unsigned int));
 
-   vector<HistogramThread*>::const_iterator iter;
+   std::vector<HistogramThread*>::const_iterator iter;
    for (iter = threads.begin(); iter != threads.end(); ++iter)
    {
       HistogramThread* pThread = NULL;
       pThread = *iter;
       if (pThread != NULL)
       {
-         const vector<unsigned int>& threadBinCounts = pThread->getBinCounts();
+         const std::vector<unsigned int>& threadBinCounts = pThread->getBinCounts();
 
          transform(totalBinCounts.begin(), totalBinCounts.end(), 
-            threadBinCounts.begin(), totalBinCounts.begin(), plus<unsigned int>());
+            threadBinCounts.begin(), totalBinCounts.begin(), std::plus<unsigned int>());
       }
    }
 }
@@ -1083,7 +1121,7 @@ void HistogramOutput::computeBinCenters()
    }
 }
 
-void HistogramOutput::computeResultHistogram(const vector<unsigned int>& totalHistogram)
+void HistogramOutput::computeResultHistogram(const std::vector<unsigned int>& totalHistogram)
 {
    memset(mBinCounts, 0, 256 * sizeof(unsigned int));
 
@@ -1111,7 +1149,7 @@ void HistogramOutput::computeResultHistogram(const vector<unsigned int>& totalHi
    }
 }
 
-void HistogramOutput::computePercentiles(const vector<unsigned int>& totalHistogram)
+void HistogramOutput::computePercentiles(const std::vector<unsigned int>& totalHistogram)
 {
    int bin;
    int pointCount = accumulate(totalHistogram.begin(), totalHistogram.end(), 0);

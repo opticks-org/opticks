@@ -7,15 +7,17 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "LayerImp.h"
 #include "AnnotationElement.h"
 #include "AoiElement.h"
+#include "AppVerify.h"
 #include "ContextMenuAction.h"
 #include "ContextMenuActions.h"
-#include "AppVerify.h"
 #include "DataElementImp.h"
+#include "DesktopServices.h"
 #include "DrawUtil.h"
 #include "GcpList.h"
+#include "HistogramWindow.h"
+#include "LayerImp.h"
 #include "LayerList.h"
 #include "LayerUndo.h"
 #include "ModelServicesImp.h"
@@ -59,6 +61,14 @@ LayerImp::LayerImp(const string& id, const string& layerName, DataElement* pElem
    mpDisplayedAction->setAutoRepeat(false);
    mpDisplayedAction->setStatusTip("Toggles display of the layer");
    VERIFYNR(connect(mpDisplayedAction, SIGNAL(triggered(bool)), this, SLOT(showLayer(bool))));
+
+   mpSubsetStatisticsAction = new QAction("Calculate Statistics on Subset", this);
+   mpSubsetStatisticsAction->setAutoRepeat(false);
+   mpSubsetStatisticsAction->setStatusTip("Calculate and display statistics over a spatial and spectral subset.");
+   VERIFYNR(connect(mpSubsetStatisticsAction, SIGNAL(triggered()), this, SLOT(calculateSubsetStatistics())));
+   // Don't add mpSubsetStatisticsAction to the context menu. It only applies to layers which hold
+   // a RasterElement. Each subclass of Layer should add this as necessary. The action is in Layer
+   // since all supported layers use the same implementation.
 
    // Initialization
    addContextMenuAction(ContextMenuAction(mpDisplayedAction, APP_LAYER_DISPLAYED_ACTION));
@@ -715,6 +725,16 @@ void LayerImp::showLayer(bool show)
       {
          pSDV->hideLayer(pLayer);
       }
+   }
+}
+
+void LayerImp::calculateSubsetStatistics()
+{
+   HistogramWindow* pHistWindow =
+      dynamic_cast<HistogramWindow*>(Service<DesktopServices>()->getWindow("Histogram Window", PLOT_WINDOW));
+   if (pHistWindow != NULL)
+   {
+      pHistWindow->createSubsetPlot(dynamic_cast<Layer*>(this));
    }
 }
 

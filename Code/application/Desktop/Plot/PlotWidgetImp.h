@@ -36,6 +36,7 @@ class PlotObject;
 class PlotSet;
 class PlotView;
 class PlotViewImp;
+class QSplitter;
 class SessionItemDeserializer;
 class SessionItemSerializer;
 
@@ -105,6 +106,8 @@ public:
    bool canRename() const;
    bool rename(const std::string &newName, std::string &errorMessage);
 
+   QSplitter* getSplitter();
+
 public slots:
    void setBackgroundColor(const QColor& backgroundColor);
    void setClassificationText(const QString& strClassification);
@@ -112,6 +115,7 @@ public slots:
    void setClassificationColor(const QColor& clrClassification);
    void setTitle(const QString& strTitle);
    void setTitleFont(const QFont& ftTitle);
+   void setTitleElideMode(Qt::TextElideMode mode);
    void showLegend(bool bShow);
    void setLegendBackgroundColor(const QColor& backgroundColor);
    void print(bool bDialog = true);
@@ -164,6 +168,8 @@ private:
    Legend* mpLegend;
    PositionType mClassificationPosition;
    PositionType mOrganizationPosition;
+
+   QSplitter* mpSplitter;
 
    QString mClassificationText;
    QString mOrganizationText;

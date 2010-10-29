@@ -184,6 +184,14 @@ public slots:
     */
    void setTitleFont(QFont fntTitle);
 
+   /**
+    *  Sets the elide mode of the title/button.
+    *
+    *  @param    mode
+    *            The elide mode for the title/button.
+    */
+   void setElideMode(Qt::TextElideMode mode);
+
 signals:
    /**
     *  Indicates a change in the title text.

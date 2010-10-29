@@ -246,6 +246,11 @@
 #define APP_HISTOGRAMPLOT_RASTER_SEPARATOR_ACTION "APP_HISTOGRAMPLOT_RASTER_SEPARATOR_ACTION"
 
 /**
+ *  Force recalculation of statistics.
+ */
+#define APP_HISTOGRAMPLOT_REFRESH_STATISTICS_ACTION "APP_HISTOGRAMPLOT_REFRESH_STATISTICS_ACTION"
+
+/**
  *  Specifies the pixels that are used in calculating the histogram data for a
  *  layer.
  */
@@ -255,6 +260,11 @@
  *  Saves the raw histogram data to a text file.
  */
 #define APP_HISTOGRAMPLOT_SAVE_ACTION "APP_HISTOGRAMPLOT_SAVE_ACTION"
+
+/**
+ *  Toggles the display of the histogram statistics.
+ */
+#define APP_HISTOGRAMPLOT_STATISTICS_ACTION "APP_HISTOGRAMPLOT_STATISTICS_ACTION"
 
 /**
  *  Resets the stretch properties of a RasterLayer.
@@ -282,6 +292,11 @@
  *  Changes the units of a RasterLayer or ThresholdLayer.
  */
 #define APP_HISTOGRAMPLOT_UNITS_MENU_ACTION "APP_HISTOGRAMPLOT_UNITS_MENU_ACTION"
+
+/**
+ *  Calculate statistics over spatial/spectral subset and display in the histogram window.
+ */
+#define APP_LAYER_CALCULATE_SUBSET_STATISTICS_ACTION "APP_LAYER_CALCULATE_SUBSET_STATISTICS_ACTION"
 
 /**
  *  A toggle action indicating whether the layer is currently displayed in its

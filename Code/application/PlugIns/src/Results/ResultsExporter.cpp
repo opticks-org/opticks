@@ -469,7 +469,7 @@ bool ResultsExporter::writeOutput(ostream &stream)
 
          VERIFY(da.isValid());
 
-         double dValue = mpModel->getDataValue(eDataType, da->getColumn(), COMPLEX_MAGNITUDE, 0);
+         double dValue = ModelServices::getDataValue(eDataType, da->getColumn(), COMPLEX_MAGNITUDE, 0);
          if (isValueExported(dValue, badValues))
          {
             string location = getLocationString(r, c, pGeo);

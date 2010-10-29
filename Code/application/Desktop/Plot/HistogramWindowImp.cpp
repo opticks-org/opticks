@@ -7,12 +7,13 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtCore/QEvent>
-
+#include "AoiElement.h"
+#include "AoiLayer.h"
 #include "AppVerify.h"
 #include "ContextMenu.h"
 #include "ContextMenuActions.h"
 #include "DesktopServices.h"
+#include "GetSubsetDialog.h"
 #include "HistogramPlotAdapter.h"
 #include "HistogramWindow.h"
 #include "HistogramWindowImp.h"
@@ -26,14 +27,19 @@
 #include "ProductWindow.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
+#include "RasterElementImp.h"
 #include "RasterLayerAdapter.h"
 #include "RasterUtilities.h"
 #include "SpatialDataView.h"
 #include "SpatialDataWindow.h"
+#include "StatisticsImp.h"
+#include "StatisticsWidget.h"
 #include "StringUtilities.h"
 #include "ThresholdLayer.h"
 #include "WorkspaceWindow.h"
 
+#include <QtCore/QEvent>
+#include <QtGui/QSplitter>
 #include <vector>
 using namespace std;
 
@@ -42,7 +48,6 @@ HistogramWindowImp::HistogramWindowImp(const string& id, const string& windowNam
    mpExplorer(Service<SessionExplorer>().get(), SIGNAL_NAME(SessionExplorer, AboutToShowSessionItemContextMenu),
       Slot(this, &HistogramWindowImp::updateContextMenu)),
    mDisplayModeChanging(false),
-   mpSyncAutoZoomAction(NULL),
    mUpdater(this)
 {
    Service<DesktopServices> pDesktop;
@@ -53,6 +58,14 @@ HistogramWindowImp::HistogramWindowImp(const string& id, const string& windowNam
    pDesktop->initializeAction(mpSyncAutoZoomAction, "Histogram Plot");     // Use the plot context since the action
                                                                            // will appear on the plot menu
 
+   mpStatisticsShowAction = new QAction("Statistics", this);
+   mpStatisticsShowAction->setAutoRepeat(false);
+   mpStatisticsShowAction->setCheckable(true);
+   mpStatisticsShowAction->setStatusTip("Toggles the display of the statistics");
+   VERIFYNR(connect(mpStatisticsShowAction, SIGNAL(triggered(bool)), this, SLOT(setStatisticsShown(bool))));
+   pDesktop->initializeAction(mpStatisticsShowAction, "Histogram Plot");   // Use the plot context since the action
+                                                                           // will appear on the plot menu
+
    InfoBar* pInfoBar = getInfoBar();
    if (pInfoBar != NULL)
    {
@@ -60,6 +73,8 @@ HistogramWindowImp::HistogramWindowImp(const string& id, const string& windowNam
    }
 
    setIcon(QIcon(":/icons/HistogramWindow"));
+
+   VERIFYNR(connect(this, SIGNAL(plotSetActivated(PlotSet*)), this, SLOT(setStatisticsShowActionState(PlotSet*))));
 }
 
 HistogramWindowImp::~HistogramWindowImp()
@@ -161,6 +176,13 @@ void HistogramWindowImp::updateContextMenu(Subject& subject, const string& signa
    if (bRemoveActions == true)
    {
       pMenu->removeAction(APP_PLOTSET_DELETE_ACTION);
+   }
+
+   // Add statistics actions
+   if (bAddActions)
+   {
+      pMenu->addActionBefore(mpStatisticsShowAction, APP_HISTOGRAMPLOT_STATISTICS_ACTION,
+         APP_HISTOGRAMPLOT_REFRESH_STATISTICS_ACTION);
    }
 }
 
@@ -373,8 +395,17 @@ PlotWidget* HistogramWindowImp::createPlot(Layer* pLayer, PlotSet* pPlotSet)
 
    // Add the plot to the plot set
    PlotWidget* pPlot = pPlotSet->createPlot(pLayer->getName(), HISTOGRAM_PLOT);
+   PlotWidgetImp* pPlotImp = dynamic_cast<PlotWidgetImp*>(pPlot);
    if (pPlot != NULL)
    {
+      // Add the statistics widget
+      HistogramPlotImp* pHistPlot = dynamic_cast<HistogramPlotImp*>(pPlot->getPlot());
+      QSplitter* pSplitter = pPlotImp->getSplitter();
+      StatisticsWidget* pStatisticsWidget = new StatisticsWidget(pHistPlot, this);
+      pSplitter->insertWidget(2, pStatisticsWidget);
+      VERIFYNR(connect(pHistPlot, SIGNAL(histogramUpdated()), pStatisticsWidget, SLOT(updateStatistics())));
+      setStatisticsShown(mpStatisticsShowAction->isChecked());
+
       // Set the histogram data in the plot
       HistogramPlotImp* pHistogramPlot = dynamic_cast<HistogramPlotImp*>(pPlot->getPlot());
       if (pHistogramPlot != NULL)
@@ -434,8 +465,17 @@ PlotWidget* HistogramWindowImp::createPlot(RasterLayer* pLayer, RasterChannelTyp
 
    // Add the plot to the plot set
    PlotWidget* pPlot = pPlotSet->createPlot(pLayer->getName(), HISTOGRAM_PLOT);
+   PlotWidgetImp* pPlotImp = dynamic_cast<PlotWidgetImp*>(pPlot);
    if (pPlot != NULL)
    {
+      // Add the statistics widget
+      HistogramPlotImp* pHistPlot = dynamic_cast<HistogramPlotImp*>(pPlot->getPlot());
+      QSplitter* pSplitter = pPlotImp->getSplitter();
+      StatisticsWidget* pStatisticsWidget = new StatisticsWidget(pHistPlot, this);
+      pSplitter->insertWidget(2, pStatisticsWidget);
+      VERIFYNR(connect(pHistPlot, SIGNAL(histogramUpdated()), pStatisticsWidget, SLOT(updateStatistics())));
+      setStatisticsShown(mpStatisticsShowAction->isChecked());
+
       // Set the histogram data in the plot
       HistogramPlotImp* pHistogramPlot = dynamic_cast<HistogramPlotImp*>(pPlot->getPlot());
       if (pHistogramPlot != NULL)
@@ -615,6 +655,7 @@ void HistogramWindowImp::deletePlot(Layer* pLayer)
       return;
    }
 
+   deleteStatisticsPlots(pLayer);
    RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(pLayer);
    if (pRasterLayer != NULL)
    {
@@ -713,6 +754,27 @@ void HistogramWindowImp::deletePlots(RasterLayer* pLayer, DisplayMode displayMod
    else
    {
       deletePlot(pLayer, GRAY);
+   }
+}
+
+void HistogramWindowImp::deleteStatisticsPlots(Layer* pLayer)
+{
+   std::vector<PlotWidget*> plots = getPlots();
+   for (std::vector<PlotWidget*>::iterator plot = plots.begin(); plot != plots.end(); ++plot)
+   {
+      HistogramPlotImp* pHistPlot = dynamic_cast<HistogramPlotImp*>((*plot)->getPlot());
+      if (pHistPlot->getLayer() == pLayer && pHistPlot->ownsStatistics())
+      {
+         PlotSet* pPlotSet = (*plot)->getPlotSet();
+         if (pPlotSet != NULL)
+         {
+            pPlotSet->deletePlot(*plot);
+            if (pPlotSet->getNumPlots() == 0)
+            {
+               deletePlotSet(pPlotSet);
+            }
+         }
+      }
    }
 }
 
@@ -843,7 +905,26 @@ void HistogramWindowImp::activateLayer(PlotWidget* pPlot)
       }
    }
 
+   setStatisticsShowActionState(dynamic_cast<PlotWidgetImp*>(pPlot));
+
    emit plotActivated(pLayer, channel);
+}
+
+void HistogramWindowImp::setStatisticsShowActionState(PlotSet* pPlotSet)
+{
+   if (pPlotSet != NULL)
+   {
+      setStatisticsShowActionState(dynamic_cast<PlotWidgetImp*>(pPlotSet->getCurrentPlot()));
+   }
+}
+
+void HistogramWindowImp::setStatisticsShowActionState(PlotWidgetImp* pPlot)
+{
+   QWidget* pWidget = pPlot == NULL ? NULL : pPlot->getSplitter()->widget(2);
+   if (pWidget != NULL)
+   {
+      mpStatisticsShowAction->setChecked(!pWidget->isHidden());
+   }
 }
 
 void HistogramWindowImp::showEvent(QShowEvent* pEvent)
@@ -927,6 +1008,7 @@ void HistogramWindowImp::updatePlotInfo(RasterLayer* pLayer, RasterChannelType c
 
    // Display the element and band names in the plot title
    pPlotWidget->setTitle(strElement + " - " + strBand);
+   pPlotWidget->setTitleElideMode(Qt::ElideLeft);
 
    // Add a tool tip for the plot tab in the window
    PlotSetImp* pPlotSet = dynamic_cast<PlotSetImp*>(pPlotWidget->getPlotSet());
@@ -1001,6 +1083,129 @@ void HistogramWindowImp::syncAutoZoom()
             pBluePlot->enableAutoZoom(autoZoom);
          }
       }
+   }
+}
+
+void HistogramWindowImp::setStatisticsShown(bool shown)
+{
+   PlotWidgetImp* pPlotImp = dynamic_cast<PlotWidgetImp*>(getCurrentPlot());
+   if (pPlotImp != NULL)
+   {
+      QWidget* pWidget = pPlotImp->getSplitter()->widget(2);
+      if (pWidget != NULL)
+      {
+         pWidget->setShown(shown);
+      }
+   }
+}
+
+void HistogramWindowImp::createSubsetPlot(Layer* pLayer)
+{
+   RasterElement* pElement = pLayer == NULL ? NULL : dynamic_cast<RasterElement*>(pLayer->getDataElement());
+   SpatialDataView* pView = pLayer == NULL ? NULL : dynamic_cast<SpatialDataView*>(pLayer->getView());
+   if (pView == NULL || pElement == NULL)
+   {
+      return;
+   }
+   const RasterDataDescriptor* pDesc = static_cast<RasterDataDescriptor*>(pElement->getDataDescriptor());
+   std::vector<Layer*> aoiLayers;
+   pView->getLayerList()->getLayers(AOI_LAYER, aoiLayers);
+   std::map<std::string, AoiElement*> aoiElements;
+   QStringList aoiNames;
+   for (std::vector<Layer*>::const_iterator layer = aoiLayers.begin(); layer != aoiLayers.end(); ++layer)
+   {
+      AoiLayer* pLayer = static_cast<AoiLayer*>(*layer);
+      aoiNames << QString::fromStdString(pLayer->getName());
+      aoiElements[pLayer->getName()] = static_cast<AoiElement*>(pLayer->getDataElement());
+   }
+   std::vector<std::string> bandNamesStl = RasterUtilities::getBandNames(pDesc);
+   QStringList bandNames;
+   for (std::vector<std::string>::const_iterator bandName = bandNamesStl.begin();
+         bandName != bandNamesStl.end(); ++bandName)
+   {
+      bandNames << QString::fromStdString(*bandName);
+   }
+   std::vector<int> defaultSelection;
+   const RasterLayer* pRasterLayer = dynamic_cast<const RasterLayer*>(pLayer);
+   if (pRasterLayer != NULL && pRasterLayer->getDisplayMode() == GRAYSCALE_MODE)
+   {
+      defaultSelection.push_back(pRasterLayer->getDisplayedBand(GRAY).getActiveNumber());
+   }
+   else if (pRasterLayer != NULL)
+   {
+      defaultSelection.push_back(pRasterLayer->getDisplayedBand(RED).getActiveNumber());
+      defaultSelection.push_back(pRasterLayer->getDisplayedBand(GREEN).getActiveNumber());
+      defaultSelection.push_back(pRasterLayer->getDisplayedBand(BLUE).getActiveNumber());
+   }
+   else
+   {
+      defaultSelection.push_back(0);
+   }
+   PlotSet* pPlotSet = getCurrentPlotSet();
+   VERIFYNRV(pPlotSet);
+   std::string baseName = pLayer->getDisplayName(true) + " - Statistics ";
+   for (int suffix = 1; suffix < 200; ++suffix) // if we reach 200 of these, we have bigger issues,
+                                                // this is an arbitrary max
+   {
+      std::string name = baseName + StringUtilities::toDisplayString(suffix);
+      if (pPlotSet->getPlot(name) == NULL)
+      {
+         baseName = name;
+         break;
+      }
+   }
+   GetSubsetDialog dlg(QString::fromStdString(baseName), aoiNames, bandNames, defaultSelection, this);
+   if (dlg.exec() == QDialog::Accepted)
+   {
+      QString aoi = dlg.getSelectedAoi();
+      std::vector<int> bandIndices = dlg.getBandSelectionIndices();
+      std::vector<DimensionDescriptor> bands;
+      bands.reserve(bandIndices.size());
+      for (std::vector<int>::const_iterator index = bandIndices.begin(); index != bandIndices.end(); ++index)
+      {
+         bands.push_back(pDesc->getActiveBand(*index));
+      }
+      PlotWidget* pPlot = pPlotSet->createPlot(dlg.getPlotName().toStdString(), HISTOGRAM_PLOT);
+      if (pPlot == NULL)
+      {
+         Service<DesktopServices>()->showMessageBox("Can't create plot",
+            "Can't create statistics plot with the specified name. It may already exist, try a different name.",
+            "Ok");
+         return;
+      }
+      // create a title which shows at least some of the bands
+      std::string title = dlg.getPlotName().toStdString() + " (";
+      std::string bandNames;
+      for (std::vector<DimensionDescriptor>::const_iterator band = bands.begin(); band != bands.end(); ++band)
+      {
+         if (!bandNames.empty())
+         {
+            bandNames += ",";
+         }
+         bandNames += RasterUtilities::getBandName(pDesc, *band);
+      }
+      title += bandNames + ")";
+      pPlot->setTitle(title);
+      PlotWidgetImp* pPlotImp = dynamic_cast<PlotWidgetImp*>(pPlot);
+      VERIFYNRV(pPlotImp);
+      pPlotImp->setTitleElideMode(Qt::ElideRight);
+
+      // Add the statistics widget
+      HistogramPlotImp* pHistPlot = dynamic_cast<HistogramPlotImp*>(pPlot->getPlot());
+      QSplitter* pSplitter = pPlotImp->getSplitter();
+      StatisticsWidget* pStatisticsWidget = new StatisticsWidget(pHistPlot, this);
+      pSplitter->insertWidget(2, pStatisticsWidget);
+      VERIFYNR(connect(pHistPlot, SIGNAL(histogramUpdated()), pStatisticsWidget, SLOT(updateStatistics())));
+      setStatisticsShown(mpStatisticsShowAction->isChecked());
+
+      StatisticsImp* pStatistics = new StatisticsImp(dynamic_cast<RasterElementImp*>(pElement),
+         bands, aoiElements[aoi.toStdString()]);
+      HistogramPlotImp* pHist = dynamic_cast<HistogramPlotImp*>(pPlot->getPlot());
+      pHist->setHistogram(pLayer, pStatistics);
+
+      // Connections
+      VERIFYNR(pPlot->attach(SIGNAL_NAME(PlotWidget, AboutToShowContextMenu),
+         Slot(this, &HistogramWindowImp::updateContextMenu)));
    }
 }
 

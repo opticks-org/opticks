@@ -71,9 +71,6 @@ public:
    char* getMemoryBlock(size_t size);
    void deleteMemoryBlock(char* memory); 
 
-   double getDataValue(EncodingType type, const void* pData, int iIndex) const;
-   double getDataValue(EncodingType type, const void* pData, ComplexComponent component, int iIndex) const;
-
    bool isKindOfElement(const std::string& className, const std::string& elementName) const;
    void getElementTypes(const std::string& className, std::vector<std::string>& classList) const;
    bool isKindOfDataDescriptor(const std::string& className, const std::string& descriptorName) const;

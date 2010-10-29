@@ -10,20 +10,28 @@
 #ifndef STATISTICSIMP_H
 #define STATISTICSIMP_H
 
-#include "Statistics.h"
+#include "AoiElement.h"
+#include "BitMask.h"
 #include "ComplexData.h"
 #include "DimensionDescriptor.h"
 #include "MultiThreadedAlgorithm.h"
+#include "ObjectResource.h"
+#include "SafePtr.h"
+#include "Statistics.h"
 
 #include <map>
 #include <vector>
 
+class RasterElement;
 class RasterElementImp;
 
 class StatisticsImp : public Statistics
 {
 public:
-   StatisticsImp(const RasterElementImp* pRasterElement, DimensionDescriptor band);
+   StatisticsImp(const RasterElementImp* pRasterElement, DimensionDescriptor band, AoiElement* pAoi = NULL);
+   StatisticsImp(const RasterElementImp* pRasterElement,
+                 const std::vector<DimensionDescriptor>& bands,
+                 AoiElement* pAoi = NULL);
    ~StatisticsImp();
 
    void setMin(double dMin);
@@ -75,8 +83,13 @@ protected:
    void calculateStatistics(ComplexComponent component);
 
 private:
+   // NOTE: this has to be a RasterElementImp instead of RasterElement as it is populated
+   // in the RasterElementImp constructor. At that point, a dynamic_cast to RasterElement
+   // is not possible.
    const RasterElementImp* mpRasterElement;
-   DimensionDescriptor mBand;
+   std::vector<DimensionDescriptor> mBands;
+   FactoryResource<BitMask> mpAoi;
+   SafePtr<AoiElement> mpOriginalAoi; // a refresh will update mpAoi if this still exists
 
    std::map<ComplexComponent, double> mMinValues;
    std::map<ComplexComponent, double> mMaxValues;
@@ -93,24 +106,25 @@ private:
 class StatisticsInput
 {
 public:
-   StatisticsInput(const mta::Cube& cube, int bandToCalculate, const RasterElementImp* pRaster,
+   StatisticsInput(const std::vector<DimensionDescriptor>& bandsToCalculate, const RasterElement* pRaster,
                    ComplexComponent component, int resolution = 1,
-                   const std::vector<int>& badValues = std::vector<int>()) :
-      mCube(cube),
-      mBandToCalculate(bandToCalculate),
+                   const std::vector<int>& badValues = std::vector<int>(),
+                   const BitMask* pAoi = NULL) :
+      mBandsToCalculate(bandsToCalculate),
       mpRasterElement(pRaster),
       mComplexComponent(component),
       mResolution(resolution),
-      mBadValues(badValues)
+      mBadValues(badValues),
+      mpAoi(pAoi)
    {
    }
 
-   mta::Cube mCube;
-   int mBandToCalculate;
-   const RasterElementImp* mpRasterElement;
+   const std::vector<DimensionDescriptor>& mBandsToCalculate;
+   const RasterElement* mpRasterElement;
    ComplexComponent mComplexComponent;
    int mResolution;
    std::vector<int> mBadValues;
+   const BitMask* mpAoi;
 };
 
 class StatisticsThread;
@@ -133,23 +147,14 @@ public:
 
    void run();
 
-   const mta::Cube& getCube() const;
    double getMaximum() const;
    double getMinimum() const;
    double getSum() const;
    double getSumSquared() const;
-   int getResolution() const;
    unsigned int getCount() const;
 
-protected:
-   template<class T> void calculateStatistics(T* pData, ComplexComponent component);
-
 private:
-   mta::Cube mCube;
-   int mBandToCalculate;
-   ComplexComponent mComplexComponent;
-   const RasterElementImp* mpRasterElement;
-   int mResolution;
+   const StatisticsInput& mInput;
 
    Range mRowRange;
    double mMaximum;
@@ -157,7 +162,6 @@ private:
    double mSum;
    double mSumSquared;
    unsigned int mCount;
-   std::vector<int> mBadValues;
 };
 
 class HistogramInput
@@ -199,31 +203,18 @@ private:
 class HistogramThread : public mta::AlgorithmThread
 {
 public:
-   HistogramThread(const HistogramInput &input, int threadCount, int threadIndex, mta::ThreadReporter &reporter);
+   HistogramThread(const HistogramInput& input, int threadCount, int threadIndex, mta::ThreadReporter& reporter);
 
    void run();
 
-   const mta::Cube& getCube() const;
    std::vector<unsigned int>& getBinCounts();
-   double getMaximum() const;
-   double getMinimum() const;
-
-protected:
-   template<class T> void calculateHistogram(T* pData, ComplexComponent component);
 
 private:
-   mta::Cube mCube;
-   int mBandToCalculate;
-   ComplexComponent mComplexComponent;
-   const RasterElementImp* mpRasterElement;
-   int mResolution;
+   const HistogramInput& mInput;
    unsigned int mCount;
 
-   double mMinimum;
-   double mMaximum;
    Range mRowRange;
    std::vector<unsigned int> mBinCounts;
-   std::vector<int> mBadValues;
 };
 
 #endif

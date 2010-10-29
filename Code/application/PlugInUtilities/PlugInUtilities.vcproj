@@ -2163,7 +2163,7 @@
 				RelativePath="$(BuildDir)\Moc\$(ProjectName)\moc_GcpSymbolGrid.cpp"
 				>
 			</File>
-			<File
+      <File
 				RelativePath="$(BuildDir)\Moc\$(ProjectName)\moc_GraphicArcWidget.cpp"
 				>
 			</File>

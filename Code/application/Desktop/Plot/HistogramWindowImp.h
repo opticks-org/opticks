@@ -22,6 +22,7 @@
 
 class Layer;
 class PlotWidget;
+class PlotWidgetImp;
 
 class HistogramWindowImp : public PlotWindowImp
 {
@@ -42,6 +43,8 @@ public:
    PlotWidget* getPlot(Layer* pLayer, const RasterChannelType& eColor) const;    // Deprecated
    PlotWidget* getPlot(RasterLayer* pLayer, RasterChannelType channel) const;
    using PlotWindowImp::setCurrentPlot;
+
+   void createSubsetPlot(Layer* pLayer);
 
 public slots:
    PlotWidget* createPlot(Layer* pLayer);
@@ -71,11 +74,17 @@ protected slots:
    void activateLayer(PlotWidget* pPlot);
    void updatePlotInfo(RasterChannelType channel);
    void syncAutoZoom();
+   void setStatisticsShown(bool shown);
+   void setStatisticsShowActionState(PlotSet* pPlotSet);
 
 private:
+   void setStatisticsShowActionState(PlotWidgetImp* pPlot);
+   void deleteStatisticsPlots(Layer* pLayer);
+
    AttachmentPtr<SessionExplorer> mpExplorer;
    bool mDisplayModeChanging;
    QAction* mpSyncAutoZoomAction;
+   QAction* mpStatisticsShowAction;
 
    class HistogramUpdater
    {
@@ -129,6 +138,10 @@ private:
    void deletePlot(Layer* pLayer) \
    { \
       impClass::deletePlot(pLayer); \
+   } \
+   void createSubsetPlot(Layer* pLayer) \
+   { \
+      impClass::createSubsetPlot(pLayer); \
    }
 
 #endif

@@ -756,19 +756,6 @@ void ModelServicesImp::deleteMemoryBlock(char* memory)
    delete [] memory;
 }
 
-double ModelServicesImp::getDataValue(EncodingType type, const void* pData, int iIndex) const
-{
-   return getDataValue(type, pData, COMPLEX_MAGNITUDE, iIndex);
-}
-
-double ModelServicesImp::getDataValue(EncodingType type, const void* pData, ComplexComponent component, int iIndex) const
-{
-   double dValue = 0.0;
-   switchOnComplexEncoding(type, ModelServices::getDataValue, pData, component, iIndex, dValue);
-
-   return dValue;
-}
-
 bool ModelServicesImp::isKindOfElement(const string& className, const string& elementName) const
 {
    bool bSuccess = false;

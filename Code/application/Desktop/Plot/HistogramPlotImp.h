@@ -67,6 +67,7 @@ public:
    void setName(const std::string& name);
 
    bool setHistogram(Layer* pLayer);
+   bool setHistogram(Layer* pLayer, Statistics* pStatistics);
    bool setHistogram(Layer* pLayer, RasterChannelType color);
    bool setHistogram(unsigned int binCount, const double* pBinCenters, const double* pValues,
       const double* pBinWidths = NULL, bool bAbove = true);
@@ -84,10 +85,17 @@ public:
    enum ValuesTypeEnum { NO_VALUE, LOWER_VALUE, UPPER_VALUE };
    typedef EnumWrapper<ValuesTypeEnum> ValuesType;
 
+   Statistics* getStatistics() const;
+   bool ownsStatistics() const;
+
 public slots:
    void enableAutoZoom(bool enable);
    void setHistogramColor(const QColor& clrHistogram);
    void setComplexComponent(const ComplexComponent& eComponent);
+   void refreshStatistics();
+
+signals:
+   void histogramUpdated();
 
 protected:
    void mousePressEvent(QMouseEvent* pEvent);
@@ -97,7 +105,6 @@ protected:
 
    bool getDataMinMax(double& minValue, double& maxValue) const;
    bool getDataLowerUpper(double& lowerLimit, double& upperLimit) const;
-   Statistics* getStatistics() const;
    PassArea getLayerPassArea() const;
    QColor getLayerColor() const;
 
@@ -134,6 +141,7 @@ protected slots:
    void updateHistogramRegionExtents();
 
 private:
+   bool setHistogram(Layer* pLayer, Statistics* pStatistics, RasterChannelType color);
    class HistogramUpdater
    {
    public:
@@ -173,6 +181,8 @@ private:
    AttachmentPtr<RasterElement> mpElement;
    bool mAutoZoom;
 
+   Statistics* mpStats;
+
    QAction* mpBelowAction;
    QAction* mpAboveAction;
    QAction* mpBetweenAction;
@@ -209,6 +219,7 @@ private:
    QAction* mpRasterMenusSeparatorAction;
    QAction* mpSamplingAction;
    QAction* mpEndSeparatorAction;
+   QAction* mpStatisticsRefreshAction;
 };
 
 #define HISTOGRAMPLOTADAPTEREXTENSION_CLASSES \

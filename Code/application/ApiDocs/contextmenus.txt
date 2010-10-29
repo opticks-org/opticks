@@ -160,10 +160,12 @@
  *    <tr><td>Element menu</td><td>APP_HISTOGRAMPLOT_ELEMENT_MENU_ACTION()</td></tr>
  *    <tr><td>Separator</td><td>APP_HISTOGRAMPLOT_END_SEPARATOR_ACTION()</td></tr>
  *    <tr><td>Pass area menu</td><td>APP_HISTOGRAMPLOT_PASS_AREA_MENU_ACTION()</td></tr>
+ *    <tr><td>Refresh Statistics</td><td>APP_HISTOGRAMPLOT_REFRESH_STATISTICS_ACTION()</td></tr>
  *    <tr><td>Separator</td><td>APP_HISTOGRAMPLOT_RASTER_MENUS_SEPARATOR_ACTION()</td></tr>
  *    <tr><td>Separator</td><td>APP_HISTOGRAMPLOT_RASTER_SEPARATOR_ACTION()</td></tr>
  *    <tr><td>Spatial Sampling</td><td>APP_HISTOGRAMPLOT_SAMPLING_ACTION()</td></tr>
  *    <tr><td>Save</td><td>APP_HISTOGRAMPLOT_SAVE_ACTION()</td></tr>
+ *    <tr><td>Statistics</td><td>APP_HISTOGRAMPLOT_STATISTICS_ACTION()</td></tr>
  *    <tr><td>Stretch reset menu</td><td>APP_HISTOGRAMPLOT_STRETCH_RESET_MENU_ACTION()</td></tr>
  *    <tr><td>Stretch type menu</td><td>APP_HISTOGRAMPLOT_STRETCH_TYPE_MENU_ACTION()</td></tr>
  *    <tr><td>Synchronize auto zoom</td><td>APP_HISTOGRAMPLOT_SYNCHRONIZE_AUTO_ZOOM_ACTION()</td></tr>
@@ -232,6 +234,7 @@
  *  also includes all Layer \ref layer "actions".\n\n
  *  <table>
  *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
+ *    <tr><td>Calculate Statistics on Subset</td><td>APP_LAYER_CALCULATE_SUBSET_STATISTICS_ACTION()</td></tr>
  *    <tr><td>Display as menu</td><td>APP_RASTERLAYER_DISPLAY_AS_MENU_ACTION()</td></tr>
  *    <tr><td>Display mode menu</td><td>APP_RASTERLAYER_DISPLAY_MODE_MENU_ACTION()</td></tr>
  *    <tr><td>Separator</td><td>APP_RASTERLAYER_SEPARATOR_ACTION()</td></tr>
@@ -273,6 +276,14 @@
  *    <tr><td>Separator</td><td>APP_SPATIALDATAVIEW_PROPERTIES_SEPARATOR_ACTION()</td></tr>
  *    <tr><td>Show layers</td><td>APP_SPATIALDATAVIEW_SHOW_LAYERS_ACTION()</td></tr>
  *    <tr><td>Smooth</td><td>APP_SPATIALDATAVIEW_SMOOTH_ACTION()</td></tr>
+ *  </table>
+ *
+ *  \subsection thresholdlayer Threshold Layer
+ *  In addition to the actions listed below, the context menu for a ThresholdLayer
+ *  also includes all Layer \ref layer "actions".\n\n
+ *  <table>
+ *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
+ *    <tr><td>Calculate Statistics on Subset</td><td>APP_LAYER_CALCULATE_SUBSET_STATISTICS_ACTION()</td></tr>
  *  </table>
  *
  *  \subsection toolbar Toolbar

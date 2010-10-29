@@ -463,6 +463,7 @@ bool RasterLayerImp::getExtents(double& x1, double& y1, double& x4, double& y4)
 list<ContextMenuAction> RasterLayerImp::getContextMenuActions() const
 {
    list<ContextMenuAction> menuActions = LayerImp::getContextMenuActions();
+   menuActions.push_front(ContextMenuAction(mpSubsetStatisticsAction, APP_LAYER_CALCULATE_SUBSET_STATISTICS_ACTION));
    menuActions.push_front(ContextMenuAction(mpSeparatorAction, APP_RASTERLAYER_SEPARATOR_ACTION));
 
    // Rebuild the menu from ConfigurationSettings.

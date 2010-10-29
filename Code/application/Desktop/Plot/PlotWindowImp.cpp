@@ -586,6 +586,11 @@ void PlotWindowImp::clear()
    }
 }
 
+void PlotWindowImp::setInfoBarElideMode(Qt::TextElideMode mode)
+{
+   mpInfoBar->setElideMode(mode);
+}
+
 bool PlotWindowImp::eventFilter(QObject* pObject, QEvent* pEvent)
 {
    if (pEvent != NULL)

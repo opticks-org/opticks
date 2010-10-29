@@ -177,6 +177,21 @@ public:
     */
    virtual void deletePlot(Layer* pLayer) = 0;
 
+   /**
+    *  Create a new histogram plot over a subset of the data in the specified layer.
+    *
+    *  This prompts the user for a spatial and band subset and creates a new histogram
+    *  plot with the statistics data for that subset.
+    *
+    *  @param pLayer
+    *         The subset will be calculated over this layer's data. This must be
+    *         a layer which holds a RasterElement. The available AOIs for spatial
+    *         subset will be the AoiLayers in the same view as \em pLayer.
+    *
+    *  @note Currently works with RasterLayer and ThresholdLayer only.
+    */
+   virtual void createSubsetPlot(Layer* pLayer) = 0;
+
 protected:
    /**
     * This object should be destroyed by calling DesktopServices::deleteWindow().

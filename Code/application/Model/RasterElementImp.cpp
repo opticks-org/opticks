@@ -218,7 +218,7 @@ double RasterElementImp::getPixelValue(DimensionDescriptor columnDim, DimensionD
    void* pData = da->getColumn();
    EncodingType dataType = pDescriptor->getDataType();
 
-   return Service<ModelServices>()->getDataValue(dataType, pData, component, 0);
+   return ModelServices::getDataValue(dataType, pData, component, 0);
 }
 
 void RasterElementImp::updateData()

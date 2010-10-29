@@ -19,12 +19,10 @@
 #include "DMutex.h"
 #include "EnumWrapper.h"
 #include "MessageLogResource.h"
-#include "TypesFile.h"
 
 #include <numeric>
 #include <algorithm>
 #include <sstream>
-#include "DataAccessorImpl.h"
 #include "DesktopServices.h"
 
 class Progress;
@@ -831,35 +829,6 @@ Result MultiThreadedAlgorithm<AlgInput, AlgOutput, AlgThread>::run()
 
    return result;
 }
-
-/**
- * @deprecated Use RasterElement and DataAccessor.
- */
-class Cube
-{
-public:
-   Cube(void* pData, EncodingType type, int rowCount, int columnCount, int bandCount);
-   Cube(const Cube& cube);
-
-   const void* getData() const;
-   EncodingType getType() const;
-   int getRowCount() const;
-   int getColumnCount() const;
-   int getBandCount() const;
-   void* getPixel(int row, int col) const;
-   double getScaleFromStandard() const;
-
-private:
-   int computePixelSize(int bandCount, EncodingType type);
-
-   const void* mpData;
-   EncodingType mType;
-   int mRowCount;
-   int mColumnCount;
-   int mBandCount;
-   int mPixelSize;
-   double mScaleFromStandard;
-};
 
 } // end namespace mta
 

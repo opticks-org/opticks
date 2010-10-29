@@ -82,6 +82,7 @@ public:
 
 public slots:
    void clear();
+   void setInfoBarElideMode(Qt::TextElideMode mode);
 
 signals:
    void plotSetAdded(PlotSet* pPlotSet);

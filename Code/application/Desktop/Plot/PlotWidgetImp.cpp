@@ -186,12 +186,12 @@ void PlotWidgetImp::initialize(PlotViewImp *pPlotView, const string& plotName, P
    mpLegend->setMinimumWidth(120);
 
    // Splitter widget
-   QSplitter* pSplitter = new QSplitter(Qt::Horizontal, mpPlotWidget);
-   pSplitter->setOpaqueResize(true);
-   pSplitter->installEventFilter(this);
-   pSplitter->insertWidget(0, pPlotWidget);
-   pSplitter->insertWidget(1, mpLegend);
-   pSplitter->setStretchFactor(0, 10);
+   mpSplitter = new QSplitter(Qt::Horizontal, mpPlotWidget);
+   mpSplitter->setOpaqueResize(true);
+   mpSplitter->installEventFilter(this);
+   mpSplitter->insertWidget(0, pPlotWidget);
+   mpSplitter->insertWidget(1, mpLegend);
+   mpSplitter->setStretchFactor(0, 10);
 
    // Layout
    QHBoxLayout* pTopLabelLayout = new QHBoxLayout();
@@ -237,7 +237,7 @@ void PlotWidgetImp::initialize(PlotViewImp *pPlotView, const string& plotName, P
    pPlotLayout->setSpacing(5);
    pPlotLayout->addLayout(pTopLabelLayout);
    pPlotLayout->addWidget(mpTitleLabel);
-   pPlotLayout->addWidget(pSplitter, 10);
+   pPlotLayout->addWidget(mpSplitter, 10);
    pPlotLayout->addLayout(pBottomLabelLayout);
 
    QVBoxLayout* pLayout = dynamic_cast<QVBoxLayout*>(layout());
@@ -380,9 +380,6 @@ list<ContextMenuAction> PlotWidgetImp::getContextMenuActions() const
    menuActions.push_back(ContextMenuAction(mpPrintAction, APP_PLOTWIDGET_PRINT_ACTION));
    menuActions.push_back(ContextMenuAction(mpSeparatorAction, APP_PLOTWIDGET_PRINT_SEPARATOR_ACTION));
 
-   list<ContextMenuAction> plotActions = mpPlot->getContextMenuActions();
-   std::copy(plotActions.begin(), plotActions.end(), std::back_inserter(menuActions));
-
    ContextMenuAction legendAction(mpLegendAction, APP_PLOTWIDGET_LEGEND_ACTION);
    legendAction.mBuddyType = ContextMenuAction::AFTER;
    legendAction.mBuddyId = APP_PLOTVIEW_MOUSE_MODE_SEPARATOR_ACTION;
@@ -392,6 +389,9 @@ list<ContextMenuAction> PlotWidgetImp::getContextMenuActions() const
    separatorAction.mBuddyType = ContextMenuAction::AFTER;
    separatorAction.mBuddyId = APP_PLOTWIDGET_LEGEND_ACTION;
    menuActions.push_back(separatorAction);
+
+   list<ContextMenuAction> plotActions = mpPlot->getContextMenuActions();
+   std::copy(plotActions.begin(), plotActions.end(), std::back_inserter(menuActions));
 
    return menuActions;
 }
@@ -649,6 +649,11 @@ void PlotWidgetImp::setTitleFont(const QFont& ftTitle)
 QFont PlotWidgetImp::getTitleFont() const
 {
    return mTitleFont.toQFont();
+}
+
+void PlotWidgetImp::setTitleElideMode(Qt::TextElideMode mode)
+{
+   mpTitleLabel->setElideMode(mode);
 }
 
 void PlotWidgetImp::showAxis(AxisPosition axis, bool bShow)
@@ -1430,6 +1435,11 @@ bool PlotWidgetImp::rename(const string &newName, string &errorMessage)
       return SessionItemImp::rename(newName, errorMessage);
    }
    return pPlotSet->renamePlot(dynamic_cast<PlotWidget*>(this), newName);
+}
+
+QSplitter* PlotWidgetImp::getSplitter()
+{
+   return mpSplitter;
 }
 
 void PlotWidgetImp::selectPlotObject(PlotObject* pObject, bool bSelect)

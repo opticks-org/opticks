@@ -15,6 +15,7 @@
 #include "ComplexData.h"
 #include "Service.h"
 #include "Subject.h"
+#include "switchOnEncoding.h"
 #include "TypesFile.h"
 
 #include <map>
@@ -693,7 +694,7 @@ public:
    virtual void deleteMemoryBlock(char* memory) = 0; 
 
    /**
-    *  Retrieves an individual data value from a block of memory.
+    *  This static method retrieves an individual data value from a block of memory.
     *
     *  @param   type
     *           The data type of the memory block.
@@ -706,10 +707,13 @@ public:
     *  @return  The data value.  A value of 0.0 is returned if the given type
     *           is not recognized.
     */
-   virtual double getDataValue(EncodingType type, const void* pData, int iIndex) const = 0;
+   static double getDataValue(EncodingType type, const void* pData, int iIndex)
+   {
+      return getDataValue(type, pData, COMPLEX_MAGNITUDE, iIndex);
+   }
 
    /**
-    *  Retrieves an individual data value from a block of memory.
+    *  This static method retrieves an individual data value from a block of memory.
     *
     *  @param   type
     *           The data type of the memory block.
@@ -728,7 +732,12 @@ public:
     *
     *  @see     ComplexComponent
     */
-   virtual double getDataValue(EncodingType type, const void* pData, ComplexComponent component, int iIndex) const = 0;
+   static double getDataValue(EncodingType type, const void* pData, ComplexComponent component, int iIndex)
+   {
+      double dValue = 0.0;
+      switchOnComplexEncoding(type, ModelServices::getDataValue, pData, component, iIndex, dValue);
+      return dValue;
+   }
 
    /**
     *  Retrieves an individual data value from a block of memory independent
