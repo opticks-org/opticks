@@ -1,3 +1,3 @@
 __doc__ = """ESRI shapefile library."""
-package = {'url':"https://opticks.ballforge.net/files/documents/8/21/shapelib.zip",
+package = {'url':"http://opticks.org/downloads/dependencies/shapelib-1.2.10.zip",
            'downloadLocation':'shapelib-1.2.10.zip'}

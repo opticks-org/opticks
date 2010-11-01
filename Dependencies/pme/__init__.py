@@ -1,3 +1,3 @@
 __doc__ = """PCRE c++ library."""
-package = {'url':"https://opticks.ballforge.net/files/documents/8/49/pme.zip",
+package = {'url':"http://opticks.org/downloads/dependencies/pme-1.0.4.zip",
            'downloadLocation':'pme-1.0.4.zip'}
