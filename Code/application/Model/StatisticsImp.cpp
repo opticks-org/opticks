@@ -27,6 +27,7 @@
 
 #include <algorithm>
 #include <limits>
+#include <numeric>
 using namespace mta;
 XERCES_CPP_NAMESPACE_USE
 
@@ -1152,7 +1153,7 @@ void HistogramOutput::computeResultHistogram(const std::vector<unsigned int>& to
 void HistogramOutput::computePercentiles(const std::vector<unsigned int>& totalHistogram)
 {
    int bin;
-   int pointCount = accumulate(totalHistogram.begin(), totalHistogram.end(), 0);
+   int pointCount = std::accumulate(totalHistogram.begin(), totalHistogram.end(), 0);
 
    double range = mMaximum - mMinimum;
    int percentile;
