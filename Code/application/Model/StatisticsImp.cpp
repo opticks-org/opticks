@@ -662,22 +662,36 @@ void StatisticsImp::calculateStatistics(ComplexComponent component)
       bInteger = false;
    }
 
-   HistogramInput histInput(statInput, statOutput);
-   HistogramOutput histOutput(bInteger, statOutput.mMaximum, statOutput.mMinimum);
-
    progressReporter.setCurrentPhase(1);
 
-   mta::MultiThreadedAlgorithm<HistogramInput, HistogramOutput, HistogramThread> histogramAlgorithm
-      (getNumRequiredThreads(pDescriptor->getRowCount()), histInput, histOutput, &progressReporter);
-
-   if (histogramAlgorithm.run() == mta::SUCCESS)
+   if (statOutput.mMaxMinSet)
    {
-      setMin(statOutput.mMinimum, component);
-      setMax(statOutput.mMaximum, component);
-      setAverage(statOutput.mAverage, component);
-      setStandardDeviation(statOutput.mStandardDeviation, component);
-      setPercentiles(histOutput.getPercentiles(), component);
-      setHistogram(histOutput.getBinCenters(), histOutput.getBinCounts(), component);
+      HistogramInput histInput(statInput, statOutput);
+      HistogramOutput histOutput(bInteger, statOutput.mMaximum, statOutput.mMinimum);
+
+      mta::MultiThreadedAlgorithm<HistogramInput, HistogramOutput, HistogramThread> histogramAlgorithm
+         (getNumRequiredThreads(pDescriptor->getRowCount()), histInput, histOutput, &progressReporter);
+
+      if (histogramAlgorithm.run() == mta::SUCCESS)
+      {
+         setMin(statOutput.mMinimum, component);
+         setMax(statOutput.mMaximum, component);
+         setAverage(statOutput.mAverage, component);
+         setStandardDeviation(statOutput.mStandardDeviation, component);
+         setPercentiles(histOutput.getPercentiles(), component);
+         setHistogram(histOutput.getBinCenters(), histOutput.getBinCounts(), component);
+      }
+   }
+   else
+   {
+         setMin(0.0, component);
+         setMax(0.0, component);
+         setAverage(statOutput.mAverage, component);
+         setStandardDeviation(statOutput.mStandardDeviation, component);
+         std::vector<double> dzeroes(256, 0.0);
+         std::vector<unsigned int> uizeroes(256, 0);
+         setPercentiles(&dzeroes.front(), component);
+         setHistogram(&dzeroes.front(), &uizeroes.front(), component);
    }
 }
 
@@ -687,6 +701,7 @@ StatisticsThread::StatisticsThread(const StatisticsInput& input, int threadCount
    mInput(input),
    mRowRange(getThreadRange(threadCount, static_cast<const RasterDataDescriptor*>(
                                  input.mpRasterElement->getDataDescriptor())->getRowCount())),
+   mMaxMinSet(false),
    mMaximum(-std::numeric_limits<double>::max()),
    mMinimum(std::numeric_limits<double>::max()),
    mSum(0.0),
@@ -702,7 +717,7 @@ void StatisticsThread::run()
 
    BitMaskIterator diter(mInput.mpAoi, 0, mRowRange.mFirst, pDescriptor->getColumnCount() - 1, mRowRange.mLast);
 
-   bool maxMinSet = false;
+   mMaxMinSet = false;
    mSum = 0.0;
    mSumSquared = 0.0;
    mCount = 0;
@@ -776,10 +791,10 @@ void StatisticsThread::run()
             if (badValueCount == 0 || (badValueCount == 1 && tempInt != firstBadValue) || 
                !std::binary_search(badBegin, badEnd, tempInt))
             {
-               if (!maxMinSet)
+               if (!mMaxMinSet)
                {
                   mMinimum = mMaximum = temp;
-                  maxMinSet = true;
+                  mMaxMinSet = true;
                }
                else
                {
@@ -819,6 +834,11 @@ void StatisticsThread::run()
    }
 }
 
+bool StatisticsThread::isMaxMinSet() const
+{
+   return mMaxMinSet;
+}
+
 double StatisticsThread::getMaximum() const
 {
    return mMaximum;
@@ -845,6 +865,7 @@ unsigned int StatisticsThread::getCount() const
 }
 
 StatisticsOutput::StatisticsOutput() :
+   mMaxMinSet(false),
    mMaximum(-std::numeric_limits<double>::max()),
    mMinimum(std::numeric_limits<double>::max()),
    mAverage(0.0),
@@ -853,6 +874,7 @@ StatisticsOutput::StatisticsOutput() :
 
 bool StatisticsOutput::compileOverallResults(const std::vector<StatisticsThread*>& threads)
 {
+   mMaxMinSet = false;
    mMaximum = -std::numeric_limits<double>::max();
    mMinimum = std::numeric_limits<double>::max();
    mAverage = 0.0;
@@ -872,8 +894,12 @@ bool StatisticsOutput::compileOverallResults(const std::vector<StatisticsThread*
       StatisticsThread* pThread = *iter;
       if (pThread != NULL)
       {
-         mMaximum = std::max(mMaximum, pThread->getMaximum());
-         mMinimum = std::min(mMinimum, pThread->getMinimum());
+         if (pThread->isMaxMinSet())
+         {
+            mMaxMinSet = true;
+            mMaximum = std::max(mMaximum, pThread->getMaximum());
+            mMinimum = std::min(mMinimum, pThread->getMinimum());
+         }
          totalSum += pThread->getSum();
          totalSquaredSum += pThread->getSumSquared();
          pointCount += pThread->getCount();

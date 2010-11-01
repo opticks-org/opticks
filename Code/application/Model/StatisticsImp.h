@@ -133,6 +133,7 @@ class StatisticsOutput
 public:
    StatisticsOutput();
 
+   bool mMaxMinSet;
    double mMaximum;
    double mMinimum;
    double mAverage;
@@ -147,6 +148,7 @@ public:
 
    void run();
 
+   bool isMaxMinSet() const;
    double getMaximum() const;
    double getMinimum() const;
    double getSum() const;
@@ -157,6 +159,7 @@ private:
    const StatisticsInput& mInput;
 
    Range mRowRange;
+   bool mMaxMinSet;
    double mMaximum;
    double mMinimum;
    double mSum;
