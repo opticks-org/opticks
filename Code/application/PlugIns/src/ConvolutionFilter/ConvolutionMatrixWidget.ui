@@ -1,0 +1,205 @@
+<ui version="4.0" >
+ <class>ConvolutionMatrixWidget</class>
+ <widget class="QWidget" name="ConvolutionMatrixWidget" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>373</width>
+    <height>322</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" >
+   <item row="0" column="0" >
+    <widget class="QPushButton" name="mpLink" >
+     <property name="toolTip" >
+      <string>Force the kernel to be square.</string>
+     </property>
+     <property name="text" >
+      <string/>
+     </property>
+     <property name="checkable" >
+      <bool>true</bool>
+     </property>
+     <property name="checked" >
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1" >
+    <widget class="QSlider" name="mpWidthSlider" >
+     <property name="minimum" >
+      <number>0</number>
+     </property>
+     <property name="maximum" >
+      <number>4</number>
+     </property>
+     <property name="pageStep" >
+      <number>1</number>
+     </property>
+     <property name="orientation" >
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="tickPosition" >
+      <enum>QSlider::TicksAbove</enum>
+     </property>
+     <property name="tickInterval" >
+      <number>1</number>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0" >
+    <widget class="QSlider" name="mpHeightSlider" >
+     <property name="maximum" >
+      <number>4</number>
+     </property>
+     <property name="pageStep" >
+      <number>1</number>
+     </property>
+     <property name="orientation" >
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="invertedAppearance" >
+      <bool>true</bool>
+     </property>
+     <property name="invertedControls" >
+      <bool>true</bool>
+     </property>
+     <property name="tickPosition" >
+      <enum>QSlider::TicksAbove</enum>
+     </property>
+     <property name="tickInterval" >
+      <number>1</number>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1" >
+    <widget class="QTableWidget" name="mpFilter" >
+     <property name="toolTip" >
+      <string>Enter kernel values.</string>
+     </property>
+     <property name="frameShape" >
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="frameShadow" >
+      <enum>QFrame::Plain</enum>
+     </property>
+     <property name="selectionMode" >
+      <enum>QAbstractItemView::NoSelection</enum>
+     </property>
+     <property name="textElideMode" >
+      <enum>Qt::ElideNone</enum>
+     </property>
+     <property name="rowCount" >
+      <number>0</number>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="1" >
+    <widget class="QDialogButtonBox" name="mpPresetButtons" >
+     <property name="toolTip" >
+      <string>Load or save the current divisor and matrix settings to the named preset. This will overwrite an existing preset if selected.
+Remove an existing preset.</string>
+     </property>
+     <property name="standardButtons" >
+      <set>QDialogButtonBox::Save</set>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="1" >
+    <spacer>
+     <property name="orientation" >
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" >
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="4" column="1" >
+    <widget class="QComboBox" name="mpFilterName" >
+     <property name="toolTip" >
+      <string>You can save presets by typing in a name or selecting and existing preset name and hitting Save.
+You can load a preset by selecting it and hitting load.
+You can remove a preset by selecting it and hitting Remove.</string>
+     </property>
+     <property name="editable" >
+      <bool>true</bool>
+     </property>
+     <property name="insertPolicy" >
+      <enum>QComboBox::NoInsert</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1" >
+    <widget class="QDialogButtonBox" name="mpMatrixButtons" >
+     <property name="toolTip" >
+      <string>Reset the divisor and matrix to the defaults.
+Apply the convolution to the primary raster element in the active window.</string>
+     </property>
+     <property name="standardButtons" >
+      <set>QDialogButtonBox::Apply|QDialogButtonBox::NoButton|QDialogButtonBox::Reset</set>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0" >
+    <widget class="QLabel" name="label" >
+     <property name="text" >
+      <string>Preset</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1" >
+    <layout class="QHBoxLayout" >
+     <item>
+      <widget class="QDoubleSpinBox" name="mpDivisor" >
+       <property name="toolTip" >
+        <string>Additional divisor. The result is always divided by the number of cells in the kernel.</string>
+       </property>
+       <property name="decimals" >
+        <number>3</number>
+       </property>
+       <property name="minimum" >
+        <double>0.001000000000000</double>
+       </property>
+       <property name="maximum" >
+        <double>10000.000000000000000</double>
+       </property>
+       <property name="value" >
+        <double>1.000000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item row="2" column="0" >
+    <widget class="QLabel" name="label_2" >
+     <property name="text" >
+      <string>Divisor</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
