@@ -1,0 +1,12 @@
+
+if [ $CLASSIFICATIONDISPLAY = "y" ]; then
+   while read src dest
+   do
+      sed -e "s:<value>0</value>:<value>1</value>:" "$src" > "$dest"
+   done
+else
+   while read src dest
+   do
+      cp $src $dest
+   done
+fi
