@@ -81,11 +81,11 @@ public:
    bool adoptSetting(const std::string& key, DataVariant& var, bool setIfSame = false);
    const DataVariant& getSetting(const std::string& key) const;
    bool isUserSetting(const std::string& key) const;
-   bool isSessionSetting(const std::string& key) const;
+   bool isTemporarySetting(const std::string& key) const;
    bool isDefaultSetting(const std::string& key) const;
    void deleteUserSetting(const std::string& key);
-   void deleteSessionSetting(const std::string& key);
-   bool adoptSessionSetting(const std::string& key, DataVariant& var);
+   void deleteTemporarySetting(const std::string& key);
+   bool adoptTemporarySetting(const std::string& key, DataVariant& var);
    void copySetting(const std::string& key, DynamicObject* pObject) const;
 
    void setMruFiles(const std::vector<MruFile>& mruFiles);
@@ -119,7 +119,7 @@ public:
 
 protected:
    bool setSetting(const std::string& key, DataVariant& var, bool setIfSame, bool adopt);
-   bool setSessionSetting(const std::string& key, DataVariant& var, bool adopt);
+   bool setTemporarySetting(const std::string& key, DataVariant& var, bool adopt);
 
    std::string getUserSettingsFileName() const;
    std::string getUserSettingsFilePath() const;

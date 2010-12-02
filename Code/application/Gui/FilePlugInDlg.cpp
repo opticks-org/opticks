@@ -275,7 +275,7 @@ void FilePlugInDlg::accept()
          FactoryResource<Filename> pImportDir;
          pImportDir->setFullPathAndName(strDirectory.toStdString());
          Service<ConfigurationSettings> pSettings;
-         pSettings->setSessionSetting(mPlugInKey, *pImportDir.get());
+         pSettings->setTemporarySetting(mPlugInKey, *pImportDir.get());
       }
    }
 

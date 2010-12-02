@@ -491,7 +491,7 @@ class Filename;
  * The configuration settings allow data values to be stored per-user and
  * during an application run.  Settings which are saved per-user and persist
  * between application runs are called per-user settings.  Settings which
- * only exist during one application run are called per-session settings.
+ * only exist during one application run are called per-session or temporary settings.
  *
  * These settings are initialized on application startup.  This is done by
  * locating any .cfg files contained in getHome()/DefaultSettings and the
@@ -510,18 +510,18 @@ class Filename;
  *
  * The configuration settings can also be used to allow the Studio to create
  * PlugInArg objects prior to plug-in execution.  If the plug-in args cannot be
- * defined the configuration setting are queried for specific values using the
+ * defined, the configuration setting are queried for specific values using the
  * plug-in name for the Setting group name.
  *
  * This subclass of Subject will notify upon the following conditions:
- * - The following methods are called: setSetting(), setSessionSetting,
- *   deleteUserSetting, deleteSessionSetting.
+ * - The following methods are called: setSetting(), setTemporarySetting,
+ *   deleteUserSetting, deleteTemporarySetting.
  */
 class ConfigurationSettings : public Subject
 {
 public:
    /**
-    * Emitted with any<std::string> when setSetting or setSessionSetting is called.
+    * Emitted with any<std::string> when setSetting or setTemporarySetting is called.
     * The string will be the key of the setting that was modified.
     */
    SIGNAL_METHOD(ConfigurationSettings, SettingModified);
@@ -691,7 +691,7 @@ public:
     * during application shutdown
     * meaning the particular value set for this setting will be
     * a per-user value.  If the given setting was previously set
-    * with setSessionSetting(), it will no longer be a session setting
+    * with setTemporarySetting(), it will no longer be a temporary setting
     * and will become a per-user setting.
     *
     * This method is preferred to adoptSetting() unless
@@ -733,7 +733,7 @@ public:
     * during application shutdown
     * meaning the particular value set for this setting will be
     * a per-user value.  If the given setting was previously set
-    * with setSessionSetting(), it will no longer be a session setting
+    * with setTemporarySetting(), it will no longer be a temporary setting
     * and will become a per-user setting.
     *
     * This method should not be used; generally setSetting() is
@@ -767,11 +767,15 @@ public:
    /**
     * Sets the given setting for this session only.  Any value
     * set using this method will only be valid while the application
-    * is running.
+    * is running. The value set using this method will not be saved during
+    * a session save, and will not be restored during a session restore.
+    * If a plug-in sets a value using this method and needs the value
+    * saved/restored during session save/restore, it is the responsibility
+    * of the plug-in to save/restore the value during session save/restore.
     *
-    * This method is preferred to adoptSessionSetting() unless
+    * This method is preferred to adoptTemporarySetting() unless
     * you are passing an already constructed DataVariant in
-    * which case, adoptSessionSetting() will be faster because
+    * which case, adoptTemporarySetting() will be faster because
     * it avoids a deep copy.
     *
     * @param key
@@ -784,23 +788,27 @@ public:
     * @return \c true if the setting was successfully set, and \c false otherwise.
     */
    template<typename T>
-   bool setSessionSetting(const std::string& key, const T& var)
+   bool setTemporarySetting(const std::string& key, const T& var)
    {
       DataVariant temp(var);
-      return adoptSessionSetting(key, temp);
+      return adoptTemporarySetting(key, temp);
    }
 
    /**
     * Sets the given setting for this session only.  Any value
     * set using this method will only be valid while the application
-    * is running.
+    * is running. The value set using this method will not be saved during
+    * a session save, and will not be restored during a session restore.
+    * If a plug-in sets a value using this method and needs the value
+    * saved/restored during session save/restore, it is the responsibility
+    * of the plug-in to save/restore the value during session save/restore.
     *
-    * This method should not be used; generally setSessionSetting() is
-    * preferred. This method and setSessionSetting() have identical
-    * performance characteristics and setSessionSetting() is easier to
-    * call.  This method is faster than setSessionSetting() though if
+    * This method should not be used; generally setTemporarySetting() is
+    * preferred. This method and setTemporarySetting() have identical
+    * performance characteristics and setTemporarySetting() is easier to
+    * call.  This method is faster than setTemporarySetting() though if
     * you have an already constructed DataVariant and is
-    * preferred to setSessionSetting() in this case.
+    * preferred to setTemporarySetting() in this case.
     *
     * @param key
     *        The name of the setting.  This key
@@ -813,14 +821,14 @@ public:
     *
     * @return \c true if the setting was successfully set, and \c false otherwise.
     */
-   virtual bool adoptSessionSetting(const std::string& key, DataVariant& var) = 0;
+   virtual bool adoptTemporarySetting(const std::string& key, DataVariant& var) = 0;
 
    /**
     * Gets the current value for the given setting.  The value
-    * returned will be located in the following order: session setting,
+    * returned will be located in the following order: temporary setting,
     * per-user setting and default setting.  
     *
-    * @see setSessionSetting(), setSetting()
+    * @see setTemporarySetting(), setSetting()
     *
     * @param   key
     *          Name of the setting to be found.  This key
@@ -846,20 +854,20 @@ public:
    virtual bool isUserSetting(const std::string& key) const = 0;
 
    /**
-    * Queries whether a given setting has been set using setSessionSetting().
+    * Queries whether a given setting has been set using setTemporarySetting().
     *
     * @param key
     *        Name of the setting to be found.  This key
     *        can have '/' in it, in which case it will behave like
     *        DynamicObject::getAttributeByPath.
     *
-    * @return true if this particular setting has been set using setSessionSetting().
+    * @return true if this particular setting has been set using setTemporarySetting().
     */
-   virtual bool isSessionSetting(const std::string& key) const = 0;
+   virtual bool isTemporarySetting(const std::string& key) const = 0;
 
    /**
     * Queries whether a given setting is the default value, i.e. it has not been
-    * overridden by the user or by calling setSessionSetting().
+    * overridden by the user or by calling setTemporarySetting().
     *
     * @param key
     *        Name of the setting to be found.  This key
@@ -880,17 +888,17 @@ public:
    virtual void deleteUserSetting(const std::string& key) = 0;
 
    /**
-    * Removes a per-session setting.  See getSetting() for
+    * Removes a per-session temporary setting.  See getSetting() for
     * more details.  
     *
     * @param   key
     *          Name of the setting to be deleted.
     */
-   virtual void deleteSessionSetting(const std::string& key) = 0;
+   virtual void deleteTemporarySetting(const std::string& key) = 0;
 
    /**
     * Copies the value of the given setting into the provided
-    * DynamicObject. This method is intented to be used
+    * DynamicObject. This method is intended to be used
     * when creating default files, so a plug-in developer
     * can copy a setting into a DynamicObject which can
     * be written to a defaults file using serializeAsDefaults().

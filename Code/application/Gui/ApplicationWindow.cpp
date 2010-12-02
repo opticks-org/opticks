@@ -2473,7 +2473,7 @@ void ApplicationWindow::openSession()
       FactoryResource<Filename> pDir;
       pDir->setFullPathAndName(filename.toStdString());
       pDir->setFullPathAndName(pDir->getPath());
-      Service<ConfigurationSettings>()->setSessionSetting(
+      Service<ConfigurationSettings>()->setTemporarySetting(
          ConfigurationSettings::getSettingSaveOpenSessionPathKey(), *pDir.get());
       openSession(filename);
    }
@@ -2705,7 +2705,7 @@ bool ApplicationWindow::saveSessionAs()
       FactoryResource<Filename> pDir;
       pDir->setFullPathAndName(filename.toStdString());
       pDir->setFullPathAndName(pDir->getPath());
-      Service<ConfigurationSettings>()->setSessionSetting(
+      Service<ConfigurationSettings>()->setTemporarySetting(
          ConfigurationSettings::getSettingSaveOpenSessionPathKey(), *pDir.get());
       mSessionFilename = filename.toStdString();
       return saveSession();
@@ -5221,7 +5221,7 @@ void ApplicationWindow::checkGpuImageSupport()
    if (!systemSupportsGpuImage && defaultGpuImage)
    {
       Service<ConfigurationSettings> pSettings;
-      pSettings->setSessionSetting(RasterLayer::getSettingGpuImageKey(), false);
+      pSettings->setTemporarySetting(RasterLayer::getSettingGpuImageKey(), false);
    }
 }
 

@@ -187,10 +187,10 @@ void OptionsDlg::fixNodes(QTreeWidgetItem* pCurItem)
 void OptionsDlg::saveState()
 {
    Service<ConfigurationSettings> pSettings;
-   pSettings->setSessionSetting("OptionsDlg/geometry/posX", pos().x());
-   pSettings->setSessionSetting("OptionsDlg/geometry/posY", pos().y());
-   pSettings->setSessionSetting("OptionsDlg/geometry/height", size().height());
-   pSettings->setSessionSetting("OptionsDlg/geometry/width", size().width());
+   pSettings->setTemporarySetting("OptionsDlg/geometry/posX", pos().x());
+   pSettings->setTemporarySetting("OptionsDlg/geometry/posY", pos().y());
+   pSettings->setTemporarySetting("OptionsDlg/geometry/height", size().height());
+   pSettings->setTemporarySetting("OptionsDlg/geometry/width", size().width());
    QByteArray splitterConfiguration = mpSplitter->saveState().toBase64();
    string configData;
    QString strConfiguration(splitterConfiguration);
@@ -198,8 +198,8 @@ void OptionsDlg::saveState()
    {
       configData = strConfiguration.toStdString();
    }
-   pSettings->setSessionSetting("OptionsDlg/geometry/splitterState", configData);
-   pSettings->setSessionSetting("OptionsDlg/selectedOption", getCurrentOptionPath());
+   pSettings->setTemporarySetting("OptionsDlg/geometry/splitterState", configData);
+   pSettings->setTemporarySetting("OptionsDlg/selectedOption", getCurrentOptionPath());
 }
 
 void OptionsDlg::restoreState()

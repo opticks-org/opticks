@@ -293,7 +293,7 @@ public:
       Service<ConfigurationSettings> pSettings;
       std::string plugInsKey = "_" + mModuleId + "DynamicPlugInNames_";
       std::vector<std::string> names;
-      if (pSettings->isSessionSetting(plugInsKey))
+      if (pSettings->isTemporarySetting(plugInsKey))
       {
          const std::vector<std::string>* pNames = NULL;
          pNames = dv_cast<std::vector<std::string> >(&pSettings->getSetting(plugInsKey));
@@ -307,7 +307,7 @@ public:
       else
       {
          init(true, names);
-         pSettings->setSessionSetting(plugInsKey, names);
+         pSettings->setTemporarySetting(plugInsKey, names);
       }
       return names;
    }

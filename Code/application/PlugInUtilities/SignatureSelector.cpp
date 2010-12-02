@@ -1013,7 +1013,7 @@ void SignatureSelector::browseFiles()
                FactoryResource<Filename> pNewWorkingDir;
                pNewWorkingDir->setFullPathAndName(strDirectory.toStdString());
                Service<ConfigurationSettings> pSettings;
-               pSettings->setSessionSetting(ConfigurationSettings::getSettingPluginWorkingDirectoryKey("Signature"),
+               pSettings->setTemporarySetting(ConfigurationSettings::getSettingPluginWorkingDirectoryKey("Signature"),
                   *pNewWorkingDir.get());
             }
          }

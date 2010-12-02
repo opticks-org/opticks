@@ -306,7 +306,7 @@ void WavelengthsWidget::loadWavelengths()
    {
       FactoryResource<Filename> pImportDirectory;
       pImportDirectory->setFullPathAndName(importDirectory.toStdString());
-      pSettings->setSessionSetting(key, *pImportDirectory.get());
+      pSettings->setTemporarySetting(key, *pImportDirectory.get());
    }
 
    // Load as metadata in XML format
@@ -516,7 +516,7 @@ void WavelengthsWidget::saveWavelengths()
    {
       FactoryResource<Filename> pExportDirectory;
       pExportDirectory->setFullPathAndName(exportDirectory.toStdString());
-      pSettings->setSessionSetting(key, *pExportDirectory.get());
+      pSettings->setTemporarySetting(key, *pExportDirectory.get());
    }
 
    // Save the wavelengths

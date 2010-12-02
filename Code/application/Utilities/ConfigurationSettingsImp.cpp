@@ -707,7 +707,7 @@ bool ConfigurationSettingsImp::setSetting(const string& key, DataVariant& var, b
       }
       if (success)
       {
-         deleteSessionSetting(key);
+         deleteTemporarySetting(key);
          notify(SIGNAL_NAME(ConfigurationSettings, SettingModified), boost::any(key));
       }
    }
@@ -744,7 +744,7 @@ const DataVariant& ConfigurationSettingsImp::getSetting(const string& key) const
 
 bool ConfigurationSettingsImp::isUserSetting(const string& key) const
 {
-   if (isSessionSetting(key))
+   if (isTemporarySetting(key))
    {
       return false;
    }
@@ -752,7 +752,7 @@ bool ConfigurationSettingsImp::isUserSetting(const string& key) const
    return userValue.isValid();
 }
 
-bool ConfigurationSettingsImp::isSessionSetting(const string& key) const
+bool ConfigurationSettingsImp::isTemporarySetting(const string& key) const
 {
    return mpSessionSettings->getAttributeByPath(key).isValid();
 }
@@ -786,7 +786,7 @@ void ConfigurationSettingsImp::deleteUserSetting(const string& key)
    }
 }
 
-void ConfigurationSettingsImp::deleteSessionSetting(const string& key)
+void ConfigurationSettingsImp::deleteTemporarySetting(const string& key)
 {
    bool success = mpSessionSettings->removeAttributeByPath(key);
    if (success)
@@ -795,12 +795,12 @@ void ConfigurationSettingsImp::deleteSessionSetting(const string& key)
    }
 }
 
-bool ConfigurationSettingsImp::adoptSessionSetting(const std::string& key, DataVariant& var)
+bool ConfigurationSettingsImp::adoptTemporarySetting(const std::string& key, DataVariant& var)
 {
-   return setSessionSetting(key, var, true);
+   return setTemporarySetting(key, var, true);
 }
 
-bool ConfigurationSettingsImp::setSessionSetting(const string& key, DataVariant& var, bool adopt)
+bool ConfigurationSettingsImp::setTemporarySetting(const string& key, DataVariant& var, bool adopt)
 {
    bool success = false;
    if (adopt)

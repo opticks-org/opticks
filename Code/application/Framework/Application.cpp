@@ -88,13 +88,13 @@ int Application::run(int argc, char** argv)
       unsigned int procArgValue = atoi(processorArg.c_str());
       if (procArgValue >= 1u && procArgValue <= numberOfProcessors)
       {
-         pSettings->setSessionSetting(ConfigurationSettings::getSettingThreadCountKey(), procArgValue);
+         pSettings->setTemporarySetting(ConfigurationSettings::getSettingThreadCountKey(), procArgValue);
       }
       else
       {
          reportWarning("The requested number of processors are not available.  Using the actual number of "
             "processors on the system instead.");
-         pSettings->setSessionSetting(ConfigurationSettings::getSettingThreadCountKey(), numberOfProcessors);
+         pSettings->setTemporarySetting(ConfigurationSettings::getSettingThreadCountKey(), numberOfProcessors);
       }
    }
    else
@@ -109,7 +109,7 @@ int Application::run(int argc, char** argv)
       }
       else
       {
-         pSettings->setSessionSetting(ConfigurationSettings::getSettingThreadCountKey(), numberOfProcessors);
+         pSettings->setTemporarySetting(ConfigurationSettings::getSettingThreadCountKey(), numberOfProcessors);
       }
    }
 

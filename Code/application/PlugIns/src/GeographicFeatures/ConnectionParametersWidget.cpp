@@ -247,7 +247,7 @@ void ConnectionParametersWidget::selectFileClicked()
       pNewWorkingDir->setFullPathAndName(newDirectory.path().toStdString());
 
       Service<ConfigurationSettings> pSettings;
-      pSettings->setSessionSetting(ConfigurationSettings::getSettingPluginWorkingDirectoryKey(
+      pSettings->setTemporarySetting(ConfigurationSettings::getSettingPluginWorkingDirectoryKey(
          ShapeFileImporter::PLUGIN_SUBTYPE), *pNewWorkingDir.get());
    }
 }
