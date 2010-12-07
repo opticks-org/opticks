@@ -1425,13 +1425,23 @@ bool Nitf::BandsbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
    }
 
    // b24 signals the CWAVE field.
-   if (success && bitTest(existmask, 24))
+   // b21 signals the NOM_WAVE field which is used for non-symmetric band profiles.
+   //     Technically this is not a center but should be close enough for most uses.
+   //     If it isn't then a sensor specific extension should recalculate wavelength
+   //     information for the specific sensor response profile.
+   if (success && (bitTest(existmask, 24) || bitTest(existmask, 21)))
    {
       mCenterWavelengths.resize(count);
    }
    else
    {
       mCenterWavelengths.clear();
+   }
+   if (success && bitTest(existmask, 21))
+   {
+      errorMessage += "Nominal wavelengths indicate an asymmetric sensor response. "\
+                      "Nominal wavelengths will be loaded as center wavelengths. "\
+                      "A more accurate reponse may require sensor specific extensions.\n";
    }
 
    // b23 signals the FWHM field.
@@ -1520,6 +1530,7 @@ bool Nitf::BandsbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
       {
          fieldName = BANDSB::NOM_WAVE + bandNumStr;
          readField<double>(input, output, success, fieldName, 7, errorMessage, buf);
+         mCenterWavelengths[bandNum] = boost::lexical_cast<double>(&buf[0]);
       }
 
       // b20 signals the NOM_WAVE_UNCn field.
