@@ -688,7 +688,7 @@ void StatisticsImp::calculateStatistics(ComplexComponent component)
          setMax(0.0, component);
          setAverage(statOutput.mAverage, component);
          setStandardDeviation(statOutput.mStandardDeviation, component);
-         std::vector<double> dzeroes(256, 0.0);
+         std::vector<double> dzeroes(1001, 0.0); // setPercentiles needs 1001 contiguous values; setHistogram needs 256
          std::vector<unsigned int> uizeroes(256, 0);
          setPercentiles(&dzeroes.front(), component);
          setHistogram(&dzeroes.front(), &uizeroes.front(), component);
