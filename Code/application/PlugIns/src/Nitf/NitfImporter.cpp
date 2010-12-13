@@ -131,6 +131,7 @@ vector<ImportDescriptor*> Nitf::NitfImporter::getImportDescriptors(const string 
       string imageName = imageNameStream.str();
       ImportDescriptorResource pImportDescriptor(filename + "-" + imageName, "RasterElement", NULL);
       VERIFYRV(pImportDescriptor.get() != NULL, retval);
+      pImportDescriptor->setImported(pImgHeader->getRepresentation() != "NODISPLY");
 
       RasterDataDescriptor* pDd = dynamic_cast<RasterDataDescriptor*>(pImportDescriptor->getDataDescriptor());
       VERIFYRV(pDd != NULL, retval);
