@@ -163,8 +163,6 @@ bool AspamManager::deserialize(SessionItemDeserializer& deserializer)
          string aspamId = A(pElmnt->getAttribute(X("aspamId")));
          DataElement* pElement = dynamic_cast<DataElement*>(Service<SessionManager>()->getSessionItem(aspamId));
          pInputSpec->setPlugInArgValueLoose(Importer::ImportElementArg(), pElement);
-         bool trueValue(true);
-         pInputSpec->setPlugInArgValue(Importer::SessionLoadArg(), &trueValue);
          if (!pImporter->execute(pInputSpec, NULL))
          {
             return false;

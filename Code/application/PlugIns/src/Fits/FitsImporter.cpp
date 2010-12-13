@@ -600,7 +600,6 @@ bool FitsImporter::getInputSpecification(PlugInArgList *&pArgList)
    VERIFY((pArgList = mpPlugInManager->getPlugInArgList()) != NULL);
    VERIFY(pArgList->addArg<Progress>(Executable::ProgressArg(), NULL));
    VERIFY(pArgList->addArg<DataElement>(Importer::ImportElementArg()));
-   VERIFY(pArgList->addArg(Importer::SessionLoadArg(), false));
    return true;
 }
 

@@ -42,18 +42,6 @@ public:
    static std::string ImportElementArg() { return "Import Element"; }
 
    /**
-    *  The name for a session load argument.
-    *
-    *  Input arguments with this name will be automatically populated with a
-    *  bool value indicating whether the import is being called as part of the
-    *  deserialization of a session.  If the value is set to \c true the
-    *  importer should only load the DataElement data.   Anything else normally
-    *  done during import (such as creation of a View or Animation) should not
-    *  be performed.
-    */
-   static std::string SessionLoadArg() { return "Session Load"; }
-
-   /**
     *  Returns the default file extensions recognized by the importer.
     *
     *  @return  The file extensions recognized by the importer as a string.

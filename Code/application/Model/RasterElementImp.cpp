@@ -1387,8 +1387,6 @@ bool RasterElementImp::deserialize(SessionItemDeserializer& deserializer)
             importerName = "Auto Importer";
          }
          ExecutableResource importer(importerName);
-         bool dummy = true;
-         importer->getInArgList().setPlugInArgValue(Importer::SessionLoadArg(), &dummy);
          importer->getInArgList().setPlugInArgValueLoose(Importer::ImportElementArg(),
             dynamic_cast<DataElement*>(this));
          if (!importer->execute())

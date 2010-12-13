@@ -296,11 +296,11 @@ protected:
     *
     *  This method creates a view for the imported data set in interactive mode only.
     *  Prior to calling this method, the parseInputArgList() method must be called to
-    *  extract the RasterElement.  This method is called from the default implemetation
-    *  of execute() after the data has been loaded from the file.
+    *  extract the RasterElement.  This method is called from the default implementation
+    *  of execute() after the createGcpList() method.
     *
     *  A new message log step is created and the initially displayed bands and display
-    *  mode are added as properies to the step.
+    *  mode are added as properties to the step.
     *
     *  @return  A pointer to the created view.  <b>NULL</b> is returned if the plug-in
     *           is in batch mode or the raster element has not been extracted from the
@@ -314,8 +314,7 @@ protected:
     *
     *  Prior to calling this method, the parseInputArgList() method must be
     *  called to extract the raster element.  This method is called from the
-    *  default implemetation of createView() after the raster layer has been
-    *  created for the raster element.
+    *  default implementation of execute() after the performImport() method.
     *
     *  @return  A pointer to the created GCP list.  \c NULL is returned if the
     *           raster element has not been extracted from the input arg list.
@@ -392,7 +391,6 @@ private:
    mutable bool mUsingMemoryMappedPager;
    Progress* mpProgress;
    RasterElement* mpRasterElement;
-   bool mIsSessionLoad;
 };
 
 #endif
