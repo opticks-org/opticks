@@ -134,8 +134,8 @@ bool MovieExporter::getInputSpecification(PlugInArgList*& pInArgList)
    VERIFY(pInArgList->addArg<Progress>(ProgressArg(), NULL));
    VERIFY(pInArgList->addArg<FileDescriptor>(ExportDescriptorArg()));
    VERIFY(pInArgList->addArg<View>(ExportItemArg()));
-   VERIFY(pInArgList->addArg<unsigned int>("Resolution X"));
-   VERIFY(pInArgList->addArg<unsigned int>("Resolution Y"));
+   VERIFY(pInArgList->addArg<int>("Resolution X"));
+   VERIFY(pInArgList->addArg<int>("Resolution Y"));
    VERIFY(pInArgList->addArg<int>("Framerate Numerator"));
    VERIFY(pInArgList->addArg<int>("Framerate Denominator"));
    VERIFY(pInArgList->addArg<unsigned int>("Bitrate"));
@@ -181,8 +181,8 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
    View* pView(NULL);
    AnimationController* pController(NULL);
    AVOutputFormat* pOutFormat(NULL);
-   unsigned int resolutionX(0);
-   unsigned int resolutionY(0);
+   int resolutionX(-1);
+   int resolutionY(-1);
    rational<int> framerate(0);
    unsigned int bitrate(0);
    double startExport(0.0);
@@ -240,9 +240,8 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
             VERIFY(pResolutionWidget != NULL);
 
             QSize resolution = pResolutionWidget->getResolution();
-            // prevent cast from -1 to unsigned int
-            resolutionX = max<int>(resolution.width(), 0);
-            resolutionY = max<int>(resolution.height(), 0);
+            resolutionX = resolution.width();
+            resolutionY = resolution.height();
          }
          else
          {
@@ -255,7 +254,7 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
          resolutionFromInputArgs = true;
       }
 
-      if (resolutionX == 0 || resolutionY == 0)
+      if (resolutionX <= 0 || resolutionY <= 0)
       {
          QWidget* pWidget = pView->getWidget();
          if (pWidget != NULL)

@@ -26,8 +26,8 @@ public:
    OptionsMovieExporter();
    ~OptionsMovieExporter();
 
-   SETTING(Width, MovieExporter, unsigned int, 0);
-   SETTING(Height, MovieExporter, unsigned int, 0);
+   SETTING(Width, MovieExporter, int, -1);
+   SETTING(Height, MovieExporter, int, -1);
    SETTING(Bitrate, MovieExporter, unsigned int, 0);
    SETTING(MeMethod, MovieExporter, std::string, std::string());
    SETTING(GopSize, MovieExporter, int, 0);
