@@ -42,6 +42,7 @@ public:
    PlotWidget* getPlot(Layer* pLayer) const;
    PlotWidget* getPlot(Layer* pLayer, const RasterChannelType& eColor) const;    // Deprecated
    PlotWidget* getPlot(RasterLayer* pLayer, RasterChannelType channel) const;
+   PlotWidget* getPlot(RasterLayer* pLayer, RasterChannelType channel, bool ignoreStatisticsPlots) const;
    using PlotWindowImp::setCurrentPlot;
 
    void createSubsetPlot(Layer* pLayer);
@@ -85,6 +86,7 @@ private:
    bool mDisplayModeChanging;
    QAction* mpSyncAutoZoomAction;
    QAction* mpStatisticsShowAction;
+   bool mAddingStatisticsPlot;
 
    class HistogramUpdater
    {

@@ -48,7 +48,8 @@ HistogramWindowImp::HistogramWindowImp(const string& id, const string& windowNam
    mpExplorer(Service<SessionExplorer>().get(), SIGNAL_NAME(SessionExplorer, AboutToShowSessionItemContextMenu),
       Slot(this, &HistogramWindowImp::updateContextMenu)),
    mDisplayModeChanging(false),
-   mUpdater(this)
+   mUpdater(this),
+   mAddingStatisticsPlot(false)
 {
    Service<DesktopServices> pDesktop;
 
@@ -294,6 +295,11 @@ PlotWidget* HistogramWindowImp::getPlot(Layer* pLayer, const RasterChannelType& 
 
 PlotWidget* HistogramWindowImp::getPlot(RasterLayer* pLayer, RasterChannelType channel) const
 {
+   return getPlot(pLayer, channel, false);
+}
+
+PlotWidget* HistogramWindowImp::getPlot(RasterLayer* pLayer, RasterChannelType channel, bool ignoreStatisticsPlots) const
+{
    if (pLayer == NULL)
    {
       return NULL;
@@ -307,7 +313,7 @@ PlotWidget* HistogramWindowImp::getPlot(RasterLayer* pLayer, RasterChannelType c
       if (pPlot != NULL)
       {
          HistogramPlotImp* pHistogramPlot = dynamic_cast<HistogramPlotImp*>(pPlot->getPlot());
-         if (pHistogramPlot != NULL)
+         if (pHistogramPlot != NULL && (!ignoreStatisticsPlots || !pHistogramPlot->ownsStatistics()))
          {
             RasterLayer* pCurrentLayer = dynamic_cast<RasterLayer*>(pHistogramPlot->getLayer());
             if (pCurrentLayer == pLayer)
@@ -433,7 +439,7 @@ PlotWidget* HistogramWindowImp::createPlot(RasterLayer* pLayer, RasterChannelTyp
    }
 
    // Do not add the plot if it already exists
-   if (getPlot(pLayer, channel) != NULL)
+   if (getPlot(pLayer, channel, true) != NULL)
    {
       return NULL;
    }
@@ -692,7 +698,7 @@ void HistogramWindowImp::deletePlot(RasterLayer* pLayer, RasterChannelType chann
       return;
    }
 
-   PlotWidget* pPlotWidget = getPlot(pLayer, channel);
+   PlotWidget* pPlotWidget = getPlot(pLayer, channel, true);
    if (pPlotWidget != NULL)
    {
       PlotSet* pPlotSet = pPlotWidget->getPlotSet();
@@ -794,6 +800,10 @@ bool HistogramWindowImp::event(QEvent* pEvent)
 
 void HistogramWindowImp::setCurrentPlot(const DisplayMode& displayMode)
 {
+   if (mAddingStatisticsPlot)
+   {
+      return;
+   }
    RasterLayer* pLayer = dynamic_cast<RasterLayer*>(sender());
    if (pLayer != NULL)
    {
@@ -824,7 +834,7 @@ void HistogramWindowImp::setCurrentPlot(const DisplayMode& displayMode)
 
 void HistogramWindowImp::activateLayer(PlotWidget* pPlot)
 {
-   if (pPlot == NULL)
+   if (mAddingStatisticsPlot || pPlot == NULL)
    {
       return;
    }
@@ -907,7 +917,10 @@ void HistogramWindowImp::activateLayer(PlotWidget* pPlot)
 
    setStatisticsShowActionState(dynamic_cast<PlotWidgetImp*>(pPlot));
 
-   emit plotActivated(pLayer, channel);
+   if (!pHistogramPlot->ownsStatistics())
+   {
+      emit plotActivated(pLayer, channel);
+   }
 }
 
 void HistogramWindowImp::setStatisticsShowActionState(PlotSet* pPlotSet)
@@ -1165,7 +1178,10 @@ void HistogramWindowImp::createSubsetPlot(Layer* pLayer)
       {
          bands.push_back(pDesc->getActiveBand(*index));
       }
+      show();
+      mAddingStatisticsPlot = true;
       PlotWidget* pPlot = pPlotSet->createPlot(dlg.getPlotName().toStdString(), HISTOGRAM_PLOT);
+      mAddingStatisticsPlot = false;
       if (pPlot == NULL)
       {
          Service<DesktopServices>()->showMessageBox("Can't create plot",
