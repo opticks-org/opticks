@@ -164,15 +164,20 @@ public:
 
    /**
     *  Set the string of valid country and/or multilateral entity codes to which countries and/or 
-    *  multilateral entities the data is authorized for release.
+    *  multilateral entities the data is authorized for release. This method should be called after
+    *  calling the setCountryCode() method.
     *
     *  @param   myFileReleasing
     *           A string documenting the countries and/or groups to which the data 
     *           may be released. Valid items in the list are one or more country codes
     *           found in FIPS 10-4 and/or codes identifying multilateral entries as
-    *           found in DIAM 65-19.
+    *           found in DIAM 65-19. If "NOFORN" is specified, then text set in setCountryCode()
+    *           is removed from the classification. If "NOFORN" and "REL\\ TO" are specified, then
+    *           text set in setCountryCode() and "REL\\ TO" are removed from the classification.
     *
     *  @notify  This method will notify Subject::signalModified.
+    *
+    *  @see setCountryCode()
     */
    virtual void setFileReleasing(const std::string& myFileReleasing) = 0;
 
@@ -306,13 +311,16 @@ public:
    virtual const std::string& getCountryCode() const = 0;
 
    /**
-    *  Set the country code. Used in conjunction with "REL TO" under file 
-    *  releasing attributes.
+    *  Set the country code. Used in conjunction with "REL TO" under file releasing attributes.
+    *  This method should be called prior to calling the setFileReleasing() method.
     *
     *  @param   myCountryCode
-    *           The country code
+    *           The country code. Each country code should be separated by a space. If the country code
+    *           is not empty and does not contain "USA", then "USA" will be prepended to the country code.
     *
     *  @notify  This method will notify Subject::signalModified.
+    *
+    *  @see setFileReleasing()
     */
    virtual void setCountryCode(const std::string& myCountryCode) = 0;
 
