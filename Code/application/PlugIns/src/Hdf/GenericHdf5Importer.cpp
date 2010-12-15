@@ -175,7 +175,7 @@ vector<ImportDescriptor*> GenericHdf5Importer::getImportDescriptors(const string
                Service<ModelServices> pModel;
 
                ImportDescriptor* pImportDescriptor =
-                  pModel->createImportDescriptor(fpan, "RasterElement", NULL, false);
+                  pModel->createImportDescriptor(filename + fpan, "RasterElement", NULL, false);
                if (pImportDescriptor == NULL)
                {
                   continue;
