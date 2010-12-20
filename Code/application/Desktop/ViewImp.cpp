@@ -210,8 +210,21 @@ ViewImp& ViewImp::operator= (const ViewImp& view)
       mSelectionBox = view.mSelectionBox;
       mInset = view.mInset;
       mCrossHair = view.mCrossHair;
-      mLinkedViews = view.mLinkedViews;
       mMouseStart = view.mMouseStart;
+
+      // Reset all linked views
+      while (mLinkedViews.empty() == false)
+      {
+         VERIFYNR(unlinkView(mLinkedViews.back().first));
+      }
+
+      for (vector<pair<View*, LinkType> >::const_iterator iter = view.mLinkedViews.begin();
+         iter != view.mLinkedViews.end();
+         ++iter)
+      {
+         VERIFYNR(linkView(iter->first, iter->second));
+      }
+
       setAnimationController(view.mpAnimationController);
 
       notify(SIGNAL_NAME(Subject, Modified));
