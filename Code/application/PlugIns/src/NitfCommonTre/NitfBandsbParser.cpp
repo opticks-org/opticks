@@ -894,8 +894,12 @@ bool Nitf::BandsbParser::runAllTests(Progress* pProgress, ostream& failure)
 
    if (!errorMessage.empty())
    {
-      failure << errorMessage << endl;
-      errorMessage.clear();
+      // Presence of NOM_WAVE will trigger a warning, this is ok, we'll continue on without an error.
+      if (!success || errorMessage.substr(0, 19) != "Nominal wavelengths")
+      {
+         failure << errorMessage << endl;
+         errorMessage.clear();
+      }
    }
 
    TreState status(INVALID);
@@ -954,8 +958,12 @@ bool Nitf::BandsbParser::runAllTests(Progress* pProgress, ostream& failure)
 
    if (!errorMessage.empty())
    {
-      failure << errorMessage << endl;
-      errorMessage.clear();
+      // Presence of NOM_WAVE will trigger a warning, this is ok, we'll continue on without an error.
+      if (!success || errorMessage.substr(0, 19) != "Nominal wavelengths")
+      {
+         failure << errorMessage << endl;
+         errorMessage.clear();
+      }
    }
 
    status = INVALID;
@@ -1000,8 +1008,12 @@ bool Nitf::BandsbParser::runAllTests(Progress* pProgress, ostream& failure)
 
    if (!errorMessage.empty())
    {
-      failure << errorMessage << endl;
-      errorMessage.clear();
+      // Presence of NOM_WAVE will trigger a warning, this is ok, we'll continue on without an error.
+      if (!success || errorMessage.substr(0, 19) != "Nominal wavelengths")
+      {
+         failure << errorMessage << endl;
+         errorMessage.clear();
+      }
    }
 
    status = INVALID;
@@ -2154,9 +2166,10 @@ Nitf::TreState Nitf::BandsbParser::isTreValid(const DynamicObject& tre, ostream&
    }
 
    // b24 signals the CWAVE field.
+   // b21 signals the NOM_WAVE field which also populates center wavelengths
    if (status != INVALID)
    {
-      if (bitTest(existmask, 24))
+      if (bitTest(existmask, 24) || bitTest(existmask, 21))
       {
          if (mCenterWavelengths.size() != count)
          {
