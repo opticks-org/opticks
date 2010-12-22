@@ -532,7 +532,10 @@ bool LayerImp::hasUniqueElement() const
       return false;
    }
    QMap<const DataElement*, int>::iterator iter = mElementLayers.find(mpElement.get());
-   VERIFY(iter != mElementLayers.end());
+   if (iter == mElementLayers.end())
+   {
+      return false;
+   }
 
    return iter.value() == 1;
 }
