@@ -265,7 +265,6 @@ protected slots:
    void showGcpEditor(bool bShow);
    void showTiePointEditor(bool bShow);
    void showWizardBuilder();
-   void showSecurityMarkings();
    void showZapDlg();
    void showBatchEditor();
 
@@ -290,6 +289,7 @@ protected slots:
 
    // SessionItem context menu actions
    void deleteSelectedElement();
+   void editClassification();
    void exportSessionItem();
    void displaySessionItemProperties();
 
@@ -392,7 +392,6 @@ private:
    QAction* m_pGCP_Editor_Action;
    QAction* m_pTiePoint_Editor_Action;
    QAction* m_pLink_Action;
-   QAction* m_pSecurityMarkings_Action;
 
    // Window actions
    QAction* mpCascadeAction;

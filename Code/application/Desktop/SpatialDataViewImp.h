@@ -50,9 +50,7 @@ public:
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
 
-   void elementModified(Subject &subject, const std::string &signal, const boost::any &v);
    void elementDeleted(Subject &subject, const std::string &signal, const boost::any &v);
-   void attached(Subject &subject, const std::string &signal, const Slot &slot);
 
    static bool isKindOfView(const std::string& className);
    static void getViewTypes(std::vector<std::string>& classList);

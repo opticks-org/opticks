@@ -14,6 +14,8 @@
 #include <QtGui/QSplitter>
 
 #include "AppVersion.h"
+#include "Classification.h"
+#include "ClassificationWidget.h"
 #include "DataDescriptorWidget.h"
 #include "DataVariant.h"
 #include "DynamicObject.h"
@@ -29,6 +31,7 @@
 #include "Slot.h"
 #include "SpecialMetadata.h"
 #include "SubsetWidget.h"
+#include "UtilityServices.h"
 #include "WavelengthsWidget.h"
 
 #include <algorithm>
@@ -72,9 +75,11 @@ ImportOptionsDlg::ImportOptionsDlg(Importer* pImporter, const QMap<QString, vect
    mPromptForChanges(true),
    mAllowDeselectedFiles(true),
    mpDatasetTree(NULL),
+   mpClassificationLabel(NULL),
    mpTabWidget(NULL),
    mpDataPage(NULL),
    mpFilePage(NULL),
+   mpClassificationPage(NULL),
    mpSubsetPage(NULL),
    mpMetadataPage(NULL),
    mpWavelengthsPage(NULL),
@@ -98,16 +103,28 @@ ImportOptionsDlg::ImportOptionsDlg(Importer* pImporter, const QMap<QString, vect
    QPushButton* pImportAllButton = new QPushButton("Import All", pDatasetWidget);
    QPushButton* pImportNoneButton = new QPushButton("Import None", pDatasetWidget);
 
+   // Classification label
+   QWidget* pInfoWidget = new QWidget(pSplitter);
+
+   QFont labelFont = font();
+   labelFont.setBold(true);
+
+   mpClassificationLabel = new QLabel(pInfoWidget);
+   mpClassificationLabel->setFont(labelFont);
+   mpClassificationLabel->setAlignment(Qt::AlignCenter);
+
    // Tab widget
-   mpTabWidget = new QTabWidget(pSplitter);
+   mpTabWidget = new QTabWidget(pInfoWidget);
    mpDataPage = new DataDescriptorWidget();
    mpFilePage = new FileDescriptorWidget();
+   mpClassificationPage = new ClassificationWidget();
    mpSubsetPage = new SubsetWidget();
    mpMetadataPage = new MetadataWidget();
    mpWavelengthsPage = new WavelengthsWidget();
 
    mpTabWidget->addTab(mpDataPage, "Data");
    mpTabWidget->addTab(mpFilePage, "File");
+   mpTabWidget->addTab(mpClassificationPage, "Classification");
    mpTabWidget->addTab(mpSubsetPage, "Subset");
    mpTabWidget->addTab(mpMetadataPage, "Metadata");
 
@@ -134,6 +151,12 @@ ImportOptionsDlg::ImportOptionsDlg(Importer* pImporter, const QMap<QString, vect
    if (pFileLayout != NULL)
    {
       pFileLayout->setMargin(10);
+   }
+
+   QLayout* pClassificationLayout = mpClassificationPage->layout();
+   if (pClassificationLayout != NULL)
+   {
+      pClassificationLayout->setMargin(10);
    }
 
    QLayout* pSubsetLayout = mpSubsetPage->layout();
@@ -164,6 +187,12 @@ ImportOptionsDlg::ImportOptionsDlg(Importer* pImporter, const QMap<QString, vect
    pDatasetLayout->setRowStretch(1, 10);
    pDatasetLayout->setColumnStretch(0, 10);
 
+   QVBoxLayout* pInfoLayout = new QVBoxLayout(pInfoWidget);
+   pInfoLayout->setMargin(0);
+   pInfoLayout->setSpacing(10);
+   pInfoLayout->addWidget(mpClassificationLabel);
+   pInfoLayout->addWidget(mpTabWidget, 10);
+
    QHBoxLayout* pButtonLayout = new QHBoxLayout();
    pButtonLayout->setMargin(0);
    pButtonLayout->setSpacing(5);
@@ -183,7 +212,7 @@ ImportOptionsDlg::ImportOptionsDlg(Importer* pImporter, const QMap<QString, vect
    resize(700, 450);
 
    pSplitter->addWidget(pDatasetWidget);
-   pSplitter->addWidget(mpTabWidget);
+   pSplitter->addWidget(pInfoWidget);
 
    if (mpImporter != NULL)
    {
@@ -367,7 +396,7 @@ void ImportOptionsDlg::setCurrentDataset(ImportDescriptor* pImportDescriptor)
    if (mpCurrentDataset != NULL)
    {
       if ((mpDataPage->isModified() == true) || (mpFilePage->isModified() == true) ||
-         (mEditDescriptorModified == true))
+         (mpClassificationPage->isModified() == true) || (mEditDescriptorModified == true))
       {
          if (mPromptForChanges == true)
          {
@@ -563,6 +592,10 @@ void ImportOptionsDlg::setCurrentDataset(ImportDescriptor* pImportDescriptor)
          mpTabWidget->insertTab(1, mpFilePage, "File");
       }
    }
+
+   // Classification page
+   updateClassificationLabel();
+   mpClassificationPage->setClassification(mpEditDescriptor->getClassification());
 
    // Metadata page
    mpMetadataPage->setMetadata(mpEditDescriptor->getMetadata());
@@ -1210,6 +1243,84 @@ void ImportOptionsDlg::updateDataBands(const vector<DimensionDescriptor>& bands)
    VERIFYNR(connect(mpDataPage, SIGNAL(modified()), this, SLOT(pagesModified())));
 }
 
+void ImportOptionsDlg::updateClassification()
+{
+   if (mpEditDescriptor == NULL)
+   {
+      return;
+   }
+
+   disconnect(mpClassificationPage, SIGNAL(modified()), this, SLOT(updateClassification()));
+
+   if (mpClassificationPage->applyChanges() == true)
+   {
+      updateClassificationLabel();
+   }
+   else
+   {
+      mpTabWidget->setCurrentWidget(mpClassificationPage);
+   }
+
+   VERIFYNR(connect(mpClassificationPage, SIGNAL(modified()), this, SLOT(updateClassification())));
+   validateEditDataset();
+}
+
+void ImportOptionsDlg::updateClassificationLabel()
+{
+   if (mpEditDescriptor == NULL)
+   {
+      return;
+   }
+
+   QString strClassification;
+   string classificationLevel;
+   const Classification* pClassification = mpEditDescriptor->getClassification();
+   if (pClassification != NULL)
+   {
+      string classificationText = "";
+      classificationLevel = pClassification->getLevel();
+      pClassification->getClassificationText(classificationText);
+      strClassification = QString::fromStdString(classificationText);
+   }
+
+   if (strClassification.isEmpty() == true)
+   {
+      Service<UtilityServices> pUtilities;
+      strClassification = QString::fromStdString(pUtilities->getDefaultClassification());
+   }
+
+   QPalette labelPalette = palette();
+   if (strClassification.isEmpty() == false)
+   {
+      // Text color
+      labelPalette.setColor(QPalette::WindowText, Qt::white);
+
+      // Background color
+      labelPalette.setColor(QPalette::Window, Qt::darkYellow);    // Default to background color used for TS
+
+      if ((classificationLevel == "C") || (classificationLevel == "R"))
+      {
+         labelPalette.setColor(QPalette::Window, Qt::darkBlue);
+      }
+      else if (classificationLevel == "S")
+      {
+         labelPalette.setColor(QPalette::Window, Qt::darkRed);
+      }
+      else if (classificationLevel == "U")
+      {
+         labelPalette.setColor(QPalette::Window, Qt::darkGreen);
+      }
+   }
+   else
+   {
+      labelPalette.setColor(QPalette::WindowText, Qt::black);
+   }
+
+   mpClassificationLabel->setPalette(labelPalette);
+   mpClassificationLabel->setAutoFillBackground(!strClassification.isEmpty());
+   mpClassificationLabel->setText(strClassification);
+}
+
 void ImportOptionsDlg::pagesModified()
 {
    if (mpEditDescriptor == NULL)
@@ -1272,6 +1383,7 @@ void ImportOptionsDlg::updateConnections(bool bConnect)
       VERIFYNR(connect(mpFilePage, SIGNAL(modified()), this, SLOT(pagesModified())));
       VERIFYNR(connect(mpFilePage, SIGNAL(valueChanged(const QString&)), this,
          SLOT(generateDimensionVector(const QString&))));
+      VERIFYNR(connect(mpClassificationPage, SIGNAL(modified()), this, SLOT(updateClassification())));
       VERIFYNR(connect(mpSubsetPage, SIGNAL(subsetRowsChanged(const std::vector<DimensionDescriptor>&)), this,
          SLOT(updateDataRows(const std::vector<DimensionDescriptor>&))));
       VERIFYNR(connect(mpSubsetPage, SIGNAL(subsetColumnsChanged(const std::vector<DimensionDescriptor>&)), this,
@@ -1287,6 +1399,7 @@ void ImportOptionsDlg::updateConnections(bool bConnect)
       disconnect(mpFilePage, SIGNAL(modified()), this, SLOT(pagesModified()));
       disconnect(mpFilePage, SIGNAL(valueChanged(const QString&)), this,
          SLOT(generateDimensionVector(const QString&)));
+      disconnect(mpClassificationPage, SIGNAL(modified()), this, SLOT(updateClassification()));
       disconnect(mpSubsetPage, SIGNAL(subsetRowsChanged(const std::vector<DimensionDescriptor>&)), this,
          SLOT(updateDataRows(const std::vector<DimensionDescriptor>&)));
       disconnect(mpSubsetPage, SIGNAL(subsetColumnsChanged(const std::vector<DimensionDescriptor>&)), this,

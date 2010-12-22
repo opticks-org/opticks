@@ -10,10 +10,13 @@
 #ifndef CLASSIFICATIONIMP_H
 #define CLASSIFICATIONIMP_H
 
-#include "DateTimeImp.h"
 #include "DynamicObjectImp.h"
 
+#include <string>
+
 class Classification;
+class DateTime;
+class DateTimeImp;
 
 class ClassificationImp : public DynamicObjectImp
 {
@@ -62,8 +65,10 @@ public:
    void setFileCopyNumber(const std::string& myFileCopyNumber);
    const std::string& getFileNumberOfCopies() const;
    void setFileNumberOfCopies(const std::string& myFileNumberOfCopies);
-   void getClassificationText(std::string& classificationText) const;
+
+   bool setClassification(const std::string& classificationText);
    void setClassification(const Classification* pClassification);
+   void getClassificationText(std::string& classificationText) const;
    bool isValid(std::string& errorMessage) const;
 
    bool toXml(XMLWriter* pXml) const;
@@ -261,6 +266,10 @@ private:
    void getClassificationText(std::string& classificationText) const \
    { \
       impClass::getClassificationText(classificationText); \
+   } \
+   bool setClassification(const std::string& classificationText) \
+   { \
+      return impClass::setClassification(classificationText); \
    } \
    void setClassification(const Classification* pClassification) \
    { \

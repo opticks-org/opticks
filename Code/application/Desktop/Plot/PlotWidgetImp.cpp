@@ -73,7 +73,9 @@ PlotWidgetImp::PlotWidgetImp(const string& id, const string& plotName, PlotType 
    mpYAxis(NULL),
    mpLegend(NULL),
    mClassificationPosition(CENTER),
-   mOrganizationPosition(TOP_RIGHT_BOTTOM_LEFT)
+   mOrganizationPosition(TOP_RIGHT_BOTTOM_LEFT),
+   mClassificationColor(Qt::black),
+   mOrganizationColor(Qt::black)
 {
    // Context menu actions
    Service<DesktopServices> pDesktop;
@@ -264,11 +266,7 @@ void PlotWidgetImp::initialize(PlotViewImp *pPlotView, const string& plotName, P
    const MouseMode* pMouseMode = mpPlot->getCurrentMouseMode();
    enableAnnotationToolBar(pMouseMode);
 
-   QString strClassificationText = mpPlot->getClassificationText();
-   if (strClassificationText.isEmpty() == false)
-   {
-      setClassificationText(strClassificationText);
-   }
+   updateClassificationText();
 
    list<PlotObject*> plotObjects = mpPlot->getObjects();
    for (list<PlotObject*>::iterator iter = plotObjects.begin(); iter != plotObjects.end(); ++iter)
@@ -286,8 +284,8 @@ void PlotWidgetImp::initialize(PlotViewImp *pPlotView, const string& plotName, P
    VERIFYNR(connect(mpPlot, SIGNAL(renamed(const QString&)), this, SLOT(updateName(const QString&))));
    VERIFYNR(connect(mpPlot, SIGNAL(mouseModeChanged(const MouseMode*)), this,
       SLOT(enableAnnotationToolBar(const MouseMode*))));
-   VERIFYNR(connect(mpPlot, SIGNAL(classificationChanged(const QString&)), this,
-      SLOT(setClassificationText(const QString&))));
+   VERIFYNR(connect(mpPlot, SIGNAL(classificationChanged(const Classification*)), this,
+      SLOT(updateClassificationText())));
    VERIFYNR(connect(mpPlot, SIGNAL(classificationFontChanged(const QFont&)), this,
       SLOT(setClassificationFont(const QFont&))));
    VERIFYNR(connect(mpPlot, SIGNAL(classificationColorChanged(const QColor&)), this,
@@ -475,10 +473,11 @@ void PlotWidgetImp::setClassificationPosition(PositionType ePosition)
 
    // Clear the text properties in the current position
    QString strClassification = getClassificationText();
+   QString strOrganization = getOrganizationText();
    QFont ftClassification = getClassificationFont();
    QColor clrClassification = getClassificationColor();
 
-   setClassificationText(QString());
+   setLabelText(QString(), QString());
    setClassificationFont(QFont());
    setClassificationColor(Qt::black);
 
@@ -489,7 +488,7 @@ void PlotWidgetImp::setClassificationPosition(PositionType ePosition)
    notify(SIGNAL_NAME(Subject, Modified));
 
    // Set the text properties at the new position
-   setClassificationText(strClassification);
+   setLabelText(strClassification, strOrganization);
    setClassificationFont(ftClassification);
    setClassificationColor(clrClassification);
 }
@@ -499,10 +498,24 @@ PositionType PlotWidgetImp::getClassificationPosition() const
    return mClassificationPosition;
 }
 
-void PlotWidgetImp::setClassificationText(const Classification* pClassification)
+void PlotWidgetImp::setClassification(const Classification* pClassification)
 {
-   QString strClassification;
+   mpPlot->setClassification(pClassification);
+}
 
+Classification* PlotWidgetImp::getClassification()
+{
+   return mpPlot->getClassification();
+}
+
+const Classification* PlotWidgetImp::getClassification() const
+{
+   return mpPlot->getClassification();
+}
+
+QString PlotWidgetImp::getClassificationText() const
+{
+   const Classification* pClassification = getClassification();
    if (pClassification != NULL)
    {
       std::string tmp;
@@ -512,22 +525,18 @@ void PlotWidgetImp::setClassificationText(const Classification* pClassification)
          pClassification->getClassificationText(classificationText);
          if (classificationText.empty() == false)
          {
-            strClassification = QString::fromStdString(classificationText);
+            return QString::fromStdString(classificationText);
          }
       }
    }
 
-   setClassificationText(strClassification);
+   return QString();
 }
 
-void PlotWidgetImp::setClassificationText(const QString& strClassification)
+void PlotWidgetImp::updateClassificationText()
 {
+   QString strClassification = getClassificationText();
    setLabelText(strClassification, getOrganizationText());
-}
-
-QString PlotWidgetImp::getClassificationText() const
-{
-   return mClassificationText;
 }
 
 void PlotWidgetImp::setClassificationFont(const QFont& ftClassification)
@@ -546,7 +555,6 @@ void PlotWidgetImp::setClassificationColor(const QColor& clrClassification)
    {
       setLabelColor(clrClassification, getOrganizationColor());
    }
-
 }
 
 QColor PlotWidgetImp::getClassificationColor() const
@@ -613,7 +621,6 @@ void PlotWidgetImp::setOrganizationColor(const QColor& clrOrganization)
    {
       setLabelColor(getClassificationColor(), clrOrganization);
    }
-
 }
 
 QColor PlotWidgetImp::getOrganizationColor() const
@@ -1061,7 +1068,6 @@ void PlotWidgetImp::setLabelText(const QString& strClassification, const QString
    mpBottomLeftLabel->setText(strBottomLeftText);
    mpBottomCenterLabel->setText(strBottomCenterText);
    mpBottomRightLabel->setText(strBottomRightText);
-   mClassificationText = strClassification;
    mOrganizationText = strOrganization;
 
    notify(SIGNAL_NAME(Subject, Modified));

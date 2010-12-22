@@ -113,10 +113,6 @@ DesktopAPITestGui::DesktopAPITestGui(QWidget* pParent) :
 
    mpPlotWidget.reset(pDesktop->createPlotWidget("Test Plot Widget", HISTOGRAM_PLOT, pPlotWidget));
 
-   QLabel* pClassificationLabel = new QLabel("Set Classification:", pPlotWidget);
-   mpClassificationEdit = new QLineEdit(pPlotWidget);
-   QPushButton* pClassificationApplyButton = new QPushButton("Apply", pPlotWidget);
-
    QLabel* pMouseModeLabel = new QLabel("Mouse Modes:", pPlotWidget);
    mpMouseModeCombo = new QComboBox(pPlotWidget);
    mpMouseModeCombo->setEditable(false);
@@ -209,27 +205,24 @@ DesktopAPITestGui::DesktopAPITestGui(QWidget* pParent) :
    QGridLayout* pPlotWidgetGrid = new QGridLayout(pPlotWidget);
    pPlotWidgetGrid->setMargin(0);
    pPlotWidgetGrid->setSpacing(5);
-   pPlotWidgetGrid->addWidget(mpPlotWidget->getWidget(), 0, 0, 10, 1);
-   pPlotWidgetGrid->addWidget(pClassificationLabel, 0, 2);
-   pPlotWidgetGrid->addWidget(mpClassificationEdit, 0, 3);
-   pPlotWidgetGrid->addWidget(pClassificationApplyButton, 0, 4);
-   pPlotWidgetGrid->addWidget(pMouseModeLabel, 1, 2);
-   pPlotWidgetGrid->addWidget(mpMouseModeCombo, 1, 3);
-   pPlotWidgetGrid->addWidget(pMouseModeApplyButton, 1, 4);
-   pPlotWidgetGrid->addWidget(pMarginLabel, 2, 2);
-   pPlotWidgetGrid->addWidget(mpMarginEdit, 2, 3, 1, 2, Qt::AlignLeft);
-   pPlotWidgetGrid->addWidget(pBackgroundColorLabel, 3, 2);
-   pPlotWidgetGrid->addWidget(pBackgroundColorButton, 3, 3, 1, 2, Qt::AlignLeft);
-   pPlotWidgetGrid->addWidget(pPlotBackgroundColorLabel, 4, 2);
-   pPlotWidgetGrid->addWidget(pPlotBackgroundColorButton, 4, 3, 1, 2, Qt::AlignLeft);
-   pPlotWidgetGrid->addWidget(pLegendBackgroundColorLabel, 5, 2);
-   pPlotWidgetGrid->addWidget(pLegendBackgroundColorButton, 5, 3, 1, 2, Qt::AlignLeft);
-   pPlotWidgetGrid->addWidget(pTextColorLabel, 6, 2);
-   pPlotWidgetGrid->addWidget(pTextColorButton, 6, 3, 1, 2, Qt::AlignLeft);
-   pPlotWidgetGrid->addWidget(pTitleColorLabel, 7, 2);
-   pPlotWidgetGrid->addWidget(pTitleColorButton, 7, 3, 1, 2, Qt::AlignLeft);
-   pPlotWidgetGrid->addWidget(mpContextMenuCheck, 8, 2, 1, 3);
-   pPlotWidgetGrid->setRowStretch(9, 10);
+   pPlotWidgetGrid->addWidget(mpPlotWidget->getWidget(), 0, 0, 9, 1);
+   pPlotWidgetGrid->addWidget(pMouseModeLabel, 0, 2);
+   pPlotWidgetGrid->addWidget(mpMouseModeCombo, 0, 3);
+   pPlotWidgetGrid->addWidget(pMouseModeApplyButton, 0, 4);
+   pPlotWidgetGrid->addWidget(pMarginLabel, 1, 2);
+   pPlotWidgetGrid->addWidget(mpMarginEdit, 1, 3, 1, 2, Qt::AlignLeft);
+   pPlotWidgetGrid->addWidget(pBackgroundColorLabel, 2, 2);
+   pPlotWidgetGrid->addWidget(pBackgroundColorButton, 2, 3, 1, 2, Qt::AlignLeft);
+   pPlotWidgetGrid->addWidget(pPlotBackgroundColorLabel, 3, 2);
+   pPlotWidgetGrid->addWidget(pPlotBackgroundColorButton, 3, 3, 1, 2, Qt::AlignLeft);
+   pPlotWidgetGrid->addWidget(pLegendBackgroundColorLabel, 4, 2);
+   pPlotWidgetGrid->addWidget(pLegendBackgroundColorButton, 4, 3, 1, 2, Qt::AlignLeft);
+   pPlotWidgetGrid->addWidget(pTextColorLabel, 5, 2);
+   pPlotWidgetGrid->addWidget(pTextColorButton, 5, 3, 1, 2, Qt::AlignLeft);
+   pPlotWidgetGrid->addWidget(pTitleColorLabel, 6, 2);
+   pPlotWidgetGrid->addWidget(pTitleColorButton, 6, 3, 1, 2, Qt::AlignLeft);
+   pPlotWidgetGrid->addWidget(mpContextMenuCheck, 7, 2, 1, 3);
+   pPlotWidgetGrid->setRowStretch(8, 10);
    pPlotWidgetGrid->setColumnStretch(0, 10);
    pPlotWidgetGrid->setColumnStretch(3, 5);
    pPlotWidgetGrid->setColumnMinimumWidth(1, 15);
@@ -299,7 +292,6 @@ DesktopAPITestGui::DesktopAPITestGui(QWidget* pParent) :
    }
 
    mpPlotWidget->showLegend(false);
-   mpClassificationEdit->setText(QString::fromStdString(mpPlotWidget->getClassificationText()));
    pBackgroundColorButton->setColor(mpPlotWidget->getBackgroundColor());
    pLegendBackgroundColorButton->setColor(mpPlotWidget->getLegendBackgroundColor());
    pTextColorButton->setColor(mpPlotWidget->getClassificationColor());
@@ -307,8 +299,6 @@ DesktopAPITestGui::DesktopAPITestGui(QWidget* pParent) :
    // Connections
    VERIFYNR(connect(pBrowseCheck, SIGNAL(toggled(bool)), this, SLOT(addBrowseButton(bool))));
    VERIFYNR(connect(pPrintCheck, SIGNAL(toggled(bool)), this, SLOT(addPrintButton(bool))));
-   VERIFYNR(connect(mpClassificationEdit, SIGNAL(returnPressed()), this, SLOT(setClassificationText())));
-   VERIFYNR(connect(pClassificationApplyButton, SIGNAL(clicked()), this, SLOT(setClassificationText())));
    VERIFYNR(connect(pMouseModeApplyButton, SIGNAL(clicked()), this, SLOT(enableMouseMode())));
    VERIFYNR(connect(mpMouseModeAction, SIGNAL(triggered()), this, SLOT(setCustomMouseMode())));
    VERIFYNR(connect(mpMarginEdit, SIGNAL(editingFinished()), this, SLOT(setPlotMargin())));
@@ -438,7 +428,8 @@ void DesktopAPITestGui::updateContextMenu(Subject& subject, const string& signal
 
    QAction* pAction3 = new QAction("Custom Plug-In Item 3", pParent);
    pAction3->setAutoRepeat(false);
-   pMenu->addActionBefore(pAction3, APP_DESKTOPAPITESTGUI_THIRD_TEST_ACTION, APP_PLOTVIEW_SECURITY_MARKINGS_ACTION);
+   pMenu->addActionAfter(pAction3, APP_DESKTOPAPITESTGUI_THIRD_TEST_ACTION,
+      APP_PLOTVIEW_RESCALE_AXES_SEPARATOR_ACTION);
 }
 
 void DesktopAPITestGui::updatePropertiesDialog(Subject& subject, const string& signal, const boost::any& value)
@@ -657,15 +648,6 @@ void DesktopAPITestGui::setCustomMouseMode()
    VERIFYNRV(pPlotView != NULL);
 
    pPlotView->setMouseMode("Custom Mode");
-}
-
-void DesktopAPITestGui::setClassificationText()
-{
-   if (mpPlotWidget.get() != NULL)
-   {
-      QString classificationText = mpClassificationEdit->text();
-      mpPlotWidget->setClassificationText(classificationText.toStdString());
-   }
 }
 
 void DesktopAPITestGui::setPlotMargin()

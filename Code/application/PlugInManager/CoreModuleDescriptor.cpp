@@ -39,6 +39,7 @@
 #include "PlugInRegistration.h"
 #include "PropertiesAnnotationLayer.h"
 #include "PropertiesAoiLayer.h"
+#include "PropertiesClassification.h"
 #include "PropertiesDataDescriptor.h"
 #include "PropertiesFileDescriptor.h"
 #include "PropertiesGcpLayer.h"
@@ -80,8 +81,7 @@ CoreModuleDescriptor::CoreModuleDescriptor(const string& id, map<string, string>
 }
 
 CoreModuleDescriptor::~CoreModuleDescriptor()
-{
-}
+{}
 
 bool CoreModuleDescriptor::load()
 {
@@ -89,9 +89,7 @@ bool CoreModuleDescriptor::load()
 }
 
 void CoreModuleDescriptor::unload()
-{
-   return;
-}
+{}
 
 GENERATE_FACTORY(OpticksCore);
 
@@ -118,6 +116,7 @@ REGISTER_PLUGIN(OpticksCore, OptionsSuppressibleMsg, OptionQWidgetWrapper<Option
 REGISTER_PLUGIN(OpticksCore, OptionsThresholdLayer, OptionQWidgetWrapper<OptionsThresholdLayer>());
 REGISTER_PLUGIN(OpticksCore, OptionsTiePointLayer, OptionQWidgetWrapper<OptionsTiePointLayer>());
 REGISTER_PLUGIN(OpticksCore, OptionsView, OptionQWidgetWrapper<OptionsView>());
+REGISTER_PLUGIN_BASIC(OpticksCore, PropertiesClassification);
 REGISTER_PLUGIN_BASIC(OpticksCore, PropertiesDataDescriptor);
 REGISTER_PLUGIN_BASIC(OpticksCore, PropertiesFileDescriptor);
 REGISTER_PLUGIN_BASIC(OpticksCore, PropertiesMetadata);

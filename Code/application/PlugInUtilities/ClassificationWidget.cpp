@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2010 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -15,10 +15,10 @@
 #include <QtGui/QMessageBox>
 #include <QtGui/QPushButton>
 
-#include "AppConfig.h"
-#include "SecurityMarkingsDlg.h"
 #include "ApplicationServices.h"
+#include "AppVerify.h"
 #include "Classification.h"
+#include "ClassificationWidget.h"
 #include "ConfigurationSettings.h"
 #include "DateTime.h"
 #include "DynamicObject.h"
@@ -110,15 +110,14 @@ void populateListFromFile(T* box, const QString& strFilename, bool addBlank)
    }
 }
 
-SecurityMarkingsDlg::SecurityMarkingsDlg(QWidget* parent, const QString& strInitialMarkings,
-                                         Classification* pClassification) :
-   QDialog(parent),
+ClassificationWidget::ClassificationWidget(QWidget* pParent) :
+   QWidget(pParent),
+   mpClass(NULL),
+   mModified(false),
    mFavoritesAttributePrefix("favorite"),
    mDeclassDateIsValid(false),
    mDowngradeDateIsValid(false)
 {
-   mpClass = pClassification;
-
    // Classification level
    QLabel* pClassificationLabel = new QLabel("Classification Level:", this);
    mpClassLevelCombo = new QComboBox(this);
@@ -275,23 +274,19 @@ SecurityMarkingsDlg::SecurityMarkingsDlg(QWidget* parent, const QString& strInit
    mpTabWidget->addTab(pDescriptorTab, "Descriptor");
 
    // Buttons
-   QPushButton* pOkButton = new QPushButton("&OK", this);
-   QPushButton* pCancelButton = new QPushButton("&Cancel", this);
    QPushButton* pAddToFavoritesButton = new QPushButton("Add to favorites", this);
    QPushButton* pRemoveFromFavoritesButton = new QPushButton("Remove from favorites", this);
 
    QHBoxLayout* pButtonLayout = new QHBoxLayout();
    pButtonLayout->setMargin(0);
    pButtonLayout->setSpacing(5);
+   pButtonLayout->addStretch();
    pButtonLayout->addWidget(pAddToFavoritesButton);
    pButtonLayout->addWidget(pRemoveFromFavoritesButton);
-   pButtonLayout->addStretch();
-   pButtonLayout->addWidget(pOkButton);
-   pButtonLayout->addWidget(pCancelButton);
 
    // Layout
    QGridLayout* pGrid = new QGridLayout(this);
-   pGrid->setMargin(10);
+   pGrid->setMargin(0);
    pGrid->setSpacing(10);
    pGrid->addWidget(pClassificationLabel, 0, 0);
    pGrid->addWidget(mpClassLevelCombo, 0, 1);
@@ -303,76 +298,90 @@ SecurityMarkingsDlg::SecurityMarkingsDlg(QWidget* parent, const QString& strInit
    pGrid->setColumnStretch(1, 10);
 
    // Initialization
-   setWindowTitle("Security Markings");
-   setModal(true);
    initialize();
-   connect(mpDeclassDateEdit, SIGNAL(dateChanged(const QDate &)), this, SLOT(dateChanged(const QDate &)));
-   connect(mpDowngradeDateEdit, SIGNAL(dateChanged(const QDate &)), this, SLOT(dateChanged(const QDate &)));
-   importFromClassification(mpClass);
    pFieldList->setCurrentRow(0);
-
-   QString strText;
-   if (strInitialMarkings.isEmpty() == false)
-   {
-      strText = strInitialMarkings;
-   }
-   else if (mpClass != NULL)
-   {
-      string classificationText = "";
-      mpClass->getClassificationText(classificationText);
-      if (classificationText.empty() == false)
-      {
-         strText = QString::fromStdString(classificationText);
-      }
-   }
-
-   mpMarkingsEdit->setPlainText(strText);
-
    checkAddButton(mpValueStack->currentIndex());
 
    // Connections
-   connect(mpClassLevelCombo, SIGNAL(activated(const QString&)), this, SLOT(updateMarkings()));
-   connect(mpClassReasonCombo, SIGNAL(activated(const QString&)), this, SLOT(updateMarkings()));
-   connect(mpDeclassTypeCombo, SIGNAL(activated(const QString&)), this, SLOT(updateMarkings()));
-   connect(mpValueStack, SIGNAL(currentChanged(int)), this, SLOT(updateSize()));
-   connect(mpValueStack, SIGNAL(currentChanged(int)), this, SLOT(checkAddButton(int)));
-   connect(mpCodewordList, SIGNAL(itemSelectionChanged()), this, SLOT(updateMarkings()));
-   connect(mpSystemList, SIGNAL(itemSelectionChanged()), this, SLOT(updateMarkings()));
-   connect(mpCountryCodeList, SIGNAL(itemSelectionChanged()), this, SLOT(updateMarkings()));
-   connect(mpFileReleasingList, SIGNAL(itemSelectionChanged()), this, SLOT(updateMarkings()));
-   connect(mpExemptionList, SIGNAL(itemSelectionChanged()), this, SLOT(updateMarkings()));
-   connect(mpDeclassDateEdit, SIGNAL(dateChanged(const QDate &)), this, SLOT(updateMarkings()));
-   connect(mpDowngradeDateEdit, SIGNAL(dateChanged(const QDate &)), this, SLOT(updateMarkings()));
-   connect(mpAddButton, SIGNAL(clicked()), this, SLOT(addListItem()));
-   connect(pResetButton, SIGNAL(clicked()), this, SLOT(resetList()));
-   connect(pOkButton, SIGNAL(clicked()), this, SLOT(accept()));
-   connect(pCancelButton, SIGNAL(clicked()), this, SLOT(reject()));
-   connect(pAddToFavoritesButton, SIGNAL(clicked()), this, SLOT(addFavoriteItem()));
-   connect(pRemoveFromFavoritesButton, SIGNAL(clicked()), this, SLOT(removeFavoriteItem()));
-   connect(mpFavoritesCombo, SIGNAL(activated(const QString&)), this, SLOT(favoriteSelected()));
-   connect(mpResetDeclassDateButton, SIGNAL(clicked()), this, SLOT(resetDateTimeEdit()));
-   connect(mpResetDowngradeDateButton, SIGNAL(clicked()), this, SLOT(resetDateTimeEdit()));
-   connect(mpResetDeclassDateButton, SIGNAL(clicked()), this, SLOT(updateMarkings()));
-   connect(mpResetDowngradeDateButton, SIGNAL(clicked()), this, SLOT(updateMarkings()));
+   VERIFYNR(connect(mpClassLevelCombo, SIGNAL(activated(const QString&)), this, SLOT(updateMarkings())));
+   VERIFYNR(connect(mpClassReasonCombo, SIGNAL(activated(const QString&)), this, SLOT(updateMarkings())));
+   VERIFYNR(connect(mpDeclassTypeCombo, SIGNAL(activated(const QString&)), this, SLOT(updateMarkings())));
+   VERIFYNR(connect(mpValueStack, SIGNAL(currentChanged(int)), this, SLOT(updateSize())));
+   VERIFYNR(connect(mpValueStack, SIGNAL(currentChanged(int)), this, SLOT(checkAddButton(int))));
+   VERIFYNR(connect(mpCodewordList, SIGNAL(itemSelectionChanged()), this, SLOT(updateMarkings())));
+   VERIFYNR(connect(mpSystemList, SIGNAL(itemSelectionChanged()), this, SLOT(updateMarkings())));
+   VERIFYNR(connect(mpCountryCodeList, SIGNAL(itemSelectionChanged()), this, SLOT(updateMarkings())));
+   VERIFYNR(connect(mpFileReleasingList, SIGNAL(itemSelectionChanged()), this, SLOT(updateMarkings())));
+   VERIFYNR(connect(mpExemptionList, SIGNAL(itemSelectionChanged()), this, SLOT(updateMarkings())));
+   VERIFYNR(connect(mpDeclassDateEdit, SIGNAL(dateChanged(const QDate&)), this, SLOT(dateChanged(const QDate&))));
+   VERIFYNR(connect(mpDeclassDateEdit, SIGNAL(dateChanged(const QDate&)), this, SLOT(updateMarkings())));
+   VERIFYNR(connect(mpDowngradeDateEdit, SIGNAL(dateChanged(const QDate&)), this, SLOT(dateChanged(const QDate&))));
+   VERIFYNR(connect(mpDowngradeDateEdit, SIGNAL(dateChanged(const QDate&)), this, SLOT(updateMarkings())));
+   VERIFYNR(connect(mpAddButton, SIGNAL(clicked()), this, SLOT(addListItem())));
+   VERIFYNR(connect(pResetButton, SIGNAL(clicked()), this, SLOT(resetList())));
+   VERIFYNR(connect(pAddToFavoritesButton, SIGNAL(clicked()), this, SLOT(addFavoriteItem())));
+   VERIFYNR(connect(pRemoveFromFavoritesButton, SIGNAL(clicked()), this, SLOT(removeFavoriteItem())));
+   VERIFYNR(connect(mpFavoritesCombo, SIGNAL(activated(const QString&)), this, SLOT(favoriteSelected())));
+   VERIFYNR(connect(mpResetDeclassDateButton, SIGNAL(clicked()), this, SLOT(resetDateTimeEdit())));
+   VERIFYNR(connect(mpResetDowngradeDateButton, SIGNAL(clicked()), this, SLOT(resetDateTimeEdit())));
+   VERIFYNR(connect(mpResetDeclassDateButton, SIGNAL(clicked()), this, SLOT(updateMarkings())));
+   VERIFYNR(connect(mpResetDowngradeDateButton, SIGNAL(clicked()), this, SLOT(updateMarkings())));
 }
 
-SecurityMarkingsDlg::~SecurityMarkingsDlg()
+ClassificationWidget::~ClassificationWidget()
 {
    clearFavorites();
 }
 
-QString SecurityMarkingsDlg::getSecurityMarkings() const
+void ClassificationWidget::setClassification(Classification* pClassification, bool initializeWidgets)
 {
-   QString strMarkings;
-   if (mpMarkingsEdit != NULL)
+   if (pClassification != NULL)
    {
-      strMarkings = mpMarkingsEdit->toPlainText();
-   }
+      mpClass = pClassification;
+      if (initializeWidgets == true)
+      {
+         importFromClassification(mpClass);
+         updateMarkings();
+      }
+      else
+      {
+         mpClassLevelCombo->setCurrentIndex(-1);
+         mpTabWidget->setEnabled(false);
+         mpMarkingsEdit->setPlainText(QString());
+      }
 
-   return strMarkings;
+      mModified = false;
+   }
 }
 
-void SecurityMarkingsDlg::initialize(QWidget* pWidget)
+bool ClassificationWidget::isModified() const
+{
+   return mModified;
+}
+
+bool ClassificationWidget::applyChanges()
+{
+   if (mModified == false)
+   {
+      return true;
+   }
+
+   if (mpClass == NULL)
+   {
+      return false;
+   }
+
+   if (mpClassLevelCombo->currentIndex() == -1)
+   {
+      return false;
+   }
+
+   exportToClassification(mpClass);
+   serializeFavorites();
+   return true;
+}
+
+void ClassificationWidget::initialize(QWidget* pWidget)
 {
    // Get the default directory from the options
    QString strDefaultDir = QDir::currentPath();
@@ -481,7 +490,7 @@ void SecurityMarkingsDlg::initialize(QWidget* pWidget)
    updateFavoritesCombo();
 }
 
-void SecurityMarkingsDlg::importFromClassification(Classification *pClass)
+void ClassificationWidget::importFromClassification(const Classification* pClass)
 {
    if (pClass == NULL)
    {
@@ -588,7 +597,7 @@ void SecurityMarkingsDlg::importFromClassification(Classification *pClass)
    mpNumberOfCopiesSpinBox->setValue((QString::fromStdString(pClass->getFileNumberOfCopies())).toInt());
 }
 
-void SecurityMarkingsDlg::exportToClassification(Classification *pClass)
+void ClassificationWidget::exportToClassification(Classification* pClass)
 {
    if (pClass == NULL)
    {
@@ -779,7 +788,7 @@ void SecurityMarkingsDlg::exportToClassification(Classification *pClass)
    }
 }
 
-QString SecurityMarkingsDlg::getListString(QListWidget* pListWidget, const QString& strDelimiter)
+QString ClassificationWidget::getListString(QListWidget* pListWidget, const QString& strDelimiter)
 {
    if (pListWidget == NULL)
    {
@@ -815,7 +824,7 @@ QString SecurityMarkingsDlg::getListString(QListWidget* pListWidget, const QStri
    return strText;
 }
 
-void SecurityMarkingsDlg::selectListFromString(QListWidget* pListWidget, const QString& strText)
+void ClassificationWidget::selectListFromString(QListWidget* pListWidget, const QString& strText)
 {
    if (pListWidget == NULL)
    {
@@ -836,7 +845,7 @@ void SecurityMarkingsDlg::selectListFromString(QListWidget* pListWidget, const Q
 
    const char* ptr = StringUtilities::escapedToken(strText.toStdString());
 
-   // setSelected() below will signal to SecurityMarkingsDlg::updateMarkings(),
+   // setSelected() below will signal to ClassificationWidget::updateMarkings(),
    // which indirectly calls selectListFromString.  Block the signal to prevent this.
    while (ptr != NULL)
    {
@@ -862,7 +871,7 @@ void SecurityMarkingsDlg::selectListFromString(QListWidget* pListWidget, const Q
    pListWidget->blockSignals(false);
 }
 
-void SecurityMarkingsDlg::selectComboFromString(QComboBox* pComboBox, const QString& strText)
+void ClassificationWidget::selectComboFromString(QComboBox* pComboBox, const QString& strText)
 {
    if ((pComboBox == NULL) || (strText.isEmpty() == true))
    {
@@ -879,7 +888,7 @@ void SecurityMarkingsDlg::selectComboFromString(QComboBox* pComboBox, const QStr
    }
 }
 
-void SecurityMarkingsDlg::setDateEdit(QDateEdit* pDateEdit, const DateTime* pDateTime)
+void ClassificationWidget::setDateEdit(QDateEdit* pDateEdit, const DateTime* pDateTime)
 {
    if (pDateEdit == NULL)
    {
@@ -914,7 +923,7 @@ void SecurityMarkingsDlg::setDateEdit(QDateEdit* pDateEdit, const DateTime* pDat
    }
 }
 
-void SecurityMarkingsDlg::addListItem()
+void ClassificationWidget::addListItem()
 {
    QListWidget* pList = static_cast<QListWidget*>(mpValueStack->currentWidget());
    if (pList != NULL)
@@ -927,7 +936,7 @@ void SecurityMarkingsDlg::addListItem()
    }
 }
 
-void SecurityMarkingsDlg::resetList()
+void ClassificationWidget::resetList()
 {
    QListWidget* pList = static_cast<QListWidget*>(mpValueStack->currentWidget());
    if (pList != NULL)
@@ -937,7 +946,7 @@ void SecurityMarkingsDlg::resetList()
    }
 }
 
-void SecurityMarkingsDlg::updateMarkings()
+void ClassificationWidget::updateMarkings()
 {
    QString strMarkings;
 
@@ -956,54 +965,18 @@ void SecurityMarkingsDlg::updateMarkings()
    }
 
    mpMarkingsEdit->setPlainText(strMarkings);
+
+   mModified = true;
+   emit modified(true);
 }
 
-void SecurityMarkingsDlg::updateSize()
+void ClassificationWidget::updateSize()
 {
    mpValueStack->updateGeometry();
    mpTabWidget->updateGeometry();
 }
 
-void SecurityMarkingsDlg::accept()
-{
-   QString strMarkings = getSecurityMarkings();
-   if (strMarkings.isEmpty() == true)
-   {
-      QMessageBox::critical(this, "Security Markings", "No markings are selected!  Please "
-         "select valid security markings before accepting the changes.");
-      return;
-   }
-
-   FactoryResource<Classification> pClass;
-   if (pClass.get() == NULL)
-   {
-      return;
-   }
-
-   exportToClassification(pClass.get());
-
-   string errorMessage;
-   if (pClass->isValid(errorMessage) == false)
-   {
-      if (errorMessage.empty() == true)
-      {
-         errorMessage = "An unknown error has occurred while validating the marking.";
-      }
-
-      QMessageBox::critical(this, windowTitle(), QString::fromStdString(errorMessage));
-      return;
-   }
-
-   if (mpClass != NULL)
-   {
-      mpClass->setClassification(pClass.get());
-   }
-
-   serializeFavorites();
-   QDialog::accept();
-}
-
-void SecurityMarkingsDlg::addFavoriteItem()
+void ClassificationWidget::addFavoriteItem()
 {
    FactoryResource<Classification> pFactoryClass;
    Classification* pClass = pFactoryClass.release();
@@ -1014,7 +987,7 @@ void SecurityMarkingsDlg::addFavoriteItem()
    updateFavoritesCombo();
 }
 
-void SecurityMarkingsDlg::removeFavoriteItem()
+void ClassificationWidget::removeFavoriteItem()
 {
    int iRemoveClass = mpFavoritesCombo->currentIndex();
    if (iRemoveClass >= 0 && (unsigned int)iRemoveClass < mlstFavorites.size())
@@ -1041,14 +1014,14 @@ void SecurityMarkingsDlg::removeFavoriteItem()
    }
 }
 
-void SecurityMarkingsDlg::favoriteSelected()
+void ClassificationWidget::favoriteSelected()
 {
    Classification* pClass = mlstFavorites[mpFavoritesCombo->currentIndex()];
    importFromClassification(pClass);
    updateMarkings();
 }
 
-bool SecurityMarkingsDlg::serializeFavorites()
+bool ClassificationWidget::serializeFavorites()
 {
    FactoryResource<DynamicObject> pNewFavorites;
    VERIFY(pNewFavorites.get() != NULL);
@@ -1084,13 +1057,13 @@ bool SecurityMarkingsDlg::serializeFavorites()
 
       pNewFavorites->setAttribute(attributeName, *pClassificationObject.get());
    }
-   SecurityMarkingsDlg::setSettingFavorites(pNewFavorites.get());
+   ClassificationWidget::setSettingFavorites(pNewFavorites.get());
    return true;
 }
 
-bool SecurityMarkingsDlg::deserializeFavorites()
+bool ClassificationWidget::deserializeFavorites()
 {
-   const DynamicObject* pFavorites = SecurityMarkingsDlg::getSettingFavorites();
+   const DynamicObject* pFavorites = ClassificationWidget::getSettingFavorites();
    if (pFavorites == NULL)
    {
       return false;
@@ -1153,13 +1126,13 @@ bool SecurityMarkingsDlg::deserializeFavorites()
       if (pClassificationText == NULL || classText != *pClassificationText)
       {
          // if not, kill the old setting, do not add our own
-         const DynamicObject* pOriginalFavorites = SecurityMarkingsDlg::getSettingFavorites();
+         const DynamicObject* pOriginalFavorites = ClassificationWidget::getSettingFavorites();
          if (pOriginalFavorites != NULL)
          {
             FactoryResource<DynamicObject> pNewFavorites;
             pNewFavorites->merge(pOriginalFavorites);
             pNewFavorites->removeAttribute(previews[i]);
-            SecurityMarkingsDlg::setSettingFavorites(pNewFavorites.get());
+            ClassificationWidget::setSettingFavorites(pNewFavorites.get());
          }
       }
       else
@@ -1171,7 +1144,7 @@ bool SecurityMarkingsDlg::deserializeFavorites()
    return true;
 }
 
-void SecurityMarkingsDlg::updateFavoritesCombo()
+void ClassificationWidget::updateFavoritesCombo()
 {
    mpFavoritesCombo->clear();
    for (unsigned int i = 0; i < mlstFavorites.size(); ++i)
@@ -1182,7 +1155,7 @@ void SecurityMarkingsDlg::updateFavoritesCombo()
    }
 }
 
-void SecurityMarkingsDlg::clearFavorites()
+void ClassificationWidget::clearFavorites()
 {
    Service<ApplicationServices> pApp;
    if (pApp.get() != NULL)
@@ -1200,12 +1173,12 @@ void SecurityMarkingsDlg::clearFavorites()
    mlstFavorites.clear();
 }
 
-void SecurityMarkingsDlg::resetDateTimeEdit()
+void ClassificationWidget::resetDateTimeEdit()
 {
    dateChanged(sender(), QDate());
 }
 
-void SecurityMarkingsDlg::checkAddButton(int iIndex)
+void ClassificationWidget::checkAddButton(int iIndex)
 {
    QWidget* pWidget = mpValueStack->widget(iIndex);
    if (pWidget == mpCodewordList || pWidget == mpFileReleasingList || pWidget == mpCountryCodeList)
@@ -1218,12 +1191,12 @@ void SecurityMarkingsDlg::checkAddButton(int iIndex)
    }
 }
 
-void SecurityMarkingsDlg::dateChanged(const QDate &date)
+void ClassificationWidget::dateChanged(const QDate &date)
 {
    dateChanged(sender(), date);
 }
 
-void SecurityMarkingsDlg::dateChanged(const QObject *pSender, const QDate &date)
+void ClassificationWidget::dateChanged(const QObject *pSender, const QDate &date)
 {
    if (pSender == mpResetDeclassDateButton || pSender == mpDeclassDateEdit)
    {

@@ -25,6 +25,7 @@
 #include <string>
 #include <vector>
 
+class ClassificationWidget;
 class DataDescriptor;
 class DataDescriptorWidget;
 class FileDescriptorWidget;
@@ -76,6 +77,8 @@ protected slots:
    void updateDataRows(const std::vector<DimensionDescriptor>& rows);
    void updateDataColumns(const std::vector<DimensionDescriptor>& columns);
    void updateDataBands(const std::vector<DimensionDescriptor>& bands);
+   void updateClassification();
+   void updateClassificationLabel();
    void pagesModified();
    bool applyChanges();
 
@@ -92,9 +95,11 @@ private:
    bool mAllowDeselectedFiles;
 
    QTreeWidget* mpDatasetTree;
+   QLabel* mpClassificationLabel;
    QTabWidget* mpTabWidget;
    DataDescriptorWidget* mpDataPage;
    FileDescriptorWidget* mpFilePage;
+   ClassificationWidget* mpClassificationPage;
    SubsetWidget* mpSubsetPage;
    MetadataWidget* mpMetadataPage;
    WavelengthsWidget* mpWavelengthsPage;

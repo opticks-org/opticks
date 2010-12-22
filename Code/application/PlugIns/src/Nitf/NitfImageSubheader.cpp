@@ -7,15 +7,15 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "NitfImageSubheader.h"
-
 #include "Classification.h"
+#include "DateTime.h"
 #include "DynamicObject.h"
 #include "GeoPoint.h"
 #include "LocationType.h"
 #include "ModelServices.h"
 #include "NitfConstants.h"
 #include "NitfHeader.h"
+#include "NitfImageSubheader.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "RasterFileDescriptor.h"

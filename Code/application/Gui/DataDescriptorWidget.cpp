@@ -13,8 +13,8 @@
 #include <QtGui/QMessageBox>
 #include <QtGui/QPushButton>
 
+#include "AppVerify.h"
 #include "AppVersion.h"
-#include "Classification.h"
 #include "CustomTreeWidget.h"
 #include "DataDescriptor.h"
 #include "DataDescriptorWidget.h"
@@ -27,10 +27,8 @@
 #include "RasterDataDescriptor.h"
 #include "RasterLayer.h"
 #include "RasterUtilities.h"
-#include "Service.h"
 #include "StringUtilities.h"
 #include "Units.h"
-#include "UtilityServicesImp.h"
 
 #include <string>
 #include <vector>
@@ -41,18 +39,9 @@ DataDescriptorWidget::DataDescriptorWidget(QWidget* parent) :
    mEditAll(false),
    mModified(false),
    mpDescriptor(NULL),
-   mpClassificationLabel(NULL),
    mpTreeWidget(NULL),
    mpProcessingLocationCombo(NULL)
 {
-   // Classification label
-   QFont labelFont = font();
-   labelFont.setBold(true);
-
-   mpClassificationLabel = new QLabel(this);
-   mpClassificationLabel->setFont(labelFont);
-   mpClassificationLabel->setAlignment(Qt::AlignCenter);
-
    // Item tree widget
    QStringList columnNames;
    columnNames.append("Item");
@@ -90,7 +79,6 @@ DataDescriptorWidget::DataDescriptorWidget(QWidget* parent) :
    QVBoxLayout* pLayout = new QVBoxLayout(this);
    pLayout->setMargin(0);
    pLayout->setSpacing(10);
-   pLayout->addWidget(mpClassificationLabel);
    pLayout->addWidget(mpTreeWidget);
    pLayout->addWidget(mpSetDisplayButton, 0, Qt::AlignRight);
 
@@ -163,55 +151,6 @@ void DataDescriptorWidget::initialize()
    {
       return;
    }
-
-   // Classification
-   QString strClassification;
-   string classificationLevel;
-   const Classification* pClassification = mpDescriptor->getClassification();
-   if (pClassification != NULL)
-   {
-      string classificationText = "";
-      classificationLevel = pClassification->getLevel();
-      pClassification->getClassificationText(classificationText);
-      strClassification = QString::fromStdString(classificationText);
-   }
-
-   if (strClassification.isEmpty() == true)
-   {
-      Service<UtilityServices> pUtilities;
-      strClassification = QString::fromStdString(pUtilities->getDefaultClassification());
-   }
-
-   QPalette labelPalette = palette();
-   if (strClassification.isEmpty() == false)
-   {
-      // Text color
-      labelPalette.setColor(QPalette::WindowText, Qt::white);
-
-      // Background color
-      labelPalette.setColor(QPalette::Window, Qt::darkYellow); //default to background color used for TS
-
-      if ((classificationLevel == "C") || (classificationLevel == "R"))
-      {
-         labelPalette.setColor(QPalette::Window, Qt::darkBlue);
-      }
-      else if (classificationLevel == "S")
-      {
-         labelPalette.setColor(QPalette::Window, Qt::darkRed);
-      }
-      else if (classificationLevel == "U")
-      {
-         labelPalette.setColor(QPalette::Window, Qt::darkGreen);
-      }
-   }
-   else
-   {
-      labelPalette.setColor(QPalette::WindowText, Qt::black);
-   }
-
-   mpClassificationLabel->setPalette(labelPalette);
-   mpClassificationLabel->setAutoFillBackground(!strClassification.isEmpty());
-   mpClassificationLabel->setText(strClassification);
 
    // Name
    QTreeWidgetItem* pNameItem = new QTreeWidgetItem(mpTreeWidget);

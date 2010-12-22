@@ -10,10 +10,10 @@
 #ifndef VIEW_H
 #define VIEW_H
 
-#include "SessionItem.h"
 #include "ColorType.h"
 #include "ConfigurationSettings.h"
 #include "LocationType.h"
+#include "SessionItem.h"
 #include "Subject.h"
 #include "TypesFile.h"
 
@@ -152,7 +152,7 @@ public:
    SIGNAL_METHOD(View, Renamed)
 
    /**
-    *  Emitted with any<std::string> when the classification text is changed.
+    *  Emitted with any<const Classification*> when the classification is changed.
     */
    SIGNAL_METHOD(View, ClassificationChanged)
 
@@ -275,38 +275,46 @@ public:
     *           A pointer to the classification object from which to set the view's
     *           text markings.  Cannot be \c NULL.
     *
-    *  @see     Classification, setClassificationText()
+    *  @see     Classification
     *
     *  @notify  This method will notify signalClassificationChanged() with
-    *           any<std::string>.
+    *           boost::any<const Classification*>.
     */
    virtual void setClassification(const Classification* pClassification) = 0;
 
    /**
-    *  Sets the classification level of the view.
+    *  Returns a pointer to the view's classification object.
     *
-    *  This method does not call refresh() so that multiple calls to modify view
-    *  settings can be made without refreshing the view after each modification.
+    *  The classification object documents how the data in the view is to be
+    *  handled and/or restricted.
     *
-    *  @param   classificationText
-    *           A text string containing classification markings that are displayed in
-    *           the view.
+    *  @return  A pointer to the view's classification object.
     *
-    *  @notify  This method will notify signalClassificationChanged() with
-    *           any<std::string>.
-    *
-    *  @see     setClassification()
+    *  @see     Classification
     */
-   virtual void setClassificationText(const std::string& classificationText) = 0;
+   virtual Classification* getClassification() = 0;
 
    /**
-    *  Retrieves a text string containing the classification settings.
+    *  Returns read-only access to the view's classification object.
     *
-    *  @param   classificationText
-    *           The string to contain the classification text.  Any text existing
-    *           in the string is erased.
+    *  The classification object documents how the data in the view is to be
+    *  handled and/or restricted.
+    *
+    *  @return  A const pointer to the view's classification object. The
+    *           classification represented by the returned pointer should not
+    *           be modified.  To modify the values, call the non-const version
+    *           of getClassification() instead.
+    *
+    *  @see     Classification
     */
-   virtual void getClassificationText(std::string& classificationText) const = 0;
+   virtual const Classification* getClassification() const = 0;
+
+   /**
+    *  Retrieves a text string containing the classification markings.
+    *
+    *  @return  A string containing the complete classification text.
+    */
+   virtual std::string getClassificationText() const = 0;
 
    /**
     *  Enables/disables display of classification markings.

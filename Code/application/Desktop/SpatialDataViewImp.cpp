@@ -455,32 +455,6 @@ void SpatialDataViewImp::elementDeleted(Subject &subject, const string &signal, 
    }
 }
 
-void SpatialDataViewImp::elementModified(Subject &subject, const string &signal, const boost::any &v)
-{
-   DataElement* pElement = dynamic_cast<DataElement*>(&subject);
-   if (NN(pElement))
-   {
-      // Update the security markings
-      RasterElement* pSensor = dynamic_cast<RasterElement*>(pElement);
-      if (pSensor != NULL)
-      {
-         const Classification* pClass = pSensor->getClassification();
-         if (pClass != NULL)
-         {
-            setClassification(pClass);
-         }
-      }
-   }
-}
-
-void SpatialDataViewImp::attached(Subject &subject, const string &signal, const Slot &slot)
-{
-   if (dynamic_cast<DataElement*>(&subject) != NULL)
-   {
-      elementModified(subject, signal, boost::any());
-   }
-}
-
 SpatialDataViewImp& SpatialDataViewImp::operator= (const SpatialDataViewImp& spatialDataView)
 {
    if (this != &spatialDataView)
@@ -625,15 +599,6 @@ bool SpatialDataViewImp::setPrimaryRasterElement(RasterElement* pRasterElement)
                }
             }
          }
-
-         // Set the classification
-         const Classification* pClassification = NULL;
-         if (pRasterElement != NULL)
-         {
-            pClassification = pRasterElement->getClassification();
-         }
-
-         setClassification(pClassification);
       }
    }
 
@@ -683,7 +648,6 @@ Layer* SpatialDataViewImp::createLayer(const LayerType& layerType, DataElement* 
       // Attach the element
       if (pElement != NULL)
       {
-         pElement->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &SpatialDataViewImp::elementModified));
          pElement->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &SpatialDataViewImp::elementDeleted));
       }
 
@@ -731,7 +695,6 @@ bool SpatialDataViewImp::addLayer(Layer* pLayer)
    DataElement* pElement = pLayer->getDataElement();
    if (pElement != NULL)
    {
-      pElement->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &SpatialDataViewImp::elementModified));
       pElement->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &SpatialDataViewImp::elementDeleted));
    }
 
@@ -768,6 +731,20 @@ bool SpatialDataViewImp::addLayer(Layer* pLayer)
             this, SLOT(updateStatusBar())));
       }
 
+      // Set the view classification to that of the layer's element if this is the first layer added
+      if ((mpLayerList->getNumLayers() == 1) && (pElement != NULL))
+      {
+         Service<SessionManager> pManager;
+         if (pManager->isSessionLoading() == false)
+         {
+            const Classification* pClassification = pElement->getClassification();
+            if (pClassification != NULL)
+            {
+               setClassification(pClassification);
+            }
+         }
+      }
+
       // Show the layer
       UndoLock lock(dynamic_cast<View*>(this));
       showLayer(pLayer);
@@ -777,7 +754,6 @@ bool SpatialDataViewImp::addLayer(Layer* pLayer)
    }
    else if (pElement != NULL)
    {
-      pElement->detach(SIGNAL_NAME(Subject, Modified), Slot(this, &SpatialDataViewImp::elementModified));
       pElement->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &SpatialDataViewImp::elementDeleted));
    }
 
@@ -1186,7 +1162,6 @@ bool SpatialDataViewImp::deleteLayer(Layer* pLayer, bool bClearUndo)
    DataElement* pElement = pLayer->getDataElement();
    if (pElement != NULL)
    {
-      pElement->detach(SIGNAL_NAME(Subject, Modified), Slot(this, &SpatialDataViewImp::elementModified));
       pElement->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &SpatialDataViewImp::elementDeleted));
    }
 

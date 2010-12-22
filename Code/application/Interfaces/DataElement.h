@@ -122,13 +122,31 @@ public:
    /**
     *  Returns a pointer to the element's classification object.
     *
-    *  The classification object documents how the data in element is to be handled and/or
-    *  restricted.
+    *  The classification object documents how the data in the element is to be
+    *  handled and/or restricted.
     *
-    *  This is a convenience method that returns the classification object that is stored
-    *  in the DataDescriptor object.
+    *  This is a convenience method that returns the classification object that
+    *  is stored in the DataDescriptor object.
     *
     *  @return  A pointer to the element's classification object.
+    *
+    *  @see     DataDescriptor::getClassification(), Classification
+    */
+   virtual Classification* getClassification() = 0;
+
+   /**
+    *  Returns read-only access to the element's classification object.
+    *
+    *  The classification object documents how the data in the element is to be
+    *  handled and/or restricted.
+    *
+    *  This is a convenience method that returns the classification object that
+    *  is stored in the DataDescriptor object.
+    *
+    *  @return  A const pointer to the element's classification object.
+    *           The classification represented by the returned pointer should
+    *           not be modified.  To modify the values, call the non-const
+    *           version of getClassification() instead.
     *
     *  @see     DataDescriptor::getClassification(), Classification
     */

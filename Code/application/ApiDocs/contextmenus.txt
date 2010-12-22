@@ -118,6 +118,7 @@
  *    <tr><td>Separator</td><td>APP_APPLICATIONWINDOW_COPY_SNAPSHOT_SEPARATOR_ACTION()</td></tr>
  *    <tr><td>Copy snapshot</td><td>APP_APPLICATIONWINDOW_COPY_SNAPSHOT_SIZED_ACTION()</td></tr>
  *    <tr><td>Delete Data Element</td><td>APP_APPLICATIONWINDOW_DATAELEMENT_DELETE_ACTION()</td></tr>
+ *    <tr><td>Edit %Classification</td><td>APP_APPLICATIONWINDOW_EDIT_CLASSIFICATION_ACTION()</td></tr>
  *    <tr><td>Export</td><td>APP_APPLICATIONWINDOW_EXPORT_ACTION()</td></tr>
  *    <tr><td>%Properties</td><td>APP_APPLICATIONWINDOW_PROPERTIES_ACTION()</td></tr>
  *  </table>
@@ -194,7 +195,6 @@
  *    <tr><td>Separator</td><td>APP_PLOTVIEW_MOUSE_MODE_SEPARATOR_ACTION()</td></tr>
  *    <tr><td>Rescale axes</td><td>APP_PLOTVIEW_RESCALE_AXES_ACTION()</td></tr>
  *    <tr><td>Separator</td><td>APP_PLOTVIEW_RESCALE_AXES_SEPARATOR_ACTION()</td></tr>
- *    <tr><td>Security markings</td><td>APP_PLOTVIEW_SECURITY_MARKINGS_ACTION()</td></tr>
  *  </table>
  *
  *  \subsection plotwidget Plot Widget

@@ -10,17 +10,8 @@
 #ifndef VIEWIMP_H
 #define VIEWIMP_H
 
+#include "ClassificationAdapter.h"
 #include "glCommon.h"
-
-#include <QtCore/QPoint>
-#include <QtCore/QString>
-#include <QtGui/QColor>
-#include <QtGui/QFont>
-#include <QtGui/QImage>
-#include <QtGui/QPolygon>
-#include <QtOpenGL/QGLContext>
-#include <QtOpenGL/QGLWidget>
-
 #include "LocationType.h"
 #include "Resource.h"
 #include "SessionItemImp.h"
@@ -31,11 +22,19 @@
 #include "XercesIncludes.h"
 #include "xmlwriter.h"
 
+#include <QtCore/QPoint>
+#include <QtCore/QString>
+#include <QtGui/QColor>
+#include <QtGui/QFont>
+#include <QtGui/QImage>
+#include <QtGui/QPolygon>
+#include <QtOpenGL/QGLContext>
+#include <QtOpenGL/QGLWidget>
+
 #include <map>
 #include <vector>
 
 class AnimationController;
-class Classification;
 class MouseMode;
 class SessionItemDeserializer;
 class SessionItemSerializer;
@@ -93,7 +92,8 @@ public:
    void setName(const std::string& viewName);
    virtual ViewType getViewType() const = 0;
 
-   void setClassification(const Classification* pClassification);
+   Classification* getClassification();
+   const Classification* getClassification() const;
    QString getClassificationText() const;
    QFont getClassificationFont() const;
    QColor getClassificationColor() const;
@@ -177,7 +177,7 @@ public:
    SIGNAL_METHOD(ViewImp, AnimationControllerChanged)
 
 public slots:
-   virtual void setClassificationText(const QString& strClassification);
+   virtual void setClassification(const Classification* pClassification);
    virtual void setClassificationFont(const QFont& classificationFont);
    virtual void setClassificationColor(const QColor& clrClassification);
    virtual void enableClassification(bool bEnable);
@@ -211,7 +211,7 @@ public slots:
 
 signals:
    void renamed(const QString& strViewName);
-   void classificationChanged(const QString& strClassification);
+   void classificationChanged(const Classification* pClassification);
    void classificationFontChanged(const QFont& classificationFont);
    void classificationColorChanged(const QColor& clrClassification);
    void backgroundColorChanged(const QColor& clrBackground);
@@ -340,7 +340,7 @@ private:
    static const QGLWidget* mpShareWidget;
 
    QColor mBackgroundColor;
-   QString mClassificationText;
+   ClassificationAdapter mClassification;
    QFont mClassificationFont;
    QColor mClassificationColor;
    bool mClassificationEnabled;
@@ -443,25 +443,17 @@ private:
    { \
       return impClass::setClassification(pClassification); \
    } \
-   void setClassificationText(const std::string& classificationText) \
+   Classification* getClassification() \
    { \
-      QString strClassification; \
-      if (classificationText.empty() == false) \
-      { \
-         strClassification = QString::fromStdString(classificationText); \
-      } \
-      \
-      impClass::setClassificationText(strClassification); \
+      return impClass::getClassification(); \
    } \
-   void getClassificationText(std::string& classificationText) const \
+   const Classification* getClassification() const \
    { \
-      classificationText.erase(); \
-      \
-      QString strClassification = impClass::getClassificationText(); \
-      if (strClassification.isEmpty() == false) \
-      { \
-         classificationText = strClassification.toStdString(); \
-      } \
+      return impClass::getClassification(); \
+   } \
+   std::string getClassificationText() const \
+   { \
+      return impClass::getClassificationText().toStdString(); \
    } \
    void setDataOrigin(const DataOrigin& dataOrigin) \
    { \

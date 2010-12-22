@@ -13,8 +13,6 @@
 #include <QtGui/QInputDialog>
 #include <QtGui/QMouseEvent>
 
-#include "glCommon.h"
-#include "PlotViewImp.h"
 #include "AnnotationElementAdapter.h"
 #include "AnnotationLayerAdapter.h"
 #include "AppVerify.h"
@@ -29,28 +27,29 @@
 #include "CurveCollectionAdapter.h"
 #include "DataDescriptorAdapter.h"
 #include "DesktopServices.h"
+#include "DrawUtil.h"
+#include "glCommon.h"
 #include "GraphicGroupImp.h"
 #include "HistogramAdapter.h"
 #include "LocatorAdapter.h"
 #include "MouseModeImp.h"
 #include "PlotGroupAdapter.h"
 #include "PlotView.h"
+#include "PlotViewImp.h"
 #include "PolarGridlinesAdapter.h"
 #include "PolygonPlotObjectAdapter.h"
 #include "PointAdapter.h"
 #include "PointSetAdapter.h"
 #include "PropertiesPlotView.h"
 #include "RegionObjectAdapter.h"
-#include "SecurityMarkingsDlg.h"
 #include "SessionManager.h"
 #include "TextAdapter.h"
 #include "TextObjectImp.h"
 #include "Undo.h"
+#include "xmlreader.h"
 
 #include <algorithm>
 #include <boost/bind.hpp>
-#include <xmlreader.h>
-#include "DrawUtil.h"
 
 const int DISPLAY_LIST_SIZE = 32;
 
@@ -136,14 +135,6 @@ PlotViewImp::PlotViewImp(const string& id, const string& viewName, QGLContext* d
    QAction* pSeparator2Action = new QAction(this);
    pSeparator2Action->setSeparator(true);
    menuActions.push_back(ContextMenuAction(pSeparator2Action, APP_PLOTVIEW_RESCALE_AXES_SEPARATOR_ACTION));
-
-   // Security markings
-   QAction* pSecurityAction = new QAction("Security Mar&kings...", this);
-   pSecurityAction->setAutoRepeat(false);
-   pSecurityAction->setStatusTip("Sets the security markings on the plot");
-   VERIFYNR(connect(pSecurityAction, SIGNAL(triggered()), this, SLOT(setSecurityMarkings())));
-   pDesktop->initializeAction(pSecurityAction, shortcutContext);
-   menuActions.push_back(ContextMenuAction(pSecurityAction, APP_PLOTVIEW_SECURITY_MARKINGS_ACTION));
 
    // Annotation layer
    DataDescriptorAdapter descriptor("Annotation", "AnnotationElement", NULL);
@@ -1644,23 +1635,6 @@ void PlotViewImp::updateAnnotationObjects()
       if (pTextObject != NULL)
       {
          pTextObject->updateBoundingBox();
-      }
-   }
-}
-
-void PlotViewImp::setSecurityMarkings()
-{
-   QString strCurrentMarkings = getClassificationText();
-
-   SecurityMarkingsDlg dlg(this, strCurrentMarkings);
-
-   int iReturn = dlg.exec();
-   if (iReturn == QDialog::Accepted)
-   {
-      QString strNewMarkings = dlg.getSecurityMarkings();
-      if (strNewMarkings.isEmpty() == false)
-      {
-         setClassificationText(strNewMarkings);
       }
    }
 }

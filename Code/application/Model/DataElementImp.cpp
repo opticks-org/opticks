@@ -33,6 +33,7 @@ DataElementImp::DataElementImp(const DataDescriptorImp& descriptor, const string
          addPropertiesPage("File Descriptor Properties");
       }
 
+      addPropertiesPage("Classification Properties");
       addPropertiesPage("Metadata Properties");
    }
 
@@ -174,6 +175,16 @@ vector<string> DataElementImp::getParentDesignator() const
    }
 
    return parentDesignator;
+}
+
+Classification* DataElementImp::getClassification()
+{
+   if (mpDataDescriptor != NULL)
+   {
+      return mpDataDescriptor->getClassification();
+   }
+
+   return NULL;
 }
 
 const Classification* DataElementImp::getClassification() const

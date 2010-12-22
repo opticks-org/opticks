@@ -59,10 +59,9 @@ public:
    bool copy(View *pView) const;
 
    PlotType getPlotType() const;
+   void classificationModified(Subject& subject, const std::string& signal, const boost::any& value);
    void elementModified(Subject &subject, const std::string &signal, const boost::any &v);
    void elementDeleted(Subject &subject, const std::string &signal, const boost::any &v);
-   void attached(Subject &subject, const std::string &signal, const Slot &slot);
-   void detached(Subject &subject, const std::string &signal, const Slot &slot);
 
    void setName(const std::string& name);
 
@@ -116,7 +115,6 @@ protected:
 protected slots:
    void saveHistogram();
    void setResolution();
-   void setSecurityMarkings();
    void updateSelectedColorMap();
    void setColorMapFromFile();
    void saveColorMapToFile();
@@ -135,6 +133,7 @@ protected slots:
    void initializeBandList();
    void setBadValues();
 
+   void updateElementClassification(const Classification* pClassification);
    void updateHistogramName();
    void updateHistogramValues();
    void updateHistogramRegions();

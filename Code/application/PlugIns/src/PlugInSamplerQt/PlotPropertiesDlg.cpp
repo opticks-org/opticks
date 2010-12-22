@@ -42,7 +42,6 @@ PlotPropertiesDlg::PlotPropertiesDlg(PlotWidget* pPlot, QWidget* pParent) :
    QDialog(pParent),
    mpPlot(pPlot),
    mpClassPositionCombo(NULL),
-   mpClassText(NULL),
    mpOrgPositionCombo(NULL),
    mpOrgText(NULL),
    mpGridlineStyleCombo(NULL),
@@ -78,8 +77,6 @@ PlotPropertiesDlg::PlotPropertiesDlg(PlotWidget* pPlot, QWidget* pParent) :
    mpClassPositionCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(CENTER)));
    mpClassPositionCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(TOP_RIGHT_BOTTOM_LEFT)));
    mpClassPositionCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(TOP_RIGHT_BOTTOM_RIGHT)));
-
-   mpClassText = new GraphicTextWidget(this);
 
    // Organization
    QLabel* pOrgLabel = new QLabel("Organization", this);
@@ -284,7 +281,7 @@ PlotPropertiesDlg::PlotPropertiesDlg(PlotWidget* pPlot, QWidget* pParent) :
          mpSelectionModeCombo->setFixedWidth(175);
          mpSelectionModeCombo->addItem("Normal Selection");
          mpSelectionModeCombo->addItem("Deep Selection");
-         
+
          // Create the selection display mode combo
          QLabel* pSelectionDisplayModeLabel = new QLabel("Selection Display:", pPlotWidget);
          mpSelectionDisplayModeCombo = new QComboBox(pPlotWidget);
@@ -293,7 +290,7 @@ PlotPropertiesDlg::PlotPropertiesDlg(PlotWidget* pPlot, QWidget* pParent) :
          mpSelectionDisplayModeCombo->addItem("Box Selection");
          mpSelectionDisplayModeCombo->addItem("Invert Selection");
          mpSelectionDisplayModeCombo->addItem("Symbol Selection");
-         
+
          // Create the symbol chooser combo
          QLabel* pSymbolChooserLabel = new QLabel("Symbol:", pPlotWidget);
          mpSymbolChooserCombo = new QComboBox(pPlotWidget);
@@ -418,7 +415,6 @@ PlotPropertiesDlg::PlotPropertiesDlg(PlotWidget* pPlot, QWidget* pParent) :
    pGrid->addLayout(pClassLayout, 0, 0, 1, 2);
    pGrid->addWidget(pClassPositionLabel, 1, 0);
    pGrid->addWidget(mpClassPositionCombo, 1, 1, Qt::AlignLeft);
-   pGrid->addWidget(mpClassText, 2, 0, 1, 2);
    pGrid->setColumnMinimumWidth(2, 15);
    pGrid->addLayout(pOrgLayout, 0, 3, 1, 2);
    pGrid->addWidget(pOrgPositionLabel, 1, 3);
@@ -451,7 +447,6 @@ PlotPropertiesDlg::PlotPropertiesDlg(PlotWidget* pPlot, QWidget* pParent) :
    pGrid->setRowMinimumHeight(12, 12);
    pGrid->addLayout(pButtonLayout, 13, 0, 1, 5);
    pGrid->setRowStretch(2, 10);
-   pGrid->setColumnStretch(1, 10);
    pGrid->setColumnStretch(4, 10);
 
    // Initialization
@@ -472,10 +467,6 @@ PlotPropertiesDlg::PlotPropertiesDlg(PlotWidget* pPlot, QWidget* pParent) :
             mpClassPositionCombo->setCurrentIndex(iIndex);
          }
       }
-
-      mpClassText->setText(QString::fromStdString(mpPlot->getClassificationText()));
-      mpClassText->setTextFont(mpPlot->getClassificationFont().getQFont());
-      mpClassText->setColor(COLORTYPE_TO_QCOLOR(mpPlot->getClassificationColor()));
 
       // Organization
       PositionType eOrgPosition = mpPlot->getOrganizationPosition();
@@ -907,13 +898,6 @@ void PlotPropertiesDlg::applyChanges()
    }
 
    mpPlot->setClassificationPosition(eClassPosition);
-
-   // Classification text
-   FactoryResource<Font> pClassFont;
-   pClassFont->setQFont(mpClassText->getTextFont());
-   mpPlot->setClassificationFont(*pClassFont.get());
-   mpPlot->setClassificationText(mpClassText->getText().toStdString());
-   mpPlot->setClassificationColor(QCOLOR_TO_COLORTYPE(mpClassText->getColor()));
 
    // Organization position
    PositionType eOrgPosition = TOP_RIGHT_BOTTOM_LEFT;

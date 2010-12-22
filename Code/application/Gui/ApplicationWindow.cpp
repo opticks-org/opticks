@@ -10,17 +10,21 @@
 #include <QtCore/QEvent>
 #include <QtCore/QMap>
 #include <QtCore/QRegExp>
+#include <QtCore/QTime>
 #include <QtCore/QTimer>
 #include <QtCore/QUrl>
 #include <QtGui/QActionGroup>
 #include <QtGui/QApplication>
 #include <QtGui/QBitmap>
 #include <QtGui/QClipboard>
+#include <QtGui/QDialog>
 #include <QtGui/QDialogButtonBox>
 #include <QtGui/QDragEnterEvent>
 #include <QtGui/QDropEvent>
 #include <QtGui/QFileDialog>
+#include <QtGui/QFrame>
 #include <QtGui/QInputDialog>
+#include <QtGui/QLayout>
 #include <QtGui/QMessageBox>
 #include <QtGui/QSplashScreen>
 #include <QtGui/QToolTip>
@@ -49,8 +53,8 @@
 #if defined(CG_SUPPORTED)
 #include "CgContext.h"
 #endif
-#include "ClassificationAdapter.h"
-#include "ClassificationLayer.h"
+#include "Classification.h"
+#include "ClassificationWidget.h"
 #include "ConfigurationSettingsImp.h"
 #include "ContextMenu.h"
 #include "ContextMenuActions.h"
@@ -112,7 +116,6 @@
 #include "RasterLayerAdapter.h"
 #include "RasterUtilities.h"
 #include "ScriptingWindow.h"
-#include "SecurityMarkingsDlg.h"
 #include "SessionExplorerAdapter.h"
 #include "SessionItemDeserializer.h"
 #include "SessionItemSerializer.h"
@@ -661,12 +664,6 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    VERIFYNR(connect(pUpdate_Wizards_Action, SIGNAL(triggered()), this, SLOT(updateWizardCommands())));
 
    // Options
-   m_pSecurityMarkings_Action = new QAction("Sec&urity Markings...", this);
-   m_pSecurityMarkings_Action->setAutoRepeat(false);
-   m_pSecurityMarkings_Action->setToolTip("Security Markings");
-   m_pSecurityMarkings_Action->setStatusTip("Sets the security markings on the current window");
-   VERIFYNR(connect(m_pSecurityMarkings_Action, SIGNAL(triggered()), this, SLOT(showSecurityMarkings())));
-
    QAction* pOptions_Action = new QAction("&Options...", this);
    pOptions_Action->setAutoRepeat(false);
    pOptions_Action->setToolTip("Options");
@@ -1120,7 +1117,6 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    m_pTools->addSeparator();
    mpMenuBar->insertCommand(pUpdate_Wizards_Action, m_pTools, toolsContext);
    m_pTools->addSeparator();
-   mpMenuBar->insertCommand(m_pSecurityMarkings_Action, m_pTools, toolsContext);
    mpMenuBar->insertCommand(pOptions_Action, m_pTools, toolsContext);
 
    // Help menu
@@ -3496,69 +3492,6 @@ void ApplicationWindow::showBatchEditor()
    }
 }
 
-void ApplicationWindow::showSecurityMarkings()
-{
-   WorkspaceWindow* pWindow = NULL;
-   pWindow = getCurrentWorkspaceWindow();
-   if (pWindow == NULL)
-   {
-      return;
-   }
-
-   QString strClassification;
-   ClassificationAdapter newClassification;
-   DataDescriptor* pDescriptor = NULL;
-   AnnotationLayer* pLayer = NULL;
-
-   SpatialDataView* pSpatialDataView = dynamic_cast<SpatialDataView*>(pWindow->getView());
-   if (pSpatialDataView != NULL)
-   {
-      LayerList* pLayerList = pSpatialDataView->getLayerList();
-         if (pLayerList != NULL)
-         {
-            RasterElement* pRasterElement = pLayerList->getPrimaryRasterElement();
-            if (pRasterElement != NULL)
-            {
-               pDescriptor = pRasterElement->getDataDescriptor();
-               if (pDescriptor != NULL)
-               {
-                  const Classification* pClassification = pDescriptor->getClassification();
-                  if (pClassification != NULL)
-                  {
-                     newClassification.setClassification(pClassification);
-                  }
-               }
-            }
-         }
-      }
-
-   ViewImp* pView = dynamic_cast<ViewImp*>(pWindow->getView());
-   if (pView != NULL)
-   {
-      strClassification = pView->getClassificationText();
-   }
-
-   SecurityMarkingsDlg dlg(this, strClassification, &newClassification);
-
-   int iReturn = dlg.exec();
-   if (iReturn == QDialog::Accepted)
-   {
-      if (pDescriptor != NULL)
-      {
-         pDescriptor->setClassification(&newClassification);
-      }
-      else
-      {
-         strClassification = dlg.getSecurityMarkings();
-         if ((strClassification.isEmpty() == false) && (pView != NULL))
-         {
-            pView->setClassificationText(strClassification);
-            pView->refresh();
-         }
-      }
-   }
-}
-
 void ApplicationWindow::showZapDlg()
 {
    PerspectiveView* pView = dynamic_cast<PerspectiveView*>(getCurrentWorkspaceWindowView());
@@ -4060,9 +3993,7 @@ ProductWindow* ApplicationWindow::deriveProduct(View *pView)
       ProductView* pProductView = pWindow->getProductView();
       if(pProductView != NULL)
       {
-         string classText;
-         pView->getClassificationText(classText);
-         pProductView->setClassificationText(classText);
+         pProductView->setClassification(pView->getClassification());
 
          GraphicLayer* pLayoutLayer = pProductView->getLayoutLayer();
          if(pLayoutLayer != NULL)
@@ -4835,7 +4766,6 @@ void ApplicationWindow::enableActions(bool bEnable)
                                                                         // are linked in the overview window
    m_pChipping_Wnd_Action->setEnabled(bEnable && bSpatialDataView);
    m_pLink_Action->setEnabled(bEnable && bSpatialDataView);
-   m_pSecurityMarkings_Action->setEnabled(bEnable && bView);
 
    // Window actions
    mpCascadeAction->setEnabled(bEnable);
@@ -5736,6 +5666,45 @@ void ApplicationWindow::updateContextMenu(Subject& subject, const string& signal
       return;
    }
 
+   // Action to edit classification for multiple selected view windows or data elements
+   vector<ViewWindow*> viewItems = pMenu->getSessionItems<ViewWindow>();
+   vector<DataElement*> elementItems = pMenu->getSessionItems<DataElement>();
+   if ((viewItems.size() > 1) || (elementItems.size() > 1))
+   {
+      QList<QVariant> itemList;
+      if (elementItems.size() > 1)
+      {
+         for (vector<DataElement*>::const_iterator iter = elementItems.begin(); iter != elementItems.end(); ++iter)
+         {
+            SessionItem* pItem = *iter;
+            if (pItem != NULL)
+            {
+               itemList.append(QVariant::fromValue(pItem));
+            }
+         }
+      }
+      else if (viewItems.size() > 1)
+      {
+         for (vector<ViewWindow*>::const_iterator iter = viewItems.begin(); iter != viewItems.end(); ++iter)
+         {
+            SessionItem* pItem = (*iter)->getView();
+            if (pItem != NULL)
+            {
+               itemList.append(QVariant::fromValue(pItem));
+            }
+         }
+      }
+
+      QAction* pClassificationAction = new QAction("Edit &Classification...", pMenu->getActionParent());
+      pClassificationAction->setAutoRepeat(false);
+      pClassificationAction->setStatusTip("Edits the classification for the selected items");
+      pClassificationAction->setData(QVariant::fromValue(itemList));
+      VERIFYNR(connect(pClassificationAction, SIGNAL(triggered()), this, SLOT(editClassification())));
+      pMenu->addAction(pClassificationAction, APP_APPLICATIONWINDOW_EDIT_CLASSIFICATION_ACTION);
+
+      return;
+   }
+
    vector<SessionItem*> sessionItems = pMenu->getSessionItems();
    if (sessionItems.size() != 1)
    {
@@ -5862,6 +5831,66 @@ void ApplicationWindow::deleteSelectedElement()
 
    Service<ModelServices> pModel;
    pModel->destroyElement(pElement);
+}
+
+void ApplicationWindow::editClassification()
+{
+   QAction* pAction = dynamic_cast<QAction*>(sender());
+   if (pAction == NULL)
+   {
+      return;
+   }
+
+   QDialog classificationDialog(this);
+   classificationDialog.setWindowTitle("Edit Classification");
+
+   ClassificationWidget* pClassificationWidget = new ClassificationWidget(&classificationDialog);
+   QFrame* pLine = new QFrame(&classificationDialog);
+   pLine->setFrameStyle(QFrame::HLine | QFrame::Sunken);
+   QDialogButtonBox* pButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal,
+      &classificationDialog);
+   QVBoxLayout* pLayout = new QVBoxLayout(&classificationDialog);
+   pLayout->setMargin(10);
+   pLayout->setSpacing(10);
+   pLayout->addWidget(pClassificationWidget, 10);
+   pLayout->addWidget(pLine);
+   pLayout->addWidget(pButtonBox);
+
+   FactoryResource<Classification> pClassification;
+   pClassificationWidget->setClassification(pClassification.get(), false);
+
+   QPushButton* pOkButton = pButtonBox->button(QDialogButtonBox::Ok);
+   pOkButton->setEnabled(false);
+
+   VERIFYNR(connect(pClassificationWidget, SIGNAL(modified(bool)), pOkButton, SLOT(setEnabled(bool))));
+   VERIFYNR(connect(pButtonBox, SIGNAL(accepted()), &classificationDialog, SLOT(accept())));
+   VERIFYNR(connect(pButtonBox, SIGNAL(rejected()), &classificationDialog, SLOT(reject())));
+
+   if (classificationDialog.exec() == QDialog::Rejected)
+   {
+      return;
+   }
+
+   if (pClassificationWidget->applyChanges() == true)
+   {
+      QList<QVariant> itemList = pAction->data().toList();
+      for (int i = 0; i < itemList.count(); ++i)
+      {
+         SessionItem* pItem = itemList[i].value<SessionItem*>();
+
+         DataElement* pElement = dynamic_cast<DataElement*>(pItem);
+         if (pElement != NULL)
+         {
+            pElement->setClassification(pClassification.get());
+         }
+
+         View* pView = pView = dynamic_cast<View*>(pItem);
+         if (pView != NULL)
+         {
+            pView->setClassification(pClassification.get());
+         }
+      }
+   }
 }
 
 void ApplicationWindow::exportSessionItem()

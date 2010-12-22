@@ -135,6 +135,12 @@
 #define APP_APPLICATIONWINDOW_DATAELEMENT_DELETE_ACTION "APP_APPLICATIONWINDOW_DATAELEMENT_DELETE_ACTION"
 
 /**
+ *  Edits the classification markings for multiple selected ViewWindow or
+ *  DataElement objects in the Session Explorer.
+ */
+#define APP_APPLICATIONWINDOW_EDIT_CLASSIFICATION_ACTION "APP_APPLICATIONWINDOW_EDIT_CLASSIFICATION_ACTION"
+
+/**
  *  Export the selected SessionItem.
  */
 #define APP_APPLICATIONWINDOW_EXPORT_ACTION "APP_APPLICATIONWINDOW_EXPORT_ACTION"
@@ -341,11 +347,6 @@
  *  Default menu separator.
  */
 #define APP_PLOTVIEW_RESCALE_AXES_SEPARATOR_ACTION "APP_PLOTVIEW_RESCALE_AXES_SEPARATOR_ACTION"
-
-/**
- *  Sets the security markings on the plot.
- */
-#define APP_PLOTVIEW_SECURITY_MARKINGS_ACTION "APP_PLOTVIEW_SECURITY_MARKINGS_ACTION"
 
 /**
  *  Toggles the display of the plot legend.

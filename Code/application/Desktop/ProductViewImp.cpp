@@ -13,6 +13,7 @@
 #include "ApplicationWindow.h"
 #include "AppVerify.h"
 #include "AppVersion.h"
+#include "Classification.h"
 #include "ClassificationLayerAdapter.h"
 #include "ConfigurationSettingsImp.h"
 #include "ContextMenu.h"
@@ -93,8 +94,9 @@ ProductViewImp::ProductViewImp(const string& id, const string& viewName, QGLCont
    {
       pBottomText->setTextAlignment(Qt::AlignHCenter);
    }
-   VERIFYNR(connect(this, SIGNAL(classificationChanged(const QString&)), this, SLOT(updateClassificationMarks(const QString&))));
-   updateClassificationMarks(getClassificationText()); // Sets the text in the classification layer
+   VERIFYNR(connect(this, SIGNAL(classificationChanged(const Classification*)), this,
+      SLOT(updateClassificationMarks(const Classification*))));
+   updateClassificationMarks(getClassification()); // Sets the text in the classification layer
    setClassificationFont(QApplication::font());
    setClassificationColor(Qt::black);
 
@@ -630,14 +632,18 @@ bool ProductViewImp::enableInset(bool bEnable)
    return false;
 }
 
-void ProductViewImp::updateClassificationMarks(const QString &newClassification)
+void ProductViewImp::updateClassificationMarks(const Classification* pClassification)
 {
    QString strTopText;
    QString strBottomText;
-   if (mProductClassificationEnabled)
+
+   if ((mProductClassificationEnabled) && (pClassification != NULL))
    {
-      strTopText = newClassification;
-      strBottomText = newClassification;
+      string newClassification;
+      pClassification->getClassificationText(newClassification);
+
+      strTopText = QString::fromStdString(newClassification);
+      strBottomText = QString::fromStdString(newClassification);
    }
 
    Service<ConfigurationSettings> pConfigSettings;
@@ -1723,5 +1729,5 @@ void ProductViewImp::updateExtents()
 void ProductViewImp::enableClassification(bool bEnable)
 {
    mProductClassificationEnabled = bEnable;
-   updateClassificationMarks(getClassificationText());
+   updateClassificationMarks(getClassification());
 }

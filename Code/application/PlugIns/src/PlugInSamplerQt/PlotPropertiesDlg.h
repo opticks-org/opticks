@@ -34,7 +34,6 @@ private:
    PlotWidget* mpPlot;
 
    QComboBox* mpClassPositionCombo;
-   GraphicTextWidget* mpClassText;
 
    QComboBox* mpOrgPositionCombo;
    GraphicTextWidget* mpOrgText;

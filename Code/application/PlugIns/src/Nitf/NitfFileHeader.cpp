@@ -9,12 +9,13 @@
 
 #include "Classification.h"
 #include "DataVariant.h"
+#include "DateTime.h"
 #include "Int64.h"
 #include "NitfConstants.h"
 #include "NitfFileHeader.h"
 #include "NitfHeader.h"
-#include "RasterDataDescriptor.h"
 #include "ObjectResource.h"
+#include "RasterDataDescriptor.h"
 #include "SpecialMetadata.h"
 #include "TypeConverter.h"
 

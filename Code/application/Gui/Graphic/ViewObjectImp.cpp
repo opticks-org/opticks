@@ -15,7 +15,7 @@
 #include <QtGui/QVBoxLayout>
 
 #include "AppVerify.h"
-#include "ClassificationAdapter.h"
+#include "Classification.h"
 #include "GraphicLayer.h"
 #include "GraphicLayerImp.h"
 #include "GraphicViewWidget.h"
@@ -197,29 +197,17 @@ void ViewObjectImp::setView(View* pView)
          mpView->hide();
          mpView->setUpdatesEnabled(false);
 
-         // Update classification string.
-         // If new object has a higher level than the existing product,
-         // use the new classifications string.
-         QString classTextNew = pViewImp->getClassificationText();
-
-         // strip off everything but the level
-         QString classTextLevelNew = classTextNew.left(classTextNew.indexOf('/'));
-
-         ClassificationAdapter classNew;
-         classNew.setLevel(classTextLevelNew.toStdString());
-
+         // Update the classification
          if (pLayer != NULL && pParentView != NULL)
          {
-            QString classTextOrig = pParentView->getClassificationText();
+            // If new object has a higher level than the existing product, use the new classification
+            const Classification* pClass = pViewImp->getClassification();
+            VERIFYNRV(pClass != NULL);
 
-            // strip off everything but the level
-            QString classTextLevelOrig = classTextOrig.left(classTextOrig.indexOf('/'));
-
-            ClassificationAdapter classOrig;
-            classOrig.setLevel(classTextLevelOrig.toStdString());
-            if (classNew.hasGreaterLevel(&classOrig))
+            const Classification* pOrigClass = pParentView->getClassification();
+            if (pClass->hasGreaterLevel(pOrigClass))
             {
-               pParentView->setClassificationText(classTextNew);
+               pParentView->setClassification(pClass);
             }
          }
 

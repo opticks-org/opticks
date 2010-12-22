@@ -22,6 +22,7 @@
 
 class AnnotationLayer;
 class AnnotationLayerImp;
+class Classification;
 class ClassificationLayer;
 class ClassificationLayerImp;
 class GraphicLayer;
@@ -118,7 +119,7 @@ protected slots:
    void updateClassificationLocation();
    void updateMouseCursor(const MouseMode* pMouseMode);
    void setActiveLayer();
-   void updateClassificationMarks(const QString &newClassification);
+   void updateClassificationMarks(const Classification* pClassification);
 
 private:
    void connectLayers();

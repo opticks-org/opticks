@@ -132,7 +132,6 @@ protected slots:
    void updateMouseModeAction(const MouseMode* pMouseMode);
    void updateExtents();
    void updateAnnotationObjects();
-   virtual void setSecurityMarkings();
 
 private:
    QMenu* mpMouseModeMenu;

@@ -48,7 +48,6 @@ protected slots:
    void addPrintButton(bool bAdd);
    void enableMouseMode();
    void setCustomMouseMode();
-   void setClassificationText();
    void setPlotMargin();
    void setBackgroundColor(const QColor& backgroundColor);
    void setPlotBackgroundColor(const QColor& backgroundColor);
@@ -65,7 +64,6 @@ private:
 
    // Plot widget
    AttachmentPtr<PlotWidget> mpPlotWidget;
-   QLineEdit* mpClassificationEdit;
    QComboBox* mpMouseModeCombo;
    QAction* mpMouseModeAction;
    QLineEdit* mpMarginEdit;

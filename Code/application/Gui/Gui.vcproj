@@ -524,6 +524,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PropertiesClassification.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\PropertiesDataDescriptor.cpp"
 				>
 			</File>
@@ -3455,6 +3459,10 @@
 			</File>
 			<File
 				RelativePath=".\PropertiesAoiLayer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PropertiesClassification.h"
 				>
 			</File>
 			<File

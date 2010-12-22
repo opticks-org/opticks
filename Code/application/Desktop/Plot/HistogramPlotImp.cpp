@@ -32,20 +32,20 @@
 #include "HistogramPlotImp.h"
 #include "HistogramPlotAdapter.h"
 #include "MouseMode.h"
+#include "ObjectResource.h"
 #include "PropertiesHistogramPlot.h"
 #include "RasterDataDescriptor.h"
 #include "RasterFileDescriptor.h"
 #include "RasterLayerAdapter.h"
 #include "RasterUtilities.h"
 #include "RegionObjectAdapter.h"
-#include "SecurityMarkingsDlg.h"
 #include "SessionManager.h"
+#include "SignalBlocker.h"
 #include "Statistics.h"
 #include "StatisticsImp.h"
 #include "StringUtilities.h"
 #include "ThresholdLayerAdapter.h"
 #include "Undo.h"
-#include "UtilityServicesImp.h"
 #include "XercesIncludes.h"
 #include "xmlreader.h"
 
@@ -406,14 +406,14 @@ HistogramPlotImp::HistogramPlotImp(const string& id, const string& viewName, QGL
       }
    }
 
-   Service<UtilityServices> pUtilities;
-   QString strClassification = QString::fromStdString(pUtilities->getDefaultClassification());
-   setClassificationText(strClassification);
-
    addPropertiesPage(PropertiesHistogramPlot::getName());
 
+   // Connections
    mpElement.addSignal(SIGNAL_NAME(Subject, Deleted), Slot(this, &HistogramPlotImp::elementDeleted));
    mpElement.addSignal(SIGNAL_NAME(Subject, Modified), Slot(this, &HistogramPlotImp::elementModified));
+
+   VERIFYNR(connect(this, SIGNAL(classificationChanged(const Classification*)), this,
+      SLOT(updateElementClassification(const Classification*))));
 }
 
 HistogramPlotImp::~HistogramPlotImp()
@@ -435,19 +435,21 @@ list<ContextMenuAction> HistogramPlotImp::getContextMenuActions() const
    saveAction.mBuddyId = APP_PLOTWIDGET_PRINT_ACTION;
    menuActions.push_back(saveAction);
 
-   string beforeId = APP_PLOTVIEW_SECURITY_MARKINGS_ACTION;
+   string afterId = APP_PLOTVIEW_RESCALE_AXES_SEPARATOR_ACTION;
    bool bNeedSeparator = false;
    if (mpElement.get() != NULL)
    {
       ContextMenuAction badValuesAction(mpBadValuesAction, APP_HISTOGRAMPLOT_BAD_VALUES_ACTION);
-      badValuesAction.mBuddyType = ContextMenuAction::BEFORE;
-      badValuesAction.mBuddyId = beforeId;
+      badValuesAction.mBuddyType = ContextMenuAction::AFTER;
+      badValuesAction.mBuddyId = afterId;
       menuActions.push_back(badValuesAction);
+      afterId = APP_HISTOGRAMPLOT_BAD_VALUES_ACTION;
 
       ContextMenuAction samplingAction(mpSamplingAction, APP_HISTOGRAMPLOT_SAMPLING_ACTION);
-      samplingAction.mBuddyType = ContextMenuAction::BEFORE;
-      samplingAction.mBuddyId = beforeId;
+      samplingAction.mBuddyType = ContextMenuAction::AFTER;
+      samplingAction.mBuddyId = afterId;
       menuActions.push_back(samplingAction);
+      afterId = APP_HISTOGRAMPLOT_SAMPLING_ACTION;
 
       bNeedSeparator = true;
    }
@@ -458,21 +460,24 @@ list<ContextMenuAction> HistogramPlotImp::getContextMenuActions() const
       {
          ContextMenuAction thresholdSeparatorAction(mpThresholdSeparatorAction,
             APP_HISTOGRAMPLOT_THRESHOLD_SEPARATOR_ACTION);
-         thresholdSeparatorAction.mBuddyType = ContextMenuAction::BEFORE;
-         thresholdSeparatorAction.mBuddyId = beforeId;
+         thresholdSeparatorAction.mBuddyType = ContextMenuAction::AFTER;
+         thresholdSeparatorAction.mBuddyId = afterId;
          menuActions.push_back(thresholdSeparatorAction);
+         afterId = APP_HISTOGRAMPLOT_THRESHOLD_SEPARATOR_ACTION;
       }
 
       ContextMenuAction passAreaAction(mpPassAreaMenu->menuAction(), APP_HISTOGRAMPLOT_PASS_AREA_MENU_ACTION);
-      passAreaAction.mBuddyType = ContextMenuAction::BEFORE;
-      passAreaAction.mBuddyId = beforeId;
+      passAreaAction.mBuddyType = ContextMenuAction::AFTER;
+      passAreaAction.mBuddyId = afterId;
       menuActions.push_back(passAreaAction);
+      afterId = APP_HISTOGRAMPLOT_PASS_AREA_MENU_ACTION;
 
       mpStretchUnitsMenu->setTitle("Threshold &Units");
       ContextMenuAction regionUnitsAction(mpStretchUnitsMenu->menuAction(), APP_HISTOGRAMPLOT_UNITS_MENU_ACTION);
-      regionUnitsAction.mBuddyType = ContextMenuAction::BEFORE;
-      regionUnitsAction.mBuddyId = beforeId;
+      regionUnitsAction.mBuddyType = ContextMenuAction::AFTER;
+      regionUnitsAction.mBuddyId = afterId;
       menuActions.push_back(regionUnitsAction);
+      afterId = APP_HISTOGRAMPLOT_UNITS_MENU_ACTION;
 
       bNeedSeparator = true;
    }
@@ -482,53 +487,62 @@ list<ContextMenuAction> HistogramPlotImp::getContextMenuActions() const
       if (bNeedSeparator == true)
       {
          ContextMenuAction rasterSeparatorAction(mpRasterSeparatorAction, APP_HISTOGRAMPLOT_RASTER_SEPARATOR_ACTION);
-         rasterSeparatorAction.mBuddyType = ContextMenuAction::BEFORE;
-         rasterSeparatorAction.mBuddyId = beforeId;
+         rasterSeparatorAction.mBuddyType = ContextMenuAction::AFTER;
+         rasterSeparatorAction.mBuddyId = afterId;
          menuActions.push_back(rasterSeparatorAction);
+         afterId = APP_HISTOGRAMPLOT_RASTER_SEPARATOR_ACTION;
       }
 
       ContextMenuAction autoZoomAction(mpAutoZoomAction, APP_HISTOGRAMPLOT_AUTO_ZOOM_ACTION);
-      autoZoomAction.mBuddyType = ContextMenuAction::BEFORE;
-      autoZoomAction.mBuddyId = beforeId;
+      autoZoomAction.mBuddyType = ContextMenuAction::AFTER;
+      autoZoomAction.mBuddyId = afterId;
       menuActions.push_back(autoZoomAction);
+      afterId = APP_HISTOGRAMPLOT_AUTO_ZOOM_ACTION;
 
       ContextMenuAction rasterMenusSeparatorAction(mpRasterMenusSeparatorAction,
          APP_HISTOGRAMPLOT_RASTER_MENUS_SEPARATOR_ACTION);
-      rasterMenusSeparatorAction.mBuddyType = ContextMenuAction::BEFORE;
-      rasterMenusSeparatorAction.mBuddyId = beforeId;
+      rasterMenusSeparatorAction.mBuddyType = ContextMenuAction::AFTER;
+      rasterMenusSeparatorAction.mBuddyId = afterId;
       menuActions.push_back(rasterMenusSeparatorAction);
+      afterId = APP_HISTOGRAMPLOT_RASTER_MENUS_SEPARATOR_ACTION;
 
       ContextMenuAction colorMapAction(mpColorMapMenu->menuAction(), APP_HISTOGRAMPLOT_COLOR_MAP_MENU_ACTION);
-      colorMapAction.mBuddyType = ContextMenuAction::BEFORE;
-      colorMapAction.mBuddyId = beforeId;
+      colorMapAction.mBuddyType = ContextMenuAction::AFTER;
+      colorMapAction.mBuddyId = afterId;
       menuActions.push_back(colorMapAction);
+      afterId = APP_HISTOGRAMPLOT_COLOR_MAP_MENU_ACTION;
 
       ContextMenuAction stretchTypeAction(mpStretchTypeMenu->menuAction(), APP_HISTOGRAMPLOT_STRETCH_TYPE_MENU_ACTION);
-      stretchTypeAction.mBuddyType = ContextMenuAction::BEFORE;
-      stretchTypeAction.mBuddyId = beforeId;
+      stretchTypeAction.mBuddyType = ContextMenuAction::AFTER;
+      stretchTypeAction.mBuddyId = afterId;
       menuActions.push_back(stretchTypeAction);
+      afterId = APP_HISTOGRAMPLOT_STRETCH_TYPE_MENU_ACTION;
 
       mpStretchUnitsMenu->setTitle("Stretch &Units");
       ContextMenuAction regionUnitsAction(mpStretchUnitsMenu->menuAction(), APP_HISTOGRAMPLOT_UNITS_MENU_ACTION);
-      regionUnitsAction.mBuddyType = ContextMenuAction::BEFORE;
-      regionUnitsAction.mBuddyId = beforeId;
+      regionUnitsAction.mBuddyType = ContextMenuAction::AFTER;
+      regionUnitsAction.mBuddyId = afterId;
       menuActions.push_back(regionUnitsAction);
+      afterId = APP_HISTOGRAMPLOT_UNITS_MENU_ACTION;
 
       ContextMenuAction stretchResetAction(mpStretchResetMenu->menuAction(),
          APP_HISTOGRAMPLOT_STRETCH_RESET_MENU_ACTION);
-      stretchResetAction.mBuddyType = ContextMenuAction::BEFORE;
-      stretchResetAction.mBuddyId = beforeId;
+      stretchResetAction.mBuddyType = ContextMenuAction::AFTER;
+      stretchResetAction.mBuddyId = afterId;
       menuActions.push_back(stretchResetAction);
+      afterId = APP_HISTOGRAMPLOT_STRETCH_RESET_MENU_ACTION;
 
       ContextMenuAction elementMenuAction(mpElementMenu->menuAction(), APP_HISTOGRAMPLOT_ELEMENT_MENU_ACTION);
-      elementMenuAction.mBuddyType = ContextMenuAction::BEFORE;
-      elementMenuAction.mBuddyId = beforeId;
+      elementMenuAction.mBuddyType = ContextMenuAction::AFTER;
+      elementMenuAction.mBuddyId = afterId;
       menuActions.push_back(elementMenuAction);
+      afterId = APP_HISTOGRAMPLOT_ELEMENT_MENU_ACTION;
 
       ContextMenuAction bandMenuAction(mpBandMenu->menuAction(), APP_HISTOGRAMPLOT_BAND_MENU_ACTION);
-      bandMenuAction.mBuddyType = ContextMenuAction::BEFORE;
-      bandMenuAction.mBuddyId = beforeId;
+      bandMenuAction.mBuddyType = ContextMenuAction::AFTER;
+      bandMenuAction.mBuddyId = afterId;
       menuActions.push_back(bandMenuAction);
+      afterId = APP_HISTOGRAMPLOT_BAND_MENU_ACTION;
 
       bNeedSeparator = true;
    }
@@ -544,9 +558,10 @@ list<ContextMenuAction> HistogramPlotImp::getContextMenuActions() const
          {
             ContextMenuAction complexDataAction(mpComplexDataMenu->menuAction(),
                APP_HISTOGRAMPLOT_COMPLEX_DATA_MENU_ACTION);
-            complexDataAction.mBuddyType = ContextMenuAction::BEFORE;
-            complexDataAction.mBuddyId = beforeId;
+            complexDataAction.mBuddyType = ContextMenuAction::AFTER;
+            complexDataAction.mBuddyId = afterId;
             menuActions.push_back(complexDataAction);
+            afterId = APP_HISTOGRAMPLOT_COMPLEX_DATA_MENU_ACTION;
 
             bNeedSeparator = true;
          }
@@ -556,9 +571,10 @@ list<ContextMenuAction> HistogramPlotImp::getContextMenuActions() const
    if (bNeedSeparator == true)
    {
       ContextMenuAction endSeparatorAction(mpEndSeparatorAction, APP_HISTOGRAMPLOT_END_SEPARATOR_ACTION);
-      endSeparatorAction.mBuddyType = ContextMenuAction::BEFORE;
-      endSeparatorAction.mBuddyId = beforeId;
+      endSeparatorAction.mBuddyType = ContextMenuAction::AFTER;
+      endSeparatorAction.mBuddyId = afterId;
       menuActions.push_back(endSeparatorAction);
+      afterId = APP_HISTOGRAMPLOT_END_SEPARATOR_ACTION;
    }
 
    return menuActions;
@@ -693,6 +709,16 @@ void HistogramPlotImp::elementDeleted(Subject& subject, const string& signal, co
    updateHistogramValues();
 }
 
+void HistogramPlotImp::classificationModified(Subject& subject, const std::string& signal, const boost::any& value)
+{
+   // The element's classification was modified, so update the plot classification
+   Classification* pClass = dynamic_cast<Classification*>(&subject);
+   if (pClass != NULL)
+   {
+      setClassification(pClass);
+   }
+}
+
 void HistogramPlotImp::elementModified(Subject& subject, const string& signal, const boost::any& v)
 {
    RasterElement* pElement = dynamic_cast<RasterElement*>(&subject);
@@ -703,13 +729,6 @@ void HistogramPlotImp::elementModified(Subject& subject, const string& signal, c
 
    if (pElement == mpElement.get())
    {
-      // Update the security markings
-      const Classification* pClass = mpElement->getClassification();
-      if (pClass != NULL)
-      {
-         setClassification(pClass);
-      }
-
       // Update the histogram for a values change
       updateHistogramValues();
    }
@@ -1917,47 +1936,6 @@ void HistogramPlotImp::saveHistogram()
    fclose(stream);
 }
 
-void HistogramPlotImp::setSecurityMarkings()
-{
-   QString strMarkings;
-   ClassificationAdapter newClassification;
-
-   if (mpElement.get() == NULL)
-   {
-      strMarkings = getClassificationText();
-   }
-   else
-   {
-      const Classification* pClassification = mpElement->getClassification();
-      if (pClassification != NULL)
-      {
-         newClassification.setClassification(pClassification);
-      }
-   }
-
-   SecurityMarkingsDlg dlg(this, strMarkings, &newClassification);
-
-   int iReturn = -1;
-   iReturn = dlg.exec();
-   if (iReturn == QDialog::Accepted)
-   {
-      QString strNewMarkings = dlg.getSecurityMarkings();
-      if (strNewMarkings.isEmpty() == false)
-      {
-         setClassificationText(strNewMarkings);
-      }
-
-      if (mpElement.get() != NULL)
-      {
-         DataDescriptor* pDescriptor = mpElement->getDataDescriptor();
-         if (pDescriptor != NULL)
-         {
-            pDescriptor->setClassification(&newClassification);
-         }
-      }
-   }
-}
-
 void HistogramPlotImp::preloadColormaps()
 {
    if (mpColorMapList == NULL)
@@ -2436,15 +2414,36 @@ void HistogramPlotImp::updateElement()
 
    if (pElement != mpElement.get())
    {
-      // Reset the element pointer, which updates the histogram values
+      if (mpElement.get() != NULL)
+      {
+         Classification* pClassification = mpElement->getClassification();
+         if (pClassification != NULL)
+         {
+            pClassification->detach(SIGNAL_NAME(Subject, Modified),
+               Slot(this, &HistogramPlotImp::classificationModified));
+         }
+      }
+
       mpElement.reset(pElement);
+
+      FactoryResource<Classification> pInitialClassification;
+      if (mpElement.get() != NULL)
+      {
+         Classification* pClassification = mpElement->getClassification();
+         if (pClassification != NULL)
+         {
+            pClassification->attach(SIGNAL_NAME(Subject, Modified),
+               Slot(this, &HistogramPlotImp::classificationModified));
+            pInitialClassification->setClassification(pClassification);
+         }
+      }
+
+      setClassification(pInitialClassification.get());
    }
-   else
-   {
-      // Since updateElement() is called when the displayed band changes in the raster layer,
-      // update the histogram values even if the displayed element does not change
-      updateHistogramValues();
-   }
+
+   // Since updateElement() is called when the displayed band changes in the raster layer,
+   // update the histogram values even if the displayed element does not change
+   updateHistogramValues();
 }
 
 void HistogramPlotImp::initializeElementList()
@@ -2624,6 +2623,34 @@ void HistogramPlotImp::initializeBandList()
       {
          pItem->setSelected(true);
          mpBandList->setCurrentItem(pItem);
+      }
+   }
+}
+
+void HistogramPlotImp::updateElementClassification(const Classification* pClassification)
+{
+   if (mpElement.get() != NULL)
+   {
+      DataDescriptor* pDescriptor = mpElement->getDataDescriptor();
+      if (pDescriptor != NULL)
+      {
+         Classification* pElementClassification = pDescriptor->getClassification();
+         if (pElementClassification != NULL)
+         {
+            string elementText;
+            string newText;
+            pElementClassification->getClassificationText(elementText);
+            pClassification->getClassificationText(newText);
+
+            if (elementText != newText)
+            {
+               // Need to block the classification modified signal, because it is actually emitted twice when
+               // calling setClassification(): once when clearing the dynamic object, and again after updating
+               // the classification fields - this causes the classification to be reset to the original value
+               SignalBlocker blocker(*pElementClassification);
+               pDescriptor->setClassification(pClassification);
+            }
+         }
       }
    }
 }
@@ -2899,16 +2926,6 @@ void HistogramPlotImp::setBadValues()
 
       updateHistogramValues();
    }
-}
-
-void HistogramPlotImp::attached(Subject& subject, const string& signal, const Slot& slot)
-{
-   elementModified(subject, signal, boost::any());
-}
-
-void HistogramPlotImp::detached(Subject& subject, const string& signal, const Slot& slot)
-{
-   elementDeleted(subject, signal, boost::any());
 }
 
 #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove QListWidget subclass when QListWidget " \

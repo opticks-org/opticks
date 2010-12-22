@@ -190,11 +190,10 @@ public:
    virtual PositionType getClassificationPosition() const = 0;
 
    /**
-    *  Sets the classification text for this plot widget.
+    *  Sets the classification for this plot widget.
     *
-    *  This method replaces the current classification text of the widget to
-    *  the string populated by Classification::getClassificationText(). If classification
-    *  markings display has been disabled on installation, this will have no effect.
+    *  This method is a convenience method that sets the classification of the
+    *  PlotView.
     *
     *  @param   pClassification
     *           A pointer to the classification object from which to set the
@@ -204,27 +203,42 @@ public:
     *
     *  @notify  This method will notify Subject::signalModified().
     *
-    *  @see     Classification, Classification::getClassificationText(),
-    *           Classification::isValid(),
-    *           setClassificationText(const std::string&)
+    *  @see     View::setClassification(), Classification
     */
-   virtual void setClassificationText(const Classification* pClassification) = 0;
+   virtual void setClassification(const Classification* pClassification) = 0;
 
    /**
-    *  Sets the classification text for this plot widget.
+    *  Returns a pointer to the plot widget's classification object.
     *
-    *  This method replaces the current classification text of the widget to
-    *  the text in the given string.
+    *  The classification object documents how the data in the plot widget is
+    *  to be handled and/or restricted.
     *
-    *  @param   classificationText
-    *           The new classification text for this plot widget.  The
-    *           classification text is cleared if the given string is empty.
+    *  This is a convenience method that returns the classification object that
+    *  is stored in the PlotView object.
     *
-    *  @notify  This method will notify Subject::signalModified().
+    *  @return  A pointer to the plot widget's classification object.
     *
-    *  @see     setClassificationText(const Classification*)
+    *  @see     View::getClassification(), Classification
     */
-   virtual void setClassificationText(const std::string& classificationText) = 0;
+   virtual Classification* getClassification() = 0;
+
+   /**
+    *  Returns read-only access to the plot widget's classification object.
+    *
+    *  The classification object documents how the data in the plot widget is
+    *  to be handled and/or restricted.
+    *
+    *  This is a convenience method that returns the classification object that
+    *  is stored in the PlotView object.
+    *
+    *  @return  A const pointer to the plot widgets's classification object.
+    *           The classification represented by the returned pointer should
+    *           not be modified.  To modify the values, call the non-const
+    *           version of getClassification() instead.
+    *
+    *  @see     View::getClassification(), Classification
+    */
+   virtual const Classification* getClassification() const = 0;
 
    /**
     *  Returns a text string containing the classification text of the plot

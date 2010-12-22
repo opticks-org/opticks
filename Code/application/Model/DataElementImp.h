@@ -41,6 +41,7 @@ public:
 
    DataElement* getParent() const;
    std::vector<std::string> getParentDesignator() const;
+   Classification* getClassification();
    const Classification* getClassification() const;
    void setClassification(const Classification* pClassification);
    void copyClassification(const DataElement* pElement);
@@ -97,6 +98,10 @@ private:
    std::vector<std::string> getParentDesignator() const \
    { \
       return impClass::getParentDesignator(); \
+   } \
+   Classification* getClassification() \
+   { \
+      return impClass::getClassification();\
    } \
    const Classification* getClassification() const \
    { \

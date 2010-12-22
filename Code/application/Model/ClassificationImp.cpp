@@ -7,12 +7,16 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "ClassificationImp.h"
-#include "Classification.h"
 #include "AppVerify.h"
+#include "Classification.h"
+#include "ClassificationImp.h"
 #include "DateTimeImp.h"
+#include "ObjectResource.h"
 #include "StringUtilities.h"
-#include "UtilityServicesImp.h"
+#include "UtilityServices.h"
+
+#include <QtCore/QDate>
+#include <QtCore/QString>
 
 #include <string>
 using namespace std;
@@ -670,6 +674,293 @@ void ClassificationImp::getClassificationText(string& classificationText) const
    }
 }
 
+bool ClassificationImp::setClassification(const string& classificationText)
+{
+   if (classificationText.empty() == true)
+   {
+      return false;
+   }
+
+   Service<UtilityServices> pUtilities;
+   FactoryResource<Classification> pClassification;
+   const string delimiter = "//";
+
+   // Level
+   QString field = QString::fromStdString(classificationText);
+
+   string::size_type pos = classificationText.find(delimiter);
+   if (pos != string::npos)
+   {
+      field = QString::fromStdString(classificationText.substr(0, pos));
+   }
+
+   pClassification->setLevel(field.toStdString());
+
+   // All other fields
+   while (pos != string::npos)
+   {
+      // Get the next field
+      pos += delimiter.length();
+
+      string::size_type nextPos = classificationText.find(delimiter, pos);
+      if (nextPos != string::npos)
+      {
+         field = QString::fromStdString(classificationText.substr(pos, nextPos - pos));
+      }
+      else
+      {
+         field = QString::fromStdString(classificationText.substr(pos));
+      }
+
+      pos = nextPos;
+
+      if (field.isEmpty() == true)
+      {
+         continue;
+      }
+
+      QStringList fieldList = field.split("/", QString::SkipEmptyParts);
+
+      // Codewords
+      bool codewordsField = true;
+
+      const vector<string>& codewords = pUtilities->getCodewords();
+      for (int i = 0; i < fieldList.count(); ++i)
+      {
+         if (std::find(codewords.begin(), codewords.end(), fieldList[i].toStdString()) == codewords.end())
+         {
+            codewordsField = false;
+            break;
+         }
+      }
+
+      if (codewordsField == true)
+      {
+         field.replace("/", " ");
+         pClassification->setCodewords(field.toStdString());
+         continue;
+      }
+
+      // System
+      bool systemField = true;
+
+      const vector<string>& systems = pUtilities->getSystems();
+      for (int i = 0; i < fieldList.count(); ++i)
+      {
+         if (std::find(systems.begin(), systems.end(), fieldList[i].toStdString()) == systems.end())
+         {
+            systemField = false;
+            break;
+         }
+      }
+
+      if (systemField == true)
+      {
+         field.replace("/", " ");
+         pClassification->setSystem(field.toStdString());
+         continue;
+      }
+
+      // File releasing
+      bool fileReleasingField = true;
+      const QString relTo = "REL TO";
+
+      const vector<string>& fileReleasings = pUtilities->getFileReleasing();
+      for (int i = 0; i < fieldList.count(); ++i)
+      {
+         QString fileReleasing = fieldList[i];
+         if (fileReleasing.indexOf(relTo) == 0)
+         {
+            fileReleasing = relTo;
+         }
+
+         if (std::find(fileReleasings.begin(), fileReleasings.end(), fileReleasing.toStdString()) ==
+            fileReleasings.end())
+         {
+            fileReleasingField = false;
+            break;
+         }
+      }
+
+      if (fileReleasingField == true)
+      {
+         int relToPos = field.indexOf(relTo);
+         if (relToPos != -1)
+         {
+            // Extract the country codes from the file releasing field
+            QString countryCodesField;
+
+            int slashPos = field.indexOf("/", relToPos);
+            if (slashPos != -1)
+            {
+               countryCodesField = field.mid(relToPos + relTo.length() + 1, slashPos - relToPos - relTo.length() - 1);
+               field.remove(relToPos + relTo.length(), slashPos - relToPos - relTo.length());
+            }
+            else
+            {
+               countryCodesField = field.mid(relToPos + relTo.length() + 1);
+               field.truncate(relToPos + relTo.length());
+            }
+
+            // Add the escape sequence
+            field.replace(relTo, "REL\\ TO");
+
+            // Country codes
+            bool validCountryCodes = true;
+            if (countryCodesField.isEmpty() == false)
+            {
+               const vector<string>& countryCodes = pUtilities->getCountryCodes();
+
+               QStringList countryList = countryCodesField.split(", ", QString::SkipEmptyParts);
+               for (int i = 0; i < countryList.count(); ++i)
+               {
+                  if (std::find(countryCodes.begin(), countryCodes.end(), countryList[i].toStdString()) ==
+                     countryCodes.end())
+                  {
+                     validCountryCodes = false;
+                     break;
+                  }
+               }
+            }
+            else
+            {
+               validCountryCodes = false;
+            }
+
+            // Must have valid country codes
+            if (validCountryCodes == false)
+            {
+               return false;
+            }
+
+            countryCodesField.replace(",", QString());
+            pClassification->setCountryCode(countryCodesField.toStdString());
+         }
+
+         field.replace("/", " ");
+         pClassification->setFileReleasing(field.toStdString());
+         continue;
+      }
+
+      // Declassification exemption
+      bool declassExemptionField = true;
+
+      const vector<string>& exemptions = pUtilities->getDeclassificationExemptions();
+      for (int i = 0; i < fieldList.count(); ++i)
+      {
+         if (std::find(exemptions.begin(), exemptions.end(), fieldList[i].toStdString()) == exemptions.end())
+         {
+            declassExemptionField = false;
+            break;
+         }
+      }
+
+      if (declassExemptionField == true)
+      {
+         field.replace("/", " ");
+         pClassification->setDeclassificationExemption(field.toStdString());
+         continue;
+      }
+
+      // Declassification date
+      QDate declassDate = QDate::fromString(field, "yyyyMMdd");
+      if (declassDate.isValid() == true)
+      {
+         FactoryResource<DateTime> pDeclassDate;
+         pDeclassDate->set(declassDate.year(), declassDate.month(), declassDate.day());
+         pClassification->setDeclassificationDate(pDeclassDate.get());
+         continue;
+      }
+
+      // Classification reason
+      bool reasonField = true;
+
+      const vector<string>& reasons = pUtilities->getClassificationReasons();
+      for (int i = 0; i < fieldList.count(); ++i)
+      {
+         if (std::find(reasons.begin(), reasons.end(), fieldList[i].toStdString()) == reasons.end())
+         {
+            reasonField = false;
+            break;
+         }
+      }
+
+      if (reasonField == true)
+      {
+         field.replace("/", " ");
+         pClassification->setClassificationReason(field.toStdString());
+         continue;
+      }
+
+      // Declassification type
+      bool declassTypeField = true;
+
+      const vector<string>& declassTypes = pUtilities->getDeclassificationTypes();
+      for (int i = 0; i < fieldList.count(); ++i)
+      {
+         if (std::find(declassTypes.begin(), declassTypes.end(), fieldList[i].toStdString()) == declassTypes.end())
+         {
+            declassTypeField = false;
+            break;
+         }
+      }
+
+      if (declassTypeField == true)
+      {
+         field.replace("/", " ");
+         pClassification->setDeclassificationType(field.toStdString());
+         continue;
+      }
+
+      // File downgrades
+      bool fileDowngradeField = true;
+
+      const vector<string>& fileDowngrades = pUtilities->getFileDowngrades();
+      for (int i = 0; i < fieldList.count(); ++i)
+      {
+         if (std::find(fileDowngrades.begin(), fileDowngrades.end(), fieldList[i].toStdString()) ==
+            fileDowngrades.end())
+         {
+            fileDowngradeField = false;
+            break;
+         }
+      }
+
+      if (fileDowngradeField == true)
+      {
+         field.replace("/", " ");
+         pClassification->setFileDowngrade(field.toStdString());
+         continue;
+      }
+
+      // File control
+      bool fileControlField = true;
+
+      const vector<string>& fileControls = pUtilities->getFileControls();
+      for (int i = 0; i < fieldList.count(); ++i)
+      {
+         if (std::find(fileControls.begin(), fileControls.end(), fieldList[i].toStdString()) == fileControls.end())
+         {
+            fileControlField = false;
+            break;
+         }
+      }
+
+      if (fileControlField == true)
+      {
+         field.replace("/", " ");
+         pClassification->setFileControl(field.toStdString());
+         continue;
+      }
+
+      // Not a valid field
+      return false;
+   }
+
+   setClassification(pClassification.get());
+   return true;
+}
+
 void ClassificationImp::setClassification(const Classification* pClassification)
 {
    if (pClassification == NULL)
@@ -711,7 +1002,8 @@ bool ClassificationImp::toXml(XMLWriter* pXml) const
       // BTW, this should NEVER happen unless you have
       // as the default is set elsewhere in this class
       // however, it's here just in case
-      pXml->addAttr("level", string(UtilityServicesImp::instance()->getDefaultClassification()));
+      Service<UtilityServices> pUtilities;
+      pXml->addAttr("level", pUtilities->getDefaultClassification());
    }
    if (mSystem.size() > 0)
    {

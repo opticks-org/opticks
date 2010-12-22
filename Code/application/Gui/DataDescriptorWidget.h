@@ -11,7 +11,6 @@
 #define DATADESCRIPTORWIDGET_H
 
 #include <QtGui/QComboBox>
-#include <QtGui/QLabel>
 #include <QtGui/QTreeWidgetItem>
 #include <QtGui/QWidget>
 
@@ -62,7 +61,6 @@ private:
    bool mModified;
    DataDescriptor* mpDescriptor;
 
-   QLabel* mpClassificationLabel;
    CustomTreeWidget* mpTreeWidget;
    QPushButton* mpSetDisplayButton;
 

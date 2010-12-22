@@ -7,19 +7,17 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #ifndef _CLASSIFICATION
 #define _CLASSIFICATION
 
 #include "DynamicObject.h"
-#include "DateTime.h"
-#include "TypesFile.h"
 
 #include <string>
 
+class DateTime;
+
 /**
- *  Classification information for spectral elements.
+ *  Classification information for data elements and views.
  *
  *  The Classification serves as an attribute for other data objects. It
  *  captures the security classification data needed to handle and mark
@@ -46,6 +44,37 @@ class Classification : public DynamicObject
 {
 public:
    /**
+    *  Sets all classification fields and attributes to those contained in a
+    *  given text string.
+    *
+    *  %Any additional attributes contained in this classification object will
+    *  be lost.
+    *
+    *  @param   classificationText
+    *           The classification text from which to set this object's values.
+    *           The string format should be identical to the format generated
+    *           by getClassificationText().
+    *
+    *  @return  Returns \c true if the classification was successfully set from
+    *           the given string.  Returns \c false if any of the following
+    *           conditions are met:
+    *           - \em classificationText is empty.
+    *           - One or more field entries specified in \em classificationText
+    *             is not contained in the security markings files in the
+    *             SupportFiles directory.
+    *           - The "REL TO" file releasing is specified without valid
+    *             country codes.
+    *           .
+    *           If \c false is returned, the classification fields and
+    *           attributes of this classification object are not changed.
+    *
+    *  @notify  This method notifies Subject::signalModified() if successful.
+    *
+    *  @see     setClassification(const Classification*)
+    */
+   virtual bool setClassification(const std::string& classificationText) = 0;
+
+   /**
     *  Sets all classification fields and attributes to that of another classification
     *  object.
     *
@@ -53,6 +82,8 @@ public:
     *           The classification object from which to set this object's values.
     *
     *  @notify  This method will notify Subject::signalModified.
+    *
+    *  @see     setClassification(const std::string&)
     */
    virtual void setClassification(const Classification* pClassification) = 0;
 
@@ -503,8 +534,17 @@ public:
     *  Retrieves a text string containing the classification settings.
     *
     *  @param   classificationText
-    *           The string to contain the classification text.  Any text existing
-    *           in the string is erased.
+    *           The string to contain the classification text.  %Any text
+    *           existing in the string is erased.  The string is formatted as
+    *           follows:
+    *           - The classification level is the first field in the string.
+    *           - The "//" delimiter separates fields.
+    *           - The "/"  delimiter separates entries within a single field.
+    *           - If applicable, the "REL TO" file releasing is followed by a
+    *             space and then the country codes.
+    *           - The ", " delimiter separates country codes.
+    *           - If applicable, the declassification date is in "%Y%m%d"
+    *             format, as used by DateTime::getFormattedUtc().
     */
    virtual void getClassificationText(std::string& classificationText) const = 0;
 

@@ -12,7 +12,6 @@
 #include "AnimationController.h"
 #include "AppConfig.h"
 #include "AppVerify.h"
-#include "Classification.h"
 #include "ColorType.h"
 #include "ConfigurationSettings.h"
 #include "ContextMenuActions.h"
@@ -97,11 +96,11 @@ ViewImp::ViewImp(const string& id, const string& viewName, QGLContext* drawConte
 
    // Initialization
    setContextMenuPolicy(Qt::DefaultContextMenu);
-   setClassificationText(QString());
    setMouseTracking(true);
    setFocusPolicy(Qt::ClickFocus);
    setAttribute(Qt::WA_DeleteOnClose);
    addPropertiesPage(PropertiesView::getName());
+   addPropertiesPage("Classification Properties");
 
    int undoLimit = static_cast<int>(ConfigurationSettings::getSettingUndoBufferSize());
    mpUndoStack->setUndoLimit(undoLimit);
@@ -196,7 +195,7 @@ ViewImp& ViewImp::operator= (const ViewImp& view)
       SessionItemImp::operator= (view);
 
       mBackgroundColor = view.mBackgroundColor;
-      mClassificationText = view.mClassificationText;
+      mClassification = view.mClassification;
       mClassificationFont = view.mClassificationFont;
       mClassificationColor = view.mClassificationColor;
       mClassificationEnabled = view.mClassificationEnabled;
@@ -250,23 +249,42 @@ void ViewImp::setName(const string& viewName)
 
 void ViewImp::setClassification(const Classification* pClassification)
 {
-   QString strClassification;
-   if (pClassification != NULL)
+   const ClassificationAdapter* pClassificationAdapter = dynamic_cast<const ClassificationAdapter*>(pClassification);
+   if (pClassificationAdapter == NULL)
    {
-      string classificationText = "";
-      pClassification->getClassificationText(classificationText);
-      if (classificationText.empty() == false)
-      {
-         strClassification = QString::fromStdString(classificationText);
-      }
+      return;
    }
 
-   setClassificationText(strClassification);
+   string currentClassification;
+   string newClassification;
+   mClassification.getClassificationText(currentClassification);
+   pClassification->getClassificationText(newClassification);
+
+   if (newClassification != currentClassification)
+   {
+      mClassification = *pClassificationAdapter;
+      emit classificationChanged(&mClassification);
+      notify(SIGNAL_NAME(View, ClassificationChanged),
+         boost::any(static_cast<const Classification*>(&mClassification)));
+   }
+}
+
+Classification* ViewImp::getClassification()
+{
+   return &mClassification;
+}
+
+const Classification* ViewImp::getClassification() const
+{
+   return &mClassification;
 }
 
 QString ViewImp::getClassificationText() const
 {
-   return mClassificationText;
+   string classificationText;
+   mClassification.getClassificationText(classificationText);
+
+   return QString::fromStdString(classificationText);
 }
 
 QFont ViewImp::getClassificationFont() const
@@ -1092,30 +1110,6 @@ void ViewImp::reorderImage(unsigned int pImage[], int iWidth, int iHeight)
    }
 }
 
-void ViewImp::setClassificationText(const QString& strClassification)
-{
-   QString strNewClassification = strClassification.trimmed();
-   if (strNewClassification.isEmpty())
-   {
-      strNewClassification = QString::fromStdString(Service<UtilityServices>()->getDefaultClassification());
-   }
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This should check available classification markings " \
-   "to ensure the classification string starts with a valid level (tclarke)")
-   // pseudocode
-   // stringlist valid = Service<something>()->getValidClassificationLevels();
-   // bool found = false;
-   // for(str in valid)
-   //   if(strNewClassification.startsWith(str)) { valid = true; break; }
-   // if(!valid) return false;
-
-   if (strNewClassification != mClassificationText)
-   {
-      mClassificationText = strNewClassification;
-      emit classificationChanged(mClassificationText);
-      notify(SIGNAL_NAME(View, ClassificationChanged), boost::any(mClassificationText.toStdString()));
-   }
-}
-
 void ViewImp::setClassificationFont(const QFont& classificationFont)
 {
    if (classificationFont != mClassificationFont)
@@ -1557,11 +1551,12 @@ void ViewImp::drawClassification()
    const int shadowOffset = 2;
 
    // Draw the classification markings
-   if ((mClassificationEnabled == true) && (mClassificationText.isEmpty() == false))
+   QString classificationText = getClassificationText();
+   if ((mClassificationEnabled == true) && (classificationText.isEmpty() == false))
    {
       // Calculate the screen width and height of the classification markings
       QFontMetrics fontMetrics(mClassificationFont);
-      iClassificationWidth = fontMetrics.width(mClassificationText);
+      iClassificationWidth = fontMetrics.width(classificationText);
       iClassificationHeight = fontMetrics.ascent();
 
       // Top markings - Qt has an upper left origin, so there is
@@ -1569,23 +1564,23 @@ void ViewImp::drawClassification()
       qglColor(Qt::black);
       int screenX = (iWidth / 2) - (iClassificationWidth / 2) + shadowOffset;
       int screenY = topMargin + iClassificationHeight + shadowOffset;   // 
-      renderText(screenX, screenY, mClassificationText, mClassificationFont);
+      renderText(screenX, screenY, classificationText, mClassificationFont);
 
       qglColor(mClassificationColor);
       screenX = (iWidth / 2) - (iClassificationWidth / 2);
       screenY = topMargin + iClassificationHeight;
-      renderText(screenX, screenY, mClassificationText, mClassificationFont);
+      renderText(screenX, screenY, classificationText, mClassificationFont);
 
       // Bottom markings
       qglColor(Qt::black);
       screenX = (iWidth / 2) - (iClassificationWidth / 2) + shadowOffset;
       screenY = iHeight - bottomMargin;
-      renderText(screenX, screenY, mClassificationText, mClassificationFont);
+      renderText(screenX, screenY, classificationText, mClassificationFont);
 
       qglColor(mClassificationColor);
       screenX = (iWidth / 2) - (iClassificationWidth / 2);
       screenY = iHeight - bottomMargin - shadowOffset;
-      renderText(screenX, screenY, mClassificationText, mClassificationFont);
+      renderText(screenX, screenY, classificationText, mClassificationFont);
    }
 
    // Draw the release info
@@ -2001,13 +1996,17 @@ bool ViewImp::toXml(XMLWriter* pXml) const
    str << a << " " << b << " " << c << " " << d;
    pXml->addAttr("extents", str.str());
    pXml->addAttr("backgroundColor", mBackgroundColor.name().toStdString());
-   pXml->addAttr("classificationText", mClassificationText.toStdString());
    pXml->addFontElement("classificationFont", FontImp(mClassificationFont));
    pXml->addAttr("classificationColor", mClassificationColor.name().toStdString());
    pXml->addAttr("classificationEnabled", mClassificationEnabled);
    pXml->addAttr("releaseInfoEnabled", mReleaseInfoEnabled);
    pXml->addAttr("origin", mOrigin);
    pXml->addAttr("crossHair", mCrossHair);
+
+   if (mClassification.toXml(pXml) == false)
+   {
+      return false;
+   }
 
    if (mpMouseMode != NULL)
    {
@@ -2070,8 +2069,6 @@ bool ViewImp::fromXml(DOMNode* pDocument, unsigned int version)
       A(pElem->getAttribute(X("visibleCenter")))));
    QColor bkgColor(A(pElem->getAttribute(X("backgroundColor"))));
    setBackgroundColor(bkgColor);
-   QString classificationText(A(pElem->getAttribute(X("classificationText"))));
-   setClassificationText(classificationText);
    FontImp classificationFont;
    readFontElement("classificationFont", pElem, classificationFont);
    setClassificationFont(classificationFont.getQFont());
@@ -2097,6 +2094,17 @@ bool ViewImp::fromXml(DOMNode* pDocument, unsigned int version)
       if (pController != NULL)
       {
          setAnimationController(pController);
+      }
+   }
+
+   for (DOMNode* pNode = pDocument->getFirstChild(); pNode != NULL; pNode = pNode->getNextSibling())
+   {
+      if (XMLString::equals(pNode->getNodeName(), X("classification")))
+      {
+         if (mClassification.fromXml(pNode, version) == false)
+         {
+            return false;
+         }
       }
    }
 

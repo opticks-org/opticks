@@ -68,7 +68,8 @@ public:
    // Classification
    void setClassificationPosition(PositionType ePosition);
    PositionType getClassificationPosition() const;
-   void setClassificationText(const Classification* pClassification);
+   Classification* getClassification();
+   const Classification* getClassification() const;
    QString getClassificationText() const;
    QFont getClassificationFont() const;
    QColor getClassificationColor() const;
@@ -110,7 +111,7 @@ public:
 
 public slots:
    void setBackgroundColor(const QColor& backgroundColor);
-   void setClassificationText(const QString& strClassification);
+   void setClassification(const Classification* pClassification);
    void setClassificationFont(const QFont& ftClassification);
    void setClassificationColor(const QColor& clrClassification);
    void setTitle(const QString& strTitle);
@@ -132,6 +133,7 @@ protected:
 
 protected slots:
    void updateName(const QString& strName);
+   void updateClassificationText();
    void enableAnnotationToolBar(const MouseMode* pMouseMode);
    void updateScaleRange();
    void updateMouseLabel(const QString& strTextX, const QString& strTextY);
@@ -171,7 +173,6 @@ private:
 
    QSplitter* mpSplitter;
 
-   QString mClassificationText;
    QString mOrganizationText;
 
    QColor mClassificationColor;
@@ -221,13 +222,17 @@ private:
    { \
       return impClass::getClassificationPosition(); \
    } \
-   void setClassificationText(const Classification* pClassification) \
+   void setClassification(const Classification* pClassification) \
    { \
-      impClass::setClassificationText(pClassification); \
+      impClass::setClassification(pClassification); \
    } \
-   void setClassificationText(const std::string& classificationText) \
+   Classification* getClassification() \
    { \
-      impClass::setClassificationText(QString::fromStdString(classificationText)); \
+      return impClass::getClassification(); \
+   } \
+   const Classification* getClassification() const \
+   { \
+      return impClass::getClassification(); \
    } \
    std::string getClassificationText() const \
    { \

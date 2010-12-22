@@ -8,6 +8,7 @@
  */
 
 #include "Classification.h"
+#include "DateTime.h"
 #include "NitfDesSubheader.h"
 #include "RasterDataDescriptor.h"
 #include "RasterFileDescriptor.h"
