@@ -457,7 +457,11 @@ bool InstallerServicesImp::performUninstall(const std::string& extensionId, Prog
          toRemove.pop();
       }
    }
-   extensionDir.rmdir(".");
+
+   // remove the extension's folder
+   QString extFolder = extensionDir.canonicalPath();
+   extensionDir.cdUp();
+   extensionDir.rmdir(extFolder);
 
    if (extension != mExtensions.end())
    {
