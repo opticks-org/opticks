@@ -63,44 +63,9 @@ GraphicGroupImp& GraphicGroupImp::operator= (const GraphicGroupImp& graphicGroup
          interactive = pElement->getInteractive();
          pElement->setInteractive(false);
       }
-      removeAllObjects(true);
 
-      list<GraphicObject*>::const_iterator iter = graphicGroup.mObjects.begin();
-      while (iter != graphicGroup.mObjects.end())
-      {
-         GraphicObject* pObject = *iter;
-         if (pObject != NULL)
-         {
-            GraphicObjectType eType = pObject->getGraphicObjectType();
-            
-            bool bSelected = false;
+      VERIFYNR(replicateObject(dynamic_cast<const GraphicObject*>(&graphicGroup)));
 
-            GraphicLayer* pOrigLayer = NULL;
-            pOrigLayer = graphicGroup.getLayer();
-            if (pOrigLayer != NULL)
-            {
-               bSelected = pOrigLayer->isObjectSelected(pObject);
-            }
-
-            GraphicObject* pCloneObject = addObject(eType);
-            GraphicObjectImp* pCloneObjectImp = dynamic_cast<GraphicObjectImp*>(pCloneObject);
-            if (pCloneObject != NULL && pCloneObject != NULL)
-            {
-               bool bSuccess = pCloneObjectImp->replicateObject(pObject);
-               if ((bSuccess == true) && (bSelected == true))
-               {
-                  GraphicLayer* pLayer = NULL;
-                  pLayer = getLayer();
-                  if (pLayer != NULL)
-                  {
-                     pLayer->selectObject(pCloneObject);
-                  }
-               }
-            }
-         }
-
-         ++iter;
-      }
       if (pElement != NULL)
       {
          pElement->setInteractive(interactive);

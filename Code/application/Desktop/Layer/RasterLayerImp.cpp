@@ -447,7 +447,11 @@ void RasterLayerImp::draw()
 bool RasterLayerImp::getExtents(double& x1, double& y1, double& x4, double& y4)
 {
    RasterElement* pRasterElement = dynamic_cast<RasterElement*>(getDataElement());
-   VERIFY(pRasterElement != NULL);
+   if (pRasterElement == NULL)
+   {
+      // This occurs during application shutdown when the overview window is open and pan limits have been disabled.
+      return false;
+   }
 
    const RasterDataDescriptor* pDescriptor =
       dynamic_cast<const RasterDataDescriptor*>(pRasterElement->getDataDescriptor());
