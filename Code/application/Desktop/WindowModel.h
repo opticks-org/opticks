@@ -24,25 +24,24 @@ class WindowModel : public QSortFilterProxyModel
 {
 public:
    WindowModel(QObject* pParent = 0);
-   ~WindowModel();
+   virtual ~WindowModel();
 
-   Qt::DropActions supportedDropActions() const;
-   QStringList mimeTypes() const;
-   QMimeData* mimeData(const QModelIndexList& indexes) const;
-   bool dropMimeData(const QMimeData* pData, Qt::DropAction action, int row, int column, const QModelIndex& dropIndex);
+   virtual Qt::DropActions supportedDropActions() const;
+   virtual bool dropMimeData(const QMimeData* pData, Qt::DropAction action, int row, int column,\
+      const QModelIndex& dropIndex);
 
 protected:
-   bool lessThan(const QModelIndex& left, const QModelIndex& right) const;
+   virtual bool lessThan(const QModelIndex& left, const QModelIndex& right) const;
 
 private:
    class WindowSourceModel : public SessionItemModel
    {
    public:
       WindowSourceModel(QObject* pParent = 0);
-      ~WindowSourceModel();
+      virtual ~WindowSourceModel();
 
-      Qt::ItemFlags flags(const QModelIndex& index) const;
-      bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole);
+      virtual Qt::ItemFlags flags(const QModelIndex& index) const;
+      virtual bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole);
 
       void refreshModel(Subject &subject, const std::string &signal, const boost::any &v);
       void detachModel(Subject &subject, const std::string &signal, const boost::any &v);

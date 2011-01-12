@@ -6,24 +6,25 @@
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
-#include "SessionExplorerImp.h"
 
 #include "AnimationModel.h"
+#include "AppAssert.h"
 #include "ContextMenuAction.h"
 #include "ContextMenuActions.h"
 #include "ContextMenuImp.h"
-#include "AppAssert.h"
 #include "DesktopServices.h"
 #include "ElementModel.h"
 #include "PlugInModel.h"
+#include "SessionExplorerImp.h"
 #include "SessionItem.h"
 #include "SessionItemModel.h"
 #include "WindowModel.h"
 
+#include <QtCore/QDataStream>
+#include <QtCore/QMimeData>
 #include <QtGui/QApplication>
 #include <QtGui/QClipboard>
 #include <QtGui/QContextMenuEvent>
-#include <QtGui/QHeaderView>
 #include <QtGui/QMenu>
 #include <QtGui/QMessageBox>
 #include <QtGui/QSortFilterProxyModel>
@@ -50,6 +51,7 @@ SessionExplorerImp::SessionExplorerImp(const string& id, const string& windowNam
 
    // Windows tree
    mpWindowTree = new QTreeView();
+   mpWindowTree->setHeaderHidden(true);
    mpWindowTree->setEditTriggers(QAbstractItemView::EditKeyPressed | QAbstractItemView::SelectedClicked);
    mpWindowTree->setSelectionMode(QAbstractItemView::ExtendedSelection);
    mpWindowTree->setRootIsDecorated(true);
@@ -58,31 +60,22 @@ SessionExplorerImp::SessionExplorerImp(const string& id, const string& windowNam
    mpWindowTree->sortByColumn(0, Qt::AscendingOrder);
    mpWindowTree->setDragEnabled(true);
    mpWindowTree->setDragDropMode(QAbstractItemView::InternalMove);
-   mpWindowTree->setDropIndicatorShown(true);
    mpWindowTree->viewport()->installEventFilter(this);
-
-   QHeaderView* pWindowHeader = mpWindowTree->header();
-   if (pWindowHeader != NULL)
-   {
-      pWindowHeader->hide();
-   }
 
    // Animations tree
    mpAnimationTree = new QTreeView();
+   mpAnimationTree->setHeaderHidden(true);
    mpAnimationTree->setSelectionMode(QAbstractItemView::ExtendedSelection);
    mpAnimationTree->setRootIsDecorated(true);
    mpAnimationTree->setSortingEnabled(true);
    mpAnimationTree->setSelectionBehavior(QAbstractItemView::SelectItems);
    mpAnimationTree->sortByColumn(0, Qt::AscendingOrder);
-
-   QHeaderView* pAnimationHeader = mpAnimationTree->header();
-   if (pAnimationHeader != NULL)
-   {
-      pAnimationHeader->hide();
-   }
+   mpAnimationTree->setDragEnabled(true);
+   mpAnimationTree->setDragDropMode(QAbstractItemView::DragOnly);
 
    // Elements tree
    mpElementTree = new QTreeView();
+   mpElementTree->setHeaderHidden(true);
    mpElementTree->setEditTriggers(QAbstractItemView::EditKeyPressed | QAbstractItemView::SelectedClicked);
    mpElementTree->setSelectionMode(QAbstractItemView::ExtendedSelection);
    mpElementTree->setRootIsDecorated(true);
@@ -92,25 +85,16 @@ SessionExplorerImp::SessionExplorerImp(const string& id, const string& windowNam
    mpElementTree->setSelectionBehavior(QAbstractItemView::SelectItems);
    mpElementTree->sortByColumn(0, Qt::AscendingOrder);
 
-   QHeaderView* pElementHeader = mpElementTree->header();
-   if (pElementHeader != NULL)
-   {
-      pElementHeader->hide();
-   }
-
    // Plug-ins tree
    mpPlugInTree = new QTreeView();
+   mpPlugInTree->setHeaderHidden(true);
    mpPlugInTree->setSelectionMode(QAbstractItemView::ExtendedSelection);
    mpPlugInTree->setRootIsDecorated(true);
    mpPlugInTree->setSortingEnabled(true);
    mpPlugInTree->setSelectionBehavior(QAbstractItemView::SelectItems);
    mpPlugInTree->sortByColumn(0, Qt::AscendingOrder);
-
-   QHeaderView* pPlugInHeader = mpPlugInTree->header();
-   if (pPlugInHeader != NULL)
-   {
-      pPlugInHeader->hide();
-   }
+   mpPlugInTree->setDragEnabled(true);
+   mpPlugInTree->setDragDropMode(QAbstractItemView::DragOnly);
 
    // Actions
    Service<DesktopServices> pDesktop;
@@ -166,7 +150,6 @@ SessionExplorerImp::SessionExplorerImp(const string& id, const string& windowNam
    pTabWidget->addTab(mpPlugInTree, "Plug-Ins");
 
    setIcon(QIcon(":/icons/SessionExplorer"));
-
    setWidget(pTabWidget);
 
    // Connections
@@ -178,8 +161,7 @@ SessionExplorerImp::SessionExplorerImp(const string& id, const string& windowNam
 }
 
 SessionExplorerImp::~SessionExplorerImp()
-{
-}
+{}
 
 list<ContextMenuAction> SessionExplorerImp::getContextMenuActions() const
 {
@@ -456,79 +438,98 @@ bool SessionExplorerImp::eventFilter(QObject* pObject, QEvent* pEvent)
          QEvent::Type type = pEvent->type();
          if ((type == QEvent::DragEnter) || (type == QEvent::DragMove) || (type == QEvent::Drop))
          {
+            mpWindowTree->setDropIndicatorShown(false);
+
             QDropEvent* pDropEvent = static_cast<QDropEvent*>(pEvent);
 
             const QMimeData* pData = pDropEvent->mimeData();
             if (pData != NULL)
             {
-               if (pData->hasFormat("application/x-sessionitem") == true)
+               if (pData->hasFormat("application/x-sessionitem-id") == true)
                {
-                  WindowModel* pWindowModel = dynamic_cast<WindowModel*>(mpWindowTree->model());
-                  VERIFY(pWindowModel != NULL);
+                  QByteArray itemIdArray = pData->data("application/x-sessionitem-id");
+                  QDataStream itemIdStream(&itemIdArray, QIODevice::ReadOnly);
 
-                  SessionItemModel* pSourceModel = dynamic_cast<SessionItemModel*>(pWindowModel->sourceModel());
-                  VERIFY(pSourceModel != NULL);
-
-                  // Get the index of the parent item containing the selected layer item(s)
-                  QModelIndex index;
-
-                  vector<SessionItem*> selectedLayers = getSelectedSessionItems();
-                  if (selectedLayers.empty() == false)
+                  int itemCount = 0;
+                  while (itemIdStream.atEnd() == false)
                   {
-                     SessionItem* pItem = selectedLayers.front();
-                     if (pItem != NULL)
+                     QString itemId;
+                     itemIdStream >> itemId;
+                     if (itemId.isEmpty() == false)
                      {
-                        QModelIndex itemIndex = pWindowModel->mapFromSource(pSourceModel->index(pItem));
-                        if (itemIndex.isValid() == true)
-                        {
-                           index = itemIndex.parent();
-                        }
+                        ++itemCount;
                      }
                   }
 
-                  // Update the drop point to be between the layer items
-                  QPoint dropPos = pDropEvent->pos();
-                  QPoint& newPos = const_cast<QPoint&>(pDropEvent->pos());
-
-                  QRect layersRect;
-                  if (index.isValid() == true)
+                  if (itemCount == 1)
                   {
-                     int numLayers = pWindowModel->rowCount(index);
-                     for (int i = 0; i < numLayers; ++i)
+                     WindowModel* pWindowModel = dynamic_cast<WindowModel*>(mpWindowTree->model());
+                     VERIFY(pWindowModel != NULL);
+
+                     SessionItemModel* pSourceModel = dynamic_cast<SessionItemModel*>(pWindowModel->sourceModel());
+                     VERIFY(pSourceModel != NULL);
+
+                     // Get the index of the parent item containing the selected layer item(s)
+                     QModelIndex index;
+
+                     vector<SessionItem*> selectedLayers = getSelectedSessionItems();
+                     if (selectedLayers.empty() == false)
                      {
-                        QModelIndex layerIndex = index.child(i, 0);
-
-                        QRect layerRect = mpWindowTree->visualRect(layerIndex);
-                        if (layerRect.isValid() == true)
+                        SessionItem* pItem = selectedLayers.front();
+                        if (pItem != NULL)
                         {
-                           layersRect = layersRect.united(layerRect);
-
-                           if (layerRect.contains(dropPos) == true)
+                           QModelIndex itemIndex = pWindowModel->mapFromSource(pSourceModel->index(pItem));
+                           if (itemIndex.isValid() == true)
                            {
-                              int topDist = dropPos.y() - layerRect.top();
-                              int bottomDist = layerRect.bottom() - dropPos.y();
+                              index = itemIndex.parent();
+                           }
+                        }
+                     }
 
-                              if (topDist < bottomDist)
+                     // Update the drop point to be between the layer items
+                     QPoint dropPos = pDropEvent->pos();
+                     QPoint& newPos = const_cast<QPoint&>(pDropEvent->pos());
+
+                     QRect layersRect;
+                     if (index.isValid() == true)
+                     {
+                        int numLayers = pWindowModel->rowCount(index);
+                        for (int i = 0; i < numLayers; ++i)
+                        {
+                           QModelIndex layerIndex = index.child(i, 0);
+
+                           QRect layerRect = mpWindowTree->visualRect(layerIndex);
+                           if (layerRect.isValid() == true)
+                           {
+                              layersRect = layersRect.united(layerRect);
+
+                              if (layerRect.contains(dropPos) == true)
                               {
-                                 newPos.setY(layerRect.top());
-                              }
-                              else
-                              {
-                                 newPos.setY(layerRect.bottom());
+                                 int topDist = dropPos.y() - layerRect.top();
+                                 int bottomDist = layerRect.bottom() - dropPos.y();
+
+                                 if (topDist < bottomDist)
+                                 {
+                                    newPos.setY(layerRect.top());
+                                 }
+                                 else
+                                 {
+                                    newPos.setY(layerRect.bottom());
+                                 }
                               }
                            }
                         }
                      }
-                  }
 
-                  // Do not allow drops outside of the sibling layers
-                  if (type != QEvent::Drop)
-                  {
-                     mpWindowTree->setDropIndicatorShown(layersRect.contains(dropPos));
-                  }
+                     // Do not allow drops outside of the sibling layers
+                     if (type != QEvent::Drop)
+                     {
+                        mpWindowTree->setDropIndicatorShown(layersRect.contains(dropPos));
+                     }
 
-                  // Send the event to the tree view
-                  return false;
+                     // Send the event to the tree view
+                     return false;
+                  }
                }
             }
          }

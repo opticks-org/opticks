@@ -11,7 +11,6 @@
 #include "ElementModel.h"
 #include "ModelServices.h"
 #include "Slot.h"
-#include <QtCore/QMimeData>
 
 using namespace std;
 
@@ -54,33 +53,6 @@ Qt::ItemFlags ElementModel::flags(const QModelIndex& index) const
       itemFlags |= Qt::ItemIsDragEnabled;
    }
    return itemFlags;
-}
-
-QStringList ElementModel::mimeTypes() const
-{
-   return SessionItemModel::mimeTypes() << "text/x-session-id";
-}
-
-QMimeData* ElementModel::mimeData(const QModelIndexList &indexes) const
-{
-   QMimeData* pMimeData = SessionItemModel::mimeData(indexes);
-   QByteArray encodedData;
-   QDataStream stream(&encodedData, QIODevice::WriteOnly);
-   foreach(QModelIndex index, indexes)
-   {
-      if (index.isValid())
-      {
-         SessionItemModel::SessionItemWrapper* pWrapper =
-            reinterpret_cast<SessionItemModel::SessionItemWrapper*>(index.internalPointer());
-         if (pWrapper != NULL)
-         {
-            stream << QString::fromStdString(pWrapper->getSessionItem()->getId());
-         }
-      }
-   }
-
-   pMimeData->setData("text/x-session-id", encodedData);
-   return pMimeData;
 }
 
 void ElementModel::addElement(Subject& subject, const string& signal, const boost::any& value)

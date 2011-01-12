@@ -106,9 +106,20 @@ void WindowImp::enableSessionItemDrops(Window::SessionItemDropFilter *pFilter)
 
 void WindowImp::dragEnterEvent(QDragEnterEvent *pEvent)
 {
-   if (pEvent->mimeData()->hasFormat("text/x-session-id"))
+   if (pEvent == NULL)
    {
-      QByteArray encoded = pEvent->mimeData()->data("text/x-session-id");
+      return;
+   }
+
+   const QMimeData* pData = pEvent->mimeData();
+   if (pData == NULL)
+   {
+      return;
+   }
+
+   if (pData->hasFormat("application/x-sessionitem-id") == true)
+   {
+      QByteArray encoded = pData->data("application/x-sessionitem-id");
       QDataStream stream(&encoded, QIODevice::ReadOnly);
       bool accepted = mAcceptAllSessionItemDrops;
       while (!accepted && !stream.atEnd())
@@ -134,10 +145,21 @@ void WindowImp::dragEnterEvent(QDragEnterEvent *pEvent)
 
 void WindowImp::dropEvent(QDropEvent *pEvent)
 {
-   if (pEvent->mimeData()->hasFormat("text/x-session-id"))
+   if (pEvent == NULL)
+   {
+      return;
+   }
+
+   const QMimeData* pData = pEvent->mimeData();
+   if (pData == NULL)
+   {
+      return;
+   }
+
+   if (pData->hasFormat("application/x-sessionitem-id") == true)
    {
       vector<SessionItem*> droppedItems;
-      QByteArray encoded = pEvent->mimeData()->data("text/x-session-id");
+      QByteArray encoded = pData->data("application/x-sessionitem-id");
       QDataStream stream(&encoded, QIODevice::ReadOnly);
       bool accepted = false;
       while (!stream.atEnd())

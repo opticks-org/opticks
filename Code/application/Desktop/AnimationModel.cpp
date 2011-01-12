@@ -64,6 +64,17 @@ AnimationModel::~AnimationModel()
    }
 }
 
+Qt::ItemFlags AnimationModel::flags(const QModelIndex& index) const
+{
+   Qt::ItemFlags itemFlags = SessionItemModel::flags(index);
+   if (index.isValid() == true)
+   {
+      itemFlags |= Qt::ItemIsDragEnabled;
+   }
+
+   return itemFlags;
+}
+
 void AnimationModel::addController(Subject& subject, const string& signal, const boost::any& value)
 {
    AnimationController* pController = boost::any_cast<AnimationController*>(value);

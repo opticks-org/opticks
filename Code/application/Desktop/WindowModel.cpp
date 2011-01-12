@@ -7,6 +7,7 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtCore/QDataStream>
 #include <QtCore/QMimeData>
 #include <QtGui/QWidget>
 
@@ -55,44 +56,6 @@ Qt::DropActions WindowModel::supportedDropActions() const
    return Qt::CopyAction | Qt::MoveAction;
 }
 
-QStringList WindowModel::mimeTypes() const
-{
-   QStringList types;
-   types.append("application/x-sessionitem");
-
-   return types;
-}
-
-QMimeData* WindowModel::mimeData(const QModelIndexList& indexes) const
-{
-   if (indexes.count() != 1)
-   {
-      return NULL;
-   }
-
-   QString strItemId;
-
-   QModelIndex index = indexes.front();
-   if (index.isValid() == true)
-   {
-      SessionItem* pItem = index.data(SessionItemModel::SessionItemRole).value<SessionItem*>();
-      if (pItem != NULL)
-      {
-         strItemId = QString::fromStdString(pItem->getId());
-      }
-   }
-
-   if (strItemId.isEmpty() == true)
-   {
-      return NULL;
-   }
-
-   QMimeData* pData = new QMimeData();
-   pData->setData("application/x-sessionitem", strItemId.toAscii());
-
-   return pData;
-}
-
 bool WindowModel::dropMimeData(const QMimeData* pData, Qt::DropAction action, int row, int column,
                                const QModelIndex& dropIndex)
 {
@@ -101,7 +64,7 @@ bool WindowModel::dropMimeData(const QMimeData* pData, Qt::DropAction action, in
       return false;
    }
 
-   if (pData->hasFormat("application/x-sessionitem") == false)
+   if (pData->hasFormat("application/x-sessionitem-id") == false)
    {
       return false;
    }
@@ -109,19 +72,32 @@ bool WindowModel::dropMimeData(const QMimeData* pData, Qt::DropAction action, in
    // Get the dragged layer
    Layer* pDropLayer = NULL;
 
-   QString strItemId = QString::fromAscii(pData->data("application/x-sessionitem"));
-   if (strItemId.isEmpty() == false)
+   QByteArray itemIdArray = pData->data("application/x-sessionitem-id");
+   QDataStream itemIdStream(&itemIdArray, QIODevice::ReadOnly);
+
+   while (itemIdStream.atEnd() == false)
    {
+      QString itemId;
+      itemIdStream >> itemId;
+      VERIFY(itemId.isEmpty() == false);
+
+      // Can only drop a single layer
+      if (pDropLayer != NULL)
+      {
+         return false;
+      }
+
       int numLayers = rowCount(dropIndex);
       for (int i = 0; i < numLayers; ++i)
       {
          QModelIndex layerIndex = dropIndex.child(i, 0);
          if (layerIndex.isValid() == true)
          {
-            Layer* pLayer = dynamic_cast<Layer*>(layerIndex.data(SessionItemModel::SessionItemRole).value<SessionItem*>());
+            Layer* pLayer =
+               dynamic_cast<Layer*>(layerIndex.data(SessionItemModel::SessionItemRole).value<SessionItem*>());
             if (pLayer != NULL)
             {
-               if (QString::fromStdString(pLayer->getId()) == strItemId)
+               if (QString::fromStdString(pLayer->getId()) == itemId)
                {
                   pDropLayer = pLayer;
                   break;
@@ -295,13 +271,19 @@ Qt::ItemFlags WindowModel::WindowSourceModel::flags(const QModelIndex& index) co
    Qt::ItemFlags itemFlags = SessionItemModel::flags(index);
    if (index.isValid() == true)
    {
+      QModelIndex parentIndex = index.parent();
+      if (parentIndex.isValid() == true)
+      {
+         itemFlags |= Qt::ItemIsDragEnabled;
+      }
+
       Layer* pLayer = dynamic_cast<Layer*>(index.data(SessionItemModel::SessionItemRole).value<SessionItem*>());
       if (pLayer != NULL)
       {
          SpatialDataView* pView = dynamic_cast<SpatialDataView*>(pLayer->getView());
          if (pView != NULL)
          {
-            itemFlags |= Qt::ItemIsDragEnabled | Qt::ItemIsUserCheckable;
+            itemFlags |= Qt::ItemIsUserCheckable;
          }
       }
       else if (rowCount(index) > 0)

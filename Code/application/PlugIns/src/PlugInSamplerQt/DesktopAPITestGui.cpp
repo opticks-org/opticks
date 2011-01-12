@@ -31,6 +31,7 @@
 #include "PlotSet.h"
 #include "PlotView.h"
 #include "PlotWindow.h"
+#include "SessionManager.h"
 #include "Signature.h"
 #include "ToolBar.h"
 
@@ -97,7 +98,8 @@ DesktopAPITestGui::DesktopAPITestGui(QWidget* pParent) :
    mpPrintAction(NULL),
    mpPlotWidget(SIGNAL_NAME(PlotWidget, AboutToShowContextMenu), Slot(this, &DesktopAPITestGui::updateContextMenu)),
    mpDockWindow(NULL),
-   mpDockPlotWidget(NULL)
+   mpDockPlotWidget(NULL),
+   mpDragDropList(NULL)
 {
    Service<DesktopServices> pDesktop;
 
@@ -173,17 +175,35 @@ DesktopAPITestGui::DesktopAPITestGui(QWidget* pParent) :
    QWidget* pDockWindowWidget = new QWidget(this);
    mpDockedCheck = new QCheckBox("Docked", pDockWindowWidget);
    mpDockedCheck->setChecked(true);
-   mpDragDropCheck = new QCheckBox("Enable drag-and-drop to add signatures", pDockWindowWidget);
+   mpSigDragDropCheck = new QCheckBox("Enable drag-and-drop to add signatures", pDockWindowWidget);
    mpPropertiesCheck = new QCheckBox("Enable custom properties", pDockWindowWidget);
    QPushButton* pPropertiesButton = new QPushButton("Properties", pDockWindowWidget);
 
    LabeledSection* pDockWindowSection = new LabeledSection(pDockWindowWidget, "Dock Window", this);
+
+   // Drag-and-drop
+   QWidget* pDragDropWidget = new QWidget(this);
+   QCheckBox* pDragDropCheck = new QCheckBox("Enable drops from the Session Explorer:", pDragDropWidget);
+   QPushButton* pClearDropsButton = new QPushButton("Clear", pDragDropWidget);
+
+   mpDragDropList = new SessionItemDropList(pDragDropWidget);
+   mpDragDropList->setMinimumHeight(100);
+   mpDragDropList->setViewMode(QListView::ListMode);
+   mpDragDropList->setResizeMode(QListView::Adjust);
+   mpDragDropList->setWrapping(true);
+   mpDragDropList->setFlow(QListView::TopToBottom);
+   mpDragDropList->setMovement(QListView::Static);
+   mpDragDropList->setSelectionMode(QAbstractItemView::NoSelection);
+   mpDragDropList->setDragDropMode(QAbstractItemView::DropOnly);
+
+   LabeledSection* pDragDropSection = new LabeledSection(pDragDropWidget, "Drag-and-Drop", this);
 
    // Labeled section group
    LabeledSectionGroup* pSectionGroup = new LabeledSectionGroup(this);
    pSectionGroup->addSection(pToolBarSection);
    pSectionGroup->addSection(pPlotWidgetSection, 1000);
    pSectionGroup->addSection(pDockWindowSection);
+   pSectionGroup->addSection(pDragDropSection, 1000);
    pSectionGroup->addStretch(1);
 
    // Horizontal line
@@ -231,9 +251,18 @@ DesktopAPITestGui::DesktopAPITestGui(QWidget* pParent) :
    pDockWindowLayout->setMargin(0);
    pDockWindowLayout->setSpacing(5);
    pDockWindowLayout->addWidget(mpDockedCheck);
-   pDockWindowLayout->addWidget(mpDragDropCheck);
+   pDockWindowLayout->addWidget(mpSigDragDropCheck);
    pDockWindowLayout->addWidget(mpPropertiesCheck);
    pDockWindowLayout->addWidget(pPropertiesButton, 0, Qt::AlignLeft);
+
+   QGridLayout* pDragDropLayout = new QGridLayout(pDragDropWidget);
+   pDragDropLayout->setMargin(0);
+   pDragDropLayout->setSpacing(5);
+   pDragDropLayout->addWidget(pDragDropCheck, 0, 0, 1, 2);
+   pDragDropLayout->addWidget(mpDragDropList, 1, 0);
+   pDragDropLayout->addWidget(pClearDropsButton, 1, 1, Qt::AlignTop);
+   pDragDropLayout->setRowStretch(1, 10);
+   pDragDropLayout->setColumnStretch(0, 10);
 
    QVBoxLayout* pLayout = new QVBoxLayout(this);
    pLayout->setMargin(10);
@@ -313,14 +342,14 @@ DesktopAPITestGui::DesktopAPITestGui(QWidget* pParent) :
    VERIFYNR(connect(pPropertiesButton, SIGNAL(clicked()), this, SLOT(displayProperties())));
    VERIFYNR(connect(pButtonBox, SIGNAL(rejected()), this, SLOT(reject())));
    VERIFYNR(connect(mpDockedCheck, SIGNAL(toggled(bool)), this, SLOT(setDocked(bool))));
+   VERIFYNR(connect(pDragDropCheck, SIGNAL(toggled(bool)), this, SLOT(enableDrops(bool))));
+   VERIFYNR(connect(pClearDropsButton, SIGNAL(clicked()), mpDragDropList, SLOT(clear())));
    VERIFYNR(mpDockWindow->attach(SIGNAL_NAME(Window, SessionItemDropped),
       Slot(this, &DesktopAPITestGui::dropSessionItem)));
    VERIFYNR(pDesktop->attach(SIGNAL_NAME(DesktopServices, AboutToShowPropertiesDialog),
       Slot(this, &DesktopAPITestGui::updatePropertiesDialog)));
-   VERIFYNR(mpDockWindow->attach(SIGNAL_NAME(DockWindow, Docked),
-      Slot(this, &DesktopAPITestGui::docked)));
-   VERIFYNR(mpDockWindow->attach(SIGNAL_NAME(DockWindow, Undocked),
-      Slot(this, &DesktopAPITestGui::undocked)));
+   VERIFYNR(mpDockWindow->attach(SIGNAL_NAME(DockWindow, Docked), Slot(this, &DesktopAPITestGui::docked)));
+   VERIFYNR(mpDockWindow->attach(SIGNAL_NAME(DockWindow, Undocked), Slot(this, &DesktopAPITestGui::undocked)));
 }
 
 DesktopAPITestGui::~DesktopAPITestGui()
@@ -334,7 +363,7 @@ DesktopAPITestGui::~DesktopAPITestGui()
 bool DesktopAPITestGui::accept(SessionItem* pItem) const
 {
    bool bAccept = false;
-   if (mpDragDropCheck->isChecked() == true)
+   if (mpSigDragDropCheck->isChecked() == true)
    {
       bAccept = dynamic_cast<Signature*>(pItem) != NULL;
    }
@@ -743,5 +772,73 @@ void DesktopAPITestGui::setDocked(bool docked)
    else
    {
       mpDockWindow->undock();
+   }
+}
+
+void DesktopAPITestGui::enableDrops(bool enable)
+{
+   mpDragDropList->enableDrops(enable);
+}
+
+DesktopAPITestGui::SessionItemDropList::SessionItemDropList(QWidget* pParent) :
+   QListWidget(pParent),
+   mSupportsDrops(false)
+{}
+
+DesktopAPITestGui::SessionItemDropList::~SessionItemDropList()
+{}
+
+void DesktopAPITestGui::SessionItemDropList::enableDrops(bool enable)
+{
+   mSupportsDrops = enable;
+}
+
+void DesktopAPITestGui::SessionItemDropList::dragEnterEvent(QDragEnterEvent* pEvent)
+{
+   if ((pEvent == NULL) || (mSupportsDrops == false))
+   {
+      return;
+   }
+
+   const QMimeData* pData = pEvent->mimeData();
+   if ((pData != NULL) && (pData->hasFormat("application/x-sessionitem-id") == true))
+   {
+      pEvent->acceptProposedAction();
+   }
+}
+
+void DesktopAPITestGui::SessionItemDropList::dropEvent(QDropEvent* pEvent)
+{
+   if (pEvent == NULL)
+   {
+      return;
+   }
+
+   const QMimeData* pData = pEvent->mimeData();
+   if (pData == NULL)
+   {
+      return;
+   }
+
+   if (pData->hasFormat("application/x-sessionitem-id") == true)
+   {
+      QByteArray itemIdArray = pData->data("application/x-sessionitem-id");
+      QDataStream itemIdStream(&itemIdArray, QIODevice::ReadOnly);
+
+      Service<SessionManager> pManager;
+      while (itemIdStream.atEnd() == false)
+      {
+         QString itemId;
+         itemIdStream >> itemId;
+         VERIFYNRV(itemId.isEmpty() == false);
+
+         SessionItem* pItem = pManager->getSessionItem(itemId.toStdString());
+         if (pItem != NULL)
+         {
+            addItem(QString::fromStdString(pItem->getDisplayName(true)));
+         }
+      }
+
+      pEvent->acceptProposedAction();
    }
 }

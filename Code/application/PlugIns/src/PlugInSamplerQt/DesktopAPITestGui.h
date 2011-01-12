@@ -15,6 +15,7 @@
 #include <QtGui/QComboBox>
 #include <QtGui/QDialog>
 #include <QtGui/QLineEdit>
+#include <QtGui/QListWidget>
 
 #include "AttachmentPtr.h"
 #include "PlotWidget.h"
@@ -56,8 +57,25 @@ protected slots:
    void setTitleColor(const QColor& titleColor);
    void displayProperties();
    void setDocked(bool docked);
+   void enableDrops(bool enable);
 
 private:
+   class SessionItemDropList : public QListWidget
+   {
+   public:
+      SessionItemDropList(QWidget* pParent = NULL);
+      virtual ~SessionItemDropList();
+
+      void enableDrops(bool enable);
+
+   protected:
+      virtual void dragEnterEvent(QDragEnterEvent* pEvent);
+      virtual void dropEvent(QDropEvent* pEvent);
+
+   private:
+      bool mSupportsDrops;
+   };
+
    // Toolbar buttons
    QAction* mpOpenAction;
    QAction* mpPrintAction;
@@ -73,8 +91,11 @@ private:
    PlotWindow* mpDockWindow;
    PlotWidget* mpDockPlotWidget;
    QCheckBox* mpDockedCheck;
-   QCheckBox* mpDragDropCheck;
+   QCheckBox* mpSigDragDropCheck;
    QCheckBox* mpPropertiesCheck;
+
+   // Drag-and-drop
+   SessionItemDropList* mpDragDropList;
 };
 
 #endif

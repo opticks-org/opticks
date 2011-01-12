@@ -18,11 +18,10 @@ class ElementModel : public SessionItemModel
 {
 public:
    ElementModel(QObject* pParent = 0);
-   ~ElementModel();
+   virtual ~ElementModel();
 
-   Qt::ItemFlags flags(const QModelIndex& index) const;
-   QStringList mimeTypes() const;
-   QMimeData *mimeData(const QModelIndexList &indexes) const;
+   virtual Qt::ItemFlags flags(const QModelIndex& index) const;
+
    void addElement(Subject& subject, const std::string& signal, const boost::any& value);
    void removeElement(Subject& subject, const std::string& signal, const boost::any& value);
    void updateElementParent(Subject& subject, const std::string& signal, const boost::any& value);

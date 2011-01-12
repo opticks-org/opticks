@@ -21,7 +21,9 @@ class AnimationModel : public SessionItemModel
 {
 public:
    AnimationModel(QObject* pParent = 0);
-   ~AnimationModel();
+   virtual ~AnimationModel();
+
+   virtual Qt::ItemFlags flags(const QModelIndex& index) const;
 
    void addController(Subject& subject, const std::string& signal, const boost::any& value);
    void removeController(Subject& subject, const std::string& signal, const boost::any& value);

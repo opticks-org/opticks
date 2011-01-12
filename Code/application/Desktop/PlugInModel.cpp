@@ -63,6 +63,17 @@ PlugInModel::~PlugInModel()
    }
 }
 
+Qt::ItemFlags PlugInModel::flags(const QModelIndex& index) const
+{
+   Qt::ItemFlags itemFlags = SessionItemModel::flags(index);
+   if (index.isValid() == true)
+   {
+      itemFlags |= Qt::ItemIsDragEnabled;
+   }
+
+   return itemFlags;
+}
+
 QVariant PlugInModel::data(const QModelIndex& index, int role) const
 {
    QVariant value = SessionItemModel::data(index, role);

@@ -7,6 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtCore/QDataStream>
+#include <QtCore/QMimeData>
 #include <QtGui/QIcon>
 #include <QtGui/QMessageBox>
 
@@ -163,6 +165,49 @@ Qt::ItemFlags SessionItemModel::flags(const QModelIndex& index) const
       }
    }
    return flag;
+}
+
+QStringList SessionItemModel::mimeTypes() const
+{
+   QStringList types = QAbstractItemModel::mimeTypes();
+   types.append("application/x-sessionitem-id");
+   types.append("application/x-sessionitem");      // Deprecated
+   types.append("text/x-session-id");              // Deprecated
+
+   return types;
+}
+
+QMimeData* SessionItemModel::mimeData(const QModelIndexList& indexes) const
+{
+   QByteArray itemIdArray;
+   QDataStream itemIdStream(&itemIdArray, QIODevice::WriteOnly);
+
+   for (int i = 0; i < indexes.count(); ++i)
+   {
+      QModelIndex index = indexes[i];
+      if (index.isValid() == true)
+      {
+         SessionItem* pItem = index.data(SessionItemModel::SessionItemRole).value<SessionItem*>();
+         if (pItem != NULL)
+         {
+            QString itemId = QString::fromStdString(pItem->getId());
+            if (itemId.isEmpty() == false)
+            {
+               itemIdStream << itemId;
+            }
+         }
+      }
+   }
+
+   QMimeData* pData = QAbstractItemModel::mimeData(indexes);
+   if (pData != NULL)
+   {
+      pData->setData("application/x-sessionitem-id", itemIdArray);
+      pData->setData("application/x-sessionitem", itemIdArray);      // Deprecated
+      pData->setData("text/x-session-id", itemIdArray);              // Deprecated
+   }
+
+   return pData;
 }
 
 bool SessionItemModel::setData(const QModelIndex& index, const QVariant& value, int role)
