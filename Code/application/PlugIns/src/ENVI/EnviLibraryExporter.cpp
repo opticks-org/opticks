@@ -69,23 +69,26 @@ bool EnviLibraryExporter::getInputSpecification(PlugInArgList*& pArgList)
 
    PlugInArg* pArg = mpPlugInManager->getPlugInArg();
    VERIFY(pArg != NULL);
-   pArg->setName(ProgressArg());
+   pArg->setName(Executable::ProgressArg());
    pArg->setType("Progress");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription(Executable::ProgressArgDescription());
    pArgList->addArg(*pArg);
 
    pArg = mpPlugInManager->getPlugInArg();
    VERIFY(pArg != NULL);
-   pArg->setName(ExportItemArg());
+   pArg->setName(Exporter::ExportItemArg());
    pArg->setType("SignatureSet");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Signature set to be exported.");
    pArgList->addArg(*pArg);
 
    pArg = mpPlugInManager->getPlugInArg();
    VERIFY(pArg != NULL);
-   pArg->setName(ExportDescriptorArg());
+   pArg->setName(Exporter::ExportDescriptorArg());
    pArg->setType("FileDescriptor");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("File descriptor for the exported file.");
    pArgList->addArg(*pArg);
 
    return true;
@@ -443,13 +446,13 @@ bool EnviLibraryExporter::extractPlugInArgs(PlugInArgList* pArgList)
    PlugInArg* pArg = NULL;
 
    // Progress
-   if (pArgList->getArg(ProgressArg(), pArg) && (pArg != NULL))
+   if (pArgList->getArg(Executable::ProgressArg(), pArg) && (pArg != NULL))
    {
       mpProgress = pArg->getPlugInArgValue<Progress>();
    }
 
    // Signature set
-   if (!pArgList->getArg(ExportItemArg(), pArg) || (pArg == NULL))
+   if (!pArgList->getArg(Exporter::ExportDescriptorArg(), pArg) || (pArg == NULL))
    {
       string message = "Could not read the signature set input value!";
       if (mpProgress != NULL)
@@ -475,7 +478,7 @@ bool EnviLibraryExporter::extractPlugInArgs(PlugInArgList* pArgList)
    }
 
    // File descriptor
-   if (!pArgList->getArg(ExportDescriptorArg(), pArg) || (pArg == NULL))
+   if (!pArgList->getArg(Exporter::ExportDescriptorArg(), pArg) || (pArg == NULL))
    {
       string message = "Could not read the file descriptor input value!";
       if (mpProgress != NULL)

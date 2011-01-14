@@ -131,14 +131,15 @@ bool MovieExporter::getInputSpecification(PlugInArgList*& pInArgList)
    pInArgList = pPlugInManager->getPlugInArgList();
 
    VERIFY(pInArgList != NULL);
-   VERIFY(pInArgList->addArg<Progress>(ProgressArg(), NULL));
-   VERIFY(pInArgList->addArg<FileDescriptor>(ExportDescriptorArg()));
-   VERIFY(pInArgList->addArg<View>(ExportItemArg()));
-   VERIFY(pInArgList->addArg<int>("Resolution X"));
-   VERIFY(pInArgList->addArg<int>("Resolution Y"));
-   VERIFY(pInArgList->addArg<int>("Framerate Numerator"));
-   VERIFY(pInArgList->addArg<int>("Framerate Denominator"));
-   VERIFY(pInArgList->addArg<unsigned int>("Bitrate"));
+   VERIFY(pInArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription()));
+   VERIFY(pInArgList->addArg<FileDescriptor>(Exporter::ExportDescriptorArg(), "File descriptor for the output file."));
+   VERIFY(pInArgList->addArg<View>(Exporter::ExportItemArg(), "View to be exported."));
+   VERIFY(pInArgList->addArg<unsigned int>("Resolution X", "X resolution of the output file."));
+   VERIFY(pInArgList->addArg<unsigned int>("Resolution Y", "Y resolution of the output file."));
+   VERIFY(pInArgList->addArg<int>("Framerate Numerator", "Numerator (frames) in frames/second calculation."));
+   VERIFY(pInArgList->addArg<int>("Framerate Denominator", "Denominator (seconds) in frames/second calculation."));
+   VERIFY(pInArgList->addArg<unsigned int>("Bitrate", 
+      "Bitrate for the output file; affects quality of the output file."));
    string description("Time for time-based animations. "
       "1-based frame number for frame-based animations, i.e., first frame is 1.");
    VERIFY(pInArgList->addArg<double>("Start Export", description));
@@ -195,10 +196,10 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
    { // scope the MessageResource
       MessageResource pMsg("Input arguments", "app", "4551F478-E182-4b56-B88F-6682F0E3A2CF");
 
-      mpProgress = pInArgList->getPlugInArgValue<Progress>(ProgressArg());
+      mpProgress = pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
       pMsg->addBooleanProperty("Progress Present", (mpProgress != NULL));
 
-      pFileDescriptor = pInArgList->getPlugInArgValue<FileDescriptor>(ExportDescriptorArg());
+      pFileDescriptor = pInArgList->getPlugInArgValue<FileDescriptor>(Exporter::ExportDescriptorArg());
       if (pFileDescriptor == NULL)
       {
          log_error("No file specified");
@@ -207,7 +208,7 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
       pMsg->addProperty("Destination", pFileDescriptor->getFilename());
       filename = pFileDescriptor->getFilename().getFullPathAndName();
 
-      pView = pInArgList->getPlugInArgValue<View>(ExportItemArg());
+      pView = pInArgList->getPlugInArgValue<View>(Exporter::ExportItemArg());
       if (pView == NULL)
       {
          log_error("No view specified");
@@ -583,7 +584,7 @@ ValidationResultType MovieExporter::validate(const PlugInArgList* pArgList, stri
    {
       return result;
    }
-   View* pView = pArgList->getPlugInArgValue<View>(ExportItemArg());
+   View* pView = pArgList->getPlugInArgValue<View>(Exporter::ExportItemArg());
    if (pView == NULL)
    {
       errorMessage = "No view specified. Nothing to export.";
@@ -714,7 +715,7 @@ QWidget* MovieExporter::getExportOptionsWidget(const PlugInArgList* pInArgList)
          pFramerateWidget->setFramerates(frameRates);
       }
 
-      View* pView = pInArgList->getPlugInArgValue<View>(ExportItemArg());
+      View* pView = pInArgList->getPlugInArgValue<View>(Exporter::ExportItemArg());
       if (pView != NULL)
       {
          AnimationController* pController = pView->getAnimationController();

@@ -159,15 +159,17 @@ bool AspamImporter::getInputSpecification(PlugInArgList*& pInArgList)
    pInArgList = pPlugInManager->getPlugInArgList();
    VERIFY(pInArgList != NULL);
 
-   pInArgList->addArg<Progress>(ProgressArg(), NULL);
+   pInArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription());
 
    Service<ModelServices> pModel;
    pModel->addElementType("Aspam");
 
    PlugInArg* pArg = NULL;
    VERIFY((pArg = pPlugInManager->getPlugInArg()) != NULL);
-   pArg->setName(ImportElementArg());
+   pArg->setName(Importer::ImportElementArg());
    pArg->setType("Aspam");
+   pArg->setDefaultValue(NULL);
+   pArg->setDescription("ASPAM file to import.");
    pInArgList->addArg(*pArg);
 
    return true;
@@ -233,10 +235,10 @@ bool AspamImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
    { // scope the MessageResource
       MessageResource pMsg("Input arguments", "app", "69A4FC3B-9FBB-4327-BEAF-03321046EF60");
 
-      pProgress = pInArgList->getPlugInArgValue<Progress>(ProgressArg());
+      pProgress = pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
       pMsg->addBooleanProperty("Progress Present", (pProgress != NULL));
 
-      pAspamContainer = pInArgList->getPlugInArgValueUnsafe<Any>(ImportElementArg());
+      pAspamContainer = pInArgList->getPlugInArgValueUnsafe<Any>(Importer::ImportElementArg());
       if (pAspamContainer == NULL)
       {
          if (pProgress != NULL)

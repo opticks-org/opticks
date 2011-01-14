@@ -377,24 +377,30 @@ bool AutoImporter::getInputSpecification(PlugInArgList*& pArgList)
    PlugInArg* pArg = mpPlugInManager->getPlugInArg();
    VERIFY(pArg != NULL);
 
-   pArg->setName(MenuCommandArg());
+   pArg->setName(Executable::MenuCommandArg());
    pArg->setType("string");
+   pArg->setDescription("String name for the menu command.");
+   pArg->setDefaultValue(NULL);
    pArgList->addArg(*pArg);
 
    // Progress
    pArg = mpPlugInManager->getPlugInArg();
    VERIFY(pArg != NULL);
 
-   pArg->setName(ProgressArg());
+   pArg->setName(Executable::ProgressArg());
    pArg->setType("Progress");
+   pArg->setDescription(Executable::ProgressArgDescription());
+   pArg->setDefaultValue(NULL);
    pArgList->addArg(*pArg);
 
    // Data element
    pArg = mpPlugInManager->getPlugInArg();
    VERIFY(pArg != NULL);
 
-   pArg->setName(ImportElementArg());
+   pArg->setName(Importer::ImportElementArg());
    pArg->setType("DataElement");
+   pArg->setDescription("Data element to be imported.");
+   pArg->setDefaultValue(NULL);
    pArgList->addArg(*pArg);
 
    return true;
@@ -443,7 +449,7 @@ bool AutoImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
    if (pExecutable.get() != NULL)
    {
       // Create the input arg list
-      pExecutable->getInArgList().setPlugInArgValueLoose(ImportElementArg(), mpElement);
+      pExecutable->getInArgList().setPlugInArgValueLoose(Importer::ImportElementArg(), mpElement);
       if (!pExecutable->execute())
       {
          return false;
@@ -489,17 +495,17 @@ bool AutoImporter::extractPlugInArgs(const PlugInArgList* pArgList)
    StepResource pStep("Validate Inputs", "app", "2E851D37-622E-43F1-8E1E-6574D26E6DB0");
 
    // Menu command
-   string* pCommand = pArgList->getPlugInArgValue<string>(MenuCommandArg());
+   string* pCommand = pArgList->getPlugInArgValue<string>(Executable::MenuCommandArg());
    if (pCommand != NULL)
    {
       mMenuCommand = *pCommand;
    }
 
    // Progress
-   mpProgress = pArgList->getPlugInArgValue<Progress>(ProgressArg());
+   mpProgress = pArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
 
    // Data element
-   mpElement = pArgList->getPlugInArgValue<DataElement>(ImportElementArg());
+   mpElement = pArgList->getPlugInArgValue<DataElement>(Importer::ImportElementArg());
    if (mpElement == NULL)
    {
       string message = "The data element input value is invalid!";

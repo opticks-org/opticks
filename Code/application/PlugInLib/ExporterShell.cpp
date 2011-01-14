@@ -40,14 +40,14 @@ bool ExporterShell::getInputSpecification(PlugInArgList*& pArgList)
    bool success = true;
    pArgList = Service<PlugInManagerServices>()->getPlugInArgList();
    VERIFY(pArgList != NULL);
-   success = success && pArgList->addArg<FileDescriptor>(ExportDescriptorArg());
-   success = success && pArgList->addArg<Progress>(ProgressArg());
+   success = success && pArgList->addArg<FileDescriptor>(Exporter::ExportDescriptorArg(), "File descriptor for the output file.");
+   success = success && pArgList->addArg<Progress>(Executable::ProgressArg(), Executable::ProgressArgDescription());
    return success;
 }
 
 ValidationResultType ExporterShell::validate(const PlugInArgList* pArgList, string& errorMessage) const
 {
-   FileDescriptor* pFileDescriptor = pArgList->getPlugInArgValueUnsafe<FileDescriptor>(ExportDescriptorArg());
+   FileDescriptor* pFileDescriptor = pArgList->getPlugInArgValueUnsafe<FileDescriptor>(Exporter::ExportDescriptorArg());
    if ((pFileDescriptor == NULL) || (pFileDescriptor->getFilename().getFullPathAndName().empty()))
    {
       errorMessage = "No output file specified.";

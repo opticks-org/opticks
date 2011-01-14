@@ -398,8 +398,8 @@ bool Covariance::populateBatchInputArgList(PlugInArgList* pArgList)
 bool Covariance::populateInteractiveInputArgList(PlugInArgList* pArgList)
 {
    VERIFY(pArgList != NULL);
-   VERIFY(pArgList->addArg<Progress>(ProgressArg(), NULL));
-   VERIFY(pArgList->addArg<RasterElement>(DataElementArg(), NULL));
+   VERIFY(pArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription()));
+   VERIFY(pArgList->addArg<RasterElement>(Executable::DataElementArg(), NULL, "Data element to run the Covariance plugin on."));
    bool recalc = false;
    VERIFY(pArgList->addArg<bool>("Recalculate", &recalc, "If true, the Covariance matrix will be recalculated.  "
       "If false, the plug-in will decide if the matrix needs to be recalculated. If a matrix exists in memory, "
@@ -414,8 +414,8 @@ bool Covariance::populateInteractiveInputArgList(PlugInArgList* pArgList)
 bool Covariance::populateDefaultOutputArgList(PlugInArgList* pArgList)
 {
    VERIFY(pArgList != NULL);
-   VERIFY(pArgList->addArg<RasterElement>("Covariance Matrix"));
-   VERIFY(pArgList->addArg<RasterElement>("Inverse Covariance Matrix"));
+   VERIFY(pArgList->addArg<RasterElement>("Covariance Matrix", NULL, "Resulting covariance matrix."));
+   VERIFY(pArgList->addArg<RasterElement>("Inverse Covariance Matrix", NULL, "Inverse of the covariance matrix."));
    return true;
 }
 
@@ -423,13 +423,13 @@ bool Covariance::parseInputArgList(PlugInArgList* pArgList)
 {
    Filename* pCvmFilename = NULL;
 
-   Progress* pProgress = pArgList->getPlugInArgValue<Progress>(ProgressArg());
+   Progress* pProgress = pArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
    if (pProgress == NULL)
    {
       return false;
    }
 
-   mpRasterElement = pArgList->getPlugInArgValue<RasterElement>(DataElementArg());
+   mpRasterElement = pArgList->getPlugInArgValue<RasterElement>(Executable::DataElementArg());
    if (mpRasterElement == NULL)
    {
       string msg = "The raster element input value is invalid!";

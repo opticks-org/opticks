@@ -57,15 +57,16 @@ ConvolutionFilterShell::~ConvolutionFilterShell()
 bool ConvolutionFilterShell::getInputSpecification(PlugInArgList*& pInArgList)
 {
    VERIFY(pInArgList = Service<PlugInManagerServices>()->getPlugInArgList());
-   VERIFY(pInArgList->addArg<Progress>(ProgressArg(), NULL));
-   VERIFY(pInArgList->addArg<RasterElement>(DataElementArg()));
+   VERIFY(pInArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription()));
+   VERIFY(pInArgList->addArg<RasterElement>(Executable::DataElementArg(), NULL, 
+      "The data element to be convolved.."));
    VERIFY(pInArgList->addArg<AoiElement>("AOI", NULL, "If not NULL, only the data in this AOI will be convolved and the "
-                                                      "new raster element will be the size of this AOI."));
-   VERIFY(pInArgList->addArg<SpatialDataView>(ViewArg(), NULL));
+      "new raster element will be the size of this AOI."));
+   VERIFY(pInArgList->addArg<SpatialDataView>(Executable::ViewArg(), NULL, "The view to which the raster element to be convoluted is attached."));
    unsigned int defaultBand = 0;
    VERIFY(pInArgList->addArg<unsigned int>("Band Number", defaultBand, "The band which will be convolved. Defaults to the first band."));
    VERIFY(pInArgList->addArg<std::string>("Result Name", "The name of the new raster element. "
-                                                         "Defaults to the name of the input raster element with ' Convolved' appended."));
+      "Defaults to the name of the input raster element with ' Convolved' appended."));
    return true;
 }
 
@@ -174,9 +175,9 @@ bool ConvolutionFilterShell::execute(PlugInArgList* pInArgList, PlugInArgList* p
 bool ConvolutionFilterShell::extractInputArgs(PlugInArgList* pInArgList)
 {
    VERIFY(pInArgList);
-   mProgress = ProgressTracker(pInArgList->getPlugInArgValue<Progress>(ProgressArg()),
+   mProgress = ProgressTracker(pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg()),
       "Executing " + getName(), "app", "{64097F31-84D0-41bf-BBAF-F60DAF212836}");
-   if ((mInput.mpRaster = pInArgList->getPlugInArgValue<RasterElement>(DataElementArg())) == NULL)
+   if ((mInput.mpRaster = pInArgList->getPlugInArgValue<RasterElement>(Executable::DataElementArg())) == NULL)
    {
       mProgress.report("No raster element.", 0, ERRORS, true);
       return false;
@@ -185,7 +186,7 @@ bool ConvolutionFilterShell::extractInputArgs(PlugInArgList* pInArgList)
    mpAoi = pInArgList->getPlugInArgValue<AoiElement>("AOI");
    if (mpAoi == NULL && !isBatch())
    {
-      SpatialDataView* pView = pInArgList->getPlugInArgValue<SpatialDataView>(ViewArg());
+      SpatialDataView* pView = pInArgList->getPlugInArgValue<SpatialDataView>(Executable::ViewArg());
       if (pView != NULL)
       {
          std::vector<Layer*> layers;

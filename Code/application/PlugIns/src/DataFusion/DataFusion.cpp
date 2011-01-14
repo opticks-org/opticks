@@ -64,9 +64,10 @@ bool DataFusion::getInputSpecification(PlugInArgList*& pArgList)
          return false; // bad arg -> kick out
       }
       // get the progress from the arg list
-      pArg->setName(ProgressArg()); 
+      pArg->setName(Executable::ProgressArg()); 
       pArg->setType("Progress"); // we want a Progress object
       pArg->setDefaultValue(NULL);
+      pArg->setDescription(Executable::ProgressArgDescription());
       pArgList->addArg(*pArg);
    }
 
@@ -98,7 +99,7 @@ bool DataFusion::execute(PlugInArgList* pInputArgs, PlugInArgList* pOutputArgs)
    if (pInputArgs != NULL)
    {
       PlugInArg* pArg = NULL;
-      if ((pInputArgs->getArg(ProgressArg(), pArg)) && (pArg != NULL))
+      if ((pInputArgs->getArg(Executable::ProgressArg(), pArg)) && (pArg != NULL))
       {
          pProgress = reinterpret_cast<Progress*>(pArg->getActualValue());
       }

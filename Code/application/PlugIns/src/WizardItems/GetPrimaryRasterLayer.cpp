@@ -48,7 +48,7 @@ bool GetPrimaryRasterLayer::getInputSpecification(PlugInArgList*& pArgList)
       VERIFY(pArgList != NULL);
    }
 
-   VERIFY(pArgList->addArg<SpatialDataView>(Executable::ViewArg()) == true);
+   VERIFY(pArgList->addArg<SpatialDataView>(Executable::ViewArg(), "View from which to get the primary raster layer."));
    return true;
 }
 
@@ -61,7 +61,7 @@ bool GetPrimaryRasterLayer::getOutputSpecification(PlugInArgList*& pArgList)
       VERIFY(pArgList != NULL);
    }
 
-   VERIFY(pArgList->addArg<RasterLayer>(Executable::LayerArg()) == true);
+   VERIFY(pArgList->addArg<RasterLayer>(Executable::LayerArg(), "Primary raster layer returned from the selected view."));
    return true;
 }
 

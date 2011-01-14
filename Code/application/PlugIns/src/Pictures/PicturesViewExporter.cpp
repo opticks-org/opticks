@@ -39,7 +39,7 @@ bool PicturesViewExporter::getInputSpecification(PlugInArgList*& pArgList)
    VERIFY(PicturesExporter::getInputSpecification(pArgList));
    VERIFY(pArgList != NULL);
 
-   VERIFY(pArgList->addArg<View>(ExportItemArg()));
+   VERIFY(pArgList->addArg<View>(Exporter::ExportItemArg(), "View to export."));
 
    return true;
 }
@@ -52,7 +52,7 @@ bool PicturesViewExporter::extractInputArgs(const PlugInArgList* pInArgList)
    }
    VERIFY(pInArgList != NULL);
 
-   mpItem = pInArgList->getPlugInArgValue<View>(ExportItemArg());
+   mpItem = pInArgList->getPlugInArgValue<View>(Exporter::ExportItemArg());
    return (mpItem != NULL);
 }
 

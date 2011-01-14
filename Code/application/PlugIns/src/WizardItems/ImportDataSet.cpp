@@ -60,14 +60,14 @@ bool ImportDataSet::getInputSpecification(PlugInArgList*& pArgList)
    }
 
    VERIFY(pArgList != NULL);
-   VERIFY(pArgList->addArg<Filename>("Filename", NULL));
-   VERIFY(pArgList->addArg<vector<Filename*> >("Filenames", NULL));
-   VERIFY(pArgList->addArg<DataDescriptor>("Data Descriptor", NULL));
-   VERIFY(pArgList->addArg<string>("Importer Name", NULL));
+   VERIFY(pArgList->addArg<Filename>("Filename", NULL, "Single filename to be imported."));
+   VERIFY(pArgList->addArg<vector<Filename*> >("Filenames", NULL, "List of multiple filenames to be imported, if necessary."));
+   VERIFY(pArgList->addArg<DataDescriptor>("Data Descriptor", NULL, "Data descriptor to load data from."));
+   VERIFY(pArgList->addArg<string>("Importer Name", NULL, "Name of importer to be used."));
 
    if (mbInteractive == true)
    {
-      VERIFY(pArgList->addArg<bool>("Show Options Dialog", mShowDialog));
+      VERIFY(pArgList->addArg<bool>("Show Options Dialog", mShowDialog, "Whether to show the options dialog or not."));
    }
 
    return true;
@@ -83,7 +83,7 @@ bool ImportDataSet::getOutputSpecification(PlugInArgList*& pArgList)
    VERIFY(pArgList != NULL);
 
    // Add args
-   VERIFY(pArgList->addArg<DataElement>("Data Set"));
+   VERIFY(pArgList->addArg<DataElement>("Data Set", "Data set resulting from the import operation."));
 
    return true;
 }

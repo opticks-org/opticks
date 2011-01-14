@@ -44,16 +44,16 @@ DeriveProduct::~DeriveProduct()
 bool DeriveProduct::getInputSpecification(PlugInArgList*& pArgList)
 {
    VERIFY(DesktopItems::getInputSpecification(pArgList) && (pArgList != NULL));
-   bool success = pArgList->addArg<SpatialDataView>("View");
-   success = success && pArgList->addArg<Filename>("Template", NULL);
+   bool success = pArgList->addArg<SpatialDataView>("View", "View from which the product will be derived.");
+   success = success && pArgList->addArg<Filename>("Template", NULL, "Product template from which to create the new product.");
    return success;
 }
 
 bool DeriveProduct::getOutputSpecification(PlugInArgList*& pArgList)
 {
    VERIFY((pArgList = Service<PlugInManagerServices>()->getPlugInArgList()) != NULL);
-   bool success = pArgList->addArg<ProductWindow>("Window");
-   success = success && pArgList->addArg<ProductView>("View");
+   bool success = pArgList->addArg<ProductWindow>("Window", "Window for the resulting product.");
+   success = success && pArgList->addArg<ProductView>("View", "View for the resulting product.");
    return success;
 }
 

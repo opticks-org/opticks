@@ -40,9 +40,10 @@ bool WizardItems::getInputSpecification(PlugInArgList*& pArgList)
    PlugInArg* pArg = NULL;
    pArg = pPlugInManager->getPlugInArg();      // Progress
    VERIFY(pArg != NULL);
-   pArg->setName(ProgressArg());
+   pArg->setName(Executable::ProgressArg());
    pArg->setType("Progress");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription(Executable::ProgressArgDescription());
    pArgList->addArg(*pArg);
 
    return true;
@@ -57,7 +58,7 @@ bool WizardItems::extractInputArgs(PlugInArgList* pInArgList)
 
    // Progress
    PlugInArg* pArg = NULL;
-   if ((pInArgList->getArg(ProgressArg(), pArg) == true) && (pArg != NULL))
+   if ((pInArgList->getArg(Executable::ProgressArg(), pArg) == true) && (pArg != NULL))
    {
       mpProgress = pArg->getPlugInArgValue<Progress>();
    }

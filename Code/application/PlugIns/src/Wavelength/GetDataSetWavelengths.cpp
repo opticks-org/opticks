@@ -46,12 +46,12 @@ bool GetDataSetWavelengths::getInputSpecification(PlugInArgList*& pArgList)
    pArgList = pManager->getPlugInArgList();
    VERIFY(pArgList != NULL);
 
-   VERIFY(pArgList->addArg<Progress>(Executable::ProgressArg(), NULL));
-   VERIFY(pArgList->addArg<RasterElement>(Executable::DataElementArg(), NULL));
+   VERIFY(pArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription()));
+   VERIFY(pArgList->addArg<RasterElement>(Executable::DataElementArg(), NULL, "Data element to retrieve wavelengths from."));
 
    if (isBatch() == false)
    {
-      VERIFY(pArgList->addArg<SpatialDataView>(Executable::ViewArg(), NULL));
+      VERIFY(pArgList->addArg<SpatialDataView>(Executable::ViewArg(), NULL, "View which the data element is part of."));
    }
 
    return true;
@@ -63,7 +63,7 @@ bool GetDataSetWavelengths::getOutputSpecification(PlugInArgList*& pArgList)
    pArgList = pManager->getPlugInArgList();
    VERIFY(pArgList != NULL);
 
-   VERIFY(pArgList->addArg<Wavelengths>(Wavelengths::WavelengthsArg()));
+   VERIFY(pArgList->addArg<Wavelengths>(Wavelengths::WavelengthsArg(), "Wavelengths extracted from the data element."));
    return true;
 }
 
@@ -77,12 +77,12 @@ bool GetDataSetWavelengths::execute(PlugInArgList* pInArgList, PlugInArgList* pO
    StepResource pStep(string("Execute ") + getName(), "app", "9AD895AB-F5BB-4CBB-9351-179B19238B13");
 
    // Extract the input args
-   Progress* pProgress = pInArgList->getPlugInArgValue<Progress>(ProgressArg());
+   Progress* pProgress = pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
 
-   RasterElement* pDataset = pInArgList->getPlugInArgValue<RasterElement>(DataElementArg());
+   RasterElement* pDataset = pInArgList->getPlugInArgValue<RasterElement>(Executable::DataElementArg());
    if ((pDataset == NULL) && (isBatch() == false))
    {
-      SpatialDataView* pView = pInArgList->getPlugInArgValue<SpatialDataView>(ViewArg());
+      SpatialDataView* pView = pInArgList->getPlugInArgValue<SpatialDataView>(Executable::ViewArg());
       if (pView != NULL)
       {
          LayerList* pLayerList = pView->getLayerList();

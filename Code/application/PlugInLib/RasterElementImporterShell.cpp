@@ -543,10 +543,10 @@ QWidget* RasterElementImporterShell::getPreview(const DataDescriptor* pDescripto
          bool bSuccess = getInputSpecification(pInArgList);
          if ((bSuccess == true) && (pInArgList != NULL))
          {
-            bSuccess = pInArgList->setPlugInArgValue(ProgressArg(), pProgress);
+            bSuccess = pInArgList->setPlugInArgValue(Executable::ProgressArg(), pProgress);
             if (bSuccess)
             {
-               bSuccess = pInArgList->setPlugInArgValue(ImportElementArg(), pRasterElement);
+               bSuccess = pInArgList->setPlugInArgValue(Importer::ImportElementArg(), pRasterElement);
             }
          }
 
@@ -629,7 +629,7 @@ bool RasterElementImporterShell::parseInputArgList(PlugInArgList* pInArgList)
    bool bSuccess = false;
 
    // Progress
-   bSuccess = pInArgList->getArg(ProgressArg(), pArg);
+   bSuccess = pInArgList->getArg(Executable::ProgressArg(), pArg);
    if ((bSuccess == true) && (pArg != NULL))
    {
       if (pArg->isActualSet() == true)
@@ -639,7 +639,7 @@ bool RasterElementImporterShell::parseInputArgList(PlugInArgList* pInArgList)
    }
 
    // Sensor data
-   mpRasterElement = pInArgList->getPlugInArgValue<RasterElement>(ImportElementArg());
+   mpRasterElement = pInArgList->getPlugInArgValue<RasterElement>(Importer::ImportElementArg());
    if (mpRasterElement == NULL)
    {
       string msg = "The raster element input value is invalid!";

@@ -74,6 +74,7 @@ bool AnyPlugIn::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("Custom Element");
    pArg->setType("CustomElement");
    pArg->setDefaultValue(pModel->getElement("AnyPlugInCount", "CustomElement", NULL));
+   pArg->setDescription("A custom element.");
    pArgList->addArg(*pArg);
 
    return true;

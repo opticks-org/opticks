@@ -83,7 +83,7 @@ bool RunInterpreterCommands::getOutputSpecification(PlugInArgList*& pArgList)
 bool RunInterpreterCommands::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
    VERIFY(pInArgList != NULL);
-   ProgressTracker progress(pInArgList->getPlugInArgValue<Progress>(ProgressArg()),
+   ProgressTracker progress(pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg()),
       "Run Interpreter Commands.", "app", "FBA8DDA3-9EA4-40da-BC78-CCD55E867297");
 
    mVerbose = false;

@@ -35,8 +35,8 @@ bool WavelengthImporter::getInputSpecification(PlugInArgList*& pArgList)
    pArgList = pManager->getPlugInArgList();
    VERIFY(pArgList != NULL);
 
-   VERIFY(pArgList->addArg<Progress>(Executable::ProgressArg(), NULL));
-   VERIFY(pArgList->addArg<Filename>(Wavelengths::WavelengthFileArg()));
+   VERIFY(pArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription()));
+   VERIFY(pArgList->addArg<Filename>(Wavelengths::WavelengthFileArg(), "Wavelength file to be imported."));
 
    return true;
 }
@@ -47,7 +47,7 @@ bool WavelengthImporter::getOutputSpecification(PlugInArgList*& pArgList)
    pArgList = pManager->getPlugInArgList();
    VERIFY(pArgList != NULL);
 
-   VERIFY(pArgList->addArg<Wavelengths>(Wavelengths::WavelengthsArg()));
+   VERIFY(pArgList->addArg<Wavelengths>(Wavelengths::WavelengthsArg(), "The imported wavelengths."));
    return true;
 }
 
@@ -62,7 +62,7 @@ bool WavelengthImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutA
    }
 
    // Extract the input args
-   Progress* pProgress = pInArgList->getPlugInArgValue<Progress>(ProgressArg());
+   Progress* pProgress = pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
 
    Filename* pFilename = pInArgList->getPlugInArgValue<Filename>(Wavelengths::WavelengthFileArg());
    if (pFilename == NULL)

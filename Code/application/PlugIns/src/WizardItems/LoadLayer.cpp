@@ -52,8 +52,8 @@ bool LoadLayer::getInputSpecification(PlugInArgList*& pArgList)
    if (mbInteractive)
    {
       VERIFY(DesktopItems::getInputSpecification(pArgList) && (pArgList != NULL));
-      VERIFY(pArgList->addArg<Filename>("Filename", NULL));
-      VERIFY(pArgList->addArg<SpatialDataView>("View", NULL));
+      VERIFY(pArgList->addArg<Filename>("Filename", NULL, "Name of the file to be loaded."));
+      VERIFY(pArgList->addArg<SpatialDataView>("View", NULL, "View for the new layer to be added to."));
    }
 
    return true;
@@ -75,7 +75,7 @@ bool LoadLayer::getOutputSpecification(PlugInArgList*& pArgList)
       string modelType = getModelType(eType);
 
       // Add args
-      VERIFY(pArgList->addArg<string>("Layer Name", NULL));
+      VERIFY(pArgList->addArg<string>("Layer Name", NULL, "Name of the created layer."));
 
       if (!modelType.empty())
       {
@@ -84,6 +84,7 @@ bool LoadLayer::getOutputSpecification(PlugInArgList*& pArgList)
          pArg->setName("Layer Element");
          pArg->setType(modelType);
          pArg->setDefaultValue(NULL);
+         pArg->setDescription("Element created by the load operation.");
          pArgList->addArg(*pArg);
       }
    }

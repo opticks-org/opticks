@@ -71,6 +71,7 @@ bool ScriptPlugIn::getInputSpecification(PlugInArgList *&pArgList)
    p1->setName("ScriptPath");
    p1->setType("Filename");
    p1->setDefaultValue(NULL);
+   p1->setDescription("Filename of the script to be executed.");
    pArgList->addArg(*p1);
    return true;
 }
@@ -86,12 +87,14 @@ bool ScriptPlugIn::getOutputSpecification(PlugInArgList *&pArgList)
    p1->setName("ReturnPath");
    p1->setType("Filename");
    p1->setDefaultValue(NULL);
+   p1->setDescription("File where the results of the script will be stored.");
    pArgList->addArg(*p1);
    p1 = pPlugInManager->getPlugInArg();
    VERIFY(p1 != NULL);
    p1->setName("ReturnString");
    p1->setType("string");
    p1->setDefaultValue(NULL);
+   p1->setDescription("String containing the results of script execution.");
    pArgList->addArg(*p1);
    return true;
 }

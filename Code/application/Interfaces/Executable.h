@@ -37,6 +37,16 @@ public:
    static std::string ProgressArg() { return "Progress"; }
 
    /**
+    *  The description for a Progress argument.
+    *
+    *  This description can be used to populate the Description field for 
+    *  a plug-in's input argument list when attaching a Progress argument.
+    *
+    *  @see     ExecutableAgent::execute()
+    */
+   static std::string ProgressArgDescription() { return "Progress object for this plugin."; }
+
+   /**
     *  The name for a menu command argument.
     *
     *  Input arguments with this name will be automatically populated with the

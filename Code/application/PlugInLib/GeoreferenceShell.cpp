@@ -37,8 +37,9 @@ bool GeoreferenceShell::getInputSpecification(PlugInArgList*& pArgList)
    {
       pArgList = Service<PlugInManagerServices>()->getPlugInArgList();
       VERIFY(pArgList != NULL);
-      success = success && pArgList->addArg<RasterElement>(DataElementArg());
-      success = success && pArgList->addArg<Progress>(ProgressArg());
+      success = success && pArgList->addArg<RasterElement>(Executable::DataElementArg(), NULL, 
+         "Raster element on which georeferencing will be performed.");
+      success = success && pArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription());
    }
    else
    {

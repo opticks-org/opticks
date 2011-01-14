@@ -488,7 +488,7 @@ bool SioImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
    RasterElement* pRaster = NULL;
    if (pInArgList != NULL)
    {
-      pRaster = pInArgList->getPlugInArgValue<RasterElement>(ImportElementArg());
+      pRaster = pInArgList->getPlugInArgValue<RasterElement>(Importer::ImportElementArg());
    }
 
    if (pRaster != NULL)
@@ -595,7 +595,7 @@ bool SioImporter::ensureStatisticsReadProperly(Progress *pProgress, std::ostream
    isseas(getInputSpecification(pInList) != false, failure);
    isseas(getOutputSpecification(pOutList) != false, failure);
    PlugInArg* pRasterElementArg = NULL;
-   isseas(pInList->getArg(ImportElementArg(), pRasterElementArg) != false, failure);
+   isseas(pInList->getArg(Importer::ImportElementArg(), pRasterElementArg) != false, failure);
 
    string testFilePath = TestUtilities::getTestDataPath() + "tipjul5bands.sio";
 

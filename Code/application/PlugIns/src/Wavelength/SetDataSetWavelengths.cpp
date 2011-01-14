@@ -47,15 +47,15 @@ bool SetDataSetWavelengths::getInputSpecification(PlugInArgList*& pArgList)
    pArgList = pManager->getPlugInArgList();
    VERIFY(pArgList != NULL);
 
-   VERIFY(pArgList->addArg<Progress>(Executable::ProgressArg(), NULL));
-   VERIFY(pArgList->addArg<RasterElement>(Executable::DataElementArg(), NULL));
+   VERIFY(pArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription()));
+   VERIFY(pArgList->addArg<RasterElement>(Executable::DataElementArg(), NULL, "Element to set the wavelengths of."));
 
    if (isBatch() == false)
    {
-      VERIFY(pArgList->addArg<SpatialDataView>(Executable::ViewArg(), NULL));
+      VERIFY(pArgList->addArg<SpatialDataView>(Executable::ViewArg(), NULL, "View for the result of the operation."));
    }
 
-   VERIFY(pArgList->addArg<Wavelengths>(Wavelengths::WavelengthsArg()));
+   VERIFY(pArgList->addArg<Wavelengths>(Wavelengths::WavelengthsArg(), "Wavelengths to be set."));
    return true;
 }
 
@@ -75,12 +75,12 @@ bool SetDataSetWavelengths::execute(PlugInArgList* pInArgList, PlugInArgList* pO
    StepResource pStep(string("Execute ") + getName(), "app", "863CB0EE-5BC0-4A49-8FCB-FBC385F1AD2D");
 
    // Extract the input args
-   Progress* pProgress = pInArgList->getPlugInArgValue<Progress>(ProgressArg());
+   Progress* pProgress = pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
 
-   RasterElement* pDataset = pInArgList->getPlugInArgValue<RasterElement>(DataElementArg());
+   RasterElement* pDataset = pInArgList->getPlugInArgValue<RasterElement>(Executable::DataElementArg());
    if ((pDataset == NULL) && (isBatch() == false))
    {
-      SpatialDataView* pView = pInArgList->getPlugInArgValue<SpatialDataView>(ViewArg());
+      SpatialDataView* pView = pInArgList->getPlugInArgValue<SpatialDataView>(Executable::ViewArg());
       if (pView != NULL)
       {
          LayerList* pLayerList = pView->getLayerList();

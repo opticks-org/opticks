@@ -71,12 +71,14 @@ bool CreateFileDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    VERIFY(pArg != NULL);
    pArg->setName("Filename");                // Filename
    pArg->setType("Filename");
+   pArg->setDescription("Location on-disk for the file data.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
    VERIFY(pArg != NULL);
    pArg->setName("Data Set Location");       // Data set location
    pArg->setType("string");
+   pArg->setDescription("Location of the dataset within the file, if applicable.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -84,6 +86,7 @@ bool CreateFileDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("Endian");                  // Endian
    pArg->setType("EndianType");
    pArg->setDefaultValue(&mEndianType);
+   pArg->setDescription("Endian type for the data on-disk.");
    pArgList->addArg(*pArg);
 
    return true;
@@ -103,6 +106,7 @@ bool CreateFileDescriptor::getOutputSpecification(PlugInArgList*& pArgList)
    VERIFY(pArg != NULL);
    pArg->setName("File Descriptor");         // File descriptor
    pArg->setType("FileDescriptor");
+   pArg->setDescription("Resulting file descriptor.");
    pArgList->addArg(*pArg);
 
    return true;
@@ -300,114 +304,133 @@ bool CreateRasterFileDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    VERIFY(pArg != NULL);
    pArg->setName("Header Bytes");               // Header bytes
    pArg->setType("unsigned int");
+   pArg->setDescription("The number of bytes allocated for header information in the data set file.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
    VERIFY(pArg != NULL);
    pArg->setName("Trailer Bytes");              // Trailer bytes
    pArg->setType("unsigned int");
+   pArg->setDescription("The number of bytes allocated for trailer information in the data set file.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
    VERIFY(pArg != NULL);
    pArg->setName("Preline Bytes");              // Preline bytes
    pArg->setType("unsigned int");
+   pArg->setDescription("The number of bytes allocated preceding each line of data values in the data set file.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
    VERIFY(pArg != NULL);
    pArg->setName("Postline Bytes");             // Postline bytes
    pArg->setType("unsigned int");
+   pArg->setDescription("The number of bytes allocated following each line of data values in the data set file.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
    VERIFY(pArg != NULL);
    pArg->setName("Preband Bytes");              // Preband bytes
    pArg->setType("unsigned int");
+   pArg->setDescription("The number of bytes allocated preceding each band of data values in the data set file.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
    VERIFY(pArg != NULL);
    pArg->setName("Postband Bytes");             // Postband bytes
    pArg->setType("unsigned int");
+   pArg->setDescription("The number of bytes allocated following each band of data values in the data set file.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
    VERIFY(pArg != NULL);
    pArg->setName("Bits Per Element");           // Bits per element
    pArg->setType("unsigned int");
+   pArg->setDescription("Number of bits per element.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
    VERIFY(pArg != NULL);
    pArg->setName("Number of Rows");             // Number of rows
    pArg->setType("unsigned int");
+   pArg->setDescription("Number of rows for the descriptor.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
    VERIFY(pArg != NULL);
    pArg->setName("Number of Columns");          // Number of columns
    pArg->setType("unsigned int");
+   pArg->setDescription("Number of columns for the descriptor.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
    VERIFY(pArg != NULL);
    pArg->setName("Number of Bands");            // Number of bands
    pArg->setType("unsigned int");
+   pArg->setDescription("Number of bands for the descriptor.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
    VERIFY(pArg != NULL);
    pArg->setName("X Pixel Size");               // X pixel size
    pArg->setType("double");
+   pArg->setDescription("Size of each of the columns for the data set.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
    VERIFY(pArg != NULL);
    pArg->setName("Y Pixel Size");               // Y pixel size
    pArg->setType("double");
+   pArg->setDescription("Size of each of the rows for the data set.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
    VERIFY(pArg != NULL);
    pArg->setName("Units Name");                 // Units name
    pArg->setType("string");
+   pArg->setDescription("Name for the units used in the data set.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
    VERIFY(pArg != NULL);
    pArg->setName("Units Type");                 // Units type
    pArg->setType("UnitType");
+   pArg->setDescription("Type of units used in the data set.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
    VERIFY(pArg != NULL);
    pArg->setName("Units Scale Factor");         // Units scale factor
    pArg->setType("double");
+   pArg->setDescription("Scale factor for the data set's units.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
    VERIFY(pArg != NULL);
    pArg->setName("Units Range Minimum");        // Units range min
    pArg->setType("double");
+   pArg->setDescription("Minimum range for the units.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
    VERIFY(pArg != NULL);
    pArg->setName("Units Range Maximum");        // Units range max
    pArg->setType("double");
+   pArg->setDescription("Maximum range for the units.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
    VERIFY(pArg != NULL);
    pArg->setName("Interleave Format");          // Interleave format
    pArg->setType("InterleaveFormatType");
+   pArg->setDescription("Interleaving format for the data set.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
    VERIFY(pArg != NULL);
    pArg->setName("Band Files");                 // Band files
    pArg->setType("vector<Filename>");
+   pArg->setDescription("The filenames for each band of data of a BSQ multiple-file data set.");
    pArgList->addArg(*pArg);
 
 
@@ -428,6 +451,7 @@ bool CreateRasterFileDescriptor::getOutputSpecification(PlugInArgList*& pArgList
    VERIFY(pArg != NULL);
    pArg->setName("File Descriptor");            // File descriptor
    pArg->setType("RasterFileDescriptor");
+   pArg->setDescription("Resulting raster file descriptor.");
    pArgList->addArg(*pArg);
 
    return true;

@@ -42,8 +42,8 @@ IceRasterElementExporter::~IceRasterElementExporter()
 bool IceRasterElementExporter::getInputSpecification(PlugInArgList*& pArgList)
 {
    DO_IF(IceExporterShell::getInputSpecification(pArgList) == false, return false);
-   VERIFY(pArgList->addArg<RasterElement>(ExportItemArg()));
-   VERIFY(pArgList->addArg<RasterFileDescriptor>(ExportDescriptorArg()));
+   VERIFY(pArgList->addArg<RasterElement>(Exporter::ExportItemArg(), "Element to be exported."));
+   VERIFY(pArgList->addArg<RasterFileDescriptor>(Exporter::ExportDescriptorArg(), "File descriptor for the element to be exported."));
    return true;
 }
 
@@ -51,10 +51,10 @@ void IceRasterElementExporter::parseInputArgs(PlugInArgList* pInArgList)
 {
    IceExporterShell::parseInputArgs(pInArgList);
 
-   mpCube = pInArgList->getPlugInArgValue<RasterElement>(ExportItemArg());
+   mpCube = pInArgList->getPlugInArgValue<RasterElement>(Exporter::ExportItemArg());
    ICEVERIFY_MSG(mpCube != NULL, "No cube to export.");
 
-   mpOutputDescriptor = pInArgList->getPlugInArgValue<RasterFileDescriptor>(ExportDescriptorArg());
+   mpOutputDescriptor = pInArgList->getPlugInArgValue<RasterFileDescriptor>(Exporter::ExportDescriptorArg());
    ICEVERIFY_MSG(mpOutputDescriptor != NULL, "No output file descriptor provided.");
 }
 

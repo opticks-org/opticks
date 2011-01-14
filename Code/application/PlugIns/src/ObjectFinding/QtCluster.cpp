@@ -77,15 +77,15 @@ QtCluster::~QtCluster()
 bool QtCluster::getInputSpecification(PlugInArgList*& pInArgList)
 {
    VERIFY(pInArgList = Service<PlugInManagerServices>()->getPlugInArgList());
-   VERIFY(pInArgList->addArg<Progress>(ProgressArg(), NULL));
+   VERIFY(pInArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription()));
    if (isBatch())
    {
-      VERIFY(pInArgList->addArg<AoiElement>(DataElementArg()));
+      VERIFY(pInArgList->addArg<AoiElement>(Executable::DataElementArg(), "AOI element to perform clustering over."));
    }
    else
    {
-      VERIFY(pInArgList->addArg<AoiLayer>(LayerArg()));
-      VERIFY(pInArgList->addArg<SpatialDataView>(ViewArg()));
+      VERIFY(pInArgList->addArg<AoiLayer>(Executable::LayerArg(), "AOI layer to perform clustering over."));
+      VERIFY(pInArgList->addArg<SpatialDataView>(Executable::ViewArg(), "View containing the AOI to perform clustering over."));
    }
 #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Might be useful to allow real-world cluster " \
                                                             "sizes. (feet, meters, DMS, etc.) (tclarke)")
@@ -114,10 +114,10 @@ bool QtCluster::getInputSpecification(PlugInArgList*& pInArgList)
 bool QtCluster::getOutputSpecification(PlugInArgList*& pOutArgList)
 {
    VERIFY(pOutArgList = Service<PlugInManagerServices>()->getPlugInArgList());
-   VERIFY(pOutArgList->addArg<DataElement>("Result Element"));
+   VERIFY(pOutArgList->addArg<DataElement>("Result Element", "Data element resulting from the clustering operation."));
    if (!isBatch())
    {
-      VERIFY(pOutArgList->addArg<Layer>("Result Layer"));
+      VERIFY(pOutArgList->addArg<Layer>("Result Layer", "Layer where the result of the clustering operation is placed."));
    }
    return true;
 }
@@ -128,7 +128,7 @@ bool QtCluster::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
    {
       return false;
    }
-   ProgressTracker progress(pInArgList->getPlugInArgValue<Progress>(ProgressArg()),
+   ProgressTracker progress(pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg()),
       "Clustering data", "app", "{9E15CC5E-C286-4d23-8E14-644958AAC2EC}");
 
    AoiElement* pAoiElement = NULL;
@@ -137,18 +137,18 @@ bool QtCluster::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
    BitMaskIterator* pOrigMaskIt = NULL;
    if (isBatch())
    {
-      pAoiElement = pInArgList->getPlugInArgValue<AoiElement>(DataElementArg());
+      pAoiElement = pInArgList->getPlugInArgValue<AoiElement>(Executable::DataElementArg());
    }
    else
    {
-      pView = pInArgList->getPlugInArgValue<SpatialDataView>(ViewArg());
+      pView = pInArgList->getPlugInArgValue<SpatialDataView>(Executable::ViewArg());
       if (pView == NULL)
       {
          progress.report("Invalid view", 0, ERRORS, true);
          return false;
       }
       pParentElement = pView->getLayerList()->getPrimaryRasterElement();
-      AoiLayer* pAoi = pInArgList->getPlugInArgValue<AoiLayer>(LayerArg());
+      AoiLayer* pAoi = pInArgList->getPlugInArgValue<AoiLayer>(Executable::LayerArg());
       if (pAoi == NULL) // try the active layer
       {
          pAoi = dynamic_cast<AoiLayer*>(pView->getActiveLayer());

@@ -54,6 +54,7 @@ bool TemplateUtilities::getInputSpecification(PlugInArgList*& pArgList)
       pArg->setName("Product Name");
       pArg->setType("string");
       pArg->setDefaultValue(NULL);
+      pArg->setDescription("String name for the product.");
       pArgList->addArg(*pArg);
 
       pArg = pPlugInManager->getPlugInArg();
@@ -61,6 +62,7 @@ bool TemplateUtilities::getInputSpecification(PlugInArgList*& pArgList)
       pArg->setName("Template File");
       pArg->setType("Filename");
       pArg->setDefaultValue(NULL);
+      pArg->setDescription("On-disk filename for the product template.");
       pArgList->addArg(*pArg);
    }
 

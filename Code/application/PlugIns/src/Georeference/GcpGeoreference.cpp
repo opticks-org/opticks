@@ -82,8 +82,8 @@ bool GcpGeoreference::setInteractive()
 bool GcpGeoreference::getInputSpecification(PlugInArgList*& pArgList)
 {
    bool success = GeoreferenceShell::getInputSpecification(pArgList);
-   success = success && pArgList->addArg<GcpList>(Georeference::GcpListArg(), string("Corner Coordinates"));
-   success = success && pArgList->addArg<int>("Order", 1);
+   success = success && pArgList->addArg<GcpList>(Georeference::GcpListArg(), NULL, "Corner coordinates.");
+   success = success && pArgList->addArg<int>("Order", 1, "Polynomial order for the georeferencing calculations.");
    return success;
 }
 
@@ -91,7 +91,7 @@ bool GcpGeoreference::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
 {
    StepResource pStep("Run GCP Georeference", "app", "296120A0-1CD5-467E-A501-934BCA7775EA");
 
-   Progress* pProgress = pInArgList->getPlugInArgValue<Progress>(ProgressArg());
+   Progress* pProgress = pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
    mpProgress = pProgress;
 
    FAIL_IF(!isBatch(), "Interactive mode is not supported.", return false);
@@ -99,7 +99,7 @@ bool GcpGeoreference::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
    int numPoints;
    PlugInArg* pArg = NULL;
 
-   mpRaster = pInArgList->getPlugInArgValue<RasterElement>(DataElementArg());
+   mpRaster = pInArgList->getPlugInArgValue<RasterElement>(Executable::DataElementArg());
    FAIL_IF(mpRaster == NULL, "Unable to find raster element input", return false);
 
    GcpList* pGcpList = NULL;

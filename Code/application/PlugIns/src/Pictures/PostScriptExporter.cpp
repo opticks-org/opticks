@@ -47,9 +47,9 @@ PostScriptExporter::~PostScriptExporter()
 bool PostScriptExporter::getInputSpecification(PlugInArgList *&pArgList)
 {
    bool success = ExporterShell::getInputSpecification(pArgList);
-   success = success && pArgList->addArg<View>(ExportItemArg());
-   success = success && pArgList->addArg<unsigned int>("Output Width");
-   success = success && pArgList->addArg<unsigned int>("Output Height");
+   success = success && pArgList->addArg<View>(Exporter::ExportItemArg(), "View to be exported.");
+   success = success && pArgList->addArg<unsigned int>("Output Width", "Width of the exported image.");
+   success = success && pArgList->addArg<unsigned int>("Output Height", "Height of the exported image.");
    return success;
 }
 
@@ -57,8 +57,8 @@ bool PostScriptExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutA
 {
    StepResource pStep("Execute PostScript Exporter", "app", "5BE7D170-BFB5-43C9-A980-06C8C376D558");
 
-   Progress* pProgress = pInArgList->getPlugInArgValue<Progress>(ProgressArg());
-   View* pView = pInArgList->getPlugInArgValue<View>(ExportItemArg());
+   Progress* pProgress = pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
+   View* pView = pInArgList->getPlugInArgValue<View>(Exporter::ExportItemArg());
    if (pView == NULL)
    {
       string msg = "No view specified.";
@@ -74,7 +74,7 @@ bool PostScriptExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutA
    string viewName = pView->getName();
    pStep->addProperty("View Name", viewName);
 
-   FileDescriptor* pFileDescriptor = pInArgList->getPlugInArgValue<FileDescriptor>(ExportDescriptorArg());
+   FileDescriptor* pFileDescriptor = pInArgList->getPlugInArgValue<FileDescriptor>(Exporter::ExportDescriptorArg());
    if (pFileDescriptor != NULL)
    {
       outPath = pFileDescriptor->getFilename().getFullPathAndName();

@@ -85,7 +85,7 @@ QWidget* ResultsExporter::getExportOptionsWidget(const PlugInArgList *pInArgList
    const DataDescriptor* pDescriptor = NULL;
    if (pInArgList != NULL)
    {
-      RasterElement* pElement = pInArgList->getPlugInArgValue<RasterElement>(ExportItemArg());
+      RasterElement* pElement = pInArgList->getPlugInArgValue<RasterElement>(Exporter::ExportItemArg());
       if (pElement != NULL)
       {
          pDescriptor = pElement->getDataDescriptor();
@@ -183,23 +183,26 @@ bool ResultsExporter::getInputSpecification(PlugInArgList*& pArgList)
 
    PlugInArg* pArg = mpPlugInManager->getPlugInArg();
    VERIFY(pArg != NULL);
-   pArg->setName(ProgressArg());
+   pArg->setName(Executable::ProgressArg());
    pArg->setType("Progress");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription(Executable::ProgressArgDescription());
    pArgList->addArg(*pArg);
 
    pArg = mpPlugInManager->getPlugInArg();
    VERIFY(pArg != NULL);
-   pArg->setName(ExportItemArg());
+   pArg->setName(Exporter::ExportItemArg());
    pArg->setType("RasterElement");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Element to be exported.");
    pArgList->addArg(*pArg);
 
    pArg = mpPlugInManager->getPlugInArg();
    VERIFY(pArg != NULL);
-   pArg->setName(ExportDescriptorArg());
+   pArg->setName(Exporter::ExportDescriptorArg());
    pArg->setType("RasterFileDescriptor");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("File descriptor for the output file.");
    pArgList->addArg(*pArg);
 
    if (!mbInteractive)
@@ -209,6 +212,7 @@ bool ResultsExporter::getInputSpecification(PlugInArgList*& pArgList)
       pArg->setName("Pass Area");
       pArg->setType("PassArea");
       pArg->setDefaultValue(&mPassArea);
+      pArg->setDescription("The area of the threshold from which results should be exported.");
       pArgList->addArg(*pArg);
 
       pArg = mpPlugInManager->getPlugInArg();
@@ -216,6 +220,7 @@ bool ResultsExporter::getInputSpecification(PlugInArgList*& pArgList)
       pArg->setName("First Threshold");
       pArg->setType("double");
       pArg->setDefaultValue(&mFirstThreshold);
+      pArg->setDescription("The lower boundary of the threshold.");
       pArgList->addArg(*pArg);
 
       pArg = mpPlugInManager->getPlugInArg();
@@ -223,6 +228,7 @@ bool ResultsExporter::getInputSpecification(PlugInArgList*& pArgList)
       pArg->setName("Second Threshold");
       pArg->setType("double");
       pArg->setDefaultValue(&mSecondThreshold);
+      pArg->setDescription("The upper boundary of the threshold.");
       pArgList->addArg(*pArg);
 
       pArg = mpPlugInManager->getPlugInArg();
@@ -230,6 +236,7 @@ bool ResultsExporter::getInputSpecification(PlugInArgList*& pArgList)
       pArg->setName("Geocoordinate Type");
       pArg->setType("GeocoordType");
       pArg->setDefaultValue(&mGeocoordType);
+      pArg->setDescription("Coordinate type for georeferenced files.");
       pArgList->addArg(*pArg);
 
       pArg = mpPlugInManager->getPlugInArg();
@@ -237,6 +244,7 @@ bool ResultsExporter::getInputSpecification(PlugInArgList*& pArgList)
       pArg->setName("Metadata");
       pArg->setType("bool");
       pArg->setDefaultValue(&mbMetadata);
+      pArg->setDescription("Whether associated metadata should be exported.");
       pArgList->addArg(*pArg);
 
       pArg = mpPlugInManager->getPlugInArg();
@@ -244,6 +252,7 @@ bool ResultsExporter::getInputSpecification(PlugInArgList*& pArgList)
       pArg->setName("Append To File");
       pArg->setType("bool");
       pArg->setDefaultValue(&mbAppendFile);
+      pArg->setDescription("Whether to append to an existing file or create a new file for the results.");
       pArgList->addArg(*pArg);
    }
 
@@ -513,13 +522,13 @@ bool ResultsExporter::extractInputArgs(PlugInArgList* pArgList)
    PlugInArg* pArg = NULL;
 
    // Progress
-   if (pArgList->getArg(ProgressArg(), pArg) && (pArg != NULL))
+   if (pArgList->getArg(Executable::ProgressArg(), pArg) && (pArg != NULL))
    {
       mpProgress = pArg->getPlugInArgValue<Progress>();
    }
 
    // Results matrix
-   if (pArgList->getArg(ExportItemArg(), pArg) && (pArg != NULL))
+   if (pArgList->getArg(Exporter::ExportItemArg(), pArg) && (pArg != NULL))
    {
       mpResults = pArg->getPlugInArgValue<RasterElement>();
    }
@@ -548,7 +557,7 @@ bool ResultsExporter::extractInputArgs(PlugInArgList* pArgList)
    }
 
    // File descriptor
-   if (pArgList->getArg(ExportDescriptorArg(), pArg) && (pArg != NULL))
+   if (pArgList->getArg(Exporter::ExportDescriptorArg(), pArg) && (pArg != NULL))
    {
       mpFileDescriptor = pArg->getPlugInArgValue<RasterFileDescriptor>();
    }
@@ -585,7 +594,7 @@ bool ResultsExporter::extractInputArgs(PlugInArgList* pArgList)
          PlugInArgList* pInArgList = NULL;
          if (getInputSpecification(pInArgList) && (pInArgList != NULL))
          {
-            pInArgList->setPlugInArgValue(ExportItemArg(), mpResults);
+            pInArgList->setPlugInArgValue(Exporter::ExportItemArg(), mpResults);
          }
          getExportOptionsWidget(pInArgList);
       }

@@ -92,6 +92,7 @@ bool EditDataDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("Data Descriptor");                  // Data descriptor
    pArg->setType("DataDescriptor");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Data descriptor to be modified.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -99,6 +100,7 @@ bool EditDataDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("File Descriptor");                  // File descriptor
    pArg->setType("FileDescriptor");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("New file descriptor.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -106,6 +108,7 @@ bool EditDataDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("Processing Location");              // Processing location
    pArg->setType("ProcessingLocation");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("New processing location.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -113,6 +116,7 @@ bool EditDataDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("Data Type");                        // Data type
    pArg->setType("EncodingType");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("New encoding type.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -120,6 +124,7 @@ bool EditDataDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("Interleave Format");                // Interleave format
    pArg->setType("InterleaveFormatType");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("New interleave format.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -127,6 +132,7 @@ bool EditDataDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("Bad Values");                       // Bad values
    pArg->setType("vector<int>");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Modify the bad values in the data descriptor.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -134,6 +140,7 @@ bool EditDataDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("Start Row");                        // Start row
    pArg->setType("unsigned int");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Modify the start row for the data descriptor.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -141,6 +148,7 @@ bool EditDataDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("End Row");                          // End row
    pArg->setType("unsigned int");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Modify the end row for the data descriptor.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -148,6 +156,7 @@ bool EditDataDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("Row Skip Factor");                  // Row skip factor
    pArg->setType("unsigned int");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Modify the row skip factor for the data descriptor.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -155,6 +164,7 @@ bool EditDataDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("Start Column");                     // Start column
    pArg->setType("unsigned int");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Modify the start column for the data descriptor.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -162,6 +172,7 @@ bool EditDataDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("End Column");                       // End column
    pArg->setType("unsigned int");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Modify the end column for the data descriptor.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -169,6 +180,7 @@ bool EditDataDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("Column Skip Factor");               // Column skip factor
    pArg->setType("unsigned int");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Modify the column skip factor for the data descriptor.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -176,6 +188,7 @@ bool EditDataDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("Start Band");                       // Start band
    pArg->setType("unsigned int");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Modify the start band for the data descriptor.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -183,6 +196,7 @@ bool EditDataDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("End Band");                         // End band
    pArg->setType("unsigned int");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Modify the ending band for the data descriptor.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -190,6 +204,7 @@ bool EditDataDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("Band Skip Factor");                 // Band skip factor
    pArg->setType("unsigned int");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Modify the band skip factor for the data descriptor.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -197,6 +212,7 @@ bool EditDataDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("Bad Bands File");                   // Bad bands file
    pArg->setType("Filename");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Modify the file containing bad bands for the data descriptor.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -204,6 +220,7 @@ bool EditDataDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("X Pixel Size");                     // X pixel size
    pArg->setType("double");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Modify the column size in pixels.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -211,6 +228,7 @@ bool EditDataDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("Y Pixel Size");                     // Y pixel size
    pArg->setType("double");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Modify the row size in pixels.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -218,6 +236,7 @@ bool EditDataDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("Units Name");                       // Units name
    pArg->setType("string");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Modify the name used for units.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -225,6 +244,7 @@ bool EditDataDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("Units Type");                       // Units type
    pArg->setType("UnitType");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Modify the type of units used.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -232,6 +252,7 @@ bool EditDataDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("Units Scale Factor");               // Units scale factor
    pArg->setType("double");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Modify the scale factor for the units in the descriptor.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -239,6 +260,7 @@ bool EditDataDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("Units Range Minimum");              // Units range min
    pArg->setType("double");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Modify the minimum units range.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -246,6 +268,7 @@ bool EditDataDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("Units Range Maximum");              // Units range max
    pArg->setType("double");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Modify the maximum units range.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -253,6 +276,7 @@ bool EditDataDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("Display Mode");                     // Display mode
    pArg->setType("DisplayMode");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Modify the display mode to either RGB or grayscale.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -260,6 +284,7 @@ bool EditDataDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("Gray Display Band");                // Gray band
    pArg->setType("unsigned int");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Modify which band is used as the gray channel.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -267,6 +292,7 @@ bool EditDataDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("Red Display Band");                 // Red band
    pArg->setType("unsigned int");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Modify which band is used as the red channel.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -274,6 +300,7 @@ bool EditDataDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("Green Display Band");               // Green band
    pArg->setType("unsigned int");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Modify which band is used as the green channel.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -281,6 +308,7 @@ bool EditDataDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("Blue Display Band");                // Blue band
    pArg->setType("unsigned int");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Modify which band is used as the blue channel.");
    pArgList->addArg(*pArg);
 
    return true;

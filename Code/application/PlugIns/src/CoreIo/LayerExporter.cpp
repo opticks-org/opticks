@@ -90,21 +90,24 @@ bool LayerExporter::getInputSpecification(PlugInArgList*& pInArgList)
 
    PlugInArg* pArg = NULL;
    VERIFY((pArg = mpPlugInManager->getPlugInArg()) != NULL);
-   pArg->setName(ProgressArg());
+   pArg->setName(Executable::ProgressArg());
    pArg->setType("Progress");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription(Executable::ProgressArgDescription());
    pInArgList->addArg(*pArg);
 
    VERIFY((pArg = mpPlugInManager->getPlugInArg()) != NULL);
-   pArg->setName(ExportDescriptorArg());
+   pArg->setName(Exporter::ExportDescriptorArg());
    pArg->setType("FileDescriptor");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("File descriptor for the output file.");
    pInArgList->addArg(*pArg);
 
    VERIFY((pArg = mpPlugInManager->getPlugInArg()) != NULL);
-   pArg->setName(ExportItemArg());
+   pArg->setName(Exporter::ExportItemArg());
    pArg->setType(mLayerSubclass);
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Layer to export.");
    pInArgList->addArg(*pArg);
 
    return true;
@@ -128,10 +131,10 @@ bool LayerExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
    { // scope the MessageResource
       MessageResource pMsg("Input arguments", "app", "F81DBC70-FBE6-4D08-8F2F-96E5296DDBCC");
 
-      pProgress = pInArgList->getPlugInArgValue<Progress>(ProgressArg());
+      pProgress = pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
       pMsg->addBooleanProperty("Progress Present", (pProgress != NULL));
 
-      pFileDescriptor = pInArgList->getPlugInArgValue<FileDescriptor>(ExportDescriptorArg());
+      pFileDescriptor = pInArgList->getPlugInArgValue<FileDescriptor>(Exporter::ExportDescriptorArg());
       if (pFileDescriptor == NULL)
       {
          if (pProgress != NULL)
@@ -143,7 +146,7 @@ bool LayerExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
       }
       pMsg->addProperty("Destination", pFileDescriptor->getFilename());
 
-      pLayer = pInArgList->getPlugInArgValueUnsafe<Layer>(ExportItemArg());
+      pLayer = pInArgList->getPlugInArgValueUnsafe<Layer>(Exporter::ExportItemArg());
       if (pLayer == NULL)
       {
          if (pProgress != NULL)

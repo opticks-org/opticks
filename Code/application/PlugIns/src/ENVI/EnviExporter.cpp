@@ -151,10 +151,11 @@ bool EnviExporter::getInputSpecification(PlugInArgList*& pArgList)
    pArgList = pPlugInManager->getPlugInArgList();
    VERIFY(pArgList != NULL);
 
-   VERIFY(pArgList->addArg<Progress>(Executable::ProgressArg(), NULL));
-   VERIFY(pArgList->addArg<RasterElement>(Exporter::ExportItemArg()));
-   VERIFY(pArgList->addArg<RasterFileDescriptor>(Exporter::ExportDescriptorArg()));
-   VERIFY(pArgList->addArg<bool>("Export Header and Data", mExportDataFile));
+   VERIFY(pArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription()));
+   VERIFY(pArgList->addArg<RasterElement>(Exporter::ExportItemArg(), "Element to be exported."));
+   VERIFY(pArgList->addArg<RasterFileDescriptor>(Exporter::ExportDescriptorArg(), "File descriptor for the exported element."));
+   VERIFY(pArgList->addArg<bool>("Export Header and Data", mExportDataFile, "Export the original file header and data.  If false, "
+      "a new ENVI-compatible header will be generated."));
 
    return true;
 }

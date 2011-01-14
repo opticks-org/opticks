@@ -94,10 +94,10 @@ bool GeoTIFFExporter::execute(PlugInArgList* pInParam, PlugInArgList* pOutParam)
    mpStep = pStep.get();
 
    // Progress
-   mpProgress = pInParam->getPlugInArgValue<Progress>(ProgressArg());
+   mpProgress = pInParam->getPlugInArgValue<Progress>(Executable::ProgressArg());
 
    // Sensor data
-   mpRaster = pInParam->getPlugInArgValue<RasterElement>(ExportItemArg());
+   mpRaster = pInParam->getPlugInArgValue<RasterElement>(Exporter::ExportDescriptorArg());
    if (mpRaster == NULL)
    {
       mMessage = "The raster element input value is invalid!";
@@ -138,7 +138,7 @@ bool GeoTIFFExporter::execute(PlugInArgList* pInParam, PlugInArgList* pOutParam)
    pDescriptor->addToMessageLog(pStep.get());
 
    // File descriptor
-   mpFileDescriptor = pInParam->getPlugInArgValue<RasterFileDescriptor>(ExportDescriptorArg());
+   mpFileDescriptor = pInParam->getPlugInArgValue<RasterFileDescriptor>(Exporter::ExportDescriptorArg());
    if (mpFileDescriptor == NULL)
    {
       mMessage = "The file descriptor input value is invalid!";
@@ -222,12 +222,12 @@ bool GeoTIFFExporter::getInputSpecification(PlugInArgList*& pArgList)
    pArgList = pPlugInManager->getPlugInArgList();
    VERIFY(pArgList != NULL);
 
-   VERIFY(pArgList->addArg<Progress>(ProgressArg(), NULL));
-   VERIFY(pArgList->addArg<RasterElement>(ExportItemArg(), NULL));
-   VERIFY(pArgList->addArg<RasterFileDescriptor>(ExportDescriptorArg(), NULL));
+   VERIFY(pArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription()));
+   VERIFY(pArgList->addArg<RasterElement>(Exporter::ExportItemArg(), NULL, "Data element to be exported."));
+   VERIFY(pArgList->addArg<RasterFileDescriptor>(Exporter::ExportDescriptorArg(), NULL, "File descriptor for the output file."));
    if (isBatch() == true)
    {
-      VERIFY(pArgList->addArg<unsigned int>("Rows Per Strip", mRowsPerStrip));
+      VERIFY(pArgList->addArg<unsigned int>("Rows Per Strip", mRowsPerStrip, "Rows per strip for the TIFF file."));
    }
 
    return true;

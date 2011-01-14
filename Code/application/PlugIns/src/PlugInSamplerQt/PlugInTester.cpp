@@ -46,9 +46,10 @@ bool PlugInTester::getInputSpecification(PlugInArgList *&pArgList)
       PlugInArg* pArg = mpPlugMgr->getPlugInArg();
       if (pArg != NULL)
       {
-         pArg->setName(ProgressArg());
+         pArg->setName(Executable::ProgressArg());
          pArg->setType("Progress");
          pArg->setDefaultValue(NULL);
+         pArg->setDescription(Executable::ProgressArgDescription());
          bSuccess = pArgList->addArg(*pArg);
       }
    }
@@ -67,7 +68,7 @@ bool PlugInTester::execute(PlugInArgList* pInArgs, PlugInArgList* pOutArgs)
 
    Progress* pProgress = NULL;
    PlugInArg* pArg = NULL;
-   if (pInArgs != NULL && pInArgs->getArg(ProgressArg(), pArg) && pArg != NULL)
+   if (pInArgs != NULL && pInArgs->getArg(Executable::ProgressArg(), pArg) && pArg != NULL)
    {
       pProgress = reinterpret_cast<Progress*>(pArg->getActualValue());
    }

@@ -46,8 +46,8 @@ PicturesExporter::~PicturesExporter()
 bool PicturesExporter::getInputSpecification(PlugInArgList*& pArgList)
 {
    bool success = ExporterShell::getInputSpecification(pArgList);
-   success = success && pArgList->addArg<unsigned int>("Output Width");
-   success = success && pArgList->addArg<unsigned int>("Output Height");
+   success = success && pArgList->addArg<unsigned int>("Output Width", "Width of the exported image.");
+   success = success && pArgList->addArg<unsigned int>("Output Height", "Height of the exported image.");
    return success;
 }
 
@@ -176,14 +176,14 @@ bool PicturesExporter::extractInputArgs(const PlugInArgList* pInArgList)
    PlugInArg* pArg = NULL;
 
    // Progress
-   if (pInArgList->getArg(ProgressArg(), pArg) && (pArg != NULL))
+   if (pInArgList->getArg(Executable::ProgressArg(), pArg) && (pArg != NULL))
    {
       mpProgress = pArg->getPlugInArgValue<Progress>();
    }
 
    // File Descriptor
    mOutPath.erase();
-   FileDescriptor* pFileDescriptor = pInArgList->getPlugInArgValue<FileDescriptor>(ExportDescriptorArg());
+   FileDescriptor* pFileDescriptor = pInArgList->getPlugInArgValue<FileDescriptor>(Exporter::ExportDescriptorArg());
    if (pFileDescriptor != NULL)
    {
       mOutPath = pFileDescriptor->getFilename().getFullPathAndName();

@@ -73,8 +73,8 @@ bool ShapeFileExporter::getInputSpecification(PlugInArgList*& pArgList)
    pArgList = mpPlugInManager->getPlugInArgList();
    VERIFY(pArgList != NULL);
 
-   VERIFY(pArgList->addArg<Progress>(Executable::ProgressArg(), NULL));
-   VERIFY(pArgList->addArg<FileDescriptor>(Exporter::ExportDescriptorArg(), NULL));
+   VERIFY(pArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription()));
+   VERIFY(pArgList->addArg<FileDescriptor>(Exporter::ExportDescriptorArg(), NULL, "File descriptor for the output file."));
 
    if (isBatch())
    {

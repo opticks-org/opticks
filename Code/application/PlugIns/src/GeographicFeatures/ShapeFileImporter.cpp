@@ -169,9 +169,9 @@ bool ShapeFileImporter::getInputSpecification(PlugInArgList*& pArgList)
    pArgList = pPlugInManager->getPlugInArgList();
    VERIFY(pArgList != NULL);
 
-   pArgList->addArg<Progress>(ProgressArg(), NULL);
-   pArgList->addArg<AnnotationElement>(ImportElementArg(), NULL);
-   pArgList->addArg<SpatialDataView>(ViewArg(), NULL);
+   pArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription());
+   pArgList->addArg<AnnotationElement>(Importer::ImportElementArg(), NULL, "Shapefile to be imported.");
+   pArgList->addArg<SpatialDataView>(Executable::ViewArg(), NULL, "View in which the imported shapefile will be inserted.");
 
    return true;
 }
@@ -191,17 +191,17 @@ bool ShapeFileImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
    mpStep = pStep.get();
    pStep->addProperty("name", getName());
 
-   mpProgress = pInArgList->getPlugInArgValue<Progress>(ProgressArg());
+   mpProgress = pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
    Progress* pProgress = mpProgress;
 
    // interactive
 
-   SpatialDataView* pView = pInArgList->getPlugInArgValue<SpatialDataView>(ViewArg());
+   SpatialDataView* pView = pInArgList->getPlugInArgValue<SpatialDataView>(Executable::ViewArg());
    RasterElement* pRaster = NULL;
 
    FAIL_IF(pView == NULL, "Could not find view to insert into.", return false);
 
-   AnnotationElement* pAnno = pInArgList->getPlugInArgValue<AnnotationElement>(ImportElementArg());
+   AnnotationElement* pAnno = pInArgList->getPlugInArgValue<AnnotationElement>(Importer::ImportElementArg());
    FAIL_IF(pAnno == NULL, "Could not find created element.", return false);
 
    AnnotationLayer* pAnnotationLayer = NULL;

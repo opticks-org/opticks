@@ -73,7 +73,7 @@ bool SampleGeoref::getInputSpecification(PlugInArgList*& pArgList)
    success = success && pArgList->addArg<bool>("Extrapolate", false);
    success = success && pArgList->addArg<bool>("Animated", false);
    success = success && pArgList->addArg<bool>("Rotate", false);
-   success = success && pArgList->addArg<View>(ViewArg());
+   success = success && pArgList->addArg<View>(Executable::ViewArg());
    return success;
 }
 
@@ -83,7 +83,7 @@ bool SampleGeoref::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
    // In this case, get our X and Y factors.
 
    StepResource pStep("Run Sample Georef", "app", "CFCB8AA9-D504-42e9-86F0-547DF9B4798A");
-   Progress* pProgress = pInArgList->getPlugInArgValue<Progress>(ProgressArg());
+   Progress* pProgress = pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
 
    FAIL_IF(!isBatch(), "Interactive mode is not supported.", return false);
 
@@ -97,8 +97,8 @@ bool SampleGeoref::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
    pInArgList->getPlugInArgValue("Animated", animated);
    pInArgList->getPlugInArgValue("Rotate", mRotate);
 
-   View* pView = pInArgList->getPlugInArgValue<View>(ViewArg());
-   mpRaster = pInArgList->getPlugInArgValue<RasterElement>(DataElementArg());
+   View* pView = pInArgList->getPlugInArgValue<View>(Executable::ViewArg());
+   mpRaster = pInArgList->getPlugInArgValue<RasterElement>(Executable::DataElementArg());
    FAIL_IF(mpRaster == NULL, "Could not find raster element", return false);
 
    if (mpGui != NULL)

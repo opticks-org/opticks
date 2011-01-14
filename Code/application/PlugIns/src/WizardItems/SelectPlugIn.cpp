@@ -59,6 +59,7 @@ bool SelectPlugIn::getInputSpecification(PlugInArgList*& pArgList)
       pArg->setName("Plug-In Type");
       pArg->setType("string");
       pArg->setDefaultValue(NULL);
+      pArg->setDescription("The Type of the plugin you would like to select.");
       pArgList->addArg(*pArg);
 
       pArg = pPlugInManager->getPlugInArg();
@@ -66,6 +67,7 @@ bool SelectPlugIn::getInputSpecification(PlugInArgList*& pArgList)
       pArg->setName("Plug-In Subtype");
       pArg->setType("string");
       pArg->setDefaultValue(NULL);
+      pArg->setDescription("The subtype of the plugin you would like to select, if applicable.");
       pArgList->addArg(*pArg);
 
       pArg = pPlugInManager->getPlugInArg();
@@ -73,6 +75,7 @@ bool SelectPlugIn::getInputSpecification(PlugInArgList*& pArgList)
       pArg->setName("Dialog Caption");
       pArg->setType("string");
       pArg->setDefaultValue(NULL);
+      pArg->setDescription("The caption for the Plugin Selection dialog box.");
       pArgList->addArg(*pArg);
    }
 
@@ -98,6 +101,7 @@ bool SelectPlugIn::getOutputSpecification(PlugInArgList*& pArgList)
       pArg->setName("Plug-In Name");
       pArg->setType("string");
       pArg->setDefaultValue(NULL);
+      pArg->setDescription("String name of the plugin selected.");
       pArgList->addArg(*pArg);
    }
 

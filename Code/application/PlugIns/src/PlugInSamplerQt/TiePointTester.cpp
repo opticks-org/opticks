@@ -66,8 +66,8 @@ bool TiePointTester::populateInteractiveInputArgList(PlugInArgList *pArgList)
 {
    VERIFY(pArgList != NULL);
 
-   VERIFY(pArgList->addArg<Progress>(ProgressArg(), NULL));
-   VERIFY(pArgList->addArg<RasterElement>(DataElementArg(), NULL));
+   VERIFY(pArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription()));
+   VERIFY(pArgList->addArg<RasterElement>(Executable::DataElementArg(), NULL, "Raster element with tie points to be tested."));
 
    return true;
 }
@@ -101,9 +101,9 @@ bool TiePointTester::parseInputArgList(PlugInArgList *pArgList)
 {
 
    VERIFY(pArgList != NULL);
-   mpProgress = pArgList->getPlugInArgValue<Progress>(ProgressArg());
+   mpProgress = pArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
 
-   RasterElement* pRasterElement = pArgList->getPlugInArgValue<RasterElement>(DataElementArg());
+   RasterElement* pRasterElement = pArgList->getPlugInArgValue<RasterElement>(Executable::DataElementArg());
    if (pRasterElement == NULL)
    {
       string msg = "Error Tester001: The raster element input value is invalid!";

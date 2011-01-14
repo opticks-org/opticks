@@ -108,9 +108,9 @@ bool WizardExecutor::getInputSpecification(PlugInArgList*& pArgList)
    pArgList = pPlugInManager->getPlugInArgList();
    VERIFY(pArgList != NULL);
 
-   VERIFY(pArgList->addArg<Progress>(Executable::ProgressArg(), NULL));
-   VERIFY(pArgList->addArg<WizardObject>("Wizard", NULL));
-   VERIFY(pArgList->addArg<Filename>("Filename", NULL));
+   VERIFY(pArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription()));
+   VERIFY(pArgList->addArg<WizardObject>("Wizard", NULL, "Wizard object."));
+   VERIFY(pArgList->addArg<Filename>("Filename", NULL, ".wiz file to be executed."));
 
    return true;
 }
@@ -336,7 +336,7 @@ bool WizardExecutor::extractInputArgs(PlugInArgList* pInArgList)
    PlugInArg* pArg = NULL;
 
    // Progress
-   if ((pInArgList->getArg(ProgressArg(), pArg) == true) && (pArg != NULL))
+   if ((pInArgList->getArg(Executable::ProgressArg(), pArg) == true) && (pArg != NULL))
    {
       mpProgress = pArg->getPlugInArgValue<Progress>();
    }

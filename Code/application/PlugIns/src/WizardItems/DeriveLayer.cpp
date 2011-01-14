@@ -137,7 +137,7 @@ bool DeriveLayer::extractInputArgs(PlugInArgList* pInArgList)
    {
       return false;
    }
-   if ((mpInputLayer = pInArgList->getPlugInArgValue<Layer>(LayerArg())) == NULL)
+   if ((mpInputLayer = pInArgList->getPlugInArgValue<Layer>(Executable::LayerArg())) == NULL)
    {
       reportError("Invalid input layer.", "{9089066f-08ea-492e-a555-43dd2f53ecbc}");
       return false;

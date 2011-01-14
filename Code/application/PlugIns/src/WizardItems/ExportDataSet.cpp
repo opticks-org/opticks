@@ -72,6 +72,7 @@ bool ExportDataSet::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("View");                          // View
    pArg->setType("View");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("View which the data to be exported belongs.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -79,6 +80,7 @@ bool ExportDataSet::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("Layer");                         // Layer
    pArg->setType("Layer");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Layer to be exported.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -86,18 +88,20 @@ bool ExportDataSet::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("Data Element");                  // Data element
    pArg->setType("DataElement");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Element from which the data will be exported.");
    pArgList->addArg(*pArg);
 
    if (mbInteractive == false)
    {
-      pArgList->addArg<unsigned int>("Output Width");
-      pArgList->addArg<unsigned int>("Output Height");
+      pArgList->addArg<unsigned int>("Output Width", "Width of the exported image.");
+      pArgList->addArg<unsigned int>("Output Height", "Height of the exported image.");
 
       pArg = pPlugInManager->getPlugInArg();
       VERIFY(pArg != NULL);
       pArg->setName("Filename");                   // Filename
       pArg->setType("Filename");
       pArg->setDefaultValue(NULL);
+      pArg->setDescription("Filename for the exported file.");
       pArgList->addArg(*pArg);
 
       pArg = pPlugInManager->getPlugInArg();
@@ -105,6 +109,7 @@ bool ExportDataSet::getInputSpecification(PlugInArgList*& pArgList)
       pArg->setName("File Descriptor");            // File descriptor
       pArg->setType("FileDescriptor");
       pArg->setDefaultValue(NULL);
+      pArg->setDescription("File descriptor for the exported file.");
       pArgList->addArg(*pArg);
 
       pArg = pPlugInManager->getPlugInArg();
@@ -112,6 +117,7 @@ bool ExportDataSet::getInputSpecification(PlugInArgList*& pArgList)
       pArg->setName("Exporter Name");              // Exporter name
       pArg->setType("string");
       pArg->setDefaultValue(NULL);
+      pArg->setDescription("Exporter to use when exporting the data set.");
       pArgList->addArg(*pArg);
    }
 

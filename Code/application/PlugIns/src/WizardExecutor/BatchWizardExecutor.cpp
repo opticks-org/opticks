@@ -74,9 +74,10 @@ bool BatchWizardExecutor::getInputSpecification(PlugInArgList*& pArgList)
 
    PlugInArg* pArg = mpPlugInManager->getPlugInArg();      // Progress
    VERIFY(pArg != NULL);
-   pArg->setName(ProgressArg());
+   pArg->setName(Executable::ProgressArg());
    pArg->setType("Progress");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription(Executable::ProgressArgDescription());
    pArgList->addArg(*pArg);
 
    pArg = mpPlugInManager->getPlugInArg();      // XML Filename
@@ -84,6 +85,7 @@ bool BatchWizardExecutor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("Filename");
    pArg->setType("Filename");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("XML file containing batch wizard instructions.");
    pArgList->addArg(*pArg);
 
    return true;
@@ -277,7 +279,7 @@ bool BatchWizardExecutor::extractInputArgs(PlugInArgList* pInArgList)
    PlugInArg* pArg = NULL;
 
    // Progress
-   if (!pInArgList->getArg(ProgressArg(), pArg) || (pArg == NULL))
+   if (!pInArgList->getArg(Executable::ProgressArg(), pArg) || (pArg == NULL))
    {
       string message = "Could not read the progress input value!";
       if (mpProgress != NULL)
@@ -394,7 +396,7 @@ bool BatchWizardExecutor::runWizard(WizardObject* pWizard)
    {
       // Setup input parameters.
       PlugInArg* pArg = NULL;
-      if (pIn->getArg(ProgressArg(), pArg) && (pArg != NULL))
+      if (pIn->getArg(Executable::ProgressArg(), pArg) && (pArg != NULL))
       {
          pArg->setActualValue(mpProgress);
       }

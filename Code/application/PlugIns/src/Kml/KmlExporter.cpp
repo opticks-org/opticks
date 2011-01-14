@@ -44,9 +44,9 @@ KmlExporter::~KmlExporter()
 bool KmlExporter::getInputSpecification(PlugInArgList*& pArgList)
 {
    VERIFY((pArgList = Service<PlugInManagerServices>()->getPlugInArgList()) != NULL);
-   VERIFY(pArgList->addArg<Progress>(ProgressArg()));
-   VERIFY(pArgList->addArg<SpatialDataView>(ExportItemArg(), NULL));
-   VERIFY(pArgList->addArg<FileDescriptor>(ExportDescriptorArg()));
+   VERIFY(pArgList->addArg<Progress>(Executable::ProgressArg(), Executable::ProgressArgDescription()));
+   VERIFY(pArgList->addArg<SpatialDataView>(Exporter::ExportItemArg(), NULL, "View to be exported."));
+   VERIFY(pArgList->addArg<FileDescriptor>(Exporter::ExportDescriptorArg(), "File descriptor for the output file."));
    return true;
 }
 
@@ -58,18 +58,18 @@ bool KmlExporter::getOutputSpecification(PlugInArgList*& pArgList)
 
 bool KmlExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
-   ProgressTracker progress(pInArgList->getPlugInArgValue<Progress>(ProgressArg()), "Export KML", "app",
+   ProgressTracker progress(pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg()), "Export KML", "app",
       "447D4133-FD36-4D00-8078-D104F2D8929D");
 
-   FileDescriptor* pDescriptor = pInArgList->getPlugInArgValue<FileDescriptor>(ExportDescriptorArg());
+   FileDescriptor* pDescriptor = pInArgList->getPlugInArgValue<FileDescriptor>(Exporter::ExportDescriptorArg());
    if (pDescriptor == NULL || pDescriptor->getFilename().getFullPathAndName().empty())
    {
       progress.report("No output file specified.", 0, ERRORS, true);
       return false;
    }
    // Try and get a view and a layer...the basic exporter works on views but subclasses may work on layers.
-   SpatialDataView* pView = pInArgList->getPlugInArgValue<SpatialDataView>(ExportItemArg());
-   Layer* pLayer = pInArgList->getPlugInArgValue<Layer>(ExportItemArg());
+   SpatialDataView* pView = pInArgList->getPlugInArgValue<SpatialDataView>(Exporter::ExportItemArg());
+   Layer* pLayer = pInArgList->getPlugInArgValue<Layer>(Exporter::ExportItemArg());
    bool isKmz(pDescriptor->getFilename().getExtension() == "kmz");
    Kml kml(isKmz);
    bool success = false;
@@ -137,8 +137,8 @@ KmlLayerExporter::~KmlLayerExporter()
 bool KmlLayerExporter::getInputSpecification(PlugInArgList*& pArgList)
 {
    VERIFY((pArgList = Service<PlugInManagerServices>()->getPlugInArgList()) != NULL);
-   VERIFY(pArgList->addArg<Progress>(ProgressArg()));
-   VERIFY(pArgList->addArg<Layer>(ExportItemArg(), NULL));
-   VERIFY(pArgList->addArg<FileDescriptor>(ExportDescriptorArg()));
+   VERIFY(pArgList->addArg<Progress>(Executable::ProgressArg(), Executable::ProgressArgDescription()));
+   VERIFY(pArgList->addArg<Layer>(Exporter::ExportItemArg(), NULL, "Layer to be exported."));
+   VERIFY(pArgList->addArg<FileDescriptor>(Exporter::ExportDescriptorArg(), "File descriptor for the output file."));
    return true;
 }

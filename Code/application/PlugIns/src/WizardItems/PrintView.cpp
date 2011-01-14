@@ -60,6 +60,7 @@ bool PrintView::getInputSpecification(PlugInArgList*& pArgList)
       pArg->setName("Data set");
       pArg->setType("RasterElement");
       pArg->setDefaultValue(NULL);
+      pArg->setDescription("Data set to be printed.");
       pArgList->addArg(*pArg);
 
       pArg = pPlugInManager->getPlugInArg();
@@ -67,6 +68,7 @@ bool PrintView::getInputSpecification(PlugInArgList*& pArgList)
       pArg->setName("Setup Dialog");
       pArg->setType("bool");
       pArg->setDefaultValue(&mbPrintDialog);
+      pArg->setDescription("Whether to show the setup dialog before printing.");
       pArgList->addArg(*pArg);
    }
 

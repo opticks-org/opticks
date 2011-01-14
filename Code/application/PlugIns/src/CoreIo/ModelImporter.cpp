@@ -83,15 +83,17 @@ bool ModelImporter::getInputSpecification(PlugInArgList *&pInArgList)
 
    PlugInArg* pArg = NULL;
    VERIFY((pArg = mpPlugInManager->getPlugInArg()) != NULL);
-   pArg->setName(ProgressArg());
+   pArg->setName(Executable::ProgressArg());
    pArg->setType("Progress");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription(Executable::ProgressArgDescription());
    pInArgList->addArg(*pArg);
 
    VERIFY((pArg = mpPlugInManager->getPlugInArg()) != NULL);
-   pArg->setName(ImportElementArg());
+   pArg->setName(Importer::ImportElementArg());
    pArg->setType("DataElement");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Model item to import.");
    pInArgList->addArg(*pArg);
 
    if (isBatch())
@@ -242,10 +244,10 @@ bool ModelImporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgLis
    { // scope the MessageResource
       MessageResource pMsg("Input arguments", "app", "9A6416F1-7E25-40BA-B21A-55C382850EC0");
 
-      pProgress = pInArgList->getPlugInArgValue<Progress>(ProgressArg());
+      pProgress = pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
       pMsg->addBooleanProperty("Progress Present", (pProgress != NULL));
 
-      pElement = pInArgList->getPlugInArgValue<DataElement>(ImportElementArg());
+      pElement = pInArgList->getPlugInArgValue<DataElement>(Importer::ImportElementArg());
       if (pElement == NULL)
       {
          if (pProgress != NULL)

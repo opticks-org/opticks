@@ -77,7 +77,7 @@ bool BandMath::isInputValid(PlugInArgList& pArgList)
 
    // The following must always have values set for them
    // Sensor data
-   if (!pArgList.getArg(DataElementArg(), pArg) || (pArg == NULL) || !pArg->isActualSet())
+   if (!pArgList.getArg(Executable::DataElementArg(), pArg) || (pArg == NULL) || !pArg->isActualSet())
    {
       mpStep->finalize(Message::Failure, "Sensor data input argument not present.");
       meGabbiness = ERRORS;
@@ -166,16 +166,18 @@ bool BandMath::getInputSpecification(PlugInArgList*& pArgList)
 
    PlugInArg* pArg = mpPluginManager->getPlugInArg();  //progress
    VERIFY(pArg != NULL);
-   pArg->setName(ProgressArg());
+   pArg->setName(Executable::ProgressArg());
    pArg->setType("Progress");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription(Executable::ProgressArgDescription());
    pArgList->addArg(*pArg);
 
    pArg = mpPluginManager->getPlugInArg();     //cube
    VERIFY(pArg != NULL);
-   pArg->setName(DataElementArg());
+   pArg->setName(Executable::DataElementArg());
    pArg->setType("RasterElement");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Element on which band math will be performed.");
    pArgList->addArg(*pArg);
 
    if (!mbInteractive)
@@ -185,6 +187,7 @@ bool BandMath::getInputSpecification(PlugInArgList*& pArgList)
       pArg->setName("Raster Element 2");
       pArg->setType("RasterElement");
       pArg->setDefaultValue(NULL);
+      pArg->setDescription("Second element to perform band math on.");
       pArgList->addArg(*pArg);
 
       pArg = mpPluginManager->getPlugInArg();     //cube3
@@ -192,6 +195,7 @@ bool BandMath::getInputSpecification(PlugInArgList*& pArgList)
       pArg->setName("Raster Element 3");
       pArg->setType("RasterElement");
       pArg->setDefaultValue(NULL);
+      pArg->setDescription("Third element to perform band math on.");
       pArgList->addArg(*pArg);
 
       pArg = mpPluginManager->getPlugInArg();     //cube4
@@ -199,6 +203,7 @@ bool BandMath::getInputSpecification(PlugInArgList*& pArgList)
       pArg->setName("Raster Element 4");
       pArg->setType("RasterElement");
       pArg->setDefaultValue(NULL);
+      pArg->setDescription("Fourth element to perform band math on.");
       pArgList->addArg(*pArg);
 
       pArg = mpPluginManager->getPlugInArg();     //cube5
@@ -206,6 +211,7 @@ bool BandMath::getInputSpecification(PlugInArgList*& pArgList)
       pArg->setName("Raster Element 5");
       pArg->setType("RasterElement");
       pArg->setDefaultValue(NULL);
+      pArg->setDescription("Fifth element to perform band math on.");
       pArgList->addArg(*pArg);
 
       pArg = mpPluginManager->getPlugInArg();    // Input Expression
@@ -213,6 +219,7 @@ bool BandMath::getInputSpecification(PlugInArgList*& pArgList)
       pArg->setName("Input Expression");
       pArg->setType("string");
       pArg->setDefaultValue(&mExpression);
+      pArg->setDescription("Expression for band math to evaluate.");
       pArgList->addArg(*pArg);
 
       bool temp = true;
@@ -221,6 +228,7 @@ bool BandMath::getInputSpecification(PlugInArgList*& pArgList)
       pArg->setName("Display Results");
       pArg->setType("bool");
       pArg->setDefaultValue(&temp);
+      pArg->setDescription("Whether or not to display the result of the band math operation.");
       pArgList->addArg(*pArg);
 
       temp = false;
@@ -229,6 +237,7 @@ bool BandMath::getInputSpecification(PlugInArgList*& pArgList)
       pArg->setName("Degrees");
       pArg->setType("bool");
       pArg->setDefaultValue(&temp);
+      pArg->setDescription("True causes band math to use degrees; false uses radians (default).");
       pArgList->addArg(*pArg);
    }
 
@@ -246,6 +255,7 @@ bool BandMath::getOutputSpecification(PlugInArgList*& pArgList)
    pArg->setName("Band Math Result");
    pArg->setType("RasterElement");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Output element for the result of the band math operation.");
    pArgList->addArg(*pArg);
 
    return true;
@@ -512,7 +522,7 @@ bool BandMath::parse(PlugInArgList* pArgInList, PlugInArgList* pArgOutList)
    PlugInArg* pArg = NULL;
 
    //get the progress pointer---------------------------------------------------
-   if (!pArgInList->getArg(ProgressArg(), pArg) || (pArg == NULL))
+   if (!pArgInList->getArg(Executable::ProgressArg(), pArg) || (pArg == NULL))
    {
       mstrProgressString = "Progress input argument not present.";
       return false;
@@ -520,7 +530,7 @@ bool BandMath::parse(PlugInArgList* pArgInList, PlugInArgList* pArgOutList)
    mpProgress = pArg->getPlugInArgValue<Progress>();
 
    //get the pointer to the cube data------------------------------------------
-   if (!pArgInList->getArg(DataElementArg(), pArg) || (pArg == NULL))
+   if (!pArgInList->getArg(Executable::DataElementArg(), pArg) || (pArg == NULL))
    {
       mstrProgressString = "Raster Element input argument not present.";
       return false;

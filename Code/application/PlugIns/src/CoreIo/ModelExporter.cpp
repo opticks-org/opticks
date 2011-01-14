@@ -84,21 +84,24 @@ bool ModelExporter::getInputSpecification(PlugInArgList*& pInArgList)
 
    PlugInArg* pArg = NULL;
    VERIFY((pArg = mpPlugInManager->getPlugInArg()) != NULL);
-   pArg->setName(ProgressArg());
+   pArg->setName(Executable::ProgressArg());
    pArg->setType("Progress");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription(Executable::ProgressArgDescription());
    pInArgList->addArg(*pArg);
 
    VERIFY((pArg = mpPlugInManager->getPlugInArg()) != NULL);
-   pArg->setName(ExportDescriptorArg());
+   pArg->setName(Exporter::ExportDescriptorArg());
    pArg->setType("FileDescriptor");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("File descriptor for the output file.");
    pInArgList->addArg(*pArg);
 
    VERIFY((pArg = mpPlugInManager->getPlugInArg()) != NULL);
-   pArg->setName(ExportItemArg());
+   pArg->setName(Exporter::ExportItemArg());
    pArg->setType(mDataElementSubclass);
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Model item to export.");
    pInArgList->addArg(*pArg);
 
    return true;
@@ -122,10 +125,10 @@ bool ModelExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
    { // scope the MessageResource
       MessageResource pMsg("Input arguments", "app", "1B02F950-2E04-4BEF-8561-BB8D993340F7");
 
-      pProgress = pInArgList->getPlugInArgValue<Progress>(ProgressArg());
+      pProgress = pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
       pMsg->addBooleanProperty("Progress Present", (pProgress != NULL));
 
-      pFileDescriptor = pInArgList->getPlugInArgValue<FileDescriptor>(ExportDescriptorArg());
+      pFileDescriptor = pInArgList->getPlugInArgValue<FileDescriptor>(Exporter::ExportDescriptorArg());
       if (pFileDescriptor == NULL)
       {
          if (pProgress != NULL)
@@ -137,7 +140,7 @@ bool ModelExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
       }
       pMsg->addProperty("Destination", pFileDescriptor->getFilename());
 
-      pElement = pInArgList->getPlugInArgValueUnsafe<DataElement>(ExportItemArg());
+      pElement = pInArgList->getPlugInArgValueUnsafe<DataElement>(Exporter::ExportItemArg());
       if (pElement == NULL)
       {
          if (pProgress != NULL)

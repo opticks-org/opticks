@@ -47,7 +47,7 @@ bool CreateAnimation::getInputSpecification(PlugInArgList*& pArgList)
    {
       VERIFY(DesktopItems::getInputSpecification(pArgList) && (pArgList != NULL));
 
-      pArgList->addArg<SpatialDataView>(ViewArg());
+      pArgList->addArg<SpatialDataView>(Executable::ViewArg(), "View to create animation from.");
    }
 
    return true;
@@ -71,12 +71,14 @@ bool CreateAnimation::getOutputSpecification(PlugInArgList*& pArgList)
       VERIFY(pArg != NULL);
       pArg->setName("Animation");
       pArg->setType("Animation");
+      pArg->setDescription("Resulting animation.");
       pArgList->addArg(*pArg);
 
       pArg = pPlugInManager->getPlugInArg();
       VERIFY(pArg != NULL);
       pArg->setName("Animation Controller");
       pArg->setType("AnimationController");
+      pArg->setDescription("Controller for this animation.");
       pArgList->addArg(*pArg);
    }
 
@@ -94,7 +96,7 @@ bool CreateAnimation::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
       reportError("Unable to extract input arguments.", "5E158F48-6089-4A88-ABD0-55C717BD13E2");
       return false;
    }
-   SpatialDataView* pView = pInArgList->getPlugInArgValue<SpatialDataView>(ViewArg());
+   SpatialDataView* pView = pInArgList->getPlugInArgValue<SpatialDataView>(Executable::ViewArg());
    if (pView == NULL)
    {
       reportError("No view provided.", "852F585B-D239-4C0A-B993-70EE68EC8DEE");

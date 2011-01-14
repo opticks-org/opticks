@@ -97,14 +97,14 @@ bool Nitf::NitfExporter::getInputSpecification(PlugInArgList *&pArgList)
    pArgList = mpPlugInManager->getPlugInArgList();
    VERIFY(pArgList != NULL);
 
-   VERIFY(pArgList->addArg<Progress>(ProgressArg()));
-   VERIFY(pArgList->addArg<RasterFileDescriptor>(ExportDescriptorArg()));
-   VERIFY(pArgList->addArg<RasterElement>(ExportItemArg()));
-   VERIFY(pArgList->addArg<View>(ViewArg()));
+   VERIFY(pArgList->addArg<Progress>(Executable::ProgressArg(), Executable::ProgressArgDescription()));
+   VERIFY(pArgList->addArg<RasterFileDescriptor>(Exporter::ExportDescriptorArg(), "File descriptor for the output file."));
+   VERIFY(pArgList->addArg<RasterElement>(Exporter::ExportItemArg(), "Raster element to be exported."));
+   VERIFY(pArgList->addArg<View>(Executable::ViewArg(), "View to be exported."));
 
    if (isBatch() == true)
    {
-      VERIFY(pArgList->addArg<bool>("Classification Must Be Valid", true));
+      VERIFY(pArgList->addArg<bool>("Classification Must Be Valid", true, "Whether the exported classification must be valid."));
    }
 
    return true;
@@ -122,18 +122,18 @@ bool Nitf::NitfExporter::execute(PlugInArgList *pInParam, PlugInArgList *pOutPar
    VERIFY(pInParam != NULL);
 
    // The progress object is used to report progress to the user
-   mpProgress = pInParam->getPlugInArgValue<Progress>(ProgressArg());
+   mpProgress = pInParam->getPlugInArgValue<Progress>(Executable::ProgressArg());
    VERIFY(mpProgress != NULL);
 
    // This is the filename to export to
-   mpDestination = pInParam->getPlugInArgValue<RasterFileDescriptor>(ExportDescriptorArg());
+   mpDestination = pInParam->getPlugInArgValue<RasterFileDescriptor>(Exporter::ExportDescriptorArg());
    VERIFY(mpDestination != NULL);
    mpDestination->addToMessageLog(pStep.get());
 
    const Filename& filename = mpDestination->getFilename();
 
    // This is the cube to export data from.
-   mpRaster = pInParam->getPlugInArgValue<RasterElement>(ExportItemArg());
+   mpRaster = pInParam->getPlugInArgValue<RasterElement>(Exporter::ExportItemArg());
    VERIFY(mpRaster != NULL);
 
    // This DynamicObject has whatever the importer for this cube wanted to put in it.
@@ -232,7 +232,7 @@ bool Nitf::NitfExporter::execute(PlugInArgList *pInParam, PlugInArgList *pOutPar
    else
    {
       // This is the view to export
-      SpatialDataView* pView = dynamic_cast<SpatialDataView*>(pInParam->getPlugInArgValue<View>(ViewArg()));
+      SpatialDataView* pView = dynamic_cast<SpatialDataView*>(pInParam->getPlugInArgValue<View>(Executable::ViewArg()));
       if (pView != NULL)
       {
          LayerList* pLayerList = pView->getLayerList();
@@ -531,7 +531,7 @@ bool Nitf::NitfExporter::exportClassification(const PlugInArgList* pArgList, con
 ValidationResultType Nitf::NitfExporter::validate(const PlugInArgList* pArgList, string& errorMessage) const
 {
    VERIFYRV(pArgList != NULL, VALIDATE_FAILURE);
-   const RasterFileDescriptor* pDescriptor = pArgList->getPlugInArgValue<RasterFileDescriptor>(ExportDescriptorArg());
+   const RasterFileDescriptor* pDescriptor = pArgList->getPlugInArgValue<RasterFileDescriptor>(Exporter::ExportDescriptorArg());
    if (validateExportDescriptor(pDescriptor, errorMessage) == false)
    {
       return VALIDATE_FAILURE;
@@ -543,7 +543,7 @@ ValidationResultType Nitf::NitfExporter::validate(const PlugInArgList* pArgList,
       // If unable to obtain the widget, then this should be running in batch mode
       VERIFYRV(isBatch() == true, VALIDATE_FAILURE);
 
-      const RasterElement* pRasterElement = pArgList->getPlugInArgValue<RasterElement>(ExportItemArg());
+      const RasterElement* pRasterElement = pArgList->getPlugInArgValue<RasterElement>(Exporter::ExportItemArg());
       if (pRasterElement == NULL)
       {
          errorMessage = "Unable to obtain the Raster Element.";
@@ -599,7 +599,7 @@ QWidget* Nitf::NitfExporter::getExportOptionsWidget(const PlugInArgList* pInArgL
 
    if (mpOptionsWidget.get() == NULL)
    {
-      const RasterElement* pRasterElement = pInArgList->getPlugInArgValue<RasterElement>(ExportItemArg());
+      const RasterElement* pRasterElement = pInArgList->getPlugInArgValue<RasterElement>(Exporter::ExportItemArg());
       VERIFYRV(pRasterElement != NULL, NULL);
 
       const DataDescriptor* pDataDescriptor = pRasterElement->getDataDescriptor();

@@ -40,10 +40,10 @@ SetDisplayMode::~SetDisplayMode()
 
 bool SetDisplayMode::getInputSpecification(PlugInArgList*& pArgList)
 {
-   VERIFY(DesktopItems::getInputSpecification(pArgList) == true);
+   VERIFY(DesktopItems::getInputSpecification(pArgList));
    VERIFY(pArgList != NULL);
-   VERIFY(pArgList->addArg<RasterLayer>(Executable::LayerArg()) == true);
-   VERIFY(pArgList->addArg<DisplayMode>("Display Mode") == true);
+   VERIFY(pArgList->addArg<RasterLayer>(Executable::LayerArg(), "Layer to set the display mode of."));
+   VERIFY(pArgList->addArg<DisplayMode>("Display Mode", "Display mode to set on the chosen layer."));
    return true;
 }
 

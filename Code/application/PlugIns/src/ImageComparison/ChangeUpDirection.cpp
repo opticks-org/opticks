@@ -51,8 +51,8 @@ ChangeUpDirection::~ChangeUpDirection()
 bool ChangeUpDirection::getInputSpecification(PlugInArgList*& pInArgList)
 {
    VERIFY(pInArgList = Service<PlugInManagerServices>()->getPlugInArgList());
-   VERIFY(pInArgList->addArg<Progress>(ProgressArg(), NULL));
-   VERIFY(pInArgList->addArg<RasterElement>(DataElementArg()));
+   VERIFY(pInArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription()));
+   VERIFY(pInArgList->addArg<RasterElement>(Executable::DataElementArg(), "Element to perform rotation on."));
    bool res = !isBatch();
    VERIFY(pInArgList->addArg<bool>("Display Results", res, "Should a view be created for the results?"));
    if (isBatch())
@@ -61,7 +61,7 @@ bool ChangeUpDirection::getInputSpecification(PlugInArgList*& pInArgList)
    }
    else
    {
-      VERIFY(pInArgList->addArg<SpatialDataView>(ViewArg()));
+      VERIFY(pInArgList->addArg<SpatialDataView>(Executable::ViewArg(), "View on which the rotation will be performed."));
    }
    return true;
 }
@@ -83,10 +83,10 @@ bool ChangeUpDirection::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
    {
       return false;
    }
-   ProgressTracker progress(pInArgList->getPlugInArgValue<Progress>(ProgressArg()),
+   ProgressTracker progress(pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg()),
       "Rotating data.", "app", "{11adadb9-c133-49de-8cf5-a16372da2578}");
 
-   RasterElement* pData = pInArgList->getPlugInArgValue<RasterElement>(DataElementArg());
+   RasterElement* pData = pInArgList->getPlugInArgValue<RasterElement>(Executable::DataElementArg());
    if (pData == NULL)
    {
       progress.report("No data element specified.", 0, ERRORS, true);
@@ -110,7 +110,7 @@ bool ChangeUpDirection::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
    }
    else
    {
-      pOrigView = pInArgList->getPlugInArgValue<SpatialDataView>(ViewArg());
+      pOrigView = pInArgList->getPlugInArgValue<SpatialDataView>(Executable::ViewArg());
       if (pOrigView == NULL)
       {
          progress.report("No view specified.", 0, ERRORS, true);

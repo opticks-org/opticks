@@ -76,9 +76,10 @@ bool BackgroundTest::getInputSpecification(PlugInArgList*& pArgList)
 
    PlugInArg* pArg = mpPlugInManager->getPlugInArg();
    VERIFY(pArg != NULL);
-   pArg->setName(ProgressArg());
+   pArg->setName(Executable::ProgressArg());
    pArg->setType("Progress");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription(Executable::ProgressArgDescription());
    pArgList->addArg(*pArg);
 
    return true;
@@ -91,9 +92,10 @@ bool BackgroundTest::getOutputSpecification(PlugInArgList*& pArgList)
 
    PlugInArg* pArg = mpPlugInManager->getPlugInArg();
    VERIFY(pArg != NULL);
-   pArg->setName(ProgressArg());
+   pArg->setName(Executable::ProgressArg());
    pArg->setType("Progress");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription(Executable::ProgressArgDescription());
    pArgList->addArg(*pArg);
 
    return true;
@@ -107,7 +109,7 @@ bool BackgroundTest::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLi
    // Get the input argument
    //
    PlugInArg* pArg = NULL;
-   VERIFY(pInArgList->getArg(ProgressArg(), pArg) && (pArg != NULL));
+   VERIFY(pInArgList->getArg(Executable::ProgressArg(), pArg) && (pArg != NULL));
    if (pArg->isActualSet())
    {
       mpProgress = static_cast<Progress*>(pArg->getActualValue());
@@ -141,7 +143,7 @@ bool BackgroundTest::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLi
 
    // Set the output arg
    //
-   VERIFY(pOutArgList->getArg(ProgressArg(), pArg) && (pArg != NULL));
+   VERIFY(pOutArgList->getArg(Executable::ProgressArg(), pArg) && (pArg != NULL));
    pArg->setActualValue(mpProgress);
 
    // Create a worker thread

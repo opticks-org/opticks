@@ -65,6 +65,7 @@ bool SaveLayer::getInputSpecification(PlugInArgList*& pArgList)
       pArg->setName("Filename");
       pArg->setType("Filename");
       pArg->setDefaultValue(NULL);
+      pArg->setDescription("Location to save the file at.");
       pArgList->addArg(*pArg);
 
       LayerType eType = getLayerType();
@@ -76,6 +77,7 @@ bool SaveLayer::getInputSpecification(PlugInArgList*& pArgList)
       pArg->setName("Layer Element");
       pArg->setType(modelType);
       pArg->setDefaultValue(NULL);
+      pArg->setDescription("Layer element to save.");
       pArgList->addArg(*pArg);
    }
 
@@ -316,6 +318,7 @@ bool SaveLayerFromDataSet::getInputSpecification(PlugInArgList*& pArgList)
       pArg->setName("Filename");
       pArg->setType("Filename");
       pArg->setDefaultValue(NULL);
+      pArg->setDescription("Location to save the file at.");
       pArgList->addArg(*pArg);
 
       pArg = pPlugInManager->getPlugInArg();
@@ -323,6 +326,7 @@ bool SaveLayerFromDataSet::getInputSpecification(PlugInArgList*& pArgList)
       pArg->setName("Data set");
       pArg->setType("RasterElement");
       pArg->setDefaultValue(NULL);
+      pArg->setDescription("Data set to be saved.");
       pArgList->addArg(*pArg);
 
       pArg = pPlugInManager->getPlugInArg();
@@ -332,6 +336,7 @@ bool SaveLayerFromDataSet::getInputSpecification(PlugInArgList*& pArgList)
       pArg->setName("Layer Name");
       pArg->setType("string");
       pArg->setDefaultValue(NULL);
+      pArg->setDescription("Name of the layer to be saved.");
       pArgList->addArg(*pArg);
    }
 

@@ -75,6 +75,7 @@ bool CreateExportFileDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("Filename");                         // Filename
    pArg->setType("Filename");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Location on-disk for the file data.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -82,6 +83,7 @@ bool CreateExportFileDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("Data Set");                         // Data element
    pArg->setType("DataElement");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Element to create the new descriptor from.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -89,6 +91,7 @@ bool CreateExportFileDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("Start Row");                        // Start row
    pArg->setType("unsigned int");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Beginning row for this descriptor.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -96,6 +99,7 @@ bool CreateExportFileDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("End Row");                          // End row
    pArg->setType("unsigned int");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Ending row for this descriptor.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -103,6 +107,7 @@ bool CreateExportFileDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("Row Skip Factor");                  // Row skip factor
    pArg->setType("unsigned int");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Row skip factor for this descriptor.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -110,6 +115,7 @@ bool CreateExportFileDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("Start Column");                     // Start column
    pArg->setType("unsigned int");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Beginning column for this descriptor.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -117,6 +123,7 @@ bool CreateExportFileDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("End Column");                       // End column
    pArg->setType("unsigned int");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Ending column for this descriptor.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -124,6 +131,7 @@ bool CreateExportFileDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("Column Skip Factor");               // Column skip factor
    pArg->setType("unsigned int");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Column skip factor for this descriptor.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -131,6 +139,7 @@ bool CreateExportFileDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("Start Band");                       // Start band
    pArg->setType("unsigned int");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Beginning band for this descriptor.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -138,6 +147,7 @@ bool CreateExportFileDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("End Band");                         // End band
    pArg->setType("unsigned int");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Ending band for this descriptor.");
    pArgList->addArg(*pArg);
 
    pArg = pPlugInManager->getPlugInArg();
@@ -145,6 +155,7 @@ bool CreateExportFileDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setName("Band Skip Factor");                 // Band skip factor
    pArg->setType("unsigned int");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Band skip factor for this descriptor.");
    pArgList->addArg(*pArg);
 
    return true;
@@ -165,6 +176,7 @@ bool CreateExportFileDescriptor::getOutputSpecification(PlugInArgList*& pArgList
    pArg->setName("File Descriptor");                  // File descriptor
    pArg->setType("FileDescriptor");
    pArg->setDefaultValue(NULL);
+   pArg->setDescription("Resulting descriptor.");
    pArgList->addArg(*pArg);
 
    return true;

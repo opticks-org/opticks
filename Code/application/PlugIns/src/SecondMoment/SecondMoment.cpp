@@ -312,8 +312,8 @@ bool SecondMoment::populateBatchInputArgList(PlugInArgList* pArgList)
 bool SecondMoment::populateInteractiveInputArgList(PlugInArgList* pArgList)
 {
    VERIFY(pArgList != NULL);
-   VERIFY(pArgList->addArg<Progress>(ProgressArg(), NULL));
-   VERIFY(pArgList->addArg<RasterElement>(DataElementArg(), NULL));
+   VERIFY(pArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription()));
+   VERIFY(pArgList->addArg<RasterElement>(Executable::DataElementArg(), NULL, "Raster element to calculate the second moment matrix for."));
    bool recalc = false;
    VERIFY(pArgList->addArg<bool>("Recalculate", &recalc, "If true, the second moment matrix will be recalculated.  "
       "If false, the plug-in will decide if the matrix needs to be recalculated. If a matrix exists in memory, "
@@ -328,8 +328,8 @@ bool SecondMoment::populateInteractiveInputArgList(PlugInArgList* pArgList)
 bool SecondMoment::populateDefaultOutputArgList(PlugInArgList* pArgList)
 {
    VERIFY(pArgList != NULL);
-   VERIFY(pArgList->addArg<RasterElement>("Second Moment Matrix"));
-   VERIFY(pArgList->addArg<RasterElement>("Inverse Second Moment Matrix"));
+   VERIFY(pArgList->addArg<RasterElement>("Second Moment Matrix", "Result of the second moment calculations."));
+   VERIFY(pArgList->addArg<RasterElement>("Inverse Second Moment Matrix", "Inverse of the calculated second moment matrix."));
    return true;
 }
 
@@ -337,13 +337,13 @@ bool SecondMoment::parseInputArgList(PlugInArgList* pArgList)
 {
    Filename* pSmmFilename = NULL;
 
-   Progress* pProgress = pArgList->getPlugInArgValue<Progress>(ProgressArg());
+   Progress* pProgress = pArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
    if (pProgress == NULL)
    {
       return false;
    }
 
-   mpRasterElement = pArgList->getPlugInArgValue<RasterElement>(DataElementArg());
+   mpRasterElement = pArgList->getPlugInArgValue<RasterElement>(Executable::DataElementArg());
    if (mpRasterElement == NULL)
    {
       string msg = "The raster element input value is invalid!";

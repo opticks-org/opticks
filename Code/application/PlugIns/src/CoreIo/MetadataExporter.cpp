@@ -45,9 +45,9 @@ MetadataExporter::~MetadataExporter()
 bool MetadataExporter::getInputSpecification(PlugInArgList*& pInArgList)
 {
    VERIFY(pInArgList = Service<PlugInManagerServices>()->getPlugInArgList());
-   VERIFY(pInArgList->addArg<Progress>(ProgressArg(), NULL));
-   VERIFY(pInArgList->addArg<FileDescriptor>(ExportDescriptorArg()));
-   VERIFY(pInArgList->addArg<DataElement>(ExportItemArg()));
+   VERIFY(pInArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription()));
+   VERIFY(pInArgList->addArg<FileDescriptor>(Exporter::ExportDescriptorArg(), "File descriptor for the output file."));
+   VERIFY(pInArgList->addArg<DataElement>(Exporter::ExportItemArg(), "Data element to export metadata from."));
    return true;
 }
 
@@ -69,10 +69,10 @@ bool MetadataExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
    { // scope the MessageResource
       MessageResource pMsg("Input arguments", "app", "{5e921da0-6470-44f1-a910-ed12af1e5ebc}");
 
-      pProgress = pInArgList->getPlugInArgValue<Progress>(ProgressArg());
+      pProgress = pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
       pMsg->addBooleanProperty("Progress Present", (pProgress != NULL));
 
-      pFileDescriptor = pInArgList->getPlugInArgValue<FileDescriptor>(ExportDescriptorArg());
+      pFileDescriptor = pInArgList->getPlugInArgValue<FileDescriptor>(Exporter::ExportDescriptorArg());
       if (pFileDescriptor == NULL)
       {
          if (pProgress != NULL)
@@ -84,7 +84,7 @@ bool MetadataExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
       }
       pMsg->addProperty("Destination", pFileDescriptor->getFilename());
 
-      pElement = pInArgList->getPlugInArgValue<DataElement>(ExportItemArg());
+      pElement = pInArgList->getPlugInArgValue<DataElement>(Exporter::ExportItemArg());
       if (pElement == NULL)
       {
          if (pProgress != NULL)

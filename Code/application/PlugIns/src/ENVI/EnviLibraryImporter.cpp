@@ -362,8 +362,8 @@ bool EnviLibraryImporter::getInputSpecification(PlugInArgList*& pArgList)
    pArgList = pPlugInManager->getPlugInArgList();
    VERIFY(pArgList != NULL);
 
-   VERIFY(pArgList->addArg<Progress>(ProgressArg(), NULL));
-   VERIFY(pArgList->addArg<SignatureLibrary>(ImportElementArg(), NULL));
+   VERIFY(pArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription()));
+   VERIFY(pArgList->addArg<SignatureLibrary>(Importer::ImportElementArg(), NULL, "Signature library to be imported."));
    return true;
 }
 
@@ -439,10 +439,10 @@ bool EnviLibraryImporter::extractPlugInArgs(PlugInArgList* pArgList)
    }
 
    // Progress
-   mpProgress = pArgList->getPlugInArgValue<Progress>(ProgressArg());
+   mpProgress = pArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
 
    // SignatureLibrary
-   mpSignatureLibrary = pArgList->getPlugInArgValue<SignatureLibrary>(ImportElementArg());
+   mpSignatureLibrary = pArgList->getPlugInArgValue<SignatureLibrary>(Importer::ImportElementArg());
    if (mpSignatureLibrary == NULL)
    {
       string message = "The spectral library input value is invalid!";

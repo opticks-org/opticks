@@ -67,9 +67,9 @@ bool GeoreferencePlugIn::execute(PlugInArgList* pInParam, PlugInArgList* pOutPar
    StepResource pStep("Run GeoReference", "app", "DE61E049-5B44-41A8-BE10-6DA2FFE23E0C");
    pStep->addProperty("name", getName());
 
-   mpProgress = pInParam->getPlugInArgValue<Progress>(ProgressArg());
-   mpRaster = pInParam->getPlugInArgValue<RasterElement>(DataElementArg());
-   mpView = pInParam->getPlugInArgValue<SpatialDataView>(ViewArg());
+   mpProgress = pInParam->getPlugInArgValue<Progress>(Executable::ProgressArg());
+   mpRaster = pInParam->getPlugInArgValue<RasterElement>(Executable::DataElementArg());
+   mpView = pInParam->getPlugInArgValue<SpatialDataView>(Executable::ViewArg());
 
    if (mpRaster == NULL)
    {
@@ -201,9 +201,9 @@ bool GeoreferencePlugIn::execute(PlugInArgList* pInParam, PlugInArgList* pOutPar
          pGeoExecutable->getInputSpecification(pInArgList);
          pGeoExecutable->getOutputSpecification(pOutArgList);
 
-         pInArgList->setPlugInArgValue(DataElementArg(), mpRaster);
-         pInArgList->setPlugInArgValue(ProgressArg(), mpProgress);
-         pInArgList->setPlugInArgValueLoose(ViewArg(), mpView);
+         pInArgList->setPlugInArgValue(Executable::DataElementArg(), mpRaster);
+         pInArgList->setPlugInArgValue(Executable::ProgressArg(), mpProgress);
+         pInArgList->setPlugInArgValueLoose(Executable::ViewArg(), mpView);
          
          bool bSuccess = pGeoExecutable->execute(pInArgList, pOutArgList);
 
@@ -295,14 +295,14 @@ bool GeoreferencePlugIn::getInputSpecification(PlugInArgList*& pArgList)
    pArgList = mpPluginManager->getPlugInArgList();
    VERIFY(pArgList != NULL);
 
-   VERIFY(pArgList->addArg<Progress>(ProgressArg(), NULL));
-   VERIFY(pArgList->addArg<RasterElement>(DataElementArg(), NULL));
-   VERIFY(pArgList->addArg<SpatialDataView>(ViewArg(), NULL));
+   VERIFY(pArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription()));
+   VERIFY(pArgList->addArg<RasterElement>(Executable::DataElementArg(), NULL, "Data element to be georeferenced."));
+   VERIFY(pArgList->addArg<SpatialDataView>(Executable::ViewArg(), NULL, "View in which the georeferencing results are displayed."));
 
    if (isBatch())
    {
-      VERIFY(pArgList->addArg<string>("Results Name", &mResultsName));
-      VERIFY(pArgList->addArg<bool>("Display Layer", &mDisplayLayer));
+      VERIFY(pArgList->addArg<string>("Results Name", &mResultsName, "Name for the result of the georeferencing."));
+      VERIFY(pArgList->addArg<bool>("Display Layer", &mDisplayLayer, "Whether to display the new layer or not."));
    }
 
    return true;
@@ -312,7 +312,7 @@ bool GeoreferencePlugIn::getOutputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = mpPluginManager->getPlugInArgList();
    VERIFY(pArgList != NULL);
-   VERIFY(pArgList->addArg<LatLonLayer>("Latitude/Longitude Layer", NULL));
+   VERIFY(pArgList->addArg<LatLonLayer>("Latitude/Longitude Layer", NULL, "Latitude/longitude layer resulting from the georeferencing."));
    return true;
 }
 

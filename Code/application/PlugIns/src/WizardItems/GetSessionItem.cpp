@@ -138,7 +138,7 @@ bool GetSessionItemBase<T>::getOutputSpecification(PlugInArgList*& pArgList)
    if (mbInteractive)
    {
       VERIFY(pArgList = Service<PlugInManagerServices>()->getPlugInArgList());
-      VERIFY(pArgList->addArg<T>("Session Item", NULL));
+      VERIFY(pArgList->addArg<T>("Session Item", NULL, std::string(TypeConverter::toString<T>()) + " chosen by the Get operation."));
    }
 
    return true;

@@ -35,9 +35,9 @@ bool WavelengthExporter::getInputSpecification(PlugInArgList*& pArgList)
    pArgList = pManager->getPlugInArgList();
    VERIFY(pArgList != NULL);
 
-   VERIFY(pArgList->addArg<Progress>(Executable::ProgressArg(), NULL));
-   VERIFY(pArgList->addArg<Wavelengths>(Wavelengths::WavelengthsArg()));
-   VERIFY(pArgList->addArg<Filename>(Wavelengths::WavelengthFileArg()));
+   VERIFY(pArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription()));
+   VERIFY(pArgList->addArg<Wavelengths>(Wavelengths::WavelengthsArg(), "Wavelengths to be exported."));
+   VERIFY(pArgList->addArg<Filename>(Wavelengths::WavelengthFileArg(), "Location to export the wavelength data to."));
 
    return true;
 }

@@ -63,9 +63,9 @@ bool LayerImporter::getInputSpecification(PlugInArgList*& pInArgList)
    pInArgList = mpPlugInManager->getPlugInArgList();
    VERIFY(pInArgList != NULL);
 
-   VERIFY(pInArgList->addArg<Progress>(ProgressArg(), NULL));
-   VERIFY(pInArgList->addArg<DataElement>(ImportElementArg(), NULL));
-   VERIFY(pInArgList->addArg<SpatialDataView>(ViewArg(), NULL));
+   VERIFY(pInArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription()));
+   VERIFY(pInArgList->addArg<DataElement>(Importer::ImportElementArg(), NULL, "Layer to be imported."));
+   VERIFY(pInArgList->addArg<SpatialDataView>(Executable::ViewArg(), NULL, "View in which the layer will be inserted."));
 
    return true;
 }
@@ -74,7 +74,7 @@ bool LayerImporter::getOutputSpecification(PlugInArgList*& pOutArgList)
 {
    pOutArgList = mpPlugInManager->getPlugInArgList();
    VERIFY(pOutArgList != NULL);
-   VERIFY(pOutArgList->addArg<Layer>("Layer", NULL));
+   VERIFY(pOutArgList->addArg<Layer>("Layer", NULL, "The imported layer."));
 
    return true;
 }
@@ -151,10 +151,10 @@ bool LayerImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
    { // scope the MessageResource
       MessageResource pMsg("Input arguments", "app", "C0A532DE-0E19-44D3-837C-16ABD267B2C1");
 
-      pProgress = pInArgList->getPlugInArgValue<Progress>(ProgressArg());
+      pProgress = pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
       pMsg->addBooleanProperty("Progress Present", (pProgress != NULL));
 
-      pElement = pInArgList->getPlugInArgValue<DataElement>(ImportElementArg());
+      pElement = pInArgList->getPlugInArgValue<DataElement>(Importer::ImportElementArg());
       if (pElement == NULL)
       {
          if (pProgress != NULL)
@@ -165,7 +165,7 @@ bool LayerImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
          return false;
       }
       pMsg->addProperty("Element name", pElement->getName());
-      pView = pInArgList->getPlugInArgValue<SpatialDataView>(ViewArg());
+      pView = pInArgList->getPlugInArgValue<SpatialDataView>(Executable::ViewArg());
       if (pView != NULL)
       {
          pMsg->addProperty("View name", pView->getName());

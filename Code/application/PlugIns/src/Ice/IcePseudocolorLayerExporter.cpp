@@ -46,8 +46,8 @@ IcePseudocolorLayerExporter::~IcePseudocolorLayerExporter()
 bool IcePseudocolorLayerExporter::getInputSpecification(PlugInArgList*& pArgList)
 {
    DO_IF(IceExporterShell::getInputSpecification(pArgList) == false, return false);
-   VERIFY(pArgList->addArg<PseudocolorLayer>(ExportItemArg()));
-   VERIFY(pArgList->addArg<FileDescriptor>(ExportDescriptorArg()));
+   VERIFY(pArgList->addArg<PseudocolorLayer>(Exporter::ExportItemArg(), "Element to be exported."));
+   VERIFY(pArgList->addArg<FileDescriptor>(Exporter::ExportDescriptorArg(), "File descriptor for the exported element."));
    return true;
 }
 
@@ -55,10 +55,10 @@ void IcePseudocolorLayerExporter::parseInputArgs(PlugInArgList* pInArgList)
 {
    IceExporterShell::parseInputArgs(pInArgList);
 
-   mpLayer = pInArgList->getPlugInArgValue<PseudocolorLayer>(ExportItemArg());
+   mpLayer = pInArgList->getPlugInArgValue<PseudocolorLayer>(Exporter::ExportItemArg());
    ICEVERIFY_MSG(mpLayer != NULL, "No pseudocolor layer to export.");
 
-   mpOutputDescriptor = pInArgList->getPlugInArgValue<FileDescriptor>(ExportDescriptorArg());
+   mpOutputDescriptor = pInArgList->getPlugInArgValue<FileDescriptor>(Exporter::ExportDescriptorArg());
    ICEVERIFY_MSG(mpOutputDescriptor != NULL, "No output file descriptor provided.");
 }
 

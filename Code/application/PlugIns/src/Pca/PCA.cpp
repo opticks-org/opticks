@@ -473,8 +473,8 @@ bool PCA::getInputSpecification(PlugInArgList*& pArgList)
    // Set up list
    pArgList = mpPlugInMgr->getPlugInArgList();
    VERIFY(pArgList != NULL);
-   VERIFY(pArgList->addArg<Progress>(ProgressArg(), NULL));
-   VERIFY(pArgList->addArg<RasterElement>(DataElementArg(), NULL));
+   VERIFY(pArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription()));
+   VERIFY(pArgList->addArg<RasterElement>(Executable::DataElementArg(), NULL, "Element to run PCA on."));
 
    if (isBatch()) // need additional info in batch mode
    {
@@ -493,17 +493,18 @@ bool PCA::getInputSpecification(PlugInArgList*& pArgList)
                   A) Use SMM File / Don't use
       */
 
-      VERIFY(pArgList->addArg<bool>("Use Transform File", NULL));
-      VERIFY(pArgList->addArg<Filename>("Transform Filename", NULL));
-      VERIFY(pArgList->addArg<string>("Transform Type", NULL));
-      VERIFY(pArgList->addArg<bool>("Use AOI", false));
-      VERIFY(pArgList->addArg<string>("AOI Name", false));
-      VERIFY(pArgList->addArg<int>("Components", NULL));
-      VERIFY(pArgList->addArg<EncodingType>("Output Encoding Type", NULL));
-      VERIFY(pArgList->addArg<int>("Max Scale Value", NULL));
-      VERIFY(pArgList->addArg<RasterElement>("Second Moment Matrix", NULL));
-      VERIFY(pArgList->addArg<RasterElement>("Covariance Matrix", NULL));
-      VERIFY(pArgList->addArg<bool>("Display Results", false));
+      VERIFY(pArgList->addArg<bool>("Use Transform File", NULL, "Whether to use an external transform file."));
+      VERIFY(pArgList->addArg<Filename>("Transform Filename", NULL, "Filename for external transform file, if applicable."));
+      VERIFY(pArgList->addArg<string>("Statistics Matrix Type", NULL, 
+         "Type of statistics matrix to be used by PCA (Covariance, Second Moment, or Correlation Coefficient)."));
+      VERIFY(pArgList->addArg<bool>("Use AOI", false, "Whether to perform PCA over a specific AOI."));
+      VERIFY(pArgList->addArg<string>("AOI Name", false, "Name of AOI to perform PCA over, if applicable."));
+      VERIFY(pArgList->addArg<int>("Components", NULL, "Number of components."));
+      VERIFY(pArgList->addArg<EncodingType>("Output Encoding Type", NULL, "Encoding type for the output of PCA."));
+      VERIFY(pArgList->addArg<int>("Max Scale Value", NULL, "Value to which the maximum component should be scaled."));
+      VERIFY(pArgList->addArg<RasterElement>("Second Moment Matrix", NULL, "Element containing the second moment matrix."));
+      VERIFY(pArgList->addArg<RasterElement>("Covariance Matrix", NULL, "Element containing the covariance matrix."));
+      VERIFY(pArgList->addArg<bool>("Display Results", false, "Whether to display the results of the analysis."));
    }
 
    return true;
@@ -514,8 +515,8 @@ bool PCA::getOutputSpecification(PlugInArgList*& pArgList)
    // Set up list
    pArgList = mpPlugInMgr->getPlugInArgList();
    VERIFY(pArgList != NULL);
-   VERIFY(pArgList->addArg<SpatialDataView>(ViewArg(), NULL));
-   VERIFY(pArgList->addArg<RasterElement>("Corrected Data Cube", NULL));
+   VERIFY(pArgList->addArg<SpatialDataView>(Executable::ViewArg(), NULL, "View created from the results of analysis."));
+   VERIFY(pArgList->addArg<RasterElement>("Corrected Data Cube", NULL, "Data cube created from the analysis."));
    return true;
 }
 
@@ -632,7 +633,7 @@ bool PCA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
       {
          // extract batch-mode only args
          string xformType;
-         pInArgList->getPlugInArgValue("Transform Type", xformType);
+         pInArgList->getPlugInArgValue("Statistics Matrix Type", xformType);
          if (xformType == "Second Moment")
          {
             mCalcMethod = SECONDMOMENT;
@@ -951,7 +952,7 @@ bool PCA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
       // Set the values in the output arg list
       if (pOutArgList != NULL)
       {
-         VERIFY(pOutArgList->setPlugInArgValue(ViewArg(), mpView));
+         VERIFY(pOutArgList->setPlugInArgValue(Executable::ViewArg(), mpView));
          VERIFY(pOutArgList->setPlugInArgValue("Corrected Data Cube", mpPCARaster));
       }
 
@@ -999,8 +1000,8 @@ bool PCA::extractInputArgs(const PlugInArgList* pArgList)
       return false;
    }
 
-   mpProgress = pArgList->getPlugInArgValue<Progress>(ProgressArg());
-   mpRaster = pArgList->getPlugInArgValue<RasterElement>(DataElementArg());
+   mpProgress = pArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
+   mpRaster = pArgList->getPlugInArgValue<RasterElement>(Executable::DataElementArg());
    if (mpRaster == NULL)
    {
       mMessage = "The input raster element was null";
@@ -1895,7 +1896,7 @@ bool PCA::getStatistics(vector<string> aoiList)
 
             bool recalculate = true;
             bool computeInverse(false);
-            secondMoment->getInArgList().setPlugInArgValue(DataElementArg(), mpRaster);
+            secondMoment->getInArgList().setPlugInArgValue(Executable::DataElementArg(), mpRaster);
             secondMoment->getInArgList().setPlugInArgValue("Recalculate", &recalculate);
             secondMoment->getInArgList().setPlugInArgValue("ComputeInverse", &computeInverse);
             if (mUseAoi == true)
@@ -1969,7 +1970,7 @@ bool PCA::getStatistics(vector<string> aoiList)
 
             bool recalculate = true;
             bool computeInverse(false);
-            covariance->getInArgList().setPlugInArgValue(DataElementArg(), mpRaster);
+            covariance->getInArgList().setPlugInArgValue(Executable::DataElementArg(), mpRaster);
             covariance->getInArgList().setPlugInArgValue("Recalculate", &recalculate);
             covariance->getInArgList().setPlugInArgValue("ComputeInverse", &computeInverse);
             if (mUseAoi == true)

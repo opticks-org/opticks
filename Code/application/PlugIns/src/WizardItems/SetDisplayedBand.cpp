@@ -48,10 +48,10 @@ bool SetDisplayedBand::getInputSpecification(PlugInArgList*& pArgList)
 {
    VERIFY(DesktopItems::getInputSpecification(pArgList) == true);
    VERIFY(pArgList != NULL);
-   VERIFY(pArgList->addArg<RasterLayer>(Executable::LayerArg()) == true);
-   VERIFY(pArgList->addArg<RasterChannelType>("Channel") == true);
-   VERIFY(pArgList->addArg<unsigned int>("Original Band Number") == true);
-   VERIFY(pArgList->addArg<RasterElement>(Executable::DataElementArg()) == true);
+   VERIFY(pArgList->addArg<RasterLayer>(Executable::LayerArg(), "Layer to set the displayed bands on."));
+   VERIFY(pArgList->addArg<RasterChannelType>("Channel", "Channel to change the band to."));
+   VERIFY(pArgList->addArg<unsigned int>("Original Band Number", "Number of the band to set to a different channel."));
+   VERIFY(pArgList->addArg<RasterElement>(Executable::DataElementArg(), "Raster element to change the displayed bands on."));
    return true;
 }
 

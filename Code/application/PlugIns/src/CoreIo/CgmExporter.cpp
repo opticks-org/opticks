@@ -47,9 +47,9 @@ bool CgmExporter::getInputSpecification(PlugInArgList*& pInArgList)
    VERIFY(pInArgList != NULL);
 
    bool success = true;
-   success = success && pInArgList->addArg<Progress>(ProgressArg(), NULL);
-   success = success && pInArgList->addArg<FileDescriptor>(ExportDescriptorArg(), NULL);
-   success = success && pInArgList->addArg<AnnotationLayer>(ExportItemArg(), NULL);
+   success = success && pInArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription());
+   success = success && pInArgList->addArg<FileDescriptor>(Exporter::ExportDescriptorArg(), NULL, "File descriptor for the output file.");
+   success = success && pInArgList->addArg<AnnotationLayer>(Exporter::ExportItemArg(), NULL, "Layer to export.");
 
    return success;
 }
@@ -72,10 +72,10 @@ bool CgmExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
    { // scope the MessageResource
       MessageResource pMsg("Input arguments", "app", "9546476B-1B2B-47db-8956-8299C96CD4A4");
 
-      pProgress = pInArgList->getPlugInArgValue<Progress>(ProgressArg());
+      pProgress = pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
       pMsg->addBooleanProperty("Progress Present", (pProgress != NULL));
 
-      pFileDescriptor = pInArgList->getPlugInArgValue<FileDescriptor>(ExportDescriptorArg());
+      pFileDescriptor = pInArgList->getPlugInArgValue<FileDescriptor>(Exporter::ExportDescriptorArg());
       if (pFileDescriptor == NULL)
       {
          if (pProgress != NULL)
@@ -87,7 +87,7 @@ bool CgmExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
       }
       pMsg->addProperty("Destination", pFileDescriptor->getFilename());
 
-      pLayer = pInArgList->getPlugInArgValue<AnnotationLayer>(ExportItemArg());
+      pLayer = pInArgList->getPlugInArgValue<AnnotationLayer>(Exporter::ExportItemArg());
       if (pLayer == NULL)
       {
          if (pProgress != NULL)

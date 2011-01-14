@@ -82,8 +82,8 @@ bool Demo::populateInteractiveInputArgList(PlugInArgList *pArgList)
 {
    VERIFY(pArgList != NULL);
 
-   VERIFY(pArgList->addArg<Progress>(ProgressArg()));
-   VERIFY(pArgList->addArg<RasterElement>(DataElementArg()));
+   VERIFY(pArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription()));
+   VERIFY(pArgList->addArg<RasterElement>(Executable::DataElementArg(), NULL, "Raster element on which the demo algorithm will be performed."));
 
    return true;
 }
@@ -118,9 +118,9 @@ bool Demo::parseInputArgList(PlugInArgList *pArgList)
    bool success = true;
 
    VERIFY(pArgList != NULL);
-   mpProgress = pArgList->getPlugInArgValue<Progress>(ProgressArg());
+   mpProgress = pArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
 
-   RasterElement* pRasterElement = pArgList->getPlugInArgValue<RasterElement>(DataElementArg());
+   RasterElement* pRasterElement = pArgList->getPlugInArgValue<RasterElement>(Executable::DataElementArg());
    if (pRasterElement == NULL)
    {
       string msg = "Error Demo001: The raster element input value is invalid!";

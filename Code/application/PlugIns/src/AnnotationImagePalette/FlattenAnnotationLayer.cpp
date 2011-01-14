@@ -56,8 +56,8 @@ FlattenAnnotationLayer::~FlattenAnnotationLayer()
 bool FlattenAnnotationLayer::getInputSpecification(PlugInArgList*& pInArgList)
 {
    VERIFY(pInArgList = Service<PlugInManagerServices>()->getPlugInArgList());
-   VERIFY(pInArgList->addArg<Progress>(ProgressArg(), NULL));
-   VERIFY(pInArgList->addArg<AnnotationLayer>(LayerArg(), "The annotation layer containing the image objects to be flattened."));
+   VERIFY(pInArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription()));
+   VERIFY(pInArgList->addArg<AnnotationLayer>(Executable::LayerArg(), "The annotation layer containing the image objects to be flattened."));
    VERIFY(pInArgList->addArg<RasterLayer>("Raster Layer", NULL, "The raster layer which will contain the flattened image objects. "
                                                                 "The default is the top-most layer containing the primary raster "
                                                                 "element of the annotation layer's view."));
@@ -76,9 +76,9 @@ bool FlattenAnnotationLayer::execute(PlugInArgList* pInArgList, PlugInArgList* p
    {
       return false;
    }
-   ProgressTracker progress(pInArgList->getPlugInArgValue<Progress>(ProgressArg()), "Flattening layer.",
+   ProgressTracker progress(pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg()), "Flattening layer.",
       "app", "f2582dbc-0003-472b-80c3-acffd34334b3");
-   AnnotationLayer* pAnnotationLayer = pInArgList->getPlugInArgValue<AnnotationLayer>(LayerArg());
+   AnnotationLayer* pAnnotationLayer = pInArgList->getPlugInArgValue<AnnotationLayer>(Executable::LayerArg());
    if (pAnnotationLayer == NULL)
    {
       progress.report("No annotation layer specified.", 0, ERRORS, true);

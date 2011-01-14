@@ -61,6 +61,7 @@ bool GetFilename::getInputSpecification(PlugInArgList*& pArgList)
       pArg->setName("Dialog Caption");
       pArg->setType("string");
       pArg->setDefaultValue(NULL);
+      pArg->setDescription("Caption for the file browsing dialog.");
       pArgList->addArg(*pArg);
 
       pArg = pPlugInManager->getPlugInArg();
@@ -68,6 +69,7 @@ bool GetFilename::getInputSpecification(PlugInArgList*& pArgList)
       pArg->setName("Initial Directory/File");
       pArg->setType("Filename");
       pArg->setDefaultValue(NULL);
+      pArg->setDescription("The directory or file the file browse dialog should initialize to.");
       pArgList->addArg(*pArg);
 
       pArg = pPlugInManager->getPlugInArg();
@@ -75,6 +77,7 @@ bool GetFilename::getInputSpecification(PlugInArgList*& pArgList)
       pArg->setName("File Filters");
       pArg->setType("string");
       pArg->setDefaultValue(NULL);
+      pArg->setDescription("Desired file extensions.");
       pArgList->addArg(*pArg);
    }
 
@@ -100,6 +103,7 @@ bool GetFilename::getOutputSpecification(PlugInArgList*& pArgList)
       pArg->setName("Filename");
       pArg->setType("Filename");
       pArg->setDefaultValue(NULL);
+      pArg->setDescription("Filename chosen from the file browsing dialog.");
       pArgList->addArg(*pArg);
    }
 
@@ -332,6 +336,7 @@ bool GetExistingFilenames::getOutputSpecification(PlugInArgList*& pArgList)
       pArg->setName("Filenames");
       pArg->setType("vector<Filename>");
       pArg->setDefaultValue(NULL);
+      pArg->setDescription("Vector of filenames chosen by the file browsing dialog.");
       pArgList->addArg(*pArg);
    }
 

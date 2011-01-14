@@ -46,7 +46,7 @@ bool IceExporterShell::getInputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = mpPlugInMgr->getPlugInArgList();
    VERIFY(pArgList != NULL);
-   VERIFY(pArgList->addArg<Progress>(ProgressArg(), NULL));
+   VERIFY(pArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription()));
    return true;
 }
 
@@ -168,7 +168,7 @@ QWidget* IceExporterShell::getExportOptionsWidget(const PlugInArgList*)
 void IceExporterShell::parseInputArgs(PlugInArgList* pInArgList)
 {
    ICEVERIFY_MSG(pInArgList != NULL, "Invalid argument list specified.");
-   mpProgress = pInArgList->getPlugInArgValue<Progress>(ProgressArg());
+   mpProgress = pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
 }
 
 void IceExporterShell::finishWriting(IceWriter& writer)

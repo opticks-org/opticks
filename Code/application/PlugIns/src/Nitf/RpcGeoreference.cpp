@@ -87,8 +87,8 @@ bool Nitf::RpcGeoreference::execute(PlugInArgList* pInParam, PlugInArgList* pOut
       return false;
    }
 
-   mpRaster = pInParam->getPlugInArgValue<RasterElement>(DataElementArg());
-   Progress* pProgress = pInParam->getPlugInArgValue<Progress>(ProgressArg());
+   mpRaster = pInParam->getPlugInArgValue<RasterElement>(Executable::DataElementArg());
+   Progress* pProgress = pInParam->getPlugInArgValue<Progress>(Executable::ProgressArg());
    string messageText;
 
    if (mpRaster == NULL)
@@ -299,8 +299,8 @@ bool Nitf::RpcGeoreference::getInputSpecification(PlugInArgList*& pArgList)
 
    // Set up list
    VERIFY((pArgList = Service<PlugInManagerServices>()->getPlugInArgList()) != NULL);
-   VERIFY(pArgList->addArg<Progress>(ProgressArg(), NULL));
-   VERIFY(pArgList->addArg<RasterElement>(DataElementArg()));
+   VERIFY(pArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription()));
+   VERIFY(pArgList->addArg<RasterElement>(Executable::DataElementArg(), NULL, "Raster element on which georeferencing will be performed."));
 
    return true;
 }

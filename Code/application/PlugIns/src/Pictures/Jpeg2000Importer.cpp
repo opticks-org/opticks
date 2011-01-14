@@ -541,10 +541,10 @@ QWidget* Jpeg2000Importer::getPreview(const DataDescriptor* pDescriptor, Progres
          bool bSuccess = getInputSpecification(pInArgList);
          if ((bSuccess == true) && (pInArgList != NULL))
          {
-            bSuccess = pInArgList->setPlugInArgValue(ProgressArg(), pProgress);
+            bSuccess = pInArgList->setPlugInArgValue(Executable::ProgressArg(), pProgress);
             if (bSuccess)
             {
-               bSuccess = pInArgList->setPlugInArgValue(ImportElementArg(), pRasterElement);
+               bSuccess = pInArgList->setPlugInArgValue(Importer::ImportElementArg(), pRasterElement);
             }
          }
 
