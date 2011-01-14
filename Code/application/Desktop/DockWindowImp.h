@@ -89,6 +89,7 @@ public:
 public slots:
    void dock();
    void undock();
+   virtual void setVisible(bool visible);
 
 signals:
    void visibilityChanged(bool bVisible);

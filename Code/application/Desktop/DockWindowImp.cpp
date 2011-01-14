@@ -174,6 +174,15 @@ void DockWindowImp::undock()
    }
 }
 
+void DockWindowImp::setVisible(bool visible)
+{
+   QDockWidget::setVisible(visible);
+   if (visible == true)
+   {
+      raise();
+   }
+}
+
 void DockWindowImp::undocked(bool isUndocked)
 {
    if (isUndocked == true)
