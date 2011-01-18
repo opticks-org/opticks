@@ -755,25 +755,45 @@ void RasterLayerImp::drawPixelValues()
 
    GLboolean bScissorEnable;
    glGetBooleanv(GL_SCISSOR_TEST, &bScissorEnable);
-   if ((bScissorEnable == GL_TRUE) && (pView->isInsetEnabled() == true))
+   if (bScissorEnable == GL_TRUE)
    {
       // inset
       GLint pScreenLocation[4];
       glGetIntegerv(GL_SCISSOR_BOX, pScreenLocation);
       int iMinX = pScreenLocation[0];
       int iMinY = pScreenLocation[1];
+      int iMaxX = iMinX + pScreenLocation[2];
+      int iMaxY = iMinY + pScreenLocation[3];
 
       // Map the scissor box screen coordinates from the product view to the
       // spatial data view if the inset pixel values are drawn in a product
-      if (dynamic_cast<ViewImp*>(pView->parentWidget()) != NULL)
+      ViewImp* pParentView = dynamic_cast<ViewImp*>(pView->parentWidget());
+      if (pView->isInsetEnabled() == true)
       {
-         QPoint screenCoord = pView->mapFromParent(QPoint(iMinX, iMinY));
+         if (pParentView != NULL)
+         {
+            QPoint screenCoord = pView->mapFromParent(QPoint(iMinX, iMinY));
+            iMinX = screenCoord.x();
+            iMinY = screenCoord.y();
+         }
+
+         iMaxX = iMinX + pScreenLocation[2];
+         iMaxY = iMinY + pScreenLocation[3];
+      }
+      else if (pParentView != NULL)
+      {
+         // Calcuate the offset based on the spatial data view position relative to the view object bounding box
+         int offset = pParentView->height() - (pScreenLocation[1] * 2) - pScreenLocation[3];
+
+         QPoint screenCoord = pView->mapFromParent(QPoint(0, offset));
          iMinX = screenCoord.x();
          iMinY = screenCoord.y();
+
+         screenCoord = pView->mapFromParent(QPoint(pParentView->width(), pParentView->height() + offset));
+         iMaxX = screenCoord.x();
+         iMaxY = screenCoord.y();
       }
 
-      int iMaxX = iMinX + pScreenLocation[2];
-      int iMaxY = iMinY + pScreenLocation[3];
       pView->translateScreenToWorld(iMinX, iMinY, lowerLeft.mX, lowerLeft.mY);
       pView->translateScreenToWorld(iMinX, iMaxY, upperLeft.mX, upperLeft.mY);
       pView->translateScreenToWorld(iMaxX, iMaxY, upperRight.mX, upperRight.mY);
