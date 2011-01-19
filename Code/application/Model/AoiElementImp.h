@@ -56,6 +56,11 @@ public:
 
    bool setGeocentric(bool geocentric);
 
+protected:
+   void objectPropertyChanged(Subject &subject, const std::string &signal, const boost::any &data);
+   void objectAdded(Subject &subject, const std::string &signal, const boost::any &data);
+   void objectDeleted(Subject &subject, const std::string &signal, const boost::any &data);
+   
 private:
    mutable FactoryResource<BitMask> mpBitMask;
    mutable bool mBitMaskDirty;

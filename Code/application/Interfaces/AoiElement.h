@@ -35,13 +35,18 @@ class GraphicObject;
 class AoiElement : public GraphicElement
 {
 public:
-   /**
+    /**
+    *  Emitted when the points in the AOI are changed, e.g., points are added, removed, toggled, AOI area is moved, etc.
+    */
+   SIGNAL_METHOD(AoiElement, PointsChanged)
+
+  /**
     * Clear all points from the AOI.
     *
     * Calling this method will delete all objects
     * within the AOI.
     *
-    *  @notify  This method will notify Subject::signalModified.
+    *  @notify  This method will notify Subject::signalModified and AoiElement::signalPointsChanged.
     */
    virtual void clearPoints() = 0;
 
@@ -62,7 +67,7 @@ public:
    /**
     * Toggle all points.  This causes an inversion of the pixels selected.
     *
-    *  @notify  This method will notify Subject::signalModified.
+    *  @notify  This method will notify Subject::signalModified and AoiElement::signalPointsChanged.
     */
    virtual void toggleAllPoints() = 0;
 
@@ -80,7 +85,7 @@ public:
     *  @param   points
     *           A vector of points to be marked as selected in the AOI.
     *
-    *  @notify  This method will notify Subject::signalModified.
+    *  @notify  This method will notify Subject::signalModified and AoiElement::signalPointsChanged.
     */
    virtual GraphicObject *addPoints(const std::vector<LocationType>& points) = 0;
 
@@ -92,7 +97,7 @@ public:
     *           A BitMask containing additional points to mark as selected.
     *           The AoiElement does not take ownership over the mask.
     *
-    *  @notify  This method will notify Subject::signalModified.
+    *  @notify  This method will notify Subject::signalModified and AoiElement::signalPointsChanged.
     */
    virtual GraphicObject *addPoints(const BitMask* pPoints) = 0;
 
@@ -103,7 +108,7 @@ public:
     *  @param   point
     *           A point to mark as selected in the AOI.
     *
-    *  @notify  This method will notify Subject::signalModified.
+    *  @notify  This method will notify Subject::signalModified and AoiElement::signalPointsChanged.
     */
    virtual GraphicObject *addPoint(LocationType point) = 0;
 
@@ -114,7 +119,7 @@ public:
     *  @param   points
     *           A vector of points to be marked as unselected in the AOI.
     *
-    *  @notify  This method will notify Subject::signalModified.
+    *  @notify  This method will notify Subject::signalModified and AoiElement::signalPointsChanged.
     */
    virtual GraphicObject *removePoints(const std::vector<LocationType>& points) = 0;
 
@@ -126,7 +131,7 @@ public:
     *           A BitMask containing additional points to mark as unselected.
     *           The AoiElement does not take ownership over the mask.
     *
-    *  @notify  This method will notify Subject::signalModified.
+    *  @notify  This method will notify Subject::signalModified and AoiElement::signalPointsChanged.
     */
    virtual GraphicObject *removePoints(const BitMask* pPoints) = 0;
 
@@ -137,7 +142,7 @@ public:
     *  @param   point
     *           A point to mark as unselected in the AOI.
     *
-    *  @notify  This method will notify Subject::signalModified.
+    *  @notify  This method will notify Subject::signalModified and AoiElement::signalPointsChanged.
     */
    virtual GraphicObject *removePoint(LocationType point) = 0;
 
@@ -149,7 +154,7 @@ public:
     *  @param   points
     *           A vector of points to toggle the selected status in the AOI.
     *
-    *  @notify  This method will notify Subject::signalModified.
+    *  @notify  This method will notify Subject::signalModified and AoiElement::signalPointsChanged.
     */
    virtual GraphicObject *togglePoints(const std::vector<LocationType>& points) = 0;
 
@@ -162,7 +167,7 @@ public:
     *           A BitMask containing selected pixels indicating those that should
     *           be toggled.  The AoiElement does not take ownership over the mask.
     *
-    *  @notify  This method will notify Subject::signalModified.
+    *  @notify  This method will notify Subject::signalModified and AoiElement::signalPointsChanged.
     */
    virtual GraphicObject *togglePoints(const BitMask* pPoints) = 0;
 
@@ -174,7 +179,7 @@ public:
     *  @param   point
     *           A point to toggle the selected status in the AOI.
     *
-    *  @notify  This method will notify Subject::signalModified.
+    *  @notify  This method will notify Subject::signalModified and AoiElement::signalPointsChanged.
     */
    virtual GraphicObject *togglePoint(LocationType point) = 0;
 

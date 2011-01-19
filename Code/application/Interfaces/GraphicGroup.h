@@ -36,6 +36,11 @@ public:
    SIGNAL_METHOD(GraphicGroup, ObjectRemoved)
 
    /**
+    *  Emitted with any<GraphicProperty*> when a property of an object is changed.
+    */
+   SIGNAL_METHOD(GraphicGroup, ObjectChanged)
+
+   /**
     *  Creates and inserts an object of the specified type.
     *
     *  @param   type

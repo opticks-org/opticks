@@ -20,6 +20,7 @@
 #include "DrawUtil.h"
 #include "glCommon.h"
 #include "GraphicElement.h"
+#include "GraphicGroup.h"
 #include "GraphicGroupImp.h"
 #include "GraphicLayer.h"
 #include "GraphicLayerImp.h"
@@ -1099,4 +1100,6 @@ void GraphicGroupImp::updateFromProperty(GraphicProperty* pProperty)
          updateBoundingBox();
       }
    }
+
+   notify(SIGNAL_NAME(GraphicGroup, ObjectChanged), boost::any(pProperty));
 }
