@@ -495,7 +495,9 @@ bool PCA::getInputSpecification(PlugInArgList*& pArgList)
 
       VERIFY(pArgList->addArg<bool>("Use Transform File", NULL, "Whether to use an external transform file."));
       VERIFY(pArgList->addArg<Filename>("Transform Filename", NULL, "Filename for external transform file, if applicable."));
-      VERIFY(pArgList->addArg<string>("Statistics Matrix Type", NULL, 
+      #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Transform Type should be renamed to Statistics Matrix Type sometime when wizard compatibility " \
+         "can be broken. (sbmiller)")
+      VERIFY(pArgList->addArg<string>("Transform Type", NULL, 
          "Type of statistics matrix to be used by PCA (Covariance, Second Moment, or Correlation Coefficient)."));
       VERIFY(pArgList->addArg<bool>("Use AOI", false, "Whether to perform PCA over a specific AOI."));
       VERIFY(pArgList->addArg<string>("AOI Name", false, "Name of AOI to perform PCA over, if applicable."));

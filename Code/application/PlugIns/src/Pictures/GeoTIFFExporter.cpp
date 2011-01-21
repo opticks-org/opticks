@@ -97,7 +97,7 @@ bool GeoTIFFExporter::execute(PlugInArgList* pInParam, PlugInArgList* pOutParam)
    mpProgress = pInParam->getPlugInArgValue<Progress>(Executable::ProgressArg());
 
    // Sensor data
-   mpRaster = pInParam->getPlugInArgValue<RasterElement>(Exporter::ExportDescriptorArg());
+   mpRaster = pInParam->getPlugInArgValue<RasterElement>(Exporter::ExportItemArg());
    if (mpRaster == NULL)
    {
       mMessage = "The raster element input value is invalid!";
