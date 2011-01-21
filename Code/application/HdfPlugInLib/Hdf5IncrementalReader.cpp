@@ -40,7 +40,7 @@ bool Hdf5IncrementalReader::selectHyperslab(H5S_seloper_t operation,
    return (H5Sselect_hyperslab(mDataspace, operation, pStart, pStride, pCount, pBlock) >= 0);
 }
 
-bool Hdf5IncrementalReader::selectElements(H5S_seloper_t operation, const size_t num_elements, const hsize_t ** pCoord)
+bool Hdf5IncrementalReader::selectElements(H5S_seloper_t operation, const size_t num_elements, const hsize_t * pCoord)
 {
    DO_IF(mDataspace <= 0, return false);
    return (H5Sselect_elements(mDataspace, operation, num_elements, pCoord) >= 0);

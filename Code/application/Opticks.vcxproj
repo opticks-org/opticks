@@ -1,0 +1,474 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{4848789B-87B2-49B2-AF93-8F1B6AA7DB18}</ProjectGuid>
+    <RootNamespace>Opticks</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="CompileSettings\32bitSettings.props" />
+    <Import Project="CompileSettings\Macros.props" />
+    <Import Project="CompileSettings\AllCommonSettings-Debug-32bit.props" />
+    <Import Project="CompileSettings\pthreads.props" />
+    <Import Project="CompileSettings\qwt.props" />
+    <Import Project="CompileSettings\Qt-Debug.props" />
+    <Import Project="CompileSettings\Xerces-Debug.props" />
+    <Import Project="CompileSettings\xqilla-debug.props" />
+    <Import Project="CompileSettings\ApplicationCommonSettings-Debug.props" />
+    <Import Project="CompileSettings\Cg.props" />
+    <Import Project="CompileSettings\glew-debug.props" />
+    <Import Project="CompileSettings\raptor.props" />
+    <Import Project="CompileSettings\minizip-debug.props" />
+    <Import Project="CompileSettings\yaml-cpp.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="CompileSettings\32bitSettings.props" />
+    <Import Project="CompileSettings\Macros.props" />
+    <Import Project="CompileSettings\AllCommonSettings-Release-32bit.props" />
+    <Import Project="CompileSettings\pthreads.props" />
+    <Import Project="CompileSettings\qwt.props" />
+    <Import Project="CompileSettings\Qt-Release.props" />
+    <Import Project="CompileSettings\Xerces-Release.props" />
+    <Import Project="CompileSettings\xqilla-release.props" />
+    <Import Project="CompileSettings\ApplicationCommonSettings-Release.props" />
+    <Import Project="CompileSettings\Cg.props" />
+    <Import Project="CompileSettings\glew-release.props" />
+    <Import Project="CompileSettings\raptor.props" />
+    <Import Project="CompileSettings\minizip-release.props" />
+    <Import Project="CompileSettings\yaml-cpp.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="CompileSettings\64bitSettings.props" />
+    <Import Project="CompileSettings\Macros.props" />
+    <Import Project="CompileSettings\AllCommonSettings-Debug-64bit.props" />
+    <Import Project="CompileSettings\pthreads.props" />
+    <Import Project="CompileSettings\qwt.props" />
+    <Import Project="CompileSettings\Qt-Debug.props" />
+    <Import Project="CompileSettings\Xerces-Debug.props" />
+    <Import Project="CompileSettings\xqilla-debug.props" />
+    <Import Project="CompileSettings\ApplicationCommonSettings-Debug.props" />
+    <Import Project="CompileSettings\Cg.props" />
+    <Import Project="CompileSettings\glew-debug.props" />
+    <Import Project="CompileSettings\raptor.props" />
+    <Import Project="CompileSettings\minizip-debug.props" />
+    <Import Project="CompileSettings\yaml-cpp.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="CompileSettings\64bitSettings.props" />
+    <Import Project="CompileSettings\Macros.props" />
+    <Import Project="CompileSettings\AllCommonSettings-Release-64bit.props" />
+    <Import Project="CompileSettings\pthreads.props" />
+    <Import Project="CompileSettings\qwt.props" />
+    <Import Project="CompileSettings\Qt-Release.props" />
+    <Import Project="CompileSettings\Xerces-Release.props" />
+    <Import Project="CompileSettings\xqilla-release.props" />
+    <Import Project="CompileSettings\ApplicationCommonSettings-Release.props" />
+    <Import Project="CompileSettings\Cg.props" />
+    <Import Project="CompileSettings\glew-release.props" />
+    <Import Project="CompileSettings\raptor.props" />
+    <Import Project="CompileSettings\minizip-release.props" />
+    <Import Project="CompileSettings\yaml-cpp.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir>$(BuildDir)\Binaries-$(Platform)-$(Configuration)\Bin\</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\Release/Opticks.tlb</TypeLibraryName>
+    </Midl>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>
+      </AssemblerListingLocation>
+    </ClCompile>
+    <ResourceCompile>
+      <Culture>0x0409</Culture>
+      <ResourceOutputFileName>$(IntDir)%(Filename).res</ResourceOutputFileName>
+    </ResourceCompile>
+    <Link>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalManifestDependencies>%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+    </Link>
+    <PostBuildEvent>
+      <Message>Prepping for Run...</Message>
+      <Command>python.exe "$(CODE_DIR)\build.py" --prep --mode=release --arch=32 -v</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>X64</TargetEnvironment>
+      <TypeLibraryName>.\Release/Opticks.tlb</TypeLibraryName>
+    </Midl>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>
+      </AssemblerListingLocation>
+    </ClCompile>
+    <ResourceCompile>
+      <Culture>0x0409</Culture>
+      <ResourceOutputFileName>$(IntDir)%(Filename).res</ResourceOutputFileName>
+    </ResourceCompile>
+    <Link>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalManifestDependencies>%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+    </Link>
+    <PostBuildEvent>
+      <Message>Prepping for Run...</Message>
+      <Command>python.exe "$(CODE_DIR)\build.py" --prep --mode=release --arch=64 -v</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\Debug/Opticks.tlb</TypeLibraryName>
+    </Midl>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>
+      </AssemblerListingLocation>
+      <BrowseInformationFile>
+      </BrowseInformationFile>
+    </ClCompile>
+    <ResourceCompile>
+      <Culture>0x0409</Culture>
+      <ResourceOutputFileName>$(IntDir)%(Filename).res</ResourceOutputFileName>
+    </ResourceCompile>
+    <Link>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalManifestDependencies>%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+    </Link>
+    <PostBuildEvent>
+      <Message>Prepping for Run...</Message>
+      <Command>python.exe "$(CODE_DIR)\build.py" --prep --mode=debug --arch=32 -v</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>X64</TargetEnvironment>
+      <TypeLibraryName>.\Debug/Opticks.tlb</TypeLibraryName>
+    </Midl>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>
+      </AssemblerListingLocation>
+      <BrowseInformationFile>
+      </BrowseInformationFile>
+    </ClCompile>
+    <ResourceCompile>
+      <Culture>0x0409</Culture>
+      <ResourceOutputFileName>$(IntDir)%(Filename).res</ResourceOutputFileName>
+    </ResourceCompile>
+    <Link>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalManifestDependencies>%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+    </Link>
+    <PostBuildEvent>
+      <Message>Prepping for Run...</Message>
+      <Command>python.exe "$(CODE_DIR)\build.py" --prep --mode=debug --arch=64 -v</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ResourceCompile Include="App.rc" />
+    <ResourceCompile Include="PlugInUtilities\EventMessages.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Gui\res\application.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Interfaces\Animation.h" />
+    <ClInclude Include="Interfaces\AnimationController.h" />
+    <ClInclude Include="Interfaces\AnimationFrame.h" />
+    <ClInclude Include="Interfaces\AnimationServices.h" />
+    <ClInclude Include="Interfaces\AnimationToolBar.h" />
+    <ClInclude Include="Interfaces\AnnotationElement.h" />
+    <ClInclude Include="Interfaces\AnnotationLayer.h" />
+    <ClInclude Include="Interfaces\Any.h" />
+    <ClInclude Include="Interfaces\AnyData.h" />
+    <ClInclude Include="Interfaces\AoiElement.h" />
+    <ClInclude Include="Interfaces\AoiLayer.h" />
+    <ClInclude Include="Interfaces\AppConfig.h" />
+    <ClInclude Include="Interfaces\ApplicationServices.h" />
+    <ClInclude Include="Interfaces\ArcObject.h" />
+    <ClInclude Include="Interfaces\Arrow.h" />
+    <ClInclude Include="Interfaces\ArrowObject.h" />
+    <ClInclude Include="Interfaces\Axis.h" />
+    <ClInclude Include="Interfaces\BitMask.h" />
+    <ClInclude Include="Interfaces\BitMaskObject.h" />
+    <ClInclude Include="Interfaces\CartesianGridlines.h" />
+    <ClInclude Include="Interfaces\CartesianPlot.h" />
+    <ClInclude Include="Interfaces\CgmObject.h" />
+    <ClInclude Include="Interfaces\Classification.h" />
+    <ClInclude Include="Interfaces\ClassificationLayer.h" />
+    <ClInclude Include="Interfaces\ColorType.h" />
+    <ClInclude Include="Interfaces\ComplexData.h" />
+    <ClInclude Include="Interfaces\ConfigurationSettings.h" />
+    <ClInclude Include="Interfaces\ContextMenu.h" />
+    <ClInclude Include="Interfaces\ContextMenuAction.h" />
+    <ClInclude Include="Interfaces\ContextMenuActions.h" />
+    <ClInclude Include="Interfaces\Curve.h" />
+    <ClInclude Include="Interfaces\CurveCollection.h" />
+    <ClInclude Include="Interfaces\DataAccessor.h" />
+    <ClInclude Include="Interfaces\DataAccessorImpl.h" />
+    <ClInclude Include="Interfaces\DataDescriptor.h" />
+    <ClInclude Include="Interfaces\DataElement.h" />
+    <ClInclude Include="Interfaces\DataElementGroup.h" />
+    <ClInclude Include="Interfaces\DataRequest.h" />
+    <ClInclude Include="Interfaces\DataVariantFactory.h" />
+    <ClInclude Include="Interfaces\DateTime.h" />
+    <ClInclude Include="Interfaces\DesktopServices.h" />
+    <ClInclude Include="Interfaces\DimensionDescriptor.h" />
+    <ClInclude Include="Interfaces\DimensionObject.h" />
+    <ClInclude Include="Interfaces\DockWindow.h" />
+    <ClInclude Include="Interfaces\DynamicModule.h" />
+    <ClInclude Include="Interfaces\DynamicObject.h" />
+    <ClInclude Include="Interfaces\EastArrowObject.h" />
+    <ClInclude Include="Interfaces\EllipseObject.h" />
+    <ClInclude Include="Interfaces\EnumWrapper.h" />
+    <ClInclude Include="Interfaces\Executable.h" />
+    <ClInclude Include="Interfaces\ExecutableAgent.h" />
+    <ClInclude Include="Interfaces\ExportAgent.h" />
+    <ClInclude Include="Interfaces\Exporter.h" />
+    <ClInclude Include="Interfaces\External.h" />
+    <ClInclude Include="Interfaces\FileDescriptor.h" />
+    <ClInclude Include="Interfaces\FileFinder.h" />
+    <ClInclude Include="Interfaces\FileImageObject.h" />
+    <ClInclude Include="Interfaces\Filename.h" />
+    <ClInclude Include="Interfaces\Font.h" />
+    <ClInclude Include="Interfaces\FrameLabelObject.h" />
+    <ClInclude Include="Interfaces\GcpLayer.h" />
+    <ClInclude Include="Interfaces\GcpList.h" />
+    <ClInclude Include="Interfaces\Georeference.h" />
+    <ClInclude Include="Interfaces\GpuProgramDescriptor.h" />
+    <ClInclude Include="Interfaces\GraphicElement.h" />
+    <ClInclude Include="Interfaces\GraphicGroup.h" />
+    <ClInclude Include="Interfaces\GraphicLayer.h" />
+    <ClInclude Include="Interfaces\GraphicObject.h" />
+    <ClInclude Include="Interfaces\Gridlines.h" />
+    <ClInclude Include="Interfaces\Histogram.h" />
+    <ClInclude Include="Interfaces\HistogramPlot.h" />
+    <ClInclude Include="Interfaces\HistogramWindow.h" />
+    <ClInclude Include="Interfaces\ImageFilterDescriptor.h" />
+    <ClInclude Include="Interfaces\ImportAgent.h" />
+    <ClInclude Include="Interfaces\ImportDescriptor.h" />
+    <ClInclude Include="Interfaces\Importer.h" />
+    <ClInclude Include="Interfaces\Int64.h" />
+    <ClInclude Include="Interfaces\Interpreter.h" />
+    <ClInclude Include="Interfaces\InterpreterManager.h" />
+    <ClInclude Include="Interfaces\LatLonInsertObject.h" />
+    <ClInclude Include="Interfaces\LatLonLayer.h" />
+    <ClInclude Include="Interfaces\Layer.h" />
+    <ClInclude Include="Interfaces\LayerList.h" />
+    <ClInclude Include="Interfaces\LineObject.h" />
+    <ClInclude Include="Interfaces\Location.h" />
+    <ClInclude Include="Interfaces\LocationType.h" />
+    <ClInclude Include="Interfaces\Locator.h" />
+    <ClInclude Include="Interfaces\MeasurementLayer.h" />
+    <ClInclude Include="Interfaces\MenuBar.h" />
+    <ClInclude Include="Interfaces\MessageLog.h" />
+    <ClInclude Include="Interfaces\MessageLogMgr.h" />
+    <ClInclude Include="Interfaces\ModelServices.h" />
+    <ClInclude Include="Interfaces\Module.h" />
+    <ClInclude Include="Interfaces\ModuleManager.h" />
+    <ClInclude Include="Interfaces\MouseMode.h" />
+    <ClInclude Include="Interfaces\MultipointObject.h" />
+    <ClInclude Include="Interfaces\NorthArrowObject.h" />
+    <ClInclude Include="Interfaces\ObjectFactory.h" />
+    <ClInclude Include="Interfaces\Observer.h" />
+    <ClInclude Include="Interfaces\Option.h" />
+    <ClInclude Include="Interfaces\OrthographicView.h" />
+    <ClInclude Include="Interfaces\PerspectiveView.h" />
+    <ClInclude Include="Interfaces\PlotGroup.h" />
+    <ClInclude Include="Interfaces\PlotObject.h" />
+    <ClInclude Include="Interfaces\PlotSet.h" />
+    <ClInclude Include="Interfaces\PlotView.h" />
+    <ClInclude Include="Interfaces\PlotWidget.h" />
+    <ClInclude Include="Interfaces\PlotWindow.h" />
+    <ClInclude Include="Interfaces\PlugIn.h" />
+    <ClInclude Include="Interfaces\PlugInArg.h" />
+    <ClInclude Include="Interfaces\PlugInArgList.h" />
+    <ClInclude Include="Interfaces\PlugInCallback.h" />
+    <ClInclude Include="Interfaces\PlugInDescriptor.h" />
+    <ClInclude Include="Interfaces\PlugInManagerServices.h" />
+    <ClInclude Include="Interfaces\PlugInRegistration.h" />
+    <ClInclude Include="Interfaces\Point.h" />
+    <ClInclude Include="Interfaces\PointSet.h" />
+    <ClInclude Include="Interfaces\PolarGridlines.h" />
+    <ClInclude Include="Interfaces\PolarPlot.h" />
+    <ClInclude Include="Interfaces\PolygonObject.h" />
+    <ClInclude Include="Interfaces\PolygonPlotObject.h" />
+    <ClInclude Include="Interfaces\PolylineObject.h" />
+    <ClInclude Include="Interfaces\ProductView.h" />
+    <ClInclude Include="Interfaces\ProductWindow.h" />
+    <ClInclude Include="Interfaces\Progress.h" />
+    <ClInclude Include="Interfaces\Properties.h" />
+    <ClInclude Include="Interfaces\PseudocolorLayer.h" />
+    <ClInclude Include="Interfaces\RasterDataDescriptor.h" />
+    <ClInclude Include="Interfaces\RasterElement.h" />
+    <ClInclude Include="Interfaces\RasterFileDescriptor.h" />
+    <ClInclude Include="Interfaces\RasterLayer.h" />
+    <ClInclude Include="Interfaces\RasterPage.h" />
+    <ClInclude Include="Interfaces\RasterPager.h" />
+    <ClInclude Include="Interfaces\RawImageObject.h" />
+    <ClInclude Include="Interfaces\RectangleObject.h" />
+    <ClInclude Include="Interfaces\RegionObject.h" />
+    <ClInclude Include="Interfaces\Resampler.h" />
+    <ClInclude Include="Interfaces\RoundedRectangleObject.h" />
+    <ClInclude Include="Interfaces\SafeSlot.h" />
+    <ClInclude Include="Interfaces\ScaleBarObject.h" />
+    <ClInclude Include="Interfaces\Serializable.h" />
+    <ClInclude Include="Interfaces\SessionExplorer.h" />
+    <ClInclude Include="Interfaces\SessionItem.h" />
+    <ClInclude Include="Interfaces\SessionItemDeserializer.h" />
+    <ClInclude Include="Interfaces\SessionItemSerializer.h" />
+    <ClInclude Include="Interfaces\SessionManager.h" />
+    <ClInclude Include="Interfaces\SettableSessionItem.h" />
+    <ClInclude Include="Interfaces\Signature.h" />
+    <ClInclude Include="Interfaces\SignatureLibrary.h" />
+    <ClInclude Include="Interfaces\SignaturePlot.h" />
+    <ClInclude Include="Interfaces\SignatureSet.h" />
+    <ClInclude Include="Interfaces\Slot.h" />
+    <ClInclude Include="Interfaces\SpatialDataView.h" />
+    <ClInclude Include="Interfaces\SpatialDataWindow.h" />
+    <ClInclude Include="Interfaces\SpecialMetadata.h" />
+    <ClInclude Include="Interfaces\Statistics.h" />
+    <ClInclude Include="Interfaces\Subject.h" />
+    <ClInclude Include="Interfaces\Testable.h" />
+    <ClInclude Include="Interfaces\Text.h" />
+    <ClInclude Include="Interfaces\TextObject.h" />
+    <ClInclude Include="Interfaces\ThresholdLayer.h" />
+    <ClInclude Include="Interfaces\TiePointLayer.h" />
+    <ClInclude Include="Interfaces\TiePointList.h" />
+    <ClInclude Include="Interfaces\ToolBar.h" />
+    <ClInclude Include="Interfaces\TrailObject.h" />
+    <ClInclude Include="Interfaces\TriangleObject.h" />
+    <ClInclude Include="Interfaces\TypeAwareObject.h" />
+    <ClInclude Include="Interfaces\TypesFile.h" />
+    <ClInclude Include="Interfaces\UInt64.h" />
+    <ClInclude Include="Interfaces\Units.h" />
+    <ClInclude Include="Interfaces\UtilityServices.h" />
+    <ClInclude Include="Interfaces\View.h" />
+    <ClInclude Include="Interfaces\ViewObject.h" />
+    <ClInclude Include="Interfaces\ViewWindow.h" />
+    <ClInclude Include="Interfaces\Wavelengths.h" />
+    <ClInclude Include="Interfaces\WidgetImageObject.h" />
+    <ClInclude Include="Interfaces\Window.h" />
+    <ClInclude Include="Interfaces\WizardItem.h" />
+    <ClInclude Include="Interfaces\WizardNode.h" />
+    <ClInclude Include="Interfaces\WizardObject.h" />
+    <ClInclude Include="Interfaces\WorkspaceWindow.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="Desktop\Desktop.vcxproj">
+      <Project>{0a996cbc-8f48-499e-88d0-9a989d5439b1}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="Framework\Framework.vcxproj">
+      <Project>{acde6b09-d5e8-4002-83fc-96ed7c5a281f}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="Gui\Gui.vcxproj">
+      <Project>{bf9dec74-d1a6-448f-9c5c-8bf272b79055}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="Installer\Installer.vcxproj">
+      <Project>{d5b67bd1-5478-4534-8bf5-681df30cf0da}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="Model\Model.vcxproj">
+      <Project>{94a7d2c4-8623-4ef3-8fc9-06cd470a15bd}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="PlugInLib\PlugInLib.vcxproj">
+      <Project>{bfaa94f6-8ca1-4159-b0e1-90b09d9c3056}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="PlugInManager\PlugInManager.vcxproj">
+      <Project>{8dcb3c1b-ccbf-46b5-9f71-056cf68af1c2}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="PlugInUtilities\PlugInUtilities.vcxproj">
+      <Project>{4831b6df-aeac-4f12-a0b5-ce3ca703fb88}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="Utilities\Utilities.vcxproj">
+      <Project>{83190cff-a185-412d-82f0-b3e39954e8f3}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="Wizard\Wizard.vcxproj">
+      <Project>{9c7936f8-2c39-4e4a-b8ea-ddd29be5f653}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.targets" />
+  </ImportGroup>
+</Project>

@@ -91,9 +91,6 @@ public slots:
    void undock();
    virtual void setVisible(bool visible);
 
-signals:
-   void visibilityChanged(bool bVisible);
-
 protected:
    bool event(QEvent* pEvent);
    void showEvent(QShowEvent* pEvent);

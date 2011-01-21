@@ -1,12 +1,12 @@
-Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual Studio 2005
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PlugInSampler", "PlugIns\src\PlugInSampler\PlugInSampler.vcproj", "{EC2BF30D-D678-4382-9169-D52310177A04}"
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PlugInSampler", "PlugIns\src\PlugInSampler\PlugInSampler.vcxproj", "{EC2BF30D-D678-4382-9169-D52310177A04}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PlugInSamplerHdf", "PlugIns\src\PlugInSamplerHdf\PlugInSamplerHdf.vcproj", "{A7573793-912E-494E-AF98-99C2EC6DC593}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PlugInSamplerHdf", "PlugIns\src\PlugInSamplerHdf\PlugInSamplerHdf.vcxproj", "{A7573793-912E-494E-AF98-99C2EC6DC593}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PlugInSamplerQt", "PlugIns\src\PlugInSamplerQt\PlugInSamplerQt.vcproj", "{C34B718A-5D9C-4A27-9A26-C670DF82680B}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PlugInSamplerQt", "PlugIns\src\PlugInSamplerQt\PlugInSamplerQt.vcxproj", "{C34B718A-5D9C-4A27-9A26-C670DF82680B}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial", "PlugIns\src\Tutorial\Tutorial.vcproj", "{93926B8A-738B-4DEB-9045-AE7C0BB4ABD4}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial", "PlugIns\src\Tutorial\Tutorial.vcxproj", "{93926B8A-738B-4DEB-9045-AE7C0BB4ABD4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -12,6 +12,7 @@
 
 #include "MessageLogResource.h"
 
+#include <algorithm>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -24,7 +25,7 @@ class Message;
 class Hdf5ErrorDesc
 {
 public:
-   Hdf5ErrorDesc(H5E_error_t* pErr) :
+   Hdf5ErrorDesc(H5E_error1_t* pErr) :
       mLineNumber(0)
    {
       if (pErr != NULL)
@@ -52,7 +53,7 @@ public:
    IceException(const std::string& filename, unsigned int lineNumber, const std::string& failureMsg = "") :
       mFilename(filename), mLineNumber(lineNumber), mFailureMsg(failureMsg)
    {
-      H5Ewalk(H5E_WALK_DOWNWARD, &IceException::walk, this);
+      H5Ewalk1(H5E_WALK_DOWNWARD, &IceException::walk, this);
    }
 
    std::string hdfErrorToString() const
@@ -99,7 +100,7 @@ public:
    }
 
 private:
-   static herr_t walk(int n, H5E_error_t *pErrDesc, void* pClientData)
+   static herr_t walk(int n, H5E_error1_t *pErrDesc, void* pClientData)
    {
       IceException* pThisPtr = reinterpret_cast<IceException*>(pClientData);
       Hdf5ErrorDesc errorVal(pErrDesc);

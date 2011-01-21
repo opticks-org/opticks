@@ -62,7 +62,7 @@ private:
     * Opens the HDF5 file and dataset.
     *
     * Opens the HDF5 file by calling H5Fopen(filename.c_str())
-    * Opens the HDF5 data handle by calling getHdfDatasetName() and H5Dopen on the resulting dataset name.
+    * Opens the HDF5 data handle by calling getHdfDatasetName() and H5Dopen1 on the resulting dataset name.
     */
    bool openFile(const std::string& filename);
 

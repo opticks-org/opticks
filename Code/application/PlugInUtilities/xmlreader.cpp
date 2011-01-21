@@ -207,14 +207,14 @@ XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult* XmlReader::query(const string& ex
    }
    DOMXPathNSResolver* pResolver =
       const_cast<DOMXPathNSResolver*>(mpDoc->createNSResolver(mpDoc->getDocumentElement()));
-   static_cast<XQillaNSResolver*>(pResolver)->addNamespaceBinding(X("opticks"), X(sNamespaceId));
-   static_cast<XQillaNSResolver*>(pResolver)->addNamespaceBinding(X("xml"), X("http://www.w3.org/XML/1998/namespace"));
-   static_cast<XQillaNSResolver*>(pResolver)->addNamespaceBinding(X("xs"), X("http://www.w3.org/2001/XMLSchema"));
-   static_cast<XQillaNSResolver*>(pResolver)->addNamespaceBinding(X("xsi"),
+   pResolver->addNamespaceBinding(X("opticks"), X(sNamespaceId));
+   pResolver->addNamespaceBinding(X("xml"), X("http://www.w3.org/XML/1998/namespace"));
+   pResolver->addNamespaceBinding(X("xs"), X("http://www.w3.org/2001/XMLSchema"));
+   pResolver->addNamespaceBinding(X("xsi"),
       X("http://www.w3.org/2001/XMLSchema-instance"));
-   static_cast<XQillaNSResolver*>(pResolver)->addNamespaceBinding(X("fn"), X("http://www.w3.org/2005/xpath-functions"));
-   static_cast<XQillaNSResolver*>(pResolver)->addNamespaceBinding(X("err"), X("http://www.w3.org/2005/xqt-errors"));
-   static_cast<XQillaNSResolver*>(pResolver)->addNamespaceBinding(X("local"),
+   pResolver->addNamespaceBinding(X("fn"), X("http://www.w3.org/2005/xpath-functions"));
+   pResolver->addNamespaceBinding(X("err"), X("http://www.w3.org/2005/xqt-errors"));
+   pResolver->addNamespaceBinding(X("local"),
       X("http://www.w3.org/2005/xquery-local-functions"));
    const DOMXPathExpression* pExpr = mpDoc->createExpression(X(expression.c_str()), pResolver);
    if (pExpr == NULL)

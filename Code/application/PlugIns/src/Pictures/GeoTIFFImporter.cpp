@@ -49,7 +49,7 @@ REGISTER_PLUGIN_BASIC(OpticksPictures, GeoTIFFImporter);
 
 namespace
 {
-   #if TIFFLIB_VERSION != 20060313
+   #if TIFFLIB_VERSION != 20100615
       // Unfortunately, the methods in this namespace are tightly coupled to the implementation of libtiff.
       // The crux of the problem is that there does not seem to be a reasonable way to get a TIFFTagValue from the API.
       // The next best option is to call TIFFGetField, which does not act the same for every tag.
@@ -489,6 +489,10 @@ namespace
 
       populateStaticTagMetadataArray2D<uint16>(pTiffFile, TIFFTAG_TRANSFERFUNCTION, 
          static_cast<uint32>(1 << bitsPerElement), pMetadata, message);
+
+      // Special case
+      // TIFFTAG_REFERENCEBLACKWHITE is float* with exactly 6 entries
+      populateStaticTagMetadataArray1D<float>(pTiffFile, TIFFTAG_REFERENCEBLACKWHITE, 6, pMetadata, message);
 
       // Special case
       // TIFFTAG_INKNAMES is a char** to be read in as multiple NULL-terminated strings

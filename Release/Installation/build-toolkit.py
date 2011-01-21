@@ -249,7 +249,7 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir,
         suffixes_to_match=interface_suffixes)
     compile_settings_suffix = [".py"]
     if is_windows():
-        compile_settings_suffix.append(".vsprops")
+        compile_settings_suffix.append(".props")
     cp_dir2(s_app, d_app, "CompileSettings",
         suffixes_to_match=compile_settings_suffix)
     cp_dir2(s_app, d_app, "PlugInLib", suffixes_to_match=interface_suffixes)
@@ -260,7 +260,7 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir,
     #Copy the PlugInSamplerQt code to the right spot
     source_suffixes = interface_suffixes + [".cpp", ".ui"]
     if is_windows():
-        source_suffixes.append(".vcproj")
+        source_suffixes.append(".vcxproj")
     else:
         source_suffixes.append("SConscript")
 

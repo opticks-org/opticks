@@ -104,7 +104,7 @@ bool Hdf5Pager::openFile(const std::string& filename)
 
    const string& hdfFullPathAndName = getHdfDatasetName();
 
-   mDataHandle = H5Dopen(mFileHandle, hdfFullPathAndName.c_str());
+   mDataHandle = H5Dopen1(mFileHandle, hdfFullPathAndName.c_str());
    if (mDataHandle == INVALID_HANDLE)
    {
       return false;

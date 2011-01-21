@@ -49,20 +49,17 @@ are defined in Opticks-Version.wxi, so include that file now -->
                <Component Id="C__QtImageFormatTiff" Guid="$(var.C__QtImageFormatTiffGuid)" Win64="$(var.64Bit)">
                   <File Name="qtiff4.dll" Id="F__QtImageFormatTiff" DiskId="1" KeyPath="yes" />
                </Component>
-               <Component Id="C__VC80_CRT_For_imageformats" Guid="$(var.C__VC80_CRT_For_imageformats_Guid)" Win64="$(var.64Bit)">
-                  <File Name="msvcp80.dll" Id="F__msvcp80_For_imageformats" DiskId="1" KeyPath="yes" Source="$(var.VisualStudioRuntimeDir)\msvcp80.dll" />
-                  <File Name="msvcr80.dll" Id="F__msvcr80_For_imageformats" DiskId="1" Source="$(var.VisualStudioRuntimeDir)\msvcr80.dll" />
-                  <File Name="Microsoft.VC80.CRT.manifest" Id="F__VC80_CRT_Manifest_For_imageformats" DiskId="1" Source="$(var.VisualStudioRuntimeDir)\Microsoft.VC80.CRT.manifest" />
+               <Component Id="C__VC100_CRT_For_imageformats" Guid="$(var.C__VC100_CRT_For_imageformats_Guid)" Win64="$(var.64Bit)">
+                  <File Name="msvcp100.dll" Id="F__msvcp100_For_imageformats" DiskId="1" KeyPath="yes" Source="$(var.VisualStudioRuntimeDir)\msvcp100.dll" />
+                  <File Name="msvcr100.dll" Id="F__msvcr100_For_imageformats" DiskId="1" Source="$(var.VisualStudioRuntimeDir)\msvcr100.dll" />
                </Component>
             </Directory>
-            <Component Id="C__VC80_CRT_For_Bin" Guid="$(var.C__VC80_CRT_For_Bin_Guid)" Win64="$(var.64Bit)">
-               <File Name="msvcp80.dll" Id="F__msvcp80_For_Bin" DiskId="1" KeyPath="yes" Source="$(var.VisualStudioRuntimeDir)\msvcp80.dll" />
-               <File Name="msvcr80.dll" Id="F__msvcr80_For_Bin" DiskId="1" Source="$(var.VisualStudioRuntimeDir)\msvcr80.dll" />
-               <File Name="Microsoft.VC80.CRT.manifest" Id="F__VC80_CRT_Manifest_For_Bin" DiskId="1" Source="$(var.VisualStudioRuntimeDir)\Microsoft.VC80.CRT.manifest" />
+            <Component Id="C__VC100_CRT_For_Bin" Guid="$(var.C__VC100_CRT_For_Bin_Guid)" Win64="$(var.64Bit)">
+               <File Name="msvcp100.dll" Id="F__msvcp100_For_Bin" DiskId="1" KeyPath="yes" Source="$(var.VisualStudioRuntimeDir)\msvcp100.dll" />
+               <File Name="msvcr100.dll" Id="F__msvcr100_For_Bin" DiskId="1" Source="$(var.VisualStudioRuntimeDir)\msvcr100.dll" />
             </Component>
-            <Component Id="C__VC80_OpenMP_For_Bin" Guid="$(var.C__VC80_OpenMP_For_Bin_Guid)" Win64="$(var.64Bit)">
-               <File Name="vcomp.dll" Id="F__vcomp_For_Bin" DiskId="1" KeyPath="yes" Source="$(var.VisualStudioRuntimeDir)\vcomp.dll" />
-               <File Name="Microsoft.VC80.OpenMP.manifest" Id="F__VC80_OpenMP_Manifest_For_Bin" DiskId="1" Source="$(var.VisualStudioRuntimeDir)\Microsoft.VC80.OpenMP.manifest" />
+            <Component Id="C__VC100_OpenMP_For_Bin" Guid="$(var.C__VC100_OpenMP_For_Bin_Guid)" Win64="$(var.64Bit)">
+               <File Name="vcomp100.dll" Id="F__vcomp100_For_Bin" DiskId="1" KeyPath="yes" Source="$(var.VisualStudioRuntimeDir)\vcomp100.dll" />
             </Component>
             <Component Id="C__AppFiles" Guid="$(var.C__AppFilesGuid)" Win64="$(var.64Bit)">
                <File Name="Opticks.exe" Id="F__Opticks" DiskId="1" KeyPath="yes" Source="$(var.OpticksBinariesDir)\Bin\Opticks.exe" />
@@ -159,11 +156,11 @@ are defined in Opticks-Version.wxi, so include that file now -->
             <Component Id="C__zlib1_Dependency" Guid="$(var.C__zlib1_DependencyGuid)" Win64="$(var.64Bit)">
                <File Name="zlib1.dll" Id="F__zlib1_Dependency" DiskId="1" KeyPath="yes" />
             </Component>
-            <Component Id="C__hd423m_Dependency" Guid="$(var.C__hd423m_DependencyGuid)" Win64="$(var.64Bit)">
-               <File Name="hd423m.dll" Id="F__hd423m_Dependency" DiskId="1" KeyPath="yes" />
+            <Component Id="C__hd425m_Dependency" Guid="$(var.C__hd425m_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="hd425m.dll" Id="F__hd425m_Dependency" DiskId="1" KeyPath="yes" />
             </Component>
-            <Component Id="C__hm423m_Dependency" Guid="$(var.C__hm423m_DependencyGuid)" Win64="$(var.64Bit)">
-               <File Name="hm423m.dll" Id="F__hm423m_Dependency" DiskId="1" KeyPath="yes" />
+            <Component Id="C__hm425m_Dependency" Guid="$(var.C__hm425m_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="hm425m.dll" Id="F__hm425m_Dependency" DiskId="1" KeyPath="yes" />
             </Component>
             <Component Id="C__szlibdll_Dependency" Guid="$(var.C__szlibdll_DependencyGuid)" Win64="$(var.64Bit)">
                <File Name="szlibdll.dll" Id="F__szlibdll_Dependency" DiskId="1" KeyPath="yes" />
@@ -213,20 +210,17 @@ are defined in Opticks-Version.wxi, so include that file now -->
                <Component Id="C__ArcProxyQtNetwork" Guid="$(var.C__ArcProxyQtNetworkGuid)" Win64="no">
                   <File Name="QtNetwork4.dll" Id="F__ArcProxyQtNetwork" DiskId="1" KeyPath="yes" Source="$(var.Opticks32BitDependenciesDir)\QtNetwork4.dll" />
                </Component>
-               <Component Id="C__VC80_CRT_For_ArcProxy" Guid="$(var.C__VC80_CRT_For_ArcProxy_Guid)" Win64="$(var.64Bit)">
-                  <File Name="msvcp80.dll" Id="F__msvcp80_For_ArcProxy" DiskId="1" KeyPath="yes" Source="$(var.VisualStudio32BitRuntimeDir)\msvcp80.dll" />
-                  <File Name="msvcr80.dll" Id="F__msvcr80_For_ArcProxy" DiskId="1" Source="$(var.VisualStudio32BitRuntimeDir)\msvcr80.dll" />
-                  <File Name="Microsoft.VC80.CRT.manifest" Id="F__VC80_CRT_Manifest_For_ArcProxy" DiskId="1" Source="$(var.VisualStudio32BitRuntimeDir)\Microsoft.VC80.CRT.manifest" />
+               <Component Id="C__VC100_CRT_For_ArcProxy" Guid="$(var.C__VC100_CRT_For_ArcProxy_Guid)" Win64="$(var.64Bit)">
+                  <File Name="msvcp100.dll" Id="F__msvcp100_For_ArcProxy" DiskId="1" KeyPath="yes" Source="$(var.VisualStudio32BitRuntimeDir)\msvcp100.dll" />
+                  <File Name="msvcr100.dll" Id="F__msvcr100_For_ArcProxy" DiskId="1" Source="$(var.VisualStudio32BitRuntimeDir)\msvcr100.dll" />
                </Component>
             </Directory>
-            <Component Id="C__VC80_CRT_For_PlugIns" Guid="$(var.C__VC80_CRT_For_PlugIns_Guid)" Win64="$(var.64Bit)">
-               <File Name="msvcp80.dll" Id="F__msvcp80_For_PlugIns" DiskId="1" KeyPath="yes" Source="$(var.VisualStudioRuntimeDir)\msvcp80.dll" />
-               <File Name="msvcr80.dll" Id="F__msvcr80_For_PlugIns" DiskId="1" Source="$(var.VisualStudioRuntimeDir)\msvcr80.dll" />
-               <File Name="Microsoft.VC80.CRT.manifest" Id="F__VC80_CRT_Manifest_For_PlugIns" DiskId="1" Source="$(var.VisualStudioRuntimeDir)\Microsoft.VC80.CRT.manifest" />
+            <Component Id="C__VC100_CRT_For_PlugIns" Guid="$(var.C__VC100_CRT_For_PlugIns_Guid)" Win64="$(var.64Bit)">
+               <File Name="msvcp100.dll" Id="F__msvcp100_For_PlugIns" DiskId="1" KeyPath="yes" Source="$(var.VisualStudioRuntimeDir)\msvcp100.dll" />
+               <File Name="msvcr100.dll" Id="F__msvcr100_For_PlugIns" DiskId="1" Source="$(var.VisualStudioRuntimeDir)\msvcr100.dll" />
             </Component>
-            <Component Id="C__VC80_OpenMP_For_PlugIns" Guid="$(var.C__VC80_OpenMP_For_PlugIns_Guid)" Win64="$(var.64Bit)">
-               <File Name="vcomp.dll" Id="F__vcomp_For_PlugIns" DiskId="1" KeyPath="yes" Source="$(var.VisualStudioRuntimeDir)\vcomp.dll" />
-               <File Name="Microsoft.VC80.OpenMP.manifest" Id="F__VC80_OpenMP_Manifest_For_PlugIns" DiskId="1" Source="$(var.VisualStudioRuntimeDir)\Microsoft.VC80.OpenMP.manifest" />
+            <Component Id="C__VC100_OpenMP_For_PlugIns" Guid="$(var.C__VC100_OpenMP_For_PlugIns_Guid)" Win64="$(var.64Bit)">
+               <File Name="vcomp100.dll" Id="F__vcomp100_For_PlugIns" DiskId="1" KeyPath="yes" Source="$(var.VisualStudioRuntimeDir)\vcomp100.dll" />
             </Component>
             <Component Id="C__PlugIns" Guid="$(var.C__PlugInsGuid)" Win64="$(var.64Bit)">
                <File Name="AnnotationImagePalette.dll" Id="F__AnnotationImagePalettePlugIn" DiskId="1" />
@@ -393,8 +387,8 @@ are defined in Opticks-Version.wxi, so include that file now -->
          <ComponentRef Id="C__gdal_Dependency" />
          <ComponentRef Id="C__glew32_Dependency" />
          <ComponentRef Id="C__hdf5dll_Dependency" />
-         <ComponentRef Id="C__hd423m_Dependency" />
-         <ComponentRef Id="C__hm423m_Dependency" />
+         <ComponentRef Id="C__hd425m_Dependency" />
+         <ComponentRef Id="C__hm425m_Dependency" />
          <ComponentRef Id="C__szlibdll_Dependency" />
          <ComponentRef Id="C__libexpat_Dependency" />
          <ComponentRef Id="C__ossim_Dependency" />
@@ -426,12 +420,12 @@ are defined in Opticks-Version.wxi, so include that file now -->
          <ComponentRef Id="C__OpticksEventLogKeys" />
          <ComponentRef Id="C__SaveTempDataDirSelection" />
          <ComponentRef Id="C__ClassSettings" />
-         <ComponentRef Id="C__VC80_CRT_For_Bin"/>
-         <ComponentRef Id="C__VC80_OpenMP_For_Bin"/>
-         <ComponentRef Id="C__VC80_CRT_For_imageformats"/>
-         <ComponentRef Id="C__VC80_CRT_For_PlugIns"/>
-         <ComponentRef Id="C__VC80_OpenMP_For_PlugIns"/>
-         <ComponentRef Id="C__VC80_CRT_For_ArcProxy"/>
+         <ComponentRef Id="C__VC100_CRT_For_Bin"/>
+         <ComponentRef Id="C__VC100_OpenMP_For_Bin"/>
+         <ComponentRef Id="C__VC100_CRT_For_imageformats"/>
+         <ComponentRef Id="C__VC100_CRT_For_PlugIns"/>
+         <ComponentRef Id="C__VC100_OpenMP_For_PlugIns"/>
+         <ComponentRef Id="C__VC100_CRT_For_ArcProxy"/>
          <ComponentRef Id="C__Templates" />
          <ComponentRef Id="C__AutoInstall" />
 

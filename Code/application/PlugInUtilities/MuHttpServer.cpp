@@ -53,11 +53,13 @@ bool MuHttpServer::start()
    {
       return true;
    }
-   switch (StartServer(mParams))
+   try
    {
-   case STARTSERVER_SUCCESS:
-      mpTimer->start(); // fall through
-   case STARTSERVER_ALREADYRUNNING:
+      StartServer(mParams);
+      if (!mpTimer->isActive())
+      {
+         mpTimer->start();
+      }
       for (QMap<QString, EHS*>::iterator it = mRegistrations.begin(); it != mRegistrations.end(); ++it)
       {
          RegisterEHS(it.value(), it.key().toAscii());
@@ -66,22 +68,10 @@ bool MuHttpServer::start()
       mServerIsRunning = true;
       mSession.reset(Service<SessionManager>().get());
       return true;
-   case STARTSERVER_INVALID:
-      warning("Invalid server specification.");
-      break;
-   case STARTSERVER_NODATASPECIFIED:
-      warning("No server data specified.");
-      break;
-   case STARTSERVER_SOCKETSNOTINITIALIZED:
-      warning("Unable to initialize server socket.");
-      break;
-   case STARTSERVER_THREADCREATIONFAILED:
-      warning("Unable to create server threads.");
-      break;
-   case STARTSERVER_FAILED:
-   default:
-      warning("Server failed for an unknown reason.");
-      break;
+   }
+   catch(std::runtime_error& err)
+   {
+      warning(QString("Server failed to start: %1").arg(err.what()));
    }
    return false;
 }
@@ -115,24 +105,24 @@ ResponseCode MuHttpServer::HandleRequest(HttpRequest *pHttpRequest, HttpResponse
 {
    debug(pHttpRequest);
 
-   if (!mAllowNonLocal && pHttpRequest->GetAddress() != "127.0.0.1")
+   if (!mAllowNonLocal && pHttpRequest->Address() != "127.0.0.1")
    {
       QString errorString = QString("<html><body><h1>Forbidden</h1>"
          "Connection from %1 has been blocked. Only localhost connections are allowed.</body></html>")
-         .arg(QString::fromStdString(pHttpRequest->GetAddress()));
+         .arg(QString::fromStdString(pHttpRequest->Address()));
       pHttpResponse->SetBody(errorString.toAscii(), errorString.size());
       warning(errorString);
       return HTTPRESPONSECODE_403_FORBIDDEN;
    }
 
-   QString uri = QString::fromStdString(pHttpRequest->sUri).split("?")[0];
-   if (pHttpRequest->nRequestMethod == REQUESTMETHOD_GET || pHttpRequest->nRequestMethod == REQUESTMETHOD_POST)
+   QString uri = QString::fromStdString(pHttpRequest->Uri()).split("?")[0];
+   if (pHttpRequest->Method() == REQUESTMETHOD_GET || pHttpRequest->Method() == REQUESTMETHOD_POST)
    {
-      QString contentType = pHttpRequest->oRequestHeaders["content-type"].c_str();
-      QString body = pHttpRequest->sBody.c_str();
-      Response rsp = (pHttpRequest->nRequestMethod == REQUESTMETHOD_GET) ?
-         getRequest(uri, contentType, body, pHttpRequest->oFormValueMap) :
-         postRequest(uri, contentType, body, pHttpRequest->oFormValueMap);
+      QString contentType = pHttpRequest->Headers()["content-type"].c_str();
+      QString body = pHttpRequest->Body().c_str();
+      Response rsp = (pHttpRequest->Method() == REQUESTMETHOD_GET) ?
+         getRequest(uri, contentType, body, pHttpRequest->FormValues()) :
+         postRequest(uri, contentType, body, pHttpRequest->FormValues());
       if (rsp.mCode != HTTPRESPONSECODE_INVALID && rsp.mEncoding.isValid())
       {
          switch (rsp.mEncoding)
@@ -151,13 +141,13 @@ ResponseCode MuHttpServer::HandleRequest(HttpRequest *pHttpRequest, HttpResponse
          while (headerIt.hasNext())
          {
             headerIt.next();
-            pHttpResponse->oResponseHeaders[headerIt.key().toStdString()] = headerIt.value().toStdString();
+            pHttpResponse->SetHeader(headerIt.key().toStdString(), headerIt.value().toStdString());
          }
          return rsp.mCode;
       }
    }
    // default to responding with an internal server error
-   string errorString = "<html><body><h1>Internal server error</h1>An unknown error occured.</body></html>";
+   std::string errorString = "<html><body><h1>Internal server error</h1>An unknown error occured.</body></html>";
    pHttpResponse->SetBody(errorString.c_str(), errorString.size());
    warning(QString::fromStdString(errorString));
    return HTTPRESPONSECODE_500_INTERNALSERVERERROR;

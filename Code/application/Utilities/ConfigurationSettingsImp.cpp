@@ -384,7 +384,7 @@ bool ConfigurationSettingsImp::parseDeploymentFile(string& errorMessage, string&
          errorMessage = QString("Error while parsing %1 deployment file. "
             "Found '%2' problem at line %3 and column %4. "
             "The application will be shut down.").arg(depFileInfo.absoluteFilePath()).arg(
-            QString::fromStdString(ex.msg)).arg(ex.line).arg(ex.column).toStdString();
+			QString::fromStdString(ex.msg)).arg(ex.mark.line).arg(ex.mark.column).toStdString();
          return false;
       }
       catch (YAML::Exception&)

@@ -37,6 +37,7 @@
 #include "WizardUtilities.h"
 
 #include <QtCore/QCoreApplication>
+#include <xqilla/xqilla-dom3.hpp>
 #include <vector>
 #include <iostream>
 using namespace std;

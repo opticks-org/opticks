@@ -12,7 +12,7 @@
 EXPORTS
       opticks_get_module_interface_version
       get_name
-      initialize
+      initialize_op
       instantiate_interface
-      destroy
+      destroy_op
 

@@ -155,13 +155,13 @@ void AxisImp::setValueRange(double dMin, double dMax)
 double AxisImp::getMinimumValue() const
 {
    QwtScaleDiv scaleDiv = mScaleDraw.scaleDiv();
-   return scaleDiv.lBound();
+   return scaleDiv.lowerBound();
 }
 
 double AxisImp::getMaximumValue() const
 {
    QwtScaleDiv scaleDiv = mScaleDraw.scaleDiv();
-   return scaleDiv.hBound();
+   return scaleDiv.upperBound();
 }
 
 vector<double> AxisImp::getMajorTickLocations() const
@@ -456,8 +456,8 @@ void AxisImp::updateScale()
    QwtScaleDiv newScaleDiv;
    QwtScaleTransformation* pScaleTransformation = NULL;
 
-   double dStart = scaleDiv.lBound();
-   double dEnd = scaleDiv.hBound();
+   double dStart = scaleDiv.lowerBound();
+   double dEnd = scaleDiv.upperBound();
    double dStepSize = 0.0;
 
    if (mScaleType == SCALE_LOG)

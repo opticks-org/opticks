@@ -206,7 +206,7 @@ MuHttpServer::Response XmlRpcServer::postRequest(const QString &uri, const QStri
    XmlReader xml(Service<UtilityServices>()->getMessageLog()->getLog(), false);
    try
    {
-      string str = body.toStdString();
+      std::string str = body.toStdString();
       XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument *pDoc = xml.parseString(str);
       DOMElement* pRoot = NULL;
       if (pDoc != NULL)
@@ -263,7 +263,7 @@ void XmlRpcServer::debug(HttpRequest *pHttpRequest)
 #if defined(DEBUG)
    if (pHttpRequest != NULL)
    {
-      qDebug() << QString::fromStdString(pHttpRequest->sBody);
+      qDebug() << QString::fromStdString(pHttpRequest->Body());
    }
 #endif
 }

@@ -111,17 +111,11 @@ def copy_dependencies(dp_list, dest_dir):
 def get_dependencies(dependencies_path, platform, is_debug, arch):
     def la(dp_file, dest_dir="."):
         dp_list.append([join(dp, dp_file), dest_dir])
-    def ds(the_dir, dlls, debug_suffix, release_suffix,
-           dlls_for_win32 = None, dlls_for_win64 = None, dest = "."):
-        temp_list.append(DependencySuffix(the_dir, dlls, debug_suffix,
-            release_suffix, dlls_for_win32, dlls_for_win64, dest))
-    def dd(the_dir, dlls, dir_for_mode = False,
-           dlls_for_win32 = None, dlls_for_win64 = None, dest = "."):
-        temp_list.append(DependencyDir(the_dir, dlls, dir_for_mode,
-            dlls_for_win32, dlls_for_win64, dest))
+    def bla(dp_file, dest_dir="."):
+        dp_list.append([join(dp, "bin", dp_file), dest_dir])
     #this will return a list of dependencies as file paths
     #depending on the platform, mode and arch being passed in
-    dp = dependencies_path
+    dp = join(dependencies_path, arch)
 
     dp_list = list()
     if platform == "Solaris" or platform == "Linux":
@@ -160,108 +154,90 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
         la("curl/lib/%s/libcurl.so.4" % (plat_dir))
         la("ehs/lib/%s/libehs.so.0" % (plat_dir))
     elif platform == "Windows":
-        temp_list = list()
-        ds(r"Xerces\bin", ["xerces-c_3_1"], "D.dll", ".dll")
-        ds(r"xqilla\bin", ["xqilla22"], "d.dll", ".dll")
-        ds(r"glew\bin", ["glew32"], "d.dll", ".dll")
-        ds(r"Qt\bin",
-            ["Qt3Support", "QtCore", "QtGui", "QtNetwork",
-             "QtOpenGL", "QtScript", "QtSql", "QtSvg", "QtXml"],
-            "d4.dll", "4.dll")
-        ds(r"Qt\plugins",
-            [r"imageformats\qgif", r"imageformats\qjpeg",
-             r"imageformats\qmng", r"imageformats\qsvg",
-             r"imageformats\qtiff"],
-            "d4.dll", "4.dll", None, None, "imageformats")
-        dd(r"qwt\bin", ["qwt5.dll"], True)
-        dd(r"ShapeLib\bin", ["shapelib.dll"])
-        dd(r"pthreads\bin", ["pthreadVC2.dll"])
-        dd(r"Cg\bin", ["cg.dll", "cgc.exe", "cgD3D9.dll", "cgGL.dll"],
-            False, ["cgD3D8.dll", "glut32.dll"])
-        ds(r"Hdf4\bin",["hd423m","hm423m"],"d.dll",".dll")
-        ds(r"Hdf4\bin", ["szlibdll.dll"],"","")
-        ds(r"Hdf5\bin", ["hdf5"], "dll.dll", "dll.dll")
-        ds(r"zlib\bin", ["zlib1"], "d.dll", ".dll")
-        ds(r"zlib\bin", [], "", "", ["zlib1.dll"], ["zlib1.dll"])
-        dd(r"ffmpeg\Windows\build",
-            ["avcodec.dll", "avformat.dll", "avutil.dll"], True)
-        ds(r"ossim\bin", ["ossim"], "d.dll", ".dll")
-        ds(r"ehs\bin", ["ehs"], "d.dll", ".dll")
-        ds(r"raptor\bin", ["raptor"], ".dll", ".dll")
-        ds(r"expat\bin", ["libexpat"], ".dll", ".dll")
-        dd(r"gdal\bin", ["gdal17.dll"], False)
-        dd(r"Xerces\bin", ["xerces-c_3_1.dll"], False) # needed by gdal
-        dd(r"Hdf4\bin",["hd423m.dll","hm423m.dll"], False) # needed by gdal
-        ds(r"OpenJpeg\bin", [], "d.dll", ".dll", ["OpenJpeg"])
-
-        for depend in temp_list:
-            cur_list = depend.get_list_for(arch, is_debug)
-            for item, dest in cur_list:
-                la(item, dest)
-    return dp_list
-
-#the depedencies are dir\[Platform]\dll_name[modesuffix]
-class DependencySuffix:
-    def __init__(self, the_dir, dlls, debug_suffix, release_suffix,
-                 dlls_for_win32, dlls_for_win64, dest):
-        self.dir = the_dir
-        self.dlls = dlls
-        self.debug_suffix = debug_suffix
-        self.release_suffix = release_suffix
-        self.dlls_for_win32 = dlls_for_win32
-        self.dlls_for_win64 = dlls_for_win64
-        self.dest = dest
-    def get_list_for(self, arch, is_debug):
+        bla("pthreadVC2.dll")
+        bla("zlib1.dll")
+        bla("raptor.dll")
+        bla("libexpat.dll")
+        bla("shapelib.dll")
+        bla("hd425m.dll")
+        bla("hm425m.dll")
+        bla("szlibdll.dll")
+        bla("gdal17.dll")
+        bla("cg.dll")
+        bla("cgc.exe")
+        if arch == "32":
+            bla("cgD3D8.dll")
+            bla("openjpeg.dll")
+        bla("cgD3D9.dll")
+        bla("cgD3D10.dll")
+        bla("cgGL.dll")
+        bla("glut32.dll")
+        bla("xerces-c_3_1.dll") #needed for GDAL
+        bla("hdf5dll.dll") #needed for GDAL
         if is_debug:
-            suffix = self.debug_suffix
+            bla("ehsd.dll")
+            bla("xerces-c_3_1D.dll")
+            bla("xqilla22d.dll")
+            bla("glew32d.dll")
+            bla(join("debug", "qwt5.dll"))
+            bla(join("debug", "avcodec.dll"))
+            bla(join("debug", "avformat.dll"))
+            bla(join("debug", "avutil.dll"))
+            bla("ossimd.dll")
+            bla("hdf5ddll.dll")
+            la(join("plugins", "imageformats", "qgifd4.dll"), "imageformats")
+            la(join("plugins", "imageformats", "qjpegd4.dll"), "imageformats")
+            la(join("plugins", "imageformats", "qmngd4.dll"), "imageformats")
+            la(join("plugins", "imageformats", "qsvgd4.dll"), "imageformats")
+            la(join("plugins", "imageformats", "qtiffd4.dll"), "imageformats")
+            la(join("lib", "Qt3Supportd4.dll"))
+            la(join("lib", "QtCLucened4.dll"))
+            la(join("lib", "QtCored4.dll"))
+            la(join("lib", "QtDeclaratived4.dll"))
+            la(join("lib", "QtGuid4.dll"))
+            la(join("lib", "QtHelpd4.dll"))
+            la(join("lib", "QtMultimediad4.dll"))
+            la(join("lib", "QtNetworkd4.dll"))
+            la(join("lib", "QtOpenGLd4.dll"))
+            la(join("lib", "QtScriptd4.dll"))
+            la(join("lib", "QtScriptToolsd4.dll"))
+            la(join("lib", "QtSqld4.dll"))
+            la(join("lib", "QtSvgd4.dll"))
+            la(join("lib", "QtWebKitd4.dll"))
+            la(join("lib", "QtXmld4.dll"))
+            la(join("lib", "QtXmlPatternsd4.dll"))
         else:
-            suffix = self.release_suffix
-        temp_list = list()
-        dll_list = self.dlls[:]
-        if (self.dlls_for_win32 and arch == "32"):
-            dll_list.extend(self.dlls_for_win32)
-        if (self.dlls_for_win64 and arch == "64"):
-            dll_list.extend(self.dlls_for_win64)
-        if arch == "32":
-            expand_arch = "Win32"
-        elif arch == "64":
-            expand_arch = "x64"
-        for the_dll in dll_list:
-            temp_list.append([join(self.dir, expand_arch, the_dll + suffix),
-                self.dest])
-        return temp_list
-
-#the dependencies are dir\[Platform]\dll's
-class DependencyDir:
-    def __init__(self, the_dir, dlls, dir_for_mode,
-                 dlls_for_win32, dlls_for_win64, dest):
-        self.dir = the_dir
-        self.dlls = dlls
-        self.dir_for_mode = dir_for_mode
-        self.dlls_for_win32 = dlls_for_win32
-        self.dlls_for_win64 = dlls_for_win64
-        self.dest = dest
-    def get_list_for(self, arch, is_debug):
-        temp_list = list()
-        dll_list = self.dlls[:]
-        if self.dlls_for_win32 and arch == "32":
-            dll_list.extend(self.dlls_for_win32)
-        if self.dlls_for_win64 and arch == "64":
-            dll_list.extend(self.dlls_for_win64)
-        if arch == "32":
-            expand_arch = "Win32"
-        elif arch == "64":
-            expand_arch = "x64"
-        for the_dll in dll_list:
-            the_dir = join(self.dir, expand_arch)
-            if self.dir_for_mode:
-                if is_debug:
-                    mode = "debug"
-                else:
-                    mode = "release"
-                the_dir = join(the_dir, mode)
-            temp_list.append([join(the_dir, the_dll), self.dest])
-        return temp_list
+            bla("ehs.dll")
+            bla("xqilla22.dll")
+            bla("glew32.dll")
+            bla("qwt5.dll")
+            bla("avcodec.dll")
+            bla("avformat.dll")
+            bla("avutil.dll")
+            bla("ossim.dll")
+            bla("hdf5dll.dll")
+            la(join("plugins", "imageformats", "qgif4.dll"), "imageformats")
+            la(join("plugins", "imageformats", "qjpeg4.dll"), "imageformats")
+            la(join("plugins", "imageformats", "qmng4.dll"), "imageformats")
+            la(join("plugins", "imageformats", "qsvg4.dll"), "imageformats")
+            la(join("plugins", "imageformats", "qtiff4.dll"), "imageformats")
+            la(join("lib", "Qt3Support4.dll"))
+            la(join("lib", "QtCLucene4.dll"))
+            la(join("lib", "QtCore4.dll"))
+            la(join("lib", "QtDeclarative4.dll"))
+            la(join("lib", "QtGui4.dll"))
+            la(join("lib", "QtHelp4.dll"))
+            la(join("lib", "QtMultimedia4.dll"))
+            la(join("lib", "QtNetwork4.dll"))
+            la(join("lib", "QtOpenGL4.dll"))
+            la(join("lib", "QtScript4.dll"))
+            la(join("lib", "QtScriptTools4.dll"))
+            la(join("lib", "QtSql4.dll"))
+            la(join("lib", "QtSvg4.dll"))
+            la(join("lib", "QtWebKit4.dll"))
+            la(join("lib", "QtXml4.dll"))
+            la(join("lib", "QtXmlPatterns4.dll"))
+    return dp_list
 
 def create_qt_conf(path, verbosity):
     qt_conf_file_path = join(path, "qt.conf")

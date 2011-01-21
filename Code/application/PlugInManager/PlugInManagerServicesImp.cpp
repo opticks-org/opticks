@@ -71,18 +71,16 @@ void PlugInManagerServicesImp::destroy()
 PlugInManagerServicesImp::PlugInManagerServicesImp()
 {
 #if defined(WIN_API)
-   //Currently the excluded list only includes the Visual Studio 2005 runtime dll's
+   //Currently the excluded list only includes the Visual Studio 2010 runtime dll's
    //because they are required to be present in the plug-in path and simply by
    //calling LoadLibrary on those dll's it will cause errors to be generated
    //to include Windows system modal dialogs and errors in the message log.
-   mExcludedPlugIns.push_back("vcomp.dll");
-   mExcludedPlugIns.push_back("vcompd.dll");
-   mExcludedPlugIns.push_back("msvcp80.dll");
-   mExcludedPlugIns.push_back("msvcp80d.dll");
-   mExcludedPlugIns.push_back("msvcr80.dll");
-   mExcludedPlugIns.push_back("msvcr80d.dll");
-   mExcludedPlugIns.push_back("msvcm80.dll");
-   mExcludedPlugIns.push_back("msvcm80d.dll");
+   mExcludedPlugIns.push_back("vcomp100.dll");
+   mExcludedPlugIns.push_back("vcomp100d.dll");
+   mExcludedPlugIns.push_back("msvcp100.dll");
+   mExcludedPlugIns.push_back("msvcp100d.dll");
+   mExcludedPlugIns.push_back("msvcr100.dll");
+   mExcludedPlugIns.push_back("msvcr100d.dll");
 #endif
 }
 

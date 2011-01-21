@@ -25,6 +25,7 @@
 #include "xmlbase.h"
 
 #include <iomanip>
+#include <iterator>
 #include <sstream>
 #include <limits>
 

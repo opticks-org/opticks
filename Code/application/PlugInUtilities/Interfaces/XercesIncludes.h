@@ -29,7 +29,6 @@
 #include <xercesc/util/XMLString.hpp>
 #include <xercesc/util/XMLURL.hpp>
 #include <xercesc/util/PlatformUtils.hpp>
-#include <xqilla/xqilla-dom3.hpp>
 
 #else
 /**

@@ -183,7 +183,7 @@ namespace HdfUtilities
       {
          return false;
       }
-      Hdf5AttributeResource attrId(H5Acreate(dataDescriptor, attributeName.c_str(), *fileTypeId,
+      Hdf5AttributeResource attrId(H5Acreate1(dataDescriptor, attributeName.c_str(), *fileTypeId,
          *spaceId, H5P_DEFAULT));
       if (*attrId < 0)
       {
@@ -240,7 +240,7 @@ namespace HdfUtilities
          return false;
       }
 
-      Hdf5DataSetResource dataSet(H5Dcreate(fileDescriptor, datasetName.c_str(),
+      Hdf5DataSetResource dataSet(H5Dcreate1(fileDescriptor, datasetName.c_str(),
          *fileTypeId, *spaceId, H5P_DEFAULT));
       if (*dataSet < 0)
       {

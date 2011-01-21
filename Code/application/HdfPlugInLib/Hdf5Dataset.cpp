@@ -108,7 +108,7 @@ public:
          mFileMustBeClosed = true;
       }
 
-      mDataset = H5Dopen(mFile, pDataset->getFullPathAndName().c_str());
+      mDataset = H5Dopen1(mFile, pDataset->getFullPathAndName().c_str());
       DO_IF(mDataset < 0, return);
       mDataSpace = H5Dget_space(mDataset);
       DO_IF(mDataSpace < 0, return);

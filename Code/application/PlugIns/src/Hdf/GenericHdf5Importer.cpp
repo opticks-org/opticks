@@ -36,6 +36,7 @@
 #include "UInt64.h"
 
 #include <deque>
+#include <iterator>
 #include <sstream>
 #include <string>
 
@@ -217,7 +218,7 @@ vector<ImportDescriptor*> GenericHdf5Importer::getImportDescriptors(const string
                   pMetadata->setAttribute("Dimensions", *pDimensions.get());
                }
 
-               herr_t status = H5Aiterate(*dataId, NULL, populateMetadata, pAttributes.get());
+               herr_t status = H5Aiterate1(*dataId, NULL, populateMetadata, pAttributes.get());
                if (status == 0)
                {
                   pMetadata->setAttribute("Attributes", *pAttributes.get());

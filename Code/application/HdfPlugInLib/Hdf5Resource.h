@@ -221,7 +221,7 @@ public:
    /**
     * This is an implementation detail of the %Hdf5DataSetObject class. 
     *
-    * It is used for passing the parameters required by H5Dopen.
+    * It is used for passing the parameters required by H5Dopen1.
     */
    struct Args
    {
@@ -282,7 +282,7 @@ public:
       hid_t* pHandle = new (std::nothrow) hid_t;
       if (pHandle != NULL)
       {
-         *pHandle = H5Dopen(args.mFileHandle, args.mFullPathAndName.c_str());
+         *pHandle = H5Dopen1(args.mFileHandle, args.mFullPathAndName.c_str());
       }
       return pHandle;
    }
@@ -335,7 +335,7 @@ public:
     *
     *  Opens the specified dataset based on a file handle and the
     *  full path and name to the dataset within the file (ie. "/home/data/cube1").
-    *  Calls H5Dopen().
+    *  Calls H5Dopen1().
     *
     *  @param   fileHandle
     *           The HDF5 file handle. @see Hdf5FileResource::get().
@@ -371,14 +371,14 @@ public:
    }
 
    /**
-    *  Returns a pointer to the underlying hid_t returned by H5Dopen.
+    *  Returns a pointer to the underlying hid_t returned by H5Dopen1.
     *
     *  Returns a pointer to the underlying hid_t. This operator,
     *  used in conjunction with the dereferencing operator,
     *  allows the %Hdf5DatasetResource object to be used where ever
     *  a hid_t would normally be used.
     *
-    *  @return   A pointer to the underlying hid_t returned by H5Dopen.
+    *  @return   A pointer to the underlying hid_t returned by H5Dopen1.
     */
    operator hid_t*()
    {
@@ -862,13 +862,13 @@ public:
       /**
        *
        */
-      Args(H5E_auto_t errorFunc, void* pClientData) : mErrorFunc(errorFunc), mpClientData(pClientData)
+      Args(H5E_auto1_t errorFunc, void* pClientData) : mErrorFunc(errorFunc), mpClientData(pClientData)
       {
       }
 
-      H5E_auto_t mErrorFunc;
+      H5E_auto1_t mErrorFunc;
       void* mpClientData;
-      H5E_auto_t mOriginalErrorFunc;
+      H5E_auto1_t mOriginalErrorFunc;
       void* mpOriginalClientData;
    };
 
@@ -885,8 +885,8 @@ public:
    hid_t* obtainResource(const Args &org_args) const
    {
       Args& args = const_cast<Args&>(org_args);
-      H5Eget_auto(&args.mOriginalErrorFunc, &args.mpOriginalClientData);
-      H5Eset_auto(args.mErrorFunc, args.mpClientData);
+      H5Eget_auto1(&args.mOriginalErrorFunc, &args.mpOriginalClientData);
+      H5Eset_auto1(args.mErrorFunc, args.mpClientData);
       return NULL;
    }
 
@@ -902,7 +902,7 @@ public:
     */
    void releaseResource(const Args &args, hid_t* pHandle) const
    {
-      H5Eset_auto(args.mOriginalErrorFunc, args.mpOriginalClientData);
+      H5Eset_auto1(args.mOriginalErrorFunc, args.mpOriginalClientData);
    }
 };
 
@@ -915,7 +915,7 @@ public:
    /**
     * Construct a Resource object.
     */
-   Hdf5ErrorHandlerResource(H5E_auto_t errorFunc, void* pClientData) :
+   Hdf5ErrorHandlerResource(H5E_auto1_t errorFunc, void* pClientData) :
       Resource<hid_t, Hdf5ErrorHandlerObject>(Args(errorFunc, pClientData))
    {
    }

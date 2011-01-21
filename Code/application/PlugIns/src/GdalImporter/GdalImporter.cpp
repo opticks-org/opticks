@@ -24,6 +24,7 @@
 #include "StringUtilities.h"
 #include "TypeConverter.h"
 
+#include <boost/algorithm/string/erase.hpp>
 #include <gdal_priv.h>
 
 REGISTER_PLUGIN_BASIC(OpticksGdalImporter, GdalImporter);
@@ -155,14 +156,14 @@ GdalImporter::GdalImporter()
                {
                   extensions += ";;";
                }
+               std::string driverDesc = std::string(pDriver->GetDescription());
                if (pLongName != NULL)
                {
-                  extensions += std::string(pLongName) + " Files (*." + std::string(pExt) + ")";
+                  driverDesc = std::string(pLongName);
                }
-               else
-               {
-                  extensions += std::string(pDriver->GetDescription()) + " Files (*." + std::string(pExt) + ")";
-               }
+               boost::algorithm::erase_all(driverDesc, "(");
+               boost::algorithm::erase_all(driverDesc, ")");
+               extensions += driverDesc + " Files (*." + std::string(pExt) + ")";
             }
          }
       }

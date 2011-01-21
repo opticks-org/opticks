@@ -88,7 +88,7 @@ IceWriter::IceWriter(hid_t fileHandle, IceUtilities::FileType fileType) :
 
 void IceWriter::writeFileHeader()
 {
-   Hdf5GroupResource formatDescriptor(H5Gcreate(mFileHandle, "IceFormatDescriptor", 0));
+   Hdf5GroupResource formatDescriptor(H5Gcreate1(mFileHandle, "IceFormatDescriptor", 0));
    ICEVERIFY(*formatDescriptor >= 0)
    ICEVERIFY(HdfUtilities::writeAttribute<string>(*formatDescriptor, "Creator", string(APP_NAME)));
    ICEVERIFY(HdfUtilities::writeAttribute<string>(*formatDescriptor, "CreatorVersion", string(APP_VERSION_NUMBER)));
@@ -304,7 +304,7 @@ void IceWriter::writeCube(const string& hdfPath,
 
    string unitPath = hdfPath + "/Units";
    HdfUtilities::createGroups(unitPath, mFileHandle, true);
-   Hdf5GroupResource unitGroup(H5Gopen(mFileHandle, unitPath.c_str()));
+   Hdf5GroupResource unitGroup(H5Gopen1(mFileHandle, unitPath.c_str()));
 
    const Units* pUnits = pDataDesc->getUnits();
    HdfUtilities::writeAttribute<double>(*unitGroup, "RangeMax", pUnits->getRangeMax());
@@ -315,7 +315,7 @@ void IceWriter::writeCube(const string& hdfPath,
 
    string displayPath = hdfPath + "/DisplayInformation";
    HdfUtilities::createGroups(displayPath, mFileHandle, true);
-   Hdf5GroupResource displayGroup(H5Gopen(mFileHandle, displayPath.c_str()));
+   Hdf5GroupResource displayGroup(H5Gopen1(mFileHandle, displayPath.c_str()));
    HdfUtilities::writeAttribute<unsigned int>(*displayGroup, "GrayDisplayedBand",
       getDisplayedBandToStoreInFile(GRAY, pDataDesc, pOutputFileDescriptor));
    HdfUtilities::writeAttribute<unsigned int>(*displayGroup, "RedDisplayedBand",
@@ -428,7 +428,7 @@ void IceWriter::writeLayer(const string& hdfPath, const string& datasetPath, con
    HdfUtilities::createGroups(hdfPath, mFileHandle, true);
    if (datasetPath.empty() == false)
    {
-      Hdf5GroupResource layerGroup(H5Gopen(mFileHandle, hdfPath.c_str()));
+      Hdf5GroupResource layerGroup(H5Gopen1(mFileHandle, hdfPath.c_str()));
       ICEVERIFY_MSG(HdfUtilities::writeAttribute(*layerGroup,
          "Dataset", datasetPath), "Unable to set Dataset path.");
    }
@@ -461,7 +461,7 @@ void IceWriter::writeClassification(const Classification* pClassification,
    if (pClassification != NULL)
    {
       HdfUtilities::createGroups(groupName, mFileHandle, true);
-      Hdf5GroupResource classificationGroup(H5Gopen(mFileHandle, groupName.c_str()));
+      Hdf5GroupResource classificationGroup(H5Gopen1(mFileHandle, groupName.c_str()));
       ICEVERIFY(HdfUtilities::writeAttribute<string>(*classificationGroup, "Level", pClassification->getLevel()));
       ICEVERIFY(HdfUtilities::writeAttribute<string>(*classificationGroup, "System", pClassification->getSystem()));
       ICEVERIFY(HdfUtilities::writeAttribute<string>(*classificationGroup, "Codewords",
@@ -1133,7 +1133,7 @@ void IceWriter::createDatasetForCube(hsize_t dimSpace[3],
    Hdf5DataSpaceResource dspaceId(H5Screate_simple(3, dimSpace, NULL));
    ICEVERIFY(*dspaceId >= 0);
 
-   dataset = Hdf5DataSetResource(H5Dcreate(fd, hdfPath.c_str(), hdfType, *dspaceId, plist));
+   dataset = Hdf5DataSetResource(H5Dcreate1(fd, hdfPath.c_str(), hdfType, *dspaceId, plist));
    ICEVERIFY(*dataset >= 0);
 
    H5Pclose(plist);
@@ -1147,7 +1147,7 @@ void IceWriter::writePseudocolorLayerProperties(const string& hdfPath,
 
    // Scope the Hdf5GroupResource
    {
-      Hdf5GroupResource layerGroup(H5Gopen(mFileHandle, layerPath.c_str()));
+      Hdf5GroupResource layerGroup(H5Gopen1(mFileHandle, layerPath.c_str()));
       ICEVERIFY_MSG(*layerGroup >= 0, "Unable to open the group \"" + layerPath + "\".");
 
       ICEVERIFY_MSG(HdfUtilities::writeAttribute(*layerGroup, "Symbol",
@@ -1191,7 +1191,7 @@ void IceWriter::writeLayerProperties(const string& hdfPath,
 {
    const string layerPath = hdfPath + "/Layer";
    HdfUtilities::createGroups(layerPath, mFileHandle, true);
-   Hdf5GroupResource layerGroup(H5Gopen(mFileHandle, layerPath.c_str()));
+   Hdf5GroupResource layerGroup(H5Gopen1(mFileHandle, layerPath.c_str()));
 
    ICEVERIFY_MSG(HdfUtilities::writeAttribute(*layerGroup, "Name",
       pLayer->getName()), "Unable to write Layer name.");

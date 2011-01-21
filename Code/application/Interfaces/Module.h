@@ -69,7 +69,7 @@ extern "C" bool LINKAGE get_name( char **name,
  *
  *  @return  This method returns true if completed successfully.
  */
-extern "C" bool LINKAGE initialize( External *services );
+extern "C" bool LINKAGE initialize_op( External *services );
 /// \endcond
 
 /**
@@ -98,7 +98,7 @@ extern "C" bool LINKAGE instantiate_interface(unsigned int plugInNumber, PlugIn*
  *
  *  @return  This method returns true if completed successfully.
  */
-extern "C" bool LINKAGE destroy();
+extern "C" bool LINKAGE destroy_op();
 /// \endcond
 
 #endif

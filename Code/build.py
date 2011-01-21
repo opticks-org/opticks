@@ -92,9 +92,16 @@ class Builder:
         env["VERSION"] = current_app_version
         env["OUTPUT_DIR"] = doc_path
         env["CONFIG_DIR"] = config_dir
+        if is_windows():
+            dot_exe = "dot.exe"
+        else:
+            dot_exe = "dot"
         graphviz_dir = os.path.abspath(join(self.depend_path,
-            "graphviz", "app"))
-        env["DOT_DIR"] = join(graphviz_dir, "bin")
+            "64", "bin", "graphviz"))
+        if not(os.path.exists(join(graphviz_dir, dot_exe))):
+            graphviz_dir = os.path.abspath(join(self.depend_path,
+                "32", "bin", "graphviz"))
+        env["DOT_DIR"] = graphviz_dir
         self.other_doxygen_prep(build, env)
         retcode = execute_process(args, env=env)
         if retcode != 0:
@@ -353,9 +360,9 @@ class Builder:
 
 class WindowsBuilder(Builder):
     def __init__(self, dependencies, arcsdk, build_in_debug,
-                 verbosity, visualstudio, use_scons, ms_help_compiler):
+                 verbosity, msbuild, use_scons, ms_help_compiler):
         Builder.__init__(self, dependencies, arcsdk, build_in_debug, verbosity)
-        self.vs_path = visualstudio
+        self.msbuild_path = msbuild 
         self.ms_help_compiler = ms_help_compiler
         self.use_scons = use_scons
 
@@ -393,18 +400,18 @@ class WindowsBuilder(Builder):
             if self.verbosity > 1:
                 print "Building Opticks and plug-ins"
             solution_file = os.path.abspath("Application\\Opticks.sln")
-            self.build_in_visual_studio(solution_file,
+            self.build_in_msbuild(solution_file,
                 self.build_debug_mode, self.is_64_bit, concurrency,
-                self.vs_path, env, clean)
+                self.msbuild_path, env, clean)
             if self.verbosity > 1:
                 print "Done building Opticks and plug-ins"
             if build_opticks != "core":
                 if self.verbosity > 1:
                     print "Building ArcProxy"
                 solution_file = os.path.abspath("Application\\ArcIntegration.sln")
-                self.build_in_visual_studio(solution_file,
+                self.build_in_msbuild(solution_file,
                     self.build_debug_mode, self.is_64_bit,
-                    concurrency, self.vs_path, env, clean)
+                    concurrency, self.msbuild_path, env, clean)
                 if self.verbosity > 1:
                     print "Done building ArcProxy"
 
@@ -415,7 +422,11 @@ class WindowsBuilder(Builder):
         return "Binaries-%s-%s.zip" % (self.platform, self.mode)
 
     def get_doxygen_path(self):
-        return join(self.depend_path, "doxygen", "bin", "doxygen.exe")
+        doxygen_path = join(self.depend_path, "32", "bin", "doxygen.exe")
+        if os.path.exists(doxygen_path):
+            return doxygen_path
+        doxygen_path = join(self.depend_path, "64", "bin", "doxygen.exe")
+        return doxygen_path
 
     def other_doxygen_prep(self, build, env):
         if build != "all":
@@ -453,8 +464,8 @@ class WindowsBuilder(Builder):
         else:
             proxy_dll_names = ["QtCore4.dll", "QtNetwork4.dll"]
         for proxy_dll_name in proxy_dll_names:
-            shutil.copy2(join(self.depend_path, "Qt",
-                "bin", "win32", proxy_dll_name),
+            shutil.copy2(join(self.depend_path, "32",
+                "lib", proxy_dll_name),
                 join(proxy_dir, proxy_dll_name))
         if self.verbosity > 1:
             print "Done gathering Qt dll's needed for ArcProxy"
@@ -478,46 +489,45 @@ class WindowsBuilder(Builder):
 
         return bin_path
 
-    def build_in_visual_studio(self, solutionfile, debug,
-                               build_64_bit, concurrency,
-                               vspath, environ, clean):
-        if not os.path.exists(vspath):
-            raise ScriptException("Visual Studio path is invalid")
+    def build_in_msbuild(self, solutionfile, debug,
+                         build_64_bit, concurrency,
+                         msbuildpath, environ, clean):
+        if not os.path.exists(msbuildpath):
+            raise ScriptException("MS Build path is invalid")
     
-        if debug and not build_64_bit:
-            mode = "Debug|Win32"
-        if not debug and not build_64_bit:
-            mode = "Release|Win32"
-        if debug and build_64_bit:
-            mode = "Debug|x64"
-        if not debug and build_64_bit:
-            mode = "Release|x64"
+        if debug:
+            config = "Debug"
+        else:
+            config = "Release"
+        if build_64_bit:
+            platform = "x64"
+        else:
+            platform = "Win32"
 
-        msdev_exec = join(vspath, "vc", "vcpackages", "vcbuild.exe")
-        arguments = [msdev_exec, solutionfile]
+        msbuild_exec = join(msbuildpath, "msbuild.exe")
+        arguments = [msbuild_exec, solutionfile]
         if clean:
-            arguments.append("/clean")
-        arguments.append("/error:[ERROR]")
-        arguments.append("/warning:[WARNING]")
-        arguments.append("/M%s" % (concurrency))
-        arguments.append(mode)
+            arguments.append("/target:clean")
+        arguments.append("/m:%s" % concurrency)
+        arguments.append("/p:Platform=%s" % platform)
+        arguments.append("/p:Configuration=%s" % config)
         retcode = execute_process(arguments, env=environ)
         if retcode != 0:
             raise ScriptException("Visual Studio did not compile project")
 
 class Windows32bitBuilder(WindowsBuilder):
     def __init__(self, dependencies, arcsdk, build_in_debug,
-                 verbosity, visualstudio, use_scons, ms_help_compiler):
+                 verbosity, msbuild, use_scons, ms_help_compiler):
         WindowsBuilder.__init__(self, dependencies, arcsdk,
-            build_in_debug, verbosity, visualstudio, use_scons, ms_help_compiler)
+            build_in_debug, verbosity, msbuild, use_scons, ms_help_compiler)
         self.is_64_bit = False
         self.platform = "Win32"
 
 class Windows64bitBuilder(WindowsBuilder):
     def __init__(self, dependencies, arcsdk, build_in_debug,
-                 verbosity, visualstudio, use_scons, ms_help_compiler):
+                 verbosity, msbuild, use_scons, ms_help_compiler):
         WindowsBuilder.__init__(self, dependencies, arcsdk,
-            build_in_debug, verbosity, visualstudio, use_scons, ms_help_compiler)
+            build_in_debug, verbosity, msbuild, use_scons, ms_help_compiler)
         self.is_64_bit = True
         self.platform = "x64"
 
@@ -526,7 +536,7 @@ class SolarisBuilder(Builder):
         Builder.__init__(self, dependencies, arcsdk, build_in_debug, verbosity)
 
     def get_doxygen_path(self):
-        return join(self.depend_path, "doxygen", "bin", "doxygen")
+        return join(self.depend_path, "64", "bin", "doxygen")
 
     def other_doxygen_prep(self, build, env):
         graphviz_dir = os.path.abspath(join(self.depend_path,
@@ -598,15 +608,15 @@ class LinuxBuilder(SolarisBuilder):
         return self.generic_prep_to_run(build_dir, "Linux", "")
 
 def create_builder(opticks_depends, arcsdk, build_in_debug,
-                   visualstudio, use_scons, ms_help_compiler, arch, verbosity):
+                   msbuild, use_scons, ms_help_compiler, arch, verbosity):
     builder = None
     if is_windows():
         if arch == "32":
             builder = Windows32bitBuilder(opticks_depends, arcsdk,
-                build_in_debug, verbosity, visualstudio, use_scons, ms_help_compiler)
+                build_in_debug, verbosity, msbuild, use_scons, ms_help_compiler)
         if arch == "64":
             builder = Windows64bitBuilder(opticks_depends, arcsdk,
-                build_in_debug, verbosity, visualstudio, use_scons, ms_help_compiler)
+                build_in_debug, verbosity, msbuild, use_scons, ms_help_compiler)
     elif sys.platform.startswith("linux"):
         builder = LinuxBuilder(opticks_depends, arcsdk, build_in_debug, verbosity)
     else:
@@ -615,10 +625,10 @@ def create_builder(opticks_depends, arcsdk, build_in_debug,
     return builder
 
 def prep_to_run(opticks_depends, build_debug, arch,
-                visualstudio, build_dir, verbosity):
+                msbuild, build_dir, verbosity):
     try:
         builder = create_builder(opticks_depends, False,
-            build_debug, visualstudio, False, None, arch, verbosity)
+            build_debug, msbuild, False, None, arch, verbosity)
         if builder is not None:
             return builder.prep_to_run(build_dir)
     except ScriptException, se:
@@ -654,10 +664,8 @@ def main(args):
     options.add_option("-a", "--arcsdk", dest="arcsdk",
         action="store", type="string")
     if is_windows():
-        vs_path = "C:\\Program Files (x86)\\Microsoft Visual Studio 8"
-        if not os.path.exists(vs_path):
-            vs_path = "C:\\Program Files\\Microsoft Visual Studio 8"
-        options.add_option("--visualstudio", dest="visualstudio",
+        msbuild_path = "C:\\Windows\\Microsoft.NET\Framework\\v4.0.30319"
+        options.add_option("--msbuild", dest="msbuild",
             action="store", type="string")
         ms_help_compiler_path = "C:\\Program Files (x86)\\HTML Help Workshop"
         if not os.path.exists(ms_help_compiler_path):
@@ -672,7 +680,7 @@ def main(args):
                  "The default is to use vcbuild")
         options.add_option("--arch", dest="arch", action="store",
             type="choice", choices=["32","64"], help="Use 32 or 64.")
-        options.set_defaults(visualstudio=vs_path,
+        options.set_defaults(msbuild=msbuild_path,
             ms_help_compiler=ms_help_compiler_path, arch="64",
             use_scons=False)
     options.add_option("-m", "--mode", dest="mode",
@@ -715,7 +723,7 @@ def main(args):
 
     options = options.parse_args(args[1:])[0]
     if not is_windows():
-        options.visualstudio = None
+        options.msbuild = None
         options.ms_help_compiler = None
         options.arch = "64"
         options.use_scons = True 
@@ -740,7 +748,7 @@ def main(args):
             build_in_debug = False
 
         builder = create_builder(opticks_depends, options.arcsdk,
-            build_in_debug, options.visualstudio,
+            build_in_debug, options.msbuild,
             options.use_scons,
             options.ms_help_compiler, options.arch, options.verbosity)
         if builder is None:

@@ -77,7 +77,7 @@ public:
       }
       if (mDataspace != -1)
       {
-         mDataset = H5Dcreate(fileId, datasetName.c_str(),
+         mDataset = H5Dcreate1(fileId, datasetName.c_str(),
             *(mpWriter->getWriteFileType()), mDataspace, H5P_DEFAULT);
       }
    }

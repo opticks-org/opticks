@@ -424,7 +424,7 @@ bool createGroups(const string& hdfPath, hid_t fileDescriptor, bool bLastItemIsG
    }
 
    bool bSuccess = !(groupsToAdd.empty());
-   /* turn off error handling in Hdf5 library, because H5Gcreate will
+   /* turn off error handling in Hdf5 library, because H5Gcreate1 will
       return errors if the group already exists, but there is no HDF5 library
       call to check group existence that doesn't also return errors if
       the group doesn't exist.
@@ -435,7 +435,7 @@ bool createGroups(const string& hdfPath, hid_t fileDescriptor, bool bLastItemIsG
       string groupName = groupsToAdd.front();
       groupsToAdd.pop_front();
 
-      Hdf5GroupResource groupId(H5Gcreate(fileDescriptor, groupName.c_str(), 0));
+      Hdf5GroupResource groupId(H5Gcreate1(fileDescriptor, groupName.c_str(), 0));
    }
 
    return bSuccess;

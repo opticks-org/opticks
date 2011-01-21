@@ -14,6 +14,7 @@
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 
+#include <algorithm>
 #include <memory>
 
 ConvertToBipPager::ConvertToBipPager(RasterElement* pRaster) :

@@ -1,8 +1,8 @@
-Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual Studio 2005
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ArcProxy", "ArcProxy\ArcProxy.vcproj", "{A2A2C2A9-AFE5-4CBA-9BF3-F06E136CB9EB}"
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ArcProxy", "ArcProxy\ArcProxy.vcxproj", "{A2A2C2A9-AFE5-4CBA-9BF3-F06E136CB9EB}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ArcProxyLib", "ArcProxyLib\ArcProxyLib.vcproj", "{D2E59DB8-9AB4-447F-9340-E7E171E5F566}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ArcProxyLib", "ArcProxyLib\ArcProxyLib.vcxproj", "{D2E59DB8-9AB4-447F-9340-E7E171E5F566}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

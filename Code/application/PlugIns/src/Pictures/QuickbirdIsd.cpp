@@ -108,15 +108,6 @@ bool QuickbirdIsd::copyToMetadata(DynamicObject *pMetadata) const
       FactoryResource<DynamicObject> image;
       pMetadata->setAttributeByPath("NITF/Image Subheader", *image);
    }
-   catch (const XQillaException &exc)
-   {
-      MessageResource m(A(exc.msg), "app", "0D4EC7B3-1CA6-4039-B8D6-5808933E13C5");
-      if (!current.empty())
-      {
-         m->addProperty("query", current);
-      }
-      return false;
-   }
    catch (const XERCES_CPP_NAMESPACE_QUALIFIER DOMException &exc)
    {
       MessageResource m(A(exc.msg), "app", "0D4EC7B3-1CA6-4039-B8D6-5808933E13C5");

@@ -19,6 +19,8 @@
 #include <QtGui/QPushButton>
 #include <QtGui/QLayout>
 
+#include <algorithm>
+
 using namespace std;
 
 OptionsAnimation::OptionsAnimation() :

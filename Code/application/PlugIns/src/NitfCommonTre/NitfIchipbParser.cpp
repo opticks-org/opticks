@@ -24,6 +24,7 @@
 
 
 #include <algorithm>
+#include <iterator>
 #include <ostream>
 #include <sstream>
 #include <boost/bind.hpp>

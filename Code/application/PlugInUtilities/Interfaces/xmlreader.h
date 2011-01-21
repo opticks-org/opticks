@@ -10,6 +10,7 @@
 #ifndef XMLREADER_H
 #define XMLREADER_H
 
+#include <iterator>
 #include <stdio.h>
 
 #include "Filename.h"

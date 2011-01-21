@@ -83,12 +83,12 @@ public:
       Hdf5Node* pNode = pAttribute->getParent();
       if (dynamic_cast<Hdf5Dataset*>(pNode) != NULL)
       {
-         mDataset = H5Dopen(mFile, pNode->getFullPathAndName().c_str());
+         mDataset = H5Dopen1(mFile, pNode->getFullPathAndName().c_str());
          mAttr = H5Aopen_name(mDataset, pAttribute->getName().c_str());
       }
       else if (dynamic_cast<Hdf5Group*>(pNode) != NULL)
       {
-         mGroup = H5Gopen(mFile, pNode->getFullPathAndName().c_str());
+         mGroup = H5Gopen1(mFile, pNode->getFullPathAndName().c_str());
          mAttr = H5Aopen_name(mGroup, pAttribute->getName().c_str());
       }
       DO_IF(mAttr < 0, return);

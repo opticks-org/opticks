@@ -45,6 +45,8 @@ def main():
             (version_number))
         build_rev_handle.close()
         print "New Build Revision # is", version_number
+    else:
+        print "Build Revision # %s is up-to-date" % version_number
     return 0
 
 if __name__ == "__main__":

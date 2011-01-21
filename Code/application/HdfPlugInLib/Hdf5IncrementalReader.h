@@ -85,7 +85,7 @@ public:
     * @return Returns false if an invalid HDF5 dataset was provided or
     *         H5Sselect_elements() returns a negative value.
     */
-   bool selectElements(H5S_seloper_t operation, const size_t num_elements, const hsize_t ** pCoord);
+   bool selectElements(H5S_seloper_t operation, const size_t num_elements, const hsize_t * pCoord);
 
    /**
     * Selects all points in the dataset, so that they

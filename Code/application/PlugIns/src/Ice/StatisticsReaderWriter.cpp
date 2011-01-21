@@ -16,6 +16,7 @@
 #include "ObjectResource.h"
 #include "TypeConverter.h"
 
+#include <algorithm>
 #include <limits>
 #include <list>
 #include <sstream>

@@ -368,7 +368,7 @@ bool PlugInDescriptorImp::addPlugIn(PlugIn* pPlugIn)
 
    if (bAdd == true)
    {
-      mPlugIns.insert(pair<PlugIn*, ProgressAdapter*>(pPlugIn, NULL));
+      mPlugIns.insert(pair<PlugIn*, ProgressAdapter*>(pPlugIn, reinterpret_cast<ProgressAdapter*>(NULL)));
    }
 
    return bAdd;

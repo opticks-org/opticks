@@ -182,12 +182,12 @@ ModuleDescriptor* ModuleDescriptor::getModule(const std::string& filename, map<s
 
    // below are the functions required for a version 1 module
    bool(*pInitProcedure)(External*) =
-      reinterpret_cast<bool(*)(External*)>(pDynMod->getProcedureAddress("initialize"));
+      reinterpret_cast<bool(*)(External*)>(pDynMod->getProcedureAddress("initialize_op"));
    bool(*pNameProcedure)(char**, char**, char**, unsigned int*, char**, char**) =
       reinterpret_cast<bool(*)(char**, char**, char**, unsigned int*, char**, char**)>(
                                pDynMod->getProcedureAddress("get_name"));
    DMPROC pInterfaceProc = pDynMod->getProcedureAddress("instantiate_interface");
-   DMPROC pDestroyProc = pDynMod->getProcedureAddress("destroy");
+   DMPROC pDestroyProc = pDynMod->getProcedureAddress("destroy_op");
 
    if (pInitProcedure == NULL || pNameProcedure == NULL || pInterfaceProc == NULL || pDestroyProc == NULL)
    {
@@ -261,7 +261,7 @@ bool ModuleDescriptor::load()
    if (mModuleVersion == MOD_ONE)
    {
       bool(*moduleProcedure)(External*) =
-         reinterpret_cast<bool(*)(External*)>(mpModule->getProcedureAddress("initialize"));
+         reinterpret_cast<bool(*)(External*)>(mpModule->getProcedureAddress("initialize_op"));
       if (moduleProcedure != NULL && !moduleProcedure(ConnectionManager::instance()))
       {
          return false;

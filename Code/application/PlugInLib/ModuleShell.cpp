@@ -54,7 +54,7 @@ extern "C" bool LINKAGE get_name(char** pName, char** pVersion, char** pDescript
       *pModuleId != NULL);
 }
 
-extern "C" bool LINKAGE initialize(External* pServices)
+extern "C" bool LINKAGE initialize_op(External* pServices)
 {
    ModuleManager* pModule = ModuleManager::instance();
    if (pModule != NULL)
@@ -79,7 +79,7 @@ extern "C" bool LINKAGE instantiate_interface(unsigned int plugInNumber, PlugIn*
    return (*interfaceAddress != NULL);
 }
 
-extern "C" bool LINKAGE destroy()
+extern "C" bool LINKAGE destroy_op()
 {
    return true;
 }

@@ -63,7 +63,7 @@ public:
     * Return the HDF5 datatype, ie. hid_t that
     * represents the file type. 
     * This type will be provided as the file datatype
-    * to either a H5Acreate() or H5Dcreate() call in 
+    * to either a H5Acreate1() or H5Dcreate1() call in 
     * the HDF5 library depending on whether data
     * is being written to an HDF5 attribute or an
     * HDF5 dataset.  The hid_t returned from
@@ -114,7 +114,7 @@ public:
 
    /**
     * Returns the HDF5 dataspace that should be used
-    * in the H5Acreate() or H5Dcreate().  The dataspace
+    * in the H5Acreate1() or H5Dcreate1().  The dataspace
     * returned should be compatible with the void* buffer
     * that will be returned from getWriteBuffer().  The
     * dataspace returned should also be compatible

@@ -39,7 +39,7 @@
 
 namespace
 {
-   string sKmlNamespace = "http://earth.google.com/kml/2.1";
+   std::string sKmlNamespace = "http://earth.google.com/kml/2.1";
 };
 
 REGISTER_PLUGIN_BASIC(OpticksKml, KMLServer);

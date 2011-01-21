@@ -590,7 +590,8 @@ const QList<const AebEntry*>& AebIo::getContentPaths(std::string& errMsg) const
             continue;
          }
          filename.resize(info.size_filename);
-         if (unzGetCurrentFileInfo(*mZipFile, NULL, filename.data(), filename.size(), NULL, 0, NULL, 0) == UNZ_OK)
+         unz_file_info temp_info;
+         if (unzGetCurrentFileInfo(*mZipFile, &temp_info, filename.data(), filename.size(), NULL, 0, NULL, 0) == UNZ_OK)
          {
             QString path(filename);
             if (mObj.mPlatforms.empty() && path.startsWith(platformStr))

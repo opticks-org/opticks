@@ -1,0 +1,254 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{028F3ABC-AAB5-426C-8127-80C5FEE17647}</ProjectGuid>
+    <RootNamespace>WizardItems</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\CompileSettings\32bitSettings.props" />
+    <Import Project="..\..\..\CompileSettings\Macros.props" />
+    <Import Project="..\..\..\CompileSettings\AllCommonSettings-Release-32bit.props" />
+    <Import Project="..\..\..\CompileSettings\PlugInCommonSettings.props" />
+    <Import Project="..\..\..\CompileSettings\Qt-Release.props" />
+    <Import Project="..\..\..\CompileSettings\Xerces-Release.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\CompileSettings\32bitSettings.props" />
+    <Import Project="..\..\..\CompileSettings\Macros.props" />
+    <Import Project="..\..\..\CompileSettings\AllCommonSettings-Debug-32bit.props" />
+    <Import Project="..\..\..\CompileSettings\PlugInCommonSettings.props" />
+    <Import Project="..\..\..\CompileSettings\Qt-Debug.props" />
+    <Import Project="..\..\..\CompileSettings\Xerces-Debug.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\CompileSettings\64bitSettings.props" />
+    <Import Project="..\..\..\CompileSettings\Macros.props" />
+    <Import Project="..\..\..\CompileSettings\AllCommonSettings-Release-64bit.props" />
+    <Import Project="..\..\..\CompileSettings\PlugInCommonSettings.props" />
+    <Import Project="..\..\..\CompileSettings\Qt-Release.props" />
+    <Import Project="..\..\..\CompileSettings\Xerces-Release.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\CompileSettings\64bitSettings.props" />
+    <Import Project="..\..\..\CompileSettings\Macros.props" />
+    <Import Project="..\..\..\CompileSettings\AllCommonSettings-Debug-64bit.props" />
+    <Import Project="..\..\..\CompileSettings\PlugInCommonSettings.props" />
+    <Import Project="..\..\..\CompileSettings\Qt-Debug.props" />
+    <Import Project="..\..\..\CompileSettings\Xerces-Debug.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\Debug/WizardItems.tlb</TypeLibraryName>
+    </Midl>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>
+      </AssemblerListingLocation>
+      <BrowseInformationFile>
+      </BrowseInformationFile>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <Version>
+      </Version>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>X64</TargetEnvironment>
+      <TypeLibraryName>.\Debug/WizardItems.tlb</TypeLibraryName>
+    </Midl>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>
+      </AssemblerListingLocation>
+      <BrowseInformationFile>
+      </BrowseInformationFile>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <Version>
+      </Version>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\Release/WizardItems.tlb</TypeLibraryName>
+    </Midl>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <Version>
+      </Version>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>X64</TargetEnvironment>
+      <TypeLibraryName>.\Release/WizardItems.tlb</TypeLibraryName>
+    </Midl>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <Version>
+      </Version>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="CreateAnimation.cpp" />
+    <ClCompile Include="CreateExportFileDescriptor.cpp" />
+    <ClCompile Include="CreateFileDescriptor.cpp" />
+    <ClCompile Include="DeriveLayer.cpp" />
+    <ClCompile Include="DeriveProduct.cpp" />
+    <ClCompile Include="DesktopItems.cpp" />
+    <ClCompile Include="EditDataDescriptor.cpp" />
+    <ClCompile Include="ExportDataSet.cpp" />
+    <ClCompile Include="GetDataDescriptor.cpp" />
+    <ClCompile Include="GetFilename.cpp" />
+    <ClCompile Include="GetPrimaryRasterLayer.cpp" />
+    <ClCompile Include="GetSessionItem.cpp" />
+    <ClCompile Include="GetView.cpp" />
+    <ClCompile Include="ImportDataSet.cpp" />
+    <ClCompile Include="LayerItems.cpp" />
+    <ClCompile Include="LoadLayer.cpp" />
+    <ClCompile Include="ModelItems.cpp" />
+    <ClCompile Include="ModuleManager.cpp" />
+    <ClCompile Include="PrintView.cpp" />
+    <ClCompile Include="RunInterpreterCommands.cpp" />
+    <ClCompile Include="SaveLayer.cpp" />
+    <ClCompile Include="SelectPlugIn.cpp" />
+    <ClCompile Include="SetDisplayedBand.cpp" />
+    <ClCompile Include="SetDisplayMode.cpp" />
+    <ClCompile Include="SetThresholdOptions.cpp" />
+    <ClCompile Include="TemplateUtilities.cpp" />
+    <ClCompile Include="UtilityItems.cpp" />
+    <ClCompile Include="WizardItems.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\PlugInManager\PlugInModule.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CreateAnimation.h" />
+    <ClInclude Include="CreateExportFileDescriptor.h" />
+    <ClInclude Include="CreateFileDescriptor.h" />
+    <ClInclude Include="DeriveLayer.h" />
+    <ClInclude Include="DeriveProduct.h" />
+    <ClInclude Include="DesktopItems.h" />
+    <ClInclude Include="EditDataDescriptor.h" />
+    <ClInclude Include="ExportDataSet.h" />
+    <ClInclude Include="GetDataDescriptor.h" />
+    <ClInclude Include="GetFilename.h" />
+    <ClInclude Include="GetPrimaryRasterLayer.h" />
+    <ClInclude Include="GetSessionItem.h" />
+    <ClInclude Include="GetView.h" />
+    <ClInclude Include="ImportDataSet.h" />
+    <ClInclude Include="LayerItems.h" />
+    <ClInclude Include="LoadLayer.h" />
+    <ClInclude Include="ModelItems.h" />
+    <ClInclude Include="PrintView.h" />
+    <ClInclude Include="RunInterpreterCommands.h" />
+    <ClInclude Include="SaveLayer.h" />
+    <ClInclude Include="SelectPlugIn.h" />
+    <ClInclude Include="SetDisplayedBand.h" />
+    <ClInclude Include="SetDisplayMode.h" />
+    <ClInclude Include="SetThresholdOptions.h" />
+    <ClInclude Include="TemplateUtilities.h" />
+    <ClInclude Include="UtilityItems.h" />
+    <ClInclude Include="WizardItems.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\PlugInLib\PlugInLib.vcxproj">
+      <Project>{bfaa94f6-8ca1-4159-b0e1-90b09d9c3056}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\PlugInUtilities\PlugInUtilities.vcxproj">
+      <Project>{4831b6df-aeac-4f12-a0b5-ce3ca703fb88}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

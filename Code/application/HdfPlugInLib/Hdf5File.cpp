@@ -55,13 +55,13 @@ namespace
    };
 
    /**
-    *  PRIVATE, NON-MEMBER FUNCTION that is used with H5Aiterate to add attributes to an Hdf5Element
+    *  PRIVATE, NON-MEMBER FUNCTION that is used with H5Aiterate1 to add attributes to an Hdf5Element
     *
     *  This method is used internally only while building the Hdf5File object for a given HDF5 file.
     *
     *  The function signature is defined by the HDF5 specification. "Multiple arguments" are
     *  supported by passing in a structure to the void* argument, though we do not do that here.
-    *  It must also be a non-member function since that is what H5Aiterate requires.
+    *  It must also be a non-member function since that is what H5Aiterate1 requires.
     * 
     *  @param   loc_id
     *           The handle to a dataset or group, passed in from H5Giterate or H5Diterate.
@@ -116,7 +116,7 @@ namespace
     *
     *  The function signature is defined by the HDF5 specification. "Multiple arguments" are
     *  supported by passing in a structure to the void* argument, though we do not do that here.
-    *  It must also be a non-member function since that is what H5Aiterate requires.
+    *  It must also be a non-member function since that is what H5Aiterate1 requires.
     * 
     *  @param   loc_id
     *           The handle to a dataset or group, passed in from H5Giterate
@@ -153,7 +153,7 @@ namespace
             {
                if (pGroup != NULL)
                {
-                  Hdf5GroupResource innerGroupId(H5Gopen(loc_id, name));
+                  Hdf5GroupResource innerGroupId(H5Gopen1(loc_id, name));
 
                   // since groups are non-terminals, we need to make sure there are no
                   // recursive links and no recursive references
@@ -165,7 +165,7 @@ namespace
                   Hdf5OpData newOpData(pNewGroup, pOpData->mMap);
 
                   // perform bitwise or so that if one of these returns -1, that value is preserved
-                  status = H5Aiterate(*innerGroupId, NULL, populateAttributes, pNewGroup) |
+                  status = H5Aiterate1(*innerGroupId, NULL, populateAttributes, pNewGroup) |
                            H5Giterate(loc_id, name, NULL, populateHdfFile, &newOpData);
                }
                return status;
@@ -181,7 +181,7 @@ namespace
                      fullPathAndName = pDataset->getFullPathAndName();
                   }
 
-                  Hdf5DataSetResource dataId(H5Dopen(loc_id, fullPathAndName.c_str()));
+                  Hdf5DataSetResource dataId(H5Dopen1(loc_id, fullPathAndName.c_str()));
 
                   Hdf5TypeResource dtype(H5Dget_type(*dataId));
                   Hdf5DataSpaceResource dspace(H5Dget_space(*dataId));
@@ -208,7 +208,7 @@ namespace
 
                   pOpData->insertId(statbuf.objno[0]);
 
-                  status = H5Aiterate(*dataId, NULL, populateAttributes, pDataset);
+                  status = H5Aiterate1(*dataId, NULL, populateAttributes, pDataset);
                }
                break;
             }
@@ -283,7 +283,7 @@ bool Hdf5File::readFileData(const string& groupPath)
    Hdf5GroupResource groupId;
    {  //Turn off error handling while we check for the group, since it may not exist
       Hdf5ErrorHandlerResource errHandler(NULL, NULL);
-      groupId = Hdf5GroupResource(H5Gopen(fileHandle, groupPath.c_str()));
+      groupId = Hdf5GroupResource(H5Gopen1(fileHandle, groupPath.c_str()));
    }
    DO_IF(*groupId < 0, return false);
 
