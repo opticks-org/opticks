@@ -146,6 +146,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_RpcGui.cpp" />
     <ClCompile Include="ModuleManager.cpp" />
     <ClCompile Include="NitfDesSubheader.cpp" />
     <ClCompile Include="NitfExporter.cpp" />
@@ -162,6 +163,7 @@
     <ClCompile Include="OssimServices.cpp" />
     <ClCompile Include="RpcGeoreference.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_OptionsNitfExporter.cpp" />
+    <ClCompile Include="RpcGui.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="NitfDesSubheader.h" />
@@ -174,6 +176,20 @@
     <ClInclude Include="NitfPager.h" />
     <ClInclude Include="NitfResource.h" />
     <ClInclude Include="NitfUnknownTreParser.h" />
+    <CustomBuild Include="RpcGui.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing %(Filename).h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing %(Filename).h...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Filename).h...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Filename).h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+    </CustomBuild>
     <CustomBuild Include="OptionsNitfExporter.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing %(Filename).h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"

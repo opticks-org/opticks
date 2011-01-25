@@ -26,6 +26,7 @@
 #include "RasterDataDescriptor.h"
 #include "RasterFileDescriptor.h"
 #include "RpcGeoreference.h"
+#include "RpcGui.h"
 #include "SessionItemDeserializer.h"
 #include "SessionItemSerializer.h"
 #include "TypeConverter.h"
@@ -41,7 +42,10 @@ XERCES_CPP_NAMESPACE_USE
 
 REGISTER_PLUGIN(OpticksNitf, RpcGeoreference, Nitf::RpcGeoreference);
 
-Nitf::RpcGeoreference::RpcGeoreference() : mpRaster(NULL)
+Nitf::RpcGeoreference::RpcGeoreference() :
+   mpRaster(NULL),
+   mHeight(0.0),
+   mpGui(NULL)
 {
    setName("RPC Georeference");
    setVersion(APP_VERSION_NUMBER);
@@ -90,7 +94,10 @@ bool Nitf::RpcGeoreference::execute(PlugInArgList* pInParam, PlugInArgList* pOut
    mpRaster = pInParam->getPlugInArgValue<RasterElement>(Executable::DataElementArg());
    Progress* pProgress = pInParam->getPlugInArgValue<Progress>(Executable::ProgressArg());
    string messageText;
-
+   if (mpGui != NULL)
+   {
+      mHeight = mpGui->getHeightSize();
+   }
    if (mpRaster == NULL)
    {
       messageText = "No data cube passed to the plug-in.";
@@ -316,7 +323,7 @@ LocationType Nitf::RpcGeoreference::pixelToGeo(LocationType pixel, bool* pAccura
    pixel = mpChipConverter->activeToOriginal(pixel);
    ossimDpt imagePoint(pixel.mX, pixel.mY);
    ossimGpt worldPoint;
-   mModel.lineSampleToWorld(imagePoint, worldPoint);
+   mModel.lineSampleHeightToWorld(imagePoint, mHeight, worldPoint);
    if (worldPoint.isNan())
    {
       if (pAccurate != NULL)
@@ -338,6 +345,7 @@ LocationType Nitf::RpcGeoreference::geoToPixel(LocationType geo, bool* pAccurate
    ossimGpt worldPoint;
    worldPoint.latd(geo.mX);
    worldPoint.lond(geo.mY);
+   worldPoint.height(mHeight);
    ossimDpt imagePoint;
    mModel.worldToLineSample(worldPoint, imagePoint);
    if (imagePoint.isNan())
@@ -426,10 +434,6 @@ bool Nitf::RpcGeoreference::hasAbort()
    return false;
 }
 
-QWidget *Nitf::RpcGeoreference::getGui(RasterElement *pRaster)
-{
-   return NULL;
-}
 
 bool Nitf::RpcGeoreference::serialize(SessionItemSerializer &serializer) const
 {
@@ -495,4 +499,16 @@ bool Nitf::RpcGeoreference::deserialize(SessionItemDeserializer &deserializer)
       return false;
    }
    return mModel.loadState(kwl);
+}
+
+QWidget* Nitf::RpcGeoreference::getGui(RasterElement* pRaster)
+{
+   if (pRaster == NULL)
+   {
+      return NULL;
+   }
+
+   delete mpGui;
+   mpGui = new RpcGui(pRaster);
+   return mpGui;
 }

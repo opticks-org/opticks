@@ -62,6 +62,12 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_OptionsNitfExporter.cpp">
       <Filter>moc</Filter>
     </ClCompile>
+    <ClCompile Include="RpcGui.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_RpcGui.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="NitfDesSubheader.h">
@@ -103,6 +109,9 @@
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="OptionsNitfExporter.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="RpcGui.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>

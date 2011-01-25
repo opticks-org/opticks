@@ -22,6 +22,7 @@
 class RasterElement;
 class DynamicObject;
 class PlugInArgList;
+class RpcGui;
 
 namespace Nitf
 {
@@ -55,6 +56,8 @@ namespace Nitf
       std::auto_ptr<Nitf::ChipConverter> mpChipConverter;
 
       ossimRpcModel mModel;
+      double mHeight;
+      RpcGui* mpGui;
    };
 }
 
