@@ -10,19 +10,15 @@
 #include <QtCore/QFileInfo>
 
 #include "AppVersion.h"
-#include "AppConfig.h"
 #include "GenericImporter.h"
-#include "FileResource.h"
 #include "ImportDescriptor.h"
-#include "ModelServices.h"
 #include "ObjectResource.h"
 #include "PlugInRegistration.h"
 #include "RasterDataDescriptor.h"
 #include "RasterFileDescriptor.h"
-#include "RasterUtilities.h"
 
-#include <sstream>
 #include <string>
+#include <vector>
 using namespace std;
 
 REGISTER_PLUGIN_BASIC(OpticksGeneric, GenericImporter);
@@ -40,8 +36,7 @@ GenericImporter::GenericImporter()
 }
 
 GenericImporter::~GenericImporter()
-{
-}
+{}
 
 unsigned char GenericImporter::getFileAffinity(const string& filename)
 {
@@ -86,109 +81,24 @@ vector<ImportDescriptor*> GenericImporter::getImportDescriptors(const string& fi
    return descriptors;
 }
 
-bool GenericImporter::validate(const DataDescriptor* pDescriptor, string& errorMessage) const
+int GenericImporter::getValidationTest(const DataDescriptor* pDescriptor) const
 {
-   if (pDescriptor == NULL)
+   int validationTest = RasterElementImporterShell::getValidationTest(pDescriptor);
+   if (pDescriptor != NULL)
    {
-      errorMessage = "The data descriptor is invalid!";
-      return false;
-   }
-   const RasterFileDescriptor* pFileDescriptor =
-      dynamic_cast<const RasterFileDescriptor*>(pDescriptor->getFileDescriptor());
-   if (pFileDescriptor == NULL)
-   {
-      errorMessage = "The file descriptor is invalid!";
-      return false;
-   }
-   const Filename& filename = pFileDescriptor->getFilename();
-   if (filename.getFullPathAndName().empty() == true)
-   {
-      errorMessage = "The filename is invalid!";
-      return false;
-   }
+      const RasterFileDescriptor* pFileDescriptor = dynamic_cast<const RasterFileDescriptor*>(
+         pDescriptor->getFileDescriptor());
+      VERIFYRV(pFileDescriptor != NULL, validationTest);
 
-   unsigned int numRows = pFileDescriptor->getRowCount();
-   unsigned int numColumns = pFileDescriptor->getColumnCount();
-   unsigned int numBands = pFileDescriptor->getBandCount();
-   unsigned int bitsPerElement = pFileDescriptor->getBitsPerElement();
-
-   if (numRows == 0 && numColumns == 0 && numBands == 0 && bitsPerElement == 0)
-   {
-      errorMessage = "This file was not recognized by an importer.\n"
-         "Please enter the requested information to load this file using the Generic Importer.";
-      return false;
-   }
-
-   if (numRows == 0)
-   {
-      errorMessage = "The number of rows is invalid!";
-      return false;
-   }
-   if (numColumns == 0)
-   {
-      errorMessage = "The number of columns is invalid!";
-      return false;
-   }
-   if (numBands == 0)
-   {
-      errorMessage = "The number of bands is invalid!";
-      return false;
-   }
-   if (bitsPerElement == 0)
-   {
-      errorMessage = "The number of bits per element is invalid!";
-      return false;
-   }
-
-   // check required size against file size/s
-   int64_t requiredSize = RasterUtilities::calculateFileSize(pFileDescriptor);
-   if (requiredSize < 0)
-   {
-      errorMessage = "Unable to determine data file size due to problem in RasterFileDescriptor.";
-      return false;
-   }
-
-   const vector<const Filename*>& bandFiles = pFileDescriptor->getBandFiles();
-   if (bandFiles.empty() == true)
-   {
-      LargeFileResource file;
-      if (file.open(filename.getFullPathAndName(), O_RDONLY | O_BINARY, S_IREAD) == false)
+      if (pFileDescriptor->getBandFiles().empty() == true)
       {
-         errorMessage = "The file: " + string(filename) + " does not exist!";
-         return false;
+         validationTest |= FILE_SIZE;
       }
-      if (file.fileLength() < requiredSize)
+      else
       {
-         errorMessage = "The size of the file does not match the current parameters!";
-         return false;
-      }
-   }
-   else
-   {
-      vector<const Filename*>::const_iterator bandIt;
-      int band(1);
-      for (bandIt = bandFiles.begin(); bandIt!=bandFiles.end(); ++bandIt)
-      {
-         const Filename* pFilename = *bandIt;
-         VERIFYRV(pFilename != NULL, false);
-         LargeFileResource bandFile;
-         stringstream msg;
-         if (bandFile.open(pFilename->getFullPathAndName(), O_RDONLY | O_BINARY, S_IREAD) == false)
-         {
-            msg << "Band filename " << band << " is invalid!";
-            errorMessage = msg.str();
-            return false;
-         }
-         if (bandFile.fileLength() < requiredSize)
-         {
-            msg << "Band filename " << band; 
-            msg << " does not match required size for the current parameters!";
-            errorMessage = msg.str();
-            return false;
-         }
-         ++band;
+         validationTest |= BAND_FILE_SIZES;
       }
    }
 
-   return RasterElementImporterShell::validate(pDescriptor, errorMessage);
+   return validationTest;
 }

@@ -7,20 +7,12 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtCore/QString>
-#include <QtCore/QStringList>
-
 #include "AppVersion.h"
 #include "Classification.h"
 #include "DimensionDescriptor.h"
 #include "DynamicObject.h"
-#include "Endian.h"
 #include "EnviImporter.h"
-#include "FileFinder.h"
-#include "FileResource.h"
-#include "GeoPoint.h"
 #include "ImportDescriptor.h"
-#include "ModelServices.h"
 #include "ObjectResource.h"
 #include "PlugInRegistration.h"
 #include "RasterDataDescriptor.h"
@@ -32,7 +24,6 @@
 #include "Wavelengths.h"
 
 #include <sstream>
-
 using namespace std;
 
 REGISTER_PLUGIN_BASIC(OpticksENVI, EnviImporter);
@@ -844,6 +835,28 @@ bool EnviImporter::parseBbl(EnviField* pField, vector<unsigned int>& goodBands)
    return true;
 }
 
+int EnviImporter::getValidationTest(const DataDescriptor* pDescriptor) const
+{
+   int validationTest = RasterElementImporterShell::getValidationTest(pDescriptor);
+   if (pDescriptor != NULL)
+   {
+      const RasterFileDescriptor* pFileDescriptor = dynamic_cast<const RasterFileDescriptor*>(
+         pDescriptor->getFileDescriptor());
+      VERIFYRV(pFileDescriptor != NULL, validationTest);
+
+      if (pFileDescriptor->getBandFiles().empty() == true)
+      {
+         validationTest |= FILE_SIZE;
+      }
+      else
+      {
+         validationTest |= BAND_FILE_SIZES;
+      }
+   }
+
+   return validationTest;
+}
+
 string EnviImporter::findHeaderFile(const string& dataPath)
 {
    string temp = dataPath + ".hdr";
@@ -950,86 +963,22 @@ bool EnviImporter::validate(const DataDescriptor* pDescriptor, string& errorMess
       return false;
    }
 
-   const RasterDataDescriptor* pRasterDesc = dynamic_cast<const RasterDataDescriptor*>(pDescriptor);
-   if (pRasterDesc == NULL)
-   {
-      errorMessage = "The data descriptor is invalid!";
-      return false;
-   }
-
-   const RasterFileDescriptor* pFileDescriptor = 
-      dynamic_cast<const RasterFileDescriptor*>(pDescriptor->getFileDescriptor());
-   if (pFileDescriptor == NULL)
-   {
-      errorMessage = "The file descriptor is invalid!";
-      return false;
-   }
-   const Filename& filename = pFileDescriptor->getFilename();
-   if (filename.getFullPathAndName().empty() == true)
-   {
-      errorMessage = "The data filename is invalid!";
-      return false;
-   }
-
-   unsigned int numRows = pFileDescriptor->getRowCount();
-   unsigned int numColumns = pFileDescriptor->getColumnCount();
-   unsigned int numBands = pFileDescriptor->getBandCount();
-   unsigned int bitsPerElement = pFileDescriptor->getBitsPerElement();
-
-   if (numRows == 0)
-   {
-      errorMessage = "The number of rows is invalid!";
-      return false;
-   }
-   if (numColumns == 0)
-   {
-      errorMessage = "The number of columns is invalid!";
-      return false;
-   }
-   if (numBands == 0)
-   {
-      errorMessage = "The number of bands is invalid!";
-      return false;
-   }
-   if (bitsPerElement == 0)
-   {
-      errorMessage = "The number of bits per element is invalid!";
-      return false;
-   }
-
-   // check required size against file size/s
-   int64_t requiredSize = RasterUtilities::calculateFileSize(pFileDescriptor);
-   if (requiredSize < 0)
-   {
-      errorMessage = "Unable to determine data file size due to problem in RasterFileDescriptor.";
-      return false;
-   }
-
-   LargeFileResource file;
-   if (file.open(filename.getFullPathAndName(), O_RDONLY | O_BINARY, S_IREAD) == false)
-   {
-      errorMessage = "The data file: " + string(filename) + " does not exist!";
-      return false;
-   }
-   if (file.fileLength() < requiredSize)
-   {
-      errorMessage = "The size of the data file does not match the parameters in the header file!";
-      return false;
-   }
-
-   // check metadata for data files
+   // Check metadata for mismatched number of band names
    EnviField* pFileTypeField = mFields.find("file type");
    if (pFileTypeField == NULL || (pFileTypeField->mValue !=
       "ENVI Spectral Library" && pFileTypeField->mValue != "Spectral Library"))
    {
-      const DynamicObject* pMetadata = pRasterDesc->getMetadata();
+      const DynamicObject* pMetadata = pDescriptor->getMetadata();
       if (pMetadata != NULL)
       {
-         string pNamesPath[] = { SPECIAL_METADATA_NAME, BAND_METADATA_NAME, 
+         string pNamesPath[] = { SPECIAL_METADATA_NAME, BAND_METADATA_NAME,
             NAMES_METADATA_NAME, END_METADATA_NAME };
-         const vector<string>* pBandNames(NULL);
-         pBandNames = dv_cast<vector<string> >(&pMetadata->getAttributeByPath(pNamesPath));
 
+         const RasterFileDescriptor* pFileDescriptor = dynamic_cast<const RasterFileDescriptor*>(
+            pDescriptor->getFileDescriptor());
+         VERIFY(pFileDescriptor != NULL);
+
+         const vector<string>* pBandNames = dv_cast<vector<string> >(&pMetadata->getAttributeByPath(pNamesPath));
          if (pBandNames != NULL && pBandNames->size() != pFileDescriptor->getBandCount())
          {
             if (errorMessage.empty() == false)

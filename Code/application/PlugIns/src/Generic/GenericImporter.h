@@ -12,18 +12,17 @@
 
 #include "RasterElementImporterShell.h"
 
-#include <string>
-#include <vector>
-
 class GenericImporter : public RasterElementImporterShell
 {
 public:
    GenericImporter();
-   ~GenericImporter();
+   virtual ~GenericImporter();
 
-   std::vector<ImportDescriptor*> getImportDescriptors(const std::string& filename);
-   unsigned char getFileAffinity(const std::string& filename);
-   bool validate(const DataDescriptor* pDescriptor, std::string& errorMessage) const;
+   virtual std::vector<ImportDescriptor*> getImportDescriptors(const std::string& filename);
+   virtual unsigned char getFileAffinity(const std::string& filename);
+
+protected:
+   virtual int getValidationTest(const DataDescriptor* pDescriptor) const;
 };
 
 #endif

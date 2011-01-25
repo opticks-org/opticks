@@ -11,11 +11,9 @@
 
 #include "AppVersion.h"
 #include "DimensionDescriptor.h"
-#include "Endian.h"
 #include "FileResource.h"
 #include "GcpList.h"
 #include "ImportDescriptor.h"
-#include "MessageLogResource.h"
 #include "ModelServices.h"
 #include "ObjectResource.h"
 #include "PlugInArg.h"
@@ -26,6 +24,7 @@
 #include "RasterDataDescriptor.h"
 #include "RasterFileDescriptor.h"
 #include "RasterUtilities.h"
+#include "SessionManager.h"
 #include "Sio.h"
 #include "SioImporter.h"
 #include "SpecialMetadata.h"
@@ -441,45 +440,28 @@ bool SioImporter::validate(const DataDescriptor* pDescriptor, string& errorMessa
    string baseErrorMessage;
 
    bool bValid = RasterElementImporterShell::validate(pDescriptor, baseErrorMessage);
+   if (bValid == false)
+   {
+      ValidationTest errorTest = getValidationError();
+      if (errorTest == NO_BAND_FILES)
+      {
+         const RasterDataDescriptor* pRasterDescriptor = dynamic_cast<const RasterDataDescriptor*>(pDescriptor);
+         VERIFY(pRasterDescriptor != NULL);
+
+         if (pRasterDescriptor->getInterleaveFormat() == BSQ)
+         {
+            errorMessage += "  Bands in multiple files are not supported with on-disk or "
+               "on-disk read-only processing.";
+         }
+      }
+   }
+
    if (baseErrorMessage.empty() == false)
    {
       errorMessage += string("\n") + baseErrorMessage;
    }
 
-   if (bValid == false)
-   {
-      return false;
-   }
-
-   const RasterDataDescriptor* pRasterDescriptor = dynamic_cast<const RasterDataDescriptor*>(pDescriptor);
-   if (pRasterDescriptor == NULL)
-   {
-      errorMessage += "\nThe data descriptor is invalid!";
-      return false;
-   }
-
-   const RasterFileDescriptor* pFileDescriptor =
-      dynamic_cast<const RasterFileDescriptor*>(pRasterDescriptor->getFileDescriptor());
-   if (pFileDescriptor == NULL)
-   {
-      errorMessage += "\nThe file descriptor is invalid!";
-      return false;
-   }
-
-   // Processing location restrictions
-   ProcessingLocation processingLocation = pRasterDescriptor->getProcessingLocation();
-   if (processingLocation != IN_MEMORY)
-   {
-      // Multiple band files
-      const vector<const Filename*>& bandFiles = pFileDescriptor->getBandFiles();
-      if (bandFiles.empty() == false)
-      {
-         errorMessage += "\nOn-disk processing is not supported with multiple files!";
-         return false;
-      }
-   }
-
-   return true;
+   return bValid;
 }
 
 bool SioImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
@@ -679,4 +661,31 @@ bool SioImporter::runAllTests(Progress *pProgress, std::ostream& failure)
       success = ensureStatisticsReadProperly(pProgress, failure);
    }
    return success;
+}
+
+int SioImporter::getValidationTest(const DataDescriptor* pDescriptor) const
+{
+   int validationTest = RasterElementImporterShell::getValidationTest(pDescriptor);
+   if (pDescriptor != NULL)
+   {
+      if (pDescriptor->getProcessingLocation() != IN_MEMORY)
+      {
+         validationTest |= NO_BAND_FILES;
+      }
+
+      const RasterFileDescriptor* pFileDescriptor = dynamic_cast<const RasterFileDescriptor*>(
+         pDescriptor->getFileDescriptor());
+      VERIFYRV(pFileDescriptor != NULL, validationTest);
+
+      if (pFileDescriptor->getBandFiles().empty() == true)
+      {
+         validationTest |= FILE_SIZE;
+      }
+      else
+      {
+         validationTest |= BAND_FILE_SIZES;
+      }
+   }
+
+   return validationTest;
 }

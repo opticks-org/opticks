@@ -27,6 +27,9 @@ public:
    bool runOperationalTests(Progress *pProgress, std::ostream& failure);
    bool runAllTests(Progress *pProgress, std::ostream& failure);
 
+protected:
+   virtual int getValidationTest(const DataDescriptor* pDescriptor) const;
+
 private:
    bool ensureStatisticsReadProperly(Progress *pProgress, std::ostream& failure);
    bool mVersion9Sio;

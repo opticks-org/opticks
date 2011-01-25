@@ -7,23 +7,17 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "HdfImporterShell.h"
-#include "CachedPager.h"
 #include "AppVerify.h"
 #include "AppVersion.h"
-#include "DataAccessorImpl.h"
-#include "DimensionDescriptor.h"
+#include "CachedPager.h"
 #include "Filename.h"
-#include "MessageLogResource.h"
-#include "ModelServices.h"
-#include "ObjectFactory.h"
+#include "HdfImporterShell.h"
 #include "ObjectResource.h"
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
-#include "ProgressTracker.h"
-#include "RasterElement.h"
 #include "RasterDataDescriptor.h"
+#include "RasterElement.h"
 #include "RasterFileDescriptor.h"
 
 using namespace std;
@@ -39,68 +33,67 @@ HdfImporterShell::HdfImporterShell()
 }
 
 HdfImporterShell::~HdfImporterShell()
+{}
+
+bool HdfImporterShell::validate(const DataDescriptor* pDescriptor, std::string& errorMessage) const
 {
+   bool isValid = RasterElementImporterShell::validate(pDescriptor, errorMessage);
+   if (isValid == false)
+   {
+      ValidationTest errorTest = getValidationError();
+      if (errorTest == NO_BAND_FILES)
+      {
+         const RasterDataDescriptor* pRasterDescriptor = dynamic_cast<const RasterDataDescriptor*>(pDescriptor);
+         VERIFY(pRasterDescriptor != NULL);
+
+         if (pRasterDescriptor->getInterleaveFormat() == BSQ)
+         {
+            errorMessage += "  Bands in multiple files are not supported with on-disk read-only processing.";
+         }
+      }
+      else if (errorTest == NO_BAND_SUBSETS)
+      {
+         errorMessage = errorMessage.substr(0, errorMessage.length() - 1);
+         errorMessage += " for interleave formats other than BSQ.";
+      }
+      else if ((errorTest == NO_ROW_SUBSETS) || (errorTest == NO_COLUMN_SUBSETS))
+      {
+         errorMessage = errorMessage.substr(0, errorMessage.length() - 1);
+         errorMessage += " with on-disk read-only processing.";
+      }
+   }
+
+   return isValid;
 }
 
-bool HdfImporterShell::validateDefaultOnDiskReadOnly(const DataDescriptor* pDescriptor, string& errorMessage) const
+int HdfImporterShell::getValidationTest(const DataDescriptor* pDescriptor) const
 {
-   const RasterDataDescriptor* pRasterDescriptor = dynamic_cast<const RasterDataDescriptor*>(pDescriptor);
-   if (pRasterDescriptor == NULL)
+   int validationTest = RasterElementImporterShell::getValidationTest(pDescriptor);
+   if (pDescriptor != NULL)
    {
-      errorMessage = "The data descriptor is invalid!";
-      return false;
-   }
-
-   const RasterFileDescriptor* pFileDescriptor =
-      dynamic_cast<const RasterFileDescriptor*>(pRasterDescriptor->getFileDescriptor());
-   if (pFileDescriptor == NULL)
-   {
-      errorMessage = "The file descriptor is invalid!";
-      return false;
-   }
-
-   ProcessingLocation processingLocation = pRasterDescriptor->getProcessingLocation();
-   if (processingLocation == ON_DISK_READ_ONLY)
-   {
-      // Multiple band files
-      const vector<const Filename*>& bandFiles = pFileDescriptor->getBandFiles();
-      if (bandFiles.empty() == false)
+      if (pDescriptor->getProcessingLocation() == ON_DISK_READ_ONLY)
       {
-         errorMessage = "Bands in multiple files are not supported!";
-         return false;
-      }
+         validationTest |= NO_BAND_FILES | NO_ROW_SUBSETS | NO_COLUMN_SUBSETS;
 
-      InterleaveFormatType fileInterleave = pFileDescriptor->getInterleaveFormat();
-      InterleaveFormatType dataInterleave = pRasterDescriptor->getInterleaveFormat();
-
-      if (dataInterleave != fileInterleave)
-      {
-         errorMessage = "Interleave format conversions are not supported!";
-         return false;
-      }
-
-      // Subset
-      unsigned int loadedRows = pRasterDescriptor->getRowCount();
-      unsigned int loadedColumns = pRasterDescriptor->getColumnCount();
-      unsigned int loadedBands = pRasterDescriptor->getBandCount();
-      unsigned int fileRows = pFileDescriptor->getRowCount();
-      unsigned int fileColumns = pFileDescriptor->getColumnCount();
-      unsigned int fileBands = pFileDescriptor->getBandCount();
-
-      if ((loadedRows != fileRows) || (loadedColumns != fileColumns) || (fileInterleave != BSQ && loadedBands != fileBands))
-      {
-         errorMessage = "Subsets are not supported with on-disk read-only processing!";
-         return false;
+         const RasterFileDescriptor* pFileDescriptor = dynamic_cast<const RasterFileDescriptor*>(
+            pDescriptor->getFileDescriptor());
+         if (pFileDescriptor != NULL)
+         {
+            if (pFileDescriptor->getInterleaveFormat() == BSQ)
+            {
+               // Disabling this check since the importer supports BSQ band subsets for on-disk read-only
+               validationTest &= ~NO_BAND_SUBSETS;
+            }
+         }
       }
    }
 
-   return true;
+   return validationTest;
 }
 
-bool HdfImporterShell::createRasterPagerPlugIn(const string& pagerName,
-                                                  RasterElement& raster) const
+bool HdfImporterShell::createRasterPagerPlugIn(const string& pagerName, RasterElement& raster) const
 {
-   const RasterDataDescriptor* pDescriptor = dynamic_cast<const RasterDataDescriptor*>(raster.getDataDescriptor());
+   const DataDescriptor* pDescriptor = raster.getDataDescriptor();
    if (pDescriptor == NULL)
    {
       return false;

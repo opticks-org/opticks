@@ -76,7 +76,7 @@ public:
    /**
     *  Destroys the raster element importer plug-in.
     */
-   ~RasterElementImporterShell();
+   virtual ~RasterElementImporterShell();
 
    SETTING(AutoGeoreference, RasterElementImporter, bool, true)
    SETTING(ImporterGeoreferencePlugIn, RasterElementImporter, bool, true)
@@ -89,7 +89,7 @@ public:
     *  @default The default implementation adds a Progress arg and a
     *           RasterElement arg to the arg list.
     */
-   bool getInputSpecification(PlugInArgList*& pArgList);
+   virtual bool getInputSpecification(PlugInArgList*& pArgList);
 
    /**
     *  @copydoc ImporterShell::getOutputSpecification()
@@ -98,7 +98,7 @@ public:
     *           arg list if the plug-in is in interactive mode and does nothing
     *           if the plug-in is in batch mode.
     */
-   bool getOutputSpecification(PlugInArgList*& pArgList);
+   virtual bool getOutputSpecification(PlugInArgList*& pArgList);
 
    /**
     *  @copydoc ImporterShell::execute()
@@ -111,20 +111,16 @@ public:
     *           A RasterElement arg needs to be present in the input arg list
     *           for the method to complete successfully.
     */
-   bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
+   virtual bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
 
    /**
     *  @copydoc Importer::validate()
     *
-    *  @default The default implementation first calls validateBasic() and then
-    *           validateDefaults().
-    *
-    *  @warning Importers which override createRasterPager() and not execute()
-    *           should not override this method.  Override
-    *           validateDefaultOnDiskReadOnly() instead to indicate which
-    *           formats your RasterPager can accept.
+    *  @default The default implementation calls the base class implementation
+    *           and provides better error messages where appropriate based on
+    *           the test conditions in getValidationTest().
     */
-   bool validate(const DataDescriptor* pDescriptor, std::string& errorMessage) const;
+   virtual bool validate(const DataDescriptor* pDescriptor, std::string& errorMessage) const;
 
    /**
     *  @copydoc Importer::isProcessingLocationSupported()
@@ -133,7 +129,7 @@ public:
     *           implementation returns \b true for any valid ProcessingLocation
     *           value.
     */
-   bool isProcessingLocationSupported(ProcessingLocation location) const;
+   virtual bool isProcessingLocationSupported(ProcessingLocation location) const;
 
    /**
     *  @copydoc Importer::getPreview()
@@ -146,7 +142,7 @@ public:
     *           on-disk as determined with a call to validate(), it will be
     *           loaded into memory to create the preview.
     */
-   QWidget* getPreview(const DataDescriptor* pDescriptor, Progress* pProgress);
+   virtual QWidget* getPreview(const DataDescriptor* pDescriptor, Progress* pProgress);
 
 protected:
    /**
@@ -195,85 +191,38 @@ protected:
    RasterElement* getRasterElement() const;
 
    /**
-    *  Determines if the default RasterElementImporterShell::execute()
-    *  can import with this DataDescriptor.
-    *  
-    *  This method calls validateDefaultOnDiskReadOnly() for 
-    *  ProcessingLocation::ON_DISK_READ_ONLY.
+    *  @copydoc ImporterShell::getValidationTest()
     *
-    *  @param   pDescriptor
-    *           The data descriptor to query if it can be successfully
-    *           imported.
-    *  @param   errorMessage
-    *           An error message that is populated with the reason why Generic Importer
-    *           cannot load the given data descriptor.
-    *
-    *  @return  Returns <b>true</b> if the default execute can successfully import
-    *           the given data descriptor; otherwise returns <b>false</b>.
+    *  \par
+    *  The following raster-specific tests are added to the base class defaults
+    *  listed above:
+    *  - \link ImporterShell::VALID_CLASSIFICATION VALID_CLASSIFICATION \endlink
+    *  - \link ImporterShell::RASTER_SIZE RASTER_SIZE \endlink
+    *  - \link ImporterShell::VALID_DATA_TYPE VALID_DATA_TYPE \endlink
+    *  .
+    *  \par
+    *  Additionally, the following test is added if the ::ProcessingLocation is
+    *  ::IN_MEMORY:
+    *  - \link ImporterShell::AVAILABLE_MEMORY AVAILABLE_MEMORY \endlink
+    *  .
+    *  \par
+    *  The following tests are added if the ::ProcessingLocation is
+    *  ::ON_DISK_READ_ONLY:
+    *  - \link ImporterShell::NO_INTERLEAVE_CONVERSIONS NO_INTERLEAVE_CONVERSIONS \endlink
+    *  - \link ImporterShell::NO_BAND_SUBSETS NO_BAND_SUBSETS \endlink
+    *  - \link ImporterShell::NO_SKIP_FACTORS NO_SKIP_FACTORS \endlink
+    *  .
+    *  \par
+    *  The following tests are added if the ::InterleaveFormatType is not ::BSQ:
+    *  - \link ImporterShell::NO_PRE_POST_BAND_BYTES NO_PRE_POST_BAND_BYTES \endlink
+    *  - \link ImporterShell::NO_BAND_FILES NO_BAND_FILES \endlink
+    *  .
+    *  \par
+    *  The following test is added if multiple band files are present:
+    *  - \link ImporterShell::EXISTING_BAND_FILES EXISTING_BAND_FILES \endlink
+    *  .
     */
-   bool validateDefaults(const DataDescriptor* pDescriptor, std::string& errorMessage) const;
-   
-   /**
-    *  Determines if this importer can import with this DataDescriptor
-    *  with a ProcessingLocation::ON_DISK_READ_ONLY.
-    *
-    *  Importers which do not replace execute() should override this method to
-    *  validate for their RasterPager.  validateDefaults() will call this
-    *  method when appropriate to allow validation to fail for the particular
-    *  RasterPager restrictions.
-    *
-    *  @param   pDescriptor
-    *           The data descriptor to query if it can be successfully
-    *           imported.
-    *  @param   errorMessage
-    *           An error message that is populated with the reason why Generic Importer
-    *           cannot load the given data descriptor.
-    *
-    *  @return  Returns <b>true</b> if the RasterPager can successfully import
-    *           the given data descriptor on-disk read-only; otherwise returns <b>false</b>.
-    */
-   virtual bool validateDefaultOnDiskReadOnly(const DataDescriptor* pDescriptor, std::string& errorMessage) const;
-
-   /**
-    *  This method validates the DataDescriptor for basic problems.
-    *
-    *  This implementation checks the following criteria in the
-    *  specified order:
-    *  - All checks in ImporterShell::validate()
-    *  - Non-NULL data descriptor
-    *  - Non-NULL file descriptor
-    *  - Non-zero number of rows, columns, and bands
-    *  - Non-zero number of bits per pixel
-    *  - No preband or postband bytes for non-BSQ data
-    *    (ProcessingLocation::IN_MEMORY only)
-    *  - If band files are specified, enough band files for the number of
-    *    bands in the file descriptor
-    *  - Each of the band filenames of the bands to import is not empty
-    *  - Each of the band files of the bands to import exist on disk
-    *  - No multiple band files with non-BSQ data
-    *  - The amount of required memory can be successfully allocated
-    *    (ProcessingLocation::IN_MEMORY only)
-    *
-    *  <b>Warning:</b> This method should not be called from within execute()
-    *  because the memory allocation check should not be performed because any
-    *  memory for the data element will have already been allocated, and the
-    *  check for a non-existing data element in ImporterShell::validate() will
-    *  fail since the data element has already been created.
-    *
-    *  @param   pDescriptor
-    *           The data descriptor to query if it can be successfully
-    *           imported.
-    *  @param   errorMessage
-    *           An error message that is populated with the reason why the
-    *           importer cannot load the given data descriptor.  This message
-    *           will be displayed to the user.
-    *
-    *  @return  Returns \c true if the basic checks succeed; otherwise returns
-    *           \c false.
-    *
-    *  @see     DataDescriptor, FileDescriptor
-    */
-   bool validateBasic(const DataDescriptor* pDescriptor, std::string& errorMessage) const;
+   virtual int getValidationTest(const DataDescriptor* pDescriptor) const;
 
    /**
     * Perform the a default import.

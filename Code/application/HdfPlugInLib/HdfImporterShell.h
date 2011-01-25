@@ -10,8 +10,8 @@
 #ifndef HDFIMPORTERSHELL_H
 #define HDFIMPORTERSHELL_H
 
-#include "RasterElementImporterShell.h"
 #include "ProgressTracker.h"
+#include "RasterElementImporterShell.h"
 
 #include <string>
 #include <vector>
@@ -35,34 +35,31 @@ public:
    /**
     * Destroys the HdfImporterShell object.
     */
-   ~HdfImporterShell();
+   virtual ~HdfImporterShell();
 
    /**
-    *  Determines if the this pager can import ProcessingLocation::ON_DISK_READ_ONLY
-    *  with this DataDescriptor.
-    *
-    *  This implementation checks the following criteria in the
-    *  specified order:
-    *  - Non-NULL data descriptor
-    *  - Non-NULL file descriptor
-    *  - No bands in separate files
-    *  - The interleave matches the file
-    *  - There is no row, column, or band subset.
-    *
-    *  @param   pDescriptor
-    *           The data descriptor to query if it can be successfully
-    *           imported.
-    *  @param   errorMessage
-    *           An error message that is populated with the reason why this importer
-    *           cannot load the given data descriptor.
-    *
-    *  @return  Returns <b>true</b> if the default execute can successfully import
-    *           the given data descriptor or the DataDescriptor is not 
-    *           ProcessingLocation::ON_DISK_READ_ONLY; otherwise returns <b>false</b>.
+    *  @copydoc RasterElementImporterShell::validate()
     */
-   bool validateDefaultOnDiskReadOnly(const DataDescriptor* pDescriptor, std::string& errorMessage) const;
+   virtual bool validate(const DataDescriptor* pDescriptor, std::string& errorMessage) const;
 
 protected:
+   /**
+    *  @copydoc RasterElementImporterShell::getValidationTest()
+    *
+    *  \par
+    *  The following tests are added if the ::ProcessingLocation is
+    *  ::ON_DISK_READ_ONLY:
+    *  - \link ImporterShell::NO_BAND_FILES NO_BAND_FILES \endlink
+    *  - \link ImporterShell::NO_ROW_SUBSETS NO_ROW_SUBSETS \endlink
+    *  - \link ImporterShell::NO_COLUMN_SUBSETS NO_COLUMN_SUBSETS \endlink
+    *
+    *  \par
+    *  The following test is removed if the ::ProcessingLocation is
+    *  ::ON_DISK_READ_ONLY and the ::InterleaveFormatType is ::BSQ:
+    *  - \link ImporterShell::NO_BAND_SUBSETS NO_BAND_SUBSETS \endlink
+    */
+   virtual int getValidationTest(const DataDescriptor* pDescriptor) const;
+
    /**
     *  Based on the plug-in name and a reference to an RasterElement,
     *  creates the RasterPager Plug-In by calling the private pure virtual function

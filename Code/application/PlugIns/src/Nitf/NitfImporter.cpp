@@ -329,64 +329,6 @@ bool Nitf::NitfImporter::createRasterPager(RasterElement *pRaster) const
    return false;
 }
 
-bool Nitf::NitfImporter::validateDefaultOnDiskReadOnly(const DataDescriptor* pDescriptor, string& errorMessage) const
-{
-   const RasterDataDescriptor* pRasterDescriptor = dynamic_cast<const RasterDataDescriptor*>(pDescriptor);
-   if (pRasterDescriptor == NULL)
-   {
-      errorMessage = "The data descriptor is invalid!";
-      return false;
-   }
-   if (pDescriptor->getProcessingLocation() != ON_DISK_READ_ONLY)
-   {
-      // this method only checks Nitf's on-disk read-only
-      return true;
-   }
-
-   const RasterFileDescriptor* pFileDescriptor =
-      dynamic_cast<const RasterFileDescriptor*>(pRasterDescriptor->getFileDescriptor());
-   if (pFileDescriptor == NULL)
-   {
-      errorMessage = "The file descriptor is invalid!";
-      return false;
-   }
-
-   // Multiple band files
-   const vector<const Filename*>& bandFiles = pFileDescriptor->getBandFiles();
-   if (bandFiles.empty() == false)
-   {
-      errorMessage = "Bands in multiple files are not supported!";
-      return false;
-   }
-
-   // Interleave format
-   InterleaveFormatType fileInterleave = pFileDescriptor->getInterleaveFormat();
-   InterleaveFormatType dataInterleave = pRasterDescriptor->getInterleaveFormat();
-
-   // Interleave conversions
-   if (dataInterleave != fileInterleave)
-   {
-      errorMessage = "Interleave format conversions are not supported with on-disk read-only processing!";
-      return false;
-   }
-
-   // Subset
-   unsigned int loadedRows = pRasterDescriptor->getRowCount();
-   unsigned int loadedColumns = pRasterDescriptor->getColumnCount();
-   unsigned int loadedBands = pRasterDescriptor->getBandCount();
-   unsigned int fileRows = pFileDescriptor->getRowCount();
-   unsigned int fileColumns = pFileDescriptor->getColumnCount();
-   unsigned int fileBands = pFileDescriptor->getBandCount();
-
-   if ((loadedRows != fileRows) || (loadedColumns != fileColumns) || (loadedBands != fileBands))
-   {
-      errorMessage = "Subsets are not supported with on-disk read-only processing!";
-      return false;
-   }
-
-   return true;
-}
-
 EncodingType Nitf::NitfImporter::ossimImageHeaderToEncodingType(ossimNitfImageHeaderV2_X* pImgHeader)
 {
    VERIFYRV(pImgHeader != NULL, EncodingType());
@@ -483,28 +425,30 @@ bool Nitf::NitfImporter::validate(const DataDescriptor* pDescriptor, string& err
 {
    if (RasterElementImporterShell::validate(pDescriptor, errorMessage) == false)
    {
+      ValidationTest errorTest = getValidationError();
+      if (errorTest == NO_BAND_FILES)
+      {
+         const RasterDataDescriptor* pRasterDescriptor = dynamic_cast<const RasterDataDescriptor*>(pDescriptor);
+         VERIFY(pRasterDescriptor != NULL);
+
+         if (pRasterDescriptor->getInterleaveFormat() == BSQ)
+         {
+            errorMessage += "  Bands in multiple files are not supported with on-disk read-only processing.";
+         }
+      }
+      else if ((errorTest == NO_ROW_SUBSETS) || (errorTest == NO_COLUMN_SUBSETS))
+      {
+         errorMessage = errorMessage.substr(0, errorMessage.length() - 1);
+         errorMessage += " with on-disk read-only processing.";
+      }
+
       return false;
    }
 
-   if (pDescriptor == NULL)
-   {
-      errorMessage += "No descriptor available.";
-      return false;
-   }
-
-   const DynamicObject* const pMetadata = pDescriptor->getMetadata();
-   if (pMetadata == NULL)
-   {
-      errorMessage += "No metadata available.";
-      return false;
-   }
+   VERIFY(pDescriptor != NULL);
 
    const FileDescriptor* const pFileDescriptor = pDescriptor->getFileDescriptor();
-   if (pFileDescriptor == NULL)
-   {
-      errorMessage += "No file descriptor available.";
-      return false;
-   }
+   VERIFY(pFileDescriptor != NULL);
 
    map<string, string>::const_iterator iter = mParseMessages.find(pFileDescriptor->getDatasetLocation());
    if (iter != mParseMessages.end() && iter->second.empty() == false)
@@ -523,6 +467,9 @@ bool Nitf::NitfImporter::validate(const DataDescriptor* pDescriptor, string& err
 
    // warn user if unsupported metadata is in the file
    // NITF 2.0: ICORDS values of U and C are unsupported
+   const DynamicObject* pMetadata = pDescriptor->getMetadata();
+   VERIFY(pMetadata != NULL);
+
    const string versionPathName[] = { Nitf::NITF_METADATA, Nitf::FILE_HEADER,
       Nitf::FileHeaderFieldNames::FILE_VERSION, END_METADATA_NAME };
    if (pMetadata->getAttributeByPath(versionPathName).toDisplayString() == Nitf::VERSION_02_00)
@@ -753,4 +700,18 @@ bool Nitf::NitfImporter::runAllTests(Progress* pProgress, ostream& failure)
    }
 
    return true;
+}
+
+int Nitf::NitfImporter::getValidationTest(const DataDescriptor* pDescriptor) const
+{
+   int validationTest = RasterElementImporterShell::getValidationTest(pDescriptor) | VALID_METADATA;
+   if (pDescriptor != NULL)
+   {
+      if (pDescriptor->getProcessingLocation() == ON_DISK_READ_ONLY)
+      {
+         validationTest |= NO_BAND_FILES | NO_SUBSETS;
+      }
+   }
+
+   return validationTest;
 }

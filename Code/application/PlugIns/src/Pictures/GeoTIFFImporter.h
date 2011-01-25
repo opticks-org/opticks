@@ -27,7 +27,6 @@ public:
 
    std::vector<ImportDescriptor*> getImportDescriptors(const std::string& filename);
    unsigned char getFileAffinity(const std::string& filename);
-   bool validateDefaultOnDiskReadOnly(const DataDescriptor* pDescriptor, std::string& errorMessage) const;
    QWidget *getImportOptionsWidget(DataDescriptor *pDescriptor);
    bool performImport() const;
    PlugIn* getGeoreferencePlugIn() const;
@@ -36,6 +35,7 @@ public:
 
 protected:
    bool populateDataDescriptor(RasterDataDescriptor* pDescriptor);
+   virtual int getValidationTest(const DataDescriptor* pDescriptor) const;
    void loadIsdMetadata(DataDescriptor* pDescriptor) const;
 
 private:

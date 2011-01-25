@@ -12,7 +12,8 @@
 
 #include "RasterElementImporterShell.h"
 
-#include <gdal_priv.h>
+#include <string>
+#include <vector>
 
 class GdalImporter : public RasterElementImporterShell
 {
@@ -23,8 +24,10 @@ public:
    virtual std::vector<ImportDescriptor*> getImportDescriptors(const std::string& filename);
    virtual unsigned char getFileAffinity(const std::string& filename);
    virtual bool validate(const DataDescriptor* pDescriptor, std::string& errorMessage) const;
-   virtual bool validateDefaultOnDiskReadOnly(const DataDescriptor* pDescriptor, std::string& errorMessage) const;
    virtual bool createRasterPager(RasterElement* pRaster) const;
+
+protected:
+   virtual int getValidationTest(const DataDescriptor* pDescriptor) const;
 
 private:
    std::vector<std::string> mErrors;

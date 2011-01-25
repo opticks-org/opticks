@@ -33,12 +33,14 @@ namespace Nitf
       SpatialDataView* createView() const;
       PlugIn* getGeoreferencePlugIn() const;
       bool createRasterPager(RasterElement *pRaster) const;
-      bool validateDefaultOnDiskReadOnly(const DataDescriptor* pDescriptor, std::string& errorMessage) const;
 
       static EncodingType ossimImageHeaderToEncodingType(ossimNitfImageHeaderV2_X* pImgHeader);
 
       virtual bool runOperationalTests(Progress* pProgress, std::ostream& failure);
       virtual bool runAllTests(Progress* pProgress, std::ostream& failure);
+
+   protected:
+      virtual int getValidationTest(const DataDescriptor* pDescriptor) const;
 
    private:
       std::map<std::string, std::string> mParseMessages;

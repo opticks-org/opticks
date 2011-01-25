@@ -1210,16 +1210,16 @@ int64_t RasterUtilities::calculateFileSize(const RasterFileDescriptor* pDescript
       return fileSize;
    }
 
-   int64_t numRows = pDescriptor->getRowCount();
-   int64_t numColumns = pDescriptor->getColumnCount();
-   int64_t numBands = pDescriptor->getBandCount();
-   int64_t bitsPerElement = pDescriptor->getBitsPerElement();
-   int64_t headerBytes = pDescriptor->getHeaderBytes();
-   int64_t prelineBytes = pDescriptor->getPrelineBytes();
-   int64_t postlineBytes = pDescriptor->getPostlineBytes();
-   int64_t prebandBytes = pDescriptor->getPrebandBytes();
-   int64_t postbandBytes = pDescriptor->getPostbandBytes();
-   int64_t trailerBytes = pDescriptor->getTrailerBytes();
+   uint64_t numRows = pDescriptor->getRowCount();
+   uint64_t numColumns = pDescriptor->getColumnCount();
+   uint64_t numBands = pDescriptor->getBandCount();
+   uint64_t bitsPerElement = pDescriptor->getBitsPerElement();
+   uint64_t headerBytes = pDescriptor->getHeaderBytes();
+   uint64_t prelineBytes = pDescriptor->getPrelineBytes();
+   uint64_t postlineBytes = pDescriptor->getPostlineBytes();
+   uint64_t prebandBytes = pDescriptor->getPrebandBytes();
+   uint64_t postbandBytes = pDescriptor->getPostbandBytes();
+   uint64_t trailerBytes = pDescriptor->getTrailerBytes();
    InterleaveFormatType interleave = pDescriptor->getInterleaveFormat();
 
    // File size calculation
@@ -1257,10 +1257,6 @@ int64_t RasterUtilities::calculateFileSize(const RasterFileDescriptor* pDescript
       Pre/Post Band bytes are not used with BIL & BIP data - it would be a tremendous waste of space.
    */
 
-   int64_t columnSize = bitsPerElement / 8;
-   int64_t rowSize(0);
-   int64_t bandSize(0);
-
    switch (interleave)
    {
    case BSQ:
@@ -1270,22 +1266,19 @@ int64_t RasterUtilities::calculateFileSize(const RasterFileDescriptor* pDescript
          {
             numBands = 1;                 // one band per file
          }
+
+         uint64_t rowSize = prelineBytes + (numColumns * bitsPerElement / 8) + postlineBytes;
+         uint64_t bandSize = prebandBytes + (numRows * rowSize) + postbandBytes;
+         fileSize = static_cast<int64_t>(headerBytes + (numBands * bandSize) + trailerBytes);
       }
-      rowSize = prelineBytes + (numColumns * columnSize) + postlineBytes;
-      bandSize = prebandBytes + (numRows * rowSize) + postbandBytes;
-      fileSize = headerBytes + (numBands * bandSize) + trailerBytes;
       break;
 
-   case BIL:
-      bandSize = numColumns * columnSize;
-      rowSize = prelineBytes + (numBands * bandSize) + postlineBytes;
-      fileSize = headerBytes + (numRows * rowSize) + trailerBytes;
-      break;
-
+   case BIL:   // Fall through
    case BIP:
-      columnSize *= numBands;
-      rowSize = prelineBytes + (numColumns * columnSize) + postlineBytes;
-      fileSize = headerBytes + (numRows * rowSize) + trailerBytes;
+      {
+         uint64_t rowSize = prelineBytes + (numBands * numColumns * bitsPerElement / 8) + postlineBytes;
+         fileSize =  static_cast<int64_t>(headerBytes + (numRows * rowSize) + trailerBytes);
+      }
       break;
 
    default:

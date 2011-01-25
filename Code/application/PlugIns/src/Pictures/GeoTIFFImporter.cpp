@@ -940,67 +940,18 @@ bool GeoTIFFImporter::populateDataDescriptor(RasterDataDescriptor* pDescriptor)
    return true;
 }
 
-bool GeoTIFFImporter::validateDefaultOnDiskReadOnly(const DataDescriptor* pDescriptor, string& errorMessage) const
+int GeoTIFFImporter::getValidationTest(const DataDescriptor* pDescriptor) const
 {
-   const RasterDataDescriptor* pRasterDescriptor = dynamic_cast<const RasterDataDescriptor*>(pDescriptor);
-   if (pRasterDescriptor == NULL)
+   int validationTest = RasterElementImporterShell::getValidationTest(pDescriptor);
+   if (pDescriptor != NULL)
    {
-      errorMessage = "The data descriptor is invalid!";
-      return false;
-   }
-   if (pDescriptor->getProcessingLocation() != ON_DISK_READ_ONLY)
-   {
-      // this method only checks GeoTIFF's on-disk read-only
-      return true;
-   }
-
-   const RasterFileDescriptor* pFileDescriptor =
-      dynamic_cast<const RasterFileDescriptor*>(pRasterDescriptor->getFileDescriptor());
-   if (pFileDescriptor == NULL)
-   {
-      errorMessage = "The file descriptor is invalid!";
-      return false;
-   }
-
-   // Multiple band files
-   const vector<const Filename*>& bandFiles = pFileDescriptor->getBandFiles();
-   if (bandFiles.empty() == false)
-   {
-      errorMessage = "Bands in multiple files are not supported!";
-      return false;
-   }
-
-   // Interleave format
-   InterleaveFormatType fileInterleave = pFileDescriptor->getInterleaveFormat();
-   InterleaveFormatType dataInterleave = pRasterDescriptor->getInterleaveFormat();
-
-   // Processing location restrictions
-   ProcessingLocation processingLocation = pRasterDescriptor->getProcessingLocation();
-   if (processingLocation == ON_DISK_READ_ONLY)
-   {
-      // Interleave conversions
-      if (dataInterleave != fileInterleave)
+      if (pDescriptor->getProcessingLocation() == ON_DISK_READ_ONLY)
       {
-         errorMessage = "Interleave format conversions are not supported with on-disk read-only processing!";
-         return false;
-      }
-
-      // Subset
-      unsigned int loadedRows = pRasterDescriptor->getRowCount();
-      unsigned int loadedColumns = pRasterDescriptor->getColumnCount();
-      unsigned int loadedBands = pRasterDescriptor->getBandCount();
-      unsigned int fileRows = pFileDescriptor->getRowCount();
-      unsigned int fileColumns = pFileDescriptor->getColumnCount();
-      unsigned int fileBands = pFileDescriptor->getBandCount();
-
-      if ((loadedRows != fileRows) || (loadedColumns != fileColumns) || (loadedBands != fileBands))
-      {
-         errorMessage = "Subsets are not supported with on-disk read-only processing!";
-         return false;
+         validationTest |= NO_BAND_FILES | NO_SUBSETS;
       }
    }
 
-   return true;
+   return validationTest;
 }
 
 QWidget *GeoTIFFImporter::getImportOptionsWidget(DataDescriptor *pDescriptor)
@@ -1161,15 +1112,28 @@ bool GeoTIFFImporter::validate(const DataDescriptor* pDescriptor, std::string& e
 {
    if (RasterElementImporterShell::validate(pDescriptor, errorMessage) == false)
    {
+      ValidationTest errorTest = getValidationError();
+      if (errorTest == NO_BAND_FILES)
+      {
+         const RasterDataDescriptor* pRasterDescriptor = dynamic_cast<const RasterDataDescriptor*>(pDescriptor);
+         VERIFY(pRasterDescriptor != NULL);
+
+         if (pRasterDescriptor->getInterleaveFormat() == BSQ)
+         {
+            errorMessage += "  Bands in multiple files are not supported with on-disk read-only processing.";
+         }
+      }
+      else if ((errorTest == NO_ROW_SUBSETS) || (errorTest == NO_COLUMN_SUBSETS))
+      {
+         errorMessage = errorMessage.substr(0, errorMessage.length() - 1);
+         errorMessage += " with on-disk read-only processing.";
+      }
+
       return false;
    }
 
-   const RasterDataDescriptor* pRasterDescriptor =
-      dynamic_cast<const RasterDataDescriptor*>(pDescriptor);
-   VERIFY(pRasterDescriptor != NULL);
-
    const RasterFileDescriptor* pRasterFileDescriptor =
-      dynamic_cast<const RasterFileDescriptor*>(pRasterDescriptor->getFileDescriptor());
+      dynamic_cast<const RasterFileDescriptor*>(pDescriptor->getFileDescriptor());
    VERIFY(pRasterFileDescriptor != NULL);
    if (pRasterFileDescriptor->getInterleaveFormat() == BIL)
    {

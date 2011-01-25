@@ -269,7 +269,7 @@ std::vector<ImportDescriptor*> FitsImporter::getImportDescriptors(const std::str
          pImportDescriptor = ImportDescriptorResource(datasetName, TypeConverter::toString<RasterElement>());
          VERIFYRV(pImportDescriptor.get() != NULL, descriptors);
 
-         EncodingType encoding;
+         EncodingType fileEncoding;
          InterleaveFormatType interleave(BSQ);
          unsigned int rows=0;
          unsigned int cols=0;
@@ -282,31 +282,34 @@ std::vector<ImportDescriptor*> FitsImporter::getImportDescriptors(const std::str
          switch(bitpix)
          {
          case BYTE_IMG:
-            encoding = INT1UBYTE;
+            fileEncoding = INT1UBYTE;
             break;
          case SHORT_IMG:
-            encoding = INT2SBYTES;
+            fileEncoding = INT2SBYTES;
             break;
          case LONG_IMG:
-            encoding = INT4SBYTES;
+            fileEncoding = INT4SBYTES;
             break;
          case FLOAT_IMG:
-            encoding = FLT4BYTES;
+            fileEncoding = FLT4BYTES;
             break;
          case DOUBLE_IMG:
-            encoding = FLT8BYTES;
+            fileEncoding = FLT8BYTES;
             break;
          default:
             mWarnings.push_back("Unsupported BITPIX value " + StringUtilities::toDisplayString(bitpix) + ".");
             continue;
          }
-         encoding = checkForOverflow(encoding, pMetadata.get());
+         EncodingType dataEncoding = checkForOverflow(fileEncoding, pMetadata.get());
          if (naxis == 1)
          {
             // 1-D data is a signature
             pImportDescriptor = ImportDescriptorResource(datasetName, TypeConverter::toString<Signature>());
-            pMetadata->setAttributeByPath(METADATA_SIG_ENCODING, encoding);
+            pMetadata->setAttributeByPath(METADATA_SIG_ENCODING, dataEncoding);
             pMetadata->setAttributeByPath(METADATA_SIG_LENGTH, axes[0]);
+
+            RasterUtilities::generateAndSetFileDescriptor(pImportDescriptor->getDataDescriptor(), filename,
+               StringUtilities::toDisplayString(hdu), BIG_ENDIAN_ORDER);
             break; // leave switch()
          }
          else if (naxis == 2)
@@ -326,7 +329,7 @@ std::vector<ImportDescriptor*> FitsImporter::getImportDescriptors(const std::str
          }
 
          RasterDataDescriptor* pDataDesc = RasterUtilities::generateRasterDataDescriptor(
-            datasetName, NULL, rows, cols, bands, interleave, encoding, IN_MEMORY);
+            datasetName, NULL, rows, cols, bands, interleave, dataEncoding, IN_MEMORY);
          pImportDescriptor->setDataDescriptor(pDataDesc);
          if (specificHdu == 0 && hdu == 1 && naxis == 2 && (axes[0] <= 5 || axes[1] <= 5))
          {
@@ -359,6 +362,15 @@ std::vector<ImportDescriptor*> FitsImporter::getImportDescriptors(const std::str
             descriptors.push_back(pSigDesc.release());
          }
 
+         RasterFileDescriptor* pFileDescriptor = dynamic_cast<RasterFileDescriptor*>(
+            RasterUtilities::generateAndSetFileDescriptor(pDataDesc, filename,
+            StringUtilities::toDisplayString(hdu), BIG_ENDIAN_ORDER));
+         if (pFileDescriptor != NULL)
+         {
+            unsigned int bitsPerElement = RasterUtilities::bytesInEncoding(fileEncoding) * 8;
+            pFileDescriptor->setBitsPerElement(bitsPerElement);
+         }
+
          break; // leave switch()
       }
       case ASCII_TBL:
@@ -369,9 +381,6 @@ std::vector<ImportDescriptor*> FitsImporter::getImportDescriptors(const std::str
          mWarnings.push_back("HDU " + StringUtilities::toDisplayString(hdu) + " is an unknown type.");
          continue;
       }
-      RasterFileDescriptor* pFileDesc = 
-         dynamic_cast<RasterFileDescriptor*>(RasterUtilities::generateAndSetFileDescriptor(
-         pImportDescriptor->getDataDescriptor(), filename, StringUtilities::toDisplayString(hdu), BIG_ENDIAN_ORDER));
 
       pImportDescriptor->getDataDescriptor()->setMetadata(pMetadata.release());
       descriptors.push_back(pImportDescriptor.release());
@@ -534,7 +543,6 @@ unsigned char FitsImporter::getFileAffinity(const std::string &filename)
    return CAN_NOT_LOAD;
 }
 
-
 bool FitsImporter::validate(const DataDescriptor *pDescriptor, std::string &errorMessage) const
 {
    errorMessage = "";
@@ -543,55 +551,37 @@ bool FitsImporter::validate(const DataDescriptor *pDescriptor, std::string &erro
       errorMessage = StringUtilities::join(mErrors, "\n");
       return false;
    }
+
    std::string baseErrorMessage;
-   bool valid = false;
-   if (pDescriptor->getType() == TypeConverter::toString<RasterElement>())
+   bool valid = RasterElementImporterShell::validate(pDescriptor, baseErrorMessage);
+   if (valid == true)
    {
-      valid = RasterElementImporterShell::validate(pDescriptor, baseErrorMessage);
-   }
-   else if (pDescriptor->getType() == TypeConverter::toString<Signature>())
-   {
-      valid = true;
-      const DynamicObject* pMetadata = pDescriptor->getMetadata();
-      if (pMetadata == NULL)
+      if ((pDescriptor != NULL) && (pDescriptor->getType() == TypeConverter::toString<Signature>()))
       {
-         baseErrorMessage = "No metadata present.";
-         valid = false;
-      }
-      if (valid && (!pMetadata->getAttributeByPath(METADATA_SIG_LENGTH).isValid() ||
-                    !pMetadata->getAttributeByPath(METADATA_SIG_ENCODING).isValid()))
-      {
-         baseErrorMessage = "Metadata is invalid.";
-         valid = false;
-      }
-      if (valid && pDescriptor->getProcessingLocation() != IN_MEMORY)
-      {
-         baseErrorMessage = "Signatures can only be loaded in-memory.";
-         valid = false;
+         const DynamicObject* pMetadata = pDescriptor->getMetadata();
+         VERIFY(pMetadata != NULL);
+
+         if (!pMetadata->getAttributeByPath(METADATA_SIG_LENGTH).isValid() ||
+            !pMetadata->getAttributeByPath(METADATA_SIG_ENCODING).isValid())
+         {
+            baseErrorMessage = "Metadata is invalid.";
+            valid = false;
+         }
       }
    }
-   else if (pDescriptor->getType() == TypeConverter::toString<SignatureLibrary>())
-   {
-      valid = true;
-      const DynamicObject* pMetadata = pDescriptor->getMetadata();
-      if (pMetadata == NULL)
-      {
-         baseErrorMessage = "No metadata present.";
-         valid = false;
-      }
-   }
+
+   errorMessage = baseErrorMessage;
+
    if (!mWarnings.empty())
    {
       if (!baseErrorMessage.empty())
       {
-         errorMessage += baseErrorMessage + "\n";
+         errorMessage += "\n";
       }
+
       errorMessage += StringUtilities::join(mWarnings, "\n");
    }
-   else
-   {
-      errorMessage = baseErrorMessage;
-   }
+
    return valid;
 }
 
@@ -788,6 +778,25 @@ bool FitsImporter::createRasterPager(RasterElement* pRaster) const
    pagerPlugIn->releasePlugIn();
 
    return true;
+}
+
+int FitsImporter::getValidationTest(const DataDescriptor* pDescriptor) const
+{
+   int validationTest = NO_VALIDATION;
+   if (pDescriptor != NULL)
+   {
+      const std::string& type = pDescriptor->getType();
+      if (type == TypeConverter::toString<RasterElement>())
+      {
+         validationTest = RasterElementImporterShell::getValidationTest(pDescriptor);
+      }
+      else if ((type == TypeConverter::toString<Signature>()) || (type == TypeConverter::toString<SignatureLibrary>()))
+      {
+         validationTest = ImporterShell::getValidationTest(pDescriptor) | VALID_METADATA;
+      }
+   }
+
+   return validationTest;
 }
 
 FitsRasterPager::FitsRasterPager()

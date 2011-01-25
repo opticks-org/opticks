@@ -308,19 +308,6 @@ QWidget *ShapeFileImporter::getImportOptionsWidget(DataDescriptor *pDescriptor)
    return mpOptionsWidget;
 }
 
-bool ShapeFileImporter::validate(const DataDescriptor *pDescriptor, std::string &errorMessage) const
-{
-   VERIFY(pDescriptor != NULL);
-
-   if (pDescriptor->getProcessingLocation() != IN_MEMORY)
-   {
-      errorMessage = "Processing location must be \"In Memory\"";
-      return false;
-   }
-
-   return true;
-}
-
 void ShapeFileImporter::createFeatureClassIfNeeded(const DataDescriptor *pDescriptor)
 {
    if (mpFeatureClass.get() == NULL)

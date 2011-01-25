@@ -9,11 +9,7 @@
 
 #include "AppConfig.h"
 #include "AppVerify.h"
-#include "Classification.h"
-#include "DataAccessorImpl.h"
-#include "DataRequest.h"
 #include "DimensionDescriptor.h"
-#include "DynamicObject.h"
 #include "FileResource.h"
 #include "GcpList.h"
 #include "Georeference.h"
@@ -35,7 +31,6 @@
 #include "SpatialDataWindow.h"
 #include "StringUtilities.h"
 #include "Undo.h"
-#include "UtilityServices.h"
 
 #include <limits>
 using namespace std;
@@ -294,13 +289,27 @@ bool RasterElementImporterShell::execute(PlugInArgList* pInArgList, PlugInArgLis
 
 bool RasterElementImporterShell::validate(const DataDescriptor* pDescriptor, string& errorMessage) const
 {
-   bool success = validateBasic(pDescriptor, errorMessage);
-   if (success)
+   bool isValid = ImporterShell::validate(pDescriptor, errorMessage);
+   if (isValid == false)
    {
-      success = validateDefaults(pDescriptor, errorMessage);
+      ValidationTest errorTest = getValidationError();
+      if (errorTest == NO_PRE_POST_BAND_BYTES)
+      {
+         errorMessage += "  Preband and postband bytes are not supported for interleave formats other than BSQ.";
+      }
+      else if (errorTest == NO_BAND_FILES)
+      {
+         errorMessage += "  Bands in multiple files are not supported for interleave formats other than BSQ.";
+      }
+      else if ((errorTest == NO_INTERLEAVE_CONVERSIONS) || (errorTest == NO_ROW_SKIP_FACTOR) ||
+         (errorTest == NO_COLUMN_SKIP_FACTOR) || (errorTest == NO_BAND_SUBSETS))
+      {
+         errorMessage = errorMessage.substr(0, errorMessage.length() - 1);
+         errorMessage += " with on-disk read-only processing.";
+      }
    }
 
-   return success;
+   return isValid;
 }
 
 bool RasterElementImporterShell::isProcessingLocationSupported(ProcessingLocation location) const
@@ -311,165 +320,6 @@ bool RasterElementImporterShell::isProcessingLocationSupported(ProcessingLocatio
    }
 
    return false;
-}
-
-bool RasterElementImporterShell::validateBasic(const DataDescriptor* pDescriptor, string& errorMessage) const
-{
-   bool bSuccess = ImporterShell::validate(pDescriptor, errorMessage);
-   if (bSuccess == false)
-   {
-      return false;
-   }
-
-   const RasterDataDescriptor* pRasterDescriptor = dynamic_cast<const RasterDataDescriptor*>(pDescriptor);
-   if (pRasterDescriptor == NULL)
-   {
-      errorMessage = "The data descriptor is invalid!";
-      return false;
-   }
-
-   const RasterFileDescriptor* pFileDescriptor =
-      dynamic_cast<const RasterFileDescriptor*>(pRasterDescriptor->getFileDescriptor());
-   if (pFileDescriptor == NULL)
-   {
-      errorMessage = "The file descriptor is invalid!";
-      return false;
-   }
-
-   const Classification* pClassification = pRasterDescriptor->getClassification();
-   if (pClassification == NULL)
-   {
-      errorMessage = "The classification is invalid!";
-      return false;
-   }
-
-   // Data set size
-   uint64_t loadedRows = pRasterDescriptor->getRowCount();
-   uint64_t loadedColumns = pRasterDescriptor->getColumnCount();
-   uint64_t loadedBands = pRasterDescriptor->getBandCount();
-
-   if ((loadedRows == 0) || (loadedColumns == 0) || (loadedBands == 0))
-   {
-      errorMessage = "The data set is empty!  Check the size of the rows, columns, and bands.";
-      return false;
-   }
-
-   // Pixel size
-   unsigned int bitsPerElement = pFileDescriptor->getBitsPerElement();
-   if (bitsPerElement == 0)
-   {
-      errorMessage = "The number of bits per element is invalid!";
-      return false;
-   }
-
-   // Data type
-   const std::vector<EncodingType>& validDataTypes = pRasterDescriptor->getValidDataTypes();
-   if (find(validDataTypes.begin(), validDataTypes.end(), pRasterDescriptor->getDataType()) == validDataTypes.end())
-   {
-      errorMessage = "The data type is not valid for this data set.";
-      return false;
-   }
-
-   // Invalid pre-band and post-band bytes
-   unsigned int prebandBytes = pFileDescriptor->getPrebandBytes();
-   unsigned int postbandBytes = pFileDescriptor->getPostbandBytes();
-   InterleaveFormatType interleave = pFileDescriptor->getInterleaveFormat();
-
-   if (((prebandBytes != 0) || (postbandBytes != 0)) && (interleave != BSQ))
-   {
-      errorMessage = "Non-BSQ formatted data cannot have pre-band bytes and post-band bytes!";
-      return false;
-   }
-
-   // Multiple band file restrictions
-   const vector<const Filename*>& bandFiles = pFileDescriptor->getBandFiles();
-   if (bandFiles.empty() == false)
-   {
-      // Not enough band files for all bands
-      unsigned int numBands = pFileDescriptor->getBandCount();
-      if (bandFiles.size() < numBands)
-      {
-         char buffer[1024];
-         sprintf(buffer, "The number of band files specified (%d) is less than the total "
-            "number of bands to be loaded (%d)!", bandFiles.size(), numBands);
-
-         errorMessage = string(buffer);
-         return false;
-      }
-
-      // Invalid file for imported bands
-      const vector<DimensionDescriptor>& bands = pRasterDescriptor->getBands();
-
-      vector<DimensionDescriptor>::const_iterator iter;
-      for (iter = bands.begin(); iter != bands.end(); ++iter)
-      {
-         DimensionDescriptor bandDim = *iter;
-         if (bandDim.isValid())
-         {
-            unsigned int onDiskNumber = bandDim.getOnDiskNumber();
-            if (bandFiles.size() > onDiskNumber)
-            {
-               // Invalid filename
-               VERIFY(bandFiles[onDiskNumber] != NULL);
-               string bandFilename = bandFiles[onDiskNumber]->getFullPathAndName();
-               if (bandFilename.empty() == true)
-               {
-                  errorMessage = "One or more of the band filenames of the bands to load is invalid!";
-                  return false;
-               }
-
-               // Existing file
-               LargeFileResource bandFile;
-               if (!bandFile.open(bandFilename, O_RDONLY | O_BINARY, S_IREAD))
-               {
-                  errorMessage = "The band file: " + bandFilename + " does not exist!";
-                  return false;
-               }
-            }
-         }
-      }
-
-      // Non-BSQ data
-      if (interleave != BSQ)
-      {
-         errorMessage = "Cannot load non-BSQ data in multiple files!";
-         return false;
-      }
-   }
-
-   // Valid memory
-   ProcessingLocation processingLocation = pRasterDescriptor->getProcessingLocation();
-   if (processingLocation == IN_MEMORY)
-   {
-      unsigned int bytesPerElement = pRasterDescriptor->getBytesPerElement();
-      uint64_t dataSize = loadedRows * loadedColumns * loadedBands * bytesPerElement;
-      uint64_t maxMemoryAvail = mpUtilities->getMaxMemoryBlockSize();
-#if PTR_SIZE > 4
-      uint64_t totalRam = mpUtilities->getTotalPhysicalMemory();
-      if (totalRam < maxMemoryAvail)
-      {
-         maxMemoryAvail = totalRam;
-      }
-#endif
-
-      if (dataSize > maxMemoryAvail)
-      {
-         errorMessage = "Cube cannot be loaded into memory, use a different processing location or subset the image!";
-         return false;
-      }
-   }
-
-   // Classification -- warn the user, but do not refuse to load the file
-   FactoryResource<Classification> pSystemClassification;
-   pSystemClassification->setLevel(Service<UtilityServices>()->getDefaultClassification());
-   if (pClassification->hasGreaterLevel(pSystemClassification.get()) == true)
-   {
-      errorMessage += "THIS FILE CONTAINS CLASSIFIED INFORMATION WHICH SHOULD NOT BE PROCESSED ON THIS SYSTEM!\n"
-         "THIS MAY CONSTITUTE A SECURITY VIOLATION WHICH SHOULD BE REPORTED TO YOUR SECURITY OFFICER!\n";
-      StepResource pStep("Validate", "app", "1A881267-6A96-4eb2-A9D3-7D30334B0A0B", errorMessage);
-   }
-
-   return true;
 }
 
 QWidget* RasterElementImporterShell::getPreview(const DataDescriptor* pDescriptor, Progress* pProgress)
@@ -666,136 +516,39 @@ RasterElement* RasterElementImporterShell::getRasterElement() const
    return mpRasterElement;
 }
 
-bool RasterElementImporterShell::validateDefaultOnDiskReadOnly(const DataDescriptor* pDescriptor,
-                                                               std::string& errorMessage) const
+int RasterElementImporterShell::getValidationTest(const DataDescriptor* pDescriptor) const
 {
-   const RasterDataDescriptor* pRasterDescriptor = dynamic_cast<const RasterDataDescriptor*>(pDescriptor);
-   if (pRasterDescriptor == NULL)
+   int validationTest = ImporterShell::getValidationTest(pDescriptor) | VALID_CLASSIFICATION |
+      RASTER_SIZE | VALID_DATA_TYPE;
+   if (pDescriptor != NULL)
    {
-      errorMessage = "The data descriptor is invalid!";
-      return false;
-   }
-
-   const RasterFileDescriptor* pFileDescriptor =
-      dynamic_cast<const RasterFileDescriptor*>(pRasterDescriptor->getFileDescriptor());
-   if (pFileDescriptor == NULL)
-   {
-      errorMessage = "The file descriptor is invalid!";
-      return false;
-   }
-
-   ProcessingLocation loc = pDescriptor->getProcessingLocation();
-   if (loc == ON_DISK_READ_ONLY)
-   {
-      // Invalid filename
-      const Filename& filename = pFileDescriptor->getFilename();
-      if (filename.getFullPathAndName().empty() == true)
+      ProcessingLocation processingLocation = pDescriptor->getProcessingLocation();
+      if (processingLocation == IN_MEMORY)
       {
-         errorMessage = "The filename is invalid!";
-         return false;
+         validationTest |= AVAILABLE_MEMORY;
+      }
+      else if (processingLocation == ON_DISK_READ_ONLY)
+      {
+         validationTest |= NO_INTERLEAVE_CONVERSIONS | NO_BAND_SUBSETS | NO_SKIP_FACTORS;
       }
 
-      // Existing file
-      LargeFileResource file;
-      if (file.open(filename.getFullPathAndName(), O_RDONLY | O_BINARY, S_IREAD) == false)
+      const RasterFileDescriptor* pFileDescriptor =
+         dynamic_cast<const RasterFileDescriptor*>(pDescriptor->getFileDescriptor());
+      if (pFileDescriptor != NULL)
       {
-         errorMessage = "The file: " + string(filename) + " does not exist!";
-         return false;
-      }
-
-      // File size
-      const vector<const Filename*>& bandFiles = pFileDescriptor->getBandFiles();
-      if (bandFiles.empty() == true)
-      {
-         uint64_t numRows = pFileDescriptor->getRowCount();
-         uint64_t numColumns = pFileDescriptor->getColumnCount();
-         uint64_t numBands = pFileDescriptor->getBandCount();
-         unsigned int headerBytes = pFileDescriptor->getHeaderBytes();
-         unsigned int bitsPerElement = pFileDescriptor->getBitsPerElement();
-         unsigned int prelineBytes = pFileDescriptor->getPrelineBytes();
-         unsigned int postlineBytes = pFileDescriptor->getPostlineBytes();
-         unsigned int prebandBytes = pFileDescriptor->getPrebandBytes();
-         unsigned int postbandBytes = pFileDescriptor->getPostbandBytes();
-         unsigned int trailerBytes = pFileDescriptor->getTrailerBytes();
-
-         uint64_t requiredSize = static_cast<uint64_t>(headerBytes) +
-            (numRows * ((numBands * numColumns * bitsPerElement / 8) + prelineBytes + postlineBytes)) +
-            (numBands * (prebandBytes + postbandBytes)) + trailerBytes;
-         if (file.fileLength() < static_cast<int64_t>(requiredSize))
+         if (pFileDescriptor->getInterleaveFormat() != BSQ)
          {
-            errorMessage = "The size of the file does not match the current parameters!";
-            return false;
+            validationTest |= NO_PRE_POST_BAND_BYTES | NO_BAND_FILES;
+         }
+
+         if (pFileDescriptor->getBandFiles().empty() == false)
+         {
+            validationTest |= EXISTING_BAND_FILES;
          }
       }
-
-      // Interleave conversions
-      InterleaveFormatType dataInterleave = pRasterDescriptor->getInterleaveFormat();
-      InterleaveFormatType fileInterleave = pFileDescriptor->getInterleaveFormat();
-      if (pFileDescriptor->getBandCount() > 1 && dataInterleave != fileInterleave)
-      {
-         errorMessage = "Interleave format conversions are not supported with on-disk read-only processing"
-            " of data with more than one band!";
-         return false;
-      }
-
-      //Subset
-      unsigned int loadedBands = pRasterDescriptor->getBandCount();
-      unsigned int fileBands = pFileDescriptor->getBandCount();
-
-      if (loadedBands != fileBands)
-      {
-         errorMessage = "Band subsets are not supported with on-disk read-only processing!";
-         return false;
-      }
-
-      unsigned int skipFactor = 0;
-      if (!RasterUtilities::determineSkipFactor(pRasterDescriptor->getRows(), skipFactor)
-         || skipFactor != 0)
-      {
-         errorMessage = "Skip factors are not supported for rows or columns with on-disk read-only processing.";
-         return false;
-      }
-      if (!RasterUtilities::determineSkipFactor(pRasterDescriptor->getColumns(), skipFactor)
-         || skipFactor != 0)
-      {
-         errorMessage = "Skip factors are not supported for rows or columns with on-disk read-only processing.";
-         return false;
-      }
    }
 
-   return true;
-}
-
-bool RasterElementImporterShell::validateDefaults(const DataDescriptor* pDescriptor, std::string& errorMessage) const
-{
-   const RasterDataDescriptor* pRasterDescriptor = dynamic_cast<const RasterDataDescriptor*>(pDescriptor);
-   if (pRasterDescriptor == NULL)
-   {
-      errorMessage = "The data descriptor is invalid!";
-      return false;
-   }
-
-   const RasterFileDescriptor* pFileDescriptor =
-      dynamic_cast<const RasterFileDescriptor*>(pRasterDescriptor->getFileDescriptor());
-   if (pFileDescriptor == NULL)
-   {
-      errorMessage = "The file descriptor is invalid!";
-      return false;
-   }
-
-   // Processing location restrictions
-   ProcessingLocation processingLocation = pRasterDescriptor->getProcessingLocation();
-   if (!isProcessingLocationSupported(processingLocation))
-   {
-      errorMessage = "The requested processing location is not supported!";
-      return false;
-   }
-   if (processingLocation == ON_DISK_READ_ONLY)
-   {
-      return validateDefaultOnDiskReadOnly(pDescriptor, errorMessage);
-   }
-
-   return true;
+   return validationTest;
 }
 
 bool RasterElementImporterShell::performImport() const

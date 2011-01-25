@@ -187,10 +187,8 @@ public:
     *  specified in the data descriptor.  This allows importers that do not
     *  support certain combinations of values to indicate as such.  This method
     *  is called each time the user changes a value in the import options
-    *  dialog.  This method is also called by ImporterAgent::execute()
-    *  before executing the importer.  If a non-empty errorMessage is returned
-    *  and this method returns true, the message will be added to the
-    *  Importers Progress object as a warning.
+    *  dialog.  This method is also called by ImportAgent::execute() before
+    *  executing the importer.
     *
     *  @param   pDescriptor
     *           The data descriptor to query if it can be successfully
@@ -198,13 +196,14 @@ public:
     *  @param   errorMessage
     *           An error message that is populated with the reason why the
     *           importer cannot load the given data descriptor.  This message
-    *           will be displayed to the user.  If this method
-    *           returns true, this message will be displayed to the user
-    *           as a warning.  If this method returns false, this message
-    *           will be displayed to the user as an error.
+    *           will be displayed to the user via the importer's Progress
+    *           object.  If this method returns \c true, this message will be
+    *           displayed to the user as a warning.  If this method returns
+    *           \c false, this message will be displayed to the user as an
+    *           error.
     *
-    *  @return  Returns <b>true</b> if the importer can successfully import
-    *           the given data descriptor; otherwise returns <b>false</b>.
+    *  @return  Returns \c true if the importer can successfully import the
+    *           given data descriptor; otherwise returns \c false.
     *
     *  @see     DataDescriptor, FileDescriptor
     */

@@ -45,6 +45,9 @@ public:
    virtual bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
    virtual bool createRasterPager(RasterElement* pRaster) const;
 
+protected:
+   virtual int getValidationTest(const DataDescriptor* pDescriptor) const;
+
 private:
    bool splitFilename(std::string& filename, int& hduCnt, int& specificHdu, int& hdu, FitsFileResource& pFile);
    EncodingType checkForOverflow(EncodingType encoding, DynamicObject* pMetadata);
