@@ -23,6 +23,7 @@
 #include "Units.h"
 #include "Wavelengths.h"
 
+#include <iterator>
 #include <sstream>
 using namespace std;
 
