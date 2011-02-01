@@ -287,7 +287,19 @@ DesktopAPITestGui::DesktopAPITestGui(QWidget* pParent) :
          binValues[count] = count;
       }
 
-      Histogram* pHistogram = static_cast<Histogram*>(pView->addObject(HISTOGRAM, true));
+      Histogram* pHistogram = NULL;
+
+      list<PlotObject*> plotObjects;
+      pView->getObjects(HISTOGRAM, plotObjects);
+      if (plotObjects.empty() == true)
+      {
+         pHistogram = static_cast<Histogram*>(pView->addObject(HISTOGRAM, true));
+      }
+      else
+      {
+         pHistogram = static_cast<Histogram*>(plotObjects.front());
+      }
+
       if (pHistogram != NULL)
       {
          pHistogram->setObjectName("Histogram");

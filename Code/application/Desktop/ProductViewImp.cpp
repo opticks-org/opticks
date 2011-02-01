@@ -849,6 +849,15 @@ bool ProductViewImp::setActiveEditObject(GraphicObject* pObject)
    }
    else
    {
+      QCursor mouseCursor = cursor();
+      const MouseModeImp* pMouseMode = dynamic_cast<const MouseModeImp*>(getCurrentMouseMode());
+
+      if ((mouseCursor.shape() == Qt::ArrowCursor) && (pMouseMode != NULL))
+      {
+         mouseCursor = pMouseMode->getCursor();
+      }
+
+      setCursor(mouseCursor);
       setActiveLayer(dynamic_cast<GraphicLayer*>(mpLayoutLayer));
    }
 
@@ -1584,6 +1593,43 @@ void ProductViewImp::setActiveLayer()
          setActiveLayer(pLayer);
       }
    }
+}
+
+void ProductViewImp::toggleMousePanByKey()
+{
+   ViewImp* pEditView = dynamic_cast<ViewImp*>(getActiveEditView());
+   if (pEditView != NULL)
+   {
+      bool mousePanEnabled = pEditView->isMousePanEnabled();
+      if (mousePanEnabled == false)
+      {
+         QPoint globalPos = QCursor::pos();
+         QPoint widgetPos = mapFromGlobal(globalPos);
+
+         GraphicObjectImp* pEditObject = dynamic_cast<GraphicObjectImp*>(getActiveEditObject());
+         if (pEditObject != NULL)
+         {
+            // Get the pixel coodinate for the current screen position
+            LocationType worldCoord;
+            translateScreenToWorld(widgetPos.x(), widgetPos.y(), worldCoord.mX, worldCoord.mY);
+
+            // Only enable mouse panning when the mouse is over the active edit view object
+            if (pEditObject->hit(worldCoord) == false)
+            {
+               return;
+            }
+         }
+
+         pEditView->setMousePanPos(globalPos);
+      }
+
+      pEditView->enableMousePan(!mousePanEnabled);
+      updateGL();
+      setCursor(pEditView->cursor());
+      return;
+   }
+
+   PerspectiveViewImp::toggleMousePanByKey();
 }
 
 bool ProductViewImp::toXml(XMLWriter* pXml) const

@@ -24,6 +24,7 @@
 
 #include <QtCore/QPoint>
 #include <QtCore/QString>
+#include <QtCore/QTimer>
 #include <QtGui/QColor>
 #include <QtGui/QFont>
 #include <QtGui/QImage>
@@ -121,6 +122,10 @@ public:
    unsigned int getNumMouseModes() const;
    void enableMouseMode(const MouseMode* pMouseMode, bool bEnable);
    bool isMouseModeEnabled(const MouseMode* pMouseMode) const;
+
+   void enableMousePan(bool enabled);
+   bool isMousePanEnabled() const;
+   void setMousePanPos(const QPoint& globalScreenCoord);
 
    void getExtents(double& dMinX, double& dMinY, double& dMaxX, double& dMaxY) const;
    void getVisibleCorners(LocationType& lowerLeft, LocationType& upperLeft, LocationType& upperRight,
@@ -227,6 +232,10 @@ signals:
 
 protected:
    bool event(QEvent* pEvent);
+   bool eventFilter(QObject* pObject, QEvent* pEvent);
+   void mousePressEvent(QMouseEvent* pEvent);
+   void mouseMoveEvent(QMouseEvent* pEvent);
+   void mouseReleaseEvent(QMouseEvent* pEvent);
    void contextMenuEvent(QContextMenuEvent* pEvent);
    void initializeGL();
    void paintGL();
@@ -235,8 +244,10 @@ protected:
    void setupWorldMatrices();
    virtual void updateMatrices();
    virtual void updateMatrices(int width, int height) = 0;
+   virtual double getMousePanScaleFactor() const;
 
    virtual void drawContents() = 0;
+   virtual void drawMousePanAnchor();
    virtual void drawCrossHair();
    virtual void drawSelectionBox();
    virtual void drawInset() = 0;
@@ -325,6 +336,9 @@ protected:
       }
    }
 
+protected slots:
+   virtual void toggleMousePanByKey();
+
 protected:
    GLdouble mModelMatrix[16];
    GLdouble mProjMatrix[16];
@@ -348,6 +362,11 @@ private:
    DataOrigin mOrigin;
    const MouseMode* mpMouseMode;
    std::map<const MouseMode*, bool> mMouseModes;
+   QPoint mMousePanAnchor;
+   QPoint mMousePanCurrentPos;
+   QTimer mMousePanTimer;
+   QPoint mMousePanEngagePos;
+   const MouseMode* mpOldMouseMode;
    double mMinX;
    double mMinY;
    double mMaxX;
@@ -394,6 +413,9 @@ private:
    static const QGLWidget* getShareWidget();
    void drawImage();
    void drawImage(int width, int height);
+
+private slots:
+   void mousePanTimeout();
 };
 
 #define VIEWADAPTEREXTENSION_CLASSES \

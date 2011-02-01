@@ -120,6 +120,7 @@ protected slots:
    void updateMouseCursor(const MouseMode* pMouseMode);
    void setActiveLayer();
    void updateClassificationMarks(const Classification* pClassification);
+   virtual void toggleMousePanByKey();
 
 private:
    void connectLayers();

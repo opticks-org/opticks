@@ -31,7 +31,7 @@
 #include "HistogramAdapter.h"
 #include "HistogramPlotImp.h"
 #include "HistogramPlotAdapter.h"
-#include "MouseMode.h"
+#include "MouseModeImp.h"
 #include "ObjectResource.h"
 #include "PropertiesHistogramPlot.h"
 #include "RasterDataDescriptor.h"
@@ -46,6 +46,7 @@
 #include "StringUtilities.h"
 #include "ThresholdLayerAdapter.h"
 #include "Undo.h"
+#include "Wavelengths.h"
 #include "XercesIncludes.h"
 #include "xmlreader.h"
 
@@ -65,7 +66,7 @@ HistogramPlotImp::HistogramPlotImp(const string& id, const string& viewName, QGL
    mpRegion2(NULL),
    mpAlternateColormap(NULL),
    mUpdater(this),
-   meSelectedValue(NO_VALUE),
+   mSelectedValue(NO_VALUE),
    mRasterChannelType(GRAY),
    mpLayer(NULL),
    mpElement(NULL),
@@ -90,6 +91,7 @@ HistogramPlotImp::HistogramPlotImp(const string& id, const string& viewName, QGL
    mpPassAreaMenu(NULL),
    mpStretchUnitsMenu(NULL),
    mpStretchTypeMenu(NULL),
+   mpStretchFavoritesMenu(NULL),
    mpStretchResetMenu(NULL),
    mpElementMenu(NULL),
    mpElementList(NULL),
@@ -111,8 +113,69 @@ HistogramPlotImp::HistogramPlotImp(const string& id, const string& viewName, QGL
    Service<DesktopServices> pDesktop;
    string shortcutContext = "Histogram Plot";
 
+   // Axis menu
+   mpAxisScaleMenu = new QMenu("Axis Scale", this);
+
+   QActionGroup* pXAxisScaleGroup = new QActionGroup(mpAxisScaleMenu);
+   pXAxisScaleGroup->setExclusive(true);
+   VERIFYNR(connect(pXAxisScaleGroup, SIGNAL(triggered(QAction*)), this, SLOT(setAxisScale(QAction*))));
+
+   string axisContext = shortcutContext + string("/Axis Scale");
+
+   mpLinearXAxisAction = pXAxisScaleGroup->addAction("X-Axis Linear");
+   mpLinearXAxisAction->setAutoRepeat(false);
+   mpLinearXAxisAction->setCheckable(true);
+   mpLinearXAxisAction->setChecked(true);
+   mpLinearXAxisAction->setShortcutContext(Qt::WidgetShortcut);
+   pDesktop->initializeAction(mpLinearXAxisAction, axisContext);
+   addAction(mpLinearXAxisAction);
+
+   mpLogXAxisAction = pXAxisScaleGroup->addAction("X-Axis Logarithmic");
+   mpLogXAxisAction->setAutoRepeat(false);
+   mpLogXAxisAction->setCheckable(true);
+   mpLogXAxisAction->setShortcutContext(Qt::WidgetShortcut);
+   pDesktop->initializeAction(mpLogXAxisAction, axisContext);
+   addAction(mpLogXAxisAction);
+
+   QActionGroup* pYAxisScaleGroup = new QActionGroup(mpAxisScaleMenu);
+   pYAxisScaleGroup->setExclusive(true);
+   VERIFYNR(connect(pYAxisScaleGroup, SIGNAL(triggered(QAction*)), this, SLOT(setAxisScale(QAction*))));
+
+   mpLinearYAxisAction = pYAxisScaleGroup->addAction("Y-Axis Linear");
+   mpLinearYAxisAction->setAutoRepeat(false);
+   mpLinearYAxisAction->setCheckable(true);
+   mpLinearYAxisAction->setChecked(true);
+   mpLinearYAxisAction->setShortcutContext(Qt::WidgetShortcut);
+   pDesktop->initializeAction(mpLinearYAxisAction, axisContext);
+   addAction(mpLinearYAxisAction);
+
+   mpLogYAxisAction = pYAxisScaleGroup->addAction("Y-Axis Logarithmic");
+   mpLogYAxisAction->setAutoRepeat(false);
+   mpLogYAxisAction->setCheckable(true);
+   mpLogYAxisAction->setShortcutContext(Qt::WidgetShortcut);
+   pDesktop->initializeAction(mpLogYAxisAction, axisContext);
+   addAction(mpLogYAxisAction);
+
+   mpAxisSeparatorAction = new QAction(mpAxisScaleMenu);
+   mpAxisSeparatorAction->setSeparator(true);
+
+   mpLinkAxisStretchAction = new QAction("Link to Contrast Stretch", mpAxisScaleMenu);
+   mpLinkAxisStretchAction->setAutoRepeat(false);
+   mpLinkAxisStretchAction->setCheckable(true);
+   mpLinkAxisStretchAction->setChecked(true);
+   mpLinkAxisStretchAction->setShortcutContext(Qt::WidgetShortcut);
+   VERIFYNR(connect(mpLinkAxisStretchAction, SIGNAL(triggered(bool)), this, SLOT(linkAxisToStretch(bool))));
+   pDesktop->initializeAction(mpLinkAxisStretchAction, axisContext);
+   addAction(mpLinkAxisStretchAction);
+
+   mpAxisScaleMenu->addActions(pXAxisScaleGroup->actions());
+   mpAxisScaleMenu->addSeparator();
+   mpAxisScaleMenu->addActions(pYAxisScaleGroup->actions());
+   mpAxisScaleMenu->addAction(mpAxisSeparatorAction);
+   mpAxisScaleMenu->addAction(mpLinkAxisStretchAction);
+
    // Pass area menu
-   mpPassAreaMenu = new QMenu("&PassArea", this);
+   mpPassAreaMenu = new QMenu("&Pass Area", this);
    QActionGroup* pPassAreaGroup = new QActionGroup(mpPassAreaMenu);
    pPassAreaGroup->setExclusive(true);
 
@@ -121,22 +184,30 @@ HistogramPlotImp::HistogramPlotImp(const string& id, const string& viewName, QGL
    mpBelowAction = pPassAreaGroup->addAction("&Below");
    mpBelowAction->setAutoRepeat(false);
    mpBelowAction->setCheckable(true);
+   mpBelowAction->setShortcutContext(Qt::WidgetShortcut);
    pDesktop->initializeAction(mpBelowAction, passAreaContext);
+   addAction(mpBelowAction);
 
    mpAboveAction = pPassAreaGroup->addAction("&Above");
    mpAboveAction->setAutoRepeat(false);
    mpAboveAction->setCheckable(true);
+   mpAboveAction->setShortcutContext(Qt::WidgetShortcut);
    pDesktop->initializeAction(mpAboveAction, passAreaContext);
+   addAction(mpAboveAction);
 
    mpBetweenAction = pPassAreaGroup->addAction("Be&tween");
    mpBetweenAction->setAutoRepeat(false);
    mpBetweenAction->setCheckable(true);
+   mpBetweenAction->setShortcutContext(Qt::WidgetShortcut);
    pDesktop->initializeAction(mpBetweenAction, passAreaContext);
+   addAction(mpBetweenAction);
 
    mpOutsideAction = pPassAreaGroup->addAction("&Outside");
    mpOutsideAction->setAutoRepeat(false);
    mpOutsideAction->setCheckable(true);
+   mpOutsideAction->setShortcutContext(Qt::WidgetShortcut);
    pDesktop->initializeAction(mpOutsideAction, passAreaContext);
+   addAction(mpOutsideAction);
 
    mpPassAreaMenu->addActions(pPassAreaGroup->actions());
    VERIFYNR(connect(pPassAreaGroup, SIGNAL(triggered(QAction*)), this, SLOT(setThresholdMode(QAction*))));
@@ -151,22 +222,30 @@ HistogramPlotImp::HistogramPlotImp(const string& id, const string& viewName, QGL
    mpLinearAction = pStretchTypeGroup->addAction("&Linear");
    mpLinearAction->setAutoRepeat(false);
    mpLinearAction->setCheckable(true);
+   mpLinearAction->setShortcutContext(Qt::WidgetShortcut);
    pDesktop->initializeAction(mpLinearAction, stretchTypeContext);
+   addAction(mpLinearAction);
 
    mpExponentialAction = pStretchTypeGroup->addAction("&Exponential");
    mpExponentialAction->setAutoRepeat(false);
    mpExponentialAction->setCheckable(true);
+   mpExponentialAction->setShortcutContext(Qt::WidgetShortcut);
    pDesktop->initializeAction(mpExponentialAction, stretchTypeContext);
+   addAction(mpExponentialAction);
 
    mpLogarithmicAction = pStretchTypeGroup->addAction("L&ogarithmic");
    mpLogarithmicAction->setAutoRepeat(false);
    mpLogarithmicAction->setCheckable(true);
+   mpLogarithmicAction->setShortcutContext(Qt::WidgetShortcut);
    pDesktop->initializeAction(mpLogarithmicAction, stretchTypeContext);
+   addAction(mpLogarithmicAction);
 
    mpEqualizationAction = pStretchTypeGroup->addAction("H&istogram Equalization");
    mpEqualizationAction->setAutoRepeat(false);
    mpEqualizationAction->setCheckable(true);
+   mpEqualizationAction->setShortcutContext(Qt::WidgetShortcut);
    pDesktop->initializeAction(mpEqualizationAction, stretchTypeContext);
+   addAction(mpEqualizationAction);
 
    mpStretchTypeMenu->addActions(pStretchTypeGroup->actions());
    VERIFYNR(connect(pStretchTypeGroup, SIGNAL(triggered(QAction*)), this, SLOT(setStretchMode(QAction*))));
@@ -181,39 +260,61 @@ HistogramPlotImp::HistogramPlotImp(const string& id, const string& viewName, QGL
    mpRawAction = pStretchUnitsGroup->addAction("&Raw Values");
    mpRawAction->setAutoRepeat(false);
    mpRawAction->setCheckable(true);
+   mpRawAction->setShortcutContext(Qt::WidgetShortcut);
    pDesktop->initializeAction(mpRawAction, stretchUnitsContext);
+   addAction(mpRawAction);
 
    mpPercentageAction = pStretchUnitsGroup->addAction("Percenta&ge");
    mpPercentageAction->setAutoRepeat(false);
    mpPercentageAction->setCheckable(true);
+   mpPercentageAction->setShortcutContext(Qt::WidgetShortcut);
    pDesktop->initializeAction(mpPercentageAction, stretchUnitsContext);
+   addAction(mpPercentageAction);
 
    mpPercentileAction = pStretchUnitsGroup->addAction("Percenti&le");
    mpPercentileAction->setAutoRepeat(false);
    mpPercentileAction->setCheckable(true);
+   mpPercentileAction->setShortcutContext(Qt::WidgetShortcut);
    pDesktop->initializeAction(mpPercentileAction, stretchUnitsContext);
+   addAction(mpPercentileAction);
 
    mpStdDevAction = pStretchUnitsGroup->addAction("&Standard Deviation");
    mpStdDevAction->setAutoRepeat(false);
    mpStdDevAction->setCheckable(true);
+   mpStdDevAction->setShortcutContext(Qt::WidgetShortcut);
    pDesktop->initializeAction(mpStdDevAction, stretchUnitsContext);
+   addAction(mpStdDevAction);
 
    mpStretchUnitsMenu->addActions(pStretchUnitsGroup->actions());
    VERIFYNR(connect(pStretchUnitsGroup, SIGNAL(triggered(QAction*)), this, SLOT(setStretchUnits(QAction*))));
 
-   // Stretch menu
+   // Stretch favorites menu
+   mpStretchFavoritesMenu = new QMenu("Stretch Favorites", this);
+   VERIFYNR(connect(mpStretchFavoritesMenu, SIGNAL(triggered(QAction*)), this, SLOT(setStretchFavorite(QAction*))));
+
+   mpAddStretchAction = new QAction("Add Stretch to Favorites", this);
+   mpAddStretchAction->setAutoRepeat(false);
+
+   mpRemoveStretchAction = new QAction("Remove Stretch from Favorites...", this);
+   mpRemoveStretchAction->setAutoRepeat(false);
+
+   // Stretch reset menu
    mpStretchResetMenu = new QMenu("Stretch &Reset", this);
    string stretchResetContext = shortcutContext + string("/Stretch Reset");
 
    QAction* pResetThisChannelAction = mpStretchResetMenu->addAction("&This Channel");
    pResetThisChannelAction->setAutoRepeat(false);
+   pResetThisChannelAction->setShortcutContext(Qt::WidgetShortcut);
    pDesktop->initializeAction(pResetThisChannelAction, stretchResetContext);
    VERIFYNR(connect(pResetThisChannelAction, SIGNAL(triggered()), this, SLOT(stretchResetThisChannel())));
+   addAction(pResetThisChannelAction);
 
    QAction* pResetAllChannelsAction = mpStretchResetMenu->addAction(QIcon(":/icons/ResetStretch"), "&All Channels");
    pResetAllChannelsAction->setAutoRepeat(false);
+   pResetAllChannelsAction->setShortcutContext(Qt::WidgetShortcut);
    pDesktop->initializeAction(pResetAllChannelsAction, stretchResetContext);
    VERIFYNR(connect(pResetAllChannelsAction, SIGNAL(triggered()), this, SLOT(stretchResetAllChannels())));
+   addAction(pResetAllChannelsAction);
 
    // Complex data menu
    mpComplexDataMenu = new QMenu("Comple&x Data", this);
@@ -225,22 +326,30 @@ HistogramPlotImp::HistogramPlotImp(const string& id, const string& viewName, QGL
    mpMagnitudeAction = pComplexDataGroup->addAction("&Magnitude");
    mpMagnitudeAction->setAutoRepeat(false);
    mpMagnitudeAction->setCheckable(true);
+   mpMagnitudeAction->setShortcutContext(Qt::WidgetShortcut);
    pDesktop->initializeAction(mpMagnitudeAction, complexDataContext);
+   addAction(mpMagnitudeAction);
 
    mpPhaseAction = pComplexDataGroup->addAction("&Phase");
    mpPhaseAction->setAutoRepeat(false);
    mpPhaseAction->setCheckable(true);
+   mpPhaseAction->setShortcutContext(Qt::WidgetShortcut);
    pDesktop->initializeAction(mpPhaseAction, complexDataContext);
+   addAction(mpPhaseAction);
 
    mpInPhaseAction = pComplexDataGroup->addAction("&In-Phase");
    mpInPhaseAction->setAutoRepeat(false);
    mpInPhaseAction->setCheckable(true);
+   mpInPhaseAction->setShortcutContext(Qt::WidgetShortcut);
    pDesktop->initializeAction(mpInPhaseAction, complexDataContext);
+   addAction(mpInPhaseAction);
 
    mpQuadratureAction = pComplexDataGroup->addAction("&Quadrature");
    mpQuadratureAction->setAutoRepeat(false);
    mpQuadratureAction->setCheckable(true);
+   mpQuadratureAction->setShortcutContext(Qt::WidgetShortcut);
    pDesktop->initializeAction(mpQuadratureAction, complexDataContext);
+   addAction(mpQuadratureAction);
 
    mpComplexDataMenu->addActions(pComplexDataGroup->actions());
    VERIFYNR(connect(pComplexDataGroup, SIGNAL(triggered(QAction*)), this, SLOT(setComplexComponent(QAction*))));
@@ -249,20 +358,26 @@ HistogramPlotImp::HistogramPlotImp(const string& id, const string& viewName, QGL
    mpColorMapMenu = new QMenu("&Color Map", this);
    QAction* pColorMapLoadAction = mpColorMapMenu->addAction("&Load Color Map...", this, SLOT(setColorMapFromFile()));
    pColorMapLoadAction->setAutoRepeat(false);
+   pColorMapLoadAction->setShortcutContext(Qt::WidgetShortcut);
    pColorMapLoadAction->setStatusTip("Sets the color map of a raster layer from a file");
    pDesktop->initializeAction(pColorMapLoadAction, shortcutContext);
+   addAction(pColorMapLoadAction);
 
    QAction* pColorMapSaveAction = mpColorMapMenu->addAction("&Save Color Map...", this,
       SLOT(saveColorMapToFile()));
    pColorMapSaveAction->setAutoRepeat(false);
+   pColorMapSaveAction->setShortcutContext(Qt::WidgetShortcut);
    pColorMapSaveAction->setStatusTip("Saves the color map of a raster layer to a file");
    pDesktop->initializeAction(pColorMapSaveAction, shortcutContext);
+   addAction(pColorMapSaveAction);
 
    QAction* pColorMapCreateAction = mpColorMapMenu->addAction("&Create/Edit Color Map...", this,
       SLOT(createColorMap()));
    pColorMapCreateAction->setAutoRepeat(false);
+   pColorMapCreateAction->setShortcutContext(Qt::WidgetShortcut);
    pColorMapCreateAction->setStatusTip("Creates a new color map or edits an existing one");
    pDesktop->initializeAction(pColorMapCreateAction, shortcutContext);
+   addAction(pColorMapCreateAction);
 
    mpColorMapMenu->addSeparator();
 
@@ -301,18 +416,40 @@ HistogramPlotImp::HistogramPlotImp(const string& id, const string& viewName, QGL
 
    VERIFYNR(connect(mpBandMenu, SIGNAL(aboutToShow()), this, SLOT(initializeBandList())));
 
+   // Keyboard shortcut actions - use the same action name and shortcut context as the spatial data view actions so
+   // that changing the shortcut in the options changes both actions simultaneously
+   mpNextBandAction = new QAction("Next Band", this);
+   mpNextBandAction->setAutoRepeat(false);
+   mpNextBandAction->setShortcut(QKeySequence(Qt::Key_PageUp));
+   mpNextBandAction->setShortcutContext(Qt::WidgetShortcut);
+   VERIFYNR(connect(mpNextBandAction, SIGNAL(triggered()), this, SLOT(nextBand())));
+   pDesktop->initializeAction(mpNextBandAction, "View/Spatial Data");
+   addAction(mpNextBandAction);
+
+   mpPreviousBandAction = new QAction("Previous Band", this);
+   mpPreviousBandAction->setAutoRepeat(false);
+   mpPreviousBandAction->setShortcut(QKeySequence(Qt::Key_PageDown));
+   mpPreviousBandAction->setShortcutContext(Qt::WidgetShortcut);
+   VERIFYNR(connect(mpPreviousBandAction, SIGNAL(triggered()), this, SLOT(previousBand())));
+   pDesktop->initializeAction(mpPreviousBandAction, "View/Spatial Data");
+   addAction(mpPreviousBandAction);
+
    // Save histogram action
    mpSaveAction = new QAction(QIcon(":/icons/SaveHistogram"), "&Save...", this);
    mpSaveAction->setAutoRepeat(false);
-   mpSaveAction->setShortcut(QKeySequence("Ctrl+S"));
+   mpSaveAction->setShortcut(QKeySequence::Save);
+   mpSaveAction->setShortcutContext(Qt::WidgetShortcut);
    VERIFYNR(connect(mpSaveAction, SIGNAL(triggered()), this, SLOT(saveHistogram())));
    pDesktop->initializeAction(mpSaveAction, shortcutContext);
+   addAction(mpSaveAction);
 
    // Create the layer actions but do not yet add them to the menu
    mpBadValuesAction = new QAction("Bad Values...", this);
    mpBadValuesAction->setAutoRepeat(false);
+   mpBadValuesAction->setShortcutContext(Qt::WidgetShortcut);
    VERIFYNR(connect(mpBadValuesAction, SIGNAL(triggered()), this, SLOT(setBadValues())));
    pDesktop->initializeAction(mpBadValuesAction, shortcutContext);
+   addAction(mpBadValuesAction);
 
    mpThresholdSeparatorAction = new QAction(this);
    mpThresholdSeparatorAction->setSeparator(true);
@@ -324,16 +461,20 @@ HistogramPlotImp::HistogramPlotImp(const string& id, const string& viewName, QGL
    mpAutoZoomAction->setAutoRepeat(false);
    mpAutoZoomAction->setCheckable(true);
    mpAutoZoomAction->setChecked(true);
+   mpAutoZoomAction->setShortcutContext(Qt::WidgetShortcut);
    VERIFYNR(connect(mpAutoZoomAction, SIGNAL(triggered(bool)), this, SLOT(enableAutoZoom(bool))));
    pDesktop->initializeAction(mpAutoZoomAction, shortcutContext);
+   addAction(mpAutoZoomAction);
 
    mpRasterMenusSeparatorAction = new QAction(this);
    mpRasterMenusSeparatorAction->setSeparator(true);
 
    mpSamplingAction = new QAction("Set S&patial Sampling...", this);
    mpSamplingAction->setAutoRepeat(false);
+   mpSamplingAction->setShortcutContext(Qt::WidgetShortcut);
    VERIFYNR(connect(mpSamplingAction, SIGNAL(triggered()), this, SLOT(setResolution())));
    pDesktop->initializeAction(mpSamplingAction, shortcutContext);
+   addAction(mpSamplingAction);
 
    mpEndSeparatorAction = new QAction(this);
    mpEndSeparatorAction->setSeparator(true);
@@ -341,8 +482,10 @@ HistogramPlotImp::HistogramPlotImp(const string& id, const string& viewName, QGL
    mpStatisticsRefreshAction = new QAction("Refresh Statistics", this);
    mpStatisticsRefreshAction->setAutoRepeat(false);
    mpStatisticsRefreshAction->setStatusTip("Force recalculation of the statistics and histogram.");
+   mpStatisticsRefreshAction->setShortcutContext(Qt::WidgetShortcut);
    VERIFYNR(connect(mpStatisticsRefreshAction, SIGNAL(triggered()), this, SLOT(refreshStatistics())));
    pDesktop->initializeAction(mpStatisticsRefreshAction, shortcutContext);
+   addAction(mpStatisticsRefreshAction);
 
    // Plot objects
    mpRegion = static_cast<RegionObjectAdapter*>(addObject(REGION, false));
@@ -371,41 +514,7 @@ HistogramPlotImp::HistogramPlotImp(const string& id, const string& viewName, QGL
       setMouseMode(pLocateMode);
    }
 
-   list<ContextMenuAction> actionList = getContextMenuActions();
-   for (list<ContextMenuAction>::iterator iter = actionList.begin(); iter != actionList.end(); ++iter)
-   {
-      ContextMenuAction action = *iter;
-      if (action.mpAction != NULL)
-      {
-         QMenu* pMenu = action.mpAction->menu();
-         if (pMenu != NULL)
-         {
-            QList<QAction*> menuActions = pMenu->actions();
-
-            int i = 0;
-            for (i = 0; i < menuActions.count(); ++i)
-            {
-               QAction* pMenuAction = menuActions[i];
-               if (pMenuAction != NULL)
-               {
-                  QString strActionText = pMenuAction->text();
-                  if (strActionText == "&Locate Point")
-                  {
-                     pMenuAction->setText("&Set Value");
-                     pMenuAction->setStatusTip("Sets a threshold or contrast stretch value");
-                     break;
-                  }
-               }
-            }
-
-            if (i < menuActions.count())
-            {
-               break;
-            }
-         }
-      }
-   }
-
+   updateLocatorModeText();
    addPropertiesPage(PropertiesHistogramPlot::getName());
 
    // Connections
@@ -434,6 +543,11 @@ list<ContextMenuAction> HistogramPlotImp::getContextMenuActions() const
    saveAction.mBuddyType = ContextMenuAction::BEFORE;
    saveAction.mBuddyId = APP_PLOTWIDGET_PRINT_ACTION;
    menuActions.push_back(saveAction);
+
+   ContextMenuAction axisScaleAction(mpAxisScaleMenu->menuAction(), APP_HISTOGRAMPLOT_AXIS_SCALE_MENU_ACTION);
+   axisScaleAction.mBuddyType = ContextMenuAction::BEFORE;
+   axisScaleAction.mBuddyId = APP_CARTESIANPLOT_GRIDLINES_MENU_ACTION;
+   menuActions.push_back(axisScaleAction);
 
    string afterId = APP_PLOTVIEW_RESCALE_AXES_SEPARATOR_ACTION;
    bool bNeedSeparator = false;
@@ -482,7 +596,11 @@ list<ContextMenuAction> HistogramPlotImp::getContextMenuActions() const
       bNeedSeparator = true;
    }
 
-   if (dynamic_cast<const RasterLayerImp*>(mpLayer.get()) != NULL)
+   bool rasterLayer = (dynamic_cast<const RasterLayer*>(mpLayer.get()) != NULL);
+   mpAxisSeparatorAction->setVisible(rasterLayer);
+   mpLinkAxisStretchAction->setVisible(rasterLayer);
+
+   if (rasterLayer == true)
    {
       if (bNeedSeparator == true)
       {
@@ -524,6 +642,34 @@ list<ContextMenuAction> HistogramPlotImp::getContextMenuActions() const
       regionUnitsAction.mBuddyId = afterId;
       menuActions.push_back(regionUnitsAction);
       afterId = APP_HISTOGRAMPLOT_UNITS_MENU_ACTION;
+
+      mpStretchFavoritesMenu->clear();
+
+      const DynamicObject* pStretchFavorites = RasterLayer::getSettingStretchFavorites();
+      if (pStretchFavorites != NULL)
+      {
+         vector<string> stretchNames;
+         pStretchFavorites->getAttributeNames(stretchNames);
+         if (stretchNames.empty() == false)
+         {
+            for (vector<string>::const_iterator iter = stretchNames.begin(); iter != stretchNames.end(); ++iter)
+            {
+               mpStretchFavoritesMenu->addAction(QString::fromStdString(*iter));
+            }
+
+            mpStretchFavoritesMenu->addSeparator();
+         }
+      }
+
+      mpStretchFavoritesMenu->addAction(mpAddStretchAction);
+      mpStretchFavoritesMenu->addAction(mpRemoveStretchAction);
+
+      ContextMenuAction stretchFavoritesAction(mpStretchFavoritesMenu->menuAction(),
+         APP_HISTOGRAMPLOT_STRETCH_FAVORITES_MENU_ACTION);
+      stretchFavoritesAction.mBuddyType = ContextMenuAction::AFTER;
+      stretchFavoritesAction.mBuddyId = afterId;
+      menuActions.push_back(stretchFavoritesAction);
+      afterId = APP_HISTOGRAMPLOT_STRETCH_FAVORITES_MENU_ACTION;
 
       ContextMenuAction stretchResetAction(mpStretchResetMenu->menuAction(),
          APP_HISTOGRAMPLOT_STRETCH_RESET_MENU_ACTION);
@@ -655,7 +801,7 @@ HistogramPlotImp& HistogramPlotImp::operator=(const HistogramPlotImp& histogramP
          }
       }
 
-      meSelectedValue = histogramPlot.meSelectedValue;
+      mSelectedValue = histogramPlot.mSelectedValue;
 
       // Setting the histogram from the layer also updates the raster element
       setHistogram(const_cast<Layer*>(histogramPlot.mpLayer.get()), histogramPlot.mRasterChannelType);
@@ -833,19 +979,17 @@ bool HistogramPlotImp::setHistogram(Layer* pLayer, Statistics* pStatistics, Rast
       }
    }
 
-   // Disconnect the current layer and element
-
-   // if this monitored a specific statistics object, delete it
+   // If this monitored a specific statistics object, delete it
    delete dynamic_cast<StatisticsImp*>(mpStats);
-   if ((mpStats = pStatistics) == NULL)
+   mpStats = pStatistics;
+
+   const MouseMode* pLocatorMode = getMouseMode("LocatorMode");
+   if (pLocatorMode != NULL)
    {
-      enableMouseMode(getMouseMode("LocatorMode"), true);
-   }
-   else
-   {
-      enableMouseMode(getMouseMode("LocatorMode"), false);
+      enableMouseMode(pLocatorMode, mpStats == NULL);
    }
 
+   // Disconnect the current layer and element
    LayerImp* pLayerImp = dynamic_cast<LayerImp*>(mpLayer.get());
    if (pLayerImp != NULL)
    {
@@ -858,6 +1002,11 @@ bool HistogramPlotImp::setHistogram(Layer* pLayer, Statistics* pStatistics, Rast
       {
          VERIFYNR(disconnect(pRasterLayer, SIGNAL(complexComponentChanged(const ComplexComponent&)), this,
             SLOT(setComplexComponent(const ComplexComponent&))));
+         VERIFYNR(disconnect(pRasterLayer, SIGNAL(stretchTypeChanged(const DisplayMode&, const StretchType&)), this,
+            SLOT(updateStretchTypeAction())));
+         VERIFYNR(disconnect(pRasterLayer, SIGNAL(stretchUnitsChanged(const RasterChannelType&, const RegionUnits&)),
+            this, SLOT(updateStretchUnitAction())));
+
          // don't VERIFY, these may not have been connected in which case this is a noop
          disconnect(pRasterLayer, SIGNAL(displayedBandChanged(RasterChannelType, DimensionDescriptor)), this,
             SLOT(updateElement()));
@@ -961,6 +1110,10 @@ bool HistogramPlotImp::setHistogram(Layer* pLayer, Statistics* pStatistics, Rast
       {
          VERIFYNR(connect(pRasterLayer, SIGNAL(complexComponentChanged(const ComplexComponent&)), this,
             SLOT(setComplexComponent(const ComplexComponent&))));
+         VERIFYNR(connect(pRasterLayer, SIGNAL(stretchTypeChanged(const DisplayMode&, const StretchType&)), this,
+            SLOT(updateStretchTypeAction())));
+         VERIFYNR(connect(pRasterLayer, SIGNAL(stretchUnitsChanged(const RasterChannelType&, const RegionUnits&)),
+            this, SLOT(updateStretchUnitAction())));
          if (mpStats == NULL)
          {
             VERIFYNR(connect(pRasterLayer, SIGNAL(displayedBandChanged(RasterChannelType, DimensionDescriptor)), this,
@@ -970,6 +1123,8 @@ bool HistogramPlotImp::setHistogram(Layer* pLayer, Statistics* pStatistics, Rast
          }
       }
    }
+
+   updateLocatorModeText();
 
    notify(SIGNAL_NAME(Subject, Modified));
    return true;
@@ -1007,6 +1162,9 @@ bool HistogramPlotImp::setHistogram(unsigned int binCount, const double* pBinCen
             getExtents(dMinX, dMinY, dMaxX, dMaxY);
             setExtents(dMinX - ((dMaxX - dMinX) * 100), dMinY, dMaxX + ((dMaxX - dMinX) * 100), dMaxY);
          }
+
+         // Update the locator mouse mode text
+         updateLocatorModeText();
 
          // Notify attached objects of the change
          notify(SIGNAL_NAME(Subject, Modified));
@@ -1095,6 +1253,18 @@ static void ShowRangeValues(char* pFormat, double lower, double upper)
    pDesktop->setStatusBarMessage(message);
 }
 
+void HistogramPlotImp::keyPressEvent(QKeyEvent* pEvent)
+{
+   CartesianPlotImp::keyPressEvent(pEvent);
+   updateMouseCursor();
+}
+
+void HistogramPlotImp::keyReleaseEvent(QKeyEvent* pEvent)
+{
+   CartesianPlotImp::keyReleaseEvent(pEvent);
+   updateMouseCursor();
+}
+
 void HistogramPlotImp::mousePressEvent(QMouseEvent* pEvent)
 {
    if (pEvent != NULL)
@@ -1111,35 +1281,42 @@ void HistogramPlotImp::mousePressEvent(QMouseEvent* pEvent)
 
          if (mouseMode == "LocatorMode")
          {
-            QPoint ptMouse = pEvent->pos();
-            ptMouse.setY(height() - pEvent->pos().y());
+            mMouseStart = pEvent->pos();
+            mMouseStart.setY(height() - pEvent->pos().y());
 
-            double dXValue = 0.0;
-            double dYValue = 0.0;
-            translateScreenToData(ptMouse.x(), ptMouse.y(), dXValue, dYValue);
-            float locatorValue = dXValue;
-            QString locatorValueUnit;
+            double mouseDataX = 0.0;
+            double mouseDataY = 0.0;
+            translateScreenToData(mMouseStart.x(), mMouseStart.y(), mouseDataX, mouseDataY);
+            double mouseScreenX = static_cast<double>(mMouseStart.x());
 
-            double lowerLimit = 0.0;
-            double upperLimit = 0.0;
-            getDataLowerUpper(lowerLimit, upperLimit);
+            double stretchMinX = 0.0;
+            double stretchMaxX = 0.0;
+            getDataLowerUpper(stretchMinX, stretchMaxX);
 
-            double tmpLowerLimit = lowerLimit;
-            double tmpUpperLimit = upperLimit;
+            double stretchMinScreenX = 0.0;
+            double stretchMaxScreenX = 0.0;
+            double tempValue = 0.0;
+            translateDataToScreen(stretchMinX, 0.0, stretchMinScreenX, tempValue);
+            translateDataToScreen(stretchMaxX, 0.0, stretchMaxScreenX, tempValue);
 
-            double minValue = 0.0;
-            double maxValue = 0.0;
-            getDataMinMax(minValue, maxValue);
-            LocationType llCorner;
-            LocationType ulCorner;
-            LocationType urCorner;
-            LocationType lrCorner;
-            getVisibleCorners(llCorner, ulCorner, urCorner, lrCorner);
+            double tempStretchMinScreenX = stretchMinScreenX;
+            double tempStretchMaxScreenX = stretchMaxScreenX;
+
+            double dataMinX = 0.0;
+            double dataMaxX = 0.0;
+            getDataMinMax(dataMinX, dataMaxX);
+
+            double dataMinScreenX = 0.0;
+            double dataMaxScreenX = 0.0;
+            translateDataToScreen(dataMinX, 0.0, dataMinScreenX, tempValue);
+            translateDataToScreen(dataMaxX, 0.0, dataMaxScreenX, tempValue);
 
             PassArea ePassArea = getLayerPassArea();
             QColor regionColor = getLayerColor();
-
             bool showRegions = true;
+            bool showLocator = true;
+            float locatorValue = mouseDataX;
+            QString locatorValueUnit;
 
             RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(mpLayer.get());
             if (pRasterLayer != NULL)
@@ -1148,110 +1325,122 @@ void HistogramPlotImp::mousePressEvent(QMouseEvent* pEvent)
                if (pRasterLayer->getStretchType(pRasterLayer->getDisplayMode()) == EQUALIZATION)
                {
                   showRegions = false;
+                  showLocator = false;
                }
                else
                {
-                  tmpLowerLimit = max(llCorner.mX, lowerLimit);
-                  tmpUpperLimit = min(lrCorner.mX, upperLimit);
-                  if (fabs(tmpUpperLimit - dXValue) < fabs(tmpLowerLimit - dXValue))
+                  tempStretchMinScreenX = std::max(0.0, stretchMinScreenX);
+                  tempStretchMaxScreenX = std::min(static_cast<double>(width()), stretchMaxScreenX);
+
+                  Qt::KeyboardModifiers modifiers = pEvent->modifiers();
+                  if (modifiers == Qt::ShiftModifier)
                   {
-                     meSelectedValue = UPPER_VALUE;
-                     upperLimit = dXValue;
+                     mSelectedValue = TRANSLATE;
+                     showLocator = false;
+
+                     // Center the stretch region about the mouse location if clicking outside of the stretch range
+                     if ((mouseScreenX < tempStretchMinScreenX) || (mouseScreenX > tempStretchMaxScreenX))
+                     {
+                        double centerTranslation = mouseScreenX - ((stretchMaxScreenX + stretchMinScreenX) / 2.0);
+                        stretchMinScreenX += centerTranslation;
+                        stretchMaxScreenX += centerTranslation;
+                     }
+                  }
+                  else if (fabs(tempStretchMaxScreenX - mouseScreenX) < fabs(tempStretchMinScreenX - mouseScreenX))
+                  {
+                     mSelectedValue = UPPER_VALUE;
+
+                     if (modifiers == Qt::ControlModifier)
+                     {
+                        mSelectedValue |= SCALE;
+                        stretchMinScreenX -= mouseScreenX - stretchMaxScreenX;
+                     }
+
+                     stretchMaxScreenX = mouseScreenX;
                   }
                   else
                   {
-                     meSelectedValue = LOWER_VALUE;
-                     lowerLimit = dXValue;
+                     mSelectedValue = LOWER_VALUE;
+
+                     if (modifiers == Qt::ControlModifier)
+                     {
+                        mSelectedValue |= SCALE;
+                        stretchMaxScreenX += stretchMinScreenX - mouseScreenX;
+                     }
+
+                     stretchMinScreenX = mouseScreenX;
                   }
 
-                  ShowRangeValues("Contrast stretch: %g - %g", lowerLimit, upperLimit);
+                  translateScreenToData(stretchMinScreenX, 0.0, stretchMinX, tempValue);
+                  translateScreenToData(stretchMaxScreenX, 0.0, stretchMaxX, tempValue);
 
-                  locatorValue = pRasterLayer->convertStretchValue(mRasterChannelType, RAW_VALUE, dXValue, eUnits);
+                  ShowRangeValues("Contrast stretch: %g - %g", stretchMinX, stretchMaxX);
+
+                  locatorValue = pRasterLayer->convertStretchValue(mRasterChannelType, RAW_VALUE, mouseDataX, eUnits);
                   locatorValueUnit =
                      dynamic_cast<RasterLayerImp*>(pRasterLayer)->getStretchUnitsAsString(mRasterChannelType);
+
+                  updateMouseCursor();
                }
             }
 
             ThresholdLayer* pThresholdLayer = dynamic_cast<ThresholdLayer*>(mpLayer.get());
             if (pThresholdLayer != NULL)
             {
-               if ((ePassArea == LOWER) || (ePassArea == UPPER))
-               {
-                  meSelectedValue = LOWER_VALUE;
-                  lowerLimit = dXValue;
-               }
-               else if (ePassArea == MIDDLE)
-               {
-                  tmpLowerLimit = max(llCorner.mX, lowerLimit);
-                  tmpUpperLimit = min(lrCorner.mX, upperLimit);
-                  if (fabs(tmpUpperLimit - dXValue) < fabs(tmpLowerLimit - dXValue))
-                  {
-                     meSelectedValue = UPPER_VALUE;
-                     upperLimit = dXValue;
-                  }
-                  else
-                  {
-                     meSelectedValue = LOWER_VALUE;
-                     lowerLimit = dXValue;
-                  }
-               }
-               else // OUTSIDE
-               {
-                  if (lowerLimit < minValue)
-                  {
-                     tmpLowerLimit = minValue;
-                  }
-                  if (upperLimit > maxValue)
-                  {
-                     tmpUpperLimit = maxValue;
-                  }
-                  if (fabs(dXValue - tmpLowerLimit) < fabs(dXValue - tmpUpperLimit))
-                  {
-                     meSelectedValue = LOWER_VALUE;
-                     lowerLimit = dXValue;
-                  }
-                  else
-                  {
-                     meSelectedValue = UPPER_VALUE;
-                     upperLimit = dXValue;
-                  }
-               }
-
-               // Correct swapping of lower and upper limit
-               if (lowerLimit > upperLimit)
-               {
-                  double tmp = lowerLimit;
-                  upperLimit = lowerLimit;
-                  lowerLimit = tmp;
-               }
+               tempStretchMinScreenX = std::max(0.0, stretchMinScreenX);
+               tempStretchMaxScreenX = std::min(static_cast<double>(width()), stretchMaxScreenX);
 
                if ((ePassArea == LOWER) || (ePassArea == UPPER))
                {
-                  ShowRangeValues("Threshold: %g", dXValue);
+                  mSelectedValue = LOWER_VALUE;
+                  stretchMinX = mouseDataX;
+               }
+               else if (fabs(tempStretchMaxScreenX - mouseScreenX) < fabs(tempStretchMinScreenX - mouseScreenX))
+               {
+                  mSelectedValue = UPPER_VALUE;
+                  stretchMaxScreenX = mouseScreenX;
                }
                else
                {
-                  ShowRangeValues("Threshold: %g - %g", lowerLimit, upperLimit);
+                  mSelectedValue = LOWER_VALUE;
+                  stretchMinScreenX = mouseScreenX;
+               }
+
+               translateScreenToData(stretchMinScreenX, 0.0, stretchMinX, tempValue);
+               translateScreenToData(stretchMaxScreenX, 0.0, stretchMaxX, tempValue);
+
+               // Correct swapping of lower and upper limit
+               if (stretchMinX > stretchMaxX)
+               {
+                  double tmp = stretchMaxX;
+                  stretchMaxX = stretchMinX;
+                  stretchMinX = tmp;
+               }
+
+               if ((ePassArea == LOWER) || (ePassArea == UPPER))
+               {
+                  ShowRangeValues("Threshold: %g", mouseDataX);
+               }
+               else
+               {
+                  ShowRangeValues("Threshold: %g - %g", stretchMinX, stretchMaxX);
                }
 
                RegionUnits eUnits = pThresholdLayer->getRegionUnits();
-               locatorValue = pThresholdLayer->convertThreshold(RAW_VALUE, dXValue, eUnits);
+               locatorValue = pThresholdLayer->convertThreshold(RAW_VALUE, mouseDataX, eUnits);
                locatorValueUnit = dynamic_cast<ThresholdLayerImp*>(pThresholdLayer)->getRegionUnitsAsString();
 
-               double lowerLimitStretched = pThresholdLayer->convertThreshold(RAW_VALUE, lowerLimit, eUnits);
-               double upperLimitStretched = pThresholdLayer->convertThreshold(RAW_VALUE, upperLimit, eUnits);
-
-               pThresholdLayer->setFirstThreshold(lowerLimit);
-               pThresholdLayer->setSecondThreshold(upperLimit);
+               pThresholdLayer->setFirstThreshold(stretchMinX);
+               pThresholdLayer->setSecondThreshold(stretchMaxX);
             }
 
-            updateHistogramRegions(lowerLimit, upperLimit, minValue, maxValue, ePassArea, regionColor, showRegions);
+            updateHistogramRegions(stretchMinX, stretchMaxX, dataMinX, dataMaxX, ePassArea, regionColor, showRegions);
 
             LocatorImp* pLocator = dynamic_cast<LocatorImp*>(getMouseLocator());
-            if (pLocator != NULL && showRegions)
+            if (pLocator != NULL && showLocator)
             {
                pLocator->setVisible(true);
-               pLocator->setLocation(LocationType(dXValue, dYValue), false);
+               pLocator->setLocation(LocationType(mouseDataX, mouseDataY), false);
                pLocator->setText(QString::number(locatorValue) + " " + locatorValueUnit, QString());
                pLocator->setColor(Qt::red);
                pLocator->setLineStyle(SOLID_LINE);
@@ -1268,6 +1457,7 @@ void HistogramPlotImp::mousePressEvent(QMouseEvent* pEvent)
    }
 
    CartesianPlotImp::mousePressEvent(pEvent);
+   updateMouseCursor();
 }
 
 void HistogramPlotImp::mouseMoveEvent(QMouseEvent* pEvent)
@@ -1286,84 +1476,152 @@ void HistogramPlotImp::mouseMoveEvent(QMouseEvent* pEvent)
 
          if (mouseMode == "LocatorMode")
          {
+            if (mSelectedValue == NO_VALUE)
+            {
+               updateMouseCursor();
+               return;
+            }
+
             QPoint ptMouse = pEvent->pos();
             ptMouse.setY(height() - pEvent->pos().y());
 
-            double dXValue = 0.0;
-            double dYValue = 0.0;
+            double mouseDataX = 0.0;
+            double mouseDataY = 0.0;
+            translateScreenToData(ptMouse.x(), ptMouse.y(), mouseDataX, mouseDataY);
 
-            translateScreenToData(ptMouse.x(), ptMouse.y(), dXValue, dYValue);
-            float locatorValue = dXValue;
-            QString locatorValueUnit;
+            double mouseScreenX = static_cast<double>(ptMouse.x());
+            double mouseStartScreenX = static_cast<double>(mMouseStart.x());
+            double mouseStartScreenY = static_cast<double>(mMouseStart.y());
 
-            double lowerLimit = 0.0;
-            double upperLimit = 0.0;
-            getDataLowerUpper(lowerLimit, upperLimit);
+            double stretchMinX = 0.0;
+            double stretchMaxX = 0.0;
+            getDataLowerUpper(stretchMinX, stretchMaxX);
 
-            double minValue = 0.0;
-            double maxValue = 0.0;
-            getDataMinMax(minValue, maxValue);
+            double stretchMinScreenX = 0.0;
+            double stretchMaxScreenX = 0.0;
+            double tempValue = 0.0;
+            translateDataToScreen(stretchMinX, 0.0, stretchMinScreenX, tempValue);
+            translateDataToScreen(stretchMaxX, 0.0, stretchMaxScreenX, tempValue);
+
+            double dataMinX = 0.0;
+            double dataMaxX = 0.0;
+            getDataMinMax(dataMinX, dataMaxX);
 
             PassArea ePassArea = getLayerPassArea();
             QColor regionColor = getLayerColor();
-
             bool showRegions = true;
+            bool showLocator = true;
+            float locatorValue = mouseDataX;
+            QString locatorValueUnit;
 
-            if (meSelectedValue == LOWER_VALUE)
+            double translation = mouseScreenX - mouseStartScreenX;
+            if (mSelectedValue & SCALE)
             {
-               lowerLimit = dXValue;
+               if (mSelectedValue & LOWER_VALUE)
+               {
+                  stretchMaxScreenX += stretchMinScreenX - mouseStartScreenX - translation;
+               }
+
+               if (mSelectedValue & UPPER_VALUE)
+               {
+                  stretchMinScreenX -= mouseStartScreenX - stretchMaxScreenX + translation;
+               }
             }
-            else
+
+            if (mSelectedValue & LOWER_VALUE)
             {
-               upperLimit = dXValue;
+               stretchMinScreenX = mouseScreenX;
             }
+
+            if (mSelectedValue & UPPER_VALUE)
+            {
+               stretchMaxScreenX = mouseScreenX;
+            }
+
+            if (mSelectedValue == TRANSLATE)
+            {
+               // Center the stretch region about the mouse location if clicking outside of the stretch range
+               double tempStretchMinScreenX = std::max(0.0, stretchMinScreenX);
+               double tempStretchMaxScreenX = std::min(static_cast<double>(width()), stretchMaxScreenX);
+
+               if ((mouseStartScreenX < tempStretchMinScreenX) || (mouseStartScreenX > tempStretchMaxScreenX))
+               {
+                  double centerTranslation = mouseStartScreenX - ((stretchMaxScreenX + stretchMinScreenX) / 2.0);
+                  stretchMinScreenX += centerTranslation;
+                  stretchMaxScreenX += centerTranslation;
+               }
+
+               stretchMinScreenX += translation;
+               stretchMaxScreenX += translation;
+               showLocator = false;
+            }
+
+            translateScreenToData(stretchMinScreenX, 0.0, stretchMinX, tempValue);
+            translateScreenToData(stretchMaxScreenX, 0.0, stretchMaxX, tempValue);
 
             RasterLayerImp* pRasterLayer = dynamic_cast<RasterLayerImp*>(mpLayer.get());
             if (pRasterLayer != NULL)
             {
                RegionUnits eUnits = pRasterLayer->getStretchUnits(mRasterChannelType);
-               locatorValue = pRasterLayer->convertStretchValue(mRasterChannelType, RAW_VALUE, dXValue, eUnits);
+               locatorValue = pRasterLayer->convertStretchValue(mRasterChannelType, RAW_VALUE, mouseDataX, eUnits);
                locatorValueUnit = pRasterLayer->getStretchUnitsAsString(mRasterChannelType);
                if (pRasterLayer->getStretchType(pRasterLayer->getDisplayMode()) == EQUALIZATION)
                {
                   showRegions = false;
+                  showLocator = false;
                }
                else
                {
-                  ShowRangeValues("Contrast stretch: %g - %g", lowerLimit, upperLimit);
+                  ShowRangeValues("Contrast stretch: %g - %g", stretchMinX, stretchMaxX);
+                  updateMouseCursor();
                }
             }
 
-            if (mpLayer->isKindOf("ThresholdLayer") == true)
+            ThresholdLayerImp* pThresholdLayer = dynamic_cast<ThresholdLayerImp*>(mpLayer.get());
+            if (pThresholdLayer != NULL)
             {
+               // Correct swapping of lower and upper limit
+               if (stretchMinX > stretchMaxX)
+               {
+                  if (mSelectedValue & LOWER_VALUE)
+                  {
+                     mSelectedValue &= ~LOWER_VALUE;
+                     mSelectedValue |= UPPER_VALUE;
+                  }
+                  else if (mSelectedValue & UPPER_VALUE)
+                  {
+                     mSelectedValue &= ~UPPER_VALUE;
+                     mSelectedValue |= LOWER_VALUE;
+                  }
+
+                  double tmp = stretchMaxX;
+                  stretchMaxX = stretchMinX;
+                  stretchMinX = tmp;
+               }
+
                if ((ePassArea == LOWER) || (ePassArea == UPPER))
                {
-                  ShowRangeValues("Threshold: %g", meSelectedValue == LOWER_VALUE ? lowerLimit : upperLimit);
+                  ShowRangeValues("Threshold: %g", mSelectedValue == LOWER_VALUE ? stretchMinX : stretchMaxX);
                }
                else
                {
-                  ShowRangeValues("Threshold: %g - %g", lowerLimit, upperLimit);
+                  ShowRangeValues("Threshold: %g - %g", stretchMinX, stretchMaxX);
                }
 
-               ThresholdLayer* pLayer = static_cast<ThresholdLayer*>(mpLayer.get());
+               RegionUnits eUnits = pThresholdLayer->getRegionUnits();
+               locatorValue = pThresholdLayer->convertThreshold(RAW_VALUE, mouseDataX, eUnits);
+               locatorValueUnit = pThresholdLayer->getRegionUnitsAsString();
 
-               RegionUnits eUnits = pLayer->getRegionUnits();
-               locatorValue = pLayer->convertThreshold(RAW_VALUE, dXValue, eUnits);
-               locatorValueUnit = dynamic_cast<ThresholdLayerImp*>(pLayer)->getRegionUnitsAsString();
-
-               double lowerLimitStretched = pLayer->convertThreshold(RAW_VALUE, lowerLimit, eUnits);
-               double upperLimitStretched = pLayer->convertThreshold(RAW_VALUE, upperLimit, eUnits);
-
-               pLayer->setFirstThreshold(lowerLimit);
-               pLayer->setSecondThreshold(upperLimit);
+               pThresholdLayer->setFirstThreshold(stretchMinX);
+               pThresholdLayer->setSecondThreshold(stretchMaxX);
             }
 
-            updateHistogramRegions(lowerLimit, upperLimit, minValue, maxValue, ePassArea, regionColor, showRegions);
+            updateHistogramRegions(stretchMinX, stretchMaxX, dataMinX, dataMaxX, ePassArea, regionColor, showRegions);
 
             LocatorImp* pLocator = dynamic_cast<LocatorImp*>(getMouseLocator());
-            if (pLocator != NULL && showRegions)
+            if (pLocator != NULL && showLocator)
             {
-               pLocator->setLocation(LocationType(dXValue, dYValue), false);
+               pLocator->setLocation(LocationType(mouseDataX, mouseDataY), false);
                pLocator->setText(QString::number(locatorValue) + " " + locatorValueUnit, QString());
             }
 
@@ -1378,6 +1636,7 @@ void HistogramPlotImp::mouseMoveEvent(QMouseEvent* pEvent)
    }
 
    CartesianPlotImp::mouseMoveEvent(pEvent);
+   updateMouseCursor();
 }
 
 void HistogramPlotImp::mouseReleaseEvent(QMouseEvent* pEvent)
@@ -1396,33 +1655,84 @@ void HistogramPlotImp::mouseReleaseEvent(QMouseEvent* pEvent)
 
          if (mouseMode == "LocatorMode")
          {
+            if (mSelectedValue == NO_VALUE)
+            {
+               updateMouseCursor();
+               return;
+            }
+
             QPoint ptMouse = pEvent->pos();
             ptMouse.setY(height() - pEvent->pos().y());
 
-            double dXValue = 0.0;
-            double dYValue = 0.0;
-            translateScreenToData(ptMouse.x(), ptMouse.y(), dXValue, dYValue);
+            double mouseDataX = 0.0;
+            double mouseDataY = 0.0;
+            translateScreenToData(ptMouse.x(), ptMouse.y(), mouseDataX, mouseDataY);
 
-            double lowerLimit = 0.0;
-            double upperLimit = 0.0;
-            getDataLowerUpper(lowerLimit, upperLimit);
+            double mouseScreenX = static_cast<double>(ptMouse.x());
+            double mouseStartScreenX = static_cast<double>(mMouseStart.x());
+            double mouseStartScreenY = static_cast<double>(mMouseStart.y());
 
-            double minValue = 0.0;
-            double maxValue = 0.0;
-            getDataMinMax(minValue, maxValue);
+            double stretchMinX = 0.0;
+            double stretchMaxX = 0.0;
+            getDataLowerUpper(stretchMinX, stretchMaxX);
+
+            double stretchMinScreenX = 0.0;
+            double stretchMaxScreenX = 0.0;
+            double tempValue = 0.0;
+            translateDataToScreen(stretchMinX, 0.0, stretchMinScreenX, tempValue);
+            translateDataToScreen(stretchMaxX, 0.0, stretchMaxScreenX, tempValue);
+
+            double dataMinX = 0.0;
+            double dataMaxX = 0.0;
+            getDataMinMax(dataMinX, dataMaxX);
 
             PassArea ePassArea = getLayerPassArea();
             QColor regionColor = getLayerColor();
             bool showRegions = true;
 
-            if (meSelectedValue == LOWER_VALUE)
+            double translation = mouseScreenX - mouseStartScreenX;
+            if (mSelectedValue & SCALE)
             {
-               lowerLimit = dXValue;
+               if (mSelectedValue & LOWER_VALUE)
+               {
+                  stretchMaxScreenX += stretchMinScreenX - mouseStartScreenX - translation;
+               }
+
+               if (mSelectedValue & UPPER_VALUE)
+               {
+                  stretchMinScreenX -= mouseStartScreenX - stretchMaxScreenX + translation;
+               }
             }
-            else
+
+            if (mSelectedValue & LOWER_VALUE)
             {
-               upperLimit = dXValue;
+               stretchMinScreenX = mouseScreenX;
             }
+
+            if (mSelectedValue & UPPER_VALUE)
+            {
+               stretchMaxScreenX = mouseScreenX;
+            }
+
+            if (mSelectedValue == TRANSLATE)
+            {
+               // Center the stretch region about the mouse location if clicking outside of the stretch range
+               double tempStretchMinScreenX = std::max(0.0, stretchMinScreenX);
+               double tempStretchMaxScreenX = std::min(static_cast<double>(width()), stretchMaxScreenX);
+
+               if ((mouseStartScreenX < tempStretchMinScreenX) || (mouseStartScreenX > tempStretchMaxScreenX))
+               {
+                  double centerTranslation = mouseStartScreenX - ((stretchMaxScreenX + stretchMinScreenX) / 2.0);
+                  stretchMinScreenX += centerTranslation;
+                  stretchMaxScreenX += centerTranslation;
+               }
+
+               stretchMinScreenX += translation;
+               stretchMaxScreenX += translation;
+            }
+
+            translateScreenToData(stretchMinScreenX, 0.0, stretchMinX, tempValue);
+            translateScreenToData(stretchMaxScreenX, 0.0, stretchMaxX, tempValue);
 
             RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(mpLayer.get());
             if (pRasterLayer != NULL)
@@ -1430,9 +1740,9 @@ void HistogramPlotImp::mouseReleaseEvent(QMouseEvent* pEvent)
                RegionUnits eUnits = pRasterLayer->getStretchUnits(mRasterChannelType);
 
                double lowerLimitStretched = pRasterLayer->convertStretchValue(mRasterChannelType, RAW_VALUE,
-                  lowerLimit, eUnits);
+                  stretchMinX, eUnits);
                double upperLimitStretched = pRasterLayer->convertStretchValue(mRasterChannelType, RAW_VALUE,
-                  upperLimit, eUnits);
+                  stretchMaxX, eUnits);
 
                if (pRasterLayer->getStretchType(pRasterLayer->getDisplayMode()) == EQUALIZATION)
                {
@@ -1447,16 +1757,19 @@ void HistogramPlotImp::mouseReleaseEvent(QMouseEvent* pEvent)
             ThresholdLayer* pThresholdLayer = dynamic_cast<ThresholdLayer*>(mpLayer.get());
             if (pThresholdLayer != NULL)
             {
-               RegionUnits eUnits = pThresholdLayer->getRegionUnits();
+               // Correct swapping of lower and upper limit
+               if (stretchMinX > stretchMaxX)
+               {
+                  double tmp = stretchMaxX;
+                  stretchMaxX = stretchMinX;
+                  stretchMinX = tmp;
+               }
 
-               double lowerLimitStretched = pThresholdLayer->convertThreshold(RAW_VALUE, lowerLimit, eUnits);
-               double upperLimitStretched = pThresholdLayer->convertThreshold(RAW_VALUE, upperLimit, eUnits);
-
-               pThresholdLayer->setFirstThreshold(lowerLimit);
-               pThresholdLayer->setSecondThreshold(upperLimit);
+               pThresholdLayer->setFirstThreshold(stretchMinX);
+               pThresholdLayer->setSecondThreshold(stretchMaxX);
             }
 
-            updateHistogramRegions(lowerLimit, upperLimit, minValue, maxValue, ePassArea, regionColor, showRegions);
+            updateHistogramRegions(stretchMinX, stretchMaxX, dataMinX, dataMaxX, ePassArea, regionColor, showRegions);
 
             Locator* pLocator = getMouseLocator();
             if (pLocator != NULL)
@@ -1464,7 +1777,7 @@ void HistogramPlotImp::mouseReleaseEvent(QMouseEvent* pEvent)
                pLocator->setVisible(false);
             }
 
-            meSelectedValue = NO_VALUE;
+            mSelectedValue = NO_VALUE;
 
             if (showRegions)
             {
@@ -1475,6 +1788,7 @@ void HistogramPlotImp::mouseReleaseEvent(QMouseEvent* pEvent)
    }
 
    CartesianPlotImp::mouseReleaseEvent(pEvent);
+   updateMouseCursor();
 }
 
 bool HistogramPlotImp::getDataMinMax(double& minValue, double& maxValue) const
@@ -1662,6 +1976,12 @@ void HistogramPlotImp::updateStretchTypeAction()
          {
             mpEqualizationAction->setChecked(true);
          }
+      }
+
+      // Update the axis scale if necessary
+      if (mpLinkAxisStretchAction->isChecked() == true)
+      {
+         linkAxisToStretch();
       }
    }
 }
@@ -2152,6 +2472,55 @@ void HistogramPlotImp::createColorMap()
    pEditor->show();
 }
 
+void HistogramPlotImp::setAxisScale(QAction* pAction)
+{
+   if (pAction == NULL)
+   {
+      return;
+   }
+
+   if (pAction == mpLinearXAxisAction)
+   {
+      setXScaleType(SCALE_LINEAR);
+   }
+   else if (pAction == mpLogXAxisAction)
+   {
+      setXScaleType(SCALE_LOG);
+   }
+   else if (pAction == mpLinearYAxisAction)
+   {
+      setYScaleType(SCALE_LINEAR);
+   }
+   else if (pAction == mpLogYAxisAction)
+   {
+      setYScaleType(SCALE_LOG);
+   }
+}
+
+void HistogramPlotImp::linkAxisToStretch(bool link)
+{
+   if (link == true)
+   {
+      RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(mpLayer.get());
+      if (pRasterLayer == NULL)
+      {
+         return;
+      }
+
+      DisplayMode displayMode = mRasterChannelType == GRAY ? GRAYSCALE_MODE : RGB_MODE;
+      StretchType stretchType = pRasterLayer->getStretchType(displayMode);
+
+      if ((stretchType == LINEAR) || (stretchType == EQUALIZATION))
+      {
+         mpLinearXAxisAction->trigger();
+      }
+      else if ((stretchType == LOGARITHMIC) || (stretchType == EXPONENTIAL))
+      {
+         mpLogXAxisAction->trigger();
+      }
+   }
+}
+
 void HistogramPlotImp::setThresholdMode(QAction* pAction)
 {
    if (pAction == NULL)
@@ -2247,6 +2616,34 @@ void HistogramPlotImp::setStretchUnits(QAction* pAction)
       }
 
       pThresholdLayer->setRegionUnits(regionUnits);
+   }
+}
+
+void HistogramPlotImp::setStretchFavorite(QAction* pAction)
+{
+   if (pAction == NULL)
+   {
+      return;
+   }
+
+   RasterLayerImp* pRasterLayer = dynamic_cast<RasterLayerImp*>(mpLayer.get());
+   VERIFYNRV(pRasterLayer != NULL);
+
+   if (pAction == mpAddStretchAction)
+   {
+      pRasterLayer->addStretchFavorite(mRasterChannelType);
+   }
+   else if (pAction == mpRemoveStretchAction)
+   {
+      RasterLayerImp::removeStretchFavorite();
+   }
+   else
+   {
+      QString name = pAction->text();
+      if (name.isEmpty() == false)
+      {
+         pRasterLayer->setStretch(name);
+      }
    }
 }
 
@@ -2590,6 +2987,13 @@ void HistogramPlotImp::initializeBandList()
 
    // Get all band names
    vector<string> bandNames = RasterUtilities::getBandNames(pDescriptor);
+   vector<double> centerWavelengths;
+
+   FactoryResource<Wavelengths> pWavelengths;
+   if (pWavelengths->initializeFromDynamicObject(pDescriptor->getMetadata(), true) == true)
+   {
+      centerWavelengths = pWavelengths->getCenterValues();
+   }
 
    // Get the displayed band name
    QString displayedBand;
@@ -2601,6 +3005,10 @@ void HistogramPlotImp::initializeBandList()
       if (activeNumber < bandNames.size())
       {
          displayedBand = QString::fromStdString(bandNames[activeNumber]);
+         if (activeNumber < centerWavelengths.size())
+         {
+            displayedBand += "  --  " + QString::number(centerWavelengths[activeNumber]);
+         }
       }
    }
 
@@ -2614,6 +3022,10 @@ void HistogramPlotImp::initializeBandList()
       if (i < bandNames.size())
       {
          bandName = QString::fromStdString(bandNames[i]);
+         if (i < centerWavelengths.size())
+         {
+            bandName += "  --  " + QString::number(centerWavelengths[i]);
+         }
       }
 
       QListWidgetItem* pItem = new QListWidgetItem(bandName, mpBandList);
@@ -2955,6 +3367,12 @@ std::string toXmlString(const HistogramPlotImp::ValuesType& val, bool* pError)
    case HistogramPlotImp::UPPER_VALUE:
       retValue = "upper";
       break;
+   case HistogramPlotImp::TRANSLATE:
+      retValue = "translate";
+      break;
+   case HistogramPlotImp::SCALE:
+      retValue = "scale";
+      break;
    default:
       break;
    }
@@ -2981,6 +3399,15 @@ HistogramPlotImp::ValuesType fromXmlString<HistogramPlotImp::ValuesType>(string 
    {
       retValue = HistogramPlotImp::UPPER_VALUE;
    }
+   else if (value == "translate")
+   {
+      retValue = HistogramPlotImp::TRANSLATE;
+   }
+   else if (value == "scale")
+   {
+      retValue = HistogramPlotImp::SCALE;
+   }
+
    if (pError != NULL)
    {
       *pError = (!retValue.isValid());
@@ -2996,7 +3423,7 @@ bool HistogramPlotImp::toXml(XMLWriter* pXml) const
       return false;
    }
 
-   pXml->addAttr("selectedValue", StringUtilities::toXmlString(meSelectedValue));
+   pXml->addAttr("selectedValue", StringUtilities::toXmlString(mSelectedValue));
    pXml->addAttr("rasterChannelType", mRasterChannelType);
    if (mpLayer.get() != NULL)
    {
@@ -3036,8 +3463,7 @@ bool HistogramPlotImp::fromXml(DOMNode* pDocument, unsigned int version)
       return false;
    }
    DOMElement* pElement = static_cast<DOMElement*>(pDocument);
-   meSelectedValue = StringUtilities::fromXmlString<HistogramPlotImp::ValuesType>(
-      A(pElement->getAttribute(X("selectedValue"))));
+   mSelectedValue = StringUtilities::fromXmlString<int>(A(pElement->getAttribute(X("selectedValue"))));
    RasterChannelType channel = StringUtilities::fromXmlString<RasterChannelType>(
       A(pElement->getAttribute(X("rasterChannelType"))));
    Layer* pLayer = NULL;
@@ -3097,6 +3523,201 @@ bool HistogramPlotImp::fromXml(DOMNode* pDocument, unsigned int version)
    }
 
    return true;
+}
+
+void HistogramPlotImp::updateLocatorModeText()
+{
+   const MouseModeImp* pLocatorMode = dynamic_cast<const MouseModeImp*>(getMouseMode("LocatorMode"));
+   if (pLocatorMode == NULL)
+   {
+      return;
+   }
+
+   QString locatorModeName("Adjust Value");
+   QString locatorModeToolTip;
+   QString locatorModeStatusTip;
+
+   if (dynamic_cast<RasterLayer*>(mpLayer.get()) != NULL)
+   {
+      locatorModeName = "Adjust Stretch";
+      locatorModeToolTip = "<qt>Adjust contrast stretch values by clicking and dragging the<br>left mouse button:<br>"
+         "<table width=275>"
+         "<tr><td width=90><b>Keys Pressed</b></td><td width=185><b>Action</b></td></tr>"
+         "<tr><td>None</td><td>Moves the closest stretch range end point to the current mouse location.</td></tr>"
+         "<tr><td>Shift</td><td>Moves the entire stretch range in the direction of the mouse to adjust brightness."
+         "</td></tr>"
+         "<tr><td>Ctrl</td><td>Moves both stretch range end points in opposite directions by an equal amount such "
+         "that the closest end point is at the current mouse location.</td></tr>"
+         "</table></qt>";
+      locatorModeStatusTip = "Adjusts the current contrast stretch values - Pressing either the Shift or Ctrl keys "
+         "while clicking enables additional adjustments.";
+   }
+   else if (dynamic_cast<ThresholdLayer*>(mpLayer.get()) != NULL)
+   {
+      locatorModeName = "Adjust Threshold";
+      locatorModeStatusTip = "Adjusts the current threshold values";
+   }
+
+   QAction* pAction = pLocatorMode->getAction();
+   if (pAction != NULL)
+   {
+      pAction->setText(locatorModeName);
+      pAction->setToolTip(locatorModeToolTip);
+      pAction->setStatusTip(locatorModeStatusTip);
+   }
+}
+
+void HistogramPlotImp::updateMouseCursor()
+{
+   if (dynamic_cast<RasterLayer*>(mpLayer.get()) == NULL)
+   {
+      return;
+   }
+
+   const MouseModeImp* pMouseMode = dynamic_cast<const MouseModeImp*>(getCurrentMouseMode());
+   if (pMouseMode == NULL)
+   {
+      return;
+   }
+
+   QString mouseModeName = pMouseMode->getName();
+   if (mouseModeName != "LocatorMode")
+   {
+      return;
+   }
+
+   QCursor plotCursor(Qt::ArrowCursor);
+   if (mpRegion->isVisible() == true)
+   {
+      plotCursor = pMouseMode->getCursor();
+
+      Qt::KeyboardModifiers modifiers = QApplication::keyboardModifiers();
+      if (((modifiers == Qt::ShiftModifier) && (mSelectedValue == NO_VALUE)) || (mSelectedValue & TRANSLATE))
+      {
+         if (QApplication::mouseButtons() & Qt::LeftButton)
+         {
+            plotCursor = Qt::ClosedHandCursor;
+         }
+         else
+         {
+            plotCursor = Qt::OpenHandCursor;
+         }
+      }
+      else if (((modifiers == Qt::ControlModifier) && (mSelectedValue == NO_VALUE)) || (mSelectedValue & SCALE))
+      {
+         plotCursor = Qt::SplitHCursor;
+      }
+   }
+
+   setCursor(plotCursor);
+}
+
+void HistogramPlotImp::nextBand()
+{
+   RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(mpLayer.get());
+   if (pRasterLayer == NULL)
+   {
+      return;
+   }
+
+   DataElement* pElement = pRasterLayer->getDataElement();
+   if (pElement == NULL)
+   {
+      return;
+   }
+
+   const RasterDataDescriptor* pDescriptor = dynamic_cast<const RasterDataDescriptor*>(pElement->getDataDescriptor());
+   if (pDescriptor == NULL)
+   {
+      return;
+   }
+
+   DimensionDescriptor currentBand = pRasterLayer->getDisplayedBand(mRasterChannelType);
+   DimensionDescriptor newBand;
+
+   const vector<DimensionDescriptor>& activeBands = pDescriptor->getBands();
+   if (currentBand.isValid() == false)
+   {
+      if (activeBands.empty() == false)
+      {
+         newBand = activeBands.front();
+      }
+   }
+   else
+   {
+      bool bFound = false;
+      for (vector<DimensionDescriptor>::const_iterator iter = activeBands.begin(); iter != activeBands.end(); ++iter)
+      {
+         DimensionDescriptor activeBand = *iter;
+         if (bFound == true)
+         {
+            newBand = activeBand;
+            break;
+         }
+
+         if (activeBand == currentBand)
+         {
+            bFound = true;
+         }
+      }
+   }
+
+   pRasterLayer->setDisplayedBand(mRasterChannelType, newBand);
+}
+
+void HistogramPlotImp::previousBand()
+{
+   RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(mpLayer.get());
+   if (pRasterLayer == NULL)
+   {
+      return;
+   }
+
+   DataElement* pElement = pRasterLayer->getDataElement();
+   if (pElement == NULL)
+   {
+      return;
+   }
+
+   const RasterDataDescriptor* pDescriptor = dynamic_cast<const RasterDataDescriptor*>(pElement->getDataDescriptor());
+   if (pDescriptor == NULL)
+   {
+      return;
+   }
+
+   DimensionDescriptor currentBand = pRasterLayer->getDisplayedBand(mRasterChannelType);
+   DimensionDescriptor newBand;
+
+   const vector<DimensionDescriptor>& activeBands = pDescriptor->getBands();
+   if (currentBand.isValid() == false)
+   {
+      if (activeBands.empty() == false)
+      {
+         newBand = activeBands.back();
+      }
+   }
+   else
+   {
+      bool bFound = false;
+
+      vector<DimensionDescriptor>::const_reverse_iterator iter;
+      for (iter = activeBands.rbegin(); iter != activeBands.rend(); ++iter)
+      {
+         DimensionDescriptor activeBand = *iter;
+         if (bFound == true)
+         {
+            newBand = activeBand;
+            break;
+         }
+
+         if (activeBand == currentBand)
+         {
+            bFound = true;
+         }
+      }
+   }
+
+   pRasterLayer->setDisplayedBand(mRasterChannelType, newBand);
 }
 
 HistogramPlotImp::HistogramUpdater::HistogramUpdater(HistogramPlotImp* pPlot) :

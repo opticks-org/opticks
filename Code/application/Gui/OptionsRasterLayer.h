@@ -11,18 +11,21 @@
 #define OPTIONSRASTERLAYER_H
 
 #include <QtGui/QWidget>
+
 #include "AppVersion.h"
+
+#include <string>
 
 class ComplexComponentComboBox;
 class CustomTreeWidget;
 class DynamicObject;
+class QAction;
 class QCheckBox;
 class QComboBox;
 class QDoubleSpinBox;
+class QMenu;
 class RegionUnitsComboBox;
 class StretchTypeComboBox;
-
-#include <string>
 
 class OptionsRasterLayer : public QWidget
 {
@@ -98,9 +101,16 @@ private:
    QDoubleSpinBox* mpBlueUpperStretchValue;
    RegionUnitsComboBox* mpBlueStretch;
    QDoubleSpinBox* mpBlueLowerStretchValue;
+   QMenu* mpRgbStretchMenu;
+   QAction* mpAddFavoriteRedAction;
+   QAction* mpAddFavoriteGreenAction;
+   QAction* mpAddFavoriteBlueAction;
    QDoubleSpinBox* mpGrayUpperStretchValue;
    RegionUnitsComboBox* mpGrayStretch;
    QDoubleSpinBox* mpGrayLowerStretchValue;
+   QMenu* mpGrayStretchMenu;
+   QAction* mpAddFavoriteGrayAction;
+   QAction* mpRemoveFavoriteAction;
    QCheckBox* mpFastContrast;
    ComplexComponentComboBox* mpComplexComponent;
    QCheckBox* mpBackgroundTileGen;
@@ -113,6 +123,10 @@ private:
 private slots:
    void addColorComposite();
    void removeColorComposite();
+   void initializeStretchMenu();
+   void setRgbStretch(QAction* pAction);
+   void setGrayStretch(QAction* pAction);
+   void removeStretchFavorite();
 };
 
 #endif

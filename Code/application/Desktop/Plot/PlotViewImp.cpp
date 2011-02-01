@@ -86,32 +86,42 @@ PlotViewImp::PlotViewImp(const string& id, const string& viewName, QGLContext* d
       mpObjectSelectAction = mpMouseModeGroup->addAction(QIcon(":/icons/Edit"), "&Object Selection");
       mpObjectSelectAction->setAutoRepeat(false);
       mpObjectSelectAction->setCheckable(true);
+      mpObjectSelectAction->setShortcutContext(Qt::WidgetShortcut);
       mpObjectSelectAction->setStatusTip("Enables selection of objects within the plot area");
       pDesktop->initializeAction(mpObjectSelectAction, mouseModeContext);
+      addAction(mpObjectSelectAction);
 
       mpPanAction = mpMouseModeGroup->addAction(QIcon(":/icons/Pan"), "&Pan");
       mpPanAction->setAutoRepeat(false);
       mpPanAction->setCheckable(true);
+      mpPanAction->setShortcutContext(Qt::WidgetShortcut);
       mpPanAction->setStatusTip("Enables panning within the plot area");
       pDesktop->initializeAction(mpPanAction, mouseModeContext);
+      addAction(mpPanAction);
 
       mpZoomAction = mpMouseModeGroup->addAction(QIcon(":/icons/ZoomRect"), "&Zoom");
       mpZoomAction->setAutoRepeat(false);
       mpZoomAction->setCheckable(true);
+      mpZoomAction->setShortcutContext(Qt::WidgetShortcut);
       mpZoomAction->setStatusTip("Enables zooming within the plot area");
       pDesktop->initializeAction(mpZoomAction, mouseModeContext);
+      addAction(mpZoomAction);
 
       mpLocateAction = mpMouseModeGroup->addAction(QIcon(":/icons/DrawPixel"), "&Locate Point");
       mpLocateAction->setAutoRepeat(false);
       mpLocateAction->setCheckable(true);
+      mpLocateAction->setShortcutContext(Qt::WidgetShortcut);
       mpLocateAction->setStatusTip("Enables display of plot values at a given point");
       pDesktop->initializeAction(mpLocateAction, mouseModeContext);
+      addAction(mpLocateAction);
 
       mpAnnotateAction = mpMouseModeGroup->addAction(QIcon(":/icons/Annotation"), "&Annotation");
       mpAnnotateAction->setAutoRepeat(false);
       mpAnnotateAction->setCheckable(true);
-      mpAnnotateAction->setStatusTip("Adds an annotation object (arrow with text) to the plot at a given point");
+      mpAnnotateAction->setShortcutContext(Qt::WidgetShortcut);
+      mpAnnotateAction->setStatusTip("Enables annotation objects to be added and removed from the plot");
       pDesktop->initializeAction(mpAnnotateAction, mouseModeContext);
+      addAction(mpAnnotateAction);
 
       mpMouseModeMenu->addActions(mpMouseModeGroup->actions());
       VERIFYNR(connect(mpMouseModeGroup, SIGNAL(triggered(QAction*)), this, SLOT(setMouseMode(QAction*))));
@@ -126,9 +136,11 @@ PlotViewImp::PlotViewImp(const string& id, const string& viewName, QGLContext* d
    // Rescale axes
    QAction* pRescaleAction = new QAction(QIcon(":/icons/ZoomToFit"), "&Rescale Axes", this);
    pRescaleAction->setAutoRepeat(false);
+   pRescaleAction->setShortcutContext(Qt::WidgetShortcut);
    pRescaleAction->setStatusTip("Restores the plot axes to the original scale");
    VERIFYNR(connect(pRescaleAction, SIGNAL(triggered()), this, SLOT(zoomExtents())));
    pDesktop->initializeAction(pRescaleAction, shortcutContext);
+   addAction(pRescaleAction);
    menuActions.push_back(ContextMenuAction(pRescaleAction, APP_PLOTVIEW_RESCALE_AXES_ACTION));
 
    // Separator
@@ -931,6 +943,8 @@ void PlotViewImp::mousePressEvent(QMouseEvent* e)
       return;
    }
 
+   bool bSuccess = false;
+
    // Get the mouse coordinate
    mMouseStart = e->pos();
    mMouseStart.setY(height() - e->pos().y());
@@ -952,11 +966,7 @@ void PlotViewImp::mousePressEvent(QMouseEvent* e)
    {
       if (mpAnnotationLayer != NULL)
       {
-         bool bSuccess = mpAnnotationLayer->processMousePress(mMouseStart, e->button(), e->buttons(), e->modifiers());
-         if (bSuccess == true)
-         {
-            updateGL();
-         }
+         bSuccess = mpAnnotationLayer->processMousePress(mMouseStart, e->button(), e->buttons(), e->modifiers());
       }
    }
    else if (e->button() == Qt::LeftButton)
@@ -971,11 +981,12 @@ void PlotViewImp::mousePressEvent(QMouseEvent* e)
          mMouseLocator.setVisible(true);
 
          setCursor(Qt::BlankCursor);
-         updateGL();
+         bSuccess = true;
       }
       else if (strMouseMode == "PanMode")
       {
          setCursor(Qt::ClosedHandCursor);
+         bSuccess = true;
       }
       else if (strMouseMode == "SelectionMode")
       {
@@ -1010,13 +1021,12 @@ void PlotViewImp::mousePressEvent(QMouseEvent* e)
 
          mSelectionArea.setLineStyle(DASHED);
          mSelectionArea.setVisible(true);
-
-         updateGL();
+         bSuccess = true;
       }
       else if (strMouseMode == "ZoomBoxMode")
       {
          setSelectionBox(mMouseStart, mMouseStart);
-         updateGL();
+         bSuccess = true;
       }
    }
    else if (e->button() == Qt::MidButton)
@@ -1035,12 +1045,25 @@ void PlotViewImp::mousePressEvent(QMouseEvent* e)
          mSelectionArea.addPoint(dDataX, dDataY);
          mSelectionArea.setLineStyle(SOLID_LINE);
          mSelectionArea.setVisible(true);
-
-         updateGL();
+         bSuccess = true;
+      }
+      else
+      {
+         setCursor(Qt::SizeAllCursor);
       }
    }
 
    mMouseCurrent = mMouseStart;
+
+   if (bSuccess == true)
+   {
+      e->accept();
+      updateGL();
+   }
+   else
+   {
+      OrthographicViewImp::mousePressEvent(e);
+   }
 }
 
 void PlotViewImp::mouseMoveEvent(QMouseEvent* e)
@@ -1049,6 +1072,8 @@ void PlotViewImp::mouseMoveEvent(QMouseEvent* e)
    {
       return;
    }
+
+   bool bSuccess = false;
 
    // Get the mouse coordinate
    QPoint ptMouse = e->pos();
@@ -1075,11 +1100,7 @@ void PlotViewImp::mouseMoveEvent(QMouseEvent* e)
    {
       if (mpAnnotationLayer != NULL)
       {
-         bool bSuccess = mpAnnotationLayer->processMouseMove(ptMouse, e->button(), e->buttons(), e->modifiers());
-         if (bSuccess == true)
-         {
-            updateGL();
-         }
+         bSuccess = mpAnnotationLayer->processMouseMove(ptMouse, e->button(), e->buttons(), e->modifiers());
       }
    }
    else if ((e->buttons() & Qt::LeftButton) != 0)
@@ -1091,7 +1112,7 @@ void PlotViewImp::mouseMoveEvent(QMouseEvent* e)
          translateScreenToData(ptMouse.x(), ptMouse.y(), dDataX, dDataY);
 
          mMouseLocator.setLocation(LocationType(dDataX, dDataY));
-         updateGL();
+         bSuccess = true;
       }
       else if (strMouseMode == "PanMode")
       {
@@ -1099,8 +1120,9 @@ void PlotViewImp::mouseMoveEvent(QMouseEvent* e)
          if (pDesktop->getPanMode() == PAN_INSTANT)
          {
             ViewImp::pan(ptMouse, mMouseCurrent);
-            updateGL();
          }
+
+         bSuccess = true;
       }
       else if (strMouseMode == "SelectionMode")
       {
@@ -1122,12 +1144,12 @@ void PlotViewImp::mouseMoveEvent(QMouseEvent* e)
          mSelectionArea.addPoint(ulCorner.mX, ulCorner.mY);
          mSelectionArea.addPoint(llCorner.mX, llCorner.mY);
 
-         updateGL();
+         bSuccess = true;
       }
       else if (strMouseMode == "ZoomBoxMode")
       {
          setSelectionBox(mMouseStart, ptMouse);
-         updateGL();
+         bSuccess = true;
       }
    }
    else if ((e->buttons() & Qt::MidButton) != 0)
@@ -1140,9 +1162,9 @@ void PlotViewImp::mouseMoveEvent(QMouseEvent* e)
          translateWorldToData(dX, dY, dDeltaX, dDeltaY);
 
          mSelectionArea.addPoint(dDeltaX, dDeltaY);
-         updateGL();
+         bSuccess = true;
       }
-      else if (strMouseMode == "ZoomBoxMode")
+      else
       {
          QPoint diff = mMouseCurrent - ptMouse;
          if (ConfigurationSettings::getSettingAlternateMouseWheelZoom())
@@ -1151,11 +1173,21 @@ void PlotViewImp::mouseMoveEvent(QMouseEvent* e)
          }
 
          zoomOnPoint(mMouseStart, diff);
-         updateGL();
+         bSuccess = true;
       }
    }
 
    mMouseCurrent = ptMouse;
+
+   if (bSuccess == true)
+   {
+      e->accept();
+      updateGL();
+   }
+   else
+   {
+      OrthographicViewImp::mouseMoveEvent(e);
+   }
 }
 
 void PlotViewImp::mouseReleaseEvent(QMouseEvent* e)
@@ -1164,7 +1196,9 @@ void PlotViewImp::mouseReleaseEvent(QMouseEvent* e)
    {
       return;
    }
- 
+
+   bool bSuccess = false;
+
    double dStartX = 0;
    double dStartY = 0;
    translateScreenToWorld(mMouseStart.x(), mMouseStart.y(), dStartX, dStartY);
@@ -1186,7 +1220,7 @@ void PlotViewImp::mouseReleaseEvent(QMouseEvent* e)
    {
       if (mpAnnotationLayer != NULL)
       {
-         mpAnnotationLayer->processMouseRelease(ptMouse, e->button(), e->buttons(), e->modifiers());
+         bSuccess = mpAnnotationLayer->processMouseRelease(ptMouse, e->button(), e->buttons(), e->modifiers());
       }
    }
    else if (e->button() == Qt::LeftButton)
@@ -1204,6 +1238,7 @@ void PlotViewImp::mouseReleaseEvent(QMouseEvent* e)
          }
 
          setCursor(mouseCursor);
+         bSuccess = true;
       }
       else if (strMouseMode == "PanMode")
       {
@@ -1221,6 +1256,7 @@ void PlotViewImp::mouseReleaseEvent(QMouseEvent* e)
          }
 
          setCursor(mouseCursor);
+         bSuccess = true;
       }
       else if (strMouseMode == "SelectionMode")
       {
@@ -1233,11 +1269,14 @@ void PlotViewImp::mouseReleaseEvent(QMouseEvent* e)
          // Clear the selection area
          mSelectionArea.clear(true);
          mSelectionArea.setVisible(false);
+
+         bSuccess = true;
       }
       else if (strMouseMode == "ZoomBoxMode")
       {
          setSelectionBox(QRect());
          ViewImp::zoomToBox(mMouseStart, ptMouse);
+         bSuccess = true;
       }
    }
    else if (e->button() == Qt::MidButton)
@@ -1282,10 +1321,30 @@ void PlotViewImp::mouseReleaseEvent(QMouseEvent* e)
          // Clear the selction area
          mSelectionArea.clear(true);
          mSelectionArea.setVisible(false);
+
+         bSuccess = true;
+      }
+      else
+      {
+         QCursor mouseCursor(Qt::ArrowCursor);
+         if (pMouseMode != NULL)
+         {
+            mouseCursor = pMouseMode->getCursor();
+         }
+
+         setCursor(mouseCursor);
       }
    }
 
-   refresh();
+   if (bSuccess == true)
+   {
+      e->accept();
+      updateGL();
+   }
+   else
+   {
+      OrthographicViewImp::mouseReleaseEvent(e);
+   }
 }
 
 void PlotViewImp::mouseDoubleClickEvent(QMouseEvent* pEvent)
@@ -1336,6 +1395,7 @@ void PlotViewImp::resizeEvent(QResizeEvent* pEvent)
 void PlotViewImp::draw()
 {
    drawContents();
+   drawMousePanAnchor();
    drawSelectionBox();
 }
 
@@ -1507,7 +1567,7 @@ void PlotViewImp::enableMouseModeAction(const MouseMode* pMouseMode, bool bEnabl
          pAction->setChecked(false);
       }
 
-      pAction->setEnabled(bEnable);
+      pAction->setVisible(bEnable);
    }
 }
 

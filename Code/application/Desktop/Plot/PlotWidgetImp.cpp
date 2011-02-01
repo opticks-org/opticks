@@ -10,10 +10,12 @@
 #include <QtGui/QBitmap>
 #include <QtGui/QImage>
 #include <QtGui/QLayout>
+#include <QtGui/QMenu>
 #include <QtGui/QMouseEvent>
 #include <QtGui/QPainter>
 #include <QtGui/QPixmap>
 #include <QtGui/QSplitter>
+#include <QtGui/QToolBar>
 
 #include "AppAssert.h"
 #include "ApplicationServices.h"
@@ -57,13 +59,15 @@ using XERCES_CPP_NAMESPACE_QUALIFIER XMLString;
 
 PlotWidgetImp::PlotWidgetImp(const string& id, const string& plotName, PlotType plotType, PlotSet* pPlotSet,
    QWidget* parent) :
-   QWidget(parent),
+   QMainWindow(parent),
    SessionItemImp(id, plotName),
    mpPrintAction(NULL),
    mpSeparatorAction(NULL),
    mpLegendAction(NULL),
    mpSeparator2Action(NULL),
+   mpToolbarsMenu(NULL),
    mpAnnotationToolBar(NULL),
+   mpMouseModeToolBar(NULL),
    mpPlotSet(pPlotSet),
    mpPlot(NULL),
    mpPlotWidget(NULL),
@@ -83,10 +87,12 @@ PlotWidgetImp::PlotWidgetImp(const string& id, const string& plotName, PlotType 
 
    mpPrintAction = new QAction(QIcon(":/icons/Print"), "&Print...", this);
    mpPrintAction->setAutoRepeat(false);
-   mpPrintAction->setShortcut(QKeySequence("Ctrl+P"));
+   mpPrintAction->setShortcut(QKeySequence::Print);
+   mpPrintAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
    mpPrintAction->setStatusTip("Sends the displayed area of the current plot to the printer");
    connect(mpPrintAction, SIGNAL(triggered()), this, SLOT(print()));
    pDesktop->initializeAction(mpPrintAction, shortcutContext);
+   addAction(mpPrintAction);
 
    mpSeparatorAction = new QAction(this);
    mpSeparatorAction->setSeparator(true);
@@ -95,16 +101,25 @@ PlotWidgetImp::PlotWidgetImp(const string& id, const string& plotName, PlotType 
    mpLegendAction->setAutoRepeat(false);
    mpLegendAction->setCheckable(true);
    mpLegendAction->setShortcut(QKeySequence("Ctrl+L"));
+   mpLegendAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
    mpLegendAction->setStatusTip("Toggles the display of the legend");
    connect(mpLegendAction, SIGNAL(toggled(bool)), this, SLOT(showLegend(bool)));
    pDesktop->initializeAction(mpLegendAction, shortcutContext);
+   addAction(mpLegendAction);
 
    mpSeparator2Action = new QAction(this);
    mpSeparator2Action->setSeparator(true);
 
+   mpToolbarsMenu = new QMenu("&Toolbars", this);
+
    // Annotation toolbar
    mpAnnotationToolBar = new AnnotationToolBar(SessionItemImp::generateUniqueId(), this);
    mpAnnotationToolBar->hide();
+
+   // Mouse mode toolbar
+   mpMouseModeToolBar = new QToolBar("Mouse Mode", this);
+   mpMouseModeToolBar->setIconSize(QSize(16, 16));
+   mpMouseModeToolBar->hide();
 
    initialize(NULL, plotName, plotType);
 }
@@ -145,7 +160,7 @@ void PlotWidgetImp::initialize(PlotViewImp *pPlotView, const string& plotName, P
    mpTitleLabel->hide();
 
    // Plot widget
-   QWidget* pPlotWidget = new QWidget();
+   QWidget* pPlotWidget = new QWidget(this);
 
    // Plot
    if (pPlotView == NULL)
@@ -242,20 +257,16 @@ void PlotWidgetImp::initialize(PlotViewImp *pPlotView, const string& plotName, P
    pPlotLayout->addWidget(mpSplitter, 10);
    pPlotLayout->addLayout(pBottomLabelLayout);
 
-   QVBoxLayout* pLayout = dynamic_cast<QVBoxLayout*>(layout());
-   if (pLayout == NULL)
-   {
-      pLayout = new QVBoxLayout(this);
-   }
-   pLayout->setMargin(0);
-   pLayout->setSpacing(0);
-   pLayout->addWidget(mpAnnotationToolBar);
-   pLayout->addWidget(mpPlotWidget, 10);
-
    // Initialization
+   setWindowFlags(Qt::Widget);
    setBackgroundColor(Qt::white);
    mpPlotWidget->setAutoFillBackground(true);
+   setCentralWidget(mpPlotWidget);
    setContextMenuPolicy(Qt::DefaultContextMenu);
+   setFocusPolicy(Qt::StrongFocus);
+   setFocusProxy(mpPlot);
+   addToolBar(mpAnnotationToolBar);
+   addToolBar(mpMouseModeToolBar);
 
    AnnotationLayer* pAnnotationLayer = mpPlot->getAnnotationLayer();
    if (pAnnotationLayer != NULL)
@@ -263,8 +274,25 @@ void PlotWidgetImp::initialize(PlotViewImp *pPlotView, const string& plotName, P
       mpAnnotationToolBar->setAnnotationLayer(pAnnotationLayer);
    }
 
-   const MouseMode* pMouseMode = mpPlot->getCurrentMouseMode();
-   enableAnnotationToolBar(pMouseMode);
+   const MouseMode* pCurrentMouseMode = mpPlot->getCurrentMouseMode();
+   enableAnnotationToolBar(pCurrentMouseMode);
+
+   vector<const MouseMode*> mouseModes = mpPlot->getMouseModes();
+   for (vector<const MouseMode*>::const_iterator iter = mouseModes.begin(); iter != mouseModes.end(); ++iter)
+   {
+      const MouseMode* pMouseMode = *iter;
+      if (pMouseMode != NULL)
+      {
+         QAction* pAction = pMouseMode->getAction();
+         if (pAction != NULL)
+         {
+            mpMouseModeToolBar->addAction(pAction);
+         }
+      }
+   }
+
+   mpToolbarsMenu->addAction(mpAnnotationToolBar->toggleViewAction());
+   mpToolbarsMenu->addAction(mpMouseModeToolBar->toggleViewAction());
 
    updateClassificationText();
 
@@ -378,9 +406,14 @@ list<ContextMenuAction> PlotWidgetImp::getContextMenuActions() const
    menuActions.push_back(ContextMenuAction(mpPrintAction, APP_PLOTWIDGET_PRINT_ACTION));
    menuActions.push_back(ContextMenuAction(mpSeparatorAction, APP_PLOTWIDGET_PRINT_SEPARATOR_ACTION));
 
+   ContextMenuAction toolbarsMenuAction(mpToolbarsMenu->menuAction(), APP_PLOTWIDGET_TOOLBARS_MENU_ACTION);
+   toolbarsMenuAction.mBuddyType = ContextMenuAction::AFTER;
+   toolbarsMenuAction.mBuddyId = APP_PLOTVIEW_MOUSE_MODE_SEPARATOR_ACTION;
+   menuActions.push_back(toolbarsMenuAction);
+
    ContextMenuAction legendAction(mpLegendAction, APP_PLOTWIDGET_LEGEND_ACTION);
    legendAction.mBuddyType = ContextMenuAction::AFTER;
-   legendAction.mBuddyId = APP_PLOTVIEW_MOUSE_MODE_SEPARATOR_ACTION;
+   legendAction.mBuddyId = APP_PLOTWIDGET_TOOLBARS_MENU_ACTION;
    menuActions.push_back(legendAction);
 
    ContextMenuAction separatorAction(mpSeparator2Action, APP_PLOTWIDGET_LEGEND_SEPARATOR_ACTION);
@@ -836,18 +869,22 @@ void PlotWidgetImp::updateName(const QString& strName)
 
 void PlotWidgetImp::enableAnnotationToolBar(const MouseMode* pMouseMode)
 {
-   bool bShow = false;
+   bool enable = false;
    if (pMouseMode != NULL)
    {
       string modeName;
       pMouseMode->getName(modeName);
       if (modeName == "AnnotationMode")
       {
-         bShow = true;
+         enable = true;
       }
    }
 
-   mpAnnotationToolBar->setShown(bShow);
+   mpAnnotationToolBar->setEnabled(enable);
+   if (enable == true)
+   {
+      mpAnnotationToolBar->show();
+   }
 }
 
 void PlotWidgetImp::updateScaleRange()

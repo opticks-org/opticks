@@ -66,6 +66,7 @@ ViewImp::ViewImp(const string& id, const string& viewName, QGLContext* drawConte
    mClassificationEnabled(ConfigurationSettings::getSettingDisplayClassificationMarkings()),
    mReleaseInfoEnabled(true),
    mpMouseMode(NULL),
+   mpOldMouseMode(NULL),
    mMinX(0.0),
    mMinY(0.0),
    mMaxX(1.0),
@@ -82,6 +83,7 @@ ViewImp::ViewImp(const string& id, const string& viewName, QGLContext* drawConte
    mBackgroundColor = COLORTYPE_TO_QCOLOR(color);
    mCrossHair = View::getSettingDisplayCrosshair();
    mOrigin = View::getSettingDataOrigin();
+   mMousePanTimer.setInterval(0);
 
    mClassificationFont.setFamily("Helvetica");
    mClassificationFont.setPointSize(12);
@@ -94,6 +96,16 @@ ViewImp::ViewImp(const string& id, const string& viewName, QGLContext* drawConte
    mViewPort[2] = -1;
    mViewPort[3] = -1;
 
+   // Keyboard shortcut actions
+   Service<DesktopServices> pDesktop;
+
+   QAction* pMousePanAction = new QAction("Toggle Mouse Pan", this);
+   pMousePanAction->setAutoRepeat(false);
+   pMousePanAction->setShortcut(QKeySequence("Ctrl+Shift+E"));
+   pMousePanAction->setShortcutContext(Qt::WidgetShortcut);
+   pDesktop->initializeAction(pMousePanAction, "View");
+   addAction(pMousePanAction);
+
    // Initialization
    setContextMenuPolicy(Qt::DefaultContextMenu);
    setMouseTracking(true);
@@ -104,6 +116,10 @@ ViewImp::ViewImp(const string& id, const string& viewName, QGLContext* drawConte
 
    int undoLimit = static_cast<int>(ConfigurationSettings::getSettingUndoBufferSize());
    mpUndoStack->setUndoLimit(undoLimit);
+
+   // Connections
+   VERIFYNR(connect(pMousePanAction, SIGNAL(triggered()), this, SLOT(toggleMousePanByKey())));
+   VERIFYNR(connect(&mMousePanTimer, SIGNAL(timeout()), this, SLOT(mousePanTimeout())));
 }
 
 ViewImp::~ViewImp()
@@ -409,6 +425,8 @@ bool ViewImp::setMouseMode(const MouseMode* pMouseMode)
    setCursor(mouseCursor);
    emit mouseModeChanged(mpMouseMode);
    notify(SIGNAL_NAME(View, MouseModeChanged), boost::any(mpMouseMode));
+
+   enableMousePan(false);
    return true;
 }
 
@@ -518,6 +536,50 @@ bool ViewImp::isMouseModeEnabled(const MouseMode* pMouseMode) const
    }
 
    return bEnabled;
+}
+
+void ViewImp::enableMousePan(bool enabled)
+{
+   if (enabled == mMousePanTimer.isActive())
+   {
+      return;
+   }
+
+   if (enabled)
+   {
+      mMousePanAnchor = QCursor::pos();
+      mpOldMouseMode = getCurrentMouseMode();
+      setMouseMode(NULL);
+      setCursor(Qt::SizeAllCursor);
+      enableInset(false);
+      QApplication::instance()->installEventFilter(this);
+      startUndoGroup("Pan");
+      mMousePanTimer.start();
+      notify(SIGNAL_NAME(View, MousePanEnabled), true);
+   }
+   else
+   {
+      QApplication::instance()->removeEventFilter(this);
+      mMousePanTimer.stop();
+      endUndoGroup();
+      setMouseMode(mpOldMouseMode);
+      if (mpOldMouseMode == NULL)
+      {
+         setCursor(Qt::ArrowCursor);
+      }
+      refresh();
+      notify(SIGNAL_NAME(View, MousePanEnabled), false);
+   }
+}
+
+bool ViewImp::isMousePanEnabled() const
+{
+   return mMousePanTimer.isActive();
+}
+
+void ViewImp::setMousePanPos(const QPoint& globalScreenCoord)
+{
+   mMousePanCurrentPos = globalScreenCoord;
 }
 
 void ViewImp::getExtents(double& dMinX, double& dMinY, double& dMaxX, double& dMaxY) const
@@ -630,6 +692,7 @@ void ViewImp::draw()
 {
    GlContextSave contextSave(this);
    drawContents();
+   drawMousePanAnchor();
    drawCrossHair();
    drawSelectionBox();
    drawInset();
@@ -1375,6 +1438,108 @@ bool ViewImp::event(QEvent* pEvent)
    return QGLWidget::event(pEvent);
 }
 
+bool ViewImp::eventFilter(QObject* pObject, QEvent* pEvent)
+{
+   if (isMousePanEnabled())
+   {
+      if (pEvent->type() == QEvent::FocusOut)
+      {
+         enableMousePan(false);
+      }
+
+      if (pEvent->type() != QEvent::MouseMove && pEvent->type() != QEvent::MouseButtonPress &&
+         pEvent->type() != QEvent::MouseButtonRelease)
+      {
+         return QGLWidget::eventFilter(pObject, pEvent);
+      }
+
+      QMouseEvent* pOrgEvent = static_cast<QMouseEvent*>(pEvent);
+      QPoint globalPos = QCursor::pos();
+      QPoint widgetPos = mapFromGlobal(globalPos);
+      QMouseEvent newMouseEvent(pOrgEvent->type(), widgetPos, globalPos, pOrgEvent->button(), pOrgEvent->buttons(),
+         pOrgEvent->modifiers());
+
+      if (pEvent->type() == QEvent::MouseMove)
+      {
+         mouseMoveEvent(&newMouseEvent);
+      }
+      else if (pEvent->type() == QEvent::MouseButtonPress)
+      {
+         mousePressEvent(&newMouseEvent);
+      }
+      else if (pEvent->type() == QEvent::MouseButtonRelease)
+      {
+         mouseReleaseEvent(&newMouseEvent);
+      }
+
+      return true;
+   }
+
+   return QGLWidget::eventFilter(pObject, pEvent);
+}
+
+void ViewImp::mousePressEvent(QMouseEvent* pEvent)
+{
+   if (pEvent != NULL)
+   {
+      if (isMousePanEnabled() == true)
+      {
+         enableMousePan(false);
+         pEvent->accept();
+         refresh();
+      }
+      else if (pEvent->button() == Qt::MidButton)
+      {
+         mMousePanEngagePos = pEvent->globalPos();
+      }
+   }
+}
+
+void ViewImp::mouseMoveEvent(QMouseEvent* pEvent)
+{
+   if (pEvent != NULL)
+   {
+      if (isMousePanEnabled() == true)
+      {
+         setMousePanPos(pEvent->globalPos());
+         pEvent->accept();
+      }
+   }
+}
+
+void ViewImp::mouseReleaseEvent(QMouseEvent* pEvent)
+{
+   bool success = false;
+   if (pEvent != NULL)
+   {
+      if (pEvent->button() == Qt::MidButton)
+      {
+         if (isMousePanEnabled() == true)
+         {
+            enableMousePan(false);
+            success = true;
+         }
+         else
+         {
+            double deltaX = mMousePanEngagePos.x() - pEvent->globalPos().x();
+            double deltaY = mMousePanEngagePos.y() - pEvent->globalPos().y();
+            if (fabs(deltaX) < 3 && fabs(deltaY) < 3)
+            {
+               setMousePanPos(pEvent->globalPos());
+               enableMousePan(true);
+               success = true;
+            }
+         }
+      }
+   }
+
+   if (success == true)
+   {
+      pEvent->accept();
+      refresh();
+   }
+}
+
 void ViewImp::contextMenuEvent(QContextMenuEvent* pEvent)
 {
    if (pEvent != NULL)
@@ -1443,6 +1608,53 @@ void ViewImp::setupWorldMatrices()
 void ViewImp::updateMatrices()
 {
    updateMatrices(width(), height());
+}
+
+void ViewImp::drawMousePanAnchor()
+{
+   if (!isMousePanEnabled())
+   {
+      return;
+   }
+
+   setupScreenMatrices();
+
+   ViewImp* pView = this;
+   ViewImp* pProductView = dynamic_cast<ViewImp*>(parentWidget());
+   if (pProductView != NULL)
+   {
+      pView = pProductView;
+   }
+
+   QPoint anchorPos = pView->mapFromGlobal(mMousePanAnchor);
+   anchorPos.setY(pView->height() - anchorPos.y());
+
+   const int boxSize = 6;
+   const int crossSize = 12;
+   int centerX = anchorPos.x();
+   int centerY = anchorPos.y();
+
+   glLineWidth(1.0);
+   glColor3ub(0xff, 0xaf, 0x7f);
+   glPushAttrib(GL_COLOR_BUFFER_BIT);
+   glEnable(GL_BLEND);
+   glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ZERO);
+   glBegin(GL_LINES);
+   glVertex2f(centerX - boxSize, centerY - boxSize);
+   glVertex2f(centerX + boxSize, centerY - boxSize);
+   glVertex2f(centerX + boxSize, centerY - boxSize);
+   glVertex2f(centerX + boxSize, centerY + boxSize);
+   glVertex2f(centerX - boxSize, centerY - boxSize);
+   glVertex2f(centerX - boxSize, centerY + boxSize);
+   glVertex2f(centerX - boxSize, centerY + boxSize);
+   glVertex2f(centerX + boxSize, centerY + boxSize);
+   glVertex2f(centerX, centerY + crossSize);
+   glVertex2f(centerX, centerY - crossSize);
+   glVertex2f(centerX + crossSize, centerY);
+   glVertex2f(centerX - crossSize, centerY);
+   glEnd();
+   glDisable(GL_BLEND);
+   glPopAttrib();
 }
 
 void ViewImp::drawCrossHair()
@@ -2129,4 +2341,63 @@ bool ViewImp::fromXml(DOMNode* pDocument, unsigned int version)
    }
 
    return true;
+}
+
+void ViewImp::toggleMousePanByKey()
+{
+   if (isMousePanEnabled() == false)
+   {
+      QPoint globalPos = QCursor::pos();
+      QPoint widgetPos = mapFromGlobal(globalPos);
+      if (widgetPos.x() < 0 || widgetPos.x() > width() || widgetPos.y() < 0 || widgetPos.y() > height())
+      {
+         //since mouse pan was toggled on using keyboard
+         //while mouse was outside the view, we can't properly
+         //drawn the anchor point, so do nothing
+         //i.e. leave the mouse pan turned off.
+         return;
+      }
+
+      setMousePanPos(globalPos);
+   }
+
+   enableMousePan(!isMousePanEnabled());
+}
+
+double ViewImp::getMousePanScaleFactor() const
+{
+   double magicFactor = 0.05;    // Determined by trial and error
+   double scaleFactor = magicFactor * (View::getSettingMousePanSensitivity() / 100.0);
+   return scaleFactor;
+}
+
+void ViewImp::mousePanTimeout()
+{
+   if (abs(mMousePanAnchor.x() - mMousePanCurrentPos.x()) < 6 &&
+      abs(mMousePanAnchor.y() - mMousePanCurrentPos.y()) < 6)
+   {
+      //create dead space based upon screen pixels
+      return;
+   }
+
+   ViewImp* pView = this;
+   ViewImp* pProductView = dynamic_cast<ViewImp*>(parentWidget());
+   if (pProductView != NULL)
+   {
+      pView = pProductView;
+   }
+
+   double anchorX;
+   double anchorY;
+   double currentX;
+   double currentY;
+   translateScreenToWorld(mMousePanAnchor.x(), mMousePanAnchor.y(), anchorX, anchorY);
+   translateScreenToWorld(mMousePanCurrentPos.x(), mMousePanCurrentPos.y(), currentX, currentY);
+
+   double scaleFactor = getMousePanScaleFactor();
+   double deltaX = (anchorX - currentX) * scaleFactor * -1;
+   double deltaY = (anchorY - currentY) * scaleFactor;
+
+   panBy(deltaX, deltaY);
+   pView->refresh();
 }

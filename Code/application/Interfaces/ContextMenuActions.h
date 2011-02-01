@@ -201,6 +201,11 @@
 #define APP_HISTOGRAMPLOT_AUTO_ZOOM_ACTION "APP_HISTOGRAMPLOT_AUTO_ZOOM_ACTION"
 
 /**
+ *  Toggles the histogram count axis scale between linear and logarithmic.
+ */
+#define APP_HISTOGRAMPLOT_AXIS_SCALE_MENU_ACTION "APP_HISTOGRAMPLOT_AXIS_SCALE_MENU_ACTION"
+
+/**
  *  Invokes a dialog for users to filter data values out of the displayed
  *  histogram.
  */
@@ -271,6 +276,11 @@
  *  Toggles the display of the histogram statistics.
  */
 #define APP_HISTOGRAMPLOT_STATISTICS_ACTION "APP_HISTOGRAMPLOT_STATISTICS_ACTION"
+
+/**
+ *  Changes the contrast stretch to a preset user-defined value.
+ */
+#define APP_HISTOGRAMPLOT_STRETCH_FAVORITES_MENU_ACTION "APP_HISTOGRAMPLOT_STRETCH_FAVORITES_MENU_ACTION"
 
 /**
  *  Resets the stretch properties of a RasterLayer.
@@ -369,6 +379,11 @@
  *  Default menu separator.
  */
 #define APP_PLOTWIDGET_PRINT_SEPARATOR_ACTION "APP_PLOTWIDGET_PRINT_SEPARATOR_ACTION"
+
+/**
+ *  Toggles the display of plot widget toolbars.
+ */
+#define APP_PLOTWIDGET_TOOLBARS_MENU_ACTION "APP_PLOTWIDGET_TOOLBARS_MENU_ACTION"
 
 /**
  *  Toggles the display of major and minor polar gridlines.

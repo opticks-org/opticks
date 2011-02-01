@@ -12,8 +12,8 @@
 
 #include <QtGui/QAction>
 #include <QtGui/QLabel>
+#include <QtGui/QMainWindow>
 #include <QtGui/QPixmap>
-#include <QtGui/QWidget>
 
 #include "ColorType.h"
 #include "FontImp.h"
@@ -36,11 +36,13 @@ class PlotObject;
 class PlotSet;
 class PlotView;
 class PlotViewImp;
+class QMenu;
 class QSplitter;
+class QToolBar;
 class SessionItemDeserializer;
 class SessionItemSerializer;
 
-class PlotWidgetImp : public QWidget, public SessionItemImp, public SubjectImp
+class PlotWidgetImp : public QMainWindow, public SessionItemImp, public SubjectImp
 {
    Q_OBJECT
 
@@ -144,8 +146,10 @@ private:
    QAction* mpSeparatorAction;
    QAction* mpLegendAction;
    QAction* mpSeparator2Action;
+   QMenu* mpToolbarsMenu;
 
    AnnotationToolBar* mpAnnotationToolBar;
+   QToolBar* mpMouseModeToolBar;
    QWidget* mpPlotWidget;
 
    QLabel* mpTopLeftLabel;

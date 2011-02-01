@@ -11,6 +11,7 @@
 
 #include <QtGui/QResizeEvent>
 
+#include "ConfigurationSettings.h"
 #include "GlContextSave.h"
 #include "OrthographicView.h"
 #include "OrthographicViewImp.h"
@@ -301,6 +302,44 @@ void OrthographicViewImp::pan(const LocationType& worldBegin, const LocationType
 
    // Update the matrices
    updateMatrices();
+}
+
+void OrthographicViewImp::wheelEvent(QWheelEvent* pEvent)
+{
+   if (pEvent == NULL)
+   {
+      ViewImp::wheelEvent(pEvent);
+      return;
+   }
+
+   bool zoomIn = pEvent->delta() > 0;
+   if (ConfigurationSettings::getSettingAlternateMouseWheelZoom() == true)
+   {
+      zoomIn = !zoomIn;
+   }
+
+   if (isInsetEnabled() == true)
+   {
+      zoomInset(zoomIn);
+   }
+   else
+   {
+      const int pixelDelta = 25;    // Determined by trial and error
+
+      QPoint delta(pixelDelta, pixelDelta);
+      if (zoomIn == true)
+      {
+         delta = -delta;
+      }
+
+      QPoint mousePoint = pEvent->pos();
+      mousePoint.setY(height() - pEvent->pos().y());
+
+      zoomOnPoint(mousePoint, delta);
+   }
+
+   updateGL();
+   pEvent->accept();
 }
 
 void OrthographicViewImp::resizeEvent(QResizeEvent *e)

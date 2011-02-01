@@ -51,6 +51,7 @@ public slots:
    void pan(const LocationType& worldBegin, const LocationType& worldEnd);
 
 protected:
+   void wheelEvent(QWheelEvent* pEvent);
    void resizeEvent(QResizeEvent* e);
    using ViewImp::updateMatrices;
    void updateMatrices(int width, int height);

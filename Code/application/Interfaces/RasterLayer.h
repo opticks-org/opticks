@@ -70,6 +70,7 @@ public:
    SETTING(RgbStretchType, RasterLayer, StretchType, EXPONENTIAL)
    SETTING(FastContrastStretch, RasterLayer, bool, false)
    SETTING_PTR(ColorComposites, RasterLayer, DynamicObject)
+   SETTING_PTR(StretchFavorites, RasterLayer, DynamicObject)
 
    /**
     *  Emitted with boost::any<ComplexComponent> when the component is changed.

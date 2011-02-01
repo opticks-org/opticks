@@ -153,25 +153,27 @@
  *  HistogramPlot also includes all CartesianPlot \ref cartesianplot "actions".\n\n
  *  <table>
  *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
- *    <tr><td>Auto zoom</td><td>APP_HISTOGRAMPLOT_AUTO_ZOOM_ACTION()</td></tr>
- *    <tr><td>Bad values</td><td>APP_HISTOGRAMPLOT_BAD_VALUES_ACTION()</td></tr>
- *    <tr><td>Band menu</td><td>APP_HISTOGRAMPLOT_BAND_MENU_ACTION()</td></tr>
- *    <tr><td>Color map menu</td><td>APP_HISTOGRAMPLOT_COLOR_MAP_MENU_ACTION()</td></tr>
- *    <tr><td>Complex data menu</td><td>APP_HISTOGRAMPLOT_COMPLEX_DATA_MENU_ACTION()</td></tr>
- *    <tr><td>Element menu</td><td>APP_HISTOGRAMPLOT_ELEMENT_MENU_ACTION()</td></tr>
+ *    <tr><td>Auto Zoom</td><td>APP_HISTOGRAMPLOT_AUTO_ZOOM_ACTION()</td></tr>
+ *    <tr><td>%Axis Scale menu</td><td>APP_HISTOGRAMPLOT_AXIS_SCALE_MENU_ACTION()</td></tr>
+ *    <tr><td>Bad Values</td><td>APP_HISTOGRAMPLOT_BAD_VALUES_ACTION()</td></tr>
+ *    <tr><td>Displayed Band menu</td><td>APP_HISTOGRAMPLOT_BAND_MENU_ACTION()</td></tr>
+ *    <tr><td>Color Map menu</td><td>APP_HISTOGRAMPLOT_COLOR_MAP_MENU_ACTION()</td></tr>
+ *    <tr><td>Complex Data menu</td><td>APP_HISTOGRAMPLOT_COMPLEX_DATA_MENU_ACTION()</td></tr>
+ *    <tr><td>Displayed Element menu</td><td>APP_HISTOGRAMPLOT_ELEMENT_MENU_ACTION()</td></tr>
  *    <tr><td>Separator</td><td>APP_HISTOGRAMPLOT_END_SEPARATOR_ACTION()</td></tr>
- *    <tr><td>Pass area menu</td><td>APP_HISTOGRAMPLOT_PASS_AREA_MENU_ACTION()</td></tr>
- *    <tr><td>Refresh Statistics</td><td>APP_HISTOGRAMPLOT_REFRESH_STATISTICS_ACTION()</td></tr>
+ *    <tr><td>Pass Area menu</td><td>APP_HISTOGRAMPLOT_PASS_AREA_MENU_ACTION()</td></tr>
  *    <tr><td>Separator</td><td>APP_HISTOGRAMPLOT_RASTER_MENUS_SEPARATOR_ACTION()</td></tr>
  *    <tr><td>Separator</td><td>APP_HISTOGRAMPLOT_RASTER_SEPARATOR_ACTION()</td></tr>
- *    <tr><td>Spatial Sampling</td><td>APP_HISTOGRAMPLOT_SAMPLING_ACTION()</td></tr>
+ *    <tr><td>Refresh %Statistics</td><td>APP_HISTOGRAMPLOT_REFRESH_STATISTICS_ACTION()</td></tr>
+ *    <tr><td>Set Spatial Sampling</td><td>APP_HISTOGRAMPLOT_SAMPLING_ACTION()</td></tr>
  *    <tr><td>Save</td><td>APP_HISTOGRAMPLOT_SAVE_ACTION()</td></tr>
- *    <tr><td>Statistics</td><td>APP_HISTOGRAMPLOT_STATISTICS_ACTION()</td></tr>
- *    <tr><td>Stretch reset menu</td><td>APP_HISTOGRAMPLOT_STRETCH_RESET_MENU_ACTION()</td></tr>
- *    <tr><td>Stretch type menu</td><td>APP_HISTOGRAMPLOT_STRETCH_TYPE_MENU_ACTION()</td></tr>
- *    <tr><td>Synchronize auto zoom</td><td>APP_HISTOGRAMPLOT_SYNCHRONIZE_AUTO_ZOOM_ACTION()</td></tr>
+ *    <tr><td>%Statistics</td><td>APP_HISTOGRAMPLOT_STATISTICS_ACTION()</td></tr>
+ *    <tr><td>Stretch Favorites menu</td><td>APP_HISTOGRAMPLOT_STRETCH_FAVORITES_MENU_ACTION()</td></tr>
+ *    <tr><td>Stretch Reset menu</td><td>APP_HISTOGRAMPLOT_STRETCH_RESET_MENU_ACTION()</td></tr>
+ *    <tr><td>Stretch Type menu</td><td>APP_HISTOGRAMPLOT_STRETCH_TYPE_MENU_ACTION()</td></tr>
+ *    <tr><td>Synchronize Auto Zoom</td><td>APP_HISTOGRAMPLOT_SYNCHRONIZE_AUTO_ZOOM_ACTION()</td></tr>
  *    <tr><td>Separator</td><td>APP_HISTOGRAMPLOT_THRESHOLD_SEPARATOR_ACTION()</td></tr>
- *    <tr><td>Stretch/threshold units menu</td><td>APP_HISTOGRAMPLOT_UNITS_MENU_ACTION()</td></tr>
+ *    <tr><td>Stretch/Threshold %Units menu</td><td>APP_HISTOGRAMPLOT_UNITS_MENU_ACTION()</td></tr>
  *  </table>
  *
  *  \subsection layer Layer
@@ -208,6 +210,7 @@
  *    <tr><td>Separator</td><td>APP_PLOTWIDGET_LEGEND_SEPARATOR_ACTION()</td></tr>
  *    <tr><td>Print</td><td>APP_PLOTWIDGET_PRINT_ACTION()</td></tr>
  *    <tr><td>Separator</td><td>APP_PLOTWIDGET_PRINT_SEPARATOR_ACTION()</td></tr>
+ *    <tr><td>Toolbars menu</td><td>APP_PLOTWIDGET_TOOLBARS_MENU_ACTION()</td></tr>
  *  </table>
  *
  *  \subsection plotwindow Plot Window

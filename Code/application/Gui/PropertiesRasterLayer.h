@@ -10,15 +10,6 @@
 #ifndef PROPERTIESRASTERLAYER_H
 #define PROPERTIESRASTERLAYER_H
 
-#include <QtGui/QAction>
-#include <QtGui/QCheckBox>
-#include <QtGui/QComboBox>
-#include <QtGui/QDoubleSpinBox>
-#include <QtGui/QLabel>
-#include <QtGui/QListWidget>
-#include <QtGui/QPushButton>
-#include <QtGui/QSpinBox>
-
 #include "DimensionDescriptor.h"
 #include "LabeledSectionGroup.h"
 #include "TypesFile.h"
@@ -27,6 +18,15 @@
 #include <vector>
 
 class ComplexComponentComboBox;
+class QAction;
+class QCheckBox;
+class QComboBox;
+class QDoubleSpinBox;
+class QLabel;
+class QMenu;
+class QListWidget;
+class QPushButton;
+class QSpinBox;
 class RasterElement;
 class RasterLayer;
 class RegionUnitsComboBox;
@@ -69,6 +69,10 @@ protected slots:
    void enableFilterCheck(bool bEnable);
    void enableFilterCombo(bool bEnable);
    void setDisplayBands(QAction* pAction);
+   void initializeStretchMenu();
+   void setGrayStretch(QAction* pAction);
+   void setRgbStretch(QAction* pAction);
+   void removeStretchFavorite();
 
 private:
    bool mInitializing;
@@ -89,6 +93,10 @@ private:
    RegionUnits mGrayUnits;
    RegionUnitsComboBox* mpGrayUnitsCombo;
    StretchTypeComboBox* mpGrayStretchTypeCombo;
+
+   QMenu* mpGrayStretchMenu;
+   QAction* mpAddFavoriteGrayAction;
+   QAction* mpRemoveFavoriteAction;
 
    // RGB
    QComboBox* mpRedElementCombo;
@@ -114,6 +122,11 @@ private:
 
    QPushButton* mpDisplayBandButton;
    StretchTypeComboBox* mpRgbStretchTypeCombo;
+
+   QMenu* mpRgbStretchMenu;
+   QAction* mpAddFavoriteRedAction;
+   QAction* mpAddFavoriteGreenAction;
+   QAction* mpAddFavoriteBlueAction;
 
    // Graphics acceleration
    QCheckBox* mpAccelerationCheck;

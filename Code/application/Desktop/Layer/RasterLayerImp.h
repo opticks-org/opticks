@@ -113,6 +113,13 @@ public:
    double convertStretchValue(const RasterChannelType& eColor, double dStretchValue,
       const RegionUnits& eNewUnits) const;
 
+   bool addStretchFavorite(RasterChannelType channel) const;
+   static bool addStretchFavorite(double lower, double upper, RegionUnits units, StretchType type);
+   static bool getStretchFavorite(const QString& name, double& lower, double& upper, RegionUnits& units,
+      StretchType& type);
+   static bool removeStretchFavorite();
+   static bool removeStretchFavorite(const QString& name);
+
    bool isFilterSupported(const std::string& filterName) const;
    std::vector<std::string> getSupportedFilters() const;
    void enableFilter(const std::string& filterName);
@@ -158,6 +165,7 @@ public slots:
    bool canApplyFastContrastStretch() const;
    bool enableFastContrastStretch(bool enable);
    void setComplexComponent(const ComplexComponent& eComponent);
+   void setStretch(const QString& favorite);
    void setStretchType(const DisplayMode& eMode, const StretchType& eType);
    void setStretchUnits(const DisplayMode& eMode, const RegionUnits& eUnits);
    void setStretchUnits(const RasterChannelType& eColor, const RegionUnits& eUnits);
@@ -269,10 +277,11 @@ private:
    QAction* mpGrayscaleAction;
    QAction* mpRgbAction;
    QMenu* mpStretchMenu;
-   QAction* mpLinear0Action;
-   QAction* mpLinear2Action;
-   QAction* mpLinear5Action;
-   QAction* mpEqualAction;
+   QAction* mpAddGrayStretchAction;
+   QAction* mpAddRedStretchAction;
+   QAction* mpAddGreenStretchAction;
+   QAction* mpAddBlueStretchAction;
+   QAction* mpRemoveStretchAction;
    QAction* mpResetStretchAction;
    QMenu* mpDisplayAsMenu;
 

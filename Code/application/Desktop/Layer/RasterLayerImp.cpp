@@ -9,11 +9,13 @@
 
 #include <QtGui/QAction>
 #include <QtGui/QApplication>
+#include <QtGui/QInputDialog>
 #include <QtGui/QMenu>
 #include <QtGui/QMessageBox>
 
 #include "Animation.h"
 #include "AppConfig.h"
+#include "AppVersion.h"
 #include "ContextMenuAction.h"
 #include "ContextMenuActions.h"
 #include "DataAccessorImpl.h"
@@ -25,6 +27,7 @@
 #include "ImageFilterDescriptorImp.h"
 #include "ImageFilterManager.h"
 #include "MathUtil.h"
+#include "ObjectResource.h"
 #include "PropertiesRasterLayer.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
@@ -81,10 +84,12 @@ RasterLayerImp::RasterLayerImp(const string& id, const string& layerName, DataEl
    mpGrayscaleAction(NULL),
    mpRgbAction(NULL),
    mpStretchMenu(NULL),
-   mpLinear0Action(NULL),
-   mpLinear2Action(NULL),
-   mpLinear5Action(NULL),
-   mpEqualAction(NULL),
+   mpAddGrayStretchAction(NULL),
+   mpAddRedStretchAction(NULL),
+   mpAddGreenStretchAction(NULL),
+   mpAddBlueStretchAction(NULL),
+   mpRemoveStretchAction(NULL),
+   mpResetStretchAction(NULL),
    mpDisplayAsMenu(NULL)
 {
    // Context menu actions
@@ -110,27 +115,21 @@ RasterLayerImp::RasterLayerImp(const string& id, const string& layerName, DataEl
    mpDisplayModeMenu->addActions(pDisplayModeGroup->actions());
 
    // Stretch menu
-   mpStretchMenu = new QMenu("Image Stretch");
-   string stretchContext = shortcutContext + string("/Image Stretch");
+   mpStretchMenu = new QMenu("Contrast Stretch");
+   string stretchContext = shortcutContext + string("/Contrast Stretch");
 
-   mpLinear0Action = mpStretchMenu->addAction("Linear 0-100%ile");
-   mpLinear0Action->setAutoRepeat(false);
-   pDesktop->initializeAction(mpLinear0Action, stretchContext);
+   mpAddGrayStretchAction = new QAction("Add Stretch to Favorites", this);
+   mpAddGrayStretchAction->setAutoRepeat(false);
+   mpAddRedStretchAction = new QAction("Add Red Stretch to Favorites", this);
+   mpAddRedStretchAction->setAutoRepeat(false);
+   mpAddGreenStretchAction = new QAction("Add Green Stretch to Favorites", this);
+   mpAddGreenStretchAction->setAutoRepeat(false);
+   mpAddBlueStretchAction = new QAction("Add Blue Stretch to Favorites", this);
+   mpAddBlueStretchAction->setAutoRepeat(false);
+   mpRemoveStretchAction = new QAction("Remove Stretch from Favorites...", this);
+   mpRemoveStretchAction->setAutoRepeat(false);
 
-   mpLinear2Action = mpStretchMenu->addAction("Linear 2-98%ile");
-   mpLinear2Action->setAutoRepeat(false);
-   pDesktop->initializeAction(mpLinear2Action, stretchContext);
-
-   mpLinear5Action = mpStretchMenu->addAction("Linear 5-95%ile");
-   mpLinear5Action->setAutoRepeat(false);
-   pDesktop->initializeAction(mpLinear5Action, stretchContext);
-
-   mpEqualAction = mpStretchMenu->addAction("Equalization");
-   mpEqualAction->setAutoRepeat(false);
-   pDesktop->initializeAction(mpEqualAction, stretchContext);
-
-   mpStretchMenu->addSeparator();
-   mpResetStretchAction = mpStretchMenu->addAction(QIcon(":/icons/ResetStretch"), "Reset");
+   mpResetStretchAction = new QAction(QIcon(":/icons/ResetStretch"), "Reset", this);
    mpResetStretchAction->setAutoRepeat(false);
    pDesktop->initializeAction(mpResetStretchAction, stretchContext);
 
@@ -470,7 +469,7 @@ list<ContextMenuAction> RasterLayerImp::getContextMenuActions() const
    menuActions.push_front(ContextMenuAction(mpSubsetStatisticsAction, APP_LAYER_CALCULATE_SUBSET_STATISTICS_ACTION));
    menuActions.push_front(ContextMenuAction(mpSeparatorAction, APP_RASTERLAYER_SEPARATOR_ACTION));
 
-   // Rebuild the menu from ConfigurationSettings.
+   // Rebuild the Color Composites menu from ConfigurationSettings
    mpDisplayAsMenu->clear();
    const DynamicObject* pColorComposites = RasterLayer::getSettingColorComposites();
    if (pColorComposites != NULL)
@@ -489,6 +488,40 @@ list<ContextMenuAction> RasterLayerImp::getContextMenuActions() const
             APP_RASTERLAYER_DISPLAY_AS_MENU_ACTION));
       }
    }
+
+   // Rebuild the Contrast Stretch menu from ConfigurationSettings
+   mpStretchMenu->clear();
+
+   const DynamicObject* pStretchFavorites = RasterLayer::getSettingStretchFavorites();
+   if (pStretchFavorites != NULL)
+   {
+      vector<string> stretchNames;
+      pStretchFavorites->getAttributeNames(stretchNames);
+      if (stretchNames.empty() == false)
+      {
+         for (vector<string>::const_iterator iter = stretchNames.begin(); iter != stretchNames.end(); ++iter)
+         {
+            mpStretchMenu->addAction(QString::fromStdString(*iter));
+         }
+
+         mpStretchMenu->addSeparator();
+      }
+   }
+
+   if (meDisplayMode == GRAYSCALE_MODE)
+   {
+      mpStretchMenu->addAction(mpAddGrayStretchAction);
+   }
+   else if (meDisplayMode == RGB_MODE)
+   {
+      mpStretchMenu->addAction(mpAddRedStretchAction);
+      mpStretchMenu->addAction(mpAddGreenStretchAction);
+      mpStretchMenu->addAction(mpAddBlueStretchAction);
+   }
+
+   mpStretchMenu->addAction(mpRemoveStretchAction);
+   mpStretchMenu->addSeparator();
+   mpStretchMenu->addAction(mpResetStretchAction);
 
    menuActions.push_front(ContextMenuAction(mpStretchMenu->menuAction(), APP_RASTERLAYER_STRETCH_MENU_ACTION));
    menuActions.push_front(ContextMenuAction(mpDisplayModeMenu->menuAction(), APP_RASTERLAYER_DISPLAY_MODE_MENU_ACTION));
@@ -1795,6 +1828,205 @@ double RasterLayerImp::convertStretchValue(const RasterChannelType& eColor, doub
    return dNewValue;
 }
 
+bool RasterLayerImp::addStretchFavorite(RasterChannelType channel) const
+{
+   double lower = 0.0;
+   double upper = 0.0;
+   RegionUnits units;
+   StretchType type;
+
+   switch (channel)
+   {
+   case GRAY:
+      lower = mlstGrayStretchValues[0];
+      upper = mlstGrayStretchValues[1];
+      units = meGrayStretchUnits;
+      type = meGrayStretchType;
+      break;
+
+   case RED:
+      lower = mlstRedStretchValues[0];
+      upper = mlstRedStretchValues[1];
+      units = meRedStretchUnits;
+      type = meRgbStretchType;
+      break;
+
+   case GREEN:
+      lower = mlstGreenStretchValues[0];
+      upper = mlstGreenStretchValues[1];
+      units = meGreenStretchUnits;
+      type = meRgbStretchType;
+      break;
+
+   case BLUE:
+      lower = mlstBlueStretchValues[0];
+      upper = mlstBlueStretchValues[1];
+      units = meBlueStretchUnits;
+      type = meRgbStretchType;
+      break;
+
+   default:
+      return false;
+   }
+
+   return addStretchFavorite(lower, upper, units, type);
+}
+
+bool RasterLayerImp::addStretchFavorite(double lower, double upper, RegionUnits units, StretchType type)
+{
+   if ((units.isValid() == false) || (type.isValid() == false))
+   {
+      return false;
+   }
+
+   string name = StringUtilities::toDisplayString(type) + string(" ") +
+      StringUtilities::toDisplayString(static_cast<int>(lower)) + string("-") +
+      StringUtilities::toDisplayString(static_cast<int>(upper)) + string(" ") +
+      StringUtilities::toDisplayString(units);
+
+   const DynamicObject* pFavorites = RasterLayer::getSettingStretchFavorites();
+   if (pFavorites == NULL)
+   {
+      return false;
+   }
+
+   while (dv_cast<DynamicObject>(&pFavorites->getAttribute(name)) != NULL)
+   {
+      Service<DesktopServices> pDesktop;
+
+      QMessageBox::StandardButtons button = QMessageBox::question(pDesktop->getMainWidget(), APP_NAME,
+         "A stretch favorite has already been added with the same name (" + QString::fromStdString(name) +
+         ").  Do you want to specify a new name?", QMessageBox::Yes | QMessageBox::No);
+      if (button == QMessageBox::No)
+      {
+         return false;
+      }
+
+      bool success = false;
+
+      QString newName = QInputDialog::getText(pDesktop->getMainWidget(), "Add Stretch Favorite", "Name:",
+         QLineEdit::Normal, QString::fromStdString(name), &success);
+      if (success == false)
+      {
+         return false;
+      }
+
+      if (newName.isEmpty() == false)
+      {
+         name = newName.toStdString();
+      }
+   }
+
+   FactoryResource<DynamicObject> pStretch;
+   pStretch->setAttribute("LowerStretchValue", lower);
+   pStretch->setAttribute("UpperStretchValue", upper);
+   pStretch->setAttribute("StretchUnits", units);
+   pStretch->setAttribute("StretchType", type);
+
+   FactoryResource<DynamicObject> pNewFavorites;
+   pNewFavorites->merge(pFavorites);
+   pNewFavorites->setAttribute(name, *pStretch.get());
+
+   RasterLayer::setSettingStretchFavorites(pNewFavorites.get());
+   return true;
+}
+
+bool RasterLayerImp::getStretchFavorite(const QString& name, double& lower, double& upper, RegionUnits& units,
+                                        StretchType& type)
+{
+   if (name.isEmpty() == true)
+   {
+      return false;
+   }
+
+   const DynamicObject* pFavorites = RasterLayer::getSettingStretchFavorites();
+   if (pFavorites == NULL)
+   {
+      return false;
+   }
+
+   const DynamicObject* pStretch = dv_cast<DynamicObject>(&pFavorites->getAttribute(name.toStdString()));
+   if (pStretch == NULL)
+   {
+      return false;
+   }
+
+   try
+   {
+      lower = dv_cast<double>(pStretch->getAttribute("LowerStretchValue"));
+      upper = dv_cast<double>(pStretch->getAttribute("UpperStretchValue"));
+      units = dv_cast<RegionUnits>(pStretch->getAttribute("StretchUnits"));
+      type = dv_cast<StretchType>(pStretch->getAttribute("StretchType"));
+   }
+   catch (const std::bad_cast&)
+   {
+      return false;
+   }
+
+   return true;
+}
+
+bool RasterLayerImp::removeStretchFavorite()
+{
+   QStringList favorites;
+
+   const DynamicObject* pStretchFavorites = RasterLayer::getSettingStretchFavorites();
+   if (pStretchFavorites != NULL)
+   {
+      vector<string> names;
+      pStretchFavorites->getAttributeNames(names);
+      if (names.empty() == false)
+      {
+         for (vector<string>::const_iterator iter = names.begin(); iter != names.end(); ++iter)
+         {
+            favorites.append(QString::fromStdString(*iter));
+         }
+      }
+   }
+
+   Service<DesktopServices> pDesktop;
+   if (favorites.isEmpty() == true)
+   {
+      QMessageBox::warning(pDesktop->getMainWidget(), APP_NAME, "There are currently no stretch favorites.");
+      return false;
+   }
+
+   bool accepted = false;
+
+   QString stretch = QInputDialog::getItem(pDesktop->getMainWidget(), "Remove Stretch Favorite", "Favorites:",
+      favorites, 0, false, &accepted);
+   if (accepted == false)
+   {
+      return false;
+   }
+
+   return removeStretchFavorite(stretch);
+}
+
+bool RasterLayerImp::removeStretchFavorite(const QString& name)
+{
+   if (name.isEmpty() == true)
+   {
+      return false;
+   }
+
+   const DynamicObject* pFavorites = RasterLayer::getSettingStretchFavorites();
+   if (pFavorites == NULL)
+   {
+      return false;
+   }
+
+   FactoryResource<DynamicObject> pNewFavorites;
+   pNewFavorites->merge(pFavorites);
+   if (pNewFavorites->removeAttribute(name.toStdString()) == true)
+   {
+      RasterLayer::setSettingStretchFavorites(pNewFavorites.get());
+      return true;
+   }
+
+   return false;
+}
+
 bool RasterLayerImp::isFilterSupported(const string& filterName) const
 {
    if (filterName.empty())
@@ -2246,6 +2478,44 @@ void RasterLayerImp::enableGpuImage(bool bEnable)
       }
 
       mbLinking = false;
+   }
+}
+
+void RasterLayerImp::setStretch(const QString& favorite)
+{
+   if (favorite.isEmpty() == true)
+   {
+      return;
+   }
+
+   double lower = 5.0;
+   double upper = 95.0;
+   RegionUnits units = PERCENTILE;
+   StretchType type = LINEAR;
+
+   if (getStretchFavorite(favorite, lower, upper, units, type) == false)
+   {
+      return;
+   }
+
+   DisplayMode displayMode = getDisplayMode();
+   setStretchUnits(displayMode, units);
+   setStretchType(displayMode, type);
+
+   switch (displayMode)
+   {
+   case GRAYSCALE_MODE:
+      setStretchValues(GRAY, lower, upper);
+      break;
+
+   case RGB_MODE:
+      setStretchValues(RED, lower, upper);
+      setStretchValues(GREEN, lower, upper);
+      setStretchValues(BLUE, lower, upper);
+      break;
+
+   default:
+      break;
    }
 }
 
@@ -3724,63 +3994,38 @@ void RasterLayerImp::changeStretch(QAction* pAction)
       return;
    }
 
-   if (pAction == mpResetStretchAction)
+   if (pAction == mpAddGrayStretchAction)
+   {
+      addStretchFavorite(GRAY);
+   }
+   else if (pAction == mpAddRedStretchAction)
+   {
+      addStretchFavorite(RED);
+   }
+   else if (pAction == mpAddGreenStretchAction)
+   {
+      addStretchFavorite(GREEN);
+   }
+   else if (pAction == mpAddBlueStretchAction)
+   {
+      addStretchFavorite(BLUE);
+   }
+   else if (pAction == mpRemoveStretchAction)
+   {
+      removeStretchFavorite();
+   }
+   else if (pAction == mpResetStretchAction)
    {
       resetStretch();
-      return;
-   }
-
-   RegionUnits eUnits = PERCENTILE;
-   StretchType eType = LINEAR;
-   double lower = 5.0;
-   double upper = 95.0;
-
-   if (pAction == mpLinear0Action)
-   {
-      eType = LINEAR;
-      lower = 0.0;
-      upper = 100.0;
-   }
-   else if (pAction == mpLinear2Action)
-   {
-      eType = LINEAR;
-      lower = 2.0;
-      upper = 98.0;
-   }
-   else if (pAction == mpLinear5Action)
-   {
-      eType = LINEAR;
-      lower = 5.0;
-      upper = 95.0;
-   }
-   else if (pAction == mpEqualAction)
-   {
-      eType = EQUALIZATION;
    }
    else
    {
-      return;
+      QString name = pAction->text();
+      if (name.isEmpty() == false)
+      {
+         setStretch(name);
+      }
    }
-
-   DisplayMode eMode = getDisplayMode();
-   setStretchUnits(eMode, eUnits);
-   setStretchType(eMode, eType);
-
-   switch (eMode)
-   {
-   case GRAYSCALE_MODE:
-      setStretchValues(GRAY, lower, upper);
-      break;
-
-   case RGB_MODE:
-      setStretchValues(RED, lower, upper);
-      setStretchValues(GREEN, lower, upper);
-      setStretchValues(BLUE, lower, upper);
-      break;
-   default:
-      break;
-   }
-
 }
 
 void RasterLayerImp::setAnimation(Animation* pAnimation)

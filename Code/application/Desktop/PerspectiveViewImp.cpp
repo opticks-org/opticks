@@ -773,6 +773,7 @@ void PerspectiveViewImp::keyPressEvent(QKeyEvent* e)
 
 void PerspectiveViewImp::mousePressEvent(QMouseEvent* e)
 {
+   bool bSuccess = false;
    if (e != NULL)
    {
       mMouseStart = e->pos();
@@ -800,10 +801,12 @@ void PerspectiveViewImp::mousePressEvent(QMouseEvent* e)
             }
 
             setCursor(Qt::ClosedHandCursor);
+            bSuccess = true;
          }
          else if (mouseMode == "RotateMode")
          {
             startUndoGroup("Rotate");
+            bSuccess = true;
          }
          else if (mouseMode == "ZoomInMode")
          {
@@ -811,7 +814,7 @@ void PerspectiveViewImp::mousePressEvent(QMouseEvent* e)
             dZoom *= 1.25;
 
             zoomAboutPoint(mMouseStart, dZoom);
-            updateGL();
+            bSuccess = true;
          }
          else if (mouseMode == "ZoomOutMode")
          {
@@ -819,31 +822,41 @@ void PerspectiveViewImp::mousePressEvent(QMouseEvent* e)
             dZoom /= 1.25;
 
             zoomAboutPoint(mMouseStart, dZoom);
-            updateGL();
+            bSuccess = true;
          }
       }
       else if (e->button() == Qt::MidButton)
       {
          setCursor(Qt::SizeAllCursor);
+         // Do not set the success flag to fall through to the base class for directional pan
       }
       else if (e->button() == Qt::RightButton && mCurrentModifiers == Qt::ControlModifier)
       {
-         bool bSuccess = false;
          bSuccess = enableInset(true);
          if (bSuccess == true)
          {
             setCursor(Qt::BlankCursor);
             setInsetPoint(mMouseStart);
-            updateGL();
          }
       }
 
       mMouseCurrent = mMouseStart;
    }
+
+   if (bSuccess == true)
+   {
+      e->accept();
+      updateGL();
+   }
+   else
+   {
+      ViewImp::mousePressEvent(e);
+   }
 }
 
 void PerspectiveViewImp::mouseMoveEvent(QMouseEvent* e)
 {
+   bool bSuccess = false;
    if (e != NULL)
    {
       QPoint ptMouse = e->pos();
@@ -874,8 +887,9 @@ void PerspectiveViewImp::mouseMoveEvent(QMouseEvent* e)
             if (panMode == PAN_INSTANT)
             {
                ViewImp::pan(ptMouse, mMouseCurrent);
-               updateGL();
             }
+
+            bSuccess = true;
          }
          else if (mouseMode == "RotateMode")
          {
@@ -892,12 +906,13 @@ void PerspectiveViewImp::mouseMoveEvent(QMouseEvent* e)
 
             double dRotationAngle = angle2 - angle1;
             rotateBy(dRotationAngle);
-            updateGL();
+
+            bSuccess = true;
          }
          else if (mouseMode == "ZoomBoxMode")
          {
             setSelectionBox(mMouseStart, ptMouse);
-            updateGL();
+            bSuccess = true;
          }
       }
 
@@ -920,11 +935,21 @@ void PerspectiveViewImp::mouseMoveEvent(QMouseEvent* e)
          double zoomFact = getZoomPercentage() * zoomMult;
 
          zoomAboutPoint(mMouseStart, zoomFact);
-         updateGL();
+         bSuccess = true;
       }
 
       mMouseCurrent = ptMouse;
       updateStatusBar(mMouseCurrent);
+   }
+
+   if (bSuccess == true)
+   {
+      e->accept();
+      updateGL();
+   }
+   else
+   {
+      ViewImp::mouseMoveEvent(e);
    }
 }
 
@@ -932,6 +957,7 @@ void PerspectiveViewImp::mouseReleaseEvent(QMouseEvent* e)
 {
    mDisplayContextMenu = true;
 
+   bool bSuccess = false;
    if (e != NULL)
    {
       QPoint ptMouse = e->pos();
@@ -961,6 +987,7 @@ void PerspectiveViewImp::mouseReleaseEvent(QMouseEvent* e)
          {
             enableInset(false);
             mDisplayContextMenu = false;
+            bSuccess = true;
          }
       }
       else if (e->button() == Qt::LeftButton)
@@ -987,20 +1014,32 @@ void PerspectiveViewImp::mouseReleaseEvent(QMouseEvent* e)
             }
 
             setCursor(mouseCursor);
+            bSuccess = true;
          }
          else if (mouseMode == "RotateMode")
          {
             endUndoGroup();
+            bSuccess = true;
          }
          else if (mouseMode == "ZoomBoxMode")
          {
             setSelectionBox(QRect());
             ViewImp::zoomToBox(mMouseStart, ptMouse);
+            bSuccess = true;
          }
       }
 
       mCurrentModifiers = Qt::NoModifier;
-      refresh();
+   }
+
+   if (bSuccess == true)
+   {
+      e->accept();
+      updateGL();
+   }
+   else
+   {
+      ViewImp::mouseReleaseEvent(e);
    }
 }
 

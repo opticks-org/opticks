@@ -288,7 +288,7 @@ PlotWidget* PlotSetImp::createPlot(const QString& strPlotName, const PlotType& p
 
    // Create the plot widget
    pPlot = new PlotWidgetAdapter(SessionItemImp::generateUniqueId(), strPlotName.toStdString(), plotType,
-      dynamic_cast<PlotSet*>(this));
+      dynamic_cast<PlotSet*>(this), this);
    if (pPlot != NULL)
    {
       // Block undo actions from being added to the plot view

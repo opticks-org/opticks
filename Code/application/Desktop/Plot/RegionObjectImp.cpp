@@ -127,10 +127,11 @@ void RegionObjectImp::draw()
    pPlot->translateWorldToScreen(worldMinX, worldMinY, screenMinX, screenMinY);
    pPlot->translateWorldToScreen(worldMaxX, worldMaxY, screenMaxX, screenMaxY);
 
-   double dLineWidth = fabs(screenMaxX - screenMinX);
+   double lineWidthX = fabs(screenMaxX - screenMinX);
+   double lineWidthY = fabs(screenMaxY - screenMinY);
    double dColorWidth = (worldMaxX - worldMinX) / (mColors.size() - 1);
 
-   if (dLineWidth < 1.5)
+   if (lineWidthX < 1.5)
    {
       ColorType color = mColors.front();
       glColor4ub(color.mRed, color.mGreen, color.mBlue, mTransparency * color.mAlpha / 255);
@@ -138,6 +139,15 @@ void RegionObjectImp::draw()
       glBegin(GL_LINES);
       glVertex2d(worldMinX, worldMinY);
       glVertex2d(worldMinX, worldMaxY);
+   }
+   else if (lineWidthY < 1.5)
+   {
+      ColorType color = mColors.front();
+      glColor4ub(color.mRed, color.mGreen, color.mBlue, mTransparency * color.mAlpha / 255);
+
+      glBegin(GL_LINES);
+      glVertex2d(worldMinX, worldMinY);
+      glVertex2d(worldMaxX, worldMinY);
    }
    else
    {

@@ -57,6 +57,7 @@ public:
    SETTING(InsetSize, View, unsigned int, 300)
    SETTING(InsetZoom, View, unsigned int, 5)
    SETTING(InsetZoomMode, View, InsetZoomMode, ABSOLUTE_MODE)
+   SETTING(MousePanSensitivity, View, int, 100)
    SETTING(PixelValueMinimumFontSize, View, unsigned int, 5);
    SETTING(PixelValueMaximumFontSize, View, unsigned int, 20);
    SETTING(DisplayCrosshair, View, bool, false)
@@ -180,6 +181,12 @@ public:
     *  Emitted with any<const MouseMode*> when the mouse mode is changed.
     */
    SIGNAL_METHOD(View, MouseModeChanged)
+
+   /**
+    *  Emitted with boost::any<bool> when mouse pan is enabled or
+    *  disabled by the user.
+    */
+   SIGNAL_METHOD(View, MousePanEnabled)
 
    /**
     *  Emitted with any<boost::tuple<double,double,double,double> > when the 

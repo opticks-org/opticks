@@ -81,7 +81,14 @@ public:
    bool toXml(XMLWriter* pXml) const;
    bool fromXml(DOMNode* pDocument, unsigned int version);
 
-   enum ValuesTypeEnum { NO_VALUE, LOWER_VALUE, UPPER_VALUE };
+   enum ValuesTypeEnum
+   {
+      NO_VALUE = 0x00,
+      LOWER_VALUE = 0x01,
+      UPPER_VALUE = 0x02,
+      TRANSLATE = 0x04,
+      SCALE = 0x08
+   };
    typedef EnumWrapper<ValuesTypeEnum> ValuesType;
 
    Statistics* getStatistics() const;
@@ -97,6 +104,8 @@ signals:
    void histogramUpdated();
 
 protected:
+   void keyPressEvent(QKeyEvent* pEvent);
+   void keyReleaseEvent(QKeyEvent* pEvent);
    void mousePressEvent(QMouseEvent* pEvent);
    void mouseMoveEvent(QMouseEvent* pEvent);
    void mouseReleaseEvent(QMouseEvent* pEvent);
@@ -107,8 +116,6 @@ protected:
    PassArea getLayerPassArea() const;
    QColor getLayerColor() const;
 
-   void updateStretchTypeAction();
-   void updateStretchUnitAction();
    void updateHistogramRegions(double lowerLimit, double upperLimit, double minValue, double maxValue,
       const PassArea& eArea, const QColor& layerColor, bool showRegions);
 
@@ -120,9 +127,14 @@ protected slots:
    void saveColorMapToFile();
    void createColorMap();
    void setPreloadedColorMap(QListWidgetItem* pItem);
+   void setAxisScale(QAction* pAction);
+   void linkAxisToStretch(bool link = true);
    void setThresholdMode(QAction* pAction);
    void setStretchMode(QAction* pAction);
+   void updateStretchTypeAction();
    void setStretchUnits(QAction* pAction);
+   void updateStretchUnitAction();
+   void setStretchFavorite(QAction* pAction);
    void stretchResetThisChannel();
    void stretchResetAllChannels();
    void setComplexComponent(QAction* pAction);
@@ -141,6 +153,9 @@ protected slots:
 
 private:
    bool setHistogram(Layer* pLayer, Statistics* pStatistics, RasterChannelType color);
+   void updateLocatorModeText();
+   void updateMouseCursor();
+
    class HistogramUpdater
    {
    public:
@@ -173,7 +188,7 @@ private:
    const ColorMap* mpAlternateColormap;
    HistogramUpdater mUpdater;
 
-   ValuesType meSelectedValue;
+   int mSelectedValue;
 
    RasterChannelType mRasterChannelType;
    SafePtr<Layer> mpLayer;
@@ -182,6 +197,12 @@ private:
 
    Statistics* mpStats;
 
+   QAction* mpLinearXAxisAction;
+   QAction* mpLogXAxisAction;
+   QAction* mpLinearYAxisAction;
+   QAction* mpLogYAxisAction;
+   QAction* mpAxisSeparatorAction;
+   QAction* mpLinkAxisStretchAction;
    QAction* mpBelowAction;
    QAction* mpAboveAction;
    QAction* mpBetweenAction;
@@ -198,14 +219,20 @@ private:
    QAction* mpPhaseAction;
    QAction* mpInPhaseAction;
    QAction* mpQuadratureAction;
+   QMenu* mpAxisScaleMenu;
    QMenu* mpPassAreaMenu;
    QMenu* mpStretchUnitsMenu;
    QMenu* mpStretchTypeMenu;
+   QMenu* mpStretchFavoritesMenu;
+   QAction* mpAddStretchAction;
+   QAction* mpRemoveStretchAction;
    QMenu* mpStretchResetMenu;
    QMenu* mpElementMenu;
    MenuListWidget* mpElementList;
    QMenu* mpBandMenu;
    MenuListWidget* mpBandList;
+   QAction* mpNextBandAction;
+   QAction* mpPreviousBandAction;
    QMenu* mpComplexDataMenu;
    QMenu* mpColorMapMenu;
    MenuListWidget* mpColorMapList;
@@ -219,6 +246,10 @@ private:
    QAction* mpSamplingAction;
    QAction* mpEndSeparatorAction;
    QAction* mpStatisticsRefreshAction;
+
+private slots:
+   void nextBand();
+   void previousBand();
 };
 
 #define HISTOGRAMPLOTADAPTEREXTENSION_CLASSES \

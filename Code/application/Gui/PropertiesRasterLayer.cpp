@@ -7,13 +7,25 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtCore/QStringList>
+#include <QtGui/QAction>
+#include <QtGui/QCheckBox>
+#include <QtGui/QComboBox>
+#include <QtGui/QDoubleSpinBox>
+#include <QtGui/QLabel>
 #include <QtGui/QLayout>
+#include <QtGui/QListWidget>
 #include <QtGui/QMenu>
 #include <QtGui/QMessageBox>
+#include <QtGui/QPushButton>
+#include <QtGui/QSpinBox>
 #include <QtGui/QStackedWidget>
 
-#include "AppVersion.h"
 #include "AppConfig.h"
+#include "AppVersion.h"
+#if defined (CG_SUPPORTED)
+#include "CgContext.h"
+#endif
 #include "ComplexComponentComboBox.h"
 #include "DesktopServices.h"
 #include "DynamicObject.h"
@@ -30,10 +42,6 @@
 #include "StretchTypeComboBox.h"
 #include "Undo.h"
 #include "View.h"
-
-#if defined (CG_SUPPORTED)
-#include "CgContext.h"
-#endif
 
 #include <limits>
 using namespace std;
@@ -98,25 +106,33 @@ PropertiesRasterLayer::PropertiesRasterLayer() :
    QLabel* pGrayStretchTypeLabel = new QLabel("Stretch Type:", pGrayscaleWidget);
    mpGrayStretchTypeCombo = new StretchTypeComboBox(pGrayscaleWidget);
 
+   QPushButton* pGrayStretchFavoritesButton = new QPushButton("Favorites", this);
+   mpGrayStretchMenu = new QMenu(pGrayStretchFavoritesButton);
+   pGrayStretchFavoritesButton->setMenu(mpGrayStretchMenu);
+
+   mpAddFavoriteGrayAction = new QAction("Add Stretch to Favorites", this);
+   mpRemoveFavoriteAction = new QAction("Remove Stretch from Favorites...", this);
+
    LabeledSection* pGrayscaleSection = new LabeledSection(pGrayscaleWidget, "Grayscale", this);
 
    QGridLayout* pGrayscaleGrid = new QGridLayout(pGrayscaleWidget);
    pGrayscaleGrid->setMargin(0);
    pGrayscaleGrid->setSpacing(5);
    pGrayscaleGrid->addWidget(pGrayElementLabel, 0, 0);
-   pGrayscaleGrid->addWidget(mpGrayElementCombo, 0, 1);
+   pGrayscaleGrid->addWidget(mpGrayElementCombo, 0, 1, 1, 2);
    pGrayscaleGrid->addWidget(pGrayBandLabel, 1, 0);
-   pGrayscaleGrid->addWidget(mpGrayBandCombo, 1, 1);
+   pGrayscaleGrid->addWidget(mpGrayBandCombo, 1, 1, 1, 2);
    pGrayscaleGrid->addWidget(pGrayLowerLabel, 2, 0);
-   pGrayscaleGrid->addWidget(mpGrayLowerSpin, 2, 1, Qt::AlignLeft);
+   pGrayscaleGrid->addWidget(mpGrayLowerSpin, 2, 1);
+   pGrayscaleGrid->addWidget(pGrayStretchFavoritesButton, 2, 2, Qt::AlignLeft);
    pGrayscaleGrid->addWidget(pGrayUpperLabel, 3, 0);
-   pGrayscaleGrid->addWidget(mpGrayUpperSpin, 3, 1, Qt::AlignLeft);
+   pGrayscaleGrid->addWidget(mpGrayUpperSpin, 3, 1);
    pGrayscaleGrid->addWidget(pGrayUnitsLabel, 4, 0);
-   pGrayscaleGrid->addWidget(mpGrayUnitsCombo, 4, 1, Qt::AlignLeft);
+   pGrayscaleGrid->addWidget(mpGrayUnitsCombo, 4, 1);
    pGrayscaleGrid->addWidget(pGrayStretchTypeLabel, 5, 0);
-   pGrayscaleGrid->addWidget(mpGrayStretchTypeCombo, 5, 1, Qt::AlignLeft);
+   pGrayscaleGrid->addWidget(mpGrayStretchTypeCombo, 5, 1);
    pGrayscaleGrid->setRowStretch(6, 10);
-   pGrayscaleGrid->setColumnStretch(1, 10);
+   pGrayscaleGrid->setColumnStretch(2, 10);
 
    // RGB
    QWidget* pRgbWidget = new QWidget(this);
@@ -189,6 +205,14 @@ PropertiesRasterLayer::PropertiesRasterLayer() :
    QLabel* pRgbStretchTypeLabel = new QLabel("Stretch Type:", pRgbWidget);
    mpRgbStretchTypeCombo = new StretchTypeComboBox(pRgbWidget);
 
+   QPushButton* pRgbStretchFavoritesButton = new QPushButton("Favorites", pRgbWidget);
+   mpRgbStretchMenu = new QMenu(pRgbStretchFavoritesButton);
+   pRgbStretchFavoritesButton->setMenu(mpRgbStretchMenu);
+
+   mpAddFavoriteRedAction = new QAction("Add Red Stretch to Favorites", pRgbWidget);
+   mpAddFavoriteGreenAction = new QAction("Add Green Stretch to Favorites", pRgbWidget);
+   mpAddFavoriteBlueAction = new QAction("Add Blue Stretch to Favorites", pRgbWidget);
+
    LabeledSection* pRgbSection = new LabeledSection(pRgbWidget, "RGB", this);
 
    QGridLayout* pRgbGrid = new QGridLayout(pRgbWidget);
@@ -210,6 +234,7 @@ PropertiesRasterLayer::PropertiesRasterLayer() :
    pRgbGrid->addWidget(mpRedLowerSpin, 3, 1, Qt::AlignLeft);
    pRgbGrid->addWidget(mpGreenLowerSpin, 3, 2, Qt::AlignLeft);
    pRgbGrid->addWidget(mpBlueLowerSpin, 3, 3, Qt::AlignLeft);
+   pRgbGrid->addWidget(pRgbStretchFavoritesButton, 3, 4);
    pRgbGrid->addWidget(pRgbUpperLabel, 4, 0);
    pRgbGrid->addWidget(mpRedUpperSpin, 4, 1, Qt::AlignLeft);
    pRgbGrid->addWidget(mpGreenUpperSpin, 4, 2, Qt::AlignLeft);
@@ -288,7 +313,7 @@ PropertiesRasterLayer::PropertiesRasterLayer() :
    addSection(pGrayscaleSection);
    addSection(pRgbSection);
    addSection(pAccelerationSection, 10);
-   setSizeHint(600, 600);
+   setSizeHint(600, 610);
 
    // Connections
    VERIFYNR(connect(mpGrayElementCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateDisplayedBandCombo(int))));
@@ -308,6 +333,11 @@ PropertiesRasterLayer::PropertiesRasterLayer() :
    VERIFYNR(connect(mpBlueUnitsCombo, SIGNAL(valueChanged(RegionUnits)), this,
       SLOT(updateStretchValuesFromUnits(RegionUnits))));
    VERIFYNR(connect(pMenu, SIGNAL(triggered(QAction*)), this, SLOT(setDisplayBands(QAction*))));
+   VERIFYNR(connect(mpGrayStretchMenu, SIGNAL(aboutToShow()), this, SLOT(initializeStretchMenu())));
+   VERIFYNR(connect(mpGrayStretchMenu, SIGNAL(triggered(QAction*)), this, SLOT(setGrayStretch(QAction*))));
+   VERIFYNR(connect(mpRgbStretchMenu, SIGNAL(aboutToShow()), this, SLOT(initializeStretchMenu())));
+   VERIFYNR(connect(mpRgbStretchMenu, SIGNAL(triggered(QAction*)), this, SLOT(setRgbStretch(QAction*))));
+   VERIFYNR(connect(mpRemoveFavoriteAction, SIGNAL(triggered()), this, SLOT(removeStretchFavorite())));
    VERIFYNR(connect(mpAccelerationCheck, SIGNAL(toggled(bool)), this, SLOT(enableFilterCheck(bool))));
    VERIFYNR(connect(mpFilterCheck, SIGNAL(toggled(bool)), this, SLOT(enableFilterCombo(bool))));
 }
@@ -1062,4 +1092,165 @@ void PropertiesRasterLayer::setDisplayBands(QAction* pAction)
       mpGreenBandCombo->setCurrentIndex(greenBand.isActiveNumberValid() ? greenBand.getActiveNumber() : -1);
       mpBlueBandCombo->setCurrentIndex(blueBand.isActiveNumberValid() ? blueBand.getActiveNumber() : -1);
    }
+}
+
+void PropertiesRasterLayer::initializeStretchMenu()
+{
+   QMenu* pMenu = dynamic_cast<QMenu*>(sender());
+   VERIFYNRV(pMenu != NULL);
+
+   pMenu->clear();
+
+   const DynamicObject* pStretchFavorites = RasterLayer::getSettingStretchFavorites();
+   if (pStretchFavorites != NULL)
+   {
+      vector<string> names;
+      pStretchFavorites->getAttributeNames(names);
+      if (names.empty() == false)
+      {
+         for (vector<string>::const_iterator iter = names.begin(); iter != names.end(); ++iter)
+         {
+            pMenu->addAction(QString::fromStdString(*iter));
+         }
+
+         pMenu->addSeparator();
+      }
+   }
+
+   if (pMenu == mpGrayStretchMenu)
+   {
+      pMenu->addAction(mpAddFavoriteGrayAction);
+   }
+   else if (pMenu == mpRgbStretchMenu)
+   {
+      pMenu->addAction(mpAddFavoriteRedAction);
+      pMenu->addAction(mpAddFavoriteGreenAction);
+      pMenu->addAction(mpAddFavoriteBlueAction);
+   }
+
+   pMenu->addAction(mpRemoveFavoriteAction);
+}
+
+void PropertiesRasterLayer::setGrayStretch(QAction* pAction)
+{
+   if (pAction == NULL)
+   {
+      return;
+   }
+
+   if (pAction == mpAddFavoriteGrayAction)
+   {
+      double lower = mpGrayLowerSpin->value();
+      double upper = mpGrayUpperSpin->value();
+      RegionUnits units = mpGrayUnitsCombo->getCurrentValue();
+      StretchType type = mpGrayStretchTypeCombo->getCurrentValue();
+
+      RasterLayerImp::addStretchFavorite(lower, upper, units, type);
+      return;
+   }
+   else if (pAction == mpRemoveFavoriteAction)
+   {
+      return;
+   }
+
+   QString name = pAction->text();
+   if (name.isEmpty() == true)
+   {
+      return;
+   }
+
+   double lower = 0.0;
+   double upper = 0.0;
+   RegionUnits units;
+   StretchType type;
+   if (RasterLayerImp::getStretchFavorite(name, lower, upper, units, type) == false)
+   {
+      return;
+   }
+
+   mpGrayLowerSpin->setValue(lower);
+   mpGrayUpperSpin->setValue(upper);
+   mGrayUnits = units;
+   mpGrayUnitsCombo->setCurrentValue(units);
+   mpGrayStretchTypeCombo->setCurrentValue(type);
+}
+
+void PropertiesRasterLayer::setRgbStretch(QAction* pAction)
+{
+   if (pAction == NULL)
+   {
+      return;
+   }
+
+   if (pAction == mpAddFavoriteRedAction)
+   {
+      double lower = mpRedLowerSpin->value();
+      double upper = mpRedUpperSpin->value();
+      RegionUnits units = mpRedUnitsCombo->getCurrentValue();
+      StretchType type = mpRgbStretchTypeCombo->getCurrentValue();
+
+      RasterLayerImp::addStretchFavorite(lower, upper, units, type);
+      return;
+   }
+   else if (pAction == mpAddFavoriteGreenAction)
+   {
+      double lower = mpGreenLowerSpin->value();
+      double upper = mpGreenUpperSpin->value();
+      RegionUnits units = mpGreenUnitsCombo->getCurrentValue();
+      StretchType type = mpRgbStretchTypeCombo->getCurrentValue();
+
+      RasterLayerImp::addStretchFavorite(lower, upper, units, type);
+      return;
+   }
+   else if (pAction == mpAddFavoriteBlueAction)
+   {
+      double lower = mpBlueLowerSpin->value();
+      double upper = mpBlueUpperSpin->value();
+      RegionUnits units = mpBlueUnitsCombo->getCurrentValue();
+      StretchType type = mpRgbStretchTypeCombo->getCurrentValue();
+
+      RasterLayerImp::addStretchFavorite(lower, upper, units, type);
+      return;
+   }
+   else if (pAction == mpRemoveFavoriteAction)
+   {
+      return;
+   }
+
+   QString name = pAction->text();
+   if (name.isEmpty() == true)
+   {
+      return;
+   }
+
+   double lower = 0.0;
+   double upper = 0.0;
+   RegionUnits units;
+   StretchType type;
+   if (RasterLayerImp::getStretchFavorite(name, lower, upper, units, type) == false)
+   {
+      return;
+   }
+
+   mpRedLowerSpin->setValue(lower);
+   mpRedUpperSpin->setValue(upper);
+   mRedUnits = units;
+   mpRedUnitsCombo->setCurrentValue(units);
+
+   mpGreenLowerSpin->setValue(lower);
+   mpGreenUpperSpin->setValue(upper);
+   mGreenUnits = units;
+   mpGreenUnitsCombo->setCurrentValue(units);
+
+   mpBlueLowerSpin->setValue(lower);
+   mpBlueUpperSpin->setValue(upper);
+   mBlueUnits = units;
+   mpBlueUnitsCombo->setCurrentValue(units);
+
+   mpRgbStretchTypeCombo->setCurrentValue(type);
+}
+
+void PropertiesRasterLayer::removeStretchFavorite()
+{
+   RasterLayerImp::removeStretchFavorite();
 }

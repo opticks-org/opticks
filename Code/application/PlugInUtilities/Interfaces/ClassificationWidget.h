@@ -196,7 +196,7 @@ protected:
    bool deserializeFavorites();
 
    /**
-    *  Populates the favorties combo box from the current list of favorites.
+    *  Populates the favorites combo box from the current list of favorites.
     */
    void updateFavoritesCombo();
 

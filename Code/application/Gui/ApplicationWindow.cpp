@@ -225,7 +225,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
 
    m_pPrint_Setup_Action = new QAction(QIcon(":/icons/Print"), "&Print...", this);
    m_pPrint_Setup_Action->setAutoRepeat(false);
-   m_pPrint_Setup_Action->setShortcut(QKeySequence("Ctrl+P"));
+   m_pPrint_Setup_Action->setShortcut(QKeySequence::Print);
    m_pPrint_Setup_Action->setToolTip("Print Setup");
    m_pPrint_Setup_Action->setStatusTip("Invokes a dialog to set the print options for the "
       "currently active data set");
@@ -273,21 +273,21 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
 
    m_pCut_Action = new QAction(QIcon(":/icons/Cut"), "Cu&t", this);
    m_pCut_Action->setAutoRepeat(false);
-   m_pCut_Action->setShortcut(QKeySequence("Ctrl+X"));
+   m_pCut_Action->setShortcut(QKeySequence::Cut);
    m_pCut_Action->setToolTip("Cut");
    m_pCut_Action->setStatusTip("Cuts the current selection and moves it to the clipboard");
    VERIFYNR(connect(m_pCut_Action, SIGNAL(triggered()), this, SLOT(cut())));
 
    m_pCopy_Action = new QAction(QIcon(":/icons/Copy"), "&Copy", this);
    m_pCopy_Action->setAutoRepeat(false);
-   m_pCopy_Action->setShortcut(QKeySequence("Ctrl+C"));
+   m_pCopy_Action->setShortcut(QKeySequence::Copy);
    m_pCopy_Action->setToolTip("Copy");
    m_pCopy_Action->setStatusTip("Copies the current selection to the clipboard");
    VERIFYNR(connect(m_pCopy_Action, SIGNAL(triggered()), this, SLOT(copy())));
 
    m_pPaste_Action = new QAction(QIcon(":/icons/Paste"), "&Paste", this);
    m_pPaste_Action->setAutoRepeat(false);
-   m_pPaste_Action->setShortcut(QKeySequence("Ctrl+V"));
+   m_pPaste_Action->setShortcut(QKeySequence::Paste);
    m_pPaste_Action->setToolTip("Paste");
    m_pPaste_Action->setStatusTip("Inserts the clipboard contents at the current cursor location");
    VERIFYNR(connect(m_pPaste_Action, SIGNAL(triggered()), this, SLOT(paste())));
@@ -331,7 +331,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
 
    m_pRefresh_Action = new QAction(QIcon(":/icons/Refresh"), "&Refresh", this);
    m_pRefresh_Action->setAutoRepeat(false);
-   m_pRefresh_Action->setShortcut(QKeySequence("Ctrl+R"));
+   m_pRefresh_Action->setShortcut(QKeySequence::Refresh);
    m_pRefresh_Action->setToolTip("Refresh");
    m_pRefresh_Action->setStatusTip("Redraws the data in the active spatial data window");
    VERIFYNR(connect(m_pRefresh_Action, SIGNAL(triggered()), this, SLOT(refresh())));
