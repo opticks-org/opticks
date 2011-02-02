@@ -20,6 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F40C1A8C-3ABA-4E13-A817-1DC8DF5329B1}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
     <RootNamespace>Sio</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -176,9 +177,6 @@
     <ClCompile Include="ModuleManager.cpp" />
     <ClCompile Include="Sio.cpp" />
     <ClCompile Include="SioImporter.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\..\PlugInManager\PlugInModule.def" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sio.h" />

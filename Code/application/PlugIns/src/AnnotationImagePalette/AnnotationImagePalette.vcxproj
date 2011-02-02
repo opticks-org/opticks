@@ -20,6 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F975FCA3-DC1B-4A84-A44D-8DA35B7D4BD2}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
     <RootNamespace>AnnotationImagePalette</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

@@ -20,6 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{76D580B6-FFB6-4D04-AAEE-2885297D7494}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
     <RootNamespace>Kml</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

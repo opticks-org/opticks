@@ -263,7 +263,7 @@ void XmlRpcServer::debug(HttpRequest *pHttpRequest)
 #if defined(DEBUG)
    if (pHttpRequest != NULL)
    {
-      qDebug() << QString::fromStdString(pHttpRequest->Body());
+      qDebug() << QString::fromStdString(pHttpRequest->sBody);
    }
 #endif
 }

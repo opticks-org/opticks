@@ -20,8 +20,8 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{60E31C17-55E7-4A6F-89E8-6A921848B973}</ProjectGuid>
-    <RootNamespace>MovieExporter</RootNamespace>
     <Keyword>Win32Proj</Keyword>
+    <RootNamespace>MovieExporter</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -158,9 +158,6 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_BitrateWidget.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_FramerateWidget.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_ViewResolutionWidget.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\..\PlugInManager\PlugInModule.def" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AdvancedOptionsWidget.h" />

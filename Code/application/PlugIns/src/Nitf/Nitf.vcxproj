@@ -20,8 +20,8 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{866C6813-C1EB-4F53-B582-E567380A8097}</ProjectGuid>
-    <RootNamespace>NewNitf</RootNamespace>
     <Keyword>Win32Proj</Keyword>
+    <RootNamespace>Nitf</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">

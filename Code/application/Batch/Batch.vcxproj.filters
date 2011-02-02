@@ -16,7 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\App.rc">
-      <Filter>Source Files</Filter>
+      <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>

@@ -9,10 +9,6 @@
       <UniqueIdentifier>{000971fe-cb95-4df8-b2f7-9d69627ceae2}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl</Extensions>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{bd88767b-4e96-4b8c-9af1-de585e7d8eba}</UniqueIdentifier>
-      <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
-    </Filter>
     <Filter Include="moc">
       <UniqueIdentifier>{959b313a-4435-4352-9bf9-6b0fd95d2f06}</UniqueIdentifier>
     </Filter>

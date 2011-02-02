@@ -20,6 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{BFB8BA88-F3DF-4AC7-B243-CEB9965E7F61}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
     <RootNamespace>ShapeFileExporter</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

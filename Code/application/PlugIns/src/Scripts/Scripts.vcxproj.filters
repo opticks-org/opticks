@@ -9,10 +9,6 @@
       <UniqueIdentifier>{58ce2456-3bf4-4529-abda-7075f05bf220}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl</Extensions>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{4e23768a-5231-48ff-bd62-d59c072d7b90}</UniqueIdentifier>
-      <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ModuleManager.cpp">
@@ -21,11 +17,6 @@
     <ClCompile Include="ScriptPlugIn.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\..\PlugInManager\PlugInModule.def">
-      <Filter>Source Files</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ScriptPlugIn.h">

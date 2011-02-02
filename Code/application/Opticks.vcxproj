@@ -20,6 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{4848789B-87B2-49B2-AF93-8F1B6AA7DB18}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
     <RootNamespace>Opticks</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

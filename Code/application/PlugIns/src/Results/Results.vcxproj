@@ -20,6 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{47962A8C-CA8C-4549-937B-74ACDAB38D06}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
     <RootNamespace>Results</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -181,9 +182,6 @@
     <ClCompile Include="ResultsExporter.cpp" />
     <ClCompile Include="ResultsOptionsWidget.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_ResultsOptionsWidget.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\..\PlugInManager\PlugInModule.def" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ResultsExporter.h" />

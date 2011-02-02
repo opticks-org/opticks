@@ -815,7 +815,7 @@ class PackageBuilder(CommonBuilder):
 
             dependencies_list = \
                 commonutils.get_dependencies(self.opticks_dependencies_dir,
-                "Solaris", False, None)
+                "Solaris", False, "64")
             commonutils.copy_dependencies(dependencies_list,
                 dependencies_output)
             if self.verbosity > 1:

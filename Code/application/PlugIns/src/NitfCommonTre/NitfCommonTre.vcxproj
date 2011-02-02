@@ -20,8 +20,8 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{860D2864-451B-42C1-9D5D-7F54E4EA9754}</ProjectGuid>
-    <RootNamespace>NitfCommonTre</RootNamespace>
     <Keyword>Win32Proj</Keyword>
+    <RootNamespace>NitfCommonTre</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">

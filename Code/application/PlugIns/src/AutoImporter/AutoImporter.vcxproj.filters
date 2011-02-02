@@ -9,10 +9,6 @@
       <UniqueIdentifier>{bb2dd9a7-75e5-497a-949e-139771384e55}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl</Extensions>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{6056826a-6979-430d-a89a-972751f36323}</UniqueIdentifier>
-      <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AutoImporter.cpp">

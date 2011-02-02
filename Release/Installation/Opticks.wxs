@@ -91,7 +91,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
                <File Name="ehs.dll" Id="F__ehs_Dependency" DiskId="1" KeyPath="yes" />
             </Component>
             <Component Id="C__gdal_Dependency" Guid="$(var.C__gdal_DependencyGuid)" Win64="$(var.64Bit)">
-               <File Name="gdal17.dll" Id="F__gdal_Dependency" DiskId="1" KeyPath="yes" />
+               <File Name="gdal18.dll" Id="F__gdal_Dependency" DiskId="1" KeyPath="yes" />
             </Component>
             <Component Id="C__glew32_Dependency" Guid="$(var.C__glew32_DependencyGuid)" Win64="$(var.64Bit)">
                <File Name="glew32.dll" Id="F__glew32_Dependency" DiskId="1" KeyPath="yes" />

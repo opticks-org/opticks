@@ -20,8 +20,8 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{44ED214A-3FDC-4173-B863-D061DDCF0B60}</ProjectGuid>
-    <RootNamespace>Aspam</RootNamespace>
     <Keyword>Win32Proj</Keyword>
+    <RootNamespace>Aspam</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">

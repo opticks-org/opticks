@@ -9,10 +9,6 @@
       <UniqueIdentifier>{05f2db31-aa8f-4d60-9861-ee3274467515}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl</Extensions>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{bbb7564e-961a-4622-b846-bc9a28f445da}</UniqueIdentifier>
-      <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ModuleManager.cpp">

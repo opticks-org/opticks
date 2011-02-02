@@ -20,6 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{6A048975-EA90-4281-A25B-2EB7FE98D9C4}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
     <RootNamespace>LegacyModule</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{5F01DFF1-70D1-494F-8144-F5CFC4530C6A}</ProjectGuid>
     <RootNamespace>PCA</RootNamespace>
-    <SccLocalPath>.</SccLocalPath>
+    <Keyword>Win32Proj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -196,9 +196,6 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_EigenPlotDlg.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PcaDlg.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_StatisticsDlg.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\..\PlugInManager\PlugInModule.def" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="EigenPlotDlg.h">

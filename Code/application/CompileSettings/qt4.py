@@ -217,60 +217,51 @@ def generate(env):
     Builder = SCons.Builder.Builder
     splitext = SCons.Util.splitext
 
-    platform = env["OPTICKSPLATFORM"]
-    include_platform = platform
-    if env["OS"] == "windows":
-       include_platform = env["OS"] 
-    path = os.environ.get('OPTICKSDEPENDENCIES',None)
-    if path:
-       path = os.path.join(path, "Qt")
-    if not path:
-       SCons.Warnings.warn(QtdirNotFound,"Could not detect Qt")
-    else:
-       env.AppendUnique(QT_BINPATH = os.path.join(path, 'bin', platform),
-                      QT_CPPPATH = os.path.join(path, 'include', include_platform),
-                      QT_LIBPATH = os.path.join(path, 'lib', platform),
-                      QT_MOC = os.path.join('$QT_BINPATH','moc'),
-                      QT_UIC = os.path.join('$QT_BINPATH','uic'),
-                      QT_QRC = os.path.join('$QT_BINPATH','rcc'),
-                      QT_LIB = None,     # filled in by AddModules
-                      QT_MODULES = [], # filled in by AddModules
-                      QT_AUTOSCAN = 1, # scan for moc'able sources
+    dep_include = env["OPTICKSDEPENDENCIESINCLUDE"]
+    dep_bin = env["OPTICKSDEPENDENCIESBIN"]
+    env.AppendUnique(QT_BINPATH = dep_bin,
+                     QT_CPPPATH = os.path.join(dep_include, 'qt4'),
+                     QT_MOC = os.path.join('$QT_BINPATH','moc'),
+                     QT_UIC = os.path.join('$QT_BINPATH','uic'),
+                     QT_QRC = os.path.join('$QT_BINPATH','rcc'),
+                     QT_LIB = None,     # filled in by AddModules
+                     QT_MODULES = [], # filled in by AddModules
+                     QT_AUTOSCAN = 1, # scan for moc'able sources
 
-                      # Some QT specific flags. I don't expect someone wants to
-                      # manipulate those ...
-                      QT_UICIMPLFLAGS = CLVar(''),
-                      QT_UICDECLFLAGS = CLVar(''),
-                      QT_MOCFROMHFLAGS = CLVar(''),
-                      QT_MOCFROMCXXFLAGS = CLVar('-i'),
+                     # Some QT specific flags. I don't expect someone wants to
+                     # manipulate those ...
+                     QT_UICIMPLFLAGS = CLVar(''),
+                     QT_UICDECLFLAGS = CLVar(''),
+                     QT_MOCFROMHFLAGS = CLVar(''),
+                     QT_MOCFROMCXXFLAGS = CLVar('-i'),
 
-                      # suffixes/prefixes for the headers / sources to generate
-                      QT_UICDECLPREFIX = 'ui_',
-                      QT_UICDECLSUFFIX = '.h',
-                      QT_QRCIMPLSUFFIX = '_qrc.cpp', 
-                      QT_MOCHPREFIX = 'moc_',
-                      QT_MOCHSUFFIX = '$CXXFILESUFFIX',
-                      QT_MOCCXXPREFIX = '',
-                      QT_MOCCXXSUFFIX = '.moc',
-                      QT_UISUFFIX = '.ui',
-                      QT_QRCSUFFIX = '.qrc',
-                      # Commands for the qt support ...
-                      # command to generate header, implementation and moc-file
-                      # from a .qrc file
-                      QT_QRCCOM = [
-                       CLVar('$QT_QRC $QT_QRCDECLFLAGS $SOURCE -name ${SOURCE.filebase} -o ${TARGETS[0]}')],
-                      # from a .ui file
-                      QT_UICCOM = [
-                       CLVar('$QT_UIC $QT_UICDECLFLAGS -o ${TARGETS[0]} $SOURCE')],
-                      # command to generate meta object information for a class
-                      # declarated in a header
-                      QT_MOCFROMHCOM = (
-                             '$QT_MOC $QT_MOCFROMHFLAGS -o ${TARGETS[0]} $SOURCE'),
-                      # command to generate meta object information for a class
-                      # declarated in a cpp file
-                      QT_MOCFROMCXXCOM = [
-                       CLVar('$QT_MOC $QT_MOCFROMCXXFLAGS -o ${TARGETS[0]} $SOURCE'),
-                       Action(checkMocIncluded,None)])
+                     # suffixes/prefixes for the headers / sources to generate
+                     QT_UICDECLPREFIX = 'ui_',
+                     QT_UICDECLSUFFIX = '.h',
+                     QT_QRCIMPLSUFFIX = '_qrc.cpp', 
+                     QT_MOCHPREFIX = 'moc_',
+                     QT_MOCHSUFFIX = '$CXXFILESUFFIX',
+                     QT_MOCCXXPREFIX = '',
+                     QT_MOCCXXSUFFIX = '.moc',
+                     QT_UISUFFIX = '.ui',
+                     QT_QRCSUFFIX = '.qrc',
+                     # Commands for the qt support ...
+                     # command to generate header, implementation and moc-file
+                     # from a .qrc file
+                     QT_QRCCOM = [
+                      CLVar('$QT_QRC $QT_QRCDECLFLAGS $SOURCE -name ${SOURCE.filebase} -o ${TARGETS[0]}')],
+                     # from a .ui file
+                     QT_UICCOM = [
+                      CLVar('$QT_UIC $QT_UICDECLFLAGS -o ${TARGETS[0]} $SOURCE')],
+                     # command to generate meta object information for a class
+                     # declarated in a header
+                     QT_MOCFROMHCOM = (
+                            '$QT_MOC $QT_MOCFROMHFLAGS -o ${TARGETS[0]} $SOURCE'),
+                     # command to generate meta object information for a class
+                     # declarated in a cpp file
+                     QT_MOCFROMCXXCOM = [
+                      CLVar('$QT_MOC $QT_MOCFROMCXXFLAGS -o ${TARGETS[0]} $SOURCE'),
+                      Action(checkMocIncluded,None)])
 
     # ... and the corresponding builders
     qrcBld = Builder(action={'$QT_QRCSUFFIX':'$QT_QRCCOM'},
@@ -308,8 +299,7 @@ def generate(env):
     # correctly later by our emitter.
     env.AppendUnique(PROGEMITTER =[AutomocStatic],
                      SHLIBEMITTER=[AutomocShared],
-                     LIBEMITTER  =[AutomocStatic],
-                     LIBPATH=["$QT_LIBPATH"])
+                     LIBEMITTER  =[AutomocStatic])
 
 def Qt4AddModules(env, whichModules):
     env.AppendUnique (CXXFLAGS = map(lambda x: "-I"+x, [env ['QT_CPPPATH']] + 

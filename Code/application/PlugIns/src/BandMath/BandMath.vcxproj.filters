@@ -13,10 +13,6 @@
       <UniqueIdentifier>{9415753a-cccb-4d81-b981-c7313123accc}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{8101f62f-4ea8-44b6-b46d-6d755b61840e}</UniqueIdentifier>
-      <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BandMath.cpp">

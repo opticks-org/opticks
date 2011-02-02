@@ -20,8 +20,8 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{140590C9-ED72-44A6-B0F0-E4337452D490}</ProjectGuid>
-    <RootNamespace>XmlRpc</RootNamespace>
     <Keyword>Win32Proj</Keyword>
+    <RootNamespace>XmlRpc</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">

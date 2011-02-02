@@ -66,7 +66,7 @@ MuHttpServer::Response ImageHandler::getRequest(const QString& uri, const QStrin
       FormValueMap::const_iterator it;
       if ((it = form.find("band")) != form.end() || (it = form.find("frame")) != form.end())
       {
-         band = StringUtilities::fromXmlString<int>(it->second.m_sBody);
+         band = StringUtilities::fromXmlString<int>(it->second.sBody);
       }
 
       success = getSessionItemImage(pItem, buffer, format, band);

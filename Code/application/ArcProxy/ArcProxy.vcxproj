@@ -20,8 +20,8 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{A2A2C2A9-AFE5-4CBA-9BF3-F06E136CB9EB}</ProjectGuid>
-    <RootNamespace>ArcProxy</RootNamespace>
     <Keyword>Win32Proj</Keyword>
+    <RootNamespace>ArcProxy</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='x64-Release|Win32'" Label="Configuration">

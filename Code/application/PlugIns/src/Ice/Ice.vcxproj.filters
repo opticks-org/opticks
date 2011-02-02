@@ -62,11 +62,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\PlugInManager\PlugInModule.def">
-      <Filter>Source Files</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="DateTimeReaderWriter.h">
       <Filter>Header Files</Filter>
     </ClInclude>

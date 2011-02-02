@@ -12,10 +12,6 @@
     <Filter Include="moc">
       <UniqueIdentifier>{c10365dc-3017-4b47-97af-4a74eb79e13f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{9197ecaa-e2a0-4d55-85d7-fee31d9452e5}</UniqueIdentifier>
-      <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BmpDetails.cpp">
@@ -105,11 +101,6 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_OptionsTiffImporter.cpp">
       <Filter>moc</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\..\PlugInManager\PlugInModule.def">
-      <Filter>Source Files</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BmpDetails.h">

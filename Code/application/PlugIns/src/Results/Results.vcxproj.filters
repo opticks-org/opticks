@@ -13,10 +13,6 @@
       <UniqueIdentifier>{25a43a17-6f0c-4c35-8651-e22fd37fbfce}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{46b29ef5-715e-47e0-a0b8-4bcf3a7825ef}</UniqueIdentifier>
-      <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ModuleManager.cpp">
@@ -31,11 +27,6 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_ResultsOptionsWidget.cpp">
       <Filter>moc</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\..\PlugInManager\PlugInModule.def">
-      <Filter>Source Files</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ResultsExporter.h">

@@ -9,10 +9,6 @@
       <UniqueIdentifier>{8d30b847-c8b6-4ab4-acf4-a66b0e80c4ba}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl</Extensions>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{816d9202-7f56-46cc-bfe5-e7aff77a5d61}</UniqueIdentifier>
-      <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CreateAnimation.cpp">
@@ -99,11 +95,6 @@
     <ClCompile Include="WizardItems.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\..\PlugInManager\PlugInModule.def">
-      <Filter>Source Files</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CreateAnimation.h">

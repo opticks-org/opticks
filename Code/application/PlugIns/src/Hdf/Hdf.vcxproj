@@ -20,6 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{9F107C5C-3B83-4F7C-943D-AFFC131EAF47}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
     <RootNamespace>Hdf</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

@@ -13,10 +13,6 @@
       <UniqueIdentifier>{e22d6480-9445-4cf1-a35b-fa7dd92225e1}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{a9bd15f7-4ae2-41c7-9d64-b0076a95e9cb}</UniqueIdentifier>
-      <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ModuleManager.cpp">
@@ -31,11 +27,6 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_SecondMomentGui.cpp">
       <Filter>moc</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\..\PlugInManager\PlugInModule.def">
-      <Filter>Source Files</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SecondMoment.h">

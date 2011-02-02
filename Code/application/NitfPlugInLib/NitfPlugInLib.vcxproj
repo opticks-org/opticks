@@ -20,6 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{A342F95C-42FE-40F4-80DB-5E0288ACD389}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
     <RootNamespace>NitfPlugInLib</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

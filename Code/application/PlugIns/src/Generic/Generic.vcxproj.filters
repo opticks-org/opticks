@@ -9,10 +9,6 @@
       <UniqueIdentifier>{2743f072-fffc-4d33-a0b6-48cb16e5c22a}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl</Extensions>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{6305a509-94c9-4ef2-a79d-b5b559c1a201}</UniqueIdentifier>
-      <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GenericImporter.cpp">

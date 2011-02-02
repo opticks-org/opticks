@@ -22,6 +22,7 @@
     <ProjectName>OpticksBatch</ProjectName>
     <ProjectGuid>{FAB88922-AA54-431C-8C22-5410A8CEE7B5}</ProjectGuid>
     <RootNamespace>Batch</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

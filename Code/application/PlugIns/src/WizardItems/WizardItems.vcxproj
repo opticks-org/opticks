@@ -20,6 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{028F3ABC-AAB5-426C-8127-80C5FEE17647}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
     <RootNamespace>WizardItems</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -205,9 +206,6 @@
     <ClCompile Include="TemplateUtilities.cpp" />
     <ClCompile Include="UtilityItems.cpp" />
     <ClCompile Include="WizardItems.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\..\PlugInManager\PlugInModule.def" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CreateAnimation.h" />

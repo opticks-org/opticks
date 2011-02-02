@@ -20,6 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{767B6AEF-001B-4044-AE51-94D542FEAA3C}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
     <RootNamespace>Scripts</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -185,9 +186,6 @@
   <ItemGroup>
     <ClCompile Include="ModuleManager.cpp" />
     <ClCompile Include="ScriptPlugIn.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\..\PlugInManager\PlugInModule.def" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ScriptPlugIn.h" />

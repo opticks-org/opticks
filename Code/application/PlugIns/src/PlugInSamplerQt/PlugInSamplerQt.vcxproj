@@ -20,6 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{C34B718A-5D9C-4A27-9A26-C670DF82680B}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
     <RootNamespace>PlugInSamplerQt</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

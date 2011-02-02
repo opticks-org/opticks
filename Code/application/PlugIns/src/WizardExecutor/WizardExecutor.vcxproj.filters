@@ -9,10 +9,6 @@
       <UniqueIdentifier>{fde14aaf-efff-4c9a-9ceb-71bb3baaee84}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl</Extensions>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{fc53bd05-b7b5-4d56-be76-a259e464365d}</UniqueIdentifier>
-      <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BatchWizardExecutor.cpp">
@@ -24,11 +20,6 @@
     <ClCompile Include="WizardExecutor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\..\PlugInManager\PlugInModule.def">
-      <Filter>Source Files</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BatchWizardExecutor.h">

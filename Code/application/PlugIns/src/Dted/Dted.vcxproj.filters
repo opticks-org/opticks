@@ -7,6 +7,7 @@
     </Filter>
     <Filter Include="Header Files">
       <UniqueIdentifier>{b3021889-e3f0-4b33-bbb6-2b476a7e4bad}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>

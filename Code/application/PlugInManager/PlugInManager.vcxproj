@@ -20,6 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{8DCB3C1B-CCBF-46B5-9F71-056CF68AF1C2}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
     <RootNamespace>PlugInManager</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

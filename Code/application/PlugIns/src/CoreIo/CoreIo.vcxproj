@@ -20,8 +20,8 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{4E2BBB08-80A1-4414-B920-FC2DE4B0EB5D}</ProjectGuid>
-    <RootNamespace>CoreIo</RootNamespace>
     <Keyword>Win32Proj</Keyword>
+    <RootNamespace>CoreIo</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">

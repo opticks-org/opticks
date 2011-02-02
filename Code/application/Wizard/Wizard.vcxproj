@@ -20,6 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{9C7936F8-2C39-4E4A-B8EA-DDD29BE5F653}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
     <RootNamespace>Wizard</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

@@ -97,10 +97,10 @@ class Builder:
         else:
             dot_exe = "dot"
         graphviz_dir = os.path.abspath(join(self.depend_path,
-            "64", "bin", "graphviz"))
+            "64", "tools", "graphviz", "bin"))
         if not(os.path.exists(join(graphviz_dir, dot_exe))):
             graphviz_dir = os.path.abspath(join(self.depend_path,
-                "32", "bin", "graphviz"))
+                "32", "tools", "graphviz", "bin"))
         env["DOT_DIR"] = graphviz_dir
         self.other_doxygen_prep(build, env)
         retcode = execute_process(args, env=env)
@@ -174,6 +174,9 @@ class Builder:
         if scheme is None or scheme == "none":
             return
 
+        if options.verbosity > 1:
+            print "Updating app version..."
+
         # Read the app version directly from the file
         self.__update_build_revision_h()
         version_number = self.get_app_version_only()
@@ -231,6 +234,9 @@ class Builder:
         opticks_version_fields["OPTICKS_VERSION"] = fields_to_replace["APP_VERSION_NUMBER"]
         self.__update_h_file(join("application", "Interfaces", "OpticksVersion.h"),
             opticks_version_fields)
+
+        if options.verbosity > 1:
+            print "Done updating app version"
 
     def populate_environ_for_dependencies(self, env):
         env["OPTICKSDEPENDENCIES"] = self.depend_path
@@ -469,23 +475,6 @@ class WindowsBuilder(Builder):
                 join(proxy_dir, proxy_dll_name))
         if self.verbosity > 1:
             print "Done gathering Qt dll's needed for ArcProxy"
-        if self.verbosity > 1:
-            print "Gathering Visual Studio 7 runtime dll's..."
-        if self.build_debug_mode:
-            #Runtime DLL's
-            vs7_runtime_dlls = "C:\\luntbuild-area\\"\
-                    "VisualStudio7RuntimeDlls\\Debug"
-            if os.path.exists(vs7_runtime_dlls):
-                copy_files_in_dir(vs7_runtime_dlls, bin_path)
-        else:
-            #NOTE: This is a hack until Opticks 4 needs only Visual Studio 8
-            #Runtime DLL's
-            vs7_runtime_dlls = "C:\\luntbuild-area\\"\
-                "VisualStudio7RuntimeDlls\\Release"
-            if os.path.exists(vs7_runtime_dlls):
-                copy_files_in_dir(vs7_runtime_dlls, bin_path)
-        if self.verbosity > 1:
-            print "Done gathering Visual Studio 7 runtime dll's"
 
         return bin_path
 
@@ -580,7 +569,7 @@ class SolarisBuilder(Builder):
         if build_dir is None:
             build_dir = "Build"
 
-        return self.generic_prep_to_run(build_dir, "Solaris", "")
+        return self.generic_prep_to_run(build_dir, "Solaris", "64")
 
 class LinuxBuilder(SolarisBuilder):
     def __init__(self, dependencies, arcsdk, build_in_debug, verbosity):
@@ -605,7 +594,7 @@ class LinuxBuilder(SolarisBuilder):
         if build_dir is None:
             build_dir = "Build"
 
-        return self.generic_prep_to_run(build_dir, "Linux", "")
+        return self.generic_prep_to_run(build_dir, "Linux", "64")
 
 def create_builder(opticks_depends, arcsdk, build_in_debug,
                    msbuild, use_scons, ms_help_compiler, arch, verbosity):
@@ -754,16 +743,13 @@ def main(args):
         if builder is None:
             raise ScriptException("Unable to create builder for platform")
 
-        if options.verbosity > 1:
-            print "Updating app version..."
         builder.update_app_version_number(options.update_version_scheme,
             options.new_version, options.release_date)
-        if options.verbosity > 1:
-            print "Done updating app version"
 
-        #Force BuildRevision.h to be up-to-date, after AppVersion.h
-        #might have been changed but before we do anything else.
-        builder.get_current_app_version()
+        if options.build_opticks != "none" or options.build_doxygen != "none":
+            #Force BuildRevision.h to be up-to-date, after AppVersion.h
+            #might have been changed but before we do anything else.
+            builder.get_current_app_version()
 
         builder.build_executable(options.clean, options.build_opticks,
             options.concurrency)

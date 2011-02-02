@@ -20,6 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{2CD6BFF6-12A2-464B-9A6A-4442C8994C4D}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
     <RootNamespace>Wavelength</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

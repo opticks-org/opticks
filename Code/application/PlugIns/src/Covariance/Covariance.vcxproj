@@ -20,6 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{A7B4602C-9980-4AC4-B784-CDFAD341CAEA}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
     <RootNamespace>Covariance</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -185,9 +186,6 @@
     <ClCompile Include="CovarianceGui.cpp" />
     <ClCompile Include="ModuleManager.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_CovarianceGui.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\..\PlugInManager\PlugInModule.def" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Covariance.h" />

@@ -20,6 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{102114D1-9B4E-4354-8F30-C0E7B9DDD215}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
     <RootNamespace>Sio</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -204,9 +205,6 @@
     <ClCompile Include="OptionsIceExporter.cpp" />
     <ClCompile Include="StatisticsReaderWriter.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_OptionsIceExporter.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\..\PlugInManager\PlugInModule.def" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DateTimeReaderWriter.h" />

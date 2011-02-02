@@ -20,6 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{EA45A001-33E5-4847-85B1-D74771DDDD8A}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
     <RootNamespace>GdalImporter</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

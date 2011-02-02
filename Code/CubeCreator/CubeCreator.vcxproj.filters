@@ -5,14 +5,6 @@
       <UniqueIdentifier>{6c105b1b-5ab5-44e8-8c4e-2379dc0468e6}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
     </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{d8673dbc-3eaa-4b6f-9c91-1146cc5ab4b5}</UniqueIdentifier>
-      <Extensions>h;hpp;hxx;hm;inl</Extensions>
-    </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{7ea71829-0dbf-4534-801d-5444f24a0de6}</UniqueIdentifier>
-      <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CubeCreator.cpp">

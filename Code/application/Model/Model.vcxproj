@@ -20,6 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{94A7D2C4-8623-4EF3-8FC9-06CD470A15BD}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
     <RootNamespace>Model</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

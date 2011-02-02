@@ -39,14 +39,23 @@ if temp_env['RELEASE']:
    MODE='release'
 else:
    MODE='debug'
+dep_path = os.environ.get('OPTICKSDEPENDENCIES', None)
+if not dep_path:
+   raise Exception("OPTICKSDEPENDENCIES is not set")
+dep_path = os.path.join(dep_path, temp_env["BITS"])
+if not os.path.exists(dep_path):
+   raise Exception("Dependencies of %s does not exist" % dep_path)
+OPTICKSDEPENDENCIESINCLUDE="%s/include" % dep_path
 env = Environment(variables=vars,
                   OPTICKSPLATFORM=OPTICKSPLATFORM,
+                  OPTICKSDEPENDENCIESBIN="%s/bin" % dep_path,
+                  OPTICKSDEPENDENCIESINCLUDE=OPTICKSDEPENDENCIESINCLUDE,
                   OS=OS,
                   MODE=MODE,
                   ENV=os.environ,
                   TARGET_ARCH=TARGET_ARCH,
-                  MSVC_VERSION="8.0",
-                  tools=["default", "boost", "java", "qwt",
+                  MSVC_VERSION="10.0",
+                  tools=["default", "java", "qwt",
                          "xercesc", "ehs", "minizip", "yaml-cpp",
                          "raptor", "zlib", "pthreads", "qt4"],
                   toolpath=[TOOLPATH])
@@ -69,6 +78,7 @@ Help(vars.GenerateHelpText(env))
 env["QT_MODULES"] = ["QtCore","QtGui","Qt3Support","QtOpenGL", "QtXml","QtSql","QtNetwork"]
 env.Qt4AddModules(env["QT_MODULES"])
 
+env.AppendUnique(CXXFLAGS=["-I%s" % OPTICKSDEPENDENCIESINCLUDE])
 if OS != "windows":
    env['LINK'] = "$CXX"
 if OPTICKSPLATFORM == "solaris-sparc":
@@ -91,22 +101,22 @@ elif OS == "windows":
       env.AppendUnique(CXXFLAGS=['/Gy'])
    else:
       pass
-   env['LINKCOM'] = [env['LINKCOM'], 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;1']
-   env['SHLINKCOM'] = [env['SHLINKCOM'], 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;2']
-   env.AppendUnique(CXXFLAGS=['/EHsc', '/W3', '/Wp64', '/wd4996', '/wd4267', '/wd4250', '/errorReport:prompt', '/GR'],
+   env.AppendUnique(CXXFLAGS=['/EHsc', '/W3', '/wd4996', '/wd4267', '/wd4250', '/errorReport:prompt', '/GR'],
               CPPDEFINES=["WIN32", "NOMINMAX"],
-              LINKFLAGS=['/MAPINFO:EXPORTS', '/MAP', '/DEBUG', '/LARGEADDRESSAWARE', '/OPT:NOWIN98'],
+              LINKFLAGS=['/MAPINFO:EXPORTS', '/MAP', '/DEBUG', '/LARGEADDRESSAWARE'],
               LIBS=["opengl32", "glu32", "advapi32", "shell32"])
    if MODE == 'release':
       env.AppendUnique(CXXFLAGS=['/O2', '/Ob2', '/Oi', '/Ot', '/Oy', '/GF', '/GS-', '/MD'])
       env.AppendUnique(LIBS=["qtmain", "Qt3Support4", "QtCore4", "QtGui4", "QtOpenGL4", "QtXml4"])
       env.AppendUnique(LINKFLAGS=['/OPT:NOREF', '/OPT:NOICF', '/INCREMENTAL:NO', '/NODEFAULTLIB:"libc.lib"', '/NODEFAULTLIB:"libcmt.lib"', '/NODEFAULTLIB:"msvcrtd.lib"', '/NODEFAULTLIB:"libcd.lib"', '/NODEFAULTLIB:"libcmtd.lib"'])
    else:
+      env.AppendUnique(LIBPATH=["%s/lib/debug" % dep_path])
       env.AppendUnique(CXXFLAGS=['/Od', '/RTC1', '/RTCc', '/MDd']) 
       env.AppendUnique(CPPDEFINES=["DEBUG"])
       env.AppendUnique(LIBS=["qtmaind", "Qt3Supportd4", "QtCored4", "QtGuid4", "QtOpenGLd4", "QtXmld4"])
       env.AppendUnique(LINKFLAGS=['/INCREMENTAL', '/NODEFAULTLIB:"libc.lib"', '/NODEFAULTLIB:"libcmt.lib"', '/NODEFAULTLIB:"msvcrt.lib"', '/NODEFAULTLIB:"libcd.lib"', '/NODEFAULTLIB:"libcmtd.lib"'])
 
+env.AppendUnique(LIBPATH=["%s/lib" % dep_path])
 env.BuildDir(env["BUILDDIR"], "#", duplicate=0)
 
 if OS != "windows":
@@ -181,6 +191,7 @@ if OS == "windows":
 # Build the Opticks binary
 ####
 opticksEnv = env.Clone()
+opticksEnv.Tool("xqilla", toolpath=[TOOLPATH])
 if OS == "windows":
    opticksEnv.AppendUnique(LINKFLAGS=["/SUBSYSTEM:WINDOWS"])
 opticks = opticksEnv.Object("%s/Main.cpp" % env['BUILDDIR'])
@@ -206,6 +217,7 @@ build_dir = '%s/Batch' % env["BUILDDIR"]
 env.BuildDir(build_dir, src_dir, duplicate=0)
 batch = SConscript('Batch/SConscript', exports='build_dir')
 batchEnv = env.Clone()
+batchEnv.Tool("xqilla", toolpath=[TOOLPATH])
 if OS == "windows":
    batchEnv.AppendUnique(LINKFLAGS=["/SUBSYSTEM:CONSOLE"])
    batch = [batch,appIcon]

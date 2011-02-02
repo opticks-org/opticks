@@ -20,6 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{7E7E6BB9-95F4-4961-A39D-148429FCF9BE}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
     <RootNamespace>HdfPlugInLib</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

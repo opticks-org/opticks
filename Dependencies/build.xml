@@ -1,156 +1,353 @@
 <?xml version="1.0"?>
-<project name="opticks-deps" default="all" xmlns:ivy="antlib:org.apache.ivy.ant">
-    <property file="${basedir}/ivy-config/default.properties" />
-    <property name="organisation" value="opticks" />
-    <property name="module" value="opticks-deps" />
-    <property name="rev" value="${defaultRev}" /> <!-- ${defaultRev} comes out of ${basedir}/ivy-config/default.properties -->
-    <!-- adding a property 'no-clean' will disable cleaning before retrieving and extracting dependencies -->
-    <!-- adding a property 'no-extract' will disable extracting after retrieval -->
-    <property name="dep-path" value="${basedir}" />
-    <property name="refresh" value="false" />
+<project name="opticks-deps" default="usage" xmlns:ivy="antlib:org.apache.ivy.ant">
+<description>
+To retrieve all source code for 3rd party libaries into source/ directory:
+   If you want to remove any existing files in the source/ directory, you will
+   need to run "dependencies clean-source" first.
+   > dependencies source
 
-    <!-- targets to fetch binaries for 3rd party dependencies -->
-    <property name="32dir" value="${dep-path}/32" />
-    <property name="64dir" value="${dep-path}/64" />
-    <property name="artifact-pattern" value="pkgs/[module]/[revision]/[artifact].[ext]" />
-    <property name="ivy-pattern" value="pkgs/[module]/[revision]/[module]-ivy.xml" />
-    <target name="clean-all" depends="clean-32,clean-64,clean-source">
-    </target>
-    <target name="clean-32" unless="no-clean">
-       <delete dir="${32dir}" />
-    </target>
-    <target name="clean-64" unless="no-clean">
-       <delete dir="${64dir}" />
-    </target>
-    <target name="all" depends="all-windows,all-linux,all-solaris-sparc" description="This is the default target" />
-    <target name="all-windows" depends="all-windows-32,all-windows-64" />
-    <target name="all-windows-32" depends="clean-32,win32-debug,win32" />
-    <target name="all-windows-64" depends="clean-64,win64-debug,win64" />
-    <target name="all-linux" depends="all-linux-64" />
-    <target name="all-linux-64" depends="clean-64,linux64" />
-    <target name="all-solaris-sparc" depends="all-solaris-sparc-64" />
-    <target name="all-solaris-sparc-64" depends="clean-64,solaris-sparc64" />
+To retrieve Visual C++ pdbs for Windows 32-bit builds:
+   This does nothing if run on a system other than Windows.
+   > dependencies win32-debug-pdbs
 
-    <target name="win32-debug" depends="init-fetch" if="isWindows">
-       <ivy:retrieve organisation="${organisation}" module="${module}" inline="true" revision="${rev}" conf="win32-debug" pattern="${32dir}/${artifact-pattern}" ivypattern="${32dir}/${ivy-pattern}" transitive="${transitive}" refresh="${refresh}" settingsRef="ivy.default.settings" />
-    </target>
-    <target name="win32-debug-pdbs" depends="init-fetch" if="isWindows">
-       <ivy:retrieve organisation="${organisation}" module="${module}" inline="true" revision="${rev}" conf="win32-debug-pdbs" pattern="${32dir}/${artifact-pattern}" ivypattern="${32dir}/${ivy-pattern}" transitive="${transitive}" refresh="${refresh}" settingsRef="ivy.default.settings" />
-    </target>
-    <target name="win32" depends="init-fetch" if="isWindows">
-       <ivy:retrieve organisation="${organisation}" module="${module}" inline="true" revision="${rev}" conf="win32" pattern="${32dir}/${artifact-pattern}" ivypattern="${32dir}/${ivy-pattern}" transitive="${transitive}" refresh="${refresh}" settingsRef="ivy.default.settings" />
-    </target>
-    <target name="win64-debug" depends="init-fetch" if="isWindows">
-       <ivy:retrieve organisation="${organisation}" module="${module}" inline="true" revision="${rev}" conf="win64-debug" pattern="${64dir}/${artifact-pattern}" ivypattern="${64dir}/${ivy-pattern}" transitive="${transitive}" refresh="${refresh}" settingsRef="ivy.default.settings" />
-    </target>
-    <target name="win64-debug-pdbs" depends="init-fetch" if="isWindows">
-       <ivy:retrieve organisation="${organisation}" module="${module}" inline="true" revision="${rev}" conf="win64-debug-pdbs" pattern="${64dir}/${artifact-pattern}" ivypattern="${64dir}/${ivy-pattern}" transitive="${transitive}" refresh="${refresh}" settingsRef="ivy.default.settings" />
-    </target>
-    <target name="win64" depends="init-fetch" if="isWindows">
-       <ivy:retrieve organisation="${organisation}" module="${module}" inline="true" revision="${rev}" conf="win64" pattern="${64dir}/${artifact-pattern}" ivypattern="${64dir}/${ivy-pattern}" transitive="${transitive}" refresh="${refresh}" settingsRef="ivy.default.settings" />
-    </target>
-    <target name="linux64" depends="init-fetch" if="isLinux">
-       <ivy:retrieve organisation="${organisation}" module="${module}" inline="true" revision="${rev}" conf="linux64" pattern="${64dir}/${artifact-pattern}" ivypattern="${64dir}/${ivy-pattern}" transitive="${transitive}" refresh="${refresh}" settingsRef="ivy.default.settings" />
-    </target>
-    <target name="solaris-sparc64" depends="init-fetch" if="isSolarisSparc">
-       <ivy:retrieve organisation="${organisation}" module="${module}" inline="true" revision="${rev}" conf="solaris-sparc64" pattern="${64dir}/${artifact-pattern}" ivypattern="${64dir}/${ivy-pattern}" transitive="${transitive}" refresh="${refresh}" settingsRef="ivy.default.settings" />
-    </target>
+To retrieve Visual C++ pdbs for Windows 64-bit builds:
+   This does nothing if run on a system other than Windows.
+   > dependencies win64-debug-pdbs
 
-    <!-- targets to fetch source code -->
-    <property name="source-dir" value="${dep-path}/source" />
-    <target name="clean-source" unless="no-clean">
-       <delete dir="${source-dir}" />
-    </target>
-    <target name="source" depends="clean-source,init-fetch">
-       <ivy:retrieve organisation="${organisation}" module="${module}" inline="true" revision="${rev}" conf="source" pattern="${source-dir}/${artifact-pattern}" ivypattern="${source-dir}/${ivy-pattern}" transitive="${transitive}" refresh="${refresh}" settingsRef="ivy.default.settings" />
-    </target>
+To retrieve *up-to-date* include files and libraries for 3rd party libraries:
+   This will *DELETE* any existing files in your 32/ and 64/ directory.
+   All files required for 32-bit compilations will end up in the 32/ directory.
+   All files required for 64-bit compilations will end up in the 64/ directory.
+   The behavior of this command is dependent on the system it is run on.
+   If run on Windows:
+      Libraries for compiling 32-bit debug, 32-bit release,
+      64-bit debug and 64-bit release binaries on Windows are retrieved.
+      Visual C++ pdbs are not retrieved, neither is source code.
+   If run on Solaris:
+      Libraries for compiling 64-bit release binaries on Solaris
+      are retrieved. Source code is not retrieved.
+   If run on Linux:
+      Libraries for compiling 64-bit release binaries on Linux are
+      retrieved. Source code is not retrieved.
+   > dependencies.bat all
+   This is exactly equivalent to running retrieve-dependencies.bat or
+   retrieve-dependencies.sh
 
-    <!-- targets to perform package maintenance -->
-    <property name="staging-dir" value="${dep-path}/staging" />
-    <property name="staging-artifact-pattern" value="[artifact].[ext]" />
-    <property name="staging-ivy-pattern" value="[module]-ivy.xml" />
-    <property name="overwrite" value="false" />
-    <property name="status" value="release" />
-    <target name="retrieve-package" depends="init-ivy" description="">
-       <property name="conf" value="*" />
-       <property name="transitive" value="false" />
-       <ivy:retrieve organisation="${organisation}" module="${module}" inline="true" revision="${rev}" conf="${conf}" pattern="${staging-dir}/${staging-artifact-pattern}" ivypattern="${staging-dir}/${staging-ivy-pattern}" transitive="${transitive}" refresh="${refresh}" settingsRef="ivy.default.settings" />
-    </target>
-    <target name="publish-package" description="Used to push a dependency into the public Opticks repository">
-       <property name="resolver" value="opticks-public-publish" />
-       <ivy:configure settingsId="ivy.publish.settings" file="${basedir}/ivy-config/publish-settings.xml"/>
-       <ivy:publish organisation="${organisation}" module="${module}" publishivy="true" update="true" revision="${rev}" overwrite="${overwrite}" resolver="${resolver}" status="${status}" settingsRef="ivy.publish.settings" artifactspattern="${staging-dir}/${staging-artifact-pattern}" srcivypattern="${staging-dir}/${staging-ivy-pattern}" />
-    </target>
+Getting binaries only for build you are creating:
+   Only libraries for win32 release builds (leaves existing content in 32/ folder alone):
+   > dependencies win32
 
-    <!-- targets to mirror a repo -->
-    <target name="mirror" depends="init-ivy">
-       <property name="from-resolver" value="opticks-default" />
-       <property name="transitive" value="true" />
-       <property name="resolver" value="opticks-local" />
-       <ivy:install from="${from-resolver}" to="${resolver}" organisation="${organisation}" matcher="exact" module="${module}" revision="${rev}" overwrite="${overwrite}" transitive="${transitive}" settingsRef="ivy.default.settings" />
-    </target>
+   Only libraries for win32 debug builds (leaves existing content in 32/ folder alone):
+   > dependencies win32-debug
 
-    <!-- internal targets -->
-    <target name="init-ivy">
-       <ivy:configure settingsId="ivy.default.settings" file="${basedir}/ivy-config/opticks-settings.xml"/>
-    </target>
-    <target name="init-fetch" depends="init-ivy,enable-extraction">
-       <property name="transitive" value="true" />
-    </target>            
-    <target name="enable-extraction" unless="no-extract">
-       <property name="extract.files" value="true" />
-    </target>
-    <target name="expand-tar-gz" if="extract.files">
-       <local name="extract-dir" />
-       <condition property="extract-dir" value="${32dir}">
-           <matches string="${dep.to}" pattern=".*?[/|\\]32[/|\\]pkgs[/|\\].*" />
-       </condition>
-       <condition property="extract-dir" value="${64dir}">
-           <matches string="${dep.to}" pattern=".*?[/|\\]64[/|\\]pkgs[/|\\].*" />
-       </condition>
-       <condition property="extract-dir" value="${source-dir}">
-           <matches string="${dep.to}" pattern=".*?[/|\\]source[/|\\]pkgs[/|\\].*" />
-       </condition>
-       <untar src="${dep.to}" dest="${extract-dir}" overwrite="true" compression="gzip" failOnEmptyArchive="true" />
-    </target>
-    <target name="expand-tar-bzip2" if="extract.files">
-       <local name="extract-dir" />
-       <condition property="extract-dir" value="${32dir}">
-           <matches string="${dep.to}" pattern=".*?[/|\\]32[/|\\]pkgs[/|\\].*" />
-       </condition>
-       <condition property="extract-dir" value="${64dir}">
-           <matches string="${dep.to}" pattern=".*?[/|\\]64[/|\\]pkgs[/|\\].*" />
-       </condition>
-       <condition property="extract-dir" value="${source-dir}">
-           <matches string="${dep.to}" pattern=".*?[/|\\]source[/|\\]pkgs[/|\\].*" />
-       </condition>
-       <untar src="${dep.to}" dest="${extract-dir}" overwrite="true" compression="bzip2" failOnEmptyArchive="true" />
-    </target>
-    <target name="expand-zip" if="extract.files">
-       <local name="extract-dir" />
-       <condition property="extract-dir" value="${32dir}">
-           <matches string="${dep.to}" pattern=".*?[/|\\]32[/|\\]pkgs[/|\\].*" />
-       </condition>
-       <condition property="extract-dir" value="${64dir}">
-           <matches string="${dep.to}" pattern=".*?[/|\\]64[/|\\]pkgs[/|\\].*" />
-       </condition>
-       <condition property="extract-dir" value="${source-dir}">
-           <matches string="${dep.to}" pattern=".*?[/|\\]source[/|\\]pkgs[/|\\].*" />
-       </condition>
-       <unzip src="${dep.to}" dest="${extract-dir}" overwrite="true" failOnEmptyArchive="true" />
-    </target>
+   Only libraries for win64 release builds (leaves existing content in 64/ folder alone):
+   > dependencies win64
+   
+   Only libraries for win64 debug builds (leaves existing content in 64/ folder alone):
+   > dependencies win64-debug
+   
+   Only libraries for solaris builds (leaves existing content in 64/ folder alone):
+   > dependencies solaris-sparc64 
+   
+   Only libraries for linux builds (leaves existing content in 64/ folder alone):
+   > dependencies linux64 
 
-    <!-- determine operating system ant is being run on -->
-    <condition property="isWindows" value="true">
-       <os family="windows" />
-    </condition>
-    <condition property="isSolarisSparc" value="true">
-       <os name="SunOS" arch="sparc" />
-    </condition>
-    <condition property="isLinux" value="true">
-       <and>
-          <not><isset property="isSolarisSparc" /></not>
-          <os family="unix" />
-       </and>
-    </condition>
+Getting only what you need:
+   Provide the name and revision of the module:
+   > dependencies -Dmodule=qt -Drev=1.0.0 [otherargs]
+
+   If you want the name and revisions of the isolated dependencies, first run
+   dependencies without transitive retrieval enabled:
+   > dependencies -Dtransitive=false [otherargs]
+   And then open either:
+      32/pkgs/${defaultModule}/${defaultRev}/${defaultModule}-ivy.xml or
+      64/pkgs/${defaultModule}/${defaultRev}/${defaultModule}-ivy.xml or
+      source/pkgs/${defaultModule}/${defaultRev}/${defaultModule}-ivy.xml
+   in a text editor to locate the names and revisions of the other modules.
+
+   For example to fetch source code for Qt only:
+   > dependencies -Dmodule=qt -Drev=1.0.0 source
+
+   For example to fetch win32 debug pdbs for Qt only:
+   > dependencies -Dmodule=qt -Drev=1.0.0 win32-debug-pdbs
+
+Getting libraries for a system other than the one you are running on:
+   > dependencies linux64
+   does nothing if run on a system other than Linux.
+   This can be overriden using the isLinux, isWindows, isSolarisSparc properties
+
+   > dependencies linux64 -DisLinux=true -DisWindows=false -DisSolarisSparc=false
+   will always fetch binaries for linux 64-bit no matter what system the command
+   is run on.
+
+To mirror all 3rd party libaries into a local repository:
+   > dependencies mirror
+   All dependencies will be put into local-ivyrepo/ directory.
+
+   To mirror into a different directory use the opticks.local.root property as shown below
+   > dependencies mirror -Dopticks.local.root=C:\mylocalrepo
+
+To fetch dependencies out of local repository mirror:
+   Provide the location of the local mirror using the opticks.local.root property
+   > dependencies all -Dopticks.local.root=C:\mylocalrepo
+   Now you can retrieve dependencies without needing network access to http://opticks.org/.
+
+To edit/add new dependencies:
+   Retrieve all the content for an existing package into staging/ directory:
+      > dependencies retrieve-package -Dmodule=[module name here] -Drev=[module revision here]
+
+   To publish a package to the repository on opticks.org:
+      The ivy config and all archives must already be in the staging/ directory
+      Publishing to opticks.org requires a username and password, which is restricted to committers of the Opticks project.
+      By default, you cannot overwrite an existing revision of a module when publishing.
+      This is by design as the entire system depends on the content of the module never changing for a given revision number.
+      If you are aware of the problems with overwriting revisions of a module, you can use the -Doverwrite=true flag. 
+         > dependencies publish-package -Dmodule=[module name here] -Drev[module revision here]
+
+If you are running on a system other than Windows and are encountering
+problems running tar or gtar, you can set the following properties to use
+a different command to extract the archives (values shown are the defaults):
+   > dependencies -Dtar-bz2-command="tar --bzip2 --overwrite -xvf" -Dtar-gz-command="tar --unzip -overwrite -xvf" [other args]
+</description>
+   <target name="usage">
+      <echo>Please run dependencies -p to see the help
+
+If you just want to retrieve dependencies, you may want to run
+retrieve-dependencies.bat or retrieve-dependencies.sh.
+      </echo>
+   </target>
+   <property file="${basedir}/ivy-config/default.properties" />
+   <property name="organisation" value="opticks" />
+   <property name="defaultModule" value="opticks-deps" />
+   <property name="module" value="${defaultModule}" />
+   <property name="rev" value="${defaultRev}" /> <!-- ${defaultRev} comes out of ${basedir}/ivy-config/default.properties -->
+   <!-- adding a property 'no-clean' will disable cleaning before retrieving and extracting dependencies -->
+   <!-- adding a property 'no-extract' will disable extracting after retrieval -->
+   <property name="dep-path" value="${basedir}" />
+   <property name="refresh" value="false" />
+
+   <!-- targets to fetch binaries for 3rd party dependencies -->
+   <property name="32dir" value="${dep-path}/32" />
+   <property name="64dir" value="${dep-path}/64" />
+   <property name="pkgs-folder" value="pkgs" />
+   <property name="artifact-pattern" value="${pkgs-folder}/[module]/[revision]/[artifact].[ext]" />
+   <property name="ivy-pattern" value="${pkgs-folder}/[module]/[revision]/[module]-ivy.xml" />
+   <target name="clean-32" unless="no-clean" description="">
+      <delete dir="${32dir}" />
+   </target>
+   <target name="clean-64" unless="no-clean" description="">
+      <delete dir="${64dir}" />
+   </target>
+   <target name="purge-pkgs">
+      <delete quiet="true">
+         <!-- leave the -ivy.xml files alone -->
+         <fileset dir="${pkg-base-dir}/pkgs" includes="**/*.tar.bz2" />
+         <fileset dir="${pkg-base-dir}/pkgs" includes="**/*.tar.gz" />
+         <fileset dir="${pkg-base-dir}/pkgs" includes="**/*.zip" />
+      </delete>
+   </target>
+   <target name="all" depends="all-windows,all-linux,all-solaris-sparc" description=""/>
+   <target name="all-windows" depends="all-windows-32,all-windows-64" />
+   <target name="all-windows-32" depends="clean-32,win32-debug,win32" description="">
+      <antcall target="purge-pkgs">
+         <param name="pkg-base-dir" value="${32dir}" />
+      </antcall>
+   </target>
+   <target name="all-windows-64" depends="clean-64,win64-debug,win64" description="">
+      <antcall target="purge-pkgs">
+         <param name="pkg-base-dir" value="${64dir}" />
+      </antcall>
+   </target>
+   <target name="all-linux" depends="all-linux-64" />
+   <target name="all-linux-64" depends="clean-64,linux64">
+      <antcall target="purge-pkgs">
+         <param name="pkg-base-dir" value="${64dir}" />
+      </antcall>
+   </target>
+   <target name="all-solaris-sparc" depends="all-solaris-sparc-64" />
+   <target name="all-solaris-sparc-64" depends="clean-64,solaris-sparc64">
+      <antcall target="purge-pkgs">
+         <param name="pkg-base-dir" value="${64dir}" />
+      </antcall>
+   </target>
+
+   <target name="win32-debug" depends="init-fetch" if="isWindows" description="">
+      <ivy:retrieve organisation="${organisation}" module="${module}" inline="true" revision="${rev}" conf="win32-debug" pattern="${32dir}/${artifact-pattern}" ivypattern="${32dir}/${ivy-pattern}" transitive="${transitive}" refresh="${refresh}" settingsRef="ivy.default.settings" />
+   </target>
+   <target name="win32-debug-pdbs" depends="init-fetch" if="isWindows" description="">
+      <ivy:retrieve organisation="${organisation}" module="${module}" inline="true" revision="${rev}" conf="win32-debug-pdbs" pattern="${32dir}/${artifact-pattern}" ivypattern="${32dir}/${ivy-pattern}" transitive="${transitive}" refresh="${refresh}" settingsRef="ivy.default.settings" />
+   </target>
+   <target name="win32" depends="init-fetch" if="isWindows" description="">
+      <ivy:retrieve organisation="${organisation}" module="${module}" inline="true" revision="${rev}" conf="win32" pattern="${32dir}/${artifact-pattern}" ivypattern="${32dir}/${ivy-pattern}" transitive="${transitive}" refresh="${refresh}" settingsRef="ivy.default.settings" />
+   </target>
+   <target name="win64-debug" depends="init-fetch" if="isWindows" description="">
+      <ivy:retrieve organisation="${organisation}" module="${module}" inline="true" revision="${rev}" conf="win64-debug" pattern="${64dir}/${artifact-pattern}" ivypattern="${64dir}/${ivy-pattern}" transitive="${transitive}" refresh="${refresh}" settingsRef="ivy.default.settings" />
+   </target>
+   <target name="win64-debug-pdbs" depends="init-fetch" if="isWindows" description="">
+      <ivy:retrieve organisation="${organisation}" module="${module}" inline="true" revision="${rev}" conf="win64-debug-pdbs" pattern="${64dir}/${artifact-pattern}" ivypattern="${64dir}/${ivy-pattern}" transitive="${transitive}" refresh="${refresh}" settingsRef="ivy.default.settings" />
+   </target>
+   <target name="win64" depends="init-fetch" if="isWindows">
+      <ivy:retrieve organisation="${organisation}" module="${module}" inline="true" revision="${rev}" conf="win64" pattern="${64dir}/${artifact-pattern}" ivypattern="${64dir}/${ivy-pattern}" transitive="${transitive}" refresh="${refresh}" settingsRef="ivy.default.settings" />
+   </target>
+   <target name="linux64" depends="init-fetch" if="isLinux">
+      <ivy:retrieve organisation="${organisation}" module="${module}" inline="true" revision="${rev}" conf="linux64" pattern="${64dir}/${artifact-pattern}" ivypattern="${64dir}/${ivy-pattern}" transitive="${transitive}" refresh="${refresh}" settingsRef="ivy.default.settings" />
+   </target>
+   <target name="solaris-sparc64" depends="init-fetch" if="isSolarisSparc">
+      <ivy:retrieve organisation="${organisation}" module="${module}" inline="true" revision="${rev}" conf="solaris-sparc64" pattern="${64dir}/${artifact-pattern}" ivypattern="${64dir}/${ivy-pattern}" transitive="${transitive}" refresh="${refresh}" settingsRef="ivy.default.settings" />
+   </target>
+
+   <!-- targets to fetch source code -->
+   <property name="source-dir" value="${dep-path}/source" />
+   <target name="clean-source" description="">
+      <delete dir="${source-dir}" />
+   </target>
+   <target name="source" depends="init-fetch">
+      <ivy:retrieve organisation="${organisation}" module="${module}" inline="true" revision="${rev}" conf="source" pattern="${source-dir}/${artifact-pattern}" ivypattern="${source-dir}/${ivy-pattern}" transitive="${transitive}" refresh="${refresh}" settingsRef="ivy.default.settings" />
+      <antcall target="purge-pkgs">
+         <param name="pkg-base-dir" value="${source-dir}" />
+      </antcall>
+   </target>
+
+   <!-- targets to perform package maintenance -->
+   <property name="staging-dir" value="${dep-path}/staging" />
+   <property name="staging-artifact-pattern" value="[artifact].[ext]" />
+   <property name="staging-ivy-pattern" value="[module]-ivy.xml" />
+   <property name="overwrite" value="false" />
+   <property name="status" value="release" />
+   <target name="retrieve-package" depends="init-ivy" description="">
+      <property name="conf" value="*" />
+      <property name="transitive" value="false" />
+      <ivy:retrieve organisation="${organisation}" module="${module}" inline="true" revision="${rev}" conf="${conf}" pattern="${staging-dir}/${staging-artifact-pattern}" ivypattern="${staging-dir}/${staging-ivy-pattern}" transitive="${transitive}" refresh="${refresh}" settingsRef="ivy.default.settings" />
+   </target>
+   <target name="publish-package" description="">
+      <property name="resolver" value="opticks-public-publish" />
+      <ivy:configure settingsId="ivy.publish.settings" file="${basedir}/ivy-config/publish-settings.xml"/>
+      <ivy:publish organisation="${organisation}" module="${module}" publishivy="true" update="true" revision="${rev}" overwrite="${overwrite}" resolver="${resolver}" status="${status}" settingsRef="ivy.publish.settings" artifactspattern="${staging-dir}/${staging-artifact-pattern}" srcivypattern="${staging-dir}/${staging-ivy-pattern}" />
+   </target>
+
+   <!-- targets to mirror a repo -->
+   <target name="mirror" depends="init-ivy" description="">
+      <property name="from-resolver" value="opticks-default" />
+      <property name="transitive" value="true" />
+      <property name="resolver" value="opticks-local" />
+      <ivy:install from="${from-resolver}" to="${resolver}" organisation="${organisation}" matcher="exact" module="${module}" revision="${rev}" overwrite="${overwrite}" transitive="${transitive}" settingsRef="ivy.default.settings" />
+   </target>
+
+   <!-- internal targets -->
+   <target name="init-ivy">
+      <ivy:configure settingsId="ivy.default.settings" file="${basedir}/ivy-config/opticks-settings.xml"/>
+   </target>
+   <target name="init-fetch" depends="init-ivy,enable-extraction">
+      <property name="transitive" value="true" />
+   </target>            
+   <target name="enable-extraction" unless="no-extract">
+      <property name="extract.files" value="true" />
+   </target>
+   <target name="determine-extraction-type">
+      <condition property="use-builtin-extract">
+         <and>
+            <isset property="extract.files" />
+            <isset property="isWindows" />
+         </and>
+      </condition>
+      <condition property="use-external-extract">
+         <and>
+            <isset property="extract.files" />
+            <not><isset property="isWindows" /></not>
+         </and>
+      </condition>
+   </target>
+   <target name="expand-tar-gz-external" if="use-external-extract">
+      <local name="extract-dir" />
+      <condition property="extract-dir" value="${32dir}">
+         <matches string="${dep.to}" pattern=".*?[/|\\]32[/|\\]pkgs[/|\\].*" />
+      </condition>
+      <condition property="extract-dir" value="${64dir}">
+         <matches string="${dep.to}" pattern=".*?[/|\\]64[/|\\]pkgs[/|\\].*" />
+      </condition>
+      <condition property="extract-dir" value="${source-dir}">
+         <matches string="${dep.to}" pattern=".*?[/|\\]source[/|\\]pkgs[/|\\].*" />
+      </condition>
+      <exec command="${tar-gz-command} ${dep.to}" dir="${extract-dir}" failonerror="true" />
+   </target>
+   <target name="expand-tar-gz-builtin" if="use-builtin-extract">
+      <local name="extract-dir" />
+      <condition property="extract-dir" value="${32dir}">
+         <matches string="${dep.to}" pattern=".*?[/|\\]32[/|\\]pkgs[/|\\].*" />
+      </condition>
+      <condition property="extract-dir" value="${64dir}">
+         <matches string="${dep.to}" pattern=".*?[/|\\]64[/|\\]pkgs[/|\\].*" />
+      </condition>
+      <condition property="extract-dir" value="${source-dir}">
+         <matches string="${dep.to}" pattern=".*?[/|\\]source[/|\\]pkgs[/|\\].*" />
+      </condition>
+      <untar src="${dep.to}" dest="${extract-dir}" overwrite="true" compression="gzip" failOnEmptyArchive="true" />
+   </target>
+   <target name="expand-tar-gz" depends="expand-tar-gz-builtin,expand-tar-gz-external" />
+   <target name="expand-tar-bzip2-builtin" depends="determine-extraction-type" if="use-builtin-extract">
+      <local name="extract-dir" />
+      <condition property="extract-dir" value="${32dir}">
+         <matches string="${dep.to}" pattern=".*?[/|\\]32[/|\\]pkgs[/|\\].*" />
+      </condition>
+      <condition property="extract-dir" value="${64dir}">
+         <matches string="${dep.to}" pattern=".*?[/|\\]64[/|\\]pkgs[/|\\].*" />
+      </condition>
+      <condition property="extract-dir" value="${source-dir}">
+         <matches string="${dep.to}" pattern=".*?[/|\\]source[/|\\]pkgs[/|\\].*" />
+      </condition>
+      <untar src="${dep.to}" dest="${extract-dir}" overwrite="true" compression="bzip2" failOnEmptyArchive="true" />
+   </target>
+   <target name="expand-tar-bzip2-external" depends="determine-extraction-type" if="use-external-extract">
+      <local name="extract-dir" />
+      <condition property="extract-dir" value="${32dir}">
+         <matches string="${dep.to}" pattern=".*?[/|\\]32[/|\\]pkgs[/|\\].*" />
+      </condition>
+      <condition property="extract-dir" value="${64dir}">
+         <matches string="${dep.to}" pattern=".*?[/|\\]64[/|\\]pkgs[/|\\].*" />
+      </condition>
+      <condition property="extract-dir" value="${source-dir}">
+         <matches string="${dep.to}" pattern=".*?[/|\\]source[/|\\]pkgs[/|\\].*" />
+      </condition>
+      <exec command="${tar-bz2-command} ${dep.to}" dir="${extract-dir}" failonerror="true" />
+   </target>
+   <target name="expand-tar-bzip2" depends="expand-tar-bzip2-builtin,expand-tar-bzip2-external" />
+   <target name="expand-zip" if="extract.files">
+      <local name="extract-dir" />
+      <condition property="extract-dir" value="${32dir}">
+         <matches string="${dep.to}" pattern=".*?[/|\\]32[/|\\]pkgs[/|\\].*" />
+      </condition>
+      <condition property="extract-dir" value="${64dir}">
+         <matches string="${dep.to}" pattern=".*?[/|\\]64[/|\\]pkgs[/|\\].*" />
+      </condition>
+      <condition property="extract-dir" value="${source-dir}">
+         <matches string="${dep.to}" pattern=".*?[/|\\]source[/|\\]pkgs[/|\\].*" />
+      </condition>
+      <unzip src="${dep.to}" dest="${extract-dir}" overwrite="true" failOnEmptyArchive="true" />
+   </target>
+
+   <!-- determine operating system ant is being run on -->
+   <condition property="isWindows" value="true">
+      <os family="windows" />
+   </condition>
+   <condition property="isSolarisSparc" value="true">
+      <os name="SunOS" arch="sparc" />
+   </condition>
+   <condition property="isLinux" value="true">
+      <and>
+         <not><isset property="isSolarisSparc" /></not>
+         <os family="unix" />
+      </and>
+   </condition>
+   <condition property="tar-bz2-command" value="gtar --overwrite --bzip2 -xvf">
+      <isset property="isSolarisSparc" />
+   </condition>
+   <condition property="tar-bz2-command" value="tar --overwrite --bzip2 -xvf">
+      <isset property="isLinux" />
+   </condition>
+   <condition property="tar-gz-command" value="gtar --overwrite --ungzip -xvf">
+      <isset property="isSolarisSparc" />
+   </condition>
+   <condition property="tar-gz-command" value="tar --overwrite --ungzip -xvf">
+      <isset property="isLinux" />
+   </condition>
 </project>

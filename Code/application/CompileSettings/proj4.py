@@ -7,18 +7,10 @@ class Proj4NotFound(SCons.Warnings.Warning):
 SCons.Warnings.enableWarningClass(Proj4NotFound)
 
 def generate(env):
-    path = os.environ.get('OPTICKSDEPENDENCIES',None)
-    if path:
-       path = os.path.join(path, "libproj4")
-    if not path:
-       SCons.Warnings.warn(Proj4Found,"Could not detect Proj4")
-    else:
-       lib = "proj4"
-       if env["OS"] == "windows":
-          lib = "proj"
-       env.AppendUnique(CXXFLAGS="-I%s/includes" % (path),
-                        LIBPATH=['%s/lib/%s' % (path,env["OPTICKSPLATFORM"])],
-                        LIBS=[lib])
+    lib = "proj"
+    if env["OS"] == "windows":
+        lib = "proj"
+    env.AppendUnique(LIBS=[lib])
 
 def exists(env):
     return env.Detect('proj4')

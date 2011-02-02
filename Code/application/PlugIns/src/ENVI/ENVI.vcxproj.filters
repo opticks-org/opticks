@@ -9,10 +9,6 @@
       <UniqueIdentifier>{b0d80e98-8a1a-45d7-a75b-84d103e2d87d}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl</Extensions>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{b5f10e5f-439c-488a-8fbd-7572fdf748c5}</UniqueIdentifier>
-      <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EnviExporter.cpp">

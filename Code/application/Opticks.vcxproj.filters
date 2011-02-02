@@ -19,10 +19,10 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="App.rc">
-      <Filter>Source Files</Filter>
+      <Filter>Resource Files</Filter>
     </ResourceCompile>
     <ResourceCompile Include="PlugInUtilities\EventMessages.rc">
-      <Filter>Source Files</Filter>
+      <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>

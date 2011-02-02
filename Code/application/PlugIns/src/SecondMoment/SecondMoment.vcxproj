@@ -20,6 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{5E112F65-D477-427F-800E-4E0596C79DA5}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
     <RootNamespace>SecondMoment</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -185,9 +186,6 @@
     <ClCompile Include="SecondMoment.cpp" />
     <ClCompile Include="SecondMomentGui.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_SecondMomentGui.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\..\PlugInManager\PlugInModule.def" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SecondMoment.h" />

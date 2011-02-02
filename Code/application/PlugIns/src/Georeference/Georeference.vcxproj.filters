@@ -13,10 +13,6 @@
       <UniqueIdentifier>{6488e494-61f6-4909-a595-db3fed54041f}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{7e63b76a-ea91-45d6-9dcc-7ee9ed75e83f}</UniqueIdentifier>
-      <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GcpGeoreference.cpp">

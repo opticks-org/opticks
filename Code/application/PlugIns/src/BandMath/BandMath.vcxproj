@@ -20,6 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{8DC731C8-6AB9-4F27-8085-7BCAA272528A}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
     <RootNamespace>BandMath</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

@@ -8,15 +8,7 @@ SCons.Warnings.enableWarningClass(PthreadsNotFound)
 
 def generate(env):
    if env["OS"] == "windows":
-      path = os.environ.get('OPTICKSDEPENDENCIES',None)
-      if path:
-         path = os.path.join(path, "pthreads")
-      if not path:
-         SCons.Warnings.warn(PthreadsNotFound,"Could not detect pthreads")
-      else:
-         env.AppendUnique(CXXFLAGS=["-I%s/include" % (path)],
-                          LIBPATH=['%s/lib/%s' % (path, env["OPTICKSPLATFORM"])],
-                          LIBS=["pthreadVC2"])
+     env.AppendUnique(LIBS=["pthreadVC2"])
    elif env["OS"] == "linux":
       env.AppendUnique(CXXFLAGS="-pthread")
 
