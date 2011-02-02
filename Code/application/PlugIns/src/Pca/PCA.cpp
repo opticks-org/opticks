@@ -635,7 +635,7 @@ bool PCA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
       {
          // extract batch-mode only args
          string xformType;
-         pInArgList->getPlugInArgValue("Statistics Matrix Type", xformType);
+         pInArgList->getPlugInArgValue("Transform Type", xformType);
          if (xformType == "Second Moment")
          {
             mCalcMethod = SECONDMOMENT;
