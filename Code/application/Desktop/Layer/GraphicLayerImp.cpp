@@ -1736,10 +1736,15 @@ GraphicGroup* GraphicLayerImp::getGroup() const
 
    if (pGroup != NULL && !mGroupHasLayerSet)
    {
-      GraphicGroupImp* pImp = dynamic_cast<GraphicGroupImp*>(pGroup);
-      VERIFY(pImp != NULL);
-      pImp->setLayer(const_cast<GraphicLayer*>(dynamic_cast<const GraphicLayer*>(this)));
-      mGroupHasLayerSet = true;
+      GraphicLayer* pLayer = const_cast<GraphicLayer*>(dynamic_cast<const GraphicLayer*>(this));
+      if (pLayer != NULL)     // pLayer will be NULL if adding an object in a derived layer constructor
+      {
+         GraphicGroupImp* pImp = dynamic_cast<GraphicGroupImp*>(pGroup);
+         VERIFY(pImp != NULL);
+
+         pImp->setLayer(pLayer);
+         mGroupHasLayerSet = true;
+      }
    }
 
    return pGroup;

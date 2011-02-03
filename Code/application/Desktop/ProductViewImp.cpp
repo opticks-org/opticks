@@ -79,6 +79,8 @@ ProductViewImp::ProductViewImp(const string& id, const string& viewName, QGLCont
    DataDescriptorAdapter classificationDescriptor("Classification", "AnnotationElement", NULL);
    mpClassificationLayer = new ClassificationLayerAdapter(SessionItemImp::generateUniqueId(), "Classification",
       new AnnotationElementAdapter(classificationDescriptor, SessionItemImp::generateUniqueId()));
+   mpClassificationLayer->getGroup();     // This call sets the layer into the classification layer text objects,
+                                          // which were created in the layer constructor
    mpClassificationLayer->setView(this);
 
    // Initialization
@@ -669,16 +671,32 @@ void ProductViewImp::updateClassificationMarks(const Classification* pClassifica
       strBottomText.prepend("Not for Production Use\n");
    }
 
+   double pitch = getPitch();
+
    TextObject* pTopText = mpClassificationLayer->getTopText();
    if (pTopText != NULL)
    {
-      pTopText->setText(strTopText.toStdString());
+      if (pitch >= 0.0)
+      {
+         pTopText->setText(strTopText.toStdString());
+      }
+      else
+      {
+         pTopText->setText(strBottomText.toStdString());
+      }
    }
 
    TextObject* pBottomText = mpClassificationLayer->getBottomText();
    if (pBottomText != NULL)
    {
-      pBottomText->setText(strBottomText.toStdString());
+      if (pitch >= 0.0)
+      {
+         pBottomText->setText(strBottomText.toStdString());
+      }
+      else
+      {
+         pBottomText->setText(strTopText.toStdString());
+      }
    }
 }
 
