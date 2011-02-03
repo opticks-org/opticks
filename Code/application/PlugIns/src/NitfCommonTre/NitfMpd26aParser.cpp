@@ -131,6 +131,54 @@ bool Nitf::Mpd26aParser::runAllTests(Progress* pProgress, ostream& failure)
       "099999999"                // FIELD45
       );
 
+   static const string data5(
+      "99999999999"              // FIELD1
+      "ab"                       // FIELD2
+      "9999999"                  // FIELD3
+      "999999.999"               // FIELD4
+      "99.999"                   // FIELD5
+      "999.99999"                // FIELD6
+      "abc"                      // FIELD7
+      "9"                        // FIELD8
+      "A"                        // FIELD9
+      "-99.9"                    // FIELD10
+      "999.9"                    // FIELD11
+      "0"                        // FIELD12
+      "9"                        // FIELD13
+      "-999"                     // FIELD14
+      "099999999"                // FIELD15
+      "-99999999"                // FIELD16
+      "099999999"                // FIELD17
+      "999999.999"               // FIELD18
+      "099999999"                // FIELD19
+      "-99999999"                // FIELD20
+      "099999999"                // FIELD21
+      "-99999999"                // FIELD22
+      "099999999"                // FIELD23
+      "-99999999"                // FIELD24
+      "099999999"                // FIELD25
+      "-99999999"                // FIELD26
+      "099999999"                // FIELD27
+      "-99999999"                // FIELD28
+      "099999999"                // FIELD29
+      "-99999999"                // FIELD30
+      "099999999"                // FIELD31
+      "-99999999"                // FIELD32
+      "099999999"                // FIELD33
+      "-99999999"                // FIELD34
+      "099999999"                // FIELD35
+      "-99999999"                // FIELD36
+      "099999999"                // FIELD37
+      "-99999999"                // FIELD38
+      "099999999"                // FIELD39
+      "-99999999"                // FIELD40
+      "099999999"                // FIELD41
+      "-99999999"                // FIELD42
+      "099999999"                // FIELD43
+      "-99999999"                // FIELD44
+      "099999999"                // FIELD45
+      );
+
    FactoryResource<DynamicObject> treDO;
    size_t numBytes(0);
 
@@ -161,7 +209,7 @@ bool Nitf::Mpd26aParser::runAllTests(Progress* pProgress, ostream& failure)
 
    // Start of test 2 - Negative test: 1 extra byte in input stream
    stringstream input2(data);
-   input2 << "1";          // Add one more byte; valid as alphanumberic or numeric
+   input2 << "1";          // Add one more byte; valid as alphanumeric or numeric
    numBytes = data.size() + 1;
    success = toDynamicObject(input2, numBytes, *treDO.get(), errorMessage);
    if (success == true)     // negative test so success must == false.
@@ -209,6 +257,54 @@ bool Nitf::Mpd26aParser::runAllTests(Progress* pProgress, ostream& failure)
 
    treDO->clear();
 
+   if (status == INVALID)
+   {
+      return false;
+   }
+
+   istringstream input5(data5);
+   numBytes = data5.size();
+
+   errorMessage.clear();
+   success = toDynamicObject(input5, numBytes, *treDO.get(), errorMessage);
+
+   if (!errorMessage.empty())
+   {
+      failure << errorMessage << endl;
+      errorMessage.clear();
+   }
+
+   if (success)
+   {
+      status = isTreValid(*treDO.get(), failure);
+   }
+   else
+   {
+      status = INVALID;
+   }
+
+   if (status == INVALID)
+   {
+      return false;
+   }
+
+   stringstream output5;
+   size_t numBytesWritten = 0;
+   success = fromDynamicObject(*treDO.get(), output5, numBytesWritten, errorMessage);
+   if (!errorMessage.empty())
+   {
+      failure << errorMessage << endl;
+      errorMessage.clear();
+   }
+
+   if (success == false || numBytesWritten != numBytes || output5.str() != input5.str())
+   {
+      failure << "test5 failed" << endl;
+      return false;
+   }
+
+   treDO->clear();
+
    return (status != INVALID);
 }
 
@@ -233,7 +329,7 @@ bool Nitf::Mpd26aParser::toDynamicObject(istream& input, size_t numBytes, Dynami
    readField<double>(input, output, success, MPD26A::FIELD11, 5, errorMessage, buf, true);
    readField<unsigned int>(input, output, success, MPD26A::FIELD12, 1, errorMessage, buf, true);
    readField<unsigned int>(input, output, success, MPD26A::FIELD13, 1, errorMessage, buf, true);
-   readField<unsigned int>(input, output, success, MPD26A::FIELD14, 4, errorMessage, buf, true);
+   readField<int>(input, output, success, MPD26A::FIELD14, 4, errorMessage, buf, true);
    readField<int>(input, output, success, MPD26A::FIELD15, 9, errorMessage, buf, true);
    readField<int>(input, output, success, MPD26A::FIELD16, 9, errorMessage, buf, true);
    readField<int>(input, output, success, MPD26A::FIELD17, 9, errorMessage, buf, true);
@@ -326,8 +422,8 @@ Nitf::TreState Nitf::Mpd26aParser::isTreValid(const DynamicObject& tre, ostream&
    status = MaxState(status, testTagValueRange<unsigned int>(tre, reporter,
       &numFields, MPD26A::FIELD13, 0U, 9U));
 
-   status = MaxState(status, testTagValueRange<unsigned int>(tre, reporter,
-      &numFields, MPD26A::FIELD14, 0U, 999U));
+   status = MaxState(status, testTagValueRange<int>(tre, reporter,
+      &numFields, MPD26A::FIELD14, -999, 999));
 
    status = MaxState(status, testTagValueRange<int>(tre, reporter,
       &numFields, MPD26A::FIELD15, -99999999, 99999999));
@@ -464,7 +560,7 @@ bool Nitf::Mpd26aParser::fromDynamicObject(const DynamicObject& input, ostream& 
       output << toString(dv_cast<double>(input.getAttribute(MPD26A::FIELD11)), 5, 1);
       output << toString(dv_cast<unsigned int>(input.getAttribute(MPD26A::FIELD12)), 1, -1);
       output << toString(dv_cast<unsigned int>(input.getAttribute(MPD26A::FIELD13)), 1, -1);
-      output << toString(dv_cast<unsigned int>(input.getAttribute(MPD26A::FIELD14)), 4, -1);
+      output << toString(dv_cast<int>(input.getAttribute(MPD26A::FIELD14)), 4, -1);
       output << toString(dv_cast<int>(input.getAttribute(MPD26A::FIELD15)), 9, -1);
       output << toString(dv_cast<int>(input.getAttribute(MPD26A::FIELD16)), 9, -1);
       output << toString(dv_cast<int>(input.getAttribute(MPD26A::FIELD17)), 9, -1);
