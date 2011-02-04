@@ -256,7 +256,7 @@ public:
    /**
     *  Calculates the angle to north.
     *
-    *  This method calculates the counterclockwise rotation to north from the visible center of the view. It checks if the
+    *  This method calculates the counterclockwise rotation to north from the center of the view. It checks if the
     *  view is upside down and adjusts the angle accordingly.
     *
     *  @param  pRaster

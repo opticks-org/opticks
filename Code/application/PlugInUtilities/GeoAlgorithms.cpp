@@ -569,7 +569,15 @@ bool GeoAlgorithms::getAngleToNorth(const RasterElement* pRaster, double& angle,
 bool GeoAlgorithms::getAngleToNorth(const RasterElement* pRaster, const PerspectiveView* pView, double& angle)
 {
    VERIFY(pView != NULL);
-   LocationType pixelStart = pView->getVisibleCenter();
+   LocationType pixelStart;
+   double minX(0.0);
+   double minY(0.0);
+   double maxX(0.0);
+   double maxY(0.0);
+   pView->getExtents(minX, minY, maxX, maxY);
+   pixelStart.mX = (maxX + minX) / 2.0;
+   pixelStart.mY = (maxY + minY) / 2.0;
+
    if (getAngleToNorth(pRaster, angle, pixelStart))
    {
       if (pView->getPitch() > 0.0)  // image flipped so need to reverse angle
