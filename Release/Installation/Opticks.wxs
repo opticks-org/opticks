@@ -189,7 +189,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
                <File Name="43-IceExporter.cfg" Id="F__IceExporterCfg" />
                <File Name="44-AnnotationImagePalette.cfg" Id="F__AnnotationImagePaletteCfg" />
                <File Name="50-KmlServer.cfg" Id="F__KmlServerCfg" />
-               <Util:XmlFile Id="F__UpdateTempDirCfg" Action="setValue" File="[#F__TempDirCfg]" ElementPath="/ConfigurationSettings/group/attribute/attribute/value" Value="[TEMPDATADIR]" />
+               <Util:XmlFile Id="F__UpdateTempDirCfg" Action="bulkSetValue" File="[#F__TempDirCfg]" ElementPath="/ConfigurationSettings/group/attribute/attribute/value" Value="[TEMPDATADIR]" />
             </Component>
             <Component Id="C__SaveTempDataDirSelection" Guid="$(var.C__SaveTempDataDirSelectionGuid)" Win64="no">
                <RegistryValue Key="Software\Opticks\$(var.PublicVersionNumber) $(var.UserPlatform)\StoredTempDataDirSelection" Value="[TEMPDATADIR]" Root="HKMU" Action="write" Id="R__StoredTempDataDirSelection" Type="string" KeyPath="yes" />
