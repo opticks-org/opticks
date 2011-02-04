@@ -304,8 +304,12 @@ void PlugInManagerServicesImp::executeStartupPlugIns(Progress* pProgress) const
       {
          if (pDescriptor->isExecutedOnStartup() == true)
          {
-            ExecutableResource plugIn(pDescriptor->getName(), string(), pProgress, bBatch);
-            plugIn->execute();
+            if (((bBatch == true) && (pDescriptor->hasBatchSupport() == true)) ||
+               ((bBatch == false) && (pDescriptor->hasInteractiveSupport() == true)))
+            {
+               ExecutableResource plugIn(pDescriptor->getName(), string(), pProgress, bBatch);
+               plugIn->execute();
+            }
          }
       }
    }
