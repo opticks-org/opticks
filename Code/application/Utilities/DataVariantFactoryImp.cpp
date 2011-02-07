@@ -62,7 +62,14 @@ namespace
          {
             if (XMLString::equals(pVectorElement->getNodeName(), X("value")))
             {
-               values.push_back(StringUtilities::fromXmlString<N>(A(pVectorElement->getTextContent())));
+               bool error;
+               N value = StringUtilities::fromXmlString<N>(A(pVectorElement->getTextContent()), &error);
+               if (error)
+               {
+                  return false;
+               }
+
+               values.push_back(value);
             }
          }
          return true;
@@ -194,11 +201,10 @@ public:
       {
          if (XMLString::equals(pNode->getNodeName(), X("value")))
          {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Serialization should fail if fromXml fails. "\
-   "See OPTICKS-589 (dadkins)")
+            bool error;
             string str = A(pNode->getTextContent());
-            mValue = StringUtilities::fromXmlString<T>(str);
-            return true;
+            mValue = StringUtilities::fromXmlString<T>(str, &error);
+            return !error;
          }
       }
       return false;
