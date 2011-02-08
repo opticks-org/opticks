@@ -827,10 +827,10 @@ namespace RasterUtilities
     *           The DimensionDescriptors (unmodified from the RasterElement) for the rows
     *           which should be included in this chip.
     *  @param   selectedColumns
-    *           The DimensionDescriptors (unmodified from the RasterElement) for the rows
+    *           The DimensionDescriptors (unmodified from the RasterElement) for the columns
     *           which should be included in this chip.
     *  @param   selectedBands
-    *           The DimensionDescriptors (unmodified from the RasterElement) for the rows
+    *           The DimensionDescriptors (unmodified from the RasterElement) for the bands
     *           which should be included in this chip.
     *
     * @return True if the operation succeeded, false otherwise.

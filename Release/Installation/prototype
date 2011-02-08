@@ -61,6 +61,7 @@ d none $APPDIR/PlugIns 2755 root $GROUP
 f none $APPDIR/PlugIns/AnnotationImagePalette.so=$OpticksBinariesDir/PlugIns/AnnotationImagePalette.so 644 root $GROUP
 f none $APPDIR/PlugIns/Aspam.so=$OpticksBinariesDir/PlugIns/Aspam.so 644 root $GROUP
 f none $APPDIR/PlugIns/AutoImporter.so=$OpticksBinariesDir/PlugIns/AutoImporter.so 644 root $GROUP
+f none $APPDIR/PlugIns/BandBinning.so=$OpticksBinariesDir/PlugIns/BandBinning.so 644 root $GROUP
 f none $APPDIR/PlugIns/BandMath.so=$OpticksBinariesDir/PlugIns/BandMath.so 644 root $GROUP
 f none $APPDIR/PlugIns/ConvolutionFilter.so=$OpticksBinariesDir/PlugIns/ConvolutionFilter.so 644 root $GROUP
 f none $APPDIR/PlugIns/CoreIo.so=$OpticksBinariesDir/PlugIns/CoreIo.so 644 root $GROUP

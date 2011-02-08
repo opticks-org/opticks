@@ -226,6 +226,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
                <File Name="AnnotationImagePalette.dll" Id="F__AnnotationImagePalettePlugIn" DiskId="1" />
                <File Name="Aspam.dll" Id="F__AspamPlugIn" DiskId="1" />
                <File Name="AutoImporter.dll" Id="F__AutoImporterPlugIn" DiskId="1" />
+               <File Name="BandBinning.dll" Id="F__BandBinningPlugIn" DiskId="1" />
                <File Name="BandMath.dll" Id="F__BandMathPlugIn" DiskId="1" />
                <File Name="ConvolutionFilter.dll" Id="F__ConvolutionFilterPlugIn" DiskId="1" />
                <File Name="CoreIo.dll" Id="F__CoreIoPlugIn" DiskId="1" />

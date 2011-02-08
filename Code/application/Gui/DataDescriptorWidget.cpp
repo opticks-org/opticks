@@ -683,7 +683,11 @@ bool DataDescriptorWidget::applyToDataDescriptor(DataDescriptor* pDescriptor)
 
    // Bad values
    QString strBadValues = getDescriptorValue("Bad Values");
-   if (strBadValues.isEmpty() == false)
+   if (strBadValues.isEmpty() == true)
+   {
+      pRasterDescriptor->setBadValues(vector<int>());
+   }
+   else
    {
 #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Use a QListView to allow editing of bad values, " \
    "since the fromDisplayString parser is brittle? (kstreith)")

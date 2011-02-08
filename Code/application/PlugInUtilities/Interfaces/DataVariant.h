@@ -332,7 +332,7 @@ public:
     *  @return  Returns DataVariant::SUCCESS if the variant was successfully
     *           initialized from the text, DataVariant::FAILURE if the variant
     *           was not successfully initialized from the
-    *           text or DataVariant::NOT_SUPPORTED if the given type does not supported
+    *           text or DataVariant::NOT_SUPPORTED if the given type does not support
     *           being initialized from text.
     */
    Status fromXmlString(const std::string &type, const std::string &text);
@@ -347,7 +347,7 @@ public:
     *           depending on the result of the toXmlString operation.
     *
     *  @return  The value in the variant converted to a string. If the variant
-    *            is invalid, an empty string will be returned. If pStatus
+    *           is invalid, an empty string will be returned. If pStatus
     *           is set to DataVariant::FAILURE or DataVariant::NOT_SUPPORTED,
     *           empty string will be returned.
     */
@@ -365,7 +365,7 @@ public:
     *  @return  Returns DataVariant::SUCCESS if the variant was successfully
     *           initialized from the text, DataVariant::FAILURE if the variant
     *           was not successfully initialized from the
-    *           text or DataVariant::NOT_SUPPORTED if the given type does not supported
+    *           text or DataVariant::NOT_SUPPORTED if the given type does not support
     *           being initialized from text.
     */
    Status fromDisplayString(const std::string &type, const std::string &text);

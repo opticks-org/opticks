@@ -373,6 +373,7 @@ public:
 
    /**
     *  Gets the values that will be excluded from statistics computation.
+    *  These values will always be sorted.
     *
     *  @return  The values that should be ignored when computing statistics.
     */

@@ -114,6 +114,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Wavelength", "PlugIns\src\W
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UpdateBuildRevision", "UpdateBuildRevision\UpdateBuildRevision.vcxproj", "{7D69A896-3CC1-4C11-9D14-090EEAA8B486}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BandBinning", "PlugIns\src\BandBinning\BandBinning.vcxproj", "{E94FF0AF-CA9D-42FB-9539-BDA5CA0FD435}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -574,6 +576,14 @@ Global
 		{7D69A896-3CC1-4C11-9D14-090EEAA8B486}.Release|Win32.Build.0 = Release|Win32
 		{7D69A896-3CC1-4C11-9D14-090EEAA8B486}.Release|x64.ActiveCfg = Release|x64
 		{7D69A896-3CC1-4C11-9D14-090EEAA8B486}.Release|x64.Build.0 = Release|x64
+		{E94FF0AF-CA9D-42FB-9539-BDA5CA0FD435}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E94FF0AF-CA9D-42FB-9539-BDA5CA0FD435}.Debug|Win32.Build.0 = Debug|Win32
+		{E94FF0AF-CA9D-42FB-9539-BDA5CA0FD435}.Debug|x64.ActiveCfg = Debug|x64
+		{E94FF0AF-CA9D-42FB-9539-BDA5CA0FD435}.Debug|x64.Build.0 = Debug|x64
+		{E94FF0AF-CA9D-42FB-9539-BDA5CA0FD435}.Release|Win32.ActiveCfg = Release|Win32
+		{E94FF0AF-CA9D-42FB-9539-BDA5CA0FD435}.Release|Win32.Build.0 = Release|Win32
+		{E94FF0AF-CA9D-42FB-9539-BDA5CA0FD435}.Release|x64.ActiveCfg = Release|x64
+		{E94FF0AF-CA9D-42FB-9539-BDA5CA0FD435}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
