@@ -14,6 +14,7 @@
 #include "Slot.h"
 #include "xmlwriter.h"
 
+#include <QtCore/QCoreApplication>
 #include <QtCore/QDir>
 #include <QtCore/QFile>
 #include <QtCore/QList>
@@ -569,6 +570,7 @@ void ScriptingWidget::addOutputText(const QString& strMessage, bool error)
       {
          setTextCursor(cursor);
       }
+      QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
    }
 }
 
