@@ -81,9 +81,6 @@ protected:
    virtual void contextMenuEvent(QContextMenuEvent* pEvent);
    virtual void wheelEvent(QWheelEvent* pEvent);
 
-   virtual void drawItems(QPainter* pPainter, int numItems, QGraphicsItem* items[],
-      const QStyleOptionGraphicsItem options[]);
-
    void itemAdded(Subject& subject, const std::string& signal, const boost::any& data);
    void itemRemoved(Subject& subject, const std::string& signal, const boost::any& data);
    void executionOrderChanged(Subject& subject, const std::string& signal, const boost::any& data);

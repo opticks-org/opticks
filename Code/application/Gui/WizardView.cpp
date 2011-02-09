@@ -17,7 +17,6 @@
 #include <QtGui/QPainter>
 #include <QtGui/QPrintDialog>
 #include <QtGui/QPrinter>
-#include <QtGui/QStyleOptionGraphicsItem>
 #include <QtGui/QWheelEvent>
 
 #include "AppVersion.h"
@@ -67,6 +66,16 @@ WizardView::WizardView(QGraphicsScene* pScene, QWidget* pParent) :
    setRubberBandSelectionMode(Qt::ContainsItemShape);
    setResizeAnchor(QGraphicsView::NoAnchor);
    setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+
+   if (pScene != NULL)
+   {
+      // Ensure that the origin is included in the scene rect so that the
+      // first added wizard item is not translated to the view origin
+      QGraphicsRectItem* pTempItem = pScene->addRect(0.0, 0.0, 1.0, 1.0);
+      sceneRect();   // Force the scene rect to update
+      pScene->removeItem(pTempItem);
+      delete pTempItem;
+   }
 
    // Corner widget
    QWidget* pCorner = new QWidget(this);
@@ -1349,27 +1358,6 @@ void WizardView::wheelEvent(QWheelEvent* pEvent)
    }
 
    zoomBy(factor);
-}
-
-void WizardView::drawItems(QPainter* pPainter, int numItems, QGraphicsItem* items[],
-                           const QStyleOptionGraphicsItem options[])
-{
-   if (numItems > 0)
-   {
-      std::vector<QStyleOptionGraphicsItem> styleOptions(numItems);
-      for (int i = 0; i < numItems; ++i)
-      {
-         QStyleOptionGraphicsItem option = options[i];
-         option.state &= ~(QStyle::State_Selected);
-
-         styleOptions[i] = option;
-      }
-
-      QGraphicsView::drawItems(pPainter, numItems, items, &styleOptions[0]);
-      return;
-   }
-
-   QGraphicsView::drawItems(pPainter, numItems, items, options);
 }
 
 void WizardView::itemAdded(Subject& subject, const std::string& signal, const boost::any& data)

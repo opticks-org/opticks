@@ -7,6 +7,9 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtGui/QStyleOptionGraphicsItem>
+
+#include "AppVerify.h"
 #include "WizardLine.h"
 
 WizardLine::WizardLine(WizardNode* pOutputNode, WizardNode* pInputNode, QGraphicsItem* pParent) :
@@ -42,11 +45,22 @@ WizardNode* WizardLine::getOutputNode() const
 
 void WizardLine::paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget)
 {
+   VERIFYNRV(pOption != NULL);
+
+   // Disable the default selection rectangle
+   bool selected = isSelected();
+
+   QStyleOptionGraphicsItem option = *pOption;
+   if (selected == true)
+   {
+      option.state &= ~(QStyle::State_Selected);
+   }
+
    // Draw the line
-   QGraphicsLineItem::paint(pPainter, pOption, pWidget);
+   QGraphicsLineItem::paint(pPainter, &option, pWidget);
 
    // Draw the selection nodes
-   if ((isSelected() == true) && (pPainter != NULL))
+   if ((selected == true) && (pPainter != NULL))
    {
       pPainter->setBrush(Qt::yellow);
       pPainter->setPen(QPen(Qt::black, 1));

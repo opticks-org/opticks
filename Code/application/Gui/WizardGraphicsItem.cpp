@@ -12,7 +12,9 @@
 #include <QtGui/QGraphicsScene>
 #include <QtGui/QGraphicsSceneMouseEvent>
 #include <QtGui/QPainter>
+#include <QtGui/QStyleOptionGraphicsItem>
 
+#include "AppVerify.h"
 #include "PlugInManagerServices.h"
 #include "WizardGraphicsItem.h"
 #include "WizardNodeImp.h"
@@ -105,7 +107,7 @@ WizardGraphicsItem::WizardGraphicsItem(WizardItem* pItem, QGraphicsItem* pParent
    updateNodes();
    addToGroup(mpRect);
    addToGroup(mpText);
-   setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable);
+   setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemSendsGeometryChanges);
 
    // Connections
    mpItem.addSignal(SIGNAL_NAME(WizardItemImp, Renamed), Slot(this, &WizardGraphicsItem::itemRenamed));
@@ -299,11 +301,22 @@ QPainterPath WizardGraphicsItem::shape() const
 
 void WizardGraphicsItem::paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget)
 {
+   VERIFYNRV(pOption != NULL);
+
+   // Disable the default selection rectangle
+   bool selected = isSelected();
+
+   QStyleOptionGraphicsItem option = *pOption;
+   if (selected == true)
+   {
+      option.state &= ~(QStyle::State_Selected);
+   }
+
    // Draw the item
-   QGraphicsItemGroup::paint(pPainter, pOption, pWidget);
+   QGraphicsItemGroup::paint(pPainter, &option, pWidget);
 
    // Draw the selection nodes
-   if ((isSelected() == true) && (pPainter != NULL))
+   if ((selected == true) && (pPainter != NULL))
    {
       QRectF itemRect = boundingRect();
       const int numSelectionNodes = 8;
