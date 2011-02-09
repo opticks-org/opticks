@@ -1,1 +1,0 @@
-Double-click on the Opticks-[VersionNumber]-32bit.msi to run the installer.

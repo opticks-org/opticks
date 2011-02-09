@@ -1,5 +1,0 @@
-Download the "Microsoft Visual C++ 2005 SP1 Redistributable Package (x64)" from Microsoft's website and first install it.
-The following link should work:
-	http://www.microsoft.com/downloads/details.aspx?FamilyID=eb4ebe2d-33c0-4a47-9dd4-b9a6d7bd44da&DisplayLang=en
-
-Double-click on the Opticks-[VersionNumber]-64bit.msi to run the installer.

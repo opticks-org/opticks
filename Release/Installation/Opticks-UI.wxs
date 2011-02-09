@@ -114,7 +114,7 @@
                <Publish Event="SpawnDialog" Value="CancelConfirmDlg">1</Publish>
             </Control>
             <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="$(var.BackButtonText)">
-               <Publish Event="NewDialog" Value="SystemClassificationDlg">1</Publish>
+               <Publish Event="NewDialog" Value="FeatureSelectionDlg">1</Publish>
             </Control>
             <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" TabSkip="no" Text="Banner_Image" />
             <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
@@ -332,7 +332,11 @@
          </Dialog>
 
          <Dialog Id="FeatureSelectionDlg" Width="370" Height="270" Title="$(var.DialogTitle)" TrackDiskSpace="yes">
-            <Control Id="Tree" Type="SelectionTree" X="11" Y="56" Width="175" Height="164" Property="_BrowseProperty" Sunken="yes" TabSkip="no" Text="Tree of selections" />
+            <Control Id="Tree" Type="SelectionTree" X="11" Y="56" Width="175" Height="135" Property="_BrowseProperty" Sunken="yes" TabSkip="no" Text="Tree of selections" />
+            <Control Id="ChangeSecurity" Type="PushButton" X="11" Y="199" Width="175" Height="17" Text="Security Banners and Classification..." Disabled="yes">
+               <Condition Action="enable">NOT Installed</Condition>
+               <Publish Event="SpawnDialog" Value="SystemClassificationDlg">1</Publish>
+            </Control>
             <Control Id="Reset" Type="PushButton" X="25" Y="243" Width="73" Height="17" Text="Re&amp;set">
                <Publish Event="Reset" Value="0">1</Publish>
                <Subscribe Event="SelectionNoItems" Attribute="Enabled" />
@@ -347,7 +351,7 @@
             </Control>
             <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="$(var.NextButtonText)">
                <Subscribe Event="SelectionNoItems" Attribute="Enabled" />
-               <Publish Event="NewDialog" Value="SystemClassificationDlg">NOT Installed</Publish>
+               <Publish Event="NewDialog" Value="ConfirmInstallDlg">NOT Installed</Publish>
                <Publish Event="NewDialog" Value="ConfirmChangeDlg">__MaintenanceMode = "Change"</Publish>
             </Control>
             <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="$(var.CancelButtonText)">
@@ -622,15 +626,12 @@
          </Dialog>
 
          <Dialog Id="SystemClassificationDlg" Width="370" Height="270"  Title="$(var.DialogTitle)">
-            <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Text="$(var.NextButtonText)" Default="yes">
-               <Condition Action="enable">CLASSIFICATIONLEVEL = "Unclassified" OR CLASSIFICATIONLEVEL = "Confidential" OR CLASSIFICATIONLEVEL = "Secret" OR CLASSIFICATIONLEVEL = "TopSecret"</Condition>
-               <Publish Event="NewDialog" Value="ConfirmInstallDlg" Order="1">NOT Installed</Publish>
+            <Control Id="OK" Type="PushButton" X="240" Y="243" Width="56" Height="17" Default="yes" Text="$(var.OkButtonText)">
+               <Publish Event="EndDialog" Value="Return">1</Publish>
             </Control>
-            <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="$(var.BackButtonText)">
-               <Publish Event="NewDialog" Value="FeatureSelectionDlg">1</Publish>
-            </Control>
-            <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Text="$(var.CancelButtonText)" Cancel="yes">
-               <Publish Event="SpawnDialog" Value="CancelConfirmDlg">1</Publish>
+            <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="$(var.CancelButtonText)">
+               <Publish Event="Reset" Value="0">1</Publish>
+               <Publish Event="EndDialog" Value="Return">1</Publish>
             </Control>
             <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" TabSkip="no" Text="Banner_Image" />
             <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />

@@ -537,7 +537,7 @@ if [ $? = 3 ]; then
 fi
 echo "CLASSIFICATIONLEVEL=$CLASSIFICATIONLEVEL" >> $1
 
-result=`ckyorn -d "y" -p "Should Opticks display classification banners, default is yes?" | cut -c1-1 | tr [A-Z] [a-z]`
+result=`ckyorn -d "n" -p "Should Opticks display classification banners, default is no?" | cut -c1-1 | tr [A-Z] [a-z]`
 if [ $result = "q" ]; then
    exit 1
 fi

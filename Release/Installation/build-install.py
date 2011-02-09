@@ -533,22 +533,8 @@ class WixBuilder(CommonBuilder):
                 "is %s" % (installer_created))
 
         if self.package_dir is not None and os.path.exists(self.package_dir):
-            if is_64_bit:
-                platform = "64Bit"
-            else:
-                platform = "32Bit"
-            zip_name = os.path.abspath(os.path.join(self.package_dir,
-                "opticks-%s-windows-%s.zip" % (version_number, platform)))
-            if self.verbosity > 1:
-                print "Creating compressed archive %s..." % (zip_name)
-            zip_obj = zipfile.ZipFile(zip_name, "w", zipfile.ZIP_DEFLATED)
-            zip_obj.write(os.path.abspath(os.path.join(output_path,
-                msi_name + ".msi")), msi_name + ".msi")
-            zip_obj.write(os.path.abspath(os.path.join("DownloadDocs",
-                "%sMsi" % (platform), "INSTALLING.txt")), "INSTALLING.txt")
-            zip_obj.close()
-            if self.verbosity > 1:
-                print "Done creating compressed archive"
+            shutil.copy(os.path.abspath(os.path.join(output_path,
+                msi_name + ".msi")), self.package_dir)
         if self.verbosity > 1:
             "Done generating MSI"
 
@@ -770,9 +756,6 @@ class PackageBuilder(CommonBuilder):
             os.makedirs(tar_input)
             shutil.copy2(os.path.abspath(os.path.join(self.output_dir,
                 output_pkg_name)), os.path.join(tar_input, output_pkg_name))
-            shutil.copy2(os.path.abspath(os.path.join("DownloadDocs",
-                "SolPackage", "INSTALLING.txt")),
-                os.path.join(tar_input, "INSTALLING.txt"))
 
             tar_args = list()
             tar_args.append("tar")

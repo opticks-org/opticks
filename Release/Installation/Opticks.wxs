@@ -497,8 +497,8 @@ are defined in Opticks-Version.wxi, so include that file now -->
       
       <Property Id="ALLUSERS" Value="1" />
       <Property Id="ARPPRODUCTICON" Value="OpticksIcon" />
-      <Property Id="CLASSIFICATIONLEVEL" Value="TopSecret" Secure="yes" />
-      <Property Id="CLASSIFICATIONDISPLAY" Value="1" Secure="yes" />
+      <Property Id="CLASSIFICATIONLEVEL" Value="Unclassified" Secure="yes" />
+      <Property Id="CLASSIFICATIONDISPLAY" Secure="yes" />
       <Property Id="TEMPDATADIR" Value="NotSet" Secure="yes" />
       <Property Id="__STOREDTEMPDATADIRSELECTION" Value="NotFound" Secure="yes">
          <RegistrySearch Root="HKCU" Key="Software\Opticks\$(var.PublicVersionNumber) $(var.UserPlatform)\StoredTempDataDirSelection" Type="raw" Id="RS__FindStoredTempDataDirSelectionInCurrentUser" />
