@@ -80,8 +80,7 @@ GraphicTextWidget::GraphicTextWidget(QWidget* pParent) :
 }
 
 GraphicTextWidget::~GraphicTextWidget()
-{
-}
+{}
 
 QString GraphicTextWidget::getText() const
 {

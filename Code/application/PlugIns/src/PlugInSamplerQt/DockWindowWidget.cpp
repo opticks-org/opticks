@@ -736,7 +736,7 @@ void DockWindowWidget::updatePlotList()
                   PlotView* pPlotView = pPlot->getPlot();
                   if (pPlotView != NULL)
                   {
-                     const string& plotName = pPlotView->getDisplayName(true);
+                     const string& plotName = pPlotView->getName();
                      if (plotName.empty() == false)
                      {
                         QTreeWidgetItem* pPlotItem = new QTreeWidgetItem(pItem);

@@ -40,7 +40,7 @@ class CustomColorButton : public QToolButton
 
 public:
    /**
-    *  Creates a new color button with no text a default color of Qt::black.
+    *  Creates a new color button with no text and a default color of Qt::black.
     *
     *  @param   parent
     *           The parent widget.
@@ -111,7 +111,7 @@ public slots:
 
    /**
     *  Sets the button color.  Convenience method
-    *  that convers the ColorType into a QColor.
+    *  that converts the ColorType into a QColor.
     *
     *  @param   clrNew
     *           The new button color.  Must be a valid color.

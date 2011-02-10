@@ -744,9 +744,6 @@
     <CustomBuild Include="FloatingLabel.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="FontSizeComboBox.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="GcpSymbolGrid.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -772,9 +769,6 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="GraphicSymbolWidget.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="GraphicTextWidget.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="GraphicTriangleWidget.h">
@@ -905,6 +899,12 @@
     </CustomBuild>
     <CustomBuild Include="EventMessages.mc">
       <Filter>Source Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Interfaces\GraphicTextWidget.h">
+      <Filter>Interfaces</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Interfaces\FontSizeComboBox.h">
+      <Filter>Interfaces</Filter>
     </CustomBuild>
   </ItemGroup>
 </Project>
