@@ -52,7 +52,7 @@
           <PixelSymbol boxed="false" symbol="solid"/>
           <Rotation rotation="0"/>
           <objects>
-            <Graphic name="Text" type="Text" version="3">
+            <Graphic name="Text" textEditable="true" type="Text" version="3">
               <BoundingBox>
                 <boundingBox>206.141073417 559.99712128 289.261865346 504.583259085</boundingBox>
               </BoundingBox>
@@ -103,7 +103,7 @@ available</string>
           <PixelSymbol boxed="false" symbol="solid"/>
           <Rotation rotation="0"/>
           <objects>
-            <Graphic name="Text" type="Text" version="3">
+            <Graphic name="Text" textEditable="true" type="Text" version="3">
               <BoundingBox>
                 <boundingBox>615.168095711 706.409628598 698.288887423 650.995766071</boundingBox>
               </BoundingBox>
@@ -189,7 +189,7 @@ available</string>
           <PixelSymbol boxed="false" symbol="solid"/>
           <Rotation rotation="0"/>
           <objects>
-            <Graphic name="Text" type="Text" version="3">
+            <Graphic name="Text" textEditable="true" type="Text" version="3">
               <BoundingBox>
                 <boundingBox>549.689307618 421.290513101 632.810098921 365.876651222</boundingBox>
               </BoundingBox>
@@ -310,7 +310,7 @@ available</string>
           <PixelSymbol boxed="false" symbol="solid"/>
           <Rotation rotation="0"/>
           <objects>
-            <Graphic name="Text" type="Text" version="3">
+            <Graphic name="Text" textEditable="true" type="Text" version="3">
               <BoundingBox>
                 <boundingBox>861.757603148 546.363540346 944.878394305 490.949678183</boundingBox>
               </BoundingBox>
@@ -341,7 +341,7 @@ available</string>
             </Graphic>
           </objects>
         </Graphic>
-        <Graphic name="Comments Text" type="Text" version="3">
+        <Graphic name="Comments Text" textEditable="true" type="Text" version="3">
           <BoundingBox>
             <boundingBox>35.4815009529 96.6092265319 270.21574667 42.0749979893</boundingBox>
           </BoundingBox>
@@ -369,7 +369,7 @@ available</string>
             <string>Comments</string>
           </TextString>
         </Graphic>
-        <Graphic name="Text 2" type="Text" version="3">
+        <Graphic name="Text 2" textEditable="false" type="Text" version="3">
           <BoundingBox>
             <boundingBox>0 0 0 0</boundingBox>
           </BoundingBox>

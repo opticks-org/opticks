@@ -32,7 +32,7 @@
           <PixelSymbol boxed="false" symbol="solid"/>
           <Rotation rotation="0"/>
           <objects>
-            <Graphic name="Text" type="Text" version="3">
+            <Graphic name="Text" textEditable="true" type="Text" version="3">
               <BoundingBox>
                 <boundingBox>373.985210445 652.251044539 471.929209855 586.955038602</boundingBox>
               </BoundingBox>
@@ -63,7 +63,7 @@ available</string>
             </Graphic>
           </objects>
         </Graphic>
-        <Graphic name="Analyst" type="Text" version="3">
+        <Graphic name="Analyst" textEditable="true" type="Text" version="3">
           <BoundingBox>
             <boundingBox>47.7509760804 108.599934682 183.26138679 53.8191254171</boundingBox>
           </BoundingBox>
@@ -91,7 +91,7 @@ available</string>
             <string>Analyst</string>
           </TextString>
         </Graphic>
-        <Graphic name="Comments" type="Text" version="3">
+        <Graphic name="Comments" textEditable="true" type="Text" version="3">
           <BoundingBox>
             <boundingBox>44.8677769489 174.140270082 249.574993652 119.359457752</boundingBox>
           </BoundingBox>
@@ -119,7 +119,7 @@ available</string>
             <string>Comments</string>
           </TextString>
         </Graphic>
-        <Graphic name="Text 3" type="Text" version="3">
+        <Graphic name="Text 3" textEditable="false" type="Text" version="3">
           <BoundingBox>
             <boundingBox>0 0 0 0</boundingBox>
           </BoundingBox>

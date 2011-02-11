@@ -40,7 +40,7 @@
           <LineStyle style="solid"/>
           <Apex position="0.5"/>
         </Graphic>
-        <Graphic name="TextObject" type="Text" version="3">
+        <Graphic name="TextObject" textEditable="false" type="Text" version="3">
           <BoundingBox>
             <boundingBox>80.0 55.0 115.0 20.0</boundingBox>
           </BoundingBox>

@@ -48,6 +48,7 @@ ViewObjectImp::ViewObjectImp(const string& id, GraphicObjectType type, GraphicLa
    if (mpInvalidText != NULL)
    {
       mpInvalidText->setText("View not\navailable");
+      mpInvalidText->setTextEditable(false);
    }
 
    // Set the fill color

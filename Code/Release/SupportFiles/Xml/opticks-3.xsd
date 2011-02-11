@@ -866,6 +866,7 @@ http://www.gnu.org/licenses/lgpl.html
          </xsd:element>
          <xsd:element name="bitmask" minOccurs="0" maxOccurs="1" type="opticks:aoiBitmask" form="qualified" />
       </xsd:all>
+      <xsd:attribute name="textEditable" type="xsd:boolean" default="true" />
       <xsd:attributeGroup ref="opticks:versionHeader" />
       <xsd:attributeGroup ref="opticks:idHeader" />
    </xsd:complexType>

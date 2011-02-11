@@ -85,6 +85,8 @@ LatLonInsertObjectImp::LatLonInsertObjectImp(const string& id, GraphicObjectType
       pLatLonText->updateTexture();
    }
 
+   pLatLonText->setTextEditable(false);
+
    // Make a vertical arrow by default
    double delta = 0.5 * fabs(pLatLonText->getUrCorner().mX - pLatLonText->getLlCorner().mX);
 

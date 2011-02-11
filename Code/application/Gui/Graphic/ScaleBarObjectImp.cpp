@@ -124,6 +124,7 @@ ScaleBarObjectImp::ScaleBarObjectImp(const string& id, GraphicObjectType type, G
 
    pLeftText->setTextColor(blackColor);
    pLeftText->setText(leftValue);
+   pLeftText->setTextEditable(false);
 
    connect(pLeftText, SIGNAL(propertyModified(GraphicProperty*)), this,
       SIGNAL(propertyModified(GraphicProperty*)));
@@ -135,6 +136,7 @@ ScaleBarObjectImp::ScaleBarObjectImp(const string& id, GraphicObjectType type, G
 
    pCenterText->setTextColor(blackColor);
    pCenterText->setText(centerValue);
+   pCenterText->setTextEditable(false);
 
    connect(pCenterText, SIGNAL(propertyModified(GraphicProperty*)), this,
       SIGNAL(propertyModified(GraphicProperty*)));
@@ -147,6 +149,7 @@ ScaleBarObjectImp::ScaleBarObjectImp(const string& id, GraphicObjectType type, G
 
    pRightText->setTextColor(blackColor);
    pRightText->setText(rightValue);
+   pRightText->setTextEditable(false);
 
    connect(pRightText, SIGNAL(propertyModified(GraphicProperty*)), this,
       SIGNAL(propertyModified(GraphicProperty*)));

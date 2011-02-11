@@ -36,6 +36,7 @@
 #include <string>
 #include <vector>
 using namespace std;
+XERCES_CPP_NAMESPACE_USE
 
 TextObjectImp::TextObjectImp(const string& id, GraphicObjectType type, GraphicLayer* pLayer,
                              LocationType pixelCoord) :
@@ -48,7 +49,8 @@ TextObjectImp::TextObjectImp(const string& id, GraphicObjectType type, GraphicLa
    mUpdateTexture(true),
    mUpdateBoundingBox(true),
    mTextureResource(0),
-   mTempTextureResource(0)
+   mTempTextureResource(0),
+   mTextEditable(true)
 {
    addProperty("Font");
    addProperty("TextAlignment");
@@ -367,10 +369,34 @@ bool TextObjectImp::replicateObject(const GraphicObject* pObject)
    }
 
    bool bSuccess = RectangleObjectImp::replicateObject(pObject);
+   if (bSuccess == true)
+   {
+      const TextObjectImp* pTextObject = dynamic_cast<const TextObjectImp*>(pObject);
+      VERIFY(pTextObject != NULL);
+
+      mTextEditable = pTextObject->mTextEditable;
+   }
+
    mUpdateTexture = true;
    mUpdateBoundingBox = false;
 
    return bSuccess;
+}
+
+bool TextObjectImp::toXml(XMLWriter* pXml) const
+{
+   if (pXml == NULL)
+   {
+      return false;
+   }
+
+   bool success = RectangleObjectImp::toXml(pXml);
+   if (success == true)
+   {
+      pXml->addAttr("textEditable", mTextEditable);
+   }
+
+   return success;
 }
 
 bool TextObjectImp::fromXml(DOMNode* pDocument, unsigned int version)
@@ -381,6 +407,19 @@ bool TextObjectImp::fromXml(DOMNode* pDocument, unsigned int version)
    }
 
    bool bSuccess = RectangleObjectImp::fromXml(pDocument, version);
+   if (bSuccess == true)
+   {
+      DOMElement* pElement = static_cast<DOMElement*>(pDocument);
+      if (pElement != NULL)
+      {
+         string editable(A(pElement->getAttribute(X("textEditable"))));
+         if (editable.empty() == false)
+         {
+            mTextEditable = StringUtilities::fromXmlString<bool>(editable);
+         }
+      }
+   }
+
    mUpdateTexture = true;
    mUpdateBoundingBox = false;
 
@@ -517,10 +556,25 @@ bool TextObjectImp::processMouseRelease(LocationType screenCoord, Qt::MouseButto
    VERIFY(false);
 }
 
+void TextObjectImp::setTextEditable(bool editable)
+{
+   mTextEditable = editable;
+}
+
+bool TextObjectImp::isTextEditable() const
+{
+   return mTextEditable;
+}
+
 bool TextObjectImp::edit()
 {
    GraphicLayerImp* pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
    VERIFY(pLayer != NULL);
+
+   if (mTextEditable == false)
+   {
+      return false;
+   }
 
    QWidget* pWidget = NULL;
 

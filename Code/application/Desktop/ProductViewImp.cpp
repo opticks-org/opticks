@@ -548,6 +548,7 @@ bool ProductViewImp::saveTemplate(const QString& strTemplateFile) const
    {
       // Set unique text to identify it on load
       pClassificationObject->setText("ClassificationLabel");
+      pClassificationObject->setTextEditable(false);
 
       // Alignment
       TextObject* pTopText = mpClassificationLayer->getTopText();

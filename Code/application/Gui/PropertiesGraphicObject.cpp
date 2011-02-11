@@ -279,11 +279,12 @@ bool PropertiesGraphicObject::initialize(const list<GraphicObject*>& graphicObje
 
          // Only allow text to be edited for TextObjects, make text read-only for
          // ScaleBarObject, FrameLabelObject, etc.
-         if ((dynamic_cast<TextObjectImp*>(pGraphicObject) != NULL) &&
-            (dynamic_cast<FrameLabelObjectImp*>(pGraphicObject) == NULL))
+         TextObjectImp* pTextObject = dynamic_cast<TextObjectImp*>(pGraphicObject);
+         if (pTextObject != NULL)
          {
-            bEditText = true;
+            bEditText = pTextObject->isTextEditable();
          }
+
          if (pGraphicObject->hasProperty("UnitSystem") == true)
          {
             bUnits = true;

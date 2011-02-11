@@ -32,7 +32,7 @@
           <PixelSymbol boxed="false" symbol="solid"/>
           <Rotation rotation="0"/>
           <objects>
-            <Graphic name="Text" type="Text" version="3">
+            <Graphic name="Text" textEditable="true" type="Text" version="3">
               <BoundingBox>
                 <boundingBox>106.623284079 570.872577531 198.843287166 513.632570034</boundingBox>
               </BoundingBox>
@@ -83,7 +83,7 @@ available</string>
           <PixelSymbol boxed="false" symbol="solid"/>
           <Rotation rotation="0"/>
           <objects>
-            <Graphic name="Text" type="Text" version="3">
+            <Graphic name="Text" textEditable="true" type="Text" version="3">
               <BoundingBox>
                 <boundingBox>464.067016375 568.704874144 556.287018934 511.464866653</boundingBox>
               </BoundingBox>
@@ -134,7 +134,7 @@ available</string>
           <PixelSymbol boxed="false" symbol="solid"/>
           <Rotation rotation="0"/>
           <objects>
-            <Graphic name="Text" type="Text" version="3">
+            <Graphic name="Text" textEditable="true" type="Text" version="3">
               <BoundingBox>
                 <boundingBox>105.754710012 252.493224088 197.974712355 195.253217515</boundingBox>
               </BoundingBox>
@@ -185,7 +185,7 @@ available</string>
           <PixelSymbol boxed="false" symbol="solid"/>
           <Rotation rotation="0"/>
           <objects>
-            <Graphic name="Text" type="Text" version="3">
+            <Graphic name="Text" textEditable="true" type="Text" version="3">
               <BoundingBox>
                 <boundingBox>463.415737025 248.970711659 555.635738839 191.730705096</boundingBox>
               </BoundingBox>
@@ -216,7 +216,7 @@ available</string>
             </Graphic>
           </objects>
         </Graphic>
-        <Graphic name="ChangesText" type="Text" version="3">
+        <Graphic name="ChangesText" textEditable="true" type="Text" version="3">
           <BoundingBox>
             <boundingBox>711.706438455 687.132254249 971.829147161 645.946147687</boundingBox>
           </BoundingBox>
@@ -289,7 +289,7 @@ available</string>
           <Rotation rotation="0"/>
           <Scale scale="1"/>
         </Graphic>
-        <Graphic name="Arrow1Text" type="Text" version="3">
+        <Graphic name="Arrow1Text" textEditable="true" type="Text" version="3">
           <BoundingBox>
             <boundingBox>297.680852039 257.243906221 349.781976389 228.588287157</boundingBox>
           </BoundingBox>
@@ -317,7 +317,7 @@ available</string>
             <string>1 day</string>
           </TextString>
         </Graphic>
-        <Graphic name="Arrow2Text" type="Text" version="3">
+        <Graphic name="Arrow2Text" textEditable="true" type="Text" version="3">
           <BoundingBox>
             <boundingBox>299.667537675 369.16916517 351.768662178 340.513545933</boundingBox>
           </BoundingBox>
@@ -345,7 +345,7 @@ available</string>
             <string>1 day</string>
           </TextString>
         </Graphic>
-        <Graphic name="Arrow3Text" type="Text" version="3">
+        <Graphic name="Arrow3Text" textEditable="true" type="Text" version="3">
           <BoundingBox>
             <boundingBox>297.778599143 506.393192999 349.879723727 477.737573677</boundingBox>
           </BoundingBox>
@@ -393,7 +393,7 @@ available</string>
           <PixelSymbol boxed="false" symbol="solid"/>
           <Rotation rotation="0"/>
         </Graphic>
-        <Graphic name="Date/Originator/Comments" type="Text" version="3">
+        <Graphic name="Date/Originator/Comments" textEditable="true" type="Text" version="3">
           <BoundingBox>
             <boundingBox>651.024295149 221.312916051 768.29642115 72.5348361889</boundingBox>
           </BoundingBox>
@@ -425,7 +425,7 @@ Originator
 Comments</string>
           </TextString>
         </Graphic>
-        <Graphic name="Text 6" type="Text" version="3">
+        <Graphic name="Text 6" textEditable="false" type="Text" version="3">
           <BoundingBox>
             <boundingBox>0 0 0 0</boundingBox>
           </BoundingBox>

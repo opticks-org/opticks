@@ -64,6 +64,7 @@ ClassificationLayerImp::ClassificationLayerImp(const string& id, const string& l
       {
          mpTopText->setFont(mClassificationFont.getQFont());
          mpTopText->setTextColor(textColor);
+         mpTopText->setTextEditable(false);
       }
    }
 
@@ -76,6 +77,7 @@ ClassificationLayerImp::ClassificationLayerImp(const string& id, const string& l
       {
          mpBottomText->setFont(mClassificationFont.getQFont());
          mpBottomText->setTextColor(textColor);
+         mpBottomText->setTextEditable(false);
       }
    }
 

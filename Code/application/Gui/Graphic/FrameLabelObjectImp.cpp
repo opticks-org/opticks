@@ -43,6 +43,7 @@ FrameLabelObjectImp::FrameLabelObjectImp(const string& id, GraphicObjectType typ
    mpAnimationController.addSignal(SIGNAL_NAME(Subject, Deleted), Slot(this, &FrameLabelObjectImp::updateAnimations));
    mpLayer.addSignal(SIGNAL_NAME(LayerImp, ViewModified), Slot(this, &FrameLabelObjectImp::updateAnimations));
 
+   setTextEditable(false);
    reset();
 }
 

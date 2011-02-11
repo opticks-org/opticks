@@ -38,9 +38,10 @@ public:
    bool hit(LocationType pixelCoord) const;
    bool replicateObject(const GraphicObject* pObject);
 
-   bool fromXml(DOMNode* pDocument, unsigned int version);
-   const std::string& getObjectType() const;
-   bool isKindOf(const std::string& className) const;
+   virtual bool toXml(XMLWriter* pXml) const;
+   virtual bool fromXml(DOMNode* pDocument, unsigned int version);
+   virtual const std::string& getObjectType() const;
+   virtual bool isKindOf(const std::string& className) const;
 
    bool processMousePress(LocationType screenCoord, Qt::MouseButton button, Qt::MouseButtons buttons,
       Qt::KeyboardModifiers modifiers);
@@ -49,6 +50,8 @@ public:
    bool processMouseRelease(LocationType screenCoord, Qt::MouseButton button, Qt::MouseButtons buttons,
       Qt::KeyboardModifiers modifiers);
 
+   void setTextEditable(bool editable);
+   bool isTextEditable() const;
    bool edit();
    void moveHandle(int handle, LocationType point, bool bMaintainAspect);
 
@@ -75,6 +78,7 @@ private:
    std::map<Classification*, AttachmentPtr<Classification>* > mClassificationObjects;
    GlTextureResource mTextureResource;
    GlTextureResource mTempTextureResource;
+   bool mTextEditable;
 
    TextObjectImp& operator= (const TextObjectImp& textObject);
    TextObjectImp(const TextObjectImp& textObject);
