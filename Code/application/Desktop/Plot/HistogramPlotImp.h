@@ -130,6 +130,7 @@ protected slots:
    void setAxisScale(QAction* pAction);
    void linkAxisToStretch(bool link = true);
    void setThresholdMode(QAction* pAction);
+   void updatePassAreaAction();
    void setStretchMode(QAction* pAction);
    void updateStretchTypeAction();
    void setStretchUnits(QAction* pAction);

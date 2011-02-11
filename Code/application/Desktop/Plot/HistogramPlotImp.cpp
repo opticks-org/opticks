@@ -1013,6 +1013,15 @@ bool HistogramPlotImp::setHistogram(Layer* pLayer, Statistics* pStatistics, Rast
          disconnect(pRasterLayer, SIGNAL(colorMapChanged(const ColorMap&)), this,
             SLOT(updateSelectedColorMap()));
       }
+
+      ThresholdLayerImp* pThresholdLayer = dynamic_cast<ThresholdLayerImp*>(pLayerImp);
+      if (pThresholdLayer != NULL)
+      {
+         VERIFYNR(disconnect(pThresholdLayer, SIGNAL(passAreaChanged(const PassArea&)), this,
+            SLOT(updatePassAreaAction())));
+         VERIFYNR(disconnect(pThresholdLayer, SIGNAL(regionUnitsChanged(const RegionUnits&)), this,
+            SLOT(updateStretchUnitAction())));
+      }
    }
 
    // Set the new layer and channel
@@ -1041,26 +1050,11 @@ bool HistogramPlotImp::setHistogram(Layer* pLayer, Statistics* pStatistics, Rast
       }
 
       // Set the current pass area menu action
-      ThresholdLayer* pThresholdLayer = dynamic_cast<ThresholdLayer*>(mpLayer.get());
+      ThresholdLayerImp* pThresholdLayer = dynamic_cast<ThresholdLayerImp*>(mpLayer.get());
       if (pThresholdLayer != NULL)
       {
-         PassArea ePassArea = pThresholdLayer->getPassArea();
-         if (ePassArea == LOWER)
-         {
-            mpBelowAction->setChecked(true);
-         }
-         else if (ePassArea == UPPER)
-         {
-            mpAboveAction->setChecked(true);
-         }
-         else if (ePassArea == MIDDLE)
-         {
-            mpBetweenAction->setChecked(true);
-         }
-         else if (ePassArea == OUTSIDE)
-         {
-            mpOutsideAction->setChecked(true);
-         }
+         // Set the current pass area menu action
+         updatePassAreaAction();
 
          // Set the current stretch unit menu action
          updateStretchUnitAction();
@@ -1121,6 +1115,14 @@ bool HistogramPlotImp::setHistogram(Layer* pLayer, Statistics* pStatistics, Rast
             VERIFYNR(connect(pRasterLayer, SIGNAL(colorMapChanged(const ColorMap&)), this,
                SLOT(updateSelectedColorMap())));
          }
+      }
+
+      if (pThresholdLayer != NULL)
+      {
+         VERIFYNR(connect(pThresholdLayer, SIGNAL(passAreaChanged(const PassArea&)), this,
+            SLOT(updatePassAreaAction())));
+         VERIFYNR(connect(pThresholdLayer, SIGNAL(regionUnitsChanged(const RegionUnits&)), this,
+            SLOT(updateStretchUnitAction())));
       }
    }
 
@@ -2553,6 +2555,33 @@ void HistogramPlotImp::setThresholdMode(QAction* pAction)
    }
 
    pThresholdLayer->setPassArea(passArea);
+}
+
+void HistogramPlotImp::updatePassAreaAction()
+{
+   ThresholdLayer* pThresholdLayer = dynamic_cast<ThresholdLayer*>(mpLayer.get());
+   if (pThresholdLayer == NULL)
+   {
+      return;
+   }
+
+   PassArea passArea = pThresholdLayer->getPassArea();
+   if (passArea == LOWER)
+   {
+      mpBelowAction->setChecked(true);
+   }
+   else if (passArea == UPPER)
+   {
+      mpAboveAction->setChecked(true);
+   }
+   else if (passArea == MIDDLE)
+   {
+      mpBetweenAction->setChecked(true);
+   }
+   else if (passArea == OUTSIDE)
+   {
+      mpOutsideAction->setChecked(true);
+   }
 }
 
 void HistogramPlotImp::setStretchUnits(QAction* pAction)
