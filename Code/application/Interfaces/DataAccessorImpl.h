@@ -7,11 +7,10 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #ifndef DATA_ACCESSOR_IMPL_H
 #define DATA_ACCESSOR_IMPL_H
 
+#include "AppConfig.h"
 #include "RasterElement.h"
 #include "RasterPager.h"
 #include "DataRequest.h"
@@ -21,6 +20,9 @@
 #include <stdexcept>
 
 class RasterPage;
+
+typedef double (*convertToDouble)(const void*, int, ComplexComponent);
+typedef int64_t (*convertToInteger)(const void*, int, ComplexComponent);
 
 /**
  * Provides a generic interface to the dataset.
@@ -195,6 +197,43 @@ public:
    inline void *getColumn() 
    { 
       return &mpPage[mRowOffset + mColumnOffset]; 
+   }
+
+   /**
+    * Returns the data for the current column position as a double.
+    *
+    * @param iIndex
+    *        The number of elements past the current column position to access.
+    *        No bounds checking is performed on the provided index.
+    * @param component
+    *        For complex data, this specifies the component of the complex
+    *        data that should be returned. If an invalid enum value is used
+    *        for complex data, a value of 0 will be returned.  For non-complex data, this
+    *        value is ignored.
+    * @return The value at the given iIndex past the current column, returned as a double.
+    */
+   inline double getColumnAsDouble(int iIndex = 0, ComplexComponent component = COMPLEX_MAGNITUDE) const
+   {
+      return mConvertToDoubleFunc(&mpPage[mRowOffset + mColumnOffset], iIndex, component);
+   }
+
+   /**
+    * Returns the data for the current column position as an integer.
+    * This method will truncate the value if the underlying data is stored in floating point.
+    *
+    * @param iIndex
+    *        The number of elements past the current column position to access.
+    *        No bounds checking is performed on the provided index.
+    * @param component
+    *        For complex data, this specifies the component of the complex
+    *        data that should be returned. If an invalid enum value is used
+    *        for complex data, a value of 0 will be returned.  For non-complex data, this
+    *        value is ignored.
+    * @return The value at the given iIndex past the current column, returned as an integer.
+    */
+   int64_t getColumnAsInteger(int iIndex = 0, ComplexComponent component = COMPLEX_MAGNITUDE) const
+   {
+      return mConvertToIntegerFunc(&mpPage[mRowOffset + mColumnOffset], iIndex, component);
    }
 
    /**
@@ -416,6 +455,8 @@ private:
    size_t mAccessorBand;
 
    int mRefCount;
+   convertToDouble mConvertToDoubleFunc;
+   convertToInteger mConvertToIntegerFunc;
 };
 
 #endif

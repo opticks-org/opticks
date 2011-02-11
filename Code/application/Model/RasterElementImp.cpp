@@ -47,6 +47,109 @@
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
 
+namespace
+{
+   double convert_s1byte_to_double(const void* pValue, int iIndex, ComplexComponent component)
+   {
+      return *(reinterpret_cast<const signed char*>(pValue) + iIndex);
+   }
+
+   double convert_u1byte_to_double(const void* pValue, int iIndex, ComplexComponent component)
+   {
+      return *(reinterpret_cast<const unsigned char*>(pValue) + iIndex);
+   }
+
+   double convert_s2byte_to_double(const void* pValue, int iIndex, ComplexComponent component)
+   {
+      return *(reinterpret_cast<const signed short*>(pValue) + iIndex);
+   }
+
+   double convert_u2byte_to_double(const void* pValue, int iIndex, ComplexComponent component)
+   {
+      return *(reinterpret_cast<const unsigned short*>(pValue) + iIndex);
+   }
+
+   double convert_s4byte_to_double(const void* pValue, int iIndex, ComplexComponent component)
+   {
+      return *(reinterpret_cast<const signed int*>(pValue) + iIndex);
+   }
+
+   double convert_u4byte_to_double(const void* pValue, int iIndex, ComplexComponent component)
+   {
+      return *(reinterpret_cast<const unsigned int*>(pValue) + iIndex);
+   }
+
+   double convert_4complex_to_double(const void* pValue, int iIndex, ComplexComponent component)
+   {
+      return (*(reinterpret_cast<const IntegerComplex*>(pValue) + iIndex))[component];
+   }
+
+   double convert_8complex_to_double(const void* pValue, int iIndex, ComplexComponent component)
+   {
+      return (*(reinterpret_cast<const FloatComplex*>(pValue) + iIndex))[component];
+   }
+
+   double convert_float_to_double(const void* pValue, int iIndex, ComplexComponent component)
+   {
+      return *(reinterpret_cast<const float*>(pValue) + iIndex);
+   }
+
+   double convert_double_to_double(const void* pValue, int iIndex, ComplexComponent component)
+   {
+      return *(reinterpret_cast<const double*>(pValue) + iIndex);
+   }
+
+   int64_t convert_s1byte_to_integer(const void* pValue, int iIndex, ComplexComponent component)
+   {
+      return *(reinterpret_cast<const signed char*>(pValue) + iIndex);
+   }
+
+   int64_t convert_u1byte_to_integer(const void* pValue, int iIndex, ComplexComponent component)
+   {
+      return *(reinterpret_cast<const unsigned char*>(pValue) + iIndex);
+   }
+
+   int64_t convert_s2byte_to_integer(const void* pValue, int iIndex, ComplexComponent component)
+   {
+      return *(reinterpret_cast<const signed short*>(pValue) + iIndex);
+   }
+
+   int64_t convert_u2byte_to_integer(const void* pValue, int iIndex, ComplexComponent component)
+   {
+      return *(reinterpret_cast<const unsigned short*>(pValue) + iIndex);
+   }
+
+   int64_t convert_s4byte_to_integer(const void* pValue, int iIndex, ComplexComponent component)
+   {
+      return *(reinterpret_cast<const signed int*>(pValue) + iIndex);
+   }
+
+   int64_t convert_u4byte_to_integer(const void* pValue, int iIndex, ComplexComponent component)
+   {
+      return *(reinterpret_cast<const unsigned int*>(pValue) + iIndex);
+   }
+
+   int64_t convert_4complex_to_integer(const void* pValue, int iIndex, ComplexComponent component)
+   {
+      return (*(reinterpret_cast<const IntegerComplex*>(pValue) + iIndex))[component];
+   }
+
+   int64_t convert_8complex_to_integer(const void* pValue, int iIndex, ComplexComponent component)
+   {
+      return (*(reinterpret_cast<const FloatComplex*>(pValue) + iIndex))[component];
+   }
+
+   int64_t convert_float_to_integer(const void* pValue, int iIndex, ComplexComponent component)
+   {
+      return *(reinterpret_cast<const float*>(pValue) + iIndex);
+   }
+
+   int64_t convert_double_to_integer(const void* pValue, int iIndex, ComplexComponent component)
+   {
+      return *(reinterpret_cast<const double*>(pValue) + iIndex);
+   }
+
+};
 RasterElementImp::RasterElementImp(const DataDescriptorImp& descriptor, const string& id) :
    DataElementImp(descriptor, id),
    mpTerrain(NULL),
@@ -1629,6 +1732,54 @@ DataAccessor RasterElementImp::getDataAccessor(DataRequest* pRequestIn)
 
          pImpl->mpRasterPage = pPage;
          pImpl->mpRasterPager = pPager;
+
+         switch (pDescriptor->getDataType())
+         {
+         case INT1SBYTE:
+            pImpl->mConvertToDoubleFunc = convert_s1byte_to_double;
+            pImpl->mConvertToIntegerFunc = convert_s1byte_to_integer;
+            break;
+         case INT1UBYTE:
+            pImpl->mConvertToDoubleFunc = convert_u1byte_to_double;
+            pImpl->mConvertToIntegerFunc = convert_u1byte_to_integer;
+            break;
+         case INT2SBYTES:
+            pImpl->mConvertToDoubleFunc = convert_s2byte_to_double;
+            pImpl->mConvertToIntegerFunc = convert_s2byte_to_integer;
+            break;
+         case INT2UBYTES:
+            pImpl->mConvertToDoubleFunc = convert_u2byte_to_double;
+            pImpl->mConvertToIntegerFunc = convert_u2byte_to_integer;
+            break;
+         case INT4SBYTES:
+            pImpl->mConvertToDoubleFunc = convert_s4byte_to_double;
+            pImpl->mConvertToIntegerFunc = convert_s4byte_to_integer;
+            break;
+         case INT4UBYTES:
+            pImpl->mConvertToDoubleFunc = convert_u4byte_to_double;
+            pImpl->mConvertToIntegerFunc = convert_u4byte_to_integer;
+            break;
+         case INT4SCOMPLEX:
+            pImpl->mConvertToDoubleFunc = convert_4complex_to_double;
+            pImpl->mConvertToIntegerFunc = convert_4complex_to_integer;
+            break;
+         case FLT8COMPLEX:
+            pImpl->mConvertToDoubleFunc = convert_8complex_to_double;
+            pImpl->mConvertToIntegerFunc = convert_8complex_to_integer;
+            break;
+         case FLT4BYTES:
+            pImpl->mConvertToDoubleFunc = convert_float_to_double;
+            pImpl->mConvertToIntegerFunc = convert_float_to_integer;
+            break;
+         case FLT8BYTES:
+            pImpl->mConvertToDoubleFunc = convert_double_to_double;
+            pImpl->mConvertToIntegerFunc = convert_double_to_integer;
+            break;
+         default:
+            delete pImpl;
+            pImpl = NULL;
+            break;
+         }
       }
    }
 
