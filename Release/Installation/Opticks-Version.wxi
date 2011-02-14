@@ -40,6 +40,7 @@
    <?define C__hm425m_DependencyGuid = "0c9ed62a-0842-4155-b2dc-5ee029b082f4" ?>
    <?define C__szlibdll_DependencyGuid = "4444c14e-3b2a-48c5-a7be-2cb357915c28" ?>
    <?define C__libexpat_DependencyGuid = "db04d555-591d-46c8-a918-d7a5d2cea0f5" ?>
+   <?define C__opencv_DependencyGuid = "e4b3afc5-c151-405e-8938-6cc6674f4000" ?>
    <?define C__ossim_DependencyGuid = "94298234-4a4d-4a49-80e1-7c27e07a3791" ?>
    <?define C__pthreadVC2_DependencyGuid = "a53aac88-4d93-4ea5-a24b-e0613086b6f8" ?>
    <?define C__raptor_DependencyGuid = "21bc4030-efcb-4ace-a0a6-d0e53527f9b3" ?>
@@ -150,6 +151,7 @@
    <?define C__szlibdll_DependencyGuid = "e724135e-68ab-411e-ab91-75bed3160012" ?>
    <?define C__libexpat_DependencyGuid = "4962949b-4af7-4469-93a1-ab60c533a24e" ?>
    <?define C__openjpeg_DependencyGuid = "a8fe2149-ffe8-4b73-bd91-2016e5d3bc27" ?>
+   <?define C__opencv_DependencyGuid = "29ba2f5d-3db9-4c2c-90fa-251fc271fd48" ?>
    <?define C__ossim_DependencyGuid = "164f6f6e-f445-408b-9272-c60d4925c51a" ?>
    <?define C__pthreadVC2_DependencyGuid = "9f1bf48b-766f-40f8-807a-61c4c232a16e" ?>
    <?define C__raptor_DependencyGuid = "529e482c-0dce-42ef-8f6e-d284055c3fcb" ?>
