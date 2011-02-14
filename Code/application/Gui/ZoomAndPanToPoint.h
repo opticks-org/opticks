@@ -11,7 +11,6 @@
 #define ZOOMANDPANTOPOINT_H
 
 #include <QtGui/QDialog>
-#include <QtGui/QTextEdit>
 
 #include "LocationType.h"
 #include "TypesFile.h"
@@ -47,6 +46,11 @@ private:
    QPushButton* mpOK;
    GeocoordType mCoordType;
 
+   QLabel* mpLatitudeLabel;
+   QLabel* mpLongitudeLabel;
+   QLabel* mpZoneLabel;
+   QLabel* mpHemisphereLabel;
+
    RasterElement* mpRaster;
 
 private slots:
@@ -56,6 +60,7 @@ private slots:
    void lonModified();
    void zoneModified();
    void hemModified();
+   void coordTypeChanged(const QString& newCoordSelection);
 };
 
 #endif

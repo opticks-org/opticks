@@ -3523,7 +3523,22 @@ void ApplicationWindow::showZapDlg()
       VERIFYNRV(pLayerList != NULL);
       pRaster = pLayerList->getPrimaryRasterElement();
 
-      LatLonLayer* pLatLonLayer = dynamic_cast<LatLonLayer*>(pSpatialView->getTopMostLayer(LAT_LONG));
+      // get the geocoord layer, even if it is not visible.
+      LatLonLayer* pLatLonLayer = NULL;
+      std::vector<Layer*> layerList;
+      pSpatialView->getLayerList()->getLayers(LAT_LONG, layerList);
+      for (unsigned int i = 0; i < layerList.size(); ++i)
+      {
+         if (dynamic_cast<RasterElement*>(layerList[i]->getDataElement()) == pRaster)
+         {
+            pLatLonLayer = dynamic_cast<LatLonLayer*>(layerList[i]);
+            if (pLatLonLayer != NULL)
+            {
+               break;
+            }
+         }
+      }
+
       if (pLatLonLayer != NULL)
       {
          geocoordType = pLatLonLayer->getGeocoordType();
