@@ -692,26 +692,12 @@ bool RasterDataDescriptorImp::toXml(XMLWriter* pXml) const
 
       // Rows
       pXml->pushAddPoint(pXml->addElement("rows"));
-      vector<DimensionDescriptor>::const_iterator rowIter;
-      for (rowIter = mRows.begin(); bSuccess && rowIter != mRows.end(); ++rowIter)
-      {
-         DimensionDescriptor descriptor = *rowIter;
-         pXml->pushAddPoint(pXml->addElement("row"));
-         XmlUtilities::serializeDimensionDescriptor(descriptor, pXml);
-         pXml->popAddPoint();
-      }
+      XmlUtilities::serializeDimensionDescriptors("row", mRows, pXml);
       pXml->popAddPoint();
 
       // Columns
       pXml->pushAddPoint(pXml->addElement("columns"));
-      vector<DimensionDescriptor>::const_iterator colIter;
-      for (colIter = mColumns.begin(); bSuccess && colIter != mColumns.end(); ++colIter)
-      {
-         DimensionDescriptor descriptor = *colIter;
-         pXml->pushAddPoint(pXml->addElement("column"));
-         XmlUtilities::serializeDimensionDescriptor(descriptor, pXml);
-         pXml->popAddPoint();
-      }
+      XmlUtilities::serializeDimensionDescriptors("column", mColumns, pXml);
       pXml->popAddPoint();
 
       // Pixel size
@@ -728,15 +714,7 @@ bool RasterDataDescriptorImp::toXml(XMLWriter* pXml) const
 
       // Bands
       pXml->pushAddPoint(pXml->addElement("bands"));
-      for (vector<DimensionDescriptor>::const_iterator iter = mBands.begin();
-         bSuccess && iter != mBands.end();
-         ++iter)
-      {
-         DimensionDescriptor descriptor = *iter;
-         pXml->pushAddPoint(pXml->addElement("band"));
-         XmlUtilities::serializeDimensionDescriptor(descriptor, pXml);
-         pXml->popAddPoint();
-      }
+      XmlUtilities::serializeDimensionDescriptors("band", mBands, pXml);
       pXml->popAddPoint();
 
       // Gray Band
@@ -856,46 +834,15 @@ bool RasterDataDescriptorImp::fromXml(DOMNode* pDocument, unsigned int version)
       }
       else if (XMLString::equals(pChild->getNodeName(), X("rows")))
       {
-         for (DOMNode* pGrandchild = pChild->getFirstChild();
-            success && pGrandchild != NULL;
-            pGrandchild = pGrandchild->getNextSibling())
-         {
-            if (XMLString::equals(pGrandchild->getNodeName(), X("row")))
-            {
-               // Create the row descriptor
-               DimensionDescriptor descriptor;
-               XmlUtilities::deserializeDimensionDescriptor(descriptor, pGrandchild);
-               mRows.push_back(descriptor);
-            }
-         }
+         XmlUtilities::deserializeDimensionDescriptors("row", mRows, pChild);
       }
       else if (XMLString::equals(pChild->getNodeName(), X("columns")))
       {
-         for (DOMNode* pGrandchild = pChild->getFirstChild();
-            success && pGrandchild != NULL;
-            pGrandchild = pGrandchild->getNextSibling())
-         {
-            if (XMLString::equals(pGrandchild->getNodeName(), X("column")))
-            {
-               // Create the column descriptor
-               DimensionDescriptor descriptor;
-               XmlUtilities::deserializeDimensionDescriptor(descriptor, pGrandchild);
-               mColumns.push_back(descriptor);
-            }
-         }
+         XmlUtilities::deserializeDimensionDescriptors("column", mColumns, pChild);
       }
       else if (XMLString::equals(pChild->getNodeName(), X("bands")))
       {
-         for (DOMNode* pGrandchild = pChild->getFirstChild(); success && pGrandchild != NULL;
-            pGrandchild = pGrandchild->getNextSibling())
-         {
-            if (XMLString::equals(pGrandchild->getNodeName(), X("band")))
-            {
-               DimensionDescriptor descriptor;
-               XmlUtilities::deserializeDimensionDescriptor(descriptor, pGrandchild);
-               mBands.push_back(descriptor);
-            }
-         }
+         XmlUtilities::deserializeDimensionDescriptors("band", mBands, pChild);
       }
       else if (XMLString::equals(pChild->getNodeName(), X("units")))
       {

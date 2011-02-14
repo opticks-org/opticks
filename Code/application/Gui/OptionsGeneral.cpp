@@ -8,9 +8,8 @@
  */
 
 #include "AppVerify.h"
-#include "ConfigurationSettingsImp.h"
+#include "ConfigurationSettings.h"
 #include "LabeledSection.h"
-#include "MruFile.h"
 #include "OptionsGeneral.h"
 #include "UtilityServices.h"
 
@@ -18,9 +17,6 @@
 #include <QtGui/QLabel>
 #include <QtGui/QSpinBox>
 #include <QtGui/QVBoxLayout>
-
-#include <vector>
-using namespace std;
 
 OptionsGeneral::OptionsGeneral() :
    QWidget(NULL)
@@ -105,22 +101,8 @@ OptionsGeneral::OptionsGeneral() :
 
 void OptionsGeneral::applyChanges()
 {
-   // MRU files
-   ConfigurationSettingsImp* pSettings = ConfigurationSettingsImp::instance();
-   VERIFYNRV(pSettings != NULL);
-
-   vector<MruFile> mruFiles = pSettings->getMruFiles();
-   unsigned int maxNumMruFiles = static_cast<unsigned int>(mpMruFilesSpin->value());
-
-   while ((mruFiles.size() > maxNumMruFiles) && (mruFiles.empty() == false))
-   {
-      mruFiles.pop_back();
-   }
-
-   pSettings->setMruFiles(mruFiles);
-
    // Settings
-   ConfigurationSettings::setSettingNumberOfMruFiles(maxNumMruFiles);
+   ConfigurationSettings::setSettingNumberOfMruFiles(static_cast<unsigned int>(mpMruFilesSpin->value()));
    ConfigurationSettings::setSettingUndoBufferSize(static_cast<unsigned int>(mpBufferSpin->value()));
    ConfigurationSettings::setSettingThreadCount(static_cast<unsigned int>(mpThreadSpin->value()));
    Progress::setSettingAutoClose(mpProgressClose->isChecked());

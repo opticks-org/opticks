@@ -176,11 +176,14 @@ http://www.gnu.org/licenses/lgpl.html
       <xsd:annotation>
          <xsd:documentation xml:lang="en">
             Information about a dimension element such as a row, column, or band.
+            Multiple dimension descriptors can be stored to save disk space for large images.
          </xsd:documentation>
       </xsd:annotation>
       <xsd:attribute name="originalNumber" type="xsd:nonNegativeInteger" use="optional" />
       <xsd:attribute name="onDiskNumber" type="xsd:nonNegativeInteger" use="optional" />
       <xsd:attribute name="activeNumber" type="xsd:nonNegativeInteger" use="optional" />
+      <xsd:attribute name="count" type="xsd:nonNegativeInteger" use="optional" />
+      <xsd:attribute name="skipFactor" type="xsd:nonNegativeInteger" use="optional" />
    </xsd:complexType>
    <xsd:complexType name="RasterFileDescriptor">
       <xsd:annotation>

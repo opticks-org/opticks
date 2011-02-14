@@ -97,6 +97,7 @@
 #include "MessageLogWindow.h"
 #include "ModelServices.h"
 #include "MouseModeImp.h"
+#include "MruFile.h"
 #include "ObjectResource.h"
 #include "OptionsDlg.h"
 #include "PaperSizeDlg.h"
@@ -1869,7 +1870,7 @@ void ApplicationWindow::constructFileMenu()
    }
 
    // Check for no updates
-   vector<MruFile> mruFiles = pSettings->getMruFiles();
+   const vector<MruFile*>& mruFiles = pSettings->getMruFiles();
    if ((mruFiles.empty() == true) && (mMruFileCommands.empty() == true))
    {
       return;
@@ -1882,7 +1883,7 @@ void ApplicationWindow::constructFileMenu()
    }
    else
    {
-      QMap<QAction*, MruFile>::iterator iter;
+      QMap<QAction*, MruFile*>::iterator iter;
       for (iter = mMruFileCommands.begin(); iter != mMruFileCommands.end(); ++iter)
       {
          QAction* pAction = iter.key();
@@ -1902,15 +1903,19 @@ void ApplicationWindow::constructFileMenu()
    }
    else
    {
-      for (vector<MruFile>::size_type i = 0; i < mruFiles.size(); ++i)
+      for (vector<MruFile*>::size_type i = 0; i < mruFiles.size(); ++i)
       {
-         QString strName = QString::fromStdString(mruFiles[i].mName);
-         QString strCommand = "&" + QString::number(i + 1) + "  " + strName;
+         MruFile* pMruFile = mruFiles[i];
+         if (NN(pMruFile))
+         {
+            QString strName = QString::fromStdString(pMruFile->getName());
+            QString strCommand = "&" + QString::number(i + 1) + "  " + strName;
 
-         QAction* pMruAction = new QAction(strCommand, this);
-         m_pFile->insertAction(mpMruInsertAction, pMruAction);
+            QAction* pMruAction = new QAction(strCommand, this);
+            m_pFile->insertAction(mpMruInsertAction, pMruAction);
 
-         mMruFileCommands[pMruAction] = mruFiles[i];
+            mMruFileCommands[pMruAction] = pMruFile;
+         }
       }
    }
 }
@@ -1923,25 +1928,31 @@ void ApplicationWindow::fileMenuActivated(QAction* pAction)
    }
 
    // Check if the action is an MRU file action
-   QMap<QAction*, MruFile>::iterator mruIter = mMruFileCommands.find(pAction);
+   QMap<QAction*, MruFile*>::iterator mruIter = mMruFileCommands.find(pAction);
    if (mruIter == mMruFileCommands.end())
    {
       return;
    }
 
-   // Get the MRU file
-   MruFile mruFile = mruIter.value();
+   MruFile* pMruFile = mruIter.value();
+   if (pMruFile == NULL)
+   {
+      return;
+   }
+
+   const string& mruFileName = pMruFile->getName();
+   const vector<ImportDescriptor*>& mruFileDescriptors = pMruFile->getDescriptors();
 
    // Create the importer resource
-   ImporterResource importer(mruFile.mImporterName, mruFile.mName, NULL, false);
+   ImporterResource importer(pMruFile->getImporterName(), mruFileName, NULL, false);
    importer->createProgressDialog(true);
    importer->updateMruFileList(true);
 
    // Check if the file to import has been modified since the MRU file was created
    DateTimeImp modificationTime;
-   if (mruFile.mName.empty() == false)
+   if (mruFileName.empty() == false)
    {
-      FilenameImp filename(mruFile.mName);
+      FilenameImp filename(mruFileName);
       string filePath = filename.getPath();
       string baseFilename = filename.getFileName();
 
@@ -1953,18 +1964,18 @@ void ApplicationWindow::fileMenuActivated(QAction* pAction)
       }
    }
 
-   if (modificationTime != mruFile.mModificationTime)
+   if (modificationTime != pMruFile->getModificationTime())
    {
       ConfigurationSettingsImp* pSettings = ConfigurationSettingsImp::instance();
 
       if (modificationTime.isValid() == true)
       {
-         int button = QMessageBox::question(this, APP_NAME, "The '" + QString::fromStdString(mruFile.mName) +
+         int button = QMessageBox::question(this, APP_NAME, "The '" + QString::fromStdString(mruFileName) +
             "' file has been modified since it was added to the recent files list.  How do you want to continue?",
-            "Import File", "Remove File", "Cancel");
+            "Import File", "Remove File From List", "Cancel");
          if (button == 1)
          {
-            pSettings->removeMruFile(mruFile.mName);
+            pSettings->removeMruFile(pMruFile);
             return;
          }
          else if (button == 2)
@@ -1975,11 +1986,11 @@ void ApplicationWindow::fileMenuActivated(QAction* pAction)
       else
       {
          QMessageBox::StandardButton button = QMessageBox::question(this, APP_NAME, "The '" +
-            QString::fromStdString(mruFile.mName) + "' file cannot be opened.  Do you want to "
+            QString::fromStdString(mruFileName) + "' file cannot be opened.  Do you want to "
             "remove the file from the recent files list?", QMessageBox::Yes | QMessageBox::No);
          if (button == QMessageBox::Yes)
          {
-            pSettings->removeMruFile(mruFile.mName);
+            pSettings->removeMruFile(pMruFile);
          }
 
          return;
@@ -2002,7 +2013,7 @@ void ApplicationWindow::fileMenuActivated(QAction* pAction)
          Importer* pImporter = dynamic_cast<Importer*>(importer->getPlugIn());
          VERIFYNRV(pImporter != NULL);
 
-         resourceDescriptors = pImporter->getImportDescriptors(mruFile.mName);
+         resourceDescriptors = pImporter->getImportDescriptors(mruFileName);
 
          vector<ImportDescriptor*>::iterator importerIter;
          for (importerIter = resourceDescriptors.begin(); importerIter != resourceDescriptors.end(); ++importerIter)
@@ -2011,8 +2022,9 @@ void ApplicationWindow::fileMenuActivated(QAction* pAction)
             {
                bool bImported = false;
 
-               vector<ImportDescriptor*>::iterator mruIter;
-               for (mruIter = mruFile.mDescriptors.begin(); mruIter != mruFile.mDescriptors.end(); ++mruIter)
+               for (vector<ImportDescriptor*>::const_iterator mruIter = mruFileDescriptors.begin();
+                  mruIter != mruFileDescriptors.end();
+                  ++mruIter)
                {
                   if (*mruIter != NULL)
                   {
@@ -2047,10 +2059,11 @@ void ApplicationWindow::fileMenuActivated(QAction* pAction)
       else
       {
          // Copy the MRU file import descriptors into the resource since the resource takes ownership of them
-         vector<ImportDescriptor*>::iterator iter;
-         for (iter = mruFile.mDescriptors.begin(); iter != mruFile.mDescriptors.end(); ++iter)
+         for (vector<ImportDescriptor*>::const_iterator iter = mruFileDescriptors.begin();
+            iter != mruFileDescriptors.end();
+            ++iter)
          {
-            ImportDescriptor* pImportDescriptor = *iter;
+            const ImportDescriptor* pImportDescriptor = *iter;
             if (pImportDescriptor != NULL)
             {
                DataDescriptor* pDescriptor = pImportDescriptor->getDataDescriptor();
@@ -2072,7 +2085,7 @@ void ApplicationWindow::fileMenuActivated(QAction* pAction)
       }
 
       map<string, vector<ImportDescriptor*> > resourceDatasets;
-      resourceDatasets[mruFile.mName] = resourceDescriptors;
+      resourceDatasets[mruFileName] = resourceDescriptors;
 
       importer->setDatasets(resourceDatasets);
       importer->setEditType(modifiers & Qt::ShiftModifier ? ImportAgent::ALWAYS_EDIT : ImportAgent::AS_NEEDED_EDIT);

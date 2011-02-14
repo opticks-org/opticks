@@ -92,6 +92,9 @@
     <ClCompile Include="WavelengthsImp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MruFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ApplicationServicesImp.h">

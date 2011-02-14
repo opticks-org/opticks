@@ -23,6 +23,7 @@
 #include "DateTimeImp.h"
 #include "DynamicObjectAdapter.h"
 #include "Filename.h"
+#include "FileResource.h"
 #include "ImportDescriptorImp.h"
 #include "MessageLogMgrImp.h"
 #include "ModelServices.h"
@@ -32,13 +33,16 @@
 #include "PlugInManagerServicesImp.h"
 #include "StringUtilities.h"
 #include "UtilityServicesImp.h"
+#include "XercesIncludes.h"
 #include "xmlreader.h"
 #include "xmlwriter.h"
 
 #include "yaml.h"
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <memory>
+
 #if defined(WIN_API)
 #include <windows.h>
 #include <stdlib.h>
@@ -48,6 +52,7 @@
 #include <unistd.h>
 #include <pwd.h>
 #endif
+#include <utility>
 
 using namespace std;
 
@@ -64,6 +69,14 @@ ConfigurationSettingsImp* ConfigurationSettingsImp::instance()
             "destroying it.");
       }
       spInstance = new ConfigurationSettingsImp;
+
+      // The MRU files must be deserialized after the constructor because is calls fromXml, which, in turn, calls
+      // configuration settings methods, which call ConfigurationSettingsImp::instance, which, in turns, calls fromXml,
+      // resulting in a stack overflow. There was a time where this occurred when first accessing MRU files, however,
+      // this causes a slowdown and creates a bug where MRU files are not serialized if the File menu is never accessed.
+      // The MRU files must also be deserialized all at once in order to avoid the MruEntries file being changed by
+      // a different instance of the application.
+      spInstance->deserializeMruFiles();
    }
 
    return spInstance;
@@ -92,7 +105,6 @@ ConfigurationSettingsImp::ConfigurationSettingsImp() :
    mProductionRelease(APP_IS_PRODUCTION_RELEASE),
 #endif
    mReleaseType(RT_NORMAL),
-   mNeedToLoadMruFiles(true),
    mUserDocs(locateUserDocs()),
    mIsInitialized(false)
 {
@@ -118,6 +130,8 @@ ConfigurationSettingsImp::ConfigurationSettingsImp() :
       mInitializationErrorMsg = settingErrorMsg + " The application will be shut down.\n\n" + mDeploymentDebugMsg;
       return;
    }
+
+   attach(SIGNAL_NAME(ConfigurationSettings, SettingModified), Slot(this, &ConfigurationSettingsImp::settingModified));
 
    // Reset Any Error Codes and mark as initialized
    mIsInitialized = true;
@@ -196,23 +210,14 @@ ConfigurationSettingsImp::~ConfigurationSettingsImp()
    Service<ApplicationServices> pApp;
    pApp->detach(SIGNAL_NAME(ApplicationServices, ApplicationClosed),
       Slot(this, &ConfigurationSettingsImp::applicationClosed));
+   detach(SIGNAL_NAME(ConfigurationSettings, SettingModified), Slot(this, &ConfigurationSettingsImp::settingModified));
 
-   // Delete the data descriptors in the MRU file vector
-   vector<MruFile>::iterator iter;
-   for (iter = mMruFiles.begin(); iter != mMruFiles.end(); ++iter)
+   // Delete the entries in the MRU vector -- calling removeMruFile is not desired because it would delete the file too
+   for (vector<MruFile*>::iterator iter = mMruFiles.begin(); iter != mMruFiles.end(); ++iter)
    {
-      MruFile mruFile = *iter;
-
-      vector<ImportDescriptor*>::iterator iter2;
-      for (iter2 = mruFile.mDescriptors.begin(); iter2 != mruFile.mDescriptors.end(); ++iter2)
-      {
-         ImportDescriptorImp* pImportDescriptor = dynamic_cast<ImportDescriptorImp*>(*iter2);
-         if (pImportDescriptor != NULL)
-         {
-            delete pImportDescriptor;
-         }
-      }
+      delete *iter;
    }
+   mMruFiles.clear();
 }
 
 void ConfigurationSettingsImp::initDeploymentValues()
@@ -604,15 +609,13 @@ string ConfigurationSettingsImp::getUserName() const
 
 string ConfigurationSettingsImp::getOperatingSystemName() const
 {
-   string os;
+   string os = "Unknown";
 #if defined(WIN_API)
    os = "Windows";
 #elif defined(SOLARIS)
    os = "Solaris";
 #elif defined(LINUX)
    os = "Linux";
-#else
-   os = "Unkown"
 #endif
    return os;
 }
@@ -689,7 +692,7 @@ bool ConfigurationSettingsImp::setSetting(const string& key, DataVariant& var, b
       try
       {
          //Need try-catch because DataVariant comparison can
-         //throw UnsupportedOperation if the held type doesn't support comparision
+         //throw UnsupportedOperation if the held type doesn't support comparison
          same = (var == curValue);
       }
       catch (DataVariant::UnsupportedOperation) {}
@@ -827,185 +830,96 @@ void ConfigurationSettingsImp::copySetting(const string& key, DynamicObject* pOb
    }
 }
 
-void ConfigurationSettingsImp::setMruFiles(const vector<MruFile>& mruFiles)
+void ConfigurationSettingsImp::addMruFile(MruFile* pMruFile)
 {
-   mMruFiles = mruFiles;
-}
-
-void ConfigurationSettingsImp::removeMruFile(const string& filename)
-{
-   if (filename.empty() == true)
+   if (pMruFile == NULL || getSettingNumberOfMruFiles() == 0)
    {
       return;
    }
 
-   // Make sure the MRU files have been deserialized before trying to remove the file
-   deserializeMruFiles();
+   // The pointer should never exist in the current MRU files list as it
+   // should have been freshly allocated by the caller of this method.
+   VERIFYNR(find(mMruFiles.begin(), mMruFiles.end(), pMruFile) == mMruFiles.end());
 
-   Service<ModelServices> pModel;
+   // Remove the current file if it exists in the list.
+   // This cannot simply call removeMruFile(pMruFile) because pMruFile does not yet exist in the list.
+   removeMruFile(getMruFile(pMruFile->getName()));
+
+   // Insert is pretty inefficient, but ok since this is a small vector with lightweight objects.
+   mMruFiles.insert(mMruFiles.begin(), pMruFile);
+   while (mMruFiles.size() > getSettingNumberOfMruFiles())
+   {
+      removeMruFile(mMruFiles.back());
+   }
+}
+
+MruFile* ConfigurationSettingsImp::getMruFile(const string& filename) const
+{
+   if (filename.empty() == true)
+   {
+      return NULL;
+   }
 
    QString strFilename = QString::fromStdString(filename).toLower();
    strFilename.replace(QRegExp("\\\\"), "/");
-
-   for (vector<MruFile>::iterator iter = mMruFiles.begin(); iter != mMruFiles.end(); ++iter)
+   for (vector<MruFile*>::const_iterator iter = mMruFiles.begin(); iter != mMruFiles.end(); ++iter)
    {
-      MruFile mruFile = *iter;
-
-      QString strMruFilename = QString::fromStdString(mruFile.mName).toLower();
-      strMruFilename.replace(QRegExp("\\\\"), "/");
-
-      if (strMruFilename == strFilename)
+      MruFile* pMruFile = *iter;
+      if (NN(pMruFile))
       {
-         // Destroy the import descriptors in this MRU file
-         vector<ImportDescriptor*>::iterator descriptorIter;
-         for (descriptorIter = mruFile.mDescriptors.begin();
-              descriptorIter != mruFile.mDescriptors.end();
-              ++descriptorIter)
+         QString strMruFilename = QString::fromStdString(pMruFile->getName()).toLower().replace(QRegExp("\\\\"), "/");
+         if (strMruFilename == strFilename)
          {
-            ImportDescriptor* pImportDescriptor = *descriptorIter;
-            if (pImportDescriptor != NULL)
-            {
-               pModel->destroyImportDescriptor(pImportDescriptor);
-            }
+            return pMruFile;
          }
+      }
+   }
 
+   return NULL;
+}
+
+void ConfigurationSettingsImp::removeMruFile(MruFile* pMruFile)
+{
+   for (vector<MruFile*>::iterator iter = mMruFiles.begin(); iter != mMruFiles.end(); ++iter)
+   {
+      if (*iter == pMruFile)
+      {
+         delete pMruFile;
          mMruFiles.erase(iter);
-         break;
+         return;
       }
    }
 }
 
-const vector<MruFile>& ConfigurationSettingsImp::getMruFiles() const
+const vector<MruFile*>& ConfigurationSettingsImp::getMruFiles() const
 {
-   const_cast<ConfigurationSettingsImp*>(this)->deserializeMruFiles();
    return mMruFiles;
 }
 
 void ConfigurationSettingsImp::deserializeMruFiles()
 {
-   if (!mNeedToLoadMruFiles)
-   {
-      return;
-   }
-
-   FactoryResource<Filename> pFilename;
-   pFilename->setFullPathAndName(getUserSettingsFilePath());
    XmlReader xmlReader(NULL, false);
-   XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* pDomDoc(NULL);
-   pDomDoc = xmlReader.parse(pFilename.get());
-
-   if (pDomDoc == NULL)
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* pDocument = xmlReader.parse(getUserStorageFilePath("MruEntries", "xml"));
+   if (pDocument != NULL)
    {
-      mNeedToLoadMruFiles = false;
-      return;
-   }
-
-   XERCES_CPP_NAMESPACE_QUALIFIER DOMNodeList* pConfList(NULL);
-   pConfList = pDomDoc->getElementsByTagName(X("ConfigurationSettings"));
-   if (pConfList == NULL || pConfList->getLength() != 1)
-   {
-      mNeedToLoadMruFiles = false;
-      return;
-   }
-
-   XERCES_CPP_NAMESPACE_QUALIFIER DOMNodeList* pSettingsNodes(NULL);
-   pSettingsNodes = (pConfList->item(0))->getChildNodes();
-   for (unsigned int i = 0; i < pSettingsNodes->getLength(); i++)
-   {
-      string name;
-      XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pSettingsNode = pSettingsNodes->item(i);
-      int nodeType = pSettingsNode->getNodeType();
-      string elementName = A(pSettingsNode->getNodeName());
-      if ((nodeType == XERCES_CPP_NAMESPACE_QUALIFIER DOMNode::ELEMENT_NODE) &&
-          (elementName == "group") && (pSettingsNode->hasAttributes()))
+      XERCES_CPP_NAMESPACE_QUALIFIER DOMElement* pRootElement = pDocument->getDocumentElement();
+      if (pRootElement != NULL)
       {
-         XERCES_CPP_NAMESPACE_QUALIFIER DOMNamedNodeMap* pAttr = pSettingsNode->getAttributes();
-         XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pNameAttr = pAttr->getNamedItem(X("name"));
-         if (pNameAttr != NULL)
+         for (XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pNode = pRootElement->getFirstChild();
+            pNode != NULL;
+            pNode = pNode->getNextSibling())
          {
-            name = A(pNameAttr->getNodeValue());
-         }
-      }
-      else
-      {
-         continue;
-      }
-      if (name == "MRUFiles")
-      {
-         Service<ModelServices> pModel;
-         for (XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pMruFileNode = pSettingsNode->getFirstChild();
-            pMruFileNode != NULL;
-            pMruFileNode = pMruFileNode->getNextSibling())
-         {
-            if (XERCES_CPP_NAMESPACE_QUALIFIER XMLString::equals(pMruFileNode->getNodeName(), X("attribute")))
+            if (XERCES_CPP_NAMESPACE_QUALIFIER XMLString::equals(pNode->getNodeName(), X("MruEntry")))
             {
-               unsigned maxNumFiles = ConfigurationSettings::getSettingNumberOfMruFiles();
-               if (mMruFiles.size() == maxNumFiles)
+               auto_ptr<MruFile> pMruFile(new MruFile);
+               if (pMruFile->fromXml(pNode, XmlBase::VERSION) == true)
                {
-                  break;
-               }
-
-               if (!static_cast<XERCES_CPP_NAMESPACE_QUALIFIER DOMElement*>(pMruFileNode)->hasAttribute(X("name")))
-               {
-                  continue;
-               }
-
-               vector<ImportDescriptor*> descriptors;
-               for (XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pDescriptorNode = pMruFileNode->getFirstChild();
-                  pDescriptorNode != NULL;
-                  pDescriptorNode = pDescriptorNode->getNextSibling())
-               {
-                  if (XERCES_CPP_NAMESPACE_QUALIFIER XMLString::equals(pDescriptorNode->getNodeName(),
-                     X("DataDescriptor")))
-                  {
-                     XERCES_CPP_NAMESPACE_QUALIFIER DOMElement* pElement =
-                        static_cast<XERCES_CPP_NAMESPACE_QUALIFIER DOMElement*>(pDescriptorNode);
-                     if (!(pElement->hasAttribute(X("type")) && pElement->hasAttribute(X("version"))))
-                     {
-                        continue;
-                     }
-                     string mruName = A(pElement->getAttribute(X("name")));
-                     string type = A(pElement->getAttribute(X("type")));
-                     unsigned int version = atoi(A(pElement->getAttribute(X("version"))));
-                     DataDescriptor* pDescriptor = pModel->createDataDescriptor(mruName, type, NULL);
-                     if (pDescriptor == NULL)
-                     {
-                        continue;
-                     }
-                     try
-                     {
-                        if (pDescriptor->fromXml(pElement, version))
-                        {
-                           ImportDescriptor* pImportDescriptor = pModel->createImportDescriptor(pDescriptor);
-                           if (pImportDescriptor != NULL)
-                           {
-                              descriptors.push_back(pImportDescriptor);
-                           }
-                        }
-                     }
-                     catch (XmlBase::XmlException&)
-                     {
-                        // do nothing
-                     }
-                  }
-               }
-               string mruName = A(static_cast<XERCES_CPP_NAMESPACE_QUALIFIER DOMElement*>(
-                                                pMruFileNode)->getAttribute(X("name")));
-               string mruImporter = A(static_cast<XERCES_CPP_NAMESPACE_QUALIFIER DOMElement*>(
-                                                pMruFileNode)->getAttribute(X("importer")));
-               string mruModification = A(static_cast<XERCES_CPP_NAMESPACE_QUALIFIER DOMElement*>(
-                                                pMruFileNode)->getAttribute(X("modification_time")));
-               if ((mruName.empty() == false) && (mruImporter.empty() == false) && (mruModification.empty() == false))
-               {
-                  MruFile mruFile(mruName, mruImporter, descriptors, DateTimeImp(mruModification));
-                  mMruFiles.push_back(mruFile);
+                  mMruFiles.push_back(pMruFile.release());
                }
             }
          }
       }
    }
-
-   mNeedToLoadMruFiles = false;
 }
 
 void ConfigurationSettingsImp::applicationClosed(Subject& subject, const string& signal, const boost::any& args)
@@ -1091,7 +1005,52 @@ string ConfigurationSettingsImp::locateUserDocs()
 
 bool ConfigurationSettingsImp::serialize() const
 {
-   return serializeSettings(getUserSettingsFilePath(), mpUserSettings.get(), true);
+   return serializeSettings(getUserSettingsFilePath(), mpUserSettings.get()) && serializeMruFiles();
+}
+
+bool ConfigurationSettingsImp::serializeMruFiles() const
+{
+   const string mruFilename = getUserStorageFilePath("MruEntries", "xml");
+   FileResource pFile(mruFilename.c_str(), "wt");
+   if (pFile.get() == NULL)
+   {
+      return false;
+   }
+
+   // Return true if no files failed to serialize.
+   bool anyFailed = false;
+   try
+   {
+      XMLWriter xmlWriter("MruEntries");
+      for (vector<MruFile*>::const_iterator iter = mMruFiles.begin(); iter != mMruFiles.end(); ++iter)
+      {
+         MruFile* pMruFile = *iter;
+         VERIFY(pMruFile != NULL);
+
+         xmlWriter.pushAddPoint(xmlWriter.addElement("MruEntry"));
+         bool success = pMruFile->toXml(&xmlWriter);
+         XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pNode = xmlWriter.popAddPoint();
+         if (success == false)
+         {
+            anyFailed = true;
+            if (pNode != NULL)
+            {
+               xmlWriter.removeChild(pNode);
+               pNode->release();
+            }
+         }
+      }
+
+      xmlWriter.writeToFile(pFile);
+   }
+   catch (const XmlBase::XmlException&)
+   {
+      // Fatal error of some sort...
+      pFile.setDeleteOnClose(true);
+      return false;
+   }
+
+   return !anyFailed;
 }
 
 bool ConfigurationSettingsImp::serializeAsDefaults(const Filename* pFilename, const DynamicObject* pObject) const
@@ -1100,7 +1059,8 @@ bool ConfigurationSettingsImp::serializeAsDefaults(const Filename* pFilename, co
    {
       return false;
    }
-   return serializeSettings(pFilename->getFullPathAndName(), pObject, false);
+
+   return serializeSettings(pFilename->getFullPathAndName(), pObject);
 }
 
 bool ConfigurationSettingsImp::loadSettings(string& errorMessage)
@@ -1177,7 +1137,6 @@ bool ConfigurationSettingsImp::loadSettings(string& errorMessage)
    mpUserSettings->clear();
    mpSessionSettings->clear();
    mpDefaultSettings->clear();
-   mNeedToLoadMruFiles = true;
 
    //parse all .cfg's files into mpDefaultSettings using the
    //load order
@@ -1200,7 +1159,6 @@ bool ConfigurationSettingsImp::loadSettings(string& errorMessage)
    }
 
    notify(SIGNAL_NAME(Subject, Modified));
-
    return true;
 }
 
@@ -1292,10 +1250,9 @@ void ConfigurationSettingsImp::updateProductionStatus()
    }
 }
 
-bool ConfigurationSettingsImp::serializeSettings(const string& filename, const DynamicObject* pSettings,
-                                                 bool saveMru) const
+bool ConfigurationSettingsImp::serializeSettings(const string& filename, const DynamicObject* pSettings) const
 {
-   if (filename.empty())
+   if (filename.empty() || pSettings == NULL)
    {
       return false;
    }
@@ -1316,57 +1273,10 @@ bool ConfigurationSettingsImp::serializeSettings(const string& filename, const D
    xmlWriter.addAttr("release_date", releaseText);
    xmlWriter.popAddPoint();
 
-   if (pSettings == NULL)
-   {
-      return false;
-   }
-
    xmlWriter.pushAddPoint(xmlWriter.addElement("group"));
    xmlWriter.addAttr("name", "settings");
    pSettings->toXml(&xmlWriter);
    xmlWriter.popAddPoint();
-
-   if (saveMru && !mMruFiles.empty())
-   {
-      xmlWriter.pushAddPoint(xmlWriter.addElement("group"));
-      xmlWriter.addAttr("name", "MRUFiles");
-      for (vector<MruFile>::const_iterator iter = mMruFiles.begin(); iter != mMruFiles.end(); ++iter)
-      {
-         MruFile mruFile = *iter;
-         if (mruFile.mName.empty() || mruFile.mImporterName.empty() || mruFile.mDescriptors.empty())
-         {
-            continue;
-         }
-         xmlWriter.pushAddPoint(xmlWriter.addElement("attribute"));
-         xmlWriter.addAttr("name", mruFile.mName);
-         xmlWriter.addAttr("importer", mruFile.mImporterName);
-
-         for (vector<ImportDescriptor*>::iterator descriptorIter = mruFile.mDescriptors.begin();
-            descriptorIter != mruFile.mDescriptors.end();
-            ++descriptorIter)
-         {
-            ImportDescriptor* pImportDescriptor = *descriptorIter;
-            if (pImportDescriptor != NULL)
-            {
-               DataDescriptor* pDescriptor = pImportDescriptor->getDataDescriptor();
-               if (pDescriptor != NULL)
-               {
-                  xmlWriter.pushAddPoint(xmlWriter.addElement("DataDescriptor"));
-                  pDescriptor->toXml(&xmlWriter);
-                  xmlWriter.popAddPoint();
-               }
-            }
-         }
-
-         const DateTime* pDateTime = &(mruFile.mModificationTime);
-         string modificationText = StringUtilities::toXmlString(pDateTime);
-         xmlWriter.addAttr("modification_time", modificationText);
-
-         xmlWriter.popAddPoint();
-      }
-
-      xmlWriter.popAddPoint();
-   }
 
    FILE* pFile = fopen(filename.c_str(), "wt");
    if (pFile != NULL)
@@ -1377,4 +1287,17 @@ bool ConfigurationSettingsImp::serializeSettings(const string& filename, const D
    }
 
    return false;
+}
+
+void ConfigurationSettingsImp::settingModified(Subject& subject, const string& signal, const boost::any& value)
+{
+   string key = boost::any_cast<string>(value);
+   if (key == ConfigurationSettings::getSettingNumberOfMruFilesKey())
+   {
+      unsigned int maxNumMruFiles = dv_cast<unsigned int>(getSetting(key), 0);
+      while (mMruFiles.size() > maxNumMruFiles)
+      {
+         removeMruFile(mMruFiles.back());
+      }
+   }
 }

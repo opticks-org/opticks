@@ -10,6 +10,8 @@
 #ifndef CONFIGURATIONSETTINGSIMP_H
 #define CONFIGURATIONSETTINGSIMP_H
 
+#include <boost/any.hpp>
+
 #include "ConfigurationSettings.h"
 #include "ObjectResource.h"
 #include "SubjectImp.h"
@@ -24,8 +26,7 @@ class DataDescriptor;
 class DateTime;
 class DateTimeImp;
 class DynamicObject;
-struct MruFile;
-class XMLWriter;
+class MruFile;
 
 /**
  *  Contains settings specific to the application, user, and plug-ins.
@@ -41,8 +42,9 @@ class XMLWriter;
 class ConfigurationSettingsImp : public ConfigurationSettings, public SubjectImp
 {
 public:
-   SETTING(ReleaseType, General, ReleaseType, RT_NORMAL); 
-   SETTING(ReleaseDescription, General, std::string, std::string()); 
+   SETTING(ReleaseType, General, ReleaseType, RT_NORMAL)
+   SETTING(ReleaseDescription, General, std::string, std::string())
+
    /**
     *  Returns the instance of this singleton class.
     *
@@ -88,9 +90,10 @@ public:
    bool adoptTemporarySetting(const std::string& key, DataVariant& var);
    void copySetting(const std::string& key, DynamicObject* pObject) const;
 
-   void setMruFiles(const std::vector<MruFile>& mruFiles);
-   void removeMruFile(const std::string& filename);
-   const std::vector<MruFile>& getMruFiles() const;
+   void addMruFile(MruFile* pMruFile);
+   void removeMruFile(MruFile* pMruFile);
+   const std::vector<MruFile*>& getMruFiles() const;
+   MruFile* getMruFile(const std::string& filename) const;
 
    bool serializeAsDefaults(const Filename* pFilename, const DynamicObject* pObject) const;
    DynamicObject* deserialize(const Filename* pFilename) const;
@@ -164,12 +167,11 @@ protected:
     * @param pSettings
     *        the settings to serialize to the file.
     *
-    * @param saveMru
-    *        if true, the mruFile will be serialized to the file as well.
-    *
     * @return True on a successful operation, False otherwise.
     */
-   bool serializeSettings(const std::string& filename, const DynamicObject* pSettings, bool saveMru) const;
+   bool serializeSettings(const std::string& filename, const DynamicObject* pSettings) const;
+
+   bool serializeMruFiles() const;
 
 private:
    static ConfigurationSettingsImp* spInstance;
@@ -187,8 +189,7 @@ private:
    FactoryResource<DynamicObject> mpSessionSettings;
    FactoryResource<DynamicObject> mpDefaultSettings;
 
-   std::vector<MruFile> mMruFiles;
-   bool mNeedToLoadMruFiles;
+   std::vector<MruFile*> mMruFiles;
 
    std::string mUserConfigPath;
    std::string mAdditionalDefaultDir;
@@ -200,6 +201,8 @@ private:
    std::string mInitializationErrorMsg;
    bool mIsInitialized;
    std::string mDeploymentDebugMsg;
+
+   void settingModified(Subject& subject, const std::string& signal, const boost::any& value);
 };
 
 #endif

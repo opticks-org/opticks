@@ -11,31 +11,37 @@
 #define MRUFILE_H
 
 #include "DateTimeImp.h"
+#include "Serializable.h"
 
 #include <string>
 #include <vector>
 
 class ImportDescriptor;
 
-struct MruFile
+class MruFile : public Serializable
 {
-   MruFile()
-   {
-   }
-
+public:
+   MruFile();
    MruFile(const std::string& name, const std::string& importerName,
-      const std::vector<ImportDescriptor*>& descriptors, const DateTimeImp& modificationTime) :
-      mName(name),
-      mImporterName(importerName),
-      mDescriptors(descriptors),
-      mModificationTime(modificationTime)
-   {
-   }
+      const std::vector<ImportDescriptor*>& descriptors, const DateTimeImp& modificationTime);
 
+   virtual ~MruFile();
+   virtual bool toXml(XMLWriter* pXml) const;
+   virtual bool fromXml(DOMNode* pDocument, unsigned int version);
+   const std::string& getName() const;
+   const std::string& getImporterName() const;
+   const std::vector<ImportDescriptor*>& getDescriptors() const;
+   const DateTimeImp& getModificationTime() const;
+
+private:
    std::string mName;
    std::string mImporterName;
    std::vector<ImportDescriptor*> mDescriptors;
    DateTimeImp mModificationTime;
+
+   // Not implemented.
+   MruFile(const MruFile&);
+   MruFile& operator=(const MruFile&);
 };
 
 #endif

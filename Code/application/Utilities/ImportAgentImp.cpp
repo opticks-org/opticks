@@ -818,17 +818,29 @@ void ImportAgentImp::updateMruFileList(const map<ImportDescriptor*, bool>& impor
       return;
    }
 
-   for (QMap<QString, vector<ImportDescriptor*> >::iterator iter = mDatasets.begin(); iter != mDatasets.end(); ++iter)
+   // For efficiency, this will reverse iterate over mDatasets and build a vector of MruFile* which will be sent to
+   // ConfigurationSettings. The reverse iteration is used to detect when the maximum number of MRU files is reached
+   // and stop at that point to save time. Once the vector of MruFile* is built, it will then be added to
+   // ConfigurationSettings in reverse order because the first entry in the MruFile* vector is the last file which was
+   // imported due to the initial reverse iteration. In essence, two reverse iterations make a forward iteration . . .
+   vector<MruFile*> mruFiles;
+   ConfigurationSettingsImp* pSettings = ConfigurationSettingsImp::instance();
+   QMap<QString, vector<ImportDescriptor*> >::const_iterator mapIter = mDatasets.end();
+   while (mapIter != mDatasets.begin() && mruFiles.size() < pSettings->getSettingNumberOfMruFiles())
    {
-      // Determine if the filename really is a file
-      QString filename = iter.key();
+      // Implementation detail for backward iteration over QMap.
+      // See http://doc.qt.nokia.com/latest/containers.html#stl-style-iterators for more information.
+      --mapIter;
+
+      // Determine if the filename really is a file.
+      QString filename = mapIter.key();
       if (QFile::exists(filename) == false)
       {
          continue;
       }
 
-      // If no data sets in the file were successfully imported, do nothing to the list
-      vector<ImportDescriptor*> fileDescriptors = iter.value();
+      // If no data sets in the file were successfully imported, do nothing to the list.
+      vector<ImportDescriptor*> fileDescriptors = mapIter.value();
       bool fileHasImportedDatasets = false;
 
       for (vector<ImportDescriptor*>::iterator descriptorIter = fileDescriptors.begin();
@@ -852,90 +864,61 @@ void ImportAgentImp::updateMruFileList(const map<ImportDescriptor*, bool>& impor
          continue;
       }
 
-      // Remove the current file if it exists in the list
-      ConfigurationSettingsImp* pSettings = ConfigurationSettingsImp::instance();
-      pSettings->removeMruFile(filename.toStdString());
+      // Add only the descriptors that are selected to import to the MRU file, regardless of the import success.
+      vector<ImportDescriptor*> mruDescriptors;
 
-      // Get the number of MRU files
-      vector<MruFile> mruFiles = pSettings->getMruFiles();
-      unsigned int maxNumFiles = ConfigurationSettings::getSettingNumberOfMruFiles();
-      Service<ModelServices> pModel;
-
-      while ((mruFiles.size() >= maxNumFiles) && (mruFiles.empty() == false))
+      for (vector<ImportDescriptor*>::iterator descriptorIter = fileDescriptors.begin();
+         descriptorIter != fileDescriptors.end();
+         ++descriptorIter)
       {
-         // Destroy the existing import descriptors in the MRU file
-         MruFile mruFile = mruFiles.back();
-
-         for (vector<ImportDescriptor*>::iterator descriptorIter = mruFile.mDescriptors.begin();
-            descriptorIter != mruFile.mDescriptors.end();
-            ++descriptorIter)
+         ImportDescriptor* pImportDescriptor = *descriptorIter;
+         if ((pImportDescriptor != NULL) && (pImportDescriptor->isImported() == true))
          {
-            ImportDescriptor* pImportDescriptor = *descriptorIter;
-            if (pImportDescriptor != NULL)
+            // Copy the import descriptor to set in the MRU file since they are destroyed in the destructor.
+            DataDescriptor* pDescriptor = pImportDescriptor->getDataDescriptor();
+            if (pDescriptor != NULL)
             {
-               pModel->destroyImportDescriptor(pImportDescriptor);
-            }
-         }
-
-         // Remove the MRU file from the vector
-         mruFiles.pop_back();
-      }
-
-      // Add only the descriptors that are selected to import to the MRU file, regardless of the import success
-      if (maxNumFiles > 0)
-      {
-         vector<ImportDescriptor*> mruDescriptors;
-
-         for (vector<ImportDescriptor*>::iterator descriptorIter = fileDescriptors.begin();
-            descriptorIter != fileDescriptors.end();
-            ++descriptorIter)
-         {
-            ImportDescriptor* pImportDescriptor = *descriptorIter;
-            if ((pImportDescriptor != NULL) && (pImportDescriptor->isImported() == true))
-            {
-               // Copy the import descriptor to set in the MRU file since they are destroyed in the destructor
-               DataDescriptor* pDescriptor = pImportDescriptor->getDataDescriptor();
-               if (pDescriptor != NULL)
+               DataDescriptor* pMruDescriptor = pDescriptor->copy();
+               if (pMruDescriptor != NULL)
                {
-                  DataDescriptor* pMruDescriptor = pDescriptor->copy();
-                  if (pMruDescriptor != NULL)
+                  ImportDescriptor* pMruImportDescriptor =
+                     Service<ModelServices>()->createImportDescriptor(pMruDescriptor, true);
+                  if (pMruImportDescriptor != NULL)
                   {
-                     ImportDescriptor* pMruImportDescriptor = pModel->createImportDescriptor(pMruDescriptor, true);
-                     if (pMruImportDescriptor != NULL)
-                     {
-                        mruDescriptors.push_back(pMruImportDescriptor);
-                     }
+                     mruDescriptors.push_back(pMruImportDescriptor);
                   }
                }
             }
          }
-
-         // Add the file to the MRU file vector
-         string importer;
-
-         const PlugIn* pPlugIn = getPlugIn();
-         if (pPlugIn != NULL)
-         {
-            importer = pPlugIn->getName();
-         }
-
-         FilenameImp filenameImp(filename.toStdString());
-         string filePath = filenameImp.getPath();
-         string baseFilename = filenameImp.getFileName();
-
-         DateTimeImp modificationTime;
-
-         FileFinderImp fileFinder;
-         fileFinder.findFile(filePath, baseFilename);
-         if (fileFinder.findNextFile() == true)
-         {
-            fileFinder.getLastModificationTime(modificationTime);
-         }
-
-         mruFiles.insert(mruFiles.begin(), MruFile(filename.toStdString(), importer, mruDescriptors, modificationTime));
       }
 
-      // Update the MRU file list in the configuration settings
-      pSettings->setMruFiles(mruFiles);
+      // Add the file to the MRU file vector.
+      string importer;
+
+      const PlugIn* pPlugIn = getPlugIn();
+      if (pPlugIn != NULL)
+      {
+         importer = pPlugIn->getName();
+      }
+
+      FilenameImp filenameImp(filename.toStdString());
+      string filePath = filenameImp.getPath();
+      string baseFilename = filenameImp.getFileName();
+
+      DateTimeImp modificationTime;
+
+      FileFinderImp fileFinder;
+      fileFinder.findFile(filePath, baseFilename);
+      if (fileFinder.findNextFile() == true)
+      {
+         fileFinder.getLastModificationTime(modificationTime);
+      }
+
+      mruFiles.push_back(new MruFile(filename.toStdString(), importer, mruDescriptors, modificationTime));
+   }
+
+   for (vector<MruFile*>::reverse_iterator iter = mruFiles.rbegin(); iter != mruFiles.rend(); ++iter)
+   {
+      pSettings->addMruFile(*iter);
    }
 }

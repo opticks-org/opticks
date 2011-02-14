@@ -163,6 +163,7 @@
     <ClCompile Include="MessageLogAdapter.cpp" />
     <ClCompile Include="MessageLogImp.cpp" />
     <ClCompile Include="MessageLogMgrImp.cpp" />
+    <ClCompile Include="MruFile.cpp" />
     <ClCompile Include="ObjectFactoryImp.cpp" />
     <ClCompile Include="ProgressImp.cpp" />
     <ClCompile Include="SerializableImp.cpp" />

@@ -7,6 +7,7 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include "Blob.h"
 #include "ColorType.h"
 #include "DateTime.h"
 #include "NitfHeader.h"
@@ -130,7 +131,8 @@ bool Nitf::Header::importBinaryData(const ossimPropertyInterface *pPropertyInter
    ossimBinaryDataProperty* pBinaryDataProperty = PTR_CAST(ossimBinaryDataProperty, pProperty.get());
    if (pBinaryDataProperty != NULL)
    {
-      return pDynObj->setAttribute(appName, pBinaryDataProperty->getBinaryData());
+      // Use a Blob instead of a vector<unsigned char> because the amount of data can be large.
+      return pDynObj->setAttribute(appName, Blob(pBinaryDataProperty->getBinaryData()));
    }
 
    return false;
@@ -141,10 +143,22 @@ bool Nitf::Header::exportBinaryData(const RasterDataDescriptor *pDescriptor,
    ossimContainerProperty *pProperties, const string& appName,
    const string& ossimName)
 {
+   // This information was stored as vector<unsigned char> prior to version 4.6.0.
+   // It may still be in this format if, e.g., it was exported to an Ice file.
    const vector<unsigned char>* pData = prop.getPointerToValue<vector<unsigned char> >();
    if (pData == NULL)
    {
-      return false;
+      const Blob* pBlob = prop.getPointerToValue<Blob>();
+      if (pBlob == NULL)
+      {
+         return false;
+      }
+
+      pData = &pBlob->get();
+      if (pData == NULL)
+      {
+         return false;
+      }
    }
 
    ossimRefPtr<ossimProperty> pProperty = pProperties->getProperty(ossimName);

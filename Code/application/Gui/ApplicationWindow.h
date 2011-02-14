@@ -21,7 +21,6 @@
 #include "EnumWrapper.h"
 #include "GraphicGroupAdapter.h"
 #include "ImportAgent.h"
-#include "MruFile.h"
 #include "SafePtr.h"
 #include "SettableSessionItemAdapter.h"
 #include "SubjectAdapter.h"
@@ -49,6 +48,7 @@ class MeasurementToolBar;
 class MenuBarImp;
 class MessageLogWindow;
 class MouseMode;
+class MruFile;
 class PerspectiveView;
 class PlotWidget;
 class PlugInDescriptor;
@@ -406,7 +406,7 @@ private:
 
    // Menu bar
    MenuBarImp* mpMenuBar;
-   QMap<QAction*, MruFile> mMruFileCommands;
+   QMap<QAction*, MruFile*> mMruFileCommands;
    QList<QAction*> mPlugInCommands;
    QList<QAction*> mWizardCommands;
 

@@ -579,5 +579,8 @@
     <ClInclude Include="Interfaces\WorkspaceWindow.h">
       <Filter>Interfaces</Filter>
     </ClInclude>
+    <ClInclude Include="Interfaces\Blob.h">
+      <Filter>Interfaces</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

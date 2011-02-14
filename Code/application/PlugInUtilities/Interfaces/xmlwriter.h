@@ -349,7 +349,7 @@ public:
     *
     * @return The new DOM text node or \c NULL on failure.
     */
-   XERCES_CPP_NAMESPACE_QUALIFIER DOMText* addText(const std::string value,
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMText* addText(const std::string& value,
       XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pOwner = NULL)
    {
       return addText(value.c_str(),pOwner);
@@ -472,7 +472,7 @@ public:
     * See the class documentation for XMLWriter for further
     * information on add points.
     *
-    * @return The DOM node which was just poped from the stack.
+    * @return The DOM node which was just popped from the stack.
     *
     * @see XMLWriter
     */

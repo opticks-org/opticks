@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "StringUtilities.h"
 #include "ApplicationServices.h"
+#include "Blob.h"
 #include "ColorType.h"
 #include "ConfigurationSettings.h"
 #include "DateTime.h"
@@ -20,6 +20,7 @@
 #include "ObjectResource.h"
 #include "Point.h"
 #include "SpatialDataView.h"
+#include "StringUtilities.h"
 #include "TypesFile.h"
 #include "UInt64.h"
 #include "xmlbase.h"
@@ -847,6 +848,113 @@ ADD_ENUM_MAPPING(RT_TEST, "", "testing")
 ADD_ENUM_MAPPING(RT_PROTO, "", "prototype")
 ADD_ENUM_MAPPING(RT_RD, "", "rd")
 END_ENUM_MAPPING()
+
+template<>
+string toDisplayString(const Blob& val, bool* pError)
+{
+   if (pError != NULL)
+   {
+      *pError = false;
+   }
+
+   return "(Binary Data)";
+}
+
+template<>
+string toXmlString(const Blob& val, bool* pError)
+{
+   if (pError != NULL)
+   {
+      *pError = false;
+   }
+
+   // A copy from vector<unsigned char> to XMLByte* is not required because XMLByte is typedef'd to unsigned char.
+   // If this ever changes, this will fail to build; in this case, a copy will need to be made.
+   const vector<XMLByte>& values = val.get();
+   if (values.empty())
+   {
+      return string();
+   }
+
+   XMLSize_t outlen;
+   XMLByte* pBase64 =
+      XERCES_CPP_NAMESPACE_QUALIFIER Base64::encode(&values[0], values.size() * sizeof(values[0]), &outlen);
+   if (outlen == 0 || pBase64 == NULL)
+   {
+      if (pError != NULL)
+      {
+         *pError = true;
+      }
+
+      return string();
+   }
+
+   string xmlString(reinterpret_cast<char*>(pBase64), outlen);
+
+   // Use ::operator delete() per Xerces documentation.
+   ::operator delete(pBase64);
+   return xmlString;
+}
+
+template<>
+Blob fromDisplayString<Blob>(string value, bool* pError)
+{
+   if (pError != NULL)
+   {
+      *pError = false;
+   }
+
+   return Blob();
+}
+
+template<>
+Blob fromXmlString<Blob>(string value, bool* pError)
+{
+   if (pError != NULL)
+   {
+      *pError = false;
+   }
+
+   if (value.empty())
+   {
+      return Blob();
+   }
+
+   XMLSize_t dlen;
+   XMLByte* pBytes =
+      XERCES_CPP_NAMESPACE_QUALIFIER Base64::decode(reinterpret_cast<const XMLByte*>(value.c_str()), &dlen);
+   if (pBytes == NULL)
+   {
+      if (pError != NULL)
+      {
+         *pError = true;
+      }
+
+      return Blob();
+   }
+
+   vector<unsigned char> data;
+   try
+   {
+      data.reserve(dlen);
+      for (XMLSize_t i = 0; i < dlen; ++i)
+      {
+         data.push_back(pBytes[i]);
+      }
+   }
+   catch (const bad_alloc&)
+   {
+      data.clear();
+      if (pError != NULL)
+      {
+         *pError = true;
+      }
+   }
+
+   // Use ::operator delete() per Xerces documentation.
+   ::operator delete(pBytes);
+   return Blob(data);
+}
 
 template<>
 string toDisplayString(const ReleaseType& val, bool* pError)

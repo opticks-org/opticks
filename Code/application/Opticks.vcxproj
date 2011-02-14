@@ -263,6 +263,7 @@
     <ClInclude Include="Interfaces\Axis.h" />
     <ClInclude Include="Interfaces\BitMask.h" />
     <ClInclude Include="Interfaces\BitMaskObject.h" />
+    <ClInclude Include="Interfaces\Blob.h" />
     <ClInclude Include="Interfaces\CartesianGridlines.h" />
     <ClInclude Include="Interfaces\CartesianPlot.h" />
     <ClInclude Include="Interfaces\CgmObject.h" />

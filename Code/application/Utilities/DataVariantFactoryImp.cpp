@@ -8,6 +8,7 @@
  */
 
 #include "AppVerify.h"
+#include "Blob.h"
 #include "DataValueWrapper.h"
 #include "DataVariant.h"
 #include "DataVariantFactoryImp.h"
@@ -709,6 +710,7 @@ void DataVariantFactoryImp::initializeMaps()
    registerType<DataVariantValue<AnimationCycle> >();
    registerType<DataVariantValue<AnimationState> >();
    registerType<DataVariantValue<ArcRegion> >();
+   registerType<DataVariantValue<Blob> >();
    registerType<DataVariantValue<ColorType> >();
    registerType<DataVariantValue<ComplexComponent> >();
    registerType<DataVariantValue<DataOrigin> >();
@@ -747,8 +749,7 @@ void DataVariantFactoryImp::initializeMaps()
 }
 
 DataVariantFactoryImp::~DataVariantFactoryImp()
-{
-}
+{}
 
 DataVariantFactoryImp* DataVariantFactoryImp::instance()
 {
