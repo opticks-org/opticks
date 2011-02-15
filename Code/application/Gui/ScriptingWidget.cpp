@@ -60,6 +60,16 @@ ScriptingWidget::ScriptingWidget(const QString& strPlugInName, QWidget* parent) 
 
 ScriptingWidget::~ScriptingWidget()
 {
+   InterpreterManager* pInterMgr = dynamic_cast<InterpreterManager*>(mInterpreter.get());
+   if (pInterMgr != NULL)
+   {
+      Interpreter* pInterpreter = pInterMgr->getInterpreter();
+      if (pInterpreter != NULL)
+      {
+         pInterpreter->detach(SIGNAL_NAME(Interpreter, OutputText), Slot(this, &ScriptingWidget::receiveOutput));
+         pInterpreter->detach(SIGNAL_NAME(Interpreter, ErrorText), Slot(this, &ScriptingWidget::receiveOutput));
+      }
+   }
 }
 
 void ScriptingWidget::setCommandFont(const QFont& commandFont)
@@ -259,7 +269,7 @@ void ScriptingWidget::showEvent(QShowEvent* pEvent)
          mInteractive = pInterMgr->isInteractiveEnabled();
          pInterMgr->start();
          QString startupMsg = QString::fromStdString(pInterMgr->getStartupMessage());
-         addOutputText(startupMsg, false);
+         addOutputText(startupMsg, false, false);
          pInterMgr->attach(SIGNAL_NAME(InterpreterManager, InterpreterStarted), Slot(this, &ScriptingWidget::interpreterStarted));
          pInterpreter = pInterMgr->getInterpreter();
       }
@@ -538,7 +548,7 @@ void ScriptingWidget::executeCommand(const QString& strCommand)
    appendPrompt();
 }
 
-void ScriptingWidget::addOutputText(const QString& strMessage, bool error)
+void ScriptingWidget::addOutputText(const QString& strMessage, bool error, bool processEvents)
 {
    if (strMessage.isEmpty() == false)
    {
@@ -570,7 +580,10 @@ void ScriptingWidget::addOutputText(const QString& strMessage, bool error)
       {
          setTextCursor(cursor);
       }
-      QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+      if (processEvents)
+      {
+         QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+      }
    }
 }
 
@@ -715,7 +728,7 @@ void ScriptingWidget::interpreterStarted(Subject& subject, const std::string& si
    {
       pInterpreter = pInterMgr->getInterpreter();
       QString startupMsg = QString::fromStdString(pInterMgr->getStartupMessage());
-      addOutputText(startupMsg, false);
+      addOutputText(startupMsg, false, true);
    }
    if (pInterpreter != NULL)
    {
@@ -731,11 +744,11 @@ void ScriptingWidget::receiveOutput(Subject& subject, const std::string& signal,
    std::string text = boost::any_cast<std::string>(data);
    if (signal == SIGNAL_NAME(Interpreter, OutputText))
    {
-      addOutputText(QString::fromStdString(text), false);
+      addOutputText(QString::fromStdString(text), false, true);
    }
    else if (signal == SIGNAL_NAME(Interpreter, ErrorText))
    {
-      addOutputText(QString::fromStdString(text), true);
+      addOutputText(QString::fromStdString(text), true, true);
    }
 }
 

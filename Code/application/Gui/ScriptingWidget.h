@@ -68,7 +68,7 @@ protected slots:
    void clipToMaxParagraphs();
    void appendPrompt();
    void executeCommand();
-   void addOutputText(const QString& strMessage, bool error);
+   void addOutputText(const QString& strMessage, bool error, bool processEvents);
    void clearOutput();
    void globalOutputChanged(bool newValue);
 
