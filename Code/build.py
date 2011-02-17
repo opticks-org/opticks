@@ -174,7 +174,7 @@ class Builder:
         if scheme is None or scheme == "none":
             return
 
-        if options.verbosity > 1:
+        if self.verbosity > 1:
             print "Updating app version..."
 
         # Read the app version directly from the file
@@ -235,7 +235,7 @@ class Builder:
         self.__update_h_file(join("application", "Interfaces", "OpticksVersion.h"),
             opticks_version_fields)
 
-        if options.verbosity > 1:
+        if self.verbosity > 1:
             print "Done updating app version"
 
     def populate_environ_for_dependencies(self, env):
