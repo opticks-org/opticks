@@ -1,0 +1,57 @@
+/**
+@mainpage Opticks - Software Development Kit (SDK)
+
+\image html OpticksLogoOnWhite.png
+
+\section main_welcome Welcome
+Welcome to %Opticks plug-in development.
+The %Opticks SDK allows you to create a variety of plug-ins, allowing you to add new capability to the base application.
+There are three major types of capability that you can add to %Opticks as plug-ins:
+ - New Importers/Exporters - You can write importers that will load your custom data files into the application.
+   You can also write exporters that will allow you to save analysis results from %Opticks into your own file format.
+ - New Algorithms - You can write algorithms that will work directly on the data.
+   These algorithms can create brand new data results or they can modify the raw image data in-place.
+   These algorithms can also create new visualizations of the data, e.g. new views of the data, plots of the data.
+ - New Visualizations - You can write your own custom widgets using Qt, http://www.qtsoftware.com/products .
+   These can be new dialogs, new dock windows, new modeless windows; all completely under your control and able to do anything that Qt can do.
+
+\section main_search_docs Searching The Documentation
+If you are reading this documentation in a web browser, you might want to consider reading the CHM (Microsoft Compiled Help) version of this documentation.
+The advantage of the CHM version is that the documentation can be searched.
+Look in the SDK_HOME/doc folder of the Windows SDK for the CHM version of this help.
+The CHM version is not available in the Solaris SDK because Solaris does not natively support reading CHM files. 
+You can install xchm, http://xchm.sourceforge.net/, a free CHM viewer for Solaris, if you wish to read and use the CHM version on Solaris. 
+
+\section main_create_plugin Creating A Plug-In
+Please read \ref plugintutorial_overview, for a quick introduction to %Opticks plug-in development that mainly focuses on creating new algorithms.
+
+The tutorial should have given you a crash course in plug-in development by example.
+When creating your own plug-in, you'll need to:
+ -# Create a plug-in subclass, see \ref writing_plugin.
+ -# Register your plug-in with the application, see \ref register_plugin.
+ -# Compile your plug-in, see \ref howto_compileplugins.
+ -# Run your plug-in with %Opticks, see \ref runningplugins.
+ 
+\section main_upgrading_sdk Upgrading From an Earlier SDK
+If you have already written a plug-in for an earlier version of the SDK, please read \ref upgrade_sdk for details on upgrading to this version of the SDK.
+
+\section main_more_help More Help
+
+For more help please see \ref overviews or the <a href="classes.html">Class documentation</a>.
+
+If you are looking for more sample plug-ins, you should look at the PlugInSampler, PlugInSamplerQt, PlugInSamplerHdf folders in SDK_HOME/application/PlugIns/src.
+COAN (Comprehensive %Opticks Archive Network), available at http://github.com/tclarke/coan/tree/master also contains real-world examples of plug-ins.
+In addition, a large majority of the functionality included with %Opticks is built using plug-ins.
+You can find the source code for these plug-ins on the %Opticks website, at http://www.opticks.org/.
+*/
+
+/**
+\defgroup ServiceModule Services
+These services provide the entry point into the rest of the application API.  Please read \ref using_services for more details.
+*/
+
+/**
+\defgroup ShellModule Plug-In Shells
+These shell classes should be subclassed when creating a new plug-in.  Please read \ref plugin_subclass for more details.
+*/
+

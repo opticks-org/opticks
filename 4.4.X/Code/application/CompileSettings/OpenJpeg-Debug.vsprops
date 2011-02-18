@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="OpenJpeg-Debug"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+		AdditionalIncludeDirectories="&quot;$(OPENJPEG)\include\windows&quot;"
+	/>
+	<Tool
+		Name="VCLinkerTool"
+		AdditionalDependencies="OpenJpegd.lib"
+		AdditionalLibraryDirectories="$(OPENJPEG)\lib\$(PlatformName)"
+	/>
+</VisualStudioPropertySheet>

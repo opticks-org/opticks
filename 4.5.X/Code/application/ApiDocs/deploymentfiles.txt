@@ -1,0 +1,106 @@
+/** \page deploymentfiles Using deployment files to control the plug-in path, support files, default settings and user settings
+
+Deployment Files (.dep files) are a mechanism that can be used to control the search paths used by the application.
+
+\section depfilesummary Summary
+A deployment file provides control over the following:
+ -# AppHomePath - This is the directory used by the application to locate the DefaultSettings directory, AppHomePath/DefaultSettings.
+     See ConfigurationSettings for more details.
+     It is also used as the default directory for the SupportFiles directory, AppHomePath/SupportFiles (if not overriden by the user, see ConfigurationSettings::getSettingSupportFilesPath).
+     It is also used as the default directory for the PlugInPath, AppHomePath/PlugIns. This default is only used if the PlugInPath setting below in the deployment file isn't set.
+     Please see below for more details.
+     This is also used to locate the application help (i.e. AppHomePath/Help/Opticks/index.htm).
+ -# PlugInPath - This is the directory from which application plug-ins will be loaded.
+     See ConfigurationSettings::getPlugInPath for more details.
+ -# UserConfigPath - This is the directory used for storing and reading the user settings.
+     See ConfigurationSettings for more details.
+ -# AdditionalDefaultPath - This is the directory from which any .cfg's will be parsed and loaded when initializing ConfigurationSettings in addition to those that are always loaded from AppHomePath/DefaultSettings.
+     See ConfigurationSettings for more details.
+
+\section depfilesdebugging Deployment Debugging
+Before discussing how to create deployment files and the behavior if no deployment file is provided, it is useful to discuss how to debug these settings.
+The "debugDeployment:true" command-line argument (/debugDeployment:true on Windows, -debugDeployment:true on Solaris) can be provided when running either %Opticks or OpticksBatch.
+If this command-line argument is used, debugging information will be displayed during application start-up that specifies whether a deployment file was loaded or not.
+It will also display what settings of those shown above were specified in the deployment file and what values were parsed from the deployment file.
+For those settings omitted from the deployment file, it will list the default value that will be used by the application.
+In general, if you think you might have a problem with one of the above listed settings, it is highly recommended you use the "debugDeployment:true" command-line argument.
+
+\section depfileformat Deployment File Format
+A deployment file (.dep) must adhere to the YAML 1.2 file format specification (http://yaml.org/spec/1.2/).
+Specifically, the following additional constraints beyond YAML 1.2 are imposed:
+ -# The YAML document must have the \c depV1 tag.
+ -# Only the first YAML document in the file is read; any additional YAML documents are ignored.
+ -# The YAML document must contain a YAML Mapping node with a key of deployment and the value being another YAML Mapping node.
+    This sub YAML Mapping node can then contain the keys of AppHomePath, PlugInPath, UserConfigPath and AdditionalDefaultPath as listed above.  The values for these keys will then be used for those settings.
+    
+One example .dep file is shown below:
+\verbatim
+!depV1
+# Comment would go here
+deployment:
+	AppHomePath: C:/FooBar
+	PlugInPath: C:\FooBar
+	UserConfigPath: 'C:\Path With\Spaces'
+\endverbatim
+You should note the following:
+ - Each value is optional; you only need to provide values for those settings you wish to change.
+ - Either forward or back slashes can be used.
+ - If you are referencing a path with spaces, you can use single quotes to enclose the value.
+
+You can also use the compact YAML syntax as shown below:
+\verbatim
+!depV1 { deployment: { PlugInPath: /FooBar, AppHomePath: /FooBar, UserConfigPath: /FooBar } }
+\endverbatim
+You should note that the order of the values is not important.
+For each setting, the value provided must be a directory and the directory must already exist on the filesystem.
+$E() can be used to reference environment variables when specifying the directories to be used.
+The directory can be specified as either an absolute path or a relative path.
+If a relative path is used, it will be relative to the location from where the .dep deployment was loaded.
+An example of both is shown below:
+\verbatim
+!depV1
+deployment:
+	AppHomePath: $E(MY_CUSTOM_ENVIRONMENT_VARIABLE_NAME_HERE)
+	UserConfigPath: $E(ANOTHER_CUSTOM_ENV_VAR_NAME_HERE)
+	AdditionalDefaultPath: ../../Relative/Path/Here
+\endverbatim
+
+\section depfilespecify Specifying a Deployment File
+
+There are two ways to specify the deployment file that the application can use.
+Please note that a deployment file is not required to run %Opticks, and the default installation does not use a deployment file.
+
+The first method is to create a deployment file called opticks.dep (it must be all lowercase) in the same directory as the %Opticks binary (Bin folder in a standard installation).
+If this method is used, no command-line arguments need to be used when running the application.
+
+The second method is to create a deployment file and then specify the full path to the deployment file using the "deployment" command-line argument.
+When using the second method, the full path to the deployment file must be specified and the deployment file must exist.
+In the case that both an opticks.dep is present and the "deployment" command-line argument is used, the "deployment" command-line argument will take precedence.
+An example of using the command-line argument is shown below:
+
+For Windows
+\verbatim
+Opticks.exe /deployment:C:\FooBar\test.dep
+OpticksBatch.exe /deployment:C:\FooBar\test.dep
+\endverbatim
+
+For Solaris
+\verbatim
+Opticks -deployment:/FooBar/test.dep
+solOpticks -deployment:/FooBar/test.dep
+\endverbatim
+
+\section depfiledefault The default values when no deployment file is used
+Using a deployment file is not required and even when using a deployment file, not every value needs to be specified in a deployment file.
+If a value is omitted, the following defaults will be used:
+
+ -# AppHomePath - The parent directory of the directory where the %Opticks binary is located.
+  So if Opticks.exe is located in the C:\\Foo\\Bar\\Bin folder, the AppHomePath will be C:\\Foo\\Bar
+ -# PlugInPath - The PlugIns directory in the directory that is a parent directory of the directory where the %Opticks binary is located.
+  So if Opticks.exe is located in the C:\\Foo\\Bar\\Bin folder, the PlugInPath will be C:\\Foo\\Bar\\PlugIns.
+  If the case that AppHomePath is set in a deployment file, but PlugInPath is not, the PlugInPath default will NOT be affected by the value assigned to AppHomePath.
+ -# UserConfigDir - The directory for user settings file specific to the operating system that the application is run on.
+  For Windows, this would be "%APP_DATA%\Opticks".
+  For Solaris, this would be "$HOME/.opticks".
+ -# AdditionalDefaultDir - The default is none, meaning that no additional directory will be searched for .cfg files.
+*/

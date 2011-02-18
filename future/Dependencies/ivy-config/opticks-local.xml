@@ -1,0 +1,11 @@
+<ivysettings>
+   <property name="opticks.local.root" value="${ivy.settings.dir}/../local-ivyrepo" override="false"/>
+   <property name="opticks.local.ivy.pattern" value="[organization]/[module]/[revision]/[module]-ivy.xml" override="false"/>
+   <property name="opticks.local.artifact.pattern" value="[organization]/[module]/[revision]/[artifact].[ext]" override="false"/>
+   <resolvers>
+      <filesystem name="opticks-local">
+         <ivy pattern="${opticks.local.root}/${opticks.local.ivy.pattern}"/>
+         <artifact pattern="${opticks.local.root}/${opticks.local.artifact.pattern}"/>
+      </filesystem>
+   </resolvers>
+</ivysettings>
