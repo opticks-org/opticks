@@ -816,6 +816,8 @@ std::vector<unsigned int> RasterUtilities::findBandWavelengthMatches(double lowT
    // Filter wavelength data and select appropriate band
    typedef std::pair<std::pair<double, double>, unsigned int> wavelength_item;
    std::vector<wavelength_item> candidateBands;
+   // Secondary list of candidate bands for partial matches, to differentiate between full and partial matches.
+   std::vector<wavelength_item> candidatePartialBands;
    for (unsigned int bandNumber = 0; bandNumber < lowWavelengths.size(); ++bandNumber)
    {
       if (highWavelengths.empty())
@@ -827,23 +829,29 @@ std::vector<unsigned int> RasterUtilities::findBandWavelengthMatches(double lowT
                std::make_pair(lowWavelengths[bandNumber], lowWavelengths[bandNumber]), bandNumber));
          }
       }
+      else if ((lowWavelengths[bandNumber] >= lowTarget && highWavelengths[bandNumber] <= highTarget) ||
+         (lowWavelengths[bandNumber] < lowTarget && highWavelengths[bandNumber] > highTarget))
+      {
+         // If the entire band is in range, add it as a candidate
+         // Likewise, if the entire band encompasses the desired range, add it as
+         // a candidate.
+         candidateBands.push_back(std::make_pair(
+            std::make_pair(lowWavelengths[bandNumber], highWavelengths[bandNumber]), bandNumber));
+      }
       else if (allowPartialMatch)
       {
          // Check for any overlap and if in range, add it as a candidate.
          if ((lowWavelengths[bandNumber] >= lowTarget && lowWavelengths[bandNumber] <= highTarget) ||
-             (highWavelengths[bandNumber] >= lowTarget && highWavelengths[bandNumber] <= highTarget))
+             (highWavelengths[bandNumber] >= lowTarget && highWavelengths[bandNumber] <= highTarget) ||
+             (lowWavelengths[bandNumber] <= lowTarget && highWavelengths[bandNumber] >= lowTarget) ||
+             (lowWavelengths[bandNumber] <= highTarget && highWavelengths[bandNumber] >= highTarget))
          {
-            candidateBands.push_back(std::make_pair(
+            candidatePartialBands.push_back(std::make_pair(
                std::make_pair(lowWavelengths[bandNumber], highWavelengths[bandNumber]), bandNumber));
          }
       }
-      else if (lowWavelengths[bandNumber] >= lowTarget && highWavelengths[bandNumber] <= highTarget)
-      {
-         // If the entire band is in range, add it as a candidate
-         candidateBands.push_back(std::make_pair(
-            std::make_pair(lowWavelengths[bandNumber], highWavelengths[bandNumber]), bandNumber));
-      }
    }
+   // Don't return partial matches if full matches were found.
    if (!candidateBands.empty())
    {
       // Sort by low band range
@@ -856,6 +864,19 @@ std::vector<unsigned int> RasterUtilities::findBandWavelengthMatches(double lowT
          bands[band] = candidateBands[band].second;
       }
 
+      return bands;
+   }
+   // If no full matches were found, return the partial matches.  This will be empty
+   // if allowPartialMatch = false;
+   else if (!candidatePartialBands.empty())
+   {
+      std::stable_sort(candidatePartialBands.begin(), candidatePartialBands.end());
+
+      std::vector<unsigned int> bands(candidatePartialBands.size());
+      for (unsigned int band = 0; band < candidatePartialBands.size(); ++band)
+      {
+         bands[band] = candidatePartialBands[band].second;
+      }
       return bands;
    }
    // No bands fall in range.
