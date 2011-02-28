@@ -3728,6 +3728,10 @@ bool SpatialDataViewImp::toXml(XMLWriter* pXml) const
    {
       pXml->pushAddPoint(pXml->addElement("layer"));
       pXml->addAttr("id", (*lit)->getId());
+      if (!mpLayerList->isLayerDisplayed(*lit))
+      {
+         pXml->addAttr("hidden", true);
+      }
       if (*lit == mpPrimaryRasterLayer.get())
       {
          pXml->addAttr("primary", true);
@@ -3812,6 +3816,10 @@ bool SpatialDataViewImp::fromXml(DOMNode* pDocument, unsigned int version)
             if (pLayerElement->hasAttribute(X("primary")))
             {
                mpPrimaryRasterLayer.reset(dynamic_cast<RasterLayer*>(pLayer));
+            }
+            if (pLayerElement->hasAttribute(X("hidden")))
+            {
+               hideLayer(pLayer);
             }
          }
       }
