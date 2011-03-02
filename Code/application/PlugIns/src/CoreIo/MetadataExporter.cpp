@@ -127,6 +127,7 @@ bool MetadataExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
       pStep->addMessage("Metadata is empty. A file will be created anyway.", "app", "{29274eb3-c899-4778-ae1e-d267ea0dd346}", true);
    }
    XMLWriter xml("Metadata", Service<MessageLogMgr>()->getLog());
+   xml.pushAddPoint(NULL);
    if (!pMetadata->toXml(&xml))
    {
       if (pProgress != NULL)
@@ -136,10 +137,8 @@ bool MetadataExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
       pStep->finalize(Message::Failure, "Error saving metadata");
       return false;
    }
-   else
-   {
-      xml.writeToFile(pFile);
-   }
+   xml.popAddPoint();
+   xml.writeToFile(pFile);
    fclose(pFile);
 
    if (pProgress != NULL)
