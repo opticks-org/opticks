@@ -145,6 +145,8 @@ bool SampleGeoref::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
    mpRaster->setGeoreferencePlugin(this);
 
    mpGui = NULL; // Pointer not guaranteed to be valid after execute() is called
+
+   pStep->finalize(Message::Success);
    return true;
 }
 
