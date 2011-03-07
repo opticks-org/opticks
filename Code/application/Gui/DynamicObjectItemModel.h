@@ -55,11 +55,11 @@ protected:
       AttributeWrapper* getParent() const;
       const std::vector<AttributeWrapper*>& getChildren() const;
 
-      void addChild(AttributeWrapper* pWrapper);
-      AttributeWrapper* addChild(const std::string& name, DataVariant* pValue);
+      void addChild(AttributeWrapper* pWrapper, bool notify);
+      AttributeWrapper* addChild(const std::string& name, DataVariant* pValue, bool notify);
       AttributeWrapper* getChild(const std::string& name, DataVariant* pValue) const;
-      bool removeChild(AttributeWrapper* pWrapper);
-      bool removeChild(const std::string& name, DataVariant* pValue);
+      bool removeChild(AttributeWrapper* pWrapper, bool notify);
+      bool removeChild(const std::string& name, DataVariant* pValue, bool notify);
       void clear();
 
    private:
@@ -90,6 +90,7 @@ private:
    DynamicObject* mpDynamicObject;
    AttributeWrapper* mpRootWrapper;
    std::map<DynamicObject*, AttributeWrapper*> mDynamicObjects;
+   bool mResetting;
 };
 
 #endif
