@@ -59,6 +59,7 @@ private:
    ExecutableResource mpCovariance;
    bool mUseEigenValPlot;
    int mMaxScaleValue;
+   int mMinScaleValue;
    EncodingType mOutputDataType;
    std::string mMessage;
    AoiElement* getAoiElement(const std::string& aoiName);

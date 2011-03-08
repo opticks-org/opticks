@@ -405,24 +405,60 @@ void ComputePcaRow(T* pData, double* pPcaData,  double* pCoefficients, unsigned 
    }
 }
 
+// Intended for use with integer data types -- adds 0.5 for rounding.
 template <class T>
-void StorePcaRow(T* pPcaData, double* pCompValues, unsigned int numCols, unsigned int numComponents, double minVal,
-                 double scaleFactor)
+void StorePcaRow(T* pPcaData, double* pCompValues, unsigned int numCols, unsigned int numComponents,
+   double minVal, double scaleFactor, int minOutputVal)
 {
-   T* pOutput = pPcaData;
-   double* pInput = pCompValues;
    for (unsigned int col = 0; col < numCols; ++col)
    {
-      *pOutput = static_cast<T>((*pInput - minVal) * scaleFactor + 0.5);
-      ++pInput;
-      pOutput += numComponents;
+      *pPcaData = static_cast<T>(static_cast<int64_t>((*pCompValues - minVal) * scaleFactor + 0.5) + minOutputVal);
+      ++pCompValues;
+      pPcaData += numComponents;
    }
 }
 
-template <class T>
-void StorePcaValue(T* pPcaData, double* pValue, double* pMinVal, double* pScaleFactor)
+template <>
+void StorePcaRow<float>(float* pPcaData, double* pCompValues, unsigned int numCols, unsigned int numComponents,
+   double minVal, double scaleFactor, int minOutputVal)
 {
-   *pPcaData = static_cast<T>((*pValue - *pMinVal) * (*pScaleFactor) + 0.5);
+   for (unsigned int col = 0; col < numCols; ++col)
+   {
+      *pPcaData = static_cast<float>((*pCompValues - minVal) * scaleFactor + minOutputVal);
+      ++pCompValues;
+      pPcaData += numComponents;
+   }
+}
+
+template <>
+void StorePcaRow<double>(double* pPcaData, double* pCompValues, unsigned int numCols, unsigned int numComponents,
+   double minVal, double scaleFactor, int minOutputVal)
+{
+   for (unsigned int col = 0; col < numCols; ++col)
+   {
+      *pPcaData = static_cast<double>((*pCompValues - minVal) * scaleFactor + minOutputVal);
+      ++pCompValues;
+      pPcaData += numComponents;
+   }
+}
+
+// Intended for use with integer data types -- adds 0.5 for rounding.
+template <class T>
+void StorePcaValue(T* pPcaData, double* pValue, double* pMinVal, double* pScaleFactor, int* pMinOutputVal)
+{
+   *pPcaData = static_cast<T>(static_cast<int64_t>((*pValue - *pMinVal) * (*pScaleFactor) + 0.5) + *pMinOutputVal);
+}
+
+template <>
+void StorePcaValue<float>(float* pPcaData, double* pValue, double* pMinVal, double* pScaleFactor, int* pMinOutputVal)
+{
+   *pPcaData = static_cast<float>((*pValue - *pMinVal) * (*pScaleFactor) + *pMinOutputVal);
+}
+
+template <>
+void StorePcaValue<double>(double* pPcaData, double* pValue, double* pMinVal, double* pScaleFactor, int* pMinOutputVal)
+{
+   *pPcaData = static_cast<double>((*pValue - *pMinVal) * (*pScaleFactor) + *pMinOutputVal);
 }
 
 REGISTER_PLUGIN_BASIC(OpticksPCA, PCA);
@@ -430,6 +466,7 @@ REGISTER_PLUGIN_BASIC(OpticksPCA, PCA);
 PCA::PCA() :
    mUseEigenValPlot(false),
    mMaxScaleValue(0),
+   mMinScaleValue(0),
    mpAoiBitMask(NULL),
    mUseAoi(false),
    mDisplayResults(true),
@@ -504,6 +541,7 @@ bool PCA::getInputSpecification(PlugInArgList*& pArgList)
       VERIFY(pArgList->addArg<int>("Components", NULL, "Number of components."));
       VERIFY(pArgList->addArg<EncodingType>("Output Encoding Type", NULL, "Encoding type for the output of PCA."));
       VERIFY(pArgList->addArg<int>("Max Scale Value", NULL, "Value to which the maximum component should be scaled."));
+      VERIFY(pArgList->addArg<int>("Min Scale Value", 0, "Value to which the minimum component should be scaled."));
       VERIFY(pArgList->addArg<RasterElement>("Second Moment Matrix", NULL, "Element containing the second moment matrix."));
       VERIFY(pArgList->addArg<RasterElement>("Covariance Matrix", NULL, "Element containing the covariance matrix."));
       VERIFY(pArgList->addArg<bool>("Display Results", false, "Whether to display the results of the analysis."));
@@ -576,6 +614,7 @@ bool PCA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
             mNumComponentsToUse = dlg.getNumComponents();
             mOutputDataType = dlg.getOutputDataType();
             mMaxScaleValue = dlg.getMaxScaleValue();
+            mMinScaleValue = dlg.getMinScaleValue();
 
             transformFilename = dlg.getTransformFilename();
             if (!transformFilename.isEmpty())
@@ -759,29 +798,57 @@ bool PCA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
             return false;
          }
 
+         if (pInArgList->getPlugInArgValue("Min Scale Value", mMinScaleValue) == false)
+         {
+            pStep->finalize(Message::Failure, "Invalid Minimum Scale Value!");
+            return false;
+         }
+
+         int minThreshold = 0;
          int maxThreshold = 0;
          switch (mOutputDataType)
          {
          case INT1SBYTE:
+            minThreshold = numeric_limits<char>::min();
             maxThreshold = numeric_limits<char>::max();
             break;
          case INT1UBYTE:
+            minThreshold = numeric_limits<unsigned char>::min();
             maxThreshold = numeric_limits<unsigned char>::max();
             break;
          case INT2SBYTES:
+            minThreshold = numeric_limits<short>::min();
             maxThreshold = numeric_limits<short>::max();
             break;
          case INT2UBYTES:
+            minThreshold = numeric_limits<unsigned short>::min();
             maxThreshold = numeric_limits<unsigned short>::max();
             break;
+         case INT4UBYTES:
+            minThreshold = numeric_limits<unsigned int>::min();
+            maxThreshold = numeric_limits<int>::max();   // Must be stored within an int.
+            break;
          default:
+            minThreshold = numeric_limits<int>::min();
             maxThreshold = numeric_limits<int>::max();
             break;
          }
 
          if (mMaxScaleValue > maxThreshold)
          {
-            pStep->finalize(Message::Failure, "Bad Maximum Scale Value!");
+            pStep->finalize(Message::Failure, "Bad maximum scale value");
+            return false;
+         }
+
+         if (mMinScaleValue < minThreshold)
+         {
+            pStep->finalize(Message::Failure, "Bad minimum scale value");
+            return false;
+         }
+
+         if (mMinScaleValue >= mMaxScaleValue)
+         {
+            pStep->finalize(Message::Failure, "The minimum scale value must be less than the maximum scale value");
             return false;
          }
 
@@ -1300,8 +1367,8 @@ bool PCA::computePCAwhole()
       // check if aborted
       if (!isAborted())
       {
-         // scale component values and save in pPCACube
-         scalefactor = static_cast<double>(mMaxScaleValue) / (max - min);
+         // scale component values and save in pPCACube -- need the int64_t cast to prevent overflow/underflow
+         scalefactor = static_cast<double>(static_cast<int64_t>(mMaxScaleValue) - mMinScaleValue) / (max - min);
 
          FactoryResource<DataRequest> pPcaRequest;
          pPcaRequest->setBands(pPcaDesc->getActiveBand(comp), pPcaDesc->getActiveBand(comp));
@@ -1327,7 +1394,7 @@ bool PCA::computePCAwhole()
             VERIFY(compValAccessor.isValid());
             pValues = reinterpret_cast<double*>(compValAccessor->getRow());
             switchOnEncoding(mOutputDataType, StorePcaRow, pPCAData, pValues, pcaNumCols, pcaNumBands,
-               min, scalefactor);
+               min, scalefactor, mMinScaleValue);
             pcaAccessor->nextRow();
             compValAccessor->nextRow();
 
@@ -1527,7 +1594,8 @@ bool PCA::computePCAaoi()
 
       if (!isAborted())
       {
-         scalefactor = static_cast<double>(mMaxScaleValue) / (max - min);
+         // scale component values and save in pPCACube -- need the int64_t cast to prevent overflow/underflow
+         scalefactor = static_cast<double>(static_cast<int64_t>(mMaxScaleValue) - mMinScaleValue) / (max - min);
 
          FactoryResource<DataRequest> pPcaRequest;
          pPcaRequest->setRows(pPcaDescriptor->getActiveRow(y1), pPcaDescriptor->getActiveRow(y2));
@@ -1571,7 +1639,7 @@ bool PCA::computePCAaoi()
                return false;
             }
 
-            switchOnEncoding(mOutputDataType, StorePcaValue, pPCAData, pTempVal, &min, &scalefactor);
+            switchOnEncoding(mOutputDataType, StorePcaValue, pPCAData, pTempVal, &min, &scalefactor, &mMinScaleValue);
             ++it;
          }
          if (isAborted())

@@ -7,16 +7,24 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtGui/QCheckBox>
+#include <QtGui/QComboBox>
 #include <QtGui/QFileDialog>
 #include <QtGui/QGroupBox>
 #include <QtGui/QLabel>
 #include <QtGui/QLayout>
+#include <QtGui/QLineEdit>
 #include <QtGui/QMessageBox>
 #include <QtGui/QPixmap>
 #include <QtGui/QPushButton>
+#include <QtGui/QRadioButton>
+#include <QtGui/QSpinBox>
 
+#include "AppVerify.h"
 #include "PcaDlg.h"
 #include "StringUtilities.h"
+
+#include <limits>
 
 using namespace std;
 
@@ -55,7 +63,7 @@ PcaDlg::PcaDlg(const vector<string> &aoiList, unsigned int ulBands, QWidget* par
    QIcon icnBrowse(":/icons/Open");
    QPushButton* pBrowseButton = new QPushButton(icnBrowse, QString(), pTransformGroup);
    pBrowseButton->setFixedWidth(27);
-   connect(pBrowseButton, SIGNAL(clicked()), this, SLOT(browse()));
+   VERIFYNR(connect(pBrowseButton, SIGNAL(clicked()), this, SLOT(browse())));
 
    QHBoxLayout* pFileLayout = new QHBoxLayout();
    pFileLayout->setMargin(0);
@@ -71,12 +79,11 @@ PcaDlg::PcaDlg(const vector<string> &aoiList, unsigned int ulBands, QWidget* par
    pTransformGrid->addLayout(pMethodLayout, 1, 1);
    pTransformGrid->addWidget(mpFileRadio, 2, 0, 1, 2);
    pTransformGrid->addLayout(pFileLayout, 3, 1);
-   pTransformGrid->setRowStretch(4, 10);
 
-   connect(mpCalculateRadio, SIGNAL(toggled(bool)), pMethodLabel, SLOT(setEnabled(bool)));
-   connect(mpCalculateRadio, SIGNAL(toggled(bool)), mpMethodCombo, SLOT(setEnabled(bool)));
-   connect(mpFileRadio, SIGNAL(toggled(bool)), mpFileEdit, SLOT(setEnabled(bool)));
-   connect(mpFileRadio, SIGNAL(toggled(bool)), pBrowseButton, SLOT(setEnabled(bool)));
+   VERIFYNR(connect(mpCalculateRadio, SIGNAL(toggled(bool)), pMethodLabel, SLOT(setEnabled(bool))));
+   VERIFYNR(connect(mpCalculateRadio, SIGNAL(toggled(bool)), mpMethodCombo, SLOT(setEnabled(bool))));
+   VERIFYNR(connect(mpFileRadio, SIGNAL(toggled(bool)), mpFileEdit, SLOT(setEnabled(bool))));
+   VERIFYNR(connect(mpFileRadio, SIGNAL(toggled(bool)), pBrowseButton, SLOT(setEnabled(bool))));
 
    // Number of components
    QLabel* pComponentsLabel = new QLabel("Number of Components:", this);
@@ -96,7 +103,7 @@ PcaDlg::PcaDlg(const vector<string> &aoiList, unsigned int ulBands, QWidget* par
    pNumCompLayout->addWidget(mpFromEigenPlot);
    pNumCompLayout->addStretch();
 
-   connect(mpFromEigenPlot, SIGNAL(toggled(bool)), mpComponentsSpin, SLOT(setDisabled(bool)));
+   VERIFYNR(connect(mpFromEigenPlot, SIGNAL(toggled(bool)), mpComponentsSpin, SLOT(setDisabled(bool))));
 
    // Output data type
    QLabel* pDataLabel = new QLabel("Output Data Type:", this);
@@ -112,27 +119,37 @@ PcaDlg::PcaDlg(const vector<string> &aoiList, unsigned int ulBands, QWidget* par
    mpDataCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(FLT4BYTES)));
    mpDataCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(FLT8BYTES)));
 
-   connect(mpDataCombo, SIGNAL(activated(int)), this, SLOT(updateMaxScaleValue()));
+   VERIFYNR(connect(mpDataCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateScaleValues())));
 
-   // Scale value
-   QLabel* pScaleLabel = new QLabel("Scale Max Component Value To:", this);
-   mpScaleSpin = new QSpinBox(this);
-   mpScaleSpin->setMinimum(0);
-   mpScaleSpin->setMaximum(255);
-   mpScaleSpin->setSingleStep(1);
-   mpScaleSpin->setFixedWidth(85);
+   // Scale values
+   QLabel* pMaxScaleLabel = new QLabel("Scale Max Component Value To:", this);
+   mpMaxScaleSpin = new QSpinBox(this);
+   mpMaxScaleSpin->setMinimum(0);
+   mpMaxScaleSpin->setMaximum(255);
+   mpMaxScaleSpin->setSingleStep(1);
+   mpMaxScaleSpin->setFixedWidth(85);
+
+   QLabel* pMinScaleLabel = new QLabel("Scale Min Component Value To:", this);
+   mpMinScaleSpin = new QSpinBox(this);
+   mpMinScaleSpin->setMinimum(0);
+   mpMinScaleSpin->setMaximum(255);
+   mpMinScaleSpin->setSingleStep(1);
+   mpMinScaleSpin->setFixedWidth(85);
 
    QVBoxLayout* pLayout = new QVBoxLayout();
    pLayout->setMargin(0);
    pLayout->setSpacing(5);
-   pLayout->addWidget(pComponentsLabel, 0, Qt::AlignLeft);
+   pLayout->addWidget(pComponentsLabel);
    pLayout->addLayout(pNumCompLayout);
    pLayout->addSpacing(10);
-   pLayout->addWidget(pDataLabel, 0, Qt::AlignLeft);
+   pLayout->addWidget(pDataLabel);
    pLayout->addWidget(mpDataCombo);
    pLayout->addSpacing(10);
-   pLayout->addWidget(pScaleLabel, 0, Qt::AlignLeft);
-   pLayout->addWidget(mpScaleSpin);
+   pLayout->addWidget(pMaxScaleLabel);
+   pLayout->addWidget(mpMaxScaleSpin);
+   pLayout->addSpacing(10);
+   pLayout->addWidget(pMinScaleLabel);
+   pLayout->addWidget(mpMinScaleSpin);
    pLayout->addStretch();
 
    // ROI
@@ -150,10 +167,9 @@ PcaDlg::PcaDlg(const vector<string> &aoiList, unsigned int ulBands, QWidget* par
    pRoiLayout->setMargin(0);
    pRoiLayout->setSpacing(5);
    pRoiLayout->addWidget(mpRoiCheck);
-   pRoiLayout->addWidget(mpRoiCombo);
-   pRoiLayout->addStretch(10);
+   pRoiLayout->addWidget(mpRoiCombo, 10);
 
-   connect(mpRoiCheck, SIGNAL(toggled(bool)), mpRoiCombo, SLOT(setEnabled(bool)));
+   VERIFYNR(connect(mpRoiCheck, SIGNAL(toggled(bool)), mpRoiCombo, SLOT(setEnabled(bool))));
 
    // Horizontal line
    QFrame* pLine = new QFrame(this);
@@ -164,8 +180,8 @@ PcaDlg::PcaDlg(const vector<string> &aoiList, unsigned int ulBands, QWidget* par
    pOk->setDefault(true);
    QPushButton* pCancel = new QPushButton("&Cancel", this);
 
-   connect(pOk, SIGNAL(clicked()), this, SLOT(accept()));
-   connect(pCancel, SIGNAL(clicked()), this, SLOT(reject()));
+   VERIFYNR(connect(pOk, SIGNAL(clicked()), this, SLOT(accept())));
+   VERIFYNR(connect(pCancel, SIGNAL(clicked()), this, SLOT(reject())));
 
    QHBoxLayout* pButtonLayout = new QHBoxLayout();
    pButtonLayout->setMargin(0);
@@ -179,8 +195,8 @@ PcaDlg::PcaDlg(const vector<string> &aoiList, unsigned int ulBands, QWidget* par
    pGrid->setMargin(10);
    pGrid->setSpacing(10);
    pGrid->addWidget(pTransformGroup, 0, 0);
-   pGrid->addLayout(pLayout, 0, 1);
-   pGrid->addLayout(pRoiLayout, 1, 0, 1, 2);
+   pGrid->addLayout(pLayout, 0, 1, 2, 1);
+   pGrid->addLayout(pRoiLayout, 1, 0);
    pGrid->addWidget(pLine, 2, 0, 1, 2, Qt::AlignBottom);
    pGrid->addLayout(pButtonLayout, 3, 0, 1, 2);
    pGrid->setRowStretch(2, 10);
@@ -191,14 +207,12 @@ PcaDlg::PcaDlg(const vector<string> &aoiList, unsigned int ulBands, QWidget* par
    mpFileEdit->setEnabled(false);
    pBrowseButton->setEnabled(false);
    mpComponentsSpin->setValue(ulBands);
-   mpDataCombo->setCurrentIndex(1);
-   mpScaleSpin->setValue(255);
+   mpDataCombo->setCurrentIndex(1); // This is connected to updateScaleValues so min and max will update appropriately.
    mpRoiCombo->setEnabled(false);
 }
 
 PcaDlg::~PcaDlg()
-{
-}
+{}
 
 QString PcaDlg::getCalcMethod() const
 {
@@ -224,10 +238,7 @@ QString PcaDlg::getTransformFilename() const
 
 unsigned int PcaDlg::getNumComponents() const
 {
-   unsigned int ulComponents = 0;
-   ulComponents = static_cast<unsigned int>(mpComponentsSpin->value());
-
-   return ulComponents;
+   return static_cast<unsigned int>(mpComponentsSpin->value());
 }
 
 EncodingType PcaDlg::getOutputDataType() const
@@ -247,10 +258,12 @@ EncodingType PcaDlg::getOutputDataType() const
 
 int PcaDlg::getMaxScaleValue() const
 {
-   int lScale = 0;
-   lScale = static_cast<int>(mpScaleSpin->value());
+   return mpMaxScaleSpin->value();
+}
 
-   return lScale;
+int PcaDlg::getMinScaleValue() const
+{
+   return mpMinScaleSpin->value();
 }
 
 QString PcaDlg::getRoiName() const
@@ -262,6 +275,17 @@ QString PcaDlg::getRoiName() const
    }
 
    return strRoiName;
+}
+
+void PcaDlg::accept()
+{
+   if (getMinScaleValue() >= getMaxScaleValue())
+   {
+      QMessageBox::critical(this, "PCA", "The minimum scale value must be less than the maximum scale value.");
+      return;
+   }
+
+   QDialog::accept();
 }
 
 void PcaDlg::browse()
@@ -317,50 +341,66 @@ void PcaDlg::browse()
    mpFileEdit->setText(strFilename);
 }
 
-void PcaDlg::updateMaxScaleValue()
+void PcaDlg::updateScaleValues()
 {
    int ulMaxValue = 0;
+   int ulMinValue = 0;
 
    EncodingType eDataType = getOutputDataType();
    switch (eDataType)
    {
       case INT1UBYTE:
-         ulMaxValue = 255;
+         ulMaxValue = numeric_limits<unsigned char>::max();
+         ulMinValue = numeric_limits<unsigned char>::min();
          break;
 
       case INT1SBYTE:
-         ulMaxValue = 127;
+         ulMaxValue = numeric_limits<char>::max();
+         ulMinValue = numeric_limits<char>::min();
          break;
 
       case INT2UBYTES:
-         ulMaxValue = 65535;
+         ulMaxValue = numeric_limits<unsigned short>::max();
+         ulMinValue = numeric_limits<unsigned short>::min();
          break;
 
       case INT2SBYTES:
-         ulMaxValue = 32767;
+         ulMaxValue = numeric_limits<short>::max();
+         ulMinValue = numeric_limits<short>::min();
          break;
 
       case INT4UBYTES:
+         ulMaxValue = numeric_limits<int>::max();  // Needs to be returned as an int.
+         ulMinValue = numeric_limits<unsigned int>::min();
+         break;
+
       case INT4SBYTES:
       case FLT4BYTES:
       case FLT8BYTES:
-         ulMaxValue = 2147483647;
+         ulMaxValue = numeric_limits<int>::max();   // Needs to be returned as an int.
+         ulMinValue = numeric_limits<int>::min();   // Needs to be returned as an int.
          break;
 
       default:
          break;
    }
 
-   mpScaleSpin->setMaximum(ulMaxValue);
+   mpMaxScaleSpin->setMinimum(ulMinValue);
+   mpMaxScaleSpin->setMaximum(ulMaxValue);
+
+   mpMinScaleSpin->setMinimum(ulMinValue);
+   mpMaxScaleSpin->setMaximum(ulMaxValue);
    switch (eDataType)
    {
       case FLT4BYTES:
       case FLT8BYTES:
-         mpScaleSpin->setValue(1);
+         mpMaxScaleSpin->setValue(1);
+         mpMinScaleSpin->setValue(0);
          break;
 
       default:
-         mpScaleSpin->setValue(ulMaxValue);
+         mpMaxScaleSpin->setValue(ulMaxValue);
+         mpMinScaleSpin->setValue(ulMinValue);
          break;
    }
 }
