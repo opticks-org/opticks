@@ -39,11 +39,6 @@ MetadataWidget::MetadataWidget(QWidget* parent) :
    // Metadata
    QLabel* pMetadataLabel = new QLabel("Metadata:", this);
 
-   QStringList columnNames;
-   columnNames.append("Name");
-   columnNames.append("Type");
-   columnNames.append("Value");
-
    mpMetadataModel = new DynamicObjectItemModel(this, NULL);
    mpMetadataSortingModel = new QSortFilterProxyModel(this);
    mpMetadataSortingModel->setSortCaseSensitivity(Qt::CaseInsensitive);
@@ -53,6 +48,7 @@ MetadataWidget::MetadataWidget(QWidget* parent) :
    mpMetadataTree->setSelectionMode(QAbstractItemView::SingleSelection);
    mpMetadataTree->setRootIsDecorated(true);
    mpMetadataTree->setSortingEnabled(true);
+   mpMetadataTree->sortByColumn(0, Qt::AscendingOrder);
    mpMetadataTree->setUniformRowHeights(true);
    mpMetadataTree->setModel(mpMetadataSortingModel);
    mpMetadataTree->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -68,6 +64,7 @@ MetadataWidget::MetadataWidget(QWidget* parent) :
    {
       pHeader->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
       pHeader->setSortIndicatorShown(true);
+      pHeader->resizeSection(1, 200); // Set the default Value column width
    }
 
    // Filter

@@ -39,11 +39,11 @@ QVariant DynamicObjectItemModel::headerData(int section, Qt::Orientation orienta
       }
       else if (section == 1)
       {
-         return QVariant("Type");
+         return QVariant("Value");
       }
       else if (section == 2)
       {
-         return QVariant("Value");
+         return QVariant("Type");
       }
    }
 
@@ -185,11 +185,6 @@ QVariant DynamicObjectItemModel::data(const QModelIndex& index, int role) const
             string attributeType = pValue->getTypeName();
             if (column == 1)
             {
-               // Type
-               return QVariant(QString::fromStdString(attributeType));
-            }
-            else if (column == 2)
-            {
                // Value
                if (attributeType == "DynamicObject")
                {
@@ -205,6 +200,11 @@ QVariant DynamicObjectItemModel::data(const QModelIndex& index, int role) const
                   string attributeValue = pValue->toDisplayString();
                   return QVariant(QString::fromStdString(attributeValue));
                }
+            }
+            else if (column == 2)
+            {
+               // Type
+               return QVariant(QString::fromStdString(attributeType));
             }
          }
       }
