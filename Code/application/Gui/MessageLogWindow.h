@@ -11,24 +11,21 @@
 #define MESSAGELOGWINDOW_H
 
 #include <QtCore/QAbstractItemModel>
-#include <QtCore/QEvent>
 #include <QtCore/QHash>
 #include <QtCore/QModelIndex>
 #include <QtCore/QStringList>
 #include <QtCore/QVariant>
 #include <QtGui/QComboBox>
-#include <QtGui/QTreeView>
 
-#include "ApplicationServices.h"
 #include "AttachmentPtr.h"
 #include "DockWindowAdapter.h"
+#include "MessageLog.h"
 #include "MessageLogMgr.h"
 
-#include <map>
+#include <string>
 
 class DynamicObject;
 class Message;
-class MessageLog;
 class MessageLogWindowModel;
 class Step;
 
@@ -37,22 +34,23 @@ class MessageLogWindow : public DockWindowAdapter
    Q_OBJECT
 
 public:
-   MessageLogWindow(const std::string& id, QWidget* parent = 0);
-   ~MessageLogWindow();
+   MessageLogWindow(const std::string& id, QWidget* pParent = NULL);
+   virtual ~MessageLogWindow();
 
-   void sessionClosed(Subject &subject, const std::string &signal, const boost::any &data);
-   void messageLogAdded(Subject &subject, const std::string &signal, const boost::any &data);
+protected:
+   void messageLogAdded(Subject& subject, const std::string& signal, const boost::any& data);
+   void messageLogRemoved(Subject& subject, const std::string& signal, const boost::any& data);
 
 protected slots:
-   void setLogs(const std::vector<MessageLog*> &logs);
-   void setLog(const QString &logName);
+   void setLog(const QString& logName);
 
 private:
-   std::map<MessageLog*, QTreeView*> mLogs;
-   QComboBox* mpLogs;
+   static QString getDisplayName(const MessageLog* pLog);
+   static std::string getLogName(const QString& displayName);
+
+   QComboBox* mpLogCombo;
    MessageLogWindowModel* mpModel;
    AttachmentPtr<MessageLogMgr> mpMsgLogMgr;
-   AttachmentPtr<ApplicationServices> mpAppSrvcs;
 };
 
 
@@ -90,14 +88,14 @@ public:
    void messageAdded(Subject &subject, const std::string &signal, const boost::any &data);
 
 public slots:
-   void setMessageLog(const MessageLog *pLog);
+   void setMessageLog(MessageLog* pLog);
 
 protected:
    int findIndex(const Step *pParent, const Message *pMessage) const;
 
 private:
    QStringList mHeaderNames;
-   const MessageLog* mpLog;
+   AttachmentPtr<MessageLog> mpLog;
    mutable QHash<const DynamicObject*, const Message*> mPropertyCache;
 };
 

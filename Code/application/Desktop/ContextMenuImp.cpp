@@ -7,8 +7,9 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "ContextMenuImp.h"
 #include "AppVerify.h"
+#include "ContextMenuImp.h"
+#include "MessageLog.h"
 #include "MessageLogMgr.h"
 #include "SessionItem.h"
 

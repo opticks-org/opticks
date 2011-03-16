@@ -27,6 +27,7 @@ class PlugIn;
 class Progress;
 class RasterElement;
 class SpatialDataView;
+class Step;
 
 /**
  *  \ingroup ShellModule

@@ -132,7 +132,7 @@ public: // serialize functionality
    virtual std::string serialize();
 
 public:
-   const std::string& getLogName();
+   const std::string& getLogName() const;
    QFile* mpLogFile;
 
 protected: // Observer
@@ -199,7 +199,7 @@ const Message *operator[](MessageLog::size_t i) const  \
 {  \
    return impClass::operator[](i);  \
 } \
-const std::string& getLogName() \
+const std::string& getLogName() const \
 { \
    return impClass::getLogName(); \
 }

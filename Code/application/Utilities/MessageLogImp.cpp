@@ -271,7 +271,7 @@ bool MessageLogImp::isKindOf(const string& name) const
    return SubjectImp::isKindOf(name);
 }
 
-const string& MessageLogImp::getLogName()
+const string& MessageLogImp::getLogName() const
 {
    return mpLogName;
 }

@@ -13,8 +13,8 @@
 #include "MessageLogMgr.h"
 #include "MessageLogTest.h"
 #include "PlugInRegistration.h"
-#include "Service.h"
-#include "UtilityServices.h"
+
+#include <string>
 
 REGISTER_PLUGIN_BASIC(OpticksPlugInSampler, MessageLogTestPlugin);
 
@@ -51,25 +51,27 @@ bool MessageLogTestPlugin::getOutputSpecification(PlugInArgList*& pArgList)
 bool MessageLogTestPlugin::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
    Service<DesktopServices> pDesktop;
-   Service<UtilityServices> pUtility;
+   Service<MessageLogMgr> pMgr;
 
    DockWindow* pWindow = dynamic_cast<DockWindow*>(pDesktop->getWindow("Message Log Window", DOCK_WINDOW));
    pWindow->show();
 
-   MessageLogMgr* pMgr = pUtility->getMessageLog();
-   if (pMgr != NULL)
+   const std::string logName = "Message Log Test Plug-In";
+
+   MessageLog* pLog = pMgr->createLog(logName);
+   if (pLog == NULL)
    {
-      MessageLog* pLog = pMgr->getLog("Message Log Test Plugin");
-      if (pLog != NULL)
-      {
-         pLog->createMessage("Added new test Message. Key and Component provided.", "Message Log Test Plugin",
-            "message1", true, false);
-         pLog->createMessage("This should be yellow. No Key or Component provided.", "", "", true, false);
-         pLog->createStep("Added new test Step. Key and Component provided.", "Message Log Test Plugin", "step1",
-            false);
-         pLog->createStep("This should be yellow. No Key or Component provided.", "", "", false);
-      }
+      pLog = pMgr->getLog(logName);
    }
 
-   return true;
+   if (pLog != NULL)
+   {
+      pLog->createMessage("Added new test Message. Key and Component provided.", logName, "message1", true, false);
+      pLog->createMessage("This should be yellow. No Key or Component provided.", "", "", true, false);
+      pLog->createStep("Added new test Step. Key and Component provided.", logName, "step1", false);
+      pLog->createStep("This should be yellow. No Key or Component provided.", "", "", false);
+      return true;
+   }
+
+   return false;
 }

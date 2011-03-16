@@ -1021,7 +1021,7 @@ void SessionManagerImp::newSession()
    SessionSaveLock lock;
    close();
    mName = SessionItemImp::generateUniqueId();
-   MessageLogMgrImp::instance()->getLog(mName); //force the session log to be created.
+   MessageLogMgrImp::instance()->createLog(mName);
    ApplicationWindow* pAppWindow = static_cast<ApplicationWindow*>(Service<DesktopServices>()->getMainWidget());
    VERIFYNRV(pAppWindow != NULL);
    pAppWindow->registerPlugIns();
@@ -1074,11 +1074,9 @@ bool SessionManagerImp::open(const string &filename, Progress *pProgress)
          pProgress->updateProgress("Closing current session...", 1, NORMAL);
       }
       mIsSaveLoad = true;
-      vector<IndexFileItem> items = readIndexFile(filename);
-      name = mName;
       close();
-      mName = name;
-      MessageLogMgrImp::instance()->getLog(mName); //force the session log to be created.
+      vector<IndexFileItem> items = readIndexFile(filename);
+      MessageLogMgrImp::instance()->createLog(mName);
       if (pProgress)
       {
          pProgress->updateProgress("Restoring base services...", 1, NORMAL);
@@ -1138,9 +1136,7 @@ void SessionManagerImp::populateItemMap(const vector<IndexFileItem> &items)
 vector<SessionManagerImp::IndexFileItem> SessionManagerImp::readIndexFile(const string &filename)
 {
    vector<IndexFileItem> items;
-   Service<MessageLogMgr> pLogMgr;
-   MessageLog* pLog = pLogMgr->getLog();
-   XmlReader xml(pLog, false);
+   XmlReader xml(NULL, false);
 
    XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* pDocument = NULL;
    pDocument = xml.parse(filename);

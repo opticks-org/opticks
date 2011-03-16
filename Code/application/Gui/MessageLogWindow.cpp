@@ -8,184 +8,186 @@
  */
 
 #include <QtGui/QHeaderView>
+#include <QtGui/QTreeView>
 #include <QtGui/QVBoxLayout>
 
-#include "MessageLogWindow.h"
-
+#include "AppVerify.h"
 #include "DynamicObject.h"
-#include "MessageLogMgrImp.h"
-#include "MessageLogAdapter.h"
+#include "MessageLogImp.h"
+#include "MessageLogMgr.h"
+#include "MessageLogWindow.h"
 #include "SessionManager.h"
-#include "SessionManagerImp.h"
 
 #include <memory>
 #include <string>
 using namespace std;
 
-// MessageLogWindow
-
-MessageLogWindow::MessageLogWindow(const string& id, QWidget* parent) :
-   DockWindowAdapter(id, "Message Log Window", parent),
-   mpLogs(NULL),
-   mpModel(NULL)
+MessageLogWindow::MessageLogWindow(const string& id, QWidget* pParent) :
+   DockWindowAdapter(id, "Message Log Window", pParent),
+   mpLogCombo(NULL),
+   mpModel(NULL),
+   mpMsgLogMgr(Service<MessageLogMgr>().get())
 {
-   QFrame* pTopFrame = new QFrame(this);
-   mpLogs = new QComboBox(pTopFrame);
+   QWidget* pWidget = new QWidget(this);
+
+   // Message log item model
    mpModel = new MessageLogWindowModel;
-   QTreeView* pTreeView = new QTreeView;
-   pTreeView->setModel(mpModel);
-   pTreeView->setSelectionMode(QAbstractItemView::NoSelection);
-   pTreeView->setRootIsDecorated(true);
-   QHeaderView* pHeader = pTreeView->header();
+
+   // Message tree
+   QTreeView* pMessageTree = new QTreeView(pWidget);
+   pMessageTree->setModel(mpModel);
+   pMessageTree->setSelectionMode(QAbstractItemView::NoSelection);
+   pMessageTree->setRootIsDecorated(true);
+
+   QHeaderView* pHeader = pMessageTree->header();
    if (pHeader != NULL)
    {
       pHeader->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
       pHeader->setSortIndicatorShown(false);
    }
 
-   QVBoxLayout* pTopLayout = new QVBoxLayout(pTopFrame);
-   pTopLayout->addWidget(pTreeView, 10);
-   pTopLayout->addWidget(mpLogs, 0);
+   // Message log combo
+   mpLogCombo = new QComboBox(pWidget);
 
+   // Layout
+   QVBoxLayout* pLayout = new QVBoxLayout(pWidget);
+   pLayout->setMargin(10);
+   pLayout->setSpacing(5);
+   pLayout->addWidget(pMessageTree, 10);
+   pLayout->addWidget(mpLogCombo);
+
+   // Initialization
    setIcon(QIcon(":/icons/MessageLogWindow"));
+   setWidget(pWidget);
 
-   setWidget(pTopFrame);
+   vector<MessageLog*> logs = mpMsgLogMgr->getLogs();
+   for (vector<MessageLog*>::const_iterator iter = logs.begin(); iter != logs.end(); ++iter)
+   {
+      MessageLog* pLog = *iter;
+      if (pLog != NULL)
+      {
+         QString logName = getDisplayName(pLog);
+         if (logName.isEmpty() == false)
+         {
+            mpLogCombo->addItem(logName);
+         }
+      }
+   }
 
-   Service<MessageLogMgr> pMsgLogMgr;
-   mpMsgLogMgr.addSignal(SIGNAL_NAME(Subject, Modified), Slot(this, &MessageLogWindow::messageLogAdded));
-   mpMsgLogMgr.reset(pMsgLogMgr.get());
-   mpAppSrvcs.addSignal(SIGNAL_NAME(ApplicationServices, SessionClosed), Slot(this, &MessageLogWindow::sessionClosed));
-   mpAppSrvcs.reset(Service<ApplicationServices>().get());
+   setLog(mpLogCombo->currentText());
 
-   connect(mpLogs, SIGNAL(activated(const QString &)), this, SLOT(setLog(const QString &)));
-
-   Service<SessionManager> pSessionMgr;
-   pMsgLogMgr->getLog(pSessionMgr->getName()); //force the creation of the session log
-   setLogs(pMsgLogMgr->getLogs());
-   setLog(QString::fromStdString(pSessionMgr->getName()));
+   // Connections
+   VERIFYNR(connect(mpLogCombo, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(setLog(const QString&))));
+   mpMsgLogMgr.addSignal(SIGNAL_NAME(MessageLogMgr, LogAdded), Slot(this, &MessageLogWindow::messageLogAdded));
+   mpMsgLogMgr.addSignal(SIGNAL_NAME(MessageLogMgr, LogRemoved), Slot(this, &MessageLogWindow::messageLogRemoved));
 }
 
 MessageLogWindow::~MessageLogWindow()
-{
-}
+{}
 
-void MessageLogWindow::messageLogAdded(Subject &subject, const string &signal, const boost::any &data)
+void MessageLogWindow::messageLogAdded(Subject& subject, const string& signal, const boost::any& data)
 {
-   setLogs(mpMsgLogMgr->getLogs());
-}
-
-void MessageLogWindow::sessionClosed(Subject &subject, const string &signal, const boost::any &data)
-{
-   setLogs(vector<MessageLog*>(0));
-}
-
-void MessageLogWindow::setLogs(const vector<MessageLog*> &logs)
-{
-   QString currentName;
-   if (mpLogs->count() > 0)
+   MessageLog* pLog = boost::any_cast<MessageLog*>(data);
+   if (pLog == NULL)
    {
-      currentName = mpLogs->currentText();
-   }
-   mpLogs->clear();
-   if (logs.empty())
-   {
-      mpModel->setMessageLog(NULL);
       return;
    }
-   Service<SessionManager> pSessionMgr;
-   string sessionLogName = pSessionMgr->getName();
-   bool setLog = true;
-   for (vector<MessageLog*>::const_iterator log = logs.begin(); log != logs.end(); ++log)
-   {
-      MessageLog* pLog = *log;
-      if (pLog == NULL)
-      {
-         continue;
-      }
 
-      // Get the log name
-      string logName = pLog->getLogName();
-      if (logName.empty())
-      {
-         continue;
-      }
-      QString strName = QString::fromStdString(logName);
-      if (logName == sessionLogName)
-      {
-         strName = "Session Log";
-      }
-      
-      if (strName == currentName)
-      {
-         setLog = false;
-      }
-      mpLogs->addItem(strName);
-   }
-   if (setLog)
+   QString logName = getDisplayName(pLog);
+   if (logName.isEmpty() == false)
    {
-      mpModel->setMessageLog(logs.front());
-      mpLogs->setCurrentIndex(0);
-   }
-   else
-   {
-      mpLogs->setCurrentIndex(mpLogs->findText(currentName));
+      if (mpLogCombo->findText(logName) == -1)
+      {
+         mpLogCombo->addItem(logName);
+         mpLogCombo->setCurrentIndex(mpLogCombo->count() - 1);
+      }
    }
 }
 
-void MessageLogWindow::setLog(const QString &logName)
+void MessageLogWindow::messageLogRemoved(Subject& subject, const string& signal, const boost::any& data)
 {
-   if (mpLogs->count() == 0)
+   MessageLog* pLog = boost::any_cast<MessageLog*>(data);
+   if (pLog == NULL)
    {
-      mpModel->setMessageLog(NULL);
       return;
    }
-   string realLogName = logName.toStdString();
-   QString aliasedLogName = logName;
-   if (aliasedLogName == QString::fromStdString(Service<SessionManager>()->getName()))
+
+   QString logName = getDisplayName(pLog);
+
+   int index = mpLogCombo->findText(logName);
+   if (index != -1)
    {
-      aliasedLogName = QString::fromStdString("Session Log");
+      mpLogCombo->removeItem(index);   // This will cause a new item to be activated, which will call
+                                       // setLog() to update the current log in the item model
    }
-   if (realLogName == "Session Log")
+}
+
+void MessageLogWindow::setLog(const QString& logName)
+{
+   MessageLog* pLog = NULL;
+
+   string realLogName = getLogName(logName);
+   if (realLogName.empty() == false)
    {
-      realLogName = Service<SessionManager>()->getName();
+      pLog = mpMsgLogMgr->getLog(realLogName);
    }
-   vector<MessageLog*> logs = mpMsgLogMgr->getLogs();
-   for (vector<MessageLog*>::const_iterator lIter = logs.begin(); lIter != logs.end(); ++lIter)
+
+   mpModel->setMessageLog(pLog);
+}
+
+QString MessageLogWindow::getDisplayName(const MessageLog* pLog)
+{
+   if (pLog == NULL)
    {
-      MessageLog* pLog = *lIter;
-      if ((pLog != NULL) && (realLogName == pLog->getLogName()))
-      {
-         int idx = mpLogs->findText(aliasedLogName);
-         if (idx == -1)
-         {
-            setLogs(mpMsgLogMgr->getLogs());
-            idx = mpLogs->findText(aliasedLogName);
-         }
-         if (idx != -1)
-         {
-            mpLogs->setCurrentIndex(idx);
-            mpModel->setMessageLog(pLog);
-         }
-         return;
-      }
+      return QString();
    }
+
+   string logName = pLog->getLogName();
+   if (logName.empty() == true)
+   {
+      return QString();
+   }
+
+   if (logName == Service<SessionManager>()->getName())
+   {
+      logName = "Session Log";
+   }
+
+   return QString::fromStdString(logName);
+}
+
+string MessageLogWindow::getLogName(const QString& displayName)
+{
+   if (displayName.isEmpty() == true)
+   {
+      return string();
+   }
+
+   if (displayName == "Session Log")
+   {
+      return Service<SessionManager>()->getName();
+   }
+
+   return displayName.toStdString();
 }
 
 /*************************
  **  MessageLogWindowModel
  *************************/
-MessageLogWindowModel::MessageLogWindowModel(QObject *pParent) : mpLog(NULL)
+MessageLogWindowModel::MessageLogWindowModel(QObject* pParent) :
+   mpLog(NULL)
 {
    mHeaderNames << "ID" << "Type" << "Message" << "Result" << "Reason" << "Time Stamp" << "Component" << "Key";
+   mpLog.addSignal(SIGNAL_NAME(MessageLog, MessageAdded), Slot(this, &MessageLogWindowModel::messageAdded));
+   mpLog.addSignal(SIGNAL_NAME(MessageLog, MessageHidden), Slot(this, &MessageLogWindowModel::messageFinalized));
 }
 
 MessageLogWindowModel::~MessageLogWindowModel()
-{
-}
+{}
 
 QModelIndex MessageLogWindowModel::index(int row, int column, const QModelIndex &parent) const
 {
-   if (mpLog == NULL)
+   if (mpLog.get() == NULL)
    {
       return QModelIndex();
    }
@@ -222,14 +224,14 @@ QModelIndex MessageLogWindowModel::index(int row, int column, const QModelIndex 
    }
    else if (row < static_cast<int>(mpLog->size()))
    {
-      pMessage = (*mpLog)[row];
+      pMessage = (*(mpLog.get()))[row];
    }
    return createIndex(row, column, const_cast<Subject*>(static_cast<const Subject*>(pMessage)));
 }
 
 QModelIndex MessageLogWindowModel::parent(const QModelIndex &index) const
 {
-   if (mpLog == NULL || !index.isValid())
+   if (mpLog.get() == NULL || !index.isValid())
    {
       return QModelIndex();
    }
@@ -292,7 +294,7 @@ QModelIndex MessageLogWindowModel::parent(const QModelIndex &index) const
 
 int MessageLogWindowModel::rowCount(const QModelIndex &parent) const
 {
-   if (mpLog == NULL)
+   if (mpLog.get() == NULL)
    {
       return 0;
    }
@@ -323,7 +325,7 @@ int MessageLogWindowModel::rowCount(const QModelIndex &parent) const
 
 int MessageLogWindowModel::columnCount(const QModelIndex &parent) const
 {
-   if (mpLog == NULL)
+   if (mpLog.get() == NULL)
    {
       return 0;
    }
@@ -332,7 +334,7 @@ int MessageLogWindowModel::columnCount(const QModelIndex &parent) const
 
 QVariant MessageLogWindowModel::data(const QModelIndex &index, int role) const
 {
-   if (mpLog == NULL || !index.isValid())
+   if (mpLog.get() == NULL || !index.isValid())
    {
       return QVariant();
    }
@@ -508,28 +510,13 @@ QVariant MessageLogWindowModel::headerData(int section, Qt::Orientation orientat
    return QVariant();
 }
 
-void MessageLogWindowModel::setMessageLog(const MessageLog *pLog)
+void MessageLogWindowModel::setMessageLog(MessageLog* pLog)
 {
-   if (pLog == mpLog)
+   if (pLog != mpLog.get())
    {
-      return;
+      mpLog.reset(pLog);
+      reset();
    }
-   if (mpLog != NULL)
-   {
-      const_cast<MessageLog*>(mpLog)->detach(SIGNAL_NAME(MessageLog, MessageAdded),
-         Slot(this, &MessageLogWindowModel::messageAdded));
-      const_cast<MessageLog*>(mpLog)->detach(SIGNAL_NAME(MessageLog, MessageHidden),
-         Slot(this, &MessageLogWindowModel::messageFinalized));
-   }
-   mpLog = pLog;
-   if (mpLog != NULL)
-   {
-      const_cast<MessageLog*>(mpLog)->attach(SIGNAL_NAME(MessageLog, MessageAdded),
-         Slot(this, &MessageLogWindowModel::messageAdded));
-      const_cast<MessageLog*>(mpLog)->attach(SIGNAL_NAME(MessageLog, MessageHidden),
-         Slot(this, &MessageLogWindowModel::messageFinalized));
-   }
-   reset();
 }
 
 int MessageLogWindowModel::findIndex(const Step *pParent, const Message *pMessage) const
@@ -549,7 +536,7 @@ int MessageLogWindowModel::findIndex(const Step *pParent, const Message *pMessag
    {
       for (row = mpLog->size() - 1; row >= 0; row--)
       {
-         if ((*mpLog)[row] == pMessage)
+         if ((*(mpLog.get()))[row] == pMessage)
          {
             break;
          }

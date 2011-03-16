@@ -10,6 +10,7 @@
 #ifndef MESSAGELOGRESOURCE_H
 #define MESSAGELOGRESOURCE_H
 
+#include "MessageLog.h"
 #include "MessageLogMgr.h"
 #include "Resource.h"
 #include "SessionManager.h"
@@ -62,7 +63,11 @@ public:
       MessageLog* pLog = pMgr->getLog(args.mMessageLogName);
       if (pLog == NULL)
       {
-         return NULL;
+         pLog = pMgr->createLog(args.mMessageLogName);
+         if (pLog == NULL)
+         {
+            return NULL;
+         }
       }
 
       Message* pStep = NULL;

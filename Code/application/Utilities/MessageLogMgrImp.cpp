@@ -7,22 +7,21 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "AppConfig.h"
-#include "MessageLogMgrImp.h"
-#include "ConfigurationSettingsImp.h"
-#include "DateTimeImp.h"
+#include "ConfigurationSettings.h"
+#include "Filename.h"
 #include "MessageLogAdapter.h"
+#include "MessageLogMgrImp.h"
 #include "SessionManager.h"
 
-#include "QtCore/QTemporaryFile"
+#include <QtCore/QTemporaryFile>
 
 using namespace std;
 
-#define BUFFER_SIZE 8096
-
 MessageLogMgrImp* MessageLogMgrImp::spInstance = NULL;
+bool MessageLogMgrImp::mDestroyed = false;
 
-MessageLogMgrImp::MessageLogMgrImp() : mLogPath()
+MessageLogMgrImp::MessageLogMgrImp() :
+   mpJournal(NULL)
 {
    const Filename* pMessageLogPath = ConfigurationSettings::getSettingMessageLogPath();
    if (pMessageLogPath != NULL)
@@ -42,6 +41,9 @@ MessageLogMgrImp::MessageLogMgrImp() : mLogPath()
    mpJournal = new QTemporaryFile(QString::fromStdString(mLogPath) + "/journ");
    mpJournal->open(QIODevice::WriteOnly);
    mpJournal->setPermissions(QFile::WriteOwner);
+
+   // Create a default session log
+   createLog(Service<SessionManager>()->getName());
 }
 
 MessageLogMgrImp::~MessageLogMgrImp()
@@ -61,9 +63,9 @@ MessageLogMgrImp* MessageLogMgrImp::instance()
    {
       if (mDestroyed)
       {
-         throw std::logic_error("Attempting to use MessageLogMgr after "
-            "destroying it.");
+         throw std::logic_error("Attempting to use MessageLogMgr after destroying it.");
       }
+
       spInstance = new MessageLogMgrImp;
    }
 
@@ -74,65 +76,80 @@ void MessageLogMgrImp::destroy()
 {
    if (mDestroyed)
    {
-      throw std::logic_error("Attempting to destroy MessageLogMgr after "
-         "destroying it.");
+      throw std::logic_error("Attempting to destroy MessageLogMgr after destroying it.");
    }
+
    delete spInstance;
    spInstance = NULL;
    mDestroyed = true;
 }
 
-bool MessageLogMgrImp::mDestroyed = false;
-
 void MessageLogMgrImp::setPath(const string& path)
 {
-   mLogPath = path;
-}
-
-MessageLog *MessageLogMgrImp::getLog(const string &logName)
-{
-   if (mLogMap.count(logName) == 0)
+   if ((path.empty() == false) && (path != mLogPath))
    {
-      MessageLog* pLog(NULL);
-      pLog = static_cast<MessageLog*>(new MessageLogAdapter(logName.c_str(), mLogPath.c_str(), mpJournal));
-      mLogMap.insert(pair<string, MessageLog*>(logName, pLog));
-      notify(SIGNAL_NAME(Subject, Modified));
+      mLogPath = path;
+      notify(SIGNAL_NAME(MessageLogMgr, LogPathChanged), mLogPath);
    }
-   return mLogMap[logName];
 }
 
-MessageLog* MessageLogMgrImp::getLog()
+MessageLog* MessageLogMgrImp::createLog(const string& logName)
 {
-   Service<SessionManager> pSessionMgr;
-   return getLog(pSessionMgr->getName());
+   if (getLog(logName) != NULL)
+   {
+      return NULL;
+   }
+
+   MessageLog* pLog = new MessageLogAdapter(logName.c_str(), mLogPath.c_str(), mpJournal);
+   mLogMap.insert(pair<string, MessageLog*>(logName, pLog));
+   notify(SIGNAL_NAME(MessageLogMgr, LogAdded), pLog);
+
+   return pLog;
+}
+
+MessageLog* MessageLogMgrImp::getLog(const string& logName) const
+{
+   if (logName.empty() == true)
+   {
+      return NULL;
+   }
+
+   map<string, MessageLog*>::const_iterator iter = mLogMap.find(logName);
+   if (iter != mLogMap.end())
+   {
+      return iter->second;
+   }
+
+   return NULL;
+}
+
+MessageLog* MessageLogMgrImp::getLog() const
+{
+   return getLog(Service<SessionManager>()->getName());
 }
 
 void MessageLogMgrImp::clear()
 {
-   map<string, MessageLog*>::iterator it;
-   for (it = mLogMap.begin(); it != mLogMap.end(); it++)
+   while (mLogMap.empty() == false)
    {
-      MessageLogAdapter* pLog(static_cast<MessageLogAdapter*>(it->second));
-      delete pLog;
+      map<string, MessageLog*>::iterator iter = mLogMap.begin();
+      MessageLog* pLog = iter->second;
+      mLogMap.erase(iter);
+      notify(SIGNAL_NAME(MessageLogMgr, LogRemoved), pLog);
+      delete dynamic_cast<MessageLogAdapter*>(pLog);
    }
-   mLogMap.clear();
 }
 
 vector<MessageLog*> MessageLogMgrImp::getLogs() const
 {
    vector<MessageLog*> logs;
-
-   map<string, MessageLog*>::const_iterator iter = mLogMap.begin();
-   while (iter != mLogMap.end())
+   for (map<string, MessageLog*>::const_iterator iter = mLogMap.begin(); iter != mLogMap.end(); ++iter)
    {
-      MessageLog* pLog = NULL;
-      pLog = iter->second;
+      MessageLog* pLog = iter->second;
       if (pLog != NULL)
       {
          logs.push_back(pLog);
       }
-
-      ++iter;
    }
 
    return logs;

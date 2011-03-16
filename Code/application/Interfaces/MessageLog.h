@@ -7,8 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #ifndef MESSAGE_LOG_H
 #define MESSAGE_LOG_H
 
@@ -88,7 +86,7 @@ public: // methods
    /**
     *  Creates a new message to be added to a log.
     *
-    *  Properties can be added to the message until it is finalized.
+    *  %Properties can be added to the message until it is finalized.
     *  Messages should be used to log information
     *  that is not necessary to repeat a process, but is informative only. This could
     *  include intermediate results from an algorithm or detailed information about
@@ -96,7 +94,7 @@ public: // methods
     *  identify a message.  The purpose of the component and key is to allow
     *  messages to be uniquely identified between versions of the software, so that
     *  any code that may subscribe to messages or parses the message log does
-    *  not need to be regualary updated.
+    *  not need to be regularly updated.
     *
     *  @param   action
     *           A string describing the nature of the event that triggered the message.
@@ -108,26 +106,26 @@ public: // methods
     *           created.  The key combined with the component shall uniquely
     *           identify a message.
     *  @param   finalizeOnCreate
-    *           If this is true, the Message will be automatically finalize()'d
+    *           If this is \c true, the Message will be automatically finalized.
     *  @param   recurse
-    *           If this is true, steps are recursed and the Message
+    *           If this is \c true, steps are recursed and the Message
     *           is added to the deepest un-finalized step.
     *
     *  @return  A pointer to the message created. This pointer will be valid until it
     *           is finalized.
     *
-    *  @notify  This method will notify signalMessageAdded with any<Message*>.
+    *  @notify  This method will notify signalMessageAdded() with
+    *           boost::any<\link Message \endlink*>.
+    *
+    *  @see     Message::finalize()
     */
-   virtual Message *createMessage(const std::string &action,
-                                  const std::string &component,
-                                  const std::string &key,
-                                  bool finalizeOnCreate = false,
-                                  bool recurse = true) = 0;
+   virtual Message* createMessage(const std::string& action, const std::string& component, const std::string& key,
+      bool finalizeOnCreate = false, bool recurse = true) = 0;
 
    /**
     *  Creates a new 'step' message to be added to a log.
-    *  
-    *  Properties can be added to the message until it is finalized. 'Step'  
+    *
+    *  %Properties can be added to the message until it is finalized. 'Step'  
     *  messages should be used to log information that is necessary to repeat 
     *  a process. Steps can have sub-steps. After creating a 'step' message,
     *  all properties necessary to duplicate that step should be added to the
@@ -135,7 +133,7 @@ public: // methods
     *  identify a step.  The purpose of the component and key is to allow
     *  steps to be uniquely identified between versions of the software, so that
     *  any code that may subscribe to steps or parses the message log does
-    *  not need to be regualary updated.
+    *  not need to be regularly updated.
     *
     *  @param   action
     *           A string describing the nature of the event that triggered the message.
@@ -147,25 +145,26 @@ public: // methods
     *           created.  The key combined with the component shall uniquely
     *           identify a step.
     *  @param   recurse
-    *           If this is true, steps are recursed and the new Step
+    *           If this is \c true, steps are recursed and the new Step
     *           is added to the deepest un-finalized step.
     *
     *  @return  A pointer to the message created. This pointer will be valid until it
     *           is finalized.
     *
-    *  @notify  This method will notify signalMessageAdded with any<Message*>.
+    *  @notify  This method will notify signalMessageAdded() with
+    *           boost::any<\link Message \endlink*>.
+    *
+    *  @see     Step::finalize()
     */
-   virtual Step *createStep(const std::string &action,
-                            const std::string &component,
-                            const std::string &key,
-                            bool recurse = true) = 0;
+   virtual Step* createStep(const std::string& action, const std::string& component, const std::string& key,
+      bool recurse = true) = 0;
 
    /**
     *  Get the name of this message log
     *
     *  @return The name of this log
     */
-   virtual const std::string& getLogName() = 0;
+   virtual const std::string& getLogName() const = 0;
 
    /**
     *  Obtain the count of Messages in this %MessageLog.

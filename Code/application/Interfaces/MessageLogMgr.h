@@ -7,18 +7,16 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #ifndef MESSAGELOGMGR_H
 #define MESSAGELOGMGR_H
 
-#include "TypesFile.h"
-#include "MessageLog.h"
 #include "Service.h"
 #include "Subject.h"
 
 #include <string>
 #include <vector>
+
+class MessageLog;
 
 /**
  *  Manages reporting of status messages to a log file.
@@ -39,10 +37,12 @@
  *  is the username of the person currently logged into the system.
  *
  *  This subclass of Subject will notify upon the following conditions:
- *  - A new MessageLog is implicitly created by asking for a previously non-existing
- *    log. 
- *  - The %MessageLogMgr is destroyed. This is send before the MessageLogs are deleted
- *    allowing observers to access the MessageLogs during cleanup.
+ *  - The message log path is changed as a result of calling setPath().
+ *  - A new MessageLog is created as a result of calling createLog().
+ *  - A log is removed when a session is closed.
+ *  - The MessageLogMgr is destroyed.  The notification occurs before the
+ *    message logs are deleted allowing observers to access the logs during
+ *    cleanup.
  *  - Everything else documented in Subject.
  *
  *  @see     MessageReportingLevel
@@ -50,6 +50,26 @@
 class MessageLogMgr : public Subject
 {
 public:
+   /**
+    *  Emitted when the message log path changes with boost::any<std::string>
+    *  containing the new path.
+    */
+   SIGNAL_METHOD(MessageLogMgr, LogPathChanged)
+
+   /**
+    *  Emitted when a new log is created by calling createLog() with
+    *  boost::any<\link MessageLog \endlink*> containing a pointer to the
+    *  created log.
+    */
+   SIGNAL_METHOD(MessageLogMgr, LogAdded)
+
+   /**
+    *  Emitted when a log is removed while closing a session with
+    *  boost::any<\link MessageLog \endlink*> containing a pointer to the
+    *  removed log.
+    */
+   SIGNAL_METHOD(MessageLogMgr, LogRemoved)
+
    /**
     *  Sets a new path for message logs.
     *
@@ -63,26 +83,45 @@ public:
    virtual void setPath(const std::string& path) = 0;
 
    /**
+    *  Creates a new log with a given name.
+    *
+    *  @param   logName
+    *           The name of the new log to create.
+    *
+    *  @return  A pointer to the created log.  A \c NULL pointer is returned
+    *           if a log with the given name already exists.
+    *
+    *  @see     getLog(const std::string&) const, getLog(), getLogs()
+    */
+   virtual MessageLog* createLog(const std::string& logName) = 0;
+
+   /**
     *  Gets a handle to the specified log.
     *
     *  @param   logName
     *           The name of the desired log.
     *
-    *  @return A pointer to the specified log.
+    *  @return  A pointer to the specified log.
+    *
+    *  @see     getLog(), getLogs(), createLog()
     */
-   virtual MessageLog *getLog(const std::string &logName) = 0;
+   virtual MessageLog* getLog(const std::string& logName) const = 0;
 
    /**
     *  Gets a handle to log associated with the current session.
     *
-    *  @return A pointer to the current log.
+    *  @return  A pointer to the current log.
+    *
+    *  @see     getLog(const std::string&) const, getLogs(), createLog()
     */
-   virtual MessageLog *getLog() = 0;
+   virtual MessageLog* getLog() const = 0;
 
    /**
     *  Gets handles for all managed logs.
     *
     *  @return  A vector of pointers to all managed logs.
+    *
+    *  @see     getLog(const std::string&) const, getLog(), createLog()
     */
    virtual std::vector<MessageLog*> getLogs() const = 0;
 

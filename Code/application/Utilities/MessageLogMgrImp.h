@@ -7,21 +7,17 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #ifndef MESSAGELOGMGRIMP_H
 #define MESSAGELOGMGRIMP_H
 
 #include "MessageLogMgr.h"
 #include "SubjectImp.h"
 
-#include <string>
 #include <map>
+#include <string>
 #include <vector>
 
 class MessageLog;
-class Message;
-class Step;
 class QFile;
 
 class MessageLogMgrImp : public MessageLogMgr, public SubjectImp
@@ -31,16 +27,17 @@ public:
    static void destroy();
 
    virtual void setPath(const std::string& path);
-   virtual MessageLog *getLog(const std::string &logName);
-   virtual MessageLog *getLog();
+   virtual MessageLog* createLog(const std::string& logName);
+   virtual MessageLog* getLog(const std::string& logName) const;
+   virtual MessageLog* getLog() const;
    virtual std::vector<MessageLog*> getLogs() const;
+
+   void clear();
 
    virtual const std::string& getObjectType() const;
    virtual bool isKindOf(const std::string& className) const;
 
    SUBJECTADAPTER_METHODS(SubjectImp)
-
-   void clear(); //should only be called after the current session has been closed, otherwise crashes will result.
 
 protected:
    MessageLogMgrImp();
@@ -55,4 +52,4 @@ private:
    QFile* mpJournal;
 };
 
-#endif   // MESSAGELOGMGRIMP_H
+#endif

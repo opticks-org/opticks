@@ -10,6 +10,7 @@
 #ifndef OPTICKSMETHODS_H
 #define OPTICKSMETHODS_H
 
+#include "TypesFile.h"
 #include "XmlRpc.h"
 #include "XmlRpcParam.h"
 
