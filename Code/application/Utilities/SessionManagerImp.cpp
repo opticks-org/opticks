@@ -1260,6 +1260,12 @@ SessionManagerImp::serialize(const string& filename, Progress* pProgress)
    {
       return make_pair(SerializationStatus(LOCKED), vector<pair<SessionItem*, string> >());
    }
+
+   if (pProgress)
+   {
+      pProgress->updateProgress("Creating index file...", 0, NORMAL);
+   }
+
    SerializationStatus status = SUCCESS;
    vector<IndexFileItem> items = getAllIndexFileItems();
 
