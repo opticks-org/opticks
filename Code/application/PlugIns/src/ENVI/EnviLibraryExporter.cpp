@@ -452,7 +452,7 @@ bool EnviLibraryExporter::extractPlugInArgs(PlugInArgList* pArgList)
    }
 
    // Signature set
-   if (!pArgList->getArg(Exporter::ExportDescriptorArg(), pArg) || (pArg == NULL))
+   if (!pArgList->getArg(Exporter::ExportItemArg(), pArg) || (pArg == NULL))
    {
       string message = "Could not read the signature set input value!";
       if (mpProgress != NULL)
