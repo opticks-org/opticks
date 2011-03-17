@@ -335,9 +335,9 @@ bool EnviLibraryExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
    fprintf(pFp, "interleave = bsq\n");
    fprintf(pFp, "byte order = %d\n", Endian::getSystemEndian() == BIG_ENDIAN_ORDER);
    fprintf(pFp, "wavelength units = Micrometers\n");
-   if (unitType == REFLECTANCE)
+   if ((unitType == REFLECTANCE) && (scalingFactor != 0.0))
    {
-      fprintf(pFp, "reflectance scale factor = %0.6f\n", scalingFactor);
+      fprintf(pFp, "reflectance scale factor = %0.6f\n", 1.0 / scalingFactor);
    }
 
    fprintf(pFp, "band names = { %s }\n", mpSignatureSet->getName().c_str());
