@@ -26,7 +26,6 @@
 #include <ossim/imaging/ossimImageWriterFactoryRegistry.h>
 #include <ossim/imaging/ossimBandSelector.h>
 #include <ossim/init/ossimInit.h>
-#include <ossim/support_data/ossimNitfImageHeader.h>
 
 #include <QtCore/QString>
 
@@ -93,13 +92,15 @@ CachedPage::UnitPtr Nitf::Pager::fetchUnit(DataRequest *pOriginalRequest)
    pTileSource->setExpandLut(false);
    mpImageHandler->setCurrentEntry(mSegment - 1);
 
+   // Try to set the output band list.
+   // If it cannot succeed (e.g.: for VQ), this is not an error.
    vector<ossim_uint32> bandList(concurrentBands);
    for (unsigned int band = 0; band < concurrentBands; ++band)
    {
       bandList[band] = bandNumber + band;
    }
 
-   VERIFYRV(mpImageHandler->setOutputBandList(bandList), CachedPage::UnitPtr());
+   mpImageHandler->setOutputBandList(bandList);
 
    // The Bounding Rectangle contains NITF Chipping Information.
    ossimIrect br = mpImageHandler->getBoundingRect();
@@ -126,25 +127,47 @@ CachedPage::UnitPtr Nitf::Pager::fetchUnit(DataRequest *pOriginalRequest)
       return CachedPage::UnitPtr();
    }
 
-   ossimInterleaveType interleave;
-   if (pOriginalRequest->getInterleaveFormat() == BSQ)
+   if (concurrentBands == 1)
    {
-      interleave = OSSIM_BSQ;
-   }
-   else if (pOriginalRequest->getInterleaveFormat() == BIL)
-   {
-      interleave = OSSIM_BIL;
-   }
-   else if (pOriginalRequest->getInterleaveFormat() == BIP)
-   {
-      interleave = OSSIM_BIP;
+      // This looks like an innocent optimization. It is not; it is actually a very special case for VQ compression
+      // which happens to result in optimization for single band, non-VQ data.
+      // Since OSSIM special cases VQ to always have 3 output bands (even when it is really only single band),
+      // calling cubeData->unloadTile results in an access violation (copying 3 bands into 1 is a bad idea).
+      // So, to work around this, we need to detect when we are dealing with VQ-compressed data. Because OSSIM only
+      // supports single band VQ data, all VQ data must be exactly one band. And since single band data in any
+      // interleave is equivalent to any other interleave, it also happens to be a very convenient optimization for
+      // single band data. And since ossimImageData stores data as BSQ, memcpy is safe to use in this scenario.
+
+      // Since concurrentBands is set to 1, the earlier call to setOutputBandList only requested a single band. In the
+      // case of VQ, there will actually be 3 bands, all of which must be identical because ossimNitfTileSource only
+      // accepts single-band VQ. In all other cases, the call to setOutputBandList will have restricted cubeData to a
+      // single band, meaning that the only valid parameter to cubeData->getBuf is a 0. This parameter cannot be
+      // bandNumber because of the earlier call to setOutputBandList (setting it to bandNumber returns a NULL pointer).
+      memcpy(pData.get(), cubeData->getBuf(0), dstSize);
    }
    else
    {
-      return CachedPage::UnitPtr();
+      ossimInterleaveType interleave;
+      if (pOriginalRequest->getInterleaveFormat() == BSQ)
+      {
+         interleave = OSSIM_BSQ;
+      }
+      else if (pOriginalRequest->getInterleaveFormat() == BIL)
+      {
+         interleave = OSSIM_BIL;
+      }
+      else if (pOriginalRequest->getInterleaveFormat() == BIP)
+      {
+         interleave = OSSIM_BIP;
+      }
+      else
+      {
+         return CachedPage::UnitPtr();
+      }
+
+      cubeData->unloadTile(pData.get(), region, interleave);
    }
 
-   cubeData->unloadTile(pData.get(), region, interleave);
    return CachedPage::UnitPtr(new CachedPage::CacheUnit(pData.release(), startRow, concurrentRows,
       dstSize, concurrentBands == 1 ? startBand : CachedPage::CacheUnit::ALL_BANDS));
 }

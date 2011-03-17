@@ -359,7 +359,7 @@ bool Nitf::ImageSubheader::importBandInformation(const ossimPropertyInterface *p
    {
       ossimRefPtr<ossimNitfImageBand> pBandInformation = pImageHeader->getBandInformation(i);
 
-      ossimNitfImageBandV2_1* pImageBand = dynamic_cast<ossimNitfImageBandV2_1*>(pBandInformation.get());
+      ossimNitfImageBandV2_0* pImageBand = dynamic_cast<ossimNitfImageBandV2_0*>(pBandInformation.get());
       if (pImageBand != NULL)
       {
          unsigned int numLuts = static_cast<unsigned int>(pImageBand->getNumberOfLuts());
