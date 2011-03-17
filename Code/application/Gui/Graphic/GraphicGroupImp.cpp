@@ -179,6 +179,12 @@ bool GraphicGroupImp::setProperty(const GraphicProperty* pProperty)
 
 void GraphicGroupImp::updateBoundingBox()
 {
+   GraphicElement* pElement = getElement();
+   if (pElement && !pElement->getInteractive())
+   {
+      return;
+   }
+
    double dMaxX = -1e30;
    double dMinX = 1e30;
    double dMaxY = -1e30;
@@ -1088,17 +1094,7 @@ void GraphicGroupImp::updateFromProperty(GraphicProperty* pProperty)
 {
    if (dynamic_cast<BoundingBoxProperty*>(pProperty) != NULL)
    {
-      bool update = true;
-      GraphicElement* pElement = getElement();
-      if (pElement != NULL)
-      {
-         update = pElement->getInteractive();
-      }
-
-      if (update)
-      {
-         updateBoundingBox();
-      }
+      updateBoundingBox();
    }
 
    notify(SIGNAL_NAME(GraphicGroup, ObjectChanged), boost::any(pProperty));
