@@ -1279,8 +1279,14 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    // the path as tempnam() on Windows will use %TMP% as the path
    // if available regardless of the path you pass in
    QFile tempFile(QString(messageLogPath.c_str()) + "/" + tempFileInfo.fileName());
-   if(!tempFile.open(QIODevice::WriteOnly))
+   if (!tempFile.open(QIODevice::WriteOnly))
    {
+      // hide the splash screen so it doesn't obscure the message dialog
+      if (pSplash != NULL)
+      {
+         pSplash->hide();
+      }
+
       QString errorMessage("Unable to access log files\n");
       errorMessage += tempFile.errorString();
       QMessageBox::warning(this,
@@ -1288,7 +1294,6 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
                            errorMessage,
                            QMessageBox::Ignore,
                            QMessageBox::NoButton);
-
    }
    else
    {
@@ -5135,10 +5140,13 @@ void ApplicationWindow::checkColorDepth(QWidget* pSplash)
    int nbp(QPixmap::defaultDepth());
 #endif
 
-   if(nbp < 16)
+   if (nbp < 16)
    {
       // hide the splash screen so it doesn't obscure the message dialog
-      if(pSplash != NULL) pSplash->hide();
+      if (pSplash != NULL)
+      {
+         pSplash->hide();
+      }
 
       QString msg = QString("The graphics display on this computer has a color depth\n"
                   "of %1 bits. %2 requires a display which supports\n"
