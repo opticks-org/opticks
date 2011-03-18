@@ -36,11 +36,9 @@
 #include "LatLonLayer.h"
 #include "LayerList.h"
 #include "MouseMode.h"
-#include "ObjectResource.h"
 #include "PlugIn.h"
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
-#include "PlugInManagerServices.h"
 #include "PlugInResource.h"
 #include "Poly2D.h"
 #include "Polywarp.h"
@@ -926,29 +924,12 @@ void DataFusionDlg::fuse()
 
          if (mpInputsPage->openOverlayTools())
          {
-            Window* pWindow = mpDesktop->getWindow("Flicker Window", DOCK_WINDOW);
-            if (pWindow != NULL) // the FlickerControls Plug-In was already invoked, so show the Window
-            {
-               DockWindow* pDockWindow = static_cast<DockWindow*>(pWindow);
-               if (pDockWindow != NULL)
-               {
-                  pDockWindow->show();
-               }
-               else
-               {
-                  throw FusionException("Error DataFusionDlg: Dock Window type is incorrect!");
-               }
-            }
-            else // no DockWindow, so invoke the FlickerControls
-            {
-               ExecutableResource flickerPlugIn("Flicker Controls");
-               if (flickerPlugIn->execute() == true)
-               {
-                  // leave the plug-in out there so the DockWindow Plug-In stays around until the user destroys it
-                  flickerPlugIn->releasePlugIn();
-               }
-            }
+            DockWindow* pDockWindow = static_cast<DockWindow*>(mpDesktop->getWindow("Flicker Controls", DOCK_WINDOW));
+            VERIFYNRV(pDockWindow != NULL);     // The Flicker Controls plug-in executes on startup
+
+            pDockWindow->show();
          }
+
          mModified[mpInputsPage] = false;
       }
       catch (AssertException& exc)
