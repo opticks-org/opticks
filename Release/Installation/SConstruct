@@ -1,0 +1,147 @@
+import os
+import sys
+
+####
+# Set up the options and environment
+####
+vars = Variables()
+vars.Add('CODEDIR', 'Code directory', '#/../../Code')
+vars.Add('OPTICKSDEPENDENCIES', 'Dependencies directory')
+vars.Add('BUILDDIR','Directory for build files','$CODEDIR/Build')
+vars.Add('VERSION','Version string for the package. This includes the package version number. For example, 4.5.0-1','Unknown')
+vars.Add('OUTPUT_DIR','Intermediate directory used to generate the install package.', '#/PackageOutput')
+
+OPTICKS_PLATFORM = "unknown"
+if sys.platform.startswith("linux"):
+   OPTICKS_PLATFORM = "linux-x86_64"
+else:
+   raise EnvironmentError('Invalid or unknown platform')
+
+TOOLPATH=Dir("#/../../Code/application/CompileSettings")
+env = Environment(variables=vars,
+                  ENV=os.environ,
+                  tools=["default","package"],
+                  toolpath=[TOOLPATH])
+
+BUILDDIR = env.Dir(env["BUILDDIR"]).abspath
+env["BINDIR"] = '%s/Binaries-%s-release/Bin' % (BUILDDIR,OPTICKS_PLATFORM)
+env["PLUGINDIR"] = '%s/Binaries-%s-release/PlugIns' % (BUILDDIR,OPTICKS_PLATFORM)
+env["LIBDIR"] = '%s/Binaries-%s-release/Lib' % (BUILDDIR,OPTICKS_PLATFORM)
+
+
+Help(vars.GenerateHelpText(env))
+
+####
+# Build the installation packages
+####
+if OPTICKS_PLATFORM == "linux-x86_64":
+   import sys
+   sys.path.append(TOOLPATH.abspath)
+   import deb
+   sys.path.append(env.Dir('$CODEDIR').abspath)
+   import commonutils
+   debenv = env.Clone()
+   debenv['PREF'] = '/opt/Opticks'
+   debenv.Install('./DEBIAN', debenv.File('#/linux_extra/prerm'))
+   debenv.Install('./DEBIAN', debenv.File('#/linux_extra/copyright'))
+   debenv.Install('$PREF/Bin', debenv.File('#/linux_extra/Environment'))
+   debenv.Install('$PREF/Bin', debenv.File('#/linux_extra/Opticks'))
+   debenv.Install('$PREF/Bin', debenv.File('#/linux_extra/OpticksBatch'))
+   debenv.Install('/usr/share/applications', debenv.File('#/linux_extra/opticks.desktop'))
+   debenv.Install('$PREF/Bin', debenv.File('$CODEDIR/application/Gui/res/application-large.png'))
+   debenv.Install('$PREF/Bin', debenv.File('$BINDIR/linuxBatch'))
+   debenv.Install('$PREF/Bin', debenv.File('$BINDIR/linuxOpticks'))
+   for src,dst in commonutils.get_dependencies(debenv.Dir('$OPTICKSDEPENDENCIES').abspath, 'Linux', False, '64'):
+       debenv.Install('$PREF/Bin/%s' % dst, debenv.File(src))
+   debenv.Install('$PREF/Lib', debenv.File('$LIBDIR/libSimpleApiLib.so'))
+   debenv.Install('$PREF/DefaultSettings', debenv.File('$CODEDIR/Release/DefaultSettings/1-ApplicationDefaults.cfg'))
+   debenv.Install('$PREF/DefaultSettings', debenv.File('$CODEDIR/Release/DefaultSettings/2-ApplicationMode.cfg'))
+   debenv.InstallAs(target='$PREF/DefaultSettings/3-ApplicationTempDir.cfg', source=debenv.File('#/linux_extra/3-ApplicationTempDir.cfg.in'))
+   debenv.Install('$PREF/DefaultSettings', debenv.File('$CODEDIR/Release/DefaultSettings/40-PicturesExporters.cfg'))
+   debenv.Install('$PREF/DefaultSettings', debenv.File('$CODEDIR/Release/DefaultSettings/41-MovieExporter.cfg'))
+   debenv.Install('$PREF/DefaultSettings', debenv.File('$CODEDIR/Release/DefaultSettings/42-Nitf.cfg'))
+   debenv.Install('$PREF/DefaultSettings', debenv.File('$CODEDIR/Release/DefaultSettings/43-IceExporter.cfg'))
+   debenv.Install('$PREF/DefaultSettings', debenv.File('$CODEDIR/Release/DefaultSettings/44-AnnotationImagePalette.cfg'))
+   debenv.Install('$PREF/DefaultSettings', debenv.File('$CODEDIR/Release/DefaultSettings/50-KmlServer.cfg'))
+   debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/AnnotationImagePalette.so'))
+   debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/Aspam.so'))
+   debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/AutoImporter.so'))
+   debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/BandBinning.so'))
+   debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/BandMath.so'))
+   debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/ConvolutionFilter.so'))
+   debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/CoreIo.so'))
+   debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/Covariance.so'))
+   debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/DataFusion.so'))
+   debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/Dted.so'))
+   debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/ENVI.so'))
+   debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/Fits.so'))
+   debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/GdalImporter.so'))
+   debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/Generic.so'))
+   debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/GeographicFeatures.so'))
+   debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/Georeference.so'))
+   debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/Hdf.so'))
+   debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/Ice.so'))
+   debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/ImageComparison.so'))
+   debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/Kml.so'))
+   debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/MovieExporter.so'))
+   debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/NitfCommonTre.so'))
+   debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/Nitf.so'))
+   debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/ObjectFinding.so'))
+   debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/Pca.so'))
+   debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/Pictures.so'))
+   debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/Results.so'))
+   debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/Scripts.so'))
+   debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/SecondMoment.so'))
+   debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/ShapeFileExporter.so'))
+   debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/Sio.so'))
+   debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/Wavelength.so'))
+   debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/WizardExecutor.so'))
+   debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/WizardItems.so'))
+   debenv.Install('$PREF/SupportFiles/Annotation', debenv.File('$CODEDIR/Release/SupportFiles/Annotation/default.cgm'))
+   debenv.Install('$PREF/SupportFiles/Annotation', debenv.File('$CODEDIR/Release/SupportFiles/Annotation/East.ano'))
+   debenv.Install('$PREF/SupportFiles/Annotation', debenv.File('$CODEDIR/Release/SupportFiles/Annotation/North.ano'))
+   debenv.Install('$PREF/SupportFiles/Cg', debenv.File('$CODEDIR/Release/SupportFiles/Cg/ByPass.cg'))
+   debenv.Install('$PREF/SupportFiles/Cg', debenv.File('$CODEDIR/Release/SupportFiles/Cg/ColormapDisplay.cg'))
+   debenv.Install('$PREF/SupportFiles/Cg', debenv.File('$CODEDIR/Release/SupportFiles/Cg/EdgeDetection.cg'))
+   debenv.Install('$PREF/SupportFiles/Cg', debenv.File('$CODEDIR/Release/SupportFiles/Cg/GrayscaleDisplay.cg'))
+   debenv.Install('$PREF/SupportFiles/Cg', debenv.File('$CODEDIR/Release/SupportFiles/Cg/RgbDisplay.cg'))
+   debenv.Install('$PREF/SupportFiles/ColorTables', debenv.File('$CODEDIR/Release/SupportFiles/ColorTables/autocolor.clu'))
+   debenv.Install('$PREF/SupportFiles/ColorTables', debenv.File('$CODEDIR/Release/SupportFiles/ColorTables/HotIronAlpha.clu'))
+   debenv.Install('$PREF/SupportFiles/ColorTables', debenv.File('$CODEDIR/Release/SupportFiles/ColorTables/HotIron.clu'))
+   debenv.Install('$PREF/SupportFiles/ColorTables', debenv.File('$CODEDIR/Release/SupportFiles/ColorTables/Primaries.clu'))
+   debenv.Install('$PREF/SupportFiles/ColorTables', debenv.File('$CODEDIR/Release/SupportFiles/ColorTables/RedTemp.cgr'))
+   debenv.Install('$PREF/SupportFiles/ColorTables', debenv.File('$CODEDIR/Release/SupportFiles/ColorTables/SpectrumAlpha.clu'))
+   debenv.Install('$PREF/SupportFiles/ColorTables', debenv.File('$CODEDIR/Release/SupportFiles/ColorTables/Spectrum.cgr'))
+   debenv.Install('$PREF/SupportFiles/ColorTables', debenv.File('$CODEDIR/Release/SupportFiles/ColorTables/StopLight.clu'))
+   debenv.Install('$PREF/SupportFiles/ColorTables', debenv.File('$CODEDIR/Release/SupportFiles/ColorTables/WeatherMap.clu'))
+   debenv.Install('$PREF/SupportFiles/ImageFilters', debenv.File('$CODEDIR/Release/SupportFiles/ImageFilters/FilterDefaults.gic'))
+   debenv.Install('$PREF/SupportFiles/SecurityMarkings', debenv.File('$CODEDIR/Release/SupportFiles/SecurityMarkings/1-SecurityValues.sec'))
+   debenv.Install('$PREF/SupportFiles/SecurityMarkings', debenv.File('$CODEDIR/Release/SupportFiles/SecurityMarkings/ClassificationLevels.txt'))
+   debenv.Install('$PREF/SupportFiles/Xml', debenv.File('$CODEDIR/Release/SupportFiles/Xml/opticks-1.xsd'))
+   debenv.Install('$PREF/SupportFiles/Xml', debenv.File('$CODEDIR/Release/SupportFiles/Xml/opticks-2.xsd'))
+   debenv.Install('$PREF/SupportFiles/Xml', debenv.File('$CODEDIR/Release/SupportFiles/Xml/opticks-3.xsd'))
+   debenv.Install('$PREF/Templates', debenv.File('$CODEDIR/Release/Templates/MultipleImages.spg'))
+   debenv.Install('$PREF/Templates', debenv.File('$CODEDIR/Release/Templates/SingleImage.spg'))
+   debenv.Install('$PREF/Templates', debenv.File('$CODEDIR/Release/Templates/ZoomedImages.spg'))
+   debenv.Install('$PREF/Extensions/AutoInstall', debenv.File('#/linux_extra/.dummy'))
+
+   pkg = debenv.Package(NAME='opticks',
+                        VERSION=env['VERSION'],
+                        PACKAGEROOT=env.Dir(env['OUTPUT_DIR']),
+                        PACKAGE_INSTALL_LOCATION='/opt/Opticks',
+                        PACKAGETYPE=deb,
+                        X_DPKG_PRIORITY='extra',
+                        X_DPKG_SECTION='science',
+                        X_DPKG_MAINTAINER='Kip Streithorst <kstreith@ball.com>',
+                        X_DPKG_DEPENDS='libtbb2 (>= 2.2+r009-1), libpq5 (>= 8.4.3)',
+                        ARCHITECTURE='amd64',
+                        SUMMARY='Opticks is a remote sensing P&E workbench.',
+                        DESCRIPTION='''
+ Opticks is an expandable remote sensing and imagery analysis software platform that is free and open source.
+ 
+ If you've used other commercial tools like: ERDAS IMAGINE, RemoteView, ENVI, or SOCET GXP, then you need to give Opticks a try. Unlike other competing tools, you can add capability to Opticks by creating an extension. Opticks provides the most advanced extension capability of any other remote sensing tool on the market.
+''',
+                        SOURCE_URL='http://opticks.org',
+                        X_DPKG_HOMEPAGE='http://opticks.org'
+                       )
+   env.Alias('deb', pkg)
