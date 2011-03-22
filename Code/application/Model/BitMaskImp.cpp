@@ -237,7 +237,7 @@ BitMaskImp& BitMaskImp::operator=(const BitMaskImp& rhs)
          mpMask[0] = new (nothrow) unsigned int[mSize];
          if (mpMask[0] == NULL)
          {
-            delete[] mpMask;
+            delete [] mpMask;
             mpMask = NULL;
             throw bad_alloc();
          }
@@ -1181,7 +1181,7 @@ const bool** BitMaskImp::getRegion(int x1, int y1, int x2, int y2)
    mpBuffer[0] = new (nothrow) bool[totalSize];
    if (mpBuffer[0] == NULL)
    {
-      delete[] mpBuffer;
+      delete [] mpBuffer;
       mpBuffer = NULL;
       throw bad_alloc();
    }

@@ -210,8 +210,8 @@ namespace MatrixFunctions
       }
       catch (const std::bad_alloc&)
       {
-         delete[] pMatrix[0];
-         delete[] pMatrix;
+         delete [] pMatrix[0];
+         delete [] pMatrix;
          return NULL;
       }
 
@@ -251,8 +251,8 @@ namespace MatrixFunctions
          return false;
       }
 
-      delete[] pMatrix[0];
-      delete[] pMatrix;
+      delete [] pMatrix[0];
+      delete [] pMatrix;
       pMatrix = NULL;
       return true;
    }

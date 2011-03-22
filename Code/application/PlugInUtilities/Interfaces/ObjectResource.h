@@ -478,7 +478,7 @@ typedef ObjectArrayArgs ArrayArgs;
  *     ArrayResource<double> pArray(12); // allocate an array of 12 doubles
  *     for (int i=0; i<12; ++i)
  *        pArray = cos(3.141592654/12.0 * i);
- *  } // delete[] called on pArray here
+ *  } // delete [] called on pArray here
  *  @endcode
  *
  *  @see ObjectFactory

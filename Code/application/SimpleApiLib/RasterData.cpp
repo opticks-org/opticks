@@ -231,7 +231,7 @@ extern "C"
    {
       if (pDataInfo != NULL)
       {
-         delete[] pDataInfo->pBadValues;
+         delete [] pDataInfo->pBadValues;
          delete pDataInfo;
       }
    }
@@ -368,7 +368,7 @@ extern "C"
          pArgs->bandStart, pArgs->bandEnd, false, success);
       if (!success)
       {
-         delete[] pRawData;
+         delete [] pRawData;
          setLastError(SIMPLE_OTHER_FAILURE);
          return NULL;
       }
@@ -378,7 +378,7 @@ extern "C"
 
    void destroyDataPointer(void* pData)
    {
-      delete[] pData;
+      delete [] pData;
    }
 
    int copyDataToRasterElement(DataElement* pElement, DataPointerArgs* pArgs, void* pData)

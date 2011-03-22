@@ -156,7 +156,7 @@ bool EigenPlotDlg::setEigenValues(double* yVals, int numVals)
    mpCurve->attach(mpPlot);
 
    mpPlot->replot();
-   delete[] xVals;
+   delete [] xVals;
 
    return true;
 }

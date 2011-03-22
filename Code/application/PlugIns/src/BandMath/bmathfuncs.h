@@ -71,7 +71,7 @@ public:
       delete Right;
       if (Opera != NULL)
       {
-         delete[] Opera;
+         delete [] Opera;
       }
    }
 

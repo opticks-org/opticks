@@ -240,7 +240,7 @@ SioFile::~SioFile()
       double* pPercentile = *mPercentileIter;
       if (pPercentile != NULL)
       {
-         delete pPercentile;
+         delete [] pPercentile;
       }
    }
 
@@ -250,7 +250,7 @@ SioFile::~SioFile()
       double* pCenter = *mCenterIter;
       if (pCenter != NULL)
       {
-         delete pCenter;
+         delete [] pCenter;
       }
    }
 
@@ -260,7 +260,7 @@ SioFile::~SioFile()
       unsigned int* pHistogram = *mHistogramIter;
       if (pHistogram != NULL)
       {
-         delete pHistogram;
+         delete [] pHistogram;
       }
    }
 }

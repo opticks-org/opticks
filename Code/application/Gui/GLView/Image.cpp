@@ -62,19 +62,19 @@ void Image::initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsign
    mInfo.mpData = data;
    if (mInfo.mpExponentialMultipliers != NULL)
    {
-      delete mInfo.mpExponentialMultipliers;
+      delete [] mInfo.mpExponentialMultipliers;
       mInfo.mpExponentialMultipliers = NULL;
    }
    if (mInfo.mpLogarithmicMultipliers != NULL)
    {
-      delete mInfo.mpLogarithmicMultipliers;
+      delete [] mInfo.mpLogarithmicMultipliers;
       mInfo.mpLogarithmicMultipliers = NULL;
    }
    for (int i = 0; i < 3; ++i)
    {
       if (mInfo.mpEqualizationValues[i] != NULL)
       {
-         delete mInfo.mpEqualizationValues[i];
+         delete [] mInfo.mpEqualizationValues[i];
          mInfo.mpEqualizationValues[i] = NULL;
       }
    }
@@ -104,19 +104,19 @@ void Image::initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsign
    mInfo.mpData = data;
    if (mInfo.mpExponentialMultipliers != NULL)
    {
-      delete mInfo.mpExponentialMultipliers;
+      delete [] mInfo.mpExponentialMultipliers;
       mInfo.mpExponentialMultipliers = NULL;
    }
    if (mInfo.mpLogarithmicMultipliers != NULL)
    {
-      delete mInfo.mpLogarithmicMultipliers;
+      delete [] mInfo.mpLogarithmicMultipliers;
       mInfo.mpLogarithmicMultipliers = NULL;
    }
    for (int i = 0; i < 3; ++i)
    {
       if (mInfo.mpEqualizationValues[i] != NULL)
       {
-         delete mInfo.mpEqualizationValues[i];
+         delete [] mInfo.mpEqualizationValues[i];
          mInfo.mpEqualizationValues[i] = NULL;
       }
    }
@@ -147,19 +147,19 @@ void Image::initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsign
    mInfo.mpData = data;
    if (mInfo.mpExponentialMultipliers != NULL)
    {
-      delete mInfo.mpExponentialMultipliers;
+      delete [] mInfo.mpExponentialMultipliers;
       mInfo.mpExponentialMultipliers = NULL;
    }
    if (mInfo.mpLogarithmicMultipliers != NULL)
    {
-      delete mInfo.mpLogarithmicMultipliers;
+      delete [] mInfo.mpLogarithmicMultipliers;
       mInfo.mpLogarithmicMultipliers = NULL;
    }
    for (int i = 0; i < 3; ++i)
    {
       if (mInfo.mpEqualizationValues[i] != NULL)
       {
-         delete mInfo.mpEqualizationValues[i];
+         delete [] mInfo.mpEqualizationValues[i];
          mInfo.mpEqualizationValues[i] = NULL;
       }
    }
@@ -188,19 +188,19 @@ void Image::initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsign
    mInfo.mpData = data;
    if (mInfo.mpExponentialMultipliers != NULL)
    {
-      delete mInfo.mpExponentialMultipliers;
+      delete [] mInfo.mpExponentialMultipliers;
       mInfo.mpExponentialMultipliers = NULL;
    }
    if (mInfo.mpLogarithmicMultipliers != NULL)
    {
-      delete mInfo.mpLogarithmicMultipliers;
+      delete [] mInfo.mpLogarithmicMultipliers;
       mInfo.mpLogarithmicMultipliers = NULL;
    }
    for (int i = 0; i < 3; ++i)
    {
       if (mInfo.mpEqualizationValues[i] != NULL)
       {
-         delete mInfo.mpEqualizationValues[i];
+         delete [] mInfo.mpEqualizationValues[i];
          mInfo.mpEqualizationValues[i] = NULL;
       }
    }
@@ -230,19 +230,19 @@ void Image::initialize(int sizeX, int sizeY, DimensionDescriptor band1, Dimensio
    mInfo.mpData = data;
    if (mInfo.mpExponentialMultipliers != NULL)
    {
-      delete mInfo.mpExponentialMultipliers;
+      delete [] mInfo.mpExponentialMultipliers;
       mInfo.mpExponentialMultipliers = NULL;
    }
    if (mInfo.mpLogarithmicMultipliers != NULL)
    {
-      delete mInfo.mpLogarithmicMultipliers;
+      delete [] mInfo.mpLogarithmicMultipliers;
       mInfo.mpLogarithmicMultipliers = NULL;
    }
    for (int i = 0; i < 3; ++i)
    {
       if (mInfo.mpEqualizationValues[i] != NULL)
       {
-         delete mInfo.mpEqualizationValues[i];
+         delete [] mInfo.mpEqualizationValues[i];
          mInfo.mpEqualizationValues[i] = NULL;
       }
    }
@@ -271,19 +271,19 @@ void Image::initialize(int sizeX, int sizeY, DimensionDescriptor band1, Dimensio
    mInfo.mpData = data;
    if (mInfo.mpExponentialMultipliers != NULL)
    {
-      delete mInfo.mpExponentialMultipliers;
+      delete [] mInfo.mpExponentialMultipliers;
       mInfo.mpExponentialMultipliers = NULL;
    }
    if (mInfo.mpLogarithmicMultipliers != NULL)
    {
-      delete mInfo.mpLogarithmicMultipliers;
+      delete [] mInfo.mpLogarithmicMultipliers;
       mInfo.mpLogarithmicMultipliers = NULL;
    }
    for (int i = 0; i < 3; ++i)
    {
       if (mInfo.mpEqualizationValues[i] != NULL)
       {
-         delete mInfo.mpEqualizationValues[i];
+         delete [] mInfo.mpEqualizationValues[i];
          mInfo.mpEqualizationValues[i] = NULL;
       }
    }
@@ -315,19 +315,19 @@ void Image::initialize(int sizeX, int sizeY, DimensionDescriptor band1, Dimensio
    mInfo.mpData = data;
    if (mInfo.mpExponentialMultipliers != NULL)
    {
-      delete mInfo.mpExponentialMultipliers;
+      delete [] mInfo.mpExponentialMultipliers;
       mInfo.mpExponentialMultipliers = NULL;
    }
    if (mInfo.mpLogarithmicMultipliers != NULL)
    {
-      delete mInfo.mpLogarithmicMultipliers;
+      delete [] mInfo.mpLogarithmicMultipliers;
       mInfo.mpLogarithmicMultipliers = NULL;
    }
    for (int i = 0; i < 3; ++i)
    {
       if (mInfo.mpEqualizationValues[i] != NULL)
       {
-         delete mInfo.mpEqualizationValues[i];
+         delete [] mInfo.mpEqualizationValues[i];
          mInfo.mpEqualizationValues[i] = NULL;
       }
    }
@@ -339,23 +339,23 @@ Image::~Image()
 {
    if (mInfo.mpExponentialMultipliers != NULL)
    {
-      delete mInfo.mpExponentialMultipliers;
+      delete [] mInfo.mpExponentialMultipliers;
    }
    if (mInfo.mpLogarithmicMultipliers != NULL)
    {
-      delete mInfo.mpLogarithmicMultipliers;
+      delete [] mInfo.mpLogarithmicMultipliers;
    }
    if (mInfo.mpEqualizationValues[0] != NULL)
    {
-      delete mInfo.mpEqualizationValues[0];
+      delete [] mInfo.mpEqualizationValues[0];
    }
    if (mInfo.mpEqualizationValues[1] != NULL)
    {
-      delete mInfo.mpEqualizationValues[1];
+      delete [] mInfo.mpEqualizationValues[1];
    }
    if (mInfo.mpEqualizationValues[2] != NULL)
    {
-      delete mInfo.mpEqualizationValues[2];
+      delete [] mInfo.mpEqualizationValues[2];
    }
 }
 

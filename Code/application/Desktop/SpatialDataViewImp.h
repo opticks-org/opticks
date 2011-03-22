@@ -420,7 +420,7 @@ private slots:
       static unsigned char* spBuffer = NULL; \
       if (spBuffer != NULL) \
       { \
-         delete spBuffer; \
+         delete [] spBuffer; \
       } \
       \
       /* Set the image data */ \

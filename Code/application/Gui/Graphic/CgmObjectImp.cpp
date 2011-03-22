@@ -275,7 +275,7 @@ int CgmObjectImp::fromCgm(short* pData)
             pFontName[ucLength] = '\0';
 
             mFontList.push_back(std::string(pFontName));
-            delete[] pFontName;
+            delete [] pFontName;
          }
 
          sBytes -= ucLength;

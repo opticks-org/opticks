@@ -998,8 +998,8 @@ int eval(Progress* pProgress, vector<DataAccessor>& dataCubes, const vector<Enco
       "log2 1 9 exp 1 9 abs 1 9 asin 1 9 acos 1 9 atan 1 9 sinh 1 9 cosh 1 9 tanh 1 9 sec 1 9 csc 1 9 "
       "cot 1 9 asec 1 9 acsc 1 9 acot 1 9 sech 1 9 csch 1 9 coth 1 9 rand 1 9 ";
    DataNode* pTree = BuildTreeFromInfix(ops, pString, pItems, itemsCount, degrees);
-   delete[] pItems;
-   delete[] pString;
+   delete [] pItems;
+   delete [] pString;
    pItems = NULL;
    pString = NULL;
 

@@ -74,7 +74,7 @@ public:
       {
          GlContextSave contextSave(args.mpContext);
          glDeleteTextures(args.mCount, pTextures);
-         delete[] pTextures;
+         delete [] pTextures;
       }
    }
 };
