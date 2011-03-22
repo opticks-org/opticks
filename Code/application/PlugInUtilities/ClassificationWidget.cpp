@@ -15,6 +15,7 @@
 #include <QtGui/QMessageBox>
 #include <QtGui/QPushButton>
 
+#include "AppConfig.h"
 #include "ApplicationServices.h"
 #include "AppVerify.h"
 #include "Classification.h"
@@ -165,7 +166,9 @@ ClassificationWidget::ClassificationWidget(QWidget* pParent) :
    InfoBar* pInfoBar = new InfoBar(pTopTab);
    pInfoBar->setBackgroundColor(Qt::gray);
    pInfoBar->setTitleColor(Qt::black);
+#if !defined(LINUX)
    pInfoBar->setTitleFont(QFont("Tahoma", 8, QFont::Bold, true));
+#endif
    connect(pFieldList, SIGNAL(currentTextChanged(const QString&)), pInfoBar, SLOT(setTitle(const QString&)));
    connect(pFieldList, SIGNAL(currentRowChanged(int)), mpValueStack, SLOT(setCurrentIndex(int)));
 

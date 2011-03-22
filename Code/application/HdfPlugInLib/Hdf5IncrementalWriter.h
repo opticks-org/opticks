@@ -260,7 +260,7 @@ public:
     *         write were successful, false otherwise.
     */
    bool writeElements(const size_t num_elements,
-      const hsize_t ** pCoordinates,
+      const hsize_t * pCoordinates,
       const T& object)
    {
       DO_IF(!isValid(), return false);

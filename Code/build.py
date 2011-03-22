@@ -576,13 +576,16 @@ class LinuxBuilder(SolarisBuilder):
         SolarisBuilder.__init__(self, dependencies, arcsdk, build_in_debug, verbosity)
 
     def other_doxygen_prep(self, build, env):
-        graphviz_dir = os.path.abspath(join(self.depend_path,
-            "graphviz", "app"))
-        env["GVBINDIR"] = join(graphviz_dir, "lib", "graphviz")
+        graphviz_dir = os.path.abspath(join("/", "usr", "bin"))
+        env["DOT_DIR"] = join(graphviz_dir)
+        env["GVBINDIR"] = join("/", "usr", "lib", "graphviz")
         new_value = join(graphviz_dir, "lib")
         if env.has_key("LD_LIBRARY_PATH"):
             new_value = new_value + ":" + env["LD_LIBRARY_PATH"]
         env["LD_LIBRARY_PATH"] = new_value
+
+    def get_doxygen_path(self):
+        return join("/","usr","bin","doxygen")
 
     def get_binaries_dir(self, build_dir):
         return join(build_dir,"Binaries-linux-x86_64-%s" % (self.mode))

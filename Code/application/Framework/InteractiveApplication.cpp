@@ -74,7 +74,9 @@ int InteractiveApplication::run(int argc, char** argv)
 
    // Initialize the Qt application
    QApplication& qApplication = dynamic_cast<QApplication&>(getQApp());
+#if !defined(LINUX)
    qApplication.setFont(QFont("Tahoma", 8));
+#endif
 
    bool configSettingsValid = false;
    string configSettingsErrorMsg = "";

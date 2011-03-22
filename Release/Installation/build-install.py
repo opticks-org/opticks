@@ -272,6 +272,9 @@ class CommonBuilder:
         self.opticks_code_dir = opticks_code_dir
         self.verbosity = verbosity
 
+    def clean(self):
+        shutil.rmtree(self.output_dir, True)
+
     def require_code_dir(self):
         if self.opticks_code_dir is None:
             if os.environ.has_key("OPTICKS_CODE_DIR"):
@@ -610,11 +613,6 @@ class WixBuilder(CommonBuilder):
                 print "Done unpacking Help"
         return help_output
 
-    def clean(self):
-        if os.path.exists(self.output_dir):
-            shutil.rmtree(self.output_dir)
-
-
 def run_pkgmk(variables, output_path):
     """Runs pkgmk with the given variables to generate a package in
     the given output_path.
@@ -654,9 +652,6 @@ class PackageBuilder(CommonBuilder):
         self.opticks_dependencies_dir = opticks_dependencies_dir
         self.opticks_release_dir = opticks_release_dir
         self.package_dir = package_dir
-
-    def clean(self):
-        shutil.rmtree(self.output_dir, True)
 
     def get_data_from_pkginfo(self, param):
         pkginfo_file = open("pkginfo", "r")
@@ -840,6 +835,161 @@ class PackageBuilder(CommonBuilder):
             print "Done generating help-prototype"
         return help_output
 
+
+class SConsBuilder(CommonBuilder):
+    def __init__(self, opticks_code_dir, opticks_dependencies_dir,
+                 opticks_release_dir, package_dir, verbosity):
+        CommonBuilder.__init__(self, opticks_code_dir, verbosity)
+        self.output_dir = os.path.abspath("PackageOutput")
+        self.opticks_dependencies_dir = opticks_dependencies_dir
+        self.opticks_release_dir = opticks_release_dir
+        #####
+        # Change this if you need a different package version number
+        # This is almost never needed. Always use an odd number since the
+        # RPM will use package_version+1
+        #####
+        self.package_version = 1
+        self.package_dir = package_dir
+
+    def generate_installer(self):
+        """Generate the Opticks Linux package to the PackageOutput folder.
+        @rtype: L{int}
+
+        """
+        if self.verbosity > 1:
+            print "Cleaning out old PackageOutput temporary directory..."
+        self.clean()
+        if self.verbosity > 1:
+            print "Generating Linux package..."
+        if self.opticks_code_dir is None:
+            if os.environ.has_key("OPTICKS_CODE_DIR"):
+                self.opticks_code_dir = os.environ["OPTICKS_CODE_DIR"]
+            else:
+                raise ScriptException("The path to the Opticks source "\
+                    "code was not provided, see -c or --code-dir")
+
+        if not(os.path.exists(self.opticks_code_dir)):
+            raise ScriptException("The path to the Opticks source "\
+                "code does not exist %s, see -c or "\
+                "--code-dir" % (self.opticks_code_dir))
+
+        if self.opticks_dependencies_dir is None:
+            if os.environ.has_key("OPTICKSDEPENDENCIES"):
+                self.opticks_dependencies_dir = \
+                    os.environ["OPTICKSDEPENDENCIES"]
+            else:
+                raise ScriptException("The path to the Opticks "\
+                    "dependencies was not provided, see -d or "\
+                    "--dependencies")
+
+        if not(os.path.exists(self.opticks_dependencies_dir)):
+            raise ScriptException("The path to the Opticks "\
+                "dependencies does not exist %s, see -d or "\
+                "--dependencies" % (self.opticks_dependencies_dir))
+
+        if self.opticks_release_dir is None:
+            raise ScriptException("The path to the Opticks release"
+                "directory was not provided, see -r or --release-dir")
+
+        if not(os.path.exists(self.opticks_release_dir)):
+            raise ScriptException("The path to the Opticks release"\
+                "directory does not exist %s, see -r or "\
+                "--release-dir" % (self.opticks_release_dir))
+
+        if self.verbosity > 1:
+            print "Creating debian format of package"
+
+        sys.path.append(self.opticks_code_dir)
+        import commonutils
+        version = commonutils.get_app_version_only(self.opticks_code_dir)
+        version += "-%i" % self.package_version
+        self.get_help() # unpack the Help files
+        scons_args = list()
+        scons_args.append('scons')
+        scons_args.append('CODEDIR=%s' % self.opticks_code_dir)
+        scons_args.append('BUILDDIR=%s' % os.path.join(self.opticks_code_dir,"Build"))
+        scons_args.append('OPTICKSDEPENDENCIES=%s' % self.opticks_dependencies_dir)
+        scons_args.append('VERSION=%s' % version)
+        scons_args.append('OUTPUT_DIR=%s' % self.output_dir)
+
+        if self.verbosity > 1:
+            print "Execute:"," ".join(scons_args)
+        retcode = execute_process(scons_args)
+        if retcode != 0:
+            raise ScriptException("Running scons failed with "\
+                "an error code of %s" % (retcode))
+        if self.package_dir is not None:
+            try:
+                os.mkdir(self.package_dir)
+            except OSError: # already exists...ignore the error
+                pass
+            shutil.copy2(os.path.abspath(os.path.join(self.output_dir,"opticks_%s_amd64.deb" % version)), self.package_dir)
+        if self.verbosity > 1:
+            print "Done creating debian format of package"
+
+        if self.verbosity > 1:
+            print "Creating RPM format of package"
+        
+        oldpath = os.path.abspath(os.curdir)
+        if self.package_dir is not None:
+            os.chdir(self.package_dir)
+        else:
+            os.chdir(self.output_dir)
+        alien_args = list()
+        alien_args.append('fakeroot')
+        alien_args.append('alien')
+        alien_args.append('--to-rpm')
+        alien_args.append('--scripts')
+        alien_args.append('opticks_%s_amd64.deb' % version)
+
+        if self.verbosity > 1:
+            print "Execute:"," ".join(alien_args)
+        retcode = execute_process(alien_args)
+        os.chdir(oldpath)
+        if retcode != 0:
+            raise ScriptException("Running alien failed with "\
+                "an error code of %s" % (retcode))
+
+        if self.verbosity > 1:
+            print "Done creating RPM format of package"
+
+        if self.verbosity > 1:
+            print "Done generating Linux package"
+
+    def get_dependencies(self, output_path):
+        dependencies_output = os.path.join(output_path, "Dependencies")
+        if not(os.path.exists(dependencies_output)):
+            if self.verbosity > 1:
+                print "Gathering dependency libraries..."
+            sys.path.append(self.opticks_code_dir)
+            import commonutils
+
+            dependencies_list = \
+                commonutils.get_dependencies(self.opticks_dependencies_dir,
+                "linux-x86_64", False, None)
+            commonutils.copy_dependencies(dependencies_list,
+                dependencies_output)
+            if self.verbosity > 1:
+                print "Done gathering dependency libraries"
+        return dependencies_output
+
+    def get_help(self):
+        help_output = os.path.join(self.output_dir, "opt", "Opticks", "Help")
+        if not(os.path.exists(help_output)):
+            help_zip_path = os.path.join(self.opticks_release_dir,
+                "Help", "Opticks.zip")
+            total_help_output = os.path.join(help_output, "Opticks")
+            if self.verbosity > 1:
+                print "Unpacking Help located at %s to "\
+                    "%s..." % (help_zip_path, total_help_output)
+            unzip_file(help_zip_path, total_help_output)
+            if self.verbosity > 1:
+                print "Done unpacking Help"
+
+        if self.verbosity > 1:
+            print "Done generating help-prototype"
+        return help_output
+
 def is_windows():
     """Determine if this script is executing on the Windows operating system.
     @return: Return True if script is executed on Windows, False otherwise.
@@ -981,6 +1131,10 @@ def main(args):
     try:
         if is_windows():
             builder = WixBuilder(options.wix_path, options.opticks_code_dir,
+                options.opticks_dependencies_dir, options.opticks_release_dir,
+                options.package_dir, options.verbosity)
+        elif sys.platform.startswith("linux"):
+            builder = SConsBuilder(options.opticks_code_dir,
                 options.opticks_dependencies_dir, options.opticks_release_dir,
                 options.package_dir, options.verbosity)
         else:

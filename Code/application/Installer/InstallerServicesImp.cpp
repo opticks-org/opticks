@@ -569,6 +569,15 @@ bool InstallerServicesImp::processPending(Progress* pProgress)
    bool success = true;
    foreach (QString extensionId, extensionIds)
    {
+      if (extensionId == "+all")
+      {
+         // uninstall all extensions
+         while (success && !mExtensions.empty())
+         {
+            success = performUninstall(mExtensions.begin()->first, pProgress);
+         }
+         break;
+      }
       success = performUninstall(extensionId.toStdString(), pProgress);
    }
    success = success && pending.remove();

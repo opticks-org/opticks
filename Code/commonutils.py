@@ -123,11 +123,17 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
     if platform == "Solaris" or platform == "Linux":
         if platform == "Solaris":
             plat_dir = "solaris-sparc"
+            lla("libshp.so")
+            lla("libgdal.so.1")
         else:
             plat_dir = "linux-x86_64"
-            la("Cg/lib/%s/libCg.so" % (plat_dir))
-            la("Cg/lib/%s/libCgGL.so" % (plat_dir))
-            la("glew/lib/%s/libGLEW.so.1.3" % (plat_dir))
+            lla("libCg.so")
+            lla("libCgGL.so")
+            lla("libGLEW.so")
+            lla("libshp.so.1")
+            lla("libgdal.so")
+            lla("libGLEW.so.1.5")
+            lla("libopencv_highgui.so.2.2")
         lla("libavcodec.so.51")
         lla("libavformat.so.50")
         lla("libavutil.so.49")
@@ -143,7 +149,6 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
         lla("libQtSql.so.4")
         lla("libQtSvg.so.4")
         lla("libQtXml.so.4")
-        lla("libshp.so")
         lla("libhdf5.so.6")
         lla("libsz.so.2")
         la(join("plugins", "imageformats", "libqgif.so"), "imageformats")
@@ -152,7 +157,6 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
         la(join("plugins", "imageformats", "libqsvg.so"), "imageformats")
         la(join("plugins", "imageformats", "libqtiff.so"), "imageformats")
         lla("libossim.so.1")
-        lla("libgdal.so.1")
         lla("libcurl.so.4")
         lla("libehs.so.0")
         lla("libopencv_core.so.2.2")

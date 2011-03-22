@@ -10,10 +10,7 @@ import subprocess
 import zipfile
 
 class ScriptException(Exception):
-    def __init__(self, msg, retcode):
-        Exception.__init__(self)
-        self.msg = msg
-        self.retcode = retcode
+    "Report error while running script"
 
 def execute_process(args, bufsize=0, executable=None, preexec_fn=None,
       close_fds=None, shell=False, cwd=None, env=None,
@@ -390,8 +387,10 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir,
             commonutils.copy_dependencies(dp_list, bin_dir)
     else:
         cp_file2(s_app, d_app, join("PlugIns", "src"), "SConstruct")
-
-        binaries_dir = join("Build", "Binaries-solaris-sparc-release")
+        if sys.platform == "linux2":
+            binaries_dir = join("Build", "Binaries-linux-x86_64-release")
+        else:
+            binaries_dir = join("Build", "Binaries-solaris-sparc-release")
         lib_dir = join(binaries_dir,"Lib")
         for the_lib in static_libs:
             cp_file2(opticks_code_dir, out_dir, lib_dir, "lib%s.a" % (the_lib))
@@ -401,9 +400,10 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir,
         for the_plugin in sample_plugins:
             cp_file2(opticks_code_dir, out_dir,
                 join(binaries_dir,"PlugIns"), "%s.so" % (the_plugin))
-        #Make copy of the "application" dir but with an upper-case
-        #first letter to maintain compatibility with earlier SDKs
-        cp_dir(d_app, join(out_dir, "Application"), recursive_copy = True)
+        if sys.platform != "linux2":
+           #Make copy of the "application" dir but with an upper-case
+           #first letter to maintain compatibility with earlier SDKs
+           cp_dir(d_app, join(out_dir, "Application"), recursive_copy = True)
     if verbosity > 1:
         print "Done acquiring Opticks binaries"
     if verbosity >= 1:
@@ -433,8 +433,12 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir,
             if verbosity > 1:
                 print "Done creating compressed archive"
         else:
-            output_tar_bz2 = os.path.abspath(join(package_dir,
-                "opticks-sdk-%s-sol10-sparc.tar.bz2" % (app_version)))
+            if sys.platform == "linux2":
+               output_tar_bz2 = os.path.abspath(join(package_dir,
+                   "opticks-sdk-%s-linux-x86_64.tar.bz2" % (app_version)))
+            else:
+               output_tar_bz2 = os.path.abspath(join(package_dir,
+                   "opticks-sdk-%s-sol10-sparc.tar.bz2" % (app_version)))
             if verbosity > 1:
                 print "Creating compressed archive %s..." % (output_tar_bz2)
             tar_args = list()
@@ -476,7 +480,7 @@ def parse_args(args):
         desc = "Generate the Developers Toolkit .zip file for the "\
             "32-bit and 64-bit version of Opticks for Windows."
     else:
-        desc = "Generate the Developers Toolkit file for the Solaris "\
+        desc = "Generate the Developers Toolkit file for the Solaris or Linux "\
             "version of Opticks."
 
     parser = OptionParser(usage="%prog [options]",

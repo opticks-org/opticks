@@ -11,6 +11,8 @@ def generate(env):
     libs = ["gdal", "jpeg"]
     if env["OS"] == "windows":
         libs = ["gdal_i"]
+    elif env["OS"] == "linux":
+        libs.append("curl")
     env.AppendUnique(CXXFLAGS=["-I%s/gdal" % dep_include],
                      LIBS=[libs])
 

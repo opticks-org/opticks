@@ -1399,10 +1399,10 @@ bool GraphicObjectImp::fromXml(DOMNode* pDocument, unsigned int version)
             updateHandles();
          }
       }
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove PaperSize special case and xsd entry when " \
-"no longer supporting template files from 4.3.X. (dadkins)")
       else if (propertyName == "PaperSize")
       {
+#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove PaperSize special case and xsd entry when " \
+"no longer supporting template files from 4.3.X. (dadkins)")
          Layer* pLayer = getLayer();
          if (pLayer != NULL)
          {
