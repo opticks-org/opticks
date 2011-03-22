@@ -992,6 +992,8 @@ void SessionManagerImp::getSessionItemsWindow(vector<IndexFileItem> &items) cons
       }
    }
 
+   // This must occur after the rest of the initialization. If it occurs before, then dragging a toolbar
+   // onto a SpatialDataView sometimes causes the SpatialDataView to maximize after a session restore.
    items.push_back(makeIfiI<SessionItem*>("ApplicationWindow")
       (static_cast<ApplicationWindow*>(Service<DesktopServices>()->getMainWidget())));
 }

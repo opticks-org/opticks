@@ -83,6 +83,10 @@ LayerImp::~LayerImp()
 {
    setDataElement(NULL);
    setView(NULL);
+   while (!mLinkedLayers.empty())
+   {
+      VERIFYNRV(unlinkLayer(mLinkedLayers.front()));
+   }
 }
 
 const string& LayerImp::getObjectType() const
@@ -294,6 +298,7 @@ bool LayerImp::unlinkLayer(Layer* pLayer)
       Layer* pLinkedLayer = *iter;
       if (pLinkedLayer == pLayer)
       {
+         pLinkedLayer->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &LayerImp::removeLinkedLayer));
          mLinkedLayers.erase(iter);
          return true;
       }

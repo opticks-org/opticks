@@ -1242,7 +1242,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    VERIFYNR(connect(mpDisplayToolBar, SIGNAL(zoomChanged(double)), this, SLOT(zoomTo(double))));
    VERIFYNR(connect(m_pScripting_Wnd_Action, SIGNAL(triggered(bool)), m_pScripting, SLOT(setVisible(bool))));
    VERIFYNR(connect(m_pScripting, SIGNAL(visibilityChanged(bool)), m_pScripting_Wnd_Action, SLOT(setChecked(bool))));
-   VERIFYNR(connect(mpWorkspace, SIGNAL(windowActivated(QWidget*)), this, SLOT(updateActiveWindow(QWidget*))));
+   VERIFYNR(connect(mpWorkspace, SIGNAL(subWindowActivated(QMdiSubWindow*)), this, SLOT(updateActiveWindow(QMdiSubWindow*))));
    VERIFYNR(connect(mpToolbarsMenu, SIGNAL(aboutToShow()), this, SLOT(showToolbarsMenu())));
    VERIFYNR(connect(mpClipboardSizedAction, SIGNAL(triggered()), SLOT(forwardSnapshot())));
    VERIFYNR(connect(mpClipboardAction, SIGNAL(triggered()), SLOT(forwardSnapshot())));
@@ -1427,12 +1427,13 @@ bool ApplicationWindow::addWindow(Window* pWindow)
       WorkspaceWindowImp* pWorkspaceWindowImp = dynamic_cast<WorkspaceWindowImp*> (pWorkspaceWindow);
       if (pWorkspaceWindowImp != NULL)
       {
-         mpWorkspace->addWindow(pWorkspaceWindowImp);
+         mpWorkspace->addSubWindow(pWorkspaceWindowImp);
          pWorkspaceWindowImp->installEventFilter(this);
 
-         // Show the window
+         // Show the window -- do not maximize during session load since the window
+         //  position and state were restored already in WorkspaceWindowImp::fromXml.
          WindowSizeType eWindowSize = WorkspaceWindow::getSettingWindowSize();
-         if (eWindowSize == MAXIMIZED)
+         if (!Service<SessionManager>()->isSessionLoading() && eWindowSize == MAXIMIZED)
          {
             pWorkspaceWindowImp->showMaximized();
          }
@@ -1741,7 +1742,7 @@ bool ApplicationWindow::setCurrentWorkspaceWindow(WorkspaceWindow* pWindow)
    WorkspaceWindowImp* pWindowImp = dynamic_cast<WorkspaceWindowImp*>(pWindow);
    if (pWindowImp != NULL)
    {
-      mpWorkspace->setActiveWindow(pWindowImp);
+      mpWorkspace->setActiveSubWindow(pWindowImp);
       pWindowImp->setFocus(Qt::ActiveWindowFocusReason);
       return true;
    }
@@ -1754,7 +1755,7 @@ WorkspaceWindow* ApplicationWindow::getCurrentWorkspaceWindow() const
    WorkspaceWindow* pWindow = NULL;
    if (mpWorkspace != NULL)
    {
-      pWindow = dynamic_cast<WorkspaceWindow*>(mpWorkspace->activeWindow());
+      pWindow = dynamic_cast<WorkspaceWindow*>(mpWorkspace->activeSubWindow());
    }
 
    return pWindow;
@@ -1786,7 +1787,7 @@ View* ApplicationWindow::getCurrentWorkspaceWindowView() const
 
 void ApplicationWindow::cascadeWorkspaceWindows()
 {
-   mpWorkspace->cascade();
+   mpWorkspace->cascadeSubWindows();
 }
 
 void ApplicationWindow::tileWorkspaceWindows(TilingType eType)
@@ -2111,7 +2112,7 @@ void ApplicationWindow::constructWindowMenu()
    mpMenuBar->insertCommand(mpTileVerticalAction, m_pWindow, context);
    mpMenuBar->insertCommand(mpTileSelectedAction, m_pWindow, context);
 
-   QWidgetList windowList = mpWorkspace->windowList();
+   QList<QMdiSubWindow*> windowList = mpWorkspace->subWindowList(); // uses the default of CreationOrder
 
    unsigned int numWindows = windowList.count();
    if (numWindows > 0)
@@ -2152,7 +2153,7 @@ void ApplicationWindow::windowMenuActivated(QAction* pAction)
          strWindowName = strWindowName.mid(iStartPos + 2);
       }
 
-      QWidgetList windowList = mpWorkspace->windowList();
+      QList<QMdiSubWindow*> windowList = mpWorkspace->subWindowList(); // uses the default of CreationOrder
       for (int i = 0; i < windowList.count(); ++i)
       {
          WorkspaceWindowImp* pWindow = static_cast<WorkspaceWindowImp*>(windowList.at(i));
@@ -4238,7 +4239,7 @@ void ApplicationWindow::editViewObject(bool bEdit)
    if (bSuccess == true)
    {
       // Update the toolbars and dock windows
-      updateActiveWindow(dynamic_cast<QWidget*>(pWindow));
+      updateActiveWindow(dynamic_cast<QMdiSubWindow*>(pWindow));
    }
 
    // Update the action toggle state
@@ -4309,7 +4310,7 @@ void ApplicationWindow::setPaperSize()
    }
 }
 
-void ApplicationWindow::updateActiveWindow(QWidget* pWindow)
+void ApplicationWindow::updateActiveWindow(QMdiSubWindow* pWindow)
 {
    // Check for the currently active window
    WorkspaceWindowImp* pWorkspaceWindow = dynamic_cast<WorkspaceWindowImp*>(pWindow);
@@ -5066,27 +5067,6 @@ bool ApplicationWindow::eventFilter(QObject* pObj, QEvent* pEvent)
       sIdleTime = sIdleTime.addSecs(3);
    }
 
-   if (pEvent->type() == QEvent::Close)
-   {
-      if (pObj != NULL)
-      {
-         if (pObj->inherits("WorkspaceWindowImp") == true)
-         {
-            WorkspaceWindowImp* pWindow = static_cast<WorkspaceWindowImp*> (pObj);
-
-            QWidget* pWorkspaceChild = pWindow->parentWidget();
-            if (pWorkspaceChild != NULL)
-            {
-               // Show a minimized window to prevent a crash or an infinite loop in QWorkspace
-               if (pWorkspaceChild->isMinimized() == true)
-               {
-                  pWorkspaceChild->show();
-               }
-            }
-         }
-      }
-   }
-
    if (pObj == mpAnnotationToolBar && pEvent->type() == QEvent::EnabledChange)
    {
       bool enable(mpAnnotationToolBar->isEnabled());
@@ -5830,7 +5810,7 @@ void ApplicationWindow::sessionLoaded(Subject& subject, const string& signal, co
    WorkspaceWindow *pCurrentWindow = getCurrentWorkspaceWindow();
    if(mpWorkspace != NULL)
    {
-      mpWorkspace->setActiveWindow(NULL);
+      mpWorkspace->setActiveSubWindow(NULL);
    }
    setCurrentWorkspaceWindow(pCurrentWindow);
    clearUndoStacks();
@@ -6050,8 +6030,6 @@ GraphicLayer* ApplicationWindow::getClipboardLayer() const
 bool ApplicationWindow::serialize(SessionItemSerializer &serializer) const
 {
    XMLWriter writer("ApplicationWindow");
-   QSize frame = size();
-   QPoint location = pos();
 
    writer.pushAddPoint(writer.addElement("Geometry"));
    writer.addText(saveState().toBase64().data());

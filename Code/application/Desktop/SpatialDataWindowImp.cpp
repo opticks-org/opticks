@@ -25,12 +25,7 @@ SpatialDataWindowImp::SpatialDataWindowImp(const string& id, const string& windo
 }
 
 SpatialDataWindowImp::~SpatialDataWindowImp()
-{
-   if (mpOverview != NULL)
-   {
-      delete mpOverview;
-   }
-}
+{}
 
 const string& SpatialDataWindowImp::getObjectType() const
 {

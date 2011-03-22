@@ -12,12 +12,13 @@
 #ifndef WORKSPACE_H
 #define WORKSPACE_H
 
-#include <QtGui/QWorkspace>
+#include <QtGui/QMdiArea>
 
 #include "TypesFile.h"
 
 #include <vector>
 
+class QMdiSubWindow;
 class WorkspaceWindow;
 
 /**
@@ -28,9 +29,13 @@ class WorkspaceWindow;
  *  needed to display all the views in the list. For an odd number of views, either the first or the last
  *  view is displayed in a full column (twice height of other views) based on value of passed boolean, maxFirst.
  *
- *  @see    ApplicationWindow
+ *  @see     ApplicationWindow
+ *  @warning Because of the custom tiling, this class hides the base class cascadeSubWindows() method. Use caution
+ *           when calling this method as it is not virtual and pointers to the base class will not work correctly
+ *           when custom tiling is in effect. Pointers to type Workspace should be used whenever possible.
  */
-class Workspace : public QWorkspace
+
+class Workspace : public QMdiArea
 {
 public:
    Workspace(QWidget *parent = 0);
@@ -39,7 +44,7 @@ public:
 
 public slots:
    void tile(const TilingType eType = TILE_GRID);
-   void cascade();
+   void cascadeSubWindows();
 
 protected:
    void resizeEvent(QResizeEvent* e);
@@ -48,9 +53,9 @@ private:
    bool mbCustomTiling;
    bool mMaxFirst;
    TilingType mTilingType;
-   std::vector<QWidget*> mTileWindows;
+   std::vector<QMdiSubWindow*> mTileWindows;
    void refreshCustomView();
-   void setWindow(QWidget* pWidget, int x, int y, int winWidth, int winHeight);
+   void setSubWindow(QMdiSubWindow* pSubWindow, int x, int y, int winWidth, int winHeight);
 };
 
 #endif

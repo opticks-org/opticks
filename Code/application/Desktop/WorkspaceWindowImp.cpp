@@ -9,6 +9,7 @@
 
 #include <QtGui/QIcon>
 #include <QtGui/QCloseEvent>
+#include <QtGui/QMdiArea>
 #include <QtGui/QMessageBox>
 
 #include "ApplicationWindow.h"
@@ -19,7 +20,6 @@
 #include "SessionItemSerializer.h"
 #include "SessionManager.h"
 #include "ViewImp.h"
-#include "Workspace.h"
 #include "WorkspaceWindow.h"
 #include "WorkspaceWindowImp.h"
 #include "xmlreader.h"
@@ -31,7 +31,7 @@ XERCES_CPP_NAMESPACE_USE
 using namespace std;
 
 WorkspaceWindowImp::WorkspaceWindowImp(const string& id, const string& windowName, QWidget* parent) :
-   QMainWindow(parent),
+   QMdiSubWindow(parent),
    ViewWindowImp(id, windowName),
    mpApplicationServices(Service<ApplicationServices>().get(), SIGNAL_NAME(ApplicationServices, SessionClosed),
       Slot(this, &WorkspaceWindowImp::sessionClosed)),
@@ -50,6 +50,11 @@ WorkspaceWindowImp::WorkspaceWindowImp(const string& id, const string& windowNam
 
 WorkspaceWindowImp::~WorkspaceWindowImp()
 {
+   View* pView = getView();
+   if (pView != NULL)
+   {
+      pView->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &WorkspaceWindowImp::viewDeleted));
+   }
 }
 
 list<ContextMenuAction> WorkspaceWindowImp::getContextMenuActions() const
@@ -147,7 +152,7 @@ View* WorkspaceWindowImp::createView(const QString& strViewName, const ViewType&
    View* pView = ViewWindowImp::createView(strViewName, viewType);
    if (pView != NULL)
    {
-      setWidget(dynamic_cast<ViewImp*> (pView));
+      setWidget(dynamic_cast<ViewImp*>(pView));
       pView->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &WorkspaceWindowImp::viewDeleted));
    }
 
@@ -177,8 +182,7 @@ void WorkspaceWindowImp::setWidget(QWidget* pWidget)
 {
    if (pWidget != NULL)
    {
-      pWidget->setParent(this);
-      setCentralWidget(pWidget);
+      QMdiSubWindow::setWidget(pWidget);
 
       QIcon windowIcon = pWidget->windowIcon();
       if (windowIcon.isNull() == false)
@@ -191,7 +195,7 @@ void WorkspaceWindowImp::setWidget(QWidget* pWidget)
 
 QWidget* WorkspaceWindowImp::getWidget() const
 {
-   return centralWidget();
+   return QMdiSubWindow::widget();
 }
 
 void WorkspaceWindowImp::minimize()
@@ -217,17 +221,10 @@ void WorkspaceWindowImp::restore()
 QSize WorkspaceWindowImp::sizeHint() const
 {
    int windowWidth = 450;
-   int windowHeight = 250;
-   WindowSizeType eWindowSize = FIXED_SIZE;
+   int windowHeight = 300;
+   WindowSizeType eWindowSize = WorkspaceWindow::getSettingWindowSize();
 
-   QWidget* pWorkspace = parentWidget();
-   while ((pWorkspace != NULL) && (pWorkspace->inherits("QWorkspace") == false))
-   {
-      pWorkspace = pWorkspace->parentWidget();
-   }
-
-   eWindowSize = WorkspaceWindow::getSettingWindowSize();
-
+   QMdiArea* pMdiArea = mdiArea();
    if (eWindowSize == FIXED_SIZE)
    {
       windowWidth = WorkspaceWindow::getSettingWindowWidth();
@@ -235,23 +232,23 @@ QSize WorkspaceWindowImp::sizeHint() const
    }
    else if (eWindowSize == WORKSPACE_PERCENTAGE)
    {
-      if (pWorkspace != NULL)
+      if (pMdiArea != NULL)
       {
          int iPercentage = static_cast<int>(WorkspaceWindow::getSettingWindowPercentage());
-         windowWidth = pWorkspace->width() * iPercentage / 100;
-         windowHeight = pWorkspace->height() * iPercentage / 100;
+         windowWidth = pMdiArea->width() * iPercentage / 100;
+         windowHeight = pMdiArea->height() * iPercentage / 100;
       }
    }
 
-   if (pWorkspace != NULL)
+   if (pMdiArea != NULL)
    {
-      int workspaceWidth = pWorkspace->width();
+      int workspaceWidth = pMdiArea->width();
       if (windowWidth > workspaceWidth)
       {
          windowWidth = workspaceWidth;
       }
 
-      int workspaceHeight = pWorkspace->height();
+      int workspaceHeight = pMdiArea->height();
       if (windowHeight > workspaceHeight)
       {
          windowHeight = workspaceHeight;
@@ -274,13 +271,38 @@ void WorkspaceWindowImp::closeEvent(QCloseEvent* pEvent)
       }
    }
 
-   View* pView = getView();
-   if (pView != NULL)
+   QMdiSubWindow::closeEvent(pEvent);
+}
+
+void WorkspaceWindowImp::changeEvent(QEvent* pEvent)
+{
+   // This is a workaround for QMdiSubWindow which does not save (or make available) the window restore position.
+   // It uses an undocumented method, QWindowStateChangeEvent::isOverride(), to only capture changes which do not
+   // specify the "override" flag, which is a flag used mainly for Qt 3 compatibility (see qmdisubwindow.cpp).
+   if (pEvent != NULL && pEvent->type() == QEvent::WindowStateChange)
    {
-      pView->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &WorkspaceWindowImp::viewDeleted));
+      QWindowStateChangeEvent* pWindowStateChangeEvent = dynamic_cast<QWindowStateChangeEvent*>(pEvent);
+      if (pWindowStateChangeEvent != NULL && !pWindowStateChangeEvent->isOverride())
+      {
+         // If going from a normal state to a minimized, maximized, or fullscreen state, store the geometry so it can
+         // later be persisted during session save/restore. Note that this does NOT do a bitwise OR for oldState to
+         // prevent overwriting the restore size and position when transitioning from (e.g.) minimized to maximized.
+         Qt::WindowStates oldState = pWindowStateChangeEvent->oldState();
+         if (oldState == Qt::WindowNoState || oldState == Qt::WindowActive)
+         {
+            Qt::WindowStates newState = windowState();
+            if ((newState & Qt::WindowMinimized) ||
+               (newState & Qt::WindowMaximized) ||
+               (newState & Qt::WindowFullScreen))
+            {
+               mRestoreSize = size();
+               mRestorePos = pos();
+            }
+         }
+      }
    }
 
-   QMainWindow::closeEvent(pEvent);
+   QMdiSubWindow::changeEvent(pEvent);
 }
 
 bool WorkspaceWindowImp::toXml(XMLWriter* pXml) const
@@ -290,35 +312,25 @@ bool WorkspaceWindowImp::toXml(XMLWriter* pXml) const
       return false;
    }
 
-   // need to access parent for geometry of workspace windows
-   QWidget* pParent = parentWidget();
-   if (pParent != NULL)
+   // This is a workaround since QMdiSubWindow does not save the window restore position in saveGeometry().
+   QSize frame = size();
+   QPoint location = pos();
+   if (isMinimized() || isMaximized() || isFullScreen())
    {
-      QSize frame;
-      QPoint location;
-      if (pParent->isMaximized())
-      {
-         frame = size();
-         location = pos();
-      }
-      else
-      {
-         frame = pParent->size();
-         location = pParent->pos();
-      }
-      stringstream buf;
-      pXml->pushAddPoint(pXml->addElement("Geometry"));
-      buf << location.x() << " " << location.y();
-      pXml->addAttr("pos", buf.str());
-      buf.str("");
-      buf << frame.width() << " " << frame.height();
-      pXml->addAttr("size", buf.str());
-      pXml->addAttr("minimized", pParent->isMinimized());
-      pXml->addAttr("maximized", pParent->isMaximized());
-
-      pXml->popAddPoint();
+      frame = mRestoreSize;
+      location = mRestorePos;
    }
 
+   stringstream buf;
+   pXml->pushAddPoint(pXml->addElement("Geometry"));
+   buf << location.x() << " " << location.y();
+   pXml->addAttr("pos", buf.str());
+   buf.str("");
+   buf << frame.width() << " " << frame.height();
+   pXml->addAttr("size", buf.str());
+   pXml->addAttr("minimized", isMinimized());
+   pXml->addAttr("maximized", isMaximized());
+   pXml->popAddPoint();
    return true;
 }
 
@@ -335,12 +347,6 @@ bool WorkspaceWindowImp::fromXml(DOMNode* pDocument, unsigned int version)
       pCurrentView->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &WorkspaceWindowImp::viewDeleted));
    }
    if (!ViewWindowImp::fromXml(pDocument, version))
-   {
-      return false;
-   }
-
-   QWidget* pParent = parentWidget();
-   if (pParent == NULL)
    {
       return false;
    }
@@ -369,8 +375,8 @@ bool WorkspaceWindowImp::fromXml(DOMNode* pDocument, unsigned int version)
       LocationType size;
       XmlReader::StrToLocation(pConfig->getAttribute(X("pos")), pos);
       XmlReader::StrToLocation(pConfig->getAttribute(X("size")), size);
-      pParent->resize(size.mX, size.mY);
-      pParent->move(pos.mX, pos.mY);
+      resize(size.mX, size.mY);
+      move(pos.mX, pos.mY);
 
       bool isMinimized = StringUtilities::fromXmlString<bool>(A(pConfig->getAttribute(X("minimized"))));
       if (isMinimized)
@@ -390,6 +396,5 @@ bool WorkspaceWindowImp::fromXml(DOMNode* pDocument, unsigned int version)
 
 void WorkspaceWindowImp::activate()
 {
-   Service<DesktopServices> pDesktop;
-   pDesktop->setCurrentWorkspaceWindow(dynamic_cast<WorkspaceWindow*>(this));
+   Service<DesktopServices>()->setCurrentWorkspaceWindow(dynamic_cast<WorkspaceWindow*>(this));
 }

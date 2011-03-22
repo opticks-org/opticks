@@ -33,7 +33,7 @@ class View;
 class WorkspaceWindow : public ViewWindow
 {
 public:
-   SETTING(WindowHeight, WorkspaceWindow, unsigned int, 250)
+   SETTING(WindowHeight, WorkspaceWindow, unsigned int, 300)
    SETTING(WindowSize, WorkspaceWindow, WindowSizeType, MAXIMIZED)
    SETTING(WindowWidth, WorkspaceWindow, unsigned int, 450)
    SETTING(WindowPercentage, WorkspaceWindow, unsigned int, 40)

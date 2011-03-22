@@ -15,27 +15,29 @@
 using namespace std;
 
 Workspace::Workspace(QWidget* parent) :
-   QWorkspace(parent),
+   QMdiArea(parent),
    mbCustomTiling(false),
    mMaxFirst(true),
    mTilingType(TILE_GRID)
 {
+   // This controls how subwindows are tiled and/or cascaded by the base class.
+   setActivationOrder(QMdiArea::StackingOrder);
 }
 
 void Workspace::resizeEvent(QResizeEvent * e)
 {
-   QWorkspace::resizeEvent(e);
+   QMdiArea::resizeEvent(e);
    if (mbCustomTiling)
    {
-      QWidgetList windows = windowList();
-      QWidget* pWidget = NULL;
+      QList<QMdiSubWindow*> windows = subWindowList();
+      QMdiSubWindow* pSubWindow = NULL;
 
       int numViews = mTileWindows.size();
       bool listValid = (numViews > 0);
       for (int i = 0; i < numViews; i++)
       {
-         pWidget = mTileWindows[i];
-         if (!windows.contains(pWidget))
+         pSubWindow = mTileWindows[i];
+         if (!windows.contains(pSubWindow))
          {
             listValid = false;
          }
@@ -62,7 +64,7 @@ void Workspace::refreshCustomView()
       // if vector of windows is empty, tile all windows
       if (numViews < 1)
       {
-         QWidgetList workspaceWindows = windowList();
+         QList<QMdiSubWindow*> workspaceWindows = subWindowList();
          numViews = workspaceWindows.size();
          for (int i = 0; i < numViews; ++i)
          {
@@ -83,7 +85,7 @@ void Workspace::refreshCustomView()
             // handle special case for 1 window in list
             if (mTileWindows.size() == 1)
             {
-               setWindow(mTileWindows.front(), 0, 0, width(), height());
+               setSubWindow(mTileWindows.front(), 0, 0, width(), height());
                break;
             }
 
@@ -100,19 +102,19 @@ void Workspace::refreshCustomView()
                rowHeight = height();
                colWidth = width() / (halfViews+1);
                oddColWidth = width() - colWidth * halfViews;
-               QWidget* pWidget = NULL;
+               QMdiSubWindow* pSubWindow = NULL;
                if (mMaxFirst)
                {
-                  pWidget = mTileWindows.at(startAt++);
+                  pSubWindow = mTileWindows.at(startAt++);
                   x = 0;
                   evenColStart = oddColWidth;
                }
                else
                {
-                  pWidget = mTileWindows.at(runTo--);
+                  pSubWindow = mTileWindows.at(runTo--);
                   x = halfViews * colWidth;
                }
-               setWindow(pWidget, x, y, oddColWidth, rowHeight);
+               setSubWindow(pSubWindow, x, y, oddColWidth, rowHeight);
             }
 
             rowHeight = height() / 2;
@@ -135,7 +137,7 @@ void Workspace::refreshCustomView()
                {
                   --colWidth;
                }
-               setWindow(mTileWindows.at(i), x, y, colWidth, rowHeight);
+               setSubWindow(mTileWindows.at(i), x, y, colWidth, rowHeight);
                x += colWidth;
             }
 
@@ -156,7 +158,7 @@ void Workspace::refreshCustomView()
                {
                   --colWidth;
                }
-               setWindow(mTileWindows.at(i), x, y, colWidth, rowHeight);
+               setSubWindow(mTileWindows.at(i), x, y, colWidth, rowHeight);
                x += colWidth;
             }
          }
@@ -178,7 +180,7 @@ void Workspace::refreshCustomView()
             {
                --colWidth;
             }
-            setWindow(mTileWindows.at(i), x, y, colWidth, rowHeight);
+            setSubWindow(mTileWindows.at(i), x, y, colWidth, rowHeight);
             x += colWidth;
          }
          break;
@@ -199,7 +201,7 @@ void Workspace::refreshCustomView()
             {
                --rowHeight;
             }
-            setWindow(mTileWindows.at(i), x, y, colWidth, rowHeight);
+            setSubWindow(mTileWindows.at(i), x, y, colWidth, rowHeight);
             y += rowHeight;
          }
          break;
@@ -220,11 +222,11 @@ void Workspace::refreshCustomView()
    }
 }
 
-void Workspace::cascade()
+void Workspace::cascadeSubWindows()
 {
    mbCustomTiling = false;
    mTileWindows.clear();
-   QWorkspace::cascade();
+   QMdiArea::cascadeSubWindows();
 }
 
 void Workspace::tile(const TilingType eType)
@@ -233,11 +235,11 @@ void Workspace::tile(const TilingType eType)
    mTilingType = eType;
    mTileWindows.clear();
 
-   QWidgetList windows = windowList();
+   QList<QMdiSubWindow*> windows = subWindowList();
    int numWindows = windows.count();
    if (numWindows < 2)
    {
-      QWorkspace::tile();
+      QMdiArea::tileSubWindows();
       return;
    }
 
@@ -245,7 +247,7 @@ void Workspace::tile(const TilingType eType)
    switch (mTilingType)
    {
    case TILE_GRID:
-      QWorkspace::tile();
+      QMdiArea::tileSubWindows();
       break;
    case TILE_HORIZONTAL:
       {
@@ -256,17 +258,17 @@ void Workspace::tile(const TilingType eType)
             ++wWidth;
          }
          int x = 0;
-         QWidget* pWidget(NULL);
-         for (int i = 0; i < numWindows; ++i) 
+         QMdiSubWindow* pSubWindow(NULL);
+         for (int i = 0; i < numWindows; ++i)
          {
-            pWidget = windows.at(i);
-            if (pWidget != NULL)
+            pSubWindow = windows.at(i);
+            if (pSubWindow != NULL)
             {
                if (leftOver-- == 0)
                {
                   --wWidth;
                }
-               setWindow(pWidget, x, 0, wWidth, height());
+               setSubWindow(pSubWindow, x, 0, wWidth, height());
                x += wWidth;
             }
          }
@@ -281,17 +283,17 @@ void Workspace::tile(const TilingType eType)
             ++wHeight;
          }
          int y = 0;
-         QWidget* pWidget(NULL);
+         QMdiSubWindow* pSubWindow(NULL);
          for (int i = 0; i < numWindows; ++i)
          {
-            pWidget = windows.at(i);
-            if (pWidget != NULL)
+            pSubWindow = windows.at(i);
+            if (pSubWindow != NULL)
             {
                if (leftOver-- == 0)
                {
                   --wHeight;
                }
-               setWindow(pWidget, 0, y, width(), wHeight);
+               setSubWindow(pSubWindow, 0, y, width(), wHeight);
                y += wHeight;
             }
          }
@@ -308,7 +310,7 @@ bool Workspace::tileWindows(const vector<WorkspaceWindow*>& windows, bool maxFir
    mTilingType = eType;
    mTileWindows.clear();
 
-   QWidgetList workspaceWindows = windowList();
+   QList<QMdiSubWindow*> workspaceWindows = subWindowList();
    for (vector<WorkspaceWindow*>::const_iterator iter = windows.begin(); iter != windows.end(); ++iter)
    {
       WorkspaceWindowImp* pWindow = dynamic_cast<WorkspaceWindowImp*>(*iter);
@@ -333,20 +335,15 @@ bool Workspace::tileWindows(const vector<WorkspaceWindow*>& windows, bool maxFir
    return true;
 }
 
-void Workspace::setWindow(QWidget* pWidget, int x, int y, int winWidth, int winHeight)
+void Workspace::setSubWindow(QMdiSubWindow* pSubWindow, int x, int y, int winWidth, int winHeight)
 {
-   if (pWidget == NULL)
+   if (pSubWindow == NULL)
    {
       return;
    }
 
-   pWidget->showNormal();
-
-   QWidget* pParent = pWidget->parentWidget();
-   if (pParent != NULL)
-   {
-      pParent->resize(winWidth, winHeight);
-      pParent->move(x, y);
-      pParent->raise();
-   }
+   pSubWindow->showNormal();
+   pSubWindow->resize(winWidth, winHeight);
+   pSubWindow->move(x, y);
+   pSubWindow->raise();
 }

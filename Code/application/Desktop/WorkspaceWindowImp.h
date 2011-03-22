@@ -10,7 +10,7 @@
 #ifndef WORKSPACEWINDOWIMP_H
 #define WORKSPACEWINDOWIMP_H
 
-#include <QtGui/QMainWindow>
+#include <QtGui/QMdiSubWindow>
 
 #include "ApplicationServices.h"
 #include "AttachmentPtr.h"
@@ -22,7 +22,7 @@
 class OverviewWindow;
 class View;
 
-class WorkspaceWindowImp : public QMainWindow, public ViewWindowImp
+class WorkspaceWindowImp : public QMdiSubWindow, public ViewWindowImp
 {
    Q_OBJECT
 
@@ -63,8 +63,11 @@ protected slots:
 protected:
    AttachmentPtr<ApplicationServices> mpApplicationServices;
    virtual void closeEvent(QCloseEvent* pEvent);
+   virtual void changeEvent(QEvent* pEvent);
 
 private:
+   QSize mRestoreSize;
+   QPoint mRestorePos;
    bool mConfirmOnClose;
    QAction* mpActiveAction;
 

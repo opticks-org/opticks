@@ -68,6 +68,8 @@ class Workspace;
 class WorkspaceWindow;
 class WorkspaceWindowImp;
 
+class QMdiSubWindow;
+
 class ApplicationWindow : public QMainWindow, public SubjectAdapter, public SettableSessionItemAdapter
 {
    Q_OBJECT
@@ -284,7 +286,7 @@ protected slots:
    void executeCommand(QAction* pAction);
 
    // Application Window management
-   void updateActiveWindow(QWidget* pWindow);
+   void updateActiveWindow(QMdiSubWindow* pWindow);
    void initializeToolBars(Layer* pLayer);
 
    // SessionItem context menu actions
