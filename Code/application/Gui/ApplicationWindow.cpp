@@ -1755,7 +1755,8 @@ WorkspaceWindow* ApplicationWindow::getCurrentWorkspaceWindow() const
    WorkspaceWindow* pWindow = NULL;
    if (mpWorkspace != NULL)
    {
-      pWindow = dynamic_cast<WorkspaceWindow*>(mpWorkspace->activeSubWindow());
+      // mpWorkspace->activeSubWindow() cannot be used as it returns NULL when a widget outside mpWorkspace is active
+      pWindow = dynamic_cast<WorkspaceWindow*>(mpWorkspace->currentSubWindow());
    }
 
    return pWindow;
