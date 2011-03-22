@@ -72,8 +72,8 @@ HistogramPlotImp::HistogramPlotImp(const string& id, const string& viewName, QGL
    mpElement(NULL),
    mAutoZoom(true),
    mpStats(NULL),
-   mpBelowAction(NULL),
-   mpAboveAction(NULL),
+   mpLessThanAction(NULL),
+   mpGreaterThanAction(NULL),
    mpBetweenAction(NULL),
    mpOutsideAction(NULL),
    mpLinearAction(NULL),
@@ -181,28 +181,28 @@ HistogramPlotImp::HistogramPlotImp(const string& id, const string& viewName, QGL
 
    string passAreaContext = shortcutContext + string("/Threshold Pass Area");
 
-   mpBelowAction = pPassAreaGroup->addAction("&Below");
-   mpBelowAction->setAutoRepeat(false);
-   mpBelowAction->setCheckable(true);
-   mpBelowAction->setShortcutContext(Qt::WidgetShortcut);
-   pDesktop->initializeAction(mpBelowAction, passAreaContext);
-   addAction(mpBelowAction);
+   mpLessThanAction = pPassAreaGroup->addAction(QString::fromStdString(StringUtilities::toDisplayString(LOWER)));
+   mpLessThanAction->setAutoRepeat(false);
+   mpLessThanAction->setCheckable(true);
+   mpLessThanAction->setShortcutContext(Qt::WidgetShortcut);
+   pDesktop->initializeAction(mpLessThanAction, passAreaContext);
+   addAction(mpLessThanAction);
 
-   mpAboveAction = pPassAreaGroup->addAction("&Above");
-   mpAboveAction->setAutoRepeat(false);
-   mpAboveAction->setCheckable(true);
-   mpAboveAction->setShortcutContext(Qt::WidgetShortcut);
-   pDesktop->initializeAction(mpAboveAction, passAreaContext);
-   addAction(mpAboveAction);
+   mpGreaterThanAction = pPassAreaGroup->addAction(QString::fromStdString(StringUtilities::toDisplayString(UPPER)));
+   mpGreaterThanAction->setAutoRepeat(false);
+   mpGreaterThanAction->setCheckable(true);
+   mpGreaterThanAction->setShortcutContext(Qt::WidgetShortcut);
+   pDesktop->initializeAction(mpGreaterThanAction, passAreaContext);
+   addAction(mpGreaterThanAction);
 
-   mpBetweenAction = pPassAreaGroup->addAction("Be&tween");
+   mpBetweenAction = pPassAreaGroup->addAction(QString::fromStdString(StringUtilities::toDisplayString(MIDDLE)));
    mpBetweenAction->setAutoRepeat(false);
    mpBetweenAction->setCheckable(true);
    mpBetweenAction->setShortcutContext(Qt::WidgetShortcut);
    pDesktop->initializeAction(mpBetweenAction, passAreaContext);
    addAction(mpBetweenAction);
 
-   mpOutsideAction = pPassAreaGroup->addAction("&Outside");
+   mpOutsideAction = pPassAreaGroup->addAction(QString::fromStdString(StringUtilities::toDisplayString(OUTSIDE)));
    mpOutsideAction->setAutoRepeat(false);
    mpOutsideAction->setCheckable(true);
    mpOutsideAction->setShortcutContext(Qt::WidgetShortcut);
@@ -2537,11 +2537,11 @@ void HistogramPlotImp::setThresholdMode(QAction* pAction)
    }
 
    PassArea passArea = pThresholdLayer->getPassArea();
-   if (pAction == mpBelowAction)
+   if (pAction == mpLessThanAction)
    {
       passArea = LOWER;
    }
-   else if (pAction == mpAboveAction)
+   else if (pAction == mpGreaterThanAction)
    {
       passArea = UPPER;
    }
@@ -2568,11 +2568,11 @@ void HistogramPlotImp::updatePassAreaAction()
    PassArea passArea = pThresholdLayer->getPassArea();
    if (passArea == LOWER)
    {
-      mpBelowAction->setChecked(true);
+      mpLessThanAction->setChecked(true);
    }
    else if (passArea == UPPER)
    {
-      mpAboveAction->setChecked(true);
+      mpGreaterThanAction->setChecked(true);
    }
    else if (passArea == MIDDLE)
    {

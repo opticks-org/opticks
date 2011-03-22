@@ -204,8 +204,8 @@ private:
    QAction* mpLogYAxisAction;
    QAction* mpAxisSeparatorAction;
    QAction* mpLinkAxisStretchAction;
-   QAction* mpBelowAction;
-   QAction* mpAboveAction;
+   QAction* mpLessThanAction;
+   QAction* mpGreaterThanAction;
    QAction* mpBetweenAction;
    QAction* mpOutsideAction;
    QAction* mpLinearAction;
