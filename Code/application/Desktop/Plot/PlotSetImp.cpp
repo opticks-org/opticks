@@ -11,19 +11,15 @@
 #include <QtGui/QInputDialog>
 #include <QtGui/QMessageBox>
 
+#include "AppVerify.h"
 #include "ContextMenu.h"
 #include "ContextMenuActions.h"
-#include "AppVerify.h"
-#include "DesktopServices.h"
-#include "HistogramPlotImp.h"
-#include "HistogramWindowImp.h"
 #include "PlotSet.h"
 #include "PlotSetImp.h"
 #include "PlotView.h"
 #include "PlotViewImp.h"
 #include "PlotWidgetAdapter.h"
 #include "PlotWindow.h"
-#include "RasterLayerImp.h"
 #include "SessionItemDeserializer.h"
 #include "SessionItemSerializer.h"
 #include "SessionManagerImp.h"
@@ -780,26 +776,6 @@ bool PlotSetImp::fromXml(DOMNode* pDocument, unsigned int version)
          if (pWidget != NULL)
          {
             addPlot(pWidget);
-
-            HistogramWindowImp* pHWI = dynamic_cast<HistogramWindowImp*>(mpPlotWindow);
-            if (pHWI != NULL)
-            {
-               VERIFYNR(pWidget->attach(SIGNAL_NAME(PlotWidget, AboutToShowContextMenu),
-                  Slot(pHWI, &HistogramWindowImp::updateContextMenu)));
-
-               HistogramPlotImp* pPlotImp = dynamic_cast<HistogramPlotImp*>(pWidget->getPlot());
-               if (pPlotImp != NULL)
-               {
-                  RasterLayerImp* pRasterImp = dynamic_cast<RasterLayerImp*>(pPlotImp->getLayer());
-                  if (pRasterImp != NULL)
-                  {
-                     VERIFYNR(connect(pRasterImp, SIGNAL(displayModeChanged(const DisplayMode&)), pHWI,
-                        SLOT(setCurrentPlot(const DisplayMode&))));
-                     VERIFYNR(connect(pRasterImp, SIGNAL(displayedBandChanged(RasterChannelType, DimensionDescriptor)),
-                        pHWI, SLOT(updatePlotInfo(RasterChannelType))));
-                  }
-               }
-            }
          }
       }
    }

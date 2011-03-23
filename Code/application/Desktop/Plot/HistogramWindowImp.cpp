@@ -12,7 +12,6 @@
 #include "AppVerify.h"
 #include "ContextMenu.h"
 #include "ContextMenuActions.h"
-#include "DesktopServices.h"
 #include "GetSubsetDialog.h"
 #include "HistogramPlotAdapter.h"
 #include "HistogramWindow.h"
@@ -31,6 +30,7 @@
 #include "RasterLayerAdapter.h"
 #include "RasterUtilities.h"
 #include "SpatialDataView.h"
+#include "SpatialDataViewImp.h"
 #include "SpatialDataWindow.h"
 #include "StatisticsImp.h"
 #include "StatisticsWidget.h"
@@ -42,21 +42,21 @@
 #include <QtGui/QSplitter>
 #include <vector>
 using namespace std;
+XERCES_CPP_NAMESPACE_USE
 
 HistogramWindowImp::HistogramWindowImp(const string& id, const string& windowName, QWidget* pParent) :
    PlotWindowImp(id, windowName, pParent),
+   mpDesktop(Service<DesktopServices>().get()),
    mpExplorer(Service<SessionExplorer>().get(), SIGNAL_NAME(SessionExplorer, AboutToShowSessionItemContextMenu),
       Slot(this, &HistogramWindowImp::updateContextMenu)),
    mDisplayModeChanging(false),
    mUpdater(this),
    mAddingStatisticsPlot(false)
 {
-   Service<DesktopServices> pDesktop;
-
    mpSyncAutoZoomAction = new QAction("Synchronize Auto Zoom", this);
    mpSyncAutoZoomAction->setAutoRepeat(false);
    VERIFYNR(connect(mpSyncAutoZoomAction, SIGNAL(triggered()), this, SLOT(syncAutoZoom())));
-   pDesktop->initializeAction(mpSyncAutoZoomAction, "Histogram Plot");     // Use the plot context since the action
+   mpDesktop->initializeAction(mpSyncAutoZoomAction, "Histogram Plot");    // Use the plot context since the action
                                                                            // will appear on the plot menu
 
    mpStatisticsShowAction = new QAction("Statistics", this);
@@ -64,7 +64,7 @@ HistogramWindowImp::HistogramWindowImp(const string& id, const string& windowNam
    mpStatisticsShowAction->setCheckable(true);
    mpStatisticsShowAction->setStatusTip("Toggles the display of the statistics");
    VERIFYNR(connect(mpStatisticsShowAction, SIGNAL(triggered(bool)), this, SLOT(setStatisticsShown(bool))));
-   pDesktop->initializeAction(mpStatisticsShowAction, "Histogram Plot");   // Use the plot context since the action
+   mpDesktop->initializeAction(mpStatisticsShowAction, "Histogram Plot");  // Use the plot context since the action
                                                                            // will appear on the plot menu
 
    InfoBar* pInfoBar = getInfoBar();
@@ -76,11 +76,13 @@ HistogramWindowImp::HistogramWindowImp(const string& id, const string& windowNam
    setIcon(QIcon(":/icons/HistogramWindow"));
 
    VERIFYNR(connect(this, SIGNAL(plotSetActivated(PlotSet*)), this, SLOT(setStatisticsShowActionState(PlotSet*))));
+
+   mpDesktop.addSignal(SIGNAL_NAME(DesktopServices, WindowAdded), Slot(this, &HistogramWindowImp::windowAdded));
+   mpDesktop.addSignal(SIGNAL_NAME(DesktopServices, WindowRemoved), Slot(this, &HistogramWindowImp::windowRemoved));
 }
 
 HistogramWindowImp::~HistogramWindowImp()
-{
-}
+{}
 
 void HistogramWindowImp::updateContextMenu(Subject& subject, const string& signal, const boost::any& value)
 {
@@ -184,24 +186,6 @@ void HistogramWindowImp::updateContextMenu(Subject& subject, const string& signa
    {
       pMenu->addActionBefore(mpStatisticsShowAction, APP_HISTOGRAMPLOT_STATISTICS_ACTION,
          APP_HISTOGRAMPLOT_REFRESH_STATISTICS_ACTION);
-   }
-}
-
-void HistogramWindowImp::activateLayerPlot(Subject& subject, const std::string& signal, const boost::any& value)
-{
-   if (isHidden() || !HistogramWindow::getSettingLayerActivation())
-   {
-      return;
-   }
-   ThresholdLayer* pLayer = dynamic_cast<ThresholdLayer*>(boost::any_cast<Layer*>(value));
-   if (pLayer == NULL)
-   {
-      return;
-   }
-   PlotWidget* pPlot = getPlot(pLayer);
-   if (pPlot != NULL)
-   {
-      setCurrentPlot(pPlot);
    }
 }
 
@@ -331,6 +315,109 @@ PlotWidget* HistogramWindowImp::getPlot(RasterLayer* pLayer, RasterChannelType c
    return NULL;
 }
 
+bool HistogramWindowImp::toXml(XMLWriter* pXml) const
+{
+   if ((pXml == NULL) || (PlotWindowImp::toXml(pXml) == false))
+   {
+      return false;
+   }
+
+   vector<PlotWidget*> plots = getPlots(HISTOGRAM_PLOT);
+   for (vector<PlotWidget*>::const_iterator iter = plots.begin(); iter != plots.end(); ++iter)
+   {
+      PlotWidget* pPlotWidget = *iter;
+      if (pPlotWidget != NULL)
+      {
+         pXml->pushAddPoint(pXml->addElement("HistogramPlot"));
+         pXml->addAttr("id", pPlotWidget->getId());
+
+         HistogramPlotImp* pPlot = dynamic_cast<HistogramPlotImp*>(pPlotWidget->getPlot());
+         if (pPlot != NULL)
+         {
+            Layer* pLayer = pPlot->getLayer();
+            if (pLayer != NULL)
+            {
+               pXml->addAttr("layerId", pLayer->getId());
+            }
+         }
+
+         pXml->popAddPoint();
+      }
+   }
+
+   return true;
+}
+
+bool HistogramWindowImp::fromXml(DOMNode* pDocument, unsigned int version)
+{
+   if (pDocument == NULL)
+   {
+      return false;
+   }
+
+   bool success = PlotWindowImp::fromXml(pDocument, version);
+   if (success == true)
+   {
+      vector<Window*> windows;
+      mpDesktop->getWindows(SPATIAL_DATA_WINDOW, windows);
+      for (vector<Window*>::const_iterator iter = windows.begin(); iter != windows.end(); ++iter)
+      {
+         SpatialDataWindow* pWindow = static_cast<SpatialDataWindow*>(*iter);
+         if (pWindow != NULL)
+         {
+            SpatialDataViewImp* pView = dynamic_cast<SpatialDataViewImp*>(pWindow->getSpatialDataView());
+            if (pView != NULL)
+            {
+               VERIFYNR(connect(pView, SIGNAL(layerAdded(Layer*)), this, SLOT(createPlot(Layer*))));
+               VERIFYNR(connect(pView, SIGNAL(layerActivated(Layer*)), this, SLOT(setCurrentPlot(Layer*))));
+               VERIFYNR(pView->attach(SIGNAL_NAME(SpatialDataView, LayerShown),
+                  Slot(this, &HistogramWindowImp::layerShown)));
+            }
+         }
+      }
+
+      Service<SessionManager> pManager;
+      for (DOMNode* pChild = pDocument->getFirstChild(); pChild != NULL; pChild = pChild->getNextSibling())
+      {
+         if (XMLString::equals(pChild->getNodeName(), X("HistogramPlot")))
+         {
+            DOMElement* pElement = static_cast<DOMElement*>(pChild);
+
+            // Attach the plot widget
+            PlotWidget* pPlotWidget = dynamic_cast<PlotWidget*>(pManager->getSessionItem(
+               A(pElement->getAttribute(X("id")))));
+            if (pPlotWidget != NULL)
+            {
+               VERIFYNR(pPlotWidget->attach(SIGNAL_NAME(PlotWidget, AboutToShowContextMenu),
+                  Slot(this, &HistogramWindowImp::updateContextMenu)));
+            }
+
+            // Attach the layer
+            Layer* pLayer = dynamic_cast<Layer*>(pManager->getSessionItem(A(pElement->getAttribute(X("layerId")))));
+
+            RasterLayerImp* pRasterLayer = dynamic_cast<RasterLayerImp*>(pLayer);
+            if (pRasterLayer != NULL)
+            {
+               VERIFYNR(connect(pRasterLayer, SIGNAL(displayModeChanged(const DisplayMode&)), this,
+                  SLOT(setCurrentPlot(const DisplayMode&))));
+               VERIFYNR(connect(pRasterLayer, SIGNAL(displayedBandChanged(RasterChannelType, DimensionDescriptor)),
+                  this, SLOT(updatePlotInfo(RasterChannelType))));
+               pRasterLayer->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &HistogramWindowImp::layerDeleted));
+            }
+
+            ThresholdLayer* pThresholdLayer = dynamic_cast<ThresholdLayer*>(pLayer);
+            if (pThresholdLayer != NULL)
+            {
+               VERIFYNR(pThresholdLayer->attach(SIGNAL_NAME(Subject, Deleted),
+                  Slot(this, &HistogramWindowImp::layerDeleted)));
+            }
+         }
+      }
+   }
+
+   return success;
+}
+
 PlotWidget* HistogramWindowImp::createPlot(Layer* pLayer)
 {
    return createPlot(pLayer, NULL);
@@ -383,13 +470,6 @@ PlotWidget* HistogramWindowImp::createPlot(Layer* pLayer, PlotSet* pPlotSet)
             {
                pPlotSet = createPlotSet(strViewName);
             }
-
-            // Attach layer shown signals
-            SpatialDataView* pSdv = dynamic_cast<SpatialDataView*>(pView);
-            if (pSdv != NULL)
-            {
-               pSdv->attach(SIGNAL_NAME(SpatialDataView, LayerShown), Slot(this, &HistogramWindowImp::activateLayerPlot));
-            }
          }
       }
    }
@@ -404,6 +484,10 @@ PlotWidget* HistogramWindowImp::createPlot(Layer* pLayer, PlotSet* pPlotSet)
    PlotWidgetImp* pPlotImp = dynamic_cast<PlotWidgetImp*>(pPlot);
    if (pPlot != NULL)
    {
+      // Attach to the Layer::Deleted signal before calling setHistogram() so that the
+      // layerDeleted() slot is called before the histogram plot pointer is NULLed
+      VERIFYNR(pLayer->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &HistogramWindowImp::layerDeleted)));
+
       // Add the statistics widget
       HistogramPlotImp* pHistPlot = dynamic_cast<HistogramPlotImp*>(pPlot->getPlot());
       QSplitter* pSplitter = pPlotImp->getSplitter();
@@ -474,6 +558,10 @@ PlotWidget* HistogramWindowImp::createPlot(RasterLayer* pLayer, RasterChannelTyp
    PlotWidgetImp* pPlotImp = dynamic_cast<PlotWidgetImp*>(pPlot);
    if (pPlot != NULL)
    {
+      // Attach to the Layer::Deleted signal before calling setHistogram() so that the
+      // layerDeleted() slot is called before the histogram plot pointer is NULLed
+      pLayer->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &HistogramWindowImp::layerDeleted));
+
       // Add the statistics widget
       HistogramPlotImp* pHistPlot = dynamic_cast<HistogramPlotImp*>(pPlot->getPlot());
       QSplitter* pSplitter = pPlotImp->getSplitter();
@@ -675,17 +763,12 @@ void HistogramWindowImp::deletePlot(Layer* pLayer)
       PlotSet* pPlotSet = pPlotWidget->getPlotSet();
       if (pPlotSet != NULL)
       {
+         VERIFYNR(pLayer->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &HistogramWindowImp::layerDeleted)));
+
          pPlotSet->deletePlot(pPlotWidget);
          if (pPlotSet->getNumPlots() == 0)
          {
             deletePlotSet(pPlotSet);
-
-            // Detach layer shown signals
-            SpatialDataView* pSdv = static_cast<SpatialDataView*>(pLayer->getView());
-            if (pSdv != NULL)
-            {
-               pSdv->detach(SIGNAL_NAME(SpatialDataView, LayerShown), Slot(this, &HistogramWindowImp::activateLayerPlot));
-            }
          }
       }
    }
@@ -706,6 +789,7 @@ void HistogramWindowImp::deletePlot(RasterLayer* pLayer, RasterChannelType chann
       {
          pPlotWidget->detach(SIGNAL_NAME(PlotWidget, AboutToShowContextMenu),
             Slot(this, &HistogramWindowImp::updateContextMenu));
+         pLayer->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &HistogramWindowImp::layerDeleted));
 
          RasterLayerImp* pRasterLayerImp = dynamic_cast<RasterLayerImp*>(pLayer);
          if (pRasterLayerImp != NULL)
@@ -878,8 +962,7 @@ void HistogramWindowImp::activateLayer(PlotWidget* pPlot)
 
       if (activate)
       {
-         Service<DesktopServices> pDesktop;
-         WorkspaceWindow* pWindow = pDesktop->getCurrentWorkspaceWindow();
+         WorkspaceWindow* pWindow = mpDesktop->getCurrentWorkspaceWindow();
          if (pWindow != NULL)
          {
             SpatialDataView* pView = NULL;
@@ -944,6 +1027,65 @@ void HistogramWindowImp::showEvent(QShowEvent* pEvent)
 {
    PlotWindowImp::showEvent(pEvent);
    mUpdater.update();
+}
+
+void HistogramWindowImp::windowAdded(Subject& subject, const string& signal, const boost::any& value)
+{
+   SpatialDataWindow* pWindow = dynamic_cast<SpatialDataWindow*>(boost::any_cast<Window*>(value));
+   if (pWindow != NULL)
+   {
+      SpatialDataViewImp* pView = dynamic_cast<SpatialDataViewImp*>(pWindow->getSpatialDataView());
+      if (pView != NULL)
+      {
+         VERIFYNR(connect(pView, SIGNAL(layerAdded(Layer*)), this, SLOT(createPlot(Layer*))));
+         VERIFYNR(connect(pView, SIGNAL(layerActivated(Layer*)), this, SLOT(setCurrentPlot(Layer*))));
+         VERIFYNR(pView->attach(SIGNAL_NAME(SpatialDataView, LayerShown), Slot(this, &HistogramWindowImp::layerShown)));
+      }
+   }
+}
+
+void HistogramWindowImp::windowRemoved(Subject& subject, const string& signal, const boost::any& value)
+{
+   SpatialDataWindow* pWindow = dynamic_cast<SpatialDataWindow*>(boost::any_cast<Window*>(value));
+   if (pWindow != NULL)
+   {
+      SpatialDataViewImp* pView = dynamic_cast<SpatialDataViewImp*>(pWindow->getSpatialDataView());
+      if (pView != NULL)
+      {
+         VERIFYNR(disconnect(pView, SIGNAL(layerAdded(Layer*)), this, SLOT(createPlot(Layer*))));
+         VERIFYNR(disconnect(pView, SIGNAL(layerActivated(Layer*)), this, SLOT(setCurrentPlot(Layer*))));
+         VERIFYNR(pView->detach(SIGNAL_NAME(SpatialDataView, LayerShown), Slot(this, &HistogramWindowImp::layerShown)));
+      }
+   }
+}
+
+void HistogramWindowImp::layerShown(Subject& subject, const string& signal, const boost::any& value)
+{
+   if (isHidden() || !HistogramWindow::getSettingLayerActivation())
+   {
+      return;
+   }
+
+   ThresholdLayer* pLayer = dynamic_cast<ThresholdLayer*>(boost::any_cast<Layer*>(value));
+   if (pLayer == NULL)
+   {
+      return;
+   }
+
+   PlotWidget* pPlot = getPlot(pLayer);
+   if (pPlot != NULL)
+   {
+      setCurrentPlot(pPlot);
+   }
+}
+
+void HistogramWindowImp::layerDeleted(Subject& subject, const string& signal, const boost::any& value)
+{
+   Layer* pLayer = dynamic_cast<Layer*>(&subject);
+   if (pLayer != NULL)
+   {
+      deletePlot(pLayer);
+   }
 }
 
 void HistogramWindowImp::updatePlotInfo(RasterChannelType channel)

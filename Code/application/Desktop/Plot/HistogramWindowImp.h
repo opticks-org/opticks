@@ -13,6 +13,7 @@
 #include <QtGui/QAction>
 
 #include "AttachmentPtr.h"
+#include "DesktopServices.h"
 #include "PlotWindowImp.h"
 #include "RasterLayer.h"
 #include "SessionExplorer.h"
@@ -34,7 +35,6 @@ public:
 
    using SessionItemImp::setIcon;
    void updateContextMenu(Subject& subject, const std::string& signal, const boost::any& value);
-   void activateLayerPlot(Subject& subject, const std::string& signal, const boost::any& value);
 
    PlotSet* createPlotSet(const QString& strPlotSet);
    bool deletePlotSet(PlotSet* pPlotSet);
@@ -46,6 +46,9 @@ public:
    using PlotWindowImp::setCurrentPlot;
 
    void createSubsetPlot(Layer* pLayer);
+
+   virtual bool toXml(XMLWriter* pXml) const;
+   virtual bool fromXml(DOMNode* pDocument, unsigned int version);
 
 public slots:
    PlotWidget* createPlot(Layer* pLayer);
@@ -64,6 +67,10 @@ signals:
 protected:
    bool event(QEvent* pEvent);
    void showEvent(QShowEvent * pEvent);
+   void windowAdded(Subject& subject, const std::string& signal, const boost::any& value);
+   void windowRemoved(Subject& subject, const std::string& signal, const boost::any& value);
+   void layerShown(Subject& subject, const std::string& signal, const boost::any& value);
+   void layerDeleted(Subject& subject, const std::string& signal, const boost::any& value);
 
    void createPlots(RasterLayer* pLayer, DisplayMode displayMode);
    void createPlots(RasterLayer* pLayer, DisplayMode displayMode, PlotSet* pPlotSet);
@@ -82,6 +89,7 @@ private:
    void setStatisticsShowActionState(PlotWidgetImp* pPlot);
    void deleteStatisticsPlots(Layer* pLayer);
 
+   AttachmentPtr<DesktopServices> mpDesktop;
    AttachmentPtr<SessionExplorer> mpExplorer;
    bool mDisplayModeChanging;
    QAction* mpSyncAutoZoomAction;

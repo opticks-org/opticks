@@ -17,7 +17,6 @@
 
 class OverviewWindow;
 class SpatialDataView;
-class View;
 
 class SpatialDataWindowImp : public WorkspaceWindowImp
 {
@@ -45,9 +44,6 @@ public:
 
 signals:
    void overviewVisibilityChanged(bool bVisible);
-
-protected:
-   virtual bool setView(View* pView);
 
 private:
    OverviewWindow* mpOverview;
