@@ -105,6 +105,7 @@ public:
    static const std::vector<DataVariantEditorDelegate>& getDelegates();
    static DataVariantEditorDelegate getDelegate(const std::string& type);
    static bool hasDelegate(const std::string& type);
+   static const std::string& getVectorStringEditWarningDialogId();
 
    virtual QSize sizeHint() const;
 

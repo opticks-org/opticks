@@ -13,6 +13,10 @@
 #include <QtGui/QWidget>
 #include "AppVersion.h"
 
+#include <string>
+#include <utility>
+#include <vector>
+
 class QCheckBox;
 
 class OptionsSuppressibleMsg : public QWidget
@@ -79,9 +83,7 @@ public:
    }
 
 private:
-   QCheckBox* mpEditMetadataDialogState;
-   QCheckBox* mpEnableDisplayAsDialogState;
-   QCheckBox* mpEnableTextureGenerationDialogState;
+   std::vector<std::pair<QCheckBox*, std::string> > mCheckBoxes;
 };
 
 #endif

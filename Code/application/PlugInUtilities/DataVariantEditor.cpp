@@ -8,11 +8,13 @@
  */
 
 #include "AppVerify.h"
+#include "AppVersion.h"
 #include "ColorType.h"
 #include "ConfigurationSettings.h"
 #include "CustomColorButton.h"
 #include "DataVariantEditor.h"
 #include "DateTime.h"
+#include "DesktopServices.h"
 #include "DynamicObject.h"
 #include "Filename.h"
 #include "ObjectFactory.h"
@@ -493,6 +495,18 @@ const DataVariant& DataVariantEditor::getValue()
       QString valueText = mpValueTextEdit->toPlainText();
       if (curDelegate.getTypeName() == "vector<string>")
       {
+         // Replace all comma-space entries with just a comma.
+         // This is needed due to StringUtilities using ", " as a hard-coded separator.
+         const QString commaSpace = ", ";
+         if (valueText.contains(commaSpace))
+         {
+            valueText.replace(commaSpace, commaSpace[0]);
+            Service<DesktopServices>()->showSuppressibleMsgDlg(APP_NAME, "One or more of the strings entered contains "
+               "a comma followed immediately by a space. This format is used internally by " + string(APP_NAME) +
+               " and cannot be saved. All instances of a comma followed by a space have been replaced by a comma.",
+               MESSAGE_WARNING, getVectorStringEditWarningDialogId(), this);
+         }
+
          vector<string> values;
 
          QStringList items = valueText.split("\n");
@@ -838,6 +852,12 @@ void DataVariantEditor::tempFileChanged()
    }
 
    mpValueTextEdit->setPlainText(QString(file.readAll()));
+}
+
+const string& DataVariantEditor::getVectorStringEditWarningDialogId()
+{
+   static string editWarningDialogId = "{7E4029B6-F9AE-462E-9A1F-F4A58833E4A7}";
+   return editWarningDialogId;
 }
 
 #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Use a QListView to allow editing of vector data, " \

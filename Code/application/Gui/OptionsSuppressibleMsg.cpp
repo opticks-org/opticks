@@ -7,11 +7,11 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "OptionsSuppressibleMsg.h"
-
+#include "DataVariantEditor.h"
 #include "DesktopServices.h"
 #include "LabeledSection.h"
 #include "MetadataWidget.h"
+#include "OptionsSuppressibleMsg.h"
 #include "PropertiesRasterLayer.h"
 
 #include <QtGui/QCheckBox>
@@ -21,19 +21,32 @@
 OptionsSuppressibleMsg::OptionsSuppressibleMsg() :
    QWidget(NULL)
 {
-   mpEditMetadataDialogState = new QCheckBox("Edit metadata", this);
-   mpEnableDisplayAsDialogState = new QCheckBox("Warn when \"Display As\" menu commands fail", this);
-   mpEnableTextureGenerationDialogState = new QCheckBox("Enable dynamic texture generation", this);
+   // To add a new Suppressible option to the list, add an entry to the "entries" vector with a description and an id.
+   std::vector<std::pair<QString, std::string> > entries;
+   entries.push_back(std::make_pair("Edit metadata", MetadataWidget::getEditWarningDialogId()));
+   entries.push_back(std::make_pair("Warn when \"Display As\" menu commands fail",
+      PropertiesRasterLayer::getDisplayAsWarningDialogId()));
+   entries.push_back(std::make_pair("Enable dynamic texture generation",
+      PropertiesRasterLayer::getFilterWarningDialogId()));
+   entries.push_back(std::make_pair("Warn when entering comma-spaces within vector<string> entries",
+      DataVariantEditor::getVectorStringEditWarningDialogId()));
 
+   // Everything from this point is generic.
    QWidget* pOptionalMessagesWidget = new QWidget(this);
    QVBoxLayout* pOptionalMessagesLayout = new QVBoxLayout(pOptionalMessagesWidget);
    pOptionalMessagesLayout->setMargin(0);
    pOptionalMessagesLayout->setSpacing(5);
-   pOptionalMessagesLayout->addWidget(mpEditMetadataDialogState);
-   pOptionalMessagesLayout->addWidget(mpEnableDisplayAsDialogState);
-   pOptionalMessagesLayout->addWidget(mpEnableTextureGenerationDialogState);
+   for (std::vector<std::pair<QString, std::string> >::const_iterator iter = entries.begin();
+      iter != entries.end();
+      ++iter)
+   {
+      QCheckBox* pCheckBox = new QCheckBox(iter->first, this);
+      pCheckBox->setChecked(!(Service<DesktopServices>()->getSuppressibleMsgDlgState(iter->second)));
+      pOptionalMessagesLayout->addWidget(pCheckBox);
+      mCheckBoxes.push_back(std::make_pair(pCheckBox, iter->second));
+   }
    pOptionalMessagesLayout->addStretch(10);
-   LabeledSection* pOptionalMessagesSection = new LabeledSection(pOptionalMessagesWidget, 
+   LabeledSection* pOptionalMessagesSection = new LabeledSection(pOptionalMessagesWidget,
       "Display Optional Messages", this);
 
    // Dialog layout
@@ -42,27 +55,17 @@ OptionsSuppressibleMsg::OptionsSuppressibleMsg() :
    pLayout->setSpacing(10);
    pLayout->addWidget(pOptionalMessagesSection);
    pLayout->addStretch(10);
-
-   Service<DesktopServices> pDesktop;
-
-   mpEditMetadataDialogState->setChecked(!(pDesktop->getSuppressibleMsgDlgState(
-      MetadataWidget::getEditWarningDialogId())));
-   mpEnableDisplayAsDialogState->setChecked(!(pDesktop->getSuppressibleMsgDlgState(
-      PropertiesRasterLayer::getDisplayAsWarningDialogId())));
-   mpEnableTextureGenerationDialogState->setChecked(!(pDesktop->getSuppressibleMsgDlgState(
-      PropertiesRasterLayer::getFilterWarningDialogId())));
 }
+
+OptionsSuppressibleMsg::~OptionsSuppressibleMsg()
+{}
 
 void OptionsSuppressibleMsg::applyChanges()
 {
-   Service<DesktopServices> pDesktop;
-
-   pDesktop->setSuppressibleMsgDlgState(MetadataWidget::getEditWarningDialogId(),
-      !(mpEditMetadataDialogState->isChecked()));
-   pDesktop->setSuppressibleMsgDlgState(PropertiesRasterLayer::getDisplayAsWarningDialogId(),
-      !(mpEnableDisplayAsDialogState->isChecked()));
-   pDesktop->setSuppressibleMsgDlgState(PropertiesRasterLayer::getFilterWarningDialogId(),
-      !(mpEnableTextureGenerationDialogState->isChecked()));
+   for (std::vector<std::pair<QCheckBox*, std::string> >::const_iterator iter = mCheckBoxes.begin();
+      iter != mCheckBoxes.end();
+      ++iter)
+   {
+      Service<DesktopServices>()->setSuppressibleMsgDlgState(iter->second, !iter->first->isChecked());
+   }
 }
-
-OptionsSuppressibleMsg::~OptionsSuppressibleMsg() { }
