@@ -66,8 +66,6 @@ private:
    bool writeOutPCAtransform(QString filename);
    bool readInPCAtransform(QString filename);
    bool computeCovarianceMatrix(QString aoiName = "", int rowSkip = 1, int colSkip = 1);
-   bool readMatrixFromFile(QString filename, double **pData, int numBands, const std::string &caption);
-   bool writeMatrixToFile(QString filename, const double **pData, int numBands, const std::string &caption);
    bool getStatistics(std::vector<std::string> aoiList);
    BitMask* mpAoiBitMask;
    bool mUseAoi;

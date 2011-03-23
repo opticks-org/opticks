@@ -901,6 +901,30 @@ bool PCA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
       }
       else
       {
+         // Get filename from the user prior to computing statistics because computing statistics can take awhile
+         QString filename = QString::fromStdString(mpRaster->getFilename());
+
+         switch (mCalcMethod)
+         {
+         case SECONDMOMENT:
+            filename += ".pcasmm";
+            break;
+         case COVARIANCE:
+            filename += ".pcacvm";
+            break;
+         case CORRCOEF:
+            filename += ".pcaccm";
+            break;
+         default:
+            filename += ".pca";
+            break;
+         }
+         if (!isBatch())
+         {
+            filename = QFileDialog::getSaveFileName(mpDesktop->getMainWidget(),
+               "Choose filename to save PCA Transform", filename, "PCA files (*.pca*);;All Files (*)");
+         }
+
          // get statistics to use for PCA
          if (!getStatistics(aoiNames))
          {
@@ -930,28 +954,6 @@ bool PCA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
          }
 
          // Save PCA transform
-         QString filename = QString::fromStdString(mpRaster->getFilename());
-
-         switch (mCalcMethod)
-         {
-         case SECONDMOMENT:
-            filename += ".pcasmm";
-            break;
-         case COVARIANCE:
-            filename += ".pcacvm";
-            break;
-         case CORRCOEF:
-            filename += ".pcaccm";
-            break;
-         default:
-            filename += ".pca";
-            break;
-         }
-         if (!isBatch())
-         {
-            filename = QFileDialog::getSaveFileName(NULL, "Choose filename to save PCA Transform",
-               filename, "PCA files (*.pca*);;All Files (*.*)");
-         }
          if (!filename.isEmpty())
          {
             writeOutPCAtransform(filename);
@@ -1944,16 +1946,7 @@ void PCA::calculateEigenValues()
 bool PCA::getStatistics(vector<string> aoiList)
 {
    double* pdTemp = NULL;
-   QString strFilename;
-
-   string filename = mpRaster->getFilename();
-   if (filename.empty() == false)
-   {
-      strFilename = QString::fromStdString(filename);
-   }
-
    QString message;
-   bool bLoadFromFile = false;
    bool success = false;
    switch (mCalcMethod)
    {
@@ -2106,99 +2099,66 @@ bool PCA::getStatistics(vector<string> aoiList)
       }
    case CORRCOEF:
       {
-         strFilename += ".ccm";
          if (!isBatch())
          {
-            if (QFile::exists(strFilename))
+            StatisticsDlg sDlg("Correlation Coefficient", aoiList, mpDesktop->getMainWidget());
+            if (sDlg.exec() == QDialog::Rejected)
             {
-               bLoadFromFile = !QMessageBox::information(NULL, "Correlation Coefficient Algorithm",
-                                              "A correlation coefficient matrix file has been found for this image.\n"
-                                                      "Do you want to use it?",
-                                              "Use",
-                                              "Don't Use");
-            }
-         }
-         else
-         {
-            bLoadFromFile = false;
-         }
-
-         if (bLoadFromFile)
-         {
-            if (!readMatrixFromFile(strFilename, mpMatrixValues, mNumBands, "Correlation Coefficient"))
-            {
-               return false; // error logged in mReadMatrixFromFile routine
-            }
-         }
-         else
-         {
-            if (!isBatch())
-            {
-               StatisticsDlg sDlg("Correlation Coefficient", aoiList, mpDesktop->getMainWidget());
-               if (sDlg.exec() == QDialog::Rejected)
-               {
-                  mpStep->finalize(Message::Abort);
-                  return false;
-               }
-
-               QString strAoiName = sDlg.getAoiName();
-               if (!strAoiName.isEmpty())
-               {
-                  success = computeCovarianceMatrix(strAoiName);
-               }
-               else // compute covariance over whole image using skip factors
-               {
-                  success = computeCovarianceMatrix(QString(), sDlg.getRowFactor(), sDlg.getColumnFactor());
-               }
-            }
-            else // compute covariance over whole image using every pixel
-            {
-               success = computeCovarianceMatrix(QString(), 1, 1);
+               mpStep->finalize(Message::Abort);
+               return false;
             }
 
-            if (success)
+            QString strAoiName = sDlg.getAoiName();
+            if (!strAoiName.isEmpty())
             {
-               // check if allocated
-               vector<double> stdDev(mNumBands);
-               if (mpProgress != NULL)
+               success = computeCovarianceMatrix(strAoiName);
+            }
+            else // compute covariance over whole image using skip factors
+            {
+               success = computeCovarianceMatrix(QString(), sDlg.getRowFactor(), sDlg.getColumnFactor());
+            }
+         }
+         else // compute covariance over whole image using every pixel
+         {
+            success = computeCovarianceMatrix(QString(), 1, 1);
+         }
+
+         if (success)
+         {
+            // check if allocated
+            vector<double> stdDev(mNumBands);
+            if (mpProgress != NULL)
+            {
+               mpProgress->updateProgress("Computing Correlation Coefficients from Covariances...", 0, NORMAL);
+            }
+            for (unsigned int band = 0; band < mNumBands; ++band)
+            {
+               stdDev[band] = sqrt(mpMatrixValues[band][band]);
+            }
+            for (unsigned int band2 = 0; band2 < mNumBands; ++band2)
+            {
+               for (unsigned int band1 = 0; band1 < mNumBands; ++band1)
                {
-                  mpProgress->updateProgress("Computing Correlation Coefficients from Covariances...", 0, NORMAL);
-               }
-               for (unsigned int band = 0; band < mNumBands; ++band)
-               {
-                  stdDev[band] = sqrt(mpMatrixValues[band][band]);
-               }
-               for (unsigned int band2 = 0; band2 < mNumBands; ++band2)
-               {
-                  for (unsigned int band1 = 0; band1 < mNumBands; ++band1)
+                  if (band1 == band2)
                   {
-                     if (band1 == band2)
-                     {
-                        mpMatrixValues[band2][band1] = 1.0;
-                     }
-                     else
-                     {
-                        mpMatrixValues[band2][band1] = mpMatrixValues[band2][band1] / (stdDev[band2] * stdDev[band1]);
-                     }
+                     mpMatrixValues[band2][band1] = 1.0;
                   }
-
-                  if (mpProgress != NULL)
+                  else
                   {
-                     mpProgress->updateProgress("Computing Correlation Coefficients from Covariances...",
-                                                      100 * band2 / mNumBands, NORMAL);
+                     mpMatrixValues[band2][band1] = mpMatrixValues[band2][band1] / (stdDev[band2] * stdDev[band1]);
                   }
                }
 
                if (mpProgress != NULL)
                {
-                  mpProgress->updateProgress("Finished computing Correlation Coefficients", 100, NORMAL);
+                  mpProgress->updateProgress("Computing Correlation Coefficients from Covariances...",
+                                                   100 * band2 / mNumBands, NORMAL);
                }
+            }
 
-               if (!bLoadFromFile)
-               {
-                  writeMatrixToFile(strFilename, const_cast<const double**>(mpMatrixValues),
-                     mNumBands, "Correlation Coefficient");
-               }
+            if (mpProgress != NULL)
+            {
+               mpProgress->updateProgress("Finished computing Correlation Coefficients", 100, NORMAL);
             }
          }
 
@@ -2210,113 +2170,6 @@ bool PCA::getStatistics(vector<string> aoiList)
    }
 
    return success;
-}
-
-bool PCA::writeMatrixToFile(QString filename, const double **pData, int numBands, const string &caption)
-{
-   FileResource pFile(filename.toStdString().c_str(), "wt");
-   if (pFile.get() == NULL)
-   {
-      mMessage = "Unable to save " + caption + " matrix to disk as " + filename.toStdString();
-      if (mpProgress != NULL)
-      {
-         mpProgress->updateProgress(mMessage, 100, ERRORS);
-      }
-
-      mpStep->addMessage(mMessage, "app", "A0478959-21AF-4e64-B9DA-C17D7363F1BB", true);
-   }
-   else
-   {
-      fprintf(pFile, "%d\n", numBands);
-      for (int row = 0; row < numBands; ++row)
-      {
-         for (int col = 0; col < numBands; ++col)
-         {
-            fprintf(pFile, "%.15e ", pData[row][col]);
-         }
-         fprintf(pFile, "\n");
-      }
-
-      mMessage = caption + " matrix saved to disk as " + filename.toStdString();
-      if (mpProgress != NULL)
-      {
-         mpProgress->updateProgress(mMessage, 100, NORMAL);
-      }
-   }
-
-   return true;
-}
-
-bool PCA::readMatrixFromFile(QString filename, double **pData, int numBands, const string &caption)
-{
-   FileResource pFile(filename.toStdString().c_str(), "rt");
-   if (pFile.get() == NULL)
-   {
-      mMessage = "Unable to read " + caption + " matrix from file " + filename.toStdString();
-      if (mpProgress != NULL)
-      {
-         mpProgress->updateProgress(mMessage, 0, ERRORS);
-      }
-
-      mpStep->finalize(Message::Failure, mMessage);
-      return false;
-   }
-   mMessage = "Reading "  + caption + " matrix from file " + filename.toStdString();
-   mpProgress->updateProgress(mMessage, 0, NORMAL);
-
-   int lnumBands = 0;
-   int numFieldsRead = fscanf(pFile, "%d\n", &lnumBands);
-   if (numFieldsRead != 1)
-   {
-      mMessage = "Unable to read matrix file\n" + filename.toStdString();
-      if (mpProgress != NULL)
-      {
-         mpProgress->updateProgress(mMessage, 0, ERRORS);
-      }
-
-      mpStep->finalize(Message::Failure, mMessage);
-      return false;
-   }
-   if (lnumBands != numBands)
-   {
-      mMessage = "Mismatch between number of bands in cube and in matrix file.";
-      if (mpProgress != NULL)
-      {
-         mpProgress->updateProgress(mMessage, 0, ERRORS);
-      }
-
-      mpStep->finalize(Message::Failure, mMessage);
-      return false;
-   }
-   for (int row = 0; row < numBands; ++row)
-   {
-      for (int col = 0; col < numBands; ++col)
-      {
-         numFieldsRead = fscanf(pFile, "%lg ", &(pData[row][col]));
-         if (numFieldsRead != 1)
-         {
-            mMessage = "Error reading " + caption + " matrix from disk.";
-            if (mpProgress != NULL)
-            {
-               mpProgress->updateProgress(mMessage, 0, ERRORS);
-            }
-
-            mpStep->finalize(Message::Failure, mMessage);
-            return false;
-         }
-      }
-      if (mpProgress != NULL)
-      {
-         mpProgress->updateProgress(mMessage, 100 * row / numBands, NORMAL);
-      }
-   }
-   mMessage = caption + " matrix successfully read from disk";
-   if (mpProgress != NULL)
-   {
-      mpProgress->updateProgress(mMessage, 100, NORMAL);
-   }
-
-   return true;
 }
 
 bool PCA::computeCovarianceMatrix(QString aoiName, int rowSkip, int colSkip)
