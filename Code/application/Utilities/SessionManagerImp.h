@@ -117,7 +117,7 @@ private:
    SessionItem *createLayer(const std::string &type, const std::string &id, const std::string &name);
    SessionItem *createWindow(const std::string &type, const std::string &id, const std::string &name);
    SessionItem *createView(const std::string &type, const std::string &id, const std::string &name);
-   SessionItem *createSessionInfo(const std::string &type, const std::string &id, const std::string &name);
+
    // These methods are used to destroy SessionItems that fail to deserialize
    typedef void (SessionManagerImp::*DestroyerProc)(SessionItem *pItem);
    void destroyPlotWidget(SessionItem *pItem);
@@ -132,7 +132,6 @@ private:
    void destroyLayer(SessionItem *pItem);
    void destroyWindow(SessionItem *pItem);
    void destroyView(SessionItem *pItem);
-   void destroySessionInfo(SessionItem *pItem);
 
    void createSessionItems(std::vector<IndexFileItem> &items, Progress *pProgress);
    void deleteObsoleteFiles(const std::string &dir, const std::vector<IndexFileItem> &itemsToKeep) const;

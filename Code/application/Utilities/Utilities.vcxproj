@@ -167,7 +167,6 @@
     <ClCompile Include="ObjectFactoryImp.cpp" />
     <ClCompile Include="ProgressImp.cpp" />
     <ClCompile Include="SerializableImp.cpp" />
-    <ClCompile Include="SessionInfoItem.cpp" />
     <ClCompile Include="SessionItemDeserializerImp.cpp" />
     <ClCompile Include="SessionItemImp.cpp" />
     <ClCompile Include="SessionItemSerializerImp.cpp" />
@@ -204,7 +203,6 @@
     <ClInclude Include="ProgressAdapter.h" />
     <ClInclude Include="ProgressImp.h" />
     <ClInclude Include="SerializableImp.h" />
-    <ClInclude Include="SessionInfoItem.h" />
     <ClInclude Include="SessionItemDeserializerImp.h" />
     <ClInclude Include="SessionItemImp.h" />
     <ClInclude Include="SessionItemSerializerImp.h" />

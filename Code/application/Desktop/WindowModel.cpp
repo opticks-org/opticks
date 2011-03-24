@@ -246,13 +246,18 @@ void WindowModel::WindowSourceModel::refreshModel(Subject &subject, const string
 
    // Initialize the model
    vector<Window*> windows;
-   Service<DesktopServices>()->getWindows(windows);
+   pDesktop->getWindows(windows);
    for (vector<DataElement*>::size_type i = 0; i < windows.size(); ++i)
    {
       Window* pWindow = windows[i];
       if (pWindow != NULL)
       {
          addWindowItem(pWindow);
+         WorkspaceWindow* pWorkWin = dynamic_cast<WorkspaceWindow*>(pWindow);
+         if (pWorkWin != NULL && pDesktop->getCurrentWorkspaceWindow() == pWorkWin)
+         {
+            activateItem(pWindow);
+         }
       }
    }
 }
@@ -866,6 +871,10 @@ WindowModel::WindowSourceModel::SessionItemWrapper* WindowModel::WindowSourceMod
             if (pPlotSet != NULL)
             {
                addPlotSetItem(pWindowWrapper, pPlotSet);
+               if (pPlotWindow->getCurrentPlotSet() == pPlotSet)
+               {
+                  activateItem(pPlotSet);
+               }
             }
          }
 
@@ -1378,6 +1387,10 @@ WindowModel::WindowSourceModel::addPlotSetItem(SessionItemWrapper* pPlotWindowWr
          if (pPlotWidget != NULL)
          {
             pPlotSetWrapper->addChild(pPlotWidget);
+            if (pPlotSet->getCurrentPlot() == pPlotWidget)
+            {
+               activateItem(pPlotWidget);
+            }
          }
       }
 

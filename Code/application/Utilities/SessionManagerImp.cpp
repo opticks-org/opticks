@@ -52,7 +52,6 @@
 #include "RasterLayerAdapter.h"
 #include "RasterDataDescriptor.h"
 #include "ScriptingWindow.h"
-#include "SessionInfoItem.h"
 #include "SessionItem.h"
 #include "SessionItemDeserializerImp.h"
 #include "SessionItemImp.h"
@@ -466,13 +465,6 @@ SessionItem *SessionManagerImp::createView(const string &type, const string &id,
    return pView;
 }
 
-SessionItem *SessionManagerImp::createSessionInfo(const string &type, const string &id, const std::string &name)
-{
-   VERIFYRV(type == "SessionInfo", NULL);
-   SessionInfoItem* pInfo = new SessionInfoItem(id, name);
-   return pInfo;
-}
-
 void SessionManagerImp::destroyPlotWidget(SessionItem *pItem)
 {
 #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Needs to be implemented (tjohnson)")
@@ -558,12 +550,6 @@ void SessionManagerImp::destroyView(SessionItem *pItem)
 #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Needs to be implemented (tjohnson)")
 }
 
-void SessionManagerImp::destroySessionInfo(SessionItem *pItem)
-{
-   SessionInfoItem* pInfo = dynamic_cast<SessionInfoItem*>(pItem);
-   delete pInfo;
-}
-
 namespace
 {
 string getBaseType(const string &type)
@@ -595,7 +581,6 @@ void SessionManagerImp::createSessionItems(vector<IndexFileItem> &items, Progres
    creators["ApplicationWindow"] = &SessionManagerImp::createAppWindow;
    creators["Animation"] = &SessionManagerImp::createAnimation;
    creators["AnimationController"] = &SessionManagerImp::createAnimationController;
-   creators["SessionInfo"] = &SessionManagerImp::createSessionInfo;
    vector<IndexFileItem>::iterator pItem;
    int count = items.size();
    int i = 0;
@@ -673,7 +658,6 @@ void SessionManagerImp::destroyFailedSessionItem(const string &type, SessionItem
    destroyers["ApplicationWindow"] = &SessionManagerImp::destroyAppWindow;
    destroyers["Animation"] = &SessionManagerImp::destroyAnimation;
    destroyers["AnimationController"] = &SessionManagerImp::destroyAnimationController;
-   destroyers["SessionInfo"] = &SessionManagerImp::destroySessionInfo;
    string baseType = getBaseType(type);
    map<string, DestroyerProc>::iterator pNode = destroyers.find(baseType);
    VERIFYNRV(pNode != destroyers.end());
@@ -1233,10 +1217,6 @@ void SessionManagerImp::restoreSessionItems(vector<IndexFileItem> &items, Progre
          }
       }
    }
-   // remove session info item
-   IndexFileItem infoItem = items.back();
-   SessionItem* pSessionItem = infoItem.mpItem;   
-   destroyFailedSessionItem(infoItem.mType, pSessionItem);
 }
 
 bool SessionManagerImp::restoreSessionItem(IndexFileItem &item)
@@ -1270,10 +1250,6 @@ SessionManagerImp::serialize(const string& filename, Progress* pProgress)
 
    SerializationStatus status = SUCCESS;
    vector<IndexFileItem> items = getAllIndexFileItems();
-
-   //add session info that needs to be restored as last item
-   SessionInfoItem* pInfo = new SessionInfoItem("{98043E17-338D-4273-8C7F-C6A5E9FF58A5}", "SessionInfo");
-   items.push_back(makeIfiI<SessionItem*>("SessionInfo")(pInfo));
 
    vector<pair<SessionItem*, string> > failedItems;
    vector<IndexFileItem> successItems;

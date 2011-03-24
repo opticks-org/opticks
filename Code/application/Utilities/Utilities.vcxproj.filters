@@ -65,9 +65,6 @@
     <ClCompile Include="SerializableImp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SessionInfoItem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="SessionItemDeserializerImp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -173,9 +170,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SerializableImp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SessionInfoItem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SessionItemDeserializerImp.h">

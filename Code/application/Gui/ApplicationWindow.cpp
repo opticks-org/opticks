@@ -5807,13 +5807,6 @@ void ApplicationWindow::sessionAboutToRestore(Subject& subject, const string& si
 
 void ApplicationWindow::sessionLoaded(Subject& subject, const string& signal, const boost::any& value)
 {
-   // make sure that the zoom percentage toolbar item, etc. are properly connected to the window and view.
-   WorkspaceWindow *pCurrentWindow = getCurrentWorkspaceWindow();
-   if(mpWorkspace != NULL)
-   {
-      mpWorkspace->setActiveSubWindow(NULL);
-   }
-   setCurrentWorkspaceWindow(pCurrentWindow);
    clearUndoStacks();
    resize(mPreviousSize);
 }
@@ -6032,6 +6025,13 @@ bool ApplicationWindow::serialize(SessionItemSerializer &serializer) const
 {
    XMLWriter writer("ApplicationWindow");
 
+   // save active window id
+   WorkspaceWindow* pWork = getCurrentWorkspaceWindow();
+   if (pWork != NULL)
+   {
+      writer.addAttr("currentWorkspaceWindowId", pWork->getId());
+   }
+
    writer.pushAddPoint(writer.addElement("Geometry"));
    writer.addText(saveState().toBase64().data());
    writer.popAddPoint();
@@ -6055,6 +6055,19 @@ bool ApplicationWindow::deserialize(SessionItemDeserializer &deserializer)
          restoreState(QByteArray::fromBase64(A(pChld->getNodeValue())));
       }
    }
+
+   // set active window
+   WorkspaceWindow* pWork(NULL);
+   if (pElement->hasAttribute(X("currentWorkspaceWindowId")))
+   {
+      string winId(A(pElement->getAttribute(X("currentWorkspaceWindowId"))));
+      pWork = dynamic_cast<WorkspaceWindow*>(SessionManagerImp::instance()->getSessionItem(winId));
+   }
+   if(mpWorkspace != NULL)
+   {
+      mpWorkspace->setActiveSubWindow(NULL);
+   }
+   setCurrentWorkspaceWindow(pWork);
 
    return true;
 }
