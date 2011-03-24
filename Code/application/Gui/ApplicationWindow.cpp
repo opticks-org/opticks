@@ -1242,7 +1242,8 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    VERIFYNR(connect(mpDisplayToolBar, SIGNAL(zoomChanged(double)), this, SLOT(zoomTo(double))));
    VERIFYNR(connect(m_pScripting_Wnd_Action, SIGNAL(triggered(bool)), m_pScripting, SLOT(setVisible(bool))));
    VERIFYNR(connect(m_pScripting, SIGNAL(visibilityChanged(bool)), m_pScripting_Wnd_Action, SLOT(setChecked(bool))));
-   VERIFYNR(connect(mpWorkspace, SIGNAL(subWindowActivated(QMdiSubWindow*)), this, SLOT(updateActiveWindow(QMdiSubWindow*))));
+   VERIFYNR(connect(mpWorkspace, SIGNAL(subWindowActivated(QMdiSubWindow*)),
+      this, SLOT(updateActiveSubWindow(QMdiSubWindow*))));
    VERIFYNR(connect(mpToolbarsMenu, SIGNAL(aboutToShow()), this, SLOT(showToolbarsMenu())));
    VERIFYNR(connect(mpClipboardSizedAction, SIGNAL(triggered()), SLOT(forwardSnapshot())));
    VERIFYNR(connect(mpClipboardAction, SIGNAL(triggered()), SLOT(forwardSnapshot())));
@@ -4309,6 +4310,12 @@ void ApplicationWindow::setPaperSize()
             "The paper size can only be set on a product window!");
       }
    }
+}
+
+void ApplicationWindow::updateActiveSubWindow(QMdiSubWindow* pWindow)
+{
+   // The active window will be NULL when a widget outside mpWorkspace has focus -- use the current window instead
+   updateActiveWindow(pWindow == NULL ? mpWorkspace->currentSubWindow() : pWindow);
 }
 
 void ApplicationWindow::updateActiveWindow(QMdiSubWindow* pWindow)

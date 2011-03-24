@@ -286,7 +286,7 @@ protected slots:
    void executeCommand(QAction* pAction);
 
    // Application Window management
-   void updateActiveWindow(QMdiSubWindow* pWindow);
+   void updateActiveSubWindow(QMdiSubWindow* pWindow);
    void initializeToolBars(Layer* pLayer);
 
    // SessionItem context menu actions
@@ -473,6 +473,7 @@ private:
    bool mDropNewSession;
 
 private:
+   void updateActiveWindow(QMdiSubWindow* pWindow);
    bool isDefaultWindow(Window* pWindow) const;
    void checkColorDepth(QWidget* pSplash);
    void checkGpuImageSupport();
