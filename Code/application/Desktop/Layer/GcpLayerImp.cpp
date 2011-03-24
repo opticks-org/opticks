@@ -11,6 +11,7 @@
 #include <QtGui/QFont>
 #include <QtGui/QFontMetrics>
 
+#include "AppVerify.h"
 #include "glCommon.h"
 #include "GcpLayerImp.h"
 #include "DrawUtil.h"
@@ -44,14 +45,13 @@ GcpLayerImp::GcpLayerImp(const string& id, const string& layerName, DataElement*
    addPropertiesPage(PropertiesGcpLayer::getName());
 
    // Connections
-   connect(this, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(modified()));
-   connect(this, SIGNAL(symbolChanged(const GcpSymbol&)), this, SIGNAL(modified()));
-   connect(this, SIGNAL(sizeChanged(int)), this, SIGNAL(modified()));
+   VERIFYNR(connect(this, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(modified())));
+   VERIFYNR(connect(this, SIGNAL(symbolChanged(const GcpSymbol&)), this, SIGNAL(modified())));
+   VERIFYNR(connect(this, SIGNAL(sizeChanged(int)), this, SIGNAL(modified())));
 }
 
 GcpLayerImp::~GcpLayerImp()
-{
-}
+{}
 
 const string& GcpLayerImp::getObjectType() const
 {
@@ -140,7 +140,7 @@ void GcpLayerImp::draw()
 
       // Translation
       GcpPoint point = *iter;
-      glTranslatef(point.mPixel.mX + 0.5, point.mPixel.mY + 0.5, 0);
+      glTranslatef(point.mPixel.mX, point.mPixel.mY, 0);
 
       // Calculate the circle radius
       LocationType center;
@@ -199,7 +199,7 @@ void GcpLayerImp::draw()
             QRect textRect = fontMetrics.tightBoundingRect(strText);
 
             LocationType textCoord;
-            translateDataToScreen(point.mPixel.mX + 0.5, point.mPixel.mY + 0.5, textCoord.mX, textCoord.mY);
+            translateDataToScreen(point.mPixel.mX, point.mPixel.mY, textCoord.mX, textCoord.mY);
 
             int screenX = static_cast<int>(textCoord.mX + mSymbolSize);
             int screenY = pView->height() - static_cast<int>(textCoord.mY - mSymbolSize - textRect.height());
@@ -272,7 +272,7 @@ bool GcpLayerImp::processMousePress(const QPoint& screenCoord, Qt::MouseButton b
       if (pGcpList != NULL)
       {
          GcpPoint gcpPoint;
-         gcpPoint.mPixel = pixelCoord - 0.5;
+         gcpPoint.mPixel = pixelCoord;
 
          RasterElement* pRaster = dynamic_cast<RasterElement*>(pGcpList->getParent());
          if ((pRaster != NULL) && (pRaster->isGeoreferenced() == true))
