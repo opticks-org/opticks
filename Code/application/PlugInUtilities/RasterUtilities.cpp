@@ -26,6 +26,7 @@
 #include "SpecialMetadata.h"
 #include "switchOnEncoding.h"
 #include "UInt64.h"
+#include "Wavelengths.h"
 
 #include <algorithm>
 #include <boost/bind.hpp>
@@ -910,59 +911,52 @@ DimensionDescriptor RasterUtilities::findBandWavelengthMatch(double lowTarget, d
       return DimensionDescriptor();
    }
 
-   const RasterFileDescriptor* pFileDescriptor =
-      dynamic_cast<const RasterFileDescriptor*>(pDescriptor->getFileDescriptor());
    const DynamicObject* pMetadata = pDescriptor->getMetadata();
    if (pMetadata == NULL)
    {
       return DimensionDescriptor();
    }
 
-   const std::string centerWavelengthsPath[] = {SPECIAL_METADATA_NAME, BAND_METADATA_NAME,
-      CENTER_WAVELENGTHS_METADATA_NAME, END_METADATA_NAME};
-   const std::vector<double>* pCenterWavelengths =
-      dv_cast<std::vector<double> >(&pMetadata->getAttributeByPath(centerWavelengthsPath));
+   FactoryResource<Wavelengths> pWavelengths;
+   if (pWavelengths->initializeFromDynamicObject(pMetadata, false) == false)
+   {
+      return DimensionDescriptor();
+   }
 
-   const std::string startWavelengthsPath[] = {SPECIAL_METADATA_NAME, BAND_METADATA_NAME,
-      START_WAVELENGTHS_METADATA_NAME, END_METADATA_NAME};
-   const std::vector<double>* pStartWavelengths = 
-      dv_cast<std::vector<double> >(&pMetadata->getAttributeByPath(startWavelengthsPath));
+   if (pWavelengths->isEmpty() == true)
+   {
+      return DimensionDescriptor();
+   }
 
-   const std::string endWavelengthsPath[] = {SPECIAL_METADATA_NAME, BAND_METADATA_NAME,
-      END_WAVELENGTHS_METADATA_NAME, END_METADATA_NAME};
-   const std::vector<double>* pEndWavelengths = 
-      dv_cast<std::vector<double> >(&pMetadata->getAttributeByPath(endWavelengthsPath));
+   const std::vector<double>& startWavelengths = pWavelengths->getStartValues();
+   const std::vector<double>& centerWavelengths = pWavelengths->getCenterValues();
+   const std::vector<double>& endWavelengths = pWavelengths->getEndValues();
 
-   bool useOriginalNumbers;
+   bool useOriginalNumbers = false;
    std::vector<unsigned int> bands;
-   if ((pStartWavelengths != NULL && pStartWavelengths->empty() == false) &&
-      (pEndWavelengths != NULL && pEndWavelengths->empty() == false))
+   if ((startWavelengths.empty() == false) && (endWavelengths.empty() == false))
    {
       // Start and end wavelengths available. Use those as the targets.
-      bands = findBandWavelengthMatches(lowTarget, highTarget,
-         *pStartWavelengths, *pEndWavelengths, allowPartialMatch);
-      useOriginalNumbers = pFileDescriptor != NULL && pStartWavelengths->size() == pFileDescriptor->getBandCount();
+      bands = findBandWavelengthMatches(lowTarget, highTarget, startWavelengths, endWavelengths, allowPartialMatch);
+      useOriginalNumbers = startWavelengths.size() != pDescriptor->getBandCount();
    }
-   else if (pCenterWavelengths != NULL && pCenterWavelengths->empty() == false)
+   else if (centerWavelengths.empty() == false)
    {
       // Centers are available so we use those as the targets.
-      bands = findBandWavelengthMatches(lowTarget, highTarget,
-         *pCenterWavelengths, *pCenterWavelengths, allowPartialMatch);
-      useOriginalNumbers = pFileDescriptor != NULL && pCenterWavelengths->size() == pFileDescriptor->getBandCount();
+      bands = findBandWavelengthMatches(lowTarget, highTarget, centerWavelengths, centerWavelengths, allowPartialMatch);
+      useOriginalNumbers = centerWavelengths.size() != pDescriptor->getBandCount();
    }
-   else if (pStartWavelengths != NULL && pStartWavelengths->empty() == false)
+   else if (startWavelengths.empty() == false)
    {
       // Only start wavelengths are available, so use those as the targets.
-      bands = findBandWavelengthMatches(lowTarget, highTarget,
-         *pStartWavelengths, *pStartWavelengths, allowPartialMatch);
-      useOriginalNumbers = pFileDescriptor != NULL && pStartWavelengths->size() == pFileDescriptor->getBandCount();
+      bands = findBandWavelengthMatches(lowTarget, highTarget, startWavelengths, startWavelengths, allowPartialMatch);
+      useOriginalNumbers = startWavelengths.size() != pDescriptor->getBandCount();
    }
-   else if (pEndWavelengths != NULL && pEndWavelengths->empty() == false)
+   else if (endWavelengths.empty() == false)
    {
       // Only end wavelengths are available, so use those as the targets.
-      bands = findBandWavelengthMatches(lowTarget, highTarget,
-         *pEndWavelengths, *pEndWavelengths, allowPartialMatch);
-      useOriginalNumbers = pFileDescriptor != NULL && pEndWavelengths->size() == pFileDescriptor->getBandCount();
+      bands = findBandWavelengthMatches(lowTarget, highTarget, endWavelengths, endWavelengths, allowPartialMatch);
+      useOriginalNumbers = endWavelengths.size() != pDescriptor->getBandCount();
    }
 
    if (useOriginalNumbers)
@@ -971,7 +965,7 @@ DimensionDescriptor RasterUtilities::findBandWavelengthMatch(double lowTarget, d
          std::remove_if(bands.begin(), bands.end(), OriginalBandChecker(pDescriptor));
       if (iter != bands.end())
       {
-         bands.erase(iter);
+         bands.erase(iter, bands.end());
       }
    }
 
