@@ -113,7 +113,12 @@ int main(int argc, char** argv)
    cout << endl;
    cout << APP_NAME_LONG << endl;
    cout << APP_NAME << " Batch Processor, Version " << version << ", Release Date " << dateString << endl;
-   cout << APP_COPYRIGHT << endl;
+
+   string copyright = APP_COPYRIGHT;
+   int pos = copyright.find('©');
+   copyright.replace(pos, 1, string("(C)"));
+   cout << copyright << endl;
+
    cout << releaseType;
 
    if (bProductionRelease == false)
