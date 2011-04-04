@@ -665,14 +665,19 @@ bool EnviExporter::exportHeaderFile() const
             gcps.push_back(llPoint);
             gcps.push_back(lrPoint);
 
-            list<GcpPoint>::const_iterator it;
             fprintf(pStream, "geo points = {");
-            for (it = gcps.begin(); it != gcps.end(); ++it)
+            for (list<GcpPoint>::const_iterator it = gcps.begin(); it != gcps.end(); )
             {
                GcpPoint gcp = *it;
                // add 1.5 to adjust from Opticks to ENVI pixel coordinate systems
                i = fprintf(pStream, "\n %.4f, %.4f, %.8f, %.8f", gcp.mPixel.mX + 1.5, 
                   gcp.mPixel.mY + 1.5, gcp.mCoordinate.mX, gcp.mCoordinate.mY);
+
+               ++it;
+               if (it != gcps.end())
+               {
+                  i = fprintf(pStream, ",");
+               }
             }
 
             i = fprintf(pStream, "}\n");
