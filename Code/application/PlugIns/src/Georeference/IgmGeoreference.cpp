@@ -273,8 +273,12 @@ LocationType IgmGeoreference::pixelToGeoQuick(LocationType pixel, bool* pAccurat
 void IgmGeoreference::elementDeleted(Subject& subject, const std::string& signal, const boost::any& data)
 {
    Service<DesktopServices> pDesktop;
-   SpatialDataWindow* pWindow = static_cast<SpatialDataWindow*>(pDesktop->getCurrentWorkspaceWindow());
+   SpatialDataWindow* pWindow = dynamic_cast<SpatialDataWindow*>(pDesktop->getCurrentWorkspaceWindow());
    SpatialDataView* pView = (pWindow == NULL) ? NULL : pWindow->getSpatialDataView();
+   if (pView == NULL)
+   {
+      return;
+   }
 
    std::vector<Layer*> latLonLayers;
    pView->getLayerList()->getLayers(LAT_LONG, latLonLayers);
