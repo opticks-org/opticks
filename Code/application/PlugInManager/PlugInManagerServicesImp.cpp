@@ -33,6 +33,7 @@
 #include <algorithm>
 
 #include <QtCore/QDateTime>
+#include <QtCore/QFile>
 #include <QtCore/QFileInfo>
 #include <QtCore/QString>
 
@@ -961,7 +962,7 @@ FactoryResource<DynamicObject> PlugInManagerServicesImp::loadPlugInListCache()
 {
    FactoryResource<DynamicObject> pCache;
    string plugInCacheFile = getPlugInCacheFilePath();
-   if (plugInCacheFile.empty())
+   if (!QFile::exists(QString::fromStdString(plugInCacheFile)))
    {
       return pCache;
    }
