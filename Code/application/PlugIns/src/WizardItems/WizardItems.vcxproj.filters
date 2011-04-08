@@ -95,6 +95,9 @@
     <ClCompile Include="WizardItems.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ThresholdData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CreateAnimation.h">
@@ -176,6 +179,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WizardItems.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ThresholdData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

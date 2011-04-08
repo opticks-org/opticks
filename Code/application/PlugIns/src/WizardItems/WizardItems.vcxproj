@@ -204,6 +204,7 @@
     <ClCompile Include="SetDisplayMode.cpp" />
     <ClCompile Include="SetThresholdOptions.cpp" />
     <ClCompile Include="TemplateUtilities.cpp" />
+    <ClCompile Include="ThresholdData.cpp" />
     <ClCompile Include="UtilityItems.cpp" />
     <ClCompile Include="WizardItems.cpp" />
   </ItemGroup>
@@ -233,6 +234,7 @@
     <ClInclude Include="SetDisplayMode.h" />
     <ClInclude Include="SetThresholdOptions.h" />
     <ClInclude Include="TemplateUtilities.h" />
+    <ClInclude Include="ThresholdData.h" />
     <ClInclude Include="UtilityItems.h" />
     <ClInclude Include="WizardItems.h" />
   </ItemGroup>
