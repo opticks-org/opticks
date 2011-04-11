@@ -14,6 +14,8 @@
 
 #include <string>
 
+class Progress;
+class Step;
 class Wavelengths;
 
 class WavelengthExporter : public ExecutableShell
@@ -27,10 +29,15 @@ public:
    virtual bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
 
 protected:
+   virtual bool extractInputArgs(PlugInArgList* pArgList);
    virtual bool saveWavelengths(const Wavelengths* pWavelengths) const = 0;
+   Progress* getProgress() const;
    const std::string& getFilename() const;
 
 private:
+   Step* mpStep;
+   Progress* mpProgress;
+   Wavelengths* mpWavelengths;
    std::string mFilename;
 };
 

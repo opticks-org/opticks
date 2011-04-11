@@ -20,8 +20,14 @@ public:
    WavelengthTextExporter();
    virtual ~WavelengthTextExporter();
 
+   virtual bool getInputSpecification(PlugInArgList*& pArgList);
+
 protected:
+   virtual bool extractInputArgs(PlugInArgList* pArgList);
    virtual bool saveWavelengths(const Wavelengths* pWavelengths) const;
+
+private:
+   bool mBandNumbers;
 };
 
 #endif

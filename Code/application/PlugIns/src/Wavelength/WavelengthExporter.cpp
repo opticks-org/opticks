@@ -19,7 +19,10 @@
 #include <sstream>
 using namespace std;
 
-WavelengthExporter::WavelengthExporter()
+WavelengthExporter::WavelengthExporter() :
+   mpStep(NULL),
+   mpProgress(NULL),
+   mpWavelengths(NULL)
 {
    setType(Wavelengths::WavelengthType());
    setAbortSupported(false);
@@ -56,33 +59,66 @@ bool WavelengthExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutA
    }
 
    StepResource pStep(string("Execute ") + getName(), "app", "B6112093-AE6A-4319-85D8-B7A4C1E3DC5E");
+   mpStep = pStep.get();
 
    // Extract the input args
-   Progress* pProgress = pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
-
-   Wavelengths* pWavelengths = pInArgList->getPlugInArgValue<Wavelengths>(Wavelengths::WavelengthsArg());
-   if (pWavelengths == NULL)
+   if (extractInputArgs(pInArgList) == false)
    {
-      string message = "The " + Wavelengths::WavelengthsArg() + " input value is invalid.";
-      if (pProgress != NULL)
+      return false;
+   }
+
+   // Save the wavelength values
+   bool bSuccess = saveWavelengths(mpWavelengths);
+   if (bSuccess == false)
+   {
+      string message = "Could not save the wavelengths to the file.";
+      if (mpProgress != NULL)
       {
-         pProgress->updateProgress(message, 0, ERRORS);
+         mpProgress->updateProgress(message, 0, ERRORS);
       }
 
       pStep->finalize(Message::Failure, message);
       return false;
    }
 
-   Filename* pFilename = pInArgList->getPlugInArgValue<Filename>(Wavelengths::WavelengthFileArg());
+   if (mpProgress != NULL)
+   {
+      mpProgress->updateProgress("Wavelength export completed successfully.", 100, NORMAL);
+   }
+
+   pStep->finalize(Message::Success);
+   return true;
+}
+
+bool WavelengthExporter::extractInputArgs(PlugInArgList* pArgList)
+{
+   VERIFY(pArgList != NULL);
+
+   mpProgress = pArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
+
+   mpWavelengths = pArgList->getPlugInArgValue<Wavelengths>(Wavelengths::WavelengthsArg());
+   if (mpWavelengths == NULL)
+   {
+      string message = "The " + Wavelengths::WavelengthsArg() + " input value is invalid.";
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(message, 0, ERRORS);
+      }
+
+      mpStep->finalize(Message::Failure, message);
+      return false;
+   }
+
+   Filename* pFilename = pArgList->getPlugInArgValue<Filename>(Wavelengths::WavelengthFileArg());
    if (pFilename == NULL)
    {
       string message = "The " + Wavelengths::WavelengthFileArg() + " input value is not present.";
-      if (pProgress != NULL)
+      if (mpProgress != NULL)
       {
-         pProgress->updateProgress(message, 0, ERRORS);
+         mpProgress->updateProgress(message, 0, ERRORS);
       }
 
-      pStep->finalize(Message::Failure, message);
+      mpStep->finalize(Message::Failure, message);
       return false;
    }
 
@@ -90,36 +126,21 @@ bool WavelengthExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutA
    if (mFilename.empty() == true)
    {
       string message = "The " + Wavelengths::WavelengthFileArg() + " input value is invalid.";
-      if (pProgress != NULL)
+      if (mpProgress != NULL)
       {
-         pProgress->updateProgress(message, 0, ERRORS);
+         mpProgress->updateProgress(message, 0, ERRORS);
       }
 
-      pStep->finalize(Message::Failure, message);
+      mpStep->finalize(Message::Failure, message);
       return false;
    }
 
-   // Save the wavelength values
-   bool bSuccess = saveWavelengths(pWavelengths);
-   if (bSuccess == false)
-   {
-      string message = "Could not save the wavelengths to the file.";
-      if (pProgress != NULL)
-      {
-         pProgress->updateProgress(message, 0, ERRORS);
-      }
-
-      pStep->finalize(Message::Failure, message);
-      return false;
-   }
-
-   if (pProgress != NULL)
-   {
-      pProgress->updateProgress("Wavelength export completed successfully.", 100, NORMAL);
-   }
-
-   pStep->finalize(Message::Success);
    return true;
+}
+
+Progress* WavelengthExporter::getProgress() const
+{
+   return mpProgress;
 }
 
 const string& WavelengthExporter::getFilename() const
