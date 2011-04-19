@@ -266,6 +266,10 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
                                     gcp.mCoordinate.mX = -gcp.mCoordinate.mX;
                                  }
 
+                                 // ENVI uses a 1-based pixel coordinate system, with each coordinate referring
+                                 // to the top-left corner of the pixel, e.g. (1,1) is the top-left
+                                 // corner of the pixel in the top-left of the raster cube
+                                 // The ENVI pixel coordinate format is described on p. 1126 of the ENVI 4.2 User's Guide
                                  if (pChild->mTag == "ll")
                                  {
                                     gcp.mPixel.mX = 0.0;
@@ -288,8 +292,8 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
                                  }
                                  else if (pChild->mTag == "center")
                                  {
-                                    gcp.mPixel.mX = (columns.size() / 2.0) - 0.5;
-                                    gcp.mPixel.mY = (rows.size() / 2.0) - 0.5;
+                                    gcp.mPixel.mX = floor((columns.size() - 1.0) / 2.0);
+                                    gcp.mPixel.mY = floor((rows.size() - 1.0) / 2.0);
                                  }
 
                                  gcps.push_back(gcp);
@@ -327,8 +331,8 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
                            GcpPoint gcp;
                            while (iter != geoValues.end())
                            {
-                              gcp.mPixel.mX = *iter++ - 1.5;  // adjust ref point for ENVI's use of
-                              gcp.mPixel.mY = *iter++ - 1.5;  // upper left corner and one-based first pixel
+                              gcp.mPixel.mX = *iter++ - 1.0;  // adjust ref point for ENVI's use of
+                              gcp.mPixel.mY = *iter++ - 1.0;  // upper left corner and one-based first pixel
                               gcp.mCoordinate.mX = *iter++;   // GcpPoint has lat as mX and Lon as mY 
                               gcp.mCoordinate.mY = *iter++;   // geo point field has lat then lon value
                               gcps.push_back(gcp);

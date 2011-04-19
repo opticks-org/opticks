@@ -449,11 +449,13 @@ bool Nitf::ImageSubheader::importGeoInformation_2_0(const ossimPropertyInterface
    const string& iCords = pDynObj->getAttribute(ICORDS).toXmlString();
    const string& iGeolo = pDynObj->getAttribute(IGEOLO).toXmlString();
 
+   // These corner coordinates follows the format for the IGEOLO tag specified in the
+   // IIF Encapsulation Specification Annex D, p. 31.
    const LocationType pixelCorners[] = {
-      LocationType(0, 0),
-      LocationType(pFd->getColumnCount()-1, 0),
-      LocationType(pFd->getColumnCount()-1, pFd->getRowCount()-1),
-      LocationType(0, pFd->getRowCount()-1)
+      LocationType(0.0, 0.0),
+      LocationType(pFd->getColumnCount() - 1.0, 0.0),
+      LocationType(pFd->getColumnCount() - 1.0, pFd->getRowCount() - 1.0),
+      LocationType(0.0, pFd->getRowCount() - 1.0)
    };
    const unsigned int numPixelCorners = sizeof(pixelCorners) / sizeof(pixelCorners[0]);
 
@@ -517,11 +519,13 @@ bool Nitf::ImageSubheader::importGeoInformation(const ossimPropertyInterface *pP
    const string& iCords = pDynObj->getAttribute(ICORDS).toXmlString();
    const string& iGeolo = pDynObj->getAttribute(IGEOLO).toXmlString();
 
+   // These corner coordinates follows the format for the IGEOLO tag specified in the
+   // IIF Encapsulation Specification Annex D, p. 31.
    const LocationType pixelCorners[] = {
-      LocationType(0, 0),
-      LocationType(pFd->getColumnCount()-1, 0),
-      LocationType(pFd->getColumnCount()-1, pFd->getRowCount()-1),
-      LocationType(0, pFd->getRowCount()-1)
+      LocationType(0.0, 0.0),
+      LocationType(pFd->getColumnCount() - 1.0, 0.0),
+      LocationType(pFd->getColumnCount() - 1.0, pFd->getRowCount() - 1.0),
+      LocationType(0.0, pFd->getRowCount() - 1.0)
    };
    const unsigned int numPixelCorners = sizeof(pixelCorners) / sizeof(pixelCorners[0]);
 

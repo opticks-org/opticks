@@ -669,9 +669,12 @@ bool EnviExporter::exportHeaderFile() const
             for (list<GcpPoint>::const_iterator it = gcps.begin(); it != gcps.end(); )
             {
                GcpPoint gcp = *it;
-               // add 1.5 to adjust from Opticks to ENVI pixel coordinate systems
-               i = fprintf(pStream, "\n %.4f, %.4f, %.8f, %.8f", gcp.mPixel.mX + 1.5, 
-                  gcp.mPixel.mY + 1.5, gcp.mCoordinate.mX, gcp.mCoordinate.mY);
+               // ENVI uses a 1-based pixel coordinate system, with each coordinate referring
+               // to the top-left corner of the pixel, e.g. (1,1) is the top-left
+               // corner of the pixel in the top-left of the raster cube
+               // The ENVI pixel coordinate format is described on p. 1126 of the ENVI 4.2 User's Guide
+               i = fprintf(pStream, "\n %.4f, %.4f, %.8f, %.8f", gcp.mPixel.mX + 1.0, 
+                  gcp.mPixel.mY + 1.0, gcp.mCoordinate.mX, gcp.mCoordinate.mY);
 
                ++it;
                if (it != gcps.end())

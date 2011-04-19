@@ -119,37 +119,42 @@ vector<ImportDescriptor*> DtedImporter::getImportDescriptors(const string& filen
                // GCPs
                list<GcpPoint> gcps;
 
+               // DTED specification states that row/column coordinates refer to the center
+               // of a cell.  This is found in section 3.9.3 of MIL-PRF-89020B.
+               // Additional discussion on discrepancies between GDAL's handling of
+               // DTED and the spec can be found here: 
+               // http://osgeo-org.1803224.n2.nabble.com/Does-gdalinfo-Bounding-Box-Information-really-match-DTED-SRTM-td2028736.html
                GcpPoint upperLeft;
-               upperLeft.mPixel.mX = 0.0;
-               upperLeft.mPixel.mY = 0.0;
+               upperLeft.mPixel.mX = 0.5;
+               upperLeft.mPixel.mY = 0.5;
                upperLeft.mCoordinate.mX = mDsi_h.getNWLatCorner();
                upperLeft.mCoordinate.mY = mDsi_h.getNWLongCorner();
                gcps.push_back(upperLeft);
 
                GcpPoint upperRight;
-               upperRight.mPixel.mX = mUhl_h.getLongCount() - 1.0;
-               upperRight.mPixel.mY = 0.0;
+               upperRight.mPixel.mX = mUhl_h.getLongCount() - 0.5;
+               upperRight.mPixel.mY = 0.5;
                upperRight.mCoordinate.mX = mDsi_h.getNELatCorner();
                upperRight.mCoordinate.mY = mDsi_h.getNELongCorner();
                gcps.push_back(upperRight);
 
                GcpPoint lowerLeft;
-               lowerLeft.mPixel.mX = 0.0;
-               lowerLeft.mPixel.mY = mUhl_h.getLatCount() - 1.0;
+               lowerLeft.mPixel.mX = 0.5;
+               lowerLeft.mPixel.mY = mUhl_h.getLatCount() - 0.5;
                lowerLeft.mCoordinate.mX = mDsi_h.getSWLatCorner();
                lowerLeft.mCoordinate.mY = mDsi_h.getSWLongCorner();
                gcps.push_back(lowerLeft);
 
                GcpPoint lowerRight;
-               lowerRight.mPixel.mX = mUhl_h.getLongCount() - 1.0;
-               lowerRight.mPixel.mY = mUhl_h.getLatCount() - 1.0;
+               lowerRight.mPixel.mX = mUhl_h.getLongCount() - 0.5;
+               lowerRight.mPixel.mY = mUhl_h.getLatCount() - 0.5;
                lowerRight.mCoordinate.mX = mDsi_h.getSELatCorner();
                lowerRight.mCoordinate.mY = mDsi_h.getSELongCorner();
                gcps.push_back(lowerRight);
 
                GcpPoint center;
-               center.mPixel.mX = mUhl_h.getLongCount() / 2.0 - 0.5;
-               center.mPixel.mY = mUhl_h.getLatCount() / 2.0 - 0.5;
+               center.mPixel.mX = mUhl_h.getLongCount() / 2.0;
+               center.mPixel.mY = mUhl_h.getLatCount() / 2.0;
                center.mCoordinate.mX = (mDsi_h.getNWLatCorner() + mDsi_h.getSWLatCorner()) / 2.0;
                center.mCoordinate.mY = (mDsi_h.getNWLongCorner() + mDsi_h.getNELongCorner()) / 2.0;
                gcps.push_back(center);

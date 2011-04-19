@@ -838,6 +838,11 @@ bool GeoTIFFImporter::populateDataDescriptor(RasterDataDescriptor* pDescriptor)
    {
       list<GcpPoint> gcps;
 
+      // The pixel coordinate system for GeoTIFF is defined as referring to the
+      // top-left corner of the pixel, regardless of whether the format is set
+      // as PixelIsArea or PixelIsPoint.  More on the issue can be read at the
+      // GeoTIFF FAQ: http://remotesensing.org/geotiff/faq.html#PixelIsPoint
+
       // Upper left
       double x = 0;
       double y = 0;
@@ -921,8 +926,9 @@ bool GeoTIFFImporter::populateDataDescriptor(RasterDataDescriptor* pDescriptor)
          }
 
          GcpPoint gcp;
-         gcp.mPixel.mX = (numColumns - 1.0) / 2.0;
-         gcp.mPixel.mY = (numRows - 1.0) / 2.0;
+         // pixels in GeoTIFF refer to top-left corner of the rastered pixel, so floor the center
+         gcp.mPixel.mX = floor((numColumns - 1.0) / 2.0);
+         gcp.mPixel.mY = floor((numRows - 1.0) / 2.0);
          gcp.mCoordinate.mX = y;
          gcp.mCoordinate.mY = x;
          gcps.push_back(gcp);

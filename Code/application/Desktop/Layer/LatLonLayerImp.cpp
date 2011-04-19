@@ -357,8 +357,6 @@ void LatLonLayerImp::draw()
                geoVertex.mY = stepValues[left].mY;
                LocationType geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
                pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
-               pixelVertex.mX += 0.5;
-               pixelVertex.mY += 0.5;
                isInData = DrawUtil::isWithin(pixelVertex, &(*mBoundingBox.begin()), 4);
             }
 
@@ -376,8 +374,6 @@ void LatLonLayerImp::draw()
                   geoVertex.mY = stepValues[right].mY;
                   LocationType geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
                   pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
-                  pixelVertex.mX += 0.5;
-                  pixelVertex.mY += 0.5;
                   isInData = DrawUtil::isWithin(pixelVertex, &(*mBoundingBox.begin()), 4);
                }
 
@@ -388,8 +384,6 @@ void LatLonLayerImp::draw()
                   leftEdge.mY = stepValues[left-1].mY;
                   LocationType geoDraw = convertPointToLatLon(mGeocoordType, leftEdge);
                   pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
-                  pixelVertex.mX += 0.5;
-                  pixelVertex.mY += 0.5;
                   pixelVertex = adjustSegment(pixelVertex, vertices.front(), mBoundingBox);
                   vertices.insert(vertices.begin(), pixelVertex);
                }
@@ -400,8 +394,6 @@ void LatLonLayerImp::draw()
                   geoVertex.mY = stepValues[loc].mY;
                   LocationType geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
                   pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
-                  pixelVertex.mX += 0.5;
-                  pixelVertex.mY += 0.5;
                   vertices.push_back(pixelVertex);
                }
 
@@ -412,8 +404,6 @@ void LatLonLayerImp::draw()
                   rightEdge.mY = stepValues[right + 1].mY;
                   LocationType geoDraw = convertPointToLatLon(mGeocoordType, rightEdge);
                   pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
-                  pixelVertex.mX += 0.5;
-                  pixelVertex.mY += 0.5;
                   pixelVertex = adjustSegment(pixelVertex, vertices.back(), mBoundingBox);
                   vertices.push_back(pixelVertex);
                }
@@ -530,8 +520,6 @@ void LatLonLayerImp::draw()
                geoVertex.mX = stepValues[bottom].mX;
                LocationType geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
                pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
-               pixelVertex.mX += 0.5;
-               pixelVertex.mY += 0.5;
                isInData = DrawUtil::isWithin(pixelVertex, &(*mBoundingBox.begin()), 4);
             }
 
@@ -549,8 +537,6 @@ void LatLonLayerImp::draw()
                   geoVertex.mX = stepValues[top].mX;
                   LocationType geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
                   pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
-                  pixelVertex.mX += 0.5;
-                  pixelVertex.mY += 0.5;
                   isInData = DrawUtil::isWithin(pixelVertex, &(*mBoundingBox.begin()), 4);
                }
 
@@ -561,8 +547,6 @@ void LatLonLayerImp::draw()
                   bottomEdge.mY = geoVertex.mY;
                   LocationType geoDraw = convertPointToLatLon(mGeocoordType, bottomEdge);
                   pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
-                  pixelVertex.mX += 0.5;
-                  pixelVertex.mY += 0.5;
                   pixelVertex = adjustSegment(pixelVertex, vertices.front(), mBoundingBox);
                   vertices.insert(vertices.begin(), pixelVertex);
                }
@@ -573,8 +557,6 @@ void LatLonLayerImp::draw()
                   geoVertex.mX = stepValues[loc].mX;
                   LocationType geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
                   pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
-                  pixelVertex.mX += 0.5;
-                  pixelVertex.mY += 0.5;
                   vertices.push_back(pixelVertex);
                }
 
@@ -585,8 +567,6 @@ void LatLonLayerImp::draw()
                   topEdge.mY = geoVertex.mY;
                   LocationType geoDraw = convertPointToLatLon(mGeocoordType, topEdge);
                   pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
-                  pixelVertex.mX += 0.5;
-                  pixelVertex.mY += 0.5;
                   pixelVertex = adjustSegment(pixelVertex, vertices.back(), mBoundingBox);
                   vertices.push_back(pixelVertex);
                }
@@ -680,15 +660,11 @@ void LatLonLayerImp::draw()
                   geoVertex.mY -= tickSpacing.mY / 20.0;
                   geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
                   pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
-                  pixelVertex.mX += 0.5;
-                  pixelVertex.mY += 0.5;
                   verticalSegment.push_back(pixelVertex);
 
                   geoVertex.mY += tickSpacing.mY / 10.0;
                   geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
                   pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
-                  pixelVertex.mX += 0.5;
-                  pixelVertex.mY += 0.5;
                   verticalSegment.push_back(pixelVertex);
                   vector<LocationType>::iterator it;
                   for (it = verticalSegment.begin(); it != verticalSegment.end(); ++it)
@@ -721,15 +697,11 @@ void LatLonLayerImp::draw()
                   geoVertex.mX -= tickSpacing.mX / 20.0;
                   geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
                   pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
-                  pixelVertex.mX += 0.5;
-                  pixelVertex.mY += 0.5;
                   horizontalSegment.push_back(pixelVertex);
 
                   geoVertex.mX += tickSpacing.mX / 10.0;
                   geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
                   pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
-                  pixelVertex.mX += 0.5;
-                  pixelVertex.mY += 0.5;
                   horizontalSegment.push_back(pixelVertex);
                   vector<LocationType>::iterator it;
                   for (it = horizontalSegment.begin(); it != horizontalSegment.end(); ++it)
@@ -745,7 +717,7 @@ void LatLonLayerImp::draw()
             }
          }
       }
-      glEnd ();
+      glEnd();
    }
 
    if (bProductView == true && mStyle != LATLONSTYLE_CROSS)
