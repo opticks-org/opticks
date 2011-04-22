@@ -22,10 +22,13 @@
 #include <vector>
 
 class DataDescriptor;
+class GcpLayer;
 class GcpList;
+class LatLonLayer;
 class PlugIn;
 class Progress;
 class RasterElement;
+class RasterLayer;
 class SpatialDataView;
 class Step;
 
@@ -259,6 +262,76 @@ protected:
    virtual SpatialDataView* createView() const;
 
    /**
+    *  Creates a raster layer in the given view.
+    *
+    *  This method is called from the default implementation of createView()
+    *  after the view is created.
+    *
+    *  @param   pView
+    *           The view in which to create the raster layer.
+    *  @param   pStep
+    *           The message log step for creating the view.
+    *
+    *  @return  A pointer to the created raster layer.
+    *
+    *  @default The default implementation of this method calls
+    *           SpatialDataView::createLayer() with the raster element
+    *           extracted from the input arg list as the element to display in
+    *           the layer.
+    *
+    *  @see     getRasterElement()
+    */
+   virtual RasterLayer* createRasterLayer(SpatialDataView* pView, Step* pStep) const;
+
+   /**
+    *  Creates a GCP layer in the given view.
+    *
+    *  This method is called from the default implementation of createView()
+    *  after the raster layer is created.
+    *
+    *  @param   pView
+    *           The view in which to create the GCP layer.
+    *  @param   pStep
+    *           The message log step for creating the view.
+    *
+    *  @return  A pointer to the created GCP layer.
+    *
+    *  @default The default implementation of this method calls
+    *           SpatialDataView::createLayer() with the GCP list returned from
+    *           createGcpList() as the element to display in the layer.  If
+    *           createGcpList() returns \c NULL, the default implementation
+    *           does nothing.
+    *
+    *  @see     createRasterLayer()
+    */
+   virtual GcpLayer* createGcpLayer(SpatialDataView* pView, Step* pStep) const;
+
+   /**
+    *  Creates a latitude/longitude layer in the given view.
+    *
+    *  This method is called from the default implementation of createView()
+    *  after the GCP layer is created.
+    *
+    *  @param   pView
+    *           The view in which to create the latitude/longitude layer.
+    *  @param   pStep
+    *           The message log step for creating the view.
+    *
+    *  @return  A pointer to the created latitude/longitude layer.
+    *
+    *  @default The default implementation of this method executes the
+    *           "Georeference" plug-in to create the latitude/longitude layer
+    *           based on the previously georeferenced raster element.  If the
+    *           layer is successfully created, the layer is shown or hidden
+    *           based on the value of the DisplayLatLonLayer setting.  If the
+    *           raster element was not successfully georeferenced, the default
+    *           implementation does nothing.
+    *
+    *  @see     createGcpLayer(), getSettingDisplayLatLonLayer()
+    */
+   virtual LatLonLayer* createLatLonLayer(SpatialDataView* pView, Step* pStep) const;
+
+   /**
     *  Creates a GcpList element for the GCPs contained in the raster element
     *  file descriptor.
     *
@@ -272,6 +345,15 @@ protected:
     *  @see     getRasterElement()
     */
    virtual GcpList* createGcpList() const;
+
+   /**
+    *  Returns the GcpList object returned from createGcpList().
+    *
+    *  @return  A pointer to the GcpList object created as a result of the call
+    *           to createGcpList().  \c NULL is returned if the createGcpList()
+    *           method has not yet been called.
+    */
+   GcpList* getGcpList() const;
 
    /**
     *  Creates a Georeference plug-in that can be used to georeference the
@@ -341,6 +423,7 @@ private:
    mutable bool mUsingMemoryMappedPager;
    Progress* mpProgress;
    RasterElement* mpRasterElement;
+   GcpList* mpGcpList;
 };
 
 #endif
