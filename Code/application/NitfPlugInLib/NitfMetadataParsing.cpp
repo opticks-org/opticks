@@ -17,7 +17,6 @@
 #include "NitfImageSubheader.h"
 #include "NitfMetadataParsing.h"
 #include "NitfTreParser.h"
-#include "NitfUnknownTreParser.h"
 #include "NitfUtilities.h"
 #include "ObjectFactory.h"
 #include "PlugInDescriptor.h"
@@ -131,7 +130,7 @@ bool Nitf::TrePlugInResource::writeTag(const DynamicObject& input, const ossim_u
       }
       else
       {
-         PlugInResource pUnknownPlugin(UnknownTreParser::PLUGIN_NAME);
+         PlugInResource pUnknownPlugin("Unknown Tre Parser");
          const TreParser* pUnknownParser = dynamic_cast<const TreParser*>(pUnknownPlugin.get());
          VERIFY(pUnknownParser != NULL);
          success = pUnknownParser->fromDynamicObject(input, strm, numBytesWritten, errorMessage);
@@ -194,13 +193,6 @@ bool Nitf::TrePlugInResource::exportMetadata(const RasterDataDescriptor& descrip
    }
    
    return false;
-}
-
-TreState Nitf::TrePlugInResource::validateTag(const DynamicObject& tag, ostream& reporter) const
-{
-   const TreParser* pParser = dynamic_cast<const TreParser*>(get());
-   VERIFYRV(pParser != NULL, INVALID);
-   return pParser->isTreValid(tag, reporter);
 }
 
 bool Nitf::importMetadata(const unsigned int& currentImage, const Nitf::OssimFileResource& pFile,
@@ -445,11 +437,10 @@ bool Nitf::addTagToMetadata(const unsigned int& ownerIndex, const ossimNitfTagIn
       pTag->clear();
 
       // Again, do NOT make a copy of pParser.
-      pParser = parsers.find(UnknownTreParser::PLUGIN_NAME);
+      pParser = parsers.find("Unknown Tre Parser");
       if (pParser == parsers.end())
       {
-         pParser = parsers.insert(make_pair(UnknownTreParser::PLUGIN_NAME,
-            TrePlugInResource(UnknownTreParser::PLUGIN_NAME))).first;
+         pParser = parsers.insert(make_pair("Unknown Tre Parser", TrePlugInResource("Unknown Tre Parser"))).first;
       }
 
       if (pParser->second.parseTag(*pRegTag.get(), *pTag.get(), *pDescriptor, errorMessage) == false)

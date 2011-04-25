@@ -30,7 +30,6 @@ class ossimPropertyInterface;
 
 namespace Nitf
 {
-
    /**
     * The Header class contains all knowledge needed to succesfully
     * import or export a given NITF header.
@@ -40,13 +39,16 @@ namespace Nitf
     * include a public import method, which calls the protected one on
     * this class.
     *
-    * When importing or exporting, the Header iterates over the contents 
-    * of mElements, calling the appropriate functions to import/export.
+    * When importing or exporting, the Header iterates over the contents
+    * of Header::mElements, calling the appropriate functions to import/export.
     */
    class Header
    {
    public:
-      ~Header();
+      /**
+       * Destructs the object.
+       */
+      virtual ~Header();
 
       /**
        * Import the metadata from OSSIM into a given DynamicObject.
@@ -54,7 +56,7 @@ namespace Nitf
        * Subclasses must provide a public import method, which eventually
        * calls this one.
        *
-       * Imports according to the specification in mElements.
+       * Imports according to the specification in Header::mElements.
        *
        * @param pProperties
        *        The header to import from.
@@ -65,8 +67,8 @@ namespace Nitf
        *
        * @return True if the operation succeeded, false otherwise.
        */
-      bool importMetadata(const ossimPropertyInterface *pProperties, 
-         RasterDataDescriptor *pDescriptor, DynamicObject *pDynObj);
+      bool importMetadata(const ossimPropertyInterface* pProperties,
+         RasterDataDescriptor* pDescriptor, DynamicObject* pDynObj);
 
       /**
        * Export all metadata from the given descriptor to the export header.
@@ -99,7 +101,7 @@ namespace Nitf
       Header(const std::string &fileVersion);
 
       /**
-       * Returns the metadata location..
+       * Returns the metadata location.
        *
        * @return The name to place and retrieve the main metadata DynamicObject for this header.
        */
@@ -112,14 +114,13 @@ namespace Nitf
        *        Descriptor which will be exported.  May be needed to
        *        create defaults.
        *
-       * @return The defaults DynamicObject, wrapped in an ObjectFactory
-       *         to prevent leaks.
+       * @return The defaults DynamicObject, wrapped in a FactoryResource to prevent leaks.
        */
       virtual FactoryResource<DynamicObject> createDefaultsDynamicObject(
          const RasterDataDescriptor *pDescriptor) = 0;
 
       /**
-       * Exports a provided DynamicObject according to the specification in mElements.
+       * Exports a provided DynamicObject according to the specification in Header::mElements.
        *
        * @param pDescriptor
        *        The Descriptor to export
@@ -133,7 +134,6 @@ namespace Nitf
       bool exportMetadata(const RasterDataDescriptor *pDescriptor,
          const DynamicObject *pDynObj, 
          ossimContainerProperty *pProperties);
-
 
       /**
        * Typedef for function pointer to use to import a specific piece of
@@ -496,7 +496,14 @@ namespace Nitf
          Element(ImportFunction importFunction, ExportFunction exportFunction);
       };
 
+      /**
+       * Contains all Element objects for import and/or export.
+       */
       std::vector<Element> mElements;
+
+      /**
+       * The version of the NITF file - either Nitf::VERSION_02_00 or Nitf::VERSION_02_10.
+       */
       const std::string mFileVersion;
    };
 }

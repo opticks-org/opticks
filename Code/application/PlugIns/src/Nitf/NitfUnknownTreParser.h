@@ -18,18 +18,15 @@ namespace Nitf
    class UnknownTreParser : public TreParserShell
    {
    public:
-      static const std::string PLUGIN_NAME;
-
       UnknownTreParser();
-      ~UnknownTreParser();
+      virtual ~UnknownTreParser();
 
-      bool runAllTests(Progress *pProgress, std::ostream &failure);
+      virtual bool runAllTests(Progress* pProgress, std::ostream& failure);
 
-      bool toDynamicObject(const ossimNitfRegisteredTag& input, DynamicObject& output, 
-         std::string &errorMessage) const;
-      bool fromDynamicObject(const DynamicObject& input, std::ostream& output, size_t& numBytesWritten, 
-         std::string &errorMessage) const;
-
+      virtual bool toDynamicObject(const ossimNitfRegisteredTag& input,
+         DynamicObject& output, std::string& errorMessage) const;
+      virtual bool fromDynamicObject(const DynamicObject& input, std::ostream& output,
+         size_t& numBytesWritten, std::string& errorMessage) const;
    };
 }
 

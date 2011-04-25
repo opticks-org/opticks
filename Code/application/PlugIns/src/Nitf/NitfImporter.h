@@ -10,40 +10,19 @@
 #ifndef NITFIMPORTER_H
 #define NITFIMPORTER_H
 
-#include "RasterElementImporterShell.h"
+#include "NitfImporterShell.h"
 #include "Testable.h"
-
-#include <ossim/base/ossimConstants.h>
-#include <string>
-#include <map>
-
-class ossimNitfImageHeaderV2_X;
 
 namespace Nitf
 {
-   class NitfImporter : public RasterElementImporterShell, public Testable
+   class NitfImporter : public Nitf::NitfImporterShell, public Testable
    {
    public:
       NitfImporter();
-      ~NitfImporter();
-
-      std::vector<ImportDescriptor*> getImportDescriptors(const std::string &filename);
-      unsigned char getFileAffinity(const std::string& filename);
-      bool validate(const DataDescriptor* pDescriptor, std::string& errorMessage) const;
-      SpatialDataView* createView() const;
-      PlugIn* getGeoreferencePlugIn() const;
-      bool createRasterPager(RasterElement *pRaster) const;
-
-      static EncodingType ossimImageHeaderToEncodingType(ossimNitfImageHeaderV2_X* pImgHeader);
+      virtual ~NitfImporter();
 
       virtual bool runOperationalTests(Progress* pProgress, std::ostream& failure);
       virtual bool runAllTests(Progress* pProgress, std::ostream& failure);
-
-   protected:
-      virtual int getValidationTest(const DataDescriptor* pDescriptor) const;
-
-   private:
-      std::map<std::string, std::string> mParseMessages;
    };
 }
 #endif

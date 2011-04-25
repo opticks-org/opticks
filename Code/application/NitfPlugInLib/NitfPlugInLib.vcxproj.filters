@@ -23,6 +23,27 @@
     <ClCompile Include="StubString.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="NitfImporterShell.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NitfResource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NitfDesSubheader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NitfFileHeader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NitfHeader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NitfImageSubheader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NitfMetadataParsing.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="NitfChipConverter.h">
@@ -38,6 +59,27 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="NitfUtilities.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NitfImporterShell.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NitfMetadataParsing.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NitfResource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NitfDesSubheader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NitfFileHeader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NitfHeader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NitfImageSubheader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

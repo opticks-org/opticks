@@ -149,6 +149,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="NitfChipConverter.cpp" />
+    <ClCompile Include="NitfDesSubheader.cpp" />
+    <ClCompile Include="NitfFileHeader.cpp" />
+    <ClCompile Include="NitfHeader.cpp" />
+    <ClCompile Include="NitfImageSubheader.cpp" />
+    <ClCompile Include="NitfImporterShell.cpp" />
+    <ClCompile Include="NitfMetadataParsing.cpp" />
+    <ClCompile Include="NitfResource.cpp" />
     <ClCompile Include="NitfTreParserShell.cpp" />
     <ClCompile Include="NitfUtilities.cpp" />
     <ClCompile Include="StubString.cpp" />
@@ -156,6 +163,13 @@
   <ItemGroup>
     <ClInclude Include="NitfChipConverter.h" />
     <ClInclude Include="NitfConstants.h" />
+    <ClInclude Include="NitfDesSubheader.h" />
+    <ClInclude Include="NitfFileHeader.h" />
+    <ClInclude Include="NitfHeader.h" />
+    <ClInclude Include="NitfImageSubheader.h" />
+    <ClInclude Include="NitfImporterShell.h" />
+    <ClInclude Include="NitfMetadataParsing.h" />
+    <ClInclude Include="NitfResource.h" />
     <ClInclude Include="NitfTreParser.h" />
     <ClInclude Include="NitfTreParserShell.h" />
     <ClInclude Include="NitfUtilities.h" />

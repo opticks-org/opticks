@@ -17,31 +17,13 @@
     <ClCompile Include="ModuleManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="NitfDesSubheader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="NitfExporter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NitfFileHeader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NitfHeader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NitfImageSubheader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NitfImporter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="NitfMetadataParsing.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="NitfPager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NitfResource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NitfUnknownTreParser.cpp">
@@ -70,31 +52,13 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="NitfDesSubheader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="NitfExporter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NitfFileHeader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NitfHeader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NitfImageSubheader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="NitfImporter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="NitfMetadataParsing.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="NitfPager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NitfResource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="NitfUnknownTreParser.h">

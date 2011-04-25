@@ -148,15 +148,9 @@
   <ItemGroup>
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_RpcGui.cpp" />
     <ClCompile Include="ModuleManager.cpp" />
-    <ClCompile Include="NitfDesSubheader.cpp" />
     <ClCompile Include="NitfExporter.cpp" />
-    <ClCompile Include="NitfFileHeader.cpp" />
-    <ClCompile Include="NitfHeader.cpp" />
-    <ClCompile Include="NitfImageSubheader.cpp" />
     <ClCompile Include="NitfImporter.cpp" />
-    <ClCompile Include="NitfMetadataParsing.cpp" />
     <ClCompile Include="NitfPager.cpp" />
-    <ClCompile Include="NitfResource.cpp" />
     <ClCompile Include="NitfUnknownTreParser.cpp" />
     <ClCompile Include="OptionsNitfExporter.cpp" />
     <ClCompile Include="OssimAppMemorySource.cpp" />
@@ -166,15 +160,9 @@
     <ClCompile Include="RpcGui.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="NitfDesSubheader.h" />
     <ClInclude Include="NitfExporter.h" />
-    <ClInclude Include="NitfFileHeader.h" />
-    <ClInclude Include="NitfHeader.h" />
-    <ClInclude Include="NitfImageSubheader.h" />
     <ClInclude Include="NitfImporter.h" />
-    <ClInclude Include="NitfMetadataParsing.h" />
     <ClInclude Include="NitfPager.h" />
-    <ClInclude Include="NitfResource.h" />
     <ClInclude Include="NitfUnknownTreParser.h" />
     <CustomBuild Include="RpcGui.h">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>

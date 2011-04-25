@@ -18,13 +18,11 @@
 
 using namespace std;
 
-const string Nitf::UnknownTreParser::PLUGIN_NAME = "Unknown Tre Parser";
-
 REGISTER_PLUGIN(OpticksNitf, UnknownTreParser, Nitf::UnknownTreParser);
 
 Nitf::UnknownTreParser::UnknownTreParser()
 {
-   setName(PLUGIN_NAME);
+   setName("Unknown Tre Parser");
    setDescriptorId("{12CF1BDF-F997-4428-9AED-6B076C3F036F}");
    setProductionStatus(APP_IS_PRODUCTION_RELEASE);
 }
