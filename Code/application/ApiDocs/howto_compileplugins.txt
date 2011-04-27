@@ -5,7 +5,7 @@ It is recommended that you first read \ref compileplugins_supported_compilers if
 This document is broken into two sections.
 The first section, \ref compileplugins_general_basic, describes the bare essentials needed to build plug-ins.
 The second section, \ref compileplugins_general_complete, expands on the first section by explaining the additional parts of the SDK that are needed when building more advanced plugins.
-Please note that you might want to take a look at our Visual Studio 2005 property sheets or the SCons configurations when setting up your plug-in build environment.
+Please note that you might want to take a look at our Visual Studio 2010 property sheets or the SCons configurations when setting up your plug-in build environment.
 Both are included in the SDK and are used to provide the build environment for the tutorial and sample plug-ins.
 
 This document assumes that the SDK was unzipped to a location known as SDK_HOME.
@@ -17,8 +17,8 @@ Wherever you see the word SDK_HOME, please expand that to be the directory where
 The following platform and compiler combinations are supported when building %Opticks plug-ins.
 <table>
 <tr><th>Operating System</th><th>Processor</th><th>Compiler</th></tr>
-<tr><td>Windows XP 32-bit</td><td>x86</td><td>Visual Studio 2005 SP1 (any edition)</td></tr>
-<tr><td>Windows XP 64-bit</td><td>x86</td><td>Visual Studio 2005 SP1 (any edition)</td></tr>
+<tr><td>Windows XP 32-bit</td><td>x86</td><td>Visual Studio 2010 (any edition)</td></tr>
+<tr><td>Windows XP 64-bit</td><td>x86</td><td>Visual Studio 2010 (any edition)</td></tr>
 <tr><td>Solaris 10</td><td>SPARC v9</td><td>Sun Studio 12</td></tr>
 </table>
 
@@ -51,7 +51,7 @@ Add the listed SDK libraries in the table below to your link line when creating 
 </table>
 </li>
 <li>
-When compiling on Windows using Visual Studio 2005, you also need to do the following:
+When compiling on Windows using Visual Studio 2010, you also need to do the following:
 <ul>
     <li>You must use the same C++ runtime library that is used by %Opticks when building your plug-in.
     See the following table for more information.

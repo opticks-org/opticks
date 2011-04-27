@@ -21,14 +21,18 @@ There is a page dedicated to each version of the SDK and if you are upgrading a 
 \subsubsection u432_to_433_BitMaskIterator BitMaskIterator
 <div style="margin-left: 3em">
 <b>Description:</b>
-- The constructors of BitMaskIterator were changed.
-  - One of the constructors was changed from "const BitMask*, int, int, int, int" to "const BitMask*, unsigned int, unsigned int, unsigned int, unsigned int.".
-  - The other constructor was changed from "const BitMask*, RasterElement*" to "const BitMask*, const RasterElement*".
-- The "int getCount()" was made a const method so that it can be called on a const BitMaskIterator object.
-- The "getPixel()" method that takes no arguments has been removed. It was of little utility and was never intended to be in the public interface.
+<ul>
+<li>The constructors of BitMaskIterator were changed.</li>
+  <ul>
+  <li>One of the constructors was changed from "const BitMask*, int, int, int, int" to "const BitMask*, unsigned int, unsigned int, unsigned int, unsigned int.".</li>
+  <li>The other constructor was changed from "const BitMask*, RasterElement*" to "const BitMask*, const RasterElement*".</li>
+  </ul>
+<li>The "int getCount()" was made a const method so that it can be called on a const BitMaskIterator object.</li>
+<li>The "getPixel()" method that takes no arguments has been removed. It was of little utility and was never intended to be in the public interface.</li>
+</ul>
 </div>
 
-\subsection u432_to_433_importer ImporterShell
+\subsubsection u432_to_433_importer ImporterShell
 <div style="margin-left: 3em">
 <b>Description:</b>
 If you compile against this version of the SDK, the behavior of any Importer you have will change.

@@ -3,24 +3,24 @@ Instructions on building the Opticks source code in windows 32-bit/64-bit.
 
 Programs that need to be installed before building the source code:
 -----------------------------------------------------------------------
-- Visual Studio 2005 SP1 (specifically Visual C++ SP1)
+- Visual Studio 2010 (specifically Visual C++)
      - Please note that this can be any edition of Visual C++: Express
        Edition, Professional Edition, and Team Edition will all work.
-     - Also note that Visual C++ 2005 SP1 must be used; neither earlier nor
-       later versions will work.
+     - Also note that Visual C++ 2010 must be used.
 - Python 2.5 or later (http://www.python.org/download/)
+- Java 1.4.X or later
 - Subversion Command Line Client
   (http://downloads.open.collab.net/collabnet-subversion.html)
 
 Download these required dependencies:
 ---------------------------------------------------
-The Dependencies folder in the trunk contains a system which automatically
-downloads the appropriate dependencies.  This system requires python v2.5
-or later.
-> python dependencies.py --help
-will provide a usage summary.  Most of the time, no command line options are
-needed.  Install all the dependencies.
-> python dependencies.py
+The Dependencies folder in the checkout folder contains a system which
+automatically downloads the appropriate dependencies.  This system requires
+Java 1.4.X or later.
+> dependencies.bat -p 
+will provide a usage summary.  Most of the time, you should use 
+retrieve-dependencies.
+> retrieve-dependencies.bat
 This will download the appropriate dependencies builds and will install them
 in the proper directories.
 

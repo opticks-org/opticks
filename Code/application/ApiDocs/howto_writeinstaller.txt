@@ -17,10 +17,10 @@ This sample AEB will provide an extension icon, an end user license agreement, a
          - index.html
          - tutorial.html
    - platform
-     - win32-x86-msvc8.1-release
+     - win32-x86-msvc10.0-release
        - PlugIns
          - Sample.dll
-     - win64-x86-msvc8.1-release
+     - win64-x86-msvc10.0-release
        - PlugIns
          - Sample.dll
      - solaris-sparc-studio12-release
@@ -56,10 +56,10 @@ The notation3 source code is placed in \c install.n3 and the rapper.exe utility 
    aebl:licenseURL "aeb:///license/LGPL.html" ;
    aebl:targetApplication [
       aebl:id "opticks@ballforge.net" ;
-      aebl:minVersion "4.2.0" ;
-      aebl:maxVersion "4.2.*" ] ;
-   aebl:targetPlatform "win32-x86-msvc8.1-release" ;
-   aebl:targetPlatform "win64-x86-msvc8.1-release" ;
+      aebl:minVersion "4.6.0" ;
+      aebl:maxVersion "4.6.*" ] ;
+   aebl:targetPlatform "win32-x86-msvc10.0-release" ;
+   aebl:targetPlatform "win64-x86-msvc10.0-release" ;
    aebl:targetPlatform "solaris-sparc-studio12-release" ;
    opticks:splashScreenURL "aeb:///splashScreen/SampleSplash.jpg" ;
    opticks:helpEntry [

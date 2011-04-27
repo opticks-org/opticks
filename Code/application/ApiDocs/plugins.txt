@@ -9,7 +9,7 @@ The available plug-in types and sub-types are:
 	- Executable
 		- Georeference
 		- Importer
-		- Interpreter
+		- InterpreterManager
 		- RasterPager
 		- Exporter
 		
@@ -33,7 +33,7 @@ A complete list of Shell classes is shown below:
 				- HdfImporterShell
 					- Hdf4ImporterShell
 					- Hdf5ImporterShell
-		- InterpreterShell
+		- InterpreterManagerShell
 		- RasterPagerShell
 			- CachedPager
 		- ViewerShell

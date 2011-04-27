@@ -14,9 +14,10 @@ Before you can compile the tutorials or sample plug-ins you must first acquire a
 <li>Please install the following software, regardless of operating system:
     <ul>
     <li>Python 2.5 or later (http://www.python.org/download/).</li>
+    <li>Java Runtime Environment 1.4 or later (http://www.java.com/).</li>
     </ul>
 </li>
-<li>On Windows, please install a copy of Visual Studio 2005 SP1 (any edition will work)</li>
+<li>On Windows, please install a copy of Visual Studio 2010 (any edition will work)</li>
 <li>On Solaris, please install the following software:
     <ul>
     <li>Sun Studio 12</li>
@@ -28,10 +29,15 @@ Before you can compile the tutorials or sample plug-ins you must first acquire a
 Once you have acquired the above software, you will need to acquire the 3rd party software packages that are needed to compile and link the tutorial and sample plug-ins.
 <ol>
 <li>
-Open a command window or terminal and run the following command:
+For Windows, open a command window and run the following command:
+\verbatim
+cd SDK_HOME\Dependencies
+retrieve-dependencies.bat
+\endverbatim
+For Solaris, open a terminal window and run the following command:
 \verbatim
 cd SDK_HOME/Dependencies
-python dependencies.py Boost Hdf4 pthreads Xerces xqilla Qt
+./retrieve-dependencies.sh
 \endverbatim
 </li>
 <li>You should not encounter any errors running the previous step.</li>
@@ -43,7 +49,7 @@ You will now need to create an environment variable called OPTICKSDEPENDENCIES s
 
 <ol>
 <li>
-Open Visual Studio 2005 SP1 (any edition).
+Open Visual Studio 2010 (any edition).
 Please make sure that you have acquired the 3rd party dependencies and set the OPTICKSDEPENDENCIES environment variable as described in \ref GettingTutorialDependencies.</li>
 <li>Open SDK_HOME\Application\SamplePlugIns.sln</li>
 <li>Build the solution in your desired platform and configuration.  This will build all of the tutorials and all of the sample plug-ins.</li>
@@ -54,7 +60,7 @@ Please make sure that you have acquired the 3rd party dependencies and set the O
 
 <ol>
 <li>
-Open a terminal.
+Open a terminal window.
 Please make sure that you have acquired the 3rd party dependencies and set the OPTICKSDEPENDENCIES environment variable as described in \ref GettingTutorialDependencies.
 </li>
 <li>

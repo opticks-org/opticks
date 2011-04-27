@@ -6,75 +6,68 @@ This document assumes that the SDK was unzipped to a location known as SDK_HOME.
 Wherever you see the word SDK_HOME, please expand that to be the directory where you unzipped this SDK.
 
 \section GettingPreqs Prerequisite Software
-You must first install Python 2.5 or later (http://www.python.org/download/).
+You must first install Java Runtime Environment 1.4 or later (http://www.java.com/).
 
 \section FetchingDeps Fetching 3rd party libraries
-The SDK includes a python script that will automatically fetch all of the 3rd party libraries that may be needed when creating plug-ins for %Opticks.
+The SDK includes a batch file and shell script that will automatically fetch all of the 3rd party libraries that may be needed when creating plug-ins for %Opticks.
 This script can be found in the SDK_HOME\\Dependencies folder.
-In general, this script can be run by opening a command window or terminal and running the following command:
+There are two scripts, retrieve-dependencies and dependencies.
+The retrieve-dependencies script has no arguments and downloads all of the 3rd party libraries for the platform it is run on.
+
+In general on Windows, this script can be run by opening a command window and running the following command:
+\verbatim
+cd SDK_HOME\Dependencies
+retrieve-dependencies.bat
+\endverbatim
+In general on Solaris/Linux, this script can be run by opening a terminal window and running the following command:
 \verbatim
 cd SDK_HOME/Dependencies
-python dependencies.py [NameOfDependency1] [NameOfDependency2]
-\endverbatim
-where [NameOfDependency1] and [NameOfDependency2] are the names of the two 3rd party libraries to fetch.
-
-If you want help on the script arguments, you can run the following command:
-\verbatim
-python dependencies.py -h
+./retrieve-dependencies.sh
 \endverbatim
 
-If you would like a complete list of all of the 3rd party libraries that can be downloaded, you can run the following command:
+The dependencies script provides more features and arguments.
+For complete documentation on Windows, run the following command:
 \verbatim
-python dependencies.py -m list
+dependencies.bat -p
 \endverbatim
-
-If you would like to fetch all of the 3rd party libraries, you can run the script without any arguments:
+For documentation on Solaris/Linux, run the following command:
 \verbatim
-python dependencies.py
+./dependencies.sh -p
 \endverbatim
 
 \section DepsCompilingLinking Compiling and Linking With 3rd party libraries
-The pre-built binaries that dependencies.py fetches are compilations of the original source distributions and then they have been arranged into a convenient directory structure to support cross-platform compilations.
-Each dependency usually follows the sample layout shown below:
+The pre-built binaries that the dependencies scripts fetch are compilations of the original source distributions and then they have been arranged into a convenient directory structure to support cross-platform compilations.
+Each dependency places it's binaries and header files into the directory layout shown below:
 
 <ul>
-<li>Xerces 
+<li>Dependencies 
 	<ul>
-		<li>bin
+		<li>32 - contains 32-bit binaries and header files only
 			<ul>
-				<li>Win32 - contains the windows 32-bit dll's, either in this directory or in two subdirectories called debug and release.
+				<li>bin - contains the debug and release 32-bit DLL's for Windows. Contains any 32-bit executable programs provided by the dependencies.
 					<ul>
-						<li>debug - if both debug and release are present, this contains the debug dll's only</li>
-						<li>release - contains the release dll's only</li>
+						<li>debug - if both debug and release DLLs have the same name, this contains the 32-bit debug DLL's only</li>
 					</ul>
 				</li>
-				<li>x64  - contains the windows 64-bit dll's, either in this directory or in two subdirectories called debug and release.
+				<li>include - contains the header files, some dependencies create subfolders.</li>
+				<li>lib - contains the release 32-bit so's and a's for Solaris/Linux. Contains the debug and 32-bit libs for Windows.
 					<ul>
-						<li>debug - if both debug and release are present, this contains the debug dll's only</li>
-						<li>release - contains the release dll's only</li>
+						<li>debug - if both debug and release libs have the same name, this contains the 32-bit debug libs only</li>
 					</ul>
 				</li>
 			</ul>
 		</li>
-		<li>include - contains the header files, either in this directory on in a subdirectory based upon operating system.
+		<li>64 - contains 64-bit binaries and header files only
 			<ul>
-				<li>solaris-sparc - if both solaris-sparc and windows are present, this contains the solaris only include files</li>
-				<li>windows - contains windows only include files</li>
-			</ul>
-		</li>
-		<li>lib
-			<ul>
-				<li>solaris-sparc - contains the solaris so's, both debug and release</li>
-				<li>win32 - contains the windows 32-bit lib's, either in this directory or in two subdirectories called debug and release.
+				<li>bin - contains the debug and release 64-bit DLL's for Windows. Contains any 64-bit executable programs provided by the dependencies.
 					<ul>
-						<li>debug - if both debug and release are present, this contains the debug lib's only</li>
-						<li>release - contains the release lib's only</li>
-					</ul>				
+						<li>debug - if both debug and release DLLs have the same name, this contains the 64-bit debug DLL's only</li>
+					</ul>
 				</li>
-				<li>x64 - contains the windows 64-bit lib's, either in this directory or in two subdirectories called debug and release.
+				<li>include - contains the header files, some dependencies create subfolders.</li>
+				<li>lib - contains the release 64-bit so's and a's for Solaris/Linux. Contains the debug and 64-bit libs for Windows.
 					<ul>
-						<li>debug - if both debug and release are present, this contains the debug lib's only</li>
-						<li>release - contains the release lib's only</li>
+						<li>debug - if both debug and release libs have the same name, this contains the 64-bit debug libs only</li>
 					</ul>
 				</li>
 			</ul>
@@ -83,8 +76,8 @@ Each dependency usually follows the sample layout shown below:
 </li>
 </ul>
 
-For detailed information on the compiler and linker settings needed when compiling against these third-party dependencies, you can either reference the Visual Studio 2005 property sheets or SCons tool configurations.
-The Visual Studio 2005 property sheets are located in SDK_HOME\\Application\\CompileSettings and can be opened in any text editor.
+For detailed information on the compiler and linker settings needed when compiling against these third-party dependencies, you can either reference the Visual Studio 2010 property sheets or SCons tool configurations.
+The Visual Studio 2010 property sheets are located in SDK_HOME\\Application\\CompileSettings and can be opened in any text editor.
 It should be self explanatory how to read the property sheets and apply the settings to the build tool of your choice.
 The SCons tool configurations are also located in SDK_HOME\\Application\\CompileSettings and can be opened in any text editor.
 

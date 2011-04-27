@@ -1,7 +1,7 @@
 /** \page howto_buildenvironment Setting up a build environment
 Files:
  - \ref Tutorial/ModuleManager.cpp "Tutorial/ModuleManager.cpp"
- - \ref Tutorial/Tutorial.vcproj "Tutorial/Tutorial.vcproj"
+ - \ref Tutorial/Tutorial.vcxproj "Tutorial/Tutorial.vcxproj"
  - \ref Tutorial/SConscript
 
 The %Opticks SDK provides a few files to help you set up a plug-in build environment.
@@ -18,7 +18,7 @@ Below is the ModuleManager.cpp file for the tutorial.
 The %Opticks SDK also provides utilities for building your modules.
 \subsection build_files_windows Windows
 The easiest way to build a module on Windows is to create a directory in the %Opticks SDK Application/PlugIns/src directory.
-Create a Visual Studio 2005 project file for your plug-in.
+Create a Visual Studio 2010 project file for your plug-in.
 The %Opticks SDK contains a number of Visual Studio property sheets in the Application/CompileSettings directory.
 They set various options required to build a plug-in.
 Some property sheets are required, others add optional functionality.
@@ -28,7 +28,6 @@ Below is a list of common property sheets for the debug 32-bit configuration.
 Other configurations need to make appropriate substitutions.
  - Macros
  - Xerces-Debug
- - boost
  - AllCommonSettings-Debug-32bit
  - PlugInCommonSettings
  - 32bitSettings
@@ -37,22 +36,20 @@ You should remove most property overrides in the project files.
 See the example project files for more details.
 A common way to create a new project file is to copy an existing one.
 If you do this, there are a few things in the project file which need to be edited with a text editor before adding it to a Visual Studio solution.
-As an example, I'll copy the tutorial project file to MyModule.vcproj.
+As an example, I'll copy the tutorial project file to MyModule.vcxproj.
 I open the new project file in a text editor such as \c notepad.exe and change the following lines.
-\dontinclude Tutorial/Tutorial.vcproj
-\skipline Name
-This should be changed to the name of your project as it will appear in the Visual Studio solution explorer.
-\skipline ProjectGUID
+\dontinclude Tutorial/Tutorial.vcxproj
+\skipline <ProjectGuid>
 This GUID must be changed to a unique GUID.
 The "Create GUID" tool in Visual Studio can be used.
-\skipline RootNamespace
+\skipline <RootNamespace>
 This is generally the same as your project name and is used by Visual Studio when creating certain directories.
-\skipline TypeLibraryName
+\skipline <TypeLibraryName>
 Change the base name to match your project file base name.
 This line occurs multiple times in a project file, once for each configuration.
-\skip <Files>
-\until </Files>
-You can remove the %File entries for the old project's files now or you can remove them after you add the project to the solution.
+\skip <ClCompile
+\until <ClInclude
+You can remove the &lt;ClCompile&gt; and &lt;ClInclude&gt; entries for the old project's files now or you can remove them after you add the project to the solution.
 
 Once you've made these changes, save the project file and add it to a Visual Studio solution.
 Make changes to the list of property sheets in the Property Manager inside Visual Studio.
@@ -89,7 +86,7 @@ This scons build system uses the same environment variables as the Visual Studio
 
 \example Tutorial/ModuleManager.cpp
 The tutorial's plug-in module definition and factory file.
-\example Tutorial/Tutorial.vcproj
+\example Tutorial/Tutorial.vcxproj
 The tutorial's Visual Studio project file.
 \example Tutorial/SConscript
 The tutorial's scons build file.
