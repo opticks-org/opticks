@@ -309,9 +309,10 @@ LocationType IgmGeoreference::pixelToGeo(LocationType pixel, bool* pAccurate) co
 
    const DimensionDescriptor& column = mLoadedColumns[static_cast<unsigned int>(pixel.mX)];
    const DimensionDescriptor& row = mLoadedRows[static_cast<unsigned int>(pixel.mY)];
-   const DimensionDescriptor& northingBand = mLoadedBands[static_cast<unsigned int>(0)];
-   const DimensionDescriptor& eastingBand = mLoadedBands[static_cast<unsigned int>(1)];
-   if (column.isValid() == false || row.isValid() == false || northingBand.isValid() == false || eastingBand.isValid() == false)
+   // first/second is either northing/easting or longitude/latitude
+   const DimensionDescriptor& firstBand = mLoadedBands[static_cast<unsigned int>(0)];
+   const DimensionDescriptor& secondBand = mLoadedBands[static_cast<unsigned int>(1)];
+   if (column.isValid() == false || row.isValid() == false || firstBand.isValid() == false || secondBand.isValid() == false)
    {
       return LocationType();
    }
@@ -321,9 +322,13 @@ LocationType IgmGeoreference::pixelToGeo(LocationType pixel, bool* pAccurate) co
       *pAccurate = true;
    }
 
-   UtmPoint uPoint(mpIgmRaster->getPixelValue(column, row, northingBand),
-      mpIgmRaster->getPixelValue(column, row, eastingBand), mZone, 'N');
-
+   if (mZone == 100) // no zone...assume we are lat/lon instead of UTM
+   {
+      return LocationType(mpIgmRaster->getPixelValue(column, row, secondBand),
+         mpIgmRaster->getPixelValue(column, row, firstBand));
+   }
+   UtmPoint uPoint(mpIgmRaster->getPixelValue(column, row, firstBand),
+      mpIgmRaster->getPixelValue(column, row, secondBand), mZone, 'N');
    return LocationType(uPoint.getLatLonCoordinates().getLatitude().getValue(),
       uPoint.getLatLonCoordinates().getLongitude().getValue());
 }

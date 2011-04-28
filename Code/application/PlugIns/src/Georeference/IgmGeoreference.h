@@ -56,7 +56,6 @@ private:
    std::vector<DimensionDescriptor> mLoadedRows;
    std::vector<DimensionDescriptor> mLoadedBands;
    unsigned int mZone;
-
 };
 
 #endif // IGMGEOREFERENCE_H
