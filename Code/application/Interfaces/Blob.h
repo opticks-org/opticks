@@ -13,6 +13,7 @@
 #include "AppConfig.h"
 #include "DataVariantValidator.h"
 
+#include <string.h>
 #include <vector>
 
 /**
