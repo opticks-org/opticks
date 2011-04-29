@@ -450,7 +450,7 @@ void ImportOptionsDlg::setCurrentDataset(ImportDescriptor* pImportDescriptor)
    DataDescriptor* pDescriptor = mpCurrentDataset->getDataDescriptor();
    if (pDescriptor != NULL)
    {
-      mpEditDescriptor = pDescriptor->copy(pDescriptor->getName(), NULL);
+      mpEditDescriptor = pDescriptor->copy();
    }
 
    VERIFYNRV(mpEditDescriptor != NULL);
