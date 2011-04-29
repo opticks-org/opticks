@@ -133,6 +133,67 @@ bool Nitf::DtgParseCCYYMMDDhhmm(const string &fDTG,
    return pDateTime != NULL && pDateTime->set(year, month, day, hour, min, 0);
 }
 
+bool Nitf::DtgParseCCYYMMDDssss(const std::string& date,
+                                const std::string& time,
+                                DateTime* pDateTime,
+                                float& secondsInDay)
+{
+   secondsInDay = -1;
+   unsigned short year;
+   unsigned short month;
+   unsigned short day;
+   unsigned short hour;
+   unsigned short minute;
+   float second;
+   if (date.size() < 8)
+   {
+      return false;
+   }
+   try
+   {
+      year = lexical_cast<unsigned short>(date.substr(0, 4));
+      month = lexical_cast<unsigned short>(date.substr(4, 2));
+      day = lexical_cast<unsigned short>(date.substr(6, 2));
+      secondsInDay = lexical_cast<float>(time);
+      second = secondsInDay;
+      hour = static_cast<unsigned short>(second / 3600);
+      second -= hour * 3600;
+      minute =  static_cast<unsigned short>(second / 60);
+      second -= minute * 60;
+   }
+   catch (const boost::bad_lexical_cast&)
+   {
+      return false;
+   }
+
+   if (year < 1900 || year > 2100)
+   {
+      return false;
+   }
+   if (month < 1 || month > 12)
+   {
+      return false;
+   }
+   if (day < 1 || day > maxDayOfMonth[month-1])
+   {
+      return false;
+   }
+   if (hour > 23)
+   {
+      return false;
+   }
+   if (minute > 59)
+   {
+      return false;
+   }
+   if (second >= 60.0)
+   {
+      return false;
+   }
+
+   return pDateTime != NULL && pDateTime->set(year, month, day, hour, minute, second);
+}
+
 bool Nitf::DtgParseCCYYMMDDhhmmss(const string &fDTG, 
    unsigned short &year, 
    unsigned short &month, 

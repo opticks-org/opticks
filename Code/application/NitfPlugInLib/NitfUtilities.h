@@ -351,6 +351,25 @@ namespace Nitf
    bool DtgParseCCYYMMDDhhmm(const std::string& fDTG, DateTime* pDateTime);
 
    /**
+    * Parse a date-time from two strings of the form CCYYMMDD and ssss.sss.
+    *
+    * @param date
+    *        The date string to parse
+    * @param time
+    *        The time string to parse, this may have a variable number of digits but must be
+    *        seconds of the day
+    * @param pDateTime
+    *        Upon successful return, this contains the date and time from the string.
+    * @param secondsInDay
+    *        Return the seconds in the day as a float. \em pDateTime only contains 1 second resolution
+    *        so this is required to obtain fractional seconds. This is the value in time as a \c float.
+    *
+    * @return \c True if the parse succeeded, \c false otherwise.
+    */
+   bool DtgParseCCYYMMDDssss(const std::string& date, const std::string& time,
+                             DateTime* pDateTime, float& secondsInDay);
+
+   /**
     * Parse a date-time string of the form CCYYMMDDhhmmss.
     *
     * @param fDTG
@@ -826,7 +845,7 @@ namespace Nitf
 
    // General template for dealing with most types
    template<typename T>
-   inline T fromBuffer(std::vector<char>& buf, bool& ok, bool allBlankOk)
+   inline T fromBuffer(std::vector<char>& buf, bool& ok, bool allBlankOk, bool allDashesOk)
    {
       if (!std::numeric_limits<T>::is_signed)
       {
@@ -847,6 +866,21 @@ namespace Nitf
          }
          else
          {
+            if (allDashesOk)
+            {
+               size_t idx = 0;
+               for (; idx < trimmedString.size(); ++idx)
+               {
+                  if (trimmedString[idx] != '-')
+                  {
+                     break;
+                  }
+               }
+               if (idx == trimmedString.size())
+               {
+                  return true;
+               }
+            }
             return boost::lexical_cast<T>(trimmedString);
          }
       }
@@ -860,14 +894,18 @@ namespace Nitf
 
    // Specialization for the unusual ones
    template <>
-   inline std::string fromBuffer<std::string>(std::vector<char>& buf, bool& ok, bool allBlankOk)
+   inline std::string fromBuffer<std::string>(std::vector<char>& buf, bool& ok, bool allBlankOk, bool allDashesOk)
    {
       std::string trimmedString = StringUtilities::stripWhitespace(std::string(&buf.front()));
       if (trimmedString.empty() == true)
       {
          ok = allBlankOk;
       }
-
+      else if (allDashesOk)
+      {
+         std::string tmp(trimmedString.size(), '-');
+         ok = (tmp == trimmedString);
+      }
       return trimmedString;
    }
 
@@ -911,7 +949,8 @@ namespace Nitf
 
    template<typename T>
    inline bool readField(std::istream& input, DynamicObject& output, bool& success,
-      const std::string& name, int len, std::string& msg, std::vector<char>& buf, bool allBlankOk = false)
+      const std::string& name, int len, std::string& msg, std::vector<char>& buf,
+      bool allBlankOk = false, bool allDashesOk = false)
    {
       bool ok(true);
       if (input.good() == false)
@@ -922,10 +961,37 @@ namespace Nitf
       {
          success = false;
       }
-      else if (output.setAttribute(name, fromBuffer<T>(buf, ok, allBlankOk)) == false || ok == false)
+      else if (output.setAttribute(name, fromBuffer<T>(buf, ok, allBlankOk, allDashesOk)) == false || ok == false)
       {
          success = false;
          readFieldErrMsg(msg, name, buf, len);
+      }
+
+      return success;
+   }
+
+   template<typename T>
+   inline bool readAndConvertFromStream(std::istream& input, T& output, bool& success,
+      const std::string& name, int len, std::string& msg, std::vector<char>& buf,
+      bool allBlankOk = false, bool allDashesOk = false)
+   {
+      bool ok(true);
+      if (!input.good())
+      {
+         success = false;
+      }
+      else if (!readFromStream(input, buf, len))
+      {
+         success = false;
+      }
+      else
+      {
+         output = fromBuffer<T>(buf, ok, allBlankOk, allDashesOk);
+         if (!ok)
+         {
+            success = false;
+            readFieldErrMsg(msg, name, buf, len);
+         }
       }
 
       return success;

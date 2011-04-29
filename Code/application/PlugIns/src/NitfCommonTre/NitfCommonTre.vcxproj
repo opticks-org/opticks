@@ -146,6 +146,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_EngrdaWidget.cpp" />
+    <ClCompile Include="EngrdaWidget.cpp" />
     <ClCompile Include="ModuleManager.cpp" />
     <ClCompile Include="NitfAcftaParser.cpp" />
     <ClCompile Include="NitfAcftbParser.cpp" />
@@ -155,6 +157,7 @@
     <ClCompile Include="NitfBandsbParser.cpp" />
     <ClCompile Include="NitfBlockaParser.cpp" />
     <ClCompile Include="NitfCmetaaParser.cpp" />
+    <ClCompile Include="NitfEngrdaParser.cpp" />
     <ClCompile Include="NitfExoptaParser.cpp" />
     <ClCompile Include="NitfExpltaParser.cpp" />
     <ClCompile Include="NitfExpltbParser.cpp" />
@@ -172,12 +175,27 @@
     <ClCompile Include="NitfRpcParser.cpp" />
     <ClCompile Include="NitfSectgaParser.cpp" />
     <ClCompile Include="NitfSensraParser.cpp" />
+    <ClCompile Include="NitfSensrbParser.cpp" />
     <ClCompile Include="NitfStdidbParser.cpp" />
     <ClCompile Include="NitfStdidcParser.cpp" />
     <ClCompile Include="NitfUse00aParser.cpp" />
     <ClCompile Include="NitfUse26aParser.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <CustomBuild Include="EngrdaWidget.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing %(Filename).h...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing %(Filename).h...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Filename).h...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Filename).h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+    </CustomBuild>
     <ClInclude Include="NitfAcftaParser.h" />
     <ClInclude Include="NitfAcftbParser.h" />
     <ClInclude Include="NitfAimidaParser.h" />
@@ -186,6 +204,7 @@
     <ClInclude Include="NitfBandsbParser.h" />
     <ClInclude Include="NitfBlockaParser.h" />
     <ClInclude Include="NitfCmetaaParser.h" />
+    <ClInclude Include="NitfEngrdaParser.h" />
     <ClInclude Include="NitfExoptaParser.h" />
     <ClInclude Include="NitfExpltaParser.h" />
     <ClInclude Include="NitfExpltbParser.h" />
@@ -203,6 +222,7 @@
     <ClInclude Include="NitfRpcParser.h" />
     <ClInclude Include="NitfSectgaParser.h" />
     <ClInclude Include="NitfSensraParser.h" />
+    <ClInclude Include="NitfSensrbParser.h" />
     <ClInclude Include="NitfStdidbParser.h" />
     <ClInclude Include="NitfStdidcParser.h" />
     <ClInclude Include="NitfUse00aParser.h" />

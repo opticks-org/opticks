@@ -591,6 +591,21 @@ namespace Nitf
          const static std::string VPH_COND = "VPH_COND";
       }
 
+      namespace ENGRDA
+      {
+         const static std::string RESRC = "RESRC";
+         const static std::string RECNT = "RECNT";
+         const static std::string ENGLN = "ENGLN";
+         const static std::string ENGLBL = "ENGLBL";
+         const static std::string ENGMTXC = "ENGMTXC";
+         const static std::string ENGMTXR = "ENGMTXR";
+         const static std::string ENGTYP = "ENGTYP";
+         const static std::string ENGDTS = "ENGDTS";
+         const static std::string ENGDATU = "ENGDATU";
+         const static std::string ENGDATC = "ENGDATC";
+         const static std::string ENGDATA = "ENGDATA";
+      }
+
       namespace EXOPTA
       {
          const static std::string ANGLE_TO_NORTH = "ANGLE_TO_NORTH";
@@ -1036,6 +1051,170 @@ namespace Nitf
          const static std::string SWATH_FRAMES = "SWATH_FRAMES";
          const static std::string NUM_SWATHS = "NUM_SWATHS";
          const static std::string SPOT_NUM = "SPOT_NUM";
+      }
+
+      namespace SENSRB
+      {
+         namespace GENERAL_DATA
+         {
+            const static std::string TAG = "GENERAL_DATA";
+            const static std::string SENSOR = "SENSOR";
+            const static std::string SENSOR_URI = "SENSOR_URI";
+            const static std::string PLATFORM = "PLARFORM";
+            const static std::string PLATFORM_URI = "PLATFORM_URI";
+            const static std::string OPERATION_DOMAIN = "OPERATION_DOMAIN";
+            const static std::string CONTENT_LEVEL = "CONTENT_LEVEL";
+            const static std::string GEODETIC_SYSTEM = "GEODETIC_SYSTEM";
+            const static std::string GEODETIC_TYPE = "GEODETIC_TYPE";
+            const static std::string ELEVATION_DATUM = "ELEVATION_DATUM";
+            const static std::string LENGTH_UNIT = "LENGTH_UNIT";
+            const static std::string ANGULAR_UNIT = "ANGULAR_UNIT";
+            const static std::string START_DATE = "START_DATE";
+            const static std::string START_TIME = "START_TIME";
+            const static std::string END_DATE = "END_DATE";
+            const static std::string END_TIME = "END_TIME";
+            const static std::string GENERATION_COUNT = "GENERATION_COUNT";
+            const static std::string GENERATION_DATE = "GENERATION_DATE";
+            const static std::string GENERATION_TIME = "GENERATION_TIME";
+         }
+         namespace SENSOR_ARRAY_DATA
+         {
+            const static std::string TAG = "SENSOR_ARRAY_DATA";
+            const static std::string DETECTION = "DETECTION";
+            const static std::string ROW_DETECTORS = "ROW_DETECTORS";
+            const static std::string COLUMN_DETECTORS = "COLUMN_DETECTORS";
+            const static std::string ROW_METRIC = "ROW_METRIC";
+            const static std::string COLUMN_METRIC = "COLUMN_METRIC";
+            const static std::string FOCAL_LENGTH = "FOCAL_LENGTH";
+            const static std::string ROW_FOV = "ROW_FOV";
+            const static std::string COLUMN_FOV = "COLUMN_FOV";
+            const static std::string CALIBRATED = "CALIBRATED";
+         }
+         namespace SENSOR_CALIBRATION_DATA
+         {
+            const static std::string TAG = "SENSOR_CALIBRATION_DATA";
+            const static std::string CALIBRATION_UNIT = "CALIBRATION_UNIT";
+            const static std::string PRINCIPAL_POINT_OFFSET_X = "PRINCIPAL_POINT_OFFSET_X";
+            const static std::string PRINCIPAL_POINT_OFFSET_Y = "PRINCIPAL_POINT_OFFSET_Y";
+            const static std::string RADIAL_DISTORT_1 = "RADIAL_DISTORT_1";
+            const static std::string RADIAL_DISTORT_2 = "RADIAL_DISTORT_2";
+            const static std::string RADIAL_DISTORT_3 = "RADIAL_DISTORT_3";
+            const static std::string RADIAL_DISTORT_LIMIT = "RADIAL_DISTORT_LIMIT";
+            const static std::string DECENT_DISTORT_1 = "DECENT_DISTORT_1";
+            const static std::string DECENT_DISTORT_2 = "DECENT_DISTORT_2";
+            const static std::string AFFINITY_DISTORT_1 = "AFFINITY_DISTORT_1";
+            const static std::string AFFINITY_DISTORT_2 = "AFFINITY_DISTORT_2";
+            const static std::string CALIBRATION_DATE = "CALIBRATION_DATE";
+         }
+         namespace IMAGE_FORMATION_DATA
+         {
+            const static std::string TAG = "IMAGE_FORMATION_DATA";
+            const static std::string METHOD = "METHOD";
+            const static std::string MODE = "MODE";
+            const static std::string ROW_COUNT = "ROW_COUNT";
+            const static std::string COLUMN_COUNT = "COLUMN_COUNT";
+            const static std::string ROW_SET = "ROW_SET";
+            const static std::string COLUMN_SET = "COLUMN_SET";
+            const static std::string ROW_DETECTION_RATE = "ROW_DETECTION_RATE";
+            const static std::string COLUMN_DETECTION_RATE = "COLUMN_DETECTION_RATE";
+            const static std::string FIRST_PIXEL_ROW = "FIRST_PIXEL_ROW";
+            const static std::string FIRST_PIXEL_COLUMN = "FIRST_PIXEL_COLUMN";
+            const static std::string TRANSFORM_PARAMS = "TRANSFORM_PARAMS";
+            const static std::string TRANSFORM_PARAM_ = "TRANSFORM_PARAM_";
+         }
+         const static std::string REFERENCE_TIME = "REFERENCE_TIME";
+         const static std::string REFERENCE_ROW = "REFERENCE_ROW";
+         const static std::string REFERENCE_COLUMN = "REFERENCE_COLUMN";
+         const static std::string LATITUDE_OR_X = "LATITUDE_OR_X";
+         const static std::string LONGITUDE_OR_Y = "LONGITUDE_OR_Y";
+         const static std::string ALTITUDE_OR_Z = "ALTITUDE_OR_Z";
+         const static std::string SENSOR_X_OFFSET = "SENSOR_X_OFFSET";
+         const static std::string SENSOR_Y_OFFSET = "SENSOR_Y_OFFSET";
+         const static std::string SENSOR_Z_OFFSET = "SENSOR_Z_OFFSET";
+         namespace ATTITUDE_EULER_ANGLES
+         {
+            const static std::string TAG = "ATTITUDE_EULER_ANGLES";
+            const static std::string SENSOR_ANGLE_MODEL = "SENSOR_ANGLE_MODEL";
+            const static std::string SENSOR_ANGLE_1 = "SENSOR_ANGLE_1";
+            const static std::string SENSOR_ANGLE_2 = "SENSOR_ANGLE_2";
+            const static std::string SENSOR_ANGLE_3 = "SENSOR_ANGLE_3";
+            const static std::string PLATFORM_RELATIVE = "PLATFORM_RELATIVE";
+            const static std::string PLATFORM_HEADING = "PLATFORM_HEADING";
+            const static std::string PLATFORM_PITCH = "PLATFORM_PITCH";
+            const static std::string PLATFORM_ROLL = "PLATFORM_ROLL";
+         }
+         namespace ATTITUDE_UNIT_VECTORS
+         {
+            const static std::string TAG = "ATTITUDE_UNIT_VECTORS";
+            const static std::string ICX_NORTH_OR_X = "ICX_NORTH_OR_X";
+            const static std::string ICX_EAST_OR_Y = "ICX_EAST_OR_Y";
+            const static std::string ICX_DOWN_OR_Z = "ICX_DOWN_OR_Z";
+            const static std::string ICY_NORTH_OR_X = "ICY_NORTH_OR_X";
+            const static std::string ICY_EAST_OR_Y = "ICY_EAST_OR_Y";
+            const static std::string ICY_DOWN_OR_Z = "ICY_DOWN_OR_Z";
+            const static std::string ICZ_NORTH_OR_X = "ICZ_NORTH_OR_X";
+            const static std::string ICZ_EAST_OR_Y = "ICZ_EAST_OR_Y";
+            const static std::string ICZ_DOWN_OR_Z = "ICZ_DOWN_OR_Z";
+         }
+         namespace ATTITUDE_QUATERNION
+         {
+            const static std::string TAG = "ATTITUDE_QUATERNION";
+            const static std::string ATTITUDE_Q1 = "ATTITUDE_Q1";
+            const static std::string ATTITUDE_Q2 = "ATTITUDE_Q2";
+            const static std::string ATTITUDE_Q3 = "ATTITUDE_Q3";
+            const static std::string ATTITUDE_Q4 = "ATTITUDE_Q4";
+         }
+         namespace SENSOR_VELOCITY_DATA
+         {
+            const static std::string TAG = "SENSOR_VELOCITY_DATA";
+            const static std::string VELOCITY_NORTH_OR_X = "VELOCITY_NORTH_OR_X";
+            const static std::string VELOCITY_EAST_OR_Y = "VELOCITY_EAST_OR_Y";
+            const static std::string VELOCITY_DOWN_OR_Z = "VELOCITY_DOWN_OR_Z";
+         }
+         namespace POINT_SET_DATA
+         {
+            const static std::string TAG = "POINT_SET_DATA";
+            const static std::string POINT_SET_TYPE = "POINT_SET_TYPE";
+            const static std::string POINT_COUNT = "POINT_COUNT";
+            const static std::string P_ROW = "P_ROW";
+            const static std::string P_COLUMN = "P_COLUMN";
+            const static std::string P_LATITUDE = "P_LATITUDE";
+            const static std::string P_LONGITUDE = "P_LONGITUDE";
+            const static std::string P_ELEVATION = "P_ELEVATION";
+            const static std::string P_RANGE = "P_RANGE";
+         }
+         namespace TIME_STAMPED_DATA_SETS
+         {
+            const static std::string TAG = "TIME_STAMPED_DATA_SETS";
+            const static std::string TIME_STAMP_TYPE = "TIME_STAMP_TYPE";
+            const static std::string TIME_STAMP_COUNT = "TIME_STAMP_COUNT";
+            const static std::string TIME_STAMP_TIME = "TIME_STAMP_TIME";
+            const static std::string TIME_STAMP_VALUE = "TIME_STAMP_VALUE";
+         }
+         namespace PIXEL_REFERENCED_DATA_SETS
+         {
+            const static std::string TAG = "PIXEL_REFERENCED_DATA_SETS";
+            const static std::string PIXEL_REFERENCE_TYPE = "PIXEL_REFERENCE_TYPE";
+            const static std::string PIXEL_REFERENCE_COUNT = "PIXEL_REFERENCE_COUNT";
+            const static std::string PIXEL_REFERENCE_ROW = "PIXEL_REFERENCE_ROW";
+            const static std::string PIXEL_REFERENCE_COLUMN = "PIXEL_REFERENCE_COLUMN";
+            const static std::string PIXEL_REFERENCE_VALUE = "PIXEL_REFERENCE_VALUE";
+         }
+         namespace UNCERTAINTY_DATA
+         {
+            const static std::string TAG = "UNCERTAINTY_DATA";
+            const static std::string UNCERTAINTY_FIRST_TYPE = "UNCERTAINTY_FIRST_TYPE";
+            const static std::string UNCERTAINTY_SECOND_TYPE = "UNCERTAINTY_SECOND_TYPE";
+            const static std::string UNCERTAINTY_VALUE = "UNCERTAINTY_VALUE";
+         }
+         namespace ADDITIONAL_PARAMETER_DATA
+         {
+            const static std::string TAG = "ADDITIONAL_PARAMETER_DATA";
+            const static std::string PARAMETER_NAME = "PARAMETER_NAME";
+            const static std::string PARAMETER_SIZE = "PARAMETER_SIZE";
+            const static std::string PARAMETER_COUNT = "PARAMETER_COUNT";
+            const static std::string PARAMETER_VALUE = "PARAMETER_VALUE";
+         }
       }
 
       namespace STDIDB

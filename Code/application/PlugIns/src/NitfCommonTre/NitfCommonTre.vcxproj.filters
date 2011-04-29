@@ -9,6 +9,9 @@
       <UniqueIdentifier>{22e6a00b-3da5-44b0-8a3f-863c346abe1f}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
+    <Filter Include="moc">
+      <UniqueIdentifier>{8994f4b0-a40a-4b98-9fd5-8bf970c1c501}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ModuleManager.cpp">
@@ -101,6 +104,18 @@
     <ClCompile Include="NitfUse26aParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="NitfSensrbParser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EngrdaWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NitfEngrdaParser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_EngrdaWidget.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="NitfAcftaParser.h">
@@ -190,5 +205,16 @@
     <ClInclude Include="NitfUse26aParser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="NitfSensrbParser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NitfEngrdaParser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="EngrdaWidget.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
   </ItemGroup>
 </Project>

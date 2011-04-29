@@ -42,6 +42,27 @@ public:
    explicit Blob(const std::vector<unsigned char>& value) : mValue(value) {}
 
    /**
+    * Construct a blob from a C array of octets.
+    *
+    * @param pValue
+    *        C array of octets with len bytes. If this is NULL, an empty blob is created.
+    * @param len
+    *        The number of octets in the array.
+    */
+   explicit Blob(const void* pValue, size_t len)
+   {
+      if (pValue == NULL)
+      {
+         mValue.clear();
+      }
+      else
+      {
+         mValue.resize(len);
+         memcpy(&mValue.front(), pValue, len);
+      }
+   }
+
+   /**
     * Assignment operator.
     * 
     * @param right

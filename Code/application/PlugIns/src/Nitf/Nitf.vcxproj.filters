@@ -50,6 +50,9 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_RpcGui.cpp">
       <Filter>moc</Filter>
     </ClCompile>
+    <ClCompile Include="NitfPropertiesManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="NitfExporter.h">
@@ -68,6 +71,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RpcGeoreference.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NitfPropertiesManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -172,7 +172,9 @@
     <ClInclude Include="NitfResource.h" />
     <ClInclude Include="NitfTreParser.h" />
     <ClInclude Include="NitfTreParserShell.h" />
+    <ClInclude Include="NitfProperties.h" />
     <ClInclude Include="NitfUtilities.h" />
+    <ClInclude Include="NitfPropertiesQWidgetWrapper.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -82,5 +82,11 @@
     <ClInclude Include="NitfImageSubheader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="NitfProperties.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NitfPropertiesQWidgetWrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
