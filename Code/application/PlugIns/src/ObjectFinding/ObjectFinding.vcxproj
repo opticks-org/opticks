@@ -56,6 +56,7 @@
     <Import Project="..\..\..\CompileSettings\Qt-Debug.props" />
     <Import Project="..\..\..\CompileSettings\Xerces-Debug.props" />
     <Import Project="..\..\..\CompileSettings\pthreads.props" />
+    <Import Project="..\..\..\CompileSettings\opencv-debug.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -66,6 +67,7 @@
     <Import Project="..\..\..\CompileSettings\Qt-Release.props" />
     <Import Project="..\..\..\CompileSettings\Xerces-Release.props" />
     <Import Project="..\..\..\CompileSettings\pthreads.props" />
+    <Import Project="..\..\..\CompileSettings\opencv-release.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -76,6 +78,7 @@
     <Import Project="..\..\..\CompileSettings\Qt-Debug.props" />
     <Import Project="..\..\..\CompileSettings\Xerces-Debug.props" />
     <Import Project="..\..\..\CompileSettings\pthreads.props" />
+    <Import Project="..\..\..\CompileSettings\opencv-debug.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -86,6 +89,7 @@
     <Import Project="..\..\..\CompileSettings\Qt-Release.props" />
     <Import Project="..\..\..\CompileSettings\Xerces-Release.props" />
     <Import Project="..\..\..\CompileSettings\pthreads.props" />
+    <Import Project="..\..\..\CompileSettings\opencv-release.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
@@ -138,12 +142,14 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ConnectedComponents.cpp" />
     <ClCompile Include="ModuleManager.cpp" />
     <ClCompile Include="QtCluster.cpp" />
     <ClCompile Include="QtClusterGui.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_QtClusterGui.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ConnectedComponents.h" />
     <ClInclude Include="QtCluster.h" />
     <CustomBuild Include="QtClusterGui.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing %(Filename).h...</Message>

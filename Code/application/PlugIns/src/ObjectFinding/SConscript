@@ -4,6 +4,8 @@ import glob
 # import the environment
 ####
 Import('env build_dir TOOLPATH')
+env = env.Clone()
+env.Tool('opencv', toolpath=[TOOLPATH])
 
 ####
 # build sources

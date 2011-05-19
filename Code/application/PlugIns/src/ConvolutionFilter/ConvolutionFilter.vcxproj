@@ -57,6 +57,7 @@
     <Import Project="..\..\..\CompileSettings\PlugInCommonSettings.props" />
     <Import Project="..\..\..\CompileSettings\Qt-Debug.props" />
     <Import Project="..\..\..\CompileSettings\Xerces-Debug.props" />
+    <Import Project="..\..\..\CompileSettings\opencv-debug.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -68,6 +69,7 @@
     <Import Project="..\..\..\CompileSettings\PlugInCommonSettings.props" />
     <Import Project="..\..\..\CompileSettings\Qt-Release.props" />
     <Import Project="..\..\..\CompileSettings\Xerces-Release.props" />
+    <Import Project="..\..\..\CompileSettings\opencv-release.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -79,6 +81,7 @@
     <Import Project="..\..\..\CompileSettings\PlugInCommonSettings.props" />
     <Import Project="..\..\..\CompileSettings\Qt-Debug.props" />
     <Import Project="..\..\..\CompileSettings\Xerces-Debug.props" />
+    <Import Project="..\..\..\CompileSettings\opencv-debug.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -90,6 +93,7 @@
     <Import Project="..\..\..\CompileSettings\PlugInCommonSettings.props" />
     <Import Project="..\..\..\CompileSettings\Qt-Release.props" />
     <Import Project="..\..\..\CompileSettings\Xerces-Release.props" />
+    <Import Project="..\..\..\CompileSettings\opencv-release.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
@@ -159,10 +163,12 @@
     <ClCompile Include="ConvolutionMatrixWidget.cpp" />
     <ClCompile Include="ModuleManager.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_ConvolutionMatrixWidget.cpp" />
+    <ClCompile Include="MorphologicalFilter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConvolutionFilterShell.h" />
     <ClInclude Include="ConvolutionMatrixEditor.h" />
+    <ClInclude Include="MorphologicalFilter.h" />
     <CustomBuild Include="ConvolutionMatrixWidget.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing %(Filename).h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"

@@ -26,9 +26,15 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_QtClusterGui.cpp">
       <Filter>moc</Filter>
     </ClCompile>
+    <ClCompile Include="ConnectedComponents.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="QtCluster.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ConnectedComponents.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
