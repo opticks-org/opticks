@@ -33,13 +33,8 @@ public:
    unsigned int getNumBands();
    unsigned int getInterlineBytes();
 
-   unsigned int getStartBlock() const;
-   unsigned int getEndBlock() const;
-
 private:
    GeoTiffOnDisk::CacheUnit* mpCacheUnit;
-   unsigned int mStartBlock;
-   unsigned int mEndBlock;
    size_t mOffset;
    unsigned int mRowSkip;
    unsigned int mColumnSkip;

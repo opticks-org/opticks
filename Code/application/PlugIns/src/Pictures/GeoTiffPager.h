@@ -10,15 +10,16 @@
 #ifndef GEOTIFFPAGER_H
 #define GEOTIFFPAGER_H
 
+#include "DMutex.h"
 #include "ModelServices.h"
 #include "PlugInManagerServices.h"
 #include "RasterPagerShell.h"
 #include "tiffio.h"
+#include "TypesFile.h"
 
 #include <deque>
 
 class GeoTiffPage;
-class Mutex;
 class RasterElement;
 
 namespace GeoTiffOnDisk
@@ -57,6 +58,8 @@ public:
    Cache();
    ~Cache();
 
+   void initCacheSize(unsigned int cacheSize);
+
    CacheUnit* getCacheUnit(unsigned int startBlock, unsigned int endBlock, size_t blockSize);
    CacheUnit* getCacheUnit(std::vector<unsigned int>& blocks, size_t blockSize);
 
@@ -65,7 +68,7 @@ private:
    static bool CacheCleaner(const CacheUnit* pUnit);
 
    cache_t mCache;
-   const unsigned int mCacheSize;
+   unsigned int mCacheSize;
    Service<ModelServices> mpModelSvcs;
 };
 
@@ -93,9 +96,13 @@ protected:
    GeoTiffPage* getPage(tstrip_t startStrip, tstrip_t endStrip, tsize_t stripSize);
 
 private:
-   RasterElement* mpRaster;
+   InterleaveFormatType mInterleave;
+   unsigned int mRowCount;
+   unsigned int mColumnCount;
+   unsigned int mBandCount;
+   unsigned int mBytesPerElement;
    TIFF* mpTiff;
-   Mutex* mpMutex;
+   mta::DMutex mMutex;
    Service<PlugInManagerServices> mpPluginSvcs;
    Service<ModelServices> mpModelSvcs;
    GeoTiffOnDisk::Cache mBlockCache;

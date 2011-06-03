@@ -11,7 +11,6 @@
 #include "GeoTiffPage.h"
 
 #include "AppVersion.h"
-#include "bmutex.h"
 #include "AppVerify.h"
 #include "DataRequest.h"
 #include "Filename.h"
@@ -97,6 +96,11 @@ void CacheUnit::setIsEmpty(bool v)
 
 Cache::Cache() : mCacheSize(8)
 {
+}
+
+void Cache::initCacheSize(unsigned int cacheSize)
+{
+   mCacheSize = cacheSize;
 }
 
 Cache::~Cache()
@@ -194,13 +198,13 @@ REGISTER_PLUGIN_BASIC(OpticksPictures, GeoTiffPager);
 
 GeoTiffPager::GeoTiffPager() :
          RasterPagerShell(),
-         mpRaster(NULL),
-         mpTiff(NULL),
-         mpMutex(new BMutex)
+         mInterleave(BIP),
+         mRowCount(0),
+         mColumnCount(0),
+         mBandCount(0),
+         mBytesPerElement(0),
+         mpTiff(NULL)
 {
-   mpMutex->MutexCreate();
-   mpMutex->MutexInit();
-
    setName("GeoTiffPager");
    setCopyright(APP_COPYRIGHT);
    setCreator("Ball Aerospace & Technologies Corp.");
@@ -213,9 +217,6 @@ GeoTiffPager::GeoTiffPager() :
 
 GeoTiffPager::~GeoTiffPager()
 {
-   mpMutex->MutexDestroy();
-   delete mpMutex;
-
    if (mpTiff != NULL)
    {
       TIFFClose(mpTiff);
@@ -228,19 +229,13 @@ bool GeoTiffPager::getInputSpecification(PlugInArgList *&pArgList)
    pArgList = mpPluginSvcs->getPlugInArgList();
    VERIFY(pArgList != NULL);
 
-   PlugInArg* pArg = mpPluginSvcs->getPlugInArg();
-   VERIFY(pArg != NULL);
-   pArg->setName("Raster Element");
-   pArg->setType("RasterElement");
-   pArg->setDefaultValue(NULL);
-   pArgList->addArg(*pArg);
-
-   pArg = mpPluginSvcs->getPlugInArg();
-   VERIFY(pArg != NULL);
-   pArg->setName("Filename");
-   pArg->setType("Filename");
-   pArg->setDefaultValue(NULL);
-   pArgList->addArg(*pArg);
+   VERIFY(pArgList->addArg<InterleaveFormatType>("interleave"));
+   VERIFY(pArgList->addArg<unsigned int>("numRows"));
+   VERIFY(pArgList->addArg<unsigned int>("numColumns"));
+   VERIFY(pArgList->addArg<unsigned int>("numBands"));
+   VERIFY(pArgList->addArg<unsigned int>("bytesPerElement"));
+   VERIFY(pArgList->addArg<unsigned int>("cacheBlocks", 8));
+   VERIFY(pArgList->addArg<Filename>("Filename", NULL));
 
    return true;
 }
@@ -255,20 +250,45 @@ bool GeoTiffPager::getOutputSpecification(PlugInArgList *&pArgList)
 
 bool GeoTiffPager::execute(PlugInArgList *pInputArgList, PlugInArgList *)
 {
-   if ((mpRaster != NULL) || (pInputArgList == NULL))
+   if (pInputArgList == NULL)
    {
       return false;
    }
 
    //Get PlugIn Arguments
-
-   RasterElement* pRaster = pInputArgList->getPlugInArgValue<RasterElement>("Raster Element");
-   if (pRaster == NULL)
+   if (!pInputArgList->getPlugInArgValue<InterleaveFormatType>("interleave", mInterleave))
    {
       return false;
    }
 
-   //Get Filename argument
+   if (!pInputArgList->getPlugInArgValue<unsigned int>("numRows", mRowCount))
+   {
+      return false;
+   }
+
+   if (!pInputArgList->getPlugInArgValue<unsigned int>("numColumns", mColumnCount))
+   {
+      return false;
+   }
+
+   if (!pInputArgList->getPlugInArgValue<unsigned int>("numBands", mBandCount))
+   {
+      return false;
+   }
+
+   if (!pInputArgList->getPlugInArgValue<unsigned int>("bytesPerElement", mBytesPerElement))
+   {
+      return false;
+   }
+
+   unsigned int cacheBlocks;
+   if (!pInputArgList->getPlugInArgValue<unsigned int>("cacheBlocks", cacheBlocks))
+   {
+      return false;
+   }
+
+   mBlockCache.initCacheSize(cacheBlocks);
+
    Filename* pFilename = pInputArgList->getPlugInArgValue<Filename>("Filename");
    if (pFilename == NULL)
    {
@@ -277,8 +297,6 @@ bool GeoTiffPager::execute(PlugInArgList *pInputArgList, PlugInArgList *)
 
    //Done getting PlugIn Arguments
    
-   mpRaster = pRaster;
-
    // open the TIFF
    mpTiff = TIFFOpen(pFilename->getFullPathAndName().c_str(), "r");
    return (mpTiff != NULL);
@@ -289,7 +307,7 @@ RasterPage* GeoTiffPager::getPage(DataRequest *pOriginalRequest,
       DimensionDescriptor startColumn, 
       DimensionDescriptor startBand)
 {
-   if (mpRaster == NULL || pOriginalRequest == NULL)
+   if (pOriginalRequest == NULL)
    {
       return NULL;
    }
@@ -302,32 +320,12 @@ RasterPage* GeoTiffPager::getPage(DataRequest *pOriginalRequest,
    GeoTiffPage* pPage(NULL);
 
    // ensure only one thread enters this code at a time
-   mpMutex->MutexLock();
+   mta::MutexLock lock(mMutex);
 
    // we wrap all this in a try/catch so we can have one exit point
    // and ensure that the mutex gets unlocked on an error
    try
    {
-      const RasterDataDescriptor* pDescriptor =
-         dynamic_cast<const RasterDataDescriptor*>(mpRaster->getDataDescriptor());
-      if (pDescriptor == NULL)
-      {
-         throw string("Invalid Data Descriptor");
-      }
-
-      const RasterFileDescriptor* pFileDescriptor =
-         dynamic_cast<const RasterFileDescriptor*>(pDescriptor->getFileDescriptor());
-      if (pFileDescriptor == NULL)
-      {
-         throw string("Invalid File Descriptor");
-      }
-
-      InterleaveFormatType interleave = pFileDescriptor->getInterleaveFormat();
-      unsigned int numBands = pFileDescriptor->getBandCount();
-      unsigned int numRows = pFileDescriptor->getRowCount();
-      unsigned int numColumns = pFileDescriptor->getColumnCount();
-      unsigned int bytesPerElement = pDescriptor->getBytesPerElement();
-
       unsigned int concurrentRows = pOriginalRequest->getConcurrentRows();
       unsigned int concurrentColumns = pOriginalRequest->getConcurrentColumns();
       unsigned int concurrentBands = pOriginalRequest->getConcurrentBands();
@@ -337,15 +335,15 @@ RasterPage* GeoTiffPager::getPage(DataRequest *pOriginalRequest,
       unsigned int bandNumber = startBand.getOnDiskNumber();
 
       // make sure the request is valid
-      if ((rowNumber >= numRows) || ((rowNumber + concurrentRows) > numRows) ||
-         (colNumber >= numColumns) || ((colNumber + concurrentColumns) > numColumns) ||
-         (bandNumber >= numBands) || ((bandNumber + concurrentBands) > numBands))
+      if ((rowNumber >= mRowCount) || ((rowNumber + concurrentRows) > mRowCount) ||
+         (colNumber >= mColumnCount) || ((colNumber + concurrentColumns) > mColumnCount) ||
+         (bandNumber >= mBandCount) || ((bandNumber + concurrentBands) > mBandCount))
       {
          // Since it is acceptable to increment off the end of the data, do not report an error message
          throw string();
       }
 
-      if ((interleave == BSQ) && (concurrentBands != 1))
+      if ((mInterleave == BSQ) && (concurrentBands != 1))
       {
          throw string("BSQ data can only be accessed one band at a time.");
       }
@@ -384,14 +382,14 @@ RasterPage* GeoTiffPager::getPage(DataRequest *pOriginalRequest,
          {
             throw string("Can't create a cache unit");
          }
-         if (interleave == BIP)
+         if (mInterleave == BIP)
          {
-            float rowsPerStrip(static_cast<float>(stripSize / numColumns) / static_cast<float>(numBands) /
-               static_cast<float>(bytesPerElement));
+            float rowsPerStrip(static_cast<float>(stripSize / mColumnCount) / static_cast<float>(mBandCount) /
+               static_cast<float>(mBytesPerElement));
             if (rowsPerStrip < 1.0)
             {
-               pPage = new GeoTiffPage(pCacheUnit, 0 + (rowNumber * numBands * bytesPerElement) +
-                                                           (bandNumber * bytesPerElement),
+               pPage = new GeoTiffPage(pCacheUnit, 0 + (rowNumber * mBandCount * mBytesPerElement) +
+                                                           (bandNumber * mBytesPerElement),
                                                            0, 0, 0);
             }
             else
@@ -400,17 +398,17 @@ RasterPage* GeoTiffPager::getPage(DataRequest *pOriginalRequest,
                const unsigned int numRowsOffset = rowNumber % uiRowsPerStrip;
                const unsigned int numRowsAvailable = (uiRowsPerStrip * (endStrip - startStrip + 1)) - numRowsOffset;
                pPage = new GeoTiffPage(pCacheUnit,
-                           (numRowsOffset * numColumns * numBands * bytesPerElement) +
-                           (colNumber * numBands * bytesPerElement) + (bandNumber * bytesPerElement),
+                           (numRowsOffset * mColumnCount * mBandCount * mBytesPerElement) +
+                           (colNumber * mBandCount * mBytesPerElement) + (bandNumber * mBytesPerElement),
                            numRowsAvailable, 0, 0);
             }
          }
-         else if (interleave == BSQ)
+         else if (mInterleave == BSQ)
          {
-            float rowsPerStrip(static_cast<float>(stripSize / numColumns) / static_cast<float>(bytesPerElement));
+            float rowsPerStrip(static_cast<float>(stripSize / mColumnCount) / static_cast<float>(mBytesPerElement));
             if (rowsPerStrip < 1.0)
             {
-               pPage = new GeoTiffPage(pCacheUnit, 0 + colNumber * bytesPerElement, 0, 0, 0);
+               pPage = new GeoTiffPage(pCacheUnit, 0 + colNumber * mBytesPerElement, 0, 0, 0);
             }
             else
             {
@@ -418,7 +416,7 @@ RasterPage* GeoTiffPager::getPage(DataRequest *pOriginalRequest,
                const unsigned int numRowsOffset = rowNumber % uiRowsPerStrip;
                const unsigned int numRowsAvailable = (uiRowsPerStrip * (endStrip - startStrip + 1)) - numRowsOffset;
                pPage = new GeoTiffPage(pCacheUnit,
-                  (numRowsOffset * numColumns * bytesPerElement) + (colNumber * bytesPerElement),
+                  (numRowsOffset * mColumnCount * mBytesPerElement) + (colNumber * mBytesPerElement),
                   numRowsAvailable, 0, 0);
             }
          }
@@ -478,14 +476,14 @@ RasterPage* GeoTiffPager::getPage(DataRequest *pOriginalRequest,
          // in that method (as of libtiff 3.8.1) so compute them manually here.
 
          // The number of tiles from left to right
-         const uint32 tilesAcross((numColumns + tileWidth - 1) / tileWidth);
+         const uint32 tilesAcross((mColumnCount + tileWidth - 1) / tileWidth);
          if (tilesAcross == 0)
          {
             throw string("Cannot determine tilesAcross");
          }
 
          // The number of tiles from top to bottom
-         const uint32 tilesDown((numRows + tileLength - 1) / tileLength);
+         const uint32 tilesDown((mRowCount + tileLength - 1) / tileLength);
          if (tilesDown == 0)
          {
             throw string("Cannot determine tilesDown");
@@ -495,7 +493,7 @@ RasterPage* GeoTiffPager::getPage(DataRequest *pOriginalRequest,
          // BIP: Tiles contain all bands, so this is 0
          // BSQ: Tiles contain a single band, so this is number of tiles per band * bandNumber
          // This is stated in the TIFF 6.0 spec on page 68 (in the TileOffsets definition)
-         const uint32 tileOffset(interleave == BIP ? 0 : bandNumber * tilesAcross * tilesDown);
+         const uint32 tileOffset(mInterleave == BIP ? 0 : bandNumber * tilesAcross * tilesDown);
 
          // The 0-based index of the first desired tile
          const ttile_t startTileIndex(rowNumber / tileLength);
@@ -525,14 +523,14 @@ RasterPage* GeoTiffPager::getPage(DataRequest *pOriginalRequest,
          }
 
          // The number of bands in pPage
-         const unsigned int bandSkip(interleave == BIP ? numBands : 1);
+         const unsigned int bandSkip(mInterleave == BIP ? mBandCount : 1);
 
          // The number of columns in pPage
-         const unsigned int columnSkip(numColumns);
+         const unsigned int columnSkip(mColumnCount);
 
          // The offset of the first requested data within pPage
-         const size_t offset(bytesPerElement *
-            ((rowNumber % tileLength) * columnSkip * bandSkip + (interleave == BSQ ? 0 : bandNumber)));
+         const size_t offset(mBytesPerElement *
+            ((rowNumber % tileLength) * columnSkip * bandSkip + (mInterleave == BSQ ? 0 : bandNumber)));
 
          // The number of rows in pPage
          const unsigned int rowSkip(tileLength * ((endTile - startTile + 1) / tilesAcross));
@@ -554,23 +552,23 @@ RasterPage* GeoTiffPager::getPage(DataRequest *pOriginalRequest,
                char* pBlockPos(pCacheUnit->data());
 
                // Increment by one or more rows of tiles
-               pBlockPos += tileSize * tilesAcross * bandSkip * bytesPerElement * (tileNum / tilesAcross);
+               pBlockPos += tileSize * tilesAcross * bandSkip * mBytesPerElement * (tileNum / tilesAcross);
 
                // Increment by one or more tiles within a row
-               pBlockPos += tileWidth * bandSkip * bytesPerElement * (tileNum % tilesAcross);
+               pBlockPos += tileWidth * bandSkip * mBytesPerElement * (tileNum % tilesAcross);
 
                // The number of bytes to copy - this might be different for partial tiles (e.g.: at the end of a row)
                size_t numBytesToCopy = tileWidth;
-               if ((tileNum + 1) % tilesAcross == 0 && numColumns % tileWidth != 0)
+               if ((tileNum + 1) % tilesAcross == 0 && mColumnCount % tileWidth != 0)
                {
-                  numBytesToCopy = numColumns % tileWidth;
+                  numBytesToCopy = mColumnCount % tileWidth;
                }
 
-               numBytesToCopy *= bandSkip * bytesPerElement;
+               numBytesToCopy *= bandSkip * mBytesPerElement;
                for (uint32 row = 0; row < tileLength; ++row)
                {
-                  const size_t rowOffset = row * numColumns * bandSkip * bytesPerElement;
-                  const size_t tileOffset = row * tileWidth * bandSkip * bytesPerElement;
+                  const size_t rowOffset = row * mColumnCount * bandSkip * mBytesPerElement;
+                  const size_t tileOffset = row * tileWidth * bandSkip * mBytesPerElement;
                   memcpy(pBlockPos + rowOffset, &tileData[tileOffset], numBytesToCopy);
                }
             }
@@ -590,9 +588,6 @@ RasterPage* GeoTiffPager::getPage(DataRequest *pOriginalRequest,
       }
    }
 
-   //unlock the mutex now
-   mpMutex->MutexUnlock();
-
    return pPage;
 }
 
@@ -604,13 +599,10 @@ void GeoTiffPager::releasePage(RasterPage *pPage)
    }
 
    //ensure only one thread enters this code at a time
-   mpMutex->MutexLock();
+   mta::MutexLock lock(mMutex);
 
    GeoTiffPage* pGeoTiffPage = static_cast<GeoTiffPage*>(pPage);
    delete pGeoTiffPage;
-
-   //unlock the mutex now
-   mpMutex->MutexUnlock();
 }
 
 int GeoTiffPager::getSupportedRequestVersion() const

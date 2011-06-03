@@ -10,26 +10,14 @@
 #include "GeoTiffPage.h"
 #include "GeoTiffPager.h"
 
-#include <functional>
-#include <algorithm>
-
-using namespace std;
-
 GeoTiffPage::GeoTiffPage(GeoTiffOnDisk::CacheUnit* pCacheUnit, size_t offset, unsigned int rowSkip,
                          unsigned int columnSkip, unsigned int bandSkip) :
    mpCacheUnit(pCacheUnit),
-   mStartBlock(0),
-   mEndBlock(0),
    mOffset(offset),
    mRowSkip(rowSkip),
    mColumnSkip(columnSkip),
    mBandSkip(bandSkip)
 {
-   if (pCacheUnit != NULL)
-   {
-      mStartBlock = *min_element(pCacheUnit->blockNumbers().begin(), pCacheUnit->blockNumbers().end());
-      mEndBlock = *max_element(pCacheUnit->blockNumbers().begin(), pCacheUnit->blockNumbers().end());
-   }
 }
 
 GeoTiffPage::~GeoTiffPage()
@@ -67,14 +55,4 @@ unsigned int GeoTiffPage::getNumBands()
 unsigned int GeoTiffPage::getInterlineBytes()
 {
    return 0;
-}
-
-unsigned int GeoTiffPage::getStartBlock() const
-{
-   return mStartBlock;
-}
-
-unsigned int GeoTiffPage::getEndBlock() const
-{
-   return mEndBlock;
 }

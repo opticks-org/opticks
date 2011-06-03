@@ -1076,9 +1076,9 @@ void GeoTIFFImporter::loadIsdMetadata(DataDescriptor* pDescriptor) const
 bool GeoTIFFImporter::createRasterPager(RasterElement *pRasterElement) const
 {
    VERIFY(pRasterElement != NULL);
-   DataDescriptor* pDescriptor = pRasterElement->getDataDescriptor();
+   RasterDataDescriptor* pDescriptor = dynamic_cast<RasterDataDescriptor*>(pRasterElement->getDataDescriptor());
    VERIFY(pDescriptor != NULL);
-   FileDescriptor* pFileDescriptor = pDescriptor->getFileDescriptor();
+   RasterFileDescriptor* pFileDescriptor = dynamic_cast<RasterFileDescriptor*>(pDescriptor->getFileDescriptor());
    VERIFY(pFileDescriptor != NULL);
 
    const string& filename = pRasterElement->getFilename();
@@ -1090,7 +1090,16 @@ bool GeoTIFFImporter::createRasterPager(RasterElement *pRasterElement) const
    pFilename->setFullPathAndName(filename);
 
    ExecutableResource pagerPlugIn("GeoTiffPager", string(), pProgress);
-   pagerPlugIn->getInArgList().setPlugInArgValue("Raster Element", pRasterElement);
+   InterleaveFormatType interleave = pFileDescriptor->getInterleaveFormat();
+   unsigned int rowCount = pFileDescriptor->getRowCount();
+   unsigned int colCount = pFileDescriptor->getColumnCount();
+   unsigned int bandCount = pFileDescriptor->getBandCount();
+   unsigned int bytesPerElement = pDescriptor->getBytesPerElement();
+   pagerPlugIn->getInArgList().setPlugInArgValue<InterleaveFormatType>("interleave", &interleave);
+   pagerPlugIn->getInArgList().setPlugInArgValue<unsigned int>("numRows", &rowCount);
+   pagerPlugIn->getInArgList().setPlugInArgValue<unsigned int>("numColumns", &colCount);
+   pagerPlugIn->getInArgList().setPlugInArgValue<unsigned int>("numBands", &bandCount);
+   pagerPlugIn->getInArgList().setPlugInArgValue<unsigned int>("bytesPerElement", &bytesPerElement);
    pagerPlugIn->getInArgList().setPlugInArgValue("Filename", pFilename.get());
    bool success = pagerPlugIn->execute();
 
