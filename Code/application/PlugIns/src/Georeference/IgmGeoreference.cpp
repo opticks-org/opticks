@@ -95,7 +95,7 @@ bool IgmGeoreference::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
 
    std::string geoName = "IGM_GEO";
 
-   if (mpGui != NULL && mpGui->getFilename().isEmpty() == false || mpRaster->isGeoreferenced())
+   if (mpGui != NULL && mpGui->getFilename().isEmpty() == false)
    {
       ImporterResource importer("Auto Importer", mpGui->getFilename().toStdString());
       if (importer->execute() == false)
@@ -127,8 +127,11 @@ bool IgmGeoreference::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
    mLoadedColumns = pMainDesc->getColumns();
    mLoadedBands = pMainDesc->getBands();
 
-   mpIgmRaster.reset(dynamic_cast<RasterElement*>(Service<ModelServices>()->getElement(
-      geoName, TypeConverter::toString<RasterElement>(), mpRaster)));
+   if (mpGui == NULL || (mpGui != NULL && mpGui->getFilename().length() != 0))
+   {
+      mpIgmRaster.reset(dynamic_cast<RasterElement*>(Service<ModelServices>()->getElement(
+         geoName, TypeConverter::toString<RasterElement>(), mpRaster)));
+   }
    mpIgmRaster.addSignal(SIGNAL_NAME(Subject, Deleted), Slot(this, &IgmGeoreference::elementDeleted));
    if (mpIgmRaster.get() == NULL)
    {
@@ -208,7 +211,6 @@ bool IgmGeoreference::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
    }
 
    int order = 2;
-   mpGcpPlugIn = NULL;
    PlugInArgList& gcpArgs = pGeoreference->getInArgList();
    bool bConditionsForExecution =
       (gcpArgs.setPlugInArgValue<RasterElement>(Executable::DataElementArg(), mpIgmRaster.get()) == false ||
