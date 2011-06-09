@@ -1,0 +1,103 @@
+/** \page plugintutorial_building Building and Running Tutorial plug-ins
+
+The SDK includes tutorial plug-ins to help first-time developers understand how to create plug-ins for %Opticks.
+The SDK also includes other sample plug-ins that more advanced developers can use as reference.
+This document will describe how to build those plug-ins and then run them with an installation of %Opticks.
+This document assumes that the SDK was unzipped to a location known as SDK_HOME.
+Wherever you see the word SDK_HOME, please expand that to be the directory where you unzipped this SDK.
+
+If you have any difficulty building or running the tutorials, please join the developers mailing list at <a href="https://opticks.ballforge.net/ds/viewForums.do" target="_blank">https://opticks.ballforge.net/servlets/ProjectMailingListList</a> and send an e-mail describing your problem.
+
+\section GettingTutorialDependencies Acquiring 3rd party software and libraries
+Before you can compile the tutorials or sample plug-ins you must first acquire all necessary 3rd party software.
+<ol>
+<li>Please install the following software, regardless of operating system:
+    <ul>
+    <li>Python 2.5 or later (http://www.python.org/download/).</li>
+    <li>Java Runtime Environment 1.4 or later (http://www.java.com/).</li>
+    </ul>
+</li>
+<li>On Windows, please install a copy of Visual Studio 2010 (any edition will work)</li>
+<li>On Solaris, please install the following software:
+    <ul>
+    <li>Sun Studio 12</li>
+    <li>SCons 1.2 or later (http://www.scons.org).</li>
+    </ul>
+</li>
+</ol>
+
+Once you have acquired the above software, you will need to acquire the 3rd party software packages that are needed to compile and link the tutorial and sample plug-ins.
+<ol>
+<li>
+For Windows, open a command window and run the following command:
+\verbatim
+cd SDK_HOME\Dependencies
+retrieve-dependencies.bat
+\endverbatim
+For Solaris, open a terminal window and run the following command:
+\verbatim
+cd SDK_HOME/Dependencies
+./retrieve-dependencies.sh
+\endverbatim
+</li>
+<li>You should not encounter any errors running the previous step.</li>
+</ol>
+At this point you have all of the necessary dependencies.
+You will now need to create an environment variable called OPTICKSDEPENDENCIES set to SDK_HOME/Dependencies using the appropriate method for your system/operating system.
+
+\section BuildingTutorialWindows Building On Windows
+
+<ol>
+<li>
+Open Visual Studio 2010 (any edition).
+Please make sure that you have acquired the 3rd party dependencies and set the OPTICKSDEPENDENCIES environment variable as described in \ref GettingTutorialDependencies.</li>
+<li>Open SDK_HOME\Application\SamplePlugIns.sln</li>
+<li>Build the solution in your desired platform and configuration.  This will build all of the tutorials and all of the sample plug-ins.</li>
+<li>If you see any compilation or link errors, please go back and repeat these steps.</li>
+</ol>
+
+\section BuildingTutorialSolaris Building On Solaris
+
+<ol>
+<li>
+Open a terminal window.
+Please make sure that you have acquired the 3rd party dependencies and set the OPTICKSDEPENDENCIES environment variable as described in \ref GettingTutorialDependencies.
+</li>
+<li>
+Run the following command to build all of the tutorials and all of the sample plug-ins:
+\verbatim
+scons RELEASE="yes"
+\endverbatim
+</li>
+<li>If you see any compilation or link errors, please go back and repeat these steps.</li>
+</ol>
+
+\section RunningTutorial Running Tutorials With Opticks
+
+You do not need to have completed \ref GettingTutorialDependencies, \ref BuildingTutorialWindows or \ref BuildingTutorialSolaris before starting this step.
+The SDK includes pre-built binaries of all of the tutorials and sample plug-ins.
+If you do build the tutorial and sample plug-ins they will simply overwrite the pre-built binaries.
+You will need to have downloaded and installed %Opticks (<a href="https://opticks.ballforge.net/servlets/ProjectProcess?tab=1" target="_blank">https://opticks.ballforge.net/servlets/ProjectProcess?tab=1</a>) before you can run the tutorials or sample plug-ins.
+ 
+<ol>
+<li>Preparing to run on Windows
+
+Copy the pre-built tutorial and sample plug-ins (PlugInSampler.dll, PlugInSamplerHdf.dll, PlugInSamplerQt.dll, Tutorial.dll) from the appropriate SDK_HOME\\Build\\Binaries-YY-ZZ folder\\PlugIns to your %Opticks installation's plug-in folder.
+If you want to run %Opticks 32-bit, you will copy them from the SDK_HOME\\Build\\Binaries-Win32-release\\PlugIns folder to the "PlugIns" folder where you installed 32-bit %Opticks (i.e. C:\\Program Files\\%Opticks\\4.2.0\\PlugIns).
+If you want to run %Opticks 64-bit, you will copy them from the SDK_HOME\\Build\\Binaries-x64-release\\PlugIns folder to the "PlugIns" folder where you installed 64-bit %Opticks (i.e. C:\\Program Files\\%Opticks\\4.2.0\\PlugIns).
+</li>
+<li>Preparing to run on Solaris
+
+Copy the pre-built tutorial and sample plug-ins (PlugInSampler.so, PlugInSamplerHdf.so, PlugInSamplerQt.so, Tutorial.so) from the SDK_HOME/Build/Binaries-solaris-sparc-release/PlugIns to the "PlugIns" folder where you installed %Opticks (i.e. /opt/Opticks/4.2.0/PlugIns).
+</li>
+<li>Running %Opticks
+
+Start %Opticks as you would normally.
+You may need to right-click on the menu bar and click on the toolbar name in order to make it appear.
+The toolbars you would need to make visible are "Demo", "Tests" and "Tutorial."
+If you cannot find those toolbars please double-check the above steps.
+You can also open the message log to see if there are any error messages related to trying to load those plug-ins.
+</li>
+</ol>
+
+ */
