@@ -1,0 +1,121 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Documentation">
+      <UniqueIdentifier>{67ae4a67-2668-4f1d-ae71-28f3ce87e3f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Doxygen Configuration">
+      <UniqueIdentifier>{44aaa2b0-b3bf-4f41-b432-96c725ef81bb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Generated Doxygen">
+      <UniqueIdentifier>{4d750b2f-8be6-4382-a870-8b9368a844d5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="aeb.html">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="aeb.txt">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="aebl.html">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="contextmenus.txt">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="coordinate_systems.txt">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="dependencies.txt">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="deploymentfiles.txt">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="howto_buildenvironment.txt">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="howto_compileplugins.txt">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="howto_customdraganddrop.txt">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="howto_importer.txt">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="howto_sessionsave.txt">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="howto_writeinstaller.txt">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="iceformat.txt">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="mainpage.txt">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="overviews.txt">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="plugins.txt">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="plugintutorial1.txt">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="plugintutorial2.txt">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="plugintutorial3.txt">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="plugintutorial4.txt">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="plugintutorial5.txt">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="plugintutorial_building.txt">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="plugintutorial_overview.txt">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="settings_macros.txt">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="specialmetadata.txt">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="stringutilities_types.txt">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="suppressiblemsgdlg.txt">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="typeconverter_types.txt">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="upgrade_sdk.txt">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="usingimporterresource.txt">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="wavelengthfileformat.txt">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="application.dox">
+      <Filter>Doxygen Configuration</Filter>
+    </None>
+    <None Include="trailer.html">
+      <Filter>Doxygen Configuration</Filter>
+    </None>
+    <None Include="$(BUILDDIR)\DoxygenOutput\html\index.html">
+      <Filter>Generated Doxygen</Filter>
+    </None>
+  </ItemGroup>
+</Project>

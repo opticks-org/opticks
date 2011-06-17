@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<ConfigurationSettings xmlns="https://comet.balldayton.com/standards/namespaces/2005/v1/comet.xsd">
+
+  <opticks build_date="11 January 2007" release_date="17 January 2006" version="MPR02.05.4843"/>
+
+  <group name="settings" version="3">
+    <attribute name="General" type="DynamicObject" version="3">
+      <attribute name="DisplayClassificationMarkings" type="bool">
+        <value>0</value>
+      </attribute>
+    </attribute>
+    <attribute name="FileLocations" type="DynamicObject" version="3">
+      <attribute name="TempPath" type="Filename">
+        <value>/tmp</value>
+      </attribute>
+      <attribute name="MessageLogPath" type="Filename">
+        <value>/tmp</value>
+      </attribute>
+      <attribute name="WizardPath" type="Filename">
+        <value>$V(USER_DOCS)/Wizards</value>
+      </attribute>
+    </attribute>
+  </group>
+
+</ConfigurationSettings>
