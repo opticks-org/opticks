@@ -336,7 +336,14 @@ void PlugInManagerServicesImp::buildPlugInList(const string& plugInPath)
       vector<PlugInDescriptorImp*>::iterator plugInIter = plugIns.begin();
       while (plugInIter != plugIns.end())
       {
-         mPlugIns.insert(pair<string, PlugInDescriptorImp*>((*plugInIter)->getName(), (*plugInIter)));
+         pair<map<string, PlugInDescriptorImp*>::iterator, bool> insertResult;
+         insertResult = mPlugIns.insert(make_pair((*plugInIter)->getName(), (*plugInIter)));
+         if (!insertResult.second)
+         {
+            string msg = string("Multiple plug-ins are attempting to "
+               "register with the same name of " + (*plugInIter)->getName());
+            VERIFYNR_MSG(false, msg.c_str());
+         }
          plugInIter++;
       }
       notify(SIGNAL_NAME(PlugInManagerServices, ModuleCreated), boost::any(pCoreModule));
@@ -863,7 +870,14 @@ ModuleDescriptor* PlugInManagerServicesImp::addModule(const string& moduleFilena
       PlugInDescriptorImp* pPlugIn = *iter;
       if (pPlugIn != NULL)
       {
-         mPlugIns.insert(pair<string, PlugInDescriptorImp*>((*iter)->getName(), (*iter)));
+         pair<map<string, PlugInDescriptorImp*>::iterator, bool> insertResult;
+         insertResult = mPlugIns.insert(make_pair(pPlugIn->getName(), pPlugIn));
+         if (!insertResult.second)
+         {
+            string msg = string("Multiple plug-ins are attempting to "
+               "register with the same name of " + pPlugIn->getName());
+            VERIFYNR_MSG(false, msg.c_str());
+         }
       }
    }
    notify(SIGNAL_NAME(PlugInManagerServices, ModuleCreated), boost::any(pModule));
