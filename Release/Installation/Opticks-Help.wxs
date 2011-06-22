@@ -10,7 +10,6 @@
                   <File Name="index.htm" Id="F__Help_index.htm" />
                   <File Name="index.js" Id="F__Help_index.js" />
                   <File Name="index.mcwebhelp" Id="F__Help_index.mcwebhelp" />
-                  <File Name="index.xml" Id="F__Help_index.xml" />
                   <File Name="index_CSH.htm" Id="F__Help_index_csh.htm" />
                   <File Name="index_Left.htm" Id="F__Help_index_left.htm" />
                </Component>
@@ -75,6 +74,7 @@
                      <File Name="FT_Button.gif" Id="F__Help_ft_button.gif" />
                      <File Name="Geo_dropdown.gif" Id="F__Help_geo_dropdown.gif" />
                      <File Name="Glossary.htm" Id="F__Help_glossary.htm" />
+                     <File Name="Glossary.js" Id="F__Help_glossary.js" />
                      <File Name="Glossary.xml" Id="F__Help_glossary.xml" />
                      <File Name="Histogram_Window_Button.gif" Id="F__Help_histogram_window_button.gif" />
                      <File Name="Horizontal_Line.gif" Id="F__Help_horizontal_line.gif" />
@@ -120,7 +120,6 @@
                      <File Name="log_2_x_Button.gif" Id="F__Help_log_2_x_button.gif" />
                      <File Name="log_e_x_Button.gif" Id="F__Help_log_e_x_button.gif" />
                      <File Name="Measurement_Mode_Button.gif" Id="F__Help_measurement_mode_button.gif" />
-                     <File Name="Measurement_Mode_Button_22x21.gif" Id="F__Help_measurement_mode_button_22x21.gif" />
                      <File Name="Merge_AOIs_Button.gif" Id="F__Help_merge_aois_button.gif" />
                      <File Name="MGRS_Button.gif" Id="F__Help_mgrs_button.gif" />
                      <File Name="Mi_Button.gif" Id="F__Help_mi_button.gif" />
@@ -540,6 +539,7 @@
                            <File Name="Enable_Filters.gif" Id="F__Help_enable_filters.gif" />
                            <File Name="End_Point_Label_Buttons.png" Id="F__Help_end_point_label_buttons.png" />
                            <File Name="End_Point_Label_Buttons_22x21.png" Id="F__Help_end_point_label_buttons_22x21.png" />
+                           <File Name="ENGRDA_Tab.gif" Id="F__Help_engrda_tab.gif" />
                            <File Name="Enlarge_Image.jpg" Id="F__Help_enlarge_image.jpg" />
                            <File Name="Enlarge_Image_2.gif" Id="F__Help_enlarge_image_2.gif" />
                            <File Name="Enter_Wizard_Values.gif" Id="F__Help_enter_wizard_values.gif" />
@@ -802,7 +802,6 @@
                            <File Name="Run_Band_Math_3.gif" Id="F__Help_run_band_math_3.gif" />
                            <File Name="Run_Band_Math_4.gif" Id="F__Help_run_band_math_4.gif" />
                            <File Name="Run_cmd.jpg" Id="F__Help_run_cmd.jpg" />
-                           <File Name="Run_cmd_288x154.jpg" Id="F__Help_run_cmd_288x154.jpg" />
                            <File Name="Save_button.png" Id="F__Help_save_button.png" />
                            <File Name="Save_button_22x21.png" Id="F__Help_save_button_22x21.png" />
                            <File Name="Save_Menu_Location.gif" Id="F__Help_save_menu_location.gif" />
@@ -1092,73 +1091,143 @@
                </Directory>
                <Directory Id="D__Help_data" Name="Data" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Data">
                   <Component Id="C__Help_data" Guid="$(var.C__Help_data_Guid)" Win64="no">
+                     <File Name="Alias.js" Id="F__Help_alias.js" />
                      <File Name="Alias.xml" Id="F__Help_alias.xml" />
+                     <File Name="BrowseSequences.js" Id="F__Help_browsesequences.js" />
                      <File Name="BrowseSequences.xml" Id="F__Help_browsesequences.xml" />
+                     <File Name="Concepts.js" Id="F__Help_concepts.js" />
                      <File Name="Concepts.xml" Id="F__Help_concepts.xml" />
-                     <File Name="Index.xml" Id="F__Help_index.xml2" />
+                     <File Name="HelpSystem.js" Id="F__Help_helpsystem.js" />
+                     <File Name="HelpSystem.xml" Id="F__Help_helpsystem.xml" />
+                     <File Name="Index.js" Id="F__Help_index.js2" />
+                     <File Name="Index.xml" Id="F__Help_index.xml" />
+                     <File Name="Index_Chunk1.js" Id="F__Help_index_chunk1.js" />
                      <File Name="Index_Chunk1.xml" Id="F__Help_index_chunk1.xml" />
+                     <File Name="Index_Chunk2.js" Id="F__Help_index_chunk2.js" />
                      <File Name="Index_Chunk2.xml" Id="F__Help_index_chunk2.xml" />
+                     <File Name="Index_Chunk3.js" Id="F__Help_index_chunk3.js" />
                      <File Name="Index_Chunk3.xml" Id="F__Help_index_chunk3.xml" />
+                     <File Name="Index_Chunk4.js" Id="F__Help_index_chunk4.js" />
                      <File Name="Index_Chunk4.xml" Id="F__Help_index_chunk4.xml" />
+                     <File Name="Index_Chunk5.js" Id="F__Help_index_chunk5.js" />
                      <File Name="Index_Chunk5.xml" Id="F__Help_index_chunk5.xml" />
+                     <File Name="Search.js" Id="F__Help_search.js" />
                      <File Name="Search.xml" Id="F__Help_search.xml" />
+                     <File Name="Search_Chunk1.js" Id="F__Help_search_chunk1.js" />
                      <File Name="Search_Chunk1.xml" Id="F__Help_search_chunk1.xml" />
+                     <File Name="Search_Chunk10.js" Id="F__Help_search_chunk10.js" />
                      <File Name="Search_Chunk10.xml" Id="F__Help_search_chunk10.xml" />
+                     <File Name="Search_Chunk11.js" Id="F__Help_search_chunk11.js" />
                      <File Name="Search_Chunk11.xml" Id="F__Help_search_chunk11.xml" />
+                     <File Name="Search_Chunk12.js" Id="F__Help_search_chunk12.js" />
                      <File Name="Search_Chunk12.xml" Id="F__Help_search_chunk12.xml" />
+                     <File Name="Search_Chunk13.js" Id="F__Help_search_chunk13.js" />
                      <File Name="Search_Chunk13.xml" Id="F__Help_search_chunk13.xml" />
+                     <File Name="Search_Chunk14.js" Id="F__Help_search_chunk14.js" />
                      <File Name="Search_Chunk14.xml" Id="F__Help_search_chunk14.xml" />
+                     <File Name="Search_Chunk15.js" Id="F__Help_search_chunk15.js" />
                      <File Name="Search_Chunk15.xml" Id="F__Help_search_chunk15.xml" />
+                     <File Name="Search_Chunk16.js" Id="F__Help_search_chunk16.js" />
                      <File Name="Search_Chunk16.xml" Id="F__Help_search_chunk16.xml" />
+                     <File Name="Search_Chunk17.js" Id="F__Help_search_chunk17.js" />
                      <File Name="Search_Chunk17.xml" Id="F__Help_search_chunk17.xml" />
+                     <File Name="Search_Chunk18.js" Id="F__Help_search_chunk18.js" />
                      <File Name="Search_Chunk18.xml" Id="F__Help_search_chunk18.xml" />
+                     <File Name="Search_Chunk19.js" Id="F__Help_search_chunk19.js" />
                      <File Name="Search_Chunk19.xml" Id="F__Help_search_chunk19.xml" />
+                     <File Name="Search_Chunk2.js" Id="F__Help_search_chunk2.js" />
                      <File Name="Search_Chunk2.xml" Id="F__Help_search_chunk2.xml" />
+                     <File Name="Search_Chunk20.js" Id="F__Help_search_chunk20.js" />
                      <File Name="Search_Chunk20.xml" Id="F__Help_search_chunk20.xml" />
+                     <File Name="Search_Chunk21.js" Id="F__Help_search_chunk21.js" />
                      <File Name="Search_Chunk21.xml" Id="F__Help_search_chunk21.xml" />
+                     <File Name="Search_Chunk22.js" Id="F__Help_search_chunk22.js" />
                      <File Name="Search_Chunk22.xml" Id="F__Help_search_chunk22.xml" />
+                     <File Name="Search_Chunk23.js" Id="F__Help_search_chunk23.js" />
                      <File Name="Search_Chunk23.xml" Id="F__Help_search_chunk23.xml" />
+                     <File Name="Search_Chunk24.js" Id="F__Help_search_chunk24.js" />
                      <File Name="Search_Chunk24.xml" Id="F__Help_search_chunk24.xml" />
+                     <File Name="Search_Chunk25.js" Id="F__Help_search_chunk25.js" />
                      <File Name="Search_Chunk25.xml" Id="F__Help_search_chunk25.xml" />
+                     <File Name="Search_Chunk26.js" Id="F__Help_search_chunk26.js" />
                      <File Name="Search_Chunk26.xml" Id="F__Help_search_chunk26.xml" />
+                     <File Name="Search_Chunk27.js" Id="F__Help_search_chunk27.js" />
                      <File Name="Search_Chunk27.xml" Id="F__Help_search_chunk27.xml" />
+                     <File Name="Search_Chunk28.js" Id="F__Help_search_chunk28.js" />
                      <File Name="Search_Chunk28.xml" Id="F__Help_search_chunk28.xml" />
+                     <File Name="Search_Chunk29.js" Id="F__Help_search_chunk29.js" />
                      <File Name="Search_Chunk29.xml" Id="F__Help_search_chunk29.xml" />
+                     <File Name="Search_Chunk3.js" Id="F__Help_search_chunk3.js" />
                      <File Name="Search_Chunk3.xml" Id="F__Help_search_chunk3.xml" />
+                     <File Name="Search_Chunk30.js" Id="F__Help_search_chunk30.js" />
                      <File Name="Search_Chunk30.xml" Id="F__Help_search_chunk30.xml" />
+                     <File Name="Search_Chunk31.js" Id="F__Help_search_chunk31.js" />
                      <File Name="Search_Chunk31.xml" Id="F__Help_search_chunk31.xml" />
+                     <File Name="Search_Chunk32.js" Id="F__Help_search_chunk32.js" />
                      <File Name="Search_Chunk32.xml" Id="F__Help_search_chunk32.xml" />
+                     <File Name="Search_Chunk33.js" Id="F__Help_search_chunk33.js" />
                      <File Name="Search_Chunk33.xml" Id="F__Help_search_chunk33.xml" />
+                     <File Name="Search_Chunk34.js" Id="F__Help_search_chunk34.js" />
                      <File Name="Search_Chunk34.xml" Id="F__Help_search_chunk34.xml" />
+                     <File Name="Search_Chunk35.js" Id="F__Help_search_chunk35.js" />
                      <File Name="Search_Chunk35.xml" Id="F__Help_search_chunk35.xml" />
+                     <File Name="Search_Chunk36.js" Id="F__Help_search_chunk36.js" />
                      <File Name="Search_Chunk36.xml" Id="F__Help_search_chunk36.xml" />
+                     <File Name="Search_Chunk37.js" Id="F__Help_search_chunk37.js" />
                      <File Name="Search_Chunk37.xml" Id="F__Help_search_chunk37.xml" />
+                     <File Name="Search_Chunk38.js" Id="F__Help_search_chunk38.js" />
                      <File Name="Search_Chunk38.xml" Id="F__Help_search_chunk38.xml" />
+                     <File Name="Search_Chunk39.js" Id="F__Help_search_chunk39.js" />
                      <File Name="Search_Chunk39.xml" Id="F__Help_search_chunk39.xml" />
+                     <File Name="Search_Chunk4.js" Id="F__Help_search_chunk4.js" />
                      <File Name="Search_Chunk4.xml" Id="F__Help_search_chunk4.xml" />
+                     <File Name="Search_Chunk40.js" Id="F__Help_search_chunk40.js" />
                      <File Name="Search_Chunk40.xml" Id="F__Help_search_chunk40.xml" />
+                     <File Name="Search_Chunk41.js" Id="F__Help_search_chunk41.js" />
                      <File Name="Search_Chunk41.xml" Id="F__Help_search_chunk41.xml" />
+                     <File Name="Search_Chunk42.js" Id="F__Help_search_chunk42.js" />
                      <File Name="Search_Chunk42.xml" Id="F__Help_search_chunk42.xml" />
+                     <File Name="Search_Chunk43.js" Id="F__Help_search_chunk43.js" />
                      <File Name="Search_Chunk43.xml" Id="F__Help_search_chunk43.xml" />
+                     <File Name="Search_Chunk44.js" Id="F__Help_search_chunk44.js" />
                      <File Name="Search_Chunk44.xml" Id="F__Help_search_chunk44.xml" />
+                     <File Name="Search_Chunk45.js" Id="F__Help_search_chunk45.js" />
                      <File Name="Search_Chunk45.xml" Id="F__Help_search_chunk45.xml" />
+                     <File Name="Search_Chunk46.js" Id="F__Help_search_chunk46.js" />
                      <File Name="Search_Chunk46.xml" Id="F__Help_search_chunk46.xml" />
+                     <File Name="Search_Chunk47.js" Id="F__Help_search_chunk47.js" />
                      <File Name="Search_Chunk47.xml" Id="F__Help_search_chunk47.xml" />
+                     <File Name="Search_Chunk48.js" Id="F__Help_search_chunk48.js" />
                      <File Name="Search_Chunk48.xml" Id="F__Help_search_chunk48.xml" />
+                     <File Name="Search_Chunk49.js" Id="F__Help_search_chunk49.js" />
                      <File Name="Search_Chunk49.xml" Id="F__Help_search_chunk49.xml" />
+                     <File Name="Search_Chunk5.js" Id="F__Help_search_chunk5.js" />
                      <File Name="Search_Chunk5.xml" Id="F__Help_search_chunk5.xml" />
+                     <File Name="Search_Chunk50.js" Id="F__Help_search_chunk50.js" />
                      <File Name="Search_Chunk50.xml" Id="F__Help_search_chunk50.xml" />
+                     <File Name="Search_Chunk51.js" Id="F__Help_search_chunk51.js" />
                      <File Name="Search_Chunk51.xml" Id="F__Help_search_chunk51.xml" />
+                     <File Name="Search_Chunk52.js" Id="F__Help_search_chunk52.js" />
                      <File Name="Search_Chunk52.xml" Id="F__Help_search_chunk52.xml" />
+                     <File Name="Search_Chunk53.js" Id="F__Help_search_chunk53.js" />
                      <File Name="Search_Chunk53.xml" Id="F__Help_search_chunk53.xml" />
+                     <File Name="Search_Chunk54.js" Id="F__Help_search_chunk54.js" />
                      <File Name="Search_Chunk54.xml" Id="F__Help_search_chunk54.xml" />
+                     <File Name="Search_Chunk55.js" Id="F__Help_search_chunk55.js" />
                      <File Name="Search_Chunk55.xml" Id="F__Help_search_chunk55.xml" />
+                     <File Name="Search_Chunk6.js" Id="F__Help_search_chunk6.js" />
                      <File Name="Search_Chunk6.xml" Id="F__Help_search_chunk6.xml" />
+                     <File Name="Search_Chunk7.js" Id="F__Help_search_chunk7.js" />
                      <File Name="Search_Chunk7.xml" Id="F__Help_search_chunk7.xml" />
+                     <File Name="Search_Chunk8.js" Id="F__Help_search_chunk8.js" />
                      <File Name="Search_Chunk8.xml" Id="F__Help_search_chunk8.xml" />
+                     <File Name="Search_Chunk9.js" Id="F__Help_search_chunk9.js" />
                      <File Name="Search_Chunk9.xml" Id="F__Help_search_chunk9.xml" />
+                     <File Name="Synonyms.js" Id="F__Help_synonyms.js" />
                      <File Name="Synonyms.xml" Id="F__Help_synonyms.xml" />
+                     <File Name="Toc.js" Id="F__Help_toc.js" />
                      <File Name="Toc.xml" Id="F__Help_toc.xml" />
+                     <File Name="Toc_Chunk1.js" Id="F__Help_toc_chunk1.js" />
                      <File Name="Toc_Chunk1.xml" Id="F__Help_toc_chunk1.xml" />
                   </Component>
                   <Directory Id="D__Help_skinbluegov" Name="SkinBlueGov" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Data\SkinBlueGov">
@@ -1214,7 +1283,9 @@
                         <File Name="SearchAccordionBackground.jpg" Id="F__Help_searchaccordionbackground.jpg" />
                         <File Name="SearchAccordionBackground_over.jpg" Id="F__Help_searchaccordionbackground_over.jpg" />
                         <File Name="SearchBG.png" Id="F__Help_searchbg.png" />
+                        <File Name="Skin.js" Id="F__Help_skin.js" />
                         <File Name="Skin.xml" Id="F__Help_skin.xml" />
+                        <File Name="Stylesheet.js" Id="F__Help_stylesheet.js" />
                         <File Name="Stylesheet.xml" Id="F__Help_stylesheet.xml" />
                         <File Name="TocAccordionBackground.jpg" Id="F__Help_tocaccordionbackground.jpg" />
                         <File Name="TocAccordionBackground_over.jpg" Id="F__Help_tocaccordionbackground_over.jpg" />
@@ -1328,10 +1399,12 @@
                         <File Name="SelectToc.gif" Id="F__Help_selecttoc.gif" />
                         <File Name="SelectToc_over.gif" Id="F__Help_selecttoc_over.gif" />
                         <File Name="SelectToc_selected.gif" Id="F__Help_selecttoc_selected.gif" />
+                        <File Name="Skin.js" Id="F__Help_skin.js2" />
                         <File Name="Skin.xml" Id="F__Help_skin.xml2" />
                         <File Name="Stop.gif" Id="F__Help_stop.gif" />
                         <File Name="Stop_over.gif" Id="F__Help_stop_over.gif" />
                         <File Name="Stop_selected.gif" Id="F__Help_stop_selected.gif" />
+                        <File Name="Stylesheet.js" Id="F__Help_stylesheet.js2" />
                         <File Name="Stylesheet.xml" Id="F__Help_stylesheet.xml2" />
                         <File Name="TocAccordionBackground.jpg" Id="F__Help_tocaccordionbackground.jpg2" />
                         <File Name="TocAccordionBackground_over.jpg" Id="F__Help_tocaccordionbackground_over.jpg2" />
@@ -1453,10 +1526,12 @@
                         <File Name="SelectTopiccomments.gif" Id="F__Help_selecttopiccomments.gif" />
                         <File Name="SelectTopiccomments_over.gif" Id="F__Help_selecttopiccomments_over.gif" />
                         <File Name="SelectTopiccomments_selected.gif" Id="F__Help_selecttopiccomments_selected.gif" />
+                        <File Name="Skin.js" Id="F__Help_skin.js3" />
                         <File Name="Skin.xml" Id="F__Help_skin.xml3" />
                         <File Name="Stop.gif" Id="F__Help_stop.gif2" />
                         <File Name="Stop_over.gif" Id="F__Help_stop_over.gif2" />
                         <File Name="Stop_selected.gif" Id="F__Help_stop_selected.gif2" />
+                        <File Name="Stylesheet.js" Id="F__Help_stylesheet.js3" />
                         <File Name="Stylesheet.xml" Id="F__Help_stylesheet.xml3" />
                         <File Name="TocAccordionBackground.jpg" Id="F__Help_tocaccordionbackground.jpg3" />
                         <File Name="TocAccordionBackground_over.jpg" Id="F__Help_tocaccordionbackground_over.jpg3" />
@@ -1549,9 +1624,11 @@
                         <File Name="SearchBG.png" Id="F__Help_searchbg.png4" />
                         <File Name="SelectBrowseSequences.gif" Id="F__Help_selectbrowsesequences.gif2" />
                         <File Name="SelectBrowseSequences_selected.gif" Id="F__Help_selectbrowsesequences_selected.gif2" />
+                        <File Name="Skin.js" Id="F__Help_skin.js4" />
                         <File Name="Skin.xml" Id="F__Help_skin.xml4" />
                         <File Name="star.png" Id="F__Help_star.png" />
                         <File Name="stop.png" Id="F__Help_stop.png" />
+                        <File Name="Stylesheet.js" Id="F__Help_stylesheet.js4" />
                         <File Name="Stylesheet.xml" Id="F__Help_stylesheet.xml4" />
                         <File Name="TocAccordionBackground.jpg" Id="F__Help_tocaccordionbackground.jpg4" />
                         <File Name="TocAccordionBackground_over.jpg" Id="F__Help_tocaccordionbackground_over.jpg4" />

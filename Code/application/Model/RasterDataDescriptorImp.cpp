@@ -592,6 +592,31 @@ DataDescriptor* RasterDataDescriptorImp::copy(const string& name, DataElement* p
    return pDescriptor;
 }
 
+DataDescriptor* RasterDataDescriptorImp::copy(const string& name, const vector<string>& parent) const
+{
+   RasterDataDescriptor* pDescriptor = dynamic_cast<RasterDataDescriptor*>(DataDescriptorImp::copy(name, parent));
+   if (pDescriptor != NULL)
+   {
+      pDescriptor->setDataType(mDataType);
+      pDescriptor->setValidDataTypes(mValidDataTypes);
+      pDescriptor->setInterleaveFormat(mInterleave);
+      pDescriptor->setBadValues(mBadValues);
+      pDescriptor->setRows(mRows);
+      pDescriptor->setColumns(mColumns);
+      pDescriptor->setBands(mBands);
+      pDescriptor->setXPixelSize(mXPixelSize);
+      pDescriptor->setYPixelSize(mYPixelSize);
+      pDescriptor->setUnits(&mUnits);
+      pDescriptor->setDisplayBand(GRAY, mGrayBand);
+      pDescriptor->setDisplayBand(RED, mRedBand);
+      pDescriptor->setDisplayBand(GREEN, mGreenBand);
+      pDescriptor->setDisplayBand(BLUE, mBlueBand);
+      pDescriptor->setDisplayMode(mDisplayMode);
+   }
+
+   return pDescriptor;
+}
+
 void RasterDataDescriptorImp::addToMessageLog(Message* pMessage) const
 {
    DataDescriptorImp::addToMessageLog(pMessage);

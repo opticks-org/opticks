@@ -77,7 +77,8 @@ public:
    DisplayMode getDisplayMode() const;
 
    using DataDescriptorImp::copy;
-   DataDescriptor* copy(const std::string& name, DataElement* pParent) const;
+   virtual DataDescriptor* copy(const std::string& name, DataElement* pParent) const;
+   virtual DataDescriptor* copy(const std::string& name, const std::vector<std::string>& parent) const;
 
    void addToMessageLog(Message* pMessage) const;
 
