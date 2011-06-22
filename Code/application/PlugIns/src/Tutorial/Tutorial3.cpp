@@ -100,7 +100,6 @@ bool Tutorial3::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
    VERIFY(pDesc != NULL);
 
    FactoryResource<DataRequest> pRequest;
-   pRequest->setInterleaveFormat(BSQ);
    DataAccessor pAcc = pCube->getDataAccessor(pRequest.release());
    double min = std::numeric_limits<double>::max();
    double max = -min;

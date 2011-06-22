@@ -754,9 +754,7 @@ void StatisticsThread::run()
       }
       else
       {
-         // BIL is really tricky to use with BitMaskIterator so we convert to BSQ
          pRequest->setBands(*bandIt, *bandIt, 1);
-         pRequest->setInterleaveFormat(BSQ);
       }
       DataAccessor da(mInput.mpRasterElement->getDataAccessor(pRequest.release()));
       if (!da.isValid())
@@ -973,9 +971,7 @@ void HistogramThread::run()
       }
       else
       {
-         // BIL is really tricky to use with BitMaskIterator so we convert to BSQ
          pRequest->setBands(*bandIt, *bandIt, 1);
-         pRequest->setInterleaveFormat(BSQ);
       }
       DataAccessor da(mInput.mStatInput.mpRasterElement->getDataAccessor(pRequest.release()));
       if (!da.isValid())

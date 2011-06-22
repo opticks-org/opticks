@@ -148,7 +148,6 @@ bool Tutorial5::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
    }
 
    FactoryResource<DataRequest> pRequest;
-   pRequest->setInterleaveFormat(BSQ);
    DataAccessor pSrcAcc = pCube->getDataAccessor(pRequest.release());
 
    ModelResource<RasterElement> pResultCube(RasterUtilities::createRasterElement(pCube->getName() +

@@ -178,7 +178,6 @@ bool Tutorial4::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
    FactoryResource<DataRequest> pRequest;
    pRequest->setRows(pDesc->getActiveRow(startRow), pDesc->getActiveRow(endRow));
    pRequest->setColumns(pDesc->getActiveColumn(startColumn), pDesc->getActiveColumn(endColumn));
-   pRequest->setInterleaveFormat(BSQ);
    DataAccessor pAcc = pCube->getDataAccessor(pRequest.release());
    double min = std::numeric_limits<double>::max();
    double max = -min;

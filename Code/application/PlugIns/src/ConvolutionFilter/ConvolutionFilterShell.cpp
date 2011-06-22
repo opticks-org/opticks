@@ -341,7 +341,6 @@ void ConvolutionFilterShell::ConvolutionFilterThread::convolve(const T*)
    int xshift = (mInput.mKernel.Ncols() - 1) / 2;
 
    FactoryResource<DataRequest> pRequest;
-   pRequest->setInterleaveFormat(BSQ);
    pRequest->setRows(mInput.mpDescriptor->getActiveRow(std::max(0, startRow - yshift)),
       mInput.mpDescriptor->getActiveRow(std::min(maxRowNum, stopRow + mInput.mKernel.Nrows() - yshift)));
    pRequest->setColumns(mInput.mpDescriptor->getActiveColumn(startColumn),
