@@ -2950,6 +2950,11 @@ void HistogramPlotImp::initializeElementList()
          }
       }
    }
+
+   // Force a geometry update in order to account for long element names
+   // Need to explicitly show the menu first in order to have updateGeometry() have an effect
+   mpElementMenu->show();
+   mpElementMenu->updateGeometry();
 }
 
 void HistogramPlotImp::setBand(QListWidgetItem* pItem)
@@ -3066,6 +3071,11 @@ void HistogramPlotImp::initializeBandList()
          mpBandList->setCurrentItem(pItem);
       }
    }
+
+   // Force a geometry update in order to account for long band names
+   // Need to explicitly show the menu first in order to have updateGeometry() have an effect
+   mpBandMenu->show();
+   mpBandMenu->updateGeometry();
 }
 
 void HistogramPlotImp::updateElementClassification(const Classification* pClassification)
