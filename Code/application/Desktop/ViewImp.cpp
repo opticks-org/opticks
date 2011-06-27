@@ -602,7 +602,7 @@ void ViewImp::getVisibleCorners(LocationType& lowerLeft, LocationType& upperLeft
 LocationType ViewImp::getVisibleCenter() const
 {
    LocationType center;
-   translateScreenToWorld(width() / 2, height() / 2, center.mX, center.mY);
+   translateScreenToWorld(width() / 2.0, height() / 2.0, center.mX, center.mY);
 
    return center;
 }
@@ -1339,7 +1339,7 @@ void ViewImp::panTo(const QPoint& screenCoord)
 
 void ViewImp::panTo(const LocationType& worldCoord)
 {
-   QPoint screenCenter(width() / 2, height() / 2);
+   QPointF screenCenter(width() / 2.0, height() / 2.0);
 
    LocationType center;
    translateScreenToWorld(screenCenter.x(), screenCenter.y(), center.mX, center.mY);
@@ -1365,7 +1365,7 @@ void ViewImp::panBy(double dWorldDeltaX, double dWorldDeltaY)
 {
    double dCenterX;
    double dCenterY;
-   translateScreenToWorld(width() / 2, height() / 2, dCenterX, dCenterY);
+   translateScreenToWorld(width() / 2.0, height() / 2.0, dCenterX, dCenterY);
 
    LocationType newCenter(dCenterX + dWorldDeltaX, dCenterY + dWorldDeltaY);
    panTo(newCenter);

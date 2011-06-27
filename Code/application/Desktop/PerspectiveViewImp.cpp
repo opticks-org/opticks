@@ -549,7 +549,7 @@ void PerspectiveViewImp::resetZoom()
       zoomTo(zoomPercent);
 
       // Align the data origin to the corner of the view
-      QPoint screenCenter(width() / 2, height() / 2);
+      QPointF screenCenter(width() / 2.0, height() / 2.0);
       LocationType worldCenter(screenCenter.x() * 100 / zoomPercent, screenCenter.y() * 100 / zoomPercent);
       panTo(worldCenter);
    }
