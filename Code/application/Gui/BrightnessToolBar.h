@@ -71,8 +71,12 @@ signals:
 private slots:
    void updateValues();
    void updateValues(const RasterChannelType& eColor, double dLower, double dUpper);
+   void updateBrightnessValue(int iValue);
    void updateBrightnessLabel(int iValue);
+   void updateBrightness(int sliderAction);
+   void updateContrastValue(int iValue);
    void updateContrastLabel(int iValue);
+   void updateContrast(int sliderAction);
    void adjustLayerStretch();
    void updateLayerCombo(bool updateCurrentRasterLayer);
    void updateBandCombo(bool updateCurrentBand);
@@ -83,8 +87,10 @@ private slots:
 
 private:
    void onRasterLayerDeleted(Subject &subject, const std::string &signal, const boost::any &v);
+   double mBrightnessValue;
    QSlider* mpBrightnessSlider;
    QLabel* mpBrightnessText;
+   double mContrastValue;
    QSlider* mpContrastSlider;
    QLabel* mpContrastText;
    QComboBox* mpBandCombo;

@@ -37,8 +37,10 @@ static const unsigned int RGB_BANDCOMBO_INDEX = 4;
 
 BrightnessToolBar::BrightnessToolBar(const string& id, QWidget* parent) :
    ToolBarAdapter(id, "Brightness", parent),
+   mBrightnessValue(0.0),
    mpBrightnessSlider(NULL),
    mpBrightnessText(NULL),
+   mContrastValue(0.0),
    mpContrastSlider(NULL),
    mpContrastText(NULL),
    mpBandCombo(NULL),
@@ -140,16 +142,16 @@ BrightnessToolBar::BrightnessToolBar(const string& id, QWidget* parent) :
 
    // Initialization
    updateValues();
-   updateBrightnessLabel(mpBrightnessSlider->value());
-   updateContrastLabel(mpContrastSlider->value());
 
    // Connections
-   VERIFYNR(connect(mpBrightnessSlider, SIGNAL(valueChanged(int)), this, SLOT(adjustLayerStretch())));
-   VERIFYNR(connect(mpBrightnessSlider, SIGNAL(valueChanged(int)), this, SLOT(updateBrightnessLabel(int))));
+   VERIFYNR(connect(mpBrightnessSlider, SIGNAL(sliderMoved(int)), this, SLOT(updateBrightnessValue(int))));
    VERIFYNR(connect(mpBrightnessSlider, SIGNAL(sliderMoved(int)), this, SLOT(updateBrightnessLabel(int))));
-   VERIFYNR(connect(mpContrastSlider, SIGNAL(valueChanged(int)), this, SLOT(adjustLayerStretch())));
-   VERIFYNR(connect(mpContrastSlider, SIGNAL(valueChanged(int)), this, SLOT(updateContrastLabel(int))));
+   VERIFYNR(connect(mpBrightnessSlider, SIGNAL(sliderReleased()), this, SLOT(adjustLayerStretch())));
+   VERIFYNR(connect(mpBrightnessSlider, SIGNAL(actionTriggered(int)), this, SLOT(updateBrightness(int))));
+   VERIFYNR(connect(mpContrastSlider, SIGNAL(sliderMoved(int)), this, SLOT(updateContrastValue(int))));
    VERIFYNR(connect(mpContrastSlider, SIGNAL(sliderMoved(int)), this, SLOT(updateContrastLabel(int))));
+   VERIFYNR(connect(mpContrastSlider, SIGNAL(sliderReleased()), this, SLOT(adjustLayerStretch())));
+   VERIFYNR(connect(mpContrastSlider, SIGNAL(actionTriggered(int)), this, SLOT(updateContrast(int))));
    VERIFYNR(connect(mpBandCombo, SIGNAL(activated(int)), this, SLOT(onBandSelectionChange(int))));
    VERIFYNR(connect(mpLayerCombo, SIGNAL(activated(int)), this, SLOT(onLayerSelectionChange(int))));
 }
@@ -197,8 +199,8 @@ void BrightnessToolBar::updateValues(const RasterChannelType& eColor, double dLo
       return;
    }
 
-   int iContrast = 0;
-   int iBrightness = 0;
+   mContrastValue = 0.0;
+   mBrightnessValue = 0.0;
 
    if (mpRasterLayer != NULL)
    {
@@ -210,35 +212,30 @@ void BrightnessToolBar::updateValues(const RasterChannelType& eColor, double dLo
       }
       if (dUpper - dLower >= 0)
       {
-         iBrightness = 100-mpRasterLayer->convertStretchValue(eColor, RAW_VALUE, (dUpper+dLower)/2.0, PERCENTILE);
+         mBrightnessValue = 100.0 - mpRasterLayer->convertStretchValue(eColor, RAW_VALUE,
+            (dUpper + dLower) / 2.0, PERCENTILE);
          double dWidth = getDelta1(mpRasterLayer, eColor);
          if (fabs(dWidth) > 1e-20) // prevent divide-by-zero
          {
-            iContrast = 100-(dUpper - dLower) / (5.0*dWidth);
+            mContrastValue = 100.0 - (dUpper - dLower) / (5.0 * dWidth);
          }
       }
       else
       {
-         iBrightness = mpRasterLayer->convertStretchValue(eColor, RAW_VALUE, (dUpper+dLower)/2.0, PERCENTILE);
+         mBrightnessValue = mpRasterLayer->convertStretchValue(eColor, RAW_VALUE, (dUpper + dLower) / 2.0, PERCENTILE);
          double dWidth = -getDelta1(mpRasterLayer, eColor);
          if (fabs(dWidth) > 1e-20) // prevent divide-by-zero
          {
-            iContrast = 100-(dUpper - dLower) / (5.0*dWidth);
+            mContrastValue = 100.0 - (dUpper - dLower) / (5.0 * dWidth);
          }
       }
    }
 
-   // Disconnect the sliders to prevent modifying the stretch from the current values
-   disconnect(mpBrightnessSlider, SIGNAL(valueChanged(int)), this, SLOT(adjustLayerStretch()));
-   disconnect(mpContrastSlider, SIGNAL(valueChanged(int)), this, SLOT(adjustLayerStretch()));
-
-   // Set the slider values
-   mpBrightnessSlider->setValue(iBrightness);
-   mpContrastSlider->setValue(iContrast);
-
-   // Reconnect the sliders to modify the stretch values
-   VERIFYNR(connect(mpBrightnessSlider, SIGNAL(valueChanged(int)), this, SLOT(adjustLayerStretch())));
-   VERIFYNR(connect(mpContrastSlider, SIGNAL(valueChanged(int)), this, SLOT(adjustLayerStretch())));
+   // Set the slider and label values
+   mpBrightnessSlider->setValue(static_cast<int>(mBrightnessValue + 0.5));
+   mpContrastSlider->setValue(static_cast<int>(mContrastValue + 0.5));
+   updateBrightnessLabel(static_cast<int>(mBrightnessValue + 0.5));
+   updateContrastLabel(static_cast<int>(mContrastValue + 0.5));
 
    // Make sure all three stretch values are updated when displaying RGB
    if (mRgb == true)
@@ -592,20 +589,50 @@ void BrightnessToolBar::onLayerSelectionChange(int newIndex)
    setCurrentLayer(pRasterLayer, channel, false);
 }
 
+void BrightnessToolBar::updateBrightnessValue(int iValue)
+{
+   mBrightnessValue = iValue;
+}
+
 void BrightnessToolBar::updateBrightnessLabel(int iValue)
 {
-   if (mpBrightnessText != NULL)
+   mpBrightnessText->setText(QString::number(iValue));
+}
+
+void BrightnessToolBar::updateBrightness(int sliderAction)
+{
+   if ((sliderAction == QAbstractSlider::SliderNoAction) || (sliderAction == QAbstractSlider::SliderMove))
    {
-      mpBrightnessText->setText(QString::number(iValue));
+      return;
    }
+
+   int value = mpBrightnessSlider->sliderPosition();
+   updateBrightnessValue(value);
+   updateBrightnessLabel(value);
+   adjustLayerStretch();
+}
+
+void BrightnessToolBar::updateContrastValue(int iValue)
+{
+   mContrastValue = iValue;
 }
 
 void BrightnessToolBar::updateContrastLabel(int iValue)
 {
-   if (mpContrastText != NULL)
+   mpContrastText->setText(QString::number(iValue));
+}
+
+void BrightnessToolBar::updateContrast(int sliderAction)
+{
+   if ((sliderAction == QAbstractSlider::SliderNoAction) || (sliderAction == QAbstractSlider::SliderMove))
    {
-      mpContrastText->setText(QString::number(iValue));
+      return;
    }
+
+   int value = mpContrastSlider->sliderPosition();
+   updateContrastValue(value);
+   updateContrastLabel(value);
+   adjustLayerStretch();
 }
 
 void BrightnessToolBar::adjustLayerStretch()
@@ -629,8 +656,8 @@ void BrightnessToolBar::adjustLayerStretch()
       dUpper = mpRasterLayer->convertStretchValue(mRasterChannelType, eRegionUnits, dUpper, PERCENTAGE);
    }
 
-   double dWidth = 5.0*(100-mpContrastSlider->value()) * getDelta1(mpRasterLayer, mRasterChannelType);
-   int brightness = 100.0-mpBrightnessSlider->value();
+   double dWidth = 5.0 * (100 - mContrastValue) * getDelta1(mpRasterLayer, mRasterChannelType);
+   double brightness = 100.0 - mBrightnessValue;
    if ((dUpper - dLower) < 0)
    {
       dWidth *= -1;
