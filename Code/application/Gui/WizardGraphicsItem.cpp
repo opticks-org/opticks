@@ -13,6 +13,7 @@
 #include <QtGui/QGraphicsSceneMouseEvent>
 #include <QtGui/QPainter>
 #include <QtGui/QStyleOptionGraphicsItem>
+#include <QtGui/QTextDocument>
 
 #include "AppVerify.h"
 #include "PlugInManagerServices.h"
@@ -703,10 +704,8 @@ QString WizardGraphicsItem::getNodeToolTip(WizardNode* pNode) const
          imageType = "Unknown";
       }
 
-      imageType.replace("<", "&lt;");
-      imageType.replace(">", "&gt;");
-      originalType.replace("<", "&lt;");
-      originalType.replace(">", "&gt;");
+      imageType = Qt::escape(imageType);
+      originalType = Qt::escape(originalType);
 
       originalType = "<img source=\"" + imageType + "\">" + originalType;
    }
@@ -720,10 +719,8 @@ QString WizardGraphicsItem::getNodeToolTip(WizardNode* pNode) const
          imageType = "Unknown";
       }
 
-      imageType.replace("<", "&lt;");
-      imageType.replace(">", "&gt;");
-      type.replace("<", "&lt;");
-      type.replace(">", "&gt;");
+      imageType = Qt::escape(imageType);
+      type = Qt::escape(type);
 
       type = "<img source=\"" + imageType + "\">" + type;
    }
@@ -742,10 +739,8 @@ QString WizardGraphicsItem::getNodeToolTip(WizardNode* pNode) const
             imageType = "Unknown";
          }
 
-         imageType.replace("<", "&lt;");
-         imageType.replace(">", "&gt;");
-         validType.replace("<", "&lt;");
-         validType.replace(">", "&gt;");
+         imageType = Qt::escape(imageType);
+         validType = Qt::escape(validType);
 
          validType = "<img source=\"" + imageType + "\">" + validType;
          validTypes.append(validType);
@@ -757,6 +752,15 @@ QString WizardGraphicsItem::getNodeToolTip(WizardNode* pNode) const
    {
       description = "&nbsp;";
    }
+   else
+   {
+      description = Qt::escape(description);
+   }
+
+   // The type and description text obtained above has the <, >, &, and " characters converted to valid
+   // HTML characters by calling Qt::escape().  The remaining invalid character, ', is not converted by
+   // Qt::escape(), which is acceptable because all of the converted text is displayed here as text
+   // within a table cell and not as an attribute within a tag.
 
    QString tipText = "<qt><table width=235 cellspacing=0>"
       "<tr><td width=90><b>Name:</b></td><td width=145>" + name + "</td></tr>"

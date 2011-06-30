@@ -906,6 +906,7 @@ http://www.gnu.org/licenses/lgpl.html
          </xsd:documentation>
       </xsd:annotation>
       <xsd:sequence>
+         <xsd:element name="description" type="xsd:string" minOccurs="0" maxOccurs="1" form="qualified" />
          <xsd:element name="validType" type="xsd:string" minOccurs="0" maxOccurs="unbounded" form="qualified" />
          <xsd:element name="value" minOccurs="0" form="qualified" />
       </xsd:sequence>

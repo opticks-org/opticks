@@ -303,6 +303,11 @@ bool WizardNodeImp::toXml(XMLWriter* pXml) const
    pXml->addAttr("originalType", mOriginalType);
    pXml->addAttr("type", mType);
 
+   if (mDescription.empty() == false)
+   {
+      pXml->addText(mDescription, pXml->addElement("description"));
+   }
+
    for (vector<string>::const_iterator iter = mValidTypes.begin(); iter != mValidTypes.end(); ++iter)
    {
       pXml->addText(*iter, pXml->addElement("validType"));
@@ -352,12 +357,17 @@ bool WizardNodeImp::fromXml(DOMNode* pDocument, unsigned int version)
    mName = A(elmnt->getAttribute(X("name")));
    mOriginalType = A(elmnt->getAttribute(X("originalType")));
    mType = A(elmnt->getAttribute(X("type")));
+   mDescription.clear();
    deleteValue();
    mValidTypes.clear();
 
    for (DOMNode* pChld = pDocument->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
    {
-      if (XMLString::equals(pChld->getNodeName(), X("validType")))
+      if (XMLString::equals(pChld->getNodeName(), X("description")))
+      {
+         mDescription = A(pChld->getTextContent());
+      }
+      else if (XMLString::equals(pChld->getNodeName(), X("validType")))
       {
          string vt(A(pChld->getTextContent()));
          mValidTypes.push_back(vt);
