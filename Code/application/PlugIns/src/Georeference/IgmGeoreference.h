@@ -11,17 +11,15 @@
 #define IGMGEOREFERENCE_H
 
 
-#include "ApplicationServices.h"
 #include "AttachmentPtr.h"
-#include "DimensionDescriptor.h"
 #include "GeoreferenceShell.h"
-#include "ModelServices.h"
-#include "PlugInResource.h"
-#include "UtilityServices.h"
-
-class IgmGui;
+#include "GeoreferenceUtilities.h"
+#include "RasterElement.h"
 
 #include <vector>
+
+class IgmGui;
+class RasterDataDescriptor;
 
 class IgmGeoreference : public GeoreferenceShell
 {
@@ -36,7 +34,6 @@ public:
    virtual LocationType geoToPixel(LocationType geo, bool* pAccurate) const;
 
    virtual LocationType pixelToGeo(LocationType pixel, bool* pAccurate) const;
-   virtual LocationType pixelToGeoQuick(LocationType pixel, bool* pAccurate) const;
    virtual bool canHandleRasterElement(RasterElement* pRaster) const;
    virtual QWidget* getGui(RasterElement* pRaster);
    virtual bool validateGuiInput() const;
@@ -49,13 +46,13 @@ private:
    IgmGui* mpGui;
 
    RasterElement* mpRaster;
-   Georeference* mpGcpPlugIn;
-   AttachmentPtr<DataElement> mpIgmGeo;
    AttachmentPtr<RasterElement> mpIgmRaster;
-   std::vector<DimensionDescriptor> mLoadedColumns;
-   std::vector<DimensionDescriptor> mLoadedRows;
-   std::vector<DimensionDescriptor> mLoadedBands;
+   unsigned int mNumRows;
+   unsigned int mNumColumns;
+   const RasterDataDescriptor* mpIgmDesc;
    unsigned int mZone;
+   std::vector<double> mLatCoefficients;
+   std::vector<double> mLonCoefficients;
 };
 
 #endif // IGMGEOREFERENCE_H

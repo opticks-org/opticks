@@ -45,6 +45,9 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_IgmGui.cpp">
       <Filter>moc</Filter>
     </ClCompile>
+    <ClCompile Include="GeoreferenceUtilities.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GcpGeoreference.h">
@@ -54,6 +57,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="IgmGeoreference.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeoreferenceUtilities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -187,6 +187,7 @@
     <ClCompile Include="GcpGui.cpp" />
     <ClCompile Include="GeoreferenceDlg.cpp" />
     <ClCompile Include="GeoreferencePlugIn.cpp" />
+    <ClCompile Include="GeoreferenceUtilities.cpp" />
     <ClCompile Include="IgmGeoreference.cpp" />
     <ClCompile Include="IgmGui.cpp" />
     <ClCompile Include="ModuleManager.cpp" />
@@ -195,6 +196,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GcpGeoreference.h" />
+    <ClInclude Include="GeoreferenceUtilities.h" />
     <ClInclude Include="IgmGeoreference.h" />
     <CustomBuild Include="IgmGui.h">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>

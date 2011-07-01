@@ -12,6 +12,7 @@
 
 #include "ApplicationServices.h"
 #include "GeoreferenceShell.h"
+#include "GeoreferenceUtilities.h"
 #include "LocationType.h"
 #include "ModelServices.h"
 #include "PlugInManagerServices.h"
@@ -21,7 +22,6 @@ class GcpGui;
 
 #include <vector>
 
-#define COEFFS_FOR_ORDER(order) (((order) + 1) * ((order) + 2) / 2)
 #define MAX_ORDER 6
 #define INTERACTIVE_MAX_ORDER 3
 
@@ -45,9 +45,6 @@ public:
    bool deserialize(SessionItemDeserializer &deserializer);
 
 protected:
-   LocationType evaluatePolynomial(LocationType position, const double pXCoeffs[], 
-      const double pYCoeffs[], int order) const;
-
    void computeAnchor(int corner);
    void setCubeSize(unsigned int numRows, unsigned int numColumns);
 
@@ -57,14 +54,10 @@ private:
    RasterElement* mpRaster;
    int mOrder;
    unsigned short mReverseOrder;
-   double mLatCoefficients[COEFFS_FOR_ORDER(MAX_ORDER)];
-   double mLonCoefficients[COEFFS_FOR_ORDER(MAX_ORDER)];
-   double mXCoefficients[COEFFS_FOR_ORDER(MAX_ORDER)];
-   double mYCoefficients[COEFFS_FOR_ORDER(MAX_ORDER)];
-   double computePolynomial(LocationType pixel, int order, std::vector<double> &coeffs);
-   bool computeFit(const std::vector<LocationType> &points,
-      const std::vector<LocationType> &values, int which, std::vector<double> &coefficients);
-   void basisFunction(const LocationType& pixelCoord, double* pBasisValues, int numBasisValues);
+   std::vector<double> mLatCoefficients;
+   std::vector<double> mLonCoefficients;
+   std::vector<double> mXCoefficients;
+   std::vector<double> mYCoefficients;
 
    int mNumRows;
    int mNumColumns;

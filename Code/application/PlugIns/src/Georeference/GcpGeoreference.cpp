@@ -8,22 +8,17 @@
  */
 
 #include "AppVersion.h"
-#include "AppAssert.h"
-#include "AppVerify.h"
-#include "DesktopServices.h"
 #include "GcpGeoreference.h"
 #include "GcpGui.h"
 #include "GcpList.h"
 #include "Georeference.h"
-#include "MatrixFunctions.h"
+#include "GeoreferenceUtilities.h"
 #include "MessageLogResource.h"
-#include "ModelServices.h"
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
-#include "PlugInManagerServices.h"
 #include "PlugInRegistration.h"
-#include "RasterElement.h"
 #include "RasterDataDescriptor.h"
+#include "RasterElement.h"
 #include "SessionItemDeserializer.h"
 #include "SessionItemSerializer.h"
 #include "TypeConverter.h"
@@ -62,11 +57,6 @@ GcpGeoreference::GcpGeoreference() :
    executeOnStartup(false);
    destroyAfterExecute(false);
    setProductionStatus(APP_IS_PRODUCTION_RELEASE);
-
-   fill(mLatCoefficients, &mLatCoefficients[COEFFS_FOR_ORDER(MAX_ORDER)], 0.0);
-   fill(mLonCoefficients, &mLonCoefficients[COEFFS_FOR_ORDER(MAX_ORDER)], 0.0);
-   fill(mXCoefficients, &mXCoefficients[COEFFS_FOR_ORDER(MAX_ORDER)], 0.0);
-   fill(mYCoefficients, &mYCoefficients[COEFFS_FOR_ORDER(MAX_ORDER)], 0.0);
 }
 
 GcpGeoreference::~GcpGeoreference()
@@ -161,10 +151,10 @@ bool GcpGeoreference::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
    }
 
    int numReverseCoeffs = COEFFS_FOR_ORDER(mReverseOrder);
-   vector<double> latCoeffs(numCoeffs);
-   vector<double> lonCoeffs(numCoeffs);
-   vector<double> pXCoeffs(numReverseCoeffs);
-   vector<double> pYCoeffs(numReverseCoeffs);
+   mLatCoefficients.resize(numCoeffs, 0.0);
+   mLonCoefficients.resize(numCoeffs, 0.0);
+   mXCoefficients.resize(numReverseCoeffs, 0.0);
+   mYCoefficients.resize(numReverseCoeffs, 0.0);
    vector<LocationType> latlonValues(numPoints);
    vector<LocationType> pixelValues(numPoints);
    double maxLonSeparation(0.0);
@@ -271,10 +261,10 @@ bool GcpGeoreference::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
       mpProgress->updateProgress(mMessageText, 0, NORMAL);
    }
 
-   bool success = computeFit(pixelValues, latlonValues, 0, latCoeffs);
+   bool success = GeoreferenceUtilities::computeFit(pixelValues, latlonValues, 0, mLatCoefficients);
    if (success)
    {
-      success = computeFit(pixelValues, latlonValues, 1, lonCoeffs);
+      success = GeoreferenceUtilities::computeFit(pixelValues, latlonValues, 1, mLonCoefficients);
    }
 
    const RasterDataDescriptor* pDescriptor = dynamic_cast<const RasterDataDescriptor*>(mpRaster->getDataDescriptor());
@@ -282,9 +272,6 @@ bool GcpGeoreference::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
    {
       setCubeSize(pDescriptor->getRowCount(), pDescriptor->getColumnCount());
    }
-
-   copy(latCoeffs.begin(), latCoeffs.end(), mLatCoefficients);
-   copy(lonCoeffs.begin(), lonCoeffs.end(), mLonCoefficients);
 
    // Generate a gridSize x gridSize grid of GCPs calculated from the 
    // frontwards (pixel-to-lat/lon) polynomial. Then generate the reverse 
@@ -300,8 +287,8 @@ bool GcpGeoreference::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
          LocationType latlon;
          pixel.mX = i * mNumColumns / gridSize;
          pixel.mY = j * mNumRows / gridSize;
-         latlon.mX = computePolynomial(pixel, mOrder, latCoeffs);
-         latlon.mY = computePolynomial(pixel, mOrder, lonCoeffs);
+         latlon.mX = GeoreferenceUtilities::computePolynomial(pixel, mOrder, mLatCoefficients);
+         latlon.mY = GeoreferenceUtilities::computePolynomial(pixel, mOrder, mLonCoefficients);
          pixelValues.push_back(pixel);
          latlonValues.push_back(latlon);
       }
@@ -309,15 +296,12 @@ bool GcpGeoreference::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
 
    if (success)
    {
-      success = computeFit(latlonValues, pixelValues, 0, pXCoeffs);
+      success = GeoreferenceUtilities::computeFit(latlonValues, pixelValues, 0, mXCoefficients);
    }
    if (success)
    {
-      success = computeFit(latlonValues, pixelValues, 1, pYCoeffs);
+      success = GeoreferenceUtilities::computeFit(latlonValues, pixelValues, 1, mYCoefficients);
    }
-
-   copy(pXCoeffs.begin(), pXCoeffs.end(), mXCoefficients);
-   copy(pYCoeffs.begin(), pYCoeffs.end(), mYCoefficients);
 
    list<GcpPoint> newPoints;
    list<GcpPoint>::iterator npIter;
@@ -358,26 +342,10 @@ bool GcpGeoreference::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
    return true;
 }
 
-static LocationType solveLinearEquations(LocationType size1, LocationType size2, LocationType delta)
-{
-   LocationType distance(0.0, 0.0);
-
-   double alpha = size2.mY*size1.mX - size2.mX*size1.mY;
-   double beta = size1.mX*delta.mY - size1.mY*delta.mX;
-   double gamma = size2.mX*delta.mY - size2.mY*delta.mX;
-
-   if (fabs(alpha) > 1e-16)
-   {
-      distance.mY = beta / alpha;
-      distance.mX = -gamma / alpha;
-   }
-
-   return distance;
-}
-
 LocationType GcpGeoreference::geoToPixel(LocationType geocoord, bool* pAccurate) const
 {
-   LocationType pixcoord = evaluatePolynomial(geocoord, mXCoefficients, mYCoefficients, mReverseOrder);
+   LocationType pixcoord = GeoreferenceUtilities::evaluatePolynomial(
+      geocoord, mXCoefficients, mYCoefficients, mReverseOrder);
    if (pAccurate != NULL)
    {
       bool outsideCols = pixcoord.mX < 0.0 || pixcoord.mX > static_cast<double>(mNumColumns);
@@ -396,7 +364,7 @@ LocationType GcpGeoreference::pixelToGeo(LocationType pixel, bool* pAccurate) co
       bool outsideRows = pixel.mY < 0.0 || pixel.mY > static_cast<double>(mNumRows);
       *pAccurate = !(outsideCols || outsideRows);
    }
-  return evaluatePolynomial(pixel, mLatCoefficients, mLonCoefficients, mOrder);
+  return GeoreferenceUtilities::evaluatePolynomial(pixel, mLatCoefficients, mLonCoefficients, mOrder);
 }
 
 bool GcpGeoreference::canHandleRasterElement(RasterElement *pRaster) const
@@ -408,31 +376,6 @@ bool GcpGeoreference::canHandleRasterElement(RasterElement *pRaster) const
    }
 
    return true;
-}
-
-LocationType GcpGeoreference::evaluatePolynomial(LocationType position,
-                                                 const double pXCoeffs[],
-                                                 const double pYCoeffs[],
-                                                 int order) const
-{
-   double yValue;
-   double xyValue;
-   LocationType transformedPosition(0.0, 0.0);
-
-   int count = 0;
-   for (int i = 0; i <= order; ++i)          // y power
-   {
-      yValue = pow(position.mY, i);
-      for (int j = 0; j <= order - i; ++j)   // x power
-      {
-         xyValue = pow(position.mX, j) * yValue;
-         transformedPosition.mX += pXCoeffs[count] * xyValue;
-         transformedPosition.mY += pYCoeffs[count] * xyValue;
-         count++;
-      }
-   }
-
-   return transformedPosition;
 }
 
 QWidget *GcpGeoreference::getGui(RasterElement *pRaster)
@@ -485,10 +428,10 @@ bool GcpGeoreference::serialize(SessionItemSerializer &serializer) const
    writer.addAttr("reverseOrder", mReverseOrder);
    writer.addAttr("numRows", mNumRows);
    writer.addAttr("numCols", mNumColumns);
-   XML_ADD_CONTAINER(writer, latCoefficients, &mLatCoefficients[0], &mLatCoefficients[COEFFS_FOR_ORDER(MAX_ORDER)]);
-   XML_ADD_CONTAINER(writer, lonCoefficients, &mLonCoefficients[0], &mLonCoefficients[COEFFS_FOR_ORDER(MAX_ORDER)]);
-   XML_ADD_CONTAINER(writer, xCoefficients, &mXCoefficients[0], &mXCoefficients[COEFFS_FOR_ORDER(MAX_ORDER)]);
-   XML_ADD_CONTAINER(writer, yCoefficients, &mYCoefficients[0], &mYCoefficients[COEFFS_FOR_ORDER(MAX_ORDER)]);
+   writer.addAttr("latCoefficients", mLatCoefficients);
+   writer.addAttr("lonCoefficients", mLonCoefficients);
+   writer.addAttr("xCoefficients", mXCoefficients);
+   writer.addAttr("yCoefficients", mYCoefficients);
    return serializer.serialize(writer);
 }
 
@@ -510,85 +453,19 @@ bool GcpGeoreference::deserialize(SessionItemDeserializer &deserializer)
       mReverseOrder = toUShort(A(pRootElement->getAttribute(X("reverseOrder"))));
       mNumRows = toInt(A(pRootElement->getAttribute(X("numRows"))));
       mNumColumns = toInt(A(pRootElement->getAttribute(X("numCols"))));
-      readContainerElements(pRootElement, "latCoefficients", mLatCoefficients, COEFFS_FOR_ORDER(MAX_ORDER));
-      readContainerElements(pRootElement, "lonCoefficients", mLonCoefficients, COEFFS_FOR_ORDER(MAX_ORDER));
-      readContainerElements(pRootElement, "xCoefficients", mXCoefficients, COEFFS_FOR_ORDER(MAX_ORDER));
-      readContainerElements(pRootElement, "yCoefficients", mYCoefficients, COEFFS_FOR_ORDER(MAX_ORDER));
+      mLatCoefficients = *reinterpret_cast<std::vector<double>*>(
+         XmlReader::StrToVector<double, XmlReader::StringStreamAssigner<double> >(
+            pRootElement->getAttribute(X("latCoefficients"))));
+      mLonCoefficients = *reinterpret_cast<std::vector<double>*>(
+         XmlReader::StrToVector<double, XmlReader::StringStreamAssigner<double> >(
+            pRootElement->getAttribute(X("lonCoefficients"))));
+      mXCoefficients = *reinterpret_cast<std::vector<double>*>(
+         XmlReader::StrToVector<double, XmlReader::StringStreamAssigner<double> >(
+            pRootElement->getAttribute(X("xCoefficients"))));
+      mYCoefficients = *reinterpret_cast<std::vector<double>*>(
+         XmlReader::StrToVector<double, XmlReader::StringStreamAssigner<double> >(
+            pRootElement->getAttribute(X("yCoefficients"))));
       return true;
    }
    return false;
-}
-
-double GcpGeoreference::computePolynomial(LocationType pixel, int order, vector<double> &coeffs)
-{
-   double yValue;
-
-   int count = 0;
-   double value = 0.0;
-   for (int i = 0; i <= order; ++i)          // y power
-   {
-      yValue = pow(pixel.mY, i);
-      for (int j = 0; j <= order - i; ++j)   // x power
-      {
-         value += coeffs[count] * pow (pixel.mX, j) * yValue;
-         count++;
-      }
-   }
-
-   return value;
-}
-
-bool GcpGeoreference::computeFit(const vector<LocationType> &points,
-   const vector<LocationType> &values, int which, vector<double> &coefficients)
-{
-   // The number of GCP points represents the number of rows in the matrix to be solved.
-   // The number of coefficients required for the calculation represents the number of columns in the matrix.
-   const int numRows = values.size();
-   const int numCols = coefficients.size();
-
-   // Create and populate the matrix to be solved.
-   MatrixFunctions::MatrixResource<double> pMatrix(numRows, numCols);
-   VERIFY(pMatrix.get() != NULL);
-
-   for (int row = 0; row < numRows; ++row)
-   {
-      basisFunction(points[row], pMatrix[row], numCols);
-   }
-
-   // Create a vector of latlon points corresponding to which (X or Y) set of values is to be used.
-   // This vector represents the right-hand side of the equation to use when solving the equation.
-   vector<double> latlon(numRows);
-   for (int point = 0; point < numRows; ++point)
-   {
-      if (which == 0)
-      {
-         latlon[point] = values[point].mX;
-      }
-      else
-      {
-         latlon[point] = values[point].mY;
-      }
-   }
-
-   // Solve the equation.
-   return MatrixFunctions::solveLinearEquation(&coefficients.front(), pMatrix, &latlon.front(), numRows, numCols);
-}
-
-void GcpGeoreference::basisFunction(const LocationType& pixelCoord, double* pBasisValues, int numBasisValues)
-{
-   // numBasisValues = (order+1)*(order+2)/2, solve for order
-   // add fudge factor to prevent x.9999999 being truncated to x
-   int order = static_cast<int>((-3.0 + sqrt(9.0 + 8.0 *(numBasisValues-1)))/2.0 + 0.5);
-   double yValue;
-
-   int count = 0;
-   for (int i = 0; i <= order; ++i)          // y power
-   {
-      yValue = pow(pixelCoord.mY, i);
-      for (int j = 0; j <= order - i; ++j)   // x power
-      {
-         pBasisValues[count] = pow (pixelCoord.mX, j) * yValue;
-         count++;
-      }
-   }
 }

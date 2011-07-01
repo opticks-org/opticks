@@ -16,6 +16,7 @@
 #include "Importer.h"
 #include "GcpList.h"
 #include "GeoPoint.h"
+#include "GeoreferenceUtilities.h"
 #include "Layer.h"
 #include "LayerList.h"
 #include "MatrixFunctions.h"
@@ -46,11 +47,15 @@ XERCES_CPP_NAMESPACE_USE
 
 REGISTER_PLUGIN_BASIC(OpticksGeoreference, IgmGeoreference);
 
+#define IGM_GEO_NAME "IGM_GEO"
+
 IgmGeoreference::IgmGeoreference() :
    mpGui(NULL),
    mpRaster(NULL),
-   mpGcpPlugIn(NULL),
-   mpIgmRaster(NULL)
+   mpIgmRaster(NULL),
+   mNumRows(0),
+   mNumColumns(0),
+   mpIgmDesc(NULL)
 {
    setName("IGM Georeference");
    setVersion(APP_VERSION_NUMBER);
@@ -60,6 +65,8 @@ IgmGeoreference::IgmGeoreference() :
    setDescriptorId("{EE7B8EB9-8493-4af4-A594-A41FEC3DC4CC}");
    destroyAfterExecute(false);
    setProductionStatus(APP_IS_PRODUCTION_RELEASE);
+
+   mpIgmRaster.addSignal(SIGNAL_NAME(Subject, Deleted), Slot(this, &IgmGeoreference::elementDeleted));
 }
 
 IgmGeoreference::~IgmGeoreference()
@@ -75,6 +82,10 @@ bool IgmGeoreference::setInteractive()
 bool IgmGeoreference::getInputSpecification(PlugInArgList*& pArgList)
 {
    bool success = GeoreferenceShell::getInputSpecification(pArgList);
+   VERIFY(pArgList->addArg<RasterElement>("IGM Element", NULL, "If specified, this element contains the IGM data. "
+      "If not specified, the existing " IGM_GEO_NAME " child element will be used. If neither exists, the IGM data will be "
+      "loaded from the file specified in the GUI. In batch mode, either this argument must be specified or an existing "
+      IGM_GEO_NAME " child element must be present."));
    return success;
 }
 
@@ -93,62 +104,58 @@ bool IgmGeoreference::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
       return false;
    }
 
-   std::string geoName = "IGM_GEO";
-
-   if (mpGui != NULL && mpGui->getFilename().isEmpty() == false)
+   // Check the plug-in arg first, then the GUI, and finally look for an existing element
+   mpIgmRaster.reset(pInArgList->getPlugInArgValue<RasterElement>("IGM Element"));
+   if (mpIgmRaster.get() == NULL && mpGui != NULL && !mpGui->useExisting() && !mpGui->getFilename().isEmpty())
    {
-      ImporterResource importer("Auto Importer", mpGui->getFilename().toStdString());
-      if (importer->execute() == false)
+      ImporterResource importer("Auto Importer", mpGui->getFilename().toStdString(), progress.getCurrentProgress());
+      if (!importer->execute())
       {
-         progress.report("File type not recognized as IGM", 0, ERRORS, true);
+         progress.report("Unable to load IGM data. The file type may not be recognized.", 0, ERRORS, true);
          return false;
       }
       std::vector<DataElement*> igmDataElement = importer->getImportedElements();
-      if (igmDataElement.empty() == true)
+      if (igmDataElement.empty())
       {
-         progress.report("No data was imported, file type may be invalid", 0, ERRORS, true);
+         progress.report("Unable to load IGM data. The file type may not be recognized.", 0, ERRORS, true);
          return false;
       }
-
-      mpIgmGeo.reset(dynamic_cast<RasterElement*>(igmDataElement.front()));
-      if (mpIgmGeo.get() == NULL)
+      mpIgmRaster.reset(dynamic_cast<RasterElement*>(igmDataElement.front()));
+      if (mpIgmRaster.get() == NULL)
       {
          progress.report("Not a valid IGM file", 0, ERRORS, true);
          return false;
       }
-      Service<ModelServices>()->destroyElement(Service<ModelServices>()->getElement(geoName, "RasterElement", mpRaster));
-      Service<ModelServices>()->setElementName(mpIgmGeo.get(), geoName);
-      Service<ModelServices>()->setElementParent(mpIgmGeo.get(), mpRaster);
+      Service<ModelServices>()->destroyElement(
+         Service<ModelServices>()->getElement(IGM_GEO_NAME, TypeConverter::toString<RasterElement>(), mpRaster));
+      Service<ModelServices>()->setElementParent(mpIgmRaster.get(), mpRaster);
+      Service<ModelServices>()->setElementName(mpIgmRaster.get(), IGM_GEO_NAME);
    }
-
-   RasterDataDescriptor* pMainDesc = dynamic_cast<RasterDataDescriptor*>(mpRaster->getDataDescriptor());
-   VERIFY(pMainDesc != NULL);
-   mLoadedRows = pMainDesc->getRows();
-   mLoadedColumns = pMainDesc->getColumns();
-   mLoadedBands = pMainDesc->getBands();
-
-   if (mpGui == NULL || (mpGui != NULL && mpGui->getFilename().length() != 0))
+   if (mpIgmRaster.get() == NULL)
    {
-      mpIgmRaster.reset(dynamic_cast<RasterElement*>(Service<ModelServices>()->getElement(
-         geoName, TypeConverter::toString<RasterElement>(), mpRaster)));
+      mpIgmRaster.reset(static_cast<RasterElement*>(Service<ModelServices>()->getElement(
+         IGM_GEO_NAME, TypeConverter::toString<RasterElement>(), mpRaster)));
    }
-   mpIgmRaster.addSignal(SIGNAL_NAME(Subject, Deleted), Slot(this, &IgmGeoreference::elementDeleted));
    if (mpIgmRaster.get() == NULL)
    {
       progress.report("No IGM specified", 0, ERRORS, true);
       return false;
    }
 
-   RasterDataDescriptor* pLatLonDesc = dynamic_cast<RasterDataDescriptor*>(mpIgmRaster->getDataDescriptor());
-   VERIFY(pLatLonDesc != NULL);
-   if (pLatLonDesc->getRowCount() != pMainDesc->getRowCount() ||
-      pLatLonDesc->getColumnCount() != pMainDesc->getColumnCount())
+   RasterDataDescriptor* pMainDesc = dynamic_cast<RasterDataDescriptor*>(mpRaster->getDataDescriptor());
+   VERIFY(pMainDesc != NULL);
+   mNumRows = pMainDesc->getRowCount();
+   mNumColumns = pMainDesc->getColumnCount();
+
+   mpIgmDesc = static_cast<const RasterDataDescriptor*>(mpIgmRaster->getDataDescriptor());
+   VERIFY(mpIgmDesc != NULL);
+   if (mpIgmDesc->getRowCount() != mNumRows || mpIgmDesc->getColumnCount() != mNumColumns)
    {
       progress.report("IGM sizes do not match", 0, ERRORS, true);
       return false;
    }
 
-   EncodingType latLonType = pLatLonDesc->getDataType();
+   EncodingType latLonType = mpIgmDesc->getDataType();
    if (latLonType != FLT4BYTES && latLonType != FLT8BYTES)
    {
       progress.report("IGM types must be floating point", 0, ERRORS, true);
@@ -168,20 +175,16 @@ bool IgmGeoreference::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
          mZone = sZone.fromStdString(stdZone).toInt();
       }
    }
-   std::string gcpListName = "Corner Coordinates";
-   ModelResource<GcpList> pGcpList(dynamic_cast<GcpList*>(Service<ModelServices>()->createElement(gcpListName,
-      TypeConverter::toString<GcpList>(), mpIgmRaster.get())));
 
-   if (pGcpList.get() == NULL)
-   {
-      progress.report("Unable to create GCP List", 0, ERRORS, true);
-      return false;
-   }
+   // calculate the reverse polynomial
    std::list<GcpPoint> gcpList;
-   const unsigned int maxX = mLoadedColumns.size() - 1;
-   const unsigned int maxY = mLoadedRows.size() - 1;
+   const unsigned int maxX = mpIgmDesc->getColumnCount() - 1;
+   const unsigned int maxY = mpIgmDesc->getRowCount() - 1;
    unsigned int skipX = maxX / 4;   // Appropriate skip factor for a well determined 2 order system.
    unsigned int skipY = maxY / 4;   // Appropriate skip factor for a well determined 2 order system.
+
+   std::vector<LocationType> latlonValues;
+   std::vector<LocationType> pixelValues;
    for (unsigned int row = 0; row <= maxY; row += skipY)
    {
       // Read one row at a time.
@@ -190,39 +193,63 @@ bool IgmGeoreference::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
          // Note that the location of the pixel coordinates and geocoordinates has been reversed.
          // This is to ensure that when the reverse method, IgmGeoreference::geoToPixel(),
          // is called that GcpGeoreference::pixelToGeo() returns the appropriate results.
-         GcpPoint pt;
-         bool geoOk = false;
-
-         pt.mCoordinate = LocationType(col, row);
-         pt.mPixel  = pixelToGeo(pt.mCoordinate, &geoOk);
-         gcpList.push_back(pt);
+         LocationType pt(col, row);
+         latlonValues.push_back(pt);
+         pixelValues.push_back(pixelToGeo(pt, NULL));
+      }
+   }
+   unsigned int numCoeffs = COEFFS_FOR_ORDER(2);
+   if (pixelValues.size() < numCoeffs)
+   {
+      progress.report("Insufficient number of points for geo to pixel conversion.", 0, ERRORS, true);
+      return false;
+   }
+   mLatCoefficients.resize(numCoeffs, 0.0);
+   mLonCoefficients.resize(numCoeffs, 0.0);
+   // Find the maximum separation to determine if it is the antimeridian or the poles
+   bool badValues = true;
+   bool badPixelValues = true;
+   double maxLonSeparation = 0.0;
+   for (size_t i = 0; i < latlonValues.size(); ++i)
+   {
+      for (size_t j = i + 1; j < latlonValues.size(); ++j)
+      {
+         double tmpY = fabs(latlonValues[i].mY - latlonValues[j].mY);
+         if (fabs(latlonValues[i].mX - latlonValues[j].mX) > 1e-20 || tmpY > 1e-20)
+         {
+            badValues = false;
+         }
+         maxLonSeparation = std::max(maxLonSeparation, tmpY);
+         if (fabs(pixelValues[i].mX - pixelValues[j].mX) > 1e-20 ||
+             fabs(pixelValues[i].mY - pixelValues[j].mY) > 1e-20)
+         {
+            badPixelValues = false;
+         }
+      }
+   }
+   if (badValues || badPixelValues)
+   {
+      progress.report("Invalid IGM data. Unable to calculate geo to pixel coversion.", 0, ERRORS, true);
+      return false;
+   }
+   if (maxLonSeparation > 180.0)
+   {
+      for (std::vector<LocationType>::iterator val = latlonValues.begin(); val != latlonValues.end(); ++val)
+      {
+         if (val->mY < 0.0)
+         {
+            val->mY += 360.0;
+         }
       }
    }
 
-   pGcpList->addPoints(gcpList);
-
-   // Reset the GCP Georeference plug-in, and execute GCP Georeference on mpIgmRaster.
-   // If the operation succeeds, keep a pointer to the GCP Georeference plug-in for use later.
-   ExecutableResource pGeoreference = ExecutableResource("GCP Georeference", "", progress.getCurrentProgress());
-   if (pGeoreference.get() == NULL)
+   if (!GeoreferenceUtilities::computeFit(pixelValues, latlonValues, 0, mLatCoefficients) ||
+       !GeoreferenceUtilities::computeFit(pixelValues, latlonValues, 1, mLonCoefficients))
    {
-      progress.report("Unable to create GCP Georeference plug-in", 0, ERRORS, true);
+      progress.report("Unable to calculate geo to pixel conversion.", 0, ERRORS, true);
       return false;
    }
 
-   int order = 2;
-   PlugInArgList& gcpArgs = pGeoreference->getInArgList();
-   bool bConditionsForExecution =
-      (gcpArgs.setPlugInArgValue<RasterElement>(Executable::DataElementArg(), mpIgmRaster.get()) == false ||
-      gcpArgs.setPlugInArgValue<GcpList>("GCP List", pGcpList.get()) == false ||  gcpArgs.setPlugInArgValue<int>("Order", &order) == false);
-
-   if (bConditionsForExecution || pGeoreference->execute() == false)
-   {
-      progress.report("Unable to execute GCP Georeference plug-in", 0, ERRORS, true);
-      return false;
-   }
-
-   mpGcpPlugIn = dynamic_cast<Georeference*>(pGeoreference->getPlugIn());
    mpRaster->setGeoreferencePlugin(this);
 
    progress.report("Georeference finished", 100, NORMAL);
@@ -244,6 +271,9 @@ QWidget* IgmGeoreference::getGui(RasterElement* pRaster)
    }
 
    mpGui = new IgmGui(pRaster);
+   bool igmPresent = 
+      Service<ModelServices>()->getElement("IGM_GEO", TypeConverter::toString<RasterElement>(), pRaster) != NULL;
+   mpGui->hasExisting(igmPresent);
    return mpGui;
 }
 
@@ -266,14 +296,9 @@ bool IgmGeoreference::deserialize(SessionItemDeserializer &deserializer)
    return false;
 }
 
-LocationType IgmGeoreference::pixelToGeoQuick(LocationType pixel, bool* pAccurate) const
-{
-   LocationType geo = pixelToGeo(pixel, pAccurate);
-   return geo;
-}
-
 void IgmGeoreference::elementDeleted(Subject& subject, const std::string& signal, const boost::any& data)
 {
+   // Delete any lat-lon layers in the raster's view since they will no longer be valid
    Service<DesktopServices> pDesktop;
    SpatialDataWindow* pWindow = dynamic_cast<SpatialDataWindow*>(pDesktop->getCurrentWorkspaceWindow());
    SpatialDataView* pView = (pWindow == NULL) ? NULL : pWindow->getSpatialDataView();
@@ -307,14 +332,14 @@ LocationType IgmGeoreference::pixelToGeo(LocationType pixel, bool* pAccurate) co
 
    // Input pixel is in Active Numbers: enforce input to be within bounds.
    pixel.clampMinimum(LocationType(0, 0));
-   pixel.clampMaximum(LocationType(mLoadedColumns.size() - 1, mLoadedRows.size() - 1));
+   pixel.clampMaximum(LocationType(mpIgmDesc->getColumnCount() - 1, mpIgmDesc->getRowCount() - 1));
 
-   const DimensionDescriptor& column = mLoadedColumns[static_cast<unsigned int>(pixel.mX)];
-   const DimensionDescriptor& row = mLoadedRows[static_cast<unsigned int>(pixel.mY)];
+   DimensionDescriptor column(mpIgmDesc->getActiveColumn(pixel.mX));
+   DimensionDescriptor row(mpIgmDesc->getActiveRow(pixel.mY));
    // first/second is either northing/easting or longitude/latitude
-   const DimensionDescriptor& firstBand = mLoadedBands[static_cast<unsigned int>(0)];
-   const DimensionDescriptor& secondBand = mLoadedBands[static_cast<unsigned int>(1)];
-   if (column.isValid() == false || row.isValid() == false || firstBand.isValid() == false || secondBand.isValid() == false)
+   DimensionDescriptor firstBand(mpIgmDesc->getActiveBand(0));
+   DimensionDescriptor secondBand(mpIgmDesc->getActiveBand(1));
+   if (!column.isValid() || !row.isValid() || !firstBand.isValid() || !secondBand.isValid())
    {
       return LocationType();
    }
@@ -329,21 +354,25 @@ LocationType IgmGeoreference::pixelToGeo(LocationType pixel, bool* pAccurate) co
       return LocationType(mpIgmRaster->getPixelValue(column, row, secondBand),
          mpIgmRaster->getPixelValue(column, row, firstBand));
    }
-   UtmPoint uPoint(mpIgmRaster->getPixelValue(column, row, firstBand),
-      mpIgmRaster->getPixelValue(column, row, secondBand), mZone, 'N');
+   char hemisphere = 'N';
+   double northing = mpIgmRaster->getPixelValue(column, row, secondBand);
+   if (northing < 0.0)
+   {
+      hemisphere = 'S';
+      northing = -northing;
+   }
+   UtmPoint uPoint(mpIgmRaster->getPixelValue(column, row, firstBand), northing, mZone, hemisphere);
    return LocationType(uPoint.getLatLonCoordinates().getLatitude().getValue(),
       uPoint.getLatLonCoordinates().getLongitude().getValue());
 }
 
 LocationType IgmGeoreference::geoToPixel(LocationType geo, bool* pAccurate) const
 {
-   // Since GCP Georeference values are stored in reverse order, perform the reverse operation here.
-   if (mpGcpPlugIn == NULL || mpIgmGeo.get() == NULL)
+   if (pAccurate != NULL)
    {
-      return LocationType();
+      bool outsideCols = geo.mX < 0.0 || geo.mX > static_cast<double>(mNumColumns);
+      bool outsideRows = geo.mY < 0.0 || geo.mY > static_cast<double>(mNumRows);
+      *pAccurate = !(outsideCols || outsideRows);
    }
-   else
-   {
-      return mpGcpPlugIn->pixelToGeo(geo, pAccurate);
-   }
+   return GeoreferenceUtilities::evaluatePolynomial(geo, mLatCoefficients, mLonCoefficients, 2);
 }

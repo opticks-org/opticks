@@ -20,6 +20,7 @@
 class FileBrowser;
 class Progress;
 class RasterElement;
+class QRadioButton;
 
 class IgmGui : public QWidget
 {
@@ -28,10 +29,14 @@ class IgmGui : public QWidget
 public:
    IgmGui(RasterElement* pRasterElement, QWidget* pParent = 0);
    ~IgmGui();
-   QString getFilename() const;
    bool validateInput();
+   bool useExisting() const;
+   void hasExisting(bool val);
+   QString getFilename() const;
 
 protected:
+   QRadioButton* mpUseExisting;
+   QRadioButton* mpLoad;
    FileBrowser* mpFilename;
 };
 
