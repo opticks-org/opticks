@@ -159,7 +159,6 @@
     <ClCompile Include="RpcGeoreference.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_OptionsNitfExporter.cpp" />
     <ClCompile Include="RpcGui.cpp" />
-    <ClCompile Include="NitfDesExporter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="NitfExporter.h" />
@@ -167,7 +166,6 @@
     <ClInclude Include="NitfPager.h" />
     <ClInclude Include="NitfPropertiesManager.h" />
     <ClInclude Include="NitfUnknownTreParser.h" />
-    <ClInclude Include="NitfDesExporter.h" />
     <CustomBuild Include="RpcGui.h">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
