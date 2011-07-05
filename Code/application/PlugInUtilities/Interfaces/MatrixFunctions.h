@@ -15,6 +15,7 @@
 #include <exception>
 #include <math.h>
 #include <memory>
+#include <string.h>
 
 class RasterElement;
 
