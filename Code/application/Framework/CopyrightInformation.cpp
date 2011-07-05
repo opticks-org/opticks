@@ -2334,4 +2334,24 @@ CopyrightInformation::CopyrightInformation()
       "DAMAGES. "
       "<br><br>"
       "END OF TERMS AND CONDITIONS ");
+      addDependencyCopyright("tbb",
+         "<H4>License Agreement for<br>"
+         "Intel Threading Building Blocks Library.</H4>"
+         "<pre>The source code of Threading Building Blocks\n"
+         "is distributed under version 2 of the GNU\n"
+         "GeneralPublic License, with the so-called\n"
+         "\"runtime exception\", as follows:\n\n"
+         "  As a special exception, you may use this\n"
+         "  file as part of a free software library\n"
+         "  without restriction. Specifically, if\n"
+         "  other files instantiate templates or use\n"
+         "  macros or inline functions from this file,\n"
+         "  or you compile this file and link it with\n"
+         "  other files to produce an executable, this\n"
+         "  file does not by itself cause the resulting\n"
+         "  executable to be covered by the GNU General\n"
+         "  Public License. This exception does not\n"
+         "  however invalidate any other reasons why\n"
+         "  the executable file might be covered by the\n"
+         "  GNU General Public License.</pre>");
 }

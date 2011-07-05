@@ -111,7 +111,6 @@ are defined in Opticks-Version.wxi, so include that file now -->
                <File Name="opencv_objdetect220.dll" Id="F__opencv_objdetect_Dependency" DiskId="1" />
                <File Name="opencv_calib3d220.dll" Id="F__opencv_calib3d_Dependency" DiskId="1" />
                <File Name="opencv_flann220.dll" Id="F__opencv_flann_Dependency" DiskId="1" />
-               <File Name="tbb.dll" Id="F__opencv_tbb_Dependency" DiskId="1" />
                <File Name="opencv_haartraining.exe" Id="F__opencv_haartraining_Dependency" DiskId="1" />
                <File Name="opencv_traincascade.exe" Id="F__opencv_traincascade_Dependency" DiskId="1" />
             </Component>
@@ -159,6 +158,11 @@ are defined in Opticks-Version.wxi, so include that file now -->
             </Component>
             <Component Id="C__shapelib_Dependency" Guid="$(var.C__shapelib_DependencyGuid)" Win64="$(var.64Bit)">
                <File Name="shapelib.dll" Id="F__shapelib_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
+            <Component Id="C__tbb_Dependency" Guid="$(var.C__tbb_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="tbb.dll" Id="F__tbb_Dependency" DiskId="1" KeyPath="yes" />
+               <File Name="tbbmalloc.dll" Id="F__tbbmalloc_Dependency" DiskId="1" />
+               <File Name="tbbmalloc_proxy.dll" Id="F__tbbmalloc_proxy_Dependency" DiskId="1" />
             </Component>
             <Component Id="C__xercesc_3_1_Dependency" Guid="$(var.C__xercesc_3_1_DependencyGuid)" Win64="$(var.64Bit)">
                <File Name="xerces-c_3_1.dll" Id="F__xercesc_3_1_Dependency" DiskId="1" KeyPath="yes" />
@@ -421,6 +425,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
          <ComponentRef Id="C__qwt5_Dependency" />
          <ComponentRef Id="C__raptor_Dependency" />
          <ComponentRef Id="C__shapelib_Dependency" />
+         <ComponentRef Id="C__tbb_Dependency" />
          <ComponentRef Id="C__xercesc_3_1_Dependency" />
          <ComponentRef Id="C__xqilla224_Dependency" />
          <ComponentRef Id="C__zlib1_Dependency" />

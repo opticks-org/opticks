@@ -56,6 +56,7 @@
    <?define C__QtXml4_DependencyGuid = "716e8f52-36ba-4ff3-ad3b-ea6887e1b1eb" ?>
    <?define C__qwt5_DependencyGuid = "2b62fa33-ac63-41d9-9d75-c4cf3b553572" ?>
    <?define C__shapelib_DependencyGuid = "e38a331a-9774-4170-a8ef-2bc9f299c8a3" ?>
+   <?define C__tbb_DependencyGuid = "6eb86a65-1f32-454f-aaab-add3f25b6927" ?>
    <?define C__xercesc_3_1_DependencyGuid = "55568b85-bc60-423b-932c-5fc80b99bb39" ?>
    <?define C__xqilla224_DependencyGuid = "ae9cd3dd-5e5e-4a6a-8e8e-2a27949ff762" ?>
    <?define C__zlib1_DependencyGuid = "f8985f8e-74c3-4d77-8135-433fcc37df1d" ?>
