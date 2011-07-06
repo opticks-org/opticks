@@ -64,7 +64,7 @@ bool ConvolutionFilterShell::getInputSpecification(PlugInArgList*& pInArgList)
       "new raster element will be the size of this AOI."));
    VERIFY(pInArgList->addArg<SpatialDataView>(Executable::ViewArg(), NULL, "The view to which the raster element to be convoluted is attached."));
    unsigned int defaultBand = 0;
-   VERIFY(pInArgList->addArg<unsigned int>("Band Number", defaultBand, "The band which will be convolved. Defaults to the first band."));
+   VERIFY(pInArgList->addArg<std::vector<unsigned int> >("Band Numbers", "The band numbers which will be convolved. Defaults to no bands. This argument takes precedence over the Band Number argument."));
    VERIFY(pInArgList->addArg<std::string>("Result Name", "The name of the new raster element. "
       "Defaults to the name of the input raster element with ' Convolved' appended."));
    return true;
@@ -127,8 +127,24 @@ bool ConvolutionFilterShell::execute(PlugInArgList* pInArgList, PlugInArgList* p
 
    ModelResource<RasterElement> pResult(RasterUtilities::createRasterElement(
       mResultName, iterChecker.getNumSelectedRows(), iterChecker.getNumSelectedColumns(),
-      resultType, mInput.mpDescriptor->getProcessingLocation() == IN_MEMORY));
+      mInput.mBands.size(), resultType, mInput.mpDescriptor->getInterleaveFormat(),
+      mInput.mpDescriptor->getProcessingLocation() == IN_MEMORY));
    pResult->copyClassification(mInput.mpRaster);
+   pResult->getMetadata()->merge(mInput.mpDescriptor->getMetadata()); //copy original metadata
+   //chip metadata by bands
+   vector<DimensionDescriptor> orgBands = mInput.mpDescriptor->getBands();
+   vector<DimensionDescriptor> newBands;
+   newBands.reserve(mInput.mBands.size());
+   for (unsigned int index = 0; index < mInput.mBands.size(); ++index)
+   {
+      unsigned int selectedBand = mInput.mBands[index];
+      if (selectedBand < orgBands.size())
+      {
+         newBands.push_back(orgBands[selectedBand]);
+      }
+   }
+   RasterUtilities::chipMetadata(pResult->getMetadata(), mInput.mpDescriptor->getRows(),
+      mInput.mpDescriptor->getColumns(), newBands);
    mInput.mpResult = pResult.get();
    if (mInput.mpResult == NULL)
    {
@@ -219,10 +235,15 @@ bool ConvolutionFilterShell::extractInputArgs(PlugInArgList* pInArgList)
          }
       }
    }
-   if (!pInArgList->getPlugInArgValue("Band Number", mInput.mBand))
+   std::vector<unsigned int> bandNumbers;
+   if (!pInArgList->getPlugInArgValue("Band Numbers", bandNumbers))
    {
-      mProgress.report("Error getting band number.", 0, ERRORS, true);
+      mProgress.report("Error getting band numbers.", 0, ERRORS, true);
       return false;
+   }
+   if (!bandNumbers.empty())
+   {
+      mInput.mBands = bandNumbers;
    }
    pInArgList->getPlugInArgValue("Result Name", mResultName);
    if (mResultName.empty())
@@ -315,94 +336,101 @@ void ConvolutionFilterShell::ConvolutionFilterThread::convolve(const T*)
    mRowRange.mFirst = std::max(0, mRowRange.mFirst);
    mRowRange.mLast = std::min(mRowRange.mLast, maxRowNum);
 
-   FactoryResource<DataRequest> pResultRequest;
-   pResultRequest->setRows(pResultDescriptor->getActiveRow(mRowRange.mFirst),
-      pResultDescriptor->getActiveRow(mRowRange.mLast));
-   pResultRequest->setColumns(pResultDescriptor->getActiveColumn(0),
-      pResultDescriptor->getActiveColumn(numResultsCols - 1));
-   pResultRequest->setWritable(true);
-   DataAccessor resultAccessor = mInput.mpResult->getDataAccessor(pResultRequest.release());
-   if (!resultAccessor.isValid())
+   unsigned int bandCount = mInput.mBands.size();
+   for (unsigned int bandNum = 0; bandNum < bandCount; ++bandNum)
    {
-      return;
-   }
-
-   int index = numResultsCols * mRowRange.mFirst;
-   int oldPercentDone = -1;
-   int rowOffset = static_cast<int>(mInput.mpIterCheck->getOffset().mY);
-   int startRow = mRowRange.mFirst + rowOffset;
-   int stopRow = mRowRange.mLast + rowOffset;
-
-   int columnOffset = static_cast<int>(mInput.mpIterCheck->getOffset().mX);
-   int startColumn = columnOffset;
-   int stopColumn = numResultsCols + columnOffset - 1;
-
-   int yshift = (mInput.mKernel.Nrows() - 1) / 2;
-   int xshift = (mInput.mKernel.Ncols() - 1) / 2;
-
-   FactoryResource<DataRequest> pRequest;
-   pRequest->setRows(mInput.mpDescriptor->getActiveRow(std::max(0, startRow - yshift)),
-      mInput.mpDescriptor->getActiveRow(std::min(maxRowNum, stopRow + mInput.mKernel.Nrows() - yshift)));
-   pRequest->setColumns(mInput.mpDescriptor->getActiveColumn(startColumn),
-      mInput.mpDescriptor->getActiveColumn(stopColumn));
-   pRequest->setBands(mInput.mpDescriptor->getActiveBand(mInput.mBand),
-      mInput.mpDescriptor->getActiveRow(mInput.mBand));
-   DataAccessor accessor = mInput.mpRaster->getDataAccessor(pRequest.release());
-   if (!accessor.isValid())
-   {
-      return;
-   }
-
-   Service<ModelServices> pModel;
-   for (int row_index = startRow; row_index <= stopRow; ++row_index)
-   {
-      int percentDone = mRowRange.computePercent(row_index - rowOffset);
-      if (percentDone > oldPercentDone)
+      FactoryResource<DataRequest> pResultRequest;
+      pResultRequest->setRows(pResultDescriptor->getActiveRow(mRowRange.mFirst),
+         pResultDescriptor->getActiveRow(mRowRange.mLast));
+      pResultRequest->setColumns(pResultDescriptor->getActiveColumn(0),
+         pResultDescriptor->getActiveColumn(numResultsCols - 1));
+      pResultRequest->setBands(pResultDescriptor->getActiveBand(bandNum),
+         pResultDescriptor->getActiveBand(bandNum));
+      pResultRequest->setWritable(true);
+      DataAccessor resultAccessor = mInput.mpResult->getDataAccessor(pResultRequest.release());
+      if (!resultAccessor.isValid())
       {
-         oldPercentDone = percentDone;
-         getReporter().reportProgress(getThreadIndex(), percentDone);
-      }
-      if (mInput.mpAbortFlag != NULL && *mInput.mpAbortFlag)
-      {
-         break;
+         return;
       }
 
-      for (int col_index = startColumn; col_index <= stopColumn; ++col_index)
+      int index = numResultsCols * mRowRange.mFirst;
+      int oldPercentDone = -1;
+      int rowOffset = static_cast<int>(mInput.mpIterCheck->getOffset().mY);
+      int startRow = mRowRange.mFirst + rowOffset;
+      int stopRow = mRowRange.mLast + rowOffset;
+
+      int columnOffset = static_cast<int>(mInput.mpIterCheck->getOffset().mX);
+      int startColumn = columnOffset;
+      int stopColumn = numResultsCols + columnOffset - 1;
+
+      int yshift = (mInput.mKernel.Nrows() - 1) / 2;
+      int xshift = (mInput.mKernel.Ncols() - 1) / 2;
+
+      FactoryResource<DataRequest> pRequest;
+      pRequest->setRows(mInput.mpDescriptor->getActiveRow(std::max(0, startRow - yshift)),
+         mInput.mpDescriptor->getActiveRow(std::min(maxRowNum, stopRow + mInput.mKernel.Nrows() - yshift)));
+      pRequest->setColumns(mInput.mpDescriptor->getActiveColumn(startColumn),
+         mInput.mpDescriptor->getActiveColumn(stopColumn));
+      pRequest->setBands(mInput.mpDescriptor->getActiveBand(mInput.mBands[bandNum]),
+         mInput.mpDescriptor->getActiveBand(mInput.mBands[bandNum]));
+      DataAccessor accessor = mInput.mpRaster->getDataAccessor(pRequest.release());
+      if (!accessor.isValid())
       {
-         double accum = 0.0;
-         if (mInput.mpIterCheck->getPixel(col_index, row_index))
+         return;
+      }
+
+      Service<ModelServices> pModel;
+      int numRows = stopRow - startRow + 1;
+      for (int row_index = startRow; row_index <= stopRow; ++row_index)
+      {
+         int percentDone = 100 * ((bandNum * numRows) + (row_index - startRow)) / (numRows * bandCount); 
+         if (percentDone > oldPercentDone)
          {
-            for (int kernelrow = 0; kernelrow < mInput.mKernel.Nrows(); kernelrow++)
-            {
-               int neighbor_row = row_index - yshift + kernelrow;
-               int real_row = std::min(std::max(0, neighbor_row),
-                  static_cast<int>(mInput.mpDescriptor->getRowCount()) - 1);
-               for (int kernelcol = 0; kernelcol < mInput.mKernel.Ncols(); kernelcol++)
-               {
-                  int neighbor_col = col_index - xshift + kernelcol;
-                  int real_col = std::min(std::max(0, neighbor_col),
-                     static_cast<int>(mInput.mpDescriptor->getColumnCount()) - 1);
-                  accessor->toPixel(real_row, real_col);
-                  if (accessor.isValid() == false)
-                  {
-                     return;
-                  }
+            oldPercentDone = percentDone;
+            getReporter().reportProgress(getThreadIndex(), percentDone);
+         }
+         if (mInput.mpAbortFlag != NULL && *mInput.mpAbortFlag)
+         {
+            break;
+         }
 
-                  double val = 0.0;
-                  pModel->getDataValue<T>(reinterpret_cast<T*>(accessor->getColumn()), COMPLEX_MAGNITUDE, 0, val);
-                  accum += mInput.mKernel(kernelrow+1, kernelcol+1) * val / mInput.mKernel.Storage();
+         for (int col_index = startColumn; col_index <= stopColumn; ++col_index)
+         {
+            double accum = 0.0;
+            if (mInput.mpIterCheck->getPixel(col_index, row_index))
+            {
+               for (int kernelrow = 0; kernelrow < mInput.mKernel.Nrows(); kernelrow++)
+               {
+                  int neighbor_row = row_index - yshift + kernelrow;
+                  int real_row = std::min(std::max(0, neighbor_row),
+                     static_cast<int>(mInput.mpDescriptor->getRowCount()) - 1);
+                  for (int kernelcol = 0; kernelcol < mInput.mKernel.Ncols(); kernelcol++)
+                  {
+                     int neighbor_col = col_index - xshift + kernelcol;
+                     int real_col = std::min(std::max(0, neighbor_col),
+                        static_cast<int>(mInput.mpDescriptor->getColumnCount()) - 1);
+                     accessor->toPixel(real_row, real_col);
+                     if (accessor.isValid() == false)
+                     {
+                        return;
+                     }
+
+                     double val = 0.0;
+                     pModel->getDataValue<T>(reinterpret_cast<T*>(accessor->getColumn()), COMPLEX_MAGNITUDE, 0, val);
+                     accum += mInput.mKernel(kernelrow+1, kernelcol+1) * val / mInput.mKernel.Storage();
+                  }
                }
             }
-         }
-         if (resultAccessor.isValid() == false)
-         {
-            return;
-         }
+            if (resultAccessor.isValid() == false)
+            {
+               return;
+            }
 
-         switchOnEncoding(pResultDescriptor->getDataType(), assignResult, resultAccessor->getColumn(), accum);
-         resultAccessor->nextColumn();
+            switchOnEncoding(pResultDescriptor->getDataType(), assignResult, resultAccessor->getColumn(), accum);
+            resultAccessor->nextColumn();
+         }
+         resultAccessor->nextRow();
       }
-      resultAccessor->nextRow();
    }
 }
 

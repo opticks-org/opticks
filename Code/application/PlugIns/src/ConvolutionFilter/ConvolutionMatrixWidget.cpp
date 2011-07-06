@@ -7,22 +7,27 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include "AoiElement.h"
 #include "AppVerify.h"
 #include "ConvolutionMatrixWidget.h"
 #include "DynamicObject.h"
 #include "DesktopServices.h"
 #include "Executable.h"
+#include "GetConvolveParametersDialog.h"
 #include "LayerList.h"
 #include "PlugInArgList.h"
 #include "PlugInResource.h"
 #include "ProgressResource.h"
+#include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "RasterLayer.h"
 #include "SpatialDataView.h"
+#include "WorkspaceWindow.h"
 
 #include <ossim/matrix/newmat.h>
 #include <QtGui/QBitmap>
 #include <QtGui/QHeaderView>
+#include <QtGui/QInputDialog>
 #include <QtGui/QMessageBox>
 
 namespace
@@ -271,6 +276,22 @@ ConvolutionMatrixWidget::ConvolutionMatrixWidget(QWidget* pParent) : QWidget(pPa
    mpFilter->horizontalHeader()->hide();
    mpFilter->horizontalHeader()->setDefaultSectionSize(mpFilter->fontMetrics().width("00.000"));
 
+   QPushButton* pSubsetButton = mpMatrixButtons->addButton("Subset...", QDialogButtonBox::ActionRole); 
+   if (pSubsetButton != NULL)
+   {
+      pSubsetButton->setToolTip("Change the AOI and bands that will be used when convolving the active window.");
+   }
+   QPushButton* pResetButton = mpMatrixButtons->button(QDialogButtonBox::Reset);
+   if (pResetButton != NULL)
+   {
+      pResetButton->setToolTip("Reset the divisor and matrix to the defaults.");
+   }
+   QPushButton* pApplyButton = mpMatrixButtons->button(QDialogButtonBox::Apply);
+   if (pApplyButton != NULL)
+   {
+      pApplyButton->setToolTip("Apply the convolution to the primary raster element in the active window.");
+   }
+
    mpPresetButtons->addButton("Load", QDialogButtonBox::ActionRole);
    mpPresetButtons->addButton("Remove", QDialogButtonBox::DestructiveRole);
 
@@ -337,6 +358,7 @@ void ConvolutionMatrixWidget::linkToggled(bool locked)
 
 void ConvolutionMatrixWidget::matrixButtonPressed(QAbstractButton* pButton)
 {
+   bool subsetClicked = (mpMatrixButtons->buttonRole(pButton) == QDialogButtonBox::ActionRole);
    if (mpMatrixButtons->buttonRole(pButton) == QDialogButtonBox::ResetRole)
    {
       mpWidthSlider->setValue(0);
@@ -347,11 +369,11 @@ void ConvolutionMatrixWidget::matrixButtonPressed(QAbstractButton* pButton)
       mpDivisor->setValue(1.0);
       mpFilterName->setEditText(QString());
    }
-   else if (mpMatrixButtons->buttonRole(pButton) == QDialogButtonBox::ApplyRole)
+   else if (mpMatrixButtons->buttonRole(pButton) == QDialogButtonBox::ApplyRole || 
+            subsetClicked)
    {
       NEWMAT::Matrix kernel = getCurrentMatrix() / mpDivisor->value();
 
-      // execute convolution
       ProgressResource progress("Convolve data");
       SpatialDataView* pView = dynamic_cast<SpatialDataView*>(
          Service<DesktopServices>()->getCurrentWorkspaceWindowView());
@@ -360,25 +382,133 @@ void ConvolutionMatrixWidget::matrixButtonPressed(QAbstractButton* pButton)
          progress->updateProgress("Active view is not a spatial data view.", 0, ERRORS);
          return;
       }
-      RasterLayer* pLayer = dynamic_cast<RasterLayer*>(pView->getActiveLayer());
-      RasterElement* pRaster = (pLayer == NULL) ? NULL : static_cast<RasterElement*>(pLayer->getDataElement());
-      if (pRaster == NULL)
-      {
-         pRaster = pView->getLayerList()->getPrimaryRasterElement();
-      }
-      VERIFYNRV(pRaster != NULL);
+
       ExecutableResource pConv("Generic Convolution", std::string(), progress.get(), false);
       if (pConv->getPlugIn() == NULL)
       {
          progress->updateProgress("Generic convolution plug-in is not available.", 0, ERRORS);
          return;
       }
-      pConv->getInArgList().setPlugInArgValue(Executable::DataElementArg(), pRaster);
-      pConv->getInArgList().setPlugInArgValue(Executable::ViewArg(), pView);
-      std::string resultName = pRaster->getName() + ":Convolved";
-      pConv->getInArgList().setPlugInArgValue("Result Name", &resultName);
-      pConv->getInArgList().setPlugInArgValueLoose("Kernel", &kernel);
-      pConv->execute();
+
+      RasterLayer* pLayer = dynamic_cast<RasterLayer*>(pView->getActiveLayer());
+      RasterElement* pRaster = (pLayer == NULL) ? NULL : static_cast<RasterElement*>(pLayer->getDataElement());
+      if (pRaster == NULL)
+      {
+         pRaster = pView->getLayerList()->getPrimaryRasterElement();
+      }
+
+      //get previous execution results if any
+      std::vector<unsigned int> bandNums;
+      bandNums.push_back(0);
+      AoiElement* pAoi = NULL;
+      bool promptUser = true;
+      std::string viewId = pView->getId();
+      std::map<std::string, PreviousConvolutionExecution>::iterator iter = mPreviousConvolves.find(viewId);
+      if (iter != mPreviousConvolves.end())
+      {
+         if (iter->second.mRasterElementId == pRaster->getId())
+         {
+            bandNums = iter->second.mActiveBandNums;
+            pAoi = NULL;
+            if (!iter->second.mAoiElementId.empty())
+            {
+               std::vector<Layer*> layers;
+               pView->getLayerList()->getLayers(AOI_LAYER, layers);
+               for (unsigned int i = 0; i < layers.size(); ++i)
+               {
+                  Layer* pLayer = layers[i];
+                  if (pLayer == NULL)
+                  {
+                     continue;
+                  }
+                  AoiElement* pElement = dynamic_cast<AoiElement*>(pLayer->getDataElement());
+                  if (pElement != NULL && pElement->getId() == iter->second.mAoiElementId)
+                  {
+                     pAoi = pElement;
+                     break;
+                  }
+               }
+               if (pAoi == NULL && !subsetClicked)
+               {
+                  progress->updateProgress("Previously selected AOI is no longer available, using entire image.",
+                     0, WARNING);
+               }
+            }
+         }
+         else if (!subsetClicked)
+         {
+            progress->updateProgress("Previously selected bands are no longer available, using first band.",
+               0, WARNING);
+         }
+      }
+
+      if (subsetClicked)
+      {
+         GetConvolveParametersDialog paramDlg(pView, pRaster, this);
+         paramDlg.setSelectedAoi(pAoi);
+         paramDlg.setBandSelectionIndices(bandNums);
+         int dialogResult = paramDlg.exec();
+         if (dialogResult == QDialog::Rejected)
+         {
+            return;
+         }
+
+         pAoi = paramDlg.getSelectedAoi();
+         bandNums = paramDlg.getBandSelectionIndices();
+         PreviousConvolutionExecution prevExec;
+         prevExec.mActiveBandNums = bandNums;
+         if (pAoi != NULL)
+         {
+            prevExec.mAoiElementId = pAoi->getId();
+         }
+         prevExec.mRasterElementId = pRaster->getId();
+         mPreviousConvolves[viewId] = prevExec;
+      }
+
+      //clean-up any stale data in mPreviousConvolves
+      std::vector<Window*> windows;
+      std::vector<string> activeViewIds;
+      Service<DesktopServices>()->getWindows(windows);
+      for (unsigned int i = 0; i < windows.size(); ++i)
+      {
+         WorkspaceWindow* pWindow = dynamic_cast<WorkspaceWindow*>(windows[i]);
+         if (pWindow == NULL)
+         {
+            continue;
+         }
+         SpatialDataView* pView = dynamic_cast<SpatialDataView*>(pWindow->getActiveView());
+         if (pView != NULL)
+         {
+            activeViewIds.push_back(pView->getId());
+         }
+      }
+      std::sort(activeViewIds.begin(), activeViewIds.end());
+      std::map<std::string, PreviousConvolutionExecution>::iterator copyOfIter;
+      for (iter = mPreviousConvolves.begin();
+           iter != mPreviousConvolves.end(); )
+      {
+         copyOfIter = iter;
+         ++iter;
+         if (!std::binary_search(activeViewIds.begin(), activeViewIds.end(), copyOfIter->first))
+         {
+            mPreviousConvolves.erase(copyOfIter);
+         }
+      }
+
+      if (!subsetClicked)
+      {
+         // execute convolution
+         pConv->getInArgList().setPlugInArgValue(Executable::DataElementArg(), pRaster);
+         pConv->getInArgList().setPlugInArgValue("AOI", pAoi);
+         //since we prompted for an AOI, we don't want "Generic Convolution" to prompt for
+         //one.  We can suppress this by passing a NULL value for the Executable::ViewArg()
+         pConv->getInArgList().setPlugInArgValue<SpatialDataView>(Executable::ViewArg(), NULL);
+         std::string resultName = pRaster->getName() + ":Convolved";
+         pConv->getInArgList().setPlugInArgValue("Result Name", &resultName);
+         pConv->getInArgList().setPlugInArgValueLoose("Kernel", &kernel);
+         pConv->getInArgList().setPlugInArgValue("Band Numbers", &bandNums);
+         pConv->execute();
+      }
    }
 }
 

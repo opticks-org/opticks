@@ -1,3 +1,4 @@
+
 /*
  * The information in this file is
  * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
@@ -16,7 +17,36 @@
 #include <QtGui/QTableWidgetItem>
 #include <QtGui/QWidget>
 
+class AoiElement;
 class QIcon;
+
+class PreviousConvolutionExecution
+{
+public:
+   PreviousConvolutionExecution() {}
+
+   PreviousConvolutionExecution(const PreviousConvolutionExecution& rhs)
+   {
+      mRasterElementId = rhs.mRasterElementId;
+      mAoiElementId = rhs.mAoiElementId;
+      mActiveBandNums = rhs.mActiveBandNums;
+   }
+
+   PreviousConvolutionExecution& operator=(const PreviousConvolutionExecution& rhs)
+   {
+      if (this != &rhs)
+      {
+         mRasterElementId = rhs.mRasterElementId;
+         mAoiElementId = rhs.mAoiElementId;
+         mActiveBandNums = rhs.mActiveBandNums;
+      }
+      return *this;
+   }
+   
+   std::string mRasterElementId;
+   std::string mAoiElementId;
+   std::vector<unsigned int> mActiveBandNums;
+};
 
 class NumberItem : public QTableWidgetItem
 {
@@ -53,6 +83,7 @@ private:
    QIcon* mpLockIcon;
    QIcon* mpUnlockIcon;
    QMap<QString, QPair<NEWMAT::Matrix, double> > mPresets;
+   std::map<std::string, PreviousConvolutionExecution> mPreviousConvolves;
 };
 
 #endif

@@ -50,8 +50,7 @@ protected:
             mpDescriptor(NULL),
             mpResult(NULL),
             mpAbortFlag(NULL),
-            mpIterCheck(NULL),
-            mBand(0)
+            mpIterCheck(NULL)
       {}
 
       const RasterElement* mpRaster;
@@ -59,7 +58,7 @@ protected:
       RasterElement* mpResult;
       const bool* mpAbortFlag;
       const BitMaskIterator* mpIterCheck;
-      unsigned int mBand;
+      std::vector<unsigned int> mBands;
       NEWMAT::Matrix mKernel;
    };
 

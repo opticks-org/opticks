@@ -139,10 +139,6 @@ You can remove a preset by selecting it and hitting Remove.</string>
    </item>
    <item row="3" column="1" >
     <widget class="QDialogButtonBox" name="mpMatrixButtons" >
-     <property name="toolTip" >
-      <string>Reset the divisor and matrix to the defaults.
-Apply the convolution to the primary raster element in the active window.</string>
-     </property>
      <property name="standardButtons" >
       <set>QDialogButtonBox::Apply|QDialogButtonBox::NoButton|QDialogButtonBox::Reset</set>
      </property>

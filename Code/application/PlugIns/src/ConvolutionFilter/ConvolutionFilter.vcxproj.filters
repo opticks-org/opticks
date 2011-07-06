@@ -32,7 +32,13 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_ConvolutionMatrixWidget.cpp">
       <Filter>moc</Filter>
     </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_GetConvolveParametersDialog.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
     <ClCompile Include="MorphologicalFilter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GetConvolveParametersDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -56,6 +62,9 @@
     </CustomBuild>
     <CustomBuild Include="ConvolutionMatrixWidget.ui">
       <Filter>uic</Filter>
+    </CustomBuild>
+    <CustomBuild Include="GetConvolveParametersDialog.h">
+      <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
 </Project>
