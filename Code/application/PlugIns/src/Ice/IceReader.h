@@ -27,6 +27,7 @@ class PseudocolorLayer;
 class RasterDataDescriptor;
 class RasterElement;
 class SpatialDataView;
+class ThresholdLayer;
 
 class IceReader
 {
@@ -68,7 +69,8 @@ private:
       DataElement* pParent, std::string& warningMessage);
    bool parsePseudocolorLayer(const Hdf5Group* pPseudocolorLayerGroup,
       PseudocolorLayer* pPseudocolorLayer, std::string& warningMessage);
-
+   bool parseThresholdLayer(const Hdf5Group* pThresholdLayerGroup, ThresholdLayer* pThresholdLayer,
+      std::string& warningMessage);
 
    Hdf5File& mIceFile;
    ValidityType mIceFileValid;

@@ -199,6 +199,8 @@
     <ClCompile Include="IceRasterElementExporter.cpp" />
     <ClCompile Include="IceRasterElementImporter.cpp" />
     <ClCompile Include="IceReader.cpp" />
+    <ClCompile Include="IceThresholdLayerExporter.cpp" />
+    <ClCompile Include="IceThresholdLayerImporter.cpp" />
     <ClCompile Include="IceUtilities.cpp" />
     <ClCompile Include="IceWriter.cpp" />
     <ClCompile Include="ModuleManager.cpp" />
@@ -216,6 +218,8 @@
     <ClInclude Include="IceRasterElementExporter.h" />
     <ClInclude Include="IceRasterElementImporter.h" />
     <ClInclude Include="IceReader.h" />
+    <ClInclude Include="IceThresholdLayerExporter.h" />
+    <ClInclude Include="IceThresholdLayerImporter.h" />
     <ClInclude Include="IceUtilities.h" />
     <ClInclude Include="IceWriter.h" />
     <CustomBuild Include="OptionsIceExporter.h">

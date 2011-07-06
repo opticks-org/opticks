@@ -31,6 +31,7 @@
 #include "StatisticsReaderWriter.h"
 #include "StringUtilities.h"
 #include "StringUtilitiesMacros.h"
+#include "ThresholdLayer.h"
 #include "TypesFile.h"
 #include "Units.h"
 #include "xmlwriter.h"
@@ -98,7 +99,12 @@ void IceWriter::writeFileHeader()
    ICEVERIFY(HdfUtilities::writeAttribute<string>(*formatDescriptor, "CreatorOS", os));
    ICEVERIFY(HdfUtilities::writeAttribute<string>(*formatDescriptor, "CreatorArch", arch));
    unsigned int majorVersion = 1;
-   unsigned int minorVersion = 10; //support 0-99 minor versions
+   unsigned int minorVersion = 20; //support 0-99 minor versions
+   if ((mFileType == IceUtilities::RASTER_ELEMENT) || (mFileType == IceUtilities::PSEUDOCOLOR_LAYER))
+   {
+      minorVersion = 10;   // Write version 1.10 raster element and pseudocolor layer files
+                           // so that they can be loaded by previous importer versions
+   }
    unsigned int formatVersion = (majorVersion * 100) + minorVersion;
    ICEVERIFY(HdfUtilities::writeAttribute<unsigned int>(*formatDescriptor, "FormatVersion", formatVersion));
    ICEVERIFY(HdfUtilities::writeAttribute<string>(*formatDescriptor,
@@ -439,7 +445,13 @@ void IceWriter::writeLayer(const string& hdfPath, const string& datasetPath, con
    {
       case PSEUDOCOLOR:
       {
-         writePseudocolorLayerProperties(hdfPath, reinterpret_cast<const PseudocolorLayer*>(pLayer), pProgress);
+         writePseudocolorLayerProperties(hdfPath, static_cast<const PseudocolorLayer*>(pLayer), pProgress);
+         break;
+      }
+
+      case THRESHOLD:
+      {
+         writeThresholdLayerProperties(hdfPath, static_cast<const ThresholdLayer*>(pLayer), pProgress);
          break;
       }
 
@@ -451,6 +463,29 @@ void IceWriter::writeLayer(const string& hdfPath, const string& datasetPath, con
 
    // Write common layer attributes
    writeLayerProperties(hdfPath, pLayer, pProgress);
+   abortIfNecessary();
+}
+
+void IceWriter::writeThresholdLayer(const std::string& hdfPath, const std::string& datasetPath,
+                                    const std::string& layerName, double xScaleFactor, double yScaleFactor,
+                                    double xOffset, double yOffset, SymbolType symbol, ColorType color,
+                                    double firstThreshold, double secondThreshold, RegionUnits regionUnits,
+                                    PassArea passArea, Progress* pProgress)
+{
+   // Write out the Dataset if one was provided.
+   HdfUtilities::createGroups(hdfPath, mFileHandle, true);
+   if (datasetPath.empty() == false)
+   {
+      Hdf5GroupResource layerGroup(H5Gopen1(mFileHandle, hdfPath.c_str()));
+      ICEVERIFY_MSG(HdfUtilities::writeAttribute(*layerGroup, "Dataset", datasetPath), "Unable to set Dataset path.");
+   }
+
+   // Write threshold layer attributes
+   writeThresholdLayerProperties(hdfPath, symbol, color, firstThreshold, secondThreshold, regionUnits, passArea,
+      pProgress);
+
+   // Write common layer attributes
+   writeLayerProperties(hdfPath, layerName, THRESHOLD, xScaleFactor, yScaleFactor, xOffset, yOffset, pProgress);
    abortIfNecessary();
 }
 
@@ -1186,30 +1221,83 @@ void IceWriter::writePseudocolorLayerProperties(const string& hdfPath,
    }
 }
 
-void IceWriter::writeLayerProperties(const string& hdfPath,
-   const Layer* pLayer, Progress*pProgress)
+void IceWriter::writeThresholdLayerProperties(const std::string& hdfPath, const ThresholdLayer* pLayer,
+                                              Progress* pProgress)
+{
+   if (pLayer == NULL)
+   {
+      return;
+   }
+
+   SymbolType symbol = pLayer->getSymbol();
+   ColorType color = pLayer->getColor();
+   double firstThreshold = pLayer->getFirstThreshold();
+   double secondThreshold = pLayer->getSecondThreshold();
+   RegionUnits regionUnits = pLayer->getRegionUnits();
+   PassArea passArea = pLayer->getPassArea();
+
+   writeThresholdLayerProperties(hdfPath, symbol, color, firstThreshold, secondThreshold, regionUnits, passArea,
+      pProgress);
+}
+
+void IceWriter::writeThresholdLayerProperties(const std::string& hdfPath, SymbolType symbol, ColorType color,
+                                              double firstThreshold, double secondThreshold, RegionUnits regionUnits,
+                                              PassArea passArea, Progress* pProgress)
+{
+   const string layerPath = hdfPath + "/ThresholdLayerProperties";
+   HdfUtilities::createGroups(layerPath, mFileHandle, true);
+
+   Hdf5GroupResource layerGroup(H5Gopen1(mFileHandle, layerPath.c_str()));
+   ICEVERIFY_MSG(*layerGroup >= 0, "Unable to open the group \"" + layerPath + "\".");
+
+   ICEVERIFY_MSG(HdfUtilities::writeAttribute(*layerGroup, "Symbol", StringUtilities::toXmlString(symbol)),
+      "Unable to write symbol.");
+   ICEVERIFY_MSG(HdfUtilities::writeAttribute(*layerGroup, "Color", StringUtilities::toXmlString(color)),
+      "Unable to write color.");
+   ICEVERIFY_MSG(HdfUtilities::writeAttribute(*layerGroup, "PassArea", StringUtilities::toXmlString(passArea)),
+      "Unable to write pass area.");
+   ICEVERIFY_MSG(HdfUtilities::writeAttribute(*layerGroup, "RegionUnits", StringUtilities::toXmlString(regionUnits)),
+      "Unable to write region units.");
+   ICEVERIFY_MSG(HdfUtilities::writeAttribute(*layerGroup, "FirstThreshold", firstThreshold),
+      "Unable to write first threshold.");
+   ICEVERIFY_MSG(HdfUtilities::writeAttribute(*layerGroup, "SecondThreshold", secondThreshold),
+      "Unable to write second threshold.");
+}
+
+void IceWriter::writeLayerProperties(const string& hdfPath, const Layer* pLayer, Progress* pProgress)
+{
+   if (pLayer == NULL)
+   {
+      return;
+   }
+
+   const std::string& name = pLayer->getName();
+   LayerType type = pLayer->getLayerType();
+   double xScaleFactor = pLayer->getXScaleFactor();
+   double yScaleFactor = pLayer->getYScaleFactor();
+   double xOffset = pLayer->getXOffset();
+   double yOffset = pLayer->getYOffset();
+
+   writeLayerProperties(hdfPath, name, type, xScaleFactor, yScaleFactor, xOffset, yOffset, pProgress);
+}
+
+void IceWriter::writeLayerProperties(const std::string& hdfPath, const std::string& name, LayerType type,
+                                     double xScaleFactor, double yScaleFactor, double xOffset, double yOffset,
+                                     Progress* pProgress)
 {
    const string layerPath = hdfPath + "/Layer";
    HdfUtilities::createGroups(layerPath, mFileHandle, true);
    Hdf5GroupResource layerGroup(H5Gopen1(mFileHandle, layerPath.c_str()));
 
-   ICEVERIFY_MSG(HdfUtilities::writeAttribute(*layerGroup, "Name",
-      pLayer->getName()), "Unable to write Layer name.");
-
-   ICEVERIFY_MSG(HdfUtilities::writeAttribute(*layerGroup, "LayerType",
-      StringUtilities::toXmlString(pLayer->getLayerType())), "Unable to write LayerType.");
-
-   ICEVERIFY_MSG(HdfUtilities::writeAttribute(*layerGroup, "XScaleFactor",
-      pLayer->getXScaleFactor()), "Unable to write XScaleFactor.");
-
-   ICEVERIFY_MSG(HdfUtilities::writeAttribute(*layerGroup, "YScaleFactor",
-      pLayer->getYScaleFactor()), "Unable to write YScaleFactor.");
-
-   ICEVERIFY_MSG(HdfUtilities::writeAttribute(*layerGroup, "XOffset",
-      pLayer->getXOffset()), "Unable to write XOffset.");
-
-   ICEVERIFY_MSG(HdfUtilities::writeAttribute(*layerGroup, "YOffset",
-      pLayer->getYOffset()), "Unable to write YOffset.");
+   ICEVERIFY_MSG(HdfUtilities::writeAttribute(*layerGroup, "Name", name), "Unable to write Layer name.");
+   ICEVERIFY_MSG(HdfUtilities::writeAttribute(*layerGroup, "LayerType", StringUtilities::toXmlString(type)),
+      "Unable to write LayerType.");
+   ICEVERIFY_MSG(HdfUtilities::writeAttribute(*layerGroup, "XScaleFactor", xScaleFactor),
+      "Unable to write XScaleFactor.");
+   ICEVERIFY_MSG(HdfUtilities::writeAttribute(*layerGroup, "YScaleFactor", yScaleFactor),
+      "Unable to write YScaleFactor.");
+   ICEVERIFY_MSG(HdfUtilities::writeAttribute(*layerGroup, "XOffset", xOffset), "Unable to write XOffset.");
+   ICEVERIFY_MSG(HdfUtilities::writeAttribute(*layerGroup, "YOffset", yOffset), "Unable to write YOffset.");
 }
 
 void IceWriter::abort()

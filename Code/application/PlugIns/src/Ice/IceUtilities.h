@@ -163,7 +163,8 @@ namespace IceUtilities
    enum FileTypeEnum
    {
       RASTER_ELEMENT,
-      PSEUDOCOLOR_LAYER
+      PSEUDOCOLOR_LAYER,
+      THRESHOLD_LAYER
    };
    typedef EnumWrapper<FileTypeEnum> FileType;
 };

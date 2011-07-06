@@ -21,6 +21,7 @@ namespace StringUtilities
 BEGIN_ENUM_MAPPING_ALIAS(IceUtilities::FileType, IceUtilitiesFileType)
 ADD_ENUM_MAPPING(IceUtilities::RASTER_ELEMENT, "Raster Element", "RasterElement")
 ADD_ENUM_MAPPING(IceUtilities::PSEUDOCOLOR_LAYER, "Pseudocolor Layer", "PseudocolorLayer")
+ADD_ENUM_MAPPING(IceUtilities::THRESHOLD_LAYER, "Threshold Layer", "ThresholdLayer")
 END_ENUM_MAPPING()
 }
 
@@ -38,6 +39,7 @@ bool IceFormatDescriptor::getSupportedFeature(FeatureType feature)
          //list of supported file format versions that are not deprecated.
          versions.push_back(IceVersion(1, 0));
          versions.push_back(IceVersion(1, 10));
+         versions.push_back(IceVersion(1, 20));
       }
       return mVersion.checkVersion(versions);
    }

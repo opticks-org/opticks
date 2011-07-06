@@ -60,6 +60,12 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_OptionsIceExporter.cpp">
       <Filter>moc</Filter>
     </ClCompile>
+    <ClCompile Include="IceThresholdLayerExporter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IceThresholdLayerImporter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DateTimeReaderWriter.h">
@@ -96,6 +102,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="StatisticsReaderWriter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IceThresholdLayerExporter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IceThresholdLayerImporter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -29,6 +29,7 @@
 #include "Statistics.h"
 #include "StatisticsReaderWriter.h"
 #include "StringUtilities.h"
+#include "ThresholdLayer.h"
 #include "TypesFile.h"
 #include "Units.h"
 #include "XercesIncludes.h"
@@ -1103,9 +1104,19 @@ bool IceReader::createLayer(const string& hdfPath, SpatialDataView* pView,
          const string pseudocolorLayerPath = hdfPath + "/PseudocolorLayer";
          const Hdf5Group* pPseudocolorLayerGroup = dynamic_cast<const Hdf5Group*>
             (pRoot->getElementByPath(pseudocolorLayerPath));
-         PseudocolorLayer* pPseudocolorLayer = reinterpret_cast<PseudocolorLayer*>(pLayer);
+         PseudocolorLayer* pPseudocolorLayer = static_cast<PseudocolorLayer*>(pLayer);
          DO_IF(parsePseudocolorLayer(pPseudocolorLayerGroup,
             pPseudocolorLayer, warningMessage) == false, return false);
+         break;
+      }
+
+      case THRESHOLD:
+      {
+         const string thresholdLayerPath = hdfPath + "/ThresholdLayerProperties";
+         const Hdf5Group* pThresholdLayerGroup = dynamic_cast<const Hdf5Group*>
+            (pRoot->getElementByPath(thresholdLayerPath));
+         ThresholdLayer* pThresholdLayer = static_cast<ThresholdLayer*>(pLayer);
+         DO_IF(parseThresholdLayer(pThresholdLayerGroup, pThresholdLayer, warningMessage) == false, return false);
          break;
       }
 
@@ -1237,6 +1248,59 @@ bool IceReader::parsePseudocolorLayer(const Hdf5Group* pPseudocolorLayerGroup,
       DO_IF(pPseudocolorLayer->addInitializedClass(className, classValue, classColor, classIsDisplayed) < 0,
          warningMessage += ("Unable to add class " + className + ". Other classes will still be added.\n"));
    }
+
+   return true;
+}
+
+bool IceReader::parseThresholdLayer(const Hdf5Group* pThresholdLayerGroup, ThresholdLayer* pThresholdLayer,
+                                    string& warningMessage)
+{
+   DO_IF(pThresholdLayerGroup == NULL, return false);
+   DO_IF(pThresholdLayer == NULL, return false);
+
+   bool parseError = false;
+
+   // Symbol
+   string symbolTypeString;
+   PARSE_ATTRIBUTE_DEFAULT(pThresholdLayerGroup, "Symbol", symbolTypeString, string, string());
+
+   SymbolType symbol = StringUtilities::fromXmlString<SymbolType>(symbolTypeString);
+   DO_IF(symbol.isValid() == false, symbol = ThresholdLayer::getSettingMarkerSymbol());
+   pThresholdLayer->setSymbol(symbol);
+
+   // Color
+   string colorTypeString;
+   PARSE_ATTRIBUTE_DEFAULT(pThresholdLayerGroup, "Color", colorTypeString, string, string());
+
+   ColorType color = StringUtilities::fromXmlString<ColorType>(colorTypeString);
+   DO_IF(color.isValid() == false, color = ThresholdLayer::getSettingMarkerColor());
+   pThresholdLayer->setColor(color);
+
+   // Pass area
+   string passAreaString;
+   PARSE_ATTRIBUTE_DEFAULT(pThresholdLayerGroup, "PassArea", passAreaString, string, string());
+
+   PassArea passArea = StringUtilities::fromXmlString<PassArea>(passAreaString);
+   DO_IF(passArea.isValid() == false, passArea = ThresholdLayer::getSettingPassArea());
+   pThresholdLayer->setPassArea(passArea);
+
+   // Region units
+   string unitsString;
+   PARSE_ATTRIBUTE_DEFAULT(pThresholdLayerGroup, "RegionUnits", unitsString, string, string());
+
+   RegionUnits units = StringUtilities::fromXmlString<RegionUnits>(unitsString);
+   DO_IF(units.isValid() == false, units = ThresholdLayer::getSettingRegionUnits());
+   pThresholdLayer->setRegionUnits(units);
+
+   // First threshold
+   double firstThreshold = 0.0;
+   PARSE_ATTRIBUTE_DEFAULT(pThresholdLayerGroup, "FirstThreshold", firstThreshold, double, 0.0);
+   pThresholdLayer->setFirstThreshold(firstThreshold);
+
+   // Second threshold
+   double secondThreshold = 0.0;
+   PARSE_ATTRIBUTE_DEFAULT(pThresholdLayerGroup, "SecondThreshold", secondThreshold, double, 0.0);
+   pThresholdLayer->setSecondThreshold(secondThreshold);
 
    return true;
 }

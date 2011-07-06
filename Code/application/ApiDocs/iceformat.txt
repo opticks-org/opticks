@@ -15,7 +15,8 @@ Versions of Ice File:
 <tr><td>0</td><td>70</td><td>COMET MPR03.09.7404 only</td><td>COMET MPR03.09.7404 to Current Version</td></tr>
 <tr><td>0</td><td>90</td><td>COMET MPR03.10.8013 only</td><td>COMET MPR03.10.8013 to Current Version</td></tr>
 <tr><td>1</td><td>0</td><td>COMET MPR03.11.738 to %Opticks 4.0.0</td><td>COMET MPR03.11.738 to Current Version</td></tr>
-<tr><td>1</td><td>10</td><td>%Opticks 4.0.1 to Current Version</td><td>%Opticks 4.0.1 to Current Version</td></tr>
+<tr><td>1</td><td>10</td><td>%Opticks 4.0.1 to Current Version for the "RasterElement" and "PseudocolorLayer" file types</td><td>%Opticks 4.0.1 to Current Version</td></tr>
+<tr><td>1</td><td>20</td><td>%Opticks 4.7.1 to Current Version for the "ThresholdLayer" file type</td><td>%Opticks 4.7.1 to Current Version</td></tr>
 </table>
 
 The most basic part of the Ice file is the IceFormatDescriptor which identifies an Ice file from any other HDF5 file.
@@ -52,11 +53,14 @@ Information on the attributes stored on this group are provided below.
     </td>
 </tr>
 <tr>
-    <td>File Type</td>
+    <td>FileType</td>
     <td>H5T_C_S1</td>
     <td>Scalar</td>
     <td>
-    The contents of this file. Valid values are "RasterElement" and "PseudocolorLayer". This field was introduced in version 1.10.
+    The contents of this file.
+    Valid values are "RasterElement", "PseudocolorLayer", and "ThresholdLayer".
+    This field was introduced in version 1.10.
+    The "ThresholdLayer" value was introduced in version 1.20.
     If the file version is prior to 1.10, readers can parse this file as though this field contains "RasterElement".
     </td>
 </tr>
@@ -904,11 +908,12 @@ When interpreting the band statistics values from this HDF5 Dataset keep in mind
 <b>Contents:</b> 
 This HDF5 group acts simply as a container for the layers contained within the ice file. This group will contain additional HDF5 groups for each layer that is stored in the file.
 Each layer stored in the file will be stored in a child HDF5 group following the naming convention of [LayerType][Number] (i.e.: PseudocolorLayer1, PseudocolorLayer2, PseudocolorLayer3, etc.).
-The numbers will start at 1 and then increase. All current versions of the Ice format only provide support for one layer. The only currently supported layer type is \ref PseudocolorLayerSection.
+The numbers will start at 1 and then increase. All current versions of the Ice format only provide support for one layer.
+The currently supported layer types are \ref PseudocolorLayerSection and \ref ThresholdLayerSection.
 
 \section LayerSection Layer
 <hr>
-<b>Parent:</b> \ref PseudocolorLayerSection <br>
+<b>Parent:</b> \ref PseudocolorLayerSection or \ref ThresholdLayerSection <br>
 <b>HDF5 Path:</b> Layer <br>
 <b>HDF5 Container:</b> HDF5 Group <br>
 <b>Added In:</b> Version 1.10 <br>
@@ -934,7 +939,7 @@ This HDF5 group acts as a container for all of the generic data required to stor
     <td>LayerType</td>
     <td>H5T_C_S1</td>
     <td>Scalar</td>
-    <td>The type of this layer. The only supported value is "PseudocolorLayer".</td>
+    <td>The type of this layer. The only supported values are "PseudocolorLayer" and "ThresholdLayer".</td>
 </tr>
 <tr>
     <td>XScaleFactor</td>
@@ -1059,6 +1064,120 @@ Its members are provided below.
 </tr>
 </table>
 Each HDF5 Dataset shown above must be of equal size and the indices should correspond to the same class across all datasets (for example, ClassNames[i] should contain the name of the class with ClassValues[i], ClassColors[i], and ClassIsDisplayed[i]).
+
+\section ThresholdLayerSection ThresholdLayer
+<hr>
+<b>Parent:</b> \ref LayersSection <br>
+<b>HDF5 Path:</b> ThresholdLayer[Number] <br>
+<b>HDF5 Container:</b> HDF5 Group <br>
+<b>Added In:</b> Version 1.20 <br>
+<b>Removed In:</b> N/A <br>
+<b>Required In:</b> None <br>
+<b>Optional In:</b> Version >= 1.20 <br>
+<b>Contents:</b>
+This HDF5 group acts as a container for all of the data required to store the properties of a threshold layer.
+This group will only appear if the file type is "ThresholdLayer".
+This group will contain the \ref LayerSection and \ref ThresholdLayerPropertiesSection groups.
+In addition, this group will also contain the attributes listed below.
+<table align="center">
+<tr>
+    <td><b>Name</b></td>
+    <td><b>HDF5 Type</b></td>
+    <td><b>HDF5 DataSpace</b></td>
+    <td><b>Description</b></td>
+</tr>
+<tr>
+    <td>Dataset</td>
+    <td>H5T_C_S1</td>
+    <td>Scalar</td>
+    <td>The full path of the cube containing the cube data for this layer. This value must be "/Datasets/Cube1".</td>
+</tr>
+</table>
+
+\section ThresholdLayerPropertiesSection ThresholdLayerProperties
+<hr>
+<b>Parent:</b> \ref ThresholdLayerSection <br>
+<b>HDF5 Path:</b> ThresholdLayerProperties <br>
+<b>HDF5 Container:</b> HDF5 Group <br>
+<b>Added In:</b> Version 1.20 <br>
+<b>Removed In:</b> N/A <br>
+<b>Required In:</b> None <br>
+<b>Optional In:</b> Version >= 1.20 <br>
+<b>Contents:</b>
+This HDF5 group acts as a container for all of the layer-specific data required to store the properties
+of a single threshold layer. Its members are provided below.
+<table align="center">
+<tr>
+    <td><b>Name</b></td>
+    <td><b>HDF5 Container</b></td>
+    <td><b>HDF5 Type</b></td>
+    <td><b>HDF5 DataSpace</b></td>
+    <td><b>Description</b></td>
+</tr>
+<tr>
+    <td>Symbol</td>
+    <td>HDF5 Attribute</td>
+    <td>H5T_C_S1</td>
+    <td>Scalar</td>
+    <td>
+    The symbol type to use when displaying the threshold layer. Valid values are "solid", "x", "crosshair",
+    "asterisk", "horizontalLine", "verticalLine", "forwardSlash", "backSlash", "box", "boxX", "boxCrosshair",
+    "boxAsterisk", "boxHorizontalLine", "boxVerticalLine", "boxForwardSlash", and "boxBackSlash".
+    </td>
+</tr>
+<tr>
+    <td>Color</td>
+    <td>HDF5 Attribute</td>
+    <td>H5T_C_S1</td>
+    <td>Scalar</td>
+    <td>
+    The pixel marker color for the threshold layer. This string is in the format "#AARRGGBB",
+    where AA, RR, GG, and BB correspond to unsigned, 8-bit hexadceimal values for the
+    alpha (opacity), red, green, and blue values respectively.
+    </td>
+</tr>
+<tr>
+    <td>PassArea</td>
+    <td>HDF5 Attribute</td>
+    <td>H5T_C_S1</td>
+    <td>Scalar</td>
+    <td>
+    The pass area identifies the pixel values in the threshold layer that will be used to flag pixels
+    relative to the threshold value(s). Valid values are "Lower", "Upper", "Middle", and "Outside".
+    </td>
+</tr>
+<tr>
+    <td>RegionUnits</td>
+    <td>HDF5 Attribute</td>
+    <td>H5T_C_S1</td>
+    <td>Scalar</td>
+    <td>
+    The regions units specify how the threshold values are measured against the pixel values.
+    Valid values are "Raw", "Percentage", "Percentile", and "StdDev".
+    </td>
+</tr>
+<tr>
+    <td>FirstThreshold</td>
+    <td>HDF5 Attribute</td>
+    <td>H5T_NATIVE_DOUBLE</td>
+    <td>Scalar</td>
+    <td>
+    For pass areas of "Lower" and "Upper", this is the single threshold value that is used to flag pixels.
+    For pass areas of "Middle" and "Outside", this is the lesser threshold value that is used in conjunction
+    with the second threshold value to flag pixels.
+    </td>
+</tr>
+<tr>
+    <td>SecondThreshold</td>
+    <td>HDF5 Attribute</td>
+    <td>H5T_NATIVE_DOUBLE</td>
+    <td>Scalar</td>
+    <td>
+    For pass areas of "Middle" and "Outside", this is the greater threshold value that is used in conjunction
+    with the first threshold value to flag pixels. For pass areas of "Lower" and "Upper", this value is ignored.
+    </td>
+</tr>
+</table>
 
 \section AppendixSection Appendix
 <hr>

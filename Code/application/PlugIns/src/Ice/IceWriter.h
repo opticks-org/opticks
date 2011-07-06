@@ -10,6 +10,7 @@
 #ifndef ICEWRITER_H
 #define ICEWRITER_H
 
+#include "ColorType.h"
 #include "EnumWrapper.h"
 #include "Hdf5Resource.h"
 #include "IceUtilities.h"
@@ -21,10 +22,11 @@
 class Classification;
 class DynamicObject;
 class Layer;
+class Progress;
 class PseudocolorLayer;
 class RasterElement;
 class RasterFileDescriptor;
-class Progress;
+class ThresholdLayer;
 
 enum IceCompressionTypeEnum
 {
@@ -48,6 +50,9 @@ public:
       const RasterFileDescriptor* pOutputFileDescriptor, Progress* pProgress);
    void writeLayer(const std::string& hdfPath, const std::string& datasetPath,
       const Layer* pLayer, Progress* pProgress);
+   void writeThresholdLayer(const std::string& hdfPath, const std::string& datasetPath, const std::string& layerName,
+      double xScaleFactor, double yScaleFactor, double xOffset, double yOffset, SymbolType symbol, ColorType color,
+      double firstThreshold, double secondThreshold, RegionUnits regionUnits, PassArea passArea, Progress* pProgress);
    void abort();
    void setChunkSize(int chunkSize);
    void setCompressionType(IceCompressionType type);
@@ -84,8 +89,12 @@ private:
       Hdf5DataSetResource& dataset);
    void writePseudocolorLayerProperties(const std::string& hdfPath,
       const PseudocolorLayer* pLayer, Progress*pProgress);
-   void writeLayerProperties(const std::string& hdfPath,
-      const Layer* pLayer, Progress*pProgress);
+   void writeThresholdLayerProperties(const std::string& hdfPath, const ThresholdLayer* pLayer, Progress* pProgress);
+   void writeThresholdLayerProperties(const std::string& hdfPath, SymbolType symbol, ColorType color,
+      double firstThreshold, double secondThreshold, RegionUnits regionUnits, PassArea passArea, Progress* pProgress);
+   void writeLayerProperties(const std::string& hdfPath, const Layer* pLayer, Progress* pProgress);
+   void writeLayerProperties(const std::string& hdfPath, const std::string& name, LayerType type, double xScaleFactor,
+      double yScaleFactor, double xOffset, double yOffset, Progress* pProgress);
 
    void abortIfNecessary();
 
