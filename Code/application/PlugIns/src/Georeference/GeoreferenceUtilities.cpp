@@ -11,6 +11,7 @@
 #include "GeoreferenceUtilities.h"
 #include "LocationType.h"
 #include "MatrixFunctions.h"
+#include <stdexcept>
 
 namespace GeoreferenceUtilities
 {
