@@ -148,6 +148,7 @@
   <ItemGroup>
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_RpcGui.cpp" />
     <ClCompile Include="ModuleManager.cpp" />
+    <ClCompile Include="NitfDesExporter.cpp" />
     <ClCompile Include="NitfExporter.cpp" />
     <ClCompile Include="NitfImporter.cpp" />
     <ClCompile Include="NitfPager.cpp" />
@@ -161,6 +162,7 @@
     <ClCompile Include="RpcGui.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="NitfDesExporter.h" />
     <ClInclude Include="NitfExporter.h" />
     <ClInclude Include="NitfImporter.h" />
     <ClInclude Include="NitfPager.h" />
