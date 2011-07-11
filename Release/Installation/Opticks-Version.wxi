@@ -168,6 +168,7 @@
    <?define C__QtXml4_DependencyGuid = "cb669227-3503-412f-bfdf-46795f9d6333" ?>
    <?define C__qwt5_DependencyGuid = "a3f24e8d-c924-4bb5-a690-e6b44ded0b34" ?>
    <?define C__shapelib_DependencyGuid = "7dcb7962-eda6-4964-9d9c-a615773be577" ?>
+   <?define C__tbb_DependencyGuid = "b26405b3-d548-414a-a781-84177c63323a" ?>
    <?define C__xercesc_3_1_DependencyGuid = "aa5b0627-05e1-40ca-9b85-45daac1dc88f" ?>
    <?define C__xqilla224_DependencyGuid = "4ae0ea49-112e-4d1f-83a4-1c67c4e07b8f" ?>
    <?define C__zlib1_DependencyGuid = "a4e407e0-8bc3-4e0c-a3e0-5dccd8b6fec2" ?>
