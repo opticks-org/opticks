@@ -14,7 +14,7 @@
 
 using namespace std;
 
-int ParseExp(char* exp, int bands, char* DelimString, int cubes)
+int ParseExp(char* exp, int bands, char* DelimString, int delimStringLength, int cubes)
 {
    //return if no string was passed in
    if (!exp || exp[0] == 0)
@@ -58,7 +58,7 @@ int ParseExp(char* exp, int bands, char* DelimString, int cubes)
             (exp[i] != 94) &&
             ((exp[i] < 97) && (exp[i] > 122)) )
          {
-            sprintf(DelimString, "%c Is An Invalid Character", exp[i]);
+            snprintf(DelimString, delimStringLength, "%c Is An Invalid Character", exp[i]);
             return -1;
          }
       }
@@ -181,12 +181,12 @@ int ParseExp(char* exp, int bands, char* DelimString, int cubes)
          //check that '()' contains a value
          if (pValToRight && *pValToRight == ')')
          {
-            strcpy(DelimString, "Empty Parentheses Set In Expression");
+            strncpy(DelimString, "Empty Parentheses Set In Expression",  delimStringLength);
             return -1;
          }
          if (pValToLeft && !ParseIsOp(ops, pValToLeft))
          {
-            strcpy(DelimString, "Left Parentheses Must Have An Operator To The Left");
+            strncpy(DelimString, "Left Parentheses Must Have An Operator To The Left",  delimStringLength);
             return -1;
          }
 
@@ -195,7 +195,7 @@ int ParseExp(char* exp, int bands, char* DelimString, int cubes)
       {
          if (pValToRight && !ParseIsOp(ops, pValToRight))
          {
-            strcpy(DelimString, "Right Parentheses Must Have An Operator To The Right");
+            strncpy(DelimString, "Right Parentheses Must Have An Operator To The Right",  delimStringLength);
             return -1;
          }
 
@@ -215,12 +215,12 @@ int ParseExp(char* exp, int bands, char* DelimString, int cubes)
 
    if (parenCount > 0)
    {
-      strcpy(DelimString, "Missing \")\" In Expression.");
+      strncpy(DelimString, "Missing \")\" In Expression.",  delimStringLength);
       return -1;
    }
    else if (parenCount < 0)
    {
-      strcpy(DelimString, "Missing \"(\" In Expression.");
+      strncpy(DelimString, "Missing \"(\" In Expression.",  delimStringLength);
       return -1;
    }
 
@@ -233,10 +233,9 @@ int ParseExp(char* exp, int bands, char* DelimString, int cubes)
    iStringPos = 0;
    while (DelimString[iStringPos] != '?')
    {
-
-
       if ((DelimString[iStringPos] != '(') && (DelimString[iStringPos] != ')'))
       {
+         const size_t bufsize = 10;
          //check for unary and binary to have correct number of operands
          ////////////////////////////////////////////////////////////////////////
 
@@ -249,7 +248,6 @@ int ParseExp(char* exp, int bands, char* DelimString, int cubes)
                char* pValToRight = ValRight(DelimString, iCount);
                char* pValToLeft = ValLeft(DelimString, iCount);
 
-
                //check to see if op is negation rather then subtraction
                if ((!pValToLeft) || ((pValToLeft) && (ParseIsOp(ops, pValToLeft)) && (*pValToLeft != ')')))
                {
@@ -261,42 +259,42 @@ int ParseExp(char* exp, int bands, char* DelimString, int cubes)
 
                if (!pValToLeft)
                {
-                  char op[10];
-                  strcpy(op, &DelimString[iStringPos]);
-                  sprintf(DelimString, "Operator \"%s\" Without Left Operand", op);
+                  char op[bufsize];
+                  strncpy(op, &DelimString[iStringPos], bufsize);
+                  snprintf(DelimString, delimStringLength, "Operator \"%s\" Without Left Operand", op);
                   return -1;
                }
                if (!pValToRight)
                {
-                  char op[10];
-                  strcpy(op, &DelimString[iStringPos]);
-                  sprintf(DelimString, "Operator \"%s\" Without Right Operand", op);
+                  char op[bufsize];
+                  strncpy(op, &DelimString[iStringPos], bufsize);
+                  snprintf(DelimString, delimStringLength, "Operator \"%s\" Without Right Operand", op);
                   return -1;
                }
 
                if ((*pValToLeft != ')') && (ParseIsOp(ops, pValToLeft)))
                {
-                  char op1[10];
-                  char op2[10];
+                  char op1[bufsize];
+                  char op2[bufsize];
 
-                  strcpy(op1, &DelimString[iStringPos]);
-                  strcpy(op2, ValLeft(DelimString, iCount));
+                  strncpy(op1, &DelimString[iStringPos], bufsize);
+                  strncpy(op2, ValLeft(DelimString, iCount), bufsize);
 
-                  sprintf(DelimString, "Operator \"%s\" Can Not Have \"%s\" As Left Operand", op1, op2);
+                  snprintf(DelimString, delimStringLength, "Operator \"%s\" Can Not Have \"%s\" As Left Operand", op1, op2);
                   return -1;
                }
 
                if (((ParseIsOp(ops, pValToRight)) && (OpParams(ops, pValToRight) != 1)) || *pValToRight == ')')
                {
-                  char op1[10];
-                  char op2[10];
+                  char op1[bufsize];
+                  char op2[bufsize];
 
-                  strcpy(op1, &DelimString[iStringPos]);
-                  strcpy(op2, ValRight(DelimString, iCount));
+                  strncpy(op1, &DelimString[iStringPos], bufsize);
+                  strncpy(op2, ValRight(DelimString, iCount), bufsize);
 
                   if (*op2 != '-')
                   {
-                     sprintf(DelimString, "Operator \"%s\" Can Not Have \"%s\" As Right Operand", op1, op2);
+                     snprintf(DelimString, delimStringLength, "Operator \"%s\" Can Not Have \"%s\" As Right Operand", op1, op2);
                      return -1;
                   }
                }
@@ -311,17 +309,17 @@ int ParseExp(char* exp, int bands, char* DelimString, int cubes)
 
                if ((!pValToRight) || (*pValToRight != '('))
                {
-                  char op[10];
-                  strcpy(op, &DelimString[iStringPos]);
-                  sprintf(DelimString, "Operator \"%s\" Without Operand", op);
+                  char op[bufsize];
+                  strncpy(op, &DelimString[iStringPos], bufsize);
+                  snprintf(DelimString, delimStringLength, "Operator \"%s\" Without Operand", op);
                   return -1;
                }
 
                if ((pValToLeft) && !ParseIsOp(ops, pValToLeft))
                {
-                  char op1[10];
-                  strcpy(op1, &DelimString[iStringPos]);
-                  sprintf(DelimString, "Operator \"%s\" Can Only Have Operators To the Left", op1);
+                  char op1[bufsize];
+                  strncpy(op1, &DelimString[iStringPos], bufsize);
+                  snprintf(DelimString, delimStringLength, "Operator \"%s\" Can Only Have Operators To the Left", op1);
                   return -1;
                }
 
@@ -335,6 +333,8 @@ int ParseExp(char* exp, int bands, char* DelimString, int cubes)
 
          else
          {
+            const size_t bufsize = 80;
+
             if ((DelimString[iStringPos] == 'b') || (DelimString[iStringPos] == 'B'))
             {
                for (int k = 1; DelimString[iStringPos+k]; k++)
@@ -343,14 +343,14 @@ int ParseExp(char* exp, int bands, char* DelimString, int cubes)
                   {
                      if (strlen(&DelimString[iStringPos]) < 60)
                      {
-                        char op[80];
-                        strcpy(op, &DelimString[iStringPos]);
-                        sprintf(DelimString, "Operand \"%s\" Is Invalid", op);
+                        char op[bufsize];
+                        strncpy(op, &DelimString[iStringPos], bufsize);
+                        snprintf(DelimString, delimStringLength, "Operand \"%s\" Is Invalid", op);
                         return -1;
                      }
                      else
                      {
-                        sprintf(DelimString, "Invalid Operand");
+                        snprintf(DelimString, delimStringLength, "Invalid Operand");
                         return -1;
                      }
                   }
@@ -361,14 +361,14 @@ int ParseExp(char* exp, int bands, char* DelimString, int cubes)
                {
                   if (strlen(&DelimString[iStringPos]) < 60)
                   {
-                     char op[80];
-                     strcpy(op, &DelimString[iStringPos]);
-                     sprintf(DelimString, "Operand \"%s\" Is Too Large, The Cube Only Has %d Bands", op, bands);
+                     char op[bufsize];
+                     strncpy(op, &DelimString[iStringPos], bufsize);
+                     snprintf(DelimString, delimStringLength, "Operand \"%s\" Is Too Large, The Cube Only Has %d Bands", op, bands);
                      return -1;
                   }
                   else
                   {
-                     sprintf(DelimString, "Invalid Operand");
+                     snprintf(DelimString, delimStringLength, "Invalid Operand");
                      return -1;
                   }
                }
@@ -384,14 +384,14 @@ int ParseExp(char* exp, int bands, char* DelimString, int cubes)
                   {
                      if (strlen(&DelimString[iStringPos]) < 60)
                      {
-                        char op[80];
-                        strcpy(op, &DelimString[iStringPos]);
-                        sprintf(DelimString, "Operand \"%s\" Is Invalid", op);
+                        char op[bufsize];
+                        strncpy(op, &DelimString[iStringPos], bufsize);
+                        snprintf(DelimString, delimStringLength, "Operand \"%s\" Is Invalid", op);
                         return -1;
                      }
                      else
                      {
-                        sprintf(DelimString, "Invalid Operand");
+                        snprintf(DelimString, delimStringLength, "Invalid Operand");
                         return -1;
                      }
                   }
@@ -402,14 +402,14 @@ int ParseExp(char* exp, int bands, char* DelimString, int cubes)
                {
                   if (strlen(&DelimString[iStringPos]) < 60)
                   {
-                     char op[80];
-                     strcpy(op, &DelimString[iStringPos]);
-                     sprintf(DelimString, "Operand \"%s\" Is Too Large, There are only %d Cubes", op, cubes);
+                     char op[bufsize];
+                     strncpy(op, &DelimString[iStringPos], bufsize);
+                     snprintf(DelimString, delimStringLength, "Operand \"%s\" Is Too Large, There are only %d Cubes", op, cubes);
                      return -1;
                   }
                   else
                   {
-                     sprintf(DelimString, "Invalid Operand");
+                     snprintf(DelimString, delimStringLength, "Invalid Operand");
                      return -1;
                   }
                }
@@ -425,9 +425,9 @@ int ParseExp(char* exp, int bands, char* DelimString, int cubes)
                   {
                      if (k && DelimString[iStringPos+k] == '-')
                      {
-                        char op[80];
-                        strcpy(op, &DelimString[iStringPos]);
-                        sprintf(DelimString, "Operand \"%s\" Is An Invalid Operand", op);
+                        char op[bufsize];
+                        strncpy(op, &DelimString[iStringPos], bufsize);
+                        snprintf(DelimString, delimStringLength, "Operand \"%s\" Is An Invalid Operand", op);
                         return -1;
                      }
 
@@ -441,14 +441,14 @@ int ParseExp(char* exp, int bands, char* DelimString, int cubes)
                         {
                            if (strlen(&DelimString[iStringPos]) < 60)
                            {
-                              char op[80];
-                              strcpy(op, &DelimString[iStringPos]);
-                              sprintf(DelimString, "Operand \"%s\" Has More Then One Decimal Point", op);
+                              char op[bufsize];
+                              strncpy(op, &DelimString[iStringPos], bufsize);
+                              snprintf(DelimString, delimStringLength, "Operand \"%s\" Has More Then One Decimal Point", op);
                               return -1;
                            }
                            else
                            {
-                              sprintf(DelimString, "Invalid Operand");
+                              snprintf(DelimString, delimStringLength, "Invalid Operand");
                               return -1;
                            }
                         }
@@ -458,14 +458,14 @@ int ParseExp(char* exp, int bands, char* DelimString, int cubes)
                      {
                         if (strlen(&DelimString[iStringPos]) < 60)
                         {
-                           char op[80];
-                           strcpy(op, &DelimString[iStringPos]);
-                           sprintf(DelimString, "Operand \"%s\" Is Invalid", op);
+                           char op[bufsize];
+                           strncpy(op, &DelimString[iStringPos], bufsize);
+                           snprintf(DelimString, delimStringLength, "Operand \"%s\" Is Invalid", op);
                            return -1;
                         }
                         else
                         {
-                           sprintf(DelimString, "Invalid Operand");
+                           snprintf(DelimString, delimStringLength, "Invalid Operand");
                            return -1;
                         }
                      }
@@ -946,7 +946,7 @@ int eval(Progress* pProgress, vector<DataAccessor>& dataCubes, const vector<Enco
 
    char* pString = new char[stringSize];
 
-   int iError = ParseExp(exp, bands, pString, dataCubes.size());
+   int iError = ParseExp(exp, bands, pString, stringSize, dataCubes.size());
    if (iError)
    {
       strcpy(error, pString);

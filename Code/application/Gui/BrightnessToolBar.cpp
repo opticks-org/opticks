@@ -521,7 +521,7 @@ void BrightnessToolBar::updateBandCombo(bool updateCurrentBand)
       }
       else
       {
-         strBandName.sprintf("No Band Displayed - %s", channelName);
+         strBandName = QString("No band displayed - %1").arg(channelName);
       }
       mpBandCombo->addItem(strBandName);
    }

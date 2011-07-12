@@ -35,7 +35,7 @@ class NoData {};
 
 bool ParseIsOp(char* ops, char* val);
 int OpParams(char* ops, char* val);
-int ParseExp(char* exp, int bands, char* DelimString, int cubes = 0);
+int ParseExp(char* exp, int bands, char* DelimString, int delimStringLength, int cubes = 0);
 char* ValRight(char* exp, int pos);
 char* ValLeft(char* exp, int pos);
 bool IsOp(char* ops, char* val);

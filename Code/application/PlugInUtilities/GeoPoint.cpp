@@ -270,17 +270,18 @@ string DmsPoint::getValueText(DmsFormatType format, int precision) const
       }
    }
 
-   char buffer[1024];
+   const size_t bufsize = 1024;
+   char buffer[bufsize];
    string strVal;
    string formatStr;
    switch (format)
    {
    case DMS_FULL:
-      sprintf(buffer, "%c%d%s", direction, iDegrees, DEG_CHAR.c_str());
+      snprintf(buffer, bufsize, "%c%d%s", direction, iDegrees, DEG_CHAR.c_str());
       strVal = buffer;
       if (iMinutes > 0)
       {
-         sprintf(buffer, "%d%s", iMinutes, "'");
+         sprintf(buffer, "%d%c", iMinutes, '\'');
          strVal += buffer;
       }
       else
@@ -301,7 +302,7 @@ string DmsPoint::getValueText(DmsFormatType format, int precision) const
 
    case DMS_FULL_DECIMAL:
 
-      sprintf(buffer, "%c%c.%df%s", direction, formatChar, degSecPrecision, DEG_CHAR.c_str());
+      snprintf(buffer, bufsize, "%c%c.%df%s", direction, formatChar, degSecPrecision, DEG_CHAR.c_str());
       formatStr = buffer;
       sprintf(buffer, formatStr.c_str(), dPositiveValue);
       strVal = buffer;
@@ -310,7 +311,7 @@ string DmsPoint::getValueText(DmsFormatType format, int precision) const
    case DMS_MINUTES_DECIMAL:
       // set scope for variable dMinutes
       {
-         sprintf(buffer, "%c%d%s", direction, iDegrees, DEG_CHAR.c_str());
+         snprintf(buffer, bufsize, "%c%d%s", direction, iDegrees, DEG_CHAR.c_str());
          strVal = buffer;
          double dMinutes = 60.0 * (dPositiveValue - iDegrees);
          if (dMinutes > 0.0)

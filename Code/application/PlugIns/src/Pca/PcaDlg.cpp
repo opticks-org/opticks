@@ -326,9 +326,8 @@ void PcaDlg::browse()
    unsigned int ulMaxBands = mpComponentsSpin->maximum();
    if (lnumBands != ulMaxBands)
    {
-      QString message;
-      message.sprintf("File-> %s\ncontains PCA results for %d bands.\nThere are %d bands loaded for this image.",
-         strFilename, lnumBands, ulMaxBands);
+      QString message = QString("File-> %1\ncontains PCA results for %2 bands.\nThere are %3 bands"
+         " loaded for this image.").arg(strFilename).arg(lnumBands).arg(ulMaxBands);
       message = "Error: Mismatch on number of bands!\n" + message;
       QMessageBox::critical(this, "PCA", message);
       fclose(pFile);
