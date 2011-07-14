@@ -126,11 +126,6 @@ vector<ImportDescriptor*> GenericHdf5Importer::getImportDescriptors(const string
    bool bSuccess = parsedFile.readFileData();
    if (bSuccess == true)
    {
-      FactoryResource<RasterFileDescriptor> pFileDescriptor;
-      VERIFYRV(pFileDescriptor.get() != NULL, descriptors);
-
-      pFileDescriptor->setFilename(filename);
-
       const Hdf5Group* pRoot = parsedFile.getRootGroup();
       if (pRoot != NULL)
       {
@@ -165,6 +160,9 @@ vector<ImportDescriptor*> GenericHdf5Importer::getImportDescriptors(const string
                   continue;
                }
 
+               FactoryResource<RasterFileDescriptor> pFileDescriptor;
+               VERIFYRV(pFileDescriptor.get() != NULL, descriptors);
+               pFileDescriptor->setFilename(filename);
                pFileDescriptor->setDatasetLocation(fpan);
 
                FactoryResource<DynamicObject> pMetadata;
