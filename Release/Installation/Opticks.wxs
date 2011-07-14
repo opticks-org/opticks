@@ -255,6 +255,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
                <File Name="GdalImporter.dll" Id="F__GdalImporterPlugIn" DiskId="1" />
                <File Name="Generic.dll" Id="F__GenericPlugIn" KeyPath="yes" DiskId="1" />
                <File Name="GeographicFeatures.dll" Id="F__GeographicFeaturesPlugIn" DiskId="1" />
+               <File Name="GeoMosaic.dll" Id="F__GeomosaicPlugIn" DiskId="1" />
                <File Name="Georeference.dll" Id="F__GeoreferencePlugIn" DiskId="1" />
                <File Name="Hdf.dll" Id="F__HdfPlugIn" DiskId="1" />
                <File Name="Ice.dll" Id="F__IcePlugIn" DiskId="1" />

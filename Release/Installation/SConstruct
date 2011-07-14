@@ -78,6 +78,7 @@ if OPTICKS_PLATFORM == "linux-x86_64":
    debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/GdalImporter.so'))
    debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/Generic.so'))
    debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/GeographicFeatures.so'))
+   debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/GeoMosaic.so'))
    debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/Georeference.so'))
    debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/Hdf.so'))
    debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/Ice.so'))

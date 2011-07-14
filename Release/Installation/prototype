@@ -84,6 +84,7 @@ f none $APPDIR/PlugIns/Fits.so=$OpticksBinariesDir/PlugIns/Fits.so 644 root $GRO
 f none $APPDIR/PlugIns/GdalImporter.so=$OpticksBinariesDir/PlugIns/GdalImporter.so 644 root $GROUP
 f none $APPDIR/PlugIns/Generic.so=$OpticksBinariesDir/PlugIns/Generic.so 644 root $GROUP
 f none $APPDIR/PlugIns/GeographicFeatures.so=$OpticksBinariesDir/PlugIns/GeographicFeatures.so 644 root $GROUP
+f none $APPDIR/PlugIns/GeoMosaic.so=$OpticksBinariesDir/PlugIns/GeoMosaic.so 644 root $GROUP
 f none $APPDIR/PlugIns/Georeference.so=$OpticksBinariesDir/PlugIns/Georeference.so 644 root $GROUP
 f none $APPDIR/PlugIns/Hdf.so=$OpticksBinariesDir/PlugIns/Hdf.so 644 root $GROUP
 f none $APPDIR/PlugIns/Ice.so=$OpticksBinariesDir/PlugIns/Ice.so 644 root $GROUP
