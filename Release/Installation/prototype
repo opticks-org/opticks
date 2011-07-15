@@ -44,6 +44,7 @@ f none $APPDIR/Bin/libopencv_video.so.2.2=$OpticksDependenciesDir/libopencv_vide
 f none $APPDIR/Bin/libopencv_objdetect.so.2.2=$OpticksDependenciesDir/libopencv_objdetect.so.2.2 0755 root $GROUP
 f none $APPDIR/Bin/libopencv_calib3d.so.2.2=$OpticksDependenciesDir/libopencv_calib3d.so.2.2 0755 root $GROUP
 f none $APPDIR/Bin/libopencv_flann.so.2.2=$OpticksDependenciesDir/libopencv_flann.so.2.2 0755 root $GROUP
+f none $APPDIR/Bin/libopencv_highgui.so.2.2=$OpticksDependenciesDir/libopencv_highgui.so.2.2 0755 root $GROUP
 f none $APPDIR/Bin/opencv_haartraining=$OpticksDependenciesDir/opencv_haartraining 0755 root $GROUP
 f none $APPDIR/Bin/opencv_traincascade=$OpticksDependenciesDir/opencv_traincascade 0755 root $GROUP
 f none $APPDIR/Bin/libqwt.so.5=$OpticksDependenciesDir/libqwt.so.5 0755 root $GROUP
