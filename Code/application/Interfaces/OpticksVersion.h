@@ -10,6 +10,6 @@
 #ifndef OPTICKSVERSION_H
 #define OPTICKSVERSION_H
 
-#define OPTICKS_VERSION "4.7.2Unofficial"
+#define OPTICKS_VERSION "4.8Unofficial"
 
 #endif
