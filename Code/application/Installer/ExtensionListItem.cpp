@@ -177,13 +177,21 @@ void ExtensionListItem::about()
    const Aeb* pExtension = Service<InstallerServices>()->getAeb(mExtensionId.toStdString());
    if (pExtension != NULL && pExtension->validate())
    {
-      QMessageBox::about(this, QString("About %1").arg(QString::fromStdString(pExtension->getName())),
-         QString("<h3>%1</h3>version %2<br>%3<hr><b>Created By:</b><br>%4<br><a href=\"%5\">Visit Home Page</a>")
-         .arg(QString::fromStdString(pExtension->getName()))
-         .arg(QString::fromStdString(pExtension->getVersion().toString()))
-         .arg(QString::fromStdString(pExtension->getDescription()))
-         .arg(QString::fromStdString(pExtension->getCreator()))
-         .arg(QString::fromStdString(pExtension->getHomepageURL())));
+      QString name = QString::fromStdString(pExtension->getName());
+      QString version = QString::fromStdString(pExtension->getVersion().toString());
+      QString description = QString::fromStdString(pExtension->getDescription());
+      QString creator = QString::fromStdString(pExtension->getCreator());
+      QString homepageUrl = QString::fromStdString(pExtension->getHomepageURL());
+
+      QString caption = QString("About %1").arg(name);
+      QString message = QString("<h3>%1</h3>Version %2<br>%3<hr><b>Created By:</b><br>%4").arg(name).arg(version)
+         .arg(description).arg(creator);
+      if (homepageUrl.isEmpty() == false)
+      {
+         message += QString("<br><a href=\"%5\">Visit Home Page</a>").arg(homepageUrl);
+      }
+
+      QMessageBox::about(this, caption, message);
    }
 }
 
