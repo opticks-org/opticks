@@ -42,7 +42,7 @@ EnviLibraryImporter::EnviLibraryImporter() :
    setCreator("Ball Aerospace & Technologies Corp.");
    setCopyright(APP_COPYRIGHT);
    setVersion(APP_VERSION_NUMBER);
-   setExtensions("ENVI Signature Library Files (*.sli *.spl *.hdr)");
+   setExtensions("ENVI Signature Library Files (*.sli *.spl *.dat *.hdr)");
    setSubtype("Signature Set");
    setDescriptorId("{638DB32A-D6A5-43c9-A4DB-4E059C750367}");
    allowMultipleInstances(true);
@@ -352,7 +352,7 @@ unsigned char EnviLibraryImporter::getFileAffinity(const string& filename)
    }
    else
    {
-      return Importer::CAN_LOAD+1; // ensures that it beats EnviImporter
+      return Importer::CAN_LOAD + 5; // ensures that it beats EnviImporter
    }
 }
 
@@ -478,6 +478,11 @@ string EnviLibraryImporter::findDataFile(const string& headerFilename)
    if (dataFile.empty())
    {
       dataFile = findFileByExtension(headerFilename, ".spl", "rb");
+
+      if (dataFile.empty())
+      {
+         dataFile = findFileByExtension(headerFilename, ".dat", "rb");
+      }
    }
    return dataFile;
 }
