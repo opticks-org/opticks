@@ -337,6 +337,24 @@ void copyLineFromSource<double, float>(double* pSource, float* pTarget, unsigned
    }
 }
 
+template<typename T>
+T getOpenGlMax()
+{
+   return numeric_limits<T>::max();
+}
+
+template<>
+float getOpenGlMax<float>()
+{
+   return 1.0f;
+}
+
+template<>
+double getOpenGlMax<double>()
+{
+   return 1.0;
+}
+
 class GpuTileProcessor
 {
 public:
@@ -390,7 +408,7 @@ private:
                }
                else
                {
-                  *pTarget = numeric_limits<Out>::max();
+                  *pTarget = getOpenGlMax<Out>();
                }
 
                ++pTarget;
@@ -420,7 +438,7 @@ private:
                   }
                   else
                   {
-                     *pTarget = numeric_limits<Out>::max();
+                     *pTarget = getOpenGlMax<Out>();
                   }
 
                   ++pTarget;
@@ -449,7 +467,7 @@ private:
                      if (totalChannels == 2)
                      {
                         ++pTarget;
-                        *pTarget = numeric_limits<Out>::max();
+                        *pTarget = getOpenGlMax<Out>();
                         ++pTarget;
                      }
                      else if (static_cast<int>(x1) < mInfo.mTileSizeX - 1)
