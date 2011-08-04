@@ -443,7 +443,7 @@ void ViewObjectImp::updateTextColor()
    clrText.getHsv(&h, &s, &v);
    if (h == -1)
    {
-      v = (v + 180) % 360;
+      v = (v + 128) % 256;
    }
    else
    {

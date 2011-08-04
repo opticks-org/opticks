@@ -591,11 +591,21 @@ bool AoiLayerImp::processMouseRelease(const QPoint& screenCoord, Qt::MouseButton
 QColor AoiLayerImp::getLabelColor(const GraphicObjectImp *pObj)
 {
    QColor labelColor(mColor);
+
    int h;
    int s;
    int v;
    labelColor.getHsv(&h, &s, &v);
-   h = (h + 180) % 360;
+
+   if (h == -1)
+   {
+      v = (v + 128) % 256;
+   }
+   else
+   {
+      h = (h + 180) % 360;
+   }
+
    labelColor.setHsv(h, s, v);
    return labelColor;
 }
