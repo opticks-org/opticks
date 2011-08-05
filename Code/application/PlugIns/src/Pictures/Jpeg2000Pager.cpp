@@ -393,9 +393,8 @@ RasterPage* Jpeg2000Pager::getPage(DataRequest* pOriginalRequest,
 
       if (interleave == BIP)
       {
-         pPage = new Jpeg2000Page(pCacheUnit, 0 + (rowNumber * numBands * numColumns * bytesPerElement) +
-                                                     (bandNumber * bytesPerElement),
-                                                     numRows, numColumns, numBands);
+         pPage = new Jpeg2000Page(pCacheUnit, (rowNumber * numColumns * numBands * bytesPerElement) +
+            (colNumber * numBands * bytesPerElement) + (bandNumber * bytesPerElement), numRows, numColumns, numBands);
       }
 
       if (pCacheUnit->isEmpty())
