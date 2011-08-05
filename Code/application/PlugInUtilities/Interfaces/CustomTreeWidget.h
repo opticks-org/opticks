@@ -13,10 +13,10 @@
 #include <QtCore/QMap>
 #include <QtGui/QComboBox>
 #include <QtGui/QDoubleSpinBox>
-#include <QtGui/QItemDelegate>
 #include <QtGui/QLineEdit>
 #include <QtGui/QPushButton>
 #include <QtGui/QSpinBox>
+#include <QtGui/QStyledItemDelegate>
 #include <QtGui/QTreeWidget>
 #include <QtGui/QTreeWidgetItem>
 
@@ -997,16 +997,15 @@ private:
       int iColumn;
    };
 
-   class CustomTreeWidgetItemDelegate : public QItemDelegate
+   class CustomTreeWidgetItemDelegate : public QStyledItemDelegate
    {
    public:
       CustomTreeWidgetItemDelegate()
-      {
-      }
+      {}
 
       QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
       {
-         QSize itemSize = QItemDelegate::sizeHint(option, index);
+         QSize itemSize = QStyledItemDelegate::sizeHint(option, index);
          itemSize.setHeight(20);
 
          return itemSize;

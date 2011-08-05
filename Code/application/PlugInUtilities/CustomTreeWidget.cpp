@@ -45,7 +45,7 @@ CustomTreeWidget::CustomTreeWidget(QWidget* parent) :
    setIconSize(QSize(1000, 20));    // Ensure that the item icons are the appropriate size
                                     // and not scaled to the default small icon size
 
-   QItemDelegate* pDelegate = new CustomTreeWidgetItemDelegate();
+   QAbstractItemDelegate* pDelegate = new CustomTreeWidgetItemDelegate();
    setItemDelegate(pDelegate);
 
    // Connections
