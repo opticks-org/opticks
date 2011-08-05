@@ -7,18 +7,17 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include "AddFeatureDlg.h"
+#include "AoiElement.h"
+
 #include <QtGui/QHeaderView>
 #include <QtGui/QLabel>
 #include <QtGui/QLayout>
 #include <QtGui/QMessageBox>
 #include <QtGui/QPushButton>
 
-#include "AddFeatureDlg.h"
-#include "AoiElement.h"
-#include "DesktopServices.h"
-#include "ModelServices.h"
-
 #include <string>
+
 using namespace std;
 
 AddFeatureDlg::AddFeatureDlg(const vector<AoiElement*>& aois, QWidget* parent) :

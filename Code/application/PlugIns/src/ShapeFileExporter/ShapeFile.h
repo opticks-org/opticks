@@ -31,15 +31,15 @@ public:
    ShapeFile();
    ~ShapeFile();
 
-   void shapeModified(Subject &subject, const std::string &signal, const boost::any &v);
-   void shapeAttached(Subject &subject, const std::string &signal, const boost::any &v);
-   void attached(Subject &subject, const std::string &signal, const Slot &slot);
+   void shapeModified(Subject& subject, const std::string& signal, const boost::any& v);
+   void shapeAttached(Subject& subject, const std::string& signal, const boost::any& v);
+   void attached(Subject& subject, const std::string& signal, const Slot& slot);
 
    void setFilename(const std::string& filename);
    const std::string& getFilename() const;
 
-   void setShape(ShapeType eShape);
-   ShapeType getShape() const;
+   void setShape(ShapefileTypes::ShapeType eShape);
+   ShapefileTypes::ShapeType getShape() const;
 
    std::vector<Feature*> addFeatures(DataElement* pElement, RasterElement* pGeoref, std::string& message);
    bool removeFeature(Feature* pFeature);
@@ -62,7 +62,7 @@ private:
    DBFHandle mpAttributeFile;
    SHPHandle mpShapeFile;
    std::string mFilename;
-   ShapeType mShape;
+   ShapefileTypes::ShapeType mShape;
    std::vector<Feature*> mFeatures;
    std::map<std::string, std::string> mFields;
 };

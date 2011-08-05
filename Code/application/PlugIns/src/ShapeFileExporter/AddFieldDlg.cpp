@@ -7,14 +7,14 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include "AddFieldDlg.h"
+
 #include <QtCore/QRegExp>
 #include <QtGui/QLabel>
 #include <QtGui/QLayout>
 #include <QtGui/QMessageBox>
 #include <QtGui/QPushButton>
 #include <QtGui/QValidator>
-
-#include "AddFieldDlg.h"
 
 AddFieldDlg::AddFieldDlg(QWidget* parent) :
    QDialog(parent)

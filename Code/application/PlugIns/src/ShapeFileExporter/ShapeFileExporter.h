@@ -10,12 +10,13 @@
 #ifndef SHAPEFILEEXPORTER_H
 #define SHAPEFILEEXPORTER_H
 
-#include <memory>
-#include <QtGui/QWidget>
-
 #include "ExporterShell.h"
 #include "PlugInManagerServices.h"
 #include "ShapeFile.h"
+
+#include <QtGui/QWidget>
+
+#include <memory>
 
 class AoiElement;
 class LayerList;

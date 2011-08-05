@@ -147,6 +147,7 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_AddFeatureDlg.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_AddFieldDlg.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_ShapeFileOptionsWidget.cpp" />
+    <ClCompile Include="ShapeFileTypes.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="AddFeatureDlg.h">

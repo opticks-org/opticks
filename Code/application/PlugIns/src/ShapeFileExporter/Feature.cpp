@@ -7,27 +7,22 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
-#include "Feature.h"
 #include "DataVariant.h"
 #include "DynamicObject.h"
+#include "Feature.h"
 
 using namespace std;
 
-Feature::Feature(ShapeType eShape)
-{
-}
+Feature::Feature(ShapefileTypes::ShapeType eShape)
+{}
 
-ShapeType Feature::getShape() const
+ShapefileTypes::ShapeType Feature::getShape() const
 {
    return mShape;
 }
 
 Feature::~Feature()
-{
-}
-
+{}
 
 int Feature::addVertex(double dX, double dY, double dZ)
 {
@@ -89,7 +84,7 @@ void Feature::clearVertices()
    }
 }
 
-bool Feature::addField(const string& name, const DataVariant &defaultValue)
+bool Feature::addField(const string& name, const DataVariant& defaultValue)
 {
    if (hasField(name))
    {

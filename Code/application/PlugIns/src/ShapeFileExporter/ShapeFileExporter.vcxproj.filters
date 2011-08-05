@@ -44,6 +44,9 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_ShapeFileOptionsWidget.cpp">
       <Filter>moc</Filter>
     </ClCompile>
+    <ClCompile Include="ShapeFileTypes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Feature.h">

@@ -7,6 +7,17 @@
 * http://www.gnu.org/licenses/lgpl.html
 */
 
+#include "AddFeatureDlg.h"
+#include "AddFieldDlg.h"
+#include "AoiElement.h"
+#include "CustomTreeWidget.h"
+#include "DataVariant.h"
+#include "Feature.h"
+#include "RasterElement.h"
+#include "ShapeFile.h"
+#include "ShapeFileOptionsWidget.h"
+#include "StringUtilities.h"
+
 #include <QtCore/QFileInfo>
 #include <QtGui/QApplication>
 #include <QtGui/QFileDialog>
@@ -17,18 +28,8 @@
 #include <QtGui/QPixmap>
 #include <QtGui/QPushButton>
 
-#include "AddFeatureDlg.h"
-#include "AddFieldDlg.h"
-#include "AoiElement.h"
-#include "CustomTreeWidget.h"
-#include "DataElement.h"
-#include "DataVariant.h"
-#include "Feature.h"
-#include "RasterElement.h"
-#include "ShapeFile.h"
-#include "ShapeFileOptionsWidget.h"
-
 #include <string>
+
 using namespace std;
 
 ShapeFileOptionsWidget::ShapeFileOptionsWidget(ShapeFile* pShapefile, const vector<AoiElement*>& aois, 
@@ -72,11 +73,12 @@ ShapeFileOptionsWidget::ShapeFileOptionsWidget(ShapeFile* pShapefile, const vect
 
    mpShapeCombo = new QComboBox(this);
    mpShapeCombo->setEditable(false);
-   mpShapeCombo->addItem("Point");
-   mpShapeCombo->addItem("Polyline");
-   mpShapeCombo->addItem("Polygon");
-   mpShapeCombo->addItem("Multi-Point");
    mpShapeCombo->setFixedWidth(150);
+   vector<string> comboText = StringUtilities::getAllEnumValuesAsDisplayString<ShapefileTypes::ShapeType>();
+   for (vector<string>::iterator it = comboText.begin(); it != comboText.end(); ++it)
+   {
+      mpShapeCombo->addItem(QString::fromStdString(*it));
+   }
 
    // Feature list
    QLabel* pFeatureLabel = new QLabel("Features:", this);
@@ -172,24 +174,12 @@ ShapeFileOptionsWidget::ShapeFileOptionsWidget(ShapeFile* pShapefile, const vect
       updateFilenames();
 
       // Shape
-      ShapeType eShape = mpShapeFile->getShape();
-      switch(eShape)
+      int index = ShapefileTypes::getIndex(mpShapeFile->getShape());
+      if (index < 0)
       {
-      case POINT_SHAPE:
-         mpShapeCombo->setCurrentIndex(0);
-         break;
-      case POLYLINE_SHAPE:
-         mpShapeCombo->setCurrentIndex(1);
-         break;
-      case POLYGON_SHAPE:
-         mpShapeCombo->setCurrentIndex(2);
-         break;
-      case MULTIPOINT_SHAPE:
-         mpShapeCombo->setCurrentIndex(3);
-         break;
-      default:
-         ; // blank
+         index = 0;
       }
+      mpShapeCombo->setCurrentIndex(index);
 
       // Features
       const vector<Feature*>& features = mpShapeFile->getFeatures();
@@ -293,30 +283,27 @@ void ShapeFileOptionsWidget::setShape(const QString& strShape)
       return;
    }
 
-   ShapeType eShape;
-   if (strShape == "Point")
-   {
-      eShape = POINT_SHAPE;
-   }
-   else if (strShape == "Polyline")
-   {
-      eShape = POLYLINE_SHAPE;
-   }
-   else if (strShape == "Polygon")
-   {
-      eShape = POLYGON_SHAPE;
-   }
-   else if (strShape == "Multi-Point")
-   {
-      eShape = MULTIPOINT_SHAPE;
-   }
-   else
+   ShapefileTypes::ShapeType eShape =
+      StringUtilities::fromDisplayString<ShapefileTypes::ShapeType>(strShape.toStdString());
+   ShapefileTypes::ShapeType eCurrentShape = mpShapeFile->getShape();
+   if (eShape == eCurrentShape)
    {
       return;
    }
 
-   ShapeType eCurrentShape = mpShapeFile->getShape();
-   if ((eCurrentShape != POINT_SHAPE) && (eShape == POINT_SHAPE))
+   QString msg = "If you change the output shape type, all listed features will be "
+      "cleared. You will have to add the features to be exported as the new shape type.\nDo you want to change the "
+      "output shape type?";
+   if (QMessageBox::question(this, windowTitle(), msg, QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
+   {
+      int index = ShapefileTypes::getIndex(mpShapeFile->getShape());
+      index = (index < 0 ? 0 : index);
+      mpShapeCombo->setCurrentIndex(index);
+   }
+
+   clearFeatures();
+
+   if ((eCurrentShape != ShapefileTypes::POINT_SHAPE) && (eShape == ShapefileTypes::POINT_SHAPE))
    {
       if (mpFeatureTree->topLevelItemCount() > 0)
       {

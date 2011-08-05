@@ -7,9 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QLabel>
-#include <QtGui/QMessageBox>
-
 #include "AoiElement.h"
 #include "AoiLayer.h"
 #include "AppVersion.h"
@@ -23,7 +20,6 @@
 #include "MessageLogResource.h"
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
-#include "PlugInManagerServices.h"
 #include "PlugInRegistration.h"
 #include "Progress.h"
 #include "RasterElement.h"
@@ -31,6 +27,9 @@
 #include "ShapeFileExporter.h"
 #include "ShapeFileOptionsWidget.h"
 #include "SpatialDataView.h"
+
+#include <QtCore/QString>
+#include <QtGui/QMessageBox>
 
 using namespace std;
 
@@ -250,7 +249,7 @@ bool ShapeFileExporter::extractInputs(const PlugInArgList* pInArgList, string& m
    }
 
    //add aoi to shape file
-   mShapefile.setShape(MULTIPOINT_SHAPE);
+   mShapefile.setShape(ShapefileTypes::MULTIPOINT_SHAPE);
    string err;
    mShapefile.addFeatures(mpAoi, mpGeoref, err);
 

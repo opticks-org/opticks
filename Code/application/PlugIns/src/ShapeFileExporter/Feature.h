@@ -7,8 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #ifndef FEATURE_H
 #define FEATURE_H
 
@@ -48,10 +46,10 @@ public:
       double mZ;
    };
 
-   Feature(ShapeType eShape);
+   Feature(ShapefileTypes::ShapeType eShape);
    ~Feature();
 
-   virtual ShapeType getShape() const;
+   virtual ShapefileTypes::ShapeType getShape() const;
 
    /**
     * @notify  signalVertexAdded with any<FeatureVertex>
@@ -74,7 +72,7 @@ public:
    /**
     * @notify  Subject::signalModified
     */
-   bool addField(const std::string& name, const DataVariant &defaultValue);
+   bool addField(const std::string& name, const DataVariant& defaultValue);
    /**
     * @notify  Subject::signalModified
     */
@@ -85,8 +83,8 @@ public:
    /**
     * @notify  Subject::signalModified
     */
-   bool setFieldValue(const std::string& name, const DataVariant &var);
-   const DataVariant &getFieldValue(const std::string& name) const;
+   bool setFieldValue(const std::string& name, const DataVariant& var);
+   const DataVariant& getFieldValue(const std::string& name) const;
    bool hasField(const std::string& name) const;
    /**
     * @notify  Subject::signalModified
@@ -97,7 +95,7 @@ public:
    virtual bool isKindOf(const std::string& className) const;
 
 private:
-   ShapeType mShape;
+   ShapefileTypes::ShapeType mShape;
    std::vector<FeatureVertex> mVertices;
    FactoryResource<DynamicObject> mpFields;
 };
