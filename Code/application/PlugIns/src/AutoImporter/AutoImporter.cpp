@@ -8,6 +8,7 @@
  */
 
 #include <QtCore/QDir>
+#include <QtCore/QFileInfo>
 #include <QtCore/QStringList>
 
 #include "AppVerify.h"
@@ -529,49 +530,48 @@ bool AutoImporter::checkExtension(const PlugInDescriptor* pDescriptor, const str
       return false;
    }
 
-   bool bUse = false;
-
-   // Check the file extension
-   QString strFilename = QString::fromStdString(filename);
-   QString strImporterExtensions;
-
-   string plugInExtensions = pDescriptor->getFileExtensions();
-   if (plugInExtensions.empty() == false)
+   // Get the filename without the path
+   QFileInfo fileInfo(QString::fromStdString(filename));
+   QString strFilename = fileInfo.fileName();
+   if (strFilename.isEmpty() == true)
    {
-      strImporterExtensions = QString::fromStdString(plugInExtensions);
+      return false;
    }
 
-   if (strImporterExtensions.isEmpty() == false)
+   // Get the list of filename patterns from the importer
+   QString strImporterExtensions = QString::fromStdString(pDescriptor->getFileExtensions());
+   if (strImporterExtensions.isEmpty() == true)
    {
-      QStringList filterListCandidates = strImporterExtensions.split(";;", QString::SkipEmptyParts);
-      QStringList filterList;
-      for (int i = 0; i < filterListCandidates.count(); i++)
-      {
-         QString strExtensions = filterListCandidates[i];
-         if (strExtensions.isEmpty() == false)
-         {
-            int iOpenPos = strExtensions.indexOf("(");
-            int iClosePos = strExtensions.lastIndexOf(")");
-            strExtensions = strExtensions.mid(iOpenPos + 1, iClosePos - iOpenPos - 1);
+      return false;
+   }
 
-            QStringList globPatterns = strExtensions.split(QString(" "), QString::SkipEmptyParts);
-            QString catchAll = QString::fromStdString("*");
-            QString catchAll2 = QString::fromStdString("*.*");
-            for (int globCount = 0; globCount < globPatterns.count(); ++globCount)
+   QStringList filterListCandidates = strImporterExtensions.split(";;", QString::SkipEmptyParts);
+   QStringList filterList;
+   for (int i = 0; i < filterListCandidates.count(); i++)
+   {
+      QString strExtensions = filterListCandidates[i];
+      if (strExtensions.isEmpty() == false)
+      {
+         int iOpenPos = strExtensions.indexOf("(");
+         int iClosePos = strExtensions.lastIndexOf(")");
+         strExtensions = strExtensions.mid(iOpenPos + 1, iClosePos - iOpenPos - 1);
+
+         QStringList globPatterns = strExtensions.split(QString(" "), QString::SkipEmptyParts);
+         QString catchAll = QString::fromStdString("*");
+         QString catchAll2 = QString::fromStdString("*.*");
+         for (int globCount = 0; globCount < globPatterns.count(); ++globCount)
+         {
+            QString pattern = globPatterns[globCount];
+            if ((pattern != catchAll) && (pattern != catchAll2))
             {
-               QString pattern = globPatterns[globCount];
-               if ((pattern != catchAll) && (pattern != catchAll2))
-               {
-                  filterList << pattern;
-               }
+               filterList << pattern;
             }
          }
       }
-
-      bUse = QDir::match(filterList, strFilename);
    }
 
-   return bUse;
+   // Compare the filename against the importer filename patterns
+   return QDir::match(filterList, strFilename);
 }
 
 Importer* AutoImporter::findImporter(const DataDescriptor* pDescriptor)
