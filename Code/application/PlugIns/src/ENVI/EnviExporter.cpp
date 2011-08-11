@@ -1085,6 +1085,13 @@ bool EnviExporter::exportDataFile() const
    const vector<DimensionDescriptor>& exportBands = mpFileDescriptor->getBands();
    unsigned int bytesPerElement = pDescriptor->getBytesPerElement();
 
+   DimensionDescriptor startRow = pDescriptor->getActiveRow(exportRows.front().getActiveNumber());
+   DimensionDescriptor endRow = pDescriptor->getActiveRow(exportRows.back().getActiveNumber());
+   DimensionDescriptor startColumn = pDescriptor->getActiveColumn(exportColumns.front().getActiveNumber());
+   DimensionDescriptor endColumn = pDescriptor->getActiveColumn(exportColumns.back().getActiveNumber());
+   DimensionDescriptor startBand = pDescriptor->getActiveBand(exportBands.front().getActiveNumber());
+   DimensionDescriptor endBand = pDescriptor->getActiveBand(exportBands.back().getActiveNumber());
+
    string progressText = "Exporting the data file...";
    if (mpProgress != NULL)
    {
@@ -1103,8 +1110,8 @@ bool EnviExporter::exportDataFile() const
             // Export a full contiguous row at a time
             FactoryResource<DataRequest> pDataRequest;
             pDataRequest->setInterleaveFormat(BIP);
-            pDataRequest->setRows(exportRows.front(), exportRows.back(), 1);
-            pDataRequest->setColumns(exportColumns.front(), exportColumns.back(), exportColumns.size());
+            pDataRequest->setRows(startRow, endRow, 1);
+            pDataRequest->setColumns(startColumn, endColumn, exportColumns.size());
 
             DataAccessor dataAccessor = mpRaster->getDataAccessor(pDataRequest.release());
             if (dataAccessor.isValid() == false)
@@ -1171,8 +1178,8 @@ bool EnviExporter::exportDataFile() const
             // Export one full pixel at a time
             FactoryResource<DataRequest> pDataRequest;
             pDataRequest->setInterleaveFormat(BIP);
-            pDataRequest->setRows(exportRows.front(), exportRows.back(), 1);
-            pDataRequest->setColumns(exportColumns.front(), exportColumns.back(), 1);
+            pDataRequest->setRows(startRow, endRow, 1);
+            pDataRequest->setColumns(startColumn, endColumn, 1);
 
             DataAccessor dataAccessor = mpRaster->getDataAccessor(pDataRequest.release());
             if (dataAccessor.isValid() == false)
@@ -1245,8 +1252,8 @@ bool EnviExporter::exportDataFile() const
          // Slowest possible copy, one pixel at a time
          FactoryResource<DataRequest> pDataRequest;
          pDataRequest->setInterleaveFormat(BIP);
-         pDataRequest->setRows(exportRows.front(), exportRows.back(), 1);
-         pDataRequest->setColumns(exportColumns.front(), exportColumns.back(), 1);
+         pDataRequest->setRows(startRow, endRow, 1);
+         pDataRequest->setColumns(startColumn, endColumn, 1);
 
          DataAccessor dataAccessor = mpRaster->getDataAccessor(pDataRequest.release());
          if (dataAccessor.isValid() == false)
@@ -1327,14 +1334,15 @@ bool EnviExporter::exportDataFile() const
          vector<DimensionDescriptor>::const_iterator bandIter;
          for (bandIter = exportBands.begin(); bandIter != exportBands.end(); ++bandIter)
          {
-            DimensionDescriptor band = *bandIter;
+            DimensionDescriptor exportBand = *bandIter;
+            DimensionDescriptor originalBand = pDescriptor->getActiveBand(exportBand.getActiveNumber());
 
             // Export a full contiguous row at a time
             FactoryResource<DataRequest> pDataRequest;
             pDataRequest->setInterleaveFormat(BSQ);
-            pDataRequest->setRows(exportRows.front(), exportRows.back(), 1);
-            pDataRequest->setColumns(exportColumns.front(), exportColumns.back(), exportColumns.size());
-            pDataRequest->setBands(band, band, 1);
+            pDataRequest->setRows(startRow, endRow, 1);
+            pDataRequest->setColumns(startColumn, endColumn, exportColumns.size());
+            pDataRequest->setBands(originalBand, originalBand, 1);
 
             DataAccessor dataAccessor = mpRaster->getDataAccessor(pDataRequest.release());
             if (dataAccessor.isValid() == false)
@@ -1403,14 +1411,15 @@ bool EnviExporter::exportDataFile() const
          vector<DimensionDescriptor>::const_iterator bandIter;
          for (bandIter = exportBands.begin(); bandIter != exportBands.end(); ++bandIter)
          {
-            DimensionDescriptor band = *bandIter;
+            DimensionDescriptor exportBand = *bandIter;
+            DimensionDescriptor originalBand = pDescriptor->getActiveBand(exportBand.getActiveNumber());
 
             // Slowest possible copy, one pixel at a time
             FactoryResource<DataRequest> pDataRequest;
             pDataRequest->setInterleaveFormat(BSQ);
-            pDataRequest->setRows(exportRows.front(), exportRows.back(), 1);
-            pDataRequest->setColumns(exportColumns.front(), exportColumns.back(), 1);
-            pDataRequest->setBands(band, band, 1);
+            pDataRequest->setRows(startRow, endRow, 1);
+            pDataRequest->setColumns(startColumn, endColumn, 1);
+            pDataRequest->setBands(originalBand, originalBand, 1);
 
             DataAccessor dataAccessor = mpRaster->getDataAccessor(pDataRequest.release());
             if (dataAccessor.isValid() == false)
@@ -1490,9 +1499,9 @@ bool EnviExporter::exportDataFile() const
          // Export a full contiguous row at a time
          FactoryResource<DataRequest> pDataRequest;
          pDataRequest->setInterleaveFormat(BIL);
-         pDataRequest->setRows(exportRows.front(), exportRows.back(), 1);
-         pDataRequest->setColumns(exportColumns.front(), exportColumns.back(), exportColumns.size());
-         pDataRequest->setBands(exportBands.front(), exportBands.back(), exportBands.size());
+         pDataRequest->setRows(startRow, endRow, 1);
+         pDataRequest->setColumns(startColumn, endColumn, exportColumns.size());
+         pDataRequest->setBands(startBand, endBand, exportBands.size());
 
          DataAccessor dataAccessor = mpRaster->getDataAccessor(pDataRequest.release());
          if (dataAccessor.isValid() == false)
@@ -1575,18 +1584,20 @@ bool EnviExporter::exportDataFile() const
                return false;
             }
 
-            DimensionDescriptor row = *rowIter;
+            DimensionDescriptor exportRow = *rowIter;
+            DimensionDescriptor originalRow = pDescriptor->getActiveRow(exportRow.getActiveNumber());
 
             vector<DimensionDescriptor>::const_iterator bandIter;
             for (bandIter = exportBands.begin(); bandIter != exportBands.end(); ++bandIter)
             {
-               DimensionDescriptor band = *bandIter;
+               DimensionDescriptor exportBand = *bandIter;
+               DimensionDescriptor originalBand = pDescriptor->getActiveBand(exportBand.getActiveNumber());
 
                FactoryResource<DataRequest> pDataRequest;
                pDataRequest->setInterleaveFormat(BIL);
-               pDataRequest->setRows(row, row, 1);
-               pDataRequest->setColumns(exportColumns.front(), exportColumns.back(), exportColumns.size());
-               pDataRequest->setBands(band, band, 1);
+               pDataRequest->setRows(originalRow, originalRow, 1);
+               pDataRequest->setColumns(startColumn, endColumn, exportColumns.size());
+               pDataRequest->setBands(originalBand, originalBand, 1);
 
                DataAccessor dataAccessor = mpRaster->getDataAccessor(pDataRequest.release());
                if (dataAccessor.isValid() == false)
@@ -1604,7 +1615,7 @@ bool EnviExporter::exportDataFile() const
                   return false;
                }
 
-               dataAccessor->toPixel(row.getActiveNumber(), exportColumns.front().getActiveNumber());
+               dataAccessor->toPixel(originalRow.getActiveNumber(), exportColumns.front().getActiveNumber());
                if (dataAccessor.isValid() == false)
                {
                   string message = "An error occurred when reading the data from the data set.";
@@ -1651,18 +1662,20 @@ bool EnviExporter::exportDataFile() const
                return false;
             }
 
-            DimensionDescriptor row = *rowIter;
+            DimensionDescriptor exportRow = *rowIter;
+            DimensionDescriptor originalRow = pDescriptor->getActiveRow(exportRow.getActiveNumber());
 
             vector<DimensionDescriptor>::const_iterator bandIter;
             for (bandIter = exportBands.begin(); bandIter != exportBands.end(); ++bandIter)
             {
-               DimensionDescriptor band = *bandIter;
+               DimensionDescriptor exportBand = *bandIter;
+               DimensionDescriptor originalBand = pDescriptor->getActiveBand(exportBand.getActiveNumber());
 
                FactoryResource<DataRequest> pDataRequest;
                pDataRequest->setInterleaveFormat(BIL);
-               pDataRequest->setRows(row, row, 1);
-               pDataRequest->setColumns(exportColumns.front(), exportColumns.back(), 1);
-               pDataRequest->setBands(band, band, 1);
+               pDataRequest->setRows(originalRow, originalRow, 1);
+               pDataRequest->setColumns(startColumn, endColumn, 1);
+               pDataRequest->setBands(originalBand, originalBand, 1);
 
                DataAccessor dataAccessor = mpRaster->getDataAccessor(pDataRequest.release());
                if (dataAccessor.isValid() == false)
@@ -1685,7 +1698,7 @@ bool EnviExporter::exportDataFile() const
                {
                   DimensionDescriptor column = *columnIter;
 
-                  dataAccessor->toPixel(row.getActiveNumber(), column.getActiveNumber());
+                  dataAccessor->toPixel(originalRow.getActiveNumber(), column.getActiveNumber());
                   if (dataAccessor.isValid() == false)
                   {
                      string message = "An error occurred when reading the data from the data set.";
