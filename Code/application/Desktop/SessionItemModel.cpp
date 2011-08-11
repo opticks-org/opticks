@@ -322,6 +322,12 @@ QVariant SessionItemModel::data(const QModelIndex& index, int role) const
             {
                return QVariant(QString::fromStdString(displayText));
             }
+
+            const string& name = pItem->getName();
+            if (name.empty() == false)
+            {
+               return QVariant(QString::fromStdString(name));
+            }
          }
       }
       else if (role == SessionItemModel::SessionItemRole)

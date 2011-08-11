@@ -72,6 +72,7 @@ SessionExplorerImp::SessionExplorerImp(const string& id, const string& windowNam
    mpAnimationTree->sortByColumn(0, Qt::AscendingOrder);
    mpAnimationTree->setDragEnabled(true);
    mpAnimationTree->setDragDropMode(QAbstractItemView::DragOnly);
+   mpAnimationTree->viewport()->installEventFilter(this);
 
    // Elements tree
    mpElementTree = new QTreeView();
@@ -84,6 +85,7 @@ SessionExplorerImp::SessionExplorerImp(const string& id, const string& windowNam
    mpElementTree->setDragDropMode(QAbstractItemView::DragOnly);
    mpElementTree->setSelectionBehavior(QAbstractItemView::SelectItems);
    mpElementTree->sortByColumn(0, Qt::AscendingOrder);
+   mpElementTree->viewport()->installEventFilter(this);
 
    // Plug-ins tree
    mpPlugInTree = new QTreeView();
@@ -95,6 +97,7 @@ SessionExplorerImp::SessionExplorerImp(const string& id, const string& windowNam
    mpPlugInTree->sortByColumn(0, Qt::AscendingOrder);
    mpPlugInTree->setDragEnabled(true);
    mpPlugInTree->setDragDropMode(QAbstractItemView::DragOnly);
+   mpPlugInTree->viewport()->installEventFilter(this);
 
    // Actions
    Service<DesktopServices> pDesktop;
@@ -433,9 +436,9 @@ bool SessionExplorerImp::eventFilter(QObject* pObject, QEvent* pEvent)
 {
    if ((pObject != NULL) && (pEvent != NULL))
    {
+      QEvent::Type type = pEvent->type();
       if (pObject == mpWindowTree->viewport())
       {
-         QEvent::Type type = pEvent->type();
          if ((type == QEvent::DragEnter) || (type == QEvent::DragMove) || (type == QEvent::Drop))
          {
             mpWindowTree->setDropIndicatorShown(false);
@@ -530,6 +533,29 @@ bool SessionExplorerImp::eventFilter(QObject* pObject, QEvent* pEvent)
                      // Send the event to the tree view
                      return false;
                   }
+               }
+            }
+         }
+      }
+
+      if (type == QEvent::ToolTip)
+      {
+         QTreeView* pTreeView = getCurrentTreeView();
+         if ((pTreeView != NULL) && (pTreeView->viewport() == dynamic_cast<QWidget*>(pObject)))
+         {
+            QHelpEvent* pHelpEvent = dynamic_cast<QHelpEvent*>(pEvent);
+            const QModelIndex index = pTreeView->indexAt(pHelpEvent->pos());
+
+            SessionItem* pItem = index.data(SessionItemModel::SessionItemRole).value<SessionItem*>();
+            if ((pItem != NULL) && (pItem->getDisplayText().empty() == true))
+            {
+               int currentWidth = pTreeView->visualRect(index).width();
+               int requiredWidth = pTreeView->sizeHintForIndex(index).width();
+
+               if (currentWidth >= requiredWidth)
+               {
+                  pEvent->ignore();
+                  return true;
                }
             }
          }
