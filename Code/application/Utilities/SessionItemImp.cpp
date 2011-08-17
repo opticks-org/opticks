@@ -8,6 +8,8 @@
  */
 
 #include <QtCore/QFileInfo>
+#include <QtCore/QRegExp>
+#include <QtCore/QString>
 #include <QtCore/QUuid>
 #include <QtGui/QIcon>
 
@@ -294,11 +296,61 @@ void SessionItemImp::updateFilenameDisplay()
    string displayName;
    string displayText;
 
-   QFileInfo fileInfo(QString::fromStdString(mName));
-   if (fileInfo.isFile() == true)
+   // Iteratively check for a directory based on slashes in the name and
+   // set the display name as all text in the name following the directory
+   QString name = QString::fromStdString(mName);
+   QRegExp slashes("\\\\|/");
+   int lastPos = -1;
+
+   // First check the last slash in the name
+   int pos = name.lastIndexOf(slashes);
+   while (pos != -1)
    {
-      displayName = fileInfo.fileName().toStdString();
-      displayText = mName;
+      QString dir = name.left(pos + 1);
+
+      QFileInfo fileInfo(dir);
+      if (fileInfo.isDir() == true)
+      {
+         if (lastPos < 0)
+         {
+            // A directory was found that was not the first slash, so set
+            // all text to the right of the directory as the display name
+            displayName = mName.substr(pos + 1);
+            displayText = mName;
+            break;
+         }
+      }
+      else if (lastPos > -1)
+      {
+         // The first slash did not indicate a directory, so no other checks are needed
+         break;
+      }
+
+      if (lastPos == -1)
+      {
+         // The last slash did not indicate a directory, so check the
+         // first slash to see if other slashes need to be checked
+         lastPos = pos - 1;
+         pos = name.indexOf(slashes);
+
+         if (pos == lastPos + 1)
+         {
+            // The name only has one slash that is not a directory
+            break;
+         }
+      }
+      else if (lastPos > -1)
+      {
+         // The first slash indicated a directory, so continue to check slashes
+         // at the end of the name to get the complete directory path
+         pos = name.lastIndexOf(slashes, lastPos);
+         lastPos = -2;
+      }
+      else
+      {
+         // The last slash did not indicate a directory, so check the next-to-last slash
+         pos = name.lastIndexOf(slashes, pos - 1);
+      }
    }
 
    setDisplayName(displayName);
