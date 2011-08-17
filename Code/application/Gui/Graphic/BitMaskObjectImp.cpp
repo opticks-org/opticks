@@ -69,20 +69,27 @@ void BitMaskObjectImp::draw(double zoomFactor) const
    int endRow;
    pMask->getBoundingBox(startColumn, startRow, endColumn, endRow);
 
-   LocationType textPosition(startColumn, startRow);
-
    RasterElement* pRaster = NULL;
 
    GraphicLayer* pLayer = getLayer();
    VERIFYNRV(pLayer != NULL);
 
-   SpatialDataView* pSpatialDataView = dynamic_cast<SpatialDataView*> (pLayer->getView());
-   if (pSpatialDataView != NULL)
+   DataElement* pElement = pLayer->getDataElement();
+   if (pElement != NULL)
    {
-      LayerList* pLayerList = pSpatialDataView->getLayerList();
-      if (pLayerList != NULL)
+      pRaster = dynamic_cast<RasterElement*>(pElement->getParent());
+   }
+
+   if (pRaster == NULL)
+   {
+      SpatialDataView* pSpatialDataView = dynamic_cast<SpatialDataView*>(pLayer->getView());
+      if (pSpatialDataView != NULL)
       {
-         pRaster = dynamic_cast<RasterElement*> (pLayerList->getPrimaryRasterElement());
+         LayerList* pLayerList = pSpatialDataView->getLayerList();
+         if (pLayerList != NULL)
+         {
+            pRaster = pLayerList->getPrimaryRasterElement();
+         }
       }
    }
 
@@ -111,26 +118,6 @@ void BitMaskObjectImp::draw(double zoomFactor) const
    else if (pMask->getCount() == 0)
    {
       return;
-   }
-
-   if (startColumn > columns)
-   {
-      startColumn = columns - 1;
-   }
-
-   if (startRow > rows)
-   {
-      startRow = rows - 1;
-   }
-
-   if (endColumn > columns)
-   {
-      endColumn = columns - 1;
-   }
-
-   if (endRow > rows)
-   {
-      endRow = rows - 1;
    }
 
    int visStartColumn = startColumn;
