@@ -1,0 +1,65 @@
+Instructions on building the Opticks source code in Solaris 64-bit.
+---------------------------------------------------------------------------
+
+Programs that need to be installed before building the source code:
+--------------------------------------------------------------------------
+- Solaris 10
+- Sun Studio 12
+- Python 2.5 or later (http://www.python.org/download/)
+- Java 1.4.X or later
+- Subversion Command Line Client
+  (http://downloads.open.collab.net/collabnet-subversion.html)
+- SCons 1.2 or later (http://www.scons.org)
+
+
+Download these required dependencies:
+-----------------------------------------------------
+The Dependencies folder in the checkout folder contains a system which
+automatically downloads the appropriate dependencies.  This system requires
+Java 1.4.X or later.
+> ./dependencies -p 
+will provide a usage summary.  Most of the time, you should use 
+retrieve-dependencies.
+> ./retrieve-dependencies
+This will download the appropriate dependencies builds and will install
+them in the proper directories.
+
+Point the OPTICKSDEPENDENCIES variable at the Dependencies folder so the
+build system can find the installed dependencies.
+
+How to Build Opticks: 
+-------------------------------
+In order to build Opticks, you will need to run the build.py python script
+that is included with the source code.
+
+An example of building Opticks with build.py is shown below:
+   ./build.py -d /Opticks/Dependencies --mode=debug --build-opticks=core --prep --concurrency=3 
+
+The -d command-line argument is used to point to the location where you
+created the Opticks dependencies as mentioned earlier.  If you have
+created an OPTICKSDEPENDENCIES environment variable, you don't need to
+use the -d command-line argument.  You will always need to provide the
+--mode, --build-opticks and --prep command-line arguments.  The
+--build-opticks command-line argument should always be equal to "core" as 
+shown in the sample line above.  The --mode=debug will cause a debug binary
+of Opticks to be built, using --mode=release will cause a release binary
+of Opticks to be built.  The --concurrency command-line argument is optional,
+but it controls how many concurrent compilers are used, so it may speed up
+your compilation time.  If you need more information about running
+build.py, run it with --help.
+
+You may notice compiler and linker warnings, however there should not be
+any compiler or linker errors.
+
+How to Run Opticks:
+-------------------------------
+Once you have built Opticks, you can go into either the
+"Build/Binaries-solaris-sparc-debug/Bin" or
+"Build/Binaries-solaris-sparc-release/Bin" directory depending on whether
+you built a debug or release binary.  You will then need to set the 
+LD_LIBRARY_PATH_64 environment variable to this "Bin" directory.  Once this
+environment variable is set, you can simply run
+   ./solOpticks
+to run the interactive version of Opticks, or
+   ./solBatch
+to run the batch version of Opticks.
