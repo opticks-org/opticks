@@ -1193,6 +1193,18 @@ bool SpatialDataViewImp::deleteLayer(Layer* pLayer, bool bClearUndo)
       {
          Layer* pNewActiveLayer = getTopMostLayer(layerType);
          setActiveLayer(pNewActiveLayer);
+
+         // Reset the mouse mode if no active layer is available
+         const MouseMode* pMouseMode = getCurrentMouseMode();
+         if ((pMouseMode != NULL) && (pNewActiveLayer == NULL))
+         {
+            string modeName;
+            pMouseMode->getName(modeName);
+            if (modeName == "LayerMode")
+            {
+               setMouseMode(NULL);
+            }
+         }
       }
 
       // Notify of a display index change
