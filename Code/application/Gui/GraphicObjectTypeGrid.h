@@ -60,6 +60,9 @@ public:
 
 signals:
    void valueChanged(GraphicObjectType value);
+
+private slots:
+   void translateChange(const QString& identifier);
 };
 
 #endif

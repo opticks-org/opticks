@@ -229,15 +229,18 @@ void GraphicObjectTypeGrid::translateChange(const QString& strText)
    emit valueChanged(curType);
 }
 
-GraphicObjectTypeButton::GraphicObjectTypeButton(GraphicObjectTypeGrid::Mode modeValue, QWidget* pParent) : 
+GraphicObjectTypeButton::GraphicObjectTypeButton(GraphicObjectTypeGrid::Mode modeValue, QWidget* pParent) :
    PixmapGridButton(pParent)
 {
    setSyncIcon(true);
    GraphicObjectTypeGrid* pGrid = new GraphicObjectTypeGrid(modeValue, this);
    setPixmapGrid(pGrid);
-   VERIFYNR(connect(pGrid, SIGNAL(valueChanged(GraphicObjectType)), this, SIGNAL(valueChanged(GraphicObjectType))));
+
+   // Connect to the button signal instead of the grid signal to ensure the member
+   // signal is emitted when the user selects a pixmap in the button menu
+   VERIFYNR(connect(this, SIGNAL(valueChanged(const QString&)), this, SLOT(translateChange(const QString&))));
 }
-      
+
 GraphicObjectTypeGrid::Mode GraphicObjectTypeButton::getMode() const
 {
    GraphicObjectTypeGrid* pGrid = dynamic_cast<GraphicObjectTypeGrid*>(getPixmapGrid());
@@ -276,4 +279,10 @@ GraphicObjectType GraphicObjectTypeButton::getCurrentValue() const
       retValue = pGrid->getCurrentValue();
    }
    return retValue;
+}
+
+void GraphicObjectTypeButton::translateChange(const QString& identifier)
+{
+   GraphicObjectType objectType = StringUtilities::fromXmlString<GraphicObjectType>(identifier.toStdString());
+   emit valueChanged(objectType);
 }
