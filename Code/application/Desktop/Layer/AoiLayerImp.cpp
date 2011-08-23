@@ -370,6 +370,7 @@ void AoiLayerImp::setMode(ModeType mode)
 {
    if (mode != mCurrentMode)
    {
+      completeInsertion();
       mCurrentMode = mode;
       emit modeChanged(mode);
    }
@@ -379,7 +380,6 @@ void AoiLayerImp::objectWasAdded(GraphicObject *pObject)
 {
    if (pObject != NULL)
    {
-
       ColorType color(mColor.red(), mColor.green(), mColor.blue());
       pObject->setFillColor(color);
       pObject->setLineColor(color);
