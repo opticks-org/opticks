@@ -28,10 +28,10 @@
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
 #include "PlugInRegistration.h"
+#include "ProductView.h"
 #include "Progress.h"
 #include "RasterElement.h"
 #include "SpatialDataView.h"
-#include "SpatialDataWindow.h"
 #include "Undo.h"
 
 using namespace std;
@@ -242,19 +242,13 @@ bool CgmImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
       pProgress->updateProgress((string("Read and parse file ") + pElement->getFilename()), 20, NORMAL);
    }
 
-   // Create a new annotation layer
+   // Create a new annotation layer for a spatial data view or get the layout layer for a product view
    if (pProgress != NULL)
    {
       pProgress->updateProgress("Create a new layer", 30, NORMAL);
    }
-   AnnotationLayer* pLayer = NULL;
-   SpatialDataView* pView = NULL;
-   SpatialDataWindow* pWindow = dynamic_cast<SpatialDataWindow*>(mpDesktop->getCurrentWorkspaceWindow());
-   if (pWindow != NULL)
-   {
-      pView = pWindow->getSpatialDataView();
-   }
 
+   View* pView = mpDesktop->getCurrentWorkspaceWindowView();
    if (pView == NULL)
    {
       if (pProgress != NULL)
@@ -266,27 +260,43 @@ bool CgmImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
       return false;
    }
 
-   LayerList* pLayerList = pView->getLayerList();
-   if (pLayerList != NULL)
+   UndoGroup undoGroup(pView, "Import CGM");
+   AnnotationLayer* pLayer = NULL;
+
+   SpatialDataView* pSpatialDataView = dynamic_cast<SpatialDataView*>(pView);
+   if (pSpatialDataView != NULL)
    {
-      RasterElement* pNewParentElement = pLayerList->getPrimaryRasterElement();
-      if (pNewParentElement != NULL)
+      // Set the parent element of the annotation element to the primary raster element
+      LayerList* pLayerList = pSpatialDataView->getLayerList();
+      if (pLayerList != NULL)
       {
-         Service<ModelServices> pModel;
-         pModel->setElementParent(pElement, pNewParentElement);
+         RasterElement* pNewParentElement = pLayerList->getPrimaryRasterElement();
+         if (pNewParentElement != NULL)
+         {
+            Service<ModelServices> pModel;
+            pModel->setElementParent(pElement, pNewParentElement);
+         }
+      }
+
+      pLayer = dynamic_cast<AnnotationLayer*>(pSpatialDataView->createLayer(ANNOTATION, pElement));
+   }
+   else
+   {
+      ProductView* pProductView = dynamic_cast<ProductView*>(mpDesktop->getCurrentWorkspaceWindowView());
+      if (pProductView != NULL)
+      {
+         pLayer = pProductView->getLayoutLayer();
       }
    }
 
-   UndoGroup undoGroup(pView, "Import CGM");
-
-   pLayer = dynamic_cast<AnnotationLayer*>(pView->createLayer(ANNOTATION, pElement));
    if (pLayer == NULL)
    {
       if (pProgress != NULL)
       {
-         pProgress->updateProgress("Unable to create the layer", 0, ERRORS);
+         pProgress->updateProgress("Unable to get the annotation layer", 0, ERRORS);
       }
-      pStep->finalize(Message::Failure, "Unable to create the layer");
+
+      pStep->finalize(Message::Failure, "Unable to get the annotation layer");
       return false;
    }
 
