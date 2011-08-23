@@ -105,11 +105,13 @@ RasterLayerImp::RasterLayerImp(const string& id, const string& layerName, DataEl
    mpGrayscaleAction = pDisplayModeGroup->addAction("Grayscale");
    mpGrayscaleAction->setAutoRepeat(false);
    mpGrayscaleAction->setCheckable(true);
+   mpGrayscaleAction->setShortcutContext(Qt::WidgetShortcut);
    pDesktop->initializeAction(mpGrayscaleAction, displayModeContext);
 
    mpRgbAction = pDisplayModeGroup->addAction("RGB");
    mpRgbAction->setAutoRepeat(false);
    mpRgbAction->setCheckable(true);
+   mpRgbAction->setShortcutContext(Qt::WidgetShortcut);
    pDesktop->initializeAction(mpRgbAction, displayModeContext);
 
    mpDisplayModeMenu->addActions(pDisplayModeGroup->actions());
@@ -131,6 +133,7 @@ RasterLayerImp::RasterLayerImp(const string& id, const string& layerName, DataEl
 
    mpResetStretchAction = new QAction(QIcon(":/icons/ResetStretch"), "Reset", this);
    mpResetStretchAction->setAutoRepeat(false);
+   mpResetStretchAction->setShortcutContext(Qt::WidgetShortcut);
    pDesktop->initializeAction(mpResetStretchAction, stretchContext);
 
    // Display As menu
@@ -170,6 +173,7 @@ RasterLayerImp::RasterLayerImp(const string& id, const string& layerName, DataEl
       this, SIGNAL(modified())));
    VERIFYNR(connect(this, SIGNAL(filtersChanged(const std::vector<ImageFilterDescriptor*>&)),
       this, SIGNAL(modified())));
+   VERIFYNR(connect(this, SIGNAL(viewModified(ViewImp*)), this, SLOT(attachActionsToView(ViewImp*))));
    VERIFYNR(connect(pDisplayModeGroup, SIGNAL(triggered(QAction*)),
       this, SLOT(setDisplayMode(QAction*))));
    VERIFYNR(connect(this, SIGNAL(displayModeChanged(const DisplayMode&)),
@@ -480,8 +484,19 @@ list<ContextMenuAction> RasterLayerImp::getContextMenuActions() const
       {
          for (vector<string>::const_iterator iter = compositeNames.begin(); iter != compositeNames.end(); ++iter)
          {
-            Service<DesktopServices>()->initializeAction(mpDisplayAsMenu->addAction(QString::fromStdString(*iter)),
-               shortcutContext + "/Color Composites");
+            QAction* pCompositeAction = mpDisplayAsMenu->addAction(QString::fromStdString(*iter));
+            if (pCompositeAction != NULL)
+            {
+               pCompositeAction->setAutoRepeat(false);
+               pCompositeAction->setShortcutContext(Qt::WidgetShortcut);
+               Service<DesktopServices>()->initializeAction(pCompositeAction, shortcutContext + "/Color Composites");
+
+               ViewImp* pView = dynamic_cast<ViewImp*>(getView());
+               if (pView != NULL)
+               {
+                  pView->addAction(pCompositeAction);
+               }
+            }
          }
 
          menuActions.push_front(ContextMenuAction(mpDisplayAsMenu->menuAction(),
@@ -3958,6 +3973,19 @@ bool RasterLayerImp::generateFullResTexture()
    }
 
    return mpImage->generateFullResTexture();
+}
+
+void RasterLayerImp::attachActionsToView(ViewImp* pView)
+{
+   if (pView != NULL)
+   {
+      pView->addAction(mpGrayscaleAction);
+      pView->addAction(mpRgbAction);
+      pView->addAction(mpResetStretchAction);
+
+      // Create the actions on the context menu so the keyboard shortcuts will work prior to invoking the menu
+      getContextMenuActions();
+   }
 }
 
 void RasterLayerImp::setDisplayMode(QAction* pAction)

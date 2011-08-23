@@ -208,6 +208,7 @@ protected:
    double getNumberThreshold() const;
 
 protected slots:
+   void attachActionsToView(ViewImp* pView);
    void setDisplayMode(QAction* pAction);
    void updateDisplayModeAction(const DisplayMode& displayMode);
    void changeStretch(QAction* pAction);

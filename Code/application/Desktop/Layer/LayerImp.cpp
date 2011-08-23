@@ -191,6 +191,7 @@ void LayerImp::setView(ViewImp* pView)
    }
 
    notify(SIGNAL_NAME(LayerImp, ViewModified), boost::any(mpView));
+   emit viewModified(mpView);
 }
 
 View* LayerImp::getView() const

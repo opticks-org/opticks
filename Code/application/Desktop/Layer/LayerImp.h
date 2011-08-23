@@ -127,6 +127,7 @@ public slots:
 
 signals:
    void nameChanged(const QString& strName);
+   void viewModified(ViewImp* pView);
    void modified();
    void extentsModified();
 
