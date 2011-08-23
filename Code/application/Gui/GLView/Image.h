@@ -63,7 +63,7 @@ public:
       const std::vector<double>& points3, const std::vector<ColorType>& colorMap,
       ComplexComponent component, GLenum format, RasterElement* pRasterElement1, RasterElement* pRasterElement2,
       RasterElement* pRasterElement3,
-      const std::vector<int> &badValues = std::vector<int>()) :
+      const std::vector<int>& badValues1, const std::vector<int>& badValues2, const std::vector<int>& badValues3) :
       mChannels(channels),
       mBand1(band1),
       mBand2(band2),
@@ -75,7 +75,9 @@ public:
       mColorMap(colorMap),
       mComponent(component),
       mFormat(format),
-      mBadValues(badValues)
+      mBadValues1(badValues1),
+      mBadValues2(badValues2),
+      mBadValues3(badValues3)
    {
       mpRasterElement[0] = pRasterElement1;
       mpRasterElement[1] = pRasterElement2;
@@ -98,7 +100,9 @@ public:
       mpRasterElement[0] = rhs.mpRasterElement[0];
       mpRasterElement[1] = rhs.mpRasterElement[1];
       mpRasterElement[2] = rhs.mpRasterElement[2];
-      mBadValues = rhs.mBadValues;
+      mBadValues1 = rhs.mBadValues1;
+      mBadValues2 = rhs.mBadValues2;
+      mBadValues3 = rhs.mBadValues3;
    }
 
    bool operator==(const class ImageKey &rhs) const
@@ -173,7 +177,17 @@ public:
          return false;
       }
 
-      if (mBadValues != rhs.mBadValues)
+      if (mBadValues1 != rhs.mBadValues1)
+      {
+         return false;
+      }
+
+      if (mBadValues2 != rhs.mBadValues2)
+      {
+         return false;
+      }
+
+      if (mBadValues3 != rhs.mBadValues3)
       {
          return false;
       }
@@ -400,24 +414,70 @@ public:
          }
       }
 
-      if (mBadValues.size() < rhs.mBadValues.size())
+      if (mBadValues1.size() < rhs.mBadValues1.size())
       {
          return true;
       }
 
-      if (mBadValues.size() > rhs.mBadValues.size())
+      if (mBadValues1.size() > rhs.mBadValues1.size())
       {
          return false;
       }
 
-      for (unsigned int i = 0; i < mBadValues.size(); ++i)
+      for (unsigned int i = 0; i < mBadValues1.size(); ++i)
       {
-         if (mBadValues[i] < rhs.mBadValues[i])
+         if (mBadValues1[i] < rhs.mBadValues1[i])
          {
             return true;
          }
 
-         if (mBadValues[i] > rhs.mBadValues[i])
+         if (mBadValues1[i] > rhs.mBadValues1[i])
+         {
+            return false;
+         }
+      }
+
+      if (mBadValues2.size() < rhs.mBadValues2.size())
+      {
+         return true;
+      }
+
+      if (mBadValues2.size() > rhs.mBadValues2.size())
+      {
+         return false;
+      }
+
+      for (unsigned int i = 0; i < mBadValues2.size(); ++i)
+      {
+         if (mBadValues2[i] < rhs.mBadValues2[i])
+         {
+            return true;
+         }
+
+         if (mBadValues2[i] > rhs.mBadValues2[i])
+         {
+            return false;
+         }
+      }
+
+      if (mBadValues3.size() < rhs.mBadValues3.size())
+      {
+         return true;
+      }
+
+      if (mBadValues3.size() > rhs.mBadValues3.size())
+      {
+         return false;
+      }
+
+      for (unsigned int i = 0; i < mBadValues3.size(); ++i)
+      {
+         if (mBadValues3[i] < rhs.mBadValues3[i])
+         {
+            return true;
+         }
+
+         if (mBadValues3[i] > rhs.mBadValues3[i])
          {
             return false;
          }
@@ -438,7 +498,9 @@ public:
    ComplexComponent mComponent;
    GLenum mFormat;
    RasterElement* mpRasterElement[3];
-   std::vector<int> mBadValues;
+   std::vector<int> mBadValues1;
+   std::vector<int> mBadValues2;
+   std::vector<int> mBadValues3;
 };
 
 class Image
@@ -455,9 +517,10 @@ public:
                 StretchType type, const std::vector<double>& points1, const std::vector<double>& points2,
                 const std::vector<double>& points3, const std::vector<ColorType>& colorMap, ComplexComponent component,
                 GLenum format, RasterElement* pRasterElement1, RasterElement* pRasterElement2,
-                RasterElement* pRasterElement3, const std::vector<int>& badValues = std::vector<int>()) :
+                RasterElement* pRasterElement3, const std::vector<int>& badValues1, const std::vector<int>& badValues2,
+                const std::vector<int>& badValues3) :
          mKey(channels, band1, band2, band3, type, points1, points2, points3, colorMap, component, format,
-            pRasterElement1, pRasterElement2, pRasterElement3, badValues),
+            pRasterElement1, pRasterElement2, pRasterElement3, badValues1, badValues2, badValues3),
          mTileSizeX(0),
          mTileSizeY(0),
          mImageSizeX(0),
@@ -553,19 +616,22 @@ public:
    virtual void initialize(int sizeX, int sizeY, DimensionDescriptor band1, DimensionDescriptor band2,
       DimensionDescriptor band3, unsigned int imageSizeX, unsigned int imageSizeY, unsigned int channels,
       GLenum format, EncodingType type, void* data, StretchType stretchType, std::vector<double>& stretchPointsRed,
-      std::vector<double>& stretchPointsGreen, std::vector<double>& stretchPointsBlue, RasterElement* pRasterElement);
+      std::vector<double>& stretchPointsGreen, std::vector<double>& stretchPointsBlue, RasterElement* pRasterElement,
+      const std::vector<int>& badValues1, const std::vector<int>& badValues2, const std::vector<int>& badValues3);
    virtual void initialize(int sizeX, int sizeY, DimensionDescriptor band1, DimensionDescriptor band2,
       DimensionDescriptor band3, unsigned int imageSizeX, unsigned int imageSizeY, unsigned int channels,
       GLenum format, EncodingType type, ComplexComponent component, void* data, StretchType stretchType,
       std::vector<double>& stretchPointsRed, std::vector<double>& stretchPointsGreen,
-      std::vector<double>& stretchPointsBlue, RasterElement* pRasterElement);
+      std::vector<double>& stretchPointsBlue, RasterElement* pRasterElement, const std::vector<int>& badValues1,
+      const std::vector<int>& badValues2, const std::vector<int>& badValues3);
    // Separate RasterElements for each channel
    virtual void initialize(int sizeX, int sizeY, DimensionDescriptor band1, DimensionDescriptor band2,
       DimensionDescriptor band3, unsigned int imageSizeX, unsigned int imageSizeY, unsigned int channels,
       GLenum format, EncodingType type1, EncodingType type2, EncodingType type3, ComplexComponent component,
       void* data, StretchType stretchType, std::vector<double>& stretchPointsRed,
       std::vector<double>& stretchPointsGreen, std::vector<double>& stretchPointsBlue,
-      RasterElement* pRasterElement1, RasterElement* pRasterElement2, RasterElement* pRasterElement3);
+      RasterElement* pRasterElement1, RasterElement* pRasterElement2, RasterElement* pRasterElement3,
+      const std::vector<int>& badValues1, const std::vector<int>& badValues2, const std::vector<int>& badValues3);
 
    virtual ~Image();
 

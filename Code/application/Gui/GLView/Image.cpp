@@ -33,7 +33,7 @@ unsigned int Image::TileSet::sNextId = 0;
 Image::Image() :
    mInfo(0, DimensionDescriptor(), DimensionDescriptor(), DimensionDescriptor(), LINEAR, std::vector<double>(),
       std::vector<double>(), std::vector<double>(), sDefaultColorMap, COMPLEX_MAGNITUDE, GL_LUMINANCE, NULL,
-      NULL, NULL),
+      NULL, NULL, std::vector<int>(), std::vector<int>(), std::vector<int>()),
    mNumTilesX(0),
    mNumTilesY(0),
    mpTiles(NULL),
@@ -48,7 +48,7 @@ void Image::initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsign
 {
    mInfo = ImageData(channels, channel, DimensionDescriptor(), DimensionDescriptor(), stretchType, stretchPoints,
       std::vector<double>(), std::vector<double>(), sDefaultColorMap, COMPLEX_MAGNITUDE, GL_LUMINANCE,
-      pRasterElement, pRasterElement, pRasterElement, badValues);
+      pRasterElement, pRasterElement, pRasterElement, badValues, std::vector<int>(), std::vector<int>());
    mInfo.mTileSizeX = sizeX;
    mInfo.mTileSizeY = sizeY;
    mInfo.mImageSizeX = imageSizeX;
@@ -90,7 +90,7 @@ void Image::initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsign
 {
    mInfo = ImageData(channels, channel, DimensionDescriptor(), DimensionDescriptor(), stretchType, stretchPoints,
       vector<double>(), vector<double>(), sDefaultColorMap, component, GL_LUMINANCE, pRasterElement, pRasterElement,
-      pRasterElement, badValues);
+      pRasterElement, badValues, std::vector<int>(), std::vector<int>());
    mInfo.mTileSizeX = sizeX;
    mInfo.mTileSizeY = sizeY;
    mInfo.mImageSizeX = imageSizeX;
@@ -133,7 +133,7 @@ void Image::initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsign
 {
    mInfo = ImageData(channels, channel, DimensionDescriptor(), DimensionDescriptor(), stretchType, stretchPoints,
       vector<double>(), vector<double>(), colorMap, COMPLEX_MAGNITUDE, GL_LUMINANCE, pRasterElement, pRasterElement,
-      pRasterElement, badValues);
+      pRasterElement, badValues, std::vector<int>(), std::vector<int>());
    mInfo.mTileSizeX = sizeX;
    mInfo.mTileSizeY = sizeY;
    mInfo.mImageSizeX = imageSizeX;
@@ -174,7 +174,7 @@ void Image::initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsign
 {
    mInfo = ImageData(channels, channel, DimensionDescriptor(), DimensionDescriptor(), stretchType, stretchPoints,
       vector<double>(), vector<double>(), colorMap, component, GL_LUMINANCE, pRasterElement, pRasterElement,
-      pRasterElement, badValues);
+      pRasterElement, badValues, std::vector<int>(), std::vector<int>());
    mInfo.mTileSizeX = sizeX;
    mInfo.mTileSizeY = sizeY;
    mInfo.mImageSizeX = imageSizeX;
@@ -213,10 +213,12 @@ void Image::initialize(int sizeX, int sizeY, DimensionDescriptor band1, Dimensio
                        DimensionDescriptor band3, unsigned int imageSizeX, unsigned int imageSizeY,
                        unsigned int channels, GLenum format, EncodingType type, void *data, StretchType stretchType,
                        vector<double>& stretchPointsRed, vector<double>& stretchPointsGreen,
-                       vector<double>& stretchPointsBlue, RasterElement* pRasterElement)
+                       vector<double>& stretchPointsBlue, RasterElement* pRasterElement,
+                       const vector<int>& badValues1, const vector<int>& badValues2, const vector<int>& badValues3)
 {
    mInfo = ImageData(channels, band1, band2, band3, stretchType, stretchPointsRed, stretchPointsGreen,
-      stretchPointsBlue, sDefaultColorMap, COMPLEX_MAGNITUDE, GL_RGB, pRasterElement, pRasterElement, pRasterElement);
+      stretchPointsBlue, sDefaultColorMap, COMPLEX_MAGNITUDE, GL_RGB, pRasterElement, pRasterElement, pRasterElement,
+      badValues1, badValues2, badValues3);
    mInfo.mTileSizeX = sizeX;
    mInfo.mTileSizeY = sizeY;
    mInfo.mImageSizeX = imageSizeX;
@@ -254,10 +256,12 @@ void Image::initialize(int sizeX, int sizeY, DimensionDescriptor band1, Dimensio
                        DimensionDescriptor band3, unsigned int imageSizeX, unsigned int imageSizeY,
                        unsigned int channels, GLenum format, EncodingType type, ComplexComponent component, void* data,
                        StretchType stretchType, vector<double>& stretchPointsRed, vector<double>& stretchPointsGreen,
-                       vector<double>& stretchPointsBlue, RasterElement* pRasterElement)
+                       vector<double>& stretchPointsBlue, RasterElement* pRasterElement, const vector<int>& badValues1,
+                       const vector<int>& badValues2, const vector<int>& badValues3)
 {
    mInfo = ImageData(channels, band1, band2, band3, stretchType, stretchPointsRed, stretchPointsGreen,
-      stretchPointsBlue, sDefaultColorMap, component, GL_RGB, pRasterElement, pRasterElement, pRasterElement);
+      stretchPointsBlue, sDefaultColorMap, component, GL_RGB, pRasterElement, pRasterElement, pRasterElement,
+      badValues1, badValues2, badValues3);
    mInfo.mTileSizeX = sizeX;
    mInfo.mTileSizeY = sizeY;
    mInfo.mImageSizeX = imageSizeX;
@@ -298,10 +302,12 @@ void Image::initialize(int sizeX, int sizeY, DimensionDescriptor band1, Dimensio
                        EncodingType type3, ComplexComponent component, void* data, StretchType stretchType,
                        vector<double>& stretchPointsRed, vector<double>& stretchPointsGreen,
                        vector<double>& stretchPointsBlue, RasterElement* pRasterElement1,
-                       RasterElement* pRasterElement2, RasterElement* pRasterElement3)
+                       RasterElement* pRasterElement2, RasterElement* pRasterElement3, const vector<int>& badValues1,
+                       const vector<int>& badValues2, const vector<int>& badValues3)
 {
    mInfo = ImageData(channels, band1, band2, band3, stretchType, stretchPointsRed, stretchPointsGreen,
-      stretchPointsBlue, sDefaultColorMap, component, GL_RGB, pRasterElement1, pRasterElement2, pRasterElement3);
+      stretchPointsBlue, sDefaultColorMap, component, GL_RGB, pRasterElement1, pRasterElement2, pRasterElement3,
+      badValues1, badValues2, badValues3);
    mInfo.mTileSizeX = sizeX;
    mInfo.mTileSizeY = sizeY;
    mInfo.mImageSizeX = imageSizeX;
@@ -513,8 +519,8 @@ private:
       ScaleStruct scaleData;
       Image::prepareScale(mInfo, mInfo.mKey.mStretchPoints1, scaleData, 0);
 
-      std::vector<int>::const_iterator badBegin = mInfo.mKey.mBadValues.begin();
-      std::vector<int>::const_iterator badEnd = mInfo.mKey.mBadValues.end();
+      std::vector<int>::const_iterator badBegin = mInfo.mKey.mBadValues1.begin();
+      std::vector<int>::const_iterator badEnd = mInfo.mKey.mBadValues1.end();
 
       int bufSize = mInfo.mTileSizeX * mInfo.mTileSizeY * sizeof(unsigned char);
       bool hasBadValues = (badBegin != badEnd);
@@ -525,11 +531,11 @@ private:
 
       vector<unsigned char> pTexData(bufSize);
 
-      bool bHas1BadValue = mInfo.mKey.mBadValues.size() == 1;
+      bool bHas1BadValue = mInfo.mKey.mBadValues1.size() == 1;
       int singleBadValue = 0;
       if (bHas1BadValue)
       {
-         singleBadValue = mInfo.mKey.mBadValues.front();
+         singleBadValue = mInfo.mKey.mBadValues1.front();
       }
 
       int oldPercentDone = -1;
@@ -647,19 +653,19 @@ private:
       ScaleStruct scaleData;
       Image::prepareScale(mInfo, mInfo.mKey.mStretchPoints1, scaleData, 0, maxValue-1);
 
-      std::vector<int>::const_iterator badBegin = mInfo.mKey.mBadValues.begin();
-      std::vector<int>::const_iterator badEnd = mInfo.mKey.mBadValues.end();
+      std::vector<int>::const_iterator badBegin = mInfo.mKey.mBadValues1.begin();
+      std::vector<int>::const_iterator badEnd = mInfo.mKey.mBadValues1.end();
 
       bool hasBadValues = (badBegin != badEnd);
       int channels = (mInfo.mFormat == GL_RGBA ? 4 : 3);
       int bufSize = mInfo.mTileSizeX * mInfo.mTileSizeY * channels * sizeof(unsigned char);
       vector<unsigned char> pTexData(bufSize);
 
-      bool bHas1BadValue = mInfo.mKey.mBadValues.size() == 1;
+      bool bHas1BadValue = mInfo.mKey.mBadValues1.size() == 1;
       int singleBadValue = 0;
       if (bHas1BadValue)
       {
-         singleBadValue = mInfo.mKey.mBadValues.front();
+         singleBadValue = mInfo.mKey.mBadValues1.front();
       }
 
       int oldPercentDone = -1;
@@ -768,55 +774,6 @@ private:
    }
 
    // RGB: channel1=red, channel2=green, channel3=blue band
-   template <class T>
-   void createRgbTile(T*pData, std::vector<unsigned char> &pTexData, ComplexComponent component, 
-      DataAccessor da, unsigned int posX, unsigned int posY, unsigned int geomSizeX, unsigned int geomSizeY, 
-      int reductionFactor, ScaleStruct &scaleData, int offset)
-   {
-      T* source;
-      vector<unsigned char>::iterator targetBase = pTexData.begin();
-
-      for (unsigned int y1 = 0;
-         y1 < geomSizeY;
-         y1 += reductionFactor, targetBase += 3 * mInfo.mTileSizeX / reductionFactor)
-      {
-         VERIFYNRV(da.isValid());
-         unsigned char *target = &*targetBase;
-         //vector<unsigned char>::iterator target = targetBase;
-         target += offset;
-         for (unsigned int x1 = 0; x1 < geomSizeX; x1 += reductionFactor)
-         {
-            source = static_cast<T*>(da->getColumn());
-            double dValue = ModelServices::getDataValue(*source, component);
-            *target = Image::scale(dValue, scaleData, mInfo);
-            target += 3;
-
-            da->nextColumn(reductionFactor);
-         }
-         da->nextRow(reductionFactor);
-      }
-   }
-
-   void createEmptyRgbTile(std::vector<unsigned char> &pTexData, 
-      unsigned int posX, unsigned int posY, unsigned int geomSizeX, unsigned int geomSizeY, 
-      int reductionFactor, int offset)
-   {
-      vector<unsigned char>::iterator targetBase = pTexData.begin();
-
-      for (unsigned int y1 = 0;
-         y1 < geomSizeY;
-         y1 += reductionFactor, targetBase += 3 * mInfo.mTileSizeX / reductionFactor)
-      {
-         unsigned char* target = &*targetBase;
-         target += offset;
-         for (unsigned int x1 = 0; x1 < geomSizeX; x1 += reductionFactor)
-         {
-            *target = 0;
-            target += 3;
-         }
-      }
-   }
-
    void createRgb(EncodingType encodingRed, EncodingType encodingGreen, EncodingType encodingBlue,
       ComplexComponent component)
    {
@@ -832,8 +789,43 @@ private:
       Image::prepareScale(mInfo, mInfo.mKey.mStretchPoints1, scaleDataRed, 0);
       Image::prepareScale(mInfo, mInfo.mKey.mStretchPoints2, scaleDataGreen, 1);
       Image::prepareScale(mInfo, mInfo.mKey.mStretchPoints3, scaleDataBlue, 2);
-      
-      int bufSize = mInfo.mTileSizeX * mInfo.mTileSizeY * 3 * sizeof(unsigned char);
+
+      std::vector<int>::const_iterator redBadBegin = mInfo.mKey.mBadValues1.begin();
+      std::vector<int>::const_iterator redBadEnd = mInfo.mKey.mBadValues1.end();
+      bool hasRedBadValues = (redBadBegin != redBadEnd);
+
+      bool hasOneRedBadValue = (mInfo.mKey.mBadValues1.size() == 1);
+      int singleRedBadValue = 0;
+      if (hasOneRedBadValue == true)
+      {
+         singleRedBadValue = mInfo.mKey.mBadValues1.front();
+      }
+
+      std::vector<int>::const_iterator greenBadBegin = mInfo.mKey.mBadValues2.begin();
+      std::vector<int>::const_iterator greenBadEnd = mInfo.mKey.mBadValues2.end();
+      bool hasGreenBadValues = (greenBadBegin != greenBadEnd);
+
+      bool hasOneGreenBadValue = (mInfo.mKey.mBadValues2.size() == 1);
+      int singleGreenBadValue = 0;
+      if (hasOneGreenBadValue == true)
+      {
+         singleGreenBadValue = mInfo.mKey.mBadValues2.front();
+      }
+
+      std::vector<int>::const_iterator blueBadBegin = mInfo.mKey.mBadValues3.begin();
+      std::vector<int>::const_iterator blueBadEnd = mInfo.mKey.mBadValues3.end();
+      bool hasBlueBadValues = (blueBadBegin != blueBadEnd);
+
+      bool hasOneBlueBadValue = (mInfo.mKey.mBadValues3.size() == 1);
+      int singleBlueBadValue = 0;
+      if (hasOneBlueBadValue == true)
+      {
+         singleBlueBadValue = mInfo.mKey.mBadValues3.front();
+      }
+
+      bool hasBadValues = hasRedBadValues || hasGreenBadValues || hasBlueBadValues;
+
+      int bufSize = mInfo.mTileSizeX * mInfo.mTileSizeY * sizeof(unsigned char) * (mInfo.mFormat == GL_RGBA ? 4 : 3);
       std::vector<unsigned char> pTexData(bufSize);
 
       int oldPercentDone = -1;
@@ -852,17 +844,7 @@ private:
             RasterElement* pRedRasterElement = mInfo.mKey.mpRasterElement[0];
             DimensionDescriptor redBand = mInfo.mKey.mBand1;
             bool haveRedData = (pRedRasterElement != NULL) && (redBand.isActiveNumberValid());
-
-            RasterElement* pGreenRasterElement = mInfo.mKey.mpRasterElement[1];
-            DimensionDescriptor greenBand = mInfo.mKey.mBand2;
-            bool haveGreenData = (pGreenRasterElement != NULL) && (greenBand.isActiveNumberValid());
-
-            RasterElement* pBlueRasterElement = mInfo.mKey.mpRasterElement[2];
-            DimensionDescriptor blueBand = mInfo.mKey.mBand3;
-            bool haveBlueData = (pBlueRasterElement != NULL) && (blueBand.isActiveNumberValid());
-
-            int reductionFactor = Tile::computeReductionFactor(mTileZoomIndices[tileId]);
-
+            DataAccessor daRed(NULL, NULL);
             if (haveRedData)
             {
                RasterDataDescriptor* pRedRasterDescriptor =
@@ -875,19 +857,17 @@ private:
                   pRedRasterDescriptor->getActiveColumn(posX+geomSizeX-1), geomSizeX);
                pRedRequest->setBands(mInfo.mKey.mBand1, mInfo.mKey.mBand1, 1);
 
-               DataAccessor daRed = pRedRasterElement->getDataAccessor(pRedRequest.release());
+               daRed = pRedRasterElement->getDataAccessor(pRedRequest.release());
                if (!daRed.isValid())
                {
                   return;
                }
-               switchOnComplexEncoding(encodingRed, createRgbTile, NULL, pTexData, component, daRed, posX, posY,
-                  geomSizeX, geomSizeY, reductionFactor, scaleDataRed, 0);
-            }
-            else
-            {
-               createEmptyRgbTile(pTexData, posX, posY, geomSizeX, geomSizeY, reductionFactor, 0);
             }
 
+            RasterElement* pGreenRasterElement = mInfo.mKey.mpRasterElement[1];
+            DimensionDescriptor greenBand = mInfo.mKey.mBand2;
+            bool haveGreenData = (pGreenRasterElement != NULL) && (greenBand.isActiveNumberValid());
+            DataAccessor daGreen(NULL, NULL);
             if (haveGreenData)
             {
                RasterDataDescriptor* pGreenRasterDescriptor =
@@ -900,19 +880,17 @@ private:
                   pGreenRasterDescriptor->getActiveColumn(posX+geomSizeX-1), geomSizeX);
                pGreenRequest->setBands(mInfo.mKey.mBand2, mInfo.mKey.mBand2, 1);
 
-               DataAccessor daGreen = pGreenRasterElement->getDataAccessor(pGreenRequest.release());
+               daGreen = pGreenRasterElement->getDataAccessor(pGreenRequest.release());
                if (!daGreen.isValid())
                {
                   return;
                }
-               switchOnComplexEncoding(encodingGreen, createRgbTile, NULL, pTexData, component, daGreen, posX, posY,
-                  geomSizeX, geomSizeY, reductionFactor, scaleDataGreen, 1);
-            }
-            else
-            {
-               createEmptyRgbTile(pTexData, posX, posY, geomSizeX, geomSizeY, reductionFactor, 1);
             }
 
+            RasterElement* pBlueRasterElement = mInfo.mKey.mpRasterElement[2];
+            DimensionDescriptor blueBand = mInfo.mKey.mBand3;
+            bool haveBlueData = (pBlueRasterElement != NULL) && (blueBand.isActiveNumberValid());
+            DataAccessor daBlue(NULL, NULL);
             if (haveBlueData)
             {
                RasterDataDescriptor* pBlueRasterDescriptor =
@@ -925,17 +903,176 @@ private:
                   pBlueRasterDescriptor->getActiveColumn(posX+geomSizeX-1), geomSizeX);
                pBlueRequest->setBands(mInfo.mKey.mBand3, mInfo.mKey.mBand3, 1);
 
-               DataAccessor daBlue = pBlueRasterElement->getDataAccessor(pBlueRequest.release());
+               daBlue = pBlueRasterElement->getDataAccessor(pBlueRequest.release());
                if (!daBlue.isValid())
                {
                   return;
                }
-               switchOnComplexEncoding(encodingBlue, createRgbTile, NULL, pTexData, component, daBlue, posX, posY,
-                  geomSizeX, geomSizeY, reductionFactor, scaleDataBlue, 2);
             }
-            else
+
+            int reductionFactor = Tile::computeReductionFactor(mTileZoomIndices[tileId]);
+
+            vector<unsigned char>::iterator targetBase = pTexData.begin();
+
+            for (unsigned int y1 = 0;
+               y1 < geomSizeY;
+               y1 += reductionFactor, targetBase += mInfo.mTileSizeX / reductionFactor * (hasBadValues ? 4 : 3))
             {
-               createEmptyRgbTile(pTexData, posX, posY, geomSizeX, geomSizeY, reductionFactor, 2);
+               unsigned char* target = &*targetBase;
+               for (unsigned int x1 = 0; x1 < geomSizeX; x1 += reductionFactor)
+               {
+                  // Red
+                  bool isRedValueBad = true;
+                  if (haveRedData)
+                  {
+                     VERIFYNRV(daRed.isValid());
+                     void* pSource = daRed->getColumn();
+                     double dValue = ModelServices::getDataValue(encodingRed, pSource, component, 0);
+                     *target = Image::scale(dValue, scaleDataRed, mInfo);
+
+                     if (hasRedBadValues)
+                     {
+                        int tempInt = roundDouble(dValue);
+                        if (hasOneRedBadValue)
+                        {
+                           if (tempInt != singleRedBadValue)
+                           {
+                              isRedValueBad = false;
+                           }
+                        }
+                        else if (binary_search(redBadBegin, redBadEnd, tempInt) == false)
+                        {
+                           isRedValueBad = false;
+                        }
+                     }
+                     else
+                     {
+                        isRedValueBad = false;
+                     }
+
+                     daRed->nextColumn(reductionFactor);
+                  }
+
+                  if (isRedValueBad == true)
+                  {
+                     *target = 0;
+                  }
+
+                  ++target;
+
+                  // Green
+                  bool isGreenValueBad = true;
+                  if (haveGreenData)
+                  {
+                     VERIFYNRV(daGreen.isValid());
+                     void* pSource = daGreen->getColumn();
+                     double dValue = ModelServices::getDataValue(encodingGreen, pSource, component, 0);
+                     *target = Image::scale(dValue, scaleDataGreen, mInfo);
+
+                     if (hasGreenBadValues)
+                     {
+                        int tempInt = roundDouble(dValue);
+                        if (hasOneGreenBadValue)
+                        {
+                           if (tempInt != singleGreenBadValue)
+                           {
+                              isGreenValueBad = false;
+                           }
+                        }
+                        else if (binary_search(greenBadBegin, greenBadEnd, tempInt) == false)
+                        {
+                           isGreenValueBad = false;
+                        }
+                     }
+                     else
+                     {
+                        isGreenValueBad = false;
+                     }
+
+                     daGreen->nextColumn(reductionFactor);
+                  }
+
+                  if (isGreenValueBad == true)
+                  {
+                     *target = 0;
+                  }
+
+                  ++target;
+
+                  // Blue
+                  bool isBlueValueBad = true;
+                  if (haveBlueData)
+                  {
+                     VERIFYNRV(daBlue.isValid());
+                     void* pSource = daBlue->getColumn();
+                     double dValue = ModelServices::getDataValue(encodingBlue, pSource, component, 0);
+                     *target = Image::scale(dValue, scaleDataBlue, mInfo);
+
+                     if (hasBlueBadValues)
+                     {
+                        int tempInt = roundDouble(dValue);
+                        if (hasOneBlueBadValue)
+                        {
+                           if (tempInt != singleBlueBadValue)
+                           {
+                              isBlueValueBad = false;
+                           }
+                        }
+                        else if (binary_search(blueBadBegin, blueBadEnd, tempInt) == false)
+                        {
+                           isBlueValueBad = false;
+                        }
+                     }
+                     else
+                     {
+                        isBlueValueBad = false;
+                     }
+
+                     daBlue->nextColumn(reductionFactor);
+                  }
+
+                  if (isBlueValueBad == true)
+                  {
+                     *target = 0;
+                  }
+
+                  ++target;
+
+                  // Bad values
+                  if (hasBadValues == true)
+                  {
+                     if ((isRedValueBad == true) && (isGreenValueBad == true) && (isBlueValueBad == true))
+                     {
+                        *target = 0;
+                     }
+                     else
+                     {
+                        *target = 0xff;
+                     }
+
+                     ++target;
+                  }
+                  else if (mInfo.mFormat == GL_RGBA)
+                  {
+                     *target = 0xff;
+                     ++target;
+                  }
+               }
+
+               if (daRed.isValid() == true)
+               {
+                  daRed->nextRow(reductionFactor);
+               }
+
+               if (daGreen.isValid() == true)
+               {
+                  daGreen->nextRow(reductionFactor);
+               }
+
+               if (daBlue.isValid() == true)
+               {
+                  daBlue->nextRow(reductionFactor);
+               }
             }
 
             SetTileTexture cmd(pTile, &pTexData[0], mTileZoomIndices[tileId]);

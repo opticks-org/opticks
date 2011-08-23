@@ -49,18 +49,21 @@ public:
    void initialize(int sizeX, int sizeY, DimensionDescriptor band1, DimensionDescriptor band2,
       DimensionDescriptor band3, unsigned int imageSizeX, unsigned int imageSizeY, unsigned int channels,
       GLenum format, EncodingType type, void* pData, StretchType stretchType, std::vector<double>& stretchPointsRed,
-      std::vector<double>& stretchPointsGreen, std::vector<double>& stretchPointsBlue, RasterElement* pRasterElement);
+      std::vector<double>& stretchPointsGreen, std::vector<double>& stretchPointsBlue, RasterElement* pRasterElement,
+      const std::vector<int>& badValues1, const std::vector<int>& badValues2, const std::vector<int>& badValues3);
    void initialize(int sizeX, int sizeY, DimensionDescriptor band1, DimensionDescriptor band2,
       DimensionDescriptor band3, unsigned int imageSizeX, unsigned int imageSizeY, unsigned int channels,
       GLenum format, EncodingType type, ComplexComponent component, void* pData, StretchType stretchType,
       std::vector<double>& stretchPointsRed, std::vector<double>& stretchPointsGreen,
-      std::vector<double>& stretchPointsBlue, RasterElement* pRasterElement);
+      std::vector<double>& stretchPointsBlue, RasterElement* pRasterElement, const std::vector<int>& badValues1,
+      const std::vector<int>& badValues2, const std::vector<int>& badValues3);
    void initialize(int sizeX, int sizeY, DimensionDescriptor band1, DimensionDescriptor band2,
       DimensionDescriptor band3, unsigned int imageSizeX, unsigned int imageSizeY, unsigned int channels,
       GLenum format, EncodingType type1, EncodingType type2, EncodingType type3, ComplexComponent component,
       void* pData, StretchType stretchType, std::vector<double>& stretchPointsRed,
       std::vector<double>& stretchPointsGreen, std::vector<double>& stretchPointsBlue,
-      RasterElement* pRasterElement1, RasterElement* pRasterElement2, RasterElement* pRasterElement3);
+      RasterElement* pRasterElement1, RasterElement* pRasterElement2, RasterElement* pRasterElement3,
+      const std::vector<int>& badValues1, const std::vector<int>& badValues2, const std::vector<int>& badValues3);
 
    // Filters
    void enableFilter(ImageFilterDescriptor *pDescriptor);

@@ -147,7 +147,9 @@ void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor band1, Dimen
                           DimensionDescriptor band3, unsigned int imageSizeX, unsigned int imageSizeY,
                           unsigned int channels, GLenum format, EncodingType type, void* pData,
                           StretchType stretchType, vector<double>& stretchPointsRed, vector<double>& stretchPointsGreen,
-                          vector<double>& stretchPointsBlue, RasterElement* pRasterElement)
+                          vector<double>& stretchPointsBlue, RasterElement* pRasterElement,
+                          const std::vector<int>& badValues1, const std::vector<int>& badValues2,
+                          const std::vector<int>& badValues3)
 {
    initializeRgb();
 
@@ -156,7 +158,8 @@ void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor band1, Dimen
    calculateTileSize(type, imageSizeX, imageSizeY, tileSizeX, tileSizeY);
 
    Image::initialize(tileSizeX, tileSizeY, band1, band2, band3, imageSizeX, imageSizeY, channels, format, type,
-      pData, stretchType, stretchPointsRed, stretchPointsGreen, stretchPointsBlue, pRasterElement);
+      pData, stretchType, stretchPointsRed, stretchPointsGreen, stretchPointsBlue, pRasterElement, badValues1,
+      badValues2, badValues3);
 }
 
 void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor band1, DimensionDescriptor band2,
@@ -164,7 +167,8 @@ void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor band1, Dimen
                           unsigned int channels, GLenum format, EncodingType type, ComplexComponent component,
                           void* pData, StretchType stretchType, vector<double>& stretchPointsRed,
                           vector<double>& stretchPointsGreen, vector<double>& stretchPointsBlue,
-                          RasterElement* pRasterElement)
+                          RasterElement* pRasterElement, const std::vector<int>& badValues1,
+                          const std::vector<int>& badValues2, const std::vector<int>& badValues3)
 {
    initializeRgb();
 
@@ -173,7 +177,8 @@ void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor band1, Dimen
    calculateTileSize(type, imageSizeX, imageSizeY, tileSizeX, tileSizeY);
 
    Image::initialize(tileSizeX, tileSizeY, band1, band2, band3, imageSizeX, imageSizeY, channels, format, type,
-      component, pData, stretchType, stretchPointsRed, stretchPointsGreen, stretchPointsBlue, pRasterElement);
+      component, pData, stretchType, stretchPointsRed, stretchPointsGreen, stretchPointsBlue, pRasterElement,
+      badValues1, badValues2, badValues3);
 }
 
 void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor band1, DimensionDescriptor band2,
@@ -182,7 +187,9 @@ void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor band1, Dimen
                           EncodingType type3, ComplexComponent component, void* pData, StretchType stretchType,
                           vector<double>& stretchPointsRed, vector<double>& stretchPointsGreen,
                           vector<double>& stretchPointsBlue, RasterElement* pRasterElement1,
-                          RasterElement* pRasterElement2, RasterElement* pRasterElement3)
+                          RasterElement* pRasterElement2, RasterElement* pRasterElement3,
+                          const std::vector<int>& badValues1, const std::vector<int>& badValues2,
+                          const std::vector<int>& badValues3)
 {
    initializeRgb();
 
@@ -202,7 +209,7 @@ void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor band1, Dimen
 
    Image::initialize(tileSizeX, tileSizeY, band1, band2, band3, imageSizeX, imageSizeY, channels, format, type1,
       type2, type3, component, pData, stretchType, stretchPointsRed, stretchPointsGreen, stretchPointsBlue,
-      pRasterElement1, pRasterElement2, pRasterElement3);
+      pRasterElement1, pRasterElement2, pRasterElement3, badValues1, badValues2, badValues3);
 }
 
 template<class T>
@@ -274,6 +281,23 @@ template<typename In>
 In getFromSource(In src)
 {
    return src - getOffset<In>();
+}
+
+template<typename Out>
+Out getFromSource(EncodingType encoding, double source)
+{
+   if (encoding == INT1SBYTE)
+   {
+      signed char value = static_cast<signed char>(source);
+      return static_cast<Out>(value - numeric_limits<signed char>::min());
+   }
+   else if (encoding == INT2SBYTES)
+   {
+      signed short value = static_cast<signed short>(source);
+      return static_cast<Out>(value - numeric_limits<signed short>::min());
+   }
+
+   return static_cast<Out>(source);
 }
 
 template<typename In, typename Out>
@@ -377,14 +401,14 @@ private:
       DataAccessor da, InterleaveFormatType interleave, int currentChannel, int totalChannels, 
       EncodingType outputType)
    {
-      std::vector<int>::const_iterator badBegin = mInfo.mKey.mBadValues.begin();
-      std::vector<int>::const_iterator badEnd = mInfo.mKey.mBadValues.end();
+      std::vector<int>::const_iterator badBegin = mInfo.mKey.mBadValues1.begin();
+      std::vector<int>::const_iterator badEnd = mInfo.mKey.mBadValues1.end();
       bool bBadValues = (badBegin != badEnd);
-      bool bHas1BadValue = mInfo.mKey.mBadValues.size() == 1;
+      bool bHas1BadValue = mInfo.mKey.mBadValues1.size() == 1;
       int singleBadValue = 0;
       if (bHas1BadValue)
       {
-         singleBadValue = mInfo.mKey.mBadValues.front();
+         singleBadValue = mInfo.mKey.mBadValues1.front();
       }
 
       Out* pTargetBase = pTexData;
@@ -541,8 +565,8 @@ private:
    void populateEmptyTextureData(vector<Out>& texData, unsigned int tileSizeX, unsigned int tileSizeY,
       int currentChannel, int totalChannels, EncodingType outputType)
    {
-      std::vector<int>::const_iterator badBegin = mInfo.mKey.mBadValues.begin();
-      std::vector<int>::const_iterator badEnd = mInfo.mKey.mBadValues.end();
+      std::vector<int>::const_iterator badBegin = mInfo.mKey.mBadValues1.begin();
+      std::vector<int>::const_iterator badEnd = mInfo.mKey.mBadValues1.end();
       bool bBadValues = (badBegin != badEnd);
 
       typename vector<Out>::iterator targetBase = texData.begin();
@@ -637,7 +661,7 @@ private:
       int bufSize = mInfo.mTileSizeX * mInfo.mTileSizeY;
       int channels = 1;
 
-      bool badValues = !mInfo.mKey.mBadValues.empty();
+      bool badValues = !mInfo.mKey.mBadValues1.empty();
       if (mInfo.mFormat == GL_LUMINANCE_ALPHA)
       {
          bufSize *= 2;
@@ -686,7 +710,48 @@ private:
    template <typename Out>
    void createRgb(EncodingType outputType)
    {
-      int bufSize = mInfo.mTileSizeX * mInfo.mTileSizeY * 3;
+      std::vector<int>::const_iterator redBadBegin = mInfo.mKey.mBadValues1.begin();
+      std::vector<int>::const_iterator redBadEnd = mInfo.mKey.mBadValues1.end();
+      bool hasRedBadValues = (redBadBegin != redBadEnd);
+
+      bool hasOneRedBadValue = (mInfo.mKey.mBadValues1.size() == 1);
+      int singleRedBadValue = 0;
+      if (hasOneRedBadValue == true)
+      {
+         singleRedBadValue = mInfo.mKey.mBadValues1.front();
+      }
+
+      std::vector<int>::const_iterator greenBadBegin = mInfo.mKey.mBadValues2.begin();
+      std::vector<int>::const_iterator greenBadEnd = mInfo.mKey.mBadValues2.end();
+      bool hasGreenBadValues = (greenBadBegin != greenBadEnd);
+
+      bool hasOneGreenBadValue = (mInfo.mKey.mBadValues2.size() == 1);
+      int singleGreenBadValue = 0;
+      if (hasOneGreenBadValue == true)
+      {
+         singleGreenBadValue = mInfo.mKey.mBadValues2.front();
+      }
+
+      std::vector<int>::const_iterator blueBadBegin = mInfo.mKey.mBadValues3.begin();
+      std::vector<int>::const_iterator blueBadEnd = mInfo.mKey.mBadValues3.end();
+      bool hasBlueBadValues = (blueBadBegin != blueBadEnd);
+
+      bool hasOneBlueBadValue = (mInfo.mKey.mBadValues3.size() == 1);
+      int singleBlueBadValue = 0;
+      if (hasOneBlueBadValue == true)
+      {
+         singleBlueBadValue = mInfo.mKey.mBadValues3.front();
+      }
+
+      bool hasBadValues = hasRedBadValues || hasGreenBadValues || hasBlueBadValues;
+
+      int totalChannels = 3;
+      if (mInfo.mFormat == GL_RGBA)
+      {
+         totalChannels = 4;
+      }
+
+      int bufSize = mInfo.mTileSizeX * mInfo.mTileSizeY * sizeof(unsigned char) * totalChannels;
       vector<Out> texData(bufSize);
 
       int oldPercentDone = -1;
@@ -701,46 +766,34 @@ private:
             unsigned int geomSizeX = static_cast<unsigned int>(pTile->getGeomSize().mX);
             unsigned int geomSizeY = static_cast<unsigned int>(pTile->getGeomSize().mY);
 
-            bool haveRedData = false, haveGreenData = false, haveBlueData = false;
-
             RasterElement* pRedRasterElement = mInfo.mKey.mpRasterElement[0];
             DimensionDescriptor redBand = mInfo.mKey.mBand1;
-            haveRedData = ((pRedRasterElement != NULL) && (redBand.isActiveNumberValid()));
-
-            RasterElement* pGreenRasterElement = mInfo.mKey.mpRasterElement[1];
-            DimensionDescriptor greenBand = mInfo.mKey.mBand2;
-            haveGreenData = ((pGreenRasterElement != NULL) && (greenBand.isActiveNumberValid()));
-
-            RasterElement* pBlueRasterElement = mInfo.mKey.mpRasterElement[2];
-            DimensionDescriptor blueBand = mInfo.mKey.mBand3;
-            haveBlueData = ((pBlueRasterElement != NULL) && (blueBand.isActiveNumberValid()));
-
+            bool haveRedData = ((pRedRasterElement != NULL) && (redBand.isActiveNumberValid()));
+            DataAccessor daRed(NULL, NULL);
             if (haveRedData)
             {
                RasterDataDescriptor* pRedRasterDescriptor =
                   dynamic_cast<RasterDataDescriptor*>(pRedRasterElement->getDataDescriptor());
                VERIFYNRV(pRedRasterDescriptor != NULL);
-               FactoryResource<DataRequest> pRedRequest;
-               pRedRequest->setRows(pRedRasterDescriptor->getActiveRow(posY), 
-                  pRedRasterDescriptor->getActiveRow(posY+geomSizeY-1), geomSizeY);
-               pRedRequest->setColumns(pRedRasterDescriptor->getActiveColumn(posX), 
-                  pRedRasterDescriptor->getActiveColumn(posX+geomSizeX-1), geomSizeX);
-               pRedRequest->setBands(mInfo.mKey.mBand1,
-                  mInfo.mKey.mBand1, 1);
 
-               DataAccessor daRed = pRedRasterElement->getDataAccessor(pRedRequest.release());
+               FactoryResource<DataRequest> pRedRequest;
+               pRedRequest->setRows(pRedRasterDescriptor->getActiveRow(posY),
+                  pRedRasterDescriptor->getActiveRow(posY + geomSizeY - 1), geomSizeY);
+               pRedRequest->setColumns(pRedRasterDescriptor->getActiveColumn(posX),
+                  pRedRasterDescriptor->getActiveColumn(posX + geomSizeX - 1), geomSizeX);
+               pRedRequest->setBands(mInfo.mKey.mBand1, mInfo.mKey.mBand1, 1);
+
+               daRed = pRedRasterElement->getDataAccessor(pRedRequest.release());
                if (!daRed.isValid())
                {
                   return;
                }
-               populateTextureData(&texData.front(), mInfo.mRawType[0], geomSizeX, geomSizeY, daRed, 
-                  pRedRasterDescriptor->getInterleaveFormat(), 1, 3, outputType);
-            }
-            else
-            {
-               populateEmptyTextureData(texData, mInfo.mRawType[0], geomSizeX, geomSizeY, 1, 3, outputType);
             }
 
+            RasterElement* pGreenRasterElement = mInfo.mKey.mpRasterElement[1];
+            DimensionDescriptor greenBand = mInfo.mKey.mBand2;
+            bool haveGreenData = ((pGreenRasterElement != NULL) && (greenBand.isActiveNumberValid()));
+            DataAccessor daGreen(NULL, NULL);
             if (haveGreenData)
             {
                RasterDataDescriptor* pGreenRasterDescriptor =
@@ -748,27 +801,23 @@ private:
                VERIFYNRV(pGreenRasterDescriptor != NULL);
 
                FactoryResource<DataRequest> pGreenRequest;
-               pGreenRequest->setRows(pGreenRasterDescriptor->getActiveRow(posY), 
-                  pGreenRasterDescriptor->getActiveRow(posY+geomSizeY-1), geomSizeY);
-               pGreenRequest->setColumns(pGreenRasterDescriptor->getActiveColumn(posX), 
-                  pGreenRasterDescriptor->getActiveColumn(posX+geomSizeX-1), geomSizeX);
-               pGreenRequest->setBands(mInfo.mKey.mBand2,
-                  mInfo.mKey.mBand2, 1);
-            
-               DataAccessor daGreen = pGreenRasterElement->getDataAccessor(pGreenRequest.release());
+               pGreenRequest->setRows(pGreenRasterDescriptor->getActiveRow(posY),
+                  pGreenRasterDescriptor->getActiveRow(posY + geomSizeY - 1), geomSizeY);
+               pGreenRequest->setColumns(pGreenRasterDescriptor->getActiveColumn(posX),
+                  pGreenRasterDescriptor->getActiveColumn(posX + geomSizeX - 1), geomSizeX);
+               pGreenRequest->setBands(mInfo.mKey.mBand2, mInfo.mKey.mBand2, 1);
+
+               daGreen = pGreenRasterElement->getDataAccessor(pGreenRequest.release());
                if (!daGreen.isValid())
                {
                   return;
                }
-
-               populateTextureData(&texData.front(), mInfo.mRawType[1], geomSizeX, geomSizeY, daGreen, 
-                  pGreenRasterDescriptor->getInterleaveFormat(), 2, 3, outputType);
-            }
-            else
-            {
-               populateEmptyTextureData(texData, mInfo.mRawType[1], geomSizeX, geomSizeY, 2, 3, outputType);
             }
 
+            RasterElement* pBlueRasterElement = mInfo.mKey.mpRasterElement[2];
+            DimensionDescriptor blueBand = mInfo.mKey.mBand3;
+            bool haveBlueData = ((pBlueRasterElement != NULL) && (blueBand.isActiveNumberValid()));
+            DataAccessor daBlue(NULL, NULL);
             if (haveBlueData)
             {
                RasterDataDescriptor* pBlueRasterDescriptor =
@@ -776,25 +825,177 @@ private:
                VERIFYNRV(pBlueRasterDescriptor != NULL);
 
                FactoryResource<DataRequest> pBlueRequest;
-               pBlueRequest->setRows(pBlueRasterDescriptor->getActiveRow(posY), 
-                  pBlueRasterDescriptor->getActiveRow(posY+geomSizeY-1), geomSizeY);
-               pBlueRequest->setColumns(pBlueRasterDescriptor->getActiveColumn(posX), 
-                  pBlueRasterDescriptor->getActiveColumn(posX+geomSizeX-1), geomSizeX);
-               pBlueRequest->setBands(mInfo.mKey.mBand3,
-                  mInfo.mKey.mBand3, 1);
+               pBlueRequest->setRows(pBlueRasterDescriptor->getActiveRow(posY),
+                  pBlueRasterDescriptor->getActiveRow(posY + geomSizeY - 1), geomSizeY);
+               pBlueRequest->setColumns(pBlueRasterDescriptor->getActiveColumn(posX),
+                  pBlueRasterDescriptor->getActiveColumn(posX + geomSizeX - 1), geomSizeX);
+               pBlueRequest->setBands(mInfo.mKey.mBand3, mInfo.mKey.mBand3, 1);
 
-               DataAccessor daBlue = pBlueRasterElement->getDataAccessor(pBlueRequest.release());
+               daBlue = pBlueRasterElement->getDataAccessor(pBlueRequest.release());
                if (!daBlue.isValid())
                {
                   return;
                }
-
-               populateTextureData(&texData.front(), mInfo.mRawType[2], geomSizeX, geomSizeY, daBlue, 
-                  pBlueRasterDescriptor->getInterleaveFormat(), 3, 3, outputType);
             }
-            else
+
+            Out* pTargetBase = &texData.front();
+            for (unsigned int y1 = 0; y1 < geomSizeY; y1++, pTargetBase += (mInfo.mTileSizeX * totalChannels))
             {
-               populateEmptyTextureData(texData, mInfo.mRawType[2], geomSizeX, geomSizeY, 3, 3, outputType);
+               Out* pTarget = pTargetBase;
+               for (unsigned int x1 = 0; x1 < geomSizeX; x1++)
+               {
+                  // Red
+                  bool isRedValueBad = true;
+                  if (haveRedData)
+                  {
+                     VERIFYNRV(daRed.isValid());
+                     void* pSource = daRed->getColumn();
+                     double source = ModelServices::getDataValue(mInfo.mRawType[0], pSource, mInfo.mKey.mComponent, 0);
+                     *pTarget = getFromSource<Out>(mInfo.mRawType[0], source);
+
+                     if (hasRedBadValues)
+                     {
+                        int tempInt = roundDouble(source);
+                        if (hasOneRedBadValue)
+                        {
+                           if (tempInt != singleRedBadValue)
+                           {
+                              isRedValueBad = false;
+                           }
+                        }
+                        else if (binary_search(redBadBegin, redBadEnd, tempInt) == false)
+                        {
+                           isRedValueBad = false;
+                        }
+                     }
+                     else
+                     {
+                        isRedValueBad = false;
+                     }
+
+                     daRed->nextColumn();
+                  }
+
+                  if (isRedValueBad == true)
+                  {
+                     *pTarget = static_cast<Out>(0);
+                  }
+
+                  ++pTarget;
+
+                  // Green
+                  bool isGreenValueBad = true;
+                  if (haveGreenData)
+                  {
+                     VERIFYNRV(daGreen.isValid());
+                     void* pSource = daGreen->getColumn();
+                     double source = ModelServices::getDataValue(mInfo.mRawType[1], pSource, mInfo.mKey.mComponent, 0);
+                     *pTarget = getFromSource<Out>(mInfo.mRawType[1], source);
+
+                     if (hasGreenBadValues)
+                     {
+                        int tempInt = roundDouble(source);
+                        if (hasOneGreenBadValue)
+                        {
+                           if (tempInt != singleGreenBadValue)
+                           {
+                              isGreenValueBad = false;
+                           }
+                        }
+                        else if (binary_search(greenBadBegin, greenBadEnd, tempInt) == false)
+                        {
+                           isGreenValueBad = false;
+                        }
+                     }
+                     else
+                     {
+                        isGreenValueBad = false;
+                     }
+
+                     daGreen->nextColumn();
+                  }
+
+                  if (isGreenValueBad == true)
+                  {
+                     *pTarget = static_cast<Out>(0);
+                  }
+
+                  ++pTarget;
+
+                  // Blue
+                  bool isBlueValueBad = true;
+                  if (haveBlueData)
+                  {
+                     VERIFYNRV(daBlue.isValid());
+                     void* pSource = daBlue->getColumn();
+                     double source = ModelServices::getDataValue(mInfo.mRawType[2], pSource, mInfo.mKey.mComponent, 0);
+                     *pTarget = getFromSource<Out>(mInfo.mRawType[2], source);
+
+                     if (hasBlueBadValues)
+                     {
+                        int tempInt = roundDouble(source);
+                        if (hasOneBlueBadValue)
+                        {
+                           if (tempInt != singleBlueBadValue)
+                           {
+                              isBlueValueBad = false;
+                           }
+                        }
+                        else if (binary_search(blueBadBegin, blueBadEnd, tempInt) == false)
+                        {
+                           isBlueValueBad = false;
+                        }
+                     }
+                     else
+                     {
+                        isBlueValueBad = false;
+                     }
+
+                     daBlue->nextColumn();
+                  }
+
+                  if (isBlueValueBad == true)
+                  {
+                     *pTarget = static_cast<Out>(0);
+                  }
+
+                  ++pTarget;
+
+                  // Bad values
+                  if (hasBadValues == true)
+                  {
+                     if ((isRedValueBad == true) && (isGreenValueBad == true) && (isBlueValueBad == true))
+                     {
+                        *pTarget = static_cast<Out>(0);
+                     }
+                     else
+                     {
+                        *pTarget = getOpenGlMax<Out>();
+                     }
+
+                     ++pTarget;
+                  }
+                  else if (mInfo.mFormat == GL_RGBA)
+                  {
+                     *pTarget = getOpenGlMax<Out>();
+                     ++pTarget;
+                  }
+               }
+
+               if (daRed.isValid() == true)
+               {
+                  daRed->nextRow();
+               }
+
+               if (daGreen.isValid() == true)
+               {
+                  daGreen->nextRow();
+               }
+
+               if (daBlue.isValid() == true)
+               {
+                  daBlue->nextRow();
+               }
             }
 
             pTile->setupTile(&texData.front(), outputType, mTileZoomIndices[i]);

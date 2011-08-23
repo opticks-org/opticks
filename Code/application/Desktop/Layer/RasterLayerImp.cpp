@@ -3195,28 +3195,46 @@ void RasterLayerImp::generateImage()
       vector<double> lstGreenStretchValues = getRawStretchValues(GREEN);
       vector<double> lstBlueStretchValues = getRawStretchValues(BLUE);
 
-      if (canApplyFastContrastStretch())
+      vector<int> redBadValues;
+      vector<int> greenBadValues;
+      vector<int> blueBadValues;
+
+      bool applyFastContrastStretch = canApplyFastContrastStretch();
+
+      Statistics* pStatistics = getStatistics(RED);
+      if (pStatistics != NULL)
       {
-         Statistics* pStatistics = getStatistics(RED);
-         if (pStatistics != NULL)
+         if (applyFastContrastStretch)
          {
             lstRedStretchValues[0] = pStatistics->getMin(eComponent);
             lstRedStretchValues[1] = pStatistics->getMax(eComponent);
          }
 
-         pStatistics = getStatistics(GREEN);
-         if (pStatistics != NULL)
+         redBadValues = pStatistics->getBadValues();
+      }
+
+      pStatistics = getStatistics(GREEN);
+      if (pStatistics != NULL)
+      {
+         if (applyFastContrastStretch)
          {
             lstGreenStretchValues[0] = pStatistics->getMin(eComponent);
             lstGreenStretchValues[1] = pStatistics->getMax(eComponent);
          }
 
-         pStatistics = getStatistics(BLUE);
-         if (pStatistics != NULL)
+         greenBadValues = pStatistics->getBadValues();
+      }
+
+      pStatistics = getStatistics(BLUE);
+      if (pStatistics != NULL)
+      {
+         if (applyFastContrastStretch)
          {
             lstBlueStretchValues[0] = pStatistics->getMin(eComponent);
             lstBlueStretchValues[1] = pStatistics->getMax(eComponent);
          }
+
+         blueBadValues = pStatistics->getBadValues();
       }
 
       const RasterDataDescriptor* pRedDescriptor = NULL;
@@ -3255,10 +3273,13 @@ void RasterLayerImp::generateImage()
          eBlueEncoding = pBlueDescriptor->getDataType();
       }
 
-      pImage->initialize(512, 512, mRedBand, mGreenBand,
-         mBlueBand, columns, rows, bands, GL_RGB, eRedEncoding, eGreenEncoding,
-         eBlueEncoding, eComponent, NULL, eType, lstRedStretchValues, lstGreenStretchValues,
-         lstBlueStretchValues, pRedElement, pGreenElement, pBlueElement);
+      bool hasBadValues = !(redBadValues.empty() && greenBadValues.empty() && blueBadValues.empty());
+      GLenum format = (hasBadValues ? GL_RGBA : GL_RGB);
+
+      pImage->initialize(512, 512, mRedBand, mGreenBand, mBlueBand, columns, rows, bands, format,
+         eRedEncoding, eGreenEncoding, eBlueEncoding, eComponent, NULL, eType, lstRedStretchValues,
+         lstGreenStretchValues, lstBlueStretchValues, pRedElement, pGreenElement, pBlueElement,
+         redBadValues, greenBadValues, blueBadValues);
    }
 
 #if defined (CG_SUPPORTED)
