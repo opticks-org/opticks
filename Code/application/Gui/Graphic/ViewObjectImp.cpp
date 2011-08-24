@@ -573,37 +573,56 @@ bool ViewObjectImp::toXml(XMLWriter *pWriter) const
 
 bool ViewObjectImp::fromXml(DOMNode *pDocument, unsigned int version)
 {
-   if (pDocument == NULL)
+   if ((pDocument == NULL) || (GraphicObjectImp::fromXml(pDocument, version) == false))
    {
       return false;
    }
 
-   bool bSuccess = GraphicObjectImp::fromXml(pDocument, version);
-   if (bSuccess == false)
-   {
-      return false;
-   }
+   bool success = false;
 
-   if (mpInvalidText != NULL)
+   DOMElement* pElement = dynamic_cast<DOMElement*>(pDocument);
+   if (pElement != NULL)
    {
-      DOMNode* pObjectNode = NULL;
-      for (pObjectNode = pDocument->getFirstChild(); pObjectNode != NULL; pObjectNode = pObjectNode->getNextSibling())
+      Service<SessionManager> pSession;
+      if ((pSession->isSessionLoading() == true) && (pElement->hasAttribute(X("viewId")) == true))
       {
-         if (XMLString::equals(pObjectNode->getNodeName(), X("objects")))
+         string id(A(pElement->getAttribute(X("viewId"))));
+         if (id.empty() == false)
          {
-            DOMNode* pTextNode = NULL;
-            for (pTextNode = pObjectNode->getFirstChild(); pTextNode != NULL; pTextNode = pTextNode->getNextSibling())
+            View* pView = dynamic_cast<View*>(pSession->getSessionItem(id));
+            if (pView != NULL)
             {
-               if (XMLString::equals(pTextNode->getNodeName(), X("Graphic")))
+               setView(pView);
+               delete dynamic_cast<ViewImp*>(pView);
+               success = true;
+            }
+         }
+      }
+      else if (mpInvalidText != NULL)
+      {
+         DOMNode* pObjectNode = NULL;
+         for (pObjectNode = pDocument->getFirstChild();
+            pObjectNode != NULL;
+            pObjectNode = pObjectNode->getNextSibling())
+         {
+            if (XMLString::equals(pObjectNode->getNodeName(), X("objects")))
+            {
+               DOMNode* pTextNode = NULL;
+               for (pTextNode = pObjectNode->getFirstChild();
+                  pTextNode != NULL;
+                  pTextNode = pTextNode->getNextSibling())
                {
-                  DOMElement* pElement(static_cast<DOMElement*>(pTextNode));
-                  string type(A(pElement->getAttribute(X("type"))));
-
-                  GraphicObjectType objectType = StringUtilities::fromXmlString<GraphicObjectType>(type);
-                  if (objectType == TEXT_OBJECT)
+                  if (XMLString::equals(pTextNode->getNodeName(), X("Graphic")))
                   {
-                     bSuccess = mpInvalidText->fromXml(pTextNode, version);
-                     break;
+                     DOMElement* pElement(static_cast<DOMElement*>(pTextNode));
+                     string type(A(pElement->getAttribute(X("type"))));
+
+                     GraphicObjectType objectType = StringUtilities::fromXmlString<GraphicObjectType>(type);
+                     if (objectType == TEXT_OBJECT)
+                     {
+                        success = mpInvalidText->fromXml(pTextNode, version);
+                        break;
+                     }
                   }
                }
             }
@@ -611,30 +630,5 @@ bool ViewObjectImp::fromXml(DOMNode *pDocument, unsigned int version)
       }
    }
 
-   if (bSuccess == true)
-   {
-      Service<SessionManager> pSession;
-      if (pSession->isSessionLoading() == true)
-      {
-         bSuccess = false;
-
-         DOMElement* pElem = dynamic_cast<DOMElement*>(pDocument);
-         if (pElem)
-         {
-            string id(A(pElem->getAttribute(X("viewId"))));
-            if (id.empty() == false)
-            {
-               View* pView = dynamic_cast<View*>(pSession->getSessionItem(id));
-               if (pView != NULL)
-               {
-                  setView(pView);
-                  delete dynamic_cast<ViewImp*>(pView);
-                  bSuccess = true;
-               }
-            }
-         }
-      }
-   }
-
-   return bSuccess;
+   return success;
 }
