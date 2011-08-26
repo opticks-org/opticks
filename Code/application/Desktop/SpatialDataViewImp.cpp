@@ -3127,7 +3127,7 @@ void SpatialDataViewImp::updateContextMenu(Subject& subject, const string& signa
             list<ContextMenuAction> layerActions = pLayer->getContextMenuActions();
             if (layerActions.empty() == false)
             {
-               QMenu* pLayerMenu = new QMenu(QString::fromStdString(pLayer->getName()),
+               QMenu* pLayerMenu = new QMenu(QString::fromStdString(pLayer->getDisplayName(true)),
                   const_cast<SpatialDataViewImp*>(this));
 
                // Layer actions
