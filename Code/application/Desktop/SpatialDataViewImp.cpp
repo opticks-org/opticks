@@ -436,9 +436,7 @@ void SpatialDataViewImp::elementDeleted(Subject &subject, const string &signal, 
    {
       if (mpLayerList != NULL)
       {
-         vector<Layer*> layers;
-         mpLayerList->getLayers(layers);
-
+         vector<Layer*> layers = mpLayerList->getLayers();
          for (unsigned int i = 0; i < layers.size(); i++)
          {
             Layer* pLayer = layers[i];
@@ -511,8 +509,7 @@ SpatialDataViewImp& SpatialDataViewImp::operator= (const SpatialDataViewImp& spa
       {
          setPrimaryRasterElement(pLayerList->getPrimaryRasterElement());
 
-         vector<Layer*> layers;
-         pLayerList->getLayers(layers);
+         vector<Layer*> layers = pLayerList->getLayers();
          for (vector<Layer*>::size_type i = 0; i < layers.size(); ++i)
          {
             Layer* pLayer = layers[i];
@@ -594,8 +591,7 @@ bool SpatialDataViewImp::setPrimaryRasterElement(RasterElement* pRasterElement)
       if (bSuccess == true)
       {
          // Set the primary raster layer
-         vector<Layer*> layers;
-         mpLayerList->getLayers(RASTER, layers);
+         vector<Layer*> layers = mpLayerList->getLayers(RASTER);
          for (vector<Layer*>::iterator iter = layers.begin(); iter != layers.end(); ++iter)
          {
             RasterLayer* pRasterLayer = static_cast<RasterLayer*>(*iter);
@@ -777,12 +773,10 @@ bool SpatialDataViewImp::addLayerList(const LayerList* pLayerList)
       return false;
    }
 
-   vector<Layer*> layers;
-   pLayerList->getLayers(layers);
+   vector<Layer*> layers = pLayerList->getLayers();
    for (unsigned int i = 0; i < layers.size(); i++)
    {
-      Layer* pLayer = NULL;
-      pLayer = layers.at(i);
+      Layer* pLayer = layers[i];
       if (pLayer != NULL)
       {
          addLayer(pLayer);
@@ -1056,14 +1050,29 @@ bool SpatialDataViewImp::isLayerDisplayed(Layer* pLayer) const
    return mpLayerList->isLayerDisplayed(pLayer);
 }
 
-Layer* SpatialDataViewImp::getTopMostLayer(const LayerType& layerType) const
+Layer* SpatialDataViewImp::getTopMostLayer() const
+{
+   return mpLayerList->getTopMostLayer();
+}
+
+Layer* SpatialDataViewImp::getTopMostLayer(LayerType layerType) const
 {
    return mpLayerList->getTopMostLayer(layerType);
 }
 
-Layer* SpatialDataViewImp::getTopMostLayer() const
+Layer* SpatialDataViewImp::getTopMostLayer(const LocationType& worldCoord) const
 {
-   return mpLayerList->getTopMostLayer();
+   return mpLayerList->getTopMostLayer(worldCoord);
+}
+
+Layer* SpatialDataViewImp::getTopMostLayer(LayerType layerType, const LocationType& worldCoord) const
+{
+   return mpLayerList->getTopMostLayer(layerType, worldCoord);
+}
+
+DataElement* SpatialDataViewImp::getTopMostElement() const
+{
+   return mpLayerList->getTopMostElement();
 }
 
 DataElement* SpatialDataViewImp::getTopMostElement(LayerType layerType) const
@@ -1071,9 +1080,14 @@ DataElement* SpatialDataViewImp::getTopMostElement(LayerType layerType) const
    return mpLayerList->getTopMostElement(layerType);
 }
 
-DataElement* SpatialDataViewImp::getTopMostElement() const
+DataElement* SpatialDataViewImp::getTopMostElement(const LocationType& worldCoord) const
 {
-   return mpLayerList->getTopMostElement();
+   return mpLayerList->getTopMostElement(worldCoord);
+}
+
+DataElement* SpatialDataViewImp::getTopMostElement(LayerType layerType, const LocationType& worldCoord) const
+{
+   return mpLayerList->getTopMostElement(layerType, worldCoord);
 }
 
 DataElement* SpatialDataViewImp::getTopMostElement(const string& elementType) const
@@ -1237,14 +1251,12 @@ void SpatialDataViewImp::clear()
       return;
    }
 
-   vector<Layer*> layers;
-   mpLayerList->getLayers(layers);
-
    // We can't simply iterate over the list of layers and delete them one at a time because the
    // deletion of a layer could also cause the deletion of the associated data element. This
    // could cause the deletion of a child element which could cause the deletion of a layer in
    // the list before the iterator reaches the now invalid layer pointer. The attempt to delete the 
    // invalid pointer would cause Opticks to crash.
+   vector<Layer*> layers = mpLayerList->getLayers();
    while (layers.empty() == false)
    {
       // delete the primary raster layer last
@@ -1256,7 +1268,8 @@ void SpatialDataViewImp::clear()
       {
          deleteLayer(layers.front());
       }
-      mpLayerList->getLayers(layers);
+
+      layers = mpLayerList->getLayers();
    }
 }
 
@@ -1278,9 +1291,7 @@ void SpatialDataViewImp::clearMarkings()
    LayerImp* pRasterLayer = NULL;
    LayerImp* pGcpLayer = NULL;
 
-   vector<Layer*> layers;
-   mpLayerList->getLayers(layers);
-
+   vector<Layer*> layers = mpLayerList->getLayers();
    for (unsigned int i = 0; i < layers.size(); i++)
    {
       Layer* pLayer = layers[i];
@@ -1859,26 +1870,6 @@ bool SpatialDataViewImp::sendLayerBackward(Layer* pLayer)
    return bSuccess;
 }
 
-void SpatialDataViewImp::updateStatusBarGeocoords(StatusBar *pBar, LocationType geoCoord)
-{
-   if (pBar == NULL)
-   {
-      return;
-   }
-
-   GeocoordType geocoordType = LatLonLayer::getSettingGeocoordType();
-   DmsFormatType dmsFormat = LatLonLayer::getSettingFormat();
-
-   LatLonLayer* pLatLonLayer = dynamic_cast<LatLonLayer*>(getTopMostLayer(LAT_LONG));
-   if (pLatLonLayer != NULL)
-   {
-      geocoordType = pLatLonLayer->getGeocoordType();
-      dmsFormat = pLatLonLayer->getLatLonFormat();
-   }
-
-   pBar->setGeoCoords(geoCoord, geocoordType, dmsFormat);
-}
-
 void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
 {
    Service<DesktopServices> pDesktop;
@@ -1896,286 +1887,320 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
    }
 
    pBar->clearValues();
-   if (screenCoord.isNull() == false)
+   if (screenCoord.isNull() == true)
    {
-      double dX = 0.0;
-      double dY = 0.0;
-      translateScreenToWorld(screenCoord.x(), screenCoord.y(), dX, dY);
+      return;
+   }
 
-      double dMinX = 0.0;
-      double dMinY = 0.0;
-      double dMaxX = 0.0;
-      double dMaxY = 0.0;
-      getExtents(dMinX, dMinY, dMaxX, dMaxY);
+   double dX = 0.0;
+   double dY = 0.0;
+   translateScreenToWorld(screenCoord.x(), screenCoord.y(), dX, dY);
 
-      LocationType dataCoord;
-      LocationType geoCoord;
-      if (mpPrimaryRasterLayer.get() != NULL)
+   // Set values from the primary raster layer
+   if (mpPrimaryRasterLayer.get() != NULL)
+   {
+      RasterElement* pPrimaryRasterElement = mpLayerList->getPrimaryRasterElement();
+      if (pPrimaryRasterElement != NULL)
       {
-         RasterElement* pPrimaryRasterElement = mpLayerList->getPrimaryRasterElement();
-         if (pPrimaryRasterElement != NULL)
+         // Geocoordinates
+         bool validGeocoords = false;
+         LocationType geoCoord;
+
+         if (pPrimaryRasterElement->isGeoreferenced() == true)
          {
+            LocationType dataCoord;
             mpPrimaryRasterLayer->translateWorldToData(dX, dY, dataCoord.mX, dataCoord.mY);
-            bool geoValid(false);
-            geoCoord = pPrimaryRasterElement->convertPixelToGeocoord(dataCoord, false, &geoValid);
-            if (geoValid)
-            {
-               updateStatusBarGeocoords(pBar, geoCoord);
-            }
-         }
-      }
 
-      if ((dX >= dMinX) && (dX <= dMaxX) && (dY >= dMinY) && (dY <= dMaxY))
-      {
-         vector<Layer*> displayedLayers = mpLayerList->getDisplayedLayers();
-         for (unsigned int i = 0; i < displayedLayers.size(); i++)
+            geoCoord = pPrimaryRasterElement->convertPixelToGeocoord(dataCoord, false, &validGeocoords);
+         }
+
+         if (validGeocoords == true)
          {
-            Layer* pLayer = displayedLayers[i];
-            if (pLayer != NULL)
+            GeocoordType geocoordType = LatLonLayer::getSettingGeocoordType();
+            DmsFormatType dmsFormat = LatLonLayer::getSettingFormat();
+
+            LatLonLayer* pLatLonLayer = dynamic_cast<LatLonLayer*>(getTopMostLayer(LAT_LONG));
+            if (pLatLonLayer != NULL)
             {
-               LocationType dataCoord;
-               pLayer->translateWorldToData(dX, dY, dataCoord.mX, dataCoord.mY);
-
-               DataElement* pElement = pLayer->getDataElement();
-               if (pElement != NULL)
-               {
-                  RasterElement* pRaster = dynamic_cast<RasterElement*>(pElement);
-                  if (pRaster != NULL)
-                  {
-                     // Get the original pixel coordinates
-                     const RasterDataDescriptor* pDescriptor =
-                        dynamic_cast<const RasterDataDescriptor*>(pRaster->getDataDescriptor());
-                     if (pDescriptor != NULL)
-                     {
-                        const vector<DimensionDescriptor>& activeRows = pDescriptor->getRows();
-                        const vector<DimensionDescriptor>& activeColumns = pDescriptor->getColumns();
-                        if ((dataCoord.mY >= 0) &&
-                           (activeRows.size() > static_cast<unsigned int>(dataCoord.mY)) &&
-                           (activeRows[static_cast<int>(dataCoord.mY)].isValid()) &&
-                           (dataCoord.mX >= 0) &&
-                           (activeColumns.size() > static_cast<unsigned int>(dataCoord.mX)) &&
-                           (activeColumns[static_cast<int>(dataCoord.mX)].isValid()))
-                        {
-                           if (pRaster == mpLayerList->getPrimaryRasterElement())
-                           {
-                              RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(pLayer);
-                              if (pRasterLayer == NULL)
-                              {
-                                 continue;
-                              }
-
-                              DimensionDescriptor rowDim = activeRows[static_cast<int>(dataCoord.mY)];
-                              DimensionDescriptor columnDim = activeColumns[static_cast<int>(dataCoord.mX)];
-
-                              int originalSceneX = columnDim.getOriginalNumber();
-                              int originalSceneY = rowDim.getOriginalNumber();
-                              pBar->setPixelCoords(originalSceneX, originalSceneY);
-
-                              ComplexComponent eComponent = pRasterLayer->getComplexComponent();
-                              DisplayMode eMode = pRasterLayer->getDisplayMode();
-
-                              const RasterElement* pTerrain = pRaster->getTerrain();
-                              if (pTerrain != NULL)
-                              {
-                                 // Do not need a valid band for elevation information
-                                 double dValue = pTerrain->getPixelValue(columnDim, rowDim, DimensionDescriptor(),
-                                    eComponent);
-
-                                 const Units* pElevationUnits = NULL;
-
-                                 // Multiply by the units scale factor
-                                 const RasterDataDescriptor* pTerrainDescriptor =
-                                    dynamic_cast<const RasterDataDescriptor*>(pTerrain->getDataDescriptor());
-                                 if (pTerrainDescriptor != NULL)
-                                 {
-                                    pElevationUnits = pTerrainDescriptor->getUnits();
-                                    if (pElevationUnits != NULL)
-                                    {
-                                       dValue *= pElevationUnits->getScaleFromStandard();
-                                    }
-                                 }
-
-                                 pBar->setElevationValue(dValue, pElevationUnits);
-                              }
-
-                              const Units* pUnits = pDescriptor->getUnits();
-
-                              if (eMode == GRAYSCALE_MODE)
-                              {
-                                 DimensionDescriptor bandDim = pRasterLayer->getDisplayedBand(GRAY);
-                                 if (bandDim.isValid())
-                                 {
-                                    // Get the value from the displayed raster element
-                                    double dValue = 0.0;
-
-                                    RasterElement* pDisplayedRaster = pRasterLayer->getDisplayedRasterElement(GRAY);
-                                    if (pDisplayedRaster != NULL)
-                                    {
-                                       dValue = pDisplayedRaster->getPixelValue(columnDim, rowDim, bandDim, eComponent);
-                                    }
-
-                                    // Multiply the value by the units scale factor
-                                    if (pUnits != NULL)
-                                    {
-                                       dValue *= pUnits->getScaleFromStandard();
-                                    }
-
-                                    // Set the value in the status bar
-                                    pBar->setCubeValue(dValue);
-                                 }
-                                 else
-                                 {
-                                    pBar->clearCubeValue();
-                                 }
-                              }
-                              else // eMode == RGB_MODE
-                              {
-                                 QString redValue = "N/A";
-                                 QString greenValue = "N/A";
-                                 QString blueValue = "N/A";
-
-                                 // Get the red band value
-                                 DimensionDescriptor redBand = pRasterLayer->getDisplayedBand(RED);
-                                 if (redBand.isValid())
-                                 {
-                                    // Get the value from the displayed raster element
-                                    double dRedValue = 0.0;
-
-                                    RasterElement* pDisplayedRaster = pRasterLayer->getDisplayedRasterElement(RED);
-                                    if (pDisplayedRaster != NULL)
-                                    {
-                                       dRedValue = pDisplayedRaster->getPixelValue(columnDim, rowDim, redBand,
-                                          eComponent);
-                                    }
-
-                                    // Multiply the value by the units scale factor
-                                    if (pUnits != NULL)
-                                    {
-                                       dRedValue *= pUnits->getScaleFromStandard();
-                                    }
-
-                                    redValue = QString::number(dRedValue, 'g', numeric_limits<double>::digits10);
-                                 }
-
-                                 // Get the green band value
-                                 DimensionDescriptor greenBand = pRasterLayer->getDisplayedBand(GREEN);
-                                 if (greenBand.isValid())
-                                 {
-                                    // Get the value from the displayed raster element
-                                    double dGreenValue = 0.0;
-
-                                    RasterElement* pDisplayedRaster = pRasterLayer->getDisplayedRasterElement(GREEN);
-                                    if (pDisplayedRaster != NULL)
-                                    {
-                                       dGreenValue = pDisplayedRaster->getPixelValue(columnDim, rowDim, greenBand,
-                                          eComponent);
-                                    }
-
-                                    // Multiply the value by the units scale factor
-                                    if (pUnits != NULL)
-                                    {
-                                       dGreenValue *= pUnits->getScaleFromStandard();
-                                    }
-
-                                    greenValue = QString::number(dGreenValue, 'g', numeric_limits<double>::digits10);
-                                 }
-
-                                 // Get the blue band value
-                                 DimensionDescriptor blueBand = pRasterLayer->getDisplayedBand(BLUE);
-                                 if (blueBand.isValid())
-                                 {
-                                    // Get the value from the displayed raster element
-                                    double dBlueValue = 0.0;
-
-                                    RasterElement* pDisplayedRaster = pRasterLayer->getDisplayedRasterElement(BLUE);
-                                    if (pDisplayedRaster != NULL)
-                                    {
-                                       dBlueValue = pDisplayedRaster->getPixelValue(columnDim, rowDim, blueBand,
-                                          eComponent);
-                                    }
-
-                                    // Multiply the value by the units scale factor
-                                    if (pUnits != NULL)
-                                    {
-                                       dBlueValue *= pUnits->getScaleFromStandard();
-                                    }
-
-                                    blueValue = QString::number(dBlueValue, 'g', numeric_limits<double>::digits10);
-                                 }
-
-                                 if ((redBand.isValid()) || (greenBand.isValid()) || (blueBand.isValid()))
-                                 {
-                                    pBar->setCubeValue(redValue, greenValue, blueValue);
-                                 }
-                                 else
-                                 {
-                                    pBar->clearCubeValue();
-                                 }
-                              }
-                           }
-                           else
-                           {
-                              // not the primary RasterElement
-                              ComplexComponent eComponent = RasterLayer::getSettingComplexComponent();
-                              DimensionDescriptor bandDim;
-
-                              RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(pLayer);
-                              if (pRasterLayer != NULL)
-                              {
-                                 eComponent = pRasterLayer->getComplexComponent();
-                                 bandDim = pRasterLayer->getDisplayedBand(GRAY);
-                              }
-
-                              string layerName = pLayer->getName();
-                              QString strLayerName = QString::fromStdString(layerName);
-
-                              int numRows = pDescriptor->getRowCount();
-                              int numCols = pDescriptor->getColumnCount();
-
-                              vector<int> badValues;
-
-                              Statistics* pStatistics = pRaster->getStatistics(bandDim);
-                              if (pStatistics != NULL)
-                              {
-                                 badValues = pStatistics->getBadValues();
-                              }
-
-                              if ((dataCoord.mX >= 0) && (dataCoord.mX < numCols) && (dataCoord.mY >= 0) &&
-                                 (dataCoord.mY < numRows))
-                              {
-                                 DimensionDescriptor column = pDescriptor->getActiveColumn(
-                                    static_cast<unsigned int>(dataCoord.mX));
-                                 DimensionDescriptor row = pDescriptor->getActiveRow(
-                                    static_cast<unsigned int>(dataCoord.mY));
-
-                                 double dValue = pRaster->getPixelValue(column, row, bandDim, eComponent);
-                                 if (std::find(badValues.begin(), badValues.end(),
-                                    roundDouble(dValue)) == badValues.end())
-                                 {
-                                    pBar->setResultValue(strLayerName, dValue, pDescriptor->getUnits());
-                                 }
-                                 else
-                                 {
-                                    pBar->clearResultValue();
-                                 }
-                              }
-                              else
-                              {
-                                 pBar->clearResultValue();
-                              }
-
-                           }
-                        }
-                     }
-                  }
-               }
+               geocoordType = pLatLonLayer->getGeocoordType();
+               dmsFormat = pLatLonLayer->getLatLonFormat();
             }
-         }
 
-         double rotation = getRotation();
-         pBar->setRotationValue(rotation);
+            pBar->setGeoCoords(geoCoord, geocoordType, dmsFormat);
+         }
+         else
+         {
+            pBar->clearGeoCoords();
+         }
       }
    }
+
+   // Set values from the top raster layer
+   RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(mpLayerList->getTopMostLayer(RASTER,
+      LocationType(dX, dY)));
+   if (pRasterLayer != NULL)
+   {
+      RasterElement* pRaster = dynamic_cast<RasterElement*>(pRasterLayer->getDataElement());
+      VERIFYNRV(pRaster != NULL);
+
+      const RasterDataDescriptor* pDescriptor =
+         dynamic_cast<const RasterDataDescriptor*>(pRaster->getDataDescriptor());
+      VERIFYNRV(pDescriptor != NULL);
+
+      // Get the row and column
+      DimensionDescriptor row;
+      DimensionDescriptor column;
+
+      LocationType dataCoord;
+      pRasterLayer->translateWorldToData(dX, dY, dataCoord.mX, dataCoord.mY);
+
+      const vector<DimensionDescriptor>& activeRows = pDescriptor->getRows();
+      const vector<DimensionDescriptor>& activeColumns = pDescriptor->getColumns();
+      if ((dataCoord.mY >= 0) &&
+         (activeRows.size() > static_cast<unsigned int>(dataCoord.mY)) &&
+         (activeRows[static_cast<int>(dataCoord.mY)].isValid()) &&
+         (dataCoord.mX >= 0) &&
+         (activeColumns.size() > static_cast<unsigned int>(dataCoord.mX)) &&
+         (activeColumns[static_cast<int>(dataCoord.mX)].isValid()))
+      {
+         row = activeRows[static_cast<int>(dataCoord.mY)];
+         column = activeColumns[static_cast<int>(dataCoord.mX)];
+      }
+
+      // Pixel coordinates
+      if ((row.isOriginalNumberValid() == true) && (column.isOriginalNumberValid() == true))
+      {
+         int originalSceneX = column.getOriginalNumber();
+         int originalSceneY = row.getOriginalNumber();
+         pBar->setPixelCoords(originalSceneX, originalSceneY);
+      }
+      else
+      {
+         pBar->clearPixelCoords();
+      }
+
+      // Elevation
+      ComplexComponent complexComponent = pRasterLayer->getComplexComponent();
+
+      const RasterElement* pTerrain = pRaster->getTerrain();
+      if ((pTerrain != NULL) && (row.isOriginalNumberValid() == true) && (column.isOriginalNumberValid() == true))
+      {
+         // Get the elevation value from the terrain raster element at the current pixel
+         double elevation = pTerrain->getPixelValue(column, row, DimensionDescriptor(), complexComponent);
+
+         // Multiply the value by the units scale factor
+         const Units* pElevationUnits = NULL;
+
+         const RasterDataDescriptor* pTerrainDescriptor =
+            dynamic_cast<const RasterDataDescriptor*>(pTerrain->getDataDescriptor());
+         if (pTerrainDescriptor != NULL)
+         {
+            pElevationUnits = pTerrainDescriptor->getUnits();
+            if (pElevationUnits != NULL)
+            {
+               elevation *= pElevationUnits->getScaleFromStandard();
+            }
+         }
+
+         // Set the value on the status bar
+         pBar->setElevationValue(elevation, pElevationUnits);
+      }
+      else
+      {
+         pBar->clearElevationValue();
+      }
+
+      // Raster values
+      QString layerName = QString::fromStdString(pRasterLayer->getDisplayName(true));
+      const Units* pUnits = pDescriptor->getUnits();
+
+      DisplayMode displayMode = pRasterLayer->getDisplayMode();
+      if (displayMode == GRAYSCALE_MODE)
+      {
+         DimensionDescriptor band = pRasterLayer->getDisplayedBand(GRAY);
+         if ((row.isValid() == true) && (column.isValid() == true) && (band.isValid() == true))
+         {
+            // Get the raster value from the displayed raster element
+            double value = 0.0;
+
+            RasterElement* pDisplayedRaster = pRasterLayer->getDisplayedRasterElement(GRAY);
+            if (pDisplayedRaster != NULL)
+            {
+               value = pDisplayedRaster->getPixelValue(column, row, band, complexComponent);
+            }
+
+            // Multiply the value by the units scale factor
+            if (pUnits != NULL)
+            {
+               value *= pUnits->getScaleFromStandard();
+            }
+
+            // Set the raster value on the status bar
+            pBar->setCubeValue(layerName, value);
+         }
+         else
+         {
+            pBar->clearCubeValue();
+         }
+      }
+      else  // displayMode == RGB_MODE
+      {
+         DimensionDescriptor redBand = pRasterLayer->getDisplayedBand(RED);
+         DimensionDescriptor greenBand = pRasterLayer->getDisplayedBand(GREEN);
+         DimensionDescriptor blueBand = pRasterLayer->getDisplayedBand(BLUE);
+
+         if ((row.isValid() == true) && (column.isValid() == true) &&
+            (redBand.isValid() == true || greenBand.isValid() == true || blueBand.isValid() == true))
+         {
+            QString redValueText = "N/A";
+            QString greenValueText = "N/A";
+            QString blueValueText = "N/A";
+
+            // Get the red band value
+            if (redBand.isValid() == true)
+            {
+               // Get the value from the displayed raster element
+               double redValue = 0.0;
+
+               RasterElement* pDisplayedRaster = pRasterLayer->getDisplayedRasterElement(RED);
+               if (pDisplayedRaster != NULL)
+               {
+                  redValue = pDisplayedRaster->getPixelValue(column, row, redBand, complexComponent);
+               }
+
+               // Multiply the value by the units scale factor
+               if (pUnits != NULL)
+               {
+                  redValue *= pUnits->getScaleFromStandard();
+               }
+
+               redValueText = QString::number(redValue, 'g', numeric_limits<double>::digits10);
+            }
+
+            // Get the green band value
+            if (greenBand.isValid() == true)
+            {
+               // Get the value from the displayed raster element
+               double greenValue = 0.0;
+
+               RasterElement* pDisplayedRaster = pRasterLayer->getDisplayedRasterElement(GREEN);
+               if (pDisplayedRaster != NULL)
+               {
+                  greenValue = pDisplayedRaster->getPixelValue(column, row, greenBand, complexComponent);
+               }
+
+               // Multiply the value by the units scale factor
+               if (pUnits != NULL)
+               {
+                  greenValue *= pUnits->getScaleFromStandard();
+               }
+
+               greenValueText = QString::number(greenValue, 'g', numeric_limits<double>::digits10);
+            }
+
+            // Get the blue band value
+            if (blueBand.isValid() == true)
+            {
+               // Get the value from the displayed raster element
+               double blueValue = 0.0;
+
+               RasterElement* pDisplayedRaster = pRasterLayer->getDisplayedRasterElement(BLUE);
+               if (pDisplayedRaster != NULL)
+               {
+                  blueValue = pDisplayedRaster->getPixelValue(column, row, blueBand, complexComponent);
+               }
+
+               // Multiply the value by the units scale factor
+               if (pUnits != NULL)
+               {
+                  blueValue *= pUnits->getScaleFromStandard();
+               }
+
+               blueValueText = QString::number(blueValue, 'g', numeric_limits<double>::digits10);
+            }
+
+            pBar->setCubeValue(layerName, redValueText, greenValueText, blueValueText);
+         }
+         else
+         {
+            pBar->clearCubeValue();
+         }
+      }
+   }
+
+   // Set the values from the top raster element that is not a raster layer
+   vector<Layer*> layers = mpLayerList->getLayers(LocationType(dX, dY));
+   for (vector<Layer*>::const_reverse_iterator iter = layers.rbegin(); iter != layers.rend(); ++iter)
+   {
+      Layer* pLayer = *iter;
+      if ((pLayer != NULL) && (isLayerDisplayed(pLayer) == true))
+      {
+         RasterElement* pRaster = dynamic_cast<RasterElement*>(pLayer->getDataElement());
+         if ((pRaster != NULL) && (pLayer->getLayerType() != RASTER))
+         {
+            const RasterDataDescriptor* pDescriptor =
+               dynamic_cast<const RasterDataDescriptor*>(pRaster->getDataDescriptor());
+            VERIFYNRV(pDescriptor != NULL);
+
+            // Get the row and column
+            DimensionDescriptor row;
+            DimensionDescriptor column;
+
+            LocationType dataCoord;
+            pLayer->translateWorldToData(dX, dY, dataCoord.mX, dataCoord.mY);
+
+            const vector<DimensionDescriptor>& activeRows = pDescriptor->getRows();
+            const vector<DimensionDescriptor>& activeColumns = pDescriptor->getColumns();
+            if ((dataCoord.mY >= 0) &&
+               (activeRows.size() > static_cast<unsigned int>(dataCoord.mY)) &&
+               (activeRows[static_cast<int>(dataCoord.mY)].isValid()) &&
+               (dataCoord.mX >= 0) &&
+               (activeColumns.size() > static_cast<unsigned int>(dataCoord.mX)) &&
+               (activeColumns[static_cast<int>(dataCoord.mX)].isValid()))
+            {
+               row = activeRows[static_cast<int>(dataCoord.mY)];
+               column = activeColumns[static_cast<int>(dataCoord.mX)];
+            }
+
+            // Results value
+            bool displayResultsValue = false;
+            double resultValue = 0.0;
+
+            if ((row.isOriginalNumberValid() == true) && (column.isOriginalNumberValid() == true))
+            {
+               vector<int> badValues;
+
+               Statistics* pStatistics = pRaster->getStatistics();
+               if (pStatistics != NULL)
+               {
+                  badValues = pStatistics->getBadValues();
+               }
+
+               resultValue = pRaster->getPixelValue(column, row);
+               if (std::find(badValues.begin(), badValues.end(), roundDouble(resultValue)) == badValues.end())
+               {
+                  displayResultsValue = true;
+               }
+            }
+
+            if (displayResultsValue == true)
+            {
+               QString layerName = QString::fromStdString(pLayer->getDisplayName(true));
+               pBar->setResultValue(layerName, resultValue, pDescriptor->getUnits());
+            }
+            else
+            {
+               pBar->clearResultValue();
+            }
+
+            break;
+         }
+      }
+   }
+
+   // Rotation
+   double rotation = getRotation();
+   pBar->setRotationValue(rotation);
 }
 
 void SpatialDataViewImp::updateExtents()
@@ -3117,8 +3142,7 @@ void SpatialDataViewImp::updateContextMenu(Subject& subject, const string& signa
          APP_SPATIALDATAVIEW_NEW_LAYER_MENU_ACTION);
 
       // Add layer actions on submenus
-      vector<Layer*> layers;
-      mpLayerList->getLayers(layers);
+      vector<Layer*> layers = mpLayerList->getLayers();
       for (vector<Layer*>::iterator iter = layers.begin(); iter != layers.end(); ++iter)
       {
          Layer* pLayer = *iter;
@@ -3514,8 +3538,7 @@ void SpatialDataViewImp::selectLayersOfType()
         typeIter != layerTypes.end();
         ++typeIter)
    {
-      std::vector<Layer*> curLayers;
-      typeIter->first->getLayerList()->getLayers(typeIter->second, curLayers);
+      std::vector<Layer*> curLayers = typeIter->first->getLayerList()->getLayers(typeIter->second);
       for (std::vector<Layer*>::iterator curIter = curLayers.begin(); curIter != curLayers.end(); ++curIter)
       {
          newLayerSelection.push_back(*curIter);
@@ -3734,8 +3757,8 @@ bool SpatialDataViewImp::toXml(XMLWriter* pXml) const
    RasterElement* pElement = mpLayerList->getPrimaryRasterElement();
    VERIFY(pElement != NULL);
    pXml->addAttr("primary", pElement->getId());
-   vector<Layer*> layers;
-   mpLayerList->getLayers(layers);
+
+   vector<Layer*> layers = mpLayerList->getLayers();
    for (vector<Layer*>::const_iterator lit = layers.begin(); lit != layers.end(); ++lit)
    {
       pXml->pushAddPoint(pXml->addElement("layer"));
@@ -4078,8 +4101,8 @@ double SpatialDataViewImp::getMousePanScaleFactor() const
 bool SpatialDataViewImp::isSmoothingAvailable() const
 {
    VERIFY(mpLayerList != NULL);
-   vector<Layer*> layers;
-   mpLayerList->getLayers(RASTER, layers);
+
+   vector<Layer*> layers = mpLayerList->getLayers(RASTER);
    for (vector<Layer*>::iterator iter = layers.begin(); iter != layers.end(); ++iter)
    {
       RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(*iter);
@@ -4096,8 +4119,8 @@ void SpatialDataViewImp::resetStretch()
 {
    VERIFYNR(mpLayerList != NULL);
    UndoGroup group(dynamic_cast<View*>(this), "Reset Stretch for Visible Layers");
-   vector<Layer*> layers;
-   mpLayerList->getLayers(RASTER, layers);
+
+   vector<Layer*> layers = mpLayerList->getLayers(RASTER);
    for (vector<Layer*>::iterator iter = layers.begin(); iter != layers.end(); ++iter)
    {
       RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(*iter);

@@ -380,39 +380,77 @@ Layer* LayerListImp::getLayer(const LayerType& layerType, const DataElement* pEl
     return NULL;
 }
 
-vector<Layer*> LayerListImp::getLayers(const LayerType& layerType) const
-{
-   vector<Layer*> layers;
-   for (unsigned int i = 0; i < mLayers.size(); i++)
-   {
-      Layer* pLayer = mLayers[i];
-      if (pLayer != NULL)
-      {
-         LayerType currentType = pLayer->getLayerType();
-         if (currentType == layerType)
-         {
-            layers.push_back(pLayer);
-         }
-      }
-   }
-
-    return layers;
-}
-
 vector<Layer*> LayerListImp::getLayers() const
 {
    return mLayers;
 }
 
-unsigned int LayerListImp::getNumLayers(const LayerType& layerType) const
+vector<Layer*> LayerListImp::getLayers(const LocationType& worldCoord) const
 {
-   vector<Layer*> layers = getLayers(layerType);
-   return layers.size();
+   return getLayers(LayerType(), worldCoord);
+}
+
+vector<Layer*> LayerListImp::getLayers(LayerType layerType) const
+{
+   vector<Layer*> layers;
+   for (vector<Layer*>::const_iterator iter = mLayers.begin(); iter != mLayers.end(); ++iter)
+   {
+      Layer* pLayer = *iter;
+      if ((pLayer != NULL) && (layerType.isValid() == false || pLayer->getLayerType() == layerType))
+      {
+         layers.push_back(pLayer);
+      }
+   }
+
+   return layers;
+}
+
+vector<Layer*> LayerListImp::getLayers(LayerType layerType, const LocationType& worldCoord) const
+{
+   vector<Layer*> layers;
+   for (vector<Layer*>::const_iterator iter = mLayers.begin(); iter != mLayers.end(); ++iter)
+   {
+      Layer* pLayer = *iter;
+      if ((pLayer != NULL) && (layerType.isValid() == false || pLayer->getLayerType() == layerType))
+      {
+         double minX = 0.0;
+         double minY = 0.0;
+         double maxX = 0.0;
+         double maxY = 0.0;
+         if (pLayer->getExtents(minX, minY, maxX, maxY) == true)
+         {
+            if ((worldCoord.mX >= minX) && (worldCoord.mX <= maxX) &&
+               (worldCoord.mY >= minY) && (worldCoord.mY <= maxY))
+            {
+               layers.push_back(pLayer);
+            }
+         }
+      }
+   }
+
+   return layers;
 }
 
 unsigned int LayerListImp::getNumLayers() const
 {
    return mLayers.size();
+}
+
+unsigned int LayerListImp::getNumLayers(const LocationType& worldCoord) const
+{
+   return getNumLayers(LayerType(), worldCoord);
+}
+
+unsigned int LayerListImp::getNumLayers(LayerType layerType) const
+{
+   vector<Layer*> layers = getLayers(layerType);
+   return layers.size();
+}
+
+unsigned int LayerListImp::getNumLayers(LayerType layerType, const LocationType& worldCoord) const
+{
+   vector<Layer*> layers = getLayers(layerType, worldCoord);
+   return layers.size();
 }
 
 bool LayerListImp::renameLayer(Layer* pLayer, const QString& strNewName) const
@@ -780,16 +818,47 @@ int LayerListImp::getLayerDisplayIndex(Layer* pLayer) const
    return -1;
 }
 
-Layer* LayerListImp::getTopMostLayer(const LayerType& layerType) const
+Layer* LayerListImp::getTopMostLayer() const
+{
+   return getTopMostLayer(LayerType());
+}
+
+Layer* LayerListImp::getTopMostLayer(const LocationType& worldCoord) const
+{
+   return getTopMostLayer(LayerType(), worldCoord);
+}
+
+Layer* LayerListImp::getTopMostLayer(LayerType layerType) const
 {
    for (vector<Layer*>::const_reverse_iterator iter = mLayers.rbegin(); iter != mLayers.rend(); ++iter)
    {
       Layer* pLayer = *iter;
-      if (pLayer != NULL)
+      if ((pLayer != NULL) && (layerType.isValid() == false || pLayer->getLayerType() == layerType) &&
+         (isLayerDisplayed(pLayer) == true))
       {
-         if (pLayer->getLayerType() == layerType)
+         return pLayer;
+      }
+   }
+
+   return NULL;
+}
+
+Layer* LayerListImp::getTopMostLayer(LayerType layerType, const LocationType& worldCoord) const
+{
+   for (vector<Layer*>::const_reverse_iterator iter = mLayers.rbegin(); iter != mLayers.rend(); ++iter)
+   {
+      Layer* pLayer = *iter;
+      if ((pLayer != NULL) && (layerType.isValid() == false || pLayer->getLayerType() == layerType) &&
+         (isLayerDisplayed(pLayer) == true))
+      {
+         double minX = 0.0;
+         double minY = 0.0;
+         double maxX = 0.0;
+         double maxY = 0.0;
+         if (pLayer->getExtents(minX, minY, maxX, maxY) == true)
          {
-            if (isLayerDisplayed(pLayer) == true)
+            if ((worldCoord.mX >= minX) && (worldCoord.mX <= maxX) &&
+               (worldCoord.mY >= minY) && (worldCoord.mY <= maxY))
             {
                return pLayer;
             }
@@ -800,21 +869,14 @@ Layer* LayerListImp::getTopMostLayer(const LayerType& layerType) const
    return NULL;
 }
 
-Layer* LayerListImp::getTopMostLayer() const
+DataElement* LayerListImp::getTopMostElement() const
 {
-   for (vector<Layer*>::const_reverse_iterator iter = mLayers.rbegin(); iter != mLayers.rend(); ++iter)
-   {
-      Layer* pLayer = *iter;
-      if (pLayer != NULL)
-      {
-         if (isLayerDisplayed(pLayer) == true)
-         {
-            return pLayer;
-         }
-      }
-   }
+   return getTopMostElement(LayerType());
+}
 
-   return NULL;
+DataElement* LayerListImp::getTopMostElement(const LocationType& worldCoord) const
+{
+   return getTopMostElement(LayerType(), worldCoord);
 }
 
 DataElement* LayerListImp::getTopMostElement(LayerType layerType) const
@@ -822,8 +884,18 @@ DataElement* LayerListImp::getTopMostElement(LayerType layerType) const
    Layer* pLayer = getTopMostLayer(layerType);
    if (pLayer != NULL)
    {
-      DataElement* pElement = pLayer->getDataElement();
-      return pElement;
+      return pLayer->getDataElement();
+   }
+
+   return NULL;
+}
+
+DataElement* LayerListImp::getTopMostElement(LayerType layerType, const LocationType& worldCoord) const
+{
+   Layer* pLayer = getTopMostLayer(layerType, worldCoord);
+   if (pLayer != NULL)
+   {
+      return pLayer->getDataElement();
    }
 
    return NULL;
@@ -839,32 +911,14 @@ DataElement* LayerListImp::getTopMostElement(const string& elementType) const
    for (vector<Layer*>::const_reverse_iterator iter = mLayers.rbegin(); iter != mLayers.rend(); ++iter)
    {
       Layer* pLayer = *iter;
-      if (pLayer != NULL)
+      if ((pLayer != NULL) && (isLayerDisplayed(pLayer) == true))
       {
-         if (isLayerDisplayed(pLayer) == true)
+         DataElement* pElement = pLayer->getDataElement();
+         if ((pElement != NULL) && (pElement->isKindOf(elementType) == true))
          {
-            DataElement* pElement = pLayer->getDataElement();
-            if (pElement != NULL)
-            {
-               if (pElement->isKindOf(elementType) == true)
-               {
-                  return pElement;
-               }
-            }
+            return pElement;
          }
       }
-   }
-
-   return NULL;
-}
-
-DataElement* LayerListImp::getTopMostElement() const
-{
-   Layer* pLayer = getTopMostLayer();
-   if (pLayer != NULL)
-   {
-      DataElement* pElement = pLayer->getDataElement();
-      return pElement;
    }
 
    return NULL;

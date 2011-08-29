@@ -390,75 +390,164 @@ public:
    /**
     *  Returns the top-most layer.
     *
-    *  This method returns the top-most visible layer in the view regardless of layer type.
+    *  @return  A pointer to the top-most visible layer, regardless of the layer
+    *           type.  \c NULL is returned if no layers are currently visible in
+    *           the view.
     *
-    *  @return  A pointer to the current layer.  \b NULL is returned if no
-    *           visible layers are present in the view.
-    *
-    *  @see     getTopMostLayer(const LayerType&) const, getTopMostElement(),
-    *           getActiveLayer()
+    *  @see     getTopMostLayer(LayerType) const,
+    *           getTopMostLayer(const LocationType&) const,
+    *           getTopMostLayer(LayerType, const LocationType&) const,
+    *           getTopMostElement() const
     */
    virtual Layer* getTopMostLayer() const = 0;
 
    /**
     *  Returns the top-most layer of a given type.
     *
-    *  This method returns the top-most visible layer of the given type.
-    *
     *  @param   layerType
     *           The type of layer for which to get the top-most layer.
     *
-    *  @return  A pointer to the current layer of the given type.  \b NULL is
-    *           returned if no visible layers of the given type are present in the
-    *           view.
+    *  @return  A pointer to the top-most visible layer of the given type.
+    *           \c NULL is returned if no layers of the given type are
+    *           currently visible in the view.
     *
-    *  @see     getTopMostLayer()
+    *  @see     getTopMostLayer() const,
+    *           getTopMostLayer(const LocationType&) const,
+    *           getTopMostLayer(LayerType, const LocationType&) const
     */
-   virtual Layer* getTopMostLayer(const LayerType& layerType) const = 0;
+   virtual Layer* getTopMostLayer(LayerType layerType) const = 0;
+
+   /**
+    *  Returns the top-most layer at a given pixel coordinate regardless of
+    *  layer type.
+    *
+    *  @param   worldCoord
+    *           The pixel coordinate in world coordinates.
+    *
+    *  @return  A pointer to the top-most displayed layer in the view whose
+    *           extents include the given pixel coordinate.  \c NULL is returned
+    *           if no layers are currently visible in the view whose extents
+    *           include the given pixel coordinate.
+    *
+    *  @see     getTopMostLayer() const,
+    *           getTopMostLayer(LayerType) const,
+    *           getTopMostLayer(LayerType, const LocationType&) const
+    */
+   virtual Layer* getTopMostLayer(const LocationType& worldCoord) const = 0;
+
+   /**
+    *  Returns the top-most layer of a given type at a given pixel coordinate.
+    *
+    *  @param   layerType
+    *           The layer type.
+    *  @param   worldCoord
+    *           The pixel coordinate in world coordinates.
+    *
+    *  @return  A pointer to the top-most displayed layer of the given type in
+    *           the view whose extents include the given pixel coordinate.
+    *           \c NULL is returned if no layers of the given type are currently
+    *           visible in the view whose extents include the given pixel
+    *           coordinate.
+    *
+    *  @see     getTopMostLayer() const,
+    *           getTopMostLayer(LayerType) const,
+    *           getTopMostLayer(const LocationType&) const
+    */
+   virtual Layer* getTopMostLayer(LayerType layerType, const LocationType& worldCoord) const = 0;
 
    /**
     *  Returns the data element of the top-most layer.
     *
-    *  This method returns the data element being displayed by the top-most
-    *  visible layer regardless of the layer type.
+    *  @return  A pointer to the data element being displayed by the top-most
+    *           visible layer in the view, regardless of layer type.  \c NULL is
+    *           returned if no layers are currently visible in the view.
     *
-    *  @return  A pointer to the data element of the current layer.  \b NULL is
-    *           returned if no visible layers are present in the view.
+    *  @see     getTopMostElement(LayerType) const,
+    *           getTopMostElement(const LocationType&) const,
+    *           getTopMostElement(LayerType, const LocationType&) const,
+    *           getTopMostElement(const std::string&) const,
+    *           getTopMostLayer() const
     */
    virtual DataElement* getTopMostElement() const = 0;
 
    /**
     *  Returns the data element of the top-most layer of a given type.
     *
-    *  This method returns the data element being displayed by the top-most
-    *  visible layer of the given layer type.
-    *
     *  @param   layerType
-    *           The type of layer for which to get the top-most layer to get
-    *           its element.
+    *           The type of layer for which to get the element.
     *
-    *  @return  A pointer to the data element of the current layer of the given
-    *           type.  \b NULL is returned if no visible layers of the given type are
-    *           present in the view.
+    *  @return  A pointer to the data element being displayed by the top-most
+    *           visible layer of the given type.  \c NULL is returned if no
+    *           layers of the given type are currently visible in the view.
+    *
+    *  @see     getTopMostElement() const,
+    *           getTopMostElement(const LocationType&) const,
+    *           getTopMostElement(LayerType, const LocationType&) const,
+    *           getTopMostElement(const std::string&) const
     */
    virtual DataElement* getTopMostElement(LayerType layerType) const = 0;
 
    /**
-    *  Returns the data element of a given type in the top-most layer of layers
-    *  displaying elements of the given type.
+    *  Returns the data element of the top-most layer at a given pixel
+    *  coordinate regardless of layer type.
     *
-    *  This method returns the data element of the given type in the topmost
-    *  layer that displays elements of the given type, regardless of whether
-    *  the layer is shown or hidden.
+    *  @param   worldCoord
+    *           The pixel coordinate in world coordinates.
+    *
+    *  @return  A pointer to the data element being displayed by the top-most
+    *           displayed layer in the view whose extents include the given
+    *           pixel coordinate.  \c NULL is returned if no layers are
+    *           currently visible in the view whose extents include the given
+    *           pixel coordinate.
+    *
+    *  @see     getTopMostElement() const,
+    *           getTopMostElement(LayerType) const,
+    *           getTopMostElement(LayerType, const LocationType&) const,
+    *           getTopMostElement(const std::string&) const
+    */
+   virtual DataElement* getTopMostElement(const LocationType& worldCoord) const = 0;
+
+   /**
+    *  Returns the data element of the top-most layer of a given type at a given
+    *  pixel coordinate.
+    *
+    *  @param   layerType
+    *           The type of layer for which to get the element.
+    *  @param   worldCoord
+    *           The pixel coordinate in world coordinates.
+    *
+    *  @return  A pointer to the data element being displayed by the top-most
+    *           displayed layer of the given type in the view whose extents
+    *           include the given pixel coordinate.  \c NULL is returned if no
+    *           layers of the given type are currently visible in the view whose
+    *           extents include the given pixel coordinate.
+    *
+    *  @see     getTopMostElement() const,
+    *           getTopMostElement(LayerType) const,
+    *           getTopMostElement(const LocationType&) const,
+    *           getTopMostElement(const std::string&) const
+    */
+   virtual DataElement* getTopMostElement(LayerType layerType, const LocationType& worldCoord) const = 0;
+
+   /**
+    *  Returns the data element the top-most layer displaying an element of the
+    *  given type.
     *
     *  @param   elementType
-    *           The element type for which to get the element of the top-most
-    *           layer displaying an element of that type.
+    *           The element type corresponding the to class name of element for
+    *           which to get the data element being displayed by the top-most
+    *           layer.  Subclass element types are also checked.
     *
-    *  @return  A pointer to the data element in the top-most layer that
-    *           displays an element of the given type.  \b NULL is returned if
-    *           no layers with an element of the given type are present in the
-    *           view.
+    *  @return  A pointer to the data element being displayed by the top-most
+    *           layer that displays an element of the given type.  \c NULL is
+    *           returned if no layers displaying an element of the given type
+    *           are currently visible in the view.
+    *
+    *  @see     getTopMostElement() const,
+    *           getTopMostElement(LayerType) const,
+    *           getTopMostElement(const LocationType&) const,
+    *           getTopMostElement(LayerType, const LocationType&) const,
+    *           TypeConverter::toString()
     */
    virtual DataElement* getTopMostElement(const std::string& elementType) const = 0;
 

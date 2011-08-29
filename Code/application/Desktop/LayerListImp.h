@@ -44,10 +44,14 @@ public:
    bool containsLayer(Layer* pLayer) const;
    Layer* getLayer(const LayerType& layerType, const DataElement* pElement,
       const QString& strLayerName = QString()) const;
-   std::vector<Layer*> getLayers(const LayerType& layerType) const;
    std::vector<Layer*> getLayers() const;
-   unsigned int getNumLayers(const LayerType& layerType) const;
+   std::vector<Layer*> getLayers(const LocationType& worldCoord) const;
+   std::vector<Layer*> getLayers(LayerType layerType) const;
+   std::vector<Layer*> getLayers(LayerType layerType, const LocationType& worldCoord) const;
    unsigned int getNumLayers() const;
+   unsigned int getNumLayers(const LocationType& worldCoord) const;
+   unsigned int getNumLayers(LayerType layerType) const;
+   unsigned int getNumLayers(LayerType layerType, const LocationType& worldCoord) const;
    bool renameLayer(Layer* pLayer, const QString& strNewName = QString()) const;
    bool isLayerNameUnique(const QString& strLayerName, const LayerType& layerType) const;
    QString getUniqueLayerName(const QString& strInitialName, const LayerType& layerType) const;
@@ -67,11 +71,15 @@ public:
    bool setLayerDisplayIndex(Layer* pLayer, int iIndex);
    int getLayerDisplayIndex(Layer* pLayer) const;
 
-   Layer* getTopMostLayer(const LayerType& layerType) const;
    Layer* getTopMostLayer() const;
-   DataElement* getTopMostElement(LayerType layerType) const;
-   DataElement* getTopMostElement(const std::string& elementType) const;
+   Layer* getTopMostLayer(const LocationType& worldCoord) const;
+   Layer* getTopMostLayer(LayerType layerType) const;
+   Layer* getTopMostLayer(LayerType layerType, const LocationType& worldCoord) const;
    DataElement* getTopMostElement() const;
+   DataElement* getTopMostElement(const LocationType& worldCoord) const;
+   DataElement* getTopMostElement(LayerType layerType) const;
+   DataElement* getTopMostElement(LayerType layerType, const LocationType& worldCoord) const;
+   DataElement* getTopMostElement(const std::string& elementType) const;
 
 signals:
    void layerAdded(Layer* pLayer);
@@ -109,7 +117,7 @@ private:
       } \
       return impClass::getLayer(layerType, pElement, strLayerName); \
    } \
-   void getLayers(const LayerType& layerType, std::vector<Layer*>& layers) const \
+   void getLayers(LayerType layerType, std::vector<Layer*>& layers) const \
    { \
       layers = impClass::getLayers(layerType); \
    } \
@@ -117,13 +125,37 @@ private:
    { \
       layers = impClass::getLayers(); \
    } \
-   unsigned int getNumLayers(const LayerType& layerType) const \
+   std::vector<Layer*> getLayers() const \
+   { \
+      return impClass::getLayers(); \
+   } \
+   std::vector<Layer*> getLayers(const LocationType& worldCoord) const \
+   { \
+      return impClass::getLayers(worldCoord); \
+   } \
+   std::vector<Layer*> getLayers(LayerType layerType) const \
+   { \
+      return impClass::getLayers(layerType); \
+   } \
+   std::vector<Layer*> getLayers(LayerType layerType, const LocationType& worldCoord) const \
+   { \
+      return impClass::getLayers(layerType, worldCoord); \
+   } \
+   unsigned int getNumLayers(LayerType layerType) const \
    { \
       return impClass::getNumLayers(layerType); \
    } \
    unsigned int getNumLayers() const \
    { \
       return impClass::getNumLayers(); \
+   } \
+   unsigned int getNumLayers(const LocationType& worldCoord) const \
+   { \
+      return impClass::getNumLayers(worldCoord); \
+   } \
+   unsigned int getNumLayers(LayerType layerType, const LocationType& worldCoord) const \
+   { \
+      return impClass::getNumLayers(layerType, worldCoord); \
    } \
    bool renameLayer(Layer* pLayer) const \
    { \

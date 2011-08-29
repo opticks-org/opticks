@@ -10,6 +10,7 @@
 #ifndef LAYERLIST_H
 #define LAYERLIST_H
 
+#include "LocationType.h"
 #include "Subject.h"
 #include "TypesFile.h"
 
@@ -114,23 +115,90 @@ public:
     *  @param   layerType
     *           The layer type.
     *  @param   layers
-    *           The vector that is populated with pointers to the layers of the
+    *           A vector that is populated with pointers to the layers of the
     *           given type contained in the list.
     *
-    *  @see     getLayer()
+    *  @deprecated
+    *           This method is deprecated and may be removed in a future
+    *           version.\  Use getLayers(LayerType) const instead, which returns
+    *           a vector by value.
     */
-   virtual void getLayers(const LayerType& layerType, std::vector<Layer*>& layers) const = 0;
+   virtual void getLayers(LayerType layerType, std::vector<Layer*>& layers) const = 0;
 
    /**
     *  Retrieves all layers in the list.
     *
     *  @param   layers
-    *           The vector that is populated with pointers to all layers
+    *           A vector that is populated with pointers to all layers
     *           contained in the list.
     *
-    *  @see     getLayer()
+    *  @deprecated
+    *           This method is deprecated and may be removed in a future
+    *           version.\  Use getLayers() const instead, which returns a vector
+    *           by value.
     */
    virtual void getLayers(std::vector<Layer*>& layers) const = 0;
+
+   /**
+    *  Retrieves all layers in the list.
+    *
+    *  @return  A vector containing pointers to all layers in the list.
+    *
+    *  @see     getLayers(const LocationType&) const,
+    *           getLayers(LayerType) const,
+    *           getLayers(LayerType, const LocationType&) const
+    */
+   virtual std::vector<Layer*> getLayers() const = 0;
+
+   /**
+    *  Retrieves all layers at a given pixel coordinate in the list.
+    *
+    *  @param   worldCoord
+    *           The pixel coordinate in world coordinates.
+    *
+    *  @return  A vector containing pointers to the layers in the list whose
+    *           extents include the given pixel coordinate.
+    *
+    *  @see     getLayers() const,
+    *           getLayers(LayerType) const,
+    *           getLayers(LayerType, const LocationType&) const,
+    *           Layer::getExtents()
+    */
+   virtual std::vector<Layer*> getLayers(const LocationType& worldCoord) const = 0;
+
+   /**
+    *  Retrieves all layers of a given type in the list.
+    *
+    *  @param   layerType
+    *           The layer type.
+    *
+    *  @return  A vector containing pointers to the layers of the given type
+    *           in the list.
+    *
+    *  @see     getLayers()const,
+    *           getLayers(const LocationType&) const,
+    *           getLayers(LayerType, const LocationType&) const
+    */
+   virtual std::vector<Layer*> getLayers(LayerType layerType) const = 0;
+
+   /**
+    *  Retrieves all layers of a given type at a given pixel coordinate in the
+    *  list.
+    *
+    *  @param   layerType
+    *           The layer type.
+    *  @param   worldCoord
+    *           The pixel coordinate in world coordinates.
+    *
+    *  @return  A vector containing pointers to the layers of the given type
+    *           in the list whose extents include the given pixel coordinate.
+    *
+    *  @see     getLayers() const,
+    *           getLayers(LayerType) const,
+    *           getLayers(const LocationType&) const,
+    *           Layer::getExtents()
+    */
+   virtual std::vector<Layer*> getLayers(LayerType layerType, const LocationType& worldCoord) const = 0;
 
    /**
     *  Returns the number of layers in the list of a given type.
@@ -140,15 +208,58 @@ public:
     *           in the list.
     *
     *  @return  The number of layers contained in the list of the given type.
+    *
+    *  @see     getNumLayers() const,
+    *           getNumLayers(const LocationType&) const,
+    *           getNumLayers(LayerType, const LocationType&) const
     */
-   virtual unsigned int getNumLayers(const LayerType& layerType) const = 0;
+   virtual unsigned int getNumLayers(LayerType layerType) const = 0;
 
    /**
     *  Returns the total number of layers in the list.
     *
     *  @return  The total number of layers contained in the list.
+    *
+    *  @see     getNumLayers(LayerType) const,
+    *           getNumLayers(const LocationType&) const,
+    *           getNumLayers(LayerType, const LocationType&) const
     */
    virtual unsigned int getNumLayers() const = 0;
+
+   /**
+    *  Returns the number of layers in the list at a given pixel coordinate.
+    *
+    *  @param   worldCoord
+    *           The pixel coordinate in world coordinates.
+    *
+    *  @return  The number of layers contained in the list whose extents include
+    *           the given pixel coordinate.
+    *
+    *  @see     getNumLayers() const,
+    *           getNumLayers(LayerType) const,
+    *           getNumLayers(LayerType, const LocationType&) const,
+    *           Layer::getExtents()
+    */
+   virtual unsigned int getNumLayers(const LocationType& worldCoord) const = 0;
+
+   /**
+    *  Returns the number of layers of a given type at a given pixel coordinate
+    *  in the list.
+    *
+    *  @param   layerType
+    *           The layer type.
+    *  @param   worldCoord
+    *           The pixel coordinate in world coordinates.
+    *
+    *  @return  The number of layers contained in the list of the given type
+    *           whose extents include the given pixel coordinate.
+    *
+    *  @see     getNumLayers() const,
+    *           getNumLayers(LayerType) const,
+    *           getNumLayers(const LocationType&) const,
+    *           Layer::getExtents()
+    */
+   virtual unsigned int getNumLayers(LayerType layerType, const LocationType& worldCoord) const = 0;
 
    /**
     *  Renames a layer to a user-defined name.

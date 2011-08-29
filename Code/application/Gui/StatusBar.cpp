@@ -202,26 +202,40 @@ void StatusBar::showGeoCoords(bool bShow)
    m_pGeoCoordinates_Label->setVisible(bShow);
 }
 
-void StatusBar::setCubeValue(double gray)
+void StatusBar::setCubeValue(const QString& layerName, double gray)
 {
-   setCubeValue(QString::number(gray, 'g', numeric_limits<double>::digits10));
+   setCubeValue(layerName, QString::number(gray, 'g', numeric_limits<double>::digits10));
 }
 
-void StatusBar::setCubeValue(const QString& strGray)
+void StatusBar::setCubeValue(const QString& layerName, const QString& strGray)
 {
-   m_pCubeValue_Label->setText(" Gray: " + strGray + " ");
+   QString nameText = " Raster";
+   if (layerName.isEmpty() == false)
+   {
+      nameText += " (" + layerName + ")";
+   }
+
+   nameText += ": ";
+   m_pCubeValue_Label->setText(nameText + "Gray - " + strGray + " ");
 }
 
-void StatusBar::setCubeValue(double red, double green, double blue)
+void StatusBar::setCubeValue(const QString& layerName, double red, double green, double blue)
 {
-   setCubeValue(QString::number(red, 'g', numeric_limits<double>::digits10),
+   setCubeValue(layerName, QString::number(red, 'g', numeric_limits<double>::digits10),
       QString::number(green, 'g', numeric_limits<double>::digits10),
       QString::number(blue, 'g', numeric_limits<double>::digits10));
 }
 
-void StatusBar::setCubeValue(const QString& strRed, const QString& strGreen, const QString& strBlue)
+void StatusBar::setCubeValue(const QString& layerName, const QString& strRed, const QString& strGreen, const QString& strBlue)
 {
-   m_pCubeValue_Label->setText(" R,G,B: " + strRed + ", " + strGreen + ", " + strBlue + " ");
+   QString nameText = " Raster";
+   if (layerName.isEmpty() == false)
+   {
+      nameText += " (" + layerName + ")";
+   }
+
+   nameText += ": ";
+   m_pCubeValue_Label->setText(nameText + "R,G,B - " + strRed + ", " + strGreen + ", " + strBlue + " ");
 }
 
 void StatusBar::clearCubeValue()
@@ -236,17 +250,13 @@ void StatusBar::showCubeValue(bool bShow)
 
 void StatusBar::setElevationValue(double value, const Units* pUnits)
 {
-   QString strResults = "Elevation";
-   QString strValue = QString::number(value);
-
-   QString strUnit = "";
+   QString unitText;
    if (pUnits != NULL)
    {
-      strUnit = pUnits->getUnitName().c_str();
-      strUnit = strUnit + " ";
+      unitText = QString::fromStdString(pUnits->getUnitName()) + " ";
    }
 
-   m_pElevation_Label->setText(" " + strResults + ": " + strValue + " " + strUnit);
+   m_pElevation_Label->setText(" Elevation: " + QString::number(value) + " " + unitText);
 }
 
 void StatusBar::clearElevationValue()
@@ -259,30 +269,24 @@ void StatusBar::showElevationValue(bool bShow)
    m_pElevation_Label->setVisible(bShow);
 }
 
-void StatusBar::setResultValue(const QString& strName, double value, const Units* pUnits)
+void StatusBar::setResultValue(const QString& layerName, double value, const Units* pUnits)
 {
-   QString strResults = strName;
-   if (strName.isEmpty() == true)
+   QString nameText = " Result";
+   if (layerName.isEmpty() == false)
    {
-      strResults = "Unnamed";
+      nameText += " (" + layerName + ")";
    }
 
-   QString strUnit = "";
+   nameText += ": ";
+
+   QString unitText;
    if (pUnits != NULL)
    {
-      strUnit = pUnits->getUnitName().c_str();
-      strUnit = strUnit + " "; // add extra spacing
+      unitText = QString::fromStdString(pUnits->getUnitName()) + " ";
       value *= pUnits->getScaleFromStandard();
    }
 
-   QString strValue = QString::number(value);
-
-   m_pResultValue_Label->setText(" " + strResults + ": " + strValue + " " + strUnit);
-}
-
-void StatusBar::setResultValue(double value, const Units* pUnits)
-{
-   setResultValue("Result", value, pUnits);
+   m_pResultValue_Label->setText(nameText + QString::number(value) + " " + unitText);
 }
 
 void StatusBar::clearResultValue()
@@ -297,8 +301,7 @@ void StatusBar::showResultValue(bool bShow)
 
 void StatusBar::setRotationValue(double value)
 {
-   QString strValue = QString::number(value);
-   m_pRotation_Label->setText(" Rotation: " + strValue + " ");
+   m_pRotation_Label->setText(" Rotation: " + QString::number(value) + " ");
 }
 
 void StatusBar::clearRotationValue()

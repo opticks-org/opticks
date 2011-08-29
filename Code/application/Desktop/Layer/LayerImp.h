@@ -68,14 +68,7 @@ public:
    virtual std::vector<ColorType> getColors() const;
 
    virtual void draw() = 0;
-
-   /**
-    * Get the extents of the layer.  These are be in world coordinates.
-    *
-    * @return True if the operations has successfully set the coordinates,
-    *         false otherwise.
-    */
-   virtual bool getExtents(double& x1, double& y1, double& x4, double& y4) = 0;
+   virtual bool getExtents(double& minX, double& minY, double& maxX, double& maxY) = 0;
 
    virtual bool acceptsMouseEvents() const;
    virtual QCursor getMouseCursor() const;
@@ -200,6 +193,10 @@ private:
    bool unlinkLayer(Layer* pLayer) \
    { \
       return impClass::unlinkLayer(pLayer); \
+   } \
+   bool getExtents(double& minX, double& minY, double& maxX, double& maxY) \
+   { \
+      return impClass::getExtents(minX, minY, maxX, maxY); \
    } \
    void setXScaleFactor(double xScaleFactor) \
    { \

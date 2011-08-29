@@ -165,6 +165,29 @@ public:
       DataElement* pElement = NULL) const = 0;
 
    /**
+    *  Retrieves the layer extents in world coordinates.
+    *
+    *  %Layer extents are defined as the pixel coordinate range of all data
+    *  in the data element being displayed by the layer.  The populated extent
+    *  coordinates already account for layer scaling and offset values.
+    *
+    *  @param   minX
+    *           The minimum coordinate value of the layer in the X dimension.
+    *  @param   minY
+    *           The minimum coordinate value of the layer in the Y dimension.
+    *  @param   maxX
+    *           The maximum coordinate value of the layer in the X dimension.
+    *  @param   maxY
+    *           The maximum coordinate value of the layer in the Y dimension.
+    *
+    *  @return  Returns \c true if the extents of the layer were successfully
+    *           retrieved; otherwise returns \c false.
+    *
+    *  @see     View::getExtents()
+    */
+   virtual bool getExtents(double& minX, double& minY, double& maxX, double& maxY) = 0;
+
+   /**
     *  Sets the X-dimension scale factor when drawing.
     *
     *  %Any scaling is applied before the offset is applied.

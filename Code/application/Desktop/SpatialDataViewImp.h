@@ -75,10 +75,14 @@ public:
    Layer* convertLayer(Layer* pLayer, const LayerType& newLayerType);
    std::vector<Layer*> getDisplayedLayers() const;
    bool isLayerDisplayed(Layer* pLayer) const;
-   Layer* getTopMostLayer(const LayerType& layerType) const;
    Layer* getTopMostLayer() const;
-   DataElement* getTopMostElement(LayerType layerType) const;
+   Layer* getTopMostLayer(LayerType layerType) const;
+   Layer* getTopMostLayer(const LocationType& worldCoord) const;
+   Layer* getTopMostLayer(LayerType layerType, const LocationType& worldCoord) const;
    DataElement* getTopMostElement() const;
+   DataElement* getTopMostElement(LayerType layerType) const;
+   DataElement* getTopMostElement(const LocationType& worldCoord) const;
+   DataElement* getTopMostElement(LayerType layerType, const LocationType& worldCoord) const;
    DataElement* getTopMostElement(const std::string& elementType) const;
    void setActiveLayer(Layer* pLayer);
    Layer* getActiveLayer() const;
@@ -163,8 +167,6 @@ protected:
    virtual LocationType limitPanCenter(LocationType center);
 
    void updateContextMenu(Subject& subject, const std::string& signal, const boost::any& value);
-
-   void updateStatusBarGeocoords(StatusBar *pBar, LocationType geoCoord);
 
 protected slots:
    void keyPan();
@@ -336,9 +338,17 @@ private slots:
    { \
       return impClass::getTopMostLayer(); \
    } \
-   Layer* getTopMostLayer(const LayerType& layerType) const \
+   Layer* getTopMostLayer(LayerType layerType) const \
    { \
       return impClass::getTopMostLayer(layerType); \
+   } \
+   Layer* getTopMostLayer(const LocationType& worldCoord) const \
+   { \
+      return impClass::getTopMostLayer(worldCoord); \
+   } \
+   Layer* getTopMostLayer(LayerType layerType, const LocationType& worldCoord) const \
+   { \
+      return impClass::getTopMostLayer(layerType, worldCoord); \
    } \
    DataElement* getTopMostElement() const \
    { \
@@ -347,6 +357,14 @@ private slots:
    DataElement* getTopMostElement(LayerType layerType) const \
    { \
       return impClass::getTopMostElement(layerType); \
+   } \
+   DataElement* getTopMostElement(const LocationType& worldCoord) const \
+   { \
+      return impClass::getTopMostElement(worldCoord); \
+   } \
+   DataElement* getTopMostElement(LayerType layerType, const LocationType& worldCoord) const \
+   { \
+      return impClass::getTopMostElement(layerType, worldCoord); \
    } \
    DataElement* getTopMostElement(const std::string& elementType) const \
    { \
