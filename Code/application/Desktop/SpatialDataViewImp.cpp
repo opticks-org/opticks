@@ -2130,7 +2130,7 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
 
    // Set the values from the top raster element that is not a raster layer
    vector<Layer*> layers = mpLayerList->getLayers(LocationType(dX, dY));
-   for (vector<Layer*>::const_reverse_iterator iter = layers.rbegin(); iter != layers.rend(); ++iter)
+   for (vector<Layer*>::reverse_iterator iter = layers.rbegin(); iter != layers.rend(); ++iter)
    {
       Layer* pLayer = *iter;
       if ((pLayer != NULL) && (isLayerDisplayed(pLayer) == true))
