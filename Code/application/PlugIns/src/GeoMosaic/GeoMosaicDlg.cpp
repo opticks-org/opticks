@@ -14,7 +14,6 @@
 #include "PlugInDescriptor.h"
 #include "PlugInResource.h"
 #include "Progress.h"
-#include "ProgressResource.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "SpatialDataView.h"
@@ -132,8 +131,7 @@ void GeoMosaicDlg::batchStitch()
       }
       if (pItem->data(Qt::UserRole).toBool() == true)
       {
-         ProgressResource importProgress("Importing");
-         ImporterResource autoImporter("Auto Importer", importProgress.get(), true);
+         ImporterResource autoImporter("Auto Importer", mProgressTracker.getCurrentProgress(), true);
          if (autoImporter.get() == NULL)
          {
             return;
