@@ -141,7 +141,7 @@ class PlugInFactory;
  * Using this class requires ModuleManager.cpp to be configured for PlugInFactory use.
  * The sample ModuleManager.cpp contained in the Opticks SDK shows how to configure
  * ModuleManager.cpp for use with PlugInFactory. Direct use of this class is not needed.
- * @see REGISTER_PLUGIN(), REGISTER_PLUGIN_ADVANCED()
+ * @see REGISTER_PLUGIN(), REGISTER_PLUGIN_BASIC()
  */
 class PlugInFactory
 {
@@ -172,7 +172,7 @@ public:
  * Using this class requires ModuleManager.cpp to be configured for PlugInFactory use.
  * The sample ModuleManager.cpp contained in the Opticks SDK shows how to configure
  * ModuleManager.cpp for use with PlugInFactory. Direct use of this class is not needed.
- * @see REGISTER_PLUGIN(), REGISTER_PLUGIN_ADVANCED()
+ * @see REGISTER_PLUGIN(), REGISTER_PLUGIN_BASIC()
  */
 class BasicPlugInFactory : public PlugInFactory
 {
@@ -209,7 +209,7 @@ private:
  * To perform dynamic plug-in registration, a subclass of this
  * class must be created that performs the actual dynamic plug-in
  * registration.  The subclass must then be provided as the
- * second argument to the REGISTER_DYNAMIC_MODULE macro.
+ * second argument to the REGISTER_DYNAMIC_MODULE() macro.
  * Please read \ref advanced_plugin_register for more details.
  */
 class DynamicPlugInFactory : public PlugInFactory

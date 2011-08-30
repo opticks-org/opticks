@@ -3,56 +3,56 @@
 \section plugin_subclass Create Plug-In Class
 In order to create a plug-in, you must first decide which plug-in interface you would like to implement.
 The available plug-in types and sub-types are:
- - PlugIn
-	- Option
-	- Properties
-	- Executable
-		- Georeference
-		- Importer
-		- InterpreterManager
-		- RasterPager
-		- Exporter
-		
+- PlugIn
+   - Option
+   - Properties
+   - Executable
+      - Georeference
+      - Importer
+      - InterpreterManager
+      - RasterPager
+      - Exporter
+
 You can directly subclass one of those interfaces and implement all of the abstract functions in order to create a plug-in.
 However, it is <b>highly</b> recommended that you subclass one of our Shell classes.
 These Shell classes implement large portions of these interfaces for you and require you write less code.
 A complete list of Shell classes is shown below:
- - PlugInShell
-	- OptionShell
-		- OptionQWidgetWrapper
-	- PropertiesShell
-		- PropertiesQWidgetWrapper
-	- ExecutableShell
-		- AlgorithmShell
-			- AlgorithmPlugIn
-		- DockWindowShell
-		- ExporterShell
-		- GeoreferenceShell
-		- ImporterShell
-			- RasterElementImporterShell
-				- HdfImporterShell
-					- Hdf4ImporterShell
-					- Hdf5ImporterShell
-		- InterpreterManagerShell
-		- RasterPagerShell
-			- CachedPager
-		- ViewerShell
-		- WizardShell
+- PlugInShell
+   - OptionShell
+      - OptionQWidgetWrapper
+   - PropertiesShell
+      - PropertiesQWidgetWrapper
+   - ExecutableShell
+      - AlgorithmShell
+         - AlgorithmPlugIn
+      - DockWindowShell
+      - ExporterShell
+      - GeoreferenceShell
+      - ImporterShell
+         - RasterElementImporterShell
+            - HdfImporterShell
+               - Hdf4ImporterShell
+               - Hdf5ImporterShell
+      - InterpreterManagerShell
+      - RasterPagerShell
+         - CachedPager
+      - ViewerShell
+      - WizardShell
 
 \section using_services Accessing Opticks Services
 While writing your plug-in you will need access to the rest of the plug-in API.
 The way that you access the rest of the plug-in API is to use our Services.
 The complete list of our Services is:
 - DesktopServices <sup>1</sup>
-	- SessionExplorer <sup>1</sup>
+   - SessionExplorer <sup>1</sup>
 - ModelServices
 - ApplicationServices
-	- SessionManager
-	- ConfigurationSettings
-	- ObjectFactory
-	- DataVariantFactory
+   - SessionManager
+   - ConfigurationSettings
+   - ObjectFactory
+   - DataVariantFactory
 - UtilityServices
-	- MessageLog
+   - MessageLog
 - AnimationServices
 - PlugInManagerServices
 
@@ -65,17 +65,17 @@ The easiest method to access these Services is to use the Service template speci
 
 void foo()
 {
-	std::string version = Service<ConfigurationSettings>()->getVersion(); //Fetch the application version # from the ConfigurationSettings Service.
+   std::string version = Service<ConfigurationSettings>()->getVersion(); //Fetch the application version # from the ConfigurationSettings Service.
 
-	//OR, another way to do the above
+   //OR, another way to do the above
 
-	Service<ConfigurationSettings> pConfSett;
-	std::string version = pConfSett->getVersion(); 
+   Service<ConfigurationSettings> pConfSett;
+   std::string version = pConfSett->getVersion(); 
 
-	//OR, yet another way to do the above
-		
-	ConfigurationSettings* pConfPointer = pConfSett.get();
-	version = pConfPointer->getVersion();
+   //OR, yet another way to do the above
+
+   ConfigurationSettings* pConfPointer = pConfSett.get();
+   version = pConfPointer->getVersion();
 }
 \endcode
 
@@ -92,34 +92,34 @@ If you haven't created a plug-in subclass to register, please read \ref plugin_s
 Once you have a plug-in subclass to register, you will first need to prepare your plug-in library (i.e. .dll, .so) by registering a module inside your library.
 
 In order to register a module inside your library, it is recommended that you create a new .cpp file called ModuleManager.cpp.
-Inside this ModuleManager.cpp, you should use the REGISTER_MODULE macro.
+Inside this ModuleManager.cpp, you should use the REGISTER_MODULE() macro.
 Below, you will see the ModuleManager.cpp that is included with the Tutorial plug-in library.
 \include Tutorial/ModuleManager.cpp
 
-The REGISTER_MODULE macro has one argument, which is the module id.
-This module id must be a valid C++ identifier and must not be used elsewhere in your plug-in library.
-The module id will be used to declare a C++ namespace inside your plug-in library and must therefore be unique.
-In addition, this module id must be unique for all other plug-in libraries that might be loaded by the application.
-If two plug-in libraries have the same module id, only the first will be loaded by the application.
-In addition, you must only use the REGISTER_MODULE macro once in your plug-in library.
+The REGISTER_MODULE() macro has one argument, which is the module ID.
+This module ID must be a valid C++ identifier and must not be used elsewhere in your plug-in library.
+The module ID will be used to declare a C++ namespace inside your plug-in library and must therefore be unique.
+In addition, this module ID must be unique for all other plug-in libraries that might be loaded by the application.
+If two plug-in libraries have the same module ID, only the first will be loaded by the application.
+In addition, you must only use the REGISTER_MODULE() macro once in your plug-in library.
 Attempting to use it twice inside a single plug-in library will cause compile and link errors.
 
 Now that your plug-in library has a registered module, you can actually register your individual plug-in subclasses.
 
 You can use one of two macros to register your individual plug-in subclasses.
-You can use either REGISTER_PLUGIN or REGISTER_PLUGIN_BASIC, see below for examples.
+You can use either REGISTER_PLUGIN() or REGISTER_PLUGIN_BASIC(), see below for examples.
 \code
-REGISTER_PLUGIN(OpticksTutorial, Tutorial1);
+REGISTER_PLUGIN(OpticksTutorial, Tutorial1, Tutorial1);
 \endcode
 or
 \code
-REGISTER_PLUGIN_BASIC(OpticksTutorial, Tutorial1, Tutorial1);
+REGISTER_PLUGIN_BASIC(OpticksTutorial, Tutorial1);
 \endcode
-The first argument to either macro is the module id that was used in the REGISTER_MODULE() macro.
+The first argument to either macro is the module ID that was used in the REGISTER_MODULE() macro.
 The last argument to either macro is the constructor of your plug-in subclass.
-The REGISTER_PLUGIN_BASIC macro uses it second argument to uniquely identify the plug-in within the module.
-If your plug-in subclass is not templated and has a no-argument constructor, you can simply use the REGISTER_PLUGIN macro which will deduce the plug-in identifier from the plug-ins classname.
-If however, your plug-in subclass requires constructor arguments or is templated, you should instead use REGISTER_PLUGIN_BASIC and provide a unique identifier for plug-in as the second argument to the macro.
+The REGISTER_PLUGIN() macro uses its second argument to uniquely identify the plug-in within the module.
+If your plug-in subclass is not templated and has a no-argument constructor, you can simply use the REGISTER_PLUGIN_BASIC() macro which will deduce the plug-in identifier from the plug-ins classname.
+If however, your plug-in subclass requires constructor arguments or is templated, you should instead use REGISTER_PLUGIN() and provide a unique identifier for plug-in as the second argument to the macro.
 The plug-in identifier provided must be a valid C++ identifier and needs only to be unique within the context of the module.
 Please see below for a more complete example.
 \code
@@ -129,14 +129,14 @@ Please see below for a more complete example.
 //see below for the plug-in registration code:
 REGISTER_MODULE(TestModule);
 
-REGISTER_PLUGIN(TestModule, TestPlugIn); //one could also use the commented out line below
+REGISTER_PLUGIN_BASIC(TestModule, TestPlugIn); //one could also use the commented out line below
 //REGISTER_PLUGIN(TestModule, TestPlugIn, TestPlugIn);
 
-//REGISTER_PLUGIN(TestModule, TestPlugIn2<int>(true)); // this will NOT compile, instead use the line below
-REGISTER_PLUGIN_BASIC(TestModule, TestPlugIn2, TestPlugIn2<int>(true));
+//REGISTER_PLUGIN_BASIC(TestModule, TestPlugIn2<int>(true)); //this will NOT compile, instead use the line below
+REGISTER_PLUGIN(TestModule, TestPlugIn2, TestPlugIn2<int>(true));
 \endcode
 
-When using REGISTER_MODULE, REGISTER_PLUGIN and REGISTER_PLUGIN_BASIC, it's important to know that they can be put into any .cpp file that will included in your plug-in library (.dll, .so).
+When using REGISTER_MODULE(), REGISTER_PLUGIN() and REGISTER_PLUGIN_BASIC(), it's important to know that they can be put into any .cpp file that will included in your plug-in library (.dll, .so).
 This allows a developer to put the REGISTER_PLUGIN-* macro in the .cpp that is providing the implementation for that plug-in subclass.
 This completes the discussion on standard plug-in registration.
 If you'd like to learn more about a very advanced type of plug-in registration, you can continue reading the next section.
@@ -149,9 +149,9 @@ It is possible to mix both static and dynamic plug-in registration together in a
 
 In order to perform dynamic plug-in registration, you must first create a subclass of the DynamicPlugInFactory base class.
 It is this class that will perform all of the dynamic plug-in registration.
-You must then use the REGISTER_DYNAMIC_MODULE macro instead of the REGISTER_MODULE macro.
+You must then use the REGISTER_DYNAMIC_MODULE() macro instead of the REGISTER_MODULE() macro.
 Please keep in mind that you can still only use one use of this macro per plug-in library (.dll, .so).
-The REGISTER_DYNAMIC_MODULE macro has a second argument that must be the name of the DynamicPlugInFactory subclass you have created.
+The REGISTER_DYNAMIC_MODULE() macro has a second argument that must be the name of the DynamicPlugInFactory subclass you have created.
 See below for an example.
 \include PlugInSampler\ModuleManager.cpp
 The source code above comes from the PlugInSampler.
@@ -172,14 +172,14 @@ On Windows, you must use either the 32-bit or 64-bit install of %Opticks, depend
 On Solaris, we only provide a 64-bit binary.
 Also on Solaris, there is no distiction between debug and release, so you put either compilation type of your plug-in into a Solaris installation of %Opticks.
 In order to use this approach on either Windows or Solaris, you need to perform the following steps:
- -# Copy your compiled plug-in (i.e. .dll or .so) into the PlugIns folder of the %Opticks installation.
- -# Copy any third party dependency libraries (i.e. .dll or .so's that are not plug-ins) into the Bin folder of the installation.
- -# Copy any custom settings default files (i.e. *.cfg, see ConfigurationSettings) into the DefaultSettings folder of the installation.
- -# Copy any plug-in on-line help into the Help folder of the installation.
- -# Copy any product templates into the Templates folder of the installation.
- -# Copy any wizard files into either the Wizards folder of the installation or the SupportFiles/Wizards folder of the installation.
- -# Copy any other custom supporting data files into the SupportFiles folder of the installation.
- -# On Windows, if you wished to run your plug-ins in debug mode, you would need to perform the following additional steps:
+-# Copy your compiled plug-in (i.e. .dll or .so) into the PlugIns folder of the %Opticks installation.
+-# Copy any third party dependency libraries (i.e. .dll or .so's that are not plug-ins) into the Bin folder of the installation.
+-# Copy any custom settings default files (i.e. *.cfg, see ConfigurationSettings) into the DefaultSettings folder of the installation.
+-# Copy any plug-in on-line help into the Help folder of the installation.
+-# Copy any product templates into the Templates folder of the installation.
+-# Copy any wizard files into either the Wizards folder of the installation or the SupportFiles/Wizards folder of the installation.
+-# Copy any other custom supporting data files into the SupportFiles folder of the installation.
+-# On Windows, if you wished to run your plug-ins in debug mode, you would need to perform the following additional steps:
    -# Rename the existing Bin folder in the installation to Bin-release
    -# Rename the existing PlugIns folder in the installation to PlugIns-release
    -# Create a new Bin folder in the installation by copying either the SDK_HOME\\Build\\Binaries-Win32-Debug\\Bin or SDK_HOME\\Build\\Binaries-x64-Debug\\Bin folder depending on whether you are trying to run 32-bit or 64-bit plug-ins respectively.
@@ -189,31 +189,31 @@ In order to use this approach on either Windows or Solaris, you need to perform 
    -# At this point, you could run your plug-ins in debug mode.
       If you wished to revert back to running in release mode, you would have to reverse the above steps.
       Also, note that with this approach you cannot run debug mode and release mode simultaneously.
-    
+
 \section running_approach2 Approach 2: Create a custom workspace
 This approach involves creating a custom workspace. 
 You will need to perform the following steps:
- -# Create a new folder anywhere on the filesystem.
-    This directory will be called WS_HOME from this point forward.
- -# Copy the DefaultSettings, Help, SupportFiles, Templates folders from an %Opticks installation into the WS_HOME folder.
- -# Create a UserSettings folder in the WS_HOME folder.
- -# Create a Build folder in the WS_HOME folder.
- -# On Windows, perform the following steps:
-    -# If you will run plug-ins in release 32-bit mode, then copy the Bin and PlugIns folder from SDK_HOME\\Build\\Binaries-Win32-Release into WS_HOME\\Build\\Binaries-Win32-Release folder.
-    -# If you will run plug-ins in debug 32-bit mode, then copy the Bin and PlugIns folder from the SDK_HOME\\Build\\Binaries-Win32-Debug into WS_HOME\\Build\\Binaries-Win32-Debug folder.
-    -# If you will run plug-ins in release 64-bit mode, then copy the Bin and PlugIns folder from the SDK_HOME\\Build\\Binaries-x64-Release into WS_HOME\\Build\\Binaries-x64-Release folder.
-    -# If you will run plug-ins in debug 64-bit mode, then copy the Bin and PlugIns folder from the SDK_HOME\\Build\\Binaries-x64-Debug into WS_HOME\\Build\\Binaries-x64-Debug folder.
- -# On Solaris, perform the following steps:
-	-# Copy the Bin and PlugIns folder from an %Opticks installation into the WS_HOME/Build/Binaries-solaris-sparc-release folder.
- -# For both Windows and Solaris, perform the following steps:
-    -# Create a opticks.dep file (it must be named exactly this) in all the Bin folders you have created thus far in the WS_HOME/Build/Binaries-* folders with the content shown below.
-    \verbatim
-    !depV1
-    deployment:
-		UserConfigPath: ../../UserSettings
-		AppHomePath: ../..
-    \endverbatim
-    For more details on the opticks.dep file, please see \ref deploymentfiles .
+-# Create a new folder anywhere on the filesystem.
+   This directory will be called WS_HOME from this point forward.
+-# Copy the DefaultSettings, Help, SupportFiles, Templates folders from an %Opticks installation into the WS_HOME folder.
+-# Create a UserSettings folder in the WS_HOME folder.
+-# Create a Build folder in the WS_HOME folder.
+-# On Windows, perform the following steps:
+   -# If you will run plug-ins in release 32-bit mode, then copy the Bin and PlugIns folder from SDK_HOME\\Build\\Binaries-Win32-Release into WS_HOME\\Build\\Binaries-Win32-Release folder.
+   -# If you will run plug-ins in debug 32-bit mode, then copy the Bin and PlugIns folder from the SDK_HOME\\Build\\Binaries-Win32-Debug into WS_HOME\\Build\\Binaries-Win32-Debug folder.
+   -# If you will run plug-ins in release 64-bit mode, then copy the Bin and PlugIns folder from the SDK_HOME\\Build\\Binaries-x64-Release into WS_HOME\\Build\\Binaries-x64-Release folder.
+   -# If you will run plug-ins in debug 64-bit mode, then copy the Bin and PlugIns folder from the SDK_HOME\\Build\\Binaries-x64-Debug into WS_HOME\\Build\\Binaries-x64-Debug folder.
+-# On Solaris, perform the following steps:
+   -# Copy the Bin and PlugIns folder from an %Opticks installation into the WS_HOME/Build/Binaries-solaris-sparc-release folder.
+-# For both Windows and Solaris, perform the following steps:
+   -# Create a opticks.dep file (it must be named exactly this) in all the Bin folders you have created thus far in the WS_HOME/Build/Binaries-* folders with the content shown below.
+   \verbatim
+   !depV1
+   deployment:
+      UserConfigPath: ../../UserSettings
+      AppHomePath: ../..
+   \endverbatim
+   For more details on the opticks.dep file, please see \ref deploymentfiles .
 
 Once you have created this workspace, you would copy any custom plug-ins into the appropriate PlugIns folder.
 The advantage of this approach is that this workspace is entirely self-contained.
@@ -224,26 +224,26 @@ All you need to do is run the Opticks.exe in the appropriate Build\\Binaries-* f
 \section running_notes Additional notes about running Opticks
 In general, when running %Opticks there are two classes of things that %Opticks requires to run properly.
 %Opticks requires:
- -# %Executable code
- -# Other supporting data
- -# User settings
+-# %Executable code
+-# Other supporting data
+-# User settings
 
 The "Executable Code" consists of:
- -# The %Opticks and OpticksBatch executable.
- -# %Opticks plug-ins.
- -# Third-party dependency libraries.
- 
+-# The %Opticks and OpticksBatch executable.
+-# %Opticks plug-ins.
+-# Third-party dependency libraries.
+
 The first and third items should reside in the same folder, for an %Opticks installation this is the Bin folder.
 The plug-ins need to all reside in a single folder, for an %Opticks installation this is the PlugIns folder.
 The location of the %PlugIn folder is controlled by the "PlugInPath" setting in the deployment file.
 You can read \ref deploymentfiles to determine the default location %Opticks searches for plug-ins if a deployment file is not present along with documentation on how to provide a custom deployment file.
 
 The "Other supporting data" consists of:
- -# DefaultSettings
- -# Help
- -# Templates
- -# SupportFiles
- 
+-# DefaultSettings
+-# Help
+-# Templates
+-# SupportFiles
+
 The DefaultSettings and Help must always be located in the folder specified by the "AppHomePath" setting in the deployment file.
 You can read \ref deploymentfiles to determine the default location %Optick uses for the "AppHomePath" along with ways to change that path.
 
@@ -262,4 +262,3 @@ The user setting file is named according the following convention, "UserSettings
 In practice this means that all %Opticks installations on the same machine that use the same "UserConfigPath" that have the  same arch (e.g. 32-bit, 64-bit) and mode (e.g. debug, release) will share one user settings file.
 This can cause confusion and the solution to this problem is to use a deployment file to specify a different value for the "UserConfigPath" for the problematic installations.
 */
- 
