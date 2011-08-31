@@ -82,10 +82,7 @@ namespace
 
 const double *SignatureLibraryImp::getOrdinateData(unsigned int index) const
 {
-   if (mNeedToResample || mResampledData.empty())
-   {
-      const_cast<SignatureLibraryImp*>(this)->resample(mAbscissa);
-   }
+   const_cast<SignatureLibraryImp*>(this)->resample(mAbscissa);
 
    if (index < mSignatures.size() && (!mAbscissa.empty() || mpOdre.get() != NULL))
    {
@@ -145,10 +142,7 @@ string SignatureLibraryImp::getSignatureName(unsigned int index) const
 
 const Signature *SignatureLibraryImp::getSignature(unsigned int index) const
 {
-   if (mNeedToResample)
-   {
-      const_cast<SignatureLibraryImp*>(this)->resample(mAbscissa);
-   }
+   const_cast<SignatureLibraryImp*>(this)->resample(mAbscissa);
 
    if (index < mSignatures.size())
    {
@@ -162,10 +156,7 @@ const Signature *SignatureLibraryImp::getSignature(unsigned int index) const
 
 const Signature* SignatureLibraryImp::getSignature(const string& name) const
 {
-   if (mNeedToResample)
-   {
-      const_cast<SignatureLibraryImp*>(this)->resample(mAbscissa);
-   }
+   const_cast<SignatureLibraryImp*>(this)->resample(mAbscissa);
 
    map<string, Signature*>::const_iterator pItem = mSignatureNames.find(name);
    if (pItem != mSignatureNames.end())
@@ -185,7 +176,7 @@ bool SignatureLibraryImp::resample(const vector<double> &abscissa)
       return false;
    }
 
-   if (abscissa == mAbscissa)
+   if (mResampledData.empty() == false && mNeedToResample == false && abscissa == mAbscissa)
    {
       return true;
    }
