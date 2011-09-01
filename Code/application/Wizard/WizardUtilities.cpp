@@ -97,40 +97,41 @@ BatchWizard* WizardUtilities::createBatchWizardFromWizard(WizardObject* pWizard,
    }
 
    BatchWizard* pBatchWizard = new BatchWizard();
-   if (pBatchWizard != NULL)
+   pBatchWizard->setWizardFilename(wizardFilename);
+
+   // Values
+   vector<WizardItem*> wizItems = pWizard->getItems();
+   for (unsigned int i = 0; i < wizItems.size(); i++)
    {
-      pBatchWizard->setWizardFilename(wizardFilename);
-
-      // Values
-      vector<WizardItem*> wizItems = pWizard->getItems();
-      for (unsigned int i = 0; i < wizItems.size(); i++)
+      WizardItem* pItem = wizItems[i];
+      if ((pItem != NULL) && (pItem->getType() != "Value"))
       {
-         WizardItem* pItem = wizItems[i];
-         if ((pItem != NULL) && (pItem->getType() != "Value"))
+         const string& itemName = pItem->getName();
+
+         vector<WizardItem*> inputItems;
+         pItem->getConnectedItems(true, inputItems);
+         for (unsigned int j = 0; j < inputItems.size(); j++)
          {
-            const string& itemName = pItem->getName();
-
-            vector<WizardItem*> inputItems;
-            pItem->getConnectedItems(true, inputItems);
-            for (unsigned int j = 0; j < inputItems.size(); j++)
+            WizardItem* pInputItem = inputItems[j];
+            if ((pInputItem != NULL) && (pInputItem->getType() == "Value"))
             {
-               WizardItem* pInputItem = inputItems[j];
-               if ((pInputItem != NULL) && (pInputItem->getType() == "Value"))
+               vector<WizardNode*> wizNodes = pInputItem->getOutputNodes();
+               for (unsigned int n = 0; n < wizNodes.size(); n++)
                {
-                  vector<WizardNode*> wizNodes = pInputItem->getOutputNodes();
-                  for (unsigned int n = 0; n < wizNodes.size(); n++)
+                  string nodeName = wizNodes[n]->getName();
+                  string nodeType = wizNodes[n]->getType();
+
+                  void* pValue = wizNodes[n]->getValue();
+                  if (pValue == NULL)
                   {
-                     string nodeName = wizNodes[n]->getName();
-                     string nodeType = wizNodes[n]->getType();
+                     continue;
+                  }
 
-                     void* pValue = wizNodes[n]->getValue();
-                     if (pValue == NULL)
-                     {
-                        continue;
-                     }
-
-                     DataVariant value(nodeType, pValue);
-                     pBatchWizard->setInputValue(itemName, nodeName, nodeType, value);
+                  DataVariant value(nodeType, pValue);
+                  if (pBatchWizard->setInputValue(itemName, nodeName, nodeType, value) == false)
+                  {
+                     delete pBatchWizard;
+                     return NULL;
                   }
                }
             }

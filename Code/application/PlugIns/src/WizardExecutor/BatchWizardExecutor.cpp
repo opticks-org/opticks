@@ -172,8 +172,9 @@ bool BatchWizardExecutor::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
             Value* pValue = *iter;
             if (pValue != NULL)
             {
-               string nodeName = pValue->getNodeName();
-               string nodeType = pValue->getNodeType();
+               const string& connectedItemName = pValue->getItemName();
+               const string& nodeName = pValue->getNodeName();
+               const string& nodeType = pValue->getNodeType();
 
                string nodeTypeString = nodeType;
                if (nodeType == "File set")
@@ -181,7 +182,7 @@ bool BatchWizardExecutor::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
                   nodeTypeString = "Filename";
                }
 
-               WizardNode* pNode = getValueNode(pWizard.get(), nodeName, nodeTypeString);
+               WizardNode* pNode = getValueNode(pWizard.get(), connectedItemName, nodeName, nodeTypeString);
                if (pNode != NULL)
                {
                   const DataVariant& value = pValue->getValue();
@@ -250,12 +251,22 @@ bool BatchWizardExecutor::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
       }
 
       delete pBatchWizard;
-      pBatchWizard = NULL;
       pBatchWizard = fileParser.read();
    }
 
-   pStep->finalize(Message::Success);
+   const string& errorMsg = fileParser.getError();
+   if (errorMsg.empty() == false)
+   {
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress(errorMsg, 0, ERRORS);
+      }
 
+      pStep->finalize(Message::Failure, errorMsg);
+      return false;
+   }
+
+   pStep->finalize(Message::Success);
    return true;
 }
 
@@ -327,40 +338,48 @@ bool BatchWizardExecutor::extractInputArgs(PlugInArgList* pInArgList)
    return true;
 }
 
-WizardNode* BatchWizardExecutor::getValueNode(const WizardObject* pWizard, const string& nodeName,
-                                              const string& nodeType)
+WizardNode* BatchWizardExecutor::getValueNode(const WizardObject* pWizard, const string& connectedItemName,
+                                              const string& nodeName, const string& nodeType) const
 {
    VERIFY(pWizard != NULL);
 
-   vector<WizardItem*> items = pWizard->getItems();
-
    // Loop through all wizard items and find value items.
    // For example, ignore algorithms, importers, etc.
-   for (vector<WizardItem*>::iterator itemIter = items.begin(); itemIter != items.end(); ++itemIter)
+   const vector<WizardItem*>& items = pWizard->getItems();
+   for (vector<WizardItem*>::const_iterator itemIter = items.begin(); itemIter != items.end(); ++itemIter)
    {
       WizardItem* pItem = *itemIter;
-      if (pItem != NULL)
+      if ((pItem != NULL) && (pItem->getType() == "Value"))
       {
-         string itemType = pItem->getType();
-         if (itemType == "Value")
+         // Loop through the nodes for this item.
+         // Really shouldn't have to do this right now, but
+         // may change in the future.  Currently Values only
+         // have one node.
+         const vector<WizardNode*>& nodes = pItem->getOutputNodes();
+         for (vector<WizardNode*>::const_iterator node = nodes.begin(); node != nodes.end(); ++node)
          {
-            const vector<WizardNode*>& nodes = pItem->getOutputNodes();
-
-            // Loop through the nodes for this item.
-            // Really shouldn't have to do this right now, but
-            // may change in the future.  Currently Values only
-            // have one node.
-            for (vector<WizardNode*>::const_iterator node = nodes.begin(); node != nodes.end(); ++node)
+            WizardNode* pNode = *node;
+            if (pNode != NULL)
             {
-               WizardNode* pNode = *node;
-               if (pNode != NULL)
-               {
-                  string currentName = pNode->getName();
-                  string currentType = pNode->getType();
+               string currentName = pNode->getName();
+               string currentType = pNode->getType();
 
-                  if ((currentName == nodeName) && (currentType == nodeType))
+               if ((currentName == nodeName) && (currentType == nodeType))
+               {
+                  const vector<WizardNode*>& connectedNodes = pNode->getConnectedNodes();
+                  for (vector<WizardNode*>::const_iterator iter = connectedNodes.begin();
+                     iter != connectedNodes.end();
+                     ++iter)
                   {
-                     return pNode;
+                     WizardNode* pConnectedNode = *iter;
+                     if (pConnectedNode != NULL)
+                     {
+                        WizardItem* pConnectedItem = pConnectedNode->getItem();
+                        if ((pConnectedItem != NULL) && (pConnectedItem->getName() == connectedItemName))
+                        {
+                           return pNode;
+                        }
+                     }
                   }
                }
             }

@@ -24,7 +24,7 @@ class BatchWizard : Serializable
 {
 public:
    BatchWizard();
-   ~BatchWizard();
+   virtual ~BatchWizard();
 
    void setWizardFilename(const std::string& filename);
    const std::string& getWizardFilename() const;
@@ -44,6 +44,7 @@ public:
    // Input values
    Value* setInputValue(const std::string& itemName, const std::string& nodeName, const std::string& nodeType,
       const DataVariant& value);
+   bool hasInputValue(const std::string& itemName, const std::string& nodeName, const std::string& nodeType) const;
    const std::vector<Value*>& getInputValues() const;
 
    // Execution
@@ -53,8 +54,8 @@ public:
    void getCurrentFilesetFile(const std::string& filesetName, std::string& currentFile) const;
    bool isComplete() const;
 
-   bool toXml(XMLWriter* pXml) const;
-   bool fromXml(DOMNode* pDocument, unsigned int version);
+   virtual bool toXml(XMLWriter* pXml) const;
+   virtual bool fromXml(DOMNode* pDocument, unsigned int version);
 
 private:
    std::string mWizardFilename;

@@ -27,6 +27,8 @@ BatchFileParser::~BatchFileParser()
 
 bool BatchFileParser::setFile(const string& filename)
 {
+   mErrorMessage.clear();
+
    if (filename.empty() == true)
    {
       mErrorMessage = "The filename is empty!";
@@ -86,6 +88,8 @@ const string& BatchFileParser::getError() const
 
 BatchWizard* BatchFileParser::read()
 {
+   mErrorMessage.clear();
+
    if (mpDocument == NULL)
    {
       return NULL;
@@ -119,6 +123,7 @@ BatchWizard* BatchFileParser::read()
    else
    {
       mErrorMessage = "The wizard filename was not found while parsing the XML batch file!";
+      delete pBatchWizard;
       return NULL;
    }
 
@@ -191,7 +196,14 @@ BatchWizard* BatchFileParser::read()
 
          DataVariant valueData;
          valueData.fromXmlString(variantType, valueString);
-         pBatchWizard->setInputValue(itemString, nameString, typeString, valueData);
+
+         if (pBatchWizard->setInputValue(itemString, nameString, typeString, valueData) == NULL)
+         {
+            mErrorMessage = "The batch wizard contains ambiguous value items.  Make sure that "
+               "each value item in the wizard has a unique name.";
+            delete pBatchWizard;
+            return NULL;
+         }
 
          if ((valueString.empty() == false) && (typeString == "File set"))
          {
@@ -208,8 +220,10 @@ BatchWizard* BatchFileParser::read()
    return pBatchWizard;
 }
 
-bool BatchFileParser::parseFilesets() 
+bool BatchFileParser::parseFilesets()
 {
+   mErrorMessage.clear();
+
    if (mpDocument == NULL)
    {
       return false;

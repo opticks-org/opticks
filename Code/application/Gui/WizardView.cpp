@@ -24,6 +24,7 @@
 #include "ConfigurationSettings.h"
 #include "DataVariant.h"
 #include "DataVariantEditor.h"
+#include "DesktopServices.h"
 #include "FileResource.h"
 #include "NameTypeValueDlg.h"
 #include "ObjectResource.h"
@@ -118,6 +119,12 @@ WizardView::~WizardView()
 
    // Destroy the items
    clear();
+}
+
+const std::string& WizardView::getSaveWarningDialogId()
+{
+   static std::string saveWarningDialogId = "{31DC0C77-AE90-44EF-A8E7-28BB574EFA76}";
+   return saveWarningDialogId;
 }
 
 bool WizardView::setWizard(const QString& filename)
@@ -1987,22 +1994,27 @@ bool WizardView::save(const QString& filename)
    }
    else
    {
-      std::string batchFilename = WizardUtilities::deriveBatchWizardFilename(filename.toStdString());
-      bool createdBatchWizard = false;
-
+      // Save a corresponding batch wizard file
       std::auto_ptr<BatchWizard> pBatchWizard(WizardUtilities::createBatchWizardFromWizard(mpWizard.get(),
          filename.toStdString()));
       if (pBatchWizard.get() != NULL)
       {
          std::vector<BatchWizard*> batchWizards;
          batchWizards.push_back(pBatchWizard.get());
-         createdBatchWizard = WizardUtilities::writeBatchWizard(batchWizards, batchFilename);
-      }
 
-      if (createdBatchWizard == false)
+         std::string batchFilename = WizardUtilities::deriveBatchWizardFilename(filename.toStdString());
+         if (WizardUtilities::writeBatchWizard(batchWizards, batchFilename) == false)
+         {
+            QMessageBox::warning(this, "Wizard Builder", "Could not save the '" +
+               QString::fromStdString(batchFilename) + "' file!");
+         }
+      }
+      else
       {
-         QMessageBox::critical(this, "Wizard Builder", "Could not save the '" +
-            QString::fromStdString(batchFilename) + "' file!");
+         Service<DesktopServices>()->showSuppressibleMsgDlg("Wizard Builder", "The wizard was saved successfully, "
+            "but a corresponding batch wizard file could not be created.  Changing each value item to have a "
+            "unique name will allow the batch wizard file to be successfully created.", MESSAGE_WARNING,
+            WizardView::getSaveWarningDialogId(), this);
       }
    }
 

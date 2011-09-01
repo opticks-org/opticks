@@ -38,7 +38,8 @@ public:
 protected:
    bool extractInputArgs(PlugInArgList* pInArgList);
 
-   WizardNode* getValueNode(const WizardObject* pWizard, const std::string& nodeName, const std::string& nodeType);
+   WizardNode* getValueNode(const WizardObject* pWizard, const std::string& connectedItemName,
+      const std::string& nodeName, const std::string& nodeType) const;
    bool runWizard(WizardObject* pWizard);
 
 private:

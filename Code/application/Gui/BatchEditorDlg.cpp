@@ -190,8 +190,7 @@ bool BatchEditorDlg::setBatchWizard(const QString& strXmlFilename)
          BatchFileParser fileParser;
 
          // Test for a valid XML file
-         bool bSuccess = false;
-         bSuccess = fileParser.setFile(strXmlFilename.toStdString());
+         bool bSuccess = fileParser.setFile(strXmlFilename.toStdString());
          if (bSuccess == false)
          {
             QString strError = "Could not read the " + strXmlFilename + " file!";
@@ -213,14 +212,18 @@ bool BatchEditorDlg::setBatchWizard(const QString& strXmlFilename)
          fileParser.getFileSets(mFilesets);
 
          // Get the wizards
-         BatchWizard* pBatchWizard = NULL;
-         pBatchWizard = fileParser.read();
+         BatchWizard* pBatchWizard = fileParser.read();
          while (pBatchWizard != NULL)
          {
             mWizards.push_back(pBatchWizard);
-
-            pBatchWizard = NULL;
             pBatchWizard = fileParser.read();
+         }
+
+         const string& errorMsg = fileParser.getError();
+         if (errorMsg.empty() == false)
+         {
+            QMessageBox::critical(this, "Batch Wizard Editor", QString::fromStdString(errorMsg));
+            return false;
          }
 
          // Update the caption
@@ -294,7 +297,8 @@ BatchWizard* BatchEditorDlg::readWizardFile(const QString& strWizardFilename)
    BatchWizard* pBatchWizard = WizardUtilities::createBatchWizardFromWizard(strWizardFilename.toStdString());
    if (pBatchWizard == NULL)
    {
-      QMessageBox::critical(this, "Batch Wizard Editor", "Could not read the wizard in the file!");
+      QMessageBox::critical(this, "Batch Wizard Editor", "Could not add the wizard.  Make sure that the file "
+         "is a valid wizard file, and that each value item in the wizard has a unique name.");
    }
 
    return pBatchWizard;

@@ -37,9 +37,11 @@
 #include "WizardUtilities.h"
 
 #include <QtCore/QCoreApplication>
-#include <xqilla/xqilla-dom3.hpp>
-#include <vector>
+
 #include <iostream>
+#include <memory>
+#include <vector>
+#include <xqilla/xqilla-dom3.hpp>
 using namespace std;
 
 Application::Application(QCoreApplication& app) :
@@ -183,26 +185,25 @@ bool Application::generateXml()
    for (vector<string>::iterator iter = files.begin(); iter != files.end(); ++iter)
    {
       string wizardFilename = *iter;
-      BatchWizard* pBatchWizard = WizardUtilities::createBatchWizardFromWizard(wizardFilename);
-      if (pBatchWizard != NULL)
+
+      auto_ptr<BatchWizard> pBatchWizard(WizardUtilities::createBatchWizardFromWizard(wizardFilename));
+      if (pBatchWizard.get() != NULL)
       {
          vector<BatchWizard*> batchWizards;
-         batchWizards.push_back(pBatchWizard);
+         batchWizards.push_back(pBatchWizard.get());
          string outputFilename = WizardUtilities::deriveBatchWizardFilename(wizardFilename);
          if (!WizardUtilities::writeBatchWizard(batchWizards, outputFilename))
          {
             reportError("Cannot write out batch wizard file: " + outputFilename);
-            delete pBatchWizard;
             return false;
          }
       }
       else
       {
-         reportError("Cannot load the wizard file: " + wizardFilename);
-         delete pBatchWizard;
+         reportError("Could not create the batch wizard.  Make sure that the wizard file is valid, and that "
+            "each value item in the wizard has a unique name.");
          return false;
       }
-      delete pBatchWizard;
    }
 
    return true;

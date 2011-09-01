@@ -17,6 +17,7 @@
 #include "WizardObjectAdapter.h"
 
 #include <memory>
+#include <string>
 #include <vector>
 
 class WizardGraphicsItem;
@@ -31,6 +32,8 @@ class WizardView : public QGraphicsView
 public:
    WizardView(QGraphicsScene* pScene, QWidget* pParent = NULL);
    virtual ~WizardView();
+
+   static const std::string& getSaveWarningDialogId();
 
    bool setWizard(const QString& filename);
    void setWizard(WizardObject* pObject);

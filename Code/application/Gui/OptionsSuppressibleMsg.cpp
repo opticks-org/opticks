@@ -13,6 +13,7 @@
 #include "MetadataWidget.h"
 #include "OptionsSuppressibleMsg.h"
 #include "PropertiesRasterLayer.h"
+#include "WizardView.h"
 
 #include <QtGui/QCheckBox>
 #include <QtGui/QLabel>
@@ -30,6 +31,8 @@ OptionsSuppressibleMsg::OptionsSuppressibleMsg() :
       PropertiesRasterLayer::getFilterWarningDialogId()));
    entries.push_back(std::make_pair("Warn when entering comma-spaces within vector<string> entries",
       DataVariantEditor::getVectorStringEditWarningDialogId()));
+   entries.push_back(std::make_pair("Warn when the batch wizard file cannot be saved in the wizard builder",
+      WizardView::getSaveWarningDialogId()));
 
    // Everything from this point is generic.
    QWidget* pOptionalMessagesWidget = new QWidget(this);

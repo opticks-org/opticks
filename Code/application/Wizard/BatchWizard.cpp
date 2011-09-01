@@ -158,13 +158,33 @@ bool BatchWizard::removeFileset(BatchFileset* pFileset)
 Value* BatchWizard::setInputValue(const string& itemName, const string& nodeName, const string& nodeType,
                                   const DataVariant& value)
 {
-   Value* pValue = new Value(itemName, nodeName, nodeType, value);
-   if (pValue != NULL)
+   if (hasInputValue(itemName, nodeName, nodeType) == true)
    {
-      mInputValues.push_back(pValue);
+      return NULL;
    }
 
+   Value* pValue = new Value(itemName, nodeName, nodeType, value);
+   mInputValues.push_back(pValue);
+
    return pValue;
+}
+
+bool BatchWizard::hasInputValue(const string& itemName, const string& nodeName, const string& nodeType) const
+{
+   for (vector<Value*>::const_iterator iter = mInputValues.begin(); iter != mInputValues.end(); ++iter)
+   {
+      Value* pValue = *iter;
+      if (pValue != NULL)
+      {
+         if ((pValue->getItemName() == itemName) && (pValue->getNodeName() == nodeName) &&
+            (pValue->getNodeType() == nodeType))
+         {
+            return true;
+         }
+      }
+   }
+
+   return false;
 }
 
 const vector<Value*>& BatchWizard::getInputValues() const
