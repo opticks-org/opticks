@@ -201,6 +201,12 @@ bool ShapeFileImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
 
    FAIL_IF(pView == NULL, "Could not find view to insert into.", return false);
 
+   // The redo actions associated with an undo group for importing a shape file will not work. The FeatureClass
+   // associated with the annotation element for the shape file layer is lost when the group undo is performed
+   // and can not be restored with the redo actions. Set undo lock for the import and to prevent problems, clear the
+   // undo stack if import was successful.
+   UndoLock undoLock(pView);
+
    AnnotationElement* pAnno = pInArgList->getPlugInArgValue<AnnotationElement>(Importer::ImportElementArg());
    FAIL_IF(pAnno == NULL, "Could not find created element.", return false);
 
@@ -242,8 +248,6 @@ bool ShapeFileImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
 
    FAIL_IF(pAnno->setGeocentric(true) == false, "Could not set the element to geocentric.", return false)
 
-   UndoGroup group(pView, "Set Object Properties");
-
    string layerName = mpFeatureClass->getLayerName();
 
    pAnnotationLayer = static_cast<AnnotationLayer*>(pLayerList->getLayer(ANNOTATION, pAnno, layerName));
@@ -277,6 +281,9 @@ bool ShapeFileImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
    pAny.release();
    mpProgress->updateProgress("Complete", 100, NORMAL);
    pStep->finalize(Message::Success);
+
+   // import was successful, so clear the undo stack
+   pView->clearUndo();
 
    return true;
 }
