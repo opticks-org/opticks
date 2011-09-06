@@ -222,10 +222,11 @@ void GraphicElementImp::georeferenceModified(Subject &subject, const std::string
 
    // If the layer is hidden, do not force an update.
    // This is done to ensure that updateGeo is not called needlessly as it has large performance implications.
+   SpatialDataView* pView(NULL);
    Layer* pLayer = pGroup->getLayer();
    if (pLayer != NULL)
    {
-      SpatialDataView* pView = dynamic_cast<SpatialDataView*>(pLayer->getView());
+      pView = dynamic_cast<SpatialDataView*>(pLayer->getView());
       if (pView != NULL && pView->isLayerDisplayed(pLayer) == false)
       {
          mpView.reset(pView);
@@ -238,4 +239,8 @@ void GraphicElementImp::georeferenceModified(Subject &subject, const std::string
    setInteractive(false);
    pGroup->updateGeo();
    setInteractive(interactive);
+   if (pView != NULL)
+   {
+      pView->clearUndo();
+   }
 }

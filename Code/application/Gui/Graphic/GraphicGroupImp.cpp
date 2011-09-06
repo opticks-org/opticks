@@ -36,6 +36,7 @@
 #include "xmlreader.h"
 
 #include <algorithm>
+
 using namespace std;
 
 XERCES_CPP_NAMESPACE_USE

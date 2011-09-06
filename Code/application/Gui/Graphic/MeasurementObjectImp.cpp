@@ -766,6 +766,15 @@ void MeasurementObjectImp::georeferenceModified(Subject &subject, const std::str
 {
    updateGeo();
    generateGeoStrings();
+   Layer* pLayer = getLayer();
+   if (pLayer != NULL)
+   {
+      SpatialDataView* pView = dynamic_cast<SpatialDataView*>(pLayer->getView());
+      if (pView != NULL)
+      {
+         pView->clearUndo();
+      }
+   }
 }
 
 

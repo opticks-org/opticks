@@ -34,10 +34,12 @@
 #include "RasterElement.h"
 #include "SpatialDataView.h"
 #include "SpatialDataWindow.h"
+#include "Undo.h"
 #include "UtilityServices.h"
 
 #include <algorithm>
 #include <boost/bind.hpp>
+#include <memory>
 
 REGISTER_PLUGIN_BASIC(OpticksGeoreference, GeoreferencePlugIn);
 
@@ -261,9 +263,11 @@ bool GeoreferencePlugIn::execute(PlugInArgList* pInParam, PlugInArgList* pOutPar
       LayerList* pLayerList = mpView->getLayerList();
       if (pLayerList != NULL)
       {
+         auto_ptr<UndoGroup> pUndoGroup;
          LatLonLayer* pLatLonLayer = static_cast<LatLonLayer*>(pLayerList->getLayer(LAT_LONG, mpRaster, mResultsName));
          if (pLatLonLayer == NULL)
          {
+            pUndoGroup.reset(new UndoGroup(mpView, "Add Lat/Lon Layer"));
             pLatLonLayer = static_cast<LatLonLayer*>(mpView->createLayer(LAT_LONG, mpRaster, mResultsName));
          }
 
