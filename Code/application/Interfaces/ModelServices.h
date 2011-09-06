@@ -381,11 +381,26 @@ public:
     *             does not exist.
     *           - The element could not be created (i.e. the element already
     *             exists).
+    *           - The element type is RasterElement with a processing location of \link ProcessingLocation::IN_MEMORY IN_MEMORY \endlink
+    *             and the required amount of memory could not be allocated.
+    *
+    *  @warning For data element type RasterElement with a processing location of \link ProcessingLocation::ON_DISK ON_DISK \endlink
+    *           or \link ProcessingLocation::ON_DISK_READ_ONLY ON_DISK_READ_ONLY \endlink, this method will return a non-\c NULL pointer
+    *           even if the temporary file required for the element can't be created. This behavior is necessary
+    *           to prevent performance problems with importers. If you use this method to create an
+    *           \link ProcessingLocation::ON_DISK ON_DISK \endlink or \link ProcessingLocation::ON_DISK_READ_ONLY ON_DISK_READ_ONLY \endlink
+    *           raster element, a \c NULL check on the return from this method will not insure that the
+    *           returned data element is usable. A better way is to check the return from a call to
+    *           RasterElement::createDefaultPager() which will return \c false if the associated temporary file
+    *           can not be created. For an even simpler approach, use RasterUtilities::createRasterElement() instead of
+    *           this method to create the data element. RasterUtilities::createRasterElement() will return \c NULL
+    *           if either the memory can't be allocated or the temporary file can't be created.
     *
     *  @notify  This method will notify signalElementCreated() with
     *           boost::any<DataElement*>.
     *
-    *  @see     createElement(const std::string&, const std::string&, DataElement*)
+    *  @see     createElement(const std::string&, const std::string&, DataElement*),
+    *           RasterUtilities::createRasterElement()
     */
    virtual DataElement* createElement(const DataDescriptor* pDescriptor) = 0;
 
