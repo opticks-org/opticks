@@ -845,10 +845,10 @@ ViewImp::SubImageIteratorImp::SubImageIteratorImp(ViewImp *pView, const QSize &t
 
    // Calculate the total number of sub-images.
    //
-   mTotalTilesX = totalSize.width() / subImageSize.width() +
-                ((totalSize.width() % subImageSize.width() == 0) ? 0 : 1);
-   mTotalTilesY = totalSize.height() / subImageSize.height() +
-                ((totalSize.height() % subImageSize.height() == 0) ? 0 : 1);
+   double totalTilesX = static_cast<double>(totalSize.width()) / static_cast<double>(subImageSize.width());
+   double totalTilesY = static_cast<double>(totalSize.height()) / static_cast<double>(subImageSize.height());
+   mTotalTilesX = static_cast<int>(ceil(totalTilesX));
+   mTotalTilesY = static_cast<int>(ceil(totalTilesY));
 
    // resize the view to the requested sub-image size (pixel coordinates)
    //
@@ -856,22 +856,47 @@ ViewImp::SubImageIteratorImp::SubImageIteratorImp(ViewImp *pView, const QSize &t
 
    // move the view to the first sub-image
    //
-   double extentMinX;
-   double extentMinY;
-   double extentMaxX;
-   double extentMaxY;
-   mpView->getExtents(extentMinX, extentMinY, extentMaxX, extentMaxY);
-   LocationType worldTileSize(fabs(extentMaxX - extentMinX) / mTotalTilesX, 0);
-   if (mpView->getDataOrigin() == LOWER_LEFT)
+
+   // Calculate the origin location based on the current visible corners
+   mStartLowerLeft = LocationType(mRestoreLowerLeft.mX, mRestoreLowerLeft.mY);
+
+   double inputImageAspect = fabs(mRestoreUpperRight.mX - mRestoreLowerLeft.mX) /
+      fabs(mRestoreUpperRight.mY - mRestoreLowerLeft.mY);
+   double outputImageAspect = static_cast<double>(totalSize.width()) / static_cast<double>(totalSize.height());
+
+   if (inputImageAspect < outputImageAspect)
    {
-      worldTileSize.mY = fabs(extentMaxY - extentMinY) / mTotalTilesY;
-      mStartLowerLeft = LocationType(extentMinX, extentMinY);
+      // The image will be drawn to the left, so center in the x-direction
+      double deltaX = (outputImageAspect * fabs(mRestoreUpperRight.mY - mRestoreLowerLeft.mY) -
+         fabs(mRestoreUpperRight.mX - mRestoreLowerLeft.mX)) / 2.0;
+      mStartLowerLeft.mX -= deltaX;
    }
    else
    {
-      worldTileSize.mY = -(fabs(extentMaxY - extentMinY) / mTotalTilesY);
-      mStartLowerLeft = LocationType(extentMinX, extentMaxY);
+      // The image will be drawn along the top, so center in the y-direction
+      double deltaY = ((fabs(mRestoreUpperRight.mX - mRestoreLowerLeft.mX) / outputImageAspect) -
+         fabs(mRestoreUpperRight.mY - mRestoreLowerLeft.mY)) / 2.0;
+      mStartLowerLeft.mY += deltaY;
    }
+
+   // Calculate the size of each tile in world pixels
+   LocationType worldTileSize(fabs(mRestoreUpperRight.mX - mRestoreLowerLeft.mX) / totalTilesX,
+      fabs(mRestoreUpperRight.mY - mRestoreLowerLeft.mY) / totalTilesY);
+
+   double tileAspect = worldTileSize.mX / worldTileSize.mY;
+   double subImageAspect = static_cast<double>(subImageSize.width()) / static_cast<double>(subImageSize.height());
+
+   if (tileAspect < subImageAspect)
+   {
+      worldTileSize.mX = subImageAspect * worldTileSize.mY;
+   }
+   else
+   {
+      worldTileSize.mY = worldTileSize.mX / subImageAspect;
+   }
+
+   worldTileSize.mY *= -1.0;
+
    LocationType upperRight = mStartLowerLeft + worldTileSize;
    mpView->zoomToBox(mStartLowerLeft, upperRight);
 }

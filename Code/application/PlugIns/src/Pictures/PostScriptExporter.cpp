@@ -130,7 +130,13 @@ bool PostScriptExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutA
          QImage subImage;
          if (!pSubImage->next(subImage))
          {
-            break;
+            if (pProgress != NULL)
+            {
+               pProgress->updateProgress("An error occurred when generating the image", 0, ERRORS);
+            }
+
+            delete pSubImage;
+            return false;
          }
 
          writeImageSegment(subImage, origin);

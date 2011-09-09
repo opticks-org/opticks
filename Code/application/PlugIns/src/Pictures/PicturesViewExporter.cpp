@@ -148,7 +148,13 @@ bool PicturesViewExporter::generateImage(QImage &image)
          QImage subImage;
          if (!pSubImage->next(subImage))
          {
-            break;
+            if (mpProgress != NULL)
+            {
+               mpProgress->updateProgress("An error occurred when generating the image", 0, ERRORS);
+            }
+
+            delete pSubImage;
+            return false;
          }
          painter.drawImage(origin, subImage);
          int newX = origin.x() + subImage.width();
