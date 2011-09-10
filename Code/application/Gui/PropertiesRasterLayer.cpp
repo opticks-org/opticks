@@ -39,7 +39,9 @@
 #include "RasterLayerImp.h"
 #include "RasterUtilities.h"
 #include "RegionUnitsComboBox.h"
+#include "SignalBlocker.h"
 #include "StretchTypeComboBox.h"
+#include "StringUtilities.h"
 #include "Undo.h"
 #include "View.h"
 
@@ -56,8 +58,11 @@ PropertiesRasterLayer::PropertiesRasterLayer() :
 
    QLabel* pDisplayModeLabel = new QLabel("Display Mode:", pDisplayWidget);
    mpDisplayModeCombo = new QComboBox(pDisplayWidget);
-   mpDisplayModeCombo->addItem("Grayscale");
-   mpDisplayModeCombo->addItem("RGB");
+   vector<string> modes = StringUtilities::getAllEnumValuesAsDisplayString<DisplayMode>();
+   for (vector<string>::iterator it = modes.begin(); it != modes.end(); ++it)
+   {
+      mpDisplayModeCombo->addItem(QString::fromStdString(*it));
+   }
    mpComplexComponentLabel = new QLabel("Complex Component:", pDisplayWidget);
    mpComplexComponentCombo = new ComplexComponentComboBox(pDisplayWidget);
    QLabel* pOpacityLabel = new QLabel("Opacity:", pDisplayWidget);
@@ -65,6 +70,7 @@ PropertiesRasterLayer::PropertiesRasterLayer() :
    mpOpacitySpin->setMinimum(0);
    mpOpacitySpin->setMaximum(255);
    mpOpacitySpin->setSingleStep(1);
+   mDisplayConfigModifier.setModified(false);
 
    LabeledSection* pDisplaySection = new LabeledSection(pDisplayWidget, "Display Configuration", this);
 
@@ -112,6 +118,7 @@ PropertiesRasterLayer::PropertiesRasterLayer() :
 
    mpAddFavoriteGrayAction = new QAction("Add Stretch to Favorites", this);
    mpRemoveFavoriteAction = new QAction("Remove Stretch from Favorites...", this);
+   mGrayscaleModifier.setModified(false);
 
    LabeledSection* pGrayscaleSection = new LabeledSection(pGrayscaleWidget, "Grayscale", this);
 
@@ -212,6 +219,7 @@ PropertiesRasterLayer::PropertiesRasterLayer() :
    mpAddFavoriteRedAction = new QAction("Add Red Stretch to Favorites", pRgbWidget);
    mpAddFavoriteGreenAction = new QAction("Add Green Stretch to Favorites", pRgbWidget);
    mpAddFavoriteBlueAction = new QAction("Add Blue Stretch to Favorites", pRgbWidget);
+   mRgbModifier.setModified(false);
 
    LabeledSection* pRgbSection = new LabeledSection(pRgbWidget, "RGB", this);
 
@@ -275,6 +283,7 @@ PropertiesRasterLayer::PropertiesRasterLayer() :
 
    filterNames.sort();
    mpFilterList->addItems(filterNames);
+   mGraphicsAccModifier.setModified(false);
 
    QStackedWidget* pAccelerationStack = new QStackedWidget(this);
    LabeledSection* pAccelerationSection = new LabeledSection(pAccelerationStack,
@@ -316,22 +325,35 @@ PropertiesRasterLayer::PropertiesRasterLayer() :
    setSizeHint(600, 610);
 
    // Connections
+   VERIFYNR(mDisplayConfigModifier.attachSignal(mpDisplayModeCombo, SIGNAL(currentIndexChanged(int))));
    VERIFYNR(connect(mpGrayElementCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateDisplayedBandCombo(int))));
+   VERIFYNR(mGrayscaleModifier.attachSignal(mpGrayElementCombo, SIGNAL(currentIndexChanged(int))));
    VERIFYNR(connect(mpRedElementCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateDisplayedBandCombo(int))));
+   VERIFYNR(mRgbModifier.attachSignal(mpRedElementCombo, SIGNAL(currentIndexChanged(int))));
    VERIFYNR(connect(mpGreenElementCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateDisplayedBandCombo(int))));
+   VERIFYNR(mRgbModifier.attachSignal(mpGreenElementCombo, SIGNAL(currentIndexChanged(int))));
    VERIFYNR(connect(mpBlueElementCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateDisplayedBandCombo(int))));
+   VERIFYNR(mRgbModifier.attachSignal(mpBlueElementCombo, SIGNAL(currentIndexChanged(int))));
    VERIFYNR(connect(mpGrayBandCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStretchValuesFromBand())));
+   VERIFYNR(mGrayscaleModifier.attachSignal(mpGrayBandCombo, SIGNAL(currentIndexChanged(int))));
    VERIFYNR(connect(mpRedBandCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStretchValuesFromBand())));
+   VERIFYNR(mRgbModifier.attachSignal(mpRedBandCombo, SIGNAL(currentIndexChanged(int))));
    VERIFYNR(connect(mpGreenBandCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStretchValuesFromBand())));
+   VERIFYNR(mRgbModifier.attachSignal(mpGreenBandCombo, SIGNAL(currentIndexChanged(int))));
    VERIFYNR(connect(mpBlueBandCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStretchValuesFromBand())));
+   VERIFYNR(mRgbModifier.attachSignal(mpBlueBandCombo, SIGNAL(currentIndexChanged(int))));
    VERIFYNR(connect(mpGrayUnitsCombo, SIGNAL(valueChanged(RegionUnits)), this,
       SLOT(updateStretchValuesFromUnits(RegionUnits))));
+   VERIFYNR(mGrayscaleModifier.attachSignal(mpGrayUnitsCombo, SIGNAL(valueChanged(RegionUnits))));
    VERIFYNR(connect(mpRedUnitsCombo, SIGNAL(valueChanged(RegionUnits)), this,
       SLOT(updateStretchValuesFromUnits(RegionUnits))));
+   VERIFYNR(mRgbModifier.attachSignal(mpRedUnitsCombo, SIGNAL(valueChanged(RegionUnits))));
    VERIFYNR(connect(mpGreenUnitsCombo, SIGNAL(valueChanged(RegionUnits)), this,
       SLOT(updateStretchValuesFromUnits(RegionUnits))));
+   VERIFYNR(mRgbModifier.attachSignal(mpGreenUnitsCombo, SIGNAL(valueChanged(RegionUnits))));
    VERIFYNR(connect(mpBlueUnitsCombo, SIGNAL(valueChanged(RegionUnits)), this,
       SLOT(updateStretchValuesFromUnits(RegionUnits))));
+   VERIFYNR(mRgbModifier.attachSignal(mpBlueUnitsCombo, SIGNAL(valueChanged(RegionUnits))));
    VERIFYNR(connect(pMenu, SIGNAL(triggered(QAction*)), this, SLOT(setDisplayBands(QAction*))));
    VERIFYNR(connect(mpGrayStretchMenu, SIGNAL(aboutToShow()), this, SLOT(initializeStretchMenu())));
    VERIFYNR(connect(mpGrayStretchMenu, SIGNAL(triggered(QAction*)), this, SLOT(setGrayStretch(QAction*))));
@@ -339,7 +361,10 @@ PropertiesRasterLayer::PropertiesRasterLayer() :
    VERIFYNR(connect(mpRgbStretchMenu, SIGNAL(triggered(QAction*)), this, SLOT(setRgbStretch(QAction*))));
    VERIFYNR(connect(mpRemoveFavoriteAction, SIGNAL(triggered()), this, SLOT(removeStretchFavorite())));
    VERIFYNR(connect(mpAccelerationCheck, SIGNAL(toggled(bool)), this, SLOT(enableFilterCheck(bool))));
+   VERIFYNR(mGraphicsAccModifier.attachSignal(mpAccelerationCheck, SIGNAL(toggled(bool))));
    VERIFYNR(connect(mpFilterCheck, SIGNAL(toggled(bool)), this, SLOT(enableFilterCombo(bool))));
+   VERIFYNR(mGraphicsAccModifier.attachSignal(mpFilterCheck, SIGNAL(toggled(bool))));
+   VERIFYNR(mGraphicsAccModifier.attachSignal(mpFilterList, SIGNAL(itemSelectionChanged())));
 }
 
 PropertiesRasterLayer::~PropertiesRasterLayer()
@@ -528,67 +553,76 @@ bool PropertiesRasterLayer::applyChanges()
    UndoGroup group(mpRasterLayer->getView(), actionText);
 
    // Display configuration
-   DisplayMode displayMode = GRAYSCALE_MODE;
-   if (mpDisplayModeCombo->currentIndex() == 1)
+   if (mDisplayConfigModifier.isModified())
    {
-      displayMode = RGB_MODE;
+      DisplayMode displayMode =
+         StringUtilities::fromDisplayString<DisplayMode>(mpDisplayModeCombo->currentText().toStdString());
+
+      mpRasterLayer->setDisplayMode(displayMode);
+      mpRasterLayer->setComplexComponent(mpComplexComponentCombo->getCurrentValue());
+      mpRasterLayer->setAlpha(static_cast<unsigned int>(mpOpacitySpin->value()));
    }
 
-   mpRasterLayer->setDisplayMode(displayMode);
-   mpRasterLayer->setComplexComponent(mpComplexComponentCombo->getCurrentValue());
-   mpRasterLayer->setAlpha(static_cast<unsigned int>(mpOpacitySpin->value()));
-
    // Grayscale
-   RasterElement* pGrayElement = NULL;
-   DimensionDescriptor grayBand = getSelectedBand(GRAY, pGrayElement);
-   mpRasterLayer->setStretchType(GRAYSCALE_MODE, mpGrayStretchTypeCombo->getCurrentValue());
-   mpRasterLayer->setDisplayedBand(GRAY, grayBand, pGrayElement);
-   mpRasterLayer->setStretchUnits(GRAY, mpGrayUnitsCombo->getCurrentValue());
-   mpRasterLayer->setStretchValues(GRAY, mpGrayLowerSpin->value(), mpGrayUpperSpin->value());
+   if (mGrayscaleModifier.isModified())
+   {
+      RasterElement* pGrayElement = NULL;
+      DimensionDescriptor grayBand = getSelectedBand(GRAY, pGrayElement);
+      mpRasterLayer->setStretchType(GRAYSCALE_MODE, mpGrayStretchTypeCombo->getCurrentValue());
+      mpRasterLayer->setDisplayedBand(GRAY, grayBand, pGrayElement);
+      mpRasterLayer->setStretchUnits(GRAY, mpGrayUnitsCombo->getCurrentValue());
+      mpRasterLayer->setStretchValues(GRAY, mpGrayLowerSpin->value(), mpGrayUpperSpin->value());
+   }
 
    // RGB
-   mpRasterLayer->setStretchType(RGB_MODE, mpRgbStretchTypeCombo->getCurrentValue());
+   if (mRgbModifier.isModified())
+   {
+      mpRasterLayer->setStretchType(RGB_MODE, mpRgbStretchTypeCombo->getCurrentValue());
 
-   RasterElement* pRedElement = NULL;
-   DimensionDescriptor redBand = getSelectedBand(RED, pRedElement);
-   mpRasterLayer->setDisplayedBand(RED, redBand, pRedElement);
-   mpRasterLayer->setStretchUnits(RED, mpRedUnitsCombo->getCurrentValue());
-   mpRasterLayer->setStretchValues(RED, mpRedLowerSpin->value(), mpRedUpperSpin->value());
+      RasterElement* pRedElement = NULL;
+      DimensionDescriptor redBand = getSelectedBand(RED, pRedElement);
+      mpRasterLayer->setDisplayedBand(RED, redBand, pRedElement);
+      mpRasterLayer->setStretchUnits(RED, mpRedUnitsCombo->getCurrentValue());
+      mpRasterLayer->setStretchValues(RED, mpRedLowerSpin->value(), mpRedUpperSpin->value());
 
-   RasterElement* pGreenElement = NULL;
-   DimensionDescriptor greenBand = getSelectedBand(GREEN, pGreenElement);
-   mpRasterLayer->setDisplayedBand(GREEN, greenBand, pGreenElement);
-   mpRasterLayer->setStretchUnits(GREEN, mpGreenUnitsCombo->getCurrentValue());
-   mpRasterLayer->setStretchValues(GREEN, mpGreenLowerSpin->value(), mpGreenUpperSpin->value());
+      RasterElement* pGreenElement = NULL;
+      DimensionDescriptor greenBand = getSelectedBand(GREEN, pGreenElement);
+      mpRasterLayer->setDisplayedBand(GREEN, greenBand, pGreenElement);
+      mpRasterLayer->setStretchUnits(GREEN, mpGreenUnitsCombo->getCurrentValue());
+      mpRasterLayer->setStretchValues(GREEN, mpGreenLowerSpin->value(), mpGreenUpperSpin->value());
 
-   RasterElement* pBlueElement = NULL;
-   DimensionDescriptor blueBand = getSelectedBand(BLUE, pBlueElement);
-   mpRasterLayer->setDisplayedBand(BLUE, blueBand, pBlueElement);
-   mpRasterLayer->setStretchUnits(BLUE, mpBlueUnitsCombo->getCurrentValue());
-   mpRasterLayer->setStretchValues(BLUE, mpBlueLowerSpin->value(), mpBlueUpperSpin->value());
+      RasterElement* pBlueElement = NULL;
+      DimensionDescriptor blueBand = getSelectedBand(BLUE, pBlueElement);
+      mpRasterLayer->setDisplayedBand(BLUE, blueBand, pBlueElement);
+      mpRasterLayer->setStretchUnits(BLUE, mpBlueUnitsCombo->getCurrentValue());
+      mpRasterLayer->setStretchValues(BLUE, mpBlueLowerSpin->value(), mpBlueUpperSpin->value());
+   }
 
    // Graphics acceleration
-   mpRasterLayer->enableGpuImage(mpAccelerationCheck->isChecked());
-
-   vector<string> filterNames;
-   if (mpFilterCheck->isChecked() == true)
+   if (mGraphicsAccModifier.isModified())
    {
-      QList<QListWidgetItem*> selectedFilters = mpFilterList->selectedItems();
-      for (int i = 0; i < selectedFilters.count(); ++i)
+      mpRasterLayer->enableGpuImage(mpAccelerationCheck->isChecked());
+
+      vector<string> filterNames;
+      if (mpFilterCheck->isChecked() == true)
       {
-         QListWidgetItem* pItem = selectedFilters[i];
-         if (pItem != NULL)
+         QList<QListWidgetItem*> selectedFilters = mpFilterList->selectedItems();
+         for (int i = 0; i < selectedFilters.count(); ++i)
          {
-            QString filterName = pItem->text();
-            if (filterName.isEmpty() == false)
+            QListWidgetItem* pItem = selectedFilters[i];
+            if (pItem != NULL)
             {
-               filterNames.push_back(filterName.toStdString());
+               QString filterName = pItem->text();
+               if (filterName.isEmpty() == false)
+               {
+                  filterNames.push_back(filterName.toStdString());
+               }
             }
          }
       }
-   }
 
-   mpRasterLayer->enableFilters(filterNames);
+      mpRasterLayer->enableFilters(filterNames);
+   }
 
    // Refresh the view
    View* pView = mpRasterLayer->getView();
@@ -731,8 +765,15 @@ void PropertiesRasterLayer::setStretchUnits(RasterChannelType channel, RegionUni
    if (mpRasterLayer != NULL)
    {
       // Update the cube layer to display the currently selected bands
-      // so that the stretch values will be converted properly
+      // so that the stretch values will be converted properly.
+      // Block signals so observers ignore this temporary set and reset.
       UndoLock lock(mpRasterLayer->getView());
+      SignalBlocker sigBlock(*dynamic_cast<Subject*>(mpRasterLayer));
+      RasterLayerImp* pLayerImp = dynamic_cast<RasterLayerImp*>(mpRasterLayer);
+      if (pLayerImp != NULL)
+      {
+         pLayerImp->blockSignals(true);
+      }
 
       RasterElement* pRasterElement = mpRasterLayer->getDisplayedRasterElement(channel);
       DimensionDescriptor band = mpRasterLayer->getDisplayedBand(channel);
@@ -745,8 +786,12 @@ void PropertiesRasterLayer::setStretchUnits(RasterChannelType channel, RegionUni
       dNewLower = mpRasterLayer->convertStretchValue(channel, currentUnits, dLower, newUnits);
       dNewUpper = mpRasterLayer->convertStretchValue(channel, currentUnits, dUpper, newUnits);
 
-      // Reset the cube layer to the actual displayed bands
+      // Reset the cube layer to the actual displayed bands and remove block on Qt signals
       mpRasterLayer->setDisplayedBand(channel, band, pRasterElement);
+      if (pLayerImp != NULL)
+      {
+         pLayerImp->blockSignals(false);
+      }
    }
 
    // Display the converted values

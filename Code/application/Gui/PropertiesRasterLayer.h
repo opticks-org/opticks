@@ -12,6 +12,7 @@
 
 #include "DimensionDescriptor.h"
 #include "LabeledSectionGroup.h"
+#include "Modifier.h"
 #include "TypesFile.h"
 
 #include <string>
@@ -84,6 +85,7 @@ private:
    QLabel* mpComplexComponentLabel;
    ComplexComponentComboBox* mpComplexComponentCombo;
    QSpinBox* mpOpacitySpin;
+   Modifier mDisplayConfigModifier;
 
    // Grayscale
    QComboBox* mpGrayElementCombo;
@@ -93,6 +95,7 @@ private:
    RegionUnits mGrayUnits;
    RegionUnitsComboBox* mpGrayUnitsCombo;
    StretchTypeComboBox* mpGrayStretchTypeCombo;
+   Modifier mGrayscaleModifier;
 
    QMenu* mpGrayStretchMenu;
    QAction* mpAddFavoriteGrayAction;
@@ -105,6 +108,7 @@ private:
    QDoubleSpinBox* mpRedUpperSpin;
    RegionUnits mRedUnits;
    RegionUnitsComboBox* mpRedUnitsCombo;
+   Modifier mRgbModifier;
 
    QComboBox* mpGreenElementCombo;
    QComboBox* mpGreenBandCombo;
@@ -132,6 +136,7 @@ private:
    QCheckBox* mpAccelerationCheck;
    QCheckBox* mpFilterCheck;
    QListWidget* mpFilterList;
+   Modifier mGraphicsAccModifier;
 };
 
 #endif
