@@ -155,6 +155,8 @@ SpatialDataView* ChippingWindow::createChipView() const
             }
          }
       }
+
+      pChipView->resetOrientation();
    }
 
    return pChipView;
