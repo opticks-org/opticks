@@ -1048,7 +1048,10 @@ void ImportOptionsDlg::updateEditDataset()
    if (selectedItems.empty() == true)
    {
       // User selected a file item, which clears the selection, so reset the current item to the dataset
+      bool autoScroll = mpDatasetTree->hasAutoScroll();
+      mpDatasetTree->setAutoScroll(false);
       selectCurrentDatasetItem();
+      mpDatasetTree->setAutoScroll(autoScroll);
       return;
    }
 
