@@ -476,7 +476,6 @@ void AnimationToolBarImp::updateFrameRange()
    int lineStep = 1;
    int pageStep = 1;
    double currentFrame = -1.0;
-   int timestampWidth = 0;
 
    if (mpController != NULL)
    {
@@ -513,26 +512,6 @@ void AnimationToolBarImp::updateFrameRange()
 
       // Define the page step size so ten steps for the entire range
       pageStep = numSteps / 10;
-
-      // Determine the maximum width of the timestamp
-      FrameType frameType = mpController->getFrameType();
-      QString sample;
-      if (frameType == FRAME_ID)
-      {
-         int digits = 0;
-         if (stopFrame > -1)
-         {
-            digits = log10(stopFrame+1) + 1;
-         }
-         sample = QString("Frame: %1/%2").arg(0, digits, 10, QChar('0')).arg(static_cast<int>(stopFrame + 1));
-      }
-      else
-      {
-         sample = "yyyy/MM/dd hh:mm:ss.zzzZ";
-      }
-
-      QFontMetrics metric(mpTimestampLabel->font());
-      timestampWidth = metric.width(sample);
    }
 
    // Update the slider range
@@ -543,13 +522,8 @@ void AnimationToolBarImp::updateFrameRange()
    // update bumpers
    updateBumpers();
 
-   mpTimestampLabel->setFixedWidth(timestampWidth);
-
    // Update the slider value
    updateCurrentFrame(currentFrame);
-
-   // Make sure the toolbar updates its size with the label width changing
-   adjustSize();
 }
 
 void AnimationToolBarImp::updateCurrentFrame(double frameValue)
@@ -575,7 +549,7 @@ void AnimationToolBarImp::updateCurrentFrame(double frameValue)
       if (mHideTimestamp == false)
       {
          strFrameText = AnimationImp::frameToQString(frameValue, mpController->getFrameType(),
-            static_cast<unsigned int> (stopFrame - startFrame + 1.0));
+            static_cast<unsigned int> (stopFrame - startFrame + 1.0)) + " ";
       }
    }
 
