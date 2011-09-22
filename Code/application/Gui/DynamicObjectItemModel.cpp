@@ -10,6 +10,7 @@
 #include "DynamicObject.h"
 #include "DynamicObjectItemModel.h"
 #include "Slot.h"
+#include "TypeConverter.h"
 
 #include <algorithm>
 using namespace std;
@@ -186,7 +187,7 @@ QVariant DynamicObjectItemModel::data(const QModelIndex& index, int role) const
             if (column == 1)
             {
                // Value
-               if (attributeType == "DynamicObject")
+               if (attributeType == TypeConverter::toString<DynamicObject>())
                {
                   DynamicObject* pObject = dv_cast<DynamicObject>(pValue);
                   if (pObject != NULL)
@@ -292,18 +293,20 @@ void DynamicObjectItemModel::modifyAttribute(Subject& subject, const string& sig
    }
 
    // Update the value in the wrapper and get its row
+   AttributeWrapper* pWrapper = NULL;
    int row = 0;
 
    const vector<AttributeWrapper*>& wrappers = pDynamicObjectWrapper->getChildren();
    for (vector<AttributeWrapper*>::size_type i = 0; i < wrappers.size(); ++i)
    {
-      AttributeWrapper* pWrapper = wrappers[i];
-      if (pWrapper != NULL)
+      AttributeWrapper* pCurrentWrapper = wrappers[i];
+      if (pCurrentWrapper != NULL)
       {
-         const string& currentName = pWrapper->getName();
+         const string& currentName = pCurrentWrapper->getName();
          if (currentName == attributeName)
          {
-            pWrapper->setValue(pAttributeValue);
+            pCurrentWrapper->setValue(pAttributeValue);
+            pWrapper = pCurrentWrapper;
             row = static_cast<int>(i);
             break;
          }
@@ -319,6 +322,17 @@ void DynamicObjectItemModel::modifyAttribute(Subject& subject, const string& sig
    if ((startIndex.isValid() == true) && (endIndex.isValid() == true))
    {
       emit dataChanged(startIndex, endIndex);
+   }
+
+   // Initialize a DynamicObject item
+   string attributeType = pAttributeValue->getTypeName();
+   if (attributeType == TypeConverter::toString<DynamicObject>())
+   {
+      DynamicObject* pNewDynamicObject = dv_cast<DynamicObject>(pAttributeValue);
+      if (pNewDynamicObject != NULL)
+      {
+         initializeDynamicObjectItem(pWrapper, pNewDynamicObject);
+      }
    }
 }
 
@@ -412,7 +426,7 @@ DynamicObjectItemModel::addAttributeItem(AttributeWrapper* pParentWrapper, const
    {
       // Initialize a DynamicObject item
       string attributeType = pValue->getTypeName();
-      if (attributeType == "DynamicObject")
+      if (attributeType == TypeConverter::toString<DynamicObject>())
       {
          DynamicObject* pDynamicObject = dv_cast<DynamicObject>(pValue);
          if (pDynamicObject != NULL)
@@ -439,7 +453,7 @@ void DynamicObjectItemModel::removeAttributeItem(AttributeWrapper* pParentWrappe
    DataVariant* pParentValue = pParentWrapper->getValue();
    if ((pParentValue != NULL) && (pParentValue->isValid() == true))
    {
-      if (pParentValue->getTypeName() == "DynamicObject")
+      if (pParentValue->getTypeName() == TypeConverter::toString<DynamicObject>())
       {
          DynamicObject* pDynamicObject = dv_cast<DynamicObject>(pParentValue);
          if (pDynamicObject != NULL)
@@ -460,7 +474,7 @@ void DynamicObjectItemModel::removeAttributeItem(AttributeWrapper* pParentWrappe
    if (pValue->isValid() == true)
    {
       string attributeType = pValue->getTypeName();
-      if (attributeType == "DynamicObject")
+      if (attributeType == TypeConverter::toString<DynamicObject>())
       {
          DynamicObject* pDynamicObject = dv_cast<DynamicObject>(pValue);
          if (pDynamicObject != NULL)
@@ -524,10 +538,13 @@ void DynamicObjectItemModel::initializeDynamicObjectItem(AttributeWrapper* pWrap
 
    // Add the dynamic object to the map
    map<DynamicObject*, AttributeWrapper*>::iterator iter = mDynamicObjects.find(pDynamicObject);
-   if (iter == mDynamicObjects.end())
+   if (iter != mDynamicObjects.end())
    {
-      mDynamicObjects[pDynamicObject] = pWrapper;
+      // The dynamic object item is already initialized
+      return;
    }
+
+   mDynamicObjects[pDynamicObject] = pWrapper;
 
    // Add items for the children
    vector<string> attributeNames;

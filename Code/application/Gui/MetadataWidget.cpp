@@ -15,6 +15,7 @@
 #include "MetadataWidget.h"
 #include "NameTypeValueDlg.h"
 #include "Slot.h"
+#include "TypeConverter.h"
 
 #include <QtCore/QRegExp>
 #include <QtGui/QAction>
@@ -492,7 +493,7 @@ void MetadataWidget::addKey()
       DataVariant* pValue = parent.data(DataVariantRole).value<DataVariant*>();
       if ((pValue != NULL) && (pValue->isValid() == true))
       {
-         if (pValue->getTypeName() == "DynamicObject")
+         if (pValue->getTypeName() == TypeConverter::toString<DynamicObject>())
          {
             pDynamicObject = dv_cast<DynamicObject>(pValue);
          }
@@ -544,7 +545,7 @@ void MetadataWidget::deleteKey()
       DataVariant* pValue = parent.data(DataVariantRole).value<DataVariant*>();
       if ((pValue != NULL) && (pValue->isValid() == true))
       {
-         if (pValue->getTypeName() == "DynamicObject")
+         if (pValue->getTypeName() == TypeConverter::toString<DynamicObject>())
          {
             pDynamicObject = dv_cast<DynamicObject>(pValue);
          }
@@ -615,7 +616,7 @@ void MetadataWidget::currentChanged(const QModelIndex& selectedItem, const QMode
       DataVariant* pValue = selected.data(DataVariantRole).value<DataVariant*>();
       if ((pValue != NULL) && (pValue->isValid() == true))
       {
-         if (pValue->getTypeName() == "DynamicObject")
+         if (pValue->getTypeName() == TypeConverter::toString<DynamicObject>())
          {
             mpEditButton->setEnabled(false);
          }
@@ -636,7 +637,7 @@ void MetadataWidget::editSelectedValue(const QModelIndex& selectedItem)
       DataVariant* pValue = index.data(DataVariantRole).value<DataVariant*>();
       if ((pValue != NULL) && (pValue->isValid() == true))
       {
-         if (pValue->getTypeName() == "DynamicObject")
+         if (pValue->getTypeName() == TypeConverter::toString<DynamicObject>())
          {
             return;
          }
@@ -656,7 +657,7 @@ void MetadataWidget::editSelectedValue(const QModelIndex& selectedItem)
       DataVariant* pValue = parent.data(DataVariantRole).value<DataVariant*>();
       if ((pValue != NULL) && (pValue->isValid() == true))
       {
-         if (pValue->getTypeName() == "DynamicObject")
+         if (pValue->getTypeName() == TypeConverter::toString<DynamicObject>())
          {
             pDynamicObject = dv_cast<DynamicObject>(pValue);
          }
@@ -685,12 +686,20 @@ void MetadataWidget::editSelectedValue(const QModelIndex& selectedItem)
    dlg.setValue(name, *pValue);
    if (dlg.exec() == QDialog::Accepted)
    {
+      // Name
       QString newName = dlg.getName();
       if (newName.isEmpty() == false)
       {
          // Update the value
          const DataVariant& newValue = dlg.getValue();
          pDynamicObject->setAttribute(newName.toStdString(), newValue);
+      }
+
+      // Type
+      if (dlg.getType() == QString::fromStdString(TypeConverter::toString<DynamicObject>()))
+      {
+         // Update the enabled state of the tool buttons
+         currentChanged(selectedItem, QModelIndex());
       }
    }
 }
