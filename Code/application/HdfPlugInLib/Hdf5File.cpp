@@ -287,6 +287,10 @@ bool Hdf5File::readFileData(const string& groupPath)
    }
    DO_IF(*groupId < 0, return false);
 
+   // Read in the root group attributes
+   herr_t status = H5Aiterate1(fileHandle, NULL, populateAttributes, pRootGroup);
+   DO_IF(status < 0, return false);
+
    //  Read over the root file system and find out all the groups
    // and populate an internal structure used to populate the file info
    return (H5Giterate(*groupId, "/", NULL, populateHdfFile, &opData) >= 0);
