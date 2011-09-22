@@ -217,11 +217,14 @@
                   </Directory>
                   <Directory Id="D__Help_general_algorithms" Name="General_Algorithms" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\General_Algorithms">
                      <Component Id="C__Help_general_algorithms" Guid="$(var.C__Help_general_algorithms_Guid)" Win64="no">
+                        <File Name="AOI_Morphology.htm" Id="F__Help_aoi_morphology.htm" />
                         <File Name="Band_Binning.htm" Id="F__Help_band_binning.htm" />
                         <File Name="band_math.htm" Id="F__Help_band_math.htm" />
                         <File Name="Band_Math_Operators.htm" Id="F__Help_band_math_operators.htm" />
                         <File Name="Change_Up_Direction.htm" Id="F__Help_change_up_direction.htm" />
+                        <File Name="Connected_Components.htm" Id="F__Help_connected_components.htm" />
                         <File Name="Flatten_Annotation_Layer.htm" Id="F__Help_flatten_annotation_layer.htm" />
+                        <File Name="Mosaic_Chip.htm" Id="F__Help_mosaic_chip.htm" />
                         <File Name="principal_component_analysis.htm" Id="F__Help_principal_component_analysis.htm" />
                         <File Name="QT_Cluster.htm" Id="F__Help_qt_cluster.htm" />
                         <File Name="QT_Cluster_Algorithm.htm" Id="F__Help_qt_cluster_algorithm.htm" />
@@ -234,6 +237,7 @@
                         <File Name="GCP_Lists.htm" Id="F__Help_gcp_lists.htm" />
                         <File Name="gcp_polynomial_order.htm" Id="F__Help_gcp_polynomial_order.htm" />
                         <File Name="Georeference.htm" Id="F__Help_georeference.htm" />
+                        <File Name="Mosaic.htm" Id="F__Help_mosaic.htm" />
                      </Component>
                   </Directory>
                   <Directory Id="D__Help_geographic_features" Name="Geographic_Features" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\Geographic_Features">
@@ -260,6 +264,8 @@
                         <File Name="Import_ASPAM_File.htm" Id="F__Help_import_aspam_file.htm" />
                         <File Name="Import_Data.htm" Id="F__Help_import_data.htm" />
                         <File Name="Import_Shape_File.htm" Id="F__Help_import_shape_file.htm" />
+                        <File Name="Layer_Exporters.htm" Id="F__Help_layer_exporters.htm" />
+                        <File Name="NITF_DES_Exporter.htm" Id="F__Help_nitf_des_exporter.htm" />
                         <File Name="NITF_Importer.htm" Id="F__Help_nitf_importer.htm" />
                         <File Name="Paragraph_A.htm" Id="F__Help_paragraph_a.htm" />
                         <File Name="Paragraph_B.htm" Id="F__Help_paragraph_b.htm" />
@@ -450,6 +456,7 @@
                            <File Name="Batch_Mode.png" Id="F__Help_batch_mode.png" />
                            <File Name="Bearing_Label_Button.gif" Id="F__Help_bearing_label_button.gif" />
                            <File Name="Bitmap_View_Exporter.png" Id="F__Help_bitmap_view_exporter.png" />
+                           <File Name="Blobs_Session_Explorer.gif" Id="F__Help_blobs_session_explorer.gif" />
                            <File Name="BMP_Export_Options.png" Id="F__Help_bmp_export_options.png" />
                            <File Name="Brightness_layer.gif" Id="F__Help_brightness_layer.gif" />
                            <File Name="Browse_button.gif" Id="F__Help_browse_button.gif" />
@@ -479,8 +486,11 @@
                            <File Name="Compression_Options_JPEG.gif" Id="F__Help_compression_options_jpeg.gif" />
                            <File Name="Compression_Option_GeoTIFF.gif" Id="F__Help_compression_option_geotiff.gif" />
                            <File Name="Confirm_Close.gif" Id="F__Help_confirm_close.gif" />
+                           <File Name="Connected_Comp_Results.gif" Id="F__Help_connected_comp_results.gif" />
                            <File Name="Connect_Wizard_Items.png" Id="F__Help_connect_wizard_items.png" />
                            <File Name="Convolution_Matrix_Editor.gif" Id="F__Help_convolution_matrix_editor.gif" />
+                           <File Name="Convolution_Matrix_Editor_2.gif" Id="F__Help_convolution_matrix_editor_2.gif" />
+                           <File Name="Convolution_Parameters.gif" Id="F__Help_convolution_parameters.gif" />
                            <File Name="Copy_button.png" Id="F__Help_copy_button.png" />
                            <File Name="Copy_button_22x21.png" Id="F__Help_copy_button_22x21.png" />
                            <File Name="Copy_Layers.gif" Id="F__Help_copy_layers.gif" />
@@ -559,6 +569,8 @@
                            <File Name="Export_Data_1.gif" Id="F__Help_export_data_1.gif" />
                            <File Name="Export_File.gif" Id="F__Help_export_file.gif" />
                            <File Name="Export_Image_Chip.gif" Id="F__Help_export_image_chip.gif" />
+                           <File Name="Export_NITF_DES_1.gif" Id="F__Help_export_nitf_des_1.gif" />
+                           <File Name="Export_Options_DES.gif" Id="F__Help_export_options_des.gif" />
                            <File Name="Export_Product.gif" Id="F__Help_export_product.gif" />
                            <File Name="Export_Roads_1.gif" Id="F__Help_export_roads_1.gif" />
                            <File Name="Export_Roads_2.gif" Id="F__Help_export_roads_2.gif" />
@@ -605,6 +617,9 @@
                            <File Name="GeoTIFF_Export_Options_1.gif" Id="F__Help_geotiff_export_options_1.gif" />
                            <File Name="GeoTIFF_Export_Options_2.gif" Id="F__Help_geotiff_export_options_2.gif" />
                            <File Name="GeoTIFF_Viewer_Export_Options.gif" Id="F__Help_geotiff_viewer_export_options.gif" />
+                           <File Name="Geo_Mosaic_Stitiching_1.gif" Id="F__Help_geo_mosaic_stitiching_1.gif" />
+                           <File Name="Geo_Mosaic_Stitiching_2.gif" Id="F__Help_geo_mosaic_stitiching_2.gif" />
+                           <File Name="Geo_Mosaic_Window.gif" Id="F__Help_geo_mosaic_window.gif" />
                            <File Name="Geo_Properties.gif" Id="F__Help_geo_properties.gif" />
                            <File Name="Geo_Results_Select.gif" Id="F__Help_geo_results_select.gif" />
                            <File Name="Green_Check.png" Id="F__Help_green_check.png" />
@@ -750,6 +765,7 @@
                            <File Name="Product_Properties_2.gif" Id="F__Help_product_properties_2.gif" />
                            <File Name="Product_Properties_3.gif" Id="F__Help_product_properties_3.gif" />
                            <File Name="Product_Properties_4.gif" Id="F__Help_product_properties_4.gif" />
+                           <File Name="Properties_Blobs.gif" Id="F__Help_properties_blobs.gif" />
                            <File Name="Properties_Class_Tab.gif" Id="F__Help_properties_class_tab.gif" />
                            <File Name="Properties_Class_Tab2.gif" Id="F__Help_properties_class_tab2.gif" />
                            <File Name="Properties_Spatial_Data_View_tab.gif" Id="F__Help_properties_spatial_data_view_tab.gif" />
@@ -827,6 +843,7 @@
                            <File Name="Select_Import_Data.png" Id="F__Help_select_import_data.png" />
                            <File Name="Select_Layer.gif" Id="F__Help_select_layer.gif2" />
                            <File Name="Select_Modify_Values.gif" Id="F__Help_select_modify_values.gif" />
+                           <File Name="Select_Mosaic_AOI.gif" Id="F__Help_select_mosaic_aoi.gif" />
                            <File Name="Select_PCA.gif" Id="F__Help_select_pca.gif" />
                            <File Name="Select_Polyline.gif" Id="F__Help_select_polyline.gif" />
                            <File Name="Select_Rectangle.gif" Id="F__Help_select_rectangle.gif" />
@@ -989,6 +1006,7 @@
                         <File Name="Link_Unlink.htm" Id="F__Help_link_unlink.htm" />
                         <File Name="Overview_Window.htm" Id="F__Help_overview_window.htm" />
                         <File Name="Scripting_Window.htm" Id="F__Help_scripting_window.htm" />
+                        <File Name="Subset_Using_Convolution_Matrix_Editor.htm" Id="F__Help_subset_using_convolution_matrix_editor.htm" />
                      </Component>
                      <Directory Id="D__Help_histogram_window" Name="Histogram_Window" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\Tools\Histogram_Window">
                         <Component Id="C__Help_histogram_window" Guid="$(var.C__Help_histogram_window_Guid)" Win64="no">
@@ -1367,7 +1385,6 @@
                         <File Name="QuickSearch_selected.gif" Id="F__Help_quicksearch_selected.gif2" />
                         <File Name="Rating0.gif" Id="F__Help_rating0.gif" />
                         <File Name="RatingGold100.gif" Id="F__Help_ratinggold100.gif" />
-                        <File Name="RatingGold50.gif" Id="F__Help_ratinggold50.gif" />
                         <File Name="Refresh.gif" Id="F__Help_refresh.gif" />
                         <File Name="RefreshTopicComments.gif" Id="F__Help_refreshtopiccomments.gif2" />
                         <File Name="RefreshTopicComments_over.gif" Id="F__Help_refreshtopiccomments_over.gif2" />
@@ -1488,7 +1505,6 @@
                         <File Name="QuickSearch_selected.gif" Id="F__Help_quicksearch_selected.gif3" />
                         <File Name="Rating0.gif" Id="F__Help_rating0.gif2" />
                         <File Name="RatingGold100.gif" Id="F__Help_ratinggold100.gif2" />
-                        <File Name="RatingGold50.gif" Id="F__Help_ratinggold50.gif2" />
                         <File Name="Refresh.gif" Id="F__Help_refresh.gif2" />
                         <File Name="RefreshTopicComments.gif" Id="F__Help_refreshtopiccomments.gif3" />
                         <File Name="RefreshTopicComments_over.gif" Id="F__Help_refreshtopiccomments_over.gif3" />
@@ -1610,7 +1626,6 @@
                         <File Name="printer_empty.png" Id="F__Help_printer_empty.png" />
                         <File Name="Rating0.gif" Id="F__Help_rating0.gif3" />
                         <File Name="RatingGold100.gif" Id="F__Help_ratinggold100.gif3" />
-                        <File Name="RatingGold50.gif" Id="F__Help_ratinggold50.gif3" />
                         <File Name="RefreshTopicComments.gif" Id="F__Help_refreshtopiccomments.gif4" />
                         <File Name="RefreshTopicComments_over.gif" Id="F__Help_refreshtopiccomments_over.gif4" />
                         <File Name="RefreshTopicComments_selected.gif" Id="F__Help_refreshtopiccomments_selected.gif4" />
