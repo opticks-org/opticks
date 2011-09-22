@@ -109,8 +109,8 @@ public:
    void isFlipped(const LocationType& dataLowerLeft, const LocationType& dataUpperRight, bool& bHorizontalFlip,
       bool& bVerticalFlip) const;
 
-   bool canRename() const;
-   bool rename(const std::string& newName, std::string& errorMessage);
+   virtual bool canRename() const;
+   virtual bool rename(const std::string& newName, std::string& errorMessage);
 
 public slots:
    /**
@@ -250,6 +250,11 @@ private:
       bool& bVerticalFlip) const \
    { \
       return impClass::isFlipped(dataLowerLeft, dataUpperRight, bHorizontalFlip, bVerticalFlip); \
+   } \
+   bool rename(const std::string& newName) \
+   { \
+      std::string emptyString; \
+      return impClass::rename(newName, emptyString); \
    }
 
 #endif

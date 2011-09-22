@@ -269,12 +269,15 @@ public:
     *  the layer list for the layer type.
     *
     *  @param   pLayer
-    *           The layer to rename.  Must be a contained within the list and
-    *           cannot be NULL.
+    *           The layer to rename, which must be contained within the layer
+    *           list.  This method does nothing and returns \c false if \c NULL
+    *           is passed in.
     *
-    *  @return  TRUE if the layer was successfully renamed, otherwise FALSE.
-    *           FALSE is returned if the user cancels the dialog to select a
-    *           new name.
+    *  @return  Returns \c true if the layer was successfully renamed.  Returns
+    *           \c false if the layer does not exist in the layer list or if the
+    *           user cancels the dialog to select a new name.
+    *
+    *  @see     renameLayer(Layer*, const std::string&) const, Layer::rename()
     */
    virtual bool renameLayer(Layer* pLayer) const = 0;
 
@@ -282,16 +285,19 @@ public:
     *  Renames a layer to a given name.
     *
     *  @param   pLayer
-    *           The layer to rename.  Must be a contained within the list and
-    *           cannot be NULL.
+    *           The layer to rename, which must be contained within the layer
+    *           list.  This method does nothing and returns \c false if \c NULL
+    *           is passed in.
     *  @param   newName
-    *           The layer to rename.  Must be a contained within the list and
-    *           cannot be empty.  The name must also be unique within the layer
-    *           list for the layer type.
+    *           The new name for the layer, which must be unique within the
+    *           layer list for the layer type.  This method does nothing and
+    *           returns \c false if an empty string is passed in.
     *
-    *  @return  TRUE if the layer was successfully renamed, otherwise FALSE.
-    *           FALSE is returned if the another layer of the same type has the
-    *           same name as the given name.
+    *  @return  Returns \c true if the layer was successfully renamed.  Returns
+    *           \c false if another layer of the same type in the layer list
+    *           already has the given name.
+    *
+    *  @see     renameLayer(Layer*) const, Layer::rename()
     */
    virtual bool renameLayer(Layer* pLayer, const std::string& newName) const = 0;
 

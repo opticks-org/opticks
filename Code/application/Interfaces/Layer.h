@@ -363,6 +363,22 @@ public:
    virtual void isFlipped(const LocationType& dataLowerLeft, const LocationType& dataUpperRight,
       bool& bHorizontalFlip, bool& bVerticalFlip) const = 0;
 
+   /**
+    *  Renames the layer to a given name.
+    *
+    *  @param   newName
+    *           The new name for the layer, which must be unique within the
+    *           layer list for the layer type.  This method does nothing and
+    *           returns \c false if an empty string is passed in.
+    *
+    *  @return  Returns \c true if the layer was successfully renamed.  Returns
+    *           \c false if another layer of the same type in the layer list
+    *           already has the given name.
+    *
+    *  @see     LayerList::renameLayer()
+    */
+   virtual bool rename(const std::string& newName) = 0;
+
 protected:
    /**
     * This should be destroyed by calling SpatialDataView::deleteLayer.
