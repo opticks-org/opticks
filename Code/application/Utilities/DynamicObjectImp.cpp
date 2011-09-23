@@ -187,55 +187,56 @@ bool DynamicObjectImp::adoptAttributeByPath(const string pComponents[], DataVari
 
 bool DynamicObjectImp::setAttribute(const string& name, DataVariant& value, bool swap)
 {
-   bool valueIsValid = value.isValid();
-   if (valueIsValid)
+   if ((name.empty() == true) || (value.isValid() == false))
    {
-      pair<map<string, DataVariant>::iterator, bool> location = 
-         mVariantAttributes.insert(pair<string, DataVariant>(name, DataVariant()));
-      DataVariant& mapVariant(location.first->second);
-
-      if (swap)
-      {
-         mapVariant.swap(value);
-         DynamicObjectImp* pValue = dynamic_cast<DynamicObjectImp*>(dv_cast<DynamicObject>(&value));
-         if (pValue != NULL && pValue->mpParent != NULL)
-         {
-            //since value is no longer in the map it should
-            //not be notifying this object when it changes.
-            pValue->detach(SIGNAL_NAME(Subject, Modified), Signal(dynamic_cast<Subject*>(pValue->mpParent),
-               SIGNAL_NAME(Subject, Modified)));
-         }
-      }
-      else
-      {
-         mapVariant = value;
-      }
-
-      if (location.second)
-      {
-         notify(SIGNAL_NAME(DynamicObject, AttributeAdded), boost::any(pair<string, DataVariant*>(name, &mapVariant)));
-      }
-      else
-      {
-         notify(SIGNAL_NAME(DynamicObject, AttributeModified),
-            boost::any(pair<string, DataVariant*>(name, &mapVariant)));
-      }
-
-      DynamicObjectImp* pValue = dynamic_cast<DynamicObjectImp*>(dv_cast<DynamicObject>(&mapVariant));
-      if (pValue != NULL)
-      {
-         if (pValue->mpParent != NULL)
-         {
-            pValue->detach(SIGNAL_NAME(Subject, Modified), Signal(dynamic_cast<Subject*>(pValue->mpParent),
-               SIGNAL_NAME(Subject, Modified)));
-         }
-         pValue->attach(SIGNAL_NAME(Subject, Modified), Signal(dynamic_cast<Subject*>(this),
-            SIGNAL_NAME(Subject, Modified)));
-         pValue->mpParent = this;
-      }
+      return false;
    }
 
-   return valueIsValid;
+   pair<map<string, DataVariant>::iterator, bool> location = 
+      mVariantAttributes.insert(pair<string, DataVariant>(name, DataVariant()));
+   DataVariant& mapVariant(location.first->second);
+
+   if (swap)
+   {
+      mapVariant.swap(value);
+      DynamicObjectImp* pValue = dynamic_cast<DynamicObjectImp*>(dv_cast<DynamicObject>(&value));
+      if (pValue != NULL && pValue->mpParent != NULL)
+      {
+         //since value is no longer in the map it should
+         //not be notifying this object when it changes.
+         pValue->detach(SIGNAL_NAME(Subject, Modified), Signal(dynamic_cast<Subject*>(pValue->mpParent),
+            SIGNAL_NAME(Subject, Modified)));
+      }
+   }
+   else
+   {
+      mapVariant = value;
+   }
+
+   if (location.second)
+   {
+      notify(SIGNAL_NAME(DynamicObject, AttributeAdded), boost::any(pair<string, DataVariant*>(name, &mapVariant)));
+   }
+   else
+   {
+      notify(SIGNAL_NAME(DynamicObject, AttributeModified),
+         boost::any(pair<string, DataVariant*>(name, &mapVariant)));
+   }
+
+   DynamicObjectImp* pValue = dynamic_cast<DynamicObjectImp*>(dv_cast<DynamicObject>(&mapVariant));
+   if (pValue != NULL)
+   {
+      if (pValue->mpParent != NULL)
+      {
+         pValue->detach(SIGNAL_NAME(Subject, Modified), Signal(dynamic_cast<Subject*>(pValue->mpParent),
+            SIGNAL_NAME(Subject, Modified)));
+      }
+      pValue->attach(SIGNAL_NAME(Subject, Modified), Signal(dynamic_cast<Subject*>(this),
+         SIGNAL_NAME(Subject, Modified)));
+      pValue->mpParent = this;
+   }
+
+   return true;
 }
 
 bool DynamicObjectImp::setAttributeByPath(QStringList pathComponents, DataVariant& value, bool swap)
@@ -452,16 +453,11 @@ DataVariant& DynamicObjectImp::getAttributeByPath(const string pComponents[])
 void DynamicObjectImp::getAttributeNames(vector<string>& attributeNames) const
 {
    attributeNames.clear();
-   string prev;
 
    map<string, DataVariant>::const_iterator pPair;
    for (pPair = mVariantAttributes.begin(); pPair != mVariantAttributes.end(); ++pPair)
    {
-      if (pPair->first != prev)
-      {
-         prev = pPair->first;
-         attributeNames.push_back(prev);
-      }
+      attributeNames.push_back(pPair->first);
    }
 }
 
