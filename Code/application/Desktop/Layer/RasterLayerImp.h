@@ -291,6 +291,7 @@ private:
    bool xmlToChannel(DOMNode* pDocument, RasterElement*& pElem, 
       RegionUnits &units, DimensionDescriptor &descriptor, double &minValue, double &maxValue);
    double calculateThresholdForEncodingType(EncodingType type) const;
+   QString stringifyValue(const void* pValue, EncodingType dataType, const std::vector<int>& badValues) const;
 };
 
 #define RASTERLAYERADAPTEREXTENSION_CLASSES \

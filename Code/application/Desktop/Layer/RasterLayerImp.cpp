@@ -40,7 +40,6 @@
 #include "SessionManagerImp.h"
 #include "SpatialDataView.h"
 #include "Statistics.h"
-#include "switchOnEncoding.h"
 #include "Undo.h"
 #include "ViewImp.h"
 #include "XercesIncludes.h"
@@ -768,21 +767,42 @@ bool RasterLayerImp::needToDrawPixelValues() const
    return false;
 }
 
-namespace
+QString RasterLayerImp::stringifyValue(const void* pValue, EncodingType dataType, const vector<int>& badValues) const
 {
-   template<typename T>
-   void stringifyValue(T* pValue, ComplexComponent component, const vector<int>& badValues, QString& strValue)
-   {
-      T value = ModelServices::getDataValue(*pValue, component);
-      strValue = QString::number(value);
+   double value = ModelServices::getDataValue(dataType, pValue, mComplexComponent, 0);
 
-      int badValue = static_cast<int>(roundDouble(value));
-      if (binary_search(badValues.begin(), badValues.end(), badValue) == true)
+   int badValue = static_cast<int>(roundDouble(value));
+   if (binary_search(badValues.begin(), badValues.end(), badValue) == true)
+   {
+      return QString();
+   }
+
+   if ((meDisplayMode == GRAYSCALE_MODE) && (mColorMap.isDefault() == false))
+   {
+      const vector<ColorType>& colorMapValues = mColorMap.getTable();
+      if ((colorMapValues.empty() == false) && (mpImage != NULL))
       {
-         strValue.clear();
+         Image::ImageData imageData = mpImage->getImageData();
+         int maxValue = static_cast<int>(colorMapValues.size());
+
+         ScaleStruct scaleData;
+         if (Image::prepareScale(imageData, imageData.mKey.mStretchPoints1, scaleData, 0, maxValue - 1) == true)
+         {
+            int index = static_cast<int>(Image::scale(value, scaleData, imageData, maxValue));
+            if ((index >= 0) && (index < maxValue))
+            {
+               const ColorType& transparent = mColorMap[index];
+               if (transparent.mAlpha == 0)
+               {
+                  return QString();
+               }
+            }
+         }
       }
    }
-};
+
+   return QString::number(value);
+}
 
 void RasterLayerImp::drawPixelValues()
 {
@@ -966,8 +986,6 @@ void RasterLayerImp::drawPixelValues()
    }
    else
    {
-      ComplexComponent complexComponent = getComplexComponent();
-
       DisplayMode displayMode = getDisplayMode();
       if (displayMode == GRAYSCALE_MODE)
       {
@@ -1014,9 +1032,7 @@ void RasterLayerImp::drawPixelValues()
                      QPoint centerPoint(centerScreen.mX, centerScreen.mY - fm.ascent() / 2);
 
                      // Draw the text
-                     QString strGray;
-                     switchOnEncoding(dataType, stringifyValue, accessor->getColumn(), complexComponent,
-                        badValues, strGray);
+                     QString strGray = stringifyValue(accessor->getColumn(), dataType, badValues);
                      if (strGray.isEmpty() == false)
                      {
                         QPoint textOffset(-fm.width(strGray) / 2, 0);
@@ -1148,8 +1164,7 @@ void RasterLayerImp::drawPixelValues()
                QString strRed = "N/A";
                if ((redValid == true) && (redDataType.isValid()))
                {
-                  switchOnEncoding(redDataType, stringifyValue, redAccessor->getColumn(), complexComponent,
-                     redBadValues, strRed);
+                  strRed = stringifyValue(redAccessor->getColumn(), redDataType, redBadValues);
                   redAccessor->nextColumn();
                }
 
@@ -1157,8 +1172,7 @@ void RasterLayerImp::drawPixelValues()
                QString strGreen = "N/A";
                if ((greenValid == true) && (greenDataType.isValid()))
                {
-                  switchOnEncoding(greenDataType, stringifyValue, greenAccessor->getColumn(), complexComponent,
-                     greenBadValues, strGreen);
+                  strGreen = stringifyValue(greenAccessor->getColumn(), greenDataType, greenBadValues);
                   greenAccessor->nextColumn();
                }
 
@@ -1166,8 +1180,7 @@ void RasterLayerImp::drawPixelValues()
                QString strBlue = "N/A";
                if ((blueValid == true) && (blueDataType.isValid()))
                {
-                  switchOnEncoding(blueDataType, stringifyValue, blueAccessor->getColumn(), complexComponent,
-                     blueBadValues, strBlue);
+                  strBlue = stringifyValue(blueAccessor->getColumn(), blueDataType, blueBadValues);
                   blueAccessor->nextColumn();
                }
 

@@ -689,8 +689,9 @@ public:
    bool generateFullResTexture();
    void generateAllFullResTextures();
 
-protected:
    const ImageData& getImageData() const;
+
+protected:
    virtual Tile* createTile() const;
    const std::vector<Tile*>* getActiveTiles() const;
    const std::map<ImageKey, TileSet>& getTileSets() const;
