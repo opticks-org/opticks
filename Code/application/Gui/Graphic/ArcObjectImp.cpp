@@ -9,16 +9,16 @@
 
 #include <math.h>
 
-#include "glCommon.h"
 #include "ArcObjectImp.h"
-#include "AppConfig.h"
 #include "DrawUtil.h"
+#include "glCommon.h"
 #include "GraphicLayer.h"
+#include "GraphicProperty.h"
 #include "StringUtilities.h"
 #include "View.h"
 
-#include <string>
 #include <map>
+#include <string>
 using namespace std;
 
 XERCES_CPP_NAMESPACE_USE
@@ -32,6 +32,20 @@ ArcObjectImp::ArcObjectImp(const string& id, GraphicObjectType type, GraphicLaye
    addProperty("ArcRegion");
    mHandles.push_back(pixelCoord);
    mHandles.push_back(pixelCoord);
+
+   // Set a non-zero bounding box so that the ellipse can be properly resized
+   // when the object is not added via the mouse (e.g. paste or undo/redo)
+   if (pLayer != NULL)
+   {
+      pixelCoord = pLayer->correctCoordinate(pixelCoord);
+   }
+
+   if (mpEllipse.get() != NULL)
+   {
+      LocationType urCorner(pixelCoord.mX + HANDLE_DELTA_MINIMUM, pixelCoord.mY + HANDLE_DELTA_MINIMUM);
+      mpEllipse->setBoundingBox(pixelCoord, urCorner);
+      updateBoundingBox();
+   }
 }
 
 void ArcObjectImp::draw(double zoomFactor) const
@@ -460,31 +474,6 @@ bool ArcObjectImp::hit(LocationType pixelCoord) const
    }
 
    return bHit;
-}
-
-bool ArcObjectImp::processMousePress(LocationType screenCoord, Qt::MouseButton button, Qt::MouseButtons buttons,
-                                     Qt::KeyboardModifiers modifiers)
-{
-   if (button == Qt::LeftButton)
-   {
-      GraphicLayer* pLayer = getLayer();
-      if (pLayer != NULL)
-      {
-         screenCoord = pLayer->correctCoordinate(screenCoord);
-         if (mpEllipse.get() != NULL)
-         {
-            LocationType urCorner;
-            urCorner.mX = screenCoord.mX + HANDLE_DELTA_MINIMUM;
-            urCorner.mY = screenCoord.mY + HANDLE_DELTA_MINIMUM;
-
-            mpEllipse->setBoundingBox(screenCoord, urCorner);
-            updateBoundingBox();
-            return true;
-         }
-      }
-   }
-
-   return false;
 }
 
 LocationType ArcObjectImp::getLocation(double dAngle) const

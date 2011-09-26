@@ -13,11 +13,10 @@
 #include "FilledObjectImp.h"
 #include "GraphicObjectFactory.h"
 #include "GraphicObjectImp.h"
-#include "GraphicProperty.h"
-#include "EllipseObjectImp.h"
 #include "TypesFile.h"
 
 class GraphicLayer;
+class GraphicProperty;
 
 class ArcObjectImp : public FilledObjectImp
 {
@@ -30,9 +29,6 @@ public:
    void moveHandle(int handle, LocationType point, bool bMaintainAspect = false);
    void updateHandles();
    bool hit(LocationType pixelCoord) const;
-
-   bool processMousePress(LocationType screenCoord, Qt::MouseButton button, Qt::MouseButtons buttons,
-      Qt::KeyboardModifiers modifiers);
 
    LocationType getLocation(double dAngle) const;
    double getAngle(LocationType point) const;
