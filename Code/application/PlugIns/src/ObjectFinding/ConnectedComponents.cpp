@@ -39,6 +39,10 @@ namespace
                      unsigned short parentLabel, // or 0 for an external
                      int contourIdx)
    {
+      if (hierarchy.size() <= contourIdx)
+      {
+         return;
+      }
       // Loop all contours at this level of the tree
       while (contourIdx != -1)
       {
@@ -233,7 +237,13 @@ bool ConnectedComponents::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
       DynamicObject* pMeta = pLabels->getMetadata();
       VERIFY(pMeta);
       pMeta->setAttribute("BlobCount", numBlobs);
-
+      if (numBlobs == 0 && !isBatch())
+      {
+         // Inform the user that there were no blobs so they don't think there was an
+         // error running the algorithm. No need to do this in batch since this is
+         // represented in the metadata already.
+         mProgress.report("No blobs were found.", 95, WARNING);
+      }
       // update the output arg list
       if (pOutArgList != NULL)
       {
