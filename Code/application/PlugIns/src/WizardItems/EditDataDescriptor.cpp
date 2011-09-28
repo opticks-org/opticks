@@ -384,7 +384,15 @@ bool EditDataDescriptor::execute(PlugInArgList* pInArgList, PlugInArgList* pOutA
    // Rows
    if ((pRasterDescriptor != NULL) && ((mpStartRow != NULL) || (mpEndRow != NULL) || (mpRowSkipFactor != NULL)))
    {
-      const vector<DimensionDescriptor>& origRows = pRasterDescriptor->getRows();
+      // We need to obtain this origRows from the FileDescriptor if present since an importer
+      // may generate a subset by default in which case the DataDescriptor will not contain all
+      // the rows and subsetting will not work correctly. We
+      // can't just set mpFileDescriptor = pRasterDescriptor->getFileDescriptor() since we only
+      // want to replace the DataDescriptor's row list if one of the subset options is specified
+      const RasterFileDescriptor* pFileDesc = static_cast<const RasterFileDescriptor*>(
+         (mpFileDescriptor != NULL) ? mpFileDescriptor : pRasterDescriptor->getFileDescriptor());
+      const vector<DimensionDescriptor>& origRows = (pFileDesc != NULL) ?
+         pFileDesc->getRows() : pRasterDescriptor->getRows();
 
       unsigned int startRow = 0;
       if (mpStartRow != NULL)
@@ -431,7 +439,15 @@ bool EditDataDescriptor::execute(PlugInArgList* pInArgList, PlugInArgList* pOutA
    if ((pRasterDescriptor != NULL) &&
       ((mpStartColumn != NULL) || (mpEndColumn != NULL) || (mpColumnSkipFactor != NULL)))
    {
-      const vector<DimensionDescriptor>& origColumns = pRasterDescriptor->getColumns();
+      // We need to obtain this origColumns from the FileDescriptor if present since an importer
+      // may generate a subset by default in which case the DataDescriptor will not contain all
+      // the columns and subsetting will not work correctly. We
+      // can't just set mpFileDescriptor = pRasterDescriptor->getFileDescriptor() since we only
+      // want to replace the DataDescriptor's column list if one of the subset options is specified
+      const RasterFileDescriptor* pFileDesc = static_cast<const RasterFileDescriptor*>(
+         (mpFileDescriptor != NULL) ? mpFileDescriptor : pRasterDescriptor->getFileDescriptor());
+      const vector<DimensionDescriptor>& origColumns = (pFileDesc != NULL) ?
+         pFileDesc->getColumns() : pRasterDescriptor->getColumns();
 
       unsigned int startColumn = 0;
       if (mpStartColumn != NULL)
@@ -478,7 +494,15 @@ bool EditDataDescriptor::execute(PlugInArgList* pInArgList, PlugInArgList* pOutA
    if ((pRasterDescriptor != NULL) &&
       ((mpStartBand != NULL) || (mpEndBand != NULL) || (mpBandSkipFactor != NULL) || (mpBadBandsFile != NULL)))
    {
-      const vector<DimensionDescriptor>& origBands = pRasterDescriptor->getBands();
+      // We need to obtain this origBands from the FileDescriptor if present since an importer
+      // may generate a subset by default in which case the DataDescriptor will not contain all
+      // the bands and subsetting (especially by bad band file) will not work correctly. We
+      // can't just set mpFileDescriptor = pRasterDescriptor->getFileDescriptor() since we only
+      // want to replace the DataDescriptor's band list if one of the subset options is specified
+      const RasterFileDescriptor* pFileDesc = static_cast<const RasterFileDescriptor*>(
+         (mpFileDescriptor != NULL) ? mpFileDescriptor : pRasterDescriptor->getFileDescriptor());
+      const vector<DimensionDescriptor>& origBands = (pFileDesc != NULL) ?
+         pFileDesc->getBands() : pRasterDescriptor->getBands();
 
       unsigned int startBand = 0;
       if (mpStartBand != NULL)

@@ -169,6 +169,29 @@ vector<ImportDescriptor*> Nitf::NitfImporterShell::getImportDescriptors(const st
       string errorMessage;
       if (Nitf::importMetadata(currentIndex + 1, pFile, pFileHeader, pImgHeader, pDd, parsers, errorMessage) == true)
       {
+         const DynamicObject* pMeta = pDd->getMetadata();
+         VERIFYRV(pMeta, retval);
+         // This only checks the first BANDSB. It is possible to have multiple BANDSB TREs.
+         // If someone runs across real data where the bad band info is in another BANDSB TRE
+         // this code will need to be modified.
+         const std::string bandsbPath[] = { Nitf::NITF_METADATA, Nitf::TRE_METADATA,
+                                            "BANDSB", "0", END_METADATA_NAME };
+         const DynamicObject* pBandsB = dv_cast<DynamicObject>(&pMeta->getAttributeByPath(bandsbPath));
+         if (pBandsB != NULL && pBandsB->getAttribute(Nitf::TRE::BANDSB::BAD_BAND + "#0").isValid())
+         {
+            const std::vector<DimensionDescriptor>& curBands = pDd->getBands();
+            std::vector<DimensionDescriptor> newBands;
+            for (size_t idx = 0; idx < curBands.size(); ++idx)
+            {
+               const int* pVal = dv_cast<int>(&pBandsB->getAttribute(
+                  Nitf::TRE::BANDSB::BAD_BAND + "#" + StringUtilities::toDisplayString(idx)));
+               if (pVal == NULL || *pVal == 1) // 0 == invalid or suspect band, 1 = valid band
+               {
+                  newBands.push_back(curBands[idx]);
+               }
+            }
+            pDd->setBands(newBands);
+         }
          if (pImgHeader->hasTransparentCode() == true)
          {
             vector<int> badValues;
