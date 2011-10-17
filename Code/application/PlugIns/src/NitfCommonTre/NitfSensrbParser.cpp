@@ -93,6 +93,81 @@ Nitf::SensrbParser::SensrbParser()
 
 bool Nitf::SensrbParser::runAllTests(Progress* pProgress, std::ostream& failure)
 {
+   // Bare minimum TRE.
+   // Note that this TRE is not actually valid per the spec, but we should still be able to parse it without error.
+   static const std::string data(
+      "N"            // GENERAL_DATA
+      "N"            // SENSOR_ARRAY_DATA
+      "N"            // SENSOR_CALIBRATION_DATA
+      "N"            // IMAGE_FORMATION_DATA
+      "------------" // REFERENCE_TIME
+      "--------"     // REFERENCE_ROW
+      "--------"     // REFERENCE_COLUMN
+      "0.000000000"  // LATITUDE_OR_X
+      "0.0000000000" // LONGITUDE_OR_Y
+      "0.000000000"  // ALTITUDE_OR_Z
+      "00000000"     // SENSOR_X_OFFSET
+      "00000000"     // SENSOR_Y_OFFSET
+      "00000000"     // SENSOR_Z_OFFSET
+      "N"            // ATTITUDE_EULER_ANGLES
+      "N"            // ATTITUDE_UNIT_VECTORS
+      "N"            // ATTITUDE_QUATERNION
+      "N"            // SENSOR_VELOCITY_DATA
+      "00"           // POINT_SET_DATA
+      "00"           // TIME_STAMPED_DATA_SETS
+      "00"           // PIXEL_REFERENCED_DATA_SETS
+      "000"          // UNCERTAINTY_DATA
+      "000"          // ADDITIONAL_PARAMETER_DATA
+      );
+
+   FactoryResource<DynamicObject> treDO;
+   size_t numBytes(0);
+
+
+   // Start of test 1
+   std::stringstream input(data);
+   numBytes = data.size();
+
+   std::string errorMessage;
+   bool success = toDynamicObject(input, numBytes, *treDO.get(), errorMessage);
+
+   if (!errorMessage.empty())
+   {
+      failure << errorMessage << std::endl;
+      errorMessage.clear();
+   }
+
+   if (success == false)
+   {
+      return false;
+   }
+
+   TreState status(INVALID);
+   if (success == true)
+   {
+      status = isTreValid(*treDO.get(), failure);
+   }
+
+   if (status == INVALID)
+   {
+      return false;
+   }
+
+   std::stringstream tmpStream;
+   success = fromDynamicObject(*treDO.get(), tmpStream, numBytes, errorMessage);
+   if (success == false)
+   {
+      failure << errorMessage;
+      return false;
+   }
+
+   if (input.str() != tmpStream.str())
+   {
+      failure << "Error: Test with blank data failed: fromDynamicObject returned an unexpected value\n";
+      return false;
+   }
+
+   treDO->clear();
    return true;
 }
 
@@ -101,7 +176,6 @@ Nitf::TreState Nitf::SensrbParser::isTreValid(const DynamicObject& tre, std::ost
    TreState status(VALID);
    return status;
 }
-
 
 bool Nitf::SensrbParser::toDynamicObject(std::istream& input,
                                          size_t numBytes,
@@ -122,9 +196,9 @@ bool Nitf::SensrbParser::toDynamicObject(std::istream& input,
       }
       DynamicObject& general = dv_cast<DynamicObject>(output.getAttribute(SENSRB::GENERAL_DATA::TAG));
       Nitf::readField<std::string>(input, general, success, SENSRB::GENERAL_DATA::SENSOR, 25, errorMessage, buf);
-      Nitf::readField<std::string>(input, general, success, SENSRB::GENERAL_DATA::SENSOR_URI, 32, errorMessage, buf);
+      Nitf::readField<std::string>(input, general, success, SENSRB::GENERAL_DATA::SENSOR_URI, 32, errorMessage, buf, true, true);
       Nitf::readField<std::string>(input, general, success, SENSRB::GENERAL_DATA::PLATFORM, 25, errorMessage, buf);
-      Nitf::readField<std::string>(input, general, success, SENSRB::GENERAL_DATA::PLATFORM_URI, 32, errorMessage, buf);
+      Nitf::readField<std::string>(input, general, success, SENSRB::GENERAL_DATA::PLATFORM_URI, 32, errorMessage, buf, true, true);
       Nitf::readField<std::string>(input, general, success, SENSRB::GENERAL_DATA::OPERATION_DOMAIN, 10,
          errorMessage, buf);
       Nitf::readField<unsigned short>(input, general, success, SENSRB::GENERAL_DATA::CONTENT_LEVEL, 1,
@@ -160,9 +234,9 @@ bool Nitf::SensrbParser::toDynamicObject(std::istream& input,
          errorMessage, buf);
       FactoryResource<DateTime> pGenerationDate;
       Nitf::readAndConvertFromStream(input, dateString, success, SENSRB::GENERAL_DATA::GENERATION_DATE, 8,
-         errorMessage, buf);
+         errorMessage, buf, true, true);
       Nitf::readAndConvertFromStream(input, timeString, success, SENSRB::GENERAL_DATA::GENERATION_TIME, 10,
-         errorMessage, buf);
+         errorMessage, buf, true, true);
       secondsInDay = 0.0;
       Nitf::DtgParseCCYYMMDDssss(dateString, timeString, pGenerationDate.get(), secondsInDay);
       general.setAttribute(SENSRB::GENERAL_DATA::GENERATION_DATE, *pGenerationDate.get());
@@ -234,7 +308,7 @@ bool Nitf::SensrbParser::toDynamicObject(std::istream& input,
          errorMessage, buf, true, true);
       std::string tmp;
       Nitf::readAndConvertFromStream<std::string>(input, tmp, success,
-         SENSRB::SENSOR_CALIBRATION_DATA::CALIBRATION_DATE, 8, errorMessage, buf);
+         SENSRB::SENSOR_CALIBRATION_DATA::CALIBRATION_DATE, 8, errorMessage, buf, true, true);
       FactoryResource<DateTime> pCalibDate;
       Nitf::DtgParseCCYYMMDD(tmp, pCalibDate.get());
       calib.setAttribute(SENSRB::SENSOR_CALIBRATION_DATA::CALIBRATION_DATE, *pCalibDate.get());
@@ -258,8 +332,8 @@ bool Nitf::SensrbParser::toDynamicObject(std::istream& input,
          errorMessage, buf);
       Nitf::readField<unsigned int>(input, iform, success, SENSRB::IMAGE_FORMATION_DATA::COLUMN_COUNT, 8,
          errorMessage, buf);
-      Nitf::readField<unsigned int>(input, iform, success, SENSRB::IMAGE_FORMATION_DATA::ROW_SET, 8, errorMessage, buf);
-      Nitf::readField<unsigned int>(input, iform, success, SENSRB::IMAGE_FORMATION_DATA::COLUMN_SET, 8,
+      Nitf::readField<int>(input, iform, success, SENSRB::IMAGE_FORMATION_DATA::ROW_SET, 8, errorMessage, buf);
+      Nitf::readField<int>(input, iform, success, SENSRB::IMAGE_FORMATION_DATA::COLUMN_SET, 8,
          errorMessage, buf);
       Nitf::readField<float>(input, iform, success, SENSRB::IMAGE_FORMATION_DATA::ROW_DETECTION_RATE, 10,
          errorMessage, buf);
@@ -280,8 +354,8 @@ bool Nitf::SensrbParser::toDynamicObject(std::istream& input,
    }
 
    Nitf::readField<double>(input, output, success, SENSRB::REFERENCE_TIME, 12, errorMessage, buf, true, true);
-   Nitf::readField<unsigned int>(input, output, success, SENSRB::REFERENCE_ROW, 8, errorMessage, buf, true, true);
-   Nitf::readField<unsigned int>(input, output, success, SENSRB::REFERENCE_COLUMN, 8, errorMessage, buf, true, true);
+   Nitf::readField<int>(input, output, success, SENSRB::REFERENCE_ROW, 8, errorMessage, buf, true, true);
+   Nitf::readField<int>(input, output, success, SENSRB::REFERENCE_COLUMN, 8, errorMessage, buf, true, true);
    Nitf::readField<double>(input, output, success, SENSRB::LATITUDE_OR_X, 11, errorMessage, buf);
    Nitf::readField<double>(input, output, success, SENSRB::LONGITUDE_OR_Y, 12, errorMessage, buf);
    Nitf::readField<double>(input, output, success, SENSRB::ALTITUDE_OR_Z, 11, errorMessage, buf);
@@ -312,11 +386,11 @@ bool Nitf::SensrbParser::toDynamicObject(std::istream& input,
       Nitf::readField<std::string>(input, euler, success, SENSRB::ATTITUDE_EULER_ANGLES::PLATFORM_RELATIVE, 1,
          errorMessage, buf);
       Nitf::readField<double>(input, euler, success, SENSRB::ATTITUDE_EULER_ANGLES::PLATFORM_HEADING, 9,
-         errorMessage, buf);
+         errorMessage, buf, true, true);
       Nitf::readField<double>(input, euler, success, SENSRB::ATTITUDE_EULER_ANGLES::PLATFORM_PITCH, 9,
-         errorMessage, buf);
+         errorMessage, buf, true, true);
       Nitf::readField<double>(input, euler, success, SENSRB::ATTITUDE_EULER_ANGLES::PLATFORM_ROLL, 10,
-         errorMessage, buf);
+         errorMessage, buf, true, true);
    }
 
    // Attitude unit vectors
@@ -411,7 +485,7 @@ bool Nitf::SensrbParser::toDynamicObject(std::istream& input,
             FactoryResource<DynamicObject> pointSet;
             pointSets.setAttribute(StringUtilities::toDisplayString(pointSetDatum), *pointSet.get());
          }
-         DynamicObject& pointSet = dv_cast<DynamicObject>(output.getAttribute(
+         DynamicObject& pointSet = dv_cast<DynamicObject>(pointSets.getAttribute(
             StringUtilities::toDisplayString(pointSetDatum)));
          Nitf::readField<std::string>(input, pointSet, success, SENSRB::POINT_SET_DATA::POINT_SET_TYPE, 25,
             errorMessage, buf);
@@ -433,9 +507,9 @@ bool Nitf::SensrbParser::toDynamicObject(std::istream& input,
             double elevation = 0.0;
             double range = 0.0;
             Nitf::readAndConvertFromStream(input, row, success, SENSRB::POINT_SET_DATA::P_ROW, 8,
-               errorMessage, buf, true, true);
+               errorMessage, buf);
             Nitf::readAndConvertFromStream(input, column, success, SENSRB::POINT_SET_DATA::P_COLUMN, 8,
-               errorMessage, buf, true, true);
+               errorMessage, buf);
             Nitf::readAndConvertFromStream(input, latitude, success, SENSRB::POINT_SET_DATA::P_LATITUDE, 10,
                errorMessage, buf, true, true);
             Nitf::readAndConvertFromStream(input, longitude, success, SENSRB::POINT_SET_DATA::P_LONGITUDE, 11,
@@ -497,7 +571,7 @@ bool Nitf::SensrbParser::toDynamicObject(std::istream& input,
             Nitf::readAndConvertFromStream(input, timeStampTime, success,
                SENSRB::TIME_STAMPED_DATA_SETS::TIME_STAMP_TIME, 12, errorMessage, buf);
             Nitf::readAndConvertFromStream(input, timeStampValue, success,
-               SENSRB::TIME_STAMPED_DATA_SETS::TIME_STAMP_VALUE, valueLength, errorMessage, buf, true, true);
+               SENSRB::TIME_STAMPED_DATA_SETS::TIME_STAMP_VALUE, valueLength, errorMessage, buf);
             timeStampTimes.push_back(timeStampTime);
             timeStampValues.push_back(timeStampValue);
          }
@@ -549,7 +623,7 @@ bool Nitf::SensrbParser::toDynamicObject(std::istream& input,
             Nitf::readAndConvertFromStream(input, pixelReferenceColumn, success,
                SENSRB::PIXEL_REFERENCED_DATA_SETS::PIXEL_REFERENCE_COLUMN, 8, errorMessage, buf);
             Nitf::readAndConvertFromStream(input, pixelReferenceValue, success,
-               SENSRB::PIXEL_REFERENCED_DATA_SETS::PIXEL_REFERENCE_VALUE, valueLength, errorMessage, buf, true, true);
+               SENSRB::PIXEL_REFERENCED_DATA_SETS::PIXEL_REFERENCE_VALUE, valueLength, errorMessage, buf);
             pixelReferenceRows.push_back(pixelReferenceRow);
             pixelReferenceColumns.push_back(pixelReferenceColumn);
             pixelReferenceValues.push_back(pixelReferenceValue);
@@ -587,7 +661,7 @@ bool Nitf::SensrbParser::toDynamicObject(std::istream& input,
          Nitf::readField<std::string>(input, uncertainty, success,
             SENSRB::UNCERTAINTY_DATA::UNCERTAINTY_FIRST_TYPE, 11, errorMessage, buf);
          Nitf::readField<std::string>(input, uncertainty, success,
-            SENSRB::UNCERTAINTY_DATA::UNCERTAINTY_SECOND_TYPE, 11, errorMessage, buf);
+            SENSRB::UNCERTAINTY_DATA::UNCERTAINTY_SECOND_TYPE, 11, errorMessage, buf, true, true);
          Nitf::readField<double>(input, uncertainty, success,
             SENSRB::UNCERTAINTY_DATA::UNCERTAINTY_VALUE, 10, errorMessage, buf);
       }
@@ -703,11 +777,16 @@ bool Nitf::SensrbParser::fromDynamicObject(const DynamicObject& input,
          output << sizeString(dv_cast<std::string>(sensor.getAttribute(SENSRB::SENSOR_ARRAY_DATA::DETECTION)), 20);
          output << toString(dv_cast<unsigned int>(sensor.getAttribute(SENSRB::SENSOR_ARRAY_DATA::ROW_DETECTORS)), 8);
          output << toString(dv_cast<unsigned int>(sensor.getAttribute(SENSRB::SENSOR_ARRAY_DATA::COLUMN_DETECTORS)), 8);
-         output << toString(dv_cast<double>(sensor.getAttribute(SENSRB::SENSOR_ARRAY_DATA::ROW_METRIC)), 8);
-         output << toString(dv_cast<double>(sensor.getAttribute(SENSRB::SENSOR_ARRAY_DATA::COLUMN_METRIC)), 8);
-         output << toString(dv_cast<double>(sensor.getAttribute(SENSRB::SENSOR_ARRAY_DATA::FOCAL_LENGTH)), 8);
-         output << toString(dv_cast<double>(sensor.getAttribute(SENSRB::SENSOR_ARRAY_DATA::ROW_FOV)), 8);
-         output << toString(dv_cast<double>(sensor.getAttribute(SENSRB::SENSOR_ARRAY_DATA::COLUMN_FOV)), 8);
+         output << toString(dv_cast<double>(sensor.getAttribute(SENSRB::SENSOR_ARRAY_DATA::ROW_METRIC)), 8,
+            -1, '0', false, false, 3, true, '-');
+         output << toString(dv_cast<double>(sensor.getAttribute(SENSRB::SENSOR_ARRAY_DATA::COLUMN_METRIC)), 8,
+            -1, '0', false, false, 3, true, '-');
+         output << toString(dv_cast<double>(sensor.getAttribute(SENSRB::SENSOR_ARRAY_DATA::FOCAL_LENGTH)), 8,
+            -1, '0', false, false, 3, true, '-');
+         output << toString(dv_cast<double>(sensor.getAttribute(SENSRB::SENSOR_ARRAY_DATA::ROW_FOV)), 8,
+            -1, '0', false, false, 3, true, '-');
+         output << toString(dv_cast<double>(sensor.getAttribute(SENSRB::SENSOR_ARRAY_DATA::COLUMN_FOV)), 8,
+            -1, '0', false, false, 3, true, '-');
          output << sizeString(dv_cast<std::string>(sensor.getAttribute(SENSRB::SENSOR_ARRAY_DATA::CALIBRATED)), 1);
       }
       else
@@ -722,25 +801,35 @@ bool Nitf::SensrbParser::fromDynamicObject(const DynamicObject& input,
          output << sizeString(dv_cast<std::string>(
             calib.getAttribute(SENSRB::SENSOR_CALIBRATION_DATA::CALIBRATION_UNIT)), 2);
          output << toString(dv_cast<double>(
-            calib.getAttribute(SENSRB::SENSOR_CALIBRATION_DATA::PRINCIPAL_POINT_OFFSET_X)), 9);
+            calib.getAttribute(SENSRB::SENSOR_CALIBRATION_DATA::PRINCIPAL_POINT_OFFSET_X)), 9,
+            -1, '0', false, false, 3, true, '-');
          output << toString(dv_cast<double>(
-            calib.getAttribute(SENSRB::SENSOR_CALIBRATION_DATA::PRINCIPAL_POINT_OFFSET_Y)), 9);
+            calib.getAttribute(SENSRB::SENSOR_CALIBRATION_DATA::PRINCIPAL_POINT_OFFSET_Y)), 9,
+            -1, '0', false, false, 3, true, '-');
          output << toString(dv_cast<double>(
-            calib.getAttribute(SENSRB::SENSOR_CALIBRATION_DATA::RADIAL_DISTORT_1)), 12);
+            calib.getAttribute(SENSRB::SENSOR_CALIBRATION_DATA::RADIAL_DISTORT_1)), 12,
+            -1, '0', false, false, 3, true, '-');
          output << toString(dv_cast<double>(
-            calib.getAttribute(SENSRB::SENSOR_CALIBRATION_DATA::RADIAL_DISTORT_2)), 12);
+            calib.getAttribute(SENSRB::SENSOR_CALIBRATION_DATA::RADIAL_DISTORT_2)), 12,
+            -1, '0', false, false, 3, true, '-');
          output << toString(dv_cast<double>(
-            calib.getAttribute(SENSRB::SENSOR_CALIBRATION_DATA::RADIAL_DISTORT_3)), 12);
+            calib.getAttribute(SENSRB::SENSOR_CALIBRATION_DATA::RADIAL_DISTORT_3)), 12,
+            -1, '0', false, false, 3, true, '-');
          output << toString(dv_cast<double>(
-            calib.getAttribute(SENSRB::SENSOR_CALIBRATION_DATA::RADIAL_DISTORT_LIMIT)), 9);
+            calib.getAttribute(SENSRB::SENSOR_CALIBRATION_DATA::RADIAL_DISTORT_LIMIT)), 9,
+            -1, '0', false, false, 3, true, '-');
          output << toString(dv_cast<double>(
-            calib.getAttribute(SENSRB::SENSOR_CALIBRATION_DATA::DECENT_DISTORT_1)), 12);
+            calib.getAttribute(SENSRB::SENSOR_CALIBRATION_DATA::DECENT_DISTORT_1)), 12,
+            -1, '0', false, false, 3, true, '-');
          output << toString(dv_cast<double>(
-            calib.getAttribute(SENSRB::SENSOR_CALIBRATION_DATA::DECENT_DISTORT_2)), 12);
+            calib.getAttribute(SENSRB::SENSOR_CALIBRATION_DATA::DECENT_DISTORT_2)), 12,
+            -1, '0', false, false, 3, true, '-');
          output << toString(dv_cast<double>(
-            calib.getAttribute(SENSRB::SENSOR_CALIBRATION_DATA::AFFINITY_DISTORT_1)), 12);
+            calib.getAttribute(SENSRB::SENSOR_CALIBRATION_DATA::AFFINITY_DISTORT_1)), 12,
+            -1, '0', false, false, 3, true, '-');
          output << toString(dv_cast<double>(
-            calib.getAttribute(SENSRB::SENSOR_CALIBRATION_DATA::AFFINITY_DISTORT_2)), 12);
+            calib.getAttribute(SENSRB::SENSOR_CALIBRATION_DATA::AFFINITY_DISTORT_2)), 12,
+            -1, '0', false, false, 3, true, '-');
          output << dv_cast<DateTime>(
             calib.getAttribute(SENSRB::SENSOR_CALIBRATION_DATA::CALIBRATION_DATE)).getFormattedUtc("%Y%m%d");
       }
@@ -757,8 +846,8 @@ bool Nitf::SensrbParser::fromDynamicObject(const DynamicObject& input,
          output << toString(dv_cast<unsigned short>(iform.getAttribute(SENSRB::IMAGE_FORMATION_DATA::MODE)), 3);
          output << toString(dv_cast<unsigned int>(iform.getAttribute(SENSRB::IMAGE_FORMATION_DATA::ROW_COUNT)), 8);
          output << toString(dv_cast<unsigned int>(iform.getAttribute(SENSRB::IMAGE_FORMATION_DATA::COLUMN_COUNT)), 8);
-         output << toString(dv_cast<unsigned int>(iform.getAttribute(SENSRB::IMAGE_FORMATION_DATA::ROW_SET)), 8);
-         output << toString(dv_cast<unsigned int>(iform.getAttribute(SENSRB::IMAGE_FORMATION_DATA::COLUMN_SET)), 8);
+         output << toString(dv_cast<int>(iform.getAttribute(SENSRB::IMAGE_FORMATION_DATA::ROW_SET)), 8);
+         output << toString(dv_cast<int>(iform.getAttribute(SENSRB::IMAGE_FORMATION_DATA::COLUMN_SET)), 8);
          output << toString(dv_cast<float>(iform.getAttribute(SENSRB::IMAGE_FORMATION_DATA::ROW_DETECTION_RATE)), 10);
          output << toString(dv_cast<float>(
             iform.getAttribute(SENSRB::IMAGE_FORMATION_DATA::COLUMN_DETECTION_RATE)), 10);
@@ -789,9 +878,12 @@ bool Nitf::SensrbParser::fromDynamicObject(const DynamicObject& input,
       {
          output << "N";
       }
-      output << toString(dv_cast<double>(input.getAttribute(SENSRB::REFERENCE_TIME)), 12);
-      output << toString(dv_cast<unsigned int>(input.getAttribute(SENSRB::REFERENCE_ROW)), 8);
-      output << toString(dv_cast<unsigned int>(input.getAttribute(SENSRB::REFERENCE_COLUMN)), 8);
+      output << toString(dv_cast<double>(input.getAttribute(SENSRB::REFERENCE_TIME)), 12,
+            -1, '0', false, false, 3, true, '-');
+      output << toString(dv_cast<int>(input.getAttribute(SENSRB::REFERENCE_ROW)), 8,
+            -1, '0', false, false, 3, true, '-');
+      output << toString(dv_cast<int>(input.getAttribute(SENSRB::REFERENCE_COLUMN)), 8,
+            -1, '0', false, false, 3, true, '-');
       output << toString(dv_cast<double>(input.getAttribute(SENSRB::LATITUDE_OR_X)), 11);
       output << toString(dv_cast<double>(input.getAttribute(SENSRB::LONGITUDE_OR_Y)), 12);
       output << toString(dv_cast<double>(input.getAttribute(SENSRB::ALTITUDE_OR_Z)), 11);
@@ -811,9 +903,12 @@ bool Nitf::SensrbParser::fromDynamicObject(const DynamicObject& input,
          output << toString(dv_cast<double>(euler.getAttribute(SENSRB::ATTITUDE_EULER_ANGLES::SENSOR_ANGLE_3)), 10);
          output << sizeString(dv_cast<std::string>(
             euler.getAttribute(SENSRB::ATTITUDE_EULER_ANGLES::PLATFORM_RELATIVE)), 1);
-         output << toString(dv_cast<double>(euler.getAttribute(SENSRB::ATTITUDE_EULER_ANGLES::PLATFORM_HEADING)), 9);
-         output << toString(dv_cast<double>(euler.getAttribute(SENSRB::ATTITUDE_EULER_ANGLES::PLATFORM_PITCH)), 9);
-         output << toString(dv_cast<double>(euler.getAttribute(SENSRB::ATTITUDE_EULER_ANGLES::PLATFORM_ROLL)), 10);
+         output << toString(dv_cast<double>(euler.getAttribute(SENSRB::ATTITUDE_EULER_ANGLES::PLATFORM_HEADING)), 9,
+            -1, '0', false, false, 3, true, '-');
+         output << toString(dv_cast<double>(euler.getAttribute(SENSRB::ATTITUDE_EULER_ANGLES::PLATFORM_PITCH)), 9,
+            -1, '0', false, false, 3, true, '-');
+         output << toString(dv_cast<double>(euler.getAttribute(SENSRB::ATTITUDE_EULER_ANGLES::PLATFORM_ROLL)), 10,
+            -1, '0', false, false, 3, true, '-');
       }
       else
       {
@@ -910,10 +1005,10 @@ bool Nitf::SensrbParser::fromDynamicObject(const DynamicObject& input,
             {
                output << toString(rows[idx], 8);
                output << toString(columns[idx], 8);
-               output << toString(latitudes[idx], 10);
-               output << toString(longitudes[idx], 11);
-               output << toString(elevations[idx], 6);
-               output << toString(ranges[idx], 8);
+               output << toString(latitudes[idx], 10, -1, '0', false, false, 3, true, '-');
+               output << toString(longitudes[idx], 11, -1, '0', false, false, 3, true, '-');
+               output << toString(elevations[idx], 6, -1, '0', false, false, 3, true, '-');
+               output << toString(ranges[idx], 8, -1, '0', false, false, 3, true, '-');
             }
          }
       }

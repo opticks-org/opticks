@@ -699,20 +699,22 @@ namespace Nitf
     * @param  expSize
     *         The number of digits in the exponent (where 1 <= expSize <= 3).
     * @param optional
-    *        \c True if field can be exported as all spaces if not present initially.
+    *        \c True if field can be exported as optional (with placeholders) if not present initially.
+    * @param optionalChar
+    *        The \c char to use when filling the field with a placeholder.
     * @return The numeric value converted to a string. Guaranteed to be num characters 
     *         long with a leading '-' if negative or a leading '+' if positive and posSign == true
     */
    template<typename T>
-   std::string toString(T num, unsigned int size, int precision = -1,
-      char fillChar = '0', bool posSign = false, bool sciNotation = false, int expSize = 3, bool optional = false)
+   std::string toString(T num, unsigned int size, int precision = -1, char fillChar = '0', bool posSign = false,
+      bool sciNotation = false, int expSize = 3, bool optional = false, char optionalChar = ' ')
    {
       std::stringstream   outp;
       std::string         outStr;
 
       if (optional == true && getSentinel<T>() == num)
       {
-         outStr.resize(size, ' ');
+         outStr.resize(size, optionalChar);
          return outStr;
       }
 
@@ -847,19 +849,28 @@ namespace Nitf
    template<typename T>
    inline T fromBuffer(std::vector<char>& buf, bool& ok, bool allBlankOk, bool allDashesOk)
    {
+      std::string trimmedString = StringUtilities::stripWhitespace(std::string(&buf.front()));
+
+      // This special check must be made for signed types because boost::lexical_cast accepts
+      // strings starting with a minus sign for unsigned types and converts them to two's complement.
+      // See http://www.boost.org/doc/libs/1_47_0/libs/conversion/lexical_cast.htm#faq for more details.
       if (!std::numeric_limits<T>::is_signed)
       {
-         std::string temp = StringUtilities::stripWhitespace(std::string(&buf.front()));
-         if (temp.size() > 0 && temp[0] == '-')
+         if (trimmedString.empty() == false && trimmedString[0] == '-')
          {
-            ok = false;
+            // This could be all dashes or a negative number.
+            std::string allDashes(trimmedString.size(), '-');
+            if (allDashesOk == false || trimmedString != allDashes)
+            {
+               ok = false;
+            }
+
             return getSentinel<T>();
          }
       }
 
       try
       {
-         std::string trimmedString = StringUtilities::stripWhitespace(std::string(&buf.front()));
          if (trimmedString.empty() == true)
          {
             ok = allBlankOk;
@@ -868,19 +879,13 @@ namespace Nitf
          {
             if (allDashesOk)
             {
-               size_t idx = 0;
-               for (; idx < trimmedString.size(); ++idx)
+               std::string allDashes(trimmedString.size(), '-');
+               if (trimmedString == allDashes)
                {
-                  if (trimmedString[idx] != '-')
-                  {
-                     break;
-                  }
-               }
-               if (idx == trimmedString.size())
-               {
-                  return true;
+                  return getSentinel<T>();
                }
             }
+
             return boost::lexical_cast<T>(trimmedString);
          }
       }
@@ -901,11 +906,7 @@ namespace Nitf
       {
          ok = allBlankOk;
       }
-      else if (allDashesOk)
-      {
-         std::string tmp(trimmedString.size(), '-');
-         ok = (tmp == trimmedString);
-      }
+
       return trimmedString;
    }
 
@@ -961,10 +962,14 @@ namespace Nitf
       {
          success = false;
       }
-      else if (output.setAttribute(name, fromBuffer<T>(buf, ok, allBlankOk, allDashesOk)) == false || ok == false)
+      else
       {
-         success = false;
-         readFieldErrMsg(msg, name, buf, len);
+         T value = fromBuffer<T>(buf, ok, allBlankOk, allDashesOk);
+         if (ok == false || output.setAttribute(name, value) == false)
+         {
+            success = false;
+            readFieldErrMsg(msg, name, buf, len);
+         }
       }
 
       return success;
