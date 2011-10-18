@@ -424,8 +424,6 @@ bool RegionObjectImp::getRegion(double& minX, double& minY, double& maxX, double
 
 bool RegionObjectImp::toXml(XMLWriter* pXml) const
 {
-   pXml->pushAddPoint(pXml->addElement(getObjectType().c_str()));
-
    if (!PlotObjectImp::toXml(pXml))
    {
       return false;
@@ -451,7 +449,6 @@ bool RegionObjectImp::toXml(XMLWriter* pXml) const
       }
    }
 
-   pXml->popAddPoint();
    return true;
 }
 

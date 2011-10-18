@@ -140,7 +140,7 @@ protected slots:
    void stretchResetAllChannels();
    void setComplexComponent(QAction* pAction);
    void setDisplayedElement(QListWidgetItem* pItem);
-   void updateElement();
+   void updateElement(RasterElement* pElement = NULL);
    void initializeElementList();
    void setBand(QListWidgetItem* pItem);
    void initializeBandList();
@@ -153,7 +153,7 @@ protected slots:
    void updateHistogramRegionExtents();
 
 private:
-   bool setHistogram(Layer* pLayer, Statistics* pStatistics, RasterChannelType color);
+   bool setHistogram(Layer* pLayer, RasterElement* pElement, Statistics* pStatistics, RasterChannelType color);
    void updateLocatorModeText();
    void updateMouseCursor();
 

@@ -59,6 +59,7 @@ signals:
 
 protected:
    double calculateBinWidth(unsigned int binCount, const double* pBinCenters);
+   void clearBins();
 
 private:
    std::vector<RegionObjectAdapter*> mBins;

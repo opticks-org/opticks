@@ -21,6 +21,7 @@
 
 using namespace std;
 using XERCES_CPP_NAMESPACE_QUALIFIER DOMElement;
+using XERCES_CPP_NAMESPACE_QUALIFIER XMLString;
 
 HistogramImp::HistogramImp(PlotViewImp* pPlot, bool bPrimary) :
    PlotObjectImp(pPlot, bPrimary),
@@ -28,11 +29,11 @@ HistogramImp::HistogramImp(PlotViewImp* pPlot, bool bPrimary) :
 {
    VERIFYNR(connect(this, SIGNAL(histogramChanged()), this, SIGNAL(extentsChanged())));
    VERIFYNR(connect(this, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(legendPixmapChanged())));
-
 }
 
 HistogramImp::~HistogramImp()
 {
+   clearBins();
 }
 
 HistogramImp& HistogramImp::operator= (const HistogramImp& object)
@@ -41,7 +42,7 @@ HistogramImp& HistogramImp::operator= (const HistogramImp& object)
    {
       PlotObjectImp::operator= (object);
 
-      mBins.clear();
+      clearBins();
 
       vector<RegionObjectAdapter*>::const_iterator iter = object.mBins.begin();
       while (iter != object.mBins.end())
@@ -120,18 +121,7 @@ bool HistogramImp::setHistogramData(unsigned int binCount, const double* pBinCen
       return false;
    }
 
-   unsigned int i = 0;
-   for (i = 0; i < mBins.size(); i++)
-   {
-      RegionObjectAdapter* pBin = NULL;
-      pBin = mBins.at(i);
-      if (pBin != NULL)
-      {
-         delete pBin;
-      }
-   }
-
-   mBins.clear();
+   clearBins();
 
    if (binCount == 0)
    {
@@ -151,7 +141,7 @@ bool HistogramImp::setHistogramData(unsigned int binCount, const double* pBinCen
    bool bPrimary = false;
    bPrimary = isPrimary();
 
-   for (i = 0; i < binCount; i++)
+   for (unsigned int i = 0; i < binCount; i++)
    {
       if (pValues[i] > 0)
       {
@@ -413,7 +403,26 @@ bool HistogramImp::toXml(XMLWriter* pXml) const
    {
       return false;
    }
+
+   // Color
    pXml->addAttr("color", QCOLOR_TO_COLORTYPE(mColor));
+
+   // Bins
+   for (vector<RegionObjectAdapter*>::const_iterator iter = mBins.begin(); iter != mBins.end(); ++iter)
+   {
+      RegionObjectAdapter* pBin = *iter;
+      if (pBin != NULL)
+      {
+         pXml->pushAddPoint(pXml->addElement("bin"));
+         if (pBin->toXml(pXml) == false)
+         {
+            return false;
+         }
+
+         pXml->popAddPoint();
+      }
+   }
+
    return true;
 }
 
@@ -425,8 +434,45 @@ bool HistogramImp::fromXml(DOMNode* pDocument, unsigned int version)
    }
 
    DOMElement* pElem = static_cast<DOMElement*>(pDocument);
+
+   // Color
    ColorType color = StringUtilities::fromXmlString<ColorType>(A(pElem->getAttribute(X("color"))));
    mColor = COLORTYPE_TO_QCOLOR(color);
 
+   // Bins
+   PlotViewImp* pPlot = getPlot();
+   bool primary = isPrimary();
+
+   clearBins();
+   for (DOMNode* pChild = pDocument->getFirstChild(); pChild != NULL; pChild = pChild->getNextSibling())
+   {
+      if (XMLString::equals(pChild->getNodeName(), X("bin")))
+      {
+         RegionObjectAdapter* pRegion = new RegionObjectAdapter(pPlot, primary);
+         if (pRegion->fromXml(pChild, version) == false)
+         {
+            clearBins();
+            delete pRegion;
+            return false;
+         }
+
+         mBins.push_back(pRegion);
+      }
+   }
+
    return true;
+}
+
+void HistogramImp::clearBins()
+{
+   for (vector<RegionObjectAdapter*>::iterator iter = mBins.begin(); iter != mBins.end(); ++iter)
+   {
+      RegionObjectAdapter* pBin = *iter;
+      if (pBin != NULL)
+      {
+         delete pBin;
+      }
+   }
+
+   mBins.clear();
 }

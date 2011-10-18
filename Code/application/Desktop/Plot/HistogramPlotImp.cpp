@@ -961,10 +961,11 @@ bool HistogramPlotImp::setHistogram(Layer* pLayer)
 
 bool HistogramPlotImp::setHistogram(Layer* pLayer, RasterChannelType color)
 {
-   return setHistogram(pLayer, NULL, color);
+   return setHistogram(pLayer, NULL, NULL, color);
 }
 
-bool HistogramPlotImp::setHistogram(Layer* pLayer, Statistics* pStatistics, RasterChannelType color)
+bool HistogramPlotImp::setHistogram(Layer* pLayer, RasterElement* pElement, Statistics* pStatistics,
+                                    RasterChannelType color)
 {
    if ((pLayer == mpLayer.get()) && color == mRasterChannelType)
    {
@@ -1029,7 +1030,7 @@ bool HistogramPlotImp::setHistogram(Layer* pLayer, Statistics* pStatistics, Rast
    mRasterChannelType = color;
 
    // Set the displayed element
-   updateElement();
+   updateElement(pElement);
 
    if (mpLayer.get() != NULL)
    {
@@ -1134,7 +1135,7 @@ bool HistogramPlotImp::setHistogram(Layer* pLayer, Statistics* pStatistics, Rast
 
 bool HistogramPlotImp::setHistogram(Layer* pLayer, Statistics* pStatistics)
 {
-   return setHistogram(pLayer, pStatistics, GRAY);
+   return setHistogram(pLayer, NULL, pStatistics, GRAY);
 }
 
 void HistogramPlotImp::showEvent(QShowEvent* pEvent)
@@ -1182,7 +1183,7 @@ QColor HistogramPlotImp::getHistogramColor() const
    QColor clrHistogram;
    if (mpHistogram != NULL)
    {
-      clrHistogram = mpHistogram->HistogramImp::getColor();
+      clrHistogram = mpHistogram->getColor();
    }
 
    return clrHistogram;
@@ -2823,19 +2824,20 @@ void HistogramPlotImp::setDisplayedElement(QListWidgetItem* pItem)
    }
 }
 
-void HistogramPlotImp::updateElement()
+void HistogramPlotImp::updateElement(RasterElement* pElement)
 {
    // Update the member element
-   RasterElement* pElement = NULL;
-
-   RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(mpLayer.get());
-   if (pRasterLayer != NULL)
+   if (pElement == NULL)
    {
-      pElement = pRasterLayer->getDisplayedRasterElement(mRasterChannelType);
-   }
-   else if (mpLayer.get() != NULL)
-   {
-      pElement = dynamic_cast<RasterElement*>(mpLayer->getDataElement());
+      RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(mpLayer.get());
+      if (pRasterLayer != NULL)
+      {
+         pElement = pRasterLayer->getDisplayedRasterElement(mRasterChannelType);
+      }
+      else if (mpLayer.get() != NULL)
+      {
+         pElement = dynamic_cast<RasterElement*>(mpLayer->getDataElement());
+      }
    }
 
    if (pElement != mpElement.get())
@@ -3469,6 +3471,11 @@ bool HistogramPlotImp::toXml(XMLWriter* pXml) const
       pXml->addAttr("layerId", mpLayer->getId());
    }
 
+   if (mpElement.get() != NULL)
+   {
+      pXml->addAttr("elementId", mpElement->getId());
+   }
+
    if (mPreloadedColorMaps.empty() == false)
    {
       pXml->pushAddPoint(pXml->addElement("PreloadedColorMaps"));
@@ -3517,7 +3524,14 @@ bool HistogramPlotImp::fromXml(DOMNode* pDocument, unsigned int version)
       }
    }
 
-   if (!setHistogram(pLayer, channel))
+   RasterElement* pRaster = NULL;
+   if (pElement->hasAttribute(X("elementId")))
+   {
+      pRaster = dynamic_cast<RasterElement*>(Service<SessionManager>()->getSessionItem(
+         A(pElement->getAttribute(X("elementId")))));
+   }
+
+   if (!setHistogram(pLayer, pRaster, NULL, channel))
    {
       return false;
    }
@@ -3534,29 +3548,16 @@ bool HistogramPlotImp::fromXml(DOMNode* pDocument, unsigned int version)
       }
       else if (XMLString::equals(pChild->getNodeName(), X("Region1")))
       {
-         for (DOMNode* pGChld = pChild->getFirstChild(); pGChld != NULL; pGChld = pGChld->getNextSibling())
+         if (!mpRegion->fromXml(pChild, version))
          {
-            if (pGChld->getNodeType() == DOMNode::ELEMENT_NODE)
-            {
-               string name = A(pGChld->getNodeName());
-               if (!mpRegion->fromXml(pGChld, version))
-               {
-                  return false;
-               }
-            }
+            return false;
          }
       }
       else if (XMLString::equals(pChild->getNodeName(), X("Region2")))
       {
-         for (DOMNode* pGChld = pChild->getFirstChild(); pGChld != NULL; pGChld = pGChld->getNextSibling())
+         if (!mpRegion2->fromXml(pChild, version))
          {
-            if (pGChld->getNodeType() == DOMNode::ELEMENT_NODE)
-            {
-               if (!mpRegion2->fromXml(pGChld, version))
-               {
-                  return false;
-               }
-            }
+            return false;
          }
       }
    }
@@ -3772,7 +3773,7 @@ void HistogramPlotImp::HistogramUpdater::initialize()
 
 void HistogramPlotImp::HistogramUpdater::update()
 {
-   if (mpPlot != NULL && mNeedsUpdated)
+   if (mpPlot != NULL && mNeedsUpdated && Service<SessionManager>()->isSessionLoading() == false)
    {
       mpPlot->updateHistogramValues(true);
       mpPlot->updateHistogramRegions(true);
