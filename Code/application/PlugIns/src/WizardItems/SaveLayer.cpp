@@ -15,7 +15,6 @@
 #include "Layer.h"
 #include "LayerList.h"
 #include "MessageLogResource.h"
-#include "ModelServices.h"
 #include "ObjectFactory.h"
 #include "ObjectResource.h"
 #include "PlugInArg.h"
@@ -24,6 +23,7 @@
 #include "PlugInRegistration.h"
 #include "PlugInResource.h"
 #include "SaveLayer.h"
+#include "StringUtilities.h"
 #include "RasterElement.h"
 #include "SpatialDataView.h"
 #include "SpatialDataWindow.h"
@@ -191,7 +191,8 @@ bool SaveLayer::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
    FactoryResource<FileDescriptor> pFileDescriptor;
    VERIFY(pFileDescriptor.get() != NULL);
    pFileDescriptor->setFilename(filename);
-   ExporterResource exporter("Layer Exporter", pLayer, pFileDescriptor.get());
+   std::string exporterName = StringUtilities::toDisplayString(eType) + " Layer Exporter";
+   ExporterResource exporter(exporterName, pLayer, pFileDescriptor.get());
    VERIFY(exporter->getPlugIn() != NULL);
    bool bSaved = exporter->execute();
 
@@ -231,7 +232,7 @@ bool SaveLayer::extractInputArgs(PlugInArgList* pInArgList)
       reportError("Could not read the data element input value!", "2AA2FB55-32F7-478b-9920-3696EF55F957");
       return false;
    }
-   mpElement = pArg->getPlugInArgValue<DataElement>();
+   mpElement = pArg->getPlugInArgValueUnsafe<DataElement>();
 
    return true;
 }
@@ -441,14 +442,6 @@ bool SaveLayerFromDataSet::execute(PlugInArgList* pInArgList, PlugInArgList* pOu
 
    // Get the spectral element
    LayerType eType = getLayerType();
-   string modelType = getModelType(eType);
-
-   DataElement* pElement = NULL;
-   Service<ModelServices> pModel;
-   if ((pModel.get() != NULL) && !modelType.empty())
-   {
-      pElement = pModel->getElement(mLayerName, modelType, mpRasterElement);
-   }
 
    // Save the layer
    bool bSaved = false;
@@ -456,7 +449,17 @@ bool SaveLayerFromDataSet::execute(PlugInArgList* pInArgList, PlugInArgList* pOu
    LayerList* pLayerList = pView->getLayerList();
    if (pLayerList != NULL)
    {
-      Layer* pLayer = pLayerList->getLayer(eType, pElement, mLayerName.c_str());
+      std::vector<Layer*> layers;
+      pLayerList->getLayers(eType, layers);
+      Layer* pLayer = NULL;
+      for (std::vector<Layer*>::iterator it = layers.begin(); it != layers.end(); ++it)
+      {
+         if ((*it)->getName() == mLayerName)
+         {
+            pLayer = (*it);
+            break;
+         }
+      }
       if (pLayer == NULL)
       {
          reportError("Could not get the layer to save!", "02F03D56-7CA8-4052-894D-BFDDFC3A814F");
@@ -466,7 +469,8 @@ bool SaveLayerFromDataSet::execute(PlugInArgList* pInArgList, PlugInArgList* pOu
       FactoryResource<FileDescriptor> pFileDescriptor;
       VERIFY(pFileDescriptor.get() != NULL);
       pFileDescriptor->setFilename(filename);
-      ExporterResource exporter("Layer Exporter", pLayer, pFileDescriptor.get());
+      std::string exporterName = StringUtilities::toDisplayString(eType) + " Layer Exporter";
+      ExporterResource exporter(exporterName, pLayer, pFileDescriptor.get());
       VERIFY(exporter->getPlugIn() != NULL);
       bSaved = exporter->execute();
    }
