@@ -50,10 +50,10 @@ protected:
 
 private:
    bool splitFilename(std::string& filename, int& hduCnt, int& specificHdu, int& hdu, FitsFileResource& pFile);
-   EncodingType checkForOverflow(EncodingType encoding, DynamicObject* pMetadata);
+   EncodingType checkForOverflow(EncodingType encoding, DynamicObject* pMetadata, int hdu);
 
-   std::vector<std::string> mErrors;
-   std::vector<std::string> mWarnings;
+   std::vector<std::vector<std::string> > mErrors;
+   std::vector<std::vector<std::string> > mWarnings;
 };
 
 class FitsSignatureImporter : public FitsImporter

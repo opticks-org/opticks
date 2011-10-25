@@ -295,6 +295,13 @@ std::vector<ImportDescriptor*> GdalImporter::getImportDescriptors(const std::str
 
 unsigned char GdalImporter::getFileAffinity(const std::string& filename)
 {
+   if (filename.find(".fts") != std::string::npos ||
+       filename.find(".fit") != std::string::npos ||
+       filename.find(".fits") != std::string::npos)
+   {
+      // GDAL currently crashes on some FITS files so we'll just ignore them
+      return CAN_NOT_LOAD;
+   }
    std::auto_ptr<GDALDataset> pDataset(reinterpret_cast<GDALDataset*>(GDALOpen(filename.c_str(), GA_ReadOnly)));
    if (pDataset.get() != NULL)
    {
