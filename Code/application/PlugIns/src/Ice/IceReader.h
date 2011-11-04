@@ -38,7 +38,7 @@ public:
    {
       FULLY_SUPPORTED, /**< This is an ice file and a version of the file supported by this importer */
       NOT_SUPPORTED, /**< This is an ice file but not a version of the file supported by this importer */
-      NOT_ICE, /**< This is not an ice file at all */
+      NOT_ICE /**< This is not an ice file at all */
    };
    typedef EnumWrapper<ValidityTypeEnum> ValidityType;
 
@@ -55,6 +55,8 @@ public:
       std::string& warningMessage);
 
 private:
+   IceReader& operator=(const IceReader& rhs);
+
    void readFormatDescriptor();
    ImportDescriptor* getImportDescriptor(const Hdf5Group* pCube);
 

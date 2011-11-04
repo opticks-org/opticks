@@ -509,8 +509,9 @@ public:
             size_t strLen = H5Tget_size(mDataType); // get the number of characters in the fixed length strings
             hsize_t numberOfStrings = mDataSpace.front();
             mpReadBuffer = new char*[1];
-            mpReadBuffer[0] = new char[numberOfStrings * strLen];
-            memset(mpReadBuffer[0], 0, numberOfStrings * strLen); //set to NULL, so that string is auto null terminated
+            size_t size = static_cast<size_t>(numberOfStrings) * strLen;
+            mpReadBuffer[0] = new char[size];
+            memset(mpReadBuffer[0], 0, size); //set to NULL, so that string is auto null terminated
             mDeleteFixedSpace = true;
          }
          return mpReadBuffer[0];

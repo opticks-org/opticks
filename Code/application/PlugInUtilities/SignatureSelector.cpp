@@ -32,8 +32,8 @@
 
 using namespace std;
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : These special cases for the display format type " \
-   "should be removed when functional compatibility can be broken (dsulgrov)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : These special cases for the display format type " \
+//   "should be removed when functional compatibility can be broken (dsulgrov)")
 const QString SignatureSelector::sMetadataType = "Metadata...";
 const QString SignatureSelector::sDashType = "-----------------------";
 

@@ -49,6 +49,9 @@ protected slots:
    void updateItemPixmap();
 
 private:
+   Legend(const Legend& rhs);
+   Legend& operator=(const Legend& rhs);
+
    QMap<PlotObject*, QTreeWidgetItem*> mObjects;
    bool mSecondaryObjects;
 };

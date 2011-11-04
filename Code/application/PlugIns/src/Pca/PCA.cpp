@@ -532,8 +532,8 @@ bool PCA::getInputSpecification(PlugInArgList*& pArgList)
 
       VERIFY(pArgList->addArg<bool>("Use Transform File", NULL, "Whether to use an external transform file."));
       VERIFY(pArgList->addArg<Filename>("Transform Filename", NULL, "Filename for external transform file, if applicable."));
-      #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Transform Type should be renamed to Statistics Matrix Type sometime when wizard compatibility " \
-         "can be broken. (sbmiller)")
+      //#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Transform Type should be renamed to Statistics Matrix Type sometime when wizard compatibility " \
+      //   "can be broken. (sbmiller)")
       VERIFY(pArgList->addArg<string>("Transform Type", NULL, 
          "Type of statistics matrix to be used by PCA (Covariance, Second Moment, or Correlation Coefficient)."));
       VERIFY(pArgList->addArg<bool>("Use AOI", false, "Whether to perform PCA over a specific AOI."));
@@ -595,7 +595,6 @@ bool PCA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
       mNumBands = pDescriptor->getBandCount();
 
       vector<string> aoiNames = mpModel->getElementNames(mpRaster, TypeConverter::toString<AoiElement>());
-      int iResult = 0;
 
       if (!isBatch())
       {
@@ -716,8 +715,8 @@ bool PCA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
             return false;
          }
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Number of Components input argument " \
-   "should be an unsigned int (dadkins)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Number of Components input argument " \
+//   "should be an unsigned int (dadkins)")
          mNumComponentsToUse = static_cast<unsigned int>(numComponents);
          if (mNumComponentsToUse <= 0 || mNumBands < mNumComponentsToUse)
          {
@@ -731,7 +730,7 @@ bool PCA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
          {
             bool aoiFailure = false;
             string roiName;
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : AOI Name should be an AoiElement (dadkins)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : AOI Name should be an AoiElement (dadkins)")
             if (pInArgList->getPlugInArgValue("AOI Name", roiName) == false)
             {
                pStep->finalize(Message::Failure, "Must specify the AOI name when choosing to process over an AOI!");
@@ -1143,7 +1142,7 @@ bool PCA::createPCACube()
 
    StepResource pStep(mMessage, "app", "2EA8BA45-E826-4bb1-AB94-968D29184F80", "Can't create spectral cube");
 
-   int loc = outputName.rfind('.');
+   string::size_type loc = outputName.rfind('.');
    if (loc == string::npos)
    {
       loc = outputName.length();
@@ -1287,7 +1286,6 @@ bool PCA::computePCAwhole()
 
    // Initialize progress bar variables
    int currentProgress = 0;
-   int count = 0;
 
    void* pPCAData = NULL;
    void* pOrigData = NULL;
@@ -1309,7 +1307,7 @@ bool PCA::computePCAwhole()
    double min = 0.0;
    double max = 0.0;
    double scalefactor = 0.0;
-   int memsize = mNumRows * mNumColumns * sizeof(float);
+
    string compValuesName = "PcaComponentValues";
    RasterElement* pOldComponentValues = dynamic_cast<RasterElement*>(
       Service<ModelServices>()->getElement(compValuesName, TypeConverter::toString<RasterElement>(), mpRaster));
@@ -1474,7 +1472,6 @@ bool PCA::computePCAaoi()
 
    // Initialize progress bar variables
    int currentProgress = 0;
-   int count = 0;
 
    void* pPCAData = NULL;
    void* pOrigData = NULL;

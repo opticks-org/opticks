@@ -135,8 +135,8 @@ void RasterDataDescriptorImp::setRows(const vector<DimensionDescriptor>& rows)
             if (count > 0)
             {
                //determine skip factor on second iteration
-               int curSkipFactor = rows[count].getOnDiskNumber() - rows[count-1].getOnDiskNumber();
-               VERIFYNRV(curSkipFactor >= 1);
+               VERIFYNRV(rows[count].getOnDiskNumber() > rows[count-1].getOnDiskNumber());
+               unsigned int curSkipFactor = rows[count].getOnDiskNumber() - rows[count-1].getOnDiskNumber();
                if (count > 1)
                {
                   //on any iteration after second, verify skip factor remains the same
@@ -247,8 +247,8 @@ void RasterDataDescriptorImp::setColumns(const vector<DimensionDescriptor>& colu
             if (count > 0)
             {
                //determine skip factor on second iteration
-               int curSkipFactor = columns[count].getOnDiskNumber() - columns[count - 1].getOnDiskNumber();
-               VERIFYNRV(curSkipFactor >= 1);
+               VERIFYNRV(columns[count].getOnDiskNumber() > columns[count-1].getOnDiskNumber());
+               unsigned int curSkipFactor = columns[count].getOnDiskNumber() - columns[count - 1].getOnDiskNumber();
                if (count > 1)
                {
                   //on any iteration after second, verify skip factor remains the same
@@ -357,8 +357,7 @@ void RasterDataDescriptorImp::setBands(const vector<DimensionDescriptor>& bands)
             anyOnDiskNumberSet = true;
             if (count > 0)
             {
-               int numberDiff = bands[count].getOnDiskNumber() - bands[count - 1].getOnDiskNumber();
-               VERIFYNRV(numberDiff >= 1);
+               VERIFYNRV(bands[count].getOnDiskNumber() > bands[count - 1].getOnDiskNumber());
             }
          }
          else

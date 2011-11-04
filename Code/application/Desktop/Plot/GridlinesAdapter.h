@@ -24,6 +24,9 @@ public:
    bool isKindOf(const std::string& className) const;
 
    GRIDLINESADAPTER_METHODS(GridlinesImp)
+
+private:
+   GridlinesAdapter(const GridlinesAdapter& rhs);
 };
 
 #endif

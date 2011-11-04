@@ -62,6 +62,8 @@ protected slots:
    void updateWidgetsFromWavelengths();
 
 private:
+   WavelengthsWidget(const WavelengthsWidget& rhs);
+   WavelengthsWidget& operator=(const WavelengthsWidget& rhs);
    DynamicObject* mpWavelengthData;
    Wavelengths* mpWavelengths;
 
@@ -85,6 +87,10 @@ public:
    void setEditorData(QWidget* pEditor, const QModelIndex& index) const;
    void setModelData(QWidget* pEditor, QAbstractItemModel* pModel, const QModelIndex& index) const;
    void updateEditorGeometry(QWidget* pEditor, const QStyleOptionViewItem& option, const QModelIndex& index) const;
+
+private:
+   WavelengthItemDelegate(const WavelengthItemDelegate& rhs);
+   WavelengthItemDelegate& operator=(const WavelengthItemDelegate& rhs);
 };
 
 #endif

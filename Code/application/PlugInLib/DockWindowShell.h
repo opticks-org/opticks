@@ -233,6 +233,8 @@ protected slots:
    void displayDockWindow(bool bDisplay);
 
 private:
+   DockWindowShell(const DockWindowShell& rhs);
+   DockWindowShell& operator=(const DockWindowShell& rhs);
    void windowShown(Subject& subject, const std::string& signal, const boost::any& value);
    void windowHidden(Subject& subject, const std::string& signal, const boost::any& value);
 

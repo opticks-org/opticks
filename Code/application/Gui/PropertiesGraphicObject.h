@@ -61,6 +61,8 @@ protected:
    void resetModifiers();
 
 private:
+   PropertiesGraphicObject(const PropertiesGraphicObject& rhs);
+   PropertiesGraphicObject& operator=(const PropertiesGraphicObject& rhs);
    std::list<GraphicObject*> mObjects;
    GraphicLayerImp* mpGraphicLayer;
 

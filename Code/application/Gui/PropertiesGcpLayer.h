@@ -41,6 +41,8 @@ public:
    static bool isProduction();
 
 private:
+   PropertiesGcpLayer(const PropertiesGcpLayer& rhs);
+   PropertiesGcpLayer& operator=(const PropertiesGcpLayer& rhs);
    GcpLayer* mpGcpLayer;
 
    // Pixel marker

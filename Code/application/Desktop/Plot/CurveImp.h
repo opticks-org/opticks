@@ -58,6 +58,8 @@ signals:
    void pointsChanged(const std::vector<LocationType>& points);
 
 private:
+   CurveImp(const CurveImp& rhs);
+
    std::vector<LocationType> mPoints;
 
    QColor mColor;

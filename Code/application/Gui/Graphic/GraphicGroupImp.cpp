@@ -601,7 +601,7 @@ int GraphicGroupImp::getObjectStackingIndex(GraphicObject* pObject) const
    {
       index++;
    }
-   if (index == mObjects.size())
+   if (static_cast<unsigned int>(index) == mObjects.size())
    {
       index = -1;
    }

@@ -31,6 +31,9 @@ protected slots:
    void applyChanges();
 
 private:
+   PlotPropertiesDlg(const PlotPropertiesDlg& rhs);
+   PlotPropertiesDlg& operator=(const PlotPropertiesDlg& rhs);
+
    PlotWidget* mpPlot;
 
    QComboBox* mpClassPositionCombo;

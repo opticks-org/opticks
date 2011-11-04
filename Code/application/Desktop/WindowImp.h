@@ -46,6 +46,7 @@ public:
    virtual void enableSessionItemDrops(Window::SessionItemDropFilter *pFilter = NULL);
 
 protected:
+   WindowImp(const WindowImp& rhs);
    virtual void dragEnterEvent(QDragEnterEvent *pEvent);
    virtual void dropEvent(QDropEvent *pEvent);
 

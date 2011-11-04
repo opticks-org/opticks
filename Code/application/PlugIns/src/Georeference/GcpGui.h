@@ -41,6 +41,9 @@ protected slots:
    bool setCurrentGcpList(const QString& strGcpList);
 
 private:
+   GcpGui(const GcpGui& rhs);
+   GcpGui& operator=(const GcpGui& rhs);
+
    const int mMaxOrder;
    Service<ModelServices> mpModel;
    RasterElement* mpRasterElement;

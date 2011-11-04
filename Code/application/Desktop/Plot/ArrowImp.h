@@ -58,6 +58,7 @@ protected slots:
    void updateArrowHead();
 
 private:
+   ArrowImp(const ArrowImp& rhs);
    ArrowStyle mStyle;
    PointSetAdapter mLine;
    PolygonPlotObjectAdapter mArrowHead;
@@ -85,7 +86,7 @@ private:
       QColor color = impClass::getColor(); \
       return ColorType(color.red(), color.blue(), color.green()); \
    } \
-   bool hit(LocationType point) \
+   bool hit(LocationType point) const \
    { \
       return impClass::hit(point); \
    } \

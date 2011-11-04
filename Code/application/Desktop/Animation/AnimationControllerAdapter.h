@@ -24,6 +24,10 @@ public:
    bool isKindOf(const std::string& className) const;
 
    ANIMATIONCONTROLLERADAPTER_METHODS(AnimationControllerImp)
+
+private:
+   AnimationControllerAdapter(const AnimationControllerAdapter& rhs);
+   AnimationControllerAdapter& operator=(const AnimationControllerAdapter& rhs);
 };
 
 #endif

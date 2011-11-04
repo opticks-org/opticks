@@ -73,6 +73,8 @@ protected slots:
    void globalOutputChanged(bool newValue);
 
 private:
+   ScriptingWidget(const ScriptingWidget& rhs);
+   ScriptingWidget& operator=(const ScriptingWidget& rhs);
    bool mDropOccurring;
    bool mDisplayedOnce;
    QString mPrompt;
@@ -100,9 +102,9 @@ private:
    virtual bool canInsertFromMimeData(const QMimeData* pSource) const;
    virtual void dropEvent(QDropEvent* pEvent);
    virtual void insertFromMimeData(const QMimeData* pSource);
-   void receiveOutput(Subject& subject, const std::string& signal, const boost::any& data);
-   void interpreterStarted(Subject& subject, const std::string& signal, const boost::any& data);
-   void plugInDestroyed(Subject& subject, const std::string& signal, const boost::any& data);
+   void receiveOutput(Subject& subject, const std::string& signal, const boost::any& value);
+   void interpreterStarted(Subject& subject, const std::string& signal, const boost::any& value);
+   void plugInDestroyed(Subject& subject, const std::string& signal, const boost::any& value);
 };
 
 #endif

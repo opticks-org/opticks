@@ -34,6 +34,8 @@ public:
 private:
    ConvertToBilPager();
 
+   ConvertToBilPager& operator=(const ConvertToBilPager& rhs);
+
    RasterElement* const mpRaster;
    unsigned int mBytesPerElement;
 };

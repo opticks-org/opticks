@@ -41,6 +41,8 @@ public:
    static bool isProduction();
 
 private:
+   PropertiesView(const PropertiesView& rhs);
+   PropertiesView& operator=(const PropertiesView& rhs);
    View* mpView;
 
    // General

@@ -45,6 +45,10 @@ public:
    }
 
    EASTARROWOBJECTADAPTER_METHODS(EastArrowObjectImp)
+
+private:
+   EastArrowObjectAdapter(const EastArrowObjectAdapter& rhs);
+   EastArrowObjectAdapter& operator=(const EastArrowObjectAdapter& rhs);
 };
 
 #endif

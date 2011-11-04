@@ -57,8 +57,6 @@ ScaleBarObjectImp::ScaleBarObjectImp(const string& id, GraphicObjectType type, G
    ColorType blackColor(0, 0, 0);
    ColorType whiteColor(255, 255, 255);
 
-   int longLength = 0;
-
    int i = 0;
    LocationType llObjCorner;
    LocationType urObjCorner;
@@ -67,7 +65,6 @@ ScaleBarObjectImp::ScaleBarObjectImp(const string& id, GraphicObjectType type, G
 
    for (i = 0; i < 6; ++i)
    {
-      int j = 0;
       RectangleObjectImp* pRect = dynamic_cast<RectangleObjectImp*>(mpGroup->addObject(RECTANGLE_OBJECT, pixelCoord));
       REQUIRE(pRect != NULL);
 
@@ -217,7 +214,6 @@ void ScaleBarObjectImp::updateLayout()
       urCorner.mY = temp;
    }
 
-   double barWidth = urCorner.mX - llCorner.mX;
    double barHeight = urCorner.mY - llCorner.mY;
 
    double spacingScale = 1.0;
@@ -255,7 +251,6 @@ void ScaleBarObjectImp::updateLayout()
    }
 
    double deltaX = urCorner.mX - llCorner.mX;
-   double deltaY = urCorner.mY - llCorner.mY;
    double lengthBar = fabs(deltaX * mXgsd * unitScale);
    double totalLengthPixels = fabs(deltaX);
    double ticksize = 0.0; //ticksize in pixels

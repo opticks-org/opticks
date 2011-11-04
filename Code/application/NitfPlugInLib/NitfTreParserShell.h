@@ -58,13 +58,13 @@ namespace Nitf
       TreState isTreValid(const DynamicObject& tre, std::ostream& reporter) const;
 
       /**
-       * @copydoc Nitf::TreParser::toDynamicObject(const ossimNitfRegisteredTag&, DynamicObject&, std::string&) const
+       * @copydoc Nitf::TreParser::ossimTagToDynamicObject(const ossimNitfRegisteredTag&, DynamicObject&, std::string&) const
        *
        * @default The default implementation returns false,
        *          so that developers only need to override
        *          those methods they wish to implement.
        */
-      bool toDynamicObject(const ossimNitfRegisteredTag& input, DynamicObject& output, 
+      bool ossimTagToDynamicObject(const ossimNitfRegisteredTag& input, DynamicObject& output, 
          std::string& errorMessage) const;
 
       /**
@@ -78,13 +78,13 @@ namespace Nitf
          std::string& errorMessage) const;
 
       /**
-       * @copydoc Nitf::TreParser::fromDynamicObject(const DynamicObject&, ossimNitfRegisteredTag&, std::string&) const
+       * @copydoc Nitf::TreParser::ossimTagFromDynamicObject(const DynamicObject&, ossimNitfRegisteredTag&, std::string&) const
        *
        * @default The default implementation returns false,
        *          so that developers only need to override
        *          those methods they wish to implement.
        */
-      bool fromDynamicObject(const DynamicObject& input, ossimNitfRegisteredTag& tre, 
+      bool ossimTagFromDynamicObject(const DynamicObject& input, ossimNitfRegisteredTag& tre, 
          std::string& errorMessage) const;
 
       /**

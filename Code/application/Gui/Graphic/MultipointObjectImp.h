@@ -22,6 +22,8 @@ public:
    MultipointObjectImp(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer, LocationType pixelCoord);
    ~MultipointObjectImp();
 
+   using PixelObjectImp::getPixels;
+
    void drawVector(double zoomFactor) const;
    void drawPixels(double zoomFactor) const;
 
@@ -40,7 +42,6 @@ public:
    void removeVertex(unsigned int index);
    void clearVertices();
 
-   using GraphicObjectImp::getPixels;
    const BitMask* getPixels(int iStartColumn, int iStartRow, int iEndColumn, int iEndRow);
 
    bool replicateObject(const GraphicObject* pObject);
@@ -71,6 +72,8 @@ protected:
       LocationType endPoint, bool bMaintainAspect, LocationType translateFactor = LocationType());
 
 private:
+   MultipointObjectImp(const MultipointObjectImp& rhs);
+   MultipointObjectImp& operator=(const MultipointObjectImp& rhs);
    void getVertices(const DOMNode* pVertex, const std::string& nodeName, std::vector<LocationType>& vertices);
    std::vector<LocationType> mVertices;
    std::vector<LocationType> mGeoVertices;

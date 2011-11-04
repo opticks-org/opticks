@@ -44,7 +44,8 @@ MetadataExporter::~MetadataExporter()
 
 bool MetadataExporter::getInputSpecification(PlugInArgList*& pInArgList)
 {
-   VERIFY(pInArgList = Service<PlugInManagerServices>()->getPlugInArgList());
+   pInArgList = Service<PlugInManagerServices>()->getPlugInArgList();
+   VERIFY(pInArgList != NULL);
    VERIFY(pInArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription()));
    VERIFY(pInArgList->addArg<FileDescriptor>(Exporter::ExportDescriptorArg(), "File descriptor for the output file."));
    VERIFY(pInArgList->addArg<DataElement>(Exporter::ExportItemArg(), "Data element to export metadata from."));

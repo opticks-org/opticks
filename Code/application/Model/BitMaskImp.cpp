@@ -776,9 +776,6 @@ void BitMaskImp::setRegion(int x1, int y1, int x2, int y2, ModeType op)
    unsigned int leftMask = 0xffffffff;
    unsigned int rightMask = 0xffffffff;
 
-   int inX1 = x1;
-   int inX2 = x2;
-
    if (x1 > mx2 || x2 < mx1 || y1 > my2 || y2 < my1 || mpMask == NULL)
    {
       if ((op == DRAW && mOutside == true) || (op == ERASE && mOutside == false))
@@ -807,7 +804,7 @@ void BitMaskImp::setRegion(int x1, int y1, int x2, int y2, ModeType op)
    switch (op)
    {
    case ERASE:
-      mask = -1;
+      mask = std::numeric_limits<unsigned int>::max();
       leftMask ^= -1;
       rightMask ^= -1;
       // yes, I left the break out on purpose
@@ -847,7 +844,7 @@ void BitMaskImp::setRegion(int x1, int y1, int x2, int y2, ModeType op)
       {
          if (leftX == rightX - 31)
          {
-            setPixels(leftX, y, getPixels(leftX, y) ^ leftMask & rightMask);
+            setPixels(leftX, y, getPixels(leftX, y) ^ (leftMask & rightMask));
          }
          else
          {
@@ -1065,7 +1062,6 @@ void BitMaskImp::setPixels(int x, int y, unsigned int values)
          return;
       }
 
-      int rdx = x - x & 0x1f;
       growToInclude(x, y, x + 31, y, mOutside);
    }
 
@@ -1414,7 +1410,7 @@ void BitMaskImp::growToInclude(int x1, int y1, int x2, int y2, bool fill)
 static inline int countBits(unsigned int v)
 {
    int count = 0;
-   for (int i = 0; i < LONG_BITS; ++i)
+   for (unsigned int i = 0; i < LONG_BITS; ++i)
    {
       if (v & 0x1)
       {

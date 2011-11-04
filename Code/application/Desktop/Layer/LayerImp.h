@@ -141,6 +141,7 @@ protected slots:
    void layerActivated(Layer* pLayer);
 
 private:
+   LayerImp(const LayerImp& rhs);
    void setDataElement(DataElement* pElement);
 
 private:
@@ -162,6 +163,7 @@ private:
 #define LAYERADAPTER_METHODS(impClass) \
    SESSIONITEMADAPTER_METHODS(impClass) \
    SUBJECTADAPTER_METHODS(impClass) \
+   using impClass::rename; \
    LayerType getLayerType() const \
    { \
       return impClass::getLayerType(); \

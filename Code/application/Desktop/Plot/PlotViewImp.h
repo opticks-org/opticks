@@ -33,7 +33,8 @@ public:
    PlotViewImp(const std::string& id, const std::string& viewName, QGLContext* drawContext = 0, QWidget* parent = 0);
    ~PlotViewImp();
 
-   using SessionItemImp::setIcon;
+   using OrthographicViewImp::setIcon;
+   using OrthographicViewImp::setName;
    bool canRename() const;
 
    const std::string& getObjectType() const;
@@ -42,10 +43,7 @@ public:
    static bool isKindOfView(const std::string& className);
    static void getViewTypes(std::vector<std::string>& classList);
 
-   PlotViewImp& operator= (const PlotViewImp& plotView);
-
    ViewType getViewType() const;
-   using ViewImp::setName;
 
    virtual PlotType getPlotType() const = 0;
 
@@ -112,6 +110,8 @@ signals:
    void objectSelected(PlotObject* pObject, bool bSelected);
 
 protected:
+   PlotViewImp& operator=(const PlotViewImp& plotView);
+   using OrthographicViewImp::setMouseMode;
    void keyPressEvent(QKeyEvent* pEvent);
    void mousePressEvent(QMouseEvent* e);
    void mouseMoveEvent(QMouseEvent* e);
@@ -121,8 +121,6 @@ protected:
    void drawContents();
    virtual void drawGridlines() = 0;
    virtual void initializeGL();
-
-   using OrthographicViewImp::setMouseMode;
 
 protected slots:
    void setMouseMode(QAction* pAction);
@@ -134,6 +132,8 @@ protected slots:
    void updateAnnotationObjects();
 
 private:
+   PlotViewImp(const PlotViewImp& rhs);
+
    QMenu* mpMouseModeMenu;
    QActionGroup* mpMouseModeGroup;
    QAction* mpObjectSelectAction;

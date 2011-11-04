@@ -35,6 +35,8 @@ public:
    std::vector<int> getBandSelectionIndices() const;
 
 private:
+   GetSubsetDialog(const GetSubsetDialog& rhs);
+   GetSubsetDialog& operator=(const GetSubsetDialog& rhs);
    QLineEdit* mpName;
    QComboBox* mpAoiSelect;
    QListWidget* mpBandSelect;

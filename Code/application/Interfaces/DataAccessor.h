@@ -79,7 +79,7 @@ public:
     *  @param   rhs
     *           The DataAccessor from which to set this accessor's values.
     */
-   DataAccessor &operator=(const DataAccessor &rhs);
+   DataAccessor& operator=(const DataAccessor& rhs);
 
    /**
     *  Provides access to the real DataAccessorImpl.

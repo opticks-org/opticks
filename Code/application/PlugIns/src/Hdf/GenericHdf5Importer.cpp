@@ -45,7 +45,7 @@ using namespace std;
 
 namespace
 {
-   herr_t populateMetadata(hid_t loc_id, const char *name, void* pParameter)
+   extern "C" herr_t populateMetadata(hid_t loc_id, const char *name, void* pParameter)
    {
       DynamicObject* pMetadata = static_cast<DynamicObject*>(pParameter);
       VERIFYRV(pMetadata != NULL, 1);

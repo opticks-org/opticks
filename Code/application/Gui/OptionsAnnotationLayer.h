@@ -91,6 +91,8 @@ public:
    }
 
 private:
+   OptionsAnnotationLayer(const OptionsAnnotationLayer& rhs);
+   OptionsAnnotationLayer& operator=(const OptionsAnnotationLayer& rhs);
    CustomColorButton* mpTextColor;
    QDoubleSpinBox* mpStartAngle;
    QDoubleSpinBox* mpStopAngle;

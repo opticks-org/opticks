@@ -72,6 +72,12 @@ public:
    ColorType() { mRed = -1; mGreen = -1; mBlue = -1; mAlpha = 255;};
 
    /**
+    *  Destructor.
+    */
+   ~ColorType()
+   {};
+
+   /**
     *  Returns a unique color that is farthest away in color space from given colors.
     *
     *  @param   excludedColors

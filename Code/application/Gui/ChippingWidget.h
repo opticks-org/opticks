@@ -56,6 +56,8 @@ protected slots:
    void centerView();
 
 private:
+   ChippingWidget(const ChippingWidget& rhs);
+   ChippingWidget& operator=(const ChippingWidget& rhs);
    bool mExportMode;
    SpatialDataView* mpView;
    const RasterDataDescriptor* mpDefaultDescriptor;

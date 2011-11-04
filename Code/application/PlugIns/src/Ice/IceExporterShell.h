@@ -47,6 +47,8 @@ protected:
    static std::string outputCubePath();
 
 private:
+   IceExporterShell& operator=(const IceExporterShell& rhs);
+
    Service<PlugInManagerServices> mpPlugInMgr;
    IceWriter* mpWriter;
    const IceUtilities::FileType mFileType;

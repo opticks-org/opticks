@@ -39,7 +39,7 @@ namespace
                      unsigned short parentLabel, // or 0 for an external
                      int contourIdx)
    {
-      if (hierarchy.size() <= contourIdx)
+      if (static_cast<int>(hierarchy.size()) <= contourIdx)
       {
          return;
       }
@@ -91,7 +91,8 @@ ConnectedComponents::~ConnectedComponents()
 
 bool ConnectedComponents::getInputSpecification(PlugInArgList*& pInArgList)
 {
-   VERIFY(pInArgList = Service<PlugInManagerServices>()->getPlugInArgList());
+   pInArgList = Service<PlugInManagerServices>()->getPlugInArgList();
+   VERIFY(pInArgList != NULL);
    VERIFY(pInArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription()));
    VERIFY(pInArgList->addArg<AoiElement>("AOI", "AOI where connected components will be labeled."));
    VERIFY(pInArgList->addArg<SpatialDataView>(Executable::ViewArg(), NULL,
@@ -101,7 +102,8 @@ bool ConnectedComponents::getInputSpecification(PlugInArgList*& pInArgList)
 
 bool ConnectedComponents::getOutputSpecification(PlugInArgList*& pOutArgList)
 {
-   VERIFY(pOutArgList = Service<PlugInManagerServices>()->getPlugInArgList());
+   pOutArgList = Service<PlugInManagerServices>()->getPlugInArgList();
+   VERIFY(pOutArgList != NULL);
    VERIFY(pOutArgList->addArg<unsigned int>("Number of Blobs",
       "The number of blobs found after removing blobs which don't meet the minimum size."));
    VERIFY(pOutArgList->addArg<RasterElement>("Blobs",
@@ -226,8 +228,7 @@ bool ConnectedComponents::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
       // create a pseudocolor layer for display
       mProgress.report("Displaying results", 90, NORMAL);
       mpLabels->updateData();
-      unsigned int numBlobs = lastLabel;
-      if (!createPseudocolor(numBlobs))
+      if (!createPseudocolor(lastLabel))
       {
          mProgress.report("Unable to create blob layer", 0, ERRORS, true);
          return false;
@@ -236,6 +237,7 @@ bool ConnectedComponents::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
       // add blob count to the metadata
       DynamicObject* pMeta = pLabels->getMetadata();
       VERIFY(pMeta);
+      unsigned int numBlobs = static_cast<unsigned int>(lastLabel);
       pMeta->setAttribute("BlobCount", numBlobs);
       if (numBlobs == 0 && !isBatch())
       {

@@ -44,6 +44,10 @@ public:
    }
 
    ARROWOBJECTADAPTER_METHODS(ArrowObjectImp)
+
+private:
+   ArrowObjectAdapter(const ArrowObjectAdapter& rhs);
+   ArrowObjectAdapter& operator=(const ArrowObjectAdapter& rhs);
 };
 
 #endif

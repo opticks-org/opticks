@@ -23,6 +23,10 @@ public:
 
 protected:
    FilledObjectImp(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer, LocationType pixelCoord);
+
+private:
+   FilledObjectImp(const FilledObjectImp& rhs);
+   FilledObjectImp& operator=(const FilledObjectImp& rhs);
 };
 
 #define FILLEDOBJECTADAPTEREXTENSION_CLASSES \

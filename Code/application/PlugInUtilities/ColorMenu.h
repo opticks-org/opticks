@@ -35,6 +35,8 @@ protected:
    bool eventFilter(QObject* pObject, QEvent* pEvent);
 
 private:
+   ColorMenu(const ColorMenu& rhs);
+   ColorMenu& operator=(const ColorMenu& rhs);
    QColor mColor;
    ColorGrid* mpColorGrid;
 };

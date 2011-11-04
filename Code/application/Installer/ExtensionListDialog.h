@@ -27,6 +27,8 @@ private slots:
    void reloadExtensions();
 
 private:
+   ExtensionListDialog(const ExtensionListDialog& rhs);
+   ExtensionListDialog& operator=(const ExtensionListDialog& rhs);
    QListWidget* mpExtensionList;
 };
 

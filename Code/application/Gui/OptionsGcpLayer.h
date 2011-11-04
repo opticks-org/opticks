@@ -81,6 +81,8 @@ public:
    }
 
 private:
+   OptionsGcpLayer(const OptionsGcpLayer& rhs);
+   OptionsGcpLayer& operator=(const OptionsGcpLayer& rhs);
    QSpinBox* mpMarkerSize;
    GcpSymbolButton* mpMarkerSymbol;
    CustomColorButton* mpMarkerColor;

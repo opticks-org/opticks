@@ -24,6 +24,9 @@ public:
    bool isKindOf(const std::string& className) const;
 
    TIEPOINTLISTADAPTER_METHODS(TiePointListImp)
+
+private:
+   TiePointListAdapter(const TiePointListAdapter& rhs);
 };
 
 #endif

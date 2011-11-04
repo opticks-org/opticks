@@ -320,9 +320,9 @@ QSize DataVariantEditor::sizeHint() const
 
 void DataVariantEditor::setValue(const DataVariant& value, bool useVariantCurrentValue)
 {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : The useVariantCurrentValue parameter is used to not " \
-   "initialize a widget with a default value only when it would otherwise initialize to an undefined value.  The " \
-   "parameter can be removed when DataVariant supports a valid type with an invalid value. (dsulgrov)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : The useVariantCurrentValue parameter is used to not " \
+//   "initialize a widget with a default value only when it would otherwise initialize to an undefined value.  The " \
+//   "parameter can be removed when DataVariant supports a valid type with an invalid value. (dsulgrov)")
 
    if (value.isValid() == false)
    {
@@ -561,8 +561,8 @@ const DataVariant& DataVariantEditor::getValue()
       string valueText = mpValueLineEdit->text().toStdString();
       if (mValue.fromDisplayString(mValue.getTypeName(), valueText) == DataVariant::FAILURE)
       {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This should error, fix this when we can have a " \
-   "DataVariant with a type and an invalid value (tclarke)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This should error, fix this when we can have a " \
+//   "DataVariant with a type and an invalid value (tclarke)")
          // if possible, put a reasonable default in the variant so we don't get garbage
          // types not in this list either have a reasonable value already or we can't determine one at this point
          switch (curDelegate.getType())
@@ -860,5 +860,5 @@ const string& DataVariantEditor::getVectorStringEditWarningDialogId()
    return editWarningDialogId;
 }
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Use a QListView to allow editing of vector data, " \
-   "since the fromDisplayString parser is brittle? (kstreith)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Use a QListView to allow editing of vector data, " \
+//   "since the fromDisplayString parser is brittle? (kstreith)")

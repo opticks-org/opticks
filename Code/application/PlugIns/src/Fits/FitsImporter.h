@@ -70,6 +70,8 @@ public:
    virtual ~FitsRasterPager();
 
 private:
+   FitsRasterPager& operator=(const FitsRasterPager& rhs);
+
    virtual bool openFile(const std::string& filename);
    virtual CachedPage::UnitPtr fetchUnit(DataRequest* pOriginalRequest);
 

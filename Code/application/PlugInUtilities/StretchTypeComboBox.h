@@ -28,6 +28,10 @@ signals:
 
 private slots:
    void translateActivated(int newIndex);
+
+private:
+   StretchTypeComboBox(const StretchTypeComboBox& rhs);
+   StretchTypeComboBox& operator=(const StretchTypeComboBox& rhs);
 };
 
 #endif

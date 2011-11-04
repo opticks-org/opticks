@@ -28,6 +28,10 @@ signals:
 
 private slots:
    void translateActivated(int newIndex);
+
+private:
+   ArcRegionComboBox(const ArcRegionComboBox& rhs);
+   ArcRegionComboBox& operator=(const ArcRegionComboBox& rhs);
 };
 
 #endif

@@ -48,6 +48,7 @@ public:
    static bool xmlToGcps(std::back_insert_iterator<std::list<GcpPoint> > first, DOMNode* pDoc, unsigned int version);
 
 private:
+   GcpListImp(const GcpListImp& rhs);
    std::list<GcpPoint> mSelected;
 };
 

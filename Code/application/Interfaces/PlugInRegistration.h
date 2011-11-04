@@ -154,6 +154,8 @@ public:
     */
    PlugInFactory() {}
 
+   virtual ~PlugInFactory() {}
+
    /**
     * Create a new plugin.
     *
@@ -187,6 +189,7 @@ public:
    {
       addPlugInName(name);
    }
+   virtual ~BasicPlugInFactory() {}
    virtual std::vector<std::string> getPlugInNames()
    {
       return mPlugInNames;
@@ -194,6 +197,7 @@ public:
 
 private:
    BasicPlugInFactory() {}
+
    void addPlugInName(std::string name)
    {
       mPlugInNames.push_back(name);
@@ -222,6 +226,7 @@ public:
     *          in their constructors.
     */
    DynamicPlugInFactory() {}
+   virtual ~DynamicPlugInFactory() {};
 
    /// \cond INTERNAL
    void setModuleId(const std::string& moduleId)
@@ -353,6 +358,7 @@ struct FactoryPtrComparator
          { \
             moduleNamespace__::addFactory(this); \
          } \
+         virtual ~pluginname__##PlugInFactory() {}; \
          PlugIn* createPlugIn(const std::string& name) \
          { \
             return new className__; \

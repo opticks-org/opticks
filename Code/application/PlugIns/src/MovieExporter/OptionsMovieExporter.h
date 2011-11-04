@@ -98,6 +98,8 @@ public:
    }
 
 private:
+   OptionsMovieExporter(const OptionsMovieExporter& rhs);
+   OptionsMovieExporter& operator=(const OptionsMovieExporter& rhs);
    ViewResolutionWidget* mpResolutionWidget;
    BitrateWidget* mpBitrateWidget;
    AdvancedOptionsWidget* mpAdvancedWidget;

@@ -22,6 +22,10 @@ public:
 protected:
    virtual QAction* createAction();
    virtual QWidget* createWidget();
+
+private:
+   ConvolutionMatrixEditor(const ConvolutionMatrixEditor& rhs);
+   ConvolutionMatrixEditor& operator=(const ConvolutionMatrixEditor& rhs);
 };
 
 #endif

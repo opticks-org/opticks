@@ -45,7 +45,6 @@ public:
    LatLonLayerImp& operator= (const LatLonLayerImp& latLonLayer);
 
    LayerType getLayerType() const;
-   using LayerImp::setName;
 
    std::vector<ColorType> getColors() const;
    void draw();
@@ -242,6 +241,8 @@ protected:
    const FontImp& getFontImp() const;
 
 private:
+   LatLonLayerImp(const LatLonLayerImp& rhs);
+
    GeocoordType mGeocoordType;
    DmsFormatType mFormat;
    LatLonStyle mStyle;                 // the current drawing style

@@ -24,6 +24,10 @@ public:
    bool isKindOf(const std::string& className) const;
 
    PLOTWINDOWADAPTER_METHODS(PlotWindowImp)
+
+private:
+   PlotWindowAdapter(const PlotWindowAdapter& rhs);
+   PlotWindowAdapter& operator=(const PlotWindowAdapter& rhs);
 };
 
 #endif

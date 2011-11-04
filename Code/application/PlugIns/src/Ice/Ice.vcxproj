@@ -58,6 +58,7 @@
     <Import Project="..\..\..\CompileSettings\Qt-Debug.props" />
     <Import Project="..\..\..\CompileSettings\hdf5-debug.props" />
     <Import Project="..\..\..\CompileSettings\pthreads.props" />
+    <Import Project="..\..\..\CompileSettings\EnableWarnings.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -70,6 +71,7 @@
     <Import Project="..\..\..\CompileSettings\Xerces-Release.props" />
     <Import Project="..\..\..\CompileSettings\Qt-Release.props" />
     <Import Project="..\..\..\CompileSettings\pthreads.props" />
+    <Import Project="..\..\..\CompileSettings\EnableWarnings.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -82,6 +84,7 @@
     <Import Project="..\..\..\CompileSettings\Qt-Debug.props" />
     <Import Project="..\..\..\CompileSettings\hdf5-debug.props" />
     <Import Project="..\..\..\CompileSettings\pthreads.props" />
+    <Import Project="..\..\..\CompileSettings\EnableWarnings.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -94,6 +97,7 @@
     <Import Project="..\..\..\CompileSettings\Xerces-Release.props" />
     <Import Project="..\..\..\CompileSettings\Qt-Release.props" />
     <Import Project="..\..\..\CompileSettings\pthreads.props" />
+    <Import Project="..\..\..\CompileSettings\EnableWarnings.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>

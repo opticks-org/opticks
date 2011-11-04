@@ -55,6 +55,9 @@ protected slots:
    virtual void undo();
 
 private:
+   FrmBM(const FrmBM& rhs);
+   FrmBM& operator=(const FrmBM& rhs);
+
    // Units
    QButtonGroup* bgUnits;
    QRadioButton* rbDegrees;

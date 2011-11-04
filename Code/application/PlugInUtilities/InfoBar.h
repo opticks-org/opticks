@@ -249,6 +249,8 @@ protected slots:
    void setTitle(QAction* pAction);
 
 private:
+   InfoBar(const InfoBar& rhs);
+   InfoBar& operator=(const InfoBar& rhs);
    ElidedLabel* mpTitle;
    ElidedButton* mpButton;
    QLabel* mpIconLabel;

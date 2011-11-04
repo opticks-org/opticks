@@ -28,8 +28,8 @@
 
 using namespace std;
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Make cancel work for custom exporter options widgets. " \
-   "(kstreith)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Make cancel work for custom exporter options widgets. " \
+//   "(kstreith)")
 
 ExportOptionsDlg::ExportOptionsDlg(ExporterResource& pExporter, QWidget* pParent) :
    QDialog(pParent),

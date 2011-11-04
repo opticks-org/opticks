@@ -27,6 +27,10 @@ public:
    bool isKindOf(const std::string& className) const;
 
    RASTERDATADESCRIPTORADAPTER_METHODS(RasterDataDescriptorImp)
+
+private:
+   RasterDataDescriptorAdapter(const RasterDataDescriptorAdapter& rhs);
+   RasterDataDescriptorAdapter& operator=(const RasterDataDescriptorAdapter& rhs);
 };
 
 #endif

@@ -35,6 +35,8 @@ private slots:
    void install();
 
 private:
+   InstallWizard(const InstallWizard& rhs);
+   InstallWizard& operator=(const InstallWizard& rhs);
    QList<Aeb*> mPackageDescriptors;
    Progress* mpProgress;
 };

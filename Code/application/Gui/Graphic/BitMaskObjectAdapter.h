@@ -44,6 +44,10 @@ public:
    }
 
    BITMASKOBJECTADAPTER_METHODS(BitMaskObjectImp)
+
+private:
+   BitMaskObjectAdapter(const BitMaskObjectAdapter& rhs);
+   BitMaskObjectAdapter& operator=(const BitMaskObjectAdapter& rhs);
 };
 
 #endif

@@ -62,8 +62,8 @@ namespace
 
 // The ImportOptionsDlg should be changed to listen to the FileDescriptor and DataDescriptor being edited
 // and immediately update their gui's in case the importer mutates either descriptor
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Make ImportOptionsDlg provide the data descriptor " \
-   "being modified by the user to the custom options widget (kstreith)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Make ImportOptionsDlg provide the data descriptor " \
+//   "being modified by the user to the custom options widget (kstreith)")
 
 ImportOptionsDlg::ImportOptionsDlg(Importer* pImporter, const QMap<QString, vector<ImportDescriptor*> >& files,
    QWidget* pParent) :

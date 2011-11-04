@@ -33,6 +33,8 @@ private slots:
    void translateActivated(int newIndex);
 
 private:
+   GraphicUnitsWidget(const GraphicUnitsWidget& rhs);
+   GraphicUnitsWidget& operator=(const GraphicUnitsWidget& rhs);
    QComboBox* mpUnitSystemComboBox;
 };
 

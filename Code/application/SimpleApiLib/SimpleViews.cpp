@@ -1315,7 +1315,6 @@ extern "C"
             setLastError(SIMPLE_OTHER_FAILURE);
             return NULL;
          }
-         RasterLayer* pLayer = NULL;
          { // scope
             UndoLock lock(pView);
             if (pSdv->createLayer(RASTER, pRaster) == NULL)

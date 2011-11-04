@@ -59,6 +59,8 @@ signals:
    void textChanged(const QString& strText);
 
 private:
+   TextImp(const TextImp& rhs);
+
    LocationType mLocation;
    QString mText;
    QFont mFont;
@@ -91,7 +93,7 @@ private:
       QColor color = impClass::getColor(); \
       return ColorType(color.red(), color.green(), color.blue()); \
    } \
-   bool hit(LocationType point) \
+   bool hit(LocationType point) const \
    { \
       return impClass::hit(point); \
    } \

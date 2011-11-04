@@ -74,6 +74,8 @@ namespace Nitf
          const std::string& ossimName);
 
    private:
+      DesSubheader& operator=(const DesSubheader& rhs);
+
       const unsigned int mIndex;
    };
 }

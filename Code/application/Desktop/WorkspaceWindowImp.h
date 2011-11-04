@@ -30,7 +30,7 @@ public:
    WorkspaceWindowImp(const std::string& id, const std::string& windowName, QWidget* parent = 0);
    ~WorkspaceWindowImp();
 
-   using SessionItemImp::setIcon;
+   using ViewWindowImp::setIcon;
    std::list<ContextMenuAction> getContextMenuActions() const;
 
    const std::string& getObjectType() const;
@@ -66,6 +66,8 @@ protected:
    virtual void changeEvent(QEvent* pEvent);
 
 private:
+   WorkspaceWindowImp(const WorkspaceWindowImp& rhs);
+   WorkspaceWindowImp& operator=(const WorkspaceWindowImp& rhs);
    QSize mRestoreSize;
    QPoint mRestorePos;
    bool mConfirmOnClose;

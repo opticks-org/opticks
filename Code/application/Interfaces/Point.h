@@ -165,7 +165,7 @@ public:
     *  @param point  The location of the mouse click
     *  @return       True if the plot object is at this point
     */
-   virtual bool hit(LocationType point) = 0;
+   virtual bool hit(LocationType point) const = 0;
 
    /**
     *  Sets the location of the point

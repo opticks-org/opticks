@@ -86,6 +86,8 @@ protected slots:
    void addFeature(const ArcProxyLib::Feature &feature);
 
 private:
+   FeatureClass(const FeatureClass& rhs);
+   FeatureClass& operator=(const FeatureClass& rhs);
    static const std::string CONNECTION_KEY;
    static const std::string QUERY_KEY;
    static const std::string CLIPPING_TYPE_KEY;

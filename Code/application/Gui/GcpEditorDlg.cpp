@@ -172,12 +172,12 @@ GcpEditorDlg::~GcpEditorDlg()
 {
 }
 
-void GcpEditorDlg::attached(Subject &subject, const string &signal, const Slot &slot)
+void GcpEditorDlg::attached(Subject& subject, const string& signal, const Slot& slot)
 {
    elementModified(subject, signal, boost::any());
 }
 
-void GcpEditorDlg::elementModified(Subject &subject, const string &signal, const boost::any &data)
+void GcpEditorDlg::elementModified(Subject& subject, const string& signal, const boost::any& value)
 {
    GcpList* pGcpList = dynamic_cast<GcpList*>(&subject);
    if (pGcpList == mpGcpList && pGcpList != NULL)
@@ -775,7 +775,7 @@ void GcpEditorDlg::deleteGcp()
       }
    }
 
-   if (gcps.size() == numItems)
+   if (static_cast<int>(gcps.size()) == numItems)
    {
       QMessageBox::critical(this, "GCP Editor", "Please select one or more GCPs to remove!");
       return;

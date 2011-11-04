@@ -42,6 +42,9 @@ signals:
    void sizeChanged(unsigned int size);
 
 private:
+   GraphicSymbolWidget(const GraphicSymbolWidget& rhs);
+   GraphicSymbolWidget& operator=(const GraphicSymbolWidget& rhs);
+
    static const QString NO_SYMBOL;
 
    QListWidgetItem *getSelectedItem() const;

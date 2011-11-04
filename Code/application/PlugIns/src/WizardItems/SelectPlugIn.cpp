@@ -172,8 +172,6 @@ bool SelectPlugIn::extractInputArgs(PlugInArgList* pInArgList)
       return false;
    }
 
-   PlugInArg* pArg = NULL;
-
    // Plug-in type
    mType = PlugInManagerServices::AlgorithmType();
    pInArgList->getPlugInArgValue<string>("Plug-In Type", mType);

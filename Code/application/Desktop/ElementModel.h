@@ -29,6 +29,10 @@ public:
 protected:
    void addElementItem(DataElement* pElement);
    void removeElementItem(DataElement* pElement);
+
+private:
+   ElementModel(const ElementModel& rhs);
+   ElementModel& operator=(const ElementModel& rhs);
 };
 
 #endif

@@ -36,6 +36,8 @@ protected slots:
    void zoomToCustomValue();
 
 private:
+   DisplayToolBar(const DisplayToolBar& rhs);
+   DisplayToolBar& operator=(const DisplayToolBar& rhs);
    QComboBox* mpPercentCombo;
 };
 

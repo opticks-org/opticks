@@ -34,6 +34,8 @@ public:
    DesktopAPITestGui(QWidget* pParent = NULL);
    ~DesktopAPITestGui();
 
+   using QDialog::accept;
+
    bool accept(SessionItem* pItem) const;
 
 protected:
@@ -60,6 +62,9 @@ protected slots:
    void enableDrops(bool enable);
 
 private:
+   DesktopAPITestGui(const DesktopAPITestGui& rhs);
+   DesktopAPITestGui& operator=(const DesktopAPITestGui& rhs);
+
    class SessionItemDropList : public QListWidget
    {
    public:
@@ -73,6 +78,8 @@ private:
       virtual void dropEvent(QDropEvent* pEvent);
 
    private:
+      SessionItemDropList(const SessionItemDropList& rhs);
+      SessionItemDropList& operator=(const SessionItemDropList& rhs);
       bool mSupportsDrops;
    };
 

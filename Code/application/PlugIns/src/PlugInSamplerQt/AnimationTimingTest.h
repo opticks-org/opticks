@@ -32,6 +32,8 @@ protected:
    QWidget* getWidget() const;
 
 private:
+   AnimationTimingTestPlugIn(const AnimationTimingTestPlugIn& rhs);
+   AnimationTimingTestPlugIn& operator=(const AnimationTimingTestPlugIn& rhs);
    QDialog* mpDialog;
 };
 
@@ -52,6 +54,8 @@ private:
    void updateStateLabel(QString state);
 
 private:
+   AnimationTimingTestDlg(const AnimationTimingTestDlg& rhs);
+   AnimationTimingTestDlg& operator=(const AnimationTimingTestDlg& rhs);
    Executable* mpPlugIn;
    AttachmentPtr<AnimationController> mpController;
    AttachmentPtr<RasterLayer> mpRasterLayer;

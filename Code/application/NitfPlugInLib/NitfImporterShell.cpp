@@ -52,8 +52,8 @@
 
 using namespace std;
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : TODO: The NULL pix value for OSSIM_PARTIAL " \
-   "is a bad value (leckels)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : TODO: The NULL pix value for OSSIM_PARTIAL " \
+//   "is a bad value (leckels)")
 
 Nitf::NitfImporterShell::NitfImporterShell()
 {
@@ -163,8 +163,7 @@ vector<ImportDescriptor*> Nitf::NitfImporterShell::getImportDescriptors(const st
       pDd->setValidDataTypes(vector<EncodingType>(1, dataType));
       pDd->setProcessingLocation(IN_MEMORY);
 
-      RasterFileDescriptor* pFd = dynamic_cast<RasterFileDescriptor*>(
-         RasterUtilities::generateAndSetFileDescriptor(pDd, filename, imageName, LITTLE_ENDIAN_ORDER));
+      RasterUtilities::generateAndSetFileDescriptor(pDd, filename, imageName, LITTLE_ENDIAN_ORDER);
 
       string errorMessage;
       if (Nitf::importMetadata(currentIndex + 1, pFile, pFileHeader, pImgHeader, pDd, parsers, errorMessage) == true)

@@ -49,6 +49,8 @@ protected slots:
    void activateOptions();
 
 private:
+   LinkOptionsPage(const LinkOptionsPage& rhs);
+   LinkOptionsPage& operator=(const LinkOptionsPage& rhs);
    CustomTreeWidget* mpLinksTree;
    QMap<QTreeWidgetItem*, View*> mViews;
    QMap<QTreeWidgetItem*, Layer*> mLayers;

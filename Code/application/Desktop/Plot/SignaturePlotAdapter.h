@@ -25,6 +25,9 @@ public:
    bool isKindOf(const std::string& className) const;
 
    SIGNATUREPLOTADAPTER_METHODS(SignaturePlotImp)
+
+private:
+   SignaturePlotAdapter(const SignaturePlotAdapter& rhs);
 };
 
 #endif

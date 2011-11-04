@@ -28,6 +28,10 @@ signals:
 
 private slots:
    void translateActivated(int newIndex);
+
+private:
+   RegionUnitsComboBox(const RegionUnitsComboBox& rhs);
+   RegionUnitsComboBox& operator=(const RegionUnitsComboBox& rhs);
 };
 
 #endif

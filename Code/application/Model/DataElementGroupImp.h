@@ -42,6 +42,7 @@ public:
    static bool isKindOfElement(const std::string& className);
 
 private:
+   DataElementGroupImp(const DataElementGroupImp& rhs);
    std::vector<DataElement*> mElements;
    bool mEnforceUniformity;
    bool mNotificationEnabled;

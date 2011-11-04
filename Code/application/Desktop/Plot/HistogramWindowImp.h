@@ -33,7 +33,9 @@ public:
    HistogramWindowImp(const std::string& id, const std::string& windowName, QWidget* pParent = 0);
    ~HistogramWindowImp();
 
-   using SessionItemImp::setIcon;
+   using PlotWindowImp::setCurrentPlot;
+   using PlotWindowImp::setIcon;
+
    void updateContextMenu(Subject& subject, const std::string& signal, const boost::any& value);
 
    PlotSet* createPlotSet(const QString& strPlotSet);
@@ -43,7 +45,6 @@ public:
    PlotWidget* getPlot(Layer* pLayer, const RasterChannelType& eColor) const;    // Deprecated
    PlotWidget* getPlot(RasterLayer* pLayer, RasterChannelType channel) const;
    PlotWidget* getPlot(RasterLayer* pLayer, RasterChannelType channel, bool ignoreStatisticsPlots) const;
-   using PlotWindowImp::setCurrentPlot;
 
    void createSubsetPlot(Layer* pLayer);
 
@@ -86,6 +87,9 @@ protected slots:
    void setStatisticsShowActionState(PlotSet* pPlotSet);
 
 private:
+   HistogramWindowImp(const HistogramWindowImp& rhs);
+   HistogramWindowImp& operator=(const HistogramWindowImp& rhs);
+
    void setStatisticsShowActionState(PlotWidgetImp* pPlot);
    void deleteStatisticsPlots(Layer* pLayer);
 
@@ -108,7 +112,7 @@ private:
       {
       public:
          UpdateMomento(HistogramWindowImp *pWindow, RasterLayer* pLayer, RasterChannelType channel);
-         bool operator<(const UpdateMomento &rhs) const;
+         bool operator<(const UpdateMomento& rhs) const;
          void update() const;
       private:
          HistogramWindowImp* mpWindow;

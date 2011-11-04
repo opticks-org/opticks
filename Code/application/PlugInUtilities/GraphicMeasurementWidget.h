@@ -38,6 +38,8 @@ signals:
    void endPointsPrecisionChanged(int precision);
 
 private:
+   GraphicMeasurementWidget(const GraphicMeasurementWidget& rhs);
+   GraphicMeasurementWidget& operator=(const GraphicMeasurementWidget& rhs);
    QSpinBox* mpDistancePrecisionSpin;
    QSpinBox* mpBearingPrecisionSpin;
    QSpinBox* mpEndPointsPrecisionSpin;

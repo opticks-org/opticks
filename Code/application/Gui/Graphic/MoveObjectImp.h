@@ -54,6 +54,8 @@ public:
    bool isKindOf(const std::string& className) const;
 
 private:
+   MoveObjectImp(const MoveObjectImp& rhs);
+   MoveObjectImp& operator=(const MoveObjectImp& rhs);
    LocationType mLastCoord;
    LocationType mPressCoord;
    int mSelectedHandle;
@@ -99,6 +101,10 @@ public:
    }
 
    MOVEOBJECTADAPTER_METHODS(MoveObjectImp)
+
+private:
+   MoveObjectAdapter(const MoveObjectAdapter& rhs);
+   MoveObjectAdapter& operator=(const MoveObjectAdapter& rhs);
 };
 
 #endif

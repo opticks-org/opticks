@@ -56,7 +56,8 @@ using XERCES_CPP_NAMESPACE_QUALIFIER DOMElement;
 using XERCES_CPP_NAMESPACE_QUALIFIER DOMNode;
 using XERCES_CPP_NAMESPACE_QUALIFIER XMLString;
 
-static void ShowRangeValues(char* pFormat, double lower, double upper = 0.0);
+static void ShowRangeValues(const std::string& text, double lower, double upper);
+static void ShowRangeValues(const std::string& text, double value);
 
 HistogramPlotImp::HistogramPlotImp(const string& id, const string& viewName, QGLContext* pDrawContext,
                                    QWidget* pParent) :
@@ -1247,10 +1248,19 @@ void HistogramPlotImp::setComplexComponent(const ComplexComponent& eComponent)
    updateHistogramValues();
 }
 
-static void ShowRangeValues(char* pFormat, double lower, double upper)
+static void ShowRangeValues(const std::string& text, double value)
 {
    char message[1024];
-   sprintf(message, pFormat, lower, upper);
+   sprintf(message, "%s: %g", text.c_str(), value);
+
+   Service<DesktopServices> pDesktop;
+   pDesktop->setStatusBarMessage(message);
+}
+
+static void ShowRangeValues(const std::string& text, double lower, double upper)
+{
+   char message[1024];
+   sprintf(message, "%s: %g - %g", text.c_str(), lower, upper);
 
    Service<DesktopServices> pDesktop;
    pDesktop->setStatusBarMessage(message);
@@ -1377,7 +1387,7 @@ void HistogramPlotImp::mousePressEvent(QMouseEvent* pEvent)
                   translateScreenToData(stretchMinScreenX, 0.0, stretchMinX, tempValue);
                   translateScreenToData(stretchMaxScreenX, 0.0, stretchMaxX, tempValue);
 
-                  ShowRangeValues("Contrast stretch: %g - %g", stretchMinX, stretchMaxX);
+                  ShowRangeValues("Contrast stretch", stretchMinX, stretchMaxX);
 
                   locatorValue = pRasterLayer->convertStretchValue(mRasterChannelType, RAW_VALUE, mouseDataX, eUnits);
                   locatorValueUnit =
@@ -1422,11 +1432,11 @@ void HistogramPlotImp::mousePressEvent(QMouseEvent* pEvent)
 
                if ((ePassArea == LOWER) || (ePassArea == UPPER))
                {
-                  ShowRangeValues("Threshold: %g", mouseDataX);
+                  ShowRangeValues("Threshold", mouseDataX);
                }
                else
                {
-                  ShowRangeValues("Threshold: %g - %g", stretchMinX, stretchMaxX);
+                  ShowRangeValues("Threshold", stretchMinX, stretchMaxX);
                }
 
                RegionUnits eUnits = pThresholdLayer->getRegionUnits();
@@ -1494,7 +1504,6 @@ void HistogramPlotImp::mouseMoveEvent(QMouseEvent* pEvent)
 
             double mouseScreenX = static_cast<double>(ptMouse.x());
             double mouseStartScreenX = static_cast<double>(mMouseStart.x());
-            double mouseStartScreenY = static_cast<double>(mMouseStart.y());
 
             double stretchMinX = 0.0;
             double stretchMaxX = 0.0;
@@ -1575,7 +1584,7 @@ void HistogramPlotImp::mouseMoveEvent(QMouseEvent* pEvent)
                }
                else
                {
-                  ShowRangeValues("Contrast stretch: %g - %g", stretchMinX, stretchMaxX);
+                  ShowRangeValues("Contrast stretch", stretchMinX, stretchMaxX);
                   updateMouseCursor();
                }
             }
@@ -1604,11 +1613,11 @@ void HistogramPlotImp::mouseMoveEvent(QMouseEvent* pEvent)
 
                if ((ePassArea == LOWER) || (ePassArea == UPPER))
                {
-                  ShowRangeValues("Threshold: %g", mSelectedValue == LOWER_VALUE ? stretchMinX : stretchMaxX);
+                  ShowRangeValues("Threshold", mSelectedValue == LOWER_VALUE ? stretchMinX : stretchMaxX);
                }
                else
                {
-                  ShowRangeValues("Threshold: %g - %g", stretchMinX, stretchMaxX);
+                  ShowRangeValues("Threshold", stretchMinX, stretchMaxX);
                }
 
                RegionUnits eUnits = pThresholdLayer->getRegionUnits();
@@ -1673,7 +1682,6 @@ void HistogramPlotImp::mouseReleaseEvent(QMouseEvent* pEvent)
 
             double mouseScreenX = static_cast<double>(ptMouse.x());
             double mouseStartScreenX = static_cast<double>(mMouseStart.x());
-            double mouseStartScreenY = static_cast<double>(mMouseStart.y());
 
             double stretchMinX = 0.0;
             double stretchMaxX = 0.0;
@@ -3054,7 +3062,6 @@ void HistogramPlotImp::initializeBandList()
    {
       QString bandName;
 
-      const DimensionDescriptor& bandDim = activeBands[i];
       if (i < bandNames.size())
       {
          bandName = QString::fromStdString(bandNames[i]);
@@ -3381,8 +3388,8 @@ void HistogramPlotImp::setBadValues()
    }
 }
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove QListWidget subclass when QListWidget " \
-   "defines an appropriate size hint! (Qt 4.5.2) (dsulgrov)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove QListWidget subclass when QListWidget " \
+//   "defines an appropriate size hint! (Qt 4.5.2) (dsulgrov)")
 QSize HistogramPlotImp::MenuListWidget::sizeHint() const
 {
    int iWidth = sizeHintForColumn(0) + 25;   // Add 25 to provide room for the scroll bar

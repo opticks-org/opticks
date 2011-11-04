@@ -34,6 +34,7 @@ public:
    static void getElementTypes(std::vector<std::string>& classList);
 
 private:
+   LibrarySignatureImp(const LibrarySignatureImp& rhs);
    unsigned int mSignatureIndex;
    const SignatureLibrary* mpLibrary;
    std::string mOrdinateName;

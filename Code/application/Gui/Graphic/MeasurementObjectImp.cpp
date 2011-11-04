@@ -270,7 +270,7 @@ void MeasurementObjectImp::draw(double zoomFactor) const
          bearingDrawTop = false;
       }
       bearingTextTheta = ((bearingTextEndPoint.mX - bearingTextStartPoint.mX) == 0.0) ? 0.0 :
-         bearingTextTheta = atan((bearingTextEndPoint.mY - bearingTextStartPoint.mY)/
+         atan((bearingTextEndPoint.mY - bearingTextStartPoint.mY) /
          (bearingTextEndPoint.mX - bearingTextStartPoint.mX));
 
       if (!mBearingText.isEmpty())
@@ -329,7 +329,7 @@ void MeasurementObjectImp::draw(double zoomFactor) const
 
       }
       distanceTextTheta = ((distanceTextEndPoint.mX - distanceTextStartPoint.mX) == 0.0) ? 0.0 :
-         distanceTextTheta = atan((distanceTextEndPoint.mY - distanceTextStartPoint.mY)/
+         atan((distanceTextEndPoint.mY - distanceTextStartPoint.mY) /
          (distanceTextEndPoint.mX - distanceTextStartPoint.mX));
 
       if (!mDistanceText.isEmpty())

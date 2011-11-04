@@ -20,6 +20,8 @@ public:
    BitMaskObjectImp(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer, LocationType pixelCoord);
    ~BitMaskObjectImp();
 
+   using GraphicObjectImp::getPixels;
+
    bool toXml(XMLWriter* pXml) const;
    bool fromXml(DOMNode* pDocument, unsigned int version);
    const std::string& getObjectType() const;
@@ -30,10 +32,11 @@ public:
 
    void setBitMask(const BitMask *pMask, bool copy = true);
 
-   using GraphicObjectImp::getPixels;
    const BitMask *getPixels(int iStartColumn, int iStartRow, int iEndColumn, int iEndRow);
 
 private:
+   BitMaskObjectImp(const BitMaskObjectImp& rhs);
+   BitMaskObjectImp& operator=(const BitMaskObjectImp& rhs);
    const BitMask *getMask() const;
 
    FactoryResource<BitMask> mpMask;

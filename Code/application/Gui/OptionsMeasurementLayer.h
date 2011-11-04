@@ -90,6 +90,8 @@ public:
    }
 
 private:
+   OptionsMeasurementLayer(const OptionsMeasurementLayer& rhs);
+   OptionsMeasurementLayer& operator=(const OptionsMeasurementLayer& rhs);
    LineWidthComboBox* mpLineWidth;
    LineStyleComboBox* mpLineStyle;
    CustomColorButton* mpLineColor;

@@ -29,8 +29,8 @@ public:
    ProgressDlg(const QString& strCaption, QWidget* parent = NULL);
    ~ProgressDlg();
 
-   void progressDeleted(Subject &subject, const std::string &signal, const boost::any &data);
-   void progressUpdated(Subject &subject, const std::string &signal, const boost::any &data);
+   void progressDeleted(Subject& subject, const std::string& signal, const boost::any& value);
+   void progressUpdated(Subject& subject, const std::string& signal, const boost::any& value);
 
    void enableAbort(bool bEnable);
    bool hasAbort();
@@ -49,6 +49,8 @@ protected slots:
    void setProcessComplete(bool bComplete);
 
 private:
+   ProgressDlg(const ProgressDlg& rhs);
+   ProgressDlg& operator=(const ProgressDlg& rhs);
    QLabel* mpProgressLabel;
    QProgressBar* mpProgressBar;
    QPushButton* mpCancel;

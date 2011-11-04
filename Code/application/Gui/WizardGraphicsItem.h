@@ -73,6 +73,8 @@ protected:
    void updateNodes();
 
 private:
+   WizardGraphicsItem(const WizardGraphicsItem& rhs);
+   WizardGraphicsItem& operator=(const WizardGraphicsItem& rhs);
    AttachmentPtr<WizardItemImp> mpItem;
 
    // Rectangle

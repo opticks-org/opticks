@@ -230,7 +230,6 @@ bool Nitf::PatchbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
    string &errorMessage) const
 {
    vector<char> buf;
-   bool ok(true);
    bool success(true);
 
    readField<int>(input, output, success, PATCHB::PAT_NO, 4, errorMessage, buf);
@@ -256,8 +255,9 @@ bool Nitf::PatchbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
    readField<double>(input, output, success, PATCHB::SHEAR, 8, errorMessage, buf, true);
    readField<int>(input, output, success, PATCHB::BATCH_NO, 6, errorMessage, buf, true);
 
-   size_t numRead = input.tellg();
-   if (numRead != numBytes)
+   int64_t numRead = input.tellg();
+   if (numRead < 0 || numRead > static_cast<int64_t>(std::numeric_limits<size_t>::max()) ||
+      numRead != static_cast<int64_t>(numBytes))
    {
       numReadErrMsg(numRead, numBytes, errorMessage);
       return false;
@@ -321,7 +321,11 @@ Nitf::TreState Nitf::PatchbParser::isTreValid(const DynamicObject& tre, ostream&
 bool Nitf::PatchbParser::fromDynamicObject(const DynamicObject& input, ostream& output, size_t& numBytesWritten,
    string &errorMessage) const
 {
-   size_t sizeIn = max(static_cast<ostream::pos_type>(0), output.tellp());
+   if (output.tellp() < 0 || output.tellp() > static_cast<int64_t>(std::numeric_limits<size_t>::max()))
+   {
+      return false;
+   }
+   size_t sizeIn = max<size_t>(0, static_cast<size_t>(output.tellp()));
    size_t sizeOut(sizeIn);
 
    try
@@ -363,7 +367,11 @@ bool Nitf::PatchbParser::fromDynamicObject(const DynamicObject& input, ostream& 
       return false;
    }
 
-   sizeOut = output.tellp();
+   if (output.tellp() < 0 || output.tellp() > static_cast<int64_t>(std::numeric_limits<size_t>::max()))
+   {
+      return false;
+   }
+   sizeOut = static_cast<size_t>(output.tellp());
    numBytesWritten = sizeOut - sizeIn;
    return true;
 }

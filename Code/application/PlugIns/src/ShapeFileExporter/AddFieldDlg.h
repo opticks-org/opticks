@@ -29,6 +29,8 @@ protected:
    void accept();
 
 private:
+   AddFieldDlg(const AddFieldDlg& rhs);
+   AddFieldDlg& operator=(const AddFieldDlg& rhs);
    QLineEdit* mpNameEdit;
    QComboBox* mpTypeCombo;
 };

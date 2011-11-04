@@ -44,6 +44,10 @@ public:
    }
 
    ELLIPSEOBJECTADAPTER_METHODS(EllipseObjectImp)
+
+private:
+   EllipseObjectAdapter(const EllipseObjectAdapter& rhs);
+   EllipseObjectAdapter& operator=(const EllipseObjectAdapter& rhs);
 };
 
 #endif

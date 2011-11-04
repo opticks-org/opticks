@@ -1536,7 +1536,6 @@ void ProductViewImp::updateClassificationLocation()
       LocationType urCorner = pTopText->getUrCorner();
       LocationType center((llCorner.mX + urCorner.mX) / 2.0, (llCorner.mY + urCorner.mY) / 2.0);
 
-      double dTextWidth = urCorner.mX - llCorner.mX;
       double dTextHeight = urCorner.mY - llCorner.mY;
 
       // Calculate the distance from the new text center to the old text center
@@ -1564,7 +1563,6 @@ void ProductViewImp::updateClassificationLocation()
       LocationType urCorner = pBottomText->getUrCorner();
       LocationType center((llCorner.mX + urCorner.mX) / 2.0, (llCorner.mY + urCorner.mY) / 2.0);
 
-      double dTextWidth = urCorner.mX - llCorner.mX;
       double dTextHeight = urCorner.mY - llCorner.mY;
 
       // Calculate the distance from the new text center to the old text center
@@ -1724,7 +1722,6 @@ bool ProductViewImp::fromXml(DOMNode* pDocument, unsigned int version)
    mPaperColor = QColor(A(pElem->getAttribute(X("paperColor"))));
    mDpi = StringUtilities::fromXmlString<unsigned int>(A(pElem->getAttribute(X("dpi"))));
 
-   AnnotationElement* pAnnoElem = dynamic_cast<AnnotationElement*>(mpClassificationLayer->getDataElement());
    mpClassificationLayer->setView(this);
    // restore classification text objects
    DOMNode* pNode = findChildNode(pElem, "ClassificationElement/group/objects");

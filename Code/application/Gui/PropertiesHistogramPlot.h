@@ -38,6 +38,8 @@ public:
    static bool isProduction();
 
 private:
+   PropertiesHistogramPlot(const PropertiesHistogramPlot& rhs);
+   PropertiesHistogramPlot& operator=(const PropertiesHistogramPlot& rhs);
    HistogramPlot* mpHistogramPlot;
 
    // Histogram

@@ -490,32 +490,32 @@ void ZoomPanWidget::updateMouseCursor()
    }
 }
 
-void ZoomPanWidget::translateDataToWorld(const std::vector<LocationType> &data, 
-   std::vector<LocationType> &world) const
+void ZoomPanWidget::translateDataToWorld(const std::vector<LocationType>& dataValue, 
+   std::vector<LocationType>& worldValue) const
 {
    VERIFYNRV(mpView != NULL && mpLayer != NULL);
 
-   world.resize(data.size());
+   worldValue.resize(dataValue.size());
 
-   vector<LocationType>::iterator iterWorld = world.begin();
-   for (vector<LocationType>::const_iterator iterData = data.begin();
-      iterData != data.end(); ++iterData, ++iterWorld)
+   vector<LocationType>::iterator iterWorld = worldValue.begin();
+   for (vector<LocationType>::const_iterator iterData = dataValue.begin();
+      iterData != dataValue.end(); ++iterData, ++iterWorld)
    {
       mpLayer->translateDataToWorld(iterData->mX, iterData->mY, iterWorld->mX, iterWorld->mY);
    }
 
 }
 
-void ZoomPanWidget::translateWorldToData(const std::vector<LocationType> &world,
-   std::vector<LocationType> &data) const
+void ZoomPanWidget::translateWorldToData(const std::vector<LocationType>& worldValue,
+   std::vector<LocationType>& dataValue) const
 {
    VERIFYNRV(mpView != NULL && mpLayer != NULL);
 
-   data.resize(world.size());
+   dataValue.resize(worldValue.size());
 
-   vector<LocationType>::iterator iterData = data.begin();
-   for (vector<LocationType>::const_iterator iterWorld = world.begin();
-      iterWorld != world.end(); ++iterWorld, ++iterData)
+   vector<LocationType>::iterator iterData = dataValue.begin();
+   for (vector<LocationType>::const_iterator iterWorld = worldValue.begin();
+      iterWorld != worldValue.end(); ++iterWorld, ++iterData)
    {
       mpLayer->translateWorldToData(iterWorld->mX, iterWorld->mY, iterData->mX, iterData->mY);
    }

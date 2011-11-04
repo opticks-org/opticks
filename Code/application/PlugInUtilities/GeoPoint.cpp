@@ -21,8 +21,8 @@
 
 using namespace std;
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This should really be a Location<double, 3> " \
-   "with methods to convert/access as DMS, LatLon, UTM, and GPRS (tclarke)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This should really be a Location<double, 3> " \
+//   "with methods to convert/access as DMS, LatLon, UTM, and GPRS (tclarke)")
 
 ///////////////
 //  DmsPoint //
@@ -207,8 +207,8 @@ string DmsPoint::getValueText(DmsFormatType format, int precision) const
       dPositiveValue = -mValue;
    }
 
-   #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This is a short term solution " \
-   "the draw method in LatLonLayer needs to be changed! (mconsidi)")
+   //#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This is a short term solution " \
+   //"the draw method in LatLonLayer needs to be changed! (mconsidi)")
    // Special cases of the Antimeridian and poles
    if (dPositiveValue > 180)
    {
@@ -234,7 +234,7 @@ string DmsPoint::getValueText(DmsFormatType format, int precision) const
       iMinutes = 0;
    }
 
-   char direction;
+   char direction = ' ';
    if (bPositive == true)
    {
       if (mValue == 0.0 || fabs(mValue) == 180.0)

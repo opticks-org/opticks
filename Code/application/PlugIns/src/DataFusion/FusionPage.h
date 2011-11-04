@@ -43,6 +43,8 @@ signals:
    void modified();
 
 private:
+   FusionPage(const FusionPage& rhs);
+   FusionPage& operator=(const FusionPage& rhs);
    SpatialDataView* mpPrimaryView;
    SpatialDataView* mpSecondaryView;
 };

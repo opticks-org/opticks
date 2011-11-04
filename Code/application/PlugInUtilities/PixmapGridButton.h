@@ -46,6 +46,8 @@ private slots:
    void menuBeingHidden();
 
 private:
+   PixmapGridButton(const PixmapGridButton& rhs);
+   PixmapGridButton& operator=(const PixmapGridButton& rhs);
    void initialize();
    bool eventFilter(QObject* pObject, QEvent* pEvent);
 

@@ -1020,9 +1020,6 @@ RasterElement* DataFusionDlg::createChip(RasterElement* pRaster, unsigned int x1
 {
    Service<ModelServices> pModel;
 
-   int fromBand = 0;
-   unsigned int toBand = 0;
-
    RasterDataDescriptor* pDescriptor = dynamic_cast<RasterDataDescriptor*>(pRaster->getDataDescriptor());
 
    if (NN(pDescriptor))

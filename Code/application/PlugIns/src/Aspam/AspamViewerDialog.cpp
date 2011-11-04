@@ -538,16 +538,16 @@ QMap<QString, unsigned int> AspamViewerDialog::getPlotSelectionList(QPushButton*
    return selected;
 }
 
-void AspamViewerDialog::getPlotSelectionData(vector<Point*>& data, PlotView* pView, unsigned int primary,
+void AspamViewerDialog::getPlotSelectionData(vector<Point*>& points, PlotView* pView, unsigned int primary,
                                              unsigned int secondary) const
 {
    if (mpDataStack->currentWidget() == mpDataWidget)
    {
-      data.clear();
+      points.clear();
       ParagraphGui* pGui = dynamic_cast<ParagraphGui*>(mpDataWidget->currentWidget());
       if (pGui != NULL)
       {
-         pGui->getPlotData(data, pView, primary, secondary);
+         pGui->getPlotData(points, pView, primary, secondary);
       }
    }
 }
@@ -573,7 +573,7 @@ QPushButton* ParagraphGui::getButton() const
    return NULL;
 }
 
-void ParagraphGui::getPlotData(vector<Point*>& data, PlotView* pView, unsigned int primary, unsigned int secondary)
+void ParagraphGui::getPlotData(vector<Point*>& points, PlotView* pView, unsigned int primary, unsigned int secondary)
 {}
 
 ParagraphAgui::ParagraphAgui(QWidget* pParent) :
@@ -1133,47 +1133,47 @@ QPushButton* ParagraphJgui::getButton() const
    return mpPlotButton;
 }
 
-void ParagraphAgui::setData(const Aspam::ParagraphA& data, QTabWidget* pTabWidget)
+void ParagraphAgui::setData(const Aspam::ParagraphA& value, QTabWidget* pTabWidget)
 {
    if (pTabWidget != NULL)
    {
-      pTabWidget->setTabEnabled(pTabWidget->indexOf(this), data.mLoaded);
+      pTabWidget->setTabEnabled(pTabWidget->indexOf(this), value.mLoaded);
    }
 
-   mpSiteId->setText(QString::fromStdString(StringUtilities::latLonToText(data.mSiteId)));
+   mpSiteId->setText(QString::fromStdString(StringUtilities::latLonToText(value.mSiteId)));
 }
 
-void ParagraphBgui::setData(const Aspam::ParagraphB& data, QTabWidget* pTabWidget)
+void ParagraphBgui::setData(const Aspam::ParagraphB& value, QTabWidget* pTabWidget)
 {
    if (pTabWidget != NULL)
    {
-      pTabWidget->setTabEnabled(pTabWidget->indexOf(this), data.mLoaded);
+      pTabWidget->setTabEnabled(pTabWidget->indexOf(this), value.mLoaded);
    }
-   VERIFYNRV(data.mpDateTime.get() != NULL);
+   VERIFYNRV(value.mpDateTime.get() != NULL);
    string strTime;
-   strTime = data.mpDateTime->getFormattedUtc("%Y-%m-%dT%H:%M:%SZ");
+   strTime = value.mpDateTime->getFormattedUtc("%Y-%m-%dT%H:%M:%SZ");
    mpDateTime->setDateTime(QDateTime::fromString(QString::fromStdString(strTime), Qt::ISODate));
 }
 
-void ParagraphDgui::setData(const Aspam::ParagraphD& data, QTabWidget* pTabWidget)
+void ParagraphDgui::setData(const Aspam::ParagraphD& value, QTabWidget* pTabWidget)
 {
-   mpRawData = &data;
+   mpRawData = &value;
    if (pTabWidget != NULL)
    {
-      pTabWidget->setTabEnabled(pTabWidget->indexOf(this), data.mLoaded);
+      pTabWidget->setTabEnabled(pTabWidget->indexOf(this), value.mLoaded);
    }
-   mpSurfaceVisibility->setText(QString::number(data.mSurfaceVisibility) + " " + data.mUnits.c_str());
-   mpTotalCoverage->setValue(data.mTotalCoverage);
-   mpWindDirection->setText(QString::number(data.mWindDirection) + "°");
-   mpWindSpeed->setText(QString::number(data.mWindSpeed) + " kt.");
-   mpGustSpeed->setText(QString::number(data.mGustSpeed) + " kt.");
-   mpRemark->setPlainText(QString::fromLatin1(data.mRemark.c_str()));
+   mpSurfaceVisibility->setText(QString::number(value.mSurfaceVisibility) + " " + value.mUnits.c_str());
+   mpTotalCoverage->setValue(value.mTotalCoverage);
+   mpWindDirection->setText(QString::number(value.mWindDirection) + "°");
+   mpWindSpeed->setText(QString::number(value.mWindSpeed) + " kt.");
+   mpGustSpeed->setText(QString::number(value.mGustSpeed) + " kt.");
+   mpRemark->setPlainText(QString::fromLatin1(value.mRemark.c_str()));
 
-   mpClouds->setRowCount(data.mCloudLayers.size());
+   mpClouds->setRowCount(value.mCloudLayers.size());
    mpClouds->setColumnCount(4);
    int row = 0;
-   for (vector<Aspam::CloudLayer>::const_iterator cit = data.mCloudLayers.begin();
-      cit != data.mCloudLayers.end();
+   for (vector<Aspam::CloudLayer>::const_iterator cit = value.mCloudLayers.begin();
+      cit != value.mCloudLayers.end();
       ++cit, ++row)
    {
       QTableWidgetItem* pItem0 = new QTableWidgetItem(QString::number(cit->mCoverage) + "/8");
@@ -1189,19 +1189,19 @@ void ParagraphDgui::setData(const Aspam::ParagraphD& data, QTabWidget* pTabWidge
    mpClouds->resizeColumnsToContents();
 }
 
-void ParagraphFgui::setData(const Aspam::ParagraphF& data, QTabWidget* pTabWidget)
+void ParagraphFgui::setData(const Aspam::ParagraphF& value, QTabWidget* pTabWidget)
 {
-   mpRawData = &data;
+   mpRawData = &value;
    if (pTabWidget != NULL)
    {
-      pTabWidget->setTabEnabled(pTabWidget->indexOf(this), data.mLoaded);
+      pTabWidget->setTabEnabled(pTabWidget->indexOf(this), value.mLoaded);
    }
 
-   mpLevel->setText(QString::fromStdString(data.mLevel));
-   mpAnalytic->setRowCount(data.mAnalytic.size());
+   mpLevel->setText(QString::fromStdString(value.mLevel));
+   mpAnalytic->setRowCount(value.mAnalytic.size());
    mpAnalytic->setColumnCount(7);
    int row = 0;
-   for (vector<Aspam::Analytic>::const_iterator ait = data.mAnalytic.begin(); ait != data.mAnalytic.end(); ++ait, ++row)
+   for (vector<Aspam::Analytic>::const_iterator ait = value.mAnalytic.begin(); ait != value.mAnalytic.end(); ++ait, ++row)
    {
       if (ait->mHeight == 0 && ait->mUnits == ' ')
       {
@@ -1241,13 +1241,13 @@ void ParagraphFgui::setData(const Aspam::ParagraphF& data, QTabWidget* pTabWidge
    mpAnalytic->resizeColumnsToContents();
 }
 
-void ParagraphGgui::setData(const Aspam::ParagraphG& data, QTabWidget* pTabWidget)
+void ParagraphGgui::setData(const Aspam::ParagraphG& value, QTabWidget* pTabWidget)
 {
    if (pTabWidget != NULL)
    {
-      pTabWidget->setTabEnabled(pTabWidget->indexOf(this), data.mLoaded);
+      pTabWidget->setTabEnabled(pTabWidget->indexOf(this), value.mLoaded);
    }
-   mpRemarks->setPlainText(QString::fromLatin1(data.mRemarks.c_str()));
+   mpRemarks->setPlainText(QString::fromLatin1(value.mRemarks.c_str()));
    mpRemarks->selectAll();
 #if defined(UNIX_API)
    mpRemarks->setCurrentFont(QFont("Lucidatypewriter", 9));
@@ -1257,23 +1257,23 @@ void ParagraphGgui::setData(const Aspam::ParagraphG& data, QTabWidget* pTabWidge
    mpRemarks->textCursor().clearSelection();
 }
 
-void ParagraphHgui::setData(const Aspam::ParagraphH& data, QTabWidget* pTabWidget)
+void ParagraphHgui::setData(const Aspam::ParagraphH& value, QTabWidget* pTabWidget)
 {
-   mpRawData = &data;
+   mpRawData = &value;
    if (pTabWidget != NULL)
    {
-      pTabWidget->setTabEnabled(pTabWidget->indexOf(this), data.mLoaded);
+      pTabWidget->setTabEnabled(pTabWidget->indexOf(this), value.mLoaded);
    }
-   mpLevels->setText(QString::number(data.mLevels));
-   mpSeasonalDependence->setCurrentIndex(data.mSeasonalDependence - 1);
-   mpStratosphericAerosol->setCurrentIndex(data.mStratosphericAerosol - 1);
-   mpOzoneProfile->setCurrentIndex(data.mOzoneProfile - 1);
-   mpBlpqi->setText(QString::number(data.mBoundaryLayerParameterQualityIndex));
+   mpLevels->setText(QString::number(value.mLevels));
+   mpSeasonalDependence->setCurrentIndex(value.mSeasonalDependence - 1);
+   mpStratosphericAerosol->setCurrentIndex(value.mStratosphericAerosol - 1);
+   mpOzoneProfile->setCurrentIndex(value.mOzoneProfile - 1);
+   mpBlpqi->setText(QString::number(value.mBoundaryLayerParameterQualityIndex));
 
-   mpPrimaryBlap->setCurrentIndex(data.mPrimaryBoundaryLayerAerosolParameter - 1);
-   if (data.mPrimaryBoundaryLayerAerosolParameter == 3)
+   mpPrimaryBlap->setCurrentIndex(value.mPrimaryBoundaryLayerAerosolParameter - 1);
+   if (value.mPrimaryBoundaryLayerAerosolParameter == 3)
    {
-      mpAirParcelType->setText(QString::number(data.mAirParcelType));
+      mpAirParcelType->setText(QString::number(value.mAirParcelType));
       mpAirParcelType->setEnabled(true);
    }
    else
@@ -1281,12 +1281,12 @@ void ParagraphHgui::setData(const Aspam::ParagraphH& data, QTabWidget* pTabWidge
       mpAirParcelType->setText("");
       mpAirParcelType->setEnabled(false);
    }
-   mpSurfaceVisibility->setText(QString::number(data.mSurfaceVisibility));
+   mpSurfaceVisibility->setText(QString::number(value.mSurfaceVisibility));
 
-   mpAlternateBlap->setCurrentIndex(data.mAlternateBoundaryLayerAerosolParameter - 1);
-   if (data.mAlternateBoundaryLayerAerosolParameter == 3)
+   mpAlternateBlap->setCurrentIndex(value.mAlternateBoundaryLayerAerosolParameter - 1);
+   if (value.mAlternateBoundaryLayerAerosolParameter == 3)
    {
-      mpAlternateAirParcelType->setText(QString::number(data.mAlternateAirParcelType));
+      mpAlternateAirParcelType->setText(QString::number(value.mAlternateAirParcelType));
       mpAlternateAirParcelType->setEnabled(true);
    }
    else
@@ -1294,12 +1294,12 @@ void ParagraphHgui::setData(const Aspam::ParagraphH& data, QTabWidget* pTabWidge
       mpAlternateAirParcelType->setText("");
       mpAlternateAirParcelType->setEnabled(false);
    }
-   mpAlternateSurfaceVisibility->setText(QString::number(data.mAlternateSurfaceVisibility));
+   mpAlternateSurfaceVisibility->setText(QString::number(value.mAlternateSurfaceVisibility));
 
-   mpAerosol->setRowCount(data.mAerosol.size());
+   mpAerosol->setRowCount(value.mAerosol.size());
    mpAerosol->setColumnCount(9);
    int row = 0;
-   for (vector<Aspam::Aerosol>::const_iterator ait = data.mAerosol.begin(); ait != data.mAerosol.end(); ++ait, ++row)
+   for (vector<Aspam::Aerosol>::const_iterator ait = value.mAerosol.begin(); ait != value.mAerosol.end(); ++ait, ++row)
    {
       QTableWidgetItem* pItem0 = new QTableWidgetItem(QString::number(ait->mHeight / 100.0, 'f', 2) + " km MSL");
       QTableWidgetItem* pItem1 = new QTableWidgetItem(QString::number(ait->mPressure / 10.0) + " mb");
@@ -1333,22 +1333,22 @@ void ParagraphHgui::setData(const Aspam::ParagraphH& data, QTabWidget* pTabWidge
    mpAerosol->resizeColumnsToContents();
 }
 
-void ParagraphJgui::setData(const Aspam::ParagraphJ& data, QTabWidget* pTabWidget)
+void ParagraphJgui::setData(const Aspam::ParagraphJ& value, QTabWidget* pTabWidget)
 {
-   mpRawData = &data;
+   mpRawData = &value;
    if (pTabWidget != NULL)
    {
-      pTabWidget->setTabEnabled(pTabWidget->indexOf(this), data.mLoaded);
+      pTabWidget->setTabEnabled(pTabWidget->indexOf(this), value.mLoaded);
    }
-   mpMaxTemperature->setText(QString::number(data.mMaxTemperature)+ "°C");
-   mpMinTemperature->setText(QString::number(data.mMinTemperature)+ "°C");
-   mpSnowDepth->setText(QString::number(data.mSnowDepth)+ " in");
+   mpMaxTemperature->setText(QString::number(value.mMaxTemperature)+ "°C");
+   mpMinTemperature->setText(QString::number(value.mMinTemperature)+ "°C");
+   mpSnowDepth->setText(QString::number(value.mSnowDepth)+ " in");
 
-   mpSurfaceWeather->setRowCount(data.mSurfaceWeather.size());
+   mpSurfaceWeather->setRowCount(value.mSurfaceWeather.size());
    mpSurfaceWeather->setColumnCount(23);
    int row = 0;
-   for (vector<Aspam::SurfaceWeather>::const_iterator wxit = data.mSurfaceWeather.begin();
-      wxit != data.mSurfaceWeather.end();
+   for (vector<Aspam::SurfaceWeather>::const_iterator wxit = value.mSurfaceWeather.begin();
+      wxit != value.mSurfaceWeather.end();
       ++wxit, ++row)
    {
       unsigned int year = wxit->mYear;
@@ -1407,12 +1407,12 @@ void ParagraphJgui::setData(const Aspam::ParagraphJ& data, QTabWidget* pTabWidge
    mpSurfaceWeather->resizeColumnsToContents();
 }
 
-void ParagraphDgui::getPlotData(vector<Point*>& data, PlotView* pView, unsigned int primary, unsigned int secondary)
+void ParagraphDgui::getPlotData(vector<Point*>& points, PlotView* pView, unsigned int primary, unsigned int secondary)
 {
    VERIFYNRV(mpRawData);
    VERIFYNRV(pView);
 
-   data.reserve(mpRawData->mCloudLayers.size());
+   points.reserve(mpRawData->mCloudLayers.size());
    for (vector<Aspam::CloudLayer>::const_iterator cit = mpRawData->mCloudLayers.begin();
       cit != mpRawData->mCloudLayers.end();
       ++cit)
@@ -1421,16 +1421,16 @@ void ParagraphDgui::getPlotData(vector<Point*>& data, PlotView* pView, unsigned 
       VERIFYNRV(pPoint);
       pPoint->setLocation(getDataPointFromCloudLayer(primary, *cit),
                           getDataPointFromCloudLayer(secondary, *cit));
-      data.push_back(pPoint);
+      points.push_back(pPoint);
    }
 }
 
-void ParagraphFgui::getPlotData(vector<Point*>& data, PlotView* pView, unsigned int primary, unsigned int secondary)
+void ParagraphFgui::getPlotData(vector<Point*>& points, PlotView* pView, unsigned int primary, unsigned int secondary)
 {
    VERIFYNRV(mpRawData);
    VERIFYNRV(pView);
 
-   data.reserve(mpRawData->mAnalytic.size());
+   points.reserve(mpRawData->mAnalytic.size());
    for (vector<Aspam::Analytic>::const_iterator ait = mpRawData->mAnalytic.begin();
       ait != mpRawData->mAnalytic.end();
       ++ait)
@@ -1439,16 +1439,16 @@ void ParagraphFgui::getPlotData(vector<Point*>& data, PlotView* pView, unsigned 
       VERIFYNRV(pPoint);
       pPoint->setLocation(getDataPointFromAnalytic(primary, *ait),
                           getDataPointFromAnalytic(secondary, *ait));
-      data.push_back(pPoint);
+      points.push_back(pPoint);
    }
 }
 
-void ParagraphHgui::getPlotData(vector<Point*>& data, PlotView* pView, unsigned int primary, unsigned int secondary)
+void ParagraphHgui::getPlotData(vector<Point*>& points, PlotView* pView, unsigned int primary, unsigned int secondary)
 {
    VERIFYNRV(mpRawData);
    VERIFYNRV(pView);
 
-   data.reserve(mpRawData->mAerosol.size());
+   points.reserve(mpRawData->mAerosol.size());
    for (vector<Aspam::Aerosol>::const_iterator ait = mpRawData->mAerosol.begin();
       ait != mpRawData->mAerosol.end();
       ++ait)
@@ -1457,16 +1457,16 @@ void ParagraphHgui::getPlotData(vector<Point*>& data, PlotView* pView, unsigned 
       VERIFYNRV(pPoint);
       pPoint->setLocation(getDataPointFromAerosol(primary, *ait),
                           getDataPointFromAerosol(secondary, *ait));
-      data.push_back(pPoint);
+      points.push_back(pPoint);
    }
 }
 
-void ParagraphJgui::getPlotData(vector<Point*>& data, PlotView* pView, unsigned int primary, unsigned int secondary)
+void ParagraphJgui::getPlotData(vector<Point*>& points, PlotView* pView, unsigned int primary, unsigned int secondary)
 {
    VERIFYNRV(mpRawData);
    VERIFYNRV(pView);
 
-   data.reserve(mpRawData->mSurfaceWeather.size());
+   points.reserve(mpRawData->mSurfaceWeather.size());
    for (vector<Aspam::SurfaceWeather>::const_iterator wxit = mpRawData->mSurfaceWeather.begin();
       wxit != mpRawData->mSurfaceWeather.end();
       ++wxit)
@@ -1475,6 +1475,6 @@ void ParagraphJgui::getPlotData(vector<Point*>& data, PlotView* pView, unsigned 
       VERIFYNRV(pPoint);
       pPoint->setLocation(getDataPointFromSurfaceWeather(primary, *wxit),
                           getDataPointFromSurfaceWeather(secondary, *wxit));
-      data.push_back(pPoint);
+      points.push_back(pPoint);
    }
 }

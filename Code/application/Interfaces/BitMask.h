@@ -44,7 +44,7 @@ public:
     *  @param   rhs
     *           "Right Hand Side". The mask to merge from.
     */
-   virtual void merge (const BitMask &rhs) = 0;
+   virtual void merge (const BitMask& rhs) = 0;
 
    /**
     *  In-place bitwise 'AND' operator.
@@ -57,7 +57,7 @@ public:
     *  @param   rhs
     *           "Right Hand Side". The mask to merge from.
     */
-   virtual void intersect (const BitMask &rhs) = 0;
+   virtual void intersect (const BitMask& rhs) = 0;
 
    /**
     *  Equivalence operator.
@@ -70,7 +70,7 @@ public:
     *  @return  true if the two masks are identical in content
     *         ` false otherwise
     */
-   virtual bool compare (const BitMask &rhs) const = 0;
+   virtual bool compare (const BitMask& rhs) const = 0;
 
    /**
     *  Mask inversion method.
@@ -233,7 +233,7 @@ public:
     *  @param   rhs
     *           "Right Hand Side". The mask to merge from.
     */
-   virtual void toggle (const BitMask &rhs) = 0;
+   virtual void toggle (const BitMask& rhs) = 0;
 
    /**
     *   Gets the actual bounding box of set pixels in the bitmap.

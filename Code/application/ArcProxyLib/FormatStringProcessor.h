@@ -23,6 +23,7 @@ namespace ArcProxyLib
       FormatStringProcessor() : mInFieldNumber(false)
       {
       }
+      virtual ~FormatStringProcessor() {};
 
       std::string getProcessedString()
       {
@@ -83,6 +84,7 @@ namespace ArcProxyLib
          mEscaping(false)
       {
       }
+      virtual ~FormatStringPreprocessor() {};
 
       virtual int getFieldIndex(const std::string &fieldName) const = 0;
 
@@ -142,6 +144,7 @@ namespace ArcProxyLib
       }
 
    private:
+      FormatStringPreprocessor& operator=(const FormatStringPreprocessor& rhs);
       std::string &mPreprocessedString;
       std::string mFieldName;
       bool mInField;

@@ -21,16 +21,14 @@ public:
       QWidget* parent = 0);
    ~PerspectiveViewImp();
 
-   using SessionItemImp::setIcon;
+   using ViewImp::setIcon;
+   using ViewImp::setName;
 
    static bool isKindOfView(const std::string& className);
    static void getViewTypes(std::vector<std::string>& classList);
 
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
-
-   PerspectiveViewImp& operator= (const PerspectiveViewImp& perspectiveView);
-   using ViewImp::setName;
 
    double getZoomPercentage() const;
    double getRotation() const;
@@ -53,8 +51,10 @@ public slots:
    void zoomToPoint(const QPoint& screenCoord, double dPercent);
    void zoomToPoint(const LocationType& worldCoord, double dPercent);
    void zoomToCenter(double dPercent);
+   virtual void zoomToBox(const QPoint& screenLowerLeft, const QPoint& screenUpperRight);
    virtual void zoomToBox(const LocationType& worldLowerLeft, const LocationType& worldUpperRight);
    void zoomToInset();
+   virtual void pan(const QPoint& screenBegin, const QPoint& screenEnd);
    virtual void pan(const LocationType& worldBegin, const LocationType& worldEnd);
    void rotateBy(double dDegrees);
    virtual void rotateTo(double dDegrees);
@@ -73,6 +73,7 @@ signals:
    void pitchChanged(double dPitch);
 
 protected:
+   PerspectiveViewImp& operator=(const PerspectiveViewImp& perspectiveView);
    virtual void updateStatusBar(const QPoint& screenCoord);
 
    void resizeEvent(QResizeEvent* e);
@@ -94,6 +95,8 @@ protected:
    static unsigned int sKeyboardNumber;
 
 private:
+   PerspectiveViewImp(const PerspectiveViewImp& rhs);
+
    struct PointType
    {
       float x;
@@ -128,6 +131,7 @@ private slots:
 
 #define PERSPECTIVEVIEWADAPTER_METHODS(impClass) \
    VIEWADAPTER_METHODS(impClass) \
+   using ViewImp::zoomToBox; \
    void zoomBy(double dPercent) \
    { \
       return impClass::zoomBy(dPercent); \

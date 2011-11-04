@@ -26,6 +26,10 @@ public:
 
    void executeUndo();
    void executeRedo();
+
+private:
+   ShowLayer(const ShowLayer& rhs);
+   ShowLayer& operator=(const ShowLayer& rhs);
 };
 
 
@@ -36,6 +40,10 @@ public:
 
    void executeUndo();
    void executeRedo();
+
+private:
+   HideLayer(const HideLayer& rhs);
+   HideLayer& operator=(const HideLayer& rhs);
 };
 
 
@@ -51,6 +59,8 @@ protected:
    void renameLayer(const std::string& name);
 
 private:
+   SetLayerName(const SetLayerName& rhs);
+   SetLayerName& operator=(const SetLayerName& rhs);
    std::string mOldName;
    std::string mNewName;
 };
@@ -68,6 +78,8 @@ protected:
    void setLayerDisplayIndex(int index);
 
 private:
+   SetLayerDisplayIndex(const SetLayerDisplayIndex& rhs);
+   SetLayerDisplayIndex& operator=(const SetLayerDisplayIndex& rhs);
    int mOldIndex;
    int mNewIndex;
 };
@@ -81,6 +93,9 @@ public:
 
 public:
    virtual void toLayer(Layer* pLayer) const = 0;
+
+private:
+   LayerMemento(const LayerMemento& rhs);
 };
 
 
@@ -97,6 +112,8 @@ protected:
    void destroyLayer();
 
 private:
+   CreateDestroyLayer(const CreateDestroyLayer& rhs);
+   CreateDestroyLayer& operator=(const CreateDestroyLayer& rhs);
    std::string mLayerId;
    std::string mLayerName;
    LayerType mLayerType;
@@ -115,6 +132,10 @@ public:
 
    void executeUndo();
    void executeRedo();
+
+private:
+   AddLayer(const AddLayer& rhs);
+   AddLayer& operator=(const AddLayer& rhs);
 };
 
 
@@ -125,6 +146,10 @@ public:
 
    void executeUndo();
    void executeRedo();
+
+private:
+   DeleteLayer(const DeleteLayer& rhs);
+   DeleteLayer& operator=(const DeleteLayer& rhs);
 };
 
 #endif

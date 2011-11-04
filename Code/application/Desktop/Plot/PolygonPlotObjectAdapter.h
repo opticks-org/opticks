@@ -26,6 +26,9 @@ public:
    bool isKindOf(const std::string& className) const;
 
    POLYGONPLOTOBJECTADAPTER_METHODS(PolygonPlotObjectImp)
+
+private:
+   PolygonPlotObjectAdapter(const PolygonPlotObjectAdapter& rhs);
 };
 
 #endif

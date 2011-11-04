@@ -26,6 +26,9 @@ public:
    bool getPackBitsCompression();
 
 private:
+   TiffExportOptionsWidget(const TiffExportOptionsWidget& rhs);
+   TiffExportOptionsWidget& operator=(const TiffExportOptionsWidget& rhs);
+
    QCheckBox* mpPackBits;
    QSpinBox* mpRowsPerStrip;
    ImageResolutionWidget* mpResolutionWidget;

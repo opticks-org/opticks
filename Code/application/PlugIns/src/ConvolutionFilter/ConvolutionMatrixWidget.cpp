@@ -401,7 +401,6 @@ void ConvolutionMatrixWidget::matrixButtonPressed(QAbstractButton* pButton)
       std::vector<unsigned int> bandNums;
       bandNums.push_back(0);
       AoiElement* pAoi = NULL;
-      bool promptUser = true;
       std::string viewId = pView->getId();
       std::map<std::string, PreviousConvolutionExecution>::iterator iter = mPreviousConvolves.find(viewId);
       if (iter != mPreviousConvolves.end())
@@ -618,7 +617,7 @@ void ConvolutionMatrixWidget::loadFromConfigurationSettings()
       int colcount = dv_cast<int>(pPresetsDo->getAttributeByPath(*name + "/colcount"), 0);
       std::vector<double> elements = dv_cast<std::vector<double> >(
          pPresetsDo->getAttributeByPath(*name + "/kernel"), std::vector<double>());
-      if (rowcount == 0 || colcount == 0 || elements.size() != (rowcount * colcount))
+      if (rowcount == 0 || colcount == 0 || elements.size() != static_cast<unsigned int>(rowcount) * colcount)
       {
          continue;
       }

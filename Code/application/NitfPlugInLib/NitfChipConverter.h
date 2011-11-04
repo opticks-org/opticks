@@ -72,6 +72,8 @@ namespace Nitf
       const std::vector<double> &getChipCoefficients() const;
 
    private:
+      ChipConverter& operator=(const ChipConverter& rhs);
+
       std::vector<double> mChipCoefficients;
       const RasterDataDescriptor& mDescriptor;
 

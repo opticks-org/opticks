@@ -19,6 +19,7 @@
 #pragma warning(push)
 #pragma warning(disable : 4146)
 #pragma warning(disable : 4192)
+#pragma warning(disable : 4336)
 
 #import <esriSystem.olb> raw_interfaces_only raw_native_types no_namespace named_guids exclude("OLE_COLOR", "OLE_HANDLE")
 #import <esriSystemUI.olb> raw_interfaces_only raw_native_types no_namespace named_guids exclude("OLE_COLOR", "OLE_HANDLE")

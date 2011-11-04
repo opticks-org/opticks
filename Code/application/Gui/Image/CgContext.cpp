@@ -187,7 +187,7 @@ void CgContext::destroyCgProgram(const string& programName)
 
 CGprofile CgContext::getVertexProfile() const
 {
-   CGprofile vertexProfile;
+   CGprofile vertexProfile = CG_PROFILE_UNKNOWN;
    if (cgGLIsProfileSupported(cgGLGetLatestProfile(CG_GL_VERTEX)))
    {
       vertexProfile = cgGLGetLatestProfile(CG_GL_VERTEX);
@@ -202,7 +202,7 @@ CGprofile CgContext::getVertexProfile() const
 
 CGprofile CgContext::getFragmentProfile() const
 {
-   CGprofile fragmentProfile;
+   CGprofile fragmentProfile = CG_PROFILE_UNKNOWN;
    if (cgGLIsProfileSupported(cgGLGetLatestProfile(CG_GL_FRAGMENT)))
    {
       fragmentProfile = cgGLGetLatestProfile(CG_GL_FRAGMENT);
@@ -239,9 +239,12 @@ CgContext::CgContext() :
       public:
          tmpGL(QWidget *parent) : QGLWidget(parent) {}
       protected:
-         void initializeGL() {}
-         void resizeGL() {}
-         void paintGL() {}
+         virtual void initializeGL() {}
+         virtual void resizeGL(int w, int h) {}
+         virtual void paintGL() {}
+      private:
+         tmpGL(const tmpGL& rhs) {}
+         tmpGL& operator=(const tmpGL& rhs) { return *this; }
       };
       pGlWidget = new tmpGL(NULL);
       pGlWidget->makeCurrent();

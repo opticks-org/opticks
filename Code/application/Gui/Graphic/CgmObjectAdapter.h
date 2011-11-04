@@ -44,6 +44,9 @@ public:
    }
 
    CGMOBJECTADAPTER_METHODS(CgmObjectImp)
+
+private:
+   CgmObjectAdapter(const CgmObjectAdapter& rhs);
 };
 
 #endif

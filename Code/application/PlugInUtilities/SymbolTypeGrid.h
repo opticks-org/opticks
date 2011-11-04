@@ -34,6 +34,9 @@ private slots:
    void translateChange(const QString&);
 
 private:
+   SymbolTypeGrid(const SymbolTypeGrid& rhs);
+   SymbolTypeGrid& operator=(const SymbolTypeGrid& rhs);
+
    QPixmap getSymbolPixmap(SymbolType eSymbol);
 
    std::map<SymbolType, QPixmap> mPixmaps;
@@ -55,6 +58,10 @@ signals:
 
 private slots:
    void translateChange();
+
+private:
+   SymbolTypeButton(const SymbolTypeButton& rhs);
+   SymbolTypeButton& operator=(const SymbolTypeButton& rhs);
 };
 
 #endif

@@ -44,6 +44,7 @@ public:
    RasterElement* getInverseCovarianceElement() const;
 
 private:
+   CovarianceAlgorithm(const CovarianceAlgorithm& rhs);
    bool preprocess();                     // from AlgorithmPattern. Initializes Raster Elements to NULL.
    bool processAll();                     // from AlgorithmPattern. Controls computation of CVM.
    bool postprocess();                    // from AlgorithmPattern. Does nothing.
@@ -71,6 +72,7 @@ public:
    bool hasAbort();
 
 private:
+   Covariance(const Covariance& rhs);
    bool canRunBatch() const;
    bool canRunInteractive() const;
    bool populateBatchInputArgList(PlugInArgList* pArgList);

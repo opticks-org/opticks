@@ -111,7 +111,7 @@ bool GeoreferencePlugIn::execute(PlugInArgList* pInParam, PlugInArgList* pOutPar
       dlgGeo.setResultsName(mResultsName);
 
       bool bInputValid = false;
-      int iResult;
+      int iResult = QDialog::Rejected;
       while (!bInputValid)
       {
          // Display dialog

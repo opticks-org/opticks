@@ -49,6 +49,9 @@ private slots:
    void updateScaleValues();
 
 private:
+   PcaDlg(const PcaDlg& rhs);
+   PcaDlg& operator=(const PcaDlg& rhs);
+
    QRadioButton* mpCalculateRadio;
    QComboBox* mpMethodCombo;
    QRadioButton* mpFileRadio;

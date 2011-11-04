@@ -86,6 +86,9 @@ signals:
    void layerDeleted(Layer* pLayer);
 
 private:
+   LayerListImp(const LayerListImp& rhs);
+   LayerListImp& operator=(const LayerListImp& rhs);
+
    SafePtr<RasterElement> mpRasterElement;
    std::vector<Layer*> mLayers;
    std::vector<Layer*> mDisplayedLayers;

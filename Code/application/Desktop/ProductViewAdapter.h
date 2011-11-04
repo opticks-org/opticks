@@ -25,6 +25,9 @@ public:
    bool isKindOf(const std::string& className) const;
 
    PRODUCTVIEWADAPTER_METHODS(ProductViewImp)
+
+private:
+   ProductViewAdapter(const ProductViewAdapter& rhs);
 };
 
 #endif

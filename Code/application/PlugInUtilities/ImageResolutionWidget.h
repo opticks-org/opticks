@@ -40,6 +40,8 @@ private slots:
    void checkResolutionY(bool ignoreAspectRatio = false);
 
 private:
+   ImageResolutionWidget(const ImageResolutionWidget& rhs);
+   ImageResolutionWidget& operator=(const ImageResolutionWidget& rhs);
    QLineEdit* mpResolutionX;
    QLineEdit* mpResolutionY;
    QPushButton* mpResolutionAspectLock;

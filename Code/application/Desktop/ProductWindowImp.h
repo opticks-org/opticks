@@ -21,19 +21,23 @@ public:
    ProductWindowImp(const std::string& id, const std::string& windowName, QWidget* parent = 0);
    ~ProductWindowImp();
 
-   using SessionItemImp::setIcon;
+   using WorkspaceWindowImp::setIcon;
+   using WorkspaceWindowImp::setName;
 
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
 
    WindowType getWindowType() const;
-   using WorkspaceWindowImp::setName;
 
    View* createView(const QString& strViewName, const ViewType& viewType);
    void setWidget(QWidget* pWidget);
    void print(bool bSetupDialog = false);
 
    ProductView* getProductView() const;
+
+private:
+   ProductWindowImp(const ProductWindowImp& rhs);
+   ProductWindowImp& operator=(const ProductWindowImp& rhs);
 };
 
 #define PRODUCTWINDOWADAPTEREXTENSION_CLASSES \

@@ -41,6 +41,8 @@ class ImportDescriptor;
 class ImportAgent : public ExecutableAgent
 {
 public:
+   using ExecutableAgent::instantiate;
+
    /**
     *  Specifies the conditions in which the user can edit the import data
     *  parameters via the import options dialog.

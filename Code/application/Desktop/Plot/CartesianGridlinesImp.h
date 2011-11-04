@@ -38,6 +38,7 @@ protected slots:
    void updateLineStyle(LineStyle lineStyle);
 
 private:
+   CartesianGridlinesImp(const CartesianGridlinesImp& rhs);
    OrientationType mOrientation;
    PlotGroupAdapter mLines;
 };

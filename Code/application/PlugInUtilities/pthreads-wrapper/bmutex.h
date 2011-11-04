@@ -17,13 +17,13 @@ class BMutex : public Mutex
 {
    public:
       BMutex();
-      ~BMutex();
-      bool MutexCreate (); 
-      bool MutexInit ();
-      bool MutexLock ();
-      bool MutexUnlock ();
-      bool MutexDestroy ();
-      pthread_mutex_t *GetMutexID() { return mMutexID; };
+      virtual ~BMutex();
+      virtual bool MutexCreate(); 
+      virtual bool MutexInit();
+      virtual bool MutexLock();
+      virtual bool MutexUnlock();
+      virtual bool MutexDestroy();
+      pthread_mutex_t* GetMutexID() { return mMutexID; }
 
    private:
       pthread_mutex_t *mMutexID;

@@ -46,6 +46,10 @@ public:
    }
 
    MULTIPOINTOBJECTADAPTER_METHODS(MultipointObjectImp)
+
+private:
+   MultipointObjectAdapter(const MultipointObjectAdapter& rhs);
+   MultipointObjectAdapter& operator=(const MultipointObjectAdapter& rhs);
 };
 
 #endif

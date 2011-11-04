@@ -373,8 +373,8 @@ RasterPage* GeoTiffPager::getPage(DataRequest *pOriginalRequest,
          // how many strips should we load?
          // find the strip that our data block begins in
          // then find the strip that our concurrent data ends in
-         tstrip_t startStrip(TIFFComputeStrip(mpTiff, rowNumber, bandNumber));
-         tstrip_t endStrip(TIFFComputeStrip(mpTiff, (rowNumber + concurrentRows) - 1, bandNumber));
+         tstrip_t startStrip(TIFFComputeStrip(mpTiff, rowNumber, static_cast<tsample_t>(bandNumber)));
+         tstrip_t endStrip(TIFFComputeStrip(mpTiff, (rowNumber + concurrentRows) - 1, static_cast<tsample_t>(bandNumber)));
 
          // if this data block is already in the cache, retrieve it...otherwise create a new block
          GeoTiffOnDisk::CacheUnit* pCacheUnit(mBlockCache.getCacheUnit(startStrip, endStrip, stripSize));

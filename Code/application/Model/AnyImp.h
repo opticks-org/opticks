@@ -40,6 +40,7 @@ public:
    static void getElementTypes(std::vector<std::string>& classList);
 
 private:
+   AnyImp(const AnyImp& rhs);
    AnyData* mpData;
    std::string mDataType;
 };

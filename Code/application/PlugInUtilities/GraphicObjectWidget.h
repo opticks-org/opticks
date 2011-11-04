@@ -42,6 +42,8 @@ protected slots:
    void notifyUpperRightChange();
 
 private:
+   GraphicObjectWidget(const GraphicObjectWidget& rhs);
+   GraphicObjectWidget& operator=(const GraphicObjectWidget& rhs);
    QDoubleSpinBox* mpLowerLeftXSpin;
    QDoubleSpinBox* mpLowerLeftYSpin;
    QDoubleSpinBox* mpUpperRightXSpin;

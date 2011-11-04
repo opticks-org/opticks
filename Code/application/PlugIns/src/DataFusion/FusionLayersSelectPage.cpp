@@ -121,6 +121,8 @@ struct LayerSetBuilder : unary_function<Layer*, bool>
    }
 
 private:
+   LayerSetBuilder& operator=(const LayerSetBuilder& rhs);
+
    set<Layer*>& mSet;
 };
 

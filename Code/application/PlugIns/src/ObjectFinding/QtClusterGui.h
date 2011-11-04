@@ -45,6 +45,8 @@ public slots:
    void setDisplayType(DisplayType type);
 
 private:
+   QtClusterGui(const QtClusterGui& rhs);
+   QtClusterGui& operator=(const QtClusterGui& rhs);
    QDoubleSpinBox* mpClusterSize;
    QLineEdit* mpResultName;
    QComboBox* mpDisplayType;

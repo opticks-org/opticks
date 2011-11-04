@@ -28,6 +28,10 @@ signals:
 
 private slots:
    void translateActivated(int newIndex);
+
+private:
+   LineStyleComboBox(const LineStyleComboBox& rhs);
+   LineStyleComboBox& operator=(const LineStyleComboBox& rhs);
 };
 
 #endif

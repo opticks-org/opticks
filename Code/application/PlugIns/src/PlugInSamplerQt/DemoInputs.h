@@ -25,7 +25,7 @@ struct DemoInputs
    /**
     *  The number of colors to make in the colormap 
     */
-   int mNumberOfCells;
+   unsigned int mNumberOfCells;
 };
 
 #endif

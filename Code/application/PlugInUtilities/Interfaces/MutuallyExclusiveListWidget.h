@@ -193,6 +193,8 @@ protected slots:
    void removeSelectedItem();
 
 private:
+   MutuallyExclusiveListWidget(const MutuallyExclusiveListWidget& rhs);
+   MutuallyExclusiveListWidget& operator=(const MutuallyExclusiveListWidget& rhs);
    void selectAvailableItem(QListWidgetItem* pAvailableItem);
    void removeSelectedItem(QListWidgetItem* pSelectedItem);
 

@@ -121,7 +121,8 @@ bool ThresholdData::getInputSpecification(PlugInArgList*& pArgList)
 
 bool ThresholdData::getOutputSpecification(PlugInArgList*& pArgList)
 {
-   VERIFY(pArgList = Service<PlugInManagerServices>()->getPlugInArgList());
+   pArgList = Service<PlugInManagerServices>()->getPlugInArgList();
+   VERIFY(pArgList != NULL);
    VERIFY(pArgList->addArg<AoiElement>("Result", "The new AOI."));
    VERIFY(pArgList->addArg<AoiLayer>("Result Layer", "The new AOI layer."));
    return true;

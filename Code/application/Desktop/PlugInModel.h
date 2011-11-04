@@ -35,6 +35,9 @@ protected:
    void removeModuleItem(ModuleDescriptor* pModule);
 
 private:
+   PlugInModel(const PlugInModel& rhs);
+   PlugInModel& operator=(const PlugInModel& rhs);
+
    AttachmentPtr<PlugInManagerServices> mpManager;
 };
 

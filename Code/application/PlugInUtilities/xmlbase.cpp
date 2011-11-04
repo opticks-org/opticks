@@ -275,7 +275,7 @@ XMLByte* XmlBase::encodeBase64(const unsigned int* pData, XMLSize_t size, XMLSiz
    for (unsigned int i = 0; i < size; i++)
    {
       tmp = pData[i];
-      for (int j = 0; j < sizeof(tmp); j++)
+      for (unsigned int j = 0; j < sizeof(tmp); j++)
       {
          bytes[bytesIndex] = (tmp >> (8 * j)) & 0xff;
          if (pChecksum != NULL)
@@ -326,7 +326,7 @@ unsigned int* XmlBase::decodeBase64(const XMLByte* pData, XMLSize_t size, const 
    for (unsigned int i = 0; i < dlen / sizeof(unsigned int); i++)
    {
       tmp = 0;
-      for (int j = 0; j < sizeof(tmp); j++)
+      for (unsigned int j = 0; j < sizeof(tmp); j++)
       {
          tmp |= bytes[bytesIndex] << (8 * j);
          if (checksum.empty() == false)

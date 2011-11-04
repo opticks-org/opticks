@@ -44,6 +44,8 @@ public:
    RasterElement* getInverseSecondMomentElement() const;
 
 private:
+   SecondMomentAlgorithm(const SecondMomentAlgorithm& rhs);
+
    bool preprocess();                     // from AlgorithmPattern. Does nothing.
    bool processAll();                     // from AlgorithmPattern. Controls computation of SMM.
    bool postprocess();                    // from AlgorithmPattern. Does nothing.
@@ -71,6 +73,8 @@ public:
    bool hasAbort();
 
 private:
+   SecondMoment(const SecondMoment& rhs);
+
    bool canRunBatch() const;
    bool canRunInteractive() const;
    bool populateBatchInputArgList(PlugInArgList* pArgList);

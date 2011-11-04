@@ -50,8 +50,8 @@ HistogramWindowImp::HistogramWindowImp(const string& id, const string& windowNam
    mpExplorer(Service<SessionExplorer>().get(), SIGNAL_NAME(SessionExplorer, AboutToShowSessionItemContextMenu),
       Slot(this, &HistogramWindowImp::updateContextMenu)),
    mDisplayModeChanging(false),
-   mUpdater(this),
-   mAddingStatisticsPlot(false)
+   mAddingStatisticsPlot(false),
+   mUpdater(this)
 {
    mpSyncAutoZoomAction = new QAction("Synchronize Auto Zoom", this);
    mpSyncAutoZoomAction->setAutoRepeat(false);
@@ -952,7 +952,7 @@ void HistogramWindowImp::activateLayer(PlotWidget* pPlot)
                 **/
                if (pLayerList->getPrimaryRasterElement() == pElement &&
                    pLayer->getLayerType() == RASTER &&
-                   pView->getLayerDisplayIndex(pLayer) == (pLayerList->getNumLayers() - 1))
+                   pView->getLayerDisplayIndex(pLayer) == static_cast<int>(pLayerList->getNumLayers()) - 1)
                {
                   isPrimary = true;
                }

@@ -55,7 +55,6 @@ struct tm TimeUtilities::secondsFrom1940ToTimeStruct(unsigned int seconds)
    unsigned int hourSeconds = seconds % 60;     // 60 == seconds / minute
    unsigned int minutes = (seconds / 60) % 60;  // 60 == minutes / hour
    unsigned int hours = (seconds / 3600) % 24;  // 24 == hours / day;
-   unsigned int days = (seconds / secondsPerDay) % 365;
    unsigned int year;
    timeStruct.tm_hour = hours;
    timeStruct.tm_min = minutes;
@@ -89,7 +88,6 @@ struct tm TimeUtilities::secondsFrom1940ToTimeStruct(unsigned int seconds)
    timeStruct.tm_year = i - 1900;
    timeStruct.tm_yday = totalDays;
    timeStruct.tm_isdst = 0;
-   int monthDaySum = 0;
    for (i = 0; i < 12; ++i)
    {
       unsigned int daysThisMonth = daysPerMonth[i];

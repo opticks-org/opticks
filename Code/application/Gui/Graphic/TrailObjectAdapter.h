@@ -44,6 +44,10 @@ public:
    }
 
    TRAILOBJECTADAPTER_METHODS(TrailObjectImp)
+
+private:
+   TrailObjectAdapter(const TrailObjectAdapter& rhs);
+   TrailObjectAdapter& operator=(const TrailObjectAdapter& rhs);
 };
 
 #endif

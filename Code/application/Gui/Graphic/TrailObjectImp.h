@@ -32,6 +32,8 @@ protected:
    void updateStencil();
 
 private:
+   TrailObjectImp(const TrailObjectImp& rhs);
+   TrailObjectImp& operator=(const TrailObjectImp& rhs);
    char* mpBuffer;
    int mRows;
    int mColumns;

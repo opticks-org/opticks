@@ -380,6 +380,8 @@ public:
    }
 
 private:
+   ResetVariableOnDestroy& operator=(const ResetVariableOnDestroy& rhs);
+
    T& mVariable;
    T mOriginalValue;
 };

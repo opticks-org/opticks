@@ -23,6 +23,10 @@ public:
 
    static void getElementTypes(std::vector<std::string>& classList);
    static bool isKindOfElement(const std::string& className);
+
+private:
+   AnnotationElementImp(const AnnotationElementImp& rhs);
+   AnnotationElementImp& operator=(const AnnotationElementImp& rhs);
 };
 
 #define ANNOTATIONELEMENTADAPTEREXTENSION_CLASSES \

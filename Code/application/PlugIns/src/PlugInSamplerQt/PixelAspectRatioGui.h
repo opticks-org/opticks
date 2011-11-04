@@ -32,20 +32,23 @@ public slots:
     void generateNewView();
 
 private:
-    QPushButton* mpCancelButton;
-    QPushButton* mpApplyButton;
-    QPushButton* mpGenerateViewButton;
-    QComboBox* mpCubeListCombo;
-    QDoubleSpinBox* mpXScaleFactor;
-    QDoubleSpinBox* mpYScaleFactor;
-    QLabel* mpCubeListComboLabel;
-    QLabel* mpXScaleFactorLabel;
-    QLabel* mpYScaleFactorLabel;
+   PixelAspectRatioGui(const PixelAspectRatioGui& rhs);
+   PixelAspectRatioGui& operator=(const PixelAspectRatioGui& rhs);
 
-    void init();
-    std::vector<std::string> mCubeNames;
-    Layer* mpScaledLayer;
-    bool mbScalingApplied;
+   QPushButton* mpCancelButton;
+   QPushButton* mpApplyButton;
+   QPushButton* mpGenerateViewButton;
+   QComboBox* mpCubeListCombo;
+   QDoubleSpinBox* mpXScaleFactor;
+   QDoubleSpinBox* mpYScaleFactor;
+   QLabel* mpCubeListComboLabel;
+   QLabel* mpXScaleFactorLabel;
+   QLabel* mpYScaleFactorLabel;
+
+   void init();
+   std::vector<std::string> mCubeNames;
+   Layer* mpScaledLayer;
+   bool mbScalingApplied;
 
 };
 

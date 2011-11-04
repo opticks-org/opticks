@@ -30,19 +30,19 @@ public:
    ToolBarImp(const std::string& id, const std::string& name, QWidget* parent = 0);
    ~ToolBarImp();
 
-   using SessionItemImp::setIcon;
+   using WindowImp::setIcon;
+   using WindowImp::setName;
+   using QToolBar::insertWidget;
 
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
 
    WindowType getWindowType() const;
-   using WindowImp::setName;
 
    MenuBar* getMenuBar() const;
    void addButton(QAction* pAction, QAction* pBefore = NULL);
    void addButton(QAction* pAction, const std::string& shortcutContext, QAction* pBefore = NULL);
    QAction* insertWidget(QWidget* pWidget, QAction* pBefore = NULL);
-   using QToolBar::insertWidget;
    QAction* addSeparator(QAction* pBefore = NULL);
    std::vector<QAction*> getItems() const;
    void removeItem(QAction* pAction);
@@ -59,6 +59,9 @@ protected:
    void hideEvent(QHideEvent* pEvent);
 
 private:
+   ToolBarImp(const ToolBarImp& rhs);
+   ToolBarImp& operator=(const ToolBarImp& rhs);
+
    MenuBarImp* mpMenuBar;
    QAction* mpShowAction;
    QAction* mpHideAction;
@@ -110,6 +113,6 @@ private:
    bool isShown() const \
    { \
       return impClass::isShown(); \
-   }  
+   }
 
 #endif

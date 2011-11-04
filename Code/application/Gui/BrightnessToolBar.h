@@ -86,6 +86,8 @@ private slots:
    void enableSliders();
 
 private:
+   BrightnessToolBar(const BrightnessToolBar& rhs);
+   BrightnessToolBar& operator=(const BrightnessToolBar& rhs);
    void onRasterLayerDeleted(Subject &subject, const std::string &signal, const boost::any &v);
    double mBrightnessValue;
    QSlider* mpBrightnessSlider;

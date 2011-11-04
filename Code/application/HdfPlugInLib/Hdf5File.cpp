@@ -74,7 +74,7 @@ namespace
     *
     *  @return  0 if the operation succeeds, -1 otherwise.
     */
-   herr_t populateAttributes(hid_t loc_id, const char* name, void* pData)
+   extern "C" herr_t populateAttributes(hid_t loc_id, const char* name, void* pData)
    {
       if (pData == NULL)
       {
@@ -129,7 +129,7 @@ namespace
     *
     *  @return  0 if the operation succeeds, -1 otherwise.
     */
-   herr_t populateHdfFile(hid_t loc_id, const char *name, void *pStructure)
+   extern "C" herr_t populateHdfFile(hid_t loc_id, const char *name, void *pStructure)
    {
       H5G_stat_t statbuf;
 
@@ -185,7 +185,6 @@ namespace
 
                   Hdf5TypeResource dtype(H5Dget_type(*dataId));
                   Hdf5DataSpaceResource dspace(H5Dget_space(*dataId));
-                  H5T_class_t dataType = H5Tget_class(*dtype); // integer or floating point data?
 
                   if (pDataset != NULL)
                   {

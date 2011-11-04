@@ -38,7 +38,6 @@ MessageLogImp::MessageLogImp(const char* name, const char* path, QFile* journal)
    //determine the path + filename of the log
    string fname(name);
    string jname;
-   int lth = fname.length();
    int x = fname.find(":");
    while (x >= 0)
    {
@@ -777,7 +776,7 @@ bool MessageImp::addProperty(const string& name, const vector<const Filename*>& 
    return true;
 }
 
-bool MessageImp::finalize(Message::Result result)
+bool MessageImp::finalize()
 {
    if (mFinalized)
    {
@@ -797,16 +796,6 @@ const DynamicObject* MessageImp::getProperties() const
 string MessageImp::getAction() const
 {
    return mAction;
-}
-
-Message::Result MessageImp::getResult() const
-{
-   if (mFinalized)
-   {
-      return Message::Success;
-   }
-
-   return Message::Unresolved;
 }
 
 string MessageImp::getComponent() const
@@ -844,7 +833,7 @@ bool MessageImp::toXml(XMLWriter* pXml) const
    return true;
 }
 
-bool MessageImp::fromXml(DOMNode* pDocument, unsigned int version) const
+bool MessageImp::fromXml(DOMNode* pDocument, unsigned int version)
 {
    return false;
 }
@@ -1263,7 +1252,6 @@ Message* StepImp::addMessage(const string& action, const string& component, cons
       {
          return NULL;
       }
-
       if (finalizeOnCreate)
       {
          pMsg->finalize();
@@ -1281,6 +1269,11 @@ Message* StepImp::addMessage(const string& action, const string& component, cons
 bool StepImp::finalize(Message::Result result)
 {
    return finalize(result, "");
+}
+
+bool StepImp::finalize()
+{
+   return finalize(Message::Success, "");
 }
 
 bool StepImp::finalize(Message::Result result, const string& failureReason)
@@ -1302,7 +1295,7 @@ bool StepImp::finalize(Message::Result result, const string& failureReason)
       }
       else
       {
-         m->finalize(result);
+         m->finalize();
       }
    }
    return MessageImp::finalize();

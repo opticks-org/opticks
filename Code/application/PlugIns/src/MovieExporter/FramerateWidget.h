@@ -34,6 +34,8 @@ protected slots:
    void framerateChanged(const QString& framerate);
 
 private:
+   FramerateWidget(const FramerateWidget& rhs);
+   FramerateWidget& operator=(const FramerateWidget& rhs);
    QSpinBox* mpNumeratorSpin;
    QSpinBox* mpDenominatorSpin;
    QComboBox* mpFramerateCombo;

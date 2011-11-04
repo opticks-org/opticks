@@ -144,6 +144,8 @@ signals:
    void frameChanged(const AnimationFrame& frame);
    
 private:
+   AnimationFrameSpinBox(const AnimationFrameSpinBox& rhs);
+   AnimationFrameSpinBox& operator=(const AnimationFrameSpinBox& rhs);
    FrameType mType;
    std::vector<AnimationFrame> mFrames;
    int mIndex;

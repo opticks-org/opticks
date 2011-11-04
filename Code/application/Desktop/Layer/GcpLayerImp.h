@@ -34,7 +34,6 @@ public:
    GcpLayerImp& operator= (const GcpLayerImp& gcpLayer);
 
    LayerType getLayerType() const;
-   using LayerImp::setName;
 
    std::vector<ColorType> getColors() const;
    void draw();
@@ -65,6 +64,8 @@ signals:
    void sizeChanged(int iSize);
 
 private:
+   GcpLayerImp(const GcpLayerImp& rhs);
+
    QColor mColor;
    GcpSymbol mSymbol;
    int mSymbolSize;   // Symbol radius in screen pixels

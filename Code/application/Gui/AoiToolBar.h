@@ -152,6 +152,9 @@ protected slots:
    void setShowPointLabelState(bool showPointLabel);
 
 private:
+   AoiToolBar(const AoiToolBar& rhs);
+   AoiToolBar& operator=(const AoiToolBar& rhs);
+
    // Draw mode actions
    QAction* mpDraw;
    QAction* mpErase;
@@ -199,6 +202,10 @@ signals:
 
 private slots:
    void translateChange(const QString&);
+
+private:
+   AoiAddModeGrid(const AoiAddModeGrid& rhs);
+   AoiAddModeGrid& operator=(const AoiAddModeGrid& rhs);
 };
 
 class AoiAddModeButton : public PixmapGridButton
@@ -213,6 +220,10 @@ public:
 
 signals:
    void valueChanged(AoiAddMode value);
+
+private:
+   AoiAddModeButton(const AoiAddModeButton& rhs);
+   AoiAddModeButton& operator=(const AoiAddModeButton& rhs);
 };
 
 #endif

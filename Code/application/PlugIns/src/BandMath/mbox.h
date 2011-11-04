@@ -10,7 +10,7 @@
 #ifndef MBOX_H
 #define MBOX_H
 
-#define MB_OK                1
+#define MB_OK_ONLY           1
 #define MB_CANCEL            2
 #define MB_OK_CANCEL         3
 #define MB_OK_CANCEL_ALWAYS  4
@@ -27,6 +27,10 @@ public:
     ~MBox();
 
     QCheckBox* cbAlways;
+
+private:
+   MBox(const MBox& rhs);
+   MBox& operator=(const MBox& rhs);
 };
 
 #endif

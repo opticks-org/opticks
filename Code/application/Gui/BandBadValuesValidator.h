@@ -25,6 +25,10 @@ public:
    QValidator::State validate(QString& input, int& pos) const;
    static QString convertVectorToString(const std::vector<int>& vec);
    static const std::vector<int> convertStringToVector(QString& input, bool& result);
+
+private:
+   BandBadValuesValidator(const BandBadValuesValidator& rhs);
+   BandBadValuesValidator& operator=(const BandBadValuesValidator& rhs);
 };
 
 #endif

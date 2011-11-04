@@ -30,6 +30,8 @@ signals:
    void apexChanged(int apex);
 
 private:
+   GraphicTriangleWidget(const GraphicTriangleWidget& rhs);
+   GraphicTriangleWidget& operator=(const GraphicTriangleWidget& rhs);
    QSpinBox* mpApexSpin;
 };
 

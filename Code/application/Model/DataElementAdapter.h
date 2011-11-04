@@ -24,6 +24,9 @@ public:
    bool isKindOf(const std::string& className) const;
 
    DATAELEMENTADAPTER_METHODS(DataElementImp)
+
+private:
+   DataElementAdapter(const DataElementAdapter& rhs);
 };
 
 #endif

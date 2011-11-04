@@ -391,7 +391,6 @@ void AxisImp::paintEvent(QPaintEvent* e)
    {
       p.setFont(mTitleFont.toQFont());
       p.setPen(mTitleColor);
-      int iTitleHeight = p.fontMetrics().height();
 
       QRect rcText = rcWidget;
       switch (mScaleDraw.alignment())

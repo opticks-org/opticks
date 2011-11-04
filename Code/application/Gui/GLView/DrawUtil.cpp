@@ -266,6 +266,11 @@ int DrawUtil::isWithin(double x, double y, const double *bx, const double *by, i
 bool DrawUtil::isWithin(LocationType point, const LocationType *pRegion, int count,
                         const unsigned int *pIgnoreSegmentsEnd, int ignoreCount)
 {
+   if (count <= 0)
+   {
+      return false;
+   }
+
    double slope;
    int ignorePos = 0;
    int above = 0;
@@ -279,9 +284,9 @@ bool DrawUtil::isWithin(LocationType point, const LocationType *pRegion, int cou
       ++ignorePos;
    }
 
-   for (int i = 0; i < count - 1; ++i)
+   for (unsigned int i = 0; i < static_cast<unsigned int>(count - 1); ++i)
    {
-      if (ignorePos < ignoreCount && i + 1 == pIgnoreSegmentsEnd[ignorePos])
+      if (ignorePos < ignoreCount && (i + 1) == pIgnoreSegmentsEnd[ignorePos])
       {
          ++ignorePos;
          continue;
@@ -295,7 +300,6 @@ bool DrawUtil::isWithin(LocationType point, const LocationType *pRegion, int cou
          }
       }
    }
-
    return (above & 1);
 }
 
@@ -437,8 +441,8 @@ bool DrawUtil::unProjectToZero(double xPixel, double yPixel, const double modelM
 {
    LocationType temp1;
    LocationType temp2;
-   double winZ1;
-   double winZ2;
+   double winZ1 = 0.0;
+   double winZ2 = 0.0;
 
    bool success = gluUnProject(xPixel, yPixel, 0.0, modelMatrix, projectionMatrix, viewport, &temp1.mX,
       &temp1.mY, &winZ1);
@@ -466,8 +470,8 @@ bool DrawUtil::unProjectToZero(double xPixel, double yPixel, const double modelM
    return success;
 }
 
-void DrawUtil::restrictToViewport(int &ulStartColumn, int &ulStartRow,
-                                  int &ulEndColumn, int &ulEndRow)
+void DrawUtil::restrictToViewport(int& ulStartColumn, int& ulStartRow,
+                                  int& ulEndColumn, int& ulEndRow)
 {
    double modelMatrix[16];
    double projectionMatrix[16];
@@ -642,7 +646,7 @@ LocationType DrawUtil::getRotatedCoordinate(const LocationType& coord, const Loc
    return newCoord;
 }
 
-void DrawUtil::updateBoundingBox(LocationType &llCorner, LocationType &urCorner,
+void DrawUtil::updateBoundingBox(LocationType& llCorner, LocationType& urCorner,
                                  LocationType vertex)
 {
    llCorner.mX = MIN(llCorner.mX, vertex.mX);
@@ -651,7 +655,7 @@ void DrawUtil::updateBoundingBox(LocationType &llCorner, LocationType &urCorner,
    urCorner.mY = MAX(urCorner.mY, vertex.mY);
 }
 
-void DrawUtil::drawRotatedText(DrawUtil::TextTexture &tex, QString text, QFont font, 
+void DrawUtil::drawRotatedText(DrawUtil::TextTexture& tex, QString text, QFont font, 
                                                 ColorType textColor, LocationType textLocation, 
                                                 double textDirection, bool drawFromTop)
 {
@@ -897,7 +901,7 @@ void DrawUtil::drawRotatedText(DrawUtil::TextTexture &tex, QString text, QFont f
 }
 
 void DrawUtil::getParallelLine(LocationType origLineStart, LocationType origLineEnd, float offset,
-                               float startRatio, float endRatio, LocationType &newLineStart, LocationType &newLineEnd)
+                               float startRatio, float endRatio, LocationType& newLineStart, LocationType& newLineEnd)
 {
    // Verify that arguments are valid
    if (((startRatio < 0.0) || (startRatio > 1.0)) || ((endRatio < 0.0) || (endRatio > 1.0)))
@@ -940,7 +944,6 @@ void DrawUtil::getPerpendicularLine(LocationType origLineStart, LocationType ori
    }
 
    // Variables
-   double perpLineLength = 0;    // The length of the perpendicular line
    double perpLineScreenX = 0;   // Screen coord x component of perp. line length
    double perpLineScreenY = 0;   // Screen coord y component of perp. line length
    double width = 0;             // Width of box bounding original line
@@ -1034,7 +1037,7 @@ DrawUtil::TextTexture::TextTexture(GLuint textureId, QFont font, unsigned int te
 {
 }
 
-DrawUtil::TextTexture::TextTexture(const TextTexture &original) : mImp(original.mImp)
+DrawUtil::TextTexture::TextTexture(const TextTexture& original) : mImp(original.mImp)
 {
    if (mImp != NULL)
    {
@@ -1042,7 +1045,7 @@ DrawUtil::TextTexture::TextTexture(const TextTexture &original) : mImp(original.
    }
 }
 
-const DrawUtil::TextTexture &DrawUtil::TextTexture::operator=(const TextTexture &rhs)
+const DrawUtil::TextTexture& DrawUtil::TextTexture::operator=(const TextTexture& rhs)
 {
    if (this == &rhs)
    {

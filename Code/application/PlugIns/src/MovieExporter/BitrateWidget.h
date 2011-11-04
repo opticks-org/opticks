@@ -30,6 +30,8 @@ protected slots:
    void bitrateChanged(int value);
 
 private:
+   BitrateWidget(const BitrateWidget& rhs);
+   BitrateWidget& operator=(const BitrateWidget& rhs);
    QSlider* mpBitrateSlider;
    QLabel* mpBitrateLabel;
 };

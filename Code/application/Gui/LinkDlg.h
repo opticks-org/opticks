@@ -39,6 +39,8 @@ protected slots:
    void accept();
 
 private:
+   LinkDlg(const LinkDlg& rhs);
+   LinkDlg& operator=(const LinkDlg& rhs);
    QLabel* mpDescriptionLabel;
    QStackedWidget* mpStack;
    LinkDatasetPage* mpSourcePage;

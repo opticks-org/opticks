@@ -43,6 +43,8 @@ public:
    ~Hdf4Pager();
 
 private:
+   Hdf4Pager& operator=(const Hdf4Pager& rhs);
+
    // file and data handles.
    int mFileHandle;
    int32 mDataHandle;

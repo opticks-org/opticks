@@ -76,6 +76,8 @@ protected:
       void run();
 
    private:
+      ConvolutionFilterThread& operator=(const ConvolutionFilterThread& rhs);
+
       template<typename T> void convolve(const T*);
       const ConvolutionFilterThreadInput& mInput;
       mta::AlgorithmThread::Range mRowRange;

@@ -89,6 +89,9 @@ public:
    }
 
 private:
+   OptionsJpegExporter(const OptionsJpegExporter& rhs);
+   OptionsJpegExporter& operator=(const OptionsJpegExporter& rhs);
+
    QSlider* mpQualitySlider;
    ResolutionWidget* mpResolutionWidget;
 };

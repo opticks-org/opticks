@@ -137,7 +137,6 @@ bool PicturesViewExporter::generateImage(QImage &image)
       QSize subImageSize(512, 512);
       QPoint origin(0, imageSize.height() - subImageSize.height());
       QPainter painter(&image);
-      int segment = 0;
       View::SubImageIterator* pSubImage = pView->getSubImageIterator(imageSize, subImageSize);
       int totalX;
       int totalTiles;

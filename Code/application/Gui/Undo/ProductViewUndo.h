@@ -24,6 +24,8 @@ public:
    void executeRedo();
 
 private:
+   SetPaperSize(const SetPaperSize& rhs);
+   SetPaperSize& operator=(const SetPaperSize& rhs);
    double mOldWidth;
    double mOldHeight;
    double mNewWidth;
@@ -40,6 +42,8 @@ public:
    void executeRedo();
 
 private:
+   SetPaperColor(const SetPaperColor& rhs);
+   SetPaperColor& operator=(const SetPaperColor& rhs);
    ColorType mOldColor;
    ColorType mNewColor;
 };

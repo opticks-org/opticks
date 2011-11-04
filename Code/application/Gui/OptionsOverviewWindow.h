@@ -80,6 +80,8 @@ public:
    }
 
 private:
+   OptionsOverviewWindow(const OptionsOverviewWindow& rhs);
+   OptionsOverviewWindow& operator=(const OptionsOverviewWindow& rhs);
    CustomColorButton* mpTrailColor;
    QSpinBox* mpTrailOpacity;
    QSpinBox* mpTrailThreshold;

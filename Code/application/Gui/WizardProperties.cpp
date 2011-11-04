@@ -126,7 +126,7 @@ const WizardObject* WizardProperties::getWizard() const
    return mpWizard.get();
 }
 
-void WizardProperties::wizardRenamed(Subject& subject, const std::string& signal, const boost::any& data)
+void WizardProperties::wizardRenamed(Subject& subject, const std::string& signal, const boost::any& value)
 {
    WizardObjectAdapter* pWizard = dynamic_cast<WizardObjectAdapter*>(&subject);
    VERIFYNRV(pWizard != NULL);
@@ -139,7 +139,7 @@ void WizardProperties::wizardRenamed(Subject& subject, const std::string& signal
    }
 }
 
-void WizardProperties::menuLocationChanged(Subject& subject, const std::string& signal, const boost::any& data)
+void WizardProperties::menuLocationChanged(Subject& subject, const std::string& signal, const boost::any& value)
 {
    WizardObjectAdapter* pWizard = dynamic_cast<WizardObjectAdapter*>(&subject);
    VERIFYNRV(pWizard != NULL);
@@ -152,7 +152,7 @@ void WizardProperties::menuLocationChanged(Subject& subject, const std::string& 
    }
 }
 
-void WizardProperties::executionModeChanged(Subject& subject, const std::string& signal, const boost::any& data)
+void WizardProperties::executionModeChanged(Subject& subject, const std::string& signal, const boost::any& value)
 {
    WizardObjectAdapter* pWizard = dynamic_cast<WizardObjectAdapter*>(&subject);
    VERIFYNRV(pWizard != NULL);

@@ -50,6 +50,8 @@ protected:
    void hideEvent(QHideEvent* pEvt);
 
 private:
+   FusionLayersSelectPage(const FusionLayersSelectPage& rhs);
+   FusionLayersSelectPage& operator=(const FusionLayersSelectPage& rhs);
    void addLayerToGui(Layer* pLayer);
 
    const static QString LAYER_NAME_COLUMN;

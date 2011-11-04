@@ -37,7 +37,6 @@ public:
    AoiLayerImp& operator= (const AoiLayerImp& aoiLayer);
 
    LayerType getLayerType() const;
-   using LayerImp::setName;
 
    std::vector<ColorType> getColors() const;
    QColor getColor() const;
@@ -86,6 +85,8 @@ protected:
    SymbolType mSymbol;
 
 private:
+   AoiLayerImp(const AoiLayerImp& rhs);
+
    bool mustDrawAsBitmask() const;
 
    double mLabelHandleSize;

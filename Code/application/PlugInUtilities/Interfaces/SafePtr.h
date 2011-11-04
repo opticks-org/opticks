@@ -158,7 +158,7 @@ protected:
 
 private:
    SafePtr(const SafePtr&);
-   SafePtr &operator=(const SafePtr&);
+   SafePtr& operator=(const SafePtr&);
 
    void attachToDeleted()
    {

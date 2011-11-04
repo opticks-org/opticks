@@ -25,6 +25,9 @@ public:
    bool isKindOf(const std::string& className) const;
 
    SPATIALDATAVIEWADAPTER_METHODS(SpatialDataViewImp)
+
+private:
+   SpatialDataViewAdapter(const SpatialDataViewAdapter& rhs);
 };
 
 #endif

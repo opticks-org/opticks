@@ -42,7 +42,6 @@ public:
    AnnotationLayerImp &operator = (const AnnotationLayerImp &annotationLayer);
 
    LayerType getLayerType() const;
-   using LayerImp::setName;
 
    QCursor getMouseCursor() const;
 
@@ -77,6 +76,8 @@ signals:
    void snapToGridChanged(bool snap);
 
 private:
+   AnnotationLayerImp(const AnnotationLayerImp& rhs);
+
    bool mSnapToGrid;
 };
 

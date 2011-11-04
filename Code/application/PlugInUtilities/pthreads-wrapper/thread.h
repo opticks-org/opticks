@@ -19,13 +19,13 @@
 class Thread
 {
    public:
-      virtual bool ThreadInit () = 0; 
+      virtual bool ThreadInit() = 0; 
       virtual bool ThreadLaunch() = 0;
       virtual bool ThreadWait() = 0;
-      virtual bool ThreadRegisterMutex (Mutex *mutexPointer) = 0;
-      virtual bool ThreadUnregisterMutex (Mutex *mutexPointer) = 0;
-      virtual bool ThreadSetRunFunction(void *threadRunFunction) = 0;
-      virtual bool ThreadSetThreadData(void *threadData) = 0;
+      virtual bool ThreadRegisterMutex(Mutex* mutexPointer) = 0;
+      virtual bool ThreadUnregisterMutex(Mutex* mutexPointer) = 0;
+      virtual bool ThreadSetRunFunction(void* threadRunFunction) = 0;
+      virtual bool ThreadSetThreadData(void* threadData) = 0;
       virtual bool ThreadDetach() = 0;
       virtual bool ThreadCancel() = 0;
 };

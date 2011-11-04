@@ -25,6 +25,10 @@ public:
    bool isKindOf(const std::string& className) const;
 
    ANNOTATIONELEMENTADAPTER_METHODS(AnnotationElementImp)
+
+private:
+   AnnotationElementAdapter(const AnnotationElementAdapter& rhs);
+   AnnotationElementAdapter& operator=(const AnnotationElementAdapter& rhs);
 };
 
 #endif

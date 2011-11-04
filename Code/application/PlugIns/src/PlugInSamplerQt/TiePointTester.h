@@ -39,6 +39,8 @@ public:
    bool needToRunAlgorithm();
 
 private:
+   TiePointTester(const TiePointTester& rhs);
+
    // obligations from base class
    bool canRunBatch() const;
    bool canRunInteractive() const;

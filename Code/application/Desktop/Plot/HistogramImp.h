@@ -62,6 +62,8 @@ protected:
    void clearBins();
 
 private:
+   HistogramImp(const HistogramImp& rhs);
+
    std::vector<RegionObjectAdapter*> mBins;
    QColor mColor;
 };

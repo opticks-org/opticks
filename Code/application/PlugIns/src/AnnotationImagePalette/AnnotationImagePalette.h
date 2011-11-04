@@ -22,6 +22,10 @@ public:
 protected:
    virtual QAction* createAction();
    virtual QWidget* createWidget();
+
+private:
+   AnnotationImagePalette(const AnnotationImagePalette& rhs);
+   AnnotationImagePalette& operator=(const AnnotationImagePalette& rhs);
 };
 
 #endif

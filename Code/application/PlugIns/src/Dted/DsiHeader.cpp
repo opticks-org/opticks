@@ -9,6 +9,7 @@
 
 #include "DsiHeader.h"
 
+#include <limits>
 #include <string>
 #include <string.h>
 
@@ -347,8 +348,12 @@ bool DsiHeader::readDataEdition(FILE* pInputFile, short& dataEd)
    {
       return false;
    }
-
-   dataEd = atoi(buf);
+   int bufferValue = atoi(buf);
+   if (bufferValue > std::numeric_limits<short>::max() || bufferValue < std::numeric_limits<short>::min())
+   {
+      return false;
+   }
+   dataEd = static_cast<short>(bufferValue);
    return true;
 }
 

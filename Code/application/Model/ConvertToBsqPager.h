@@ -34,6 +34,8 @@ public:
 private:
    ConvertToBsqPager();
 
+   ConvertToBsqPager& operator=(const ConvertToBsqPager& rhs);
+
    RasterElement* const mpRaster;
    unsigned int mBytesPerElement;
 };

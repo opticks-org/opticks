@@ -169,6 +169,11 @@ public:
       BThreadSignal& signalB);
 
    /**
+    * Destructor.
+    */
+   virtual ~MultiThreadReporter() {};
+
+   /**
     * Copy constructor.
     *
     * @param reporter
@@ -236,6 +241,8 @@ public:
    ThreadCommand* getThreadCommand();
 
 private:
+   MultiThreadReporter& operator=(const MultiThreadReporter& rhs);
+
    BMutex& mMutexA;
    BThreadSignal& mSignalA;
    BMutex& mMutexB;
@@ -253,7 +260,10 @@ private:
 
 // this pragma shushes a compiler warning regarding the initialization
 // of the mThreadHandle with 'this'
+#if defined(WIN_API)
+#pragma warning (push)
 #pragma warning (disable: 4355)
+#endif
 
 /**
  * Base class for an algorithm thread.
@@ -274,6 +284,11 @@ public:
       mReporter(reporter), 
       mThreadHandle(static_cast<void*>(this),  reinterpret_cast<void*>(AlgorithmThread::threadFunction)), 
       mThreadIndex(threadIndex) {}
+
+   /**
+    * Destructor.
+    */
+   virtual ~AlgorithmThread() {};
 
    /**
     * Copy constructor.
@@ -410,6 +425,10 @@ private:
    int mThreadIndex;
 };
 
+#if defined(WIN_API)
+#pragma warning (pop)
+#endif
+
 /** \page multithreadedhowto Writing a multi-threaded algorithm
  * Use this template to make a thread class.
  * @code
@@ -479,6 +498,11 @@ public:
    }
 
    /**
+    * Destructor.
+    */
+   virtual ~ProgressObjectReporter() {};
+
+   /**
     * @copydoc ProgressReporter::reportProgress()
     */
    void reportProgress(int percent);
@@ -516,6 +540,11 @@ public:
    {}
 
    /**
+    * Destructor.
+    */
+   virtual ~StatusBarReporter() {};
+
+   /**
     * @copydoc ProgressReporter::reportProgress()
     */
    void reportProgress(int percent)
@@ -535,6 +564,8 @@ public:
       msg->addProperty("Message", text);
    }
 private:
+   StatusBarReporter& operator=(const StatusBarReporter& rhs);
+
    std::string mMessage;
    const std::string& mComponent;
    const std::string& mKey;
@@ -557,6 +588,11 @@ public:
     */
    MultiPhaseProgressReporter(ProgressReporter& base, const std::vector<int>& phaseWeights) :
       mReporter(base), mPhaseWeights(phaseWeights), mCurrentPhase(0) {}
+
+   /**
+    * Destructor.
+    */
+   virtual ~MultiPhaseProgressReporter() {};
 
    /**
     * @copydoc ProgressReporter::reportProgress()
@@ -584,6 +620,8 @@ public:
    int getCurrentPhase() const;
 
 private:
+   MultiPhaseProgressReporter& operator=(const MultiPhaseProgressReporter& rhs);
+
    int convertPhaseProgressToTotalProgress(int phaseProgress);
 
    ProgressReporter& mReporter;
@@ -636,6 +674,8 @@ public:
    }
 
 private:
+   MultiThreadedAlgorithm& operator=(const MultiThreadedAlgorithm& rhs);
+
    Result createThreads(int threadCount);
    Result startAllThreads();
    Result waitForThreadsToComplete();

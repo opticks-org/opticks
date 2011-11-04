@@ -24,6 +24,9 @@ public:
    bool isKindOf(const std::string& className) const;
 
    CARTESIANGRIDLINESADAPTER_METHODS(CartesianGridlinesImp)
+
+private:
+   CartesianGridlinesAdapter(const CartesianGridlinesAdapter& rhs);
 };
 
 #endif

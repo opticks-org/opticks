@@ -193,7 +193,7 @@ bool GeoMosaicChip::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
       return false;
    }
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") The class BitMask does not support values smaller than 0, 0 for any masking")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") The class BitMask does not support values smaller than 0, 0 for any masking")
    //Get the bounding info and always assume that the region is rectangular
    GraphicGroup* pGroup = pAoi->getGroup();
    LocationType Ll = pGroup->getLlCorner();
@@ -328,11 +328,8 @@ bool GeoMosaicChip::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
    pRequest->setWritable(true);
    DataAccessor pSubAccessor = pSubCubeRaster->getDataAccessor(pRequest.release());
 
-   void* pDestData = NULL;
    void* pSourceData = NULL;
    void* pValue = NULL;
-   RasterElement* pElement = NULL;
-   RasterDataDescriptor* pDesc = NULL;
    int currentCount = 0;
    int currentPercent = 0;
    int savePercent = 0;

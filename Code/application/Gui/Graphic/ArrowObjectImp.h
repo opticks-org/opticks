@@ -24,6 +24,10 @@ public:
 
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
+
+private:
+   ArrowObjectImp(const ArrowObjectImp& rhs);
+   ArrowObjectImp& operator=(const ArrowObjectImp& rhs);
 };
 
 #define ARROWOBJECTADAPTEREXTENSION_CLASSES \

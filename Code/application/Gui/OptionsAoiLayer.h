@@ -81,6 +81,8 @@ public:
    }
 
 private:
+   OptionsAoiLayer(const OptionsAoiLayer& rhs);
+   OptionsAoiLayer& operator=(const OptionsAoiLayer& rhs);
    SymbolTypeButton* mpMarkerSymbol;
    CustomColorButton* mpMarkerColor;
    QCheckBox* mpAutoColor;

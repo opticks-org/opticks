@@ -81,6 +81,8 @@ public:
    }
 
 private:
+   OptionsSession(const OptionsSession& rhs);
+   OptionsSession& operator=(const OptionsSession& rhs);
    QComboBox* mpSaveCombo;
    QCheckBox* mpAutoSaveEnabledCheck;
    QSpinBox* mpAutoSaveIntervalSpin;

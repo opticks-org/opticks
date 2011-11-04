@@ -202,8 +202,6 @@ void PlugInManagerServicesImp::listPlugIns(bool showModules, bool showPlugIns, b
             string filename = pModule->getFileName();
             if (!fullDetail) 
             {
-               int position = filename.find_last_of("/")+1;
-               //if ((position!=0) || (position!=filename.length()) )
                filename.erase(0, filename.find_last_of("/") + 1);
             }
             const unsigned int total = pModule->getNumPlugIns();

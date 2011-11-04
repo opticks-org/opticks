@@ -54,6 +54,8 @@ public:
    bool deserialize(SessionItemDeserializer& deserializer);
 
 private:
+   AspamViewer(const AspamViewer& rhs);
+   AspamViewer& operator=(const AspamViewer& rhs);
    AspamViewerDialog* mpMainWindow;
    Service<ModelServices> mpModelServices;
    AttachmentPtr<AspamManager> mpMgrAttachment;

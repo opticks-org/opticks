@@ -40,7 +40,7 @@ TreState Nitf::TreParserShell::isTreValid(const DynamicObject& tre, ostream& rep
    return UNTESTED;
 }
 
-bool Nitf::TreParserShell::toDynamicObject(const ossimNitfRegisteredTag& input, DynamicObject& output, 
+bool Nitf::TreParserShell::ossimTagToDynamicObject(const ossimNitfRegisteredTag& input, DynamicObject& output, 
    string &errorMessage) const
 {
    return false;
@@ -58,7 +58,7 @@ bool Nitf::TreParserShell::fromDynamicObject(const DynamicObject& input, ostream
    return false;
 }
 
-bool Nitf::TreParserShell::fromDynamicObject(const DynamicObject& input, ossimNitfRegisteredTag& tre, 
+bool Nitf::TreParserShell::ossimTagFromDynamicObject(const DynamicObject& input, ossimNitfRegisteredTag& tre, 
    string &errorMessage) const
 {
    return false;

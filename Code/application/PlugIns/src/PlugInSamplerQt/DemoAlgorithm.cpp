@@ -140,7 +140,7 @@ ColorMap DemoAlgorithm::createColormapFromNodes() const
    std::vector<ColorType> colors;
 
    unsigned int j = 0;
-   for (int i = 0; i < mInputs.mNumberOfCells; ++i)
+   for (unsigned int i = 0; i < mInputs.mNumberOfCells; ++i)
    {
       double cellPosition = static_cast<double>(i) / static_cast<double>(mInputs.mNumberOfCells-1);
 

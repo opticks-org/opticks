@@ -192,7 +192,7 @@ void BatchFileset::updateFileset(ObjectFactory* pObjFact)
       {
          if (pFileFinder->findFile(mDirectory, iter->second) == true)
          {
-            while (pFileFinder->findNextFile() != NULL)
+            while (pFileFinder->findNextFile())
             {
                string filePath = "";
                pFileFinder->getFullPath(filePath);

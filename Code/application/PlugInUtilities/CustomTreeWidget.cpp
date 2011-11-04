@@ -128,7 +128,7 @@ void CustomTreeWidget::mousePressEvent(QMouseEvent* e)
                   }
                }
 
-               QMap<CellLocation, QColor>::Iterator iterColor = mColors.find(cell);
+               QMap<CellLocation, ColorType>::Iterator iterColor = mColors.find(cell);
                if (iterColor != mColors.end())
                {
                   QColor clrCurrent = getCellColor(pItem, iColumn);
@@ -465,6 +465,10 @@ void CustomTreeWidget::activateCellWidget(QTreeWidgetItem* pItem, int iColumn)
 
          break;
       }
+      case NO_WIDGET:
+         break;
+      default:
+         break;
    }
 }
 
@@ -640,9 +644,10 @@ bool CustomTreeWidget::setCellColor(QTreeWidgetItem* pItem, int iColumn, QColor 
 
       pItem->setIcon(iColumn, QIcon(pix));
 
-      if (mColors[cell] != clrCell)
+      ColorType clrCellColorType = QCOLOR_TO_COLORTYPE(clrCell);
+      if (mColors[cell] != clrCellColorType)
       {
-         mColors[cell] = clrCell;
+         mColors[cell] = clrCellColorType;
          emit cellColorChanged(pItem, iColumn);
       }
 
@@ -665,10 +670,10 @@ QColor CustomTreeWidget::getCellColor(QTreeWidgetItem* pItem, int iColumn) const
    cell.pItem = pItem;
    cell.iColumn = iColumn;
 
-   QMap<CellLocation, QColor>::const_iterator iter = mColors.find(cell);
+   QMap<CellLocation, ColorType>::const_iterator iter = mColors.find(cell);
    if (iter != mColors.end())
    {
-      clrCell = iter.value();
+      clrCell = COLORTYPE_TO_QCOLOR(iter.value());
    }
 
    return clrCell;

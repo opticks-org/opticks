@@ -304,7 +304,7 @@ bool Jpeg2000Importer::populateDataDescriptor(RasterDataDescriptor* pDescriptor)
       pDescriptor->setDisplayMode(RGB_MODE);
    }
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This code will need to set bits per pixel from the library if Openjpeg is upgraded (mconsidi)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This code will need to set bits per pixel from the library if Openjpeg is upgraded (mconsidi)")
 
    // Bits per pixel doesn't work in OpenJpeg V 1.3
    // If we upgrade to OpenJpg V 2.0 we need check the library

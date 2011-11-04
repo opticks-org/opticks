@@ -1388,9 +1388,9 @@ void AnimationControllerImp::restoreBumpers()
    Service<ConfigurationSettings> pSettings;
    string bumperPath("AnimationController/Bumpers");
    bool validRestore(true);
-   bool bumpersEnabled;
-   double startBumper;
-   double stopBumper;
+   bool bumpersEnabled(false);
+   double startBumper = 0.0;
+   double stopBumper = 0.0;
    const bool* pBoolValue = dv_cast<bool>(&pSettings->getSetting(bumperPath + "/BumpersActive"));
    if (pBoolValue != NULL)
    {

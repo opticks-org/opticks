@@ -81,6 +81,8 @@ public:
    }
 
 private:
+   OptionsTiePointLayer(const OptionsTiePointLayer& rhs);
+   OptionsTiePointLayer& operator=(const OptionsTiePointLayer& rhs);
    QSpinBox* mpSymbolSize;
    QCheckBox* mpLabelsEnabled;
    CustomColorButton* mpColor;

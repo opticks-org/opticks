@@ -135,6 +135,10 @@ protected:
    virtual QWidget* getWidget() const = 0;
 
    AttachmentPtr<ApplicationServices> mpAppSvcsAttachment;
+
+private:
+   ViewerShell(const ViewerShell& rhs);
+   ViewerShell& operator=(const ViewerShell& rhs);
 };
 
 #endif

@@ -433,7 +433,7 @@ ImportDescriptor* PreviewWidget::getCurrentDataset() const
    return mpCurrentDataset;
 }
 
-void PreviewWidget::progressUpdated(Subject &subject, const string &signal, const boost::any &data)
+void PreviewWidget::progressUpdated(Subject& subject, const string& signal, const boost::any& value)
 {
    Progress* pProgress = dynamic_cast<Progress*>(&subject);
    if (NN(pProgress))

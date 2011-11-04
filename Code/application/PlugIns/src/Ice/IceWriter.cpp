@@ -125,7 +125,6 @@ void IceWriter::writeCube(const string& hdfPath,
    const vector<DimensionDescriptor>& bands = pOutputFileDescriptor->getBands();
    const vector<DimensionDescriptor>& rows = pOutputFileDescriptor->getRows();
    const vector<DimensionDescriptor>& cols = pOutputFileDescriptor->getColumns();
-   unsigned int bpe = pDataDesc->getBytesPerElement();
 
    Hdf5DataSetResource dataId;
    if (interleave == BIL)
@@ -253,8 +252,8 @@ void IceWriter::writeCube(const string& hdfPath,
    {
       if (!rows.empty() && !cols.empty())
       {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This functionality should be moved into a method " \
-   "in a new RasterElementExporterShell class (dsulgrov)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This functionality should be moved into a method " \
+//   "in a new RasterElementExporterShell class (dsulgrov)")
          list<GcpPoint> gcps;
          unsigned int startRow = rows.front().getActiveNumber();
          unsigned int endRow = rows.back().getActiveNumber();
@@ -594,15 +593,11 @@ void IceWriter::writeBilCubeData(const std::string& hdfPath,
    const vector<DimensionDescriptor>& cols = pOutputFileDescriptor->getColumns();
 
    const vector<DimensionDescriptor>& cubeBands = pDescriptor->getBands();
-   const vector<DimensionDescriptor>& cubeRows = pDescriptor->getRows();
    const vector<DimensionDescriptor>& cubeCols = pDescriptor->getColumns();
 
    unsigned int bpe = pDescriptor->getBytesPerElement();
 
    ICEVERIFY_MSG(!rows.empty() && !cols.empty() && !bands.empty(), "No data selected for export.")
-
-   unsigned int startRow = rows.front().getActiveNumber();
-   unsigned int endRow = rows.back().getActiveNumber();
 
    // set up the dataspace for the amount of data to read in
    hsize_t offset[3] = {0}; // the start offset to read in the file
@@ -776,15 +771,11 @@ void IceWriter::writeBipCubeData(const string& hdfPath,
    const vector<DimensionDescriptor>& cols = pOutputFileDescriptor->getColumns();
 
    const vector<DimensionDescriptor>& cubeBands = pDescriptor->getBands();
-   const vector<DimensionDescriptor>& cubeRows = pDescriptor->getRows();
    const vector<DimensionDescriptor>& cubeCols = pDescriptor->getColumns();
 
    unsigned int bpe = pDescriptor->getBytesPerElement();
 
    ICEVERIFY_MSG(!rows.empty() && !cols.empty() && !bands.empty(), "No data selected for export.")
-
-   unsigned int startRow = rows.front().getActiveNumber();
-   unsigned int endRow = rows.back().getActiveNumber();
 
    // set up the dataspace for the amount of data to read in
    hsize_t offset[3] = {0}; // the start offset to read in the file
@@ -961,10 +952,6 @@ void IceWriter::writeBsqCubeData(const string& hdfPath,
    const vector<DimensionDescriptor>& rows = pOutputFileDescriptor->getRows();
    const vector<DimensionDescriptor>& cols = pOutputFileDescriptor->getColumns();
 
-   const vector<DimensionDescriptor>& cubeBands = pDescriptor->getBands();
-   const vector<DimensionDescriptor>& cubeRows = pDescriptor->getRows();
-   const vector<DimensionDescriptor>& cubeCols = pDescriptor->getColumns();
-
    unsigned int bpe = pDescriptor->getBytesPerElement();
 
    ICEVERIFY_MSG(!rows.empty() && !cols.empty() && !bands.empty(), "No data selected for export.")
@@ -1004,8 +991,6 @@ void IceWriter::writeBsqCubeData(const string& hdfPath,
    ICEVERIFY(*dSpaceId >= 0);
    Hdf5TypeResource hdfEncoding(H5Dget_type(*dataId));
    ICEVERIFY(*hdfEncoding >= 0);
-
-   bool bEntireRow = (cubeCols.size() == cols.size());
 
    vector<char> pWriteBufferRes(rowsInChunk*rowSize, 0);
    char* pWriteBuffer = &pWriteBufferRes.front();

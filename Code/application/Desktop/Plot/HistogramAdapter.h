@@ -24,6 +24,9 @@ public:
    bool isKindOf(const std::string& className) const;
 
    HISTOGRAMADAPTER_METHODS(HistogramImp)
+
+private:
+   HistogramAdapter(const HistogramAdapter& rhs);
 };
 
 #endif

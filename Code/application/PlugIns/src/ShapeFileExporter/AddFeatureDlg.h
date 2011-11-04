@@ -33,6 +33,8 @@ protected:
    void accept();
 
 private:
+   AddFeatureDlg(const AddFeatureDlg& rhs);
+   AddFeatureDlg& operator=(const AddFeatureDlg& rhs);
    QTreeWidget* mpElementTree;
    QMap<QTreeWidgetItem*, AoiElement*> mElements;
 };

@@ -87,8 +87,8 @@ bool QtCluster::getInputSpecification(PlugInArgList*& pInArgList)
       VERIFY(pInArgList->addArg<AoiLayer>(Executable::LayerArg(), "AOI layer to perform clustering over."));
       VERIFY(pInArgList->addArg<SpatialDataView>(Executable::ViewArg(), "View containing the AOI to perform clustering over."));
    }
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Might be useful to allow real-world cluster " \
-                                                            "sizes. (feet, meters, DMS, etc.) (tclarke)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Might be useful to allow real-world cluster " \
+//                                                            "sizes. (feet, meters, DMS, etc.) (tclarke)")
    VERIFY(pInArgList->addArg<double>("Cluster Size", 15.0, "Maximum cluster size in pixels. Default is 15."));
    std::string typeDesc = "Type of display created. Valid values are: ";
    std::vector<std::string> vals = StringUtilities::getAllEnumValuesAsDisplayString<DisplayType>();

@@ -105,7 +105,7 @@ FrameBuffer::~FrameBuffer()
 
    // if the currently bound FBO equals this class's FBO,
    // bind to the previous FBO and draw to the previous buffer
-   if (mFrameBufferObject != 0 && mFrameBufferObject == currentFrameBufferObject)
+   if (mFrameBufferObject != 0 && mFrameBufferObject == static_cast<GLuint>(currentFrameBufferObject))
    {
       // bind FBO
       glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, mPreviousFrameBufferObject);
@@ -188,7 +188,7 @@ void FrameBuffer::drawToBuffer(ColorBuffer *pColorBuffer)
 
    if (pColorBuffer == NULL)
    {
-      if (currentFrameBufferObject != mPreviousFrameBufferObject)
+      if (static_cast<GLuint>(currentFrameBufferObject) != mPreviousFrameBufferObject)
       {
          // bind to the previous FBO
          glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, mPreviousFrameBufferObject);
@@ -208,7 +208,7 @@ void FrameBuffer::drawToBuffer(ColorBuffer *pColorBuffer)
          return;
       }
 
-      if (mFrameBufferObject != currentFrameBufferObject)
+      if (mFrameBufferObject != static_cast<GLuint>(currentFrameBufferObject))
       {
          // store the current FrameBuffer object
          mPreviousFrameBufferObject = currentFrameBufferObject;
@@ -245,7 +245,7 @@ void FrameBuffer::readFromBuffer(ColorBuffer *pColorBuffer)
 
    if (pColorBuffer == NULL)
    {
-      if (currentFrameBufferObject != mPreviousFrameBufferObject)
+      if (static_cast<GLuint>(currentFrameBufferObject) != mPreviousFrameBufferObject)
       {
          // bind to the graphics card's framebuffer
          glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, mPreviousFrameBufferObject);
@@ -265,10 +265,10 @@ void FrameBuffer::readFromBuffer(ColorBuffer *pColorBuffer)
          return;
       }
 
-      if (mFrameBufferObject != currentFrameBufferObject)
+      if (mFrameBufferObject != static_cast<GLuint>(currentFrameBufferObject))
       {
          // store the current FrameBuffer object
-         mPreviousFrameBufferObject = currentFrameBufferObject;
+         mPreviousFrameBufferObject = static_cast<GLuint>(currentFrameBufferObject);
 
          // get the current draw buffer
          glGetIntegerv(GL_READ_BUFFER, &mPreviousColorBufferId);
@@ -308,7 +308,6 @@ bool FrameBuffer::attachBuffer(ColorBuffer *pColorBuffer)
    }
 
    bool bValue = false;
-   GLint maxColorBuffers = 0;
    GLenum status = GL_FRAMEBUFFER_UNSUPPORTED_EXT;
    GLint currentFrameBufferObject = 0;
 
@@ -322,7 +321,7 @@ bool FrameBuffer::attachBuffer(ColorBuffer *pColorBuffer)
       }
 
       glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &currentFrameBufferObject);
-      if (currentFrameBufferObject != mFrameBufferObject)
+      if (static_cast<GLuint>(currentFrameBufferObject) != mFrameBufferObject)
       {
          // bind to the class's FBO
          glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, mFrameBufferObject);
@@ -335,7 +334,7 @@ bool FrameBuffer::attachBuffer(ColorBuffer *pColorBuffer)
       // check to make sure the texture successfully attached to the framebuffer object
       status = static_cast<GLenum>(glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT));
 
-      if (currentFrameBufferObject != mFrameBufferObject)
+      if (static_cast<GLuint>(currentFrameBufferObject) != mFrameBufferObject)
       {
          // bind back to the previous framebuffer
          glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, currentFrameBufferObject);
@@ -376,7 +375,7 @@ void FrameBuffer::detachBuffer(ColorBuffer *pColorBuffer)
 
    // get the currently bound FrameBuffer object
    glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &currentFrameBufferObject);
-   if (currentFrameBufferObject != mFrameBufferObject)
+   if (static_cast<GLuint>(currentFrameBufferObject) != mFrameBufferObject)
    {
       glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, mFrameBufferObject);  // bind framebuffer object
    }
@@ -389,7 +388,7 @@ void FrameBuffer::detachBuffer(ColorBuffer *pColorBuffer)
       // detach texture from FrameBuffer's color buffer attachment
       glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, colorBufferId, textureTarget, 0, 0);
 
-      if (currentFrameBufferObject != mFrameBufferObject)
+      if (static_cast<GLuint>(currentFrameBufferObject) != mFrameBufferObject)
       {
          // bind back to previous framebuffer object
          glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, currentFrameBufferObject);

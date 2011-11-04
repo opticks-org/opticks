@@ -24,6 +24,9 @@ public:
    bool isKindOf(const std::string& className) const;
 
    POINTSETADAPTER_METHODS(PointSetImp)
+
+private:
+   PointSetAdapter(const PointSetAdapter& rhs);
 };
 
 #endif

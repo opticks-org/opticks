@@ -49,6 +49,8 @@ protected:
    void clear();
 
 private:
+   TiePointTableModel(const TiePointTableModel& rhs);
+   TiePointTableModel& operator=(const TiePointTableModel& rhs);
    TiePointList* mpTiePointList;    // This is not an AttachmentPtr because the signal needs to be detached
                                     // and then reattached when updating the tie points in the model element
    int mRows;

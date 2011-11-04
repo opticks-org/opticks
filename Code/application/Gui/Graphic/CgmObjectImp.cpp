@@ -1154,7 +1154,7 @@ int CgmObjectImp::fromCgm(short* pData)
 
             case TEXT_FONT_INDEX:
             {
-               char *pCgmFonts[] = 
+               const char* pCgmFonts[] = 
                {
                   "TIMES_ROMAN",
                   "TIMES_ITALIC",
@@ -1186,7 +1186,7 @@ int CgmObjectImp::fromCgm(short* pData)
                   "HERSHEY/GOTHIC_ITALIAN"*/
                };
 #if defined(WIN_API)
-               char *pReplacementFonts[] = 
+               const char* pReplacementFonts[] = 
                {
                   "Times New Roman",
                   "Times New Roman",
@@ -1199,10 +1199,10 @@ int CgmObjectImp::fromCgm(short* pData)
                   "Courier New",
                   "Courier New",
                   "Courier New",
-                  "Courier New",
+                  "Courier New"
                };
 #else
-               char *pReplacementFonts[] = 
+               const char* pReplacementFonts[] = 
                {
                   "Times Roman",
                   "Times Roman",
@@ -1215,7 +1215,7 @@ int CgmObjectImp::fromCgm(short* pData)
                   "Courier",
                   "Courier",
                   "Courier",
-                  "Courier",
+                  "Courier"
                };
 #endif
                bool isFontBold[] = { false, false, true, true, false, false, true, true, false, true, false, true };

@@ -44,6 +44,10 @@ public:
    }
 
    POLYGONOBJECTADAPTER_METHODS(PolygonObjectImp)
+
+private:
+   PolygonObjectAdapter(const PolygonObjectAdapter& rhs);
+   PolygonObjectAdapter& operator=(const PolygonObjectAdapter& rhs);
 };
 
 #endif

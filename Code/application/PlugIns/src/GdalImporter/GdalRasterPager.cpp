@@ -74,6 +74,10 @@ namespace
          return 8;
       case GDT_CFloat64:
          return 16;
+      case GDT_TypeCount: // pass through
+      case GDT_Unknown:   // pass through
+      default:
+         break;
       }
       return 0;
    }
@@ -144,7 +148,7 @@ CachedPage::UnitPtr GdalRasterPager::fetchUnit(DataRequest* pOriginalRequest)
 
    // calculate to columns we a loading
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : fix this when cached pager properly handles column subsets (tclarke)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : fix this when cached pager properly handles column subsets (tclarke)")
    /** this should work but CachedPager assumes fetchUnit() returns full rows **/
    /*std::vector<DimensionDescriptor> cols = RasterUtilities::subsetDimensionVector(pDesc->getColumns(), pOriginalRequest->getStartColumn(),
       pOriginalRequest->getStopColumn());
@@ -170,7 +174,6 @@ CachedPage::UnitPtr GdalRasterPager::fetchUnit(DataRequest* pOriginalRequest)
    {
       return CachedPage::UnitPtr();
    }
-   GDALDataType rawType = pBand->GetRasterDataType();
    GDALDataType effectiveType = encodingTypeToGdalDataType(pDesc->getDataType());
 
    if (pDesc->getRowSkipFactor() == 0 && pDesc->getColumnSkipFactor() == 0)

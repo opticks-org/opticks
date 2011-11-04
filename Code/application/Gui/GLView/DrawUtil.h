@@ -113,9 +113,9 @@ public:
    TextTexture(GLuint textureId, QFont font, unsigned int textureWidth,
       unsigned int textureHeight, unsigned int textWidth, unsigned int textHeight);
    
-   TextTexture(const TextTexture &original);
+   TextTexture(const TextTexture& original);
 
-   const TextTexture &operator=(const TextTexture &rhs);
+   const TextTexture& operator=(const TextTexture& rhs);
 
    ~TextTexture();   
 
@@ -138,7 +138,7 @@ private:
    private:
       TextTextureImp();
       TextTextureImp(const TextTextureImp& rhs);
-      const TextTextureImp &operator=(const TextTextureImp &rhs);
+      const TextTextureImp& operator=(const TextTextureImp& rhs);
    };
 
    TextTextureImp* mImp;
@@ -207,8 +207,8 @@ bool unProjectToZero(double xPixel, double yPixel, const double modelMatrix[16],
                      const double projectionMatrix[16], const int viewport[4],
                      double *xCoord, double *yCoord);
 
-void restrictToViewport(int &ulStartColumn, int &ulStartRow,
-                        int &ulEndColumn, int &ulEndRow);
+void restrictToViewport(int& ulStartColumn, int& ulStartRow,
+                        int& ulEndColumn, int& ulEndRow);
 
 double getPixelSize(GLfloat ulStartColumn, GLfloat ulStartRow,
                     GLfloat ulEndColumn, GLfloat ulEndRow);
@@ -245,7 +245,7 @@ inline const itemType& MIN(const itemType& left, const itemType& right)
  * @param vertex
  *        New vertex to modify bounding box to include.
  */
-void updateBoundingBox(LocationType &llCorner, LocationType &urCorner,
+void updateBoundingBox(LocationType& llCorner, LocationType& urCorner,
                        LocationType vertex);
                        
 
@@ -277,7 +277,7 @@ void updateBoundingBox(LocationType &llCorner, LocationType &urCorner,
 *      A TextTexture object that contains information about the text texture.
 *      This object can be used to redraw the text without re-rendering it.
 */
-void drawRotatedText(DrawUtil::TextTexture &tex, QString text, QFont font, 
+void drawRotatedText(DrawUtil::TextTexture& tex, QString text, QFont font, 
                                                 ColorType textColor, LocationType textLocation, 
                                                 double textDirection, bool drawFromTop);
 
@@ -312,7 +312,7 @@ void drawRotatedText(DrawUtil::TextTexture &tex, QString text, QFont font,
 *      The returned end point of the new parallel line
 */
 void getParallelLine(LocationType origLineStart, LocationType origLineEnd, float offset,
-                     float startRatio, float endRatio, LocationType &newLineStart, LocationType &newLineEnd);
+                     float startRatio, float endRatio, LocationType& newLineStart, LocationType& newLineEnd);
                      
 
 /**
@@ -336,7 +336,7 @@ void getParallelLine(LocationType origLineStart, LocationType origLineEnd, float
 *      The returned end point of the new perpendicular line
 */
 void getPerpendicularLine(LocationType origLineStart, LocationType origLineEnd,
-                          float length, LocationType &newLineStart, LocationType &newLineEnd);
+                          float length, LocationType& newLineStart, LocationType& newLineEnd);
 
 
 class BitMaskPixelDrawer
@@ -374,7 +374,7 @@ private:
 };
 
 template<typename T>
-void drawPixelLine(LocationType p0, LocationType p1, T &drawer)
+void drawPixelLine(LocationType p0, LocationType p1, T& drawer)
 {
    int x0 = floor(p0.mX);
    int y0 = floor(p0.mY);
@@ -475,8 +475,8 @@ void drawPixelLine(LocationType p0, LocationType p1, T &drawer)
 }
 
 template<typename T>
-void drawPixelPolygon(const std::vector<LocationType> &vertices, const std::vector<unsigned int> &paths, 
-                      int iStartColumn, int iStartRow, int iEndColumn, int iEndRow, T &drawer)
+void drawPixelPolygon(const std::vector<LocationType>& vertices, const std::vector<unsigned int>& paths, 
+                      int iStartColumn, int iStartRow, int iEndColumn, int iEndRow, T& drawer)
 {
    unsigned int numVertices = vertices.size();
    std::vector<double> xVertices(numVertices);
@@ -511,12 +511,10 @@ void drawPixelPolygon(const std::vector<LocationType> &vertices, const std::vect
       return;
    }
 
-   int iRowIndex = 0;
    std::vector<unsigned char> insides(iEndColumn - iStartColumn + 1);
    unsigned char *pInsides = &insides.front();
    for (int i = iStartRow, iRowIndex = 0; i <= iEndRow; ++i, ++iRowIndex)
    {
-      bool isInside = false;
       double dRow = i;
       fill(insides.begin(), insides.end(), '\0');
 

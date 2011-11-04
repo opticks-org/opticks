@@ -38,6 +38,8 @@ public:
    static bool isProduction();
 
 private:
+   PropertiesProductView(const PropertiesProductView& rhs);
+   PropertiesProductView& operator=(const PropertiesProductView& rhs);
    ProductView* mpView;
 
    // Paper

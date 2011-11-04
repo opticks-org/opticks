@@ -57,6 +57,8 @@ protected slots:
    void editPlotProperties();
 
 private:
+   DockWindowWidget(const DockWindowWidget& rhs);
+   DockWindowWidget& operator=(const DockWindowWidget& rhs);
    Service<DesktopServices> mpDesktop;
 
    QListWidget* mpWindowList;

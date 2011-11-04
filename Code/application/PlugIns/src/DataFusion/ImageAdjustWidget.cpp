@@ -340,7 +340,6 @@ void ImageAdjustWidget::changeFlickerAlpha(int position)
 double ImageAdjustWidget::computeFlickerRate(int position) const
 {
    double maxFrameRate = mpFlickerMax->text().toInt(); // maximum frame rate
-   double maxSlider = mpFlickerSlider->maximum(); // number of positions on slider
    double fps = 0;
    if (position > 0)
    {

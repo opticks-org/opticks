@@ -25,6 +25,8 @@ public:
    void executeRedo();
 
 private:
+   SetTiePoints(const SetTiePoints& rhs);
+   SetTiePoints& operator=(const SetTiePoints& rhs);
    std::vector<TiePoint> mOldVertices;
    std::vector<TiePoint> mNewVertices;
 };

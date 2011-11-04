@@ -73,6 +73,8 @@ public:
    std::string serializeToString(const std::string &uri);
 
 private:
+   RdfSerializer& operator=(const RdfSerializer& rhs);
+
    bool serializeAll(raptor_serializer* pSerializer);
 
    const Rdf &mRdf;

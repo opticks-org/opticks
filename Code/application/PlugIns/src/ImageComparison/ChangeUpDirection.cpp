@@ -50,7 +50,8 @@ ChangeUpDirection::~ChangeUpDirection()
 
 bool ChangeUpDirection::getInputSpecification(PlugInArgList*& pInArgList)
 {
-   VERIFY(pInArgList = Service<PlugInManagerServices>()->getPlugInArgList());
+   pInArgList = Service<PlugInManagerServices>()->getPlugInArgList();
+   VERIFY(pInArgList != NULL);
    VERIFY(pInArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription()));
    VERIFY(pInArgList->addArg<RasterElement>(Executable::DataElementArg(), "Element to perform rotation on."));
    bool res = !isBatch();
@@ -68,7 +69,8 @@ bool ChangeUpDirection::getInputSpecification(PlugInArgList*& pInArgList)
 
 bool ChangeUpDirection::getOutputSpecification(PlugInArgList*& pOutArgList)
 {
-   VERIFY(pOutArgList = Service<PlugInManagerServices>()->getPlugInArgList());
+   pOutArgList = Service<PlugInManagerServices>()->getPlugInArgList();
+   VERIFY(pOutArgList != NULL);
    VERIFY(pOutArgList->addArg<RasterElement>("Rotated Element", "The new raster element with the rotated data."));
    if (!isBatch())
    {
@@ -212,8 +214,8 @@ bool ChangeUpDirection::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
       }
       if (pLayer == NULL)
       {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This would be cleaner with a WindowResource. If one " \
-                                              "becomes available, use it instead. (tclarke)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This would be cleaner with a WindowResource. If one " \
+//                                              "becomes available, use it instead. (tclarke)")
          Service<DesktopServices>()->deleteWindow(pWindow);
          progress.report("Unable to create layer.", 0, ERRORS, true);
          return false;

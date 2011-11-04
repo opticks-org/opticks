@@ -45,6 +45,8 @@ protected slots:
    void tileChanged(bool enable);
 
 private:
+   WindowSelectionDlg(const WindowSelectionDlg& rhs);
+   WindowSelectionDlg& operator=(const WindowSelectionDlg& rhs);
    QListWidget* mpTileList;
    QListWidget* mpSelectedList;
    QRadioButton* mpTileRadio;

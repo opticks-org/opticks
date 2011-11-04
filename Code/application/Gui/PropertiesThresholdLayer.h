@@ -51,6 +51,8 @@ protected slots:
    void setRegionUnits(RegionUnits newUnits);
 
 private:
+   PropertiesThresholdLayer(const PropertiesThresholdLayer& rhs);
+   PropertiesThresholdLayer& operator=(const PropertiesThresholdLayer& rhs);
    ThresholdLayer* mpThresholdLayer;
    RegionUnits mUnits;
 

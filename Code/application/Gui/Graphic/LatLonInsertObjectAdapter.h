@@ -46,6 +46,10 @@ public:
    }
 
    LATLONINSERTOBJECTADAPTER_METHODS(LatLonInsertObjectImp)
+
+private:
+   LatLonInsertObjectAdapter(const LatLonInsertObjectAdapter& rhs);
+   LatLonInsertObjectAdapter& operator=(const LatLonInsertObjectAdapter& rhs);
 };
 
 #endif

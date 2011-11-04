@@ -43,14 +43,15 @@ public:
    PlotWindowImp(const std::string& id, const std::string& windowName, QWidget* parent = 0);
    ~PlotWindowImp();
 
-   using SessionItemImp::setIcon;
+   using DockWindowImp::setIcon;
+   using DockWindowImp::setName;
+
    std::list<ContextMenuAction> getContextMenuActions() const;
 
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
 
    WindowType getWindowType() const;
-   using WindowImp::setName;
 
    virtual PlotSet* createPlotSet(const QString& strPlotSet);
    PlotSet* getPlotSet(const QString& strPlotSet) const;
@@ -104,6 +105,9 @@ protected slots:
    void setCurrentPlotSet(QAction* pAction);
 
 private:
+   PlotWindowImp(const PlotWindowImp& rhs);
+   PlotWindowImp& operator=(const PlotWindowImp& rhs);
+
    InfoBar* mpInfoBar;
    QStackedWidget* mpStack;
    std::vector<PlotSet*> mPlotSets;
@@ -114,6 +118,7 @@ private:
 
 #define PLOTWINDOWADAPTER_METHODS(impClass) \
    DOCKWINDOWADAPTER_METHODS(impClass) \
+   using impClass::createPlotSet; \
    PlotSet* createPlotSet(const std::string& plotSet) \
    { \
       return impClass::createPlotSet(QString::fromStdString(plotSet)); \

@@ -347,20 +347,17 @@ public: // methods
 
    /**
     *  If the message is a top level message, it is written to the log. If it is a
-    *  sub-message, it is closed to further modificaiton. No properties can 
+    *  sub-message, it is closed to further modification. No properties can 
     *  be added to the message or any submessages after finalization. The
     *  message pointer is no longer a valid pointer and must not be 
     *  de-referenced. Upon finalization of a message, the log will notify all
     *  of its observers, passing the message to them.
     *
-    *  @param   result
-    *           An indication of the cause of the completion of the step.
-    *
     *  @return  true if successfully closed or written; false otherwise.
     *
-    *  @notify  This method will notify signalMessageModified with any<Message*>.
+    *  @notify  This method will notify signalHidden() with any<Message*>.
     */
-   virtual bool finalize(Result result = Success) = 0;
+   virtual bool finalize() = 0;
 
    /**
     *  Returns the name of the component that created this Message.
@@ -394,18 +391,6 @@ public: // methods
     *  @return  The action string that the message was created with.
     */
    virtual std::string getAction() const = 0;
-
-   /**
-    *  If the message was created with the createStep call, this returns the
-    *  value passed to the finalize call, else it returns Success. If the
-    *  message hasn't been finalized, this returns Unresolved.
-    *
-    *  @return  A value indicating whether the action documented in the message
-    *           was successful or not.
-    *
-    *  @see     Message::Result
-    */
-   virtual Result getResult() const = 0;
 
    /**
     *  Convert a property of an arbitrary (but valid) type to a string.
@@ -577,7 +562,15 @@ public: // methods
     *
     *  @return  true if successfully closed or written; false otherwise.
     */
-   virtual bool finalize(Result result = Success, const std::string& failureReason = "") = 0;
+   virtual bool finalize(Result result, const std::string& failureReason = "") = 0;
+
+   /**
+    * This method finalizes the current Step with the result being \link Message::Success\endlink
+    * and an empty failure reason string.
+    *
+    * @return \c true if the step is successfully closed or written; otherwise returns \c false.
+    */
+   virtual bool finalize() = 0;
 
    /**
     *  This method returns the failure message passed to the finalize

@@ -45,6 +45,8 @@ signals:
    void displayStateChanged(bool bDisplay);
 
 private:
+   PseudocolorClass& operator=(const PseudocolorClass& rhs);
+
    PseudocolorLayer* mpLayer;
    int miValue;
    QString mstrName;

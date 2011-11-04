@@ -53,6 +53,8 @@ protected:
    double normalizeAngle(double dAngle) const;
 
 private:
+   ArcObjectImp(const ArcObjectImp& rhs);
+   ArcObjectImp& operator=(const ArcObjectImp& rhs);
    GraphicResource<GraphicObjectImp> mpEllipse;
 
    bool mbNeedsLayout;

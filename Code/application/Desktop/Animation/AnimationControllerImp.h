@@ -128,6 +128,9 @@ protected slots:
    void destroyAnimation();
 
 private:
+   AnimationControllerImp(const AnimationControllerImp& rhs);
+   AnimationControllerImp& operator=(const AnimationControllerImp& rhs);
+
    void removeFromRunningControllers();
 
    Service<DesktopServices> mpDesktop;

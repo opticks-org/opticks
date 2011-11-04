@@ -86,8 +86,6 @@ void Tile::draw(GLfloat textureMode)
    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, textureMode);
    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-   float fsizeX = static_cast<GLfloat>(mTexSizeX);
-   float fsizeY = static_cast<GLfloat>(mTexSizeY);
    float ratioX = static_cast<GLfloat>(mGeomSizeX) / static_cast<GLfloat>(mTexSizeX);
    float ratioY = static_cast<GLfloat>(mGeomSizeY) / static_cast<GLfloat>(mTexSizeY);
 

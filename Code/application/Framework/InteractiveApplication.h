@@ -27,6 +27,8 @@ public:
    void reportError(const std::string& errorMessage) const;
 
 private:
+   InteractiveApplication& operator=(const InteractiveApplication& rhs);
+
    enum FileTypeEnum
    {
       WIZARD_FILES,

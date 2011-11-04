@@ -54,6 +54,7 @@
     <Import Project="..\..\..\CompileSettings\Qt-Release.props" />
     <Import Project="..\..\..\CompileSettings\ffmpeg.props" />
     <Import Project="..\..\..\CompileSettings\PlugInCommonSettings.props" />
+    <Import Project="..\..\..\CompileSettings\EnableWarnings.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -64,6 +65,7 @@
     <Import Project="..\..\..\CompileSettings\Qt-Debug.props" />
     <Import Project="..\..\..\CompileSettings\ffmpeg.props" />
     <Import Project="..\..\..\CompileSettings\PlugInCommonSettings.props" />
+    <Import Project="..\..\..\CompileSettings\EnableWarnings.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -74,6 +76,7 @@
     <Import Project="..\..\..\CompileSettings\Qt-Release.props" />
     <Import Project="..\..\..\CompileSettings\ffmpeg.props" />
     <Import Project="..\..\..\CompileSettings\PlugInCommonSettings.props" />
+    <Import Project="..\..\..\CompileSettings\EnableWarnings.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -84,6 +87,7 @@
     <Import Project="..\..\..\CompileSettings\Qt-Debug.props" />
     <Import Project="..\..\..\CompileSettings\ffmpeg.props" />
     <Import Project="..\..\..\CompileSettings\PlugInCommonSettings.props" />
+    <Import Project="..\..\..\CompileSettings\EnableWarnings.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>

@@ -30,6 +30,9 @@ public:
 
    void reportWarning(const std::string& warningMessage) const;
    void reportError(const std::string& errorMessage) const;
+
+private:
+   BatchApplication& operator=(const BatchApplication& rhs);
 };
 
 #endif

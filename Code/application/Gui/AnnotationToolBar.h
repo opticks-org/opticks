@@ -101,6 +101,9 @@ protected slots:
    void setSnapToGrid(bool snap);
 
 private:
+   AnnotationToolBar(const AnnotationToolBar& rhs);
+   AnnotationToolBar& operator=(const AnnotationToolBar& rhs);
+
    GraphicObjectType getSelectionObject();
 
    // Lock layer check box

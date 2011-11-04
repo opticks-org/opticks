@@ -26,6 +26,8 @@ public:
    void executeRedo();
 
 private:
+   SetAoiColor(const SetAoiColor& rhs);
+   SetAoiColor& operator=(const SetAoiColor& rhs);
    ColorType mOldColor;
    ColorType mNewColor;
 };
@@ -40,6 +42,8 @@ public:
    void executeRedo();
 
 private:
+   SetAoiSymbol(const SetAoiSymbol& rhs);
+   SetAoiSymbol& operator=(const SetAoiSymbol& rhs);
    SymbolType mOldSymbol;
    SymbolType mNewSymbol;
 };
@@ -52,6 +56,8 @@ public:
    void toLayer(Layer* pLayer) const;
 
 private:
+   AoiLayerMemento(const AoiLayerMemento& rhs);
+   AoiLayerMemento& operator=(const AoiLayerMemento& rhs);
    ColorType mColor;
    SymbolType mSymbol;
 };

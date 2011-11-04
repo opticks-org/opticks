@@ -163,6 +163,8 @@ namespace Nitf
          const std::string& ossimName);
 
    private:
+      ImageSubheader& operator=(const ImageSubheader& rhs);
+
       static bool getGCPsFromUtmMgrs(const string& iGeolo, const LocationType gcpPixels[],
          unsigned int numGcpPixels, list<GcpPoint>& gcps);
 

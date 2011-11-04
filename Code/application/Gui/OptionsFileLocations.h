@@ -83,6 +83,9 @@ public:
    }
 
 private:
+   OptionsFileLocations(const OptionsFileLocations& rhs);
+   OptionsFileLocations& operator=(const OptionsFileLocations& rhs);
+
    class FileLocationDescriptor
    {
    public:

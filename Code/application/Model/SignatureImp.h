@@ -48,6 +48,7 @@ public:
    static void getElementTypes(std::vector<std::string>& classList);
 
 private:
+   SignatureImp(const SignatureImp& rhs);
    void setData(const std::string& name, DataVariant& data, bool adopt);
    std::map<std::string, DataVariant> mData;
    std::map<std::string, boost::shared_ptr<UnitsImp> > mUnits;

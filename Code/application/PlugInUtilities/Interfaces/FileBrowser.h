@@ -193,6 +193,8 @@ protected slots:
    void browse();
 
 private:
+   FileBrowser(const FileBrowser& rhs);
+   FileBrowser& operator=(const FileBrowser& rhs);
    QLineEdit* mpFileEdit;
    QPushButton* mpBrowseButton;
    QString mBrowseCaption;

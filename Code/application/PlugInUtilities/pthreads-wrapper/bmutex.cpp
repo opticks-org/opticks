@@ -27,13 +27,13 @@ BMutex::~BMutex()
    }
 
 }
-bool BMutex::MutexCreate ()
+bool BMutex::MutexCreate()
 {
    mMutexID = new pthread_mutex_t;
    return true;
 }
 
-bool BMutex::MutexInit ()
+bool BMutex::MutexInit()
 {
    assert (mMutexID != NULL);
 
@@ -41,7 +41,7 @@ bool BMutex::MutexInit ()
    return true;
 }
 
-bool BMutex::MutexLock ()
+bool BMutex::MutexLock()
 {
    assert (mMutexID != NULL);
 
@@ -50,7 +50,7 @@ bool BMutex::MutexLock ()
    return true;
 }
 
-bool BMutex::MutexUnlock ()
+bool BMutex::MutexUnlock()
 {
    assert (mMutexID != NULL);
 
@@ -59,7 +59,7 @@ bool BMutex::MutexUnlock ()
    return true;
 }
 
-bool BMutex::MutexDestroy ()
+bool BMutex::MutexDestroy()
 {
    assert (mMutexID != NULL);
 

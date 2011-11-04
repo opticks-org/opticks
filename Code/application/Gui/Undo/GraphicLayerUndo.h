@@ -33,6 +33,10 @@ class GraphicLayerMemento : public LayerMemento
 protected:
    GraphicLayerMemento(GraphicLayer* pLayer);
    void toLayer(Layer* pLayer) const;
+
+private:
+   GraphicLayerMemento(const GraphicLayerMemento& rhs);
+   GraphicLayerMemento& operator=(const GraphicLayerMemento& rhs);
 };
 
 
@@ -40,6 +44,10 @@ class AnnotationLayerMemento : public GraphicLayerMemento
 {
 public:
    AnnotationLayerMemento(AnnotationLayer* pLayer);
+
+private:
+   AnnotationLayerMemento(const AnnotationLayerMemento& rhs);
+   AnnotationLayerMemento& operator=(const AnnotationLayerMemento& rhs);
 };
 
 
@@ -57,6 +65,8 @@ protected:
    void destroyObject();
 
 private:
+   CreateDestroyGraphicObject(const CreateDestroyGraphicObject& rhs);
+   CreateDestroyGraphicObject& operator=(const CreateDestroyGraphicObject& rhs);
    std::string mViewId;
    std::string mLayerId;
    std::string mObjectId;
@@ -73,6 +83,10 @@ public:
 
    void executeUndo();
    void executeRedo();
+
+private:
+   AddGraphicObject(const AddGraphicObject& rhs);
+   AddGraphicObject& operator=(const AddGraphicObject& rhs);
 };
 
 
@@ -83,6 +97,10 @@ public:
 
    void executeUndo();
    void executeRedo();
+
+private:
+   RemoveGraphicObject(const RemoveGraphicObject& rhs);
+   RemoveGraphicObject& operator=(const RemoveGraphicObject& rhs);
 };
 
 
@@ -100,6 +118,9 @@ public:
    void executeRedo();
 
 private:
+   SetGraphicObjectProperty(const SetGraphicObjectProperty& rhs);
+   SetGraphicObjectProperty& operator=(const SetGraphicObjectProperty& rhs);
+
    std::string mViewId;
    std::string mLayerId;
    GraphicProperty* mpOldProperty;
@@ -121,6 +142,8 @@ protected:
    void renameGraphicObject(const std::string& name);
 
 private:
+   SetGraphicObjectName(const SetGraphicObjectName& rhs);
+   SetGraphicObjectName& operator=(const SetGraphicObjectName& rhs);
    std::string mViewId;
    std::string mLayerId;
    std::string mOldName;
@@ -138,6 +161,8 @@ public:
    void executeRedo();
 
 private:
+   SetGraphicStackingOrder(const SetGraphicStackingOrder& rhs);
+   SetGraphicStackingOrder& operator=(const SetGraphicStackingOrder& rhs);
    std::string mObjectId;
    int mOldIndex;
    int mNewIndex;
@@ -156,6 +181,8 @@ protected:
    void ungroup();
 
 private:
+   GroupUngroupGraphicObjects(const GroupUngroupGraphicObjects& rhs);
+   GroupUngroupGraphicObjects& operator=(const GroupUngroupGraphicObjects& rhs);
    std::list<std::string> mObjectIds;
    std::string mGroupId;
 };
@@ -168,6 +195,10 @@ public:
 
    void executeUndo();
    void executeRedo();
+
+private:
+   GroupGraphicObjects(const GroupGraphicObjects& rhs);
+   GroupGraphicObjects& operator=(const GroupGraphicObjects& rhs);
 };
 
 
@@ -178,6 +209,10 @@ public:
 
    void executeUndo();
    void executeRedo();
+
+private:
+   UngroupGraphicObjects(const UngroupGraphicObjects& rhs);
+   UngroupGraphicObjects& operator=(const UngroupGraphicObjects& rhs);
 };
 
 class AddVertices : public UndoAction
@@ -194,6 +229,9 @@ public:
    void executeRedo();
 
 private:
+   AddVertices(const AddVertices& rhs);
+   AddVertices& operator=(const AddVertices& rhs);
+
    std::string mViewId;
    std::string mLayerId;
    std::vector<LocationType> mOldVertices;
@@ -214,6 +252,9 @@ public:
    void executeRedo();
 
 private:
+   NewPath(const NewPath& rhs);
+   NewPath& operator=(const NewPath& rhs);
+
    std::string mViewId;
    std::string mLayerId;
    unsigned int mPath;

@@ -54,7 +54,7 @@ public slots:
    bool setMeasurementsLayer(Layer* pLayer);
 
 protected:
-   void georeferenceModified(Subject &subject, const std::string &signal, const boost::any &data);
+   void georeferenceModified(Subject& subject, const std::string& signal, const boost::any& value);
    void measurementsLayerDeleted(Subject& subject, const std::string& signal, const boost::any& value);
    bool isGeoreferenced() const;
 
@@ -72,6 +72,8 @@ protected slots:
    void updateRaster();
 
 private:
+   MeasurementToolBar(const MeasurementToolBar& rhs);
+   MeasurementToolBar& operator=(const MeasurementToolBar& rhs);
    QButtonGroup* mpObjectGroup;
    QAction* mpDrawAction;
    QAction* mpMoveAction;
@@ -105,6 +107,10 @@ signals:
 
 private slots:
    void translateChange(const QString&);
+
+private:
+   DistanceUnitsGrid(const DistanceUnitsGrid& rhs);
+   DistanceUnitsGrid& operator=(const DistanceUnitsGrid& rhs);
 };
 
 class DistanceUnitsButton : public PixmapGridButton
@@ -119,6 +125,10 @@ public:
 
 signals:
    void valueChanged(DistanceUnits value);
+
+private:
+   DistanceUnitsButton(const DistanceUnitsButton& rhs);
+   DistanceUnitsButton& operator=(const DistanceUnitsButton& rhs);
 };
 
 class LocationUnitsGrid : public PixmapGrid
@@ -136,6 +146,10 @@ signals:
 
 private slots:
    void translateChange(const QString&);
+
+private:
+   LocationUnitsGrid(const LocationUnitsGrid& rhs);
+   LocationUnitsGrid& operator=(const LocationUnitsGrid& rhs);
 };
 
 class LocationUnitsButton : public PixmapGridButton
@@ -150,6 +164,10 @@ public:
 
 signals:
    void valueChanged(GeocoordType geoType, DmsFormatType geoFormat);
+
+private:
+   LocationUnitsButton(const LocationUnitsButton& rhs);
+   LocationUnitsButton& operator=(const LocationUnitsButton& rhs);
 };
 
 #endif

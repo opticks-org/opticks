@@ -46,7 +46,7 @@ WizardGraphicsItem::WizardGraphicsItem(WizardItem* pItem, QGraphicsItem* pParent
    const vector<string>& argTypes = pManager->getArgTypes();
 
    unsigned int numTypes = argTypes.size();
-   if (sNodeColors.count() != (numTypes + 1))
+   if (static_cast<unsigned int>(sNodeColors.count()) != (numTypes + 1))
    {
       sNodeColors.clear();
 

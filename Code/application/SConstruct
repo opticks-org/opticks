@@ -82,12 +82,12 @@ env.AppendUnique(CXXFLAGS=["-I%s" % OPTICKSDEPENDENCIESINCLUDE])
 if OS != "windows":
    env['LINK'] = "$CXX"
 if OPTICKSPLATFORM == "solaris-sparc":
-   env.Append(CXXFLAGS="-library=stlport4 -m64 -xcode=pic32 -erroff=nonewline",
+   env.Append(CXXFLAGS="-library=stlport4 -m64 -xcode=pic32 -erroff=nonewline,truncwarn,wvarhidenmem ",
               LINKFLAGS="-library=stlport4 -m64 -xcode=pic32 -mt -L/usr/sfw/lib/sparcv9",
               CPPDEFINES=["APPLICATION_XERCES"],
               LIBS=env["QT_MODULES"] + ["nsl","dl","GLU","GL","Xm","Xext","Xrender","X11","m"])
 elif OPTICKSPLATFORM == "linux-x86_64":
-   env.Append(CXXFLAGS="-m64 -fpic -w",
+   env.Append(CXXFLAGS="-m64 -fpic -Wall -Wno-unused-value -Wno-comment",
               LINKFLAGS="-melf_x86_64 -Wl,-E",
               CPPDEFINES=["APPLICATION_XERCES"],
               LIBS=env["QT_MODULES"] + ["dl","GLU","GL","Xext","Xrender","X11","m"])

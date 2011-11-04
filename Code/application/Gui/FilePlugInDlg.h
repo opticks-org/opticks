@@ -54,6 +54,8 @@ protected slots:
    void updateFileFilters(const QString& strPlugIn);
 
 private:
+   FilePlugInDlg(const FilePlugInDlg& rhs);
+   FilePlugInDlg& operator=(const FilePlugInDlg& rhs);
    static std::map<std::string, QString> mLastPlugIns;
    QMap<QString, QStringList> mPlugInFilters;
    QWidget* mpPlugInWidget;

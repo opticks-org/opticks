@@ -711,8 +711,9 @@ bool Nitf::SensrbParser::toDynamicObject(std::istream& input,
    }
 
    // verify length
-   size_t numRead = input.tellg();
-   if (numRead != numBytes)
+   int64_t numRead = input.tellg();
+   if (numRead < 0 || numRead > static_cast<int64_t>(std::numeric_limits<size_t>::max()) ||
+      numRead != static_cast<int64_t>(numBytes))
    {
       numReadErrMsg(numRead, numBytes, errorMessage);
       return false;
@@ -726,7 +727,11 @@ bool Nitf::SensrbParser::fromDynamicObject(const DynamicObject& input,
                                            size_t& numBytesWritten,
                                            std::string &errorMessage) const
 {
-   size_t sizeIn = std::max(static_cast<std::ostream::pos_type>(0), output.tellp());
+   if (output.tellp() < 0 || output.tellp() > static_cast<int64_t>(std::numeric_limits<size_t>::max()))
+   {
+      return false;
+   }
+   size_t sizeIn = std::max<size_t>(0, static_cast<size_t>(output.tellp()));
    size_t sizeOut(sizeIn);
 
    try
@@ -1153,7 +1158,11 @@ bool Nitf::SensrbParser::fromDynamicObject(const DynamicObject& input,
       return false;
    }
 
-   sizeOut = output.tellp();
+   if (output.tellp() < 0 || output.tellp() > static_cast<int64_t>(std::numeric_limits<size_t>::max()))
+   {
+      return false;
+   }
+   sizeOut = static_cast<size_t>(output.tellp());
    numBytesWritten = sizeOut - sizeIn;
    return true;
 }

@@ -47,6 +47,8 @@ protected slots:
    void refresh();
 
 private:
+   ViewObjectImp(const ViewObjectImp& rhs);
+   ViewObjectImp& operator=(const ViewObjectImp& rhs);
    ViewImp* mpView;
    TextObjectImp* mpInvalidText;
    mutable bool mUpdateBounds;

@@ -192,6 +192,8 @@ protected: // custom events
    void customEvent(QEvent* pEvent);
 
 private:
+   BackgroundPluginWindow(const BackgroundPluginWindow& rhs);
+   BackgroundPluginWindow& operator=(const BackgroundPluginWindow& rhs);
    QListWidget* mpStatusList;
    QPushButton* mpDismissButton;
    QPushButton* mpAbortButton;

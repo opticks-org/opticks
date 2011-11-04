@@ -26,6 +26,8 @@ public:
    QRegExp getFilter() const;
 
 private:
+   FilterWidget(const FilterWidget& rhs);
+   FilterWidget operator=(const FilterWidget& rhs);
    QLineEdit* mpFilterEdit;
    QCheckBox* mpWildcardCheck;
    QCheckBox* mpCaseCheck;

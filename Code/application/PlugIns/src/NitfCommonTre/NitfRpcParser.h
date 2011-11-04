@@ -21,7 +21,7 @@ namespace Nitf
 
       bool toDynamicObject(std::istream&, size_t, DynamicObject&, 
          std::string &errorMessage) const;
-      bool toDynamicObject(const ossimNitfRegisteredTag& input, DynamicObject& output, 
+      bool ossimTagToDynamicObject(const ossimNitfRegisteredTag& input, DynamicObject& output, 
          std::string &errorMessage) const;
       bool fromDynamicObject(const DynamicObject& input, std::ostream& output, size_t& numBytesWritten, 
          std::string &errorMessage) const;

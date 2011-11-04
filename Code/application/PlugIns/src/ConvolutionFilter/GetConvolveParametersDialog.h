@@ -35,6 +35,8 @@ public:
    std::vector<unsigned int> getBandSelectionIndices() const;
 
 private:
+   GetConvolveParametersDialog(const GetConvolveParametersDialog& rhs);
+   GetConvolveParametersDialog& operator=(const GetConvolveParametersDialog& rhs);
    QComboBox* mpAoiSelect;
    QListWidget* mpBandSelect;
    SpatialDataView* mpView;

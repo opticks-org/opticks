@@ -22,6 +22,10 @@ public:
    QWidget* getWidget();
 
    AXISADAPTER_METHODS(AxisImp)
+
+private:
+   AxisAdapter(const AxisAdapter& rhs);
+   AxisAdapter& operator=(const AxisAdapter& rhs);
 };
 
 #endif

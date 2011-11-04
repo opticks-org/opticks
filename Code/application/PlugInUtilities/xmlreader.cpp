@@ -39,6 +39,8 @@ public:
    }
 
 private:
+   XmlReaderErrorHandler(const XmlReaderErrorHandler& rhs);
+   XmlReaderErrorHandler& operator=(const XmlReaderErrorHandler& rhs);
    XmlBase* mpLogger;
 };
 

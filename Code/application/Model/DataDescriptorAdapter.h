@@ -25,6 +25,10 @@ public:
    bool isKindOf(const std::string& className) const;
 
    DATADESCRIPTORADAPTER_METHODS(DataDescriptorImp)
+
+private:
+   DataDescriptorAdapter(const DataDescriptorAdapter& rhs);
+   DataDescriptorAdapter& operator=(const DataDescriptorAdapter& rhs);
 };
 
 #endif

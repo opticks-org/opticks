@@ -92,7 +92,7 @@ public:
    SIGNAL_METHOD(ApplicationWindow, WindowActivated)
    SIGNAL_METHOD(ApplicationWindow, AboutToShowPropertiesDialog)
 
-   void windowRemoved(Subject &subject, const std::string &signal, const boost::any &data);
+   void windowRemoved(Subject& subject, const std::string& signal, const boost::any& value);
 
    bool serialize(SessionItemSerializer &serializer) const;
    bool deserialize(SessionItemDeserializer &deserializer);
@@ -296,6 +296,9 @@ protected slots:
    void displaySessionItemProperties();
 
 private:
+   ApplicationWindow(const ApplicationWindow& rhs);
+   ApplicationWindow& operator=(const ApplicationWindow& rhs);
+
    // Main menu bar menus
    QMenu* m_pFile;
    QMenu* m_pSession;

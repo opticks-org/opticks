@@ -405,7 +405,6 @@ RasterPage* Jpeg2000Pager::getPage(DataRequest* pOriginalRequest,
          {
             throw string("Data block has no data");
          }
-         char* pBlockPos(pData);
          opj_dparameters_t parameters;
          opj_event_mgr_t eventMgr;
          vector<unsigned char> pSrc(NULL);
@@ -465,7 +464,7 @@ RasterPage* Jpeg2000Pager::getPage(DataRequest* pOriginalRequest,
          {
             for(unsigned int j = 0; j < numBands; ++j)
             {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This code will need to changed if Openjpeg is upgraded (mconsidi)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This code will need to changed if Openjpeg is upgraded (mconsidi)")
 
                // This allows for proper operation when the library puts one-byte data into an unsigned int
                pData[(i * numBands + j)*4] = 0xFF & pImage->comps[j].data[i];

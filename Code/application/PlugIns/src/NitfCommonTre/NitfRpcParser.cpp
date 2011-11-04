@@ -300,7 +300,7 @@ bool Nitf::RpcParser::runAllTests(Progress* pProgress, ostream& failure)
    return (status != INVALID);
 }
 
-bool Nitf::RpcParser::toDynamicObject(const ossimNitfRegisteredTag& input, DynamicObject& output,
+bool Nitf::RpcParser::ossimTagToDynamicObject(const ossimNitfRegisteredTag& input, DynamicObject& output,
    string &errorMessage) const
 {
    const ossimNitfRegisteredTag* pInput = &input;
@@ -326,22 +326,22 @@ bool Nitf::RpcParser::toDynamicObject(const ossimNitfRegisteredTag& input, Dynam
       for (u = 1; u <= 20; ++u)
       {
          double coeff = pBase->getLineNumeratorCoeff(u-1).toDouble();
-         status = status && output.setAttribute(getCoefficient(LINE_NUMERATOR_COEF_PREFIX, u), coeff);
+         status = status && output.setAttribute(getRpcCoefficient(LINE_NUMERATOR_COEF_PREFIX, u), coeff);
       }
       for (u = 1; u <= 20; ++u)
       {
          double coeff = pBase->getLineDenominatorCoeff(u-1).toDouble();
-         status = status && output.setAttribute(getCoefficient(LINE_DENOMINATOR_COEF_PREFIX, u), coeff);
+         status = status && output.setAttribute(getRpcCoefficient(LINE_DENOMINATOR_COEF_PREFIX, u), coeff);
       }
       for (u = 1; u <= 20; ++u)
       {
          double coeff = pBase->getSampleNumeratorCoeff(u-1).toDouble();
-         status = status && output.setAttribute(getCoefficient(SAMPLE_NUMERATOR_COEF_PREFIX, u), coeff);
+         status = status && output.setAttribute(getRpcCoefficient(SAMPLE_NUMERATOR_COEF_PREFIX, u), coeff);
       }
       for (u = 1; u <= 20; ++u)
       {
          double coeff = pBase->getSampleDenominatorCoeff(u-1).toDouble();
-         status = status && output.setAttribute(getCoefficient(SAMPLE_DENOMINATOR_COEF_PREFIX, u), coeff);
+         status = status && output.setAttribute(getRpcCoefficient(SAMPLE_DENOMINATOR_COEF_PREFIX, u), coeff);
       }
 
       return status;
@@ -356,7 +356,6 @@ bool Nitf::RpcParser::toDynamicObject(istream& input, size_t numBytes, DynamicOb
    vector<char> buf;
    bool success = true;
    unsigned int u;
-   bool ok = true;
 
    readField<bool>(input, output, success, SUCCESS, 1, errorMessage, buf);
    readField<double>(input, output, success, ERR_BIAS, 7, errorMessage, buf);
@@ -375,26 +374,27 @@ bool Nitf::RpcParser::toDynamicObject(istream& input, size_t numBytes, DynamicOb
    for (u = 1; u <= 20; ++u)
    {
       readField<double>(input, output, success,
-         getCoefficient(LINE_NUMERATOR_COEF_PREFIX, u), 12, errorMessage, buf);
+         getRpcCoefficient(LINE_NUMERATOR_COEF_PREFIX, u), 12, errorMessage, buf);
    }
    for (u = 1; u <= 20; ++u)
    {
       readField<double>(input, output, success,
-         getCoefficient(LINE_DENOMINATOR_COEF_PREFIX, u), 12, errorMessage, buf);
+         getRpcCoefficient(LINE_DENOMINATOR_COEF_PREFIX, u), 12, errorMessage, buf);
    }
    for (u = 1; u <= 20; ++u)
    {
       readField<double>(input, output, success,
-         getCoefficient(SAMPLE_NUMERATOR_COEF_PREFIX, u), 12, errorMessage, buf);
+         getRpcCoefficient(SAMPLE_NUMERATOR_COEF_PREFIX, u), 12, errorMessage, buf);
    }
    for (u = 1; u <= 20; ++u)
    {
       readField<double>(input, output, success,
-         getCoefficient(SAMPLE_DENOMINATOR_COEF_PREFIX, u), 12, errorMessage, buf);
+         getRpcCoefficient(SAMPLE_DENOMINATOR_COEF_PREFIX, u), 12, errorMessage, buf);
    }
 
-   int numRead = input.tellg();
-   if (numRead != numBytes)
+   int64_t numRead = input.tellg();
+   if (numRead < 0 || numRead > static_cast<int64_t>(std::numeric_limits<size_t>::max()) ||
+      numRead != static_cast<int64_t>(numBytes))
    {
       numReadErrMsg(numRead, numBytes, errorMessage);
       return false;
@@ -430,25 +430,25 @@ Nitf::TreState Nitf::RpcParser::isTreValid(const DynamicObject& tre, ostream& re
    for (u = 1; u <= 20; ++u)
    {
       status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields,
-         getCoefficient(LINE_NUMERATOR_COEF_PREFIX, u), minCoef, maxCoef));
+         getRpcCoefficient(LINE_NUMERATOR_COEF_PREFIX, u), minCoef, maxCoef));
    }
 
    for (u = 1; u <= 20; ++u)
    {
       status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields,
-         getCoefficient(LINE_DENOMINATOR_COEF_PREFIX, u), minCoef, maxCoef));
+         getRpcCoefficient(LINE_DENOMINATOR_COEF_PREFIX, u), minCoef, maxCoef));
    }
 
    for (u = 1; u <= 20; ++u)
    {
       status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields,
-         getCoefficient(SAMPLE_NUMERATOR_COEF_PREFIX, u), minCoef, maxCoef));
+         getRpcCoefficient(SAMPLE_NUMERATOR_COEF_PREFIX, u), minCoef, maxCoef));
    }
 
    for (u = 1; u <= 20; ++u)
    {
       status = MaxState(status, testTagValueRange<double>(tre, reporter, &numFields,
-         getCoefficient(SAMPLE_DENOMINATOR_COEF_PREFIX, u), minCoef, maxCoef));
+         getRpcCoefficient(SAMPLE_DENOMINATOR_COEF_PREFIX, u), minCoef, maxCoef));
    }
 
    unsigned int totalFields = tre.getNumAttributes();
@@ -476,12 +476,16 @@ Nitf::TreState Nitf::RpcParser::isTreValid(const DynamicObject& tre, ostream& re
 bool Nitf::RpcParser::fromDynamicObject(const DynamicObject& input, ostream& output, size_t& numBytesWritten,
    string &errorMessage) const
 {
-   size_t sizeIn = max(static_cast<ostream::pos_type>(0), output.tellp());
+   if (output.tellp() < 0 || output.tellp() > static_cast<int64_t>(std::numeric_limits<size_t>::max()))
+   {
+      return false;
+   }
+   size_t sizeIn = max<size_t>(0, static_cast<size_t>(output.tellp()));
    size_t sizeOut(sizeIn);
 
    try
    {
-      output << toString(dv_cast<bool>(input.getAttribute(SUCCESS)), 1);
+      output << dv_cast<bool>(input.getAttribute(SUCCESS)) ? "1" : "0";
       output << toString(dv_cast<double>(input.getAttribute(ERR_BIAS)), 7, 2);
       output << toString(dv_cast<double>(input.getAttribute(ERR_RAND)), 7, 2);
       output << toString(dv_cast<unsigned int>(input.getAttribute(LINE_OFFSET)), 6);
@@ -499,22 +503,22 @@ bool Nitf::RpcParser::fromDynamicObject(const DynamicObject& input, ostream& out
 
       for (u = 1; u <= 20; ++u)
       {
-         output << toString(dv_cast<double>(input.getAttribute(getCoefficient(LINE_NUMERATOR_COEF_PREFIX, u))),
+         output << toString(dv_cast<double>(input.getAttribute(getRpcCoefficient(LINE_NUMERATOR_COEF_PREFIX, u))),
             12, 6, ZERO_FILL, POS_SIGN_TRUE, USE_SCIENTIFIC_NOTATION, ONE_EXP_DIGIT);
       }
       for (u = 1; u <= 20; ++u)
       {
-         output << toString(dv_cast<double>(input.getAttribute(getCoefficient(LINE_DENOMINATOR_COEF_PREFIX, u))),
+         output << toString(dv_cast<double>(input.getAttribute(getRpcCoefficient(LINE_DENOMINATOR_COEF_PREFIX, u))),
             12, 6, ZERO_FILL, POS_SIGN_TRUE, USE_SCIENTIFIC_NOTATION, ONE_EXP_DIGIT);
       }
       for (u = 1; u <= 20; ++u)
       {
-         output << toString(dv_cast<double>(input.getAttribute(getCoefficient(SAMPLE_NUMERATOR_COEF_PREFIX, u))),
+         output << toString(dv_cast<double>(input.getAttribute(getRpcCoefficient(SAMPLE_NUMERATOR_COEF_PREFIX, u))),
             12, 6, ZERO_FILL, POS_SIGN_TRUE, USE_SCIENTIFIC_NOTATION, ONE_EXP_DIGIT);
       }
       for (u = 1; u <= 20; ++u)
       {
-         output << toString(dv_cast<double>(input.getAttribute(getCoefficient(SAMPLE_DENOMINATOR_COEF_PREFIX, u))),
+         output << toString(dv_cast<double>(input.getAttribute(getRpcCoefficient(SAMPLE_DENOMINATOR_COEF_PREFIX, u))),
             12, 6, ZERO_FILL, POS_SIGN_TRUE, USE_SCIENTIFIC_NOTATION, ONE_EXP_DIGIT);
       }
    }
@@ -523,7 +527,11 @@ bool Nitf::RpcParser::fromDynamicObject(const DynamicObject& input, ostream& out
       return false;
    }
 
-   sizeOut = output.tellp();
+   if (output.tellp() < 0 || output.tellp() > static_cast<int64_t>(std::numeric_limits<size_t>::max()))
+   {
+      return false;
+   }
+   sizeOut = static_cast<size_t>(output.tellp());
    numBytesWritten = sizeOut - sizeIn;
    return true;
 }

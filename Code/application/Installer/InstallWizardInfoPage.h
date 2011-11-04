@@ -27,6 +27,8 @@ public:
 
 
 private:
+   InstallWizardInfoPage(const InstallWizardInfoPage& rhs);
+   InstallWizardInfoPage& operator=(const InstallWizardInfoPage& rhs);
    QListWidget* mpList;
 };
 

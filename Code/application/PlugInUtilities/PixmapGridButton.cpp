@@ -50,7 +50,6 @@ void PixmapGridButton::initialize()
    setMenu(mpGridMenu);
    setPopupMode(QToolButton::MenuButtonPopup);
    setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-   QAction* pMenuAction = mpGridMenu->menuAction();
    mClickShowsMenu = false;
    setClickShowsMenu(true);
    setPixmapGrid(NULL);

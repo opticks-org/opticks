@@ -26,6 +26,8 @@ public:
    unsigned int getCompressionQuality();
 
 private:
+   JpegExportOptionsWidget(const JpegExportOptionsWidget& rhs);
+   JpegExportOptionsWidget& operator=(const JpegExportOptionsWidget& rhs);
    QSlider* mpQualitySlider;
    ImageResolutionWidget* mpResolutionWidget;
 };

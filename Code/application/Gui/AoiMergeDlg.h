@@ -36,6 +36,8 @@ protected slots:
    void accept();
 
 private:
+   AoiMergeDlg(const AoiMergeDlg& rhs);
+   AoiMergeDlg& operator=(const AoiMergeDlg& rhs);
    QListWidget* mpMergeList;
    QRadioButton* mpCombineRadio;
    QComboBox* mpOutputCombo;

@@ -28,6 +28,9 @@ public slots:
    void updateStatistics();
 
 private:
+   StatisticsWidget(const StatisticsWidget& rhs);
+   StatisticsWidget& operator=(const StatisticsWidget& rhs);
+
    QLabel* mpTitle;
    QTableWidget* mpStats;
    HistogramPlotImp* mpHistogram;

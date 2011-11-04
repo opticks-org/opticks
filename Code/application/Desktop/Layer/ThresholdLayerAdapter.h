@@ -30,6 +30,9 @@ public:
       DataElement* pParent = NULL) const;
 
    THRESHOLDLAYERADAPTER_METHODS(ThresholdLayerImp)
+
+private:
+   ThresholdLayerAdapter(const ThresholdLayerAdapter& rhs);
 };
 
 #endif

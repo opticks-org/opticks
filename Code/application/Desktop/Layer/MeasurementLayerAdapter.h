@@ -30,6 +30,9 @@ public:
       DataElement* pParent = NULL) const;
 
    MEASUREMENTLAYERADAPTER_METHODS(MeasurementLayerImp)
+
+private:
+   MeasurementLayerAdapter(const MeasurementLayerAdapter& rhs);
 };
 
 #endif

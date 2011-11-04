@@ -379,8 +379,6 @@ FrmBM::FrmBM(const RasterDataDescriptor* pDescriptor, const vector<RasterElement
    connect(btnProcess, SIGNAL(clicked()), this, SLOT(accept()));
    connect(btnCancel, SIGNAL(clicked()), this, SLOT(reject()));
 
-   const vector<DimensionDescriptor>& loadedBands = pDescriptor->getBands();
-
    const DynamicObject* pMetadata = pDescriptor->getMetadata();
    const vector<double>* pCenterWavelengths = NULL;
    if (pMetadata != NULL)

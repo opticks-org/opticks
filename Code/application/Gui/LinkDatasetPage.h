@@ -26,6 +26,8 @@ public:
    QString getSelectedDatasetName() const;
 
 private:
+   LinkDatasetPage(const LinkDatasetPage& rhs);
+   LinkDatasetPage& operator=(const LinkDatasetPage& rhs);
    QComboBox* mpDatasetCombo;
 };
 

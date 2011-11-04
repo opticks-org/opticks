@@ -75,6 +75,8 @@ protected slots:
    virtual void updateOrientation();
 
 private:
+   DirectionalArrowObjectImp(const DirectionalArrowObjectImp& rhs);
+   DirectionalArrowObjectImp& operator=(const DirectionalArrowObjectImp& rhs);
    GraphicResource<GraphicGroupImp> mpGroup;
    bool mbOriented;
 };

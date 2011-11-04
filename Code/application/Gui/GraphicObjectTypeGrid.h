@@ -42,6 +42,8 @@ private slots:
    void translateChange(const QString&);
 
 private:
+   GraphicObjectTypeGrid(const GraphicObjectTypeGrid& rhs);
+   GraphicObjectTypeGrid& operator=(const GraphicObjectTypeGrid& rhs);
    Mode mMode;
    std::map<GraphicObjectType, QPixmap> mPixmaps;
 };
@@ -63,6 +65,10 @@ signals:
 
 private slots:
    void translateChange(const QString& identifier);
+
+private:
+   GraphicObjectTypeButton(const GraphicObjectTypeButton& rhs);
+   GraphicObjectTypeButton& operator=(const GraphicObjectTypeButton& rhs);
 };
 
 #endif

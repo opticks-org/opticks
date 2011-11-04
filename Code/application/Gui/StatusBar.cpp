@@ -88,12 +88,12 @@ void StatusBar::attached(Subject &subject, const string &signal, const Slot &slo
    }
 }
 
-void StatusBar::optionsModified(Subject &subject, const string &signal, const boost::any &data)
+void StatusBar::optionsModified(Subject& subject, const string& signal, const boost::any& value)
 {
    if (NN(dynamic_cast<ConfigurationSettings*>(&subject)))
    {
       VERIFYNR(signal == SIGNAL_NAME(ConfigurationSettings, SettingModified));
-      string key = boost::any_cast<string>(data);
+      string key = boost::any_cast<string>(value);
       if (key.find("StatusBar/ShowStatusBar") == 0)
       {
          updateDisplayedWidgets();

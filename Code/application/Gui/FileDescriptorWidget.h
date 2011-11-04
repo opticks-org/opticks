@@ -51,6 +51,8 @@ protected slots:
    void updateBandFiles();
 
 private:
+   FileDescriptorWidget(const FileDescriptorWidget& rhs);
+   FileDescriptorWidget& operator=(const FileDescriptorWidget& rhs);
    FileDescriptor* mpFileDescriptor;
    bool mReadOnly;
    bool mModified;

@@ -66,6 +66,8 @@ public:
    void setPlotNames(const QStringList& names, const QString& selected);
 
 private:
+   AspamPlotSelectionDialog(const AspamPlotSelectionDialog& rhs);
+   AspamPlotSelectionDialog& operator=(const AspamPlotSelectionDialog& rhs);
    QComboBox* mpPrimary;
    QComboBox* mpPlotName;
 };

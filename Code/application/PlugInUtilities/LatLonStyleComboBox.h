@@ -28,6 +28,10 @@ signals:
 
 private slots:
    void translateActivated(int newIndex);
+
+private:
+   LatLonStyleComboBox(const LatLonStyleComboBox& rhs);
+   LatLonStyleComboBox& operator=(const LatLonStyleComboBox& rhs);
 };
 
 #endif

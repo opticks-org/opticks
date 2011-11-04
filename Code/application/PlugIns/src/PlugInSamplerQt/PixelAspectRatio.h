@@ -30,6 +30,8 @@ public slots:
    void dialogClosed();
 
 private:
+   PixelAspectRatio(const PixelAspectRatio& rhs);
+   PixelAspectRatio& operator=(const PixelAspectRatio& rhs);
    bool showGui();
    PixelAspectRatioGui* mpGui;
 };

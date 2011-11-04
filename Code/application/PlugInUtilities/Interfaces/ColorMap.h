@@ -46,9 +46,9 @@ public:
          int mPosition;   /**< The index of the color specified by the control. Indices between 
                           two controls will be linearly interpolated between the controls. */
       };
-      static const int MAX_CONTROLS = 20;   /**< The maximum number of controls that can 
-                                            be specified. If more than this number of controls are specified 
-                                            the Gradient will be rejected. */
+      static const unsigned int MAX_CONTROLS = 20;   /**< The maximum number of controls that can 
+                                                     be specified. If more than this number of controls are specified 
+                                                     the Gradient will be rejected. */
       std::vector<Control> mControls;   /**< The controls specifying the color lookup table 
                                         defined by the Gradient. The positions of the controls must be 
                                         monotonically increasing (i.e. the position of Control n must be 
@@ -255,7 +255,7 @@ public:
    bool loadFromBuffer(const std::string& buffer);
 
 private:
-   static const int VERSION_ONE_TABLE_SIZE = 256;
+   static const unsigned int VERSION_ONE_TABLE_SIZE = 256;
 
    bool serialize(QIODevice &io) const;
    bool deserialize(QIODevice &io);

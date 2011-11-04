@@ -33,6 +33,8 @@ protected slots:
    void dialogClosed();
 
 private:
+   DesktopAPITest(const DesktopAPITest& rhs);
+   DesktopAPITest& operator=(const DesktopAPITest& rhs);
    DesktopAPITestGui* mpGui;
 };
 

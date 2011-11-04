@@ -536,8 +536,6 @@ void AnimationToolBarImp::updateCurrentFrame(double frameValue)
       // Get the current slider index value
       double startFrame = mpController->getStartFrame();
       double stopFrame = mpController->getStopFrame();
-      double intervalMultiplier = mpController->getIntervalMultiplier();
-      const int frequency = mpController->getFrequency();
 
       // Add 0.5 to round to the nearest index
       currentStep = static_cast<int> (mpFrameSlider->maximum() * ((frameValue - startFrame) / (stopFrame - startFrame)) + 0.5);
@@ -561,7 +559,7 @@ void AnimationToolBarImp::cleanUpItems()
 {
    std::vector<double> frameSpeeds = AnimationToolBar::getSettingFrameSpeeds();
 
-   if (AnimationToolBar::getSettingFrameSpeeds().size() != mpFrameSpeedCombo->count())
+   if (static_cast<int>(frameSpeeds.size()) != mpFrameSpeedCombo->count())
    {
       for (int i = 0; i < mpFrameSpeedCombo->count(); ++i)
       {
@@ -881,9 +879,9 @@ void AnimationToolBarImp::updateBumpers()
 AnimationToolBarImp::WheelEventSlider::WheelEventSlider(
                                    Qt::Orientation orientation, QWidget *parent)
                                    : QSlider(orientation, parent),
+                                   mBumpersEnabled(false),
                                    mLeftBumper(-1),
-                                   mRightBumper(-1),
-                                   mBumpersEnabled(false)
+                                   mRightBumper(-1)
 {
 }
 

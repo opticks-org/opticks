@@ -24,6 +24,10 @@ public:
    bool isKindOf(const std::string& className) const;
 
    AOIELEMENTADAPTER_METHODS(AoiElementImp)
+
+private:
+   AoiElementAdapter(const AoiElementAdapter& rhs);
+   AoiElementAdapter& operator=(const AoiElementAdapter& rhs);
 };
 
 #endif

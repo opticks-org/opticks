@@ -40,6 +40,8 @@ public slots:
    void updateWidgets();
 
 private:
+   ConnectionParametersWidget(const ConnectionParametersWidget& rhs);
+   ConnectionParametersWidget& operator=(const ConnectionParametersWidget& rhs);
    QRadioButton* mpSdeButton;
    QRadioButton* mpShpButton;
    QCheckBox* mpUseArcCheck;

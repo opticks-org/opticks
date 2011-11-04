@@ -69,6 +69,9 @@ protected:
    double getFrameValue(const AnimationFrame* pFrame) const;
 
 private:
+   AnimationImp(const AnimationImp& rhs);
+   AnimationImp& operator=(const AnimationImp& rhs);
+
    FrameType mFrameType;
    std::vector<AnimationFrame> mFrames;
    FrameIterator mCurrentFrameIter;
@@ -105,6 +108,7 @@ private:
    { \
       return impClass::hasFrame(pFrame); \
    } \
+   using impClass::setCurrentFrame; \
    void setCurrentFrame(const AnimationFrame* pFrame) \
    { \
       return impClass::setCurrentFrame(pFrame); \

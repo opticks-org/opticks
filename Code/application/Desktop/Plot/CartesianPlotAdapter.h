@@ -25,6 +25,9 @@ public:
    bool isKindOf(const std::string& className) const;
 
    CARTESIANPLOTADAPTER_METHODS(CartesianPlotImp)
+
+private:
+   CartesianPlotAdapter(const CartesianPlotAdapter& rhs);
 };
 
 #endif

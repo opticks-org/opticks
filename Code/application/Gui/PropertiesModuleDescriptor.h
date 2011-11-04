@@ -38,6 +38,8 @@ public:
    static bool isProduction();
 
 private:
+   PropertiesModuleDescriptor(const PropertiesModuleDescriptor& rhs);
+   PropertiesModuleDescriptor& operator=(const PropertiesModuleDescriptor& rhs);
    // Module
    QWidget* mpModuleWidget;
    QLabel* mpNameLabel;

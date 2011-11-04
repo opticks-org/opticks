@@ -40,6 +40,9 @@ protected slots:
    void processResponseHeader(const QHttpResponseHeader& header);
 
 private:
+   XmlRpcCallback(const XmlRpcCallback& rhs);
+   XmlRpcCallback& operator=(const XmlRpcCallback& rhs);
+
    QString mUrl;
    QString mMethod;
    mutable QHttp* mpHttpConnection;

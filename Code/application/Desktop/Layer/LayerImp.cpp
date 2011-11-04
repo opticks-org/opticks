@@ -341,8 +341,8 @@ bool LayerImp::toXml(XMLWriter* pXml) const
       StringUtilities::toXmlString(getLayerType())));
    if (Service<SessionManager>()->isSessionSaving())
    {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Should we make this a part of exported layers too? " \
-   "(tclarke)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Should we make this a part of exported layers too? " \
+//   "(tclarke)")
       if (!SessionItemImp::toXml(pXml))
       {
          return false;
@@ -450,7 +450,6 @@ bool LayerImp::fromXml(DOMNode* pDocument, unsigned int version)
    else
    {
       setName(A(pElem->getAttribute(X("name"))));
-      bool success = false;
       for (DOMNode* pChld = pDocument->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
       {
          if (pChld->getNodeType() == DOMNode::ELEMENT_NODE)

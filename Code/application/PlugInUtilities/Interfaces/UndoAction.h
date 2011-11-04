@@ -239,6 +239,8 @@ protected:
    virtual void executeRedo() = 0;
 
 private:
+   UndoAction(const UndoAction& rhs);
+   UndoAction& operator=(const UndoAction& rhs);
    std::string mSessionItemId;
    bool mRedo;
 };

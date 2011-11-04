@@ -291,8 +291,8 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
 
       pMsg->addProperty("Resolution", QString("%1 x %2").arg(resolutionX).arg(resolutionY).toStdString());
 
-      int framerateNum;
-      int framerateDen;
+      int framerateNum = 0;
+      int framerateDen = 0;
       // first, get the framerate from the arg list
       // next, try the option widget
       // next, get from the animation controller
@@ -604,12 +604,20 @@ ValidationResultType MovieExporter::validate(const PlugInArgList* pArgList, stri
    // next, try the option widget
    // next, get from the animation controller
    // finally, default to the config settings
-   int framerateNum;
-   int framerateDen;
+   int framerateNum = 0;
+   int framerateDen = 0;
    if (pArgList->getPlugInArgValue("Framerate Numerator", framerateNum) &&
       pArgList->getPlugInArgValue("Framerate Denominator", framerateDen))
    {
-      expectedFrameRate.assign(framerateNum, framerateDen);
+      try
+      {
+         expectedFrameRate.assign(framerateNum, framerateDen);
+      }
+      catch (const boost::bad_rational&)
+      {
+         errorMessage = "Invalid framerate specified";
+         return VALIDATE_FAILURE;
+      }
    }
    if (expectedFrameRate == 0)
    {

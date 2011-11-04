@@ -51,6 +51,9 @@ public:
    ~GlContextSave();
 
 private:
+   GlContextSave(const GlContextSave& rhs);
+   GlContextSave& operator=(const GlContextSave& rhs);
+
    QGLContext* const mpCurrentContext;
 };
 

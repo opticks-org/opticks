@@ -62,6 +62,8 @@ protected:
    void updateAnimations(Subject &subject, const std::string &signal, const boost::any &value);
 
 private:
+   FrameLabelObjectImp(const FrameLabelObjectImp& rhs);
+   FrameLabelObjectImp& operator=(const FrameLabelObjectImp& rhs);
    bool mAutoMode;
    bool mLocked;
    AttachmentPtr<View> mpView;

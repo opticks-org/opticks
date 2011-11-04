@@ -44,6 +44,10 @@ public:
    }
 
    LINEOBJECTADAPTER_METHODS(LineObjectImp)
+
+private:
+   LineObjectAdapter(const LineObjectAdapter& rhs);
+   LineObjectAdapter& operator=(const LineObjectAdapter& rhs);
 };
 
 #endif

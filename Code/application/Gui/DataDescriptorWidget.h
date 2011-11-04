@@ -57,6 +57,8 @@ protected slots:
    void setDisplayBands(QAction* pAction);
 
 private:
+   DataDescriptorWidget(const DataDescriptorWidget& rhs);
+   DataDescriptorWidget& operator=(const DataDescriptorWidget& rhs);
    bool mEditAll;
    bool mModified;
    DataDescriptor* mpDescriptor;

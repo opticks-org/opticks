@@ -43,6 +43,9 @@ public:
    bool geoStitch(MosaicManager::MosaicData* pData, Progress* pProgress);
 
 private:
+   MosaicManager(const MosaicManager& rhs);
+   MosaicManager& operator=(const MosaicManager& rhs);
+
    void layerDeleted(Subject& subject, const std::string& signal, const boost::any& value);
    void changeFrame(Subject& subject, const std::string& signalName, const boost::any& data);
    bool createAnimation(bool haveTimes, Progress* pProgress);

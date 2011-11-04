@@ -48,6 +48,8 @@ protected slots:
    void browseDirectories();
 
 private:
+   SearchDlg(const SearchDlg& rhs);
+   SearchDlg& operator=(const SearchDlg& rhs);
    Progress* mpProgress;
    bool mbAbort;
 

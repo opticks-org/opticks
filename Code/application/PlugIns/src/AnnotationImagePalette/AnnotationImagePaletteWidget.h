@@ -34,6 +34,10 @@ public:
    virtual ~PaletteModel();
    QStringList mimeTypes() const;
    QMimeData* mimeData(const QModelIndexList& indexes) const;
+
+private:
+   PaletteModel(const PaletteModel& rhs);
+   PaletteModel& operator=(const PaletteModel& rhs);
 };
 
 class AnnotationImagePaletteWidget : public QToolBox
@@ -58,6 +62,8 @@ protected:
    void windowDropEvent(SpatialDataView* pWindow, QDropEvent* pEvent);
 
 private:
+   AnnotationImagePaletteWidget(const AnnotationImagePaletteWidget& rhs);
+   AnnotationImagePaletteWidget& operator=(const AnnotationImagePaletteWidget& rhs);
    AttachmentPtr<DesktopServices> mDesktopAttachments;
    std::set<Window*> mWindows;
    QMap<QString,QWidget*> mPalettes;

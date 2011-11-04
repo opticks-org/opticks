@@ -84,7 +84,6 @@ bool DeserializeStringVector(FILE* fp, std::vector<std::string>& theList)
    unsigned int numElements;
    unsigned int i;
    unsigned short version;
-   char* buff = NULL;
 
    theList.clear();
    fread(&version, sizeof(version), 1, fp);

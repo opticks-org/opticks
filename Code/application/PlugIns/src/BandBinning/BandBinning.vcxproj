@@ -53,6 +53,7 @@
     <Import Project="..\..\..\CompileSettings\AllCommonSettings-Debug-32bit.props" />
     <Import Project="..\..\..\CompileSettings\PlugInCommonSettings.props" />
     <Import Project="..\..\..\CompileSettings\Qt-Debug.props" />
+    <Import Project="..\..\..\CompileSettings\EnableWarnings.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -61,6 +62,7 @@
     <Import Project="..\..\..\CompileSettings\AllCommonSettings-Release-32bit.props" />
     <Import Project="..\..\..\CompileSettings\PlugInCommonSettings.props" />
     <Import Project="..\..\..\CompileSettings\Qt-Release.props" />
+    <Import Project="..\..\..\CompileSettings\EnableWarnings.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -69,6 +71,7 @@
     <Import Project="..\..\..\CompileSettings\AllCommonSettings-Debug-64bit.props" />
     <Import Project="..\..\..\CompileSettings\PlugInCommonSettings.props" />
     <Import Project="..\..\..\CompileSettings\Qt-Debug.props" />
+    <Import Project="..\..\..\CompileSettings\EnableWarnings.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -77,6 +80,7 @@
     <Import Project="..\..\..\CompileSettings\AllCommonSettings-Release-64bit.props" />
     <Import Project="..\..\..\CompileSettings\PlugInCommonSettings.props" />
     <Import Project="..\..\..\CompileSettings\Qt-Release.props" />
+    <Import Project="..\..\..\CompileSettings\EnableWarnings.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>

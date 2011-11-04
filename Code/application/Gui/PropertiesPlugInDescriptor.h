@@ -41,6 +41,8 @@ public:
    static bool isProduction();
 
 private:
+   PropertiesPlugInDescriptor(const PropertiesPlugInDescriptor& rhs);
+   PropertiesPlugInDescriptor& operator=(const PropertiesPlugInDescriptor& rhs);
    void initializeArgTree(const PlugInArgList* pArgList, bool bInputArgs, QTreeWidgetItem* pParentItem);
 
    // PlugIn

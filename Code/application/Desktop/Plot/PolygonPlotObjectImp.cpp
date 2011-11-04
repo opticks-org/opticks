@@ -12,22 +12,43 @@
 
 #include "AppConfig.h"
 #include "AppVerify.h"
-#include "PolygonPlotObjectImp.h"
 #include "DrawUtil.h"
-#include "Point.h"
+#include "glCommon.h"
 #include "PlotViewImp.h"
+#include "Point.h"
+#include "PolygonPlotObjectImp.h"
 
 #include <vector>
 #include <boost/shared_array.hpp>
 
-#if defined(UNIX_API)
-#define __stdcall
-#endif
-
 using namespace std;
 using XERCES_CPP_NAMESPACE_QUALIFIER DOMElement;
 
-std::vector<boost::shared_array<GLdouble> > PolygonPlotObjectImp::mCombinedVertices;
+namespace
+{
+   static std::vector<boost::shared_array<GLdouble> > sCombinedVertices;
+
+   extern "C" void combineVertexData(GLdouble coords[3], GLdouble* pVertexData[4], GLfloat weight[4], void** pOutData)
+   {
+      if (pOutData == NULL)
+      {
+         return;
+      }
+
+      boost::shared_array<GLdouble> vertex(new GLdouble[3]);
+      sCombinedVertices.push_back(vertex);
+
+      if (vertex.get() == NULL)
+      {
+         return;
+      }
+
+      vertex[0] = coords[0];
+      vertex[1] = coords[1];
+      vertex[2] = coords[2];
+      *pOutData = vertex.get();
+   }
+}
 
 PolygonPlotObjectImp::PolygonPlotObjectImp(PlotViewImp* pPlot, bool bPrimary) :
    PointSetImp(pPlot, bPrimary),
@@ -103,12 +124,12 @@ void PolygonPlotObjectImp::draw()
 
       gluTessCallback(pTess, GLU_TESS_BEGIN, (void (__stdcall *)(void)) glBegin);
       gluTessCallback(pTess, GLU_TESS_VERTEX, (void (__stdcall *)(void)) glVertex3dv);
-      gluTessCallback(pTess, GLU_TESS_COMBINE, (void (__stdcall *)(void)) PolygonPlotObjectImp::combineVertexData);
+      gluTessCallback(pTess, GLU_TESS_COMBINE, (void (__stdcall *)(void)) combineVertexData);
       gluTessCallback(pTess, GLU_TESS_END, glEnd);
       gluTessNormal(pTess, 0.0, 0.0, 1.0);
       gluTessBeginPolygon(pTess, NULL);
       gluTessBeginContour(pTess);
-      mCombinedVertices.clear();
+      sCombinedVertices.clear();
 
       for (unsigned int i = 0; i < points.size(); i++)
       {
@@ -122,14 +143,14 @@ void PolygonPlotObjectImp::draw()
             vertex[2] = 0.0;
 
             gluTessVertex(pTess, vertex.get(), vertex.get());
-            mCombinedVertices.push_back(vertex);
+            sCombinedVertices.push_back(vertex);
          }
       }
 
       gluTessEndContour(pTess);
       gluTessEndPolygon(pTess);
       gluDeleteTess(pTess);
-      mCombinedVertices.clear();
+      sCombinedVertices.clear();
 
       if (pPattern != NULL)
       {
@@ -484,27 +505,6 @@ void PolygonPlotObjectImp::setHatchStyle(const SymbolType& hatchStyle)
       emit legendPixmapChanged();
       notify(SIGNAL_NAME(Subject, Modified));
    }
-}
-
-void PolygonPlotObjectImp::combineVertexData(GLdouble coords[3], GLdouble* pVertexData[4], GLfloat weight[4], void** pOutData)
-{
-   if (pOutData == NULL)
-   {
-      return;
-   }
-
-   boost::shared_array<GLdouble> vertex(new GLdouble[3]);
-   mCombinedVertices.push_back(vertex);
-
-   if (vertex.get() == NULL)
-   {
-      return;
-   }
-
-   vertex[0] = coords[0];
-   vertex[1] = coords[1];
-   vertex[2] = coords[2];
-   *pOutData = vertex.get();
 }
 
 bool PolygonPlotObjectImp::toXml(XMLWriter* pXml) const

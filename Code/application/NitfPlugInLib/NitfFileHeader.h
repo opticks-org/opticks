@@ -128,6 +128,8 @@ namespace Nitf
          const std::string& ossimName);
 
    private:
+      FileHeader& operator=(const FileHeader& rhs);
+
       SETTING(OSTAID, FileHeader, std::string, APP_NAME);
       SETTING(ONAME, FileHeader, std::string, std::string());
       SETTING(OPHONE, FileHeader, std::string, std::string());

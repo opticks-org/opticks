@@ -188,7 +188,6 @@ bool PolylineObjectImp::hit(LocationType pixelCoord) const
    }
 
    const vector<LocationType>& vectices = getVertices();
-   int numLines = vectices.size();
    unsigned int ignorePos = 1;
    for (unsigned int i = 1; i < vectices.size() && bHit == false; ++i)
    {

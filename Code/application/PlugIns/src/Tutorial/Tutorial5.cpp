@@ -102,7 +102,8 @@ Tutorial5::~Tutorial5()
 
 bool Tutorial5::getInputSpecification(PlugInArgList*& pInArgList)
 {
-   VERIFY(pInArgList = Service<PlugInManagerServices>()->getPlugInArgList());
+   pInArgList = Service<PlugInManagerServices>()->getPlugInArgList();
+   VERIFY(pInArgList != NULL);
    pInArgList->addArg<Progress>(Executable::ProgressArg(), NULL, "Progress reporter");
    pInArgList->addArg<RasterElement>(Executable::DataElementArg(), "Perform edge detection on this data element");
    return true;
@@ -110,7 +111,8 @@ bool Tutorial5::getInputSpecification(PlugInArgList*& pInArgList)
 
 bool Tutorial5::getOutputSpecification(PlugInArgList*& pOutArgList)
 {
-   VERIFY(pOutArgList = Service<PlugInManagerServices>()->getPlugInArgList());
+   pOutArgList = Service<PlugInManagerServices>()->getPlugInArgList();
+   VERIFY(pOutArgList != NULL);
    pOutArgList->addArg<RasterElement>("Result", NULL);
    return true;
 }

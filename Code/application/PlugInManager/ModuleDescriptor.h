@@ -129,6 +129,9 @@ protected:
 
    std::vector<PlugInDescriptorImp*> mPlugins;
    DynamicModule* mpModule;
+
+private:
+   ModuleDescriptor(const ModuleDescriptor& rhs);
 };
 
 #define READ_FROM_STREAM(var) reader >> var; if (reader.status() != QDataStream::Ok) { return false; }

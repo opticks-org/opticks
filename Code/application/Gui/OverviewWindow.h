@@ -67,6 +67,8 @@ protected slots:
    void takeSnapshot();
 
 private:
+   OverviewWindow(const OverviewWindow& rhs);
+   OverviewWindow& operator=(const OverviewWindow& rhs);
    SpatialDataViewImp* mpView;
    SpatialDataViewImp* mpOverview;
    ZoomPanWidget* mpSelectionWidget;

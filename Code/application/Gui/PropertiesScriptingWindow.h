@@ -48,6 +48,8 @@ protected slots:
    void setErrorFont();
 
 private:
+   PropertiesScriptingWindow(const PropertiesScriptingWindow& rhs);
+   PropertiesScriptingWindow& operator=(const PropertiesScriptingWindow& rhs);
    ScriptingWindow* mpScriptingWindow;
 
    // General

@@ -26,7 +26,7 @@ DataRequestImp::~DataRequestImp()
 {
 }
 
-DataRequestImp::DataRequestImp(const DataRequestImp &rhs) :
+DataRequestImp::DataRequestImp(const DataRequestImp& rhs) :
    mInterleave(rhs.mInterleave),
    mInterleaveDefault(rhs.mInterleaveDefault),
    mStartRow(rhs.mStartRow),
@@ -56,8 +56,6 @@ bool DataRequestImp::validate(const RasterDataDescriptor *pDescriptor) const
    unsigned int numRows = pDescriptor->getRowCount();
    unsigned int numColumns = pDescriptor->getColumnCount();
    unsigned int numBands = pDescriptor->getBandCount();
-   unsigned int bytesPerElement = pDescriptor->getBytesPerElement();
-   unsigned int postLineBytes = 0;
 
    DimensionDescriptor startRow = getStartRow();
    DimensionDescriptor stopRow = getStopRow();

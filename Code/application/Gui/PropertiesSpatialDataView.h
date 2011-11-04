@@ -42,6 +42,8 @@ public:
    static bool isProduction();
 
 private:
+   PropertiesSpatialDataView(const PropertiesSpatialDataView& rhs);
+   PropertiesSpatialDataView& operator=(const PropertiesSpatialDataView& rhs);
    SpatialDataView* mpView;
 
    // Pan and zoom

@@ -53,6 +53,8 @@ public:
    hid_t getFileHandle();
 
 private:
+   Hdf5Pager& operator=(const Hdf5Pager& rhs);
+
    // file and data handles.
    hid_t mFileHandle;
    hid_t mDataHandle;

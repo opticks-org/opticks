@@ -29,6 +29,8 @@ public:
    TiePointTesterAlgorithm(RasterElement &rasterElement, Progress *pProgress, bool interactive);
 
 private:
+   TiePointTesterAlgorithm(const TiePointTesterAlgorithm& rhs);
+
    int findCubes(RasterElement* pCube[2]);
    void computeTiePoints(size_t xSize, size_t ySize, std::vector<TiePoint>& points);
    void addLayer(RasterElement *pCube, TiePointList *pList, bool isMission);

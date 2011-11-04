@@ -466,8 +466,8 @@ void SubsetWidget::setBands(const vector<DimensionDescriptor>& bands, const vect
    {
       QItemSelection totalSelection;
       bool inRange = false;
-      int rangeStart;
-      int rangeEnd;
+      int rangeStart = 0;
+      int rangeEnd = 0;
       for (unsigned int allBandIndex = 0, selectedBandIndex = 0;
          (allBandIndex < mBands.size()) && (selectedBandIndex < selectedBands.size());
          ++allBandIndex)
@@ -599,7 +599,6 @@ void SubsetWidget::customBandSelection()
       }
       else
       {
-         int totalBands = mpBandModel->rowCount();
          for (int i = startBand; i < endBand; ++i)
          {
             QModelIndex bandToSelect = mpBandModel->index(i);

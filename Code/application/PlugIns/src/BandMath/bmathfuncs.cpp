@@ -1018,7 +1018,6 @@ int eval(Progress* pProgress, vector<DataAccessor>& dataCubes, const vector<Enco
    }
 
    float* pReturnValue = NULL;
-   void* pCubeValue = NULL;
    vector<void*> cubeValues(dataCubes.size());
 
    for (i = 0; i < rows; i++)

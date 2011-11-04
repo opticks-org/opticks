@@ -22,8 +22,8 @@
 
 XERCES_CPP_NAMESPACE_USE
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove qDebug() calls " \
-   "after debugging is complete (tclarke)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove qDebug() calls " \
+//   "after debugging is complete (tclarke)")
 
 REGISTER_PLUGIN_BASIC(OpticksXmlRpc, XmlRpcServer);
 

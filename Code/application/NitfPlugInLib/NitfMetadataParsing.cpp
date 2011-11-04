@@ -60,7 +60,7 @@ bool Nitf::TrePlugInResource::parseTag(const ossimNitfRegisteredTag& input, Dyna
    {
       string errorMessage1;
       string errorMessage2;
-      parsed = pParser->toDynamicObject(input, output, errorMessage1);
+      parsed = pParser->ossimTagToDynamicObject(input, output, errorMessage1);
       if (!parsed)
       {
          stringstream strm;
@@ -95,7 +95,6 @@ bool Nitf::TrePlugInResource::writeTag(const DynamicObject& input, const ossim_u
    const ossimString& tagType, ossimNitfWriter& writer, string& errorMessage) const
 {
    bool success = false;
-   bool skipped = false;
    string tagName = getArgs().mPlugInName;
 
    // Check the list of excluded TREs to ensure that the config setting takes precedence over any existing plugins.
@@ -116,7 +115,7 @@ bool Nitf::TrePlugInResource::writeTag(const DynamicObject& input, const ossim_u
       pUnknown = PTR_CAST(ossimNitfUnknownTag, pTag.get());
    }
 
-   if (pUnknown == NULL && pParser != NULL && pParser->fromDynamicObject(input, *pTag, errorMessage))
+   if (pUnknown == NULL && pParser != NULL && pParser->ossimTagFromDynamicObject(input, *pTag, errorMessage))
    {
       success = true;
    }
@@ -199,8 +198,8 @@ bool Nitf::importMetadata(const unsigned int& currentImage, const Nitf::OssimFil
    const ossimNitfFileHeaderV2_X* pFileHeader, const ossimNitfImageHeaderV2_X* pImageSubheader,
    RasterDataDescriptor* pDescriptor, map<string, TrePlugInResource>& parsers, string& errorMessage)
 {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Separate the file header parsing " \
-   "from the subheader parsing (dadkins)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Separate the file header parsing " \
+//   "from the subheader parsing (dadkins)")
 
    VERIFY(pFileHeader != NULL && pImageSubheader != NULL && pDescriptor != NULL);
 
@@ -279,7 +278,7 @@ bool Nitf::importMetadata(const unsigned int& currentImage, const Nitf::OssimFil
    pMetadata->setAttributeByPath(Nitf::NITF_METADATA + "/" + Nitf::TRE_METADATA, *pTres.get());
    pMetadata->setAttributeByPath(Nitf::NITF_METADATA + "/" + Nitf::TRE_INFO_METADATA, *pTreInfo.get());
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Consider moving this into ChipConverter (leckels)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Consider moving this into ChipConverter (leckels)")
    // We have two equations of the form:
    // FI_x = a*OP_x + b*OP_y + c and
    // FI_y = d*OP_x + e*OP_y + f
@@ -395,7 +394,7 @@ bool Nitf::importMetadata(const unsigned int& currentImage, const Nitf::OssimFil
       }
       else
       {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : TODO: Error - unable to set values (leckels)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : TODO: Error - unable to set values (leckels)")
          return false;
       }
 

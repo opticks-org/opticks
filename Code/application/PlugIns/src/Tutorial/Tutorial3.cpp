@@ -60,7 +60,8 @@ Tutorial3::~Tutorial3()
 
 bool Tutorial3::getInputSpecification(PlugInArgList* &pInArgList)
 {
-   VERIFY(pInArgList = Service<PlugInManagerServices>()->getPlugInArgList());
+   pInArgList = Service<PlugInManagerServices>()->getPlugInArgList();
+   VERIFY(pInArgList != NULL);
    pInArgList->addArg<Progress>(Executable::ProgressArg(), NULL, "Progress reporter");
    pInArgList->addArg<RasterElement>(Executable::DataElementArg(), "Generate statistics for this raster element");
    return true;
@@ -68,7 +69,8 @@ bool Tutorial3::getInputSpecification(PlugInArgList* &pInArgList)
 
 bool Tutorial3::getOutputSpecification(PlugInArgList*& pOutArgList)
 {
-   VERIFY(pOutArgList = Service<PlugInManagerServices>()->getPlugInArgList());
+   pOutArgList = Service<PlugInManagerServices>()->getPlugInArgList();
+   VERIFY(pOutArgList != NULL);
    pOutArgList->addArg<double>("Minimum", "The minimum value");
    pOutArgList->addArg<double>("Maximum", "The maximum value");
    pOutArgList->addArg<unsigned int>("Count", "The number of pixels");

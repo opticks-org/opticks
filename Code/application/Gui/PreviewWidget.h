@@ -44,7 +44,7 @@ signals:
    void currentDatasetChanged(ImportDescriptor* pDataset);
 
 protected:
-   void progressUpdated(Subject& subject, const std::string& signal, const boost::any& data);
+   void progressUpdated(Subject& subject, const std::string& signal, const boost::any& value);
 
 protected slots:
    void displayPreviousFile();
@@ -56,6 +56,8 @@ protected slots:
    void updateCurrentDataset();
 
 private:
+   PreviewWidget(const PreviewWidget& rhs);
+   PreviewWidget& operator=(const PreviewWidget& rhs);
    QStackedWidget* mpStack;
 
    QLabel* mpFileLabel;

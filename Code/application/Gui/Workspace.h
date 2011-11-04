@@ -50,6 +50,8 @@ protected:
    void resizeEvent(QResizeEvent* e);
 
 private:
+   Workspace(const Workspace& rhs);
+   Workspace& operator=(const Workspace& rhs);
    bool mbCustomTiling;
    bool mMaxFirst;
    TilingType mTilingType;

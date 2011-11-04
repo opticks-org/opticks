@@ -36,6 +36,8 @@ protected slots:
    void heightEdited();
 
 private:
+   ViewResolutionWidget(const ViewResolutionWidget& rhs);
+   ViewResolutionWidget& operator=(const ViewResolutionWidget& rhs);
    QCheckBox* mpViewResolutionCheck;
    QLineEdit* mpWidthEdit;
    QLineEdit* mpHeightEdit;

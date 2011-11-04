@@ -66,6 +66,8 @@ protected:
    virtual void closeEvent(QCloseEvent* pEvent);
 
 private:
+   AspamViewerDialog(const AspamViewerDialog& rhs);
+   AspamViewerDialog& operator=(const AspamViewerDialog& rhs);
    AspamViewer* mpViewer;
    QComboBox* mpAspamList;
    QPushButton* mpUnloadButton;
@@ -130,6 +132,10 @@ public:
 
 protected:
    ParagraphGui(QWidget* pParent = NULL);
+
+private:
+   ParagraphGui(const ParagraphGui& rhs);
+   ParagraphGui& operator=(const ParagraphGui& rhs);
 };
 
 /**
@@ -148,6 +154,8 @@ public slots:
    void setData(const Aspam::ParagraphA& data, QTabWidget* pTabWidget);
 
 private:
+   ParagraphAgui(const ParagraphAgui& rhs);
+   ParagraphAgui& operator=(const ParagraphAgui& rhs);
    QLineEdit* mpSiteId;
 };
 
@@ -167,6 +175,8 @@ public slots:
    void setData(const Aspam::ParagraphB& data, QTabWidget* pTabWidget);
 
 private:
+   ParagraphBgui(const ParagraphBgui& rhs);
+   ParagraphBgui& operator=(const ParagraphBgui& rhs);
    QDateTimeEdit* mpDateTime;
 };
 
@@ -194,6 +204,8 @@ signals:
    void plotDataUpdated();
 
 private:
+   ParagraphDgui(const ParagraphDgui& rhs);
+   ParagraphDgui& operator=(const ParagraphDgui& rhs);
    QLineEdit* mpSurfaceVisibility;
    QSpinBox* mpTotalCoverage;
    QLineEdit* mpWindDirection;
@@ -230,6 +242,8 @@ signals:
    void plotDataUpdated();
 
 private:
+   ParagraphFgui(const ParagraphFgui& rhs);
+   ParagraphFgui& operator=(const ParagraphFgui& rhs);
    QLineEdit* mpLevel;
    QTableWidget* mpAnalytic;
    QPushButton* mpPlotButton;
@@ -253,6 +267,8 @@ public slots:
    void setData(const Aspam::ParagraphG& data, QTabWidget* pTabWidget);
 
 private:
+   ParagraphGgui(const ParagraphGgui& rhs);
+   ParagraphGgui& operator=(const ParagraphGgui& rhs);
    QTextEdit* mpRemarks;
 };
 
@@ -280,6 +296,8 @@ signals:
    void plotDataUpdated();
 
 private:
+   ParagraphHgui(const ParagraphHgui& rhs);
+   ParagraphHgui& operator=(const ParagraphHgui& rhs);
    QLineEdit* mpLevels;
    QComboBox* mpSeasonalDependence;
    QComboBox* mpStratosphericAerosol;
@@ -321,6 +339,8 @@ signals:
    void plotDataUpdated();
 
 private:
+   ParagraphJgui(const ParagraphJgui& rhs);
+   ParagraphJgui& operator=(const ParagraphJgui& rhs);
    QLineEdit* mpMaxTemperature;
    QLineEdit* mpMinTemperature;
    QLineEdit* mpSnowDepth;

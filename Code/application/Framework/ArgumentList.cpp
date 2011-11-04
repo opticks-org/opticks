@@ -108,13 +108,11 @@ void ArgumentList::set(int argc, char* argv[])
 string ArgumentList::getExecutableBaseName()
 {
    unsigned int slash;
-   unsigned int period;
-
    string name = getExecutableName();
 
 #if defined(WIN_API)
    slash = name.find_last_of("\\") + 1;
-   period = name.find_last_of(".");
+   unsigned int period = name.find_last_of(".");
    name = name.substr(slash, period - slash);
 #else
    slash = name.find_last_of("/") + 1;

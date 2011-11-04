@@ -52,6 +52,8 @@ protected slots:
    void updateFieldValues();
 
 private:
+   ShapeFileOptionsWidget(const ShapeFileOptionsWidget& rhs);
+   ShapeFileOptionsWidget& operator=(const ShapeFileOptionsWidget& rhs);
    ShapeFile* mpShapeFile;
    std::vector<AoiElement*> mAois;
    RasterElement* mpGeoref;

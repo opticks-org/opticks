@@ -133,8 +133,8 @@ vector<string> SessionItemImp::getPropertiesPages() const
    return mPropertiesPages;
 }
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : These should eventually be pure virtual, " \
-   "once all of the implementations are written (TJOHNSON)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : These should eventually be pure virtual, " \
+//   "once all of the implementations are written (TJOHNSON)")
 bool SessionItemImp::serialize(SessionItemSerializer &serializer) const
 {
    return false;

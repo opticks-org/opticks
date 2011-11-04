@@ -17,6 +17,9 @@ class IceRasterElementImporter : public IceImporterShell
 public:
    IceRasterElementImporter();
    ~IceRasterElementImporter();
+
+private:
+   IceRasterElementImporter& operator=(const IceRasterElementImporter& rhs);
 };
 
 #endif

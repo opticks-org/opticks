@@ -59,6 +59,8 @@ protected slots:
    void updateExtents();
 
 private:
+   LocatorImp(const LocatorImp& rhs);
+
    double mMinX;
    double mMinY;
    double mMaxX;

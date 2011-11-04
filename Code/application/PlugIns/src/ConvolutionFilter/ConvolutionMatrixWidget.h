@@ -80,6 +80,8 @@ protected:
    void loadFromConfigurationSettings();
 
 private:
+   ConvolutionMatrixWidget(const ConvolutionMatrixWidget& rhs);
+   ConvolutionMatrixWidget& operator=(const ConvolutionMatrixWidget& rhs);
    QIcon* mpLockIcon;
    QIcon* mpUnlockIcon;
    QMap<QString, QPair<NEWMAT::Matrix, double> > mPresets;

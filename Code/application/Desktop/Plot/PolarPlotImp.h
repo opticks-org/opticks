@@ -24,7 +24,8 @@ public:
       QWidget* pParent = 0);
    ~PolarPlotImp();
 
-   using SessionItemImp::setIcon;
+   using PlotViewImp::setName;
+   using PlotViewImp::setIcon;
 
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
@@ -32,10 +33,8 @@ public:
    static bool isKindOfView(const std::string& className);
    static void getViewTypes(std::vector<std::string>& classList);
 
-   PolarPlotImp& operator= (const PolarPlotImp& polarPlot);
    View* copy(QGLContext* pDrawContext = 0, QWidget* pParent = 0) const;
    bool copy(View *pView) const;
-   using ViewImp::setName;
 
    PlotType getPlotType() const;
 
@@ -51,6 +50,7 @@ public:
    bool fromXml(DOMNode* pDocument, unsigned int version);
 
 protected:
+   PolarPlotImp& operator=(const PolarPlotImp& polarPlot);
    void drawGridlines();
 
 protected slots:
@@ -58,6 +58,8 @@ protected slots:
    void setMinorGridlines(bool bShow);
 
 private:
+   PolarPlotImp(const PolarPlotImp& rhs);
+
    // Gridlines
    PolarGridlinesAdapter mGridlines;
 };

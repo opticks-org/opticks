@@ -85,6 +85,8 @@ public:
    }
 
 private:
+   OptionsLatLonLayer(const OptionsLatLonLayer& rhs);
+   OptionsLatLonLayer& operator=(const OptionsLatLonLayer& rhs);
    LatLonStyleComboBox* mpStyle;
    LineWidthComboBox* mpLineWidth;
    DmsFormatTypeComboBox* mpFormat;

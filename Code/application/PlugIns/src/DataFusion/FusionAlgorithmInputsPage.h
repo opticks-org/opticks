@@ -70,6 +70,9 @@ protected slots:
    void enableFusion();
 
 private:
+   FusionAlgorithmInputsPage(const FusionAlgorithmInputsPage& rhs);
+   FusionAlgorithmInputsPage& operator=(const FusionAlgorithmInputsPage& rhs);
+
    static const std::string FUSION_ROI_NAME;
 
    QLabel* mpCurrentMinX;

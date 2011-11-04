@@ -125,8 +125,12 @@ time_t DateTimeImp::getStructured() const
 
 double DateTimeImp::getSecondsSince(const DateTime& other) const
 {
-   DateTimeImp temp = reinterpret_cast<const DateTimeImp&> (other);
-   return difftime(mTime, temp.mTime);
+   const DateTimeImp* pTemp = dynamic_cast<const DateTimeImp*>(&other);
+   if (pTemp == NULL)
+   {
+      return 0.0;
+   }
+   return difftime(mTime, pTemp->mTime);
 }
 
 void DateTimeImp::setStructured(time_t fromTime)
@@ -212,13 +216,13 @@ bool DateTimeImp::set(unsigned short year, unsigned short month, unsigned short 
 bool DateTimeImp::set(const std::string &fromTime)
 {
    stringstream ft(fromTime);
-   unsigned int year;
-   unsigned int month;
-   unsigned int day;
-   unsigned int hour;
-   unsigned int min;
-   unsigned int sec;
-   char dummy;
+   unsigned short year = 0;
+   unsigned short month = 0;
+   unsigned short day = 0;
+   unsigned short hour = 0;
+   unsigned short min = 0;
+   unsigned short sec = 0;
+   char dummy = '\0';
    ft >> year >> dummy
       >> month >> dummy
       >> day;

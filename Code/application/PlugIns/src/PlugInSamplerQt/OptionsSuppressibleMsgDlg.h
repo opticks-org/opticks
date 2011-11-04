@@ -78,6 +78,9 @@ public:
    void applyChanges();
 
 private:
+   OptionsSuppressibleMsgDlg(const OptionsSuppressibleMsgDlg& rhs);
+   OptionsSuppressibleMsgDlg& operator=(const OptionsSuppressibleMsgDlg& rhs);
+
    std::vector<std::pair<std::string, std::string> > mDialogList;
    CustomTreeWidget* mpDialogTree;
 };

@@ -1820,7 +1820,7 @@ bool Nitf::BandsbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
          {
             case 'I':
             {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : BANDSB::APN Needs to be an int64 (lbeck)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : BANDSB::APN Needs to be an int64 (lbeck)")
                fieldName = BANDSB::APN + auxbStr + bandNumStr;
                readField<string>(input, output, success, fieldName, 10, errorMessage, buf);
                break;
@@ -1877,7 +1877,7 @@ bool Nitf::BandsbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
       {
          case 'I':
          {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : BANDSB::APN Needs to be an int64 (lbeck)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : BANDSB::APN Needs to be an int64 (lbeck)")
             fieldName = BANDSB::APN + auxcStr;
             readField<string>(input, output, success, fieldName, 10, errorMessage, buf);
             break;
@@ -1912,8 +1912,9 @@ bool Nitf::BandsbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
       }
    }
 
-   int numRead = input.tellg();
-   if (numRead != numBytes)
+   int64_t numRead = input.tellg();
+   if (numRead < 0 || numRead > static_cast<int64_t>(std::numeric_limits<size_t>::max()) ||
+      numRead != static_cast<int64_t>(numBytes))
    {
       numReadErrMsg(numRead, numBytes, errorMessage);
       return false;
@@ -2629,7 +2630,7 @@ Nitf::TreState Nitf::BandsbParser::isTreValid(const DynamicObject& tre, ostream&
 
       status = MaxState(status, testTagValidBcsASet(bapf, reporter, testSet, false, false, true));
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Test against DIGEST Edition 2.1, Part 3-7 (lbeck)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Test against DIGEST Edition 2.1, Part 3-7 (lbeck)")
       fieldName = BANDSB::UBAP + auxbStr;
       testSet.clear();
       status = MaxState(status, testTagValidBcsASet(tre, reporter, &numFields, fieldName, testSet, true, true, false));
@@ -2644,7 +2645,7 @@ Nitf::TreState Nitf::BandsbParser::isTreValid(const DynamicObject& tre, ostream&
          {
             case 'I':
             {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : BANDSB::APN Needs to be an int64 (lbeck)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : BANDSB::APN Needs to be an int64 (lbeck)")
                fieldName = BANDSB::APN + auxbStr + bandNumStr;
                testSet.clear();
                // Don't need to test range because it is min to max int.
@@ -2714,7 +2715,7 @@ Nitf::TreState Nitf::BandsbParser::isTreValid(const DynamicObject& tre, ostream&
 
       if (status != INVALID)
       {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Test against DIGEST Edition 2.1, Part 3-7 (lbeck)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Test against DIGEST Edition 2.1, Part 3-7 (lbeck)")
          fieldName = BANDSB::UCAP + auxcStr;
          testSet.clear();
          status = MaxState(status, testTagValidBcsASet(tre, reporter,
@@ -2725,7 +2726,7 @@ Nitf::TreState Nitf::BandsbParser::isTreValid(const DynamicObject& tre, ostream&
       {
          case 'I':
          {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : BANDSB::APN Needs to be an int64 (lbeck)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : BANDSB::APN Needs to be an int64 (lbeck)")
             fieldName = BANDSB::APN + auxcStr;
             testSet.clear();
             // Don't need to test range because it is min to max int.
@@ -2786,7 +2787,11 @@ Nitf::TreState Nitf::BandsbParser::isTreValid(const DynamicObject& tre, ostream&
 bool Nitf::BandsbParser::fromDynamicObject(const DynamicObject& input, ostream& output, size_t& numBytesWritten,
    string &errorMessage) const
 {
-   size_t sizeIn = max(static_cast<ostream::pos_type>(0), output.tellp());
+   if (output.tellp() < 0 || output.tellp() > static_cast<int64_t>(std::numeric_limits<size_t>::max()))
+   {
+      return false;
+   }
+   size_t sizeIn = max<size_t>(0, static_cast<size_t>(output.tellp()));
    size_t sizeOut(sizeIn);
 
    try
@@ -3262,7 +3267,7 @@ bool Nitf::BandsbParser::fromDynamicObject(const DynamicObject& input, ostream& 
             {
                case 'I':
                {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : BANDSB::APN Needs to be an int64 (lbeck)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : BANDSB::APN Needs to be an int64 (lbeck)")
                   fieldName = BANDSB::APN + auxbStr + bandNumStr;
                   output << sizeString(dv_cast<string>(input.getAttribute(fieldName)), 10);
                   break;
@@ -3309,7 +3314,7 @@ bool Nitf::BandsbParser::fromDynamicObject(const DynamicObject& input, ostream& 
          {
             case 'I':
             {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : BANDSB::APN Needs to be an int64 (lbeck)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : BANDSB::APN Needs to be an int64 (lbeck)")
                fieldName = BANDSB::APN + auxcStr;
                output << sizeString(dv_cast<string>(input.getAttribute(fieldName)), 10);
                break;
@@ -3341,7 +3346,11 @@ bool Nitf::BandsbParser::fromDynamicObject(const DynamicObject& input, ostream& 
       return false;
    }
 
-   sizeOut = output.tellp();
+   if (output.tellp() < 0 || output.tellp() > static_cast<int64_t>(std::numeric_limits<size_t>::max()))
+   {
+      return false;
+   }
+   sizeOut = static_cast<size_t>(output.tellp());
    numBytesWritten = sizeOut - sizeIn;
    return true;
 }

@@ -7,12 +7,12 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "DynamicObjectImp.h"
 #include "AppConfig.h"
 #include "AppVerify.h"
 #include "DateTimeImp.h"
 #include "DynamicObject.h"
 #include "DynamicObjectAdapter.h"
+#include "DynamicObjectImp.h"
 #include "FilenameImp.h"
 #include "ObjectResource.h"
 #include "SpecialMetadata.h"

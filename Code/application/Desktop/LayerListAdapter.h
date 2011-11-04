@@ -24,6 +24,10 @@ public:
    bool isKindOf(const std::string& className) const;
 
    LAYERLISTADAPTER_METHODS(LayerListImp)
+
+private:
+   LayerListAdapter(const LayerListAdapter& rhs);
+   LayerListAdapter& operator=(const LayerListAdapter& rhs);
 };
 
 #endif

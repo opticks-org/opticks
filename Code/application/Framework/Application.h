@@ -40,6 +40,8 @@ protected:
    Progress* mpProgress;
 
 private:
+   Application& operator=(const Application& rhs);
+
    QCoreApplication& mApplication;
    bool mXmlInitialized;
 };

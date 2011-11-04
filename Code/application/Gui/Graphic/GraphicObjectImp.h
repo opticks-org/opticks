@@ -160,7 +160,7 @@ public:
    bool setImageFile(const char *pFilename);
    const char* getImageFile() const;
    virtual bool setObjectImage(const unsigned int* pData, int width, int height,
-      ColorType transparent = ColorType(-1, -1, -1));
+      ColorType transparent = ColorType());
    virtual const unsigned int* getObjectImage(int& width, int& height, ColorType& transparent) const;
    double getAlpha() const;
    bool setAlpha(double alpha);
@@ -289,6 +289,8 @@ protected:
    AttachmentPtr<GraphicLayer> mpLayer;
 
 private:
+   GraphicObjectImp(const GraphicObjectImp& rhs);
+   GraphicObjectImp& operator=(const GraphicObjectImp& rhs);
    void adjustHandles(int handle, LocationType point, bool bMaintainAspect);
 
    std::map<std::string, GraphicProperty*> mProperties;
@@ -302,6 +304,8 @@ private:
 #define GRAPHICOBJECTADAPTER_METHODS(impClass) \
    SESSIONITEMADAPTER_METHODS(impClass) \
    SUBJECTADAPTER_METHODS(impClass) \
+   using impClass::getPixels; \
+   using impClass::setFont; \
    GraphicObjectType getGraphicObjectType() const \
    { \
       return impClass::getGraphicObjectType(); \

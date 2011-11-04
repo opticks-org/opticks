@@ -22,6 +22,8 @@ public:
    DimensionObjectImp(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer, LocationType pixelCoord);
    ~DimensionObjectImp();
 
+   using PixelObjectImp::getPixels;
+
    void drawVector(double zoomFactor) const;
    void drawPixels(double zoomFactor) const;
 
@@ -50,7 +52,6 @@ public:
 
    void moveHandle(int handle, LocationType pixel, bool bMaintainAspect = false);
 
-   using PixelObjectImp::getPixels;
    const BitMask* getPixels(int iStartColumn, int iStartRow, int iEndColumn, int iEndRow);
 
    bool toXml(XMLWriter* pXml) const;
@@ -77,10 +78,13 @@ public:
       int y(int mainDim, int secondDim) const;
 
    private:
+      DimensionSwitcher& operator=(const DimensionSwitcher& rhs);
       GraphicObjectType mType;
    };
 
 private:
+   DimensionObjectImp(const DimensionObjectImp& rhs);
+   DimensionObjectImp& operator=(const DimensionObjectImp& rhs);
    std::vector <int> mSelectedDims;
    int mInsertingDim;
    bool mInserting;

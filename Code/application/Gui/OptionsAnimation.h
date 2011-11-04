@@ -89,6 +89,8 @@ protected slots:
    void editFrameSpeedFinished(QListWidgetItem *pCurrentItem);
 
 private:
+   OptionsAnimation(const OptionsAnimation& rhs);
+   OptionsAnimation& operator=(const OptionsAnimation& rhs);
    QCheckBox* mpCanDropFrames;
    AnimationCycleButton* mpCycle;
    QListWidget* mpFrameSpeedList;

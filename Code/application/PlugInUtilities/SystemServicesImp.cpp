@@ -58,7 +58,7 @@ void SystemServicesImp::WriteLogInfo(string message)
 {
    if (mLoggingActive)
    {
-      syslog(LOG_INFO, message.c_str());
+      syslog(LOG_INFO, "%s", message.c_str());
    }
 }
 
@@ -66,7 +66,7 @@ void SystemServicesImp::WriteLogWarning(string message)
 {
    if (mLoggingActive)
    {
-      syslog(LOG_WARNING, message.c_str());
+      syslog(LOG_WARNING, "%s", message.c_str());
    }
 }
 
@@ -74,7 +74,7 @@ void SystemServicesImp::WriteLogError(string message)
 {
    if (mLoggingActive)
    {
-      syslog(LOG_ERR, message.c_str());
+      syslog(LOG_ERR, "%s", message.c_str());
    }
 }
 

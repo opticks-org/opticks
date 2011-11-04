@@ -40,6 +40,7 @@ class SessionItem;
 class ExportAgent : public ExecutableAgent
 {
 public:
+   using ExecutableAgent::instantiate;
 
    /**
     *  Creates an invalid object for delayed initialization of an ExportAgent.

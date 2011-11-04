@@ -137,7 +137,6 @@ bool SampleGeoref::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList
 
    unsigned int rows = pDescriptor->getRowCount();
    unsigned int cols = pDescriptor->getColumnCount();
-   unsigned int bands = pDescriptor->getBandCount();
 
    mXScale = static_cast<double>(mXSize) / rows;
    mYScale = static_cast<double>(mYSize) / cols;

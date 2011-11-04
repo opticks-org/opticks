@@ -307,7 +307,7 @@ bool ColorMap::deserialize(QIODevice &io)
       colorMap.push_back(ColorType(red, green, blue, alpha));
    }
 
-   if (version == 1 && colorMap.size() != VERSION_ONE_TABLE_SIZE)
+   if (version == 1 && (colorMap.size() != VERSION_ONE_TABLE_SIZE))
    {
       return false;
    }
@@ -395,7 +395,7 @@ bool ColorMap::deserializeGradient(QIODevice &io, int version)
    {
       return false;
    }
-   int i = 0;
+   unsigned int i = 0;
    for (i = 0; ; ++i)
    {
       int count = 0;
@@ -463,7 +463,7 @@ bool ColorMap::setTable(const std::string& name, const std::vector<ColorType>& t
 std::vector<ColorType> ColorMap::tableFromGradient(const Gradient &gradient)
 {
    std::vector<ColorType> colormap;
-   if (gradient.mControls.size() < 2 || gradient.mControls.size() > Gradient::MAX_CONTROLS)
+   if (gradient.mControls.size() < 2 || (gradient.mControls.size() > Gradient::MAX_CONTROLS))
    {
       return colormap;
    }
@@ -553,7 +553,7 @@ void ColorMap::resetToDefault()
 {
    mTable.clear();
    mTable.reserve(VERSION_ONE_TABLE_SIZE);
-   int i;
+   unsigned int i;
    for (i = 0; i < VERSION_ONE_TABLE_SIZE; ++i)
    {
       mTable.push_back(ColorType(i, i, i));

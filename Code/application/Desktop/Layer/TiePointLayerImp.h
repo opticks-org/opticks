@@ -39,7 +39,6 @@ public:
    bool fromXml(DOMNode* pDocument, unsigned int version);
 
    LayerType getLayerType() const;
-   using LayerImp::setName;
 
    std::vector<ColorType> getColors() const;
    void draw();
@@ -74,6 +73,8 @@ signals:
    void labelEnabledChanged(bool bEnabled);
 
 private:
+   TiePointLayerImp(const TiePointLayerImp& rhs);
+
    int drawSymbols(const std::vector<TiePoint> &points, double sceneSymbolSize, const int viewableBounds[4]) const;
    void drawLabels(const std::vector<TiePoint>& points, double sceneSymbolSize, const int viewableBounds[4]) const;
    void drawSymbol(const LocationType& point, double symbolSize) const;

@@ -46,6 +46,8 @@ protected:
    void showEvent(QShowEvent* pEvent);
 
 private:
+   SignatureFilterDlg(const SignatureFilterDlg& rhs);
+   SignatureFilterDlg& operator=(const SignatureFilterDlg& rhs);
    QLineEdit* mpFilterNameEdit;
    QCheckBox* mpLibrarySignatureCheck;
    FilterWidget* mpSignatureNameFilter;

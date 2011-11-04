@@ -32,6 +32,17 @@ class DateTime;
 namespace Nitf
 {
    /**
+    * Returns the string representation of the given RPC coefficient.
+    *
+    * @param prefix
+    *        The prefix for the coefficient name.
+    * @param num
+    *        The coefficient number to get [1, 20].
+    * @return string representation of the coefficient.
+    */
+   std::string getRpcCoefficient(const std::string& prefix, const unsigned int& num);
+
+   /**
     * Determine the least trusted state of the provided TreStates.
     *
     * @param stateA
@@ -752,7 +763,7 @@ namespace Nitf
                {
                   // We need the abs(num) but the overloaded abs() function is ambiguous 
                   // in this template so use "?" operator on a known type
-                  double ans(num);
+                  double ans = static_cast<double>(num);
                   ans = (ans >= 0 ? ans : -ans);
 
                   expSize = 3;
@@ -922,7 +933,7 @@ namespace Nitf
    }
 
    //
-   inline bool numReadErrMsg(int numRead, int numBytes, std::string& errorMessage)
+   inline bool numReadErrMsg(int64_t numRead, int64_t numBytes, std::string& errorMessage)
    {
       std::string numB;
       std::string numR;

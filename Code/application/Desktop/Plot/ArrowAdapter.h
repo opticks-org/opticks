@@ -25,6 +25,9 @@ public:
    bool isKindOf(const std::string& className) const;
 
    ARROWADAPTER_METHODS(ArrowImp)
+
+private:
+   ArrowAdapter(const ArrowAdapter& rhs);
 };
 
 #endif

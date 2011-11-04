@@ -288,6 +288,8 @@ public:
    virtual XmlRpcArrayParam *getSignature();
 
 private:
+   RegisterCallback& operator=(const RegisterCallback& rhs);
+
    XmlRpcServer& mServer;
    std::list<XmlRpcCallback*> mCallbacks;
 };

@@ -30,6 +30,8 @@
 class OrthographicView : public View
 {
 public:
+   using View::getPixelSize;
+
    /**
     *  Emitted when the viewable area changes.
     */

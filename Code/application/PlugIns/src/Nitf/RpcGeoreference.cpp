@@ -69,7 +69,7 @@ namespace
    {
       bool operator()(const DynamicObject& dynObj)
       {
-         return dynObj.getAttribute(getCoefficient(LINE_NUMERATOR_COEF_PREFIX, 1)).getPointerToValue<double>() != NULL;
+         return dynObj.getAttribute(getRpcCoefficient(LINE_NUMERATOR_COEF_PREFIX, 1)).getPointerToValue<double>() != NULL;
       }
    };
 }
@@ -158,22 +158,22 @@ bool Nitf::RpcGeoreference::execute(PlugInArgList* pInParam, PlugInArgList* pOut
    {
       for (int i = 0; i < NUM_RPC_COEFFICIENTS; i++)
       {
-         istringstream vstrm(pRpc->getAttribute(getCoefficient(LINE_NUMERATOR_COEF_PREFIX, i+1)).toXmlString());
+         istringstream vstrm(pRpc->getAttribute(getRpcCoefficient(LINE_NUMERATOR_COEF_PREFIX, i+1)).toXmlString());
          vstrm >> lineRPCnumCoefficients[i];
       }
       for (int i = 0; i < NUM_RPC_COEFFICIENTS; i++)
       {
-         istringstream vstrm(pRpc->getAttribute(getCoefficient(LINE_DENOMINATOR_COEF_PREFIX, i+1)).toXmlString());
+         istringstream vstrm(pRpc->getAttribute(getRpcCoefficient(LINE_DENOMINATOR_COEF_PREFIX, i+1)).toXmlString());
          vstrm >> lineRPCdenCoefficients[i];
       }
       for (int i = 0; i < NUM_RPC_COEFFICIENTS; i++)
       {
-         istringstream vstrm(pRpc->getAttribute(getCoefficient(SAMPLE_NUMERATOR_COEF_PREFIX, i+1)).toXmlString());
+         istringstream vstrm(pRpc->getAttribute(getRpcCoefficient(SAMPLE_NUMERATOR_COEF_PREFIX, i+1)).toXmlString());
          vstrm >> sampRPCnumCoefficients[i];
       }
       for (int i = 0; i < NUM_RPC_COEFFICIENTS; i++)
       {
-         istringstream vstrm(pRpc->getAttribute(getCoefficient(SAMPLE_DENOMINATOR_COEF_PREFIX, i+1)).toXmlString());
+         istringstream vstrm(pRpc->getAttribute(getRpcCoefficient(SAMPLE_DENOMINATOR_COEF_PREFIX, i+1)).toXmlString());
          vstrm >> sampRPCdenCoefficients[i];
       }
 
@@ -366,9 +366,6 @@ LocationType Nitf::RpcGeoreference::geoToPixel(LocationType geo, bool* pAccurate
 
 const DynamicObject* Nitf::RpcGeoreference::getRpcInstance(RasterElement *pRaster) const
 {
-   int i = 0;
-   bool found = false;
-
    if (pRaster != NULL)
    {
       DataDescriptor* pDd = pRaster->getDataDescriptor();

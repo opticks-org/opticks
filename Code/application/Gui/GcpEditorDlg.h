@@ -57,7 +57,7 @@ public:
     */
    ~GcpEditorDlg();
 
-   void elementModified(Subject& subject, const std::string& signal, const boost::any& data);
+   void elementModified(Subject& subject, const std::string& signal, const boost::any& value);
    void attached(Subject& subject, const std::string& signal, const Slot& slot);
 
 public slots:
@@ -256,6 +256,8 @@ protected slots:
    void apply();
 
 private:
+   GcpEditorDlg(const GcpEditorDlg& rhs);
+   GcpEditorDlg& operator=(const GcpEditorDlg& rhs);
    QTreeWidgetItem* insertGcp(const GcpPoint& point);
 
    QComboBox* mpListCombo;

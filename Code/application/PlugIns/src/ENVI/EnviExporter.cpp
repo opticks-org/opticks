@@ -626,8 +626,8 @@ bool EnviExporter::exportHeaderFile() const
          const vector<DimensionDescriptor>& cols = pFileDescriptor->getColumns();
          if (!rows.empty() && !cols.empty())
          {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This functionality should be moved into a method in a " \
-   "new RasterElementExporterShell class (dsulgrov)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This functionality should be moved into a method in a " \
+//   "new RasterElementExporterShell class (dsulgrov)")
             list<GcpPoint> gcps;
             unsigned int startRow = rows.front().getActiveNumber();
             unsigned int endRow = rows.back().getActiveNumber();

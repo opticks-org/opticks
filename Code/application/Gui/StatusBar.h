@@ -30,8 +30,8 @@ public:
    StatusBar(QWidget* parent = 0);
    ~StatusBar();
 
-   void optionsModified(Subject &subject, const std::string &signal, const boost::any &data);
-   void attached(Subject &subject, const std::string &signal, const Slot &slot);
+   void optionsModified(Subject& subject, const std::string& signal, const boost::any& value);
+   void attached(Subject& subject, const std::string& signal, const Slot& slot);
 
    bool arePixelCoordsShown();
    bool areGeoCoordsShown();
@@ -76,6 +76,8 @@ protected slots:
    void updateDisplayedWidgets();
 
 private:
+   StatusBar(const StatusBar& rhs);
+   StatusBar& operator=(const StatusBar& rhs);
    QLabel* m_pResultValue_Label;
    QLabel* m_pCubeValue_Label;
    QLabel* m_pCoordinates_Label;

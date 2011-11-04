@@ -43,7 +43,7 @@ QString AebEntry::getFilePath() const
    return mFilePath;
 }
 
-size_t AebEntry::getFileSize() const
+int64_t AebEntry::getFileSize() const
 {
    return mFileSize;
 }
@@ -517,6 +517,7 @@ public:
    }
 
 private:
+   QOpenFileResource& operator=(const QOpenFileResource& rhs);
    QFile& mFile;
    bool mRetValue;
 };
@@ -635,32 +636,28 @@ const AebEntry* AebIo::getEntry(const QUrl& aebUrl) const
       }
       return new FsAebEntry(upath, file.size(), absoluteFilePath);
    }
-   else
+   openZipFileIfNeeded();
+   if (!mZipFile.get())
    {
-      openZipFileIfNeeded();
-      if (!mZipFile.get())
-      {
-         return NULL;
-      }
-      // remove the initial / since an aeb: URL is really relative to the zip file
-      QString upath = aebUrl.path().remove(0, 1);
-      if (unzLocateFile(*mZipFile, upath.toAscii(), 0) != UNZ_OK)
-      {
-         return NULL;
-      }
-      unz_file_info file_info;
-      if (unzGetCurrentFileInfo(*mZipFile, &file_info, NULL, 0, NULL, 0, NULL, 0) != UNZ_OK)
-      {
-         return NULL;
-      }
-      unz_file_pos zipPosition;
-      if (unzGetFilePos(*mZipFile, &zipPosition) != UNZ_OK)
-      {
-         return NULL;
-      }
-      return new ZipAebEntry(upath, file_info.uncompressed_size, zipPosition);
+      return NULL;
    }
-   return NULL;
+   // remove the initial / since an aeb: URL is really relative to the zip file
+   QString upath = aebUrl.path().remove(0, 1);
+   if (unzLocateFile(*mZipFile, upath.toAscii(), 0) != UNZ_OK)
+   {
+      return NULL;
+   }
+   unz_file_info file_info;
+   if (unzGetCurrentFileInfo(*mZipFile, &file_info, NULL, 0, NULL, 0, NULL, 0) != UNZ_OK)
+   {
+      return NULL;
+   }
+   unz_file_pos zipPosition;
+   if (unzGetFilePos(*mZipFile, &zipPosition) != UNZ_OK)
+   {
+      return NULL;
+   }
+   return new ZipAebEntry(upath, file_info.uncompressed_size, zipPosition);
 }
 
 bool AebIo::installFileFromAeb(const AebEntry* pSource, const std::string& destination) const
@@ -717,7 +714,7 @@ bool AebIo::installFileFromAeb(const AebEntry* pSource, const std::string& desti
             return false;
          }
       }
-      while (bytesRead == COPY_BUF_SIZE);
+      while (static_cast<unsigned int>(bytesRead) == COPY_BUF_SIZE);
       return true;
    }
 }
@@ -764,7 +761,7 @@ bool AebIo::compareFileInAeb(const AebEntry* pSource, const std::string& destina
             return false;
          }
       }
-      while (sourceBytesRead == COPY_BUF_SIZE);
+      while (static_cast<unsigned int>(sourceBytesRead) == COPY_BUF_SIZE);
       return true;
    }
    else
@@ -815,7 +812,7 @@ bool AebIo::compareFileInAeb(const AebEntry* pSource, const std::string& destina
             return false;
          }
       }
-      while (sourceBytesRead == COPY_BUF_SIZE);
+      while (static_cast<unsigned int>(sourceBytesRead) == COPY_BUF_SIZE);
       return true;
    }
 }

@@ -41,6 +41,9 @@ protected slots:
    void enableCustomMouseMode(bool bEnable);
 
 private:
+   MouseModeTestGui(const MouseModeTestGui& rhs);
+   MouseModeTestGui& operator=(const MouseModeTestGui& rhs);
+
    QRadioButton* mpNoModeRadio;
    QRadioButton* mpLayerRadio;
    QRadioButton* mpMeasurementRadio;

@@ -39,7 +39,8 @@ public:
       QWidget* parent = 0);
    ~ProductViewImp();
 
-   using SessionItemImp::setIcon;
+   using PerspectiveViewImp::setIcon;
+   using PerspectiveViewImp::setName;
 
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
@@ -47,12 +48,10 @@ public:
    static bool isKindOfView(const std::string& className);
    static void getViewTypes(std::vector<std::string>& classList);
 
-   ProductViewImp& operator= (const ProductViewImp& productView);
    View* copy(QGLContext* drawContext = 0, QWidget* parent = 0) const;
    bool copy(View *pView) const;
 
    ViewType getViewType() const;
-   using ViewImp::setName;
 
    void getPaperSize(double& dWidth, double& dHeight) const;
    QColor getPaperColor() const;
@@ -97,6 +96,7 @@ signals:
    void editViewChanged(View* pView);
 
 protected:
+   ProductViewImp& operator=(const ProductViewImp& productView);
    bool event(QEvent* pEvent);
    void showEvent(QShowEvent* pEvent);
    void toolTipEvent(QHelpEvent* pEvent);
@@ -123,6 +123,8 @@ protected slots:
    virtual void toggleMousePanByKey();
 
 private:
+   ProductViewImp(const ProductViewImp& rhs);
+
    void connectLayers();
 
    AttachmentPtr<SessionExplorer> mpExplorer;

@@ -30,6 +30,9 @@ public:
       DataElement* pParent = NULL) const;
 
    AOILAYERADAPTER_METHODS(AoiLayerImp)
+
+private:
+   AoiLayerAdapter(const AoiLayerAdapter& rhs);
 };
 
 #endif

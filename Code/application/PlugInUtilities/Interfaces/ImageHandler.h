@@ -81,6 +81,10 @@ protected:
     */
    MuHttpServer::Response getRequest(const QString &uri, const QString &contentType, const QString &body,
       const FormValueMap &form);
+
+private:
+   ImageHandler(const ImageHandler& rhs);
+   ImageHandler& operator=(const ImageHandler& rhs);
 };
 
 #endif

@@ -24,6 +24,10 @@ public:
    bool isKindOf(const std::string& className) const;
 
    HISTOGRAMWINDOWADAPTER_METHODS(HistogramWindowImp)
+
+private:
+   HistogramWindowAdapter(const HistogramWindowAdapter& rhs);
+   HistogramWindowAdapter& operator=(const HistogramWindowAdapter& rhs);
 };
 
 #endif

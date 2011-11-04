@@ -33,6 +33,10 @@ public:
    bool fromXml(DOMNode* pDocument, unsigned int version);
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
+
+private:
+   WidgetImageObjectImp(const WidgetImageObjectImp& rhs);
+   WidgetImageObjectImp& operator=(const WidgetImageObjectImp& rhs);
 };
 
 #define WIDGETIMAGEOBJECTADAPTEREXTENSION_CLASSES \

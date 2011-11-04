@@ -23,6 +23,18 @@
 using namespace std;
 using boost::lexical_cast;
 
+std::string Nitf::getRpcCoefficient(const std::string& prefix, const unsigned int& num)
+{
+   if (num < 1 || num > 20)
+   {
+      throw std::out_of_range("getRpcCoefficient: num must be between 1 and 20!");
+   }
+
+   std::ostringstream strm;
+   strm << prefix << std::setw(2) << std::setfill('0') << num;
+   return strm.str();
+}
+
 Nitf::TreState Nitf::MaxState(Nitf::TreState stateA, Nitf::TreState stateB)
 {
    if (stateA > stateB)
@@ -138,7 +150,7 @@ bool Nitf::DtgParseCCYYMMDDssss(const std::string& date,
                                 DateTime* pDateTime,
                                 float& secondsInDay)
 {
-   secondsInDay = -1;
+   secondsInDay = 0.0f;
    unsigned short year;
    unsigned short month;
    unsigned short day;
@@ -155,6 +167,10 @@ bool Nitf::DtgParseCCYYMMDDssss(const std::string& date,
       month = lexical_cast<unsigned short>(date.substr(4, 2));
       day = lexical_cast<unsigned short>(date.substr(6, 2));
       secondsInDay = lexical_cast<float>(time);
+      if (secondsInDay < 0.0f || secondsInDay > 86400.0f)
+      {
+         secondsInDay = 0.0f;
+      }
       second = secondsInDay;
       hour = static_cast<unsigned short>(second / 3600);
       second -= hour * 3600;
@@ -191,7 +207,7 @@ bool Nitf::DtgParseCCYYMMDDssss(const std::string& date,
       return false;
    }
 
-   return pDateTime != NULL && pDateTime->set(year, month, day, hour, minute, second);
+   return pDateTime != NULL && pDateTime->set(year, month, day, hour, minute, static_cast<unsigned short>(second));
 }
 
 bool Nitf::DtgParseCCYYMMDDhhmmss(const string &fDTG, 
@@ -795,7 +811,7 @@ bool Nitf::readFromStream(istream& strm, vector<char>& buf, streamsize count, bo
       {
          ++count;
       }
-      buf.resize(count);
+      buf.resize(static_cast<vector<char>::size_type>(count));
       memset(&buf.front(), 0, buf.size());
       if (bStr == true)
       {
@@ -951,9 +967,23 @@ bool Nitf::isClassificationValidForExport(const Classification& classification, 
    }
 
    vector<string> invalidFields;
-   char* ppFieldNames[] = {"Level", "System", "Codewords", "FileControl", "FileReleasing", "ClassificationReason",
-      "DeclassificationType", "DeclassificationDate", "DeclassificationExemption", "FileDowngrade", "DowngradeDate",
-      "Description", "Authority", "AuthorityType", "SecuritySourceDate", "SecurityControlNumber", "FileCopyNumber",
+   const char* ppFieldNames[] = { "Level",
+      "System",
+      "Codewords",
+      "FileControl",
+      "FileReleasing",
+      "ClassificationReason",
+      "DeclassificationType",
+      "DeclassificationDate",
+      "DeclassificationExemption",
+      "FileDowngrade",
+      "DowngradeDate",
+      "Description",
+      "Authority",
+      "AuthorityType",
+      "SecuritySourceDate",
+      "SecurityControlNumber",
+      "FileCopyNumber",
       "FileNumberOfCopies" };
    vector<string> fieldNames(&ppFieldNames[0], &ppFieldNames[sizeof(ppFieldNames)/sizeof(ppFieldNames[0])]);
    vector<string>::const_iterator iter;

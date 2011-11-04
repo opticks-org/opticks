@@ -28,6 +28,10 @@ signals:
 
 private slots:
    void translateChange(const QString&);
+
+private:
+   AnimationCycleGrid(const AnimationCycleGrid& rhs);
+   AnimationCycleGrid& operator=(const AnimationCycleGrid& rhs);
 };
 
 class AnimationCycleButton : public PixmapGridButton
@@ -42,6 +46,10 @@ public:
 
 signals:
    void valueChanged(AnimationCycle value);
+
+private:
+   AnimationCycleButton(const AnimationCycleButton& rhs);
+   AnimationCycleButton& operator=(const AnimationCycleButton& rhs);
 };
 
 #endif

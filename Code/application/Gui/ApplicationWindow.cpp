@@ -1338,7 +1338,7 @@ bool ApplicationWindow::isKindOf(const string& className) const
    return SubjectAdapter::isKindOf(className);
 }
 
-void ApplicationWindow::windowRemoved(Subject &subject, const string &signal, const boost::any &data)
+void ApplicationWindow::windowRemoved(Subject& subject, const string& signal, const boost::any& value)
 {
    Window *pWindow = dynamic_cast<Window*>(&subject);
    if (NN(pWindow))
@@ -2642,36 +2642,32 @@ bool ApplicationWindow::saveSession()
    {
       return saveSessionAs();
    }
-   else
+   ProgressAdapter progress;
+   Service<DesktopServices>()->createProgressDialog("Save Session", &progress);
+   pair<SessionManager::SerializationStatus,vector<pair<SessionItem*, string> > > status =
+      pManager->serialize(mSessionFilename, &progress);
+   if (status.first == SessionManager::FAILURE) 
    {
-      ProgressAdapter progress;
-      Service<DesktopServices>()->createProgressDialog("Save Session", &progress);
-      pair<SessionManager::SerializationStatus,vector<pair<SessionItem*, string> > > status =
-         pManager->serialize(mSessionFilename, &progress);
-      if (status.first == SessionManager::FAILURE) 
-      {
-         progress.updateProgress("Session saving failed.", 0, ERRORS);
-         return false;
-      }
-      else if (status.first == SessionManager::LOCKED)
-      {
-         progress.updateProgress("Session saving is temporarily locked.", 0, ERRORS);
-         return false;
-      }
-      Service<MessageLogMgr> pLogMgr;
-      MessageLog *pLog = pLogMgr->getLog();
-      if (pLog != NULL && status.first == SessionManager::SUCCESS)
-      {
-         pLog->createMessage("Session saved: " + mSessionFilename,"app","7AD6D0B4-08E4-4556-A20D-2595B797B4F3");
-      }
-      else if(pLog != NULL && status.first == SessionManager::PARTIAL_SUCCESS)
-      {
-         pLog->createMessage("Session saved. Not all session items were successfully loaded: " +
-            mSessionFilename, "app", "C85E14F3-69B0-4495-AD91-F3E1B7013A8E");
-      }
-      return true;
+      progress.updateProgress("Session saving failed.", 0, ERRORS);
+      return false;
    }
-   return false;
+   else if (status.first == SessionManager::LOCKED)
+   {
+      progress.updateProgress("Session saving is temporarily locked.", 0, ERRORS);
+      return false;
+   }
+   Service<MessageLogMgr> pLogMgr;
+   MessageLog *pLog = pLogMgr->getLog();
+   if (pLog != NULL && status.first == SessionManager::SUCCESS)
+   {
+      pLog->createMessage("Session saved: " + mSessionFilename,"app","7AD6D0B4-08E4-4556-A20D-2595B797B4F3");
+   }
+   else if(pLog != NULL && status.first == SessionManager::PARTIAL_SUCCESS)
+   {
+      pLog->createMessage("Session saved. Not all session items were successfully loaded: " +
+         mSessionFilename, "app", "C85E14F3-69B0-4495-AD91-F3E1B7013A8E");
+   }
+   return true;
 }
 
 bool ApplicationWindow::saveSessionAs()
@@ -2727,8 +2723,6 @@ bool ApplicationWindow::saveSessionAs()
       mSessionFilename = filename.toStdString();
       return saveSession();
    }
-
-   return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -3642,8 +3636,8 @@ void ApplicationWindow::displayPlugInHelp()
    bool bSuccess = false;
    if (pSender != NULL)
    {
-      QVariant data = pSender->data();
-      QMap<QString, QVariant> mapData = data.toMap();
+      QVariant value = pSender->data();
+      QMap<QString, QVariant> mapData = value.toMap();
       if (mapData.contains("helpWebpage"))
       {
          string webpage = mapData["helpWebpage"].toString().toStdString();
@@ -5116,9 +5110,12 @@ void ApplicationWindow::checkColorDepth(QWidget* pSplash)
    public:
       tmpGL(QWidget *parent) : QGLWidget(parent) {}
    protected:
-      void initializeGL() {}
-      void resizeGL() {}
-      void paintGL() {}
+      virtual void initializeGL() {}
+      virtual void resizeGL(int, int) {}
+      virtual void paintGL() {}
+   private:
+      tmpGL(const tmpGL& rhs) {}
+      tmpGL& operator=(const tmpGL& rhs) { return *this; }
    } tmp(this);
 
    int nbp(tmp.context()->device()->depth());
@@ -5161,9 +5158,12 @@ void ApplicationWindow::checkGpuImageSupport()
    public:
       tmpGL(QWidget *parent) : QGLWidget(parent) {}
    protected:
-      void initializeGL() {}
-      void resizeGL() {}
-      void paintGL() {}
+      virtual void initializeGL() {}
+      virtual void resizeGL(int w, int h) {}
+      virtual void paintGL() {}
+   private:
+      tmpGL(const tmpGL& rhs) {}
+      tmpGL& operator=(const tmpGL& rhs) { return *this; }
    } tmp(this);
    tmp.makeCurrent();
    if (CgContext::instance() != NULL)
@@ -5901,7 +5901,7 @@ void ApplicationWindow::editClassification()
             pElement->setClassification(pClassification.get());
          }
 
-         View* pView = pView = dynamic_cast<View*>(pItem);
+         View* pView = dynamic_cast<View*>(pItem);
          if (pView != NULL)
          {
             pView->setClassification(pClassification.get());
@@ -5988,8 +5988,8 @@ const vector<PlugInDescriptor*> &ApplicationWindow::getAvailableExporters(const 
 
       string subtype = pDescriptor->getSubtype();
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove SignatureSet special case when SignatureSet " \
-   "no longer inherits Signature. (dsulgrov)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove SignatureSet special case when SignatureSet " \
+//   "no longer inherits Signature. (dsulgrov)")
       if ((pTao->isKindOf(TypeConverter::toString<SignatureSet>()) == true) &&
          (subtype == TypeConverter::toString<Signature>()))
       {

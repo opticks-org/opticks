@@ -44,7 +44,8 @@ public:
       QWidget* pParent = 0);
    ~HistogramPlotImp();
 
-   using SessionItemImp::setIcon;
+   using CartesianPlotImp::setIcon;
+
    std::list<ContextMenuAction> getContextMenuActions() const;
    bool canRename() const;
 
@@ -54,7 +55,6 @@ public:
    static bool isKindOfView(const std::string& className);
    static void getViewTypes(std::vector<std::string>& classList);
 
-   HistogramPlotImp& operator= (const HistogramPlotImp& histogramPlot);
    View* copy(QGLContext* pDrawContext = 0, QWidget* pParent = 0) const;
    bool copy(View *pView) const;
 
@@ -104,6 +104,7 @@ signals:
    void histogramUpdated();
 
 protected:
+   HistogramPlotImp& operator=(const HistogramPlotImp& histogramPlot);
    void keyPressEvent(QKeyEvent* pEvent);
    void keyReleaseEvent(QKeyEvent* pEvent);
    void mousePressEvent(QMouseEvent* pEvent);
@@ -153,6 +154,8 @@ protected slots:
    void updateHistogramRegionExtents();
 
 private:
+   HistogramPlotImp(const HistogramPlotImp& rhs);
+
    bool setHistogram(Layer* pLayer, RasterElement* pElement, Statistics* pStatistics, RasterChannelType color);
    void updateLocatorModeText();
    void updateMouseCursor();
@@ -177,6 +180,10 @@ private:
    public:
       MenuListWidget(QWidget* pParent = NULL) : QListWidget(pParent) {}
       QSize sizeHint() const;
+
+   private:
+      MenuListWidget(const MenuListWidget& rhs);
+      MenuListWidget& operator=(const MenuListWidget& rhs);
    };
 
    void preloadColormaps();

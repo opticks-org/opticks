@@ -166,6 +166,8 @@ public:
    bool updateSettings(QDataStream& writer) const;
 
 private:
+   PlugInDescriptorImp(const PlugInDescriptorImp& rhs);
+
    void destroyPlugIns();
 
    bool populateFromSettings(QDataStream& reader);

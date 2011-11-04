@@ -153,7 +153,8 @@ public:
    virtual QValidator::State validate(QString& input, int& pos) const;
 
 private:
-   T textToValue(const QString& input, bool* pSuccess = NULL) const;
+   IntValidator(const IntValidator& rhs);
+   IntValidator& operator=(const IntValidator& rhs);
 
    T mMinimum;
    T mMaximum;

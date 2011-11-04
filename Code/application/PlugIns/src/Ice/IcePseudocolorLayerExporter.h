@@ -24,6 +24,8 @@ public:
    bool getInputSpecification(PlugInArgList*& pArgList);
 
 private:
+   IcePseudocolorLayerExporter& operator=(const IcePseudocolorLayerExporter& rhs);
+
    void parseInputArgs(PlugInArgList* pInArgList);
    void getOutputCubeAndFileDescriptor(RasterElement*& pOutputCube,
       RasterFileDescriptor*& pOutputFileDescriptor);

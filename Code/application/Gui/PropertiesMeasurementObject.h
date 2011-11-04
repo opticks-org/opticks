@@ -56,6 +56,8 @@ protected:
    int getEndPointsPrecision(const std::list<GraphicObject*>& objects) const;
 
 private:
+   PropertiesMeasurementObject(const PropertiesMeasurementObject& rhs);
+   PropertiesMeasurementObject& operator=(const PropertiesMeasurementObject& rhs);
    std::list<GraphicObject*> mObjects;
    GraphicLayerImp* mpGraphicLayer;
 

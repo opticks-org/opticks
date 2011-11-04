@@ -49,6 +49,8 @@ public:
    }
 
 private:
+   CallbackHandler(const CallbackHandler& rhs);
+   CallbackHandler& operator=(const CallbackHandler& rhs);
    AttachmentPtr<Animation> mpAnimation;
    animation_callback_t mpCallback;
    void* mpUser;

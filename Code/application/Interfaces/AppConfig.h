@@ -50,6 +50,7 @@
 
    #include <stddef.h>
    #define DISAMBIGUATE_TEMPLATE
+   #define HIDE_UNUSED_VARIABLE_WARNING
 #elif defined (__SUNPRO_CC)
    #include <sys/isa_defs.h>
 
@@ -83,6 +84,7 @@
 
    #include <sys/int_types.h>
    #define DISAMBIGUATE_TEMPLATE
+   #define HIDE_UNUSED_VARIABLE_WARNING
 #elif defined(__linux__)
 #if !defined(__amd64__)
 #error "Linux support requires a 64-bit x86 (AMD64) processor"
@@ -128,6 +130,7 @@
    #define __stdcall
 
    #define DISAMBIGUATE_TEMPLATE template
+   #define HIDE_UNUSED_VARIABLE_WARNING __attribute__((unused))
 #else
    #error Unrecognized build platform
 #endif

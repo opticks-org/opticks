@@ -66,7 +66,7 @@ MessageLogWindow::MessageLogWindow(const string& id, QWidget* pParent) :
       MessageLog* pLog = *iter;
       if (pLog != NULL)
       {
-         QString logName = getDisplayName(pLog);
+         QString logName = getLogDisplayName(pLog);
          if (logName.isEmpty() == false)
          {
             mpLogCombo->addItem(logName);
@@ -85,15 +85,15 @@ MessageLogWindow::MessageLogWindow(const string& id, QWidget* pParent) :
 MessageLogWindow::~MessageLogWindow()
 {}
 
-void MessageLogWindow::messageLogAdded(Subject& subject, const string& signal, const boost::any& data)
+void MessageLogWindow::messageLogAdded(Subject& subject, const string& signal, const boost::any& value)
 {
-   MessageLog* pLog = boost::any_cast<MessageLog*>(data);
+   MessageLog* pLog = boost::any_cast<MessageLog*>(value);
    if (pLog == NULL)
    {
       return;
    }
 
-   QString logName = getDisplayName(pLog);
+   QString logName = getLogDisplayName(pLog);
    if (logName.isEmpty() == false)
    {
       if (mpLogCombo->findText(logName) == -1)
@@ -104,15 +104,15 @@ void MessageLogWindow::messageLogAdded(Subject& subject, const string& signal, c
    }
 }
 
-void MessageLogWindow::messageLogRemoved(Subject& subject, const string& signal, const boost::any& data)
+void MessageLogWindow::messageLogRemoved(Subject& subject, const string& signal, const boost::any& value)
 {
-   MessageLog* pLog = boost::any_cast<MessageLog*>(data);
+   MessageLog* pLog = boost::any_cast<MessageLog*>(value);
    if (pLog == NULL)
    {
       return;
    }
 
-   QString logName = getDisplayName(pLog);
+   QString logName = getLogDisplayName(pLog);
 
    int index = mpLogCombo->findText(logName);
    if (index != -1)
@@ -135,7 +135,7 @@ void MessageLogWindow::setLog(const QString& logName)
    mpModel->setMessageLog(pLog);
 }
 
-QString MessageLogWindow::getDisplayName(const MessageLog* pLog)
+QString MessageLogWindow::getLogDisplayName(const MessageLog* pLog)
 {
    if (pLog == NULL)
    {
@@ -465,7 +465,8 @@ QVariant MessageLogWindowModel::data(const QModelIndex &index, int role) const
             {
                return QVariant(Qt::yellow);
             }
-            if (pMessageImp->getResult() == Message::Failure)
+            const StepImp* pStepImp = dynamic_cast<const StepImp*>(pMessageImp);
+            if ((pStepImp != NULL) && (pStepImp->getResult() == Message::Failure))
             {
                return QVariant(Qt::red);
             }
@@ -474,11 +475,11 @@ QVariant MessageLogWindowModel::data(const QModelIndex &index, int role) const
          }
          case Qt::ForegroundRole:
          {
-            if (pMessageImp->getResult() == Message::Failure)
+            const StepImp* pStepImp = dynamic_cast<const StepImp*>(pMessageImp);
+            if ((pStepImp != NULL) && (pStepImp->getResult() == Message::Failure))
             {
                return QVariant(Qt::white);
             }
-
             break;
          }
          default:
@@ -545,15 +546,14 @@ int MessageLogWindowModel::findIndex(const Step *pParent, const Message *pMessag
    return row;
 }
 
-void MessageLogWindowModel::messageAdded(Subject &subject, const string &signal, const boost::any &data)
+void MessageLogWindowModel::messageAdded(Subject& subject, const string& signal, const boost::any& value)
 {
    MessageLog* pLog = dynamic_cast<MessageLog*>(&subject);
-   Message* pMessage = boost::any_cast<Message*>(data);
+   Message* pMessage = boost::any_cast<Message*>(value);
    MessageImp* pMessageImp = dynamic_cast<MessageImp*>(pMessage);
    if (pMessageImp != NULL)
    {
       const Step* pParent = pMessageImp->getParent();
-      int msgRow = findIndex(pParent, pMessage);
       if (pParent != NULL)
       {
          // get the numeric index (row) of the parent step in the grand-parent
@@ -574,10 +574,9 @@ void MessageLogWindowModel::messageAdded(Subject &subject, const string &signal,
    }
 }
 
-void MessageLogWindowModel::messageFinalized(Subject &subject, const string &signal, const boost::any &data)
+void MessageLogWindowModel::messageFinalized(Subject& subject, const string& signal, const boost::any& value)
 {
-   MessageLog* pLog = dynamic_cast<MessageLog*>(&subject);
-   Message* pMessage = boost::any_cast<Message*>(data);
+   Message* pMessage = boost::any_cast<Message*>(value);
    MessageImp* pMessageImp = dynamic_cast<MessageImp*>(pMessage);
    if (pMessageImp != NULL)
    {

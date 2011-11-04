@@ -34,6 +34,8 @@ protected slots:
    void dialogClosed();
 
 private:
+   MouseModeTest(const MouseModeTest& rhs);
+   MouseModeTest& operator=(const MouseModeTest& rhs);
    MouseModeTestGui* mpGui;
 };
 

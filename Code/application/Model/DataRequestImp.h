@@ -18,7 +18,7 @@ class DataRequestImp : public DataRequest
 {
 public:
    DataRequestImp();
-   DataRequestImp(const DataRequestImp &rhs);
+   DataRequestImp(const DataRequestImp& rhs);
    ~DataRequestImp();
 
    DataRequest *copy() const;

@@ -13,13 +13,13 @@
 #include <QtGui/QToolButton>
 #include <QtGui/QWidgetAction>
 
-#include "MeasurementToolBar.h"
 #include "DesktopServicesImp.h"
 #include "Layer.h"
 #include "LayerList.h"
 #include "MeasurementLayer.h"
 #include "MeasurementLayerImp.h"
 #include "MeasurementObjectImp.h"
+#include "MeasurementToolBar.h"
 #include "PixmapGrid.h"
 #include "PixmapGridButton.h"
 #include "ProductView.h"
@@ -388,8 +388,8 @@ void MeasurementToolBar::updateGeoreference()
    mpLocationUnits->blockSignals(false);
 }
 
-void MeasurementToolBar::georeferenceModified(Subject &subject, const std::string &signal, 
-                                              const boost::any &data)
+void MeasurementToolBar::georeferenceModified(Subject& subject, const std::string& signal, 
+                                              const boost::any& value)
 {
    updateGeoreference();
 }

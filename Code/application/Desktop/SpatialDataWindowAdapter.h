@@ -24,6 +24,10 @@ public:
    bool isKindOf(const std::string& className) const;
 
    SPATIALDATAWINDOWADAPTER_METHODS(SpatialDataWindowImp)
+
+private:
+   SpatialDataWindowAdapter(const SpatialDataWindowAdapter& rhs);
+   SpatialDataWindowAdapter& operator=(const SpatialDataWindowAdapter& rhs);
 };
 
 #endif

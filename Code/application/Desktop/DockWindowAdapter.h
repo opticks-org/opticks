@@ -24,6 +24,10 @@ public:
    bool isKindOf(const std::string& className) const;
 
    DOCKWINDOWADAPTER_METHODS(DockWindowImp)
+
+private:
+   DockWindowAdapter(const DockWindowAdapter& rhs);
+   DockWindowAdapter& operator=(const DockWindowAdapter& rhs);
 };
 
 #endif

@@ -148,7 +148,7 @@ DataVariant & DataVariant::operator=(const DataVariant & rhs)
    return *this;
 }
 
-bool DataVariant::operator==(const DataVariant &rhs) const
+bool DataVariant::operator==(const DataVariant& rhs) const
 {
    if (mpValue == NULL)
    {
@@ -215,5 +215,5 @@ DataValueWrapper *DataVariant::createWrapper(const void *pValue, const char *pTy
    return Service<DataVariantFactory>()->createWrapper(pValue, pTypeName, strict);
 }
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove long, unsigned long, int64_t and uint64_t from "\
-   "DataVariant when source, binary, and file compatibility can be broken (OPTICKS-539). (dadkins)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove long, unsigned long, int64_t and uint64_t from "\
+//   "DataVariant when source, binary, and file compatibility can be broken (OPTICKS-539). (dadkins)")

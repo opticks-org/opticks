@@ -43,7 +43,9 @@ public:
       QWidget* parent = 0);
    ~SpatialDataViewImp();
 
-   using SessionItemImp::setIcon;
+   using PerspectiveViewImp::setIcon;
+   using PerspectiveViewImp::setName;
+   using PerspectiveViewImp::setInsetPoint;
 
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
@@ -53,12 +55,10 @@ public:
    static bool isKindOfView(const std::string& className);
    static void getViewTypes(std::vector<std::string>& classList);
 
-   SpatialDataViewImp& operator= (const SpatialDataViewImp& spatialDataView);
    View* copy(QGLContext* drawContext = 0, QWidget* parent = 0) const;
    bool copy(View *pView) const;
 
    ViewType getViewType() const;
-   using ViewImp::setName;
 
    bool setPrimaryRasterElement(RasterElement* pRasterElement);
    TextureMode getTextureMode() const;
@@ -101,7 +101,6 @@ public:
 
    QSize sizeHint() const;
 
-   using PerspectiveViewImp::setInsetPoint;
    void setInsetPoint(const LocationType &worldCoord);
    void setInsetPointGeo(const LocationType &geoCoord);
 
@@ -145,6 +144,7 @@ signals:
    void layerDisplayIndexesChanged();
 
 protected:
+   SpatialDataViewImp& operator=(const SpatialDataViewImp& spatialDataView);
    virtual double getMousePanScaleFactor() const;
 
    void updateStatusBar(const QPoint& screenCoord);
@@ -193,6 +193,8 @@ protected slots:
    void setAoiMode();
 
 private:
+   SpatialDataViewImp(const SpatialDataViewImp& rhs);
+
    AttachmentPtr<SessionExplorer> mpExplorer;
 
    TextureMode mTextureMode;

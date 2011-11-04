@@ -26,6 +26,8 @@ protected:
    SpatialDataView* createView() const;
 
 private:
+   IcePseudocolorLayerImporter& operator=(const IcePseudocolorLayerImporter& rhs);
+
    SpatialDataView* mpView;
 };
 

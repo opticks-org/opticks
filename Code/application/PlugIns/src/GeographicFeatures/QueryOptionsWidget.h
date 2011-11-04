@@ -70,6 +70,10 @@ private:
          }
          return QStackedWidget::sizeHint();
       }
+
+   private:
+      AutoResizeStackedWidget(const AutoResizeStackedWidget& rhs);
+      AutoResizeStackedWidget& operator=(const AutoResizeStackedWidget& rhs);
    };
 
    QLineEdit* mpQueryNameEdit;
@@ -88,6 +92,10 @@ private:
    GraphicLineWidget* mpPolygonLineWidget;
    GraphicFillWidget* mpPolygonFillWidget;
    QueryBuilderWidget* mpQueryBuilderWidget;
+
+private:
+   QueryOptionsWidget(const QueryOptionsWidget& rhs);
+   QueryOptionsWidget& operator=(const QueryOptionsWidget& rhs);
 };
 
 #endif

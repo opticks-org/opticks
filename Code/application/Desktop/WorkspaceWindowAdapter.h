@@ -24,6 +24,10 @@ public:
    bool isKindOf(const std::string& className) const;
 
    WORKSPACEWINDOWADAPTER_METHODS(WorkspaceWindowImp)
+
+private:
+   WorkspaceWindowAdapter(const WorkspaceWindowAdapter& rhs);
+   WorkspaceWindowAdapter& operator=(const WorkspaceWindowAdapter& rhs);
 };
 
 #endif

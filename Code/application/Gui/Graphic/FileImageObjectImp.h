@@ -33,6 +33,8 @@ public:
    virtual bool replicateObject(const GraphicObject* pObject);
 
 private:
+   FileImageObjectImp(const FileImageObjectImp& rhs);
+   FileImageObjectImp& operator=(const FileImageObjectImp& rhs);
    bool mUpdateBoundingBox;
 };
 

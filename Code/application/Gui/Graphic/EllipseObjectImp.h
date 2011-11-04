@@ -25,6 +25,10 @@ public:
 
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
+
+private:
+   EllipseObjectImp(const EllipseObjectImp& rhs);
+   EllipseObjectImp& operator=(const EllipseObjectImp& rhs);
 };
 
 #define ELLIPSEOBJECTADAPTEREXTENSION_CLASSES \

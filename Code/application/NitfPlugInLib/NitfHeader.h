@@ -505,6 +505,9 @@ namespace Nitf
        * The version of the NITF file - either Nitf::VERSION_02_00 or Nitf::VERSION_02_10.
        */
       const std::string mFileVersion;
+
+   private:
+      Header& operator=(const Header& rhs);
    };
 }
 

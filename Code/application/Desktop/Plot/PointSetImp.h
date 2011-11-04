@@ -96,6 +96,8 @@ protected:
    void propagateLocationChanged(Subject& subject, const std::string& signal, const boost::any& value);
 
 private:
+   PointSetImp(const PointSetImp& rhs);
+
    // Points
    std::vector<Point*> mPoints;
 

@@ -81,6 +81,8 @@ protected slots:
    void verifyTiePoint(QTreeWidgetItem* pItem, int column);
 
 private:
+   TiePointPage(const TiePointPage& rhs);
+   TiePointPage& operator=(const TiePointPage& rhs);
    static const std::string FUSION_GCP_NAME;
    // the columns in the GCP CustomListViews
    enum GcpItemTypeEnum { NAME = 0, PIXEL_X = 1, PIXEL_Y = 2 };

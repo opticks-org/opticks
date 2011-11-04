@@ -25,6 +25,9 @@ public:
    bool isKindOf(const std::string& className) const;
 
    POLARPLOTADAPTER_METHODS(PolarPlotImp)
+
+private:
+   PolarPlotAdapter(const PolarPlotAdapter& rhs);
 };
 
 #endif

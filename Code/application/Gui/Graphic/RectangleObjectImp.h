@@ -20,17 +20,21 @@ class RectangleObjectImp : public PixelObjectImp
 {
 public:
    RectangleObjectImp(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer, LocationType pixelCoord);
+   using PixelObjectImp::getPixels;
 
    void drawVector(double zoomFactor) const;
    void drawPixels(double zoomFactor) const;
 
    bool hit(LocationType pixelCoord) const;
 
-   using PixelObjectImp::getPixels;
    const BitMask *getPixels(int iStartColumn, int iStartRow, int iEndColumn, int iEndRow);
 
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
+
+private:
+   RectangleObjectImp(const RectangleObjectImp& rhs);
+   RectangleObjectImp& operator=(const RectangleObjectImp& rhs);
 };
 
 #define RECTANGLEOBJECTADAPTEREXTENSION_CLASSES \
@@ -49,6 +53,10 @@ public:
 
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
+
+private:
+   RoundedRectangleObjectImp(const RoundedRectangleObjectImp& rhs);
+   RoundedRectangleObjectImp& operator=(const RoundedRectangleObjectImp& rhs);
 };
 
 #define ROUNDEDRECTANGLEOBJECTADAPTEREXTENSION_CLASSES \

@@ -56,6 +56,8 @@ signals:
    void objectRemoved(PlotObject* pObject);
 
 private:
+   PlotGroupImp(const PlotGroupImp& rhs);
+
    std::vector<PlotObject*> mObjects;
 };
 
@@ -88,7 +90,7 @@ private:
    { \
       return impClass::hitObject(point); \
    } \
-   bool hit(LocationType point) \
+   bool hit(LocationType point) const \
    { \
       return impClass::hit(point); \
    } \

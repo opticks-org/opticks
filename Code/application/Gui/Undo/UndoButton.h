@@ -29,11 +29,18 @@ protected slots:
    void executeUndo(const QModelIndex& modelIndex);
 
 private:
+   UndoButton(const UndoButton& rhs);
+   UndoButton& operator=(const UndoButton& rhs);
+
    class MenuListView : public QListView
    {
    public:
       MenuListView(QWidget* pParent = NULL) : QListView(pParent) {}
       QSize sizeHint() const;
+
+   private:
+      MenuListView(const MenuListView& rhs);
+      MenuListView& operator=(const MenuListView& rhs);
    };
 
    bool mUndo;

@@ -6,8 +6,6 @@
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
- 
-
 
 #include "Mgrs.h"
 #include "TypesFile.h"
@@ -23,13 +21,10 @@
 double Mgrs::MGRS_a = 6378137.0;    // Semi-major axis of ellipsoid in meters
 double Mgrs::MGRS_b = 6356752.3142; // Semi-minor axis of ellipsoid           
 double Mgrs::MGRS_recpf = 1 / ((6378137.0 - 6356752.3142) / 6378137.0);
-//char Mgrs::MGRS_Ellipsoid_Code[0] = 'W';
-//char Mgrs::MGRS_Ellipsoid_Code[1] = 'E';
-//char Mgrs::MGRS_Ellipsoid_Code[2] = 0;
 char Mgrs::MGRS_Ellipsoid_Code[3] = {'W','E',0};
-char* Mgrs::CLARKE_1866 = "CC";
-char* Mgrs::CLARKE_1880 = "CD";
-char* Mgrs::BESSEL_1841 = "BR";
+const char* Mgrs::CLARKE_1866 = "CC";
+const char* Mgrs::CLARKE_1880 = "CD";
+const char* Mgrs::BESSEL_1841 = "BR";
 
 //                  UTM    GLOBAL DECLARATIONS
 double Mgrs::UTM_a = 6378137.0;    // Semi-major axis of ellipsoid in meters  
@@ -793,7 +788,7 @@ int Mgrs::Make_MGRS_String (char* MGRS,
   int error_code = MGRS_NO_ERROR;
   i = 0;
   if (Zone)
-    i = sprintf (MGRS+i,"%2.2ld",Zone);
+    i = sprintf (MGRS+i,"%2.2d", Zone);
   for (j=0;j<3;j++)
     MGRS[i++] = ALBET[ltrnum[j]];
   divisor = pow (10.0, (5 - Precision));
@@ -801,12 +796,12 @@ int Mgrs::Make_MGRS_String (char* MGRS,
   if (Easting >= 99999.5)
     Easting = 0.0;
   east = Round_MGRS (Easting/divisor);
-  i += sprintf (MGRS+i, "%*.*ld", Precision, Precision, east);
+  i += sprintf (MGRS+i, "%*.*d", Precision, Precision, east);
   Northing = fmod (Northing, 100000.0);
   if (Northing >= 99999.5)
     Northing = 0.0;
   north = Round_MGRS (Northing/divisor);
-  i += sprintf (MGRS+i, "%*.*ld", Precision, Precision, north);
+  i += sprintf (MGRS+i, "%*.*d", Precision, Precision, north);
   return (error_code);
 } /* Make_MGRS_String */
 

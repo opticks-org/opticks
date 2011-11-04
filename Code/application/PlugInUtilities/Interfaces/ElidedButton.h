@@ -88,6 +88,8 @@ protected:
    virtual void paintEvent(QPaintEvent* pEvent);
 
 private:
+   ElidedButton(const ElidedButton& rhs);
+   ElidedButton& operator=(const ElidedButton& rhs);
    Qt::TextElideMode mElideMode;
    QString mPreviousText;
    QRect mPreviousRect;

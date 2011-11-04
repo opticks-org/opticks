@@ -124,11 +124,11 @@ bool RasterUtilities::determineSkipFactor(const std::vector<DimensionDescriptor>
       if (count > 0)
       {
          //determine skip factor on second iteration
-         int curSkipFactor = values[count].getOnDiskNumber() - values[count-1].getOnDiskNumber();
-         if (curSkipFactor < 1)
+         if (values[count].getOnDiskNumber() <= values[count-1].getOnDiskNumber())
          {
             return false;
          }
+         unsigned int curSkipFactor = values[count].getOnDiskNumber() - values[count-1].getOnDiskNumber();
          if (count > 1)
          {
             //on any iteration after second, verify skip factor remains the same
@@ -156,11 +156,11 @@ bool RasterUtilities::determineExportSkipFactor(const std::vector<DimensionDescr
       if (count > 0)
       {
          //determine skip factor on second iteration
-         int curSkipFactor = values[count].getActiveNumber() - values[count-1].getActiveNumber();
-         if (curSkipFactor < 1)
+         if (values[count].getActiveNumber() <= values[count-1].getActiveNumber())
          {
             return false;
          }
+         unsigned int curSkipFactor = values[count].getActiveNumber() - values[count-1].getActiveNumber();
          if (count > 1)
          {
             //on any iteration after second, verify skip factor remains the same

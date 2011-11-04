@@ -51,6 +51,8 @@ public:
    void setFlags(int val);
 
 private:
+   AdvancedOptionsWidget(const AdvancedOptionsWidget& rhs);
+   AdvancedOptionsWidget& operator=(const AdvancedOptionsWidget& rhs);
    QComboBox* mpMeMethod;
    QSpinBox* mpGopSize;
    QDoubleSpinBox* mpQCompress;

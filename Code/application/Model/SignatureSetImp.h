@@ -47,6 +47,8 @@ public:
    static bool isKindOfElement(const std::string& className);
 
 private:
+   SignatureSetImp(const SignatureSetImp& rhs);
+   SignatureSetImp& operator=(const SignatureSetImp& rhs);
    DataDescriptorImp mGroupDescriptor;
    DataElementGroupImp mGroup;
 };

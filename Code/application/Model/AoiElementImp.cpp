@@ -365,7 +365,7 @@ void AoiElementImp::objectPropertyChanged(Subject &subject, const std::string &s
          return;
       }
    }
-   catch (boost::bad_any_cast &exc)
+   catch (boost::bad_any_cast&)
    {
       return;
    }
@@ -390,7 +390,7 @@ void AoiElementImp::objectAdded(Subject &subject, const std::string &signal, con
          return;
       }
    }
-   catch (boost::bad_any_cast &exc)
+   catch (boost::bad_any_cast&)
    {
       return;
    }

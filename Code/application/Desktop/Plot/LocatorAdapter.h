@@ -24,6 +24,9 @@ public:
    bool isKindOf(const std::string& className) const;
 
    LOCATORADAPTER_METHODS(LocatorImp)
+
+private:
+   LocatorAdapter(const LocatorAdapter& rhs);
 };
 
 #endif

@@ -234,6 +234,8 @@ protected slots:
    }
 
 private:
+   MuHttpServer(const MuHttpServer& rhs);
+   MuHttpServer& operator=(const MuHttpServer& rhs);
    ResponseCode HandleRequest(HttpRequest *pHttpRequest, HttpResponse *pHttpResponse);
 
    EHSServerParameters mParams;

@@ -120,6 +120,10 @@ public:
       SignalEnabler(subject, false)
    {
    }
+
+private:
+   SignalBlocker(const SignalBlocker& rhs);
+   SignalBlocker& operator=(const SignalBlocker& rhs);
 };
 
 #endif

@@ -26,9 +26,11 @@
 #include "xmlbase.h"
 
 #include <iomanip>
+#include <iostream>
 #include <iterator>
-#include <sstream>
 #include <limits>
+#include <locale>
+#include <sstream>
 
 #include "StringUtilitiesMacros.h"
 
@@ -43,7 +45,7 @@ by default. This way, you can actually OVERWRITE a string if you'd like!
 bool readSTLString(FILE* pInputFile, size_t readSize, string &target, bool append)
 {
    bool success = true;
-   char c;
+   char c = '\0';
    
    if (!append)
    {
@@ -126,9 +128,8 @@ string stripWhitespace(const string& source)
 
 bool isAllBlank(const string &source)
 {
-   static const basic_string <char>::size_type npos = -1;
    basic_string <char>::size_type findIndex = source.find_first_not_of(" ");
-   if (findIndex == npos)
+   if (findIndex == string::npos)
    {
       return true;      // Found an all blank string
    }
@@ -139,9 +140,10 @@ bool isAllBlank(const string &source)
 string toLower(const string& source)
 {
    string lowerString = source;
+   std::locale loc;
    for (unsigned int i = 0; i < lowerString.size(); i++)
    {
-      lowerString.at(i) = tolower(lowerString.at(i));
+      lowerString.at(i) = tolower(lowerString.at(i), loc);
    }
 
    return lowerString;
@@ -150,9 +152,10 @@ string toLower(const string& source)
 string toUpper(const string& source)
 {
    string upperString = source;
+   locale loc;
    for (unsigned int i = 0; i < upperString.size(); i++)
    {
-      upperString.at(i) = toupper(upperString.at(i));
+      upperString.at(i) = toupper(upperString.at(i), loc);
    }
 
    return upperString;
@@ -1458,25 +1461,27 @@ DateTime* fromDisplayString<DateTime*>(string dateText, bool* pError)
    {
       return pDateTime.release();
    }
-   char month[128];
-   int iMonth = 0;
-   int iDay = 0;
-   int iYear = 0;
-   int iHour = 0;
-   int iMinute = 0;
-   int iSecond = 0;
+   std::vector<char> monthBuf;
+   monthBuf.reserve(128);
+   char* pMonth = &monthBuf.front();
+   unsigned short month = 0;
+   unsigned short day = 0;
+   unsigned short year = 0;
+   unsigned short hour = 0;
+   unsigned short minute = 0;
+   unsigned short second = 0;
 
    int iValues = 0;
-   iValues = sscanf(dateText.c_str(), "%s %d, %d, %d:%d:%d", &month, &iDay, &iYear,
-      &iHour, &iMinute, &iSecond);
+   iValues = sscanf(dateText.c_str(), "%s %hu, %hu, %hu:%hu:%hu", pMonth, &day, &year,
+      &hour, &minute, &second);
    if (iValues > 0)
    {
-      string monthText = month;
-      for (int i = 0; i < 12; i++)
+      string monthText = std::string(pMonth);
+      for (unsigned short i = 0; i < 12; ++i)
       {
          if (monthText.substr(0, 3) == monthNames[i])
          {
-            iMonth = i + 1;
+            month = i + 1;
             break;
          }
       }
@@ -1484,12 +1489,12 @@ DateTime* fromDisplayString<DateTime*>(string dateText, bool* pError)
    bool dateTimeSet = false;
    if (iValues > 3)
    {
-      dateTimeSet = pDateTime->set(iYear, iMonth, iDay, iHour, iMinute, iSecond);
+      dateTimeSet = pDateTime->set(year, month, day, hour, minute, second);
       dateTimeSet = dateTimeSet && pDateTime->isTimeValid();
    }
    else
    {
-      dateTimeSet = pDateTime->set(iYear, iMonth, iDay);
+      dateTimeSet = pDateTime->set(year, month, day);
       dateTimeSet = dateTimeSet && !(pDateTime->isTimeValid());
    }
    if (dateTimeSet)

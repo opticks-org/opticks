@@ -305,6 +305,8 @@ protected:
    virtual double getChunkSize() const;
 
 private:
+   CachedPager& operator=(const CachedPager& rhs);
+
    PageCache mCache;
    std::auto_ptr<mta::DMutex> mpMutex;
    std::string mFilename;

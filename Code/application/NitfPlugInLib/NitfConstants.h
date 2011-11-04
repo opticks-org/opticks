@@ -979,26 +979,6 @@ namespace Nitf
 
       namespace RPC
       {
-         /**
-          * Get the string representing the coefficient for the above strings.
-          *
-          * @param prefix
-          *        The prefix for the coefficient name.
-          * @param num
-          *        The coefficient number to get [1, 20].
-          */
-         static std::string getCoefficient(const std::string& prefix, const unsigned int& num)
-         {
-            if (num < 1 || num > 20)
-            {
-               throw std::out_of_range("getCoefficient: num must be between 1 and 20!");
-            }
-
-            std::ostringstream strm;
-            strm << prefix << std::setw(2) << std::setfill('0') << num;
-            return strm.str();
-         }
-
          const static std::string LINE_NUMERATOR_COEF_PREFIX = "LNNUMCOEF";
          const static std::string LINE_DENOMINATOR_COEF_PREFIX = "LNDENCOEF";
          const static std::string SAMPLE_NUMERATOR_COEF_PREFIX = "SMPNUMCOEF";

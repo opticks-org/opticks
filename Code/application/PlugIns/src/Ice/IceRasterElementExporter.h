@@ -25,6 +25,8 @@ public:
    bool getInputSpecification(PlugInArgList*& pArgList);
 
 private:
+   IceRasterElementExporter& operator=(const IceRasterElementExporter& rhs);
+
    void parseInputArgs(PlugInArgList* pInArgList);
    void getOutputCubeAndFileDescriptor(RasterElement*& pOutputCube,
       RasterFileDescriptor*& pOutputFileDescriptor);

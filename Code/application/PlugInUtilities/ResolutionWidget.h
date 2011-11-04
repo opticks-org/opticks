@@ -52,6 +52,10 @@ public:
    unsigned int mCurrentResolutionX;
    unsigned int mCurrentResolutionY;
    LabeledSection* mpSettingsSection;
+
+private:
+   ResolutionWidget(const ResolutionWidget& rhs);
+   ResolutionWidget& operator=(const ResolutionWidget& rhs);
 };
 #endif
 

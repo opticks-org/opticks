@@ -31,6 +31,8 @@ protected slots:
    void accept();
 
 private:
+   ZoomCustomDlg(const ZoomCustomDlg& rhs);
+   ZoomCustomDlg& operator=(const ZoomCustomDlg& rhs);
    QLineEdit* mpMinXEdit;
    QLineEdit* mpMinYEdit;
    QLineEdit* mpMaxXEdit;

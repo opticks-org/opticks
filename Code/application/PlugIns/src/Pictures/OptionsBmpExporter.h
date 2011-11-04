@@ -86,6 +86,9 @@ public:
    }
 
 private:
+   OptionsBmpExporter(const OptionsBmpExporter& rhs);
+   OptionsBmpExporter& operator=(const OptionsBmpExporter& rhs);
+
    QCheckBox* mpSaveSettings;
    ResolutionWidget* mpResolutionWidget;
 };

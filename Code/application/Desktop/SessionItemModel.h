@@ -26,7 +26,7 @@ class SessionItemModel : public QAbstractItemModel
 public:
    enum ItemDataRole
    {
-      SessionItemRole = Qt::UserRole,
+      SessionItemRole = Qt::UserRole
    };
    SessionItemModel(QObject* pParent = 0);
    virtual ~SessionItemModel();
@@ -89,6 +89,9 @@ protected:
    void clear();
 
 private:
+   SessionItemModel(const SessionItemModel& rhs);
+   SessionItemModel& operator=(const SessionItemModel& rhs);
+
    SessionItemWrapper* mpRootWrapper;
    std::map<SessionItem*, SessionItemWrapper*> mSessionItems;
 };

@@ -50,7 +50,8 @@ public:
     */
    ~DockWindowImp();
 
-   using SessionItemImp::setIcon;
+   using ViewWindowImp::setIcon;
+   using ViewWindowImp::setName;
 
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
@@ -64,9 +65,8 @@ public:
     *  @return   The window type.
     */
    WindowType getWindowType() const;
-   using WindowImp::setName;
 
-   View* createView(const QString& strViewName, const ViewType& viewType);
+   virtual View* createView(const QString& strViewName, const ViewType& viewType);
 
    /**
     *  Sets the widget for the dock window
@@ -101,6 +101,9 @@ protected slots:
    void undocked(bool isUndocked);
 
 private:
+   DockWindowImp(const DockWindowImp& rhs);
+   DockWindowImp& operator=(const DockWindowImp& rhs);
+
    QAction* mpDockAction;
    QAction* mpUndockAction;
    QAction* mpShowAction;
@@ -139,5 +142,4 @@ private:
    { \
       return impClass::isShown(); \
    }
-
 #endif

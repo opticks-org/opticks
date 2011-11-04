@@ -227,8 +227,6 @@ bool PointImp::hit(LocationType point) const
 
    double dCurrentScreenX = 0.0;
    double dCurrentScreenY = 0.0;
-   double dCurrentWorldX = 0.0;
-   double dCurrentWorldY = 0.0;
 
    pPlot->translateDataToScreen(mLocation.mX, mLocation.mY, dCurrentScreenX, dCurrentScreenY);
 

@@ -398,6 +398,7 @@ public: // struct and static utility functions
          return mBin;
       }
 
+      using XmlException::str;
       /**
        * This override appends an additional notice when the
        * file may be binary.
@@ -453,6 +454,7 @@ public: // struct and static utility functions
          return mpNode;
       }
 
+      using XmlException::str;
       /**
        * Get the message associated with this exception.
        *
@@ -537,6 +539,8 @@ public:
    }
 
 private:
+   BinFILEInputStream(const BinFILEInputStream& rhs);
+   BinFILEInputStream& operator=(const BinFILEInputStream& rhs);
    FILE* mpFp;
    XERCES_CPP_NAMESPACE_QUALIFIER MemoryManager* mpManager;
 };
@@ -594,6 +598,8 @@ public:
    virtual void release() {}
 
 private:
+   FILEInputSource(const FILEInputSource& rhs);
+   FILEInputSource& operator=(const FILEInputSource& rhs);
    FILE* mpFp;
    XERCES_CPP_NAMESPACE_QUALIFIER MemoryManager* mpManager;
 };

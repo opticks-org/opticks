@@ -64,6 +64,9 @@ protected slots:
    void next();
 
 private:
+   DataFusionDlg(const DataFusionDlg& rhs);
+   DataFusionDlg& operator=(const DataFusionDlg& rhs);
+
    // copies the color map from one RasterLayer to another
    void copyColorMap(RasterLayer& destination, const RasterLayer& source) const;
 

@@ -55,6 +55,8 @@ protected slots:
    void shift(int value);
 
 private:
+   ImageAdjustWidget(const ImageAdjustWidget& rhs);
+   ImageAdjustWidget& operator=(const ImageAdjustWidget& rhs);
    QTimer* mpTimer;
    QGroupBox* mpAutomatedFlickerBox;
    QGroupBox* mpManualFlickerBox;

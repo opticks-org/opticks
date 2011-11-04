@@ -77,6 +77,8 @@ protected:
    void notifyModified(Subject& subject, const std::string& signal, const boost::any& data);
 
 private:
+   DataDescriptorImp(const DataDescriptorImp& rhs);
+   DataDescriptorImp& operator=(const DataDescriptorImp& rhs);
    void generateParentDesignator();
    std::string mName;
    std::string mType;

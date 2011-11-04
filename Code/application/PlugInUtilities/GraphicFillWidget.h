@@ -41,6 +41,8 @@ signals:
    void hatchChanged(SymbolType hatch);
 
 private:
+   GraphicFillWidget(const GraphicFillWidget& rhs);
+   GraphicFillWidget& operator=(const GraphicFillWidget& rhs);
    FillStyleComboBox* mpFillStyleCombo;
    SymbolTypeButton* mpHatchStyle;
    CustomColorButton* mpFillColorButton;

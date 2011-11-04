@@ -42,6 +42,8 @@ public:
    const std::vector<std::pair<DimensionDescriptor, DimensionDescriptor> >& getGroupedBands() const;
 
 private:
+   BandBinningModel(const BandBinningModel& rhs);
+   BandBinningModel& operator=(const BandBinningModel& rhs);
    std::vector<std::pair<DimensionDescriptor, DimensionDescriptor> > mGroupedBands;
    const RasterDataDescriptor* mpDescriptor;
 };

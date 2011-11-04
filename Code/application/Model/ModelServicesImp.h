@@ -88,6 +88,8 @@ protected:
    ~ModelServicesImp();
 
 private:
+   ModelServicesImp(const ModelServicesImp& rhs);
+
    class Key
    {
    public:

@@ -24,6 +24,9 @@ public:
    bool isKindOf(const std::string& className) const;
 
    ANYADAPTER_METHODS(AnyImp)
+
+private:
+   AnyAdapter(const AnyAdapter& rhs);
 };
 
 #endif

@@ -48,6 +48,8 @@ protected:
    void enableAction();
 
 private:
+   MouseModePlugIn(const MouseModePlugIn& rhs);
+   MouseModePlugIn& operator=(const MouseModePlugIn& rhs);
    MouseMode* mpMouseMode;
    QAction* mpMouseModeAction;
 };

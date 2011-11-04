@@ -54,6 +54,10 @@ public:
     *  Destroys the dialog.
     */
    ~SignaturePropertiesDlg();
+
+private:
+   SignaturePropertiesDlg(const SignaturePropertiesDlg& rhs);
+   SignaturePropertiesDlg& operator=(const SignaturePropertiesDlg& rhs);
 };
 
 #endif

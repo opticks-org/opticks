@@ -41,6 +41,8 @@ public:
    static bool isProduction();
 
 private:
+   PropertiesTiePointLayer(const PropertiesTiePointLayer& rhs);
+   PropertiesTiePointLayer& operator=(const PropertiesTiePointLayer& rhs);
    TiePointLayer* mpTiePointLayer;
 
    // Pixel marker

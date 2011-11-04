@@ -107,7 +107,7 @@ ProgressDlg::~ProgressDlg()
 {
 }
 
-void ProgressDlg::progressUpdated(Subject &subject, const string &signal, const boost::any &data)
+void ProgressDlg::progressUpdated(Subject& subject, const string& signal, const boost::any& value)
 {
    mpProgressObject = NULL;
    mpPlugIn = NULL;
@@ -240,7 +240,7 @@ void ProgressDlg::progressUpdated(Subject &subject, const string &signal, const 
    }
 }
 
-void ProgressDlg::progressDeleted(Subject &subject, const string &signal, const boost::any &data)
+void ProgressDlg::progressDeleted(Subject& subject, const string& signal, const boost::any& value)
 {
    mpProgressObject = NULL;
    mpPlugIn = NULL;

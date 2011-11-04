@@ -53,6 +53,8 @@ protected:
    void georeferenceModified(Subject &subject, const std::string &signal, const boost::any &v);
 
 private:
+   ScaleBarObjectImp(const ScaleBarObjectImp& rhs);
+   ScaleBarObjectImp& operator=(const ScaleBarObjectImp& rhs);
    double mXgsd;
    bool mNeedsLayout;
    AttachmentPtr<PerspectiveView> mpView;

@@ -25,6 +25,9 @@ public:
    bool isKindOf(const std::string& className) const;
 
    PLOTVIEWADAPTER_METHODS(PlotViewImp)
+
+private:
+   PlotViewAdapter(const PlotViewAdapter& rhs);
 };
 
 #endif

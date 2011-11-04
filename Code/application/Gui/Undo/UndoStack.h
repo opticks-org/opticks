@@ -36,6 +36,8 @@ protected slots:
    void removeAction(QObject* pAction);
 
 private:
+   UndoStack(const UndoStack& rhs);
+   UndoStack& operator=(const UndoStack& rhs);
    QList<QObject*> mActions;
 };
 

@@ -32,7 +32,7 @@ Nitf::UnknownTreParser::~UnknownTreParser()
    // Do nothing
 }
 
-bool Nitf::UnknownTreParser::toDynamicObject(const ossimNitfRegisteredTag& input, DynamicObject& output, 
+bool Nitf::UnknownTreParser::ossimTagToDynamicObject(const ossimNitfRegisteredTag& input, DynamicObject& output, 
    string &errorMessage) const
 {
    ostringstream strm;

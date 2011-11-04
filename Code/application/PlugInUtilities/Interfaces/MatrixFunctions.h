@@ -54,6 +54,8 @@ namespace MatrixFunctions
          const T* const mpInitialData;
          Args(const int& numRows, const int& numCols, const T* pInitialData) :
             mNumRows(numRows), mNumCols(numCols), mpInitialData(pInitialData) {}
+      private:
+         Args& operator=(const Args& rhs);
       };
 
       /**

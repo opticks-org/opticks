@@ -78,6 +78,8 @@ protected:
    virtual void setPropertiesPages(const std::vector<std::string>& plugInNames);
 
 private:
+   SessionItemImp(const SessionItemImp& rhs);
+
    void updateFilenameDisplay();
    void updateSessionExplorer();
 

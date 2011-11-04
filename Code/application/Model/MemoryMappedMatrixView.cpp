@@ -178,7 +178,6 @@ unsigned char* MemoryMappedMatrixView::getSegment(int64_t address)
       mBlockSize));
    if (mpBlock == NULL)
    {
-      int error = GetLastError();
       LPVOID lpMsgBuf = NULL;
       FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
           NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language

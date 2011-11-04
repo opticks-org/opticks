@@ -42,6 +42,8 @@ public:
    static bool isProduction();
 
 private:
+   PropertiesAoiLayer(const PropertiesAoiLayer& rhs);
+   PropertiesAoiLayer& operator=(const PropertiesAoiLayer& rhs);
    AoiLayer* mpAoiLayer;
 
    // Pixel marker

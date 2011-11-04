@@ -32,6 +32,8 @@ public:
    void executeRedo();
 
 private:
+   SetLatLonColor(const SetLatLonColor& rhs);
+   SetLatLonColor& operator=(const SetLatLonColor& rhs);
    ColorType mOldColor;
    ColorType mNewColor;
 };
@@ -46,6 +48,8 @@ public:
    void executeRedo();
 
 private:
+   SetLatLonStyle(const SetLatLonStyle& rhs);
+   SetLatLonStyle& operator=(const SetLatLonStyle& rhs);
    LatLonStyle mOldStyle;
    LatLonStyle mNewStyle;
 };
@@ -60,6 +64,8 @@ public:
    void executeRedo();
 
 private:
+   SetLatLonWidth(const SetLatLonWidth& rhs);
+   SetLatLonWidth& operator=(const SetLatLonWidth& rhs);
    int mOldWidth;
    int mNewWidth;
 };
@@ -74,6 +80,8 @@ public:
    void executeRedo();
 
 private:
+   SetLatLonTickSpacing(const SetLatLonTickSpacing& rhs);
+   SetLatLonTickSpacing& operator=(const SetLatLonTickSpacing& rhs);
    LocationType mOldTickSpacing;
    LocationType mNewTickSpacing;
 };
@@ -88,6 +96,8 @@ public:
    void executeRedo();
 
 private:
+   SetLatLonAutoTickSpacing(const SetLatLonAutoTickSpacing& rhs);
+   SetLatLonAutoTickSpacing& operator=(const SetLatLonAutoTickSpacing& rhs);
    bool mOldAutoSpacing;
    bool mNewAutoSpacing;
 };
@@ -102,6 +112,8 @@ public:
    void executeRedo();
 
 private:
+   SetLatLonFont(const SetLatLonFont& rhs);
+   SetLatLonFont& operator=(const SetLatLonFont& rhs);
    QFont mOldFont;
    QFont mNewFont;
 };
@@ -116,6 +128,8 @@ public:
    void executeRedo();
 
 private:
+   SetLatLonGeocoordType(const SetLatLonGeocoordType& rhs);
+   SetLatLonGeocoordType& operator=(const SetLatLonGeocoordType& rhs);
    GeocoordType mOldGeocoordType;
    GeocoordType mNewGeocoordType;
 };
@@ -130,6 +144,8 @@ public:
    void executeRedo();
 
 private:
+   SetLatLonFormat(const SetLatLonFormat& rhs);
+   SetLatLonFormat& operator=(const SetLatLonFormat& rhs);
    DmsFormatType mOldFormat;
    DmsFormatType mNewFormat;
 };
@@ -142,6 +158,8 @@ public:
    void toLayer(Layer* pLayer) const;
 
 private:
+   LatLonLayerMemento(const LatLonLayerMemento& rhs);
+   LatLonLayerMemento& operator=(const LatLonLayerMemento& rhs);
    QColor mColor;
    LatLonStyle mStyle;
    int mWidth;

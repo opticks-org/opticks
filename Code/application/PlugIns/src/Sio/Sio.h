@@ -138,9 +138,9 @@ typedef enum
 
 typedef struct
 {
-   eParm_Data_Type   eAttribute_Type;
-   char*         pczAttribute_Name;
-   bool         eSave_To_SIO;
+   eParm_Data_Type eAttribute_Type;
+   const char*     pczAttribute_Name;
+   bool            eSave_To_SIO;
 } Attribute_Metadata;
 
 union muValue

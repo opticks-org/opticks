@@ -45,6 +45,8 @@ protected slots:
    void accept();
 
 private:
+   ChippingWindow(const ChippingWindow& rhs);
+   ChippingWindow& operator=(const ChippingWindow& rhs);
    SpatialDataView* mpView;
 
    ChippingWidget* mpChippingWidget;

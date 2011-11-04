@@ -27,6 +27,9 @@ public:
    void setFilename(const QString &filename);
 
 private:
+   OptionsTiffImporter(const OptionsTiffImporter& rhs);
+   OptionsTiffImporter& operator=(const OptionsTiffImporter& rhs);
+
    FileBrowser* mpFilename;
 };
 

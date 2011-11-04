@@ -22,6 +22,8 @@ public:
    virtual bool parseInputArgs(PlugInArgList* pInputArgList);
 
 private:
+   GdalRasterPager& operator=(const GdalRasterPager& rhs);
+
    virtual bool openFile(const std::string& filename);
    virtual CachedPage::UnitPtr fetchUnit(DataRequest* pOriginalRequest);
 

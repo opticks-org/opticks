@@ -55,7 +55,7 @@ MBox::MBox(const QString& strTitle, const QString& strMessage, int type, QWidget
 
    switch (type)
    {
-      case MB_OK:
+      case MB_OK_ONLY:
          cbAlways->setEnabled(false);
          pCancelButton->setEnabled(false);
          break;

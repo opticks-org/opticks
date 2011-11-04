@@ -23,7 +23,7 @@ namespace Nitf
 
       virtual bool runAllTests(Progress* pProgress, std::ostream& failure);
 
-      virtual bool toDynamicObject(const ossimNitfRegisteredTag& input,
+      virtual bool ossimTagToDynamicObject(const ossimNitfRegisteredTag& input,
          DynamicObject& output, std::string& errorMessage) const;
       virtual bool fromDynamicObject(const DynamicObject& input, std::ostream& output,
          size_t& numBytesWritten, std::string& errorMessage) const;

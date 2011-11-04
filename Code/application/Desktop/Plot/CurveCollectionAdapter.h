@@ -24,6 +24,9 @@ public:
    bool isKindOf(const std::string& className) const;
 
    CURVECOLLECTIONADAPTER_METHODS(CurveCollectionImp)
+
+private:
+   CurveCollectionAdapter(const CurveCollectionAdapter& rhs);
 };
 
 #endif

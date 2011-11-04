@@ -62,6 +62,8 @@ protected:
    void objectDeleted(Subject &subject, const std::string &signal, const boost::any &data);
    
 private:
+   AoiElementImp(const AoiElementImp& rhs);
+   AoiElementImp& operator=(const AoiElementImp& rhs);
    mutable FactoryResource<BitMask> mpBitMask;
    mutable bool mBitMaskDirty;
    bool mToggledAllPoints;

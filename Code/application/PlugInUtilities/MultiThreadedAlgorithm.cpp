@@ -70,7 +70,8 @@ struct ProgressFunctor : public ThreadCommand
 {
    ProgressFunctor(int *pProgressValue, int percent) : 
       mpProgressValue(pProgressValue), mPercent(percent) {}
-   void run()
+   virtual ~ProgressFunctor() {};
+   virtual void run()
    {
       *mpProgressValue = mPercent;
    }
@@ -81,17 +82,21 @@ private:
 struct CompletionFunctor : public ProgressFunctor
 {
    CompletionFunctor(int *pProgressValue) : ProgressFunctor(pProgressValue, 100) {}
+   virtual ~CompletionFunctor() {};
 };
 struct ErrorFunctor : public ThreadCommand
 {
    ErrorFunctor(std::string errorText, std::string& errorMessage, Result *pResult) : 
       mErrorText(errorText), mMessage(errorMessage), mpResult(pResult) {}
-   void run()
+   virtual ~ErrorFunctor() {};
+   virtual void run()
    {
       mMessage = mErrorText;
       *mpResult = FAILURE;
    }
 private:
+   ErrorFunctor& operator=(const ErrorFunctor& rhs);
+
    std::string mErrorText;
    std::string& mMessage;
    Result* mpResult;
@@ -100,11 +105,14 @@ struct WorkFunctor : public ThreadCommand
 {
    WorkFunctor(ThreadCommand*&pCommand, ThreadCommand& command) : 
       mpCommand(pCommand), mCommand(command) {}
-   void run()
+   virtual ~WorkFunctor() {};
+   virtual void run()
    {
       mpCommand = &mCommand;
    }
 private:
+   WorkFunctor& operator=(const WorkFunctor& rhs);
+
    ThreadCommand*& mpCommand;
    ThreadCommand& mCommand;
 };

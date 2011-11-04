@@ -119,6 +119,9 @@ protected:
    int mBandCount;
 
    void enforceCacheSize();
+
+private:
+   PageCache& operator=(const PageCache& rhs);
 };
 
 #endif

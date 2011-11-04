@@ -378,8 +378,8 @@ void PerspectiveViewImp::zoomToBox(const LocationType& worldLowerLeft, const Loc
 
       // Update the linked views
       executeOnLinks<PerspectiveViewImp>(
-         boost::bind(&PerspectiveViewImp::zoomToBox, _1, worldLowerLeft, worldUpperRight),
-         GeocoordLinkFunctor(this));
+         boost::bind(static_cast<void (PerspectiveViewImp::*)(const LocationType&, const LocationType&)>
+         (&PerspectiveViewImp::zoomToBox), _1, worldLowerLeft, worldUpperRight), GeocoordLinkFunctor(this));
    }
 }
 
@@ -423,8 +423,9 @@ void PerspectiveViewImp::pan(const LocationType& worldBegin, const LocationType&
       notify(SIGNAL_NAME(Subject, Modified));
 
       // Update the linked views
-      executeOnLinks<PerspectiveViewImp>(boost::bind(&PerspectiveViewImp::pan, _1, worldBegin, worldEnd),
-         GeocoordLinkFunctor(this));
+      executeOnLinks<PerspectiveViewImp>(
+         boost::bind(static_cast<void (PerspectiveViewImp::*)(const LocationType&, const LocationType&)>
+         (&PerspectiveViewImp::pan), _1, worldBegin, worldEnd), GeocoordLinkFunctor(this));
    }
 }
 
@@ -1459,4 +1460,20 @@ void PerspectiveViewImp::togglePixelCoordinates()
 {
    toggleShowCoordinates();
    refresh();
+}
+
+// Implementation added in order to suppress compiler warnings about hiding this method from the base class.
+// Since using directives are not allowed in slot declarations, this implementation that passes through
+// to the base class method was added instead.
+void PerspectiveViewImp::pan(const QPoint& screenBegin, const QPoint& screenEnd)
+{
+   ViewImp::pan(screenBegin, screenEnd);
+}
+
+// Implementation added in order to suppress compiler warnings about hiding this method from the base class.
+// Since using directives are not allowed in slot declarations, this implementation that passes through
+// to the base class method was added instead.
+void PerspectiveViewImp::zoomToBox(const QPoint& screenLowerLeft, const QPoint& screenUpperRight)
+{
+   ViewImp::zoomToBox(screenLowerLeft, screenUpperRight);
 }

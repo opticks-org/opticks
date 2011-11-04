@@ -476,6 +476,9 @@ public:
    vector<Tile*>& mTiles;
    vector<unsigned int>& mTileZoomIndices;
    Image::ImageData& mInfo;
+
+private:
+   TileInput& operator=(const TileInput& rhs);
 };
 
 class TileOutput
@@ -498,14 +501,16 @@ public:
       mTileRange(getThreadRange(threadCount, mTiles.size()))
    {
    }
-
-   void run();
+   virtual ~TileThread() {};
+   virtual void run();
 
 private:
    vector<Tile*>& mTiles;
    vector<unsigned int>& mTileZoomIndices;
    Image::ImageData& mInfo;
    Range mTileRange;
+
+   TileThread& operator=(const TileThread& rhs);
 
    // grayscale, channel specifies the band to display
    template <class T>

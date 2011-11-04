@@ -16,13 +16,13 @@
 class BThreadSignal : public ThreadSignal
 {
    public:
-      BThreadSignal ();
-      ~BThreadSignal ();
-      bool ThreadSignalCreate (); 
-      bool ThreadSignalInit ();
-      bool ThreadSignalDestroy ();
-      bool ThreadSignalWait (void *mutexData);
-      bool ThreadSignalActivate ();
+      BThreadSignal();
+      virtual ~BThreadSignal();
+      virtual bool ThreadSignalCreate(); 
+      virtual bool ThreadSignalInit();
+      virtual bool ThreadSignalDestroy();
+      virtual bool ThreadSignalWait(void *mutexData);
+      virtual bool ThreadSignalActivate();
 
    private:
       pthread_cond_t *mThreadSignalID;

@@ -22,6 +22,10 @@ public:
    InstallWizardLicensePage(const Aeb* pPackageDescriptor,
       unsigned int licenseNum, const QString& license, bool isHtml, QWidget* pParent = NULL);
    virtual ~InstallWizardLicensePage();
+
+private:
+   InstallWizardLicensePage(const InstallWizardLicensePage& rhs);
+   InstallWizardLicensePage& operator=(const InstallWizardLicensePage& rhs);
 };
 
 #endif

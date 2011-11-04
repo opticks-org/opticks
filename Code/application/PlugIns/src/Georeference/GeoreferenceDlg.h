@@ -44,6 +44,9 @@ protected slots:
    void accept();
 
 private:
+   GeoreferenceDlg(const GeoreferenceDlg& rhs);
+   GeoreferenceDlg& operator=(const GeoreferenceDlg& rhs);
+
    QListWidget* mpGeoList;
    QStackedWidget* mpStack;
 

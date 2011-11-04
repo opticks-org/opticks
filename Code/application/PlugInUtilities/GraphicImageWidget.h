@@ -55,6 +55,8 @@ protected slots:
    void notifyImageWidgetChange();
 
 private:
+   GraphicImageWidget(const GraphicImageWidget& rhs);
+   GraphicImageWidget& operator=(const GraphicImageWidget& rhs);
    QLabel* mpFileLabel;
    FileBrowser* mpFileBrowser;
    QLabel* mpWidgetLabel;

@@ -61,6 +61,9 @@ protected slots:
    void importData();
 
 private:
+   DatasetPage(const DatasetPage& rhs);
+   DatasetPage& operator=(const DatasetPage& rhs);
+
    // sets the current spatial data view and the appropriate ListBox
    // this method depends on the fact that a SpatialDataView and SpatialDataWindow have the same name
    void setView(SpatialDataView* pView, QListWidget& box);

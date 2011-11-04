@@ -90,6 +90,8 @@ protected:
    virtual void paintEvent(QPaintEvent* pEvent);
 
 private:
+   ElidedLabel(const ElidedLabel& rhs);
+   ElidedLabel& operator=(const ElidedLabel& rhs);
    Qt::TextElideMode mElideMode;
    QString mPreviousText;
    QRect mPreviousRect;

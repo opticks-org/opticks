@@ -40,6 +40,8 @@ protected slots:
    void updateFileExtensions();
 
 private:
+   BatchExportDlg(const BatchExportDlg& rhs);
+   BatchExportDlg& operator=(const BatchExportDlg& rhs);
    QLineEdit* mpDirectoryEdit;
    QComboBox* mpExporterCombo;
    QComboBox* mpExtensionCombo;

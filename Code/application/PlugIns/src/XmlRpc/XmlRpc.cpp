@@ -144,7 +144,6 @@ XmlRpcMethodCall::XmlRpcMethodCall(DOMElement *pRoot)
       }
       else if (XMLString::equals(pNode->getNodeName(), X("params")))
       {
-         char id = 0;
          DOMNodeList* pParams = static_cast<DOMElement*>(pNode)->getElementsByTagName(X("param"));
          for (XMLSize_t i = 0; i < pParams->getLength(); i++)
          {

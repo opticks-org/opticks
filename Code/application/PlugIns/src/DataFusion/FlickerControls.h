@@ -21,6 +21,10 @@ public:
 protected:
    QAction* createAction();
    QWidget* createWidget();
+
+private:
+   FlickerControls(const FlickerControls& rhs);
+   FlickerControls& operator=(const FlickerControls& rhs);
 };
 
 #endif

@@ -241,7 +241,6 @@ void LatLonInsertObjectImp::move(LocationType delta)
 void LatLonInsertObjectImp::moveHandle(int handle, LocationType pixel, bool bMaintainAspect)
 {
    ArrowObjectImp* pArrow = getArrowObject();
-   TextObjectImp* pLatLonText = getTextObject();
 
    if (handle == BASE_HANDLE)
    {

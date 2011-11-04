@@ -45,6 +45,9 @@ protected slots:
    void accept();
 
 private:
+   AddPlotDlg(const AddPlotDlg& rhs);
+   AddPlotDlg& operator=(const AddPlotDlg& rhs);
+
    Service<DesktopServices> mpDesktop;
    Service<ModelServices> mpModel;
 

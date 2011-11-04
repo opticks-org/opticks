@@ -83,6 +83,9 @@ protected:
    void calculateStatistics(ComplexComponent component);
 
 private:
+   StatisticsImp(const StatisticsImp& rhs);
+   StatisticsImp& operator=(const StatisticsImp& rhs);
+
    // NOTE: this has to be a RasterElementImp instead of RasterElement as it is populated
    // in the RasterElementImp constructor. At that point, a dynamic_cast to RasterElement
    // is not possible.
@@ -125,6 +128,9 @@ public:
    int mResolution;
    std::vector<int> mBadValues;
    const BitMask* mpAoi;
+
+private:
+   StatisticsInput& operator=(const StatisticsInput& rhs);
 };
 
 class StatisticsThread;
@@ -145,8 +151,9 @@ class StatisticsThread : public mta::AlgorithmThread
 {
 public:
    StatisticsThread(const StatisticsInput &input, int threadCount, int threadIndex, mta::ThreadReporter &reporter);
+   virtual ~StatisticsThread() {};
 
-   void run();
+   virtual void run();
 
    bool isMaxMinSet() const;
    double getMaximum() const;
@@ -156,6 +163,8 @@ public:
    unsigned int getCount() const;
 
 private:
+   StatisticsThread& operator=(const StatisticsThread& rhs);
+
    const StatisticsInput& mInput;
 
    Range mRowRange;
@@ -174,6 +183,9 @@ public:
       mStatInput(statInput), mStatistics(statOutput) {}
    StatisticsInput mStatInput;
    StatisticsOutput mStatistics;
+
+private:
+   HistogramInput& operator=(const HistogramInput& rhs);
 };
 
 class HistogramThread;
@@ -207,12 +219,15 @@ class HistogramThread : public mta::AlgorithmThread
 {
 public:
    HistogramThread(const HistogramInput& input, int threadCount, int threadIndex, mta::ThreadReporter& reporter);
+   virtual ~HistogramThread() {};
 
-   void run();
+   virtual void run();
 
    std::vector<unsigned int>& getBinCounts();
 
 private:
+   HistogramThread& operator=(const HistogramThread& rhs);
+
    const HistogramInput& mInput;
    unsigned int mCount;
 

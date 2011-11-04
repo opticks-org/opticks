@@ -30,7 +30,7 @@ ProcessStatusChecker::~ProcessStatusChecker()
 
 void ProcessStatusChecker::timeout()
 {
-#pragma message("Write this function for unix (leckels)")
+//#pragma message("Write this function for unix (leckels)")
 #if defined(ESRI_WINDOWS)
    HANDLE proc = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, mPid);
    if (proc == NULL)

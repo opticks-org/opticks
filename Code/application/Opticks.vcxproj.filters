@@ -582,5 +582,8 @@
     <ClInclude Include="Interfaces\Blob.h">
       <Filter>Interfaces</Filter>
     </ClInclude>
+    <ClInclude Include="Interfaces\EnableWarnings.h">
+      <Filter>Interfaces</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

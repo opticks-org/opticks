@@ -247,7 +247,7 @@ public:
    virtual bool addProperty(const std::string &name, const std::vector<const Filename*>& value);
    virtual bool addBooleanProperty(const std::string &name, bool value);
 
-   virtual bool finalize(Message::Result result = Message::Success);
+   virtual bool finalize();
 
    virtual std::string getComponent() const;
    virtual std::string getKey() const;
@@ -255,7 +255,6 @@ public:
    virtual const DynamicObject *getProperties() const = 0;
 
    virtual std::string getAction() const;
-   virtual Message::Result getResult() const;
    virtual std::string propertyToString(const std::string &type, void *pValue) const;
    virtual std::string getStringId();
    NumChain& getId();
@@ -264,7 +263,7 @@ public:
 
 public: // serialize functionality
    virtual bool toXml(XMLWriter* pXml) const;
-   virtual bool fromXml(DOMNode* pDocument, unsigned int version) const;
+   virtual bool fromXml(DOMNode* pDocument, unsigned int version);
    virtual void serializeDate(std::string &date, std::string &time) const;
 
 public: // SubjectAdapter functionality
@@ -308,7 +307,8 @@ public:
                                bool finalizeOnCreate = false,
                                bool recurse = true);
 
-   virtual bool finalize(Message::Result result = Message::Success);
+   virtual bool finalize();
+   virtual bool finalize(Message::Result result);
    virtual bool finalize(Message::Result result, const std::string& failureReason);
    virtual const std::string& getFailureMessage() const;
    virtual Message::Result getResult() const;
@@ -512,9 +512,9 @@ bool addBooleanProperty(const std::string &name, bool value) \
    return impClass::addBooleanProperty(name, value); \
 } \
  \
-bool finalize(Message::Result result = Message::Success) \
+bool finalize() \
 { \
-   return impClass::finalize(result); \
+   return impClass::finalize(); \
 } \
  \
 std::string getComponent() const \
@@ -530,11 +530,6 @@ std::string getKey() const \
 std::string getAction() const \
 { \
    return impClass::getAction(); \
-} \
- \
-Message::Result getResult() const \
-{ \
-   return impClass::getResult(); \
 } \
  \
 std::string propertyToString(const std::string &type, void *pValue) const \
@@ -572,9 +567,14 @@ const DynamicObject *getProperties() const \
 
 #define STEPADAPTER_METHODS(impClass) \
    MESSAGEADAPTER_METHODS(impClass) \
-bool finalize(Message::Result result, const std::string& failureReason) \
+using impClass::finalize; \
+bool finalize(Message::Result result, const std::string& failureReason = "") \
 { \
    return impClass::finalize(result, failureReason); \
+} \
+Result getResult() const \
+{ \
+   return impClass::getResult(); \
 } \
 const std::string& getFailureMessage() const \
 { \
@@ -624,7 +624,7 @@ const Message *operator[](Step::size_t i) const  \
    return impClass::operator[](i);  \
 } \
 const Step *getParent() const  \
-{  \
+{ \
    return impClass::getParent();  \
 }
 

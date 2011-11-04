@@ -30,6 +30,9 @@ public:
       DataElement* pParent = NULL) const;
 
    ANNOTATIONLAYERADAPTER_METHODS(AnnotationLayerImp)
+
+private:
+   AnnotationLayerAdapter(const AnnotationLayerAdapter& rhs);
 };
 
 #endif

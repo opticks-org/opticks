@@ -36,6 +36,8 @@ public:
       return mMask.getPixel(col, row);
    }
 private:
+   PixelOper& operator=(const PixelOper& rhs);
+
    const BitMask& mMask;
 };
 }

@@ -84,6 +84,8 @@ public:
    }
 
 private:
+   OptionsView(const OptionsView& rhs);
+   OptionsView& operator=(const OptionsView& rhs);
    QRadioButton* mpFixedSizeRadio;
    QRadioButton* mpMaximizedRadio;
    QRadioButton* mpPercentageRadio;

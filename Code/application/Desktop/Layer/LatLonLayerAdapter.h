@@ -30,6 +30,9 @@ public:
       DataElement* pParent = NULL) const;
 
    LATLONLAYERADAPTER_METHODS(LatLonLayerImp)
+
+private:
+   LatLonLayerAdapter(const LatLonLayerAdapter& rhs);
 };
 
 #endif

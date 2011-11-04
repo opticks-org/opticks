@@ -67,6 +67,10 @@ signals:
 
 private slots:
    void translateActivated(int index);
+
+private:
+   WavelengthUnitsComboBox(const WavelengthUnitsComboBox& rhs);
+   WavelengthUnitsComboBox& operator=(const WavelengthUnitsComboBox& rhs);
 };
 
 #endif

@@ -23,7 +23,9 @@ public:
       QWidget* parent = 0);
    ~OrthographicViewImp();
 
-   using SessionItemImp::setIcon;
+   using ViewImp::getPixelSize;
+   using ViewImp::setIcon;
+   using ViewImp::setName;
 
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
@@ -31,26 +33,25 @@ public:
    static bool isKindOfView(const std::string& className);
    static void getViewTypes(std::vector<std::string>& classList);
 
-   OrthographicViewImp& operator= (const OrthographicViewImp& orthographicView);
-   using ViewImp::setName;
-
    void lockAspectRatio(bool bLock);
    bool isAspectRatioLocked() const;
 
    LocationType getPixelSize() const;
-   using ViewImp::getPixelSize;
 
    bool toXml(XMLWriter* pXml) const;
    bool fromXml(DOMNode* pDocument, unsigned int version);
 
 public slots:
    void zoomExtents();
+   void zoomToBox(const QPoint& screenLowerLeft, const QPoint& screenUpperRight);
    void zoomToBox(const LocationType& worldLowerLeft, const LocationType& worldUpperRight);
    void zoomOnPoint(const QPoint& anchor, const QPoint& delta);
    void zoomToInset();
+   void pan(const QPoint& screenBegin, const QPoint& screenEnd);
    void pan(const LocationType& worldBegin, const LocationType& worldEnd);
 
 protected:
+   OrthographicViewImp& operator=(const OrthographicViewImp& orthographicView);
    void wheelEvent(QWheelEvent* pEvent);
    void resizeEvent(QResizeEvent* e);
    using ViewImp::updateMatrices;
@@ -58,6 +59,8 @@ protected:
    void drawInset();
 
 private:
+   OrthographicViewImp(const OrthographicViewImp& rhs);
+
    double mDisplayMinX;
    double mDisplayMinY;
    double mDisplayMaxX;
@@ -70,6 +73,7 @@ private:
 
 #define ORTHOGRAPHICVIEWADAPTER_METHODS(impClass) \
    VIEWADAPTER_METHODS(impClass) \
+   using ViewImp::zoomToBox; \
    void lockAspectRatio(bool bLock) \
    { \
       return impClass::lockAspectRatio(bLock); \

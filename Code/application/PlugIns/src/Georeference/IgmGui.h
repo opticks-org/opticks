@@ -38,6 +38,10 @@ protected:
    QRadioButton* mpUseExisting;
    QRadioButton* mpLoad;
    FileBrowser* mpFilename;
+
+private:
+   IgmGui(const IgmGui& rhs);
+   IgmGui& operator=(const IgmGui& rhs);
 };
 
 #endif // IGMGUI_H

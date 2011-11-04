@@ -84,6 +84,8 @@ protected:
    void clear();
 
 private:
+   DynamicObjectItemModel(const DynamicObjectItemModel& rhs);
+   DynamicObjectItemModel& operator=(const DynamicObjectItemModel& rhs);
    void initializeDynamicObjectItem(AttributeWrapper* pWrapper, DynamicObject* pDynamicObject);
    void cleanupDynamicObjectItem(AttributeWrapper* pWrapper, DynamicObject* pDynamicObject);
 

@@ -43,6 +43,8 @@ public:
    virtual bool deserialize(SessionItemDeserializer& deserializer);
 
 private:
+   IgmGeoreference(const IgmGeoreference& rhs);
+   IgmGeoreference& operator=(const IgmGeoreference& rhs);
    IgmGui* mpGui;
 
    RasterElement* mpRaster;

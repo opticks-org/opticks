@@ -51,7 +51,6 @@ public:
    PseudocolorLayerImp& operator= (const PseudocolorLayerImp& pseudocolorLayer);
 
    LayerType getLayerType() const;
-   using LayerImp::setName;
 
    std::vector<ColorType> getColors() const;
    void draw();
@@ -96,6 +95,8 @@ protected slots:
    void invalidateImage();
 
 private:
+   PseudocolorLayerImp(const PseudocolorLayerImp& rhs);
+
    QMap<int, PseudocolorClass*> mClasses;
 
    SymbolType mSymbol;

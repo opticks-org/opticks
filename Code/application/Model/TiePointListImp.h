@@ -40,6 +40,7 @@ public:
    static void getElementTypes(std::vector<std::string>& classList);
 
 private:
+   TiePointListImp(const TiePointListImp& rhs);
    std::string mMissionName;
    std::vector<TiePoint> mTiePoints;
 };

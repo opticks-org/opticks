@@ -26,6 +26,10 @@ public:
 signals: 
    void valueChanged(DmsFormatType value);
 
+private:
+   DmsFormatTypeComboBox(const DmsFormatTypeComboBox& rhs);
+   DmsFormatTypeComboBox& operator=(const DmsFormatTypeComboBox& rhs);
+
 private slots:
    void translateActivated(int newIndex);
 };

@@ -49,6 +49,8 @@ protected:
    void hideEvent(QHideEvent* pEvent);
 
 private:
+   TiePointEditor(const TiePointEditor& rhs);
+   TiePointEditor& operator=(const TiePointEditor& rhs);
    QTableView* mpTableView;
    QPushButton* mpAddButton;
    QPushButton* mpDeleteButton;

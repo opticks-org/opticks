@@ -80,6 +80,10 @@ private slots:
    void translateEdited();
    void translateActivated();
    void translateChanged();
+
+private:
+   FontSizeComboBox(const FontSizeComboBox& rhs);
+   FontSizeComboBox& operator=(const FontSizeComboBox& rhs);
 };
 
 #endif

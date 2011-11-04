@@ -81,6 +81,8 @@ public:
    }
 
 private:
+   OptionsGeneral(const OptionsGeneral& rhs);
+   OptionsGeneral& operator=(const OptionsGeneral& rhs);
    QSpinBox* mpMruFilesSpin;
    QSpinBox* mpBufferSpin;
    QSpinBox* mpThreadSpin;

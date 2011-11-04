@@ -79,6 +79,8 @@ public:
    }
 
 private:
+   OptionsPseudocolorLayer(const OptionsPseudocolorLayer& rhs);
+   OptionsPseudocolorLayer& operator=(const OptionsPseudocolorLayer& rhs);
    SymbolTypeButton* mpSymbolType;
 };
 

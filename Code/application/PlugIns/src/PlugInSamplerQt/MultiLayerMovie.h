@@ -33,9 +33,9 @@ private:
    RasterLayer* mpLayer1;
    RasterLayer* mpLayer2;
    RasterLayer* mpLayer3;
-   static const int mNumRows = 256;
-   static const int mNumCols = 256;
-   static const int mNumBands = 256;
+   static const unsigned short mNumRows = 256;
+   static const unsigned short mNumCols = 256;
+   static const unsigned short mNumBands = 256;
 
    bool createRasterElements();
    bool populateRasterElements();

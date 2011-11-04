@@ -51,10 +51,12 @@ namespace
          return FLT8BYTES;
       case GDT_CInt16:
          return INT4SCOMPLEX;
-      case GDT_CInt32:
-      case GDT_CFloat32:
+      case GDT_CInt32:    // fall through
+      case GDT_CFloat32:  // fall through
       case GDT_CFloat64:
          return FLT8COMPLEX;
+      case GDT_TypeCount: // fall through
+      case GDT_Unknown:   // fall through
       default:
          break;
       }
@@ -67,22 +69,25 @@ namespace
       {
       case GDT_Byte:
          return 1;
-      case GDT_UInt16:
+      case GDT_UInt16:    // fall through
       case GDT_Int16:
          return 2;
-      case GDT_UInt32:
-      case GDT_Int32:
-      case GDT_Float32:
+      case GDT_UInt32:    // fall through
+      case GDT_Int32:     // fall through
+      case GDT_Float32:   // fall through
       case GDT_CInt16:
          return 4;
-      case GDT_Float64:
-      case GDT_CInt32:
+      case GDT_Float64:   // fall through
+      case GDT_CInt32:    // fall through
       case GDT_CFloat32:
          return 8;
       case GDT_CFloat64:
          return 16;
+      case GDT_TypeCount: // fall through
+      case GDT_Unknown:   // fall through
+      default:
+         return 0;
       }
-      return 0;
    }
 }
 

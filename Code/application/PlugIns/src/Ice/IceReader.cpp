@@ -490,7 +490,6 @@ bool IceReader::parseDimensionDescriptors(const Hdf5Group* pCube, RasterDataDesc
    vector<DimensionDescriptor> rows;
    vector<DimensionDescriptor> columns;
    vector<DimensionDescriptor> bands;
-   unsigned int originalNumber = 0;
    unsigned int t;
    for (t = 0; t < numRows; ++t)
    {
@@ -1147,16 +1146,16 @@ Layer* IceReader::parseAndCreateLayer(const Hdf5Group* pLayerGroup,
    LayerType layerType = StringUtilities::fromXmlString<LayerType>(layerTypeString);
    DO_IF(layerType.isValid() == false, return NULL);
 
-   double xScaleFactor;
+   double xScaleFactor = 1.0;
    PARSE_ATTRIBUTE_DEFAULT(pLayerGroup, "XScaleFactor", xScaleFactor, double, 1.0);
 
-   double yScaleFactor;
+   double yScaleFactor = 1.0;
    PARSE_ATTRIBUTE_DEFAULT(pLayerGroup, "YScaleFactor", yScaleFactor, double, 1.0);
 
-   double xOffset;
+   double xOffset = 0.0;
    PARSE_ATTRIBUTE_DEFAULT(pLayerGroup, "XOffset", xOffset, double, 0.0);
 
-   double yOffset;
+   double yOffset = 0.0;
    PARSE_ATTRIBUTE_DEFAULT(pLayerGroup, "YOffset", yOffset, double, 0.0);
 
    Layer* pLayer = pView->createLayer(layerType, pParent, layerName);

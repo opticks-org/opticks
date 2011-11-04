@@ -224,13 +224,15 @@ public:
     *           performed, unless the pointer is NULL, in which case an empty
     *           variant is created.
     */
+#if defined(WIN_API)
 #pragma warning( push )
 #pragma warning( disable: 4101 )
+#endif
    template <typename T>
    DataVariant(const T& value) :
       mpValue(NULL)
    {
-      VariantTypeValidator<T> validator;
+      VariantTypeValidator<T> validator HIDE_UNUSED_VARIABLE_WARNING;
 
       mpValue = createWrapper(static_cast<const void*>(&value), typeid(T).name());
    }
@@ -430,7 +432,7 @@ public:
    template <typename T>
    bool getValue(T& value) const
    {
-      VariantTypeValidator<T> validator;
+      VariantTypeValidator<T> validator HIDE_UNUSED_VARIABLE_WARNING;
       T* pValue = const_cast<DataVariant*>(this)->getPointerToValue<T>();
       if (pValue != NULL)
       {
@@ -464,7 +466,7 @@ public:
    template <typename T>
    const T* getPointerToValue() const
    {
-      VariantTypeValidator<T> validator;
+      VariantTypeValidator<T> validator HIDE_UNUSED_VARIABLE_WARNING;
       if (getType() == typeid(T))
       {
          return reinterpret_cast<T*> (getPointerToValueAsVoid());
@@ -496,7 +498,7 @@ public:
    template <typename T>
    T* getPointerToValue()
    {
-      VariantTypeValidator<T> validator;
+      VariantTypeValidator<T> validator HIDE_UNUSED_VARIABLE_WARNING;
       return const_cast<T*>(const_cast<const DataVariant*>(this)->getPointerToValue<T>());
    }
 
@@ -577,7 +579,7 @@ public:
    template<typename ValueType>
    bool operator==(const ValueType & rhs) const
    {
-      VariantTypeValidator<ValueType> validator;
+      VariantTypeValidator<ValueType> validator HIDE_UNUSED_VARIABLE_WARNING;
       DataVariant rhsVariant(rhs);
       return *this == rhsVariant;
    }
@@ -596,7 +598,7 @@ public:
     *  @return  true if the types are the same and the internal values compare 
     *         equal and false otherwise.
     */
-   bool operator==(const DataVariant &rhs) const;
+   bool operator==(const DataVariant& rhs) const;
 
    /**
     *  Returns a pointer to the wrapped object.
@@ -651,7 +653,7 @@ private:
 template<typename T>
 const T &dv_cast(const DataVariant &variant)
 {
-   VariantTypeValidator<T> validator;
+   VariantTypeValidator<T> validator HIDE_UNUSED_VARIABLE_WARNING;
    const T* pT = variant.getPointerToValue<T>();
    if (pT == NULL)
    {
@@ -699,7 +701,7 @@ const T &dv_cast(const DataVariant &variant)
 template<typename T>
 T &dv_cast(DataVariant &variant)
 {
-   VariantTypeValidator<T> validator;
+   VariantTypeValidator<T> validator HIDE_UNUSED_VARIABLE_WARNING;
    T* pT = variant.getPointerToValue<T>();
    if (pT == NULL)
    {
@@ -740,7 +742,7 @@ T &dv_cast(DataVariant &variant)
 template<typename T>
 T dv_cast_with_verification(const DataVariant &variant, const T& defaultValue)
 {
-   VariantTypeValidator<T> validator;
+   VariantTypeValidator<T> validator HIDE_UNUSED_VARIABLE_WARNING;
    T retValue = defaultValue;
    bool success = variant.getValue(retValue);
    if (!success)
@@ -783,7 +785,7 @@ T dv_cast_with_verification(const DataVariant &variant, const T& defaultValue)
 template<typename T>
 T dv_cast(const DataVariant &variant, const T& defaultValue)
 {
-   VariantTypeValidator<T> validator;
+   VariantTypeValidator<T> validator HIDE_UNUSED_VARIABLE_WARNING;
    T retValue = defaultValue;
    variant.getValue(retValue);
    return retValue;
@@ -814,7 +816,7 @@ T dv_cast(const DataVariant &variant, const T& defaultValue)
 template<typename T>
 const T* dv_cast(const DataVariant *pVariant)
 {
-   VariantTypeValidator<T> validator;
+   VariantTypeValidator<T> validator HIDE_UNUSED_VARIABLE_WARNING;
    if (pVariant == NULL)
    {
       return NULL;
@@ -847,13 +849,15 @@ const T* dv_cast(const DataVariant *pVariant)
 template<typename T>
 T* dv_cast(DataVariant *pVariant)
 {
-   VariantTypeValidator<T> validator;
+   VariantTypeValidator<T> validator HIDE_UNUSED_VARIABLE_WARNING;
    if (pVariant == NULL)
    {
       return NULL;
    }
    return pVariant->getPointerToValue<T>();
 }
+#if defined(WIN_API)
 #pragma warning( pop )
+#endif
 
 #endif

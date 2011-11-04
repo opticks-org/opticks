@@ -38,6 +38,9 @@ protected slots:
    void accept();
 
 private:
+   NameTypeValueDlg(const NameTypeValueDlg& rhs);
+   NameTypeValueDlg& operator=(const NameTypeValueDlg& rhs);
+
    QLineEdit* mpNameEdit;
    QListWidget* mpTypeList;
    DataVariantEditor* mpValueEditor;

@@ -37,7 +37,7 @@ public:
    AnimationToolBarImp(const std::string& id, QWidget* parent = 0);
    ~AnimationToolBarImp();
 
-   using SessionItemImp::setIcon;
+   using ToolBarImp::setIcon;
 
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
@@ -88,6 +88,9 @@ protected:
    void removeAnimationController(AnimationController* pController);
 
 private:
+   AnimationToolBarImp(const AnimationToolBarImp& rhs);
+   AnimationToolBarImp& operator=(const AnimationToolBarImp& rhs);
+
    void setPlayButtonState(AnimationState state);
    void setChangeDirectionButtonState(AnimationState state);
    int getSliderIndex(double frameValue);
@@ -119,6 +122,9 @@ private:
       void paintEvent(QPaintEvent* pEvent);
 
    private:
+      WheelEventSlider(const WheelEventSlider& rhs);
+      WheelEventSlider& operator=(const WheelEventSlider& rhs);
+
       bool mBumpersEnabled;
       int mLeftBumper;
       int mRightBumper;

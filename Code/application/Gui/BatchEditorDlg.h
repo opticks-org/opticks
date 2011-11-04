@@ -55,6 +55,8 @@ protected slots:
    void setModified();
 
 private:
+   BatchEditorDlg(const BatchEditorDlg& rhs);
+   BatchEditorDlg& operator=(const BatchEditorDlg& rhs);
    QString mXmlFilename;
    std::vector<BatchFileset*> mFilesets;
    std::vector<BatchWizard*> mWizards;

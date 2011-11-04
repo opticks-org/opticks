@@ -184,7 +184,7 @@ ColormapEditor::~ColormapEditor()
 
 void ColormapEditor::numPrimariesChanged(int newCount)
 {
-   if (newCount == mPrimaries.size())
+   if (newCount == static_cast<int>(mPrimaries.size()))
    {
       return;
    }
@@ -480,12 +480,12 @@ void ColormapEditor::updateColormap()
 
    // Create the display of the colormap
    QImage image(size, 1, QImage::Format_ARGB32);
-   vector<unsigned int> data(size);
+   vector<unsigned int> value(size);
    for (int i = 0; i < size; ++i)
    {
-      data[i] = qRgb(colorMap[i].mRed, colorMap[i].mGreen, colorMap[i].mBlue);
+      value[i] = qRgb(colorMap[i].mRed, colorMap[i].mGreen, colorMap[i].mBlue);
    }
-   memcpy(image.bits(), &data[0], size * sizeof(unsigned int));
+   memcpy(image.bits(), &value[0], size * sizeof(unsigned int));
 
    // scale it ourselves non-smoothly to defeat Qt's hard-coded smooth rescaling
    image = image.scaled(max(size, 500), mpDisplay->height(), Qt::IgnoreAspectRatio, Qt::FastTransformation);

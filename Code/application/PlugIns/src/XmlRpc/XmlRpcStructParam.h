@@ -26,7 +26,7 @@ public:
       XmlRpcParam(other),
       mStruct(other.mStruct) {}
 
-   ~XmlRpcStructParam()
+   virtual ~XmlRpcStructParam()
    {
       for (QMap<QString, const XmlRpcParam*>::const_iterator it = mStruct.begin(); it != mStruct.end(); ++it)
       {

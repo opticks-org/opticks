@@ -65,6 +65,8 @@ signals:
    void extentsChanged();
 
 private:
+   PlotObjectImp(const PlotObjectImp& rhs);
+
    PlotViewImp* mpPlot;
    QString mName;
    bool mbVisible;

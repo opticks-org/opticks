@@ -40,6 +40,8 @@ protected slots:
    void updateLocations();
 
 private:
+   PolarGridlinesImp(const PolarGridlinesImp& rhs);
+
    double mAngle;
    std::vector<double> mDrawLocations;
 };

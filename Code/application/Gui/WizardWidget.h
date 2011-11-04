@@ -48,6 +48,8 @@ protected slots:
    void updateBatchWizardValues();
 
 private:
+   WizardWidget(const WizardWidget& rhs);
+   WizardWidget& operator=(const WizardWidget& rhs);
    QTreeWidget* mpNameTree;
    QMap<QTreeWidgetItem*, Value*> mValues;
 

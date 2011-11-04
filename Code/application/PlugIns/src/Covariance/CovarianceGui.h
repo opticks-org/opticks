@@ -42,6 +42,8 @@ private slots:
    void updateFilename(const QString& filename);
 
 private:
+   CovarianceGui(const CovarianceGui& rhs);
+   CovarianceGui& operator=(const CovarianceGui& rhs);
    bool mForceRecalculate;
    bool mElementExists;
    QFileInfo mCvmFile;

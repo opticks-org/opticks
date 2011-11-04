@@ -28,6 +28,10 @@ public:
 
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
+
+private:
+   TriangleObjectImp(const TriangleObjectImp& rhs);
+   TriangleObjectImp& operator=(const TriangleObjectImp& rhs);
 };
 
 #define TRIANGLEOBJECTADAPTEREXTENSION_CLASSES \

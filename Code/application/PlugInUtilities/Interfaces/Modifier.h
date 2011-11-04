@@ -115,6 +115,8 @@ signals:
    void modified();
 
 private:
+   Modifier(const Modifier& rhs);
+   Modifier& operator=(const Modifier& rhs);
    bool mModified;
 };
 

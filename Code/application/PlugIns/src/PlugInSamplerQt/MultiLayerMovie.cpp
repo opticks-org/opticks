@@ -122,12 +122,12 @@ bool MultiLayerMovie::populateRasterElements()
       return false;
    }
 
-   for (int row = 0; row < mNumRows; ++row)
+   for (unsigned short row = 0; row < mNumRows; ++row)
    {
       unsigned short* pData = static_cast<unsigned short*>(da1->getRow());
-      for (int col = 0; col < mNumCols; ++col)
+      for (unsigned short col = 0; col < mNumCols; ++col)
       {
-         for (int band = 0; band < mNumBands; ++band)
+         for (unsigned short band = 0; band < mNumBands; ++band)
          {
             *pData++ = band;
          }
@@ -144,12 +144,12 @@ bool MultiLayerMovie::populateRasterElements()
       return false;
    }
 
-   for (int row = 0; row < mNumRows / 2; ++row)
+   for (unsigned short row = 0; row < mNumRows / 2; ++row)
    {
       unsigned short* pData = static_cast<unsigned short*>(da2->getRow());
-      for (int col = 0; col < mNumCols / 2; ++col)
+      for (unsigned short col = 0; col < mNumCols / 2; ++col)
       {
-         for (int band = 0; band < mNumBands; ++band)
+         for (unsigned short band = 0; band < mNumBands; ++band)
          {
             *pData++ = mNumBands + band;
          }
@@ -166,14 +166,14 @@ bool MultiLayerMovie::populateRasterElements()
       return false;
    }
 
-   for (int row = 0; row < mNumRows / 4; ++row)
+   for (unsigned short row = 0; row < mNumRows / 4; ++row)
    {
       unsigned short* pData = static_cast<unsigned short*>(da3->getRow());
-      for (int col = 0; col < mNumCols / 4; ++col)
+      for (unsigned short col = 0; col < mNumCols / 4; ++col)
       {
-         for (int band = 0; band < mNumBands; ++band)
+         for (unsigned short band = 0; band < mNumBands; ++band)
          {
-            *pData++ = 2*mNumBands + band;
+            *pData++ = 2 * mNumBands + band;
          }
       }
       da3->nextRow();

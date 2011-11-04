@@ -33,6 +33,9 @@ public:
    QString getAoiName() const;
 
 private:
+   StatisticsDlg(const StatisticsDlg& rhs);
+   StatisticsDlg& operator=(const StatisticsDlg& rhs);
+
    QRadioButton* mpFactorRadio;
    QSpinBox* mpRowSpin;
    QSpinBox* mpColumnSpin;

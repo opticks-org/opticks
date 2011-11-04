@@ -397,6 +397,9 @@ protected slots:
    virtual void customButtonClicked();
 
 private:
+   SignatureSelector(const SignatureSelector& rhs);
+   SignatureSelector& operator=(const SignatureSelector& rhs);
+
    Progress* mpProgress;
    Service<PlugInManagerServices> mpManager;
    Service<ModelServices> mpModel;

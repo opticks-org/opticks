@@ -119,6 +119,8 @@ protected slots:
    void tempFileChanged();
 
 private:
+   DataVariantEditor(const DataVariantEditor& rhs);
+   DataVariantEditor& operator=(const DataVariantEditor& rhs);
    QStackedWidget* mpStack;
    QLineEdit* mpValueLineEdit;
    QPushButton* mpBrowseButton;

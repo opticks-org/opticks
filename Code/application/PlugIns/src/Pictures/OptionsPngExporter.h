@@ -86,6 +86,9 @@ public:
    }
 
 private:
+   OptionsPngExporter(const OptionsPngExporter& rhs);
+   OptionsPngExporter& operator=(const OptionsPngExporter& rhs);
+
    ResolutionWidget* mpResolutionWidget;
 };
 

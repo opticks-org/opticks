@@ -283,14 +283,14 @@ CachedPage::UnitPtr Hdf5Pager::fetchUnit(DataRequest *pOriginalRequest)
       if (dataEncoding == INT4SCOMPLEX)
       {
          loadedType = Hdf5TypeResource(H5Tcreate(H5T_COMPOUND, sizeof(IntegerComplex)));
-         H5Tinsert(*loadedType, "Real", HOFFSET(IntegerComplex, mReal), H5T_NATIVE_SHORT);
-         H5Tinsert(*loadedType, "Imaginary", offsetof(IntegerComplex, mImaginary), H5T_NATIVE_SHORT);
+         H5Tinsert(*loadedType, "Real", 0, H5T_NATIVE_SHORT);
+         H5Tinsert(*loadedType, "Imaginary", sizeof(short), H5T_NATIVE_SHORT);
       }
       else
       {
          loadedType = Hdf5TypeResource(H5Tcreate(H5T_COMPOUND, sizeof(FloatComplex)));
-         H5Tinsert(*loadedType, "Real", HOFFSET(FloatComplex, mReal), H5T_NATIVE_FLOAT);
-         H5Tinsert(*loadedType, "Imaginary", offsetof(FloatComplex, mImaginary), H5T_NATIVE_FLOAT);
+         H5Tinsert(*loadedType, "Real", 0, H5T_NATIVE_FLOAT);
+         H5Tinsert(*loadedType, "Imaginary", sizeof(float), H5T_NATIVE_FLOAT);
       }
    }
    else

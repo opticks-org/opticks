@@ -53,6 +53,8 @@ public:
       return true;
    }
 private:
+   GetAnnoObjectColors& operator=(const GetAnnoObjectColors& rhs);
+
    std::vector<ColorType> &mColors;
 };
 

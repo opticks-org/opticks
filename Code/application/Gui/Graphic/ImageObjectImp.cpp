@@ -424,8 +424,6 @@ void ImageObjectImp::generateTextures()
 
    const unsigned int* pData = &mData[0];
 
-   int pixelCount = mHeight * mWidth;
-
    // Round height and width up to the next larger powers of 2
    mTextureWidth = pow(2.0, 1.0 + floor((log10(static_cast<double>(mWidth + 2)) / log10(2.0)))) + 0.5;
    mTextureHeight = pow(2.0, 1.0 + floor((log10(static_cast<double>(mHeight + 2)) / log10(2.0)))) + 0.5;

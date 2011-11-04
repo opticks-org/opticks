@@ -173,6 +173,8 @@ protected slots:
    void notifyFontChange();
 
 private:
+   GraphicTextWidget(const GraphicTextWidget& rhs);
+   GraphicTextWidget& operator=(const GraphicTextWidget& rhs);
    QTextEdit* mpTextEdit;
    QComboBox* mpAlignmentCombo;
    QFontComboBox* mpFontCombo;

@@ -87,7 +87,6 @@ bool GcpGeoreference::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
    FAIL_IF(!isBatch(), "Interactive mode is not supported.", return false);
 
    int numPoints;
-   PlugInArg* pArg = NULL;
 
    mpRaster = pInArgList->getPlugInArgValue<RasterElement>(Executable::DataElementArg());
    FAIL_IF(mpRaster == NULL, "Unable to find raster element input", return false);
@@ -201,8 +200,8 @@ bool GcpGeoreference::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
       }
    }
 
-   #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This is a short term solution " \
-   "the draw method in LatLonLayer needs to be changed! (mconsidi)")
+   //#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This is a short term solution " \
+   //"the draw method in LatLonLayer needs to be changed! (mconsidi)")
    // Special lon cases of the Antimeridian and poles
    // A value of more than 180.0 in maxLonSeparation indicates a special condition
    if (maxLonSeparation > 180.0)

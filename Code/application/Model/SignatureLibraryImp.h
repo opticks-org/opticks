@@ -61,6 +61,8 @@ public:
    static bool isKindOfElement(const std::string& className);
 
 private:
+   SignatureLibraryImp(const SignatureLibraryImp& rhs);
+   SignatureLibraryImp& operator=(const SignatureLibraryImp& rhs);
    void ordinateDeleted(Subject &subject, const std::string &signal, const boost::any &data);
    void ordinateModified(Subject &subject, const std::string &signal, const boost::any &data);
    std::vector<double> mAbscissa;

@@ -33,7 +33,7 @@ extern "C"
          setLastError(SIMPLE_WRONG_TYPE);
          return NULL;
       }
-      pPlugin->instantiate(name, std::string(), NULL, batch != NULL);
+      pPlugin->instantiate(name, std::string(), NULL, (batch != 0));
       if (pPlugin->getPlugIn() == NULL)
       {
          freePlugIn(pPlugin);

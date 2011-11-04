@@ -265,7 +265,6 @@ bool Nitf::AimidbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
    unsigned short hh(0);
    unsigned short min(0);
    unsigned short ss(0);
-   bool ok(true);
 
    bool success = true;
 
@@ -311,8 +310,9 @@ bool Nitf::AimidbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
    readField<string>(input, output, success, AIMIDB::LOCATION, 11, errorMessage, buf, true);
    readField<string>(input, output, success, AIMIDB::RESERVED3, 13, errorMessage, buf, true);
 
-   size_t numRead = input.tellg();
-   if (numRead != numBytes)
+   int64_t numRead = input.tellg();
+   if (numRead < 0 || numRead > static_cast<int64_t>(std::numeric_limits<size_t>::max()) ||
+      numRead != static_cast<int64_t>(numBytes))
    {
       numReadErrMsg(numRead, numBytes, errorMessage);
       return false;
@@ -326,7 +326,11 @@ bool Nitf::AimidbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
 bool Nitf::AimidbParser::fromDynamicObject(const DynamicObject& input, ostream& output, size_t& numBytesWritten,
    string &errorMessage) const
 {
-   size_t sizeIn = max(static_cast<ostream::pos_type>(0), output.tellp());
+   if (output.tellp() < 0 || output.tellp() > static_cast<int64_t>(std::numeric_limits<size_t>::max()))
+   {
+      return false;
+   }
+   size_t sizeIn = max<size_t>(0, static_cast<size_t>(output.tellp()));
    size_t sizeOut(sizeIn);
 
    try
@@ -364,7 +368,11 @@ bool Nitf::AimidbParser::fromDynamicObject(const DynamicObject& input, ostream& 
       return false;
    }
 
-   sizeOut = output.tellp();
+   if (output.tellp() < 0 || output.tellp() > static_cast<int64_t>(std::numeric_limits<size_t>::max()))
+   {
+      return false;
+   }
+   sizeOut = static_cast<size_t>(output.tellp());
    numBytesWritten = sizeOut - sizeIn;
    return true;
 }

@@ -36,6 +36,8 @@ protected slots:
    void okPressed();
 
 private:
+   BandBadValuesDlg(const BandBadValuesDlg& rhs);
+   BandBadValuesDlg& operator=(const BandBadValuesDlg& rhs);
    QLineEdit* mpBandBadValue;
    QCheckBox* mpChkBoxAllBands;
    std::vector<int> mBadValues;

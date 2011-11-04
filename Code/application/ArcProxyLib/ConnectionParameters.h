@@ -39,7 +39,7 @@ namespace ArcProxyLib
       {
       }
 
-      ConnectionParameters(const ConnectionParameters &rhs) :
+      ConnectionParameters(const ConnectionParameters& rhs) :
          mUser(rhs.mUser),
          mPassword(rhs.mPassword),
          mDatabase(rhs.mDatabase),
@@ -55,7 +55,7 @@ namespace ArcProxyLib
       {
       }
 
-      bool operator==(const ConnectionParameters &rhs) const
+      bool operator==(const ConnectionParameters& rhs) const
       {
          return (mUser == rhs.mUser && mPassword == rhs.mPassword &&
             mDatabase == rhs.mDatabase && mServer == rhs.mServer &&
@@ -64,7 +64,7 @@ namespace ArcProxyLib
 
       }
 
-      bool operator!=(const ConnectionParameters &rhs) const
+      bool operator!=(const ConnectionParameters& rhs) const
       {
          return !operator==(rhs);
       }

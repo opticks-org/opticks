@@ -45,6 +45,10 @@ public:
    }
 
    RAWIMAGEOBJECTADAPTER_METHODS(RawImageObjectImp)
+
+private:
+   RawImageObjectAdapter(const RawImageObjectAdapter& rhs);
+   RawImageObjectAdapter& operator=(const RawImageObjectAdapter& rhs);
 };
 
 #endif

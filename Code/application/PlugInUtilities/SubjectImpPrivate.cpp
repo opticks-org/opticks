@@ -156,6 +156,8 @@ public:
       mRecursions.pop_back();
    }
 private:
+   PopRecursion& operator=(const PopRecursion& rhs);
+
    vector<string>& mRecursions;
 };
 

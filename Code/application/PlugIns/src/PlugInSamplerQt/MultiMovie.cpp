@@ -153,18 +153,18 @@ bool MultiMovie::populateRasterElements()
       return false;
    }
 
-   for (int row = 0; row < mNumRows; ++row)
+   for (unsigned short row = 0; row < mNumRows; ++row)
    {
-      unsigned short* pData1 = static_cast<unsigned short*>(da1->getRow());
-      unsigned short* pData2 = static_cast<unsigned short*>(da2->getRow());
-      unsigned short* pData3 = static_cast<unsigned short*>(da3->getRow());
-      for (int col = 0; col < mNumCols; ++col)
+      unsigned short* pData1 = reinterpret_cast<unsigned short*>(da1->getRow());
+      unsigned short* pData2 = reinterpret_cast<unsigned short*>(da2->getRow());
+      unsigned short* pData3 = reinterpret_cast<unsigned short*>(da3->getRow());
+      for (unsigned short col = 0; col < mNumCols; ++col)
       {
-         for (int band = 0; band < mNumBands; ++band)
+         for (unsigned short band = 0; band < mNumBands; ++band)
          {
             *pData1++ = band;
             *pData2++ = mNumBands + band;
-            *pData3++ = 2*mNumBands + band;
+            *pData3++ = 2 * mNumBands + band;
          }
       }
       da1->nextRow();

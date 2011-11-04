@@ -124,7 +124,7 @@ ossimScalarType OssimAppMemorySource::getOutputScalarType() const
    const RasterDataDescriptor* pDescriptor = dynamic_cast<const RasterDataDescriptor*>(mCube.getDataDescriptor());
    VERIFYRV(pDescriptor != NULL, OSSIM_SCALAR_UNKNOWN);
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : TODO: Support Complex Data (leckels)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : TODO: Support Complex Data (leckels)")
    switch (pDescriptor->getDataType())
    {
    case INT1SBYTE:

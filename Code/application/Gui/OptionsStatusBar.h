@@ -79,6 +79,8 @@ public:
    }
 
 private:
+   OptionsStatusBar(const OptionsStatusBar& rhs);
+   OptionsStatusBar& operator=(const OptionsStatusBar& rhs);
    QCheckBox* mpPixelCoordsCheck;
    QCheckBox* mpGeoCoordsCheck;
    QCheckBox* mpCubeValueCheck;

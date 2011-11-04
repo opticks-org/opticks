@@ -24,6 +24,10 @@ public:
    bool isKindOf(const std::string& className) const;
 
    TOOLBARADAPTER_METHODS(ToolBarImp)
+
+private:
+   ToolBarAdapter(const ToolBarAdapter& rhs);
+   ToolBarAdapter& operator=(const ToolBarAdapter& rhs);
 };
 
 #endif

@@ -75,6 +75,9 @@ public:
    ~SettableSessionItemAdapter();
 
    SETTABLESESSIONITEMADAPTER_METHODS(SessionItemImp)
+
+private:
+   SettableSessionItemAdapter(const SettableSessionItemAdapter& rhs);
 };
 
 #endif

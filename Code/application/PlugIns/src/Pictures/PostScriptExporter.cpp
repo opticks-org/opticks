@@ -93,8 +93,8 @@ bool PostScriptExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutA
    pStep->addProperty("Filename", outPath);
 
    QSize outputSize;
-   unsigned int outputWidth;
-   unsigned int outputHeight;
+   unsigned int outputWidth = 0;
+   unsigned int outputHeight = 0;
    if (pInArgList->getPlugInArgValue("Output Width", outputWidth) &&
       pInArgList->getPlugInArgValue("Output Height", outputHeight))
    {
@@ -119,7 +119,6 @@ bool PostScriptExporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutA
       writePostScriptHeader(outPath, QPoint(0, 0), outputSize);
       QSize subImageSize(512, 512);
       QPoint origin(0, 0);
-      int segment = 0;
       View::SubImageIterator* pSubImage = pView->getSubImageIterator(outputSize, subImageSize);
       int totalX;
       int totalTiles;

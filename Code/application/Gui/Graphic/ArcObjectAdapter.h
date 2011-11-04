@@ -44,6 +44,10 @@ public:
    }
 
    ARCOBJECTADAPTER_METHODS(ArcObjectImp)
+
+private:
+   ArcObjectAdapter(const ArcObjectAdapter& rhs);
+   ArcObjectAdapter& operator=(const ArcObjectAdapter& rhs);
 };
 
 #endif

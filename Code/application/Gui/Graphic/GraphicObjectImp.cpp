@@ -291,7 +291,7 @@ GraphicProperty* GraphicObjectImp::addProperty(const string& propertyName)
       return NULL;
    }
 
-   if (hasProperty(propertyName) != NULL)
+   if (hasProperty(propertyName))
    {
       return NULL;
    }
@@ -362,7 +362,6 @@ bool GraphicObjectImp::setProperty(const GraphicProperty* pProp)
       const RasterElement* pRaster = getGeoreferenceElement();
       if (pRaster != NULL)
       {
-         bool changed = false;
          const BoundingBoxProperty* pBoundingBox = static_cast<const BoundingBoxProperty*>(pProp);
          if (pBoundingBox->geoCoordsMatchPixelCoords() == false &&
             (pBoundingBox->hasGeoCoords() || pBoundingBox->hasPixelCoords()))
@@ -1401,8 +1400,8 @@ bool GraphicObjectImp::fromXml(DOMNode* pDocument, unsigned int version)
       }
       else if (propertyName == "PaperSize")
       {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove PaperSize special case and xsd entry when " \
-"no longer supporting template files from 4.3.X. (dadkins)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove PaperSize special case and xsd entry when " \
+//"no longer supporting template files from 4.3.X. (dadkins)")
          Layer* pLayer = getLayer();
          if (pLayer != NULL)
          {

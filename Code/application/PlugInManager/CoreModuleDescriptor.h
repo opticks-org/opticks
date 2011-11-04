@@ -24,6 +24,9 @@ public:
    virtual PlugIn* createInterface(PlugInDescriptorImp* pDescriptor);
    virtual const bool isValidatedModule() const;
    virtual bool isLoaded() const;
+
+private:
+   CoreModuleDescriptor(const CoreModuleDescriptor& rhs);
 };
 
 #endif

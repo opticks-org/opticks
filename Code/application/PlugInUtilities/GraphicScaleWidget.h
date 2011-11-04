@@ -30,6 +30,8 @@ signals:
    void scaleChanged(double scale);
 
 private:
+   GraphicScaleWidget(const GraphicScaleWidget& rhs);
+   GraphicScaleWidget& operator=(const GraphicScaleWidget& rhs);
    QDoubleSpinBox* mpScaleSpin;
 };
 

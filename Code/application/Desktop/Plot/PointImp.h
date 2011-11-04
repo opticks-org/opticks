@@ -68,6 +68,8 @@ signals:
    void colorChanged(const QColor& clrSymbol);
 
 private:
+   PointImp(const PointImp& rhs);
+
    LocationType mLocation;
    Point::PointSymbolType mSymbol;
    int mSymbolSize;
@@ -113,7 +115,7 @@ private:
    { \
       return impClass::getPointSet(); \
    } \
-   bool hit(LocationType point) \
+   bool hit(LocationType point) const \
    { \
       return impClass::hit(point); \
    } \
@@ -141,5 +143,5 @@ private:
    { \
       return impClass::setPointSet(pPointSet); \
    }
-  
+
 #endif

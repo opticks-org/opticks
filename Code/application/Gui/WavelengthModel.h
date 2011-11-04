@@ -39,6 +39,8 @@ public:
    void updateData();
 
 private:
+   WavelengthModel(const WavelengthModel& rhs);
+   WavelengthModel& operator=(const WavelengthModel& rhs);
    Wavelengths* mpWavelengths;
    std::vector<unsigned int> mAllBands;
    std::vector<unsigned int> mActiveBands;

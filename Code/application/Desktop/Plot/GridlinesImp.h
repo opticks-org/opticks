@@ -56,6 +56,8 @@ protected slots:
    virtual void updateLocations() = 0;
 
 private:
+   GridlinesImp(const GridlinesImp& rhs);
+
    bool mMinorGridlines;
    QColor mColor;
    int mLineWidth;

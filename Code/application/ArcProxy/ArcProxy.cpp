@@ -44,7 +44,7 @@ namespace
 
    std::string toString(const CComBSTR &str)
    {
-#pragma message("Write this method for Solaris")
+//#pragma message("Write this method for Solaris")
 #if defined(ESRI_WINDOWS)
       _bstr_t moreBstr(str, true);
       return LPCSTR(moreBstr);
@@ -132,7 +132,6 @@ ArcProxy::~ArcProxy()
    {
       ShutdownApp();
    }
-   exit(0);
 }
 
 void ArcProxy::connectToServer()
@@ -572,6 +571,23 @@ bool ArcProxy::writeFeature(IFeaturePtr pFeature, const std::string &labelFormat
       break;
    case esriGeometryMultiPatch:
       mStream << "ERROR Multi patch shapes are not supported" << endl;
+      return false;
+   case esriGeometryTriangles:     // fall-through
+   case esriGeometrySphere:        // fall-through
+   case esriGeometryRay:           // fall-through
+   case esriGeometryTriangleFan:   // fall-through
+   case esriGeometryTriangleStrip: // fall-through
+   case esriGeometryBag:           // fall-through
+   case esriGeometryAny:           // fall-through
+   case esriGeometryEnvelope:      // fall-through
+   case esriGeometryRing:          // fall-through
+   case esriGeometryPath:          // fall-through
+   case esriGeometryBezier3Curve:  // fall-through
+   case esriGeometryEllipticArc:   // fall-through
+   case esriGeometryCircularArc:   // fall-through
+   case esriGeometryLine:          // fall-through
+   case esriGeometryNull:          // fall-through
+      mStream << "ERROR Unsupported type encountered" << endl;
       return false;
    }
 

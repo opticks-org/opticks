@@ -20,6 +20,7 @@
 #include <QtGui/QTreeWidget>
 #include <QtGui/QTreeWidgetItem>
 
+#include "ColorType.h"
 #include "EnumWrapper.h"
 
 class FileBrowser;
@@ -966,6 +967,9 @@ protected slots:
    void closeDoubleSpin();
 
 private:
+   CustomTreeWidget(const CustomTreeWidget& rhs);
+   CustomTreeWidget& operator=(const CustomTreeWidget& rhs);
+
    class CellLocation
    {
    public:
@@ -1010,6 +1014,9 @@ private:
 
          return itemSize;
       }
+   private:
+      CustomTreeWidgetItemDelegate(const CustomTreeWidgetItemDelegate& rhs);
+      CustomTreeWidgetItemDelegate& operator=(const CustomTreeWidgetItemDelegate& rhs);
    };
 
    bool mbFullColor;
@@ -1034,7 +1041,7 @@ private:
    QMap<CellLocation, QSpinBox*> mSpinBoxes;
    QMap<CellLocation, QDoubleSpinBox*> mDoubleSpinBoxes;
    QMap<CellLocation, CheckState> mChecks;
-   QMap<CellLocation, QColor> mColors;
+   QMap<CellLocation, ColorType> mColors;
    QMap<CellLocation, bool> mFullCellEdit;
 };
 

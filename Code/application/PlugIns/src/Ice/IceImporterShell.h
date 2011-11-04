@@ -31,6 +31,8 @@ protected:
    const IceUtilities::FileType mFileType;
 
 private:
+   IceImporterShell& operator=(const IceImporterShell& rhs);
+
    std::vector<std::string> mWarnings;
    std::vector<std::string> mErrors;
 };

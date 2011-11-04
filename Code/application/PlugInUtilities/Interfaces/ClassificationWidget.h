@@ -273,6 +273,9 @@ protected slots:
    void favoriteSelected();
 
 private:
+   ClassificationWidget(const ClassificationWidget& rhs);
+   ClassificationWidget& operator=(const ClassificationWidget& rhs);
+
    QStackedWidget* mpValueStack;
    QTabWidget* mpTabWidget;
    QComboBox* mpClassLevelCombo;

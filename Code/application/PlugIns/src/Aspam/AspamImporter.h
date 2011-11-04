@@ -34,6 +34,7 @@ public:
    bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
 
 private:
+   using ImporterShell::deserialize;
    const char* parseParagraphA(const char* pStart);
    const char* parseParagraphB(const char* pStart);
    const char* parseParagraphD(const char* pStart);

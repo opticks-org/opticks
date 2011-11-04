@@ -124,6 +124,9 @@ private slots:
    void proxyExited();
 
 private:
+   FeatureProxyConnector(const FeatureProxyConnector& rhs);
+   FeatureProxyConnector& operator=(const FeatureProxyConnector& rhs);
+
    enum CommandsTypeEnum
    {
       NO_COMMAND, OPEN_DATA_SOURCE, CLOSE_DATA_SOURCE, GET_FEATURE_CLASS_PROPERTIES, QUERY

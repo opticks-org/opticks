@@ -30,6 +30,9 @@ public:
       DataElement* pParent = NULL) const;
 
    RASTERLAYERADAPTER_METHODS(RasterLayerImp)
+
+private:
+   RasterLayerAdapter(const RasterLayerAdapter& rhs);
 };
 
 #endif

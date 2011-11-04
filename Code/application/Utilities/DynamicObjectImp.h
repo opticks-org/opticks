@@ -31,7 +31,7 @@ public:
    DynamicObjectImp();
    virtual ~DynamicObjectImp();
 
-   virtual DynamicObjectImp& operator= (const DynamicObjectImp& rhs);
+   DynamicObjectImp& operator= (const DynamicObjectImp& rhs);
 
    virtual void merge(const DynamicObject* pObject);
    virtual void adoptiveMerge(DynamicObject* pObject);
@@ -90,6 +90,8 @@ protected:
 #define DYNAMICOBJECTADAPTER_METHODS(impClass) \
    SUBJECTADAPTER_METHODS(impClass) \
    SERIALIZABLEADAPTER_METHODS(impClass) \
+   using impClass::getAttributeByPath; \
+   using impClass::removeAttributeByPath; \
    void merge(const DynamicObject* pObject) \
    { \
       return impClass::merge(pObject); \

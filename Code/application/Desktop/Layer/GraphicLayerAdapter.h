@@ -32,6 +32,9 @@ public:
       DataElement* pParent = NULL) const;
 
    GRAPHICLAYERADAPTER_METHODS(GraphicLayerImp)
+
+private:
+   GraphicLayerAdapter(const GraphicLayerAdapter& rhs);
 };
 
 #endif

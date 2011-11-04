@@ -38,14 +38,16 @@ public:
    virtual ~MessageLogWindow();
 
 protected:
-   void messageLogAdded(Subject& subject, const std::string& signal, const boost::any& data);
-   void messageLogRemoved(Subject& subject, const std::string& signal, const boost::any& data);
+   void messageLogAdded(Subject& subject, const std::string& signal, const boost::any& value);
+   void messageLogRemoved(Subject& subject, const std::string& signal, const boost::any& value);
 
 protected slots:
    void setLog(const QString& logName);
 
 private:
-   static QString getDisplayName(const MessageLog* pLog);
+   MessageLogWindow(const MessageLogWindow& rhs);
+   MessageLogWindow& operator=(const MessageLogWindow& rhs);
+   static QString getLogDisplayName(const MessageLog* pLog);
    static std::string getLogName(const QString& displayName);
 
    QComboBox* mpLogCombo;
@@ -69,6 +71,9 @@ class MessageLogWindowModel : public QAbstractItemModel
          mIsProperties(isProperties)
       {
       }
+
+   private:
+      DataElement(const DataElement& rhs);
    };
 
 public:
@@ -84,8 +89,8 @@ public:
    virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
    virtual bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex());
 
-   void messageFinalized(Subject &subject, const std::string &signal, const boost::any &data);
-   void messageAdded(Subject &subject, const std::string &signal, const boost::any &data);
+   void messageFinalized(Subject& subject, const std::string& signal, const boost::any& value);
+   void messageAdded(Subject& subject, const std::string& signal, const boost::any& value);
 
 public slots:
    void setMessageLog(MessageLog* pLog);
@@ -94,6 +99,8 @@ protected:
    int findIndex(const Step *pParent, const Message *pMessage) const;
 
 private:
+   MessageLogWindowModel(const MessageLogWindowModel& rhs);
+   MessageLogWindowModel& operator=(const MessageLogWindowModel& rhs);
    QStringList mHeaderNames;
    AttachmentPtr<MessageLog> mpLog;
    mutable QHash<const DynamicObject*, const Message*> mPropertyCache;

@@ -243,8 +243,6 @@ void TiePointLayerImp::drawLabels(const vector<TiePoint>& points, double sceneSy
       dRotation = pPerspectiveView->getRotation() * PI / 180.0;
    }
 
-   double textScale = sceneSymbolSize / mSymbolSize;
-
    LocationType offset;
    sceneSymbolSize *= 1.2; // push the label off the symbol a little
    offset.mX = cos(dRotation) * sceneSymbolSize + 0.5;
@@ -254,16 +252,14 @@ void TiePointLayerImp::drawLabels(const vector<TiePoint>& points, double sceneSy
    font.setBold(false);
    font.setPointSize(12);
 
-   vector<TiePoint>::const_iterator pPoint;
-   for (pPoint = points.begin(); pPoint != points.end(); ++pPoint)
+   for (unsigned int i = 0; i < points.size(); ++i)
    {
-      LocationType point = getPoint(*pPoint);
+      LocationType point = getPoint(points[i]);
       if (isInBounds(point, viewableBounds))
       {
          point += offset;
 
-         QString strText;
-         strText.sprintf("%d", pPoint-points.begin()+1);
+         QString strText = QString::number(i + 1);
 
          LocationType screenCoord;
          translateDataToScreen(point.mX, point.mY, screenCoord.mX, screenCoord.mY);

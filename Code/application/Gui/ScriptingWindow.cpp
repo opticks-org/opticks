@@ -339,7 +339,7 @@ void ScriptingWindow::clear()
    }
 }
 
-void ScriptingWindow::sessionClosed(Subject &subject, const std::string &signal, const boost::any &data)
+void ScriptingWindow::sessionClosed(Subject& subject, const std::string& signal, const boost::any& value)
 {
    clear();
 }

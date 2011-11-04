@@ -45,6 +45,10 @@ public:
    }
 
    DIMENSIONOBJECTADAPTER_METHODS(DimensionObjectImp)
+
+private:
+   DimensionObjectAdapter(const DimensionObjectAdapter& rhs);
+   DimensionObjectAdapter& operator=(const DimensionObjectAdapter& rhs);
 };
 
 #endif

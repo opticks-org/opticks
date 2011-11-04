@@ -45,6 +45,10 @@ public:
    }
 
    SCALEBAROBJECTADAPTER_METHODS(ScaleBarObjectImp)
+
+private:
+   ScaleBarObjectAdapter(const ScaleBarObjectAdapter& rhs);
+   ScaleBarObjectAdapter& operator=(const ScaleBarObjectAdapter& rhs);
 };
 
 #endif

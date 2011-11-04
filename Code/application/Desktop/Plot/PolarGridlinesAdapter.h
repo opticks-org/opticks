@@ -24,6 +24,9 @@ public:
    bool isKindOf(const std::string& className) const;
 
    POLARGRIDLINESADAPTER_METHODS(PolarGridlinesImp)
+
+private:
+   PolarGridlinesAdapter(const PolarGridlinesAdapter& rhs);
 };
 
 #endif

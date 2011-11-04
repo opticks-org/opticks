@@ -28,6 +28,8 @@ protected:
    virtual void contextMenuEvent(QContextMenuEvent* pEvent);
 
 private:
+   WizardItemPalette(const WizardItemPalette& rhs);
+   WizardItemPalette& operator=(const WizardItemPalette& rhs);
    class WizardItemList : public QListWidget
    {
    public:
@@ -42,6 +44,10 @@ private:
    protected:
       virtual QStringList mimeTypes() const;
       virtual QMimeData* mimeData(const QList<QListWidgetItem*> items) const;
+
+   private:
+      WizardItemList(const WizardItemList& rhs);
+      WizardItemList& operator=(const WizardItemList& rhs);
    };
 };
 

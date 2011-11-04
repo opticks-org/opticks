@@ -60,6 +60,8 @@ signals:
    void endPointsPrecisionChanged(int precision);
 
 private:
+   MeasurementLayerImp(const MeasurementLayerImp& rhs);
+
    bool mbDisplayDistanceText;
    bool mbDisplayBearingText;
    bool mbDisplayEndPointsText;

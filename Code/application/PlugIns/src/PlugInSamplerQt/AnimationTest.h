@@ -36,6 +36,8 @@ protected:
    QWidget* getWidget() const;
 
 private:
+   AnimationTestPlugIn(const AnimationTestPlugIn& rhs);
+   AnimationTestPlugIn& operator=(const AnimationTestPlugIn& rhs);
    QDialog* mpDialog;
 };
 
@@ -68,6 +70,8 @@ protected:
    void viewFrames(const std::vector<Animation*>& animations);
 
 private:
+   AnimationTestDlg(const AnimationTestDlg& rhs);
+   AnimationTestDlg& operator=(const AnimationTestDlg& rhs);
    PlugIn* mpPlugIn;
    AttachmentPtr<AnimationController> mpController;
    QSpinBox* mpNumAnimations;

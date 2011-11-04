@@ -292,7 +292,6 @@ void TextObjectImp::updateTexture()
       target = &texData[mTextureWidth * j];
       for (int i = 0; i < iWidth; i++)
       {
-         QRgb rgb = image.pixel(i, j);
          if (image.pixel(i, j) != 0xffffffff)
          {
             *target = 0xffffffff;

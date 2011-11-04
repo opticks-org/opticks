@@ -102,6 +102,8 @@ public:
    virtual void paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget = NULL);
 
 private:
+   WizardLine(const WizardLine& rhs);
+   WizardLine& operator=(const WizardLine& rhs);
    WizardNode* mpInputNode;
    WizardNode* mpOutputNode;
 };

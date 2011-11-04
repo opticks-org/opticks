@@ -40,6 +40,9 @@ protected slots:
    void enableOK();
 
 private:
+   GeoMosaicDlg(const GeoMosaicDlg& rhs);
+   GeoMosaicDlg& operator=(const GeoMosaicDlg& rhs);
+
    void batchStitch();
 
    QDialogButtonBox* mpDlgBtns;

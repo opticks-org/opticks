@@ -83,6 +83,9 @@ protected:
    const FontImp& getTitleFontImp() const;
 
 private:
+   AxisImp(const AxisImp& rhs);
+   AxisImp& operator=(const AxisImp& rhs);
+
    class ScaleDraw : public QwtScaleDraw
    {
    public:

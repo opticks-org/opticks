@@ -65,6 +65,9 @@ public:
    std::map<std::string, std::string> getHelpEntries() const;
 
 private:
+   Aeb(const Aeb& rhs);
+   Aeb& operator=(const Aeb& rhs);
+
    // AEBL required
    AebId mId;
    AebVersion mVersion;

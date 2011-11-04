@@ -117,7 +117,7 @@ vector<ImportDescriptor*> CgmImporter::getImportDescriptors(const string& filena
 unsigned char CgmImporter::getFileAffinity(const std::string& filename)
 {
    const uint16_t COMMAND_MASK = 0xFFE0;
-   const uint16_t LENGTH_MASK = ~COMMAND_MASK;
+   const uint16_t LENGTH_MASK = 0x001F; // bitwise complement of COMMAND_MASK
    const uint16_t BEGIN_METAFILE_VAL = 0x0020;
    const uint32_t METAFILE_VERSION_VAL = 0x10220001;
    const uint16_t END_PICTURE_VAL = 0x00A0;

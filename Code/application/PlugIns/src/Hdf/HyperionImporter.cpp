@@ -67,7 +67,6 @@ namespace
                                          EncodingType type)
    {
       vector<double> wavelengths;
-      bool bTruncated = false;
       for (size_t ui = 0; ui < numElements; ++ui)
       {
          size_t index = ui * colCount + column;
@@ -268,7 +267,6 @@ vector<ImportDescriptor*> HyperionImporter::getImportDescriptors(const string& f
                      {
                         EncodingType dataType;
                         pCenterDataset->getDataEncoding(dataType);
-                        unsigned int wavelengthSize = HdfUtilities::getDataSize(dataType);
 
                         // Get the wavelength units
                         bool inMicrons = true;
@@ -313,7 +311,6 @@ vector<ImportDescriptor*> HyperionImporter::getImportDescriptors(const string& f
                         {
                            EncodingType dataType;
                            pWidthDataset->getDataEncoding(dataType);
-                           unsigned int wavelengthSize = HdfUtilities::getDataSize(dataType);
 
                            // Get the wavelength units
                            bool inMicrons = true;

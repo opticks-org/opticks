@@ -51,6 +51,8 @@ protected slots:
    void updateProperties();
 
 private:
+   PropertiesAnnotationLayer(const PropertiesAnnotationLayer& rhs);
+   PropertiesAnnotationLayer& operator=(const PropertiesAnnotationLayer& rhs);
    AnnotationLayer* mpAnnotationLayer;
    std::map<QListWidgetItem*, GraphicObject*> mObjects;
    Modifier mPropertiesModifier;

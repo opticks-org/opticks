@@ -26,6 +26,10 @@ public:
 signals: 
    void valueChanged(FillStyle value);
 
+private:
+   FillStyleComboBox(const FillStyleComboBox& rhs);
+   FillStyleComboBox& operator=(const FillStyleComboBox& rhs);
+
 private slots:
    void translateActivated(int newIndex);
 };

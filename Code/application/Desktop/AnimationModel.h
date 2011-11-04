@@ -36,6 +36,9 @@ protected:
    void removeControllerItem(AnimationController* pController);
 
 private:
+   AnimationModel(const AnimationModel& rhs);
+   AnimationModel& operator=(const AnimationModel& rhs);
+
    AttachmentPtr<AnimationServices> mpAnimationServices;
    AttachmentPtr<AnimationToolBar> mpAnimationToolBar;
 };

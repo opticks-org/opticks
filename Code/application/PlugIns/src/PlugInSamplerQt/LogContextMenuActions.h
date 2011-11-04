@@ -32,13 +32,12 @@ public:
    bool serialize(SessionItemSerializer &serializer) const;
    bool deserialize(SessionItemDeserializer &deserializer);
 
-protected:
-   using PlugInShell::setName;
-
 protected slots:
    void logContextMenuActions(bool bLog);
 
 private:
+   LogContextMenuActions(const LogContextMenuActions& rhs);
+   LogContextMenuActions& operator=(const LogContextMenuActions& rhs);
    bool createAction();
    Service<DesktopServices> mpDesktop;
    QAction* mpLogAction;

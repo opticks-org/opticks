@@ -97,6 +97,8 @@ protected:
    void setInitialWidth(int width);
 
 private:
+   AnnotationImagePaletteOptions(const AnnotationImagePaletteOptions& rhs);
+   AnnotationImagePaletteOptions& operator=(const AnnotationImagePaletteOptions& rhs);
    CustomTreeWidget* mpDirWidget;
    QSpinBox* mpInitialWidth;
    QCheckBox* mpFullSize;

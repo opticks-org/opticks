@@ -34,6 +34,8 @@ private slots:
    void addToPlot();
 
 private:
+   DataPlotterDlg(const DataPlotterDlg& rhs);
+   DataPlotterDlg& operator=(const DataPlotterDlg& rhs);
    QComboBox* mpXbox;
    QComboBox* mpYbox;
    QPushButton* mpAddButton;

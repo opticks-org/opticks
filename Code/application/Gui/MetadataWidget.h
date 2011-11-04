@@ -58,12 +58,14 @@ protected slots:
 protected:
    enum ItemDataRole
    {
-      DataVariantRole = Qt::UserRole,
+      DataVariantRole = Qt::UserRole
    };
 
    void metadataDeleted(Subject& subject, const std::string& signal, const boost::any& value);
 
 private:
+   MetadataWidget(const MetadataWidget& rhs);
+   MetadataWidget& operator=(const MetadataWidget& rhs);
    bool applyFilter(int row, const QModelIndex& parent, const QRegExp& nameFilter, const QRegExp& valueFilter,
       bool parentMatch = false);
    bool isFilterNameUnique(const QString& filterName, int ignoreIndex = -1) const;

@@ -24,6 +24,8 @@ public:
    void executeRedo();
 
 private:
+   SetTiePointSymbolSize(const SetTiePointSymbolSize& rhs);
+   SetTiePointSymbolSize& operator=(const SetTiePointSymbolSize& rhs);
    int mOldSize;
    int mNewSize;
 };
@@ -38,6 +40,8 @@ public:
    void executeRedo();
 
 private:
+   SetTiePointColor(const SetTiePointColor& rhs);
+   SetTiePointColor& operator=(const SetTiePointColor& rhs);
    ColorType mOldColor;
    ColorType mNewColor;
 };
@@ -52,6 +56,8 @@ public:
    void executeRedo();
 
 private:
+   SetTiePointLabels(const SetTiePointLabels& rhs);
+   SetTiePointLabels& operator=(const SetTiePointLabels& rhs);
    bool mOldLabels;
    bool mNewLabels;
 };
@@ -64,6 +70,8 @@ public:
    void toLayer(Layer* pLayer) const;
 
 private:
+   TiePointLayerMemento(const TiePointLayerMemento& rhs);
+   TiePointLayerMemento& operator=(const TiePointLayerMemento& rhs);
    int mSymbolSize;
    ColorType mColor;
    bool mLabels;

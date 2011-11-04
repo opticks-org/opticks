@@ -54,7 +54,6 @@ public:
 
    virtual bool getExtents(double& x1, double& y1, double& x4, double& y4);
    virtual LayerType getLayerType() const;
-   using LayerImp::setName;
 
    virtual void groupSelection();
    virtual void ungroupSelection();
@@ -233,6 +232,8 @@ signals:
    void showLabelsChanged(bool showLabels);
 
 private:
+   GraphicLayerImp(const GraphicLayerImp& rhs);
+
    AttachmentPtr<SessionExplorer> mpExplorer;
 
    bool mbHideSelectionBox;
@@ -272,6 +273,8 @@ private:
 
 #define GRAPHICLAYERADAPTER_METHODS(impClass) \
    LAYERADAPTER_METHODS(impClass) \
+   using impClass::addObject; \
+   using impClass::getObjects; \
    GraphicObject* addObject(const GraphicObjectType& objectType) \
    { \
       return impClass::addObject(objectType, LocationType()); \

@@ -21,6 +21,10 @@ class AboutDlg : public QDialog
 public:
    AboutDlg(QWidget* parent = 0);
    ~AboutDlg();
+
+private:
+   AboutDlg(const AboutDlg& rhs);
+   AboutDlg& operator=(const AboutDlg& rhs);
 };
 
 #endif

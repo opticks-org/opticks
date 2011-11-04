@@ -63,6 +63,8 @@ namespace Jpeg2000Cache
       CacheUnit* getCacheUnit(std::vector<unsigned int>& blocks, size_t blockSize);
 
    private:
+      Cache& operator=(const Cache& rhs);
+
       static bool CacheLocator(std::vector<unsigned int> blockNumbers, CacheUnit* pUnit);
       static bool CacheCleaner(const CacheUnit* pUnit);
 
@@ -95,6 +97,8 @@ protected:
    Jpeg2000Page* getPage(tstrip_t startStrip, tstrip_t endStrip, tsize_t stripSize);
 
 private:
+   Jpeg2000Pager& operator=(const Jpeg2000Pager& rhs);
+
    RasterElement* mpRaster;
    FILE* mpJpeg2000;
    Mutex* mpMutex;

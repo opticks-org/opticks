@@ -14,6 +14,219 @@
 
 #include <limits>
 
+void textToValue(const QString& input, bool* pSuccess, char* pParam)
+{
+   if (pParam == NULL)
+   {
+      if (pSuccess != NULL)
+      {
+         *pSuccess = false;
+      }
+      return;
+   }
+   *pParam = 0;
+   short value = input.toShort(pSuccess);
+   if (pSuccess != NULL && *pSuccess == false)
+   {
+      return;
+   }
+
+   if ((value >= std::numeric_limits<char>::min()) && (value <= std::numeric_limits<char>::max()))
+   {
+      *pParam = static_cast<char>(value);
+   }
+   else if (pSuccess != NULL)
+   {
+      *pSuccess = false;
+   }
+}
+
+void textToValue(const QString& input, bool* pSuccess, signed char* pParam)
+{
+   if (pParam == NULL)
+   {
+      if (pSuccess != NULL)
+      {
+         pSuccess = false;
+      }
+      return;
+   }
+   *pParam = 0;
+   short value = input.toShort(pSuccess);
+   if (pSuccess != NULL && *pSuccess == false)
+   {
+      return;
+   }
+
+   if ((value >= std::numeric_limits<signed char>::min()) && (value <= std::numeric_limits<signed char>::max()))
+   {
+      *pParam = static_cast<signed char>(value);
+   }
+   else if (pSuccess != NULL)
+   {
+      *pSuccess = false;
+   }
+}
+
+void textToValue(const QString& input, bool* pSuccess, unsigned char* pParam)
+{
+   if (pParam == NULL)
+   {
+      if (pSuccess != NULL)
+      {
+         pSuccess = false;
+      }
+      return;
+   }
+   *pParam = 0;
+   unsigned short value = input.toUShort(pSuccess);
+   if (pSuccess != NULL && *pSuccess == false)
+   {
+      return;
+   }
+
+   if (value <= std::numeric_limits<unsigned char>::max())
+   {
+      *pParam = static_cast<unsigned char>(value);
+   }
+   else if (pSuccess != NULL)
+   {
+      *pSuccess = false;
+   }
+}
+
+void textToValue(const QString& input, bool* pSuccess, short* pParam)
+{
+   if (pParam == NULL)
+   {
+      if (pSuccess != NULL)
+      {
+         pSuccess = false;
+      }
+      return;
+   }
+   *pParam = input.toShort(pSuccess);
+}
+
+void textToValue(const QString& input, bool* pSuccess, unsigned short* pParam)
+{
+   if (pParam == NULL)
+   {
+      if (pSuccess != NULL)
+      {
+         pSuccess = false;
+      }
+      return;
+   }
+   *pParam = input.toUShort(pSuccess);
+}
+
+void textToValue(const QString& input, bool* pSuccess, int* pParam)
+{
+   if (pParam == NULL)
+   {
+      if (pSuccess != NULL)
+      {
+         pSuccess = false;
+      }
+      return;
+   }
+   *pParam = input.toInt(pSuccess);
+}
+
+void textToValue(const QString& input, bool* pSuccess, unsigned int* pParam)
+{
+   if (pParam == NULL)
+   {
+      if (pSuccess != NULL)
+      {
+         pSuccess = false;
+      }
+      return;
+   }
+   *pParam = input.toUInt(pSuccess);
+}
+
+void textToValue(const QString& input, bool* pSuccess, long* pParam)
+{
+   if (pParam == NULL)
+   {
+      if (pSuccess != NULL)
+      {
+         pSuccess = false;
+      }
+      return;
+   }
+   *pParam = input.toLong(pSuccess);
+}
+
+void textToValue(const QString& input, bool* pSuccess, unsigned long* pParam)
+{
+   if (pParam == NULL)
+   {
+      if (pSuccess != NULL)
+      {
+         pSuccess = false;
+      }
+      return;
+   }
+   *pParam = input.toULong(pSuccess);
+}
+
+#ifdef WIN_API
+void textToValue(const QString& input, bool* pSuccess, int64_t* pParam)
+{
+   if (pParam == NULL)
+   {
+      if (pSuccess != NULL)
+      {
+         pSuccess = false;
+      }
+      return;
+   }
+   *pParam = input.toLongLong(pSuccess);
+}
+
+void textToValue(const QString& input, bool* pSuccess, uint64_t* pParam)
+{
+   if (pParam == NULL)
+   {
+      if (pSuccess != NULL)
+      {
+         pSuccess = false;
+      }
+      return;
+   }
+   *pParam = input.toULongLong(pSuccess);
+}
+#endif
+
+void textToValue(const QString& input, bool* pSuccess, Int64* pParam)
+{
+   if (pParam == NULL)
+   {
+      if (pSuccess != NULL)
+      {
+         pSuccess = false;
+      }
+      return;
+   }
+   *pParam = Int64(input.toLongLong(pSuccess));
+}
+
+void textToValue(const QString& input, bool* pSuccess, UInt64* pParam)
+{
+   if (pParam == NULL)
+   {
+      if (pSuccess != NULL)
+      {
+         pSuccess = false;
+      }
+      return;
+   }
+   *pParam = UInt64(input.toULongLong(pSuccess));
+}
+
 template<typename T>
 IntValidator<T>::IntValidator(QObject* pParent) :
    QValidator(pParent),
@@ -94,7 +307,8 @@ QValidator::State IntValidator<T>::validate(QString& input, int& pos) const
    // Convert the string to a value and disallow text that is not a valid value
    bool success = false;
 
-   T value = textToValue(input, &success);
+   T value = std::numeric_limits<T>::max();
+   textToValue(input, &success, &value);
    if (success == false)
    {
       return QValidator::Invalid;
@@ -108,134 +322,6 @@ QValidator::State IntValidator<T>::validate(QString& input, int& pos) const
 
    // Allow the value
    return QValidator::Acceptable;
-}
-
-template<>
-char IntValidator<char>::textToValue(const QString& input, bool* pSuccess) const
-{
-   short value = input.toShort(pSuccess);
-   if (pSuccess != NULL && *pSuccess == false)
-   {
-      return 0;
-   }
-
-   if ((value >= std::numeric_limits<char>::min()) && (value <= std::numeric_limits<char>::max()))
-   {
-      return static_cast<char>(value);
-   }
-
-   if (pSuccess != NULL)
-   {
-      *pSuccess = false;
-   }
-
-   return 0;
-}
-
-template<>
-signed char IntValidator<signed char>::textToValue(const QString& input, bool* pSuccess) const
-{
-   short value = input.toShort(pSuccess);
-   if (pSuccess != NULL && *pSuccess == false)
-   {
-      return 0;
-   }
-
-   if ((value >= std::numeric_limits<signed char>::min()) && (value <= std::numeric_limits<signed char>::max()))
-   {
-      return static_cast<signed char>(value);
-   }
-
-   if (pSuccess != NULL)
-   {
-      *pSuccess = false;
-   }
-
-   return 0;
-}
-
-template<>
-unsigned char IntValidator<unsigned char>::textToValue(const QString& input, bool* pSuccess) const
-{
-   unsigned short value = input.toUShort(pSuccess);
-   if (pSuccess != NULL && *pSuccess == false)
-   {
-      return 0;
-   }
-
-   if (value <= std::numeric_limits<unsigned char>::max())
-   {
-      return static_cast<unsigned char>(value);
-   }
-
-   if (pSuccess != NULL)
-   {
-      *pSuccess = false;
-   }
-
-   return 0;
-}
-
-template<>
-short IntValidator<short>::textToValue(const QString& input, bool* pSuccess) const
-{
-   return input.toShort(pSuccess);
-}
-
-template<>
-unsigned short IntValidator<unsigned short>::textToValue(const QString& input, bool* pSuccess) const
-{
-   return input.toUShort(pSuccess);
-}
-
-template<>
-int IntValidator<int>::textToValue(const QString& input, bool* pSuccess) const
-{
-   return input.toInt(pSuccess);
-}
-
-template<>
-unsigned int IntValidator<unsigned int>::textToValue(const QString& input, bool* pSuccess) const
-{
-   return input.toUInt(pSuccess);
-}
-
-template<>
-long IntValidator<long>::textToValue(const QString& input, bool* pSuccess) const
-{
-   return input.toLong(pSuccess);
-}
-
-template<>
-unsigned long IntValidator<unsigned long>::textToValue(const QString& input, bool* pSuccess) const
-{
-   return input.toULong(pSuccess);
-}
-
-#ifdef WIN_API
-template<>
-int64_t IntValidator<int64_t>::textToValue(const QString& input, bool* pSuccess) const
-{
-   return input.toLongLong(pSuccess);
-}
-
-template<>
-uint64_t IntValidator<uint64_t>::textToValue(const QString& input, bool* pSuccess) const
-{
-   return input.toULongLong(pSuccess);
-}
-#endif
-
-template<>
-Int64 IntValidator<Int64>::textToValue(const QString& input, bool* pSuccess) const
-{
-   return Int64(input.toLongLong(pSuccess));
-}
-
-template<>
-UInt64 IntValidator<UInt64>::textToValue(const QString& input, bool* pSuccess) const
-{
-   return UInt64(input.toULongLong(pSuccess));
 }
 
 template class IntValidator<char>;

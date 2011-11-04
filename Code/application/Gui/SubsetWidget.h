@@ -68,6 +68,8 @@ protected slots:
    void customBandSelection();
 
 private:
+   SubsetWidget(const SubsetWidget& rhs);
+   SubsetWidget& operator=(const SubsetWidget& rhs);
    bool compareDimensionDescriptors(DimensionDescriptor left, DimensionDescriptor right);
 
    bool mExportMode;
@@ -114,6 +116,8 @@ private slots:
    void selectionChanged();
 
 private:
+   BandCustomSelectionDialog(const BandCustomSelectionDialog& rhs);
+   BandCustomSelectionDialog& operator=(const BandCustomSelectionDialog& rhs);
    QComboBox* mpStartBandCombo;
    QComboBox* mpEndBandCombo;
    QSpinBox* mpBandSkipSpin;

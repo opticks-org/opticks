@@ -25,6 +25,10 @@ public:
 protected:
    std::string getFileIndicator() const;
    void orient();
+
+private:
+   NorthArrowObjectImp(const NorthArrowObjectImp& rhs);
+   NorthArrowObjectImp& operator=(const NorthArrowObjectImp& rhs);
 };
 
 #define NORTHARROWOBJECTADAPTEREXTENSION_CLASSES \

@@ -26,6 +26,9 @@ public:
    bool isKindOf(const std::string& className) const;
 
    TEXTADAPTER_METHODS(TextImp)
+
+private:
+   TextAdapter(const TextAdapter& rhs);
 };
 
 #endif

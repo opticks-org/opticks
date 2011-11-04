@@ -49,6 +49,8 @@ public:
    void georeferenceModified(Subject &subject, const std::string &signal, const boost::any &data);
 
 private:
+   GraphicElementImp(const GraphicElementImp& rhs);
+   GraphicElementImp& operator=(const GraphicElementImp& rhs);
    GraphicResource<GraphicGroup> mpGroup;
    bool mInteractive;
    AttachmentPtr<RasterElement> mpGeocentricSource;

@@ -503,3 +503,19 @@ bool OrthographicViewImp::fromXml(DOMNode* pDocument, unsigned int version)
    updateMatrices();
    return true;
 }
+
+// Implementation added in order to suppress compiler warnings about hiding this method from the base class.
+// Since using directives are not allowed in slot declarations, this implementation that passes through
+// to the base class method was added instead.
+void OrthographicViewImp::zoomToBox(const QPoint& screenLowerLeft, const QPoint& screenUpperRight)
+{
+   ViewImp::zoomToBox(screenLowerLeft, screenUpperRight);
+}
+
+// Implementation added in order to suppress compiler warnings about hiding this method from the base class.
+// Since using directives are not allowed in slot declarations, this implementation that passes through
+// to the base class method was added instead.
+void OrthographicViewImp::pan(const QPoint& screenBegin, const QPoint& screenEnd)
+{
+   ViewImp::pan(screenBegin, screenEnd);
+}

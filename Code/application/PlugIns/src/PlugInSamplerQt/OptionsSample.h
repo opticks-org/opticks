@@ -86,6 +86,9 @@ public:
    }
 
 private:
+   OptionsSample(const OptionsSample& rhs);
+   OptionsSample& operator=(const OptionsSample& rhs);
+
    QLineEdit* mpTextSetting;
    QSpinBox* mpIntSetting;
    QCheckBox* mpBoolSetting;

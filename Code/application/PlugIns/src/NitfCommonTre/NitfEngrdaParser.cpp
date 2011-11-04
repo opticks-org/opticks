@@ -70,7 +70,6 @@ bool Nitf::EngrdaParser::toDynamicObject(std::istream& input,
       Nitf::readField<unsigned int>(input, record, success, ENGRDA::ENGMTXC, 4, errorMessage, buf);
       Nitf::readField<unsigned int>(input, record, success, ENGRDA::ENGMTXR, 4, errorMessage, buf);
       Nitf::readField<std::string>(input, record, success, ENGRDA::ENGTYP, 1, errorMessage, buf);
-      char typ = buf.front();
       Nitf::readField<unsigned int>(input, record, success, ENGRDA::ENGDTS, 1, errorMessage, buf);
       int dts = QString(&buf.front()).toInt(); // bytes per element
       Nitf::readField<std::string>(input, record, success, ENGRDA::ENGDATU, 2, errorMessage, buf);
@@ -82,8 +81,9 @@ bool Nitf::EngrdaParser::toDynamicObject(std::istream& input,
       record.setAttribute(ENGRDA::ENGDATA, Blob(&buf.front(), buf.size()));
    }
 
-   size_t numRead = input.tellg();
-   if (numRead != numBytes)
+   int64_t numRead = input.tellg();
+   if (numRead < 0 || numRead > static_cast<int64_t>(std::numeric_limits<size_t>::max()) ||
+      numRead != static_cast<int64_t>(numBytes))
    {
       numReadErrMsg(numRead, numBytes, errorMessage);
       return false;
@@ -97,7 +97,11 @@ bool Nitf::EngrdaParser::fromDynamicObject(const DynamicObject& input,
                                            size_t& numBytesWritten,
                                            std::string &errorMessage) const
 {
-   size_t sizeIn = std::max(static_cast<std::ostream::pos_type>(0), output.tellp());
+   if (output.tellp() < 0 || output.tellp() > static_cast<int64_t>(std::numeric_limits<size_t>::max()))
+   {
+      return false;
+   }
+   size_t sizeIn = std::max<size_t>(0, static_cast<size_t>(output.tellp()));
    size_t sizeOut(sizeIn);
 
    try
@@ -130,7 +134,11 @@ bool Nitf::EngrdaParser::fromDynamicObject(const DynamicObject& input,
       return false;
    }
 
-   sizeOut = output.tellp();
+   if (output.tellp() < 0 || output.tellp() > static_cast<int64_t>(std::numeric_limits<size_t>::max()))
+   {
+      return false;
+   }
+   sizeOut = static_cast<size_t>(output.tellp());
    numBytesWritten = sizeOut - sizeIn;
    return true;
 }

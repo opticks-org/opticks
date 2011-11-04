@@ -36,10 +36,14 @@ namespace
    public:
       QImageFileIconProvider() {}
       virtual ~QImageFileIconProvider() {}
-      QIcon icon(const QFileInfo& info) const
+      using QFileIconProvider::icon;
+      virtual QIcon icon(const QFileInfo& info) const
       {
          return QIcon(info.absoluteFilePath());
       }
+   private:
+      QImageFileIconProvider(const QImageFileIconProvider& rhs);
+      QImageFileIconProvider& operator=(const QImageFileIconProvider& rhs);
    };
 
    QString dndMimeType("text/x-annotation-image-filename");
@@ -280,8 +284,8 @@ void AnnotationImagePaletteWidget::windowDropEvent(SpatialDataView* pView, QDrop
 
       QMessageBox::critical(this, "Annotation Image Palette", "The image could not be loaded from the file.");
 
-      #pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : The undo group is still added to the view.  This " \
-         "should be removed when capability exists to delay adding undo group actions to the stack. (dsulgrov)")
+      //#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : The undo group is still added to the view.  This " \
+      //   "should be removed when capability exists to delay adding undo group actions to the stack. (dsulgrov)")
       return;
    }
    LocationType corner;

@@ -18,8 +18,8 @@
 
 #include <limits>
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Many methods in this class are duplicated " \
-   "by MatrixFunctions.h (dadkins)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Many methods in this class are duplicated " \
+//   "by MatrixFunctions.h (dadkins)")
 
 template<class T>
 class Matrix

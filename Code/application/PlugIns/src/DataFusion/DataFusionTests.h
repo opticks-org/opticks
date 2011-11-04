@@ -27,6 +27,8 @@ public:
    {
    }
 
+   virtual ~Test() {};
+
    virtual bool run(double pause = 0) = 0;
 
    const ProgressTracker::Stage& getStage()
@@ -40,15 +42,21 @@ protected:
 
    std::ostream& mOutputStream;
    ProgressTracker& mProgressTracker;
+
+private:
+   Test& operator=(const Test& rhs);
 };
 
 class PolywarpTests : public Test
 {
 public:
    PolywarpTests(std::ostream& output, ProgressTracker& tracker);
-   bool run(double pause = 0);
+   virtual ~PolywarpTests() {};
+   virtual bool run(double pause = 0);
 
 private:
+   PolywarpTests& operator=(const PolywarpTests& rhs);
+
    void setupInputMatrices(Vector<double>& xP, Vector<double>& yP, Vector<double>& xS, Vector<double>& yS,
                            Vector<double>& kX, Vector<double>& kY,
                            Vector<double>& expectedKX, Vector<double>& expectedKY);
@@ -69,6 +77,8 @@ class Poly2DTests : public Test
 {
 public:
    Poly2DTests(std::ostream& output, ProgressTracker& tracker);
+   virtual ~Poly2DTests() {};
+
    bool run(double pause = 0);
 
    bool identityTest();
@@ -82,6 +92,9 @@ public:
 
    bool verifyMatrix(ProgressTracker::Stage& s, RasterElement* pResults, RasterElement* pExpected,
                      std::string name);
+
+private:
+   Poly2DTests &operator=(const Poly2DTests& rhs);
 };
 
 #endif

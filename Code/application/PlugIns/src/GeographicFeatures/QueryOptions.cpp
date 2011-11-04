@@ -46,6 +46,8 @@ namespace
       }
 
    private:
+      DynamicObjectSource& operator=(const DynamicObjectSource& rhs);
+
       DynamicObject& mDynObj;
    };
 }

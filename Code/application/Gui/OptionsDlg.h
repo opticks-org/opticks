@@ -36,6 +36,8 @@ protected slots:
    void optionSelected(QTreeWidgetItem* pItem);
 
 private:
+   OptionsDlg(const OptionsDlg& rhs);
+   OptionsDlg& operator=(const OptionsDlg& rhs);
    void populateDialogWithOptions();
    void fixNodes(QTreeWidgetItem* pCurItem);
    void saveState();

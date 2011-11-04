@@ -31,6 +31,8 @@ public:
    bool getExtrapolate() const;
 
 private:
+   SampleGeorefGui(const SampleGeorefGui& rhs);
+   SampleGeorefGui& operator=(const SampleGeorefGui& rhs);
    QSpinBox* mpXSpin;
    QSpinBox* mpYSpin;
    QCheckBox* mpExtrapolateCheck;

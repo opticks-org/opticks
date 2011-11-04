@@ -48,6 +48,8 @@ protected:
    QAction* getAction(const QString& strMenuItem, QMenu* pMenu) const;
 
 private:
+   MenuBarImp(const MenuBarImp& rhs);
+   MenuBarImp& operator=(const MenuBarImp& rhs);
    QString mName;
    QList<QMenu*> mMenus;
 };

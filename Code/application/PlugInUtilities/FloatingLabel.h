@@ -49,6 +49,8 @@ protected:
    int getPositionLimit() const;
 
 private:
+   FloatingLabel(const FloatingLabel& rhs);
+   FloatingLabel& operator=(const FloatingLabel& rhs);
    Qt::Orientation meOrientation;
    int miPosition;
    TextJustification meJustification;

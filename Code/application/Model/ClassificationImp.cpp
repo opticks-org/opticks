@@ -256,7 +256,11 @@ bool ClassificationImp::hasGreaterLevel(const Classification* pClassification) c
       return true;
    }
 
-   char* levels[] = {"U", "R", "C", "S", "T"};
+   const char* levels[] = { "U",
+      "R",
+      "C",
+      "S",
+      "T" };
    const unsigned int numLevels = sizeof(levels) / sizeof(levels[0]);
    const string& compareLevel = pClassification->getLevel();
 
@@ -338,7 +342,7 @@ void ClassificationImp::setFileReleasing(const string& myFileReleasing)
       string relTo("REL\\ TO");
       if (fileReleasing.find("NOFORN") != string::npos)
       {
-         int relToPos = fileReleasing.find(relTo);
+         string::size_type relToPos = fileReleasing.find(relTo);
          if (relToPos != string::npos) // can't have both NOFORN & REL TO
          {
             int len = relTo.length();
@@ -627,7 +631,7 @@ void ClassificationImp::getClassificationText(string& classificationText) const
    int relToLen = relTo.size();
    if (escaped.empty() == false)
    {
-      int relToPos = escaped.find(relTo);
+      string::size_type relToPos = escaped.find(relTo);
       if (relToPos != string::npos)
       {
          field = getCountryCode();

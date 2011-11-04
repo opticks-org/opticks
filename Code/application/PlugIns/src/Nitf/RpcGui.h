@@ -26,6 +26,9 @@ public:
    bool validateInput();
 
 private:
+   RpcGui(const RpcGui& rhs);
+   RpcGui& operator=(const RpcGui& rhs);
+
    RasterElement* mpRasterElement;
    QSpinBox* mpHeightSpin;
 };

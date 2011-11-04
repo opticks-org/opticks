@@ -530,6 +530,8 @@ public:
       return firstTime;
    }
 private:
+   XmlAddPoint& operator=(const XmlAddPoint& rhs);
+
    XMLWriter& mWriter;
    bool mFirstTime;
 };

@@ -25,7 +25,8 @@ public:
       QWidget* pParent = 0);
    ~CartesianPlotImp();
 
-   using SessionItemImp::setIcon;
+   using PlotViewImp::setIcon;
+   using PlotViewImp::setName;
 
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
@@ -33,10 +34,8 @@ public:
    static bool isKindOfView(const std::string& className);
    static void getViewTypes(std::vector<std::string>& classList);
 
-   CartesianPlotImp& operator= (const CartesianPlotImp& cartesianPlot);
    View* copy(QGLContext* pDrawContext = 0, QWidget* pParent = 0) const;
    bool copy(View *pView) const;
-   using ViewImp::setName;
 
    PlotType getPlotType() const;
 
@@ -73,6 +72,7 @@ signals:
    void yDataTypeChanged(const QString& strDataType);
 
 protected:
+   CartesianPlotImp& operator=(const CartesianPlotImp& cartesianPlot);
    void drawGridlines();
 
 protected slots:
@@ -82,6 +82,8 @@ protected slots:
    void setMinorVerticalGridlines(bool bShow);
 
 private:
+   CartesianPlotImp(const CartesianPlotImp& rhs);
+
    // Gridlines
    CartesianGridlinesAdapter mHorizontalGridlines;
    CartesianGridlinesAdapter mVerticalGridlines;

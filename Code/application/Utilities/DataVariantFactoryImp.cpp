@@ -362,7 +362,6 @@ public:
    {
       string message = std::string(TypeConverter::toString<T>()) + " doesn't support comparison";
       throw DataVariant::UnsupportedOperation(message);
-      return false;
    }
 
 protected:
@@ -788,8 +787,8 @@ DataValueWrapper* DataVariantFactoryImp::createWrapper(const void* pObject, cons
       return ((*itr).second) (pObject);
    }
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : WBS9.1: stack overflow if we get here " \
-   "via CS::deserialize (TJOHNSON)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : WBS9.1: stack overflow if we get here " \
+//   "via CS::deserialize (TJOHNSON)")
    if (strict)
    {
       string msg = "DataVariantFactory::createWrapper given unknown object type: '" + className + "'";

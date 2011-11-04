@@ -28,6 +28,8 @@ public:
    RasterDataDescriptorImp(DOMNode *pDocument, unsigned int version, DataElement *pParent);
    ~RasterDataDescriptorImp();
 
+   using DataDescriptorImp::copy;
+
    void setDataType(EncodingType dataType);
    EncodingType getDataType() const;
    void setValidDataTypes(const std::vector<EncodingType>& validDataTypes);
@@ -76,7 +78,6 @@ public:
    void setDisplayMode(DisplayMode displayMode);
    DisplayMode getDisplayMode() const;
 
-   using DataDescriptorImp::copy;
    virtual DataDescriptor* copy(const std::string& name, DataElement* pParent) const;
    virtual DataDescriptor* copy(const std::string& name, const std::vector<std::string>& parent) const;
 
@@ -91,6 +92,8 @@ public:
    static bool isKindOfDataDescriptor(const std::string& className);
 
 private:
+   RasterDataDescriptorImp(const RasterDataDescriptorImp& rhs);
+   RasterDataDescriptorImp& operator=(const RasterDataDescriptorImp& rhs);
    EncodingType mDataType;
    std::vector<EncodingType> mValidDataTypes;
    InterleaveFormatType mInterleave;

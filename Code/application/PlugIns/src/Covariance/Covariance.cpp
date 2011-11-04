@@ -108,7 +108,6 @@ void ComputeFactoredCov(T* pData, RasterElement* pRaster, double* pMatrix,
 
    DataAccessor accessor = pRaster->getDataAccessor(pRequest.release());
 
-   T* pDataColumn(NULL);
    for (row = 0; row < numRows; row += rowFactor)
    {
       if (pProgress != NULL)
@@ -597,7 +596,6 @@ bool CovarianceAlgorithm::processAll()
    mpStep = pStep.get();
 
    const RasterDataDescriptor* pDescriptor = NULL;
-   const char* pCubeName = NULL;
    void* pData = NULL;
    unsigned int numRows(0);
    unsigned int numColumns(0);

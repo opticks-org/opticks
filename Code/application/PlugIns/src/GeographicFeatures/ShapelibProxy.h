@@ -30,7 +30,7 @@ class ShapelibProxy : public QObject
 
 public:
    ShapelibProxy();
-   ~ShapelibProxy();
+   virtual ~ShapelibProxy();
 
    bool containsHandle(const std::string &handle) const;
 
@@ -107,6 +107,8 @@ signals:
    void featureLoaded(const ArcProxyLib::Feature &feature);
 
 private:
+   ShapelibProxy(const ShapelibProxy& rhs);
+   ShapelibProxy& operator=(const ShapelibProxy& rhs);
 
    std::map<std::string, ShapelibHandle> mHandles;
 

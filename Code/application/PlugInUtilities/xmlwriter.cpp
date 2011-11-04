@@ -126,8 +126,6 @@ bool XMLWriter::addAttr(const char* pName, const char* pValue, DOMElement* pOwne
       logSimpleMessage(std::string("XMLWriter unexpected exception"));
       throw XmlBase::XmlException("XMLWriter unexpected exception");
    }
-
-   return false;
 }
 
 DOMElement* XMLWriter::addElement(const char* pName, DOMNode* pOwner)
@@ -176,8 +174,6 @@ DOMElement* XMLWriter::addElement(const char* pName, DOMNode* pOwner)
       logSimpleMessage(std::string("XMLWriter unexpected exception"));
       throw XmlBase::XmlException("XMLWriter unexpected exception");
    }
-
-   return NULL;
 }
 
 XERCES_CPP_NAMESPACE_QUALIFIER DOMElement* XMLWriter::addFontElement(const char* pName, const Font& font,
@@ -229,8 +225,6 @@ DOMText* XMLWriter::addText(const char* pValue, DOMNode* pOwner)
       logSimpleMessage(std::string("XMLWriter unexpected exception"));
       throw XmlBase::XmlException("XMLWriter unexpected exception");
    }
-
-   return NULL;
 }
 
 bool XMLWriter::elementExists(const char* pName, DOMNode* pOwner)

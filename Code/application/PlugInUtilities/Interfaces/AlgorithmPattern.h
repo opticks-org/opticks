@@ -37,7 +37,7 @@ class AlgorithmReporter
 {
 public:
    AlgorithmReporter(Progress* pProgress);
-   ~AlgorithmReporter();
+   virtual ~AlgorithmReporter();
 
    void reportProgress(ReportingLevel rptLevel, int progress, std::string message) const;
    int getProgressPercent() const;
@@ -104,6 +104,7 @@ protected:
    ObjectFactory* mpObjFact;
 
 private:
+   AlgorithmPattern(const AlgorithmPattern& rhs);
    virtual bool preprocess() = 0;
    virtual bool processAll() = 0;
    virtual bool postprocess() = 0;

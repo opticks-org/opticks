@@ -24,6 +24,10 @@ public:
    bool isKindOf(const std::string& className) const;
 
    PRODUCTWINDOWADAPTER_METHODS(ProductWindowImp)
+
+private:
+   ProductWindowAdapter(const ProductWindowAdapter& rhs);
+   ProductWindowAdapter& operator=(const ProductWindowAdapter& rhs);
 };
 
 #endif

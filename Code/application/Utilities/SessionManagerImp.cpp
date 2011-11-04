@@ -272,7 +272,7 @@ SessionItem *SessionManagerImp::createDataElement(const string &type, const stri
 
 SessionItem *SessionManagerImp::createPlugInInstance(const string &type, const string &id, const std::string &name)
 {
-   int pos = type.find("/");
+   string::size_type pos = type.find("/");
    if (pos == string::npos)
    {
       return NULL;
@@ -303,7 +303,7 @@ SessionItem *SessionManagerImp::createModule(const string &type, const string &i
 SessionItem *SessionManagerImp::createPlugInDescriptor(const string &type, const string &id, const std::string &name)
 {
    string localType = type;
-   int pos = localType.find_first_of("/");
+   string::size_type pos = localType.find_first_of("/");
    if (pos != string::npos)
    {
       localType = localType.substr(pos+1);
@@ -467,12 +467,12 @@ SessionItem *SessionManagerImp::createView(const string &type, const string &id,
 
 void SessionManagerImp::destroyPlotWidget(SessionItem *pItem)
 {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Needs to be implemented (tjohnson)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Needs to be implemented (tjohnson)")
 }
 
 void SessionManagerImp::destroyPlotSet(SessionItem *pItem)
 {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Needs to be implemented (tjohnson)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Needs to be implemented (tjohnson)")
 }
 
 void SessionManagerImp::destroyAnimationController(SessionItem *pItem)
@@ -537,24 +537,24 @@ void SessionManagerImp::destroyPlugInDescriptor(SessionItem *pItem)
 
 void SessionManagerImp::destroyLayer(SessionItem *pItem)
 {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Needs to be implemented (tjohnson)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Needs to be implemented (tjohnson)")
 }
 
 void SessionManagerImp::destroyWindow(SessionItem *pItem)
 {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Needs to be implemented (tjohnson)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Needs to be implemented (tjohnson)")
 }
 
 void SessionManagerImp::destroyView(SessionItem *pItem)
 {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Needs to be implemented (tjohnson)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Needs to be implemented (tjohnson)")
 }
 
 namespace
 {
 string getBaseType(const string &type)
 {
-   int pos = type.find_first_of("/");
+   string::size_type pos = type.find_first_of("/");
    if (pos == string::npos)
    {
       return type;
@@ -731,6 +731,7 @@ string SessionManagerImp::getPathForItem(const string &dir, const SessionManager
 template<class M>
 struct IfiInitializer
 {
+public:
    IfiInitializer(const string &baseType) : mBaseType(baseType) {}
    template<class T> SessionManagerImp::IndexFileItem operator() (T *pT)
    {
@@ -743,11 +744,15 @@ struct IfiInitializer
       return ifi;
    }
    const string& mBaseType;
+
+private:
+   IfiInitializer& operator=(const IfiInitializer& rhs);
 };
 
 template<>
 struct IfiInitializer<SessionItem*>
 {
+public:
    IfiInitializer( const string &baseType) : mBaseType(baseType) {}
    template<class T> SessionManagerImp::IndexFileItem operator() (T *pT)
    {
@@ -756,11 +761,15 @@ struct IfiInitializer<SessionItem*>
       return ifi;
    }
    const string& mBaseType;
+
+private:
+   IfiInitializer& operator=(const IfiInitializer& rhs);
 };
 
 template<>
 struct IfiInitializer<TypeAwareObject*>
 {
+public:
    IfiInitializer( const string &baseType) : mBaseType(baseType) {}
    template<class T> SessionManagerImp::IndexFileItem operator() (T *pT)
    {
@@ -773,6 +782,9 @@ struct IfiInitializer<TypeAwareObject*>
       return ifi;
    }
    const string& mBaseType;
+
+private:
+   IfiInitializer& operator=(const IfiInitializer& rhs);
 };
 
 template<class M>

@@ -24,6 +24,9 @@ public:
    bool isKindOf(const std::string& className) const;
 
    SIGNATUREADAPTER_METHODS(SignatureImp)
+
+private:
+   SignatureAdapter(const SignatureAdapter& rhs);
 };
 
 #endif

@@ -23,6 +23,10 @@ public:
 protected:
    QAction* createAction();
    QWidget* createWidget();
+
+private:
+   PlotManager(const PlotManager& rhs);
+   PlotManager& operator=(const PlotManager& rhs);
 };
 
 #endif

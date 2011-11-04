@@ -24,6 +24,10 @@ public:
    bool isKindOf(const std::string& className) const;
 
    RASTERELEMENTADAPTER_METHODS(RasterElementImp)
+
+private:
+   RasterElementAdapter(const RasterElementAdapter& rhs);
+   RasterElementAdapter& operator=(const RasterElementAdapter& rhs);
 };
 
 #endif

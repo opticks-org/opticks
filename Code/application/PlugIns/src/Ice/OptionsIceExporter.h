@@ -92,6 +92,8 @@ private slots:
    void gzipCompressionValueChanged(int value);
 
 private:
+   OptionsIceExporter(const OptionsIceExporter& rhs);
+   OptionsIceExporter operator=(const OptionsIceExporter& rhs);
    QComboBox* mpCompressionTypeCombo;
    QSlider* mpGzipCompressionSlider;
    QLabel* mpGzipLevelValue;

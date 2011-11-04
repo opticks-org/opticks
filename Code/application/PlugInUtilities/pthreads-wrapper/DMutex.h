@@ -95,6 +95,8 @@ namespace mta
       }
 
    private:
+      MutexLock& operator=(const MutexLock& rhs);
+
       BMutex& mMutex;
    };
 }

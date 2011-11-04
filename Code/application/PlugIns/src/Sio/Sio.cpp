@@ -98,21 +98,21 @@ static void formatDate(const string& value, DateTime* pDateTime)
 {
    VERIFYNRV((value.empty() == false) && (pDateTime != NULL));
 
-   int iMonth = 0;
-   int iDay = 0;
-   int iYear = 0;
-   int iHour = 0;
-   int iMinute = 0;
-   int iSecond = 0;
+   unsigned short month = 0;
+   unsigned short day = 0;
+   unsigned short year = 0;
+   unsigned short hour = 0;
+   unsigned short minute = 0;
+   unsigned short second = 0;
 
-   int iValues = sscanf(value.c_str(), "%d %d %d %d %d %d", &iMonth, &iDay, &iYear, &iHour, &iMinute, &iSecond);
+   int iValues = sscanf(value.c_str(), "%hu %hu %hu %hu %hu %hu", &month, &day, &year, &hour, &minute, &second);
    if (iValues == 6)
    {
-      pDateTime->set(iYear, iMonth, iDay, iHour, iMinute, iSecond);
+      pDateTime->set(year, month, day, hour, minute, second);
    }
    else if (iValues == 3)
    {
-      pDateTime->set(iYear, iMonth, iDay);
+      pDateTime->set(year, month, day);
    }
 }
 
@@ -280,8 +280,8 @@ bool SioFile::deserialize(FILE* pFile)
 //Version 9 sio's are only written by the temporary Sio Exporter provided in Opticks
 //The exporter has bugs and will be removed in Opticks, therefore version 9 sio's
 //will never be supported by the Opticks Team.
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : When Sio Exporter is removed from Opticks, " \
-   "remove the ability to load version 9 sio's (kstreith)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : When Sio Exporter is removed from Opticks, " \
+//   "remove the ability to load version 9 sio's (kstreith)")
    // Endian
    if ((mVersion != 5) && (mVersion != 6) && (mVersion != 7) && (mVersion != 8) && (mVersion != 9))
    {

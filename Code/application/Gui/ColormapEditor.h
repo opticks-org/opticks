@@ -57,6 +57,8 @@ private slots:
    void primaryColorChanged(const QColor &clrNew);
 
 private:
+   ColormapEditor(const ColormapEditor& rhs);
+   ColormapEditor& operator=(const ColormapEditor& rhs);
    void histogramDeleted(Subject &subject, const std::string &signal, const boost::any& v);
    ColorMap::Gradient makeGradient() const;
 

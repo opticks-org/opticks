@@ -312,8 +312,8 @@ bool Nitf::ImageSubheader::importMetadata(const ossimPropertyInterface *pHeader,
    VERIFY(pImageHeader != NULL);
    VERIFY(Header::importMetadata(pImageHeader, pDescriptor, pImageHeaderMetadata.get()));
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : TODO: Fix OSSIM to parse comments and " \
-   "return the size of the vector (leckels)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : TODO: Fix OSSIM to parse comments and " \
+//   "return the size of the vector (leckels)")
 
    VERIFY(pDescriptor != NULL);
    DynamicObject* pMetadata = pDescriptor->getMetadata();
@@ -485,8 +485,8 @@ bool Nitf::ImageSubheader::importGeoInformation_2_0(const ossimPropertyInterface
       return true;
 
    }
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : TODO: Add full NITF 02.00 compatibility " \
-   "for IGEOLO (GeoCentric). (dadkins)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : TODO: Add full NITF 02.00 compatibility " \
+//   "for IGEOLO (GeoCentric). (dadkins)")
 
    return false;
 }

@@ -24,6 +24,10 @@ public:
    bool isKindOf(const std::string& className) const;
 
    GRAPHICELEMENTADAPTER_METHODS(GraphicElementImp)
+
+private:
+   GraphicElementAdapter(const GraphicElementAdapter& rhs);
+   GraphicElementAdapter& operator=(const GraphicElementAdapter& rhs);
 };
 
 #endif

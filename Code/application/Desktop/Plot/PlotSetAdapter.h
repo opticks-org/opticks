@@ -24,6 +24,10 @@ public:
    bool isKindOf(const std::string& className) const;
 
    PLOTSETADAPTER_METHODS(PlotSetImp)
+
+private:
+   PlotSetAdapter(const PlotSetAdapter& rhs);
+   PlotSetAdapter& operator=(const PlotSetAdapter& rhs);
 };
 
 #endif

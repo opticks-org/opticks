@@ -213,6 +213,8 @@ protected:
    void mouseDoubleClickEvent(QMouseEvent* pEvent);
 
 private:
+   LabeledSection(const LabeledSection& rhs);
+   LabeledSection& operator=(const LabeledSection& rhs);
    void initialize(const QString& text = QString(), QWidget* pSectionWidget = NULL);
    void updateIndicator();
 

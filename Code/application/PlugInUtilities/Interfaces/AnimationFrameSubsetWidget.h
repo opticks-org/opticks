@@ -151,6 +151,9 @@ private slots:
    void updateStopSlider(const AnimationFrame& frame);
 
 private:
+   AnimationFrameSubsetWidget(const AnimationFrameSubsetWidget& rhs);
+   AnimationFrameSubsetWidget& operator=(const AnimationFrameSubsetWidget& rhs);
+
    /**
     *  Sets the type of animation.
     *

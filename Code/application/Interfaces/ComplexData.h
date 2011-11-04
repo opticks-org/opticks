@@ -83,15 +83,8 @@ public:
     */
    float getMagnitude() const
    {
-      try 
-      {
-         std::complex<float> complexData(mReal, mImaginary);
-         return std::abs(complexData);
-      }
-      catch ( ... ) {
-      };
-
-      return 0.0f;
+      std::complex<float> complexData(mReal, mImaginary);
+      return std::abs(complexData);
    }
 
    /**

@@ -67,6 +67,8 @@ signals:
    void pointsChanged();
 
 private:
+   CurveCollectionImp(const CurveCollectionImp& rhs);
+
    std::vector<Curve*> mCurves;
 
    QColor mColor;

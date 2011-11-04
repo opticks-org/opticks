@@ -40,6 +40,10 @@ public:
 
 protected:
    AttachmentPtr<ApplicationServices> mpAttachment;
+
+private:
+   CloseNotificationTest(const CloseNotificationTest& rhs);
+   CloseNotificationTest& operator=(const CloseNotificationTest& rhs);
 };
 
 #endif

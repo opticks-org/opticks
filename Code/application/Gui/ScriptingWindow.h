@@ -62,7 +62,9 @@ protected slots:
    void clear();
 
 private:
-   void sessionClosed(Subject &subject, const std::string &signal, const boost::any &data);
+   ScriptingWindow(const ScriptingWindow& rhs);
+   ScriptingWindow& operator=(const ScriptingWindow& rhs);
+   void sessionClosed(Subject& subject, const std::string& signal, const boost::any& value);
 
    QLabel* mpEmptyLabel;
    QTabWidget* mpTabWidget;

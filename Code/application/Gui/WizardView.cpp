@@ -1048,8 +1048,8 @@ void WizardView::mouseDoubleClickEvent(QMouseEvent* pEvent)
                   DataVariant initialValue(nodeType, pNodeValue);
                   if (pNodeValue == NULL)
                   {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This should error; " \
-   "fix this when we can have a DataVariant with a type and an invalid value (tclarke)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This should error; " \
+//   "fix this when we can have a DataVariant with a type and an invalid value (tclarke)")
                      QString type = QString::fromStdString(nodeType);
                      if ((type.contains("char") ||
                           type.contains("short") ||
@@ -1281,22 +1281,21 @@ void WizardView::contextMenuEvent(QContextMenuEvent* pEvent)
       // Create the wizard menu
       QMenu contextMenu(this);
 
-      QAction* pSelectAllAction = contextMenu.addAction("Se&lect All", this, SLOT(selectAllItems()));
+      contextMenu.addAction("Se&lect All", this, SLOT(selectAllItems()));
       contextMenu.addSeparator();
       QAction* pBatchAction = contextMenu.addAction("&Batch Mode");
       QAction* pInteractiveAction = contextMenu.addAction("&Interactive Mode");
       contextMenu.addSeparator();
-      QAction* pZoomInAction = contextMenu.addAction(QIcon(":/icons/ZoomIn"), "&Zoom In", this, SLOT(zoomIn()));
-      QAction* pZoomOutAction = contextMenu.addAction(QIcon(":/icons/ZoomOut"), "Zoom &Out", this, SLOT(zoomOut()));
-      QAction* pZoomToFitAction = contextMenu.addAction(QIcon(":/icons/ZoomToFit"), "Zoom to &Fit",
-         this, SLOT(zoomToFit()));
+      contextMenu.addAction(QIcon(":/icons/ZoomIn"), "&Zoom In", this, SLOT(zoomIn()));
+      contextMenu.addAction(QIcon(":/icons/ZoomOut"), "Zoom &Out", this, SLOT(zoomOut()));
+      contextMenu.addAction(QIcon(":/icons/ZoomToFit"), "Zoom to &Fit", this, SLOT(zoomToFit()));
       contextMenu.addSeparator();
-      QAction* pExecuteAction = contextMenu.addAction("&Execute", this, SLOT(execute()));
+      contextMenu.addAction("&Execute", this, SLOT(execute()));
       contextMenu.addSeparator();
       QAction* pClearAction = contextMenu.addAction("&Clear");
       contextMenu.addSeparator();
-      QAction* pSaveAction = contextMenu.addAction(QIcon(":/icons/Save"), "&Save", this, SLOT(save()));
-      QAction* pPrintAction = contextMenu.addAction(QIcon(":/icons/Print"), "&Print", this, SLOT(print()));
+      contextMenu.addAction(QIcon(":/icons/Save"), "&Save", this, SLOT(save()));
+      contextMenu.addAction(QIcon(":/icons/Print"), "&Print", this, SLOT(print()));
 
       pBatchAction->setCheckable(true);
       pInteractiveAction->setCheckable(true);
@@ -1367,33 +1366,33 @@ void WizardView::wheelEvent(QWheelEvent* pEvent)
    zoomBy(factor);
 }
 
-void WizardView::itemAdded(Subject& subject, const std::string& signal, const boost::any& data)
+void WizardView::itemAdded(Subject& subject, const std::string& signal, const boost::any& value)
 {
    WizardObjectImp* pWizard = dynamic_cast<WizardObjectImp*>(&subject);
    VERIFYNRV(pWizard != NULL);
    VERIFYNRV(pWizard == mpWizard.get());
 
-   WizardItem* pItem = boost::any_cast<WizardItem*>(data);
+   WizardItem* pItem = boost::any_cast<WizardItem*>(value);
    VERIFYNRV(pItem != NULL);
 
    // Add the item to the view
    addItem(pItem);
 }
 
-void WizardView::itemRemoved(Subject& subject, const std::string& signal, const boost::any& data)
+void WizardView::itemRemoved(Subject& subject, const std::string& signal, const boost::any& value)
 {
    WizardObjectImp* pWizard = dynamic_cast<WizardObjectImp*>(&subject);
    VERIFYNRV(pWizard != NULL);
    VERIFYNRV(pWizard == mpWizard.get());
 
-   WizardItem* pItem = boost::any_cast<WizardItem*>(data);
+   WizardItem* pItem = boost::any_cast<WizardItem*>(value);
    VERIFYNRV(pItem != NULL);
 
    // Remove the item from the view
    removeItem(pItem);
 }
 
-void WizardView::executionOrderChanged(Subject& subject, const std::string& signal, const boost::any& data)
+void WizardView::executionOrderChanged(Subject& subject, const std::string& signal, const boost::any& value)
 {
    WizardObjectImp* pWizard = dynamic_cast<WizardObjectImp*>(&subject);
    VERIFYNRV(pWizard != NULL);
@@ -1403,7 +1402,7 @@ void WizardView::executionOrderChanged(Subject& subject, const std::string& sign
    updateExecutionOrder();
 }
 
-void WizardView::itemPositionChanged(Subject& subject, const std::string& signal, const boost::any& data)
+void WizardView::itemPositionChanged(Subject& subject, const std::string& signal, const boost::any& value)
 {
    WizardItem* pItem = dynamic_cast<WizardItem*>(&subject);
    if (pItem != NULL)
@@ -1412,9 +1411,9 @@ void WizardView::itemPositionChanged(Subject& subject, const std::string& signal
    }
 }
 
-void WizardView::nodeAdded(Subject& subject, const std::string& signal, const boost::any& data)
+void WizardView::nodeAdded(Subject& subject, const std::string& signal, const boost::any& value)
 {
-   WizardNodeImp* pNode = static_cast<WizardNodeImp*>(boost::any_cast<WizardNode*>(data));
+   WizardNodeImp* pNode = static_cast<WizardNodeImp*>(boost::any_cast<WizardNode*>(value));
    if (pNode != NULL)
    {
       VERIFYNR(pNode->attach(SIGNAL_NAME(WizardNodeImp, NodeConnected), Slot(this, &WizardView::nodeConnected)));
@@ -1423,9 +1422,9 @@ void WizardView::nodeAdded(Subject& subject, const std::string& signal, const bo
    }
 }
 
-void WizardView::nodeRemoved(Subject& subject, const std::string& signal, const boost::any& data)
+void WizardView::nodeRemoved(Subject& subject, const std::string& signal, const boost::any& value)
 {
-   WizardNodeImp* pNode = static_cast<WizardNodeImp*>(boost::any_cast<WizardNode*>(data));
+   WizardNodeImp* pNode = static_cast<WizardNodeImp*>(boost::any_cast<WizardNode*>(value));
    if (pNode != NULL)
    {
       VERIFYNR(pNode->detach(SIGNAL_NAME(WizardNodeImp, NodeConnected), Slot(this, &WizardView::nodeConnected)));
@@ -1455,10 +1454,10 @@ void WizardView::nodeRemoved(Subject& subject, const std::string& signal, const 
    }
 }
 
-void WizardView::nodeConnected(Subject& subject, const std::string& signal, const boost::any& data)
+void WizardView::nodeConnected(Subject& subject, const std::string& signal, const boost::any& value)
 {
    WizardNode* pNode = dynamic_cast<WizardNode*>(&subject);
-   WizardNode* pConnectedNode = boost::any_cast<WizardNode*>(data);
+   WizardNode* pConnectedNode = boost::any_cast<WizardNode*>(value);
 
    if ((pNode != NULL) && (pConnectedNode != NULL))
    {
@@ -1466,10 +1465,10 @@ void WizardView::nodeConnected(Subject& subject, const std::string& signal, cons
    }
 }
 
-void WizardView::nodeDisconnected(Subject& subject, const std::string& signal, const boost::any& data)
+void WizardView::nodeDisconnected(Subject& subject, const std::string& signal, const boost::any& value)
 {
    WizardNode* pNode = dynamic_cast<WizardNode*>(&subject);
-   WizardNode* pConnectedNode = boost::any_cast<WizardNode*>(data);
+   WizardNode* pConnectedNode = boost::any_cast<WizardNode*>(value);
 
    if ((pNode != NULL) && (pConnectedNode != NULL))
    {
@@ -1488,7 +1487,7 @@ void WizardView::nodeDisconnected(Subject& subject, const std::string& signal, c
    }
 }
 
-void WizardView::setModified(Subject& subject, const std::string& signal, const boost::any& data)
+void WizardView::setModified(Subject& subject, const std::string& signal, const boost::any& value)
 {
    mModified = true;
 }

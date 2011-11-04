@@ -143,6 +143,8 @@ private slots:
    void removeDisplayedItem();
 
 private:
+   ListInspectorWidget(const ListInspectorWidget& rhs);
+   ListInspectorWidget& operator=(const ListInspectorWidget& rhs);
    QListWidget* mpListWidget;
    QWidget* mpInspector;
    QSplitter* mpSplitter;

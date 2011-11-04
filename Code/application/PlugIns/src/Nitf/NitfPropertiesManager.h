@@ -32,6 +32,8 @@ public:
    PlugInResource getPropertyPlugIn(const std::string& name, const DynamicObject& metadata);
 
 private:
+   NitfPropertiesManager(const NitfPropertiesManager& rhs);
+   NitfPropertiesManager& operator=(const NitfPropertiesManager& rhs);
    void addProperties(Subject& subject, const std::string& signal, const boost::any& val);
    AttachmentPtr<DesktopServices> mpDesktop;
    std::map<std::string, std::string> mPropertiesPlugins;

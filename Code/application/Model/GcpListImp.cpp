@@ -76,8 +76,6 @@ void GcpListImp::removePoints(const list<GcpPoint>& points)
    pStep->addProperty("name", string(getName()));
 
    bool changed = false;
-   int i = 0;
-   int iCount = 0;
    GcpPoint point;
    list<GcpPoint>::iterator it;
    list<GcpPoint>::const_iterator newit;

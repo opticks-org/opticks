@@ -141,6 +141,8 @@ signals:
    void colorChanged(const QColor& clrNew);
 
 private:
+   CustomColorButton(const CustomColorButton& rhs);
+   CustomColorButton& operator=(const CustomColorButton& rhs);
    QColor mColor;
    ColorMenu* mpMenu;
 

@@ -37,6 +37,8 @@ public:
       GraphicObjectType newObjectType = TEXT_OBJECT);
 
 private:
+   XmlRpcAnnotationCallback(const XmlRpcAnnotationCallback& rhs);
+   XmlRpcAnnotationCallback& operator=(const XmlRpcAnnotationCallback& rhs);
    QString mObjectName;
    GraphicLayer* mpLayer;
    GraphicObject* mpObject;

@@ -190,6 +190,8 @@ protected slots:
    void updateItemProperties();
 
 private:
+   WizardBuilder(const WizardBuilder& rhs);
+   WizardBuilder& operator=(const WizardBuilder& rhs);
    WizardView* mpView;
    WizardProperties* mpWizardProperties;
    WizardItemProperties* mpItemProperties;

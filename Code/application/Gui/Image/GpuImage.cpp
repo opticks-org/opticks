@@ -396,6 +396,8 @@ private:
    vector<unsigned int>& mTileZoomIndices;
    const Image::ImageData& mInfo;
 
+   GpuTileProcessor& operator=(const GpuTileProcessor& rhs);
+
    template <typename In, typename Out>
    void populateTextureData(Out* pTexData, unsigned int tileSizeX, unsigned int tileSizeY,
       DataAccessor da, InterleaveFormatType interleave, int currentChannel, int totalChannels, 
@@ -661,14 +663,12 @@ private:
       int bufSize = mInfo.mTileSizeX * mInfo.mTileSizeY;
       int channels = 1;
 
-      bool badValues = !mInfo.mKey.mBadValues1.empty();
       if (mInfo.mFormat == GL_LUMINANCE_ALPHA)
       {
          bufSize *= 2;
          channels++;
       }
 
-      int oldPercentDone = -1;
       for (unsigned int i = 0; i < mTiles.size(); ++i)
       {
          GpuTile* pTile = mTiles[i];
@@ -754,7 +754,6 @@ private:
       int bufSize = mInfo.mTileSizeX * mInfo.mTileSizeY * sizeof(unsigned char) * totalChannels;
       vector<Out> texData(bufSize);
 
-      int oldPercentDone = -1;
       for (unsigned int i = 0; i < mTiles.size(); ++i)
       {
          GpuTile* pTile = mTiles[i];
@@ -1683,14 +1682,8 @@ unsigned int GpuImage::readTiles(double xCoord, double yCoord, GLsizei width, GL
    const vector<Tile*>* pTileSet = getActiveTiles();
    VERIFY(pTileSet != NULL);
 
-   const ImageData& imageData = getImageData();
-   int imageWidth = imageData.mImageSizeX;
-   int imageHeight = imageData.mImageSizeY;
-   
    int x1Coord = static_cast<int>(xCoord);
    int y1Coord = static_cast<int>(yCoord);
-   int x2Coord = x1Coord + width;
-   int y2Coord = y1Coord + height;
 
    GLsizei calculatedWidth = width;
    GLsizei calculatedHeight = height;
@@ -1707,9 +1700,7 @@ unsigned int GpuImage::readTiles(double xCoord, double yCoord, GLsizei width, GL
    vector<GLsizei> destinationOffsets;
    vector<float> dataVector;
 
-   unsigned int counter = 0;
    unsigned int numElements = 0;
-   unsigned int destElements = 0;
 
    size_t tileNum = 0;
    size_t numTiles = tiles.size();

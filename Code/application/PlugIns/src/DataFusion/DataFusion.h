@@ -40,6 +40,8 @@ protected:
    QWidget* getWidget() const;
 
 private:
+   DataFusion(const DataFusion& rhs);
+   DataFusion& operator=(const DataFusion& rhs);
    Service<PlugInManagerServices> mpPlugInManager;
    bool mbInteractive;
    DataFusionDlg* mpWizardDlg;

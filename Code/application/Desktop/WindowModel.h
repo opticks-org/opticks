@@ -34,6 +34,9 @@ protected:
    virtual bool lessThan(const QModelIndex& left, const QModelIndex& right) const;
 
 private:
+   WindowModel(const WindowModel& rhs);
+   WindowModel& operator=(const WindowModel& rhs);
+
    class WindowSourceModel : public SessionItemModel
    {
    public:
@@ -79,6 +82,8 @@ private:
       void removePlotSetItem(SessionItemWrapper* pPlotWindowWrapper, PlotSet* pPlotSet);
 
    private:
+      WindowSourceModel(const WindowSourceModel& rhs);
+      WindowSourceModel& operator=(const WindowSourceModel& rhs);
       SessionItemWrapper* mpWorkspaceWindowWrapper;
       SessionItemWrapper* mpDockWindowWrapper;
       SessionItemWrapper* mpToolBarWrapper;

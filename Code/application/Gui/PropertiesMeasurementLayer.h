@@ -51,6 +51,8 @@ protected slots:
    void updateProperties();
 
 private:
+   PropertiesMeasurementLayer(const PropertiesMeasurementLayer& rhs);
+   PropertiesMeasurementLayer& operator=(const PropertiesMeasurementLayer& rhs);
    MeasurementLayer* mpMeasurementLayer;
    std::map<QListWidgetItem*, GraphicObject*> mObjects;
    Modifier mPropertiesModifier;

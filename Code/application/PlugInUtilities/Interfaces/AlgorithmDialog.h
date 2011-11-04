@@ -87,6 +87,8 @@ public slots:
    void reject();
 
 private:
+   AlgorithmDialog(const AlgorithmDialog& rhs);
+   AlgorithmDialog& operator=(const AlgorithmDialog& rhs);
    QEventLoop* mpEventLoop;
 };
 

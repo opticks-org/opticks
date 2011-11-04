@@ -46,6 +46,10 @@ public:
    }
 
    ROUNDEDRECTANGLEOBJECTADAPTER_METHODS(RoundedRectangleObjectImp)
+
+private:
+   RoundedRectangleObjectAdapter(const RoundedRectangleObjectAdapter& rhs);
+   RoundedRectangleObjectAdapter& operator=(const RoundedRectangleObjectAdapter& rhs);
 };
 
 #endif

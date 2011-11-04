@@ -54,7 +54,7 @@ StatisticsValuesReaderWriter::StatisticsValuesReaderWriter(hid_t dataType) :
       sort(sExpectedMembers.begin(), sExpectedMembers.end());
    }
    int memberCount = H5Tget_nmembers(dataType);
-   if (memberCount != sExpectedMembers.size())
+   if (memberCount != static_cast<int>(sExpectedMembers.size()))
    {
       return;
    }
@@ -196,7 +196,7 @@ StatisticsMetadataReaderWriter::StatisticsMetadataReaderWriter(hid_t dataType) :
       sort(sExpectedMembers.begin(), sExpectedMembers.end());
    }
    int memberCount = H5Tget_nmembers(dataType);
-   if (memberCount != sExpectedMembers.size())
+   if (memberCount != static_cast<int>(sExpectedMembers.size()))
    {
       return;
    }

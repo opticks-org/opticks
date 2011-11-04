@@ -85,6 +85,8 @@ public:
    }
 
 private:
+   OptionsRasterElementImporter(const OptionsRasterElementImporter& rhs);
+   OptionsRasterElementImporter& operator=(const OptionsRasterElementImporter& rhs);
    QGroupBox* mpAutoGeorefGroup;
    QRadioButton* mpImporterPlugInRadio;
    MutuallyExclusiveListWidget* mpPlugInList;

@@ -34,7 +34,8 @@ bool readAttribute(hid_t attrId, hid_t attrType, hid_t dataSpace, DataVariant& v
    DO_IF(pReader.get() == NULL || !pReader->isValid(), return false)
    hsize_t sizeArray[H5S_MAX_RANK];
    int num_dimensions = H5Sget_simple_extent_dims(dataSpace, sizeArray, NULL);
-   DO_IF(num_dimensions != pReader->getSupportedDimensionality(), return false);
+   DO_IF(num_dimensions < 0 || static_cast<unsigned int>(num_dimensions) !=
+      pReader->getSupportedDimensionality(), return false);
 
    vector<hsize_t> dimensions;
    for (int i = 0; i < num_dimensions; ++i)

@@ -29,6 +29,8 @@ public:
    void executeRedo();
 
 private:
+   SetViewClassificationFont(const SetViewClassificationFont& rhs);
+   SetViewClassificationFont& operator=(const SetViewClassificationFont& rhs);
    QFont mOldFont;
    QFont mNewFont;
 };
@@ -43,6 +45,8 @@ public:
    void executeRedo();
 
 private:
+   SetViewClassificationColor(const SetViewClassificationColor& rhs);
+   SetViewClassificationColor& operator=(const SetViewClassificationColor& rhs);
    QColor mOldColor;
    QColor mNewColor;
 };
@@ -57,6 +61,8 @@ public:
    void executeRedo();
 
 private:
+   SetViewBackgroundColor(const SetViewBackgroundColor& rhs);
+   SetViewBackgroundColor& operator=(const SetViewBackgroundColor& rhs);
    QColor mOldColor;
    QColor mNewColor;
 };
@@ -71,6 +77,8 @@ public:
    void executeRedo();
 
 private:
+   SetViewDataOrigin(const SetViewDataOrigin& rhs);
+   SetViewDataOrigin& operator=(const SetViewDataOrigin& rhs);
    DataOrigin mOldOrigin;
    DataOrigin mNewOrigin;
 };
@@ -86,6 +94,8 @@ public:
    void executeRedo();
 
 private:
+   ZoomViewBox(const ZoomViewBox& rhs);
+   ZoomViewBox& operator=(const ZoomViewBox& rhs);
    LocationType mOldLowerLeft;
    LocationType mNewLowerLeft;
    LocationType mOldUpperRight;
@@ -102,6 +112,8 @@ public:
    void executeRedo();
 
 private:
+   ZoomViewPercent(const ZoomViewPercent& rhs);
+   ZoomViewPercent& operator=(const ZoomViewPercent& rhs);
    double mOldPercent;
    double mNewPercent;
 };
@@ -116,6 +128,8 @@ public:
    void executeRedo();
 
 private:
+   PanView(const PanView& rhs);
+   PanView& operator=(const PanView& rhs);
    LocationType mOldCenter;
    LocationType mNewCenter;
 };
@@ -130,6 +144,8 @@ public:
    void executeRedo();
 
 private:
+   RotateView(const RotateView& rhs);
+   RotateView& operator=(const RotateView& rhs);
    double mOldAngle;
    double mNewAngle;
 };
@@ -144,6 +160,8 @@ public:
    void executeRedo();
 
 private:
+   FlipView(const FlipView& rhs);
+   FlipView& operator=(const FlipView& rhs);
    double mOldPitch;
    double mNewPitch;
 };

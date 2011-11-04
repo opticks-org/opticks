@@ -50,6 +50,11 @@ bool BThread::ThreadLaunch(int priority)
    return true;
 }
 
+bool BThread::ThreadLaunch()
+{
+   return ThreadLaunch(0);
+}
+
 bool BThread::ThreadWait()
 {
    pthread_join (mThreadID, NULL);

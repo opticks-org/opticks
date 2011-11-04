@@ -26,6 +26,8 @@ public:
    void executeRedo();
 
 private:
+   SetGcpColor(const SetGcpColor& rhs);
+   SetGcpColor& operator=(const SetGcpColor& rhs);
    ColorType mOldColor;
    ColorType mNewColor;
 };
@@ -40,6 +42,8 @@ public:
    void executeRedo();
 
 private:
+   SetGcpSymbol(const SetGcpSymbol& rhs);
+   SetGcpSymbol& operator=(const SetGcpSymbol& rhs);
    GcpSymbol mOldSymbol;
    GcpSymbol mNewSymbol;
 };
@@ -54,6 +58,8 @@ public:
    void executeRedo();
 
 private:
+   SetGcpSymbolSize(const SetGcpSymbolSize& rhs);
+   SetGcpSymbolSize& operator=(const SetGcpSymbolSize& rhs);
    int mOldSize;
    int mNewSize;
 };
@@ -66,6 +72,8 @@ public:
    void toLayer(Layer* pLayer) const;
 
 private:
+   GcpLayerMemento(const GcpLayerMemento& rhs);
+   GcpLayerMemento& operator=(const GcpLayerMemento& rhs);
    ColorType mColor;
    GcpSymbol mSymbol;
    int mSymbolSize;

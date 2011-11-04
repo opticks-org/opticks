@@ -40,6 +40,9 @@ public slots:
    void apply();
 
 private:
+   DemoGuiImp(const DemoGuiImp& rhs);
+   DemoGuiImp& operator=(const DemoGuiImp& rhs);
+
    void setButtonColors();
 
    AlgorithmRunner* mpRunner;

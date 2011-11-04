@@ -46,6 +46,8 @@ protected:
    void mousePressEvent(QMouseEvent* pEvent);
 
 private:
+   SplashScreen(const SplashScreen& rhs);
+   SplashScreen& operator=(const SplashScreen& rhs);
    Progress* mpProgress;
    QLabel* mpProgressLabel;
    QProgressBar* mpProgressBar;

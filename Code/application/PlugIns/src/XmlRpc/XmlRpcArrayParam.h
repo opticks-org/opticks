@@ -19,7 +19,7 @@ class XmlRpcArrayParam : public XmlRpcParam
 public:
    XmlRpcArrayParam() : XmlRpcParam("array") {}
    XmlRpcArrayParam(const XmlRpcArrayParam &other) : XmlRpcParam(other), mArray(other.mArray) {}
-   ~XmlRpcArrayParam()
+   virtual ~XmlRpcArrayParam()
    {
       for (QVector<const XmlRpcParam*>::const_iterator it = mArray.begin(); it != mArray.end(); ++it)
       {

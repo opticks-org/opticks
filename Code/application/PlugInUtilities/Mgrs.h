@@ -210,9 +210,9 @@ static double MGRS_b; // Semi-minor axis of ellipsoid
 static double MGRS_recpf;
 static char   MGRS_Ellipsoid_Code[3]; //= {'W','E',0}; 
 
-static char* CLARKE_1866;
-static char* CLARKE_1880;
-static char* BESSEL_1841;
+static const char* CLARKE_1866;
+static const char* CLARKE_1880;
+static const char* BESSEL_1841;
 
 
 public:

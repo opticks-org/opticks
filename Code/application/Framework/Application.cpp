@@ -45,9 +45,9 @@
 using namespace std;
 
 Application::Application(QCoreApplication& app) :
+   mpProgress(NULL),
    mApplication(app),
-   mXmlInitialized(true),
-   mpProgress(NULL)
+   mXmlInitialized(true)
 {
    // Initialize Xerces and XQilla
    try

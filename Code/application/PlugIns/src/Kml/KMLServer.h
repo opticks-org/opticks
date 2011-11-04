@@ -42,6 +42,10 @@ public:
 protected:
    MuHttpServer::Response getRequest(const QString &uri, const QString &contentType, const QString &body,
       const FormValueMap &form);
+
+private:
+   KMLServer(const KMLServer& rhs);
+   KMLServer& operator=(const KMLServer& rhs);
 };
 
 #endif

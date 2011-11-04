@@ -63,6 +63,9 @@ protected slots:
    void copyNameToClipboard();
 
 private:
+   SessionExplorerImp(const SessionExplorerImp& rhs);
+   SessionExplorerImp& operator=(const SessionExplorerImp& rhs);
+
    QTreeView* mpWindowTree;
    QTreeView* mpAnimationTree;
    QTreeView* mpElementTree;

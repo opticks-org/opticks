@@ -38,6 +38,9 @@ public:
    static bool isProduction();
 
 private:
+   DesktopAPITestProperties(const DesktopAPITestProperties& rhs);
+   DesktopAPITestProperties& operator=(const DesktopAPITestProperties& rhs);
+
    PlotView* mpPlotView;
 
    // Signatures

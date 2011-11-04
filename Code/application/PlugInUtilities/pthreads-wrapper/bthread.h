@@ -18,9 +18,9 @@ class BThread : public Thread
 {
    public:
       BThread();
-      BThread(void *threadData, void *threadRunFunction);
-      ~BThread(){};
-      bool ThreadInit (){ return true;}; 
+      BThread(void* threadData, void* threadRunFunction);
+      virtual ~BThread() {};
+      virtual bool ThreadInit() { return true; }
       /**
        * Start a thread
        *
@@ -33,15 +33,23 @@ class BThread : public Thread
        *
        * @see ThreadSetPriority(int priority)
        */
-      bool ThreadLaunch (int priority);
-      bool ThreadLaunch () { return ThreadLaunch(0); }
-      bool ThreadWait ();
-      bool ThreadRegisterMutex (Mutex *mutexPointer){ return true;};
-      bool ThreadUnregisterMutex (Mutex *mutexPointer){ return true;};
-      bool ThreadSetRunFunction(void *threadRunFunction){mThreadRunFunction = threadRunFunction; return true;};
-      bool ThreadSetThreadData(void *threadData){ mThreadData = threadData; return true; };
-      bool ThreadDetach();
-      bool ThreadCancel();
+      virtual bool ThreadLaunch(int priority);
+      virtual bool ThreadLaunch();
+      virtual bool ThreadWait();
+      virtual bool ThreadRegisterMutex(Mutex* mutexPointer) { return true; }
+      virtual bool ThreadUnregisterMutex(Mutex* mutexPointer) { return true; }
+      virtual bool ThreadSetRunFunction(void* threadRunFunction)
+      {
+         mThreadRunFunction = threadRunFunction;
+         return true;
+      }
+      virtual bool ThreadSetThreadData(void* threadData)
+      {
+         mThreadData = threadData;
+         return true;
+      }
+      virtual bool ThreadDetach();
+      virtual bool ThreadCancel();
       /**
        * Set the thread's priority.
        * @param priority
@@ -60,14 +68,17 @@ class BThread : public Thread
        * @return true if the priority was successfully changed, false otherwise
        */
       bool ThreadSetPriority(int priority);
-      BThread operator=(BThread *current) {this->mThreadData = current->mThreadData; 
-        this->mThreadRunFunction = current->mThreadRunFunction; 
-        this->mThreadID = current->mThreadID; 
-         return *this;};
+      BThread& operator=(BThread* current)
+      {
+         this->mThreadData = current->mThreadData;
+         this->mThreadRunFunction = current->mThreadRunFunction;
+         this->mThreadID = current->mThreadID;
+         return *this;
+      };
 
    private:
-      void *mThreadData;
-      void *mThreadRunFunction;
+      void* mThreadData;
+      void* mThreadRunFunction;
       pthread_t mThreadID;
 };
 

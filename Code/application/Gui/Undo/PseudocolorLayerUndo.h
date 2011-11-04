@@ -31,6 +31,8 @@ public:
    void executeRedo();
 
 private:
+   SetPseudocolorSymbol(const SetPseudocolorSymbol& rhs);
+   SetPseudocolorSymbol& operator=(const SetPseudocolorSymbol& rhs);
    SymbolType mOldSymbol;
    SymbolType mNewSymbol;
 };
@@ -47,6 +49,8 @@ protected:
    void destroyClass();
 
 private:
+   CreateDestroyPseudocolorClass(const CreateDestroyPseudocolorClass& rhs);
+   CreateDestroyPseudocolorClass& operator=(const CreateDestroyPseudocolorClass& rhs);
    int mId;
    QString mName;
    int mValue;
@@ -62,6 +66,10 @@ public:
 
    void executeUndo();
    void executeRedo();
+
+private:
+   AddPseudocolorClass(const AddPseudocolorClass& rhs);
+   AddPseudocolorClass& operator=(const AddPseudocolorClass& rhs);
 };
 
 
@@ -72,6 +80,10 @@ public:
 
    void executeUndo();
    void executeRedo();
+
+private:
+   DeletePseudocolorClass(const DeletePseudocolorClass& rhs);
+   DeletePseudocolorClass& operator=(const DeletePseudocolorClass& rhs);
 };
 
 
@@ -85,6 +97,8 @@ public:
    void executeRedo();
 
 private:
+   SetPseudocolorClassName(const SetPseudocolorClassName& rhs);
+   SetPseudocolorClassName& operator=(const SetPseudocolorClassName& rhs);
    int mClassId;
    QString mOldName;
    QString mNewName;
@@ -100,6 +114,8 @@ public:
    void executeRedo();
 
 private:
+   SetPseudocolorClassValue(const SetPseudocolorClassValue& rhs);
+   SetPseudocolorClassValue& operator=(const SetPseudocolorClassValue& rhs);
    int mClassId;
    int mOldValue;
    int mNewValue;
@@ -116,6 +132,8 @@ public:
    void executeRedo();
 
 private:
+   SetPseudocolorClassColor(const SetPseudocolorClassColor& rhs);
+   SetPseudocolorClassColor& operator=(const SetPseudocolorClassColor& rhs);
    int mClassId;
    QColor mOldColor;
    QColor mNewColor;
@@ -132,6 +150,8 @@ public:
    void executeRedo();
 
 private:
+   SetPseudocolorClassDisplayed(const SetPseudocolorClassDisplayed& rhs);
+   SetPseudocolorClassDisplayed& operator=(const SetPseudocolorClassDisplayed& rhs);
    int mClassId;
    bool mOldDisplayed;
    bool mNewDisplayed;
@@ -147,6 +167,8 @@ public:
    void toLayer(Layer* pLayer) const;
 
 private:
+   PseudocolorLayerMemento(const PseudocolorLayerMemento& rhs);
+   PseudocolorLayerMemento& operator=(const PseudocolorLayerMemento& rhs);
    std::vector<PseudocolorClass*> mClasses;
 };
 

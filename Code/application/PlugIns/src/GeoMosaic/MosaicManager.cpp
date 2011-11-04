@@ -271,7 +271,6 @@ bool MosaicManager::geoStitch(MosaicManager::MosaicData* pData, Progress* pProgr
       }
       else
       {
-         RasterDataDescriptor* pDescriptor = dynamic_cast<RasterDataDescriptor*>(pRaster->getDataDescriptor());
          RasterLayer* pLayer = dynamic_cast<RasterLayer*>(mpView->createLayer(RASTER, pRaster));
          if (pLayer != NULL)
          {

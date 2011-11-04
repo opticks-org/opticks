@@ -582,9 +582,9 @@ string ConfigurationSettingsImp::getBuildRevision() const
 
 string ConfigurationSettingsImp::getUserName() const
 {
-   const int BUFFER_SIZE = 8096;
    string username;
 #if defined(WIN_API)
+   const int BUFFER_SIZE = 8096;
    char* pUserName = new char[BUFFER_SIZE];
    DWORD size = BUFFER_SIZE;
 

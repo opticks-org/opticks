@@ -185,7 +185,7 @@ private:
          return mpInvalidator;
       }
 
-      bool matches(const SlotWrapper &rhs) const
+      bool matches(const SlotWrapper& rhs) const
       {
          // Two SafeSlotValues test equal if the target and method are the 
          // same and they both have or both don't have an invalidator. If

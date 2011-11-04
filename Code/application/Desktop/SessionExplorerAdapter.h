@@ -24,6 +24,10 @@ public:
    bool isKindOf(const std::string& className) const;
 
    SESSIONEXPLORERADAPTER_METHODS(SessionExplorerImp)
+
+private:
+   SessionExplorerAdapter(const SessionExplorerAdapter& rhs);
+   SessionExplorerAdapter& operator=(const SessionExplorerAdapter& rhs);
 };
 
 #endif

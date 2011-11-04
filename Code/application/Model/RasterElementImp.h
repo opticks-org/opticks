@@ -158,6 +158,7 @@ protected:
    public:
       StatusBarProgress();
       void getProgress(std::string &text, int &percent, ReportingLevel &gran) const;
+      using ProgressAdapter::updateProgress;
       void updateProgress(const char *pText, int percent, ReportingLevel gran);
 
    private:
@@ -167,6 +168,8 @@ protected:
    };
 
 private:
+   RasterElementImp(const RasterElementImp& rhs);
+   RasterElementImp& operator=(const RasterElementImp& rhs);
    SafePtr<RasterElement> mpTerrain;
    std::map<DimensionDescriptor, StatisticsImp*> mStatistics;
 

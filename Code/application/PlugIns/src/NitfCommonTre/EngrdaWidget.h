@@ -44,6 +44,9 @@ private slots:
    void updateData(QTreeWidgetItem* pItem);
 
 private:
+   EngrdaWidget(const EngrdaWidget& rhs);
+   EngrdaWidget& operator=(const EngrdaWidget& rhs);
+
    QTreeWidget* mpTres;
    QLineEdit* mpValueType;
    QLineEdit* mpDataUnits;

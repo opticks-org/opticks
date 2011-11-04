@@ -30,9 +30,9 @@ public:
    const WizardObject* getWizard() const;
 
 protected:
-   void wizardRenamed(Subject& subject, const std::string& signal, const boost::any& data);
-   void menuLocationChanged(Subject& subject, const std::string& signal, const boost::any& data);
-   void executionModeChanged(Subject& subject, const std::string& signal, const boost::any& data);
+   void wizardRenamed(Subject& subject, const std::string& signal, const boost::any& value);
+   void menuLocationChanged(Subject& subject, const std::string& signal, const boost::any& value);
+   void executionModeChanged(Subject& subject, const std::string& signal, const boost::any& value);
 
 protected slots:
    void setWizardName(const QString& wizardName);
@@ -41,6 +41,8 @@ protected slots:
    void executeWizard();
 
 private:
+   WizardProperties(const WizardProperties& rhs);
+   WizardProperties& operator=(const WizardProperties& rhs);
    QLineEdit* mpNameEdit;
    QLineEdit* mpMenuEdit;
    QComboBox* mpModeCombo;

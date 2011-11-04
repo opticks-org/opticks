@@ -59,7 +59,7 @@ We'll add that in later.
 
 The Tutorial1::~Tutorial() and Tutorial1::getOutputSpecification() methods don't do anything interesting right now but Tutorial1::getInputSpecification() does.
 \skip getInputSpecification
-\until getPlugInArgList
+\until VERIFY
 The VERIFY() macro checks for errors and if one is detected, logs a message and returns false.
 There are a few variations on VERIFY() including VERIFYNRV() and VERIFYRV().
 See the reference documentation for a complete list.

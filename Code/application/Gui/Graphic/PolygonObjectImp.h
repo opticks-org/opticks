@@ -20,6 +20,8 @@ class PolygonObjectImp : public PolylineObjectImp
 public:
    PolygonObjectImp(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer, LocationType pixelCoord);
 
+   using PolylineObjectImp::getPixels;
+
    void drawVector(double zoomFactor) const;
    void drawPixels(double zoomFactor) const;
 
@@ -29,7 +31,6 @@ public:
 
    bool hit(LocationType pixelCoord) const;
 
-   using PolylineObjectImp::getPixels;
    const BitMask* getPixels(int iStartColumn, int iStartRow, int iEndColumn, int iEndRow);
 
    bool newPath();
@@ -53,6 +54,8 @@ public:
    bool isKindOf(const std::string& className) const;
 
 private:
+   PolygonObjectImp(const PolygonObjectImp& rhs);
+   PolygonObjectImp& operator=(const PolygonObjectImp& rhs);
    static void combineVertexData(GLdouble coords[3], GLdouble* pVertexData[4],
       GLfloat weight[4], void** pOutData);
 };

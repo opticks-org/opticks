@@ -77,6 +77,8 @@ public:
    ViewImp(const std::string& id, const std::string& viewName, QGLContext* drawContext = 0, QWidget* parent = 0);
    ~ViewImp();
 
+   using SessionItemImp::setIcon;
+
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
 
@@ -86,7 +88,6 @@ public:
    static bool isKindOfView(const std::string& className);
    static void getViewTypes(std::vector<std::string>& classList);
 
-   virtual ViewImp& operator= (const ViewImp& view);
    virtual View* copy(QGLContext* drawContext = 0, QWidget* parent = 0) const = 0;
    virtual bool copy(View *pView) const = 0;
 
@@ -231,6 +232,7 @@ signals:
    void displayAreaChanged();
 
 protected:
+   ViewImp& operator=(const ViewImp& view);
    bool event(QEvent* pEvent);
    bool eventFilter(QObject* pObject, QEvent* pEvent);
    void mousePressEvent(QMouseEvent* pEvent);
@@ -351,6 +353,8 @@ protected:
    QPoint mMouseEnd;
 
 private:
+   ViewImp(const ViewImp& rhs);
+
    static const QGLWidget* mpShareWidget;
 
    QColor mBackgroundColor;
@@ -406,6 +410,8 @@ private:
       }
 
    private:
+      ViewContext(const ViewContext& rhs);
+      ViewContext& operator=(const ViewContext& rhs);
       QGLContext* mpDrawContext;
    };
 
@@ -425,6 +431,11 @@ private slots:
 #define VIEWADAPTER_METHODS(impClass) \
    SESSIONITEMADAPTER_METHODS(impClass) \
    SUBJECTADAPTER_METHODS(impClass) \
+   using impClass::panBy; \
+   using impClass::panTo; \
+   using impClass::setBackgroundColor; \
+   using impClass::setInsetPoint; \
+   using impClass::copy; \
    void setName(const std::string& viewName) \
    { \
       impClass::setName(viewName); \

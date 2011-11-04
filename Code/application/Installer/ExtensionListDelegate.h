@@ -35,6 +35,8 @@ public:
    virtual void paint(QPainter* pPainter, const QStyleOptionViewItem& option, const QModelIndex& index) const;
 
 private:
+   ExtensionListDelegate(const ExtensionListDelegate& rhs);
+   ExtensionListDelegate& operator=(const ExtensionListDelegate& rhs);
    bool mAllowEditing;
 };
 

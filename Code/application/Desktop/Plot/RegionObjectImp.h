@@ -49,7 +49,7 @@ public:
 
    bool toXml(XMLWriter* pXml) const;
    bool fromXml(DOMNode* pDocument, unsigned int version);
-   
+
 public slots:
    void setRegion(double dMinX, double dMinY, double dMaxX, double dMaxY);
    void setColor(const QColor& clrRegion);
@@ -66,6 +66,8 @@ signals:
    void borderToggled(bool bBorder);
 
 private:
+   RegionObjectImp(const RegionObjectImp& rhs);
+
    double mMinX;
    double mMinY;
    double mMaxX;

@@ -53,6 +53,9 @@ public:
    void dateModified(const QDate& newDate);
 
 private:
+   OptionsNitfExporter(const OptionsNitfExporter& rhs);
+   OptionsNitfExporter& operator=(const OptionsNitfExporter& rhs);
+
    struct OptionsNitfExporterElement
    {
       QString mName;

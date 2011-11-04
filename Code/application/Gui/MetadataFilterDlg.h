@@ -41,6 +41,8 @@ protected:
    void showEvent(QShowEvent* pEvent);
 
 private:
+   MetadataFilterDlg(const MetadataFilterDlg& rhs);
+   MetadataFilterDlg& operator=(const MetadataFilterDlg& rhs);
    QLineEdit* mpFilterNameEdit;
    FilterWidget* mpNameFilter;
    FilterWidget* mpValueFilter;

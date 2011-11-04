@@ -25,10 +25,10 @@ public:
    ViewWindowImp(const std::string& id, const std::string& windowName);
    ~ViewWindowImp();
 
+   using WindowImp::setName;
+
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
-
-   using WindowImp::setName;
 
    virtual View* createView(const QString& strViewName, const ViewType& viewType);
    virtual View* getView() const;
@@ -41,6 +41,7 @@ public:
    bool fromXml(DOMNode* pDocument, unsigned int version);
 
 protected:
+   ViewWindowImp(const ViewWindowImp& rhs);
    virtual bool setView(View* pView);
 
 private:
@@ -52,6 +53,7 @@ private:
 
 #define VIEWWINDOWADAPTER_METHODS(impClass) \
    WINDOWADAPTER_METHODS(impClass) \
+   using impClass::createView; \
    View* createView(const std::string& viewName, const ViewType& viewType) \
    { \
       return impClass::createView(QString::fromStdString(viewName), viewType); \

@@ -31,6 +31,8 @@ protected:
    bool eventFilter(QObject* pObject, QEvent* pEvent);
 
 private:
+   EigenPlotDlg(const EigenPlotDlg& rhs);
+   EigenPlotDlg& operator=(const EigenPlotDlg& rhs);
    QwtPlot* mpPlot;
    QwtPlotCurve* mpCurve;
    QSpinBox* mpComponentsSpin;

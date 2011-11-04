@@ -189,7 +189,7 @@ void RasterFileDescriptorImp::setRows(const vector<DimensionDescriptor>& rows)
 {
    //ensure the provided values have correct on-disk numbers
    bool anyActiveNumberFound = false;
-   unsigned int lastActiveNumber;
+   unsigned int lastActiveNumber = 0;
    bool firstSkipFactorDetermined = false;
    unsigned int skipFactor = 1;
    for (vector<DimensionDescriptor>::size_type count = 0; count != rows.size(); ++count)
@@ -201,8 +201,8 @@ void RasterFileDescriptorImp::setRows(const vector<DimensionDescriptor>& rows)
       {
          if (anyActiveNumberFound)
          {
-            int curSkipFactor = rows[count].getActiveNumber() - lastActiveNumber;
-            VERIFYNRV(curSkipFactor >= 1);
+            VERIFYNRV(rows[count].getActiveNumber() > lastActiveNumber);
+            unsigned int curSkipFactor = rows[count].getActiveNumber() - lastActiveNumber;
             if (firstSkipFactorDetermined)
             {
                VERIFYNRV(curSkipFactor == skipFactor);
@@ -274,7 +274,7 @@ void RasterFileDescriptorImp::setColumns(const vector<DimensionDescriptor>& colu
 {
    //ensure the provided values have correct on-disk numbers
    bool anyActiveNumberFound = false;
-   unsigned int lastActiveNumber;
+   unsigned int lastActiveNumber = 0;
    bool firstSkipFactorDetermined = false;
    unsigned int skipFactor = 1;
    for (vector<DimensionDescriptor>::size_type count = 0; count != columns.size(); ++count)
@@ -286,8 +286,8 @@ void RasterFileDescriptorImp::setColumns(const vector<DimensionDescriptor>& colu
       {
          if (anyActiveNumberFound)
          {
-            int curSkipFactor = columns[count].getActiveNumber() - lastActiveNumber;
-            VERIFYNRV(curSkipFactor >= 1);
+            VERIFYNRV(columns[count].getActiveNumber() > lastActiveNumber);
+            unsigned int curSkipFactor = columns[count].getActiveNumber() - lastActiveNumber;
             if (firstSkipFactorDetermined)
             {
                VERIFYNRV(curSkipFactor == skipFactor);
@@ -359,7 +359,7 @@ void RasterFileDescriptorImp::setBands(const vector<DimensionDescriptor>& bands)
 {
    //ensure the provided values have correct on-disk numbers
    bool anyActiveNumberFound = false;
-   unsigned int lastActiveNumber;
+   unsigned int lastActiveNumber = 0;
    for (vector<DimensionDescriptor>::size_type count = 0; count != bands.size(); ++count)
    {
       VERIFYNRV(bands[count].isOnDiskNumberValid());
@@ -369,7 +369,7 @@ void RasterFileDescriptorImp::setBands(const vector<DimensionDescriptor>& bands)
       {
          if (anyActiveNumberFound)
          {
-            VERIFYNRV(bands[count].getActiveNumber() - lastActiveNumber >= 1);
+            VERIFYNRV(bands[count].getActiveNumber() > lastActiveNumber);
          }
          anyActiveNumberFound = true;
          lastActiveNumber = bands[count].getActiveNumber();

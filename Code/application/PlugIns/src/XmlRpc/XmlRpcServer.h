@@ -50,6 +50,8 @@ protected slots:
    void warning(const QString& msg);
 
 private:
+   XmlRpcServer(const XmlRpcServer& rhs);
+   XmlRpcServer& operator=(const XmlRpcServer& rhs);
    QMap<QString, XmlRpcMethodCallImp*> mMethodCalls;
 };
 

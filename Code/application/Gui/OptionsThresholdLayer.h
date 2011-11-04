@@ -84,6 +84,8 @@ public:
    }
 
 private:
+   OptionsThresholdLayer(const OptionsThresholdLayer& rhs);
+   OptionsThresholdLayer& operator=(const OptionsThresholdLayer& rhs);
    RegionUnitsComboBox* mpRegionUnits;
    SymbolTypeButton* mpSymbolType;
    QDoubleSpinBox* mpFirstValue;

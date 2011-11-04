@@ -764,8 +764,8 @@ bool PseudocolorLayerImp::canRenderAsImage() const
    // there must be displayed classes and the range of values must
    // be low enough to prevent an unreasonably large colormap.
    pair<int, int> range = getValueRange(true);
-   if (range.first == 0 && range.second == -1 ||   // no displayed classes
-      range.second - range.first > 1000000)        // too many colors for a colormap
+   if ((range.first == 0 && range.second == -1) ||   // no displayed classes
+      (range.second - range.first > 1000000))        // too many colors for a colormap
    {
       canBeImage = false;
    }

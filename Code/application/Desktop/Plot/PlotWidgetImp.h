@@ -142,6 +142,9 @@ protected slots:
    void selectPlotObject(PlotObject* pObject, bool bSelect);
 
 private:
+   PlotWidgetImp(const PlotWidgetImp& rhs);
+   PlotWidgetImp& operator=(const PlotWidgetImp& rhs);
+
    QAction* mpPrintAction;
    QAction* mpSeparatorAction;
    QAction* mpLegendAction;

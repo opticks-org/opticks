@@ -66,9 +66,10 @@ public:
    bool toXml(XMLWriter* pXml) const;
    bool fromXml(DOMNode* pDocument, unsigned int version);
 
-protected:
-
 private:
+   MeasurementObjectImp(const MeasurementObjectImp& rhs);
+   MeasurementObjectImp& operator=(const MeasurementObjectImp& rhs);
+
    int mDistancePrecision;
    int mBearingPrecision;
    int mEndPointsPrecision;

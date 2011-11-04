@@ -46,6 +46,10 @@ public:
    }
 
    MEASUREMENTOBJECTADAPTER_METHODS(MeasurementObjectImp)
+
+private:
+   MeasurementObjectAdapter(const MeasurementObjectAdapter& rhs);
+   MeasurementObjectAdapter& operator=(const MeasurementObjectAdapter& rhs);
 };
 
 #endif

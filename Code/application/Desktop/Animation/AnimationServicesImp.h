@@ -65,6 +65,9 @@ protected slots:
    void destroySelectedControllers();
 
 private:
+   AnimationServicesImp(const AnimationServicesImp& rhs);
+   AnimationServicesImp& operator=(const AnimationServicesImp& rhs);
+
    static AnimationServicesImp* spInstance;
    static bool mDestroyed;
 

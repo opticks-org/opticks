@@ -53,6 +53,8 @@ signals:
    void scaledChanged(bool scaled);
 
 private:
+   GraphicLineWidget(const GraphicLineWidget& rhs);
+   GraphicLineWidget& operator=(const GraphicLineWidget& rhs);
    QCheckBox* mpBorderCheck;
    LineStyleComboBox* mpLineStyleCombo;
    LineWidthComboBox* mpLineWidthCombo;

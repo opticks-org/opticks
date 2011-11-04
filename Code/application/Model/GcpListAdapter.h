@@ -27,6 +27,9 @@ public:
    bool isKindOf(const std::string& className) const;
 
    GCPLISTADAPTER_METHODS(GcpListImp)
+
+private:
+   GcpListAdapter(const GcpListAdapter& rhs);
 };
 
 #endif

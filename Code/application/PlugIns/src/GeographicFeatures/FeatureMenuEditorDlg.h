@@ -38,6 +38,8 @@ public slots:
    void removeItem(QListWidgetItem *pItem);
 
 private:
+   FeatureMenuEditorDlg(const FeatureMenuEditorDlg& rhs);
+   FeatureMenuEditorDlg& operator=(const FeatureMenuEditorDlg& rhs);
    void populateList();
 
    FeatureClass mCurrentFeatureClass;

@@ -47,13 +47,15 @@ public:
    std::string mMinorErrorMsg;
 };
 
+extern "C" herr_t ice_exception_walk(int n, H5E_error1_t *pErrDesc, void* pClientData);
+
 class IceException
 {
 public:
    IceException(const std::string& filename, unsigned int lineNumber, const std::string& failureMsg = "") :
       mFilename(filename), mLineNumber(lineNumber), mFailureMsg(failureMsg)
    {
-      H5Ewalk1(H5E_WALK_DOWNWARD, &IceException::walk, this);
+      H5Ewalk1(H5E_WALK_DOWNWARD, &ice_exception_walk, this);
    }
 
    std::string hdfErrorToString() const
@@ -100,13 +102,7 @@ public:
    }
 
 private:
-   static herr_t walk(int n, H5E_error1_t *pErrDesc, void* pClientData)
-   {
-      IceException* pThisPtr = reinterpret_cast<IceException*>(pClientData);
-      Hdf5ErrorDesc errorVal(pErrDesc);
-      pThisPtr->mErrorList.push_back(errorVal);
-      return 0;
-   }
+   friend herr_t ice_exception_walk(int n, H5E_error1_t *pErrDesc, void* pClientData);
 
    std::vector<Hdf5ErrorDesc> mErrorList;
    std::string mFilename;

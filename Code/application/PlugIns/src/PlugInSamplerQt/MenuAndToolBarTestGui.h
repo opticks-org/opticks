@@ -56,6 +56,8 @@ public slots:
     void resetToolboxToolbarButtons();
 
 private:
+    MenuAndToolBarTestGui(const MenuAndToolBarTestGui& rhs);
+    MenuAndToolBarTestGui& operator=(const MenuAndToolBarTestGui& rhs);
     QPushButton* mpCancelButton;
     QPushButton* mpDisableOpenButton;
     QPushButton* mpEnableOpenButton;

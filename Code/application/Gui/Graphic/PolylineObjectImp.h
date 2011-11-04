@@ -26,6 +26,8 @@ public:
    PolylineObjectImp(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer, LocationType pixelCoord);
    ~PolylineObjectImp();
 
+   using MultipointObjectImp::getPixels;
+
    void drawVector(double zoomFactor) const;
    void drawPixels(double zoomFactor) const;
    bool hit(LocationType pixelCoord) const;
@@ -37,7 +39,6 @@ public:
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
 
-   using MultipointObjectImp::getPixels;
    const BitMask* getPixels(int iStartColumn, int iStartRow, int iEndColumn, int iEndRow);
 
    bool replicateObject(const GraphicObject *pObject);
@@ -66,6 +67,8 @@ protected:
    std::vector<unsigned int> mPaths;
 
 private:
+   PolylineObjectImp(const PolylineObjectImp& rhs);
+   PolylineObjectImp& operator=(const PolylineObjectImp& rhs);
    bool mUseHitTolerance;
    mutable bool mResetSymbolName;
 

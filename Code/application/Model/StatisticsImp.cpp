@@ -763,7 +763,7 @@ void StatisticsThread::run()
       }
 
       // Iterate the band over the AOI or all bands in the case of BIP
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This should be changed to for (; fiter != diter.end(); diter += mInput.mResolution)  if/when BitMaskIterator is modified to be an STL iterator (tclarke)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This should be changed to for (; fiter != diter.end(); diter += mInput.mResolution)  if/when BitMaskIterator is modified to be an STL iterator (tclarke)")
       while (diter != diter.end())
       {
          LocationType loc;
@@ -818,7 +818,7 @@ void StatisticsThread::run()
             }
          }
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove this if BitMaskIterator becomes an STL iterator or change it if BitMaskIterator::operator+=(int) is created (tclarke)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove this if BitMaskIterator becomes an STL iterator or change it if BitMaskIterator::operator+=(int) is created (tclarke)")
          for (int cnt = 0; diter != diter.end() && cnt < mInput.mResolution; ++cnt)
          {
             diter.nextPixel();
@@ -992,7 +992,7 @@ void HistogramThread::run()
 
       int oldPercentDone = -1;
       // Iterate the band over the AOI or all bands in the case of BIP
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This should be changed to for (; fiter != diter.end(); diter += mInput.mResolution)  if/when BitMaskIterator is modified to be an STL iterator (tclarke)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This should be changed to for (; fiter != diter.end(); diter += mInput.mResolution)  if/when BitMaskIterator is modified to be an STL iterator (tclarke)")
       while (diter != diter.end())
       {
          LocationType loc;
@@ -1038,7 +1038,7 @@ void HistogramThread::run()
                break;
             }
          }
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove this if BitMaskIterator becomes an STL iterator or change it if BitMaskIterator::operator+=(int) is created (tclarke)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove this if BitMaskIterator becomes an STL iterator or change it if BitMaskIterator::operator+=(int) is created (tclarke)")
          for (int cnt = 0; diter != diter.end() && cnt < mInput.mStatInput.mResolution; ++cnt)
          {
             diter.nextPixel();

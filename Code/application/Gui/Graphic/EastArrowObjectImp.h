@@ -25,6 +25,10 @@ public:
 protected:
    std::string getFileIndicator() const;
    void orient();
+
+private:
+   EastArrowObjectImp(const EastArrowObjectImp& rhs);
+   EastArrowObjectImp& operator=(const EastArrowObjectImp& rhs);
 };
 
 #define EASTARROWOBJECTADAPTEREXTENSION_CLASSES \

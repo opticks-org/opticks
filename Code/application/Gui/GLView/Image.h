@@ -84,7 +84,7 @@ public:
       mpRasterElement[2] = pRasterElement3;
    }
 
-   void operator=(const class ImageKey &rhs)
+   void operator=(const class ImageKey& rhs)
    {
       mChannels = rhs.mChannels;
       mBand1 = rhs.mBand1;
@@ -105,7 +105,7 @@ public:
       mBadValues3 = rhs.mBadValues3;
    }
 
-   bool operator==(const class ImageKey &rhs) const
+   bool operator==(const class ImageKey& rhs) const
    {
       if (mChannels != rhs.mChannels)
       {
@@ -195,7 +195,7 @@ public:
       return true;
    }
 
-   bool operator<(const class ImageKey &rhs) const
+   bool operator<(const class ImageKey& rhs) const
    {
       if (mChannels < rhs.mChannels)
       {

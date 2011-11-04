@@ -82,6 +82,8 @@ protected:
    ArrowObjectImp* getArrowObject() const;
 
 private:
+   LatLonInsertObjectImp(const LatLonInsertObjectImp& rhs);
+   LatLonInsertObjectImp& operator=(const LatLonInsertObjectImp& rhs);
    GraphicResource<GraphicGroupImp> mpGroup;
    AttachmentPtr<RasterElement> mpGeoreference;
 };

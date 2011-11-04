@@ -84,6 +84,8 @@ public:
    }
 
 private:
+   OptionsSpatialDataView(const OptionsSpatialDataView& rhs);
+   OptionsSpatialDataView& operator=(const OptionsSpatialDataView& rhs);
    QSpinBox* mpInsetSizeSpin;
    QSpinBox* mpInsetZoomSpin;
    QComboBox* mpInsetZoom;

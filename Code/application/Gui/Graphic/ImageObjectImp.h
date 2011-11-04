@@ -42,13 +42,16 @@ public:
 protected:
    ImageObjectImp(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer, LocationType pixelCoord);
 
-   bool setImageData(const QImage& image, ColorType transparent = ColorType(-1, -1, -1));
+   bool setImageData(const QImage& image, ColorType transparent = ColorType());
    bool setImageData(const unsigned int* pData, int iWidth, int iHeight,
-      ColorType transparent = ColorType(-1, -1, -1));
+      ColorType transparent = ColorType());
 
    void updateBoundingBox();
 
 private:
+   ImageObjectImp(const ImageObjectImp& rhs);
+   ImageObjectImp& operator=(const ImageObjectImp& rhs);
+
    void generateTextures();
 
    std::vector<unsigned int> mData;

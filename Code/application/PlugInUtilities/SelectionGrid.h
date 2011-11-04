@@ -61,6 +61,8 @@ signals:
    void cellSelected(int row, int column);
 
 private:
+   SelectionGrid(const SelectionGrid& rhs);
+   SelectionGrid& operator=(const SelectionGrid& rhs);
    int miRows;
    int miColumns;
 

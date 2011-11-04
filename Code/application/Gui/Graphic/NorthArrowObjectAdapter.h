@@ -46,6 +46,10 @@ public:
    }
 
    NORTHARROWOBJECTADAPTER_METHODS(NorthArrowObjectImp)
+
+private:
+   NorthArrowObjectAdapter(const NorthArrowObjectAdapter& rhs);
+   NorthArrowObjectAdapter& operator=(const NorthArrowObjectAdapter& rhs);
 };
 
 #endif

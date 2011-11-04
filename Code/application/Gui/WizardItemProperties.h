@@ -36,15 +36,15 @@ public:
    virtual QSize sizeHint() const;
 
 protected:
-   void wizardExecutionModeChanged(Subject& subject, const std::string& signal, const boost::any& data);
-   void executionOrderChanged(Subject& subject, const std::string& signal, const boost::any& data);
-   void itemRenamed(Subject& subject, const std::string& signal, const boost::any& data);
-   void itemExecutionModeChanged(Subject& subject, const std::string& signal, const boost::any& data);
-   void nodeAdded(Subject& subject, const std::string& signal, const boost::any& data);
-   void nodeRemoved(Subject& subject, const std::string& signal, const boost::any& data);
-   void nodeRenamed(Subject& subject, const std::string& signal, const boost::any& data);
-   void nodeTypeChanged(Subject& subject, const std::string& signal, const boost::any& data);
-   void nodeDescriptionChanged(Subject& subject, const std::string& signal, const boost::any& data);
+   void wizardExecutionModeChanged(Subject& subject, const std::string& signal, const boost::any& value);
+   void executionOrderChanged(Subject& subject, const std::string& signal, const boost::any& value);
+   void itemRenamed(Subject& subject, const std::string& signal, const boost::any& value);
+   void itemExecutionModeChanged(Subject& subject, const std::string& signal, const boost::any& value);
+   void nodeAdded(Subject& subject, const std::string& signal, const boost::any& value);
+   void nodeRemoved(Subject& subject, const std::string& signal, const boost::any& value);
+   void nodeRenamed(Subject& subject, const std::string& signal, const boost::any& value);
+   void nodeTypeChanged(Subject& subject, const std::string& signal, const boost::any& value);
+   void nodeDescriptionChanged(Subject& subject, const std::string& signal, const boost::any& value);
 
    void addNode(WizardNodeImp* pNode);
    void removeNode(WizardNodeImp* pNode);
@@ -55,6 +55,8 @@ protected slots:
    void setItemExecutionMode(int modeIndex);
 
 private:
+   WizardItemProperties(const WizardItemProperties& rhs);
+   WizardItemProperties& operator=(const WizardItemProperties& rhs);
    QLabel* mpItemNameLabel;
    QLabel* mpItemTypeLabel;
    QLabel* mpItemOrderLabel;

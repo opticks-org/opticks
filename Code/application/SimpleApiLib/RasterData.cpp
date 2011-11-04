@@ -355,30 +355,30 @@ extern "C"
       unsigned int rowCount = pArgs->rowEnd - pArgs->rowStart + 1;
       unsigned int columnCount = pArgs->columnEnd - pArgs->columnStart + 1;
       unsigned int bandCount = pArgs->bandEnd - pArgs->bandStart + 1;
-      pRawData = new (std::nothrow) char[rowCount * columnCount * bandCount * pDesc->getBytesPerElement()];
-      if (pRawData == NULL)
+      char* pNewRawData = new (std::nothrow) char[rowCount * columnCount * bandCount * pDesc->getBytesPerElement()];
+      if (pNewRawData == NULL)
       {
          setLastError(SIMPLE_NO_MEM);
          return NULL;
       }
       bool success = true;
-      switchOnComplexEncoding(pDesc->getDataType(), copySubcube, pRawData, pRaster,
+      switchOnComplexEncoding(pDesc->getDataType(), copySubcube, pNewRawData, pRaster,
          pArgs->rowStart, pArgs->rowEnd,
          pArgs->columnStart, pArgs->columnEnd,
          pArgs->bandStart, pArgs->bandEnd, false, success);
       if (!success)
       {
-         delete [] pRawData;
+         delete [] pNewRawData;
          setLastError(SIMPLE_OTHER_FAILURE);
          return NULL;
       }
       setLastError(SIMPLE_NO_ERROR);
-      return pRawData;
+      return pNewRawData;
    }
 
    void destroyDataPointer(void* pData)
    {
-      delete [] pData;
+      delete [] reinterpret_cast<char*>(pData);
    }
 
    int copyDataToRasterElement(DataElement* pElement, DataPointerArgs* pArgs, void* pData)

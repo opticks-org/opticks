@@ -28,6 +28,8 @@ public:
    DemoAlgorithm(RasterElement &rasterElement, Progress *pProgress, bool interactive);
 
 private:
+   DemoAlgorithm(const DemoAlgorithm& rhs);
+
    // obligations from base class
    bool initialize(void *pAlgorithmData);
    bool preprocess();

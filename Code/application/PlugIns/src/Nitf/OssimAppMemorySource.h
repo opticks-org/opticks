@@ -42,6 +42,8 @@ public:
 // bands
 // could use the general raster info class.
 private:
+   OssimAppMemorySource& operator=(const OssimAppMemorySource& rhs);
+
    RasterElement& mCube;
    const RasterFileDescriptor& mExportDescriptor;
    unsigned int mColSkipFactor;

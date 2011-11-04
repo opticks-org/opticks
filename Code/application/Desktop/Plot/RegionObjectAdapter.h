@@ -24,6 +24,9 @@ public:
    bool isKindOf(const std::string& className) const;
 
    REGIONOBJECTADAPTER_METHODS(RegionObjectImp)
+
+private:
+   RegionObjectAdapter(const RegionObjectAdapter& rhs);
 };
 
 #endif

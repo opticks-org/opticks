@@ -76,6 +76,8 @@ protected slots:
    void removeStretchFavorite();
 
 private:
+   PropertiesRasterLayer(const PropertiesRasterLayer& rhs);
+   PropertiesRasterLayer& operator=(const PropertiesRasterLayer& rhs);
    bool mInitializing;
    RasterLayer* mpRasterLayer;
    std::vector<RasterElement*> mRasterElements;

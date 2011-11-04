@@ -57,6 +57,8 @@ private slots:
    void uninstall();
 
 private:
+   ExtensionListItem(const ExtensionListItem& rhs);
+   ExtensionListItem& operator=(const ExtensionListItem& rhs);
    QLabel* mpIcon;
    QLabel* mpName;
    QLabel* mpVersion;

@@ -21,13 +21,17 @@ public:
    ~RawImageObjectImp() {}
 
    virtual bool setObjectImage(const unsigned int* pData, int iWidth, int iHeight, ColorType transparent);
-   bool setImage(const QImage& image, ColorType transparent = ColorType(-1, -1, -1));
-   bool setImage(const unsigned int* pData, int iWidth, int iHeight, ColorType transparent = ColorType(-1, -1, -1));
+   bool setImage(const QImage& image, ColorType transparent = ColorType());
+   bool setImage(const unsigned int* pData, int iWidth, int iHeight, ColorType transparent = ColorType());
 
    bool toXml(XMLWriter* pXml) const;
    bool fromXml(DOMNode* pDocument, unsigned int version);
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
+
+private:
+   RawImageObjectImp(const RawImageObjectImp& rhs);
+   RawImageObjectImp& operator=(const RawImageObjectImp& rhs);
 };
 
 #define RAWIMAGEOBJECTADAPTEREXTENSION_CLASSES \

@@ -83,6 +83,8 @@ public:
    }
 
 private:
+   OptionsSuppressibleMsg(const OptionsSuppressibleMsg& rhs);
+   OptionsSuppressibleMsg& operator=(const OptionsSuppressibleMsg& rhs);
    std::vector<std::pair<QCheckBox*, std::string> > mCheckBoxes;
 };
 

@@ -69,6 +69,8 @@ protected slots:
    void displayFeatureClassProperties();
 
 private:
+   FeatureManager(const FeatureManager& rhs);
+   FeatureManager& operator=(const FeatureManager& rhs);
    AttachmentPtr<SessionExplorer> mpExplorer;
 
    bool refresh(MenuBar &menuBar);

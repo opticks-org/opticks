@@ -84,15 +84,15 @@ protected:
    virtual void contextMenuEvent(QContextMenuEvent* pEvent);
    virtual void wheelEvent(QWheelEvent* pEvent);
 
-   void itemAdded(Subject& subject, const std::string& signal, const boost::any& data);
-   void itemRemoved(Subject& subject, const std::string& signal, const boost::any& data);
-   void executionOrderChanged(Subject& subject, const std::string& signal, const boost::any& data);
-   void itemPositionChanged(Subject& subject, const std::string& signal, const boost::any& data);
-   void nodeAdded(Subject& subject, const std::string& signal, const boost::any& data);
-   void nodeRemoved(Subject& subject, const std::string& signal, const boost::any& data);
-   void nodeConnected(Subject& subject, const std::string& signal, const boost::any& data);
-   void nodeDisconnected(Subject& subject, const std::string& signal, const boost::any& data);
-   void setModified(Subject& subject, const std::string& signal, const boost::any& data);
+   void itemAdded(Subject& subject, const std::string& signal, const boost::any& value);
+   void itemRemoved(Subject& subject, const std::string& signal, const boost::any& value);
+   void executionOrderChanged(Subject& subject, const std::string& signal, const boost::any& value);
+   void itemPositionChanged(Subject& subject, const std::string& signal, const boost::any& value);
+   void nodeAdded(Subject& subject, const std::string& signal, const boost::any& value);
+   void nodeRemoved(Subject& subject, const std::string& signal, const boost::any& value);
+   void nodeConnected(Subject& subject, const std::string& signal, const boost::any& value);
+   void nodeDisconnected(Subject& subject, const std::string& signal, const boost::any& value);
+   void setModified(Subject& subject, const std::string& signal, const boost::any& value);
 
    void addItem(WizardItem* pItem);
    void addItems(const std::vector<WizardItem*>& wizardItems);
@@ -114,6 +114,8 @@ protected:
    bool save(const QString& filename);
 
 private:
+   WizardView(const WizardView& rhs);
+   WizardView& operator=(const WizardView& rhs);
    static int sItemZ;
    static int sLineZ;
    static const double sZoomIn;

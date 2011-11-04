@@ -152,7 +152,7 @@ public:
 
 private:
    AttachmentPtr(const AttachmentPtr&);
-   AttachmentPtr &operator=(const AttachmentPtr&);
+   AttachmentPtr& operator=(const AttachmentPtr&);
 
    std::vector<std::pair<std::string, Slot> > mSignalSlots;
 };

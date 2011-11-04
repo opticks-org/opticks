@@ -25,6 +25,14 @@ ADD_ENUM_MAPPING(IceUtilities::THRESHOLD_LAYER, "Threshold Layer", "ThresholdLay
 END_ENUM_MAPPING()
 }
 
+herr_t ice_exception_walk(int n, H5E_error1_t *pErrDesc, void* pClientData)
+{
+   IceException* pThisPtr = reinterpret_cast<IceException*>(pClientData);
+   Hdf5ErrorDesc errorVal(pErrDesc);
+   pThisPtr->mErrorList.push_back(errorVal);
+   return 0;
+}
+
 bool IceFormatDescriptor::getSupportedFeature(FeatureType feature)
 {
    if (feature == FILE_FORMAT_VERSION || feature == FILE_FORMAT_VERSION_DEPRECATED)

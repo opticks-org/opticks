@@ -26,6 +26,10 @@ public:
 signals: 
    void valueChanged(PassArea value);
 
+private:
+   PassAreaComboBox(const PassAreaComboBox& rhs);
+   PassAreaComboBox& operator=(const PassAreaComboBox& rhs);
+
 private slots:
    void translateActivated(int newIndex);
 };

@@ -50,6 +50,8 @@ protected:
    virtual void keyPressEvent(QKeyEvent* pEvent);
 
 private:
+   BandBinningDlg(const BandBinningDlg& rhs);
+   BandBinningDlg& operator=(const BandBinningDlg& rhs);
    QTableView* mpGroupedBandView;
    BandBinningModel* mpBandModel;
    const RasterDataDescriptor* mpDescriptor;

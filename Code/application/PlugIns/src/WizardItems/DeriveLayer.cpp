@@ -63,7 +63,8 @@ bool DeriveLayer::getInputSpecification(PlugInArgList*& pArgList)
 
 bool DeriveLayer::getOutputSpecification(PlugInArgList*& pArgList)
 {
-   VERIFY(pArgList = Service<PlugInManagerServices>()->getPlugInArgList());
+   pArgList = Service<PlugInManagerServices>()->getPlugInArgList();
+   VERIFY(pArgList != NULL);
    VERIFY(pArgList->addArg<Layer>("Layer", "The new layer."));
    VERIFY(pArgList->addArg<DataElement>("Element", "The data element for the new layer."));
 

@@ -156,12 +156,12 @@ void PolygonObjectImp::moveHandle(int handle, LocationType pixel, bool bMaintain
       bool endPiece = false;
       int otherVertex = 0;
    
-      if (movedVertex == vertices.size()-1) // last handle of last path
+      if (!vertices.empty() && static_cast<unsigned int>(movedVertex) == vertices.size()-1) // last handle of last path
       {
          endPiece = true;
          otherVertex = mPaths.back();
       }
-      else if (movedVertex == mPaths.back()) // first handle of last path
+      else if (!vertices.empty() && static_cast<unsigned int>(movedVertex) == mPaths.back()) // first handle of last path
       {
          endPiece = true;
          otherVertex = vertices.size()-1;
@@ -186,7 +186,8 @@ void PolygonObjectImp::moveHandle(int handle, LocationType pixel, bool bMaintain
 
       }
 
-      if (endPiece && abs(movedVertex-otherVertex) > 1 && vertices[movedVertex] == vertices[otherVertex])
+      if (endPiece && abs(movedVertex-otherVertex) > 1 && !vertices.empty() &&
+         vertices[movedVertex] == vertices[otherVertex])
       {
          PolylineObjectImp::moveHandle(otherVertex+8, pixel, false);
       }

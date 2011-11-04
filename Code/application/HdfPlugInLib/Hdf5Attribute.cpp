@@ -146,7 +146,8 @@ public:
 
       hsize_t sizeArray[H5S_MAX_RANK];
       int num_dimensions = H5Sget_simple_extent_dims(mDataSpace, sizeArray, NULL);
-      DO_IF(num_dimensions != pReader->getSupportedDimensionality(), return NULL);
+      DO_IF(num_dimensions < 0 || static_cast<unsigned int>(num_dimensions) !=
+         pReader->getSupportedDimensionality(), return NULL);
 
       vector<hsize_t> dimensions;
       for (int i = 0; i < num_dimensions; ++i)

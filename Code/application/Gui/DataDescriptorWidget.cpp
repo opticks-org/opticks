@@ -689,8 +689,8 @@ bool DataDescriptorWidget::applyToDataDescriptor(DataDescriptor* pDescriptor)
    }
    else
    {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Use a QListView to allow editing of bad values, " \
-   "since the fromDisplayString parser is brittle? (kstreith)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Use a QListView to allow editing of bad values, " \
+//   "since the fromDisplayString parser is brittle? (kstreith)")
       bool bError = true;
       vector<int> badValues = StringUtilities::fromDisplayString<vector<int> >(strBadValues.toStdString(), &bError);
       if (bError == false)

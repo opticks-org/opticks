@@ -216,7 +216,7 @@ unsigned char AspamImporter::getFileAffinity(const std::string& filename)
       return Importer::CAN_NOT_LOAD;
    }
    string data(128, '\0'); // 128 should be plenty to locate start of Paragraph A
-   unsigned int numberRead = fread(&data[0], sizeof(char), 127, pFile);
+   fread(&data[0], sizeof(char), 127, pFile);
    stringstream sstr(data);
    if (checkForToken(sstr, "A.", true) && checkForToken(sstr, "SITE"))
    {
@@ -370,7 +370,7 @@ const char* AspamImporter::parseParagraphA(const char* pStart)
    paragraphA.mLoaded = success;
    mpAspam->setParagraphA(paragraphA);
 
-   const char* pStop = pStart + sstr.tellg();
+   const char* pStop = pStart + static_cast<int>(sstr.tellg());
 
    // END PARSING
 
@@ -417,12 +417,12 @@ const char* AspamImporter::parseParagraphB(const char* pStart)
       sstr >> ztime >> cbuf;
       if (cbuf == 'Z')
       {
-         int minute = ztime % 100;
-         int hour = ztime / 100;
+         unsigned short minute = static_cast<unsigned short>(ztime % 100);
+         unsigned short hour = static_cast<unsigned short>(ztime / 100);
 
-         int day;
-         int month;
-         int year;
+         unsigned short day = 0;
+         unsigned short month = 0;
+         unsigned short year = 0;
 
          string monthBuf;
          sstr >> day >> monthBuf >> year;
@@ -488,7 +488,7 @@ const char* AspamImporter::parseParagraphB(const char* pStart)
    paragraphB.mLoaded = success;
    mpAspam->setParagraphB(paragraphB);
 
-   const char* pStop = pStart + sstr.tellg();
+   const char* pStop = pStart + static_cast<int>(sstr.tellg());
 
    // END PARSING
 
@@ -585,7 +585,7 @@ const char* AspamImporter::parseParagraphD(const char* pStart)
    paragraphD.mLoaded = success;
    mpAspam->setParagraphD(paragraphD);
 
-   const char* pStop = pStart + sstr.tellg();
+   const char* pStop = pStart + static_cast<int>(sstr.tellg());
 
    // END PARSING
 
@@ -667,7 +667,7 @@ const char* AspamImporter::parseParagraphF(const char* pStart, bool isReallyI)
             }
             else
             {
-               streampos sstrPosition(sstr.tellg());
+               int sstrPosition = static_cast<int>(sstr.tellg());
                sstr >> data.mHeight >> data.mUnits;
 
                // height will be zero 
@@ -747,7 +747,7 @@ const char* AspamImporter::parseParagraphG(const char* pStart)
    paragraphG.mLoaded = success;
    mpAspam->setParagraphG(paragraphG);
 
-   const char* pStop = pStart + sstr.tellg();
+   const char* pStop = pStart + static_cast<int>(sstr.tellg());
 
    // END PARSING
 
@@ -882,7 +882,7 @@ const char* AspamImporter::parseParagraphH(const char* pStart)
    paragraphH.mLoaded = success;
    mpAspam->setParagraphH(paragraphH);
 
-   const char* pStop = pStart + sstr.tellg();
+   const char* pStop = pStart + static_cast<int>(sstr.tellg());
 
    // END PARSING
 
@@ -1019,7 +1019,7 @@ const char* AspamImporter::parseParagraphJ(const char* pStart)
    paragraphJ.mLoaded = success;
    mpAspam->setParagraphJ(paragraphJ);
 
-   const char* pStop = pStart + sstr.tellg();
+   const char* pStop = pStart + static_cast<int>(sstr.tellg());
 
    // END PARSING
 
@@ -1054,7 +1054,7 @@ bool AspamImporter::deserialize(FILE* pFp)
          data += buf.substr(0, numberRead);
       }
       pLoadMsg->addProperty("Length", UInt64(data.size()));
-      pLoadMsg->finalize(Message::Success);
+      pLoadMsg->finalize();
    }
 
    MessageResource pParseMsg("Parse ASPAM data", "app", "ED0C895C-9E01-4FD0-A82F-177CCB14430C");

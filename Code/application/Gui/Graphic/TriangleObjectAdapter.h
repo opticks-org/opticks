@@ -45,6 +45,10 @@ public:
    }
 
    TRIANGLEOBJECTADAPTER_METHODS(TriangleObjectImp)
+
+private:
+   TriangleObjectAdapter(const TriangleObjectAdapter& rhs);
+   TriangleObjectAdapter& operator=(const TriangleObjectAdapter& rhs);
 };
 
 #endif

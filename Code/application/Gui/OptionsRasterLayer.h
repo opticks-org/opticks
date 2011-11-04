@@ -91,6 +91,8 @@ public:
    }
 
 private:
+   OptionsRasterLayer(const OptionsRasterLayer& rhs);
+   OptionsRasterLayer& operator=(const OptionsRasterLayer& rhs);
    QCheckBox* mpUseGpuImage;
    QDoubleSpinBox* mpRedUpperStretchValue;
    RegionUnitsComboBox* mpRedStretch;

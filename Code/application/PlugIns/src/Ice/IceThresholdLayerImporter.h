@@ -28,6 +28,8 @@ protected:
    virtual SpatialDataView* createView() const;
 
 private:
+   IceThresholdLayerImporter& operator=(const IceThresholdLayerImporter& rhs);
+
    SpatialDataView* mpView;
 };
 

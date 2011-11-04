@@ -176,44 +176,6 @@ typedef enum Datum_Types
  * in this component.
  */
 
-/*
-  int Create_Datum ( const char *Code,
-                      const char *Name,
-                      const char *Ellipsoid_Code,
-                      double Delta_X,
-                      double Delta_Y,
-                      double Delta_Z,
-                      double Sigma_X,
-                      double Sigma_Y,
-                      double Sigma_Z,
-                      double South_latitude,
-                      double North_latitude,
-                      double West_longitude,
-                      double East_longitude);
-/*
- *   Code           : 5-letter new datum code.                      (input)
- *   Name           : Name of the new datum                         (input)
- *   Ellipsoid_Code : 2-letter code for the associated ellipsoid    (input)
- *   Delta_X        : X translation to WGS84 in meters              (input)
- *   Delta_Y        : Y translation to WGS84 in meters              (input)
- *   Delta_Z        : Z translation to WGS84 in meters              (input)
- *   Sigma_X        : Standard error in X in meters                 (input)
- *   Sigma_Y        : Standard error in Y in meters                 (input)
- *   Sigma_Z        : Standard error in Z in meters                 (input)
- *   South_latitude : Southern edge of validity rectangle in radians(input)
- *   North_latitude : Northern edge of validity rectangle in radians(input)
- *   West_longitude : Western edge of validity rectangle in radians (input)
- *   East_longitude : Eastern edge of validity rectangle in radians (input)
- *
- * The function Create_Datum creates a new local (3-parameter) datum with the 
- * specified code, name, shift values, and standard error values.  If the 
- * datum table has not been initialized, the specified code is already in use, 
- * or a new version of the 3-param.dat file cannot be created, an error code 
- * is returned, otherwise DATUM_NO_ERROR is returned.  Note that the indexes 
- * of all datums in the datum table may be changed by this function.
- */
-
-
   int Datum_Count ( int *Count );
 /*
  *  The function Datum_Count returns the number of Datums in the table

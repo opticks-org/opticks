@@ -31,6 +31,10 @@ signals:
 
 private slots:
    void translateChange(const QString&);
+
+private:
+   GcpSymbolGrid(const GcpSymbolGrid& rhs);
+   GcpSymbolGrid& operator=(const GcpSymbolGrid& rhs);
 };
 
 class GcpSymbolButton : public PixmapGridButton
@@ -48,6 +52,10 @@ signals:
 
 private slots:
    void translateChange();
+
+private:
+   GcpSymbolButton(const GcpSymbolButton& rhs);
+   GcpSymbolButton& operator=(const GcpSymbolButton& rhs);
 };
 
 #endif

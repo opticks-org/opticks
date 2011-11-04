@@ -30,6 +30,9 @@ public:
       DataElement* pParent = NULL) const;
 
    GCPLAYERADAPTER_METHODS(GcpLayerImp)
+
+private:
+   GcpLayerAdapter(const GcpLayerAdapter& rhs);
 };
 
 #endif

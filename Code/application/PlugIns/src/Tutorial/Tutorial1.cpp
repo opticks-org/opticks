@@ -36,7 +36,8 @@ Tutorial1::~Tutorial1()
 
 bool Tutorial1::getInputSpecification(PlugInArgList*& pInArgList)
 {
-   VERIFY(pInArgList = Service<PlugInManagerServices>()->getPlugInArgList());
+   pInArgList = Service<PlugInManagerServices>()->getPlugInArgList();
+   VERIFY(pInArgList != NULL);
    pInArgList->addArg<Progress>(Executable::ProgressArg(), NULL, "Progress reporter");
    return true;
 }

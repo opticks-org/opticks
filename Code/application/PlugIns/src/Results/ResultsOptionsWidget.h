@@ -50,6 +50,9 @@ protected slots:
    void enableSecondThreshold(PassArea area);
 
 private:
+   ResultsOptionsWidget(const ResultsOptionsWidget& rhs);
+   ResultsOptionsWidget& operator=(const ResultsOptionsWidget& rhs);
+
    PassAreaComboBox* mpPassAreaCombo;
    QLineEdit* mpFirstThresholdEdit;
    QLabel* mpSecondThresholdLabel;

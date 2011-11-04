@@ -45,6 +45,10 @@ public:
    }
 
    RECTANGLEOBJECTADAPTER_METHODS(RectangleObjectImp)
+
+private:
+   RectangleObjectAdapter(const RectangleObjectAdapter& rhs);
+   RectangleObjectAdapter& operator=(const RectangleObjectAdapter& rhs);
 };
 
 #endif

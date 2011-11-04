@@ -73,7 +73,6 @@ BandMath::~BandMath()
 bool BandMath::isInputValid(PlugInArgList& pArgList)
 {
    PlugInArg* pArg = NULL;
-   bool bUseFullDataset = true;
 
    // The following must always have values set for them
    // Sensor data
@@ -334,9 +333,9 @@ bool BandMath::execute(PlugInArgList* pInputArgList, PlugInArgList* pOutputArgLi
             dynamic_cast<const RasterDataDescriptor*>(pRaster->getDataDescriptor());
          if (pCurrentDescriptor != NULL)
          {
-            if ((mCubeRows == pCurrentDescriptor->getRowCount()) &&
-               (mCubeColumns == pCurrentDescriptor->getColumnCount()) &&
-               (mCubeBands == pCurrentDescriptor->getBandCount()))
+            if ((mCubeRows == static_cast<int>(pCurrentDescriptor->getRowCount())) &&
+               (mCubeColumns == static_cast<int>(pCurrentDescriptor->getColumnCount())) &&
+               (mCubeBands == static_cast<int>(pCurrentDescriptor->getBandCount())))
             {
                mCubesList.push_back(pRaster);
             }

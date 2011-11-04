@@ -29,6 +29,8 @@ public slots:
    void dialogClosed();
 
 private:
+   MenuAndToolBarTest(const MenuAndToolBarTest& rhs);
+   MenuAndToolBarTest& operator=(const MenuAndToolBarTest& rhs);
    MenuAndToolBarTestGui* mpGui;
 };
 

@@ -38,6 +38,8 @@ public:
    LocationType getCenter() const;
 
 private:
+   ZoomAndPanToPointDlg(const ZoomAndPanToPointDlg& rhs);
+   ZoomAndPanToPointDlg& operator=(const ZoomAndPanToPointDlg& rhs);
    QLineEdit* mpLatitudeEdit;
    QLineEdit* mpLongitudeEdit;
    QLineEdit* mpZoneEdit;

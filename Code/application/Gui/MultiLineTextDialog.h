@@ -33,6 +33,8 @@ public slots:
    void accept();
 
 private:
+   MultiLineTextDialog(const MultiLineTextDialog& rhs);
+   MultiLineTextDialog& operator=(const MultiLineTextDialog& rhs);
    QTextEdit* mpEdit;
 };
 

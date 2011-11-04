@@ -90,6 +90,9 @@ public:
    }
 
 private:
+   OptionsTiffExporter(const OptionsTiffExporter& rhs);
+   OptionsTiffExporter& operator=(const OptionsTiffExporter& rhs);
+
    QCheckBox* mpPackBits;
    QSpinBox* mpRowsPerStrip;
    ResolutionWidget* mpResolutionWidget;

@@ -46,7 +46,8 @@ Tutorial2::~Tutorial2()
 
 bool Tutorial2::getInputSpecification(PlugInArgList*& pInArgList)
 {
-   VERIFY(pInArgList = Service<PlugInManagerServices>()->getPlugInArgList());
+   pInArgList = Service<PlugInManagerServices>()->getPlugInArgList();
+   VERIFY(pInArgList != NULL);
    pInArgList->addArg<Progress>(Executable::ProgressArg(), NULL, "Progress reporter");
    pInArgList->addArg<int>("Count", 5, "How many times should the plug-in recurse?");
    pInArgList->addArg<int>("Depth", 1, "This is the recursive depth. Not usually set by the initial caller.");

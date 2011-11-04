@@ -224,13 +224,6 @@ bool Nitf::Header::importDateCCYYMMDDhhmmss(const ossimPropertyInterface *pPrope
    DynamicObject *pDynObj, const string& appName,
    const string& ossimName)
 {
-   unsigned short year = 0;
-   unsigned short month = 0;
-   unsigned short day = 0;
-   unsigned short hour = 0;
-   unsigned short min = 0;
-   unsigned short sec = 0;
-
    if (pPropertyInterface == NULL)
    {
       return false;

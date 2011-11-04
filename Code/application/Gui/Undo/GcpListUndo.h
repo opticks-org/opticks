@@ -24,6 +24,8 @@ public:
    void executeRedo();
 
 private:
+   SetGcpPoints(const SetGcpPoints& rhs);
+   SetGcpPoints& operator=(const SetGcpPoints& rhs);
    std::list<GcpPoint> mOldPoints;
    std::list<GcpPoint> mNewPoints;
 };
@@ -38,6 +40,8 @@ public:
    void executeRedo();
 
 private:
+   AddGcpPoint(const AddGcpPoint& rhs);
+   AddGcpPoint& operator=(const AddGcpPoint& rhs);
    GcpPoint mPoint;
 };
 
@@ -51,6 +55,8 @@ public:
    void executeRedo();
 
 private:
+   RemoveGcpPoint(const RemoveGcpPoint& rhs);
+   RemoveGcpPoint& operator=(const RemoveGcpPoint& rhs);
    GcpPoint mPoint;
 };
 

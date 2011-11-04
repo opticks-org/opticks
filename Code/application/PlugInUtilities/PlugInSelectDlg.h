@@ -41,6 +41,8 @@ protected slots:
    void accept();
 
 private:
+   PlugInSelectDlg(const PlugInSelectDlg& rhs);
+   PlugInSelectDlg& operator=(const PlugInSelectDlg& rhs);
    std::vector<std::string> mTypes;
    std::vector<std::string> mExcludedTypes;
    std::string mSubtype;

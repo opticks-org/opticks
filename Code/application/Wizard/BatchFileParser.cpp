@@ -131,8 +131,8 @@ BatchWizard* BatchFileParser::read()
    if (attrs.namedItem("cleanup").isNull() == false)
    {
       string text = ((attrs.namedItem("cleanup")).nodeValue()).toStdString();
-      bool cleanup = StringUtilities::fromXmlString<bool>(text);
-      pBatchWizard->setCleanup(true);
+      bool cleanup = true;
+      pBatchWizard->setCleanup(cleanup);
    }
 
    // Repeat - not required

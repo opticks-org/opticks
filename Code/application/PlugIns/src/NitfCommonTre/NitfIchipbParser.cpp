@@ -167,7 +167,7 @@ bool Nitf::IchipbParser::runAllTests(Progress* pProgress, ostream& failure)
    return (status != INVALID);
 }
 
-bool Nitf::IchipbParser::toDynamicObject(const ossimNitfRegisteredTag& input, DynamicObject& output,
+bool Nitf::IchipbParser::ossimTagToDynamicObject(const ossimNitfRegisteredTag& input, DynamicObject& output,
    string &errorMessage) const
 {
    const ossimNitfRegisteredTag* pInput = &input;
@@ -206,8 +206,6 @@ bool Nitf::IchipbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
    string &errorMessage) const
 {
    vector<char> buf;
-   bool ok(true);
-
    bool success(true);
 
    readField<bool>(input, output, success, ICHIPB::XFRM_FLAG, 2, errorMessage, buf);
@@ -233,8 +231,9 @@ bool Nitf::IchipbParser::toDynamicObject(istream& input, size_t numBytes, Dynami
    readField<unsigned int>(input, output, success, ICHIPB::FI_ROW, 8, errorMessage, buf);
    readField<unsigned int>(input, output, success, ICHIPB::FI_COL, 8, errorMessage, buf);
 
-   int numRead = input.tellg();
-   if (numRead != numBytes)
+   int64_t numRead = input.tellg();
+   if (numRead < 0 || numRead > static_cast<int64_t>(std::numeric_limits<size_t>::max()) ||
+      numRead != static_cast<int64_t>(numBytes))
    {
       numReadErrMsg(numRead, numBytes, errorMessage);
       return false;
@@ -339,14 +338,18 @@ Nitf::TreState Nitf::IchipbParser::isTreValid(const DynamicObject& tre, ostream&
 bool Nitf::IchipbParser::fromDynamicObject(const DynamicObject& input, ostream& output, size_t& numBytesWritten,
    string &errorMessage) const
 {
-   size_t sizeIn = max(static_cast<ostream::pos_type>(0), output.tellp());
+   if (output.tellp() < 0 || output.tellp() > static_cast<int64_t>(std::numeric_limits<size_t>::max()))
+   {
+      return false;
+   }
+   size_t sizeIn = max<size_t>(0, static_cast<size_t>(output.tellp()));
    size_t sizeOut(sizeIn);
 
    try
    {
-      output << toString(dv_cast<bool>(input.getAttribute(ICHIPB::XFRM_FLAG)), 2);
+      output << dv_cast<bool>(input.getAttribute(ICHIPB::XFRM_FLAG)) ? "01" : "00";
       output << toString(dv_cast<double>(input.getAttribute(ICHIPB::SCALE_FACTOR)), 10, 5);
-      output << toString(dv_cast<bool>(input.getAttribute(ICHIPB::ANAMRPH_CORR)), 2);
+      output << dv_cast<bool>(input.getAttribute(ICHIPB::ANAMRPH_CORR)) ? "01" : "00";
       output << toString(dv_cast<unsigned int>(input.getAttribute(ICHIPB::SCANBLK_NUM)), 2);
       output << toString(dv_cast<double>(input.getAttribute(ICHIPB::OP_ROW_11)), 12, 3);
       output << toString(dv_cast<double>(input.getAttribute(ICHIPB::OP_COL_11)), 12, 3);
@@ -372,7 +375,11 @@ bool Nitf::IchipbParser::fromDynamicObject(const DynamicObject& input, ostream& 
       return false;
    }
 
-   sizeOut = output.tellp();
+   if (output.tellp() < 0 || output.tellp() > static_cast<int64_t>(std::numeric_limits<size_t>::max()))
+   {
+      return false;
+   }
+   sizeOut = static_cast<size_t>(output.tellp());
    numBytesWritten = sizeOut - sizeIn;
    return true;
 }

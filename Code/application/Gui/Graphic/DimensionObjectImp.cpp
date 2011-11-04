@@ -123,6 +123,7 @@ namespace
          mHandles.push_back(mSwitcher.location(main+0.5, mMidSec));
       }
    private:
+      AddHandle& operator=(const AddHandle& rhs);
       const DimensionObjectImp::DimensionSwitcher& mSwitcher;
       std::vector<LocationType>& mHandles;
       double mMidSec;
@@ -148,6 +149,7 @@ namespace
          glVertex2i(mSwitcher.x(main, mMaxSec), mSwitcher.y(main, mMaxSec));
       }
    private:
+      DrawDimVector& operator=(const DrawDimVector& rhs);
       const DimensionObjectImp::DimensionSwitcher& mSwitcher;
       int mMinSec;
       int mMaxSec;
@@ -169,6 +171,7 @@ namespace
       }
 
    private:
+      DrawDimPixels& operator=(const DrawDimPixels& rhs);
       const DimensionObjectImp::DimensionSwitcher& mSwitcher;
       DrawUtil::PixelDrawer mDrawer;
       int mMinSec;

@@ -31,6 +31,9 @@ protected:
    QWidget* getWidget() const;
 
 private:
+   ModelessPlugIn(const ModelessPlugIn& rhs);
+   ModelessPlugIn& operator=(const ModelessPlugIn& rhs);
+
    QDialog* mpDialog;
    int mRuns;
    bool mSessionClosed;
@@ -54,6 +57,8 @@ protected:
    void closeEvent(QCloseEvent* pEvent);
 
 private:
+   ModelessDlg(const ModelessDlg& rhs);
+   ModelessDlg& operator=(const ModelessDlg& rhs);
    PlugIn* mpPlugIn;
 };
 

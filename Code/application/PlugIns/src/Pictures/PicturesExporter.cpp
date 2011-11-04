@@ -100,8 +100,8 @@ bool PicturesExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
    // get the output height and width
    //
    QSize outputSize;
-   unsigned int outputWidth;
-   unsigned int outputHeight;
+   unsigned int outputWidth = 0;
+   unsigned int outputHeight = 0;
    if (pInArgList->getPlugInArgValue("Output Width", outputWidth) &&
       pInArgList->getPlugInArgValue("Output Height", outputHeight))
    {

@@ -226,6 +226,9 @@ private slots:
    void disableSectionStretch();
 
 private:
+   LabeledSectionGroup(const LabeledSectionGroup& rhs);
+   LabeledSectionGroup& operator=(const LabeledSectionGroup& rhs);
+
    QVBoxLayout* mpLayout;
    QSize mPreferredSize;
    QMap<LabeledSection*, int> mSections;

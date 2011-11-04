@@ -511,7 +511,6 @@ bool SecondMomentAlgorithm::processAll()
    mpStep = pStep.get();
 
    const RasterDataDescriptor* pDescriptor = NULL;
-   const char* pCubeName = NULL;
    void* pData = NULL;
    unsigned int numRows(0);
    unsigned int numColumns(0);

@@ -42,6 +42,9 @@ public:
    int mVisEndRow;
    double mPixelSize;
    const Oper& mOper;
+
+private:
+   DrawInfo& operator=(const DrawInfo& rhs);
 };
 
 template<class Oper> 
@@ -185,7 +188,8 @@ void drawSolid(const DrawInfo<Oper> &info)
    int xx = 0;
    int yy = 0;
    bool prevDraw = false;
-   int start, stop;
+   int start = info.mVisStartColumn - 1;
+   int stop = start - 1;
 
    float pixelSize = std::max(1.0, 1.0/info.mPixelSize);
 
@@ -236,7 +240,8 @@ void drawHorizontalBorder(const DrawInfo<Oper> &info)
    glBegin(GL_LINES);
 
    bool prevDraw = false;
-   int start, stop;
+   int start = info.mVisStartColumn - 1;
+   int stop = start - 1;
 
    for (yy = info.mVisStartRow; yy <= info.mVisEndRow; yy++)
    {
@@ -316,7 +321,8 @@ void drawVerticalBorder(const DrawInfo<Oper> &info)
    glBegin(GL_LINES);
 
    bool prevDraw = false;
-   int start, stop;
+   int start = info.mVisStartRow - 1;
+   int stop = start - 1;
 
    for (xx = info.mVisStartColumn; xx <= info.mVisEndColumn; xx++)
    {
@@ -408,7 +414,8 @@ void drawHorizontalLine(const DrawInfo<Oper> &info)
    glBegin(GL_LINES);
 
    bool prevDraw = false;
-   int start, stop;
+   int start = info.mVisStartColumn - 1;
+   int stop = start - 1;
 
    for (yy = info.mVisStartRow; yy <= info.mVisEndRow; yy += pixelSizeY)
    {
@@ -459,7 +466,8 @@ void drawVerticalLine(const DrawInfo<Oper> &info)
    glBegin(GL_LINES);
 
    bool prevDraw = false;
-   int start, stop;
+   int start = info.mVisStartRow - 1;
+   int stop = start - 1;
 
    for (xx = info.mVisStartColumn; xx <= info.mVisEndColumn; xx++)
    {
@@ -500,7 +508,8 @@ void drawPositiveSlope(const DrawInfo<Oper> &info)
    int xx = 0;
    int yy = 0;
    int rowStart, maxLength, pixelIndex;
-   int start, stop;
+   int start = info.mVisStartColumn - 1;
+   int stop = start - 1;
    int xSize = info.mVisEndColumn - info.mVisStartColumn + 1;
    int ySize = info.mVisEndRow - info.mVisStartRow + 1;
 
@@ -585,7 +594,8 @@ void drawNegativeSlope(const DrawInfo<Oper> &info)
    int xx = 0;
    int yy = 0;
    int rowStart, maxLength, pixelIndex;
-   int start, stop;
+   int start = info.mVisStartColumn - 1;
+   int stop = start - 1;
    int xSize = info.mVisEndColumn - info.mVisStartColumn + 1;
    int ySize = info.mVisEndRow - info.mVisStartRow + 1;
 

@@ -724,8 +724,6 @@ bool RasterElementImp::copyDataBip(RasterElement* pChipElement, const vector<Dim
    const RasterDataDescriptor* pSrcDd = dynamic_cast<const RasterDataDescriptor*>(getDataDescriptor());
    VERIFY(pSrcDd != NULL);
 
-   const vector<DimensionDescriptor>& srcActiveRows = pSrcDd->getRows();
-   const vector<DimensionDescriptor>& srcActiveCols = pSrcDd->getColumns();
    const vector<DimensionDescriptor>& srcActiveBands = pSrcDd->getBands();
 
    int bytesPerElement = pSrcDd->getBytesPerElement();
@@ -739,10 +737,7 @@ bool RasterElementImp::copyDataBip(RasterElement* pChipElement, const vector<Dim
       if (selectedColumns.size() == 
          selectedColumns.back().getActiveNumber() - selectedColumns.front().getActiveNumber() + 1)
       {
-         unsigned int startRow = selectedRows.front().getActiveNumber();
-         unsigned int stopRow = selectedRows.back().getActiveNumber();
          unsigned int startCol = selectedColumns.front().getActiveNumber();
-         unsigned int stopCol = selectedColumns.back().getActiveNumber();
 
          // full contiguous row at a time
          FactoryResource<DataRequest> pSrcRequest;
@@ -892,9 +887,7 @@ bool RasterElementImp::copyDataBil(RasterElement* pChipElement, const vector<Dim
    const RasterDataDescriptor* pChipDd = dynamic_cast<const RasterDataDescriptor*>(pChipElement->getDataDescriptor());
    VERIFY(pChipDd != NULL);
 
-   const vector<DimensionDescriptor>& srcActiveRows = pSrcDd->getRows();
    const vector<DimensionDescriptor>& srcActiveCols = pSrcDd->getColumns();
-   const vector<DimensionDescriptor>& srcActiveBands = pSrcDd->getBands();
 
    unsigned int bytesPerElement = pSrcDd->getBytesPerElement();
 
@@ -983,7 +976,6 @@ bool RasterElementImp::copyDataBil(RasterElement* pChipElement, const vector<Dim
    else
    {
       // slowest possible copy, per pixel, but it works for any BIL data
-      unsigned int chipRow = 0;
       unsigned int step = 0;
       unsigned int steps = selectedBands.size() * selectedRows.size();
 
@@ -1052,10 +1044,6 @@ bool RasterElementImp::copyDataBsq(RasterElement* pChipElement, const vector<Dim
    VERIFY(pSrcDd != NULL);
    const RasterDataDescriptor* pChipDd = dynamic_cast<const RasterDataDescriptor*>(pChipElement->getDataDescriptor());
    VERIFY(pChipDd != NULL);
-
-   const vector<DimensionDescriptor>& srcActiveRows = pSrcDd->getRows();
-   const vector<DimensionDescriptor>& srcActiveCols = pSrcDd->getColumns();
-   const vector<DimensionDescriptor>& srcActiveBands = pSrcDd->getBands();
 
    int bytesPerElement = pSrcDd->getBytesPerElement();
 
@@ -1344,7 +1332,7 @@ bool RasterElementImp::serialize(SessionItemSerializer& serializer) const
 
    if (mModified || pDescriptor->getFileDescriptor() == NULL)
    {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Modify this to only save when necessary (tclarke)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Modify this to only save when necessary (tclarke)")
       //mModified = false;
 
       // serialize the cube
@@ -1368,7 +1356,7 @@ bool RasterElementImp::serialize(SessionItemSerializer& serializer) const
       {
          // Get a data accessor with an entire concurrent row
          FactoryResource<DataRequest> pRequest;
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : fix this when there's a getNextBand() (tclarke)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : fix this when there's a getNextBand() (tclarke)")
          // since there's not getNextBand() we need to request only 1 band for BSQ
          if (pDescriptor->getInterleaveFormat() == BSQ)
          {
@@ -1445,7 +1433,6 @@ bool RasterElementImp::deserialize(SessionItemDeserializer& deserializer)
 
       if (deserializer.getBlockSizes().size() > 1)
       {
-         int64_t cubeSize = deserializer.getBlockSizes()[1];
          deserializer.nextBlock();
 
          if (!createDefaultPager())
@@ -1458,7 +1445,7 @@ bool RasterElementImp::deserialize(SessionItemDeserializer& deserializer)
          {
             // Get a data accessor with an entire concurrent row
             FactoryResource<DataRequest> pRequest;
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : fix this when there's a getNextBand() (tclarke)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : fix this when there's a getNextBand() (tclarke)")
             // since there's not getNextBand() we need to request only 1 band for BSQ
             if (pDescriptor->getInterleaveFormat() == BSQ)
             {
@@ -1640,7 +1627,6 @@ DataAccessor RasterElementImp::getDataAccessor(DataRequest* pRequestIn)
       return DataAccessor(NULL, NULL);
    }
 
-   unsigned int numRows = pDescriptor->getRowCount();
    unsigned int numColumns = pDescriptor->getColumnCount();
    unsigned int numBands = pDescriptor->getBandCount();
    unsigned int bytesPerElement = pDescriptor->getBytesPerElement();
@@ -1946,8 +1932,6 @@ bool RasterElementImp::createDefaultPager()
    default:
       return false;
    }
-
-   return false;
 }
 
 const void* RasterElementImp::getRawData() const

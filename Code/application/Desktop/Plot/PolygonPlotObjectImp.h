@@ -11,12 +11,8 @@
 #define POLYGONPLOTOBJECTIMP_H
 
 #include "ColorType.h"
-#include "glCommon.h"
 #include "PointSetImp.h"
 #include "TypesFile.h"
-
-#include <vector>
-#include <boost/shared_array.hpp>
 
 class PolygonPlotObjectImp : public PointSetImp
 {
@@ -53,11 +49,11 @@ signals:
    void hatchStyleChanged(const SymbolType& hatchStyle);
 
 private:
+   PolygonPlotObjectImp(const PolygonPlotObjectImp& rhs);
+
    QColor mFillColor;
    FillStyle mFillStyle;
    SymbolType mHatchStyle;
-   static std::vector<boost::shared_array<GLdouble> > mCombinedVertices;
-   static void combineVertexData(GLdouble coords[3], GLdouble* pVertexData[4], GLfloat weight[4], void** pOutData);
 };
 
 #define POLYGONPLOTOBJECTADAPTEREXTENSION_CLASSES \

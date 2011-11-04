@@ -45,6 +45,10 @@ public:
    }
 
    POLYLINEOBJECTADAPTER_METHODS(PolylineObjectImp)
+
+private:
+   PolylineObjectAdapter(const PolylineObjectAdapter& rhs);
+   PolylineObjectAdapter& operator=(const PolylineObjectAdapter& rhs);
 };
 
 #endif

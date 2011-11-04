@@ -44,6 +44,10 @@ public:
    }
 
    VIEWOBJECTADAPTER_METHODS(ViewObjectImp)
+
+private:
+   ViewObjectAdapter(const ViewObjectAdapter& rhs);
+   ViewObjectAdapter& operator=(const ViewObjectAdapter& rhs);
 };
 
 #endif

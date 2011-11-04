@@ -69,6 +69,8 @@ protected slots:
    void setSelectedPixmap(int iRow, int iColumn);
 
 private:
+   PixmapGrid(const PixmapGrid& rhs);
+   PixmapGrid& operator=(const PixmapGrid& rhs);
 
    std::map<int, CellPixmap> mPixmaps;
    CellPixmap mSelectedCell;

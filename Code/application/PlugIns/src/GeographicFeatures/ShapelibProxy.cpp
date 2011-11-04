@@ -25,6 +25,7 @@ namespace
          FormatStringPreprocessor(preprocessedString), mHandle(handle)
       {
       }
+      virtual ~ShapelibFormatStringPreprocessor() {};
 
       int getFieldIndex(const std::string &fieldName) const
       {
@@ -32,6 +33,8 @@ namespace
       }
 
    private:
+      ShapelibFormatStringPreprocessor& operator=(const ShapelibFormatStringPreprocessor& rhs);
+
       const ShapelibProxy::ShapelibHandle& mHandle;
    };
 
@@ -42,6 +45,7 @@ namespace
          mHandle(handle), mFeature(feature)
       {
       }
+      virtual ~ShapelibFormatStringProcessor() {};
 
       std::string getFieldValue(int fieldNumber) const
       {
@@ -53,6 +57,8 @@ namespace
       }
 
    private:
+      ShapelibFormatStringProcessor& operator=(const ShapelibFormatStringProcessor& rhs);
+
       const ShapelibProxy::ShapelibHandle& mHandle;
       int mFeature;
    };

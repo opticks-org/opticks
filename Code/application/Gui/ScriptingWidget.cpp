@@ -641,7 +641,6 @@ void ScriptingWidget::insertFromMimeData(const QMimeData* pSource)
       text = pSource->text();
       int numNewlines = text.count("\n");
       QString trimmedText = text.trimmed();
-      bool haveFile = false;
       if (mDropOccurring && numNewlines <= 1 && QFile::exists(trimmedText))
       {
          filePath = trimmedText;
@@ -720,7 +719,7 @@ void ScriptingWidget::insertFromMimeData(const QMimeData* pSource)
    }
 }
 
-void ScriptingWidget::interpreterStarted(Subject& subject, const std::string& signal, const boost::any& data)
+void ScriptingWidget::interpreterStarted(Subject& subject, const std::string& signal, const boost::any& value)
 {
    Interpreter* pInterpreter = NULL;
    InterpreterManager* pInterMgr = dynamic_cast<InterpreterManager*>(mInterpreter.get());
@@ -739,9 +738,9 @@ void ScriptingWidget::interpreterStarted(Subject& subject, const std::string& si
    }
 }
 
-void ScriptingWidget::receiveOutput(Subject& subject, const std::string& signal, const boost::any& data)
+void ScriptingWidget::receiveOutput(Subject& subject, const std::string& signal, const boost::any& value)
 {
-   std::string text = boost::any_cast<std::string>(data);
+   std::string text = boost::any_cast<std::string>(value);
    if (signal == SIGNAL_NAME(Interpreter, OutputText))
    {
       addOutputText(QString::fromStdString(text), false, true);
@@ -752,9 +751,9 @@ void ScriptingWidget::receiveOutput(Subject& subject, const std::string& signal,
    }
 }
 
-void ScriptingWidget::plugInDestroyed(Subject &subject, const std::string &signal, const boost::any &data)
+void ScriptingWidget::plugInDestroyed(Subject& subject, const std::string& signal, const boost::any& value)
 {
-   if (boost::any_cast<PlugIn*>(data) == mInterpreter.get())
+   if (boost::any_cast<PlugIn*>(value) == mInterpreter.get())
    {
       mInterpreter = PlugInResource();
    }

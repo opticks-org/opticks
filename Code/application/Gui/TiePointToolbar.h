@@ -43,6 +43,8 @@ protected slots:
    void setMarkerColor(const QColor& markerColor);
 
 private:
+   TiePointToolBar(const TiePointToolBar& rhs);
+   TiePointToolBar& operator=(const TiePointToolBar& rhs);
    QAction* mpLabelsEnabledAction;
    QAction* mpColorAction;
    ColorMenu* mpColorMenu;

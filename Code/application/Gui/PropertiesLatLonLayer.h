@@ -52,6 +52,8 @@ protected slots:
    void autoTickSpacingEnabled(bool bEnable);
 
 private:
+   PropertiesLatLonLayer(const PropertiesLatLonLayer& rhs);
+   PropertiesLatLonLayer& operator=(const PropertiesLatLonLayer& rhs);
    LatLonLayer* mpLatLonLayer;
 
    // Coordinates

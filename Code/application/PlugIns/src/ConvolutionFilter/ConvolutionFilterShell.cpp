@@ -63,7 +63,6 @@ bool ConvolutionFilterShell::getInputSpecification(PlugInArgList*& pInArgList)
    VERIFY(pInArgList->addArg<AoiElement>("AOI", NULL, "If not NULL, only the data in this AOI will be convolved and the "
       "new raster element will be the size of this AOI."));
    VERIFY(pInArgList->addArg<SpatialDataView>(Executable::ViewArg(), NULL, "The view to which the raster element to be convoluted is attached."));
-   unsigned int defaultBand = 0;
    VERIFY(pInArgList->addArg<std::vector<unsigned int> >("Band Numbers", "The band numbers which will be convolved. Defaults to no bands. This argument takes precedence over the Band Number argument."));
    VERIFY(pInArgList->addArg<std::string>("Result Name", "The name of the new raster element. "
       "Defaults to the name of the input raster element with ' Convolved' appended."));
@@ -289,8 +288,8 @@ SpatialDataView* ConvolutionFilterShell::displayResult()
    }
    if (pLayer == NULL)
    {
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This would be cleaner with a WindowResource. If one " \
-                                              "becomes available, use it instead. (tclarke)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This would be cleaner with a WindowResource. If one " \
+//                                              "becomes available, use it instead. (tclarke)")
       Service<DesktopServices>()->deleteWindow(pWindow);
       mProgress.report("Unable to create layer.", 0, ERRORS, true);
       return NULL;
@@ -353,7 +352,6 @@ void ConvolutionFilterShell::ConvolutionFilterThread::convolve(const T*)
          return;
       }
 
-      int index = numResultsCols * mRowRange.mFirst;
       int oldPercentDone = -1;
       int rowOffset = static_cast<int>(mInput.mpIterCheck->getOffset().mY);
       int startRow = mRowRange.mFirst + rowOffset;

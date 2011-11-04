@@ -40,6 +40,8 @@ signals:
    void regionChanged(ArcRegion region);
 
 private:
+   GraphicArcWidget(const GraphicArcWidget& rhs);
+   GraphicArcWidget& operator=(const GraphicArcWidget& rhs);
    QDoubleSpinBox* mpStartSpin;
    QDoubleSpinBox* mpStopSpin;
    ArcRegionComboBox* mpRegionCombo;

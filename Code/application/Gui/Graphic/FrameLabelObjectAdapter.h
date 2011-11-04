@@ -46,6 +46,10 @@ public:
    }
 
    FRAMELABELOBJECTADAPTER_METHODS(FrameLabelObjectImp)
+
+private:
+   FrameLabelObjectAdapter(const FrameLabelObjectAdapter& rhs);
+   FrameLabelObjectAdapter& operator=(const FrameLabelObjectAdapter& rhs);
 };
 
 #endif

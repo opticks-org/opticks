@@ -49,8 +49,8 @@
 #include <string>
 #include <vector>
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove qDebug() calls " \
-   "after debugging is complete (tclarke)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove qDebug() calls " \
+//   "after debugging is complete (tclarke)")
 
 using namespace OpticksXmlRpcMethods;
 
@@ -882,7 +882,6 @@ XmlRpcArrayParam* GetMetadata::getSignature()
 
 XmlRpcParam* GetViewInfo::operator()(const XmlRpcParams& params)
 {
-   WorkspaceWindow* pWindow = NULL;
    if (params.size() > 1)
    {
       throw XmlRpcMethodFault(200);

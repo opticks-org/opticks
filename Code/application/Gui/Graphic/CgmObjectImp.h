@@ -69,6 +69,7 @@ protected:
    bool serializeCgmObject(const GraphicObject* pObject, short* pData, int& lByteIndex, bool bCountOnly);
 
 private:
+   CgmObjectImp(const CgmObjectImp& rhs);
    enum MetafileConstantEnum
    {
       // Delimiters

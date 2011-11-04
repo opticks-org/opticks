@@ -26,6 +26,8 @@ public:
    void executeRedo();
 
 private:
+   SetThresholdValues(const SetThresholdValues& rhs);
+   SetThresholdValues& operator=(const SetThresholdValues& rhs);
    double mOldLowerThreshold;
    double mNewLowerThreshold;
    double mOldUpperThreshold;
@@ -42,6 +44,8 @@ public:
    void executeRedo();
 
 private:
+   SetThresholdPassArea(const SetThresholdPassArea& rhs);
+   SetThresholdPassArea& operator=(const SetThresholdPassArea& rhs);
    PassArea mOldPassArea;
    PassArea mNewPassArea;
 };
@@ -56,6 +60,8 @@ public:
    void executeRedo();
 
 private:
+   SetThresholdUnits(const SetThresholdUnits& rhs);
+   SetThresholdUnits& operator=(const SetThresholdUnits& rhs);
    RegionUnits mOldUnits;
    RegionUnits mNewUnits;
 };
@@ -70,6 +76,8 @@ public:
    void executeRedo();
 
 private:
+   SetThresholdColor(const SetThresholdColor& rhs);
+   SetThresholdColor& operator=(const SetThresholdColor& rhs);
    ColorType mOldColor;
    ColorType mNewColor;
 };
@@ -84,6 +92,8 @@ public:
    void executeRedo();
 
 private:
+   SetThresholdSymbol(const SetThresholdSymbol& rhs);
+   SetThresholdSymbol& operator=(const SetThresholdSymbol& rhs);
    SymbolType mOldSymbol;
    SymbolType mNewSymbol;
 };
@@ -96,6 +106,8 @@ public:
    void toLayer(Layer* pLayer) const;
 
 private:
+   ThresholdLayerMemento(const ThresholdLayerMemento& rhs);
+   ThresholdLayerMemento& operator=(const ThresholdLayerMemento& rhs);
    double mLowerThreshold;
    double mUpperThreshold;
    PassArea mPassArea;

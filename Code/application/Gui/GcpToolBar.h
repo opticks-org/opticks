@@ -43,6 +43,8 @@ protected slots:
    void setMarkerColor(const QColor& markerColor);
 
 private:
+   GcpToolBar(const GcpToolBar& rhs);
+   GcpToolBar& operator=(const GcpToolBar& rhs);
    GcpSymbolButton* mpSymbol;
    QAction* mpColorAction;
    ColorMenu* mpColorMenu;

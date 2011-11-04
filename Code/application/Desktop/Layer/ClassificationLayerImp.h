@@ -98,6 +98,8 @@ protected slots:
    void updateProperties(GraphicProperty* pProperty);
 
 private:
+   ClassificationLayerImp(const ClassificationLayerImp& rhs);
+
    FontImp mClassificationFont;
    QColor mClassificationColor;
    TextObjectImp* mpTopText;

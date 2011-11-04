@@ -31,6 +31,8 @@ public:
 
    PSEUDOCOLORLAYERADAPTER_METHODS(PseudocolorLayerImp)
 
+private:
+   PseudocolorLayerAdapter(const PseudocolorLayerAdapter& rhs);
 };
 
 #endif

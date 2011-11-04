@@ -66,8 +66,8 @@ namespace Nitf
     * plug-in name is the same 6-character string as the CETAG as the TRE.
     *
     * Implementers of this interface can use an existing OSSIM TRE plug-in by implementing 
-    * toDynamicObject(ossimNitfRegisteredTag&, DynamicObject&) const and 
-    * fromDynamicObject(const DynamicObject&, ossimNitfRegisteredTag&) const.  The ossimNitfRegisteredTag
+    * ossimTagToDynamicObject(ossimNitfRegisteredTag&, DynamicObject&) const and 
+    * ossimTagFromDynamicObject(const DynamicObject&, ossimNitfRegisteredTag&) const.  The ossimNitfRegisteredTag
     * object will be that registered with OSSIM.
     *
     * Implementers can also simply perform stream operations for TRE import and export.  In that case,
@@ -150,13 +150,13 @@ namespace Nitf
        *
        * @return True if the operation succeeded, false otherwise.
        */
-      virtual bool toDynamicObject(const ossimNitfRegisteredTag& input, DynamicObject& output, 
+      virtual bool ossimTagToDynamicObject(const ossimNitfRegisteredTag& input, DynamicObject& output, 
          std::string &errorMessage) const = 0;
 
       /**
        * Load the TRE from an istream.
        *
-       * Implementers should implement either this function or toDynamicObject(ossimNitfRegisteredTag&, DynamicObject&) const
+       * Implementers should implement either this function or ossimTagToDynamicObject(ossimNitfRegisteredTag&, DynamicObject&) const
        * to load the TRE.  This function will only be called if the other returned false.
        *
        * @param input
@@ -194,13 +194,13 @@ namespace Nitf
        *
        * @return True if the operation succeeded, false otherwise.
        */
-      virtual bool fromDynamicObject(const DynamicObject& input, ossimNitfRegisteredTag& tre, 
+      virtual bool ossimTagFromDynamicObject(const DynamicObject& input, ossimNitfRegisteredTag& tre, 
          std::string &errorMessage) const = 0;
- 
+
       /**
-       * Write the TRE directly to an ossimNitfRegisteredTag.
+       * Write the TRE from a DynamicObject into an ostream.
        *
-       * Implementers should implement either this function or fromDynamicObject(const DynamicObject&, ossimNitfRegisteredTag&) const
+       * Implementers should implement either this function or ossimTagFromDynamicObject(const DynamicObject&, ossimNitfRegisteredTag&) const
        * to write the TRE.  This function will only be called if the other returned false.
        *
        * @param input

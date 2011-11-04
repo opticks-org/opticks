@@ -365,7 +365,6 @@ bool Nitf::AcftaParser::toDynamicObject(istream& input, size_t numBytes, Dynamic
    string &errorMessage) const
 {
    vector<char> buf;
-   bool ok(true);
    bool success(true);
 
    readField<string>(input, output, success, ACFTA::AC_MSN_ID, 10, errorMessage, buf);
@@ -421,8 +420,9 @@ bool Nitf::AcftaParser::toDynamicObject(istream& input, size_t numBytes, Dynamic
    // The ABSWVER is the Version/Revision number in the form "VVVV.RR" so make it a string not a double
    readField<string>(input, output, success, ACFTA::ABSWVER, 7, errorMessage, buf, true);
 
-   size_t numRead = input.tellg();
-   if (numRead != numBytes)
+   int64_t numRead = input.tellg();
+   if (numRead < 0 || numRead > static_cast<int64_t>(std::numeric_limits<size_t>::max()) ||
+      numRead != static_cast<int64_t>(numBytes))
    {
       numReadErrMsg(numRead, numBytes, errorMessage);
       return false;
@@ -434,7 +434,11 @@ bool Nitf::AcftaParser::toDynamicObject(istream& input, size_t numBytes, Dynamic
 bool Nitf::AcftaParser::fromDynamicObject(const DynamicObject& input, ostream& output, size_t& numBytesWritten,
    string &errorMessage) const
 {
-   size_t sizeIn = max(static_cast<ostream::pos_type>(0), output.tellp());
+   if (output.tellp() < 0 || output.tellp() > static_cast<int64_t>(std::numeric_limits<size_t>::max()))
+   {
+      return false;
+   }
+   size_t sizeIn = max<size_t>(0, static_cast<size_t>(output.tellp()));
    size_t sizeOut(sizeIn);
 
    try
@@ -478,7 +482,11 @@ bool Nitf::AcftaParser::fromDynamicObject(const DynamicObject& input, ostream& o
       return false;
    }
 
-   sizeOut = output.tellp();
+   if (output.tellp() < 0 || output.tellp() > static_cast<int64_t>(std::numeric_limits<size_t>::max()))
+   {
+      return false;
+   }
+   sizeOut = static_cast<size_t>(output.tellp());
    numBytesWritten = sizeOut - sizeIn;
    return true;
 }

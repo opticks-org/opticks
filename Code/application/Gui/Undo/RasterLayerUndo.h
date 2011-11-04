@@ -36,6 +36,8 @@ public:
    void executeRedo();
 
 private:
+   SetRasterGpuImage(const SetRasterGpuImage& rhs);
+   SetRasterGpuImage& operator=(const SetRasterGpuImage& rhs);
    bool mOldGpuImage;
    bool mNewGpuImage;
 };
@@ -50,6 +52,8 @@ public:
    void executeRedo();
 
 private:
+   SetRasterDisplayMode(const SetRasterDisplayMode& rhs);
+   SetRasterDisplayMode& operator=(const SetRasterDisplayMode& rhs);
    DisplayMode mOldMode;
    DisplayMode mNewMode;
 };
@@ -64,6 +68,8 @@ public:
    void executeRedo();
 
 private:
+   SetRasterColorMap(const SetRasterColorMap& rhs);
+   SetRasterColorMap& operator=(const SetRasterColorMap& rhs);
    ColorMap mOldColorMap;
    ColorMap mNewColorMap;
 };
@@ -78,6 +84,8 @@ public:
    void executeRedo();
 
 private:
+   SetRasterComplexComponent(const SetRasterComplexComponent& rhs);
+   SetRasterComplexComponent& operator=(const SetRasterComplexComponent& rhs);
    ComplexComponent mOldComplexComponent;
    ComplexComponent mNewComplexComponent;
 };
@@ -93,6 +101,8 @@ public:
    void executeRedo();
 
 private:
+   SetRasterStretchType(const SetRasterStretchType& rhs);
+   SetRasterStretchType& operator=(const SetRasterStretchType& rhs);
    DisplayMode mDisplayMode;
    StretchType mOldStretchType;
    StretchType mNewStretchType;
@@ -108,6 +118,8 @@ public:
    void executeRedo();
 
 private:
+   SetRasterStretchUnits(const SetRasterStretchUnits& rhs);
+   SetRasterStretchUnits& operator=(const SetRasterStretchUnits& rhs);
    RasterChannelType mChannel;
    RegionUnits mOldUnits;
    RegionUnits mNewUnits;
@@ -124,6 +136,8 @@ public:
    void executeRedo();
 
 private:
+   SetRasterStretchValues(const SetRasterStretchValues& rhs);
+   SetRasterStretchValues& operator=(const SetRasterStretchValues& rhs);
    RasterChannelType mChannel;
    double mOldLower;
    double mNewLower;
@@ -144,6 +158,8 @@ public:
    void executeRedo();
 
 private:
+   SetRasterDisplayedBand(const SetRasterDisplayedBand& rhs);
+   SetRasterDisplayedBand& operator=(const SetRasterDisplayedBand& rhs);
    RasterChannelType mChannel;
    DimensionDescriptor mOldBand;
    DimensionDescriptor mNewBand;
@@ -164,6 +180,8 @@ public:
    void executeRedo();
 
 private:
+   SetRasterImageFilters(const SetRasterImageFilters& rhs);
+   SetRasterImageFilters& operator=(const SetRasterImageFilters& rhs);
    std::vector<std::string> mOldImageFilters;
    std::vector<std::string> mNewImageFilters;
 };
@@ -176,6 +194,8 @@ public:
    void toLayer(Layer* pLayer) const;
 
 private:
+   RasterLayerMemento(const RasterLayerMemento& rhs);
+   RasterLayerMemento& operator=(const RasterLayerMemento& rhs);
    bool mUseGpuImage;
 
    DisplayMode mDisplayMode;

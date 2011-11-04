@@ -28,6 +28,10 @@ signals:
 
 private slots:
    void translateActivated(int newIndex);
+
+private:
+   PanLimitTypeComboBox(const PanLimitTypeComboBox& rhs);
+   PanLimitTypeComboBox& operator=(const PanLimitTypeComboBox& rhs);
 };
 
 #endif

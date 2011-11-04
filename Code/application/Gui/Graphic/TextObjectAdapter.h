@@ -44,6 +44,10 @@ public:
    }
 
    TEXTOBJECTADAPTER_METHODS(TextObjectImp)
+
+private:
+   TextObjectAdapter(const TextObjectAdapter& rhs);
+   TextObjectAdapter& operator=(const TextObjectAdapter& rhs);
 };
 
 #endif

@@ -72,6 +72,8 @@ protected:
    virtual void closeFile() = 0;
 
 private:
+   HdfPager& operator=(const HdfPager& rhs);
+
    std::string mHdfName;
 };
 

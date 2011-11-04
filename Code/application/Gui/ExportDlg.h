@@ -40,6 +40,8 @@ protected slots:
    bool invokeOptionsDialog();
 
 private:
+   ExportDlg(const ExportDlg& rhs);
+   ExportDlg& operator=(const ExportDlg& rhs);
    ExporterResource& mpExporter;
 };
 

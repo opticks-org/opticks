@@ -39,6 +39,7 @@ class HistogramWindow : public PlotWindow
 public:
    SETTING(LayerActivation, HistogramWindow, bool, false)
 
+   using PlotWindow::setCurrentPlot;
    /**
     *  Creates a histogram plot widget for a given layer.
     *

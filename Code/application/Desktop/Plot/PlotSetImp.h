@@ -94,6 +94,9 @@ protected slots:
    void updatePlotName();
 
 private:
+   PlotSetImp(const PlotSetImp& rhs);
+   PlotSetImp& operator=(const PlotSetImp& rhs);
+
    AttachmentPtr<SessionExplorer> mpExplorer;
    PlotWindow* mpPlotWindow;
    View* mpAssociatedView;

@@ -48,6 +48,7 @@ public:
       }
       return NULL;
    }
+   virtual ~CustomMenuPlugInFactory() {};
 private:
    std::map<std::string, std::string> mPlugIns;
 };

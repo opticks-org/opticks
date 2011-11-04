@@ -78,6 +78,7 @@ protected slots:
    void updateFromProperty(GraphicProperty* pProperty);
 
 private:
+   GraphicGroupImp(const GraphicGroupImp& rhs);
    bool mbNeedsLayout;
    LocationType mLlCorner;
    LocationType mUrCorner;

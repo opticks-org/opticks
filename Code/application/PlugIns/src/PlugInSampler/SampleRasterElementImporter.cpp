@@ -26,9 +26,9 @@ SampleRasterPage::SampleRasterPage(int row, int col) :
    mRow(row),
    mCol(col)
 {
-   for (int r = 0; r < NUM_ROWS; ++r)
+   for (unsigned char r = 0; r < NUM_ROWS; ++r)
    {
-      for (int c = 0; c < NUM_COLS; ++c)
+      for (unsigned char c = 0; c < NUM_COLS; ++c)
       {
          mData.push_back(r * NUM_COLS + c);
       }

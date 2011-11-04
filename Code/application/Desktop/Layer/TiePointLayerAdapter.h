@@ -28,6 +28,9 @@ public:
       DataElement* pParent = NULL) const;
 
    TIEPOINTLAYERADAPTER_METHODS(TiePointLayerImp)
+
+private:
+   TiePointLayerAdapter(const TiePointLayerAdapter& rhs);
 };
 
 #endif

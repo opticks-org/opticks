@@ -43,7 +43,8 @@ MorphologicalFilter::~MorphologicalFilter()
 
 bool MorphologicalFilter::getInputSpecification(PlugInArgList*& pInArgList)
 {
-   VERIFY(pInArgList = Service<PlugInManagerServices>()->getPlugInArgList());
+   pInArgList = Service<PlugInManagerServices>()->getPlugInArgList();
+   VERIFY(pInArgList != NULL);
    VERIFY(pInArgList->addArg<Progress>(Executable::ProgressArg(), NULL,
       Executable::ProgressArgDescription()));
    VERIFY(pInArgList->addArg<SpatialDataView>(Executable::ViewArg(), NULL,

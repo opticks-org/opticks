@@ -41,6 +41,9 @@ private slots:
    void updateFilename(const QString &filename);
 
 private:
+   SecondMomentGui(const SecondMomentGui& rhs);
+   SecondMomentGui& operator=(const SecondMomentGui& rhs);
+
    bool mForceRecalculate;
    bool mElementExists;
    QFileInfo mSmmFile;

@@ -34,6 +34,8 @@ protected:
    double convertThreshold(Statistics* pStatistics, RegionUnits regionUnits, double value) const;
 
 private:
+   IceThresholdLayerExporter& operator=(const IceThresholdLayerExporter& rhs);
+
    ThresholdLayer* mpLayer;
    RasterElement* mpRaster;
    double mFirstThreshold;

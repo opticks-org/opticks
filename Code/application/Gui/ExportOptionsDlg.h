@@ -29,6 +29,8 @@ public slots:
    void accept();
 
 private:
+   ExportOptionsDlg(const ExportOptionsDlg& rhs);
+   ExportOptionsDlg& operator=(const ExportOptionsDlg& rhs);
    ExporterResource& mpExporter;
 
    QTabWidget* mpTabWidget;

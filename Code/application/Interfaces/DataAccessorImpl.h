@@ -94,12 +94,22 @@ public:
       size_t interLineBytes, size_t concurrentColumns,
       size_t concurrentBands, 
       size_t elementSize, RasterElement* pRasterElement) :
-      mpPage(pPage), mpRasterElement(pRasterElement),
-      mpRequest(pRequest), mConcurrentRows(concurrentRows),
+      mbValid(true),
+      mpPage(pPage),
+      mpRasterElement(pRasterElement),
+      mpRasterPage(NULL),
+      mpRasterPager(NULL),
+      mpRequest(pRequest),
+      mConcurrentRows(concurrentRows),
       mConcurrentColumns(concurrentColumns),
       mConcurrentBands(concurrentBands),
-      mCurrentRow(0), mCurrentColumn(0), mRowOffset(0), mColumnOffset(0),
-      mRefCount(0), mpRasterPage(0), mpRasterPager(0), mbValid(true)
+      mCurrentRow(0),
+      mCurrentColumn(0),
+      mRowOffset(0),
+      mColumnOffset(0),
+      mRefCount(0),
+      mConvertToDoubleFunc(NULL),
+      mConvertToIntegerFunc(NULL)
    {
       if (pPage == NULL || mpRasterElement == NULL || mpRequest.get() == NULL)
       {

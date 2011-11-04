@@ -81,6 +81,8 @@ public:
    }
 
 private:
+   OptionsShortcuts(const OptionsShortcuts& rhs);
+   OptionsShortcuts& operator=(const OptionsShortcuts& rhs);
    void shortcutsIntoGui(const DynamicObject* pCurObject, QTreeWidgetItem* pParent);
    void shortcutsFromGui(QTreeWidgetItem* pCurObject, DynamicObject* pParent) const;
 

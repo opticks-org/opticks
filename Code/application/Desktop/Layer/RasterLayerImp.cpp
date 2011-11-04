@@ -68,11 +68,11 @@ RasterLayerImp::RasterLayerImp(const string& id, const string& layerName, DataEl
    mUseGpuImage(false),
    mbRegenerate(true),
    meDisplayMode(GRAYSCALE_MODE),
-   mEnableFastContrastStretch(true),
    mlstGrayStretchValues(2),
    mlstRedStretchValues(2),
    mlstGreenStretchValues(2),
    mlstBlueStretchValues(2),
+   mEnableFastContrastStretch(true),
    mOriginalGrayStretchValues(2),
    mOriginalRedStretchValues(2),
    mOriginalGreenStretchValues(2),
@@ -1397,8 +1397,8 @@ bool RasterLayerImp::isBandDisplayed(RasterChannelType eColor, DimensionDescript
    return false;
 }
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : The setDisplayedBand() methods should return a bool " \
-   "when breaking binary compatibility. (dsulgrov)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : The setDisplayedBand() methods should return a bool " \
+//   "when breaking binary compatibility. (dsulgrov)")
 void RasterLayerImp::setDisplayedBand(RasterChannelType eColor, DimensionDescriptor band)
 {
    setDisplayedBand(eColor, band, NULL);

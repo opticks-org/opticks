@@ -170,8 +170,11 @@ protected slots:
    void updateMouseCursor();
 
 private:
-   void translateDataToWorld(const std::vector<LocationType>& data, std::vector<LocationType>& world) const;
-   void translateWorldToData(const std::vector<LocationType>& world, std::vector<LocationType>& data) const;
+   ZoomPanWidget(const ZoomPanWidget& rhs);
+   ZoomPanWidget& operator=(const ZoomPanWidget& rhs);
+
+   void translateDataToWorld(const std::vector<LocationType>& dataValue, std::vector<LocationType>& worldValue) const;
+   void translateWorldToData(const std::vector<LocationType>& worldValue, std::vector<LocationType>& dataValue) const;
 
    SpatialDataViewImp* mpView;
    Layer* mpLayer;

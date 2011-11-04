@@ -268,7 +268,7 @@ QSize WizardItemProperties::sizeHint() const
 }
 
 void WizardItemProperties::wizardExecutionModeChanged(Subject& subject, const std::string& signal,
-                                                      const boost::any& data)
+                                                      const boost::any& value)
 {
    WizardObjectImp* pWizard = dynamic_cast<WizardObjectImp*>(&subject);
    VERIFYNRV(pWizard != NULL);
@@ -277,7 +277,7 @@ void WizardItemProperties::wizardExecutionModeChanged(Subject& subject, const st
    mpItemModeCombo->setDisabled(batch);
 }
 
-void WizardItemProperties::executionOrderChanged(Subject& subject, const std::string& signal, const boost::any& data)
+void WizardItemProperties::executionOrderChanged(Subject& subject, const std::string& signal, const boost::any& value)
 {
    WizardObjectImp* pWizard = dynamic_cast<WizardObjectImp*>(&subject);
    VERIFYNRV(pWizard != NULL);
@@ -293,7 +293,7 @@ void WizardItemProperties::executionOrderChanged(Subject& subject, const std::st
    mpItemOrderLabel->setText(orderText);
 }
 
-void WizardItemProperties::itemRenamed(Subject& subject, const std::string& signal, const boost::any& data)
+void WizardItemProperties::itemRenamed(Subject& subject, const std::string& signal, const boost::any& value)
 {
    WizardItemImp* pItem = dynamic_cast<WizardItemImp*>(&subject);
    VERIFYNRV(pItem != NULL);
@@ -303,7 +303,7 @@ void WizardItemProperties::itemRenamed(Subject& subject, const std::string& sign
    mpItemNameLabel->setText(QString::fromStdString(itemName));
 }
 
-void WizardItemProperties::itemExecutionModeChanged(Subject& subject, const std::string& signal, const boost::any& data)
+void WizardItemProperties::itemExecutionModeChanged(Subject& subject, const std::string& signal, const boost::any& value)
 {
    WizardItemImp* pItem = dynamic_cast<WizardItemImp*>(&subject);
    VERIFYNRV(pItem != NULL);
@@ -319,25 +319,25 @@ void WizardItemProperties::itemExecutionModeChanged(Subject& subject, const std:
    }
 }
 
-void WizardItemProperties::nodeAdded(Subject& subject, const std::string& signal, const boost::any& data)
+void WizardItemProperties::nodeAdded(Subject& subject, const std::string& signal, const boost::any& value)
 {
-   WizardNodeImp* pNode = static_cast<WizardNodeImp*>(boost::any_cast<WizardNode*>(data));
+   WizardNodeImp* pNode = static_cast<WizardNodeImp*>(boost::any_cast<WizardNode*>(value));
    if (pNode != NULL)
    {
       addNode(pNode);
    }
 }
 
-void WizardItemProperties::nodeRemoved(Subject& subject, const std::string& signal, const boost::any& data)
+void WizardItemProperties::nodeRemoved(Subject& subject, const std::string& signal, const boost::any& value)
 {
-   WizardNodeImp* pNode = static_cast<WizardNodeImp*>(boost::any_cast<WizardNode*>(data));
+   WizardNodeImp* pNode = static_cast<WizardNodeImp*>(boost::any_cast<WizardNode*>(value));
    if (pNode != NULL)
    {
       removeNode(pNode);
    }
 }
 
-void WizardItemProperties::nodeRenamed(Subject& subject, const std::string& signal, const boost::any& data)
+void WizardItemProperties::nodeRenamed(Subject& subject, const std::string& signal, const boost::any& value)
 {
    WizardNodeImp* pNode = dynamic_cast<WizardNodeImp*>(&subject);
    VERIFYNRV(pNode != NULL);
@@ -354,7 +354,7 @@ void WizardItemProperties::nodeRenamed(Subject& subject, const std::string& sign
    }
 }
 
-void WizardItemProperties::nodeTypeChanged(Subject& subject, const std::string& signal, const boost::any& data)
+void WizardItemProperties::nodeTypeChanged(Subject& subject, const std::string& signal, const boost::any& value)
 {
    WizardNodeImp* pNode = dynamic_cast<WizardNodeImp*>(&subject);
    VERIFYNRV(pNode != NULL);
@@ -374,7 +374,7 @@ void WizardItemProperties::nodeTypeChanged(Subject& subject, const std::string& 
    }
 }
 
-void WizardItemProperties::nodeDescriptionChanged(Subject& subject, const std::string& signal, const boost::any& data)
+void WizardItemProperties::nodeDescriptionChanged(Subject& subject, const std::string& signal, const boost::any& value)
 {
    WizardNodeImp* pNode = dynamic_cast<WizardNodeImp*>(&subject);
    VERIFYNRV(pNode != NULL);

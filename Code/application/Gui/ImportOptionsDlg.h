@@ -86,6 +86,8 @@ private:
    void updateConnections(bool bConnect);
 
 private:
+   ImportOptionsDlg(const ImportOptionsDlg& rhs);
+   ImportOptionsDlg& operator=(const ImportOptionsDlg& rhs);
    Importer* mpImporter;
    std::map<ImportDescriptor*, QTreeWidgetItem*> mDatasets;
    ImportDescriptor* mpCurrentDataset;

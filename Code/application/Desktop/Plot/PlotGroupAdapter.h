@@ -24,6 +24,9 @@ public:
    bool isKindOf(const std::string& className) const;
 
    PLOTGROUPADAPTER_METHODS(PlotGroupImp)
+
+private:
+   PlotGroupAdapter(const PlotGroupAdapter& rhs);
 };
 
 #endif

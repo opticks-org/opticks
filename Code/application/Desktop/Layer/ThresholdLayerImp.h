@@ -36,7 +36,6 @@ public:
    ThresholdLayerImp& operator= (const ThresholdLayerImp& thresholdLayer);
 
    LayerType getLayerType() const;
-   using LayerImp::setName;
 
    std::vector<ColorType> getColors() const;
    void draw();
@@ -90,6 +89,7 @@ protected:
    double rawToPercentile(double value, const double* pdPercentiles) const;
 
 private:
+   ThresholdLayerImp(const ThresholdLayerImp& rhs);
    RegionUnits meRegionUnits;
    PassArea mePassArea;
    double mdFirstThreshold;

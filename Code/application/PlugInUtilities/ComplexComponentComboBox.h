@@ -26,6 +26,10 @@ public:
 signals: 
    void valueChanged(ComplexComponent value);
 
+private:
+   ComplexComponentComboBox(const ComplexComponentComboBox& rhs);
+   ComplexComponentComboBox& operator=(const ComplexComponentComboBox& rhs);
+
 private slots:
    void translateActivated(int newIndex);
 };

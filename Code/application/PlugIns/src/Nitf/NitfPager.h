@@ -47,6 +47,8 @@ namespace Nitf
       virtual CachedPage::UnitPtr fetchUnit(DataRequest *pOriginalRequest);
 
    private:
+      Pager& operator=(const Pager& rhs);
+
       int mSegment; // 1-based segment number
       Nitf::OssimImageHandlerResource mpImageHandler;
       Step* mpStep;

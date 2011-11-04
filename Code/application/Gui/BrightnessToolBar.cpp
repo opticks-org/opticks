@@ -29,11 +29,11 @@
 #include <vector>
 using namespace std;
 
-static const unsigned int GRAY_BANDCOMBO_INDEX = 0;
-static const unsigned int RED_BANDCOMBO_INDEX = 1;
-static const unsigned int GREEN_BANDCOMBO_INDEX = 2;
-static const unsigned int BLUE_BANDCOMBO_INDEX = 3;
-static const unsigned int RGB_BANDCOMBO_INDEX = 4;
+static const int GRAY_BANDCOMBO_INDEX = 0;
+static const int RED_BANDCOMBO_INDEX = 1;
+static const int GREEN_BANDCOMBO_INDEX = 2;
+static const int BLUE_BANDCOMBO_INDEX = 3;
+static const int RGB_BANDCOMBO_INDEX = 4;
 
 BrightnessToolBar::BrightnessToolBar(const string& id, QWidget* parent) :
    ToolBarAdapter(id, "Brightness", parent),

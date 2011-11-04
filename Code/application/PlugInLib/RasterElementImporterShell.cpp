@@ -498,8 +498,8 @@ bool RasterElementImporterShell::performImport() const
 
    string message;
 
-#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Re-evaluate this code when plug-ins " \
-   "are being loaded into the global symbol space (tclarke)")
+//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Re-evaluate this code when plug-ins " \
+//   "are being loaded into the global symbol space (tclarke)")
    // This was changed from a try/catch due to a problem with the exceptions 
    // not being caught and propagating up to QApplication::notify on solaris.
    // it is believed this is due to how we load plug-ins;
@@ -580,11 +580,11 @@ bool RasterElementImporterShell::performImport() const
       uint64_t badValueCount = mpRasterElement->sanitizeData(value);
       if (badValueCount != 0)
       {
-         char buffer[256];
-         sprintf (buffer, "%llu bad value(s) found in data.\nBad values set to %f.", badValueCount, value);
          if (mpProgress != NULL)
          {
-            mpProgress->updateProgress(buffer, 100, WARNING);
+            string message = StringUtilities::toDisplayString(badValueCount) + " bad value(s) found in data.\n" +
+               "Bad values set to " + StringUtilities::toDisplayString(value);
+            mpProgress->updateProgress(message, 100, WARNING);
          }
       }
    }

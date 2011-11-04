@@ -146,6 +146,12 @@ public:
    }
 
    /**
+    * Destructor.
+    */
+   ~EnumWrapper()
+   {}
+
+   /**
     * Queries whether the contained enum value is
     * valid and can be used.
     * 

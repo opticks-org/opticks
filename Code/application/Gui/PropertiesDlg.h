@@ -33,6 +33,8 @@ protected slots:
    void processButtonClick(QAbstractButton* pButton);
 
 private:
+   PropertiesDlg(const PropertiesDlg& rhs);
+   PropertiesDlg& operator=(const PropertiesDlg& rhs);
    SessionItem* mpSessionItem;
    std::vector<Properties*> mPlugIns;
    QDialogButtonBox* mpButtonBox;

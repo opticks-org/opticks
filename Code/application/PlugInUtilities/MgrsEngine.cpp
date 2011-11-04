@@ -6,8 +6,6 @@
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
- 
-#include "AppConfig.h"
 
 /***************************************************************************/
 /* RSC IDENTIFIER: GEOTRANS ENGINE                 
@@ -69,10 +67,13 @@
  *                               INCLUDES
  */
 #include <ctype.h>
+#include <locale>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string>
 #include <string.h>
+#include "AppConfig.h"
 #include "Mgrs.h"
 #include "MgrsDatum.h"
 #include "MgrsEngine.h"
@@ -326,9 +327,10 @@ int MgrsEngine::Get_Coordinate_System_Index ( const char *Code,
   *Index = 0;
   if (MgrsEngine::Engine_Initialized)
   {
+    std::locale loc;
     while (j < COORD_SYS_CODE_LENGTH)
     {
-      temp_code[j] = toupper(Code[j]);
+      temp_code[j] = toupper(Code[j], loc);
       j++;
     }
     temp_code[COORD_SYS_CODE_LENGTH - 1] = 0;
@@ -676,79 +678,6 @@ int MgrsEngine::Get_Datum
   return (error_code);
 } /* Get_Datum */
 
-/*
-int MgrsEngine::Define_Datum ( const char *Code,
-                    const char *Name,
-                    const char *Ellipsoid_Code,
-                    double Delta_X,
-                    double Delta_Y,
-                    double Delta_Z,
-                    double Sigma_X,
-                    double Sigma_Y,
-                    double Sigma_Z,
-                    double South_latitude,
-                    double North_latitude,
-                    double West_longitude,
-                    double East_longitude)
-/*
- *   Code           : 5-letter new datum code.                      (input)
- *   Name           : Name of the new datum                         (input)
- *   Ellipsoid_Code : 2-letter code for the associated ellipsoid    (input)
- *   Delta_X        : X translation to WGS84 in meters              (input)
- *   Delta_Y        : Y translation to WGS84 in meters              (input)
- *   Delta_Z        : Z translation to WGS84 in meters              (input)
- *   Sigma_X        : Standard error in X in meters                 (input)
- *   Sigma_Y        : Standard error in Y in meters                 (input)
- *   Sigma_Z        : Standard error in Z in meters                 (input)
- *   South_latitude : Southern edge of validity rectangle in radians(input)
- *   North_latitude : Northern edge of validity rectangle in radians(input)
- *   West_longitude : Western edge of validity rectangle in radians (input)
- *   East_longitude : Eastern edge of validity rectangle in radians (input)
- *
- * The function Define_Datum creates a new local (3-parameter) datum with the 
- * specified code, name, shift values, and standard error values.  If the 
- * datum table has not been initialized, the specified code is already in use, 
- * or a new version of the 3-param.dat file cannot be created, an error code 
- * is returned, otherwise DATUM_NO_ERROR is returned.  Note that the indexes 
- * of all datums in the datum table may be changed by this function.
- */
-//{ /* Define_Datum */
-
-//  int error_code = ENGINE_NO_ERROR;
-  /*
-  int temp_error;
-  if (!Engine_Initialized)
-    error_code |= ENGINE_NOT_INITIALIZED;
-  else
-  {
-    temp_error = Create_Datum (Code, Name, Ellipsoid_Code,
-                               Delta_X, Delta_Y, Delta_Z, Sigma_X, Sigma_Y, Sigma_Z,
-                               South_latitude, North_latitude, West_longitude, East_longitude);
-    if (temp_error & DATUM_INVALID_CODE_ERROR)
-      error_code |= ENGINE_INVALID_CODE_ERROR;
-    if (temp_error & DATUM_SIGMA_ERROR)
-      error_code |= ENGINE_DATUM_SIGMA_ERROR;
-    if (temp_error & DATUM_DOMAIN_ERROR)
-      error_code |= ENGINE_DATUM_DOMAIN_ERROR;
-    if (temp_error & DATUM_LAT_ERROR)
-      error_code |= ENGINE_LAT_ERROR;
-    if (temp_error & DATUM_LON_ERROR)
-      error_code |= ENGINE_LON_ERROR;
-    if (temp_error & DATUM_3PARAM_OVERFLOW_ERROR)
-      error_code |= ENGINE_DATUM_OVERFLOW;
-    if (temp_error & DATUM_ELLIPSE_ERROR)
-      error_code |= ENGINE_ELLIPSOID_ERROR;
-    if (temp_error & DATUM_3PARAM_FILE_OPEN_ERROR)
-      error_code |= ENGINE_DATUM_ERROR;
-    if (temp_error == DATUM_NO_ERROR)
-      Datum_Count (&Number_of_Datums);
-  }
-  */
-//  return (error_code);
-//} /* Define_Datum */
-
-
-
 int MgrsEngine::Get_Ellipsoid_Count ( int *Count )
 /*
  *   Count    : The number of ellipsoids in the ellipsoid table. (output)
@@ -857,50 +786,6 @@ int MgrsEngine::Get_Ellipsoid_Code ( const int Index,
   }
   return (error_code);
 } /* Get_Ellipsoid_Code */
-
-/*
-int MgrsEngine::Define_Ellipsoid (const char* Code,
-                       const char* Name,
-                       double a,
-                       double b)
-/*
- *   Code     : 2-letter ellipsoid code.                      (input)
- *   Name     : Name of the new ellipsoid                     (input)
- *   a        : Semi-major axis, in meters, of new ellipsoid  (input)
- *   b        : Semi-minor axis, in meters, of new ellipsoid. (input)
- *
- * The function Define_Ellipsoid creates a new ellipsoid with the specified
- * code, name, and axes.  If the ellipsoid table has not been initialized,
- * the specified code is already in use, or a new version of the ellips.dat 
- * file cannot be created, an error code is returned, otherwise ELLIPSE_NO_ERROR 
- * is returned.  Note that the indexes of all ellipsoids in the ellipsoid
- * table may be changed by this function.
- */
-//{ // Define_Ellipsoid 
-/*
-  int error_code = ENGINE_NO_ERROR;
-  int temp_error;
-  if (!MgrsEngine::Engine_Initialized)
-    error_code |= ENGINE_NOT_INITIALIZED;
-  else
-  {
-    temp_error = MgrsEngine::Create_Ellipsoid (Code, Name, a, b);
-    if (temp_error & ELLIPSE_TABLE_OVERFLOW_ERROR)
-      error_code |= ENGINE_ELLIPSOID_OVERFLOW;
-    if (temp_error & ELLIPSE_INVALID_CODE_ERROR)
-      error_code |= ENGINE_INVALID_CODE_ERROR;
-    if (temp_error & ELLIPSE_A_ERROR)
-      error_code |= ENGINE_A_ERROR;
-    if (temp_error & ELLIPSE_B_ERROR)
-      error_code |= ENGINE_B_ERROR;
-    if (temp_error & ELLIPSE_A_LESS_B_ERROR)
-      error_code |= ENGINE_A_LESS_B_ERROR;
-    if (temp_error & ELLIPSE_FILE_OPEN_ERROR)
-      error_code |= ENGINE_ELLIPSOID_ERROR;
-  }
-  return (error_code);
-} /* Define_Ellipsoid */
-
 
 void MgrsEngine::Set_Precision(MgrsEngine::Precision Precis)
 /*
@@ -1276,6 +1161,9 @@ int MgrsEngine::Convert()
   Shifted_Geodetic.latitude = 0.0;
   Shifted_Geodetic.longitude = 0.0;
   Shifted_Geodetic.height = 0.0;
+  WGS84_Geodetic.latitude = 0.0;
+  WGS84_Geodetic.longitude = 0.0;
+  WGS84_Geodetic.height = 0.0;
   if (!Engine_Initialized)
     error_code |= ENGINE_NOT_INITIALIZED;
 //  if (!Valid_State(State))
@@ -1759,7 +1647,7 @@ int MgrsEngine::Get_Conversion_Status_String
  */
 { /* Get_Conversion_Status_String */
   int error_code = ENGINE_NO_ERROR;
-  char   *in_out;
+  std::string in_out;
   int Error_Code;
   MgrsEngine::Coordinate_Type System;
   if (!MgrsEngine::Engine_Initialized)
@@ -1780,17 +1668,17 @@ int MgrsEngine::Get_Conversion_Status_String
     {
     case MgrsEngine::Geodetic:
       {
-        sprintf(String,"%s%s%s%s",in_out," Geodetic Coordinates:",Separator,Separator);
+        sprintf(String,"%s%s%s%s",in_out.c_str()," Geodetic Coordinates:",Separator,Separator);
         break;
       }
     case MgrsEngine::MGRS:
       {
-        sprintf(String,"%s%s%s%s",in_out," MGRS Coordinates:",Separator,Separator);
+        sprintf(String,"%s%s%s%s",in_out.c_str()," MGRS Coordinates:",Separator,Separator);
         break;
       }
     case MgrsEngine::UTM:
       {
-        sprintf(String,"%s%s%s%s",in_out," UTM Coordinates:",Separator,Separator);
+        sprintf(String,"%s%s%s%s",in_out.c_str()," UTM Coordinates:",Separator,Separator);
         break;
       }
     } /* switch */

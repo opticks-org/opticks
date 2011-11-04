@@ -70,7 +70,6 @@ using namespace std;
 CoreModuleDescriptor::CoreModuleDescriptor(const string& id, map<string, string>& plugInIds) :
    ModuleDescriptor(id)
 {
-   ModuleManager* pCore = ModuleManager::instance();
    setName("Application");
    mVersion = APP_VERSION_NUMBER;
    mDescription = "Plug-ins built into the application";

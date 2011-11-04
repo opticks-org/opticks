@@ -117,7 +117,7 @@ protected:
     *
     * Use Hdf4Element::removeAttribute() to delete an Hdf4Attribute from an Hdf4Element.
     */
-   ~Hdf4Attribute();
+   virtual ~Hdf4Attribute();
 
    /* Only Hdf4Element can create or destroy Hdf4Attribute types.
     */

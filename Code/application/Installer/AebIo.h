@@ -10,6 +10,7 @@
 #ifndef AEBIO_H
 #define AEBIO_H
 
+#include "AppConfig.h"
 #include "ZipResource.h"
 
 #include <QtCore/QByteArray>
@@ -26,7 +27,7 @@ class AebEntry
 {
 public:
    QString getFilePath() const;
-   size_t getFileSize() const;
+   int64_t getFileSize() const;
 
 protected:
    AebEntry(QString path, size_t size);
@@ -34,7 +35,7 @@ protected:
    friend class AebIo;
 
    QString mFilePath;
-   size_t mFileSize;
+   int64_t mFileSize;
 };
 
 class AebIo
@@ -53,6 +54,8 @@ public:
    bool compareFileInAeb(const AebEntry* pSource, const std::string& destination) const;
 
 private:
+   AebIo& operator=(const AebIo& rhs);
+
    bool openZipFileIfNeeded() const;
    QByteArray getBytesFromAeb(const QString& url, bool& wasValidPath) const;
 

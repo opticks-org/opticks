@@ -31,6 +31,9 @@ private slots:
    void enableRunIndivTest(bool bRunAll);
 
 private:
+   PlugInSelectorDlg(const PlugInSelectorDlg& rhs);
+   PlugInSelectorDlg& operator=(const PlugInSelectorDlg& rhs);
+
    bool runAllTests() const;
 
    QComboBox* mpCombo;

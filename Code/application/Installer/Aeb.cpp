@@ -39,7 +39,7 @@ bool Aeb::validate() const
    {
       return false;
    }
-   if (mLicenses.size() != mLicenseURLs.size())
+   if (mLicenses.size() != static_cast<int>(mLicenseURLs.size()))
    {
       return false;
    }

@@ -153,7 +153,7 @@ bool GeoTIFFExporter::execute(PlugInArgList* pInParam, PlugInArgList* pOutParam)
 
    Message* pMessage = pStep->addMessage("Export File Parameters", "app", "1CB336ED-A1A9-42F2-AE83-7179EF919432");
    mpFileDescriptor->addToMessageLog(pMessage);
-   pMessage->finalize(Message::Success);
+   pMessage->finalize();
 
    mMessage = "Start GeoTIFF Exporter";
    if (mpProgress)
@@ -287,9 +287,7 @@ bool GeoTIFFExporter::writeCube(TIFF* pOut)
 
    int size = 0;
    int row = 0;
-   unsigned char* pTempPtr = NULL;
    unsigned char* pBuffer = NULL;
-   unsigned char* pDataCubePtr = NULL;
    unsigned short numRows = pDescriptor->getRowCount();
    unsigned short numCols = pDescriptor->getColumnCount();
    unsigned short numBands = pDescriptor->getBandCount();
@@ -729,7 +727,6 @@ bool GeoTIFFExporter::CreateGeoTIFF(TIFF *pOut)
 bool GeoTIFFExporter::applyWorldFile(TIFF *pOut)
 {
    FILE* pTfw = NULL;
-   int size = 0;
    double pPixsize[3];
    double xoff;
    double yoff;

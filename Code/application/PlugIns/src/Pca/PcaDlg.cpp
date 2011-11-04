@@ -323,7 +323,7 @@ void PcaDlg::browse()
       return;
    }
 
-   unsigned int ulMaxBands = mpComponentsSpin->maximum();
+   int ulMaxBands = mpComponentsSpin->maximum();
    if (lnumBands != ulMaxBands)
    {
       QString message = QString("File-> %1\ncontains PCA results for %2 bands.\nThere are %3 bands"

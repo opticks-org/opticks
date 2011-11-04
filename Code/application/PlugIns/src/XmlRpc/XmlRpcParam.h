@@ -38,6 +38,8 @@ public:
    {
    }
 
+   virtual ~XmlRpcParam() {};
+
    const QString& type() const
    {
       return mType;

@@ -26,13 +26,13 @@ public:
    SpatialDataWindowImp(const std::string& id, const std::string& windowName, QWidget* parent = 0);
    ~SpatialDataWindowImp();
 
-   using SessionItemImp::setIcon;
+   using WorkspaceWindowImp::setIcon;
+   using WorkspaceWindowImp::setName;
 
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
 
    WindowType getWindowType() const;
-   using WorkspaceWindowImp::setName;
 
    void setWidget(QWidget* pWidget);
 
@@ -46,6 +46,9 @@ signals:
    void overviewVisibilityChanged(bool bVisible);
 
 private:
+   SpatialDataWindowImp(const SpatialDataWindowImp& rhs);
+   SpatialDataWindowImp& operator=(const SpatialDataWindowImp& rhs);
+
    OverviewWindow* mpOverview;
 };
 

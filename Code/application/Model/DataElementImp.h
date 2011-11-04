@@ -30,7 +30,7 @@ public:
    void descriptorRenamed(Subject &subject, const std::string &signal, const boost::any &data);
    void descriptorModified(Subject &subject, const std::string &signal, const boost::any &data);
 
-   DataElementImp& operator =(const DataElementImp& element);
+   DataElementImp& operator=(const DataElementImp& element);
 
    DataDescriptorImp* getDataDescriptor();
    const DataDescriptorImp* getDataDescriptor() const;
@@ -65,6 +65,7 @@ public:
    static bool isKindOfElement(const std::string& className);
 
 private:
+   DataElementImp(const DataElementImp& rhs);
    DataDescriptorImp* mpDataDescriptor;
 };
 

@@ -70,6 +70,8 @@ public:
    virtual void setDontShowAgain(bool bEnable);
 
 private:
+   SuppressibleMsgDlg(const SuppressibleMsgDlg& rhs);
+   SuppressibleMsgDlg& operator=(const SuppressibleMsgDlg& rhs);
    QCheckBox* mpDontShow;
 };
 

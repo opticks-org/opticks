@@ -26,6 +26,8 @@ public:
    void getSize(double& dWidth, double& dHeight) const;
 
 private:
+   PaperSizeDlg(const PaperSizeDlg& rhs);
+   PaperSizeDlg& operator=(const PaperSizeDlg& rhs);
    QComboBox* mpTypeCombo;
    QRadioButton* mpPortraitRadio;
    QRadioButton* mpLandscapeRadio;

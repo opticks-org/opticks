@@ -30,6 +30,9 @@ public:
       DataElement* pParent = NULL) const;
 
    CLASSIFICATIONLAYERADAPTER_METHODS(ClassificationLayerImp)
+
+private:
+   ClassificationLayerAdapter(const ClassificationLayerAdapter& rhs);
 };
 
 #endif

@@ -54,6 +54,8 @@ public:
    }
 
 private:
+   SystemListMethodsCallImp& operator=(const SystemListMethodsCallImp& rhs);
+
    const QMap<QString, XmlRpcMethodCallImp*>& mMethods;
 };
 
@@ -103,6 +105,8 @@ public:
    }
 
 private:
+   SystemMethodHelpCallImp& operator=(const SystemMethodHelpCallImp& rhs);
+
    const QMap<QString, XmlRpcMethodCallImp*>& mMethods;
 };
 
@@ -159,6 +163,8 @@ public:
    }
 
 private:
+   SystemMethodSignatureCallImp& operator=(const SystemMethodSignatureCallImp& rhs);
+
    const QMap<QString, XmlRpcMethodCallImp*>& mMethods;
 };
 

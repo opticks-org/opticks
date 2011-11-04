@@ -43,6 +43,9 @@ protected slots:
    void updateFileset();
 
 private:
+   FilesetWidget(const FilesetWidget& rhs);
+   FilesetWidget& operator=(const FilesetWidget& rhs);
+
    BatchFileset* mpFileset;
 
    QLineEdit* mpDirectoryEdit;

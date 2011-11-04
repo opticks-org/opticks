@@ -24,7 +24,8 @@ public:
       QWidget* pParent = 0);
    ~SignaturePlotImp();
 
-   using SessionItemImp::setIcon;
+   using CartesianPlotImp::setIcon;
+   using CartesianPlotImp::setName;
 
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
@@ -32,12 +33,16 @@ public:
    static bool isKindOfView(const std::string& className);
    static void getViewTypes(std::vector<std::string>& classList);
 
-   SignaturePlotImp& operator=(const SignaturePlotImp& signaturePlot);
    View* copy(QGLContext* pDrawContext = 0, QWidget* pParent = 0) const;
    bool copy(View* pView) const;
-   using ViewImp::setName;
 
    PlotType getPlotType() const;
+
+protected:
+   SignaturePlotImp& operator=(const SignaturePlotImp& signaturePlot);
+
+private:
+   SignaturePlotImp(const SignaturePlotImp& rhs);
 };
 
 #define SIGNATUREPLOTADAPTEREXTENSION_CLASSES \

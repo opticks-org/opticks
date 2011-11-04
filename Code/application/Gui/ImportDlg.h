@@ -50,6 +50,8 @@ protected slots:
    void updatePreviewDatasets();
 
 private:
+   ImportDlg(const ImportDlg& rhs);
+   ImportDlg& operator=(const ImportDlg& rhs);
    Importer* mpImporter;
    QMap<QString, std::vector<ImportDescriptor*> > mFiles;
 

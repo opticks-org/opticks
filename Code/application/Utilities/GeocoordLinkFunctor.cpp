@@ -97,7 +97,7 @@ void GeocoordLinkFunctor::operator()(ViewImp *pDestView) const
 
    // (Desired screen offset) / (world offset) yields zoom (magnitude) and rotation (phase).
    vector<complex<double> > transformVec(NUM_POINTS);
-   for (unsigned int i = 0; i < NUM_POINTS; ++i)
+   for (int i = 0; i < NUM_POINTS; ++i)
    {
       // dst: screen -> world -> data -> geo
       LocationType dstWorld;

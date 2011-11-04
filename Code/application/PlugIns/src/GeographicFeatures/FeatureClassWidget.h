@@ -58,6 +58,8 @@ protected:
       ArcProxyLib::ConnectionType connectionType);
 
 private:
+   FeatureClassWidget(const FeatureClassWidget& rhs);
+   FeatureClassWidget& operator=(const FeatureClassWidget& rhs);
    ConnectionParametersWidget* mpConnection;
    ListInspectorWidget* mpDisplay;
    QWidget* mpClipping;

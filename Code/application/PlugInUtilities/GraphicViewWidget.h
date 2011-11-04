@@ -40,6 +40,8 @@ protected slots:
    void notifyViewChange();
 
 private:
+   GraphicViewWidget(const GraphicViewWidget& rhs);
+   GraphicViewWidget& operator=(const GraphicViewWidget& rhs);
    std::vector<View*> mViews;
    QComboBox* mpViewCombo;
 };

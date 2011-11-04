@@ -20,7 +20,6 @@ public:
       GraphicGroupImp(id, type, pLayer, pixelCoord)
    {
    }
-
    ~GraphicGroupAdapter()
    {
       notify(SIGNAL_NAME(Subject, Deleted));
@@ -44,6 +43,9 @@ public:
    }
 
    GRAPHICGROUPADAPTER_METHODS(GraphicGroupImp)
+
+private:
+   GraphicGroupAdapter(const GraphicGroupAdapter& rhs);
 };
 
 #endif

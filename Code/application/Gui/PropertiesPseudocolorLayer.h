@@ -49,6 +49,8 @@ protected slots:
    void removeSelectedClasses();
 
 private:
+   PropertiesPseudocolorLayer(const PropertiesPseudocolorLayer& rhs);
+   PropertiesPseudocolorLayer& operator=(const PropertiesPseudocolorLayer& rhs);
    PseudocolorLayer* mpPseudocolorLayer;
 
    // Pixel marker

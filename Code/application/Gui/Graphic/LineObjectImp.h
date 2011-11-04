@@ -21,12 +21,13 @@ class LineObjectImp : public PixelObjectImp
 public:
    LineObjectImp(const std::string& id, GraphicObjectType type, GraphicLayer* pLayer, LocationType pixelCoord);
 
+   using PixelObjectImp::getPixels;
+
    void drawVector(double zoomFactor) const;
    void drawPixels(double zoomFactor) const;
 
    bool hit(LocationType pixelCoord) const;
 
-   using GraphicObjectImp::getPixels;
    const BitMask* getPixels(int iStartColumn, int iStartRow, int iEndColumn, int iEndRow);
 
    void moveHandle(int handle, LocationType pixel, bool bMaintainAspect = false);
@@ -44,6 +45,8 @@ protected:
    bool setHitToleranceFactor(double hitFactor);
 
 private:
+   LineObjectImp(const LineObjectImp& rhs);
+   LineObjectImp& operator=(const LineObjectImp& rhs);
    double mToleranceFactor;
    bool mUseHitTolerance;
 };

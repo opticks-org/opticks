@@ -24,7 +24,6 @@
 class PixelObjectImp : public GraphicObjectImp
 {
 public:
-
    void draw(double zoomFactor) const;
 
    const std::string& getObjectType() const;
@@ -38,6 +37,8 @@ protected:
    virtual void drawVector(double zoomFactor) const = 0;
 
 private:
+   PixelObjectImp(const PixelObjectImp& rhs);
+   PixelObjectImp& operator=(const PixelObjectImp& rhs);
    mutable int mDisplayList;
 };
 

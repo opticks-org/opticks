@@ -31,6 +31,8 @@ public:
    AdvancedOptionsWidget* getAdvancedWidget() const;
 
 private:
+   MovieExportOptionsWidget(const MovieExportOptionsWidget& rhs);
+   MovieExportOptionsWidget& operator=(const MovieExportOptionsWidget& rhs);
    ViewResolutionWidget* mpResolutionWidget;
    BitrateWidget* mpBitrateWidget;
    FramerateWidget* mpFramerateWidget;

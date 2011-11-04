@@ -79,7 +79,6 @@ public:
    RasterLayerImp& operator= (const RasterLayerImp& rasterLayer);
 
    LayerType getLayerType() const;
-   using LayerImp::setName;
 
    void draw();
    bool getExtents(double& x1, double& y1, double& x4, double& y4);
@@ -215,6 +214,8 @@ protected slots:
    void displayAs(QAction* pAction);
 
 private:
+   RasterLayerImp(const RasterLayerImp& rhs);
+
    Image* mpImage;
    bool mUseGpuImage;
    bool mbRegenerate;

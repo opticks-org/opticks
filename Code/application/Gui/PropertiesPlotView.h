@@ -40,6 +40,8 @@ public:
    static bool isProduction();
 
 private:
+   PropertiesPlotView(const PropertiesPlotView& rhs);
+   PropertiesPlotView& operator=(const PropertiesPlotView& rhs);
    PlotView* mpPlotView;
 
    // Gridlines

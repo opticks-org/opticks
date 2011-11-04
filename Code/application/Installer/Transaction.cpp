@@ -28,7 +28,7 @@
 #include <QtCore/QStringList>
 #include <QtCore/QUrl>
 
-Transaction::Transaction() : mpAebIo(NULL), mpAebEntry(NULL)
+Transaction::Transaction() : mpAebEntry(NULL), mpAebIo(NULL)
 {
 }
 

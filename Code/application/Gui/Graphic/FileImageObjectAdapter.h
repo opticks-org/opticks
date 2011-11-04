@@ -45,6 +45,10 @@ public:
    }
 
    FILEIMAGEOBJECTADAPTER_METHODS(FileImageObjectImp)
+
+private:
+   FileImageObjectAdapter(const FileImageObjectAdapter& rhs);
+   FileImageObjectAdapter& operator=(const FileImageObjectAdapter& rhs);
 };
 
 #endif

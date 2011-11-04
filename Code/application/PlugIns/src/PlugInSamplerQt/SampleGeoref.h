@@ -46,6 +46,9 @@ public:
    void animationFrameChanged(Subject &subject, const std::string &signal, const boost::any &data);
 
 private:
+   SampleGeoref(const SampleGeoref& rhs);
+   SampleGeoref& operator=(const SampleGeoref& rhs);
+
    static LocationType rotate(LocationType loc, double rad);
 
    int mXSize;

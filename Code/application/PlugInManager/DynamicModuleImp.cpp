@@ -113,7 +113,6 @@ DMPROC DynamicModuleImp::getProcedureAddress(const std::string& procName) const
    {
 #if defined(WIN_API)
       proc = reinterpret_cast<DMPROC>(GetProcAddress(reinterpret_cast<HMODULE>(mpLibHandle), procName.c_str()));
-      DWORD temp = GetLastError();
 #elif defined(UNIX_API)
       proc = reinterpret_cast<DMPROC>(dlsym(mpLibHandle, procName.c_str()));
 #endif

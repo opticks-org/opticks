@@ -121,6 +121,8 @@ protected:
    void focusOutEvent(QFocusEvent* pEvent);
 
 private:
+   LatLonLineEdit(const LatLonLineEdit& rhs);
+   LatLonLineEdit& operator=(const LatLonLineEdit& rhs);
    bool mAutoUpdate;
    DmsPoint::DmsType mDisplayType;
 };

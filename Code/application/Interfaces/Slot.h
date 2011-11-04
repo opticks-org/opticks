@@ -128,7 +128,7 @@ public:
     *
     *  @return   a reference to the slot assigned to.
     */
-   Slot &operator=(const Slot &rhs)
+   Slot& operator=(const Slot& rhs)
    {
       SlotWrapper *pSlot = NULL;
       if (rhs.isValid())
@@ -221,7 +221,7 @@ public:
     *  @return  true if the two Slots are both invalid or if they were
     *            constructed with the same arguments, or false otherwise.
     */
-   bool operator==(const Slot &rhs) const
+   bool operator==(const Slot& rhs) const
    {
       if (!isValid())
       {
@@ -302,7 +302,7 @@ protected:
        *
        *  @return \c true if the two objects match and false otherwise.
        */
-      virtual bool matches(const SlotWrapper &rhs) const = 0;
+      virtual bool matches(const SlotWrapper& rhs) const = 0;
 
       /**
        *  Returns the type information of the concrete type of the object.
@@ -355,12 +355,14 @@ private:
       {
       }
 
-      void update(Subject &subject, const std::string &signal, const boost::any &data) const
+      virtual ~SlotValue() {};
+
+      virtual void update(Subject& subject, const std::string& signal, const boost::any& data) const
       {
          (mpTarget->*mpMethod)(subject, signal.c_str(), data);
       }
 
-      void callAttachMethod(Subject &subject, const std::string &signal, const Slot &slot)
+      virtual void callAttachMethod(Subject& subject, const std::string& signal, const Slot& slot)
       {
          Observer *pObs = dynamic_cast<Observer*>(mpTarget);
          if (pObs != NULL)
@@ -369,7 +371,7 @@ private:
          }
       }
 
-      void callDetachMethod(Subject &subject, const std::string &signal, const Slot &slot)
+      virtual void callDetachMethod(Subject& subject, const std::string& signal, const Slot& slot)
       {
          Observer *pObs = dynamic_cast<Observer*>(mpTarget);
          if (pObs != NULL)
@@ -378,21 +380,21 @@ private:
          }
       }
 
-      SlotWrapper* clone() const
+      virtual SlotWrapper* clone() const
       {
          return new SlotValue<T>(mpTarget, mpMethod);
       }
 
-      const std::type_info &getType() const
+      virtual const std::type_info& getType() const
       {
          return typeid(SlotValue<T>);
       }
 
-      bool matches(const SlotWrapper &rhs) const
+      virtual bool matches(const SlotWrapper& rhs) const
       {
          if (getType() == rhs.getType())
          {
-            const SlotValue<T> &rhsValue = static_cast<const SlotValue<T>&>(rhs);
+            const SlotValue<T>& rhsValue = static_cast<const SlotValue<T>&>(rhs);
             return (mpTarget == rhsValue.mpTarget && mpMethod == rhsValue.mpMethod);
          }
          else
@@ -451,7 +453,7 @@ public:
     *           The name to re-emit the signal as. If NULL, the signal will be
     *           re-emited with its original name.
     */
-   Signal(Subject* pSubject, const std::string &signalName) : Slot()
+   Signal(Subject* pSubject, const std::string& signalName) : Slot()
    {
       if (pSubject != NULL)
       {
@@ -463,24 +465,26 @@ private:
    class SignalValue : public SlotWrapper
    {
    public:
-      SignalValue(Subject &subject, const std::string &signalName) :
+      SignalValue(Subject& subject, const std::string& signalName) :
          mSubject(subject),
          mSignalName(signalName)
       {
       }
 
-      void update(Subject &subject, const std::string &signal, const boost::any &data) const;
+      virtual ~SignalValue() {};
 
-      SlotWrapper *clone() const
+      virtual void update(Subject& subject, const std::string& signal, const boost::any& data) const;
+
+      virtual SlotWrapper *clone() const
       {
          return new SignalValue(mSubject, mSignalName);
       }
 
-      bool matches(const SlotWrapper &rhs) const
+      virtual bool matches(const SlotWrapper& rhs) const
       {
          if (getType() == rhs.getType())
          {
-            const SignalValue &rhsValue = static_cast<const SignalValue&>(rhs);
+            const SignalValue& rhsValue = static_cast<const SignalValue&>(rhs);
             return (&mSubject == &rhsValue.mSubject && mSignalName == rhsValue.mSignalName);
          }
          else
@@ -489,21 +493,23 @@ private:
          }
       }
 
-      const std::type_info &getType() const
+      virtual const std::type_info& getType() const
       {
          return typeid(SignalValue);
       }
 
-      void callAttachMethod(Subject &subject, const std::string &signal, const Slot &slot)
+      virtual void callAttachMethod(Subject& subject, const std::string& signal, const Slot& slot)
       {
       }
 
-      void callDetachMethod(Subject &subject, const std::string &signal, const Slot &slot)
+      virtual void callDetachMethod(Subject& subject, const std::string& signal, const Slot& slot)
       {
       }
 
    private:
-      Subject &mSubject;
+      SignalValue& operator=(const SignalValue& rhs);
+
+      Subject& mSubject;
       std::string mSignalName;
    };
 };

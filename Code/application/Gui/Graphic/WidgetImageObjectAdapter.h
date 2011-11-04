@@ -46,6 +46,10 @@ public:
    }
 
    WIDGETIMAGEOBJECTADAPTER_METHODS(WidgetImageObjectImp)
+
+private:
+   WidgetImageObjectAdapter(const WidgetImageObjectAdapter& rhs);
+   WidgetImageObjectAdapter& operator=(const WidgetImageObjectAdapter& rhs);
 };
 
 #endif

@@ -42,6 +42,8 @@ protected slots:
    void setSelectedColor(int iRow, int iColumn);
 
 private:
+   ColorGrid(const ColorGrid& rhs);
+   ColorGrid& operator=(const ColorGrid& rhs);
    std::vector<QColor> mColors;
    QColor mSelectedColor;
 };
