@@ -5,7 +5,6 @@
       <WarningLevel>Level4</WarningLevel>
       <!-- C4127, C4245 disabled specifically for boost -->
       <DisableSpecificWarnings>4005;4100;4127;4245;4250;4267;4514;4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <ForcedIncludeFiles>$(SolutionDir)\Interfaces\EnableWarnings.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
   </ItemDefinitionGroup>
