@@ -1462,7 +1462,7 @@ DateTime* fromDisplayString<DateTime*>(string dateText, bool* pError)
       return pDateTime.release();
    }
    std::vector<char> monthBuf;
-   monthBuf.reserve(128);
+   monthBuf.resize(128);
    char* pMonth = &monthBuf.front();
    unsigned short month = 0;
    unsigned short day = 0;

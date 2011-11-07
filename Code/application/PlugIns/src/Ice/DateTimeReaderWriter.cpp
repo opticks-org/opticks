@@ -170,15 +170,15 @@ const void* DateTimeReaderWriter::getWriteBuffer() const
          string formatString = mpValue->getFormattedUtc("%d %m %Y");
          istringstream formatParser;
          formatParser.str(formatString);
-         unsigned char day;
+         unsigned int day;
          unsigned int year;
-         unsigned char month;
+         unsigned int month;
          formatParser >> day;
          formatParser >> month;
          formatParser >> year;
-         mpWriteBuffer->mDay = day;
+         mpWriteBuffer->mDay = static_cast<unsigned char>(day);
          mpWriteBuffer->mYear = year;
-         mpWriteBuffer->mMonth = month;
+         mpWriteBuffer->mMonth = static_cast<unsigned char>(month);
       }
       else
       {
@@ -192,15 +192,15 @@ const void* DateTimeReaderWriter::getWriteBuffer() const
          string formatString = mpValue->getFormattedUtc("%H %M %S");
          istringstream formatParser;
          formatParser.str(formatString);
-         unsigned char hour;
-         unsigned char minute;
-         unsigned char second;
+         unsigned int hour;
+         unsigned int minute;
+         unsigned int second;
          formatParser >> hour;
          formatParser >> minute;
          formatParser >> second;
-         mpWriteBuffer->mHour = hour;
-         mpWriteBuffer->mMinute = minute;
-         mpWriteBuffer->mSecond = second;
+         mpWriteBuffer->mHour = static_cast<unsigned char>(hour);
+         mpWriteBuffer->mMinute = static_cast<unsigned char>(minute);
+         mpWriteBuffer->mSecond = static_cast<unsigned char>(second);
       }
       else
       {
