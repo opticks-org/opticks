@@ -28,6 +28,7 @@
 
 ExtensionListDialog::ExtensionListDialog(QWidget* pParent) : QDialog(pParent)
 {
+   setWindowTitle("Extensions");
    mpExtensionList = new QListWidget(this);
    mpExtensionList->setItemDelegate(new ExtensionListDelegate(this));
    mpExtensionList->setEditTriggers(QAbstractItemView::CurrentChanged);
