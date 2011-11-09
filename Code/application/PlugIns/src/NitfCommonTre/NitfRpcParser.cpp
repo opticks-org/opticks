@@ -393,7 +393,7 @@ bool Nitf::RpcParser::toDynamicObject(istream& input, size_t numBytes, DynamicOb
    }
 
    int64_t numRead = input.tellg();
-   if (numRead < 0 || numRead > static_cast<int64_t>(std::numeric_limits<size_t>::max()) ||
+   if (numRead < 0 || static_cast<uint64_t>(numRead) > std::numeric_limits<size_t>::max() ||
       numRead != static_cast<int64_t>(numBytes))
    {
       numReadErrMsg(numRead, numBytes, errorMessage);
@@ -476,7 +476,7 @@ Nitf::TreState Nitf::RpcParser::isTreValid(const DynamicObject& tre, ostream& re
 bool Nitf::RpcParser::fromDynamicObject(const DynamicObject& input, ostream& output, size_t& numBytesWritten,
    string &errorMessage) const
 {
-   if (output.tellp() < 0 || output.tellp() > static_cast<int64_t>(std::numeric_limits<size_t>::max()))
+   if (output.tellp() < 0 || static_cast<uint64_t>(output.tellp()) > std::numeric_limits<size_t>::max())
    {
       return false;
    }
@@ -527,7 +527,7 @@ bool Nitf::RpcParser::fromDynamicObject(const DynamicObject& input, ostream& out
       return false;
    }
 
-   if (output.tellp() < 0 || output.tellp() > static_cast<int64_t>(std::numeric_limits<size_t>::max()))
+   if (output.tellp() < 0 || static_cast<uint64_t>(output.tellp()) > std::numeric_limits<size_t>::max())
    {
       return false;
    }
