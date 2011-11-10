@@ -289,6 +289,11 @@ bool Nitf::Mpd26aParser::runAllTests(Progress* pProgress, ostream& failure)
    }
 
    stringstream output5;
+#if defined SOLARIS
+   // Workaround for Solaris bug where stringstream::tellp() returns -1 incorrectly
+   // http://wesunsolve.net/bugid/id/6881211
+   output5.str(string());
+#endif
    size_t numBytesWritten = 0;
    success = fromDynamicObject(*treDO.get(), output5, numBytesWritten, errorMessage);
    if (!errorMessage.empty())

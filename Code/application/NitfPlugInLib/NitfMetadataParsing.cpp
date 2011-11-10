@@ -123,6 +123,11 @@ bool Nitf::TrePlugInResource::writeTag(const DynamicObject& input, const ossim_u
    {
       size_t numBytesWritten = 0;
       stringstream strm;
+#if defined SOLARIS
+      // Workaround for Solaris bug where stringstream::tellp() returns -1 incorrectly
+      // http://wesunsolve.net/bugid/id/6881211
+      strm.str(string());
+#endif
       if (pParser != NULL && pParser->fromDynamicObject(input, strm, numBytesWritten, errorMessage))
       {
          success = true;

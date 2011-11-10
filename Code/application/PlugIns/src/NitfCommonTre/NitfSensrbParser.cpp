@@ -154,6 +154,11 @@ bool Nitf::SensrbParser::runAllTests(Progress* pProgress, std::ostream& failure)
    }
 
    std::stringstream tmpStream;
+#if defined SOLARIS
+   // Workaround for Solaris bug where stringstream::tellp() returns -1 incorrectly
+   // http://wesunsolve.net/bugid/id/6881211
+   tmpStream.str(std::string());
+#endif
    success = fromDynamicObject(*treDO.get(), tmpStream, numBytes, errorMessage);
    if (success == false)
    {
