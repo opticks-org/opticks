@@ -359,7 +359,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
             <Directory Id="D__OpticksStartMenuFolder" Name="Opticks $(var.PublicVersionNumber) $(var.UserPlatform)">
                <Component Id="C__OpticksShortcuts" Guid="$(var.C__OpticksShortcutsGuid)" Win64="$(var.64Bit)">
                   <RegistryValue Id="R__OpticksShortcut" Action="write" Key="Software\Opticks\$(var.PublicVersionNumber) $(var.UserPlatform)\OpticksShortcut" KeyPath="yes" Root="HKCU" Type="string" Value="ShortcutInstalled"/>
-                  <Shortcut Id="S__Opticks" Directory="D__OpticksStartMenuFolder" Advertise="no" Show="normal" Target="[TARGETDIR]\Bin\Opticks.exe" Name="Opticks" />
+                  <Shortcut Id="S__Opticks" Directory="D__OpticksStartMenuFolder" Advertise="no" Show="normal" Target="[TARGETDIR]\Bin\Opticks.exe" Name="Opticks $(var.PublicVersionNumber) $(var.UserPlatform)" />
                   <Shortcut Id="S__Help" Directory="D__OpticksStartMenuFolder" Advertise="no" Show="normal" Target="[TARGETDIR]\Help\Opticks\index.htm" Name="Help" />
                   <RemoveFolder Id="RF__OpticksStartMenu" On="uninstall"/>
                </Component>
