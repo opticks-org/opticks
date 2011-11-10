@@ -75,6 +75,11 @@ public:
    SETTING(AutoSaveInterval, SessionManager, unsigned int, 30)
 
    /**
+    *  Emitted with a null boost::any just prior to saving a session.
+    */
+   SIGNAL_METHOD(SessionManager, AboutToSaveSession)
+
+   /**
     *  Emitted with a null boost::any just prior to restoring a session.
     */
    SIGNAL_METHOD(SessionManager, AboutToRestore)
