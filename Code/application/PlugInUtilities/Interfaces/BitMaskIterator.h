@@ -199,10 +199,9 @@ public:
 
    /**
     * Advances the pixel location to the next selected pixel. This overloads the postfix increment operator.
+    * A dummy parameter is used to differentiate between the signatures of the postfix (var++) operator
+    * and the prefix (++var) operator.
     *
-    * @param   int
-    *          Dummy parameter used to differentiate between the signatures of the postfix (var++) operator
-    *          and the prefix (++var) operator.
     * @return  Returns \c true if the iterator advanced to the next selected
     *          pixel or the BitMask is \c NULL and the pixel is contained within the extents of the iterator.
     *          If there are no more selected pixels within the iterator extents, the state of the
