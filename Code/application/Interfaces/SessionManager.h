@@ -90,6 +90,13 @@ public:
    SIGNAL_METHOD(SessionManager, SessionRestored)
 
    /**
+    *  Emitted after the session save has finished with a boost::any<std::pair<\link SessionManager::SerializationStatus SerializationStatus\endlink, std::string>>
+    *  containing the status of the serialization and the filename of the saved session. If the status
+    *  is \link SessionManager::FAILURE FAILURE\endlink, the filename string will be empty.
+    */
+   SIGNAL_METHOD(SessionManager, SessionSaved)
+
+   /**
     *  Emitted when a session is closed.
     *
     *  The session is still fully created when this signal is emitted.

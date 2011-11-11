@@ -1357,6 +1357,8 @@ SessionManagerImp::serialize(const string& filename, Progress* pProgress)
    }
 
    mIsSaveLoad = false;
+   std::pair<SerializationStatus, std::string> saveResults(status, (status == FAILURE ? std::string() : filename));
+   notify(SIGNAL_NAME(SessionManager, SessionSaved), boost::any(saveResults));
    return make_pair(status, failedItems);
 }
 
