@@ -7,15 +7,11 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <limits.h>
-#include <assert.h>
-#include <float.h>
-
+#include "ApplicationServices.h"
+#include "AppVerify.h"
 #include "AppVersion.h"
 #include "BandMath.h"
 #include "bm.h"
-#include "AppAssert.h"
-#include "AppVerify.h"
 #include "DimensionDescriptor.h"
 #include "LayerList.h"
 #include "MessageLogResource.h"
@@ -238,6 +234,10 @@ bool BandMath::getInputSpecification(PlugInArgList*& pArgList)
       pArg->setDefaultValue(&temp);
       pArg->setDescription("True causes band math to use degrees; false uses radians (default).");
       pArgList->addArg(*pArg);
+
+      VERIFY(pArgList->addArg<bool>("Overlay Results", mbAsLayerOnExistingView, "Flag for whether "
+         "the results should be added to the original view or a new view.  A new view is created "
+         "by default if results are displayed."));
    }
 
    return true;
@@ -653,6 +653,9 @@ bool BandMath::parse(PlugInArgList* pArgInList, PlugInArgList* pArgOutList)
             return false;
          }
       }
+
+      // Overlay results
+      VERIFY(pArgInList->getPlugInArgValue("Overlay Results", mbAsLayerOnExistingView));
    }
 
    return true;
@@ -775,28 +778,23 @@ bool BandMath::createReturnGuiElement()
 {
    bool bSuccess = false;
 
-   if (mbInteractive || mbDisplayResults) 
+   if (mbInteractive || (mbDisplayResults && Service<ApplicationServices>()->isBatch() == false))
    {
       SpatialDataWindow* pWindow = NULL;
-
-      if (mbAsLayerOnExistingView) 
+      if (mbAsLayerOnExistingView)
       {
-         // Create the spectral data window
-         // Attach results matrix to data set view
-         pWindow = static_cast<SpatialDataWindow*>(mpDesktop->getWindow(
-                                                            mpCube->getName(),
-                                                            SPATIAL_DATA_WINDOW));
+         pWindow = static_cast<SpatialDataWindow*>(mpDesktop->getWindow(mpCube->getName(), SPATIAL_DATA_WINDOW));
       }
       else
       {
-         // Create the spectral data window
-         pWindow = static_cast<SpatialDataWindow*>(mpDesktop->createWindow(
-                                                                           mResultsName.c_str(),
-                                                                           SPATIAL_DATA_WINDOW));
+         pWindow = static_cast<SpatialDataWindow*>(mpDesktop->createWindow(mResultsName.c_str(), SPATIAL_DATA_WINDOW));
       }
 
-      VERIFYRV(pWindow != NULL, NULL);
-      
+      if (pWindow == NULL)
+      {
+         return false;
+      }
+
       SpatialDataView* pView = pWindow->getSpatialDataView();
       VERIFYRV(pView != NULL, NULL);
 
