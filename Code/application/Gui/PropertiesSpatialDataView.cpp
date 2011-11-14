@@ -65,6 +65,8 @@ PropertiesSpatialDataView::PropertiesSpatialDataView() :
    // Image
    QWidget* pImageWidget = new QWidget(this);
 
+   mpOriginCheck = new QCheckBox("Display origin location", pImageWidget);
+   mpAxisCheck = new QCheckBox("Display orientation axis", pImageWidget);
    mpSmoothCheck = new QCheckBox("Smooth pixel edges", pImageWidget);
 
    LabeledSection* pImageSection = new LabeledSection(pImageWidget, "Image", this);
@@ -72,6 +74,8 @@ PropertiesSpatialDataView::PropertiesSpatialDataView() :
    QVBoxLayout* pImageLayout = new QVBoxLayout(pImageWidget);
    pImageLayout->setMargin(0);
    pImageLayout->setSpacing(5);
+   pImageLayout->addWidget(mpOriginCheck);
+   pImageLayout->addWidget(mpAxisCheck);
    pImageLayout->addWidget(mpSmoothCheck);
    pImageLayout->addStretch();
 
@@ -82,8 +86,7 @@ PropertiesSpatialDataView::PropertiesSpatialDataView() :
 }
 
 PropertiesSpatialDataView::~PropertiesSpatialDataView()
-{
-}
+{}
 
 bool PropertiesSpatialDataView::initialize(SessionItem* pSessionItem)
 {
@@ -99,7 +102,10 @@ bool PropertiesSpatialDataView::initialize(SessionItem* pSessionItem)
    mpMaxZoomSpin->setValue(mpView->getMaximumZoom() * 100);
 
    // Image
+   mpOriginCheck->setChecked(mpView->isOriginDisplayed());
+   mpAxisCheck->setChecked(mpView->isAxisDisplayed());
    mpSmoothCheck->setChecked(mpView->getTextureMode() == TEXTURE_LINEAR);
+
    SpatialDataViewImp* pViewImp = dynamic_cast<SpatialDataViewImp*>(mpView);
    if (pViewImp != NULL)
    {
@@ -158,6 +164,9 @@ bool PropertiesSpatialDataView::applyChanges()
    }
 
    // Image
+   mpView->displayOrigin(mpOriginCheck->isChecked());
+   mpView->displayAxis(mpAxisCheck->isChecked());
+
    TextureMode textureMode;
    if (mpSmoothCheck->isChecked() == true)
    {

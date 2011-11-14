@@ -88,6 +88,8 @@ SpatialDataViewImp::SpatialDataViewImp(const string& id, const string& viewName,
    mpMeasurementsLayer(NULL),
    mShowMeasurements(true),
    mpDrawLayer(NULL),
+   mDisplayOrigin(SpatialDataView::getSettingDisplayOrigin()),
+   mDisplayAxis(SpatialDataView::getSettingDisplayAxis()),
    mpPanTimer(NULL),
    mPanKey(0),
    mShiftPressed(false),
@@ -178,10 +180,10 @@ SpatialDataViewImp::SpatialDataViewImp(const string& id, const string& viewName,
    pOriginSeparatorAction->setSeparator(true);
 
    // Origin
-   QMenu* pOriginMenu = new QMenu("Origin", this);
+   QMenu* pOriginMenu = new QMenu("Origin Location", this);
    if (pOriginMenu != NULL)
    {
-      string originContext = shortcutContext + "/Origin";
+      string originContext = shortcutContext + "/Origin Location";
 
       QActionGroup* pGroup = new QActionGroup(pOriginMenu);
       pGroup->setExclusive(true);
@@ -207,6 +209,26 @@ SpatialDataViewImp::SpatialDataViewImp(const string& id, const string& viewName,
    // Separator
    QAction* pCrossHairSeparatorAction = new QAction(this);
    pCrossHairSeparatorAction->setSeparator(true);
+
+   // Origin
+   QAction* pOriginAction = new QAction("Origin", this);
+   pOriginAction->setCheckable(true);
+   pOriginAction->setChecked(mDisplayOrigin);
+   pOriginAction->setAutoRepeat(false);
+   pOriginAction->setShortcutContext(Qt::WidgetShortcut);
+   pOriginAction->setToolTip("Show or hide the origin location");
+   pDesktop->initializeAction(pOriginAction, shortcutContext);
+   addAction(pOriginAction);
+
+   // Axis
+   QAction* pAxisAction = new QAction("Axis", this);
+   pAxisAction->setCheckable(true);
+   pAxisAction->setChecked(mDisplayAxis);
+   pAxisAction->setAutoRepeat(false);
+   pAxisAction->setShortcutContext(Qt::WidgetShortcut);
+   pAxisAction->setToolTip("Show or hide the orientation axis");
+   pDesktop->initializeAction(pAxisAction, shortcutContext);
+   addAction(pAxisAction);
 
    // Crosshair
    QAction* pCrossHairAction = new QAction("Crosshair", this);
@@ -312,8 +334,10 @@ SpatialDataViewImp::SpatialDataViewImp(const string& id, const string& viewName,
 
    addContextMenuAction(ContextMenuAction(pNewLayerMenu->menuAction(), APP_SPATIALDATAVIEW_NEW_LAYER_MENU_ACTION));
    addContextMenuAction(ContextMenuAction(pOriginSeparatorAction, APP_SPATIALDATAVIEW_ORIGIN_SEPARATOR_ACTION));
+   addContextMenuAction(ContextMenuAction(pOriginAction, APP_SPATIALDATAVIEW_ORIGIN_ACTION));
    addContextMenuAction(ContextMenuAction(pOriginMenu->menuAction(), APP_SPATIALDATAVIEW_ORIGIN_MENU_ACTION));
    addContextMenuAction(ContextMenuAction(pCrossHairSeparatorAction, APP_SPATIALDATAVIEW_CROSSHAIR_SEPARATOR_ACTION));
+   addContextMenuAction(ContextMenuAction(pAxisAction, APP_SPATIALDATAVIEW_AXIS_ACTION));
    addContextMenuAction(ContextMenuAction(pCrossHairAction, APP_SPATIALDATAVIEW_CROSSHAIR_ACTION));
    addContextMenuAction(ContextMenuAction(mpSmoothAction, APP_SPATIALDATAVIEW_SMOOTH_ACTION));
    addContextMenuAction(ContextMenuAction(pColorAction, APP_SPATIALDATAVIEW_BACKGROUND_COLOR_ACTION));
@@ -338,6 +362,10 @@ SpatialDataViewImp::SpatialDataViewImp(const string& id, const string& viewName,
    VERIFYNR(connect(this, SIGNAL(mouseModeChanged(const MouseMode*)),
       this, SLOT(updateMouseCursor(const MouseMode*))));
    VERIFYNR(connect(this, SIGNAL(originChanged(const DataOrigin&)), this, SLOT(updateOriginAction(const DataOrigin&))));
+   VERIFYNR(connect(pOriginAction, SIGNAL(toggled(bool)), this, SLOT(displayOrigin(bool))));
+   VERIFYNR(connect(this, SIGNAL(originDisplayed(bool)), pOriginAction, SLOT(setChecked(bool))));
+   VERIFYNR(connect(pAxisAction, SIGNAL(toggled(bool)), this, SLOT(displayAxis(bool))));
+   VERIFYNR(connect(this, SIGNAL(axisDisplayed(bool)), pAxisAction, SLOT(setChecked(bool))));
    VERIFYNR(connect(pCrossHairAction, SIGNAL(toggled(bool)), this, SLOT(setCrossHair(bool))));
    VERIFYNR(connect(this, SIGNAL(crossHairDisplayed(bool)), pCrossHairAction, SLOT(setChecked(bool))));
    VERIFYNR(connect(mpSmoothAction, SIGNAL(toggled(bool)), this, SLOT(setSmoothing(bool))));
@@ -469,6 +497,8 @@ SpatialDataViewImp& SpatialDataViewImp::operator= (const SpatialDataViewImp& spa
    {
       PerspectiveViewImp::operator= (spatialDataView);
 
+      mDisplayOrigin = spatialDataView.mDisplayOrigin;
+      mDisplayAxis = spatialDataView.mDisplayAxis;
       mTextureMode = spatialDataView.getTextureMode();
       mShowMeasurements = spatialDataView.mShowMeasurements;
       mPanLimit = spatialDataView.mPanLimit;
@@ -1334,6 +1364,16 @@ void SpatialDataViewImp::clearMarkings()
 
    reset();
    clearUndo();
+}
+
+bool SpatialDataViewImp::isOriginDisplayed() const
+{
+   return mDisplayOrigin;
+}
+
+bool SpatialDataViewImp::isAxisDisplayed() const
+{
+   return mDisplayAxis;
 }
 
 Layer* SpatialDataViewImp::getMeasurementsLayer() const
@@ -2203,6 +2243,26 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
    pBar->setRotationValue(rotation);
 }
 
+void SpatialDataViewImp::displayOrigin(bool display)
+{
+   if (display != mDisplayOrigin)
+   {
+      mDisplayOrigin = display;
+      emit originDisplayed(mDisplayOrigin);
+      refresh();
+   }
+}
+
+void SpatialDataViewImp::displayAxis(bool display)
+{
+   if (display != mDisplayAxis)
+   {
+      mDisplayAxis = display;
+      emit axisDisplayed(mDisplayAxis);
+      refresh();
+   }
+}
+
 void SpatialDataViewImp::updateExtents()
 {
    vector<Layer*> layers;
@@ -2325,6 +2385,11 @@ void SpatialDataViewImp::drawLayers()
 
 void SpatialDataViewImp::drawOrigin()
 {
+   if (mDisplayOrigin == false)
+   {
+      return;
+   }
+
    setupWorldMatrices();
 
    qglColor(Qt::white);
@@ -2339,6 +2404,11 @@ void SpatialDataViewImp::drawOrigin()
 
 void SpatialDataViewImp::drawAxis(float fX, float fY)
 {
+   if (mDisplayAxis == false)
+   {
+      return;
+   }
+
    setupScreenMatrices();
 
    glMatrixMode(GL_MODELVIEW);
@@ -3731,6 +3801,8 @@ bool SpatialDataViewImp::toXml(XMLWriter* pXml) const
       return false;
    }
 
+   pXml->addAttr("displayOrigin", mDisplayOrigin);
+   pXml->addAttr("displayAxis", mDisplayAxis);
    pXml->addAttr("textureMode", mTextureMode);
    pXml->addAttr("showMeasurements", mShowMeasurements);
    pXml->addAttr("panKey", mPanKey);
@@ -3790,6 +3862,8 @@ bool SpatialDataViewImp::fromXml(DOMNode* pDocument, unsigned int version)
    }
 
    DOMElement* pElem = static_cast<DOMElement*>(pDocument);
+   displayOrigin(StringUtilities::fromXmlString<bool>(A(pElem->getAttribute(X("displayOrigin")))));
+   displayAxis(StringUtilities::fromXmlString<bool>(A(pElem->getAttribute(X("displayAxis")))));
    setTextureMode(StringUtilities::fromXmlString<TextureMode>(A(pElem->getAttribute(X("textureMode")))));
    mShowMeasurements = StringUtilities::fromXmlString<bool>(A(pElem->getAttribute(X("showMeasurements"))));
    mPanKey = StringUtilities::fromXmlString<int>(A(pElem->getAttribute(X("panKey"))));

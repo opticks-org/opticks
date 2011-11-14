@@ -7,11 +7,10 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "OptionsSpatialDataView.h"
-
 #include "CustomColorButton.h"
 #include "LabeledSection.h"
 #include "HistogramWindow.h"
+#include "OptionsSpatialDataView.h"
 #include "PanLimitTypeComboBox.h"
 #include "PerspectiveView.h"
 #include "SpatialDataView.h"
@@ -93,15 +92,17 @@ OptionsSpatialDataView::OptionsSpatialDataView() :
    LabeledSection* pPanSpeedSection = new LabeledSection(pPanSpeedWidget, "Pan Speed", this);
 
    // Other Options
-   mpGeoCoordTooltip = new QCheckBox("Geo Coordinate Tool Tip", this);
+   mpGeoCoordTooltip = new QCheckBox("Geo-coordinate tool tip", this);
    mpConfirmLayerDelete = new QCheckBox("Confirm non-undoable layer delete", this);
-   mpActiveLayer = new QCheckBox("Link Layer and Histogram Activation", this);
-   mpActiveLayer->setToolTip("Selecting a threshold or raster layer histogram will activate the layer and make it visible.\n"
-                             "Showing a threshold layer in the session explorer will make the histogram plot active.\n"
-                             "The primary raster layer will never be activated and pulled to the top of the layer stack.");
-   mpShowCoordinates = new QCheckBox("Show Pixel Coordinates When Zoomed In", this);
+   mpActiveLayer = new QCheckBox("Link layer and histogram activation", this);
+   mpActiveLayer->setToolTip("Selecting a threshold or raster layer histogram will activate the layer and "
+      "make it visible.\nShowing a threshold layer in the session explorer will make the histogram plot "
+      "active.\nThe primary raster layer will never be activated and pulled to the top of the layer stack.");
+   mpShowCoordinates = new QCheckBox("Show pixel coordinates when zoomed in", this);
    mpShowCoordinates->setToolTip("Show pixel coordinates instead of raw values when zoomed in.");
-   mpDisplayCrosshair = new QCheckBox("Display Crosshair", this);
+   mpDisplayOrigin = new QCheckBox("Display origin location", this);
+   mpDisplayAxis = new QCheckBox("Display orientation axis", this);
+   mpDisplayCrosshair = new QCheckBox("Display crosshair", this);
 
    QWidget* pOtherOptionsWidget = new QWidget(this);
    QVBoxLayout* pOtherOptionsLayout = new QVBoxLayout(pOtherOptionsWidget);
@@ -111,6 +112,8 @@ OptionsSpatialDataView::OptionsSpatialDataView() :
    pOtherOptionsLayout->addWidget(mpConfirmLayerDelete);
    pOtherOptionsLayout->addWidget(mpActiveLayer);
    pOtherOptionsLayout->addWidget(mpShowCoordinates);
+   pOtherOptionsLayout->addWidget(mpDisplayOrigin);
+   pOtherOptionsLayout->addWidget(mpDisplayAxis);
    pOtherOptionsLayout->addWidget(mpDisplayCrosshair);
    LabeledSection* pOtherOptionsSection = new LabeledSection(pOtherOptionsWidget, "Other Options", this);
 
@@ -180,6 +183,8 @@ OptionsSpatialDataView::OptionsSpatialDataView() :
    mpGeoCoordTooltip->setChecked(SpatialDataView::getSettingGeoCoordTooltip());
    mpConfirmLayerDelete->setChecked(SpatialDataView::getSettingConfirmLayerDelete());
    mpActiveLayer->setChecked(HistogramWindow::getSettingLayerActivation());
+   mpDisplayOrigin->setChecked(SpatialDataView::getSettingDisplayOrigin());
+   mpDisplayAxis->setChecked(SpatialDataView::getSettingDisplayAxis());
    mpDisplayCrosshair->setChecked(View::getSettingDisplayCrosshair());
 }
 
@@ -207,9 +212,11 @@ void OptionsSpatialDataView::applyChanges()
    double zoomRatio = zoomPercent / 100.0;
    SpatialDataView::setSettingMaximumZoomRatio(zoomRatio);
    SpatialDataView::setSettingGeoCoordTooltip(mpGeoCoordTooltip->isChecked());
-   View::setSettingDisplayCrosshair(mpDisplayCrosshair->isChecked());
    SpatialDataView::setSettingConfirmLayerDelete(mpConfirmLayerDelete->isChecked());
    HistogramWindow::setSettingLayerActivation(mpActiveLayer->isChecked());
+   SpatialDataView::setSettingDisplayOrigin(mpDisplayOrigin->isChecked());
+   SpatialDataView::setSettingDisplayAxis(mpDisplayAxis->isChecked());
+   View::setSettingDisplayCrosshair(mpDisplayCrosshair->isChecked());
 }
 
 OptionsSpatialDataView::~OptionsSpatialDataView()

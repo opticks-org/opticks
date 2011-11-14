@@ -26,7 +26,7 @@ class OptionsSpatialDataView : public QWidget
 
 public:
    OptionsSpatialDataView();
-   ~OptionsSpatialDataView();
+   virtual ~OptionsSpatialDataView();
 
    void applyChanges();
 
@@ -90,6 +90,8 @@ private:
    QSpinBox* mpInsetZoomSpin;
    QComboBox* mpInsetZoom;
    QCheckBox* mpShowCoordinates;
+   QCheckBox* mpDisplayOrigin;
+   QCheckBox* mpDisplayAxis;
    QCheckBox* mpDisplayCrosshair;
    QSpinBox* mpFastPanSpeedSpin;
    QSpinBox* mpSlowPanSpeedSpin;

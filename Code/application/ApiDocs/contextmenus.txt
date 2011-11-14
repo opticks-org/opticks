@@ -237,7 +237,7 @@
  *  also includes all Layer \ref layer "actions".\n\n
  *  <table>
  *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
- *    <tr><td>Calculate Statistics on Subset</td><td>APP_LAYER_CALCULATE_SUBSET_STATISTICS_ACTION()</td></tr>
+ *    <tr><td>Calculate %Statistics on Subset</td><td>APP_LAYER_CALCULATE_SUBSET_STATISTICS_ACTION()</td></tr>
  *    <tr><td>Display as menu</td><td>APP_RASTERLAYER_DISPLAY_AS_MENU_ACTION()</td></tr>
  *    <tr><td>Display mode menu</td><td>APP_RASTERLAYER_DISPLAY_MODE_MENU_ACTION()</td></tr>
  *    <tr><td>Separator</td><td>APP_RASTERLAYER_SEPARATOR_ACTION()</td></tr>
@@ -259,10 +259,11 @@
  *  \subsection spatialdataview Spatial Data View
  *  <table>
  *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
- *    <tr><td>Background color</td><td>APP_SPATIALDATAVIEW_BACKGROUND_COLOR_ACTION()</td></tr>
+ *    <tr><td>%Axis</td><td>APP_SPATIALDATAVIEW_AXIS_ACTION()</td></tr>
+ *    <tr><td>Background Color</td><td>APP_SPATIALDATAVIEW_BACKGROUND_COLOR_ACTION()</td></tr>
  *    <tr><td>Crosshair</td><td>APP_SPATIALDATAVIEW_CROSSHAIR_ACTION()</td></tr>
  *    <tr><td>Separator</td><td>APP_SPATIALDATAVIEW_CROSSHAIR_SEPARATOR_ACTION()</td></tr>
- *    <tr><td>Hide layers</td><td>APP_SPATIALDATAVIEW_HIDE_LAYERS_ACTION()</td></tr>
+ *    <tr><td>Hide Layers</td><td>APP_SPATIALDATAVIEW_HIDE_LAYERS_ACTION()</td></tr>
  *    <tr><td>Select Layers of Type</td><td>APP_SPATIALDATAVIEW_SELECT_LAYERS_OF_TYPE_ACTION()</td></tr>
  *    <tr><td>Activate</td><td>APP_SPATIALDATAVIEW_LAYER_ACTIVATE_ACTION()</td></tr>
  *    <tr><td>Separator</td><td>APP_SPATIALDATAVIEW_LAYER_ACTIVATE_SEPARATOR_ACTION()</td></tr>
@@ -272,12 +273,13 @@
  *    <tr><td>Separator</td><td>APP_SPATIALDATAVIEW_LAYER_DELETE_SEPARATOR_ACTION()</td></tr>
  *    <tr><td>%Layer menu</td><td>APP_SPATIALDATAVIEW_LAYER_MENU_ACTION()</td></tr>
  *    <tr><td>Separator</td><td>APP_SPATIALDATAVIEW_LAYER_SEPARATOR_ACTION()</td></tr>
- *    <tr><td>Measurements properties</td><td>APP_SPATIALDATAVIEW_MEASUREMENTS_PROPERTIES_ACTION()</td></tr>
- *    <tr><td>New layer menu</td><td>APP_SPATIALDATAVIEW_NEW_LAYER_MENU_ACTION()</td></tr>
- *    <tr><td>Origin menu</td><td>APP_SPATIALDATAVIEW_ORIGIN_MENU_ACTION()</td></tr>
+ *    <tr><td>Measurements %Properties</td><td>APP_SPATIALDATAVIEW_MEASUREMENTS_PROPERTIES_ACTION()</td></tr>
+ *    <tr><td>New %Layer menu</td><td>APP_SPATIALDATAVIEW_NEW_LAYER_MENU_ACTION()</td></tr>
+ *    <tr><td>Origin</td><td>APP_SPATIALDATAVIEW_ORIGIN_ACTION()</td></tr>
+ *    <tr><td>Origin Location menu</td><td>APP_SPATIALDATAVIEW_ORIGIN_MENU_ACTION()</td></tr>
  *    <tr><td>Separator</td><td>APP_SPATIALDATAVIEW_ORIGIN_SEPARATOR_ACTION()</td></tr>
  *    <tr><td>Separator</td><td>APP_SPATIALDATAVIEW_PROPERTIES_SEPARATOR_ACTION()</td></tr>
- *    <tr><td>Show layers</td><td>APP_SPATIALDATAVIEW_SHOW_LAYERS_ACTION()</td></tr>
+ *    <tr><td>Show Layers</td><td>APP_SPATIALDATAVIEW_SHOW_LAYERS_ACTION()</td></tr>
  *    <tr><td>Smooth</td><td>APP_SPATIALDATAVIEW_SMOOTH_ACTION()</td></tr>
  *  </table>
  *
@@ -286,7 +288,7 @@
  *  also includes all Layer \ref layer "actions".\n\n
  *  <table>
  *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
- *    <tr><td>Calculate Statistics on Subset</td><td>APP_LAYER_CALCULATE_SUBSET_STATISTICS_ACTION()</td></tr>
+ *    <tr><td>Calculate %Statistics on Subset</td><td>APP_LAYER_CALCULATE_SUBSET_STATISTICS_ACTION()</td></tr>
  *  </table>
  *
  *  \subsection toolbar Toolbar

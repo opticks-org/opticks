@@ -41,7 +41,7 @@ class SpatialDataViewImp : public PerspectiveViewImp, public Observer
 public:
    SpatialDataViewImp(const std::string& id, const std::string& viewName, QGLContext* drawContext = 0,
       QWidget* parent = 0);
-   ~SpatialDataViewImp();
+   virtual ~SpatialDataViewImp();
 
    using PerspectiveViewImp::setIcon;
    using PerspectiveViewImp::setName;
@@ -92,6 +92,9 @@ public:
    void clear();
    void clearMarkings();
 
+   bool isOriginDisplayed() const;
+   bool isAxisDisplayed() const;
+
    Layer* getMeasurementsLayer() const;
    void showMeasurementsLayer(bool bShow);
    bool isMeasurementsLayerShown() const;
@@ -131,6 +134,8 @@ public slots:
    bool setBackLayer(Layer* pLayer);
    bool bringLayerForward(Layer* pLayer);
    bool sendLayerBackward(Layer* pLayer);
+   void displayOrigin(bool display);
+   void displayAxis(bool display);
    void updateExtents();
 
 signals:
@@ -142,6 +147,8 @@ signals:
    void layerActivated(Layer* pLayer);
    void layerDeleted(Layer* pLayer);
    void layerDisplayIndexesChanged();
+   void originDisplayed(bool displayed);
+   void axisDisplayed(bool displayed);
 
 protected:
    SpatialDataViewImp& operator=(const SpatialDataViewImp& spatialDataView);
@@ -204,6 +211,8 @@ private:
    bool mShowMeasurements;
    SafePtr<Layer> mpActiveLayer;
    LayerImp* mpDrawLayer;
+   bool mDisplayOrigin;
+   bool mDisplayAxis;
    QTimer* mpPanTimer;
    int mPanKey;
    bool mShiftPressed;
@@ -415,6 +424,22 @@ private slots:
    void clearMarkings() \
    { \
       return impClass::clearMarkings(); \
+   } \
+   void displayOrigin(bool display) \
+   { \
+      impClass::displayOrigin(display); \
+   } \
+   bool isOriginDisplayed() const \
+   { \
+      return impClass::isOriginDisplayed(); \
+   } \
+   void displayAxis(bool display) \
+   { \
+      impClass::displayAxis(display); \
+   } \
+   bool isAxisDisplayed() const \
+   { \
+      return impClass::isAxisDisplayed(); \
    } \
    bool getLayerImage(Layer* pLayer, QImage &image, ColorType& transparent, int bbox[4]) \
    { \

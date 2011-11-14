@@ -447,6 +447,11 @@
 #define APP_SESSIONEXPLORER_RENAME_ACTION "APP_SESSIONEXPLORER_RENAME_ACTION"
 
 /**
+ *  Toggles the display of the orientation axis in the upper left corner of the view.
+ */
+#define APP_SPATIALDATAVIEW_AXIS_ACTION "APP_SPATIALDATAVIEW_AXIS_ACTION"
+
+/**
  *  Allows the user to change the background color of the view.
  */
 #define APP_SPATIALDATAVIEW_BACKGROUND_COLOR_ACTION "APP_SPATIALDATAVIEW_BACKGROUND_COLOR_ACTION"
@@ -520,6 +525,11 @@
  *  Creates a new, empty layer in the view.
  */
 #define APP_SPATIALDATAVIEW_NEW_LAYER_MENU_ACTION "APP_SPATIALDATAVIEW_NEW_LAYER_MENU_ACTION"
+
+/**
+ *  Toggles the display of the origin location marker in the view.
+ */
+#define APP_SPATIALDATAVIEW_ORIGIN_ACTION "APP_SPATIALDATAVIEW_ORIGIN_ACTION"
 
 /**
  *  Indicates the image corner location of the data origin.

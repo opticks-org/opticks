@@ -74,6 +74,8 @@ typedef EnumWrapper<PanLimitTypeEnum> PanLimitType;
 class SpatialDataView : public PerspectiveView
 {
 public:
+   SETTING(DisplayOrigin, SpatialDataView, bool, true)
+   SETTING(DisplayAxis, SpatialDataView, bool, true)
    SETTING(GeoCoordTooltip, SpatialDataView, bool, false)
    SETTING(ConfirmLayerDelete, SpatialDataView, bool, true)
    SETTING(FastPanSpeed, SpatialDataView, int, 20)
@@ -729,6 +731,50 @@ public:
     *  the RasterElement had just been loaded.  This action cannot be undone.
     */
    virtual void clearMarkings() = 0;
+
+   /**
+    *  Toggles the display of the origin location marker in the view.
+    *
+    *  @param   display
+    *           Set this value to \c true to display the origin location marker
+    *           in the view or to \c false to hide the origin marker.
+    *
+    *  @see     isOriginDisplayed()
+    */
+   virtual void displayOrigin(bool display) = 0;
+
+   /**
+    *  Queries whether the origin location marker is displayed in the view.
+    *
+    *  @return  Returns \c true if the origin location marker is currently
+    *           displayed in the view.  Returns \c false if the origin is
+    *           currently hidden.
+    *
+    *  @see     displayOrigin()
+    */
+   virtual bool isOriginDisplayed() const = 0;
+
+   /**
+    *  Toggles the display of the orientation axis in the upper left corner of
+    *  the view.
+    *
+    *  @param   display
+    *           Set this value to \c true to display the orientation axis in the
+    *           view or to \c false to hide the axis.
+    *
+    *  @see     isAxisDisplayed()
+    */
+   virtual void displayAxis(bool display) = 0;
+
+   /**
+    *  Queries whether the orientation axis is displayed in the view.
+    *
+    *  @return  Returns \c true if the orientation axis is currently displayed
+    *           in the view.  Returns \c false if the axis is currently hidden.
+    *
+    *  @see     displayAxis()
+    */
+   virtual bool isAxisDisplayed() const = 0;
 
    /**
     *  Retrieves 2D image data for a displayed layer.

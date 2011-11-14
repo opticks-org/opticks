@@ -26,7 +26,7 @@ class PropertiesSpatialDataView : public LabeledSectionGroup
 {
 public:
    PropertiesSpatialDataView();
-   ~PropertiesSpatialDataView();
+   virtual ~PropertiesSpatialDataView();
 
    bool initialize(SessionItem* pSessionItem);
    bool applyChanges();
@@ -52,6 +52,8 @@ private:
    QSpinBox* mpMaxZoomSpin;
 
    // Image
+   QCheckBox* mpOriginCheck;
+   QCheckBox* mpAxisCheck;
    QCheckBox* mpSmoothCheck;
 };
 
