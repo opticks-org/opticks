@@ -12,7 +12,8 @@
 #include <iostream>
 using namespace std;
 
-ProgressBriefConsole::ProgressBriefConsole() :
+ProgressBriefConsole::ProgressBriefConsole(bool veryBrief) :
+   mVeryBrief(veryBrief),
    mCounter(0)
 {
 }
@@ -49,31 +50,34 @@ void ProgressBriefConsole::updateProgress(const std::string& text, int percent, 
       return;
    }
 
-   switch (mCounter)
+   if (mVeryBrief == false)
    {
-      case 0:
-         cout << "\rProcessing -";
-         break;
-      case 10:
-         cout << "\rProcessing \\";
-         break;
-      case 20:
-         cout << "\rProcessing |";
-         break;
-      case 30:
-         cout << "\rProcessing /";
-         break;
-      default:
-         break;
-   }
+      switch (mCounter)
+      {
+         case 0:
+            cout << "\rProcessing -";
+            break;
+         case 10:
+            cout << "\rProcessing \\";
+            break;
+         case 20:
+            cout << "\rProcessing |";
+            break;
+         case 30:
+            cout << "\rProcessing /";
+            break;
+         default:
+            break;
+      }
 
-   mCounter++;
-   if (mCounter >= 40)
-   {
-      mCounter = 0;
-   }
+      mCounter++;
+      if (mCounter >= 40)
+      {
+         mCounter = 0;
+      }
 
-   cout.flush();
+      cout.flush();
+   }
 }
 
 void ProgressBriefConsole::getProgress(string& text, int& percent, ReportingLevel& gran) const

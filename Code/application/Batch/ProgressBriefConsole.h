@@ -26,7 +26,7 @@
 class ProgressBriefConsole : public Progress, SubjectImp
 {
 public:
-   ProgressBriefConsole();
+   ProgressBriefConsole(bool veryBrief);
    virtual ~ProgressBriefConsole();
 
    /**
@@ -68,6 +68,7 @@ public:
 
 private:
    std::string mMessage;
+   bool mVeryBrief;
    int mCounter;
 };
 

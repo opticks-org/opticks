@@ -43,6 +43,7 @@ int main(int argc, char** argv)
       return -1;
    }
    pArgumentList->registerOption("brief");
+   pArgumentList->registerOption("verybrief");
    pArgumentList->registerOption("deployment");
    pArgumentList->registerOption("debugDeployment");
    pArgumentList->registerOption("input");
@@ -165,6 +166,7 @@ int main(int argc, char** argv)
       cout << "     " << dlm << "generate              Generates a batch file based on the given wizard 'filename.batchwiz'" <<
          endl;
       cout << "     " << dlm << "brief                 Displays brief output messages" << endl;
+      cout << "     " << dlm << "verybrief             Displays only abort, warning, and error messages" << endl;
       cout << "     " << dlm << "processors            Sets number of available processors" << endl;
       //cout << "     " << dlm << "test        Runs a set of operational tests" << endl;
       //cout << "     " << dlm << "testAll     Runs the full set of system tests" << endl;

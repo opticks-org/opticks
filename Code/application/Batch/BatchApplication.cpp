@@ -128,20 +128,22 @@ int BatchApplication::run(int argc, char** argv)
 
    // Create the progress object
    bool bBrief = false;
+   bool bVeryBrief = false;
 
    ArgumentList* pArgumentList = ArgumentList::instance();
    if (pArgumentList != NULL)
    {
       bBrief = pArgumentList->exists("brief");
+      bVeryBrief = pArgumentList->exists("verybrief");
    }
 
-   if (bBrief == false)
+   if (bBrief == false && bVeryBrief == false)
    {
       mpProgress = new ProgressConsole();
    }
    else
    {
-      mpProgress = new ProgressBriefConsole();
+      mpProgress = new ProgressBriefConsole(bVeryBrief);
    }
 
    // process pending extension uninstalls
@@ -215,7 +217,7 @@ int BatchApplication::run(int argc, char** argv)
    SessionManagerImp::instance()->close();
 
    // Cleanup
-   if (bBrief == false)
+   if (bBrief == false && bVeryBrief == false)
    {
       delete dynamic_cast<ProgressConsole*>(mpProgress);
    }
