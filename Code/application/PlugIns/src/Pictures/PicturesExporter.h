@@ -80,18 +80,17 @@ protected:
 class PicturesExporter : public ExporterShell
 {
 public:
-   PicturesExporter(PicturesDetails *pDetails);
-   ~PicturesExporter();
+   PicturesExporter(PicturesDetails* pDetails);
+   virtual ~PicturesExporter();
 
-   bool getInputSpecification(PlugInArgList*& pArgList);
-   bool getOutputSpecification(PlugInArgList*& pArgList);
-   ValidationResultType validate(const PlugInArgList* pArgList, std::string& errorMessage) const;
+   virtual bool getInputSpecification(PlugInArgList*& pArgList);
+   virtual bool getOutputSpecification(PlugInArgList*& pArgList);
    virtual bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
-   QWidget* getExportOptionsWidget(const PlugInArgList *pInArgList);
+   virtual QWidget* getExportOptionsWidget(const PlugInArgList* pInArgList);
 
 protected:
    virtual bool extractInputArgs(const PlugInArgList* pInArgList);
-   virtual bool generateImage(QImage &image) = 0;
+   virtual bool generateImage(QImage& image) = 0;
 
    Progress* mpProgress;
    SessionItem* mpItem;

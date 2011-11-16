@@ -581,9 +581,6 @@ ValidationResultType Nitf::NitfExporter::validate(const PlugInArgList* pArgList,
    }
    else if (mpOptionsWidget->isValid(errorMessage) == false)
    {
-      errorMessage += "To accept these values, click \"Ok\".\n"
-         "To modify these values, click \"Options\".\n"
-         "To cancel the export, click \"Cancel\".";
       return VALIDATE_INFO;
    }
 

@@ -57,18 +57,6 @@ bool PicturesExporter::getOutputSpecification(PlugInArgList*& pArgList)
    return true;
 }
 
-ValidationResultType PicturesExporter::validate(const PlugInArgList* pArgList, string& errorMessage) const
-{
-   bool bSuccess = const_cast<PicturesExporter*>(this)->extractInputArgs(pArgList);
-   if (bSuccess == false)
-   {
-      errorMessage = mMessage;
-      return VALIDATE_FAILURE;
-   }
-
-   return VALIDATE_SUCCESS;
-}
-
 bool PicturesExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
    string exporterName = getName();

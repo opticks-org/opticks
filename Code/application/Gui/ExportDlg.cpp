@@ -11,10 +11,9 @@
 #include <QtGui/QListView>
 #include <QtGui/QMessageBox>
 
-#include "AppVersion.h"
+#include "AppVerify.h"
 #include "ConfigurationSettings.h"
 #include "DataElement.h"
-#include "DesktopServices.h"
 #include "ExportDlg.h"
 #include "ExportOptionsDlg.h"
 #include "FileDescriptor.h"
@@ -26,7 +25,8 @@ ExportDlg::ExportDlg(ExporterResource& pExporter,
                      const vector<PlugInDescriptor*>& availablePlugins,
                      QWidget* pParent) :
    FilePlugInDlg(availablePlugins, ConfigurationSettings::getSettingPluginWorkingDirectoryKey("Exporter"), pParent),
-   mpExporter(pExporter)
+   mpExporter(pExporter),
+   mValidated(false)
 {
    // Initializtion
    setWindowTitle("Export");
@@ -38,20 +38,21 @@ ExportDlg::ExportDlg(ExporterResource& pExporter,
    enableOptions(true);
 
    // Set the initial directory
-   string directory;
-   const Filename* pWorkingDir = NULL;
    Service<ConfigurationSettings> pSettings;
-   pWorkingDir = pSettings->getSetting(ConfigurationSettings::getSettingPluginWorkingDirectoryKey("Exporter")).getPointerToValue<Filename>();
+   const Filename* pWorkingDir = pSettings->getSetting(
+      ConfigurationSettings::getSettingPluginWorkingDirectoryKey("Exporter")).getPointerToValue<Filename>();
    if (pWorkingDir == NULL)
    {
       pWorkingDir = ConfigurationSettings::getSettingExportPath();
    }
+
+   string directory;
    if (pWorkingDir != NULL)
    {
       directory = pWorkingDir->getFullPathAndName();
    }
 
-   if(!directory.empty())
+   if (!directory.empty())
    {
       setDirectory(QString::fromStdString(directory));
    }
@@ -86,13 +87,12 @@ ExportDlg::ExportDlg(ExporterResource& pExporter,
    updateFromFile(strFilename);
 
    // Connections
-   connect(this, SIGNAL(plugInSelected(const QString&)), this, SLOT(updateFromExporter(const QString&)));
-   connect(this, SIGNAL(optionsClicked()), this, SLOT(invokeOptionsDialog()));
+   VERIFYNR(connect(this, SIGNAL(plugInSelected(const QString&)), this, SLOT(updateFromExporter(const QString&))));
+   VERIFYNR(connect(this, SIGNAL(optionsClicked()), this, SLOT(invokeOptionsDialog())));
 }
 
 ExportDlg::~ExportDlg()
-{
-}
+{}
 
 ExporterResource& ExportDlg::getExporterResource() const
 {
@@ -105,15 +105,14 @@ void ExportDlg::accept()
    QString strPlugIn = getSelectedPlugIn();
    if (strPlugIn.isEmpty() == true)
    {
-      QMessageBox::critical(this, APP_NAME, "The selected exporter is invalid!");
+      QMessageBox::critical(this, windowTitle(), "The selected exporter is invalid!");
       return;
    }
 
    // Validate with the exporter
    bool validating = true;
-   while (validating)
+   while ((validating == true) && (mValidated == false))
    {
-      Service<DesktopServices> pDesktop;
       string errorMessage;
 
       // Update the file descriptor with the selected file
@@ -133,14 +132,14 @@ void ExportDlg::accept()
          {
             errorMessage = "Unable to validate inputs.";
          }
-         pDesktop->showMessageBox("Validation Error", errorMessage, "&Cancel");
+         QMessageBox::critical(this, windowTitle(), QString::fromStdString(errorMessage));
          return;
       case VALIDATE_INFO:
          // Exporter's returning VALIDATE_INFO must provide a value
          // for error message...not providing a value is a programmer error
          VERIFYNRV(!errorMessage.empty());
-         switch (pDesktop->showMessageBox("Validation Information", errorMessage,
-            "&Ok", "&Options", "&Cancel", 0, 2))
+         switch (QMessageBox::warning(this, windowTitle(), QString::fromStdString(errorMessage),
+            "OK", "Options...", "Cancel", 0, 2))
          {
          case 0: // Ok
             validating = false;
@@ -156,6 +155,10 @@ void ExportDlg::accept()
          }
          break;
       case VALIDATE_INPUT_REQUIRED:
+         if (errorMessage.empty() == false)
+         {
+            QMessageBox::critical(this, windowTitle(), QString::fromStdString(errorMessage));
+         }
          if (!invokeOptionsDialog())
          {
             return;
@@ -289,8 +292,10 @@ bool ExportDlg::invokeOptionsDialog()
    ExportOptionsDlg optionsDlg(mpExporter, this);
    if (optionsDlg.exec() == QDialog::Accepted)
    {
+      mValidated = true;
       return true;
    }
 
+   mValidated = false;
    return false;
 }

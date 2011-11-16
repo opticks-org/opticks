@@ -43,6 +43,7 @@ private:
    ExportDlg(const ExportDlg& rhs);
    ExportDlg& operator=(const ExportDlg& rhs);
    ExporterResource& mpExporter;
+   bool mValidated;
 };
 
 #endif

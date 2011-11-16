@@ -12,6 +12,7 @@
 #include <QtGui/QFrame>
 #include <QtGui/QLabel>
 #include <QtGui/QLayout>
+#include <QtGui/QMessageBox>
 #include <QtGui/QStackedWidget>
 
 #include "AppVerify.h"
@@ -105,9 +106,8 @@ ExportOptionsDlg::ExportOptionsDlg(ExporterResource& pExporter, QWidget* pParent
    pLine->setFrameStyle(QFrame::HLine | QFrame::Sunken);
 
    // Buttons
-   QDialogButtonBox* pButtonBox = new QDialogButtonBox(this);
-   pButtonBox->setOrientation(Qt::Horizontal);
-   pButtonBox->setStandardButtons(QDialogButtonBox::Ok);
+   QDialogButtonBox* pButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
+      Qt::Horizontal, this);
 
    // Layout
    QVBoxLayout* pLayout = new QVBoxLayout(this);
@@ -283,6 +283,41 @@ void ExportOptionsDlg::accept()
       vector<DimensionDescriptor> bands = mpSubsetPage->getSubsetBands();
       std::transform(bands.begin(), bands.end(), bands.begin(), SetOnDiskNumber());
       pRasterFileDescriptor->setBands(bands);
+   }
+
+   // Validate with the exporter
+   string errorMessage;
+   ValidationResultType result = mpExporter->validate(errorMessage);
+   if (result == VALIDATE_FAILURE)
+   {
+      if (errorMessage.empty() == true)
+      {
+         errorMessage = "Unable to validate inputs.";
+      }
+
+      QMessageBox::critical(this, "Export Options", QString::fromStdString(errorMessage));
+      return;
+   }
+   else if (result == VALIDATE_INFO)
+   {
+      // Exporters returning VALIDATE_INFO must provide a value for the error message
+      VERIFYNRV(errorMessage.empty() == false);
+
+      if (QMessageBox::warning(this, "Export Options", QString::fromStdString(errorMessage), QMessageBox::Ok,
+         QMessageBox::Cancel) == QMessageBox::Cancel)
+      {
+         return;
+      }
+   }
+   else if (result == VALIDATE_INPUT_REQUIRED)
+   {
+      if (errorMessage.empty() == true)
+      {
+         errorMessage = "Additional input is required.";
+      }
+
+      QMessageBox::critical(this, "Export Options", QString::fromStdString(errorMessage));
+      return;
    }
 
    QDialog::accept();
