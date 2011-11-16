@@ -722,6 +722,11 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    VERIFYNR(connect(pAbout_Action, SIGNAL(triggered()), this, SLOT(aboutApp())));
 
    // SessionItem context menu
+   mpUnlinkAction = new QAction(QIcon(":/icons/Unlink"), "Unlink", this);
+   mpUnlinkAction->setAutoRepeat(false);
+   mpUnlinkAction->setStatusTip("Unlinks all views connected to this view");
+   VERIFYNR(connect(mpUnlinkAction, SIGNAL(triggered()), this, SLOT(unlinkSelectedView())));
+
    mpExportContextMenuAction = new QAction(QIcon(":/icons/Save"), "Export", this);
    mpExportContextMenuAction->setAutoRepeat(false);
    mpExportContextMenuAction->setToolTip("Export");
@@ -5709,6 +5714,88 @@ void ApplicationWindow::updateContextMenu(Subject& subject, const string& signal
       }
       else if (viewItems.size() > 1)
       {
+         QVariantList linkPairs;
+         QVariantList unlinkPairs;
+         int numSpatialDataViews = 0;
+
+         for (vector<ViewWindow*>::const_iterator iter = viewItems.begin(); iter != viewItems.end(); ++iter)
+         {
+            ViewWindow* pWindow = *iter;
+            if (pWindow == NULL)
+            {
+               continue;
+            }
+
+            View* pView = pWindow->getView();
+            if (pView == NULL)
+            {
+               continue;
+            }
+
+            for (vector<ViewWindow*>::const_iterator iter2 = viewItems.begin(); iter2 != viewItems.end(); ++iter2)
+            {
+               ViewWindow* pWindow2 = *iter2;
+               if (pWindow2 == NULL || pWindow2 == pWindow)
+               {
+                  continue;
+               }
+
+               View* pView2 = pWindow2->getView();
+               if (pView2 == NULL)
+               {
+                  continue;
+               }
+
+               if (pView->getViewLinkType(pView2) != NO_LINK)
+               {
+                  unlinkPairs.push_back(QVariant::fromValue(pView));
+                  unlinkPairs.push_back(QVariant::fromValue(pView2));
+               }
+               else
+               {
+                  SpatialDataView* pSpatialDataView = dynamic_cast<SpatialDataView*>(pView);
+                  if (pSpatialDataView != NULL)
+                  {
+                     ++numSpatialDataViews;
+                  }
+
+                  SpatialDataView* pSpatialDataView2 = dynamic_cast<SpatialDataView*>(pView2);
+                  if (pSpatialDataView2 != NULL)
+                  {
+                     ++numSpatialDataViews;
+                  }
+
+                  if ((pSpatialDataView != NULL) || (pSpatialDataView2 != NULL))
+                  {
+                     linkPairs.push_back(QVariant::fromValue(pView));
+                     linkPairs.push_back(QVariant::fromValue(pView2));
+                  }
+               }
+            }
+         }
+
+         // Only add the link action if more than one spatial data view is selected
+         if ((linkPairs.empty() == false) && (numSpatialDataViews > 2))    // Check for two views since a single view
+                                                                           // will appear in the linkPairs list twice
+         {
+            QAction* pLinkAction = new QAction(QIcon(":/icons/Link"), "Link", pMenu->getActionParent());
+            pLinkAction->setAutoRepeat(false);
+            pLinkAction->setData(linkPairs);
+            pLinkAction->setStatusTip("Links all selected views");
+            VERIFYNR(connect(pLinkAction, SIGNAL(triggered()), this, SLOT(linkSelectedViews())));
+            pMenu->addAction(pLinkAction, APP_APPLICATIONWINDOW_LINK_ACTION);
+         }
+
+         if (unlinkPairs.empty() == false)
+         {
+            QAction* pUnlinkAction = new QAction(QIcon(":/icons/Unlink"), "Unlink", pMenu->getActionParent());
+            pUnlinkAction->setAutoRepeat(false);
+            pUnlinkAction->setData(unlinkPairs);
+            pUnlinkAction->setStatusTip("Unlinks all selected views");
+            VERIFYNR(connect(pUnlinkAction, SIGNAL(triggered()), this, SLOT(unlinkSelectedViews())));
+            pMenu->addAction(pUnlinkAction, APP_APPLICATIONWINDOW_UNLINK_ACTION);
+         }
+
          for (vector<ViewWindow*>::const_iterator iter = viewItems.begin(); iter != viewItems.end(); ++iter)
          {
             SessionItem* pItem = (*iter)->getView();
@@ -5716,6 +5803,13 @@ void ApplicationWindow::updateContextMenu(Subject& subject, const string& signal
             {
                itemList.append(QVariant::fromValue(pItem));
             }
+         }
+
+         if (((linkPairs.empty() == false) && (numSpatialDataViews > 2)) || (unlinkPairs.empty() == false))
+         {
+            QAction* pSeparatorAction = new QAction(pMenu->getActionParent());
+            pSeparatorAction->setSeparator(true);
+            pMenu->addAction(pSeparatorAction, APP_APPLICATIONWINDOW_LINK_SEPARATOR_ACTION);
          }
       }
 
@@ -5793,17 +5887,32 @@ void ApplicationWindow::updateContextMenu(Subject& subject, const string& signal
 
    if (dynamic_cast<SpatialDataView*>(pItem) != NULL || dynamic_cast<ProductView*>(pItem) != NULL)
    {
-      // Copy Snapshot Actions
-      QAction* pViewSeparatorAction = new QAction(pMenu->getActionParent());
-      pViewSeparatorAction->setSeparator(true);
       string beforeAction = APP_SPATIALDATAVIEW_PROPERTIES_SEPARATOR_ACTION;
       if (dynamic_cast<ProductView*>(pItem) != NULL)
       {
          beforeAction = APP_PRODUCTVIEW_PROPERTIES_SEPARATOR_ACTION;
       }
+
+      // Copy Snapshot actions
+      QAction* pViewSeparatorAction = new QAction(pMenu->getActionParent());
+      pViewSeparatorAction->setSeparator(true);
+
       pMenu->addActionBefore(pViewSeparatorAction, APP_APPLICATIONWINDOW_COPY_SNAPSHOT_SEPARATOR_ACTION, beforeAction);
       pMenu->addActionBefore(mpClipboardAction, APP_APPLICATIONWINDOW_COPY_SNAPSHOT_ACTION, beforeAction);
       pMenu->addActionBefore(mpClipboardSizedAction, APP_APPLICATIONWINDOW_COPY_SNAPSHOT_SIZED_ACTION, beforeAction);
+
+      // Unlink action
+      View* pView = dynamic_cast<View*>(pItem);
+      if (pView != NULL)
+      {
+         vector<pair<View*, LinkType> > linkedViews;
+         pView->getLinkedViews(linkedViews);
+         if (linkedViews.empty() == false)
+         {
+            mpUnlinkAction->setData(QVariant::fromValue(pView));
+            pMenu->addActionBefore(mpUnlinkAction, APP_APPLICATIONWINDOW_UNLINK_ACTION, beforeAction);
+         }
+      }
    }
 }
 
@@ -5832,6 +5941,169 @@ void ApplicationWindow::exportFileMenu()
    }
 
    exportSessionItem(pItem);
+}
+
+void ApplicationWindow::linkSelectedViews()
+{
+   QAction* pAction = dynamic_cast<QAction*>(sender());
+   if (pAction == NULL)
+   {
+      return;
+   }
+
+   QVariantList linkPairs = pAction->data().toList();
+   VERIFYNRV(linkPairs.size() % 2 == 0);
+
+   vector<View*> warningViews;
+
+   QVariantList::iterator first = linkPairs.begin();
+   QVariantList::iterator second = first + 1;
+   while (first != linkPairs.end() && second != linkPairs.end())
+   {
+      View* pFirstView = first->value<View*>();
+      View* pSecondView = second->value<View*>();
+      if (pFirstView != NULL && pSecondView != NULL)
+      {
+         bool link = true;
+
+         // Prevent linking a data set to a product
+         View* pProductView = dynamic_cast<ProductView*>(pFirstView);
+         if (pProductView == NULL)
+         {
+            pProductView = dynamic_cast<ProductView*>(pSecondView);
+         }
+
+         if (pProductView != NULL)
+         {
+            if (std::find(warningViews.begin(), warningViews.end(), pProductView) == warningViews.end())
+            {
+               QString viewName = QString::fromStdString(pProductView->getDisplayName(true));
+               QMessageBox::warning(this, APP_NAME, "The " + viewName + " product cannot be linked to a data set.");
+               warningViews.push_back(pProductView);
+            }
+
+            link = false;
+         }
+
+         // Prevent linking by latitude/longitude if geocoordinates are not available
+         LinkType linkType = View::getSettingLinkType();
+         if ((link == true) && (linkType == GEOCOORD_LINK))
+         {
+            bool hasGeocoords = false;
+
+            SpatialDataView* pSpatialDataView = dynamic_cast<SpatialDataView*>(pFirstView);
+            if (pSpatialDataView != NULL)
+            {
+               LayerList* pLayerList = pSpatialDataView->getLayerList();
+               if (pLayerList != NULL)
+               {
+                  RasterElement* pRaster = pLayerList->getPrimaryRasterElement();
+                  if (pRaster != NULL)
+                  {
+                     hasGeocoords = pRaster->isGeoreferenced();
+                  }
+               }
+            }
+
+            if (hasGeocoords == true)
+            {
+               pSpatialDataView = dynamic_cast<SpatialDataView*>(pSecondView);
+               if (pSpatialDataView != NULL)
+               {
+                  LayerList* pLayerList = pSpatialDataView->getLayerList();
+                  if (pLayerList != NULL)
+                  {
+                     RasterElement* pRaster = pLayerList->getPrimaryRasterElement();
+                     if (pRaster != NULL)
+                     {
+                        hasGeocoords = pRaster->isGeoreferenced();
+                     }
+                  }
+               }
+            }
+
+            if (hasGeocoords == false)
+            {
+               if (pSpatialDataView != NULL)
+               {
+                  if (std::find(warningViews.begin(), warningViews.end(), pSpatialDataView) == warningViews.end())
+                  {
+                     QString viewName = QString::fromStdString(pSpatialDataView->getDisplayName(true));
+                     QMessageBox::warning(this, APP_NAME, "The " + viewName + " data set must have "
+                        "geocoords in order to link based on latitude and longitude.");
+                     warningViews.push_back(pSpatialDataView);
+                  }
+               }
+
+               link = false;
+            }
+         }
+
+         // Perform the link
+         if (link == true)
+         {
+            pFirstView->linkView(pSecondView, linkType);    // No need to perform the reverse link since it
+                                                            // has already been added to the linkPairs list
+            pFirstView->refresh();
+         }
+      }
+
+      first += 2;
+      second += 2;
+   }
+}
+
+void ApplicationWindow::unlinkSelectedViews()
+{
+   QAction* pAction = dynamic_cast<QAction*>(sender());
+   if (pAction == NULL)
+   {
+      return;
+   }
+
+   QVariantList unlinkPairs = pAction->data().toList();
+   VERIFYNRV(unlinkPairs.size() % 2 == 0);
+
+   QVariantList::iterator first = unlinkPairs.begin();
+   QVariantList::iterator second = first + 1;
+   while (first != unlinkPairs.end() && second != unlinkPairs.end())
+   {
+      View* pFirstView = first->value<View*>();
+      View* pSecondView = second->value<View*>();
+      if (pFirstView != NULL && pSecondView != NULL)
+      {
+         pFirstView->unlinkView(pSecondView);   // No need to perform the reverse unlink since it
+                                                // has already been added to the unlinkPairs list
+      }
+
+      first += 2;
+      second += 2;
+   }
+}
+
+void ApplicationWindow::unlinkSelectedView()
+{
+   QAction* pAction = dynamic_cast<QAction*>(sender());
+   if (pAction == NULL)
+   {
+      return;
+   }
+
+   View* pView = pAction->data().value<View*>();
+   if (pView != NULL)
+   {
+      vector<pair<View*, LinkType> > linkedViews;
+      pView->getLinkedViews(linkedViews);
+      for (vector<pair<View*, LinkType> >::iterator iter = linkedViews.begin(); iter != linkedViews.end(); ++iter)
+      {
+         View* pLinkedView = iter->first;
+         if (pLinkedView != NULL)
+         {
+            pView->unlinkView(pLinkedView);
+            pLinkedView->unlinkView(pView);
+         }
+      }
+   }
 }
 
 void ApplicationWindow::deleteSelectedElement()

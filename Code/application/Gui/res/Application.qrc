@@ -234,6 +234,7 @@
    <file alias="Underline">icons/UnderlineIcon.png</file>
    <file alias="Undo">icons/UndoIcon.png</file>
    <file alias="Ungroup">icons/UngroupIcon.png</file>
+   <file alias="Unlink">icons/UnlinkIcon.png</file>
    <file alias="VLine">icons/VLineIcon.png</file>
    <file alias="ValueEdit">icons/ValueEditIcon.png</file>
    <file alias="ValueItem">icons/ValueItemIcon.png</file>

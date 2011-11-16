@@ -76,7 +76,7 @@ class ApplicationWindow : public QMainWindow, public SubjectAdapter, public Sett
 
 public:
    ApplicationWindow(QWidget* pSplash = NULL);
-   ~ApplicationWindow();
+   virtual ~ApplicationWindow();
 
    void setSessionFilename(const std::string& sessionFilename);
    const std::string& getObjectType() const;
@@ -290,6 +290,9 @@ protected slots:
    void initializeToolBars(Layer* pLayer);
 
    // SessionItem context menu actions
+   void linkSelectedViews();
+   void unlinkSelectedViews();
+   void unlinkSelectedView();
    void deleteSelectedElement();
    void editClassification();
    void exportSessionItem();
@@ -406,7 +409,8 @@ private:
    QAction* mpTileSelectedAction;
 
    // SessionItem context menu actions
-   QAction *mpExportContextMenuAction;
+   QAction* mpUnlinkAction;
+   QAction* mpExportContextMenuAction;
    QAction* mpPropertiesAction;
 
    // Menu bar

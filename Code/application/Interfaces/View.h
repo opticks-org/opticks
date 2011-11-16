@@ -65,6 +65,7 @@ public:
    SETTING(AspectRatioLock, View, bool, false);
    SETTING(OutputWidth, View, unsigned int, 0);
    SETTING(OutputHeight, View, unsigned int, 0);
+   SETTING(LinkType, View, LinkType, AUTOMATIC_LINK);
 
    /**
     *  This class accesses portions of a view image.

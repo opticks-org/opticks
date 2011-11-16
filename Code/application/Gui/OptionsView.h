@@ -26,7 +26,7 @@ class OptionsView : public QWidget
 
 public:
    OptionsView();
-   ~OptionsView();
+   virtual ~OptionsView();
 
    void applyChanges();
 
@@ -86,6 +86,7 @@ public:
 private:
    OptionsView(const OptionsView& rhs);
    OptionsView& operator=(const OptionsView& rhs);
+
    QRadioButton* mpFixedSizeRadio;
    QRadioButton* mpMaximizedRadio;
    QRadioButton* mpPercentageRadio;
@@ -97,6 +98,7 @@ private:
    QSpinBox* mpZoomPercentSpin;
    CustomColorButton* mpBackgroundColor;
    QComboBox* mpOriginCombo;
+   QComboBox* mpLinkCombo;
    QCheckBox* mpConfirmClose;
    ResolutionWidget* mpResolutionWidget;
 };

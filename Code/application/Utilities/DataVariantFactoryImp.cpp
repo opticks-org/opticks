@@ -727,6 +727,7 @@ void DataVariantFactoryImp::initializeMaps()
    registerType<DataVariantValue<LatLonStyle> >();
    registerType<DataVariantValue<LayerType> >();
    registerType<DataVariantValue<LineStyle> >();
+   registerType<DataVariantValue<LinkType> >();
    registerType<DataVariantValue<LocationType> >();
    registerType<DataVariantValue<PanLimitType> >();
    registerType<DataVariantValue<PassArea> >();

@@ -22,6 +22,7 @@
 #include "XercesIncludes.h"
 #include "xmlwriter.h"
 
+#include <QtCore/QMetaType>
 #include <QtCore/QPoint>
 #include <QtCore/QString>
 #include <QtCore/QTimer>
@@ -41,6 +42,8 @@ class SessionItemDeserializer;
 class SessionItemSerializer;
 class UndoAction;
 class UndoStack;
+
+Q_DECLARE_METATYPE(View*)
 
 class ViewImp : public QGLWidget, public SessionItemImp, public SubjectImp
 {

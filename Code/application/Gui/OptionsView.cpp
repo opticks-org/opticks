@@ -7,12 +7,13 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "OptionsView.h"
-
+#include "AppVerify.h"
 #include "CustomColorButton.h"
 #include "LabeledSection.h"
+#include "OptionsView.h"
 #include "PerspectiveView.h"
 #include "ResolutionWidget.h"
+#include "TypesFile.h"
 #include "View.h"
 #include "WorkspaceWindow.h"
 
@@ -114,6 +115,13 @@ OptionsView::OptionsView() :
    mpOriginCombo->addItem("Lower Left");
    mpOriginCombo->addItem("Upper Left");
 
+   QLabel* pLinkLabel = new QLabel("Link Type:", this);
+   mpLinkCombo = new QComboBox(this);
+   mpLinkCombo->setEditable(false);
+   mpLinkCombo->addItem("Automatic");
+   mpLinkCombo->addItem("Mirror");
+   mpLinkCombo->addItem("Latitude/Longitude");
+
    mpConfirmClose = new QCheckBox("Confirm Close", this);
 
    QWidget* pOtherOptWidget = new QWidget(this);
@@ -124,10 +132,12 @@ OptionsView::OptionsView() :
    pOtherOptLayout->addWidget(mpBackgroundColor, 0, 1, Qt::AlignLeft);
    pOtherOptLayout->addWidget(pOriginLabel, 1, 0);
    pOtherOptLayout->addWidget(mpOriginCombo, 1, 1, Qt::AlignLeft);
-   pOtherOptLayout->addWidget(mpConfirmClose, 2, 0, 1, 2);
+   pOtherOptLayout->addWidget(pLinkLabel, 2, 0);
+   pOtherOptLayout->addWidget(mpLinkCombo, 2, 1, Qt::AlignLeft);
+   pOtherOptLayout->addWidget(mpConfirmClose, 3, 0, 1, 2);
    pOtherOptLayout->setColumnStretch(1, 10);
    LabeledSection* pOtherOptSection = new LabeledSection(pOtherOptWidget, "Other Default Properties", this);
-   
+
    // Dialog layout
    QVBoxLayout* pLayout = new QVBoxLayout(this);
    pLayout->setMargin(0);
@@ -138,13 +148,13 @@ OptionsView::OptionsView() :
    pLayout->addWidget(pOtherOptSection);
    pLayout->addStretch(10);
 
-   //Connections
-   connect(mpZoomPercentRadio, SIGNAL(toggled(bool)), mpZoomPercentSpin, SLOT(setEnabled(bool)));
-   connect(mpFixedSizeRadio, SIGNAL(toggled(bool)), pHeightLabel, SLOT(setEnabled(bool)));
-   connect(mpFixedSizeRadio, SIGNAL(toggled(bool)), mpHeightSpin, SLOT(setEnabled(bool)));
-   connect(mpFixedSizeRadio, SIGNAL(toggled(bool)), pWidthLabel, SLOT(setEnabled(bool)));
-   connect(mpFixedSizeRadio, SIGNAL(toggled(bool)), mpWidthSpin, SLOT(setEnabled(bool)));
-   connect(mpPercentageRadio, SIGNAL(toggled(bool)), mpPercentageSpin, SLOT(setEnabled(bool)));
+   // Connections
+   VERIFYNR(connect(mpZoomPercentRadio, SIGNAL(toggled(bool)), mpZoomPercentSpin, SLOT(setEnabled(bool))));
+   VERIFYNR(connect(mpFixedSizeRadio, SIGNAL(toggled(bool)), pHeightLabel, SLOT(setEnabled(bool))));
+   VERIFYNR(connect(mpFixedSizeRadio, SIGNAL(toggled(bool)), mpHeightSpin, SLOT(setEnabled(bool))));
+   VERIFYNR(connect(mpFixedSizeRadio, SIGNAL(toggled(bool)), pWidthLabel, SLOT(setEnabled(bool))));
+   VERIFYNR(connect(mpFixedSizeRadio, SIGNAL(toggled(bool)), mpWidthSpin, SLOT(setEnabled(bool))));
+   VERIFYNR(connect(mpPercentageRadio, SIGNAL(toggled(bool)), mpPercentageSpin, SLOT(setEnabled(bool))));
 
    // Initialize From Settings
    WindowSizeType sizeType = WorkspaceWindow::getSettingWindowSize();
@@ -185,12 +195,26 @@ OptionsView::OptionsView() :
       mpOriginCombo->setCurrentIndex(1);
    }
 
+   LinkType linkType = View::getSettingLinkType();
+   if (linkType == AUTOMATIC_LINK)
+   {
+      mpLinkCombo->setCurrentIndex(0);
+   }
+   else if (linkType == MIRRORED_LINK)
+   {
+      mpLinkCombo->setCurrentIndex(1);
+   }
+   else if (linkType == GEOCOORD_LINK)
+   {
+      mpLinkCombo->setCurrentIndex(2);
+   }
+
    mpBackgroundColor->setColor(View::getSettingBackgroundColor());
    mpConfirmClose->setChecked(WorkspaceWindow::getSettingConfirmClose());
 }
-   
+
 void OptionsView::applyChanges()
-{  
+{
    WorkspaceWindow::setSettingWindowHeight(mpHeightSpin->value());
    WorkspaceWindow::setSettingWindowWidth(mpWidthSpin->value());
    WorkspaceWindow::setSettingWindowPercentage(mpPercentageSpin->value());
@@ -208,7 +232,7 @@ void OptionsView::applyChanges()
       sizeType = WORKSPACE_PERCENTAGE;
    }
    WorkspaceWindow::setSettingWindowSize(sizeType);
-   
+
    unsigned int zoomPercentage = 0;
    if (mpZoomPercentRadio->isChecked() == true)
    {
@@ -226,6 +250,22 @@ void OptionsView::applyChanges()
       origin = UPPER_LEFT;
    }
    View::setSettingDataOrigin(origin);
+
+   LinkType linkType = NO_LINK;
+   if (mpLinkCombo->currentIndex() == 0)
+   {
+      linkType = AUTOMATIC_LINK;
+   }
+   else if (mpLinkCombo->currentIndex() == 1)
+   {
+      linkType = MIRRORED_LINK;
+   }
+   else if (mpLinkCombo->currentIndex() == 2)
+   {
+      linkType = GEOCOORD_LINK;
+   }
+   View::setSettingLinkType(linkType);
+
    View::setSettingBackgroundColor(mpBackgroundColor->getColorType());
    WorkspaceWindow::setSettingConfirmClose(mpConfirmClose->isChecked());
 
@@ -239,5 +279,4 @@ void OptionsView::applyChanges()
 }
 
 OptionsView::~OptionsView()
-{
-}
+{}

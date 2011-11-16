@@ -110,7 +110,23 @@ LinkOptionsPage::LinkOptionsPage(QWidget* parent) :
    pGrid->setColumnStretch(1, 10);
 
    // Initialization
-   mpAutolinkRadio->setChecked(true);
+   LinkType linkType = View::getSettingLinkType();
+   switch (linkType)
+   {
+   case AUTOMATIC_LINK:
+   default:
+      mpAutolinkRadio->setChecked(true);
+      break;
+
+   case MIRRORED_LINK:
+      mpMirrorRadio->setChecked(true);
+      break;
+
+   case GEOCOORD_LINK:
+      mpGeoRadio->setChecked(true);
+      break;
+   }
+
    mpDuplicateCheck->setChecked(true);       // Temporary: Initially checked until more options exist
 
    // Connections
@@ -118,8 +134,7 @@ LinkOptionsPage::LinkOptionsPage(QWidget* parent) :
 }
 
 LinkOptionsPage::~LinkOptionsPage()
-{
-}
+{}
 
 vector<View*> LinkOptionsPage::getViewLinks() const
 {

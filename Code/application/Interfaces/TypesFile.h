@@ -913,6 +913,7 @@ template <> class VariantTypeValidator<InterleaveFormatType> {};
 template <> class VariantTypeValidator<LatLonStyle> {};
 template <> class VariantTypeValidator<LayerType> {};
 template <> class VariantTypeValidator<LineStyle> {};
+template <> class VariantTypeValidator<LinkType> {};
 template <> class VariantTypeValidator<PassArea> {};
 template <> class VariantTypeValidator<PlotObjectType> {};
 template <> class VariantTypeValidator<PositionType> {};

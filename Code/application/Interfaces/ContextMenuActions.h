@@ -146,9 +146,24 @@
 #define APP_APPLICATIONWINDOW_EXPORT_ACTION "APP_APPLICATIONWINDOW_EXPORT_ACTION"
 
 /**
+ *  Links selected views in the Session Explorer.
+ */
+#define APP_APPLICATIONWINDOW_LINK_ACTION "APP_APPLICATIONWINDOW_LINK_ACTION"
+
+/**
+ *  Default menu separator.
+ */
+#define APP_APPLICATIONWINDOW_LINK_SEPARATOR_ACTION "APP_APPLICATIONWINDOW_LINK_SEPARATOR_ACTION"
+
+/**
  *  Displays properties of the selected SessionItem.
  */
 #define APP_APPLICATIONWINDOW_PROPERTIES_ACTION "APP_APPLICATIONWINDOW_PROPERTIES_ACTION"
+
+/**
+ *  Unlinks selected views in the Session Explorer.
+ */
+#define APP_APPLICATIONWINDOW_UNLINK_ACTION "APP_APPLICATIONWINDOW_UNLINK_ACTION"
 
 /**
  *  Zooms the plot axes to user-defined extents.
