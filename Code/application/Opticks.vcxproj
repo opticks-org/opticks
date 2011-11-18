@@ -297,7 +297,6 @@
     <ClInclude Include="Interfaces\DynamicObject.h" />
     <ClInclude Include="Interfaces\EastArrowObject.h" />
     <ClInclude Include="Interfaces\EllipseObject.h" />
-    <ClInclude Include="Interfaces\EnableWarnings.h" />
     <ClInclude Include="Interfaces\EnumWrapper.h" />
     <ClInclude Include="Interfaces\Executable.h" />
     <ClInclude Include="Interfaces\ExecutableAgent.h" />
