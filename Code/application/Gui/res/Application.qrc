@@ -121,6 +121,7 @@
    <file alias="Line">icons/LineIcon.png</file>
    <file alias="LineWidth">icons/LineWidthIcon.png</file>
    <file alias="Link">icons/LinkIcon.png</file>
+   <file alias="LinkAllWindows">icons/LinkAllWindows.png</file>
    <file alias="MajorHorizontalGridlines">icons/MajorHorizontalGridlinesIcon.png</file>
    <file alias="MajorVerticalGridlines">icons/MajorVerticalGridlinesIcon.png</file>
    <file alias="MeasurementBearingLabelOnOff">icons/MeasurementBearingLabelOnOffIcon.png</file>

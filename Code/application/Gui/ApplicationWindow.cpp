@@ -658,6 +658,12 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    m_pLink_Action->setStatusTip("Connects layer and elements across multiple spatial data windows");
    VERIFYNR(connect(m_pLink_Action, SIGNAL(triggered()), this, SLOT(linkWindows())));
 
+   mpLinkAllWindowsAction = new QAction(QIcon(":/icons/LinkAllWindows"), "Link All Windows", this);
+   mpLinkAllWindowsAction->setAutoRepeat(false);
+   mpLinkAllWindowsAction->setToolTip("Link All Windows");
+   mpLinkAllWindowsAction->setStatusTip("Connects all spatial data windows to each other");
+   VERIFYNR(connect(mpLinkAllWindowsAction, SIGNAL(triggered()), this, SLOT(linkAllSpatialDataWindows())));
+
    QAction* pUpdate_Wizards_Action = new QAction("Update &Wizard List", this);
    pUpdate_Wizards_Action->setAutoRepeat(false);
    pUpdate_Wizards_Action->setToolTip("Update Wizard List");
@@ -850,6 +856,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
       mpToolboxToolBar->addAction(m_pChipping_Wnd_Action);
       mpToolboxToolBar->addSeparator();
       mpToolboxToolBar->addAction(m_pLink_Action);
+      mpToolboxToolBar->addAction(mpLinkAllWindowsAction);
       mpToolboxToolBar->addSeparator();
       mpToolboxToolBar->addButton(m_pNo_View_Mode_Action, mouseModeContext);
       mpToolboxToolBar->addButton(mpLayerEditAction, mouseModeContext);
@@ -1120,6 +1127,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    mpMenuBar->insertCommand(pBatch_Wizard_Editor_Action, m_pTools, toolsContext);
    m_pTools->addSeparator();
    mpMenuBar->insertCommand(m_pLink_Action, m_pTools, toolsContext);
+   mpMenuBar->insertCommand(mpLinkAllWindowsAction, m_pTools, toolsContext);
    m_pTools->addSeparator();
    mpMenuBar->insertCommand(pUpdate_Wizards_Action, m_pTools, toolsContext);
    m_pTools->addSeparator();
@@ -3609,6 +3617,99 @@ void ApplicationWindow::linkWindows()
    dlgLink.exec();
 }
 
+void ApplicationWindow::linkAllSpatialDataWindows()
+{
+   vector<Window*> windows = getWindows(SPATIAL_DATA_WINDOW);
+   if (windows.size() < 2)
+   {
+      QMessageBox::critical(this, APP_NAME, "At least two spatial data windows must be open "
+         "before linking can be performed.");
+      return;
+   }
+
+   vector<SpatialDataView*> warningViews;
+
+   for (vector<Window*>::const_iterator iter = windows.begin(); iter != windows.end(); ++iter)
+   {
+      SpatialDataWindow* pWindow = dynamic_cast<SpatialDataWindow*>(*iter);
+      if (pWindow == NULL)
+      {
+         continue;
+      }
+
+      SpatialDataView* pView = pWindow->getSpatialDataView();
+      VERIFYNRV(pView != NULL);
+
+      for (vector<Window*>::const_iterator iter2 = windows.begin(); iter2 != windows.end(); ++iter2)
+      {
+         SpatialDataWindow* pWindow2 = dynamic_cast<SpatialDataWindow*>(*iter2);
+         if (pWindow2 == NULL || pWindow2 == pWindow)
+         {
+            continue;
+         }
+
+         SpatialDataView* pView2 = pWindow2->getSpatialDataView();
+         VERIFYNRV(pView2 != NULL);
+
+         if (pView->getViewLinkType(pView2) == NO_LINK)
+         {
+            bool link = true;
+
+            LinkType linkType = View::getSettingLinkType();
+            if (linkType == GEOCOORD_LINK)
+            {
+               bool hasGeocoords = false;
+               SpatialDataView* pSpatialDataView = pView;
+
+               LayerList* pLayerList = pSpatialDataView->getLayerList();
+               if (pLayerList != NULL)
+               {
+                  RasterElement* pRaster = pLayerList->getPrimaryRasterElement();
+                  if (pRaster != NULL)
+                  {
+                     hasGeocoords = pRaster->isGeoreferenced();
+                  }
+               }
+
+               if (hasGeocoords == true)
+               {
+                  pSpatialDataView = pView2;
+
+                  LayerList* pLayerList = pSpatialDataView->getLayerList();
+                  if (pLayerList != NULL)
+                  {
+                     RasterElement* pRaster = pLayerList->getPrimaryRasterElement();
+                     if (pRaster != NULL)
+                     {
+                        hasGeocoords = pRaster->isGeoreferenced();
+                     }
+                  }
+               }
+
+               if (hasGeocoords == false)
+               {
+                  if (std::find(warningViews.begin(), warningViews.end(), pSpatialDataView) == warningViews.end())
+                  {
+                     QString viewName = QString::fromStdString(pSpatialDataView->getDisplayName(true));
+                     QMessageBox::warning(this, APP_NAME, "The " + viewName + " data set must have "
+                        "geocoords in order to link based on latitude and longitude.");
+                     warningViews.push_back(pSpatialDataView);
+                  }
+
+                  link = false;
+               }
+            }
+
+            if (link == true)
+            {
+               pView->linkView(pView2, linkType);
+               pView->refresh();
+            }
+         }
+      }
+   }
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////
 // Help actions
 
@@ -4807,6 +4908,7 @@ void ApplicationWindow::enableActions(bool bEnable)
                                                                         // are linked in the overview window
    m_pChipping_Wnd_Action->setEnabled(bEnable && bSpatialDataView);
    m_pLink_Action->setEnabled(bEnable && bSpatialDataView);
+   mpLinkAllWindowsAction->setEnabled(bEnable);
 
    // Window actions
    mpCascadeAction->setEnabled(bEnable);

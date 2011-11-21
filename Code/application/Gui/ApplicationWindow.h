@@ -275,6 +275,7 @@ protected slots:
 
    // Window actions
    void linkWindows();
+   void linkAllSpatialDataWindows();
 
    // Help actions
    void helpTopics();
@@ -400,6 +401,7 @@ private:
    QAction* m_pGCP_Editor_Action;
    QAction* m_pTiePoint_Editor_Action;
    QAction* m_pLink_Action;
+   QAction* mpLinkAllWindowsAction;
 
    // Window actions
    QAction* mpCascadeAction;
