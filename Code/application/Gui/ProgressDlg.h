@@ -44,6 +44,9 @@ signals:
 
 protected:
    void closeEvent(QCloseEvent* e);
+   void updateWindowsTaskbar(int percentage, ReportingLevel level);
+   void resetWindowsTaskbar();
+   void setWindowsTaskbarPaused();
 
 protected slots:
    void setProcessComplete(bool bComplete);

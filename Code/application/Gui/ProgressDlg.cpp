@@ -11,12 +11,17 @@
 #include <QtGui/QCloseEvent>
 #include <QtGui/QMovie>
 #include <QtGui/QVBoxLayout>
-
-#include "ProgressDlg.h"
+#include <QtGui/QWidget>
 
 #include "AppAssert.h"
 #include "Executable.h"
 #include "DataVariant.h"
+#include "DesktopServices.h"
+#include "ProgressDlg.h"
+
+#if defined(WIN_API)
+   #include <ShObjIdl.h>
+#endif
 
 #include <string>
 using namespace std;
@@ -164,6 +169,7 @@ void ProgressDlg::progressUpdated(Subject& subject, const string& signal, const 
       {
          mpProgressBar->reset();
          mpProgressBar->setValue(0);
+         resetWindowsTaskbar();
       }
    }
    else if (eLevel == ERRORS)
@@ -177,9 +183,11 @@ void ProgressDlg::progressUpdated(Subject& subject, const string& signal, const 
       if (iPercent < iOldPercent)
       {
          mpProgressBar->reset();
+         resetWindowsTaskbar();
       }
 
       mpProgressBar->setValue(iPercent);
+      updateWindowsTaskbar(iPercent, eLevel);
    }
    else
    {
@@ -198,21 +206,28 @@ void ProgressDlg::progressUpdated(Subject& subject, const string& signal, const 
          if (iPercent < iOldPercent)
          {
             mpProgressBar->reset();
+            resetWindowsTaskbar();
 
             if (iPercent >= 0)
             {
                mpProgressBar->setValue(iPercent);
+               updateWindowsTaskbar(iPercent, eLevel);
             }
          }
          else if (iPercent > iOldPercent)
          {
             mpProgressBar->setValue(iPercent);
+            updateWindowsTaskbar(iPercent, eLevel);
          }
       }
 
       if (iPercent != mpProgressBar->maximum())
       {
          bComplete = false;
+      }
+      else
+      {
+         setWindowsTaskbarPaused();
       }
    }
 
@@ -231,6 +246,7 @@ void ProgressDlg::progressUpdated(Subject& subject, const string& signal, const 
    {
       if (isVisible() == true)
       {
+         resetWindowsTaskbar();
          hide();
       }
    }
@@ -257,6 +273,7 @@ void ProgressDlg::progressDeleted(Subject& subject, const string& signal, const 
    if (((mbAutoClose == true) && (eLevel != ERRORS) && (mpWarningWidget->isVisible() == false)) ||
       (isVisible() == false))
    {
+      resetWindowsTaskbar();
       delete this;
    }
 }
@@ -305,6 +322,7 @@ void ProgressDlg::closeEvent(QCloseEvent* e)
    mpWarningEdit->clear();
    mpWarningWidget->hide();
    setMinimumSize(300, 125);
+   resetWindowsTaskbar();
 
    if (mpProgressObject == NULL)
    {
@@ -322,6 +340,66 @@ void ProgressDlg::closeEvent(QCloseEvent* e)
 
       hide();
    }
+}
+
+void ProgressDlg::updateWindowsTaskbar(int percentage, ReportingLevel level)
+{
+#if defined(WIN_API)
+   ITaskbarList3* pTask(NULL);
+   if ((CoCreateInstance(CLSID_TaskbarList, NULL, CLSCTX_ALL, IID_ITaskbarList3, (void**)&pTask) == S_OK) &&
+      (pTask != NULL))
+   {
+      HWND pWin = Service<DesktopServices>()->getMainWidget()->winId();
+      if (pWin != NULL)
+      {
+         if (level != ERRORS)
+         {
+            pTask->SetProgressValue(pWin, percentage, 100);
+            pTask->SetProgressState(pWin, TBPF_NORMAL);
+         }
+         else
+         {
+            pTask->SetProgressValue(pWin, 100, 100);
+            pTask->SetProgressState(pWin, TBPF_ERROR);
+         }
+      }
+   }
+#else
+   Q_UNUSED(percentage);
+   Q_UNUSED(level);
+#endif
+}
+
+void ProgressDlg::setWindowsTaskbarPaused()
+{
+#if defined(WIN_API)
+   ITaskbarList3* pTask(NULL);
+   if ((CoCreateInstance(CLSID_TaskbarList, NULL, CLSCTX_ALL, IID_ITaskbarList3, (void**)&pTask) == S_OK) &&
+      (pTask != NULL))
+   {
+      HWND pWin = Service<DesktopServices>()->getMainWidget()->winId();
+      if (pWin != NULL)
+      {
+         pTask->SetProgressState(pWin, TBPF_PAUSED);
+      }
+   }
+#endif
+
+}
+void ProgressDlg::resetWindowsTaskbar()
+{
+#if defined(WIN_API)
+   ITaskbarList3* pTask(NULL);
+   if ((CoCreateInstance(CLSID_TaskbarList, NULL, CLSCTX_ALL, IID_ITaskbarList3, (void**)&pTask) == S_OK) &&
+      (pTask != NULL))
+   {
+      HWND pWin = Service<DesktopServices>()->getMainWidget()->winId();
+      if (pWin != NULL)
+      {
+         pTask->SetProgressState(pWin, TBPF_NOPROGRESS);
+      }
+   }
+#endif
 }
 
 void ProgressDlg::setProcessComplete(bool bComplete)
