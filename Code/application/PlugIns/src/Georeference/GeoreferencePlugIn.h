@@ -42,6 +42,7 @@ private:
    Service<PlugInManagerServices> mpPluginManager;
    std::string mMessageText;
 
+   bool mCreateLayer;
    bool mDisplayLayer;
    Progress* mpProgress;
    RasterElement* mpRaster;

@@ -12,17 +12,18 @@
 #ifndef GEOREFERENCEDLG_H
 #define GEOREFERENCEDLG_H
 
-#include <QtGui/QComboBox>
 #include <QtGui/QDialog>
-#include <QtGui/QLabel>
-#include <QtGui/QLineEdit>
-#include <QtGui/QListWidget>
-#include <QtGui/QStackedWidget>
 
 #include "TypesFile.h"
 
 #include <string>
 #include <vector>
+
+class QCheckBox;
+class QComboBox;
+class QLineEdit;
+class QListWidget;
+class QStackedWidget;
 
 class GeoreferenceDlg : public QDialog
 {
@@ -38,9 +39,12 @@ public:
    GeocoordType getGeocoordType() const;
 
    int getGeorefAlgorithmIndex() const;
+   bool getCreateLayer() const;
+   bool getDisplayLayer() const;
 
 protected slots:
    void setPlugin(int iPluginIndex);
+   void createLayerChanged(bool create);
    void accept();
 
 private:
@@ -52,6 +56,8 @@ private:
 
    QLineEdit* mpResultsEdit;
    QComboBox* mpCoordCombo;
+   QCheckBox* mpCreateLayer;
+   QCheckBox* mpDisplayLayer;
 
    std::vector<QWidget*> mWidgets;
 };

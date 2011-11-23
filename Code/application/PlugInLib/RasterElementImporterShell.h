@@ -10,7 +10,6 @@
 #ifndef RASTERELEMENTIMPORTERSHELL_H
 #define RASTERELEMENTIMPORTERSHELL_H
 
-#include "ConfigurationSettings.h"
 #include "DesktopServices.h"
 #include "ImporterShell.h"
 #include "ModelServices.h"
@@ -81,11 +80,6 @@ public:
     *  Destroys the raster element importer plug-in.
     */
    virtual ~RasterElementImporterShell();
-
-   SETTING(AutoGeoreference, RasterElementImporter, bool, true)
-   SETTING(ImporterGeoreferencePlugIn, RasterElementImporter, bool, true)
-   SETTING(GeoreferencePlugIns, RasterElementImporter, std::vector<std::string>, std::vector<std::string>())
-   SETTING(DisplayLatLonLayer, RasterElementImporter, bool, false)
 
    /**
     *  @copydoc ImporterShell::getInputSpecification()
@@ -163,7 +157,7 @@ protected:
     *  @return  Returns <b>true</b> if the sensor data value was successfully
     *           extracted from the arg list.  <b>false</b> is returned if the raster
     *           element value could not be extracted from the arg list.  The return value
-    *           does not depend on successfully extractinf the progress value since
+    *           does not depend on successfully extracting the progress value since
     *           the Progress object is not required to successfully load the element.
     *
     *  @see     getProgress(), getRasterElement()
@@ -310,7 +304,9 @@ protected:
     *  Creates a latitude/longitude layer in the given view.
     *
     *  This method is called from the default implementation of createView()
-    *  after the GCP layer is created.
+    *  after the GCP layer is created.  This method is not called if the
+    *  \link  Georeference::getSettingCreateLatLonLayer()
+    *  Georeference::CreateLatLonLayer\endlink setting is \c false.
     *
     *  @param   pView
     *           The view in which to create the latitude/longitude layer.
@@ -323,11 +319,13 @@ protected:
     *           "Georeference" plug-in to create the latitude/longitude layer
     *           based on the previously georeferenced raster element.  If the
     *           layer is successfully created, the layer is shown or hidden
-    *           based on the value of the DisplayLatLonLayer setting.  If the
-    *           raster element was not successfully georeferenced, the default
+    *           based on the value of the
+    *           \link Georeference::getSettingDisplayLatLonLayer()
+    *           Georeference::DisplayLatLonLayer\endlink setting.  If the raster
+    *           element was not successfully georeferenced, the default
     *           implementation does nothing.
     *
-    *  @see     createGcpLayer(), getSettingDisplayLatLonLayer()
+    *  @see     createGcpLayer()
     */
    virtual LatLonLayer* createLatLonLayer(SpatialDataView* pView, Step* pStep) const;
 
@@ -382,8 +380,8 @@ protected:
     *           is available to georeference the raster data, or if the raster
     *           data does not contain georeference information.
     *
-    *  @see     getRasterElement(), getSettingAutoGeoreference(),
-    *           getSettingImporterGeoreferencePlugIn()
+    *  @see     getRasterElement(), Georeference::getSettingAutoGeoreference(),
+    *           Georeference::getSettingImporterGeoreferencePlugIn()
     */
    virtual PlugIn* getGeoreferencePlugIn() const;
 

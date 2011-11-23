@@ -132,17 +132,17 @@ bool RasterElementImporterShell::execute(PlugInArgList* pInArgList, PlugInArgLis
       mpGcpList = createGcpList();
 
       // Georeference the raster element
-      if (RasterElementImporterShell::getSettingAutoGeoreference() == true)
+      if (Georeference::getSettingAutoGeoreference() == true)
       {
          // Get the Georeference plug-in
          PlugIn* pGeoPlugIn = NULL;
-         if (RasterElementImporterShell::getSettingImporterGeoreferencePlugIn() == true)
+         if (Georeference::getSettingImporterGeoreferencePlugIn() == true)
          {
             pGeoPlugIn = getGeoreferencePlugIn();
          }
          else
          {
-            vector<string> plugInNames = RasterElementImporterShell::getSettingGeoreferencePlugIns();
+            vector<string> plugInNames = Georeference::getSettingGeoreferencePlugIns();
             for (vector<string>::const_iterator iter = plugInNames.begin(); iter != plugInNames.end(); ++iter)
             {
                PlugIn* pPlugIn = mpPlugInManager->createPlugIn(*iter);
@@ -671,7 +671,10 @@ SpatialDataView* RasterElementImporterShell::createView() const
       UndoLock lock(pView);
       createRasterLayer(pView, pStep.get());
       createGcpLayer(pView, pStep.get());
-      createLatLonLayer(pView, pStep.get());
+      if (Georeference::getSettingCreateLatLonLayer() == true)
+      {
+         createLatLonLayer(pView, pStep.get());
+      }
    }
 
    // Check for at least one layer in the view
@@ -803,15 +806,10 @@ LatLonLayer* RasterElementImporterShell::createLatLonLayer(SpatialDataView* pVie
       return NULL;
    }
 
-   string resultsName = "GEO_RESULTS";
-   bool displayLayer = true;     // Always set to display the layer; otherwise the plug-in will not create it
-
    ExecutableResource geoDisplayPlugIn("Georeference", string(), mpProgress, true);
    PlugInArgList& inArgList = geoDisplayPlugIn->getInArgList();
    VERIFY(inArgList.setPlugInArgValue(Executable::DataElementArg(), mpRasterElement));
    VERIFY(inArgList.setPlugInArgValue(Executable::ViewArg(), pView));
-   VERIFY(inArgList.setPlugInArgValue("Results Name", &resultsName));
-   VERIFY(inArgList.setPlugInArgValue("Display Layer", &displayLayer));
    if (geoDisplayPlugIn->execute() == false)
    {
       string message = "Could not create the latitude/longitude layer for the georeference data.";
@@ -831,22 +829,6 @@ LatLonLayer* RasterElementImporterShell::createLatLonLayer(SpatialDataView* pVie
    PlugInArgList& outArgList = geoDisplayPlugIn->getOutArgList();
 
    LatLonLayer* pLayer = outArgList.getPlugInArgValue<LatLonLayer>("Latitude/Longitude Layer");
-   if ((pLayer != NULL) && (RasterElementImporterShell::getSettingDisplayLatLonLayer() == false))
-   {
-      if (pView->hideLayer(pLayer) == false)
-      {
-         string message = "Could not hide the latitude/longitude layer.";
-         if (mpProgress != NULL)
-         {
-            mpProgress->updateProgress(message, 0, WARNING);
-         }
-
-         if (pStep != NULL)
-         {
-            pStep->addMessage(message, "app", "EA1FA2D1-8D06-424B-83FE-960DE21F0D80");
-         }
-      }
-   }
 
    return pLayer;
 }

@@ -19,11 +19,11 @@
 #include "OptionsFileLocations.h"
 #include "OptionsGcpLayer.h"
 #include "OptionsGeneral.h"
+#include "OptionsGeoreference.h"
 #include "OptionsLatLonLayer.h"
 #include "OptionsMeasurementLayer.h"
 #include "OptionsOverviewWindow.h"
 #include "OptionsPseudocolorLayer.h"
-#include "OptionsRasterElementImporter.h"
 #include "OptionsRasterLayer.h"
 #include "OptionsSession.h"
 #include "OptionsShortcuts.h"
@@ -101,11 +101,11 @@ REGISTER_PLUGIN(OpticksCore, OptionsAoiLayer, OptionQWidgetWrapper<OptionsAoiLay
 REGISTER_PLUGIN(OpticksCore, OptionsFileLocations, OptionQWidgetWrapper<OptionsFileLocations>());
 REGISTER_PLUGIN(OpticksCore, OptionsGcpLayer, OptionQWidgetWrapper<OptionsGcpLayer>());
 REGISTER_PLUGIN(OpticksCore, OptionsGeneral, OptionQWidgetWrapper<OptionsGeneral>());
+REGISTER_PLUGIN(OpticksCore, OptionsGeoreference, OptionQWidgetWrapper<OptionsGeoreference>());
 REGISTER_PLUGIN(OpticksCore, OptionsLatLonLayer, OptionQWidgetWrapper<OptionsLatLonLayer>());
 REGISTER_PLUGIN(OpticksCore, OptionsMeasurementLayer, OptionQWidgetWrapper<OptionsMeasurementLayer>());
 REGISTER_PLUGIN(OpticksCore, OptionsOverviewWindow, OptionQWidgetWrapper<OptionsOverviewWindow>());
 REGISTER_PLUGIN(OpticksCore, OptionsPseudocolorLayer, OptionQWidgetWrapper<OptionsPseudocolorLayer>());
-REGISTER_PLUGIN(OpticksCore, OptionsRasterElementImporter, OptionQWidgetWrapper<OptionsRasterElementImporter>());
 REGISTER_PLUGIN(OpticksCore, OptionsRasterLayer, OptionQWidgetWrapper<OptionsRasterLayer>());
 REGISTER_PLUGIN(OpticksCore, OptionsSession, OptionQWidgetWrapper<OptionsSession>());
 REGISTER_PLUGIN(OpticksCore, OptionsShortcuts, OptionQWidgetWrapper<OptionsShortcuts>());

@@ -7,11 +7,19 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtGui/QCheckBox>
+#include <QtGui/QComboBox>
 #include <QtGui/QFrame>
+#include <QtGui/QLabel>
 #include <QtGui/QLayout>
+#include <QtGui/QLineEdit>
+#include <QtGui/QListWidget>
 #include <QtGui/QMessageBox>
 #include <QtGui/QPushButton>
+#include <QtGui/QStackedWidget>
 
+#include "AppVerify.h"
+#include "Georeference.h"
 #include "GeoreferenceDlg.h"
 
 using namespace std;
@@ -40,6 +48,16 @@ GeoreferenceDlg::GeoreferenceDlg(const QString& title,
    // Results name
    QLabel* pResultsLabel = new QLabel("Results Name:", this);
    mpResultsEdit = new QLineEdit(this);
+
+   // create layer option
+   mpCreateLayer = new QCheckBox("Create layer for the georeference results", this);
+   mpCreateLayer->setToolTip("Toggles whether or not a layer is created for the georeference results.\n"
+      "If a layer already exists, it will be updated for the new results regardless of this setting.");
+
+   // display layer option
+   mpDisplayLayer = new QCheckBox("Display the georeference results layer", this);
+   mpDisplayLayer->setToolTip("Toggles whether or not the created georeference results layer is displayed.\n"
+      "If the layer isn't created, this setting is ignored.");
 
    // Coordinate type
    QLabel* pCoordLabel = new QLabel("Coordinate Type:", this);
@@ -81,8 +99,10 @@ GeoreferenceDlg::GeoreferenceDlg(const QString& title,
    pGrid->addWidget(mpResultsEdit, 2, 1, 1, 2);
    pGrid->addWidget(pCoordLabel, 3, 0);
    pGrid->addWidget(mpCoordCombo, 3, 1, 1, 2, Qt::AlignLeft);
-   pGrid->addWidget(pHLine2, 4, 0, 1, 3);
-   pGrid->addLayout(pButtonLayout, 5, 0, 1, 3);
+   pGrid->addWidget(mpCreateLayer, 4, 1, 1, 2, Qt::AlignLeft);
+   pGrid->addWidget(mpDisplayLayer, 5, 1, 1, 2, Qt::AlignLeft);
+   pGrid->addWidget(pHLine2, 6, 0, 1, 3);
+   pGrid->addLayout(pButtonLayout, 7, 0, 1, 3);
    pGrid->setRowStretch(0, 10);
    pGrid->setColumnStretch(2, 10);
 
@@ -90,6 +110,9 @@ GeoreferenceDlg::GeoreferenceDlg(const QString& title,
    setWindowTitle(title);
    setModal(true);
    resize(400, 250);
+   mpCreateLayer->setChecked(Georeference::getSettingCreateLatLonLayer());
+   mpDisplayLayer->setChecked(mpCreateLayer->isChecked() ? Georeference::getSettingDisplayLatLonLayer() : false);
+   mpDisplayLayer->setEnabled(mpCreateLayer->isChecked());
 
    if (geoPluginWidgetList.empty() == true)
    {
@@ -138,9 +161,10 @@ GeoreferenceDlg::GeoreferenceDlg(const QString& title,
    }
 
    // Connections
-   connect(mpGeoList, SIGNAL(currentRowChanged(int)), this, SLOT(setPlugin(int)));
-   connect(pOkButton, SIGNAL(clicked()), this, SLOT(accept()));
-   connect(pCancelButton, SIGNAL(clicked()), this, SLOT(reject()));
+   VERIFYNR(connect(mpGeoList, SIGNAL(currentRowChanged(int)), this, SLOT(setPlugin(int))));
+   VERIFYNR(connect(pOkButton, SIGNAL(clicked()), this, SLOT(accept())));
+   VERIFYNR(connect(pCancelButton, SIGNAL(clicked()), this, SLOT(reject())));
+   VERIFYNR(connect(mpCreateLayer, SIGNAL(toggled(bool)), this, SLOT(createLayerChanged(bool))));
 }
 
 GeoreferenceDlg::~GeoreferenceDlg()
@@ -228,4 +252,24 @@ void GeoreferenceDlg::accept()
    }
 
    QDialog::accept();
+}
+
+bool GeoreferenceDlg::getCreateLayer() const
+{
+   return mpCreateLayer->isChecked();
+}
+
+bool GeoreferenceDlg::getDisplayLayer() const
+{
+   return (getCreateLayer() && mpDisplayLayer->isChecked());
+}
+
+void GeoreferenceDlg::createLayerChanged(bool create)
+{
+   if (create == false)
+   {
+      mpDisplayLayer->setChecked(false);
+   }
+
+   mpDisplayLayer->setEnabled(create);
 }

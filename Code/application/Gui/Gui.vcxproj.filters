@@ -176,9 +176,6 @@
     <ClCompile Include="OptionsPseudocolorLayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="OptionsRasterElementImporter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="OptionsRasterLayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -506,6 +503,9 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_OptionsGeneral.cpp">
       <Filter>moc</Filter>
     </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_OptionsGeoreference.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_OptionsLatLonLayer.cpp">
       <Filter>moc</Filter>
     </ClCompile>
@@ -516,9 +516,6 @@
       <Filter>moc</Filter>
     </ClCompile>
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_OptionsPseudocolorLayer.cpp">
-      <Filter>moc</Filter>
-    </ClCompile>
-    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_OptionsRasterElementImporter.cpp">
       <Filter>moc</Filter>
     </ClCompile>
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_OptionsRasterLayer.cpp">
@@ -883,6 +880,9 @@
     </ClCompile>
     <ClCompile Include="Undo\ViewUndo.cpp">
       <Filter>Undo</Filter>
+    </ClCompile>
+    <ClCompile Include="OptionsGeoreference.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1374,9 +1374,6 @@
     <CustomBuild Include="OptionsPseudocolorLayer.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="OptionsRasterElementImporter.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="OptionsRasterLayer.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -1535,6 +1532,9 @@
     </CustomBuild>
     <CustomBuild Include="Undo\UndoStack.h">
       <Filter>Undo</Filter>
+    </CustomBuild>
+    <CustomBuild Include="OptionsGeoreference.h">
+      <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
 </Project>

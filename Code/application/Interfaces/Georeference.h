@@ -10,9 +10,11 @@
 #ifndef GEOREFERENCE_H
 #define GEOREFERENCE_H
 
+#include "ConfigurationSettings.h"
 #include "LocationType.h"
 
 #include <string>
+#include <vector>
 
 class QWidget;
 class RasterElement;
@@ -30,6 +32,12 @@ class RasterElement;
 class Georeference
 {
 public:
+   SETTING(AutoGeoreference, Georeference, bool, true)
+   SETTING(ImporterGeoreferencePlugIn, Georeference, bool, true)
+   SETTING(GeoreferencePlugIns, Georeference, std::vector<std::string>, std::vector<std::string>())
+   SETTING(CreateLatLonLayer, Georeference, bool, true)
+   SETTING(DisplayLatLonLayer, Georeference, bool, false)
+
    /**
     *  The name for a GcpList argument.
     *

@@ -17,6 +17,7 @@
 #include "DataDescriptor.h"
 #include "DesktopServices.h"
 #include "Filename.h"
+#include "Georeference.h"
 #include "GeoreferenceDlg.h"
 #include "GeoreferencePlugIn.h"
 #include "LatLonLayer.h"
@@ -44,7 +45,8 @@
 REGISTER_PLUGIN_BASIC(OpticksGeoreference, GeoreferencePlugIn);
 
 GeoreferencePlugIn::GeoreferencePlugIn() :
-   mDisplayLayer(false),
+   mCreateLayer(Georeference::getSettingCreateLatLonLayer()),
+   mDisplayLayer(Georeference::getSettingDisplayLatLonLayer()),
    mpProgress(NULL),
    mpRaster(NULL),
    mpView(NULL),
@@ -158,6 +160,8 @@ bool GeoreferencePlugIn::execute(PlugInArgList* pInParam, PlugInArgList* pOutPar
       }
 
       // Get results
+      mCreateLayer = dlgGeo.getCreateLayer();
+      mDisplayLayer = dlgGeo.getDisplayLayer();
       mResultsName = dlgGeo.getResultsName();
       eType = dlgGeo.getGeocoordType();
       unsigned int uiGeoIndex = dlgGeo.getGeorefAlgorithmIndex();
@@ -242,23 +246,12 @@ bool GeoreferencePlugIn::execute(PlugInArgList* pInParam, PlugInArgList* pOutPar
    }
    else
    {
-      if (!pInParam->getPlugInArgValue("Display Layer", mDisplayLayer) ||
-         !pInParam->getPlugInArgValue("Results Name", mResultsName))
-      {
-         mMessageText = "No name or Display Layer flag provided for georeferencing layer";
-         if (mpProgress)
-         {
-            mpProgress->updateProgress(mMessageText, 0, ERRORS);
-         }
-         pStep->finalize(Message::Failure, mMessageText);
-         return false;
-      }
+      pInParam->getPlugInArgValue("Create Layer", mCreateLayer);
+      pInParam->getPlugInArgValue("Display Layer", mDisplayLayer);
+      pInParam->getPlugInArgValue("Results Name", mResultsName);
    }
 
-   pStep->addProperty("resultsName", mResultsName);
-   pStep->addProperty("geocoordType", eType);
-
-   if ((!isBatch() || mDisplayLayer) && mpView != NULL)
+   if (mCreateLayer && mpView != NULL)
    {
       LayerList* pLayerList = mpView->getLayerList();
       if (pLayerList != NULL)
@@ -269,15 +262,39 @@ bool GeoreferencePlugIn::execute(PlugInArgList* pInParam, PlugInArgList* pOutPar
          {
             pUndoGroup.reset(new UndoGroup(mpView, "Add Lat/Lon Layer"));
             pLatLonLayer = static_cast<LatLonLayer*>(mpView->createLayer(LAT_LONG, mpRaster, mResultsName));
+            if (pLatLonLayer == NULL)
+            {
+               string warningTxt = "Could not create the latitude/longitude layer.";
+               if (mResultsName.empty())
+               {
+                  warningTxt += " The input results name was blank.";
+               }
+               if (mpProgress != NULL)
+               {
+                  mpProgress->updateProgress(warningTxt, 99, WARNING);
+               }
+               pStep->addMessage(warningTxt, "app", "84B6CB10-9902-4ECA-BD9B-0BF6DEDF288D");
+            }
          }
 
          if (pLatLonLayer != NULL)
          {
+            pStep->addProperty("resultsName", mResultsName);
+            pStep->addProperty("geocoordType", eType);
             pLatLonLayer->setGeocoordType(eType);
 
             if (pOutParam != NULL)
             {
                pOutParam->setPlugInArgValue<LatLonLayer>("Latitude/Longitude Layer", pLatLonLayer);
+            }
+
+            if (mDisplayLayer)
+            {
+               mpView->showLayer(pLatLonLayer);
+            }
+            else
+            {
+               mpView->hideLayer(pLatLonLayer);
             }
          }
       }
@@ -306,7 +323,9 @@ bool GeoreferencePlugIn::getInputSpecification(PlugInArgList*& pArgList)
    if (isBatch())
    {
       VERIFY(pArgList->addArg<string>("Results Name", &mResultsName, "Name for the result of the georeferencing."));
-      VERIFY(pArgList->addArg<bool>("Display Layer", &mDisplayLayer, "Whether to display the new layer or not."));
+      VERIFY(pArgList->addArg<bool>("Create Layer", &mCreateLayer, "Whether to create a lat/lon layer or not."));
+      VERIFY(pArgList->addArg<bool>("Display Layer", &mDisplayLayer, "If a lat/lon layer is created, whether to "
+         "display the new layer or not."));
    }
 
    return true;

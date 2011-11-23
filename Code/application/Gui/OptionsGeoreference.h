@@ -1,14 +1,14 @@
 /*
  * The information in this file is
- * Copyright(c) 2010 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2011 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef OPTIONSRASTERELEMENTIMPORTER_H
-#define OPTIONSRASTERELEMENTIMPORTER_H
+#ifndef OPTIONSGEOREFERENCE_H
+#define OPTIONSGEOREFERENCE_H
 
 #include "AppVersion.h"
 
@@ -18,40 +18,38 @@
 
 class MutuallyExclusiveListWidget;
 class QCheckBox;
-class QGroupBox;
 class QRadioButton;
 
-class OptionsRasterElementImporter : public QWidget
+class OptionsGeoreference : public QWidget
 {
    Q_OBJECT
 
 public:
-   OptionsRasterElementImporter();
-   virtual ~OptionsRasterElementImporter();
+   OptionsGeoreference();
+   virtual ~OptionsGeoreference();
 
    void applyChanges();
 
    static const std::string& getName()
    {
-      static std::string var = "Raster Element Importer Options";
+      static std::string var = "Georeference Options";
       return var;
    }
 
    static const std::string& getOptionName()
    {
-      static std::string var = "Import/Raster Element";
+      static std::string var = "Georeference";
       return var;
    }
 
    static const std::string& getDescription()
    {
-      static std::string var = "Widget to display raster element importer related options for the application";
-      return var;
+      return getShortDescription();
    }
 
    static const std::string& getShortDescription()
    {
-      static std::string var = "Widget to display raster element importer related options for the application";
+      static std::string var = "Widget to display georeference related options for the application";
       return var;
    }
 
@@ -84,13 +82,19 @@ public:
       return var;
    }
 
+protected slots:
+   void createLayerChanged(bool create);
+   void enableAutoOptions(bool enabled);
+
 private:
-   OptionsRasterElementImporter(const OptionsRasterElementImporter& rhs);
-   OptionsRasterElementImporter& operator=(const OptionsRasterElementImporter& rhs);
-   QGroupBox* mpAutoGeorefGroup;
+   OptionsGeoreference(const OptionsGeoreference& rhs);
+   OptionsGeoreference& operator=(const OptionsGeoreference& rhs);
+   QCheckBox* mpAutoGeoreference;
    QRadioButton* mpImporterPlugInRadio;
+   QRadioButton* mpBestPlugInRadio;
    MutuallyExclusiveListWidget* mpPlugInList;
-   QCheckBox* mpLatLonLayerCheck;
+   QCheckBox* mpCreateLayer;
+   QCheckBox* mpDisplayLayer;
 };
 
 #endif
