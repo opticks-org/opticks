@@ -1657,13 +1657,13 @@ Animation* SpatialDataViewImp::createDefaultAnimation()
    {
       if (pController->getNumAnimations() == 0)
       {
-         if (pController->getFrameType() == FRAME_TIME)
+         if (pController->getFrameType() != FRAME_ID)
          {
             pAnimationServices->destroyAnimationController(pController);
             pController = NULL;
          }
       }
-      else if (pController->getFrameType() == FRAME_TIME)
+      else if (pController->getFrameType() != FRAME_ID)
       {
          return NULL;
       }

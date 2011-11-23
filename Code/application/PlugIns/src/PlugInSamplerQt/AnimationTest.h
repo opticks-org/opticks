@@ -20,8 +20,9 @@
 
 class Animation;
 class QComboBox;
-class QDoubleSpinBox;
+class QDateTimeEdit;
 class QSpinBox;
+class QStackedWidget;
 
 class AnimationTestPlugIn : public ViewerShell
 {
@@ -54,7 +55,7 @@ public:
    void controllerDeleted(Subject& subject, const std::string& signal, const boost::any& value);
 
 protected slots:
-   void createController();
+   void createController(QAction* pAction);
    void destroyController();
    void createAnimations();
    void clearAnimation();
@@ -76,8 +77,12 @@ private:
    AttachmentPtr<AnimationController> mpController;
    QSpinBox* mpNumAnimations;
    QSpinBox* mpNumFrames;
-   QDoubleSpinBox* mpMinFrameValue;
-   QDoubleSpinBox* mpMaxFrameValue;
+   QStackedWidget* mpStack;
+   QDateTimeEdit* mpMinFrameTime;
+   QDateTimeEdit* mpMaxFrameTime;
+   QSpinBox* mpHoursSpin;
+   QSpinBox* mpMinutesSpin;
+   QSpinBox* mpSecondsSpin;
    QComboBox* mpAnimationList;
    unsigned int mAnimationNumber;
 };

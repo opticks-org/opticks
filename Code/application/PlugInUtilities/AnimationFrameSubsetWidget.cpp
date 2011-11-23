@@ -219,12 +219,12 @@ void AnimationFrameSubsetWidget::setStopFrame(double stop)
       if (mpStopSpin->getFrameType() == FRAME_ID)
       {
          if (frames[i].mFrameNumber == stop)
-         { 
+         {
             index = i;
             break;
          }
       }
-      else 
+      else
       {
          if (frames[i].mTime == stop || (i + 1) == frames.size())
          {
@@ -322,7 +322,8 @@ void AnimationFrameSubsetWidget::setFrameType(FrameType type)
       mpStopSlider->setToolTip("Last frame to export, 1-based frame number");
       mpStopSpin->setToolTip("Last frame to export, 1-based frame number");
       break;
-   case FRAME_TIME:
+   case FRAME_TIME:           // Fall through
+   case FRAME_ELAPSED_TIME:
       mpStartLabel->setText("Start Time:");
       mpStartSlider->setToolTip("Time of first frame to export");
       mpStartSpin->setToolTip("Time of first frame to export");

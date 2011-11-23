@@ -20,6 +20,7 @@
 #include <vector>
 
 class AnimationController;
+class AnimationFrame;
 
 class AnimationServicesImp : public QObject, public AnimationServices, public SubjectImp
 {
@@ -37,12 +38,8 @@ public:
    SUBJECTADAPTER_METHODS(SubjectImp)
 
    // AnimationServices
-   AnimationController* createAnimationController(const std::string& name, FrameType frameType,
-                                                   const std::string& id);
-   AnimationController* createAnimationController(const std::string& name, FrameType frameType)
-   {
-      return createAnimationController(name, frameType, std::string());
-   }
+   AnimationController* createAnimationController(const std::string& name, FrameType frameType);
+   AnimationController* createAnimationController(const std::string& name, FrameType frameType, const std::string& id);
    bool hasAnimationController(const std::string& name) const;
    AnimationController* getAnimationController(const std::string& name) const;
    const std::vector<AnimationController*>& getAnimationControllers() const;
@@ -53,12 +50,15 @@ public:
    void destroyAnimationController(AnimationController* pController);
    void clear();
 
+   std::string frameToString(const AnimationFrame& frame, FrameType frameType) const;
+   std::string frameToString(double frameValue, FrameType frameType) const;
+
    // AnimationServicesImp
    void updateContextMenu(Subject& subject, const std::string& signal, const boost::any& value);
 
 protected:
    AnimationServicesImp();
-   ~AnimationServicesImp();
+   virtual ~AnimationServicesImp();
 
 protected slots:
    void activateSelectedController();

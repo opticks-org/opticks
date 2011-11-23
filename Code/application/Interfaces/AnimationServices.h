@@ -18,6 +18,7 @@
 #include <vector>
 
 class AnimationController;
+class AnimationFrame;
 
 /**
  *  \ingroup ServiceModule
@@ -177,6 +178,44 @@ public:
     *  @see     Animation
     */
    virtual void destroyAnimationController(AnimationController* pController) = 0;
+
+   /**
+    *  Returns a frame value as a formatted string.
+    *
+    *  @param   frame
+    *           The animation frame containing the value to convert to a string.
+    *  @param   frameType
+    *           The frame type that specifies the format of the returned string.
+    *
+    *  @return  Returns a formatted string based on the frame type containing
+    *           the frame value as follows:
+    *           <table>
+    *           <tr>
+    *              <td align="center"><b>Frame Type</b></td>
+    *              <td align="center"><b>Format</b></td>
+    *              <td align="center"><b>Description</b></td>
+    *           </tr>
+    *           <tr>
+    *              <td>::FRAME_ID</td>
+    *              <td>"n"</td>
+    *              <td>One-based numeric frame number</td>
+    *           </tr>
+    *           <tr>
+    *              <td>::FRAME_TIME</td>
+    *              <td>"yyyy/MM/dd hh:mm:ss.zzz"</td>
+    *              <td>Year, month, day, hours, minutes, seconds, and milliseconds</td>
+    *           </tr>
+    *           <tr>
+    *              <td>::FRAME_ELAPSED_TIME</td>
+    *              <td>"hh:mm:ss.zzz"</td>
+    *              <td>Hours, minutes, seconds, and milliseconds</td>
+    *           </tr>
+    *           </table>
+    *           An empty string is returned if \e frameType is invalid or if
+    *           \e frameType  is ::FRAME_TIME or ::FRAME_ELAPSED_TIME and the
+    *           value has not been set.
+    */
+   virtual std::string frameToString(const AnimationFrame& frame, FrameType frameType) const = 0;
 
 protected:
    /**

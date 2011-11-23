@@ -20,7 +20,7 @@
 #include "AnimationController.h"
 #include "AnimationControllerImp.h"
 #include "AnimationCycleButton.h"
-#include "AnimationImp.h"
+#include "AnimationServicesImp.h"
 #include "AnimationToolBar.h"
 #include "AnimationToolBarImp.h"
 #include "AppVerify.h"
@@ -546,8 +546,24 @@ void AnimationToolBarImp::updateCurrentFrame(double frameValue)
       // Frame text
       if (mHideTimestamp == false)
       {
-         strFrameText = AnimationImp::frameToQString(frameValue, mpController->getFrameType(),
-            static_cast<unsigned int> (stopFrame - startFrame + 1.0)) + " ";
+         AnimationServicesImp* pAnimationServices = AnimationServicesImp::instance();
+         if (pAnimationServices != NULL)
+         {
+            FrameType frameType = mpController->getFrameType();
+
+            std::string frameText = pAnimationServices->frameToString(frameValue, frameType);
+            if (frameType == FRAME_ID)
+            {
+               strFrameText = "Frame: " + QString::fromStdString(frameText) + "/" +
+                  QString::number(static_cast<unsigned int>(stopFrame - startFrame + 1.0));
+            }
+            else
+            {
+               strFrameText = QString::fromStdString(frameText);
+            }
+
+            strFrameText += " ";
+         }
       }
    }
 

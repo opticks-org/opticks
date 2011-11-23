@@ -11,12 +11,12 @@
 #include "AnimationController.h"
 #include "AnimationFrame.h"
 #include "AnimationFrameSpinBox.h"
+#include "AnimationServices.h"
 
-#include <QtCore/QDateTime>
 #include <QtGui/QLineEdit>
 
 #include <algorithm>
-#include <math.h>
+#include <string>
 using namespace std;
 
 namespace
@@ -115,7 +115,7 @@ const std::vector<AnimationFrame>& AnimationFrameSpinBox::getFrames() const
 
 void AnimationFrameSpinBox::setCurrentFrame(const AnimationFrame& frame)
 {
-   for (unsigned int i = 0;i < mFrames.size(); ++i)
+   for (unsigned int i = 0; i < mFrames.size(); ++i)
    {
       double check1 = mType == FRAME_ID ? mFrames[i].mFrameNumber : mFrames[i].mTime;
       double check2 = mType == FRAME_ID ? frame.mFrameNumber : frame.mTime;
@@ -124,13 +124,13 @@ void AnimationFrameSpinBox::setCurrentFrame(const AnimationFrame& frame)
          QString spinBoxText = convertToText(i);
          if (!spinBoxText.isEmpty())
          {
-            mIndex = i;
             QLineEdit* pLineEdit = lineEdit();
             if (pLineEdit != NULL)
             {
                pLineEdit->setText(spinBoxText);
             }
-            
+
+            mIndex = i;
             emit frameChanged(mFrames[mIndex]);
          }
          break;
@@ -182,23 +182,23 @@ QAbstractSpinBox::StepEnabled AnimationFrameSpinBox::stepEnabled() const
 {
    if (isReadOnly())
    {
-      return StepNone;
+      return QAbstractSpinBox::StepNone;
    }
 
    if (wrapping())
    {
-      return StepEnabled(StepUpEnabled | StepDownEnabled);
+      return QAbstractSpinBox::StepUpEnabled | QAbstractSpinBox::StepDownEnabled;
    }
 
-   StepEnabled ret = StepNone;
+   QAbstractSpinBox::StepEnabled ret = QAbstractSpinBox::StepNone;
 
    if (mIndex < static_cast<int>(mFrames.size() - 1))
    {
-      ret |= StepUpEnabled;
+      ret |= QAbstractSpinBox::StepUpEnabled;
    }
    if (mIndex > 0)
    {
-      ret |= StepDownEnabled;
+      ret |= QAbstractSpinBox::StepDownEnabled;
    }
 
    return ret;
@@ -211,36 +211,18 @@ FrameType AnimationFrameSpinBox::getFrameType() const
 
 QString AnimationFrameSpinBox::convertToText(int index)
 {
-   QString frameText;
-
    if (mFrames.empty())
    {
-      return frameText;
+      return QString();
    }
 
    if (index < 0 || index >= static_cast<int>(mFrames.size()))
    {
-      return frameText;
+      return QString();
    }
 
    AnimationFrame frame = mFrames[index];
+   string frameText = Service<AnimationServices>()->frameToString(frame, mType);
 
-   if (mType == FRAME_ID)
-   {
-      frameText = QString::number(frame.mFrameNumber+1);
-   }
-   else
-   {
-      double seconds = floor(frame.mTime);
-      int milliseconds = static_cast<int>((frame.mTime - seconds) * 1000.0);
-
-      QDateTime dateTime;
-      dateTime.setTime_t(static_cast<unsigned int>(seconds));
-      dateTime.setTime(dateTime.time().addMSecs(milliseconds));
-      dateTime = dateTime.toUTC();
-
-      frameText = dateTime.toString("yyyy/MM/dd hh:mm:ss.zzz");
-   }
-
-   return frameText;
+   return QString::fromStdString(frameText);
 }

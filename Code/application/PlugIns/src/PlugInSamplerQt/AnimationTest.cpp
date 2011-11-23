@@ -9,17 +9,16 @@
 
 #include <QtCore/QString>
 #include <QtGui/QComboBox>
+#include <QtGui/QDateTimeEdit>
 #include <QtGui/QDialog>
-#include <QtGui/QDoubleSpinBox>
-#include <QtGui/QGridLayout>
-#include <QtGui/QGroupBox>
-#include <QtGui/QHBoxLayout>
 #include <QtGui/QLabel>
+#include <QtGui/QLayout>
+#include <QtGui/QMenu>
 #include <QtGui/QMessageBox>
 #include <QtGui/QPushButton>
 #include <QtGui/QSpinBox>
+#include <QtGui/QStackedWidget>
 #include <QtGui/QTextEdit>
-#include <QtGui/QVBoxLayout>
 
 #include "Animation.h"
 #include "AnimationController.h"
@@ -27,9 +26,13 @@
 #include "AnimationServices.h"
 #include "AnimationTest.h"
 #include "AnimationToolBar.h"
+#include "AppVerify.h"
 #include "DesktopServices.h"
 #include "Executable.h"
+#include "LabeledSection.h"
+#include "LabeledSectionGroup.h"
 #include "PlugInRegistration.h"
+#include "StringUtilities.h"
 
 #include <boost/any.hpp>
 #include <math.h>
@@ -59,9 +62,7 @@ AnimationTestPlugIn::AnimationTestPlugIn() :
 }
 
 AnimationTestPlugIn::~AnimationTestPlugIn()
-{
-
-}
+{}
 
 bool AnimationTestPlugIn::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
@@ -97,101 +98,178 @@ AnimationTestDlg::AnimationTestDlg(PlugIn* pPlugIn, QWidget* pParent) :
    mpPlugIn(pPlugIn),
    mAnimationNumber(0)
 {
-   // Initialization
-   setWindowTitle("Animation Test");
-   setModal(false);
-   createController();
-
    // Animation Controller
-   QPushButton* pCreateControllerButton = new QPushButton("Create Controller", this);
-   QPushButton* pDestroyControllerButton = new QPushButton("Destroy Controller", this);
+   QWidget* pControllerWidget = new QWidget(this);
+   QMenu* pFrameTypeMenu = new QMenu(this);
 
-   QHBoxLayout* pControllerLayout = new QHBoxLayout;
+   vector<string> frameTypes = StringUtilities::getAllEnumValuesAsDisplayString<FrameType>();
+   for (vector<string>::const_iterator iter = frameTypes.begin(); iter != frameTypes.end(); ++iter)
+   {
+      pFrameTypeMenu->addAction(QString::fromStdString(*iter));
+   }
+
+   QPushButton* pCreateControllerButton = new QPushButton("Create", pControllerWidget);
+   pCreateControllerButton->setMenu(pFrameTypeMenu);
+   QPushButton* pDestroyControllerButton = new QPushButton("Destroy", pControllerWidget);
+
+   QHBoxLayout* pControllerLayout = new QHBoxLayout(pControllerWidget);
+   pControllerLayout->setMargin(0);
+   pControllerLayout->setSpacing(5);
    pControllerLayout->addWidget(pCreateControllerButton);
    pControllerLayout->addWidget(pDestroyControllerButton);
+   pControllerLayout->addStretch(10);
 
-   QGroupBox* pControllerGroup = new QGroupBox("Animation Controller", this);
-   pControllerGroup->setLayout(pControllerLayout);
+   LabeledSection* pControllerSection = new LabeledSection(pControllerWidget, "Animation Controller", this);
 
    // Create Animations
-   QLabel* pNumAnimationsLabel = new QLabel("Number of Animations:", this);
-   mpNumAnimations = new QSpinBox(this);
+   QWidget* pCreateAnimationsWidget = new QWidget(this);
+
+   QLabel* pNumAnimationsLabel = new QLabel("Number of Animations:", pCreateAnimationsWidget);
+   mpNumAnimations = new QSpinBox(pCreateAnimationsWidget);
    mpNumAnimations->setRange(1, 10000);
 
-   QLabel* pNumFramesLabel = new QLabel("Number of Frames:", this);
-   mpNumFrames = new QSpinBox(this);
+   QLabel* pNumFramesLabel = new QLabel("Number of Frames:", pCreateAnimationsWidget);
+   mpNumFrames = new QSpinBox(pCreateAnimationsWidget);
    mpNumFrames->setRange(1, 10000);
 
-   QLabel* pMinFrameValueLabel = new QLabel("Min Frame Value:", this);
-   mpMinFrameValue = new QDoubleSpinBox(this);
-   mpMinFrameValue->setDecimals(10);
-   mpMinFrameValue->setRange(0, 10000);
+   mpStack = new QStackedWidget(pCreateAnimationsWidget);
+   QLabel* pEmptyLabel = new QLabel(mpStack);
 
-   QLabel* pMaxFrameValueLabel = new QLabel("Max Frame Value:", this);
-   mpMaxFrameValue = new QDoubleSpinBox(this);
-   mpMaxFrameValue->setDecimals(10);
-   mpMaxFrameValue->setRange(0, 10000);
-   mpMaxFrameValue->setValue(1);
+   QWidget* pFrameTimeWidget = new QWidget(mpStack);
 
-   QPushButton* pCreateAnimationsButton = new QPushButton("Create Animations", this);
+   QLabel* pMinFrameTimeLabel = new QLabel("Min Frame Time:", pFrameTimeWidget);
+   mpMinFrameTime = new QDateTimeEdit(pFrameTimeWidget);
+   mpMinFrameTime->setMinimumDateTime(QDateTime(QDate(1970, 1, 1), QTime(0, 0, 0)));   // Valid range for converting
+   mpMinFrameTime->setMaximumDateTime(QDateTime(QDate(2106, 2, 7), QTime(6, 28, 14))); // the QDateTime to a time_t
+   mpMinFrameTime->setCalendarPopup(true);
 
-   QGridLayout* pCreateAnimationsLayout = new QGridLayout;
+   QLabel* pMaxFrameTimeLabel = new QLabel("Max Frame Time:", pFrameTimeWidget);
+   mpMaxFrameTime = new QDateTimeEdit(pFrameTimeWidget);
+   mpMaxFrameTime->setMinimumDateTime(QDateTime(QDate(1970, 1, 1), QTime(0, 0, 0)));
+   mpMaxFrameTime->setMaximumDateTime(QDateTime(QDate(2106, 2, 7), QTime(6, 28, 14)));
+   mpMaxFrameTime->setCalendarPopup(true);
+
+   QGridLayout* pFrameTimeLayout = new QGridLayout(pFrameTimeWidget);
+   pFrameTimeLayout->setMargin(0);
+   pFrameTimeLayout->setSpacing(5);
+   pFrameTimeLayout->addWidget(pMinFrameTimeLabel, 0, 0);
+   pFrameTimeLayout->addWidget(mpMinFrameTime, 0, 1);
+   pFrameTimeLayout->addWidget(pMaxFrameTimeLabel, 1, 0);
+   pFrameTimeLayout->addWidget(mpMaxFrameTime, 1, 1);
+   pFrameTimeLayout->setRowStretch(2, 10);
+
+   QWidget* pFrameElapsedTimeWidget = new QWidget(mpStack);
+
+   QLabel* pHoursLabel = new QLabel("Hours:", pFrameElapsedTimeWidget);
+   mpHoursSpin = new QSpinBox(pFrameElapsedTimeWidget);
+   mpHoursSpin->setRange(0, 1000);
+
+   QLabel* pMinutesLabel = new QLabel("Minutes:", pFrameElapsedTimeWidget);
+   mpMinutesSpin = new QSpinBox(pFrameElapsedTimeWidget);
+   mpMinutesSpin->setRange(0, 59);
+
+   QLabel* pSecondsLabel = new QLabel("Seconds:", pFrameElapsedTimeWidget);
+   mpSecondsSpin = new QSpinBox(pFrameElapsedTimeWidget);
+   mpSecondsSpin->setRange(0, 59);
+
+   QGridLayout* pFrameElapsedTimeLayout = new QGridLayout(pFrameElapsedTimeWidget);
+   pFrameElapsedTimeLayout->setMargin(0);
+   pFrameElapsedTimeLayout->setSpacing(5);
+   pFrameElapsedTimeLayout->addWidget(pHoursLabel, 0, 0);
+   pFrameElapsedTimeLayout->addWidget(mpHoursSpin, 0, 1);
+   pFrameElapsedTimeLayout->addWidget(pMinutesLabel, 1, 0);
+   pFrameElapsedTimeLayout->addWidget(mpMinutesSpin, 1, 1);
+   pFrameElapsedTimeLayout->addWidget(pSecondsLabel, 2, 0);
+   pFrameElapsedTimeLayout->addWidget(mpSecondsSpin, 2, 1);
+
+   mpStack->addWidget(pEmptyLabel);
+   mpStack->addWidget(pFrameTimeWidget);
+   mpStack->addWidget(pFrameElapsedTimeWidget);
+
+   QPushButton* pCreateAnimationsButton = new QPushButton("Create", pCreateAnimationsWidget);
+
+   QGridLayout* pCreateAnimationsLayout = new QGridLayout(pCreateAnimationsWidget);
+   pCreateAnimationsLayout->setMargin(0);
+   pCreateAnimationsLayout->setSpacing(5);
    pCreateAnimationsLayout->addWidget(pNumAnimationsLabel, 0, 0);
    pCreateAnimationsLayout->addWidget(mpNumAnimations, 0, 1);
    pCreateAnimationsLayout->addWidget(pNumFramesLabel, 1, 0);
    pCreateAnimationsLayout->addWidget(mpNumFrames, 1, 1);
-   pCreateAnimationsLayout->addWidget(pMinFrameValueLabel, 2, 0);
-   pCreateAnimationsLayout->addWidget(mpMinFrameValue, 2, 1);
-   pCreateAnimationsLayout->addWidget(pMaxFrameValueLabel, 3, 0);
-   pCreateAnimationsLayout->addWidget(mpMaxFrameValue, 3, 1);
-   pCreateAnimationsLayout->addWidget(pCreateAnimationsButton, 4, 1);
+   pCreateAnimationsLayout->addWidget(mpStack, 2, 0, 1, 2);
+   pCreateAnimationsLayout->addWidget(pCreateAnimationsButton, 3, 0, Qt::AlignLeft);
+   pCreateAnimationsLayout->setColumnStretch(2, 10);
 
-   QGroupBox* pCreateAnimationsGroup = new QGroupBox("Create Animations", this);
-   pCreateAnimationsGroup->setLayout(pCreateAnimationsLayout);
+   LabeledSection* pCreateAnimationsSection = new LabeledSection(pCreateAnimationsWidget, "Create Animations", this);
 
    // Existing Animations
-   mpAnimationList = new QComboBox;
-   QPushButton* pClearAnimationButton = new QPushButton("Clear Animation", this);
-   QPushButton* pDestroyAnimationButton = new QPushButton("Destroy Animation", this);
-   QPushButton* pViewFramesButton = new QPushButton("View Frames", this);
-   QPushButton* pViewAllFramesButton = new QPushButton("View All Frames", this);
+   QWidget* pExistingAnimationsWidget = new QWidget(this);
 
-   QGridLayout* pExistingAnimationsLayout = new QGridLayout;
-   pExistingAnimationsLayout->addWidget(mpAnimationList, 0, 0);
-   pExistingAnimationsLayout->addWidget(pClearAnimationButton, 0, 1);
-   pExistingAnimationsLayout->addWidget(pDestroyAnimationButton, 1, 1);
-   pExistingAnimationsLayout->addWidget(pViewFramesButton, 2, 1);
-   pExistingAnimationsLayout->addWidget(pViewAllFramesButton, 3, 1);
+   mpAnimationList = new QComboBox(pExistingAnimationsWidget);
+   QPushButton* pClearAnimationButton = new QPushButton("Clear", pExistingAnimationsWidget);
+   QPushButton* pDestroyAnimationButton = new QPushButton("Destroy", pExistingAnimationsWidget);
+   QPushButton* pViewFramesButton = new QPushButton("View Frames", pExistingAnimationsWidget);
+   QPushButton* pViewAllFramesButton = new QPushButton("View All Frames", pExistingAnimationsWidget);
 
-   QGroupBox* pExistingAnimationsGroup = new QGroupBox("Existing Animations", this);
-   pExistingAnimationsGroup->setLayout(pExistingAnimationsLayout);
+   QGridLayout* pExistingAnimationsLayout = new QGridLayout(pExistingAnimationsWidget);
+   pExistingAnimationsLayout->setMargin(0);
+   pExistingAnimationsLayout->setSpacing(5);
+   pExistingAnimationsLayout->addWidget(mpAnimationList, 0, 0, 1, 3);
+   pExistingAnimationsLayout->addWidget(pClearAnimationButton, 1, 0);
+   pExistingAnimationsLayout->addWidget(pDestroyAnimationButton, 2, 0);
+   pExistingAnimationsLayout->addWidget(pViewFramesButton, 1, 1);
+   pExistingAnimationsLayout->addWidget(pViewAllFramesButton, 2, 1);
+   pExistingAnimationsLayout->setColumnStretch(2, 10);
+
+   LabeledSection* pExistingAnimationsSection = new LabeledSection(pExistingAnimationsWidget,
+      "Existing Animations", this);
 
    // Misc
-   QPushButton* pToggleTimeDisplayButton = new QPushButton("Toggle Time Display", this);
-   QPushButton* pToggleCanDropFramesButton = new QPushButton("Toggle Can Drop Frames", this);
-   QPushButton* pDestroyAnimationsButton = new QPushButton("Destroy All Animations", this);
-   QPushButton* pCloseButton = new QPushButton("Close");
+   QWidget* pMiscWidget = new QWidget(this);
 
-   QHBoxLayout* pMiscLayout = new QHBoxLayout;
-   pMiscLayout->addWidget(pToggleTimeDisplayButton);
-   pMiscLayout->addWidget(pToggleCanDropFramesButton);
-   pMiscLayout->addWidget(pDestroyAnimationsButton);
-   pMiscLayout->addWidget(pCloseButton);
+   QPushButton* pToggleTimeDisplayButton = new QPushButton("Toggle Time Display", pMiscWidget);
+   QPushButton* pToggleCanDropFramesButton = new QPushButton("Toggle Can Drop Frames", pMiscWidget);
+   QPushButton* pDestroyAnimationsButton = new QPushButton("Destroy All Animations", pMiscWidget);
 
-   QGroupBox* pMiscGroup = new QGroupBox("Miscellaneous", this);
-   pMiscGroup->setLayout(pMiscLayout);
+   QGridLayout* pMiscLayout = new QGridLayout(pMiscWidget);
+   pMiscLayout->setMargin(0);
+   pMiscLayout->setSpacing(5);
+   pMiscLayout->addWidget(pToggleTimeDisplayButton, 0, 0);
+   pMiscLayout->addWidget(pToggleCanDropFramesButton, 1, 0);
+   pMiscLayout->addWidget(pDestroyAnimationsButton, 2, 0);
+   pMiscLayout->setColumnStretch(1, 10);
+
+   LabeledSection* pMiscSection = new LabeledSection(pMiscWidget, "Miscellaneous", this);
+
+   // Labeled section group
+   LabeledSectionGroup* pSectionGroup = new LabeledSectionGroup(this);
+   pSectionGroup->addSection(pControllerSection);
+   pSectionGroup->addSection(pCreateAnimationsSection);
+   pSectionGroup->addSection(pExistingAnimationsSection);
+   pSectionGroup->addSection(pMiscSection);
+   pSectionGroup->addStretch(1000);
+
+   // Line
+   QFrame* pHLine = new QFrame(this);
+   pHLine->setFrameStyle(QFrame::HLine | QFrame::Sunken);
+
+   // Buttons
+   QPushButton* pCloseButton = new QPushButton("Close", this);
 
    // Layout
    QVBoxLayout* pLayout = new QVBoxLayout(this);
    pLayout->setMargin(10);
    pLayout->setSpacing(5);
-   pLayout->addWidget(pControllerGroup);
-   pLayout->addWidget(pCreateAnimationsGroup);
-   pLayout->addWidget(pExistingAnimationsGroup);
-   pLayout->addWidget(pMiscGroup);
+   pLayout->addWidget(pSectionGroup, 10);
+   pLayout->addWidget(pHLine);
+   pLayout->addWidget(pCloseButton, 0, Qt::AlignRight);
+
+   // Initialization
+   setWindowTitle("Animation Test");
+   setModal(false);
+   resize(300, 500);
 
    // Connections
-   VERIFYNRV(connect(pCreateControllerButton, SIGNAL(clicked()), this, SLOT(createController())));
+   VERIFYNRV(connect(pFrameTypeMenu, SIGNAL(triggered(QAction*)), this, SLOT(createController(QAction*))));
    VERIFYNRV(connect(pCreateAnimationsButton, SIGNAL(clicked()), this, SLOT(createAnimations())));
    VERIFYNRV(connect(pDestroyControllerButton, SIGNAL(clicked()), this, SLOT(destroyController())));
    VERIFYNRV(connect(pClearAnimationButton, SIGNAL(clicked()), this, SLOT(clearAnimation())));
@@ -241,20 +319,65 @@ void AnimationTestDlg::controllerDeleted(Subject& subject, const std::string& si
    mpAnimationList->clear();
 }
 
-void AnimationTestDlg::createController()
+void AnimationTestDlg::createController(QAction* pAction)
 {
-   if (mpController.get() == NULL)
-   {
-      mAnimationNumber = 0;
-      mpController.reset(Service<AnimationServices>()->createAnimationController("AnimationTest", FRAME_TIME));
-      VERIFYNRV(mpController.get() != NULL);
+   VERIFYNR(pAction != NULL);
 
-      AnimationToolBar* pToolBar = dynamic_cast<AnimationToolBar*>
-         (Service<DesktopServices>()->getWindow("Animation", TOOLBAR));
-      if (pToolBar != NULL)
+   if (mpController.get() != NULL)
+   {
+      FrameType frameType = mpController->getFrameType();
+      string frameTypeText = StringUtilities::toDisplayString(frameType);
+
+      QString message = "An animation controller ";
+      if (frameTypeText.empty() == false)
       {
-         pToolBar->setAnimationController(mpController.get());
+         message += "with the " + QString::fromStdString(frameTypeText) + " frame type ";
       }
+
+      message += "already exists.  The controller must first be destroyed before a new controller can be created.";
+      QMessageBox::critical(this, windowTitle(), message);
+      return;
+   }
+
+   QString frameTypeText = pAction->text();
+   bool error = false;
+
+   FrameType frameType = StringUtilities::fromDisplayString<FrameType>(frameTypeText.toStdString(), &error);
+   if ((error == true) || (frameType.isValid() == false))
+   {
+      QMessageBox::critical(this, windowTitle(), "Could not determine the frame type for the animation controller.");
+      return;
+   }
+
+   // Create the controller
+   mAnimationNumber = 0;
+
+   mpController.reset(Service<AnimationServices>()->createAnimationController("AnimationTest", frameType));
+   VERIFYNRV(mpController.get() != NULL);
+
+   // Make the created controller the active controller on the Animation toolbar
+   AnimationToolBar* pToolBar = dynamic_cast<AnimationToolBar*>
+      (Service<DesktopServices>()->getWindow("Animation", TOOLBAR));
+   if (pToolBar != NULL)
+   {
+      pToolBar->setAnimationController(mpController.get());
+   }
+
+   // Update the stacked widget to display the appropriate animation options
+   switch (frameType)
+   {
+   case FRAME_ID:    // Fall through
+   default:
+      mpStack->setCurrentIndex(0);
+      break;
+
+   case FRAME_TIME:
+      mpStack->setCurrentIndex(1);
+      break;
+
+   case FRAME_ELAPSED_TIME:
+      mpStack->setCurrentIndex(2);
+      break;
    }
 }
 
@@ -263,19 +386,46 @@ void AnimationTestDlg::destroyController()
    if (mpController.get() != NULL)
    {
       Service<AnimationServices>()->destroyAnimationController(mpController.get());
+      mpStack->setCurrentIndex(0);
    }
 }
 
 void AnimationTestDlg::createAnimations()
 {
-   createController();
-   const double minValue = mpMinFrameValue->value();
-   const double maxValue = mpMaxFrameValue->value();
-   const double range = maxValue - minValue;
-   if (range <= 0)
+   if (mpController.get() == NULL)
    {
-      QMessageBox::warning(this, "Error", "Minimum frame value must be less than or equal to maximum frame value.");
+      QMessageBox::critical(this, windowTitle(), "The animation controller must be created "
+         "before creating animations.");
       return;
+   }
+
+   double range = 0.0;
+   double minValue = 0.0;
+
+   FrameType frameType = mpController->getFrameType();
+   if (frameType != FRAME_ID)
+   {
+      if (frameType == FRAME_TIME)
+      {
+         minValue = mpMinFrameTime->dateTime().toTime_t();
+         double maxValue = mpMaxFrameTime->dateTime().toTime_t();
+         range = maxValue - minValue;
+
+      }
+      else if (frameType == FRAME_ELAPSED_TIME)
+      {
+         int hours = mpHoursSpin->value();
+         int minutes = mpMinutesSpin->value();
+         int seconds = mpSecondsSpin->value();
+         range = (hours * 3600.0) + (minutes * 60.0) + seconds;
+      }
+
+      if (range <= 0.0)
+      {
+         QMessageBox::critical(this, windowTitle(), "The minimum frame value must be less than or "
+            "equal to the maximum frame value.");
+         return;
+      }
    }
 
    srand(static_cast<unsigned int>(time(NULL)));
@@ -294,12 +444,29 @@ void AnimationTestDlg::createAnimations()
       {
          QString animationFrameName = QString("AnimationFrame_%1").arg(j, valWidth, 10, QChar('0'));
 
-         // Get a random value between 0 and 1. Scale the value by range and offset it by minValue.
-         double frameTime = ((static_cast<double>(rand()) / static_cast<double>(RAND_MAX)) * range) + minValue;
-         frames.push_back(AnimationFrame(animationFrameName.toStdString(), i, frameTime));
-         if (j == 0) // insert a duplicate frame
+         if (frameType == FRAME_ID)
          {
-            frames.push_back(AnimationFrame(animationFrameName.toStdString() + "_dup", i, frameTime));
+            frames.push_back(AnimationFrame(animationFrameName.toStdString(), j));
+         }
+         else if (frameType == FRAME_TIME)
+         {
+            // Get a random value between 0 and 1. Scale the value by range and offset it by minValue.
+            double frameTime = ((static_cast<double>(rand()) / static_cast<double>(RAND_MAX)) * range) + minValue;
+            frames.push_back(AnimationFrame(animationFrameName.toStdString(), j, frameTime));
+            if (j == 0) // insert a duplicate frame
+            {
+               frames.push_back(AnimationFrame(animationFrameName.toStdString() + "_dup", j, frameTime));
+            }
+         }
+         else if (frameType == FRAME_ELAPSED_TIME)
+         {
+            double frameTime = minValue;
+            if (numValues > 1)
+            {
+               frameTime += j * range / (numValues - 1);
+            }
+
+            frames.push_back(AnimationFrame(animationFrameName.toStdString(), j, frameTime));
          }
       }
 

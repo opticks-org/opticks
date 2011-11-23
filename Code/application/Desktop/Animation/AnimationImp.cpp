@@ -7,8 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtCore/QDateTime>
-
 #include "Animation.h"
 #include "AnimationImp.h"
 #include "AppVerify.h"
@@ -19,7 +17,6 @@
 #include "xmlwriter.h"
 
 #include <algorithm>
-#include <math.h>
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
 
@@ -28,9 +25,10 @@ namespace
    class AnimationFrameLessThanEqual
    {
    public:
-      AnimationFrameLessThanEqual(FrameType type, double value) : mType(type), mValue(value)
-      {
-      }
+      AnimationFrameLessThanEqual(FrameType type, double value) :
+         mType(type),
+         mValue(value)
+      {}
 
       inline bool operator()(const AnimationFrame& lhs) const
       {
@@ -39,7 +37,8 @@ namespace
          case FRAME_ID:
             return (lhs.mFrameNumber <= mValue);
             break;
-         case FRAME_TIME:
+         case FRAME_TIME:           // Fall through
+         case FRAME_ELAPSED_TIME:
             return (lhs.mTime <= mValue);
             break;
          default:
@@ -47,6 +46,7 @@ namespace
          };
          return false;
       }
+
    private:
       FrameType mType;
       double mValue;
@@ -55,9 +55,10 @@ namespace
    class AnimationFrameGreaterThan
    {
    public:
-      AnimationFrameGreaterThan(FrameType type, double value) : mType(type), mValue(value)
-      {
-      }
+      AnimationFrameGreaterThan(FrameType type, double value) :
+         mType(type),
+         mValue(value)
+      {}
 
       inline bool operator()(const AnimationFrame& lhs) const
       {
@@ -66,7 +67,8 @@ namespace
          case FRAME_ID:
             return (lhs.mFrameNumber > mValue);
             break;
-         case FRAME_TIME:
+         case FRAME_TIME:           // Fall through
+         case FRAME_ELAPSED_TIME:
             return (lhs.mTime > mValue);
             break;
          default:
@@ -74,6 +76,7 @@ namespace
          };
          return false;
       }
+
    private:
       FrameType mType;
       double mValue;
@@ -85,12 +88,10 @@ AnimationImp::AnimationImp(FrameType frameType, const string& id) :
    SessionItemImp(id),
    mFrameType(frameType),
    mCurrentFrameIter(mFrames.begin())
-{
-}
+{}
 
 AnimationImp::~AnimationImp()
-{
-}
+{}
 
 const string& AnimationImp::getObjectType() const
 {
@@ -277,7 +278,7 @@ double AnimationImp::getFrameValue(const AnimationFrame* pFrame) const
       {
          frameValue = pFrame->mFrameNumber;
       }
-      else if (mFrameType == FRAME_TIME)
+      else if (mFrameType == FRAME_TIME || mFrameType == FRAME_ELAPSED_TIME)
       {
          frameValue = pFrame->mTime;
       }
@@ -345,66 +346,6 @@ double AnimationImp::getNextFrameValue(AnimationState direction, size_t offset) 
    return getFrameValue(pFrame);
 }
 
-QString AnimationImp::frameToQString(double value, FrameType frameType, unsigned int count)
-{
-   QString frameString;
-   if (frameType == FRAME_ID)
-   {
-      if (count > 0)
-      {
-         frameString.sprintf("Frame: %d/%d", static_cast<unsigned int>(value + 1.0), count);
-      }
-      else
-      {
-         frameString.sprintf("Frame: %d", static_cast<unsigned int>(value + 1.0));
-      }
-   }
-   else
-   {
-      double seconds = floor(value);
-      int milliseconds = static_cast<int>((value - seconds) * 1000.0);
-
-      QDateTime dateTime;
-      dateTime.setTime_t(static_cast<unsigned int>(seconds));
-      dateTime.setTime(dateTime.time().addMSecs(milliseconds));
-      dateTime = dateTime.toUTC();
-
-      frameString = dateTime.toString("yyyy/MM/dd hh:mm:ss.zzz") + "Z";
-   }
-
-   return frameString;
-}
-
-QString AnimationImp::frameToQString(const AnimationFrame* pFrame, FrameType frameType, unsigned int count)
-{
-   if (pFrame == NULL)
-   {
-      return QString();
-   }
-
-   if (frameType == FRAME_ID)
-   {
-      return frameToQString(pFrame->mFrameNumber, frameType, count);
-   }
-
-   return frameToQString(pFrame->mTime, frameType, count);
-}
-
-QString AnimationImp::frameToQString(const AnimationFrame* pFrame, unsigned int count)
-{
-   if (pFrame == NULL)
-   {
-      return QString();
-   }
-
-   if (pFrame->mTime < 0)
-   {
-      return frameToQString(pFrame, FRAME_ID, count);
-   }
-
-   return frameToQString(pFrame, FRAME_TIME, count);
-}
-
 bool AnimationImp::serialize(SessionItemSerializer& serializer) const
 {
    XMLWriter xml("Animation");
@@ -428,6 +369,10 @@ bool AnimationImp::serialize(SessionItemSerializer& serializer) const
 
       case FRAME_TIME:
          xml.addAttr("currentFrameTime", pFrame->mTime);
+         break;
+
+      case FRAME_ELAPSED_TIME:
+         xml.addAttr("currentFrameElapsedTime", pFrame->mTime);
          break;
 
       default:
@@ -495,6 +440,15 @@ bool AnimationImp::deserialize(SessionItemDeserializer& deserializer)
       {
          double currentTime = StringUtilities::fromXmlString<double>(A(pRoot->getAttribute(X("currentFrameTime"))));
          setCurrentFrame(currentTime);
+      }
+      break;
+
+   case FRAME_ELAPSED_TIME:
+      if (pRoot->hasAttribute(X("currentFrameElapsedTime")))
+      {
+         double currentPos =
+            StringUtilities::fromXmlString<double>(A(pRoot->getAttribute(X("currentFrameElapsedTime"))));
+         setCurrentFrame(currentPos);
       }
       break;
 

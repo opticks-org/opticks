@@ -252,11 +252,13 @@ typedef EnumWrapper<FillStyleEnum> FillStyle;
  */
 enum FrameTypeEnum
 {
-   FRAME_ID,   /**< The animation is based on the frame number.\   Frame numbers typically range
-                    from zero to one less than the number of total frames.\   Multiple frames in a
-                    single animation should not contain the same frame number. */
-   FRAME_TIME  /**< The animation is based on the time value.\   See the AnimationFrame documentation
-                    for more details on the time value. */
+   FRAME_ID,            /**< The animation is based on a frame number.\   Frame numbers typically range from
+                             zero to one less than the number of total frames.\   Multiple frames in a single
+                             animation should not contain the same frame number. */
+   FRAME_TIME,          /**< The animation is based on a date/time value.\   See the AnimationFrame documentation
+                             for more details on the time value. */
+   FRAME_ELAPSED_TIME   /**< The animation is based on elapsed seconds after the start of the animation.\   See
+                             the AnimationFrame documentation for more details on the elapsed time value. */
 };
 
 /**

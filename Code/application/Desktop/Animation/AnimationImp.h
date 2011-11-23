@@ -28,7 +28,7 @@ public:
    typedef std::vector<AnimationFrame>::iterator FrameIterator;
 
    AnimationImp(FrameType frameType, const std::string& id);
-   ~AnimationImp();
+   virtual ~AnimationImp();
 
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
@@ -50,11 +50,7 @@ public:
 
    double getStartValue() const;
    double getStopValue() const;
-
    double getNextFrameValue(AnimationState direction, size_t offset = 1) const;
-   static QString frameToQString(double value, FrameType frameType, unsigned int count = 0);
-   static QString frameToQString(const AnimationFrame* pFrame, FrameType frameType, unsigned int count = 0);
-   static QString frameToQString(const AnimationFrame* pFrame, unsigned int count = 0);
 
    bool serialize(SessionItemSerializer& serializer) const;
    bool deserialize(SessionItemDeserializer& deserializer);

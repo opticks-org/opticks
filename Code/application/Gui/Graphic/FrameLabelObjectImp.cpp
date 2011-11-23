@@ -8,7 +8,7 @@
  */
 
 #include "Animation.h"
-#include "AnimationImp.h"
+#include "AnimationServices.h"
 #include "FrameLabelObject.h"
 #include "FrameLabelObjectImp.h"
 #include "GraphicLayer.h"
@@ -282,10 +282,14 @@ void FrameLabelObjectImp::updateText()
    string text = "[Frame Label]";
    if (pFrame != NULL)
    {
-      text = AnimationImp::frameToQString(pFrame, frameType, maxCount + 1).toStdString();
+      text = Service<AnimationServices>()->frameToString(*pFrame, frameType);
+      if (frameType == FRAME_ID)
+      {
+         text = "Frame: " + text + "/" + QString::number(maxCount + 1).toStdString();
+      }
    }
 
-   setText(text.c_str());
+   setText(text);
 }
 
 void FrameLabelObjectImp::setAnimations(const vector<Animation*> &animations)

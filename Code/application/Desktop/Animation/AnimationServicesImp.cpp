@@ -7,10 +7,13 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtCore/QDateTime>
+#include <QtCore/QString>
 #include <QtGui/QAction>
 #include <QtGui/QMenu>
 
 #include "AnimationControllerAdapter.h"
+#include "AnimationFrame.h"
 #include "AnimationServicesImp.h"
 #include "AnimationToolBar.h"
 #include "ContextMenu.h"
@@ -18,6 +21,7 @@
 #include "DesktopServices.h"
 
 #include <boost/bind.hpp>
+#include <math.h>
 
 using namespace std;
 
@@ -87,6 +91,11 @@ bool AnimationServicesImp::isKindOf(const string& className) const
    }
 
    return SubjectImp::isKindOf(className);
+}
+
+AnimationController* AnimationServicesImp::createAnimationController(const string& name, FrameType frameType)
+{
+   return createAnimationController(name, frameType, string());
 }
 
 AnimationController* AnimationServicesImp::createAnimationController(const string& name, FrameType frameType,
@@ -252,6 +261,51 @@ void AnimationServicesImp::destroyAnimationController(AnimationController* pCont
          break;
       }
    }
+}
+
+string AnimationServicesImp::frameToString(const AnimationFrame& frame, FrameType frameType) const
+{
+   if (frameType == FRAME_ID)
+   {
+      return frameToString(frame.mFrameNumber, frameType);
+   }
+
+   return frameToString(frame.mTime, frameType);
+}
+
+string AnimationServicesImp::frameToString(double frameValue, FrameType frameType) const
+{
+   QString frameText;
+   if (frameType == FRAME_ID)
+   {
+      frameText = QString::number(static_cast<unsigned int>(frameValue + 1.0));
+   }
+   else if (frameValue >= 0.0)
+   {
+      unsigned int seconds = static_cast<unsigned int>(floor(frameValue));
+      int milliseconds = static_cast<int>((frameValue - static_cast<double>(seconds)) * 1000.0);
+
+      if (frameType == FRAME_TIME)
+      {
+         QDateTime dateTime;
+         dateTime.setTime_t(seconds);
+         dateTime.setTime(dateTime.time().addMSecs(milliseconds));
+         dateTime = dateTime.toUTC();
+
+         frameText = dateTime.toString("yyyy/MM/dd hh:mm:ss.zzz");
+      }
+      else if (frameType == FRAME_ELAPSED_TIME)
+      {
+         unsigned int hourSeconds = seconds % 60;
+         unsigned int minutes = (seconds / 60) % 60;
+         unsigned int hours = seconds / 3600;
+
+         frameText = QString("%1:%2:%3.%4").arg(hours, 2, 10, QChar('0')).arg(minutes, 2, 10,
+            QChar('0')).arg(hourSeconds, 2, 10, QChar('0')).arg(milliseconds, 3, 10, QChar('0'));
+      }
+   }
+
+   return frameText.toStdString();
 }
 
 void AnimationServicesImp::updateContextMenu(Subject& subject, const string& signal, const boost::any& value)
