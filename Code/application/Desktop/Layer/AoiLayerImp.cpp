@@ -22,6 +22,7 @@
 #include "AoiLayerImp.h"
 #include "AoiLayerUndo.h"
 #include "AoiToolBar.h"
+#include "AoiToolBarImp.h"
 #include "AppVerify.h"
 #include "BitMaskImp.h"
 #include "BitMaskObjectImp.h"
@@ -348,7 +349,7 @@ LocationType AoiLayerImp::correctCoordinate(const LocationType& coord) const
 GraphicObject *AoiLayerImp::addObject(const GraphicObjectType& objectType, LocationType point)
 {
    Service<DesktopServices> pDesktop;
-   AoiToolBar* pToolbar = static_cast<AoiToolBar*>(pDesktop->getWindow("AOI", TOOLBAR));
+   AoiToolBar* pToolbar = dynamic_cast<AoiToolBar*>(pDesktop->getWindow("AOI", TOOLBAR));
    if ((pToolbar != NULL) && (pToolbar->getAddMode() == REPLACE_AOI))
    {
       // erase the current AOI
@@ -451,7 +452,7 @@ void AoiLayerImp::draw()
 
    Service<DesktopServices> pDesktop;
 
-   AoiToolBar* pToolbar = static_cast<AoiToolBar*>(pDesktop->getWindow("AOI", TOOLBAR));
+   AoiToolBarImp* pToolbar = dynamic_cast<AoiToolBarImp*>(pDesktop->getWindow("AOI", TOOLBAR));
    if (pToolbar == NULL)
    {
       return;

@@ -32,7 +32,7 @@
 
 class AnimationToolBarAdapter;
 class AnnotationToolBar;
-class AoiToolBar;
+class AoiToolBarAdapter;
 class BackgroundPluginWindow;
 class BrightnessToolBar;
 class DataElement;
@@ -125,12 +125,6 @@ public:
    // Modes
    void setPanMode(PanModeType panMode);
    PanModeType getPanMode() const;
-
-   void setAoiSelectionTool(GraphicObjectType toolType, ModeType modeType);
-   void setAoiAddMode(AoiAddMode mode);
-   GraphicObjectType getAoiSelectionTool() const;
-   ModeType getAoiSelectionMode() const;
-   AoiAddMode getAoiAddMode() const;
 
    void setAnnotationObject(GraphicObjectType objectType);
    GraphicObjectType getAnnotationObject() const;
@@ -425,7 +419,7 @@ private:
    ToolBarAdapter* mpStandardToolBar;
    ToolBarAdapter* mpToolboxToolBar;
    DisplayToolBar* mpDisplayToolBar;
-   AoiToolBar* mpAoiToolBar;
+   AoiToolBarAdapter* mpAoiToolBar;
    AnnotationToolBar* mpAnnotationToolBar;
    GcpToolBar* mpGcpToolBar;
    TiePointToolBar* mpTiePointToolBar;

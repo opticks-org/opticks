@@ -1,22 +1,21 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2011 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef AOITOOLBAR_H
-#define AOITOOLBAR_H
+#ifndef AOITOOLBARIMP_H
+#define AOITOOLBARIMP_H
 
 #include <QtGui/QAction>
 #include <QtGui/QMenu>
 
-#include "ToolBarAdapter.h"
-
 #include "PixmapGrid.h"
 #include "PixmapGridButton.h"
+#include "ToolBarImp.h"
 #include "TypesFile.h"
 
 class AoiLayer;
@@ -42,7 +41,7 @@ class SymbolTypeButton;
  *  The user can also invoke
  *  the properties dialog to set additional layer characteristics.
  */
-class AoiToolBar : public ToolBarAdapter
+class AoiToolBarImp : public ToolBarImp
 {
    Q_OBJECT
 
@@ -52,15 +51,15 @@ public:
     *
     *  @param   id
     *           The unique ID for the toolbar.
-    *  @param   parent
+    *  @param   pParent
     *           The widget to which the toolbar is attached.
     */
-   AoiToolBar(const std::string& id, QWidget* parent = 0);
+   AoiToolBarImp(const std::string& id, QWidget* pParent = NULL);
 
    /**
     *  Destroys the AOI toolbar.
     */
-   ~AoiToolBar();
+   virtual ~AoiToolBarImp();
 
    /**
     *  Returns the current AOI layer.
@@ -124,8 +123,8 @@ public:
     */
    bool getAoiShowPointLabels() const;
 
-   bool toXml(XMLWriter* pXml) const;
-   bool fromXml(DOMNode* pDocument, unsigned int version);
+   virtual bool toXml(XMLWriter* pXml) const;
+   virtual bool fromXml(DOMNode* pDocument, unsigned int version);
 
 public slots:
    bool setAoiLayer(Layer* pLayer);
@@ -152,8 +151,8 @@ protected slots:
    void setShowPointLabelState(bool showPointLabel);
 
 private:
-   AoiToolBar(const AoiToolBar& rhs);
-   AoiToolBar& operator=(const AoiToolBar& rhs);
+   AoiToolBarImp(const AoiToolBarImp& rhs);
+   AoiToolBarImp& operator=(const AoiToolBarImp& rhs);
 
    // Draw mode actions
    QAction* mpDraw;
@@ -187,6 +186,32 @@ private:
    // AOI layer
    AoiLayer* mpAoiLayer;
 };
+
+#define AOITOOLBARADAPTEREXTENSION_CLASSES \
+   TOOLBARADAPTEREXTENSION_CLASSES
+
+#define AOITOOLBARADAPTER_METHODS(impClass) \
+   TOOLBARADAPTER_METHODS(impClass) \
+   void setSelectionTool(GraphicObjectType toolType, ModeType modeType) \
+   { \
+      impClass::setSelectionTool(toolType, modeType); \
+   } \
+   GraphicObjectType getSelectionTool() const \
+   { \
+      return impClass::getSelectionTool(); \
+   } \
+   ModeType getSelectionMode() const \
+   { \
+      return impClass::getSelectionMode(); \
+   } \
+   void setAddMode(AoiAddMode mode) \
+   { \
+      impClass::setAddMode(mode); \
+   } \
+   AoiAddMode getAddMode() const \
+   { \
+      return impClass::getAddMode(); \
+   }
 
 class AoiAddModeGrid : public PixmapGrid
 {

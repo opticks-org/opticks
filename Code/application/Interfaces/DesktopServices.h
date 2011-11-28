@@ -741,6 +741,10 @@ public:
     *           The new pixel selection tool.
     *  @param   modeType
     *           The new pixel selection mode.
+    *
+    *  @deprecated
+    *           This method is deprecated, and may be removed in a future
+    *           version.\  Use AoiToolBar::setSelectionTool() instead.
     */
    virtual void setAoiSelectionTool(GraphicObjectType toolType, ModeType modeType) = 0;
    
@@ -750,7 +754,9 @@ public:
     *  @param   mode
     *           The new add mode.
     *
-    *  @see     AoiAddMode
+    *  @deprecated
+    *           This method is deprecated, and may be removed in a future
+    *           version.\  Use AoiToolBar::setAddMode() instead.
     */
    virtual void setAoiAddMode(AoiAddMode mode) = 0;
 
@@ -758,6 +764,10 @@ public:
     *  Returns the current AOI pixel selection tool on the AOI toolbar.
     *
     *  @return  The current pixel selection tool.
+    *
+    *  @deprecated
+    *           This method is deprecated, and may be removed in a future
+    *           version.\  Use AoiToolBar::getSelectionTool() instead.
     */
    virtual GraphicObjectType getAoiSelectionTool() const = 0;
 
@@ -765,6 +775,10 @@ public:
     *  Returns the current AOI pixel selection mode on the AOI toolbar.
     *
     *  @return  The current pixel selection mode.
+    *
+    *  @deprecated
+    *           This method is deprecated, and may be removed in a future
+    *           version.\  Use AoiToolBar::getSelectionMode() instead.
     */
    virtual ModeType getAoiSelectionMode() const = 0;
 
@@ -772,6 +786,10 @@ public:
     *  Returns the current AOI add mode on the AOI toolbar.
     *
     *  @return  The current add mode.
+    *
+    *  @deprecated
+    *           This method is deprecated, and may be removed in a future
+    *           version.\  Use AoiToolBar::getAddMode() instead.
     */
    virtual AoiAddMode getAoiAddMode() const = 0;
 

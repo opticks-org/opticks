@@ -41,7 +41,10 @@
     <ClCompile Include="AoiMergeDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AoiToolBar.cpp">
+    <ClCompile Include="AoiToolBarAdapter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AoiToolBarImp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ApplicationWindow.cpp">
@@ -374,7 +377,7 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_AoiMergeDlg.cpp">
       <Filter>moc</Filter>
     </ClCompile>
-    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_AoiToolBar.cpp">
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_AoiToolBarImp.cpp">
       <Filter>moc</Filter>
     </ClCompile>
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_ApplicationWindow.cpp">
@@ -886,6 +889,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AoiToolBarAdapter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="BandBadValuesValidator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1245,7 +1251,7 @@
     <CustomBuild Include="AoiMergeDlg.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="AoiToolBar.h">
+    <CustomBuild Include="AoiToolBarImp.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="ApplicationWindow.h">

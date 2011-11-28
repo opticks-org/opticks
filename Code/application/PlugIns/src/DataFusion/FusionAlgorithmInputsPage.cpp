@@ -15,6 +15,7 @@
 
 #include "AoiElement.h"
 #include "AoiLayer.h"
+#include "AoiToolBar.h"
 #include "AppVerify.h"
 #include "BitMask.h"
 #include "BitMaskIterator.h"
@@ -388,10 +389,12 @@ void FusionAlgorithmInputsPage::setAoiLayer(AoiLayer* pLayer)
 void FusionAlgorithmInputsPage::showEvent(QShowEvent* pEvt)
 {
    Service<DesktopServices> pDesktop;
-   if (pDesktop.get() != NULL)
+
+   AoiToolBar* pToolBar = dynamic_cast<AoiToolBar*>(pDesktop->getWindow("AOI", TOOLBAR));
+   if (pToolBar != NULL)
    {
       // enable rectangle mode
-      pDesktop->setAoiSelectionTool(RECTANGLE_OBJECT, DRAW);
+      pToolBar->setSelectionTool(RECTANGLE_OBJECT, DRAW);
       enableFusion();
    }
    FusionPage::showEvent(pEvt);

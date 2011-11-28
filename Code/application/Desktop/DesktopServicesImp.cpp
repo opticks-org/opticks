@@ -27,6 +27,7 @@
 
 #include "AnnotationLayerImp.h"
 #include "AoiLayerImp.h"
+#include "AoiToolBar.h"
 #include "ApplicationWindow.h"
 #include "AxisAdapter.h"
 #include "AppAssert.h"
@@ -858,19 +859,19 @@ PanModeType DesktopServicesImp::getPanMode() const
 
 void DesktopServicesImp::setAoiSelectionTool(GraphicObjectType toolType, ModeType modeType)
 {
-   ApplicationWindow* pAppWindow = static_cast<ApplicationWindow*>(getMainWidget());
-   if (pAppWindow != NULL)
+   AoiToolBar* pToolBar = dynamic_cast<AoiToolBar*>(getWindow("AOI", TOOLBAR));
+   if (pToolBar != NULL)
    {
-      pAppWindow->setAoiSelectionTool(toolType, modeType);
+      pToolBar->setSelectionTool(toolType, modeType);
    }
 }
 
 void DesktopServicesImp::setAoiAddMode(AoiAddMode mode)
 {
-   ApplicationWindow* pAppWindow = static_cast<ApplicationWindow*>(getMainWidget());
-   if (pAppWindow != NULL)
+   AoiToolBar* pToolBar = dynamic_cast<AoiToolBar*>(getWindow("AOI", TOOLBAR));
+   if (pToolBar != NULL)
    {
-      pAppWindow->setAoiAddMode(mode);
+      pToolBar->setAddMode(mode);
    }
 }
 
@@ -878,10 +879,10 @@ GraphicObjectType DesktopServicesImp::getAoiSelectionTool() const
 {
    GraphicObjectType toolType;
 
-   ApplicationWindow* pAppWindow = static_cast<ApplicationWindow*>(getMainWidget());
-   if (pAppWindow != NULL)
+   AoiToolBar* pToolBar = dynamic_cast<AoiToolBar*>(getWindow("AOI", TOOLBAR));
+   if (pToolBar != NULL)
    {
-      toolType = pAppWindow->getAoiSelectionTool();
+      toolType = pToolBar->getSelectionTool();
    }
 
    return toolType;
@@ -891,10 +892,10 @@ ModeType DesktopServicesImp::getAoiSelectionMode() const
 {
    ModeType modeType;
 
-   ApplicationWindow* pAppWindow = static_cast<ApplicationWindow*>(getMainWidget());
-   if (pAppWindow != NULL)
+   AoiToolBar* pToolBar = dynamic_cast<AoiToolBar*>(getWindow("AOI", TOOLBAR));
+   if (pToolBar != NULL)
    {
-      modeType = pAppWindow->getAoiSelectionMode();
+      modeType = pToolBar->getSelectionMode();
    }
 
    return modeType;
@@ -904,10 +905,10 @@ AoiAddMode DesktopServicesImp::getAoiAddMode() const
 {
    AoiAddMode mode;
 
-   ApplicationWindow* pAppWindow = static_cast<ApplicationWindow*>(getMainWidget());
-   if (pAppWindow != NULL)
+   AoiToolBar* pToolBar = dynamic_cast<AoiToolBar*>(getWindow("AOI", TOOLBAR));
+   if (pToolBar != NULL)
    {
-      mode = pAppWindow->getAoiAddMode();
+      mode = pToolBar->getAddMode();
    }
 
    return mode;

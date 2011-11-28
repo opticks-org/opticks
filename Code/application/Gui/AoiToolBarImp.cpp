@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2011 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -12,11 +12,12 @@
 #include <QtGui/QToolButton>
 #include <QtGui/QWidgetAction>
 
-#include "AoiToolBar.h"
 #include "AoiElement.h"
 #include "AoiMergeDlg.h"
 #include "AoiLayer.h"
 #include "AoiLayerImp.h"
+#include "AoiToolBar.h"
+#include "AoiToolBarImp.h"
 #include "AppVerify.h"
 #include "BitMaskImp.h"
 #include "ColorMenu.h"
@@ -41,8 +42,8 @@
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
 
-AoiToolBar::AoiToolBar(const string& id, QWidget* parent) :
-   ToolBarAdapter(id, "AOI", parent),
+AoiToolBarImp::AoiToolBarImp(const string& id, QWidget* pParent) :
+   ToolBarImp(id, "AOI", pParent),
    mpDraw(NULL),
    mpErase(NULL),
    mpToggle(NULL),
@@ -181,19 +182,18 @@ AoiToolBar::AoiToolBar(const string& id, QWidget* parent) :
       VERIFYNR(connect(mpColorMenu, SIGNAL(colorSelected(const QColor&)), this, SLOT(setAoiColor(const QColor&))));
    }
 
-   setSelectionTool(MULTIPOINT_OBJECT, DRAW);
+   setSelectionTool(AoiToolBar::getSettingSelectionTool(), DRAW);
 }
 
-AoiToolBar::~AoiToolBar()
-{
-}
+AoiToolBarImp::~AoiToolBarImp()
+{}
 
-Layer* AoiToolBar::getAoiLayer() const
+Layer* AoiToolBarImp::getAoiLayer() const
 {
    return mpAoiLayer;
 }
 
-bool AoiToolBar::setAoiLayer(Layer* pLayer)
+bool AoiToolBarImp::setAoiLayer(Layer* pLayer)
 {
    if (pLayer == mpAoiLayer)
    {
@@ -222,7 +222,7 @@ bool AoiToolBar::setAoiLayer(Layer* pLayer)
          VERIFYNR(disconnect(pAoiLayerImp, SIGNAL(showLabelsChanged(bool)), this, SLOT(setShowPointLabelState(bool))));
       }
 
-      mpAoiLayer->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &AoiToolBar::aoiLayerDeleted));
+      mpAoiLayer->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &AoiToolBarImp::aoiLayerDeleted));
    }
 
    mpAoiLayer = static_cast<AoiLayer*>(pLayer);
@@ -243,7 +243,7 @@ bool AoiToolBar::setAoiLayer(Layer* pLayer)
          pAoiLayerImp->setShowLabels(mpAoiShowPointLabels->isChecked());
       }
 
-      mpAoiLayer->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &AoiToolBar::aoiLayerDeleted));
+      mpAoiLayer->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &AoiToolBarImp::aoiLayerDeleted));
       disconnect(mpSymbolButton, SIGNAL(valueChanged(SymbolType)), this, SLOT(setAoiSymbol(SymbolType)));
       mpSymbolButton->setCurrentValue(pAoiLayerImp->getSymbol());
       VERIFYNR(connect(mpSymbolButton, SIGNAL(valueChanged(SymbolType)), this, SLOT(setAoiSymbol(SymbolType))));
@@ -253,7 +253,7 @@ bool AoiToolBar::setAoiLayer(Layer* pLayer)
    return true;
 }
 
-void AoiToolBar::setSelectionTool(GraphicObjectType eTool, ModeType eMode)
+void AoiToolBarImp::setSelectionTool(GraphicObjectType eTool, ModeType eMode)
 {
    // Mode
    if (eMode == DRAW)
@@ -276,22 +276,18 @@ void AoiToolBar::setSelectionTool(GraphicObjectType eTool, ModeType eMode)
    setSelectionTool(eTool);
 }
 
-GraphicObjectType AoiToolBar::getSelectionTool() const
+GraphicObjectType AoiToolBarImp::getSelectionTool() const
 {
-   GraphicObjectType type = MULTIPOINT_OBJECT;
+   GraphicObjectType type = mpTool->getCurrentValue();
    if (mpAoiMoveMode->isChecked() == true)
    {
       type = MOVE_OBJECT;
-   }
-   else
-   {
-      type = mpTool->getCurrentValue();
    }
 
    return type;
 }
 
-ModeType AoiToolBar::getSelectionMode() const
+ModeType AoiToolBarImp::getSelectionMode() const
 {
    ModeType eMode;
    if (mpDraw->isChecked() == true)
@@ -314,22 +310,22 @@ ModeType AoiToolBar::getSelectionMode() const
    return eMode;
 }
 
-AoiAddMode AoiToolBar::getAddMode() const
+AoiAddMode AoiToolBarImp::getAddMode() const
 {
    return mpAddMode->getCurrentValue();
 }
 
-bool AoiToolBar::getAoiShowLabels() const
+bool AoiToolBarImp::getAoiShowLabels() const
 {
    return mpAoiShowLabels->isChecked();
 }
 
-bool AoiToolBar::getAoiShowPointLabels() const
+bool AoiToolBarImp::getAoiShowPointLabels() const
 {
    return mpAoiShowPointLabels->isChecked();
 }
 
-void AoiToolBar::aoiLayerDeleted(Subject& subject, const string& signal, const boost::any& value)
+void AoiToolBarImp::aoiLayerDeleted(Subject& subject, const string& signal, const boost::any& value)
 {
    if (dynamic_cast<AoiLayer*>(&subject) == mpAoiLayer)
    {
@@ -338,7 +334,7 @@ void AoiToolBar::aoiLayerDeleted(Subject& subject, const string& signal, const b
    }
 }
 
-void AoiToolBar::mergeAoi()
+void AoiToolBarImp::mergeAoi()
 {
    AoiMergeDlg mergeDlg(this);
 
@@ -463,7 +459,7 @@ void AoiToolBar::mergeAoi()
    }
 }
 
-void AoiToolBar::setSelectionTool(GraphicObjectType eTool)
+void AoiToolBarImp::setSelectionTool(GraphicObjectType eTool)
 {
    if (eTool != MOVE_OBJECT)
    {
@@ -477,7 +473,7 @@ void AoiToolBar::setSelectionTool(GraphicObjectType eTool)
    }
 }
 
-void AoiToolBar::setSelectionMode(ModeType eMode)
+void AoiToolBarImp::setSelectionMode(ModeType eMode)
 {
    if (eMode != getSelectionMode())
    {
@@ -502,7 +498,7 @@ void AoiToolBar::setSelectionMode(ModeType eMode)
    }
 }
 
-void AoiToolBar::setAddMode(AoiAddMode mode)
+void AoiToolBarImp::setAddMode(AoiAddMode mode)
 {
    if (mpAddMode != NULL)
    {
@@ -510,7 +506,7 @@ void AoiToolBar::setAddMode(AoiAddMode mode)
    }
 }
 
-void AoiToolBar::clearAoi()
+void AoiToolBarImp::clearAoi()
 {
    AoiElement* pAoi = NULL;
    if (mpAoiLayer != NULL)
@@ -522,7 +518,7 @@ void AoiToolBar::clearAoi()
    pAoi->clearPoints();
 }
 
-void AoiToolBar::invertAoi()
+void AoiToolBarImp::invertAoi()
 {
    AoiElement* pAoi = NULL;
    if (mpAoiLayer != NULL)
@@ -534,7 +530,7 @@ void AoiToolBar::invertAoi()
    pAoi->toggleAllPoints();
 }
 
-void AoiToolBar::setAoiSymbol(SymbolType markerSymbol)
+void AoiToolBarImp::setAoiSymbol(SymbolType markerSymbol)
 {
    if (mpAoiLayer != NULL)
    {
@@ -542,7 +538,7 @@ void AoiToolBar::setAoiSymbol(SymbolType markerSymbol)
    }
 }
 
-void AoiToolBar::initializeColorMenu()
+void AoiToolBarImp::initializeColorMenu()
 {
    AoiLayerImp* pLayer = dynamic_cast<AoiLayerImp*>(mpAoiLayer);
    if (pLayer != NULL)
@@ -552,7 +548,7 @@ void AoiToolBar::initializeColorMenu()
    }
 }
 
-void AoiToolBar::setAoiColor(const QColor& markerColor)
+void AoiToolBarImp::setAoiColor(const QColor& markerColor)
 {
    AoiLayerImp* pLayer = dynamic_cast<AoiLayerImp*>(mpAoiLayer);
    if (pLayer != NULL)
@@ -561,7 +557,7 @@ void AoiToolBar::setAoiColor(const QColor& markerColor)
    }
 }
 
-void AoiToolBar::changeShowLabelState()
+void AoiToolBarImp::changeShowLabelState()
 {
    if (mpAoiLayer != NULL)
    {
@@ -573,7 +569,7 @@ void AoiToolBar::changeShowLabelState()
    }
 }
 
-void AoiToolBar::setShowPointLabelState(bool showPointLabel)
+void AoiToolBarImp::setShowPointLabelState(bool showPointLabel)
 {
    mpAoiShowPointLabels->setChecked(showPointLabel);
 
@@ -589,14 +585,14 @@ void AoiToolBar::setShowPointLabelState(bool showPointLabel)
    }
 }
 
-void AoiToolBar::selectionObjectChanged()
+void AoiToolBarImp::selectionObjectChanged()
 {
    emit graphicObjectTypeChanged(getSelectionTool());
    emit modeChanged(getSelectionMode());
 }
 
-AoiAddModeGrid::AoiAddModeGrid(QWidget* pParent)
-: PixmapGrid(pParent)
+AoiAddModeGrid::AoiAddModeGrid(QWidget* pParent) :
+   PixmapGrid(pParent)
 {
    setNumRows(1);
    setNumColumns(3);
@@ -670,9 +666,9 @@ AoiAddMode AoiAddModeButton::getCurrentValue() const
 }
 
 
-bool AoiToolBar::toXml(XMLWriter* pXml) const
+bool AoiToolBarImp::toXml(XMLWriter* pXml) const
 {
-   if (!WindowImp::toXml(pXml))
+   if (!ToolBarImp::toXml(pXml))
    {
       return false;
    }
@@ -684,9 +680,9 @@ bool AoiToolBar::toXml(XMLWriter* pXml) const
    return true;
 }
 
-bool AoiToolBar::fromXml(DOMNode* pDocument, unsigned int version)
+bool AoiToolBarImp::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   if (pDocument == NULL || !WindowImp::fromXml(pDocument, version))
+   if (pDocument == NULL || !ToolBarImp::fromXml(pDocument, version))
    {
       return false;
    }

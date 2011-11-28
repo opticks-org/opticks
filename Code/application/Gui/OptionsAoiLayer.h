@@ -14,6 +14,7 @@
 #include "AppVersion.h"
 
 class CustomColorButton;
+class GraphicObjectTypeButton;
 class QCheckBox;
 class SymbolTypeButton;
 
@@ -23,31 +24,30 @@ class OptionsAoiLayer : public QWidget
 
 public:
    OptionsAoiLayer();
-   ~OptionsAoiLayer();
+   virtual ~OptionsAoiLayer();
 
    void applyChanges();
 
    static const std::string& getName()
    {
-      static std::string var = "Aoi Layer Options";
+      static std::string var = "AOI Layer Options";
       return var;
    }
 
    static const std::string& getOptionName()
    {
-      static std::string var = "Layers/Aoi";
+      static std::string var = "Layers/AOI";
       return var;
    }
 
    static const std::string& getDescription()
    {
-      static std::string var = "Widget to display Aoi layer related options for the application";
-      return var;
+      return OptionsAoiLayer::getShortDescription();
    }
 
    static const std::string& getShortDescription()
    {
-      static std::string var = "Widget to display Aoi layer related related options for the application";
+      static std::string var = "Widget to display AOI layer related options for the application";
       return var;
    }
 
@@ -83,9 +83,11 @@ public:
 private:
    OptionsAoiLayer(const OptionsAoiLayer& rhs);
    OptionsAoiLayer& operator=(const OptionsAoiLayer& rhs);
+
    SymbolTypeButton* mpMarkerSymbol;
    CustomColorButton* mpMarkerColor;
    QCheckBox* mpAutoColor;
+   GraphicObjectTypeButton* mpSelectionTool;
 };
 
 #endif

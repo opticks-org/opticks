@@ -259,6 +259,7 @@
     <ClInclude Include="Interfaces\AnyData.h" />
     <ClInclude Include="Interfaces\AoiElement.h" />
     <ClInclude Include="Interfaces\AoiLayer.h" />
+    <ClInclude Include="Interfaces\AoiToolBar.h" />
     <ClInclude Include="Interfaces\AppConfig.h" />
     <ClInclude Include="Interfaces\ApplicationServices.h" />
     <ClInclude Include="Interfaces\ArcObject.h" />

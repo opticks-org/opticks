@@ -40,7 +40,7 @@
 #include "AnnotationLayerImp.h"
 #include "AnnotationToolBar.h"
 #include "AoiLayer.h"
-#include "AoiToolBar.h"
+#include "AoiToolBarAdapter.h"
 #include "AppConfig.h"
 #include "ApplicationServices.h"
 #include "ApplicationWindow.h"
@@ -904,7 +904,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    }
 
    // AOI toolbar
-   mpAoiToolBar = new AoiToolBar("{D82BF3FF-B773-4d5e-970E-CCB6D6E73223}", this);
+   mpAoiToolBar = new AoiToolBarAdapter("{D82BF3FF-B773-4d5e-970E-CCB6D6E73223}", this);
    if (mpAoiToolBar != NULL)
    {
       addToolBarBreak();
@@ -1841,31 +1841,6 @@ PanModeType ApplicationWindow::getPanMode() const
    }
 
    return panMode;
-}
-
-void ApplicationWindow::setAoiSelectionTool(GraphicObjectType toolType, ModeType modeType)
-{
-   mpAoiToolBar->setSelectionTool(toolType, modeType);
-}
-
-void ApplicationWindow::setAoiAddMode(AoiAddMode mode)
-{
-   mpAoiToolBar->setAddMode(mode);
-}
-
-GraphicObjectType ApplicationWindow::getAoiSelectionTool() const
-{
-   return mpAoiToolBar->getSelectionTool();
-}
-
-ModeType ApplicationWindow::getAoiSelectionMode() const
-{
-   return mpAoiToolBar->getSelectionMode();
-}
-
-AoiAddMode ApplicationWindow::getAoiAddMode() const
-{
-   return mpAoiToolBar->getAddMode();
 }
 
 void ApplicationWindow::setAnnotationObject(GraphicObjectType objectType)

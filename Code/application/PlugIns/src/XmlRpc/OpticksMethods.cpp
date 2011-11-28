@@ -10,6 +10,7 @@
 #include "ModelServices.h"
 #include "AnnotationLayer.h"
 #include "AoiLayer.h"
+#include "AoiToolBar.h"
 #include "AppVersion.h"
 #include "GraphicObject.h"
 #include "OpticksMethods.h"
@@ -516,9 +517,14 @@ XmlRpcParam* Aoi::SetMode::operator()(const XmlRpcParams& params)
    {
       throw XmlRpcMethodFault(200);
    }
-   Service<DesktopServices>()->setAoiSelectionTool(aoiTool, aoiMode);
-   pView->setMouseMode("LayerMode");
 
+   AoiToolBar* pToolBar = dynamic_cast<AoiToolBar*>(Service<DesktopServices>()->getWindow("AOI", TOOLBAR));
+   if (pToolBar != NULL)
+   {
+      pToolBar->setSelectionTool(aoiTool, aoiMode);
+   }
+
+   pView->setMouseMode("LayerMode");
    return NULL;
 }
 
