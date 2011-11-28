@@ -191,6 +191,10 @@ public:
     *  If the input argument list is already populated, calling this function
     *  will not clear the list.
     *
+    *  The Progress argument is always auto-populated with the current Progress
+    *  object. This can be overridden by explicitly setting the Progress argument
+    *  to \c NULL.
+    *
     *  If this function is not called, the input argument list will be
     *  automatically populated.
     *

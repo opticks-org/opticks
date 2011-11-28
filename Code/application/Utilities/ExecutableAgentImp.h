@@ -71,6 +71,14 @@ protected:
     */
    virtual void populateArgValues(PlugInArgList *pArgList);
 
+   /**
+    *  Populates the Progress arg into the input arg list.
+    *
+    *  @param  pArgList
+    *          A pointer to the input arg list.
+    */
+   void populateProgressArg(PlugInArgList* pArgList);
+
    bool getInstantiated() const;
    bool isBatch() const;
    void createProgressDialog();

@@ -4005,6 +4005,7 @@ void ApplicationWindow::executeCommand(QAction* pAction)
       string commandName = strCommand.toStdString();
       ExecutableResource plugIn(plugInName, commandName, NULL, false);
       plugIn->createProgressDialog(true);
+      plugIn->setAutoArg(true);
 
       // Execute the plug-in
       plugIn->execute();

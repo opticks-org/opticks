@@ -351,6 +351,8 @@ PlugInArgList& ExecutableAgentImp::getInArgList() const
 {
    checkInstantiate();
    const_cast<ExecutableAgentImp*>(this)->setupArgList();
+   // Always auto populate the Progress arg
+   const_cast<ExecutableAgentImp*>(this)->populateProgressArg(mpInArgList);
    return *mpInArgList;
 }
 
@@ -633,17 +635,6 @@ void ExecutableAgentImp::populateArgValues(PlugInArgList *pArgList)
          }
       }
 
-      // Progress
-      PlugInArg* pProgressArg = NULL;
-      pArgList->getArg(Executable::ProgressArg(), pProgressArg);
-      if (pProgressArg != NULL)
-      {
-         if (pProgressArg->isActualSet() == false)
-         {
-            pProgressArg->setPlugInArgValue(mpProgress);
-         }
-      }
-
       // Menu command
       PlugInArg* pMenuCommandArg = NULL;
       pArgList->getArg(Executable::MenuCommandArg(), pMenuCommandArg);
@@ -653,6 +644,22 @@ void ExecutableAgentImp::populateArgValues(PlugInArgList *pArgList)
          {
             pMenuCommandArg->setPlugInArgValue(&mMenuCommand);
          }
+      }
+
+      // Progress
+      populateProgressArg(pArgList);
+   }
+}
+
+void ExecutableAgentImp::populateProgressArg(PlugInArgList* pArgList)
+{
+   PlugInArg* pProgressArg = NULL;
+   pArgList->getArg(Executable::ProgressArg(), pProgressArg);
+   if (pProgressArg != NULL)
+   {
+      if (pProgressArg->isActualSet() == false)
+      {
+         pProgressArg->setPlugInArgValue(mpProgress);
       }
    }
 }

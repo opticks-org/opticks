@@ -40,6 +40,8 @@ extern "C"
          setLastError(SIMPLE_NOT_FOUND);
          return NULL;
       }
+      pPlugin->createProgressDialog(true);
+      pPlugin->setAutoArg(false);
       setLastError(SIMPLE_NO_ERROR);
       return pPlugin;
    }
