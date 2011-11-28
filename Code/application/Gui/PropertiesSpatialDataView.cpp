@@ -7,26 +7,37 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtGui/QCheckBox>
+#include <QtGui/QComboBox>
+#include <QtGui/QDoubleSpinBox>
+#include <QtGui/QHBoxLayout>
 #include <QtGui/QLabel>
 #include <QtGui/QLayout>
 #include <QtGui/QMessageBox>
+#include <QtGui/QSpinBox>
+#include <QtGui/QVBoxLayout>
 
 #include "AppVersion.h"
+#include "ConfigurationSettings.h"
 #include "DesktopServices.h"
 #include "LabeledSection.h"
 #include "PanLimitTypeComboBox.h"
 #include "PropertiesSpatialDataView.h"
 #include "SpatialDataViewImp.h"
 #include "SpatialDataWindow.h"
+#include "StringUtilities.h"
+#include "TypesFile.h"
 #include "Undo.h"
 #include "Window.h"
 
 #include <limits>
+#include <vector>
 using namespace std;
 
 PropertiesSpatialDataView::PropertiesSpatialDataView() :
    LabeledSectionGroup(NULL),
-   mpView(NULL)
+   mpView(NULL),
+   mpClassificationPosition(NULL)
 {
    // Pan and zoom
    QWidget* pPanZoomWidget = new QWidget(this);
@@ -79,9 +90,34 @@ PropertiesSpatialDataView::PropertiesSpatialDataView() :
    pImageLayout->addWidget(mpSmoothCheck);
    pImageLayout->addStretch();
 
+   // classification markings
+   LabeledSection* pMarkingsSection(NULL);
+   if (ConfigurationSettings::getSettingDisplayClassificationMarkings())
+   {
+      QWidget* pMarkingsWidget = new QWidget(this);
+      pMarkingsSection = new LabeledSection(pMarkingsWidget, "Classification Markings", this);
+      mpClassificationPosition = new QComboBox(pMarkingsWidget);
+      QLabel* pMarkingsLabel = new QLabel("Position:", pMarkingsWidget);
+      QHBoxLayout* pMarkingsLayout = new QHBoxLayout(pMarkingsWidget);
+      pMarkingsLayout->setMargin(0);
+      pMarkingsLayout->setSpacing(5);
+      pMarkingsLayout->addWidget(pMarkingsLabel);
+      pMarkingsLayout->addWidget(mpClassificationPosition);
+      pMarkingsLayout->addStretch();
+      vector<string> positions = StringUtilities::getAllEnumValuesAsDisplayString<PositionType>();
+      for (vector<string>::iterator it = positions.begin(); it != positions.end(); ++it)
+      {
+         mpClassificationPosition->addItem(QString::fromStdString(*it));
+      }
+   }
+
    // Initialization
    addSection(pPanZoomSection);
    addSection(pImageSection);
+   if (pMarkingsSection != NULL)
+   {
+      addSection(pMarkingsSection);
+   }
    addStretch(10);
 }
 
@@ -110,6 +146,17 @@ bool PropertiesSpatialDataView::initialize(SessionItem* pSessionItem)
    if (pViewImp != NULL)
    {
       mpSmoothCheck->setEnabled(pViewImp->isSmoothingAvailable());
+   }
+
+   // classification markings
+   if (mpClassificationPosition != NULL)
+   {
+      string positionStr = StringUtilities::toDisplayString<PositionType>(mpView->getClassificationPosition());
+      int index = mpClassificationPosition->findText(QString::fromStdString(positionStr));
+      if (index != -1)
+      {
+         mpClassificationPosition->setCurrentIndex(index);
+      }
    }
 
    return true;
@@ -178,6 +225,14 @@ bool PropertiesSpatialDataView::applyChanges()
    }
 
    mpView->setTextureMode(textureMode);
+
+   // classification markings
+   if (mpClassificationPosition != NULL)
+   {
+      PositionType ePosition = StringUtilities::fromDisplayString<PositionType>(
+         mpClassificationPosition->currentText().toStdString());
+      mpView->setClassificationPosition(ePosition);
+   }
 
    // Refresh the view
    mpView->refresh();

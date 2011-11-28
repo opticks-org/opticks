@@ -1785,6 +1785,8 @@ void ViewImp::drawClassification()
 
    const int topMargin = 1;
    const int bottomMargin = 4;
+   const int leftMargin = 5;
+   const int rightMargin = 5;
    const int shadowOffset = 2;
 
    // Draw the classification markings
@@ -1799,24 +1801,54 @@ void ViewImp::drawClassification()
       // Top markings - Qt has an upper left origin, so there is
       // no need to offset the y-coordinate by the view height
       qglColor(Qt::black);
-      int screenX = (iWidth / 2) - (iClassificationWidth / 2) + shadowOffset;
-      int screenY = topMargin + iClassificationHeight + shadowOffset;   // 
+      int screenX((iWidth / 2) - (iClassificationWidth / 2) + shadowOffset);
+      switch (getClassificationPosition())
+      {
+      case TOP_LEFT_BOTTOM_LEFT:    // fall through
+      case TOP_LEFT_BOTTOM_RIGHT:
+         screenX = leftMargin + shadowOffset;
+         break;
+
+      case TOP_RIGHT_BOTTOM_LEFT:   // fall through
+      case TOP_RIGHT_BOTTOM_RIGHT:
+         screenX = iWidth - rightMargin - iClassificationWidth + shadowOffset;
+         break;
+
+      default:                      // nothing to do, markings centered by default
+         break;
+      }
+      int screenY = topMargin + iClassificationHeight + shadowOffset;
       renderText(screenX, screenY, classificationText, mClassificationFont);
 
       qglColor(mClassificationColor);
-      screenX = (iWidth / 2) - (iClassificationWidth / 2);
-      screenY = topMargin + iClassificationHeight;
+      screenX -= shadowOffset;
+      screenY -= shadowOffset;
       renderText(screenX, screenY, classificationText, mClassificationFont);
 
       // Bottom markings
       qglColor(Qt::black);
-      screenX = (iWidth / 2) - (iClassificationWidth / 2) + shadowOffset;
+      switch (getClassificationPosition())
+      {
+      case TOP_LEFT_BOTTOM_LEFT:    // fall through
+      case TOP_RIGHT_BOTTOM_LEFT:
+         screenX = leftMargin + shadowOffset;
+         break;
+
+      case TOP_LEFT_BOTTOM_RIGHT:   // fall through
+      case TOP_RIGHT_BOTTOM_RIGHT:
+         screenX = iWidth - rightMargin - iClassificationWidth + shadowOffset;
+         break;
+
+      default:                      // center the markings
+         screenX = (iWidth / 2) - (iClassificationWidth / 2) + shadowOffset;
+         break;
+      }
       screenY = iHeight - bottomMargin;
       renderText(screenX, screenY, classificationText, mClassificationFont);
 
       qglColor(mClassificationColor);
-      screenX = (iWidth / 2) - (iClassificationWidth / 2);
-      screenY = iHeight - bottomMargin - shadowOffset;
+      screenX -= shadowOffset;
+      screenY -= shadowOffset;
       renderText(screenX, screenY, classificationText, mClassificationFont);
    }
 
@@ -2233,6 +2265,8 @@ bool ViewImp::toXml(XMLWriter* pXml) const
    str << a << " " << b << " " << c << " " << d;
    pXml->addAttr("extents", str.str());
    pXml->addAttr("backgroundColor", mBackgroundColor.name().toStdString());
+   pXml->addAttr("classificationPosition",
+      StringUtilities::toXmlString<PositionType>(mClassificationPosition));
    pXml->addFontElement("classificationFont", FontImp(mClassificationFont));
    pXml->addAttr("classificationColor", mClassificationColor.name().toStdString());
    pXml->addAttr("classificationEnabled", mClassificationEnabled);
@@ -2306,6 +2340,8 @@ bool ViewImp::fromXml(DOMNode* pDocument, unsigned int version)
       A(pElem->getAttribute(X("visibleCenter")))));
    QColor bkgColor(A(pElem->getAttribute(X("backgroundColor"))));
    setBackgroundColor(bkgColor);
+   setClassificationPosition(StringUtilities::fromXmlString<PositionType>(
+      A(pElem->getAttribute(X("classificationPosition")))));
    FontImp classificationFont;
    readFontElement("classificationFont", pElem, classificationFont);
    setClassificationFont(classificationFont.getQFont());
@@ -2425,4 +2461,21 @@ void ViewImp::mousePanTimeout()
 
    panBy(deltaX, deltaY);
    pView->refresh();
+}
+
+PositionType ViewImp::getClassificationPosition() const
+{
+   return mClassificationPosition;
+}
+
+void ViewImp::setClassificationPosition(PositionType position)
+{
+   if (position == mClassificationPosition)
+   {
+      return;
+   }
+
+   mClassificationPosition = position;
+   emit classificationPositionChanged(position);
+   notify(SIGNAL_NAME(Subject, Modified), position);
 }

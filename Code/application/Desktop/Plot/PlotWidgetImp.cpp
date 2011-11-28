@@ -76,7 +76,6 @@ PlotWidgetImp::PlotWidgetImp(const string& id, const string& plotName, PlotType 
    mpXAxis(NULL),
    mpYAxis(NULL),
    mpLegend(NULL),
-   mClassificationPosition(CENTER),
    mOrganizationPosition(TOP_RIGHT_BOTTOM_LEFT),
    mClassificationColor(Qt::black),
    mOrganizationColor(Qt::black)
@@ -318,6 +317,8 @@ void PlotWidgetImp::initialize(PlotViewImp *pPlotView, const string& plotName, P
       SLOT(setClassificationFont(const QFont&))));
    VERIFYNR(connect(mpPlot, SIGNAL(classificationColorChanged(const QColor&)), this,
       SLOT(setClassificationColor(const QColor&))));
+   VERIFYNR(connect(mpPlot, SIGNAL(classificationPositionChanged(PositionType)), this,
+      SLOT(updateClassificationText())));
    VERIFYNR(connect(mpPlot, SIGNAL(objectAdded(PlotObject*)), mpLegend, SLOT(insertItem(PlotObject*))));
    VERIFYNR(connect(mpPlot, SIGNAL(objectDeleted(PlotObject*)), mpLegend, SLOT(removeItem(PlotObject*))));
    VERIFYNR(connect(mpPlot, SIGNAL(objectSelected(PlotObject*, bool)), mpLegend,
@@ -499,7 +500,7 @@ QColor PlotWidgetImp::getBackgroundColor() const
 
 void PlotWidgetImp::setClassificationPosition(PositionType ePosition)
 {
-   if (ePosition == mClassificationPosition)
+   if (ePosition == getClassificationPosition())
    {
       return;
    }
@@ -515,7 +516,7 @@ void PlotWidgetImp::setClassificationPosition(PositionType ePosition)
    setClassificationColor(Qt::black);
 
    // Set the new position
-   mClassificationPosition = ePosition;
+   mpPlot->setClassificationPosition(ePosition);
 
    // Notify attached objects of the change
    notify(SIGNAL_NAME(Subject, Modified));
@@ -528,7 +529,7 @@ void PlotWidgetImp::setClassificationPosition(PositionType ePosition)
 
 PositionType PlotWidgetImp::getClassificationPosition() const
 {
-   return mClassificationPosition;
+   return mpPlot->getClassificationPosition();
 }
 
 void PlotWidgetImp::setClassification(const Classification* pClassification)
@@ -980,7 +981,7 @@ void PlotWidgetImp::setLabelText(const QString& strClassification, const QString
    // or if classification display is disabled
    if (!strClassification.isEmpty() && ConfigurationSettings::getSettingDisplayClassificationMarkings())
    {
-      switch (mClassificationPosition)
+      switch (getClassificationPosition())
       {
          case TOP_LEFT_BOTTOM_LEFT:
             if (strTopLeftText.isEmpty() == false)
@@ -1151,7 +1152,7 @@ void PlotWidgetImp::setLabelFont(const QFont& ftClassification, const QFont& ftO
          break;
    }
 
-   switch (mClassificationPosition)
+   switch (getClassificationPosition())
    {
       case TOP_LEFT_BOTTOM_LEFT:
          ftTopLeft = ftClassification;
@@ -1235,7 +1236,7 @@ void PlotWidgetImp::setLabelColor(const QColor& clrClassification, const QColor&
          break;
    }
 
-   switch (mClassificationPosition)
+   switch (getClassificationPosition())
    {
       case TOP_LEFT_BOTTOM_LEFT:
          clrTopLeft = clrClassification;
@@ -1323,7 +1324,6 @@ bool PlotWidgetImp::toXml(XMLWriter* pXml) const
    pXml->addAttr("title", getTitle().toStdString());
    pXml->addAttr("type", getObjectType());
    pXml->addAttr("legendShown", isLegendShown());
-   pXml->addAttr("classificationPosition", mClassificationPosition);
    pXml->addAttr("organizationPosition", mOrganizationPosition);
 
    if (mpPlotSet != NULL)
@@ -1411,9 +1411,6 @@ bool PlotWidgetImp::fromXml(DOMNode* pDocument, unsigned int version)
    }
 
    showLegend(StringUtilities::fromXmlString<bool>(A(pElem->getAttribute(X("legendShown")))));
-
-   setClassificationPosition(StringUtilities::fromXmlString<PositionType>(
-      A(pElem->getAttribute(X("classificationPosition")))));
 
    setOrganizationPosition(StringUtilities::fromXmlString<PositionType>(
       A(pElem->getAttribute(X("organizationPosition")))));

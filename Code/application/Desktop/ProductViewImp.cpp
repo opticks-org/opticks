@@ -15,7 +15,7 @@
 #include "AppVersion.h"
 #include "Classification.h"
 #include "ClassificationLayerAdapter.h"
-#include "ConfigurationSettingsImp.h"
+#include "ConfigurationSettings.h"
 #include "ContextMenu.h"
 #include "ContextMenuActions.h"
 #include "DataDescriptorAdapter.h"
@@ -26,6 +26,7 @@
 #include "GraphicProperty.h"
 #include "ModelServicesImp.h"
 #include "MouseModeImp.h"
+#include "ProductView.h"
 #include "ProductViewAdapter.h"
 #include "ProductViewImp.h"
 #include "ProductViewUndo.h"
@@ -96,6 +97,9 @@ ProductViewImp::ProductViewImp(const string& id, const string& viewName, QGLCont
    {
       pBottomText->setTextAlignment(Qt::AlignHCenter);
    }
+   setClassificationPosition(ProductView::getSettingClassificationMarkingPositions());
+   VERIFYNR(connect(this, SIGNAL(classificationPositionChanged(PositionType)), this,
+      SLOT(updateClassificationLocation())));
    VERIFYNR(connect(this, SIGNAL(classificationChanged(const Classification*)), this,
       SLOT(updateClassificationMarks(const Classification*))));
    updateClassificationMarks(getClassification()); // Sets the text in the classification layer
@@ -1522,6 +1526,9 @@ void ProductViewImp::updateContextMenu(Subject& subject, const string& signal, c
 
 void ProductViewImp::updateClassificationLocation()
 {
+   DataOrigin origin = getDataOrigin();
+   double margin = 0.1 * static_cast<double>(mDpi);
+
    TextObjectImp* pTopText = dynamic_cast<TextObjectImp*>(mpClassificationLayer->getTopText());
    if (pTopText != NULL)
    {
@@ -1536,10 +1543,47 @@ void ProductViewImp::updateClassificationLocation()
       LocationType urCorner = pTopText->getUrCorner();
       LocationType center((llCorner.mX + urCorner.mX) / 2.0, (llCorner.mY + urCorner.mY) / 2.0);
 
+      double dTextWidth = urCorner.mX - llCorner.mX;
       double dTextHeight = urCorner.mY - llCorner.mY;
 
       // Calculate the distance from the new text center to the old text center
-      LocationType newCenter(mPaperWidth * mDpi / 2.0, (mPaperHeight * mDpi) - (mDpi * 0.1) - (dTextHeight / 2.0));
+      LocationType newCenter(mPaperWidth * static_cast<double>(mDpi) / 2.0,
+         (mPaperHeight * static_cast<double>(mDpi)) - margin - (dTextHeight / 2.0));
+      switch (getClassificationPosition())
+      {
+      case TOP_LEFT_BOTTOM_LEFT:
+         newCenter.mX = margin + dTextWidth / 2.0;
+         break;
+
+      case TOP_RIGHT_BOTTOM_LEFT:
+         if (origin == UPPER_LEFT)
+         {
+            newCenter.mX = margin + dTextWidth / 2.0;
+         }
+         else
+         {
+            newCenter.mX = mPaperWidth * static_cast<double>(mDpi) - margin - dTextWidth / 2.0;
+         }
+         break;
+
+      case TOP_LEFT_BOTTOM_RIGHT:
+         if (origin == UPPER_LEFT)
+         {
+            newCenter.mX = mPaperWidth * static_cast<double>(mDpi) - margin - dTextWidth / 2.0;
+         }
+         else
+         {
+            newCenter.mX = margin + dTextWidth / 2.0;
+         }
+         break;
+
+      case TOP_RIGHT_BOTTOM_RIGHT:
+         newCenter.mX = mPaperWidth * static_cast<double>(mDpi) - margin - dTextWidth / 2.0;
+         break;
+
+      default:  // nothing to do, center case already set by default
+         break;
+      }
       LocationType delta = newCenter - center;
 
       // Move the text object to the center of the view object
@@ -1563,10 +1607,46 @@ void ProductViewImp::updateClassificationLocation()
       LocationType urCorner = pBottomText->getUrCorner();
       LocationType center((llCorner.mX + urCorner.mX) / 2.0, (llCorner.mY + urCorner.mY) / 2.0);
 
+      double dTextWidth = urCorner.mX - llCorner.mX;
       double dTextHeight = urCorner.mY - llCorner.mY;
 
       // Calculate the distance from the new text center to the old text center
-      LocationType newCenter(mPaperWidth * mDpi / 2.0, (mDpi * 0.1) + (dTextHeight / 2.0));
+      LocationType newCenter(mPaperWidth * static_cast<double>(mDpi) / 2.0, margin + (dTextHeight / 2.0));
+      switch (getClassificationPosition())
+      {
+      case TOP_LEFT_BOTTOM_LEFT:
+         newCenter.mX = margin + dTextWidth / 2.0;
+         break;
+
+      case TOP_LEFT_BOTTOM_RIGHT:
+         if (origin == UPPER_LEFT)
+         {
+            newCenter.mX = margin + dTextWidth / 2.0;
+         }
+         else
+         {
+            newCenter.mX = mPaperWidth * static_cast<double>(mDpi) - margin - dTextWidth / 2.0;
+         }
+         break;
+
+      case TOP_RIGHT_BOTTOM_LEFT:
+         if (origin == UPPER_LEFT)
+         {
+            newCenter.mX = mPaperWidth * static_cast<double>(mDpi) - margin - dTextWidth / 2.0;
+         }
+         else
+         {
+            newCenter.mX = margin + dTextWidth / 2.0;
+         }
+         break;
+
+      case TOP_RIGHT_BOTTOM_RIGHT:
+         newCenter.mX = mPaperWidth * static_cast<double>(mDpi) - margin - dTextWidth / 2.0;
+         break;
+
+      default:  // nothing to do, center case already set by default
+         break;
+      }
       LocationType delta = newCenter - center;
 
       // Move the text object to the center of the view object

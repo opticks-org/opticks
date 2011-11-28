@@ -10,17 +10,17 @@
 #ifndef PROPERTIESSPATIALDATAVIEW_H
 #define PROPERTIESSPATIALDATAVIEW_H
 
-#include <QtGui/QCheckBox>
-#include <QtGui/QDoubleSpinBox>
-#include <QtGui/QSpinBox>
-
 #include "LabeledSectionGroup.h"
 
 #include <string>
 
 class PanLimitTypeComboBox;
+class QCheckBox;
+class QComboBox;
+class QDoubleSpinBox;
 class SessionItem;
 class SpatialDataView;
+class QSpinBox;
 
 class PropertiesSpatialDataView : public LabeledSectionGroup
 {
@@ -55,6 +55,9 @@ private:
    QCheckBox* mpOriginCheck;
    QCheckBox* mpAxisCheck;
    QCheckBox* mpSmoothCheck;
+
+   // classification markings
+   QComboBox* mpClassificationPosition;
 };
 
 #endif

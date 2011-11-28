@@ -175,7 +175,6 @@ private:
    AxisImp* mpXAxis;
    AxisImp* mpYAxis;
    Legend* mpLegend;
-   PositionType mClassificationPosition;
    PositionType mOrganizationPosition;
 
    QSplitter* mpSplitter;

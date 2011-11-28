@@ -10,8 +10,9 @@
 #ifndef PRODUCTVIEW_H
 #define PRODUCTVIEW_H
 
-#include "PerspectiveView.h"
 #include "ConfigurationSettings.h"
+#include "PerspectiveView.h"
+#include "TypesFile.h"
 
 #include <string>
 #include <vector>
@@ -53,6 +54,7 @@ class ProductView : public PerspectiveView
 public:
    SETTING_PTR(TemplateFile, ProductView, Filename)
    SETTING_PTR(TemplatePath, ProductView, Filename)
+   SETTING(ClassificationMarkingPositions, ProductView, PositionType, CENTER)
 
    /**
     *  Emitted with boost::any<std::pair<double,double> > when the paper size

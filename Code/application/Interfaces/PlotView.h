@@ -10,6 +10,7 @@
 #ifndef PLOTVIEW_H
 #define PLOTVIEW_H
 
+#include "ConfigurationSettings.h"
 #include "OrthographicView.h"
 #include "TypesFile.h"
 
@@ -55,6 +56,8 @@ class PlotObject;
 class PlotView : public OrthographicView
 {
 public:
+   SETTING(ClassificationMarkingPositions, PlotView, PositionType, CENTER)
+
    /**
     *  Emitted with any<PlotObject*> when an object is added to the plot.
     */

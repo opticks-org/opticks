@@ -7,12 +7,16 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtGui/QHBoxLayout>
 #include <QtGui/QLabel>
 #include <QtGui/QLayout>
+#include <QtGui/QComboBox>
+#include <QtGui/QWidget>
 
 #include "AppVersion.h"
 #include "CartesianGridlines.h"
 #include "CartesianPlot.h"
+#include "ConfigurationSettings.h"
 #include "CustomColorButton.h"
 #include "LabeledSection.h"
 #include "LineStyleComboBox.h"
@@ -22,13 +26,17 @@
 #include "PolarGridlines.h"
 #include "PolarPlot.h"
 #include "PropertiesPlotView.h"
+#include "StringUtilities.h"
+#include "TypesFile.h"
 #include "Undo.h"
 
+#include <vector>
 using namespace std;
 
 PropertiesPlotView::PropertiesPlotView() :
    LabeledSectionGroup(NULL),
-   mpPlotView(NULL)
+   mpPlotView(NULL),
+   mpClassificationPosition(NULL)
 {
    // Gridlines
    QWidget* pGridlinesWidget = new QWidget(this);
@@ -57,8 +65,33 @@ PropertiesPlotView::PropertiesPlotView() :
    pGridlinesGrid->setRowStretch(3, 10);
    pGridlinesGrid->setColumnStretch(2, 10);
 
+   // classification markings
+   LabeledSection* pMarkingsSection(NULL);
+   if (ConfigurationSettings::getSettingDisplayClassificationMarkings())
+   {
+      QWidget* pMarkingsWidget = new QWidget(this);
+      pMarkingsSection = new LabeledSection(pMarkingsWidget, "Classification Markings", this);
+      mpClassificationPosition = new QComboBox(pMarkingsWidget);
+      QLabel* pMarkingsLabel = new QLabel("Position:", pMarkingsWidget);
+      QHBoxLayout* pMarkingsLayout = new QHBoxLayout(pMarkingsWidget);
+      pMarkingsLayout->setMargin(0);
+      pMarkingsLayout->setSpacing(5);
+      pMarkingsLayout->addWidget(pMarkingsLabel);
+      pMarkingsLayout->addWidget(mpClassificationPosition);
+      pMarkingsLayout->addStretch();
+      vector<string> positions = StringUtilities::getAllEnumValuesAsDisplayString<PositionType>();
+      for (vector<string>::iterator it = positions.begin(); it != positions.end(); ++it)
+      {
+         mpClassificationPosition->addItem(QString::fromStdString(*it));
+      }
+   }
+
    // Initialization
    addSection(pGridlinesSection);
+   if (pMarkingsSection != NULL)
+   {
+      addSection(pMarkingsSection);
+   }
    addStretch(10);
    setSizeHint(350, 150);
 }
@@ -81,6 +114,18 @@ bool PropertiesPlotView::initialize(SessionItem* pSessionItem)
       if (mpPlotView == NULL)
       {
          return false;
+      }
+   }
+
+   // classification markings
+   if (mpClassificationPosition != NULL)
+   {
+      string positionStr =
+         StringUtilities::toDisplayString<PositionType>(mpPlotView->getClassificationPosition());
+      int index = mpClassificationPosition->findText(QString::fromStdString(positionStr));
+      if (index != -1)
+      {
+         mpClassificationPosition->setCurrentIndex(index);
       }
    }
 
@@ -176,6 +221,14 @@ bool PropertiesPlotView::applyChanges()
          pGridlines->setLineWidth(lineWidth);
          pGridlines->setColor(gridlineColor);
       }
+   }
+
+   // classification markings
+   if (mpClassificationPosition != NULL)
+   {
+      PositionType ePosition = StringUtilities::fromDisplayString<PositionType>(
+         mpClassificationPosition->currentText().toStdString());
+      mpPlotView->setClassificationPosition(ePosition);
    }
 
    // Refresh the view

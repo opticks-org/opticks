@@ -102,6 +102,7 @@ public:
    QString getClassificationText() const;
    QFont getClassificationFont() const;
    QColor getClassificationColor() const;
+   PositionType getClassificationPosition() const;
 
    QColor getBackgroundColor() const;
    DataOrigin getDataOrigin() const;
@@ -189,6 +190,7 @@ public slots:
    virtual void setClassification(const Classification* pClassification);
    virtual void setClassificationFont(const QFont& classificationFont);
    virtual void setClassificationColor(const QColor& clrClassification);
+   virtual void setClassificationPosition(PositionType position);
    virtual void enableClassification(bool bEnable);
    virtual void enableReleaseInfo(bool bEnable);
    virtual void setBackgroundColor(const QColor& clrBackground);
@@ -223,6 +225,7 @@ signals:
    void classificationChanged(const Classification* pClassification);
    void classificationFontChanged(const QFont& classificationFont);
    void classificationColorChanged(const QColor& clrClassification);
+   void classificationPositionChanged(PositionType newPosition);
    void backgroundColorChanged(const QColor& clrBackground);
    void originChanged(const DataOrigin& dataOrigin);
    void crossHairDisplayed(bool bDisplayed);
@@ -364,6 +367,7 @@ private:
    ClassificationAdapter mClassification;
    QFont mClassificationFont;
    QColor mClassificationColor;
+   PositionType mClassificationPosition;
    bool mClassificationEnabled;
    bool mReleaseInfoEnabled;
    DataOrigin mOrigin;
@@ -486,6 +490,14 @@ private slots:
    const Classification* getClassification() const \
    { \
       return impClass::getClassification(); \
+   } \
+   PositionType getClassificationPosition() const \
+   { \
+      return impClass::getClassificationPosition(); \
+   } \
+   void setClassificationPosition(PositionType position) \
+   { \
+      return impClass::setClassificationPosition(position); \
    } \
    std::string getClassificationText() const \
    { \

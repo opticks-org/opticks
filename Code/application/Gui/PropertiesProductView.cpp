@@ -7,21 +7,27 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtGui/QComboBox>
 #include <QtGui/QLabel>
 #include <QtGui/QLayout>
 
 #include "AppVersion.h"
+#include "ConfigurationSettings.h"
 #include "CustomColorButton.h"
 #include "LabeledSection.h"
 #include "ProductView.h"
 #include "PropertiesProductView.h"
+#include "StringUtilities.h"
+#include "TypesFile.h"
 #include "Undo.h"
 
+#include <vector>
 using namespace std;
 
 PropertiesProductView::PropertiesProductView() :
    LabeledSectionGroup(NULL),
-   mpView(NULL)
+   mpView(NULL),
+   mpClassificationPosition(NULL)
 {
    // Paper
    QWidget* pPaperWidget = new QWidget(this);
@@ -40,8 +46,33 @@ PropertiesProductView::PropertiesProductView() :
    pPaperGrid->setRowStretch(1, 10);
    pPaperGrid->setColumnStretch(1, 10);
 
+   // classification markings
+   LabeledSection* pMarkingsSection(NULL);
+   if (ConfigurationSettings::getSettingDisplayClassificationMarkings())
+   {
+      QWidget* pMarkingsWidget = new QWidget(this);
+      pMarkingsSection = new LabeledSection(pMarkingsWidget, "Classification Markings", this);
+      mpClassificationPosition = new QComboBox(pMarkingsWidget);
+      QLabel* pMarkingsLabel = new QLabel("Position:", pMarkingsWidget);
+      QHBoxLayout* pMarkingsLayout = new QHBoxLayout(pMarkingsWidget);
+      pMarkingsLayout->setMargin(0);
+      pMarkingsLayout->setSpacing(5);
+      pMarkingsLayout->addWidget(pMarkingsLabel);
+      pMarkingsLayout->addWidget(mpClassificationPosition);
+      pMarkingsLayout->addStretch();
+      vector<string> positions = StringUtilities::getAllEnumValuesAsDisplayString<PositionType>();
+      for (vector<string>::iterator it = positions.begin(); it != positions.end(); ++it)
+      {
+         mpClassificationPosition->addItem(QString::fromStdString(*it));
+      }
+   }
+
    // Initialization
    addSection(pPaperSection);
+   if (pMarkingsSection != NULL)
+   {
+      addSection(pMarkingsSection);
+   }
    addStretch(10);
 }
 
@@ -60,6 +91,17 @@ bool PropertiesProductView::initialize(SessionItem* pSessionItem)
    // Paper
    mpColorButton->setColor(mpView->getPaperColor());
 
+   // classification markings
+   if (mpClassificationPosition != NULL)
+   {
+      string positionStr = StringUtilities::toDisplayString<PositionType>(mpView->getClassificationPosition());
+      int index = mpClassificationPosition->findText(QString::fromStdString(positionStr));
+      if (index != -1)
+      {
+         mpClassificationPosition->setCurrentIndex(index);
+      }
+   }
+
    return true;
 }
 
@@ -75,6 +117,14 @@ bool PropertiesProductView::applyChanges()
 
    // Paper
    mpView->setPaperColor(QCOLOR_TO_COLORTYPE(mpColorButton->getColor()));
+
+   // classification markings
+   if (mpClassificationPosition != NULL)
+   {
+      PositionType ePosition = StringUtilities::fromDisplayString<PositionType>(
+         mpClassificationPosition->currentText().toStdString());
+      mpView->setClassificationPosition(ePosition);
+   }
 
    // Refresh the view
    mpView->refresh();

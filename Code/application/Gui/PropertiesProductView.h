@@ -16,6 +16,7 @@
 
 class CustomColorButton;
 class ProductView;
+class QComboBox;
 class SessionItem;
 
 class PropertiesProductView : public LabeledSectionGroup
@@ -44,6 +45,9 @@ private:
 
    // Paper
    CustomColorButton* mpColorButton;
+
+   // classification markings
+   QComboBox* mpClassificationPosition;
 };
 
 #endif

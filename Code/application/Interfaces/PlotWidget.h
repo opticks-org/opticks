@@ -164,7 +164,8 @@ public:
    virtual ColorType getBackgroundColor() const = 0;
 
    /**
-    *  Sets the position of the classification label.
+    *  Sets the position of the classification label. The position value is maintained by the plot view even though
+    *  the PlotWidget actually draws the classification text. The new position is set in the plot view.
     *
     *  @param   ePosition
     *           The position of the label.
@@ -178,14 +179,17 @@ public:
     *             classification text will be used for display in the overlapping
     *             areas (the color and font of the organization text will be ignored).
     *
-    *  @see     PositionType
+    *  @see     PositionType, View::setClassificationPosition()
     */
    virtual void setClassificationPosition(PositionType ePosition) = 0;
 
    /**
-    *  Gets the position of the classification label.
+    *  Gets the position of the classification label.  The position value is maintained by the plot view even though
+    *  the PlotWidget actually draws the classification text at the position stored in the plot view.
     *
     *  @return  The position of the label.
+    *
+    *  @see PositionType, View::getClassificationPosition()
     */
    virtual PositionType getClassificationPosition() const = 0;
 

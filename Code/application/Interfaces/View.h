@@ -41,8 +41,8 @@ class UndoAction;
  *  view.
  *
  *  This subclass of Subject will notify upon the following conditions:
- *  - The following methods are called: setMouseMode(), setName(),
- *    setClassificationText(), setBackgroundColor(), setDataOrigin().
+ *  - The following methods are called: setMouseMode(), setName(), setClassificationPosition(),
+ *    setClassification(), setBackgroundColor(), setDataOrigin().
  *  - The user right-clicks in the view to invoke a context menu.
  *  - Everything else documented in Subject.
  *
@@ -316,6 +316,28 @@ public:
     *  @see     Classification
     */
    virtual const Classification* getClassification() const = 0;
+
+   /**
+    *  Returns the position for the classification markings.
+    *
+    *  @return  An enum that designates the positions for the top and bottom classification markings.
+    *
+    *  @see     \link PositionType\endlink
+    */
+   virtual PositionType getClassificationPosition() const = 0;
+
+   /**
+    *  Sets the position of the classification markings in the view.
+    *
+    *  @param   position
+    *           An enum that designates the positions for the top and bottom classification markings.
+    *
+    *  @see     \link PositionType\endlink
+    *
+    *  @notify  This method will notify Subject::signalModified() with
+    *           boost::any<\link ::PositionType PositionType\endlink>.
+    */
+   virtual void setClassificationPosition(PositionType position) = 0;
 
    /**
     *  Retrieves a text string containing the classification markings.

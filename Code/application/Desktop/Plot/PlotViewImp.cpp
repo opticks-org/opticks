@@ -162,7 +162,7 @@ PlotViewImp::PlotViewImp(const string& id, const string& viewName, QGLContext* d
    setContextMenuActions(menuActions);
    addPropertiesPage(PropertiesPlotView::getName());
    unblockUndo();
-
+   setClassificationPosition(PlotView::getSettingClassificationMarkingPositions());
    addMouseMode(new MouseModeImp("LocatorMode", QCursor(Qt::CrossCursor), mpLocateAction));
    addMouseMode(new MouseModeImp("PanMode", QCursor(Qt::OpenHandCursor), mpPanAction));
    addMouseMode(new MouseModeImp("SelectionMode", QCursor(Qt::ArrowCursor), mpObjectSelectAction));

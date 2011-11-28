@@ -45,6 +45,7 @@
 #include "RasterElement.h"
 #include "RasterLayerImp.h"
 #include "SessionManagerImp.h"
+#include "SpatialDataView.h"
 #include "SpatialDataViewAdapter.h"
 #include "SpatialDataViewImp.h"
 #include "Statistics.h"
@@ -331,6 +332,7 @@ SpatialDataViewImp::SpatialDataViewImp(const string& id, const string& viewName,
    {
       mpMeasurementsLayer->setView(this);
    }
+   setClassificationPosition(SpatialDataView::getSettingClassificationMarkingPositions());
 
    addContextMenuAction(ContextMenuAction(pNewLayerMenu->menuAction(), APP_SPATIALDATAVIEW_NEW_LAYER_MENU_ACTION));
    addContextMenuAction(ContextMenuAction(pOriginSeparatorAction, APP_SPATIALDATAVIEW_ORIGIN_SEPARATOR_ACTION));

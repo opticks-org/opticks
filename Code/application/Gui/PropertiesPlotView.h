@@ -17,6 +17,7 @@
 class CustomColorButton;
 class LineStyleComboBox;
 class LineWidthComboBox;
+class QComboBox;
 class PlotView;
 class SessionItem;
 
@@ -48,6 +49,9 @@ private:
    LineStyleComboBox* mpStyleCombo;
    LineWidthComboBox* mpWidthCombo;
    CustomColorButton* mpColorButton;
+
+   // classification markings
+   QComboBox* mpClassificationPosition;
 };
 
 #endif

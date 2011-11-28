@@ -11,12 +11,22 @@
 #include "ConfigurationSettings.h"
 #include "LabeledSection.h"
 #include "OptionsGeneral.h"
+#include "PlotView.h"
+#include "ProductView.h"
+#include "SpatialDataView.h"
+#include "StringUtilities.h"
+#include "TypesFile.h"
 #include "UtilityServices.h"
 
 #include <QtGui/QCheckBox>
+#include <QtGui/QComboBox>
+#include <QtGui/QGridLayout>
 #include <QtGui/QLabel>
 #include <QtGui/QSpinBox>
 #include <QtGui/QVBoxLayout>
+
+#include <string>
+#include <vector>
 
 OptionsGeneral::OptionsGeneral() :
    QWidget(NULL)
@@ -80,6 +90,39 @@ OptionsGeneral::OptionsGeneral() :
    mpMouseWheelZoom = new QCheckBox("Alternate mouse wheel zoom direction", this);
    LabeledSection* pMouseWheelZoomSection = new LabeledSection(mpMouseWheelZoom, "Mouse Wheel Zoom Direction", this);
 
+   // Classification markings positions - only added if display markings is enabled
+   LabeledSection* pMarkingsSection(NULL);
+   if (ConfigurationSettings::getSettingDisplayClassificationMarkings())
+   {
+      QWidget* pMarkingsWidget = new QWidget(this);
+      QLabel* pLabelPlot = new QLabel("Plot Views:", pMarkingsWidget);
+      mpClassificationPositionPlotView = new QComboBox(pMarkingsWidget);
+      QLabel* pLabelProduct = new QLabel("Product Views:", pMarkingsWidget);
+      mpClassificationPositionProductView = new QComboBox(pMarkingsWidget);
+      QLabel* pLabelSpatial = new QLabel("Spatial Data Views:", pMarkingsWidget);
+      mpClassificationPositionSpatialView = new QComboBox(pMarkingsWidget);
+      QGridLayout* pMarkingsLayout = new QGridLayout(pMarkingsWidget);
+      pMarkingsLayout->setMargin(0);
+      pMarkingsLayout->setSpacing(5);
+      pMarkingsLayout->addWidget(pLabelPlot, 0, 0);
+      pMarkingsLayout->addWidget(mpClassificationPositionPlotView, 0, 1);
+      pMarkingsLayout->addWidget(pLabelProduct, 1, 0);
+      pMarkingsLayout->addWidget(mpClassificationPositionProductView, 1, 1);
+      pMarkingsLayout->setRowMinimumHeight(1, mpClassificationPositionProductView->height() * 2);
+      pMarkingsLayout->addWidget(pLabelSpatial, 2, 0);
+      pMarkingsLayout->addWidget(mpClassificationPositionSpatialView, 2, 1);
+      pMarkingsLayout->setColumnStretch(2, 10);
+      pMarkingsSection = new LabeledSection(pMarkingsWidget,
+         "Classification Marking Positions", this);
+      std::vector<std::string> positions = StringUtilities::getAllEnumValuesAsDisplayString<PositionType>();
+      for (std::vector<std::string>::iterator it = positions.begin(); it != positions.end(); ++it)
+      {
+         mpClassificationPositionPlotView->addItem(QString::fromStdString(*it));
+         mpClassificationPositionProductView->addItem(QString::fromStdString(*it));
+         mpClassificationPositionSpatialView->addItem(QString::fromStdString(*it));
+      }
+   }
+
    // Dialog layout
    QVBoxLayout* pLayout = new QVBoxLayout(this);
    pLayout->setMargin(0);
@@ -89,6 +132,10 @@ OptionsGeneral::OptionsGeneral() :
    pLayout->addWidget(pThreadingSection);
    pLayout->addWidget(pProgressSection);
    pLayout->addWidget(pMouseWheelZoomSection);
+   if (pMarkingsSection != NULL)
+   {
+      pLayout->addWidget(pMarkingsSection);
+   }
    pLayout->addStretch(10);
 
    // Initialization
@@ -97,6 +144,21 @@ OptionsGeneral::OptionsGeneral() :
    mpThreadSpin->setValue(static_cast<int>(ConfigurationSettings::getSettingThreadCount()));
    mpProgressClose->setChecked(Progress::getSettingAutoClose());
    mpMouseWheelZoom->setChecked(ConfigurationSettings::getSettingAlternateMouseWheelZoom());
+   if (pMarkingsSection != NULL)
+   {
+      std::string positionStr = StringUtilities::toDisplayString<PositionType>
+         (PlotView::getSettingClassificationMarkingPositions());
+      int index =  mpClassificationPositionPlotView->findText(QString::fromStdString(positionStr));
+      mpClassificationPositionPlotView->setCurrentIndex(index);
+      positionStr = StringUtilities::toDisplayString<PositionType>
+         (ProductView::getSettingClassificationMarkingPositions());
+      index = mpClassificationPositionProductView->findText(QString::fromStdString(positionStr));
+      mpClassificationPositionProductView->setCurrentIndex(index);
+      positionStr = StringUtilities::toDisplayString<PositionType>
+         (SpatialDataView::getSettingClassificationMarkingPositions());
+      index = mpClassificationPositionSpatialView->findText(QString::fromStdString(positionStr));
+      mpClassificationPositionSpatialView->setCurrentIndex(index);
+   }
 }
 
 void OptionsGeneral::applyChanges()
@@ -107,6 +169,16 @@ void OptionsGeneral::applyChanges()
    ConfigurationSettings::setSettingThreadCount(static_cast<unsigned int>(mpThreadSpin->value()));
    Progress::setSettingAutoClose(mpProgressClose->isChecked());
    ConfigurationSettings::setSettingAlternateMouseWheelZoom(mpMouseWheelZoom->isChecked());
+
+   if (ConfigurationSettings::getSettingDisplayClassificationMarkings())
+   {
+      PlotView::setSettingClassificationMarkingPositions(StringUtilities::fromDisplayString<PositionType>(
+         mpClassificationPositionPlotView->currentText().toStdString()));
+      ProductView::setSettingClassificationMarkingPositions(StringUtilities::fromDisplayString<PositionType>(
+         mpClassificationPositionProductView->currentText().toStdString()));
+      SpatialDataView::setSettingClassificationMarkingPositions(StringUtilities::fromDisplayString<PositionType>(
+         mpClassificationPositionSpatialView->currentText().toStdString()));
+   }
 }
 
 OptionsGeneral::~OptionsGeneral()

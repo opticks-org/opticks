@@ -15,6 +15,7 @@
 #include "AppVersion.h"
 
 class QCheckBox;
+class QComboBox;
 class QSpinBox;
 
 class OptionsGeneral : public QWidget
@@ -88,6 +89,9 @@ private:
    QSpinBox* mpThreadSpin;
    QCheckBox* mpProgressClose;
    QCheckBox* mpMouseWheelZoom;
+   QComboBox* mpClassificationPositionPlotView;
+   QComboBox* mpClassificationPositionProductView;
+   QComboBox* mpClassificationPositionSpatialView;
 };
 
 #endif

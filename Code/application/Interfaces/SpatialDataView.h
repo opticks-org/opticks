@@ -74,6 +74,7 @@ typedef EnumWrapper<PanLimitTypeEnum> PanLimitType;
 class SpatialDataView : public PerspectiveView
 {
 public:
+   SETTING(ClassificationMarkingPositions, SpatialDataView, PositionType, CENTER)
    SETTING(DisplayOrigin, SpatialDataView, bool, true)
    SETTING(DisplayAxis, SpatialDataView, bool, true)
    SETTING(GeoCoordTooltip, SpatialDataView, bool, false)
