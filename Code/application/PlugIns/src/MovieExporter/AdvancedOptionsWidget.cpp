@@ -18,6 +18,7 @@
 #include <QtGui/QSpinBox>
 
 #include <avcodec.h>
+#include <limits>
 
 AdvancedOptionsWidget::AdvancedOptionsWidget(QWidget* pParent) :
    QWidget(pParent)
@@ -74,6 +75,13 @@ AdvancedOptionsWidget::AdvancedOptionsWidget(QWidget* pParent) :
    mpDiaSize->setToolTip("-1 for fast encode, 2-4 for better quality and compression");
    mpDiaSize->setMinimum(-10);
    mpDiaSize->setMaximum(10);
+   QLabel* pOutputBufferSize = new QLabel("Output Buffer Size", this);
+   mpOutputBufferSize = new QSpinBox(this);
+   mpOutputBufferSize->setToolTip(QString("Number of bytes to allocate for the video output buffer. "
+      "Setting this value below %1 results in the largest possible buffer.").arg(FF_MIN_BUFFER_SIZE));
+   mpOutputBufferSize->setMinimum(0);
+   mpOutputBufferSize->setMaximum(std::numeric_limits<int>::max());
+   mpOutputBufferSize->setSingleStep(1000000);
    QGroupBox* pFlagsGroup = new QGroupBox("Flags", this);
    mpQScale = new QCheckBox("Fixed Quantizer Scale", pFlagsGroup);
    mpQPel = new QCheckBox("Quarter Pixel Motion Estimation", pFlagsGroup);
@@ -122,7 +130,9 @@ AdvancedOptionsWidget::AdvancedOptionsWidget(QWidget* pParent) :
    pAdvancedLayout->addWidget(mpBQuantOffset, 7, 2);
    pAdvancedLayout->addWidget(pDiaSizeLabel, 8, 0);
    pAdvancedLayout->addWidget(mpDiaSize, 8, 1);
-   pAdvancedLayout->addWidget(pFlagsGroup, 9, 0, 1, 3);
+   pAdvancedLayout->addWidget(pOutputBufferSize, 9, 0);
+   pAdvancedLayout->addWidget(mpOutputBufferSize, 9, 1);
+   pAdvancedLayout->addWidget(pFlagsGroup, 10, 0, 1, 3);
    pAdvancedLayout->setColumnStretch(3, 10);
 }
 
@@ -270,6 +280,19 @@ void AdvancedOptionsWidget::setDiaSize(int val)
    if (val >= mpDiaSize->minimum() && val <= mpDiaSize->maximum())
    {
       mpDiaSize->setValue(val);
+   }
+}
+
+int AdvancedOptionsWidget::getOutputBufferSize() const
+{
+   return mpOutputBufferSize->value();
+}
+
+void AdvancedOptionsWidget::setOutputBufferSize(int val)
+{
+   if (val >= mpOutputBufferSize->minimum() && val <= mpOutputBufferSize->maximum())
+   {
+      mpOutputBufferSize->setValue(val);
    }
 }
 

@@ -122,8 +122,7 @@ MovieExporter::MovieExporter() :
 }
 
 MovieExporter::~MovieExporter()
-{
-}
+{}
 
 bool MovieExporter::getInputSpecification(PlugInArgList*& pInArgList)
 {
@@ -519,6 +518,7 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
          pVideoStream = AvStreamResource();
          pFormat = AvFormatContextResource(NULL);
          mpPicture = NULL;
+         free(mpVideoOutbuf);
          mpVideoOutbuf = NULL;
          remove(filename.c_str());
 
@@ -551,6 +551,7 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
          pVideoStream = AvStreamResource();
          pFormat = AvFormatContextResource(NULL);
          mpPicture = NULL;
+         free(mpVideoOutbuf);
          mpVideoOutbuf = NULL;
          remove(filename.c_str());
          string msg = "Can't write frame.";
@@ -571,6 +572,8 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
       mpProgress->updateProgress("Finished saving movie", 100, NORMAL);
    }
 
+   free(mpVideoOutbuf);
+   mpVideoOutbuf = NULL;
    pController->setAnimationState(savedAnimationState);
    mpStep->finalize(Message::Success);
    return true;
@@ -774,6 +777,7 @@ QWidget* MovieExporter::getExportOptionsWidget(const PlugInArgList* pInArgList)
       pAdvancedWidget->setBQuantFactor(OptionsMovieExporter::getSettingBQuantFactor());
       pAdvancedWidget->setBQuantOffset(OptionsMovieExporter::getSettingBQuantOffset());
       pAdvancedWidget->setDiaSize(OptionsMovieExporter::getSettingDiaSize());
+      pAdvancedWidget->setOutputBufferSize(OptionsMovieExporter::getSettingOutputBufferSize());
       pAdvancedWidget->setFlags(OptionsMovieExporter::getSettingFlags());
    }
 
@@ -797,6 +801,7 @@ bool MovieExporter::setAvCodecOptions(AVCodecContext* pContext)
    pContext->b_quant_factor = OptionsMovieExporter::getSettingBQuantFactor();
    pContext->b_quant_offset = OptionsMovieExporter::getSettingBQuantOffset();
    pContext->dia_size = OptionsMovieExporter::getSettingDiaSize();
+   mVideoOutbufSize = OptionsMovieExporter::getSettingOutputBufferSize();
    int newFlags = OptionsMovieExporter::getSettingFlags();
    if (mpOptionWidget.get() != NULL)
    {
@@ -814,6 +819,7 @@ bool MovieExporter::setAvCodecOptions(AVCodecContext* pContext)
       pContext->b_quant_factor = pAdvancedWidget->getBQuantFactor();
       pContext->b_quant_offset = pAdvancedWidget->getBQuantOffset();
       pContext->dia_size = pAdvancedWidget->getDiaSize();
+      mVideoOutbufSize = pAdvancedWidget->getOutputBufferSize();
       newFlags = pAdvancedWidget->getFlags();
    }
    pContext->me_method = StringUtilities::fromXmlString<Motion_Est_ID>(meMethod);
@@ -851,11 +857,21 @@ bool MovieExporter::open_video(AVFormatContext* pFormat, AVStream* pVideoStream)
       return false;
    }
 
-   mpVideoOutbuf = NULL;
    if (!(pFormat->oformat->flags & AVFMT_RAWPICTURE))
    {
-      mVideoOutbufSize = 200000;
+      if (mVideoOutbufSize < FF_MIN_BUFFER_SIZE)
+      {
+         mVideoOutbufSize = avpicture_get_size(pCodecContext->pix_fmt, pCodecContext->width, pCodecContext->height);
+         if (mVideoOutbufSize <= 0)
+         {
+            return false;
+         }
+      }
       mpVideoOutbuf = reinterpret_cast<uint8_t*>(malloc(mVideoOutbufSize));
+      if (mpVideoOutbuf == NULL)
+      {
+         return false;
+      }
    }
 
    /* allocate the encoded raw picture */
@@ -908,7 +924,7 @@ bool MovieExporter::write_video_frame(AVFormatContext* pFormat, AVStream* pVideo
    {
       /* encode the image */
       out_size = avcodec_encode_video(pCodecContext, mpVideoOutbuf, mVideoOutbufSize, mpPicture);
-      /* if zero size, it means the image was buffered */
+      /* if zero size, it means the image was buffered; if negative, it means error */
       if (out_size > 0)
       {
          AVPacket pkt;
@@ -928,7 +944,7 @@ bool MovieExporter::write_video_frame(AVFormatContext* pFormat, AVStream* pVideo
       }
       else
       {
-         ret = 0;
+         ret = out_size;
       }
    }
    if (ret != 0)

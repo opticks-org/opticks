@@ -47,6 +47,8 @@ public:
    void setBQuantOffset(float val);
    int getDiaSize() const;
    void setDiaSize(int val);
+   int getOutputBufferSize() const;
+   void setOutputBufferSize(int val);
    int getFlags() const;
    void setFlags(int val);
 
@@ -64,6 +66,7 @@ private:
    QDoubleSpinBox* mpBQuantFactor;
    QDoubleSpinBox* mpBQuantOffset;
    QSpinBox* mpDiaSize;
+   QSpinBox* mpOutputBufferSize;
    QCheckBox* mpQScale;
    QCheckBox* mpQPel;
    QCheckBox* mpGmc;

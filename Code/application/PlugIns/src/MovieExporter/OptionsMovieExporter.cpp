@@ -46,6 +46,7 @@ OptionsMovieExporter::OptionsMovieExporter() :
    mpAdvancedWidget->setBQuantFactor(OptionsMovieExporter::getSettingBQuantFactor());
    mpAdvancedWidget->setBQuantOffset(OptionsMovieExporter::getSettingBQuantOffset());
    mpAdvancedWidget->setDiaSize(OptionsMovieExporter::getSettingDiaSize());
+   mpAdvancedWidget->setOutputBufferSize(OptionsMovieExporter::getSettingOutputBufferSize());
    mpAdvancedWidget->setFlags(OptionsMovieExporter::getSettingFlags());
 
    LabeledSection* pAdvancedSection = new LabeledSection(mpAdvancedWidget, "Advanced Options", this);
@@ -78,5 +79,6 @@ void OptionsMovieExporter::applyChanges()
    OptionsMovieExporter::setSettingBQuantFactor(mpAdvancedWidget->getBQuantFactor());
    OptionsMovieExporter::setSettingBQuantOffset(mpAdvancedWidget->getBQuantOffset());
    OptionsMovieExporter::setSettingDiaSize(mpAdvancedWidget->getDiaSize());
+   OptionsMovieExporter::setSettingOutputBufferSize(mpAdvancedWidget->getOutputBufferSize());
    OptionsMovieExporter::setSettingFlags(mpAdvancedWidget->getFlags());
 }

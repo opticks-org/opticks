@@ -41,6 +41,7 @@ public:
    SETTING(BQuantOffset, MovieExporter, float, 0.0);
    SETTING(DiaSize, MovieExporter, int, 0);
    SETTING(Flags, MovieExporter, int, 0);
+   SETTING(OutputBufferSize, MovieExporter, int, 0);
 
    void applyChanges();
 
