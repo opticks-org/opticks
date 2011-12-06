@@ -15,13 +15,10 @@
 #include "LocationType.h"
 #include "TypesFile.h"
 
-#include <string>
-
 class QLineEdit;
 class QLabel;
 class QPushButton;
 class QSpinBox;
-
 class RasterElement;
 
 class ZoomAndPanToPointDlg : public QDialog
@@ -29,8 +26,8 @@ class ZoomAndPanToPointDlg : public QDialog
    Q_OBJECT
 
 public:
-   ZoomAndPanToPointDlg(RasterElement* pRaster, GeocoordType coordType = GEOCOORD_GENERAL, QWidget* parent = 0);
-   ~ZoomAndPanToPointDlg() {}
+   ZoomAndPanToPointDlg(RasterElement* pRaster, GeocoordType coordType = GEOCOORD_GENERAL, QWidget* pParent = NULL);
+   virtual ~ZoomAndPanToPointDlg();
 
    void setZoomPct(float pct);
    float getZoomPct() const;
@@ -40,6 +37,7 @@ public:
 private:
    ZoomAndPanToPointDlg(const ZoomAndPanToPointDlg& rhs);
    ZoomAndPanToPointDlg& operator=(const ZoomAndPanToPointDlg& rhs);
+
    QLineEdit* mpLatitudeEdit;
    QLineEdit* mpLongitudeEdit;
    QLineEdit* mpZoneEdit;

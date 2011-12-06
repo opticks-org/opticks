@@ -42,12 +42,11 @@ ImportDataSet::ImportDataSet() :
 }
 
 ImportDataSet::~ImportDataSet()
-{
-}
+{}
 
 bool ImportDataSet::setBatch()
 {
-   mbInteractive = false;
+   DesktopItems::setBatch();
    return true;
 }
 
@@ -65,7 +64,7 @@ bool ImportDataSet::getInputSpecification(PlugInArgList*& pArgList)
    VERIFY(pArgList->addArg<DataDescriptor>("Data Descriptor", NULL, "Data descriptor to load data from."));
    VERIFY(pArgList->addArg<string>("Importer Name", NULL, "Name of importer to be used."));
 
-   if (mbInteractive == true)
+   if (isBatch() == false)
    {
       VERIFY(pArgList->addArg<bool>("Show Options Dialog", mShowDialog, "Whether to show the options dialog or not."));
    }
@@ -102,7 +101,7 @@ bool ImportDataSet::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
    Progress* pProgress = getProgress();
 
    // Set the data sets to load
-   ImporterResource importer(mImporterName, pProgress, !mbInteractive);
+   ImporterResource importer(mImporterName, pProgress, isBatch());
    if (mpDescriptor != NULL)
    {
       // Copy the data descriptor because the importer resource owns all data descriptors
@@ -253,13 +252,13 @@ bool ImportDataSet::extractInputArgs(PlugInArgList* pInArgList)
    }
 
    // Show options dialog
-   if (mbInteractive == true)
+   if (isBatch() == false)
    {
       pInArgList->getPlugInArgValue<bool>("Show Options Dialog", mShowDialog);
    }
 
    // Error checking
-   if (mbInteractive == false)
+   if (isBatch() == true)
    {
       if ((mFilenames.empty() == true) && (mpDescriptor == NULL))
       {

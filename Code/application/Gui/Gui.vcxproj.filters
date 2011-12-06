@@ -356,9 +356,6 @@
     <ClCompile Include="Workspace.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ZoomAndPanToPoint.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ZoomCustomDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -654,9 +651,6 @@
       <Filter>moc</Filter>
     </ClCompile>
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_WizardWidget.cpp">
-      <Filter>moc</Filter>
-    </ClCompile>
-    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_ZoomAndPanToPoint.cpp">
       <Filter>moc</Filter>
     </ClCompile>
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_ZoomCustomDlg.cpp">
@@ -1498,9 +1492,6 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="WizardWidget.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="ZoomAndPanToPoint.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="ZoomCustomDlg.h">

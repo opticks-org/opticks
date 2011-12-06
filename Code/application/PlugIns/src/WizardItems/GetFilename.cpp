@@ -7,8 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #include <QtCore/QStringList>
 #include <QtGui/QFileDialog>
 
@@ -37,18 +35,16 @@ REGISTER_PLUGIN_BASIC(OpticksWizardItems, GetNewFilename);
 /////////////////
 
 GetFilename::GetFilename()
-{
-}
+{}
 
 GetFilename::~GetFilename()
-{
-}
+{}
 
 bool GetFilename::getInputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
 
-   if (mbInteractive)
+   if (isBatch() == false)
    {
       VERIFY(DesktopItems::getInputSpecification(pArgList) && (pArgList != NULL));
 
@@ -88,7 +84,7 @@ bool GetFilename::getOutputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
 
-   if (mbInteractive)
+   if (isBatch() == false)
    {
       Service<PlugInManagerServices> pPlugInManager;
       VERIFY(pPlugInManager.get() != NULL);
@@ -262,8 +258,7 @@ GetExistingFilename::GetExistingFilename()
 }
 
 GetExistingFilename::~GetExistingFilename()
-{
-}
+{}
 
 QString GetExistingFilename::getFilenameFromUser()
 {
@@ -288,8 +283,7 @@ GetNewFilename::GetNewFilename()
 }
 
 GetNewFilename::~GetNewFilename()
-{
-}
+{}
 
 QString GetNewFilename::getFilenameFromUser()
 {
@@ -314,14 +308,13 @@ GetExistingFilenames::GetExistingFilenames()
 }
 
 GetExistingFilenames::~GetExistingFilenames()
-{
-}
+{}
 
 bool GetExistingFilenames::getOutputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
 
-   if (mbInteractive)
+   if (isBatch() == false)
    {
       Service<PlugInManagerServices> pPlugInManager;
       VERIFY(pPlugInManager.get() != NULL);

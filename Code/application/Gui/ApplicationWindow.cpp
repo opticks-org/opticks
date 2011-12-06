@@ -67,6 +67,7 @@
 #include "DockWindowAdapter.h"
 #include "DynamicObject.h"
 #include "Endian.h"
+#include "Executable.h"
 #include "ExportDlg.h"
 #include "ExtensionListDialog.h"
 #include "FileDescriptor.h"
@@ -87,7 +88,6 @@
 #include "Importer.h"
 #include "InstallerServices.h"
 #include "InstallWizard.h"
-#include "LatLonLayer.h"
 #include "Layer.h"
 #include "LayerList.h"
 #include "LinkDlg.h"
@@ -104,6 +104,7 @@
 #include "PaperSizeDlg.h"
 #include "PlotWindowAdapter.h"
 #include "PlugIn.h"
+#include "PlugInArgList.h"
 #include "PlugInDescriptor.h"
 #include "PlugInManagerServicesImp.h"
 #include "PlugInResource.h"
@@ -146,7 +147,6 @@
 #include "WorkspaceWindowAdapter.h"
 #include "xmlreader.h"
 #include "xmlwriter.h"
-#include "ZoomAndPanToPoint.h"
 
 #if defined(WIN_API)
 #include <direct.h>
@@ -3539,57 +3539,11 @@ void ApplicationWindow::showZapDlg()
       return;
    }
 
-   GeocoordType geocoordType = GEOCOORD_GENERAL;
-   RasterElement *pRaster = NULL;
-
-   SpatialDataView *pSpatialView = dynamic_cast<SpatialDataView*>(pView);
-   if (pSpatialView != NULL)
-   {
-      LayerList *pLayerList = pSpatialView->getLayerList();
-      VERIFYNRV(pLayerList != NULL);
-      pRaster = pLayerList->getPrimaryRasterElement();
-
-      // get the geocoord layer, even if it is not visible.
-      LatLonLayer* pLatLonLayer = NULL;
-      std::vector<Layer*> layerList;
-      pSpatialView->getLayerList()->getLayers(LAT_LONG, layerList);
-      for (unsigned int i = 0; i < layerList.size(); ++i)
-      {
-         if (dynamic_cast<RasterElement*>(layerList[i]->getDataElement()) == pRaster)
-         {
-            pLatLonLayer = dynamic_cast<LatLonLayer*>(layerList[i]);
-            if (pLatLonLayer != NULL)
-            {
-               break;
-            }
-         }
-      }
-
-      if (pLatLonLayer != NULL)
-      {
-         geocoordType = pLatLonLayer->getGeocoordType();
-      }
-      else
-      {
-         if (pRaster->isGeoreferenced())
-         {
-            geocoordType = LatLonLayer::getSettingGeocoordType();
-         }
-      }
-   }
-
-   ZoomAndPanToPointDlg zapDlg(pRaster, geocoordType, this);
-   zapDlg.setZoomPct(pView->getZoomPercentage());
-
-   int retVal = zapDlg.exec(); // show the dialog
-   if (retVal == QDialog::Accepted)
-   {
-      LocationType pixel = zapDlg.getCenter();
-      double dZoomPercent = zapDlg.getZoomPct();
-
-      pView->zoomToPoint(pixel, dZoomPercent);
-      pView->refresh();
-   }
+   ExecutableResource pPlugIn("Set View Display Area", string(), NULL, false);
+   pPlugIn->getInArgList().setPlugInArgValue(Executable::ViewArg(), pView);
+   pPlugIn->setAutoArg(false);
+   pPlugIn->createProgressDialog(false);
+   pPlugIn->execute();
 }
 
 void ApplicationWindow::registerPlugIns()

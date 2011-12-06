@@ -9,8 +9,14 @@
       <UniqueIdentifier>{8d30b847-c8b6-4ab4-acf4-a66b0e80c4ba}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl</Extensions>
     </Filter>
+    <Filter Include="moc">
+      <UniqueIdentifier>{78cc2d46-cd20-4d18-9121-33fc220bdbe4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_ZoomAndPanToPoint.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
     <ClCompile Include="CreateAnimation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -86,6 +92,9 @@
     <ClCompile Include="SetThresholdOptions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SetViewDisplayArea.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="TemplateUtilities.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -96,6 +105,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ThresholdData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ZoomAndPanToPoint.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -172,6 +184,9 @@
     <ClInclude Include="SetThresholdOptions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SetViewDisplayArea.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="TemplateUtilities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -184,5 +199,10 @@
     <ClInclude Include="ThresholdData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="ZoomAndPanToPoint.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
   </ItemGroup>
 </Project>

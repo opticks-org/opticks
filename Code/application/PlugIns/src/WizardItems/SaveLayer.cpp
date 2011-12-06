@@ -40,19 +40,19 @@ REGISTER_PLUGIN_BASIC(OpticksWizardItems, SaveGcpListFromDataSet);
 // SaveLayer //
 ///////////////
 
-SaveLayer::SaveLayer() : mpOutputFilename(NULL), mpElement(NULL)
-{
-}
+SaveLayer::SaveLayer() :
+   mpOutputFilename(NULL),
+   mpElement(NULL)
+{}
 
 SaveLayer::~SaveLayer()
-{
-}
+{}
 
 bool SaveLayer::getInputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
 
-   if (mbInteractive)
+   if (isBatch() == false)
    {
       VERIFY(DesktopItems::getInputSpecification(pArgList) && pArgList != NULL);
 
@@ -254,8 +254,7 @@ SaveAoi::SaveAoi()
 }
 
 SaveAoi::~SaveAoi()
-{
-}
+{}
 
 LayerType SaveAoi::getLayerType() const
 {
@@ -279,8 +278,7 @@ SaveGcpList::SaveGcpList()
 }
 
 SaveGcpList::~SaveGcpList()
-{
-}
+{}
 
 LayerType SaveGcpList::getLayerType() const
 {
@@ -294,18 +292,16 @@ LayerType SaveGcpList::getLayerType() const
 SaveLayerFromDataSet::SaveLayerFromDataSet() :
    mpOutputFilename(NULL),
    mpRasterElement(NULL)
-{
-}
+{}
 
 SaveLayerFromDataSet::~SaveLayerFromDataSet()
-{
-}
+{}
 
 bool SaveLayerFromDataSet::getInputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
 
-   if (mbInteractive)
+   if (isBatch() == false)
    {
       VERIFY(DesktopItems::getInputSpecification(pArgList) && pArgList != NULL);
    
@@ -546,8 +542,7 @@ SaveAoiFromDataSet::SaveAoiFromDataSet()
 }
 
 SaveAoiFromDataSet::~SaveAoiFromDataSet()
-{
-}
+{}
 
 LayerType SaveAoiFromDataSet::getLayerType() const
 {
@@ -571,8 +566,7 @@ SaveAnnotation::SaveAnnotation()
 }
 
 SaveAnnotation::~SaveAnnotation()
-{
-}
+{}
 
 LayerType SaveAnnotation::getLayerType() const
 {
@@ -596,8 +590,7 @@ SaveGcpListFromDataSet::SaveGcpListFromDataSet()
 }
 
 SaveGcpListFromDataSet::~SaveGcpListFromDataSet()
-{
-}
+{}
 
 LayerType SaveGcpListFromDataSet::getLayerType() const
 {

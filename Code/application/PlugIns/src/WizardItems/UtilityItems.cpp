@@ -6,8 +6,6 @@
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
- 
-
 
 #include "UtilityItems.h"
 
@@ -17,19 +15,16 @@ UtilityItems::UtilityItems()
 }
 
 UtilityItems::~UtilityItems()
-{
-}
+{}
 
 bool UtilityItems::setBatch()
 {
-   mbInteractive = false;
+   WizardItems::setBatch();
    return true;
 }
 
 bool UtilityItems::setInteractive()
 {
-   mbInteractive = true;
+   WizardItems::setInteractive();
    return true;
 }
-
- 

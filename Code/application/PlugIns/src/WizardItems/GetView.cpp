@@ -46,14 +46,13 @@ GetDataSet::GetDataSet()
 }
 
 GetDataSet::~GetDataSet()
-{
-}
+{}
 
 bool GetDataSet::getInputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
 
-   if (mbInteractive)
+   if (isBatch() == false)
    {
       VERIFY(DesktopItems::getInputSpecification(pArgList) && (pArgList != NULL));
       if (!pArgList->addArg<string>("Name"))
@@ -69,7 +68,7 @@ bool GetDataSet::getOutputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
 
-   if (mbInteractive)
+   if (isBatch() == false)
    {
       Service<PlugInManagerServices> pPlugInManager;
       VERIFY(pPlugInManager.get() != NULL);

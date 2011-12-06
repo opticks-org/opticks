@@ -30,18 +30,16 @@ REGISTER_PLUGIN_BASIC(OpticksWizardItems, SaveTemplate);
 
 TemplateUtilities::TemplateUtilities() :
    mpFilename(NULL)
-{
-}
+{}
 
 TemplateUtilities::~TemplateUtilities()
-{
-}
+{}
 
 bool TemplateUtilities::getInputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
 
-   if (mbInteractive)
+   if (isBatch() == false)
    {
       VERIFY(DesktopItems::getInputSpecification(pArgList) && (pArgList != NULL));
 
@@ -204,8 +202,7 @@ LoadTemplate::LoadTemplate()
 }
 
 LoadTemplate::~LoadTemplate()
-{
-}
+{}
 
 bool LoadTemplate::executeUtility(ProductView* pView, const string& templateFile)
 {
@@ -240,8 +237,7 @@ SaveTemplate::SaveTemplate()
 }
 
 SaveTemplate::~SaveTemplate()
-{
-}
+{}
 
 bool SaveTemplate::executeUtility(ProductView* pView, const string& templateFile)
 {

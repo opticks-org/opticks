@@ -6,8 +6,6 @@
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
- 
-
 
 #include "DesktopItems.h"
 
@@ -17,19 +15,16 @@ DesktopItems::DesktopItems()
 }
 
 DesktopItems::~DesktopItems()
-{
-}
+{}
 
 bool DesktopItems::setBatch()
 {
-   mbInteractive = false;
+   WizardItems::setBatch();
    return false;
 }
 
 bool DesktopItems::setInteractive()
 {
-   mbInteractive = true;
+   WizardItems::setInteractive();
    return true;
 }
-
- 

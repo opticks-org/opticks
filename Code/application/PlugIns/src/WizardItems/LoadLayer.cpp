@@ -38,18 +38,16 @@ REGISTER_PLUGIN_BASIC(OpticksWizardItems, LoadGcpList);
 LoadLayer::LoadLayer() :
    mpFilename(NULL),
    mpView(NULL)
-{
-}
+{}
 
 LoadLayer::~LoadLayer()
-{
-}
+{}
 
 bool LoadLayer::getInputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
 
-   if (mbInteractive)
+   if (isBatch() == false)
    {
       VERIFY(DesktopItems::getInputSpecification(pArgList) && (pArgList != NULL));
       VERIFY(pArgList->addArg<Filename>("Filename", NULL, "Name of the file to be loaded."));
@@ -63,7 +61,7 @@ bool LoadLayer::getOutputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
 
-   if (mbInteractive)
+   if (isBatch() == false)
    {
       Service<PlugInManagerServices> pPlugInManager;
 
@@ -111,7 +109,7 @@ bool LoadLayer::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
    LayerType eType = getLayerType();
 
    // Load the layer
-   ImporterResource importer("Layer Importer", mpFilename->getFullPathAndName(), getProgress(), mbInteractive);
+   ImporterResource importer("Layer Importer", mpFilename->getFullPathAndName(), getProgress(), isBatch());
    if (mpView != NULL)
    {
       importer->getInArgList().setPlugInArgValue("View", mpView);

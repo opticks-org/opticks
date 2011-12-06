@@ -16,7 +16,6 @@
 #include <QtGui/QSpinBox>
 
 #include "AppVerify.h"
-#include "TypesFile.h"
 #include "GeoPoint.h"
 #include "RasterElement.h"
 #include "ZoomAndPanToPoint.h"
@@ -27,8 +26,8 @@ const int ZOOMBOX_MIN = 1;
 const int ZOOMBOX_MAX = 5000;
 
 // =============================================================================
-ZoomAndPanToPointDlg::ZoomAndPanToPointDlg(RasterElement* pRaster, GeocoordType coordType, QWidget* parent) :
-   QDialog(parent),
+ZoomAndPanToPointDlg::ZoomAndPanToPointDlg(RasterElement* pRaster, GeocoordType coordType, QWidget* pParent) :
+   QDialog(pParent),
    mpLatitudeEdit(NULL),
    mpLongitudeEdit(NULL),
    mpZoneEdit(NULL),
@@ -144,6 +143,9 @@ ZoomAndPanToPointDlg::ZoomAndPanToPointDlg(RasterElement* pRaster, GeocoordType 
    VERIFYNR(connect(pButtonBox, SIGNAL(accepted()), this, SLOT(accept())));
    VERIFYNR(connect(pButtonBox, SIGNAL(rejected()), this, SLOT(reject())));
 }
+
+ZoomAndPanToPointDlg::~ZoomAndPanToPointDlg()
+{}
 
 void ZoomAndPanToPointDlg::setZoomPct(float pct)
 {

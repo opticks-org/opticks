@@ -17,14 +17,15 @@
 
 using namespace std;
 
-WizardItems::WizardItems() : mbInteractive(false), mpStep(NULL), mpProgress(NULL)
+WizardItems::WizardItems() :
+   mpStep(NULL),
+   mpProgress(NULL)
 {
    setAbortSupported(false);
 }
 
 WizardItems::~WizardItems()
-{
-}
+{}
 
 bool WizardItems::getInputSpecification(PlugInArgList*& pArgList)
 {
@@ -66,7 +67,7 @@ bool WizardItems::extractInputArgs(PlugInArgList* pInArgList)
    return true;
 }
 
-void WizardItems::reportProgress(const string& progressMsg, int iPercent, const string &key)
+void WizardItems::reportProgress(const string& progressMsg, int iPercent, const string& key)
 {
    if (mpProgress != NULL)
    {
@@ -77,7 +78,7 @@ void WizardItems::reportProgress(const string& progressMsg, int iPercent, const 
    msg->addProperty("Message", progressMsg);
 }
 
-void WizardItems::reportWarning(const string& warningMsg, const string &key)
+void WizardItems::reportWarning(const string& warningMsg, const string& key)
 {
    if (mpProgress != NULL)
    {
@@ -88,7 +89,7 @@ void WizardItems::reportWarning(const string& warningMsg, const string &key)
    msg->addProperty("Message", warningMsg);
 }
 
-void WizardItems::reportError(const string &errorMsg, const string &key)
+void WizardItems::reportError(const string& errorMsg, const string& key)
 {
    if (mpProgress != NULL)
    {
@@ -107,7 +108,6 @@ void WizardItems::reportError(const string &errorMsg, const string &key)
 void WizardItems::reportComplete()
 {
    string plugInName = getName();
- 
    if (plugInName.empty())
    {
       plugInName = "WizardItem";

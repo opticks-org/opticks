@@ -268,7 +268,6 @@
     <ClCompile Include="WizardView.cpp" />
     <ClCompile Include="WizardWidget.cpp" />
     <ClCompile Include="Workspace.cpp" />
-    <ClCompile Include="ZoomAndPanToPoint.cpp" />
     <ClCompile Include="ZoomCustomDlg.cpp" />
     <ClCompile Include="ZoomPanWidget.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_AboutDlg.cpp" />
@@ -368,7 +367,6 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_WizardProperties.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_WizardView.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_WizardWidget.cpp" />
-    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_ZoomAndPanToPoint.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_ZoomCustomDlg.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_ZoomPanWidget.cpp" />
     <ClCompile Include="GLView\DrawUtil.cpp" />
@@ -2054,24 +2052,6 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <ClInclude Include="Workspace.h" />
-    <CustomBuild Include="ZoomAndPanToPoint.h">
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing %(Filename).h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"
-</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Filename).h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"
-</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing %(Filename).h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"
-</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Filename).h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"
-</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
-    </CustomBuild>
     <CustomBuild Include="ZoomCustomDlg.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing %(Filename).h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"

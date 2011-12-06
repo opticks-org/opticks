@@ -182,6 +182,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_ZoomAndPanToPoint.cpp" />
     <ClCompile Include="CreateAnimation.cpp" />
     <ClCompile Include="CreateExportFileDescriptor.cpp" />
     <ClCompile Include="CreateFileDescriptor.cpp" />
@@ -207,10 +208,12 @@
     <ClCompile Include="SetDisplayedBand.cpp" />
     <ClCompile Include="SetDisplayMode.cpp" />
     <ClCompile Include="SetThresholdOptions.cpp" />
+    <ClCompile Include="SetViewDisplayArea.cpp" />
     <ClCompile Include="TemplateUtilities.cpp" />
     <ClCompile Include="ThresholdData.cpp" />
     <ClCompile Include="UtilityItems.cpp" />
     <ClCompile Include="WizardItems.cpp" />
+    <ClCompile Include="ZoomAndPanToPoint.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CreateAnimation.h" />
@@ -237,10 +240,25 @@
     <ClInclude Include="SetDisplayedBand.h" />
     <ClInclude Include="SetDisplayMode.h" />
     <ClInclude Include="SetThresholdOptions.h" />
+    <ClInclude Include="SetViewDisplayArea.h" />
     <ClInclude Include="TemplateUtilities.h" />
     <ClInclude Include="ThresholdData.h" />
     <ClInclude Include="UtilityItems.h" />
     <ClInclude Include="WizardItems.h" />
+    <CustomBuild Include="ZoomAndPanToPoint.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing %(Filename).h...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing %(Filename).h...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Filename).h...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Filename).h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\PlugInLib\PlugInLib.vcxproj">

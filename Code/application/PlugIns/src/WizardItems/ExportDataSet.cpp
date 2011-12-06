@@ -44,12 +44,11 @@ ExportDataSet::ExportDataSet() :
 }
 
 ExportDataSet::~ExportDataSet()
-{
-}
+{}
 
 bool ExportDataSet::setBatch()
 {
-   mbInteractive = false;
+   DesktopItems::setBatch();
    return true;
 }
 
@@ -91,7 +90,7 @@ bool ExportDataSet::getInputSpecification(PlugInArgList*& pArgList)
    pArg->setDescription("Element from which the data will be exported.");
    pArgList->addArg(*pArg);
 
-   if (mbInteractive == false)
+   if (isBatch() == true)
    {
       pArgList->addArg<unsigned int>("Output Width", "Width of the exported image.");
       pArgList->addArg<unsigned int>("Output Height", "Height of the exported image.");
@@ -145,7 +144,7 @@ bool ExportDataSet::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
 
    // Export the data set
    bool bSuccess = false;
-   if (mbInteractive == true)
+   if (isBatch() == false)
    {
       if (mpView != NULL)
       {
@@ -187,7 +186,7 @@ bool ExportDataSet::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
       // Create a file descriptor from the filename if necessary
       if (mpFileDescriptor == NULL)
       {
-         ExecutableResource plugIn("Create Export File Descriptor", "", pProgress, !mbInteractive);
+         ExecutableResource plugIn("Create Export File Descriptor", "", pProgress, true);
          plugIn->getInArgList().setPlugInArgValue("Data Set", mpElement);
          plugIn->getInArgList().setPlugInArgValue("Filename", mpFilename);
 
@@ -246,7 +245,7 @@ bool ExportDataSet::extractInputArgs(PlugInArgList* pInArgList)
       mpElement = pArg->getPlugInArgValue<DataElement>();
    }
 
-   if (mbInteractive == false)
+   if (isBatch() == true)
    {
       // Output size
       pInArgList->getPlugInArgValue("Output Width", mOutputWidth);

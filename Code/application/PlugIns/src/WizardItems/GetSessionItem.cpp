@@ -117,7 +117,7 @@ template<class T>
 bool GetSessionItemBase<T>::getInputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
-   if (mbInteractive)
+   if (isBatch() == false)
    {
       if (DesktopItems::getInputSpecification(pArgList) == false || pArgList == NULL)
       {
@@ -135,7 +135,7 @@ template<class T>
 bool GetSessionItemBase<T>::getOutputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
-   if (mbInteractive)
+   if (isBatch() == false)
    {
       VERIFY(pArgList = Service<PlugInManagerServices>()->getPlugInArgList());
       VERIFY(pArgList->addArg<T>("Session Item", NULL, std::string(TypeConverter::toString<T>()) + " chosen by the Get operation."));

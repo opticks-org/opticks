@@ -6,8 +6,6 @@
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
- 
-
 
 #include "ModelItems.h"
 
@@ -17,19 +15,16 @@ ModelItems::ModelItems()
 }
 
 ModelItems::~ModelItems()
-{
-}
+{}
 
 bool ModelItems::setBatch()
 {
-   mbInteractive = false;
+   WizardItems::setBatch();
    return true;
 }
 
 bool ModelItems::setInteractive()
 {
-   mbInteractive = true;
+   WizardItems::setInteractive();
    return true;
 }
-
- 

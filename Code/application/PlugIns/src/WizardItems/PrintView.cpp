@@ -40,14 +40,13 @@ PrintView::PrintView() :
 }
 
 PrintView::~PrintView()
-{
-}
+{}
 
 bool PrintView::getInputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
 
-   if (mbInteractive)
+   if (isBatch() == false)
    {
       VERIFY(DesktopItems::getInputSpecification(pArgList) && pArgList != NULL);
 

@@ -24,16 +24,15 @@ public:
 
 protected:
    WizardItems();
-   ~WizardItems();
+   virtual ~WizardItems();
 
    virtual bool extractInputArgs(PlugInArgList* pInArgList);
-   void reportProgress(const std::string& progressMsg, int iPercent, const std::string &key);
-   void reportWarning(const std::string& warningMsg, const std::string &key);
-   void reportError(const std::string& errorMsg, const std::string &key);
+   void reportProgress(const std::string& progressMsg, int iPercent, const std::string& key);
+   void reportWarning(const std::string& warningMsg, const std::string& key);
+   void reportError(const std::string& errorMsg, const std::string& key);
    void reportComplete();
    Progress* getProgress() const;
 
-   bool mbInteractive;
    Step* mpStep;
 
 private:
