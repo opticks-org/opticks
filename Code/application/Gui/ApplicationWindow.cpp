@@ -17,6 +17,7 @@
 #include <QtGui/QApplication>
 #include <QtGui/QBitmap>
 #include <QtGui/QClipboard>
+#include <QtGui/QDesktopServices>
 #include <QtGui/QDialog>
 #include <QtGui/QDialogButtonBox>
 #include <QtGui/QDragEnterEvent>
@@ -721,6 +722,31 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    pExtensions_Action->setStatusTip(QString("Display information about extensions and check for updates."));
    VERIFYNR(connect(pExtensions_Action, SIGNAL(triggered()), this, SLOT(displayExtensions())));
 
+   QAction* pOpticksSiteAction = new QAction(QString("&Opticks"), this);
+   pOpticksSiteAction->setAutoRepeat(false);
+   pOpticksSiteAction->setStatusTip(QString("Open the Opticks homepage."));
+   VERIFYNR(connect(pOpticksSiteAction, SIGNAL(triggered()), this, SLOT(displayOpticksSite())));
+
+   QAction* pExtensionsSiteAction = new QAction(QString("&Extensions"), this);
+   pExtensionsSiteAction->setAutoRepeat(false);
+   pExtensionsSiteAction->setStatusTip(QString("Browse and download available Opticks Extensions."));
+   VERIFYNR(connect(pExtensionsSiteAction, SIGNAL(triggered()), this, SLOT(displayExtensionsSite())));
+
+   QAction* pMailingListsSiteAction = new QAction(QString("&Mailing Lists"), this);
+   pMailingListsSiteAction->setAutoRepeat(false);
+   pMailingListsSiteAction->setStatusTip(QString("View and subscribe to public Opticks mailing lists."));
+   VERIFYNR(connect(pMailingListsSiteAction, SIGNAL(triggered()), this, SLOT(displayMailingListsSite())));
+
+   QAction* pRealTimeChatSiteAction = new QAction(QString("&Real-Time Chat"), this);
+   pRealTimeChatSiteAction->setAutoRepeat(false);
+   pRealTimeChatSiteAction->setStatusTip(QString("Ask questions and get immediate answers from Opticks developers and others in the community."));
+   VERIFYNR(connect(pRealTimeChatSiteAction, SIGNAL(triggered()), this, SLOT(displayRealTimeChatSite())));
+
+   QAction* pSampleDataSiteAction = new QAction(QString("&Sample Data"), this);
+   pSampleDataSiteAction->setAutoRepeat(false);
+   pSampleDataSiteAction->setStatusTip(QString("Browse and download sample data for use with Opticks."));
+   VERIFYNR(connect(pSampleDataSiteAction, SIGNAL(triggered()), this, SLOT(displaySampleDataSite())));
+
    QAction* pAbout_Action = new QAction(QIcon(":/icons/About"), QString("&About %1...").arg(APP_NAME), this);
    pAbout_Action->setAutoRepeat(false);
    pAbout_Action->setToolTip(QString("About %1").arg(APP_NAME));
@@ -991,6 +1017,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    QMenu* pCenterMenu = new QMenu("&Center", pZoomMenu);
    QMenu* pPointMenu = new QMenu("Poi&nt", pZoomMenu);
    QMenu* pPercentMenu = new QMenu("&Percent", pZoomMenu);
+   QMenu* pWebsitesMenu = new QMenu("&Websites", m_pHelp);
 
    // File menu
    string fileContext = m_pFile->menuAction()->toolTip().toStdString();
@@ -1152,7 +1179,16 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    m_pHelp->addSeparator();
    mpMenuBar->insertCommand(pExtensions_Action, m_pHelp, helpContext);
    m_pHelp->addSeparator();
+   m_pHelp->addMenu(pWebsitesMenu);
+   m_pHelp->addSeparator();
    mpMenuBar->insertCommand(pAbout_Action, m_pHelp, helpContext);
+
+   // Websites popup menu
+   mpMenuBar->insertCommand(pOpticksSiteAction, pWebsitesMenu, string());
+   mpMenuBar->insertCommand(pExtensionsSiteAction, pWebsitesMenu, string());
+   mpMenuBar->insertCommand(pMailingListsSiteAction, pWebsitesMenu, string());
+   mpMenuBar->insertCommand(pRealTimeChatSiteAction, pWebsitesMenu, string());
+   mpMenuBar->insertCommand(pSampleDataSiteAction, pWebsitesMenu, string());
 
    ////////////////
    // Status Bar //
@@ -3703,6 +3739,31 @@ void ApplicationWindow::displayExtensions()
 {
    ExtensionListDialog dlg(this);
    dlg.exec();
+}
+
+void ApplicationWindow::displayOpticksSite()
+{
+   QDesktopServices::openUrl(QUrl("http://opticks.org/"));
+}
+
+void ApplicationWindow::displayExtensionsSite()
+{
+   QDesktopServices::openUrl(QUrl("http://opticks.org/confluence/display/opticksExt/"));
+}
+
+void ApplicationWindow::displayMailingListsSite()
+{
+   QDesktopServices::openUrl(QUrl("http://opticks.org/confluence/display/opticks/Mailing+Lists/"));
+}
+
+void ApplicationWindow::displayRealTimeChatSite()
+{
+   QDesktopServices::openUrl(QUrl("http://opticks.org/confluence/display/opticksChat/Chat+Client/"));
+}
+
+void ApplicationWindow::displaySampleDataSite()
+{
+   QDesktopServices::openUrl(QUrl("http://opticks.org/confluence/display/opticks/Sample+Data/"));
 }
 
 void ApplicationWindow::aboutApp()

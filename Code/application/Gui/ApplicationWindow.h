@@ -274,6 +274,11 @@ protected slots:
    // Help actions
    void helpTopics();
    void displayExtensions();
+   void displayOpticksSite();
+   void displayExtensionsSite();
+   void displayMailingListsSite();
+   void displayRealTimeChatSite();
+   void displaySampleDataSite();
    void aboutApp();
    void displayPlugInHelp();
 

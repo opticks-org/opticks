@@ -82,6 +82,12 @@ AboutDlg::AboutDlg(QWidget* parent) :
 
    QLabel* pRelease = new QLabel(strReleaseDate, pAppInfo);
 
+   // Homepage
+   QLabel* pHomepageLabel = new QLabel("Homepage:", pAppInfo);
+   pHomepageLabel->setFont(ftApp);
+
+   QLabel* pHomepage = new QLabel("<a href=\"http://opticks.org/\";>http://opticks.org/</a>", pAppInfo);
+   pHomepage->setOpenExternalLinks(true);
 
    // Release information
    QString infoLabelStr = strReleaseType;
@@ -117,17 +123,19 @@ AboutDlg::AboutDlg(QWidget* parent) :
    QGridLayout* pTextGrid = new QGridLayout(pAppInfo);
    pTextGrid->setMargin(0);
    pTextGrid->setSpacing(5);
-   pTextGrid->addWidget(pIconLabel, 0, 0, 6, 1, Qt::AlignVCenter);
+   pTextGrid->addWidget(pIconLabel, 0, 0, 7, 1, Qt::AlignVCenter);
    pTextGrid->addWidget(pVersionLabel, 0, 1);
    pTextGrid->addWidget(pVersion, 0, 2);
    pTextGrid->addWidget(pReleaseLabel, 1, 1);
    pTextGrid->addWidget(pRelease, 1, 2);
+   pTextGrid->addWidget(pHomepageLabel, 2, 1);
+   pTextGrid->addWidget(pHomepage, 2, 2);
 
-   pTextGrid->addWidget(pInfoLabel, 2, 1, 1, 2);
-   pTextGrid->addWidget(pDescriptionLabel, 3, 1, 1, 2);
+   pTextGrid->addWidget(pInfoLabel, 3, 1, 1, 2);
+   pTextGrid->addWidget(pDescriptionLabel, 4, 1, 1, 2);
 
-   pTextGrid->setRowMinimumHeight(4, 10);
-   pTextGrid->addWidget(pCopyrightLabel, 5, 1, 1, 2);
+   pTextGrid->setRowMinimumHeight(5, 10);
+   pTextGrid->addWidget(pCopyrightLabel, 6, 1, 1, 2);
    pTextGrid->setColumnStretch(2, 10);
    pTextGrid->setColumnMinimumWidth(0, 75);
 

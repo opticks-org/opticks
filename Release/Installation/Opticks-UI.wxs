@@ -4,6 +4,7 @@
       <!-- Defines the UI for the installer. -->
       <CustomAction Id="ClearMaintenanceMode" Property="__MaintenanceMode" Value="{}" />
       <CustomAction Id="LaunchOpticks" FileKey="F__Opticks" ExeCommand="" Return="asyncNoWait" />
+      <CustomAction Id="OpenHomepage" Directory="TARGETDIR" ExeCommand="explorer.exe http://opticks.org" Return="asyncNoWait" />
 
       <UI Id="OpticksUI">
          <Binary Id="Banner_Image" SourceFile="Bitmaps/dlgbannr.bmp" />
@@ -315,6 +316,7 @@
             <!-- This dialog is the final screen a user will see when the install has completed successfully, ie. the execute sequence finished with no problems. -->
             <Control Id="Finish" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Cancel="yes" Text="&amp;Finish">
                <Publish Event="DoAction" Value="LaunchOpticks">NOT Installed AND RUNOPTICKS = 1</Publish>
+               <Publish Event="DoAction" Value="OpenHomepage">NOT Installed AND OPENHOMEPAGE = 1</Publish>
                <Publish Event="EndDialog" Value="Return" Order="999">1</Publish>
             </Control>
             <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Disabled="yes" Text="$(var.CancelButtonText)" />
@@ -327,6 +329,12 @@
                <Condition Action="show">NOT Installed</Condition>
             </Control>
             <Control Id="RunAppText" Type="Text" X="150" Y="190" Width="150" Height="20" Hidden="yes" Transparent="yes" NoPrefix="yes" Text="Run Opticks">
+               <Condition Action="show">NOT Installed</Condition>
+            </Control>
+            <Control Id="HomepageCheckBox" Type="CheckBox" X="135" Y="210" Width="10" Height="10" Hidden="yes" Property="OPENHOMEPAGE" CheckBoxValue="1">
+               <Condition Action="show">NOT Installed</Condition>
+            </Control>
+            <Control Id="HomepageText" Type="Text" X="150" Y="210" Width="150" Height="20" Hidden="yes" Transparent="yes" NoPrefix="yes" Text="Open Opticks Homepage" ToolTip="View the Opticks website to check for the latest version, download sample data, interact with the community, and more.">
                <Condition Action="show">NOT Installed</Condition>
             </Control>
          </Dialog>
