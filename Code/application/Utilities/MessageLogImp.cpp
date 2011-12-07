@@ -788,6 +788,11 @@ bool MessageImp::finalize()
    return true;
 }
 
+bool MessageImp::isFinalized() const
+{
+   return mFinalized;
+}
+
 const DynamicObject* MessageImp::getProperties() const
 {
    return mpProperties;

@@ -248,6 +248,7 @@ public:
    virtual bool addBooleanProperty(const std::string &name, bool value);
 
    virtual bool finalize();
+   virtual bool isFinalized() const;
 
    virtual std::string getComponent() const;
    virtual std::string getKey() const;
@@ -515,6 +516,10 @@ bool addBooleanProperty(const std::string &name, bool value) \
 bool finalize() \
 { \
    return impClass::finalize(); \
+} \
+bool isFinalized() const \
+{ \
+   return impClass::isFinalized(); \
 } \
  \
 std::string getComponent() const \

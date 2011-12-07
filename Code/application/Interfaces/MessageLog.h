@@ -360,6 +360,13 @@ public: // methods
    virtual bool finalize() = 0;
 
    /**
+    *  Returns whether the message has been finalized by calling the finalize() method.
+    *
+    *  @return true if the message has been finalized; false otherwise.
+    */
+   virtual bool isFinalized() const = 0;
+
+   /**
     *  Returns the name of the component that created this Message.
     *
     *  @return the name of the component that created this Message.
