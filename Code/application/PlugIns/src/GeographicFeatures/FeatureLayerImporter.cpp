@@ -105,6 +105,19 @@ std::vector<ImportDescriptor*> FeatureLayerImporter::getImportDescriptors(const 
    return descriptors;
 }
 
+bool FeatureLayerImporter::validate(const DataDescriptor* pDescriptor, std::string& errorMessage) const
+{
+   VERIFY(pDescriptor != NULL);
+
+   if (pDescriptor->getProcessingLocation() != IN_MEMORY)
+   {
+      errorMessage = "The processing location must be \"In Memory\".";
+      return false;
+   }
+
+   return true;
+}
+
 bool FeatureLayerImporter::getInputSpecification(PlugInArgList*& pArgList)
 {
    if (!ShapeFileImporter::getInputSpecification(pArgList))

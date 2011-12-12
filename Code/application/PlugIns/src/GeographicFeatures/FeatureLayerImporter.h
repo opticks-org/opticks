@@ -12,16 +12,19 @@
 
 #include "ShapeFileImporter.h"
 
+class DynamicObject;
+
 class FeatureLayerImporter : public ShapeFileImporter
 {
 public:
    FeatureLayerImporter();
-   ~FeatureLayerImporter();
+   virtual ~FeatureLayerImporter();
 
-   unsigned char getFileAffinity(const std::string& filename);
-   std::vector<ImportDescriptor*> getImportDescriptors(const std::string& filename);
-   bool getInputSpecification(PlugInArgList*& pArgList);
-   bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
+   virtual unsigned char getFileAffinity(const std::string& filename);
+   virtual std::vector<ImportDescriptor*> getImportDescriptors(const std::string& filename);
+   virtual bool validate(const DataDescriptor* pDescriptor, std::string& errorMessage) const;
+   virtual bool getInputSpecification(PlugInArgList*& pArgList);
+   virtual bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
 
    static const std::string FEATURE_DYNAMIC_OBJECT_ARG;
    static const std::string PLUGIN_NAME;
