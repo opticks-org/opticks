@@ -655,7 +655,7 @@ bool Nitf::ImageSubheader::getGCPsFromGeographic(const string& iGeolo, const Loc
    for (unsigned int ui = 0; ui < numGcpPixels; ++ui)
    {
       int n;
-      vector<char> buf(3, 0);
+      vector<char> buf(4, 0);
       double latitude = 0;
       double longitude = 0;
       char dir;
@@ -673,6 +673,7 @@ bool Nitf::ImageSubheader::getGCPsFromGeographic(const string& iGeolo, const Loc
          latitude *= -1;
       }
 
+      memset(&buf.front(), 0, buf.size());
       strm.read(&buf.front(), 3);
       stringstream numer(&buf.front());
       numer >> longitude;
