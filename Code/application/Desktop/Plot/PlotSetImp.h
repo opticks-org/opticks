@@ -13,48 +13,45 @@
 #include <QtGui/QTabWidget>
 
 #include "AttachmentPtr.h"
-#include "Observer.h"
 #include "SessionExplorer.h"
 #include "SessionItemImp.h"
 #include "SubjectImp.h"
 #include "TypesFile.h"
+#include "View.h"
+#include "XercesIncludes.h"
 #include "xmlwriter.h"
 
 #include <string>
 #include <vector>
 
-#include "XercesIncludes.h"
-
 class PlotSet;
 class PlotWidget;
-class PlotWindow;
 class SessionItemDeserializer;
 class SessionItemSerializer;
-class View;
 
 Q_DECLARE_METATYPE(PlotSet*)
 
-class PlotSetImp : public QTabWidget, public SessionItemImp, public SubjectImp, public Observer
+class PlotSetImp : public QTabWidget, public SessionItemImp, public SubjectImp
 {
    Q_OBJECT
 
 public:
-   PlotSetImp(const std::string& id, const std::string& plotSetName, PlotWindow* pPlotWindow, QWidget* parent = 0);
-   ~PlotSetImp();
+   PlotSetImp(const std::string& id, const std::string& plotSetName, QWidget* pParent = NULL);
+   virtual ~PlotSetImp();
 
    using SessionItemImp::setIcon;
 
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
 
-   void elementDeleted(Subject &subject, const std::string &signal, const boost::any &v);
-   void elementModified(Subject &subject, const std::string &signal, const boost::any &v);
    void updateContextMenu(Subject& subject, const std::string& signal, const boost::any& value);
-   void attached(Subject &subject, const std::string &signal, const Slot &slot);
 
    void setName(const std::string& name);
+   QWidget* getWidget();
+   const QWidget* getWidget() const;
    void setAssociatedView(View* pView);
-   View* getAssociatedView() const;
+   View* getAssociatedView();
+   const View* getAssociatedView() const;
 
    PlotWidget* createPlot(const QString& strPlotName, const PlotType& plotType);
    PlotWidget* getPlot(const QString& strPlotName) const;
@@ -88,6 +85,7 @@ signals:
    void renamed(const QString& strName);
 
 protected:
+   void viewRenamed(Subject& subject, const std::string& signal, const boost::any& value);
    void addPlot(PlotWidget* pPlot);
 
 protected slots:
@@ -98,8 +96,7 @@ private:
    PlotSetImp& operator=(const PlotSetImp& rhs);
 
    AttachmentPtr<SessionExplorer> mpExplorer;
-   PlotWindow* mpPlotWindow;
-   View* mpAssociatedView;
+   AttachmentPtr<View> mpAssociatedView;
 
 private slots:
    void activatePlot(int iIndex);
@@ -116,11 +113,23 @@ private slots:
    { \
       impClass::setName(name); \
    } \
+   QWidget* getWidget() \
+   { \
+      return impClass::getWidget(); \
+   } \
+   const QWidget* getWidget() const \
+   { \
+      return impClass::getWidget(); \
+   } \
    void setAssociatedView(View* pView) \
    { \
       impClass::setAssociatedView(pView); \
    } \
-   View* getAssociatedView() const \
+   View* getAssociatedView() \
+   { \
+      return impClass::getAssociatedView(); \
+   } \
+   const View* getAssociatedView() const \
    { \
       return impClass::getAssociatedView(); \
    } \

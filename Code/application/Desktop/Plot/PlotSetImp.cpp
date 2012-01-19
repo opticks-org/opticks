@@ -14,37 +14,37 @@
 #include "AppVerify.h"
 #include "ContextMenu.h"
 #include "ContextMenuActions.h"
+#include "DesktopServices.h"
+#include "DockWindow.h"
 #include "PlotSet.h"
+#include "PlotSetGroup.h"
 #include "PlotSetImp.h"
 #include "PlotView.h"
 #include "PlotViewImp.h"
 #include "PlotWidgetAdapter.h"
-#include "PlotWindow.h"
 #include "SessionItemDeserializer.h"
 #include "SessionItemSerializer.h"
-#include "SessionManagerImp.h"
+#include "SessionManager.h"
 #include "xmlreader.h"
 
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
 
-PlotSetImp::PlotSetImp(const string& id, const string& plotSetName, PlotWindow* pPlotWindow, QWidget* parent) :
-   QTabWidget(parent),
+PlotSetImp::PlotSetImp(const string& id, const string& plotSetName, QWidget* pParent) :
+   QTabWidget(pParent),
    SessionItemImp(id, plotSetName),
    mpExplorer(Service<SessionExplorer>().get(), SIGNAL_NAME(SessionExplorer, AboutToShowSessionItemContextMenu),
       Slot(this, &PlotSetImp::updateContextMenu)),
-   mpPlotWindow(pPlotWindow),
-   mpAssociatedView(NULL)
+   mpAssociatedView(SIGNAL_NAME(View, Renamed), Slot(this, &PlotSetImp::viewRenamed))
 {
+   // Initialization
+   setTabPosition(QTabWidget::South);
+   setTabShape(QTabWidget::Triangular);
+
    // Connections
    VERIFYNR(connect(this, SIGNAL(currentChanged(int)), this, SLOT(activatePlot(int))));
-
-   // Attach to the plot window
-   if (mpPlotWindow != NULL)
-   {
-      mpPlotWindow->attach(SIGNAL_NAME(DockWindow, AboutToShowContextMenu),
-         Slot(this, &PlotSetImp::updateContextMenu));
-   }
+   VERIFYNR(Service<DesktopServices>()->attach(SIGNAL_NAME(DesktopServices, AboutToShowContextMenu),
+      Slot(this, &PlotSetImp::updateContextMenu)));
 }
 
 PlotSetImp::~PlotSetImp()
@@ -52,14 +52,10 @@ PlotSetImp::~PlotSetImp()
    // Detach from the view
    setAssociatedView(NULL);
 
-   // Detach from the plot window
-   if (mpPlotWindow != NULL)
-   {
-      mpPlotWindow->detach(SIGNAL_NAME(DockWindow, AboutToShowContextMenu),
-         Slot(this, &PlotSetImp::updateContextMenu));
-   }
-
    VERIFYNR(disconnect(this, SIGNAL(currentChanged(int)), this, SLOT(activatePlot(int))));
+   VERIFYNR(Service<DesktopServices>()->detach(SIGNAL_NAME(DesktopServices, AboutToShowContextMenu),
+      Slot(this, &PlotSetImp::updateContextMenu)));
+
    clear();
 }
 
@@ -77,39 +73,6 @@ bool PlotSetImp::isKindOf(const string& className) const
    }
 
    return SubjectImp::isKindOf(className);
-}
-
-void PlotSetImp::attached(Subject &subject, const string &signal, const Slot &slot)
-{
-   elementModified(subject, signal, boost::any());
-}
-
-void PlotSetImp::elementDeleted(Subject &subject, const string &signal, const boost::any &v)
-{
-   if (&subject == mpAssociatedView)
-   {
-      // Reset the member pointer
-      mpAssociatedView = NULL;
-
-      // Delete this plot set since the view is being destroyed
-      PlotSet* pPlotSet = dynamic_cast<PlotSet*>(this);
-      if ((pPlotSet != NULL) && (mpPlotWindow != NULL))
-      {
-         mpPlotWindow->deletePlotSet(pPlotSet);
-      }
-   }
-}
-
-void PlotSetImp::elementModified(Subject &subject, const string &signal, const boost::any &v)
-{
-   if (&subject == mpAssociatedView)
-   {
-      string viewName = mpAssociatedView->getName();
-      if (viewName.empty() == false)
-      {
-         setName(viewName);
-      }
-   }
 }
 
 void PlotSetImp::updateContextMenu(Subject& subject, const string& signal, const boost::any& value)
@@ -133,15 +96,20 @@ void PlotSetImp::updateContextMenu(Subject& subject, const string& signal, const
    bool bAddDelete = false;
    string afterId;
 
-   if (dynamic_cast<PlotWindow*>(&subject) == mpPlotWindow)
+   vector<DockWindow*> windowItems = pMenu->getSessionItems<DockWindow>();
+   if (windowItems.size() == 1)
    {
-      vector<PlotSet*> plotSets = pMenu->getSessionItems<PlotSet>();
-      if (plotSets.size() == 1)
+      DockWindow* pDockWindow = windowItems.front();
+      if (pDockWindow != NULL)
       {
-         if (dynamic_cast<PlotSetImp*>(plotSets.front()) == this)
+         PlotSetGroup* pPlotSetGroup = dynamic_cast<PlotSetGroup*>(pDockWindow->getWidget());
+         if (pPlotSetGroup != NULL)
          {
-            bAddSeparator = true;
-            bAddDelete = true;
+            if (dynamic_cast<PlotSetImp*>(pPlotSetGroup->getCurrentPlotSet()) == this)
+            {
+               bAddSeparator = true;
+               bAddDelete = true;
+            }
          }
       }
    }
@@ -241,31 +209,44 @@ void PlotSetImp::setName(const string& name)
    }
 }
 
+QWidget* PlotSetImp::getWidget()
+{
+   return this;
+}
+
+const QWidget* PlotSetImp::getWidget() const
+{
+   return this;
+}
+
 void PlotSetImp::setAssociatedView(View* pView)
 {
-   if (pView == mpAssociatedView)
+   if (pView == mpAssociatedView.get())
    {
       return;
    }
 
-   if (mpAssociatedView != NULL)
-   {
-      mpAssociatedView->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &PlotSetImp::elementDeleted));
-      mpAssociatedView->detach(SIGNAL_NAME(Subject, Modified), Slot(this, &PlotSetImp::elementModified));
-   }
+   mpAssociatedView.reset(pView);
+   notify(SIGNAL_NAME(PlotSet, ViewAssociated), boost::any(pView));
 
-   mpAssociatedView = pView;
-
-   if (mpAssociatedView != NULL)
+   if (mpAssociatedView.get() != NULL)
    {
-      mpAssociatedView->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &PlotSetImp::elementDeleted));
-      mpAssociatedView->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &PlotSetImp::elementModified));
+      const string& viewName = mpAssociatedView->getName();
+      if (viewName.empty() == false)
+      {
+         setName(viewName);
+      }
    }
 }
 
-View* PlotSetImp::getAssociatedView() const
+View* PlotSetImp::getAssociatedView()
 {
-   return mpAssociatedView;
+   return mpAssociatedView.get();
+}
+
+const View* PlotSetImp::getAssociatedView() const
+{
+   return mpAssociatedView.get();
 }
 
 PlotWidget* PlotSetImp::createPlot(const QString& strPlotName, const PlotType& plotType)
@@ -430,7 +411,7 @@ QString PlotSetImp::renamePlot(PlotWidget* pPlot)
 {
    QString strOldName;
 
-   PlotViewImp* pPlotView = dynamic_cast<PlotViewImp*>(pPlot->getPlot());
+   PlotView* pPlotView = pPlot->getPlot();
    if (pPlotView != NULL)
    {
       strOldName = QString::fromStdString(pPlotView->getName());
@@ -604,6 +585,18 @@ void PlotSetImp::clear()
    }
 }
 
+void PlotSetImp::viewRenamed(Subject& subject, const string& signal, const boost::any& value)
+{
+   if (&subject == mpAssociatedView.get())
+   {
+      string viewName = boost::any_cast<string>(value);
+      if (viewName.empty() == false)
+      {
+         setName(viewName);
+      }
+   }
+}
+
 void PlotSetImp::addPlot(PlotWidget* pPlot)
 {
    if (pPlot == NULL)
@@ -711,12 +704,7 @@ bool PlotSetImp::toXml(XMLWriter* pXml) const
    }
    pXml->addAttr("type", getObjectType());
 
-   if (mpPlotWindow != NULL)
-   {
-      pXml->addAttr("plotWindowId", mpPlotWindow->getId());
-   }
-
-   if (mpAssociatedView != NULL)
+   if (mpAssociatedView.get() != NULL)
    {
       pXml->addAttr("associatedViewId", mpAssociatedView->getId());
    }
@@ -743,27 +731,10 @@ bool PlotSetImp::fromXml(DOMNode* pDocument, unsigned int version)
    }
    DOMElement* pElem = static_cast<DOMElement*>(pDocument);
 
-   if (pElem->hasAttribute(X("plotWindowId")))
-   {
-      PlotWindow* pWindow = dynamic_cast<PlotWindow*>(
-         SessionManagerImp::instance()->getSessionItem(A(pElem->getAttribute(X("plotWindowId")))));
-      if (pWindow != NULL)
-      {
-         if (mpPlotWindow != NULL)
-         {
-            mpPlotWindow->detach(SIGNAL_NAME(DockWindow, AboutToShowContextMenu),
-               Slot(this, &PlotSetImp::updateContextMenu));
-         }
-         mpPlotWindow = pWindow;
-         mpPlotWindow->attach(SIGNAL_NAME(DockWindow, AboutToShowContextMenu),
-            Slot(this, &PlotSetImp::updateContextMenu));
-      }
-   }
-
    if (pElem->hasAttribute(X("associatedViewId")))
    {
       View* pView = dynamic_cast<View*>(
-         SessionManagerImp::instance()->getSessionItem(A(pElem->getAttribute(X("associatedViewId")))));
+         Service<SessionManager>()->getSessionItem(A(pElem->getAttribute(X("associatedViewId")))));
       setAssociatedView(pView);
    }
 

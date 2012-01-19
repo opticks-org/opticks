@@ -100,7 +100,6 @@
  *    - Opticks::PixelLocation
  *    - PlotView
  *    - PlotWidget
- *    - PlotWindow
  *    - PolarPlot
  *    - ProductView
  *    - ProductWindow

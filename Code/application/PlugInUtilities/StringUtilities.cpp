@@ -833,7 +833,6 @@ ADD_ENUM_MAPPING(WORKSPACE_WINDOW, "Workspace Window", "WorkspaceWindow")
 ADD_ENUM_MAPPING(SPATIAL_DATA_WINDOW, "Spatial Data Window", "SpatialDataWindow")
 ADD_ENUM_MAPPING(PRODUCT_WINDOW, "Product Window", "ProductWindow")
 ADD_ENUM_MAPPING(DOCK_WINDOW, "Dock Window", "DockWindow")
-ADD_ENUM_MAPPING(PLOT_WINDOW, "Plot Window", "PlotWindow")
 ADD_ENUM_MAPPING(TOOLBAR, "Toolbar", "ToolbarWindow")
 END_ENUM_MAPPING()
 

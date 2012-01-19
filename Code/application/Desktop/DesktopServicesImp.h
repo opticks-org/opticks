@@ -20,6 +20,8 @@ class Axis;
 class GpuResourceManager;
 class ImageFilterManager;
 class MenuBar;
+class PlotSet;
+class PlotSetGroup;
 class PlotView;
 class PlotWidget;
 class PlugIn;
@@ -106,6 +108,10 @@ public:
    ProductWindow* deriveProduct(View* pView);
 
    // Plot services
+   PlotSetGroup* createPlotSetGroup(QWidget* pParent = NULL);
+   void deletePlotSetGroup(PlotSetGroup* pPlotSetGroup);
+   PlotSet* createPlotSet(const std::string& plotSetName, QWidget* pParent = NULL);
+   void deletePlotSet(PlotSet* pPlotSet);
    PlotWidget* createPlotWidget(const std::string& plotName, PlotType plotType, QWidget* pParent = 0);
    void deletePlotWidget(PlotWidget* pPlot);
    Axis* createAxis(AxisPosition position, QWidget* pParent = 0);

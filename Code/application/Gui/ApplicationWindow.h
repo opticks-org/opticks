@@ -441,7 +441,7 @@ private:
 
    // Docking windows
    SessionExplorerAdapter* mpSessionExplorer;
-   HistogramWindowAdapter* m_pHistogram;
+   HistogramWindowAdapter* mpHistogram;
    MessageLogWindow* m_pMessage_Log;
    BackgroundPluginWindow* m_pBackground_Plugins;
    ScriptingWindow* m_pScripting;

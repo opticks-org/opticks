@@ -10,36 +10,36 @@
 #ifndef HISTOGRAMWINDOW_H
 #define HISTOGRAMWINDOW_H
 
-#include "PlotWindow.h"
 #include "ConfigurationSettings.h"
+#include "DockWindow.h"
 #include "TypesFile.h"
 
 class Layer;
+class PlotSet;
 class PlotWidget;
 
 /**
- *  A specialized plot window to display histogram plots.
+ *  A specialized dock window to display histogram plots.
  *
  *  The histogram window manages multiple histogram plots on potentially
  *  multple plot sets.  A plot set is added for each spatial data view that
  *  contains layers.  %Histogram plot widgets are automatically added to the
- *  plot set when the layer is created.  For automatically created plots, the
+ *  plot set when the layer is created.  For plots created automatically, the
  *  name of the plot set is the same name as the view, and the name of the plot
  *  is the same name as the layer.  Additional plot widgets can be added to any
- *  plot set in the window, using the basic plot window functionality as
- *  desired.
+ *  plot set in the window, using the basic functionality in PlotSet as desired.
  *
  *  This subclass of Subject will notify upon the following conditions:
- *  - Everything documented in PlotWindow.
+ *  - Everything documented in DockWindow.
  *
- *  @see        HistogramPlot, PlotWindow, PlotWidget, PlotSet, Layer
+ *  @see        DockWindow, PlotSetGroup, PlotSet, PlotWidget, HistogramPlot,
+ *              Layer
  */
-class HistogramWindow : public PlotWindow
+class HistogramWindow : public DockWindow
 {
 public:
    SETTING(LayerActivation, HistogramWindow, bool, false)
 
-   using PlotWindow::setCurrentPlot;
    /**
     *  Creates a histogram plot widget for a given layer.
     *

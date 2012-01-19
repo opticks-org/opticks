@@ -125,8 +125,9 @@ void DockWindowImp::setWidget(QWidget* pWidget)
       pWidget->setParent(this);
    }
 
+   notify(SIGNAL_NAME(ViewWindow, AboutToSetWidget));
    QDockWidget::setWidget(pWidget);
-   notify(SIGNAL_NAME(Subject, Modified));
+   notify(SIGNAL_NAME(ViewWindow, WidgetSet), boost::any(pWidget));
 }
 
 QWidget* DockWindowImp::getWidget() const

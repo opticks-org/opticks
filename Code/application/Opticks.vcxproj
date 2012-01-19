@@ -355,9 +355,9 @@
     <ClInclude Include="Interfaces\PlotGroup.h" />
     <ClInclude Include="Interfaces\PlotObject.h" />
     <ClInclude Include="Interfaces\PlotSet.h" />
+    <ClInclude Include="Interfaces\PlotSetGroup.h" />
     <ClInclude Include="Interfaces\PlotView.h" />
     <ClInclude Include="Interfaces\PlotWidget.h" />
-    <ClInclude Include="Interfaces\PlotWindow.h" />
     <ClInclude Include="Interfaces\PlugIn.h" />
     <ClInclude Include="Interfaces\PlugInArg.h" />
     <ClInclude Include="Interfaces\PlugInArgList.h" />

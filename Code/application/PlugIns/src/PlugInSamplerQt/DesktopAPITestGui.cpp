@@ -24,13 +24,14 @@
 #include "DesktopAPITestGui.h"
 #include "DesktopAPITestProperties.h"
 #include "DesktopServices.h"
+#include "DockWindow.h"
 #include "Histogram.h"
 #include "LabeledSection.h"
 #include "LabeledSectionGroup.h"
 #include "MouseMode.h"
 #include "PlotSet.h"
+#include "PlotSetGroup.h"
 #include "PlotView.h"
-#include "PlotWindow.h"
 #include "SessionManager.h"
 #include "Signature.h"
 #include "ToolBar.h"
@@ -158,10 +159,13 @@ DesktopAPITestGui::DesktopAPITestGui(QWidget* pParent) :
    LabeledSection* pPlotWidgetSection = new LabeledSection(pPlotWidget, "Plot Widget", this);
 
    // Dock window
-   mpDockWindow = static_cast<PlotWindow*>(pDesktop->createWindow("Test Plot Window", PLOT_WINDOW));
+   mpDockWindow = static_cast<DockWindow*>(pDesktop->createWindow("Test Plot Window", DOCK_WINDOW));
    mpDockWindow->enableSessionItemDrops(this);
 
-   PlotSet* pPlotSet = mpDockWindow->createPlotSet("Test Plot Set");
+   PlotSetGroup* pPlotSetGroup = pDesktop->createPlotSetGroup();
+   mpDockWindow->setWidget(pPlotSetGroup->getWidget());
+
+   PlotSet* pPlotSet = pPlotSetGroup->createPlotSet("Test Plot Set");
    if (pPlotSet != NULL)
    {
       mpDockPlotWidget = pPlotSet->createPlot("Test Plot", SIGNATURE_PLOT);
@@ -507,17 +511,21 @@ void DesktopAPITestGui::dropSessionItem(Subject& subject, const string& signal, 
    {
       if (mpDockWindow != NULL)
       {
-         // Add the signature to the plot
-         mpDockWindow->plotData(*pSignature, "Wavelength", "Reflectance", "Test Plot");
-
-         // Refresh the plot
-         if (mpDockPlotWidget != NULL)
+         PlotSetGroup* pPlotSetGroup = dynamic_cast<PlotSetGroup*>(mpDockWindow->getWidget());
+         if (pPlotSetGroup != NULL)
          {
-            PlotView* pPlotView = mpDockPlotWidget->getPlot();
-            if (pPlotView != NULL)
+            // Add the signature to the plot
+            pPlotSetGroup->plotData(*pSignature, "Wavelength", "Reflectance", "Test Plot");
+
+            // Refresh the plot
+            if (mpDockPlotWidget != NULL)
             {
-               pPlotView->zoomExtents();
-               pPlotView->refresh();
+               PlotView* pPlotView = mpDockPlotWidget->getPlot();
+               if (pPlotView != NULL)
+               {
+                  pPlotView->zoomExtents();
+                  pPlotView->refresh();
+               }
             }
          }
       }

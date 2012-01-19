@@ -96,6 +96,9 @@
     <ClInclude Include="Interfaces\BitMaskObject.h">
       <Filter>Interfaces</Filter>
     </ClInclude>
+    <ClInclude Include="Interfaces\Blob.h">
+      <Filter>Interfaces</Filter>
+    </ClInclude>
     <ClInclude Include="Interfaces\CartesianGridlines.h">
       <Filter>Interfaces</Filter>
     </ClInclude>
@@ -354,13 +357,13 @@
     <ClInclude Include="Interfaces\PlotSet.h">
       <Filter>Interfaces</Filter>
     </ClInclude>
+    <ClInclude Include="Interfaces\PlotSetGroup.h">
+      <Filter>Interfaces</Filter>
+    </ClInclude>
     <ClInclude Include="Interfaces\PlotView.h">
       <Filter>Interfaces</Filter>
     </ClInclude>
     <ClInclude Include="Interfaces\PlotWidget.h">
-      <Filter>Interfaces</Filter>
-    </ClInclude>
-    <ClInclude Include="Interfaces\PlotWindow.h">
       <Filter>Interfaces</Filter>
     </ClInclude>
     <ClInclude Include="Interfaces\PlugIn.h">
@@ -580,9 +583,6 @@
       <Filter>Interfaces</Filter>
     </ClInclude>
     <ClInclude Include="Interfaces\WorkspaceWindow.h">
-      <Filter>Interfaces</Filter>
-    </ClInclude>
-    <ClInclude Include="Interfaces\Blob.h">
       <Filter>Interfaces</Filter>
     </ClInclude>
   </ItemGroup>

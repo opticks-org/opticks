@@ -16,12 +16,12 @@
 class PlotSetAdapter : public PlotSet, public PlotSetImp PLOTSETADAPTEREXTENSION_CLASSES
 {
 public:
-   PlotSetAdapter(const std::string& id, const std::string& plotSetName, PlotWindow* pPlotWindow, QWidget* parent = 0);
-   ~PlotSetAdapter();
+   PlotSetAdapter(const std::string& id, const std::string& plotSetName, QWidget* pParent = NULL);
+   virtual ~PlotSetAdapter();
 
    // TypeAwareObject
-   const std::string& getObjectType() const;
-   bool isKindOf(const std::string& className) const;
+   virtual const std::string& getObjectType() const;
+   virtual bool isKindOf(const std::string& className) const;
 
    PLOTSETADAPTER_METHODS(PlotSetImp)
 

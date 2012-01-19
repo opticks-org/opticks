@@ -884,7 +884,6 @@ enum WindowTypeEnum
    PRODUCT_WINDOW,         /**< A workspace window that contains a product view. */
    DOCK_WINDOW,            /**< A window that can contain a QWidget that can float or dock along the edges
                                 of the main application window. */
-   PLOT_WINDOW,            /**< A dock window providing the capability to create plots. */
    TOOLBAR                 /**< A dock window containing buttons and other widgets to perform certain actions. */
 };
 

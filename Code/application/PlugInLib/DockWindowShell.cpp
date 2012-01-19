@@ -55,13 +55,13 @@ bool DockWindowShell::setBatch()
 bool DockWindowShell::getInputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
-   return true;
+   return !isBatch();
 }
 
 bool DockWindowShell::getOutputSpecification(PlugInArgList*& pArgList)
 {
    pArgList = NULL;
-   return true;
+   return !isBatch();
 }
 
 bool DockWindowShell::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
@@ -171,7 +171,27 @@ QAction* DockWindowShell::getAction()
    return mpWindowAction;
 }
 
+const QAction* DockWindowShell::getAction() const
+{
+   return mpWindowAction;
+}
+
+QWidget* DockWindowShell::getWidget() const
+{
+   if (mpDockWindow.get() != NULL)
+   {
+      return mpDockWindow->getWidget();
+   }
+
+   return NULL;
+}
+
 DockWindow* DockWindowShell::getDockWindow()
+{
+   return mpDockWindow.get();
+}
+
+const DockWindow* DockWindowShell::getDockWindow() const
 {
    return mpDockWindow.get();
 }

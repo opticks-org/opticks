@@ -861,6 +861,12 @@
     <CustomBuild Include="Interfaces\FileBrowser.h">
       <Filter>Interfaces</Filter>
     </CustomBuild>
+    <CustomBuild Include="Interfaces\FontSizeComboBox.h">
+      <Filter>Interfaces</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Interfaces\GraphicTextWidget.h">
+      <Filter>Interfaces</Filter>
+    </CustomBuild>
     <CustomBuild Include="Interfaces\ImageHandler.h">
       <Filter>Interfaces</Filter>
     </CustomBuild>
@@ -899,12 +905,6 @@
     </CustomBuild>
     <CustomBuild Include="EventMessages.mc">
       <Filter>Source Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Interfaces\GraphicTextWidget.h">
-      <Filter>Interfaces</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Interfaces\FontSizeComboBox.h">
-      <Filter>Interfaces</Filter>
     </CustomBuild>
   </ItemGroup>
 </Project>

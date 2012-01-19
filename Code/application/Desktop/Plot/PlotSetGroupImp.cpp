@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2011 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -8,71 +8,64 @@
  */
 
 #include <QtGui/QAction>
-#include <QtGui/QContextMenuEvent>
-#include <QtGui/QMenu>
+#include <QtGui/QIcon>
+#include <QtGui/QLayout>
 #include <QtGui/QMessageBox>
+#include <QtGui/QMenu>
 #include <QtGui/QStackedWidget>
-#include <QtGui/QVBoxLayout>
 
+#include "AppVerify.h"
 #include "Axis.h"
-#include "ContextMenuImp.h"
-#include "DataVariant.h"
+#include "DesktopServices.h"
 #include "DynamicObject.h"
 #include "InfoBar.h"
-#include "Int64.h"
 #include "MessageLogResource.h"
-#include "PlotSetAdapter.h"
+#include "PlotSet.h"
+#include "PlotSetImp.h"
+#include "PlotSetGroup.h"
+#include "PlotSetGroupImp.h"
 #include "PlotView.h"
 #include "PlotWidget.h"
-#include "PlotWindow.h"
-#include "PlotWindowImp.h"
 #include "PointSet.h"
-#include "SessionItemImp.h"
+#include "SessionManager.h"
 #include "Signature.h"
-#include "UInt64.h"
+#include "Slot.h"
+#include "xmlwriter.h"
 
 #include <algorithm>
+
 XERCES_CPP_NAMESPACE_USE
-using namespace std;
 
-PlotWindowImp::PlotWindowImp(const string& id, const string& windowName, QWidget* parent) :
-   DockWindowImp(id, windowName, parent)
+PlotSetGroupImp::PlotSetGroupImp(QWidget* pParent) :
+   QWidget(pParent),
+   mpInfoBar(NULL),
+   mpStack(NULL)
 {
-   mpInfoBar = NULL;
-   mpStack = NULL;
-
-   // Dock window widget
-   QWidget* pWindowWidget = new QWidget(this);
-
    // Popup menu
    QMenu* pMenu = new QMenu(NULL);
 
    // Info bar
-   mpInfoBar = new InfoBar(pWindowWidget);
+   mpInfoBar = new InfoBar(this);
    mpInfoBar->setBackgroundColor(Qt::darkGray);
    mpInfoBar->setTitleColor(Qt::white);
    mpInfoBar->setTitleFont(QFont("Arial", 12, QFont::Bold));
    mpInfoBar->setMenu(pMenu);
 
    // Widget stack
-   mpStack = new QStackedWidget(pWindowWidget);
+   mpStack = new QStackedWidget(this);
 
    // Layout
-   QVBoxLayout* pLayout = new QVBoxLayout(pWindowWidget);
+   QVBoxLayout* pLayout = new QVBoxLayout(this);
    pLayout->setMargin(2);
    pLayout->setSpacing(2);
    pLayout->addWidget(mpInfoBar);
    pLayout->addWidget(mpStack, 10);
 
-   // Initialization
-   setWidget(pWindowWidget);
-   pWindowWidget->show();    // Must call show() to show the dock window widget if a plug-in creates the window
-
    // Connections
    VERIFYNR(connect(pMenu, SIGNAL(triggered(QAction*)), this, SLOT(setCurrentPlotSet(QAction*))));
 }
 
-PlotWindowImp::~PlotWindowImp()
+PlotSetGroupImp::~PlotSetGroupImp()
 {
    QMenu* pMenu = mpInfoBar->getMenu();
    if (pMenu != NULL)
@@ -83,50 +76,25 @@ PlotWindowImp::~PlotWindowImp()
    clear();
 }
 
-list<ContextMenuAction> PlotWindowImp::getContextMenuActions() const
+QWidget* PlotSetGroupImp::getWidget()
 {
-   list<ContextMenuAction> menuActions = DockWindowImp::getContextMenuActions();
-
-   PlotSet* pPlotSet = getCurrentPlotSet();
-   if (pPlotSet != NULL)
-   {
-      list<ContextMenuAction> plotSetActions = pPlotSet->getContextMenuActions();
-      copy(plotSetActions.begin(), plotSetActions.end(), back_inserter(menuActions));
-   }
-
-   return menuActions;
+   return this;
 }
 
-const string& PlotWindowImp::getObjectType() const
+const QWidget* PlotSetGroupImp::getWidget() const
 {
-   static string type("PlotWindowImp");
-   return type;
+   return this;
 }
 
-bool PlotWindowImp::isKindOf(const string& className) const
+PlotSet* PlotSetGroupImp::createPlotSet(const QString& plotSetName)
 {
-   if ((className == getObjectType()) || (className == "PlotWindow"))
-   {
-      return true;
-   }
-
-   return DockWindowImp::isKindOf(className);
-}
-
-WindowType PlotWindowImp::getWindowType() const
-{
-   return PLOT_WINDOW;
-}
-
-PlotSet* PlotWindowImp::createPlotSet(const QString& strPlotSet)
-{
-   if (strPlotSet.isEmpty() == true)
+   if (plotSetName.isEmpty() == true)
    {
       return NULL;
    }
 
    // Do not create the plot set if one with the same name already exists
-   if (getPlotSet(strPlotSet) != NULL)
+   if (getPlotSet(plotSetName) != NULL)
    {
       return NULL;
    }
@@ -136,32 +104,34 @@ PlotSet* PlotWindowImp::createPlotSet(const QString& strPlotSet)
    if (pSessionManager->isSessionLoading() == true)
    {
       // Retrieve the PlotSet
-      pPlotSet = dynamic_cast<PlotSet*>(pSessionManager->getSessionItem(strPlotSet.toStdString()));
+      pPlotSet = dynamic_cast<PlotSet*>(pSessionManager->getSessionItem(plotSetName.toStdString()));
    }
 
    if (pPlotSet == NULL)
    {
-      // Create the PlotSet
-      pPlotSet = new PlotSetAdapter(SessionItemImp::generateUniqueId(),
-         strPlotSet.toStdString(), dynamic_cast<PlotWindow*>(this), mpStack);
+      // Create the plot set
+      pPlotSet = Service<DesktopServices>()->createPlotSet(plotSetName.toStdString(), mpStack);
+      if (pPlotSet == NULL)
+      {
+         return NULL;
+      }
    }
 
-   PlotSetImp* pPlotSetImp = dynamic_cast<PlotSetImp*>(pPlotSet);
-   VERIFYRV(pPlotSetImp != NULL, NULL);
-
-   pPlotSetImp->setTabPosition(QTabWidget::South);
-   pPlotSetImp->setTabShape(QTabWidget::Triangular);
-   pPlotSetImp->installEventFilter(this);
-   mPlotSets.push_back(pPlotSet);
+   VERIFYNR(pPlotSet->attach(SIGNAL_NAME(PlotSet, ViewAssociated),
+      Slot(this, &PlotSetGroupImp::plotSetViewAssociated)));
+   mPlotSets[pPlotSet] = NULL;
 
    // Add the plot set to the widget stack
-   mpStack->addWidget(pPlotSetImp);
+   QWidget* pWidget = pPlotSet->getWidget();
+   VERIFYRV(pWidget != NULL, NULL);
+
+   mpStack->addWidget(pWidget);
 
    // Add the plot set name to the list box
    QMenu* pMenu = mpInfoBar->getMenu();
    if (pMenu != NULL)
    {
-      const string& actionName = pPlotSet->getDisplayName(true);
+      const std::string& actionName = pPlotSet->getDisplayName(true);
 
       QAction* pAction = new QAction(QString::fromStdString(actionName), this);
       pAction->setData(QVariant::fromValue(pPlotSet));
@@ -171,112 +141,94 @@ PlotSet* PlotWindowImp::createPlotSet(const QString& strPlotSet)
 
    // Notify connected and attached objects
    emit plotSetAdded(pPlotSet);
-   notify(SIGNAL_NAME(PlotWindow, PlotSetAdded), boost::any(pPlotSet));
+   notify(SIGNAL_NAME(PlotSetGroup, PlotSetAdded), boost::any(pPlotSet));
 
    // Activate the plot set
    setCurrentPlotSet(pPlotSet);
    return pPlotSet;
 }
 
-PlotSet* PlotWindowImp::getPlotSet(const QString& strPlotSet) const
+PlotSet* PlotSetGroupImp::getPlotSet(const QString& plotSetName) const
 {
-   if (strPlotSet.isEmpty() == true)
+   if (plotSetName.isEmpty() == true)
    {
       return NULL;
    }
 
-   vector<PlotSet*>::const_iterator iter = mPlotSets.begin();
-   while (iter != mPlotSets.end())
+   for (std::map<PlotSet*, View*>::const_iterator iter = mPlotSets.begin(); iter != mPlotSets.end(); ++iter)
    {
-      PlotSet* pPlotSet = *iter;
+      PlotSet* pPlotSet = iter->first;
       if (pPlotSet != NULL)
       {
-         QString strCurrentName = QString::fromStdString(pPlotSet->getName());
-         if (strCurrentName == strPlotSet)
+         if (QString::fromStdString(pPlotSet->getName()) == plotSetName)
          {
             return pPlotSet;
          }
       }
-
-      ++iter;
    }
 
    return NULL;
 }
 
-PlotSet* PlotWindowImp::getPlotSet(PlotWidget* pPlot) const
+PlotSet* PlotSetGroupImp::getPlotSet(PlotWidget* pPlot) const
 {
    if (pPlot == NULL)
    {
       return NULL;
    }
 
-   vector<PlotSet*>::const_iterator iter = mPlotSets.begin();
-   while (iter != mPlotSets.end())
+   for (std::map<PlotSet*, View*>::const_iterator iter = mPlotSets.begin(); iter != mPlotSets.end(); ++iter)
    {
-      PlotSet* pPlotSet = *iter;
+      PlotSet* pPlotSet = iter->first;
       if (pPlotSet != NULL)
       {
-         bool bContains = pPlotSet->containsPlot(pPlot);
-         if (bContains == true)
+         if (pPlotSet->containsPlot(pPlot) == true)
          {
             return pPlotSet;
          }
       }
-
-      ++iter;
    }
 
    return NULL;
 }
 
-vector<PlotSet*> PlotWindowImp::getPlotSets() const
+std::vector<PlotSet*> PlotSetGroupImp::getPlotSets() const
 {
-   vector<PlotSet*> plots;
-
-   vector<PlotSet*>::const_iterator iter = mPlotSets.begin();
-   while (iter != mPlotSets.end())
+   std::vector<PlotSet*> plotSets;
+   for (std::map<PlotSet*, View*>::const_iterator iter = mPlotSets.begin(); iter != mPlotSets.end(); ++iter)
    {
-      PlotSet* pPlotSet = *iter;
+      PlotSet* pPlotSet = iter->first;
       if (pPlotSet != NULL)
       {
-         plots.push_back(pPlotSet);
+         plotSets.push_back(pPlotSet);
       }
-
-      ++iter;
    }
 
-   return plots;
+   return plotSets;
 }
 
-unsigned int PlotWindowImp::getNumPlotSets() const
+unsigned int PlotSetGroupImp::getNumPlotSets() const
 {
    return mPlotSets.size();
 }
 
-bool PlotWindowImp::containsPlotSet(PlotSet* pPlotSet) const
+bool PlotSetGroupImp::containsPlotSet(PlotSet* pPlotSet) const
 {
    if (pPlotSet == NULL)
    {
       return false;
    }
 
-   vector<PlotSet*>::const_iterator iter = mPlotSets.begin();
-   while (iter != mPlotSets.end())
+   std::map<PlotSet*, View*>::const_iterator iter = mPlotSets.find(pPlotSet);
+   if (iter != mPlotSets.end())
    {
-      PlotSet* pCurrentPlotSet = *iter;
-      if (pCurrentPlotSet == pPlotSet)
-      {
-         return true;
-      }
-
-      ++iter;
+      return true;
    }
 
    return false;
 }
 
-bool PlotWindowImp::setCurrentPlotSet(PlotSet* pPlotSet)
+bool PlotSetGroupImp::setCurrentPlotSet(PlotSet* pPlotSet)
 {
    if (pPlotSet == NULL)
    {
@@ -289,64 +241,62 @@ bool PlotWindowImp::setCurrentPlotSet(PlotSet* pPlotSet)
    }
 
    // Set the new title
-   const string& plotSetName = pPlotSet->getDisplayName(true);
+   const std::string& plotSetName = pPlotSet->getDisplayName(true);
    if (plotSetName.empty() == false)
    {
       mpInfoBar->setTitle(QString::fromStdString(plotSetName));
    }
 
    // Activate the tab widget
-   mpStack->setCurrentWidget(dynamic_cast<PlotSetImp*>(pPlotSet));
+   QWidget* pWidget = pPlotSet->getWidget();
+   VERIFY(pWidget != NULL);
+
+   mpStack->setCurrentWidget(pWidget);
 
    emit plotSetActivated(pPlotSet);
-   notify(SIGNAL_NAME(PlotWindow, PlotSetActivated), boost::any(pPlotSet));
+   notify(SIGNAL_NAME(PlotSetGroup, PlotSetActivated), boost::any(pPlotSet));
    return true;
 }
 
-PlotSet* PlotWindowImp::getCurrentPlotSet() const
+PlotSet* PlotSetGroupImp::getCurrentPlotSet() const
 {
    PlotSet* pPlotSet = dynamic_cast<PlotSet*>(mpStack->currentWidget());
    return pPlotSet;
 }
 
-bool PlotWindowImp::renamePlotSet(PlotSet* pPlotSet, const QString& strNewName)
+bool PlotSetGroupImp::renamePlotSet(PlotSet* pPlotSet, const QString& newName)
 {
-   if ((pPlotSet == NULL) || (strNewName.isEmpty() == true))
+   if ((pPlotSet == NULL) || (newName.isEmpty() == true))
    {
       return false;
    }
 
-   string newName = strNewName.toStdString();
+   std::string plotName = newName.toStdString();
 
    // Check if the new name is the same as the current name
-   const string& currentName = pPlotSet->getName();
-   if (newName == currentName)
+   if (plotName == pPlotSet->getName())
    {
       return false;
    }
 
    // Check if an existing plot set contains the new name
-   vector<PlotSet*>::iterator iter = mPlotSets.begin();
-   while (iter != mPlotSets.end())
+   for (std::map<PlotSet*, View*>::const_iterator iter = mPlotSets.begin(); iter != mPlotSets.end(); ++iter)
    {
-      PlotSet* pCurrentPlotSet = *iter;
+      PlotSet* pCurrentPlotSet = iter->first;
       if (pCurrentPlotSet != NULL)
       {
-         string plotSetName = pCurrentPlotSet->getName();
-         if (plotSetName == newName)
+         if (pCurrentPlotSet->getName() == plotName)
          {
             return false;
          }
       }
-
-      ++iter;
    }
 
    // Rename the plot set
-   pPlotSet->setName(newName);
+   pPlotSet->setName(plotName);
 
    // Update the info bar
-   const string& actionName = pPlotSet->getDisplayName(true);
+   const std::string& actionName = pPlotSet->getDisplayName(true);
 
    QMenu* pMenu = mpInfoBar->getMenu();
    if (pMenu != NULL)
@@ -376,33 +326,28 @@ bool PlotWindowImp::renamePlotSet(PlotSet* pPlotSet, const QString& strNewName)
    return true;
 }
 
-bool PlotWindowImp::deletePlotSet(PlotSet* pPlotSet)
+bool PlotSetGroupImp::deletePlotSet(PlotSet* pPlotSet)
 {
-   PlotSetImp* pPlotSetImp = dynamic_cast<PlotSetImp*>(pPlotSet);
-   if (pPlotSetImp == NULL)
+   if (pPlotSet == NULL)
    {
       return false;
    }
 
    // Get the name of the plot set that is being removed
-   QString strPlotSetName = QString::fromStdString(pPlotSetImp->getName());
+   QString plotSetName = QString::fromStdString(pPlotSet->getName());
+   QWidget* pWidget = pPlotSet->getWidget();
 
-   // Remove the plot set from the vector
-   vector<PlotSet*>::iterator iter = mPlotSets.begin();
-   while (iter != mPlotSets.end())
+   // Delete the plot set
+   std::map<PlotSet*, View*>::iterator iter = mPlotSets.find(pPlotSet);
+   if (iter != mPlotSets.end())
    {
-      PlotSet* pCurrentPlotSet = *iter;
-      if (pCurrentPlotSet == pPlotSet)
-      {
-         mPlotSets.erase(iter);
-         mpStack->removeWidget(pPlotSetImp);
-         emit plotSetDeleted(pPlotSet);
-         notify(SIGNAL_NAME(PlotWindow, PlotSetDeleted), boost::any(pPlotSet));
-         delete pPlotSetImp;
-         break;
-      }
-
-      ++iter;
+      VERIFYNR(pPlotSet->detach(SIGNAL_NAME(PlotSet, ViewAssociated),
+         Slot(this, &PlotSetGroupImp::plotSetViewAssociated)));
+      mPlotSets.erase(iter);
+      mpStack->removeWidget(pWidget);
+      emit plotSetDeleted(pPlotSet);
+      notify(SIGNAL_NAME(PlotSetGroup, PlotSetDeleted), boost::any(pPlotSet));
+      delete dynamic_cast<PlotSetImp*>(pPlotSet);
    }
 
    // Update the info bar title with the new current plot set
@@ -442,21 +387,20 @@ bool PlotWindowImp::deletePlotSet(PlotSet* pPlotSet)
    return true;
 }
 
-vector<PlotWidget*> PlotWindowImp::getPlots(const PlotType& plotType) const
+std::vector<PlotWidget*> PlotSetGroupImp::getPlots(PlotType plotType) const
 {
-   vector<PlotWidget*> plots;
-
-   vector<PlotSet*>::const_iterator iter;
-   for (iter = mPlotSets.begin(); iter != mPlotSets.end(); ++iter)
+   std::vector<PlotWidget*> plots;
+   for (std::map<PlotSet*, View*>::const_iterator iter = mPlotSets.begin(); iter != mPlotSets.end(); ++iter)
    {
-      PlotSet* pPlotSet = *iter;
+      PlotSet* pPlotSet = iter->first;
       if (pPlotSet != NULL)
       {
-         vector<PlotWidget*> currentPlots;
+         std::vector<PlotWidget*> currentPlots;
          pPlotSet->getPlots(currentPlots);
 
-         vector<PlotWidget*>::const_iterator widgetIter;
-         for (widgetIter = currentPlots.begin(); widgetIter != currentPlots.end(); ++widgetIter)
+         for (std::vector<PlotWidget*>::const_iterator widgetIter = currentPlots.begin();
+            widgetIter != currentPlots.end();
+            ++widgetIter)
          {
             PlotWidget* pPlot = *widgetIter;
             if (pPlot != NULL)
@@ -464,8 +408,7 @@ vector<PlotWidget*> PlotWindowImp::getPlots(const PlotType& plotType) const
                PlotView* pPlotView = pPlot->getPlot();
                if (pPlotView != NULL)
                {
-                  PlotType currentType = pPlotView->getPlotType();
-                  if (currentType == plotType)
+                  if (pPlotView->getPlotType() == plotType)
                   {
                      plots.push_back(pPlot);
                   }
@@ -478,69 +421,56 @@ vector<PlotWidget*> PlotWindowImp::getPlots(const PlotType& plotType) const
    return plots;
 }
 
-vector<PlotWidget*> PlotWindowImp::getPlots() const
+std::vector<PlotWidget*> PlotSetGroupImp::getPlots() const
 {
-   vector<PlotWidget*> plots;
-
-   vector<PlotSet*>::const_iterator iter = mPlotSets.begin();
-   while (iter != mPlotSets.end())
+   std::vector<PlotWidget*> plots;
+   for (std::map<PlotSet*, View*>::const_iterator iter = mPlotSets.begin(); iter != mPlotSets.end(); ++iter)
    {
-      PlotSet* pPlotSet = *iter;
+      PlotSet* pPlotSet = iter->first;
       if (pPlotSet != NULL)
       {
-         vector<PlotWidget*> currentPlots;
+         std::vector<PlotWidget*> currentPlots;
          pPlotSet->getPlots(currentPlots);
 
-         vector<PlotWidget*>::const_iterator widgetIter = currentPlots.begin();
-         while (widgetIter != currentPlots.end())
+         for (std::vector<PlotWidget*>::const_iterator widgetIter = currentPlots.begin();
+            widgetIter != currentPlots.end();
+            ++widgetIter)
          {
             PlotWidget* pPlot = *widgetIter;
             if (pPlot != NULL)
             {
                plots.push_back(pPlot);
             }
-
-            ++widgetIter;
          }
       }
-
-      ++iter;
    }
 
    return plots;
 }
 
-unsigned int PlotWindowImp::getNumPlots() const
+unsigned int PlotSetGroupImp::getNumPlots() const
 {
-   vector<PlotWidget*> plots = getPlots();
+   std::vector<PlotWidget*> plots = getPlots();
    return plots.size();
 }
 
-bool PlotWindowImp::containsPlot(PlotWidget* pPlot) const
+bool PlotSetGroupImp::containsPlot(PlotWidget* pPlot) const
 {
    if (pPlot == NULL)
    {
       return false;
    }
 
-   vector<PlotWidget*> plots = getPlots();
-
-   vector<PlotWidget*>::const_iterator iter = plots.begin();
-   while (iter != plots.end())
+   std::vector<PlotWidget*> plots = getPlots();
+   if (std::find(plots.begin(), plots.end(), pPlot) != plots.end())
    {
-      PlotWidget* pCurrentPlot = *iter;
-      if (pCurrentPlot == pPlot)
-      {
-         return true;
-      }
-
-      ++iter;
+      return true;
    }
 
    return false;
 }
 
-bool PlotWindowImp::setCurrentPlot(PlotWidget* pPlot)
+bool PlotSetGroupImp::setCurrentPlot(PlotWidget* pPlot)
 {
    if (pPlot == NULL)
    {
@@ -561,7 +491,7 @@ bool PlotWindowImp::setCurrentPlot(PlotWidget* pPlot)
    return false;
 }
 
-PlotWidget* PlotWindowImp::getCurrentPlot() const
+PlotWidget* PlotSetGroupImp::getCurrentPlot() const
 {
    PlotSet* pPlotSet = getCurrentPlotSet();
    if (pPlotSet != NULL)
@@ -573,9 +503,9 @@ PlotWidget* PlotWindowImp::getCurrentPlot() const
    return NULL;
 }
 
-void PlotWindowImp::clear()
+void PlotSetGroupImp::clear()
 {
-   vector<PlotSet*> plotSets = getPlotSets();
+   std::vector<PlotSet*> plotSets = getPlotSets();
    for (unsigned int i = 0; i < plotSets.size(); ++i)
    {
       PlotSet* pPlotSet = plotSets[i];
@@ -586,63 +516,50 @@ void PlotWindowImp::clear()
    }
 }
 
-void PlotWindowImp::setInfoBarElideMode(Qt::TextElideMode mode)
+void PlotSetGroupImp::setInfoBarIcon(const QIcon& icon)
+{
+   mpInfoBar->setInfoIcon(icon.pixmap(16));
+}
+
+void PlotSetGroupImp::setInfoBarElideMode(Qt::TextElideMode mode)
 {
    mpInfoBar->setElideMode(mode);
 }
 
-bool PlotWindowImp::eventFilter(QObject* pObject, QEvent* pEvent)
+void PlotSetGroupImp::plotSetViewAssociated(Subject& subject, const std::string& signal, const boost::any& value)
 {
-   if (pEvent != NULL)
+   PlotSet* pPlotSet = dynamic_cast<PlotSet*>(&subject);
+   if (pPlotSet != NULL)
    {
-      PlotSetImp* pPlotSet = dynamic_cast<PlotSetImp*>(getCurrentPlotSet());
-      if ((pObject != NULL) && (pObject == pPlotSet))
+      View* pView = boost::any_cast<View*>(value);
+      if (pView != NULL)
       {
-         if (pEvent->type() == QEvent::ContextMenu)
+         mPlotSets[pPlotSet] = pView;
+         pView->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &PlotSetGroupImp::plotSetViewDeleted));
+      }
+   }
+}
+
+void PlotSetGroupImp::plotSetViewDeleted(Subject& subject, const std::string& signal, const boost::any& value)
+{
+   View* pView = dynamic_cast<View*>(&subject);
+   if (pView != NULL)
+   {
+      VERIFYNR(pView->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &PlotSetGroupImp::plotSetViewDeleted)));
+
+      for (std::map<PlotSet*, View*>::iterator iter = mPlotSets.begin(); iter != mPlotSets.end(); ++iter)
+      {
+         PlotSet* pPlotSet = iter->first;
+         if ((pPlotSet != NULL) && (iter->second == pView))
          {
-            QContextMenuEvent* pMenuEvent = static_cast<QContextMenuEvent*>(pEvent);
-            contextMenuEvent(pMenuEvent);
-            return true;
+            deletePlotSet(pPlotSet);
+            return;
          }
       }
    }
-
-   return DockWindowImp::eventFilter(pObject, pEvent);
 }
 
-void PlotWindowImp::contextMenuEvent(QContextMenuEvent* pEvent)
-{
-   if (pEvent != NULL)
-   {
-      // Create the context menu
-      const QPoint& mouseLocation = pEvent->globalPos();
-      list<ContextMenuAction> defaultActions = getContextMenuActions();
-
-      vector<SessionItem*> sessionItems;
-      sessionItems.push_back(dynamic_cast<SessionItem*>(this));
-      sessionItems.push_back(dynamic_cast<SessionItem*>(getCurrentPlotSet()));
-
-      ContextMenuImp menu(sessionItems, mouseLocation, defaultActions, this);
-
-      // Notify to allow additional actions to be added
-      notify(SIGNAL_NAME(DockWindow, AboutToShowContextMenu), boost::any(static_cast<ContextMenu*>(&menu)));
-
-      // Invoke the menu
-      if (menu.show() == true)
-      {
-         return;
-      }
-   }
-
-   DockWindowImp::contextMenuEvent(pEvent);
-}
-
-InfoBar* PlotWindowImp::getInfoBar() const
-{
-   return mpInfoBar;
-}
-
-void PlotWindowImp::setCurrentPlotSet(QAction* pAction)
+void PlotSetGroupImp::setCurrentPlotSet(QAction* pAction)
 {
    if (pAction == NULL)
    {
@@ -659,16 +576,16 @@ void PlotWindowImp::setCurrentPlotSet(QAction* pAction)
 namespace
 {
    template<class T>
-   void extractFromVariant(const DataVariant& var, vector<double>& data)
+   void extractFromVariant(const DataVariant& var, std::vector<double>& data)
    {
-      const vector<T>* pVec = var.getPointerToValue<vector<T> >();
+      const std::vector<T>* pVec = var.getPointerToValue<std::vector<T> >();
       if (pVec != NULL)
       {
          data.reserve(pVec->size());
          copy(pVec->begin(), pVec->end(), back_inserter(data));
       }
    }
-   void convertRawData(const DataVariant& var, vector<double>& data)
+   void convertRawData(const DataVariant& var, std::vector<double>& data)
    {
       // list<types> typeList = char, unsigned char, short, ...
       // for each type in typeList
@@ -744,16 +661,17 @@ namespace
    }
 }
 
-PlotWidget* PlotWindowImp::plotData(const DataVariant& xRawData, const DataVariant& yRawData, const string& xAttribute,
-                                    const string& yAttribute, const string& plotName)
+PlotWidget* PlotSetGroupImp::plotData(const DataVariant& xRawData, const DataVariant& yRawData,
+                                      const std::string& xAttribute, const std::string& yAttribute,
+                                      const std::string& plotName)
 {
-   vector<double> xData;
+   std::vector<double> xData;
    convertRawData(xRawData, xData);
-   vector<double> yData;
+   std::vector<double> yData;
    convertRawData(yRawData, yData);
    if (xData.size() != yData.size() || xData.size() == 0 || yData.size() == 0)
    {
-      string message = "The selected attributes are not plottable:\n" + yAttribute + " vs. " + xAttribute;
+      std::string message = "The selected attributes are not plottable:\n" + yAttribute + " vs. " + xAttribute;
       QMessageBox::critical(this, "Unable to plot", message.c_str(), QMessageBox::Ok, 0);
       MessageResource msg("Plotting", "app", "7137567E-0EF3-4e46-9706-2F2F9764AD1C");
       msg->addProperty("Message", message);
@@ -763,7 +681,7 @@ PlotWidget* PlotWindowImp::plotData(const DataVariant& xRawData, const DataVaria
    PlotSet* pSet = getCurrentPlotSet();
    if (pSet == NULL)
    {
-      pSet = this->createPlotSet(QString::fromStdString(plotName));
+      pSet = createPlotSet(QString::fromStdString(plotName));
       VERIFYRV(pSet != NULL, NULL);
    }
 
@@ -785,13 +703,13 @@ PlotWidget* PlotWindowImp::plotData(const DataVariant& xRawData, const DataVaria
    {
       Axis* pAxis = pPlotWidget->getAxis(AXIS_BOTTOM);
       VERIFYRV(pAxis != NULL, NULL);
-      string xText = pAxis->getTitle();
+      std::string xText = pAxis->getTitle();
       pAxis = pPlotWidget->getAxis(AXIS_LEFT);
       VERIFYRV(pAxis != NULL, NULL);
-      string yText = pAxis->getTitle();
+      std::string yText = pAxis->getTitle();
       if (xText != xAttribute || yText != yAttribute)
       {
-         stringstream message;
+         std::stringstream message;
          message << "The attributes of the data don't match the axes of the plot:\n" <<
             "Data = " << yAttribute << " vs. " << xAttribute << "\n" <<
             "Axes = " << yText << " vs. " << xText << "\n" <<
@@ -815,25 +733,41 @@ PlotWidget* PlotWindowImp::plotData(const DataVariant& xRawData, const DataVaria
    return pPlotWidget;
 }
 
-PlotWidget* PlotWindowImp::plotData(const Signature& sig, const string& xAttribute, const string& yAttribute,
-                                    const string& plotName)
+PlotWidget* PlotSetGroupImp::plotData(const Signature& sig, const std::string& xAttribute,
+                                      const std::string& yAttribute, const std::string& plotName)
 {
    const DataVariant& xRawData = sig.getData(xAttribute);
    const DataVariant& yRawData = sig.getData(yAttribute);
    return plotData(xRawData, yRawData, xAttribute, yAttribute, plotName);
 }
 
-PlotWidget* PlotWindowImp::plotData(const DynamicObject& obj, const string& xAttribute, const string& yAttribute,
-                                    const string& plotName)
+PlotWidget* PlotSetGroupImp::plotData(const DynamicObject& obj, const std::string& xAttribute,
+                                      const std::string& yAttribute, const std::string& plotName)
 {
    const DataVariant& xRawData = obj.getAttribute(xAttribute);
    const DataVariant& yRawData = obj.getAttribute(yAttribute);
    return plotData(xRawData, yRawData, xAttribute, yAttribute, plotName);
 }
 
-bool PlotWindowImp::toXml(XMLWriter* pXml) const
+const std::string& PlotSetGroupImp::getObjectType() const
 {
-   if (!DockWindowImp::toXml(pXml))
+   static std::string sType("PlotSetGroupImp");
+   return sType;
+}
+
+bool PlotSetGroupImp::isKindOf(const std::string& className) const
+{
+   if ((className == getObjectType()) || (className == "PlotSetGroup"))
+   {
+      return true;
+   }
+
+   return SubjectImp::isKindOf(className);
+}
+
+bool PlotSetGroupImp::toXml(XMLWriter* pXml) const
+{
+   if (pXml == NULL)
    {
       return false;
    }
@@ -857,39 +791,42 @@ bool PlotWindowImp::toXml(XMLWriter* pXml) const
       pXml->addAttr("currentPlotId", pPlot->getId());
    }
 
-   if (mPlotSets.size() > 0)
+   if (mPlotSets.empty() == false)
    {
       pXml->pushAddPoint(pXml->addElement("PlotSets"));
-      for (vector<PlotSet*>::const_iterator it = mPlotSets.begin(); it != mPlotSets.end(); ++it)
+      for (std::map<PlotSet*, View*>::const_iterator iter = mPlotSets.begin(); iter != mPlotSets.end(); ++iter)
       {
-         PlotSet* pSet = *it;
-         if (pSet != NULL)
+         PlotSet* pPlotSet = iter->first;
+         if (pPlotSet != NULL)
          {
-            pXml->pushAddPoint(pXml->addElement("PlotId"));
-            pXml->addText(pSet->getId());
+            pXml->pushAddPoint(pXml->addElement("PlotSet"));
+            pXml->addAttr("plotSetId", pPlotSet->getId());
+
+            View* pView = iter->second;
+            if (pView != NULL)
+            {
+               pXml->addAttr("viewId", pView->getId());
+            }
+
             pXml->popAddPoint();
          }
       }
+
       pXml->popAddPoint();
    }
 
    return true;
 }
 
-bool PlotWindowImp::fromXml(DOMNode* pDocument, unsigned int version)
+bool PlotSetGroupImp::fromXml(DOMNode* pDocument, unsigned int version)
 {
    if (pDocument == NULL)
    {
       return false;
    }
 
-   // remove any leftovers
+   // Delete existing plots
    clear();
-
-   if (!DockWindowImp::fromXml(pDocument, version))
-   {
-      return false;
-   }
 
    DOMElement* pElem = static_cast<DOMElement*>(pDocument);
    if (pElem == NULL)
@@ -897,64 +834,78 @@ bool PlotWindowImp::fromXml(DOMNode* pDocument, unsigned int version)
       return false;
    }
 
-   // get attributes
-   string currentPlotSetId;
-   string currentPlotId;
+   // Info bar
    if (mpInfoBar != NULL)
    {
-      string infoBarTitle = A(pElem->getAttribute(X("infoBarTitle")));
-      if (!infoBarTitle.empty())
+      std::string infoBarTitle = A(pElem->getAttribute(X("infoBarTitle")));
+      if (infoBarTitle.empty() == false)
       {
-         mpInfoBar->setTitle(infoBarTitle.c_str());
+         mpInfoBar->setTitle(QString::fromStdString(infoBarTitle));
       }
 
-      string infoBarTitleColor = A(pElem->getAttribute(X("infoBarTitleColor")));
-      if (!infoBarTitleColor.empty())
+      std::string infoBarTitleColor = A(pElem->getAttribute(X("infoBarTitleColor")));
+      if (infoBarTitleColor.empty() == false)
       {
-         QColor color(infoBarTitleColor.c_str());
+         QColor color(QString::fromStdString(infoBarTitleColor));
          mpInfoBar->setTitleColor(color);
       }
 
-      string infoBarTitleFont = A(pElem->getAttribute(X("infoBarTitleFont")));
-      QFont font;
-      if (font.fromString(infoBarTitleFont.c_str()))
+      std::string infoBarTitleFont = A(pElem->getAttribute(X("infoBarTitleFont")));
+      if (infoBarTitleFont.empty() == false)
       {
-         mpInfoBar->setTitleFont(font);
+         QFont font;
+         if (font.fromString(QString::fromStdString(infoBarTitleFont)) == true)
+         {
+            mpInfoBar->setTitleFont(font);
+         }
       }
-
-      currentPlotSetId = A(pElem->getAttribute(X("currentPlotSetId")));
-      currentPlotId = A(pElem->getAttribute(X("currentPlotId")));
    }
 
-   // get plot sets
+   // Current plot set and plot
+   std::string currentPlotSetId = A(pElem->getAttribute(X("currentPlotSetId")));
+   std::string currentPlotId = A(pElem->getAttribute(X("currentPlotId")));
+
+   // Plot sets
    for (DOMNode* pChld = pDocument->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
    {
-      string name = A(pChld->getNodeName());
+      std::string name = A(pChld->getNodeName());
       if (name == "PlotSets")
       {
          for (DOMNode* pGChld = pChld->getFirstChild(); pGChld != NULL; pGChld = pGChld->getNextSibling())
          {
-            string name = A(pGChld->getNodeName());
-            if (name == "PlotId")
+            std::string name = A(pGChld->getNodeName());
+            if (name == "PlotSet")
             {
-               if (createPlotSet(A(pGChld->getFirstChild()->getNodeValue())) == NULL)
+               DOMElement* pPlotSetElement = static_cast<DOMElement*>(pGChld);
+
+               std::string plotSetId = A(pPlotSetElement->getAttribute(X("plotSetId")));
+               std::string viewId = A(pPlotSetElement->getAttribute(X("viewId")));
+
+               PlotSet* pPlotSet = createPlotSet(QString::fromStdString(plotSetId));
+               if (pPlotSet == NULL)
                {
                   return false;
                }
+
+               View* pView = dynamic_cast<View*>(Service<SessionManager>()->getSessionItem(viewId));
+               if (pView != NULL)
+               {
+                  mPlotSets[pPlotSet] = pView;
+                  pView->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &PlotSetGroupImp::plotSetViewDeleted));
+               }
             }
          }
-         // set current plot set - have to wait to set current plot in plotset restore
-         SessionItem* pItem = Service<SessionManager>()->getSessionItem(currentPlotSetId);
-         if (pItem != NULL)
+
+         // Set the current plot set
+         PlotSet* pPlotSet = dynamic_cast<PlotSet*>(Service<SessionManager>()->getSessionItem(currentPlotSetId));
+         if ((pPlotSet != NULL) && (containsPlotSet(pPlotSet) == true))
          {
-            if (containsPlotSet(dynamic_cast<PlotSet*>(pItem)))
-            {
-               setCurrentPlotSet(dynamic_cast<PlotSet*>(pItem));
-            }
+            setCurrentPlotSet(pPlotSet);
          }
       }
    }
-   setCurrentPlot(dynamic_cast<PlotWidget*>(Service<SessionManager>()->getSessionItem(currentPlotId)));
 
+   // Set the current plot
+   setCurrentPlot(dynamic_cast<PlotWidget*>(Service<SessionManager>()->getSessionItem(currentPlotId)));
    return true;
 }

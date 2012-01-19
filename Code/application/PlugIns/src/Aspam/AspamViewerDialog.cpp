@@ -16,11 +16,12 @@
 #include "AppAssert.h"
 #include "AppVerify.h"
 #include "DesktopServices.h"
+#include "DockWindow.h"
 #include "GeoPoint.h"
 #include "PlotSet.h"
+#include "PlotSetGroup.h"
 #include "PlotView.h"
 #include "PlotWidget.h"
-#include "PlotWindow.h"
 #include "Point.h"
 #include "PointSet.h"
 #include "StringUtilities.h"
@@ -329,15 +330,17 @@ void AspamViewerDialog::setDataSet(const QString& dataset)
       mpParagraphJgui->setData(pAspam->getParagraphJ(), mpDataWidget);
 
       Service<DesktopServices> pDesktopServices;
-      if (pDesktopServices.get() != NULL)
+
+      DockWindow* pDockWindow = dynamic_cast<DockWindow*>(pDesktopServices->getWindow("Aspam", DOCK_WINDOW));
+      if (pDockWindow != NULL)
       {
-         PlotWindow* pPlotWindow(static_cast<PlotWindow*>(pDesktopServices->getWindow("Aspam", PLOT_WINDOW)));
-         if (pPlotWindow != NULL)
+         PlotSetGroup* pPlotSetGroup = dynamic_cast<PlotSetGroup*>(pDockWindow->getWidget());
+         if (pPlotSetGroup != NULL)
          {
-            PlotSet* pPlotSet(pPlotWindow->getPlotSet(dataset.toStdString()));
+            PlotSet* pPlotSet(pPlotSetGroup->getPlotSet(dataset.toStdString()));
             if (pPlotSet != NULL)
             {
-               pPlotWindow->setCurrentPlotSet(pPlotSet);
+               pPlotSetGroup->setCurrentPlotSet(pPlotSet);
             }
          }
       }
@@ -356,25 +359,38 @@ void AspamViewerDialog::plot()
    if (!selected.empty())
    {
       Service<DesktopServices> pDesktopServices;
-      PlotWindow* pPlotWindow(NULL);
+      PlotSetGroup* pPlotSetGroup(NULL);
       PlotSet* pPlotSet(NULL);
       QStringList plotNames;
       QString currentPlotName;
 
-      if (pDesktopServices.get() != NULL)
+      DockWindow* pDockWindow = dynamic_cast<DockWindow*>(pDesktopServices->getWindow("Aspam", DOCK_WINDOW));
+      if (pDockWindow == NULL)
       {
-         pPlotWindow = static_cast<PlotWindow*>(pDesktopServices->createWindow("Aspam", PLOT_WINDOW));
-         if (pPlotWindow == NULL)
+         pDockWindow = dynamic_cast<DockWindow*>(pDesktopServices->createWindow("Aspam", DOCK_WINDOW));
+         if (pDockWindow != NULL)
          {
-            pPlotWindow = static_cast<PlotWindow*>(pDesktopServices->getWindow("Aspam", PLOT_WINDOW));
+            pPlotSetGroup = pDesktopServices->createPlotSetGroup();
+            if (pPlotSetGroup == NULL)
+            {
+               pDesktopServices->deleteWindow(pDockWindow);
+               return;
+            }
+
+            pDockWindow->setWidget(pPlotSetGroup->getWidget());
          }
       }
-      if (pPlotWindow != NULL)
+      else
       {
-         pPlotSet = pPlotWindow->createPlotSet(mpAspamList->currentText().toStdString());
+         pPlotSetGroup = dynamic_cast<PlotSetGroup*>(pDockWindow->getWidget());
+      }
+
+      if (pPlotSetGroup != NULL)
+      {
+         pPlotSet = pPlotSetGroup->createPlotSet(mpAspamList->currentText().toStdString());
          if (pPlotSet == NULL)
          {
-            pPlotSet = pPlotWindow->getPlotSet(mpAspamList->currentText().toStdString());
+            pPlotSet = pPlotSetGroup->getPlotSet(mpAspamList->currentText().toStdString());
          }
       }
       if (pPlotSet != NULL)
@@ -490,13 +506,17 @@ void AspamViewerDialog::unloadAspam()
          mAspams.remove(datasetName);
          populateAspamList();
 
-         PlotWindow* pPlotWindow(static_cast<PlotWindow*>(pDesktopServices->getWindow("Aspam", PLOT_WINDOW)));
-         if (pPlotWindow != NULL)
+         DockWindow* pDockWindow(dynamic_cast<DockWindow*>(pDesktopServices->getWindow("Aspam", DOCK_WINDOW)));
+         if (pDockWindow != NULL)
          {
-            PlotSet* pPlotSet(pPlotWindow->getPlotSet(datasetName.toStdString()));
-            if (pPlotSet != NULL)
+            PlotSetGroup* pPlotSetGroup = dynamic_cast<PlotSetGroup*>(pDockWindow->getWidget());
+            if (pPlotSetGroup != NULL)
             {
-               pPlotWindow->deletePlotSet(pPlotSet);
+               PlotSet* pPlotSet(pPlotSetGroup->getPlotSet(datasetName.toStdString()));
+               if (pPlotSet != NULL)
+               {
+                  pPlotSetGroup->deletePlotSet(pPlotSet);
+               }
             }
          }
       }

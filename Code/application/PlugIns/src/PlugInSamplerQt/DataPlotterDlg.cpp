@@ -10,25 +10,26 @@
 #include "AppVerify.h"
 #include "DataPlotterDlg.h"
 #include "DesktopServices.h"
+#include "DockWindow.h"
 #include "PlotSet.h"
+#include "PlotSetGroup.h"
 #include "PlotView.h"
 #include "PlotWidget.h"
-#include "PlotWindow.h"
 
-#include <QtGui/QGridLayout>
-#include <QtGui/QHBoxLayout>
+#include <QtGui/QComboBox>
+#include <QtGui/QLabel>
+#include <QtGui/QLayout>
 #include <QtGui/QPushButton>
+
 #include <string>
 #include <sstream>
-
 using namespace std;
 
-DataPlotterDlg::DataPlotterDlg(Signature &sig) :
-   QDialog(NULL),
+DataPlotterDlg::DataPlotterDlg(Signature& sig, QWidget* pParent) :
+   QDialog(pParent),
    mSig(sig),
-   mpPlot(NULL),
-   mpPlotSet(NULL),
-   mpPlotWindow(NULL)
+   mpDockWindow(NULL),
+   mpPlotWidget(NULL)
 {
    // Axis Selectors
    QLabel* pXlabel = new QLabel("X-Axis:", this);
@@ -58,65 +59,77 @@ DataPlotterDlg::DataPlotterDlg(Signature &sig) :
    pGrid->addWidget(mpAddButton, 2, 1);
    pGrid->addWidget(pCancelButton, 3, 1);
 
-   connect(pCancelButton, SIGNAL(clicked()), this, SLOT(reject()));
-   connect(mpAddButton, SIGNAL(clicked()), this, SLOT(addToPlot()));
-   connect(pNewButton, SIGNAL(clicked()), this, SLOT(newPlot()));
+   VERIFYNR(connect(pCancelButton, SIGNAL(clicked()), this, SLOT(reject())));
+   VERIFYNR(connect(mpAddButton, SIGNAL(clicked()), this, SLOT(addToPlot())));
+   VERIFYNR(connect(pNewButton, SIGNAL(clicked()), this, SLOT(newPlot())));
 }
 
 DataPlotterDlg::~DataPlotterDlg()
-{
-}
+{}
 
 void DataPlotterDlg::newPlot()
 {
    static int sCount = 1;
    Service<DesktopServices> pDesktop;
 
-   if (mpPlotWindow == NULL)
+   PlotSetGroup* pPlotSetGroup = NULL;
+   if (mpDockWindow == NULL)
    {
-      mpPlotWindow = static_cast<PlotWindow*>(pDesktop->getWindow("Data Plotter Window", PLOT_WINDOW));
-      if (mpPlotWindow == NULL)
+      mpDockWindow = static_cast<DockWindow*>(pDesktop->getWindow("Data Plotter Window", DOCK_WINDOW));
+      if (mpDockWindow == NULL)
       {
-         mpPlotWindow = static_cast<PlotWindow*>(pDesktop->createWindow("Data Plotter Window", PLOT_WINDOW));
-         if (mpPlotWindow == NULL)
+         mpDockWindow = static_cast<DockWindow*>(pDesktop->createWindow("Data Plotter Window", DOCK_WINDOW));
+         if (mpDockWindow == NULL)
          {
-            return;
-         }
-         mpPlotSet = mpPlotWindow->createPlotSet("Data Plotter Set");
-         if (mpPlotSet == NULL)
-         {
-            pDesktop->deleteWindow(mpPlotWindow);
             return;
          }
 
-         mpPlotWindow->show();
-      }
-      else
-      {
-         mpPlotSet = mpPlotWindow->getCurrentPlotSet();
-         if (mpPlotSet == NULL)
+         pPlotSetGroup = pDesktop->createPlotSetGroup();
+         if (pPlotSetGroup == NULL)
          {
-            mpPlotSet = mpPlotWindow->createPlotSet("Data Plotter Set");
-            if (mpPlotSet == NULL)
-            {
-               return;
-            }
+            pDesktop->deleteWindow(mpDockWindow);
+            mpDockWindow = NULL;
+            return;
          }
+
+         mpDockWindow->setWidget(pPlotSetGroup->getWidget());
+      }
+   }
+
+   if (pPlotSetGroup == NULL)
+   {
+      pPlotSetGroup = dynamic_cast<PlotSetGroup*>(mpDockWindow->getWidget());
+      if (pPlotSetGroup == NULL)
+      {
+         return;
+      }
+   }
+
+   // Ensure the dock window is shown
+   mpDockWindow->show();
+
+   // Create a new plot set if necessary
+   if (pPlotSetGroup->getCurrentPlotSet() == NULL)
+   {
+      if (pPlotSetGroup->createPlotSet("Data Plotter Set") == NULL)
+      {
+         return;
       }
    }
 
    stringstream name;
    name << " Data Plotter Plot " << sCount;
-   PlotWidget* pPlot = mpPlotWindow->plotData(mSig, mpXbox->currentText().toStdString(), 
+
+   mpPlotWidget = pPlotSetGroup->plotData(mSig, mpXbox->currentText().toStdString(),
       mpYbox->currentText().toStdString(), name.str());
-   if (pPlot == NULL)
+   if (mpPlotWidget == NULL)
    {
-      pDesktop->deleteWindow(mpPlotWindow);
+      pDesktop->deleteWindow(mpDockWindow);
       return;
    }
+
    sCount++;
-   mpPlot = pPlot;
-   PlotView* pPlotView = mpPlot->getPlot();
+   PlotView* pPlotView = mpPlotWidget->getPlot();
    VERIFYNRV(pPlotView != NULL);
    pPlotView->zoomExtents();
    mpAddButton->setEnabled(true);
@@ -124,13 +137,17 @@ void DataPlotterDlg::newPlot()
 
 void DataPlotterDlg::addToPlot()
 {
-   VERIFYNRV(mpPlot != NULL);
+   VERIFYNRV(mpDockWindow != NULL);
+   VERIFYNRV(mpPlotWidget != NULL);
 
-   PlotView* pPlotView = mpPlot->getPlot();
+   PlotSetGroup* pPlotSetGroup = dynamic_cast<PlotSetGroup*>(mpDockWindow->getWidget());
+   VERIFYNRV(pPlotSetGroup != NULL);
+
+   PlotView* pPlotView = mpPlotWidget->getPlot();
    VERIFYNRV(pPlotView != NULL);
 
-   string plotName = pPlotView->getName();
-   mpPlotWindow->plotData(mSig, mpXbox->currentText().toStdString(), 
-      mpYbox->currentText().toStdString(), plotName);
+   const string& plotName = pPlotView->getName();
+   pPlotSetGroup->plotData(mSig, mpXbox->currentText().toStdString(), mpYbox->currentText().toStdString(), plotName);
+
    pPlotView->zoomExtents();
 }

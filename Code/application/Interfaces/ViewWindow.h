@@ -7,8 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #ifndef VIEWWINDOW_H
 #define VIEWWINDOW_H
 
@@ -29,6 +27,7 @@ class View;
  *  as well.
  *
  *  This subclass of Subject will notify upon the following conditions:
+ *  - The following methods are called: createView(), setWidget()
  *  - Everything documented in Window.
  *
  *  @see     Window
@@ -36,6 +35,21 @@ class View;
 class ViewWindow : public Window
 {
 public:
+   /**
+    *  Emitted just before the widget is set into the window.
+    *
+    *  @see     setWidget()
+    */
+   SIGNAL_METHOD(ViewWindow, AboutToSetWidget)
+
+   /**
+    *  Emitted after the widget is set into the window with boost::any<QWidget*>
+    *  containing a pointer to the widget that was set.
+    *
+    *  @see     setWidget()
+    */
+   SIGNAL_METHOD(ViewWindow, WidgetSet)
+
    /**
     *  Creates the view based on a given type.
     *
@@ -50,6 +64,11 @@ public:
     *
     *  @return  A pointer to the created view.  NULL is returned if the view
     *           is already created or if an error occurred.
+    *
+    *  @notify  This method will notify signalAboutToSetWidget() just before the
+    *           created view is set into the window and signalWidgetSet() just
+    *           after the view is set with boost::any<QWidget*> containing a
+    *           pointer to the view that is set into the window.
     *
     *  @see     ViewType, setWidget()
     */
@@ -73,6 +92,11 @@ public:
     *
     *  @param   pWidget
     *           The Qt widget to set in the view window.  Cannot be NULL.
+    *
+    *  @notify  This method will notify signalAboutToSetWidget() just before the
+    *           widget is set into the window and signalWidgetSet() just after
+    *           the widget is set with boost::any<QWidget*> containing a pointer
+    *           to the widget that is set into the window.
     */
    virtual void setWidget(QWidget* pWidget) = 0;
 

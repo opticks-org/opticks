@@ -18,6 +18,7 @@
 #include "ClassificationLayer.h"
 #include "DataElement.h"
 #include "DataElementGroup.h"
+#include "DockWindow.h"
 #include "GcpLayer.h"
 #include "GcpList.h"
 #include "GetSessionItem.h"
@@ -31,9 +32,9 @@
 #include "MessageLogResource.h"
 #include "OrthographicView.h"
 #include "PerspectiveView.h"
+#include "PlotSetGroup.h"
 #include "PlotView.h"
 #include "PlotWidget.h"
-#include "PlotWindow.h"
 #include "PlugInArgList.h"
 #include "PlugInRegistration.h"
 #include "PolarPlot.h"
@@ -88,21 +89,24 @@ namespace
             }
          }
 
-         PlotWindow* pPlotWindow = dynamic_cast<PlotWindow*>(*iter);
-         if (pPlotWindow != NULL)
+         DockWindow* pDockWindow = dynamic_cast<DockWindow*>(*iter);
+         if (pDockWindow != NULL)
          {
-            std::vector<PlotWidget*> plots;
-            pPlotWindow->getPlots(plots);
-            for (std::vector<PlotWidget*>::const_iterator plotIter = plots.begin();
-               plotIter != plots.end();
-               ++plotIter)
+            PlotSetGroup* pPlotSetGroup = dynamic_cast<PlotSetGroup*>(pDockWindow->getWidget());
+            if (pPlotSetGroup != NULL)
             {
-               if (*plotIter != NULL)
+               const std::vector<PlotWidget*>& plots = pPlotSetGroup->getPlots();
+               for (std::vector<PlotWidget*>::const_iterator plotIter = plots.begin();
+                  plotIter != plots.end();
+                  ++plotIter)
                {
-                  View* pView = (*plotIter)->getPlot();
-                  if (pView != NULL)
+                  if (*plotIter != NULL)
                   {
-                     views.push_back(pView);
+                     View* pView = (*plotIter)->getPlot();
+                     if (pView != NULL)
+                     {
+                        views.push_back(pView);
+                     }
                   }
                }
             }
@@ -481,17 +485,22 @@ void GetPlotWidget::populateTreeWidgetItem(QTreeWidgetItem* pRoot)
 {
    VERIFYNR(pRoot != NULL);
    std::vector<Window*> windows;
-   Service<DesktopServices>()->getWindows(PLOT_WINDOW, windows);
+   Service<DesktopServices>()->getWindows(DOCK_WINDOW, windows);
    for (std::vector<Window*>::const_iterator iter = windows.begin(); iter != windows.end(); ++iter)
    {
-      PlotWindow* pPlotWindow = dynamic_cast<PlotWindow*>(*iter);
-      if (pPlotWindow == NULL)
+      DockWindow* pDockWindow = dynamic_cast<DockWindow*>(*iter);
+      if (pDockWindow == NULL)
       {
          continue;
       }
 
-      std::vector<PlotWidget*> plots;
-      pPlotWindow->getPlots(plots);
+      PlotSetGroup* pPlotSetGroup = dynamic_cast<PlotSetGroup*>(pDockWindow->getWidget());
+      if (pPlotSetGroup == NULL)
+      {
+         continue;
+      }
+
+      const std::vector<PlotWidget*>& plots = pPlotSetGroup->getPlots();
       for (std::vector<PlotWidget*>::const_iterator plotIter = plots.begin(); plotIter != plots.end(); ++plotIter)
       {
          PlotWidget* pPlotWidget = *plotIter;

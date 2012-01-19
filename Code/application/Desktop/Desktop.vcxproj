@@ -237,13 +237,13 @@
     <ClCompile Include="Plot\PlotGroupImp.cpp" />
     <ClCompile Include="Plot\PlotObjectImp.cpp" />
     <ClCompile Include="Plot\PlotSetAdapter.cpp" />
+    <ClCompile Include="Plot\PlotSetGroupAdapter.cpp" />
+    <ClCompile Include="Plot\PlotSetGroupImp.cpp" />
     <ClCompile Include="Plot\PlotSetImp.cpp" />
     <ClCompile Include="Plot\PlotViewAdapter.cpp" />
     <ClCompile Include="Plot\PlotViewImp.cpp" />
     <ClCompile Include="Plot\PlotWidgetAdapter.cpp" />
     <ClCompile Include="Plot\PlotWidgetImp.cpp" />
-    <ClCompile Include="Plot\PlotWindowAdapter.cpp" />
-    <ClCompile Include="Plot\PlotWindowImp.cpp" />
     <ClCompile Include="Plot\PointAdapter.cpp" />
     <ClCompile Include="Plot\PointImp.cpp" />
     <ClCompile Include="Plot\PointSetAdapter.cpp" />
@@ -291,10 +291,10 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PerspectiveViewImp.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PlotGroupImp.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PlotObjectImp.cpp" />
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PlotSetGroupImp.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PlotSetImp.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PlotViewImp.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PlotWidgetImp.cpp" />
-    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PlotWindowImp.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PointImp.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PointSetImp.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PolarGridlinesImp.cpp" />
@@ -395,6 +395,21 @@
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Filename).h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"
 </Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+    </CustomBuild>
+    <ClInclude Include="Plot\PlotSetGroupAdapter.h" />
+    <CustomBuild Include="Plot\PlotSetGroupImp.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing %(Filename).h...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing %(Filename).h...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Filename).h...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Filename).h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <ClInclude Include="PlugInModel.h" />
@@ -1143,25 +1158,6 @@
     </CustomBuild>
     <ClInclude Include="Plot\PlotWidgetAdapter.h" />
     <CustomBuild Include="Plot\PlotWidgetImp.h">
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing %(Filename).h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"
-</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Filename).h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"
-</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing %(Filename).h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"
-</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Filename).h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"
-</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
-    </CustomBuild>
-    <ClInclude Include="Plot\PlotWindowAdapter.h" />
-    <CustomBuild Include="Plot\PlotWindowImp.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing %(Filename).h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"
 </Command>

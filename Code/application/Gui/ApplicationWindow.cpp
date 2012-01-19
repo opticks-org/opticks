@@ -102,7 +102,7 @@
 #include "ObjectResource.h"
 #include "OptionsDlg.h"
 #include "PaperSizeDlg.h"
-#include "PlotWindowAdapter.h"
+#include "PlotSetGroup.h"
 #include "PlugIn.h"
 #include "PlugInArgList.h"
 #include "PlugInDescriptor.h"
@@ -813,10 +813,10 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
       Slot(this, &ApplicationWindow::sessionLoaded));
 
    // Histogram window
-   m_pHistogram = new HistogramWindowAdapter("{F2A66DD7-0C17-44ed-94FF-2BB4994222B9}", this);
-   addWindow(m_pHistogram);
-   m_pHistogram->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &ApplicationWindow::windowRemoved));
-   m_pHistogram->hide();
+   mpHistogram = new HistogramWindowAdapter("{F2A66DD7-0C17-44ed-94FF-2BB4994222B9}", this);
+   addWindow(mpHistogram);
+   mpHistogram->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &ApplicationWindow::windowRemoved));
+   mpHistogram->hide();
 
    // Message log window
    m_pMessage_Log = new MessageLogWindow("{0FDD098B-33D8-493d-A27B-853FC7A7774A}", this);
@@ -1275,9 +1275,9 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    VERIFYNR(connect(mpSessionExplorerAction, SIGNAL(triggered(bool)), mpSessionExplorer, SLOT(setVisible(bool))));
    VERIFYNR(connect(mpSessionExplorer, SIGNAL(visibilityChanged(bool)), mpSessionExplorerAction,
       SLOT(setChecked(bool))));
-   VERIFYNR(connect(m_pHistogram_Wnd_Action, SIGNAL(triggered(bool)), static_cast<HistogramWindowImp*>(m_pHistogram),
+   VERIFYNR(connect(m_pHistogram_Wnd_Action, SIGNAL(triggered(bool)), static_cast<HistogramWindowImp*>(mpHistogram),
       SLOT(setVisible(bool))));
-   VERIFYNR(connect(m_pHistogram, SIGNAL(visibilityChanged(bool)), m_pHistogram_Wnd_Action, SLOT(setChecked(bool))));
+   VERIFYNR(connect(mpHistogram, SIGNAL(visibilityChanged(bool)), m_pHistogram_Wnd_Action, SLOT(setChecked(bool))));
    VERIFYNR(connect(m_pMessage_Log_Wnd_Action, SIGNAL(triggered(bool)), m_pMessage_Log, SLOT(setVisible(bool))));
    VERIFYNR(connect(m_pMessage_Log, SIGNAL(visibilityChanged(bool)), m_pMessage_Log_Wnd_Action,
       SLOT(setChecked(bool))));
@@ -1414,10 +1414,6 @@ Window* ApplicationWindow::createWindow(const QString& strWindowName, WindowType
    if (windowType == DOCK_WINDOW)
    {
       pWindow = new DockWindowAdapter(SessionItemImp::generateUniqueId(), strWindowName.toStdString(), this);
-   }
-   else if (windowType == PLOT_WINDOW)
-   {
-      pWindow = new PlotWindowAdapter(SessionItemImp::generateUniqueId(), strWindowName.toStdString(), this);
    }
    else if ((windowType == WORKSPACE_WINDOW) || (windowType == SPATIAL_DATA_WINDOW) || (windowType == PRODUCT_WINDOW))
    {
@@ -4450,7 +4446,7 @@ void ApplicationWindow::updateActiveWindow(QMdiSubWindow* pWindow)
       }
 
       VERIFYNR(disconnect(mpSessionExplorer, SIGNAL(visibilityChanged(bool)), mpCurrentWnd, SLOT(setFocus())));
-      VERIFYNR(disconnect(static_cast<HistogramWindowImp*>(m_pHistogram), SIGNAL(visibilityChanged(bool)),
+      VERIFYNR(disconnect(static_cast<HistogramWindowImp*>(mpHistogram), SIGNAL(visibilityChanged(bool)),
          mpCurrentWnd, SLOT(setFocus())));
       VERIFYNR(disconnect(m_pMessage_Log, SIGNAL(visibilityChanged(bool)), mpCurrentWnd, SLOT(setFocus())));
       VERIFYNR(disconnect(m_pBackground_Plugins, SIGNAL(visibilityChanged(bool)), mpCurrentWnd, SLOT(setFocus())));
@@ -4553,7 +4549,7 @@ void ApplicationWindow::updateActiveWindow(QMdiSubWindow* pWindow)
       }
 
       VERIFYNR(connect(mpSessionExplorer, SIGNAL(visibilityChanged(bool)), pWorkspaceWindow, SLOT(setFocus())));
-      VERIFYNR(connect(static_cast<HistogramWindowImp*>(m_pHistogram), SIGNAL(visibilityChanged(bool)),
+      VERIFYNR(connect(static_cast<HistogramWindowImp*>(mpHistogram), SIGNAL(visibilityChanged(bool)),
          pWorkspaceWindow, SLOT(setFocus())));
       VERIFYNR(connect(m_pMessage_Log, SIGNAL(visibilityChanged(bool)), pWorkspaceWindow, SLOT(setFocus())));
       VERIFYNR(connect(m_pBackground_Plugins, SIGNAL(visibilityChanged(bool)), pWorkspaceWindow, SLOT(setFocus())));
@@ -4628,10 +4624,11 @@ void ApplicationWindow::updateActiveWindow(QMdiSubWindow* pWindow)
          viewName = pView->getName();
       }
 
-      if (m_pHistogram != NULL)
+      PlotSetGroup* pPlotSetGroup = dynamic_cast<PlotSetGroup*>(mpHistogram->getWidget());
+      if (pPlotSetGroup != NULL)
       {
-         PlotSet* pPlotSet = m_pHistogram->getPlotSet(viewName);
-         m_pHistogram->setCurrentPlotSet(pPlotSet);
+         PlotSet* pPlotSet = pPlotSetGroup->getPlotSet(viewName);
+         pPlotSetGroup->setCurrentPlotSet(pPlotSet);
       }
 
       // Toolbars
@@ -5187,7 +5184,7 @@ bool ApplicationWindow::isDefaultWindow(Window* pWindow) const
 
    if ((pWindow == mpStandardToolBar) || (pWindow == mpToolboxToolBar) || (pWindow == mpDisplayToolBar) ||
       (pWindow == mpAoiToolBar) || (pWindow == mpAnnotationToolBar) || (pWindow == mpGcpToolBar) ||
-      (pWindow == mpBrightnessToolbar) || (pWindow == mpSessionExplorer) || (pWindow == m_pHistogram) ||
+      (pWindow == mpBrightnessToolbar) || (pWindow == mpSessionExplorer) || (pWindow == mpHistogram) ||
       (pWindow == m_pMessage_Log) || (pWindow == mpTiePointToolBar) || (pWindow == m_pBackground_Plugins) ||
       (pWindow == mpMeasurementToolBar) || (pWindow == m_pScripting) || (pWindow == mpAnimationToolBar))
    {

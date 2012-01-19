@@ -27,14 +27,14 @@
  *  startup and when a new session is created.  The execute() method creates
  *  the dock window with the same name as the plug-in and hides it by default.
  *
- *  Subclasses are only responsible for implementing the following three items:
+ *  Subclasses are only responsible for implementing the following items:
  *  - Creating the action that toggles the display of the dock window and
  *    adding it to a menu and/or toolbar in an override of the createAction()
  *    method.
  *  - Creating the widget that is used as the dock window contents in an
  *    override of the createWidget() method.
  *  - Removing the action from a menu and/or toolbar and deleting it in the
- *    plug-in destructor.
+ *    subclass destructor.
  *
  *  Subclasses do not need to destroy the contents widget since it is
  *  automatically destroyed when the dock window is destroyed.
@@ -104,29 +104,38 @@ public:
     *
     *  This method is called on application startup and when a new session is
     *  created.  The createAction() method is called for subclasses to create
-    *  an action and add it to a menu and/or toolbar.  This method then sets
-    *  the action to be checkable and connects its triggered() signal to the
-    *  displayDockWindow() slot.
+    *  an action and add it to a menu and/or toolbar.  If a valid non-\c NULL
+    *  action is returned, this method sets the action to be a checkable action,
+    *  sets the action to not auto-repeat, and connects its triggered() signal
+    *  to the displayDockWindow() slot.
     *
-    *  After initializing the action, the dock window is created with the
-    *  window name set to the same name as the plug-in.  The window is hidden by
-    *  default, and the icon which appears in the session explorer is set to
-    *  the action's icon.
+    *  After initializing the action, the dock window is created by calling
+    *  DesktopServices::createWindow() with the window name set to the same name
+    *  as the plug-in.  If the dock window already exists, the existing window
+    *  is used instead of creating a new window.  If a new window is created, it
+    *  is hidden by default.
     *
-    *  After the dock window is created, the createWidget() method is called to
-    *  create the contents widget.  When a valid non-\c NULL widget is created,
-    *  this method sets it into the dock window.
+    *  After the dock window is created or the existing dock window is obtained,
+    *  the icon which appears in the session explorer is set to the created
+    *  action's icon, and the createWidget() method is called to create the
+    *  widget that should be used as the dock window's contents widget.  If
+    *  createWidget() returns a valid non-\c NULL widget, this method
+    *  automatically sets it into the dock window by calling
+    *  DockWindow::setWidget().
     *
     *  @param   pInArgList
-    *           This parameter is ignored since no input arguments have been
-    *           defined.
+    *           This parameter is ignored since the default implementation of
+    *           getInputSpecification() does not define any input arguments.
     *  @param   pOutArgList
-    *           This parameter is ignored since no output arguments have been
-    *           defined.
+    *           This parameter is ignored since the default implementation of
+    *           getOutputSpecification() does not define any output arguments.
     *
-    *  @return  Returns \c true if the action and dock window have been
-    *           successfully created; otherwise returns \c false.  Returns
-    *           \c false if the plug-in is set to execute in batch mode.
+    *  @return  Returns \c true if the action has been successfully created and
+    *           the dock window has been successfully created or the existing
+    *           window obtained from DesktopServices.  Returns \c false if the
+    *           plug-in is set to execute in batch mode, if the call to
+    *           createAction() returns \c false, or if the dock window does not
+    *           already exist and it could not be created from DesktopServices.
     */
    virtual bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
 
@@ -171,11 +180,11 @@ protected:
     *  create an action and add it to a menu and/or toolbar.  Typically, the
     *  action is created by calling MenuBar::addCommand().  After the action is
     *  created, only the action icon, tool tip, and status tip need to be set.
-    *  The execute() method will set the action to be checkable and will
-    *  connect it to the displayDockWindow() slot.
+    *  The execute() method will set the action to be checkable and to not
+    *  auto-repeat, and will connect it to the displayDockWindow() slot.
     *
     *  The action should be removed from the menu and/or toolbar and deleted in
-    *  the destructor.
+    *  the subclass destructor.
     *
     *  Subclasses do not need to store a pointer to the created action.  It can
     *  be retrieved by calling getAction().
@@ -185,6 +194,31 @@ protected:
     *           returned.
     */
    virtual QAction* createAction() = 0;
+
+   /**
+    *  Returns the action that is used to toggle the display of the dock window.
+    *
+    *  @return  Returns a pointer to the action that was created in
+    *           createAction().  Returns \c NULL if createAction() has not yet
+    *           been called.
+    *
+    *  @see     getAction() const
+    */
+   QAction* getAction();
+
+   /**
+    *  Returns read-only access to the action that is used to toggle the display
+    *  of the dock window.
+    *
+    *  @return  Returns a const pointer to the action that was created in
+    *           createAction().  Returns \c NULL if createAction() has not yet
+    *           been called.  The action represented by the returned pointer
+    *           should not be modified.  To modify its values, call the
+    *           non-const version of getAction() instead.
+    *
+    *  @see     getAction()
+    */
+   const QAction* getAction() const;
 
    /**
     *  Creates the widget that is added to the dock window as its contents.
@@ -201,23 +235,40 @@ protected:
    virtual QWidget* createWidget() = 0;
 
    /**
-    *  Returns the action that is used to toggle the display of the dock window.
+    *  Returns the widget that is set into the dock window.
     *
-    *  @return  Returns a pointer to the action that was created in
-    *           createAction().
+    *  This method is a convenience method that calls DockWindow::getWidget().
+    *
+    *  @return  Returns a pointer to the widget that was created in
+    *           createWidget().  Returns \c NULL if createWidget() has not yet
+    *           been called.
     */
-   QAction* getAction();
+   QWidget* getWidget() const;
 
    /**
     *  Returns a pointer to the dock window.
     *
-    *  @return  Returns a pointer to the dock window that is created in
-    *           execute().  Returns \c NULL if the action to toggle the display
-    *           state of the window cannot be created.
+    *  @return  Returns a pointer to the dock window that was created in
+    *           execute().  Returns \c NULL if the dock window has not yet been
+    *           created, or if execute() returned \c false.
     *
-    *  @see     createAction()
+    *  @see     getDockWindow() const
     */
    DockWindow* getDockWindow();
+
+   /**
+    *  Returns read-only access to the dock window.
+    *
+    *  @return  Returns a const pointer to the dock window that was created in
+    *           execute().  Returns \c NULL if the dock window has not yet been
+    *           created, or if execute() returned \c false.  The dock window
+    *           represented by the returned pointer should not be modified.  To
+    *           modify its values, call the non-const version of getDockWindow()
+    *           instead.
+    *
+    *  @see     getDockWindow()
+    */
+   const DockWindow* getDockWindow() const;
 
 protected slots:
    /**
@@ -235,6 +286,7 @@ protected slots:
 private:
    DockWindowShell(const DockWindowShell& rhs);
    DockWindowShell& operator=(const DockWindowShell& rhs);
+
    void windowShown(Subject& subject, const std::string& signal, const boost::any& value);
    void windowHidden(Subject& subject, const std::string& signal, const boost::any& value);
 

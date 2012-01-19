@@ -290,6 +290,12 @@
     <ClCompile Include="Plot\PlotSetAdapter.cpp">
       <Filter>Plot</Filter>
     </ClCompile>
+    <ClCompile Include="Plot\PlotSetGroupAdapter.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\PlotSetGroupImp.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
     <ClCompile Include="Plot\PlotSetImp.cpp">
       <Filter>Plot</Filter>
     </ClCompile>
@@ -303,12 +309,6 @@
       <Filter>Plot</Filter>
     </ClCompile>
     <ClCompile Include="Plot\PlotWidgetImp.cpp">
-      <Filter>Plot</Filter>
-    </ClCompile>
-    <ClCompile Include="Plot\PlotWindowAdapter.cpp">
-      <Filter>Plot</Filter>
-    </ClCompile>
-    <ClCompile Include="Plot\PlotWindowImp.cpp">
       <Filter>Plot</Filter>
     </ClCompile>
     <ClCompile Include="Plot\PointAdapter.cpp">
@@ -452,6 +452,9 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PlotObjectImp.cpp">
       <Filter>moc</Filter>
     </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PlotSetGroupImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PlotSetImp.cpp">
       <Filter>moc</Filter>
     </ClCompile>
@@ -459,9 +462,6 @@
       <Filter>moc</Filter>
     </ClCompile>
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PlotWidgetImp.cpp">
-      <Filter>moc</Filter>
-    </ClCompile>
-    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PlotWindowImp.cpp">
       <Filter>moc</Filter>
     </ClCompile>
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PointImp.cpp">
@@ -673,13 +673,13 @@
     <ClInclude Include="Plot\PlotSetAdapter.h">
       <Filter>Plot</Filter>
     </ClInclude>
+    <ClInclude Include="Plot\PlotSetGroupAdapter.h">
+      <Filter>Plot</Filter>
+    </ClInclude>
     <ClInclude Include="Plot\PlotViewAdapter.h">
       <Filter>Plot</Filter>
     </ClInclude>
     <ClInclude Include="Plot\PlotWidgetAdapter.h">
-      <Filter>Plot</Filter>
-    </ClInclude>
-    <ClInclude Include="Plot\PlotWindowAdapter.h">
       <Filter>Plot</Filter>
     </ClInclude>
     <ClInclude Include="Plot\PointAdapter.h">
@@ -831,6 +831,9 @@
     <CustomBuild Include="Plot\PlotObjectImp.h">
       <Filter>Plot</Filter>
     </CustomBuild>
+    <CustomBuild Include="Plot\PlotSetGroupImp.h">
+      <Filter>Plot</Filter>
+    </CustomBuild>
     <CustomBuild Include="Plot\PlotSetImp.h">
       <Filter>Plot</Filter>
     </CustomBuild>
@@ -838,9 +841,6 @@
       <Filter>Plot</Filter>
     </CustomBuild>
     <CustomBuild Include="Plot\PlotWidgetImp.h">
-      <Filter>Plot</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Plot\PlotWindowImp.h">
       <Filter>Plot</Filter>
     </CustomBuild>
     <CustomBuild Include="Plot\PointImp.h">

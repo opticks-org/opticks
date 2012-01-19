@@ -38,9 +38,9 @@
 #include "PlotView.h"
 #include "PlotSet.h"
 #include "PlotSetAdapter.h"
+#include "PlotSetGroup.h"
 #include "PlotWidget.h"
 #include "PlotWidgetAdapter.h"
-#include "PlotWindow.h"
 #include "PlugIn.h"
 #include "PlugInDescriptorImp.h"
 #include "PlugInManagerServicesImp.h"
@@ -403,17 +403,7 @@ SessionItem *SessionManagerImp::createWindow(const string &type, const string &i
             pWindow = pDesktop->getWindow(name, eType);
             if (pWindow == NULL)
             {
-               // check for PlotWindow stored as DockWindow in ApplicationWindow
-               if (eType == PLOT_WINDOW)
-               {
-                  pWindow = pDesktop->getWindow(name, DOCK_WINDOW);
-               }
-
-               // now if not found, create
-               if (pWindow == NULL)
-               {
-                  pWindow = pDesktop->createWindow(name, eType);
-               }
+               pWindow = pDesktop->createWindow(name, eType);
             }
          }
       }
@@ -946,44 +936,47 @@ void SessionManagerImp::getSessionItemsWindow(vector<IndexFileItem> &items) cons
       }
       else
       {
-         PlotWindow* pPlotWindow = dynamic_cast<PlotWindow*>(*ppWindow);
-         if (pPlotWindow != NULL)
+         DockWindow* pDockWindow = dynamic_cast<DockWindow*>(*ppWindow);
+         if (pDockWindow != NULL)
          {
-            vector<PlotSet*> plotSets;
-            pPlotWindow->getPlotSets(plotSets);
-            vector<PlotSet*>::iterator ppPlotSet;
-            for (ppPlotSet = plotSets.begin(); ppPlotSet != plotSets.end(); ++ppPlotSet)
+            PlotSetGroup* pPlotSetGroup = dynamic_cast<PlotSetGroup*>(pDockWindow->getWidget());
+            if (pPlotSetGroup != NULL)
             {
-               PlotSet* pPlotSet = *ppPlotSet;
-               LOG_IF(pPlotSet == NULL, continue);
-               vector<PlotWidget*> widgets;
-               pPlotSet->getPlots(widgets);
-
-               vector<PlotWidget*>::iterator ppPlotWidget;
-               for (ppPlotWidget = widgets.begin(); ppPlotWidget != widgets.end(); ++ppPlotWidget)
+               const vector<PlotSet*>& plotSets = pPlotSetGroup->getPlotSets();
+               vector<PlotSet*>::const_iterator ppPlotSet;
+               for (ppPlotSet = plotSets.begin(); ppPlotSet != plotSets.end(); ++ppPlotSet)
                {
-                  PlotWidget* pPlotWidget = *ppPlotWidget;
-                  LOG_IF(pPlotWidget == NULL, continue);
-                  PlotView* pPlotView = pPlotWidget->getPlot();
-                  LOG_IF(pPlotView == NULL, continue);
-                  // need to add annotation layer and element to item list
-                  AnnotationLayer* pAnno = pPlotView->getAnnotationLayer();
-                  if (pAnno != NULL)
+                  PlotSet* pPlotSet = *ppPlotSet;
+                  LOG_IF(pPlotSet == NULL, continue);
+                  vector<PlotWidget*> widgets;
+                  pPlotSet->getPlots(widgets);
+
+                  vector<PlotWidget*>::iterator ppPlotWidget;
+                  for (ppPlotWidget = widgets.begin(); ppPlotWidget != widgets.end(); ++ppPlotWidget)
                   {
-                     DataElement* pElm = pAnno->getDataElement();
-                     if (pElm != NULL)
+                     PlotWidget* pPlotWidget = *ppPlotWidget;
+                     LOG_IF(pPlotWidget == NULL, continue);
+                     PlotView* pPlotView = pPlotWidget->getPlot();
+                     LOG_IF(pPlotView == NULL, continue);
+                     // need to add annotation layer and element to item list
+                     AnnotationLayer* pAnno = pPlotView->getAnnotationLayer();
+                     if (pAnno != NULL)
                      {
-                        items.push_back(makeIfiI<TypeAwareObject*>("DataElement")(pElm));
+                        DataElement* pElm = pAnno->getDataElement();
+                        if (pElm != NULL)
+                        {
+                           items.push_back(makeIfiI<TypeAwareObject*>("DataElement")(pElm));
+                        }
+                        items.push_back(makeIfiI<TypeAwareObject*>("Layer")(pAnno));
                      }
-                     items.push_back(makeIfiI<TypeAwareObject*>("Layer")(pAnno));
+                     // need to know type of plot view when creating plot widget on restore
+                     items.push_back(makeIfiI<TypeAwareObject*>("View")(pPlotView));
+                     items.push_back(makeIfiI<TypeAwareObject*>("PlotWidget/"+pPlotView->getObjectType())(pPlotWidget));
                   }
-                  // need to know type of plot view when creating plot widget on restore
-                  items.push_back(makeIfiI<TypeAwareObject*>("View")(pPlotView));
-                  items.push_back(makeIfiI<TypeAwareObject*>("PlotWidget/"+pPlotView->getObjectType())(pPlotWidget));
                }
+               // add after plot widgets and views so these items are restored before the plotset
+               transform(plotSets.begin(), plotSets.end(), back_inserter(items), makeIfiI<SessionItem*>("PlotSet"));
             }
-            // add after plot widgets and views so these items are restored before the plotset
-            transform(plotSets.begin(), plotSets.end(), back_inserter(items), makeIfiI<SessionItem*>("PlotSet"));
          }
       }
    }

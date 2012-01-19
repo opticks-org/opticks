@@ -18,10 +18,10 @@
 
 #include "DesktopServices.h"
 
+class DockWindow;
 class ElidedLabel;
 class PlotSet;
 class PlotWidget;
-class PlotWindow;
 class Subject;
 
 class DockWindowWidget : public QWidget
@@ -30,17 +30,21 @@ class DockWindowWidget : public QWidget
 
 public:
    DockWindowWidget(QWidget* pParent = 0);
-   ~DockWindowWidget();
+   virtual ~DockWindowWidget();
+
+protected:
+   virtual void hideEvent(QHideEvent* pEvent);
 
    void windowAdded(Subject& subject, const std::string& signal, const boost::any& value);
    void windowActivated(Subject& subject, const std::string& signal, const boost::any& value);
    void windowRemoved(Subject& subject, const std::string& signal, const boost::any& value);
+   void dockWindowWidgetSet(Subject& subject, const std::string& signal, const boost::any& value);
+   void sessionRestored(Subject& subject, const std::string& signal, const boost::any& value);
 
-protected:
-   void setSelectedPlotWindow(PlotWindow* pWindow);
+   void setSelectedPlotWindow(DockWindow* pWindow);
    void setSelectedPlotSet(PlotSet* pPlotSet);
    void setSelectedPlot(PlotWidget* pPlot);
-   PlotWindow* getSelectedPlotWindow() const;
+   DockWindow* getSelectedPlotWindow() const;
    PlotWidget* getSelectedPlot() const;
 
 protected slots:
@@ -49,6 +53,7 @@ protected slots:
    void showPlotWindow();
    void hidePlotWindow();
    void updatePlotWindowList();
+   void deleteAllPlotWindows();
    void addPlot();
    void deletePlot();
    void updatePlotList();

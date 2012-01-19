@@ -24,7 +24,7 @@
 #include <boost/any.hpp>
 #include <string>
 
-class PlotWindow;
+class DockWindow;
 
 class DesktopAPITestGui : public QDialog, public Window::SessionItemDropFilter
 {
@@ -95,7 +95,7 @@ private:
    QCheckBox* mpContextMenuCheck;
 
    // Dock window
-   PlotWindow* mpDockWindow;
+   DockWindow* mpDockWindow;
    PlotWidget* mpDockPlotWidget;
    QCheckBox* mpDockedCheck;
    QCheckBox* mpSigDragDropCheck;

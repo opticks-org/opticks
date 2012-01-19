@@ -124,7 +124,7 @@ BrightnessToolBar::BrightnessToolBar(const string& id, QWidget* parent) :
    Service<DesktopServices> pDesktop;
 
    HistogramWindowImp* pHistWnd =
-      dynamic_cast<HistogramWindowImp*>(pDesktop->getWindow("Histogram Window", PLOT_WINDOW));
+      dynamic_cast<HistogramWindowImp*>(pDesktop->getWindow("Histogram Window", DOCK_WINDOW));
    if (pHistWnd != NULL)
    {
       VERIFYNR(connect(pHistWnd, SIGNAL(plotActivated(Layer*, const RasterChannelType&)), this,

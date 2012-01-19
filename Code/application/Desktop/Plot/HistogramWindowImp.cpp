@@ -16,10 +16,10 @@
 #include "HistogramPlotAdapter.h"
 #include "HistogramWindow.h"
 #include "HistogramWindowImp.h"
-#include "InfoBar.h"
 #include "Layer.h"
 #include "LayerListAdapter.h"
 #include "PlotSetAdapter.h"
+#include "PlotSetGroupAdapter.h"
 #include "PlotWidget.h"
 #include "PlotWidgetImp.h"
 #include "ProductView.h"
@@ -45,14 +45,16 @@ using namespace std;
 XERCES_CPP_NAMESPACE_USE
 
 HistogramWindowImp::HistogramWindowImp(const string& id, const string& windowName, QWidget* pParent) :
-   PlotWindowImp(id, windowName, pParent),
+   DockWindowImp(id, windowName, pParent),
    mpDesktop(Service<DesktopServices>().get()),
    mpExplorer(Service<SessionExplorer>().get(), SIGNAL_NAME(SessionExplorer, AboutToShowSessionItemContextMenu),
       Slot(this, &HistogramWindowImp::updateContextMenu)),
+   mpPlotSetGroup(NULL),
    mDisplayModeChanging(false),
    mAddingStatisticsPlot(false),
    mUpdater(this)
 {
+   // Context menu actions
    mpSyncAutoZoomAction = new QAction("Synchronize Auto Zoom", this);
    mpSyncAutoZoomAction->setAutoRepeat(false);
    VERIFYNR(connect(mpSyncAutoZoomAction, SIGNAL(triggered()), this, SLOT(syncAutoZoom())));
@@ -67,15 +69,22 @@ HistogramWindowImp::HistogramWindowImp(const string& id, const string& windowNam
    mpDesktop->initializeAction(mpStatisticsShowAction, "Histogram Plot");  // Use the plot context since the action
                                                                            // will appear on the plot menu
 
-   InfoBar* pInfoBar = getInfoBar();
-   if (pInfoBar != NULL)
-   {
-      pInfoBar->setInfoIcon(QPixmap(":/icons/HistogramWindow"));
-   }
+   // Plot set
+   QIcon histogramIcon(":/icons/HistogramWindow");
+   mpPlotSetGroup = new PlotSetGroupAdapter(this);
+   mpPlotSetGroup->setInfoBarIcon(histogramIcon);
 
-   setIcon(QIcon(":/icons/HistogramWindow"));
+   // Initialization
+   setIcon(histogramIcon);
+   setWidget(mpPlotSetGroup->getWidget());
 
-   VERIFYNR(connect(this, SIGNAL(plotSetActivated(PlotSet*)), this, SLOT(setStatisticsShowActionState(PlotSet*))));
+   // Connections
+   VERIFYNR(mpPlotSetGroup->attach(SIGNAL_NAME(PlotSetGroup, PlotSetAdded),
+      Slot(this, &HistogramWindowImp::plotSetAdded)));
+   VERIFYNR(mpPlotSetGroup->attach(SIGNAL_NAME(PlotSetGroup, PlotSetActivated),
+      Slot(this, &HistogramWindowImp::plotSetActivated)));
+   VERIFYNR(mpPlotSetGroup->attach(SIGNAL_NAME(PlotSetGroup, PlotSetDeleted),
+      Slot(this, &HistogramWindowImp::plotSetDeleted)));
 
    mpDesktop.addSignal(SIGNAL_NAME(DesktopServices, WindowAdded), Slot(this, &HistogramWindowImp::windowAdded));
    mpDesktop.addSignal(SIGNAL_NAME(DesktopServices, WindowRemoved), Slot(this, &HistogramWindowImp::windowRemoved));
@@ -113,7 +122,7 @@ void HistogramWindowImp::updateContextMenu(Subject& subject, const string& signa
          PlotWidget* pPlot = *iter;
          if (pPlot != NULL)
          {
-            if (containsPlot(pPlot) == true)
+            if (mpPlotSetGroup->containsPlot(pPlot) == true)
             {
                if (plots.size() == 1)
                {
@@ -139,20 +148,15 @@ void HistogramWindowImp::updateContextMenu(Subject& subject, const string& signa
    }
    else if (dynamic_cast<HistogramWindowImp*>(&subject) == this)
    {
-      vector<PlotSet*> plotSetItems = pMenu->getSessionItems<PlotSet>();
-      if (plotSetItems.empty() == false)
+      if (mpPlotSetGroup->getNumPlotSets() > 0)
       {
-         PlotSet* pPlotSet = plotSetItems.front();
-         if (pPlotSet != NULL)
-         {
-            bRemoveActions = containsPlotSet(pPlotSet);
-         }
+         bRemoveActions = true;
       }
    }
    else
    {
       PlotWidget* pPlotWidget = dynamic_cast<PlotWidget*>(&subject);
-      if ((pPlotWidget != NULL) && (containsPlot(pPlotWidget) == true))
+      if ((pPlotWidget != NULL) && (mpPlotSetGroup->containsPlot(pPlotWidget) == true))
       {
          bAddActions = true;
          pActionWidget = pPlotWidget;
@@ -189,37 +193,6 @@ void HistogramWindowImp::updateContextMenu(Subject& subject, const string& signa
    }
 }
 
-PlotSet* HistogramWindowImp::createPlotSet(const QString& strPlotSet)
-{
-   if (strPlotSet.isEmpty() == true)
-   {
-      return NULL;
-   }
-
-   PlotSet* pPlotSet = PlotWindowImp::createPlotSet(strPlotSet);
-   if (pPlotSet != NULL)
-   {
-      VERIFYNR(connect(dynamic_cast<PlotSetImp*>(pPlotSet), SIGNAL(plotActivated(PlotWidget*)), this,
-         SLOT(activateLayer(PlotWidget*))));
-   }
-
-   return pPlotSet;
-}
-
-bool HistogramWindowImp::deletePlotSet(PlotSet* pPlotSet)
-{
-   if (pPlotSet != NULL)
-   {
-      if (containsPlotSet(pPlotSet) == true)
-      {
-         VERIFYNR(disconnect(dynamic_cast<PlotSetImp*>(pPlotSet), SIGNAL(plotActivated(PlotWidget*)), this,
-            SLOT(activateLayer(PlotWidget*))));
-      }
-   }
-
-   return PlotWindowImp::deletePlotSet(pPlotSet);
-}
-
 PlotWidget* HistogramWindowImp::getPlot(Layer* pLayer) const
 {
    if (pLayer == NULL)
@@ -240,7 +213,7 @@ PlotWidget* HistogramWindowImp::getPlot(Layer* pLayer) const
    }
 
    // Iterate over all histogram plots on all plot sets to find the plot
-   vector<PlotWidget*> plots = getPlots(HISTOGRAM_PLOT);
+   vector<PlotWidget*> plots = mpPlotSetGroup->getPlots(HISTOGRAM_PLOT);
    for (vector<PlotWidget*>::iterator iter = plots.begin(); iter != plots.end(); ++iter)
    {
       PlotWidget* pPlot = *iter;
@@ -290,7 +263,7 @@ PlotWidget* HistogramWindowImp::getPlot(RasterLayer* pLayer, RasterChannelType c
    }
 
    // Iterate over all histogram plots on all plot sets to find the plot
-   vector<PlotWidget*> plots = getPlots(HISTOGRAM_PLOT);
+   vector<PlotWidget*> plots = mpPlotSetGroup->getPlots(HISTOGRAM_PLOT);
    for (vector<PlotWidget*>::iterator iter = plots.begin(); iter != plots.end(); ++iter)
    {
       PlotWidget* pPlot = *iter;
@@ -317,12 +290,17 @@ PlotWidget* HistogramWindowImp::getPlot(RasterLayer* pLayer, RasterChannelType c
 
 bool HistogramWindowImp::toXml(XMLWriter* pXml) const
 {
-   if ((pXml == NULL) || (PlotWindowImp::toXml(pXml) == false))
+   if ((pXml == NULL) || (DockWindowImp::toXml(pXml) == false))
    {
       return false;
    }
 
-   vector<PlotWidget*> plots = getPlots(HISTOGRAM_PLOT);
+   if (mpPlotSetGroup->toXml(pXml) == false)
+   {
+      return false;
+   }
+
+   vector<PlotWidget*> plots = mpPlotSetGroup->getPlots(HISTOGRAM_PLOT);
    for (vector<PlotWidget*>::const_iterator iter = plots.begin(); iter != plots.end(); ++iter)
    {
       PlotWidget* pPlotWidget = *iter;
@@ -350,72 +328,73 @@ bool HistogramWindowImp::toXml(XMLWriter* pXml) const
 
 bool HistogramWindowImp::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   if (pDocument == NULL)
+   if ((pDocument == NULL) || (DockWindowImp::fromXml(pDocument, version) == false))
    {
       return false;
    }
 
-   bool success = PlotWindowImp::fromXml(pDocument, version);
-   if (success == true)
+   if (mpPlotSetGroup->fromXml(pDocument, version) == false)
    {
-      vector<Window*> windows;
-      mpDesktop->getWindows(SPATIAL_DATA_WINDOW, windows);
-      for (vector<Window*>::const_iterator iter = windows.begin(); iter != windows.end(); ++iter)
+      return false;
+   }
+
+   vector<Window*> windows;
+   mpDesktop->getWindows(SPATIAL_DATA_WINDOW, windows);
+   for (vector<Window*>::const_iterator iter = windows.begin(); iter != windows.end(); ++iter)
+   {
+      SpatialDataWindow* pWindow = static_cast<SpatialDataWindow*>(*iter);
+      if (pWindow != NULL)
       {
-         SpatialDataWindow* pWindow = static_cast<SpatialDataWindow*>(*iter);
-         if (pWindow != NULL)
+         SpatialDataViewImp* pView = dynamic_cast<SpatialDataViewImp*>(pWindow->getSpatialDataView());
+         if (pView != NULL)
          {
-            SpatialDataViewImp* pView = dynamic_cast<SpatialDataViewImp*>(pWindow->getSpatialDataView());
-            if (pView != NULL)
-            {
-               VERIFYNR(connect(pView, SIGNAL(layerAdded(Layer*)), this, SLOT(createPlot(Layer*))));
-               VERIFYNR(connect(pView, SIGNAL(layerActivated(Layer*)), this, SLOT(setCurrentPlot(Layer*))));
-               VERIFYNR(pView->attach(SIGNAL_NAME(SpatialDataView, LayerShown),
-                  Slot(this, &HistogramWindowImp::layerShown)));
-            }
-         }
-      }
-
-      Service<SessionManager> pManager;
-      for (DOMNode* pChild = pDocument->getFirstChild(); pChild != NULL; pChild = pChild->getNextSibling())
-      {
-         if (XMLString::equals(pChild->getNodeName(), X("HistogramPlot")))
-         {
-            DOMElement* pElement = static_cast<DOMElement*>(pChild);
-
-            // Attach the plot widget
-            PlotWidget* pPlotWidget = dynamic_cast<PlotWidget*>(pManager->getSessionItem(
-               A(pElement->getAttribute(X("id")))));
-            if (pPlotWidget != NULL)
-            {
-               VERIFYNR(pPlotWidget->attach(SIGNAL_NAME(PlotWidget, AboutToShowContextMenu),
-                  Slot(this, &HistogramWindowImp::updateContextMenu)));
-            }
-
-            // Attach the layer
-            Layer* pLayer = dynamic_cast<Layer*>(pManager->getSessionItem(A(pElement->getAttribute(X("layerId")))));
-
-            RasterLayerImp* pRasterLayer = dynamic_cast<RasterLayerImp*>(pLayer);
-            if (pRasterLayer != NULL)
-            {
-               VERIFYNR(connect(pRasterLayer, SIGNAL(displayModeChanged(const DisplayMode&)), this,
-                  SLOT(setCurrentPlot(const DisplayMode&))));
-               VERIFYNR(connect(pRasterLayer, SIGNAL(displayedBandChanged(RasterChannelType, DimensionDescriptor)),
-                  this, SLOT(updatePlotInfo(RasterChannelType))));
-               pRasterLayer->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &HistogramWindowImp::layerDeleted));
-            }
-
-            ThresholdLayer* pThresholdLayer = dynamic_cast<ThresholdLayer*>(pLayer);
-            if (pThresholdLayer != NULL)
-            {
-               VERIFYNR(pThresholdLayer->attach(SIGNAL_NAME(Subject, Deleted),
-                  Slot(this, &HistogramWindowImp::layerDeleted)));
-            }
+            VERIFYNR(connect(pView, SIGNAL(layerAdded(Layer*)), this, SLOT(createPlot(Layer*))));
+            VERIFYNR(connect(pView, SIGNAL(layerActivated(Layer*)), this, SLOT(setCurrentPlot(Layer*))));
+            VERIFYNR(pView->attach(SIGNAL_NAME(SpatialDataView, LayerShown),
+               Slot(this, &HistogramWindowImp::layerShown)));
          }
       }
    }
 
-   return success;
+   Service<SessionManager> pManager;
+   for (DOMNode* pChild = pDocument->getFirstChild(); pChild != NULL; pChild = pChild->getNextSibling())
+   {
+      if (XMLString::equals(pChild->getNodeName(), X("HistogramPlot")))
+      {
+         DOMElement* pElement = static_cast<DOMElement*>(pChild);
+
+         // Attach the plot widget
+         PlotWidget* pPlotWidget = dynamic_cast<PlotWidget*>(pManager->getSessionItem(
+            A(pElement->getAttribute(X("id")))));
+         if (pPlotWidget != NULL)
+         {
+            VERIFYNR(pPlotWidget->attach(SIGNAL_NAME(PlotWidget, AboutToShowContextMenu),
+               Slot(this, &HistogramWindowImp::updateContextMenu)));
+         }
+
+         // Attach the layer
+         Layer* pLayer = dynamic_cast<Layer*>(pManager->getSessionItem(A(pElement->getAttribute(X("layerId")))));
+
+         RasterLayerImp* pRasterLayer = dynamic_cast<RasterLayerImp*>(pLayer);
+         if (pRasterLayer != NULL)
+         {
+            VERIFYNR(connect(pRasterLayer, SIGNAL(displayModeChanged(const DisplayMode&)), this,
+               SLOT(setCurrentPlot(const DisplayMode&))));
+            VERIFYNR(connect(pRasterLayer, SIGNAL(displayedBandChanged(RasterChannelType, DimensionDescriptor)),
+               this, SLOT(updatePlotInfo(RasterChannelType))));
+            pRasterLayer->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &HistogramWindowImp::layerDeleted));
+         }
+
+         ThresholdLayer* pThresholdLayer = dynamic_cast<ThresholdLayer*>(pLayer);
+         if (pThresholdLayer != NULL)
+         {
+            VERIFYNR(pThresholdLayer->attach(SIGNAL_NAME(Subject, Deleted),
+               Slot(this, &HistogramWindowImp::layerDeleted)));
+         }
+      }
+   }
+
+   return true;
 }
 
 PlotWidget* HistogramWindowImp::createPlot(Layer* pLayer)
@@ -463,12 +442,10 @@ PlotWidget* HistogramWindowImp::createPlot(Layer* pLayer, PlotSet* pPlotSet)
          string viewName = pView->getName();
          if (viewName.empty() == false)
          {
-            QString strViewName = QString::fromStdString(viewName);
-
-            pPlotSet = getPlotSet(strViewName);
+            pPlotSet = mpPlotSetGroup->getPlotSet(viewName);
             if (pPlotSet == NULL)
             {
-               pPlotSet = createPlotSet(strViewName);
+               pPlotSet = mpPlotSetGroup->createPlotSet(viewName);
             }
          }
       }
@@ -504,7 +481,7 @@ PlotWidget* HistogramWindowImp::createPlot(Layer* pLayer, PlotSet* pPlotSet)
       }
 
       // Activate the plot
-      PlotWindowImp::setCurrentPlot(pPlot);
+      mpPlotSetGroup->setCurrentPlot(pPlot);
    }
 
    return pPlot;
@@ -537,12 +514,10 @@ PlotWidget* HistogramWindowImp::createPlot(RasterLayer* pLayer, RasterChannelTyp
          string viewName = pView->getName();
          if (viewName.empty() == false)
          {
-            QString strViewName = QString::fromStdString(viewName);
-
-            pPlotSet = getPlotSet(strViewName);
+            pPlotSet = mpPlotSetGroup->getPlotSet(viewName);
             if (pPlotSet == NULL)
             {
-               pPlotSet = createPlotSet(strViewName);
+               pPlotSet = mpPlotSetGroup->createPlotSet(viewName);
             }
          }
       }
@@ -581,7 +556,7 @@ PlotWidget* HistogramWindowImp::createPlot(RasterLayer* pLayer, RasterChannelTyp
       updatePlotInfo(pLayer, channel);
 
       // Activate the plot
-      PlotWindowImp::setCurrentPlot(pPlot);
+      mpPlotSetGroup->setCurrentPlot(pPlot);
 
       // Connections
       VERIFYNR(pPlot->attach(SIGNAL_NAME(PlotWidget, AboutToShowContextMenu),
@@ -621,12 +596,10 @@ void HistogramWindowImp::createPlots(RasterLayer* pLayer, DisplayMode displayMod
          string viewName = pView->getName();
          if (viewName.empty() == false)
          {
-            QString strViewName = QString::fromStdString(viewName);
-
-            pPlotSet = getPlotSet(strViewName);
+            pPlotSet = mpPlotSetGroup->getPlotSet(viewName);
             if (pPlotSet == NULL)
             {
-               pPlotSet = createPlotSet(strViewName);
+               pPlotSet = mpPlotSetGroup->createPlotSet(viewName);
             }
          }
       }
@@ -670,7 +643,7 @@ void HistogramWindowImp::setCurrentPlot(Layer* pLayer)
       return;
    }
 
-   if (pPlot == getCurrentPlot())
+   if (pPlot == mpPlotSetGroup->getCurrentPlot())
    {
       return;
    }
@@ -701,7 +674,7 @@ bool HistogramWindowImp::setCurrentPlot(Layer* pLayer, const RasterChannelType& 
       return false;
    }
 
-   if (pPlot == getCurrentPlot())
+   if (pPlot == mpPlotSetGroup->getCurrentPlot())
    {
       return true;
    }
@@ -727,7 +700,7 @@ bool HistogramWindowImp::setCurrentPlot(RasterLayer* pLayer, RasterChannelType c
    PlotWidget* pPlotWidget = getPlot(pLayer, channel);
    if (pPlotWidget != NULL)
    {
-      if (pPlotWidget == getCurrentPlot())
+      if (pPlotWidget == mpPlotSetGroup->getCurrentPlot())
       {
          return true;
       }
@@ -768,7 +741,7 @@ void HistogramWindowImp::deletePlot(Layer* pLayer)
          pPlotSet->deletePlot(pPlotWidget);
          if (pPlotSet->getNumPlots() == 0)
          {
-            deletePlotSet(pPlotSet);
+            mpPlotSetGroup->deletePlotSet(pPlotSet);
          }
       }
    }
@@ -803,7 +776,7 @@ void HistogramWindowImp::deletePlot(RasterLayer* pLayer, RasterChannelType chann
          pPlotSet->deletePlot(pPlotWidget);
          if (pPlotSet->getNumPlots() == 0)
          {
-            deletePlotSet(pPlotSet);
+            mpPlotSetGroup->deletePlotSet(pPlotSet);
          }
       }
    }
@@ -849,7 +822,7 @@ void HistogramWindowImp::deletePlots(RasterLayer* pLayer, DisplayMode displayMod
 
 void HistogramWindowImp::deleteStatisticsPlots(Layer* pLayer)
 {
-   std::vector<PlotWidget*> plots = getPlots();
+   std::vector<PlotWidget*> plots = mpPlotSetGroup->getPlots();
    for (std::vector<PlotWidget*>::iterator plot = plots.begin(); plot != plots.end(); ++plot)
    {
       HistogramPlotImp* pHistPlot = dynamic_cast<HistogramPlotImp*>((*plot)->getPlot());
@@ -861,7 +834,7 @@ void HistogramWindowImp::deleteStatisticsPlots(Layer* pLayer)
             pPlotSet->deletePlot(*plot);
             if (pPlotSet->getNumPlots() == 0)
             {
-               deletePlotSet(pPlotSet);
+               mpPlotSetGroup->deletePlotSet(pPlotSet);
             }
          }
       }
@@ -879,7 +852,7 @@ bool HistogramWindowImp::event(QEvent* pEvent)
       }
    }
 
-   return PlotWindowImp::event(pEvent);
+   return DockWindowImp::event(pEvent);
 }
 
 void HistogramWindowImp::setCurrentPlot(const DisplayMode& displayMode)
@@ -1025,7 +998,7 @@ void HistogramWindowImp::setStatisticsShowActionState(PlotWidgetImp* pPlot)
 
 void HistogramWindowImp::showEvent(QShowEvent* pEvent)
 {
-   PlotWindowImp::showEvent(pEvent);
+   DockWindowImp::showEvent(pEvent);
    mUpdater.update();
 }
 
@@ -1059,6 +1032,35 @@ void HistogramWindowImp::windowRemoved(Subject& subject, const string& signal, c
    }
 }
 
+void HistogramWindowImp::plotSetAdded(Subject& subject, const string& signal, const boost::any& value)
+{
+   PlotSet* pPlotSet = boost::any_cast<PlotSet*>(value);
+   if (pPlotSet != NULL)
+   {
+      VERIFYNR(connect(dynamic_cast<PlotSetImp*>(pPlotSet), SIGNAL(plotActivated(PlotWidget*)), this,
+         SLOT(activateLayer(PlotWidget*))));
+   }
+}
+
+void HistogramWindowImp::plotSetActivated(Subject& subject, const string& signal, const boost::any& value)
+{
+   PlotSet* pPlotSet = boost::any_cast<PlotSet*>(value);
+   if (pPlotSet != NULL)
+   {
+      setStatisticsShowActionState(pPlotSet);
+   }
+}
+
+void HistogramWindowImp::plotSetDeleted(Subject& subject, const string& signal, const boost::any& value)
+{
+   PlotSet* pPlotSet = boost::any_cast<PlotSet*>(value);
+   if (pPlotSet != NULL)
+   {
+      VERIFYNR(disconnect(dynamic_cast<PlotSetImp*>(pPlotSet), SIGNAL(plotActivated(PlotWidget*)), this,
+         SLOT(activateLayer(PlotWidget*))));
+   }
+}
+
 void HistogramWindowImp::layerShown(Subject& subject, const string& signal, const boost::any& value)
 {
    if (isHidden() || !HistogramWindow::getSettingLayerActivation())
@@ -1075,7 +1077,7 @@ void HistogramWindowImp::layerShown(Subject& subject, const string& signal, cons
    PlotWidget* pPlot = getPlot(pLayer);
    if (pPlot != NULL)
    {
-      setCurrentPlot(pPlot);
+      mpPlotSetGroup->setCurrentPlot(pPlot);
    }
 }
 
@@ -1243,7 +1245,7 @@ void HistogramWindowImp::syncAutoZoom()
 
 void HistogramWindowImp::setStatisticsShown(bool shown)
 {
-   PlotWidgetImp* pPlotImp = dynamic_cast<PlotWidgetImp*>(getCurrentPlot());
+   PlotWidgetImp* pPlotImp = dynamic_cast<PlotWidgetImp*>(mpPlotSetGroup->getCurrentPlot());
    if (pPlotImp != NULL)
    {
       QWidget* pWidget = pPlotImp->getSplitter()->widget(2);
@@ -1296,7 +1298,7 @@ void HistogramWindowImp::createSubsetPlot(Layer* pLayer)
    {
       defaultSelection.push_back(0);
    }
-   PlotSet* pPlotSet = getCurrentPlotSet();
+   PlotSet* pPlotSet = mpPlotSetGroup->getCurrentPlotSet();
    VERIFYNRV(pPlotSet);
    std::string baseName = pLayer->getDisplayName(true) + " - Statistics ";
    for (int suffix = 1; suffix < 200; ++suffix) // if we reach 200 of these, we have bigger issues,

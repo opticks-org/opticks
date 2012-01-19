@@ -11,6 +11,7 @@
 #include <QtCore/QMimeData>
 #include <QtGui/QWidget>
 
+#include "AppVerify.h"
 #include "ClassificationLayer.h"
 #include "DataElement.h"
 #include "DesktopServices.h"
@@ -22,8 +23,8 @@
 #include "Layer.h"
 #include "LayerList.h"
 #include "PlotSet.h"
+#include "PlotSetGroup.h"
 #include "PlotWidget.h"
-#include "PlotWindow.h"
 #include "ProductView.h"
 #include "Slot.h"
 #include "SessionManagerImp.h"
@@ -48,8 +49,7 @@ WindowModel::WindowModel(QObject* pParent) :
 }
 
 WindowModel::~WindowModel()
-{
-}
+{}
 
 Qt::DropActions WindowModel::supportedDropActions() const
 {
@@ -528,8 +528,7 @@ void WindowModel::WindowSourceModel::removeLayer(Subject& subject, const string&
    }
 }
 
-void WindowModel::WindowSourceModel::updateLayerOrder(Subject& subject, const std::string& signal,
-                                                      const boost::any& value)
+void WindowModel::WindowSourceModel::updateLayerOrder(Subject& subject, const string& signal, const boost::any& value)
 {
    SpatialDataView* pView = dynamic_cast<SpatialDataView*>(&subject);
    if (pView == NULL)
@@ -585,7 +584,8 @@ void WindowModel::WindowSourceModel::updateLayerDisplay(Subject& subject, const 
    }
 }
 
-void WindowModel::WindowSourceModel::updateToolbarDisplay(Subject& subject, const std::string& signal, const boost::any& value)
+void WindowModel::WindowSourceModel::updateToolbarDisplay(Subject& subject, const string& signal,
+                                                          const boost::any& value)
 {
    ToolBar* pToolbar = dynamic_cast<ToolBar*>(&subject);
    if (pToolbar != NULL)
@@ -607,7 +607,7 @@ void WindowModel::WindowSourceModel::updateToolbarDisplay(Subject& subject, cons
    }
 }
 
-void WindowModel::WindowSourceModel::updateDockDisplay(Subject& subject, const std::string& signal, const boost::any& value)
+void WindowModel::WindowSourceModel::updateDockDisplay(Subject& subject, const string& signal, const boost::any& value)
 {
    DockWindow* pPlot = dynamic_cast<DockWindow*>(&subject);
    if (pPlot != NULL)
@@ -710,18 +710,104 @@ void WindowModel::WindowSourceModel::removeGraphicObject(Subject& subject, const
    }
 }
 
+void WindowModel::WindowSourceModel::addPlotSets(Subject& subject, const string& signal, const boost::any& value)
+{
+   DockWindow* pDockWindow = dynamic_cast<DockWindow*>(&subject);
+   if (pDockWindow == NULL)
+   {
+      return;
+   }
+
+   PlotSetGroup* pPlotSetGroup = dynamic_cast<PlotSetGroup*>(pDockWindow->getWidget());
+   if (pPlotSetGroup != NULL)
+   {
+      SessionItemWrapper* pDockWindowWrapper = getWrapper(pDockWindow);
+      if (pDockWindowWrapper != NULL)
+      {
+         // Add plot set items
+         const vector<PlotSet*>& plotSets = pPlotSetGroup->getPlotSets();
+         for (vector<PlotSet*>::const_iterator iter = plotSets.begin(); iter != plotSets.end(); ++iter)
+         {
+            PlotSet* pPlotSet = *iter;
+            if (pPlotSet != NULL)
+            {
+               addPlotSetItem(pDockWindowWrapper, pPlotSet);
+               if (pPlotSetGroup->getCurrentPlotSet() == pPlotSet)
+               {
+                  activateItem(pPlotSet);
+               }
+            }
+         }
+
+         // Connections
+         pPlotSetGroup->attach(SIGNAL_NAME(PlotSetGroup, PlotSetAdded), Slot(this, &WindowSourceModel::addPlotSet));
+         pPlotSetGroup->attach(SIGNAL_NAME(PlotSetGroup, PlotSetDeleted),
+            Slot(this, &WindowSourceModel::removePlotSet));
+         pPlotSetGroup->attach(SIGNAL_NAME(PlotSetGroup, PlotSetActivated),
+            Slot(this, &WindowSourceModel::setCurrentPlotSet));
+      }
+   }
+}
+
+void WindowModel::WindowSourceModel::removePlotSets(Subject& subject, const string& signal, const boost::any& value)
+{
+   DockWindow* pDockWindow = dynamic_cast<DockWindow*>(&subject);
+   if (pDockWindow == NULL)
+   {
+      return;
+   }
+
+   PlotSetGroup* pPlotSetGroup = dynamic_cast<PlotSetGroup*>(pDockWindow->getWidget());
+   if (pPlotSetGroup != NULL)
+   {
+      SessionItemWrapper* pDockWindowWrapper = getWrapper(pDockWindow);
+      if (pDockWindowWrapper != NULL)
+      {
+         // Detach the plot window
+         pPlotSetGroup->detach(SIGNAL_NAME(PlotSetGroup, PlotSetAdded), Slot(this, &WindowSourceModel::addPlotSet));
+         pPlotSetGroup->detach(SIGNAL_NAME(PlotSetGroup, PlotSetDeleted),
+            Slot(this, &WindowSourceModel::removePlotSet));
+         pPlotSetGroup->detach(SIGNAL_NAME(PlotSetGroup, PlotSetActivated),
+            Slot(this, &WindowSourceModel::setCurrentPlotSet));
+
+         // Remove the plot set items
+         const vector<PlotSet*>& plotSets = pPlotSetGroup->getPlotSets();
+         for (vector<PlotSet*>::const_iterator iter = plotSets.begin(); iter != plotSets.end(); ++iter)
+         {
+            PlotSet* pPlotSet = *iter;
+            if (pPlotSet != NULL)
+            {
+               removePlotSetItem(pDockWindowWrapper, pPlotSet);
+            }
+         }
+      }
+   }
+}
+
 void WindowModel::WindowSourceModel::addPlotSet(Subject& subject, const string& signal, const boost::any& value)
 {
-   PlotWindow* pPlotWindow = dynamic_cast<PlotWindow*>(&subject);
-   if (pPlotWindow != NULL)
+   PlotSetGroup* pPlotSetGroup = dynamic_cast<PlotSetGroup*>(&subject);
+   if (pPlotSetGroup == NULL)
+   {
+      return;
+   }
+
+   QWidget* pWidget = pPlotSetGroup->getWidget();
+   if (pWidget == NULL)
+   {
+      return;
+   }
+
+   DockWindow* pDockWindow = dynamic_cast<DockWindow*>(pWidget->parentWidget());
+   if (pDockWindow != NULL)
    {
       PlotSet* pPlotSet = boost::any_cast<PlotSet*>(value);
       if (pPlotSet != NULL)
       {
-         SessionItemWrapper* pPlotWindowWrapper = getWrapper(pPlotWindow);
-         if (pPlotWindowWrapper != NULL)
+         SessionItemWrapper* pDockWindowWrapper = getWrapper(pDockWindow);
+         if (pDockWindowWrapper != NULL)
          {
-            addPlotSetItem(pPlotWindowWrapper, pPlotSet);
+            addPlotSetItem(pDockWindowWrapper, pPlotSet);
          }
       }
    }
@@ -729,16 +815,28 @@ void WindowModel::WindowSourceModel::addPlotSet(Subject& subject, const string& 
 
 void WindowModel::WindowSourceModel::removePlotSet(Subject& subject, const string& signal, const boost::any& value)
 {
-   PlotWindow* pPlotWindow = dynamic_cast<PlotWindow*>(&subject);
-   if (pPlotWindow != NULL)
+   PlotSetGroup* pPlotSetGroup = dynamic_cast<PlotSetGroup*>(&subject);
+   if (pPlotSetGroup == NULL)
+   {
+      return;
+   }
+
+   QWidget* pWidget = pPlotSetGroup->getWidget();
+   if (pWidget == NULL)
+   {
+      return;
+   }
+
+   DockWindow* pDockWindow = dynamic_cast<DockWindow*>(pWidget->parentWidget());
+   if (pDockWindow != NULL)
    {
       PlotSet* pPlotSet = boost::any_cast<PlotSet*>(value);
       if (pPlotSet != NULL)
       {
-         SessionItemWrapper* pPlotWindowWrapper = getWrapper(pPlotWindow);
-         if (pPlotWindowWrapper != NULL)
+         SessionItemWrapper* pDockWindowWrapper = getWrapper(pDockWindow);
+         if (pDockWindowWrapper != NULL)
          {
-            removePlotSetItem(pPlotWindowWrapper, pPlotSet);
+            removePlotSetItem(pDockWindowWrapper, pPlotSet);
          }
       }
    }
@@ -855,34 +953,13 @@ WindowModel::WindowSourceModel::SessionItemWrapper* WindowModel::WindowSourceMod
          pWindowWrapper->setCheckState(dockWindowDisplayed ? Qt::Checked : Qt::Unchecked);
 
          // Connections
+         pDockWindow->attach(SIGNAL_NAME(ViewWindow, AboutToSetWidget), Slot(this, &WindowSourceModel::removePlotSets));
+         pDockWindow->attach(SIGNAL_NAME(ViewWindow, WidgetSet), Slot(this, &WindowSourceModel::addPlotSets));
          pDockWindow->attach(SIGNAL_NAME(DockWindow, Shown), Slot(this, &WindowSourceModel::updateDockDisplay));
          pDockWindow->attach(SIGNAL_NAME(DockWindow, Hidden), Slot(this, &WindowSourceModel::updateDockDisplay));
-      }
 
-      PlotWindow* pPlotWindow = dynamic_cast<PlotWindow*>(pWindow);
-      if (pPlotWindow != NULL)
-      {
-         // Add the plot set items
-         vector<PlotSet*> plotSets;
-         pPlotWindow->getPlotSets(plotSets);
-         for (vector<PlotSet*>::size_type i = 0; i < plotSets.size(); ++i)
-         {
-            PlotSet* pPlotSet = plotSets[i];
-            if (pPlotSet != NULL)
-            {
-               addPlotSetItem(pWindowWrapper, pPlotSet);
-               if (pPlotWindow->getCurrentPlotSet() == pPlotSet)
-               {
-                  activateItem(pPlotSet);
-               }
-            }
-         }
-
-         // Connections
-         pPlotWindow->attach(SIGNAL_NAME(PlotWindow, PlotSetAdded), Slot(this, &WindowSourceModel::addPlotSet));
-         pPlotWindow->attach(SIGNAL_NAME(PlotWindow, PlotSetDeleted), Slot(this, &WindowSourceModel::removePlotSet));
-         pPlotWindow->attach(SIGNAL_NAME(PlotWindow, PlotSetActivated),
-            Slot(this, &WindowSourceModel::setCurrentPlotSet));
+         // Add plot set items
+         addPlotSets(*pDockWindow, SIGNAL_NAME(ViewWindow, WidgetSet), boost::any(pDockWindow->getWidget()));
       }
    }
 
@@ -922,31 +999,13 @@ void WindowModel::WindowSourceModel::removeWindowItem(Window* pWindow)
    DockWindow* pDockWindow = dynamic_cast<DockWindow*>(pWindow);
    if (pDockWindow != NULL)
    {
+      pDockWindow->detach(SIGNAL_NAME(ViewWindow, AboutToSetWidget), Slot(this, &WindowSourceModel::removePlotSets));
+      pDockWindow->detach(SIGNAL_NAME(ViewWindow, WidgetSet), Slot(this, &WindowSourceModel::addPlotSets));
       pDockWindow->detach(SIGNAL_NAME(DockWindow, Shown), Slot(this, &WindowSourceModel::updateDockDisplay));
       pDockWindow->detach(SIGNAL_NAME(DockWindow, Hidden), Slot(this, &WindowSourceModel::updateDockDisplay));
-   }
-
-
-   PlotWindow* pPlotWindow = dynamic_cast<PlotWindow*>(pWindow);
-   if (pPlotWindow != NULL)
-   {
-      // Detach the plot window
-      pPlotWindow->detach(SIGNAL_NAME(PlotWindow, PlotSetAdded), Slot(this, &WindowSourceModel::addPlotSet));
-      pPlotWindow->detach(SIGNAL_NAME(PlotWindow, PlotSetDeleted), Slot(this, &WindowSourceModel::removePlotSet));
-      pPlotWindow->detach(SIGNAL_NAME(PlotWindow, PlotSetActivated),
-         Slot(this, &WindowSourceModel::setCurrentPlotSet));
 
       // Remove the plot set items
-      vector<PlotSet*> plotSets;
-      pPlotWindow->getPlotSets(plotSets);
-      for (vector<PlotSet*>::size_type i = 0; i < plotSets.size(); ++i)
-      {
-         PlotSet* pPlotSet = plotSets[i];
-         if (pPlotSet != NULL)
-         {
-            removePlotSetItem(pWindowWrapper, pPlotSet);
-         }
-      }
+      removePlotSets(*pDockWindow, SIGNAL_NAME(ViewWindow, AboutToSetWidget), boost::any());
    }
 
    // Remove the window item
@@ -1367,15 +1426,15 @@ void WindowModel::WindowSourceModel::removeGraphicObjectItem(SessionItemWrapper*
 }
 
 WindowModel::WindowSourceModel::SessionItemWrapper*
-WindowModel::WindowSourceModel::addPlotSetItem(SessionItemWrapper* pPlotWindowWrapper, PlotSet* pPlotSet)
+WindowModel::WindowSourceModel::addPlotSetItem(SessionItemWrapper* pDockWindowWrapper, PlotSet* pPlotSet)
 {
-   if ((pPlotWindowWrapper == NULL) || (pPlotSet == NULL))
+   if ((pDockWindowWrapper == NULL) || (pPlotSet == NULL))
    {
       return NULL;
    }
 
    // Add the plot set item
-   SessionItemWrapper* pPlotSetWrapper = pPlotWindowWrapper->addChild(pPlotSet);
+   SessionItemWrapper* pPlotSetWrapper = pDockWindowWrapper->addChild(pPlotSet);
    if (pPlotSetWrapper != NULL)
    {
       // Add the plot widget items
@@ -1403,9 +1462,9 @@ WindowModel::WindowSourceModel::addPlotSetItem(SessionItemWrapper* pPlotWindowWr
    return pPlotSetWrapper;
 }
 
-void WindowModel::WindowSourceModel::removePlotSetItem(SessionItemWrapper* pPlotWindowWrapper, PlotSet* pPlotSet)
+void WindowModel::WindowSourceModel::removePlotSetItem(SessionItemWrapper* pDockWindowWrapper, PlotSet* pPlotSet)
 {
-   if ((pPlotWindowWrapper == NULL) || (pPlotSet == NULL))
+   if ((pDockWindowWrapper == NULL) || (pPlotSet == NULL))
    {
       return;
    }
@@ -1431,6 +1490,6 @@ void WindowModel::WindowSourceModel::removePlotSetItem(SessionItemWrapper* pPlot
       }
 
       // Remove the plot set item
-      pPlotWindowWrapper->removeChild(pPlotSet);
+      pDockWindowWrapper->removeChild(pPlotSet);
    }
 }

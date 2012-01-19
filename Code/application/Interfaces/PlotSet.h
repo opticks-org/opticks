@@ -18,51 +18,102 @@
 #include <vector>
 
 class PlotWidget;
+class QWidget;
 class View;
 
 /**
- *  A collection of plots in a plot window.
+ *  A collection of plots in a single widget.
  *
- *  A plot set provides for a grouping of plots within a plot window.  A plot set displays
- *  plots on a set of tabs along the bottom of the plot window.  Each tab contains a single
- *  plot widget and the plot set name appears at the top of the plot window.
+ *  A plot set provides a grouping of plots within a single widget.  A plot set
+ *  displays individual plots on tabs along the bottom of the widget.  Each tab
+ *  contains a single plot widget.
+ *
+ *  To display multiple plot set widgets within a single widget, see the
+ *  PlotSetGroup class.
  *
  *  This subclass of Subject will notify upon the following conditions:
- *  - The following methods are called: deletePlot(), setName(), 
- *    setCurrentPlot(), createPlot(), clear()
+ *  - The following methods are called: setName(), setAssociatedView(),
+ *    createPlot(), setCurrentPlot(), deletePlot(), clear()
  *  - Everything else documented in Subject.
  *
- *  @see     PlotWidget, PlotWindow
+ *  @see     PlotSetGroup, PlotWidget
  */
 class PlotSet : public SessionItem, public Subject
 {
 public:
    /**
-    *  Emitted with any<std::string> when the plotset is renamed.
+    *  Emitted when the plot set is renamed with boost::any<std::string>
+    *  containing the new plot set name.
+    *
+    *  @see     setName()
     */
    SIGNAL_METHOD(PlotSet, Renamed)
+
    /**
-    *  Emitted with any<PlotWidget*> when a plot is activated.
+    *  Emitted when a view is associated with the plot set with
+    *  boost::any<\link View\endlink*> containing a pointer to the newly
+    *  associated view.
+    *
+    *  @see     setAssociatedView()
     */
-   SIGNAL_METHOD(PlotSet, Activated)
+   SIGNAL_METHOD(PlotSet, ViewAssociated)
+
    /**
-    *  Emitted with any<PlotWidget*> when a plot is deleted from the set.
-    */
-   SIGNAL_METHOD(PlotSet, PlotDeleted)
-   /**
-    *  Emitted with any<PlotWidget*> when a plot is added to the set.
+    *  Emitted when a plot widget is added to the plot set with
+    *  boost::any<\link PlotWidget\endlink*> containing a pointer to the plot
+    *  widget that is being added.
+    *
+    *  @see     createPlot()
     */
    SIGNAL_METHOD(PlotSet, PlotAdded)
+
+   /**
+    *  Emitted when a plot widget is activated with
+    *  boost::any<\link PlotWidget\endlink*> containing a pointer to the newly
+    *  activated plot widget.
+    *
+    *  @see     setCurrentPlot()
+    */
+   SIGNAL_METHOD(PlotSet, Activated)
+
+   /**
+    *  Emitted when a plot widget is deleted from the plot set with
+    *  boost::any<\link PlotWidget\endlink*> containing a pointer to the plot
+    *  widget that is being deleted.
+    *
+    *  @see     deletePlot(), clear()
+    */
+   SIGNAL_METHOD(PlotSet, PlotDeleted)
 
    /**
     *  Sets the plot set name.
     *
     *  @param   name
-    *           The new plot set name.  Cannot be empty.
+    *           The new plot set name.  This method does nothing if an empty
+    *           string is passed in.
     *
-    *  @notify  This method will notify signalRenamed with any<std::string>.
+    *  @notify  This method will notify signalRenamed() with
+    *           boost::any<std::string> containing the new plot set name.
     */
    virtual void setName(const std::string& name) = 0;
+
+   /**
+    *  Returns the Qt widget pointer for this plot set widget.
+    *
+    *  @return  A non-const pointer to the Qt widget containing the plot set.
+    *
+    *  @see     getWidget() const
+    */
+   virtual QWidget* getWidget() = 0;
+
+   /**
+    *  Returns the Qt widget pointer for this plot set widget.
+    *
+    *  @return  A const pointer to the Qt widget containing the plot set.
+    *
+    *  @see     getWidget()
+    */
+   virtual const QWidget* getWidget() const = 0;
 
    /**
     *  Creates a new plot in the plot set.
@@ -74,10 +125,12 @@ public:
     *  @param   plotType
     *           The plot type.
     *
-    *  @return  A pointer to the created plot.  NULL is returned if an error occurred and the
-    *           plot could not be created.
+    *  @return  A pointer to the created plot.  \c NULL is returned if an error
+    *           occurred and the plot could not be created.
     *
-    *  @notify  This method will notify signalPlotAdded with any<PlotWidget*>.
+    *  @notify  This method will notify signalPlotAdded() with
+    *           boost::any<\link PlotWidget\endlink*> containing a pointer to
+    *           the plot widget that is created.
     */
    virtual PlotWidget* createPlot(const std::string& plotName, const PlotType& plotType) = 0;
 
@@ -87,10 +140,10 @@ public:
     *  @param   plotName
     *           The plot name.
     *
-    *  @return  A pointer to the plot.  NULL is returned if no plot exists with the given
-    *           name in the plot set.
+    *  @return  A pointer to the plot.  \c NULL is returned if no plot exists
+    *           with the given name in the plot set.
     *
-    *  @see     getPlots()
+    *  @see     getPlots(), getCurrentPlot()
     */
    virtual PlotWidget* getPlot(const std::string& plotName) const = 0;
 
@@ -129,9 +182,10 @@ public:
     *  Queries whether a plot exists in the plot set.
     *
     *  @param   pPlot
-    *           The plot to query for its existence.  Cannot be NULL.
+    *           The plot to query for its existence.
     *
-    *  @return  TRUE if the plot is contained in the plot set, otherwise FALSE.
+    *  @return  Returns \c true if the plot is contained in the plot set;
+    *           otherwise returns \c false.
     */
    virtual bool containsPlot(PlotWidget* pPlot) const = 0;
 
@@ -139,19 +193,23 @@ public:
     *  Sets the active plot in the plot set.
     *
     *  @param   pPlot
-    *           The plot to make the active plot.  Cannot be NULL.
+    *           The plot to make the active plot.  This method does nothing if
+    *           \c NULL is passed in.
     *
-    *  @return  TRUE if the plot was successfully activated, otherwise FALSE.
+    *  @return  Returns \c true if the plot was successfully activated;
+    *           otherwise returns \c false.
     *
-    *  @notify  This method will notify signalActivated with any<PlotWidget*>.
+    *  @notify  This method will notify signalActivated() with
+    *           boost::any<\link PlotWidget\endlink*> containing a pointer to
+    *           the newly activated plot widget.
     */
    virtual bool setCurrentPlot(PlotWidget* pPlot) = 0;
 
    /**
     *  Returns the active plot for the plot set.
     *
-    *  @return  A pointer to the plot.  NULL is returned if the plot set does not
-    *           contain any plots.
+    *  @return  A pointer to the active plot.  \c NULL is returned if the plot
+    *           set does not contain any plots.
     *
     *  @see     getPlot()
     */
@@ -160,16 +218,22 @@ public:
    /**
     *  Renames a plot in the plot set with a given name.
     *
-    *  @param    pPlot
-    *            The plot to rename.  Cannot be NULL.
-    *  @param    newPlotName
-    *            The new plot name, which appears on the tab.  The name cannot have the
-    *            same name as another plot in the plot set.
+    *  @param   pPlot
+    *           The plot to rename.  This method does nothing if \c NULL is
+    *           passed in.
+    *  @param   newPlotName
+    *           The new plot name, which appears on the tab.  The name cannot
+    *           have the same name as another plot in the plot set.  This method
+    *           does nothing if an empty string is passed in.
     *
-    *  @return   TRUE if the plot was successfully renamed.  FALSE if the plot does not
-    *            exist or the new name is the same as that of another plot.
+    *  @return  Returns \c true if the plot was successfully renamed.  Returns
+    *           \c false if the plot does not exist or the new name is the same
+    *           as that of another plot.
     *
-    *  @notify  This method will notify View::signalRenamed with any<std::string>.
+    *  @notify  This method will notify View::signalRenamed() with
+    *           boost::any<std::string> containing the new plot name.
+    *
+    *  @see     renamePlot(PlotWidget*)
     */
    virtual bool renamePlot(PlotWidget* pPlot, const std::string& newPlotName) = 0;
 
@@ -177,66 +241,97 @@ public:
     *  Deletes a plot in the plot set.
     *
     *  @param   pPlot
-    *           The plot to delete.  Cannot be NULL.
+    *           The plot to delete.  This method does nothing if \c NULL is
+    *           passed in.
     *
-    *  @return  TRUE if the plot was successfully deleted from this plot set,
-    *           otherwise FALSE.
+    *  @return  Returns \c true if the plot was successfully deleted from this
+    *           plot set; otherwise returns \c false.
     *
-    *  @notify  This method will notify signalPlotDeleted with any<PlotWidget*>.
+    *  @notify  This method will notify signalPlotDeleted() with
+    *           boost::any<\link PlotWidget\endlink*> containing a pointer to
+    *           the plot widget that is being deleted.
     */
    virtual bool deletePlot(PlotWidget* pPlot) = 0;
 
    /**
     *  Removes all plots from the plot set.
     *
-    *  @notify  This method will notify signalPlotDeleted with any<PlotWidget*> 
-    *           for each plot removed from the set.
+    *  @notify  This method will notify signalPlotDeleted() with
+    *           boost::any<\link PlotWidget\endlink*> containing a pointer to
+    *           the plot widget that is being deleted for each plot removed from
+    *           the set.
     */
    virtual void clear() = 0;
 
    /**
     *  Associates a view with the plot set.
     *
-    *  This method associates a view with the plot set.  If the plot set has an associated
-    *  view and the view is deleted, the plot set is also deleted.
+    *  This method associates a view with the plot set.  When a view is
+    *  associated with the plot set, plots are added and removed as layers are
+    *  created and destroyed in the view.
+    *
+    *  @warning If the associated view is deleted, the plot set is also deleted
+    *           automatically.
     *
     *  @param   pView
-    *           The view to associate with plot set.  If \e pView is NULL, the plot
-    *           set does not have an associated view.
+    *           The view to associate with plot set.  If \e pView is \c NULL,
+    *           the plot set does not have an associated view.
+    *
+    *  @notify  This method will notify signalViewAssociated() with
+    *           boost::any<\link View\endlink*> containing a pointer to the
+    *           newly associated view.
     */
    virtual void setAssociatedView(View* pView) = 0;
 
    /**
     *  Returns the view associated with the plot set.
     *
-    *  @return  The view currently associated with the plot set.  NULL is returned if no
-    *           view is associated.
+    *  @return  A non-const pointer to the view currently associated with the
+    *           plot set.  \c NULL is returned if no view is associated.
     *
-    *  @see     setAssociatedView()
+    *  @see     setAssociatedView(), getAssociatedView() const
     */
-   virtual View* getAssociatedView() const = 0;
+   virtual View* getAssociatedView() = 0;
+
+   /**
+    *  Returns the view associated with the plot set.
+    *
+    *  @return  A const pointer to the view currently associated with the plot
+    *           set.  \c NULL is returned if no view is associated.
+    *
+    *  @see     setAssociatedView(), getAssociatedView()
+    */
+   virtual const View* getAssociatedView() const = 0;
 
    /**
     *  Renames a plot in the plot set with a user-defined name.
     *
-    *  This method prompts the user to select a new name for the given plot and renames
-    *  the plot.
+    *  This method prompts the user to select a new name for the given plot and
+    *  renames the plot.
     *
-    *  @param    pPlot
-    *            The plot to rename.  Cannot be NULL.
+    *  @param   pPlot
+    *           The plot to rename.  This method does nothing if \c NULL is
+    *           passed in.
     *
-    *  @return   The new plot name, which is unique for all plots in the plot set. An
-    *            empty string is returned if the user cancels the process.
+    *  @return  The new plot name, which is guaranteed to be unique for all
+    *           plots in the plot set.  An empty string is returned if the user
+    *           cancels the process.
     *
-    *  @notify  This method will notify View::signalRenamed with any<std::string>.
+    *  @notify  This method will notify View::signalRenamed() with
+    *           boost::any<std::string> containing the new plot name chosen by
+    *           the user.
+    *
+    *  @see     renamePlot(PlotWidget*, const std::string&)
     */
    virtual std::string renamePlot(PlotWidget* pPlot) = 0;
 
 protected:
    /**
-    * This should be destroyed by calling PlotWindow::deletePlotSet.
+    *  The plot set should be destroyed only if it is not owned by a parent
+    *  widget by calling DesktopServices::deletePlotSet().
     */
-   virtual ~PlotSet() {}
+   virtual ~PlotSet()
+   {}
 };
 
 #endif

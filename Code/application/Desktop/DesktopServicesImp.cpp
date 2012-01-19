@@ -48,6 +48,8 @@
 #include "MenuBar.h"
 #include "MouseModeImp.h"
 #include "ObjectResource.h"
+#include "PlotSetAdapter.h"
+#include "PlotSetGroupAdapter.h"
 #include "PlotWidgetAdapter.h"
 #include "PolarPlotAdapter.h"
 #include "ProductViewAdapter.h"
@@ -702,6 +704,31 @@ ProductWindow* DesktopServicesImp::deriveProduct(View* pView)
    }
 
    return pWindow;
+}
+
+PlotSetGroup* DesktopServicesImp::createPlotSetGroup(QWidget* pParent)
+{
+   return new PlotSetGroupAdapter(pParent);
+}
+
+void DesktopServicesImp::deletePlotSetGroup(PlotSetGroup* pPlotSetGroup)
+{
+   delete dynamic_cast<PlotSetGroupImp*>(pPlotSetGroup);
+}
+
+PlotSet* DesktopServicesImp::createPlotSet(const string& plotSetName, QWidget* pParent)
+{
+   if (plotSetName.empty() == true)
+   {
+      return NULL;
+   }
+
+   return new PlotSetAdapter(SessionItemImp::generateUniqueId(), plotSetName, pParent);
+}
+
+void DesktopServicesImp::deletePlotSet(PlotSet* pPlotSet)
+{
+   delete dynamic_cast<PlotSetImp*>(pPlotSet);
 }
 
 PlotWidget* DesktopServicesImp::createPlotWidget(const string& plotName, PlotType plotType, QWidget* pParent)

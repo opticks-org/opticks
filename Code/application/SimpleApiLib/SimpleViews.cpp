@@ -10,10 +10,12 @@
 #include "AppConfig.h"
 #include "ColorMap.h"
 #include "DesktopServices.h"
+#include "DockWindow.h"
 #include "FileFinder.h"
 #include "Layer.h"
 #include "LayerList.h"
 #include "ObjectResource.h"
+#include "PlotSetGroup.h"
 #include "PseudocolorLayer.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
@@ -1289,10 +1291,26 @@ extern "C"
          windowType = PRODUCT_WINDOW;
          break;
       case PLOT_VIEW:
-         windowType = PLOT_WINDOW;
+         windowType = DOCK_WINDOW;
          break;
       }
       Window* pWindow = Service<DesktopServices>()->createWindow(std::string(pName), windowType);
+      if (type == PLOT_VIEW)
+      {
+         DockWindow* pDockWindow = dynamic_cast<DockWindow*>(pWindow);
+         if (pDockWindow != NULL)
+         {
+            PlotSetGroup* pPlotSetGroup = Service<DesktopServices>()->createPlotSetGroup();
+            if (pPlotSetGroup == NULL)
+            {
+               Service<DesktopServices>()->deleteWindow(pDockWindow);
+               setLastError(SIMPLE_OTHER_FAILURE);
+               return NULL;
+            }
+
+            pDockWindow->setWidget(pPlotSetGroup->getWidget());
+         }
+      }
       View* pView = pWindow == NULL ? NULL : static_cast<ViewWindow*>(pWindow)->getView();
       if (pView == NULL)
       {

@@ -23,6 +23,8 @@ class DockWindow;
 class FileDescriptor;
 class MenuBar;
 class MouseMode;
+class PlotSet;
+class PlotSetGroup;
 class PlotView;
 class PlotWidget;
 class PlugIn;
@@ -512,22 +514,93 @@ public:
    virtual ProductWindow *deriveProduct(View *pView) = 0;
 
    /**
-    *  Creates a plot widget that is not contained in a plot window.
+    *  Creates a widget that can contain multiple plot sets.
+    *
+    *  This method creates widget that contains multiple plot sets, where an
+    *  information bar is displayed along the top of the widget to manage the
+    *  active plot set.
+    *
+    *  @param   pParent
+    *           The Qt widget to use as the parent for the plot set group
+    *           widget.  If \c NULL is passed in, the widget is not owned by
+    *           another object, so it should be deleted when necessary by
+    *           calling the deletePlotSetGroup() method.
+    *
+    *  @return  A pointer to the newly created plot set group widget.
+    *
+    *  @see     createPlotSet(), createPlotWidget()
+    */
+   virtual PlotSetGroup* createPlotSetGroup(QWidget* pParent = NULL) = 0;
+
+   /**
+    *  Destroys a plot set group widget.
+    *
+    *  This method is intended to destroy plot set group widgets created with
+    *  the createPlotSetGroup() method.  This method should not be called
+    *  if the plot set group widget has a valid parent widget, where the widget
+    *  will be destroyed automatically when its parent is destroyed.
+    *
+    *  @param   pPlotSetGroup
+    *           The plot set group widget to delete.
+    */
+   virtual void deletePlotSetGroup(PlotSetGroup* pPlotSetGroup) = 0;
+
+   /**
+    *  Creates a plot set widget that can contain multiple plots.
+    *
+    *  This method creates a tabbed widget that displays a plot widget on each
+    *  tab.  To display multiple plot set widgets within a single widget, see
+    *  createPlotSetGroup() instead.
+    *
+    *  @param   plotSetName
+    *           The plot set name.  This method does nothing if an empty string
+    *           is passed in.
+    *  @param   pParent
+    *           The Qt widget to use as the parent for the plot set widget.  If
+    *           \c NULL is passed in, the widget is not owned by another object,
+    *           so it should be deleted when necessary by calling the
+    *           deletePlotSet() method.
+    *
+    *  @return  A pointer to the newly created plot set widget.
+    *
+    *  @see     createPlotSetGroup(), createPlotWidget()
+    */
+   virtual PlotSet* createPlotSet(const std::string& plotSetName, QWidget* pParent = NULL) = 0;
+
+   /**
+    *  Destroys a plot set widget.
+    *
+    *  This method is intended to destroy plot set widgets created with the
+    *  createPlotSet() method.  This method should not be called if the plot set
+    *  widget has a valid parent widget, where the plot set will be destroyed
+    *  automatically when its parent is destroyed.
+    *
+    *  @param   pPlotSet
+    *           The plot set widget to delete.
+    */
+   virtual void deletePlotSet(PlotSet* pPlotSet) = 0;
+
+   /**
+    *  Creates a plot widget that is not contained in a plot set.
     *
     *  This method creates a plot widget that is not associated with a plot
-    *  window.  The widget is not owned by another object, so it should be
-    *  deleted when necessary by calling the deletePlotWidget() method.
+    *  set.  To display multiple plot widgets within a single widget, see
+    *  the createPlotSet() method instead.
     *
     *  @param   plotName
-    *           The plot name.  Cannot be empty.
+    *           The plot name.  This method does nothing if an empty string is
+    *           passed in.
     *  @param   plotType
-    *           The plot type to create.
+    *           The type of plot to create.
     *  @param   pParent
-    *           The Qt widget to use as the parent for the plot widget.
+    *           The Qt widget to use as the parent for the plot widget.  If
+    *           \c NULL is passed in, the widget is not owned by another object,
+    *           so it should be deleted when necessary by calling the
+    *           deletePlotWidget() method.
     *
-    *  @return  A pointer to the newly created PlotWidget.
+    *  @return  A pointer to the newly created plot widget.
     *
-    *  @see     PlotType
+    *  @see     createPlot()
     */
    virtual PlotWidget* createPlotWidget(const std::string& plotName, PlotType plotType, QWidget* pParent = 0) = 0;
 
@@ -535,14 +608,17 @@ public:
     *  Destroys a plot widget.
     *
     *  This method is intended to destroy plot widgets created with the
-    *  createPlotWidget() method.  To destroy plot widgets displayed in a plot
-    *  window, get the plot set containing the plot widget and call
-    *  PlotSet::deletePlot() instead.
+    *  createPlotWidget() method.  This method should not be called if the plot
+    *  widget has a valid parent widget, where the plot widget will be destroyed
+    *  automatically when its parent is destroyed.
+    *
+    *  To destroy plot widgets displayed in a plot set, get the plot set
+    *  containing the plot widget and call PlotSet::deletePlot() instead.
     *
     *  @param   pPlot
-    *           The plot widget to delete.  If the given plot widget is
-    *           displayed in a plot window, the plot widget is removed from its
-    *           parent plot set.
+    *           The plot widget to delete.
+    *
+    *  @see     PlotWidget::getPlotSet()
     */
    virtual void deletePlotWidget(PlotWidget* pPlot) = 0;
 

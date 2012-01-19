@@ -62,6 +62,8 @@ private:
       void activateLayer(Subject& subject, const std::string& signal, const boost::any& value);
       void addGraphicObject(Subject& subject, const std::string& signal, const boost::any& value);
       void removeGraphicObject(Subject& subject, const std::string& signal, const boost::any& value);
+      void addPlotSets(Subject& subject, const std::string& signal, const boost::any& value);
+      void removePlotSets(Subject& subject, const std::string& signal, const boost::any& value);
       void addPlotSet(Subject& subject, const std::string& signal, const boost::any& value);
       void removePlotSet(Subject& subject, const std::string& signal, const boost::any& value);
       void setCurrentPlotSet(Subject& subject, const std::string& signal, const boost::any& value);
@@ -78,12 +80,13 @@ private:
       void removeLayerItem(SessionItemWrapper* pViewWrapper, Layer* pLayer);
       SessionItemWrapper* addGraphicObjectItem(SessionItemWrapper* pLayerWrapper, GraphicObject* pObject);
       void removeGraphicObjectItem(SessionItemWrapper* pLayerWrapper, GraphicObject* pObject);
-      SessionItemWrapper* addPlotSetItem(SessionItemWrapper* pPlotWindowWrapper, PlotSet* pPlotSet);
-      void removePlotSetItem(SessionItemWrapper* pPlotWindowWrapper, PlotSet* pPlotSet);
+      SessionItemWrapper* addPlotSetItem(SessionItemWrapper* pDockWindowWrapper, PlotSet* pPlotSet);
+      void removePlotSetItem(SessionItemWrapper* pDockWindowWrapper, PlotSet* pPlotSet);
 
    private:
       WindowSourceModel(const WindowSourceModel& rhs);
       WindowSourceModel& operator=(const WindowSourceModel& rhs);
+
       SessionItemWrapper* mpWorkspaceWindowWrapper;
       SessionItemWrapper* mpDockWindowWrapper;
       SessionItemWrapper* mpToolBarWrapper;

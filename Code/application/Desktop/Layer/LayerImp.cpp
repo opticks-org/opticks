@@ -739,7 +739,7 @@ void LayerImp::showLayer(bool show)
 void LayerImp::calculateSubsetStatistics()
 {
    HistogramWindow* pHistWindow =
-      dynamic_cast<HistogramWindow*>(Service<DesktopServices>()->getWindow("Histogram Window", PLOT_WINDOW));
+      dynamic_cast<HistogramWindow*>(Service<DesktopServices>()->getWindow("Histogram Window", DOCK_WINDOW));
    if (pHistWindow != NULL)
    {
       pHistWindow->createSubsetPlot(dynamic_cast<Layer*>(this));

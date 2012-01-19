@@ -10,6 +10,7 @@
 #include "DataPlotterDlg.h"
 #include "DataPlotterPlugIn.h"
 #include "DataVariant.h"
+#include "DesktopServices.h"
 #include "ModelServices.h"
 #include "PlugInRegistration.h"
 #include "Signature.h"
@@ -27,7 +28,7 @@ DataPlotterPlugIn::DataPlotterPlugIn() :
    setCreator("Opticks Community");
    setVersion("Sample");
    setCopyright("Copyright (C) 2008, Ball Aerospace & Technologies Corp.");
-   setDescription("Demonstrates use of portions of the PlotWindow API.");
+   setDescription("Demonstrates use of portions of the plotting API.");
    setMenuLocation("[Demo]\\Data Plotter");
    setDescriptorId("{69DD0E12-8D6B-4e23-A742-469447E4EC2F}");
    allowMultipleInstances(true);
@@ -35,8 +36,7 @@ DataPlotterPlugIn::DataPlotterPlugIn() :
 }
 
 DataPlotterPlugIn::~DataPlotterPlugIn()
-{
-}
+{}
 
 bool DataPlotterPlugIn::setBatch()
 {
@@ -779,7 +779,7 @@ bool DataPlotterPlugIn::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
       pSig->setData("Radiance", vData);
    }
 
-   DataPlotterDlg dlg (*pSig);
+   DataPlotterDlg dlg(*pSig, Service<DesktopServices>()->getMainWidget());
    dlg.exec();
 
    return true;

@@ -39,8 +39,6 @@
 #include "MultiLineTextDialog.h"
 #include "OrthographicView.h"
 #include "PlotWidgetAdapter.h"
-#include "PlotWindow.h"
-#include "PlotWindowImp.h"
 #include "PolygonObject.h"
 #include "PolylineObject.h"
 #include "PolylineObjectImp.h"

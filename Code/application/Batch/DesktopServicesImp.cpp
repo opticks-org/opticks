@@ -46,12 +46,10 @@ void DesktopServicesImp::destroy()
 }
 
 DesktopServicesImp::DesktopServicesImp()
-{
-}
+{}
 
 DesktopServicesImp::~DesktopServicesImp()
-{
-}
+{}
 
 const string& DesktopServicesImp::getObjectType() const
 {
@@ -80,8 +78,7 @@ bool DesktopServicesImp::detach(const string& signal, const Slot& slot)
 }
 
 void DesktopServicesImp::enableSignals(bool enabled)
-{
-}
+{}
 
 bool DesktopServicesImp::signalsEnabled() const
 {
@@ -124,16 +121,13 @@ Window* DesktopServicesImp::getWindow(const string& uniqueId) const
 }
 
 void DesktopServicesImp::getWindows(WindowType windowType, vector<Window*>& windows) const
-{
-}
+{}
 
 void DesktopServicesImp::getWindows(const string& windowType, vector<Window*>& windows) const
-{
-}
+{}
 
 void DesktopServicesImp::getWindows(vector<Window*>& windows) const
-{
-}
+{}
 
 unsigned int DesktopServicesImp::getNumWindows(WindowType windowType) const
 {
@@ -156,8 +150,7 @@ bool DesktopServicesImp::deleteWindow(Window* pWindow)
 }
 
 void DesktopServicesImp::deleteAllWindows()
-{
-}
+{}
 
 bool DesktopServicesImp::setCurrentWorkspaceWindow(WorkspaceWindow* pWindow)
 {
@@ -180,12 +173,10 @@ View* DesktopServicesImp::getCurrentWorkspaceWindowView() const
 }
 
 void DesktopServicesImp::cascadeWorkspaceWindows()
-{
-}
+{}
 
 void DesktopServicesImp::tileWorkspaceWindows(TilingType eType)
-{
-}
+{}
 
 bool DesktopServicesImp::tileWorkspaceWindows(const vector<WorkspaceWindow*>& windows, bool maxFirst, TilingType eType)
 {
@@ -203,8 +194,7 @@ PlotView* DesktopServicesImp::createPlot(const string& plotName, PlotType plotTy
 }
 
 void DesktopServicesImp::deleteView(View* pView)
-{
-}
+{}
 
 bool DesktopServicesImp::isKindOfView(const string& className, const string& viewName)
 {
@@ -212,8 +202,7 @@ bool DesktopServicesImp::isKindOfView(const string& className, const string& vie
 }
 
 void DesktopServicesImp::getViewTypes(const string& className, vector<string>& classList)
-{
-}
+{}
 
 bool DesktopServicesImp::isKindOfLayer(const std::string& className, const std::string& layerName)
 {
@@ -221,13 +210,28 @@ bool DesktopServicesImp::isKindOfLayer(const std::string& className, const std::
 }
 
 void DesktopServicesImp::getLayerTypes(const std::string& className, std::vector<std::string>& classList)
-{
-}
+{}
 
 ProductWindow* DesktopServicesImp::deriveProduct(View* pView)
 {
    return NULL;
 }
+
+PlotSetGroup* DesktopServicesImp::createPlotSetGroup(QWidget* pParent)
+{
+   return NULL;
+}
+
+void DesktopServicesImp::deletePlotSetGroup(PlotSetGroup* pPlotSetGroup)
+{}
+
+PlotSet* DesktopServicesImp::createPlotSet(const string& plotSetName, QWidget* pParent)
+{
+   return NULL;
+}
+
+void DesktopServicesImp::deletePlotSet(PlotSet* pPlotSet)
+{}
 
 PlotWidget* DesktopServicesImp::createPlotWidget(const string& plotName, PlotType plotType, QWidget* pParent)
 {
@@ -235,8 +239,7 @@ PlotWidget* DesktopServicesImp::createPlotWidget(const string& plotName, PlotTyp
 }
 
 void DesktopServicesImp::deletePlotWidget(PlotWidget* pPlot)
-{
-}
+{}
 
 Axis* DesktopServicesImp::createAxis(AxisPosition position, QWidget* pParent)
 {
@@ -244,12 +247,10 @@ Axis* DesktopServicesImp::createAxis(AxisPosition position, QWidget* pParent)
 }
 
 void DesktopServicesImp::deleteAxis(Axis* pAxis)
-{
-}
+{}
 
 void DesktopServicesImp::initializeAction(QAction* pAction, const string& shortcutContext)
-{
-}
+{}
 
 MouseMode* DesktopServicesImp::createMouseMode(const string& modeName, const char* const mouseCursor[],
                                                const char* const cursorMask[], int iHotX, int iHotY,
@@ -265,12 +266,10 @@ MouseMode* DesktopServicesImp::createMouseMode(const string& modeName, const QCu
 }
 
 void DesktopServicesImp::deleteMouseMode(MouseMode* pMouseMode) const
-{
-}
+{}
 
 void DesktopServicesImp::setPanMode(PanModeType panMode)
-{
-}
+{}
 
 PanModeType DesktopServicesImp::getPanMode() const
 {
@@ -278,12 +277,10 @@ PanModeType DesktopServicesImp::getPanMode() const
 }
 
 void DesktopServicesImp::setAoiSelectionTool(GraphicObjectType toolType, ModeType modeType)
-{
-}
+{}
 
 void DesktopServicesImp::setAoiAddMode(AoiAddMode mode)
-{
-}
+{}
 
 GraphicObjectType DesktopServicesImp::getAoiSelectionTool() const
 {
@@ -301,8 +298,7 @@ AoiAddMode DesktopServicesImp::getAoiAddMode() const
 }
 
 void DesktopServicesImp::setAnnotationObject(GraphicObjectType objectType)
-{
-}
+{}
 
 GraphicObjectType DesktopServicesImp::getAnnotationObject() const
 {
@@ -341,13 +337,11 @@ bool DesktopServicesImp::displayHelp(const string& filename) const
 }
 
 void DesktopServicesImp::displayProperties(SessionItem* pItem) const
-{
-}
+{}
 
 void DesktopServicesImp::displayProperties(SessionItem* pItem, const vector<string>& displayedPages,
                                            bool bEmitSignal) const
-{
-}
+{}
 
 void DesktopServicesImp::setStatusBarMessage(const string& messageText) const
 {
@@ -385,8 +379,7 @@ int DesktopServicesImp::showMessageBox(const string& caption, const string& text
 }
 
 void DesktopServicesImp::useMessageBox(bool enable)
-{
-}
+{}
 
 bool DesktopServicesImp::registerCallback(PlugInCallbackType eType, PlugInCallback* pCallback) const
 {
@@ -394,8 +387,7 @@ bool DesktopServicesImp::registerCallback(PlugInCallbackType eType, PlugInCallba
 }
 
 void DesktopServicesImp::addBackgroundPlugIn(PlugIn* pPlugIn, Progress* pProgress) const
-{
-}
+{}
 
 DockWindowAreaType DesktopServicesImp::getDockWindowArea(const DockWindow& dockWindow) const
 {

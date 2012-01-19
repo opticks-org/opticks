@@ -38,7 +38,6 @@
 #include "MeasurementLayerAdapter.h"
 #include "ModelServices.h"
 #include "MouseModeImp.h"
-#include "PlotWindowAdapter.h"
 #include "PropertiesSpatialDataView.h"
 #include "PseudocolorLayerImp.h"
 #include "RasterDataDescriptor.h"
@@ -1062,7 +1061,7 @@ Layer* SpatialDataViewImp::convertLayer(Layer* pLayer, const LayerType& newLayer
       Service<DesktopServices> pDesktop;
 
       HistogramWindow* pHistWindow =
-         dynamic_cast<HistogramWindow*>(pDesktop->getWindow("Histogram Window", PLOT_WINDOW));
+         dynamic_cast<HistogramWindow*>(pDesktop->getWindow("Histogram Window", DOCK_WINDOW));
       if (pHistWindow != NULL)
       {
          pHistWindow->createPlot(pNewLayer);

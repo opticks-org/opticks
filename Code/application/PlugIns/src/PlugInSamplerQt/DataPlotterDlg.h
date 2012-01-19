@@ -10,15 +10,12 @@
 #ifndef DATAPLOTTERDLG_H
 #define DATAPLOTTERDLG_H
 
-#include <QtGui/QComboBox>
 #include <QtGui/QDialog>
-#include <QtGui/QLabel>
 
-#include "TypesFile.h"
-
-class PlotSet;
+class DockWindow;
 class PlotWidget;
-class PlotWindow;
+class QComboBox;
+class QPushButton;
 class Signature;
 
 class DataPlotterDlg : public QDialog
@@ -26,8 +23,8 @@ class DataPlotterDlg : public QDialog
    Q_OBJECT
 
 public:
-   DataPlotterDlg(Signature &sig);
-   ~DataPlotterDlg();
+   DataPlotterDlg(Signature& sig, QWidget* pParent = NULL);
+   virtual ~DataPlotterDlg();
 
 private slots:
    void newPlot();
@@ -41,9 +38,8 @@ private:
    QPushButton* mpAddButton;
 
    Signature& mSig;
-   PlotWidget* mpPlot;
-   PlotSet* mpPlotSet;
-   PlotWindow* mpPlotWindow;
+   DockWindow* mpDockWindow;
+   PlotWidget* mpPlotWidget;
 };
 
 #endif

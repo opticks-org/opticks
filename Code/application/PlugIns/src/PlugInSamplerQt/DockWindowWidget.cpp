@@ -15,22 +15,24 @@
 #include <QtGui/QMessageBox>
 #include <QtGui/QPushButton>
 
-#include "DockWindowWidget.h"
 #include "AddPlotDlg.h"
-#include "AppAssert.h"
+#include "AppVerify.h"
 #include "Axis.h"
 #include "CartesianGridlines.h"
 #include "CartesianPlot.h"
 #include "DesktopServices.h"
+#include "DockWindow.h"
+#include "DockWindowWidget.h"
 #include "ElidedLabel.h"
 #include "PlotManager.h"
 #include "PlotPropertiesDlg.h"
 #include "PlotSet.h"
+#include "PlotSetGroup.h"
 #include "PlotView.h"
 #include "PlotWidget.h"
-#include "PlotWindow.h"
 #include "PolarGridlines.h"
 #include "PolarPlot.h"
+#include "SessionManager.h"
 #include "Slot.h"
 #include "StringUtilities.h"
 #include "TypesFile.h"
@@ -145,59 +147,61 @@ DockWindowWidget::DockWindowWidget(QWidget* pParent) :
       }
    }
 
-   mpDesktop->attach(SIGNAL_NAME(DesktopServices, WindowAdded), Slot(this, &DockWindowWidget::windowAdded));
-   mpDesktop->attach(SIGNAL_NAME(DesktopServices, WindowActivated), Slot(this, &DockWindowWidget::windowActivated));
-   mpDesktop->attach(SIGNAL_NAME(DesktopServices, WindowRemoved), Slot(this, &DockWindowWidget::windowRemoved));
+   VERIFYNR(mpDesktop->attach(SIGNAL_NAME(DesktopServices, WindowAdded), Slot(this, &DockWindowWidget::windowAdded)));
+   VERIFYNR(mpDesktop->attach(SIGNAL_NAME(DesktopServices, WindowActivated),
+      Slot(this, &DockWindowWidget::windowActivated)));
+   VERIFYNR(mpDesktop->attach(SIGNAL_NAME(DesktopServices, WindowRemoved),
+      Slot(this, &DockWindowWidget::windowRemoved)));
+   VERIFYNR(Service<SessionManager>()->attach(SIGNAL_NAME(SessionManager, SessionRestored),
+      Slot(this, &DockWindowWidget::sessionRestored)));
 
    updatePlotWindowList();
 
    // Connections
-   connect(mpWindowList, SIGNAL(itemSelectionChanged()), this, SLOT(updatePlotList()));
-   connect(pAddWindowButton, SIGNAL(clicked()), this, SLOT(addPlotWindow()));
-   connect(pDeleteWindowButton, SIGNAL(clicked()), this, SLOT(deletePlotWindow()));
-   connect(pShowWindowButton, SIGNAL(clicked()), this, SLOT(showPlotWindow()));
-   connect(pHideWindowButton, SIGNAL(clicked()), this, SLOT(hidePlotWindow()));
-   connect(pAddPlotButton, SIGNAL(clicked()), this, SLOT(addPlot()));
-   connect(pDeletePlotButton, SIGNAL(clicked()), this, SLOT(deletePlot()));
-   connect(pActivateButton, SIGNAL(clicked()), this, SLOT(activatePlot()));
-   connect(pRenameButton, SIGNAL(clicked()), this, SLOT(renamePlot()));
-   connect(pPropertiesButton, SIGNAL(clicked()), this, SLOT(editPlotProperties()));
+   VERIFYNR(connect(mpWindowList, SIGNAL(itemSelectionChanged()), this, SLOT(updatePlotList())));
+   VERIFYNR(connect(pAddWindowButton, SIGNAL(clicked()), this, SLOT(addPlotWindow())));
+   VERIFYNR(connect(pDeleteWindowButton, SIGNAL(clicked()), this, SLOT(deletePlotWindow())));
+   VERIFYNR(connect(pShowWindowButton, SIGNAL(clicked()), this, SLOT(showPlotWindow())));
+   VERIFYNR(connect(pHideWindowButton, SIGNAL(clicked()), this, SLOT(hidePlotWindow())));
+   VERIFYNR(connect(pAddPlotButton, SIGNAL(clicked()), this, SLOT(addPlot())));
+   VERIFYNR(connect(pDeletePlotButton, SIGNAL(clicked()), this, SLOT(deletePlot())));
+   VERIFYNR(connect(pActivateButton, SIGNAL(clicked()), this, SLOT(activatePlot())));
+   VERIFYNR(connect(pRenameButton, SIGNAL(clicked()), this, SLOT(renamePlot())));
+   VERIFYNR(connect(pPropertiesButton, SIGNAL(clicked()), this, SLOT(editPlotProperties())));
 }
 
 DockWindowWidget::~DockWindowWidget()
 {
-   bool bDelete = mpDeleteWindowCheck->isChecked();
-   if (bDelete == true)
+   deleteAllPlotWindows();
+
+   VERIFYNR(mpDesktop->detach(SIGNAL_NAME(DesktopServices, WindowAdded), Slot(this, &DockWindowWidget::windowAdded)));
+   VERIFYNR(mpDesktop->detach(SIGNAL_NAME(DesktopServices, WindowActivated),
+      Slot(this, &DockWindowWidget::windowActivated)));
+   VERIFYNR(mpDesktop->detach(SIGNAL_NAME(DesktopServices, WindowRemoved),
+      Slot(this, &DockWindowWidget::windowRemoved)));
+   VERIFYNR(Service<SessionManager>()->detach(SIGNAL_NAME(SessionManager, SessionRestored),
+      Slot(this, &DockWindowWidget::sessionRestored)));
+}
+
+void DockWindowWidget::hideEvent(QHideEvent* pEvent)
+{
+   if (mpDeleteWindowCheck->isChecked() == true)
    {
-      vector<Window*> plotWindows;
-      mpDesktop->getWindows(PLOT_WINDOW, plotWindows);
-
-      vector<Window*>::iterator iter = plotWindows.begin();
-      while (iter != plotWindows.end())
-      {
-         PlotWindow* pWindow = static_cast<PlotWindow*>(*iter);
-         if (pWindow != NULL)
-         {
-            mpDesktop->deleteWindow(pWindow);
-         }
-
-         ++iter;
-      }
+      deleteAllPlotWindows();
    }
 
-   mpDesktop->detach(SIGNAL_NAME(DesktopServices, WindowAdded), Slot(this, &DockWindowWidget::windowAdded));
-   mpDesktop->detach(SIGNAL_NAME(DesktopServices, WindowActivated), Slot(this, &DockWindowWidget::windowActivated));
-   mpDesktop->detach(SIGNAL_NAME(DesktopServices, WindowRemoved), Slot(this, &DockWindowWidget::windowRemoved));
+   QWidget::hideEvent(pEvent);
 }
 
 void DockWindowWidget::windowAdded(Subject& subject, const string& signal, const boost::any& value)
 {
    if (dynamic_cast<DesktopServices*>(&subject) == mpDesktop.get())
    {
-      Window* pWindow = boost::any_cast<Window*>(value);
-      if (dynamic_cast<PlotWindow*>(pWindow) != NULL)
+      DockWindow* pDockWindow = dynamic_cast<DockWindow*>(boost::any_cast<Window*>(value));
+      if (pDockWindow != NULL)
       {
-         updatePlotWindowList();
+         VERIFYNR(pDockWindow->attach(SIGNAL_NAME(ViewWindow, WidgetSet),
+            Slot(this, &DockWindowWidget::dockWindowWidgetSet)));
       }
    }
 }
@@ -222,27 +226,48 @@ void DockWindowWidget::windowRemoved(Subject& subject, const string& signal, con
 {
    if (dynamic_cast<DesktopServices*>(&subject) == mpDesktop.get())
    {
-      Window* pWindow = boost::any_cast<Window*>(value);
-
-      PlotWindow* pPlotWindow = dynamic_cast<PlotWindow*>(pWindow);
-      if (pPlotWindow != NULL)
+      DockWindow* pDockWindow = dynamic_cast<DockWindow*>(boost::any_cast<Window*>(value));
+      if ((pDockWindow != NULL) && (dynamic_cast<PlotSetGroup*>(pDockWindow->getWidget()) != NULL))
       {
-         PlotWindow* pCurrentPlotWindow = getSelectedPlotWindow();
-         updatePlotWindowList();
+         VERIFYNR(pDockWindow->detach(SIGNAL_NAME(ViewWindow, WidgetSet),
+            Slot(this, &DockWindowWidget::dockWindowWidgetSet)));
 
-         if (pCurrentPlotWindow == pPlotWindow)
-         {
-            setSelectedPlotWindow(NULL);
-         }
+         updatePlotWindowList();
       }
    }
 }
 
-void DockWindowWidget::setSelectedPlotWindow(PlotWindow* pWindow)
+void DockWindowWidget::dockWindowWidgetSet(Subject& subject, const string& signal, const boost::any& value)
+{
+   QWidget* pWidget = boost::any_cast<QWidget*>(value);
+   if (dynamic_cast<PlotSetGroup*>(pWidget) != NULL)
+   {
+      updatePlotWindowList();
+   }
+}
+
+void DockWindowWidget::sessionRestored(Subject& subject, const string& signal, const boost::any& value)
+{
+   vector<Window*> dockWindows;
+   mpDesktop->getWindows(DOCK_WINDOW, dockWindows);
+   for (vector<Window*>::const_iterator iter = dockWindows.begin(); iter != dockWindows.end(); ++iter)
+   {
+      DockWindow* pDockWindow = dynamic_cast<DockWindow*>(*iter);
+      if (pDockWindow != NULL)
+      {
+         VERIFYNR(pDockWindow->attach(SIGNAL_NAME(ViewWindow, WidgetSet),
+            Slot(this, &DockWindowWidget::dockWindowWidgetSet)));
+      }
+   }
+
+   updatePlotWindowList();
+}
+
+void DockWindowWidget::setSelectedPlotWindow(DockWindow* pWindow)
 {
    mpWindowList->clearSelection();
 
-   if (pWindow != NULL)
+   if ((pWindow != NULL) && (dynamic_cast<PlotSetGroup*>(pWindow->getWidget()) != NULL))
    {
       for (int i = 0; i < mpWindowList->count(); i++)
       {
@@ -252,8 +277,8 @@ void DockWindowWidget::setSelectedPlotWindow(PlotWindow* pWindow)
             QString strWindowName = pItem->text();
             if (strWindowName.isEmpty() == false)
             {
-               PlotWindow* pCurrentWindow = static_cast<PlotWindow*>(mpDesktop->getWindow(strWindowName.toStdString(),
-                  PLOT_WINDOW));
+               DockWindow* pCurrentWindow = static_cast<DockWindow*>(mpDesktop->getWindow(strWindowName.toStdString(),
+                  DOCK_WINDOW));
                if (pCurrentWindow == pWindow)
                {
                   mpWindowList->setItemSelected(pItem, true);
@@ -307,8 +332,15 @@ void DockWindowWidget::setSelectedPlot(PlotWidget* pPlot)
 {
    mpPlotTree->clearSelection();
 
-   PlotWindow* pWindow = getSelectedPlotWindow();
-   if (pWindow == NULL)
+   PlotSetGroup* pPlotSetGroup = NULL;
+
+   DockWindow* pWindow = getSelectedPlotWindow();
+   if (pWindow != NULL)
+   {
+      pPlotSetGroup = dynamic_cast<PlotSetGroup*>(pWindow->getWidget());
+   }
+
+   if (pPlotSetGroup == NULL)
    {
       return;
    }
@@ -327,7 +359,7 @@ void DockWindowWidget::setSelectedPlot(PlotWidget* pPlot)
                QString strPlotSet = pPlotSetItem->text(0);
                QString strPlotName = pItem->text(0);
 
-               PlotSet* pPlotSet = pWindow->getPlotSet(strPlotSet.toStdString());
+               PlotSet* pPlotSet = pPlotSetGroup->getPlotSet(strPlotSet.toStdString());
                if ((pPlotSet != NULL) && (strPlotName.isEmpty() == false))
                {
                   string plotName = strPlotName.toStdString();
@@ -348,9 +380,9 @@ void DockWindowWidget::setSelectedPlot(PlotWidget* pPlot)
    }
 }
 
-PlotWindow* DockWindowWidget::getSelectedPlotWindow() const
+DockWindow* DockWindowWidget::getSelectedPlotWindow() const
 {
-   PlotWindow* pWindow = NULL;
+   DockWindow* pWindow = NULL;
 
    QList<QListWidgetItem*> items = mpWindowList->selectedItems();
    if (items.empty() == false)
@@ -361,7 +393,7 @@ PlotWindow* DockWindowWidget::getSelectedPlotWindow() const
          QString strWindow = pItem->text();
          if (strWindow.isEmpty() == false)
          {
-            pWindow = static_cast<PlotWindow*>(mpDesktop->getWindow(strWindow.toStdString(), PLOT_WINDOW));
+            pWindow = static_cast<DockWindow*>(mpDesktop->getWindow(strWindow.toStdString(), DOCK_WINDOW));
          }
       }
    }
@@ -399,20 +431,17 @@ PlotWidget* DockWindowWidget::getSelectedPlot() const
 
    PlotWidget* pPlot = NULL;
 
-   PlotWindow* pWindow = getSelectedPlotWindow();
+   DockWindow* pWindow = getSelectedPlotWindow();
    if (pWindow != NULL)
    {
-      string plotName = strPlot.toStdString();
-      string plotSet = "";
-      if (strPlotSet.isEmpty() == false)
+      PlotSetGroup* pPlotSetGroup = dynamic_cast<PlotSetGroup*>(pWindow->getWidget());
+      if (pPlotSetGroup != NULL)
       {
-         plotSet = strPlotSet.toStdString();
-      }
-
-      PlotSet* pPlotSet = pWindow->getPlotSet(plotSet);
-      if (pPlotSet != NULL)
-      {
-         pPlot = pPlotSet->getPlot(plotName);
+         PlotSet* pPlotSet = pPlotSetGroup->getPlotSet(strPlotSet.toStdString());
+         if (pPlotSet != NULL)
+         {
+            pPlot = pPlotSet->getPlot(strPlot.toStdString());
+         }
       }
    }
 
@@ -427,30 +456,31 @@ void DockWindowWidget::addPlotWindow()
       return;
    }
 
-   PlotWindow* pWindow = static_cast<PlotWindow*>(mpDesktop->createWindow(strName.toStdString(), PLOT_WINDOW));
+   DockWindow* pWindow = static_cast<DockWindow*>(mpDesktop->createWindow(strName.toStdString(), DOCK_WINDOW));
    if (pWindow != NULL)
    {
-      updatePlotWindowList();
+      PlotSetGroup* pPlotSetGroup = mpDesktop->createPlotSetGroup();
+      if (pPlotSetGroup == NULL)
+      {
+         mpDesktop->deleteWindow(pWindow);
+         return;
+      }
+
+      pWindow->setWidget(pPlotSetGroup->getWidget());
       setSelectedPlotWindow(pWindow);
    }
 }
 
 void DockWindowWidget::deletePlotWindow()
 {
-   PlotWindow* pWindow = getSelectedPlotWindow();
+   DockWindow* pWindow = getSelectedPlotWindow();
    if (pWindow == NULL)
    {
       QMessageBox::critical(this, PLOT_MANAGER_NAME, "Please select a plot window to delete!");
       return;
    }
 
-   bool bSuccess = mpDesktop->deleteWindow(pWindow);
-   if (bSuccess == true)
-   {
-      updatePlotWindowList();
-      setSelectedPlotWindow(NULL);
-   }
-   else
+   if (mpDesktop->deleteWindow(pWindow) == false)
    {
       QMessageBox::critical(this, PLOT_MANAGER_NAME, "Could not delete the plot window!");
    }
@@ -458,7 +488,7 @@ void DockWindowWidget::deletePlotWindow()
 
 void DockWindowWidget::showPlotWindow()
 {
-   PlotWindow* pWindow = getSelectedPlotWindow();
+   DockWindow* pWindow = getSelectedPlotWindow();
    if (pWindow != NULL)
    {
       pWindow->show();
@@ -467,7 +497,7 @@ void DockWindowWidget::showPlotWindow()
 
 void DockWindowWidget::hidePlotWindow()
 {
-   PlotWindow* pWindow = getSelectedPlotWindow();
+   DockWindow* pWindow = getSelectedPlotWindow();
    if (pWindow != NULL)
    {
       pWindow->hide();
@@ -476,16 +506,16 @@ void DockWindowWidget::hidePlotWindow()
 
 void DockWindowWidget::updatePlotWindowList()
 {
+   DockWindow* pCurrentDockWindow = getSelectedPlotWindow();
    mpWindowList->clear();
 
-   vector<Window*> plotWindows;
-   mpDesktop->getWindows(PLOT_WINDOW, plotWindows);
+   vector<Window*> dockWindows;
+   mpDesktop->getWindows(DOCK_WINDOW, dockWindows);
 
-   vector<Window*>::iterator iter = plotWindows.begin();
-   while (iter != plotWindows.end())
+   for (vector<Window*>::iterator iter = dockWindows.begin(); iter != dockWindows.end(); ++iter)
    {
-      Window* pWindow = *iter;
-      if (pWindow != NULL)
+      DockWindow* pWindow = dynamic_cast<DockWindow*>(*iter);
+      if ((pWindow != NULL) && (dynamic_cast<PlotSetGroup*>(pWindow->getWidget())))
       {
          string windowName = pWindow->getName();
          if (windowName.empty() == false)
@@ -494,17 +524,38 @@ void DockWindowWidget::updatePlotWindowList()
             mpWindowList->addItem(strWindowName);
          }
       }
-
-      ++iter;
    }
 
+   setSelectedPlotWindow(pCurrentDockWindow);
    updatePlotList();
+}
+
+void DockWindowWidget::deleteAllPlotWindows()
+{
+   vector<Window*> plotWindows;
+   mpDesktop->getWindows(DOCK_WINDOW, plotWindows);
+
+   for (vector<Window*>::iterator iter = plotWindows.begin(); iter != plotWindows.end(); ++iter)
+   {
+      DockWindow* pWindow = static_cast<DockWindow*>(*iter);
+      if ((pWindow != NULL) && (dynamic_cast<PlotSetGroup*>(pWindow->getWidget()) != NULL))
+      {
+         mpDesktop->deleteWindow(pWindow);
+      }
+   }
 }
 
 void DockWindowWidget::addPlot()
 {
-   PlotWindow* pWindow = getSelectedPlotWindow();
-   if (pWindow == NULL)
+   PlotSetGroup* pPlotSetGroup = NULL;
+
+   DockWindow* pWindow = getSelectedPlotWindow();
+   if (pWindow != NULL)
+   {
+      pPlotSetGroup = dynamic_cast<PlotSetGroup*>(pWindow->getWidget());
+   }
+
+   if (pPlotSetGroup == NULL)
    {
       QMessageBox::critical(this, PLOT_MANAGER_NAME, "Please select a plot window for which to add a plot!");
       return;
@@ -523,9 +574,7 @@ void DockWindowWidget::addPlot()
       QString strPlotSet = QInputDialog::getText(this, "Add Plot Set", "Name:", QLineEdit::Normal);
       if (strPlotSet.isEmpty() == false)
       {
-         string plotSetName = strPlotSet.toStdString();
-
-         PlotSet* pPlotSet = pWindow->createPlotSet(plotSetName);
+         PlotSet* pPlotSet = pPlotSetGroup->createPlotSet(strPlotSet.toStdString());
          if (pPlotSet != NULL)
          {
             updatePlotList();
@@ -558,8 +607,7 @@ void DockWindowWidget::addPlot()
       PlotSet* pPlotSet = NULL;
       if (strPlotSet.isEmpty() == false)
       {
-         string plotSetName = strPlotSet.toStdString();
-         pPlotSet = pWindow->getPlotSet(plotSetName);
+         pPlotSet = pPlotSetGroup->getPlotSet(strPlotSet.toStdString());
       }
 
       if (pPlotSet != NULL)
@@ -641,8 +689,15 @@ void DockWindowWidget::addPlot()
 
 void DockWindowWidget::deletePlot()
 {
-   PlotWindow* pWindow = getSelectedPlotWindow();
-   if (pWindow == NULL)
+   PlotSetGroup* pPlotSetGroup = NULL;
+
+   DockWindow* pWindow = getSelectedPlotWindow();
+   if (pWindow != NULL)
+   {
+      pPlotSetGroup = dynamic_cast<PlotSetGroup*>(pWindow->getWidget());
+   }
+
+   if (pPlotSetGroup == NULL)
    {
       QMessageBox::critical(this, PLOT_MANAGER_NAME,
          "Please select a plot window for which to delete a plot set or plot!");
@@ -670,7 +725,7 @@ void DockWindowWidget::deletePlot()
       PlotWidget* pPlot = getSelectedPlot();
       if (pPlot != NULL)
       {
-         PlotSet* pPlotSet = pWindow->getPlotSet(pPlot);
+         PlotSet* pPlotSet = pPlotSetGroup->getPlotSet(pPlot);
          if (pPlotSet != NULL)
          {
             bSuccess = pPlotSet->deletePlot(pPlot);
@@ -682,12 +737,10 @@ void DockWindowWidget::deletePlot()
       QString strPlotSet = pItem->text(0);
       if (strPlotSet.isEmpty() == false)
       {
-         string plotSetName = strPlotSet.toStdString();
-
-         PlotSet* pPlotSet = pWindow->getPlotSet(plotSetName);
+         PlotSet* pPlotSet = pPlotSetGroup->getPlotSet(strPlotSet.toStdString());
          if (pPlotSet != NULL)
          {
-            bSuccess = pWindow->deletePlotSet(pPlotSet);
+            bSuccess = pPlotSetGroup->deletePlotSet(pPlotSet);
          }
       }
    }
@@ -695,7 +748,7 @@ void DockWindowWidget::deletePlot()
    if (bSuccess == true)
    {
       updatePlotList();
-      setSelectedPlot(pWindow->getCurrentPlot());
+      setSelectedPlot(pPlotSetGroup->getCurrentPlot());
    }
 }
 
@@ -703,17 +756,20 @@ void DockWindowWidget::updatePlotList()
 {
    mpPlotTree->clear();
 
-   PlotWindow* pWindow = getSelectedPlotWindow();
+   DockWindow* pWindow = getSelectedPlotWindow();
    if (pWindow == NULL)
    {
       return;
    }
 
-   vector<PlotSet*> plotSets;
-   pWindow->getPlotSets(plotSets);
+   PlotSetGroup* pPlotSetGroup = dynamic_cast<PlotSetGroup*>(pWindow->getWidget());
+   if (pPlotSetGroup == NULL)
+   {
+      return;
+   }
 
-   vector<PlotSet*>::iterator iter = plotSets.begin();
-   while (iter != plotSets.end())
+   const vector<PlotSet*>& plotSets = pPlotSetGroup->getPlotSets();
+   for (vector<PlotSet*>::const_iterator iter = plotSets.begin(); iter != plotSets.end(); ++iter)
    {
       PlotSet* pPlotSet = *iter;
       if (pPlotSet != NULL)
@@ -754,15 +810,20 @@ void DockWindowWidget::updatePlotList()
             }
          }
       }
-
-      ++iter;
    }
 }
 
 void DockWindowWidget::activatePlot()
 {
-   PlotWindow* pWindow = getSelectedPlotWindow();
-   if (pWindow == NULL)
+   PlotSetGroup* pPlotSetGroup = NULL;
+
+   DockWindow* pWindow = getSelectedPlotWindow();
+   if (pWindow != NULL)
+   {
+      pPlotSetGroup = dynamic_cast<PlotSetGroup*>(pWindow->getWidget());
+   }
+
+   if (pPlotSetGroup == NULL)
    {
       QMessageBox::critical(this, PLOT_MANAGER_NAME,
          "Please select a plot window for which to activate a plot set or plot!");
@@ -788,7 +849,7 @@ void DockWindowWidget::activatePlot()
       PlotWidget* pPlot = getSelectedPlot();
       if (pPlot != NULL)
       {
-         pWindow->setCurrentPlot(pPlot);
+         pPlotSetGroup->setCurrentPlot(pPlot);
       }
    }
    else
@@ -796,12 +857,10 @@ void DockWindowWidget::activatePlot()
       QString strPlotSet = pItem->text(0);
       if (strPlotSet.isEmpty() == false)
       {
-         string plotSetName = strPlotSet.toStdString();
-
-         PlotSet* pPlotSet = pWindow->getPlotSet(plotSetName);
+         PlotSet* pPlotSet = pPlotSetGroup->getPlotSet(strPlotSet.toStdString());
          if (pPlotSet != NULL)
          {
-            pWindow->setCurrentPlotSet(pPlotSet);
+            pPlotSetGroup->setCurrentPlotSet(pPlotSet);
          }
       }
    }
@@ -809,8 +868,15 @@ void DockWindowWidget::activatePlot()
 
 void DockWindowWidget::renamePlot()
 {
-   PlotWindow* pWindow = getSelectedPlotWindow();
-   if (pWindow == NULL)
+   PlotSetGroup* pPlotSetGroup = NULL;
+
+   DockWindow* pWindow = getSelectedPlotWindow();
+   if (pWindow != NULL)
+   {
+      pPlotSetGroup = dynamic_cast<PlotSetGroup*>(pWindow->getWidget());
+   }
+
+   if (pPlotSetGroup == NULL)
    {
       QMessageBox::critical(this, PLOT_MANAGER_NAME,
          "Please select a plot window for which to rename a plot set or plot!");
@@ -854,7 +920,7 @@ void DockWindowWidget::renamePlot()
          {
             string newPlotName = strPlotName.toStdString();
 
-            PlotSet* pPlotSet = pWindow->getPlotSet(pPlot);
+            PlotSet* pPlotSet = pPlotSetGroup->getPlotSet(pPlot);
             if (pPlotSet != NULL)
             {
                bool bSuccess = pPlotSet->renamePlot(pPlot, newPlotName);
@@ -873,24 +939,16 @@ void DockWindowWidget::renamePlot()
    }
    else
    {
-      string plotSetName = "";
-
       QString strPlotSet = pItem->text(0);
-      if (strPlotSet.isEmpty() == false)
-      {
-         plotSetName = strPlotSet.toStdString();
-      }
 
-      PlotSet* pPlotSet = pWindow->getPlotSet(plotSetName);
+      PlotSet* pPlotSet = pPlotSetGroup->getPlotSet(strPlotSet.toStdString());
       if (pPlotSet != NULL)
       {
          QString strNewPlotSet = QInputDialog::getText(this, "Select Plot Set Name", "Name:", QLineEdit::Normal,
             strPlotSet);
          if ((strNewPlotSet.isEmpty() == false) && (strNewPlotSet != strPlotSet))
          {
-            string newPlotSetName = strNewPlotSet.toStdString();
-
-            bool bSuccess = pWindow->renamePlotSet(pPlotSet, newPlotSetName);
+            bool bSuccess = pPlotSetGroup->renamePlotSet(pPlotSet, strNewPlotSet.toStdString());
             if (bSuccess == false)
             {
                QMessageBox::critical(this, PLOT_MANAGER_NAME,
@@ -907,8 +965,7 @@ void DockWindowWidget::renamePlot()
 
 void DockWindowWidget::editPlotProperties()
 {
-   PlotWindow* pWindow = getSelectedPlotWindow();
-   if (pWindow == NULL)
+   if (getSelectedPlotWindow() == NULL)
    {
       QMessageBox::critical(this, PLOT_MANAGER_NAME,
          "Please select a plot window for which to edit a plot's properties!");

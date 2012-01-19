@@ -180,9 +180,11 @@ View* WorkspaceWindowImp::getActiveView() const
 
 void WorkspaceWindowImp::setWidget(QWidget* pWidget)
 {
-   if (pWidget != NULL)
+   if ((pWidget != NULL) && (pWidget != getWidget()))
    {
+      notify(SIGNAL_NAME(ViewWindow, AboutToSetWidget));
       QMdiSubWindow::setWidget(pWidget);
+      notify(SIGNAL_NAME(ViewWindow, WidgetSet), boost::any(pWidget));
 
       QIcon windowIcon = pWidget->windowIcon();
       if (windowIcon.isNull() == false)

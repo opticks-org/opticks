@@ -30,7 +30,6 @@
 class ColorMap;
 class HistogramImp;
 class Layer;
-class PlotWindow;
 class RegionObjectAdapter;
 
 Q_DECLARE_METATYPE(RasterElement*)

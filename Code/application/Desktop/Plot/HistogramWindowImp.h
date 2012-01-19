@@ -14,7 +14,7 @@
 
 #include "AttachmentPtr.h"
 #include "DesktopServices.h"
-#include "PlotWindowImp.h"
+#include "DockWindowImp.h"
 #include "RasterLayer.h"
 #include "SessionExplorer.h"
 
@@ -22,24 +22,21 @@
 #include <set>
 
 class Layer;
+class PlotSetGroup;
 class PlotWidget;
 class PlotWidgetImp;
 
-class HistogramWindowImp : public PlotWindowImp
+class HistogramWindowImp : public DockWindowImp
 {
    Q_OBJECT
 
 public:
    HistogramWindowImp(const std::string& id, const std::string& windowName, QWidget* pParent = 0);
-   ~HistogramWindowImp();
+   virtual ~HistogramWindowImp();
 
-   using PlotWindowImp::setCurrentPlot;
-   using PlotWindowImp::setIcon;
+   using DockWindowImp::setIcon;
 
    void updateContextMenu(Subject& subject, const std::string& signal, const boost::any& value);
-
-   PlotSet* createPlotSet(const QString& strPlotSet);
-   bool deletePlotSet(PlotSet* pPlotSet);
 
    PlotWidget* getPlot(Layer* pLayer) const;
    PlotWidget* getPlot(Layer* pLayer, const RasterChannelType& eColor) const;    // Deprecated
@@ -70,6 +67,9 @@ protected:
    void showEvent(QShowEvent * pEvent);
    void windowAdded(Subject& subject, const std::string& signal, const boost::any& value);
    void windowRemoved(Subject& subject, const std::string& signal, const boost::any& value);
+   void plotSetAdded(Subject& subject, const std::string& signal, const boost::any& value);
+   void plotSetActivated(Subject& subject, const std::string& signal, const boost::any& value);
+   void plotSetDeleted(Subject& subject, const std::string& signal, const boost::any& value);
    void layerShown(Subject& subject, const std::string& signal, const boost::any& value);
    void layerDeleted(Subject& subject, const std::string& signal, const boost::any& value);
 
@@ -95,6 +95,7 @@ private:
 
    AttachmentPtr<DesktopServices> mpDesktop;
    AttachmentPtr<SessionExplorer> mpExplorer;
+   PlotSetGroup* mpPlotSetGroup;
    bool mDisplayModeChanging;
    QAction* mpSyncAutoZoomAction;
    QAction* mpStatisticsShowAction;
@@ -125,10 +126,10 @@ private:
 };
 
 #define HISTOGRAMWINDOWADAPTEREXTENSION_CLASSES \
-   PLOTWINDOWADAPTEREXTENSION_CLASSES
+   DOCKWINDOWADAPTEREXTENSION_CLASSES
 
 #define HISTOGRAMWINDOWADAPTER_METHODS(impClass) \
-   PLOTWINDOWADAPTER_METHODS(impClass) \
+   DOCKWINDOWADAPTER_METHODS(impClass) \
    PlotWidget* createPlot(Layer* pLayer, PlotSet* pPlotSet) \
    { \
       return impClass::createPlot(pLayer, pPlotSet); \

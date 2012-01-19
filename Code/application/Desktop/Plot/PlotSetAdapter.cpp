@@ -9,25 +9,22 @@
 
 #include "PlotSetAdapter.h"
 
-using namespace std;
-
-PlotSetAdapter::PlotSetAdapter(const string& id, const string& plotSetName, PlotWindow* pPlotWindow, QWidget* parent) :
-   PlotSetImp(id, plotSetName, pPlotWindow, parent)
-{
-}
+PlotSetAdapter::PlotSetAdapter(const std::string& id, const std::string& plotSetName, QWidget* pParent) :
+   PlotSetImp(id, plotSetName, pParent)
+{}
 
 PlotSetAdapter::~PlotSetAdapter()
 {
    notify(SIGNAL_NAME(Subject, Deleted));
 }
 
-const string& PlotSetAdapter::getObjectType() const
+const std::string& PlotSetAdapter::getObjectType() const
 {
-   static string type("PlotSetAdapter");
-   return type;
+   static std::string sType("PlotSetAdapter");
+   return sType;
 }
 
-bool PlotSetAdapter::isKindOf(const string& className) const
+bool PlotSetAdapter::isKindOf(const std::string& className) const
 {
    if ((className == getObjectType()) || (className == "PlotSet"))
    {

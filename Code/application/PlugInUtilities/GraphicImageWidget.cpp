@@ -13,11 +13,11 @@
 #include "AppVerify.h"
 #include "ConfigurationSettings.h"
 #include "DesktopServices.h"
+#include "DockWindowImp.h"
 #include "FileBrowser.h"
 #include "GraphicImageWidget.h"
+#include "PlotSetGroup.h"
 #include "PlotWidget.h"
-#include "PlotWindow.h"
-#include "PlotWindowImp.h"
 
 #include <string>
 #include <vector>
@@ -66,27 +66,23 @@ GraphicImageWidget::GraphicImageWidget(QWidget* pParent) :
 
    Service<DesktopServices> pDesktop;
 
-   vector<Window*> plotWindows;
-   pDesktop->getWindows(PLOT_WINDOW, plotWindows);
-   for (vector<Window*>::iterator iter = plotWindows.begin(); iter != plotWindows.end(); ++iter)
+   vector<Window*> dockWindows;
+   pDesktop->getWindows(DOCK_WINDOW, dockWindows);
+   for (vector<Window*>::iterator iter = dockWindows.begin(); iter != dockWindows.end(); ++iter)
    {
-      PlotWindowImp* pWindow = dynamic_cast<PlotWindowImp*>(*iter);
-      if (pWindow != NULL)
+      DockWindowImp* pWindow = dynamic_cast<DockWindowImp*>(*iter);
+      if ((pWindow != NULL) && (pWindow->isVisible() == true))
       {
-         if (pWindow->isVisible() == true)
+         PlotSetGroup* pPlotSetGroup = dynamic_cast<PlotSetGroup*>(pWindow->getWidget());
+         if (pPlotSetGroup != NULL)
          {
-            string name = pWindow->getDisplayName();
-            if (name.empty() == true)
-            {
-               name = pWindow->getName();
-            }
-
+            const string& name = pWindow->getDisplayName(true);
             if (name.empty() == false)
             {
                QString windowName = QString::fromStdString(name);
                mpWidgetCombo->addItem(windowName);
 
-               PlotWidget* pPlotWidget = pWindow->getCurrentPlot();
+               PlotWidget* pPlotWidget = pPlotSetGroup->getCurrentPlot();
                if (pPlotWidget != NULL)
                {
                   mWidgets.insert(windowName, pPlotWidget->getWidget());
@@ -106,8 +102,7 @@ GraphicImageWidget::GraphicImageWidget(QWidget* pParent) :
 }
 
 GraphicImageWidget::~GraphicImageWidget()
-{
-}
+{}
 
 void GraphicImageWidget::setImageSource(ImageSourceType imageSource)
 {
