@@ -174,6 +174,18 @@ DockWindowWidget::~DockWindowWidget()
 {
    deleteAllPlotWindows();
 
+   // Detach from the dock windows that do not contain plot sets
+   vector<Window*> dockWindows;
+   mpDesktop->getWindows(DOCK_WINDOW, dockWindows);
+   for (vector<Window*>::const_iterator iter = dockWindows.begin(); iter != dockWindows.end(); ++iter)
+   {
+      DockWindow* pDockWindow = dynamic_cast<DockWindow*>(*iter);
+      if (pDockWindow != NULL)
+      {
+         pDockWindow->detach(SIGNAL_NAME(ViewWindow, WidgetSet), Slot(this, &DockWindowWidget::dockWindowWidgetSet));
+      }
+   }
+
    VERIFYNR(mpDesktop->detach(SIGNAL_NAME(DesktopServices, WindowAdded), Slot(this, &DockWindowWidget::windowAdded)));
    VERIFYNR(mpDesktop->detach(SIGNAL_NAME(DesktopServices, WindowActivated),
       Slot(this, &DockWindowWidget::windowActivated)));
@@ -227,12 +239,16 @@ void DockWindowWidget::windowRemoved(Subject& subject, const string& signal, con
    if (dynamic_cast<DesktopServices*>(&subject) == mpDesktop.get())
    {
       DockWindow* pDockWindow = dynamic_cast<DockWindow*>(boost::any_cast<Window*>(value));
-      if ((pDockWindow != NULL) && (dynamic_cast<PlotSetGroup*>(pDockWindow->getWidget()) != NULL))
+      if (pDockWindow != NULL)
       {
-         VERIFYNR(pDockWindow->detach(SIGNAL_NAME(ViewWindow, WidgetSet),
-            Slot(this, &DockWindowWidget::dockWindowWidgetSet)));
+         // Detach from the dock window
+         pDockWindow->detach(SIGNAL_NAME(ViewWindow, WidgetSet), Slot(this, &DockWindowWidget::dockWindowWidgetSet));
 
-         updatePlotWindowList();
+         // If the window contains plot sets, update the plot window list
+         if (dynamic_cast<PlotSetGroup*>(pDockWindow->getWidget()) != NULL)
+         {
+            updatePlotWindowList();
+         }
       }
    }
 }
