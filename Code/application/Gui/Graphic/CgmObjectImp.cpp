@@ -1621,8 +1621,6 @@ bool CgmObjectImp::toXml(XMLWriter* pXml) const
    }
 
    pXml->popAddPoint();
-   pXml->popAddPoint();
-
    return true;
 }
 
