@@ -811,7 +811,7 @@ void PseudocolorLayerImp::generateImage()
       vector<double> lstStretchValues;
       pair<int, int> valueRange = getValueRange(true); // first = min, second = max
 
-      if (valueRange.first == -1 && valueRange.second == 0) // no classes displayed!
+      if (valueRange.first == 0 && valueRange.second == -1) // no classes displayed!
       {
          invalidateImage();
          return;
