@@ -484,6 +484,8 @@ bool PlotGroupImp::toXml(XMLWriter* pXml) const
          {
             return false;
          }
+
+         pXml->popAddPoint();
       }
    }
 

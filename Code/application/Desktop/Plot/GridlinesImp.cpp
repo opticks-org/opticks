@@ -228,22 +228,12 @@ bool GridlinesImp::fromXml(DOMNode* pDocument, unsigned int version)
       return false;
    }
 
-   mMinorGridlines = StringUtilities::fromXmlString<bool>(A(pElem->getAttribute(X("minorGridlines"))));
-
-   QColor color(A(pElem->getAttribute(X("color"))));
-   setColor(color);
-
-   setLineWidth(StringUtilities::fromXmlString<int>(
-      A(pElem->getAttribute(X("lineWidth")))));
-
-   setLineStyle(StringUtilities::fromXmlString<LineStyle>(
-      A(pElem->getAttribute(X("lineStyle")))));
-      
-   setMaxNumMajorLines(StringUtilities::fromXmlString<int>(
-      A(pElem->getAttribute(X("maxMajorLines")))));
-
-   setMaxNumMinorLines(StringUtilities::fromXmlString<int>(
-      A(pElem->getAttribute(X("maxMinorLines")))));
+   enableMinorGridlines(StringUtilities::fromXmlString<bool>(A(pElem->getAttribute(X("minorGridlines")))));
+   setColor(QColor(A(pElem->getAttribute(X("color")))));
+   setLineWidth(StringUtilities::fromXmlString<int>(A(pElem->getAttribute(X("lineWidth")))));
+   setLineStyle(StringUtilities::fromXmlString<LineStyle>(A(pElem->getAttribute(X("lineStyle")))));
+   setMaxNumMajorLines(StringUtilities::fromXmlString<int>(A(pElem->getAttribute(X("maxMajorLines")))));
+   setMaxNumMinorLines(StringUtilities::fromXmlString<int>(A(pElem->getAttribute(X("maxMinorLines")))));
 
    return true;
 }
