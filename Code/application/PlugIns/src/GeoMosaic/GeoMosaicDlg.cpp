@@ -186,6 +186,7 @@ void GeoMosaicDlg::batchStitch()
    else
    {
       mProgressTracker.report("Completed.", 100, NORMAL, true);
+      mProgressTracker.upALevel();
    }
 }
 
