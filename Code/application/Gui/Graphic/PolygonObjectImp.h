@@ -56,7 +56,7 @@ public:
 private:
    PolygonObjectImp(const PolygonObjectImp& rhs);
    PolygonObjectImp& operator=(const PolygonObjectImp& rhs);
-   static void combineVertexData(GLdouble coords[3], GLdouble* pVertexData[4],
+   static void CALLBACK combineVertexData(GLdouble coords[3], GLdouble* pVertexData[4],
       GLfloat weight[4], void** pOutData);
 };
 
