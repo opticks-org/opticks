@@ -32,10 +32,10 @@
 #include "StringUtilities.h"
 #include "switchOnEncoding.h"
 #include "TypeConverter.h"
+#include "UtilityServices.h"
 
 #include <fitsio.h>
 #include <limits>
-#include <QtCore/QFile>
 
 REGISTER_PLUGIN_BASIC(Fits, FitsImporter);
 REGISTER_PLUGIN_BASIC(Fits, FitsSignatureImporter);
@@ -140,18 +140,8 @@ FitsImporter::FitsImporter()
    setVersion(APP_VERSION_NUMBER);
    setProductionStatus(APP_IS_PRODUCTION_RELEASE);
    setExtensions("FITS Files (*.fit *.fts *.fits)");
-   QFile license(":/licenses/cfitsio");
-   if (license.open(QFile::ReadOnly | QFile::Text))
-   {
-      QByteArray licenseBytes(license.readAll());
-      QString licenseStr(licenseBytes);
-      addDependencyCopyright("cfitsio", licenseStr.toStdString());
-   }
-   else
-   {
-      addDependencyCopyright("cfitsio", "unable to locate license file");
-   }
    setWizardSupported(false);
+   addDependencyCopyright("CFITSIO", Service<UtilityServices>()->getTextFromFile(":/licenses/cfitsio"));
 }
 
 FitsImporter::~FitsImporter()

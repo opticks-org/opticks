@@ -27,6 +27,7 @@
 #include "ShapeFileExporter.h"
 #include "ShapeFileOptionsWidget.h"
 #include "SpatialDataView.h"
+#include "UtilityServices.h"
 
 #include <QtCore/QString>
 #include <QtGui/QMessageBox>
@@ -45,22 +46,7 @@ ShapeFileExporter::ShapeFileExporter() : mpAoi(NULL), mpGeoref(NULL), mpLayers(N
    setProductionStatus(APP_IS_PRODUCTION_RELEASE);
    setExtensions("Shape Files (*.shp *.shx *.dbf)");
    setSubtype(TypeConverter::toString<AoiLayer>());
-   addDependencyCopyright("shapelib",
-      "Copyright (c) 1999, Frank Warmerdam<br><br>"
-      "This software is available under the following \"MIT Style\" license, or at the option of the licensee "
-      "under the LGPL (see LICENSE.LGPL). This option is discussed in more detail in shapelib.html.<br><br>"
-      "Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated "
-      "documentation files (the \"Software\"), to deal in the Software without restriction, including without "
-      "limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the "
-      "Software, and to permit persons to whom the Software is furnished to do so, subject to the following "
-      "conditions:<br><br>"
-      "The above copyright notice and this permission notice shall be included in all copies or substantial portions "
-      "of the Software.<br><br>"
-      "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT "
-      "LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO "
-      "EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN "
-      "AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE "
-      "OR OTHER DEALINGS IN THE SOFTWARE.<br>");
+   addDependencyCopyright("shapelib", Service<UtilityServices>()->getTextFromFile(":/licenses/shapelib"));
 }
 
 ShapeFileExporter::~ShapeFileExporter()

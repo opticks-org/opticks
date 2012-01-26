@@ -16,9 +16,12 @@
 #include "Progress.h"
 #include "Service.h"
 
+#include <string>
+
 /**
  *  \ingroup ServiceModule
  *  Provides access to data objects not available in the object factory
+ *  as well as other miscellaneous routines.
  *
  *  Access to instantiation of Utilities objects found
  *  in the Interfaces. These are inherited from Serializable,
@@ -200,20 +203,16 @@ public:
    virtual size_t getAvailableVirtualMemory() = 0;
 
    /**
-    *  Returns the amount of available disk space.
+    *  Returns the contents of a file as text.
+    *  This method also works with the Qt resource system, provided that the resource can be read as text.
     *
-    *  WARNING: This method is currently unimplemented.  It will
-    *  always return 0.
-    * 
-    *  @param   path 
-    *           The directory path used to determine the disk to query.
-    *           If NULL, the available space on the disk associated with the 
-    *           current working directory is returned.
+    *  @param   filename 
+    *           The name of the file to read.
+    *           This file must be a text file.
     *
-    *  @return  The amount of free disk space in bytes for the disk
-    *           associated with the given path.
+    *  @return  The contents of the file or an error message if the file could not be opened.
     */
-   virtual uint64_t getAvailableDiskSpace( std::string path = "" ) = 0;
+   virtual std::string getTextFromFile(const std::string& filename) = 0;
 
 protected:
    /**

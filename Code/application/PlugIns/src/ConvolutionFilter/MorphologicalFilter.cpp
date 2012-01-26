@@ -20,6 +20,8 @@
 #include "PlugInRegistration.h"
 #include "Progress.h"
 #include "SpatialDataView.h"
+#include "UtilityServices.h"
+
 #include <opencv2/opencv.hpp>
 
 REGISTER_PLUGIN_BASIC(OpticksConvolutionFilter, Dilation);
@@ -35,6 +37,7 @@ MorphologicalFilter::MorphologicalFilter(const std::string& opName) : mpProgress
    setProductionStatus(APP_IS_PRODUCTION_RELEASE);
    setAbortSupported(true);
    setMenuLocation("[General Algorithms]/AOI Morphology/" + opName);
+   addDependencyCopyright("OpenCV", Service<UtilityServices>()->getTextFromFile(":/licenses/opencv"));
 }
 
 MorphologicalFilter::~MorphologicalFilter()

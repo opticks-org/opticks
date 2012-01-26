@@ -25,6 +25,7 @@
 #include "RasterUtilities.h"
 #include "SpatialDataView.h"
 #include "StringUtilities.h"
+#include "UtilityServices.h"
 
 #include <opencv2/imgproc/imgproc.hpp>
 
@@ -83,6 +84,7 @@ ConnectedComponents::ConnectedComponents() : mpView(NULL), mpLabels(NULL), mXOff
    setProductionStatus(APP_IS_PRODUCTION_RELEASE);
    setAbortSupported(true);
    setMenuLocation("[General Algorithms]/Connected Components");
+   addDependencyCopyright("OpenCV", Service<UtilityServices>()->getTextFromFile(":/licenses/opencv"));
 }
 
 ConnectedComponents::~ConnectedComponents()

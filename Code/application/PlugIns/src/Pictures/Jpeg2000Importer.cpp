@@ -32,6 +32,7 @@
 #include "RasterLayer.h"
 #include "RasterUtilities.h"
 #include "SpatialDataView.h"
+#include "UtilityServices.h"
 
 #include <errno.h>
 #include <fstream>
@@ -79,55 +80,8 @@ Jpeg2000Importer::Jpeg2000Importer()
    setDescriptorId("{ECC55485-16FC-4154-B31B-E78EA3669B8E}");
    allowMultipleInstances(true);
    setProductionStatus(APP_IS_PRODUCTION_RELEASE);
-   addDependencyCopyright("OpenJPEG",
-      "Copyright (c) 2002-2007, Communications and Remote Sensing Laboratory, Universite catholique de Louvain (UCL), Belgium"
-      "Copyright (c) 2002-2007, Professor Benoit Macq"
-      "Copyright (c) 2001-2003, David Janssens"
-      "Copyright (c) 2002-2003, Yannick Verschueren"
-      "Copyright (c) 2003-2007, Francois-Olivier Devaux and Antonin Descampe"
-      "Copyright (c) 2005, Herve Drolon, FreeImage Team"
-      "All rights reserved."
-
-      "Redistribution and use in source and binary forms, with or without "
-      "modification, are permitted provided that the following conditions "
-      "are met:"
-      "1. Redistributions of source code must retain the above copyright"
-      "   notice, this list of conditions and the following disclaimer."
-      "2. Redistributions in binary form must reproduce the above copyright"
-      "   notice, this list of conditions and the following disclaimer in the"
-      "   documentation and/or other materials provided with the distribution."
-
-      "THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS `AS IS' "
-      "AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE "
-      "IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE "
-      "ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE "
-      "LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR "
-      "CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF "
-      "SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS "
-      "INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN "
-      "CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) "
-      "ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE" 
-      "POSSIBILITY OF SUCH DAMAGE.");
-   addDependencyCopyright("proj4",
-      "Copyright (c) 2000, Frank Warmerdam<br>"
-      "<br>"
-      "Permission is hereby granted, free of charge, to any person obtaining a "
-      "copy of this software and associated documentation files (the \"Software\"), "
-      "to deal in the Software without restriction, including without limitation "
-      "the rights to use, copy, modify, merge, publish, distribute, sublicense, "
-      "and/or sell copies of the Software, and to permit persons to whom the "
-      "Software is furnished to do so, subject to the following conditions:<br>"
-      "<br>"
-      "The above copyright notice and this permission notice shall be included "
-      "in all copies or substantial portions of the Software.<br>"
-      "<br>"
-      "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS "
-      "OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, "
-      "FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL "
-      "THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER "
-      "LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING "
-      "FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER "
-      "DEALINGS IN THE SOFTWARE.");
+   addDependencyCopyright("OpenJPEG", Service<UtilityServices>()->getTextFromFile(":/licenses/openjpeg"));
+   addDependencyCopyright("proj4", Service<UtilityServices>()->getTextFromFile(":/licenses/proj4"));
 }
 
 Jpeg2000Importer::~Jpeg2000Importer()

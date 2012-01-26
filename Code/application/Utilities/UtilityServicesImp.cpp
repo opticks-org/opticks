@@ -7,7 +7,10 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtCore/QByteArray>
 #include <QtCore/QDir>
+#include <QtCore/QFile>
+#include <QtCore/QString>
 #include <QtCore/QStringList>
 
 #include "AppConfig.h"
@@ -497,7 +500,15 @@ size_t UtilityServicesImp::getAvailableVirtualMemory()
    return total;
 }
 
-uint64_t UtilityServicesImp::getAvailableDiskSpace(string path)
+string UtilityServicesImp::getTextFromFile(const string& filename)
 {
-   return 0;
+   QString fileStr = QString::fromStdString("Unable to open file: " + filename);
+   QFile file(QString::fromStdString(filename));
+   if (file.open(QFile::ReadOnly | QFile::Text))
+   {
+      QByteArray fileBytes(file.readAll());
+      fileStr = QString(fileBytes);
+   }
+
+   return fileStr.toStdString();
 }

@@ -1,5 +1,6 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
+<!-- Note: Plug-ins using these resources must be manually recompiled when the resources change because this is not automatic. -->
 <qresource prefix="/images">
    <file alias="application.ico">application.ico</file>
    <file alias="Splash">splash.png</file>
@@ -258,6 +259,38 @@
    <file alias="ZoomUndo">icons/ZoomUndoIcon.png</file>
 </qresource>
 <qresource prefix="/licenses">
+   <file alias="boost">BoostLicense.txt</file>
    <file alias="cfitsio">CfitsioLicense.txt</file>
+   <file alias="cg">CgLicense.txt</file>
+   <file alias="curl">CurlLicense.txt</file>
+   <file alias="ehs">EhsLicense.txt</file>
+   <file alias="expat">ExpatLicense.txt</file>
+   <file alias="ffmpeg">FfmpegLicense.txt</file>
+   <file alias="gdal">GdalLicense.txt</file>
+   <file alias="glew">GlewLicense.txt</file>
+   <file alias="hdf4">Hdf4License.txt</file>
+   <file alias="hdf5">Hdf5License.txt</file>
+   <file alias="ijg">IjgLicense.txt</file>
+   <file alias="libgeotiff">LibgeotiffLicense.txt</file>
+   <file alias="libtiff">LibtiffLicense.txt</file>
+   <file alias="minizip">MiniZipLicense.txt</file>
+   <file alias="opencv">OpenCvLicense.txt</file>
+   <file alias="openjpeg">OpenJpegLicense.txt</file>
+   <file alias="opticks">OpticksLicense.txt</file>
+   <file alias="ossim">OssimLicense.txt</file>
+   <file alias="pcre">PcreLicense.txt</file>
+   <file alias="pme">PmeLicense.txt</file>
+   <file alias="proj4">Proj4License.txt</file>
+   <file alias="pthreads">PthreadsLicense.txt</file>
+   <file alias="qt">QtLicense.txt</file>
+   <file alias="qwt">QwtLicense.txt</file>
+   <file alias="raptor">RaptorLicense.txt</file>
+   <file alias="shapelib">ShapelibLicense.txt</file>
+   <file alias="szip">SzipLicense.txt</file>
+   <file alias="tbb">TbbLicense.txt</file>
+   <file alias="xerces">XercesLicense.txt</file>
+   <file alias="xqilla">XqillaLicense.txt</file>
+   <file alias="yaml-cpp">YamlLicense.txt</file>
+   <file alias="zlib">ZlibLicense.txt</file>
 </qresource>
 </RCC>

@@ -27,6 +27,7 @@
 #include "RasterElement.h"
 #include "ProgressTracker.h"
 #include "StringUtilities.h"
+#include "UtilityServices.h"
 
 using namespace HdfUtilities;
 using namespace std;
@@ -34,52 +35,7 @@ using namespace std;
 Hdf4ImporterShell::Hdf4ImporterShell()
 {
    setExtensions("HDF Files (*.hdf)");
-   addDependencyCopyright("Hdf4",
-      "Copyright Notice and Statement for NCSA Hierarchical Data Format (HDF) "
-      "Software Library and Utilities<br>"
-      "<br>"
-      "Copyright 1988-2005 The Board of Trustees of the University of Illinois<br>"
-      "<br>"
-      "All rights reserved.<br>"
-      "<br>"
-      "Contributors:   National Center for Supercomputing Applications "
-      "(NCSA) at the University of Illinois, Fortner Software, Unidata "
-      "Program Center (netCDF), The Independent JPEG Group (JPEG), "
-      "Jean-loup Gailly and Mark Adler (gzip), and Digital Equipment "
-      "Corporation (DEC).<br>"
-      "<br>"
-      "Redistribution and use in source and binary forms, with or without "
-      "modification, are permitted for any purpose (including commercial "
-      "purposes) provided that the following conditions are met:<br>"
-      "<br>"
-      "1. Redistributions of source code must retain the above copyright "
-      "notice, this list of conditions, and the following disclaimer.<br>"
-      "<br>"
-      "2. Redistributions in binary form must reproduce the above copyright "
-      "notice, this list of conditions, and the following disclaimer in the "
-      "documentation and/or materials provided with the distribution.<br>"
-      "<br>"
-      "3. In addition, redistributions of modified forms of the source or "
-      "binary code must carry prominent notices stating that the original "
-      "code was changed and the date of the change.<br>"
-      "<br>"
-      "4. All publications or advertising materials mentioning features or use "
-      "of this software are asked, but not required, to acknowledge that it was "
-      "developed by the National Center for Supercomputing Applications at the "
-      "University of Illinois at Urbana-Champaign and credit the contributors.<br>"
-      "<br>"
-      "5. Neither the name of the University nor the names of the Contributors "
-      "may be used to endorse or promote products derived from this software "
-      "without specific prior written permission from the University or the "
-      "Contributors.<br>"
-      "<br>"
-      "DISCLAIMER<br>"
-      "<br>"
-      "THIS SOFTWARE IS PROVIDED BY THE UNIVERSITY AND THE CONTRIBUTORS \"AS IS\" "
-      "WITH NO WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED.  In no event "
-      "shall the University or the Contributors be liable for any damages "
-      "suffered by the users arising out of the use of this software, even if "
-      "advised of the possibility of such damage.");
+   addDependencyCopyright("HDF4", Service<UtilityServices>()->getTextFromFile(":/licenses/hdf4"));
 }
 
 bool Hdf4ImporterShell::getFileData(Hdf4File& parsedFile) const

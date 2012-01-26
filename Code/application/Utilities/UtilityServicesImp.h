@@ -14,6 +14,7 @@
 #include "TypesFile.h"
 
 #include <map>
+#include <string>
 
 class DateTime;
 class DateTimeImp;
@@ -52,7 +53,6 @@ public:
    size_t getMaxMemoryBlockSize();
    size_t getTotalPhysicalMemory();
    size_t getAvailableVirtualMemory();
-   uint64_t getAvailableDiskSpace( std::string path = "" );
 
    /**
     * Overrides the default classification with the given value.
@@ -65,6 +65,8 @@ public:
     *
     */
    void overrideDefaultClassification(const std::string& newClassification);
+
+   virtual std::string getTextFromFile(const std::string& filename);
 
 protected:
    virtual ~UtilityServicesImp() {};

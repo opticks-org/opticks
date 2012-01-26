@@ -19,6 +19,7 @@
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "RasterFileDescriptor.h"
+#include "UtilityServices.h"
 
 using namespace std;
 
@@ -30,6 +31,7 @@ HdfImporterShell::HdfImporterShell()
    setShortDescription("Hierarchical Data Format (HDF) Base Class");
    allowMultipleInstances(true);
    executeOnStartup(false);
+   addDependencyCopyright("SZIP", Service<UtilityServices>()->getTextFromFile(":/licenses/szip"));
 }
 
 HdfImporterShell::~HdfImporterShell()
