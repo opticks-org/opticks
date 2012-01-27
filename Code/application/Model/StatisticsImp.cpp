@@ -19,6 +19,7 @@
 #include "RasterElement.h"
 #include "RasterElementImp.h"
 #include "RasterDataDescriptor.h"
+#include "RasterFileDescriptorImp.h"
 #include "StatisticsImp.h"
 #include "switchOnEncoding.h"
 #include "UtilityServicesImp.h"
@@ -456,6 +457,28 @@ void StatisticsImp::resetAll()
 
 bool StatisticsImp::toXml(XMLWriter* pXml) const
 {
+   if (pXml == NULL)
+   {
+      return false;
+   }
+
+   if (mpRasterElement != NULL)
+   {
+      pXml->addAttr("rasterId", mpRasterElement->getId());
+   }
+
+   if (mpOriginalAoi.get() != NULL)
+   {
+      pXml->addAttr("aoiId", mpOriginalAoi->getId());
+   }
+
+   if (mBands.empty() == false)
+   {
+      pXml->pushAddPoint(pXml->addElement("bands"));
+      XmlUtilities::serializeDimensionDescriptors("band", mBands, pXml);
+      pXml->popAddPoint();
+   }
+
    pXml->addAttr("resolution", mStatisticsResolution);
    for (std::map<ComplexComponent, double>::const_iterator it = mMinValues.begin(); it != mMinValues.end(); ++it)
    {
@@ -516,18 +539,41 @@ bool StatisticsImp::toXml(XMLWriter* pXml) const
 
 bool StatisticsImp::fromXml(DOMNode* pDocument, unsigned int version)
 {
+   if (pDocument == NULL)
+   {
+      return false;
+   }
+
+   DOMElement* pElement = static_cast<DOMElement*>(pDocument);
+   VERIFY(pElement != NULL);
+
+   mpRasterElement = NULL;
+   mpOriginalAoi.reset(NULL);
+   mBands.clear();
+   resetAll();
+
+   if (pElement->hasAttribute(X("rasterId")) == true)
+   {
+      mpRasterElement = dynamic_cast<RasterElementImp*>(Service<SessionManager>()->getSessionItem(
+         A(pElement->getAttribute(X("rasterId")))));
+   }
+
+   if (pElement->hasAttribute(X("aoiId")) == true)
+   {
+      mpOriginalAoi.reset(dynamic_cast<AoiElement*>(Service<SessionManager>()->getSessionItem(
+         A(pElement->getAttribute(X("aoiId"))))));
+   }
+
    mStatisticsResolution = StringUtilities::fromXmlString<int>(
       A(static_cast<DOMElement*>(pDocument)->getAttribute(X("resolution"))));
-   mMinValues.clear();
-   mMaxValues.clear();
-   mAverageValues.clear();
-   mStandardDeviationValues.clear();
-   mPercentileValues.clear();
-   mBinCenterValues.clear();
-   mHistogramValues.clear();
+
    for (DOMNode *pNode = pDocument->getFirstChild(); pNode != NULL; pNode = pNode->getNextSibling())
    {
-      if (XMLString::equals(pNode->getNodeName(), X("minimum")))
+      if (XMLString::equals(pNode->getNodeName(), X("bands")))
+      {
+         XmlUtilities::deserializeDimensionDescriptors("band", mBands, pNode);
+      }
+      else if (XMLString::equals(pNode->getNodeName(), X("minimum")))
       {
          DOMElement* pElement = static_cast<DOMElement*>(pNode);
          ComplexComponent component = StringUtilities::fromXmlString<ComplexComponent>(
@@ -637,6 +683,10 @@ void StatisticsImp::calculateStatistics(ComplexComponent component)
       mpAoi->clear();
       mpAoi->merge(*(mpOriginalAoi->getSelectedPoints()));
    }
+   else if (mpAoi.get() != NULL)
+   {
+      mpAoi = FactoryResource<BitMask>(NULL);
+   }
 
    StatisticsInput statInput(mBands, dynamic_cast<const RasterElement*>(mpRasterElement),
       component, mStatisticsResolution, mBadValues, mpAoi.get());
@@ -684,14 +734,14 @@ void StatisticsImp::calculateStatistics(ComplexComponent component)
    }
    else
    {
-         setMin(0.0, component);
-         setMax(0.0, component);
-         setAverage(statOutput.mAverage, component);
-         setStandardDeviation(statOutput.mStandardDeviation, component);
-         std::vector<double> dzeroes(1001, 0.0); // setPercentiles needs 1001 contiguous values; setHistogram needs 256
-         std::vector<unsigned int> uizeroes(256, 0);
-         setPercentiles(&dzeroes.front(), component);
-         setHistogram(&dzeroes.front(), &uizeroes.front(), component);
+      setMin(0.0, component);
+      setMax(0.0, component);
+      setAverage(statOutput.mAverage, component);
+      setStandardDeviation(statOutput.mStandardDeviation, component);
+      std::vector<double> dzeroes(1001, 0.0); // setPercentiles needs 1001 contiguous values; setHistogram needs 256
+      std::vector<unsigned int> uizeroes(256, 0);
+      setPercentiles(&dzeroes.front(), component);
+      setHistogram(&dzeroes.front(), &uizeroes.front(), component);
    }
 }
 

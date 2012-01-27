@@ -49,6 +49,7 @@ HistogramWindowImp::HistogramWindowImp(const string& id, const string& windowNam
    mpDesktop(Service<DesktopServices>().get()),
    mpExplorer(Service<SessionExplorer>().get(), SIGNAL_NAME(SessionExplorer, AboutToShowSessionItemContextMenu),
       Slot(this, &HistogramWindowImp::updateContextMenu)),
+   mpSessionManager(Service<SessionManager>().get()),
    mpPlotSetGroup(NULL),
    mDisplayModeChanging(false),
    mAddingStatisticsPlot(false),
@@ -88,6 +89,8 @@ HistogramWindowImp::HistogramWindowImp(const string& id, const string& windowNam
 
    mpDesktop.addSignal(SIGNAL_NAME(DesktopServices, WindowAdded), Slot(this, &HistogramWindowImp::windowAdded));
    mpDesktop.addSignal(SIGNAL_NAME(DesktopServices, WindowRemoved), Slot(this, &HistogramWindowImp::windowRemoved));
+   mpSessionManager.addSignal(SIGNAL_NAME(SessionManager, SessionRestored),
+      Slot(this, &HistogramWindowImp::sessionRestored));
 }
 
 HistogramWindowImp::~HistogramWindowImp()
@@ -303,7 +306,7 @@ bool HistogramWindowImp::toXml(XMLWriter* pXml) const
    vector<PlotWidget*> plots = mpPlotSetGroup->getPlots(HISTOGRAM_PLOT);
    for (vector<PlotWidget*>::const_iterator iter = plots.begin(); iter != plots.end(); ++iter)
    {
-      PlotWidget* pPlotWidget = *iter;
+      PlotWidgetImp* pPlotWidget = dynamic_cast<PlotWidgetImp*>(*iter);
       if (pPlotWidget != NULL)
       {
          pXml->pushAddPoint(pXml->addElement("HistogramPlot"));
@@ -319,6 +322,19 @@ bool HistogramWindowImp::toXml(XMLWriter* pXml) const
             }
          }
 
+         bool statsShown = mpStatisticsShowAction->isChecked();
+
+         QSplitter* pSplitter = pPlotWidget->getSplitter();
+         if (pSplitter != NULL)
+         {
+            QWidget* pWidget = pSplitter->widget(2);
+            if (pWidget != NULL)
+            {
+               statsShown = pWidget->isVisibleTo(pSplitter);
+            }
+         }
+
+         pXml->addAttr("statisticsShown", statsShown);
          pXml->popAddPoint();
       }
    }
@@ -356,7 +372,8 @@ bool HistogramWindowImp::fromXml(DOMNode* pDocument, unsigned int version)
       }
    }
 
-   Service<SessionManager> pManager;
+   mShowStatistics.clear();
+
    for (DOMNode* pChild = pDocument->getFirstChild(); pChild != NULL; pChild = pChild->getNextSibling())
    {
       if (XMLString::equals(pChild->getNodeName(), X("HistogramPlot")))
@@ -364,7 +381,7 @@ bool HistogramWindowImp::fromXml(DOMNode* pDocument, unsigned int version)
          DOMElement* pElement = static_cast<DOMElement*>(pChild);
 
          // Attach the plot widget
-         PlotWidget* pPlotWidget = dynamic_cast<PlotWidget*>(pManager->getSessionItem(
+         PlotWidget* pPlotWidget = dynamic_cast<PlotWidget*>(mpSessionManager->getSessionItem(
             A(pElement->getAttribute(X("id")))));
          if (pPlotWidget != NULL)
          {
@@ -373,7 +390,8 @@ bool HistogramWindowImp::fromXml(DOMNode* pDocument, unsigned int version)
          }
 
          // Attach the layer
-         Layer* pLayer = dynamic_cast<Layer*>(pManager->getSessionItem(A(pElement->getAttribute(X("layerId")))));
+         Layer* pLayer = dynamic_cast<Layer*>(mpSessionManager->getSessionItem(
+            A(pElement->getAttribute(X("layerId")))));
 
          RasterLayerImp* pRasterLayer = dynamic_cast<RasterLayerImp*>(pLayer);
          if (pRasterLayer != NULL)
@@ -390,6 +408,13 @@ bool HistogramWindowImp::fromXml(DOMNode* pDocument, unsigned int version)
          {
             VERIFYNR(pThresholdLayer->attach(SIGNAL_NAME(Subject, Deleted),
                Slot(this, &HistogramWindowImp::layerDeleted)));
+         }
+
+         // Store the statistics widget visibility state so that it can be set properly when the widget is created
+         if (pPlotWidget != NULL)
+         {
+            mShowStatistics[pPlotWidget] =
+               StringUtilities::fromXmlString<bool>(A(pElement->getAttribute(X("statisticsShown"))));
          }
       }
    }
@@ -458,20 +483,11 @@ PlotWidget* HistogramWindowImp::createPlot(Layer* pLayer, PlotSet* pPlotSet)
 
    // Add the plot to the plot set
    PlotWidget* pPlot = pPlotSet->createPlot(pLayer->getName(), HISTOGRAM_PLOT);
-   PlotWidgetImp* pPlotImp = dynamic_cast<PlotWidgetImp*>(pPlot);
    if (pPlot != NULL)
    {
       // Attach to the Layer::Deleted signal before calling setHistogram() so that the
       // layerDeleted() slot is called before the histogram plot pointer is NULLed
       VERIFYNR(pLayer->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &HistogramWindowImp::layerDeleted)));
-
-      // Add the statistics widget
-      HistogramPlotImp* pHistPlot = dynamic_cast<HistogramPlotImp*>(pPlot->getPlot());
-      QSplitter* pSplitter = pPlotImp->getSplitter();
-      StatisticsWidget* pStatisticsWidget = new StatisticsWidget(pHistPlot, this);
-      pSplitter->insertWidget(2, pStatisticsWidget);
-      VERIFYNR(connect(pHistPlot, SIGNAL(histogramUpdated()), pStatisticsWidget, SLOT(updateStatistics())));
-      setStatisticsShown(mpStatisticsShowAction->isChecked());
 
       // Set the histogram data in the plot
       HistogramPlotImp* pHistogramPlot = dynamic_cast<HistogramPlotImp*>(pPlot->getPlot());
@@ -530,20 +546,11 @@ PlotWidget* HistogramWindowImp::createPlot(RasterLayer* pLayer, RasterChannelTyp
 
    // Add the plot to the plot set
    PlotWidget* pPlot = pPlotSet->createPlot(pLayer->getName(), HISTOGRAM_PLOT);
-   PlotWidgetImp* pPlotImp = dynamic_cast<PlotWidgetImp*>(pPlot);
    if (pPlot != NULL)
    {
       // Attach to the Layer::Deleted signal before calling setHistogram() so that the
       // layerDeleted() slot is called before the histogram plot pointer is NULLed
       pLayer->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &HistogramWindowImp::layerDeleted));
-
-      // Add the statistics widget
-      HistogramPlotImp* pHistPlot = dynamic_cast<HistogramPlotImp*>(pPlot->getPlot());
-      QSplitter* pSplitter = pPlotImp->getSplitter();
-      StatisticsWidget* pStatisticsWidget = new StatisticsWidget(pHistPlot, this);
-      pSplitter->insertWidget(2, pStatisticsWidget);
-      VERIFYNR(connect(pHistPlot, SIGNAL(histogramUpdated()), pStatisticsWidget, SLOT(updateStatistics())));
-      setStatisticsShown(mpStatisticsShowAction->isChecked());
 
       // Set the histogram data in the plot
       HistogramPlotImp* pHistogramPlot = dynamic_cast<HistogramPlotImp*>(pPlot->getPlot());
@@ -889,6 +896,45 @@ void HistogramWindowImp::setCurrentPlot(const DisplayMode& displayMode)
    }
 }
 
+void HistogramWindowImp::createStatisticsWidget(PlotWidget* pPlotWidget)
+{
+   PlotWidgetImp* pPlotWidgetImp = dynamic_cast<PlotWidgetImp*>(pPlotWidget);
+   if (pPlotWidgetImp == NULL)
+   {
+      return;
+   }
+
+   QSplitter* pSplitter = pPlotWidgetImp->getSplitter();
+   VERIFYNRV(pSplitter != NULL);
+
+   if (pSplitter->widget(2) != NULL)
+   {
+      return;
+   }
+
+   // Create the statistics widget
+   HistogramPlotImp* pHistPlot = dynamic_cast<HistogramPlotImp*>(pPlotWidgetImp->getPlot());
+   StatisticsWidget* pStatisticsWidget = new StatisticsWidget(pHistPlot, this);
+
+   // Initialization
+   bool showStats = mpStatisticsShowAction->isChecked();
+
+   map<PlotWidget*, bool>::const_iterator iter = mShowStatistics.find(pPlotWidget);
+   if (iter != mShowStatistics.end())
+   {
+      showStats = iter->second;
+      mShowStatistics.erase(iter);
+   }
+
+   pStatisticsWidget->setVisible(showStats);
+
+   // Add the statistics widget to the plot widget after setting the visibility to ensure proper initialization
+   pSplitter->insertWidget(2, pStatisticsWidget);
+
+   // Connections
+   VERIFYNR(connect(pHistPlot, SIGNAL(histogramUpdated()), pStatisticsWidget, SLOT(updateStatistics())));
+}
+
 void HistogramWindowImp::activateLayer(PlotWidget* pPlot)
 {
    if (mAddingStatisticsPlot || pPlot == NULL)
@@ -1034,11 +1080,11 @@ void HistogramWindowImp::windowRemoved(Subject& subject, const string& signal, c
 
 void HistogramWindowImp::plotSetAdded(Subject& subject, const string& signal, const boost::any& value)
 {
-   PlotSet* pPlotSet = boost::any_cast<PlotSet*>(value);
+   PlotSetImp* pPlotSet = dynamic_cast<PlotSetImp*>(boost::any_cast<PlotSet*>(value));
    if (pPlotSet != NULL)
    {
-      VERIFYNR(connect(dynamic_cast<PlotSetImp*>(pPlotSet), SIGNAL(plotActivated(PlotWidget*)), this,
-         SLOT(activateLayer(PlotWidget*))));
+      VERIFYNR(connect(pPlotSet, SIGNAL(plotAdded(PlotWidget*)), this, SLOT(createStatisticsWidget(PlotWidget*))));
+      VERIFYNR(connect(pPlotSet, SIGNAL(plotActivated(PlotWidget*)), this, SLOT(activateLayer(PlotWidget*))));
    }
 }
 
@@ -1053,11 +1099,11 @@ void HistogramWindowImp::plotSetActivated(Subject& subject, const string& signal
 
 void HistogramWindowImp::plotSetDeleted(Subject& subject, const string& signal, const boost::any& value)
 {
-   PlotSet* pPlotSet = boost::any_cast<PlotSet*>(value);
+   PlotSetImp* pPlotSet = dynamic_cast<PlotSetImp*>(boost::any_cast<PlotSet*>(value));
    if (pPlotSet != NULL)
    {
-      VERIFYNR(disconnect(dynamic_cast<PlotSetImp*>(pPlotSet), SIGNAL(plotActivated(PlotWidget*)), this,
-         SLOT(activateLayer(PlotWidget*))));
+      VERIFYNR(disconnect(pPlotSet, SIGNAL(plotAdded(PlotWidget*)), this, SLOT(createStatisticsWidget(PlotWidget*))));
+      VERIFYNR(disconnect(pPlotSet, SIGNAL(plotActivated(PlotWidget*)), this, SLOT(activateLayer(PlotWidget*))));
    }
 }
 
@@ -1090,6 +1136,26 @@ void HistogramWindowImp::layerDeleted(Subject& subject, const string& signal, co
    }
 }
 
+void HistogramWindowImp::sessionRestored(Subject& subject, const string& signal, const boost::any& value)
+{
+   vector<PlotWidget*> plots = mpPlotSetGroup->getPlots(HISTOGRAM_PLOT);
+   for (vector<PlotWidget*>::const_iterator iter = plots.begin(); iter != plots.end(); ++iter)
+   {
+      PlotWidgetImp* pPlotWidget = dynamic_cast<PlotWidgetImp*>(*iter);
+      if (pPlotWidget != NULL)
+      {
+         QSplitter* pSplitter = pPlotWidget->getSplitter();
+         VERIFYNRV(pSplitter != NULL);
+
+         StatisticsWidget* pStatsWidget = dynamic_cast<StatisticsWidget*>(pSplitter->widget(2));
+         if (pStatsWidget != NULL)
+         {
+            pStatsWidget->updateStatistics();
+         }
+      }
+   }
+}
+
 void HistogramWindowImp::updatePlotInfo(RasterChannelType channel)
 {
    RasterLayer* pLayer = dynamic_cast<RasterLayer*>(sender());
@@ -1113,7 +1179,7 @@ void HistogramWindowImp::updatePlotInfo(RasterLayer* pLayer, RasterChannelType c
       return;
    }
 
-   PlotWidgetImp* pPlotWidget = dynamic_cast<PlotWidgetImp*>(getPlot(pLayer, channel));
+   PlotWidgetImp* pPlotWidget = dynamic_cast<PlotWidgetImp*>(getPlot(pLayer, channel, true));
    if (pPlotWidget == NULL)
    {
       return;
@@ -1251,7 +1317,7 @@ void HistogramWindowImp::setStatisticsShown(bool shown)
       QWidget* pWidget = pPlotImp->getSplitter()->widget(2);
       if (pWidget != NULL)
       {
-         pWidget->setShown(shown);
+         pWidget->setVisible(shown);
       }
    }
 }
@@ -1349,14 +1415,6 @@ void HistogramWindowImp::createSubsetPlot(Layer* pLayer)
       PlotWidgetImp* pPlotImp = dynamic_cast<PlotWidgetImp*>(pPlot);
       VERIFYNRV(pPlotImp);
       pPlotImp->setTitleElideMode(Qt::ElideRight);
-
-      // Add the statistics widget
-      HistogramPlotImp* pHistPlot = dynamic_cast<HistogramPlotImp*>(pPlot->getPlot());
-      QSplitter* pSplitter = pPlotImp->getSplitter();
-      StatisticsWidget* pStatisticsWidget = new StatisticsWidget(pHistPlot, this);
-      pSplitter->insertWidget(2, pStatisticsWidget);
-      VERIFYNR(connect(pHistPlot, SIGNAL(histogramUpdated()), pStatisticsWidget, SLOT(updateStatistics())));
-      setStatisticsShown(mpStatisticsShowAction->isChecked());
 
       StatisticsImp* pStatistics = new StatisticsImp(dynamic_cast<RasterElementImp*>(pElement),
          bands, aoiElements[aoi.toStdString()]);

@@ -35,6 +35,7 @@
 #include "ObjectResource.h"
 #include "PropertiesHistogramPlot.h"
 #include "RasterDataDescriptor.h"
+#include "RasterElementImp.h"
 #include "RasterFileDescriptor.h"
 #include "RasterLayerAdapter.h"
 #include "RasterUtilities.h"
@@ -3483,6 +3484,17 @@ bool HistogramPlotImp::toXml(XMLWriter* pXml) const
       pXml->addAttr("elementId", mpElement->getId());
    }
 
+   if (mpStats != NULL)
+   {
+      pXml->pushAddPoint(pXml->addElement("Stats"));
+      if (mpStats->toXml(pXml) == false)
+      {
+         return false;
+      }
+
+      pXml->popAddPoint();
+   }
+
    if (mPreloadedColorMaps.empty() == false)
    {
       pXml->pushAddPoint(pXml->addElement("PreloadedColorMaps"));
@@ -3538,7 +3550,20 @@ bool HistogramPlotImp::fromXml(DOMNode* pDocument, unsigned int version)
          A(pElement->getAttribute(X("elementId")))));
    }
 
-   if (!setHistogram(pLayer, pRaster, NULL, channel))
+   Statistics* pStats = NULL;
+   for (DOMNode* pChild = pElement->getFirstChild(); pChild != NULL; pChild = pChild->getNextSibling())
+   {
+      if (XMLString::equals(pChild->getNodeName(), X("Stats")))
+      {
+         pStats = new StatisticsImp(dynamic_cast<RasterElementImp*>(pRaster), DimensionDescriptor());
+         if (pStats->fromXml(pChild, version) == false)
+         {
+            return false;
+         }
+      }
+   }
+
+   if (!setHistogram(pLayer, pRaster, pStats, channel))
    {
       return false;
    }
@@ -3784,7 +3809,12 @@ void HistogramPlotImp::HistogramUpdater::update()
    {
       mpPlot->updateHistogramValues(true);
       mpPlot->updateHistogramRegions(true);
-      mpPlot->updateHistogramName(true);
+      if (mpPlot->ownsStatistics() == false)    // Since the user can set a custom name for a statistics plot, the
+                                                // plot name should not be updated or the statistics info will be lost
+      {
+         mpPlot->updateHistogramName(true);
+      }
+
       mNeedsUpdated = false;
    }
 }

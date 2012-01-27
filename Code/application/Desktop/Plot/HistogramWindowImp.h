@@ -17,8 +17,10 @@
 #include "DockWindowImp.h"
 #include "RasterLayer.h"
 #include "SessionExplorer.h"
+#include "SessionManager.h"
 
 #include <boost/shared_ptr.hpp>
+#include <map>
 #include <set>
 
 class Layer;
@@ -72,6 +74,7 @@ protected:
    void plotSetDeleted(Subject& subject, const std::string& signal, const boost::any& value);
    void layerShown(Subject& subject, const std::string& signal, const boost::any& value);
    void layerDeleted(Subject& subject, const std::string& signal, const boost::any& value);
+   void sessionRestored(Subject& subject, const std::string& signal, const boost::any& value);
 
    void createPlots(RasterLayer* pLayer, DisplayMode displayMode);
    void createPlots(RasterLayer* pLayer, DisplayMode displayMode, PlotSet* pPlotSet);
@@ -80,6 +83,7 @@ protected:
 
 protected slots:
    void setCurrentPlot(const DisplayMode& displayMode);
+   void createStatisticsWidget(PlotWidget* pPlotWidget);
    void activateLayer(PlotWidget* pPlot);
    void updatePlotInfo(RasterChannelType channel);
    void syncAutoZoom();
@@ -95,11 +99,13 @@ private:
 
    AttachmentPtr<DesktopServices> mpDesktop;
    AttachmentPtr<SessionExplorer> mpExplorer;
+   AttachmentPtr<SessionManager> mpSessionManager;
    PlotSetGroup* mpPlotSetGroup;
    bool mDisplayModeChanging;
    QAction* mpSyncAutoZoomAction;
    QAction* mpStatisticsShowAction;
    bool mAddingStatisticsPlot;
+   std::map<PlotWidget*, bool> mShowStatistics;
 
    class HistogramUpdater
    {

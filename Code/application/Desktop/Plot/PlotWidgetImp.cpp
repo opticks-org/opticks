@@ -1391,10 +1391,15 @@ bool PlotWidgetImp::fromXml(DOMNode* pDocument, unsigned int version)
    }
 
    DOMElement* pElem = static_cast<DOMElement*>(pDocument);
-   setName(A(pElem->getAttribute(X("name"))));
-   setDisplayName(A(pElem->getAttribute(X("displayName"))));
-   setDisplayText(A(pElem->getAttribute(X("displayText"))));
-   setTitle(QString::fromStdString(A(pElem->getAttribute(X("title")))));
+
+   // Initialize the child widgets based on the plot view before deserializing other attributes
+   // so that all widgets will be created before their values are set to the deserialized values
+   PlotViewImp* pPlotView = dynamic_cast<PlotViewImp*>(
+      SessionManagerImp::instance()->getSessionItem(A(pElem->getAttribute(X("plotViewId")))));
+   if (pPlotView != NULL)
+   {
+      initialize(pPlotView, "", PlotType());
+   }
 
    PlotSet* pPlotSet = dynamic_cast<PlotSet*>(
       SessionManagerImp::instance()->getSessionItem(A(pElem->getAttribute(X("plotSetId")))));
@@ -1403,13 +1408,10 @@ bool PlotWidgetImp::fromXml(DOMNode* pDocument, unsigned int version)
       mpPlotSet = pPlotSet;
    }
 
-   PlotViewImp* pPlotView = dynamic_cast<PlotViewImp*>(
-      SessionManagerImp::instance()->getSessionItem(A(pElem->getAttribute(X("plotViewId")))));
-   if (pPlotView != NULL)
-   {
-      initialize(pPlotView, "", PlotType());
-   }
-
+   setName(A(pElem->getAttribute(X("name"))));
+   setDisplayName(A(pElem->getAttribute(X("displayName"))));
+   setDisplayText(A(pElem->getAttribute(X("displayText"))));
+   setTitle(QString::fromStdString(A(pElem->getAttribute(X("title")))));
    showLegend(StringUtilities::fromXmlString<bool>(A(pElem->getAttribute(X("legendShown")))));
 
    setOrganizationPosition(StringUtilities::fromXmlString<PositionType>(
