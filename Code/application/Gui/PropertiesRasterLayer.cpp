@@ -70,7 +70,6 @@ PropertiesRasterLayer::PropertiesRasterLayer() :
    mpOpacitySpin->setMinimum(0);
    mpOpacitySpin->setMaximum(255);
    mpOpacitySpin->setSingleStep(1);
-   mDisplayConfigModifier.setModified(false);
 
    LabeledSection* pDisplaySection = new LabeledSection(pDisplayWidget, "Display Configuration", this);
 
@@ -118,7 +117,6 @@ PropertiesRasterLayer::PropertiesRasterLayer() :
 
    mpAddFavoriteGrayAction = new QAction("Add Stretch to Favorites", this);
    mpRemoveFavoriteAction = new QAction("Remove Stretch from Favorites...", this);
-   mGrayscaleModifier.setModified(false);
 
    LabeledSection* pGrayscaleSection = new LabeledSection(pGrayscaleWidget, "Grayscale", this);
 
@@ -219,7 +217,6 @@ PropertiesRasterLayer::PropertiesRasterLayer() :
    mpAddFavoriteRedAction = new QAction("Add Red Stretch to Favorites", pRgbWidget);
    mpAddFavoriteGreenAction = new QAction("Add Green Stretch to Favorites", pRgbWidget);
    mpAddFavoriteBlueAction = new QAction("Add Blue Stretch to Favorites", pRgbWidget);
-   mRgbModifier.setModified(false);
 
    LabeledSection* pRgbSection = new LabeledSection(pRgbWidget, "RGB", this);
 
@@ -283,7 +280,6 @@ PropertiesRasterLayer::PropertiesRasterLayer() :
 
    filterNames.sort();
    mpFilterList->addItems(filterNames);
-   mGraphicsAccModifier.setModified(false);
 
    QStackedWidget* pAccelerationStack = new QStackedWidget(this);
    LabeledSection* pAccelerationSection = new LabeledSection(pAccelerationStack,
@@ -326,43 +322,58 @@ PropertiesRasterLayer::PropertiesRasterLayer() :
 
    // Connections
    VERIFYNR(mDisplayConfigModifier.attachSignal(mpDisplayModeCombo, SIGNAL(currentIndexChanged(int))));
+   VERIFYNR(mDisplayConfigModifier.attachSignal(mpComplexComponentCombo, SIGNAL(valueChanged(ComplexComponent))));
+   VERIFYNR(mDisplayConfigModifier.attachSignal(mpOpacitySpin, SIGNAL(valueChanged(int))));
+
    VERIFYNR(connect(mpGrayElementCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateDisplayedBandCombo(int))));
-   VERIFYNR(mGrayscaleModifier.attachSignal(mpGrayElementCombo, SIGNAL(currentIndexChanged(int))));
-   VERIFYNR(connect(mpRedElementCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateDisplayedBandCombo(int))));
-   VERIFYNR(mRgbModifier.attachSignal(mpRedElementCombo, SIGNAL(currentIndexChanged(int))));
-   VERIFYNR(connect(mpGreenElementCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateDisplayedBandCombo(int))));
-   VERIFYNR(mRgbModifier.attachSignal(mpGreenElementCombo, SIGNAL(currentIndexChanged(int))));
-   VERIFYNR(connect(mpBlueElementCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateDisplayedBandCombo(int))));
-   VERIFYNR(mRgbModifier.attachSignal(mpBlueElementCombo, SIGNAL(currentIndexChanged(int))));
    VERIFYNR(connect(mpGrayBandCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStretchValuesFromBand())));
-   VERIFYNR(mGrayscaleModifier.attachSignal(mpGrayBandCombo, SIGNAL(currentIndexChanged(int))));
-   VERIFYNR(connect(mpRedBandCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStretchValuesFromBand())));
-   VERIFYNR(mRgbModifier.attachSignal(mpRedBandCombo, SIGNAL(currentIndexChanged(int))));
-   VERIFYNR(connect(mpGreenBandCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStretchValuesFromBand())));
-   VERIFYNR(mRgbModifier.attachSignal(mpGreenBandCombo, SIGNAL(currentIndexChanged(int))));
-   VERIFYNR(connect(mpBlueBandCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStretchValuesFromBand())));
-   VERIFYNR(mRgbModifier.attachSignal(mpBlueBandCombo, SIGNAL(currentIndexChanged(int))));
-   VERIFYNR(connect(mpGrayUnitsCombo, SIGNAL(valueChanged(RegionUnits)), this,
-      SLOT(updateStretchValuesFromUnits(RegionUnits))));
-   VERIFYNR(mGrayscaleModifier.attachSignal(mpGrayUnitsCombo, SIGNAL(valueChanged(RegionUnits))));
-   VERIFYNR(connect(mpRedUnitsCombo, SIGNAL(valueChanged(RegionUnits)), this,
-      SLOT(updateStretchValuesFromUnits(RegionUnits))));
-   VERIFYNR(mRgbModifier.attachSignal(mpRedUnitsCombo, SIGNAL(valueChanged(RegionUnits))));
-   VERIFYNR(connect(mpGreenUnitsCombo, SIGNAL(valueChanged(RegionUnits)), this,
-      SLOT(updateStretchValuesFromUnits(RegionUnits))));
-   VERIFYNR(mRgbModifier.attachSignal(mpGreenUnitsCombo, SIGNAL(valueChanged(RegionUnits))));
-   VERIFYNR(connect(mpBlueUnitsCombo, SIGNAL(valueChanged(RegionUnits)), this,
-      SLOT(updateStretchValuesFromUnits(RegionUnits))));
-   VERIFYNR(mRgbModifier.attachSignal(mpBlueUnitsCombo, SIGNAL(valueChanged(RegionUnits))));
-   VERIFYNR(connect(pMenu, SIGNAL(triggered(QAction*)), this, SLOT(setDisplayBands(QAction*))));
    VERIFYNR(connect(mpGrayStretchMenu, SIGNAL(aboutToShow()), this, SLOT(initializeStretchMenu())));
    VERIFYNR(connect(mpGrayStretchMenu, SIGNAL(triggered(QAction*)), this, SLOT(setGrayStretch(QAction*))));
+   VERIFYNR(connect(mpRemoveFavoriteAction, SIGNAL(triggered()), this, SLOT(removeStretchFavorite())));
+   VERIFYNR(connect(mpGrayUnitsCombo, SIGNAL(valueChanged(RegionUnits)), this,
+      SLOT(updateStretchValuesFromUnits(RegionUnits))));
+   VERIFYNR(mGrayscaleModifier.attachSignal(mpGrayElementCombo, SIGNAL(currentIndexChanged(int))));
+   VERIFYNR(mGrayscaleModifier.attachSignal(mpGrayBandCombo, SIGNAL(currentIndexChanged(int))));
+   VERIFYNR(mGrayscaleModifier.attachSignal(mpGrayLowerSpin, SIGNAL(valueChanged(double))));
+   VERIFYNR(mGrayscaleModifier.attachSignal(mpGrayUpperSpin, SIGNAL(valueChanged(double))));
+   VERIFYNR(mGrayscaleModifier.attachSignal(mpGrayUnitsCombo, SIGNAL(valueChanged(RegionUnits))));
+   VERIFYNR(mGrayscaleModifier.attachSignal(mpGrayStretchTypeCombo, SIGNAL(valueChanged(StretchType))));
+
+   VERIFYNR(connect(mpRedElementCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateDisplayedBandCombo(int))));
+   VERIFYNR(connect(mpGreenElementCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateDisplayedBandCombo(int))));
+   VERIFYNR(connect(mpBlueElementCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateDisplayedBandCombo(int))));
+   VERIFYNR(connect(mpRedBandCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStretchValuesFromBand())));
+   VERIFYNR(connect(mpGreenBandCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStretchValuesFromBand())));
+   VERIFYNR(connect(mpBlueBandCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStretchValuesFromBand())));
+   VERIFYNR(connect(pMenu, SIGNAL(triggered(QAction*)), this, SLOT(setDisplayBands(QAction*))));
    VERIFYNR(connect(mpRgbStretchMenu, SIGNAL(aboutToShow()), this, SLOT(initializeStretchMenu())));
    VERIFYNR(connect(mpRgbStretchMenu, SIGNAL(triggered(QAction*)), this, SLOT(setRgbStretch(QAction*))));
-   VERIFYNR(connect(mpRemoveFavoriteAction, SIGNAL(triggered()), this, SLOT(removeStretchFavorite())));
+   VERIFYNR(connect(mpRedUnitsCombo, SIGNAL(valueChanged(RegionUnits)), this,
+      SLOT(updateStretchValuesFromUnits(RegionUnits))));
+   VERIFYNR(connect(mpGreenUnitsCombo, SIGNAL(valueChanged(RegionUnits)), this,
+      SLOT(updateStretchValuesFromUnits(RegionUnits))));
+   VERIFYNR(connect(mpBlueUnitsCombo, SIGNAL(valueChanged(RegionUnits)), this,
+      SLOT(updateStretchValuesFromUnits(RegionUnits))));
+   VERIFYNR(mRgbModifier.attachSignal(mpRedElementCombo, SIGNAL(currentIndexChanged(int))));
+   VERIFYNR(mRgbModifier.attachSignal(mpGreenElementCombo, SIGNAL(currentIndexChanged(int))));
+   VERIFYNR(mRgbModifier.attachSignal(mpBlueElementCombo, SIGNAL(currentIndexChanged(int))));
+   VERIFYNR(mRgbModifier.attachSignal(mpRedBandCombo, SIGNAL(currentIndexChanged(int))));
+   VERIFYNR(mRgbModifier.attachSignal(mpGreenBandCombo, SIGNAL(currentIndexChanged(int))));
+   VERIFYNR(mRgbModifier.attachSignal(mpBlueBandCombo, SIGNAL(currentIndexChanged(int))));
+   VERIFYNR(mRgbModifier.attachSignal(mpRedLowerSpin, SIGNAL(valueChanged(double))));
+   VERIFYNR(mRgbModifier.attachSignal(mpGreenLowerSpin, SIGNAL(valueChanged(double))));
+   VERIFYNR(mRgbModifier.attachSignal(mpBlueLowerSpin, SIGNAL(valueChanged(double))));
+   VERIFYNR(mRgbModifier.attachSignal(mpRedUpperSpin, SIGNAL(valueChanged(double))));
+   VERIFYNR(mRgbModifier.attachSignal(mpGreenUpperSpin, SIGNAL(valueChanged(double))));
+   VERIFYNR(mRgbModifier.attachSignal(mpBlueUpperSpin, SIGNAL(valueChanged(double))));
+   VERIFYNR(mRgbModifier.attachSignal(mpRedUnitsCombo, SIGNAL(valueChanged(RegionUnits))));
+   VERIFYNR(mRgbModifier.attachSignal(mpGreenUnitsCombo, SIGNAL(valueChanged(RegionUnits))));
+   VERIFYNR(mRgbModifier.attachSignal(mpBlueUnitsCombo, SIGNAL(valueChanged(RegionUnits))));
+   VERIFYNR(mRgbModifier.attachSignal(mpRgbStretchTypeCombo, SIGNAL(valueChanged(StretchType))));
+
    VERIFYNR(connect(mpAccelerationCheck, SIGNAL(toggled(bool)), this, SLOT(enableFilterCheck(bool))));
-   VERIFYNR(mGraphicsAccModifier.attachSignal(mpAccelerationCheck, SIGNAL(toggled(bool))));
    VERIFYNR(connect(mpFilterCheck, SIGNAL(toggled(bool)), this, SLOT(enableFilterCombo(bool))));
+   VERIFYNR(mGraphicsAccModifier.attachSignal(mpAccelerationCheck, SIGNAL(toggled(bool))));
    VERIFYNR(mGraphicsAccModifier.attachSignal(mpFilterCheck, SIGNAL(toggled(bool))));
    VERIFYNR(mGraphicsAccModifier.attachSignal(mpFilterList, SIGNAL(itemSelectionChanged())));
 }
@@ -538,6 +549,7 @@ bool PropertiesRasterLayer::initialize(SessionItem* pSessionItem)
       }
    }
 
+   resetModifiers();
    mInitializing = false;
    return true;
 }
@@ -631,6 +643,7 @@ bool PropertiesRasterLayer::applyChanges()
       pView->refresh();
    }
 
+   resetModifiers();
    return true;
 }
 
@@ -877,6 +890,14 @@ DimensionDescriptor PropertiesRasterLayer::getSelectedBand(RasterChannelType cha
    }
 
    return band;
+}
+
+void PropertiesRasterLayer::resetModifiers()
+{
+   mDisplayConfigModifier.setModified(false);
+   mGrayscaleModifier.setModified(false);
+   mRgbModifier.setModified(false);
+   mGraphicsAccModifier.setModified(false);
 }
 
 void PropertiesRasterLayer::updateDisplayedBandCombo(int index)

@@ -62,6 +62,7 @@ protected:
    void setStretchUnits(RasterChannelType channel, RegionUnits newUnits);
    RegionUnits getStretchUnits(RasterChannelType channel) const;
    DimensionDescriptor getSelectedBand(RasterChannelType channel, RasterElement*& pRasterElementOut) const;
+   void resetModifiers();
 
 protected slots:
    void updateDisplayedBandCombo(int index);
@@ -78,6 +79,7 @@ protected slots:
 private:
    PropertiesRasterLayer(const PropertiesRasterLayer& rhs);
    PropertiesRasterLayer& operator=(const PropertiesRasterLayer& rhs);
+
    bool mInitializing;
    RasterLayer* mpRasterLayer;
    std::vector<RasterElement*> mRasterElements;
