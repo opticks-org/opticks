@@ -919,7 +919,7 @@ void HistogramWindowImp::createStatisticsWidget(PlotWidget* pPlotWidget)
    // Initialization
    bool showStats = mpStatisticsShowAction->isChecked();
 
-   map<PlotWidget*, bool>::const_iterator iter = mShowStatistics.find(pPlotWidget);
+   map<PlotWidget*, bool>::iterator iter = mShowStatistics.find(pPlotWidget);
    if (iter != mShowStatistics.end())
    {
       showStats = iter->second;
