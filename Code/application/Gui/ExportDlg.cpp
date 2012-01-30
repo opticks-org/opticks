@@ -111,7 +111,7 @@ void ExportDlg::accept()
 
    // Validate with the exporter
    bool validating = true;
-   while ((validating == true) && (mValidated == false))
+   while (validating == true)
    {
       string errorMessage;
 
@@ -122,50 +122,59 @@ void ExportDlg::accept()
          break;
       }
       updateFromFile(updateExtension(strFilename, true, false));
-      switch (mpExporter->validate(errorMessage))
+
+      // Only validate with the exporter if the options have not yet been validated
+      if (mValidated == false)
       {
-      case VALIDATE_SUCCESS:
-         validating = false;
-         break;
-      case VALIDATE_FAILURE:
-         if (errorMessage.empty())
+         switch (mpExporter->validate(errorMessage))
          {
-            errorMessage = "Unable to validate inputs.";
-         }
-         QMessageBox::critical(this, windowTitle(), QString::fromStdString(errorMessage));
-         return;
-      case VALIDATE_INFO:
-         // Exporter's returning VALIDATE_INFO must provide a value
-         // for error message...not providing a value is a programmer error
-         VERIFYNRV(!errorMessage.empty());
-         switch (QMessageBox::warning(this, windowTitle(), QString::fromStdString(errorMessage),
-            "OK", "Options...", "Cancel", 0, 2))
-         {
-         case 0: // Ok
+         case VALIDATE_SUCCESS:
             validating = false;
             break;
-         case 1: // Options
-            if (invokeOptionsDialog())
+         case VALIDATE_FAILURE:
+            if (errorMessage.empty())
             {
-               break;
+               errorMessage = "Unable to validate inputs.";
             }
-            // fall through
-         case 2: // Cancel
-            return;
-         }
-         break;
-      case VALIDATE_INPUT_REQUIRED:
-         if (errorMessage.empty() == false)
-         {
             QMessageBox::critical(this, windowTitle(), QString::fromStdString(errorMessage));
-         }
-         if (!invokeOptionsDialog())
-         {
             return;
+         case VALIDATE_INFO:
+            // Exporter's returning VALIDATE_INFO must provide a value
+            // for error message...not providing a value is a programmer error
+            VERIFYNRV(!errorMessage.empty());
+            switch (QMessageBox::warning(this, windowTitle(), QString::fromStdString(errorMessage),
+               "OK", "Options...", "Cancel", 0, 2))
+            {
+            case 0: // Ok
+               validating = false;
+               break;
+            case 1: // Options
+               if (invokeOptionsDialog())
+               {
+                  break;
+               }
+               // fall through
+            case 2: // Cancel
+               return;
+            }
+            break;
+         case VALIDATE_INPUT_REQUIRED:
+            if (errorMessage.empty() == false)
+            {
+               QMessageBox::critical(this, windowTitle(), QString::fromStdString(errorMessage));
+            }
+            if (!invokeOptionsDialog())
+            {
+               return;
+            }
+            break;
+         default:
+            VERIFYNRV_MSG(false, "An invalid verification type was returned.");
          }
-         break;
-      default:
-         VERIFYNRV_MSG(false, "An invalid verification type was returned.");
+      }
+      else
+      {
+         validating = false;
       }
    }
 
