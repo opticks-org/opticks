@@ -10,11 +10,15 @@
 #ifndef COLLADAIMPORTER_H
 #define COLLADAIMPORTER_H
 
+#include "AppConfig.h"
+#if defined(OPENCOLLADA_SUPPORT)
+
 #include "Location.h"
 #include "ColladaStreamReader.h"
 #include "ImporterShell.h"
+#include "Testable.h"
 
-class ColladaImporter : public ImporterShell
+class ColladaImporter : public ImporterShell, public Testable
 {
 public:
    ColladaImporter();
@@ -26,6 +30,10 @@ public:
 
    std::vector<ImportDescriptor*> getImportDescriptors(const std::string& filename);
    unsigned char getFileAffinity(const std::string& filename);
+
+   virtual bool runOperationalTests(Progress* pProgress, std::ostream& failure);
+   virtual bool runAllTests(Progress* pProgress, std::ostream& failure);
 };
 
+#endif
 #endif

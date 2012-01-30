@@ -53,40 +53,44 @@
     <Import Project="..\..\..\CompileSettings\32bitSettings.props" />
     <Import Project="..\..\..\CompileSettings\Qt.props" />
     <Import Project="..\..\..\CompileSettings\Macros.props" />
-    <Import Project="..\..\..\CompileSettings\ApplicationCommonSettings.props" />
     <Import Project="..\..\..\CompileSettings\AllCommonSettings-Debug-32bit.props" />
     <Import Project="..\..\..\CompileSettings\Xerces-Debug.props" />
     <Import Project="..\..\..\CompileSettings\opencollada-debug.props" />
+    <Import Project="..\..\..\CompileSettings\PlugInCommonSettings.props" />
+    <Import Project="..\..\..\CompileSettings\EnableWarnings.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\..\..\CompileSettings\64bitSettings.props" />
     <Import Project="..\..\..\CompileSettings\Qt.props" />
     <Import Project="..\..\..\CompileSettings\Macros.props" />
-    <Import Project="..\..\..\CompileSettings\ApplicationCommonSettings.props" />
     <Import Project="..\..\..\CompileSettings\AllCommonSettings-Debug-64bit.props" />
     <Import Project="..\..\..\CompileSettings\Xerces-Debug.props" />
     <Import Project="..\..\..\CompileSettings\opencollada-debug.props" />
+    <Import Project="..\..\..\CompileSettings\PlugInCommonSettings.props" />
+    <Import Project="..\..\..\CompileSettings\EnableWarnings.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\..\..\CompileSettings\32bitSettings.props" />
     <Import Project="..\..\..\CompileSettings\Qt.props" />
     <Import Project="..\..\..\CompileSettings\Macros.props" />
-    <Import Project="..\..\..\CompileSettings\ApplicationCommonSettings.props" />
     <Import Project="..\..\..\CompileSettings\AllCommonSettings-Release-32bit.props" />
     <Import Project="..\..\..\CompileSettings\Xerces-Release.props" />
     <Import Project="..\..\..\CompileSettings\opencollada-release.props" />
+    <Import Project="..\..\..\CompileSettings\PlugInCommonSettings.props" />
+    <Import Project="..\..\..\CompileSettings\EnableWarnings.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\..\..\CompileSettings\64bitSettings.props" />
     <Import Project="..\..\..\CompileSettings\Qt.props" />
     <Import Project="..\..\..\CompileSettings\Macros.props" />
-    <Import Project="..\..\..\CompileSettings\ApplicationCommonSettings.props" />
     <Import Project="..\..\..\CompileSettings\AllCommonSettings-Release-64bit.props" />
     <Import Project="..\..\..\CompileSettings\Xerces-Release.props" />
     <Import Project="..\..\..\CompileSettings\opencollada-release.props" />
+    <Import Project="..\..\..\CompileSettings\PlugInCommonSettings.props" />
+    <Import Project="..\..\..\CompileSettings\EnableWarnings.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

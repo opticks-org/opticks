@@ -34,7 +34,6 @@
       #define PTR_SIZE 4
       #define JPEG2000_SUPPORT
    #endif
-
    #define CG_SUPPORTED
 
    //platform defines
@@ -45,12 +44,15 @@
    #define HANDLE_TYPE HANDLE
    #define MICRON std::string("µ")
    #define DEG_CHAR std::string("°")
+   #define OPENCOLLADA_SUPPORT
 
    #define snprintf _snprintf
 
    #include <stddef.h>
    #define DISAMBIGUATE_TEMPLATE
    #define HIDE_UNUSED_VARIABLE_WARNING
+
+   #define GL_CALLBACK CALLBACK
 #elif defined (__SUNPRO_CC)
    #include <sys/isa_defs.h>
 
@@ -85,6 +87,8 @@
    #include <sys/int_types.h>
    #define DISAMBIGUATE_TEMPLATE
    #define HIDE_UNUSED_VARIABLE_WARNING
+
+   #define GL_CALLBACK
 #elif defined(__linux__)
 #if !defined(__amd64__)
 #error "Linux support requires a 64-bit x86 (AMD64) processor"
@@ -131,6 +135,8 @@
 
    #define DISAMBIGUATE_TEMPLATE template
    #define HIDE_UNUSED_VARIABLE_WARNING __attribute__((unused))
+
+   #define GL_CALLBACK
 #else
    #error Unrecognized build platform
 #endif

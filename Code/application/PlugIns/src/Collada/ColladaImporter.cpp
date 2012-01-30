@@ -7,6 +7,9 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include "AppConfig.h"
+#if defined(OPENCOLLADA_SUPPORT)
+
 #include "AnnotationElement.h"
 #include "AnnotationLayer.h"
 #include "AppVersion.h"
@@ -34,6 +37,9 @@
 #include "SpatialDataWindow.h"
 #include "SpatialDataView.h"
 #include "TypeConverter.h"
+#include "UtilityServices.h"
+
+#include <Math/COLLADABUMathVector3.h>
 
 REGISTER_PLUGIN_BASIC(OpticksCollada, ColladaImporter);
 
@@ -49,6 +55,7 @@ ColladaImporter::ColladaImporter()
    setSubtype(TypeConverter::toString<AnnotationElement>());
    setProductionStatus(APP_IS_PRODUCTION_RELEASE);
    setExtensions("Collada Files (*.shape.dae)");
+   addDependencyCopyright("OpenCOLLADA", Service<UtilityServices>()->getTextFromFile(":/licenses/opencollada"));
 }
 
 ColladaImporter::~ColladaImporter()
@@ -105,9 +112,9 @@ bool ColladaImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
       pRasterElement = pLayerList->getPrimaryRasterElement();
       if (pRasterElement != NULL)
       {
-         vector<string> elementNames = Service<ModelServices>()->getElementNames(pRasterElement,
+         std::vector<std::string> elementNames = Service<ModelServices>()->getElementNames(pRasterElement,
             TypeConverter::toString<AnnotationElement>());
-         for (vector<string>::iterator it = elementNames.begin(); it != elementNames.end(); ++it)
+         for (std::vector<std::string>::iterator it = elementNames.begin(); it != elementNames.end(); ++it)
          {
             if (*it == pAnnoElement->getName())
             {
@@ -152,10 +159,10 @@ bool ColladaImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
    for (std::vector<std::string>::iterator idIt = geomIds.begin(); idIt != geomIds.end(); ++idIt)
    {
       // Check if the geometry was exported by Opticks by checking its ID
-      size_t suffixPos = (*idIt).find(getAnnotationSuffix());
+      size_t suffixPos = (*idIt).find(ColladaUtilities::getAnnotationSuffix());
       if (suffixPos != std::string::npos)
       {
-         string sessionName = string((*idIt).begin(), (*idIt).begin() + suffixPos);
+         std::string sessionName = std::string((*idIt).begin(), (*idIt).begin() + suffixPos);
 
          if (!reader.read(*idIt))
          {
@@ -253,3 +260,60 @@ unsigned char ColladaImporter::getFileAffinity(const std::string& filename)
    }
    return Importer::CAN_NOT_LOAD;
 }
+
+bool ColladaImporter::runOperationalTests(Progress* pProgress, std::ostream& failure)
+{
+   return runAllTests(pProgress, failure);
+}
+
+bool ColladaImporter::runAllTests(Progress* pProgress, std::ostream& failure)
+{
+   // This test is to ensure that the Vector3 type used throughout OpenCOLLADA behaves as expected.
+   // The concern comes from Vector3 using a non-ANSI compiler extension, for which we had to disable
+   // the compiler warning (C4201)
+   COLLADABU::Math::Vector3 testVec;
+   testVec.x = 3.0;
+   testVec.y = 9.0;
+   testVec.z = 81.0;
+
+   if (testVec.x != testVec[0])
+   {
+      failure << "testVec.x does not equal testVec[0] (" << testVec.x << " != " << testVec[0] << ")";
+      return false;
+   }
+   else if (testVec.y != testVec[1])
+   {
+      failure << "testVec.y does not equal testVec[1] (" << testVec.y << " != " << testVec[1] << ")";
+      return false;
+   }
+   else if (testVec.z != testVec[2])
+   {
+      failure << "testVec.z does not equal testVec[2] (" << testVec.z << " != " << testVec[2] << ")";
+      return false;
+   }
+
+   testVec = testVec * 2.0;
+
+   if (testVec.x != testVec[0])
+   {
+      failure << "after multiplication, testVec.x does not equal testVec[0] (" << testVec.x << " != " <<
+         testVec[0] << ")";
+      return false;
+   }
+   else if (testVec.y != testVec[1])
+   {
+      failure << "after multiplication, testVec.y does not equal testVec[1] (" << testVec.y << " != " <<
+         testVec[1] << ")";
+      return false;
+   }
+   else if (testVec.z != testVec[2])
+   {
+      failure << "after multiplication, testVec.z does not equal testVec[2] (" << testVec.z << " != " <<
+         testVec[2] << ")";
+      return false;
+   }
+
+   return true;
+}
+
+#endif

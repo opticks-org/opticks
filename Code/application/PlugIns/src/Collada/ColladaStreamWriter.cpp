@@ -7,6 +7,9 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include "AppConfig.h"
+#if defined(OPENCOLLADA_SUPPORT)
+
 #include "AppVersion.h"
 #include "ColladaStreamWriter.h"
 #include "ColladaUtil.h"
@@ -16,16 +19,16 @@
 #include "RectangleObject.h"
 #include "StringUtilities.h"
 
-#include "COLLADABUPlatform.h"
-#include "COLLADASWAsset.h"
-#include "COLLADASWConstants.h"
-#include "COLLADASWInputList.h"
-#include "COLLADASWInstanceGeometry.h"
-#include "COLLADASWNode.h"
-#include "COLLADASWSource.h"
-#include "COLLADASaxFWLLoader.h"
-#include "COLLADASWVertices.h"
-#include "COLLADASWPrimitves.h"
+#include <COLLADABUPlatform.h>
+#include <COLLADASWAsset.h>
+#include <COLLADASWConstants.h>
+#include <COLLADASWInputList.h>
+#include <COLLADASWInstanceGeometry.h>
+#include <COLLADASWNode.h>
+#include <COLLADASWSource.h>
+#include <COLLADASaxFWLLoader.h>
+#include <COLLADASWVertices.h>
+#include <COLLADASWPrimitves.h>
 
 using namespace std;
 
@@ -122,7 +125,7 @@ void ColladaStreamWriter::writeGraphicObjects(std::list<GraphicObject*> objects)
    }
 
    ColladaSceneLibrary sceneLib(&streamWriter);
-   sceneLib.startScene(getBasicSceneName());
+   sceneLib.startScene(ColladaUtilities::getBasicSceneName());
    for (list<GraphicObject*>::iterator it = objects.begin(); it != objects.end(); ++it)
    {
       sceneLib.writeSimpleGeometryNode((*it)->getName(), (*it)->getRotation());
@@ -166,7 +169,7 @@ void ColladaGeometryLibrary::writeArbitraryPolygon(std::string geometryId,
    // Begin library
    openLibrary();
    // Begin mesh element
-   openMesh(COLLADASW::String(formatGeometryId(geometryId)));
+   openMesh(COLLADASW::String(ColladaUtilities::formatGeometryId(geometryId)));
 
    // Create FloatSource to set all the parameters for a mesh element, including vertex positions,
    // data types for axes, accessor stride, vertex counts
@@ -233,7 +236,7 @@ COLLADASW::URI ColladaGeometryLibrary::getUriBySemantics(std::string geometryId,
 string ColladaGeometryLibrary::getIdBySemantics(std::string geometryId,
    COLLADASW::InputSemantic::Semantics type, std::string other_suffix)
 {
-   return formatGeometryId(geometryId) + getSuffixBySemantic(type) + other_suffix;
+   return ColladaUtilities::formatGeometryId(geometryId) + getSuffixBySemantic(type) + other_suffix;
 }
 
 /*
@@ -270,8 +273,10 @@ void ColladaSceneLibrary::writeSimpleGeometryNode(string nodeId, double rotation
    node.addScale("scale", 1.0, 1.0, 1.0);
 
    COLLADASW::InstanceGeometry instGeom(mSW);
-   instGeom.setUrl(COLLADASW::URI(COLLADABU::Utils::EMPTY_STRING, formatGeometryId(nodeId)));
+   instGeom.setUrl(COLLADASW::URI(COLLADABU::Utils::EMPTY_STRING, ColladaUtilities::formatGeometryId(nodeId)));
    instGeom.add();
 
    node.end();
 }
+
+#endif

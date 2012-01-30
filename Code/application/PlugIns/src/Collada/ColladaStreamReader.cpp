@@ -7,15 +7,18 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "COLLADAFWGeometry.h"
-#include "COLLADAFWPointerArray.h"
-#include "COLLADAFWPolygons.h"
-#include "COLLADAFWRoot.h"
-#include "COLLADAFWRotate.h"
-#include "COLLADAFWTransformation.h"
-#include "COLLADAFWVisualScene.h"
+#include "AppConfig.h"
+#if defined(OPENCOLLADA_SUPPORT)
 
-#include "COLLADASaxFWLLoader.h"
+#include <COLLADAFWGeometry.h>
+#include <COLLADAFWPointerArray.h>
+#include <COLLADAFWPolygons.h>
+#include <COLLADAFWRoot.h>
+#include <COLLADAFWRotate.h>
+#include <COLLADAFWTransformation.h>
+#include <COLLADAFWVisualScene.h>
+
+#include <COLLADASaxFWLLoader.h>
 
 #include "ColladaStreamReader.h"
 #include "ColladaUtil.h"
@@ -235,7 +238,7 @@ void ColladaStreamReader::readSceneNodesRecursive(COLLADAFW::Node* pNode)
    {
       return;
    }
-   if (formatGeometryId(pNode->getName()) == mCurrentElement)
+   if (ColladaUtilities::formatGeometryId(pNode->getName()) == mCurrentElement)
    {
       const COLLADAFW::TransformationPointerArray& transformations = pNode->getTransformations();
       for (unsigned int i = 0; i < transformations.getCount(); ++i)
@@ -280,3 +283,5 @@ double ColladaStreamReader::getRotation()
 {
    return mRotation;
 }
+
+#endif

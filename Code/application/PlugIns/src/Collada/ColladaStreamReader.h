@@ -7,9 +7,15 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "COLLADAFWIWriter.h"
-#include "COLLADAFWMesh.h"
-#include "COLLADAFWNode.h"
+#ifndef COLLADASTREAMREADER_H
+#define COLLADASTREAMREADER_H
+
+#include "AppConfig.h"
+#if defined(OPENCOLLADA_SUPPORT)
+
+#include <COLLADAFWIWriter.h>
+#include <COLLADAFWMesh.h>
+#include <COLLADAFWNode.h>
 
 #include "Location.h"
 
@@ -165,3 +171,6 @@ private:
    std::string mFilename;
    bool mFirstPass;
 };
+
+#endif
+#endif

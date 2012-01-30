@@ -7,21 +7,31 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#ifndef COLLADAUTIL_H
+#define COLLADAUTIL_H
+
+#include "AppConfig.h"
+#if defined(OPENCOLLADA_SUPPORT)
+
 #include <string>
 
-using namespace std;
-
-static string getAnnotationSuffix()
+namespace ColladaUtilities
 {
-   return "-opticksAnno";
+   inline std::string getAnnotationSuffix()
+   {
+      return "-opticksAnno";
+   }
+
+   inline std::string getBasicSceneName()
+   {
+      return "opticks-scene";
+   }
+
+   inline std::string formatGeometryId(std::string geometryId)
+   {
+      return geometryId + getAnnotationSuffix();
+   }
 }
 
-static string getBasicSceneName()
-{
-   return "opticks-scene";
-}
-
-static string formatGeometryId(string geometryId)
-{
-   return geometryId + getAnnotationSuffix();
-}
+#endif
+#endif

@@ -7,6 +7,9 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include "AppConfig.h"
+#if defined(OPENCOLLADA_SUPPORT)
+
 #include "AnnotationElement.h"
 #include "AnnotationLayer.h"
 #include "AppVersion.h"
@@ -36,6 +39,7 @@
 #include "SpatialDataView.h"
 #include "StringUtilities.h"
 #include "TypeConverter.h"
+#include "UtilityServices.h"
 
 #include <set>
 
@@ -53,6 +57,7 @@ ColladaExporter::ColladaExporter()
    setSubtype(TypeConverter::toString<AnnotationElement>());
    setProductionStatus(APP_IS_PRODUCTION_RELEASE);
    setExtensions("COLLADA Files (*.shape.dae)");
+   addDependencyCopyright("OpenCOLLADA", Service<UtilityServices>()->getTextFromFile(":/licenses/opencollada"));
 }
 
 ColladaExporter::~ColladaExporter()
@@ -191,3 +196,5 @@ bool ColladaExporter::isGraphicObjectSupported(GraphicObjectType type)
    }
    return isSupported;
 }
+
+#endif

@@ -7,11 +7,17 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#ifndef COLLADASTREAMWRITER_H
+#define COLLADASTREAMWRITER_H
+
+#include "AppConfig.h"
+#if defined(OPENCOLLADA_SUPPORT)
+
 #include "Location.h"
 
-#include "COLLADASWLibraryGeometries.h"
-#include "COLLADASWLibraryVisualScenes.h"
-#include "COLLADASWStreamWriter.h"
+#include <COLLADASWLibraryGeometries.h>
+#include <COLLADASWLibraryVisualScenes.h>
+#include <COLLADASWStreamWriter.h>
 
 class GraphicObject;
 
@@ -148,3 +154,6 @@ public:
     */
    void writeSimpleGeometryNode(std::string nodeId, double rotation);
 };
+
+#endif
+#endif

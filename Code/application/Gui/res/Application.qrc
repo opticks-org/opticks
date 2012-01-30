@@ -274,6 +274,7 @@
    <file alias="libgeotiff">LibgeotiffLicense.txt</file>
    <file alias="libtiff">LibtiffLicense.txt</file>
    <file alias="minizip">MiniZipLicense.txt</file>
+   <file alias="opencollada">OpenColladaLicense.txt</file>
    <file alias="opencv">OpenCvLicense.txt</file>
    <file alias="openjpeg">OpenJpegLicense.txt</file>
    <file alias="opticks">OpticksLicense.txt</file>

@@ -10,6 +10,9 @@
 #ifndef COLLADAEXPORTER_H
 #define COLLADAEXPORTER_H
 
+#include "AppConfig.h"
+#if defined(OPENCOLLADA_SUPPORT)
+
 #include "ColladaStreamWriter.h"
 #include "ExporterShell.h"
 
@@ -27,4 +30,5 @@ private:
    bool isGraphicObjectSupported(GraphicObjectType type);
 };
 
+#endif
 #endif

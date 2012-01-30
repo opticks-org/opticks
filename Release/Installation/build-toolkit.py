@@ -353,7 +353,7 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir,
         cp_file2(s_app, d_app, "", "SamplePlugIns.sln")
         cp_file2(s_app, d_app, "PlugInManager", "PlugInModule.def")
 
-        plugins = plugins + sample_plugins
+        plugins = plugins + sample_plugins + [ "Collada" ]
         #Win32 Build
         if debug32:
             copy_windows_build(opticks_code_dir, out_dir,

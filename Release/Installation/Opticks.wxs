@@ -245,6 +245,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
                <File Name="AutoImporter.dll" Id="F__AutoImporterPlugIn" DiskId="1" />
                <File Name="BandBinning.dll" Id="F__BandBinningPlugIn" DiskId="1" />
                <File Name="BandMath.dll" Id="F__BandMathPlugIn" DiskId="1" />
+               <File Name="Collada.dll" Id="F__ColladaPlugIn" DiskId="1" />
                <File Name="ConvolutionFilter.dll" Id="F__ConvolutionFilterPlugIn" DiskId="1" />
                <File Name="CoreIo.dll" Id="F__CoreIoPlugIn" DiskId="1" />
                <File Name="Covariance.dll" Id="F__CovariancePlugIn" DiskId="1" />

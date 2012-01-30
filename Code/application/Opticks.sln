@@ -119,6 +119,10 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GeoMosaic", "PlugIns\src\GeoMosaic\GeoMosaic.vcxproj", "{1D53F1E6-7A2C-43C9-92E8-CD0CAC643824}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Collada", "PlugIns\src\Collada\Collada.vcxproj", "{8B25F228-190F-4C43-9545-70FB7511842C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4831B6DF-AEAC-4F12-A0B5-CE3CA703FB88} = {4831B6DF-AEAC-4F12-A0B5-CE3CA703FB88}
+		{BFAA94F6-8CA1-4159-B0E1-90B09D9C3056} = {BFAA94F6-8CA1-4159-B0E1-90B09D9C3056}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
