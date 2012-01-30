@@ -94,7 +94,7 @@ SubsetWidget::SubsetWidget(QWidget* pParent) :
    mpBandList->setWrapping(true);
    mpBandList->setFlow(QListView::TopToBottom);
    mpBandList->setMovement(QListView::Static);
-   mpBandList->setSelectionMode(QAbstractItemView::MultiSelection);
+   mpBandList->setSelectionMode(QAbstractItemView::ExtendedSelection);
    mpBandModel = new QStringListModel(this);
    mpBandList->setModel(mpBandModel);
 
