@@ -785,12 +785,6 @@ bool PlotSetGroupImp::toXml(XMLWriter* pXml) const
       pXml->addAttr("currentPlotSetId", pCurrentSet->getId());
    }
 
-   PlotWidget* pPlot = getCurrentPlot();
-   if (pPlot != NULL)
-   {
-      pXml->addAttr("currentPlotId", pPlot->getId());
-   }
-
    if (mPlotSets.empty() == false)
    {
       pXml->pushAddPoint(pXml->addElement("PlotSets"));
@@ -861,9 +855,8 @@ bool PlotSetGroupImp::fromXml(DOMNode* pDocument, unsigned int version)
       }
    }
 
-   // Current plot set and plot
+   // Current plot set
    std::string currentPlotSetId = A(pElem->getAttribute(X("currentPlotSetId")));
-   std::string currentPlotId = A(pElem->getAttribute(X("currentPlotId")));
 
    // Plot sets
    for (DOMNode* pChld = pDocument->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
@@ -905,7 +898,5 @@ bool PlotSetGroupImp::fromXml(DOMNode* pDocument, unsigned int version)
       }
    }
 
-   // Set the current plot
-   setCurrentPlot(dynamic_cast<PlotWidget*>(Service<SessionManager>()->getSessionItem(currentPlotId)));
    return true;
 }

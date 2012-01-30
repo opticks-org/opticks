@@ -720,6 +720,12 @@ bool PlotSetImp::toXml(XMLWriter* pXml) const
       }
    }
 
+   PlotWidget* pPlot = getCurrentPlot();
+   if (pPlot != NULL)
+   {
+      pXml->addAttr("currentPlotId", pPlot->getId());
+   }
+
    return true;
 }
 
@@ -749,6 +755,14 @@ bool PlotSetImp::fromXml(DOMNode* pDocument, unsigned int version)
             addPlot(pWidget);
          }
       }
+   }
+
+   string currentPlotId = A(pElem->getAttribute(X("currentPlotId")));
+
+   PlotWidget* pPlot = dynamic_cast<PlotWidget*>(Service<SessionManager>()->getSessionItem(currentPlotId));
+   if (pPlot != NULL)
+   {
+      setCurrentPlot(pPlot);
    }
 
    return true;
