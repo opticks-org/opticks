@@ -3030,7 +3030,7 @@ bool SpatialDataViewImp::canLinkWithView(View *pView, LinkType type)
          VERIFY(pOtherLayerList != NULL && pLayerList != NULL);
 
          RasterElement* pRaster = pLayerList->getPrimaryRasterElement();
-         RasterElement* pOtherRaster = pLayerList->getPrimaryRasterElement();
+         RasterElement* pOtherRaster = pOtherLayerList->getPrimaryRasterElement();
 
          if (pRaster != NULL && pRaster->isGeoreferenced() && 
             pOtherRaster != NULL && pOtherRaster->isGeoreferenced())
