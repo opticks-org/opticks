@@ -540,18 +540,34 @@ bool GeoAlgorithms::getAngleToNorth(const RasterElement* pRaster, double& angle,
       return false;
    }
 
+   const RasterDataDescriptor* pDescriptor = static_cast<const RasterDataDescriptor*>(pRaster->getDataDescriptor());
+   if (pDescriptor != NULL)
+   {
+      if (pixelStart.mY > pDescriptor->getRowCount() - 1)
+      {
+         pixelStart.mY = pDescriptor->getRowCount() - 1;
+      }
+      else if (pixelStart.mY < 0.0)
+      {
+         pixelStart.mY = 0.0;
+      }
+      if (pixelStart.mX > pDescriptor->getColumnCount() - 1)
+      {
+         pixelStart.mX = pDescriptor->getColumnCount() - 1;
+      }
+      else if (pixelStart.mX < 0.0)
+      {
+         pixelStart.mX = 0.0;
+      }
+   }
+
    LocationType geocoordStart = pRaster->convertPixelToGeocoord(pixelStart);
-   LocationType oneUpPixel(pixelStart.mX, pixelStart.mY - 1.0);
-   LocationType oneUpGeo = pRaster->convertPixelToGeocoord(oneUpPixel);
-   double degLatPerPixel = abs(oneUpGeo.mX - geocoordStart.mX);
+   // The amount of separation in Latitude needs to be great enough that geoToPixel
+   // in the respective georeference methods returns a distance that produces a 
+   // reliable angle. Here we picked 10 degrees but any sufficiently large value will do.
+   double degLatDelta = 10.0;
 
-   // degLatPerPixel can be extremely small for high spatial resolution data. This can result
-   // in unreliable orientation, especially when the scene coordinate and Lat/Lon coordinate
-   // systems are closely aligned. We'll avoid this problem by ensuring that a value of at
-   // least 0.001 degree (roughly 100 meters between points) is used for the calculation.
-   degLatPerPixel = std::max(0.001, degLatPerPixel);
-
-   LocationType geocoordEnd = LocationType(geocoordStart.mX + degLatPerPixel, geocoordStart.mY);
+   LocationType geocoordEnd = LocationType(geocoordStart.mX + degLatDelta, geocoordStart.mY);
    LocationType pixelEnd = pRaster->convertGeocoordToPixel(geocoordEnd);
 
    double dDeltaX = pixelEnd.mX - pixelStart.mX;

@@ -158,7 +158,10 @@ void NorthArrowObjectImp::orient()
    // Calculate the angle of the object relative to the pixel coordinates
    updateHandles();
 
-   LocationType pixelStart = mHandles[1];
+   // Create pixelStart and set it to the center of the bounding box
+   LocationType pixelStart;
+   pixelStart.mX = mHandles[1].mX;
+   pixelStart.mY = mHandles[3].mY;
 
    ProductView* pProductView = dynamic_cast<ProductView*>(pView);
    if (pProductView != NULL)
