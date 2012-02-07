@@ -171,12 +171,12 @@ FitsSignatureImporter::~FitsSignatureImporter()
       status = 0; \
       if (warn__) \
       { \
-         mWarnings[hdu__].push_back(std::string(pBuf)); \
+         warnings[hdu__].push_back(std::string(pBuf)); \
          onerr__; \
       } \
       else \
       { \
-         mErrors[hdu__].push_back(std::string(pBuf)); \
+         errors[hdu__].push_back(std::string(pBuf)); \
          onerr__; \
       } \
    }
@@ -192,28 +192,30 @@ FitsSignatureImporter::~FitsSignatureImporter()
 std::vector<ImportDescriptor*> FitsImporter::getImportDescriptors(const std::string& fname)
 {
    std::string filename = fname;
-   mErrors.clear();
-   mWarnings.clear();
+   std::vector<std::vector<std::string> >& errors = mErrors[fname];
+   std::vector<std::vector<std::string> >& warnings = mWarnings[fname];
+   errors.clear();
+   warnings.clear();
    int status=0;
    std::vector<ImportDescriptor*> descriptors;
 
    FitsFileResource pFile(filename);
    if (!pFile.isValid())
    {
-      mErrors.resize(1);
-      mErrors[0].push_back(pFile.getStatus());
+      errors.resize(1);
+      errors[0].push_back(pFile.getStatus());
       RETURN_DESCRIPTORS;
    }
 
    int hduCnt = 0;
    int specificHdu = 0;
    int hdu = 1;
-   if (!splitFilename(filename, hduCnt, specificHdu, hdu, pFile))
+   if (!splitFilename(filename, hduCnt, specificHdu, hdu, pFile, errors, warnings))
    {
       RETURN_DESCRIPTORS;
    }
-   mErrors.resize(hduCnt+1);
-   mWarnings.resize(hduCnt+1);
+   errors.resize(hduCnt+1);
+   warnings.resize(hduCnt+1);
 
    for(; hdu <= hduCnt; ++hdu)
    {
@@ -290,10 +292,10 @@ std::vector<ImportDescriptor*> FitsImporter::getImportDescriptors(const std::str
             fileEncoding = FLT8BYTES;
             break;
          default:
-            mWarnings[hdu].push_back("Unsupported BITPIX value " + StringUtilities::toDisplayString(bitpix) + ".");
+            warnings[hdu].push_back("Unsupported BITPIX value " + StringUtilities::toDisplayString(bitpix) + ".");
             continue;
          }
-         EncodingType dataEncoding = checkForOverflow(fileEncoding, pMetadata.get(), hdu);
+         EncodingType dataEncoding = checkForOverflow(fileEncoding, pMetadata.get(), hdu, errors, warnings);
          if (naxis == 1)
          {
             // 1-D data is a signature
@@ -318,7 +320,7 @@ std::vector<ImportDescriptor*> FitsImporter::getImportDescriptors(const std::str
          }
          else
          {
-            mErrors[hdu].push_back(StringUtilities::toDisplayString(naxis) + " axis data not supported.");
+            errors[hdu].push_back(StringUtilities::toDisplayString(naxis) + " axis data not supported.");
          }
 
          RasterDataDescriptor* pDataDesc = RasterUtilities::generateRasterDataDescriptor(
@@ -368,21 +370,27 @@ std::vector<ImportDescriptor*> FitsImporter::getImportDescriptors(const std::str
       }
       case ASCII_TBL:
       case BINARY_TBL:
-         mWarnings[hdu].push_back("Tables not supported. [HDU " + StringUtilities::toDisplayString(hdu) + "]");
+         warnings[hdu].push_back("Tables not supported. [HDU " + StringUtilities::toDisplayString(hdu) + "]");
          continue;
       default:
-         mWarnings[hdu].push_back("HDU " + StringUtilities::toDisplayString(hdu) + " is an unknown type.");
+         warnings[hdu].push_back("HDU " + StringUtilities::toDisplayString(hdu) + " is an unknown type.");
          continue;
       }
 
       pImportDescriptor->getDataDescriptor()->setMetadata(pMetadata.release());
-      pImportDescriptor->setImported(mErrors[hdu].empty());
+      pImportDescriptor->setImported(errors[hdu].empty());
       descriptors.push_back(pImportDescriptor.release());
    }
    RETURN_DESCRIPTORS;
 }
 
-bool FitsImporter::splitFilename(std::string& filename, int& hduCnt, int& specificHdu, int& hdu, FitsFileResource& pFile)
+bool FitsImporter::splitFilename(std::string& filename,
+                                 int& hduCnt,
+                                 int& specificHdu,
+                                 int& hdu,
+                                 FitsFileResource& pFile,
+                                 std::vector<std::vector<std::string> >& errors,
+                                 std::vector<std::vector<std::string> >& warnings)
 {
    int status = 0;
    CHECK_FITS(fits_get_num_hdus(pFile, &hduCnt, &status), hdu, false, return false);
@@ -405,7 +413,11 @@ bool FitsImporter::splitFilename(std::string& filename, int& hduCnt, int& specif
    return true;
 }
 
-EncodingType FitsImporter::checkForOverflow(EncodingType encoding, DynamicObject *pMetadata, int hdu)
+EncodingType FitsImporter::checkForOverflow(EncodingType encoding,
+                                            DynamicObject *pMetadata,
+                                            int hdu,
+                                            std::vector<std::vector<std::string> >& errors,
+                                            std::vector<std::vector<std::string> >& warnings)
 {
    double bzero = 0.0, bscale = 1.0, datamax = 0.0;
    bzero = StringUtilities::fromDisplayString<double>(
@@ -416,7 +428,7 @@ EncodingType FitsImporter::checkForOverflow(EncodingType encoding, DynamicObject
       dv_cast<std::string>(pMetadata->getAttributeByPath("FITS/DATAMAX"), "0.0"));
    if (bscale == 0.0)
    {
-      mErrors[hdu].push_back("BSCALE is 0.0 which will set all values to 0.0. This result is not useful. " \
+      errors[hdu].push_back("BSCALE is 0.0 which will set all values to 0.0. This result is not useful. " \
                              "You might want to check the validity of the data file.");
       return encoding;
    }
@@ -426,7 +438,7 @@ EncodingType FitsImporter::checkForOverflow(EncodingType encoding, DynamicObject
    {
       if (encoding == INT4SCOMPLEX)
       {
-         mWarnings[hdu].push_back("Data scaling will be applied, converting to float complex.");
+         warnings[hdu].push_back("Data scaling will be applied, converting to float complex.");
          return FLT8COMPLEX;
       }
       else if (encoding == FLT8COMPLEX)
@@ -435,7 +447,7 @@ EncodingType FitsImporter::checkForOverflow(EncodingType encoding, DynamicObject
       }
       else if (encoding != FLT8BYTES)
       {
-         mWarnings[hdu].push_back("Data scaling will be applied, converting to 8-byte float.");
+         warnings[hdu].push_back("Data scaling will be applied, converting to 8-byte float.");
          return FLT8BYTES;
       }
    }
@@ -443,7 +455,7 @@ EncodingType FitsImporter::checkForOverflow(EncodingType encoding, DynamicObject
    {
       if (datamax == 0.0)
       {
-         mWarnings[hdu].push_back(
+         warnings[hdu].push_back(
             "Data scaling will be applied, you may need to change the Data Type in the import Data tab or overflow may occur.");
          return encoding;
       }
@@ -465,7 +477,7 @@ EncodingType FitsImporter::checkForOverflow(EncodingType encoding, DynamicObject
       case INT4SBYTES:
          if (newmax > std::numeric_limits<int>::max())
          {
-            mWarnings[hdu].push_back(
+            warnings[hdu].push_back(
                "Data scaling will be applied, you may need to change the Data Type in the import Data tab or overflow may occur.");
          }
          return encoding;
@@ -484,7 +496,7 @@ EncodingType FitsImporter::checkForOverflow(EncodingType encoding, DynamicObject
       case INT4UBYTES:
          if (newmax > std::numeric_limits<unsigned int>::max())
          {
-            mWarnings[hdu].push_back(
+            warnings[hdu].push_back(
                "Data scaling will be applied, you may need to change the Data Type in the import Data tab or overflow may occur.");
          }
          return encoding;
@@ -497,13 +509,13 @@ EncodingType FitsImporter::checkForOverflow(EncodingType encoding, DynamicObject
       case FLT8BYTES:
          if (newmax == std::numeric_limits<double>::infinity())
          {
-            mWarnings[hdu].push_back(
+            warnings[hdu].push_back(
                "Data scaling will be applied, you may need to change the Data Type in the import Data tab or overflow may occur.");
          }
          return encoding;
       case INT4SCOMPLEX:
       case FLT8COMPLEX:
-         mWarnings[hdu].push_back(
+         warnings[hdu].push_back(
             "Data scaling will be applied, you may need to change the Data Type in the import Data tab or overflow may occur.");
          return encoding;
       }
@@ -520,7 +532,9 @@ unsigned char FitsImporter::getFileAffinity(const std::string &filename)
       int specificHdu = 0;
       int hdu = 1;
       std::string fname(filename);
-      if (splitFilename(fname, hduCnt, specificHdu, hdu, pFile))
+      std::vector<std::vector<std::string> >& errors = mErrors[fname];
+      std::vector<std::vector<std::string> >& warnings = mWarnings[fname];
+      if (splitFilename(fname, hduCnt, specificHdu, hdu, pFile, errors, warnings))
       {
          for(; hdu <= hduCnt; ++hdu)
          {
@@ -539,20 +553,28 @@ unsigned char FitsImporter::getFileAffinity(const std::string &filename)
 
 bool FitsImporter::validate(const DataDescriptor *pDescriptor, std::string &errorMessage) const
 {
-   if (!mErrors[0].empty())
-   {
-      // Errors for the entire file
-      errorMessage = StringUtilities::join(mErrors[0], "\n");
-      return false;
-   }
-
-   // Errors for a specific dataset in the file
+   VERIFY(pDescriptor);
    int hdu = StringUtilities::fromDisplayString<int>(pDescriptor->getFileDescriptor()->getDatasetLocation());
-   errorMessage = "";
-   if (!mErrors[hdu].empty())
+   const std::string fname(pDescriptor->getFileDescriptor()->getFilename().getFullPathAndName());
+   std::map<std::string, std::vector<std::vector<std::string> > >::const_iterator errit = mErrors.find(fname);
+   std::map<std::string, std::vector<std::vector<std::string> > >::const_iterator warnit = mWarnings.find(fname);
+   if (errit != mErrors.end())
    {
-      errorMessage = StringUtilities::join(mErrors[hdu], "\n");
-      return false;
+      const std::vector<std::vector<std::string> >& errors = errit->second;
+      if (!errors[0].empty())
+      {
+         // Errors for the entire file
+         errorMessage = StringUtilities::join(errors[0], "\n");
+         return false;
+      }
+
+      // Errors for a specific dataset in the file
+      errorMessage = "";
+      if (!errors[hdu].empty())
+      {
+         errorMessage = StringUtilities::join(errors[hdu], "\n");
+         return false;
+      }
    }
 
    std::string baseErrorMessage;
@@ -575,14 +597,18 @@ bool FitsImporter::validate(const DataDescriptor *pDescriptor, std::string &erro
 
    errorMessage = baseErrorMessage;
 
-   if (!mWarnings[hdu].empty())
+   if (warnit != mWarnings.end())
    {
-      if (!baseErrorMessage.empty())
+      const std::vector<std::vector<std::string> >& warnings = warnit->second;
+      if (!warnings[hdu].empty())
       {
-         errorMessage += "\n";
-      }
+         if (!baseErrorMessage.empty())
+         {
+            errorMessage += "\n";
+         }
 
-      errorMessage += StringUtilities::join(mWarnings[hdu], "\n");
+         errorMessage += StringUtilities::join(warnings[hdu], "\n");
+      }
    }
 
    return valid;

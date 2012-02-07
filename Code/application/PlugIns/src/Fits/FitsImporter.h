@@ -13,6 +13,7 @@
 #include "CachedPager.h"
 #include "RasterElementImporterShell.h"
 
+#include <map>
 #include <fitsio.h>
 #define _TCHAR_DEFINED
 
@@ -49,11 +50,13 @@ protected:
    virtual int getValidationTest(const DataDescriptor* pDescriptor) const;
 
 private:
-   bool splitFilename(std::string& filename, int& hduCnt, int& specificHdu, int& hdu, FitsFileResource& pFile);
-   EncodingType checkForOverflow(EncodingType encoding, DynamicObject* pMetadata, int hdu);
+   bool splitFilename(std::string& filename, int& hduCnt, int& specificHdu, int& hdu, FitsFileResource& pFile,
+      std::vector<std::vector<std::string> >& errors, std::vector<std::vector<std::string> >& warnings);
+   EncodingType checkForOverflow(EncodingType encoding, DynamicObject* pMetadata, int hdu,
+      std::vector<std::vector<std::string> >& errors, std::vector<std::vector<std::string> >& warnings);
 
-   std::vector<std::vector<std::string> > mErrors;
-   std::vector<std::vector<std::string> > mWarnings;
+   std::map<std::string, std::vector<std::vector<std::string> > > mErrors;
+   std::map<std::string, std::vector<std::vector<std::string> > > mWarnings;
 };
 
 class FitsSignatureImporter : public FitsImporter
