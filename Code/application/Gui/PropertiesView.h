@@ -10,14 +10,12 @@
 #ifndef PROPERTIESVIEW_H
 #define PROPERTIESVIEW_H
 
-#include <QtGui/QCheckBox>
-#include <QtGui/QComboBox>
-
 #include "LabeledSectionGroup.h"
 
 #include <string>
 
 class CustomColorButton;
+class QComboBox;
 class SessionItem;
 class View;
 
@@ -25,7 +23,7 @@ class PropertiesView : public LabeledSectionGroup
 {
 public:
    PropertiesView();
-   ~PropertiesView();
+   virtual ~PropertiesView();
 
    bool initialize(SessionItem* pSessionItem);
    bool applyChanges();
@@ -43,12 +41,12 @@ public:
 private:
    PropertiesView(const PropertiesView& rhs);
    PropertiesView& operator=(const PropertiesView& rhs);
+
    View* mpView;
 
    // General
    CustomColorButton* mpColorButton;
    QComboBox* mpOriginCombo;
-   QCheckBox* mpCrosshairCheck;
 };
 
 #endif

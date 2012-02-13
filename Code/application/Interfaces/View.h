@@ -51,16 +51,20 @@ class UndoAction;
 class View : public SessionItem, public Subject
 {
 public:
-   SETTING(BackgroundColor, View, ColorType, ColorType())
-   SETTING(DataOrigin, View, DataOrigin, UPPER_LEFT)
-   SETTING(InsetShowCoordinates, View, bool, false)
-   SETTING(InsetSize, View, unsigned int, 300)
-   SETTING(InsetZoom, View, unsigned int, 5)
-   SETTING(InsetZoomMode, View, InsetZoomMode, ABSOLUTE_MODE)
-   SETTING(MousePanSensitivity, View, int, 100)
+   SETTING(BackgroundColor, View, ColorType, ColorType());
+   SETTING(DataOrigin, View, DataOrigin, UPPER_LEFT);
+   SETTING(InsetShowCoordinates, View, bool, false);
+   SETTING(InsetSize, View, unsigned int, 300);
+   SETTING(InsetZoom, View, unsigned int, 5);
+   SETTING(InsetZoomMode, View, InsetZoomMode, ABSOLUTE_MODE);
+   SETTING(MousePanSensitivity, View, int, 100);
    SETTING(PixelValueMinimumFontSize, View, unsigned int, 5);
    SETTING(PixelValueMaximumFontSize, View, unsigned int, 20);
-   SETTING(DisplayCrosshair, View, bool, false)
+   SETTING(DisplayCrosshair, View, bool, false);
+   SETTING(CrosshairColor, View, ColorType, ColorType(255, 175, 127));
+   SETTING(CrosshairBlend, View, bool, true);
+   SETTING(CrosshairSize, View, int, 20);
+   SETTING(CrosshairWidth, View, unsigned int, 1);
    SETTING(UseViewResolution, View, bool, false);
    SETTING(AspectRatioLock, View, bool, false);
    SETTING(OutputWidth, View, unsigned int, 0);
@@ -641,25 +645,130 @@ public:
    /**
     *  Toggles the display of the view crosshair.
     *
-    *  This methods toggles the display of a crosshair mark in the center of
+    *  This methods toggles the display of a crosshair marker in the center of
     *  the view.
     *
     *  @param   bEnable
-    *           Set this value to TRUE to display the crosshair in the view or
-    *           to FALSE to hide the crosshair.
+    *           Set this value to \c true to display the crosshair in the view
+    *           or to \c false to hide the crosshair.
     *
-    *  @return  TRUE if the crosshair was successfully enabled or disabled, or
-    *           FALSE if the crosshair is not supported by the view.
+    *  @return  Returns \c true if the crosshair was successfully enabled or
+    *           disabled, or \c false if the crosshair is not supported by the
+    *           view.
     */
    virtual bool enableCrossHair(bool bEnable) = 0;
 
    /**
     *  Queries whether the view crosshair is enabled.
     *
-    *  @return  TRUE if the crosshair is enabled, whereby it is drawn in the
-    *           center of the view, or FALSE if the crosshair is disabled.
+    *  @return  Returns \c true if the crosshair is currently enabled, whereby
+    *           it is drawn in the center of the view, or \c false if the
+    *           crosshair is currently disabled.
     */
    virtual bool isCrossHairEnabled() const = 0;
+
+   /**
+    *  Sets the crosshair color in the view.
+    *
+    *  This method does not call refresh() so that multiple calls to modify view
+    *  settings can be made without refreshing the view after each modification.
+    *
+    *  Calling this method still sets the crosshair color, even if
+    *  isCrossHairEnabled() returns \c false.
+    *
+    *  @param   color
+    *           The new crosshair color.  This method does nothing if an invalid
+    *           color is passed in.
+    *
+    *  @see     ColorType::isValid()
+    */
+   virtual void setCrossHairColor(const ColorType& color) = 0;
+
+   /**
+    *  Returns the crosshair color.
+    *
+    *  @return  The current crosshair color.
+    */
+   virtual ColorType getCrossHairColor() const = 0;
+
+   /**
+    *  Sets the crosshair color to be blended with the view color.
+    *
+    *  Enabling the blended state combines the crosshair color with the color in
+    *  the view just behind the crosshair to provide enough contrast for the
+    *  crosshair to always be visible.
+    *
+    *  This method does not call refresh() so that multiple calls to modify view
+    *  settings can be made without refreshing the view after each modification.
+    *
+    *  Calling this method still sets the crosshair blended state, even if
+    *  isCrossHairEnabled() returns \c false.
+    *
+    *  @param   blended
+    *           Set this value to \c true to enable blending the crosshair color
+    *           with the color in the view just behind the crosshair.  Set this
+    *           value to \c false to display the crosshair as a solid color,
+    *           regardless of the view color.
+    *
+    *  @see     setCrossHairColor()
+    */
+   virtual void setCrossHairBlended(bool blended) = 0;
+
+   /**
+    *  Returns the blended state when drawing the crosshair.
+    *
+    *  @return  Returns \c true if the crosshair color will be blended with the
+    *           view color when drawn.  Returns \c false if the crosshair is
+    *           drawn as a solid color regardless of the view color.
+    *
+    *  @see     setCrossHairBlended()
+    */
+   virtual bool isCrossHairBlended() const = 0;
+
+   /**
+    *  Sets the overall width and height of the crosshair in the view in screen
+    *  pixels.
+    *
+    *  This method does not call refresh() so that multiple calls to modify view
+    *  settings can be made without refreshing the view after each modification.
+    *
+    *  Calling this method still sets the crosshair size, even if
+    *  isCrossHairEnabled() returns \c false.
+    *
+    *  @param   size
+    *           The crosshair width and height in screen pixels.  This method
+    *           does nothing if a value less than one is passed in.
+    */
+   virtual void setCrossHairSize(int size) = 0;
+
+   /**
+    *  Returns the crosshair size.
+    *
+    *  @return  The current crosshair size.
+    */
+   virtual int getCrossHairSize() const = 0;
+
+   /**
+    *  Sets the line width of the crosshair in the view.
+    *
+    *  This method does not call refresh() so that multiple calls to modify view
+    *  settings can be made without refreshing the view after each modification.
+    *
+    *  Calling this method still sets the crosshair line width, even if
+    *  isCrossHairEnabled() returns \c false.
+    *
+    *  @param   width
+    *           The crosshair line width in screen pixels.  This method does
+    *           nothing if a value of zero is passed in.
+    */
+   virtual void setCrossHairWidth(unsigned int width) = 0;
+
+   /**
+    *  Returns the crosshair line width.
+    *
+    *  @return  The current crosshair line width in screen pixels.
+    */
+   virtual unsigned int getCrossHairWidth() const = 0;
 
    /**
     *  Redraws the current contents of the view.

@@ -62,9 +62,12 @@ ViewImp::ViewImp(const string& id, const string& viewName, QGLContext* drawConte
       ViewImp::getShareWidget()),
    SessionItemImp(id, viewName),
    mbLinking(false),
+   mBackgroundColor(COLORTYPE_TO_QCOLOR(View::getSettingBackgroundColor())),
+   mClassificationFont("Helvetica", 12, QFont::Bold),
    mClassificationColor(Qt::white),
    mClassificationEnabled(ConfigurationSettings::getSettingDisplayClassificationMarkings()),
    mReleaseInfoEnabled(true),
+   mOrigin(View::getSettingDataOrigin()),
    mpMouseMode(NULL),
    mpOldMouseMode(NULL),
    mMinX(0.0),
@@ -72,22 +75,18 @@ ViewImp::ViewImp(const string& id, const string& viewName, QGLContext* drawConte
    mMaxX(1.0),
    mMaxY(1.0),
    mInset(false),
-   mCrossHair(false),
+   mCrossHair(View::getSettingDisplayCrosshair()),
+   mCrossHairColor(COLORTYPE_TO_QCOLOR(View::getSettingCrosshairColor())),
+   mCrossHairBlend(View::getSettingCrosshairBlend()),
+   mCrossHairSize(View::getSettingCrosshairSize()),
+   mCrossHairWidth(View::getSettingCrosshairWidth()),
    mpAnimationController(NULL),
    mpUndoStack(new UndoStack(this)),
    mUndoBlocked(false),
    mpUndoGroup(NULL),
    mpSubImageIterator(NULL)
 {
-   ColorType color = View::getSettingBackgroundColor();
-   mBackgroundColor = COLORTYPE_TO_QCOLOR(color);
-   mCrossHair = View::getSettingDisplayCrosshair();
-   mOrigin = View::getSettingDataOrigin();
    mMousePanTimer.setInterval(0);
-
-   mClassificationFont.setFamily("Helvetica");
-   mClassificationFont.setPointSize(12);
-   mClassificationFont.setBold(true);
 
    memset(mModelMatrix, 0, 16 * sizeof(double));
    memset(mProjMatrix, 0, 16 * sizeof(double));
@@ -685,6 +684,26 @@ LocationType ViewImp::getInsetLocation() const
 bool ViewImp::isCrossHairEnabled() const
 {
    return mCrossHair;
+}
+
+QColor ViewImp::getCrossHairColor() const
+{
+   return mCrossHairColor;
+}
+
+bool ViewImp::isCrossHairBlended() const
+{
+   return mCrossHairBlend;
+}
+
+int ViewImp::getCrossHairSize() const
+{
+   return mCrossHairSize;
+}
+
+unsigned int ViewImp::getCrossHairWidth() const
+{
+   return mCrossHairWidth;
 }
 
 void ViewImp::draw()
@@ -1440,6 +1459,57 @@ bool ViewImp::enableCrossHair(bool bEnable)
    return false;
 }
 
+void ViewImp::setCrossHairColor(const QColor& color)
+{
+   if (color.isValid() == false)
+   {
+      return;
+   }
+
+   if (color != mCrossHairColor)
+   {
+      mCrossHairColor = color;
+      emit crossHairColorChanged(mCrossHairColor);
+   }
+}
+
+void ViewImp::setCrossHairBlended(bool blended)
+{
+   if (blended != mCrossHairBlend)
+   {
+      mCrossHairBlend = blended;
+      emit crossHairBlendChanged(mCrossHairBlend);
+   }
+}
+
+void ViewImp::setCrossHairSize(int size)
+{
+   if (size < 1)
+   {
+      return;
+   }
+
+   if (size != mCrossHairSize)
+   {
+      mCrossHairSize = size;
+      emit crossHairSizeChanged(mCrossHairSize);
+   }
+}
+
+void ViewImp::setCrossHairWidth(unsigned int width)
+{
+   if (width == 0)
+   {
+      return;
+   }
+
+   if (width != mCrossHairWidth)
+   {
+      mCrossHairWidth = width;
+      emit crossHairWidthChanged(mCrossHairWidth);
+   }
+}
+
 void ViewImp::refresh()
 {
    update();
@@ -1693,23 +1763,28 @@ void ViewImp::drawCrossHair()
    int viewPort[4];
    glGetIntegerv(GL_VIEWPORT, viewPort);
 
-   const int size = 10;
    int centerX = viewPort[0] + (viewPort[2] / 2);
    int centerY = viewPort[1] + (viewPort[3] / 2);
 
-   glLineWidth(1.0);
-   glColor3ub(0xff, 0xaf, 0x7f);
+   glLineWidth(mCrossHairWidth);
+   glColor3ub(mCrossHairColor.red(), mCrossHairColor.green(), mCrossHairColor.blue());
 
    glPushAttrib(GL_COLOR_BUFFER_BIT);
-   glEnable(GL_BLEND);
-   glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ZERO);
+   if (mCrossHairBlend == true)
+   {
+      glEnable(GL_BLEND);
+      glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ZERO);
+   }
    glBegin(GL_LINES);
-   glVertex2f(centerX, centerY + size);
-   glVertex2f(centerX, centerY - size);
-   glVertex2f(centerX + size, centerY);
-   glVertex2f(centerX - size, centerY);
+   glVertex2f(centerX, centerY + (mCrossHairSize / 2));
+   glVertex2f(centerX, centerY - (mCrossHairSize / 2));
+   glVertex2f(centerX + (mCrossHairSize / 2), centerY);
+   glVertex2f(centerX - (mCrossHairSize / 2), centerY);
    glEnd();
-   glDisable(GL_BLEND);
+   if (mCrossHairBlend == true)
+   {
+      glDisable(GL_BLEND);
+   }
    glPopAttrib();
 }
 

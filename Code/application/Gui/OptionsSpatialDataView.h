@@ -11,14 +11,16 @@
 #define OPTIONSSPATIALDATAVIEW_H
 
 #include <QtGui/QWidget>
+
 #include "AppVersion.h"
 
+class CustomColorButton;
+class LineWidthComboBox;
 class PanLimitTypeComboBox;
 class QCheckBox;
 class QComboBox;
 class QDoubleSpinBox;
 class QSpinBox;
-class QRadioButton;
 
 class OptionsSpatialDataView : public QWidget
 {
@@ -86,6 +88,7 @@ public:
 private:
    OptionsSpatialDataView(const OptionsSpatialDataView& rhs);
    OptionsSpatialDataView& operator=(const OptionsSpatialDataView& rhs);
+
    QSpinBox* mpInsetSizeSpin;
    QSpinBox* mpInsetZoomSpin;
    QComboBox* mpInsetZoom;
@@ -93,6 +96,10 @@ private:
    QCheckBox* mpDisplayOrigin;
    QCheckBox* mpDisplayAxis;
    QCheckBox* mpDisplayCrosshair;
+   CustomColorButton* mpCrosshairColorButton;
+   QCheckBox* mpCrosshairBlendCheck;
+   QSpinBox* mpCrosshairSizeSpin;
+   LineWidthComboBox* mpCrosshairWidthCombo;
    QSpinBox* mpFastPanSpeedSpin;
    QSpinBox* mpSlowPanSpeedSpin;
    QSpinBox* mpMousePanSensitivitySpin;

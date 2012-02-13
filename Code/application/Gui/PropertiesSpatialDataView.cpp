@@ -7,20 +7,13 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QCheckBox>
-#include <QtGui/QComboBox>
-#include <QtGui/QDoubleSpinBox>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QLabel>
-#include <QtGui/QLayout>
-#include <QtGui/QMessageBox>
-#include <QtGui/QSpinBox>
-#include <QtGui/QVBoxLayout>
-
+#include "AppVerify.h"
 #include "AppVersion.h"
 #include "ConfigurationSettings.h"
+#include "CustomColorButton.h"
 #include "DesktopServices.h"
 #include "LabeledSection.h"
+#include "LineWidthComboBox.h"
 #include "PanLimitTypeComboBox.h"
 #include "PropertiesSpatialDataView.h"
 #include "SpatialDataViewImp.h"
@@ -29,6 +22,16 @@
 #include "TypesFile.h"
 #include "Undo.h"
 #include "Window.h"
+
+#include <QtGui/QCheckBox>
+#include <QtGui/QComboBox>
+#include <QtGui/QDoubleSpinBox>
+#include <QtGui/QGridLayout>
+#include <QtGui/QHBoxLayout>
+#include <QtGui/QLabel>
+#include <QtGui/QMessageBox>
+#include <QtGui/QSpinBox>
+#include <QtGui/QStyleOptionButton>
 
 #include <limits>
 #include <vector>
@@ -76,21 +79,47 @@ PropertiesSpatialDataView::PropertiesSpatialDataView() :
    // Image
    QWidget* pImageWidget = new QWidget(this);
 
+   mpSmoothCheck = new QCheckBox("Smooth pixel edges", pImageWidget);
    mpOriginCheck = new QCheckBox("Display origin location", pImageWidget);
    mpAxisCheck = new QCheckBox("Display orientation axis", pImageWidget);
-   mpSmoothCheck = new QCheckBox("Smooth pixel edges", pImageWidget);
+   mpCrosshairCheck = new QCheckBox("Crosshair", pImageWidget);
+   mpCrosshairColorLabel = new QLabel("Color:", this);
+   mpCrosshairColorButton = new CustomColorButton(this);
+   mpCrosshairColorButton->usePopupGrid(true);
+   mpCrosshairBlendCheck = new QCheckBox("Blend", this);
+   mpCrosshairBlendCheck->setToolTip("If enabled, the crosshair color is combined with the color in "
+      "the view\njust behind the crosshair to provide enough contrast for the crosshair\nto always "
+      "be visible.  If disabled, the crosshair is drawn as a solid color.");
+   mpCrosshairSizeLabel = new QLabel("Size:", this);
+   mpCrosshairSizeSpin = new QSpinBox(this);
+   mpCrosshairSizeSpin->setSuffix(" Pixel(s)");
+   mpCrosshairSizeSpin->setRange(1, numeric_limits<int>::max());
+   mpCrosshairWidthLabel = new QLabel("Width:", this);
+   mpCrosshairWidthCombo = new LineWidthComboBox(this);
 
    LabeledSection* pImageSection = new LabeledSection(pImageWidget, "Image", this);
 
-   QVBoxLayout* pImageLayout = new QVBoxLayout(pImageWidget);
+   QGridLayout* pImageLayout = new QGridLayout(pImageWidget);
    pImageLayout->setMargin(0);
    pImageLayout->setSpacing(5);
-   pImageLayout->addWidget(mpOriginCheck);
-   pImageLayout->addWidget(mpAxisCheck);
-   pImageLayout->addWidget(mpSmoothCheck);
-   pImageLayout->addStretch();
+   pImageLayout->addWidget(mpSmoothCheck, 0, 0, 1, 4);
+   pImageLayout->addWidget(mpOriginCheck, 1, 0, 1, 4);
+   pImageLayout->addWidget(mpAxisCheck, 2, 0, 1, 4);
+   pImageLayout->addWidget(mpCrosshairCheck, 3, 0, 1, 4);
+   pImageLayout->addWidget(mpCrosshairColorLabel, 4, 1);
+   pImageLayout->addWidget(mpCrosshairColorButton, 4, 2);
+   pImageLayout->addWidget(mpCrosshairBlendCheck, 4, 3, Qt::AlignLeft);
+   pImageLayout->addWidget(mpCrosshairSizeLabel, 5, 1);
+   pImageLayout->addWidget(mpCrosshairSizeSpin, 5, 2, 1, 2, Qt::AlignLeft);
+   pImageLayout->addWidget(mpCrosshairWidthLabel, 6, 1);
+   pImageLayout->addWidget(mpCrosshairWidthCombo, 6, 2, 1, 2, Qt::AlignLeft);
+   QStyleOptionButton option;
+   option.initFrom(mpCrosshairCheck);
+   int checkBoxWidth = style()->subElementRect(QStyle::SE_CheckBoxIndicator, &option).width();
+   pImageLayout->setColumnMinimumWidth(0, checkBoxWidth);
+   pImageLayout->setColumnStretch(3, 10);
 
-   // classification markings
+   // Classification markings
    LabeledSection* pMarkingsSection(NULL);
    if (ConfigurationSettings::getSettingDisplayClassificationMarkings())
    {
@@ -119,6 +148,15 @@ PropertiesSpatialDataView::PropertiesSpatialDataView() :
       addSection(pMarkingsSection);
    }
    addStretch(10);
+
+   // Connections
+   VERIFYNR(connect(mpCrosshairCheck, SIGNAL(toggled(bool)), mpCrosshairColorLabel, SLOT(setEnabled(bool))));
+   VERIFYNR(connect(mpCrosshairCheck, SIGNAL(toggled(bool)), mpCrosshairColorButton, SLOT(setEnabled(bool))));
+   VERIFYNR(connect(mpCrosshairCheck, SIGNAL(toggled(bool)), mpCrosshairBlendCheck, SLOT(setEnabled(bool))));
+   VERIFYNR(connect(mpCrosshairCheck, SIGNAL(toggled(bool)), mpCrosshairSizeLabel, SLOT(setEnabled(bool))));
+   VERIFYNR(connect(mpCrosshairCheck, SIGNAL(toggled(bool)), mpCrosshairSizeSpin, SLOT(setEnabled(bool))));
+   VERIFYNR(connect(mpCrosshairCheck, SIGNAL(toggled(bool)), mpCrosshairWidthLabel, SLOT(setEnabled(bool))));
+   VERIFYNR(connect(mpCrosshairCheck, SIGNAL(toggled(bool)), mpCrosshairWidthCombo, SLOT(setEnabled(bool))));
 }
 
 PropertiesSpatialDataView::~PropertiesSpatialDataView()
@@ -138,9 +176,21 @@ bool PropertiesSpatialDataView::initialize(SessionItem* pSessionItem)
    mpMaxZoomSpin->setValue(mpView->getMaximumZoom() * 100);
 
    // Image
+   mpSmoothCheck->setChecked(mpView->getTextureMode() == TEXTURE_LINEAR);
    mpOriginCheck->setChecked(mpView->isOriginDisplayed());
    mpAxisCheck->setChecked(mpView->isAxisDisplayed());
-   mpSmoothCheck->setChecked(mpView->getTextureMode() == TEXTURE_LINEAR);
+   mpCrosshairCheck->setChecked(mpView->isCrossHairEnabled());
+   mpCrosshairColorLabel->setEnabled(mpView->isCrossHairEnabled());
+   mpCrosshairColorButton->setColor(mpView->getCrossHairColor());
+   mpCrosshairColorButton->setEnabled(mpView->isCrossHairEnabled());
+   mpCrosshairBlendCheck->setChecked(mpView->isCrossHairBlended());
+   mpCrosshairBlendCheck->setEnabled(mpView->isCrossHairEnabled());
+   mpCrosshairSizeLabel->setEnabled(mpView->isCrossHairEnabled());
+   mpCrosshairSizeSpin->setValue(mpView->getCrossHairSize());
+   mpCrosshairSizeSpin->setEnabled(mpView->isCrossHairEnabled());
+   mpCrosshairWidthLabel->setEnabled(mpView->isCrossHairEnabled());
+   mpCrosshairWidthCombo->setCurrentValue(mpView->getCrossHairWidth());
+   mpCrosshairWidthCombo->setEnabled(mpView->isCrossHairEnabled());
 
    SpatialDataViewImp* pViewImp = dynamic_cast<SpatialDataViewImp*>(mpView);
    if (pViewImp != NULL)
@@ -148,7 +198,7 @@ bool PropertiesSpatialDataView::initialize(SessionItem* pSessionItem)
       mpSmoothCheck->setEnabled(pViewImp->isSmoothingAvailable());
    }
 
-   // classification markings
+   // Classification markings
    if (mpClassificationPosition != NULL)
    {
       string positionStr = StringUtilities::toDisplayString<PositionType>(mpView->getClassificationPosition());
@@ -211,9 +261,6 @@ bool PropertiesSpatialDataView::applyChanges()
    }
 
    // Image
-   mpView->displayOrigin(mpOriginCheck->isChecked());
-   mpView->displayAxis(mpAxisCheck->isChecked());
-
    TextureMode textureMode;
    if (mpSmoothCheck->isChecked() == true)
    {
@@ -225,8 +272,19 @@ bool PropertiesSpatialDataView::applyChanges()
    }
 
    mpView->setTextureMode(textureMode);
+   mpView->displayOrigin(mpOriginCheck->isChecked());
+   mpView->displayAxis(mpAxisCheck->isChecked());
+   mpView->enableCrossHair(mpCrosshairCheck->isChecked());
 
-   // classification markings
+   if (mpCrosshairCheck->isChecked() == true)
+   {
+      mpView->setCrossHairColor(QCOLOR_TO_COLORTYPE(mpCrosshairColorButton->getColor()));
+      mpView->setCrossHairBlended(mpCrosshairBlendCheck->isChecked());
+      mpView->setCrossHairSize(mpCrosshairSizeSpin->value());
+      mpView->setCrossHairWidth(mpCrosshairWidthCombo->getCurrentValue());
+   }
+
+   // Classification markings
    if (mpClassificationPosition != NULL)
    {
       PositionType ePosition = StringUtilities::fromDisplayString<PositionType>(

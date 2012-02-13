@@ -14,13 +14,16 @@
 
 #include <string>
 
+class CustomColorButton;
+class LineWidthComboBox;
 class PanLimitTypeComboBox;
 class QCheckBox;
 class QComboBox;
 class QDoubleSpinBox;
+class QLabel;
+class QSpinBox;
 class SessionItem;
 class SpatialDataView;
-class QSpinBox;
 
 class PropertiesSpatialDataView : public LabeledSectionGroup
 {
@@ -44,6 +47,7 @@ public:
 private:
    PropertiesSpatialDataView(const PropertiesSpatialDataView& rhs);
    PropertiesSpatialDataView& operator=(const PropertiesSpatialDataView& rhs);
+
    SpatialDataView* mpView;
 
    // Pan and zoom
@@ -52,9 +56,17 @@ private:
    QSpinBox* mpMaxZoomSpin;
 
    // Image
+   QCheckBox* mpSmoothCheck;
    QCheckBox* mpOriginCheck;
    QCheckBox* mpAxisCheck;
-   QCheckBox* mpSmoothCheck;
+   QCheckBox* mpCrosshairCheck;
+   QLabel* mpCrosshairColorLabel;
+   CustomColorButton* mpCrosshairColorButton;
+   QCheckBox* mpCrosshairBlendCheck;
+   QLabel* mpCrosshairSizeLabel;
+   QSpinBox* mpCrosshairSizeSpin;
+   QLabel* mpCrosshairWidthLabel;
+   LineWidthComboBox* mpCrosshairWidthCombo;
 
    // classification markings
    QComboBox* mpClassificationPosition;

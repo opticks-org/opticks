@@ -10,8 +10,6 @@
 #ifndef LINEWIDTHCOMBOBOX_H
 #define LINEWIDTHCOMBOBOX_H
 
-#include "TypesFile.h"
-
 #include <QtGui/QComboBox>
 
 class LineWidthComboBox : public QComboBox
@@ -20,10 +18,12 @@ class LineWidthComboBox : public QComboBox
 
 public:
    LineWidthComboBox(QWidget* pParent);
+   virtual ~LineWidthComboBox();
+
    void setCurrentValue(unsigned int value);
    unsigned int getCurrentValue() const;
 
-signals: 
+signals:
    void valueChanged(unsigned int value);
 
 private slots:

@@ -7,8 +7,9 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtGui/QComboBox>
+#include <QtGui/QGridLayout>
 #include <QtGui/QLabel>
-#include <QtGui/QLayout>
 
 #include "AppVersion.h"
 #include "CustomColorButton.h"
@@ -34,7 +35,6 @@ PropertiesView::PropertiesView() :
    mpOriginCombo->setEditable(false);
    mpOriginCombo->addItem("Lower Left");
    mpOriginCombo->addItem("Upper Left");
-   mpCrosshairCheck = new QCheckBox("Crosshair", pGeneralWidget);
 
    LabeledSection* pGeneralSection = new LabeledSection(pGeneralWidget, "General", this);
 
@@ -45,8 +45,7 @@ PropertiesView::PropertiesView() :
    pGeneralGrid->addWidget(mpColorButton, 0, 1);
    pGeneralGrid->addWidget(pOriginLabel, 1, 0);
    pGeneralGrid->addWidget(mpOriginCombo, 1, 1);
-   pGeneralGrid->addWidget(mpCrosshairCheck, 2, 0, 1, 2);
-   pGeneralGrid->setRowStretch(3, 10);
+   pGeneralGrid->setRowStretch(2, 10);
    pGeneralGrid->setColumnStretch(2, 10);
 
    // Initialization
@@ -56,8 +55,7 @@ PropertiesView::PropertiesView() :
 }
 
 PropertiesView::~PropertiesView()
-{
-}
+{}
 
 bool PropertiesView::initialize(SessionItem* pSessionItem)
 {
@@ -69,7 +67,6 @@ bool PropertiesView::initialize(SessionItem* pSessionItem)
 
    // General
    mpColorButton->setColor(mpView->getBackgroundColor());
-   mpCrosshairCheck->setChecked(mpView->isCrossHairEnabled());
 
    DataOrigin origin = mpView->getDataOrigin();
    if (origin == LOWER_LEFT)
@@ -107,7 +104,6 @@ bool PropertiesView::applyChanges()
 
    mpView->setBackgroundColor(QCOLOR_TO_COLORTYPE(mpColorButton->getColor()));
    mpView->setDataOrigin(origin);
-   mpView->enableCrossHair(mpCrosshairCheck->isChecked());
 
    // Refresh the view
    mpView->refresh();

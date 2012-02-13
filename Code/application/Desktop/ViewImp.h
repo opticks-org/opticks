@@ -78,7 +78,7 @@ public:
    friend class SubImageIteratorImp;
 
    ViewImp(const std::string& id, const std::string& viewName, QGLContext* drawContext = 0, QWidget* parent = 0);
-   ~ViewImp();
+   virtual ~ViewImp();
 
    using SessionItemImp::setIcon;
 
@@ -144,6 +144,10 @@ public:
    bool isInsetEnabled() const;
    LocationType getInsetLocation() const;
    bool isCrossHairEnabled() const;
+   QColor getCrossHairColor() const;
+   bool isCrossHairBlended() const;
+   int getCrossHairSize() const;
+   unsigned int getCrossHairWidth() const;
 
    virtual void draw();
    void renderText(int screenCoordX, int screenCoordY, const QString& strText, const QFont& fnt = QFont());
@@ -213,6 +217,10 @@ public slots:
    virtual void setInsetPoint(const QPoint& screenCoord);
    virtual void setInsetPoint(const LocationType &worldCoord);
    virtual bool enableCrossHair(bool bEnable);
+   virtual void setCrossHairColor(const QColor& color);
+   virtual void setCrossHairBlended(bool blended);
+   virtual void setCrossHairSize(int size);
+   virtual void setCrossHairWidth(unsigned int width);
    virtual void refresh();
    void snapshot();
    void snapshotSized();
@@ -229,6 +237,10 @@ signals:
    void backgroundColorChanged(const QColor& clrBackground);
    void originChanged(const DataOrigin& dataOrigin);
    void crossHairDisplayed(bool bDisplayed);
+   void crossHairColorChanged(const QColor& color);
+   void crossHairBlendChanged(bool blended);
+   void crossHairSizeChanged(int size);
+   void crossHairWidthChanged(unsigned int width);
    void mouseModeAdded(const MouseMode* pMouseMode);
    void mouseModeRemoved(const MouseMode* pMouseMode);
    void mouseModeChanged(const MouseMode* pMouseMode);
@@ -386,6 +398,10 @@ private:
    std::vector<LocationType> mSelectionBox;
    bool mInset;
    bool mCrossHair;
+   QColor mCrossHairColor;
+   bool mCrossHairBlend;
+   int mCrossHairSize;
+   unsigned int mCrossHairWidth;
    std::vector<std::pair<View*, LinkType> > mLinkedViews;
    AnimationController* mpAnimationController;
    UndoStack* mpUndoStack;
@@ -442,6 +458,7 @@ private slots:
    using impClass::panTo; \
    using impClass::setBackgroundColor; \
    using impClass::setInsetPoint; \
+   using impClass::setCrossHairColor; \
    using impClass::copy; \
    void setName(const std::string& viewName) \
    { \
@@ -629,6 +646,38 @@ private slots:
    bool isCrossHairEnabled() const \
    { \
       return impClass::isCrossHairEnabled(); \
+   } \
+   void setCrossHairColor(const ColorType& color) \
+   { \
+      impClass::setCrossHairColor(COLORTYPE_TO_QCOLOR(color)); \
+   } \
+   ColorType getCrossHairColor() const \
+   { \
+      return QCOLOR_TO_COLORTYPE(impClass::getCrossHairColor()); \
+   } \
+   void setCrossHairBlended(bool blended) \
+   { \
+      impClass::setCrossHairBlended(blended); \
+   } \
+   bool isCrossHairBlended() const \
+   { \
+      return impClass::isCrossHairBlended(); \
+   } \
+   void setCrossHairSize(int size) \
+   { \
+      impClass::setCrossHairSize(size); \
+   } \
+   int getCrossHairSize() const \
+   { \
+      return impClass::getCrossHairSize(); \
+   } \
+   void setCrossHairWidth(unsigned int width) \
+   { \
+      impClass::setCrossHairWidth(width); \
+   } \
+   unsigned int getCrossHairWidth() const \
+   { \
+      return impClass::getCrossHairWidth(); \
    } \
    void refresh() \
    { \

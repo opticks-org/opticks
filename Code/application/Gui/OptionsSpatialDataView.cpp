@@ -7,27 +7,23 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include "AppVerify.h"
 #include "CustomColorButton.h"
-#include "LabeledSection.h"
 #include "HistogramWindow.h"
+#include "LabeledSection.h"
+#include "LineWidthComboBox.h"
 #include "OptionsSpatialDataView.h"
 #include "PanLimitTypeComboBox.h"
-#include "PerspectiveView.h"
 #include "SpatialDataView.h"
 #include "View.h"
-#include "WorkspaceWindow.h"
 
-#include <QtGui/QApplication>
-#include <QtGui/QButtonGroup>
 #include <QtGui/QCheckBox>
 #include <QtGui/QComboBox>
-#include <QtGui/QDesktopWidget>
+#include <QtGui/QDoubleSpinBox>
 #include <QtGui/QGridLayout>
-#include <QtGui/QHBoxLayout>
 #include <QtGui/QLabel>
-#include <QtGui/QLineEdit>
-#include <QtGui/QRadioButton>
 #include <QtGui/QSpinBox>
+#include <QtGui/QStyleOptionButton>
 #include <QtGui/QVBoxLayout>
 
 #include <limits>
@@ -103,18 +99,44 @@ OptionsSpatialDataView::OptionsSpatialDataView() :
    mpDisplayOrigin = new QCheckBox("Display origin location", this);
    mpDisplayAxis = new QCheckBox("Display orientation axis", this);
    mpDisplayCrosshair = new QCheckBox("Display crosshair", this);
+   QLabel* pCrosshairColorLabel = new QLabel("Color:", this);
+   mpCrosshairColorButton = new CustomColorButton(this);
+   mpCrosshairColorButton->usePopupGrid(true);
+   mpCrosshairBlendCheck = new QCheckBox("Blend", this);
+   mpCrosshairBlendCheck->setToolTip("If enabled, the crosshair color is combined with the color in "
+      "the view\njust behind the crosshair to provide enough contrast for the crosshair\nto always "
+      "be visible.  If disabled, the crosshair is drawn as a solid color.");
+   QLabel* pCrosshairSizeLabel = new QLabel("Size:", this);
+   mpCrosshairSizeSpin = new QSpinBox(this);
+   mpCrosshairSizeSpin->setSuffix(" Pixel(s)");
+   mpCrosshairSizeSpin->setRange(1, numeric_limits<int>::max());
+   QLabel* pCrosshairWidthLabel = new QLabel("Width:", this);
+   mpCrosshairWidthCombo = new LineWidthComboBox(this);
 
    QWidget* pOtherOptionsWidget = new QWidget(this);
-   QVBoxLayout* pOtherOptionsLayout = new QVBoxLayout(pOtherOptionsWidget);
+   QGridLayout* pOtherOptionsLayout = new QGridLayout(pOtherOptionsWidget);
    pOtherOptionsLayout->setMargin(0);
    pOtherOptionsLayout->setSpacing(5);
-   pOtherOptionsLayout->addWidget(mpGeoCoordTooltip);
-   pOtherOptionsLayout->addWidget(mpConfirmLayerDelete);
-   pOtherOptionsLayout->addWidget(mpActiveLayer);
-   pOtherOptionsLayout->addWidget(mpShowCoordinates);
-   pOtherOptionsLayout->addWidget(mpDisplayOrigin);
-   pOtherOptionsLayout->addWidget(mpDisplayAxis);
-   pOtherOptionsLayout->addWidget(mpDisplayCrosshair);
+   pOtherOptionsLayout->addWidget(mpGeoCoordTooltip, 0, 0, 1, 4);
+   pOtherOptionsLayout->addWidget(mpConfirmLayerDelete, 1, 0, 1, 4);
+   pOtherOptionsLayout->addWidget(mpActiveLayer, 2, 0, 1, 4);
+   pOtherOptionsLayout->addWidget(mpShowCoordinates, 3, 0, 1, 4);
+   pOtherOptionsLayout->addWidget(mpDisplayOrigin, 4, 0, 1, 4);
+   pOtherOptionsLayout->addWidget(mpDisplayAxis, 5, 0, 1, 4);
+   pOtherOptionsLayout->addWidget(mpDisplayCrosshair, 6, 0, 1, 4);
+   pOtherOptionsLayout->addWidget(pCrosshairColorLabel, 7, 1);
+   pOtherOptionsLayout->addWidget(mpCrosshairColorButton, 7, 2);
+   pOtherOptionsLayout->addWidget(mpCrosshairBlendCheck, 7, 3, Qt::AlignLeft);
+   pOtherOptionsLayout->addWidget(pCrosshairSizeLabel, 8, 1);
+   pOtherOptionsLayout->addWidget(mpCrosshairSizeSpin, 8, 2, 1, 2, Qt::AlignLeft);
+   pOtherOptionsLayout->addWidget(pCrosshairWidthLabel, 9, 1);
+   pOtherOptionsLayout->addWidget(mpCrosshairWidthCombo, 9, 2, 1, 2, Qt::AlignLeft);
+   QStyleOptionButton option;
+   option.initFrom(mpDisplayCrosshair);
+   int checkBoxWidth = style()->subElementRect(QStyle::SE_CheckBoxIndicator, &option).width();
+   pOtherOptionsLayout->setColumnMinimumWidth(0, checkBoxWidth);
+   pOtherOptionsLayout->setColumnStretch(3, 10);
+
    LabeledSection* pOtherOptionsSection = new LabeledSection(pOtherOptionsWidget, "Other Options", this);
 
    // Panning and Zooming Limit
@@ -159,7 +181,7 @@ OptionsSpatialDataView::OptionsSpatialDataView() :
    pLayout->addWidget(pPanZoomLimitSection);
    pLayout->addStretch(10);
 
-   // Initialize From Settings
+   // Initialization
    mpInsetSizeSpin->setValue(View::getSettingInsetSize());
    mpInsetZoomSpin->setValue(View::getSettingInsetZoom());
    InsetZoomMode zoomMode = View::getSettingInsetZoomMode();
@@ -186,6 +208,26 @@ OptionsSpatialDataView::OptionsSpatialDataView() :
    mpDisplayOrigin->setChecked(SpatialDataView::getSettingDisplayOrigin());
    mpDisplayAxis->setChecked(SpatialDataView::getSettingDisplayAxis());
    mpDisplayCrosshair->setChecked(View::getSettingDisplayCrosshair());
+   pCrosshairColorLabel->setEnabled(View::getSettingDisplayCrosshair());
+   mpCrosshairColorButton->setColor(View::getSettingCrosshairColor());
+   mpCrosshairColorButton->setEnabled(View::getSettingDisplayCrosshair());
+   mpCrosshairBlendCheck->setChecked(View::getSettingCrosshairBlend());
+   mpCrosshairBlendCheck->setEnabled(View::getSettingDisplayCrosshair());
+   pCrosshairSizeLabel->setEnabled(View::getSettingDisplayCrosshair());
+   mpCrosshairSizeSpin->setValue(View::getSettingCrosshairSize());
+   mpCrosshairSizeSpin->setEnabled(View::getSettingDisplayCrosshair());
+   pCrosshairWidthLabel->setEnabled(View::getSettingDisplayCrosshair());
+   mpCrosshairWidthCombo->setCurrentValue(View::getSettingCrosshairWidth());
+   mpCrosshairWidthCombo->setEnabled(View::getSettingDisplayCrosshair());
+
+   // Connections
+   VERIFYNR(connect(mpDisplayCrosshair, SIGNAL(toggled(bool)), pCrosshairColorLabel, SLOT(setEnabled(bool))));
+   VERIFYNR(connect(mpDisplayCrosshair, SIGNAL(toggled(bool)), mpCrosshairColorButton, SLOT(setEnabled(bool))));
+   VERIFYNR(connect(mpDisplayCrosshair, SIGNAL(toggled(bool)), mpCrosshairBlendCheck, SLOT(setEnabled(bool))));
+   VERIFYNR(connect(mpDisplayCrosshair, SIGNAL(toggled(bool)), pCrosshairSizeLabel, SLOT(setEnabled(bool))));
+   VERIFYNR(connect(mpDisplayCrosshair, SIGNAL(toggled(bool)), mpCrosshairSizeSpin, SLOT(setEnabled(bool))));
+   VERIFYNR(connect(mpDisplayCrosshair, SIGNAL(toggled(bool)), pCrosshairWidthLabel, SLOT(setEnabled(bool))));
+   VERIFYNR(connect(mpDisplayCrosshair, SIGNAL(toggled(bool)), mpCrosshairWidthCombo, SLOT(setEnabled(bool))));
 }
 
 void OptionsSpatialDataView::applyChanges()
@@ -217,6 +259,13 @@ void OptionsSpatialDataView::applyChanges()
    SpatialDataView::setSettingDisplayOrigin(mpDisplayOrigin->isChecked());
    SpatialDataView::setSettingDisplayAxis(mpDisplayAxis->isChecked());
    View::setSettingDisplayCrosshair(mpDisplayCrosshair->isChecked());
+   if (mpDisplayCrosshair->isChecked() == true)
+   {
+      View::setSettingCrosshairColor(QCOLOR_TO_COLORTYPE(mpCrosshairColorButton->getColor()));
+      View::setSettingCrosshairBlend(mpCrosshairBlendCheck->isChecked());
+      View::setSettingCrosshairSize(mpCrosshairSizeSpin->value());
+      View::setSettingCrosshairWidth(mpCrosshairWidthCombo->getCurrentValue());
+   }
 }
 
 OptionsSpatialDataView::~OptionsSpatialDataView()
