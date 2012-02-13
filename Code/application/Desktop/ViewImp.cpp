@@ -110,7 +110,6 @@ ViewImp::ViewImp(const string& id, const string& viewName, QGLContext* drawConte
    setContextMenuPolicy(Qt::DefaultContextMenu);
    setMouseTracking(true);
    setFocusPolicy(Qt::ClickFocus);
-   setAttribute(Qt::WA_DeleteOnClose);
    addPropertiesPage(PropertiesView::getName());
    addPropertiesPage("Classification Properties");
 

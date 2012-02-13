@@ -9,6 +9,7 @@
 
 #include "ChippingWindow.h"
 #include "OverviewWindow.h"
+#include "SessionManager.h"
 #include "SpatialDataViewImp.h"
 #include "SpatialDataWindowImp.h"
 
@@ -18,7 +19,7 @@ SpatialDataWindowImp::SpatialDataWindowImp(const string& id, const string& windo
    WorkspaceWindowImp(id, windowName, parent),
    mpOverview(NULL)
 {
-   createView(QString::fromStdString(windowName), SPATIAL_DATA_VIEW);
+   createView(windowName, SPATIAL_DATA_VIEW);
 }
 
 SpatialDataWindowImp::~SpatialDataWindowImp()
@@ -45,9 +46,19 @@ WindowType SpatialDataWindowImp::getWindowType() const
    return SPATIAL_DATA_WINDOW;
 }
 
+View* SpatialDataWindowImp::createView(const string& viewName, const ViewType& viewType)
+{
+   if (getView() == NULL)
+   {
+      return WorkspaceWindowImp::createView(viewName, viewType);
+   }
+
+   return NULL;
+}
+
 void SpatialDataWindowImp::setWidget(QWidget* pWidget)
 {
-   if (getWidget() == NULL)
+   if ((getWidget() == NULL) || (Service<SessionManager>()->isSessionLoading() == true))
    {
       WorkspaceWindowImp::setWidget(pWidget);
    }

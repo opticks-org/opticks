@@ -15,11 +15,8 @@
 #include "ApplicationWindow.h"
 #include "ContextMenuActions.h"
 #include "DesktopServices.h"
-#include "OverviewWindow.h"
 #include "ProductView.h"
-#include "SessionItemSerializer.h"
-#include "SessionManager.h"
-#include "ViewImp.h"
+#include "View.h"
 #include "WorkspaceWindow.h"
 #include "WorkspaceWindowImp.h"
 #include "xmlreader.h"
@@ -98,26 +95,14 @@ bool WorkspaceWindowImp::isKindOf(const string& className) const
 
 void WorkspaceWindowImp::viewDeleted(Subject& subject, const string& signal, const boost::any& value)
 {
-   View* pDeletedView = dynamic_cast<View*>(&subject);
-   if (pDeletedView == NULL)
+   View* pView = dynamic_cast<View*>(&subject);
+   if (pView == NULL)
    {
       return;
    }
 
-   View* pView = getView();
-   if (&subject == pView)
+   if (pView == getView())
    {
-      setView(NULL);
-      setWidget(NULL);
-
-      Service<DesktopServices> pDesktop;
-
-      ApplicationWindow* pAppWindow = dynamic_cast<ApplicationWindow*>(pDesktop->getMainWidget());
-      if (pAppWindow != NULL)
-      {
-         pAppWindow->removeWindow(dynamic_cast<Window*>(this));
-      }
-
       mConfirmOnClose = false;
       close();
    }
@@ -147,18 +132,6 @@ WindowType WorkspaceWindowImp::getWindowType() const
    return WORKSPACE_WINDOW;
 }
 
-View* WorkspaceWindowImp::createView(const QString& strViewName, const ViewType& viewType)
-{
-   View* pView = ViewWindowImp::createView(strViewName, viewType);
-   if (pView != NULL)
-   {
-      setWidget(dynamic_cast<ViewImp*>(pView));
-      pView->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &WorkspaceWindowImp::viewDeleted));
-   }
-
-   return pView;
-}
-
 View* WorkspaceWindowImp::getActiveView() const
 {
    View* pView = getView();
@@ -180,18 +153,43 @@ View* WorkspaceWindowImp::getActiveView() const
 
 void WorkspaceWindowImp::setWidget(QWidget* pWidget)
 {
-   if ((pWidget != NULL) && (pWidget != getWidget()))
+   QWidget* pCurrentWidget = getWidget();
+   if (pWidget == pCurrentWidget)
    {
-      notify(SIGNAL_NAME(ViewWindow, AboutToSetWidget));
-      QMdiSubWindow::setWidget(pWidget);
-      notify(SIGNAL_NAME(ViewWindow, WidgetSet), boost::any(pWidget));
+      return;
+   }
 
-      QIcon windowIcon = pWidget->windowIcon();
-      if (windowIcon.isNull() == false)
-      {
-         setIcon(windowIcon);
-         setWindowIcon(windowIcon);
-      }
+   // Detach from the current view
+   View* pCurrentView = dynamic_cast<View*>(pCurrentWidget);
+   if (pCurrentView != NULL)
+   {
+      pCurrentView->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &WorkspaceWindowImp::viewDeleted));
+   }
+
+   // Set the new window widget
+   notify(SIGNAL_NAME(ViewWindow, AboutToSetWidget));
+   QMdiSubWindow::setWidget(pWidget);
+   notify(SIGNAL_NAME(ViewWindow, WidgetSet), boost::any(pWidget));
+
+   // Update the window icon
+   QIcon windowIcon = pWidget->windowIcon();
+   if (windowIcon.isNull() == false)
+   {
+      setIcon(windowIcon);
+      setWindowIcon(windowIcon);
+   }
+
+   // Attach to the new view
+   View* pView = dynamic_cast<View*>(pWidget);
+   if (pView != NULL)
+   {
+      pView->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &WorkspaceWindowImp::viewDeleted));
+   }
+
+   // Delete the previous widget
+   if (pCurrentWidget != NULL)
+   {
+      delete pCurrentWidget;
    }
 }
 
@@ -273,6 +271,12 @@ void WorkspaceWindowImp::closeEvent(QCloseEvent* pEvent)
       }
    }
 
+   ApplicationWindow* pAppWindow = dynamic_cast<ApplicationWindow*>(Service<DesktopServices>()->getMainWidget());
+   if (pAppWindow != NULL)
+   {
+      pAppWindow->removeWindow(dynamic_cast<Window*>(this));
+   }
+
    QMdiSubWindow::closeEvent(pEvent);
 }
 
@@ -338,36 +342,13 @@ bool WorkspaceWindowImp::toXml(XMLWriter* pXml) const
 
 bool WorkspaceWindowImp::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   if (pDocument == NULL)
+   if ((pDocument == NULL) || (ViewWindowImp::fromXml(pDocument, version) == false))
    {
       return false;
-   }
-
-   View* pCurrentView = getView();
-   if (pCurrentView != NULL)
-   {
-      pCurrentView->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &WorkspaceWindowImp::viewDeleted));
-   }
-   if (!ViewWindowImp::fromXml(pDocument, version))
-   {
-      return false;
-   }
-
-   // connect view to be restored
-   DOMElement* pElem = static_cast<DOMElement*>(pDocument);
-   View* pView = dynamic_cast<View*>(Service<SessionManager>()->getSessionItem(A(pElem->getAttribute(X("viewId")))));
-   if (pView != NULL)
-   {
-      setWidget(dynamic_cast<ViewImp*>(pView));
-      pView->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &WorkspaceWindowImp::viewDeleted));
    }
 
    // make sure that the zoom percentage toolbar item, etc. are properly connected to the window and view.
-   ApplicationWindow* pAppWindow = dynamic_cast<ApplicationWindow*>(Service<DesktopServices>()->getMainWidget());
-   if (pAppWindow != NULL)
-   {
-      pAppWindow->setCurrentWorkspaceWindow(dynamic_cast<WorkspaceWindow*>(this));
-   }
+   activate();
 
    // restore the workspace window geometry
    DOMElement* pConfig = dynamic_cast<DOMElement*>(findChildNode(pDocument, "Geometry"));

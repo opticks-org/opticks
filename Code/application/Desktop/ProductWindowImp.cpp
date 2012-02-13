@@ -13,18 +13,18 @@
 #include "ProductWindowImp.h"
 #include "PrintPixmap.h"
 #include "ProductViewAdapter.h"
+#include "SessionManager.h"
 
 using namespace std;
 
 ProductWindowImp::ProductWindowImp(const string& id, const string& windowName, QWidget* parent) :
    WorkspaceWindowImp(id, windowName, parent)
 {
-   createView(QString::fromStdString(windowName), PRODUCT_VIEW);
+   createView(windowName, PRODUCT_VIEW);
 }
 
 ProductWindowImp::~ProductWindowImp()
-{
-}
+{}
 
 const string& ProductWindowImp::getObjectType() const
 {
@@ -47,11 +47,11 @@ WindowType ProductWindowImp::getWindowType() const
    return PRODUCT_WINDOW;
 }
 
-View* ProductWindowImp::createView(const QString& strViewName, const ViewType& viewType)
+View* ProductWindowImp::createView(const string& viewName, const ViewType& viewType)
 {
    if (getView() == NULL)
    {
-      return WorkspaceWindowImp::createView(strViewName, viewType);
+      return WorkspaceWindowImp::createView(viewName, viewType);
    }
 
    return NULL;
@@ -59,7 +59,7 @@ View* ProductWindowImp::createView(const QString& strViewName, const ViewType& v
 
 void ProductWindowImp::setWidget(QWidget* pWidget)
 {
-   if (getWidget() == NULL)
+   if ((getWidget() == NULL) || (Service<SessionManager>()->isSessionLoading() == true))
    {
       WorkspaceWindowImp::setWidget(pWidget);
    }

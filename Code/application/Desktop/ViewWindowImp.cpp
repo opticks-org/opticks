@@ -7,23 +7,21 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "ApplicationServices.h"
+#include "AppVerify.h"
 #include "AppVersion.h"
 #include "DesktopServices.h"
 #include "PrintPixmap.h"
-#include "SessionManagerImp.h"
+#include "SessionManager.h"
 #include "SystemServicesImp.h"
 #include "View.h"
 #include "ViewImp.h"
 #include "ViewWindowImp.h"
-#include "xmlreader.h"
 
 XERCES_CPP_NAMESPACE_USE
 using namespace std;
 
 ViewWindowImp::ViewWindowImp(const string& id, const string& windowName) :
-   WindowImp(id, windowName),
-   mpView(NULL)
+   WindowImp(id, windowName)
 {}
 
 ViewWindowImp::~ViewWindowImp()
@@ -45,24 +43,20 @@ bool ViewWindowImp::isKindOf(const string& className) const
    return WindowImp::isKindOf(className);
 }
 
-View* ViewWindowImp::createView(const QString& strViewName, const ViewType& viewType)
+View* ViewWindowImp::createView(const string& viewName, const ViewType& viewType)
 {
-   if ((strViewName.isEmpty() == true) || (mpView != NULL))
+   if (viewName.empty() == true)
    {
       return NULL;
    }
 
    Service<DesktopServices> pDesktop;
 
-   View* pView = pDesktop->createView(strViewName.toStdString(), viewType);
+   View* pView = pDesktop->createView(viewName, viewType);
    if (pView != NULL)
    {
-      if (setView(pView) == true)
-      {
-         return pView;
-      }
-
-      pDesktop->deleteView(pView);
+      setWidget(dynamic_cast<ViewImp*>(pView));
+      return pView;
    }
 
    return NULL;
@@ -70,16 +64,19 @@ View* ViewWindowImp::createView(const QString& strViewName, const ViewType& view
 
 View* ViewWindowImp::getView() const
 {
-   return mpView;
+   return dynamic_cast<View*>(getWidget());
 }
 
 void ViewWindowImp::print(bool bSetupDialog)
 {
    // Get the window image
    QPixmap windowPixmap;
-   if (mpView != NULL)
+
+   View* pView = getView();
+   if (pView != NULL)
    {
-      QImage windowImage = (dynamic_cast<ViewImp*>(mpView))->getCurrentImage();
+      QImage windowImage;
+      pView->getCurrentImage(windowImage);
       if (windowImage.isNull() == false)
       {
          windowPixmap = QPixmap::fromImage(windowImage);
@@ -90,8 +87,7 @@ void ViewWindowImp::print(bool bSetupDialog)
 
    if (windowPixmap.isNull() == true)
    {
-      QWidget* pWidget = NULL;
-      pWidget = getWidget();
+      QWidget* pWidget = getWidget();
       if (pWidget != NULL)
       {
          windowPixmap = QPixmap::grabWidget(pWidget);
@@ -106,23 +102,17 @@ void ViewWindowImp::print(bool bSetupDialog)
    }
 }
 
-bool ViewWindowImp::setView(View* pView)
-{
-   mpView = pView;
-   return true;
-}
-
 bool ViewWindowImp::toXml(XMLWriter* pXml) const
 {
-   if (!WindowImp::toXml(pXml))
+   if ((pXml == NULL) || (WindowImp::toXml(pXml) == false))
    {
       return false;
    }
 
-   // save view id
-   if (mpView != NULL)
+   View* pView = getView();
+   if (pView != NULL)
    {
-      pXml->addAttr("viewId", mpView->getId());
+      pXml->addAttr("viewId", pView->getId());
    }
 
    return true;
@@ -130,27 +120,23 @@ bool ViewWindowImp::toXml(XMLWriter* pXml) const
 
 bool ViewWindowImp::fromXml(DOMNode* pDocument, unsigned int version)
 {
-   if (pDocument == NULL)
-   {
-      return false;
-   }
-
-   if (!WindowImp::fromXml(pDocument, version))
+   if ((pDocument == NULL) || (WindowImp::fromXml(pDocument, version) == false))
    {
       return false;
    }
 
    DOMElement* pElement = static_cast<DOMElement*>(pDocument);
-   if (pElement->hasAttribute(X("viewId")))
+   VERIFY(pElement != NULL);
+
+   if (pElement->hasAttribute(X("viewId")) == true)
    {
-      View* pOldView = mpView;
-      setView(dynamic_cast<View*>(SessionManagerImp::instance()->getSessionItem(
-         A(pElement->getAttribute(X("viewId"))))));
-      Service<DesktopServices>()->deleteView(pOldView);
-   }
-   else
-   {
-      setView(NULL);
+      Service<SessionManager> pManager;
+
+      ViewImp* pView = dynamic_cast<ViewImp*>(pManager->getSessionItem(A(pElement->getAttribute(X("viewId")))));
+      if (pView != NULL)
+      {
+         setWidget(pView);
+      }
    }
 
    return true;

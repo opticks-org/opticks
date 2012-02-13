@@ -54,7 +54,8 @@ public:
     *  Creates the view based on a given type.
     *
     *  This method creates a view and sets it as the display widget in the
-    *  window.
+    *  window.  This method does nothing for SpatialDataWindow and ProductWindow
+    *  objects since a view is already created by default.
     *
     *  @param   viewName
     *           The name for the view.  Depending on the view type, the name

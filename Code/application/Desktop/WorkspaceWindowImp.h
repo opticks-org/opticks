@@ -19,7 +19,6 @@
 
 #include <string>
 
-class OverviewWindow;
 class View;
 
 class WorkspaceWindowImp : public QMdiSubWindow, public ViewWindowImp
@@ -28,7 +27,7 @@ class WorkspaceWindowImp : public QMdiSubWindow, public ViewWindowImp
 
 public:
    WorkspaceWindowImp(const std::string& id, const std::string& windowName, QWidget* parent = 0);
-   ~WorkspaceWindowImp();
+   virtual ~WorkspaceWindowImp();
 
    using ViewWindowImp::setIcon;
    std::list<ContextMenuAction> getContextMenuActions() const;
@@ -42,7 +41,6 @@ public:
    void setName(const std::string& windowName);
    WindowType getWindowType() const;
 
-   View* createView(const QString& strViewName, const ViewType& viewType);
    View* getActiveView() const;
    void setWidget(QWidget* pWidget);
    QWidget* getWidget() const;

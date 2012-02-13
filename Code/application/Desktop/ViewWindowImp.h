@@ -23,14 +23,14 @@ class ViewWindowImp : public WindowImp
 {
 public:
    ViewWindowImp(const std::string& id, const std::string& windowName);
-   ~ViewWindowImp();
+   virtual ~ViewWindowImp();
 
    using WindowImp::setName;
 
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
 
-   virtual View* createView(const QString& strViewName, const ViewType& viewType);
+   virtual View* createView(const std::string& viewName, const ViewType& viewType);
    virtual View* getView() const;
    virtual void setWidget(QWidget* pWidget) = 0;
    virtual QWidget* getWidget() const = 0;
@@ -40,12 +40,8 @@ public:
    bool toXml(XMLWriter* pXml) const;
    bool fromXml(DOMNode* pDocument, unsigned int version);
 
-protected:
-   ViewWindowImp(const ViewWindowImp& rhs);
-   virtual bool setView(View* pView);
-
 private:
-   View* mpView;
+   ViewWindowImp(const ViewWindowImp& rhs);
 };
 
 #define VIEWWINDOWADAPTEREXTENSION_CLASSES \
@@ -53,10 +49,9 @@ private:
 
 #define VIEWWINDOWADAPTER_METHODS(impClass) \
    WINDOWADAPTER_METHODS(impClass) \
-   using impClass::createView; \
    View* createView(const std::string& viewName, const ViewType& viewType) \
    { \
-      return impClass::createView(QString::fromStdString(viewName), viewType); \
+      return impClass::createView(viewName, viewType); \
    } \
    View* getView() const \
    { \

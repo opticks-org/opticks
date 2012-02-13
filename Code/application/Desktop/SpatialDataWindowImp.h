@@ -24,7 +24,7 @@ class SpatialDataWindowImp : public WorkspaceWindowImp
 
 public:
    SpatialDataWindowImp(const std::string& id, const std::string& windowName, QWidget* parent = 0);
-   ~SpatialDataWindowImp();
+   virtual ~SpatialDataWindowImp();
 
    using WorkspaceWindowImp::setIcon;
    using WorkspaceWindowImp::setName;
@@ -34,6 +34,7 @@ public:
 
    WindowType getWindowType() const;
 
+   View* createView(const std::string& viewName, const ViewType& viewType);
    void setWidget(QWidget* pWidget);
 
    SpatialDataView* getSpatialDataView() const;

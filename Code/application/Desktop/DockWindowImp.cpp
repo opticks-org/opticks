@@ -102,32 +102,38 @@ WindowType DockWindowImp::getWindowType() const
    return DOCK_WINDOW;
 }
 
-View* DockWindowImp::createView(const QString& strViewName, const ViewType& viewType)
-{
-   View* pView = ViewWindowImp::createView(strViewName, viewType);
-   if (pView != NULL)
-   {
-      setWidget(dynamic_cast<ViewImp*>(pView));
-   }
-
-   return pView;
-}
-
 void DockWindowImp::setWidget(QWidget* pWidget)
 {
-   if (pWidget == getWidget())
+   QWidget* pCurrentWidget = getWidget();
+   if (pWidget == pCurrentWidget)
    {
       return;
    }
 
+   // Set the dock window as the parent of the widget
    if (pWidget != NULL)
    {
       pWidget->setParent(this);
    }
 
+   // Set the new window widget
    notify(SIGNAL_NAME(ViewWindow, AboutToSetWidget));
    QDockWidget::setWidget(pWidget);
    notify(SIGNAL_NAME(ViewWindow, WidgetSet), boost::any(pWidget));
+
+   // Update the window icon
+   QIcon windowIcon = pWidget->windowIcon();
+   if (windowIcon.isNull() == false)
+   {
+      setIcon(windowIcon);
+      setWindowIcon(windowIcon);
+   }
+
+   // Delete the previous widget
+   if (pCurrentWidget != NULL)
+   {
+      delete pCurrentWidget;
+   }
 }
 
 QWidget* DockWindowImp::getWidget() const

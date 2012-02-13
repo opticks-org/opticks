@@ -48,7 +48,7 @@ public:
    /**
     *  Destroys the dock window.
     */
-   ~DockWindowImp();
+   virtual ~DockWindowImp();
 
    using ViewWindowImp::setIcon;
    using ViewWindowImp::setName;
@@ -65,8 +65,6 @@ public:
     *  @return   The window type.
     */
    WindowType getWindowType() const;
-
-   virtual View* createView(const QString& strViewName, const ViewType& viewType);
 
    /**
     *  Sets the widget for the dock window

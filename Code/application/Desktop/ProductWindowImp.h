@@ -19,7 +19,7 @@ class ProductWindowImp : public WorkspaceWindowImp
 {
 public:
    ProductWindowImp(const std::string& id, const std::string& windowName, QWidget* parent = 0);
-   ~ProductWindowImp();
+   virtual ~ProductWindowImp();
 
    using WorkspaceWindowImp::setIcon;
    using WorkspaceWindowImp::setName;
@@ -29,7 +29,7 @@ public:
 
    WindowType getWindowType() const;
 
-   View* createView(const QString& strViewName, const ViewType& viewType);
+   View* createView(const std::string& viewName, const ViewType& viewType);
    void setWidget(QWidget* pWidget);
    void print(bool bSetupDialog = false);
 
