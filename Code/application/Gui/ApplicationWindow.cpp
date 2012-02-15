@@ -1746,6 +1746,13 @@ bool ApplicationWindow::deleteWindow(Window* pWindow)
       return false;
    }
 
+   // The workspace window is set to delete on close so simply close the window, which also removes the window
+   WorkspaceWindowImp* pWorkspaceWindow = dynamic_cast<WorkspaceWindowImp*>(pWindow);
+   if (pWorkspaceWindow != NULL)
+   {
+      return pWorkspaceWindow->close();
+   }
+
    // if dock window, save geometry
    DockWindowImp* pDockWindow = dynamic_cast<DockWindowImp*>(pWindow);
    if (pDockWindow != NULL)
