@@ -390,7 +390,7 @@ namespace Nitf
       {
          const static std::string NUM_RELATED_TRES = "NUM_RELATED_TRES";
          const static std::string RELATED_TRES = "RELATED_TRES";
-         const static std::string RD_RPC_NO = "RD_RPC_NO";
+         const static std::string RD_PRC_NO = "RD_PRC_NO";
          const static std::string IF_PROCESS = "IF_PROCESS";
          const static std::string RD_CEN_FREQ = "RD_CEN_FREQ";
          const static std::string RD_MODE = "RD_MODE";

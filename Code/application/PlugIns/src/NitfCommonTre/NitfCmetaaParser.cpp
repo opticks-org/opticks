@@ -42,7 +42,7 @@ bool Nitf::CmetaaParser::runAllTests(Progress* pProgress, ostream& failure)
       // RELATED_TRES
       "                                                                                                               "
       "         "
-      "            "                    // RD_RPC_NO
+      "            "                    // RD_PRC_NO
       "PF  "                            // IF_PROCESS
       "X   "                            // RD_CEN_FREQ
       "1FG  "                           // RD_MODE
@@ -228,7 +228,7 @@ bool Nitf::CmetaaParser::runAllTests(Progress* pProgress, ostream& failure)
       "00"                              // NUM_RELATED_TRES
       "                                                                                                               "
       "         " // RELATED_TRES
-      "            "                    // RD_RPC_NO
+      "            "                    // RD_PRC_NO
       "    "                            // IF_PROCESS          // ERROR: IF_PROCESS all blank == INVALID
       "X   "                            // RD_CEN_FREQ
       "1FG  "                           // RD_MODE
@@ -415,7 +415,7 @@ bool Nitf::CmetaaParser::runAllTests(Progress* pProgress, ostream& failure)
       "00"                              // NUM_RELATED_TRES
       "                                                                                                               "
       "         " // RELATED_TRES
-      "            "                    // RD_RPC_NO
+      "            "                    // RD_PRC_NO
       "PF  "                            // IF_PROCESS
       "X   "                            // RD_CEN_FREQ
       "1FG  "                           // RD_MODE
@@ -603,7 +603,7 @@ bool Nitf::CmetaaParser::runAllTests(Progress* pProgress, ostream& failure)
       "00"                              // NUM_RELATED_TRES
       "                                                                                                               "
       "         " // RELATED_TRES
-      "            "                    // RD_RPC_NO
+      "            "                    // RD_PRC_NO
       "PF  "                            // IF_PROCESS
       "X   "                            // RD_CEN_FREQ
       "1FG  "                           // RD_MODE
@@ -792,7 +792,7 @@ bool Nitf::CmetaaParser::runAllTests(Progress* pProgress, ostream& failure)
       // RELATED_TRES
       "                                                                                                               "
       "         "
-      "            "                    // RD_RPC_NO
+      "            "                    // RD_PRC_NO
       "PF  "                            // IF_PROCESS
       "X   "                            // RD_CEN_FREQ
       "1FG  "                           // RD_MODE
@@ -1120,7 +1120,7 @@ bool Nitf::CmetaaParser::toDynamicObject(istream& input, size_t numBytes, Dynami
 
    readField<int>(input, output, success, CMETAA::NUM_RELATED_TRES, 2, errorMessage, buf);
    readField<string>(input, output, success, CMETAA::RELATED_TRES, 120, errorMessage, buf, true);
-   readField<string>(input, output, success, CMETAA::RD_RPC_NO, 12, errorMessage, buf, true);
+   readField<string>(input, output, success, CMETAA::RD_PRC_NO, 12, errorMessage, buf, true);
    readField<string>(input, output, success, CMETAA::IF_PROCESS, 4, errorMessage, buf);
    readField<string>(input, output, success, CMETAA::RD_CEN_FREQ, 4, errorMessage, buf);
    readField<string>(input, output, success, CMETAA::RD_MODE, 5, errorMessage, buf);
@@ -1396,7 +1396,7 @@ Nitf::TreState Nitf::CmetaaParser::isTreValid(const DynamicObject& tre, ostream&
    testSet.clear();
    testSet.insert("");
    status = MaxState(status, testTagValidBcsASet(tre, reporter,
-      &numFields, "RD_RPC_NO", testSet, true, true, false));
+      &numFields, "RD_PRC_NO", testSet, true, true, false));
 
    testSet.clear();
    testSet.insert("RM");
@@ -2555,7 +2555,7 @@ bool Nitf::CmetaaParser::fromDynamicObject(const DynamicObject& input, ostream& 
 
       output << toString(dv_cast<int>(input.getAttribute(CMETAA::NUM_RELATED_TRES)), 2);
       output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::RELATED_TRES)), 120);
-      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::RD_RPC_NO)), 12);
+      output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::RD_PRC_NO)), 12);
       output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::IF_PROCESS)), 4);
       output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::RD_CEN_FREQ)), 4);
       output << sizeString(dv_cast<string>(input.getAttribute(CMETAA::RD_MODE)), 5);
