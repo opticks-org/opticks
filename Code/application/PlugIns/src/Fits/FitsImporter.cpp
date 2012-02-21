@@ -558,10 +558,17 @@ bool FitsImporter::validate(const DataDescriptor *pDescriptor, std::string &erro
    const std::string fname(pDescriptor->getFileDescriptor()->getFilename().getFullPathAndName());
    std::map<std::string, std::vector<std::vector<std::string> > >::const_iterator errit = mErrors.find(fname);
    std::map<std::string, std::vector<std::vector<std::string> > >::const_iterator warnit = mWarnings.find(fname);
+
+   if (hdu <= 0)
+   {
+      errorMessage = "Invalid HDU in dataset location.";
+      return false;
+   }
+
    if (errit != mErrors.end())
    {
       const std::vector<std::vector<std::string> >& errors = errit->second;
-      if (!errors[0].empty())
+      if (!errors.empty() && !errors[0].empty())
       {
          // Errors for the entire file
          errorMessage = StringUtilities::join(errors[0], "\n");
@@ -569,8 +576,7 @@ bool FitsImporter::validate(const DataDescriptor *pDescriptor, std::string &erro
       }
 
       // Errors for a specific dataset in the file
-      errorMessage = "";
-      if (!errors[hdu].empty())
+      if (errors.size() > static_cast<unsigned int>(hdu) && !errors[hdu].empty())
       {
          errorMessage = StringUtilities::join(errors[hdu], "\n");
          return false;
@@ -597,7 +603,7 @@ bool FitsImporter::validate(const DataDescriptor *pDescriptor, std::string &erro
 
    errorMessage = baseErrorMessage;
 
-   if (warnit != mWarnings.end())
+   if (warnit != mWarnings.end() && warnit->second.size() > static_cast<unsigned int>(hdu))
    {
       const std::vector<std::vector<std::string> >& warnings = warnit->second;
       if (!warnings[hdu].empty())
