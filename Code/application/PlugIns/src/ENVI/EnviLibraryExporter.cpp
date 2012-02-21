@@ -23,6 +23,7 @@
 #include "Progress.h"
 #include "Signature.h"
 #include "SignatureSet.h"
+#include "Units.h"
 
 #include <algorithm>
 

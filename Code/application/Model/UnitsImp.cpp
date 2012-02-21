@@ -171,3 +171,17 @@ bool UnitsImp::isKindOf(const string& className) const
 
    return false;
 }
+
+bool UnitsImp::operator==(const UnitsImp& rhs) const
+{
+   return (mUnitName == rhs.mUnitName &&
+           mUnitType == rhs.mUnitType &&
+           mScaleFromStandard == rhs.mScaleFromStandard &&
+           mRangeMax == rhs.mRangeMax &&
+           mRangeMin == rhs.mRangeMin);
+}
+
+bool UnitsImp::operator!=(const UnitsImp& rhs) const
+{
+   return !(*this == rhs);
+}

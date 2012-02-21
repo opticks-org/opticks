@@ -383,6 +383,8 @@ public:
     *  - RasterLayer
     *  - #RegionUnits
     *  - Signature
+    *  - SignatureDataDescriptor
+    *  - SignatureFileDescriptor
     *  - SignatureLibrary
     *  - SignaturePlot
     *  - SignatureSet

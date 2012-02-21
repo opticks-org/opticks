@@ -9,11 +9,9 @@
 
 #include "AppVerify.h"
 #include "AppVersion.h"
-#include "DataDescriptor.h"
 #include "DynamicObject.h"
 #include "EnviImporter.h"
 #include "EnviLibraryImporter.h"
-#include "FileDescriptor.h"
 #include "ImportDescriptor.h"
 #include "MessageLogResource.h"
 #include "ModelServices.h"
@@ -24,10 +22,13 @@
 #include "PlugInRegistration.h"
 #include "Progress.h"
 #include "Signature.h"
+#include "SignatureDataDescriptor.h"
+#include "SignatureFileDescriptor.h"
 #include "SignatureLibrary.h"
 #include "RasterElement.h"
 #include "SpecialMetadata.h"
 #include "StringUtilities.h"
+#include "Units.h"
 
 using namespace std;
 
@@ -155,7 +156,8 @@ vector<ImportDescriptor*> EnviLibraryImporter::getImportDescriptors(const string
                pModel->createImportDescriptor(name, "SignatureLibrary", pRasterElement);
             if (pImportDescriptor != NULL)
             {
-               DataDescriptor* pDescriptor = pImportDescriptor->getDataDescriptor();
+               SignatureDataDescriptor* pDescriptor =
+                  dynamic_cast<SignatureDataDescriptor*>(pImportDescriptor->getDataDescriptor());
                if (pDescriptor != NULL)
                {
                   // Metadata
@@ -206,6 +208,13 @@ vector<ImportDescriptor*> EnviLibraryImporter::getImportDescriptors(const string
                         pMetadata->setAttribute("Signature Names", sigNames);
                      }
                   }
+
+                  // Signature units - Set custom units into the data descriptor so that the
+                  // user can modify them even though units are not loaded from the file
+                  FactoryResource<Units> pUnits;
+                  pUnits->setUnitName("Custom");
+                  pUnits->setUnitType(CUSTOM_UNIT);
+                  pDescriptor->setUnits("Reflectance", pUnits.get());
 
                   // Wavelengths
                   EnviField* pSamplesField = mFields.find("samples");
@@ -328,7 +337,7 @@ vector<ImportDescriptor*> EnviLibraryImporter::getImportDescriptors(const string
                   }
 
                   // Create the file descriptor
-                  FactoryResource<FileDescriptor> pFileDescriptor;
+                  FactoryResource<SignatureFileDescriptor> pFileDescriptor;
                   if (pFileDescriptor.get() != NULL)
                   {
                      pFileDescriptor->setFilename(dataFile);

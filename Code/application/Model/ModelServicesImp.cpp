@@ -25,9 +25,11 @@
 #include "RasterElementAdapter.h"
 #include "RasterFileDescriptorImp.h"
 #include "SafePtr.h"
-#include "SessionItemSerializer.h"
 #include "SessionItemDeserializer.h"
+#include "SessionItemSerializer.h"
 #include "SignatureAdapter.h"
+#include "SignatureDataDescriptorAdapter.h"
+#include "SignatureFileDescriptorAdapter.h"
 #include "SignatureLibraryAdapter.h"
 #include "SignatureSetAdapter.h"
 #include "switchOnEncoding.h"
@@ -117,6 +119,10 @@ DataDescriptor* ModelServicesImp::createDataDescriptor(const string& name, const
    {
       pDescriptor = new RasterDataDescriptorAdapter(name, type, pParent);
    }
+   else if (isKindOfElement(type, "Signature") == true)
+   {
+      pDescriptor = new SignatureDataDescriptorAdapter(name, type, pParent);
+   }
    else if (isKindOfElement(type, "DataElement") == true)
    {
       pDescriptor = new DataDescriptorAdapter(name, type, pParent);
@@ -132,6 +138,10 @@ DataDescriptor* ModelServicesImp::createDataDescriptor(const string& name, const
    if (isKindOfElement(type, "RasterElement"))
    {
       pDescriptor = new RasterDataDescriptorAdapter(name, type, parent);
+   }
+   else if (isKindOfElement(type, "Signature"))
+   {
+      pDescriptor = new SignatureDataDescriptorAdapter(name, type, parent);
    }
    else if (isKindOfElement(type, "DataElement"))
    {
@@ -903,6 +913,11 @@ bool ModelServicesImp::isKindOfDataDescriptor(const string& className, const str
    {
       bSuccess = RasterDataDescriptorImp::isKindOfDataDescriptor(descriptorName);
    }
+   else if ((className == "SignatureDataDescriptor") || (className == "SignatureDataDescriptorAdapter") ||
+      (className == "SignatureDataDescriptorImp"))
+   {
+      bSuccess = SignatureDataDescriptorImp::isKindOfDataDescriptor(descriptorName);
+   }
 
    return bSuccess;
 }
@@ -917,6 +932,11 @@ void ModelServicesImp::getDataDescriptorTypes(const string& className, vector<st
       (className == "RasterDataDescriptorImp"))
    {
       RasterDataDescriptorImp::getDataDescriptorTypes(classList);
+   }
+   else if ((className == "SignatureDataDescriptor") || (className == "SignatureDataDescriptorAdapter") ||
+      (className == "SignatureDataDescriptorImp"))
+   {
+      SignatureDataDescriptorImp::getDataDescriptorTypes(classList);
    }
 }
 
@@ -933,6 +953,11 @@ bool ModelServicesImp::isKindOfFileDescriptor(const string& className, const str
    {
       bSuccess = RasterFileDescriptorImp::isKindOfFileDescriptor(descriptorName);
    }
+   else if ((className == "SignatureFileDescriptor") || (className == "SignatureFileDescriptorAdapter") ||
+      (className == "SignatureFileDescriptorImp"))
+   {
+      bSuccess = SignatureFileDescriptorImp::isKindOfFileDescriptor(descriptorName);
+   }
 
    return bSuccess;
 }
@@ -947,6 +972,11 @@ void ModelServicesImp::getFileDescriptorTypes(const string& className, vector<st
       (className == "RasterFileDescriptorImp"))
    {
       RasterFileDescriptorImp::getFileDescriptorTypes(classList);
+   }
+   else if ((className == "SignatureFileDescriptor") || (className == "SignatureFileDescriptorAdapter") ||
+      (className == "SignatureFileDescriptorImp"))
+   {
+      SignatureFileDescriptorImp::getFileDescriptorTypes(classList);
    }
 }
 

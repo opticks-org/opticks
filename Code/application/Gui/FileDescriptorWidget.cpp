@@ -18,7 +18,9 @@
 #include "FileBrowser.h"
 #include "FileDescriptorWidget.h"
 #include "GeoPoint.h"
+#include "ObjectResource.h"
 #include "RasterFileDescriptor.h"
+#include "SignatureFileDescriptor.h"
 #include "StringUtilities.h"
 #include "Units.h"
 
@@ -156,7 +158,7 @@ QString FileDescriptorWidget::getDescriptorValue(const QString& strValueName) co
    QString strValue;
    if (strValueName.isEmpty() == false)
    {
-      QTreeWidgetItem* pItem = getDescriptorItem(strValueName);
+      const QTreeWidgetItem* pItem = getDescriptorItem(strValueName);
       if (pItem != NULL)
       {
          strValue = pItem->text(1);
@@ -222,6 +224,137 @@ void FileDescriptorWidget::initialize()
          mpTreeWidget->setCellWidgetType(pEndianItem, 1, CustomTreeWidget::COMBO_BOX);
          mpTreeWidget->setComboBox(pEndianItem, 1, pEndianCombo);
       }
+   }
+
+   // Signature file descriptor item
+   SignatureFileDescriptor* pSignatureDescriptor = dynamic_cast<SignatureFileDescriptor*>(mpFileDescriptor);
+   if (pSignatureDescriptor != NULL)
+   {
+      QTreeWidgetItem* pUnitsItem = new QTreeWidgetItem(mpTreeWidget);
+      if (pUnitsItem != NULL)
+      {
+         pUnitsItem->setText(0, "Units");
+         set<string> unitNames = pSignatureDescriptor->getUnitNames();
+         if (unitNames.empty() == false)
+         {
+            pUnitsItem->setBackgroundColor(1, Qt::lightGray);
+            for (set<string>::const_iterator it = unitNames.begin(); it != unitNames.end(); ++it)
+            {
+               string unitName = *it;
+               const Units* pUnits = pSignatureDescriptor->getUnits(unitName);
+               if (pUnits == NULL)
+               {
+                  continue;
+               }
+
+               // unit item
+               QTreeWidgetItem* pNamedItem = new QTreeWidgetItem(pUnitsItem);
+               if (pNamedItem == NULL)
+               {
+                  continue;
+               }
+               pNamedItem->setText(0, QString::fromStdString(unitName));
+               pNamedItem->setBackgroundColor(1, Qt::lightGray);
+
+               // Name
+               QTreeWidgetItem* pUnitNameItem = new QTreeWidgetItem(pNamedItem);
+               if (pUnitNameItem != NULL)
+               {
+                  string unitsName = pUnits->getUnitName();
+
+                  pUnitNameItem->setText(0, "Unit Name");
+                  pUnitNameItem->setText(1, QString::fromStdString(unitsName));
+
+                  if (mReadOnly == false)
+                  {
+                     mpTreeWidget->setCellWidgetType(pUnitNameItem, 1, CustomTreeWidget::LINE_EDIT);
+                  }
+               }
+
+               // Type
+               QTreeWidgetItem* pUnitTypeItem = new QTreeWidgetItem(pNamedItem);
+               if (pUnitTypeItem != NULL)
+               {
+                  UnitType unitType = pUnits->getUnitType();
+                  string unitTypeText = StringUtilities::toDisplayString(unitType);
+
+                  pUnitTypeItem->setText(0, "Unit Type");
+                  pUnitTypeItem->setText(1, QString::fromStdString(unitTypeText));
+
+                  if (mReadOnly == false)
+                  {
+                     QComboBox* pUnitTypeCombo = new QComboBox(mpTreeWidget);
+                     pUnitTypeCombo->setEditable(false);
+                     pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(ABSORBANCE)));
+                     pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(ABSORPTANCE)));
+                     pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(DIGITAL_NO)));
+                     pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(DISTANCE)));
+                     pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(EMISSIVITY)));
+                     pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(RADIANCE)));
+                     pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(REFLECTANCE)));
+                     pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(REFLECTANCE_FACTOR)));
+                     pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(TRANSMITTANCE)));
+                     pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(CUSTOM_UNIT)));
+                     pUnitTypeCombo->hide();
+
+                     mpTreeWidget->setCellWidgetType(pUnitTypeItem, 1, CustomTreeWidget::COMBO_BOX);
+                     mpTreeWidget->setComboBox(pUnitTypeItem, 1, pUnitTypeCombo);
+                  }
+               }
+
+               // Scale
+               QTreeWidgetItem* pScaleItem = new QTreeWidgetItem(pNamedItem);
+               if (pScaleItem != NULL)
+               {
+                  double dScale = pUnits->getScaleFromStandard();
+
+                  pScaleItem->setText(0, "Scale");
+                  pScaleItem->setText(1, QString::number(dScale));
+
+                  if (mReadOnly == false)
+                  {
+                     mpTreeWidget->setCellWidgetType(pScaleItem, 1, CustomTreeWidget::LINE_EDIT);
+                  }
+               }
+
+               // Range minimum
+               QTreeWidgetItem* pMinimumItem = new QTreeWidgetItem(pNamedItem);
+               if (pMinimumItem != NULL)
+               {
+                  double dMinimum = pUnits->getRangeMin();
+
+                  pMinimumItem->setText(0, "Range Minimum");
+                  pMinimumItem->setText(1, QString::number(dMinimum));
+
+                  if (mReadOnly == false)
+                  {
+                     mpTreeWidget->setCellWidgetType(pMinimumItem, 1, CustomTreeWidget::LINE_EDIT);
+                  }
+               }
+
+               // Range maximum
+               QTreeWidgetItem* pMaximumItem = new QTreeWidgetItem(pNamedItem);
+               if (pMaximumItem != NULL)
+               {
+                  double dMaximum = pUnits->getRangeMax();
+
+                  pMaximumItem->setText(0, "Range Maximum");
+                  pMaximumItem->setText(1, QString::number(dMaximum));
+
+                  if (mReadOnly == false)
+                  {
+                     mpTreeWidget->setCellWidgetType(pMaximumItem, 1, CustomTreeWidget::LINE_EDIT);
+                  }
+               }
+            }
+         }
+         else  // no Units associated with components in this signature
+         {
+            pUnitsItem->setText(1, "No Units defined");
+         }
+      }
+
+      return;
    }
 
    // Raster element file descriptor items
@@ -685,6 +818,95 @@ bool FileDescriptorWidget::applyToFileDescriptor(FileDescriptor* pFileDescriptor
       }
    }
 
+   // SignatureFileDescriptor items
+   SignatureFileDescriptor* pSignatureDescriptor = dynamic_cast<SignatureFileDescriptor*>(mpFileDescriptor);
+   if (pSignatureDescriptor != NULL)
+   {
+      set<string> dataNames = pSignatureDescriptor->getUnitNames();
+      if (dataNames.empty())
+      {
+         return true;
+      }
+      for (set<string>::const_iterator it = dataNames.begin(); it != dataNames.end(); ++it)
+      {
+         // data name
+         QTreeWidgetItem* pItem = getDescriptorItem(QString::fromStdString(*it));
+
+         // Units
+         FactoryResource<Units> pUnits;
+         if (pUnits.get() != NULL)
+         {
+            // Name
+            QTreeWidgetItem* pSubItem = getDescriptorItem("Unit Name", pItem);
+            if (pSubItem != NULL)
+            {
+               QString strUnitsName = pSubItem->text(1);
+               if (strUnitsName.isEmpty() == false)
+               {
+                  pUnits->setUnitName(strUnitsName.toStdString());
+               }
+            }
+
+            // Type
+            pSubItem = getDescriptorItem("Unit Type", pItem);
+            if (pSubItem != NULL)
+            {
+               QString strUnitsType = pSubItem->text(1);
+               if (strUnitsType.isEmpty() == false)
+               {
+                  bool bError = true;
+                  UnitType unitType =
+                     StringUtilities::fromDisplayString<UnitType>(strUnitsType.toStdString(), &bError);
+                  if (bError == false)
+                  {
+                     pUnits->setUnitType(unitType);
+                  }
+               }
+            }
+
+            // Scale
+            pSubItem = getDescriptorItem("Scale", pItem);
+            if (pSubItem != NULL)
+            {
+               QString strUnitsScale = pSubItem->text(1);
+               if (strUnitsScale.isEmpty() == false)
+               {
+                  double dScale = strUnitsScale.toDouble();
+                  pUnits->setScaleFromStandard(dScale);
+               }
+
+               // Range minimum
+               pSubItem = getDescriptorItem("Range Minimum", pItem);
+               if (pSubItem != NULL)
+               {
+                  QString strMinimum = pSubItem->text(1);
+                  if (strMinimum.isEmpty() == false)
+                  {
+                     double dMinimum = strMinimum.toDouble();
+                     pUnits->setRangeMin(dMinimum);
+                  }
+               }
+            }
+
+            // Range maximum
+            pSubItem = getDescriptorItem("Range Maximum", pItem);
+            if (pSubItem != NULL)
+            {
+               QString strMaximum = pSubItem->text(1);
+               if (strMaximum.isEmpty() == false)
+               {
+                  double dMaximum = strMaximum.toDouble();
+                  pUnits->setRangeMax(dMaximum);
+               }
+            }
+
+            pSignatureDescriptor->setUnits(*it, pUnits.get());
+         }
+      }
+
+      return true;
+   }
+
    // Raster element file descriptor items
    RasterFileDescriptor* pRasterDescriptor = dynamic_cast<RasterFileDescriptor*>(pFileDescriptor);
    if (pRasterDescriptor == NULL)
@@ -875,14 +1097,18 @@ QSize FileDescriptorWidget::sizeHint() const
    return QSize(575, 325);
 }
 
-QTreeWidgetItem* FileDescriptorWidget::getDescriptorItem(const QString& strName) const
+QTreeWidgetItem* FileDescriptorWidget::getDescriptorItem(const QString& strName, QTreeWidgetItem* pStartAt) const
 {
-   if (strName.isEmpty() == true)
+   if (strName.isEmpty())
    {
       return NULL;
    }
 
    QTreeWidgetItemIterator iter(mpTreeWidget);
+   if (pStartAt != NULL)
+   {
+      iter = QTreeWidgetItemIterator(pStartAt);
+   }
    while (*iter != NULL)
    {
       QTreeWidgetItem* pItem = *iter;

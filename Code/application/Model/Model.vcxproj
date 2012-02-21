@@ -195,6 +195,10 @@
     <ClCompile Include="RasterFileDescriptorAdapter.cpp" />
     <ClCompile Include="RasterFileDescriptorImp.cpp" />
     <ClCompile Include="SignatureAdapter.cpp" />
+    <ClCompile Include="SignatureDataDescriptorAdapter.cpp" />
+    <ClCompile Include="SignatureDataDescriptorImp.cpp" />
+    <ClCompile Include="SignatureFileDescriptorAdapter.cpp" />
+    <ClCompile Include="SignatureFileDescriptorImp.cpp" />
     <ClCompile Include="SignatureImp.cpp" />
     <ClCompile Include="SignatureLibraryAdapter.cpp" />
     <ClCompile Include="SignatureLibraryImp.cpp" />
@@ -251,6 +255,10 @@
     <ClInclude Include="RasterFileDescriptorAdapter.h" />
     <ClInclude Include="RasterFileDescriptorImp.h" />
     <ClInclude Include="SignatureAdapter.h" />
+    <ClInclude Include="SignatureDataDescriptorAdapter.h" />
+    <ClInclude Include="SignatureDataDescriptorImp.h" />
+    <ClInclude Include="SignatureFileDescriptorAdapter.h" />
+    <ClInclude Include="SignatureFileDescriptorImp.h" />
     <ClInclude Include="SignatureImp.h" />
     <ClInclude Include="SignatureLibraryAdapter.h" />
     <ClInclude Include="SignatureLibraryImp.h" />

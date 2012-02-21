@@ -29,6 +29,7 @@
 #include "Layer.h"
 #include "RasterFileDescriptorAdapter.h"
 #include "SettableSessionItemAdapter.h"
+#include "SignatureFileDescriptorAdapter.h"
 #include "TypeConverter.h"
 #include "UnitsImp.h"
 #include "WavelengthsImp.h"
@@ -96,6 +97,11 @@ namespace
    static void DestroyRasterFileDescriptor(void* pObj);
    static void* CreateVectorRasterFileDescriptor();
    static void DestroyVectorRasterFileDescriptor(void* pObj);
+
+   static SignatureFileDescriptor* CreateSignatureFileDescriptor();
+   static void DestroySignatureFileDescriptor(void* pObj);
+   static void* CreateVectorSignatureFileDescriptor();
+   static void DestroyVectorSignatureFileDescriptor(void* pObj);
 
    SettableSessionItem* CreateSettableSessionItem();
    void DestroySettableSessionItem(void* pObj);
@@ -266,6 +272,8 @@ ObjectFactoryImp* ObjectFactoryImp::instance()
       sCreateObjectMap.insert(ObjectMapType::value_type("Font", (void*(*)())CreateFontObject));
       sCreateObjectMap.insert(ObjectMapType::value_type("RasterFileDescriptor",
          (void*(*)())CreateRasterFileDescriptor));
+      sCreateObjectMap.insert(ObjectMapType::value_type("SignatureFileDescriptor",
+         (void*(*)())CreateSignatureFileDescriptor));
       sCreateObjectMap.insert(ObjectMapType::value_type("SettableSessionItem", (void*(*)())CreateSettableSessionItem));
       sCreateObjectMap.insert(ObjectMapType::value_type("ExecutableAgent", (void*(*)())CreateExecutableAgent));
       sCreateObjectMap.insert(ObjectMapType::value_type("ImportAgent", (void*(*)())CreateImportAgent));
@@ -321,6 +329,8 @@ ObjectFactoryImp* ObjectFactoryImp::instance()
       sDestroyObjectMap.insert(ObjectMapType2::value_type("Font", (void(*)(void*))DestroyFontObject));
       sDestroyObjectMap.insert(ObjectMapType2::value_type("RasterFileDescriptor",
          (void(*)(void*))DestroyRasterFileDescriptor));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("SignatureFileDescriptor",
+         (void(*)(void*))DestroySignatureFileDescriptor));
       sDestroyObjectMap.insert(ObjectMapType2::value_type("SettableSessionItem",
          (void(*)(void*))DestroySettableSessionItem));
       sDestroyObjectMap.insert(ObjectMapType2::value_type("ExecutableAgent", (void(*)(void*))DestroyExecutableAgent));
@@ -371,6 +381,8 @@ ObjectFactoryImp* ObjectFactoryImp::instance()
       sCreateObjectVectorMap.insert(VectorMapType::value_type("Layer", (void*(*)())CreateVectorLayer));
       sCreateObjectVectorMap.insert(VectorMapType::value_type("RasterFileDescriptor",
          (void*(*)())CreateVectorRasterFileDescriptor));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("SignatureFileDescriptor",
+         (void*(*)())CreateVectorSignatureFileDescriptor));
       sCreateObjectVectorMap.insert(VectorMapType::value_type("Units", (void*(*)())CreateVectorUnits));
       sCreateObjectVectorMap.insert(VectorMapType::value_type("Wavelengths", (void*(*)())CreateVectorWavelengths));
       sCreateObjectVectorMap.insert(VectorMapType::value_type("WizardObject", (void*(*)())CreateVectorWizardObject));
@@ -423,6 +435,8 @@ ObjectFactoryImp* ObjectFactoryImp::instance()
       sDestroyObjectVectorMap.insert(VectorMapType2::value_type("Layer", (void(*)(void*))DestroyVectorLayer));
       sDestroyObjectVectorMap.insert(VectorMapType2::value_type("RasterFileDescriptor",
          (void(*)(void*))DestroyVectorRasterFileDescriptor));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("SignatureFileDescriptor",
+         (void(*)(void*))DestroyVectorSignatureFileDescriptor));
       sDestroyObjectVectorMap.insert(VectorMapType2::value_type("Wavelengths",
          (void(*)(void*))DestroyVectorWavelengths));
       sDestroyObjectVectorMap.insert(VectorMapType2::value_type("Units", (void(*)(void*))DestroyVectorUnits));
@@ -775,6 +789,28 @@ SettableSessionItem* CreateSettableSessionItem()
 void DestroySettableSessionItem(void* pObj)
 {
    delete reinterpret_cast<SettableSessionItemAdapter*>(pObj);
+}
+
+//=============================
+// SignatureFileDescriptor
+SignatureFileDescriptor* CreateSignatureFileDescriptor()
+{
+   return new SignatureFileDescriptorAdapter();
+}
+
+void DestroySignatureFileDescriptor(void* pObj)
+{
+   delete reinterpret_cast<SignatureFileDescriptorAdapter*>(pObj);
+}
+
+void* CreateVectorSignatureFileDescriptor()
+{
+   return new vector<SignatureFileDescriptor*>();
+}
+
+void DestroyVectorSignatureFileDescriptor(void* pObj)
+{
+   delete reinterpret_cast<vector<SignatureFileDescriptor*>*>(pObj);
 }
 
 //=============================

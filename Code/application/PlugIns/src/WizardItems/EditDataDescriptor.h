@@ -13,6 +13,7 @@
 #include "ModelItems.h"
 #include "TypesFile.h"
 
+#include <string>
 #include <vector>
 
 class DataDescriptor;
@@ -67,6 +68,8 @@ private:
    unsigned int* mpRedBand;             // One-based original band number
    unsigned int* mpGreenBand;           // One-based original band number
    unsigned int* mpBlueBand;            // One-based original band number
+
+   std::string* mpComponentName;
 };
 
 #endif

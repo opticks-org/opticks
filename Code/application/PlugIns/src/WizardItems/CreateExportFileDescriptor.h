@@ -12,8 +12,12 @@
 
 #include "ModelItems.h"
 
+#include <string>
+
 class DataElement;
+class FileDescriptor;
 class Filename;
+class Units;
 
 class CreateExportFileDescriptor : public ModelItems
 {
@@ -27,6 +31,7 @@ public:
 
 protected:
    bool extractInputArgs(PlugInArgList* pInArgList);
+   void populateUnits(FileDescriptor* pDescriptor);
 
 private:
    Filename* mpFilename;
@@ -41,6 +46,12 @@ private:
    unsigned int* mpStartBand;           // One-based original band number
    unsigned int* mpEndBand;             // One-based original band number
    unsigned int* mpBandSkipFactor;
+   std::string* mpUnitsName;
+   UnitType* mpUnitsType;
+   double* mpUnitsScale;
+   double* mpUnitsRangeMin;
+   double* mpUnitsRangeMax;
+   std::string* mpComponentName;
 };
 
 #endif

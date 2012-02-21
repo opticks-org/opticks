@@ -24,12 +24,16 @@
 #include "PlugInRegistration.h"
 #include "RasterFileDescriptor.h"
 #include "RasterUtilities.h"
+#include "SignatureFileDescriptor.h"
 #include "Units.h"
+
+#include <set>
 
 using namespace std;
 
 REGISTER_PLUGIN_BASIC(OpticksWizardItems, CreateFileDescriptor);
 REGISTER_PLUGIN_BASIC(OpticksWizardItems, CreateRasterFileDescriptor);
+REGISTER_PLUGIN_BASIC(OpticksWizardItems, CreateSignatureFileDescriptor);
 
 //////////////////////////
 // CreateFileDescriptor //
@@ -198,7 +202,6 @@ bool CreateFileDescriptor::extractInputArgs(PlugInArgList* pInArgList)
 
    // Data set location
    mDatasetLocation.erase();
-
    if ((pInArgList->getArg("Data Set Location", pArg) == true) && (pArg != NULL))
    {
       string* pDatasetLocation = pArg->getPlugInArgValue<string>();
@@ -804,3 +807,161 @@ bool CreateRasterFileDescriptor::populateFileDescriptor(FileDescriptor* pFileDes
    return true;
 }
 
+//////////////////////////
+// CreateSignatureFileDescriptor //
+//////////////////////////
+
+CreateSignatureFileDescriptor::CreateSignatureFileDescriptor() :
+   mUnitsComponentName("Reflectance"),
+   mpUnitsName(NULL),
+   mpUnitsType(NULL),
+   mpUnitsScale(NULL),
+   mpUnitsRangeMin(NULL),
+   mpUnitsRangeMax(NULL)
+{
+   setName("Create Signature File Descriptor");
+   setVersion(APP_VERSION_NUMBER);
+   setCreator("Ball Aerospace & Technologies, Corp.");
+   setCopyright(APP_COPYRIGHT);
+   setDescription("Creates a signature file descriptor object");
+   setDescriptorId("{BDB30309-CDA5-4618-BDC0-6EE2C912934B}");
+   allowMultipleInstances(true);
+   setProductionStatus(APP_IS_PRODUCTION_RELEASE);
+}
+
+CreateSignatureFileDescriptor::~CreateSignatureFileDescriptor()
+{}
+
+bool CreateSignatureFileDescriptor::getInputSpecification(PlugInArgList*& pArgList)
+{
+   bool bSuccess = CreateFileDescriptor::getInputSpecification(pArgList);
+   if (bSuccess == false)
+   {
+      return false;
+   }
+
+   VERIFY(pArgList != NULL);
+
+   // Add args
+   VERIFY(pArgList->addArg<string>("Units Component Name", &mUnitsComponentName, "The signature component name "
+      "for which to set the units values.\nIf no value is specified, the default value of \"Reflectance\" is used.\n"
+      "This argument is ignored if no units input values are specified."));
+   VERIFY(pArgList->addArg<string>("Units Name", NULL,
+      "Name for the units associated with the named component data."));
+   VERIFY(pArgList->addArg<UnitType>("Units Type", NULL, "Type of units associated with the named component data."));
+   VERIFY(pArgList->addArg<double>("Units Scale Factor", NULL, "Scale factor for the units."));
+   VERIFY(pArgList->addArg<double>("Units Range Minimum", NULL, "Minimum range for the units."));
+   VERIFY(pArgList->addArg<double>("Units Range Maximum", NULL, "Maximum range for the units."));
+
+   return true;
+}
+
+bool CreateSignatureFileDescriptor::getOutputSpecification(PlugInArgList*& pArgList)
+{
+   Service<PlugInManagerServices> pPlugInManager;
+   VERIFY(pPlugInManager.get() != NULL);
+
+   // Set up list
+   pArgList = pPlugInManager->getPlugInArgList();
+   VERIFY(pArgList != NULL);
+
+   // Add args
+   VERIFY(pArgList->addArg<SignatureFileDescriptor>("File Descriptor", "Resulting signature file descriptor."));
+
+   return true;
+}
+
+bool CreateSignatureFileDescriptor::extractInputArgs(PlugInArgList* pInArgList)
+{
+   bool bSuccess = CreateFileDescriptor::extractInputArgs(pInArgList);
+   if (bSuccess == false)
+   {
+      return false;
+   }
+
+   PlugInArg* pArg = NULL;
+
+   // Component name
+   if (!(pInArgList->getPlugInArgValue<string>("Units Component Name", mUnitsComponentName)))
+   {
+      reportError("Could not read the units component name input value!", "8AD9ACDC-4252-4A4B-B1AC-83A81B422158");
+      return false;
+   }
+
+   if (mUnitsComponentName.empty())
+   {
+      reportError("The units component name input value is empty!", "1C9FA67C-3A92-4418-8C00-4FE61D5B6A5E");
+      return false;
+   }
+
+   // Units name
+   mpUnitsName = pInArgList->getPlugInArgValue<string>("Units Name");
+
+   // Units type
+   mpUnitsType = pInArgList->getPlugInArgValue<UnitType>("Units Type");
+
+   // Units scale
+   mpUnitsScale = pInArgList->getPlugInArgValue<double>("Units Scale Factor");
+
+   // Units range min
+   mpUnitsRangeMin = pInArgList->getPlugInArgValue<double>("Units Range Minimum");
+
+   // Units range max
+   mpUnitsRangeMax = pInArgList->getPlugInArgValue<double>("Units Range Maximum");
+
+   return true;
+}
+
+FileDescriptor* CreateSignatureFileDescriptor::createFileDescriptor() const
+{
+   FactoryResource<SignatureFileDescriptor> pFileDescriptor;
+   VERIFY(pFileDescriptor.get() != NULL);
+
+   return pFileDescriptor.release();
+}
+
+bool CreateSignatureFileDescriptor::populateFileDescriptor(FileDescriptor* pFileDescriptor) const
+{
+   if (CreateFileDescriptor::populateFileDescriptor(pFileDescriptor) == false)
+   {
+      return false;
+   }
+
+   SignatureFileDescriptor* pSignatureFileDescriptor = dynamic_cast<SignatureFileDescriptor*>(pFileDescriptor);
+   if (pSignatureFileDescriptor == NULL)
+   {
+      return false;
+   }
+
+   if (mpUnitsName != NULL || mpUnitsType != NULL || mpUnitsScale != NULL
+      || mpUnitsRangeMin != NULL || mpUnitsRangeMax != NULL)
+   {
+      if (mUnitsComponentName.empty() == false)
+      {
+         FactoryResource<Units> pNewUnits;
+         if (mpUnitsName != NULL)
+         {
+            pNewUnits->setUnitName(*mpUnitsName);
+         }
+         if (mpUnitsType != NULL)
+         {
+            pNewUnits->setUnitType(*mpUnitsType);
+         }
+         if (mpUnitsScale != NULL)
+         {
+            pNewUnits->setScaleFromStandard(*mpUnitsScale);
+         }
+         if (mpUnitsRangeMin != NULL)
+         {
+            pNewUnits->setRangeMin(*mpUnitsRangeMin);
+         }
+         if (mpUnitsRangeMax != NULL)
+         {
+            pNewUnits->setRangeMax(*mpUnitsRangeMax);
+         }
+
+         pSignatureFileDescriptor->setUnits(mUnitsComponentName, pNewUnits.get());
+      }
+   }
+   return true;
+}

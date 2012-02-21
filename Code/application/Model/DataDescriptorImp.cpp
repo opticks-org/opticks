@@ -12,6 +12,7 @@
 #include "FileDescriptorAdapter.h"
 #include "ModelServicesImp.h"
 #include "RasterFileDescriptorAdapter.h"
+#include "SignatureFileDescriptorAdapter.h"
 #include "SessionManager.h"
 
 XERCES_CPP_NAMESPACE_USE
@@ -398,6 +399,10 @@ bool DataDescriptorImp::fromXml(DOMNode* pDocument, unsigned int version)
             if (pModel->isKindOfFileDescriptor(fileDescriptorType, "RasterFileDescriptor") == true)
             {
                mpFileDescriptor = new RasterFileDescriptorAdapter();
+            }
+            else if (pModel->isKindOfFileDescriptor(fileDescriptorType, "SignatureFileDescriptor") == true)
+            {
+               mpFileDescriptor = new SignatureFileDescriptorAdapter();
             }
             else if (pModel->isKindOfFileDescriptor(fileDescriptorType, "FileDescriptor") == true)
             {

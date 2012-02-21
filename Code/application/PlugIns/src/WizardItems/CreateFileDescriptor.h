@@ -23,11 +23,11 @@ class CreateFileDescriptor : public ModelItems
 {
 public:
    CreateFileDescriptor();
-   ~CreateFileDescriptor();
+   virtual ~CreateFileDescriptor();
 
-   bool getInputSpecification(PlugInArgList*& pArgList);
-   bool getOutputSpecification(PlugInArgList*& pArgList);
-   bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
+   virtual bool getInputSpecification(PlugInArgList*& pArgList);
+   virtual bool getOutputSpecification(PlugInArgList*& pArgList);
+   virtual bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
 
 protected:
    virtual bool extractInputArgs(PlugInArgList* pInArgList);
@@ -44,15 +44,15 @@ class CreateRasterFileDescriptor : public CreateFileDescriptor
 {
 public:
    CreateRasterFileDescriptor();
-   ~CreateRasterFileDescriptor();
+   virtual ~CreateRasterFileDescriptor();
 
-   bool getInputSpecification(PlugInArgList*& pArgList);
-   bool getOutputSpecification(PlugInArgList*& pArgList);
+   virtual bool getInputSpecification(PlugInArgList*& pArgList);
+   virtual bool getOutputSpecification(PlugInArgList*& pArgList);
 
 protected:
-   bool extractInputArgs(PlugInArgList* pInArgList);
-   FileDescriptor* createFileDescriptor() const;
-   bool populateFileDescriptor(FileDescriptor* pFileDescriptor) const;
+   virtual bool extractInputArgs(PlugInArgList* pInArgList);
+   virtual FileDescriptor* createFileDescriptor() const;
+   virtual bool populateFileDescriptor(FileDescriptor* pFileDescriptor) const;
 
 private:
    unsigned int* mpHeaderBytes;
@@ -74,6 +74,29 @@ private:
    double* mpUnitsRangeMax;
    InterleaveFormatType mInterleave;
    std::vector<Filename*>* mpBandFiles;
+};
+
+class CreateSignatureFileDescriptor : public CreateFileDescriptor
+{
+public:
+   CreateSignatureFileDescriptor();
+   virtual ~CreateSignatureFileDescriptor();
+
+   virtual bool getInputSpecification(PlugInArgList*& pArgList);
+   virtual bool getOutputSpecification(PlugInArgList*& pArgList);
+
+protected:
+   virtual bool extractInputArgs(PlugInArgList* pInArgList);
+   virtual FileDescriptor* createFileDescriptor() const;
+   virtual bool populateFileDescriptor(FileDescriptor* pFileDescriptor) const;
+
+private:
+   std::string mUnitsComponentName;
+   std::string* mpUnitsName;
+   UnitType* mpUnitsType;
+   double* mpUnitsScale;
+   double* mpUnitsRangeMin;
+   double* mpUnitsRangeMax;
 };
 
 #endif

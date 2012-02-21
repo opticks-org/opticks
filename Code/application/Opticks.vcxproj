@@ -398,6 +398,8 @@
     <ClInclude Include="Interfaces\SessionManager.h" />
     <ClInclude Include="Interfaces\SettableSessionItem.h" />
     <ClInclude Include="Interfaces\Signature.h" />
+    <ClInclude Include="Interfaces\SignatureDataDescriptor.h" />
+    <ClInclude Include="Interfaces\SignatureFileDescriptor.h" />
     <ClInclude Include="Interfaces\SignatureLibrary.h" />
     <ClInclude Include="Interfaces\SignaturePlot.h" />
     <ClInclude Include="Interfaces\SignatureSet.h" />

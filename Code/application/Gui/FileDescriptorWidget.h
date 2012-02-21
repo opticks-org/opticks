@@ -44,7 +44,7 @@ signals:
    void modified();
 
 protected:
-   QTreeWidgetItem* getDescriptorItem(const QString& strName) const;
+   QTreeWidgetItem* getDescriptorItem(const QString& strName, QTreeWidgetItem* pStartAt = 0) const;
 
 protected slots:
    void descriptorItemChanged(QTreeWidgetItem* pItem, int iColumn);

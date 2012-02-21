@@ -273,6 +273,8 @@ void PlugInArgImp::initArgTypes()
       mArgTypes.push_back("RasterLayer");
       mArgTypes.push_back("RegionUnits");
       mArgTypes.push_back("Signature");
+      mArgTypes.push_back("SignatureDataDescriptor");
+      mArgTypes.push_back("SignatureFileDescriptor");
       mArgTypes.push_back("SignatureLibrary");
       mArgTypes.push_back("SignaturePlot");
       mArgTypes.push_back("SignatureSet");

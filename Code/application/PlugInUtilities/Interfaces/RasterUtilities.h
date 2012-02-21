@@ -199,10 +199,10 @@ namespace RasterUtilities
 
    /**
     * Returns a FileDescriptor that can be provided to an exporter
-    * to export the data that is some subset of the given DataDescriptor.
+    * to export the raster data that is some subset of the given RasterDataDescriptor.
     *
-    * @param pDd
-    *        The DataDescriptor to generate a suitable FileDescriptor
+    * @param pRasterDd
+    *        The RasterDataDescriptor to generate a suitable RasterFileDescriptor
     *        necessary for export of.
     * @param filename
     *        The name of the file that the data should be exported to.
@@ -245,12 +245,11 @@ namespace RasterUtilities
     *        The vector must be a subset of the DataDescriptor::getBands() value. An
     *        empty vector can be provided, in which case no bands will be removed
     *        during the subset.
-    * @return A newly created FileDescriptor, of an appropriate subclass
-    *         to match pDd.  The returned FileDescriptor only includes
-    *         the specified subset and is not set into the
-    *         DataDescriptor and is only suitable for an exporter to use.
+    * @return A newly created RasterFileDescriptor.  The returned RasterFileDescriptor
+    *         only includes the specified subset and is not set into the
+    *         RasterDataDescriptor and is only suitable for an exporter to use.
     */
-   FileDescriptor* generateFileDescriptorForExport(const DataDescriptor* pDd,
+   RasterFileDescriptor* generateRasterFileDescriptorForExport(const RasterDataDescriptor* pRasterDd,
       const std::string &filename, const DimensionDescriptor& startRow,
       const DimensionDescriptor& stopRow,
       unsigned int rowSkipFactor,
@@ -260,11 +259,11 @@ namespace RasterUtilities
       const std::vector<DimensionDescriptor>& subsetBands = std::vector<DimensionDescriptor>());
 
    /**
-    * Returns a FileDescriptor that can be provided to an exporter
-    * to export the data that is some subset of the given DataDescriptor.
+    * Returns a RasterFileDescriptor that can be provided to an exporter
+    * to export the data that is some subset of the given RasterDataDescriptor.
     *
-    * @param pDd
-    *        The DataDescriptor to generate a suitable FileDescriptor
+    * @param pRasterDd
+    *        The RasterDataDescriptor to generate a suitable RasterFileDescriptor
     *        necessary for export of.
     * @param filename
     *        The name of the file that the data should be exported to.
@@ -319,12 +318,11 @@ namespace RasterUtilities
     *        while creating the subset.  For example, a skipFactor of 0 would include
     *        the following band positions: 0, 1, 2, 3, 4, 5, 6. For example, a 
     *        skipFactor of 1 would include the following band positions: 0, 2, 4, 6.
-    * @return A newly created FileDescriptor, of an appropriate subclass
-    *         to match pDd.  The returned FileDescriptor only includes
+    * @return A newly created RasterFileDescriptor.  The returned FileDescriptor only includes
     *         the specified subset and is not set into the
-    *         DataDescriptor and is only suitable for an exporter to use.
+    *         RasterDataDescriptor and is only suitable for an exporter to use.
     */
-   FileDescriptor* generateFileDescriptorForExport(const DataDescriptor* pDd,
+   RasterFileDescriptor* generateRasterFileDescriptorForExport(const RasterDataDescriptor* pRasterDd,
       const std::string &filename, const DimensionDescriptor& startRow,
       const DimensionDescriptor& stopRow,
       unsigned int rowSkipFactor,

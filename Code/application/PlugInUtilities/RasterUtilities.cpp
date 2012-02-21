@@ -23,6 +23,8 @@
 #include "RasterFileDescriptor.h"
 #include "RasterLayer.h"
 #include "RasterUtilities.h"
+#include "SignatureDataDescriptor.h"
+#include "SignatureFileDescriptor.h"
 #include "SpecialMetadata.h"
 #include "switchOnEncoding.h"
 #include "UInt64.h"
@@ -30,6 +32,7 @@
 
 #include <algorithm>
 #include <boost/bind.hpp>
+#include <set>
 #include <sstream>
 
 namespace
@@ -250,6 +253,20 @@ namespace
       pFd->setDatasetLocation(datasetLocation);
       pFd->setEndian(endian);
 
+      SignatureDataDescriptor* pSigDd = dynamic_cast<SignatureDataDescriptor*>(pDd);
+      if (pSigDd != NULL)
+      {
+         SignatureFileDescriptor* pSigFd = dynamic_cast<SignatureFileDescriptor*>(pSigDd->getFileDescriptor());
+         VERIFYNRV(pSigFd != NULL);
+         std::set<std::string> unitNames = pSigDd->getUnitNames();
+         for (std::set<std::string>::iterator it = unitNames.begin(); it != unitNames.end(); ++it)
+         {
+            pSigFd->setUnits(*it, pSigDd->getUnits(*it));
+         }
+
+         return;
+      }
+
       RasterDataDescriptor* pRasterDd = dynamic_cast<RasterDataDescriptor*>(pDd);
       if (pRasterDd != NULL)
       {
@@ -320,6 +337,7 @@ FileDescriptor *RasterUtilities::generateFileDescriptor(DataDescriptor *pDd,
    const std::string &filename, const std::string &datasetLocation, EndianType endian)
 {
    const RasterDataDescriptor* pRasterDd = dynamic_cast<const RasterDataDescriptor*>(pDd);
+   const SignatureDataDescriptor* pSigDd = dynamic_cast<const SignatureDataDescriptor*>(pDd);
 
    // Create the file descriptor
    FileDescriptor* pFd = NULL;
@@ -327,6 +345,11 @@ FileDescriptor *RasterUtilities::generateFileDescriptor(DataDescriptor *pDd,
    {
       FactoryResource<RasterFileDescriptor> pRasterFd;
       pFd = pRasterFd.release();
+   }
+   else if (pSigDd != NULL)
+   {
+      FactoryResource<SignatureFileDescriptor> pSigFd;
+      pFd = pSigFd.release();
    }
    else
    {
@@ -347,12 +370,18 @@ FileDescriptor *RasterUtilities::generateAndSetFileDescriptor(DataDescriptor *pD
    VERIFYRV(pDd != NULL, NULL);
 
    const RasterDataDescriptor* pRasterDd = dynamic_cast<const RasterDataDescriptor*>(pDd);
+   const SignatureDataDescriptor* pSigDd = dynamic_cast<const SignatureDataDescriptor*>(pDd);
 
    // Create the file descriptor
    if (pRasterDd != NULL)
    {
       FactoryResource<RasterFileDescriptor> pFd;
       pDd->setFileDescriptor(pFd.get());
+   }
+   else if (pSigDd != NULL)
+   {
+      FactoryResource<SignatureFileDescriptor> pSigFd;
+      pDd->setFileDescriptor(pSigFd.get());
    }
    else
    {
@@ -370,29 +399,26 @@ FileDescriptor *RasterUtilities::generateAndSetFileDescriptor(DataDescriptor *pD
 FileDescriptor* RasterUtilities::generateFileDescriptorForExport(const DataDescriptor* pDd,
    const std::string &filename)
 {
-   DimensionDescriptor emptyDesc;
-   std::vector<DimensionDescriptor> emptyVector;
-   return generateFileDescriptorForExport(pDd, filename, emptyDesc, emptyDesc, 0,
-      emptyDesc, emptyDesc, 0, emptyVector);
-}
-
-FileDescriptor* RasterUtilities::generateFileDescriptorForExport(const DataDescriptor* pDd,
-   const std::string &filename, const DimensionDescriptor& startRow,
-   const DimensionDescriptor& stopRow,
-   unsigned int rowSkipFactor,
-   const DimensionDescriptor& startCol,
-   const DimensionDescriptor& stopCol,
-   unsigned int colSkipFactor,
-   const std::vector<DimensionDescriptor>& subsetBands)
-{
    const RasterDataDescriptor* pRasterDd = dynamic_cast<const RasterDataDescriptor*>(pDd);
-
-   // Create the file descriptor
-   FileDescriptor* pFd = NULL;
    if (pRasterDd != NULL)
    {
-      FactoryResource<RasterFileDescriptor> pRasterFd;
-      pFd = pRasterFd.release();
+      DimensionDescriptor emptyDesc;
+      std::vector<DimensionDescriptor> emptyVector;
+      return generateRasterFileDescriptorForExport(pRasterDd, filename, emptyDesc, emptyDesc, 0,
+         emptyDesc, emptyDesc, 0, emptyVector);
+   }
+
+   FileDescriptor* pFd = NULL;
+   const SignatureDataDescriptor* pSigDd = dynamic_cast<const SignatureDataDescriptor*>(pDd);
+   if (pSigDd != NULL)
+   {
+      FactoryResource<SignatureFileDescriptor> pSigFd;
+      std::set<std::string> unitNames = pSigDd->getUnitNames();
+      for (std::set<std::string>::iterator it = unitNames.begin(); it != unitNames.end(); ++it)
+      {
+         pSigFd->setUnits(*it, pSigDd->getUnits(*it));
+      }
+      pFd = pSigFd.release();
    }
    else
    {
@@ -406,64 +432,72 @@ FileDescriptor* RasterUtilities::generateFileDescriptorForExport(const DataDescr
    EndianType endian = Endian::getSystemEndian();
    pFd->setEndian(endian);
 
-   /*
-#convert CreateExportFileDescriptor wizard to use this code
-   */
-
-   if (pRasterDd != NULL)
-   {
-      RasterFileDescriptor* pRasterFd = dynamic_cast<RasterFileDescriptor*>(pFd);
-      VERIFY(pRasterFd != NULL);
-
-      unsigned int bitsPerElement = RasterUtilities::bytesInEncoding(pRasterDd->getDataType()) * 8;
-      pRasterFd->setBitsPerElement(bitsPerElement);
-
-      // Rows
-      std::vector<DimensionDescriptor> rows =
-         subsetDimensionVector(pRasterDd->getRows(), startRow, stopRow, rowSkipFactor);
-      std::transform(rows.begin(), rows.end(), rows.begin(), SetOnDiskNumber());
-      pRasterFd->setRows(rows);
-
-      // Columns
-      std::vector<DimensionDescriptor> columns =
-         subsetDimensionVector(pRasterDd->getColumns(), startCol, stopCol, colSkipFactor);
-      std::transform(columns.begin(), columns.end(), columns.begin(), SetOnDiskNumber());
-      pRasterFd->setColumns(columns);
-
-      pRasterFd->setUnits(pRasterDd->getUnits());
-      pRasterFd->setXPixelSize(pRasterDd->getXPixelSize());
-      pRasterFd->setYPixelSize(pRasterDd->getYPixelSize());
-
-      // Bands
-      std::vector<DimensionDescriptor> bands = pRasterDd->getBands();
-      const std::vector<DimensionDescriptor>& origBands = pRasterDd->getBands();
-      std::vector<DimensionDescriptor>::const_iterator foundBand;
-      if (!subsetBands.empty())
-      {
-         bands.clear();
-         for (unsigned int count = 0; count < subsetBands.size(); count++)
-         {
-            foundBand = std::find(origBands.begin(), origBands.end(), subsetBands[count]);
-            if (foundBand != origBands.end())
-            {
-               DimensionDescriptor bandDim = subsetBands[count];
-               bandDim.setOnDiskNumber(count);
-               bands.push_back(bandDim);
-            }
-         }
-      }
-      else
-      {
-         std::transform(bands.begin(), bands.end(), bands.begin(), SetOnDiskNumber());
-      }
-      pRasterFd->setBands(bands);
-      pRasterFd->setInterleaveFormat(pRasterDd->getInterleaveFormat());         
-   }
-
    return pFd;
 }
 
-FileDescriptor* RasterUtilities::generateFileDescriptorForExport(const DataDescriptor* pDd,
+RasterFileDescriptor* RasterUtilities::generateRasterFileDescriptorForExport(const RasterDataDescriptor* pRasterDd,
+   const std::string &filename, const DimensionDescriptor& startRow,
+   const DimensionDescriptor& stopRow,
+   unsigned int rowSkipFactor,
+   const DimensionDescriptor& startCol,
+   const DimensionDescriptor& stopCol,
+   unsigned int colSkipFactor,
+   const std::vector<DimensionDescriptor>& subsetBands)
+{
+   VERIFYRV(pRasterDd != NULL, NULL);
+   FactoryResource<RasterFileDescriptor> pRasterFd;
+   pRasterFd->setFilename(filename);
+   EndianType endian = Endian::getSystemEndian();
+   pRasterFd->setEndian(endian);
+
+   unsigned int bitsPerElement = RasterUtilities::bytesInEncoding(pRasterDd->getDataType()) * 8;
+   pRasterFd->setBitsPerElement(bitsPerElement);
+
+   // Rows
+   std::vector<DimensionDescriptor> rows =
+      subsetDimensionVector(pRasterDd->getRows(), startRow, stopRow, rowSkipFactor);
+   std::transform(rows.begin(), rows.end(), rows.begin(), SetOnDiskNumber());
+   pRasterFd->setRows(rows);
+
+   // Columns
+   std::vector<DimensionDescriptor> columns =
+      subsetDimensionVector(pRasterDd->getColumns(), startCol, stopCol, colSkipFactor);
+   std::transform(columns.begin(), columns.end(), columns.begin(), SetOnDiskNumber());
+   pRasterFd->setColumns(columns);
+
+   pRasterFd->setUnits(pRasterDd->getUnits());
+   pRasterFd->setXPixelSize(pRasterDd->getXPixelSize());
+   pRasterFd->setYPixelSize(pRasterDd->getYPixelSize());
+
+   // Bands
+   std::vector<DimensionDescriptor> bands = pRasterDd->getBands();
+   const std::vector<DimensionDescriptor>& origBands = pRasterDd->getBands();
+   std::vector<DimensionDescriptor>::const_iterator foundBand;
+   if (!subsetBands.empty())
+   {
+      bands.clear();
+      for (unsigned int count = 0; count < subsetBands.size(); count++)
+      {
+         foundBand = std::find(origBands.begin(), origBands.end(), subsetBands[count]);
+         if (foundBand != origBands.end())
+         {
+            DimensionDescriptor bandDim = subsetBands[count];
+            bandDim.setOnDiskNumber(count);
+            bands.push_back(bandDim);
+         }
+      }
+   }
+   else
+   {
+      std::transform(bands.begin(), bands.end(), bands.begin(), SetOnDiskNumber());
+   }
+   pRasterFd->setBands(bands);
+   pRasterFd->setInterleaveFormat(pRasterDd->getInterleaveFormat());         
+
+   return pRasterFd.release();
+}
+
+RasterFileDescriptor* RasterUtilities::generateRasterFileDescriptorForExport(const RasterDataDescriptor* pRasterDd,
    const std::string &filename, const DimensionDescriptor& startRow,
    const DimensionDescriptor& stopRow,
    unsigned int rowSkipFactor,
@@ -474,13 +508,12 @@ FileDescriptor* RasterUtilities::generateFileDescriptorForExport(const DataDescr
    const DimensionDescriptor& stopBand,
    unsigned int bandSkipFactor)
 {
-   const RasterDataDescriptor* pRasterDd = dynamic_cast<const RasterDataDescriptor*>(pDd);
    if (pRasterDd != NULL)
    {
       // Bands
       std::vector<DimensionDescriptor> bands =
          subsetDimensionVector(pRasterDd->getBands(), startBand, stopBand, bandSkipFactor);
-      return generateFileDescriptorForExport(pDd, filename, startRow, stopRow,
+      return generateRasterFileDescriptorForExport(pRasterDd, filename, startRow, stopRow,
          rowSkipFactor, startCol, stopCol, colSkipFactor, bands);
    }
    return NULL;

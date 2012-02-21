@@ -7,9 +7,9 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "CreateExportFileDescriptor.h"
 #include "AppVersion.h"
 #include "AppVerify.h"
+#include "CreateExportFileDescriptor.h"
 #include "DimensionDescriptor.h"
 #include "FileDescriptor.h"
 #include "MessageLogResource.h"
@@ -23,6 +23,9 @@
 #include "RasterElement.h"
 #include "RasterFileDescriptor.h"
 #include "RasterUtilities.h"
+#include "SignatureDataDescriptor.h"
+#include "SignatureFileDescriptor.h"
+#include "Units.h"
 
 using namespace std;
 
@@ -39,7 +42,13 @@ CreateExportFileDescriptor::CreateExportFileDescriptor() :
    mpColumnSkipFactor(NULL),
    mpStartBand(NULL),
    mpEndBand(NULL),
-   mpBandSkipFactor(NULL)
+   mpBandSkipFactor(NULL),
+   mpUnitsName(NULL),
+   mpUnitsType(NULL),
+   mpUnitsScale(NULL),
+   mpUnitsRangeMin(NULL),
+   mpUnitsRangeMax(NULL),
+   mpComponentName(NULL)
 {
    setName("Create Export File Descriptor");
    setVersion(APP_VERSION_NUMBER);
@@ -58,105 +67,35 @@ CreateExportFileDescriptor::~CreateExportFileDescriptor()
 
 bool CreateExportFileDescriptor::getInputSpecification(PlugInArgList*& pArgList)
 {
-   bool bSuccess = ModelItems::getInputSpecification(pArgList);
-   if (bSuccess == false)
+   if (!ModelItems::getInputSpecification(pArgList))
    {
       return false;
    }
 
    VERIFY(pArgList != NULL);
 
-   Service<PlugInManagerServices> pPlugInManager;
-   VERIFY(pPlugInManager.get() != NULL);
-
    // Add args
-   PlugInArg* pArg = pPlugInManager->getPlugInArg();
-   VERIFY(pArg != NULL);
-   pArg->setName("Filename");                         // Filename
-   pArg->setType("Filename");
-   pArg->setDefaultValue(NULL);
-   pArg->setDescription("Location on-disk for the file data.");
-   pArgList->addArg(*pArg);
-
-   pArg = pPlugInManager->getPlugInArg();
-   VERIFY(pArg != NULL);
-   pArg->setName("Data Set");                         // Data element
-   pArg->setType("DataElement");
-   pArg->setDefaultValue(NULL);
-   pArg->setDescription("Element to create the new descriptor from.");
-   pArgList->addArg(*pArg);
-
-   pArg = pPlugInManager->getPlugInArg();
-   VERIFY(pArg != NULL);
-   pArg->setName("Start Row");                        // Start row
-   pArg->setType("unsigned int");
-   pArg->setDefaultValue(NULL);
-   pArg->setDescription("Beginning row for this descriptor.");
-   pArgList->addArg(*pArg);
-
-   pArg = pPlugInManager->getPlugInArg();
-   VERIFY(pArg != NULL);
-   pArg->setName("End Row");                          // End row
-   pArg->setType("unsigned int");
-   pArg->setDefaultValue(NULL);
-   pArg->setDescription("Ending row for this descriptor.");
-   pArgList->addArg(*pArg);
-
-   pArg = pPlugInManager->getPlugInArg();
-   VERIFY(pArg != NULL);
-   pArg->setName("Row Skip Factor");                  // Row skip factor
-   pArg->setType("unsigned int");
-   pArg->setDefaultValue(NULL);
-   pArg->setDescription("Row skip factor for this descriptor.");
-   pArgList->addArg(*pArg);
-
-   pArg = pPlugInManager->getPlugInArg();
-   VERIFY(pArg != NULL);
-   pArg->setName("Start Column");                     // Start column
-   pArg->setType("unsigned int");
-   pArg->setDefaultValue(NULL);
-   pArg->setDescription("Beginning column for this descriptor.");
-   pArgList->addArg(*pArg);
-
-   pArg = pPlugInManager->getPlugInArg();
-   VERIFY(pArg != NULL);
-   pArg->setName("End Column");                       // End column
-   pArg->setType("unsigned int");
-   pArg->setDefaultValue(NULL);
-   pArg->setDescription("Ending column for this descriptor.");
-   pArgList->addArg(*pArg);
-
-   pArg = pPlugInManager->getPlugInArg();
-   VERIFY(pArg != NULL);
-   pArg->setName("Column Skip Factor");               // Column skip factor
-   pArg->setType("unsigned int");
-   pArg->setDefaultValue(NULL);
-   pArg->setDescription("Column skip factor for this descriptor.");
-   pArgList->addArg(*pArg);
-
-   pArg = pPlugInManager->getPlugInArg();
-   VERIFY(pArg != NULL);
-   pArg->setName("Start Band");                       // Start band
-   pArg->setType("unsigned int");
-   pArg->setDefaultValue(NULL);
-   pArg->setDescription("Beginning band for this descriptor.");
-   pArgList->addArg(*pArg);
-
-   pArg = pPlugInManager->getPlugInArg();
-   VERIFY(pArg != NULL);
-   pArg->setName("End Band");                         // End band
-   pArg->setType("unsigned int");
-   pArg->setDefaultValue(NULL);
-   pArg->setDescription("Ending band for this descriptor.");
-   pArgList->addArg(*pArg);
-
-   pArg = pPlugInManager->getPlugInArg();
-   VERIFY(pArg != NULL);
-   pArg->setName("Band Skip Factor");                 // Band skip factor
-   pArg->setType("unsigned int");
-   pArg->setDefaultValue(NULL);
-   pArg->setDescription("Band skip factor for this descriptor.");
-   pArgList->addArg(*pArg);
+   VERIFY(pArgList->addArg<Filename>("Filename", NULL, "Location on-disk for the file data."));
+   VERIFY(pArgList->addArg<DataElement>("Data Set", NULL, "Element to create the new descriptor from."));
+   VERIFY(pArgList->addArg<unsigned int>("Start Row", NULL, "Beginning row for this raster descriptor."));
+   VERIFY(pArgList->addArg<unsigned int>("End Row", NULL, "Ending row for this raster descriptor."));
+   VERIFY(pArgList->addArg<unsigned int>("Row Skip Factor", NULL, "Row skip factor for this raster descriptor."));
+   VERIFY(pArgList->addArg<unsigned int>("Start Column", NULL, "Beginning column for this raster descriptor."));
+   VERIFY(pArgList->addArg<unsigned int>("End Column", NULL, "Ending column for this raster descriptor."));
+   VERIFY(pArgList->addArg<unsigned int>("Column Skip Factor", NULL,
+      "Column skip factor for this raster descriptor."));
+   VERIFY(pArgList->addArg<unsigned int>("Start Band", NULL, "Beginning band for this raster descriptor."));
+   VERIFY(pArgList->addArg<unsigned int>("End Band", NULL, "Ending band for this raster descriptor."));
+   VERIFY(pArgList->addArg<unsigned int>("Band Skip Factor", NULL, "Band skip factor for this raster descriptor."));
+   VERIFY(pArgList->addArg<string>("Units Name", NULL, "Modify the name used for units."));
+   VERIFY(pArgList->addArg<UnitType>("Units Type", NULL, "Modify the type of units used."));
+   VERIFY(pArgList->addArg<double>("Units Scale Factor", NULL,
+      "Modify the scale factor for the units in the descriptor."));
+   VERIFY(pArgList->addArg<double>("Units Range Minimum", NULL, "Modify the minimum units range."));
+   VERIFY(pArgList->addArg<double>("Units Range Maximum", NULL, "Modify the maximum units range."));
+   VERIFY(pArgList->addArg<string>("Component Name", NULL,
+      "The signature component name for which to set the units values in a signature file descriptor.\n"
+      "This argument is ignored if no units input values are specified."));
 
    return true;
 }
@@ -170,14 +109,8 @@ bool CreateExportFileDescriptor::getOutputSpecification(PlugInArgList*& pArgList
    pArgList = pPlugInManager->getPlugInArgList();
    VERIFY(pArgList != NULL);
 
-   // Add args
-   PlugInArg* pArg = pPlugInManager->getPlugInArg();
-   VERIFY(pArg != NULL);
-   pArg->setName("File Descriptor");                  // File descriptor
-   pArg->setType("FileDescriptor");
-   pArg->setDefaultValue(NULL);
-   pArg->setDescription("Resulting descriptor.");
-   pArgList->addArg(*pArg);
+   // Add arg
+   VERIFY(pArgList->addArg<FileDescriptor>("File Descriptor", NULL, "Resulting descriptor."));
 
    return true;
 }
@@ -201,6 +134,9 @@ bool CreateExportFileDescriptor::execute(PlugInArgList* pInArgList, PlugInArgLis
    {
       const RasterDataDescriptor* pRasterDescriptor =
          dynamic_cast<const RasterDataDescriptor*>(mpElement->getDataDescriptor());
+      const SignatureDataDescriptor* pSignatureDescriptor =
+         dynamic_cast<const SignatureDataDescriptor*>(mpElement->getDataDescriptor());
+
       if (pRasterDescriptor != NULL)
       {
          // Start row
@@ -266,9 +202,15 @@ bool CreateExportFileDescriptor::execute(PlugInArgList* pInArgList, PlugInArgLis
             bandSkip = *mpBandSkipFactor;
          }
 
-         pFileDescriptor = RasterUtilities::generateFileDescriptorForExport(pRasterDescriptor,
+         pFileDescriptor = RasterUtilities::generateRasterFileDescriptorForExport(pRasterDescriptor,
             mpFilename->getFullPathAndName(), startRow, endRow, rowSkip, startColumn, endColumn, columnSkip,
             startBand, endBand, bandSkip);
+      }
+      else if (pSignatureDescriptor != NULL)
+      {
+         FactoryResource<SignatureFileDescriptor> pSigFileDescriptor;
+         pFileDescriptor = pSigFileDescriptor.release();
+         pFileDescriptor->setFilename(mpFilename->getFullPathAndName());
       }
    }
 
@@ -282,6 +224,11 @@ bool CreateExportFileDescriptor::execute(PlugInArgList* pInArgList, PlugInArgLis
       {
          pFileDescriptor->setFilename(mpFilename->getFullPathAndName());
       }
+   }
+   else
+   {
+      // set any units value inputs
+      populateUnits(pFileDescriptor);
    }
 
    if (pFileDescriptor == NULL)
@@ -406,5 +353,83 @@ bool CreateExportFileDescriptor::extractInputArgs(PlugInArgList* pInArgList)
       mpBandSkipFactor = pArg->getPlugInArgValue<unsigned int>();
    }
 
+   // Units name
+   if ((pInArgList->getArg("Units Name", pArg) == true) && (pArg != NULL))
+   {
+      mpUnitsName = pArg->getPlugInArgValue<string>();
+   }
+
+   // Units type
+   if ((pInArgList->getArg("Units Type", pArg) == true) && (pArg != NULL))
+   {
+      mpUnitsType = pArg->getPlugInArgValue<UnitType>();
+   }
+
+   // Units scale factor
+   if ((pInArgList->getArg("Units Scale Factor", pArg) == true) && (pArg != NULL))
+   {
+      mpUnitsScale = pArg->getPlugInArgValue<double>();
+   }
+
+   // Units range min
+   if ((pInArgList->getArg("Units Range Minimum", pArg) == true) && (pArg != NULL))
+   {
+      mpUnitsRangeMin = pArg->getPlugInArgValue<double>();
+   }
+
+   // Units range max
+   if ((pInArgList->getArg("Units Range Maximum", pArg) == true) && (pArg != NULL))
+   {
+      mpUnitsRangeMax = pArg->getPlugInArgValue<double>();
+   }
+
+   // Signature component name
+   if ((pInArgList->getArg("Component Name", pArg) == true) && (pArg != NULL))
+   {
+      mpComponentName = pArg->getPlugInArgValue<string>();
+   }
+
    return true;
+}
+
+void CreateExportFileDescriptor::populateUnits(FileDescriptor* pDescriptor)
+{
+   if (pDescriptor == NULL)
+   {
+      return;
+   }
+
+   FactoryResource<Units> pUnits;
+   if (mpUnitsName != NULL)
+   {
+      pUnits->setUnitName(*mpUnitsName);
+   }
+   if (mpUnitsType != NULL)
+   {
+      pUnits->setUnitType(*mpUnitsType);
+   }
+   if (mpUnitsScale != NULL)
+   {
+      pUnits->setScaleFromStandard(*mpUnitsScale);
+   }
+   if (mpUnitsRangeMin != NULL)
+   {
+      pUnits->setRangeMin(*mpUnitsRangeMin);
+   }
+   if (mpUnitsRangeMax != NULL)
+   {
+      pUnits->setRangeMax(*mpUnitsRangeMax);
+   }
+
+   RasterFileDescriptor* pRasterFd = dynamic_cast<RasterFileDescriptor*>(pDescriptor);
+   SignatureFileDescriptor* pSignatureFd = dynamic_cast<SignatureFileDescriptor*>(pDescriptor);
+
+   if (pRasterFd != NULL)
+   {
+      pRasterFd->setUnits(pUnits.get());
+   }
+   else if (pSignatureFd != NULL && mpComponentName != NULL && mpComponentName->empty() == false)
+   {
+      pSignatureFd->setUnits(*mpComponentName, pUnits.get());
+   }
 }

@@ -13,12 +13,10 @@
 #include "DataElementImp.h"
 #include "DataVariant.h"
 
-#include <boost/shared_ptr.hpp>
 #include <map>
 #include <set>
 
 class Units;
-class UnitsImp;
 
 /**
  * NOTE: Need to automatically put sensor, location, and collection
@@ -33,7 +31,6 @@ public:
    virtual const DataVariant& getData(const std::string& name) const;
    virtual void adoptData(const std::string& name, DataVariant& data);
    virtual const Units *getUnits(const std::string& name) const;
-   void setUnits(const std::string& name, const Units* pUnits);
    std::set<std::string> getDataNames() const;
    std::set<std::string> getUnitNames() const;
 
@@ -51,7 +48,6 @@ private:
    SignatureImp(const SignatureImp& rhs);
    void setData(const std::string& name, DataVariant& data, bool adopt);
    std::map<std::string, DataVariant> mData;
-   std::map<std::string, boost::shared_ptr<UnitsImp> > mUnits;
    DataVariant mNullData;
 };
 
@@ -71,10 +67,6 @@ private:
    const Units* getUnits(const std::string& name) const \
    { \
       return impClass::getUnits(name); \
-   } \
-   void setUnits(const std::string& name, const Units* pUnits) \
-   { \
-      impClass::setUnits(name, pUnits); \
    } \
    std::set<std::string> getDataNames() const \
    { \

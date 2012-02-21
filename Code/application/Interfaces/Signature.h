@@ -12,38 +12,35 @@
 
 #include "DataElement.h"
 #include "DataVariant.h"
-#include "DateTime.h"
-#include "Units.h"
 
 #include <set>
 #include <string>
 #include <vector>
 
-class DataVariant;
+class Units;
 
 /**
  * Signature with identifying attributes
  *
- * A signature is an object that essentially consists of a list of
- * data sets, along with optional units for each data set.
+ * A signature is an object that essentially consists of a map of data sets, along with a map of
+ * optional Units objects. Each data set is referred to as a component of the signature.
+ * The unique name associated with each data set is called its component name and is the key for
+ * the map of data sets. The optional Units object associated with a data set is stored in a map using the
+ * data set component name as the key.
  *
  * This subclass of Subject will notify upon the following conditions:
- * - The following methods are called: setData(), setUnits().
+ * - The following method is called: setData().
  * - Everything else documented in DataElement.
  *
- * @see    DataElement
+ * @see    DataElement, Units
  */
 class Signature : public DataElement
 {
 public:
    /**
-    * Emitted with any<std::pair<string,DataVariant> > when an attribute is added, or changed.
+    * Emitted with any<std::pair<string,DataVariant> > when an attribute is added or changed.
     */
    SIGNAL_METHOD(Signature, DataChanged)
-   /**
-    * Emitted with any<std::pair<string,const Units*> > when a units object is added, or changed.
-    */
-   SIGNAL_METHOD(Signature, UnitsChanged)
 
    /**
     * Gets a data set from the signature.
@@ -137,33 +134,19 @@ public:
 
    
    /**
-    * Returns the units object associated with the data set of the specified 
-    * name. 
+    * A convenience method that returns the Units object returned from calling
+    * SignatureDataDescriptor::getUnits.
     *
     * @param   name
-    *          The name of the units object to get from the signature.
+    *          The component name of the Units object to get from the signature.
     *
-    * @return  A pointer to the units object with the specified name. NULL
+    * @return  A pointer to the Units object with the specified component name. \c NULL
     *          will be returned if no Units object exists with the specified
     *          name.
+    *
+    * @note    This pointer should not be stored. It may become invalid at a later time.
     */
    virtual const Units* getUnits(const std::string& name) const = 0;
-
-   /**
-    * Sets the units object associated with the data set of the specified
-    * name.
-    *
-    * @param   name
-    *          The name to associated with the units object.
-    *
-    * @param   pUnits
-    *          A pointer to the units object. Cannot be NULL.
-    *
-    * @notify  This method will notify signalUnitsChanged with
-    *          any<std::pair<string,const Units*> > after the 
-    *          units object is added to the Signature.
-    */
-   virtual void setUnits(const std::string& name, const Units* pUnits) = 0;
 
    /**
     * Gets the names associated with data in this Signature.

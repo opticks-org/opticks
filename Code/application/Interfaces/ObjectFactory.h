@@ -58,6 +58,7 @@ public:
     *           - ImportAgent
     *           - RasterFileDescriptor
     *           - SettableSessionItem
+    *           - SignatureFileDescriptor
     *           - Units
     *           - Wavelengths
     *           - WizardObject
@@ -128,6 +129,7 @@ public:
     *           - GraphicObject
     *           - Layer
     *           - RasterFileDescriptor
+    *           - SignatureFileDescriptor
     *           - Units
     *           - Wavelengths
     *           - WizardObject

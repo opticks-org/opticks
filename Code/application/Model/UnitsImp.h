@@ -38,6 +38,9 @@ public:
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
 
+   bool operator==(const UnitsImp& rhs) const;
+   bool operator!=(const UnitsImp& rhs) const;
+
 private:
    UnitType mUnitType;
    std::string mUnitName;

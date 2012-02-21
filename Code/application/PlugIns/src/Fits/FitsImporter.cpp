@@ -27,11 +27,14 @@
 #include "RasterUtilities.h"
 #include "SessionManager.h"
 #include "Signature.h"
+#include "SignatureDataDescriptor.h"
+#include "SignatureFileDescriptor.h"
 #include "SignatureLibrary.h"
 #include "SpecialMetadata.h"
 #include "StringUtilities.h"
 #include "switchOnEncoding.h"
 #include "TypeConverter.h"
+#include "Units.h"
 #include "UtilityServices.h"
 
 #include <fitsio.h>
@@ -305,6 +308,18 @@ std::vector<ImportDescriptor*> FitsImporter::getImportDescriptors(const std::str
 
             RasterUtilities::generateAndSetFileDescriptor(pImportDescriptor->getDataDescriptor(), filename,
                StringUtilities::toDisplayString(hdu), BIG_ENDIAN_ORDER);
+
+            // add units
+            SignatureDataDescriptor* pSigDd =
+               dynamic_cast<SignatureDataDescriptor*>(pImportDescriptor->getDataDescriptor());
+            if (pSigDd != NULL)
+            {
+               FactoryResource<Units> pUnits;
+               pUnits->setUnitName("Custom");
+               pUnits->setUnitType(CUSTOM_UNIT);
+               pSigDd->setUnits("Reflectance", pUnits.get());
+            }
+
             break; // leave switch()
          }
          else if (naxis == 2)
@@ -328,9 +343,9 @@ std::vector<ImportDescriptor*> FitsImporter::getImportDescriptors(const std::str
          pImportDescriptor->setDataDescriptor(pDataDesc);
          if (specificHdu == 0 && hdu == 1 && naxis == 2 && (axes[0] <= 5 || axes[1] <= 5))
          {
-            // use 5 as this is a good top end for the number of astonomical band pass filters
+            // use 5 as this is a good top end for the number of astronomical band pass filters
             // in general usage. this is not in a spec anywhere and is derived from various sample
-            // FITS files for different astonomical instruments.
+            // FITS files for different astronomical instruments.
             //
             // There's a good chance this is really a spectrum. (0th HDU)
             // We'll create an import descriptor for the spectrum version of this
@@ -352,8 +367,40 @@ std::vector<ImportDescriptor*> FitsImporter::getImportDescriptors(const std::str
                centerWavelengths.push_back(startVal + (idx * incr));
             }
             pSigMetadata->setAttributeByPath(CENTER_WAVELENGTHS_METADATA_PATH, centerWavelengths);
+
+            // Units
+            std::string unitsName = dv_cast<std::string>(pMetadata->getAttributeByPath("FITS/BUNIT"), std::string());
+            if (!unitsName.empty())
+            {
+               FactoryResource<Units> units;
+               units->setUnitName(unitsName);
+               units->setUnitType(RADIANCE);
+               SignatureDataDescriptor* pSigDd =
+                  dynamic_cast<SignatureDataDescriptor*>(pSigDesc->getDataDescriptor());
+               if (pSigDd != NULL)
+               {
+                  pSigDd->setUnits("Reflectance", units.get());
+               }
+            }
+
             RasterUtilities::generateAndSetFileDescriptor(pSigDesc->getDataDescriptor(),
                filename, StringUtilities::toDisplayString(hdu), BIG_ENDIAN_ORDER);
+
+            // If units are not available, set custom units into the data descriptor so that the user can
+            // modify them - this must occur after the call to RasterUtilities::generateAndSetFileDescriptor()
+            // so that the file descriptor will still display no defined units
+            if (unitsName.empty())
+            {
+               FactoryResource<Units> units;
+               units->setUnitName("Custom");
+               units->setUnitType(CUSTOM_UNIT);
+               SignatureDataDescriptor* pSigDd = dynamic_cast<SignatureDataDescriptor*>(pSigDesc->getDataDescriptor());
+               if (pSigDd != NULL)
+               {
+                  pSigDd->setUnits("Reflectance", units.get());
+               }
+            }
+
             descriptors.push_back(pSigDesc.release());
          }
 
@@ -690,18 +737,6 @@ bool FitsImporter::execute(PlugInArgList *pInArgList, PlugInArgList *pOutArgList
       {
          progress.report("Unable to import signature library.", 0, ERRORS, true);
          return false;
-      }
-      std::string unitsName = dv_cast<std::string>(pLibrary->getMetadata()->getAttributeByPath("FITS/BUNIT"), std::string());
-      if (!unitsName.empty())
-      {
-         std::set<std::string> unitNames = pLibrary->getUnitNames();
-         for(std::set<std::string>::const_iterator name = unitNames.begin(); name != unitNames.end(); ++name)
-         {
-            FactoryResource<Units> units;
-            units->setUnitName(unitsName);
-            units->setUnitType(RADIANCE);
-            pLibrary->setUnits(*name, units.release());
-         }
       }
    }
    else if (pSignature != NULL)

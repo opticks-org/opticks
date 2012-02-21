@@ -10,8 +10,8 @@
 #include "DataVariant.h"
 #include "ModelServicesImp.h"
 #include "Signature.h"
+#include "SignatureDataDescriptor.h"
 #include "SignatureImp.h"
-#include "UnitsImp.h"
 
 #include <set>
 
@@ -39,12 +39,6 @@ DataElement* SignatureImp::copy(const string& name, DataElement* pParent) const
       {
          pSignature->setData(dataIter->first, const_cast<DataVariant&>(dataIter->second), false);
       }
-
-      map<string, boost::shared_ptr<UnitsImp> >::const_iterator unitsIter;
-      for (unitsIter = mUnits.begin(); unitsIter != mUnits.end(); ++unitsIter)
-      {
-         pSignature->setUnits(unitsIter->first, unitsIter->second.get());
-      }
    }
 
    return pElement;
@@ -67,16 +61,6 @@ bool SignatureImp::toXml(XMLWriter* pXml) const
          return false;
       }
       pXml->popAddPoint();
-      map<string, boost::shared_ptr<UnitsImp> >::const_iterator units = mUnits.find(datum->first);
-      if (units != mUnits.end())
-      {
-         pXml->pushAddPoint(pXml->addElement("units"));
-         if (!units->second->toXml(pXml))
-         {
-            return false;
-         }
-         pXml->popAddPoint();
-      }
       pXml->popAddPoint();
    }
    return true;
@@ -90,7 +74,6 @@ bool SignatureImp::fromXml(DOMNode* pDocument, unsigned int version)
    }
 
    mData.clear();
-   mUnits.clear();
 
    DOMElement* pElement = static_cast<DOMElement*>(pDocument);
    for (DOMNode* pChild = pElement->getFirstChild(); pChild != NULL; pChild = pChild->getNextSibling())
@@ -116,16 +99,6 @@ bool SignatureImp::fromXml(DOMNode* pDocument, unsigned int version)
                }
 
                mData[name] = value;
-            }
-            else if (XMLString::equals(pGChild->getNodeName(), X("units")))
-            {
-               boost::shared_ptr<UnitsImp> pNewUnits(new UnitsImp);
-               if (pNewUnits->fromXml(pGChild, version) == false)
-               {
-                  return false;
-               }
-
-               mUnits[name] = pNewUnits;
             }
          }
       }
@@ -200,34 +173,12 @@ void SignatureImp::setData(const string& name, DataVariant& data, bool adopt)
 
 const Units* SignatureImp::getUnits(const string& name) const
 {
-   map<string, boost::shared_ptr<UnitsImp> >::const_iterator ppUnits = mUnits.find(name);
-   if (ppUnits == mUnits.end())
+   const SignatureDataDescriptor* pDesc = dynamic_cast<const SignatureDataDescriptor*>(getDataDescriptor());
+   if (pDesc != NULL)
    {
-      boost::shared_ptr<UnitsImp> pUnits(new UnitsImp);
-      const_cast<SignatureImp*>(this)->mUnits[name] = pUnits;
-      return pUnits.get();
+      return pDesc->getUnits(name);
    }
-   else
-   {
-      return ppUnits->second.get();
-   }
-}
-
-void SignatureImp::setUnits(const string& name, const Units* pUnits)
-{
-   map<string, boost::shared_ptr<UnitsImp> >::const_iterator ppUnits = mUnits.find(name);
-   if (ppUnits == mUnits.end())
-   {
-      boost::shared_ptr<UnitsImp> pNewUnits(new UnitsImp);
-      *pNewUnits = *static_cast<const UnitsImp*>(pUnits);
-      mUnits[name] = pNewUnits;
-   }
-   else
-   {
-      *(ppUnits->second) = *static_cast<const UnitsImp*>(pUnits);
-   }
-   notify(SIGNAL_NAME(Signature, UnitsChanged), boost::any(
-      std::pair<string, const Units*>(name, pUnits)));
+   return NULL;
 }
 
 set<string> SignatureImp::getDataNames() const
@@ -242,10 +193,10 @@ set<string> SignatureImp::getDataNames() const
 
 set<string> SignatureImp::getUnitNames() const
 {
-   set<string> keys;
-   for (map<string, boost::shared_ptr<UnitsImp> >::const_iterator unit = mUnits.begin(); unit != mUnits.end(); ++unit)
+   const SignatureDataDescriptor* pDesc = dynamic_cast<const SignatureDataDescriptor*>(getDataDescriptor());
+   if (pDesc != NULL)
    {
-      keys.insert(unit->first);
+      return pDesc->getUnitNames();
    }
-   return keys;
+   return set<string>();
 }
