@@ -7,8 +7,6 @@
 * http://www.gnu.org/licenses/lgpl.html
 */
 
-
-
 #ifndef MEASUREMENTLAYER_H
 #define MEASUREMENTLAYER_H
 
@@ -41,8 +39,6 @@ public:
    SETTING(TextItalics, MeasurementLayer, bool, false)
    SETTING(TextUnderline, MeasurementLayer, bool, false)
    SETTING(DistanceUnits, MeasurementLayer, DistanceUnits, NO_DISTANCE_UNIT)
-   SETTING(GeocoordType, MeasurementLayer, GeocoordType, GEOCOORD_GENERAL)
-   SETTING(GeoFormat, MeasurementLayer, DmsFormatType, DMS_FULL_DECIMAL)
 
    /**
    *  Sets the status of displaying the distance text.

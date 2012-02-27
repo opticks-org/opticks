@@ -11,11 +11,6 @@
 #define GCPEDITORDLG_H
 
 #include <QtGui/QDialog>
-#include <QtGui/QCheckBox>
-#include <QtGui/QComboBox>
-#include <QtGui/QGroupBox>
-#include <QtGui/QPushButton>
-#include <QtGui/QTreeWidgetItem>
 
 #include "GcpLayer.h"
 #include "Observer.h"
@@ -26,6 +21,12 @@
 class CustomTreeWidget;
 class GcpList;
 class GcpPoint;
+class GeocoordTypeComboBox;
+class QCheckBox;
+class QComboBox;
+class QLabel;
+class QPushButton;
+class QTreeWidgetItem;
 
 namespace boost
 {
@@ -230,15 +231,14 @@ protected slots:
    /**
     *  Sets the current geocoordinate display format of the GCPs.
     *
-    *  This method is called when the user selects one of the coordinate type radio
-    *  buttons.  The GCP table is automatically updated to show the coordinates in
-    *  the new format.
+    *  This method is called when the user selects a new geocoordinate display
+    *  type.  The GCP table is automatically updated to show the coordinates in
+    *  the new type.
     *
-    *  @param   iIndex
-    *           The index of the selected radio button. 0 = GEOCOORD_LATLON,
-    *           1 = GEOCOORD_UTM, and 2 = GEOCOORD_MGRS.
+    *  @param   geocoordType
+    *           The new geocoordinate display format.
     */
-   void setCoordinateFormat(int iIndex);
+   void setCoordinateFormat(GeocoordType geocoordType);
 
    /**
     *  Invokes the properties dialog for the user to change the layer properties.
@@ -264,7 +264,8 @@ private:
    CustomTreeWidget* mpGcpView;
    QPushButton* mpNewButton;
    QPushButton* mpDeleteButton;
-   QGroupBox* mpCoordGroupBox;
+   QLabel* mpCoordTypeLabel;
+   GeocoordTypeComboBox* mpCoordTypeCombo;
    QCheckBox* mpAutoApply;
    QPushButton* mpPropertiesButton;
    QPushButton* mpApplyButton;

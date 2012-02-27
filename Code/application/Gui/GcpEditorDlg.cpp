@@ -8,18 +8,25 @@
  */
 
 #include <QtCore/QEvent>
-#include <QtGui/QButtonGroup>
+#include <QtGui/QCheckBox>
+#include <QtGui/QComboBox>
+#include <QtGui/QGridLayout>
+#include <QtGui/QGroupBox>
+#include <QtGui/QHBoxLayout>
 #include <QtGui/QHeaderView>
 #include <QtGui/QLabel>
-#include <QtGui/QLayout>
 #include <QtGui/QMessageBox>
-#include <QtGui/QRadioButton>
+#include <QtGui/QPushButton>
+#include <QtGui/QTreeWidgetItem>
+#include <QtGui/QVBoxLayout>
 
 #include "AppVerify.h"
 #include "CustomTreeWidget.h"
 #include "DesktopServices.h"
 #include "GcpEditorDlg.h"
+#include "GeocoordTypeComboBox.h"
 #include "GeoPoint.h"
+#include "Georeference.h"
 #include "GcpLayerImp.h"
 #include "GcpList.h"
 #include "GcpListUndo.h"
@@ -36,13 +43,12 @@ using namespace std;
 #define MGRS_BUTTON     2
 
 GcpEditorDlg::GcpEditorDlg(QWidget* parent) :
-   QDialog(parent)
+   QDialog(parent),
+   mpGcpList(NULL),
+   mpLayer(NULL),
+   mGeocoordType(Georeference::getSettingGeocoordType()),
+   mbModified(false)
 {
-   mpGcpList = NULL;
-   mpLayer = NULL;
-   mGeocoordType = GEOCOORD_LATLON;
-   mbModified = false;
-
    // GCP list
    QLabel* pListLabel = new QLabel("GCP List:", this);
    mpListCombo = new QComboBox(this);
@@ -85,40 +91,27 @@ GcpEditorDlg::GcpEditorDlg(QWidget* parent) :
    mpGcpView->setSelectionMode(QAbstractItemView::ExtendedSelection);
    mpGcpView->setSortingEnabled(false);
 
+   mpCoordTypeLabel = new QLabel("Coordinate Type:", this);
+   mpCoordTypeCombo = new GeocoordTypeComboBox(this);
+   mpCoordTypeCombo->setGeocoordType(mGeocoordType);
+
    mpNewButton = new QPushButton("&New", pGcpGroup);
    mpDeleteButton = new QPushButton("&Delete", pGcpGroup);
 
-   QHBoxLayout* pGcpButtonLayout = new QHBoxLayout();
-   pGcpButtonLayout->setMargin(0);
-   pGcpButtonLayout->setSpacing(5);
-   pGcpButtonLayout->addStretch(10);
-   pGcpButtonLayout->addWidget(mpNewButton);
-   pGcpButtonLayout->addWidget(mpDeleteButton);
+   QHBoxLayout* pGcpLayout = new QHBoxLayout();
+   pGcpLayout->setMargin(0);
+   pGcpLayout->setSpacing(5);
+   pGcpLayout->addWidget(mpCoordTypeLabel);
+   pGcpLayout->addWidget(mpCoordTypeCombo);
+   pGcpLayout->addStretch();
+   pGcpLayout->addWidget(mpNewButton);
+   pGcpLayout->addWidget(mpDeleteButton);
 
-   QVBoxLayout* pGcpLayout = new QVBoxLayout(pGcpGroup);
-   pGcpLayout->setMargin(10);
-   pGcpLayout->setSpacing(10);
-   pGcpLayout->addWidget(mpGcpView, 10);
-   pGcpLayout->addLayout(pGcpButtonLayout);
-
-   // Coordinate group
-   mpCoordGroupBox = new QGroupBox("Coordinate Format", this);
-
-   QRadioButton* pLatLonRadio = new QRadioButton("Latitude/Longitude", mpCoordGroupBox);
-   QRadioButton* pUtmCoordinatesRadio = new QRadioButton("UTM Coordinates", mpCoordGroupBox);
-   QRadioButton* pMgrsRadio = new QRadioButton("MGRS", mpCoordGroupBox);
-
-   QButtonGroup* pCoordButtonGroup = new QButtonGroup(mpCoordGroupBox);
-   pCoordButtonGroup->addButton(pLatLonRadio, 0);
-   pCoordButtonGroup->addButton(pUtmCoordinatesRadio, 1);
-   pCoordButtonGroup->addButton(pMgrsRadio, 2);
-
-   QVBoxLayout* pCoordLayout = new QVBoxLayout(mpCoordGroupBox);
-   pCoordLayout->setMargin(10);
-   pCoordLayout->setSpacing(5);
-   pCoordLayout->addWidget(pLatLonRadio);
-   pCoordLayout->addWidget(pUtmCoordinatesRadio);
-   pCoordLayout->addWidget(pMgrsRadio);
+   QVBoxLayout* pGcpGroupLayout = new QVBoxLayout(pGcpGroup);
+   pGcpGroupLayout->setMargin(10);
+   pGcpGroupLayout->setSpacing(10);
+   pGcpGroupLayout->addWidget(mpGcpView, 10);
+   pGcpGroupLayout->addLayout(pGcpLayout);
 
    // Auto apply check box
    mpAutoApply = new QCheckBox("Auto Apply", this);
@@ -134,14 +127,13 @@ GcpEditorDlg::GcpEditorDlg(QWidget* parent) :
    QGridLayout* pGrid = new QGridLayout(this);
    pGrid->setMargin(10);
    pGrid->setSpacing(5);
-   pGrid->addLayout(pListLayout, 0, 0, 1, 4);
+   pGrid->addLayout(pListLayout, 0, 0, 1, 5);
    pGrid->setRowMinimumHeight(1, 5);
-   pGrid->addWidget(pGcpGroup, 2, 0, 1, 4);
-   pGrid->addWidget(mpCoordGroupBox, 3, 0, 2, 1);
-   pGrid->addWidget(mpAutoApply, 3, 1, 1, 3, Qt::AlignTop | Qt::AlignRight);
-   pGrid->addWidget(mpPropertiesButton, 4, 1, Qt::AlignBottom | Qt::AlignLeft);
-   pGrid->addWidget(mpApplyButton, 4, 2, Qt::AlignBottom);
-   pGrid->addWidget(pCloseButton, 4, 3, Qt::AlignBottom);
+   pGrid->addWidget(pGcpGroup, 2, 0, 1, 5);
+   pGrid->addWidget(mpPropertiesButton, 5, 0);
+   pGrid->addWidget(mpAutoApply, 5, 2);
+   pGrid->addWidget(mpApplyButton, 5, 3);
+   pGrid->addWidget(pCloseButton, 5, 4);
    pGrid->setRowStretch(2, 10);
    pGrid->setColumnStretch(1, 10);
 
@@ -151,8 +143,7 @@ GcpEditorDlg::GcpEditorDlg(QWidget* parent) :
    setModal(false);
    setWindowTitle("GCP Editor");
    resize(650, 450);
-   pLatLonRadio->setChecked(true);
-   setCoordinateFormat(0);
+   setCoordinateFormat(mGeocoordType);
    updateLayers();
    enableGcp();
 
@@ -162,15 +153,15 @@ GcpEditorDlg::GcpEditorDlg(QWidget* parent) :
       SLOT(updateGcp(QTreeWidgetItem*, int))));
    VERIFYNR(connect(mpNewButton, SIGNAL(clicked()), this, SLOT(newGcp())));
    VERIFYNR(connect(mpDeleteButton, SIGNAL(clicked()), this, SLOT(deleteGcp())));
-   VERIFYNR(connect(pCoordButtonGroup, SIGNAL(buttonClicked(int)), this, SLOT(setCoordinateFormat(int))));
+   VERIFYNR(connect(mpCoordTypeCombo, SIGNAL(geocoordTypeChanged(GeocoordType)), this,
+      SLOT(setCoordinateFormat(GeocoordType))));
    VERIFYNR(connect(mpPropertiesButton, SIGNAL(clicked()), this, SLOT(setGcpProperties())));
    VERIFYNR(connect(mpApplyButton, SIGNAL(clicked()), this, SLOT(apply())));
    VERIFYNR(connect(pCloseButton, SIGNAL(clicked()), this, SLOT(close())));
 }
 
 GcpEditorDlg::~GcpEditorDlg()
-{
-}
+{}
 
 void GcpEditorDlg::attached(Subject& subject, const string& signal, const Slot& slot)
 {
@@ -334,9 +325,6 @@ QTreeWidgetItem* GcpEditorDlg::insertGcp(const GcpPoint& point)
    LatLonPoint latLonPoint(point.mCoordinate);
    switch (mGeocoordType)
    {
-      case GEOCOORD_GENERAL:
-         break;
-
       case GEOCOORD_LATLON:
       {
          QString strLatitude;
@@ -467,9 +455,6 @@ GcpPoint GcpEditorDlg::getGcp(QTreeWidgetItem* pItem)
       // Geocoordinate
       switch (mGeocoordType)
       {
-         case GEOCOORD_GENERAL:
-            break;
-
          case GEOCOORD_LATLON:
          {
             LatLonPoint latLonPoint(pItem->text(3).toStdString(), pItem->text(4).toStdString());
@@ -646,7 +631,8 @@ void GcpEditorDlg::enableGcp()
    mpGcpView->setEnabled(bEnable);
    mpNewButton->setEnabled(bEnable);
    mpDeleteButton->setEnabled(bEnable);
-   mpCoordGroupBox->setEnabled(bEnable);
+   mpCoordTypeLabel->setEnabled(bEnable);
+   mpCoordTypeCombo->setEnabled(bEnable);
    mpAutoApply->setEnabled(bEnable);
    mpPropertiesButton->setEnabled(bEnable);
    mpApplyButton->setEnabled(bEnable);
@@ -698,9 +684,6 @@ void GcpEditorDlg::updateGcp(QTreeWidgetItem* pItem, int iColumn)
 
    switch (mGeocoordType)
    {
-      case GEOCOORD_GENERAL:
-         break;
-
       case GEOCOORD_LATLON:
       {
          QString strCoordinate;
@@ -785,7 +768,7 @@ void GcpEditorDlg::deleteGcp()
    mbModified = true;
 }
 
-void GcpEditorDlg::setCoordinateFormat(int iIndex)
+void GcpEditorDlg::setCoordinateFormat(GeocoordType geocoordType)
 {
    QHeaderView* pHeader = mpGcpView->header();
    QTreeWidgetItem* pHeaderItem = mpGcpView->headerItem();
@@ -807,10 +790,10 @@ void GcpEditorDlg::setCoordinateFormat(int iIndex)
    }
 
    // Update the columns
-   switch (iIndex)
+   mGeocoordType = geocoordType;
+   switch (mGeocoordType)
    {
-      case LATLON_BUTTON:
-         mGeocoordType = GEOCOORD_LATLON;
+      case GEOCOORD_LATLON:
          pHeaderItem->setText(3, "Latitude");
          pHeaderItem->setText(4, "Longitude");
          pHeaderItem->setText(5, QString());
@@ -821,8 +804,7 @@ void GcpEditorDlg::setCoordinateFormat(int iIndex)
          pHeader->hideSection(6);
          break;
 
-      case UTM_BUTTON:
-         mGeocoordType = GEOCOORD_UTM;
+      case GEOCOORD_UTM:
          pHeaderItem->setText(3, "Easting");
          pHeaderItem->setText(4, "Northing");
          pHeaderItem->setText(5, "Zone");
@@ -833,8 +815,7 @@ void GcpEditorDlg::setCoordinateFormat(int iIndex)
          pHeader->showSection(6);
          break;
 
-      case MGRS_BUTTON:
-         mGeocoordType = GEOCOORD_MGRS;
+      case GEOCOORD_MGRS:
          pHeaderItem->setText(3, QString());
          pHeaderItem->setText(4, QString());
          pHeaderItem->setText(5, "MGRS string");

@@ -10,16 +10,15 @@
 #ifndef OPTIONSLATLONLAYER_H
 #define OPTIONSLATLONLAYER_H
 
-#include <QtGui/QWidget>
 #include "AppVersion.h"
 
+#include <QtGui/QWidget>
+
 class CustomColorButton;
-class DmsFormatTypeComboBox;
 class LatLonStyleComboBox;
 class LineWidthComboBox;
 class QComboBox;
 class QFontComboBox;
-class QSpinBox;
 
 class OptionsLatLonLayer : public QWidget
 {
@@ -27,7 +26,7 @@ class OptionsLatLonLayer : public QWidget
 
 public:
    OptionsLatLonLayer();
-   ~OptionsLatLonLayer();
+   virtual ~OptionsLatLonLayer();
 
    void applyChanges();
 
@@ -45,13 +44,13 @@ public:
 
    static const std::string& getDescription()
    {
-      static std::string var = "Widget to display Lat/Lon layer related options for the application";
+      static std::string var = getShortDescription();
       return var;
    }
 
    static const std::string& getShortDescription()
    {
-      static std::string var = "Widget to display Lat/Lon layer related related options for the application";
+      static std::string var = "Widget to display latitude/longitude layer related options for the application";
       return var;
    }
 
@@ -87,9 +86,9 @@ public:
 private:
    OptionsLatLonLayer(const OptionsLatLonLayer& rhs);
    OptionsLatLonLayer& operator=(const OptionsLatLonLayer& rhs);
+
    LatLonStyleComboBox* mpStyle;
    LineWidthComboBox* mpLineWidth;
-   DmsFormatTypeComboBox* mpFormat;
    QComboBox* mpFontSize;
    QFontComboBox* mpFont;
    CustomColorButton* mpColor;

@@ -285,7 +285,7 @@ typedef EnumWrapper<GcpSymbolEnum> GcpSymbol;
  *
  *  Georeferencing can be performed in Latitude/Longitude or UTM coordinates.
  */
-enum GeocoordTypeEnum { GEOCOORD_GENERAL, GEOCOORD_LATLON, GEOCOORD_UTM, GEOCOORD_MGRS };
+enum GeocoordTypeEnum { GEOCOORD_LATLON, GEOCOORD_UTM, GEOCOORD_MGRS };
 
 /**
  * @EnumWrapper ::GeocoordTypeEnum.

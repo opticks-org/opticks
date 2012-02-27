@@ -1078,6 +1078,20 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <ClInclude Include="Interfaces\FileResource.h" />
+    <CustomBuild Include="Interfaces\GeocoordTypeComboBox.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing %(Filename).h...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing %(Filename).h...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Filename).h...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Filename).h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+    </CustomBuild>
     <ClInclude Include="Interfaces\GeoPoint.h" />
     <ClInclude Include="Interfaces\GlContextSave.h" />
     <ClInclude Include="Interfaces\GlTextureResource.h" />
@@ -1356,6 +1370,7 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_FloatingLabel.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_FontSizeComboBox.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_GcpSymbolGrid.cpp" />
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_GeocoordTypeComboBox.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_GraphicArcWidget.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_GraphicFillWidget.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_GraphicImageWidget.cpp" />
@@ -1431,6 +1446,7 @@
     <ClCompile Include="FontSizeComboBox.cpp" />
     <ClCompile Include="GcpSymbolGrid.cpp" />
     <ClCompile Include="GeoAlgorithms.cpp" />
+    <ClCompile Include="GeocoordTypeComboBox.cpp" />
     <ClCompile Include="GeoPoint.cpp" />
     <ClCompile Include="GlContextSave.cpp" />
     <ClCompile Include="GraphicArcWidget.cpp" />

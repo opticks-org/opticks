@@ -10,15 +10,15 @@
 #ifndef RESULTSOPTIONSWIDGET_H
 #define RESULTSOPTIONSWIDGET_H
 
-#include <QtGui/QCheckBox>
-#include <QtGui/QComboBox>
-#include <QtGui/QLabel>
-#include <QtGui/QLineEdit>
 #include <QtGui/QWidget>
 
 #include "TypesFile.h"
 
+class GeocoordTypeComboBox;
 class PassAreaComboBox;
+class QCheckBox;
+class QLabel;
+class QLineEdit;
 
 class ResultsOptionsWidget : public QWidget
 {
@@ -26,7 +26,7 @@ class ResultsOptionsWidget : public QWidget
 
 public:
    ResultsOptionsWidget(QWidget* pParent = 0);
-   ~ResultsOptionsWidget();
+   virtual ~ResultsOptionsWidget();
 
    void setAppendToFile(bool bAppend);
    bool appendToFile() const;
@@ -58,7 +58,7 @@ private:
    QLabel* mpSecondThresholdLabel;
    QLineEdit* mpSecondThresholdEdit;
    QLabel* mpCoordLabel;
-   QComboBox* mpCoordCombo;
+   GeocoordTypeComboBox* mpCoordCombo;
    QCheckBox* mpMetadataCheck;
    QCheckBox* mpAppendCheck;
 };

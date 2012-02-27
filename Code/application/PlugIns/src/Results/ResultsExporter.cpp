@@ -15,6 +15,7 @@
 #include "DimensionDescriptor.h"
 #include "Filename.h"
 #include "GeoPoint.h"
+#include "Georeference.h"
 #include "LatLonLayer.h"
 #include "LayerList.h"
 #include "MathUtil.h"
@@ -108,6 +109,7 @@ QWidget* ResultsExporter::getExportOptionsWidget(const PlugInArgList *pInArgList
       RasterElement* pResults = dynamic_cast<RasterElement*>(mpModel->getElement(name, type, pParent));
       if (pResults != NULL)
       {
+         GeocoordType geocoordType;
          PassArea passArea = MIDDLE;
          double dFirstThreshold = 0.0;
          double dSecondThreshold = 0.0;
@@ -143,12 +145,30 @@ QWidget* ResultsExporter::getExportOptionsWidget(const PlugInArgList *pInArgList
                LatLonLayer* pLatLonLayer = static_cast<LatLonLayer*>(pView->getTopMostLayer(LAT_LONG));
                if (pLatLonLayer != NULL)
                {
-                  GeocoordType geocoordType = pLatLonLayer->getGeocoordType();
-                  mpOptionsWidget->setGeocoordType(geocoordType);
+                  geocoordType = pLatLonLayer->getGeocoordType();
+               }
+            }
+
+            if (geocoordType.isValid() == false)
+            {
+               bool hasGeoData = pResults->isGeoreferenced();
+               if (hasGeoData == false)
+               {
+                  RasterElement* pParent = dynamic_cast<RasterElement*>(mpResults->getParent());
+                  if (pParent != NULL)
+                  {
+                     hasGeoData = pParent->isGeoreferenced();
+                  }
+               }
+
+               if (hasGeoData == true)
+               {
+                  geocoordType = Georeference::getSettingGeocoordType();
                }
             }
          }
 
+         mpOptionsWidget->setGeocoordType(geocoordType);
          mpOptionsWidget->setPassArea(passArea);
          mpOptionsWidget->setFirstThreshold(dFirstThreshold);
          mpOptionsWidget->setSecondThreshold(dSecondThreshold);

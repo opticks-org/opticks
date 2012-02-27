@@ -43,11 +43,9 @@ class LatLonLayer : public Layer
 public:
    SETTING(Font, LatLonLayer, std::string, "")
    SETTING(FontSize, LatLonLayer, unsigned int, 8)
-   SETTING(Format, LatLonLayer, DmsFormatType, DMS_FULL)
    SETTING(GridlineColor, LatLonLayer, ColorType, ColorType())
    SETTING(GridlineStyle, LatLonLayer, LatLonStyle, LATLONSTYLE_SOLID)
    SETTING(GridlineWidth, LatLonLayer, unsigned int, 0)
-   SETTING(GeocoordType, LatLonLayer, GeocoordType, GEOCOORD_GENERAL);
 
    /**
     *  Emitted with any<DmsFormatType> when the numeric format changes.

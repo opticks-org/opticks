@@ -286,6 +286,9 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_GcpSymbolGrid.cpp">
       <Filter>moc</Filter>
     </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_GeocoordTypeComboBox.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_GraphicArcWidget.cpp">
       <Filter>moc</Filter>
     </ClCompile>
@@ -509,6 +512,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GeoAlgorithms.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeocoordTypeComboBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GeoPoint.cpp">
@@ -862,6 +868,9 @@
       <Filter>Interfaces</Filter>
     </CustomBuild>
     <CustomBuild Include="Interfaces\FontSizeComboBox.h">
+      <Filter>Interfaces</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Interfaces\GeocoordTypeComboBox.h">
       <Filter>Interfaces</Filter>
     </CustomBuild>
     <CustomBuild Include="Interfaces\GraphicTextWidget.h">

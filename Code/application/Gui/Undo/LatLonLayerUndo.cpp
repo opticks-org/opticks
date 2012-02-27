@@ -9,6 +9,7 @@
 
 #include <QtGui/QApplication>
 
+#include "Georeference.h"
 #include "LatLonLayer.h"
 #include "LatLonLayerImp.h"
 #include "LatLonLayerUndo.h"
@@ -260,14 +261,14 @@ void SetLatLonFormat::executeRedo()
 ////////////////////////
 
 LatLonLayerMemento::LatLonLayerMemento(LatLonLayer* pLayer) :
-   mColor(QColor()),
-   mStyle(LATLONSTYLE_SOLID),
-   mWidth(1),
+   mColor(COLORTYPE_TO_QCOLOR(LatLonLayer::getSettingGridlineColor())),
+   mStyle(LatLonLayer::getSettingGridlineStyle()),
+   mWidth(LatLonLayer::getSettingGridlineWidth()),
    mTickSpacing(LocationType()),
    mAutoSpacing(true),
    mFont(QApplication::font()),
-   mGeocoordType(GEOCOORD_GENERAL),
-   mFormat(DMS_FULL)
+   mGeocoordType(Georeference::getSettingGeocoordType()),
+   mFormat(Georeference::getSettingLatLonFormat())
 {
    LatLonLayerImp* pLayerImp = dynamic_cast<LatLonLayerImp*>(pLayer);
    if (pLayerImp != NULL)

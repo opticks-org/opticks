@@ -8,6 +8,8 @@
  */
 
 #include "AppVerify.h"
+#include "DmsFormatTypeComboBox.h"
+#include "GeocoordTypeComboBox.h"
 #include "Georeference.h"
 #include "LabeledSection.h"
 #include "MutuallyExclusiveListWidget.h"
@@ -17,6 +19,7 @@
 
 #include <QtGui/QCheckBox>
 #include <QtGui/QGridLayout>
+#include <QtGui/QLabel>
 #include <QtGui/QRadioButton>
 #include <QtGui/QStyle>
 #include <QtGui/QStyleOptionButton>
@@ -27,22 +30,36 @@
 
 OptionsGeoreference::OptionsGeoreference() :
    QWidget(NULL),
+   mpCreateLayer(NULL),
+   mpDisplayLayer(NULL),
+   mpGeocoordTypeCombo(NULL),
+   mpLatLonFormatLabel(NULL),
+   mpLatLonFormatCombo(NULL),
    mpAutoGeoreference(NULL),
    mpImporterPlugInRadio(NULL),
    mpBestPlugInRadio(NULL),
-   mpPlugInList(NULL),
-   mpCreateLayer(NULL),
-   mpDisplayLayer(NULL)
+   mpPlugInList(NULL)
 {
    // Georeference
    QWidget* pGeoWidget = new QWidget(this);
    mpCreateLayer = new QCheckBox("Create latitude/longitude layer", pGeoWidget);
    mpDisplayLayer = new QCheckBox("Display latitude/longitude layer", pGeoWidget);
-   QVBoxLayout* pGeoLayout = new QVBoxLayout(pGeoWidget);
+   QLabel* pGeocoordTypeLabel = new QLabel("Geocoordinate Type:", pGeoWidget);
+   mpGeocoordTypeCombo = new GeocoordTypeComboBox(pGeoWidget);
+   mpLatLonFormatLabel = new QLabel("Latitude/Longitude Format:", pGeoWidget);
+   mpLatLonFormatCombo = new DmsFormatTypeComboBox(pGeoWidget);
+
+   QGridLayout* pGeoLayout = new QGridLayout(pGeoWidget);
    pGeoLayout->setMargin(0);
-   pGeoLayout->setSpacing(10);
-   pGeoLayout->addWidget(mpCreateLayer);
-   pGeoLayout->addWidget(mpDisplayLayer);
+   pGeoLayout->setSpacing(5);
+   pGeoLayout->addWidget(mpCreateLayer, 0, 0, 1, 2);
+   pGeoLayout->addWidget(mpDisplayLayer, 1, 0, 1, 2);
+   pGeoLayout->addWidget(pGeocoordTypeLabel, 2, 0);
+   pGeoLayout->addWidget(mpGeocoordTypeCombo, 2, 1, Qt::AlignLeft);
+   pGeoLayout->addWidget(mpLatLonFormatLabel, 3, 0);
+   pGeoLayout->addWidget(mpLatLonFormatCombo, 3, 1, Qt::AlignLeft);
+   pGeoLayout->setColumnStretch(1, 10);
+
    LabeledSection* pGeoSection = new LabeledSection(pGeoWidget, "Georeference", this);
 
    // Auto-Georeference
@@ -66,7 +83,7 @@ OptionsGeoreference::OptionsGeoreference() :
 
    QGridLayout* pAutoGeorefGrid = new QGridLayout(pAutoWidget);
    pAutoGeorefGrid->setMargin(0);
-   pAutoGeorefGrid->setSpacing(10);
+   pAutoGeorefGrid->setSpacing(5);
    pAutoGeorefGrid->addWidget(mpAutoGeoreference, 0, 0, 1, 3);
    pAutoGeorefGrid->addWidget(mpImporterPlugInRadio, 1, 1, 1, 2);
    pAutoGeorefGrid->addWidget(mpBestPlugInRadio, 2, 1, 1, 2);
@@ -90,6 +107,11 @@ OptionsGeoreference::OptionsGeoreference() :
    mpDisplayLayer->setChecked(
       mpCreateLayer->isChecked() ? Georeference::getSettingDisplayLatLonLayer() : false);
    mpDisplayLayer->setEnabled(mpCreateLayer->isChecked());
+   mpGeocoordTypeCombo->setGeocoordType(Georeference::getSettingGeocoordType());
+   mpLatLonFormatLabel->setEnabled(Georeference::getSettingGeocoordType() == GEOCOORD_LATLON);
+   mpLatLonFormatCombo->setCurrentValue(Georeference::getSettingLatLonFormat());
+   mpLatLonFormatCombo->setEnabled(Georeference::getSettingGeocoordType() == GEOCOORD_LATLON);
+
    mpAutoGeoreference->setChecked(Georeference::getSettingAutoGeoreference());
    mpImporterPlugInRadio->setChecked(Georeference::getSettingImporterGeoreferencePlugIn());
    mpBestPlugInRadio->setChecked(!Georeference::getSettingImporterGeoreferencePlugIn());
@@ -130,9 +152,11 @@ OptionsGeoreference::OptionsGeoreference() :
    mpPlugInList->selectItems(selectedPlugInNames);
 
    // Connections
-   VERIFYNR(connect(mpBestPlugInRadio, SIGNAL(toggled(bool)), mpPlugInList, SLOT(setEnabled(bool))));
    VERIFYNR(connect(mpCreateLayer, SIGNAL(toggled(bool)), this, SLOT(createLayerChanged(bool))));
+   VERIFYNR(connect(mpGeocoordTypeCombo, SIGNAL(geocoordTypeChanged(GeocoordType)), this,
+      SLOT(geocoordTypeChanged(GeocoordType))));
    VERIFYNR(connect(mpAutoGeoreference, SIGNAL(toggled(bool)), this, SLOT(enableAutoOptions(bool))));
+   VERIFYNR(connect(mpBestPlugInRadio, SIGNAL(toggled(bool)), mpPlugInList, SLOT(setEnabled(bool))));
 }
 
 OptionsGeoreference::~OptionsGeoreference()
@@ -140,10 +164,16 @@ OptionsGeoreference::~OptionsGeoreference()
 
 void OptionsGeoreference::applyChanges()
 {
-   Georeference::setSettingAutoGeoreference(mpAutoGeoreference->isChecked());
-   Georeference::setSettingImporterGeoreferencePlugIn(mpImporterPlugInRadio->isChecked());
    Georeference::setSettingCreateLatLonLayer(mpCreateLayer->isChecked());
    Georeference::setSettingDisplayLatLonLayer(mpDisplayLayer->isChecked());
+   Georeference::setSettingGeocoordType(mpGeocoordTypeCombo->getGeocoordType());
+   if (mpGeocoordTypeCombo->getGeocoordType() == GEOCOORD_LATLON)
+   {
+      Georeference::setSettingLatLonFormat(mpLatLonFormatCombo->getCurrentValue());
+   }
+
+   Georeference::setSettingAutoGeoreference(mpAutoGeoreference->isChecked());
+   Georeference::setSettingImporterGeoreferencePlugIn(mpImporterPlugInRadio->isChecked());
 
    std::vector<std::string> plugIns;
 
@@ -168,6 +198,13 @@ void OptionsGeoreference::createLayerChanged(bool create)
    }
 
    mpDisplayLayer->setEnabled(create);
+}
+
+void OptionsGeoreference::geocoordTypeChanged(GeocoordType geocoordType)
+{
+   bool enableLatLonFormat = (geocoordType == GEOCOORD_LATLON);
+   mpLatLonFormatLabel->setEnabled(enableLatLonFormat);
+   mpLatLonFormatCombo->setEnabled(enableLatLonFormat);
 }
 
 void OptionsGeoreference::enableAutoOptions(bool enabled)

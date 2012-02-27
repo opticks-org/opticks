@@ -13,15 +13,12 @@
 #include <QtGui/QWidget>
 
 #include "AppVersion.h"
-#include "TypesFile.h"
 
 class CustomColorButton;
 class DistanceUnitsButton;
 class FontSizeComboBox;
-class LocationUnitsButton;
 class LineStyleComboBox;
 class LineWidthComboBox;
-class PixmapGridButton;
 class QCheckBox;
 class QFontComboBox;
 class QSpinBox;
@@ -32,7 +29,7 @@ class OptionsMeasurementLayer : public QWidget
 
 public:
    OptionsMeasurementLayer();
-   ~OptionsMeasurementLayer();
+   virtual ~OptionsMeasurementLayer();
 
    void applyChanges();
 
@@ -50,13 +47,13 @@ public:
 
    static const std::string& getDescription()
    {
-      static std::string var = "Widget to display measurement layer related options for the application";
+      static std::string var = getShortDescription();
       return var;
    }
 
    static const std::string& getShortDescription()
    {
-      static std::string var = "Widget to display measurement layer related related options for the application";
+      static std::string var = "Widget to display measurement layer related options for the application";
       return var;
    }
 
@@ -92,6 +89,7 @@ public:
 private:
    OptionsMeasurementLayer(const OptionsMeasurementLayer& rhs);
    OptionsMeasurementLayer& operator=(const OptionsMeasurementLayer& rhs);
+
    LineWidthComboBox* mpLineWidth;
    LineStyleComboBox* mpLineStyle;
    CustomColorButton* mpLineColor;
@@ -107,7 +105,6 @@ private:
    QSpinBox* mpBearingPrecision;
    QSpinBox* mpDistancePrecision;
    QSpinBox* mpEndPointsPrecision;
-   LocationUnitsButton* mpLocationUnits;
    DistanceUnitsButton* mpDistanceUnits;
 };
 

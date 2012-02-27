@@ -160,9 +160,10 @@ public:
 private:
    LatLonLayerMemento(const LatLonLayerMemento& rhs);
    LatLonLayerMemento& operator=(const LatLonLayerMemento& rhs);
+
    QColor mColor;
    LatLonStyle mStyle;
-   int mWidth;
+   unsigned int mWidth;
    LocationType mTickSpacing;
    bool mAutoSpacing;
    QFont mFont;

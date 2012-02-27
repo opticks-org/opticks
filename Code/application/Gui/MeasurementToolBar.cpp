@@ -13,7 +13,6 @@
 #include <QtGui/QToolButton>
 #include <QtGui/QWidgetAction>
 
-#include "DesktopServicesImp.h"
 #include "Layer.h"
 #include "LayerList.h"
 #include "MeasurementLayer.h"
@@ -42,9 +41,6 @@ MeasurementToolBar::MeasurementToolBar(const string& id, QWidget* parent) :
    mpMeasurementsLayer(NULL)
 {
    string shortcutContext = windowTitle().toStdString();
-
-   DesktopServicesImp* pDesktop = DesktopServicesImp::instance();
-   REQUIRE(pDesktop != NULL);
 
    mpObjectGroup = new QButtonGroup(this);
    mpObjectGroup->setExclusive(true);
@@ -117,7 +113,7 @@ MeasurementToolBar::MeasurementToolBar(const string& id, QWidget* parent) :
    mpDistanceLabelAction->setChecked(MeasurementLayer::getSettingDisplayDistanceLabel());
    mpEndPointsLabelAction->setChecked(MeasurementLayer::getSettingDisplayEndPointsLabel());
 
-   setLocationUnit(GEOCOORD_GENERAL, DMS_FULL);
+   setLocationUnit(GeocoordType(), DmsFormatType());
    setDistanceUnit(NO_DISTANCE_UNIT);
 
    // Connections
@@ -136,8 +132,7 @@ MeasurementToolBar::MeasurementToolBar(const string& id, QWidget* parent) :
 }
 
 MeasurementToolBar::~MeasurementToolBar()
-{
-}
+{}
 
 Layer* MeasurementToolBar::getMeasurementsLayer() const
 {
@@ -226,11 +221,10 @@ bool MeasurementToolBar::setMeasurementsLayer(Layer* pLayer)
       VERIFY(connect(mpMeasurementsLayer, SIGNAL(objectAdded(GraphicObject*)),
          this, SLOT(updateRaster())));
    }
-   else  
+   else
    {
       updateGeoreference();
    }
-   
 
    return true;
 }
@@ -359,7 +353,7 @@ bool MeasurementToolBar::isGeoreferenced() const
 
 void MeasurementToolBar::updateGeoreference()
 {
-   DistanceUnits distance;
+   DistanceUnits distance = NO_DISTANCE_UNIT;
    GeocoordType geocoord;
    DmsFormatType dms;
    if (mpMeasurementsLayer != NULL && isGeoreferenced())
@@ -371,9 +365,6 @@ void MeasurementToolBar::updateGeoreference()
    }
    else
    {
-      distance = NO_DISTANCE_UNIT;
-      geocoord = GEOCOORD_GENERAL;
-      dms = DMS_FULL;
       mpDistanceUnits->setEnabled(false);
       mpLocationUnits->setEnabled(false);
    }
@@ -581,8 +572,8 @@ void LocationUnitsGrid::translateChange(const QString& strText)
 void LocationUnitsGrid::stringToLocationUnits(const QString &strVal, GeocoordType &geoType, 
                                               DmsFormatType &geoFormat) const
 {
-   geoType = GEOCOORD_GENERAL;
-   geoFormat = DMS_FULL;
+   geoType = GeocoordType();
+   geoFormat = DmsFormatType();
 
    if (strVal == "DecimalDegrees")
    {

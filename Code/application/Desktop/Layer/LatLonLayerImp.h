@@ -24,7 +24,6 @@
 #include <vector>
 
 class DataElement;
-class GcpPoint;
 
 class LatLonLayerImp : public LayerImp
 {
@@ -97,60 +96,6 @@ public:
     * @return Returns the current latitude/longitude formatting of the layer
     */
    DmsFormatType getLatLonFormat() const;
-
-   /**
-    * A static class method that converts a GcpPoint into a string based upon
-    * a specified geocoordinate system. As a static method, it does not 
-    * require that you have a pointer to a LatLonLayerImp to call it. It will
-    * return the string in the form (sx, sy) where sx is the geocoordinate
-    * representation of x and sy is the geocoordinate representation of y.
-    *
-    * @param point
-    *     The geocoordinate to represent as text.
-    *
-    * @param type
-    *     The geocoordinate system to represent the point in.
-    *
-    * @return The geocoordinate value of the point in a text string.
-    */
-   std::string convertGcpPointToText(const GcpPoint& point, const GeocoordType& type);
-
-   /**
-    * A static class method that converts a LocationType into a string based upon
-    * a specified geocoordinate system. As a static method, it does not 
-    * require that you have a pointer to a LatLonLayerImp to call it. It will
-    * return the string in the form (sx, sy) where sx is the geocoordinate
-    * representation of x and sy is the geocoordinate representation of y.
-    *
-    * @param latLonCoords
-    *     The geocoordinate to represent as text.  The X and Y values of the location
-    *     should be equivalant to the X and Y coordinate values of a GcpPoint.
-    *
-    * @param type
-    *     The geocoordinate system to represent the point in.
-    *
-    * @return The geocoordinate value of the point in a text string.
-    */
-   std::string convertGcpPointToText(const LocationType& latLonCoords, const GeocoordType& type);
-
-   /**
-    * A static class method that converts a value into a string based upon
-    * a specified geocoordinate system. As a static method, it does not 
-    * require that you have a pointer to a LatLonLayerImp to call it.
-    *
-    * @param value
-    *     The geocoordinate value to represent as text.
-    *
-    * @param isX
-    *     A boolean value specifying whether the value is X or Y, Lat or Lon,
-    *     Northing or Easting.
-    *
-    * @param type
-    *     The geocoordinate system to represent the value in.
-    *
-    * @return The geocoordinate value in a text string.
-    */
-   std::string convertGcpValueToText(double value, bool isX, const GeocoordType& type);
 
    void setBorderDirty(bool bDirty);
    void setTickSpacingDirty(bool bDirty);

@@ -26,7 +26,7 @@ class ZoomAndPanToPointDlg : public QDialog
    Q_OBJECT
 
 public:
-   ZoomAndPanToPointDlg(RasterElement* pRaster, GeocoordType coordType = GEOCOORD_GENERAL, QWidget* pParent = NULL);
+   ZoomAndPanToPointDlg(RasterElement* pRaster, GeocoordType coordType, QWidget* pParent = NULL);
    virtual ~ZoomAndPanToPointDlg();
 
    void setZoomPct(float pct);

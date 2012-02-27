@@ -1957,8 +1957,8 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
 
          if (validGeocoords == true)
          {
-            GeocoordType geocoordType = LatLonLayer::getSettingGeocoordType();
-            DmsFormatType dmsFormat = LatLonLayer::getSettingFormat();
+            GeocoordType geocoordType = Georeference::getSettingGeocoordType();
+            DmsFormatType dmsFormat = Georeference::getSettingLatLonFormat();
 
             LatLonLayer* pLatLonLayer = dynamic_cast<LatLonLayer*>(getTopMostLayer(LAT_LONG));
             if (pLatLonLayer != NULL)
@@ -2603,9 +2603,10 @@ void SpatialDataViewImp::toolTipEvent(QHelpEvent* pEvent)
          pLayer->translateWorldToData(dX, dY, dataCoord.mX, dataCoord.mY);
       }
 
-      GeocoordType geocoordType = LatLonLayer::getSettingGeocoordType();
-      DmsFormatType dmsFormat = LatLonLayer::getSettingFormat();
-      LatLonLayer* pLatLonLayer = dynamic_cast<LatLonLayer*>(pLayerList->getLayer(LAT_LONG, pRaster));
+      GeocoordType geocoordType = Georeference::getSettingGeocoordType();
+      DmsFormatType dmsFormat = Georeference::getSettingLatLonFormat();
+
+      LatLonLayer* pLatLonLayer = dynamic_cast<LatLonLayer*>(getTopMostLayer(LAT_LONG));
       if (pLatLonLayer != NULL)
       {
          geocoordType = pLatLonLayer->getGeocoordType();
@@ -2616,7 +2617,7 @@ void SpatialDataViewImp::toolTipEvent(QHelpEvent* pEvent)
       LocationType geoCoord = pRaster->convertPixelToGeocoord(dataCoord);
       LatLonPoint latLonPoint(geoCoord);
 
-      string coordinateText = "";
+      string coordinateText;
       if (geocoordType == GEOCOORD_LATLON)
       {
          coordinateText = "Geo: (" + latLonPoint.getText(dmsFormat) + ")";
@@ -2631,8 +2632,12 @@ void SpatialDataViewImp::toolTipEvent(QHelpEvent* pEvent)
          MgrsPoint mgrsPoint(latLonPoint);
          coordinateText = "MGRS: (" + mgrsPoint.getText() + ")";
       }
-      QToolTip::showText(pEvent->globalPos(),
-                         QString::fromStdString(coordinateText), this);
+
+      if (coordinateText.empty() == false)
+      {
+         QToolTip::showText(pEvent->globalPos(), QString::fromStdString(coordinateText), this);
+      }
+
       pEvent->accept();
    }
 }

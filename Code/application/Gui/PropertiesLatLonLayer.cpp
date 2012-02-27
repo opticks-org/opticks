@@ -148,8 +148,7 @@ PropertiesLatLonLayer::PropertiesLatLonLayer() :
 }
 
 PropertiesLatLonLayer::~PropertiesLatLonLayer()
-{
-}
+{}
 
 bool PropertiesLatLonLayer::initialize(SessionItem* pSessionItem)
 {
@@ -161,9 +160,6 @@ bool PropertiesLatLonLayer::initialize(SessionItem* pSessionItem)
 
    // Coordinates
    const Font& font = mpLatLonLayer->getFont();
-   GeocoordType coordType = mpLatLonLayer->getGeocoordType();
-   DmsFormatType eFormat = mpLatLonLayer->getLatLonFormat();
-
    mpFontCombo->setCurrentFont(font.getQFont());
 
    int fontSize = font.getPointSize();
@@ -183,11 +179,11 @@ bool PropertiesLatLonLayer::initialize(SessionItem* pSessionItem)
       mpFontSizeCombo->clearEditText();
    }
 
+   GeocoordType coordType = mpLatLonLayer->getGeocoordType();
    switch (coordType)
    {
       case GEOCOORD_LATLON:
          mpLatLonRadio->setChecked(true);
-         mpLatLonFormatCombo->setCurrentValue(eFormat);
          break;
 
       case GEOCOORD_UTM:
@@ -202,6 +198,8 @@ bool PropertiesLatLonLayer::initialize(SessionItem* pSessionItem)
          break;
    }
 
+   DmsFormatType eFormat = mpLatLonLayer->getLatLonFormat();
+   mpLatLonFormatCombo->setCurrentValue(eFormat);
    mpLatLonFormatCombo->setEnabled(coordType == GEOCOORD_LATLON);
 
    // Gridlines

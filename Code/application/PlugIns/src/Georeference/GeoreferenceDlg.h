@@ -7,8 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #ifndef GEOREFERENCEDLG_H
 #define GEOREFERENCEDLG_H
 
@@ -19,8 +17,8 @@
 #include <string>
 #include <vector>
 
+class GeocoordTypeComboBox;
 class QCheckBox;
-class QComboBox;
 class QLineEdit;
 class QListWidget;
 class QStackedWidget;
@@ -31,8 +29,8 @@ class GeoreferenceDlg : public QDialog
 
 public:
    GeoreferenceDlg(const QString& title, const std::vector<std::string>& geoPluginNameList,
-      const std::vector<QWidget*>& geoPluginWidgetList, QWidget* parent = NULL);
-   ~GeoreferenceDlg();
+      const std::vector<QWidget*>& geoPluginWidgetList, QWidget* pParent = NULL);
+   virtual ~GeoreferenceDlg();
 
    void setResultsName(const std::string& name);
    std::string getResultsName() const;
@@ -55,11 +53,11 @@ private:
    QStackedWidget* mpStack;
 
    QLineEdit* mpResultsEdit;
-   QComboBox* mpCoordCombo;
    QCheckBox* mpCreateLayer;
    QCheckBox* mpDisplayLayer;
+   GeocoordTypeComboBox* mpCoordCombo;
 
    std::vector<QWidget*> mWidgets;
 };
 
-#endif // GEOREFERENCEDLG_H
+#endif

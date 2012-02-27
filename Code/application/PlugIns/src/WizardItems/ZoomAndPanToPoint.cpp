@@ -173,20 +173,21 @@ void ZoomAndPanToPointDlg::allowOk()
    bool enable = !invalid(mpLatitudeEdit->text());
    switch (mCoordType)
    {
-      case GEOCOORD_GENERAL:  // Pixel coords and lat/lon use the same line edits, so lump them together.
-      case GEOCOORD_LATLON:
+      case GEOCOORD_LATLON:   // Fall through
+      default:                // Pixel coords and lat/lon use the same line edits, so lump them together.
          enable &= !invalid(mpLongitudeEdit->text());
          break;
+
       case GEOCOORD_UTM:
          // Check all three other QLineEdits that UTM requires (longitude, hemisphere, and zone)
          enable &= !invalid(mpLongitudeEdit->text()) && !invalid(mpZoneEdit->text()) && !invalid(mpHemEdit->text());
          break;
+
       case GEOCOORD_MGRS:
          // MGRS only uses mpLatitudeEdit, so break.
          break;
-      default:
-         enable = false;
    }
+
    mpOK->setEnabled(enable);
 }
 
@@ -390,7 +391,7 @@ void ZoomAndPanToPointDlg::coordTypeChanged(const QString& newCoordSelection)
    }
    else
    {
-      mCoordType = GEOCOORD_GENERAL;
+      mCoordType = GeocoordType();
    }
 
    mpLatitudeEdit->clear();
@@ -422,6 +423,7 @@ void ZoomAndPanToPointDlg::coordTypeChanged(const QString& newCoordSelection)
          tipLat += "   (e.g. 18TUU8401 - zone 18T, square UU, E84000, N1000)\n";
          tipLat += "   (e.g. 18TUU845016 - zone 18T, square UU, E84500, N1600)";
          break;
+
       case GEOCOORD_LATLON:
          mpLatitudeLabel->setText("Latitude:");
          mpLongitudeLabel->setText("Longitude:");
@@ -446,6 +448,7 @@ void ZoomAndPanToPointDlg::coordTypeChanged(const QString& newCoordSelection)
          tipLon += "       and two characters are required for minutes and seconds (e.g. 06, not 6).\n";
          tipLon += "   To designate the western hemisphere, preface the value with 'W', 'w', or '-'.";
          break;
+
       case GEOCOORD_UTM:
          mpLatitudeLabel->setText("Northing:");
          mpLongitudeLabel->setText("Easting:");
@@ -457,16 +460,16 @@ void ZoomAndPanToPointDlg::coordTypeChanged(const QString& newCoordSelection)
          tipZone += "   Zone designator (e.g. 17)";
          tipHem += "   Hemisphere designator (e.g. N)";
          break;
-      case GEOCOORD_GENERAL:
+
+      default:
          mpLatitudeLabel->setText("X Coordinate:");
          mpLongitudeLabel->setText("Y Coordinate:");
 
          tipLat += "   X pixel coordinate.";
          tipLon += "   Y pixel coordinate.";
          break;
-      default:
-         break;
    }
+
    mpLatitudeEdit->setToolTip(tipLat);
    mpLongitudeEdit->setToolTip(tipLon);
    mpZoneEdit->setToolTip(tipZone);

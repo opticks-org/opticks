@@ -63,8 +63,7 @@ GeoreferencePlugIn::GeoreferencePlugIn() :
 }
 
 GeoreferencePlugIn::~GeoreferencePlugIn()
-{
-}
+{}
 
 bool GeoreferencePlugIn::execute(PlugInArgList* pInParam, PlugInArgList* pOutParam )
 {
@@ -89,7 +88,7 @@ bool GeoreferencePlugIn::execute(PlugInArgList* pInParam, PlugInArgList* pOutPar
    string sourceDatasetName = mpRaster->getFilename();
    pStep->addProperty("sourceDataset", sourceDatasetName);
 
-   GeocoordType eType = GEOCOORD_LATLON;
+   GeocoordType eType = Georeference::getSettingGeocoordType();
 
    PlugIn* pGeoPlugin = NULL;
    if (!isBatch())

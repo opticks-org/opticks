@@ -8,26 +8,28 @@
  */
 
 #include <QtGui/QCheckBox>
-#include <QtGui/QComboBox>
 #include <QtGui/QFrame>
 #include <QtGui/QLabel>
-#include <QtGui/QLayout>
+#include <QtGui/QGridLayout>
+#include <QtGui/QHBoxLayout>
 #include <QtGui/QLineEdit>
 #include <QtGui/QListWidget>
 #include <QtGui/QMessageBox>
 #include <QtGui/QPushButton>
 #include <QtGui/QStackedWidget>
+#include <QtGui/QVBoxLayout>
 
 #include "AppVerify.h"
+#include "GeocoordTypeComboBox.h"
 #include "Georeference.h"
 #include "GeoreferenceDlg.h"
 
 using namespace std;
 
-GeoreferenceDlg::GeoreferenceDlg(const QString& title,
-   const vector<string> &geoPluginNameList,
-   const vector<QWidget*> &geoPluginWidgetList, QWidget *parent) :
-   QDialog(parent), mWidgets(geoPluginWidgetList)
+GeoreferenceDlg::GeoreferenceDlg(const QString& title, const vector<string>& geoPluginNameList,
+                                 const vector<QWidget*>& geoPluginWidgetList, QWidget* pParent) :
+   QDialog(pParent),
+   mWidgets(geoPluginWidgetList)
 {
    // Georeference plug-ins
    QLabel* pGeoListLabel = new QLabel("Georeference Plug-Ins:", this);
@@ -61,11 +63,7 @@ GeoreferenceDlg::GeoreferenceDlg(const QString& title,
 
    // Coordinate type
    QLabel* pCoordLabel = new QLabel("Coordinate Type:", this);
-   mpCoordCombo = new QComboBox(this);
-   mpCoordCombo->setEditable(false);
-   mpCoordCombo->addItem("Latitude/Longitude");
-   mpCoordCombo->addItem("UTM");
-   mpCoordCombo->addItem("MGRS");
+   mpCoordCombo = new GeocoordTypeComboBox(this);
 
    // Horizontal line
    QFrame* pHLine2 = new QFrame(this);
@@ -113,6 +111,7 @@ GeoreferenceDlg::GeoreferenceDlg(const QString& title,
    mpCreateLayer->setChecked(Georeference::getSettingCreateLatLonLayer());
    mpDisplayLayer->setChecked(mpCreateLayer->isChecked() ? Georeference::getSettingDisplayLatLonLayer() : false);
    mpDisplayLayer->setEnabled(mpCreateLayer->isChecked());
+   mpCoordCombo->setGeocoordType(Georeference::getSettingGeocoordType());
 
    if (geoPluginWidgetList.empty() == true)
    {
@@ -168,8 +167,7 @@ GeoreferenceDlg::GeoreferenceDlg(const QString& title,
 }
 
 GeoreferenceDlg::~GeoreferenceDlg()
-{
-}
+{}
 
 void GeoreferenceDlg::setResultsName(const string& name)
 {
@@ -197,19 +195,7 @@ string GeoreferenceDlg::getResultsName() const
 
 GeocoordType GeoreferenceDlg::getGeocoordType() const
 {
-   GeocoordType eType = GEOCOORD_LATLON;
-
-   int iIndex = mpCoordCombo->currentIndex();
-   if (iIndex == 1)
-   {
-      eType = GEOCOORD_UTM;
-   }
-   else if (iIndex == 2)
-   {
-      eType = GEOCOORD_MGRS;
-   }
-
-   return eType;
+   return mpCoordCombo->getGeocoordType();
 }
 
 int GeoreferenceDlg::getGeorefAlgorithmIndex() const

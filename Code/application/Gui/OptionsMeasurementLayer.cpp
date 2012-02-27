@@ -9,13 +9,9 @@
 
 #include <QtGui/QApplication>
 #include <QtGui/QCheckBox>
-#include <QtGui/QColor>
-#include <QtGui/QComboBox>
 #include <QtGui/QFontComboBox>
 #include <QtGui/QGridLayout>
-#include <QtGui/QHBoxLayout>
 #include <QtGui/QLabel>
-#include <QtGui/QPainter>
 #include <QtGui/QSpinBox>
 #include <QtGui/QVBoxLayout>
 
@@ -28,12 +24,8 @@
 #include "MeasurementToolBar.h"
 #include "MeasurementLayer.h"
 #include "OptionsMeasurementLayer.h"
-#include "PixmapGrid.h"
-#include "PixmapGridButton.h"
 
 #include <string>
-
-using namespace std;
 
 OptionsMeasurementLayer::OptionsMeasurementLayer()
 {
@@ -109,12 +101,6 @@ OptionsMeasurementLayer::OptionsMeasurementLayer()
    mpEndPointsPrecision = new QSpinBox(this);
    mpEndPointsPrecision->setRange(0, 10);
 
-   // Location units button
-   QLabel* pLocLabel = new QLabel("Location Units:", this);
-   mpLocationUnits = new LocationUnitsButton(this);
-   mpLocationUnits->setStatusTip("Allows the units for the location to be changed");
-   mpLocationUnits->setToolTip("Location Units");
-
    // Distance units button
    QLabel* pDisLabel = new QLabel("Distance Units:", this);
    mpDistanceUnits = new DistanceUnitsButton(this);
@@ -126,19 +112,18 @@ OptionsMeasurementLayer::OptionsMeasurementLayer()
    pDisplayPropLayout->setMargin(0);
    pDisplayPropLayout->setSpacing(5);
    pDisplayPropLayout->addWidget(mpDisplayBearing, 0, 0, 1, 2);
-   pDisplayPropLayout->addWidget(pBearingPrecLabel, 0, 2, Qt::AlignRight);
-   pDisplayPropLayout->addWidget(mpBearingPrecision, 0, 3);
+   pDisplayPropLayout->addWidget(pBearingPrecLabel, 0, 3);
+   pDisplayPropLayout->addWidget(mpBearingPrecision, 0, 4);
    pDisplayPropLayout->addWidget(mpDisplayDistance, 1, 0, 1, 2);
-   pDisplayPropLayout->addWidget(pDistancePrecLabel, 1, 2, Qt::AlignRight);
-   pDisplayPropLayout->addWidget(mpDistancePrecision, 1, 3);
+   pDisplayPropLayout->addWidget(pDistancePrecLabel, 1, 3);
+   pDisplayPropLayout->addWidget(mpDistancePrecision, 1, 4);
    pDisplayPropLayout->addWidget(mpDisplayEndPoints, 2, 0, 1, 2);
-   pDisplayPropLayout->addWidget(pEndPointsPrecLabel, 2, 2, Qt::AlignRight);
-   pDisplayPropLayout->addWidget(mpEndPointsPrecision, 2, 3);
-   pDisplayPropLayout->addWidget(pLocLabel, 3, 0, Qt::AlignRight);
-   pDisplayPropLayout->addWidget(mpLocationUnits, 3, 1);
-   pDisplayPropLayout->addWidget(pDisLabel, 3, 2, Qt::AlignRight);
-   pDisplayPropLayout->addWidget(mpDistanceUnits, 3, 3);
-   pDisplayPropLayout->setColumnStretch(4, 10);
+   pDisplayPropLayout->addWidget(pEndPointsPrecLabel, 2, 3);
+   pDisplayPropLayout->addWidget(mpEndPointsPrecision, 2, 4);
+   pDisplayPropLayout->addWidget(pDisLabel, 3, 0);
+   pDisplayPropLayout->addWidget(mpDistanceUnits, 3, 1, Qt::AlignLeft);
+   pDisplayPropLayout->setColumnMinimumWidth(2, 15);
+   pDisplayPropLayout->setColumnStretch(5, 10);
    LabeledSection* pDisplayPropertiesSection = new LabeledSection(pDisplayPropertiesWidget,
       "Default Display Properties", this);
 
@@ -158,8 +143,6 @@ OptionsMeasurementLayer::OptionsMeasurementLayer()
    mpBearingPrecision->setValue(MeasurementLayer::getSettingBearingPrecision());
    mpDistancePrecision->setValue(MeasurementLayer::getSettingDistancePrecision());
    mpEndPointsPrecision->setValue(MeasurementLayer::getSettingEndPointsPrecision());
-   mpLocationUnits->setCurrentValue(MeasurementLayer::getSettingGeocoordType(), 
-      MeasurementLayer::getSettingGeoFormat());
    mpDistanceUnits->setCurrentValue(MeasurementLayer::getSettingDistanceUnits());
    mpLineWidth->setCurrentValue(MeasurementLayer::getSettingLineWidth());
    mpLineStyle->setCurrentValue(MeasurementLayer::getSettingLineStyle());
@@ -167,7 +150,7 @@ OptionsMeasurementLayer::OptionsMeasurementLayer()
    mpTextColor->setColor(MeasurementLayer::getSettingTextColor());
    mpTextFontSize->setCurrentValue(MeasurementLayer::getSettingTextFontSize());
    QFont textFont = QApplication::font();
-   string fontName = MeasurementLayer::getSettingTextFont();
+   std::string fontName = MeasurementLayer::getSettingTextFont();
    if (!fontName.empty())
    {
       textFont.setFamily(QString::fromStdString(fontName));
@@ -179,11 +162,10 @@ OptionsMeasurementLayer::OptionsMeasurementLayer()
 }
 
 OptionsMeasurementLayer::~OptionsMeasurementLayer()
-{
-}
+{}
 
 void OptionsMeasurementLayer::applyChanges()
-{  
+{
    MeasurementLayer::setSettingDisplayBearingLabel(mpDisplayBearing->isChecked());
    MeasurementLayer::setSettingDisplayDistanceLabel(mpDisplayDistance->isChecked());
    MeasurementLayer::setSettingDisplayEndPointsLabel(mpDisplayEndPoints->isChecked());
@@ -191,13 +173,6 @@ void OptionsMeasurementLayer::applyChanges()
    MeasurementLayer::setSettingDistancePrecision(mpDistancePrecision->value());
    MeasurementLayer::setSettingEndPointsPrecision(mpEndPointsPrecision->value());
    MeasurementLayer::setSettingDistanceUnits(mpDistanceUnits->getCurrentValue());
-
-   GeocoordType geoType;
-   DmsFormatType geoFormat;
-   mpLocationUnits->getCurrentValue(geoType, geoFormat);
-   MeasurementLayer::setSettingGeocoordType(geoType);
-   MeasurementLayer::setSettingGeoFormat(geoFormat);
-
    MeasurementLayer::setSettingLineWidth(mpLineWidth->getCurrentValue());
    MeasurementLayer::setSettingLineStyle(mpLineStyle->getCurrentValue());
    MeasurementLayer::setSettingLineColor(mpLineColor->getColorType());

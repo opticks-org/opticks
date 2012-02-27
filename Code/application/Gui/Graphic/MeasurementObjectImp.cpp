@@ -13,7 +13,6 @@
 #include "DrawUtil.h"
 #include "GeoAlgorithms.h"
 #include "GeoConversions.h"
-#include "Georeference.h"
 #include "glCommon.h"
 #include "GraphicLayer.h"
 #include "Layer.h"
@@ -83,8 +82,7 @@ MeasurementObjectImp::MeasurementObjectImp(const string& id, GraphicObjectType t
 }
 
 MeasurementObjectImp::~MeasurementObjectImp()
-{
-}
+{}
 
 void MeasurementObjectImp::draw(double zoomFactor) const
 {
@@ -645,27 +643,29 @@ string MeasurementObjectImp::generateGeoStrings() const
       }
 
       // set location text
-      if (mDrawnGeocoord == GEOCOORD_LATLON)
+      switch (mDrawnGeocoord)
       {
+      case GEOCOORD_LATLON:
          startLoc = startLlPoint.getText(mDrawnDmsFormat, mEndPointsPrecision);
          endLoc = endLlPoint.getText(mDrawnDmsFormat, mEndPointsPrecision);
-      }
-      else if (mDrawnGeocoord == GEOCOORD_UTM)
-      {
+         break;
+
+      case GEOCOORD_UTM:
          startLoc = startUtmPoint.getText();
          endLoc = endUtmPoint.getText();
-      }
-      else if (mDrawnGeocoord == GEOCOORD_MGRS)
-      {
+         break;
+
+      case GEOCOORD_MGRS:
          startLoc = startMgrsPoint.getText();
          endLoc = endMgrsPoint.getText();
-      }
-      else if (mDrawnGeocoord == GEOCOORD_GENERAL)
-      {
+         break;
+
+      default:
          startLoc = "(" + QString::number(llCorner.mX, 'f', mEndPointsPrecision).toStdString() + ", " +
             QString::number(llCorner.mY, 'f', mEndPointsPrecision).toStdString() + ")";
          endLoc = "(" + QString::number(urCorner.mX, 'f', mEndPointsPrecision).toStdString() + ", " +
             QString::number(urCorner.mY, 'f', mEndPointsPrecision).toStdString() + ")";
+         break;
       }
    }
    else

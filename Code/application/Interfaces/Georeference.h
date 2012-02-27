@@ -37,6 +37,8 @@ public:
    SETTING(GeoreferencePlugIns, Georeference, std::vector<std::string>, std::vector<std::string>())
    SETTING(CreateLatLonLayer, Georeference, bool, true)
    SETTING(DisplayLatLonLayer, Georeference, bool, false)
+   SETTING(GeocoordType, Georeference, GeocoordType, GEOCOORD_LATLON)
+   SETTING(LatLonFormat, Georeference, DmsFormatType, DMS_FULL)
 
    /**
     *  The name for a GcpList argument.

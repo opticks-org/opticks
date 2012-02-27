@@ -7,11 +7,16 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QLayout>
+#include <QtGui/QCheckBox>
+#include <QtGui/QGridLayout>
+#include <QtGui/QLabel>
+#include <QtGui/QLineEdit>
 
-#include "ResultsOptionsWidget.h"
-
+#include "AppVerify.h"
+#include "GeocoordTypeComboBox.h"
+#include "Georeference.h"
 #include "PassAreaComboBox.h"
+#include "ResultsOptionsWidget.h"
 #include "StringUtilities.h"
 
 ResultsOptionsWidget::ResultsOptionsWidget(QWidget* pParent) :
@@ -31,11 +36,8 @@ ResultsOptionsWidget::ResultsOptionsWidget(QWidget* pParent) :
    mpCoordLabel = new QLabel("Coordinate Type:", this);
    mpCoordLabel->setEnabled(false);
 
-   mpCoordCombo = new QComboBox(this);
-   mpCoordCombo->setEditable(false);
-   mpCoordCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(GEOCOORD_LATLON)));
-   mpCoordCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(GEOCOORD_UTM)));
-   mpCoordCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(GEOCOORD_MGRS)));
+   mpCoordCombo = new GeocoordTypeComboBox(this);
+   mpCoordCombo->setGeocoordType(Georeference::getSettingGeocoordType());
    mpCoordCombo->setEnabled(false);
 
    // Metadata
@@ -66,12 +68,11 @@ ResultsOptionsWidget::ResultsOptionsWidget(QWidget* pParent) :
    mpMetadataCheck->setChecked(true);
 
    // Connections
-   connect(mpPassAreaCombo, SIGNAL(valueChanged(PassArea)), this, SLOT(enableSecondThreshold(PassArea)));
+   VERIFYNR(connect(mpPassAreaCombo, SIGNAL(valueChanged(PassArea)), this, SLOT(enableSecondThreshold(PassArea))));
 }
 
 ResultsOptionsWidget::~ResultsOptionsWidget()
-{
-}
+{}
 
 void ResultsOptionsWidget::setAppendToFile(bool bAppend)
 {
@@ -144,26 +145,17 @@ PassArea ResultsOptionsWidget::getPassArea() const
 
 void ResultsOptionsWidget::setGeocoordType(GeocoordType geocoordType)
 {
-   int iIndex = mpCoordCombo->findText(QString::fromStdString(StringUtilities::toDisplayString(geocoordType)));
-   if (iIndex != -1)
+   if (geocoordType.isValid() == true)
    {
-      mpCoordCombo->setCurrentIndex(iIndex);
+      mpCoordLabel->setEnabled(true);
+      mpCoordCombo->setEnabled(true);
+      mpCoordCombo->setGeocoordType(geocoordType);
    }
-   mpCoordLabel->setEnabled(true);
-   mpCoordCombo->setEnabled(true);
 }
 
 GeocoordType ResultsOptionsWidget::getGeocoordType() const
 {
-   GeocoordType eType = GEOCOORD_LATLON;
-
-   QString strGeocoord = mpCoordCombo->currentText();
-   if (strGeocoord.isEmpty() == false)
-   {
-      eType = StringUtilities::fromDisplayString<GeocoordType>(strGeocoord.toStdString());
-   }
-
-   return eType;
+   return mpCoordCombo->getGeocoordType();
 }
 
 void ResultsOptionsWidget::enableSecondThreshold(PassArea area)

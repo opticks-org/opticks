@@ -9,6 +9,7 @@
 
 #include "AppVersion.h"
 #include "AppVerify.h"
+#include "Georeference.h"
 #include "LatLonLayer.h"
 #include "LayerList.h"
 #include "MessageLogResource.h"
@@ -94,38 +95,20 @@ bool SetViewDisplayArea::execute(PlugInArgList* pInArgList, PlugInArgList* pOutA
 
    if (isBatch() == false)
    {
-      GeocoordType geocoordType = GEOCOORD_GENERAL;
+      GeocoordType geocoordType;
 
       SpatialDataView* pSpatialDataView = dynamic_cast<SpatialDataView*>(mpView);
       if (pSpatialDataView != NULL)
       {
-         LayerList* pLayerList = pSpatialDataView->getLayerList();
-         VERIFY(pLayerList != NULL);
-
-         // Get the default geocoordinate type from the lat/long layer, even if it is not visible
-         LatLonLayer* pLatLonLayer = NULL;
-
-         std::vector<Layer*> layers = pLayerList->getLayers(LAT_LONG);
-         for (std::vector<Layer*>::const_iterator iter = layers.begin(); iter != layers.end(); ++iter)
-         {
-            LatLonLayer* pCurrentLatLonLayer = dynamic_cast<LatLonLayer*>(*iter);
-            if (pCurrentLatLonLayer != NULL)
-            {
-               if (dynamic_cast<RasterElement*>(pCurrentLatLonLayer->getDataElement()) == mpRaster)
-               {
-                  pLatLonLayer = pCurrentLatLonLayer;
-                  break;
-               }
-            }
-         }
-
+         // Get the default geocoordinate type from top lat/long layer
+         LatLonLayer* pLatLonLayer = dynamic_cast<LatLonLayer*>(pSpatialDataView->getTopMostLayer(LAT_LONG));
          if (pLatLonLayer != NULL)
          {
             geocoordType = pLatLonLayer->getGeocoordType();
          }
          else if (mpRaster != NULL && mpRaster->isGeoreferenced() == true)
          {
-            geocoordType = LatLonLayer::getSettingGeocoordType();
+            geocoordType = Georeference::getSettingGeocoordType();
          }
       }
 

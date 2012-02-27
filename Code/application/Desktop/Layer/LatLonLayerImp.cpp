@@ -7,14 +7,15 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtCore/QString>
 #include <QtGui/QApplication>
 
 #include "AppConfig.h"
 #include "DrawUtil.h"
-#include "GcpList.h"
 #include "GeoPoint.h"
+#include "Georeference.h"
 #include "glCommon.h"
-#include "LatLonLayerAdapter.h"
+#include "LatLonLayer.h"
 #include "LatLonLayerImp.h"
 #include "LatLonLayerUndo.h"
 #include "PerspectiveView.h"
@@ -42,8 +43,8 @@ static double getStep(double diff);
 
 LatLonLayerImp::LatLonLayerImp(const string& id, const string& layerName, DataElement* pElement) :
    LayerImp(id, layerName, pElement),
-   mGeocoordType(LatLonLayer::getSettingGeocoordType()),
-   mFormat(LatLonLayer::getSettingFormat()),
+   mGeocoordType(Georeference::getSettingGeocoordType()),
+   mFormat(Georeference::getSettingLatLonFormat()),
    mStyle(LatLonLayer::getSettingGridlineStyle()),
    mColor(COLORTYPE_TO_QCOLOR(LatLonLayer::getSettingGridlineColor())),
    mWidth(LatLonLayer::getSettingGridlineWidth()),
@@ -345,7 +346,7 @@ void LatLonLayerImp::draw()
             }
             else if (mGeocoordType == GEOCOORD_MGRS)
             {
-               xLabel = convertGcpValueToText(geoVertex.mX, true, mGeocoordType);
+               xLabel = QString::number(geoVertex.mX, 'f', 1).toStdString();
             }
 
             // find left most location in data
@@ -508,7 +509,7 @@ void LatLonLayerImp::draw()
             }
             else if (mGeocoordType == GEOCOORD_MGRS)
             {
-               yLabel = convertGcpValueToText(geoVertex.mY, false, mGeocoordType);
+               yLabel = QString::number(geoVertex.mY, 'f', 1).toStdString();
             }
 
             // find bottom most location in data
@@ -782,8 +783,8 @@ void LatLonLayerImp::reset()
    setTickSpacing(LocationType(0.0, 0.0));
    setAutoTickSpacing(true);
    setFont(LatLonLayerImp::getDefaultFont());
-   setGeocoordType(GEOCOORD_LATLON);
-   setLatLonFormat(LatLonLayer::getSettingFormat());
+   setGeocoordType(Georeference::getSettingGeocoordType());
+   setLatLonFormat(Georeference::getSettingLatLonFormat());
 }
 
 void LatLonLayerImp::drawLabel(const LocationType& location, const LocationType& textOffset,
@@ -927,71 +928,6 @@ GeocoordType LatLonLayerImp::getGeocoordType() const
 DmsFormatType LatLonLayerImp::getLatLonFormat() const
 {
    return mFormat;
-}
-
-string LatLonLayerImp::convertGcpValueToText(double value, bool isX, const GeocoordType& type)
-{
-   string gcpText = "";
-   switch (type)
-   {
-      case GEOCOORD_LATLON:
-      {
-         DmsPoint::DmsType eDmsType = DmsPoint::DMS_LATITUDE;
-         if (isX == false)
-         {
-            eDmsType = DmsPoint::DMS_LONGITUDE;
-         }
-
-         DmsPoint dmsPoint(eDmsType, value);
-         gcpText = dmsPoint.getValueText(mFormat);
-         break;
-      }
-
-      case GEOCOORD_UTM:
-      case GEOCOORD_MGRS:
-      {
-         char buffer[256];
-         sprintf(buffer, "%.1f", value);
-
-         gcpText = buffer;
-         break;
-      }
-
-      case GEOCOORD_GENERAL:
-      default:
-         break;
-   }
-
-   return gcpText;
-}
-
-string LatLonLayerImp::convertGcpPointToText(const GcpPoint& point, const GeocoordType& type)
-{
-   string label = convertGcpPointToText(point.mCoordinate, type);
-   return label;
-}
-
-string LatLonLayerImp::convertGcpPointToText(const LocationType& latLonCoords, const GeocoordType& type)
-{
-   string gcpText = "";
-
-   LatLonPoint latLon(latLonCoords);
-   if (type == GEOCOORD_LATLON)
-   {
-      gcpText = latLon.getText(mFormat);
-   }
-   else if (type == GEOCOORD_UTM)
-   {
-      UtmPoint utm(latLon);
-      gcpText = utm.getText();
-   }
-   else if (type == GEOCOORD_MGRS)
-   {
-      MgrsPoint mgrs(latLon);
-      gcpText = mgrs.getText();
-   }
-
-   return gcpText;
 }
 
 void LatLonLayerImp::setBorderDirty(bool bDirty)
