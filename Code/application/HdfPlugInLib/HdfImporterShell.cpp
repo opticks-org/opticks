@@ -61,7 +61,7 @@ bool HdfImporterShell::validate(const DataDescriptor* pDescriptor, std::string& 
       else if ((errorTest == NO_ROW_SUBSETS) || (errorTest == NO_COLUMN_SUBSETS))
       {
          errorMessage = errorMessage.substr(0, errorMessage.length() - 1);
-         errorMessage += " with on-disk read-only processing.";
+         errorMessage += " with on-disk read-only processing for interleave formats other than BSQ.";
       }
    }
 
@@ -75,7 +75,7 @@ int HdfImporterShell::getValidationTest(const DataDescriptor* pDescriptor) const
    {
       if (pDescriptor->getProcessingLocation() == ON_DISK_READ_ONLY)
       {
-         validationTest |= NO_BAND_FILES | NO_ROW_SUBSETS | NO_COLUMN_SUBSETS;
+         validationTest |= NO_BAND_FILES;
 
          const RasterFileDescriptor* pFileDescriptor = dynamic_cast<const RasterFileDescriptor*>(
             pDescriptor->getFileDescriptor());
@@ -83,8 +83,12 @@ int HdfImporterShell::getValidationTest(const DataDescriptor* pDescriptor) const
          {
             if (pFileDescriptor->getInterleaveFormat() == BSQ)
             {
-               // Disabling this check since the importer supports BSQ band subsets for on-disk read-only
+               // Disabling these checks since the importer supports BSQ subsets and skip factors for on-disk read-only
                validationTest &= ~NO_BAND_SUBSETS;
+               validationTest &= ~NO_ROW_SUBSETS;
+               validationTest &= ~NO_COLUMN_SUBSETS;
+               validationTest &= ~NO_ROW_SKIP_FACTOR;
+               validationTest &= ~NO_COLUMN_SKIP_FACTOR;
             }
          }
       }

@@ -191,6 +191,7 @@ CachedPage::UnitPtr Hdf5Pager::fetchUnit(DataRequest *pOriginalRequest)
    hsize_t offset[3] = {0, 0, 0}; // the start offset to read in the file
    hsize_t counts[3] = {0, 0, 0}; // how much data to read at a time
    hsize_t dimSpace[3] = {0, 0, 0}; // define a memory dataspace that expresses how much of the file will be read
+   hsize_t stride[3] = {1, 1, 1}; // corresponds to skip factors of 0, 0, 0
 
    if (startRow.getActiveNumber() + concurrentRows - 1 >= stopRow.getActiveNumber())
    {
@@ -204,7 +205,6 @@ CachedPage::UnitPtr Hdf5Pager::fetchUnit(DataRequest *pOriginalRequest)
    {
       concurrentBands = stopBand.getActiveNumber()-startBand.getActiveNumber()+1;
    }
-   
    bool success = false;
 
    switch (fileInterleave)
@@ -228,18 +228,49 @@ CachedPage::UnitPtr Hdf5Pager::fetchUnit(DataRequest *pOriginalRequest)
       }
    case BSQ:
       {
+         ProcessingLocation procLoc = pDescriptor->getProcessingLocation();
+
          // the offsets change the 'origin' of the read
          offset[0] = startBand.getOnDiskNumber();
-         offset[1] = startRow.getActiveNumber();
-         offset[2] = 0;
+         if (procLoc == ON_DISK_READ_ONLY)
+         {
+            offset[1] = startRow.getOnDiskNumber();
+            offset[2] = startColumn.getOnDiskNumber();
+         }
+         else
+         {
+            offset[1] = startRow.getActiveNumber();
+            offset[2] = 0;
+         }
 
          dimSpace[0] = concurrentBands;
          dimSpace[1] = concurrentRows;
-         dimSpace[2] = columnCount;
+         if (procLoc == ON_DISK_READ_ONLY)
+         {
+            dimSpace[2] = concurrentColumns;
+         }
+         else
+         {
+            dimSpace[2] = columnCount;
+         }
 
          counts[0] = concurrentBands;
          counts[1] = concurrentRows;
-         counts[2] = columnCount;
+         if (procLoc == ON_DISK_READ_ONLY)
+         {
+            counts[2] = concurrentColumns;
+         }
+         else
+         {
+            counts[2] = columnCount;
+         }
+
+         if (procLoc == ON_DISK_READ_ONLY)
+         {
+            // no band skip factor, which would be stored in stride[0]
+            stride[1] = pDescriptor->getRowSkipFactor() + 1;
+            stride[2] = pDescriptor->getColumnSkipFactor() + 1;
+         }
 
          break;
       }
@@ -306,7 +337,7 @@ CachedPage::UnitPtr Hdf5Pager::fetchUnit(DataRequest *pOriginalRequest)
       }
    }
 
-   success = 0 == H5Sselect_hyperslab(*dataSpace, H5S_SELECT_SET, offset, NULL, counts, NULL);
+   success = 0 == H5Sselect_hyperslab(*dataSpace, H5S_SELECT_SET, offset, stride, counts, NULL);
    if (success)
    {
       success = 0 == H5Dread(mDataHandle, *loadedType, *memSpace, *dataSpace, H5P_DEFAULT, pData.get());

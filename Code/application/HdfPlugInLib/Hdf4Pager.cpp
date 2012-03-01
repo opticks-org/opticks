@@ -15,10 +15,10 @@
 
 #include "AppVerify.h"
 #include "AppVersion.h"
-#include "DataDescriptor.h"
 #include "DataRequest.h"
 #include "Hdf4Pager.h"
 #include "Hdf4Utilities.h"
+#include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "RasterFileDescriptor.h"
 
@@ -101,7 +101,8 @@ CachedPage::UnitPtr Hdf4Pager::fetchUnit(DataRequest *pOriginalRequest)
    const RasterElement* pRaster = getRasterElement();
    VERIFYRV(pRaster != NULL, pUnit);
 
-   const DataDescriptor* pDescriptor = pRaster->getDataDescriptor();
+   const RasterDataDescriptor* pDescriptor = dynamic_cast<const RasterDataDescriptor*>(
+      pRaster->getDataDescriptor());
    VERIFYRV(pDescriptor != NULL, pUnit);
 
    const RasterFileDescriptor* pFileDescriptor = dynamic_cast<const RasterFileDescriptor*>
@@ -134,6 +135,8 @@ CachedPage::UnitPtr Hdf4Pager::fetchUnit(DataRequest *pOriginalRequest)
 
    int32 lStartValue[3] = {0};
    int32 lNumValues[3] = {0};
+   int32 lStrideValues[3] = {1, 1, 1};
+
    switch (fileInterleave)
    {
    case BIP:
@@ -150,13 +153,36 @@ CachedPage::UnitPtr Hdf4Pager::fetchUnit(DataRequest *pOriginalRequest)
       }
    case BSQ:
       {
+         ProcessingLocation procLoc = pDescriptor->getProcessingLocation();
          lStartValue[0] = startBand.getOnDiskNumber();
-         lStartValue[1] = startRow.getActiveNumber();
-         lStartValue[2] = 0;
+         if (procLoc == ON_DISK_READ_ONLY)
+         {
+            lStartValue[1] = startRow.getOnDiskNumber();
+            lStartValue[2] = startColumn.getOnDiskNumber();
+         }
+         else
+         {
+            lStartValue[1] = startRow.getActiveNumber();
+            lStartValue[2] = 0;
+         }
 
          lNumValues[0] = 1; // should be concurrentBands, but without a nextBand() function, this should be 1
          lNumValues[1] = concurrentRows;
-         lNumValues[2] = columnCount;
+         if (procLoc == ON_DISK_READ_ONLY)
+         {
+            lNumValues[2] = concurrentColumns;
+         }
+         else
+         {
+            lNumValues[2] = columnCount;
+         }
+
+         if (procLoc == ON_DISK_READ_ONLY)
+         {
+            // no band skip factor, which would be stored in lStrideValues[0]
+            lStrideValues[1] = pDescriptor->getRowSkipFactor() + 1;
+            lStrideValues[2] = pDescriptor->getColumnSkipFactor() + 1;
+         }
 
          break;
       }
@@ -185,7 +211,7 @@ CachedPage::UnitPtr Hdf4Pager::fetchUnit(DataRequest *pOriginalRequest)
    }
    memset(pData.get(), 0, pageSize);
 
-   int32 iSuccess = SDreaddata(mDataHandle, lStartValue, NULL, lNumValues, pData.get());
+   int32 iSuccess = SDreaddata(mDataHandle, lStartValue, lStrideValues, lNumValues, pData.get());
 
    if (iSuccess == FAIL)
    {
