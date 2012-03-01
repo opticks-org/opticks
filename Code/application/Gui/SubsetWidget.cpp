@@ -599,15 +599,13 @@ void SubsetWidget::customBandSelection()
       }
       else
       {
-         for (int i = startBand; i < endBand; ++i)
+         for (int i = startBand; i <= endBand; i += bandSkip + 1)
          {
             QModelIndex bandToSelect = mpBandModel->index(i);
             if (bandToSelect.isValid())
             {
                totalSelection.select(bandToSelect, bandToSelect);
             }
-
-            i += bandSkip;
          }
       }
       mpBandList->selectionModel()->select(totalSelection, QItemSelectionModel::Select);
