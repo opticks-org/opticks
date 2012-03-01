@@ -193,7 +193,7 @@ void ChippingWindow::createFile()
 
    // Create a file descriptor based on the data with the chip rows and columns
    FactoryResource<FileDescriptor> fileDescriptor(RasterUtilities::generateRasterFileDescriptorForExport(pDescriptor,
-      string(), startRow, stopRow, 0, startCol, stopCol, 0, mpChippingWidget->getChipBands()));
+      string(), startRow, stopRow, mpChippingWidget->getRowSkipFactor(), startCol, stopCol, mpChippingWidget->getColumnSkipFactor(), mpChippingWidget->getChipBands()));
 
    Service<DesktopServices>()->exportSessionItem(pRaster, fileDescriptor.get());
 }

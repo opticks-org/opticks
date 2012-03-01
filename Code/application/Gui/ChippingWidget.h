@@ -38,6 +38,8 @@ public:
    const std::vector<DimensionDescriptor>& getChipRows() const;
    const std::vector<DimensionDescriptor>& getChipColumns() const;
    const std::vector<DimensionDescriptor>& getChipBands() const;
+   unsigned int getRowSkipFactor() const;
+   unsigned int getColumnSkipFactor() const;
 
 signals:
    void chipChanged();

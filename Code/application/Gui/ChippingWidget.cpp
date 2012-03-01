@@ -163,6 +163,16 @@ const vector<DimensionDescriptor>& ChippingWidget::getChipBands() const
    return mChipBands;
 }
 
+unsigned int ChippingWidget::getRowSkipFactor() const
+{
+   return mRowSkipFactor;
+}
+
+unsigned int ChippingWidget::getColumnSkipFactor() const
+{
+   return mColumnSkipFactor;
+}
+
 void ChippingWidget::showEvent(QShowEvent* pEvent)
 {
    QWidget::showEvent(pEvent);
