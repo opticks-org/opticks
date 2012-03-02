@@ -234,6 +234,7 @@ void PlugInArgImp::initArgTypes()
       mArgTypes.push_back("AoiLayer");
       mArgTypes.push_back("CartesianPlot");
       mArgTypes.push_back("ClassificationLayer");
+      mArgTypes.push_back("CustomLayer");
       mArgTypes.push_back("ColorType");
       mArgTypes.push_back("DataDescriptor");
       mArgTypes.push_back("DataElement");

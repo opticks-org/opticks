@@ -30,6 +30,12 @@
     <ClCompile Include="CloseNotificationTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CustomLayerDrawObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CustomLayerPlugIn.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="DataPlotterDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -189,6 +195,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CloseNotificationTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CustomLayerDrawObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CustomLayerPlugIn.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DataPlotterPlugIn.h">

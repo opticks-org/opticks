@@ -13,6 +13,7 @@
 #include "Any.h"
 #include "ApiUtilities.h"
 #include "ClassificationLayer.h"
+#include "CustomLayer.h"
 #include "DataElementGroup.h"
 #include "DesktopServices.h"
 #include "GcpLayer.h"
@@ -373,6 +374,7 @@ extern "C"
       CAST_IMP(pSubtype, type, GraphicLayer, pLayer);
       CAST_IMP(pSubtype, type, AnnotationLayer, pLayer);
       CAST_IMP(pSubtype, type, ClassificationLayer, pLayer);
+      CAST_IMP(pSubtype, type, CustomLayer, pLayer);
       CAST_IMP(pSubtype, type, MeasurementLayer, pLayer);
       CAST_IMP(pSubtype, type, AoiLayer, pLayer);
       CAST_IMP(pSubtype, type, LatLonLayer, pLayer);

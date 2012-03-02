@@ -293,7 +293,7 @@ public:
    /**
     *  Get the names of the known types.
     *
-    *  This method is returns the names of each recognized arg type.  Plug-ins
+    *  This method returns the names of each recognized arg type.  Plug-ins
     *  can retrieve this list to query if a data type is in the known list.  The
     *  wizard builder uses this list connect plug-in in sequence according to their
     *  type names.  If an arg type exists that is not in this list, the wizard builder
@@ -345,6 +345,7 @@ public:
     *  - CartesianPlot
     *  - ClassificationLayer
     *  - ColorType
+    *  - CustomLayer
     *  - DataDescriptor
     *  - DataElement
     *  - DateTime

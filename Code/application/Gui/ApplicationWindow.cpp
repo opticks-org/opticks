@@ -59,6 +59,7 @@
 #include "ConfigurationSettingsImp.h"
 #include "ContextMenu.h"
 #include "ContextMenuActions.h"
+#include "CustomLayer.h"
 #include "DataDescriptorAdapter.h"
 #include "DateTimeImp.h"
 #include "DesktopServices.h"
@@ -6361,6 +6362,14 @@ const vector<PlugInDescriptor*> &ApplicationWindow::getAvailableExporters(const 
 //   "no longer inherits Signature. (dsulgrov)")
       if ((pTao->isKindOf(TypeConverter::toString<SignatureSet>()) == true) &&
          (subtype == TypeConverter::toString<Signature>()))
+      {
+         continue;
+      }
+
+      // remove for custom layers since the current implementation doesn't provide methods to access the geopoints
+      // for the custom drawn objects within the custom layer.
+      if ((pTao->isKindOf(TypeConverter::toString<CustomLayer>()) == true) &&
+         (subtype == TypeConverter::toString<Layer>()))
       {
          continue;
       }

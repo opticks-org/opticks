@@ -18,6 +18,7 @@
 #include "AppAssert.h"
 #include "AppVerify.h"
 #include "AppVersion.h"
+#include "CustomLayerAdapter.h"
 #include "DataElement.h"
 #include "DesktopServicesImp.h"
 #include "GcpLayerAdapter.h"
@@ -113,6 +114,11 @@ Layer* LayerListImp::newLayer(const LayerType& layerType, DataElement* pElement,
       {
          elementTypeName = "AOI Element";
          elementType = TypeConverter::toString<AoiElement>();
+      }
+      else if (layerType == CUSTOM_LAYER)
+      {
+         elementTypeName = "Any Element";
+         elementType = TypeConverter::toString<Any>();
       }
       else if (layerType == GCP_LAYER)
       {
@@ -210,6 +216,17 @@ Layer* LayerListImp::newLayer(const LayerType& layerType, DataElement* pElement,
          {
             pLayer = new AoiLayerAdapter(SessionItemImp::generateUniqueId(), 
                strName.toStdString(), pAE);
+         }
+         break;
+      }
+
+      case CUSTOM_LAYER:
+      {
+         Any* pAny = dynamic_cast<Any*>(pElement);
+         if (pAny != NULL)
+         {
+            pLayer = new CustomLayerAdapter(SessionItemImp::generateUniqueId(),
+               strName.toStdString(), pAny);
          }
          break;
       }

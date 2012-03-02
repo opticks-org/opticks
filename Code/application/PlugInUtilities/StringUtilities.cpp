@@ -613,6 +613,7 @@ ADD_ENUM_MAPPING(PSEUDOCOLOR, "Pseudocolor", "PseudocolorLayer")
 ADD_ENUM_MAPPING(RASTER, "Raster", "RasterLayer")
 ADD_ENUM_MAPPING(THRESHOLD, "Threshold", "ThresholdLayer")
 ADD_ENUM_MAPPING(TIEPOINT_LAYER, "Tie Point List", "TiePointLayer")
+ADD_ENUM_MAPPING(CUSTOM_LAYER, "Custom Layer", "CustomLayer")
 END_ENUM_MAPPING()
 
 BEGIN_ENUM_MAPPING(LineStyle)

@@ -186,6 +186,8 @@
     <ClCompile Include="Layer\AoiLayerImp.cpp" />
     <ClCompile Include="Layer\ClassificationLayerAdapter.cpp" />
     <ClCompile Include="Layer\ClassificationLayerImp.cpp" />
+    <ClCompile Include="Layer\CustomLayerAdapter.cpp" />
+    <ClCompile Include="Layer\CustomLayerImp.cpp" />
     <ClCompile Include="Layer\GcpLayerAdapter.cpp" />
     <ClCompile Include="Layer\GcpLayerImp.cpp" />
     <ClCompile Include="Layer\GraphicLayerAdapter.cpp" />
@@ -274,6 +276,7 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_ClassificationLayerImp.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_CurveCollectionImp.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_CurveImp.cpp" />
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_CustomLayerImp.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_DockWindowImp.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_GcpLayerImp.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_GraphicLayerImp.cpp" />
@@ -591,6 +594,25 @@
     </CustomBuild>
     <ClInclude Include="Layer\ClassificationLayerAdapter.h" />
     <CustomBuild Include="Layer\ClassificationLayerImp.h">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing %(Filename).h...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Filename).h...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing %(Filename).h...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Filename).h...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+    </CustomBuild>
+    <ClInclude Include="Layer\CustomLayerAdapter.h" />
+    <CustomBuild Include="Layer\CustomLayerImp.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing %(Filename).h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"
 </Command>

@@ -138,6 +138,9 @@
     <ClInclude Include="Interfaces\CurveCollection.h">
       <Filter>Interfaces</Filter>
     </ClInclude>
+    <ClInclude Include="Interfaces\CustomLayer.h">
+      <Filter>Interfaces</Filter>
+    </ClInclude>
     <ClInclude Include="Interfaces\DataAccessor.h">
       <Filter>Interfaces</Filter>
     </ClInclude>

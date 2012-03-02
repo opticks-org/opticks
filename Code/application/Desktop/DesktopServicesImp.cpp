@@ -36,6 +36,7 @@
 #include "CartesianPlotAdapter.h"
 #include "ClassificationLayerImp.h"
 #include "ConfigurationSettingsImp.h"
+#include "CustomLayerImp.h"
 #include "DataVariant.h"
 #include "DesktopServicesImp.h"
 #include "DynamicObject.h"
@@ -599,6 +600,11 @@ bool DesktopServicesImp::isKindOfLayer(const string& className, const string& la
    {
       bSuccess = ClassificationLayerImp::isKindOfLayer(layerName);
    }
+   else if ((className == "CustomLayer") || (className == "CustomLayerAdapter") ||
+      (className == "CustomLayerImp"))
+   {
+      bSuccess = CustomLayerImp::isKindOfLayer(layerName);
+   }
    else if ((className == "MeasurementLayer") || (className == "MeasurementLayerAdapter") ||
       (className == "MeasurementLayerImp"))
    {
@@ -658,6 +664,11 @@ void DesktopServicesImp::getLayerTypes(const string& className, vector<string>& 
       (className == "ClassificationLayerImp"))
    {
       ClassificationLayerImp::getLayerTypes(classList);
+   }
+   else if ((className == "CustomLayer") || (className == "CustomLayerAdapter") ||
+      (className == "CustomLayerImp"))
+   {
+      CustomLayerImp::getLayerTypes(classList);
    }
    else if ((className == "MeasurementLayer") || (className == "MeasurementLayerAdapter") ||
       (className == "MeasurementLayerImp"))

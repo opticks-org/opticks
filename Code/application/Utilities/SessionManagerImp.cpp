@@ -19,6 +19,7 @@
 #include "AppVersion.h"
 #include "CartesianPlotAdapter.h"
 #include "ClassificationLayerAdapter.h"
+#include "CustomLayerAdapter.h"
 #include "DataElement.h"
 #include "DesktopServices.h"
 #include "DesktopServicesImp.h"
@@ -338,6 +339,10 @@ SessionItem *SessionManagerImp::createLayer(const string &type, const string &id
       else if (strType == "ClassificationLayerAdapter")
       {
          pLayer = new ClassificationLayerAdapter(id, name, NULL);
+      }
+      else if (strType == "CustomLayerAdapter")
+      {
+         pLayer = new CustomLayerAdapter(id, name, NULL);
       }
       else if (strType == "GcpLayerAdapter")
       {

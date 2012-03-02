@@ -390,7 +390,7 @@ typedef EnumWrapper<LatLonStyleEnum> LatLonStyle;
  *  SpatialDataView.
  */
 enum LayerTypeEnum { ANNOTATION, AOI_LAYER, CONTOUR_MAP, GCP_LAYER, GRAPHIC_LAYER, LAT_LONG,
-                 RASTER, PSEUDOCOLOR, THRESHOLD, TIEPOINT_LAYER };
+                 RASTER, PSEUDOCOLOR, THRESHOLD, TIEPOINT_LAYER, CUSTOM_LAYER };
 
 /**
  * @EnumWrapper ::LayerTypeEnum.

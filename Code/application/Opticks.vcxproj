@@ -282,6 +282,7 @@
     <ClInclude Include="Interfaces\ContextMenuActions.h" />
     <ClInclude Include="Interfaces\Curve.h" />
     <ClInclude Include="Interfaces\CurveCollection.h" />
+    <ClInclude Include="Interfaces\CustomLayer.h" />
     <ClInclude Include="Interfaces\DataAccessor.h" />
     <ClInclude Include="Interfaces\DataAccessorImpl.h" />
     <ClInclude Include="Interfaces\DataDescriptor.h" />

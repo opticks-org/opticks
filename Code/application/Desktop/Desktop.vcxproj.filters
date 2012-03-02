@@ -137,6 +137,12 @@
     <ClCompile Include="Layer\ClassificationLayerImp.cpp">
       <Filter>Layer</Filter>
     </ClCompile>
+    <ClCompile Include="Layer\CustomLayerAdapter.cpp">
+      <Filter>Layer</Filter>
+    </ClCompile>
+    <ClCompile Include="Layer\CustomLayerImp.cpp">
+      <Filter>Layer</Filter>
+    </ClCompile>
     <ClCompile Include="Layer\GcpLayerAdapter.cpp">
       <Filter>Layer</Filter>
     </ClCompile>
@@ -401,6 +407,9 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_CurveImp.cpp">
       <Filter>moc</Filter>
     </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_CustomLayerImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_DockWindowImp.cpp">
       <Filter>moc</Filter>
     </ClCompile>
@@ -598,6 +607,9 @@
     <ClInclude Include="Layer\ClassificationLayerAdapter.h">
       <Filter>Layer</Filter>
     </ClInclude>
+    <ClInclude Include="Layer\CustomLayerAdapter.h">
+      <Filter>Layer</Filter>
+    </ClInclude>
     <ClInclude Include="Layer\GcpLayerAdapter.h">
       <Filter>Layer</Filter>
     </ClInclude>
@@ -748,6 +760,9 @@
       <Filter>Layer</Filter>
     </CustomBuild>
     <CustomBuild Include="Layer\ClassificationLayerImp.h">
+      <Filter>Layer</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Layer\CustomLayerImp.h">
       <Filter>Layer</Filter>
     </CustomBuild>
     <CustomBuild Include="Layer\GcpLayerImp.h">
