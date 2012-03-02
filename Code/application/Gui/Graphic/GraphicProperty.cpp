@@ -26,12 +26,10 @@ XERCES_CPP_NAMESPACE_USE
 
 GraphicProperty::GraphicProperty(const string& name) :
    mName(name)
-{
-}
+{}
 
 GraphicProperty::~GraphicProperty()
-{
-}
+{}
 
 string GraphicProperty::getName() const
 {
@@ -67,8 +65,7 @@ bool GraphicProperty::fromXml(DOMNode* pDocument, unsigned int version)
 AlphaProperty::AlphaProperty(double alpha) :
    GraphicProperty("Alpha"),
    mAlpha(alpha)
-{
-}
+{}
 
 bool AlphaProperty::set(const GraphicProperty* pProp)
 {
@@ -132,8 +129,7 @@ bool AlphaProperty::fromXml(DOMNode* pDocument, unsigned int version)
 ApexProperty::ApexProperty(double apex) :
    GraphicProperty("Apex"),
    mApexPosition(apex)
-{
-}
+{}
 
 bool ApexProperty::set(const GraphicProperty* pProp)
 {
@@ -197,8 +193,7 @@ bool ApexProperty::fromXml(DOMNode* pDocument, unsigned int version)
 ArcRegionProperty::ArcRegionProperty(ArcRegion eRegion) :
    GraphicProperty("ArcRegion"),
    mRegion(eRegion)
-{
-}
+{}
 
 bool ArcRegionProperty::set(const GraphicProperty* pProp)
 {
@@ -312,8 +307,7 @@ BoundingBoxProperty::BoundingBoxProperty(LocationType llCorner, LocationType urC
    mHasGeoCoords(true),
    mHasPixelCoords(true),
    mGeoCoordsMatchPixelCoords(geoCoordsMatchPixelCoords)
-{
-}
+{}
 
 bool BoundingBoxProperty::hasGeoCoords() const
 {
@@ -359,6 +353,7 @@ bool BoundingBoxProperty::set(const GraphicProperty* pProp)
    }
 
    *this = *pBoxProp;
+   mGeoCoordsMatchPixelCoords = false;
    return true;
 }
 
@@ -391,8 +386,7 @@ bool BoundingBoxProperty::compare(const GraphicProperty* pProp) const
 
 GraphicProperty* BoundingBoxProperty::copy() const
 {
-   BoundingBoxProperty* pProperty = new BoundingBoxProperty(mLlCorner, mUrCorner, mLlLatLong, mUrLatLong,
-      mGeoCoordsMatchPixelCoords);
+   BoundingBoxProperty* pProperty = new BoundingBoxProperty(mLlCorner, mUrCorner, mLlLatLong, mUrLatLong);
    if (pProperty != NULL)
    {
       pProperty->mHasGeoCoords = mHasGeoCoords;
@@ -472,8 +466,7 @@ bool BoundingBoxProperty::fromXml(DOMNode* pDocument, unsigned int version)
 FillColorProperty::FillColorProperty(ColorType color) :
    GraphicProperty("FillColor"),
    mColor(color)
-{
-}
+{}
 
 bool FillColorProperty::set(const GraphicProperty* pProp)
 {
@@ -543,8 +536,7 @@ bool FillColorProperty::fromXml(DOMNode* pDocument, unsigned int version)
 FillStyleProperty::FillStyleProperty(FillStyle eStyle) :
    GraphicProperty("FillStyle"),
    mStyle(eStyle)
-{
-}
+{}
 
 bool FillStyleProperty::set(const GraphicProperty* pProp)
 {
@@ -632,8 +624,7 @@ bool FillStyleProperty::fromXml(DOMNode* pDocument, unsigned int version)
 FontProperty::FontProperty(const FontImp& font) :
    GraphicProperty("Font"),
    mFont(font)
-{
-}
+{}
 
 bool FontProperty::set(const GraphicProperty* pProp)
 {
@@ -764,8 +755,7 @@ bool FontProperty::fromXml(DOMNode* pDocument, unsigned int version)
 HatchStyleProperty::HatchStyleProperty(SymbolType eHatch) :
    GraphicProperty("HatchStyle"),
    mStyle(eHatch)
-{
-}
+{}
 
 bool HatchStyleProperty::set(const GraphicProperty* pProp)
 {
@@ -968,8 +958,7 @@ bool HatchStyleProperty::fromXml(DOMNode* pDocument, unsigned int version)
 LatLonProperty::LatLonProperty(LatLonPoint latLonPoint) :
    GraphicProperty("LatLon"),
    mLatLon(latLonPoint)
-{
-}
+{}
 
 LatLonPoint LatLonProperty::getLatLon() const
 {
@@ -1046,8 +1035,7 @@ bool LatLonProperty::fromXml(DOMNode* pDocument, unsigned int version)
 LineColorProperty::LineColorProperty(ColorType color) :
    GraphicProperty("LineColor"),
    mColor(color)
-{
-}
+{}
 
 bool LineColorProperty::set(const GraphicProperty* pProp)
 {
@@ -1117,8 +1105,7 @@ bool LineColorProperty::fromXml(DOMNode* pDocument, unsigned int version)
 LineOnProperty::LineOnProperty(bool state) :
    GraphicProperty("LineOn"),
    mState(state)
-{
-}
+{}
 
 bool LineOnProperty::set(const GraphicProperty* pProp)
 {
@@ -1187,8 +1174,7 @@ bool LineOnProperty::fromXml(DOMNode* pDocument, unsigned int version)
 LineScaledProperty::LineScaledProperty(bool scaled) :
    GraphicProperty("LineScaled"),
    mScaled(scaled)
-{
-}
+{}
 
 bool LineScaledProperty::set(const GraphicProperty* pProp)
 {
@@ -1257,8 +1243,7 @@ bool LineScaledProperty::fromXml(DOMNode* pDocument, unsigned int version)
 LineStyleProperty::LineStyleProperty(LineStyle eStyle) :
    GraphicProperty("LineStyle"),
    mStyle(eStyle)
-{
-}
+{}
 
 bool LineStyleProperty::set(const GraphicProperty* pProp)
 {
@@ -1358,8 +1343,7 @@ bool LineStyleProperty::fromXml(DOMNode* pDocument, unsigned int version)
 LineWidthProperty::LineWidthProperty(double width) :
    GraphicProperty("LineWidth"),
    mWidth(width)
-{
-}
+{}
 
 bool LineWidthProperty::set(const GraphicProperty* pProp)
 {
@@ -1423,8 +1407,7 @@ bool LineWidthProperty::fromXml(DOMNode* pDocument, unsigned int version)
 RotationProperty::RotationProperty(double rotate) :
    GraphicProperty("Rotation"),
    mRotate(rotate)
-{
-}
+{}
 
 bool RotationProperty::set(const GraphicProperty* pProp)
 {
@@ -1488,8 +1471,7 @@ bool RotationProperty::fromXml(DOMNode* pDocument, unsigned int version)
 ScaleProperty::ScaleProperty(double scale) :
    GraphicProperty("Scale"),
    mScale(scale)
-{
-}
+{}
 
 bool ScaleProperty::set(const GraphicProperty* pProp)
 {
@@ -1553,8 +1535,7 @@ bool ScaleProperty::fromXml(DOMNode* pDocument, unsigned int version)
 TextAlignmentProperty::TextAlignmentProperty(int iAlignment) :
    GraphicProperty("TextAlignment"),
    mAlignment(iAlignment)
-{
-}
+{}
 
 int TextAlignmentProperty::getAlignment() const
 {
@@ -1636,8 +1617,7 @@ bool TextAlignmentProperty::fromXml(DOMNode* pDocument, unsigned int version)
 TextColorProperty::TextColorProperty(ColorType color) :
    GraphicProperty("TextColor"),
    mColor(color)
-{
-}
+{}
 
 bool TextColorProperty::set(const GraphicProperty* pProp)
 {
@@ -1704,8 +1684,7 @@ bool TextColorProperty::fromXml(DOMNode* pDocument, unsigned int version)
 TextStringProperty::TextStringProperty(const string& text) :
    GraphicProperty("TextString"),
    mString(text)
-{
-}
+{}
 
 bool TextStringProperty::set(const GraphicProperty* pProp)
 {
@@ -1890,8 +1869,7 @@ void WedgeProperty::normalizeAngles()
 FileNameProperty::FileNameProperty(const string &filename) :
    GraphicProperty("Filename"),
    mFileName(filename)
-{
-}
+{}
 
 const string& FileNameProperty::getFileName() const
 {
@@ -1954,8 +1932,7 @@ bool FileNameProperty::fromXml(DOMNode* pDocument, unsigned int version)
 PixelSymbolProperty::PixelSymbolProperty(SymbolType symbol) :
    GraphicProperty("PixelSymbol"),
    mSymbol(symbol)
-{
-}
+{}
 
 SymbolType PixelSymbolProperty::getPixelSymbol() const
 {
@@ -2163,8 +2140,7 @@ bool PixelSymbolProperty::set(const GraphicProperty* pProp)
 DrawModeProperty::DrawModeProperty(ModeType mode) :
    GraphicProperty("DrawMode"),
    mMode(mode)
-{
-}
+{}
 
 ModeType DrawModeProperty::getDrawMode() const
 {
@@ -2252,8 +2228,7 @@ bool DrawModeProperty::set(const GraphicProperty *pProp)
 GraphicSymbolProperty::GraphicSymbolProperty(const string& symbolName) :
    GraphicProperty("GraphicSymbol"),
    mSymbolName(symbolName)
-{
-}
+{}
 
 const string& GraphicSymbolProperty::getSymbolName() const
 {
@@ -2315,8 +2290,7 @@ bool GraphicSymbolProperty::set(const GraphicProperty *pProp)
 GraphicSymbolSizeProperty::GraphicSymbolSizeProperty(unsigned int symbolSize) :
    GraphicProperty("GraphicSymbolSize"),
    mSymbolSize(symbolSize)
-{
-}
+{}
 
 const unsigned int GraphicSymbolSizeProperty::getSymbolSize() const
 {

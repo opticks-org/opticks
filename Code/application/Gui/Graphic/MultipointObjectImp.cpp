@@ -338,8 +338,7 @@ bool MultipointObjectImp::replicateObject(const GraphicObject* pObject)
       return false;
    }
 
-   bool bSuccess = false;
-   bSuccess = GraphicObjectImp::replicateObject(pObject);
+   bool bSuccess = GraphicObjectImp::replicateObject(pObject);
    if (bSuccess == false)
    {
       return false;
@@ -347,9 +346,34 @@ bool MultipointObjectImp::replicateObject(const GraphicObject* pObject)
 
    if (pObject->getGraphicObjectType() == getGraphicObjectType())
    {
-      mVertices.clear();
+      vector<LocationType> oldVertices = mVertices;
+      vector<LocationType> oldGeoVertices = mGeoVertices;
+
       const MultipointObjectImp* pMPoint = dynamic_cast<const MultipointObjectImp*>(pObject);
-      addVertices(pMPoint->mVertices);
+      mVertices = pMPoint->mVertices;
+      mGeoVertices = pMPoint->mGeoVertices;
+
+      if (getGeoreferenceElement() != NULL)
+      {
+         if (mGeoVertices.empty())
+         {
+            enableGeo();
+         }
+         else
+         {
+            updateGeo();
+         }
+      }
+
+      GraphicLayer* pLayer = getLayer();
+      if (pLayer != NULL)
+      {
+         View* pView = pLayer->getView();
+         if (pView != NULL)
+         {
+            pView->addUndoAction(new AddVertices(this, oldVertices, oldGeoVertices, mVertices, mGeoVertices));
+         }
+      }
    }
 
    return bSuccess;

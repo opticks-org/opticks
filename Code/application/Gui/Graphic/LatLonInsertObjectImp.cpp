@@ -291,12 +291,16 @@ bool LatLonInsertObjectImp::replicateObject(const GraphicObject* pObject)
       return false;
    }
 
-   const GraphicGroup& group = pLLIObject->getGroup();
-
-   bool bSuccess = mpGroup->replicateObject(&group);
+   bool bSuccess = GraphicObjectImp::replicateObject(pObject);
    if (bSuccess == true)
    {
-      bSuccess = GraphicObjectImp::replicateObject(pObject);
+      const GraphicGroup& group = pLLIObject->getGroup();
+      bSuccess = mpGroup->replicateObject(&group);
+      if (bSuccess == true)
+      {
+         setBoundingBox(mpGroup->getLlCorner(), mpGroup->getUrCorner());
+         updateHandles();
+      }
    }
 
    return bSuccess;
