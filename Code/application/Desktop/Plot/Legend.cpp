@@ -247,6 +247,7 @@ void Legend::updateItemText(const QString& strObjectName)
             if (pItem != NULL)
             {
                pItem->setText(0, strObjectName);
+               pItem->setToolTip(0,strObjectName);
                break;
             }
          }
