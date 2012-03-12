@@ -4453,12 +4453,15 @@ void ApplicationWindow::updateActiveWindow(QMdiSubWindow* pWindow)
             SLOT(setChecked(bool))));
       }
 
-      VERIFYNR(disconnect(mpSessionExplorer, SIGNAL(visibilityChanged(bool)), mpCurrentWnd, SLOT(setFocus())));
-      VERIFYNR(disconnect(static_cast<HistogramWindowImp*>(mpHistogram), SIGNAL(visibilityChanged(bool)),
-         mpCurrentWnd, SLOT(setFocus())));
-      VERIFYNR(disconnect(m_pMessage_Log, SIGNAL(visibilityChanged(bool)), mpCurrentWnd, SLOT(setFocus())));
-      VERIFYNR(disconnect(m_pBackground_Plugins, SIGNAL(visibilityChanged(bool)), mpCurrentWnd, SLOT(setFocus())));
-      VERIFYNR(disconnect(m_pScripting, SIGNAL(visibilityChanged(bool)), mpCurrentWnd, SLOT(setFocus())));
+      vector<Window*> dockWindows = getWindows(DOCK_WINDOW);
+      for (vector<Window*>::iterator it = dockWindows.begin(); it != dockWindows.end(); ++it)
+      {
+         DockWindowImp* pDock = dynamic_cast<DockWindowImp*>(*it);
+         if (pDock != NULL)
+         {
+            VERIFYNR(disconnect(pDock, SIGNAL(visibilityChanged(bool)), mpCurrentWnd, SLOT(setFocus())));
+         }
+      }
 
       // Get the active view in the window
       View* pView = mpCurrentView.get();
@@ -4556,12 +4559,15 @@ void ApplicationWindow::updateActiveWindow(QMdiSubWindow* pWindow)
             SLOT(setChecked(bool))));
       }
 
-      VERIFYNR(connect(mpSessionExplorer, SIGNAL(visibilityChanged(bool)), pWorkspaceWindow, SLOT(setFocus())));
-      VERIFYNR(connect(static_cast<HistogramWindowImp*>(mpHistogram), SIGNAL(visibilityChanged(bool)),
-         pWorkspaceWindow, SLOT(setFocus())));
-      VERIFYNR(connect(m_pMessage_Log, SIGNAL(visibilityChanged(bool)), pWorkspaceWindow, SLOT(setFocus())));
-      VERIFYNR(connect(m_pBackground_Plugins, SIGNAL(visibilityChanged(bool)), pWorkspaceWindow, SLOT(setFocus())));
-      VERIFYNR(connect(m_pScripting, SIGNAL(visibilityChanged(bool)), pWorkspaceWindow, SLOT(setFocus())));
+      vector<Window*> dockWindows = getWindows(DOCK_WINDOW);
+      for (vector<Window*>::iterator it = dockWindows.begin(); it != dockWindows.end(); ++it)
+      {
+         DockWindowImp* pDock = dynamic_cast<DockWindowImp*>(*it);
+         if (pDock != NULL)
+         {
+            VERIFYNR(connect(pDock, SIGNAL(visibilityChanged(bool)), pWorkspaceWindow, SLOT(setFocus())));
+         }
+      }
 
       // Get the active view in the window
       View* pView = mpCurrentView.get();
