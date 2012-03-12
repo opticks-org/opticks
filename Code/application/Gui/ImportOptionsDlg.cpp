@@ -339,18 +339,23 @@ ImportOptionsDlg::ImportOptionsDlg(Importer* pImporter, const QMap<QString, vect
    mpDatasetTree->expandAll();
 
    // Update the tab widget for the selected data set
+   if (pSelectItem == NULL)
+   {
+      // No data set is set to import by default so select the first data set in the tree widget
+      for (int i = 0; i < mpDatasetTree->topLevelItemCount() && pSelectItem == NULL; ++i)
+      {
+         QTreeWidgetItem* pParentItem = mpDatasetTree->topLevelItem(i);
+         if ((pParentItem != NULL) && (pParentItem->childCount() > 0))
+         {
+            pSelectItem = pParentItem->child(0);
+         }
+      }
+   }
+
    if (pSelectItem != NULL)
    {
       mpDatasetTree->setItemSelected(pSelectItem, true);
       updateEditDataset();
-   }
-   else
-   {
-      map<ImportDescriptor*, QTreeWidgetItem*>::iterator iter = mDatasets.begin();
-      if (iter != mDatasets.end())
-      {
-         setCurrentDataset(iter->first);
-      }
    }
 
    // Connections
