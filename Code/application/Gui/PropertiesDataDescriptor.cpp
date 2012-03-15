@@ -8,13 +8,12 @@
  */
 
 #include "AppVersion.h"
-#include "AppVerify.h"
-#include "DataDescriptor.h"
 #include "DataDescriptorWidget.h"
 #include "DataElement.h"
 #include "PropertiesDataDescriptor.h"
 
-PropertiesDataDescriptor::PropertiesDataDescriptor()
+PropertiesDataDescriptor::PropertiesDataDescriptor() :
+   mpDescriptor(NULL)
 {
    setName("Data Descriptor Properties");
    setPropertiesName("Data");
@@ -27,8 +26,7 @@ PropertiesDataDescriptor::PropertiesDataDescriptor()
 }
 
 PropertiesDataDescriptor::~PropertiesDataDescriptor()
-{
-}
+{}
 
 bool PropertiesDataDescriptor::initialize(SessionItem* pSessionItem)
 {
@@ -38,15 +36,18 @@ bool PropertiesDataDescriptor::initialize(SessionItem* pSessionItem)
       return false;
    }
 
-   DataElement* pElement = dynamic_cast<DataElement*>(pSessionItem);
+   const DataElement* pElement = dynamic_cast<DataElement*>(pSessionItem);
    if (pElement != NULL)
    {
-      DataDescriptor* pDescriptor = pElement->getDataDescriptor();
+      const DataDescriptor* pDescriptor = pElement->getDataDescriptor();
       if (pDescriptor != NULL)
       {
-         // turn off full editing of fields
-         pDescriptorPage->setDataDescriptor(pDescriptor, false);
-         return true;
+         mpDescriptor = DataDescriptorResource<DataDescriptor>(pDescriptor->copy());
+         if (mpDescriptor.get() != NULL)
+         {
+            pDescriptorPage->setDataDescriptor(mpDescriptor.get(), false);    // Only allow the user to edit the units
+            return PropertiesShell::initialize(pSessionItem);
+         }
       }
    }
 
@@ -55,10 +56,22 @@ bool PropertiesDataDescriptor::initialize(SessionItem* pSessionItem)
 
 bool PropertiesDataDescriptor::applyChanges()
 {
-   DataDescriptorWidget* pDescriptorPage = dynamic_cast<DataDescriptorWidget*>(getWidget());
-   VERIFY(pDescriptorPage != NULL);
+   if (mpDescriptor.get() == NULL)
+   {
+      return false;
+   }
 
-   return pDescriptorPage->applyChanges();
+   DataElement* pElement = dynamic_cast<DataElement*>(getSessionItem());
+   if (pElement != NULL)
+   {
+      DataDescriptor* pDescriptor = pElement->getDataDescriptor();
+      if (pDescriptor != NULL)
+      {
+         return pDescriptor->clone(mpDescriptor.get());
+      }
+   }
+
+   return false;
 }
 
 QWidget* PropertiesDataDescriptor::createWidget()

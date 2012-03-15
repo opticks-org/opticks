@@ -135,7 +135,8 @@ protected:
 
 protected slots:
    void updateName(const QString& strName);
-   void updateClassificationText();
+   void updateClassificationPosition();
+   void updateClassificationText(const QString& classificationText);
    void enableAnnotationToolBar(const MouseMode* pMouseMode);
    void updateScaleRange();
    void updateMouseLabel(const QString& strTextX, const QString& strTextY);

@@ -12,6 +12,7 @@
 #include "ClassificationImp.h"
 #include "DateTimeImp.h"
 #include "ObjectResource.h"
+#include "SignalBlocker.h"
 #include "StringUtilities.h"
 #include "UtilityServices.h"
 
@@ -123,7 +124,12 @@ ClassificationImp& ClassificationImp::operator =(const ClassificationImp& rhs)
 {
    if (this != &rhs)
    {
-      DynamicObjectImp::operator =(rhs);
+      // Only notify the Modified signal at the end instead of notifying potentially
+      // numerous signals as attributes are cleared and added in the base class
+      {
+         SignalBlocker block(*dynamic_cast<Subject*>(this));
+         DynamicObjectImp::operator =(rhs);
+      }
 
       mLevel = rhs.mLevel.c_str();
       mSystem = rhs.mSystem.c_str();
@@ -670,7 +676,7 @@ void ClassificationImp::getClassificationText(string& classificationText) const
       if (pDeclassDate != NULL && pDeclassDate->isValid())
       {
          string date = pDeclassDate->getFormattedUtc("%Y%m%d");
-         if (date.empty() == false && date != "20000101")
+         if (date.empty() == false)
          {
             classificationText += "//" + date;
          }
@@ -977,6 +983,51 @@ void ClassificationImp::setClassification(const Classification* pClassification)
    {
       *this = *pClassificationImp;
    }
+}
+
+bool ClassificationImp::compare(const DynamicObject* pObject) const
+{
+   const Classification* pClassification = dynamic_cast<const Classification*>(pObject);
+   if (pClassification != NULL)
+   {
+      return compare(pClassification);
+   }
+
+   return DynamicObjectImp::compare(pObject);
+}
+
+bool ClassificationImp::compare(const Classification* pClassification) const
+{
+   if (pClassification == NULL)
+   {
+      return false;
+   }
+
+   if ((pClassification->getLevel() != mLevel) ||
+      (pClassification->getSystem() != mSystem) ||
+      (pClassification->getCodewords() != mCodewords) ||
+      (dynamic_cast<const ClassificationImp*>(pClassification)->mCodewordsDefaulted != mCodewordsDefaulted) ||
+      (pClassification->getFileControl() != mFileControl) ||
+      (pClassification->getFileReleasing() != mFileReleasing) ||
+      (pClassification->getClassificationReason() != mClassificationReason) ||
+      (pClassification->getDeclassificationType() != mDeclassificationType) ||
+      (*(dynamic_cast<const DateTimeImp*>(pClassification->getDeclassificationDate())) != *mpDeclassificationDate) ||
+      (pClassification->getDeclassificationExemption() != mDeclassificationExemption) ||
+      (pClassification->getFileDowngrade() != mFileDowngrade) ||
+      (pClassification->getCountryCode() != mCountryCode) ||
+      (*(dynamic_cast<const DateTimeImp*>(pClassification->getDowngradeDate())) != *mpDowngradeDate) ||
+      (pClassification->getDescription() != mDescription) ||
+      (pClassification->getAuthority() != mAuthority) ||
+      (pClassification->getAuthorityType() != mAuthorityType) ||
+      (*(dynamic_cast<const DateTimeImp*>(pClassification->getSecuritySourceDate())) != *mpSecuritySourceDate) ||
+      (pClassification->getSecurityControlNumber() != mSecurityControlNumber) ||
+      (pClassification->getFileCopyNumber() != mFileCopyNumber) ||
+      (pClassification->getFileNumberOfCopies() != mFileNumberOfCopies))
+   {
+      return false;
+   }
+
+   return DynamicObjectImp::compare(pClassification);
 }
 
 bool ClassificationImp::toXml(XMLWriter* pXml) const

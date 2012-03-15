@@ -202,7 +202,7 @@ void DataElementImp::setClassification(const Classification* pClassification)
 {
    if (mpDataDescriptor != NULL)
    {
-       mpDataDescriptor->setClassification(pClassification);
+      mpDataDescriptor->setClassification(pClassification);
    }
 }
 

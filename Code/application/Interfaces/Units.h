@@ -11,6 +11,7 @@
 #define _UNITS
 
 #include "Serializable.h"
+#include "Subject.h"
 #include "TypesFile.h"
 
 #include <string>
@@ -21,11 +22,47 @@
  * The units interface serves as a common mechanism for maintaining
  * unit and range information about other data structures.
  *
- * @see      Serializable
+ *  This subclass of Subject will notify upon the following conditions:
+ *  - The following methods are called: setUnitName(), setUnitType(),
+ *    setRangeMin(), setRangeMax(), setScaleFromStandard(), and setUnits().
+ *  - All notifications documented in Subject.
  */
-class Units : public Serializable
+class Units : public Subject, public Serializable
 {
 public:
+   /**
+    *  Emitted when the unit name changes with boost::any<std::string>
+    *  containing the new name.
+    *
+    *  @see     setUnitName()
+    */
+   SIGNAL_METHOD(Units, Renamed)
+
+   /**
+    *  Emitted when the unit type changes with
+    *  boost::any<\link ::UnitType UnitType\endlink> containing the new type.
+    *
+    *  @see     setUnitType()
+    */
+   SIGNAL_METHOD(Units, TypeChanged)
+
+   /**
+    *  Emitted when the minimum or maximum range value changes.
+    *
+    *  No value is associated with this signal.
+    *
+    *  @see     setRangeMin(), setRangeMax()
+    */
+   SIGNAL_METHOD(Units, RangeChanged)
+
+   /**
+    *  Emitted when the scale value changes with boost::any<double> containing
+    *  the new scale value.
+    *
+    *  @see     setScaleFromStandard()
+    */
+   SIGNAL_METHOD(Units, ScaleChanged)
+
    /**
     *  Get the name of the current unit.
     *
@@ -40,6 +77,9 @@ public:
     *
     *  @param   unitName
     *           The new name for the current unit.
+    *
+    *  @notify  This method notifies signalRenamed() if the given unit name is
+    *           different than the current unit name.
     *
     *  @see     Units::getUnitName
     */
@@ -57,6 +97,9 @@ public:
     *
     *  @param   myType
     *           An enumeration code indicating the type of the units.
+    *
+    *  @notify  This method notifies signalTypeChanged() if the given unit type
+    *           is different than the current unit type.
     */
    virtual void setUnitType(UnitType myType) = 0;
 
@@ -72,6 +115,9 @@ public:
     *
     *  @param   myRangeMin
     *           The minimum range of the units.
+    *
+    *  @notify  This method notifies signalRangeChanged() if the given range
+    *           minimum is different than the current range minimum.
     */
    virtual void setRangeMin(double myRangeMin) = 0;
 
@@ -87,6 +133,9 @@ public:
     *
     *  @param   myRangeMax
     *           The maximum range of the units.
+    *
+    *  @notify  This method notifies signalRangeChanged() if the given range
+    *           maximum is different than the current range maximum.
     */
    virtual void setRangeMax(double myRangeMax) = 0;
 
@@ -106,8 +155,41 @@ public:
     *
     *  @param   myScaleFromStandard
     *           The quantity scaled from the standard units.
+    *
+    *  @notify  This method notifies signalScaleChanged() if the given scale
+    *           value is different than the current scale value.
     */
    virtual void setScaleFromStandard(double myScaleFromStandard) = 0;
+
+   /**
+    *  Sets all values in this Units object to those of another Units object.
+    *
+    *  @param   pUnits
+    *           The Units object from which to set all data values in this Units
+    *           object.  This method does nothing if \c NULL is passed in.
+    *
+    *  @notify  This method notifies the following signals if the respective
+    *           values in this Units object change:
+    *           - signalRenamed()
+    *           - signalTypeChanged()
+    *           - signalRangeChanged()
+    *           - signalScaleChanged()
+    */
+   virtual void setUnits(const Units* pUnits) = 0;
+
+   /**
+    *  Compares all values in this Units object with those of another Units
+    *  object.
+    *
+    *  @param   pUnits
+    *           The Units object with which to compare values in this Units
+    *           object.  This method does nothing and returns \c false if
+    *           \c NULL is passed in.
+    *
+    *  @return  Returns \c true if all values in \em pUnits are the same as the
+    *           values in this Units object; otherwise returns \c false.
+    */
+   virtual bool compare(const Units* pUnits) const = 0;
 
 protected:
    /**

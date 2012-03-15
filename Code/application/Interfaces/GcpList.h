@@ -26,6 +26,36 @@
 class GcpPoint
 {
 public:
+   /**
+    *  Compares two GCPs.
+    *
+    *  @param   gcp
+    *           The GCP to compare to this GCP.
+    *
+    *  @return  Returns \c true if the reference and destination coordinates and
+    *           RMS error of this GCP are equal to that of \em gcp; otherwise
+    *           returns \c false.
+    */
+   bool operator==(const GcpPoint& gcp) const
+   {
+      return (mPixel == gcp.mPixel) && (mCoordinate == gcp.mCoordinate) && (mRmsError == gcp.mRmsError);
+   }
+
+   /**
+    *  Compares two GCPs.
+    *
+    *  @param   gcp
+    *           The GCP to compare to this GCP.
+    *
+    *  @return  Returns \c true if the reference and destination coordinates and
+    *           RMS error of this GCP are not equal to that of \em gcp;
+    *           otherwise returns \c false.
+    */
+   bool operator!=(const GcpPoint& gcp) const
+   {
+      return !(*this == gcp);
+   }
+
    LocationType mPixel;       /**< The reference coordinate of the GCP. */
    LocationType mCoordinate;  /**< The destination coordinate of the GCP. */
    LocationType mRmsError;    /**< The error computed during georeferencing. */

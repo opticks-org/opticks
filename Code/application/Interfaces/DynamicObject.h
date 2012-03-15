@@ -497,6 +497,24 @@ public:
    virtual bool removeAttributeByPath(const std::string& path) = 0;
 
    /**
+    *  Compares all attributes in this DynamicObject with those of another
+    *  DynamicObject.
+    *
+    *  @warning Based on the number of attributes present in the DynamicObject,
+    *           calling this method could be time intensive.
+    *
+    *  @param   pObject
+    *           The DynamicObject with which to compare attributes in this
+    *           DynamicObject.  This method does nothing and returns \c false if
+    *           \c NULL is passed in.
+    *
+    *  @return  Returns \c true if all attributes in \em pObject are present and
+    *           have the same values as the attributes in this DynamicObject;
+    *           otherwise returns \c false.
+    */
+   virtual bool compare(const DynamicObject* pObject) const = 0;
+
+   /**
     * Erases all attributes in the object.
     *
     * @notify This method will notify Subject::signalModified.

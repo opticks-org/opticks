@@ -8,8 +8,7 @@
  */
 
 #include "FileDescriptorAdapter.h"
-
-using namespace std;
+#include "ObjectResource.h"
 
 FileDescriptorAdapter::FileDescriptorAdapter()
 {}
@@ -20,13 +19,13 @@ FileDescriptorAdapter::~FileDescriptorAdapter()
 }
 
 // TypeAwareObject
-const string& FileDescriptorAdapter::getObjectType() const
+const std::string& FileDescriptorAdapter::getObjectType() const
 {
-   static string sType("FileDescriptorAdapter");
+   static std::string sType("FileDescriptorAdapter");
    return sType;
 }
 
-bool FileDescriptorAdapter::isKindOf(const string& className) const
+bool FileDescriptorAdapter::isKindOf(const std::string& className) const
 {
    if ((className == getObjectType()) || (className == "FileDescriptor"))
    {
@@ -39,11 +38,11 @@ bool FileDescriptorAdapter::isKindOf(const string& className) const
 // FileDescriptor
 FileDescriptor* FileDescriptorAdapter::copy() const
 {
-   FileDescriptorAdapter* pDescriptor = new FileDescriptorAdapter();
-   if (pDescriptor != NULL)
+   FactoryResource<FileDescriptor> pFileDescriptor;
+   if (pFileDescriptor->clone(this) == false)
    {
-      *pDescriptor = *this;
+      return NULL;
    }
 
-   return pDescriptor;
+   return pFileDescriptor.release();
 }

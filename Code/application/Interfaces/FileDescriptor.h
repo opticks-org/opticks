@@ -43,20 +43,48 @@ class Message;
  *
  * This subclass of Subject will notify upon the following conditions:
  *  - The following methods are called: setFilename(), setDatasetLocation(), 
- *    setEndian()
+ *    setEndian(), and clone().
  *  - Everything else documented in Subject.
  */
 class FileDescriptor : public Subject, public Serializable
 {
 public:
    /**
-    *  Sets the location on disk for the file data.
+    *  Emitted when the filename changes with
+    *  boost::any<\link Filename\endlink*> containing a pointer to the new
+    *  filename.
     *
-    *  This is a convenience method that calls the setFilename(const Filename&)
-    *  method.
+    *  @see     setFilename()
+    */
+   SIGNAL_METHOD(FileDescriptor, FilenameChanged)
+
+   /**
+    *  Emitted when the data set location changes with boost::any<std::string>
+    *  containing the new data set location.
+    *
+    *  @see     setDatasetLocation()
+    */
+   SIGNAL_METHOD(FileDescriptor, DatasetLocationChanged)
+
+   /**
+    *  Emitted when the endian changes with
+    *  boost::any<\link ::EndianType EndianType\endlink> containing the new
+    *  endian value.
+    *
+    *  @see     setEndian()
+    */
+   SIGNAL_METHOD(FileDescriptor, EndianChanged)
+
+   /**
+    *  Sets the location on disk for the file data.
     *
     *  @param   filename
     *           The location on disk of the file data.
+    *
+    *  @notify  This method notifies signalFilenameChanged() when the filename
+    *           is successfully changed.
+    *
+    *  @see     setFilename(const Filename&)
     */
    virtual void setFilename(const std::string& filename) = 0;
 
@@ -66,6 +94,9 @@ public:
     *  @param   filename
     *           The Filename object containing the location on disk of the file
     *           data.
+    *
+    *  @notify  This method notifies signalFilenameChanged() when the filename
+    *           is successfully changed.
     *
     *  @see     setFilename(const std::string&)
     */
@@ -91,6 +122,9 @@ public:
     *           The string representation of where the data set resides within
     *           the file on disk.
     *
+    *  @notify  This method notifies signalDatasetLocationChanged() when the
+    *           data set location is successfully changed.
+    *
     *  @see     setFilename(const std::string&)
     */
    virtual void setDatasetLocation(const std::string& datasetLocation) = 0;
@@ -114,6 +148,9 @@ public:
     *
     *  @param   endian
     *           The endian format of the data on disk.
+    *
+    *  @notify  This method notifies signalEndianChanged() when the endian value
+    *           is successfully changed.
     */
    virtual void setEndian(EndianType endian) = 0;
 
@@ -132,8 +169,33 @@ public:
     *
     *  @return  The new file descriptor containing values identical to the
     *           values in this file descriptor.
+    *
+    *  @see     clone()
     */
    virtual FileDescriptor* copy() const = 0;
+
+   /**
+    *  Sets all values in this file descriptor to those of another file
+    *  descriptor.
+    *
+    *  @param   pFileDescriptor
+    *           The file descriptor from which to set all data values in this
+    *           file descriptor.  No signal/slot attachments currently defined
+    *           in \em pFileDescriptor are set into this descriptor.  This
+    *           method does nothing and returns \c false if \c NULL is passed
+    *           in.
+    *
+    *  @return  Returns \c true if all values in this file descriptor were
+    *           successfully set to the values in the given file descriptor;
+    *           otherwise returns \c false.
+    *
+    *  @notify  This method notifies one or more signals defined in this class
+    *           or its subclasses based on data values that are actually
+    *           changed.
+    *
+    *  @see     copy()
+    */
+   virtual bool clone(const FileDescriptor* pFileDescriptor) = 0;
 
    /**
     *  Adds the current values in this file descriptor to a given message.

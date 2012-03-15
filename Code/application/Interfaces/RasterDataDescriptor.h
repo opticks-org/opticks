@@ -25,9 +25,10 @@ class Units;
  *  class, this class contains information pertinent to raster data elements.
  *
  *  This subclass of Subject will notify upon the following conditions:
- *  - The following methods are called: setDataType(), setBadValues(),
- *    setRows(), setColumns(), setBands(), setXPixelSize(), setYPixelSize(),
- *    setUnits(), and setInterleaveFormat()
+ *  - The following methods are called: setDataType(), setValidDataTypes(),
+ *    setBadValues(), setInterleaveFormat(), setRows(), setColumns(),
+ *    setBands(), setXPixelSize(), setYPixelSize(), setDisplayBand(),
+ *    setDisplayMode(), and setUnits().
  *  - All notifications documented in DataDescriptor.
  *
  *  @see        RasterElement
@@ -36,12 +37,101 @@ class RasterDataDescriptor : public DataDescriptor
 {
 public:
    /**
+    *  Emitted when the data type changes with
+    *  boost::any<\link ::EncodingType EncodingType\endlink> containing the new
+    *  data type.
+    *
+    *  @see     setDataType()
+    */
+   SIGNAL_METHOD(RasterDataDescriptor, DataTypeChanged)
+
+   /**
+    *  Emitted when the vector of valid data types changes with
+    *  boost::any<std::vector<\link ::EncodingType EncodingType\endlink> >
+    *  containing the new valid data types.
+    *
+    *  @see     setValidDataTypes()
+    */
+   SIGNAL_METHOD(RasterDataDescriptor, ValidDataTypesChanged)
+
+   /**
+    *  Emitted when the vector of bad values changes with
+    *  boost::any<std::vector<int> > containing the new bad values.
+    *
+    *  @see     setBadValues()
+    */
+   SIGNAL_METHOD(RasterDataDescriptor, BadValuesChanged)
+
+   /**
+    *  Emitted when the interleave format changes with
+    *  boost::any<\link ::InterleaveFormatType InterleaveFormatType\endlink>
+    *  containing the new interleave format.
+    *
+    *  @see     setInterleaveFormat()
+    */
+   SIGNAL_METHOD(RasterDataDescriptor, InterleaveFormatChanged)
+
+   /**
+    *  Emitted when the rows change with
+    *  boost::any<std::vector<\link DimensionDescriptor\endlink> > containing
+    *  the new rows.
+    *
+    *  @see     setRows()
+    */
+   SIGNAL_METHOD(RasterDataDescriptor, RowsChanged)
+
+   /**
+    *  Emitted when the columns change with
+    *  boost::any<std::vector<\link DimensionDescriptor\endlink> > containing
+    *  the new columns.
+    *
+    *  @see     setColumns()
+    */
+   SIGNAL_METHOD(RasterDataDescriptor, ColumnsChanged)
+
+   /**
+    *  Emitted when the bands change with
+    *  boost::any<std::vector<\link DimensionDescriptor\endlink> > containing
+    *  the new bands.
+    *
+    *  @see     setBands()
+    */
+   SIGNAL_METHOD(RasterDataDescriptor, BandsChanged)
+
+   /**
+    *  Emitted when the X or Y pixel size changes.
+    *
+    *  No value is associated with this signal.
+    *
+    *  @see     setXPixelSize(), setYPixelSize()
+    */
+   SIGNAL_METHOD(RasterDataDescriptor, PixelSizeChanged)
+
+   /**
+    *  Emitted when the band to display changes for any raster channel.
+    *
+    *  No value is associated with this signal.
+    *
+    *  @see     setDisplayBand(), RasterChannelType
+    */
+   SIGNAL_METHOD(RasterDataDescriptor, DisplayBandChanged)
+
+   /**
+    *  Emitted when the initial display mode changes with
+    *  boost::any<\link ::DisplayMode DisplayMode\endlink> containing the new
+    *  display mode.
+    *
+    *  @see     setDisplayMode()
+    */
+   SIGNAL_METHOD(RasterDataDescriptor, DisplayModeChanged)
+
+   /**
     *  Sets the data type of the values in the data set.
     *
     *  @param   dataType
     *           The data type of the values in the data set.
     *
-    *  @notify  This method notifies Subject::signalModified if the given
+    *  @notify  This method notifies signalDataTypeChanged() if the given
     *           data type is different than the current data type.
     */
    virtual void setDataType(EncodingType dataType) = 0;
@@ -60,7 +150,7 @@ public:
     *  @param   validDataTypes
     *           The valid data types for the data set.
     *
-    *  @notify  This method notifies Subject::signalModified if the given
+    *  @notify  This method notifies signalValidDataTypesChanged() if the given
     *           valid data types are different than the current valid data types.
     *
     *  @see     setDataType()
@@ -102,7 +192,7 @@ public:
     *  @param   badValues
     *           The bad values that should be ignored.
     *
-    *  @notify  This method notifies Subject::signalModified if the given
+    *  @notify  This method notifies signalBadValuesChanged() if the given
     *           bad values are different than the current bad values.
     *
     *  @see     Statistics::setBadValues()
@@ -122,6 +212,10 @@ public:
     *  @param   format
     *           The interleave format in which the values in the data set are
     *           stored.
+    *
+    *  @notify  This method notifies signalInterleaveFormatChanged() if the
+    *           given interleave format is different than the current interleave
+    *           format.
     */
    virtual void setInterleaveFormat(InterleaveFormatType format) = 0;
 
@@ -158,8 +252,8 @@ public:
     *           instance for each row of the data set that is available for
     *           processing.
     *
-    *  @notify  This method notifies Subject::signalModified if the given
-    *           rows are different than the current rows.
+    *  @notify  This method notifies signalRowsChanged() if the given rows are
+    *           different than the current rows.
     *
     *  @see     DimensionDescriptor
     */
@@ -257,8 +351,8 @@ public:
     *           instance for each column of the data set that is available for
     *           processing.
     *
-    *  @notify  This method notifies Subject::signalModified if the given
-    *           columns are different than the current columns.
+    *  @notify  This method notifies signalColumnsChanged() if the given columns
+    *           are different than the current columns.
     *
     *  @see     DimensionDescriptor
     */
@@ -360,8 +454,8 @@ public:
     *           instance for each band of the data set that is available for
     *           processing.
     *
-    *  @notify  This method notifies Subject::signalModified if the given
-    *           bands are different than the current bands.
+    *  @notify  This method notifies signalBandsChanged() if the given bands are
+    *           different than the current bands.
     *
     *  @see     DimensionDescriptor
     */
@@ -444,7 +538,7 @@ public:
     *           The pixel size for each column in the data set.  If this value
     *           is negative or zero, this method does nothing.
     *
-    *  @notify  This method notifies Subject::signalModified if the given
+    *  @notify  This method notifies signalPixelSizeChanged() if the given
     *           column pixel size is different than the current column pixel
     *           size.
     */
@@ -477,7 +571,7 @@ public:
     *           The pixel size for each row in the data set.  If this value
     *           is negative or zero, this method does nothing.
     *
-    *  @notify  This method notifies Subject::signalModified if the given
+    *  @notify  This method notifies signalPixelSizeChanged() if the given
     *           row pixel size is different than the current row pixel size.
     */
    virtual void setYPixelSize(double pixelSize) = 0;
@@ -529,6 +623,10 @@ public:
     *  @param   band
     *           The band object to display in the given color.
     *
+    *  @notify  This method notifies signalDisplayBandChanged() if the given
+    *           display band is different than the current display band for the
+    *           given raster channel.
+    *
     *  @see     setDisplayMode()
     */
    virtual void setDisplayBand(RasterChannelType eColor, DimensionDescriptor band) = 0;
@@ -550,6 +648,9 @@ public:
     *
     *  @param   displayMode
     *           The initial display mode.
+    *
+    *  @notify  This method notifies signalDisplayModeChanged() if the given
+    *           initial display mode is different than the current display mode.
     *
     *  @see     setDisplayBand()
     */

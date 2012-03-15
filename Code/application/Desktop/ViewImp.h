@@ -231,6 +231,7 @@ public slots:
 signals:
    void renamed(const QString& strViewName);
    void classificationChanged(const Classification* pClassification);
+   void classificationTextChanged(const QString& classificationText);
    void classificationFontChanged(const QFont& classificationFont);
    void classificationColorChanged(const QColor& clrClassification);
    void classificationPositionChanged(PositionType newPosition);
@@ -251,6 +252,9 @@ signals:
 
 protected:
    ViewImp& operator=(const ViewImp& view);
+
+   void notifyClassificationChanged(Subject& subject, const std::string& signal, const boost::any& data);
+
    bool event(QEvent* pEvent);
    bool eventFilter(QObject* pObject, QEvent* pEvent);
    void mousePressEvent(QMouseEvent* pEvent);
@@ -377,6 +381,7 @@ private:
 
    QColor mBackgroundColor;
    ClassificationAdapter mClassification;
+   std::string mClassificationText;
    QFont mClassificationFont;
    QColor mClassificationColor;
    PositionType mClassificationPosition;

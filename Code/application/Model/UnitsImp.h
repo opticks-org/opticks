@@ -10,15 +10,19 @@
 #ifndef UNITSIMP_H
 #define UNITSIMP_H
 
-#include "Units.h"
+#include "SerializableImp.h"
+#include "SubjectImp.h"
+#include "TypesFile.h"
 
 #include <string>
 
-class UnitsImp : public Units
+class Units;
+
+class UnitsImp : public SubjectImp
 {
 public:
    UnitsImp();
-   ~UnitsImp();
+   virtual ~UnitsImp();
 
    UnitType getUnitType() const;
    void setUnitType(UnitType myType);
@@ -31,15 +35,13 @@ public:
    double getScaleFromStandard() const;
    void setScaleFromStandard(double myScaleFromStandard);
 
-   UnitsImp& operator =(const UnitsImp& units);
+   void setUnits(const Units* pUnits);
+   bool compare(const Units* pUnits) const;
 
    bool toXml(XMLWriter* pXml) const;
    bool fromXml(DOMNode* pDocument, unsigned int version);
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
-
-   bool operator==(const UnitsImp& rhs) const;
-   bool operator!=(const UnitsImp& rhs) const;
 
 private:
    UnitType mUnitType;
@@ -48,5 +50,61 @@ private:
    double mRangeMax;
    double mScaleFromStandard;
 };
+
+#define UNITSADAPTEREXTENSION_CLASSES \
+   SUBJECTADAPTEREXTENSION_CLASSES \
+   SERIALIZABLEADAPTEREXTENSION_CLASSES
+
+#define UNITSADAPTER_METHODS(impClass) \
+   SUBJECTADAPTER_METHODS(impClass) \
+   SERIALIZABLEADAPTER_METHODS(impClass) \
+   const std::string& getUnitName() const \
+   { \
+      return impClass::getUnitName(); \
+   } \
+   void setUnitName(const std::string& unitName) \
+   { \
+      impClass::setUnitName(unitName); \
+   } \
+   UnitType getUnitType() const \
+   { \
+      return impClass::getUnitType(); \
+   } \
+   void setUnitType(UnitType myType) \
+   { \
+      impClass::setUnitType(myType); \
+   } \
+   double getRangeMin() const \
+   { \
+      return impClass::getRangeMin(); \
+   } \
+   void setRangeMin(double myRangeMin) \
+   { \
+      impClass::setRangeMin(myRangeMin); \
+   } \
+   double getRangeMax() const \
+   { \
+      return impClass::getRangeMax(); \
+   } \
+   void setRangeMax(double myRangeMax) \
+   { \
+      impClass::setRangeMax(myRangeMax); \
+   } \
+   double getScaleFromStandard() const \
+   { \
+      return impClass::getScaleFromStandard(); \
+   } \
+   void setScaleFromStandard(double myScaleFromStandard) \
+   { \
+      impClass::setScaleFromStandard(myScaleFromStandard); \
+   } \
+   void setUnits(const Units* pUnits) \
+   { \
+      impClass::setUnits(pUnits); \
+   } \
+   bool compare(const Units* pUnits) const \
+   { \
+      return impClass::compare(pUnits); \
+   }
 
 #endif

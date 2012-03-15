@@ -97,14 +97,11 @@ ProductViewImp::ProductViewImp(const string& id, const string& viewName, QGLCont
    {
       pBottomText->setTextAlignment(Qt::AlignHCenter);
    }
-   setClassificationPosition(ProductView::getSettingClassificationMarkingPositions());
-   VERIFYNR(connect(this, SIGNAL(classificationPositionChanged(PositionType)), this,
-      SLOT(updateClassificationLocation())));
-   VERIFYNR(connect(this, SIGNAL(classificationChanged(const Classification*)), this,
-      SLOT(updateClassificationMarks(const Classification*))));
-   updateClassificationMarks(getClassification()); // Sets the text in the classification layer
+
    setClassificationFont(QApplication::font());
    setClassificationColor(Qt::black);
+   setClassificationPosition(ProductView::getSettingClassificationMarkingPositions());
+   updateClassificationMarks(getClassificationText());   // Sets the text in the classification layer
 
    PerspectiveViewImp::enableClassification(false);
    enableReleaseInfo(false);
@@ -126,6 +123,10 @@ ProductViewImp::ProductViewImp(const string& id, const string& viewName, QGLCont
    addMouseMode(new MouseModeImp("ZoomBoxMode", QCursor(QPixmap(":/icons/ZoomRectCursor", 0, 0))));
 
    // Connections
+   VERIFYNR(connect(this, SIGNAL(classificationPositionChanged(PositionType)), this,
+      SLOT(updateClassificationLocation())));
+   VERIFYNR(connect(this, SIGNAL(classificationTextChanged(const QString&)), this,
+      SLOT(updateClassificationMarks(const QString&))));
    VERIFYNR(connect(this, SIGNAL(mouseModeChanged(const MouseMode*)), this, SLOT(updateMouseCursor(const MouseMode*))));
    VERIFYNR(connect(mpLayoutLayer, SIGNAL(extentsModified()), this, SLOT(updateExtents())));
    connectLayers();
@@ -639,18 +640,15 @@ bool ProductViewImp::enableInset(bool bEnable)
    return false;
 }
 
-void ProductViewImp::updateClassificationMarks(const Classification* pClassification)
+void ProductViewImp::updateClassificationMarks(const QString& classificationText)
 {
    QString strTopText;
    QString strBottomText;
 
-   if ((mProductClassificationEnabled) && (pClassification != NULL))
+   if (mProductClassificationEnabled)
    {
-      string newClassification;
-      pClassification->getClassificationText(newClassification);
-
-      strTopText = QString::fromStdString(newClassification);
-      strBottomText = QString::fromStdString(newClassification);
+      strTopText = classificationText;
+      strBottomText = classificationText;
    }
 
    Service<ConfigurationSettings> pConfigSettings;
@@ -1871,5 +1869,5 @@ void ProductViewImp::updateExtents()
 void ProductViewImp::enableClassification(bool bEnable)
 {
    mProductClassificationEnabled = bEnable;
-   updateClassificationMarks(getClassification());
+   updateClassificationMarks(getClassificationText());
 }

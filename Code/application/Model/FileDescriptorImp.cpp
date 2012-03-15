@@ -8,6 +8,7 @@
  */
 
 #include "Endian.h"
+#include "FileDescriptor.h"
 #include "FileDescriptorImp.h"
 #include "Filename.h"
 #include "ObjectResource.h"
@@ -19,44 +20,27 @@ using namespace std;
 
 FileDescriptorImp::FileDescriptorImp() :
    mEndian(Endian::getSystemEndian())
-{
-}
+{}
 
 FileDescriptorImp::~FileDescriptorImp()
-{
-}
-
-FileDescriptorImp& FileDescriptorImp::operator =(const FileDescriptorImp& descriptor)
-{
-   if (this != &descriptor)
-   {
-      mFilename = descriptor.mFilename;
-      mDatasetLocation = descriptor.mDatasetLocation;
-      mEndian = descriptor.mEndian;
-      notify(SIGNAL_NAME(Subject, Modified));
-   }
-
-   return *this;
-}
+{}
 
 void FileDescriptorImp::setFilename(const string& filename)
 {
-   if (filename == mFilename.getFullPathAndName())
+   if (filename != mFilename.getFullPathAndName())
    {
-      return;
+      mFilename.setFullPathAndName(filename);
+      notify(SIGNAL_NAME(FileDescriptor, FilenameChanged), boost::any(&mFilename));
    }
-   notify(SIGNAL_NAME(Subject, Modified));
-   mFilename.setFullPathAndName(filename);
 }
 
 void FileDescriptorImp::setFilename(const Filename& filename)
 {
-   if (filename == mFilename)
+   if (filename != mFilename)
    {
-      return;
+      mFilename = filename;
+      notify(SIGNAL_NAME(FileDescriptor, FilenameChanged), boost::any(&mFilename));
    }
-   mFilename = filename;
-   notify(SIGNAL_NAME(Subject, Modified));
 }
 
 const Filename& FileDescriptorImp::getFilename() const
@@ -66,12 +50,11 @@ const Filename& FileDescriptorImp::getFilename() const
 
 void FileDescriptorImp::setDatasetLocation(const string& datasetLocation)
 {
-   if (datasetLocation == mDatasetLocation)
+   if (datasetLocation != mDatasetLocation)
    {
-      return;
+      mDatasetLocation = datasetLocation;
+      notify(SIGNAL_NAME(FileDescriptor, DatasetLocationChanged), boost::any(mDatasetLocation));
    }
-   mDatasetLocation = datasetLocation;
-   notify(SIGNAL_NAME(Subject, Modified));
 }
 
 const string& FileDescriptorImp::getDatasetLocation() const
@@ -81,17 +64,33 @@ const string& FileDescriptorImp::getDatasetLocation() const
 
 void FileDescriptorImp::setEndian(EndianType endian)
 {
-   if (endian == mEndian)
+   if (endian != mEndian)
    {
-      return;
+      mEndian = endian;
+      notify(SIGNAL_NAME(FileDescriptor, EndianChanged), boost::any(mEndian));
    }
-   mEndian = endian;
-   notify(SIGNAL_NAME(Subject, Modified));
 }
 
 EndianType FileDescriptorImp::getEndian() const
 {
    return mEndian;
+}
+
+bool FileDescriptorImp::clone(const FileDescriptor* pFileDescriptor)
+{
+   if (pFileDescriptor == NULL)
+   {
+      return false;
+   }
+
+   if (dynamic_cast<const FileDescriptorImp*>(pFileDescriptor) != this)
+   {
+      setFilename(pFileDescriptor->getFilename());
+      setDatasetLocation(pFileDescriptor->getDatasetLocation());
+      setEndian(pFileDescriptor->getEndian());
+   }
+
+   return true;
 }
 
 void FileDescriptorImp::addToMessageLog(Message* pMessage) const

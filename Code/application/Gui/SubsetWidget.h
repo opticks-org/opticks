@@ -100,16 +100,20 @@ private slots:
 //private QDialog sub-class to allow user to perform custom band selections
 class BandCustomSelectionDialog : public QDialog
 {
-   Q_OBJECT 
+   Q_OBJECT
 
 public:
    BandCustomSelectionDialog(QWidget* pParent, QStringListModel* pBandList, QString badBandsDir);
+   virtual ~BandCustomSelectionDialog();
 
-   bool isSubsetSelected();
-   QString getBadBandFile();
-   int getStartBandIndex();
-   int getStopBandIndex();
-   int getSkipFactor();
+   bool isSubsetSelected() const;
+   QString getBadBandFile() const;
+   void setStartBandIndex(int index);
+   int getStartBandIndex() const;
+   void setStopBandIndex(int index);
+   int getStopBandIndex() const;
+   void setSkipFactor(int skipFactor);
+   int getSkipFactor() const;
 
 private slots:
    void selectBadBandFile();
@@ -118,6 +122,7 @@ private slots:
 private:
    BandCustomSelectionDialog(const BandCustomSelectionDialog& rhs);
    BandCustomSelectionDialog& operator=(const BandCustomSelectionDialog& rhs);
+
    QComboBox* mpStartBandCombo;
    QComboBox* mpEndBandCombo;
    QSpinBox* mpBandSkipSpin;

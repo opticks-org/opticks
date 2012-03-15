@@ -17,8 +17,7 @@
 XERCES_CPP_NAMESPACE_USE
 using namespace std;
 
-RasterDataDescriptorImp::RasterDataDescriptorImp(const string& name, const string& type,
-   DataElement* pParent) :
+RasterDataDescriptorImp::RasterDataDescriptorImp(const string& name, const string& type, DataElement* pParent) :
    DataDescriptorImp(name, type, pParent),
    mDataType(INT1UBYTE),
    mValidDataTypes(StringUtilities::getAllEnumValues<EncodingType>()),
@@ -29,6 +28,8 @@ RasterDataDescriptorImp::RasterDataDescriptorImp(const string& name, const strin
    mYPixelSize(1.0),
    mDisplayMode(GRAYSCALE_MODE)
 {
+   // Attach to the units object to notify when it changes
+   VERIFYNR(mUnits.attach(SIGNAL_NAME(Subject, Modified), Slot(this, &RasterDataDescriptorImp::notifyUnitsModified)));
 }
 
 RasterDataDescriptorImp::RasterDataDescriptorImp(const string& name, const string& type, const vector<string>& parent) :
@@ -42,10 +43,19 @@ RasterDataDescriptorImp::RasterDataDescriptorImp(const string& name, const strin
    mYPixelSize(1.0),
    mDisplayMode(GRAYSCALE_MODE)
 {
+   // Attach to the units object to notify when it changes
+   VERIFYNR(mUnits.attach(SIGNAL_NAME(Subject, Modified), Slot(this, &RasterDataDescriptorImp::notifyUnitsModified)));
 }
 
 RasterDataDescriptorImp::~RasterDataDescriptorImp()
+{}
+
+void RasterDataDescriptorImp::notifyUnitsModified(Subject &subject, const string &signal, const boost::any &data)
 {
+   if (&subject == &mUnits)
+   {
+      notify(SIGNAL_NAME(Subject, Modified));
+   }
 }
 
 void RasterDataDescriptorImp::setDataType(EncodingType dataType)
@@ -53,7 +63,7 @@ void RasterDataDescriptorImp::setDataType(EncodingType dataType)
    if (dataType != mDataType)
    {
       mDataType = dataType;
-      notify(SIGNAL_NAME(Subject, Modified));
+      notify(SIGNAL_NAME(RasterDataDescriptor, DataTypeChanged), boost::any(mDataType));
    }
 }
 
@@ -67,7 +77,7 @@ void RasterDataDescriptorImp::setValidDataTypes(const vector<EncodingType>& vali
    if (validDataTypes != mValidDataTypes)
    {
       mValidDataTypes = validDataTypes;
-      notify(SIGNAL_NAME(Subject, Modified));
+      notify(SIGNAL_NAME(RasterDataDescriptor, ValidDataTypesChanged), boost::any(mValidDataTypes));
    }
 }
 
@@ -81,7 +91,7 @@ void RasterDataDescriptorImp::setInterleaveFormat(InterleaveFormatType format)
    if (format != mInterleave)
    {
       mInterleave = format;
-      notify(SIGNAL_NAME(Subject, Modified));
+      notify(SIGNAL_NAME(RasterDataDescriptor, InterleaveFormatChanged), boost::any(mInterleave));
    }
 }
 
@@ -100,7 +110,7 @@ void RasterDataDescriptorImp::setBadValues(const vector<int>& badValues)
    if (badValues != mBadValues)
    {
       mBadValues = badValues;
-      notify(SIGNAL_NAME(Subject, Modified));
+      notify(SIGNAL_NAME(RasterDataDescriptor, BadValuesChanged), boost::any(mBadValues));
    }
 }
 
@@ -152,7 +162,7 @@ void RasterDataDescriptorImp::setRows(const vector<DimensionDescriptor>& rows)
       }
       mRows = rows;
       mRowSkipFactor = skipFactor - 1;
-      notify(SIGNAL_NAME(Subject, Modified));
+      notify(SIGNAL_NAME(RasterDataDescriptor, RowsChanged), boost::any(mRows));
    }
 }
 
@@ -264,7 +274,7 @@ void RasterDataDescriptorImp::setColumns(const vector<DimensionDescriptor>& colu
       }
       mColumns = columns;
       mColumnSkipFactor = skipFactor - 1;
-      notify(SIGNAL_NAME(Subject, Modified));
+      notify(SIGNAL_NAME(RasterDataDescriptor, ColumnsChanged), boost::any(mColumns));
    }
 }
 
@@ -366,7 +376,7 @@ void RasterDataDescriptorImp::setBands(const vector<DimensionDescriptor>& bands)
          }
       }
       mBands = bands;
-      notify(SIGNAL_NAME(Subject, Modified));
+      notify(SIGNAL_NAME(RasterDataDescriptor, BandsChanged), boost::any(mBands));
    }
 }
 
@@ -440,7 +450,7 @@ void RasterDataDescriptorImp::setXPixelSize(double pixelSize)
    if (pixelSize != mXPixelSize)
    {
       mXPixelSize = pixelSize;
-      notify(SIGNAL_NAME(Subject, Modified));
+      notify(SIGNAL_NAME(RasterDataDescriptor, PixelSizeChanged));
    }
 }
 
@@ -459,7 +469,7 @@ void RasterDataDescriptorImp::setYPixelSize(double pixelSize)
    if (pixelSize != mYPixelSize)
    {
       mYPixelSize = pixelSize;
-      notify(SIGNAL_NAME(Subject, Modified));
+      notify(SIGNAL_NAME(RasterDataDescriptor, PixelSizeChanged));
    }
 }
 
@@ -468,21 +478,21 @@ double RasterDataDescriptorImp::getYPixelSize() const
    return mYPixelSize;
 }
 
-void RasterDataDescriptorImp::setUnits(const UnitsImp* pUnits)
+void RasterDataDescriptorImp::setUnits(const Units* pUnits)
 {
-   if ((pUnits != NULL) && (pUnits != &mUnits))
+   if ((pUnits != NULL) && (dynamic_cast<const UnitsAdapter*>(pUnits) != &mUnits))
    {
-      mUnits = *pUnits;
-      notify(SIGNAL_NAME(Subject, Modified));
+      mUnits.setUnits(pUnits);   // Any changes to the units values will automatically notify
+                                 // Subject::Modified from within notifyUnitsModified()
    }
 }
 
-UnitsImp* RasterDataDescriptorImp::getUnits()
+Units* RasterDataDescriptorImp::getUnits()
 {
    return &mUnits;
 }
 
-const UnitsImp* RasterDataDescriptorImp::getUnits() const
+const Units* RasterDataDescriptorImp::getUnits() const
 {
    return &mUnits;
 }
@@ -495,7 +505,7 @@ void RasterDataDescriptorImp::setDisplayBand(RasterChannelType eColor, Dimension
          if (band != mGrayBand)
          {
             mGrayBand = band;
-            notify(SIGNAL_NAME(Subject, Modified));
+            notify(SIGNAL_NAME(RasterDataDescriptor, DisplayBandChanged));
          }
          break;
 
@@ -503,7 +513,7 @@ void RasterDataDescriptorImp::setDisplayBand(RasterChannelType eColor, Dimension
          if (band != mRedBand)
          {
             mRedBand = band;
-            notify(SIGNAL_NAME(Subject, Modified));
+            notify(SIGNAL_NAME(RasterDataDescriptor, DisplayBandChanged));
          }
          break;
 
@@ -511,7 +521,7 @@ void RasterDataDescriptorImp::setDisplayBand(RasterChannelType eColor, Dimension
          if (band != mGreenBand)
          {
             mGreenBand = band;
-            notify(SIGNAL_NAME(Subject, Modified));
+            notify(SIGNAL_NAME(RasterDataDescriptor, DisplayBandChanged));
          }
          break;
 
@@ -519,7 +529,7 @@ void RasterDataDescriptorImp::setDisplayBand(RasterChannelType eColor, Dimension
          if (band != mBlueBand)
          {
             mBlueBand = band;
-            notify(SIGNAL_NAME(Subject, Modified));
+            notify(SIGNAL_NAME(RasterDataDescriptor, DisplayBandChanged));
          }
          break;
 
@@ -557,7 +567,7 @@ void RasterDataDescriptorImp::setDisplayMode(DisplayMode displayMode)
    if (displayMode != mDisplayMode)
    {
       mDisplayMode = displayMode;
-      notify(SIGNAL_NAME(Subject, Modified));
+      notify(SIGNAL_NAME(RasterDataDescriptor, DisplayModeChanged), boost::any(mDisplayMode));
    }
 }
 
@@ -614,6 +624,36 @@ DataDescriptor* RasterDataDescriptorImp::copy(const string& name, const vector<s
    }
 
    return pDescriptor;
+}
+
+bool RasterDataDescriptorImp::clone(const DataDescriptor* pDescriptor)
+{
+   const RasterDataDescriptorImp* pRasterDescriptor = dynamic_cast<const RasterDataDescriptorImp*>(pDescriptor);
+   if ((pRasterDescriptor == NULL) || (DataDescriptorImp::clone(pDescriptor) == false))
+   {
+      return false;
+   }
+
+   if (pRasterDescriptor != this)
+   {
+      setDataType(pRasterDescriptor->getDataType());
+      setValidDataTypes(pRasterDescriptor->getValidDataTypes());
+      setInterleaveFormat(pRasterDescriptor->getInterleaveFormat());
+      setBadValues(pRasterDescriptor->getBadValues());
+      setRows(pRasterDescriptor->getRows());
+      setColumns(pRasterDescriptor->getColumns());
+      setBands(pRasterDescriptor->getBands());
+      setXPixelSize(pRasterDescriptor->getXPixelSize());
+      setYPixelSize(pRasterDescriptor->getYPixelSize());
+      setUnits(pRasterDescriptor->getUnits());
+      setDisplayBand(GRAY, pRasterDescriptor->getDisplayBand(GRAY));
+      setDisplayBand(RED, pRasterDescriptor->getDisplayBand(RED));
+      setDisplayBand(GREEN, pRasterDescriptor->getDisplayBand(GREEN));
+      setDisplayBand(BLUE, pRasterDescriptor->getDisplayBand(BLUE));
+      setDisplayMode(pRasterDescriptor->getDisplayMode());
+   }
+
+   return true;
 }
 
 void RasterDataDescriptorImp::addToMessageLog(Message* pMessage) const

@@ -8,8 +8,7 @@
  */
 
 #include "SignatureFileDescriptorAdapter.h"
-
-using namespace std;
+#include "ObjectResource.h"
 
 SignatureFileDescriptorAdapter::SignatureFileDescriptorAdapter()
 {}
@@ -20,13 +19,13 @@ SignatureFileDescriptorAdapter::~SignatureFileDescriptorAdapter()
 }
 
 // TypeAwareObject
-const string& SignatureFileDescriptorAdapter::getObjectType() const
+const std::string& SignatureFileDescriptorAdapter::getObjectType() const
 {
-   static string sType("SignatureFileDescriptorAdapter");
+   static std::string sType("SignatureFileDescriptorAdapter");
    return sType;
 }
 
-bool SignatureFileDescriptorAdapter::isKindOf(const string& className) const
+bool SignatureFileDescriptorAdapter::isKindOf(const std::string& className) const
 {
    if ((className == getObjectType()) || (className == "SignatureFileDescriptor"))
    {
@@ -39,11 +38,11 @@ bool SignatureFileDescriptorAdapter::isKindOf(const string& className) const
 // FileDescriptor
 FileDescriptor* SignatureFileDescriptorAdapter::copy() const
 {
-   SignatureFileDescriptorAdapter* pDescriptor = new SignatureFileDescriptorAdapter();
-   if (pDescriptor != NULL)
+   FactoryResource<SignatureFileDescriptor> pFileDescriptor;
+   if (pFileDescriptor->clone(this) == false)
    {
-      *pDescriptor = *this;
+      return NULL;
    }
 
-   return pDescriptor;
+   return pFileDescriptor.release();
 }

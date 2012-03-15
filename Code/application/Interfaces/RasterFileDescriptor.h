@@ -40,11 +40,133 @@ class RasterFileDescriptor : public FileDescriptor
 {
 public:
    /**
+    *  Emitted when the rows change with
+    *  boost::any<std::vector<\link DimensionDescriptor\endlink> > containing
+    *  the new rows.
+    *
+    *  @see     setRows()
+    */
+   SIGNAL_METHOD(RasterFileDescriptor, RowsChanged)
+
+   /**
+    *  Emitted when the columns change with
+    *  boost::any<std::vector<\link DimensionDescriptor\endlink> > containing
+    *  the new columns.
+    *
+    *  @see     setColumns()
+    */
+   SIGNAL_METHOD(RasterFileDescriptor, ColumnsChanged)
+
+   /**
+    *  Emitted when the bands change with
+    *  boost::any<std::vector<\link DimensionDescriptor\endlink> > containing
+    *  the new bands.
+    *
+    *  @see     setBands()
+    */
+   SIGNAL_METHOD(RasterFileDescriptor, BandsChanged)
+
+   /**
+    *  Emitted when the number of bits per element changes with
+    *  boost::any<unsigned int> containing the new number of bits per element.
+    *
+    *  @see     setBitsPerElement()
+    */
+   SIGNAL_METHOD(RasterFileDescriptor, BitsPerElementChanged)
+
+   /**
+    *  Emitted when the number of header bytes changes with
+    *  boost::any<unsigned int> containing the new number of header bytes.
+    *
+    *  @see     setHeaderBytes()
+    */
+   SIGNAL_METHOD(RasterFileDescriptor, HeaderBytesChanged)
+
+   /**
+    *  Emitted when the number of trailer bytes changes with
+    *  boost::any<unsigned int> containing the new number of trailer bytes.
+    *
+    *  @see     setTrailerBytes()
+    */
+   SIGNAL_METHOD(RasterFileDescriptor, TrailerBytesChanged)
+
+   /**
+    *  Emitted when the number of preline bytes changes with
+    *  boost::any<unsigned int> containing the new number of preline bytes.
+    *
+    *  @see     setPrelineBytes()
+    */
+   SIGNAL_METHOD(RasterFileDescriptor, PrelineBytesChanged)
+
+   /**
+    *  Emitted when the number of postline bytes changes with
+    *  boost::any<unsigned int> containing the new number of postline bytes.
+    *
+    *  @see     setPostlineBytes()
+    */
+   SIGNAL_METHOD(RasterFileDescriptor, PostlineBytesChanged)
+
+   /**
+    *  Emitted when the number of preband bytes changes with
+    *  boost::any<unsigned int> containing the new number of preband bytes.
+    *
+    *  @see     setPrebandBytes()
+    */
+   SIGNAL_METHOD(RasterFileDescriptor, PrebandBytesChanged)
+
+   /**
+    *  Emitted when the number of postband bytes changes with
+    *  boost::any<unsigned int> containing the new number of postband bytes.
+    *
+    *  @see     setPostbandBytes()
+    */
+   SIGNAL_METHOD(RasterFileDescriptor, PostbandBytesChanged)
+
+   /**
+    *  Emitted when the interleave format changes with
+    *  boost::any<\link ::InterleaveFormatType InterleaveFormatType\endlink>
+    *  containing the new interleave format.
+    *
+    *  @see     setInterleaveFormat()
+    */
+   SIGNAL_METHOD(RasterFileDescriptor, InterleaveFormatChanged)
+
+   /**
+    *  Emitted when the band files change with
+    *  boost::any<std::vector<const \link Filename\endlink*> > containing the
+    *  new band files.
+    *
+    *  @see     setBandFiles()
+    */
+   SIGNAL_METHOD(RasterFileDescriptor, BandFilesChanged)
+
+   /**
+    *  Emitted when the X or Y pixel size changes.
+    *
+    *  No value is associated with this signal.
+    *
+    *  @see     setXPixelSize(), setYPixelSize()
+    */
+   SIGNAL_METHOD(RasterFileDescriptor, PixelSizeChanged)
+
+   /**
+    *  Emitted when the GCPs change with
+    *  boost::any<std::list<\link GcpPoint\endlink> > containing the new GCPs.
+    *
+    *  @see     setGcps()
+    */
+   SIGNAL_METHOD(RasterFileDescriptor, GcpsChanged)
+
+   /**
     *  Sets the number of file header bytes.
     *
     *  @param   bytes
     *           The number of bytes allocated for header information in the
     *           data set file.
+    *
+    *  @notify  This method notifies signalHeaderBytesChanged() if the given
+    *           number of header bytes is different than the current number of
+    *           header bytes.
     */
    virtual void setHeaderBytes(unsigned int bytes) = 0;
 
@@ -62,6 +184,10 @@ public:
     *  @param   bytes
     *           The number of bytes allocated for trailer information in the
     *           data set file.
+    *
+    *  @notify  This method notifies signalTrailerBytesChanged() if the given
+    *           number of trailer bytes is different than the current number of
+    *           trailer bytes.
     */
    virtual void setTrailerBytes(unsigned int bytes) = 0;
 
@@ -83,6 +209,10 @@ public:
     *  @param   bytes
     *           The number of bytes allocated preceding each line of data
     *           values in the data set file.
+    *
+    *  @notify  This method notifies signalPrelineBytesChanged() if the given
+    *           number of preline bytes is different than the current number of
+    *           preline bytes.
     */
    virtual void setPrelineBytes(unsigned int bytes) = 0;
 
@@ -108,6 +238,10 @@ public:
     *  @param   bytes
     *           The number of bytes allocated following each line of data
     *           values in the data set file.
+    *
+    *  @notify  This method notifies signalPostlineBytesChanged() if the given
+    *           number of postline bytes is different than the current number of
+    *           postline bytes.
     */
    virtual void setPostlineBytes(unsigned int bytes) = 0;
 
@@ -134,6 +268,10 @@ public:
     *  @param   bytes
     *           The number of bytes allocated preceding each band of data
     *           values in the data set file.
+    *
+    *  @notify  This method notifies signalPrebandBytesChanged() if the given
+    *           number of preband bytes is different than the current number of
+    *           preband bytes.
     *
     *  @see     InterleaveFormatType
     */
@@ -166,6 +304,10 @@ public:
     *           The number of bytes allocated following each band of data
     *           values in the data set file.
     *
+    *  @notify  This method notifies signalPostbandBytesChanged() if the given
+    *           number of postband bytes is different than the current number of
+    *           postband bytes.
+    *
     *  @see     InterleaveFormatType
     */
    virtual void setPostbandBytes(unsigned int bytes) = 0;
@@ -191,6 +333,10 @@ public:
     *  @param   format
     *           The interleave format in which the values in the data set are
     *           stored in the file on disk.
+    *
+    *  @notify  This method notifies signalInterleaveFormatChanged() if the
+    *           given interleave format is different than the current interleave
+    *           format.
     */
    virtual void setInterleaveFormat(InterleaveFormatType format) = 0;
 
@@ -215,6 +361,9 @@ public:
     *           The filenames for each band of data of a BSQ multiple-file data
     *           set.
     *
+    *  @notify  This method notifies signalBandFilesChanged() if the
+    *           given band files are different than the current band files.
+    *
     *  @see     InterleaveFormatType
     */
    virtual void setBandFiles(const std::vector<std::string>& bandFiles) = 0;
@@ -228,6 +377,9 @@ public:
     *  @param   bandFiles
     *           The filenames for each band of data of a BSQ multiple-file data
     *           set.
+    *
+    *  @notify  This method notifies signalBandFilesChanged() if the
+    *           given band files are different than the current band files.
     *
     *  @see     InterleaveFormatType
     */
@@ -251,6 +403,10 @@ public:
     *
     *  @param   numBits
     *           The number of bits per element.
+    *
+    *  @notify  This method notifies signalBitsPerElementChanged() if the given
+    *           number of bits per element is different than the current number
+    *           of bits per element.
     */
    virtual void setBitsPerElement(unsigned int numBits) = 0;
 
@@ -271,6 +427,9 @@ public:
     *  @param   rows
     *           A vector of DimensionDescriptors containing one
     *           instance for each row of data in the file on disk.
+    *
+    *  @notify  This method notifies signalRowsChanged() if the given rows are
+    *           different than the current rows.
     *
     *  @see     DimensionDescriptor
     */
@@ -339,6 +498,9 @@ public:
     *  @param   columns
     *           A vector of DimensionDescriptors containing one
     *           instance for each column of data in the file on disk.
+    *
+    *  @notify  This method notifies signalColumnsChanged() if the given columns
+    *           are different than the current columns.
     *
     *  @see     DimensionDescriptor
     */
@@ -411,6 +573,9 @@ public:
     *           A vector of DimensionDescriptors containing one
     *           instance for each band of data in the file on disk.
     *
+    *  @notify  This method notifies signalBandsChanged() if the given bands
+    *           are different than the current bands.
+    *
     *  @see     DimensionDescriptor
     */
    virtual void setBands(const std::vector<DimensionDescriptor>& bands) = 0;
@@ -480,6 +645,10 @@ public:
     *
     *  @param   pixelSize
     *           The pixel size for each column in the data set.
+    *
+    *  @notify  This method notifies signalPixelSizeChanged() if the given
+    *           column pixel size is different than the current column pixel
+    *           size.
     */
    virtual void setXPixelSize(double pixelSize) = 0;
 
@@ -503,6 +672,9 @@ public:
     *
     *  @param   pixelSize
     *           The pixel size for each row in the data set.
+    *
+    *  @notify  This method notifies signalPixelSizeChanged() if the given
+    *           row pixel size is different than the current row pixel size.
     */
    virtual void setYPixelSize(double pixelSize) = 0;
 
@@ -520,6 +692,9 @@ public:
     *
     *  @param   pUnits
     *           The units of the values in the data set.
+    *
+    *  @notify  This method notifies Subject::signalModified() if the given
+    *           units object is different than the current units object.
     */
    virtual void setUnits(const Units* pUnits) = 0;
 
@@ -556,6 +731,9 @@ public:
     *
     *  @param   gcps
     *           The GCPs associated with the data.
+    *
+    *  @notify  This method notifies signalGcpsChanged() if the given GCPs are
+    *           different than the current GCPs.
     */
    virtual void setGcps(const std::list<GcpPoint>& gcps) = 0;
 

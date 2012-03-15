@@ -14,10 +14,9 @@
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "SignatureLibrary.h"
-#include "UnitsImp.h"
+#include "Units.h"
 
 #include <set>
-
 using namespace std;
 
 LibrarySignatureImp::LibrarySignatureImp(const DataDescriptorImp& descriptor, const string& id,
@@ -25,12 +24,10 @@ LibrarySignatureImp::LibrarySignatureImp(const DataDescriptorImp& descriptor, co
    SignatureImp(descriptor, id),
    mSignatureIndex(index),
    mpLibrary(pLib)
-{
-}
+{}
 
 LibrarySignatureImp::~LibrarySignatureImp()
-{
-}
+{}
 
 DataElement* LibrarySignatureImp::copy(const string& name, DataElement* pParent) const
 {

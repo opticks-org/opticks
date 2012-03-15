@@ -19,13 +19,13 @@
 
 #include <string>
 
+class FileDescriptor;
+
 class FileDescriptorImp : public SubjectImp, public Serializable
 {
 public:
    FileDescriptorImp();
    virtual ~FileDescriptorImp();
-
-   FileDescriptorImp& operator =(const FileDescriptorImp& descriptor);
 
    void setFilename(const std::string& filename);
    void setFilename(const Filename& filename);
@@ -37,6 +37,7 @@ public:
    void setEndian(EndianType endian);
    EndianType getEndian() const;
 
+   virtual bool clone(const FileDescriptor* pFileDescriptor);
    virtual void addToMessageLog(Message* pMessage) const;
 
    virtual bool toXml(XMLWriter* pXml) const;
@@ -48,6 +49,8 @@ public:
    static bool isKindOfFileDescriptor(const std::string& className);
 
 private:
+   FileDescriptorImp& operator=(const FileDescriptorImp& fileDescriptor);
+
    FilenameImp mFilename;
    std::string mDatasetLocation;
    EndianType mEndian;
@@ -87,6 +90,10 @@ private:
    EndianType getEndian() const \
    { \
       return impClass::getEndian(); \
+   } \
+   bool clone(const FileDescriptor* pFileDescriptor) \
+   { \
+      return impClass::clone(pFileDescriptor); \
    } \
    void addToMessageLog(Message* pMessage) const \
    { \

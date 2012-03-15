@@ -51,8 +51,9 @@ class Message;
  *
  *  This subclass of Subject will notify upon the following conditions:
  *  - The following methods are called: setClassification(), setMetadata(),
- *    setProcessingLocation(), and setFileDescriptor().
+ *    setProcessingLocation(), setFileDescriptor(), and clone().
  *  - The descriptor is renamed.
+ *  - The descriptor's parent data element is changed.
  *  - All notifications documented in Subject.
  *
  *  @see        DataElement, FileDescriptor
@@ -65,6 +66,22 @@ public:
     *  containing the new name.
     */
    SIGNAL_METHOD(DataDescriptor, Renamed)
+
+   /**
+    *  Emitted when the parent data element changes with
+    *  boost::any<\link DataElement\endlink*> containing a pointer to the new
+    *  parent element.
+    */
+   SIGNAL_METHOD(DataDescriptor, ParentChanged)
+
+   /**
+    *  Emitted when the processing location changes with
+    *  boost::any<\link ::ProcessingLocation ProcessingLocation\endlink>
+    *  containing the new processing location.
+    *
+    *  @see     setProcessingLocation()
+    */
+   SIGNAL_METHOD(DataDescriptor, ProcessingLocationChanged)
 
    /**
     *  Returns the name for the data.
@@ -215,14 +232,14 @@ public:
     *  The processing location specifies how the element data should imported
     *  and how it will be accessed after importing.  This allows for processing
     *  large data sets that cannot be loaded entirely into memory.  The default
-    *  location is ProcessingLocation::IN_MEMORY.
+    *  location is \link ProcessingLocation::IN_MEMORY IN_MEMORY\endlink.
     *
     *  @param   processingLocation
     *           The processing location for the element data.
     *
-    *  @notify  This method notifies Subject::signalModified if the given
-    *           processing location is different than the current processing
-    *           location.
+    *  @notify  This method notifies signalProcessingLocationChanged() if the
+    *           given processing location is different than the current
+    *           processing location.
     */
    virtual void setProcessingLocation(ProcessingLocation processingLocation) = 0;
 
@@ -298,12 +315,17 @@ public:
     *  Creates a duplicate data descriptor based on this data descriptor.
     *
     *  This is typically used to deep copy a data descriptor when a non-shared
-    *  copy is required. If the data element for this data descriptor already
-    *  exists, the copy data descriptor should not be used to create a new data element
-    *  as the element already exists. The copy data descriptor contains the same classification
-    *  settings as this data descriptor.
+    *  copy is required.  If the data element for this data descriptor already
+    *  exists, the created data descriptor should not be used to create a new
+    *  data element as the element already exists.
     *
-    *  @return A duplicate copy of this data descriptor or \c NULL if there was an error.
+    *  @return  A duplicate copy of this data descriptor or \c NULL if there was
+    *           an error.  The returned data descriptor contains the same
+    *           classification settings as this data descriptor.
+    *
+    *  @see     copy(const std::string&, DataElement*) const,
+    *           copy(const std::string&, const std::vector<std::string>&) const,
+    *           clone()
     */
    virtual DataDescriptor* copy() const = 0;
 
@@ -316,9 +338,7 @@ public:
     *  name and parent element as unique identifiers, a new name and/or
     *  parent should be passed into this method for the call to
     *  ModelServices::createDataDescriptor() to succeed.  The type of this
-    *  descriptor is used as the type for the new descriptor. The returned data descriptor
-    *  will have the same classification settings as this data descriptor and not the
-    *  classification settings of the passed in parent element.
+    *  descriptor is used as the type for the new descriptor.
     *
     *  @param   name
     *           The name for the new element that would be created with the
@@ -333,20 +353,78 @@ public:
     *           descriptor even if a subsequent call to
     *           ModelServices::createElement() would fail because an element
     *           already exists with the same name, type, and parent as the
-    *           created data descriptor.
+    *           created data descriptor.  The returned data descriptor will have
+    *           the same classification settings as this data descriptor and not
+    *           the classification settings of the given parent element.
+    *
+    *  @see     copy() const,
+    *           copy(const std::string&, const std::vector<std::string>&) const,
+    *           clone()
     */
    virtual DataDescriptor* copy(const std::string& name, DataElement* pParent) const = 0;
 
    /**
-    *  This version specifies the new parent as a vector of element names
-    *  which specify a parent such that the first name is a top level element,
-    *  the second name is a child of that element, and so on. The returned data descriptor
-    *  will have the same classification settings as this data descriptor and not the
-    *  classification settings of the passed in parent element.
+    *  Creates a new data descriptor based on this data descriptor.
     *
-    *  @see copy(const std::string&,DataElement*)
+    *  This method creates a new data descriptor by calling
+    *  ModelServices::createDataDescriptor() and sets the values of the created
+    *  descriptor to this object's values.  Because ModelServices uses the
+    *  name and parent element as unique identifiers, a new name and/or
+    *  parent designator should be passed into this method for the call to
+    *  ModelServices::createDataDescriptor() to succeed.  The type of this
+    *  descriptor is used as the type for the new descriptor.
+    *
+    *  @param   name
+    *           The name for the new element that would be created with the
+    *           returned data descriptor.
+    *  @param   parent
+    *           The designator that identifies the parent element for the
+    *           created data descriptor.  The designator is a vector of element
+    *           names such that the first name is a top level element, the
+    *           second name is a child of that element, and so on.
+    *
+    *  @return  The new data descriptor containing values identical to the
+    *           values in this data descriptor except for the given name and
+    *           parent element.  This method will return a valid data
+    *           descriptor even if a subsequent call to
+    *           ModelServices::createElement() would fail because an element
+    *           already exists with the same name, type, and parent as the
+    *           created data descriptor.  The returned data descriptor will have
+    *           the same classification settings as this data descriptor and not
+    *           the classification settings of the element represented by the
+    *           given parent designator.
+    *
+    *  @see     copy() const, copy(const std::string&, DataElement*) const,
+    *           clone(), getParentDesignator()
     */
    virtual DataDescriptor* copy(const std::string& name, const std::vector<std::string>& parent) const = 0;
+
+   /**
+    *  Sets all values in this data descriptor to those of another data
+    *  descriptor.
+    *
+    *  @warning The type of given data descriptor must match the type of this
+    *           data descriptor.
+    *
+    *  @param   pDescriptor
+    *           The data descriptor from which to set all data values in this
+    *           data descriptor.  No signal/slot attachments currently defined
+    *           in \em pDescriptor are set into this descriptor.  This method
+    *           does nothing and returns \c false if \c NULL is passed in.
+    *
+    *  @return  Returns \c true if all values in this data descriptor were
+    *           successfully set to the values in the given data descriptor;
+    *           otherwise returns \c false.  Returns \c false if the type of the
+    *           given data descriptor does not match the type of this data
+    *           descriptor.
+    *
+    *  @notify  This method notifies one or more signals defined in this class
+    *           or its subclasses based on data values that are actually
+    *           changed.
+    *
+    *  @see     copy(), getType()
+    */
+   virtual bool clone(const DataDescriptor* pDescriptor) = 0;
 
    /**
     *  Adds the current values in this data descriptor to a given message.

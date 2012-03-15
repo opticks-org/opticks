@@ -23,13 +23,6 @@ SetGcpPoints::SetGcpPoints(GcpList* pGcpList, const list<GcpPoint>& oldPoints, c
    setText("Set GCPs");
 }
 
-bool operator==(const GcpPoint& point1, const GcpPoint& point2)
-{
-   return (point1.mPixel == point2.mPixel) &&
-      (point1.mCoordinate == point2.mCoordinate) &&
-      (point1.mRmsError == point2.mRmsError);
-}
-
 void SetGcpPoints::executeUndo()
 {
    GcpList* pGcpList = dynamic_cast<GcpList*>(getSessionItem());

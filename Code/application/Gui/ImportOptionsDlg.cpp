@@ -8,11 +8,11 @@
  */
 
 #include <QtCore/QFileInfo>
-#include <QtGui/QHeaderView>
 #include <QtGui/QLayout>
 #include <QtGui/QMessageBox>
 #include <QtGui/QSplitter>
 
+#include "AppVerify.h"
 #include "AppVersion.h"
 #include "Classification.h"
 #include "ClassificationWidget.h"
@@ -20,14 +20,13 @@
 #include "DataVariant.h"
 #include "DynamicObject.h"
 #include "FileDescriptorWidget.h"
-#include "ImportDescriptorImp.h"
+#include "ImportDescriptor.h"
 #include "Importer.h"
 #include "ImportOptionsDlg.h"
 #include "MetadataWidget.h"
 #include "ModelServices.h"
 #include "RasterDataDescriptor.h"
 #include "RasterFileDescriptor.h"
-#include "RasterUtilities.h"
 #include "Slot.h"
 #include "SpecialMetadata.h"
 #include "SubsetWidget.h"
@@ -60,18 +59,13 @@ namespace
    };
 };
 
-// The ImportOptionsDlg should be changed to listen to the FileDescriptor and DataDescriptor being edited
-// and immediately update their gui's in case the importer mutates either descriptor
-//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Make ImportOptionsDlg provide the data descriptor " \
-//   "being modified by the user to the custom options widget (kstreith)")
-
 ImportOptionsDlg::ImportOptionsDlg(Importer* pImporter, const QMap<QString, vector<ImportDescriptor*> >& files,
    QWidget* pParent) :
    QDialog(pParent),
    mpImporter(pImporter),
    mpCurrentDataset(NULL),
    mpEditDescriptor(NULL),
-   mEditDescriptorModified(false),
+   mEditDataDescriptorModified(false),
    mPromptForChanges(true),
    mAllowDeselectedFiles(true),
    mpDatasetTree(NULL),
@@ -98,7 +92,7 @@ ImportOptionsDlg::ImportOptionsDlg(Importer* pImporter, const QMap<QString, vect
    mpDatasetTree->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
    mpDatasetTree->setTextElideMode(Qt::ElideLeft);
    mpDatasetTree->setMinimumWidth(225);
-   mpDatasetTree->header()->hide();
+   mpDatasetTree->setHeaderHidden(true);
 
    QPushButton* pImportAllButton = new QPushButton("Import All", pDatasetWidget);
    QPushButton* pImportNoneButton = new QPushButton("Import None", pDatasetWidget);
@@ -213,27 +207,6 @@ ImportOptionsDlg::ImportOptionsDlg(Importer* pImporter, const QMap<QString, vect
 
    pSplitter->addWidget(pDatasetWidget);
    pSplitter->addWidget(pInfoWidget);
-
-   if (mpImporter != NULL)
-   {
-      vector<ProcessingLocation> locations;
-      if (mpImporter->isProcessingLocationSupported(IN_MEMORY) == true)
-      {
-         locations.push_back(IN_MEMORY);
-      }
-
-      if (mpImporter->isProcessingLocationSupported(ON_DISK) == true)
-      {
-         locations.push_back(ON_DISK);
-      }
-
-      if (mpImporter->isProcessingLocationSupported(ON_DISK_READ_ONLY) == true)
-      {
-         locations.push_back(ON_DISK_READ_ONLY);
-      }
-
-      mpDataPage->setValidProcessingLocations(locations);
-   }
 
    // Populate the data set tree widget
    QTreeWidgetItem* pSelectItem = NULL;
@@ -398,37 +371,33 @@ void ImportOptionsDlg::setCurrentDataset(ImportDescriptor* pImportDescriptor)
 
    // Apply changes to the current data set if necessary
    bool bSuccess = true;
-   if (mpCurrentDataset != NULL)
+   if ((mpCurrentDataset != NULL) && (mEditDataDescriptorModified == true))
    {
-      if ((mpDataPage->isModified() == true) || (mpFilePage->isModified() == true) ||
-         (mpClassificationPage->isModified() == true) || (mEditDescriptorModified == true))
+      if (mPromptForChanges == true)
       {
-         if (mPromptForChanges == true)
-         {
-            int iReturn = QMessageBox::question(this, APP_NAME, "Apply changes?",
-               QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No | QMessageBox::Cancel);
-            if ((iReturn == QMessageBox::Yes) || (iReturn == QMessageBox::YesToAll))
-            {
-               bSuccess = applyChanges();
-               if (iReturn == QMessageBox::YesToAll)
-               {
-                  mPromptForChanges = false;
-               }
-            }
-            else if (iReturn == QMessageBox::No)
-            {
-               // Update the validation icon for the original data descriptor
-               validateDataset(mpCurrentDataset->getDataDescriptor());
-            }
-            else if (iReturn == QMessageBox::Cancel)
-            {
-               bSuccess = false;
-            }
-         }
-         else
+         int iReturn = QMessageBox::question(this, APP_NAME, "Apply changes to data?",
+            QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No | QMessageBox::Cancel);
+         if ((iReturn == QMessageBox::Yes) || (iReturn == QMessageBox::YesToAll))
          {
             bSuccess = applyChanges();
+            if (iReturn == QMessageBox::YesToAll)
+            {
+               mPromptForChanges = false;
+            }
          }
+         else if (iReturn == QMessageBox::No)
+         {
+            // Update the validation icon for the original data descriptor
+            validateDataset(mpCurrentDataset->getDataDescriptor());
+         }
+         else if (iReturn == QMessageBox::Cancel)
+         {
+            bSuccess = false;
+         }
+      }
+      else
+      {
+         bSuccess = applyChanges();
       }
    }
 
@@ -445,10 +414,41 @@ void ImportOptionsDlg::setCurrentDataset(ImportDescriptor* pImportDescriptor)
    Service<ModelServices> pModel;
    if (mpEditDescriptor != NULL)
    {
-      mpEditDescriptor->detach(SIGNAL_NAME(Subject, Modified), Slot(this, &ImportOptionsDlg::editDescriptorModified));
+      Classification* pClassification = mpEditDescriptor->getClassification();
+      if (pClassification != NULL)
+      {
+         VERIFYNR(pClassification->detach(SIGNAL_NAME(Subject, Modified),
+            Slot(this, &ImportOptionsDlg::editClassificationModified)));
+      }
+
+      RasterDataDescriptor* pRasterDescriptor = dynamic_cast<RasterDataDescriptor*>(mpEditDescriptor);
+      if (pRasterDescriptor != NULL)
+      {
+         VERIFYNR(pRasterDescriptor->detach(SIGNAL_NAME(RasterDataDescriptor, RowsChanged),
+            Slot(this, &ImportOptionsDlg::editDataDescriptorRowsModified)));
+         VERIFYNR(pRasterDescriptor->detach(SIGNAL_NAME(RasterDataDescriptor, ColumnsChanged),
+            Slot(this, &ImportOptionsDlg::editDataDescriptorColumnsModified)));
+         VERIFYNR(pRasterDescriptor->detach(SIGNAL_NAME(RasterDataDescriptor, BandsChanged),
+            Slot(this, &ImportOptionsDlg::editDataDescriptorBandsModified)));
+      }
+
+      RasterFileDescriptor* pRasterFileDescriptor =
+         dynamic_cast<RasterFileDescriptor*>(mpEditDescriptor->getFileDescriptor());
+      if (pRasterFileDescriptor != NULL)
+      {
+         VERIFYNR(pRasterFileDescriptor->detach(SIGNAL_NAME(RasterFileDescriptor, RowsChanged),
+            Slot(this, &ImportOptionsDlg::editFileDescriptorRowsModified)));
+         VERIFYNR(pRasterFileDescriptor->detach(SIGNAL_NAME(RasterFileDescriptor, ColumnsChanged),
+            Slot(this, &ImportOptionsDlg::editFileDescriptorColumnsModified)));
+         VERIFYNR(pRasterFileDescriptor->detach(SIGNAL_NAME(RasterFileDescriptor, BandsChanged),
+            Slot(this, &ImportOptionsDlg::editFileDescriptorBandsModified)));
+      }
+
+      VERIFYNR(mpEditDescriptor->detach(SIGNAL_NAME(Subject, Modified),
+         Slot(this, &ImportOptionsDlg::editDataDescriptorModified)));
       pModel->destroyDataDescriptor(mpEditDescriptor);
       mpEditDescriptor = NULL;
-      mEditDescriptorModified = false;
+      mEditDataDescriptorModified = false;
    }
 
    // Create a new data descriptor to validate the user inputs
@@ -459,7 +459,32 @@ void ImportOptionsDlg::setCurrentDataset(ImportDescriptor* pImportDescriptor)
    }
 
    VERIFYNRV(mpEditDescriptor != NULL);
-   mpEditDescriptor->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &ImportOptionsDlg::editDescriptorModified));
+   VERIFYNR(mpEditDescriptor->attach(SIGNAL_NAME(Subject, Modified),
+      Slot(this, &ImportOptionsDlg::editDataDescriptorModified)));
+
+   RasterDataDescriptor* pRasterDescriptor = dynamic_cast<RasterDataDescriptor*>(mpEditDescriptor);
+   FileDescriptor* pFileDescriptor = mpEditDescriptor->getFileDescriptor();
+   RasterFileDescriptor* pRasterFileDescriptor = dynamic_cast<RasterFileDescriptor*>(pFileDescriptor);
+
+   if (pRasterDescriptor != NULL)
+   {
+      VERIFYNR(pRasterDescriptor->attach(SIGNAL_NAME(RasterDataDescriptor, RowsChanged),
+         Slot(this, &ImportOptionsDlg::editDataDescriptorRowsModified)));
+      VERIFYNR(pRasterDescriptor->attach(SIGNAL_NAME(RasterDataDescriptor, ColumnsChanged),
+         Slot(this, &ImportOptionsDlg::editDataDescriptorColumnsModified)));
+      VERIFYNR(pRasterDescriptor->attach(SIGNAL_NAME(RasterDataDescriptor, BandsChanged),
+         Slot(this, &ImportOptionsDlg::editDataDescriptorBandsModified)));
+   }
+
+   if (pRasterFileDescriptor != NULL)
+   {
+      VERIFYNR(pRasterFileDescriptor->attach(SIGNAL_NAME(RasterFileDescriptor, RowsChanged),
+         Slot(this, &ImportOptionsDlg::editFileDescriptorRowsModified)));
+      VERIFYNR(pRasterFileDescriptor->attach(SIGNAL_NAME(RasterFileDescriptor, ColumnsChanged),
+         Slot(this, &ImportOptionsDlg::editFileDescriptorColumnsModified)));
+      VERIFYNR(pRasterFileDescriptor->attach(SIGNAL_NAME(RasterFileDescriptor, BandsChanged),
+         Slot(this, &ImportOptionsDlg::editFileDescriptorBandsModified)));
+   }
 
    // Select the tree widget item for the current data set
    selectCurrentDatasetItem();
@@ -468,10 +493,6 @@ void ImportOptionsDlg::setCurrentDataset(ImportDescriptor* pImportDescriptor)
    updateConnections(false);
 
    // Subset page
-   const RasterDataDescriptor* pRasterDescriptor = dynamic_cast<const RasterDataDescriptor*>(mpEditDescriptor);
-   const FileDescriptor* pFileDescriptor = mpEditDescriptor->getFileDescriptor();
-   const RasterFileDescriptor* pRasterFileDescriptor = dynamic_cast<const RasterFileDescriptor*>(pFileDescriptor);
-
    if (pRasterFileDescriptor != NULL)
    {
       // Show the tab if necessary
@@ -491,43 +512,9 @@ void ImportOptionsDlg::setCurrentDataset(ImportDescriptor* pImportDescriptor)
       mpSubsetPage->setColumns(columns, loadedColumns);
 
       // Bands
-      // Note: The band names here cannot use the RasterUtilities::getBandNames() method because that method uses a
-      // RasterDataDescriptor (cf. a RasterFileDescriptor) to determine band names, meaning that bad bands will not
-      // have their names included in the list of band names. If bad bands are not included in the list of band names,
-      // then the SubsetWidget will have a mismatch between the number of band names and the number of bands specified
-      // if bad bands are set by the importer. If SubsetWidget has a mismatch between these two numbers, then no band
-      // names are displayed to the user.
-      // In summary, if we change this to use RasterUtilities::getBandNames(), then the SubsetWidget will ignore band
-      // names and replace them with "Band 1", ..., "Band n" for any image with bad bands set by its importer.
       const vector<DimensionDescriptor>& bands = pRasterFileDescriptor->getBands();
-      vector<string> bandNames;
-      const DynamicObject* pMetadata = pRasterDescriptor->getMetadata();
-      if (pMetadata != NULL)
-      {
-         string pNamesPath[] = { SPECIAL_METADATA_NAME, BAND_METADATA_NAME, NAMES_METADATA_NAME, END_METADATA_NAME };
-         const vector<string>* pBandNames = dv_cast<vector<string> >(&pMetadata->getAttributeByPath(pNamesPath));
-         if ((pBandNames != NULL) && (pBandNames->size() == bands.size()))
-         {
-            bandNames = *pBandNames;
-         }
-         else
-         {
-            string pPrefixPath[] = { SPECIAL_METADATA_NAME, BAND_NAME_PREFIX_METADATA_NAME, END_METADATA_NAME };
-            const string* pBandPrefix = dv_cast<string>(&pMetadata->getAttributeByPath(pPrefixPath));
-            if (pBandPrefix != NULL)
-            {
-               string bandNamePrefix = *pBandPrefix;
-               for (unsigned int i = 0; i < bands.size(); ++i)
-               {
-                  ostringstream formatter;
-                  formatter << bandNamePrefix << " " << bands[i].getOriginalNumber() + 1;
-                  bandNames.push_back(formatter.str());
-               }
-            }
-         }
-      }
       const vector<DimensionDescriptor>& selectedBands = pRasterDescriptor->getBands();
-      mpSubsetPage->setBands(bands, bandNames, selectedBands);
+      setSubsetBands(bands, selectedBands);
 
       // Initial bad band file directory
       if (pFileDescriptor != NULL)
@@ -559,8 +546,7 @@ void ImportOptionsDlg::setCurrentDataset(ImportDescriptor* pImportDescriptor)
    mpDataPage->setDataDescriptor(mpEditDescriptor, true);
 
    // File descriptor page
-   bool bValidFile = true;
-
+   bool editFilePage = false;
    if (pRasterFileDescriptor != NULL)
    {
       unsigned int numRows = pRasterFileDescriptor->getRowCount();
@@ -569,18 +555,11 @@ void ImportOptionsDlg::setCurrentDataset(ImportDescriptor* pImportDescriptor)
       unsigned int numBands = pRasterFileDescriptor->getBandCount();
       if ((numRows == 0) || (numColumns == 0) || (numBands == 0) || (bitsPerElement == 0))
       {
-         bValidFile = false;
+         editFilePage = true;
       }
    }
 
-   if (bValidFile == false)
-   {
-      mpFilePage->setFileDescriptor(const_cast<FileDescriptor*>(pFileDescriptor));
-   }
-   else
-   {
-      mpFilePage->setFileDescriptor(pFileDescriptor);
-   }
+   mpFilePage->setFileDescriptor(pFileDescriptor, editFilePage);
 
    int iIndex = mpTabWidget->indexOf(mpFilePage);
    if (iIndex != -1)
@@ -600,7 +579,14 @@ void ImportOptionsDlg::setCurrentDataset(ImportDescriptor* pImportDescriptor)
 
    // Classification page
    updateClassificationLabel();
-   mpClassificationPage->setClassification(mpEditDescriptor->getClassification());
+
+   Classification* pClassification = mpEditDescriptor->getClassification();
+   if (pClassification != NULL)
+   {
+      VERIFYNR(pClassification->attach(SIGNAL_NAME(Subject, Modified),
+         Slot(this, &ImportOptionsDlg::editClassificationModified)));
+      mpClassificationPage->setClassification(pClassification);
+   }
 
    // Metadata page
    mpMetadataPage->setMetadata(mpEditDescriptor->getMetadata());
@@ -651,9 +637,18 @@ void ImportOptionsDlg::setCurrentDataset(ImportDescriptor* pImportDescriptor)
 
    if (mpImporter != NULL)
    {
-      mpImporterPage = mpImporter->getImportOptionsWidget(pDescriptor);
+      mpImporterPage = mpImporter->getImportOptionsWidget(mpEditDescriptor);
       if (mpImporterPage != NULL)
       {
+         QLayout* pLayout = mpImporterPage->layout();
+         if (pLayout != NULL)
+         {
+            if (pLayout->margin() <= 0)
+            {
+               pLayout->setMargin(10);
+            }
+         }
+
          QString strCaption = mpImporterPage->windowTitle();
          if (strCaption.isEmpty() == true)
          {
@@ -667,6 +662,28 @@ void ImportOptionsDlg::setCurrentDataset(ImportDescriptor* pImportDescriptor)
             mpTabWidget->setCurrentWidget(mpImporterPage);
          }
       }
+
+      // Set the valid processing locations on the data page.  This must be done after getting the import options
+      // widget from the importer so that the auto importer will correctly query the importer that is used.
+      // This can be changed if the importer design (and auto importer) is modified to support valid processing
+      // locations for a specific data set.
+      vector<ProcessingLocation> locations;
+      if (mpImporter->isProcessingLocationSupported(IN_MEMORY) == true)
+      {
+         locations.push_back(IN_MEMORY);
+      }
+
+      if (mpImporter->isProcessingLocationSupported(ON_DISK) == true)
+      {
+         locations.push_back(ON_DISK);
+      }
+
+      if (mpImporter->isProcessingLocationSupported(ON_DISK_READ_ONLY) == true)
+      {
+         locations.push_back(ON_DISK_READ_ONLY);
+      }
+
+      mpDataPage->setValidProcessingLocations(locations);
    }
 
    // Validate the current data descriptor
@@ -1023,10 +1040,111 @@ void ImportOptionsDlg::removeImporterPage()
    mpImporterPage = NULL;
 }
 
-void ImportOptionsDlg::editDescriptorModified(Subject& subject, const string& signal, const boost::any& value)
+void ImportOptionsDlg::editDataDescriptorModified(Subject& subject, const string& signal, const boost::any& value)
 {
-   mEditDescriptorModified = true;
+   mEditDataDescriptorModified = true;
    validateEditDataset();
+}
+
+void ImportOptionsDlg::editDataDescriptorRowsModified(Subject& subject, const string& signal, const boost::any& value)
+{
+   if ((mpEditDescriptor == NULL) || (dynamic_cast<DataDescriptor*>(&subject) != mpEditDescriptor))
+   {
+      return;
+   }
+
+   // Update the rows marked to import
+   const vector<DimensionDescriptor>& importedRows = boost::any_cast<vector<DimensionDescriptor> >(value);
+
+   // Subset page
+   RasterFileDescriptor* pFileDescriptor = dynamic_cast<RasterFileDescriptor*>(mpEditDescriptor->getFileDescriptor());
+   if (pFileDescriptor != NULL)
+   {
+      const vector<DimensionDescriptor>& rows = pFileDescriptor->getRows();
+      mpSubsetPage->setRows(rows, importedRows);
+   }
+}
+
+void ImportOptionsDlg::editDataDescriptorColumnsModified(Subject& subject, const string& signal,
+                                                         const boost::any& value)
+{
+   if ((mpEditDescriptor == NULL) || (dynamic_cast<DataDescriptor*>(&subject) != mpEditDescriptor))
+   {
+      return;
+   }
+
+   // Update the columns marked to import
+   const vector<DimensionDescriptor>& importedColumns = boost::any_cast<vector<DimensionDescriptor> >(value);
+
+   // Subset page
+   RasterFileDescriptor* pFileDescriptor = dynamic_cast<RasterFileDescriptor*>(mpEditDescriptor->getFileDescriptor());
+   if (pFileDescriptor != NULL)
+   {
+      const vector<DimensionDescriptor>& columns = pFileDescriptor->getColumns();
+      mpSubsetPage->setColumns(columns, importedColumns);
+   }
+}
+
+void ImportOptionsDlg::editDataDescriptorBandsModified(Subject& subject, const string& signal, const boost::any& value)
+{
+   if ((mpEditDescriptor == NULL) || (dynamic_cast<DataDescriptor*>(&subject) != mpEditDescriptor))
+   {
+      return;
+   }
+
+   // Update the bands marked to import
+   const vector<DimensionDescriptor>& importedBands = boost::any_cast<vector<DimensionDescriptor> >(value);
+
+   // Subset page
+   RasterFileDescriptor* pFileDescriptor = dynamic_cast<RasterFileDescriptor*>(mpEditDescriptor->getFileDescriptor());
+   if (pFileDescriptor != NULL)
+   {
+      const vector<DimensionDescriptor>& bands = pFileDescriptor->getBands();
+      setSubsetBands(bands, importedBands);
+   }
+
+   // Wavelengths page
+   mpWavelengthsPage->highlightActiveBands(importedBands);
+}
+
+void ImportOptionsDlg::editFileDescriptorRowsModified(Subject& subject, const string& signal, const boost::any& value)
+{
+   // Update the total number of rows
+   vector<DimensionDescriptor> rows = boost::any_cast<vector<DimensionDescriptor> >(value);
+
+   // Subset page
+   mpSubsetPage->setRows(rows, vector<DimensionDescriptor>());
+}
+
+void ImportOptionsDlg::editFileDescriptorColumnsModified(Subject& subject, const string& signal,
+                                                         const boost::any& value)
+{
+   // Update the total number of columns
+   vector<DimensionDescriptor> columns = boost::any_cast<vector<DimensionDescriptor> >(value);
+
+   // Subset page
+   mpSubsetPage->setColumns(columns, vector<DimensionDescriptor>());
+}
+
+void ImportOptionsDlg::editFileDescriptorBandsModified(Subject& subject, const string& signal, const boost::any& value)
+{
+   // Update the total number of bands, resetting the imported bands to all bands
+   vector<DimensionDescriptor> bands = boost::any_cast<vector<DimensionDescriptor> >(value);
+
+   // Subset page
+   mpSubsetPage->setBands(bands);
+
+   // Wavelengths page
+   if (mpEditDescriptor != NULL)
+   {
+      mpWavelengthsPage->setWavelengths(bands, mpEditDescriptor->getMetadata());
+      mpWavelengthsPage->highlightActiveBands(bands);
+   }
+}
+
+void ImportOptionsDlg::editClassificationModified(Subject& subject, const string& signal, const boost::any& value)
+{
+   updateClassificationLabel();
 }
 
 void ImportOptionsDlg::datasetItemChanged(QTreeWidgetItem* pItem)
@@ -1124,153 +1242,31 @@ void ImportOptionsDlg::deselectAllDatasets()
       SLOT(datasetItemChanged(QTreeWidgetItem*))));
 }
 
-void ImportOptionsDlg::generateDimensionVector(const QString& strValueName)
+void ImportOptionsDlg::updateEditDataDescriptorRows(const vector<DimensionDescriptor>& rows)
 {
-   if (mpEditDescriptor == NULL)
-   {
-      return;
-   }
-
-   updateConnections(false);
-
-   // The user entered rows, columns, or bands on the file page
-   // so update the data page, subset page, and wavelengths page
-
-   QString strValue = mpFilePage->getDescriptorValue(strValueName);
-   mpDataPage->setDescriptorValue(strValueName, strValue);
-
-   if (strValue.isEmpty() == false)
-   {
-      vector<DimensionDescriptor> values =
-         RasterUtilities::generateDimensionVector(strValue.toUInt(), true, false, true);
-
-      RasterDataDescriptor* pDescriptor = dynamic_cast<RasterDataDescriptor*>(mpEditDescriptor);
-      RasterFileDescriptor* pFileDescriptor = NULL;
-      if (mpEditDescriptor != NULL)
-      {
-         pFileDescriptor = dynamic_cast<RasterFileDescriptor*>(mpEditDescriptor->getFileDescriptor());
-      }
-
-      if (strValueName == "Rows")
-      {
-         // Create new rows and set into the subset page
-         mpSubsetPage->setRows(values, vector<DimensionDescriptor>());
-         if (pDescriptor != NULL)
-         {
-            pDescriptor->setRows(values);
-         }
-         if (pFileDescriptor != NULL)
-         {
-            pFileDescriptor->setRows(values);
-         }
-      }
-      else if (strValueName == "Columns")
-      {
-         // Create new columns and set into the subset page
-         mpSubsetPage->setColumns(values, vector<DimensionDescriptor>());
-         if (pDescriptor != NULL)
-         {
-            pDescriptor->setColumns(values);
-         }
-         if (pFileDescriptor != NULL)
-         {
-            pFileDescriptor->setColumns(values);
-         }
-      }
-      else if (strValueName == "Bands")
-      {
-         // Create new bands and set into the subset page
-         mpSubsetPage->setBands(values);
-         if (pDescriptor != NULL)
-         {
-            pDescriptor->setBands(values);
-         }
-         if (pFileDescriptor != NULL)
-         {
-            pFileDescriptor->setBands(values);
-         }
-
-         // Update the number of band items on the wavelengths page
-         mpWavelengthsPage->setWavelengths(values, mpEditDescriptor->getMetadata());
-
-         if (pDescriptor != NULL)
-         {
-            mpWavelengthsPage->highlightActiveBands(values);
-         }
-      }
-   }
-
-   updateConnections(true);
-}
-
-void ImportOptionsDlg::updateDataRows(const vector<DimensionDescriptor>& rows)
-{
-   disconnect(mpDataPage, SIGNAL(modified()), this, SLOT(pagesModified()));
-
-   mpDataPage->setDescriptorValue("Rows", QString::number(rows.size()));
-
    RasterDataDescriptor* pDescriptor = dynamic_cast<RasterDataDescriptor*>(mpEditDescriptor);
    if (pDescriptor != NULL)
    {
       pDescriptor->setRows(rows);
-      validateEditDataset();
    }
-
-   VERIFYNR(connect(mpDataPage, SIGNAL(modified()), this, SLOT(pagesModified())));
 }
 
-void ImportOptionsDlg::updateDataColumns(const vector<DimensionDescriptor>& columns)
+void ImportOptionsDlg::updateEditDataDescriptorColumns(const vector<DimensionDescriptor>& columns)
 {
-   disconnect(mpDataPage, SIGNAL(modified()), this, SLOT(pagesModified()));
-
-   mpDataPage->setDescriptorValue("Columns", QString::number(columns.size()));
-
    RasterDataDescriptor* pDescriptor = dynamic_cast<RasterDataDescriptor*>(mpEditDescriptor);
    if (pDescriptor != NULL)
    {
       pDescriptor->setColumns(columns);
-      validateEditDataset();
    }
-
-   VERIFYNR(connect(mpDataPage, SIGNAL(modified()), this, SLOT(pagesModified())));
 }
 
-void ImportOptionsDlg::updateDataBands(const vector<DimensionDescriptor>& bands)
+void ImportOptionsDlg::updateEditDataDescriptorBands(const vector<DimensionDescriptor>& bands)
 {
-   disconnect(mpDataPage, SIGNAL(modified()), this, SLOT(pagesModified()));
-
-   mpDataPage->setDescriptorValue("Bands", QString::number(bands.size()));
-
    RasterDataDescriptor* pDescriptor = dynamic_cast<RasterDataDescriptor*>(mpEditDescriptor);
    if (pDescriptor != NULL)
    {
       pDescriptor->setBands(bands);
-      validateEditDataset();
    }
-
-   VERIFYNR(connect(mpDataPage, SIGNAL(modified()), this, SLOT(pagesModified())));
-}
-
-void ImportOptionsDlg::updateClassification()
-{
-   if (mpEditDescriptor == NULL)
-   {
-      return;
-   }
-
-   disconnect(mpClassificationPage, SIGNAL(modified()), this, SLOT(updateClassification()));
-
-   if (mpClassificationPage->applyChanges() == true)
-   {
-      updateClassificationLabel();
-   }
-   else
-   {
-      mpTabWidget->setCurrentWidget(mpClassificationPage);
-   }
-
-   VERIFYNR(connect(mpClassificationPage, SIGNAL(modified()), this, SLOT(updateClassification())));
-   validateEditDataset();
 }
 
 void ImportOptionsDlg::updateClassificationLabel()
@@ -1329,40 +1325,6 @@ void ImportOptionsDlg::updateClassificationLabel()
    mpClassificationLabel->setText(strClassification);
 }
 
-void ImportOptionsDlg::pagesModified()
-{
-   if (mpEditDescriptor == NULL)
-   {
-      return;
-   }
-
-   disconnect(mpDataPage, SIGNAL(modified()), this, SLOT(pagesModified()));
-   disconnect(mpFilePage, SIGNAL(modified()), this, SLOT(pagesModified()));
-
-   // Data descriptor
-   bool bSuccess = mpDataPage->applyChanges();
-   if (!bSuccess)
-   {
-      mpTabWidget->setCurrentWidget(mpDataPage);
-   }
-
-   // File descriptor
-   FileDescriptor* pFileDescriptor = mpEditDescriptor->getFileDescriptor();
-   if (pFileDescriptor != NULL)
-   {
-      bSuccess = bSuccess && mpFilePage->applyChanges();
-      if (!bSuccess)
-      {
-         mpTabWidget->setCurrentWidget(mpFilePage);
-      }
-   }
-
-   VERIFYNR(connect(mpDataPage, SIGNAL(modified()), this, SLOT(pagesModified())));
-   VERIFYNR(connect(mpFilePage, SIGNAL(modified()), this, SLOT(pagesModified())));
-
-   validateEditDataset();
-}
-
 bool ImportOptionsDlg::applyChanges()
 {
    if (mpEditDescriptor == NULL)
@@ -1370,51 +1332,115 @@ bool ImportOptionsDlg::applyChanges()
       return false;
    }
 
-   ImportDescriptorImp* pDataset = dynamic_cast<ImportDescriptorImp*>(getCurrentDataset());
+   ImportDescriptor* pDataset = getCurrentDataset();
    if (pDataset != NULL)
    {
-      mpEditDescriptor->detach(SIGNAL_NAME(Subject, Modified), Slot(this, &ImportOptionsDlg::editDescriptorModified));
+      Classification* pClassification = mpEditDescriptor->getClassification();
+      if (pClassification != NULL)
+      {
+         VERIFYNR(pClassification->detach(SIGNAL_NAME(Subject, Modified),
+            Slot(this, &ImportOptionsDlg::editClassificationModified)));
+      }
+
+      RasterDataDescriptor* pRasterDescriptor = dynamic_cast<RasterDataDescriptor*>(mpEditDescriptor);
+      if (pRasterDescriptor != NULL)
+      {
+         VERIFYNR(pRasterDescriptor->detach(SIGNAL_NAME(RasterDataDescriptor, RowsChanged),
+            Slot(this, &ImportOptionsDlg::editDataDescriptorRowsModified)));
+         VERIFYNR(pRasterDescriptor->detach(SIGNAL_NAME(RasterDataDescriptor, ColumnsChanged),
+            Slot(this, &ImportOptionsDlg::editDataDescriptorColumnsModified)));
+         VERIFYNR(pRasterDescriptor->detach(SIGNAL_NAME(RasterDataDescriptor, BandsChanged),
+            Slot(this, &ImportOptionsDlg::editDataDescriptorBandsModified)));
+      }
+
+      RasterFileDescriptor* pRasterFileDescriptor =
+         dynamic_cast<RasterFileDescriptor*>(mpEditDescriptor->getFileDescriptor());
+      if (pRasterFileDescriptor != NULL)
+      {
+         VERIFYNR(pRasterFileDescriptor->detach(SIGNAL_NAME(RasterFileDescriptor, RowsChanged),
+            Slot(this, &ImportOptionsDlg::editFileDescriptorRowsModified)));
+         VERIFYNR(pRasterFileDescriptor->detach(SIGNAL_NAME(RasterFileDescriptor, ColumnsChanged),
+            Slot(this, &ImportOptionsDlg::editFileDescriptorColumnsModified)));
+         VERIFYNR(pRasterFileDescriptor->detach(SIGNAL_NAME(RasterFileDescriptor, BandsChanged),
+            Slot(this, &ImportOptionsDlg::editFileDescriptorBandsModified)));
+      }
+
+      VERIFYNR(mpEditDescriptor->detach(SIGNAL_NAME(Subject, Modified),
+         Slot(this, &ImportOptionsDlg::editDataDescriptorModified)));
       pDataset->setDataDescriptor(mpEditDescriptor);
       mpEditDescriptor = NULL;
-      mEditDescriptorModified = false;
+      mEditDataDescriptorModified = false;
       return true;
    }
 
    return false;
 }
 
+void ImportOptionsDlg::setSubsetBands(const vector<DimensionDescriptor>& bands,
+                                      const vector<DimensionDescriptor>& selectedBands)
+{
+   if ((mpEditDescriptor == NULL) || (mpSubsetPage == NULL))
+   {
+      return;
+   }
+
+   // Note: The band names here cannot use the RasterUtilities::getBandNames() method because that method uses a
+   // RasterDataDescriptor (cf. a RasterFileDescriptor) to determine band names, meaning that bad bands will not
+   // have their names included in the list of band names. If bad bands are not included in the list of band names,
+   // then the SubsetWidget will have a mismatch between the number of band names and the number of bands specified
+   // if bad bands are set by the importer. If SubsetWidget has a mismatch between these two numbers, then no band
+   // names are displayed to the user.
+   // In summary, if we change this to use RasterUtilities::getBandNames(), then the SubsetWidget will ignore band
+   // names and replace them with "Band 1", ..., "Band n" for any image with bad bands set by its importer.
+   vector<string> bandNames;
+
+   const DynamicObject* pMetadata = mpEditDescriptor->getMetadata();
+   if (pMetadata != NULL)
+   {
+      string pNamesPath[] = { SPECIAL_METADATA_NAME, BAND_METADATA_NAME, NAMES_METADATA_NAME, END_METADATA_NAME };
+      const vector<string>* pBandNames = dv_cast<vector<string> >(&pMetadata->getAttributeByPath(pNamesPath));
+      if ((pBandNames != NULL) && (pBandNames->size() == bands.size()))
+      {
+         bandNames = *pBandNames;
+      }
+      else
+      {
+         string pPrefixPath[] = { SPECIAL_METADATA_NAME, BAND_NAME_PREFIX_METADATA_NAME, END_METADATA_NAME };
+         const string* pBandPrefix = dv_cast<string>(&pMetadata->getAttributeByPath(pPrefixPath));
+         if (pBandPrefix != NULL)
+         {
+            string bandNamePrefix = *pBandPrefix;
+            for (unsigned int i = 0; i < bands.size(); ++i)
+            {
+               ostringstream formatter;
+               formatter << bandNamePrefix << " " << bands[i].getOriginalNumber() + 1;
+               bandNames.push_back(formatter.str());
+            }
+         }
+      }
+   }
+
+   mpSubsetPage->setBands(bands, bandNames, selectedBands);
+}
+
 void ImportOptionsDlg::updateConnections(bool bConnect)
 {
    if (bConnect == true)
    {
-      VERIFYNR(connect(mpDataPage, SIGNAL(modified()), this, SLOT(pagesModified())));
-      VERIFYNR(connect(mpFilePage, SIGNAL(modified()), this, SLOT(pagesModified())));
-      VERIFYNR(connect(mpFilePage, SIGNAL(valueChanged(const QString&)), this,
-         SLOT(generateDimensionVector(const QString&))));
-      VERIFYNR(connect(mpClassificationPage, SIGNAL(modified()), this, SLOT(updateClassification())));
       VERIFYNR(connect(mpSubsetPage, SIGNAL(subsetRowsChanged(const std::vector<DimensionDescriptor>&)), this,
-         SLOT(updateDataRows(const std::vector<DimensionDescriptor>&))));
+         SLOT(updateEditDataDescriptorRows(const std::vector<DimensionDescriptor>&))));
       VERIFYNR(connect(mpSubsetPage, SIGNAL(subsetColumnsChanged(const std::vector<DimensionDescriptor>&)), this,
-         SLOT(updateDataColumns(const std::vector<DimensionDescriptor>&))));
+         SLOT(updateEditDataDescriptorColumns(const std::vector<DimensionDescriptor>&))));
       VERIFYNR(connect(mpSubsetPage, SIGNAL(subsetBandsChanged(const std::vector<DimensionDescriptor>&)), this,
-         SLOT(updateDataBands(const std::vector<DimensionDescriptor>&))));
-      VERIFYNR(connect(mpSubsetPage, SIGNAL(subsetBandsChanged(const std::vector<DimensionDescriptor>&)),
-         mpWavelengthsPage, SLOT(highlightActiveBands(const std::vector<DimensionDescriptor>&))));
+         SLOT(updateEditDataDescriptorBands(const std::vector<DimensionDescriptor>&))));
    }
    else
    {
-      disconnect(mpDataPage, SIGNAL(modified()), this, SLOT(pagesModified()));
-      disconnect(mpFilePage, SIGNAL(modified()), this, SLOT(pagesModified()));
-      disconnect(mpFilePage, SIGNAL(valueChanged(const QString&)), this,
-         SLOT(generateDimensionVector(const QString&)));
-      disconnect(mpClassificationPage, SIGNAL(modified()), this, SLOT(updateClassification()));
       disconnect(mpSubsetPage, SIGNAL(subsetRowsChanged(const std::vector<DimensionDescriptor>&)), this,
-         SLOT(updateDataRows(const std::vector<DimensionDescriptor>&)));
+         SLOT(updateEditDataDescriptorRows(const std::vector<DimensionDescriptor>&)));
       disconnect(mpSubsetPage, SIGNAL(subsetColumnsChanged(const std::vector<DimensionDescriptor>&)), this,
-         SLOT(updateDataColumns(const std::vector<DimensionDescriptor>&)));
+         SLOT(updateEditDataDescriptorColumns(const std::vector<DimensionDescriptor>&)));
       disconnect(mpSubsetPage, SIGNAL(subsetBandsChanged(const std::vector<DimensionDescriptor>&)), this,
-         SLOT(updateDataBands(const std::vector<DimensionDescriptor>&)));
-      disconnect(mpSubsetPage, SIGNAL(subsetBandsChanged(const std::vector<DimensionDescriptor>&)),
-         mpWavelengthsPage, SLOT(highlightActiveBands(const std::vector<DimensionDescriptor>&)));
+         SLOT(updateEditDataDescriptorBands(const std::vector<DimensionDescriptor>&)));
    }
 }

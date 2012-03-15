@@ -11,7 +11,6 @@
 #define SIGNATUREDATADESCRIPTORIMP_H
 
 #include "DataDescriptorImp.h"
-#include "UnitsImp.h"
 
 #include <map>
 #include <set>
@@ -39,6 +38,7 @@ public:
 
    virtual DataDescriptor* copy(const std::string& name, DataElement* pParent) const;
    virtual DataDescriptor* copy(const std::string& name, const std::vector<std::string>& parent) const;
+   virtual bool clone(const DataDescriptor* pDescriptor);
 
    virtual bool toXml(XMLWriter* pXml) const;
    virtual bool fromXml(DOMNode* pDocument, unsigned int version);
@@ -48,8 +48,13 @@ public:
    static void getDataDescriptorTypes(std::vector<std::string>& classList);
    static bool isKindOfDataDescriptor(const std::string& className);
 
+protected:
+   void notifyUnitsModified(Subject& subject, const std::string& signal, const boost::any& data);
+
 private:
-   std::map<std::string, UnitsImp> mUnits;
+   void clearUnits();
+
+   std::map<std::string, Units*> mUnits;
 };
 
 #define SIGNATUREDATADESCRIPTORADAPTEREXTENSION_CLASSES \

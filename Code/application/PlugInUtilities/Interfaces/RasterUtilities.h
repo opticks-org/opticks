@@ -72,34 +72,57 @@ namespace RasterUtilities
       bool setOriginalNumbers = true, bool setActiveNumbers = false, bool setOnDiskNumbers = false);
 
    /**
-    * Determine the load skip factor if any between each DimensionDescriptor.  This
-    * function will determine the uniform skip factor between each DimensionDescriptor::getOnDiskNumber()
-    * which represents any skip factor used to load the data.
+    *  Determines a uniform skip factor, if any, between multiple
+    *  DimensionDescriptor objects.
     *
-    * @param values
-    *        The DimensionDescriptors to determine the skip factor of.
-    * @param skipFactor
-    *        This will be set to the calculated skip factor.  A skipFactor of 0, indicates
-    *        the on-disk numbers are the following: 0, 1, 2, 3, 4, 5, 6.  A skip factor of 1,
-    *        indicates the on-disk numbers are the following: 0, 2, 4, 6.
+    *  This method determines the uniform skip factor between each given
+    *  DimensionDescriptor based on its on-disk number, which represents the
+    *  skip factor used when the data was imported.
     *
-    * @return true, if a uniform skip factor could be determined, false otherwise.
+    *  @param   values
+    *           The DimensionDescriptor objects for which to determine the skip
+    *           factor.
+    *  @param   skipFactor
+    *           This parameter will be populated with the calculated skip factor.
+    *           A value of 0 indicates the on-disk numbers are as follows:
+    *           0, 1, 2, 3, 4, 5, 6, etc.  A skip factor of 1 indicates the
+    *           on-disk numbers are as follows: 0, 2, 4, 6, etc.  If the
+    *           DimensionDescriptor objects do not have a uniform skip factor
+    *           (i.e. the method returns \c false), \em skipFactor is not
+    *           modified.
+    *
+    *  @return  Returns \c true if a uniform skip factor could be determined;
+    *           otherwise returns \c false.
+    *
+    *  @see     determineExportSkipFactor(),
+    *           DimensionDescriptor::getOnDiskNumber()
     */
    bool determineSkipFactor(const std::vector<DimensionDescriptor>& values, unsigned int& skipFactor);
 
    /**
-    * Determine the export skip factor if any between each DimensionDescriptor.  This
-    * function will determine the uniform skip factor between each DimensionDescriptor::getActiveNumber()
-    * which represents any skip factor used when exporting the data.
+    *  Determines a uniform skip factor, if any, between multiple
+    *  DimensionDescriptor objects.
     *
-    * @param values
-    *        The DimensionDescriptors to determine the skip factor of.
-    * @param skipFactor
-    *        This will be set to the calculated skip factor.  A skipFactor of 0, indicates
-    *        the active numbers are the following: 0, 1, 2, 3, 4, 5, 6.  A skip factor of 1,
-    *        indicates the active numbers are the following: 0, 2, 4, 6.
+    *  This method determines the uniform skip factor between each given
+    *  DimensionDescriptor based on its active number, which represents the
+    *  skip factor that should be used when exporting the data.
     *
-    * @return true, if a uniform skip factor could be determined, false otherwise.
+    *  @param   values
+    *           The DimensionDescriptor objects for which to determine the skip
+    *           factor.
+    *  @param   skipFactor
+    *           This parameter will be populated with the calculated skip factor.
+    *           A value of 0 indicates the active numbers are as follows:
+    *           0, 1, 2, 3, 4, 5, 6, etc.  A skip factor of 1 indicates the
+    *           active numbers are as follows: 0, 2, 4, 6, etc.  If the
+    *           DimensionDescriptor objects do not have a uniform skip factor
+    *           (i.e. the method returns \c false), \em skipFactor is not
+    *           modified.
+    *
+    *  @return  Returns \c true if a uniform skip factor could be determined;
+    *           otherwise returns \c false.
+    *
+    *  @see     determineSkipFactor(), DimensionDescriptor::getActiveNumber()
     */
    bool determineExportSkipFactor(const std::vector<DimensionDescriptor>&values, unsigned int& skipFactor);
 

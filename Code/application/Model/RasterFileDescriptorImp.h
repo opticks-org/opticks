@@ -13,22 +13,19 @@
 #include "DimensionDescriptor.h"
 #include "FileDescriptorImp.h"
 #include "GcpList.h"
-#include "UnitsImp.h"
+#include "UnitsAdapter.h"
+#include "XercesIncludes.h"
 #include "xmlwriter.h"
 
 #include <list>
 #include <string>
 #include <vector>
 
-#include "XercesIncludes.h"
-
 class RasterFileDescriptorImp : public FileDescriptorImp
 {
 public:
    RasterFileDescriptorImp();
-   ~RasterFileDescriptorImp();
-
-   RasterFileDescriptorImp& operator =(const RasterFileDescriptorImp& descriptor);
+   virtual ~RasterFileDescriptorImp();
 
    void setHeaderBytes(unsigned int bytes);
    unsigned int getHeaderBytes() const;
@@ -75,9 +72,9 @@ public:
    void setYPixelSize(double pixelSize);
    double getYPixelSize() const;
 
-   void setUnits(const UnitsImp* pUnits);
-   UnitsImp* getUnits();
-   const UnitsImp* getUnits() const;
+   void setUnits(const Units* pUnits);
+   Units* getUnits();
+   const Units* getUnits() const;
 
    void setGcps(const std::list<GcpPoint>& gcps);
    const std::list<GcpPoint>& getGcps() const;
@@ -86,7 +83,7 @@ public:
    void setBandFiles(const std::vector<const Filename*>& bandFiles);
    const std::vector<const Filename*>& getBandFiles() const;
 
-
+   virtual bool clone(const FileDescriptor* pFileDescriptor);
    void addToMessageLog(Message* pMessage) const;
 
    bool toXml(XMLWriter* pXml) const;
@@ -97,7 +94,11 @@ public:
    static void getFileDescriptorTypes(std::vector<std::string>& classList);
    static bool isKindOfFileDescriptor(const std::string& className);
 
+protected:
+   void notifyUnitsModified(Subject& subject, const std::string& signal, const boost::any& data);
+
 private:
+   RasterFileDescriptorImp& operator=(const RasterFileDescriptorImp& fileDescriptor);
    void clearBandFiles();
 
    unsigned int mHeaderBytes;
@@ -116,7 +117,7 @@ private:
    double mXPixelSize;
    double mYPixelSize;
 
-   UnitsImp mUnits;
+   UnitsAdapter mUnits;
    std::list<GcpPoint> mGcps;
 
    std::vector<const Filename*> mBandFiles;
@@ -245,15 +246,15 @@ namespace XmlUtilities
    } \
    void setUnits(const Units* pUnits) \
    { \
-      impClass::setUnits(dynamic_cast<const UnitsImp*>(pUnits)); \
+      impClass::setUnits(pUnits); \
    } \
    Units* getUnits() \
    { \
-      return dynamic_cast<Units*>(impClass::getUnits()); \
+      return impClass::getUnits(); \
    } \
    const Units* getUnits() const \
    { \
-      return dynamic_cast<const Units*>(impClass::getUnits()); \
+      return impClass::getUnits(); \
    } \
    void setGcps(const std::list<GcpPoint>& gcps) \
    { \

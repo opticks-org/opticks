@@ -452,12 +452,14 @@ DataVariant& DynamicObjectImp::getAttributeByPath(const string pComponents[])
 
 void DynamicObjectImp::getAttributeNames(vector<string>& attributeNames) const
 {
-   attributeNames.clear();
+   attributeNames.resize(mVariantAttributes.size(), string());
 
-   map<string, DataVariant>::const_iterator pPair;
-   for (pPair = mVariantAttributes.begin(); pPair != mVariantAttributes.end(); ++pPair)
+   vector<string>::size_type i = 0;
+   for (map<string, DataVariant>::const_iterator iter = mVariantAttributes.begin();
+      iter != mVariantAttributes.end();
+      ++iter, ++i)
    {
-      attributeNames.push_back(pPair->first);
+      attributeNames[i] = iter->first;
    }
 }
 
@@ -574,6 +576,50 @@ bool DynamicObjectImp::removeAttributeByPath(QStringList pathComponents)
       return false;
    }
    return pParent->removeAttribute(attributeToRemove);
+}
+
+bool DynamicObjectImp::compare(const DynamicObject* pObject) const
+{
+   if (pObject == NULL)
+   {
+      return false;
+   }
+
+   if (pObject->getNumAttributes() != getNumAttributes())
+   {
+      return false;
+   }
+
+   try
+   {
+      for (map<string, DataVariant>::const_iterator iter = mVariantAttributes.begin();
+         iter != mVariantAttributes.end();
+         ++iter)
+      {
+         const DataVariant& value = pObject->getAttribute(iter->first);
+         if ((value.getTypeName() == TypeConverter::toString<DynamicObject>()) &&
+            (iter->second.getTypeName() == TypeConverter::toString<DynamicObject>()))
+         {
+            const DynamicObject* pChild = dv_cast<DynamicObject>(&value);
+            if (pChild->compare(dv_cast<DynamicObject>(&(iter->second))) == true)
+            {
+               continue;
+            }
+         }
+         else if (value == iter->second)
+         {
+            continue;
+         }
+
+         return false;
+      }
+   }
+   catch (DataVariant::UnsupportedOperation)
+   {
+      return false;
+   }
+
+   return true;
 }
 
 void DynamicObjectImp::clear()

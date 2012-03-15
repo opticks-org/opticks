@@ -116,7 +116,12 @@ public:
     *
     *  @default The default implementation calls the base class implementation
     *           and provides better error messages where appropriate based on
-    *           the test conditions in getValidationTest().
+    *           the test conditions in getValidationTest().  If the base class
+    *           implementation validates successfully, the gray, red, green, and
+    *           blue display bands in the RasterDataDescriptor are checked
+    *           against the loaded bands.  If the display band will not be
+    *           loaded, a warning is added to \em errorMessage and the method
+    *           returns \c true.
     */
    virtual bool validate(const DataDescriptor* pDescriptor, std::string& errorMessage) const;
 

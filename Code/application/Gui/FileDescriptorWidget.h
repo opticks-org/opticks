@@ -10,41 +10,38 @@
 #ifndef FILEDESCRIPTORWIDGET_H
 #define FILEDESCRIPTORWIDGET_H
 
-#include <QtGui/QGroupBox>
-#include <QtGui/QTreeWidgetItem>
 #include <QtGui/QWidget>
 
+#include "FileDescriptor.h"
+#include "SafePtr.h"
+
+#include <boost/any.hpp>
+#include <string>
+
 class FileBrowser;
-class FileDescriptor;
 class CustomTreeWidget;
+class QComboBox;
+class QGroupBox;
+class QTreeWidgetItem;
+class Subject;
 
 class FileDescriptorWidget : public QWidget
 {
    Q_OBJECT
 
 public:
-   FileDescriptorWidget(QWidget* parent = 0);
-   ~FileDescriptorWidget();
+   FileDescriptorWidget(QWidget* pParent = NULL);
+   virtual ~FileDescriptorWidget();
 
-   void setFileDescriptor(FileDescriptor* pFileDescriptor);
-   void setFileDescriptor(const FileDescriptor* pFileDescriptor);
-
-   void setDescriptorValue(const QString& strValueName, const QString& strValue);
-   QString getDescriptorValue(const QString& strValueName) const;
-
-   void initialize();
-   bool isModified() const;
-   bool applyChanges();
-   bool applyToFileDescriptor(FileDescriptor* pFileDescriptor);
-
-   QSize sizeHint() const;
-
-signals:
-   void valueChanged(const QString& strValueName);
-   void modified();
+   void setFileDescriptor(FileDescriptor* pFileDescriptor, bool editable);
 
 protected:
-   QTreeWidgetItem* getDescriptorItem(const QString& strName, QTreeWidgetItem* pStartAt = 0) const;
+   virtual void showEvent(QShowEvent* pEvent);
+   virtual void hideEvent(QHideEvent* pEvent);
+   void fileDescriptorModified(Subject& subject, const std::string& signal, const boost::any& value);
+
+   void initialize();
+   QTreeWidgetItem* getDescriptorItem(const QString& strName, QTreeWidgetItem* pParentItem = NULL) const;
 
 protected slots:
    void descriptorItemChanged(QTreeWidgetItem* pItem, int iColumn);
@@ -53,12 +50,16 @@ protected slots:
 private:
    FileDescriptorWidget(const FileDescriptorWidget& rhs);
    FileDescriptorWidget& operator=(const FileDescriptorWidget& rhs);
-   FileDescriptor* mpFileDescriptor;
-   bool mReadOnly;
-   bool mModified;
+
+   SafePtr<FileDescriptor> mpFileDescriptor;
+   bool mEditable;
+   bool mNeedsInitialization;
 
    CustomTreeWidget* mpTreeWidget;
    FileBrowser* mpFileBrowser;
+   QComboBox* mpEndianCombo;
+   QComboBox* mpInterleaveCombo;
+   QComboBox* mpUnitTypeCombo;
    QGroupBox* mpGcpGroup;
    CustomTreeWidget* mpGcpTree;
 };

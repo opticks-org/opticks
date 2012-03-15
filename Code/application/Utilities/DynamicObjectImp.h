@@ -55,6 +55,7 @@ public:
    virtual bool removeAttributeByPath(const std::string pComponents[]);
    virtual bool removeAttributeByPath(const std::string& path);
    virtual bool removeAttributeByPath(QStringList pathComponents);
+   virtual bool compare(const DynamicObject* pObject) const;
    virtual void clear();
 
    const std::string& getObjectType() const;
@@ -167,6 +168,10 @@ protected:
    bool removeAttributeByPath(const std::string& path) \
    { \
       return impClass::removeAttributeByPath(path); \
+   } \
+   bool compare(const DynamicObject* pObject) const \
+   { \
+      return impClass::compare(pObject); \
    } \
    void clear() \
    { \

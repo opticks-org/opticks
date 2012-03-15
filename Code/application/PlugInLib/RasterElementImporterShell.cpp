@@ -242,6 +242,73 @@ bool RasterElementImporterShell::validate(const DataDescriptor* pDescriptor, str
          errorMessage += " with on-disk read-only processing.";
       }
    }
+   else
+   {
+      // Check for display bands that are not loaded
+      const RasterDataDescriptor* pRasterDescriptor = dynamic_cast<const RasterDataDescriptor*>(pDescriptor);
+      VERIFY(pRasterDescriptor != NULL);
+
+      DimensionDescriptor grayBand = pRasterDescriptor->getDisplayBand(GRAY);
+      if (grayBand.isOriginalNumberValid() == true)
+      {
+         DimensionDescriptor band = pRasterDescriptor->getOriginalBand(grayBand.getOriginalNumber());
+         if (band.isValid() == false)
+         {
+            if (errorMessage.empty() == false)
+            {
+               errorMessage += "\n";
+            }
+
+            errorMessage += "The gray display band is not available.  The first loaded band will be displayed instead.";
+         }
+      }
+
+      DimensionDescriptor redBand = pRasterDescriptor->getDisplayBand(RED);
+      if (redBand.isOriginalNumberValid() == true)
+      {
+         DimensionDescriptor band = pRasterDescriptor->getOriginalBand(redBand.getOriginalNumber());
+         if (band.isValid() == false)
+         {
+            if (errorMessage.empty() == false)
+            {
+               errorMessage += "\n";
+            }
+
+            errorMessage += "The red display band is not available.  The first loaded band will be displayed instead.";
+         }
+      }
+
+      DimensionDescriptor greenBand = pRasterDescriptor->getDisplayBand(GREEN);
+      if (greenBand.isOriginalNumberValid() == true)
+      {
+         DimensionDescriptor band = pRasterDescriptor->getOriginalBand(greenBand.getOriginalNumber());
+         if (band.isValid() == false)
+         {
+            if (errorMessage.empty() == false)
+            {
+               errorMessage += "\n";
+            }
+
+            errorMessage += "The green display band is not available.  The first loaded band will be "
+               "displayed instead.";
+         }
+      }
+
+      DimensionDescriptor blueBand = pRasterDescriptor->getDisplayBand(BLUE);
+      if (blueBand.isOriginalNumberValid() == true)
+      {
+         DimensionDescriptor band = pRasterDescriptor->getOriginalBand(blueBand.getOriginalNumber());
+         if (band.isValid() == false)
+         {
+            if (errorMessage.empty() == false)
+            {
+               errorMessage += "\n";
+            }
+
+            errorMessage += "The blue display band is not available.  The first loaded band will be displayed instead.";
+         }
+      }
+   }
 
    return isValid;
 }

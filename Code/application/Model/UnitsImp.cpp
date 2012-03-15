@@ -7,6 +7,7 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include "Units.h"
 #include "UnitsImp.h"
 #include "xmlreader.h"
 #include "xmlwriter.h"
@@ -22,12 +23,10 @@ UnitsImp::UnitsImp() :
    mRangeMin(0.0),
    mRangeMax(0.0),
    mScaleFromStandard(1.0)
-{
-}
+{}
 
 UnitsImp::~UnitsImp()
-{
-}
+{}
 
 UnitType UnitsImp::getUnitType() const
 {
@@ -45,6 +44,7 @@ void UnitsImp::setUnitType(UnitType myType)
    string typeName = StringUtilities::toDisplayString(mUnitType);
 
    mUnitType = myType;
+   notify(SIGNAL_NAME(Units, TypeChanged), boost::any(mUnitType));
 
    if (unitName == typeName)
    {
@@ -68,6 +68,7 @@ void UnitsImp::setUnitName(const string& unitName)
    if (unitName != mUnitName)
    {
       mUnitName = unitName;
+      notify(SIGNAL_NAME(Units, Renamed), boost::any(mUnitName));
    }
 }
 
@@ -78,7 +79,11 @@ double UnitsImp::getRangeMin() const
 
 void UnitsImp::setRangeMin(double myRangeMin)
 {
-   mRangeMin = myRangeMin;
+   if (myRangeMin != mRangeMin)
+   {
+      mRangeMin = myRangeMin;
+      notify(SIGNAL_NAME(Units, RangeChanged));
+   }
 }
 
 double UnitsImp::getRangeMax() const
@@ -88,7 +93,11 @@ double UnitsImp::getRangeMax() const
 
 void UnitsImp::setRangeMax(double myRangeMax)
 {
-   mRangeMax = myRangeMax;
+   if (myRangeMax != mRangeMax)
+   {
+      mRangeMax = myRangeMax;
+      notify(SIGNAL_NAME(Units, RangeChanged));
+   }
 }
 
 double UnitsImp::getScaleFromStandard() const
@@ -98,21 +107,35 @@ double UnitsImp::getScaleFromStandard() const
 
 void UnitsImp::setScaleFromStandard(double myScaleFromStandard)
 {
-   mScaleFromStandard = myScaleFromStandard;
+   if (myScaleFromStandard != mScaleFromStandard)
+   {
+      mScaleFromStandard = myScaleFromStandard;
+      notify(SIGNAL_NAME(Units, ScaleChanged), boost::any(mScaleFromStandard));
+   }
 }
 
-UnitsImp& UnitsImp::operator =(const UnitsImp& units)
+void UnitsImp::setUnits(const Units* pUnits)
 {
-   if (this != &units)
+   if (pUnits != NULL)
    {
-      mUnitType = units.mUnitType;
-      mUnitName = units.mUnitName;
-      mRangeMin = units.mRangeMin;
-      mRangeMax = units.mRangeMax;
-      mScaleFromStandard = units.mScaleFromStandard;
+      setUnitType(pUnits->getUnitType());
+      setUnitName(pUnits->getUnitName());
+      setScaleFromStandard(pUnits->getScaleFromStandard());
+      setRangeMin(pUnits->getRangeMin());
+      setRangeMax(pUnits->getRangeMax());
+   }
+}
+
+bool UnitsImp::compare(const Units* pUnits) const
+{
+   if (pUnits == NULL)
+   {
+      return false;
    }
 
-   return *this;
+   return (mUnitType == pUnits->getUnitType() && mUnitName == pUnits->getUnitName() &&
+      mScaleFromStandard == pUnits->getScaleFromStandard() && mRangeMax == pUnits->getRangeMax() &&
+      mRangeMin == pUnits->getRangeMin());
 }
 
 bool UnitsImp::toXml(XMLWriter* pXml) const
@@ -169,19 +192,5 @@ bool UnitsImp::isKindOf(const string& className) const
       return true;
    }
 
-   return false;
-}
-
-bool UnitsImp::operator==(const UnitsImp& rhs) const
-{
-   return (mUnitName == rhs.mUnitName &&
-           mUnitType == rhs.mUnitType &&
-           mScaleFromStandard == rhs.mScaleFromStandard &&
-           mRangeMax == rhs.mRangeMax &&
-           mRangeMin == rhs.mRangeMin);
-}
-
-bool UnitsImp::operator!=(const UnitsImp& rhs) const
-{
-   return !(*this == rhs);
+   return SubjectImp::isKindOf(className);
 }

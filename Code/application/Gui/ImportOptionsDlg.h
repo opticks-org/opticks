@@ -43,7 +43,7 @@ class ImportOptionsDlg : public QDialog
 public:
    ImportOptionsDlg(Importer* pImporter, const QMap<QString, std::vector<ImportDescriptor*> >& files,
       QWidget* pParent = NULL);
-   ~ImportOptionsDlg();
+   virtual ~ImportOptionsDlg();
 
    void allowDeselectedFiles(bool allowDeselectedFiles);
    bool areDeselectedFilesAllowed() const;
@@ -66,33 +66,40 @@ protected:
    void enforceSelections(QTreeWidgetItem* pItem);
    void removeImporterPage();
 
-   void editDescriptorModified(Subject& subject, const std::string& signal, const boost::any& value);
+   void editDataDescriptorModified(Subject& subject, const std::string& signal, const boost::any& value);
+   void editDataDescriptorRowsModified(Subject& subject, const std::string& signal, const boost::any& value);
+   void editDataDescriptorColumnsModified(Subject& subject, const std::string& signal, const boost::any& value);
+   void editDataDescriptorBandsModified(Subject& subject, const std::string& signal, const boost::any& value);
+   void editFileDescriptorRowsModified(Subject& subject, const std::string& signal, const boost::any& value);
+   void editFileDescriptorColumnsModified(Subject& subject, const std::string& signal, const boost::any& value);
+   void editFileDescriptorBandsModified(Subject& subject, const std::string& signal, const boost::any& value);
+   void editClassificationModified(Subject& subject, const std::string& signal, const boost::any& value);
 
 protected slots:
    void datasetItemChanged(QTreeWidgetItem* pItem);
    void updateEditDataset();
    void selectAllDatasets();
    void deselectAllDatasets();
-   void generateDimensionVector(const QString& strValueName);
-   void updateDataRows(const std::vector<DimensionDescriptor>& rows);
-   void updateDataColumns(const std::vector<DimensionDescriptor>& columns);
-   void updateDataBands(const std::vector<DimensionDescriptor>& bands);
-   void updateClassification();
+   void updateEditDataDescriptorRows(const std::vector<DimensionDescriptor>& rows);
+   void updateEditDataDescriptorColumns(const std::vector<DimensionDescriptor>& columns);
+   void updateEditDataDescriptorBands(const std::vector<DimensionDescriptor>& bands);
    void updateClassificationLabel();
-   void pagesModified();
    bool applyChanges();
 
 private:
+   void setSubsetBands(const std::vector<DimensionDescriptor>& bands,
+      const std::vector<DimensionDescriptor>& selectedBands);
    void updateConnections(bool bConnect);
 
 private:
    ImportOptionsDlg(const ImportOptionsDlg& rhs);
    ImportOptionsDlg& operator=(const ImportOptionsDlg& rhs);
+
    Importer* mpImporter;
    std::map<ImportDescriptor*, QTreeWidgetItem*> mDatasets;
    ImportDescriptor* mpCurrentDataset;
    DataDescriptor* mpEditDescriptor;    // Contains un-applied user changes
-   bool mEditDescriptorModified;
+   bool mEditDataDescriptorModified;
    bool mPromptForChanges;
    bool mAllowDeselectedFiles;
 

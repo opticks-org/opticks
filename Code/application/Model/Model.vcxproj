@@ -207,6 +207,7 @@
     <ClCompile Include="StatisticsImp.cpp" />
     <ClCompile Include="TiePointListAdapter.cpp" />
     <ClCompile Include="TiePointListImp.cpp" />
+    <ClCompile Include="UnitsAdapter.cpp" />
     <ClCompile Include="UnitsImp.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -267,6 +268,7 @@
     <ClInclude Include="StatisticsImp.h" />
     <ClInclude Include="TiePointListAdapter.h" />
     <ClInclude Include="TiePointListImp.h" />
+    <ClInclude Include="UnitsAdapter.h" />
     <ClInclude Include="UnitsImp.h" />
   </ItemGroup>
   <ItemGroup>

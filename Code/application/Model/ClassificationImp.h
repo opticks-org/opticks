@@ -22,7 +22,7 @@ class ClassificationImp : public DynamicObjectImp
 {
 public:
    ClassificationImp();
-   ~ClassificationImp();
+   virtual ~ClassificationImp();
 
    ClassificationImp& operator =(const ClassificationImp& rhs);
 
@@ -69,6 +69,8 @@ public:
    bool setClassification(const std::string& classificationText);
    void setClassification(const Classification* pClassification);
    void getClassificationText(std::string& classificationText) const;
+   bool compare(const DynamicObject* pObject) const;
+   bool compare(const Classification* pClassification) const;
    bool isValid(std::string& errorMessage) const;
 
    bool toXml(XMLWriter* pXml) const;
@@ -274,6 +276,10 @@ private:
    void setClassification(const Classification* pClassification) \
    { \
       impClass::setClassification(pClassification); \
+   } \
+   bool compare(const Classification* pClassification) const \
+   { \
+      return impClass::compare(pClassification); \
    } \
    bool isValid(std::string& errorMessage) const \
    { \

@@ -7,30 +7,31 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtCore/QDate>
 #include <QtCore/QDir>
-
+#include <QtGui/QComboBox>
+#include <QtGui/QDateEdit>
 #include <QtGui/QInputDialog>
 #include <QtGui/QLabel>
 #include <QtGui/QLayout>
-#include <QtGui/QMessageBox>
+#include <QtGui/QListWidget>
 #include <QtGui/QPushButton>
+#include <QtGui/QSpinBox>
+#include <QtGui/QStackedWidget>
+#include <QtGui/QTabWidget>
+#include <QtGui/QTextEdit>
 
 #include "AppConfig.h"
 #include "ApplicationServices.h"
 #include "AppVerify.h"
-#include "Classification.h"
 #include "ClassificationWidget.h"
-#include "ConfigurationSettings.h"
 #include "DateTime.h"
-#include "DynamicObject.h"
 #include "InfoBar.h"
 #include "ObjectFactory.h"
 #include "ObjectResource.h"
-#include "PlugInManagerServices.h"
+#include "Slot.h"
 #include "StringUtilities.h"
 #include "UtilityServices.h"
-
-#include <string>
 
 using namespace std;
 
@@ -107,6 +108,7 @@ void populateListFromFile(T* box, const QString& strFilename, bool addBlank)
          box->addItem(QString());
       }
 
+      box->setCurrentIndex(-1);
       fclose(stream);
    }
 }
@@ -114,10 +116,7 @@ void populateListFromFile(T* box, const QString& strFilename, bool addBlank)
 ClassificationWidget::ClassificationWidget(QWidget* pParent) :
    QWidget(pParent),
    mpClass(NULL),
-   mModified(false),
-   mFavoritesAttributePrefix("favorite"),
-   mDeclassDateIsValid(false),
-   mDowngradeDateIsValid(false)
+   mNeedsInitialization(false)
 {
    // Classification level
    QLabel* pClassificationLabel = new QLabel("Classification Level:", this);
@@ -271,7 +270,7 @@ ClassificationWidget::ClassificationWidget(QWidget* pParent) :
    pDescriptorGrid->addWidget(mpCopyNumberSpinBox, 7, 1, Qt::AlignLeft);
    pDescriptorGrid->addWidget(pNumberOfCopiesLabel, 8, 0);
    pDescriptorGrid->addWidget(mpNumberOfCopiesSpinBox, 8, 1, Qt::AlignLeft);
-   pDescriptorGrid->setRowStretch(4, 10);
+   pDescriptorGrid->setRowStretch(6, 10);
    pDescriptorGrid->setColumnStretch(1, 10);
 
    mpTabWidget->addTab(pDescriptorTab, "Descriptor");
@@ -291,48 +290,64 @@ ClassificationWidget::ClassificationWidget(QWidget* pParent) :
    QGridLayout* pGrid = new QGridLayout(this);
    pGrid->setMargin(0);
    pGrid->setSpacing(10);
-   pGrid->addWidget(pClassificationLabel, 0, 0);
-   pGrid->addWidget(mpClassLevelCombo, 0, 1);
-   pGrid->addWidget(mpTabWidget, 1, 0, 1, 2);
+   pGrid->addWidget(pClassificationLabel, 0, 0, 1, 2);
+   pGrid->addWidget(mpClassLevelCombo, 0, 2);
+   pGrid->addWidget(mpTabWidget, 1, 0, 1, 3);
    pGrid->addWidget(pFavoritesLabel, 2, 0);
-   pGrid->addWidget(mpFavoritesCombo, 2, 1);
-   pGrid->addLayout(pButtonLayout, 3, 0, 1, 2);
+   pGrid->addWidget(mpFavoritesCombo, 2, 1, 1, 2);
+   pGrid->addLayout(pButtonLayout, 3, 0, 1, 3);
    pGrid->setRowStretch(1, 10);
-   pGrid->setColumnStretch(1, 10);
+   pGrid->setColumnStretch(2, 10);
 
    // Initialization
-   initialize();
+   resetToDefault();
+   deserializeFavorites();
+   updateFavoritesCombo();
    pFieldList->setCurrentRow(0);
    checkAddButton(mpValueStack->currentIndex());
 
    // Connections
-   VERIFYNR(connect(mpClassLevelCombo, SIGNAL(activated(const QString&)), this, SLOT(updateMarkings())));
-   VERIFYNR(connect(mpClassReasonCombo, SIGNAL(activated(const QString&)), this, SLOT(updateMarkings())));
-   VERIFYNR(connect(mpDeclassTypeCombo, SIGNAL(activated(const QString&)), this, SLOT(updateMarkings())));
+   VERIFYNR(connect(mpClassLevelCombo, SIGNAL(activated(const QString&)), this, SLOT(setLevel(const QString&))));
    VERIFYNR(connect(mpValueStack, SIGNAL(currentChanged(int)), this, SLOT(updateSize())));
    VERIFYNR(connect(mpValueStack, SIGNAL(currentChanged(int)), this, SLOT(checkAddButton(int))));
-   VERIFYNR(connect(mpCodewordList, SIGNAL(itemSelectionChanged()), this, SLOT(updateMarkings())));
-   VERIFYNR(connect(mpSystemList, SIGNAL(itemSelectionChanged()), this, SLOT(updateMarkings())));
-   VERIFYNR(connect(mpCountryCodeList, SIGNAL(itemSelectionChanged()), this, SLOT(updateMarkings())));
-   VERIFYNR(connect(mpFileReleasingList, SIGNAL(itemSelectionChanged()), this, SLOT(updateMarkings())));
-   VERIFYNR(connect(mpExemptionList, SIGNAL(itemSelectionChanged()), this, SLOT(updateMarkings())));
-   VERIFYNR(connect(mpDeclassDateEdit, SIGNAL(dateChanged(const QDate&)), this, SLOT(dateChanged(const QDate&))));
-   VERIFYNR(connect(mpDeclassDateEdit, SIGNAL(dateChanged(const QDate&)), this, SLOT(updateMarkings())));
-   VERIFYNR(connect(mpDowngradeDateEdit, SIGNAL(dateChanged(const QDate&)), this, SLOT(dateChanged(const QDate&))));
-   VERIFYNR(connect(mpDowngradeDateEdit, SIGNAL(dateChanged(const QDate&)), this, SLOT(updateMarkings())));
+   VERIFYNR(connect(mpCodewordList, SIGNAL(itemSelectionChanged()), this, SLOT(setCodewords())));
+   VERIFYNR(connect(mpSystemList, SIGNAL(itemSelectionChanged()), this, SLOT(setSystem())));
+   VERIFYNR(connect(mpFileReleasingList, SIGNAL(itemSelectionChanged()), this, SLOT(setFileReleasing())));
+   VERIFYNR(connect(mpCountryCodeList, SIGNAL(itemSelectionChanged()), this, SLOT(setCountryCode())));
+   VERIFYNR(connect(mpExemptionList, SIGNAL(itemSelectionChanged()), this, SLOT(setDeclassificationExemption())));
    VERIFYNR(connect(mpAddButton, SIGNAL(clicked()), this, SLOT(addListItem())));
    VERIFYNR(connect(pResetButton, SIGNAL(clicked()), this, SLOT(resetList())));
+   VERIFYNR(connect(mpClassReasonCombo, SIGNAL(activated(const QString&)), this,
+      SLOT(setClassificationReason(const QString&))));
+   VERIFYNR(connect(mpDeclassTypeCombo, SIGNAL(activated(const QString&)), this,
+      SLOT(setDeclassificationType(const QString&))));
+   VERIFYNR(connect(mpDeclassDateEdit, SIGNAL(dateChanged(const QDate&)), this,
+      SLOT(setDeclassificationDate(const QDate&))));
+   VERIFYNR(connect(mpResetDeclassDateButton, SIGNAL(clicked()), this, SLOT(resetDeclassificationDate())));
+   VERIFYNR(connect(mpFileDowngradeCombo, SIGNAL(activated(const QString&)), this,
+      SLOT(setFileDowngrade(const QString&))));
+   VERIFYNR(connect(mpDowngradeDateEdit, SIGNAL(dateChanged(const QDate&)), this,
+      SLOT(setDowngradeDate(const QDate&))));
+   VERIFYNR(connect(mpResetDowngradeDateButton, SIGNAL(clicked()), this, SLOT(resetDowngradeDate())));
+   VERIFYNR(connect(mpFileControlCombo, SIGNAL(activated(const QString&)), this,
+      SLOT(setFileControl(const QString&))));
+   VERIFYNR(connect(mpDescriptionEdit, SIGNAL(textChanged()), this, SLOT(setDescription())));
+   VERIFYNR(connect(mpCopyNumberSpinBox, SIGNAL(valueChanged(const QString&)), this,
+      SLOT(setFileCopyNumber(const QString&))));
+   VERIFYNR(connect(mpNumberOfCopiesSpinBox, SIGNAL(valueChanged(const QString&)), this,
+      SLOT(setFileNumberOfCopies(const QString&))));
+   VERIFYNR(connect(mpFavoritesCombo, SIGNAL(activated(const QString&)), this, SLOT(favoriteSelected())));
    VERIFYNR(connect(pAddToFavoritesButton, SIGNAL(clicked()), this, SLOT(addFavoriteItem())));
    VERIFYNR(connect(pRemoveFromFavoritesButton, SIGNAL(clicked()), this, SLOT(removeFavoriteItem())));
-   VERIFYNR(connect(mpFavoritesCombo, SIGNAL(activated(const QString&)), this, SLOT(favoriteSelected())));
-   VERIFYNR(connect(mpResetDeclassDateButton, SIGNAL(clicked()), this, SLOT(resetDateTimeEdit())));
-   VERIFYNR(connect(mpResetDowngradeDateButton, SIGNAL(clicked()), this, SLOT(resetDateTimeEdit())));
-   VERIFYNR(connect(mpResetDeclassDateButton, SIGNAL(clicked()), this, SLOT(updateMarkings())));
-   VERIFYNR(connect(mpResetDowngradeDateButton, SIGNAL(clicked()), this, SLOT(updateMarkings())));
 }
 
 ClassificationWidget::~ClassificationWidget()
 {
+   if (mpClass.get() != NULL)
+   {
+      mpClass->detach(SIGNAL_NAME(Subject, Modified), Slot(this, &ClassificationWidget::classificationModified));
+   }
+
    clearFavorites();
 }
 
@@ -340,11 +355,16 @@ void ClassificationWidget::setClassification(Classification* pClassification, bo
 {
    if (pClassification != NULL)
    {
-      mpClass = pClassification;
+      if (mpClass.get() != NULL)
+      {
+         mpClass->detach(SIGNAL_NAME(Subject, Modified), Slot(this, &ClassificationWidget::classificationModified));
+      }
+
+      mpClass.reset(pClassification);
       if (initializeWidgets == true)
       {
-         importFromClassification(mpClass);
-         updateMarkings();
+         mNeedsInitialization = true;
+         initialize();
       }
       else
       {
@@ -352,39 +372,31 @@ void ClassificationWidget::setClassification(Classification* pClassification, bo
          mpTabWidget->setEnabled(false);
          mpMarkingsEdit->setPlainText(QString());
       }
-
-      mModified = false;
    }
 }
 
-bool ClassificationWidget::isModified() const
+void ClassificationWidget::showEvent(QShowEvent* pEvent)
 {
-   return mModified;
+   QWidget::showEvent(pEvent);
+
+   if (mpClass.get() != NULL)
+   {
+      mpClass->detach(SIGNAL_NAME(Subject, Modified), Slot(this, &ClassificationWidget::classificationModified));
+      initialize();
+   }
 }
 
-bool ClassificationWidget::applyChanges()
+void ClassificationWidget::hideEvent(QHideEvent* pEvent)
 {
-   if (mModified == false)
-   {
-      return true;
-   }
+   QWidget::hideEvent(pEvent);
 
-   if (mpClass == NULL)
+   if (mpClass.get() != NULL)
    {
-      return false;
+      mpClass->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &ClassificationWidget::classificationModified));
    }
-
-   if (mpClassLevelCombo->currentIndex() == -1)
-   {
-      return false;
-   }
-
-   exportToClassification(mpClass);
-   serializeFavorites();
-   return true;
 }
 
-void ClassificationWidget::initialize(QWidget* pWidget)
+void ClassificationWidget::resetToDefault(QWidget* pWidget)
 {
    // Get the default directory from the options
    QString strDefaultDir = QDir::currentPath();
@@ -399,7 +411,7 @@ void ClassificationWidget::initialize(QWidget* pWidget)
    {
       strDefaultDir += "/";
    }
-   
+
    if ((pWidget == NULL) || (pWidget == mpClassLevelCombo))
    {
       populateListFromFile(mpClassLevelCombo, strDefaultDir + "ClassificationLevels.txt", false);
@@ -460,6 +472,7 @@ void ClassificationWidget::initialize(QWidget* pWidget)
       {
          mpClassReasonCombo->addItem(QString::fromStdString((*iter)));
       }
+      mpClassReasonCombo->setCurrentIndex(-1);
    }
    if ((pWidget == NULL) || (pWidget == mpDeclassTypeCombo))
    {
@@ -469,6 +482,7 @@ void ClassificationWidget::initialize(QWidget* pWidget)
       {
          mpDeclassTypeCombo->addItem(QString::fromStdString((*iter)));
       }
+      mpDeclassTypeCombo->setCurrentIndex(-1);
    }
    if ((pWidget == NULL) || (pWidget == mpFileDowngradeCombo))
    {
@@ -478,6 +492,7 @@ void ClassificationWidget::initialize(QWidget* pWidget)
       {
          mpFileDowngradeCombo->addItem(QString::fromStdString((*iter)));
       }
+      mpFileDowngradeCombo->setCurrentIndex(-1);
    }
    if ((pWidget == NULL) || (pWidget == mpFileControlCombo))
    {
@@ -487,311 +502,434 @@ void ClassificationWidget::initialize(QWidget* pWidget)
       {
          mpFileControlCombo->addItem(QString::fromStdString((*iter)));
       }
+      mpFileControlCombo->setCurrentIndex(-1);
    }
-
-   deserializeFavorites();
-   updateFavoritesCombo();
 }
 
-void ClassificationWidget::importFromClassification(const Classification* pClass)
+void ClassificationWidget::initialize()
 {
-   if (pClass == NULL)
+   if ((mpClass.get() == NULL) || (mNeedsInitialization == false) || (isVisible() == false))
    {
       return;
    }
 
-   string text = pClass->getLevel();
+   mNeedsInitialization = false;
 
-   int i = 0;
+   // Level
+   int index = -1;
+
+   string text = mpClass->getLevel();
    if (text.empty() == false)
    {
       QString strText = QString::fromStdString(text);
-
-      for (i = 0; i < mpClassLevelCombo->count(); i++)
+      for (int i = 0; i < mpClassLevelCombo->count(); ++i)
       {
          QString strItemText = mpClassLevelCombo->itemText(i);
-
          if ((strItemText == strText) || (strItemText[0] == strText[0]))
          {
-            mpClassLevelCombo->setCurrentIndex(i);
+            index = i;
             break;
          }
       }
    }
 
-   mpTabWidget->setEnabled(pClass->getLevel() != "U");
+   mpClassLevelCombo->blockSignals(true);
+   mpClassLevelCombo->setCurrentIndex(index);
+   mpClassLevelCombo->blockSignals(false);
 
-   text = pClass->getCodewords();
+   mpTabWidget->setEnabled(mpClass->getLevel() != "U");
+
+   // Codewords
+   text = mpClass->getCodewords();
    selectListFromString(mpCodewordList, QString::fromStdString(text));
 
-   text = pClass->getSystem();
+   // System
+   text = mpClass->getSystem();
    selectListFromString(mpSystemList, QString::fromStdString(text));
 
-   text = pClass->getFileControl();
-   selectComboFromString(mpFileControlCombo, QString::fromStdString(text));
-
-   text = pClass->getFileReleasing();
+   // File releasing
+   text = mpClass->getFileReleasing();
    selectListFromString(mpFileReleasingList, QString::fromStdString(text));
 
-   text = pClass->getCountryCode();
+   // Country codes
+   text = mpClass->getCountryCode();
    selectListFromString(mpCountryCodeList, QString::fromStdString(text));
 
-   text = pClass->getDeclassificationExemption();
+   // Declassification exemption
+   text = mpClass->getDeclassificationExemption();
    selectListFromString(mpExemptionList, QString::fromStdString(text));
 
-   const DateTime* pDateTime = pClass->getDeclassificationDate();
-   // if a NULL DateTime is passed in, an empty, invalid DateTime will be used
+   // Classification reason
+   text = mpClass->getClassificationReason();
+   selectComboFromString(mpClassReasonCombo, QString::fromStdString(text));
+
+   // Declassification type
+   text = mpClass->getDeclassificationType();
+   selectComboFromString(mpDeclassTypeCombo, QString::fromStdString(text));
+
+   // Declassification date
+   const DateTime* pDateTime = mpClass->getDeclassificationDate();
    setDateEdit(mpDeclassDateEdit, pDateTime);
 
-   text = pClass->getClassificationReason();
+   // File downgrade
+   index = -1;
+
+   text = mpClass->getFileDowngrade();
    if (text.empty() == false)
    {
       QString strText = QString::fromStdString(text);
-
-      for (i = 0; i < mpClassReasonCombo->count(); i++)
-      {
-         QString strItemText = mpClassReasonCombo->itemText(i);
-
-         if ((strItemText == strText) || (strItemText[0] == strText[0]))
-         {
-            mpClassReasonCombo->setCurrentIndex(i);
-            break;
-         }
-      }
-   }
-
-   text = pClass->getDeclassificationType();
-   if (text.empty() == false)
-   {
-      QString strText = QString::fromStdString(text);
-
-      for (i = 0; i < mpDeclassTypeCombo->count(); i++)
-      {
-         QString strItemText = mpDeclassTypeCombo->itemText(i);
-         if (strItemText == strText)
-         {
-            mpDeclassTypeCombo->setCurrentIndex(i);
-            break;
-         }
-      }
-   }
-
-   text = pClass->getFileDowngrade();
-   if (text.empty() == false)
-   {
-      QString strText = QString::fromStdString(text);
-
-      for (i = 0; i < mpFileDowngradeCombo->count() && i < mpClassLevelCombo->count(); i++)
+      for (int i = 0; i < mpFileDowngradeCombo->count() && i < mpClassLevelCombo->count(); ++i)
       {
          QString strItemText = mpClassLevelCombo->itemText(i);
          if (strItemText == strText)
          {
-            mpFileDowngradeCombo->setCurrentIndex(i);
+            index = i;
             break;
          }
       }
    }
 
-   pDateTime = pClass->getDowngradeDate();
+   mpFileDowngradeCombo->blockSignals(true);
+   mpFileDowngradeCombo->setCurrentIndex(index);
+   mpFileDowngradeCombo->blockSignals(false);
+
+   // Downgrade date
+   pDateTime = mpClass->getDowngradeDate();
    setDateEdit(mpDowngradeDateEdit, pDateTime);
 
-   mpDescriptionEdit->setPlainText(QString::fromStdString(pClass->getDescription()));
-   mpCopyNumberSpinBox->setValue((QString::fromStdString(pClass->getFileCopyNumber())).toInt());
-   mpNumberOfCopiesSpinBox->setValue((QString::fromStdString(pClass->getFileNumberOfCopies())).toInt());
+   // File control
+   text = mpClass->getFileControl();
+   selectComboFromString(mpFileControlCombo, QString::fromStdString(text));
+
+   // Description
+   mpDescriptionEdit->blockSignals(true);
+   mpDescriptionEdit->setPlainText(QString::fromStdString(mpClass->getDescription()));
+   mpDescriptionEdit->blockSignals(false);
+
+   // Copy number
+   mpCopyNumberSpinBox->blockSignals(true);
+   mpCopyNumberSpinBox->setValue((QString::fromStdString(mpClass->getFileCopyNumber())).toInt());
+   mpCopyNumberSpinBox->blockSignals(false);
+
+   // File number of copies
+   mpNumberOfCopiesSpinBox->blockSignals(true);
+   mpNumberOfCopiesSpinBox->setValue((QString::fromStdString(mpClass->getFileNumberOfCopies())).toInt());
+   mpNumberOfCopiesSpinBox->blockSignals(false);
+
+   // Update the preview markings
+   updateMarkings();
 }
 
-void ClassificationWidget::exportToClassification(Classification* pClass)
+void ClassificationWidget::classificationModified(Subject& subject, const string& signal, const boost::any& value)
 {
-   if (pClass == NULL)
+   mNeedsInitialization = true;
+}
+
+void ClassificationWidget::setLevel(const QString& level)
+{
+   if (mpClass.get() == NULL)
    {
       return;
    }
 
-   QString strText;
-   QString strDelimiter = " ";
-
-   strText = mpClassLevelCombo->currentText();
-   if (strText.isEmpty() == false)
+   if (level.isEmpty() == false)
    {
-      string classLevel = strText.toStdString();
+      string classLevel = level.toStdString();
       classLevel = classLevel.substr(0, 1);
-      pClass->setLevel(classLevel);
-      if (strText[0] == 'U')
-      {
-         return;
-      }
+      mpClass->setLevel(classLevel);
    }
-   else if (pClass->getLevel().empty() == false)
+   else if (mpClass->getLevel().empty() == false)
    {
-      pClass->setLevel("");
+      mpClass->setLevel(string());
    }
 
-   strText = getListString(mpSystemList, strDelimiter);
-   if (strText.isEmpty() == false)
+   bool enableTabs = (mpClass->getLevel() != "U");
+   if (enableTabs == false)
    {
-      pClass->setSystem(strText.toStdString());
-   }
-   else if (pClass->getSystem().empty() == false)
-   {
-      pClass->setSystem("");
-   }
-
-   strText = getListString(mpCodewordList, strDelimiter);
-   if (strText.isEmpty() == false)
-   {
-      pClass->setCodewords(strText.toStdString());
-   }
-   else if (pClass->getCodewords().empty() == false)
-   {
-      pClass->setCodewords("");
-   }
-
-   strText = mpFileControlCombo->currentText();
-   if (strText.isEmpty() == false)
-   {
-      pClass->setFileControl(strText.toStdString());
-   }
-   else if (pClass->getFileControl().empty() == false)
-   {
-      pClass->setFileControl("");
-   }
-
-   strText = getListString(mpCountryCodeList, strDelimiter);
-   if (strText.isEmpty() == false)
-   {
-      pClass->setCountryCode(strText.toStdString());
-   }
-   else if (pClass->getCountryCode().empty() == false)
-   {
-      pClass->setCountryCode("");
-   }
-
-   strText = getListString(mpFileReleasingList, strDelimiter);
-   if (strText.isEmpty() == false)
-   {
-      pClass->setFileReleasing(strText.toStdString());
-   }
-   else if (pClass->getFileReleasing().empty() == false)
-   {
-      pClass->setFileReleasing("");
-   }
-
-   QDate newDate = mpDeclassDateEdit->date();
-   if (mDeclassDateIsValid == true)
-   {
-      FactoryResource<DateTime> pDateTime;
-      if (pDateTime.get() != NULL)
-      {
-         pDateTime->set(newDate.year(), newDate.month(), newDate.day());
-         pClass->setDeclassificationDate(pDateTime.get());
-      }
+      // Reset the values on the tab widget since the Classification object clears all fields
+      mNeedsInitialization = true;
+      initialize();
    }
    else
    {
-      FactoryResource<DateTime> pDateTime;
-      if (pDateTime.get() != NULL)
-      {
-         pClass->setDeclassificationDate(pDateTime.get());
-      }
+      updateMarkings();
    }
 
-   strText = getListString(mpExemptionList, strDelimiter);
-   if (strText.isEmpty() == false)
+   mpTabWidget->setEnabled(enableTabs);
+}
+
+void ClassificationWidget::setCodewords()
+{
+   if (mpClass.get() == NULL)
    {
-      pClass->setDeclassificationExemption(strText.toStdString());
-   }
-   else if (pClass->getDeclassificationExemption().empty() == false)
-   {
-      pClass->setDeclassificationExemption("");
+      return;
    }
 
-   strText = mpClassReasonCombo->currentText();
+   QString strText = getListString(mpCodewordList);
    if (strText.isEmpty() == false)
    {
-      string classReason = strText.toStdString();
+      mpClass->setCodewords(strText.toStdString());
+   }
+   else if (mpClass->getCodewords().empty() == false)
+   {
+      mpClass->setCodewords(string());
+   }
+
+   updateMarkings();
+}
+
+void ClassificationWidget::setSystem()
+{
+   if (mpClass.get() == NULL)
+   {
+      return;
+   }
+
+   QString strText = getListString(mpSystemList);
+   if (strText.isEmpty() == false)
+   {
+      mpClass->setSystem(strText.toStdString());
+   }
+   else if (mpClass->getSystem().empty() == false)
+   {
+      mpClass->setSystem(string());
+   }
+
+   updateMarkings();
+}
+
+void ClassificationWidget::setFileReleasing()
+{
+   if (mpClass.get() == NULL)
+   {
+      return;
+   }
+
+   QString strText = getListString(mpFileReleasingList);
+   if (strText.isEmpty() == false)
+   {
+      mpClass->setFileReleasing(strText.toStdString());
+   }
+   else if (mpClass->getFileReleasing().empty() == false)
+   {
+      mpClass->setFileReleasing(string());
+   }
+
+   updateMarkings();
+}
+
+void ClassificationWidget::setCountryCode()
+{
+   if (mpClass.get() == NULL)
+   {
+      return;
+   }
+
+   QString strText = getListString(mpCountryCodeList);
+   if (strText.isEmpty() == false)
+   {
+      mpClass->setCountryCode(strText.toStdString());
+   }
+   else if (mpClass->getCountryCode().empty() == false)
+   {
+      mpClass->setCountryCode(string());
+   }
+
+   updateMarkings();
+}
+
+void ClassificationWidget::setDeclassificationExemption()
+{
+   if (mpClass.get() == NULL)
+   {
+      return;
+   }
+
+   QString strText = getListString(mpExemptionList);
+   if (strText.isEmpty() == false)
+   {
+      mpClass->setDeclassificationExemption(strText.toStdString());
+   }
+   else if (mpClass->getDeclassificationExemption().empty() == false)
+   {
+      mpClass->setDeclassificationExemption(string());
+   }
+
+   updateMarkings();
+}
+
+void ClassificationWidget::setClassificationReason(const QString& reason)
+{
+   if (mpClass.get() == NULL)
+   {
+      return;
+   }
+
+   if (reason.isEmpty() == false)
+   {
+      string classReason = reason.toStdString();
       classReason = classReason.substr(0, 1);
-      pClass->setClassificationReason(classReason);
+      mpClass->setClassificationReason(classReason);
    }
-   else if (pClass->getClassificationReason().empty() == false)
+   else if (mpClass->getClassificationReason().empty() == false)
    {
-      pClass->setClassificationReason("");
-   }
-
-   strText = mpDeclassTypeCombo->currentText();
-   if (strText.isEmpty() == false)
-   {
-      string declassType = strText.toStdString();
-      declassType = declassType.substr(0, 2);
-      pClass->setDeclassificationType(declassType);
-   }
-   else if (pClass->getDeclassificationType().empty() == false)
-   {
-      pClass->setDeclassificationType("");
-   }
-
-   strText = mpFileDowngradeCombo->currentText();
-   if (strText.isEmpty() == false)
-   {
-      string fileDowngrade = strText.toStdString();
-      fileDowngrade = fileDowngrade.substr(0, 1);
-      pClass->setFileDowngrade(fileDowngrade);
-   }
-   else if (pClass->getFileDowngrade().empty() == false)
-   {
-      pClass->setFileDowngrade("");
-   }
-
-   newDate = mpDowngradeDateEdit->date();
-   if (mDowngradeDateIsValid == true)
-   {
-      FactoryResource<DateTime> pDateTime;
-      if (pDateTime.get() != NULL)
-      {
-         pDateTime->set(newDate.year(), newDate.month(), newDate.day());
-         pClass->setDowngradeDate(pDateTime.get());
-      }
-   }
-   else
-   {
-      FactoryResource<DateTime> pDateTime;
-      if (pDateTime.get() != NULL)
-      {
-         pClass->setDowngradeDate(pDateTime.get());
-      }
-   }
-
-   strText = mpDescriptionEdit->toPlainText();
-   if (strText.isEmpty() == false)
-   {
-      pClass->setDescription(strText.toStdString());
-   }
-   else if (pClass->getDescription().empty() == false)
-   {
-      pClass->setDescription("");
-   }
-
-   strText = QString::number(mpCopyNumberSpinBox->value());
-   if (strText.isEmpty() == false)
-   {
-      pClass->setFileCopyNumber(strText.toStdString());
-   }
-   else if (pClass->getFileCopyNumber().empty() == false)
-   {
-      pClass->setFileCopyNumber("");
-   }
-
-   strText = QString::number(mpNumberOfCopiesSpinBox->value());
-   if (strText.isEmpty() == false)
-   {
-      pClass->setFileNumberOfCopies(strText.toStdString());
-   }
-   else if (pClass->getFileNumberOfCopies().empty() == false)
-   {
-      pClass->setFileNumberOfCopies("");
+      mpClass->setClassificationReason(string());
    }
 }
 
-QString ClassificationWidget::getListString(QListWidget* pListWidget, const QString& strDelimiter)
+void ClassificationWidget::setDeclassificationType(const QString& declassType)
+{
+   if (mpClass.get() == NULL)
+   {
+      return;
+   }
+
+   if (declassType.isEmpty() == false)
+   {
+      string declassTypeText = declassType.toStdString();
+      declassTypeText = declassTypeText.substr(0, 2);
+      mpClass->setDeclassificationType(declassTypeText);
+   }
+   else if (mpClass->getDeclassificationType().empty() == false)
+   {
+      mpClass->setDeclassificationType(string());
+   }
+}
+
+void ClassificationWidget::setDeclassificationDate(const QDate& declassDate)
+{
+   if (mpClass.get() == NULL)
+   {
+      return;
+   }
+
+   FactoryResource<DateTime> pDateTime;
+   if (declassDate.isValid() == true)
+   {
+      pDateTime->set(declassDate.year(), declassDate.month(), declassDate.day());
+   }
+
+   mpClass->setDeclassificationDate(pDateTime.get());
+   updateMarkings();
+}
+
+void ClassificationWidget::resetDeclassificationDate()
+{
+   setDateEdit(mpDeclassDateEdit, NULL);
+   setDeclassificationDate(QDate());
+}
+
+void ClassificationWidget::setFileDowngrade(const QString& fileDowngrade)
+{
+   if (mpClass.get() == NULL)
+   {
+      return;
+   }
+
+   if (fileDowngrade.isEmpty() == false)
+   {
+      string fileDowngradeText = fileDowngrade.toStdString();
+      fileDowngradeText = fileDowngradeText.substr(0, 1);
+      mpClass->setFileDowngrade(fileDowngradeText);
+   }
+   else if (mpClass->getFileDowngrade().empty() == false)
+   {
+      mpClass->setFileDowngrade(string());
+   }
+}
+
+void ClassificationWidget::setDowngradeDate(const QDate& downgradeDate)
+{
+   if (mpClass.get() == NULL)
+   {
+      return;
+   }
+
+   FactoryResource<DateTime> pDateTime;
+   if (downgradeDate.isValid() == true)
+   {
+      pDateTime->set(downgradeDate.year(), downgradeDate.month(), downgradeDate.day());
+   }
+
+   mpClass->setDowngradeDate(pDateTime.get());
+}
+
+void ClassificationWidget::resetDowngradeDate()
+{
+   setDateEdit(mpDowngradeDateEdit, NULL);
+   setDowngradeDate(QDate());
+}
+
+void ClassificationWidget::setFileControl(const QString& fileControl)
+{
+   if (mpClass.get() == NULL)
+   {
+      return;
+   }
+
+   if (fileControl.isEmpty() == false)
+   {
+      mpClass->setFileControl(fileControl.toStdString());
+   }
+   else if (mpClass->getFileControl().empty() == false)
+   {
+      mpClass->setFileControl(string());
+   }
+}
+
+void ClassificationWidget::setDescription()
+{
+   if (mpClass.get() == NULL)
+   {
+      return;
+   }
+
+   QString strText = mpDescriptionEdit->toPlainText();
+   if (strText.isEmpty() == false)
+   {
+      mpClass->setDescription(strText.toStdString());
+   }
+   else if (mpClass->getDescription().empty() == false)
+   {
+      mpClass->setDescription(string());
+   }
+}
+
+void ClassificationWidget::setFileCopyNumber(const QString& copyNumber)
+{
+   if (mpClass.get() == NULL)
+   {
+      return;
+   }
+
+   if (copyNumber.isEmpty() == false)
+   {
+      mpClass->setFileCopyNumber(copyNumber.toStdString());
+   }
+   else if (mpClass->getFileCopyNumber().empty() == false)
+   {
+      mpClass->setFileCopyNumber(string());
+   }
+}
+
+void ClassificationWidget::setFileNumberOfCopies(const QString& numberOfCopies)
+{
+   if (mpClass.get() == NULL)
+   {
+      return;
+   }
+
+   if (numberOfCopies.isEmpty() == false)
+   {
+      mpClass->setFileNumberOfCopies(numberOfCopies.toStdString());
+   }
+   else if (mpClass->getFileNumberOfCopies().empty() == false)
+   {
+      mpClass->setFileNumberOfCopies(string());
+   }
+}
+
+QString ClassificationWidget::getListString(QListWidget* pListWidget)
 {
    if (pListWidget == NULL)
    {
@@ -810,7 +948,7 @@ QString ClassificationWidget::getListString(QListWidget* pListWidget, const QStr
          {
             if (strText.isEmpty() == false)
             {
-               strText += strDelimiter;
+               strText += " ";
             }
 
             QString strItemText = pItem->text();
@@ -838,7 +976,7 @@ void ClassificationWidget::selectListFromString(QListWidget* pListWidget, const 
    // We really only want the signals when changed through the GUI.  Simulate
    // by blocking them when changing the listbox programmatically.
    pListWidget->blockSignals(true);
- 
+
    pListWidget->clearSelection();
    if (strText.isEmpty() == true)
    {
@@ -853,18 +991,24 @@ void ClassificationWidget::selectListFromString(QListWidget* pListWidget, const 
    while (ptr != NULL)
    {
       QList<QListWidgetItem*> items = pListWidget->findItems(QString::fromLatin1(ptr), Qt::MatchExactly);
-      for (int i = 0; i < items.count(); ++i)
+      if (items.empty() == false)
       {
-         QListWidgetItem* pItem = items[i];
+         for (int i = 0; i < items.count(); ++i)
+         {
+            QListWidgetItem* pItem = items[i];
+            if (pItem != NULL)
+            {
+               pListWidget->setItemSelected(pItem, true);
+            }
+         }
+      }
+      else
+      {
+         pListWidget->addItem(QString::fromLatin1(ptr));
+
+         QListWidgetItem* pItem = pListWidget->item(pListWidget->count() - 1);
          if (pItem != NULL)
          {
-            pListWidget->setItemSelected(pItem, true);
-         }
-         else
-         {
-            pListWidget->addItem(QString::fromLatin1(ptr));
-
-            pItem = pListWidget->item(pListWidget->count() - 1);
             pListWidget->setItemSelected(pItem, true);
          }
       }
@@ -876,19 +1020,27 @@ void ClassificationWidget::selectListFromString(QListWidget* pListWidget, const 
 
 void ClassificationWidget::selectComboFromString(QComboBox* pComboBox, const QString& strText)
 {
-   if ((pComboBox == NULL) || (strText.isEmpty() == true))
+   if (pComboBox == NULL)
    {
       return;
    }
 
-   for (int i = 0; i < pComboBox->count(); i++)
+   int index = -1;
+   if (strText.isEmpty() == false)
    {
-      if (pComboBox->itemText(i) == strText)
+      for (int i = 0; i < pComboBox->count(); ++i)
       {
-         pComboBox->setCurrentIndex(i);
-         break;
+         if (pComboBox->itemText(i) == strText)
+         {
+            index = i;
+            break;
+         }
       }
    }
+
+   pComboBox->blockSignals(true);
+   pComboBox->setCurrentIndex(index);
+   pComboBox->blockSignals(false);
 }
 
 void ClassificationWidget::setDateEdit(QDateEdit* pDateEdit, const DateTime* pDateTime)
@@ -898,19 +1050,21 @@ void ClassificationWidget::setDateEdit(QDateEdit* pDateEdit, const DateTime* pDa
       return;
    }
 
+   pDateEdit->blockSignals(true);
+
    if (pDateTime == NULL || pDateTime->isValid() == false)
    {
-      dateChanged(pDateEdit, QDate());
+      // Since QDateEdit cannot display an invalid date, set the date to the default constructed value for the widget
+      pDateEdit->setDate(QDate(2000, 1, 1));
    }
    else
    {
-      string dateString;
 #if defined(WIN_API)
       string format = "%#m %#d %#Y %#H %#M %#S";
 #else
       string format = "%m %d %Y %H %M %S";
 #endif
-      dateString = pDateTime->getFormattedUtc(format);
+      string dateString = pDateTime->getFormattedUtc(format);
 
       int iMonth = 0;
       int iDay = 0;
@@ -918,12 +1072,13 @@ void ClassificationWidget::setDateEdit(QDateEdit* pDateEdit, const DateTime* pDa
       int iHour = 0;
       int iMinute = 0;
       int iSecond = 0;
-
       sscanf(dateString.c_str(), "%d %d %d %d %d %d", &iMonth, &iDay, &iYear, &iHour, &iMinute, &iSecond);
 
       QDate dateValue(iYear, iMonth, iDay);
       pDateEdit->setDate(dateValue);
    }
+
+   pDateEdit->blockSignals(false);
 }
 
 void ClassificationWidget::addListItem()
@@ -944,7 +1099,7 @@ void ClassificationWidget::resetList()
    QListWidget* pList = static_cast<QListWidget*>(mpValueStack->currentWidget());
    if (pList != NULL)
    {
-      initialize(pList);
+      resetToDefault(pList);
       updateMarkings();
    }
 }
@@ -952,15 +1107,10 @@ void ClassificationWidget::resetList()
 void ClassificationWidget::updateMarkings()
 {
    QString strMarkings;
-
-   FactoryResource<Classification> pClassification;
-   if (pClassification.get() != NULL)
+   if (mpClass.get() != NULL)
    {
-      exportToClassification(pClassification.get());
-      importFromClassification(pClassification.get());
-
       string classificationText;
-      pClassification->getClassificationText(classificationText);
+      mpClass->getClassificationText(classificationText);
       if (classificationText.empty() == false)
       {
          strMarkings = QString::fromStdString(classificationText);
@@ -968,9 +1118,6 @@ void ClassificationWidget::updateMarkings()
    }
 
    mpMarkingsEdit->setPlainText(strMarkings);
-
-   mModified = true;
-   emit modified(true);
 }
 
 void ClassificationWidget::updateSize()
@@ -983,10 +1130,10 @@ void ClassificationWidget::addFavoriteItem()
 {
    FactoryResource<Classification> pFactoryClass;
    Classification* pClass = pFactoryClass.release();
+   pClass->setClassification(mpClass.get());
 
-   exportToClassification(pClass);
    mlstFavorites.push_back(pClass);
-
+   serializeFavorites();
    updateFavoritesCombo();
 }
 
@@ -1013,15 +1160,31 @@ void ClassificationWidget::removeFavoriteItem()
       }
 
       mlstFavorites.erase(itr, itr+1);
+      serializeFavorites();
       updateFavoritesCombo();
    }
 }
 
 void ClassificationWidget::favoriteSelected()
 {
-   Classification* pClass = mlstFavorites[mpFavoritesCombo->currentIndex()];
-   importFromClassification(pClass);
-   updateMarkings();
+   if (mpClass.get() == NULL)
+   {
+      return;
+   }
+
+   int index = mpFavoritesCombo->currentIndex();
+   if (index < 0)
+   {
+      return;
+   }
+
+   Classification* pClass = mlstFavorites[index];
+   if (pClass != NULL)
+   {
+      mpClass->setClassification(pClass);
+      mNeedsInitialization = true;
+      initialize();
+   }
 }
 
 bool ClassificationWidget::serializeFavorites()
@@ -1039,7 +1202,7 @@ bool ClassificationWidget::serializeFavorites()
       string exemption = mlstFavorites[i]->getDeclassificationExemption();
       const DateTime* pDeclassificationDate = mlstFavorites[i]->getDeclassificationDate();
 
-      string attributeName = mFavoritesAttributePrefix + StringUtilities::toDisplayString<unsigned int>(i);
+      string attributeName = string("favorite") + StringUtilities::toDisplayString<unsigned int>(i);
 
       FactoryResource<DynamicObject> pClassificationObject;
       pClassificationObject->setAttribute("level", level);
@@ -1176,11 +1339,6 @@ void ClassificationWidget::clearFavorites()
    mlstFavorites.clear();
 }
 
-void ClassificationWidget::resetDateTimeEdit()
-{
-   dateChanged(sender(), QDate());
-}
-
 void ClassificationWidget::checkAddButton(int iIndex)
 {
    QWidget* pWidget = mpValueStack->widget(iIndex);
@@ -1191,30 +1349,5 @@ void ClassificationWidget::checkAddButton(int iIndex)
    else
    {
       mpAddButton->setDisabled(false);
-   }
-}
-
-void ClassificationWidget::dateChanged(const QDate &date)
-{
-   dateChanged(sender(), date);
-}
-
-void ClassificationWidget::dateChanged(const QObject *pSender, const QDate &date)
-{
-   if (pSender == mpResetDeclassDateButton || pSender == mpDeclassDateEdit)
-   {
-      if (date.isValid() == false)
-      {
-         mpDeclassDateEdit->setDate(QDate());
-      }
-      mDeclassDateIsValid = date.isValid();
-   }
-   else if (pSender == mpResetDowngradeDateButton || pSender == mpDowngradeDateEdit)
-   {
-      if (date.isValid() == false)
-      {
-         mpDowngradeDateEdit->setDate(QDate());
-      }
-      mDowngradeDateIsValid = date.isValid();
    }
 }

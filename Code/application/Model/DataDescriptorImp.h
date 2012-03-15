@@ -59,6 +59,7 @@ public:
    virtual DataDescriptor* copy() const;
    virtual DataDescriptor* copy(const std::string& name, DataElement* pParent) const;
    virtual DataDescriptor* copy(const std::string& name, const std::vector<std::string>& parent) const;
+   virtual bool clone(const DataDescriptor* pDescriptor);
 
    virtual void addToMessageLog(Message* pMessage) const;
 
@@ -79,6 +80,7 @@ protected:
 private:
    DataDescriptorImp(const DataDescriptorImp& rhs);
    DataDescriptorImp& operator=(const DataDescriptorImp& rhs);
+
    void generateParentDesignator();
    std::string mName;
    std::string mType;
@@ -169,6 +171,10 @@ private:
    DataDescriptor* copy(const std::string& name, const std::vector<std::string>& parent) const \
    { \
       return dynamic_cast<DataDescriptor*>(impClass::copy(name, parent)); \
+   } \
+   bool clone(const DataDescriptor* pDescriptor) \
+   { \
+      return impClass::clone(pDescriptor); \
    } \
    void addToMessageLog(Message* pMessage) const \
    { \

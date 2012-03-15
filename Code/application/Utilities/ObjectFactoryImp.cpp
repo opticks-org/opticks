@@ -31,7 +31,7 @@
 #include "SettableSessionItemAdapter.h"
 #include "SignatureFileDescriptorAdapter.h"
 #include "TypeConverter.h"
-#include "UnitsImp.h"
+#include "UnitsAdapter.h"
 #include "WavelengthsImp.h"
 #include "WizardObjectAdapter.h"
 
@@ -853,12 +853,12 @@ void DestroyExportAgent(void* pObj)
 // Units
 Units* CreateUnits()
 {
-   return new UnitsImp();
+   return new UnitsAdapter();
 }
 
 void DestroyUnits(void* pObj)
 {
-   delete reinterpret_cast<UnitsImp*>(pObj);
+   delete reinterpret_cast<UnitsAdapter*>(pObj);
 }
 
 void* CreateVectorUnits()

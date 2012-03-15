@@ -9,10 +9,9 @@
 
 #include "AppVerify.h"
 #include "FileDescriptor.h"
-#include "ObjectResource.h"
 #include "SignatureFileDescriptor.h"
 #include "SignatureFileDescriptorImp.h"
-#include "Units.h"
+#include "UnitsAdapter.h"
 
 XERCES_CPP_NAMESPACE_USE
 
@@ -20,7 +19,9 @@ SignatureFileDescriptorImp::SignatureFileDescriptorImp()
 {}
 
 SignatureFileDescriptorImp::~SignatureFileDescriptorImp()
-{}
+{
+   clearUnits();
+}
 
 void SignatureFileDescriptorImp::setUnits(const std::string& name, const Units* pUnits)
 {
@@ -28,34 +29,72 @@ void SignatureFileDescriptorImp::setUnits(const std::string& name, const Units* 
    {
       return;
    }
-   const UnitsImp* pImp = dynamic_cast<const UnitsImp*>(pUnits);
-   VERIFYNRV(pImp != NULL);
-   std::map<std::string, UnitsImp>::iterator it = mUnits.find(name);
+
+   Units* pMapUnits = NULL;
+
+   std::map<std::string, Units*>::iterator it = mUnits.find(name);
    if (it == mUnits.end())
    {
-      mUnits[name] = *pImp;
+      pMapUnits = new UnitsAdapter();
+      pMapUnits->setUnits(pUnits);
+
+      // Attach to the units object to notify when it changes
+      VERIFYNR(pMapUnits->attach(SIGNAL_NAME(Subject, Modified),
+         Slot(this, &SignatureFileDescriptorImp::notifyUnitsModified)));
+
+      mUnits[name] = pMapUnits;
    }
    else
    {
-      if ((it->second) == *pImp)
+      pMapUnits = it->second;
+      VERIFYNRV(pMapUnits != NULL);
+
+      if (pMapUnits->compare(pUnits) == true)
       {
          return;
       }
-      it->second = *pImp;
+
+      pMapUnits->setUnits(pUnits);
    }
-   notify(SIGNAL_NAME(SignatureFileDescriptor, UnitsChanged), boost::any(
-      std::pair<std::string, const Units*>(name, getUnits(name))));
+
+   notify(SIGNAL_NAME(SignatureFileDescriptor, UnitsChanged),
+      boost::any(std::pair<std::string, const Units*>(name, pMapUnits)));
 }
 
 const Units* SignatureFileDescriptorImp::getUnits(const std::string& name) const
 {
-   std::map<std::string, UnitsImp>::const_iterator it = mUnits.find(name);
+   std::map<std::string, Units*>::const_iterator it = mUnits.find(name);
    if (it != mUnits.end())
    {
-      return &it->second;
+      return it->second;
    }
 
    return NULL;
+}
+
+bool SignatureFileDescriptorImp::clone(const FileDescriptor* pFileDescriptor)
+{
+   const SignatureFileDescriptorImp* pSignatureFileDescriptor =
+      dynamic_cast<const SignatureFileDescriptorImp*>(pFileDescriptor);
+   if ((pSignatureFileDescriptor == NULL) || (FileDescriptorImp::clone(pFileDescriptor) == false))
+   {
+      return false;
+   }
+
+   if (pSignatureFileDescriptor != this)
+   {
+      std::set<std::string> unitNames = pSignatureFileDescriptor->getUnitNames();
+      for (std::set<std::string>::const_iterator iter = unitNames.begin(); iter != unitNames.end(); ++iter)
+      {
+         std::string name = *iter;
+         if (name.empty() == false)
+         {
+            setUnits(name, pSignatureFileDescriptor->getUnits(name));
+         }
+      }
+   }
+
+   return true;
 }
 
 bool SignatureFileDescriptorImp::toXml(XMLWriter* pXml) const
@@ -71,12 +110,11 @@ bool SignatureFileDescriptorImp::toXml(XMLWriter* pXml) const
    }
 
    pXml->addAttr("type", "SignatureFileDescriptor");
-   for (std::map<std::string, UnitsImp>::const_iterator it = mUnits.begin();
-      it != mUnits.end(); ++it)
+   for (std::map<std::string, Units*>::const_iterator it = mUnits.begin(); it != mUnits.end(); ++it)
    {
       pXml->pushAddPoint(pXml->addElement("signatureUnits"));
       pXml->addAttr("componentName", it->first);
-      if (!it->second.toXml(pXml))
+      if (!it->second->toXml(pXml))
       {
          return false;
       }
@@ -95,7 +133,7 @@ bool SignatureFileDescriptorImp::fromXml(DOMNode* pDocument, unsigned int versio
       return false;
    }
 
-   mUnits.clear();
+   clearUnits();
 
    for (DOMNode* pChild = pDocument->getFirstChild(); pChild != NULL; pChild = pChild->getNextSibling())
    {
@@ -107,12 +145,18 @@ bool SignatureFileDescriptorImp::fromXml(DOMNode* pDocument, unsigned int versio
          {
             return false;
          }
-         UnitsImp newUnits;
-         if (newUnits.fromXml(pChild, version) == false)
+
+         Units* pUnits = new UnitsAdapter();
+         if (pUnits->fromXml(pChild, version) == false)
          {
             return false;
          }
-         mUnits[name] = newUnits;
+
+         // Attach to the units object to notify when it changes
+         VERIFYNR(pUnits->attach(SIGNAL_NAME(Subject, Modified),
+            Slot(this, &SignatureFileDescriptorImp::notifyUnitsModified)));
+
+         mUnits[name] = pUnits;
       }
    }
 
@@ -154,23 +198,44 @@ bool SignatureFileDescriptorImp::isKindOfFileDescriptor(const std::string& class
 std::set<std::string> SignatureFileDescriptorImp::getUnitNames() const
 {
    std::set<std::string> keys;
-   for (std::map<std::string, UnitsImp>::const_iterator unit = mUnits.begin();
-      unit != mUnits.end(); ++unit)
+   for (std::map<std::string, Units*>::const_iterator unit = mUnits.begin(); unit != mUnits.end(); ++unit)
    {
       keys.insert(unit->first);
    }
    return keys;
 }
 
-SignatureFileDescriptorImp& SignatureFileDescriptorImp::operator =(const SignatureFileDescriptorImp& descriptor)
+void SignatureFileDescriptorImp::notifyUnitsModified(Subject& subject, const std::string& signal,
+                                                     const boost::any& data)
 {
-   if (this != &descriptor)
+   Units* pUnits = dynamic_cast<Units*>(&subject);
+   if (pUnits == NULL)
    {
-      FileDescriptorImp::operator =(descriptor);
-
-      mUnits = descriptor.mUnits;
-      notify(SIGNAL_NAME(Subject, Modified));
+      return;
    }
 
-   return *this;
+   for (std::map<std::string, Units*>::iterator iter = mUnits.begin(); iter != mUnits.end(); ++iter)
+   {
+      if (pUnits == iter->second)
+      {
+         notify(SIGNAL_NAME(Subject, Modified));
+         break;
+      }
+   }
+}
+
+void SignatureFileDescriptorImp::clearUnits()
+{
+   for (std::map<std::string, Units*>::iterator iter = mUnits.begin(); iter != mUnits.end(); ++iter)
+   {
+      UnitsAdapter* pUnits = dynamic_cast<UnitsAdapter*>(iter->second);
+      if (pUnits != NULL)
+      {
+         VERIFYNR(pUnits->detach(SIGNAL_NAME(Subject, Modified),
+            Slot(this, &SignatureFileDescriptorImp::notifyUnitsModified)));
+         delete pUnits;
+      }
+   }
+
+   mUnits.clear();
 }

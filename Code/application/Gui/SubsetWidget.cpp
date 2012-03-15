@@ -95,6 +95,7 @@ SubsetWidget::SubsetWidget(QWidget* pParent) :
    mpBandList->setFlow(QListView::TopToBottom);
    mpBandList->setMovement(QListView::Static);
    mpBandList->setSelectionMode(QAbstractItemView::ExtendedSelection);
+   mpBandList->setEditTriggers(QAbstractItemView::NoEditTriggers);
    mpBandModel = new QStringListModel(this);
    mpBandList->setModel(mpBandModel);
 
@@ -565,7 +566,36 @@ QSize SubsetWidget::sizeHint() const
 
 void SubsetWidget::customBandSelection()
 {
+   // Create the dialog
    BandCustomSelectionDialog dialog(this, mpBandModel, mBadBandFileDir);
+
+   // Initialize the dialog values
+   vector<DimensionDescriptor> selectedBands = getSubsetBands();
+   if (selectedBands.empty() == false)
+   {
+      // Start and stop bands
+      QModelIndexList selectedIndexes = mpBandList->selectionModel()->selectedIndexes();
+      qSort(selectedIndexes.begin(), selectedIndexes.end(), QModelIndexCompare());
+
+      dialog.setStartBandIndex(selectedIndexes.front().row());
+      dialog.setStopBandIndex(selectedIndexes.back().row());
+
+      // Skip factor
+      unsigned int skipFactor = 0;  // Set the default value such that if a skip factor cannot be determined
+                                    // (i.e. the RasterUtilities method returns false), every band will be used
+      if (mExportMode == false)
+      {
+         RasterUtilities::determineSkipFactor(selectedBands, skipFactor);
+      }
+      else
+      {
+         RasterUtilities::determineExportSkipFactor(selectedBands, skipFactor);
+      }
+
+      dialog.setSkipFactor(static_cast<int>(skipFactor));
+   }
+
+   // Display the dialog
    if (dialog.exec() == QDialog::Rejected)
    {
       return;
@@ -787,6 +817,9 @@ BandCustomSelectionDialog::BandCustomSelectionDialog(QWidget* pParent, QStringLi
    VERIFYNR(connect(mpSubsetSelection, SIGNAL(clicked()), this, SLOT(selectionChanged())));
 }
 
+BandCustomSelectionDialog::~BandCustomSelectionDialog()
+{}
+
 void BandCustomSelectionDialog::selectBadBandFile()
 {
    QString strFilename = QFileDialog::getOpenFileName(this, "Select Bad Bands File", mBadBandDir,
@@ -819,27 +852,42 @@ void BandCustomSelectionDialog::selectionChanged()
    }
 }
 
-bool BandCustomSelectionDialog::isSubsetSelected()
+bool BandCustomSelectionDialog::isSubsetSelected() const
 {
    return mpSubsetSelection->isChecked();
 }
 
-QString BandCustomSelectionDialog::getBadBandFile()
+QString BandCustomSelectionDialog::getBadBandFile() const
 {
    return mpBadBandFile->text();
 }
 
-int BandCustomSelectionDialog::getStartBandIndex()
+void BandCustomSelectionDialog::setStartBandIndex(int index)
+{
+   mpStartBandCombo->setCurrentIndex(index);
+}
+
+int BandCustomSelectionDialog::getStartBandIndex() const
 {
    return mpStartBandCombo->currentIndex();
 }
 
-int BandCustomSelectionDialog::getStopBandIndex()
+void BandCustomSelectionDialog::setStopBandIndex(int index)
+{
+   mpEndBandCombo->setCurrentIndex(index);
+}
+
+int BandCustomSelectionDialog::getStopBandIndex() const
 {
    return mpEndBandCombo->currentIndex();
 }
 
-int BandCustomSelectionDialog::getSkipFactor()
+void BandCustomSelectionDialog::setSkipFactor(int skipFactor)
+{
+   mpBandSkipSpin->setValue(skipFactor);
+}
+
+int BandCustomSelectionDialog::getSkipFactor() const
 {
    return mpBandSkipSpin->value();
 }

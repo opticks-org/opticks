@@ -11,7 +11,6 @@
 #define SIGNATUREFILEDESCRIPTORIMP_H
 
 #include "FileDescriptorImp.h"
-#include "UnitsImp.h"
 
 #include <map>
 #include <set>
@@ -28,11 +27,11 @@ public:
    SignatureFileDescriptorImp();
    virtual ~SignatureFileDescriptorImp();
 
-   SignatureFileDescriptorImp& operator =(const SignatureFileDescriptorImp& descriptor);
-
    void setUnits(const std::string& name, const Units* pUnits);
    const Units* getUnits(const std::string& name) const;
    std::set<std::string> getUnitNames() const;
+
+   virtual bool clone(const FileDescriptor* pFileDescriptor);
 
    virtual bool toXml(XMLWriter* pXml) const;
    virtual bool fromXml(DOMNode* pDocument, unsigned int version);
@@ -42,8 +41,14 @@ public:
    static void getFileDescriptorTypes(std::vector<std::string>& classList);
    static bool isKindOfFileDescriptor(const std::string& className);
 
+protected:
+   void notifyUnitsModified(Subject& subject, const std::string& signal, const boost::any& data);
+
 private:
-   std::map<std::string, UnitsImp> mUnits;
+   SignatureFileDescriptorImp& operator=(const SignatureFileDescriptorImp& fileDescriptor);
+   void clearUnits();
+
+   std::map<std::string, Units*> mUnits;
 };
 
 #define SIGNATUREFILEDESCRIPTORADAPTEREXTENSION_CLASSES \

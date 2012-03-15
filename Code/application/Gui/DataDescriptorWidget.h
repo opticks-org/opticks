@@ -10,47 +10,43 @@
 #ifndef DATADESCRIPTORWIDGET_H
 #define DATADESCRIPTORWIDGET_H
 
-#include <QtGui/QComboBox>
-#include <QtGui/QTreeWidgetItem>
 #include <QtGui/QWidget>
 
+#include "DataDescriptor.h"
+#include "SafePtr.h"
 #include "TypesFile.h"
 
+#include <boost/any.hpp>
+#include <string>
 #include <vector>
 
 class CustomTreeWidget;
-class DataDescriptor;
 class QAction;
+class QComboBox;
 class QPushButton;
+class QTreeWidgetItem;
+class Subject;
 
 class DataDescriptorWidget : public QWidget
 {
    Q_OBJECT
 
 public:
-   DataDescriptorWidget(QWidget* parent = 0);
-   ~DataDescriptorWidget();
+   DataDescriptorWidget(QWidget* pParent = NULL);
+   virtual ~DataDescriptorWidget();
 
    void setDataDescriptor(DataDescriptor* pDescriptor, bool editAll);
-
    void setValidProcessingLocations(const std::vector<ProcessingLocation>& locations);
 
-   void setDescriptorValue(const QString& strValueName, const QString& strValue);
-   QString getDescriptorValue(const QString& strValueName) const;
+protected:
+   virtual void showEvent(QShowEvent* pEvent);
+   virtual void hideEvent(QHideEvent* pEvent);
+   void dataDescriptorModified(Subject& subject, const std::string& signal, const boost::any& value);
 
    void initialize();
-   bool isModified() const;
-   bool applyChanges();
-   bool applyToDataDescriptor(DataDescriptor* pDescriptor);
-
-   QSize sizeHint() const;
-
-signals:
-   void valueChanged(const QString& strValueName);
-   void modified();
-
-protected:
-   QTreeWidgetItem* getDescriptorItem(const QString& strName, QTreeWidgetItem* pStartAt = 0) const;
+   void fileDescriptorModified(Subject& subject, const std::string& signal, const boost::any& value);
+   void fileDescriptorUnitsModified(Subject& subject, const std::string& signal, const boost::any& value);
+   QTreeWidgetItem* getDescriptorItem(const QString& strName, QTreeWidgetItem* pParentItem = NULL) const;
 
 protected slots:
    void descriptorItemChanged(QTreeWidgetItem* pItem, int iColumn);
@@ -59,15 +55,18 @@ protected slots:
 private:
    DataDescriptorWidget(const DataDescriptorWidget& rhs);
    DataDescriptorWidget& operator=(const DataDescriptorWidget& rhs);
+
+   SafePtr<DataDescriptor> mpDescriptor;
    bool mEditAll;
-   bool mModified;
-   DataDescriptor* mpDescriptor;
+   bool mNeedsInitialization;
 
    CustomTreeWidget* mpTreeWidget;
-   QPushButton* mpSetDisplayButton;
-
-   std::vector<ProcessingLocation> mProcessingLocations;
    QComboBox* mpProcessingLocationCombo;
+   QComboBox* mpDataTypeCombo;
+   QComboBox* mpUnitTypeCombo;
+   QComboBox* mpInterleaveCombo;
+   QComboBox* mpDisplayModeCombo;
+   QPushButton* mpSetDisplayButton;
 };
 
 #endif

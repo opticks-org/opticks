@@ -8,8 +8,7 @@
  */
 
 #include "RasterFileDescriptorAdapter.h"
-
-using namespace std;
+#include "ObjectResource.h"
 
 RasterFileDescriptorAdapter::RasterFileDescriptorAdapter()
 {}
@@ -20,13 +19,13 @@ RasterFileDescriptorAdapter::~RasterFileDescriptorAdapter()
 }
 
 // TypeAwareObject
-const string& RasterFileDescriptorAdapter::getObjectType() const
+const std::string& RasterFileDescriptorAdapter::getObjectType() const
 {
-   static string sType("RasterFileDescriptorAdapter");
+   static std::string sType("RasterFileDescriptorAdapter");
    return sType;
 }
 
-bool RasterFileDescriptorAdapter::isKindOf(const string& className) const
+bool RasterFileDescriptorAdapter::isKindOf(const std::string& className) const
 {
    if ((className == getObjectType()) || (className == "RasterFileDescriptor"))
    {
@@ -39,11 +38,11 @@ bool RasterFileDescriptorAdapter::isKindOf(const string& className) const
 // FileDescriptor
 FileDescriptor* RasterFileDescriptorAdapter::copy() const
 {
-   RasterFileDescriptorAdapter* pDescriptor = new RasterFileDescriptorAdapter();
-   if (pDescriptor != NULL)
+   FactoryResource<RasterFileDescriptor> pFileDescriptor;
+   if (pFileDescriptor->clone(this) == false)
    {
-      *pDescriptor = *this;
+      return NULL;
    }
 
-   return pDescriptor;
+   return pFileDescriptor.release();
 }

@@ -7,24 +7,26 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtGui/QComboBox>
 #include <QtGui/QGroupBox>
 #include <QtGui/QHeaderView>
-#include <QtGui/QLayout>
-#include <QtGui/QMessageBox>
+#include <QtGui/QVBoxLayout>
 
 #include "AppVerify.h"
 #include "CustomTreeWidget.h"
-#include "DimensionDescriptor.h"
 #include "FileBrowser.h"
 #include "FileDescriptorWidget.h"
 #include "GeoPoint.h"
 #include "ObjectResource.h"
 #include "RasterFileDescriptor.h"
+#include "RasterUtilities.h"
 #include "SignatureFileDescriptor.h"
+#include "Slot.h"
 #include "StringUtilities.h"
+#include "TypesFile.h"
 #include "Units.h"
 
-#include <string>
+#include <algorithm>
 #include <vector>
 using namespace std;
 
@@ -37,10 +39,13 @@ namespace
 FileDescriptorWidget::FileDescriptorWidget(QWidget* parent) :
    QWidget(parent),
    mpFileDescriptor(NULL),
-   mReadOnly(true),
-   mModified(false),
+   mEditable(false),
+   mNeedsInitialization(false),
    mpTreeWidget(NULL),
    mpFileBrowser(NULL),
+   mpEndianCombo(NULL),
+   mpInterleaveCombo(NULL),
+   mpUnitTypeCombo(NULL),
    mpGcpGroup(NULL),
    mpGcpTree(NULL)
 {
@@ -71,6 +76,33 @@ FileDescriptorWidget::FileDescriptorWidget(QWidget* parent) :
    mpFileBrowser = new FileBrowser(mpTreeWidget);
    mpFileBrowser->setBrowseCaption("Select Band File");
    mpFileBrowser->hide();
+
+   // Combo boxes
+   mpEndianCombo = new QComboBox(mpTreeWidget);
+   mpEndianCombo->setEditable(false);
+   mpEndianCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(LITTLE_ENDIAN_ORDER)));
+   mpEndianCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(BIG_ENDIAN_ORDER)));
+   mpEndianCombo->hide();
+
+   mpInterleaveCombo = new QComboBox(mpTreeWidget);
+   mpInterleaveCombo->setEditable(false);
+   mpInterleaveCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(BIL)));
+   mpInterleaveCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(BIP)));
+   mpInterleaveCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(BSQ) + BSQ_SINGLE_SUFFIX));
+   mpInterleaveCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(BSQ) + BSQ_MULTI_SUFFIX));
+   mpInterleaveCombo->hide();
+
+   mpUnitTypeCombo = new QComboBox(mpTreeWidget);
+   mpUnitTypeCombo->setEditable(false);
+
+   vector<string> unitNames = StringUtilities::getAllEnumValuesAsDisplayString<UnitType>();
+   sort(unitNames.begin(), unitNames.end());
+   for (vector<string>::const_iterator iter = unitNames.begin(); iter != unitNames.end(); ++iter)
+   {
+      mpUnitTypeCombo->addItem(QString::fromStdString(*iter));
+   }
+
+   mpUnitTypeCombo->hide();
 
    // GCP group box
    mpGcpGroup = new QGroupBox("Ground Control Points (GCP)", this);
@@ -122,66 +154,46 @@ FileDescriptorWidget::FileDescriptorWidget(QWidget* parent) :
 
 FileDescriptorWidget::~FileDescriptorWidget()
 {
+   setFileDescriptor(NULL, false);
 }
 
-void FileDescriptorWidget::setFileDescriptor(FileDescriptor* pFileDescriptor)
+void FileDescriptorWidget::setFileDescriptor(FileDescriptor* pFileDescriptor, bool editable)
 {
    mpTreeWidget->closeActiveCellWidget(false);
 
-   mpFileDescriptor = pFileDescriptor;
-   mReadOnly = false;
-   initialize();
-   mModified = false;
-}
-
-void FileDescriptorWidget::setFileDescriptor(const FileDescriptor* pFileDescriptor)
-{
-   mpTreeWidget->closeActiveCellWidget(false);
-
-   mpFileDescriptor = const_cast<FileDescriptor*>(pFileDescriptor);
-   mReadOnly = true;
-   initialize();
-   mModified = false;
-}
-
-void FileDescriptorWidget::setDescriptorValue(const QString& strValueName, const QString& strValue)
-{
-   QTreeWidgetItem* pItem = getDescriptorItem(strValueName);
-   if (pItem != NULL)
+   if (mpFileDescriptor.get() != NULL)
    {
-      pItem->setText(1, strValue);
-   }
-}
-
-QString FileDescriptorWidget::getDescriptorValue(const QString& strValueName) const
-{
-   QString strValue;
-   if (strValueName.isEmpty() == false)
-   {
-      const QTreeWidgetItem* pItem = getDescriptorItem(strValueName);
-      if (pItem != NULL)
+      // Only attach to the file descriptor to update the tree widget if this widget is currently hidden.  This
+      // prevents a potentially large amount of time being spent updating the tree widget items when the file
+      // descriptor changes externally.  This assumes that the file descriptor will not updated externally when
+      // this page is shown, which means that this widget must exist in a modal dialog or other modal widget.
+      if (isVisible() == false)
       {
-         strValue = pItem->text(1);
-         if (strValueName == "Interleave Format")
-         {
-            strValue = strValue.left(3);  // only return the interleave not single/multi file info
-         }
+         VERIFYNR(mpFileDescriptor->detach(SIGNAL_NAME(Subject, Modified),
+            Slot(this, &FileDescriptorWidget::fileDescriptorModified)));
       }
    }
 
-   return strValue;
-}
+   mpFileDescriptor.reset(pFileDescriptor);
+   mEditable = editable;
 
-void FileDescriptorWidget::initialize()
-{
    mpTreeWidget->clear();
    mpGcpTree->clear();
    mpGcpGroup->hide();
 
-   if (mpFileDescriptor == NULL)
+   if (mpFileDescriptor.get() == NULL)
    {
       return;
    }
+
+   if (isVisible() == false)
+   {
+      VERIFYNR(mpFileDescriptor->attach(SIGNAL_NAME(Subject, Modified),
+         Slot(this, &FileDescriptorWidget::fileDescriptorModified)));
+   }
+
+   VERIFYNR(disconnect(mpTreeWidget, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
+      SLOT(descriptorItemChanged(QTreeWidgetItem*, int))));
 
    // Filename
    QTreeWidgetItem* pFilenameItem = new QTreeWidgetItem(mpTreeWidget);
@@ -213,51 +225,50 @@ void FileDescriptorWidget::initialize()
       pEndianItem->setText(0, "Endian");
       pEndianItem->setText(1, QString::fromStdString(endianText));
 
-      if (mReadOnly == false)
+      if (mEditable == true)
       {
-         QComboBox* pEndianCombo = new QComboBox(mpTreeWidget);
-         pEndianCombo->setEditable(false);
-         pEndianCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(LITTLE_ENDIAN_ORDER)));
-         pEndianCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(BIG_ENDIAN_ORDER)));
-         pEndianCombo->hide();
-
          mpTreeWidget->setCellWidgetType(pEndianItem, 1, CustomTreeWidget::COMBO_BOX);
-         mpTreeWidget->setComboBox(pEndianItem, 1, pEndianCombo);
+         mpTreeWidget->setComboBox(pEndianItem, 1, mpEndianCombo);
       }
    }
 
-   // Signature file descriptor item
-   SignatureFileDescriptor* pSignatureDescriptor = dynamic_cast<SignatureFileDescriptor*>(mpFileDescriptor);
+   // Signature file descriptor items
+   SignatureFileDescriptor* pSignatureDescriptor = dynamic_cast<SignatureFileDescriptor*>(mpFileDescriptor.get());
    if (pSignatureDescriptor != NULL)
    {
+      // Units
       QTreeWidgetItem* pUnitsItem = new QTreeWidgetItem(mpTreeWidget);
       if (pUnitsItem != NULL)
       {
          pUnitsItem->setText(0, "Units");
+
          set<string> unitNames = pSignatureDescriptor->getUnitNames();
          if (unitNames.empty() == false)
          {
             pUnitsItem->setBackgroundColor(1, Qt::lightGray);
-            for (set<string>::const_iterator it = unitNames.begin(); it != unitNames.end(); ++it)
+
+            for (set<string>::const_iterator iter = unitNames.begin(); iter != unitNames.end(); ++iter)
             {
-               string unitName = *it;
+               string unitName = *iter;
+
                const Units* pUnits = pSignatureDescriptor->getUnits(unitName);
                if (pUnits == NULL)
                {
                   continue;
                }
 
-               // unit item
-               QTreeWidgetItem* pNamedItem = new QTreeWidgetItem(pUnitsItem);
-               if (pNamedItem == NULL)
+               // Component item
+               QTreeWidgetItem* pComponentItem = new QTreeWidgetItem(pUnitsItem);
+               if (pComponentItem == NULL)
                {
                   continue;
                }
-               pNamedItem->setText(0, QString::fromStdString(unitName));
-               pNamedItem->setBackgroundColor(1, Qt::lightGray);
+
+               pComponentItem->setText(0, QString::fromStdString(unitName));
+               pComponentItem->setBackgroundColor(1, Qt::lightGray);
 
                // Name
-               QTreeWidgetItem* pUnitNameItem = new QTreeWidgetItem(pNamedItem);
+               QTreeWidgetItem* pUnitNameItem = new QTreeWidgetItem(pComponentItem);
                if (pUnitNameItem != NULL)
                {
                   string unitsName = pUnits->getUnitName();
@@ -265,14 +276,14 @@ void FileDescriptorWidget::initialize()
                   pUnitNameItem->setText(0, "Unit Name");
                   pUnitNameItem->setText(1, QString::fromStdString(unitsName));
 
-                  if (mReadOnly == false)
+                  if (mEditable == true)
                   {
                      mpTreeWidget->setCellWidgetType(pUnitNameItem, 1, CustomTreeWidget::LINE_EDIT);
                   }
                }
 
                // Type
-               QTreeWidgetItem* pUnitTypeItem = new QTreeWidgetItem(pNamedItem);
+               QTreeWidgetItem* pUnitTypeItem = new QTreeWidgetItem(pComponentItem);
                if (pUnitTypeItem != NULL)
                {
                   UnitType unitType = pUnits->getUnitType();
@@ -281,29 +292,15 @@ void FileDescriptorWidget::initialize()
                   pUnitTypeItem->setText(0, "Unit Type");
                   pUnitTypeItem->setText(1, QString::fromStdString(unitTypeText));
 
-                  if (mReadOnly == false)
+                  if (mEditable == true)
                   {
-                     QComboBox* pUnitTypeCombo = new QComboBox(mpTreeWidget);
-                     pUnitTypeCombo->setEditable(false);
-                     pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(ABSORBANCE)));
-                     pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(ABSORPTANCE)));
-                     pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(DIGITAL_NO)));
-                     pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(DISTANCE)));
-                     pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(EMISSIVITY)));
-                     pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(RADIANCE)));
-                     pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(REFLECTANCE)));
-                     pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(REFLECTANCE_FACTOR)));
-                     pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(TRANSMITTANCE)));
-                     pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(CUSTOM_UNIT)));
-                     pUnitTypeCombo->hide();
-
                      mpTreeWidget->setCellWidgetType(pUnitTypeItem, 1, CustomTreeWidget::COMBO_BOX);
-                     mpTreeWidget->setComboBox(pUnitTypeItem, 1, pUnitTypeCombo);
+                     mpTreeWidget->setComboBox(pUnitTypeItem, 1, mpUnitTypeCombo);
                   }
                }
 
                // Scale
-               QTreeWidgetItem* pScaleItem = new QTreeWidgetItem(pNamedItem);
+               QTreeWidgetItem* pScaleItem = new QTreeWidgetItem(pComponentItem);
                if (pScaleItem != NULL)
                {
                   double dScale = pUnits->getScaleFromStandard();
@@ -311,14 +308,14 @@ void FileDescriptorWidget::initialize()
                   pScaleItem->setText(0, "Scale");
                   pScaleItem->setText(1, QString::number(dScale));
 
-                  if (mReadOnly == false)
+                  if (mEditable == true)
                   {
                      mpTreeWidget->setCellWidgetType(pScaleItem, 1, CustomTreeWidget::LINE_EDIT);
                   }
                }
 
                // Range minimum
-               QTreeWidgetItem* pMinimumItem = new QTreeWidgetItem(pNamedItem);
+               QTreeWidgetItem* pMinimumItem = new QTreeWidgetItem(pComponentItem);
                if (pMinimumItem != NULL)
                {
                   double dMinimum = pUnits->getRangeMin();
@@ -326,14 +323,14 @@ void FileDescriptorWidget::initialize()
                   pMinimumItem->setText(0, "Range Minimum");
                   pMinimumItem->setText(1, QString::number(dMinimum));
 
-                  if (mReadOnly == false)
+                  if (mEditable == true)
                   {
                      mpTreeWidget->setCellWidgetType(pMinimumItem, 1, CustomTreeWidget::LINE_EDIT);
                   }
                }
 
                // Range maximum
-               QTreeWidgetItem* pMaximumItem = new QTreeWidgetItem(pNamedItem);
+               QTreeWidgetItem* pMaximumItem = new QTreeWidgetItem(pComponentItem);
                if (pMaximumItem != NULL)
                {
                   double dMaximum = pUnits->getRangeMax();
@@ -341,26 +338,30 @@ void FileDescriptorWidget::initialize()
                   pMaximumItem->setText(0, "Range Maximum");
                   pMaximumItem->setText(1, QString::number(dMaximum));
 
-                  if (mReadOnly == false)
+                  if (mEditable == true)
                   {
                      mpTreeWidget->setCellWidgetType(pMaximumItem, 1, CustomTreeWidget::LINE_EDIT);
                   }
                }
             }
          }
-         else  // no Units associated with components in this signature
+         else  // No units associated with components in this signature
          {
             pUnitsItem->setText(1, "No Units defined");
          }
       }
 
+      VERIFYNR(connect(mpTreeWidget, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
+         SLOT(descriptorItemChanged(QTreeWidgetItem*, int))));
       return;
    }
 
-   // Raster element file descriptor items
-   RasterFileDescriptor* pRasterDescriptor = dynamic_cast<RasterFileDescriptor*>(mpFileDescriptor);
+   // Raster file descriptor items
+   RasterFileDescriptor* pRasterDescriptor = dynamic_cast<RasterFileDescriptor*>(mpFileDescriptor.get());
    if (pRasterDescriptor == NULL)
    {
+      VERIFYNR(connect(mpTreeWidget, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
+         SLOT(descriptorItemChanged(QTreeWidgetItem*, int))));
       return;
    }
 
@@ -376,7 +377,7 @@ void FileDescriptorWidget::initialize()
       pRowsItem->setText(1, QString::number(rows));
 
       mpTreeWidget->insertTopLevelItem(2, pRowsItem);
-      if (mReadOnly == false)
+      if (mEditable == true)
       {
          mpTreeWidget->setCellWidgetType(pRowsItem, 1, CustomTreeWidget::LINE_EDIT);
       }
@@ -392,7 +393,7 @@ void FileDescriptorWidget::initialize()
       pColumnsItem->setText(1, QString::number(columns));
 
       mpTreeWidget->insertTopLevelItem(3, pColumnsItem);
-      if (mReadOnly == false)
+      if (mEditable == true)
       {
          mpTreeWidget->setCellWidgetType(pColumnsItem, 1, CustomTreeWidget::LINE_EDIT);
       }
@@ -408,7 +409,7 @@ void FileDescriptorWidget::initialize()
       pBitsPerElementItem->setText(1, QString::number(bitsPerElement));
 
       mpTreeWidget->insertTopLevelItem(4, pBitsPerElementItem);
-      if (mReadOnly == false)
+      if (mEditable == true)
       {
          mpTreeWidget->setCellWidgetType(pBitsPerElementItem, 1, CustomTreeWidget::LINE_EDIT);
       }
@@ -423,7 +424,7 @@ void FileDescriptorWidget::initialize()
       pHeaderBytesItem->setText(0, "Header Bytes");
       pHeaderBytesItem->setText(1, QString::number(headerBytes));
 
-      if (mReadOnly == false)
+      if (mEditable == true)
       {
          mpTreeWidget->setCellWidgetType(pHeaderBytesItem, 1, CustomTreeWidget::LINE_EDIT);
       }
@@ -438,7 +439,7 @@ void FileDescriptorWidget::initialize()
       pTrailerBytesItem->setText(0, "Trailer Bytes");
       pTrailerBytesItem->setText(1, QString::number(trailerBytes));
 
-      if (mReadOnly == false)
+      if (mEditable == true)
       {
          mpTreeWidget->setCellWidgetType(pTrailerBytesItem, 1, CustomTreeWidget::LINE_EDIT);
       }
@@ -453,7 +454,7 @@ void FileDescriptorWidget::initialize()
       pPrelineBytesItem->setText(0, "Preline Bytes");
       pPrelineBytesItem->setText(1, QString::number(prelineBytes));
 
-      if (mReadOnly == false)
+      if (mEditable == true)
       {
          mpTreeWidget->setCellWidgetType(pPrelineBytesItem, 1, CustomTreeWidget::LINE_EDIT);
       }
@@ -468,7 +469,7 @@ void FileDescriptorWidget::initialize()
       pPostlineBytesItem->setText(0, "Postline Bytes");
       pPostlineBytesItem->setText(1, QString::number(postlineBytes));
 
-      if (mReadOnly == false)
+      if (mEditable == true)
       {
          mpTreeWidget->setCellWidgetType(pPostlineBytesItem, 1, CustomTreeWidget::LINE_EDIT);
       }
@@ -483,7 +484,7 @@ void FileDescriptorWidget::initialize()
       pXPixelSizeItem->setText(0, "X Pixel Size");
       pXPixelSizeItem->setText(1, QString::number(pixelSize));
 
-      if (mReadOnly == false)
+      if (mEditable == true)
       {
          mpTreeWidget->setCellWidgetType(pXPixelSizeItem, 1, CustomTreeWidget::LINE_EDIT);
       }
@@ -497,7 +498,7 @@ void FileDescriptorWidget::initialize()
       pYPixelSizeItem->setText(0, "Y Pixel Size");
       pYPixelSizeItem->setText(1, QString::number(pixelSize));
 
-      if (mReadOnly == false)
+      if (mEditable == true)
       {
          mpTreeWidget->setCellWidgetType(pYPixelSizeItem, 1, CustomTreeWidget::LINE_EDIT);
       }
@@ -522,7 +523,7 @@ void FileDescriptorWidget::initialize()
             pNameItem->setText(0, "Name");
             pNameItem->setText(1, QString::fromStdString(unitsName));
 
-            if (mReadOnly == false)
+            if (mEditable == true)
             {
                mpTreeWidget->setCellWidgetType(pNameItem, 1, CustomTreeWidget::LINE_EDIT);
             }
@@ -538,24 +539,10 @@ void FileDescriptorWidget::initialize()
             pTypeItem->setText(0, "Type");
             pTypeItem->setText(1, QString::fromStdString(unitTypeText));
 
-            if (mReadOnly == false)
+            if (mEditable == true)
             {
-               QComboBox* pUnitTypeCombo = new QComboBox(mpTreeWidget);
-               pUnitTypeCombo->setEditable(false);
-               pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(ABSORBANCE)));
-               pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(ABSORPTANCE)));
-               pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(DIGITAL_NO)));
-               pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(DISTANCE)));
-               pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(EMISSIVITY)));
-               pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(RADIANCE)));
-               pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(REFLECTANCE)));
-               pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(REFLECTANCE_FACTOR)));
-               pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(TRANSMITTANCE)));
-               pUnitTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(CUSTOM_UNIT)));
-               pUnitTypeCombo->hide();
-
                mpTreeWidget->setCellWidgetType(pTypeItem, 1, CustomTreeWidget::COMBO_BOX);
-               mpTreeWidget->setComboBox(pTypeItem, 1, pUnitTypeCombo);
+               mpTreeWidget->setComboBox(pTypeItem, 1, mpUnitTypeCombo);
             }
          }
 
@@ -568,7 +555,7 @@ void FileDescriptorWidget::initialize()
             pScaleItem->setText(0, "Scale");
             pScaleItem->setText(1, QString::number(dScale));
 
-            if (mReadOnly == false)
+            if (mEditable == true)
             {
                mpTreeWidget->setCellWidgetType(pScaleItem, 1, CustomTreeWidget::LINE_EDIT);
             }
@@ -583,7 +570,7 @@ void FileDescriptorWidget::initialize()
             pMinimumItem->setText(0, "Range Minimum");
             pMinimumItem->setText(1, QString::number(dMinimum));
 
-            if (mReadOnly == false)
+            if (mEditable == true)
             {
                mpTreeWidget->setCellWidgetType(pMinimumItem, 1, CustomTreeWidget::LINE_EDIT);
             }
@@ -598,7 +585,7 @@ void FileDescriptorWidget::initialize()
             pMaximumItem->setText(0, "Range Maximum");
             pMaximumItem->setText(1, QString::number(dMaximum));
 
-            if (mReadOnly == false)
+            if (mEditable == true)
             {
                mpTreeWidget->setCellWidgetType(pMaximumItem, 1, CustomTreeWidget::LINE_EDIT);
             }
@@ -664,7 +651,7 @@ void FileDescriptorWidget::initialize()
       pBandsItem->setText(1, QString::number(bands));
 
       mpTreeWidget->insertTopLevelItem(4, pBandsItem);
-      if (mReadOnly == false)
+      if (mEditable == true)
       {
          mpTreeWidget->setCellWidgetType(pBandsItem, 1, CustomTreeWidget::LINE_EDIT);
       }
@@ -693,18 +680,10 @@ void FileDescriptorWidget::initialize()
       pInterleaveItem->setText(1, QString::fromStdString(interleaveText));
 
       mpTreeWidget->insertTopLevelItem(7, pInterleaveItem);
-      if (mReadOnly == false)
+      if (mEditable == true)
       {
-         QComboBox* pInterleaveCombo = new QComboBox(mpTreeWidget);
-         pInterleaveCombo->setEditable(false);
-         pInterleaveCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(BIL)));
-         pInterleaveCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(BIP)));
-         pInterleaveCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(BSQ) + BSQ_SINGLE_SUFFIX));
-         pInterleaveCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(BSQ) + BSQ_MULTI_SUFFIX));
-         pInterleaveCombo->hide();
-
          mpTreeWidget->setCellWidgetType(pInterleaveItem, 1, CustomTreeWidget::COMBO_BOX);
-         mpTreeWidget->setComboBox(pInterleaveItem, 1, pInterleaveCombo);
+         mpTreeWidget->setComboBox(pInterleaveItem, 1, mpInterleaveCombo);
       }
    }
 
@@ -721,7 +700,7 @@ void FileDescriptorWidget::initialize()
             pBandItem->setText(0, QString::number(i + 1));
             pBandItem->setText(1, QString::fromStdString(bandFilename));
 
-            if (mReadOnly == false)
+            if (mEditable == true)
             {
                mpTreeWidget->setCellWidgetType(pBandItem, 1, CustomTreeWidget::BROWSE_FILE_EDIT);
                mpTreeWidget->setFileBrowser(pBandItem, 1, mpFileBrowser);
@@ -748,7 +727,7 @@ void FileDescriptorWidget::initialize()
       pPrebandBytesItem->setBackgroundColor(1, cellColor);
 
       mpTreeWidget->insertTopLevelItem(12, pPrebandBytesItem);
-      if ((mReadOnly == false) && (interleave == BSQ))
+      if ((mEditable == true) && (interleave == BSQ))
       {
          mpTreeWidget->setCellWidgetType(pPrebandBytesItem, 1, CustomTreeWidget::LINE_EDIT);
       }
@@ -772,343 +751,433 @@ void FileDescriptorWidget::initialize()
       pPostbandBytesItem->setBackgroundColor(1, cellColor);
 
       mpTreeWidget->insertTopLevelItem(13, pPostbandBytesItem);
-      if ((mReadOnly == false) && (interleave == BSQ))
+      if ((mEditable == true) && (interleave == BSQ))
       {
          mpTreeWidget->setCellWidgetType(pPostbandBytesItem, 1, CustomTreeWidget::LINE_EDIT);
       }
    }
+
+   VERIFYNR(connect(mpTreeWidget, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
+      SLOT(descriptorItemChanged(QTreeWidgetItem*, int))));
 }
 
-bool FileDescriptorWidget::isModified() const
+void FileDescriptorWidget::showEvent(QShowEvent* pEvent)
 {
-   return mModified;
+   QWidget::showEvent(pEvent);
+
+   if (mpFileDescriptor.get() != NULL)
+   {
+      VERIFYNR(mpFileDescriptor->detach(SIGNAL_NAME(Subject, Modified),
+         Slot(this, &FileDescriptorWidget::fileDescriptorModified)));
+      initialize();
+   }
 }
 
-bool FileDescriptorWidget::applyChanges()
+void FileDescriptorWidget::hideEvent(QHideEvent* pEvent)
 {
-   return applyToFileDescriptor(mpFileDescriptor);
+   QWidget::hideEvent(pEvent);
+
+   if (mpFileDescriptor.get() != NULL)
+   {
+      VERIFYNR(mpFileDescriptor->attach(SIGNAL_NAME(Subject, Modified),
+         Slot(this, &FileDescriptorWidget::fileDescriptorModified)));
+   }
 }
 
-bool FileDescriptorWidget::applyToFileDescriptor(FileDescriptor* pFileDescriptor)
+void FileDescriptorWidget::fileDescriptorModified(Subject& subject, const string& signal, const boost::any& value)
 {
-   if (mReadOnly == true)
+   mNeedsInitialization = true;
+}
+
+void FileDescriptorWidget::initialize()
+{
+   if ((mpFileDescriptor.get() == NULL) || (mNeedsInitialization == false) || (isVisible() == false))
    {
-      return true;
+      return;
    }
 
-   if (mModified == false)
+   mNeedsInitialization = false;
+
+   VERIFYNR(disconnect(mpTreeWidget, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
+      SLOT(descriptorItemChanged(QTreeWidgetItem*, int))));
+
+   // File descriptor items
+   QTreeWidgetItem* pItem = getDescriptorItem("Filename");
+   if (pItem != NULL)
    {
-      return true;
+      const string& filename = mpFileDescriptor->getFilename();
+      pItem->setText(1, QString::fromStdString(filename));
    }
 
-   if (pFileDescriptor == NULL)
+   pItem = getDescriptorItem("Data Set Location");
+   if (pItem != NULL)
    {
-      return true;
+      const string& datasetLocation = mpFileDescriptor->getDatasetLocation();
+      pItem->setText(1, QString::fromStdString(datasetLocation));
    }
 
-   // Endian
-   QString strEndian = getDescriptorValue("Endian");
-   if (strEndian.isEmpty() == false)
+   pItem = getDescriptorItem("Endian");
+   if (pItem != NULL)
    {
-      bool bError = true;
-      EndianType endian = StringUtilities::fromDisplayString<EndianType>(strEndian.toStdString(), &bError);
-      if (bError == false)
+      EndianType endian = mpFileDescriptor->getEndian();
+      string endianText = StringUtilities::toDisplayString(endian);
+      pItem->setText(1, QString::fromStdString(endianText));
+
+      if (mpEndianCombo != NULL)
       {
-         pFileDescriptor->setEndian(endian);
+         int index = mpEndianCombo->findText(QString::fromStdString(endianText));
+         mpEndianCombo->setCurrentIndex(index);
       }
    }
 
-   // SignatureFileDescriptor items
-   SignatureFileDescriptor* pSignatureDescriptor = dynamic_cast<SignatureFileDescriptor*>(mpFileDescriptor);
-   if (pSignatureDescriptor != NULL)
+   // Signature file descriptor items
+   const SignatureFileDescriptor* pSignatureFileDescriptor =
+      dynamic_cast<const SignatureFileDescriptor*>(mpFileDescriptor.get());
+   if (pSignatureFileDescriptor != NULL)
    {
-      set<string> dataNames = pSignatureDescriptor->getUnitNames();
-      if (dataNames.empty())
+      set<string> componentNames = pSignatureFileDescriptor->getUnitNames();
+      for (set<string>::const_iterator iter = componentNames.begin(); iter != componentNames.end(); ++iter)
       {
-         return true;
-      }
-      for (set<string>::const_iterator it = dataNames.begin(); it != dataNames.end(); ++it)
-      {
-         // data name
-         QTreeWidgetItem* pItem = getDescriptorItem(QString::fromStdString(*it));
-
-         // Units
-         FactoryResource<Units> pUnits;
-         if (pUnits.get() != NULL)
+         const Units* pUnits = pSignatureFileDescriptor->getUnits(*iter);
+         if (pUnits != NULL)
          {
-            // Name
-            QTreeWidgetItem* pSubItem = getDescriptorItem("Unit Name", pItem);
-            if (pSubItem != NULL)
+            QTreeWidgetItem* pComponentItem = getDescriptorItem(QString::fromStdString(*iter));
+
+            pItem = getDescriptorItem("Unit Name", pComponentItem);
+            if (pItem != NULL)
             {
-               QString strUnitsName = pSubItem->text(1);
-               if (strUnitsName.isEmpty() == false)
+               pItem->setText(1, QString::fromStdString(pUnits->getUnitName()));
+            }
+
+            pItem = getDescriptorItem("Unit Type", pComponentItem);
+            if (pItem != NULL)
+            {
+               UnitType unitType = pUnits->getUnitType();
+               string unitTypeText = StringUtilities::toDisplayString(unitType);
+               pItem->setText(1, QString::fromStdString(unitTypeText));
+
+               if (mpUnitTypeCombo != NULL)
                {
-                  pUnits->setUnitName(strUnitsName.toStdString());
+                  int index = mpUnitTypeCombo->findText(QString::fromStdString(unitTypeText));
+                  mpUnitTypeCombo->setCurrentIndex(index);
                }
             }
 
-            // Type
-            pSubItem = getDescriptorItem("Unit Type", pItem);
-            if (pSubItem != NULL)
+            pItem = getDescriptorItem("Scale", pComponentItem);
+            if (pItem != NULL)
             {
-               QString strUnitsType = pSubItem->text(1);
-               if (strUnitsType.isEmpty() == false)
-               {
-                  bool bError = true;
-                  UnitType unitType =
-                     StringUtilities::fromDisplayString<UnitType>(strUnitsType.toStdString(), &bError);
-                  if (bError == false)
-                  {
-                     pUnits->setUnitType(unitType);
-                  }
-               }
+               pItem->setText(1, QString::number(pUnits->getScaleFromStandard()));
             }
 
-            // Scale
-            pSubItem = getDescriptorItem("Scale", pItem);
-            if (pSubItem != NULL)
+            pItem = getDescriptorItem("Range Minimum", pComponentItem);
+            if (pItem != NULL)
             {
-               QString strUnitsScale = pSubItem->text(1);
-               if (strUnitsScale.isEmpty() == false)
-               {
-                  double dScale = strUnitsScale.toDouble();
-                  pUnits->setScaleFromStandard(dScale);
-               }
-
-               // Range minimum
-               pSubItem = getDescriptorItem("Range Minimum", pItem);
-               if (pSubItem != NULL)
-               {
-                  QString strMinimum = pSubItem->text(1);
-                  if (strMinimum.isEmpty() == false)
-                  {
-                     double dMinimum = strMinimum.toDouble();
-                     pUnits->setRangeMin(dMinimum);
-                  }
-               }
+               pItem->setText(1, QString::number(pUnits->getRangeMin()));
             }
 
-            // Range maximum
-            pSubItem = getDescriptorItem("Range Maximum", pItem);
-            if (pSubItem != NULL)
+            pItem = getDescriptorItem("Range Maximum", pComponentItem);
+            if (pItem != NULL)
             {
-               QString strMaximum = pSubItem->text(1);
-               if (strMaximum.isEmpty() == false)
-               {
-                  double dMaximum = strMaximum.toDouble();
-                  pUnits->setRangeMax(dMaximum);
-               }
+               pItem->setText(1, QString::number(pUnits->getRangeMax()));
             }
-
-            pSignatureDescriptor->setUnits(*it, pUnits.get());
          }
       }
 
-      return true;
+      VERIFYNR(connect(mpTreeWidget, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
+         SLOT(descriptorItemChanged(QTreeWidgetItem*, int))));
+      return;
    }
 
-   // Raster element file descriptor items
-   RasterFileDescriptor* pRasterDescriptor = dynamic_cast<RasterFileDescriptor*>(pFileDescriptor);
-   if (pRasterDescriptor == NULL)
+   // Raster file descriptor items
+   const RasterFileDescriptor* pRasterFileDescriptor =
+      dynamic_cast<const RasterFileDescriptor*>(mpFileDescriptor.get());
+   if (pRasterFileDescriptor == NULL)
    {
-      return true;
+      VERIFYNR(connect(mpTreeWidget, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
+         SLOT(descriptorItemChanged(QTreeWidgetItem*, int))));
+      return;
    }
 
-   // Bits per element
-   QString strBitsPerElement = getDescriptorValue("Bits Per Element");
-   if (strBitsPerElement.isEmpty() == false)
+   pItem = getDescriptorItem("Rows");
+   if (pItem != NULL)
    {
-      unsigned int bitsPerElement = strBitsPerElement.toUInt();
-      pRasterDescriptor->setBitsPerElement(bitsPerElement);
+      pItem->setText(1, QString::number(pRasterFileDescriptor->getRowCount()));
    }
 
-   // Header bytes
-   QString strHeaderBytes = getDescriptorValue("Header Bytes");
-   if (strHeaderBytes.isEmpty() == false)
+   pItem = getDescriptorItem("Columns");
+   if (pItem != NULL)
    {
-      unsigned int headerBytes = strHeaderBytes.toUInt();
-      pRasterDescriptor->setHeaderBytes(headerBytes);
+      pItem->setText(1, QString::number(pRasterFileDescriptor->getColumnCount()));
    }
 
-   // Trailer bytes
-   QString strTrailerBytes = getDescriptorValue("Trailer Bytes");
-   if (strTrailerBytes.isEmpty() == false)
+   pItem = getDescriptorItem("Bands");
+   if (pItem != NULL)
    {
-      unsigned int trailerBytes = strTrailerBytes.toUInt();
-      pRasterDescriptor->setTrailerBytes(trailerBytes);
+      pItem->setText(1, QString::number(pRasterFileDescriptor->getBandCount()));
    }
 
-   // Preline bytes
-   QString strPrelineBytes = getDescriptorValue("Preline Bytes");
-   if (strPrelineBytes.isEmpty() == false)
+   pItem = getDescriptorItem("Bits Per Element");
+   if (pItem != NULL)
    {
-      unsigned int prelineBytes = strPrelineBytes.toUInt();
-      pRasterDescriptor->setPrelineBytes(prelineBytes);
+      pItem->setText(1, QString::number(pRasterFileDescriptor->getBitsPerElement()));
    }
 
-   // Postline bytes
-   QString strPostlineBytes = getDescriptorValue("Postline Bytes");
-   if (strPostlineBytes.isEmpty() == false)
+   pItem = getDescriptorItem("Header Bytes");
+   if (pItem != NULL)
    {
-      unsigned int postlineBytes = strPostlineBytes.toUInt();
-      pRasterDescriptor->setPostlineBytes(postlineBytes);
+      pItem->setText(1, QString::number(pRasterFileDescriptor->getHeaderBytes()));
    }
 
-   // Pixel size
-   QString strPixelSize = getDescriptorValue("X Pixel Size");
-   if (strPixelSize.isEmpty() == false)
+   pItem = getDescriptorItem("Trailer Bytes");
+   if (pItem != NULL)
    {
-      pRasterDescriptor->setXPixelSize(strPixelSize.toDouble());
+      pItem->setText(1, QString::number(pRasterFileDescriptor->getTrailerBytes()));
    }
 
-   strPixelSize = getDescriptorValue("Y Pixel Size");
-   if (strPixelSize.isEmpty() == false)
+   pItem = getDescriptorItem("Preline Bytes");
+   if (pItem != NULL)
    {
-      pRasterDescriptor->setYPixelSize(strPixelSize.toDouble());
+      pItem->setText(1, QString::number(pRasterFileDescriptor->getPrelineBytes()));
    }
 
-   // Units
-   Units* pUnits = pRasterDescriptor->getUnits();
-   if (pUnits != NULL)
+   pItem = getDescriptorItem("Postline Bytes");
+   if (pItem != NULL)
    {
-      // Name
-      QString strUnitsName = getDescriptorValue("Name");
-      if (strUnitsName.isEmpty() == false)
+      pItem->setText(1, QString::number(pRasterFileDescriptor->getPostlineBytes()));
+   }
+
+   pItem = getDescriptorItem("Preband Bytes");
+   if (pItem != NULL)
+   {
+      QString prebandBytes;
+      if (pRasterFileDescriptor->getInterleaveFormat() == BSQ)
       {
-         pUnits->setUnitName(strUnitsName.toStdString());
+         prebandBytes = QString::number(pRasterFileDescriptor->getPrebandBytes());
       }
 
-      // Type
-      QString strUnitsType = getDescriptorValue("Type");
-      if (strUnitsType.isEmpty() == false)
-      {
-         UnitType unitType;
+      pItem->setText(1, prebandBytes);
+   }
 
-         bool bError = true;
-         unitType = StringUtilities::fromDisplayString<UnitType>(strUnitsType.toStdString(), &bError);
-         if (bError == false)
+   pItem = getDescriptorItem("Postband Bytes");
+   if (pItem != NULL)
+   {
+      QString postbandBytes;
+      if (pRasterFileDescriptor->getInterleaveFormat() == BSQ)
+      {
+         postbandBytes = QString::number(pRasterFileDescriptor->getPostbandBytes());
+      }
+
+      pItem->setText(1, postbandBytes);
+   }
+
+   pItem = getDescriptorItem("Interleave Format");
+   if (pItem != NULL)
+   {
+      InterleaveFormatType interleave = pRasterFileDescriptor->getInterleaveFormat();
+      string interleaveText = StringUtilities::toDisplayString(interleave);
+
+      if (interleave == BSQ)
+      {
+         const vector<const Filename*>& bandFiles = pRasterFileDescriptor->getBandFiles();
+         if (bandFiles.empty() == false)
          {
-            pUnits->setUnitType(unitType);
+            interleaveText += BSQ_MULTI_SUFFIX;
+         }
+         else
+         {
+            interleaveText += BSQ_SINGLE_SUFFIX;
          }
       }
 
-      // Scale
-      QString strUnitsScale = getDescriptorValue("Scale");
-      if (strUnitsScale.isEmpty() == false)
-      {
-         double dScale = strUnitsScale.toDouble();
-         pUnits->setScaleFromStandard(dScale);
-      }
+      pItem->setText(1, QString::fromStdString(interleaveText));
 
-      // Range minimum
-      QString strMinimum = getDescriptorValue("Range Minimum");
-      if (strMinimum.isEmpty() == false)
+      if (mpInterleaveCombo != NULL)
       {
-         double dMinimum = strMinimum.toDouble();
-         pUnits->setRangeMin(dMinimum);
-      }
-
-      // Range maximum
-      QString strMaximum = getDescriptorValue("Range Maximum");
-      if (strMaximum.isEmpty() == false)
-      {
-         double dMaximum = strMaximum.toDouble();
-         pUnits->setRangeMax(dMaximum);
+         int index = mpInterleaveCombo->findText(QString::fromStdString(interleaveText));
+         mpInterleaveCombo->setCurrentIndex(index);
       }
    }
 
-   // Interleave format
-   QString strInterleave = getDescriptorValue("Interleave Format");
-   if (strInterleave.isEmpty() == false)
+   pItem = getDescriptorItem("X Pixel Size");
+   if (pItem != NULL)
    {
-      bool bError = true;
-      string interleaveVal = strInterleave.toStdString();
-      InterleaveFormatType interleave;
-      if ((interleaveVal == StringUtilities::toDisplayString(BSQ) + BSQ_SINGLE_SUFFIX) ||
-          (interleaveVal == StringUtilities::toDisplayString(BSQ) + BSQ_MULTI_SUFFIX))
+      pItem->setText(1, QString::number(pRasterFileDescriptor->getXPixelSize()));
+   }
+
+   pItem = getDescriptorItem("Y Pixel Size");
+   if (pItem != NULL)
+   {
+      pItem->setText(1, QString::number(pRasterFileDescriptor->getYPixelSize()));
+   }
+
+   pItem = getDescriptorItem("Filename");    // This must occur after setting the bands and interleave items
+   if (pItem != NULL)
+   {
+      // Clear the existing band file items
+      QList<QTreeWidgetItem*> bandFileItems = pItem->takeChildren();
+      for (int i = 0; i < bandFileItems.count(); ++i)
       {
-         interleave = BSQ;
-         bError = false;
+         QTreeWidgetItem* pBandFileItem = bandFileItems[i];
+         if (pBandFileItem != NULL)
+         {
+            delete pBandFileItem;
+         }
+      }
+
+      // Ensure that the interleave format is BSQ - multiple files
+      QTreeWidgetItem* pInterleaveItem = getDescriptorItem("Interleave Format");
+      if (pInterleaveItem != NULL)
+      {
+         if (pInterleaveItem->text(1).toStdString() == (StringUtilities::toDisplayString(BSQ) + BSQ_MULTI_SUFFIX))
+         {
+            // Get the number of specified bands
+            unsigned int numBands = 0;
+
+            QTreeWidgetItem* pBandsItem = getDescriptorItem("Bands");
+            if (pBandsItem != NULL)
+            {
+               QString numBandsText = pBandsItem->text(1);
+               numBands = numBandsText.toUInt();
+            }
+
+            // Create the band file items based on the band files in the
+            // file descriptor to match the specified number of bands
+            const vector<const Filename*>& bandFiles = pRasterFileDescriptor->getBandFiles();
+            for (unsigned int i = 0; i < numBands; ++i)
+            {
+               QString bandFilename;
+               if (i < bandFiles.size())
+               {
+                  const Filename* pFilename = bandFiles[i];
+                  if (pFilename != NULL)
+                  {
+                     bandFilename = QString::fromStdString(pFilename->getFullPathAndName());
+                  }
+               }
+
+               QStringList itemValues;
+               itemValues << QString::number(i + 1) << bandFilename;
+
+               QTreeWidgetItem* pBandItem = new QTreeWidgetItem(pItem, itemValues);
+               if (mEditable == true)
+               {
+                  mpTreeWidget->setCellWidgetType(pBandItem, 1, CustomTreeWidget::BROWSE_FILE_EDIT);
+                  mpTreeWidget->setFileBrowser(pBandItem, 1, mpFileBrowser);
+               }
+            }
+         }
+      }
+   }
+
+   if (mpGcpTree != NULL)
+   {
+      mpGcpTree->clear();
+
+      const list<GcpPoint>& gcps = pRasterFileDescriptor->getGcps();
+      if (gcps.empty() == false)
+      {
+         list<GcpPoint>::const_iterator iter;
+         unsigned int i = 0;
+
+         for (iter = gcps.begin(), i = 0; iter != gcps.end(); ++iter, ++i)
+         {
+            GcpPoint gcp = *iter;
+
+            QTreeWidgetItem* pGcpItem = new QTreeWidgetItem(mpGcpTree);
+            if (pGcpItem != NULL)
+            {
+               QString strLatitude;
+               QString strLongitude;
+               LatLonPoint latLonPoint(gcp.mCoordinate);
+
+               string latText = latLonPoint.getLatitudeText();
+               if (latText.empty() == false)
+               {
+                  strLatitude = QString::fromStdString(latText);
+               }
+
+               string longText = latLonPoint.getLongitudeText();
+               if (longText.empty() == false)
+               {
+                  strLongitude = QString::fromStdString(longText);
+               }
+
+               pGcpItem->setText(0, QString("GCP ") + QString::number(i + 1));
+               pGcpItem->setText(1, QString::number(gcp.mPixel.mX + 1.0));
+               pGcpItem->setText(2, QString::number(gcp.mPixel.mY + 1.0));
+               pGcpItem->setText(3, strLatitude);
+               pGcpItem->setText(4, strLongitude);
+            }
+         }
+
+         mpGcpTree->setEnabled(true);
       }
       else
       {
-         interleave = StringUtilities::fromDisplayString<InterleaveFormatType>(interleaveVal, &bError);
-      }
-      if (bError == false)
-      {
-         pRasterDescriptor->setInterleaveFormat(interleave);
+         mpGcpTree->setEnabled(false);
       }
    }
 
-   // Band files
-   vector<string> bandFiles;
-
-   QTreeWidgetItem* pFilenameItem = getDescriptorItem("Filename");
-   if (pFilenameItem != NULL)
+   // Units items
+   const Units* pUnits = pRasterFileDescriptor->getUnits();
+   if (pUnits != NULL)
    {
-      bool bMultipleFiles = false;
-      for (int i = 0; i < pFilenameItem->childCount(); ++i)
+      pItem = getDescriptorItem("Name");
+      if (pItem != NULL)
       {
-         QTreeWidgetItem* pBandFileItem = pFilenameItem->child(i);
-         if (pBandFileItem != NULL)
+         pItem->setText(1, QString::fromStdString(pUnits->getUnitName()));
+      }
+
+      pItem = getDescriptorItem("Type");
+      if (pItem != NULL)
+      {
+         UnitType unitType = pUnits->getUnitType();
+         string unitTypeText = StringUtilities::toDisplayString(unitType);
+         pItem->setText(1, QString::fromStdString(unitTypeText));
+
+         if (mpUnitTypeCombo != NULL)
          {
-            string bandFile;
-
-            QString strBandFile = pBandFileItem->text(1);
-            if (strBandFile.isEmpty() == false)
-            {
-               bandFile = strBandFile.toStdString();
-               bMultipleFiles = true;
-            }
-
-            bandFiles.push_back(bandFile);
+            int index = mpUnitTypeCombo->findText(QString::fromStdString(unitTypeText));
+            mpUnitTypeCombo->setCurrentIndex(index);
          }
       }
 
-      if (bMultipleFiles == false)
+      pItem = getDescriptorItem("Scale");
+      if (pItem != NULL)
       {
-         bandFiles.clear();
+         pItem->setText(1, QString::number(pUnits->getScaleFromStandard()));
+      }
+
+      pItem = getDescriptorItem("Range Minimum");
+      if (pItem != NULL)
+      {
+         pItem->setText(1, QString::number(pUnits->getRangeMin()));
+      }
+
+      pItem = getDescriptorItem("Range Maximum");
+      if (pItem != NULL)
+      {
+         pItem->setText(1, QString::number(pUnits->getRangeMax()));
       }
    }
 
-   pRasterDescriptor->setBandFiles(bandFiles);
-
-   // Preband bytes
-   QString strPrebandBytes = getDescriptorValue("Preband Bytes");
-   if (strPrebandBytes.isEmpty() == false)
-   {
-      unsigned int prebandBytes = strPrebandBytes.toUInt();
-      pRasterDescriptor->setPrebandBytes(prebandBytes);
-   }
-
-   // Postband bytes
-   QString strPostbandBytes = getDescriptorValue("Postband Bytes");
-   if (strPostbandBytes.isEmpty() == false)
-   {
-      unsigned int postbandBytes = strPostbandBytes.toUInt();
-      pRasterDescriptor->setPostbandBytes(postbandBytes);
-   }
-
-   return true;
+   VERIFYNR(connect(mpTreeWidget, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
+      SLOT(descriptorItemChanged(QTreeWidgetItem*, int))));
 }
 
-QSize FileDescriptorWidget::sizeHint() const
+QTreeWidgetItem* FileDescriptorWidget::getDescriptorItem(const QString& strName, QTreeWidgetItem* pParentItem) const
 {
-   return QSize(575, 325);
-}
-
-QTreeWidgetItem* FileDescriptorWidget::getDescriptorItem(const QString& strName, QTreeWidgetItem* pStartAt) const
-{
-   if (strName.isEmpty())
+   if (strName.isEmpty() == true)
    {
       return NULL;
    }
 
    QTreeWidgetItemIterator iter(mpTreeWidget);
-   if (pStartAt != NULL)
+   if (pParentItem != NULL)
    {
-      iter = QTreeWidgetItemIterator(pStartAt);
+      iter = QTreeWidgetItemIterator(pParentItem);
    }
+
    while (*iter != NULL)
    {
       QTreeWidgetItem* pItem = *iter;
@@ -1129,41 +1198,232 @@ QTreeWidgetItem* FileDescriptorWidget::getDescriptorItem(const QString& strName,
 
 void FileDescriptorWidget::descriptorItemChanged(QTreeWidgetItem* pItem, int iColumn)
 {
-   if ((pItem == NULL) || (iColumn != 1))
+   if ((pItem == NULL) || (iColumn != 1) || (mpFileDescriptor.get() == NULL) || (mEditable == false))
    {
       return;
    }
 
-   QString strItem = pItem->text(0);
-   QString strValue = pItem->text(1);
+   QTreeWidgetItem* pParentItem = pItem->parent();
+   QString itemName = pItem->text(0);
+   QString itemValue = pItem->text(iColumn);
 
-   if (strItem == "Interleave Format")
+   // File descriptor items
+   if (itemName == "Endian")
    {
+      if (itemValue.isEmpty() == false)
+      {
+         bool error = true;
+         EndianType endian = StringUtilities::fromDisplayString<EndianType>(itemValue.toStdString(), &error);
+         if (error == false)
+         {
+            mpFileDescriptor->setEndian(endian);
+         }
+      }
+   }
+
+   // Signature file descriptor items
+   SignatureFileDescriptor* pSignatureFileDescriptor = dynamic_cast<SignatureFileDescriptor*>(mpFileDescriptor.get());
+   if (pSignatureFileDescriptor != NULL)
+   {
+      set<string> componentNames = pSignatureFileDescriptor->getUnitNames();
+      for (set<string>::const_iterator iter = componentNames.begin(); iter != componentNames.end(); ++iter)
+      {
+         FactoryResource<Units> pUnits;
+
+         const Units* pCurrentUnits = pSignatureFileDescriptor->getUnits(*iter);
+         if (pCurrentUnits != NULL)
+         {
+            pUnits->setUnitName(pCurrentUnits->getUnitName());
+            pUnits->setUnitType(pCurrentUnits->getUnitType());
+            pUnits->setScaleFromStandard(pCurrentUnits->getScaleFromStandard());
+            pUnits->setRangeMin(pCurrentUnits->getRangeMin());
+            pUnits->setRangeMax(pCurrentUnits->getRangeMax());
+         }
+
+         if (itemName == "Unit Name")
+         {
+            pUnits->setUnitName(itemValue.toStdString());
+         }
+         else if (itemName == "Unit Type")
+         {
+            bool error = true;
+            UnitType unitType = StringUtilities::fromDisplayString<UnitType>(itemValue.toStdString(), &error);
+            if (error == false)
+            {
+               pUnits->setUnitType(unitType);
+            }
+         }
+         else if (itemName == "Scale")
+         {
+            double scale = itemValue.toDouble();
+            pUnits->setScaleFromStandard(scale);
+         }
+         else if (itemName == "Range Minimum")
+         {
+            double rangeMin = itemValue.toDouble();
+            pUnits->setRangeMin(rangeMin);
+         }
+         else if (itemName == "Range Maximum")
+         {
+            double rangeMax = itemValue.toDouble();
+            pUnits->setRangeMax(rangeMax);
+         }
+
+         pSignatureFileDescriptor->setUnits(*iter, pUnits.get());
+      }
+
+      return;
+   }
+
+   // Raster file descriptor items
+   RasterFileDescriptor* pRasterFileDescriptor = dynamic_cast<RasterFileDescriptor*>(mpFileDescriptor.get());
+   if (pRasterFileDescriptor == NULL)
+   {
+      return;
+   }
+
+   if (itemName == "Rows")
+   {
+      vector<DimensionDescriptor> rows;
+      if (itemValue.isEmpty() == false)
+      {
+         rows = RasterUtilities::generateDimensionVector(itemValue.toUInt(), true, false, true);
+      }
+
+      pRasterFileDescriptor->setRows(rows);
+   }
+   else if (itemName == "Columns")
+   {
+      vector<DimensionDescriptor> columns;
+      if (itemValue.isEmpty() == false)
+      {
+         columns = RasterUtilities::generateDimensionVector(itemValue.toUInt(), true, false, true);
+      }
+
+      pRasterFileDescriptor->setColumns(columns);
+   }
+   else if (itemName == "Bands")
+   {
+      vector<DimensionDescriptor> bands;
+      if (itemValue.isEmpty() == false)
+      {
+         bands = RasterUtilities::generateDimensionVector(itemValue.toUInt(), true, false, true);
+      }
+
+      pRasterFileDescriptor->setBands(bands);
+
+      // Update the band files
+      updateBandFiles();
+   }
+   else if (itemName == "Bits Per Element")
+   {
+      if (itemValue.isEmpty() == false)
+      {
+         unsigned int bitsPerElement = itemValue.toUInt();
+         pRasterFileDescriptor->setBitsPerElement(bitsPerElement);
+      }
+   }
+   else if (itemName == "Header Bytes")
+   {
+      unsigned int headerBytes = 0;
+      if (itemValue.isEmpty() == false)
+      {
+         headerBytes = itemValue.toUInt();
+      }
+
+      pRasterFileDescriptor->setHeaderBytes(headerBytes);
+   }
+   else if (itemName == "Trailer Bytes")
+   {
+      unsigned int trailerBytes = 0;
+      if (itemValue.isEmpty() == false)
+      {
+         trailerBytes = itemValue.toUInt();
+      }
+
+      pRasterFileDescriptor->setTrailerBytes(trailerBytes);
+   }
+   else if (itemName == "Preline Bytes")
+   {
+      unsigned int prelineBytes = 0;
+      if (itemValue.isEmpty() == false)
+      {
+         prelineBytes = itemValue.toUInt();
+      }
+
+      pRasterFileDescriptor->setPrelineBytes(prelineBytes);
+   }
+   else if (itemName == "Postline Bytes")
+   {
+      unsigned int postlineBytes = 0;
+      if (itemValue.isEmpty() == false)
+      {
+         postlineBytes = itemValue.toUInt();
+      }
+
+      pRasterFileDescriptor->setPostlineBytes(postlineBytes);
+   }
+   else if (itemName == "X Pixel Size")
+   {
+      double pixelSize = 1.0;
+      if (itemValue.isEmpty() == false)
+      {
+         pixelSize = itemValue.toDouble();
+      }
+
+      pRasterFileDescriptor->setXPixelSize(pixelSize);
+   }
+   else if (itemName == "Y Pixel Size")
+   {
+      double pixelSize = 1.0;
+      if (itemValue.isEmpty() == false)
+      {
+         pixelSize = itemValue.toDouble();
+      }
+
+      pRasterFileDescriptor->setYPixelSize(pixelSize);
+   }
+   else if (itemName == "Interleave Format")
+   {
+      InterleaveFormatType interleave;
+      if (itemValue.isEmpty() == false)
+      {
+         bool error = true;
+         if ((itemValue == QString::fromStdString(StringUtilities::toDisplayString(BSQ) + BSQ_SINGLE_SUFFIX)) ||
+            (itemValue == QString::fromStdString(StringUtilities::toDisplayString(BSQ) + BSQ_MULTI_SUFFIX)))
+         {
+            interleave = BSQ;
+            error = false;
+         }
+         else
+         {
+            interleave = StringUtilities::fromDisplayString<InterleaveFormatType>(itemValue.toStdString(), &error);
+         }
+
+         if (error == false)
+         {
+            pRasterFileDescriptor->setInterleaveFormat(interleave);
+         }
+      }
+
       // Enable/disable the preband and postband bytes
-      QString strPrebandBytes;
-      QString strPostbandBytes;
+      QString prebandBytes;
+      QString postbandBytes;
       QColor cellColor = Qt::lightGray;
       CustomTreeWidget::WidgetType cellWidget = CustomTreeWidget::NO_WIDGET;
 
-      string value = strValue.toStdString();
-      if ((value == StringUtilities::toDisplayString(BSQ) + BSQ_SINGLE_SUFFIX) ||
-          (value == StringUtilities::toDisplayString(BSQ) + BSQ_MULTI_SUFFIX))
+      if (interleave == BSQ)
       {
-         const RasterFileDescriptor* pRasterFileDescriptor =
-            dynamic_cast<const RasterFileDescriptor*>(mpFileDescriptor);
-         if (pRasterFileDescriptor != NULL)
-         {
-            strPrebandBytes = QString::number(pRasterFileDescriptor->getPrebandBytes());
-            strPostbandBytes = QString::number(pRasterFileDescriptor->getPostbandBytes());
-            cellColor = Qt::white;
-            cellWidget = CustomTreeWidget::LINE_EDIT;
-         }
+         prebandBytes = QString::number(pRasterFileDescriptor->getPrebandBytes());
+         postbandBytes = QString::number(pRasterFileDescriptor->getPostbandBytes());
+         cellColor = Qt::white;
+         cellWidget = CustomTreeWidget::LINE_EDIT;
       }
 
       QTreeWidgetItem* pPrebandItem = getDescriptorItem("Preband Bytes");
       if (pPrebandItem != NULL)
       {
-         pPrebandItem->setText(1, strPrebandBytes);
+         pPrebandItem->setText(1, prebandBytes);
          pPrebandItem->setBackgroundColor(1, cellColor);
          mpTreeWidget->setCellWidgetType(pPrebandItem, 1, cellWidget);
       }
@@ -1171,103 +1431,163 @@ void FileDescriptorWidget::descriptorItemChanged(QTreeWidgetItem* pItem, int iCo
       QTreeWidgetItem* pPostbandItem = getDescriptorItem("Postband Bytes");
       if (pPostbandItem != NULL)
       {
-         pPostbandItem->setText(1, strPostbandBytes);
+         pPostbandItem->setText(1, postbandBytes);
          pPostbandItem->setBackgroundColor(1, cellColor);
          mpTreeWidget->setCellWidgetType(pPostbandItem, 1, cellWidget);
       }
 
-      // Update the number of band file items
+      // Update the band files
       updateBandFiles();
    }
-   else if (strItem == "Bands")
+   else if (itemName == "Preband Bytes")
    {
-      // Update the number of band file items
-      updateBandFiles();
-   }
+      unsigned int prebandBytes = 0;
+      if (itemValue.isEmpty() == false)
+      {
+         prebandBytes = itemValue.toUInt();
+      }
 
-   mModified = true;
-   emit valueChanged(strItem);
-   emit modified();
+      pRasterFileDescriptor->setPrebandBytes(prebandBytes);
+   }
+   else if (itemName == "Postband Bytes")
+   {
+      unsigned int postbandBytes = 0;
+      if (itemValue.isEmpty() == false)
+      {
+         postbandBytes = itemValue.toUInt();
+      }
+
+      pRasterFileDescriptor->setPostbandBytes(postbandBytes);
+   }
+   else if ((pParentItem != NULL) && (pParentItem == getDescriptorItem("Filename")))
+   {
+      vector<string> bandFiles;
+      for (int i = 0; i < pParentItem->childCount(); ++i)
+      {
+         QTreeWidgetItem* pBandFileItem = pParentItem->child(i);
+         if (pBandFileItem != NULL)
+         {
+            QString bandFile = pBandFileItem->text(1);
+            bandFiles.push_back(bandFile.toStdString());
+         }
+      }
+
+      pRasterFileDescriptor->setBandFiles(bandFiles);
+   }
+   else
+   {
+      Units* pUnits = pRasterFileDescriptor->getUnits();
+      if ((pUnits != NULL) && (itemValue.isEmpty() == false))
+      {
+         if (itemName == "Name")
+         {
+            pUnits->setUnitName(itemValue.toStdString());
+         }
+         else if (itemName == "Type")
+         {
+            bool error = true;
+            UnitType unitType = StringUtilities::fromDisplayString<UnitType>(itemValue.toStdString(), &error);
+            if (error == false)
+            {
+               pUnits->setUnitType(unitType);
+            }
+         }
+         else if (itemName == "Scale")
+         {
+            double scale = itemValue.toDouble();
+            pUnits->setScaleFromStandard(scale);
+         }
+         else if (itemName == "Range Minimum")
+         {
+            double rangeMin = itemValue.toDouble();
+            pUnits->setRangeMin(rangeMin);
+         }
+         else if (itemName == "Range Maximum")
+         {
+            double rangeMax = itemValue.toDouble();
+            pUnits->setRangeMax(rangeMax);
+         }
+      }
+   }
 }
 
 void FileDescriptorWidget::updateBandFiles()
 {
+   // The number of bands or the interleave format changed, so update both the number
+   // of tree widget items and the band files in the raster data descriptor
+   vector<string> bandFiles;
+
    QTreeWidgetItem* pFilenameItem = getDescriptorItem("Filename");
-   if (pFilenameItem == NULL)
+   if (pFilenameItem != NULL)
    {
-      return;
-   }
-
-   // Store the current band filenames
-   QStringList bandFilenames;
-   for (int i = 0; i < pFilenameItem->childCount(); ++i)
-   {
-      QTreeWidgetItem* pBandFileItem = pFilenameItem->child(i);
-      if (pBandFileItem != NULL)
+      // Store the current band filenames
+      QStringList bandFilenames;
+      for (int i = 0; i < pFilenameItem->childCount(); ++i)
       {
-         bandFilenames.append(pBandFileItem->text(1));
-      }
-   }
-
-   // Clear the existing band file items
-   QList<QTreeWidgetItem*> bandFileItems = pFilenameItem->takeChildren();
-   for (int i = 0; i < bandFileItems.count(); ++i)
-   {
-      QTreeWidgetItem* pBandFileItem = bandFileItems[i];
-      if (pBandFileItem != NULL)
-      {
-         delete pBandFileItem;
-      }
-   }
-
-   // Ensure that the interleave format is BSQ - multiple files
-   bool bBsqMulti(false);
-
-   QTreeWidgetItem* pInterleaveItem = getDescriptorItem("Interleave Format");
-   if (pInterleaveItem != NULL)
-   {
-      if (pInterleaveItem->text(1).toStdString() == (StringUtilities::toDisplayString(BSQ) + BSQ_MULTI_SUFFIX))
-      {
-         bBsqMulti = true;
-      }
-   }
-
-   if (bBsqMulti == false)
-   {
-      return;
-   }
-
-   // Get the number of bands
-   int numBands = 0;
-
-   QTreeWidgetItem* pBandsItem = getDescriptorItem("Bands");
-   if (pBandsItem != NULL)
-   {
-      QString strNumBands = pBandsItem->text(1);
-      numBands = strNumBands.toInt();
-   }
-
-   // Create the new band file items
-   for (int i = 0; i < numBands; ++i)
-   {
-      QTreeWidgetItem* pBandItem = new QTreeWidgetItem(pFilenameItem);
-      if (pBandItem != NULL)
-      {
-         // Set the initial filename to the previous value
-         QString strBandFilename;
-         if (i < bandFilenames.count())
+         QTreeWidgetItem* pBandFileItem = pFilenameItem->child(i);
+         if (pBandFileItem != NULL)
          {
-            strBandFilename = bandFilenames[i];
-         }
-
-         pBandItem->setText(0, QString::number(i + 1));
-         pBandItem->setText(1, strBandFilename);
-
-         if (mReadOnly == false)
-         {
-            mpTreeWidget->setCellWidgetType(pBandItem, 1, CustomTreeWidget::BROWSE_FILE_EDIT);
-            mpTreeWidget->setFileBrowser(pBandItem, 1, mpFileBrowser);
+            bandFilenames.append(pBandFileItem->text(1));
          }
       }
+
+      // Clear the existing band file items
+      QList<QTreeWidgetItem*> bandFileItems = pFilenameItem->takeChildren();
+      for (int i = 0; i < bandFileItems.count(); ++i)
+      {
+         QTreeWidgetItem* pBandFileItem = bandFileItems[i];
+         if (pBandFileItem != NULL)
+         {
+            delete pBandFileItem;
+         }
+      }
+
+      // Only create new band file items for BSQ - multiple files
+      QTreeWidgetItem* pInterleaveItem = getDescriptorItem("Interleave Format");
+      if (pInterleaveItem != NULL)
+      {
+         if (pInterleaveItem->text(1).toStdString() == (StringUtilities::toDisplayString(BSQ) + BSQ_MULTI_SUFFIX))
+         {
+            // Get the number of bands
+            int numBands = 0;
+
+            QTreeWidgetItem* pBandsItem = getDescriptorItem("Bands");
+            if (pBandsItem != NULL)
+            {
+               QString strNumBands = pBandsItem->text(1);
+               numBands = strNumBands.toInt();
+            }
+
+            // Create the band file items based on the number of specified bands
+            for (int i = 0; i < numBands; ++i)
+            {
+               // Set the initial filename to the previous value if possible
+               QString strBandFilename;
+               if (i < bandFilenames.count())
+               {
+                  strBandFilename = bandFilenames[i];
+               }
+
+               QStringList text;
+               text << QString::number(i + 1) << strBandFilename;
+
+               QTreeWidgetItem* pBandItem = new QTreeWidgetItem(pFilenameItem, text);
+               if (mEditable == true)
+               {
+                  mpTreeWidget->setCellWidgetType(pBandItem, 1, CustomTreeWidget::BROWSE_FILE_EDIT);
+                  mpTreeWidget->setFileBrowser(pBandItem, 1, mpFileBrowser);
+               }
+
+               bandFiles.push_back(strBandFilename.toStdString());
+            }
+         }
+      }
+   }
+
+   // Update the bands in the raster file descriptor
+   RasterFileDescriptor* pRasterFileDescriptor = dynamic_cast<RasterFileDescriptor*>(mpFileDescriptor.get());
+   if (pRasterFileDescriptor != NULL)
+   {
+      pRasterFileDescriptor->setBandFiles(bandFiles);
    }
 }

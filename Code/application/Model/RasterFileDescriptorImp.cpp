@@ -10,6 +10,7 @@
 #include "AppVerify.h"
 #include "GcpListImp.h"
 #include "ObjectResource.h"
+#include "RasterFileDescriptor.h"
 #include "RasterFileDescriptorImp.h"
 
 XERCES_CPP_NAMESPACE_USE
@@ -27,6 +28,8 @@ RasterFileDescriptorImp::RasterFileDescriptorImp() :
    mXPixelSize(1.0),
    mYPixelSize(1.0)
 {
+   // Attach to the units object to notify when it changes
+   VERIFYNR(mUnits.attach(SIGNAL_NAME(Subject, Modified), Slot(this, &RasterFileDescriptorImp::notifyUnitsModified)));
 }
 
 RasterFileDescriptorImp::~RasterFileDescriptorImp()
@@ -34,45 +37,21 @@ RasterFileDescriptorImp::~RasterFileDescriptorImp()
    clearBandFiles();
 }
 
-RasterFileDescriptorImp& RasterFileDescriptorImp::operator =(const RasterFileDescriptorImp& descriptor)
+void RasterFileDescriptorImp::notifyUnitsModified(Subject &subject, const string &signal, const boost::any &data)
 {
-   if (this != &descriptor)
+   if (&subject == &mUnits)
    {
-      FileDescriptorImp::operator =(descriptor);
-
-      mHeaderBytes = descriptor.mHeaderBytes;
-      mTrailerBytes = descriptor.mTrailerBytes;
-      mPrelineBytes = descriptor.mPrelineBytes;
-      mPostlineBytes = descriptor.mPostlineBytes;
-      mPrebandBytes = descriptor.mPrebandBytes;
-      mPostbandBytes = descriptor.mPostbandBytes;
-      mBitsPerElement = descriptor.mBitsPerElement;
-      mInterleave = descriptor.mInterleave;
-
-      setRows(descriptor.mRows);
-      setColumns(descriptor.mColumns);
-      setBands(descriptor.mBands);
-
-      mXPixelSize = descriptor.mXPixelSize;
-      mYPixelSize = descriptor.mYPixelSize;
-      mUnits = descriptor.mUnits;
-      mGcps = descriptor.mGcps;
-
-      setBandFiles(descriptor.mBandFiles);
       notify(SIGNAL_NAME(Subject, Modified));
    }
-
-   return *this;
 }
 
 void RasterFileDescriptorImp::setHeaderBytes(unsigned int bytes)
 {
-   if (mHeaderBytes == bytes)
+   if (mHeaderBytes != bytes)
    {
-      return;
+      mHeaderBytes = bytes;
+      notify(SIGNAL_NAME(RasterFileDescriptor, HeaderBytesChanged), boost::any(mHeaderBytes));
    }
-   mHeaderBytes = bytes;
-   notify(SIGNAL_NAME(Subject, Modified));
 }
 
 unsigned int RasterFileDescriptorImp::getHeaderBytes() const
@@ -82,12 +61,11 @@ unsigned int RasterFileDescriptorImp::getHeaderBytes() const
 
 void RasterFileDescriptorImp::setTrailerBytes(unsigned int bytes)
 {
-   if (mTrailerBytes == bytes)
+   if (mTrailerBytes != bytes)
    {
-      return;
+      mTrailerBytes = bytes;
+      notify(SIGNAL_NAME(RasterFileDescriptor, TrailerBytesChanged), boost::any(mTrailerBytes));
    }
-   mTrailerBytes = bytes;
-   notify(SIGNAL_NAME(Subject, Modified));
 }
 
 unsigned int RasterFileDescriptorImp::getTrailerBytes() const
@@ -97,12 +75,11 @@ unsigned int RasterFileDescriptorImp::getTrailerBytes() const
 
 void RasterFileDescriptorImp::setPrelineBytes(unsigned int bytes)
 {
-   if (mPrelineBytes == bytes)
+   if (mPrelineBytes != bytes)
    {
-      return;
+      mPrelineBytes = bytes;
+      notify(SIGNAL_NAME(RasterFileDescriptor, PrelineBytesChanged), boost::any(mPrelineBytes));
    }
-   mPrelineBytes = bytes;
-   notify(SIGNAL_NAME(Subject, Modified));
 }
 
 unsigned int RasterFileDescriptorImp::getPrelineBytes() const
@@ -112,12 +89,11 @@ unsigned int RasterFileDescriptorImp::getPrelineBytes() const
 
 void RasterFileDescriptorImp::setPostlineBytes(unsigned int bytes)
 {
-   if (mPostlineBytes == bytes)
+   if (mPostlineBytes != bytes)
    {
-      return;
+      mPostlineBytes = bytes;
+      notify(SIGNAL_NAME(RasterFileDescriptor, PostlineBytesChanged), boost::any(mPostlineBytes));
    }
-   mPostlineBytes = bytes;
-   notify(SIGNAL_NAME(Subject, Modified));
 }
 
 unsigned int RasterFileDescriptorImp::getPostlineBytes() const
@@ -127,12 +103,11 @@ unsigned int RasterFileDescriptorImp::getPostlineBytes() const
 
 void RasterFileDescriptorImp::setPrebandBytes(unsigned int bytes)
 {
-   if (mPrebandBytes == bytes)
+   if (mPrebandBytes != bytes)
    {
-      return;
+      mPrebandBytes = bytes;
+      notify(SIGNAL_NAME(RasterFileDescriptor, PrebandBytesChanged), boost::any(mPrebandBytes));
    }
-   mPrebandBytes = bytes;
-   notify(SIGNAL_NAME(Subject, Modified));
 }
 
 unsigned int RasterFileDescriptorImp::getPrebandBytes() const
@@ -142,12 +117,11 @@ unsigned int RasterFileDescriptorImp::getPrebandBytes() const
 
 void RasterFileDescriptorImp::setPostbandBytes(unsigned int bytes)
 {
-   if (mPostbandBytes == bytes)
+   if (mPostbandBytes != bytes)
    {
-      return;
+      mPostbandBytes = bytes;
+      notify(SIGNAL_NAME(RasterFileDescriptor, PostbandBytesChanged), boost::any(mPostbandBytes));
    }
-   mPostbandBytes = bytes;
-   notify(SIGNAL_NAME(Subject, Modified));
 }
 
 unsigned int RasterFileDescriptorImp::getPostbandBytes() const
@@ -157,12 +131,11 @@ unsigned int RasterFileDescriptorImp::getPostbandBytes() const
 
 void RasterFileDescriptorImp::setBitsPerElement(unsigned int numBits)
 {
-   if (mBitsPerElement == numBits)
+   if (mBitsPerElement != numBits)
    {
-      return;
+      mBitsPerElement = numBits;
+      notify(SIGNAL_NAME(RasterFileDescriptor, BitsPerElementChanged), boost::any(mBitsPerElement));
    }
-   mBitsPerElement = numBits;
-   notify(SIGNAL_NAME(Subject, Modified));
 }
 
 unsigned int RasterFileDescriptorImp::getBitsPerElement() const
@@ -172,12 +145,11 @@ unsigned int RasterFileDescriptorImp::getBitsPerElement() const
 
 void RasterFileDescriptorImp::setInterleaveFormat(InterleaveFormatType format)
 {
-   if (mInterleave == format)
+   if (mInterleave != format)
    {
-      return;
+      mInterleave = format;
+      notify(SIGNAL_NAME(RasterFileDescriptor, InterleaveFormatChanged), boost::any(mInterleave));
    }
-   mInterleave = format;
-   notify(SIGNAL_NAME(Subject, Modified));
 }
 
 InterleaveFormatType RasterFileDescriptorImp::getInterleaveFormat() const
@@ -187,6 +159,11 @@ InterleaveFormatType RasterFileDescriptorImp::getInterleaveFormat() const
 
 void RasterFileDescriptorImp::setRows(const vector<DimensionDescriptor>& rows)
 {
+   if (rows == mRows)
+   {
+      return;
+   }
+
    //ensure the provided values have correct on-disk numbers
    bool anyActiveNumberFound = false;
    unsigned int lastActiveNumber = 0;
@@ -215,7 +192,7 @@ void RasterFileDescriptorImp::setRows(const vector<DimensionDescriptor>& rows)
       }
    }
    mRows = rows;
-   notify(SIGNAL_NAME(Subject, Modified));
+   notify(SIGNAL_NAME(RasterFileDescriptor, RowsChanged), boost::any(mRows));
 }
 
 const vector<DimensionDescriptor>& RasterFileDescriptorImp::getRows() const
@@ -272,6 +249,11 @@ unsigned int RasterFileDescriptorImp::getRowCount() const
 
 void RasterFileDescriptorImp::setColumns(const vector<DimensionDescriptor>& columns)
 {
+   if (columns == mColumns)
+   {
+      return;
+   }
+
    //ensure the provided values have correct on-disk numbers
    bool anyActiveNumberFound = false;
    unsigned int lastActiveNumber = 0;
@@ -300,7 +282,7 @@ void RasterFileDescriptorImp::setColumns(const vector<DimensionDescriptor>& colu
       }
    }
    mColumns = columns;
-   notify(SIGNAL_NAME(Subject, Modified));
+   notify(SIGNAL_NAME(RasterFileDescriptor, ColumnsChanged), boost::any(mColumns));
 }
 
 const vector<DimensionDescriptor>& RasterFileDescriptorImp::getColumns() const
@@ -357,6 +339,11 @@ unsigned int RasterFileDescriptorImp::getColumnCount() const
 
 void RasterFileDescriptorImp::setBands(const vector<DimensionDescriptor>& bands)
 {
+   if (bands == mBands)
+   {
+      return;
+   }
+
    //ensure the provided values have correct on-disk numbers
    bool anyActiveNumberFound = false;
    unsigned int lastActiveNumber = 0;
@@ -376,7 +363,7 @@ void RasterFileDescriptorImp::setBands(const vector<DimensionDescriptor>& bands)
       }
    }
    mBands = bands;
-   notify(SIGNAL_NAME(Subject, Modified));
+   notify(SIGNAL_NAME(RasterFileDescriptor, BandsChanged), boost::any(mBands));
 }
 
 const vector<DimensionDescriptor>& RasterFileDescriptorImp::getBands() const
@@ -436,7 +423,7 @@ void RasterFileDescriptorImp::setXPixelSize(double pixelSize)
    if (pixelSize != mXPixelSize)
    {
       mXPixelSize = pixelSize;
-      notify(SIGNAL_NAME(Subject, Modified));
+      notify(SIGNAL_NAME(RasterFileDescriptor, PixelSizeChanged));
    }
 }
 
@@ -450,7 +437,7 @@ void RasterFileDescriptorImp::setYPixelSize(double pixelSize)
    if (pixelSize != mYPixelSize)
    {
       mYPixelSize = pixelSize;
-      notify(SIGNAL_NAME(Subject, Modified));
+      notify(SIGNAL_NAME(RasterFileDescriptor, PixelSizeChanged));
    }
 }
 
@@ -459,29 +446,32 @@ double RasterFileDescriptorImp::getYPixelSize() const
    return mYPixelSize;
 }
 
-void RasterFileDescriptorImp::setUnits(const UnitsImp* pUnits)
+void RasterFileDescriptorImp::setUnits(const Units* pUnits)
 {
-   if (pUnits != NULL)
+   if ((pUnits != NULL) && (dynamic_cast<const UnitsAdapter*>(pUnits) != &mUnits))
    {
-      mUnits = *pUnits;
+      mUnits.setUnits(pUnits);
       notify(SIGNAL_NAME(Subject, Modified));
    }
 }
 
-UnitsImp* RasterFileDescriptorImp::getUnits()
+Units* RasterFileDescriptorImp::getUnits()
 {
    return &mUnits;
 }
 
-const UnitsImp* RasterFileDescriptorImp::getUnits() const
+const Units* RasterFileDescriptorImp::getUnits() const
 {
    return &mUnits;
 }
 
 void RasterFileDescriptorImp::setGcps(const list<GcpPoint>& gcps)
 {
-   mGcps = gcps;
-   notify(SIGNAL_NAME(Subject, Modified));
+   if (gcps != mGcps)
+   {
+      mGcps = gcps;
+      notify(SIGNAL_NAME(RasterFileDescriptor, GcpsChanged), boost::any(mGcps));
+   }
 }
 
 const list<GcpPoint>& RasterFileDescriptorImp::getGcps() const
@@ -491,40 +481,107 @@ const list<GcpPoint>& RasterFileDescriptorImp::getGcps() const
 
 void RasterFileDescriptorImp::setBandFiles(const vector<string>& bandFiles)
 {
-   clearBandFiles();
-   for (vector<string>::const_iterator bandFileName = bandFiles.begin();
-                                      bandFileName != bandFiles.end();
-                                      ++bandFileName)
+   vector<string> currentBandFiles;
+   for (vector<const Filename*>::const_iterator iter = mBandFiles.begin(); iter != mBandFiles.end(); ++iter)
    {
-      Filename* pBandFile = new FilenameImp(*bandFileName);
+      const Filename* pBandFile = *iter;
+      if (pBandFile != NULL)
+      {
+         currentBandFiles.push_back(pBandFile->getFullPathAndName());
+      }
+   }
+
+   if (bandFiles == currentBandFiles)
+   {
+      return;
+   }
+
+   clearBandFiles();
+   for (vector<string>::const_iterator iter = bandFiles.begin(); iter != bandFiles.end(); ++iter)
+   {
+      Filename* pBandFile = new FilenameImp(*iter);
       if (pBandFile != NULL)
       {
          mBandFiles.push_back(pBandFile);
       }
    }
-   notify(SIGNAL_NAME(Subject, Modified));
+   notify(SIGNAL_NAME(RasterFileDescriptor, BandFilesChanged), boost::any(mBandFiles));
 }
 
 void RasterFileDescriptorImp::setBandFiles(const vector<const Filename*>& bandFiles)
 {
-   clearBandFiles();
-   for (vector<const Filename*>::const_iterator bandFileName = bandFiles.begin();
-                                               bandFileName != bandFiles.end();
-                                               ++bandFileName)
+   vector<string> newBandFiles;
+   for (vector<const Filename*>::const_iterator iter = bandFiles.begin(); iter != bandFiles.end(); ++iter)
    {
-      VERIFYNRV(*bandFileName != NULL);
-      Filename* pBandFile = new FilenameImp(**bandFileName);
+      const Filename* pBandFile = *iter;
+      if (pBandFile != NULL)
+      {
+         newBandFiles.push_back(pBandFile->getFullPathAndName());
+      }
+   }
+
+   vector<string> currentBandFiles;
+   for (vector<const Filename*>::const_iterator iter = mBandFiles.begin(); iter != mBandFiles.end(); ++iter)
+   {
+      const Filename* pBandFile = *iter;
+      if (pBandFile != NULL)
+      {
+         currentBandFiles.push_back(pBandFile->getFullPathAndName());
+      }
+   }
+
+   if (newBandFiles == currentBandFiles)
+   {
+      return;
+   }
+
+   clearBandFiles();
+   for (vector<const Filename*>::const_iterator iter = bandFiles.begin(); iter != bandFiles.end(); ++iter)
+   {
+      VERIFYNRV(*iter != NULL);
+      Filename* pBandFile = new FilenameImp(**iter);
       if (pBandFile != NULL)
       {
          mBandFiles.push_back(pBandFile);
       }
    }
-   notify(SIGNAL_NAME(Subject, Modified));
+   notify(SIGNAL_NAME(RasterFileDescriptor, BandFilesChanged), boost::any(mBandFiles));
 }
 
 const vector<const Filename*>& RasterFileDescriptorImp::getBandFiles() const
 {
    return mBandFiles;
+}
+
+bool RasterFileDescriptorImp::clone(const FileDescriptor* pFileDescriptor)
+{
+   const RasterFileDescriptorImp* pRasterFileDescriptor = dynamic_cast<const RasterFileDescriptorImp*>(pFileDescriptor);
+   if ((pRasterFileDescriptor == NULL) || (FileDescriptorImp::clone(pFileDescriptor) == false))
+   {
+      return false;
+   }
+
+   if (pRasterFileDescriptor != this)
+   {
+      setHeaderBytes(pRasterFileDescriptor->getHeaderBytes());
+      setTrailerBytes(pRasterFileDescriptor->getTrailerBytes());
+      setPrelineBytes(pRasterFileDescriptor->getPrelineBytes());
+      setPostlineBytes(pRasterFileDescriptor->getPostlineBytes());
+      setPrebandBytes(pRasterFileDescriptor->getPrebandBytes());
+      setPostbandBytes(pRasterFileDescriptor->getPostbandBytes());
+      setBitsPerElement(pRasterFileDescriptor->getBitsPerElement());
+      setInterleaveFormat(pRasterFileDescriptor->getInterleaveFormat());
+      setRows(pRasterFileDescriptor->getRows());
+      setColumns(pRasterFileDescriptor->getColumns());
+      setBands(pRasterFileDescriptor->getBands());
+      setXPixelSize(pRasterFileDescriptor->getXPixelSize());
+      setYPixelSize(pRasterFileDescriptor->getYPixelSize());
+      setUnits(pRasterFileDescriptor->getUnits());
+      setGcps(pRasterFileDescriptor->getGcps());
+      setBandFiles(pRasterFileDescriptor->getBandFiles());
+   }
+
+   return true;
 }
 
 void RasterFileDescriptorImp::addToMessageLog(Message* pMessage) const
@@ -584,7 +641,6 @@ void RasterFileDescriptorImp::addToMessageLog(Message* pMessage) const
 
    // Postband bytes
    pMessage->addProperty("Postband Bytes", mPostbandBytes);
-
 }
 
 bool RasterFileDescriptorImp::toXml(XMLWriter* pXml) const
@@ -771,7 +827,6 @@ void RasterFileDescriptorImp::clearBandFiles()
          delete dynamic_cast<const FilenameImp*>(*bandFile);
       }
       mBandFiles.clear();
-      notify(SIGNAL_NAME(Subject, Modified));
    }
 }
 

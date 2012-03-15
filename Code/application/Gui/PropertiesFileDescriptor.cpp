@@ -8,7 +8,6 @@
  */
 
 #include "AppVersion.h"
-#include "AppVerify.h"
 #include "DataDescriptor.h"
 #include "DataElement.h"
 #include "FileDescriptor.h"
@@ -28,8 +27,7 @@ PropertiesFileDescriptor::PropertiesFileDescriptor()
 }
 
 PropertiesFileDescriptor::~PropertiesFileDescriptor()
-{
-}
+{}
 
 bool PropertiesFileDescriptor::initialize(SessionItem* pSessionItem)
 {
@@ -45,11 +43,12 @@ bool PropertiesFileDescriptor::initialize(SessionItem* pSessionItem)
       DataDescriptor* pDescriptor = pElement->getDataDescriptor();
       if (pDescriptor != NULL)
       {
-         const FileDescriptor* pFileDescriptor = pDescriptor->getFileDescriptor();
+         FileDescriptor* pFileDescriptor = pDescriptor->getFileDescriptor();
          if (pFileDescriptor != NULL)
          {
-            pDescriptorPage->setFileDescriptor(pFileDescriptor);
-            return true;
+            pDescriptorPage->setFileDescriptor(pFileDescriptor, false); // Do not allow the user to
+                                                                        // edit the file descriptor
+            return PropertiesShell::initialize(pSessionItem);
          }
       }
    }
@@ -59,10 +58,7 @@ bool PropertiesFileDescriptor::initialize(SessionItem* pSessionItem)
 
 bool PropertiesFileDescriptor::applyChanges()
 {
-   FileDescriptorWidget* pDescriptorPage = dynamic_cast<FileDescriptorWidget*>(getWidget());
-   VERIFY(pDescriptorPage != NULL);
-
-   return pDescriptorPage->applyChanges();
+   return true;
 }
 
 QWidget* PropertiesFileDescriptor::createWidget()

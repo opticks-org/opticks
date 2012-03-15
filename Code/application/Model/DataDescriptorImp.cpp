@@ -7,6 +7,7 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include "AppVerify.h"
 #include "DataDescriptorImp.h"
 #include "DataDescriptor.h"
 #include "FileDescriptorAdapter.h"
@@ -32,8 +33,8 @@ DataDescriptorImp::DataDescriptorImp(const string& name, const string& type, Dat
    }
 
    // Attach to the metadata and classification objects to notify when the they change
-   mMetadata.attach(SIGNAL_NAME(Subject, Modified), Slot(this, &DataDescriptorImp::notifyModified));
-   mClassification.attach(SIGNAL_NAME(Subject, Modified), Slot(this, &DataDescriptorImp::notifyModified));
+   VERIFYNR(mMetadata.attach(SIGNAL_NAME(Subject, Modified), Slot(this, &DataDescriptorImp::notifyModified)));
+   VERIFYNR(mClassification.attach(SIGNAL_NAME(Subject, Modified), Slot(this, &DataDescriptorImp::notifyModified)));
 
    generateParentDesignator();
 }
@@ -47,21 +48,18 @@ DataDescriptorImp::DataDescriptorImp(const string& name, const string& type, con
    mpFileDescriptor(NULL)
 {
    // Attach to the metadata and classification objects to notify when the they change
-   mMetadata.attach(SIGNAL_NAME(Subject, Modified), Slot(this, &DataDescriptorImp::notifyModified));
-   mClassification.attach(SIGNAL_NAME(Subject, Modified), Slot(this, &DataDescriptorImp::notifyModified));
+   VERIFYNR(mMetadata.attach(SIGNAL_NAME(Subject, Modified), Slot(this, &DataDescriptorImp::notifyModified)));
+   VERIFYNR(mClassification.attach(SIGNAL_NAME(Subject, Modified), Slot(this, &DataDescriptorImp::notifyModified)));
 }
 
 DataDescriptorImp::~DataDescriptorImp()
 {
-   if (mpFileDescriptor != NULL)
-   {
-      delete mpFileDescriptor;
-   }
+   setFileDescriptor(NULL);
 }
 
 void DataDescriptorImp::notifyModified(Subject &subject, const string &signal, const boost::any &data)
 {
-   if (&subject == &mMetadata || &subject == &mClassification)
+   if (&subject == &mMetadata || &subject == &mClassification || &subject == dynamic_cast<Subject*>(mpFileDescriptor))
    {
       notify(SIGNAL_NAME(Subject, Modified), data);
    }
@@ -102,13 +100,13 @@ void DataDescriptorImp::setParent(DataElement *pParent)
    {
       mpParent.reset(pParent);
       generateParentDesignator();
-      notify(SIGNAL_NAME(Subject, Modified));
+      notify(SIGNAL_NAME(DataDescriptor, ParentChanged), boost::any(mpParent.get()));
    }
 }
 
 void DataDescriptorImp::setClassification(const Classification* pClassification)
 {
-   if ((pClassification != NULL) && (pClassification != &mClassification))
+   if ((pClassification != NULL) && (pClassification->compare(&mClassification) == false))
    {
       mClassification = *(dynamic_cast<const ClassificationAdapter*>(pClassification));
       notify(SIGNAL_NAME(Subject, Modified));
@@ -154,7 +152,7 @@ void DataDescriptorImp::setProcessingLocation(ProcessingLocation processingLocat
    if (processingLocation != mProcessingLocation)
    {
       mProcessingLocation = processingLocation;
-      notify(SIGNAL_NAME(Subject, Modified));
+      notify(SIGNAL_NAME(DataDescriptor, ProcessingLocationChanged), boost::any(mProcessingLocation));
    }
 }
 
@@ -169,16 +167,23 @@ void DataDescriptorImp::setFileDescriptor(const FileDescriptorImp* pFileDescript
    {
       if (mpFileDescriptor != NULL)
       {
+         VERIFYNR(mpFileDescriptor->detach(SIGNAL_NAME(Subject, Modified),
+            Slot(this, &DataDescriptorImp::notifyModified)));
          delete mpFileDescriptor;
          mpFileDescriptor = NULL;
       }
 
       if (pFileDescriptor != NULL)
       {
-         const FileDescriptor* pDescriptor = dynamic_cast<const FileDescriptor*> (pFileDescriptor);
+         const FileDescriptor* pDescriptor = dynamic_cast<const FileDescriptor*>(pFileDescriptor);
          if (pDescriptor != NULL)
          {
             mpFileDescriptor = dynamic_cast<FileDescriptorImp*>(pDescriptor->copy());
+            if (mpFileDescriptor != NULL)
+            {
+               VERIFYNR(mpFileDescriptor->attach(SIGNAL_NAME(Subject, Modified),
+                  Slot(this, &DataDescriptorImp::notifyModified)));
+            }
          }
       }
 
@@ -239,6 +244,29 @@ DataDescriptor* DataDescriptorImp::copy(const string& name, const vector<string>
    }
 
    return pDescriptor;
+}
+
+bool DataDescriptorImp::clone(const DataDescriptor* pDescriptor)
+{
+   const DataDescriptorImp* pDataDescriptor = dynamic_cast<const DataDescriptorImp*>(pDescriptor);
+   if ((pDataDescriptor == NULL) || (pDataDescriptor->getType() != mType))
+   {
+      return false;
+   }
+
+   if (pDataDescriptor != this)
+   {
+      setName(pDataDescriptor->getName());
+      mParentDesignator = pDataDescriptor->getParentDesignator();
+      setParent(pDataDescriptor->getParent());
+      setClassification(pDataDescriptor->getClassification());
+      setMetadata(pDataDescriptor->getMetadata());
+      setProcessingLocation(pDataDescriptor->getProcessingLocation());
+      setFileDescriptor(pDataDescriptor->getFileDescriptor());
+      setImporterName(pDataDescriptor->getImporterName());
+   }
+
+   return true;
 }
 
 void DataDescriptorImp::addToMessageLog(Message* pMessage) const

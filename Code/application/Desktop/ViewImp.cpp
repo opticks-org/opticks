@@ -86,6 +86,7 @@ ViewImp::ViewImp(const string& id, const string& viewName, QGLContext* drawConte
    mpUndoGroup(NULL),
    mpSubImageIterator(NULL)
 {
+   mClassification.getClassificationText(mClassificationText);
    mMousePanTimer.setInterval(0);
 
    memset(mModelMatrix, 0, 16 * sizeof(double));
@@ -118,6 +119,9 @@ ViewImp::ViewImp(const string& id, const string& viewName, QGLContext* drawConte
    // Connections
    VERIFYNR(connect(pMousePanAction, SIGNAL(triggered()), this, SLOT(toggleMousePanByKey())));
    VERIFYNR(connect(&mMousePanTimer, SIGNAL(timeout()), this, SLOT(mousePanTimeout())));
+
+   // Attach to the classification object to notify the view signals when it changes
+   VERIFYNR(mClassification.attach(SIGNAL_NAME(Subject, Modified), Slot(this, &ViewImp::notifyClassificationChanged)));
 }
 
 ViewImp::~ViewImp()
@@ -263,23 +267,10 @@ void ViewImp::setName(const string& viewName)
 
 void ViewImp::setClassification(const Classification* pClassification)
 {
-   const ClassificationAdapter* pClassificationAdapter = dynamic_cast<const ClassificationAdapter*>(pClassification);
-   if (pClassificationAdapter == NULL)
+   if ((pClassification != NULL) && (pClassification->compare(&mClassification) == false))
    {
-      return;
-   }
-
-   string currentClassification;
-   string newClassification;
-   mClassification.getClassificationText(currentClassification);
-   pClassification->getClassificationText(newClassification);
-
-   if (newClassification != currentClassification)
-   {
-      mClassification = *pClassificationAdapter;
-      emit classificationChanged(&mClassification);
-      notify(SIGNAL_NAME(View, ClassificationChanged),
-         boost::any(static_cast<const Classification*>(&mClassification)));
+      // The signal notifications will occur automatically in notifyClassificationChanged()
+      mClassification = *(dynamic_cast<const ClassificationAdapter*>(pClassification));
    }
 }
 
@@ -1513,6 +1504,24 @@ void ViewImp::setCrossHairWidth(unsigned int width)
 void ViewImp::refresh()
 {
    update();
+}
+
+void ViewImp::notifyClassificationChanged(Subject& subject, const string& signal, const boost::any& data)
+{
+   if (&subject == &mClassification)
+   {
+      emit classificationChanged(&mClassification);
+      notify(SIGNAL_NAME(View, ClassificationChanged), boost::any(static_cast<const Classification*>(&mClassification)));
+
+      string newClassificationText;
+      mClassification.getClassificationText(newClassificationText);
+      if (newClassificationText != mClassificationText)
+      {
+         mClassificationText = newClassificationText;
+         emit classificationTextChanged(QString::fromStdString(mClassificationText));
+         notify(SIGNAL_NAME(View, ClassificationTextChanged), boost::any(mClassificationText));
+      }
+   }
 }
 
 bool ViewImp::event(QEvent* pEvent)

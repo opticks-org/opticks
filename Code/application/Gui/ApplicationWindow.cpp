@@ -24,8 +24,8 @@
 #include <QtGui/QDropEvent>
 #include <QtGui/QFileDialog>
 #include <QtGui/QFrame>
+#include <QtGui/QGridLayout>
 #include <QtGui/QInputDialog>
-#include <QtGui/QLayout>
 #include <QtGui/QMessageBox>
 #include <QtGui/QSplashScreen>
 #include <QtGui/QToolTip>
@@ -6240,22 +6240,25 @@ void ApplicationWindow::editClassification()
    ClassificationWidget* pClassificationWidget = new ClassificationWidget(&classificationDialog);
    QFrame* pLine = new QFrame(&classificationDialog);
    pLine->setFrameStyle(QFrame::HLine | QFrame::Sunken);
+   QLabel* pLabel = new QLabel("If the Classification Level box is empty, clicking the OK button applies the "
+      "default classification level of the system.", &classificationDialog);
+   pLabel->setWordWrap(true);
    QDialogButtonBox* pButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal,
       &classificationDialog);
-   QVBoxLayout* pLayout = new QVBoxLayout(&classificationDialog);
+
+   QGridLayout* pLayout = new QGridLayout(&classificationDialog);
    pLayout->setMargin(10);
    pLayout->setSpacing(10);
-   pLayout->addWidget(pClassificationWidget, 10);
-   pLayout->addWidget(pLine);
-   pLayout->addWidget(pButtonBox);
+   pLayout->addWidget(pClassificationWidget, 0, 0, 1, 2);
+   pLayout->addWidget(pLine, 1, 0, 1, 2);
+   pLayout->addWidget(pLabel, 2, 0);
+   pLayout->addWidget(pButtonBox, 2, 1, Qt::AlignBottom);
+   pLayout->setRowStretch(0, 10);
+   pLayout->setColumnStretch(0, 10);
 
    FactoryResource<Classification> pClassification;
    pClassificationWidget->setClassification(pClassification.get(), false);
 
-   QPushButton* pOkButton = pButtonBox->button(QDialogButtonBox::Ok);
-   pOkButton->setEnabled(false);
-
-   VERIFYNR(connect(pClassificationWidget, SIGNAL(modified(bool)), pOkButton, SLOT(setEnabled(bool))));
    VERIFYNR(connect(pButtonBox, SIGNAL(accepted()), &classificationDialog, SLOT(accept())));
    VERIFYNR(connect(pButtonBox, SIGNAL(rejected()), &classificationDialog, SLOT(reject())));
 
@@ -6264,24 +6267,21 @@ void ApplicationWindow::editClassification()
       return;
    }
 
-   if (pClassificationWidget->applyChanges() == true)
+   QList<QVariant> itemList = pAction->data().toList();
+   for (int i = 0; i < itemList.count(); ++i)
    {
-      QList<QVariant> itemList = pAction->data().toList();
-      for (int i = 0; i < itemList.count(); ++i)
+      SessionItem* pItem = itemList[i].value<SessionItem*>();
+
+      DataElement* pElement = dynamic_cast<DataElement*>(pItem);
+      if (pElement != NULL)
       {
-         SessionItem* pItem = itemList[i].value<SessionItem*>();
+         pElement->setClassification(pClassification.get());
+      }
 
-         DataElement* pElement = dynamic_cast<DataElement*>(pItem);
-         if (pElement != NULL)
-         {
-            pElement->setClassification(pClassification.get());
-         }
-
-         View* pView = dynamic_cast<View*>(pItem);
-         if (pView != NULL)
-         {
-            pView->setClassification(pClassification.get());
-         }
+      View* pView = dynamic_cast<View*>(pItem);
+      if (pView != NULL)
+      {
+         pView->setClassification(pClassification.get());
       }
    }
 }

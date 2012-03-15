@@ -293,7 +293,7 @@ void PlotWidgetImp::initialize(PlotViewImp *pPlotView, const string& plotName, P
    mpToolbarsMenu->addAction(mpAnnotationToolBar->toggleViewAction());
    mpToolbarsMenu->addAction(mpMouseModeToolBar->toggleViewAction());
 
-   updateClassificationText();
+   updateClassificationText(getClassificationText());
 
    list<PlotObject*> plotObjects = mpPlot->getObjects();
    for (list<PlotObject*>::iterator iter = plotObjects.begin(); iter != plotObjects.end(); ++iter)
@@ -311,14 +311,14 @@ void PlotWidgetImp::initialize(PlotViewImp *pPlotView, const string& plotName, P
    VERIFYNR(connect(mpPlot, SIGNAL(renamed(const QString&)), this, SLOT(updateName(const QString&))));
    VERIFYNR(connect(mpPlot, SIGNAL(mouseModeChanged(const MouseMode*)), this,
       SLOT(enableAnnotationToolBar(const MouseMode*))));
-   VERIFYNR(connect(mpPlot, SIGNAL(classificationChanged(const Classification*)), this,
-      SLOT(updateClassificationText())));
+   VERIFYNR(connect(mpPlot, SIGNAL(classificationTextChanged(const QString&)), this,
+      SLOT(updateClassificationText(const QString&))));
    VERIFYNR(connect(mpPlot, SIGNAL(classificationFontChanged(const QFont&)), this,
       SLOT(setClassificationFont(const QFont&))));
    VERIFYNR(connect(mpPlot, SIGNAL(classificationColorChanged(const QColor&)), this,
       SLOT(setClassificationColor(const QColor&))));
    VERIFYNR(connect(mpPlot, SIGNAL(classificationPositionChanged(PositionType)), this,
-      SLOT(updateClassificationText())));
+      SLOT(updateClassificationPosition())));
    VERIFYNR(connect(mpPlot, SIGNAL(objectAdded(PlotObject*)), mpLegend, SLOT(insertItem(PlotObject*))));
    VERIFYNR(connect(mpPlot, SIGNAL(objectDeleted(PlotObject*)), mpLegend, SLOT(removeItem(PlotObject*))));
    VERIFYNR(connect(mpPlot, SIGNAL(objectSelected(PlotObject*, bool)), mpLegend,
@@ -500,31 +500,11 @@ QColor PlotWidgetImp::getBackgroundColor() const
 
 void PlotWidgetImp::setClassificationPosition(PositionType ePosition)
 {
-   if (ePosition == getClassificationPosition())
+   if (ePosition != getClassificationPosition())
    {
-      return;
+      mpPlot->setClassificationPosition(ePosition);
+      notify(SIGNAL_NAME(Subject, Modified));
    }
-
-   // Clear the text properties in the current position
-   QString strClassification = getClassificationText();
-   QString strOrganization = getOrganizationText();
-   QFont ftClassification = getClassificationFont();
-   QColor clrClassification = getClassificationColor();
-
-   setLabelText(QString(), QString());
-   setClassificationFont(QFont());
-   setClassificationColor(Qt::black);
-
-   // Set the new position
-   mpPlot->setClassificationPosition(ePosition);
-
-   // Notify attached objects of the change
-   notify(SIGNAL_NAME(Subject, Modified));
-
-   // Set the text properties at the new position
-   setLabelText(strClassification, strOrganization);
-   setClassificationFont(ftClassification);
-   setClassificationColor(clrClassification);
 }
 
 PositionType PlotWidgetImp::getClassificationPosition() const
@@ -567,10 +547,27 @@ QString PlotWidgetImp::getClassificationText() const
    return QString();
 }
 
-void PlotWidgetImp::updateClassificationText()
+void PlotWidgetImp::updateClassificationPosition()
 {
-   QString strClassification = getClassificationText();
-   setLabelText(strClassification, getOrganizationText());
+   // Clear the text properties in the current position
+   QString classificationText = getClassificationText();
+   QString organizationText = getOrganizationText();
+   QFont classificationFont = getClassificationFont();
+   QColor classificationColor = getClassificationColor();
+
+   setLabelText(QString(), QString());
+   setClassificationFont(QFont());
+   setClassificationColor(Qt::black);
+
+   // Set the text properties at the new position
+   setLabelText(classificationText, organizationText);
+   setClassificationFont(classificationFont);
+   setClassificationColor(classificationColor);
+}
+
+void PlotWidgetImp::updateClassificationText(const QString& classificationText)
+{
+   setLabelText(classificationText, getOrganizationText());
 }
 
 void PlotWidgetImp::setClassificationFont(const QFont& ftClassification)

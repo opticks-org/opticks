@@ -13,7 +13,7 @@
 #include "DataDescriptorImp.h"
 #include "DimensionDescriptor.h"
 #include "TypesFile.h"
-#include "UnitsImp.h"
+#include "UnitsAdapter.h"
 
 #include <string>
 #include <vector>
@@ -69,9 +69,9 @@ public:
    void setYPixelSize(double pixelSize);
    double getYPixelSize() const;
 
-   void setUnits(const UnitsImp* pUnits);
-   UnitsImp* getUnits();
-   const UnitsImp* getUnits() const;
+   void setUnits(const Units* pUnits);
+   Units* getUnits();
+   const Units* getUnits() const;
 
    void setDisplayBand(RasterChannelType eColor, DimensionDescriptor band);
    DimensionDescriptor getDisplayBand(RasterChannelType eColor) const;
@@ -80,6 +80,7 @@ public:
 
    virtual DataDescriptor* copy(const std::string& name, DataElement* pParent) const;
    virtual DataDescriptor* copy(const std::string& name, const std::vector<std::string>& parent) const;
+   virtual bool clone(const DataDescriptor* pDescriptor);
 
    void addToMessageLog(Message* pMessage) const;
 
@@ -91,9 +92,13 @@ public:
    static void getDataDescriptorTypes(std::vector<std::string>& classList);
    static bool isKindOfDataDescriptor(const std::string& className);
 
+protected:
+   void notifyUnitsModified(Subject& subject, const std::string& signal, const boost::any& data);
+
 private:
    RasterDataDescriptorImp(const RasterDataDescriptorImp& rhs);
    RasterDataDescriptorImp& operator=(const RasterDataDescriptorImp& rhs);
+
    EncodingType mDataType;
    std::vector<EncodingType> mValidDataTypes;
    InterleaveFormatType mInterleave;
@@ -109,8 +114,8 @@ private:
    double mXPixelSize;
    double mYPixelSize;
 
-   UnitsImp mUnits;
-      
+   UnitsAdapter mUnits;
+
    DimensionDescriptor mGrayBand;
    DimensionDescriptor mRedBand;
    DimensionDescriptor mGreenBand;
@@ -225,15 +230,15 @@ private:
    } \
    void setUnits(const Units* pUnits) \
    { \
-      impClass::setUnits(dynamic_cast<const UnitsImp*>(pUnits)); \
+      impClass::setUnits(pUnits); \
    } \
    Units* getUnits() \
    { \
-      return dynamic_cast<Units*>(impClass::getUnits()); \
+      return impClass::getUnits(); \
    } \
    const Units* getUnits() const \
    { \
-      return dynamic_cast<const Units*>(impClass::getUnits()); \
+      return impClass::getUnits(); \
    } \
    void setInterleaveFormat(InterleaveFormatType format) \
    { \

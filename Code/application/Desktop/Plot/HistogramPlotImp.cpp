@@ -41,7 +41,6 @@
 #include "RasterUtilities.h"
 #include "RegionObjectAdapter.h"
 #include "SessionManager.h"
-#include "SignalBlocker.h"
 #include "Statistics.h"
 #include "StatisticsImp.h"
 #include "StringUtilities.h"
@@ -3095,23 +3094,7 @@ void HistogramPlotImp::updateElementClassification(const Classification* pClassi
       DataDescriptor* pDescriptor = mpElement->getDataDescriptor();
       if (pDescriptor != NULL)
       {
-         Classification* pElementClassification = pDescriptor->getClassification();
-         if (pElementClassification != NULL)
-         {
-            string elementText;
-            string newText;
-            pElementClassification->getClassificationText(elementText);
-            pClassification->getClassificationText(newText);
-
-            if (elementText != newText)
-            {
-               // Need to block the classification modified signal, because it is actually emitted twice when
-               // calling setClassification(): once when clearing the dynamic object, and again after updating
-               // the classification fields - this causes the classification to be reset to the original value
-               SignalBlocker blocker(*pElementClassification);
-               pDescriptor->setClassification(pClassification);
-            }
-         }
+         pDescriptor->setClassification(pClassification);
       }
    }
 }

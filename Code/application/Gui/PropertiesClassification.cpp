@@ -8,7 +8,6 @@
  */
 
 #include "AppVersion.h"
-#include "AppVerify.h"
 #include "Classification.h"
 #include "ClassificationWidget.h"
 #include "DataElement.h"
@@ -71,15 +70,6 @@ bool PropertiesClassification::initialize(SessionItem* pSessionItem)
 
 bool PropertiesClassification::applyChanges()
 {
-   ClassificationWidget* pClassificationPage = dynamic_cast<ClassificationWidget*>(getWidget());
-   VERIFY(pClassificationPage != NULL);
-
-   bool success = pClassificationPage->applyChanges();
-   if (success == false)
-   {
-      return false;
-   }
-
    DataElement* pElement = dynamic_cast<DataElement*>(getSessionItem());
    if (pElement != NULL)
    {

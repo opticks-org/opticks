@@ -10,6 +10,8 @@
 #ifndef PROPERTIESDATADESCRIPTOR_H
 #define PROPERTIESDATADESCRIPTOR_H
 
+#include "DataDescriptor.h"
+#include "ObjectResource.h"
 #include "PropertiesShell.h"
 
 class SessionItem;
@@ -18,13 +20,16 @@ class PropertiesDataDescriptor : public PropertiesShell
 {
 public:
    PropertiesDataDescriptor();
-   ~PropertiesDataDescriptor();
+   virtual ~PropertiesDataDescriptor();
 
-   bool initialize(SessionItem* pSessionItem);
-   bool applyChanges();
+   virtual bool initialize(SessionItem* pSessionItem);
+   virtual bool applyChanges();
 
 protected:
-   QWidget* createWidget();
+   virtual QWidget* createWidget();
+
+private:
+   DataDescriptorResource<DataDescriptor> mpDescriptor;
 };
 
 #endif
