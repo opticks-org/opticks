@@ -1514,6 +1514,10 @@ bool ApplicationWindow::addWindow(Window* pWindow)
    DockWindowImp* pDockWindow = dynamic_cast<DockWindowImp*>(pWindow);
    if (pDockWindow != NULL)
    {
+      if (mpCurrentWnd != NULL)
+      {
+         VERIFYNR(connect(pDockWindow, SIGNAL(visibilityChanged(bool)), mpCurrentWnd, SLOT(setFocus())));
+      }
       pDockWindow->setObjectName(QString::fromStdString(pDockWindow->getName()));
       addDockWidget(Qt::BottomDockWidgetArea, pDockWindow);
       pDockWindow->restoreState();
@@ -4565,7 +4569,7 @@ void ApplicationWindow::updateActiveWindow(QMdiSubWindow* pWindow)
          DockWindowImp* pDock = dynamic_cast<DockWindowImp*>(*it);
          if (pDock != NULL)
          {
-            VERIFYNR(connect(pDock, SIGNAL(visibilityChanged(bool)), pWorkspaceWindow, SLOT(setFocus())));
+            VERIFYNR(connect(pDock, SIGNAL(visibilityChanged(bool)), mpCurrentWnd, SLOT(setFocus())));
          }
       }
 
