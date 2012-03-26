@@ -107,6 +107,7 @@ ViewImp::ViewImp(const string& id, const string& viewName, QGLContext* drawConte
    addAction(pMousePanAction);
 
    // Initialization
+   setAutoFillBackground(false);
    setContextMenuPolicy(Qt::DefaultContextMenu);
    setMouseTracking(true);
    setFocusPolicy(Qt::ClickFocus);
@@ -757,6 +758,9 @@ bool ViewImp::getCurrentImage(QImage &image)
          zoomToBox(ll, ur);
       }
 
+      QPainter painter(this);
+      painter.beginNativePainting();
+
       GlContextSave contextSave(this);
       QGLFramebufferObject fbo(iWidth, iHeight, QGLFramebufferObject::CombinedDepthStencil);
       fbo.bind();
@@ -772,6 +776,8 @@ bool ViewImp::getCurrentImage(QImage &image)
          QImage tmpImage = fbo.toImage().convertToFormat(image.format());
          memcpy(image.bits(), tmpImage.bits(), image.numBytes());
       }
+
+      painter.endNativePainting();
 
       if ((curWidth != iWidth) || (curHeight != iHeight))
       {
@@ -1669,6 +1675,14 @@ void ViewImp::contextMenuEvent(QContextMenuEvent* pEvent)
    QGLWidget::contextMenuEvent(pEvent);
 }
 
+void ViewImp::paintEvent(QPaintEvent* pEvent)
+{
+   QPainter painter(this);
+   painter.beginNativePainting();
+   drawImage();
+   painter.endNativePainting();
+}
+
 void ViewImp::initializeGL()
 {
    // Turn off unnecessary OpenGL functions to increase speed
@@ -1681,11 +1695,6 @@ void ViewImp::initializeGL()
    glDisable(GL_ALPHA_TEST);
 
    setAutoBufferSwap(true);
-}
-
-void ViewImp::paintGL()
-{
-   drawImage();
 }
 
 void ViewImp::setupScreenMatrices()
@@ -1833,7 +1842,7 @@ void ViewImp::drawSelectionBox()
    glLineWidth(2.0);
 
    // Draw the black shadow box
-   glColor4ub(0, 0, 0, 0);
+   glColor3ub(0, 0, 0);
    glBegin(GL_LINE_STRIP);
 
    for (i = 0; i < screenCoords.size(); i++)
@@ -1845,7 +1854,7 @@ void ViewImp::drawSelectionBox()
    glEnd();
 
    // Draw the white selection box
-   glColor4ub(255, 255, 255, 255);
+   glColor3ub(255, 255, 255);
    glBegin(GL_LINE_STRIP);
 
    for (i = 0; i < screenCoords.size(); i++)

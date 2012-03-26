@@ -261,8 +261,8 @@ protected:
    void mouseMoveEvent(QMouseEvent* pEvent);
    void mouseReleaseEvent(QMouseEvent* pEvent);
    void contextMenuEvent(QContextMenuEvent* pEvent);
+   void paintEvent(QPaintEvent* pEvent);
    void initializeGL();
-   void paintGL();
 
    void setupScreenMatrices();
    void setupWorldMatrices();

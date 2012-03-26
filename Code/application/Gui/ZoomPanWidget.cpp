@@ -70,7 +70,7 @@ void ZoomPanWidget::zoomExtents()
    if (mpView != NULL)
    {
       mpView->zoomExtents();
-      mpView->updateGL();
+      mpView->repaint();
    }
 }
 
@@ -95,7 +95,7 @@ void ZoomPanWidget::setSelection(const vector<LocationType>& selectionData)
    {
       mpView->setSelectionBox(selectionWorld);
       emit selectionChanged(selectionData);
-      mpView->updateGL();
+      mpView->repaint();
    }
 }
 
@@ -208,7 +208,7 @@ void ZoomPanWidget::mousePressEvent(QMouseEvent* e)
          }
       }
 
-      mpView->updateGL();
+      mpView->repaint();
    }
 
    QWidget::mousePressEvent(e);
@@ -261,7 +261,7 @@ void ZoomPanWidget::mouseMoveEvent(QMouseEvent* e)
       }
 
       mMouseCurrent = ptMouse;
-      mpView->updateGL();
+      mpView->repaint();
 
       LocationType dataCoord;
       mpLayer->translateScreenToData(mMouseCurrent.x(), mMouseCurrent.y(), dataCoord.mX, dataCoord.mY);
@@ -312,7 +312,7 @@ void ZoomPanWidget::mouseReleaseEvent(QMouseEvent* e)
          }
       }
 
-      mpView->updateGL();
+      mpView->repaint();
    }
 
    QWidget::mouseReleaseEvent(e);
@@ -404,7 +404,7 @@ void ZoomPanWidget::keyPressEvent(QKeyEvent* e)
          translateWorldToData(newSelection, newSelectionData);
          emit selectionChanged(newSelectionData);
 
-         mpView->updateGL();
+         mpView->repaint();
       }
    }
 

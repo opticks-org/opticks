@@ -120,7 +120,7 @@ protected:
    void resizeEvent(QResizeEvent* pEvent);
    void drawContents();
    virtual void drawGridlines() = 0;
-   virtual void initializeGL();
+   void initializeDisplayList();
 
 protected slots:
    void setMouseMode(QAction* pAction);
@@ -148,6 +148,7 @@ private:
 
    LocatorAdapter mMouseLocator;
    PolygonPlotObjectAdapter mSelectionArea;
+   bool mDisplayListInitialized;
    GLuint mDisplayListIndex;          // openGL display list index
    GLuint mTemporaryDisplayListIndex; // display list index created in a temporary openGL context for renderPixmap
    bool mbTemporaryDisplayList;       // used to tell when to create a temporary display list for the plot symbols

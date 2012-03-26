@@ -62,6 +62,7 @@ PlotViewImp::PlotViewImp(const string& id, const string& viewName, QGLContext* d
    mpAnnotationLayer(NULL),
    mMouseLocator(this, false),
    mSelectionArea(this, false),
+   mDisplayListInitialized(false),
    mDisplayListIndex(0),
    mTemporaryDisplayListIndex(0),
    mbTemporaryDisplayList(false),
@@ -1058,7 +1059,7 @@ void PlotViewImp::mousePressEvent(QMouseEvent* e)
    if (bSuccess == true)
    {
       e->accept();
-      updateGL();
+      repaint();
    }
    else
    {
@@ -1182,7 +1183,7 @@ void PlotViewImp::mouseMoveEvent(QMouseEvent* e)
    if (bSuccess == true)
    {
       e->accept();
-      updateGL();
+      repaint();
    }
    else
    {
@@ -1339,7 +1340,7 @@ void PlotViewImp::mouseReleaseEvent(QMouseEvent* e)
    if (bSuccess == true)
    {
       e->accept();
-      updateGL();
+      repaint();
    }
    else
    {
@@ -1394,6 +1395,7 @@ void PlotViewImp::resizeEvent(QResizeEvent* pEvent)
 
 void PlotViewImp::draw()
 {
+   initializeDisplayList();
    drawContents();
    drawMousePanAnchor();
    drawSelectionBox();
@@ -1758,9 +1760,14 @@ void PlotViewImp::translateDataToScreen(double dataX, double dataY, double& scre
    translateWorldToScreen(worldX, worldY, screenX, screenY);
 }
 
-void PlotViewImp::initializeGL()
+void PlotViewImp::initializeDisplayList()
 {
-   ViewImp::initializeGL();
+   if (mDisplayListInitialized == true)
+   {
+      return;
+   }
+
+   mDisplayListInitialized = true;
 
    // unable to share display lists while using renderPixmap method in the QGLWidget class
    // so a temporary display list is created for the openGL context created by renderPixmap

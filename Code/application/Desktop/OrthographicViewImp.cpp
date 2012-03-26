@@ -338,7 +338,7 @@ void OrthographicViewImp::wheelEvent(QWheelEvent* pEvent)
       zoomOnPoint(mousePoint, delta);
    }
 
-   updateGL();
+   repaint();
    pEvent->accept();
 }
 

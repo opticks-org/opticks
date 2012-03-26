@@ -1028,7 +1028,7 @@ Layer* SpatialDataViewImp::deriveLayer(const Layer* pLayer, const LayerType& new
       pNewLayer->setYOffset(pLayer->getYOffset());
       pNewLayer->setXScaleFactor(pLayer->getXScaleFactor());
       pNewLayer->setYScaleFactor(pLayer->getYScaleFactor());
-      updateGL();
+      repaint();
    }
 
    return pNewLayer;
@@ -1421,6 +1421,9 @@ QImage SpatialDataViewImp::getLayerImage(Layer* pLayer, ColorType& transparent, 
 
    if (QGLFramebufferObject::hasOpenGLFramebufferObjects())
    {
+      QPainter painter(this);
+      painter.beginNativePainting();
+
       // Set to draw to an off screen buffer
       makeCurrent();
       int w = width();
@@ -1447,18 +1450,20 @@ QImage SpatialDataViewImp::getLayerImage(Layer* pLayer, ColorType& transparent, 
 
       fbo.release();
 
-      // Restore matrices
-      glMatrixMode(GL_PROJECTION);
-      glLoadMatrixd(projectionMatrix);
-      glMatrixMode(GL_MODELVIEW);
-      glLoadMatrixd(modelMatrix);
-      glViewport(viewPort[0], viewPort[1], viewPort[2], viewPort[3]);
-
       // Read the pixels from the draw buffer
       int iWidth = w;
       int iHeight = h;
 
       QImage img = fbo.toImage();
+
+      // Restore matrices
+      painter.endNativePainting();
+
+      glMatrixMode(GL_PROJECTION);
+      glLoadMatrixd(projectionMatrix);
+      glMatrixMode(GL_MODELVIEW);
+      glLoadMatrixd(modelMatrix);
+      glViewport(viewPort[0], viewPort[1], viewPort[2], viewPort[3]);
 
       // Initialize the bounding box
       bbox[0] = iWidth;
@@ -2758,22 +2763,22 @@ void SpatialDataViewImp::keyPan()
    {
       case Qt::Key_Up:
          ViewImp::pan(QPoint(0, 0), QPoint(0, distance));
-         updateGL();
+         repaint();
          break;
 
       case Qt::Key_Down:
          ViewImp::pan(QPoint(0, 0), QPoint(0, -distance));
-         updateGL();
+         repaint();
          break;
 
       case Qt::Key_Left:
          ViewImp::pan(QPoint(0, 0), QPoint(-distance, 0));
-         updateGL();
+         repaint();
          break;
 
       case Qt::Key_Right:
          ViewImp::pan(QPoint(0, 0), QPoint(distance, 0));
-         updateGL();
+         repaint();
          break;
 
       default:
@@ -2889,7 +2894,7 @@ void SpatialDataViewImp::mouseMoveEvent(QMouseEvent* pEvent)
       {
          pEvent->accept();
          updateStatusBar(ptMouse);
-         updateGL();
+         repaint();
       }
    }
 

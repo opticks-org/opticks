@@ -26,7 +26,6 @@
 #include "ViewUndo.h"
 #include "xmlreader.h"
 
-
 #include <math.h>
 #include <limits>
 #include <boost/bind.hpp>
@@ -689,22 +688,22 @@ void PerspectiveViewImp::keyPressEvent(QKeyEvent* e)
       {
          case Qt::Key_Up:
             ViewImp::pan(QPoint(0, 0), QPoint(0, height()));
-            updateGL();
+            repaint();
             break;
 
          case Qt::Key_Down:
             ViewImp::pan(QPoint(0, 0), QPoint(0, -height()));
-            updateGL();
+            repaint();
             break;
 
          case Qt::Key_Left:
             ViewImp::pan(QPoint(0, 0), QPoint(-width(), 0));
-            updateGL();
+            repaint();
             break;
 
          case Qt::Key_Right:
             ViewImp::pan(QPoint(0, 0), QPoint(width(), 0));
-            updateGL();
+            repaint();
             break;
 
          default:
@@ -717,12 +716,12 @@ void PerspectiveViewImp::keyPressEvent(QKeyEvent* e)
       {
          case Qt::Key_Left:
             rotateBy(-5.0);
-            updateGL();
+            repaint();
             break;
 
          case Qt::Key_Right:
             rotateBy(5.0);
-            updateGL();
+            repaint();
             break;
 
          default:
@@ -748,22 +747,22 @@ void PerspectiveViewImp::keyPressEvent(QKeyEvent* e)
 
          case Qt::Key_Up:
             ViewImp::pan(QPoint(0, 0), QPoint(0, 10));
-            updateGL();
+            repaint();
             break;
 
          case Qt::Key_Down:
             ViewImp::pan(QPoint(0, 0), QPoint(0, -10));
-            updateGL();
+            repaint();
             break;
 
          case Qt::Key_Left:
             ViewImp::pan(QPoint(0, 0), QPoint(-10, 0));
-            updateGL();
+            repaint();
             break;
 
          case Qt::Key_Right:
             ViewImp::pan(QPoint(0, 0), QPoint(10, 0));
-            updateGL();
+            repaint();
             break;
 
          default:
@@ -847,7 +846,7 @@ void PerspectiveViewImp::mousePressEvent(QMouseEvent* e)
    if (bSuccess == true)
    {
       e->accept();
-      updateGL();
+      repaint();
    }
    else
    {
@@ -866,7 +865,7 @@ void PerspectiveViewImp::mouseMoveEvent(QMouseEvent* e)
       if (isInsetEnabled() == true)
       {
          setInsetPoint(ptMouse);
-         updateGL();
+         repaint();
       }
 
       string mouseMode = "";
@@ -946,7 +945,7 @@ void PerspectiveViewImp::mouseMoveEvent(QMouseEvent* e)
    if (bSuccess == true)
    {
       e->accept();
-      updateGL();
+      repaint();
    }
    else
    {
@@ -1036,7 +1035,7 @@ void PerspectiveViewImp::mouseReleaseEvent(QMouseEvent* e)
    if (bSuccess == true)
    {
       e->accept();
-      updateGL();
+      repaint();
    }
    else
    {
@@ -1083,7 +1082,7 @@ void PerspectiveViewImp::wheelEvent(QWheelEvent* e)
          zoomAboutPoint(ptMouse, dZoom);
       }
 
-      updateGL();
+      repaint();
 
       e->accept();
       return;
@@ -1247,26 +1246,27 @@ void PerspectiveViewImp::drawInset()
    glLoadIdentity();
 
    // Black border
-   const double one = 0.999;
+   const double rectMin = 0.001;  // Draw the border just inside the clipping plane so that it is entirely visible
+   const double rectMax = 0.999;
 
    qglColor(Qt::black);
    glViewport(writellx, writelly, insetSize, insetSize);
    gluOrtho2D(0.0, 1.0, 0.0, 1.0);
    glBegin(GL_LINE_LOOP);
-   glVertex2d(0.0, 0.0);
-   glVertex2d(one, 0.0);
-   glVertex2d(one, one);
-   glVertex2d(0.0, one);
+   glVertex2d(rectMin, rectMin);
+   glVertex2d(rectMax, rectMin);
+   glVertex2d(rectMax, rectMax);
+   glVertex2d(rectMin, rectMax);
    glEnd();
 
    // White border
    qglColor(Qt::white);
    glViewport(writellx + 1, writelly + 1, insetSize - 2, insetSize - 2);
    glBegin(GL_LINE_LOOP);
-   glVertex2d(0.0, 0.0);
-   glVertex2d(one, 0.0);
-   glVertex2d(one, one);
-   glVertex2d(0.0, one);
+   glVertex2d(rectMin, rectMin);
+   glVertex2d(rectMax, rectMin);
+   glVertex2d(rectMax, rectMax);
+   glVertex2d(rectMin, rectMax);
    glEnd();
 
    // Cross hair

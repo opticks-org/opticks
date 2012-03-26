@@ -1484,5 +1484,5 @@ QSplitter* PlotWidgetImp::getSplitter()
 void PlotWidgetImp::selectPlotObject(PlotObject* pObject, bool bSelect)
 {
    mpPlot->selectObject(pObject, bSelect);
-   mpPlot->updateGL();
+   mpPlot->repaint();
 }

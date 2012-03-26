@@ -13,9 +13,12 @@
 #include "SystemServicesImp.h"
 
 #include <QtGui/QApplication>
+#include <QtOpenGL/qgl.h>
 
 int main(int argc, char** argv)
 {
+   QGL::setPreferredPaintEngine(QPaintEngine::OpenGL);
+
    // The QApplication will strip its args from argc/argv, so we want to do 
    // this before putting the command-line args into our ArgumentList, or we
    // will try to open the Qt args as data files.

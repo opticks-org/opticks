@@ -303,7 +303,7 @@ void OverviewWindow::updateView(const vector<LocationType>& selectionArea)
    
    // Update the view
    mpView->zoomToBox(worldLl, worldUr);
-   mpView->updateGL();
+   mpView->repaint();
 }
 
 void OverviewWindow::updateSelectionBox()

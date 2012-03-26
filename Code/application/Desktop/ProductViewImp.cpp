@@ -991,7 +991,7 @@ void ProductViewImp::keyPressEvent(QKeyEvent* e)
    if (pEditView != NULL)
    {
       QApplication::sendEvent(pEditView, e);
-      updateGL();
+      repaint();
       return;
    }
 
@@ -1053,7 +1053,7 @@ void ProductViewImp::mousePressEvent(QMouseEvent* e)
          QMouseEvent mouseEvent(QEvent::MouseButtonPress, ptView, e->globalPos(), e->button(), e->buttons(),
             e->modifiers());
          QApplication::sendEvent(pEditView, &mouseEvent);
-         updateGL();
+         repaint();
 
          // Get the edit view's cursor
          mouseCursor = pEditView->cursor();
@@ -1135,7 +1135,7 @@ void ProductViewImp::mouseMoveEvent(QMouseEvent* e)
          QPoint ptView = pEditView->mapFromParent(e->pos());
          QMouseEvent mouseEvent(QEvent::MouseMove, ptView, e->globalPos(), e->button(), e->buttons(), e->modifiers());
          QApplication::sendEvent(pEditView, &mouseEvent);
-         updateGL();
+         repaint();
 
          // Get the edit view's cursor
          mouseCursor = pEditView->cursor();
@@ -1165,7 +1165,7 @@ void ProductViewImp::mouseMoveEvent(QMouseEvent* e)
       else
       {
          updateStatusBar(ptMouse);
-         updateGL();
+         repaint();
       }
 
       // Get the current view cursor
@@ -1230,7 +1230,7 @@ void ProductViewImp::mouseReleaseEvent(QMouseEvent* e)
          QMouseEvent mouseEvent(QEvent::MouseButtonRelease, ptView, e->globalPos(), e->button(), e->buttons(),
             e->modifiers());
          QApplication::sendEvent(pEditView, &mouseEvent);
-         updateGL();
+         repaint();
 
          // Get the edit view's cursor
          if (bHit == true)
@@ -1334,7 +1334,7 @@ void ProductViewImp::mouseDoubleClickEvent(QMouseEvent* pEvent)
          QMouseEvent mouseEvent(QEvent::MouseButtonDblClick, ptView, pEvent->globalPos(), pEvent->button(),
             pEvent->buttons(), pEvent->modifiers());
          QApplication::sendEvent(pEditView, &mouseEvent);
-         updateGL();
+         repaint();
 
          // Get the edit view's cursor
          mouseCursor = pEditView->cursor();
@@ -1391,7 +1391,7 @@ void ProductViewImp::wheelEvent(QWheelEvent* e)
          QPoint ptMouse = pEditView->mapFromParent(e->pos());
          QWheelEvent wheelEvent(ptMouse, e->globalPos(), e->delta(), e->buttons(), e->modifiers(), e->orientation());
          QApplication::sendEvent(pEditView, &wheelEvent);
-         updateGL();
+         repaint();
          return;
       }
    }
@@ -1719,7 +1719,7 @@ void ProductViewImp::toggleMousePanByKey()
       }
 
       pEditView->enableMousePan(!mousePanEnabled);
-      updateGL();
+      repaint();
       setCursor(pEditView->cursor());
       return;
    }
