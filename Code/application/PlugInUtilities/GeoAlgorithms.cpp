@@ -572,7 +572,7 @@ bool GeoAlgorithms::getAngleToNorth(const RasterElement* pRaster, double& angle,
 
    double dDeltaX = pixelEnd.mX - pixelStart.mX;
    double dDeltaY = pixelEnd.mY - pixelStart.mY;
-   if (dDeltaX == 0.0)
+   if (dDeltaX == 0.0 && dDeltaY == 0.0)
    {
       return false;
    }
