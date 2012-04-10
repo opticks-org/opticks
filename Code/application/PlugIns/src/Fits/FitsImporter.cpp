@@ -630,8 +630,19 @@ bool FitsImporter::validate(const DataDescriptor *pDescriptor, std::string &erro
       }
    }
 
+   bool valid = false;
    std::string baseErrorMessage;
-   bool valid = RasterElementImporterShell::validate(pDescriptor, baseErrorMessage);
+
+   const std::string& type = pDescriptor->getType();
+   if (type == TypeConverter::toString<RasterElement>())
+   {
+      valid = RasterElementImporterShell::validate(pDescriptor, baseErrorMessage);
+   }
+   else if ((type == TypeConverter::toString<Signature>()) || (type == TypeConverter::toString<SignatureLibrary>()))
+   {
+      valid = ImporterShell::validate(pDescriptor, baseErrorMessage);
+   }
+
    if (valid == true)
    {
       if ((pDescriptor != NULL) && (pDescriptor->getType() == TypeConverter::toString<Signature>()))
