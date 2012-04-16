@@ -132,6 +132,7 @@ ArcProxy::~ArcProxy()
    {
       ShutdownApp();
    }
+   exit(0);
 }
 
 void ArcProxy::connectToServer()
@@ -588,7 +589,7 @@ bool ArcProxy::writeFeature(IFeaturePtr pFeature, const std::string &labelFormat
    case esriGeometryLine:          // fall-through
    case esriGeometryNull:          // fall-through
       mStream << "ERROR Unsupported type encountered" << endl;
-      return false;
+      break; // This will probably need a return false when we get a database to use for testing
    }
 
    // generate label
