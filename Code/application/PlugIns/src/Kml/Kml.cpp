@@ -30,6 +30,7 @@
 #include "SpatialDataView.h"
 #include "SpatialDataWindow.h"
 #include "Undo.h"
+#include "xmlreader.h"
 #include <QtCore/QBuffer>
 #include <QtCore/QByteArray>
 #include <QtCore/QDateTime>
@@ -468,7 +469,8 @@ void Kml::generateGroundOverlayLayer(Layer* pLayer, bool visible, int order, con
    }
    pView->refresh();
 
-   mXml.pushAddPoint(mXml.addElement("GroundOverlay"));
+   XERCES_CPP_NAMESPACE_QUALIFIER DOMElement* pGroundOverlay = mXml.addElement("GroundOverlay");
+   mXml.pushAddPoint(pGroundOverlay);
    string name = pLayer->getDisplayName();
    if (name.empty())
    {
@@ -526,6 +528,34 @@ void Kml::generateGroundOverlayLayer(Layer* pLayer, bool visible, int order, con
       mXml.popAddPoint();
    }
    generateBoundingBox(pGeoLayer, bbox);
+
+   // add ExtendedData
+   const DynamicObject* pMeta = pLayer->getDataElement()->getMetadata();
+   VERIFYNRV(pMeta);
+   const DataVariant& ked(pMeta->getAttributeByPath("KML/ExtendedData"));
+   if (ked.isValid())
+   {
+      std::string kedString = ked.toXmlString();
+      XmlReader reader(Service<MessageLogMgr>()->getLog(), false);
+      XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* kedDoc = reader.parseString(ked.toXmlString());
+      if (kedDoc != NULL)
+      {
+         XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pKedNode = kedDoc->getDocumentElement();
+         bool extraPop = false;
+         if (std::string(A(pKedNode->getNodeName())) != "ExtendedData")
+         {
+            mXml.pushAddPoint(mXml.addElement("ExtendedData"));
+            extraPop = true;
+         }
+         pKedNode = mXml.peekAddPoint()->getOwnerDocument()->importNode(pKedNode, true);
+         mXml.peekAddPoint()->appendChild(pKedNode);
+         if (extraPop)
+         {
+            mXml.popAddPoint();
+         }
+      }
+   }
+
    mXml.popAddPoint(); // GroundOverlay
 
    // restore original rotation
