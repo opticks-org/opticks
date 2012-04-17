@@ -158,7 +158,7 @@ bool Kml::addView(const SpatialDataView* pView)
       if (mpProgress != NULL)
       {
          mpProgress->updateProgress("The " + pView->getDisplayName(true) +
-            " view does not have georeference information and will not be exported.", 0, error);
+            " view does not have georeference information and will not be exported.", 0, ERRORS);
       }
       return false;
    }
