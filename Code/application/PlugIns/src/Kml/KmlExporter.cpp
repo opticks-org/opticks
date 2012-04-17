@@ -71,7 +71,7 @@ bool KmlExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
    SpatialDataView* pView = pInArgList->getPlugInArgValue<SpatialDataView>(Exporter::ExportItemArg());
    Layer* pLayer = pInArgList->getPlugInArgValue<Layer>(Exporter::ExportItemArg());
    bool isKmz(pDescriptor->getFilename().getExtension() == "kmz");
-   Kml kml(isKmz);
+   Kml kml(isKmz, progress.getCurrentProgress());
    bool success = false;
    if (pView == NULL && pLayer == NULL)
    {

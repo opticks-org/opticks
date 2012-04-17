@@ -15,6 +15,7 @@
 
 class GraphicLayer;
 class Layer;
+class Progress;
 class QByteArray;
 class QString;
 class RasterElement;
@@ -24,7 +25,7 @@ class SpatialDataWindow;
 class Kml
 {
 public:
-   Kml(bool exportImages = false);
+   Kml(bool exportImages = false, Progress* pProgress = NULL);
    ~Kml();
 
    QString toString();
@@ -44,6 +45,7 @@ public:
 private:
    XMLWriter mXml;
    bool mExportImages;
+   Progress* mpProgress;
    QMap<QString, QByteArray> mImages;
 };
 

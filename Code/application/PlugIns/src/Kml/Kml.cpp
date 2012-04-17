@@ -24,6 +24,7 @@
 #include "PerspectiveView.h"
 #include "PolygonObject.h"
 #include "PolylineObject.h"
+#include "Progress.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "RasterLayer.h"
@@ -49,9 +50,10 @@ namespace
    string sKmlNamespace = "http://earth.google.com/kml/2.1";
 };
 
-Kml::Kml(bool exportImages) :
+Kml::Kml(bool exportImages, Progress* pProgress) :
    mXml("kml", sKmlNamespace, Service<MessageLogMgr>()->getLog(), true),
-   mExportImages(exportImages)
+   mExportImages(exportImages),
+   mpProgress(pProgress)
 {
 }
 
@@ -120,16 +122,17 @@ bool Kml::addSession()
    mXml.pushAddPoint(mXml.addElement("Folder"));
    mXml.addText("Active Data Sets", mXml.addElement("name"));
    Service<DesktopServices>()->getWindows(SPATIAL_DATA_WINDOW, windows);
+   bool success = false;
    for (vector<Window*>::const_iterator window = windows.begin(); window != windows.end(); ++window)
    {
-      if (!addWindow(static_cast<SpatialDataWindow*>(*window)))
+      if (addWindow(static_cast<SpatialDataWindow*>(*window)))
       {
-         return false;
+         success = true;
       }
    }
    mXml.popAddPoint(); // Folder
 
-   return true;
+   return success;
 }
 
 bool Kml::addWindow(const SpatialDataWindow* pWindow)
@@ -149,8 +152,14 @@ bool Kml::addView(const SpatialDataView* pView)
    }
    // ensure we are georeferenced
    RasterElement* pElement = static_cast<RasterElement*>(pView->getLayerList()->getPrimaryRasterElement());
-   if (pElement == NULL || !pElement->isGeoreferenced())
+   VERIFY(pElement);
+   if (!pElement->isGeoreferenced())
    {
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress("The " + pView->getDisplayName(true) +
+            " view does not have georeference information and will not be exported.", 0, error);
+      }
       return false;
    }
    Layer* pPrimaryLayer = pView->getLayerList()->getLayer(RASTER, pElement);
@@ -163,6 +172,7 @@ bool Kml::addView(const SpatialDataView* pView)
    mXml.addText(name, mXml.addElement("name"));
    mXml.addText(pView->getDisplayText(), mXml.addElement("description"));
 
+   bool success = false;
    vector<Layer*> layers;
    pView->getLayerList()->getLayers(layers);
    int totalLayers = static_cast<int>(pView->getLayerList()->getNumLayers());
@@ -172,14 +182,14 @@ bool Kml::addView(const SpatialDataView* pView)
       {
          continue;
       }
-      if (!addLayer(*layer, pPrimaryLayer, pView, totalLayers))
+      if (addLayer(*layer, pPrimaryLayer, pView, totalLayers))
       {
-         return false;
+         success = true;
       }
    }
    mXml.popAddPoint(); // Folder
 
-   return true;
+   return success;
 }
 
 bool Kml::addLayer(Layer* pLayer, const Layer* pGeoLayer, const SpatialDataView* pView, int totalLayers)
@@ -236,7 +246,11 @@ bool Kml::addLayer(Layer* pLayer, const Layer* pGeoLayer, const SpatialDataView*
    case TIEPOINT_LAYER:
    default:
       // These are unsupported layers
-      return true;
+      if (mpProgress != NULL)
+      {
+         mpProgress->updateProgress("Unable to export unsupported layer " + pLayer->getName(), 0, WARNING);
+      }
+      return false;
    }
    return true;
 }
