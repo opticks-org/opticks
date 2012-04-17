@@ -31,19 +31,22 @@
 #include "CovarianceGui.h"
 #include "switchOnEncoding.h"
 #include "TypeConverter.h"
+#include "Units.h"
 
 #include <algorithm>
 #include <string>
 #include <vector>
 using namespace std;
 
-const string CovarianceAlgorithm::mExpectedFileHeader = "Covariance Matrix File v1.1\n";
+const string CovarianceAlgorithm::mExpectedFileHeader = "Covariance Matrix File v1.2\n";
+const string CovarianceAlgorithm::mOldFileHeader = "Covariance Matrix File v1.1\n";
 static bool** CopySelectedPixels(const bool** pSelectedPixels, int xsize, int ysize);
 static void DeleteSelectedPixels(bool** pSelectedPixels);
 
 struct MaskInput
 {
    double* pMatrix;
+   double* pAverage;
    int numRows;
    int numCols;
    int numBands;
@@ -65,7 +68,7 @@ T* GetRowPtr(T* raw, int numCols, int numBands, int row, int col)
 }
 
 template<class T>
-void ComputeFactoredCov(T* pData, RasterElement* pRaster, double* pMatrix,
+void ComputeFactoredCov(T* pData, RasterElement* pRaster, double* pMatrix, double* pAverage,
                         Progress* pProgress, const bool* pAbortFlag,
                         int rowFactor, int columnFactor)
 {
@@ -78,6 +81,7 @@ void ComputeFactoredCov(T* pData, RasterElement* pRaster, double* pMatrix,
    {
       return;
    }
+   VERIFYNRV(pAverage);
 
    unsigned int numRows = pDescriptor->getRowCount();
    unsigned int numCols = pDescriptor->getColumnCount();
@@ -87,8 +91,6 @@ void ComputeFactoredCov(T* pData, RasterElement* pRaster, double* pMatrix,
    unsigned int lCount = 0;
 
    T *pPixel = NULL;
-   vector<double> averages(numBands, 0);
-   double* pAverage = &averages.front();
 
    if (rowFactor < 1)
    {
@@ -107,6 +109,8 @@ void ComputeFactoredCov(T* pData, RasterElement* pRaster, double* pMatrix,
    pRequest->setInterleaveFormat(BIP);
 
    DataAccessor accessor = pRaster->getDataAccessor(pRequest.release());
+   const Units* pUnits = pDescriptor->getUnits();
+   double unitScale = (pUnits == NULL) ? 1.0 : pUnits->getScaleFromStandard();
 
    for (row = 0; row < numRows; row += rowFactor)
    {
@@ -130,7 +134,7 @@ void ComputeFactoredCov(T* pData, RasterElement* pRaster, double* pMatrix,
 
          for (band1 = 0; band1 < numBands; ++band1)
          {
-            pAverage[band1] += *pPixel;
+            pAverage[band1] += unitScale * *pPixel;
             ++pPixel;
          }
       }
@@ -177,7 +181,7 @@ void ComputeFactoredCov(T* pData, RasterElement* pRaster, double* pMatrix,
                pMatrixColumn = pMatrixRow;
                for (band1 = band2; band1 < numBands; ++band1)
                {
-                  *pMatrixColumn += (*pData - pAverage[band1]) * (*pPixel - pAverage[band2]);
+                  *pMatrixColumn += ((unitScale * *pData) - pAverage[band1]) * ((unitScale * *pPixel) - pAverage[band2]);
                   ++pData;
                   ++pMatrixColumn;
                }
@@ -233,16 +237,17 @@ void ComputeMaskedCvm(T* pData, MaskInput* pInput, RasterElement* pRaster)
    {
       return;
    }
+   VERIFYNRV(pInput->pAverage);
    unsigned int numBands = pDescriptor->getBandCount();
    int lCount = 0;
    T* pPixel = NULL;
 
-   vector<double> averages(numBands, 0);
-   double* pAverage = &averages.front();
    memset(pInput->pMatrix, 0, sizeof(double) * pInput->numBands * pInput->numBands);
    FactoryResource<DataRequest> pRequest;
    pRequest->setInterleaveFormat(BIP);
    DataAccessor accessor = pRaster->getDataAccessor(pRequest.release());
+   const Units* pUnits = pDescriptor->getUnits();
+   double unitScale = (pUnits == NULL) ? 1.0 : pUnits->getScaleFromStandard();
    BitMaskIterator it(pInput->mpMask, pRaster);
    int numPixels = it.getCount();
    LocationType loc;
@@ -272,14 +277,14 @@ void ComputeMaskedCvm(T* pData, MaskInput* pInput, RasterElement* pRaster)
       ++it;
       for (unsigned int band1 = 0; band1 < numBands; ++band1)
       {
-         pAverage[band1] += *pPixel;
+         pInput->pAverage[band1] += unitScale * *pPixel;
          ++pPixel;
       }
    }
 
    for (unsigned int band1 = 0; band1 < numBands; ++band1)
    {
-      pAverage[band1] /= lCount;
+      pInput->pAverage[band1] /= lCount;
    }
 
 
@@ -318,7 +323,7 @@ void ComputeMaskedCvm(T* pData, MaskInput* pInput, RasterElement* pRaster)
          pMatrixColumn = pMatrixRow;
          for (unsigned int band1 = band2; band1 < numBands; ++band1)
          {
-            *pMatrixColumn += (*pData - pAverage[band1]) * (*pPixel - pAverage[band2]);
+            *pMatrixColumn += ((unitScale * *pData) - pInput->pAverage[band1]) * ((unitScale * *pPixel) - pInput->pAverage[band2]);
             ++pData;
             ++pMatrixColumn;
          }
@@ -415,6 +420,7 @@ bool Covariance::populateDefaultOutputArgList(PlugInArgList* pArgList)
    VERIFY(pArgList != NULL);
    VERIFY(pArgList->addArg<RasterElement>("Covariance Matrix", NULL, "Resulting covariance matrix."));
    VERIFY(pArgList->addArg<RasterElement>("Inverse Covariance Matrix", NULL, "Inverse of the covariance matrix."));
+   VERIFY(pArgList->addArg<RasterElement>("Means", NULL, "Vector of band means."));
    return true;
 }
 
@@ -506,6 +512,11 @@ bool Covariance::setActualValuesInOutputArgList(PlugInArgList *pArgList)
          success = false;
       }
    }
+   pElement = mpCovarianceAlg->getMeansElement();
+   if (success && pElement != NULL)
+   {
+      success = pArgList->setPlugInArgValue<RasterElement>("Means", pElement);
+   }
 
    return success;
 }
@@ -586,6 +597,7 @@ bool CovarianceAlgorithm::preprocess()
 {
    mpNewRasterElement = NULL;
    mpNewInvRasterElement = NULL;
+   mpNewMeansElement = NULL;
    return true;
 }
 
@@ -642,6 +654,9 @@ bool CovarianceAlgorithm::processAll()
    ModelResource<RasterElement> pInvCvmElement(static_cast<RasterElement*>(
       mpModelServices->getElement("Inverse Covariance Matrix",
       TypeConverter::toString<RasterElement>(), pRasterElement)));
+   ModelResource<RasterElement> pMeansElement(static_cast<RasterElement*>(
+      mpModelServices->getElement("Means",
+      TypeConverter::toString<RasterElement>(), pRasterElement)));
 
    if (mInput.mRecalculate == true || pCvmElement.get() == NULL)
    {
@@ -650,22 +665,25 @@ bool CovarianceAlgorithm::processAll()
       // new object (NULL in this case)
       pCvmElement = ModelResource<RasterElement>(static_cast<RasterElement*>(NULL));
       pInvCvmElement = ModelResource<RasterElement>(static_cast<RasterElement*>(NULL));
+      pMeansElement = ModelResource<RasterElement>(static_cast<RasterElement*>(NULL));
    }
 
    if (pCvmElement.get() == NULL)
    {
       pCvmElement = ModelResource<RasterElement>(RasterUtilities::createRasterElement(
          "Covariance Matrix", numBands, numBands, FLT8BYTES, true, pRasterElement));
-      if (pCvmElement.get() == NULL)
+      pMeansElement = ModelResource<RasterElement>(RasterUtilities::createRasterElement(
+         "Means", 1, 1, numBands, FLT8BYTES, BIP, true, pRasterElement));
+      if (pCvmElement.get() == NULL || pMeansElement.get() == NULL)
       {
-         reportProgress(ERRORS, 0, "Error creating Covariance matrix.");
+         reportProgress(ERRORS, 0, "Error creating Covariance matrix or means vector.");
          return false;
       }
 
       bool loadedFromFile(false);
       if (mLoadIfExists && mInput.mRecalculate == false)  // try to load cvm from file
       {
-         loadedFromFile = readMatrixFromDisk(mCvmFile, pCvmElement.get());
+         loadedFromFile = readMatrixFromDisk(mCvmFile, pCvmElement.get(), pMeansElement);
       }
 
       if (loadedFromFile == false)                        // need to compute cvm
@@ -673,12 +691,12 @@ bool CovarianceAlgorithm::processAll()
          eType = pDescriptor->getDataType();
 
          // check that entire data block of element is in memory
-         VERIFY(pCvmElement->getRawData() != NULL);
+         VERIFY(pCvmElement->getRawData() != NULL && pMeansElement->getRawData() != NULL);
          if (mInput.mpAoi == NULL)
          {
             switchOnEncoding(eType, ComputeFactoredCov, pData, pRasterElement, 
-               static_cast<double*>(pCvmElement->getRawData()), getProgress(), 
-               &mAbortFlag, mInput.mRowFactor, mInput.mColumnFactor);
+               static_cast<double*>(pCvmElement->getRawData()), static_cast<double*>(pMeansElement->getRawData()),
+               getProgress(), &mAbortFlag, mInput.mRowFactor, mInput.mColumnFactor);
          }
          else
          {
@@ -706,6 +724,7 @@ bool CovarianceAlgorithm::processAll()
                   const bool** pSelectedPixels = const_cast<BitMask*>(pMask)->getRegion(x1, y1, x2, y2);
                   MaskInput input;
                   input.pMatrix = static_cast<double*>(pCvmElement->getRawData());
+                  input.pAverage = static_cast<double*>(pMeansElement->getRawData());
                   input.numRows = numRows;
                   input.numCols = numColumns;
                   input.numBands = numBands;
@@ -729,7 +748,7 @@ bool CovarianceAlgorithm::processAll()
             return false;
          }
 
-         writeMatrixToDisk(mCvmFile, pCvmElement.get());
+         writeMatrixToDisk(mCvmFile, pCvmElement.get(), pMeansElement.get());
       }
    }
    else
@@ -808,6 +827,9 @@ bool CovarianceAlgorithm::processAll()
    // store Cvm to be added to the output arg list
    mpNewRasterElement = pCvmElement.release();
 
+   // store means to be added to the output arg list
+   mpNewMeansElement = pMeansElement.release();
+
    pStep->finalize(Message::Success);
    reportProgress(NORMAL, 100, "Covariance Matrix Complete");
 
@@ -843,9 +865,15 @@ RasterElement* CovarianceAlgorithm::getInverseCovarianceElement() const
    return mpNewInvRasterElement;
 }
 
-bool CovarianceAlgorithm::readMatrixFromDisk(string filename, RasterElement* pElement) const
+RasterElement* CovarianceAlgorithm::getMeansElement() const
 {
-   if (filename.empty() || pElement == NULL)
+   return mpNewMeansElement;
+}
+
+bool CovarianceAlgorithm::readMatrixFromDisk(string filename,
+   RasterElement* pElement, ModelResource<RasterElement>& pMeans) const
+{
+   if (filename.empty() || pElement == NULL || pMeans.get() == NULL)
    {
       return false;
    }
@@ -872,13 +900,21 @@ bool CovarianceAlgorithm::readMatrixFromDisk(string filename, RasterElement* pEl
    string progressMessage = "Reading Covariance matrix from disk";
    reportProgress(NORMAL, 0, progressMessage);
 
+   bool isV1_1(false);
    vector<char> fileHeader(mExpectedFileHeader.length() + 1);
    if (fgets(&fileHeader.front(), fileHeader.capacity(), pFile) == NULL ||
       memcmp(&fileHeader.front(), mExpectedFileHeader.c_str(), fileHeader.size()) != 0)
    {
-      reportProgress(WARNING, 0, "The file version is incorrect. "
-         "The CVM file at \"" + filename + "\" will be overwritten with a current file.\n");
-      return false;
+      if (memcmp(&fileHeader.front(), mOldFileHeader.c_str(), fileHeader.size()) != 0)
+      {
+         reportProgress(WARNING, 0, "The file version is incorrect. "
+            "The CVM file at \"" + filename + "\" will be overwritten with a current file.\n");
+         return false;
+      }
+      isV1_1 = true;
+      reportProgress(WARNING, 0, "The CVM file is an older version. Means data will "
+         "not be available. If you require means data, run Covariance again and "
+         "recalculate.\n");
    }
 
    unsigned int numBands = 0;
@@ -901,7 +937,7 @@ bool CovarianceAlgorithm::readMatrixFromDisk(string filename, RasterElement* pEl
       double* pData(NULL);
       for (unsigned int row = 0; row < numRows; ++row)
       {
-         int iPercent = row * 100 / numRows;
+         int iPercent = row * 90 / numRows;
          reportProgress(NORMAL, iPercent, progressMessage);
 
          VERIFY(accessor.isValid())
@@ -919,17 +955,39 @@ bool CovarianceAlgorithm::readMatrixFromDisk(string filename, RasterElement* pEl
          }
          accessor->nextRow();
       }
+      if (isV1_1)
+      {
+         pMeans = ModelResource<RasterElement>(static_cast<RasterElement*>(NULL));
+      }
+      else
+      {
+         pData = reinterpret_cast<double*>(pMeans->getRawData());
+         for (unsigned int band = 0; band < numBands; ++band)
+         {
+            int iPercent = 90 + (band * 10 / numBands);
+            reportProgress(NORMAL, iPercent, progressMessage);
+
+            numFieldsRead = fscanf(pFile, "%lg ", &(pData[band]));
+            if (numFieldsRead != 1)
+            {
+               pStep->addProperty("Band", band + 1);
+               reportProgress(ERRORS, 0, "Unable to read Means vector from disk");
+               return false;
+            }
+         }
+      }
       reportProgress(NORMAL, 100, "Covariance matrix successfully read from disk");
    }
-
    pStep->finalize(Message::Success);
 
    return true;
 }
 
-bool CovarianceAlgorithm::writeMatrixToDisk(string filename, const RasterElement* pElement) const
+bool CovarianceAlgorithm::writeMatrixToDisk(string filename,
+                                            const RasterElement* pElement,
+                                            const RasterElement* pMeans) const
 {
-   if (filename.empty() || pElement == NULL)
+   if (filename.empty() || pElement == NULL || pMeans == NULL)
    {
       return false;
    }
@@ -939,13 +997,18 @@ bool CovarianceAlgorithm::writeMatrixToDisk(string filename, const RasterElement
    pStep->addProperty("Filename", filename);
 
    const RasterDataDescriptor* pDesc = static_cast<const RasterDataDescriptor*>(pElement->getDataDescriptor());
-   VERIFY(pDesc != NULL);
+   const RasterDataDescriptor* pMeanDesc =
+      static_cast<const RasterDataDescriptor*>(pMeans->getDataDescriptor());
+   VERIFY(pDesc != NULL && pMeanDesc != NULL);
    unsigned int numRows = pDesc->getRowCount();
    unsigned int numCols = pDesc->getColumnCount();
-   VERIFY(numRows == numCols);  // should be a square matrix
+   unsigned int numBands = pMeanDesc->getBandCount();
+   VERIFY(numRows == numCols && numRows == numBands);  // should be a square matrix with the same number of bands
    FactoryResource<DataRequest> pRequest;
    DataAccessor accessor = pElement->getDataAccessor(pRequest.release());
    VERIFY(accessor.isValid());
+   const double* pMeansData = reinterpret_cast<const double*>(pMeans->getRawData());
+   VERIFY(pMeansData); // we created it so we know conditions are right for getRawData
 
    FileResource pFile(filename.c_str(), "wt");
    if (pFile.get() == NULL)
@@ -970,6 +1033,11 @@ bool CovarianceAlgorithm::writeMatrixToDisk(string filename, const RasterElement
       fprintf(pFile, "\n");
       accessor->nextRow();
    }
+   for (unsigned int band = 0; band < numBands; ++band)
+   {
+      fprintf(pFile, "%.15e ", pMeansData[band]);
+   }
+   fprintf(pFile, "\n");
 
    reportProgress(NORMAL, 100, "Covariance matrix saved to disk as " + filename);
    pStep->finalize(Message::Success);
@@ -981,6 +1049,7 @@ CovarianceAlgorithm::CovarianceAlgorithm(RasterElement* pRasterElement, Progress
    AlgorithmPattern(pRasterElement, pProgress, interactive, NULL),
    mpNewRasterElement(NULL),
    mpNewInvRasterElement(NULL),
+   mpNewMeansElement(NULL),
    mAbortFlag(false),
    mLoadIfExists(true)
 {

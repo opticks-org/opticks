@@ -42,6 +42,7 @@ public:
    std::string getFilename() const;
    RasterElement* getCovarianceElement() const;
    RasterElement* getInverseCovarianceElement() const;
+   RasterElement* getMeansElement() const;
 
 private:
    CovarianceAlgorithm(const CovarianceAlgorithm& rhs);
@@ -51,16 +52,18 @@ private:
    bool initialize(void* pAlgorithmData); // from AlgorithmPattern. Sets the private data from the gui or arg-list
    bool canAbort() const;                 // from AlgorithmPattern. Returns true.
    bool doAbort();                        // from AlgorithmPattern. Aborts computation of the CVM.
-   bool readMatrixFromDisk(std::string filename, RasterElement* pElement) const;
-   bool writeMatrixToDisk(std::string filename, const RasterElement* pElement) const;
+   bool readMatrixFromDisk(std::string filename, RasterElement* pElement, ModelResource<RasterElement>& pMeans) const;
+   bool writeMatrixToDisk(std::string filename, const RasterElement* pElement, const RasterElement* pMeans) const;
 
    Input mInput;
    std::string mCvmFile;
    RasterElement* mpNewRasterElement;
    RasterElement* mpNewInvRasterElement;
+   RasterElement* mpNewMeansElement;
    bool mAbortFlag;
    bool mLoadIfExists;
    static const std::string mExpectedFileHeader;
+   static const std::string mOldFileHeader;
 };
 
 class Covariance : public AlgorithmPlugIn
