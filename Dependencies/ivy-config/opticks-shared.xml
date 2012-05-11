@@ -1,0 +1,11 @@
+<ivysettings>
+   <property name="opticks.shared.root" value="file:///${ivy.default.ivy.user.dir}/shared" override="false"/>
+   <property name="opticks.shared.ivy.pattern" value="[organization]/[module]/[revision]/[module]-ivy.xml" override="false"/>
+   <property name="opticks.shared.artifact.pattern" value="[organization]/[module]/[revision]/[artifact].[ext]" override="false"/>
+   <resolvers>
+      <url name="opticks-shared">
+         <ivy pattern="${opticks.shared.root}/${opticks.shared.ivy.pattern}"/>
+         <artifact pattern="${opticks.shared.root}/${opticks.shared.artifact.pattern}"/>
+      </url>
+   </resolvers>
+</ivysettings>

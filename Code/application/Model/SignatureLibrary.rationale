@@ -1,0 +1,53 @@
+/** \page signaturelibraryrationale Design Rationale for Spectral Signature Library Element
+
+<b>Purpose</b>
+- Efficiently (space-wise) load large signature libraries.
+- Efficiently (time & space-wise) resample large signature libraries.
+- Allow algorithms to rapidly access signatures from a signature library (efficient time-wise).
+- Allow algorithms that don’t care to use it as a Signature Set.
+- Make it transparent to the user whether they are dealing with a Signature Set or a Signature Library.
+- Allow ENVI Signature Libraries to be used more efficiently and more easily.
+
+<b>Requirements</b>
+- Opticks shall provide native support for spectral signature libraries.
+  - The Opticks Signature Library (OSL) shall support libraries containing arbitrary numbers of signatures.
+  - The OSL shall support only libraries of uniform wavelength.
+  - The OSL shall support resampling an entire library to a new set of wavelengths.
+  - The OSL shall support being loaded already resampled to a specified set of wavelengths.
+  - Resampling an OSL shall not overwrite the library file on disk.
+  - The OSL shall provide direct access to the resampled signature data.
+  - Opticks shall allow the user to select OSL through the Opticks Signature Selector (OSS).
+
+<b>Design Constraints</b>
+The Signature Library On-Disk (SLOD) may be too large to load directly into memory.
+
+<b>Design</b>
+As a first-class model element, the OSL inherits from DataElement.
+
+Since the SLOD may be very large, the original on-disk data will be paged in as necessary. 
+The OSL will have a child On-Disk RasterElement (ODRE) to support this.
+
+To support the OSS the OSL will need to support some of the existing SignatureSet interface. 
+SignatureSet has a const (SSC) and non-const (SSNC) portion to its interface. 
+By its nature, the OSL is const with respect to adding and removing signatures and therefore can only support the const portion of the SignatureSet interface.
+
+<b>OSS use of SigSet interface</b>
+insertSignature: exportSignatures
+insertSignatures: exportSignatures
+hasSignature: None
+getNumSignatures: exportSignatures
+getSignatures: exportSignatures, extractFromSigSets, getExtractedSignatures, addSignatureItem, exportSignatures
+removeSignature: None
+removeSignatures: None
+clear: exportSignatures
+
+The OSS is only using the SSNC to export a signature set from a selection of disparate signatures. 
+It creates a SigSet, adds the selected signatures to it, exports the SigSet and then deletes the SigSet. 
+Based on this, OSL support of the SSC is sufficient for full support to the OSS. 
+In the future, we might want to upgrade the OSS to allow exporting of signatures to a OSL. 
+To support this, the OSL Descriptor (OSLD) would need a field to allow specification of the source signatures.
+
+The OSL would need to support SS::clear, which would gut the OSL. 
+It also would need to support insertSignature and insertSignatures, which would succeed only on a gutted OSL. 
+With this capability, the OSS could be easily modified to allow exporting of selected signatures to a new SLOD.
+*/

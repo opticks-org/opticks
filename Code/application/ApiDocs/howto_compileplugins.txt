@@ -1,0 +1,171 @@
+/** \page howto_compileplugins Compiling and Building Plug-Ins
+
+This document will describe how to compile your plug-ins once you have written code so that they can be loaded and executed inside %Opticks.
+It is recommended that you first read \ref compileplugins_supported_compilers if you haven't already to ensure you are using a supported platform and compiler.
+This document is broken into two sections.
+The first section, \ref compileplugins_general_basic, describes the bare essentials needed to build plug-ins.
+The second section, \ref compileplugins_general_complete, expands on the first section by explaining the additional parts of the SDK that are needed when building more advanced plugins.
+Please note that you might want to take a look at our Visual Studio 2010 property sheets or the SCons configurations when setting up your plug-in build environment.
+Both are included in the SDK and are used to provide the build environment for the tutorial and sample plug-ins.
+
+This document assumes that the SDK was unzipped to a location known as SDK_HOME.
+Wherever you see the word SDK_HOME, please expand that to be the directory where you unzipped this SDK.
+
+<b>NOTE:</b> The SDK is split into separate files for each platform (Windows and Solaris), so even though this document is present in all versions of the SDK regardless of platform, you will need to have downloaded the SDK specific to your platform before proceeding with any of the recommendations in this document.
+
+\section compileplugins_supported_compilers Supported Compilers and Platforms
+The following platform and compiler combinations are supported when building %Opticks plug-ins.
+<table>
+<tr><th>Operating System</th><th>Processor</th><th>Compiler</th></tr>
+<tr><td>Windows XP 32-bit</td><td>x86</td><td>Visual Studio 2010 (any edition)</td></tr>
+<tr><td>Windows XP 64-bit</td><td>x86</td><td>Visual Studio 2010 (any edition)</td></tr>
+<tr><td>Solaris 10</td><td>SPARC v9</td><td>Sun Studio 12</td></tr>
+</table>
+
+\section compileplugins_general_basic Compiling Basic Plug-Ins For Any Platform, Compiler, or Build Tool
+In order to compile even the most basic of plug-ins, the following needs to have been done:
+<ol>
+<li>
+Add the following SDK directories to the INCLUDE and LIB directories of your compiler as indicated in the table below.
+Add the listed SDK libraries in the table below to your link line when creating the .dll or .so for your plug-in.
+<table>
+<tr><th>Platform</th><th>Configuration</th><th>Architecture</th><th>C++ Compiler/Linker Setting</th><th>Full Path</th></tr>
+<tr><td rowspan="3">Windows</td><td rowspan="3">Debug</td><td rowspan="3">32-bit</td><td>INCLUDE directory</td><td><ul><li>SDK_HOME\\application\\Interfaces</li><li>SDK_HOME\\application\\PlugInLib</li><li>SDK_HOME\\application\\PlugInUtilities\\Interfaces</li><li>SDK_HOME\\application\\PlugInUtilities\\pthreads-wrapper</li></ul></td></tr>
+<tr><td>LIB directory</td><td><ul><li>SDK_HOME\\Build-Binaries-win32-debug\\Lib\\</li></ul></td></tr>
+<tr><td>Libraries</td><td><ul><li>PlugInLib.lib</li><li>PlugInUtilities.lib</li></ul></td></tr>
+<tr><td rowspan="3">Windows</td><td rowspan="3">Debug</td><td rowspan="3">64-bit</td><td>INCLUDE directory</td><td><ul><li>SDK_HOME\\application\\Interfaces</li><li>SDK_HOME\\application\\PlugInLib</li><li>SDK_HOME\\application\\PlugInUtilities\\Interfaces</li><li>SDK_HOME\\application\\PlugInUtilities\\pthreads-wrapper</li></ul></td></tr>
+<tr><td>LIB directory</td><td><ul><li>SDK_HOME\\Build-Binaries-x64-debug\\Lib\\</li></ul></td></tr>
+<tr><td>Libraries</td><td><ul><li>PlugInLib.lib</li><li>PlugInUtilities.lib</li></ul></td></tr>
+<tr><td rowspan="3">Windows</td><td rowspan="3">Release</td><td rowspan="3">32-bit</td><td>INCLUDE directory</td><td><ul><li>SDK_HOME\\application\\Interfaces</li><li>SDK_HOME\\application\\PlugInLib</li><li>SDK_HOME\\application\\PlugInUtilities\\Interfaces</li><li>SDK_HOME\\application\\PlugInUtilities\\pthreads-wrapper</li></ul></td></tr>
+<tr><td>LIB directory</td><td><ul><li>SDK_HOME\\Build-Binaries-win32-release\\Lib\\</li></ul></td></tr>
+<tr><td>Libraries</td><td><ul><li>PlugInLib.lib</li><li>PlugInUtilities.lib</li></ul></td></tr>
+<tr><td rowspan="3">Windows</td><td rowspan="3">Release</td><td rowspan="3">64-bit</td><td>INCLUDE directory</td><td><ul><li>SDK_HOME\\application\\Interfaces</li><li>SDK_HOME\\application\\PlugInLib</li><li>SDK_HOME\\application\\PlugInUtilities\\Interfaces</li><li>SDK_HOME\\application\\PlugInUtilities\\pthreads-wrapper</li></ul></td></tr>
+<tr><td>LIB directory</td><td><ul><li>SDK_HOME\\Build-Binaries-x64-release\\Lib\\</li></ul></td></tr>
+<tr><td>Libraries</td><td><ul><li>PlugInLib.lib</li><li>PlugInUtilities.lib</li></ul></td></tr>
+<tr><td rowspan="3">Solaris</td><td rowspan="3">Debug</td><td rowspan="3">64-bit</td><td>INCLUDE directory</td><td><ul><li>SDK_HOME/application/Interfaces</li><li>SDK_HOME/application/PlugInLib</li><li>SDK_HOME/application/PlugInUtilities/Interfaces</li><li>SDK_HOME/application/PlugInUtilities/pthreads-wrapper</li></ul></td></tr>
+<tr><td>LIB directory</td><td><ul><li>SDK_HOME/Build-Binaries-solaris-sparc-debug/Lib/</li></ul></td></tr>
+<tr><td>Libraries</td><td><ul><li>libPlugInLib.a</li><li>libPlugInUtilities.a</li></ul></td></tr>
+<tr><td rowspan="3">Solaris</td><td rowspan="3">Release</td><td rowspan="3">64-bit</td><td>INCLUDE directory</td><td><ul><li>SDK_HOME/application/Interfaces</li><li>SDK_HOME/application/PlugInLib</li><li>SDK_HOME/application/PlugInUtilities/Interfaces</li><li>SDK_HOME/application/PlugInUtilities/pthreads-wrapper</li></ul></td></tr>
+<tr><td>LIB directory</td><td><ul><li>SDK_HOME/Build-Binaries-solaris-sparc-release/Lib/</li></ul></td></tr>
+<tr><td>Libraries</td><td><ul><li>libPlugInLib.a</li><li>libPlugInUtilities.a</li></ul></td></tr>
+</table>
+</li>
+<li>
+When compiling on Windows using Visual Studio 2010, you also need to do the following:
+<ul>
+    <li>You must use the same C++ runtime library that is used by %Opticks when building your plug-in.
+    See the following table for more information.
+    <table>
+    <tr><th>Configuration</th><th>Run-time Library</th><th>Ignore Specific Libraries</th></tr>
+    <tr><td>Debug</td><td>Multi-threaded Debug DLL (i.e. the /MDd cmpiler flag)</td><td><ul><li>libc.lib</li><li>libcmt.lib</li><li>msvcrt.lib</li><li>libcd.lib</li><li>libcmtd.lib</li></ul> (i.e. the /NODEFAULTLIB: linker flag)</td></tr>
+    <tr><td>Release</td><td>Multi-threaded DLL (i.e. the /MD cmpiler flag)</td><td><ul><li>libc.lib</li><li>libcmt.lib</li><li>libcd.lib</li><li>libcmtd.lib</li><li>msvcrtd.lib</li></ul> (i.e. the /NODEFAULTLIB: linker flag)</td></tr>
+    </table>
+    </li>
+</ul>
+</li>
+<li>
+When compiling on Solaris using Sun Studio 12, you also need to do the following:
+<ul>
+    <li>You must use the STLPort library included with the compiler instead of the standard STL Library in order to properly interact with the plug-in API on Solaris.
+    You must also build your plug-ins using the v9 architecture.
+    See the table below for the recommended additional compiler and linker settings.
+    <table>
+    <tr><td>Additional Compiler Args</td><td>-library=stlport4 -m64 -xcode=pic32</td></tr>
+    <tr><td>Additional Linker Args</td><td>-library=stlport4 -m64 -xcode=pic32 -lnsl -ldl -lGLU -lGL -lXm -lXext -lX11 -lm</td></tr>
+    </table>
+</ul>
+</li>
+<li>
+Provided you are using one of the \ref compileplugins_supported_compilers this is all you need to set to create basic plug-ins.
+However it is highly recommended that you read the next section, \ref compileplugins_general_complete, because it is very easy to create an "advanced plug-in" in %Opticks without realizing it.
+</ol>
+
+\section compileplugins_general_complete Compiling Advanced Plug-Ins For Any Platform, Compiler, or Build Tool
+In general, the SDK is split into the following parts:
+<ul>
+<li>Interfaces</li>
+<li>PlugInLib</li>
+<li>PlugInUtilities</li>
+<li>HdfPlugInLib</li>
+<li>NitfPlugInLib</li>
+</ul>
+
+The <b>Interfaces</b> provide the majority of the API that plug-ins can use to interact with %Opticks.
+The <b>PlugInLib</b> provides the scaffolding code that is linked into your binary that allows %Opticks to recognize it as a plug-in.
+The PlugInLib also provides base classes, known as shells, that you can subclass when creating your own plug-ins.
+The <b>PlugInUtilities</b> provide a number of utility classes that simplify the use of the more advanced APIs made available in <b>Interfaces</b>.
+In addition, the PlugInUtilities are compiled directly into your plug-in as a static library.
+As seen above creating a basic plug-in only requires using these three parts of the SDK.
+See \ref compileplugins_general_basic for details on the compiler and linker settings for using these three parts of the SDK.
+
+The <b>HdfPlugInLib</b> is a very specialized utility library.
+This utility library simplifies the creation of importers that read from HDF4 or HDF5 formatted files.
+You can see http://hdf.ncsa.uiuc.edu/ for details on HDF4 or HDF5.
+If you are not writing an importer for HDF4 or HDF5 files, you will not need to use this part of the SDK.
+
+The <b>NitfPlugInLib</b> is a very specialized utility library.
+This utility library allows a plug-in developer to build custom TRE parsers that will be used by %Opticks when loading NITF (National Imagery Transmission Format) files.
+You can see http://en.wikipedia.org/wiki/National_Imagery_Transmission_Format for more details on NITF.
+If you have a NITF file that you would like to load into %Opticks, but %Opticks does not recognize the TRE, you can use the NitfPlugInLib to write a custom TRE parser that will load the data from the TRE into %Opticks.
+If you don't need to write a custom TRE parser for a NITF file, you will not need to use this part of the SDK.
+
+If you are using any of these more advanced parts of the SDK, see below for the compiler and linker settings.
+<ul>
+<li>
+<b>HdfPlugInLib</b> requires you add the following SDK directories to the INCLUDE and LIB directories of your compiler as indicated in the table below.
+Add the listed SDK libraries in the table below to your link line when creating the .dll or .so for your plug-in.
+<table>
+<tr><th>Platform</th><th>Configuration</th><th>Architecture</th><th>C++ Compiler/Linker Setting</th><th>Full Path</th></tr>
+<tr><td rowspan="3">Windows</td><td rowspan="3">Debug</td><td rowspan="3">32-bit</td><td>INCLUDE directory</td><td><ul><li>SDK_HOME\\application\\HdfPlugInLib</li></ul></td></tr>
+<tr><td>LIB directory</td><td><ul><li>SDK_HOME\\Build-Binaries-win32-debug\\Lib\\</li></ul></td></tr>
+<tr><td>Libraries</td><td><ul><li>HdfPlugInLib.lib</li></ul></td></tr>
+<tr><td rowspan="3">Windows</td><td rowspan="3">Debug</td><td rowspan="3">64-bit</td><td>INCLUDE directory</td><td><ul><li>SDK_HOME\\application\\HdfPlugInLib</li></ul></td></tr>
+<tr><td>LIB directory</td><td><ul><li>SDK_HOME\\Build-Binaries-x64-debug\\Lib\\</li></ul></td></tr>
+<tr><td>Libraries</td><td><ul><li>HdfPlugInLib.lib</li></ul></td></tr>
+<tr><td rowspan="3">Windows</td><td rowspan="3">Release</td><td rowspan="3">32-bit</td><td>INCLUDE directory</td><td><ul><li>SDK_HOME\\application\\HdfPlugInLib</li></ul></td></tr>
+<tr><td>LIB directory</td><td><ul><li>SDK_HOME\\Build-Binaries-win32-release\\Lib\\</li></ul></td></tr>
+<tr><td>Libraries</td><td><ul><li>HdfPlugInLib.lib</li></ul></td></tr>
+<tr><td rowspan="3">Windows</td><td rowspan="3">Release</td><td rowspan="3">64-bit</td><td>INCLUDE directory</td><td><ul><li>SDK_HOME\\application\\HdfPlugInLib</li></ul></td></tr>
+<tr><td>LIB directory</td><td><ul><li>SDK_HOME\\Build-Binaries-x64-release\\Lib\\</li></ul></td></tr>
+<tr><td>Libraries</td><td><ul><li>HdfPlugInLib.lib</li></ul></td></tr>
+<tr><td rowspan="3">Solaris</td><td rowspan="3">Debug</td><td rowspan="3">64-bit</td><td>INCLUDE directory</td><td><ul><li>SDK_HOME\\application\\HdfPlugInLib</li></ul></td></tr>
+<tr><td>LIB directory</td><td><ul><li>SDK_HOME\\Build-Binaries-solaris-sparc-debug\\Lib\\</li></ul></td></tr>
+<tr><td>Libraries</td><td><ul><li>libHdfPlugInLib.a</li></ul></td></tr>
+<tr><td rowspan="3">Solaris</td><td rowspan="3">Release</td><td rowspan="3">64-bit</td><td>INCLUDE directory</td><td><ul><li>SDK_HOME\\application\\HdfPlugInLib</li></ul></td></tr>
+<tr><td>LIB directory</td><td><ul><li>SDK_HOME\\Build-Binaries-solaris-sparc-release\\Lib\\</li></ul></td></tr>
+<tr><td>Libraries</td><td><ul><li>libHdfPlugInLib.a</li></ul></td></tr>
+</table>
+</li>
+<li>
+<b>NitfPlugInLib</b> requires you add the following SDK directories to the INCLUDE and LIB directories of your compiler as indicated in the table below.
+Add the listed SDK libraries in the table below to your link line when creating the .dll or .so for your plug-in.
+<table>
+<tr><th>Platform</th><th>Configuration</th><th>Architecture</th><th>C++ Compiler/Linker Setting</th><th>Full Path</th></tr>
+<tr><td rowspan="3">Windows</td><td rowspan="3">Debug</td><td rowspan="3">32-bit</td><td>INCLUDE directory</td><td><ul><li>SDK_HOME\\application\\NitfPlugInLib</li></ul></td></tr>
+<tr><td>LIB directory</td><td><ul><li>SDK_HOME\\Build-Binaries-win32-debug\\Lib\\</li></ul></td></tr>
+<tr><td>Libraries</td><td><ul><li>NitfPlugInLib.lib</li></ul></td></tr>
+<tr><td rowspan="3">Windows</td><td rowspan="3">Debug</td><td rowspan="3">64-bit</td><td>INCLUDE directory</td><td><ul><li>SDK_HOME\\application\\NitfPlugInLib</li></ul></td></tr>
+<tr><td>LIB directory</td><td><ul><li>SDK_HOME\\Build-Binaries-x64-debug\\Lib\\</li></ul></td></tr>
+<tr><td>Libraries</td><td><ul><li>NitfPlugInLib.lib</li></ul></td></tr>
+<tr><td rowspan="3">Windows</td><td rowspan="3">Release</td><td rowspan="3">32-bit</td><td>INCLUDE directory</td><td><ul><li>SDK_HOME\\application\\NitfPlugInLib</li></ul></td></tr>
+<tr><td>LIB directory</td><td><ul><li>SDK_HOME\\Build-Binaries-win32-release\\Lib\\</li></ul></td></tr>
+<tr><td>Libraries</td><td><ul><li>NitfPlugInLib.lib</li></ul></td></tr>
+<tr><td rowspan="3">Windows</td><td rowspan="3">Release</td><td rowspan="3">64-bit</td><td>INCLUDE directory</td><td><ul><li>SDK_HOME\\application\\NitfPlugInLib</li></ul></td></tr>
+<tr><td>LIB directory</td><td><ul><li>SDK_HOME\\Build-Binaries-x64-release\\Lib\\</li></ul></td></tr>
+<tr><td>Libraries</td><td><ul><li>NitfPlugInLib.lib</li></ul></td></tr>
+<tr><td rowspan="3">Solaris</td><td rowspan="3">Debug</td><td rowspan="3">64-bit</td><td>INCLUDE directory</td><td><ul><li>SDK_HOME\\application\\NitfPlugInLib</li></ul></td></tr>
+<tr><td>LIB directory</td><td><ul><li>SDK_HOME\\Build-Binaries-solaris-sparc-debug\\Lib\\</li></ul></td></tr>
+<tr><td>Libraries</td><td><ul><li>libNitfPlugInLib.a</li></ul></td></tr>
+<tr><td rowspan="3">Solaris</td><td rowspan="3">Release</td><td rowspan="3">64-bit</td><td>INCLUDE directory</td><td><ul><li>SDK_HOME\\application\\NitfPlugInLib</li></ul></td></tr>
+<tr><td>LIB directory</td><td><ul><li>SDK_HOME\\Build-Binaries-solaris-sparc-release\\Lib\\</li></ul></td></tr>
+<tr><td>Libraries</td><td><ul><li>libNitfPlugInLib.a</li></ul></td></tr>
+</table>
+</li>
+</ul>
+
+When compiling more advanced plug-ins you may need to compile and link against certain third-party libraries.
+Using certain parts of our SDK requires compiling and linking against the following third-party libraries: Xerces, xqilla, Boost, pthreads, Qt, ehs, ossim, Hdf4, and Hdf5.
+We provide pre-built binaries of all necessary third-party libraries on the %Opticks website at <a href="https://opticks.ballforge.net/" target="_blank">https://opticks.ballforge.net/</a>.
+Please see \ref dependencies for more details on acquiring those dependencies and then compiling and linking against them.
+
+*/
