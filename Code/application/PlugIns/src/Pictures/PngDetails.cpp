@@ -60,10 +60,6 @@ bool PngDetails::savePict(QString strFilename, QImage img, const SessionItem *pI
       mpOptionsWidget->getResolution(outputWidth, outputHeight);
    }
    img = img.scaled(outputWidth, outputHeight);
-   // for some reason we have problems with Alpha on Solaris
-   // we don't care about the alpha channel for product
-   // export so we'll just convert the image.
-   img = img.convertToFormat(QImage::Format_RGB32);
    return img.save(strFilename, "PNG");
 }
 
