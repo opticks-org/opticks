@@ -166,6 +166,12 @@ void WorkspaceWindowImp::setWidget(QWidget* pWidget)
       pCurrentView->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &WorkspaceWindowImp::viewDeleted));
    }
 
+   // Delete the previous widget
+   if (pCurrentWidget != NULL)
+   {
+      delete pCurrentWidget;
+   }
+
    // Set the new window widget
    notify(SIGNAL_NAME(ViewWindow, AboutToSetWidget));
    QMdiSubWindow::setWidget(pWidget);
@@ -184,12 +190,6 @@ void WorkspaceWindowImp::setWidget(QWidget* pWidget)
    if (pView != NULL)
    {
       pView->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &WorkspaceWindowImp::viewDeleted));
-   }
-
-   // Delete the previous widget
-   if (pCurrentWidget != NULL)
-   {
-      delete pCurrentWidget;
    }
 }
 
