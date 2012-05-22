@@ -16,164 +16,19 @@
                <Directory Id="D__Help_content" Name="Content" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content">
                   <Component Id="C__Help_content" Guid="$(var.C__Help_content_Guid)" Win64="no">
                      <File Name="about_opticks_suite_data_files.htm" Id="F__Help_about_opticks_suite_data_files.htm" />
-                     <File Name="Annotation_Text_Color_Button.gif" Id="F__Help_annotation_text_color_button.gif" />
-                     <File Name="AOI_Marker_Color.gif" Id="F__Help_aoi_marker_color.gif" />
-                     <File Name="AOI_Marker_Color_Button.gif" Id="F__Help_aoi_marker_color_button.gif" />
-                     <File Name="AOI_Pixel_List.gif" Id="F__Help_aoi_pixel_list.gif" />
-                     <File Name="AOI_Pixel_Selection_Tool.gif" Id="F__Help_aoi_pixel_selection_tool.gif" />
-                     <File Name="AOI_Toggle_Button.gif" Id="F__Help_aoi_toggle_button.gif" />
-                     <File Name="Append_to_layer_button.gif" Id="F__Help_append_to_layer_button.gif" />
-                     <File Name="Arc_Object.gif" Id="F__Help_arc_object.gif" />
-                     <File Name="Arrow_east.gif" Id="F__Help_arrow_east.gif" />
-                     <File Name="Arrow_Lat_Long.gif" Id="F__Help_arrow_lat_long.gif" />
-                     <File Name="Arrow_North.gif" Id="F__Help_arrow_north.gif" />
-                     <File Name="Background_Plug-in_Button.gif" Id="F__Help_background_plug_in_button.gif" />
-                     <File Name="Bold_Button.gif" Id="F__Help_bold_button.gif" />
-                     <File Name="Bounce_Button.gif" Id="F__Help_bounce_button.gif" />
-                     <File Name="Brightness_Control.gif" Id="F__Help_brightness_control.gif" />
-                     <File Name="Change_Ann_Fill_Button.gif" Id="F__Help_change_ann_fill_button.gif" />
-                     <File Name="Change_AOI_Marker.gif" Id="F__Help_change_aoi_marker.gif" />
-                     <File Name="Change_font_drop-down.gif" Id="F__Help_change_font_drop_down.gif" />
-                     <File Name="Change_font_size.gif" Id="F__Help_change_font_size.gif" />
-                     <File Name="Change_GCP_Color.gif" Id="F__Help_change_gcp_color.gif" />
-                     <File Name="Change_GCP_Marker.gif" Id="F__Help_change_gcp_marker.gif" />
                      <File Name="Close_a_Window.htm" Id="F__Help_close_a_window.htm" />
-                     <File Name="Close_Window_Button.gif" Id="F__Help_close_window_button.gif" />
-                     <File Name="color_palette.gif" Id="F__Help_color_palette.gif" />
-                     <File Name="Contrast_Control.gif" Id="F__Help_contrast_control.gif" />
-                     <File Name="Copy_Object_Button.gif" Id="F__Help_copy_object_button.gif" />
-                     <File Name="Cosecant_Button.gif" Id="F__Help_cosecant_button.gif" />
-                     <File Name="Cosine_Button.gif" Id="F__Help_cosine_button.gif" />
-                     <File Name="Cotangent_Button.gif" Id="F__Help_cotangent_button.gif" />
-                     <File Name="Create_Arrow.gif" Id="F__Help_create_arrow.gif" />
-                     <File Name="Create_Ellipse.gif" Id="F__Help_create_ellipse.gif" />
-                     <File Name="Create_Line.gif" Id="F__Help_create_line.gif" />
-                     <File Name="Create_Polygon.gif" Id="F__Help_create_polygon.gif" />
-                     <File Name="Create_Polyline.gif" Id="F__Help_create_polyline.gif" />
-                     <File Name="Create_Rectangle.gif" Id="F__Help_create_rectangle.gif" />
-                     <File Name="Custom_button.gif" Id="F__Help_custom_button.gif" />
-                     <File Name="Cut_Button.gif" Id="F__Help_cut_button.gif" />
-                     <File Name="decdeg.png" Id="F__Help_decdeg.png" />
-                     <File Name="decmin.gif" Id="F__Help_decmin.gif" />
-                     <File Name="Display_Message_Log_Button.gif" Id="F__Help_display_message_log_button.gif" />
-                     <File Name="Divide_Button.gif" Id="F__Help_divide_button.gif" />
-                     <File Name="DMS_Button.gif" Id="F__Help_dms_button.gif" />
-                     <File Name="Down_arrow.gif" Id="F__Help_down_arrow.gif" />
-                     <File Name="Drag_Object_Button.gif" Id="F__Help_drag_object_button.gif" />
-                     <File Name="Draw_Image_Chip.gif" Id="F__Help_draw_image_chip.gif" />
                      <File Name="Edit_Color.htm" Id="F__Help_edit_color.htm" />
                      <File Name="ehlpdhtm.js" Id="F__Help_ehlpdhtm.js" />
-                     <File Name="Enter_Text.gif" Id="F__Help_enter_text.gif" />
-                     <File Name="Erase_AOI_Button.gif" Id="F__Help_erase_aoi_button.gif" />
-                     <File Name="Erase_Pixels_Button.gif" Id="F__Help_erase_pixels_button.gif" />
-                     <File Name="Execution_Order_Number.gif" Id="F__Help_execution_order_number.gif" />
-                     <File Name="Exit_Parens_Button.gif" Id="F__Help_exit_parens_button.gif" />
-                     <File Name="Expon_Button.gif" Id="F__Help_expon_button.gif" />
-                     <File Name="exp_Button.gif" Id="F__Help_exp_button.gif" />
-                     <File Name="Flip_horiz.gif" Id="F__Help_flip_horiz.gif" />
-                     <File Name="Flip_Vert.gif" Id="F__Help_flip_vert.gif" />
-                     <File Name="Frame_Number.gif" Id="F__Help_frame_number.gif" />
-                     <File Name="Frame_Speed.gif" Id="F__Help_frame_speed.gif" />
-                     <File Name="Frame_Value.gif" Id="F__Help_frame_value.gif" />
-                     <File Name="Free_Rotate.gif" Id="F__Help_free_rotate.gif" />
-                     <File Name="FT_Button.gif" Id="F__Help_ft_button.gif" />
-                     <File Name="Geo_dropdown.gif" Id="F__Help_geo_dropdown.gif" />
                      <File Name="Glossary.htm" Id="F__Help_glossary.htm" />
                      <File Name="Glossary.js" Id="F__Help_glossary.js" />
                      <File Name="Glossary.xml" Id="F__Help_glossary.xml" />
-                     <File Name="Histogram_Window_Button.gif" Id="F__Help_histogram_window_button.gif" />
-                     <File Name="Horizontal_Line.gif" Id="F__Help_horizontal_line.gif" />
-                     <File Name="Horiz_Line_Data.gif" Id="F__Help_horiz_line_data.gif" />
-                     <File Name="Hyperbolic_cosecant_Button.gif" Id="F__Help_hyperbolic_cosecant_button.gif" />
-                     <File Name="Hyperbolic_cosine_Button.gif" Id="F__Help_hyperbolic_cosine_button.gif" />
-                     <File Name="Hyperbolic_cotangent_Button.gif" Id="F__Help_hyperbolic_cotangent_button.gif" />
-                     <File Name="Hyperbolic_secant_Button.gif" Id="F__Help_hyperbolic_secant_button.gif" />
-                     <File Name="Hyperbolic_sine_Button.gif" Id="F__Help_hyperbolic_sine_button.gif" />
-                     <File Name="Hyperbolic_tangent_Button.gif" Id="F__Help_hyperbolic_tangent_button.gif" />
-                     <File Name="Image_Chipping_Window_Button.gif" Id="F__Help_image_chipping_window_button.gif" />
-                     <File Name="Input_output_nodes.gif" Id="F__Help_input_output_nodes.gif" />
-                     <File Name="Insert_Parens_Button.gif" Id="F__Help_insert_parens_button.gif" />
-                     <File Name="Inverse_cosecant_Button.gif" Id="F__Help_inverse_cosecant_button.gif" />
-                     <File Name="Inverse_cosine_Button.gif" Id="F__Help_inverse_cosine_button.gif" />
-                     <File Name="Inverse_cotangent_Button.gif" Id="F__Help_inverse_cotangent_button.gif" />
-                     <File Name="Inverse_secant_Button.gif" Id="F__Help_inverse_secant_button.gif" />
-                     <File Name="Inverse_sine_Button.gif" Id="F__Help_inverse_sine_button.gif" />
-                     <File Name="Italic_Button.gif" Id="F__Help_italic_button.gif" />
-                     <File Name="KM_Button.gif" Id="F__Help_km_button.gif" />
-                     <File Name="Labels_Enabled.gif" Id="F__Help_labels_enabled.gif" />
-                     <File Name="Link_Button.gif" Id="F__Help_link_button.gif" />
-                     <File Name="log_10_x_button.gif" Id="F__Help_log_10_x_button.gif" />
-                     <File Name="log_2_x_Button.gif" Id="F__Help_log_2_x_button.gif" />
-                     <File Name="log_e_x_Button.gif" Id="F__Help_log_e_x_button.gif" />
-                     <File Name="Measurement_Mode_Button.gif" Id="F__Help_measurement_mode_button.gif" />
-                     <File Name="Merge_AOIs_Button.gif" Id="F__Help_merge_aois_button.gif" />
-                     <File Name="MGRS_Button.gif" Id="F__Help_mgrs_button.gif" />
-                     <File Name="Mi_Button.gif" Id="F__Help_mi_button.gif" />
                      <File Name="Mouse_Actions.htm" Id="F__Help_mouse_actions.htm" />
-                     <File Name="Move_Object_Button.gif" Id="F__Help_move_object_button.gif" />
-                     <File Name="Move_Object_Button_22x23.gif" Id="F__Help_move_object_button_22x23.gif" />
-                     <File Name="Multiply_Button.gif" Id="F__Help_multiply_button.gif" />
-                     <File Name="M_Button.gif" Id="F__Help_m_button.gif" />
-                     <File Name="No_Unit_Button.gif" Id="F__Help_no_unit_button.gif" />
-                     <File Name="No_Unit_Button_32x30.gif" Id="F__Help_no_unit_button_32x30.gif" />
                      <File Name="Open_Files_When_Opticks_Starts.htm" Id="F__Help_open_files_when_opticks_starts.htm" />
-                     <File Name="Open_File_Button.gif" Id="F__Help_open_file_button.gif" />
-                     <File Name="Open_GCP_Editor_Button.gif" Id="F__Help_open_gcp_editor_button.gif" />
-                     <File Name="Open_Help_Button.gif" Id="F__Help_open_help_button.gif" />
                      <File Name="Opticks_Styles.css" Id="F__Help_opticks_styles.css" />
                      <File Name="Opticks_Websites.htm" Id="F__Help_opticks_websites.htm" />
-                     <File Name="Overview_Window_Button.gif" Id="F__Help_overview_window_button.gif" />
-                     <File Name="Pan_Button.gif" Id="F__Help_pan_button.gif" />
-                     <File Name="Paste_to_layer.gif" Id="F__Help_paste_to_layer.gif" />
-                     <File Name="Pause_Button.gif" Id="F__Help_pause_button.gif" />
-                     <File Name="Pixel_Markers.gif" Id="F__Help_pixel_markers.gif" />
-                     <File Name="Pixel_Select_List.gif" Id="F__Help_pixel_select_list.gif" />
-                     <File Name="Play_Button.gif" Id="F__Help_play_button.gif" />
-                     <File Name="Play_Once_Button.gif" Id="F__Help_play_once_button.gif" />
-                     <File Name="Preview_File_Contents_Button.gif" Id="F__Help_preview_file_contents_button.gif" />
-                     <File Name="Print_Button.gif" Id="F__Help_print_button.gif" />
                      <File Name="Print_the_Active_Window.htm" Id="F__Help_print_the_active_window.htm" />
-                     <File Name="Progress_Slider.gif" Id="F__Help_progress_slider.gif" />
-                     <File Name="Progress_Slider_246x16.gif" Id="F__Help_progress_slider_246x16.gif" />
-                     <File Name="Properties_Button.gif" Id="F__Help_properties_button.gif" />
-                     <File Name="Refresh_Button.gif" Id="F__Help_refresh_button.gif" />
-                     <File Name="Render_Full_Res.gif" Id="F__Help_render_full_res.gif" />
-                     <File Name="Repeat_Button.gif" Id="F__Help_repeat_button.gif" />
-                     <File Name="Reset_Display.gif" Id="F__Help_reset_display.gif" />
-                     <File Name="Rotate_Clockwise.gif" Id="F__Help_rotate_clockwise.gif" />
-                     <File Name="Rotate_Counter.gif" Id="F__Help_rotate_counter.gif" />
-                     <File Name="Rotate_Degrees.gif" Id="F__Help_rotate_degrees.gif" />
-                     <File Name="Rotate_Object_Button.gif" Id="F__Help_rotate_object_button.gif" />
-                     <File Name="Scripting_Window_Button.gif" Id="F__Help_scripting_window_button.gif" />
-                     <File Name="Secant_Button.gif" Id="F__Help_secant_button.gif" />
-                     <File Name="Select_Flicker_Controls.gif" Id="F__Help_select_flicker_controls.gif" />
-                     <File Name="Select_Layer.gif" Id="F__Help_select_layer.gif" />
-                     <File Name="Select_Text_Color.gif" Id="F__Help_select_text_color.gif" />
-                     <File Name="Show_AOI_Labels.gif" Id="F__Help_show_aoi_labels.gif" />
-                     <File Name="Sine_Button.gif" Id="F__Help_sine_button.gif" />
-                     <File Name="Single_Pixel.gif" Id="F__Help_single_pixel.gif" />
-                     <File Name="Snap_to_Grid_Button.gif" Id="F__Help_snap_to_grid_button.gif" />
-                     <File Name="Square_Root_Button.gif" Id="F__Help_square_root_button.gif" />
-                     <File Name="Stop_Button.gif" Id="F__Help_stop_button.gif" />
-                     <File Name="Subtract_Button.gif" Id="F__Help_subtract_button.gif" />
-                     <File Name="Tangent_Button.gif" Id="F__Help_tangent_button.gif" />
-                     <File Name="Tie_Point_Editor.gif" Id="F__Help_tie_point_editor.gif" />
-                     <File Name="Tie_Point_Marker_Color.gif" Id="F__Help_tie_point_marker_color.gif" />
-                     <File Name="Toggle_AOI_Pixels.gif" Id="F__Help_toggle_aoi_pixels.gif" />
-                     <File Name="Toggle_Display_Mode.gif" Id="F__Help_toggle_display_mode.gif" />
-                     <File Name="Underline_Button.gif" Id="F__Help_underline_button.gif" />
-                     <File Name="UTM_Button.gif" Id="F__Help_utm_button.gif" />
-                     <File Name="Vertical_Line.gif" Id="F__Help_vertical_line.gif" />
-                     <File Name="Vert_Line_Data.gif" Id="F__Help_vert_line_data.gif" />
                      <File Name="Welcome.htm" Id="F__Help_welcome.htm" />
                      <File Name="Working_with_the_Main_Application_Window.htm" Id="F__Help_working_with_the_main_application_window.htm" />
-                     <File Name="X_button.gif" Id="F__Help_x_button.gif" />
-                     <File Name="YD_Button.gif" Id="F__Help_yd_button.gif" />
-                     <File Name="Zoom_in_mouse.gif" Id="F__Help_zoom_in_mouse.gif" />
-                     <File Name="Zoom_Out.gif" Id="F__Help_zoom_out.gif" />
-                     <File Name="Zoom_Rectangle.gif" Id="F__Help_zoom_rectangle.gif" />
-                     <File Name="Zoom_to_fit.gif" Id="F__Help_zoom_to_fit.gif" />
-                     <File Name="Zoom_to_fit_22x21.gif" Id="F__Help_zoom_to_fit_22x21.gif" />
                   </Component>
                   <Directory Id="D__Help_animation" Name="Animation" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\Animation">
                      <Component Id="C__Help_animation" Guid="$(var.C__Help_animation_Guid)" Win64="no">
@@ -409,6 +264,7 @@
                            <File Name="Annotate_Layer_5.gif" Id="F__Help_annotate_layer_5.gif" />
                            <File Name="Annotate_Layer_6.gif" Id="F__Help_annotate_layer_6.gif" />
                            <File Name="Annotation_Button.gif" Id="F__Help_annotation_button.gif" />
+                           <File Name="Annotation_Button_65x22.gif" Id="F__Help_annotation_button_65x22.gif" />
                            <File Name="Annotation_Icon.gif" Id="F__Help_annotation_icon.gif" />
                            <File Name="Annotation_Image_Options1.gif" Id="F__Help_annotation_image_options1.gif" />
                            <File Name="Annotation_Image_Options2.gif" Id="F__Help_annotation_image_options2.gif" />
@@ -416,15 +272,27 @@
                            <File Name="Annotation_Layer_Properties.gif" Id="F__Help_annotation_layer_properties.gif" />
                            <File Name="Annotation_Properties_Window.gif" Id="F__Help_annotation_properties_window.gif" />
                            <File Name="Ann_Line_Color_Button.gif" Id="F__Help_ann_line_color_button.gif" />
+                           <File Name="Ann_Line_Color_Button_34x22.gif" Id="F__Help_ann_line_color_button_34x22.gif" />
                            <File Name="Ann_Line_Width_Button.gif" Id="F__Help_ann_line_width_button.gif" />
+                           <File Name="Ann_Line_Width_Button_34x22.gif" Id="F__Help_ann_line_width_button_34x22.gif" />
                            <File Name="Ann_Object_create_button.gif" Id="F__Help_ann_object_create_button.gif" />
                            <File Name="Ann_Text_Color_Button.gif" Id="F__Help_ann_text_color_button.gif" />
                            <File Name="AOI_Draw_Button.gif" Id="F__Help_aoi_draw_button.gif" />
                            <File Name="AOI_HISTOGRAM.GIF" Id="F__Help_aoi_histogram.gif" />
                            <File Name="AOI_Layer_Properties.gif" Id="F__Help_aoi_layer_properties.gif" />
+                           <File Name="AOI_Marker_Color_Button.gif" Id="F__Help_aoi_marker_color_button.gif" />
+                           <File Name="AOI_Pixel_List.gif" Id="F__Help_aoi_pixel_list.gif" />
+                           <File Name="AOI_Pixel_Selection_Tool.gif" Id="F__Help_aoi_pixel_selection_tool.gif" />
+                           <File Name="AOI_Toggle_Button.gif" Id="F__Help_aoi_toggle_button.gif" />
+                           <File Name="Append_to_layer_button.gif" Id="F__Help_append_to_layer_button.gif" />
                            <File Name="ArcEditor.jpg" Id="F__Help_arceditor.jpg" />
+                           <File Name="Arc_Object.gif" Id="F__Help_arc_object.gif" />
+                           <File Name="Arrow_east.gif" Id="F__Help_arrow_east.gif" />
+                           <File Name="Arrow_Lat_Long.gif" Id="F__Help_arrow_lat_long.gif" />
+                           <File Name="Arrow_North.gif" Id="F__Help_arrow_north.gif" />
                            <File Name="Auto_Georef_Option.gif" Id="F__Help_auto_georef_option.gif" />
                            <File Name="AVI_Exporter_Options.gif" Id="F__Help_avi_exporter_options.gif" />
+                           <File Name="Background_Plug-in_Button.gif" Id="F__Help_background_plug_in_button.gif" />
                            <File Name="Band_Bad_Values.gif" Id="F__Help_band_bad_values.gif" />
                            <File Name="Band_Binning_Dialog.gif" Id="F__Help_band_binning_dialog.gif" />
                            <File Name="Band_Math.gif" Id="F__Help_band_math.gif" />
@@ -436,6 +304,9 @@
                            <File Name="Bitmap_View_Exporter_Options.gif" Id="F__Help_bitmap_view_exporter_options.gif" />
                            <File Name="Blobs_Session_Explorer.gif" Id="F__Help_blobs_session_explorer.gif" />
                            <File Name="BMP_Export_Options.png" Id="F__Help_bmp_export_options.png" />
+                           <File Name="Bold_Button.gif" Id="F__Help_bold_button.gif" />
+                           <File Name="Bounce_Button.gif" Id="F__Help_bounce_button.gif" />
+                           <File Name="Brightness_Control.gif" Id="F__Help_brightness_control.gif" />
                            <File Name="Brightness_layer.gif" Id="F__Help_brightness_layer.gif" />
                            <File Name="Browse_button.gif" Id="F__Help_browse_button.gif" />
                            <File Name="Browse_for_Folder.gif" Id="F__Help_browse_for_folder.gif" />
@@ -447,51 +318,70 @@
                            <File Name="Can_Drop_Frames_1.gif" Id="F__Help_can_drop_frames_1.gif" />
                            <File Name="Can_Drop_Frames_2.gif" Id="F__Help_can_drop_frames_2.gif" />
                            <File Name="Center_AOI.gif" Id="F__Help_center_aoi.gif" />
+                           <File Name="Change_Ann_Fill_Button.gif" Id="F__Help_change_ann_fill_button.gif" />
+                           <File Name="Change_Ann_Fill_Button_34x22.gif" Id="F__Help_change_ann_fill_button_34x22.gif" />
+                           <File Name="Change_AOI_Marker.gif" Id="F__Help_change_aoi_marker.gif" />
+                           <File Name="Change_AOI_Marker_34x23.gif" Id="F__Help_change_aoi_marker_34x23.gif" />
                            <File Name="Change_Direction.gif" Id="F__Help_change_direction.gif" />
                            <File Name="Change_Display.gif" Id="F__Help_change_display.gif" />
                            <File Name="Change_Exec_Mode.gif" Id="F__Help_change_exec_mode.gif" />
+                           <File Name="Change_font_drop-down.gif" Id="F__Help_change_font_drop_down.gif" />
+                           <File Name="Change_font_size.gif" Id="F__Help_change_font_size.gif" />
+                           <File Name="Change_GCP_Color.gif" Id="F__Help_change_gcp_color.gif" />
+                           <File Name="Change_GCP_Marker.gif" Id="F__Help_change_gcp_marker.gif" />
                            <File Name="Change_template.gif" Id="F__Help_change_template.gif" />
                            <File Name="Change_Up.gif" Id="F__Help_change_up.gif" />
                            <File Name="Change_Up_dialog.gif" Id="F__Help_change_up_dialog.gif" />
                            <File Name="Check_box.png" Id="F__Help_check_box.png" />
                            <File Name="Clear_Undo_History_Dialog.gif" Id="F__Help_clear_undo_history_dialog.gif" />
                            <File Name="Close_Session_dialog.gif" Id="F__Help_close_session_dialog.gif" />
+                           <File Name="Close_Window_Button.gif" Id="F__Help_close_window_button.gif" />
                            <File Name="Colormap_Editor.gif" Id="F__Help_colormap_editor.gif" />
                            <File Name="Colormap_Editor_Example.gif" Id="F__Help_colormap_editor_example.gif" />
                            <File Name="Colormap_Select_Layer.gif" Id="F__Help_colormap_select_layer.gif" />
                            <File Name="Color_Composites_Defaults.gif" Id="F__Help_color_composites_defaults.gif" />
                            <File Name="Color_Composites_Options.gif" Id="F__Help_color_composites_options.gif" />
+                           <File Name="color_palette.gif" Id="F__Help_color_palette.gif" />
                            <File Name="Compression_Options_JPEG.gif" Id="F__Help_compression_options_jpeg.gif" />
                            <File Name="Compression_Option_GeoTIFF.gif" Id="F__Help_compression_option_geotiff.gif" />
                            <File Name="Confirm_Close.gif" Id="F__Help_confirm_close.gif" />
                            <File Name="Connected_Comp_Results.gif" Id="F__Help_connected_comp_results.gif" />
                            <File Name="Connect_Wizard_Items.png" Id="F__Help_connect_wizard_items.png" />
+                           <File Name="Contrast_Control.gif" Id="F__Help_contrast_control.gif" />
                            <File Name="Convolution_Matrix_Editor.gif" Id="F__Help_convolution_matrix_editor.gif" />
                            <File Name="Convolution_Matrix_Editor_2.gif" Id="F__Help_convolution_matrix_editor_2.gif" />
                            <File Name="Convolution_Parameters.gif" Id="F__Help_convolution_parameters.gif" />
-                           <File Name="Copy_button.png" Id="F__Help_copy_button.png" />
-                           <File Name="Copy_button_22x21.png" Id="F__Help_copy_button_22x21.png" />
                            <File Name="Copy_Layers.gif" Id="F__Help_copy_layers.gif" />
+                           <File Name="Copy_Object_Button.gif" Id="F__Help_copy_object_button.gif" />
                            <File Name="Copy_snapshot_1.png" Id="F__Help_copy_snapshot_1.png" />
                            <File Name="Copy_snapshot_2.png" Id="F__Help_copy_snapshot_2.png" />
                            <File Name="Copy_snapshot_dialog.png" Id="F__Help_copy_snapshot_dialog.png" />
+                           <File Name="Cosecant_Button.gif" Id="F__Help_cosecant_button.gif" />
+                           <File Name="Cosine_Button.gif" Id="F__Help_cosine_button.gif" />
+                           <File Name="Cotangent_Button.gif" Id="F__Help_cotangent_button.gif" />
                            <File Name="Create_AOI.gif" Id="F__Help_create_aoi.gif" />
+                           <File Name="Create_Arrow.gif" Id="F__Help_create_arrow.gif" />
+                           <File Name="Create_Ellipse.gif" Id="F__Help_create_ellipse.gif" />
                            <File Name="Create_Filter.gif" Id="F__Help_create_filter.gif" />
                            <File Name="Create_Filter_Button.gif" Id="F__Help_create_filter_button.gif" />
                            <File Name="Create_Image_Chip.gif" Id="F__Help_create_image_chip.gif" />
                            <File Name="Create_Image_Chip_Dialog.gif" Id="F__Help_create_image_chip_dialog.gif" />
                            <File Name="Create_Image_Chip_Dialog_1.gif" Id="F__Help_create_image_chip_dialog_1.gif" />
                            <File Name="Create_Layer.gif" Id="F__Help_create_layer.gif" />
+                           <File Name="Create_Line.gif" Id="F__Help_create_line.gif" />
                            <File Name="Create_Point.gif" Id="F__Help_create_point.gif" />
                            <File Name="Create_Point_2.gif" Id="F__Help_create_point_2.gif" />
+                           <File Name="Create_Polygon.gif" Id="F__Help_create_polygon.gif" />
+                           <File Name="Create_Polyline.gif" Id="F__Help_create_polyline.gif" />
+                           <File Name="Create_Rectangle.gif" Id="F__Help_create_rectangle.gif" />
                            <File Name="Create_Rectangle_Round.gif" Id="F__Help_create_rectangle_round.gif" />
                            <File Name="Create_tie_points.png" Id="F__Help_create_tie_points.png" />
                            <File Name="Create_Triangle.gif" Id="F__Help_create_triangle.gif" />
                            <File Name="Current_Shortcuts.gif" Id="F__Help_current_shortcuts.gif" />
+                           <File Name="Custom_button.gif" Id="F__Help_custom_button.gif" />
                            <File Name="Custom_Zoom.gif" Id="F__Help_custom_zoom.gif" />
                            <File Name="Custom_Zoom_Select.gif" Id="F__Help_custom_zoom_select.gif" />
-                           <File Name="Cut_Button.png" Id="F__Help_cut_button.png" />
-                           <File Name="Cut_Button_22x21.png" Id="F__Help_cut_button_22x21.png" />
+                           <File Name="Cut_Button.gif" Id="F__Help_cut_button.gif" />
                            <File Name="Data_Elements_Class_Tab.gif" Id="F__Help_data_elements_class_tab.gif" />
                            <File Name="Data_Elements_Class_Tab_2.gif" Id="F__Help_data_elements_class_tab_2.gif" />
                            <File Name="Data_Elements_Properties.gif" Id="F__Help_data_elements_properties.gif" />
@@ -499,6 +389,8 @@
                            <File Name="Data_Elements_Properties_3.gif" Id="F__Help_data_elements_properties_3.gif" />
                            <File Name="Data_Elements_Properties_4.gif" Id="F__Help_data_elements_properties_4.gif" />
                            <File Name="Data_Elements_Properties_5.gif" Id="F__Help_data_elements_properties_5.gif" />
+                           <File Name="decdeg.png" Id="F__Help_decdeg.png" />
+                           <File Name="decmin.gif" Id="F__Help_decmin.gif" />
                            <File Name="Decrease_Order_Button.png" Id="F__Help_decrease_order_button.png" />
                            <File Name="Decrease_Order_Button_22x21.png" Id="F__Help_decrease_order_button_22x21.png" />
                            <File Name="Delete_Bin_Button.gif" Id="F__Help_delete_bin_button.gif" />
@@ -509,12 +401,18 @@
                            <File Name="Display_As.gif" Id="F__Help_display_as.gif" />
                            <File Name="Display_As_2.gif" Id="F__Help_display_as_2.gif" />
                            <File Name="Display_Gridlines.gif" Id="F__Help_display_gridlines.gif" />
+                           <File Name="Display_Message_Log_Button.gif" Id="F__Help_display_message_log_button.gif" />
                            <File Name="Display_Tab_Color.gif" Id="F__Help_display_tab_color.gif" />
                            <File Name="Distance_Label_Button.gif" Id="F__Help_distance_label_button.gif" />
+                           <File Name="Divide_Button.gif" Id="F__Help_divide_button.gif" />
+                           <File Name="DMS_Button.gif" Id="F__Help_dms_button.gif" />
                            <File Name="Double_click_node.gif" Id="F__Help_double_click_node.gif" />
+                           <File Name="Down_arrow.gif" Id="F__Help_down_arrow.gif" />
                            <File Name="Drag_drop.gif" Id="F__Help_drag_drop.gif" />
+                           <File Name="Drag_Object_Button.gif" Id="F__Help_drag_object_button.gif" />
                            <File Name="Draw_Arrow.gif" Id="F__Help_draw_arrow.gif" />
                            <File Name="Draw_Cube_View.jpg" Id="F__Help_draw_cube_view.jpg" />
+                           <File Name="Draw_Image_Chip.gif" Id="F__Help_draw_image_chip.gif" />
                            <File Name="Draw_Road.gif" Id="F__Help_draw_road.gif" />
                            <File Name="Edit_Filter.gif" Id="F__Help_edit_filter.gif" />
                            <File Name="Edit_Filter_Button.png" Id="F__Help_edit_filter_button.png" />
@@ -530,10 +428,13 @@
                            <File Name="ENGRDA_Tab.gif" Id="F__Help_engrda_tab.gif" />
                            <File Name="Enlarge_Image.jpg" Id="F__Help_enlarge_image.jpg" />
                            <File Name="Enlarge_Image_2.gif" Id="F__Help_enlarge_image_2.gif" />
+                           <File Name="Enter_Text.gif" Id="F__Help_enter_text.gif" />
                            <File Name="Enter_Wizard_Values.gif" Id="F__Help_enter_wizard_values.gif" />
                            <File Name="ENVI_Exporter_Options_1.gif" Id="F__Help_envi_exporter_options_1.gif" />
                            <File Name="ENVI_Exporter_Options_2.gif" Id="F__Help_envi_exporter_options_2.gif" />
                            <File Name="ENVI_Importer.gif" Id="F__Help_envi_importer.gif" />
+                           <File Name="Erase_AOI_Button.gif" Id="F__Help_erase_aoi_button.gif" />
+                           <File Name="Erase_Pixels_Button.gif" Id="F__Help_erase_pixels_button.gif" />
                            <File Name="Example_Algorithm.png" Id="F__Help_example_algorithm.png" />
                            <File Name="Example_Exporter.png" Id="F__Help_example_exporter.png" />
                            <File Name="Example_Georef.png" Id="F__Help_example_georef.png" />
@@ -545,6 +446,9 @@
                            <File Name="Execute_Wizard.gif" Id="F__Help_execute_wizard.gif" />
                            <File Name="Execution_Mode.png" Id="F__Help_execution_mode.png" />
                            <File Name="Execution_Numbers.png" Id="F__Help_execution_numbers.png" />
+                           <File Name="Execution_Order_Number.gif" Id="F__Help_execution_order_number.gif" />
+                           <File Name="Exit_Parens_Button.gif" Id="F__Help_exit_parens_button.gif" />
+                           <File Name="Expon_Button.gif" Id="F__Help_expon_button.gif" />
                            <File Name="Export_Data_1.gif" Id="F__Help_export_data_1.gif" />
                            <File Name="Export_File.gif" Id="F__Help_export_file.gif" />
                            <File Name="Export_Image_Chip.gif" Id="F__Help_export_image_chip.gif" />
@@ -558,6 +462,7 @@
                            <File Name="Export_Roads_5.gif" Id="F__Help_export_roads_5.gif" />
                            <File Name="Export_Shape_File.gif" Id="F__Help_export_shape_file.gif" />
                            <File Name="Export_Shape_File_Dialog.gif" Id="F__Help_export_shape_file_dialog.gif" />
+                           <File Name="exp_Button.gif" Id="F__Help_exp_button.gif" />
                            <File Name="Favorites.gif" Id="F__Help_favorites.gif" />
                            <File Name="File_image_button.gif" Id="F__Help_file_image_button.gif" />
                            <File Name="File_Location.gif" Id="F__Help_file_location.gif" />
@@ -565,8 +470,15 @@
                            <File Name="Flatten_annotation.gif" Id="F__Help_flatten_annotation.gif" />
                            <File Name="Flicker_Blend_View.gif" Id="F__Help_flicker_blend_view.gif" />
                            <File Name="Flicker_Controls.gif" Id="F__Help_flicker_controls.gif" />
+                           <File Name="Flip_horiz.gif" Id="F__Help_flip_horiz.gif" />
+                           <File Name="Flip_Vert.gif" Id="F__Help_flip_vert.gif" />
                            <File Name="Font_size.gif" Id="F__Help_font_size.gif" />
                            <File Name="Frame_Label_button.gif" Id="F__Help_frame_label_button.gif" />
+                           <File Name="Frame_Number.gif" Id="F__Help_frame_number.gif" />
+                           <File Name="Frame_Speed.gif" Id="F__Help_frame_speed.gif" />
+                           <File Name="Frame_Value.gif" Id="F__Help_frame_value.gif" />
+                           <File Name="Free_Rotate.gif" Id="F__Help_free_rotate.gif" />
+                           <File Name="FT_Button.gif" Id="F__Help_ft_button.gif" />
                            <File Name="Fusion_Region.gif" Id="F__Help_fusion_region.gif" />
                            <File Name="GCP_Editor.gif" Id="F__Help_gcp_editor.gif" />
                            <File Name="GCP_Layer_Properties.gif" Id="F__Help_gcp_layer_properties.gif" />
@@ -598,6 +510,7 @@
                            <File Name="GeoTIFF_Export_Options_1.gif" Id="F__Help_geotiff_export_options_1.gif" />
                            <File Name="GeoTIFF_Export_Options_2.gif" Id="F__Help_geotiff_export_options_2.gif" />
                            <File Name="GeoTIFF_Viewer_Export_Options.gif" Id="F__Help_geotiff_viewer_export_options.gif" />
+                           <File Name="Geo_dropdown.gif" Id="F__Help_geo_dropdown.gif" />
                            <File Name="Geo_Mosaic_Stitiching_1.gif" Id="F__Help_geo_mosaic_stitiching_1.gif" />
                            <File Name="Geo_Mosaic_Stitiching_2.gif" Id="F__Help_geo_mosaic_stitiching_2.gif" />
                            <File Name="Geo_Mosaic_Window.gif" Id="F__Help_geo_mosaic_window.gif" />
@@ -608,15 +521,25 @@
                            <File Name="Histogram_Print.gif" Id="F__Help_histogram_print.gif" />
                            <File Name="Histogram_Window_1.gif" Id="F__Help_histogram_window_1.gif" />
                            <File Name="Histogram_Window_2.gif" Id="F__Help_histogram_window_2.gif" />
+                           <File Name="Histogram_Window_Button.gif" Id="F__Help_histogram_window_button.gif" />
                            <File Name="Hist_Window_Display.gif" Id="F__Help_hist_window_display.gif" />
                            <File Name="Hist_Window_Mouse_Mode.gif" Id="F__Help_hist_window_mouse_mode.gif" />
                            <File Name="Hist_Window_Plot_View.gif" Id="F__Help_hist_window_plot_view.gif" />
                            <File Name="Hist_Window_Save.gif" Id="F__Help_hist_window_save.gif" />
                            <File Name="Hist_Window_select.gif" Id="F__Help_hist_window_select.gif" />
                            <File Name="Hist_Window_select_2.gif" Id="F__Help_hist_window_select_2.gif" />
+                           <File Name="Horizontal_Line.gif" Id="F__Help_horizontal_line.gif" />
+                           <File Name="Horiz_Line_Data.gif" Id="F__Help_horiz_line_data.gif" />
+                           <File Name="Hyperbolic_cosecant_Button.gif" Id="F__Help_hyperbolic_cosecant_button.gif" />
+                           <File Name="Hyperbolic_cosine_Button.gif" Id="F__Help_hyperbolic_cosine_button.gif" />
+                           <File Name="Hyperbolic_cotangent_Button.gif" Id="F__Help_hyperbolic_cotangent_button.gif" />
+                           <File Name="Hyperbolic_secant_Button.gif" Id="F__Help_hyperbolic_secant_button.gif" />
+                           <File Name="Hyperbolic_sine_Button.gif" Id="F__Help_hyperbolic_sine_button.gif" />
+                           <File Name="Hyperbolic_tangent_Button.gif" Id="F__Help_hyperbolic_tangent_button.gif" />
                            <File Name="Ice_Exporter_Options.gif" Id="F__Help_ice_exporter_options.gif" />
                            <File Name="Ice_Exporter_Options_Ice_Tab.gif" Id="F__Help_ice_exporter_options_ice_tab.gif" />
                            <File Name="ICE_Export_Options.png" Id="F__Help_ice_export_options.png" />
+                           <File Name="Image_Chipping_Window_Button.gif" Id="F__Help_image_chipping_window_button.gif" />
                            <File Name="Image_Chip_Export_1.gif" Id="F__Help_image_chip_export_1.gif" />
                            <File Name="Imported_Image_Georef.gif" Id="F__Help_imported_image_georef.gif" />
                            <File Name="Imported_Subset.gif" Id="F__Help_imported_subset.gif" />
@@ -645,17 +568,28 @@
                            <File Name="Import_TIF_Pyramid.gif" Id="F__Help_import_tif_pyramid.gif" />
                            <File Name="Increase_Order_Button.png" Id="F__Help_increase_order_button.png" />
                            <File Name="Increase_Order_Button_22x21.png" Id="F__Help_increase_order_button_22x21.png" />
+                           <File Name="Input_output_nodes.gif" Id="F__Help_input_output_nodes.gif" />
+                           <File Name="Insert_Parens_Button.gif" Id="F__Help_insert_parens_button.gif" />
                            <File Name="Interactive_Mode.png" Id="F__Help_interactive_mode.png" />
+                           <File Name="Inverse_cosecant_Button.gif" Id="F__Help_inverse_cosecant_button.gif" />
+                           <File Name="Inverse_cosine_Button.gif" Id="F__Help_inverse_cosine_button.gif" />
+                           <File Name="Inverse_cotangent_Button.gif" Id="F__Help_inverse_cotangent_button.gif" />
+                           <File Name="Inverse_secant_Button.gif" Id="F__Help_inverse_secant_button.gif" />
+                           <File Name="Inverse_sine_Button.gif" Id="F__Help_inverse_sine_button.gif" />
                            <File Name="Inverse_tangent_Button.gif" Id="F__Help_inverse_tangent_button.gif" />
+                           <File Name="Italic_Button.gif" Id="F__Help_italic_button.gif" />
                            <File Name="JPEG_Exporter.gif" Id="F__Help_jpeg_exporter.gif" />
                            <File Name="Keyboard_Shortcuts.gif" Id="F__Help_keyboard_shortcuts.gif" />
                            <File Name="Keyboard_Shortcut_2.gif" Id="F__Help_keyboard_shortcut_2.gif" />
                            <File Name="Keyboard_Shortcut_3.gif" Id="F__Help_keyboard_shortcut_3.gif" />
                            <File Name="Keyboard_Shortcut_Link.png" Id="F__Help_keyboard_shortcut_link.png" />
                            <File Name="Keyboard_Shortcut_Select.gif" Id="F__Help_keyboard_shortcut_select.gif" />
+                           <File Name="KM_Button.gif" Id="F__Help_km_button.gif" />
+                           <File Name="Labels_Enabled.gif" Id="F__Help_labels_enabled.gif" />
                            <File Name="Lat-Long_Props.gif" Id="F__Help_lat_long_props.gif" />
                            <File Name="Layer_button.gif" Id="F__Help_layer_button.gif" />
                            <File Name="Link_All_Windows_Button.gif" Id="F__Help_link_all_windows_button.gif" />
+                           <File Name="Link_Button.gif" Id="F__Help_link_button.gif" />
                            <File Name="Link_Displays_1.gif" Id="F__Help_link_displays_1.gif" />
                            <File Name="Link_Displays_2.gif" Id="F__Help_link_displays_2.gif" />
                            <File Name="Link_Displays_3.gif" Id="F__Help_link_displays_3.gif" />
@@ -668,22 +602,33 @@
                            <File Name="Locked_Button.gif" Id="F__Help_locked_button.gif" />
                            <File Name="Lock_Aspect_Ratio_Button.gif" Id="F__Help_lock_aspect_ratio_button.gif" />
                            <File Name="Lock_button.gif" Id="F__Help_lock_button.gif" />
+                           <File Name="log_10_x_button.gif" Id="F__Help_log_10_x_button.gif" />
+                           <File Name="log_2_x_Button.gif" Id="F__Help_log_2_x_button.gif" />
+                           <File Name="log_e_x_Button.gif" Id="F__Help_log_e_x_button.gif" />
                            <File Name="Main_Window.gif" Id="F__Help_main_window.gif" />
                            <File Name="Measurement_Layer_Options.gif" Id="F__Help_measurement_layer_options.gif" />
-                           <File Name="Measurement_Mode_Button.gif" Id="F__Help_measurement_mode_button.gif2" />
+                           <File Name="Measurement_Mode_Button.gif" Id="F__Help_measurement_mode_button.gif" />
                            <File Name="Measurement_Units.gif" Id="F__Help_measurement_units.gif" />
                            <File Name="Merge_AOIs.gif" Id="F__Help_merge_aois.gif" />
+                           <File Name="Merge_AOIs_Button.gif" Id="F__Help_merge_aois_button.gif" />
+                           <File Name="Merge_AOIs_Button_23x23.gif" Id="F__Help_merge_aois_button_23x23.gif" />
                            <File Name="Message_Log_Window.gif" Id="F__Help_message_log_window.gif" />
                            <File Name="Message_Log_Window_SE.gif" Id="F__Help_message_log_window_se.gif" />
+                           <File Name="MGRS_Button.gif" Id="F__Help_mgrs_button.gif" />
                            <File Name="Minus_box.gif" Id="F__Help_minus_box.gif" />
                            <File Name="Minus_box_gray.gif" Id="F__Help_minus_box_gray.gif" />
+                           <File Name="Mi_Button.gif" Id="F__Help_mi_button.gif" />
                            <File Name="Mode_Unsupported.gif" Id="F__Help_mode_unsupported.gif" />
                            <File Name="Modify_Values.gif" Id="F__Help_modify_values.gif" />
                            <File Name="Modify_Values_2.gif" Id="F__Help_modify_values_2.gif" />
                            <File Name="Modify_Values_Button.gif" Id="F__Help_modify_values_button.gif" />
                            <File Name="Mouse_Mode_Toolbar.gif" Id="F__Help_mouse_mode_toolbar.gif" />
                            <File Name="Move_object.gif" Id="F__Help_move_object.gif" />
+                           <File Name="Move_Object_Button.gif" Id="F__Help_move_object_button.gif" />
+                           <File Name="Move_Object_Button_22x23.gif" Id="F__Help_move_object_button_22x23.gif" />
                            <File Name="Movie_Product_window.gif" Id="F__Help_movie_product_window.gif" />
+                           <File Name="Multiply_Button.gif" Id="F__Help_multiply_button.gif" />
+                           <File Name="M_Button.gif" Id="F__Help_m_button.gif" />
                            <File Name="Nautical_Miles_button.gif" Id="F__Help_nautical_miles_button.gif" />
                            <File Name="New_Button.png" Id="F__Help_new_button.png" />
                            <File Name="New_Button_22x21.png" Id="F__Help_new_button_22x21.png" />
@@ -702,10 +647,13 @@
                            <File Name="North_Up_2.gif" Id="F__Help_north_up_2.gif" />
                            <File Name="North_Up_button.gif" Id="F__Help_north_up_button.gif" />
                            <File Name="No_symbol.gif" Id="F__Help_no_symbol.gif" />
+                           <File Name="No_Unit_Button.gif" Id="F__Help_no_unit_button.gif" />
+                           <File Name="No_Unit_Button_32x30.gif" Id="F__Help_no_unit_button_32x30.gif" />
                            <File Name="Opened_TIF_RGB.gif" Id="F__Help_opened_tif_rgb.gif" />
                            <File Name="Opened_Wizard.gif" Id="F__Help_opened_wizard.gif" />
-                           <File Name="Open_Button.png" Id="F__Help_open_button.png" />
-                           <File Name="Open_Button_22x21.png" Id="F__Help_open_button_22x21.png" />
+                           <File Name="Open_Button.gif" Id="F__Help_open_button.gif" />
+                           <File Name="Open_GCP_Editor_Button.gif" Id="F__Help_open_gcp_editor_button.gif" />
+                           <File Name="Open_Help_Button.gif" Id="F__Help_open_help_button.gif" />
                            <File Name="Open_Histogram.png" Id="F__Help_open_histogram.png" />
                            <File Name="Open_Session_dialog.gif" Id="F__Help_open_session_dialog.gif" />
                            <File Name="Optional_Messages.png" Id="F__Help_optional_messages.png" />
@@ -724,9 +672,11 @@
                            <File Name="Options_Window_Overview.gif" Id="F__Help_options_window_overview.gif" />
                            <File Name="Options_Window_Workspace_Cube.gif" Id="F__Help_options_window_workspace_cube.gif" />
                            <File Name="Overview_Window.gif" Id="F__Help_overview_window.gif" />
+                           <File Name="Overview_Window_Button.gif" Id="F__Help_overview_window_button.gif" />
+                           <File Name="Pan_Button.gif" Id="F__Help_pan_button.gif" />
                            <File Name="Pan_marker.gif" Id="F__Help_pan_marker.gif" />
-                           <File Name="Paste_button.png" Id="F__Help_paste_button.png" />
-                           <File Name="Paste_button_22x21.png" Id="F__Help_paste_button_22x21.png" />
+                           <File Name="Paste_Button.gif" Id="F__Help_paste_button.gif" />
+                           <File Name="Pause_Button.gif" Id="F__Help_pause_button.gif" />
                            <File Name="PCA_1.gif" Id="F__Help_pca_1.gif" />
                            <File Name="PCA_2.gif" Id="F__Help_pca_2.gif" />
                            <File Name="PCA_3.gif" Id="F__Help_pca_3.gif" />
@@ -734,6 +684,10 @@
                            <File Name="PCA_Eigen.gif" Id="F__Help_pca_eigen.gif" />
                            <File Name="PCA_Eigen_2.gif" Id="F__Help_pca_eigen_2.gif" />
                            <File Name="PCA_Results.gif" Id="F__Help_pca_results.gif" />
+                           <File Name="Pixel_Markers.gif" Id="F__Help_pixel_markers.gif" />
+                           <File Name="Pixel_Select_List.gif" Id="F__Help_pixel_select_list.gif" />
+                           <File Name="Play_Button.gif" Id="F__Help_play_button.gif" />
+                           <File Name="Play_Once_Button.gif" Id="F__Help_play_once_button.gif" />
                            <File Name="Plug-Ins_Properties.gif" Id="F__Help_plug_ins_properties.gif" />
                            <File Name="Plug-Ins_Select.gif" Id="F__Help_plug_ins_select.gif" />
                            <File Name="Plug-Ins_Tab.gif" Id="F__Help_plug_ins_tab.gif" />
@@ -741,14 +695,17 @@
                            <File Name="Plus_box_gray.gif" Id="F__Help_plus_box_gray.gif" />
                            <File Name="PNG_Exporter_Options.gif" Id="F__Help_png_exporter_options.gif" />
                            <File Name="PNG_Export_Options.png" Id="F__Help_png_export_options.png" />
-                           <File Name="Print_button.png" Id="F__Help_print_button.png" />
-                           <File Name="Print_button_22x21.png" Id="F__Help_print_button_22x21.png" />
+                           <File Name="Preview_File_Contents_Button.gif" Id="F__Help_preview_file_contents_button.gif" />
+                           <File Name="Print_Button.gif" Id="F__Help_print_button.gif" />
                            <File Name="Product_Class_Properties.gif" Id="F__Help_product_class_properties.gif" />
                            <File Name="Product_Properties.gif" Id="F__Help_product_properties.gif" />
                            <File Name="Product_Properties_2.gif" Id="F__Help_product_properties_2.gif" />
                            <File Name="Product_Properties_3.gif" Id="F__Help_product_properties_3.gif" />
                            <File Name="Product_Properties_4.gif" Id="F__Help_product_properties_4.gif" />
+                           <File Name="Progress_Slider.gif" Id="F__Help_progress_slider.gif" />
+                           <File Name="Progress_Slider_246x16.gif" Id="F__Help_progress_slider_246x16.gif" />
                            <File Name="Properties_Blobs.gif" Id="F__Help_properties_blobs.gif" />
+                           <File Name="Properties_Button.gif" Id="F__Help_properties_button.gif" />
                            <File Name="Properties_Class_Tab.gif" Id="F__Help_properties_class_tab.gif" />
                            <File Name="Properties_Class_Tab2.gif" Id="F__Help_properties_class_tab2.gif" />
                            <File Name="Properties_Spatial_Data_View_tab.gif" Id="F__Help_properties_spatial_data_view_tab.gif" />
@@ -774,6 +731,7 @@
                            <File Name="Raster_Layer_Properties_Select.gif" Id="F__Help_raster_layer_properties_select.gif" />
                            <File Name="Redo_Button.gif" Id="F__Help_redo_button.gif" />
                            <File Name="Red_X.png" Id="F__Help_red_x.png" />
+                           <File Name="Refresh_Button.gif" Id="F__Help_refresh_button.gif" />
                            <File Name="Refresh_Statistics.GIF" Id="F__Help_refresh_statistics.gif" />
                            <File Name="Reload_Chip.png" Id="F__Help_reload_chip.png" />
                            <File Name="Remove_Field.gif" Id="F__Help_remove_field.gif" />
@@ -782,16 +740,23 @@
                            <File Name="Remove_Palette_Path.gif" Id="F__Help_remove_palette_path.gif" />
                            <File Name="Rename_AOI_1.gif" Id="F__Help_rename_aoi_1.gif" />
                            <File Name="Rename_AOI_2.gif" Id="F__Help_rename_aoi_2.gif" />
+                           <File Name="Render_Full_Res.gif" Id="F__Help_render_full_res.gif" />
+                           <File Name="Repeat_Button.gif" Id="F__Help_repeat_button.gif" />
                            <File Name="Reset_Bins_Button.gif" Id="F__Help_reset_bins_button.gif" />
                            <File Name="Reset_Bumpers.png" Id="F__Help_reset_bumpers.png" />
                            <File Name="Reset_Button.gif" Id="F__Help_reset_button.gif" />
+                           <File Name="Reset_Display.gif" Id="F__Help_reset_display.gif" />
                            <File Name="Reset_Stretch.gif" Id="F__Help_reset_stretch.gif" />
                            <File Name="Resize_Image.gif" Id="F__Help_resize_image.gif" />
                            <File Name="Restore_Bumpers.png" Id="F__Help_restore_bumpers.png" />
                            <File Name="Results_Exporter_Options_1.gif" Id="F__Help_results_exporter_options_1.gif" />
                            <File Name="Results_Exporter_Options_2.gif" Id="F__Help_results_exporter_options_2.gif" />
                            <File Name="RGB_Presets.gif" Id="F__Help_rgb_presets.gif" />
+                           <File Name="Rotate_Clockwise.gif" Id="F__Help_rotate_clockwise.gif" />
+                           <File Name="Rotate_Counter.gif" Id="F__Help_rotate_counter.gif" />
+                           <File Name="Rotate_Degrees.gif" Id="F__Help_rotate_degrees.gif" />
                            <File Name="Rotate_Object.gif" Id="F__Help_rotate_object.gif" />
+                           <File Name="Rotate_Object_Button.gif" Id="F__Help_rotate_object_button.gif" />
                            <File Name="Run_Band_Math.gif" Id="F__Help_run_band_math.gif" />
                            <File Name="Run_Band_Math_2.gif" Id="F__Help_run_band_math_2.gif" />
                            <File Name="Run_Band_Math_3.gif" Id="F__Help_run_band_math_3.gif" />
@@ -807,20 +772,23 @@
                            <File Name="Save_Wavelengths.gif" Id="F__Help_save_wavelengths.gif" />
                            <File Name="Scale_button.gif" Id="F__Help_scale_button.gif" />
                            <File Name="Scripting_Prop_Dialog.gif" Id="F__Help_scripting_prop_dialog.gif" />
+                           <File Name="Scripting_Window_Button.gif" Id="F__Help_scripting_window_button.gif" />
                            <File Name="Scripting_Window_Select.gif" Id="F__Help_scripting_window_select.gif" />
+                           <File Name="Secant_Button.gif" Id="F__Help_secant_button.gif" />
                            <File Name="Select_Band_Bins.gif" Id="F__Help_select_band_bins.gif" />
-                           <File Name="Select_color.png" Id="F__Help_select_color.png" />
                            <File Name="Select_Color_2.gif" Id="F__Help_select_color_2.gif" />
-                           <File Name="Select_color_488x385.png" Id="F__Help_select_color_488x385.png" />
                            <File Name="Select_Color_Composite_Import.gif" Id="F__Help_select_color_composite_import.gif" />
+                           <File Name="Select_Color_Dialog.png" Id="F__Help_select_color_dialog.png" />
                            <File Name="Select_Color_Shape.gif" Id="F__Help_select_color_shape.gif" />
                            <File Name="Select_Data_Fusion.gif" Id="F__Help_select_data_fusion.gif" />
                            <File Name="Select_Execution_Mode.gif" Id="F__Help_select_execution_mode.gif" />
                            <File Name="Select_File_Image_Man.gif" Id="F__Help_select_file_image_man.gif" />
                            <File Name="Select_Filter.gif" Id="F__Help_select_filter.gif" />
+                           <File Name="Select_Flicker_Controls.gif" Id="F__Help_select_flicker_controls.gif" />
                            <File Name="Select_Image_Subset.gif" Id="F__Help_select_image_subset.gif" />
                            <File Name="Select_Import_Data.png" Id="F__Help_select_import_data.png" />
-                           <File Name="Select_Layer.gif" Id="F__Help_select_layer.gif2" />
+                           <File Name="Select_Layer.gif" Id="F__Help_select_layer.gif" />
+                           <File Name="Select_Layer_Brightness.gif" Id="F__Help_select_layer_brightness.gif" />
                            <File Name="Select_Modify_Values.gif" Id="F__Help_select_modify_values.gif" />
                            <File Name="Select_Mosaic_AOI.gif" Id="F__Help_select_mosaic_aoi.gif" />
                            <File Name="Select_PCA.gif" Id="F__Help_select_pca.gif" />
@@ -829,6 +797,7 @@
                            <File Name="Select_ROI.gif" Id="F__Help_select_roi.gif" />
                            <File Name="Select_Subset.gif" Id="F__Help_select_subset.gif" />
                            <File Name="Select_Text_Box.gif" Id="F__Help_select_text_box.gif" />
+                           <File Name="Select_Text_Color.gif" Id="F__Help_select_text_color.gif" />
                            <File Name="Select_view_image.jpg" Id="F__Help_select_view_image.jpg" />
                            <File Name="Sensor_Up_Add_Child.png" Id="F__Help_sensor_up_add_child.png" />
                            <File Name="Sensor_Up_Add_Value.gif" Id="F__Help_sensor_up_add_value.gif" />
@@ -856,36 +825,52 @@
                            <File Name="Shape_File_Export_Options.gif" Id="F__Help_shape_file_export_options.gif" />
                            <File Name="Shape_File_Georefed.gif" Id="F__Help_shape_file_georefed.gif" />
                            <File Name="Shape_File_Warning.gif" Id="F__Help_shape_file_warning.gif" />
+                           <File Name="Show_AOI_Labels.gif" Id="F__Help_show_aoi_labels.gif" />
                            <File Name="Show_Hide_Layers1.gif" Id="F__Help_show_hide_layers1.gif" />
                            <File Name="Show_Hide_Layers2.gif" Id="F__Help_show_hide_layers2.gif" />
                            <File Name="Show_Point_Labels.gif" Id="F__Help_show_point_labels.gif" />
+                           <File Name="Sine_Button.gif" Id="F__Help_sine_button.gif" />
+                           <File Name="Single_Pixel.gif" Id="F__Help_single_pixel.gif" />
                            <File Name="Slow_Down_Button.gif" Id="F__Help_slow_down_button.gif" />
+                           <File Name="Snap_to_Grid_Button.gif" Id="F__Help_snap_to_grid_button.gif" />
                            <File Name="Spatial_Sampling.gif" Id="F__Help_spatial_sampling.gif" />
                            <File Name="Speed_Up.gif" Id="F__Help_speed_up.gif" />
+                           <File Name="Square_Root_Button.gif" Id="F__Help_square_root_button.gif" />
                            <File Name="Statistics_Display.gif" Id="F__Help_statistics_display.gif" />
                            <File Name="Statistics_Select.gif" Id="F__Help_statistics_select.gif" />
                            <File Name="Step_Back_button.gif" Id="F__Help_step_back_button.gif" />
                            <File Name="Step_Forward_button.gif" Id="F__Help_step_forward_button.gif" />
+                           <File Name="Stop_Button.gif" Id="F__Help_stop_button.gif" />
                            <File Name="Store_Bumpers.png" Id="F__Help_store_bumpers.png" />
+                           <File Name="Subtract_Button.gif" Id="F__Help_subtract_button.gif" />
+                           <File Name="Tangent_Button.gif" Id="F__Help_tangent_button.gif" />
                            <File Name="Text_Object.gif" Id="F__Help_text_object.gif" />
+                           <File Name="Tie_Point_Editor.gif" Id="F__Help_tie_point_editor.gif" />
                            <File Name="Tie_Point_Editor_Button.gif" Id="F__Help_tie_point_editor_button.gif" />
                            <File Name="Tie_Point_Layer_Properties.gif" Id="F__Help_tie_point_layer_properties.gif" />
+                           <File Name="Tie_Point_Marker_Color.gif" Id="F__Help_tie_point_marker_color.gif" />
+                           <File Name="Toggle_AOI_Pixels.gif" Id="F__Help_toggle_aoi_pixels.gif" />
+                           <File Name="Toggle_Display_Mode.gif" Id="F__Help_toggle_display_mode.gif" />
                            <File Name="Toolbar_handle.gif" Id="F__Help_toolbar_handle.gif" />
                            <File Name="Tool_Tip_Chipping.gif" Id="F__Help_tool_tip_chipping.gif" />
                            <File Name="Top_Bottom_Tab.gif" Id="F__Help_top_bottom_tab.gif" />
                            <File Name="True_Color.gif" Id="F__Help_true_color.gif" />
                            <File Name="Tutorial_Change_Color.gif" Id="F__Help_tutorial_change_color.gif" />
                            <File Name="Tutorial_Product_Display.gif" Id="F__Help_tutorial_product_display.gif" />
+                           <File Name="Underline_Button.gif" Id="F__Help_underline_button.gif" />
                            <File Name="Undo_Button.gif" Id="F__Help_undo_button.gif" />
                            <File Name="Units_2_button.gif" Id="F__Help_units_2_button.gif" />
                            <File Name="Units_button.gif" Id="F__Help_units_button.gif" />
                            <File Name="Unlocked_Button.gif" Id="F__Help_unlocked_button.gif" />
+                           <File Name="UTM_Button.gif" Id="F__Help_utm_button.gif" />
                            <File Name="Value_Item_1.gif" Id="F__Help_value_item_1.gif" />
                            <File Name="Value_Item_2.gif" Id="F__Help_value_item_2.gif" />
                            <File Name="Value_Item_3.gif" Id="F__Help_value_item_3.gif" />
                            <File Name="Value_Tab.png" Id="F__Help_value_tab.png" />
                            <File Name="Veg_1.gif" Id="F__Help_veg_1.gif" />
                            <File Name="Veg_2.gif" Id="F__Help_veg_2.gif" />
+                           <File Name="Vertical_Line.gif" Id="F__Help_vertical_line.gif" />
+                           <File Name="Vert_Line_Data.gif" Id="F__Help_vert_line_data.gif" />
                            <File Name="Wavelength_Ed_Tutorial_1.gif" Id="F__Help_wavelength_ed_tutorial_1.gif" />
                            <File Name="Wavelength_Ed_Tutorial_2.gif" Id="F__Help_wavelength_ed_tutorial_2.gif" />
                            <File Name="Wavelength_Properties_1.gif" Id="F__Help_wavelength_properties_1.gif" />
@@ -910,16 +895,23 @@
                            <File Name="Wizard_Value_Item.png" Id="F__Help_wizard_value_item.png" />
                            <File Name="Wizard_Value_Item_2.gif" Id="F__Help_wizard_value_item_2.gif" />
                            <File Name="Wizard_Value_Item_3.gif" Id="F__Help_wizard_value_item_3.gif" />
-                           <File Name="X_button.gif" Id="F__Help_x_button.gif2" />
+                           <File Name="X_button.gif" Id="F__Help_x_button.gif" />
+                           <File Name="X_Button_MLW.gif" Id="F__Help_x_button_mlw.gif" />
+                           <File Name="YD_Button.gif" Id="F__Help_yd_button.gif" />
                            <File Name="Zoomed_Blue_Shapes.gif" Id="F__Help_zoomed_blue_shapes.gif" />
                            <File Name="Zoomed_Image.gif" Id="F__Help_zoomed_image.gif" />
                            <File Name="Zoomed_Image_2.gif" Id="F__Help_zoomed_image_2.gif" />
                            <File Name="Zoom_In.gif" Id="F__Help_zoom_in.gif" />
                            <File Name="Zoom_In_22x21.gif" Id="F__Help_zoom_in_22x21.gif" />
+                           <File Name="Zoom_in_mouse.gif" Id="F__Help_zoom_in_mouse.gif" />
+                           <File Name="Zoom_Out.gif" Id="F__Help_zoom_out.gif" />
                            <File Name="Zoom_out_mouse.gif" Id="F__Help_zoom_out_mouse.gif" />
                            <File Name="Zoom_Pan.gif" Id="F__Help_zoom_pan.gif" />
                            <File Name="Zoom_Pan_Limits.gif" Id="F__Help_zoom_pan_limits.gif" />
                            <File Name="Zoom_percentage.gif" Id="F__Help_zoom_percentage.gif" />
+                           <File Name="Zoom_Rectangle.gif" Id="F__Help_zoom_rectangle.gif" />
+                           <File Name="Zoom_to_fit.gif" Id="F__Help_zoom_to_fit.gif" />
+                           <File Name="Zoom_to_fit_22x21.gif" Id="F__Help_zoom_to_fit_22x21.gif" />
                         </Component>
                      </Directory>
                      <Directory Id="D__Help_tablestyles" Name="TableStyles" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\Resources\TableStyles">
@@ -1367,6 +1359,7 @@
                         <File Name="QuickSearch_selected.gif" Id="F__Help_quicksearch_selected.gif2" />
                         <File Name="Rating0.gif" Id="F__Help_rating0.gif" />
                         <File Name="RatingGold100.gif" Id="F__Help_ratinggold100.gif" />
+                        <File Name="RatingGold50.gif" Id="F__Help_ratinggold50.gif" />
                         <File Name="Refresh.gif" Id="F__Help_refresh.gif" />
                         <File Name="RefreshTopicComments.gif" Id="F__Help_refreshtopiccomments.gif2" />
                         <File Name="RefreshTopicComments_over.gif" Id="F__Help_refreshtopiccomments_over.gif2" />
@@ -1487,6 +1480,7 @@
                         <File Name="QuickSearch_selected.gif" Id="F__Help_quicksearch_selected.gif3" />
                         <File Name="Rating0.gif" Id="F__Help_rating0.gif2" />
                         <File Name="RatingGold100.gif" Id="F__Help_ratinggold100.gif2" />
+                        <File Name="RatingGold50.gif" Id="F__Help_ratinggold50.gif2" />
                         <File Name="Refresh.gif" Id="F__Help_refresh.gif2" />
                         <File Name="RefreshTopicComments.gif" Id="F__Help_refreshtopiccomments.gif3" />
                         <File Name="RefreshTopicComments_over.gif" Id="F__Help_refreshtopiccomments_over.gif3" />
@@ -1608,6 +1602,7 @@
                         <File Name="printer_empty.png" Id="F__Help_printer_empty.png" />
                         <File Name="Rating0.gif" Id="F__Help_rating0.gif3" />
                         <File Name="RatingGold100.gif" Id="F__Help_ratinggold100.gif3" />
+                        <File Name="RatingGold50.gif" Id="F__Help_ratinggold50.gif3" />
                         <File Name="RefreshTopicComments.gif" Id="F__Help_refreshtopiccomments.gif4" />
                         <File Name="RefreshTopicComments_over.gif" Id="F__Help_refreshtopiccomments_over.gif4" />
                         <File Name="RefreshTopicComments_selected.gif" Id="F__Help_refreshtopiccomments_selected.gif4" />
