@@ -10,11 +10,12 @@
 #ifndef IMAGE_H
 #define IMAGE_H
 
-#include "glCommon.h"
+#include "AppVerify.h"
+#include "BadValues.h"
 #include "ColorType.h"
 #include "ComplexData.h"
-#include "AppVerify.h"
 #include "DimensionDescriptor.h"
+#include "glCommon.h"
 #include "LocationType.h"
 #include "TypesFile.h"
 
@@ -51,7 +52,10 @@ public:
       mBand3(),
       mType(LINEAR),
       mComponent(COMPLEX_MAGNITUDE),
-      mFormat(GL_LUMINANCE)
+      mFormat(GL_LUMINANCE),
+      mpBadValues1(NULL),
+      mpBadValues2(NULL),
+      mpBadValues3(NULL)
    {
       mpRasterElement[0] = NULL;
       mpRasterElement[1] = NULL;
@@ -63,7 +67,7 @@ public:
       const std::vector<double>& points3, const std::vector<ColorType>& colorMap,
       ComplexComponent component, GLenum format, RasterElement* pRasterElement1, RasterElement* pRasterElement2,
       RasterElement* pRasterElement3,
-      const std::vector<int>& badValues1, const std::vector<int>& badValues2, const std::vector<int>& badValues3) :
+      const BadValues* pBadValues1, const BadValues* pBadValues2, const BadValues* pBadValues3) :
       mChannels(channels),
       mBand1(band1),
       mBand2(band2),
@@ -75,9 +79,9 @@ public:
       mColorMap(colorMap),
       mComponent(component),
       mFormat(format),
-      mBadValues1(badValues1),
-      mBadValues2(badValues2),
-      mBadValues3(badValues3)
+      mpBadValues1(pBadValues1),
+      mpBadValues2(pBadValues2),
+      mpBadValues3(pBadValues3)
    {
       mpRasterElement[0] = pRasterElement1;
       mpRasterElement[1] = pRasterElement2;
@@ -100,9 +104,9 @@ public:
       mpRasterElement[0] = rhs.mpRasterElement[0];
       mpRasterElement[1] = rhs.mpRasterElement[1];
       mpRasterElement[2] = rhs.mpRasterElement[2];
-      mBadValues1 = rhs.mBadValues1;
-      mBadValues2 = rhs.mBadValues2;
-      mBadValues3 = rhs.mBadValues3;
+      mpBadValues1 = rhs.mpBadValues1;
+      mpBadValues2 = rhs.mpBadValues2;
+      mpBadValues3 = rhs.mpBadValues3;
    }
 
    bool operator==(const class ImageKey& rhs) const
@@ -177,17 +181,32 @@ public:
          return false;
       }
 
-      if (mBadValues1 != rhs.mBadValues1)
+      if ((mpBadValues1 == NULL && rhs.mpBadValues1 != NULL) || (mpBadValues1 != NULL && rhs.mpBadValues1 == NULL))
       {
          return false;
       }
 
-      if (mBadValues2 != rhs.mBadValues2)
+      if (mpBadValues1 != NULL && mpBadValues1->compare(rhs.mpBadValues1) == false)
       {
          return false;
       }
 
-      if (mBadValues3 != rhs.mBadValues3)
+      if ((mpBadValues2 == NULL && rhs.mpBadValues2 != NULL) || (mpBadValues2 != NULL && rhs.mpBadValues2 == NULL))
+      {
+         return false;
+      }
+
+      if (mpBadValues2 != NULL && mpBadValues2->compare(rhs.mpBadValues2) == false)
+      {
+         return false;
+      }
+
+      if ((mpBadValues3 == NULL && rhs.mpBadValues3 != NULL) || (mpBadValues3 != NULL && rhs.mpBadValues3 == NULL))
+      {
+         return false;
+      }
+
+      if (mpBadValues3 != NULL && mpBadValues3->compare(rhs.mpBadValues3) == false)
       {
          return false;
       }
@@ -414,70 +433,40 @@ public:
          }
       }
 
-      if (mBadValues1.size() < rhs.mBadValues1.size())
+      if (mpBadValues1 != NULL && rhs.mpBadValues1 != NULL)
       {
-         return true;
-      }
-
-      if (mBadValues1.size() > rhs.mBadValues1.size())
-      {
-         return false;
-      }
-
-      for (unsigned int i = 0; i < mBadValues1.size(); ++i)
-      {
-         if (mBadValues1[i] < rhs.mBadValues1[i])
+         if (mpBadValues1->getBadValuesString() < rhs.mpBadValues1->getBadValuesString())
          {
             return true;
          }
 
-         if (mBadValues1[i] > rhs.mBadValues1[i])
+         if (mpBadValues1->getBadValuesString() > rhs.mpBadValues1->getBadValuesString())
          {
             return false;
          }
       }
 
-      if (mBadValues2.size() < rhs.mBadValues2.size())
+      if (mpBadValues2 != NULL && rhs.mpBadValues2 != NULL)
       {
-         return true;
-      }
-
-      if (mBadValues2.size() > rhs.mBadValues2.size())
-      {
-         return false;
-      }
-
-      for (unsigned int i = 0; i < mBadValues2.size(); ++i)
-      {
-         if (mBadValues2[i] < rhs.mBadValues2[i])
+         if (mpBadValues2->getBadValuesString() < rhs.mpBadValues2->getBadValuesString())
          {
             return true;
          }
 
-         if (mBadValues2[i] > rhs.mBadValues2[i])
+         if (mpBadValues2->getBadValuesString() > rhs.mpBadValues2->getBadValuesString())
          {
             return false;
          }
       }
 
-      if (mBadValues3.size() < rhs.mBadValues3.size())
+      if (mpBadValues3 != NULL && rhs.mpBadValues3 != NULL)
       {
-         return true;
-      }
-
-      if (mBadValues3.size() > rhs.mBadValues3.size())
-      {
-         return false;
-      }
-
-      for (unsigned int i = 0; i < mBadValues3.size(); ++i)
-      {
-         if (mBadValues3[i] < rhs.mBadValues3[i])
+         if (mpBadValues3->getBadValuesString() < rhs.mpBadValues3->getBadValuesString())
          {
             return true;
          }
 
-         if (mBadValues3[i] > rhs.mBadValues3[i])
+         if (mpBadValues3->getBadValuesString() > rhs.mpBadValues3->getBadValuesString())
          {
             return false;
          }
@@ -498,9 +487,9 @@ public:
    ComplexComponent mComponent;
    GLenum mFormat;
    RasterElement* mpRasterElement[3];
-   std::vector<int> mBadValues1;
-   std::vector<int> mBadValues2;
-   std::vector<int> mBadValues3;
+   const BadValues* mpBadValues1;
+   const BadValues* mpBadValues2;
+   const BadValues* mpBadValues3;
 };
 
 class Image
@@ -517,10 +506,10 @@ public:
                 StretchType type, const std::vector<double>& points1, const std::vector<double>& points2,
                 const std::vector<double>& points3, const std::vector<ColorType>& colorMap, ComplexComponent component,
                 GLenum format, RasterElement* pRasterElement1, RasterElement* pRasterElement2,
-                RasterElement* pRasterElement3, const std::vector<int>& badValues1, const std::vector<int>& badValues2,
-                const std::vector<int>& badValues3) :
+                RasterElement* pRasterElement3, const BadValues* pBadValues1, const BadValues* pBadValues2,
+                const BadValues* pBadValues3) :
          mKey(channels, band1, band2, band3, type, points1, points2, points3, colorMap, component, format,
-            pRasterElement1, pRasterElement2, pRasterElement3, badValues1, badValues2, badValues3),
+            pRasterElement1, pRasterElement2, pRasterElement3, pBadValues1, pBadValues2, pBadValues3),
          mTileSizeX(0),
          mTileSizeY(0),
          mImageSizeX(0),
@@ -596,34 +585,34 @@ public:
    virtual void initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsigned int imageSizeX,
       unsigned int imageSizeY, unsigned int channels, GLenum format, EncodingType type, void* data,
       StretchType stretchType, std::vector<double>& stretchPoints, RasterElement* pRasterElement,
-      const std::vector<int> &badValues);
+      const BadValues* pBadValues);
    virtual void initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsigned int imageSizeX,
       unsigned int imageSizeY, unsigned int channels, GLenum format, EncodingType type, ComplexComponent component,
       void* data, StretchType stretchType, std::vector<double>& stretchPoints, RasterElement* pRasterElement,
-      const std::vector<int>& badValues);
+      const BadValues* pBadValues);
 
    // Colormap
    virtual void initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsigned int imageSizeX,
       unsigned int imageSizeY, unsigned int channels, GLenum format, EncodingType type, void* data,
       StretchType stretchType, std::vector<double>& stretchPoints, RasterElement* pRasterElement,
-      const std::vector<ColorType>& colorMap, const std::vector<int>& badValues);
+      const std::vector<ColorType>& colorMap, const BadValues* pBadValues);
    virtual void initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsigned int imageSizeX,
       unsigned int imageSizeY, unsigned int channels, GLenum format, EncodingType type, ComplexComponent component,
       void* data, StretchType stretchType, std::vector<double>& stretchPoints, RasterElement* pRasterElement,
-      const std::vector<ColorType>& colorMap, const std::vector<int>& badValues);
+      const std::vector<ColorType>& colorMap, const BadValues* pBadValues);
 
    // RGB
    virtual void initialize(int sizeX, int sizeY, DimensionDescriptor band1, DimensionDescriptor band2,
       DimensionDescriptor band3, unsigned int imageSizeX, unsigned int imageSizeY, unsigned int channels,
       GLenum format, EncodingType type, void* data, StretchType stretchType, std::vector<double>& stretchPointsRed,
       std::vector<double>& stretchPointsGreen, std::vector<double>& stretchPointsBlue, RasterElement* pRasterElement,
-      const std::vector<int>& badValues1, const std::vector<int>& badValues2, const std::vector<int>& badValues3);
+      const BadValues* pBadValues1, const BadValues* pBadValues2, const BadValues* pBadValues3);
    virtual void initialize(int sizeX, int sizeY, DimensionDescriptor band1, DimensionDescriptor band2,
       DimensionDescriptor band3, unsigned int imageSizeX, unsigned int imageSizeY, unsigned int channels,
       GLenum format, EncodingType type, ComplexComponent component, void* data, StretchType stretchType,
       std::vector<double>& stretchPointsRed, std::vector<double>& stretchPointsGreen,
-      std::vector<double>& stretchPointsBlue, RasterElement* pRasterElement, const std::vector<int>& badValues1,
-      const std::vector<int>& badValues2, const std::vector<int>& badValues3);
+      std::vector<double>& stretchPointsBlue, RasterElement* pRasterElement, const BadValues* pBadValues1,
+      const BadValues* pBadValues2, const BadValues* pBadValues3);
    // Separate RasterElements for each channel
    virtual void initialize(int sizeX, int sizeY, DimensionDescriptor band1, DimensionDescriptor band2,
       DimensionDescriptor band3, unsigned int imageSizeX, unsigned int imageSizeY, unsigned int channels,
@@ -631,7 +620,7 @@ public:
       void* data, StretchType stretchType, std::vector<double>& stretchPointsRed,
       std::vector<double>& stretchPointsGreen, std::vector<double>& stretchPointsBlue,
       RasterElement* pRasterElement1, RasterElement* pRasterElement2, RasterElement* pRasterElement3,
-      const std::vector<int>& badValues1, const std::vector<int>& badValues2, const std::vector<int>& badValues3);
+      const BadValues* pBadValues1, const BadValues* pBadValues2, const BadValues* pBadValues3);
 
    virtual ~Image();
 

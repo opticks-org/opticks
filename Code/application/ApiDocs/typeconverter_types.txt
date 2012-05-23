@@ -64,6 +64,7 @@
  *    - Any
  *    - AoiElement
  *    - AoiLayer
+ *    - BadValues
  *    - BitMask
  *    - CartesianPlot
  *    - Classification

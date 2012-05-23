@@ -78,7 +78,7 @@ GpuImage::~GpuImage()
 void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsigned int imageSizeX,
                           unsigned int imageSizeY, unsigned int channels, GLenum format, EncodingType type,
                           void* pData, StretchType stretchType, vector<double>& stretchPoints,
-                          RasterElement *pRasterElement, const vector<int>& badValues)
+                          RasterElement *pRasterElement, const BadValues* pBadValues)
 {
    int tileSizeX = 0;
    int tileSizeY = 0;
@@ -88,13 +88,13 @@ void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor channel, uns
 
    GLenum texFormat = (mAlwaysAlpha || (format == GL_RGBA || format == GL_LUMINANCE_ALPHA) ? GL_LUMINANCE_ALPHA : GL_LUMINANCE);
    Image::initialize(tileSizeX, tileSizeY, channel, imageSizeX, imageSizeY, channels, texFormat, type, pData,
-      stretchType, stretchPoints, pRasterElement, badValues);
+      stretchType, stretchPoints, pRasterElement, pBadValues);
 }
 
 void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsigned int imageSizeX,
                           unsigned int imageSizeY, unsigned int channels, GLenum format, EncodingType type,
                           ComplexComponent component, void* pData, StretchType stretchType,
-                          vector<double>& stretchPoints, RasterElement* pRasterElement, const vector<int>& badValues)
+                          vector<double>& stretchPoints, RasterElement* pRasterElement, const BadValues* pBadValues)
 {
    int tileSizeX = 0;
    int tileSizeY = 0;
@@ -104,7 +104,7 @@ void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor channel, uns
 
    GLenum texFormat = (mAlwaysAlpha || (format == GL_RGBA || format == GL_LUMINANCE_ALPHA) ? GL_LUMINANCE_ALPHA : GL_LUMINANCE);
    Image::initialize(tileSizeX, tileSizeY, channel, imageSizeX, imageSizeY, channels, texFormat, type, component,
-      pData, stretchType, stretchPoints, pRasterElement, badValues);
+      pData, stretchType, stretchPoints, pRasterElement, pBadValues);
 }
 
 // Colormap
@@ -112,7 +112,7 @@ void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor channel, uns
                           unsigned int imageSizeY, unsigned int channels, GLenum format, EncodingType type,
                           void* pData, StretchType stretchType, vector<double>& stretchPoints,
                           RasterElement* pRasterElement, const vector<ColorType>& colorMap,
-                          const vector<int>& badValues)
+                          const BadValues* pBadValues)
 {
    int tileSizeX = 0;
    int tileSizeY = 0;
@@ -122,14 +122,14 @@ void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor channel, uns
 
    GLenum texFormat = (mAlwaysAlpha || (format == GL_RGBA || format == GL_LUMINANCE_ALPHA) ? GL_LUMINANCE_ALPHA : GL_LUMINANCE);
    Image::initialize(tileSizeX, tileSizeY, channel, imageSizeX, imageSizeY, channels, texFormat, type, pData,
-      stretchType, stretchPoints, pRasterElement, colorMap, badValues);
+      stretchType, stretchPoints, pRasterElement, colorMap, pBadValues);
 }
 
 void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsigned int imageSizeX,
                           unsigned int imageSizeY, unsigned int channels, GLenum format, EncodingType type,
                           ComplexComponent component, void* pData, StretchType stretchType,
                           vector<double>& stretchPoints, RasterElement* pRasterElement,
-                          const vector<ColorType>& colorMap, const vector<int>& badValues)
+                          const vector<ColorType>& colorMap, const BadValues* pBadValues)
 {
    int tileSizeX = 0;
    int tileSizeY = 0;
@@ -139,7 +139,7 @@ void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor channel, uns
 
    GLenum texFormat = (mAlwaysAlpha || (format == GL_RGBA || format == GL_LUMINANCE_ALPHA) ? GL_LUMINANCE_ALPHA : GL_LUMINANCE);
    Image::initialize(tileSizeX, tileSizeY, channel, imageSizeX, imageSizeY, channels, texFormat, type, component,
-      pData, stretchType, stretchPoints, pRasterElement, colorMap, badValues);
+      pData, stretchType, stretchPoints, pRasterElement, colorMap, pBadValues);
 }
 
 // RGB
@@ -148,8 +148,8 @@ void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor band1, Dimen
                           unsigned int channels, GLenum format, EncodingType type, void* pData,
                           StretchType stretchType, vector<double>& stretchPointsRed, vector<double>& stretchPointsGreen,
                           vector<double>& stretchPointsBlue, RasterElement* pRasterElement,
-                          const std::vector<int>& badValues1, const std::vector<int>& badValues2,
-                          const std::vector<int>& badValues3)
+                          const BadValues* pBadValues1, const BadValues* pBadValues2,
+                          const BadValues* pBadValues3)
 {
    initializeRgb();
 
@@ -158,8 +158,8 @@ void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor band1, Dimen
    calculateTileSize(type, imageSizeX, imageSizeY, tileSizeX, tileSizeY);
 
    Image::initialize(tileSizeX, tileSizeY, band1, band2, band3, imageSizeX, imageSizeY, channels, format, type,
-      pData, stretchType, stretchPointsRed, stretchPointsGreen, stretchPointsBlue, pRasterElement, badValues1,
-      badValues2, badValues3);
+      pData, stretchType, stretchPointsRed, stretchPointsGreen, stretchPointsBlue, pRasterElement, pBadValues1,
+      pBadValues2, pBadValues3);
 }
 
 void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor band1, DimensionDescriptor band2,
@@ -167,8 +167,8 @@ void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor band1, Dimen
                           unsigned int channels, GLenum format, EncodingType type, ComplexComponent component,
                           void* pData, StretchType stretchType, vector<double>& stretchPointsRed,
                           vector<double>& stretchPointsGreen, vector<double>& stretchPointsBlue,
-                          RasterElement* pRasterElement, const std::vector<int>& badValues1,
-                          const std::vector<int>& badValues2, const std::vector<int>& badValues3)
+                          RasterElement* pRasterElement, const BadValues* pBadValues1,
+                          const BadValues* pBadValues2, const BadValues* pBadValues3)
 {
    initializeRgb();
 
@@ -178,7 +178,7 @@ void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor band1, Dimen
 
    Image::initialize(tileSizeX, tileSizeY, band1, band2, band3, imageSizeX, imageSizeY, channels, format, type,
       component, pData, stretchType, stretchPointsRed, stretchPointsGreen, stretchPointsBlue, pRasterElement,
-      badValues1, badValues2, badValues3);
+      pBadValues1, pBadValues2, pBadValues3);
 }
 
 void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor band1, DimensionDescriptor band2,
@@ -188,8 +188,8 @@ void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor band1, Dimen
                           vector<double>& stretchPointsRed, vector<double>& stretchPointsGreen,
                           vector<double>& stretchPointsBlue, RasterElement* pRasterElement1,
                           RasterElement* pRasterElement2, RasterElement* pRasterElement3,
-                          const std::vector<int>& badValues1, const std::vector<int>& badValues2,
-                          const std::vector<int>& badValues3)
+                          const BadValues* pBadValues1, const BadValues* pBadValues2,
+                          const BadValues* pBadValues3)
 {
    initializeRgb();
 
@@ -209,7 +209,7 @@ void GpuImage::initialize(int sizeX, int sizeY, DimensionDescriptor band1, Dimen
 
    Image::initialize(tileSizeX, tileSizeY, band1, band2, band3, imageSizeX, imageSizeY, channels, format, type1,
       type2, type3, component, pData, stretchType, stretchPointsRed, stretchPointsGreen, stretchPointsBlue,
-      pRasterElement1, pRasterElement2, pRasterElement3, badValues1, badValues2, badValues3);
+      pRasterElement1, pRasterElement2, pRasterElement3, pBadValues1, pBadValues2, pBadValues3);
 }
 
 template<class T>
@@ -403,21 +403,13 @@ private:
       DataAccessor da, InterleaveFormatType interleave, int currentChannel, int totalChannels, 
       EncodingType outputType)
    {
-      std::vector<int>::const_iterator badBegin = mInfo.mKey.mBadValues1.begin();
-      std::vector<int>::const_iterator badEnd = mInfo.mKey.mBadValues1.end();
-      bool bBadValues = (badBegin != badEnd);
-      bool bHas1BadValue = mInfo.mKey.mBadValues1.size() == 1;
-      int singleBadValue = 0;
-      if (bHas1BadValue)
-      {
-         singleBadValue = mInfo.mKey.mBadValues1.front();
-      }
+      bool bBadValues = (mInfo.mKey.mpBadValues1 != NULL && mInfo.mKey.mpBadValues1->empty() == false);
 
       Out* pTargetBase = pTexData;
 
       int channelMinus1 = currentChannel - 1;    // Subtract one since currentChannel is a one-based value
       int channelStep = totalChannels - currentChannel;
-      if (bHas1BadValue)
+      if (bBadValues)
       {
          for (unsigned int y1 = 0; y1 < tileSizeY; y1++, pTargetBase += (mInfo.mTileSizeX * totalChannels))
          {
@@ -427,8 +419,9 @@ private:
             {
                In source = *static_cast<In*>(da->getColumn());
                *pTarget = static_cast<Out>(getFromSource(source));
+
                pTarget += channelStep;
-               if (roundOffTarget(source) == singleBadValue)
+               if (mInfo.mKey.mpBadValues1->isBadValue(static_cast<double>(source)))
                {
                   *pTarget = static_cast<Out> (0);
                }
@@ -445,66 +438,35 @@ private:
       }
       else
       {
-         if (bBadValues)
+         for (unsigned int y1 = 0; y1 < tileSizeY; y1++, pTargetBase += (mInfo.mTileSizeX * totalChannels))
          {
-            for (unsigned int y1 = 0; y1 < tileSizeY; y1++, pTargetBase += (mInfo.mTileSizeX * totalChannels))
+            Out* pTarget = pTargetBase;
+            pTarget += channelMinus1;
+            if (interleave != BIP && totalChannels == 1)
             {
-               Out* pTarget = pTargetBase;
-               pTarget += channelMinus1;
+               unsigned int width = min(tileSizeX, static_cast<unsigned int>(mInfo.mTileSizeX));
+               copyLineFromSource(static_cast<In*>(da->getRow()), pTarget, width);
+            }
+            else
+            {
                for (unsigned int x1 = 0; x1 < tileSizeX; x1++)
                {
-                  In source = *static_cast<In*>(da->getColumn());
-                  *pTarget = static_cast<Out>(getFromSource(source));
-                  int tempInt = roundOffTarget(source);
+                  *pTarget = static_cast<Out>(getFromSource(*static_cast<In*>(da->getColumn())));
 
-                  pTarget += channelStep;
-                  if (binary_search(badBegin, badEnd, tempInt))
+                  if (totalChannels == 2)
                   {
-                     *pTarget = static_cast<Out> (0);
-                  }
-                  else
-                  {
+                     ++pTarget;
                      *pTarget = getOpenGlMax<Out>();
+                     ++pTarget;
                   }
-
-                  ++pTarget;
+                  else if (static_cast<int>(x1) < mInfo.mTileSizeX - 1)
+                  {
+                     pTarget += totalChannels;
+                  }
                   da->nextColumn();
                }
-               da->nextRow();
             }
-         }
-         else
-         {
-            for (unsigned int y1 = 0; y1 < tileSizeY; y1++, pTargetBase += (mInfo.mTileSizeX * totalChannels))
-            {
-               Out* pTarget = pTargetBase;
-               pTarget += channelMinus1;
-               if (interleave != BIP && totalChannels == 1)
-               {
-                  unsigned int width = min(tileSizeX, static_cast<unsigned int>(mInfo.mTileSizeX));
-                  copyLineFromSource(static_cast<In*>(da->getRow()), pTarget, width);
-               }
-               else
-               {
-                  for (unsigned int x1 = 0; x1 < tileSizeX; x1++)
-                  {
-                     *pTarget = static_cast<Out>(getFromSource(*static_cast<In*>(da->getColumn())));
-
-                     if (totalChannels == 2)
-                     {
-                        ++pTarget;
-                        *pTarget = getOpenGlMax<Out>();
-                        ++pTarget;
-                     }
-                     else if (static_cast<int>(x1) < mInfo.mTileSizeX - 1)
-                     {
-                        pTarget += totalChannels;
-                     }
-                     da->nextColumn();
-                  }
-               }
-               da->nextRow();
-            }
+            da->nextRow();
          }
       }
    }
@@ -567,9 +529,7 @@ private:
    void populateEmptyTextureData(vector<Out>& texData, unsigned int tileSizeX, unsigned int tileSizeY,
       int currentChannel, int totalChannels, EncodingType outputType)
    {
-      std::vector<int>::const_iterator badBegin = mInfo.mKey.mBadValues1.begin();
-      std::vector<int>::const_iterator badEnd = mInfo.mKey.mBadValues1.end();
-      bool bBadValues = (badBegin != badEnd);
+      bool bBadValues = (mInfo.mKey.mpBadValues1 != NULL && mInfo.mKey.mpBadValues1->empty() == false);
 
       typename vector<Out>::iterator targetBase = texData.begin();
       for (unsigned int y1 = 0; y1 < tileSizeY; y1++, targetBase += (mInfo.mTileSizeX * totalChannels))
@@ -710,38 +670,11 @@ private:
    template <typename Out>
    void createRgb(EncodingType outputType)
    {
-      std::vector<int>::const_iterator redBadBegin = mInfo.mKey.mBadValues1.begin();
-      std::vector<int>::const_iterator redBadEnd = mInfo.mKey.mBadValues1.end();
-      bool hasRedBadValues = (redBadBegin != redBadEnd);
+      bool hasRedBadValues = (mInfo.mKey.mpBadValues1 != NULL && mInfo.mKey.mpBadValues1->empty() == false);
 
-      bool hasOneRedBadValue = (mInfo.mKey.mBadValues1.size() == 1);
-      int singleRedBadValue = 0;
-      if (hasOneRedBadValue == true)
-      {
-         singleRedBadValue = mInfo.mKey.mBadValues1.front();
-      }
+      bool hasGreenBadValues = (mInfo.mKey.mpBadValues2 != NULL && mInfo.mKey.mpBadValues2->empty() == false);
 
-      std::vector<int>::const_iterator greenBadBegin = mInfo.mKey.mBadValues2.begin();
-      std::vector<int>::const_iterator greenBadEnd = mInfo.mKey.mBadValues2.end();
-      bool hasGreenBadValues = (greenBadBegin != greenBadEnd);
-
-      bool hasOneGreenBadValue = (mInfo.mKey.mBadValues2.size() == 1);
-      int singleGreenBadValue = 0;
-      if (hasOneGreenBadValue == true)
-      {
-         singleGreenBadValue = mInfo.mKey.mBadValues2.front();
-      }
-
-      std::vector<int>::const_iterator blueBadBegin = mInfo.mKey.mBadValues3.begin();
-      std::vector<int>::const_iterator blueBadEnd = mInfo.mKey.mBadValues3.end();
-      bool hasBlueBadValues = (blueBadBegin != blueBadEnd);
-
-      bool hasOneBlueBadValue = (mInfo.mKey.mBadValues3.size() == 1);
-      int singleBlueBadValue = 0;
-      if (hasOneBlueBadValue == true)
-      {
-         singleBlueBadValue = mInfo.mKey.mBadValues3.front();
-      }
+      bool hasBlueBadValues = (mInfo.mKey.mpBadValues3 != NULL && mInfo.mKey.mpBadValues3->empty() == false);
 
       bool hasBadValues = hasRedBadValues || hasGreenBadValues || hasBlueBadValues;
 
@@ -854,18 +787,7 @@ private:
 
                      if (hasRedBadValues)
                      {
-                        int tempInt = roundDouble(source);
-                        if (hasOneRedBadValue)
-                        {
-                           if (tempInt != singleRedBadValue)
-                           {
-                              isRedValueBad = false;
-                           }
-                        }
-                        else if (binary_search(redBadBegin, redBadEnd, tempInt) == false)
-                        {
-                           isRedValueBad = false;
-                        }
+                        isRedValueBad = mInfo.mKey.mpBadValues1->isBadValue(source);
                      }
                      else
                      {
@@ -893,18 +815,7 @@ private:
 
                      if (hasGreenBadValues)
                      {
-                        int tempInt = roundDouble(source);
-                        if (hasOneGreenBadValue)
-                        {
-                           if (tempInt != singleGreenBadValue)
-                           {
-                              isGreenValueBad = false;
-                           }
-                        }
-                        else if (binary_search(greenBadBegin, greenBadEnd, tempInt) == false)
-                        {
-                           isGreenValueBad = false;
-                        }
+                        isGreenValueBad = mInfo.mKey.mpBadValues2->isBadValue(source);
                      }
                      else
                      {
@@ -932,18 +843,7 @@ private:
 
                      if (hasBlueBadValues)
                      {
-                        int tempInt = roundDouble(source);
-                        if (hasOneBlueBadValue)
-                        {
-                           if (tempInt != singleBlueBadValue)
-                           {
-                              isBlueValueBad = false;
-                           }
-                        }
-                        else if (binary_search(blueBadBegin, blueBadEnd, tempInt) == false)
-                        {
-                           isBlueValueBad = false;
-                        }
+                        isBlueValueBad = mInfo.mKey.mpBadValues3->isBadValue(source);
                      }
                      else
                      {

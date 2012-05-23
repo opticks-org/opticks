@@ -12,6 +12,7 @@
 
 #include "AppConfig.h"
 
+class BadValues;
 class DataAccessorImpl;
 class DataElement;
 class RasterElement;
@@ -43,9 +44,8 @@ extern "C"
                                       4 -> complex short, 5 -> int, 6 -> unsigned int, 7 -> float,
                                       8 -> complex float, 9 -> double.  @see EncodingType */
       uint32_t encodingTypeSize; /**< The number of bytes per element.  @see RasterUtilities::bytesInEncoding() */
-      uint32_t numBadValues;     /**< The number of entries in pBadValues. */
-      int32_t* pBadValues;       /**< Array containing bad values for this data
-                                      set or \c NULL if no bad values exist. */
+      BadValues* pBadValues;     /**< The bad values instance for this data set or
+                                      \c NULL if the bad values vary by band. */
    };
 
    /**
@@ -87,9 +87,8 @@ extern "C"
                                       8 -> complex float, 9 -> double.  @see EncodingType */
       uint32_t location;         /**< 0 -> Prefer RAM but allow on-disk, 1 -> Only RAM, 2 -> Only on-disk */
       DataElement* pParent;      /**< The parent of this RasterElement or \c NULL if it has no parent. */
-      uint32_t numBadValues;     /**< The number of entries in pBadValues. */
-      int32_t* pBadValues;       /**< Array containing bad values for this data set or
-                                      \c NULL if no bad values exist. */
+      BadValues* pBadValues;     /**< Pointer to the bad values for this data set or
+                                      \c NULL if the bad values vary by band. */
    };
 
    /** 
@@ -107,6 +106,46 @@ extern "C"
     * @see destroyDataElement()
     */
    EXPORT_SYMBOL DataElement* createRasterElement(const char* pName, RasterElementArgs args);
+
+   /** 
+    * Creates a BadValues instance with the given parameters.
+    *
+    * @param pBadValuesStr
+    *        A \c NULL terminated C-style string containing the string representation for the bad values.
+    *        This cannot be \c NULL.
+    * @return A BadValues instance created with the given bad values string that requires no additional initialization.
+    *
+    *@note    Examples of bad value strings:
+    *             Lower threshold of -0.5, upper threshold +2.0, individual value of 0.0 is "<-0.5, 0.0, >2.0".
+    *             Lower threshold of -0.5, upper threshold +2.0, range of +0.5 to +0.75 is "<-0.5, 0.5<>0.75, >2.0".
+    */
+   EXPORT_SYMBOL BadValues* createBadValues(const char* pBadValuesStr);
+
+    /**
+    * Determines if a data value is bad.
+    *
+    * @param pBadValues
+    *        The BadValues to use to evaluate the quality of the data value.
+    *        If pBadValues is \c NULL, all data values will be evaluated as good.
+    * @param value
+    *        The data value to be evaluated.
+    * @return Returns 0 if the data value is bad or non-zero if it is good.
+    *
+    * @see BadValues::isBadValue()
+    */
+   EXPORT_SYMBOL int isDataValueBad(BadValues* pBadValues, double value);
+
+   /**
+    * Destroy a pointer obtained by calling createBadValues().
+    *
+    * Suitable for use as a cleanup callback.
+    *
+    * @param pBadValues
+    *        A BadValues obtained by calling createBadValues.
+    *
+    * @see createBadValues()
+    */
+   EXPORT_SYMBOL void destroyBadValues(BadValues* pBadValues);
 
    /**
     * Descriptor for data access.

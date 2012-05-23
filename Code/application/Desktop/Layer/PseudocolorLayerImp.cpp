@@ -802,7 +802,7 @@ void PseudocolorLayerImp::generateImage()
 
       VERIFYNRV (mpImage != NULL);
 
-      vector<int> badValues; // empty - the classes already determine which values to display
+      BadValues* pBadValues(NULL); // empty - the classes already determine which values to display
       RasterDataDescriptor* pDescriptor = dynamic_cast<RasterDataDescriptor*>(pRaster->getDataDescriptor());
       VERIFYNRV(pDescriptor != NULL);
       unsigned int uiRows = pDescriptor->getRowCount();
@@ -852,7 +852,7 @@ void PseudocolorLayerImp::generateImage()
       GLenum format = GL_RGBA;
       DimensionDescriptor bandDim = pDescriptor->getActiveBand(0);
       mpImage->initialize(512, 512, bandDim, uiColumns, uiRows, 1, format, eEncoding, COMPLEX_MAGNITUDE, NULL,
-         LINEAR, lstStretchValues, pRaster, colorMap, badValues);
+         LINEAR, lstStretchValues, pRaster, colorMap, pBadValues);
    }
 }
 

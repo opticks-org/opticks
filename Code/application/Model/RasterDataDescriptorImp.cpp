@@ -8,6 +8,7 @@
  */
 
 #include "AppVerify.h"
+#include "ObjectResource.h"
 #include "RasterDataDescriptor.h"
 #include "RasterDataDescriptorImp.h"
 #include "RasterFileDescriptorImp.h"
@@ -22,6 +23,7 @@ RasterDataDescriptorImp::RasterDataDescriptorImp(const string& name, const strin
    mDataType(INT1UBYTE),
    mValidDataTypes(StringUtilities::getAllEnumValues<EncodingType>()),
    mInterleave(BIP),
+   mpBadValues(FactoryResource<BadValues>().release()),  // initialize to empty BadValues so user can set in import options
    mRowSkipFactor(0),
    mColumnSkipFactor(0),
    mXPixelSize(1.0),
@@ -30,6 +32,7 @@ RasterDataDescriptorImp::RasterDataDescriptorImp(const string& name, const strin
 {
    // Attach to the units object to notify when it changes
    VERIFYNR(mUnits.attach(SIGNAL_NAME(Subject, Modified), Slot(this, &RasterDataDescriptorImp::notifyUnitsModified)));
+   mpBadValues.addSignal(SIGNAL_NAME(Subject, Modified), Slot(this, &RasterDataDescriptorImp::notifyBadValuesChanged));
 }
 
 RasterDataDescriptorImp::RasterDataDescriptorImp(const string& name, const string& type, const vector<string>& parent) :
@@ -37,6 +40,7 @@ RasterDataDescriptorImp::RasterDataDescriptorImp(const string& name, const strin
    mDataType(INT1UBYTE),
    mValidDataTypes(StringUtilities::getAllEnumValues<EncodingType>()),
    mInterleave(BIP),
+   mpBadValues(FactoryResource<BadValues>().release()),  // initialize to empty BadValues so user can set in import options
    mRowSkipFactor(0),
    mColumnSkipFactor(0),
    mXPixelSize(1.0),
@@ -45,6 +49,7 @@ RasterDataDescriptorImp::RasterDataDescriptorImp(const string& name, const strin
 {
    // Attach to the units object to notify when it changes
    VERIFYNR(mUnits.attach(SIGNAL_NAME(Subject, Modified), Slot(this, &RasterDataDescriptorImp::notifyUnitsModified)));
+   mpBadValues.addSignal(SIGNAL_NAME(Subject, Modified), Slot(this, &RasterDataDescriptorImp::notifyBadValuesChanged));
 }
 
 RasterDataDescriptorImp::~RasterDataDescriptorImp()
@@ -56,6 +61,12 @@ void RasterDataDescriptorImp::notifyUnitsModified(Subject &subject, const string
    {
       notify(SIGNAL_NAME(Subject, Modified));
    }
+}
+
+void RasterDataDescriptorImp::notifyBadValuesChanged(Subject& subject, const std::string& signal,
+   const boost::any& value)
+{
+   notify(SIGNAL_NAME(RasterDataDescriptor, BadValuesChanged), boost::any(mpBadValues.get()));
 }
 
 void RasterDataDescriptorImp::setDataType(EncodingType dataType)
@@ -105,18 +116,55 @@ unsigned int RasterDataDescriptorImp::getBytesPerElement() const
    return RasterUtilities::bytesInEncoding(mDataType);
 }
 
-void RasterDataDescriptorImp::setBadValues(const vector<int>& badValues)
+void RasterDataDescriptorImp::setBadValues(const BadValues* pBadValues)
 {
-   if (badValues != mBadValues)
+   if (mpBadValues.get() == NULL)
    {
-      mBadValues = badValues;
-      notify(SIGNAL_NAME(RasterDataDescriptor, BadValuesChanged), boost::any(mBadValues));
+      if (pBadValues != NULL)
+      {
+         mpBadValues.reset(FactoryResource<BadValues>().release());
+         mpBadValues->setBadValues(pBadValues);
+      }
+      else
+      {
+         return;
+      }
+   }
+   else if (pBadValues == NULL)  // indicates that the bands are not all using the same bad values criteria
+   {
+      Service<ObjectFactory>()->destroyObject(mpBadValues.get(), TypeConverter::toString<BadValues>());
+
+      // the BadValues object in mpBadValues is now NULL
+      notify(SIGNAL_NAME(RasterDataDescriptor, BadValuesChanged), boost::any(mpBadValues.get()));
+   }
+   else
+   {
+      if (mpBadValues->compare(pBadValues) == false)
+      {
+         mpBadValues->setBadValues(pBadValues);
+      }
    }
 }
 
-const vector<int>& RasterDataDescriptorImp::getBadValues() const
+void RasterDataDescriptorImp::setBadValues(const std::vector<int>& badValues)
 {
-   return mBadValues;
+   if (mpBadValues.get() == NULL)
+   {
+      mpBadValues.reset(FactoryResource<BadValues>().release());
+   }
+   FactoryResource<BadValues> pTempValues;
+   pTempValues->addBadValues(badValues);
+   mpBadValues->setBadValues(pTempValues.get());
+}
+
+const BadValues* RasterDataDescriptorImp::getBadValues() const
+{
+   return mpBadValues.get();
+}
+
+BadValues* RasterDataDescriptorImp::getBadValues()
+{
+   return mpBadValues.get();
 }
 
 void RasterDataDescriptorImp::setRows(const vector<DimensionDescriptor>& rows)
@@ -584,7 +632,7 @@ DataDescriptor* RasterDataDescriptorImp::copy(const string& name, DataElement* p
       pDescriptor->setDataType(mDataType);
       pDescriptor->setValidDataTypes(mValidDataTypes);
       pDescriptor->setInterleaveFormat(mInterleave);
-      pDescriptor->setBadValues(mBadValues);
+      pDescriptor->setBadValues(mpBadValues.get());
       pDescriptor->setRows(mRows);
       pDescriptor->setColumns(mColumns);
       pDescriptor->setBands(mBands);
@@ -609,7 +657,7 @@ DataDescriptor* RasterDataDescriptorImp::copy(const string& name, const vector<s
       pDescriptor->setDataType(mDataType);
       pDescriptor->setValidDataTypes(mValidDataTypes);
       pDescriptor->setInterleaveFormat(mInterleave);
-      pDescriptor->setBadValues(mBadValues);
+      pDescriptor->setBadValues(mpBadValues.get());
       pDescriptor->setRows(mRows);
       pDescriptor->setColumns(mColumns);
       pDescriptor->setBands(mBands);
@@ -681,7 +729,10 @@ void RasterDataDescriptorImp::addToMessageLog(Message* pMessage) const
    pMessage->addProperty("Interleave Format", mInterleave);
 
    // Bad values
-   pMessage->addProperty("Bad Values", mBadValues);
+   if (mpBadValues.get() != NULL)
+   {
+      pMessage->addProperty("Bad Values", mpBadValues->getBadValuesString());
+   }
 
    // Pixel size
    pMessage->addProperty("X Pixel Size", mXPixelSize);
@@ -744,15 +795,15 @@ bool RasterDataDescriptorImp::toXml(XMLWriter* pXml) const
       pXml->popAddPoint();
 
       // Bad values
-      pXml->pushAddPoint(pXml->addElement("BadValues"));
-      vector<int>::const_iterator valuesIter;
-      for (valuesIter = mBadValues.begin(); valuesIter != mBadValues.end(); ++valuesIter)
+      if (mpBadValues.get() != NULL)
       {
-         stringstream buf;
-         buf << *valuesIter;
-         pXml->addText(buf.str().c_str(), pXml->addElement("value"));
+         pXml->pushAddPoint(pXml->addElement("BadValues"));
+         if (!mpBadValues->toXml(pXml))
+         {
+            return false;
+         }
+         pXml->popAddPoint();
       }
-      pXml->popAddPoint();
 
       // Rows
       pXml->pushAddPoint(pXml->addElement("rows"));
@@ -833,7 +884,7 @@ bool RasterDataDescriptorImp::fromXml(DOMNode* pDocument, unsigned int version)
       return false;
    }
 
-   mBadValues.clear();
+   setBadValues(NULL);
    mValidDataTypes.clear();
    mRows.clear();
    mColumns.clear();
@@ -882,18 +933,13 @@ bool RasterDataDescriptorImp::fromXml(DOMNode* pDocument, unsigned int version)
       }
       else if (XMLString::equals(pChild->getNodeName(), X("BadValues")))
       {
-         for (DOMNode* pGrandchild = pChild->getFirstChild(); pGrandchild != NULL;
-            pGrandchild = pGrandchild->getNextSibling())
+         if (mpBadValues.get() == NULL)
          {
-            if (XMLString::equals(pGrandchild->getNodeName(), X("value")))
-            {
-               DOMNode* pValue = pGrandchild->getFirstChild();
-               if (pValue != NULL)
-               {
-                  int value = StringUtilities::fromXmlString<int>(A(pValue->getNodeValue()));
-                  mBadValues.push_back(value);
-               }
-            }
+            mpBadValues.reset(FactoryResource<BadValues>().release());
+         }
+         if (mpBadValues->fromXml(pChild, version) == false)
+         {
+            return false;
          }
       }
       else if (XMLString::equals(pChild->getNodeName(), X("rows")))

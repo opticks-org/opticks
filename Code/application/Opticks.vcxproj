@@ -266,6 +266,7 @@
     <ClInclude Include="Interfaces\Arrow.h" />
     <ClInclude Include="Interfaces\ArrowObject.h" />
     <ClInclude Include="Interfaces\Axis.h" />
+    <ClInclude Include="Interfaces\BadValues.h" />
     <ClInclude Include="Interfaces\BitMask.h" />
     <ClInclude Include="Interfaces\BitMaskObject.h" />
     <ClInclude Include="Interfaces\Blob.h" />

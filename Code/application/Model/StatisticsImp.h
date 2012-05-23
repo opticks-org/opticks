@@ -11,6 +11,7 @@
 #define STATISTICSIMP_H
 
 #include "AoiElement.h"
+#include "BadValuesAdapter.h"
 #include "BitMask.h"
 #include "ComplexData.h"
 #include "DimensionDescriptor.h"
@@ -19,6 +20,7 @@
 #include "SafePtr.h"
 #include "Statistics.h"
 
+#include <boost/any.hpp>
 #include <map>
 #include <vector>
 
@@ -32,7 +34,7 @@ public:
    StatisticsImp(const RasterElementImp* pRasterElement,
                  const std::vector<DimensionDescriptor>& bands,
                  AoiElement* pAoi = NULL);
-   ~StatisticsImp();
+   virtual ~StatisticsImp();
 
    void setMin(double dMin);
    void setMin(double dMin, ComplexComponent component);
@@ -68,8 +70,10 @@ public:
    void setStatisticsResolution(int resolution);
    int getStatisticsResolution() const;
 
-   void setBadValues(const std::vector<int>& badValues);
-   const std::vector<int>& getBadValues() const;
+   bool setBadValues(const BadValues* pBadValues);
+   bool setBadValues(const std::vector<int>& badValues);
+   const BadValues* getBadValues() const;
+   BadValues* getBadValues();
 
    bool areStatisticsCalculated() const;
    bool areStatisticsCalculated(ComplexComponent component) const;
@@ -81,6 +85,7 @@ public:
 
 protected:
    void calculateStatistics(ComplexComponent component);
+   void badValuesChanged(Subject& subject, const std::string& signal, const boost::any& value);
 
 private:
    StatisticsImp(const StatisticsImp& rhs);
@@ -103,7 +108,7 @@ private:
    std::map<ComplexComponent, std::vector<unsigned int> > mHistogramValues;
 
    int mStatisticsResolution;
-   std::vector<int> mBadValues;
+   BadValuesAdapter mBadValues;
 };
 
 class StatisticsInput
@@ -111,13 +116,13 @@ class StatisticsInput
 public:
    StatisticsInput(const std::vector<DimensionDescriptor>& bandsToCalculate, const RasterElement* pRaster,
                    ComplexComponent component, int resolution = 1,
-                   const std::vector<int>& badValues = std::vector<int>(),
+                   const BadValues* pBadValues = NULL,
                    const BitMask* pAoi = NULL) :
       mBandsToCalculate(bandsToCalculate),
       mpRasterElement(pRaster),
       mComplexComponent(component),
       mResolution(resolution),
-      mBadValues(badValues),
+      mpBadValues(pBadValues),
       mpAoi(pAoi)
    {
    }
@@ -126,7 +131,7 @@ public:
    const RasterElement* mpRasterElement;
    ComplexComponent mComplexComponent;
    int mResolution;
-   std::vector<int> mBadValues;
+   const BadValues* mpBadValues;
    const BitMask* mpAoi;
 
 private:

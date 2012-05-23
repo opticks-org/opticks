@@ -164,33 +164,13 @@ bool ChangeUpDirection::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
       progress.report("Unable to create destination raster element.", 0, ERRORS, true);
       return false;
    }
-   RasterDataDescriptor* pDesc = static_cast<RasterDataDescriptor*>(pData->getDataDescriptor());
-   VERIFY(pDesc);
-   bool updateBadValues = false;
-   std::vector<int> badValues = pDesc->getBadValues();
-   if (badValues.empty())
-   {
-      badValues.push_back(0);
-      updateBadValues = true;
-   }
-   pDesc->setBadValues(badValues);
-   if (!RasterUtilities::rotate(pRotated.get(), pData, rotation, badValues.front(),
+
+   int defaultBadValue(0);  // the rotate method will handle setting the default bad values into the rotated raster
+   if (!RasterUtilities::rotate(pRotated.get(), pData, rotation, defaultBadValue,
                RasterUtilities::NEAREST_NEIGHBOR, progress.getCurrentProgress(), &mAbort))
    {
       // error message already reported by rotate()
       return false;
-   }
-   if (updateBadValues)
-   {
-      std::vector<DimensionDescriptor> bands = pDesc->getBands();
-      for (std::vector<DimensionDescriptor>::iterator band = bands.begin(); band != bands.end(); ++band)
-      {
-         Statistics* pStats = pRotated->getStatistics(*band);
-         if (pStats != NULL)
-         {
-            pStats->setBadValues(badValues);
-         }
-      }
    }
    pOutArgList->setPlugInArgValue("Rotated Element", pRotated.get());
 

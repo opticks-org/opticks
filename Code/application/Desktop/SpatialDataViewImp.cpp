@@ -20,6 +20,7 @@
 #include "ApplicationWindow.h"
 #include "AppVerify.h"
 #include "AppVersion.h"
+#include "BadValues.h"
 #include "ContextMenu.h"
 #include "ContextMenuAction.h"
 #include "ContextMenuActions.h"
@@ -2214,18 +2215,17 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
 
             if ((row.isOriginalNumberValid() == true) && (column.isOriginalNumberValid() == true))
             {
-               vector<int> badValues;
-
+               const BadValues* pBadValues(NULL);
                Statistics* pStatistics = pRaster->getStatistics();
                if (pStatistics != NULL)
                {
-                  badValues = pStatistics->getBadValues();
+                  pBadValues = pStatistics->getBadValues();
                }
 
                resultValue = pRaster->getPixelValue(column, row);
-               if (std::find(badValues.begin(), badValues.end(), roundDouble(resultValue)) == badValues.end())
+               if (pBadValues != NULL)
                {
-                  displayResultsValue = true;
+                  displayResultsValue = !pBadValues->isBadValue(resultValue);
                }
             }
 

@@ -14,7 +14,6 @@
 #include "TypesFile.h"
 
 #include <string>
-#include <vector>
 
 class DataDescriptor;
 class FileDescriptor;
@@ -41,7 +40,7 @@ private:
    ProcessingLocation* mpProcessingLocation;
    EncodingType* mpDataType;
    InterleaveFormatType* mpInterleave;
-   std::vector<int>* mpBadValues;
+   std::string* mpBadValuesStr;
 
    unsigned int* mpStartRow;            // One-based original row number
    unsigned int* mpEndRow;              // One-based original row number

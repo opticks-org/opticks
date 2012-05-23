@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -166,8 +166,7 @@
     <ClCompile Include="AoiToolBarImp.cpp" />
     <ClCompile Include="ApplicationWindow.cpp" />
     <ClCompile Include="BackgroundPluginWindow.cpp" />
-    <ClCompile Include="BandBadValuesDlg.cpp" />
-    <ClCompile Include="BandBadValuesValidator.cpp" />
+    <ClCompile Include="BadValuesDlg.cpp" />
     <ClCompile Include="BatchEditorDlg.cpp" />
     <ClCompile Include="BatchExportDlg.cpp" />
     <ClCompile Include="BrightnessToolBar.cpp" />
@@ -277,7 +276,7 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_AoiToolBarImp.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_ApplicationWindow.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_BackgroundPluginWindow.cpp" />
-    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_BandBadValuesDlg.cpp" />
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_BadValuesDlg.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_BatchEditorDlg.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_BatchExportDlg.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_BrightnessToolBar.cpp" />
@@ -576,7 +575,7 @@
 </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
     </CustomBuild>
-    <CustomBuild Include="BandBadValuesDlg.h">
+    <CustomBuild Include="BadValuesDlg.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing %(Filename).h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"
 </Command>
@@ -594,7 +593,6 @@
 </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
     </CustomBuild>
-    <ClInclude Include="BandBadValuesValidator.h" />
     <CustomBuild Include="BatchEditorDlg.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing %(Filename).h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"

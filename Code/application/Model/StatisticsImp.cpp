@@ -48,6 +48,9 @@ StatisticsImp::StatisticsImp(const RasterElementImp* pRasterElement,
       mpAoi->merge(*(pBitMask));
    }
    mBands.push_back(band);
+
+   // no need to detach later since StatisticsImp owns mBadValues
+   VERIFYNR(mBadValues.attach(SIGNAL_NAME(Subject, Modified), Slot(this, &StatisticsImp::badValuesChanged)));
 }
 
 StatisticsImp::StatisticsImp(const RasterElementImp* pRasterElement,
@@ -66,6 +69,9 @@ StatisticsImp::StatisticsImp(const RasterElementImp* pRasterElement,
       ENSURE(pBitMask);
       mpAoi->merge(*(pBitMask));
    }
+
+   // no need to detach later since StatisticsImp owns mBadValues
+   VERIFYNR(mBadValues.attach(SIGNAL_NAME(BadValues, Modified), Slot(this, &StatisticsImp::badValuesChanged)));
 }
 
 StatisticsImp::~StatisticsImp()
@@ -360,16 +366,36 @@ int StatisticsImp::getStatisticsResolution() const
    return mStatisticsResolution;
 }
 
-void StatisticsImp::setBadValues(const std::vector<int>& badValues)
+bool StatisticsImp::setBadValues(const BadValues* pBadValues)
 {
-   mBadValues = badValues;
-   std::sort(mBadValues.begin(), mBadValues.end());
-   resetAll();
+   if (pBadValues == NULL || mBadValues.compare(pBadValues))
+   {
+      return false;
+   }
+   mBadValues.setBadValues(pBadValues);  // if bad values criteria changed, pBadValues will notify signalSubject::Modified
+   return true;
 }
 
-const std::vector<int>& StatisticsImp::getBadValues() const
+bool StatisticsImp::setBadValues(const std::vector<int>& badValues)
 {
-   return mBadValues;
+   FactoryResource<BadValues> pTempBadValues;
+   pTempBadValues->addBadValues(badValues);
+   if (mBadValues.compare(pTempBadValues.get()))
+   {
+      return false;
+   }
+   mBadValues.setBadValues(pTempBadValues.get());
+   return true;
+}
+
+const BadValues* StatisticsImp::getBadValues() const
+{
+   return &mBadValues;
+}
+
+BadValues* StatisticsImp::getBadValues()
+{
+   return &mBadValues;
 }
 
 bool StatisticsImp::areStatisticsCalculated() const
@@ -533,7 +559,13 @@ bool StatisticsImp::toXml(XMLWriter* pXml) const
       pXml->addText(it->second);
       pXml->popAddPoint();
    }
-   pXml->addText(mBadValues, pXml->addElement("badValues"));
+   pXml->pushAddPoint(pXml->addElement("badValues"));
+   if (!mBadValues.toXml(pXml))
+   {
+      return false;
+   }
+   pXml->popAddPoint();
+
    return true;
 }
 
@@ -546,7 +578,7 @@ bool StatisticsImp::fromXml(DOMNode* pDocument, unsigned int version)
 
    DOMElement* pElement = static_cast<DOMElement*>(pDocument);
    VERIFY(pElement != NULL);
-
+   mBadValues.clear();
    mpRasterElement = NULL;
    mpOriginalAoi.reset(NULL);
    mBands.clear();
@@ -639,8 +671,10 @@ bool StatisticsImp::fromXml(DOMNode* pDocument, unsigned int version)
       }
       else if (XMLString::equals(pNode->getNodeName(), X("badValues")))
       {
-         mBadValues.clear();
-         XmlReader::StrToVector<int, XmlReader::StringStreamAssigner<int> >(mBadValues, pNode->getTextContent());
+         if (!mBadValues.fromXml(pNode, version))
+         {
+            return false;
+         }
       }
    }
    return true;
@@ -689,7 +723,7 @@ void StatisticsImp::calculateStatistics(ComplexComponent component)
    }
 
    StatisticsInput statInput(mBands, dynamic_cast<const RasterElement*>(mpRasterElement),
-      component, mStatisticsResolution, mBadValues, mpAoi.get());
+      component, mStatisticsResolution, &mBadValues, mpAoi.get());
    StatisticsOutput statOutput;
 
    mta::StatusBarReporter barReporter("Computing statistics", "app", "CF884AA2-A1BF-468d-9609-795DE0F7B7A4");
@@ -774,14 +808,6 @@ void StatisticsThread::run()
 
    EncodingType encoding = pDescriptor->getDataType();
    ComplexComponent component = mInput.mComplexComponent;
-   unsigned int badValueCount = mInput.mBadValues.size();
-   int firstBadValue = 0;
-   if (badValueCount != 0)
-   {
-      firstBadValue = mInput.mBadValues.front();
-   }
-   std::vector<int>::const_iterator badBegin = mInput.mBadValues.begin();
-   std::vector<int>::const_iterator badEnd = mInput.mBadValues.end();
 
    int oldPercentDone = -1;
 
@@ -835,9 +861,7 @@ void StatisticsThread::run()
             double temp = ModelServices::getDataValue(encoding,
                da->getColumn(), component, isBip ? bipBandIt->getActiveNumber() : 0);
 
-            int tempInt = roundDouble(temp);
-            if (badValueCount == 0 || (badValueCount == 1 && tempInt != firstBadValue) || 
-               !std::binary_search(badBegin, badEnd, tempInt))
+            if (mInput.mpBadValues == NULL || mInput.mpBadValues->isBadValue(temp) == false)
             {
                if (!mMaxMinSet)
                {
@@ -1031,14 +1055,6 @@ void HistogramThread::run()
 
       EncodingType encoding = pDescriptor->getDataType();
       ComplexComponent component = mInput.mStatInput.mComplexComponent;
-      unsigned int badValueCount = mInput.mStatInput.mBadValues.size();
-      int firstBadValue = 0;
-      if (badValueCount != 0)
-      {
-         firstBadValue = mInput.mStatInput.mBadValues.front();
-      }
-      std::vector<int>::const_iterator badBegin = mInput.mStatInput.mBadValues.begin();
-      std::vector<int>::const_iterator badEnd = mInput.mStatInput.mBadValues.end();
 
       int oldPercentDone = -1;
       // Iterate the band over the AOI or all bands in the case of BIP
@@ -1065,9 +1081,7 @@ void HistogramThread::run()
                da->getColumn(), mInput.mStatInput.mComplexComponent,
                isBip ? bipBandIt->getActiveNumber() : 0);
 
-            int tempInt = roundDouble(temp);
-            if (badValueCount == 0 || (badValueCount == 1 && tempInt != firstBadValue) || 
-               !std::binary_search(badBegin, badEnd, tempInt))
+            if (mInput.mStatInput.mpBadValues == NULL || mInput.mStatInput.mpBadValues->isBadValue(temp) == false)
             {
                int bin = static_cast<int>((temp-mInput.mStatistics.mMinimum) * toBin);
                if (bin >= HISTOGRAM_SIZE)
@@ -1258,4 +1272,9 @@ void HistogramOutput::computePercentiles(const std::vector<unsigned int>& totalH
          prevPercentile = percentile;
       }
    }
+}
+
+void StatisticsImp::badValuesChanged(Subject& subject, const std::string& signal, const boost::any& value)
+{
+   resetAll();
 }

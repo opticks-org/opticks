@@ -23,10 +23,11 @@
 #include "ColorType.h"
 #include "EnumWrapper.h"
 
+class CustomEditWidget;
 class FileBrowser;
 
 /**
- *  A tree view widget with in-cell editing capbilities.
+ *  A tree view widget with in-cell editing capabilities.
  *
  *  The CustomTreeWidget extends the QTreeWidget class to provide in-cell
  *  editing to allow the user to change the value of a particular cell.  The
@@ -76,6 +77,10 @@ class FileBrowser;
  *                      the user activates the cell.  The step size and range of values
  *                      in the spin box are set by creating a QDoubleSpinBox independently
  *                      from the tree widget and calling the setDoubleSpinBox() method.
+ *  Custom Widget       A custom edit widget is invoked when the user activates the cell.
+ *                      The widget must be derived from CustomEditWidget and provide implementations
+ *                      for the pure virtual methods.  The widget must be created independently
+ *                      from the tree widget and set into the tree widget by calling setCustomEditWidget().
  *  </pre>
  *
  *  The default row height of tree widget items that are added to a custom tree
@@ -92,10 +97,10 @@ public:
    /**
     *  Creates a new, empty custom tree widget.
     *
-    *  @param   parent
+    *  @param   pParent
     *           The parent widget.
     */
-   CustomTreeWidget(QWidget* parent = 0);
+   CustomTreeWidget(QWidget* pParent = 0);
 
    /**
     *  Destroys the custom tree widget and all child tree widget items.
@@ -145,11 +150,16 @@ public:
                               step size and range of values are determined by the
                               object creating the tree widget.\  It is set into the
                               tree widget with the setSpinBox() method. */
-      DOUBLE_SPIN_BOX    /**< A spin box for double precision floating-point values is
+      DOUBLE_SPIN_BOX,   /**< A spin box for double precision floating-point values is
                               invoked when the user activates the cell.\  The spin box
                               is created and its step size and range of values are determined
                               by the object creating the tree widget.\  It is set into the
                               tree widget with the setDoubleSpinBox() method. */
+      CUSTOM_WIDGET      /**< A custom edit widget is invoked when the user activates the cell.\  The
+                              widget must be derived from CustomEditWidget and provide implementations
+                              for the pure virtual methods.\  The widget must be created by the object
+                              creating the tree widget.\  It is set into the tree widget with the
+                              setCustomEditWidget() method.*/
    };
 
    /**
@@ -562,6 +572,45 @@ public:
    QDoubleSpinBox* getDoubleSpinBox(QTreeWidgetItem* pItem, int iColumn) const;
 
    /**
+    *  Sets a custom edit widget to use as the edit widget for a given cell.
+    *
+    *  This method sets a custom edit widget as the edit widget for the given
+    *  cell.  The cell edit widget type must be set to
+    *  CustomTreeWidget::CUSTOM_WIDGET before this method is called.
+    *
+    *  @param   pItem
+    *           The item in which to set the custom edit widget as a cell edit
+    *           widget.
+    *  @param   iColumn
+    *           The item column in which to set the custom edit widget as its edit
+    *           widget.
+    *  @param   pCustomEditWidget
+    *           The custom edit widget to use as the edit widget.  The custom edit widget
+    *           is reparented to the viewport widget, so it will automatically be
+    *           deleted when the tree widget is deleted.
+    *
+    *  @return  Returns \c true if the custom edit widget was successfully set as the
+    *           edit widget; otherwise returns \c false.
+    *
+    *  @see     setCellWidgetType()
+    */
+   bool setCustomEditWidget(QTreeWidgetItem* pItem, int iColumn, CustomEditWidget* pCustomEditWidget);
+
+   /**
+    *  Returns the custom edit widget used as the edit widget for a given cell.
+    *
+    *  @param   pItem
+    *           The item in which to get a cell custom edit widget.
+    *  @param   iColumn
+    *           The item column in which to get the custom edit widget.
+    *
+    *  @return  The custom edit widget. A valid pointer is returned regardless
+    *           of the current edit widget if a custom edit widget has been
+    *           previously set as the edit widget but not reset to \c NULL.
+    */
+   CustomEditWidget* getCustomEditWidget(QTreeWidgetItem* pItem, int iColumn) const;
+
+   /**
     *  Invokes the edit widget for a given cell.
     *
     *  This method invokes the edit widget for a given cell.  It does nothing
@@ -966,6 +1015,21 @@ protected slots:
     */
    void closeDoubleSpin();
 
+   /**
+    *  Accepts the changes in the active custom edit widget.
+    *
+    *  This method sets the cell text to the current text in the active custom
+    *  edit widget.
+    */
+   void acceptCustomWidgetText();
+
+   /**
+    *  Hides the active custom edit widget.
+    *
+    *  @see     closeActiveCellWidget()
+    */
+   void closeCustomWidget();
+
 private:
    CustomTreeWidget(const CustomTreeWidget& rhs);
    CustomTreeWidget& operator=(const CustomTreeWidget& rhs);
@@ -1033,6 +1097,7 @@ private:
    QSpinBox* mpSpin;
    QDoubleSpinBox* mpDoubleSpin;
    QKeySequence mShortcut;
+   CustomEditWidget* mpCustomWidget;
 
    QMap<CellLocation, WidgetType> mCellWidgets;
    QMap<CellLocation, QLineEdit*> mCustomLineEdits;
@@ -1043,6 +1108,56 @@ private:
    QMap<CellLocation, CheckState> mChecks;
    QMap<CellLocation, ColorType> mColors;
    QMap<CellLocation, bool> mFullCellEdit;
+   QMap<CellLocation, CustomEditWidget*> mCustomEditWidgets;
+};
+
+/**
+ *  A base class for specialized in-cell editing capabilities in a CustomTreeWidget that can't be implemented
+ *  using the provided edit widget types.
+ *
+ *  A specialized edit widget must be derived from CustomEditWidget and provide implementations for text() and
+ *  setText(). Optionally, it should override selectAll() if appropriate.
+ */
+class CustomEditWidget : public QWidget
+{
+   Q_OBJECT
+
+public:
+   /**
+    *  Creates a new, empty custom edit widget.
+    *
+    *  @param   pParent
+    *           The parent widget.
+    */
+   CustomEditWidget(QWidget* pParent = NULL);
+
+   /**
+    *  Destroys the custom edit widget and all child widgets.
+    */
+   virtual ~CustomEditWidget();
+
+   /**
+    *  Retrieves the edited text from the custom edit widget.
+    *
+    *  @return  The edited text currently associated with the custom edit widget.
+    */
+   virtual QString text() const = 0;
+
+public slots:
+   /**
+    *  Sets the text to be edited into the custom edit widget.
+    *
+    *  @param   text
+    *           The text to be edited.
+    */
+   virtual void setText(const QString& text) = 0;
+   /**
+    *  Selects all the text in the custom edit widget.
+    *
+    *  @note    This class provides only an empty implementation. If this capability is
+    *           required, the derived class must provide an implementation.
+    */
+   virtual void selectAll() {}
 };
 
 #endif

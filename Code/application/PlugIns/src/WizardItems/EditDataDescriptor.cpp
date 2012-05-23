@@ -7,11 +7,12 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "EditDataDescriptor.h"
-#include "AppVersion.h"
 #include "AppVerify.h"
+#include "AppVersion.h"
+#include "BadValues.h"
 #include "DataDescriptor.h"
 #include "DimensionDescriptor.h"
+#include "EditDataDescriptor.h"
 #include "MessageLogResource.h"
 #include "ObjectFactory.h"
 #include "ObjectResource.h"
@@ -38,7 +39,7 @@ EditDataDescriptor::EditDataDescriptor() :
    mpProcessingLocation(NULL),
    mpDataType(NULL),
    mpInterleave(NULL),
-   mpBadValues(NULL),
+   mpBadValuesStr(NULL),
    mpStartRow(NULL),
    mpEndRow(NULL),
    mpRowSkipFactor(NULL),
@@ -93,7 +94,7 @@ bool EditDataDescriptor::getInputSpecification(PlugInArgList*& pArgList)
    VERIFY(pArgList->addArg<ProcessingLocation>("Processing Location", NULL, "New processing location."));
    VERIFY(pArgList->addArg<EncodingType>("Data Type", NULL, "New encoding type."));
    VERIFY(pArgList->addArg<InterleaveFormatType>("Interleave Format", NULL, "New interleave format."));
-   VERIFY(pArgList->addArg<vector<int> >("Bad Values", NULL, "Modify the bad values in the data descriptor."));
+   VERIFY(pArgList->addArg<string>("Bad Values", NULL, "Modify the bad values in the data descriptor."));
    VERIFY(pArgList->addArg<unsigned int>("Start Row", NULL, "Modify the start row for the data descriptor."));
    VERIFY(pArgList->addArg<unsigned int>("End Row", NULL, "Modify the end row for the data descriptor."));
    VERIFY(pArgList->addArg<unsigned int>("Row Skip Factor", NULL,
@@ -193,9 +194,14 @@ bool EditDataDescriptor::execute(PlugInArgList* pInArgList, PlugInArgList* pOutA
       }
 
       // Bad values
-      if (mpBadValues != NULL)
+      if (mpBadValuesStr != NULL)
       {
-         pRasterDescriptor->setBadValues(*mpBadValues);
+         FactoryResource<BadValues> pBadValues;
+         if (mpBadValuesStr->empty() == false)
+         {
+            pBadValues->setBadValues(*mpBadValuesStr);
+         }
+         pRasterDescriptor->setBadValues(pBadValues.get());
       }
 
       // Rows
@@ -607,7 +613,7 @@ bool EditDataDescriptor::extractInputArgs(PlugInArgList* pInArgList)
    // Bad values
    if ((pInArgList->getArg("Bad Values", pArg) == true) && (pArg != NULL))
    {
-      mpBadValues = pArg->getPlugInArgValue<vector<int> >();
+      mpBadValuesStr = pArg->getPlugInArgValue<string>();
    }
 
    // Start row

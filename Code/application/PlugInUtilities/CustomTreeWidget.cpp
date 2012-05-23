@@ -25,8 +25,8 @@
 #include "CustomTreeWidget.h"
 #include "FileBrowser.h"
 
-CustomTreeWidget::CustomTreeWidget(QWidget* parent) :
-   QTreeWidget(parent),
+CustomTreeWidget::CustomTreeWidget(QWidget* pParent) :
+   QTreeWidget(pParent),
    mbFullColor(false),
    miColorWidth(50),
    mHorizontalGridlines(false),
@@ -37,7 +37,8 @@ CustomTreeWidget::CustomTreeWidget(QWidget* parent) :
    mpBrowse(NULL),
    mpCombo(NULL),
    mpSpin(NULL),
-   mpDoubleSpin(NULL)
+   mpDoubleSpin(NULL),
+   mpCustomWidget(NULL)
 {
    // Initialization
    setUniformRowHeights(true);
@@ -465,6 +466,25 @@ void CustomTreeWidget::activateCellWidget(QTreeWidgetItem* pItem, int iColumn)
 
          break;
       }
+
+      case CUSTOM_WIDGET:
+      {
+         mpCustomWidget = getCustomEditWidget(pItem, iColumn);
+         if (mpCustomWidget != NULL)
+         {
+            mpCustomWidget->setText(strCellText);
+
+            mpCustomWidget->setGeometry(rcWidget);
+            mpCustomWidget->show();
+            mpCustomWidget->setFocus();
+            mpCustomWidget->selectAll();
+            mpCustomWidget->installEventFilter(this);
+            viewport()->setFocusProxy(mpCustomEdit);
+         }
+
+         break;
+      }
+
       case NO_WIDGET:
          break;
       default:
@@ -530,6 +550,12 @@ void CustomTreeWidget::columnWidthChanged(int iColumn, int iOldWidth, int iNewWi
       if (mpDoubleSpin != NULL)
       {
          mpDoubleSpin->setGeometry(rcWidget);
+      }
+
+      // Resize the custom edit widget
+      if (mpCustomWidget != NULL)
+      {
+         mpCustomWidget->setGeometry(rcWidget);
       }
    }
 
@@ -1010,6 +1036,52 @@ QDoubleSpinBox* CustomTreeWidget::getDoubleSpinBox(QTreeWidgetItem* pItem, int i
    return pSpin;
 }
 
+bool CustomTreeWidget::setCustomEditWidget(QTreeWidgetItem* pItem, int iColumn, CustomEditWidget* pCustomEditWidget)
+{
+   if ((pItem == NULL) || (pCustomEditWidget == NULL))
+   {
+      return false;
+   }
+
+   WidgetType eType = getCellWidgetType(pItem, iColumn);
+   if (eType != CUSTOM_WIDGET)
+   {
+      return false;
+   }
+
+   CellLocation cell;
+   cell.pItem = pItem;
+   cell.iColumn = iColumn;
+
+   pCustomEditWidget->setParent(viewport());
+   pCustomEditWidget->hide();
+   mCustomEditWidgets[cell] = pCustomEditWidget;
+
+   return true;
+}
+
+CustomEditWidget* CustomTreeWidget::getCustomEditWidget(QTreeWidgetItem* pItem, int iColumn) const
+{
+   if (pItem == NULL)
+   {
+      return NULL;
+   }
+
+   CellLocation cell;
+   cell.pItem = pItem;
+   cell.iColumn = iColumn;
+
+   CustomEditWidget* pCustomWidget = NULL;
+
+   QMap<CellLocation, CustomEditWidget*>::const_iterator iter = mCustomEditWidgets.find(cell);
+   if (iter != mCustomEditWidgets.end())
+   {
+      pCustomWidget = iter.value();
+   }
+
+   return pCustomWidget;
+}
+
 bool CustomTreeWidget::hitTest(QPoint ptCoord, QTreeWidgetItem* pItem, int iColumn)
 {
    QTreeWidgetItem* pPointItem = itemAt(ptCoord);
@@ -1094,7 +1166,8 @@ bool CustomTreeWidget::eventFilter(QObject* pObject, QEvent* pEvent)
                closeActiveCellWidget(true);
             }
          }
-         else if (pObject == mpCustomEdit || pObject == mpFileBrowser || pObject == mpSpin || pObject == mpDoubleSpin)
+         else if (pObject == mpCustomEdit || pObject == mpFileBrowser || pObject == mpSpin ||
+            pObject == mpDoubleSpin || pObject == mpCustomWidget)
          {
             closeActiveCellWidget(true);
          }
@@ -1254,6 +1327,18 @@ void CustomTreeWidget::closeActiveCellWidget(bool bAcceptEdit)
       else
       {
          closeDoubleSpin();
+      }
+   }
+
+   if (mpCustomWidget != NULL)
+   {
+      if (bAcceptEdit == true)
+      {
+         acceptCustomWidgetText();
+      }
+      else
+      {
+         closeCustomWidget();
       }
    }
 }
@@ -1651,3 +1736,35 @@ void CustomTreeWidget::closeDoubleSpin()
    viewport()->setFocusProxy(this);
    viewport()->setFocus();
 }
+
+void CustomTreeWidget::acceptCustomWidgetText()
+{
+   if (mpCustomWidget == NULL)
+   {
+      return;
+   }
+
+   setCurrentCellText(mpCustomWidget->text());
+   closeCustomWidget();
+}
+
+void CustomTreeWidget::closeCustomWidget()
+{
+   if (mpCustomWidget == NULL)
+   {
+      return;
+   }
+
+   mpCustomWidget->removeEventFilter(this);
+   mpCustomWidget->hide();
+   mpCustomWidget = NULL;
+
+   viewport()->setFocusProxy(this);
+   viewport()->setFocus();
+}
+
+CustomEditWidget::CustomEditWidget(QWidget* pParent) : QWidget(pParent)
+{}
+
+CustomEditWidget::~CustomEditWidget()
+{}

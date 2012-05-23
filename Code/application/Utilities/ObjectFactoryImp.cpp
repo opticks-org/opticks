@@ -11,6 +11,7 @@
 
 // For maintenance ease, please keep the following
 // list alphabetized.
+#include "BadValuesAdapter.h"
 #include "BitMaskImp.h"
 #include "ClassificationAdapter.h"
 #include "AppVerify.h"
@@ -45,6 +46,11 @@ namespace
 {
    void* CreateVectorGraphicObject();
    void DestroyVectorGraphicObject(void* pObj);
+
+   BadValues* CreateBadValues();
+   void DestroyBadValues(void* pObj);
+   void* CreateVectorBadValues();
+   void DestroyVectorBadValues(void* pObj);
 
    BitMask* CreateBitMask();
    void DestroyBitMask(void* pObj);
@@ -260,6 +266,7 @@ ObjectFactoryImp* ObjectFactoryImp::instance()
       sCreateObjectMap.insert(ObjectMapType::value_type("double", (void*(*)())CreateDouble));
       sCreateObjectMap.insert(ObjectMapType::value_type("bool", (void*(*)())CreateBool));
       sCreateObjectMap.insert(ObjectMapType::value_type("string", (void*(*)())CreateString));
+      sCreateObjectMap.insert(ObjectMapType::value_type("BadValues", (void*(*)())CreateBadValues));
       sCreateObjectMap.insert(ObjectMapType::value_type("BitMask", (void*(*)())CreateBitMask));
       sCreateObjectMap.insert(ObjectMapType::value_type("Classification", (void*(*)())CreateClassification));
       sCreateObjectMap.insert(ObjectMapType::value_type("DataRequest", (void*(*)())CreateDataRequest));
@@ -294,6 +301,7 @@ ObjectFactoryImp* ObjectFactoryImp::instance()
       sCreateObjectMap.insert(ObjectMapType::value_type(typeid(double).name(), (void*(*)())CreateDouble));
       sCreateObjectMap.insert(ObjectMapType::value_type(typeid(bool).name(), (void*(*)())CreateBool));
       sCreateObjectMap.insert(ObjectMapType::value_type(typeid(string).name(), (void*(*)())CreateString));
+      sCreateObjectMap.insert(ObjectMapType::value_type(typeid(BadValues*).name(), (void*(*)())CreateBadValues));
       sCreateObjectMap.insert(ObjectMapType::value_type(typeid(BitMask*).name(), (void*(*)())CreateBitMask));
       sCreateObjectMap.insert(ObjectMapType::value_type(typeid(Classification*).name(),
          (void*(*)())CreateClassification));
@@ -316,6 +324,7 @@ ObjectFactoryImp* ObjectFactoryImp::instance()
       sDestroyObjectMap.insert(ObjectMapType2::value_type("double", (void(*)(void*))DestroyDouble));
       sDestroyObjectMap.insert(ObjectMapType2::value_type("bool", (void(*)(void*))DestroyBool));
       sDestroyObjectMap.insert(ObjectMapType2::value_type("string", (void(*)(void*))DestroyString));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("BadValues", (void(*)(void*))DestroyBadValues));
       sDestroyObjectMap.insert(ObjectMapType2::value_type("BitMask", (void(*)(void*))DestroyBitMask));
       sDestroyObjectMap.insert(ObjectMapType2::value_type("Classification", (void(*)(void*))DestroyClassification));
       sDestroyObjectMap.insert(ObjectMapType2::value_type("DataRequest", (void(*)(void*))DestroyDataRequest));
@@ -369,6 +378,7 @@ ObjectFactoryImp* ObjectFactoryImp::instance()
       sCreateObjectVectorMap.insert(VectorMapType::value_type("bool*", (void*(*)())CreateVectorBoolPtr));
       sCreateObjectVectorMap.insert(VectorMapType::value_type("string*", (void*(*)())CreateVectorStringPtr));
       sCreateObjectVectorMap.insert(VectorMapType::value_type("GraphicObject", (void*(*)())CreateVectorGraphicObject));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("BadValues", (void*(*)())CreateVectorBadValues));
       sCreateObjectVectorMap.insert(VectorMapType::value_type("BitMask", (void*(*)())CreateVectorBitMask));
       sCreateObjectVectorMap.insert(VectorMapType::value_type("Classification",
          (void*(*)())CreateVectorClassification));
@@ -422,6 +432,7 @@ ObjectFactoryImp* ObjectFactoryImp::instance()
       sDestroyObjectVectorMap.insert(VectorMapType2::value_type("string*", (void(*)(void*))DestroyVectorStringPtr));
       sDestroyObjectVectorMap.insert(VectorMapType2::value_type("GraphicObject",
          (void(*)(void*))DestroyVectorGraphicObject));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("BadValues", (void(*)(void*))DestroyVectorBadValues));
       sDestroyObjectVectorMap.insert(VectorMapType2::value_type("BitMask", (void(*)(void*))DestroyVectorBitMask));
       sDestroyObjectVectorMap.insert(VectorMapType2::value_type("Classification",
          (void(*)(void*))DestroyVectorClassification));
@@ -553,6 +564,28 @@ void* CreateVectorGraphicObject()
 void DestroyVectorGraphicObject(void* pObj)
 {
    delete reinterpret_cast<vector<GraphicObject*>*>(pObj);
+}
+
+//=============================
+// BadValues
+BadValues* CreateBadValues()
+{
+   return new BadValuesAdapter();
+}
+
+void DestroyBadValues(void* pObj)
+{
+   delete reinterpret_cast<BadValuesAdapter*>(pObj);
+}
+
+void* CreateVectorBadValues()
+{
+   return new vector<BadValues*>();
+}
+
+void DestroyVectorBadValues(void* pObj)
+{
+   delete reinterpret_cast<vector<BadValues*>*>(pObj);
 }
 
 //=============================

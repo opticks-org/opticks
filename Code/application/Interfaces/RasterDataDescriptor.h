@@ -16,12 +16,13 @@
 
 #include <vector>
 
+class BadValues;
 class Units;
 
 /**
  *  Describes a raster data element.
  *
- *  In addition to the anscillary information stored in the DataDescriptor base
+ *  In addition to the ancillary information stored in the DataDescriptor base
  *  class, this class contains information pertinent to raster data elements.
  *
  *  This subclass of Subject will notify upon the following conditions:
@@ -36,6 +37,15 @@ class Units;
 class RasterDataDescriptor : public DataDescriptor
 {
 public:
+   /**
+    *  Emitted with boost::any<\link BadValues\endlink*> when the associated
+    *  bad values object is changed. The signal will notify with a
+    *  \c NULL value when the bad values criteria varies by band.
+    *
+    *  @see     setBadValues()
+    */
+   SIGNAL_METHOD(RasterDataDescriptor, BadValuesChanged)
+
    /**
     *  Emitted when the data type changes with
     *  boost::any<\link ::EncodingType EncodingType\endlink> containing the new
@@ -53,14 +63,6 @@ public:
     *  @see     setValidDataTypes()
     */
    SIGNAL_METHOD(RasterDataDescriptor, ValidDataTypesChanged)
-
-   /**
-    *  Emitted when the vector of bad values changes with
-    *  boost::any<std::vector<int> > containing the new bad values.
-    *
-    *  @see     setBadValues()
-    */
-   SIGNAL_METHOD(RasterDataDescriptor, BadValuesChanged)
 
    /**
     *  Emitted when the interleave format changes with
@@ -186,25 +188,58 @@ public:
     *  will be used to create a RasterElement.  When the RasterElement is
     *  created, the bad values that were set in the data descriptor by calling
     *  this method will be set into the Statistics objects in the raster
-    *  element.  After the raster element is created, the bad values should be
-    *  changed by calling Statistics::setBadValues() instead of this method.
+    *  element.  Calling this method after the raster element is created will set
+    *  all bands to use these same bad values settings.  To keep different band
+    *  bad value settings, call Statistics::setBadValues() instead of this method.
+    *
+    *  @param   pBadValues
+    *           The BadValues instance that defines the values that should be ignored.
+    *
+    *  @notify  This method notifies RasterDataDescriptor::signalBadValuesChanged if the given
+    *           bad values are different than the current bad values.
+    *
+    *  @see     Statistics::setBadValues()
+    */
+   virtual void setBadValues(const BadValues* pBadValues) = 0;
+
+   /**
+    *  Sets bad values that should be ignored in the data statistics.
+    *
+    *  This method is intended to be used when creating a data descriptor that
+    *  will be used to create a RasterElement.  When the RasterElement is
+    *  created, the bad values that were set in the data descriptor by calling
+    *  this method will be set into the Statistics objects in the raster
+    *  element.  Calling this method after the raster element is created will set
+    *  all bands to use these same bad values settings.  To keep different band
+    *  bad value settings, call Statistics::setBadValues() instead of this method.
     *
     *  @param   badValues
     *           The bad values that should be ignored.
     *
-    *  @notify  This method notifies signalBadValuesChanged() if the given
+    *  @notify  This method notifies RasterDataDescriptor::signalBadValuesChanged if the given
     *           bad values are different than the current bad values.
+    *
+    *  @note    This convenience method is provided for backward compatibility where simple integer bad values
+    *           are used (e.g. importers that set 0 as the default bad value).
     *
     *  @see     Statistics::setBadValues()
     */
    virtual void setBadValues(const std::vector<int>& badValues) = 0;
 
    /**
-    *  Returns the bad values that should be ignored in the data statistics.
+    *  Returns a const pointer to the BadValues instance that defines the values that should be ignored
+    *  in the data statistics.
     *
-    *  @return  The bad values as integers that should be ignored.
+    *  @return  The BadValues instance that defines the values that should be ignored.
     */
-   virtual const std::vector<int>& getBadValues() const = 0;
+   virtual const BadValues* getBadValues() const = 0;
+
+   /**
+    *  Returns the BadValues instance that defines the values that should be ignored in the data statistics.
+    *
+    *  @return  The BadValues instance that defines the values that should be ignored.
+    */
+   virtual BadValues* getBadValues() = 0;
 
    /**
     *  Sets the interleave format of the data values.

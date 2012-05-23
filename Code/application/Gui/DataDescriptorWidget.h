@@ -12,6 +12,7 @@
 
 #include <QtGui/QWidget>
 
+#include "CustomTreeWidget.h"
 #include "DataDescriptor.h"
 #include "SafePtr.h"
 #include "TypesFile.h"
@@ -20,7 +21,7 @@
 #include <string>
 #include <vector>
 
-class CustomTreeWidget;
+class BadValuesEdit;
 class QAction;
 class QComboBox;
 class QPushButton;
@@ -67,6 +68,32 @@ private:
    QComboBox* mpInterleaveCombo;
    QComboBox* mpDisplayModeCombo;
    QPushButton* mpSetDisplayButton;
+   BadValuesEdit* mpBadValuesEdit;
+};
+
+class BadValuesEdit : public CustomEditWidget
+{
+   Q_OBJECT
+
+public:
+   BadValuesEdit(QWidget* pParent = NULL);
+   virtual ~BadValuesEdit();
+
+   virtual QString text() const;
+
+public slots:
+   virtual void setText(const QString& text);
+   virtual void selectAll();
+
+protected:
+   virtual bool eventFilter(QObject* pObject, QEvent* pEvent);
+
+protected slots:
+   void displayBadValuesDialog();
+
+private:
+   QLineEdit* mpBadValuesStr;
+   QPushButton* mpEditButton;
 };
 
 #endif

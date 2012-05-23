@@ -17,6 +17,7 @@
 
 #include <vector>
 
+class BadValues;
 class GpuTile;
 class ImageFilter;
 
@@ -29,41 +30,41 @@ public:
    // Grayscale
    void initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsigned int imageSizeX, unsigned int imageSizeY,
       unsigned int channels, GLenum format, EncodingType type, void* pData, StretchType stretchType,
-      std::vector<double>& stretchPoints, RasterElement* pRasterElement, const std::vector<int>& badValues);
+      std::vector<double>& stretchPoints, RasterElement* pRasterElement, const BadValues* pBadValues);
    void initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsigned int imageSizeX, unsigned int imageSizeY,
       unsigned int channels, GLenum format, EncodingType type, ComplexComponent component, void* pData,
       StretchType stretchType, std::vector<double>& stretchPoints, RasterElement* pRasterElement,
-      const std::vector<int>& badValues);
+      const BadValues* pBadValues);
 
    // Colormap
    void initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsigned int imageSizeX, unsigned int imageSizeY,
       unsigned int channels, GLenum format, EncodingType type, void* pData, StretchType stretchType,
       std::vector<double>& stretchPoints, RasterElement* pRasterElement, const std::vector<ColorType>& colorMap,
-      const std::vector<int>& badValues);
+      const BadValues* pBadValues);
    void initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsigned int imageSizeX, unsigned int imageSizeY,
       unsigned int channels, GLenum format, EncodingType type, ComplexComponent component, void* pData,
       StretchType stretchType, std::vector<double>& stretchPoints, RasterElement* pRasterElement,
-      const std::vector<ColorType>& colorMap, const std::vector<int>& badValues);
+      const std::vector<ColorType>& colorMap, const BadValues* pBadValues);
 
    // RGB
    void initialize(int sizeX, int sizeY, DimensionDescriptor band1, DimensionDescriptor band2,
       DimensionDescriptor band3, unsigned int imageSizeX, unsigned int imageSizeY, unsigned int channels,
       GLenum format, EncodingType type, void* pData, StretchType stretchType, std::vector<double>& stretchPointsRed,
       std::vector<double>& stretchPointsGreen, std::vector<double>& stretchPointsBlue, RasterElement* pRasterElement,
-      const std::vector<int>& badValues1, const std::vector<int>& badValues2, const std::vector<int>& badValues3);
+      const BadValues* pBadValues1, const BadValues* pBadValues2, const BadValues* pBadValues3);
    void initialize(int sizeX, int sizeY, DimensionDescriptor band1, DimensionDescriptor band2,
       DimensionDescriptor band3, unsigned int imageSizeX, unsigned int imageSizeY, unsigned int channels,
       GLenum format, EncodingType type, ComplexComponent component, void* pData, StretchType stretchType,
       std::vector<double>& stretchPointsRed, std::vector<double>& stretchPointsGreen,
-      std::vector<double>& stretchPointsBlue, RasterElement* pRasterElement, const std::vector<int>& badValues1,
-      const std::vector<int>& badValues2, const std::vector<int>& badValues3);
+      std::vector<double>& stretchPointsBlue, RasterElement* pRasterElement, const BadValues* pBadValues1,
+      const BadValues* pBadValues2, const BadValues* pBadValues3);
    void initialize(int sizeX, int sizeY, DimensionDescriptor band1, DimensionDescriptor band2,
       DimensionDescriptor band3, unsigned int imageSizeX, unsigned int imageSizeY, unsigned int channels,
       GLenum format, EncodingType type1, EncodingType type2, EncodingType type3, ComplexComponent component,
       void* pData, StretchType stretchType, std::vector<double>& stretchPointsRed,
       std::vector<double>& stretchPointsGreen, std::vector<double>& stretchPointsBlue,
       RasterElement* pRasterElement1, RasterElement* pRasterElement2, RasterElement* pRasterElement3,
-      const std::vector<int>& badValues1, const std::vector<int>& badValues2, const std::vector<int>& badValues3);
+      const BadValues* pBadValues1, const BadValues* pBadValues2, const BadValues* pBadValues3);
 
    // Filters
    void enableFilter(ImageFilterDescriptor *pDescriptor);

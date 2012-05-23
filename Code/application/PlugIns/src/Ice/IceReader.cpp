@@ -8,6 +8,7 @@
  */
 
 #include "AppVerify.h"
+#include "BadValues.h"
 #include "Classification.h"
 #include "DynamicObject.h"
 #include "Hdf5Attribute.h"
@@ -954,10 +955,14 @@ bool IceReader::loadCubeStatistics(RasterElement* pElement)
       DO_IF(pFileDesc == NULL, return false);
 
       // Only load statistics if the user hasn't overridden the badValues in the import options dialog.
-      if (pDataDesc->getBadValues().empty())
+      if (pDataDesc->getBadValues() != NULL && pDataDesc->getBadValues()->empty())
       {
+         // the statistics metadata format changed in ICE version 1.30.
+         bool preVersion130 = 
+            (mIceDescriptor.getSupportedFeature(IceFormatDescriptor::BAND_STATISTICS_FLOATING_PT_BAD_VALUES) == false);
+
          // Look for Metadata. If it's present, parse it.
-         {  // Resource scoping
+         { // Resource scoping
             Hdf5DataSetResource statMetadataDs;
             {  //Turn off error handling while we check for stats, since it may not exist
                Hdf5ErrorHandlerResource errHandler(NULL, NULL);
@@ -976,7 +981,7 @@ bool IceReader::loadCubeStatistics(RasterElement* pElement)
             hsize_t currentRow;
             vector<DimensionDescriptor>::const_iterator iter;
             for (currentRow = 0, iter = bands.begin();
-                 iter != bands.end(); ++currentRow, ++iter)
+                  iter != bands.end(); ++currentRow, ++iter)
             {
                if (!iter->isActiveNumberValid())
                {
@@ -984,23 +989,57 @@ bool IceReader::loadCubeStatistics(RasterElement* pElement)
                   continue;
                }
                statReader.selectHyperslab(H5S_SELECT_SET, &currentRow, &oneValue, &oneValue, NULL);
-               auto_ptr<StatisticsMetadata> pValues(statReader.readSelectedData<StatisticsMetadata>());
-               Statistics* pCubeStat = pElement->getStatistics(*iter);
-               //set resolution and bad values first because they clear any other
-               //set statistics.
-               if (pCubeStat != NULL)
+               if (preVersion130)
                {
-                  pCubeStat->setStatisticsResolution(pValues->mStatResolution);
-                  StatisticsMetadata::BadValueType* pBadValues =
-                     reinterpret_cast<StatisticsMetadata::BadValueType *>(pValues->mBadValues.p);
-                  vector<StatisticsMetadata::BadValueType> badValues;
-                  badValues.reserve(pValues->mBadValues.len);
-                  for (size_t i = 0; i < pValues->mBadValues.len; ++i)
-                  {
-                     badValues.push_back(pBadValues[i]);
-                  }
+                  auto_ptr<StatisticsMetadata> pValues(
+                     statReader.readSelectedData<StatisticsMetadata>());
+                  Statistics* pCubeStat = pElement->getStatistics(*iter);
 
-                  pCubeStat->setBadValues(badValues);
+                  //set resolution and bad values first because they clear any other
+                  //set statistics.
+                  if (pCubeStat != NULL)
+                  {
+                     pCubeStat->setStatisticsResolution(pValues->mStatResolution);
+                     StatisticsMetadata::BadValueType* pBadValues =
+                        reinterpret_cast<StatisticsMetadata::BadValueType *>(pValues->mBadValues.p);
+                     vector<StatisticsMetadata::BadValueType> badValues;
+                     badValues.reserve(pValues->mBadValues.len);
+                     for (size_t i = 0; i < pValues->mBadValues.len; ++i)
+                     {
+                        badValues.push_back(pBadValues[i]);
+                     }
+
+                     pCubeStat->setBadValues(badValues);
+                  }
+               }
+               else
+               {
+                  auto_ptr<StatisticsMetadataFloat> pValues(statReader.readSelectedData<StatisticsMetadataFloat>());
+                  Statistics* pCubeStat = pElement->getStatistics(*iter);
+
+                  //set resolution and bad values first because they clear any other
+                  //set statistics.
+                  if (pCubeStat != NULL)
+                  {
+                     pCubeStat->setStatisticsResolution(pValues->mStatResolution);
+                     StatisticsMetadataFloat::BadValueType* pBadValues =
+                        reinterpret_cast<StatisticsMetadataFloat::BadValueType *>(pValues->mBadValues.p);
+                     std::string badValuesStr;
+                     badValuesStr.reserve(pValues->mBadValues.len);
+                     for (size_t i = 0; i < pValues->mBadValues.len; ++i)
+                     {
+                        badValuesStr += pBadValues[i];
+                     }
+                     FactoryResource<BadValues> pImportedBadValues;
+                     if (pImportedBadValues->setBadValues(badValuesStr) == false)
+                     {
+                        std::string warningMsg = "Unable to import bad values criteria for band " +
+                           StringUtilities::toDisplayString<unsigned int>(iter->getOriginalNumber() + 1) +
+                           ":\n   " + pImportedBadValues->getLastErrorMsg();
+                        mWarnings.push_back(warningMsg);
+                     }
+                     pCubeStat->setBadValues(pImportedBadValues.get());
+                  }
                }
             }
          }

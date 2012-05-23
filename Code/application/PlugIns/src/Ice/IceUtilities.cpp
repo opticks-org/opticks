@@ -48,6 +48,7 @@ bool IceFormatDescriptor::getSupportedFeature(FeatureType feature)
          versions.push_back(IceVersion(1, 0));
          versions.push_back(IceVersion(1, 10));
          versions.push_back(IceVersion(1, 20));
+         versions.push_back(IceVersion(1, 30));
       }
       return mVersion.checkVersion(versions);
    }
@@ -91,6 +92,20 @@ bool IceFormatDescriptor::getSupportedFeature(FeatureType feature)
       versions.push_back(IceVersion(0, 0));
       versions.push_back(IceVersion(0, 70));
       versions.push_back(IceVersion(0, 90));
+      return !mVersion.checkVersion(versions);
+   }
+   if (feature == BAND_STATISTICS_FLOATING_PT_BAD_VALUES)
+   {
+      vector<IceVersion> versions;
+      //statistics information was not present in the following versions
+      versions.push_back(IceVersion(0, 0));
+      versions.push_back(IceVersion(0, 70));
+      versions.push_back(IceVersion(0, 90));
+
+      // int bad values stored as vector of int in the following versions 
+      versions.push_back(IceVersion(1, 0));
+      versions.push_back(IceVersion(1, 10));
+      versions.push_back(IceVersion(1, 20));
       return !mVersion.checkVersion(versions);
    }
    VERIFY_MSG(false, "Missing condition in the IceFormatDescriptor::getSupportedFeature function");

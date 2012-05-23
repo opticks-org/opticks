@@ -10,10 +10,12 @@
 #ifndef STATISTICS_H
 #define STATISTICS_H
 
-#include "Serializable.h"
 #include "ComplexData.h"
+#include "Serializable.h"
 
 #include <vector>
+
+class BadValues;
 
 /**
  *  Statistics for raster elements.
@@ -253,7 +255,7 @@ public:
     *  Returns the percentile boundaries for the data.
     *
     *  @return  An array of 1001 values that contain the percentile boundaries
-    *           for this band, or \b NULL if the statistics could not be
+    *           for this band, or \c NULL if the statistics could not be
     *           calculated successfully.
     */
    virtual const double* getPercentiles() = 0;
@@ -266,7 +268,7 @@ public:
     *           values.
     *
     *  @return  An array of 1001 values that contain the percentile boundaries
-    *           for the data, or \b NULL if the statistics could not be
+    *           for the data, or \c NULL if the statistics could not be
     *           calculated successfully.
     */
    virtual const double* getPercentiles(ComplexComponent component) = 0;
@@ -307,12 +309,12 @@ public:
     *
     *  @param   pBinCenters
     *           Populated with an array of 256 values that specify the center
-    *           location of the histogram bins.  This value is set to \b NULL
+    *           location of the histogram bins.  This value is set to \c NULL
     *           if the histogram cannot be computed successfully.
     *  @param   pHistogramCounts
     *           Populated with an array of 256 values that specify the number
     *           of values contained in each histogram bin.  This value is set
-    *           to \b NULL if the histogram cannot be computed successfully.
+    *           to \c NULL if the histogram cannot be computed successfully.
     */
    virtual void getHistogram(const double*& pBinCenters, const unsigned int*& pHistogramCounts) = 0;
 
@@ -321,12 +323,12 @@ public:
     *
     *  @param   pBinCenters
     *           Populated with an array of 256 values that specify the center
-    *           location of the histogram bins.  This value is set to \b NULL
+    *           location of the histogram bins.  This value is set to \c NULL
     *           if the histogram cannot be computed successfully.
     *  @param   pHistogramCounts
     *           Populated with an array of 256 values that specify the number
     *           of values contained in each histogram bin.  This value is set
-    *           to \b NULL if the histogram cannot be computed successfully.
+    *           to \c NULL if the histogram cannot be computed successfully.
     *  @param   component
     *           The complex data component for which to get its histogram
     *           values.
@@ -361,29 +363,74 @@ public:
     *  Certain layers (e.g. ThresholdLayer) also take these values into
     *  account.
     *
-    *  This method is intended to be used to change the bad values in an
-    *  existing RasterElement.  To set the initial bad values that should be
-    *  used to populate a RasterElement when it is created, use the
+    *  This method is intended to be used to change the bad values for a band
+    *  in an existing RasterElement.  To set the initial bad values that should
+    *  be used to populate a RasterElement when it is created or to set the bad
+    *  values for all bands after a RasterElement is created, use the
+    *  RasterDataDescriptor::setBadValues() method instead.
+    *
+    *  @param   pBadValues
+    *           The values that should be ignored when computing statistics.
+    *
+    *  @return  Returns \c true if the bad values were changed;
+    *           otherwise returns \c false.
+    *
+    *  @see     BadValues
+    */
+   virtual bool setBadValues(const BadValues* pBadValues) = 0;
+
+   /**
+    *  Sets values that will be excluded from statistics computation.
+    *
+    *  Certain layers (e.g. ThresholdLayer) also take these values into
+    *  account.
+    *
+    *  This method is intended to be used to change the bad values for a band
+    *  in an existing RasterElement.  To set the initial bad values that should
+    *  be used to populate a RasterElement when it is created or to set the bad
+    *  values for all bands after a RasterElement is created, use the
     *  RasterDataDescriptor::setBadValues() method instead.
     *
     *  @param   badValues
     *           The values that should be ignored when computing statistics.
+    *
+    *  @return  Returns \c true if the bad values were changed;
+    *           otherwise returns \c false.
+    *
+    *  @note    This convenience method is provided for backward compatibility where simple integer bad values
+    *           are used (e.g. importers that set 0 as the default bad value).
+    *
+    *  @see     BadValues
     */
-   virtual void setBadValues(const std::vector<int>& badValues) = 0;
+   virtual bool setBadValues(const std::vector<int>& badValues) = 0;
 
    /**
-    *  Gets the values that will be excluded from statistics computation.
-    *  These values will always be sorted.
+    *  Returns the values that will be excluded from statistics computation.
     *
-    *  @return  The values that should be ignored when computing statistics.
+    *  @return  A pointer to the BadValues object containing the values that
+    *           should be ignored when computing statistics.
+    *
+    *  @see     BadValues
     */
-   virtual const std::vector<int>& getBadValues() const = 0;
+   virtual BadValues* getBadValues()  = 0;
+
+   /**
+    *  Returns read-only access to the values that will be excluded from statistics computation.
+    *
+    *  @return  A const pointer to the BadValues object containing the values that
+    *           should be ignored when computing statistics.  The values represented by the
+    *           returned pointer should not be modified.  To modify the values, call the
+    *           non-const version of getBadValues().
+    *
+    *  @see     BadValues
+    */
+   virtual const BadValues* getBadValues() const = 0;
 
    /**
     *  Queries whether the statistics have been calculated for the data.
     *
-    *  @return  Returns \b true if the statistics have been calculated;
-    *           otherwise returns \b false.
+    *  @return  Returns \c true if the statistics have been calculated;
+    *           otherwise returns \c false.
     */
    virtual bool areStatisticsCalculated() const = 0;
 
@@ -394,8 +441,8 @@ public:
     *  @param   component
     *           The complex data component for which to query its statistics.
     *
-    *  @return  Returns \b true if the statistics have been calculated;
-    *           otherwise returns \b false.
+    *  @return  Returns \c true if the statistics have been calculated;
+    *           otherwise returns \c false.
     */
    virtual bool areStatisticsCalculated(ComplexComponent component) const = 0;
 

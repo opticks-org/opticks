@@ -10,6 +10,7 @@
 #include "ApplicationServices.h"
 #include "AppVersion.h"
 #include "AppVerify.h"
+#include "BadValues.h"
 #include "DataAccessorImpl.h"
 #include "DesktopServices.h"
 #include "DimensionDescriptor.h"
@@ -419,7 +420,7 @@ bool ResultsExporter::writeOutput(ostream &stream)
    unsigned int numRows = pDescriptor->getRowCount();
    unsigned int numColumns = pDescriptor->getColumnCount();
    EncodingType eDataType = pDescriptor->getDataType();
-   const vector<int>& badValues = pDescriptor->getBadValues();
+   const BadValues* pBadValues = pDescriptor->getBadValues();
 
    if (mbMetadata)
    {
@@ -499,7 +500,7 @@ bool ResultsExporter::writeOutput(ostream &stream)
          VERIFY(da.isValid());
 
          double dValue = ModelServices::getDataValue(eDataType, da->getColumn(), COMPLEX_MAGNITUDE, 0);
-         if (isValueExported(dValue, badValues))
+         if (isValueExported(dValue, pBadValues))
          {
             string location = getLocationString(r, c, pGeo);
             char buffer[1024];
@@ -725,11 +726,11 @@ bool ResultsExporter::extractInputArgs(PlugInArgList* pArgList)
    return true;
 }
 
-bool ResultsExporter::isValueExported(double dValue, const vector<int>& badValues) const
+bool ResultsExporter::isValueExported(double dValue, const BadValues* pBadValues) const
 {
    bool bExported = false;
 
-   if (find(badValues.begin(), badValues.end(), roundDouble(dValue)) != badValues.end())
+   if (pBadValues != NULL && pBadValues->isBadValue(dValue))
    {
       return false;
    }

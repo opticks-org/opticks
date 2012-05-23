@@ -7,20 +7,10 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <math.h>
-
-#include <QtGui/QApplication>
-#include <QtGui/QFileDialog>
-#include <QtGui/QIcon>
-#include <QtGui/QInputDialog>
-#include <QtGui/QLayout>
-#include <QtGui/QMessageBox>
-#include <QtGui/QMouseEvent>
-#include <QtGui/QWidgetAction>
-
 #include "AppVerify.h"
 #include "AppVersion.h"
-#include "BandBadValuesDlg.h"
+#include "BadValues.h"
+#include "BadValuesDlg.h"
 #include "ClassificationAdapter.h"
 #include "ColormapEditor.h"
 #include "ContextMenuAction.h"
@@ -50,7 +40,18 @@
 #include "XercesIncludes.h"
 #include "xmlreader.h"
 
+#include <math.h>
 #include <vector>
+
+#include <QtGui/QApplication>
+#include <QtGui/QFileDialog>
+#include <QtGui/QIcon>
+#include <QtGui/QInputDialog>
+#include <QtGui/QLayout>
+#include <QtGui/QMessageBox>
+#include <QtGui/QMouseEvent>
+#include <QtGui/QWidgetAction>
+
 using namespace std;
 using XERCES_CPP_NAMESPACE_QUALIFIER DOMElement;
 using XERCES_CPP_NAMESPACE_QUALIFIER DOMNode;
@@ -3330,44 +3331,44 @@ void HistogramPlotImp::setBadValues()
       return;
    }
 
-   vector<int> badValues = pStatistics->getBadValues();
-
-   BandBadValuesDlg bandBadValuesDlg(this);
-   bandBadValuesDlg.setModal(true);
-   bandBadValuesDlg.setBadValues(badValues);
-
-   if (bandBadValuesDlg.exec() == QDialog::Accepted)
+   string bandName;
+   RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(mpLayer.get());
+   if (pRasterLayer != NULL)
    {
-      bandBadValuesDlg.getBadValues(badValues);
-      pStatistics->setBadValues(badValues);
-
-      if (mpElement.get() != NULL)
+      RasterElement* pElement = pRasterLayer->getDisplayedRasterElement(mRasterChannelType);
+      DimensionDescriptor band = pRasterLayer->getDisplayedBand(mRasterChannelType);
+      if (band.isActiveNumberValid() && pElement != NULL)
       {
-         if (bandBadValuesDlg.getChangeForAllBands() == true)
+         RasterDataDescriptor* pRasterDesc = dynamic_cast<RasterDataDescriptor*>(pElement->getDataDescriptor());
+         if (pRasterDesc != NULL)
          {
-            const RasterDataDescriptor* pDescriptor =
-               dynamic_cast<const RasterDataDescriptor*>(mpElement->getDataDescriptor());
+            bandName = RasterUtilities::getBandName(pRasterDesc, band);
+         }
+      }
+   }
+
+   BadValuesDlg badValuesDlg(this, QString::fromStdString(bandName), pRasterLayer != NULL);
+   badValuesDlg.setBadValues(pStatistics->getBadValues());
+
+   if (badValuesDlg.exec() == QDialog::Accepted)
+   {
+      const BadValues* pDlgBadValues = badValuesDlg.getBadValues();
+      if (badValuesDlg.getSetAll())
+      {
+         if (mpElement.get() != NULL)
+         {
+            RasterDataDescriptor* pDescriptor =
+               dynamic_cast<RasterDataDescriptor*>(mpElement->getDataDescriptor());
             if (pDescriptor != NULL)
             {
-               const vector<DimensionDescriptor>& allBands = pDescriptor->getBands();
-               for (unsigned int i = 0; i < allBands.size(); ++i)
-               {
-                  DimensionDescriptor bandDim = allBands[i];
-                  if (bandDim.isValid())
-                  {
-                     pStatistics = mpElement->getStatistics(bandDim);
-                     if (pStatistics != NULL)
-                     {
-                        pStatistics->setBadValues(badValues);
-                     }
-                  }
-               }
+               pDescriptor->setBadValues(pDlgBadValues);
             }
          }
-
-         mpElement->updateData();
       }
-
+      else
+      {
+         pStatistics->setBadValues(pDlgBadValues);
+      }
       updateHistogramValues();
    }
 }

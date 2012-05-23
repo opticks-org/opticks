@@ -163,6 +163,10 @@ namespace IceUtilities
       THRESHOLD_LAYER
    };
    typedef EnumWrapper<FileTypeEnum> FileType;
+
+   // define current ice format version
+   static unsigned int CurrentIceFormatMajorVersion(1);
+   static unsigned int CurrentIceFormatMinorVersion(30);  // can support up to 99
 };
 
 class IceFormatDescriptor
@@ -179,7 +183,12 @@ public:
       CUBE_CLASSIFICATION, /**< Is classification present and required for the raw cube data */
       CUBE_UNITS, /**< Is unit information present and required for the raw cube data */
       CUBE_DISPLAY_INFO, /**< Is display information present and required for the raw cube data */
-      BAND_STATISTICS /**< Are Band Statistics present and required for the raw cube data */
+      BAND_STATISTICS, /**< Are Band Statistics present and required for the raw cube data.
+                       Bad values stored as vector of int.*/
+      BAND_STATISTICS_FLOATING_PT_BAD_VALUES /**< Are Band Statistics present and required for the raw cube data.
+                                             Bad values based on floating point numbers with range capability as of
+                                             Ice format version 130. Bad values stored as vector of char
+                                             containing the string representation of the bad values criteria.*/
    };
    typedef EnumWrapper<FeatureTypeEnum> FeatureType;
 

@@ -8,6 +8,7 @@
  */
 
 #include "AppVerify.h"
+#include "BadValues.h"
 #include "BitMask.h"
 #include "ContextMenuAction.h"
 #include "ContextMenuActions.h"
@@ -40,14 +41,14 @@ class ThresholdPixelOper
 {
 public:
    ThresholdPixelOper(const T* pData, int rows, int cols, double lower, double upper, PassArea passArea,
-             const vector<int>& badValues = vector<int>()) :
+             const BadValues* pBadValues = NULL) :
       mpData(pData),
       mRows(rows),
       mCols(cols),
       mLower(lower),
       mUpper(upper),
       mPassArea(passArea),
-      mBadValues(badValues)
+      mpBadValues(pBadValues)
    {}
 
    inline bool operator()(int row, int col) const
@@ -85,9 +86,9 @@ public:
          break;
       }
 
-      if (passed)
+      if (passed && mpBadValues != NULL)
       {
-         if (find(mBadValues.begin(), mBadValues.end(), roundDouble(value)) != mBadValues.end())
+         if (mpBadValues->isBadValue(value))
          {
             return false;
          }
@@ -102,7 +103,7 @@ private:
    double mLower;
    double mUpper;
    PassArea mPassArea;
-   vector<int> mBadValues;
+   const BadValues* mpBadValues;
 };
 
 ThresholdLayerImp::ThresholdLayerImp(const string& id, const string& layerName, DataElement* pElement) :
@@ -219,17 +220,17 @@ vector<ColorType> ThresholdLayerImp::getColors() const
 template<class T>
 void drawMarkers(T* pData, int stopColumn, int stopRow, int visStartColumn, int visStartRow, int visEndColumn,
                  int visEndRow, SymbolType eSymbol, QColor clrMarker, double lower, double upper, PassArea passArea,
-                 const vector<int>& badValues, int row = -1)
+                 const BadValues* pBadValues, int row = -1)
 {
    if (row < 0) // in memory so process all rows
    {
-      ThresholdPixelOper<T> oper(pData, stopRow + 1, stopColumn + 1, lower, upper, passArea, badValues);
+      ThresholdPixelOper<T> oper(pData, stopRow + 1, stopColumn + 1, lower, upper, passArea, pBadValues);
       SymbolRegionDrawer::drawMarkers(0, 0, stopColumn, stopRow, visStartColumn, visStartRow, visEndColumn,
          visEndRow, eSymbol, clrMarker, oper);
    }
    else // on disk so being processed one row at a time
    {
-      ThresholdPixelOper<T> oper(pData, 1, 0, lower, upper, passArea, badValues);
+      ThresholdPixelOper<T> oper(pData, 1, 0, lower, upper, passArea, pBadValues);
       SymbolRegionDrawer::drawMarkers(0, row, stopColumn, row, visStartColumn, visStartRow, visEndColumn,
          visEndRow, eSymbol, clrMarker, oper);
    }
@@ -246,7 +247,7 @@ void ThresholdLayerImp::draw()
       int rows = 0;
       void* pData = NULL;
       EncodingType eType;
-      vector<int> badValues;
+      const BadValues* pBadValues(NULL);
 
       const RasterDataDescriptor* pDescriptor =
          dynamic_cast<const RasterDataDescriptor*>(pElement->getDataDescriptor());
@@ -263,7 +264,7 @@ void ThresholdLayerImp::draw()
          Statistics* pStatistics = pRasterElement->getStatistics();
          if (pStatistics != NULL)
          {
-            badValues = pStatistics->getBadValues();
+            pBadValues = pStatistics->getBadValues();
          }
 
          if (pDescriptor->getBandCount() == 1 || pDescriptor->getInterleaveFormat() == BSQ)
@@ -302,14 +303,14 @@ void ThresholdLayerImp::draw()
 
             pData = accessor->getColumn();
             switchOnEncoding(eType, drawMarkers, pData, columns - 1, row, visStartColumn, row, visEndColumn,
-               row, eSymbol, clrMarker, firstThreshold, secondThreshold, mePassArea, badValues, row);
+               row, eSymbol, clrMarker, firstThreshold, secondThreshold, mePassArea, pBadValues, row);
             accessor->nextRow();
          }
       }
       else
       {
          switchOnEncoding(eType, drawMarkers, pData, columns - 1, rows - 1, visStartColumn, visStartRow,
-            visEndColumn, visEndRow, eSymbol, clrMarker, firstThreshold, secondThreshold, mePassArea, badValues);
+            visEndColumn, visEndRow, eSymbol, clrMarker, firstThreshold, secondThreshold, mePassArea, pBadValues);
       }
    }
 }
@@ -718,7 +719,7 @@ void ThresholdLayerImp::getBoundingBox(int& x1, int& y1, int& x2, int& y2) const
 
 template<class T, class Drawer>
 void fillRegion(T* pData, DataAccessor& da, Drawer drawer, double firstThreshold, double secondThreshold,
-                unsigned int numRows, unsigned int numColumns, PassArea passArea, const vector<int>& badValues)
+                unsigned int numRows, unsigned int numColumns, PassArea passArea, const BadValues* pBadValues)
 {
    for (unsigned int uiRow = 0; uiRow < numRows; ++uiRow)
    {
@@ -757,9 +758,9 @@ void fillRegion(T* pData, DataAccessor& da, Drawer drawer, double firstThreshold
             break;
          }
 
-         if (passed)
+         if (passed && pBadValues != NULL)
          {
-            if (find(badValues.begin(), badValues.end(), static_cast<int>(value + 0.5)) == badValues.end())
+            if (pBadValues->isBadValue(value) == false)
             {
                drawer(uiColumn, uiRow);
             }
@@ -799,17 +800,17 @@ const BitMask* ThresholdLayerImp::getSelectedPixels() const
             double dFirstThreshold = mdFirstThreshold;
             double dSecondThreshold = mdSecondThreshold;
 
-            vector<int> badValues;
+            const BadValues* pBadValues(NULL);
 
             Statistics* pStatistics = pRasterElement->getStatistics();
             if (pStatistics != NULL)
             {
-               badValues = pStatistics->getBadValues();
+               pBadValues = pStatistics->getBadValues();
             }
 
             DrawUtil::BitMaskPixelDrawer drawer(mpMask.get());
             switchOnEncoding(eType, fillRegion, pData, da, drawer, dFirstThreshold, dSecondThreshold, uiNumRows,
-               uiNumColumns, mePassArea, badValues);
+               uiNumColumns, mePassArea, pBadValues);
          }
       }
 

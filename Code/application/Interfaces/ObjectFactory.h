@@ -43,6 +43,7 @@ public:
     *           - double
     *           - bool
     *           - string
+    *           - BadValues
     *           - BitMask
     *           - Classification
     *           - DataRequest

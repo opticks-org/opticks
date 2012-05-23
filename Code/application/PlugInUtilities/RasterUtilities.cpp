@@ -8,6 +8,7 @@
  */
 
 #include "AppVerify.h"
+#include "BadValues.h"
 #include "DataAccessor.h"
 #include "DataAccessorImpl.h"
 #include "DataRequest.h"
@@ -1349,12 +1350,29 @@ bool RasterUtilities::rotate(RasterElement* pDst, const RasterElement* pSrc, dou
    }
    const RasterDataDescriptor* pSrcDesc = static_cast<const RasterDataDescriptor*>(pSrc->getDataDescriptor());
    RasterDataDescriptor* pDstDesc = static_cast<RasterDataDescriptor*>(pDst->getDataDescriptor());
-   std::vector<int> bvalues = pDstDesc->getBadValues();
-   if (std::find(bvalues.begin(), bvalues.end(), defaultValue) == bvalues.end())
+   if (pSrcDesc == NULL || pDstDesc == NULL)
    {
-      bvalues.push_back(defaultValue);
-      pDstDesc->setBadValues(bvalues);
+      if (pProgress != NULL)
+      {
+         pProgress->updateProgress("Unable to access the raster data descriptors.", 0, ERRORS);
+      }
+      return false;
    }
+
+   std::vector<int> badValues;
+   badValues.push_back(defaultValue);
+   BadValues* pBadValues = pDstDesc->getBadValues();
+
+   // if already has bad values defined, just add the default value
+   if (pBadValues != NULL)
+   {
+      pBadValues->addBadValues(badValues);
+   }
+   else
+   {
+      pDstDesc->setBadValues(badValues);
+   }
+
    unsigned int numRows = pSrcDesc->getRowCount();
    unsigned int numCols = pSrcDesc->getColumnCount();
    unsigned int numBands = pSrcDesc->getBandCount();
@@ -1367,7 +1385,7 @@ bool RasterUtilities::rotate(RasterElement* pDst, const RasterElement* pSrc, dou
    {
       if (pProgress != NULL)
       {
-         pProgress->updateProgress("Desitnation cube is not compatible with source cube.", 0, ERRORS);
+         pProgress->updateProgress("Destination cube is not compatible with source cube.", 0, ERRORS);
       }
       return false;
    }

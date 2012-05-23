@@ -153,6 +153,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ApplicationServicesImp.cpp" />
+    <ClCompile Include="BadValuesAdapter.cpp" />
+    <ClCompile Include="BadValuesImp.cpp" />
     <ClCompile Include="ConfigurationSettingsImp.cpp" />
     <ClCompile Include="DataVariantFactoryImp.cpp" />
     <ClCompile Include="DateTimeImp.cpp" />
@@ -182,6 +184,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ApplicationServicesImp.h" />
+    <ClInclude Include="BadValuesAdapter.h" />
+    <ClInclude Include="BadValuesImp.h" />
     <ClInclude Include="BuildRevision.h" />
     <ClInclude Include="ConfigurationSettingsImp.h" />
     <ClInclude Include="DataValueWrapper.h" />

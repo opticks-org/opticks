@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source Files">
@@ -53,10 +53,7 @@
     <ClCompile Include="BackgroundPluginWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BandBadValuesDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BandBadValuesValidator.cpp">
+    <ClCompile Include="BadValuesDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BatchEditorDlg.cpp">
@@ -383,7 +380,7 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_BackgroundPluginWindow.cpp">
       <Filter>moc</Filter>
     </ClCompile>
-    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_BandBadValuesDlg.cpp">
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_BadValuesDlg.cpp">
       <Filter>moc</Filter>
     </ClCompile>
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_BatchEditorDlg.cpp">
@@ -886,9 +883,6 @@
     <ClInclude Include="AoiToolBarAdapter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BandBadValuesValidator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DynamicObjectItemModel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1254,7 +1248,7 @@
     <CustomBuild Include="BackgroundPluginWindow.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="BandBadValuesDlg.h">
+    <CustomBuild Include="BadValuesDlg.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="BatchEditorDlg.h">

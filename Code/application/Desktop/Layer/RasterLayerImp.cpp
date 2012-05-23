@@ -16,6 +16,7 @@
 #include "Animation.h"
 #include "AppConfig.h"
 #include "AppVersion.h"
+#include "BadValues.h"
 #include "ContextMenuAction.h"
 #include "ContextMenuActions.h"
 #include "DataAccessorImpl.h"
@@ -767,12 +768,11 @@ bool RasterLayerImp::needToDrawPixelValues() const
    return false;
 }
 
-QString RasterLayerImp::stringifyValue(const void* pValue, EncodingType dataType, const vector<int>& badValues) const
+QString RasterLayerImp::stringifyValue(const void* pValue, EncodingType dataType, const BadValues* pBadValues) const
 {
    double value = ModelServices::getDataValue(dataType, pValue, mComplexComponent, 0);
 
-   int badValue = static_cast<int>(roundDouble(value));
-   if (binary_search(badValues.begin(), badValues.end(), badValue) == true)
+   if (pBadValues != NULL && pBadValues->isBadValue(value))
    {
       return QString();
    }
@@ -991,7 +991,7 @@ void RasterLayerImp::drawPixelValues()
       {
          DataAccessor accessor(NULL, NULL);
          EncodingType dataType;
-         vector<int> badValues;
+         const BadValues* pBadValues(NULL);
 
          if (mGrayBand.isValid() == true)
          {
@@ -1012,7 +1012,7 @@ void RasterLayerImp::drawPixelValues()
                Statistics* pStatistics = pElement->getStatistics(mGrayBand);
                if (pStatistics != NULL)
                {
-                  badValues = pStatistics->getBadValues();
+                  pBadValues = pStatistics->getBadValues();
                }
             }
          }
@@ -1032,7 +1032,7 @@ void RasterLayerImp::drawPixelValues()
                      QPoint centerPoint(centerScreen.mX, centerScreen.mY - fm.ascent() / 2);
 
                      // Draw the text
-                     QString strGray = stringifyValue(accessor->getColumn(), dataType, badValues);
+                     QString strGray = stringifyValue(accessor->getColumn(), dataType, pBadValues);
                      if (strGray.isEmpty() == false)
                      {
                         QPoint textOffset(-fm.width(strGray) / 2, 0);
@@ -1070,9 +1070,9 @@ void RasterLayerImp::drawPixelValues()
          EncodingType greenDataType;
          EncodingType blueDataType;
 
-         vector<int> redBadValues;
-         vector<int> greenBadValues;
-         vector<int> blueBadValues;
+         const BadValues* pRedBadValues(NULL);
+         const BadValues* pGreenBadValues(NULL);
+         const BadValues* pBlueBadValues(NULL);
 
          if (mRedBand.isValid() == true)
          {
@@ -1093,7 +1093,7 @@ void RasterLayerImp::drawPixelValues()
                Statistics* pStatistics = pElement->getStatistics(mRedBand);
                if (pStatistics != NULL)
                {
-                  redBadValues = pStatistics->getBadValues();
+                  pRedBadValues = pStatistics->getBadValues();
                }
             }
          }
@@ -1117,7 +1117,7 @@ void RasterLayerImp::drawPixelValues()
                Statistics* pStatistics = pElement->getStatistics(mGreenBand);
                if (pStatistics != NULL)
                {
-                  greenBadValues = pStatistics->getBadValues();
+                  pGreenBadValues = pStatistics->getBadValues();
                }
             }
          }
@@ -1141,7 +1141,7 @@ void RasterLayerImp::drawPixelValues()
                Statistics* pStatistics = pElement->getStatistics(mBlueBand);
                if (pStatistics != NULL)
                {
-                  blueBadValues = pStatistics->getBadValues();
+                  pBlueBadValues = pStatistics->getBadValues();
                }
             }
          }
@@ -1164,7 +1164,7 @@ void RasterLayerImp::drawPixelValues()
                QString strRed = "N/A";
                if ((redValid == true) && (redDataType.isValid()))
                {
-                  strRed = stringifyValue(redAccessor->getColumn(), redDataType, redBadValues);
+                  strRed = stringifyValue(redAccessor->getColumn(), redDataType, pRedBadValues);
                   redAccessor->nextColumn();
                }
 
@@ -1172,7 +1172,7 @@ void RasterLayerImp::drawPixelValues()
                QString strGreen = "N/A";
                if ((greenValid == true) && (greenDataType.isValid()))
                {
-                  strGreen = stringifyValue(greenAccessor->getColumn(), greenDataType, greenBadValues);
+                  strGreen = stringifyValue(greenAccessor->getColumn(), greenDataType, pGreenBadValues);
                   greenAccessor->nextColumn();
                }
 
@@ -1180,7 +1180,7 @@ void RasterLayerImp::drawPixelValues()
                QString strBlue = "N/A";
                if ((blueValid == true) && (blueDataType.isValid()))
                {
-                  strBlue = stringifyValue(blueAccessor->getColumn(), blueDataType, blueBadValues);
+                  strBlue = stringifyValue(blueAccessor->getColumn(), blueDataType, pBlueBadValues);
                   blueAccessor->nextColumn();
                }
 
@@ -3169,12 +3169,12 @@ void RasterLayerImp::generateImage()
          dynamic_cast<const RasterDataDescriptor*>(pGrayElement->getDataDescriptor());
       VERIFYNRV(pGrayDescriptor);
       EncodingType eEncodingGray = pGrayDescriptor->getDataType();
-      vector<int> badValues;
+      const BadValues* pBadValues(NULL);
 
       Statistics* pStatistics = getStatistics(GRAY);
       if (pStatistics != NULL)
       {
-         badValues = pStatistics->getBadValues();
+         pBadValues = pStatistics->getBadValues();
       }
       if (getColorMap().isDefault())
       {
@@ -3187,15 +3187,15 @@ void RasterLayerImp::generateImage()
             }
          }
 
-         GLenum format = (badValues.empty() ? GL_LUMINANCE:GL_LUMINANCE_ALPHA);
+         GLenum format = (pBadValues == NULL || pBadValues->empty() ? GL_LUMINANCE:GL_LUMINANCE_ALPHA);
          pImage->initialize(512, 512, mGrayBand, columns, rows, bands, format,
-            eEncodingGray, eComponent, NULL, eType, lstStretchValues, pGrayElement, badValues);
+            eEncodingGray, eComponent, NULL, eType, lstStretchValues, pGrayElement, pBadValues);
       }
       else // using a colormap
       {
-         GLenum format = ((badValues.empty() && mColorMap.isFullyOpaque()) ? GL_RGB : GL_RGBA);
+         GLenum format = (((pBadValues == NULL || pBadValues->empty()) && mColorMap.isFullyOpaque()) ? GL_RGB : GL_RGBA);
          pImage->initialize(512, 512, mGrayBand, columns, rows, bands, format, eEncodingGray, eComponent,
-            NULL, eType, lstStretchValues, pGrayElement, getColorTable(), badValues);
+            NULL, eType, lstStretchValues, pGrayElement, getColorTable(), pBadValues);
       }
    }
    else if (eMode == RGB_MODE)
@@ -3208,9 +3208,9 @@ void RasterLayerImp::generateImage()
       vector<double> lstGreenStretchValues = getRawStretchValues(GREEN);
       vector<double> lstBlueStretchValues = getRawStretchValues(BLUE);
 
-      vector<int> redBadValues;
-      vector<int> greenBadValues;
-      vector<int> blueBadValues;
+      const BadValues* pRedBadValues(NULL);
+      const BadValues* pGreenBadValues(NULL);
+      const BadValues* pBlueBadValues(NULL);
 
       bool applyFastContrastStretch = canApplyFastContrastStretch();
 
@@ -3223,7 +3223,7 @@ void RasterLayerImp::generateImage()
             lstRedStretchValues[1] = pStatistics->getMax(eComponent);
          }
 
-         redBadValues = pStatistics->getBadValues();
+         pRedBadValues = pStatistics->getBadValues();
       }
 
       pStatistics = getStatistics(GREEN);
@@ -3235,7 +3235,7 @@ void RasterLayerImp::generateImage()
             lstGreenStretchValues[1] = pStatistics->getMax(eComponent);
          }
 
-         greenBadValues = pStatistics->getBadValues();
+         pGreenBadValues = pStatistics->getBadValues();
       }
 
       pStatistics = getStatistics(BLUE);
@@ -3247,7 +3247,7 @@ void RasterLayerImp::generateImage()
             lstBlueStretchValues[1] = pStatistics->getMax(eComponent);
          }
 
-         blueBadValues = pStatistics->getBadValues();
+         pBlueBadValues = pStatistics->getBadValues();
       }
 
       const RasterDataDescriptor* pRedDescriptor = NULL;
@@ -3286,13 +3286,15 @@ void RasterLayerImp::generateImage()
          eBlueEncoding = pBlueDescriptor->getDataType();
       }
 
-      bool hasBadValues = !(redBadValues.empty() && greenBadValues.empty() && blueBadValues.empty());
+      bool hasBadValues = ((pRedBadValues != NULL && pRedBadValues->empty() == false) ||
+         (pGreenBadValues != NULL && pGreenBadValues->empty() == false) ||
+         (pBlueBadValues != NULL && pBlueBadValues->empty() == false));
       GLenum format = (hasBadValues ? GL_RGBA : GL_RGB);
 
       pImage->initialize(512, 512, mRedBand, mGreenBand, mBlueBand, columns, rows, bands, format,
          eRedEncoding, eGreenEncoding, eBlueEncoding, eComponent, NULL, eType, lstRedStretchValues,
          lstGreenStretchValues, lstBlueStretchValues, pRedElement, pGreenElement, pBlueElement,
-         redBadValues, greenBadValues, blueBadValues);
+         pRedBadValues, pGreenBadValues, pBlueBadValues);
    }
 
 #if defined (CG_SUPPORTED)

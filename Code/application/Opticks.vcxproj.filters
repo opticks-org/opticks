@@ -90,6 +90,9 @@
     <ClInclude Include="Interfaces\Axis.h">
       <Filter>Interfaces</Filter>
     </ClInclude>
+    <ClInclude Include="Interfaces\BadValues.h">
+      <Filter>Interfaces</Filter>
+    </ClInclude>
     <ClInclude Include="Interfaces\BitMask.h">
       <Filter>Interfaces</Filter>
     </ClInclude>

@@ -13,14 +13,26 @@
 #include "Hdf5CustomReader.h"
 #include "Hdf5CustomWriter.h"
 #include "Hdf5Resource.h"
+#include "IceUtilities.h"
+
+class StatisticsMetadataFloat
+{
+public:
+   StatisticsMetadataFloat() :
+      mStatResolution(0)
+   {}
+
+   int mStatResolution;
+   hvl_t mBadValues;
+   typedef char BadValueType;
+};
 
 class StatisticsMetadata
 {
 public:
    StatisticsMetadata() :
       mStatResolution(0)
-   {
-   }
+   {}
 
    int mStatResolution;
    hvl_t mBadValues;
@@ -73,6 +85,30 @@ public:
 
 private:
    mutable StatisticsValues* mpValue; //not owned by class
+   hid_t mDataType;
+};
+
+class StatisticsMetadataFloatReaderWriter : public Hdf5CustomReader, public Hdf5CustomWriter
+{
+public:
+   StatisticsMetadataFloatReaderWriter();
+   StatisticsMetadataFloatReaderWriter(hid_t dataType);
+   ~StatisticsMetadataFloatReaderWriter();
+
+   unsigned int getSupportedDimensionality() const;
+   Hdf5TypeResource getReadMemoryType() const;
+   bool setDataToWrite(void* pObject);
+   Hdf5TypeResource getWriteMemoryType() const;
+   Hdf5TypeResource getWriteFileType() const;
+   Hdf5DataSpaceResource createDataSpace() const;
+   bool setReadDataSpace(const std::vector<hsize_t>& dataSpace);
+   void* getReadBuffer() const;
+   const void* getWriteBuffer() const;
+   void* getValue() const;
+   bool isValid() const;
+
+private:
+   mutable StatisticsMetadataFloat* mpValue; //not owned by class
    hid_t mDataType;
 };
 

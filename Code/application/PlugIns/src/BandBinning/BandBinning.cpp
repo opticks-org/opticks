@@ -7,11 +7,9 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtCore/QString>
-#include <QtGui/QMessageBox>
-
 #include "AppVerify.h"
 #include "AppVersion.h"
+#include "BadValues.h"
 #include "BandBinning.h"
 #include "BandBinningDlg.h"
 #include "BandBinningUtilities.h"
@@ -36,6 +34,9 @@
 #include "Wavelengths.h"
 
 #include <string>
+
+#include <QtCore/QString>
+#include <QtGui/QMessageBox>
 
 REGISTER_PLUGIN_BASIC(OpticksBandBinning, BandBinning);
 
@@ -191,7 +192,7 @@ namespace
 
    // Returns true if and only if all bad values across all bands to be processed are equivalent or do not exist.
    bool getUniformBadValues(const std::vector<std::pair<DimensionDescriptor, DimensionDescriptor> >& groupedBands,
-      const RasterElement* pElement, std::vector<int>& badValues)
+      const RasterElement* pElement, std::string& badValuesStr)
    {
       VERIFY(groupedBands.empty() == false);
       VERIFY(pElement != NULL);
@@ -199,7 +200,7 @@ namespace
          dynamic_cast<const RasterDataDescriptor*>(pElement->getDataDescriptor());
       VERIFY(pDescriptor != NULL);
 
-      badValues.clear();
+      badValuesStr.clear();
       bool firstIteration = true;
       for (
          std::vector<std::pair<DimensionDescriptor, DimensionDescriptor> >::const_iterator iter = groupedBands.begin();
@@ -213,15 +214,17 @@ namespace
             DimensionDescriptor band = pDescriptor->getActiveBand(activeNumber);
             Statistics* pStatistics = pElement->getStatistics(band);
             VERIFY(pStatistics != NULL);
-            const std::vector<int>& bandBadValues = pStatistics->getBadValues();  // Assumes sorted.
+            const BadValues* pBandBadValues = pStatistics->getBadValues();
+            const std::string bandBadValuesStr =
+               pBandBadValues != NULL ? pBandBadValues->getBadValuesString() : std::string();
             if (firstIteration == true)
             {
                firstIteration = false;
-               badValues = bandBadValues;
+               badValuesStr = bandBadValuesStr;
             }
-            else if (badValues != bandBadValues)
+            else if (badValuesStr != bandBadValuesStr)
             {
-               badValues.clear();
+               badValuesStr.clear();
                return false;
             }
          }
@@ -236,10 +239,10 @@ namespace
    void createGroupedBandsBipUniformBadValues(const T* pJunk, ProgressTracker& progress, const bool& aborted,
       const RasterElement* pElement, RasterElement* pOutputElement,
       const std::vector<std::pair<DimensionDescriptor, DimensionDescriptor> >& groupedBands,
-      const std::vector<int>& badValues)
+      const BadValues* pBadValues)
    {
       // Timing tests have shown that this bool improves performance by as much as 25% when no bad values are present.
-      const bool zeroBadValues = badValues.empty();
+      const bool zeroBadValues = (pBadValues == NULL || pBadValues->empty());
 
       VERIFYNRV(pElement != NULL);
       const RasterDataDescriptor* pDescriptor =
@@ -280,7 +283,7 @@ namespace
          DataAccessor dstAccessor = pOutputElement->getDataAccessor(pOutputRequest.release());
          Statistics* pStatistics = pOutputElement->getStatistics(pOutputDescriptor->getActiveBand(i));
          VERIFYNRV(pStatistics != NULL);
-         pStatistics->setBadValues(badValues);
+         pStatistics->setBadValues(pBadValues);
 
          // Iterate over each pixel, averaging each in turn.
          const std::string text = QString("Creating bin %1 of %2").arg(i + 1).arg(groupedBands.size()).toStdString();
@@ -303,7 +306,7 @@ namespace
                for (unsigned int band = 0; band < bandCount; ++band)
                {
                   if (zeroBadValues ||
-                     std::binary_search(badValues.begin(), badValues.end(), static_cast<int>(*pSrc)) == false)
+                     pBadValues->isBadValue(static_cast<double>(*pSrc)) == false)
                   {
                      average += static_cast<double>(*pSrc);
                      ++goodValueCount;
@@ -315,13 +318,18 @@ namespace
                T* const pDst = reinterpret_cast<T*>(dstAccessor->getColumn());
                if (goodValueCount == 0)
                {
-                  *pDst = static_cast<T>(badValues.front());
+                  double badValue(0.0);    // default bad value
+                  if (pBadValues != NULL)  // unlikely to be NULL since no good values were found, but check to be safe
+                  {
+                     badValue = pBadValues->getDefaultBadValue();
+                  }
+                  *pDst = static_cast<T>(badValue);
                }
                else
                {
                   *pDst = static_cast<T>(average / goodValueCount); // Truncates integer types.
-                  if (zeroBadValues == false &&
-                     std::binary_search(badValues.begin(), badValues.end(), static_cast<int>(*pDst)) == true)
+                  if (zeroBadValues == false &&                     // pBadValues can't be NULL if zeroBadValues is false
+                     pBadValues->isBadValue(static_cast<double>(*pDst)) == true)
                   {
                      // Corner case: the average of one or more good values happened to match a defined bad value.
                      // Flag a warning, keep the pixel set to the bad value, and continue processing.
@@ -407,7 +415,7 @@ namespace
                VERIFYNR(srcAccessor.isValid());
                VERIFYNR(dstAccessor.isValid());
 
-               double average = 0;  // Use type double instead of T to combat overflow.
+               double average = 0.0;  // Use type double instead of T to combat overflow.
                unsigned int goodValueCount = 0;
                const T* pSrc = reinterpret_cast<T*>(srcAccessor->getColumn());
                T* const pDst = reinterpret_cast<T*>(dstAccessor->getColumn());
@@ -417,11 +425,11 @@ namespace
                      pDescriptor->getActiveBand(groupedBands[i].first.getActiveNumber() + band);
                   Statistics* pStatistics = pElement->getStatistics(activeBand);
                   VERIFYNRV(pStatistics != NULL);
-                  std::vector<int> badValues = pStatistics->getBadValues();   // Assumes badValues are sorted.
-                  if (std::binary_search(badValues.begin(), badValues.end(), static_cast<int>(*pSrc)) == true)
+                  const BadValues* pBadValues = pStatistics->getBadValues();
+                  if (pBadValues != NULL && pBadValues->isBadValue(static_cast<double>(*pSrc)) == true)
                   {
                      // Always writes the most recently encountered (arbitrary choice) bad value into *pDst.
-                     *pDst = static_cast<T>(*pSrc);
+                     *pDst = *pSrc;
                   }
                   else
                   {
@@ -437,14 +445,15 @@ namespace
                   anyBadValuesSet = true;
                   Statistics* pStatistics = pOutputElement->getStatistics(pOutputDescriptor->getActiveBand(i));
                   VERIFYNRV(pStatistics != NULL);
-                  std::vector<int> badValues = pStatistics->getBadValues();
-                  if (badValues.empty())
+                  BadValues* pBadValues = pStatistics->getBadValues();  // Statistics has BadValuesAdapter so always non-NULL
+                  if (pBadValues->empty())
                   {
-                     pStatistics->setBadValues(std::vector<int>(1, *pDst));
+                     QString badValStr = QString("%1").arg(*pDst);
+                     pBadValues->addBadValue(badValStr.toStdString());
                   }
                   else
                   {
-                     *pDst = badValues.front();
+                     *pDst = static_cast<T>(pBadValues->getDefaultBadValue());
                   }
                }
                else
@@ -595,11 +604,13 @@ bool BandBinning::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
    // Scan the requested bands prior to running the algorithm to determine if the bad values are uniform.
    // If the bad values are uniform, run an optimized version of the algorithm which uses a const std::vector<int>
    // across all bands instead of querying each individual band for its bad values.
-   std::vector<int> badValues;
-   if (getUniformBadValues(groupedBands, pElement, badValues) == true)
+   std::string badValuesStr;
+   if (getUniformBadValues(groupedBands, pElement, badValuesStr) == true)
    {
+      FactoryResource<BadValues> pBadValues;
+      pBadValues->setBadValues(badValuesStr);
       switchOnEncoding(pDescriptor->getDataType(), createGroupedBandsBipUniformBadValues, NULL,
-         progress, mAborted, pElement, pOutputElement.get(), groupedBands, badValues);
+         progress, mAborted, pElement, pOutputElement.get(), groupedBands, pBadValues.get());
    }
    else
    {

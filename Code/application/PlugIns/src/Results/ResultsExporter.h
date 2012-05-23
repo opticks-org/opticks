@@ -20,6 +20,7 @@
 #include <string>
 #include <ostream>
 
+class BadValues;
 class Progress;
 class RasterElement;
 class ResultsOptionsWidget;
@@ -47,7 +48,7 @@ public:
 
 protected:
    bool extractInputArgs(PlugInArgList* pArgList);
-   bool isValueExported(double dValue, const std::vector<int>& badValues) const;
+   bool isValueExported(double dValue, const BadValues* pBadValues) const;
    std::string getLocationString(unsigned int uiRow, unsigned int uiColumn, const RasterElement* pGeo) const;
    RasterElement* getGeoreferencedRaster() const;
    bool writeOutput(std::ostream &stream);

@@ -10,11 +10,14 @@
 #ifndef RASTERDATADESCRIPTORIMP_H
 #define RASTERDATADESCRIPTORIMP_H
 
+#include "AttachmentPtr.h"
+#include "BadValues.h"
 #include "DataDescriptorImp.h"
 #include "DimensionDescriptor.h"
 #include "TypesFile.h"
 #include "UnitsAdapter.h"
 
+#include <boost/any.hpp>
 #include <string>
 #include <vector>
 
@@ -38,8 +41,10 @@ public:
    void setInterleaveFormat(InterleaveFormatType format);
    InterleaveFormatType getInterleaveFormat() const;
 
+   void setBadValues(const BadValues* pBadValues);
+   const BadValues* getBadValues() const;
    void setBadValues(const std::vector<int>& badValues);
-   const std::vector<int>& getBadValues() const;
+   BadValues* getBadValues();
 
    void setRows(const std::vector<DimensionDescriptor>& rows);
    const std::vector<DimensionDescriptor>& getRows() const;
@@ -94,6 +99,7 @@ public:
 
 protected:
    void notifyUnitsModified(Subject& subject, const std::string& signal, const boost::any& data);
+   void notifyBadValuesChanged(Subject& subject, const std::string& signal, const boost::any& value);
 
 private:
    RasterDataDescriptorImp(const RasterDataDescriptorImp& rhs);
@@ -102,7 +108,7 @@ private:
    EncodingType mDataType;
    std::vector<EncodingType> mValidDataTypes;
    InterleaveFormatType mInterleave;
-   std::vector<int> mBadValues;
+   AttachmentPtr<BadValues> mpBadValues;
 
    std::vector<DimensionDescriptor> mRows;
    std::vector<DimensionDescriptor> mColumns;
@@ -148,11 +154,19 @@ private:
    { \
       return impClass::getBytesPerElement(); \
    } \
+   void setBadValues(const BadValues* pBadValues) \
+   { \
+      impClass::setBadValues(pBadValues); \
+   } \
    void setBadValues(const std::vector<int>& badValues) \
    { \
       impClass::setBadValues(badValues); \
    } \
-   const std::vector<int>& getBadValues() const \
+   const BadValues* getBadValues() const \
+   { \
+      return impClass::getBadValues(); \
+   } \
+   BadValues* getBadValues() \
    { \
       return impClass::getBadValues(); \
    } \

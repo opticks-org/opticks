@@ -8,6 +8,7 @@
  */
 
 #include "AppVersion.h"
+#include "BadValues.h"
 #include "Classification.h"
 #include "ColorType.h"
 #include "DataAccessor.h"
@@ -98,13 +99,8 @@ void IceWriter::writeFileHeader()
    string arch = pSettings->getArchitectureName();
    ICEVERIFY(HdfUtilities::writeAttribute<string>(*formatDescriptor, "CreatorOS", os));
    ICEVERIFY(HdfUtilities::writeAttribute<string>(*formatDescriptor, "CreatorArch", arch));
-   unsigned int majorVersion = 1;
-   unsigned int minorVersion = 20; //support 0-99 minor versions
-   if ((mFileType == IceUtilities::RASTER_ELEMENT) || (mFileType == IceUtilities::PSEUDOCOLOR_LAYER))
-   {
-      minorVersion = 10;   // Write version 1.10 raster element and pseudocolor layer files
-                           // so that they can be loaded by previous importer versions
-   }
+   unsigned int majorVersion = IceUtilities::CurrentIceFormatMajorVersion;
+   unsigned int minorVersion = IceUtilities::CurrentIceFormatMinorVersion;
    unsigned int formatVersion = (majorVersion * 100) + minorVersion;
    ICEVERIFY(HdfUtilities::writeAttribute<unsigned int>(*formatDescriptor, "FormatVersion", formatVersion));
    ICEVERIFY(HdfUtilities::writeAttribute<string>(*formatDescriptor,
@@ -340,10 +336,10 @@ void IceWriter::writeCube(const string& hdfPath,
    { //scoped so that statMetadataWriter can close any resources it has open
       vector<hsize_t> statDimensions;
       statDimensions.push_back(bands.size());
-      Hdf5IncrementalWriter<StatisticsMetadata> statMetadataWriter(mFileHandle,
+      Hdf5IncrementalWriter<StatisticsMetadataFloat> statMetadataWriter(mFileHandle,
          string(statPath + "/Metadata"), statDimensions);
 
-      StatisticsMetadata statMetadata;
+      StatisticsMetadataFloat statMetadata;
       hsize_t row = 0;
       for (vector<DimensionDescriptor>::const_iterator bandIter = bands.begin();
            bandIter != bands.end();
@@ -358,6 +354,10 @@ void IceWriter::writeCube(const string& hdfPath,
          int activeNumber = curBand.getActiveNumber();
          DimensionDescriptor loadedCurBand = pDataDesc->getActiveBand(activeNumber);
          Statistics* pStatistics = pCube->getStatistics(loadedCurBand);
+         std::string badValuesStr;
+         statMetadata.mStatResolution = 0;
+         statMetadata.mBadValues.len = 0;
+         statMetadata.mBadValues.p = NULL;
          if (pStatistics != NULL)
          {
             if (pStatistics->areStatisticsCalculated())
@@ -365,23 +365,18 @@ void IceWriter::writeCube(const string& hdfPath,
                calculatedStatistics.push_back(make_pair(pStatistics, curBand.getOnDiskNumber()));
             }
             statMetadata.mStatResolution = pStatistics->getStatisticsResolution();
-            const vector<int>& badValues = pStatistics->getBadValues();
-            statMetadata.mBadValues.len = badValues.size();
-            if (statMetadata.mBadValues.len != 0)
+            const BadValues* pBadValues = pStatistics->getBadValues();
+            if (pBadValues != NULL)
             {
-               statMetadata.mBadValues.p = const_cast<int*>(&(badValues.front()));
-            }
-            else
-            {
-               statMetadata.mBadValues.p = NULL;
+               badValuesStr = pBadValues->getBadValuesString();
+               statMetadata.mBadValues.len = badValuesStr.length();
+               if (statMetadata.mBadValues.len > 0)
+               {
+                  statMetadata.mBadValues.p = &badValuesStr[0];
+               }
             }
          }
-         else
-         {
-            statMetadata.mStatResolution = 0;
-            statMetadata.mBadValues.len = 0;
-            statMetadata.mBadValues.p = NULL;
-         }
+
          ICEVERIFY(statMetadataWriter.writeBlock(row, statMetadata));
       }
    }

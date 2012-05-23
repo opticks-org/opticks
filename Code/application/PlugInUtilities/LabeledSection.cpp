@@ -211,7 +211,7 @@ void LabeledSection::updateIndicator()
       if (pStyle != NULL)
       {
          QPixmap labelPixmap(9, 9);
-         labelPixmap.fill(Qt::white);
+         labelPixmap.fill(Qt::transparent);
 
          QStyleOption option;
          option.rect = labelPixmap.rect();

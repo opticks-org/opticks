@@ -19,6 +19,7 @@
 #include "TypesFile.h"
 #include "ProgressAdapter.h"
 
+#include <boost/any.hpp>
 #include <vector>
 
 class RasterElementImp : public DataElementImp
@@ -93,6 +94,9 @@ public:
    void updateGeoreferenceData();
 
 protected:
+   void updateStatisticsBadValues(Subject& subject, const std::string& signal, const boost::any& value);
+   void updateDescriptorBadValues(Subject& subject, const std::string& signal, const boost::any& value);
+
    RasterElement* createChipInternal(DataElement* pParent, const std::string& name,
       const std::vector<DimensionDescriptor>& selectedRows,
       const std::vector<DimensionDescriptor>& selectedColumns,

@@ -22,6 +22,7 @@
 #include <vector>
 
 class Animation;
+class BadValues;
 class Image;
 class ImageFilterDescriptor;
 class QAction;
@@ -292,7 +293,7 @@ private:
    bool xmlToChannel(DOMNode* pDocument, RasterElement*& pElem, 
       RegionUnits &units, DimensionDescriptor &descriptor, double &minValue, double &maxValue);
    double calculateThresholdForEncodingType(EncodingType type) const;
-   QString stringifyValue(const void* pValue, EncodingType dataType, const std::vector<int>& badValues) const;
+   QString stringifyValue(const void* pValue, EncodingType dataType, const BadValues* pBadValues) const;
 };
 
 #define RASTERLAYERADAPTEREXTENSION_CLASSES \

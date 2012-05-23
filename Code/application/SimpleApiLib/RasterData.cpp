@@ -8,6 +8,7 @@
  */
 
 #include "ApiUtilities.h"
+#include "BadValues.h"
 #include "DataAccessor.h"
 #include "DataAccessorImpl.h"
 #include "DataElement.h"
@@ -20,6 +21,7 @@
 #include "RasterUtilities.h"
 #include "SimpleApiErrors.h"
 #include "Statistics.h"
+#include "StringUtilities.h"
 #include "switchOnEncoding.h"
 #include "TypeConverter.h"
 
@@ -211,16 +213,14 @@ extern "C"
       pDataInfo->encodingType = static_cast<uint32_t>(pDescriptor->getDataType());
       pDataInfo->encodingTypeSize = RasterUtilities::bytesInEncoding(pDescriptor->getDataType());
       pDataInfo->interleaveFormat = static_cast<uint32_t>(pDescriptor->getInterleaveFormat());
-      const std::vector<int>& badValues = pDescriptor->getBadValues();
-      pDataInfo->numBadValues = badValues.size();
-      if (pDataInfo->numBadValues == 0)
+      BadValues* pBadValues = pDescriptor->getBadValues();
+      if (pBadValues != NULL)
       {
-         pDataInfo->pBadValues = NULL;
+         pDataInfo->pBadValues = createBadValues(pBadValues->getBadValuesString().c_str());
       }
       else
       {
-         pDataInfo->pBadValues = new int32_t[pDataInfo->numBadValues];
-         memcpy(pDataInfo->pBadValues, &badValues[0], pDataInfo->numBadValues * sizeof(int32_t));
+         pDataInfo->pBadValues = NULL;
       }
 
       setLastError(SIMPLE_NO_ERROR);
@@ -231,7 +231,7 @@ extern "C"
    {
       if (pDataInfo != NULL)
       {
-         delete [] pDataInfo->pBadValues;
+         Service<ObjectFactory>()->destroyObject(pDataInfo->pBadValues, TypeConverter::toString<BadValues>());
          delete pDataInfo;
       }
    }
@@ -279,18 +279,12 @@ extern "C"
             return NULL;
          }
       }
-      if (args.pBadValues != NULL && args.numBadValues > 0)
+      if (args.pBadValues != NULL)
       {
          RasterDataDescriptor* pDesc = static_cast<RasterDataDescriptor*>(pElement->getDataDescriptor());
          if (pDesc != NULL)
          {
-            std::vector<int> badValues;
-            badValues.reserve(args.numBadValues);
-            for (uint32_t idx = 0; idx < args.numBadValues; ++idx)
-            {
-               badValues.push_back(args.pBadValues[idx]);
-            }
-            pDesc->setBadValues(badValues);
+            pDesc->setBadValues(args.pBadValues);
 
             // set on the statistics objects
             const std::vector<DimensionDescriptor>& allBands = pDesc->getBands();
@@ -302,7 +296,7 @@ extern "C"
                   Statistics* pStats = pElement->getStatistics(*band);
                   if (pStats != NULL)
                   {
-                     pStats->setBadValues(badValues);
+                     pStats->setBadValues(args.pBadValues);
                   }
                }
             }
@@ -312,6 +306,43 @@ extern "C"
 
       setLastError(SIMPLE_NO_ERROR);
       return pElement;
+   }
+
+   BadValues* createBadValues(const char* pBadValuesStr)
+   {
+      FactoryResource<BadValues> pBadValues;
+      if (pBadValues.get() == NULL)
+      {
+         setLastError(SIMPLE_OTHER_FAILURE);
+         return NULL;
+      }
+      if (pBadValuesStr != NULL)
+      {
+         std::string badValuesStr(pBadValuesStr);
+         pBadValues->setBadValues(badValuesStr);
+         if (pBadValues->getBadValuesString() != badValuesStr)
+         {
+            setLastError(SIMPLE_BAD_PARAMS);
+            return NULL;
+         }
+      }
+      return pBadValues.release();
+   }
+
+   int isDataValueBad(BadValues* pBadValues, double value)
+   {
+      setLastError(SIMPLE_NO_ERROR);
+      if (pBadValues == NULL)  // all values good if pBadValues is NULL
+      {
+         return 1;
+      }
+
+      return pBadValues->isBadValue(value);
+   }
+
+   void destroyBadValues(BadValues* pBadValues)
+   {
+      Service<ObjectFactory>()->destroyObject(pBadValues, TypeConverter::toString<BadValues>());
    }
 
    void* createDataPointer(DataElement* pElement, DataPointerArgs* pArgs, int* pOwn)

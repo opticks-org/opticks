@@ -9,6 +9,7 @@
 
 #include "AppConfig.h"
 #include "AppVerify.h"
+#include "BadValues.h"
 #include "ConfigurationSettings.h"
 #include "ConvertToBilPager.h"
 #include "ConvertToBipPager.h"
@@ -37,6 +38,8 @@
 #include "SessionItemDeserializer.h"
 #include "SessionItemSerializer.h"
 #include "SessionManager.h"
+#include "SignalBlocker.h"
+#include "Slot.h"
 #include "StatisticsImp.h"
 #include "xmlwriter.h"
 
@@ -164,6 +167,9 @@ RasterElementImp::RasterElementImp(const DataDescriptorImp& descriptor, const st
    RasterDataDescriptorImp* pDescriptor = dynamic_cast<RasterDataDescriptorImp*>(getDataDescriptor());
    if (pDescriptor != NULL)
    {
+      // don't need to worry about detaching later since RasterElementImp owns the instance of RasterDataDescriptorImp 
+      VERIFYNR(pDescriptor->attach(SIGNAL_NAME(RasterDataDescriptor, BadValuesChanged),
+         Slot(this, &RasterElementImp::updateStatisticsBadValues)));
       addPropertiesPage("Wavelength Properties");
 
       RasterFileDescriptorImp* pFileDescriptor = dynamic_cast<RasterFileDescriptorImp*>(
@@ -171,21 +177,29 @@ RasterElementImp::RasterElementImp(const DataDescriptorImp& descriptor, const st
       vector<DimensionDescriptor> bands = pDescriptor->getBands();
       vector<DimensionDescriptor> fileBands;
       vector<DimensionDescriptor>::iterator fileBandIter;
-      vector<int> badValues = pDescriptor->getBadValues();
 
       if (pFileDescriptor != NULL)
       {
          fileBands = pFileDescriptor->getBands();
          fileBandIter = fileBands.begin();
       }
+
+      const BadValues* pBadValues = pDescriptor->getBadValues();
       for (vector<DimensionDescriptor>::size_type i = 0; i < bands.size(); ++i)
       {
          bands[i].setActiveNumber(i);
          StatisticsImp* pStatistics = new StatisticsImp(this, bands[i]);
          if (pStatistics != NULL)
          {
-            pStatistics->setBadValues(badValues);
+            pStatistics->setBadValues(pBadValues);
             mStatistics[bands[i]] = pStatistics;
+            BadValues* pStatisticsBadVals = mStatistics[bands[i]]->getBadValues();
+            if (pStatisticsBadVals != NULL)
+            {
+               // don't need to worry about detaching later since RasterElementImp owns the instance of StatisticsImp 
+               VERIFYNR(pStatisticsBadVals->attach(SIGNAL_NAME(Subject, Modified),
+                  Slot(this, &RasterElementImp::updateDescriptorBadValues)));
+            }
          }
          if (!fileBands.empty())
          {
@@ -286,6 +300,11 @@ RasterElementImp::~RasterElementImp()
       pPluginManager->destroyPlugIn(dynamic_cast<PlugIn*>(mpGeoPlugin));
    }
 
+   for (map<DimensionDescriptor, StatisticsImp*>::iterator iter = mStatistics.begin();
+      iter != mStatistics.end(); ++iter)
+   {
+      delete iter->second;
+   }
 }
 
 double RasterElementImp::getPixelValue(DimensionDescriptor columnDim, DimensionDescriptor rowDim,
@@ -1399,6 +1418,12 @@ bool RasterElementImp::deserialize(SessionItemDeserializer& deserializer)
          }
       }
       setDisplayName(A(pRoot->getAttribute(X("displayName"))));
+
+      for (map<DimensionDescriptor, StatisticsImp*>::iterator iter = mStatistics.begin();
+         iter != mStatistics.end(); ++iter)
+      {
+         delete iter->second;
+      }
       mStatistics.clear();
       const RasterDataDescriptorImp* pDataDesc = static_cast<RasterDataDescriptorImp*>(getDataDescriptor());
       for (DOMNode *pNode = pRoot->getFirstChild(); pNode != NULL; pNode = pNode->getNextSibling())
@@ -2206,4 +2231,84 @@ void RasterElementImp::updateGeoreferenceData()
    {
       notify(SIGNAL_NAME(RasterElement, GeoreferenceModified));
    }
+}
+
+// This method receives notification that the bad values object in the raster data descriptor has changed and sets
+// the new bad values criteria into all the statistics objects for the bands.
+void RasterElementImp::updateStatisticsBadValues(Subject& subject, const std::string& signal, const boost::any& value)
+{
+   BadValues* pNewBadValues = boost::any_cast<BadValues*>(value);
+   if (pNewBadValues == NULL)
+   {
+      return;  // bands are now using different bad values so nothing to do
+   }
+
+   bool valuesChanged(false);
+   for (std::map<DimensionDescriptor, StatisticsImp*>::iterator iter = mStatistics.begin();
+      iter != mStatistics.end(); ++iter)
+   {
+      StatisticsImp* pStatistics = iter->second;
+      if (pStatistics == NULL)
+      {
+         continue;
+      }
+      SignalBlocker blocker(*pStatistics->getBadValues());  // prevent each change notifying updateDescriptorBadValues
+      if (pStatistics->setBadValues(pNewBadValues))
+      {
+         valuesChanged = true;
+         pStatistics->resetAll();  // since we're blocking the bad values Modified signal, we need to call resetAll()
+      }
+   }
+
+   if (valuesChanged)
+   {
+      mModified = true;
+      notify(SIGNAL_NAME(RasterElement, DataModified));
+   }
+}
+
+// This method receives notification that the bad values object in a statistics object has changed.
+void RasterElementImp::updateDescriptorBadValues(Subject& subject, const std::string& signal, const boost::any& value)
+{
+   RasterDataDescriptor* pRasterDd = dynamic_cast<RasterDataDescriptor*>(getDataDescriptor());
+   VERIFYNRV(pRasterDd != NULL);
+   BadValues* pChangedBadValues = dynamic_cast<BadValues*>(&subject);
+   if (pChangedBadValues == NULL)
+   {
+      return;
+   }
+
+   // check if the changes to this BadValues object results in all bands using same bad values criteria
+   bool usingDifferentBadValues(false);
+   std::map<DimensionDescriptor, StatisticsImp*>::const_iterator iter = mStatistics.begin();
+   StatisticsImp* pStatisticsImp = iter->second;
+   VERIFYNRV(pStatisticsImp != NULL);
+   const BadValues* pFirstBadValues = pStatisticsImp->getBadValues();
+   ++iter;
+   for (; iter != mStatistics.end(); ++iter)
+   {
+      StatisticsImp* pImp = iter->second;
+      if (pImp == NULL)
+      {
+         continue;
+      }
+      const BadValues* pBadValues = pImp->getBadValues();
+      if (pBadValues->compare(pFirstBadValues) == false)
+      {
+         usingDifferentBadValues = true;
+         break;
+      }
+   }
+
+   if (usingDifferentBadValues)
+   {
+      pRasterDd->setBadValues(NULL);
+   }
+   else
+   {
+      pRasterDd->setBadValues(pFirstBadValues);
+   }
+
+   mModified = true;
+   notify(SIGNAL_NAME(RasterElement, DataModified));
 }

@@ -7,9 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <limits>
-#include <math.h>
-
 #include "AppVerify.h"
 #include "DataAccessorImpl.h"
 #include "DrawUtil.h"
@@ -24,6 +21,9 @@
 #include "Tile.h"
 #include "UtilityServicesImp.h"
 
+#include <limits>
+#include <math.h>
+
 using namespace std;
 using namespace mta;
 
@@ -33,7 +33,7 @@ unsigned int Image::TileSet::sNextId = 0;
 Image::Image() :
    mInfo(0, DimensionDescriptor(), DimensionDescriptor(), DimensionDescriptor(), LINEAR, std::vector<double>(),
       std::vector<double>(), std::vector<double>(), sDefaultColorMap, COMPLEX_MAGNITUDE, GL_LUMINANCE, NULL,
-      NULL, NULL, std::vector<int>(), std::vector<int>(), std::vector<int>()),
+      NULL, NULL, NULL, NULL, NULL),
    mNumTilesX(0),
    mNumTilesY(0),
    mpTiles(NULL),
@@ -44,11 +44,11 @@ Image::Image() :
 void Image::initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsigned int imageSizeX,
                        unsigned int imageSizeY, unsigned int channels, GLenum format, EncodingType type, void* data,
                        StretchType stretchType, vector<double>& stretchPoints, RasterElement* pRasterElement,
-                       const vector<int>& badValues)
+                       const BadValues* pBadValues)
 {
    mInfo = ImageData(channels, channel, DimensionDescriptor(), DimensionDescriptor(), stretchType, stretchPoints,
       std::vector<double>(), std::vector<double>(), sDefaultColorMap, COMPLEX_MAGNITUDE, GL_LUMINANCE,
-      pRasterElement, pRasterElement, pRasterElement, badValues, std::vector<int>(), std::vector<int>());
+      pRasterElement, pRasterElement, pRasterElement, pBadValues, NULL, NULL);
    mInfo.mTileSizeX = sizeX;
    mInfo.mTileSizeY = sizeY;
    mInfo.mImageSizeX = imageSizeX;
@@ -86,11 +86,11 @@ void Image::initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsign
 void Image::initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsigned int imageSizeX,
                        unsigned int imageSizeY, unsigned int channels, GLenum format, EncodingType type,
                        ComplexComponent component, void* data, StretchType stretchType, vector<double>& stretchPoints,
-                       RasterElement* pRasterElement, const vector<int>& badValues)
+                       RasterElement* pRasterElement, const BadValues* pBadValues)
 {
    mInfo = ImageData(channels, channel, DimensionDescriptor(), DimensionDescriptor(), stretchType, stretchPoints,
       vector<double>(), vector<double>(), sDefaultColorMap, component, GL_LUMINANCE, pRasterElement, pRasterElement,
-      pRasterElement, badValues, std::vector<int>(), std::vector<int>());
+      pRasterElement, pBadValues, NULL, NULL);
    mInfo.mTileSizeX = sizeX;
    mInfo.mTileSizeY = sizeY;
    mInfo.mImageSizeX = imageSizeX;
@@ -129,11 +129,11 @@ void Image::initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsign
 void Image::initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsigned int imageSizeX,
                        unsigned int imageSizeY, unsigned int channels, GLenum format, EncodingType type, void* data,
                        StretchType stretchType, vector<double>& stretchPoints, RasterElement* pRasterElement,
-                       const vector<ColorType>& colorMap, const vector<int>& badValues)
+                       const vector<ColorType>& colorMap, const BadValues* pBadValues)
 {
    mInfo = ImageData(channels, channel, DimensionDescriptor(), DimensionDescriptor(), stretchType, stretchPoints,
       vector<double>(), vector<double>(), colorMap, COMPLEX_MAGNITUDE, GL_LUMINANCE, pRasterElement, pRasterElement,
-      pRasterElement, badValues, std::vector<int>(), std::vector<int>());
+      pRasterElement, pBadValues, NULL, NULL);
    mInfo.mTileSizeX = sizeX;
    mInfo.mTileSizeY = sizeY;
    mInfo.mImageSizeX = imageSizeX;
@@ -170,11 +170,11 @@ void Image::initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsign
 void Image::initialize(int sizeX, int sizeY, DimensionDescriptor channel, unsigned int imageSizeX,
                        unsigned int imageSizeY, unsigned int channels, GLenum format, EncodingType type,
                        ComplexComponent component, void* data, StretchType stretchType, vector<double>& stretchPoints,
-                       RasterElement* pRasterElement, const vector<ColorType>& colorMap, const vector<int>& badValues)
+                       RasterElement* pRasterElement, const vector<ColorType>& colorMap, const BadValues* pBadValues)
 {
    mInfo = ImageData(channels, channel, DimensionDescriptor(), DimensionDescriptor(), stretchType, stretchPoints,
       vector<double>(), vector<double>(), colorMap, component, GL_LUMINANCE, pRasterElement, pRasterElement,
-      pRasterElement, badValues, std::vector<int>(), std::vector<int>());
+      pRasterElement, pBadValues, NULL, NULL);
    mInfo.mTileSizeX = sizeX;
    mInfo.mTileSizeY = sizeY;
    mInfo.mImageSizeX = imageSizeX;
@@ -214,11 +214,11 @@ void Image::initialize(int sizeX, int sizeY, DimensionDescriptor band1, Dimensio
                        unsigned int channels, GLenum format, EncodingType type, void *data, StretchType stretchType,
                        vector<double>& stretchPointsRed, vector<double>& stretchPointsGreen,
                        vector<double>& stretchPointsBlue, RasterElement* pRasterElement,
-                       const vector<int>& badValues1, const vector<int>& badValues2, const vector<int>& badValues3)
+                       const BadValues* pBadValues1, const BadValues* pBadValues2, const BadValues* pBadValues3)
 {
    mInfo = ImageData(channels, band1, band2, band3, stretchType, stretchPointsRed, stretchPointsGreen,
       stretchPointsBlue, sDefaultColorMap, COMPLEX_MAGNITUDE, GL_RGB, pRasterElement, pRasterElement, pRasterElement,
-      badValues1, badValues2, badValues3);
+      pBadValues1, pBadValues2, pBadValues3);
    mInfo.mTileSizeX = sizeX;
    mInfo.mTileSizeY = sizeY;
    mInfo.mImageSizeX = imageSizeX;
@@ -256,12 +256,12 @@ void Image::initialize(int sizeX, int sizeY, DimensionDescriptor band1, Dimensio
                        DimensionDescriptor band3, unsigned int imageSizeX, unsigned int imageSizeY,
                        unsigned int channels, GLenum format, EncodingType type, ComplexComponent component, void* data,
                        StretchType stretchType, vector<double>& stretchPointsRed, vector<double>& stretchPointsGreen,
-                       vector<double>& stretchPointsBlue, RasterElement* pRasterElement, const vector<int>& badValues1,
-                       const vector<int>& badValues2, const vector<int>& badValues3)
+                       vector<double>& stretchPointsBlue, RasterElement* pRasterElement, const BadValues* pBadValues1,
+                       const BadValues* pBadValues2, const BadValues* pBadValues3)
 {
    mInfo = ImageData(channels, band1, band2, band3, stretchType, stretchPointsRed, stretchPointsGreen,
       stretchPointsBlue, sDefaultColorMap, component, GL_RGB, pRasterElement, pRasterElement, pRasterElement,
-      badValues1, badValues2, badValues3);
+      pBadValues1, pBadValues2, pBadValues3);
    mInfo.mTileSizeX = sizeX;
    mInfo.mTileSizeY = sizeY;
    mInfo.mImageSizeX = imageSizeX;
@@ -302,12 +302,12 @@ void Image::initialize(int sizeX, int sizeY, DimensionDescriptor band1, Dimensio
                        EncodingType type3, ComplexComponent component, void* data, StretchType stretchType,
                        vector<double>& stretchPointsRed, vector<double>& stretchPointsGreen,
                        vector<double>& stretchPointsBlue, RasterElement* pRasterElement1,
-                       RasterElement* pRasterElement2, RasterElement* pRasterElement3, const vector<int>& badValues1,
-                       const vector<int>& badValues2, const vector<int>& badValues3)
+                       RasterElement* pRasterElement2, RasterElement* pRasterElement3, const BadValues* pBadValues1,
+                       const BadValues* pBadValues2, const BadValues* pBadValues3)
 {
    mInfo = ImageData(channels, band1, band2, band3, stretchType, stretchPointsRed, stretchPointsGreen,
       stretchPointsBlue, sDefaultColorMap, component, GL_RGB, pRasterElement1, pRasterElement2, pRasterElement3,
-      badValues1, badValues2, badValues3);
+      pBadValues1, pBadValues2, pBadValues3);
    mInfo.mTileSizeX = sizeX;
    mInfo.mTileSizeY = sizeY;
    mInfo.mImageSizeX = imageSizeX;
@@ -524,24 +524,14 @@ private:
       ScaleStruct scaleData;
       Image::prepareScale(mInfo, mInfo.mKey.mStretchPoints1, scaleData, 0);
 
-      std::vector<int>::const_iterator badBegin = mInfo.mKey.mBadValues1.begin();
-      std::vector<int>::const_iterator badEnd = mInfo.mKey.mBadValues1.end();
-
       int bufSize = mInfo.mTileSizeX * mInfo.mTileSizeY * sizeof(unsigned char);
-      bool hasBadValues = (badBegin != badEnd);
+      bool hasBadValues = (mInfo.mKey.mpBadValues1 != NULL && mInfo.mKey.mpBadValues1->empty() == false);
       if (mInfo.mFormat == GL_LUMINANCE_ALPHA)
       {
          bufSize *= 2;
       }
 
       vector<unsigned char> pTexData(bufSize);
-
-      bool bHas1BadValue = mInfo.mKey.mBadValues1.size() == 1;
-      int singleBadValue = 0;
-      if (bHas1BadValue)
-      {
-         singleBadValue = mInfo.mKey.mBadValues1.front();
-      }
 
       int oldPercentDone = -1;
 
@@ -597,19 +587,7 @@ private:
                   if (hasBadValues)
                   {
                      ++target;
-                     int tempInt = roundDouble(dValue);
-                     if (bHas1BadValue)
-                     {
-                        if (tempInt == singleBadValue)
-                        {
-                           *target = 0;
-                        }
-                        else
-                        {
-                           *target = 0xff;
-                        }
-                     }
-                     else if (binary_search(badBegin, badEnd, tempInt))
+                     if (mInfo.mKey.mpBadValues1->isBadValue(dValue))
                      {
                         *target = 0;
                      }
@@ -658,20 +636,10 @@ private:
       ScaleStruct scaleData;
       Image::prepareScale(mInfo, mInfo.mKey.mStretchPoints1, scaleData, 0, maxValue-1);
 
-      std::vector<int>::const_iterator badBegin = mInfo.mKey.mBadValues1.begin();
-      std::vector<int>::const_iterator badEnd = mInfo.mKey.mBadValues1.end();
-
-      bool hasBadValues = (badBegin != badEnd);
+      bool hasBadValues = (mInfo.mKey.mpBadValues1 != NULL && mInfo.mKey.mpBadValues1->empty() == false);
       int channels = (mInfo.mFormat == GL_RGBA ? 4 : 3);
       int bufSize = mInfo.mTileSizeX * mInfo.mTileSizeY * channels * sizeof(unsigned char);
       vector<unsigned char> pTexData(bufSize);
-
-      bool bHas1BadValue = mInfo.mKey.mBadValues1.size() == 1;
-      int singleBadValue = 0;
-      if (bHas1BadValue)
-      {
-         singleBadValue = mInfo.mKey.mBadValues1.front();
-      }
 
       int oldPercentDone = -1;
 
@@ -732,19 +700,7 @@ private:
 
                   if (hasBadValues)
                   {
-                     int tempInt = roundDouble(dValue);
-                     if (bHas1BadValue)
-                     {
-                        if (tempInt == singleBadValue)
-                        {
-                           *target = 0;
-                        }
-                        else
-                        {
-                           *target = mInfo.mKey.mColorMap[index].mAlpha;
-                        }
-                     }
-                     else if (binary_search(badBegin, badEnd, tempInt))
+                     if (mInfo.mKey.mpBadValues1->isBadValue(dValue))
                      {
                         *target = 0;
                      }
@@ -795,38 +751,11 @@ private:
       Image::prepareScale(mInfo, mInfo.mKey.mStretchPoints2, scaleDataGreen, 1);
       Image::prepareScale(mInfo, mInfo.mKey.mStretchPoints3, scaleDataBlue, 2);
 
-      std::vector<int>::const_iterator redBadBegin = mInfo.mKey.mBadValues1.begin();
-      std::vector<int>::const_iterator redBadEnd = mInfo.mKey.mBadValues1.end();
-      bool hasRedBadValues = (redBadBegin != redBadEnd);
+      bool hasRedBadValues = (mInfo.mKey.mpBadValues1 != NULL && mInfo.mKey.mpBadValues1->empty() == false);
 
-      bool hasOneRedBadValue = (mInfo.mKey.mBadValues1.size() == 1);
-      int singleRedBadValue = 0;
-      if (hasOneRedBadValue == true)
-      {
-         singleRedBadValue = mInfo.mKey.mBadValues1.front();
-      }
+      bool hasGreenBadValues = (mInfo.mKey.mpBadValues2 != NULL && mInfo.mKey.mpBadValues2->empty() == false);
 
-      std::vector<int>::const_iterator greenBadBegin = mInfo.mKey.mBadValues2.begin();
-      std::vector<int>::const_iterator greenBadEnd = mInfo.mKey.mBadValues2.end();
-      bool hasGreenBadValues = (greenBadBegin != greenBadEnd);
-
-      bool hasOneGreenBadValue = (mInfo.mKey.mBadValues2.size() == 1);
-      int singleGreenBadValue = 0;
-      if (hasOneGreenBadValue == true)
-      {
-         singleGreenBadValue = mInfo.mKey.mBadValues2.front();
-      }
-
-      std::vector<int>::const_iterator blueBadBegin = mInfo.mKey.mBadValues3.begin();
-      std::vector<int>::const_iterator blueBadEnd = mInfo.mKey.mBadValues3.end();
-      bool hasBlueBadValues = (blueBadBegin != blueBadEnd);
-
-      bool hasOneBlueBadValue = (mInfo.mKey.mBadValues3.size() == 1);
-      int singleBlueBadValue = 0;
-      if (hasOneBlueBadValue == true)
-      {
-         singleBlueBadValue = mInfo.mKey.mBadValues3.front();
-      }
+      bool hasBlueBadValues = (mInfo.mKey.mpBadValues3 != NULL && mInfo.mKey.mpBadValues3->empty() == false);
 
       bool hasBadValues = hasRedBadValues || hasGreenBadValues || hasBlueBadValues;
 
@@ -937,18 +866,7 @@ private:
 
                      if (hasRedBadValues)
                      {
-                        int tempInt = roundDouble(dValue);
-                        if (hasOneRedBadValue)
-                        {
-                           if (tempInt != singleRedBadValue)
-                           {
-                              isRedValueBad = false;
-                           }
-                        }
-                        else if (binary_search(redBadBegin, redBadEnd, tempInt) == false)
-                        {
-                           isRedValueBad = false;
-                        }
+                        isRedValueBad = mInfo.mKey.mpBadValues1->isBadValue(dValue);
                      }
                      else
                      {
@@ -976,18 +894,7 @@ private:
 
                      if (hasGreenBadValues)
                      {
-                        int tempInt = roundDouble(dValue);
-                        if (hasOneGreenBadValue)
-                        {
-                           if (tempInt != singleGreenBadValue)
-                           {
-                              isGreenValueBad = false;
-                           }
-                        }
-                        else if (binary_search(greenBadBegin, greenBadEnd, tempInt) == false)
-                        {
-                           isGreenValueBad = false;
-                        }
+                        isGreenValueBad = mInfo.mKey.mpBadValues2->isBadValue(dValue);
                      }
                      else
                      {
@@ -1015,18 +922,7 @@ private:
 
                      if (hasBlueBadValues)
                      {
-                        int tempInt = roundDouble(dValue);
-                        if (hasOneBlueBadValue)
-                        {
-                           if (tempInt != singleBlueBadValue)
-                           {
-                              isBlueValueBad = false;
-                           }
-                        }
-                        else if (binary_search(blueBadBegin, blueBadEnd, tempInt) == false)
-                        {
-                           isBlueValueBad = false;
-                        }
+                        isBlueValueBad = mInfo.mKey.mpBadValues3->isBadValue(dValue);
                      }
                      else
                      {

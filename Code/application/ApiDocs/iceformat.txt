@@ -15,8 +15,9 @@ Versions of Ice File:
 <tr><td>0</td><td>70</td><td>COMET MPR03.09.7404 only</td><td>COMET MPR03.09.7404 to Current Version</td></tr>
 <tr><td>0</td><td>90</td><td>COMET MPR03.10.8013 only</td><td>COMET MPR03.10.8013 to Current Version</td></tr>
 <tr><td>1</td><td>0</td><td>COMET MPR03.11.738 to %Opticks 4.0.0</td><td>COMET MPR03.11.738 to Current Version</td></tr>
-<tr><td>1</td><td>10</td><td>%Opticks 4.0.1 to Current Version for the "RasterElement" and "PseudocolorLayer" file types</td><td>%Opticks 4.0.1 to Current Version</td></tr>
-<tr><td>1</td><td>20</td><td>%Opticks 4.7.1 to Current Version for the "ThresholdLayer" file type</td><td>%Opticks 4.7.1 to Current Version</td></tr>
+<tr><td>1</td><td>10</td><td>%Opticks 4.0.1 to 4.9.X for the "RasterElement" and "PseudocolorLayer" file types</td><td>%Opticks 4.0.1 to Current Version</td></tr>
+<tr><td>1</td><td>20</td><td>%Opticks 4.7.1 to 4.9.X for the "ThresholdLayer" file type</td><td>%Opticks 4.7.1 to Current Version</td></tr>
+<tr><td>1</td><td>30</td><td>%Opticks 4.10.0 to Current Version</td><td>%Opticks 4.10.0 to Current Version</td></tr>
 </table>
 
 The most basic part of the Ice file is the IceFormatDescriptor which identifies an Ice file from any other HDF5 file.
@@ -771,6 +772,7 @@ This HDF5 group contains two children HDF5 datasets, see \ref BandStatisticsMeta
 <b>HDF5 Type:</b> Compound DataType. See Contents for more details <br>
 <b>HDF5 DataSpace:</b> 1 dimension. <br>
 <b>Added In:</b> Version 1.00 <br>
+<b>Last Modified In:</b> Version 1.30 <br>
 <b>Removed In:</b> N/A <br>
 <b>Required In:</b> Version >= 1.00 <br>
 <b>Optional In:</b> None <br>
@@ -780,12 +782,14 @@ The type of this HDF5 Dataset is a compound data type with members as shown belo
 <table align="center">
 <tr>
     <td><b>Member Name</b></td>
+    <td><b>Ice Version Present</b></td>
     <td><b>HDF5 Type</b></td>
     <td><b>HDF5 DataSpace</b></td>
     <td><b>Description</b></td>
 </tr>
 <tr>
     <td>resolution</td>
+    <td>1.00 to current</td>
     <td>H5T_NATIVE_UINT</td>
     <td>Scalar</td>
     <td>This is the number of rows and columns within a band that must be skipped when an application wishes to generate band statistics.
@@ -796,12 +800,27 @@ The type of this HDF5 Dataset is a compound data type with members as shown belo
 </tr>
 <tr>
     <td>badValues</td>
+    <td>1.00 to 1.20</td>
     <td>H5T_NATIVE_INT</td>
     <td>Variable length</td>
     <td>This indicates the raw data values that should be ignored by the application when generating statistics for a band.
     This is a variable length array and can contain an unlimited number of values.
     The values stored are int, but the raw data can be stored in a non integral format.
     If that is the case, the application should truncate the raw data values before comparing them to the bad values present in this member.    
+    </td>
+</tr>
+<tr>
+    <td>badValuesFloat</td>
+    <td>1.30 to current</td>
+    <td>H5T_C_S1</td>
+    <td>Scalar</td>
+    <td>This is the string representation of the criteria for determining the raw data values that should be ignored by the application when generating statistics for a band.
+    The string may contain multiple comma separated criteria for specifying bad values.
+    The character '<' used before a numeric string defines a lower bad values threshold - any value less than or equal to this threshold is considered a bad value.
+    The character '>' used before a numeric string defines an upper bad values threshold - any value greater than or equal to this threshold is considered a bad value.
+    The character sequence'<>' used between two numeric strings defines a bad value range - any value greater than or equal to the first numeric and less than or equal to the second numeric is considered a bad value.
+    A numeric string without any of these special characters defines an individual bad value.
+    For example, the string "<-1.0, 0, 3.5<>10, >1e2" defines all values that are less than or equal to -1.0, equal to 0.0, greater than or equal to 3.5 and less than or equal to 10.0, or that are greater than or equal to 100.0 as bad values.
     </td>
 </tr>
 </table>

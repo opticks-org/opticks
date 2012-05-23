@@ -7,16 +7,10 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QComboBox>
-#include <QtGui/QHeaderView>
-#include <QtGui/QLayout>
-#include <QtGui/QMenu>
-#include <QtGui/QMessageBox>
-#include <QtGui/QPushButton>
-
 #include "AppVerify.h"
 #include "AppVersion.h"
-#include "CustomTreeWidget.h"
+#include "BadValues.h"
+#include "BadValuesDlg.h"
 #include "DataDescriptorWidget.h"
 #include "DataElement.h"
 #include "DesktopServices.h"
@@ -34,7 +28,21 @@
 #include "StringUtilities.h"
 #include "Units.h"
 
+#include <QtCore/QRegExp>
+#include <QtGui/QApplication>
+#include <QtGui/QComboBox>
+#include <QtGui/QFocusEvent>
+#include <QtGui/QHeaderView>
+#include <QtGui/QLayout>
+#include <QtGui/QMenu>
+#include <QtGui/QMessageBox>
+#include <QtGui/QPushButton>
+#include <QtGui/QRegExpValidator>
+
 #include <algorithm>
+#include <string>
+#include <vector>
+
 using namespace std;
 
 DataDescriptorWidget::DataDescriptorWidget(QWidget* pParent) :
@@ -111,6 +119,10 @@ DataDescriptorWidget::DataDescriptorWidget(QWidget* pParent) :
    mpSetDisplayButton = new QPushButton("Set Display Bands", this);
    QMenu* pMenu = new QMenu(mpSetDisplayButton);
    mpSetDisplayButton->setMenu(pMenu);
+
+   // create custom edit widget for bad Values
+   mpBadValuesEdit = new BadValuesEdit(mpTreeWidget);
+   mpBadValuesEdit->hide();
 
    // Layout
    QVBoxLayout* pLayout = new QVBoxLayout(this);
@@ -487,19 +499,25 @@ void DataDescriptorWidget::setDataDescriptor(DataDescriptor* pDescriptor, bool e
    }
 
    // Bad values
-   QTreeWidgetItem* pBadValues = new QTreeWidgetItem(mpTreeWidget);
-   if (pBadValues != NULL)
+   QTreeWidgetItem* pBadValuesItem = new QTreeWidgetItem(mpTreeWidget);
+   if (pBadValuesItem != NULL)
    {
-      vector<int> badValues = pRasterDescriptor->getBadValues();
-      string badValuesText = StringUtilities::toDisplayString(badValues);
-
-      pBadValues->setText(0, "Bad Values");
-      pBadValues->setText(1, QString::fromStdString(badValuesText));
-
-      if (mEditAll)
+      const BadValues* pBadValues = pRasterDescriptor->getBadValues();
+      string badValuesText;
+      if (pBadValues != NULL)
       {
-         mpTreeWidget->setCellWidgetType(pBadValues, 1, CustomTreeWidget::LINE_EDIT);
+         badValuesText = pBadValues->getBadValuesString();
       }
+      else
+      {
+         badValuesText = "Bad values vary by band";
+      }
+
+      pBadValuesItem->setText(0, "Bad Values");
+      pBadValuesItem->setText(1, QString::fromStdString(badValuesText));
+
+      mpTreeWidget->setCellWidgetType(pBadValuesItem, 1, CustomTreeWidget::CUSTOM_WIDGET);
+      mpTreeWidget->setCustomEditWidget(pBadValuesItem, 1, mpBadValuesEdit);
    }
 
    // Pixel size
@@ -938,12 +956,19 @@ void DataDescriptorWidget::initialize()
       }
    }
 
+   // Bad values
    pItem = getDescriptorItem("Bad Values");
    if (pItem != NULL)
    {
-      vector<int> badValues = pRasterDescriptor->getBadValues();
-      string badValuesText = StringUtilities::toDisplayString(badValues);
-      pItem->setText(1, QString::fromStdString(badValuesText));
+      const BadValues* pBadValues = pRasterDescriptor->getBadValues();
+      if (pBadValues != NULL)
+      {
+         pItem->setText(1, QString::fromStdString(pBadValues->getBadValuesString()));
+      }
+      else
+      {
+         pItem->setText(1, "Bad values vary by band");
+      }
    }
 
    pItem = getDescriptorItem("X Pixel Size");
@@ -1371,6 +1396,30 @@ void DataDescriptorWidget::descriptorItemChanged(QTreeWidgetItem* pItem, int iCo
       }
    }
 
+   if (itemName == "Bad Values")
+   {
+      FactoryResource<BadValues> pBadValues;
+      if (pBadValues->setBadValues(itemValue.toStdString()) == false)
+      {
+         QString errorMsg = "Unable to set bad values: " + QString::fromStdString(pBadValues->getLastErrorMsg());
+         QMessageBox::warning(this, APP_NAME, errorMsg);
+         QString badValuesText = "Bad values vary by band";
+         const BadValues* pCurrentBadValues = pRasterDescriptor->getBadValues();
+         if (pCurrentBadValues != NULL)
+         {
+            badValuesText = QString::fromStdString(pCurrentBadValues->getBadValuesString());
+         }
+         VERIFYNR(disconnect(mpTreeWidget, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
+            SLOT(descriptorItemChanged(QTreeWidgetItem*, int))));
+         pItem->setText(iColumn, badValuesText);
+         VERIFYNR(connect(mpTreeWidget, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
+            SLOT(descriptorItemChanged(QTreeWidgetItem*, int))));
+         return;
+      }
+
+      pRasterDescriptor->setBadValues(pBadValues.get());
+   }
+
    if (mEditAll == false)  // Nothing else could have been changed, so return
    {
       return;
@@ -1424,24 +1473,6 @@ void DataDescriptorWidget::descriptorItemChanged(QTreeWidgetItem* pItem, int iCo
          if (error == false)
          {
             pRasterDescriptor->setDataType(dataType);
-         }
-      }
-   }
-   else if (itemName == "Bad Values")
-   {
-      if (itemValue.isEmpty() == true)
-      {
-         pRasterDescriptor->setBadValues(vector<int>());
-      }
-      else
-      {
-//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Use a QListView to allow editing of bad values, " \
-//   "since the fromDisplayString parser is brittle? (kstreith)")
-         bool error = true;
-         vector<int> badValues = StringUtilities::fromDisplayString<vector<int> >(itemValue.toStdString(), &error);
-         if (error == false)
-         {
-            pRasterDescriptor->setBadValues(badValues);
          }
       }
    }
@@ -1640,4 +1671,93 @@ void DataDescriptorWidget::setDisplayBands(QAction* pAction)
          "Broaden the wavelength region or specify band numbers in the Raster Layers section of the Options dialog.",
          MESSAGE_ERROR, PropertiesRasterLayer::getDisplayAsWarningDialogId());
    }
+}
+
+BadValuesEdit::BadValuesEdit(QWidget* pParent) :
+   CustomEditWidget(pParent)
+{
+   // create line edit validator expression
+   QRegExp badValuesExp;
+#if defined(WIN_API)
+   badValuesExp.setPattern("^([<>]?[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?[,]?[<>]?[\\s]?)+$");
+#else
+   badValuesExp.setPattern("^([<>]?[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?[,]?[<>]?[\s]?)+$");
+#endif
+
+   QHBoxLayout* pLayout = new QHBoxLayout(this);
+   mpBadValuesStr = new QLineEdit(this);
+   mpBadValuesStr->setValidator(new QRegExpValidator(badValuesExp, this));
+   mpBadValuesStr->installEventFilter(this);
+   mpBadValuesStr->setFrame(false);
+   mpEditButton = new QPushButton("Edit...", this);
+   mpEditButton->installEventFilter(this);
+   pLayout->addWidget(mpBadValuesStr, 10);
+   pLayout->addWidget(mpEditButton);
+   pLayout->setMargin(0);
+   pLayout->setSpacing(0);
+
+   setFocusPolicy(Qt::StrongFocus);
+   setFocusProxy(mpBadValuesStr);
+
+   VERIFYNR(connect(mpEditButton, SIGNAL(clicked()), this, SLOT(displayBadValuesDialog())));
+}
+
+BadValuesEdit::~BadValuesEdit()
+{}
+
+QString BadValuesEdit::text() const
+{
+   VERIFYRV(mpBadValuesStr != NULL, QString());
+   return mpBadValuesStr->text();
+}
+
+void BadValuesEdit::setText(const QString& text)
+{
+   VERIFYNRV(mpBadValuesStr != NULL);
+   mpBadValuesStr->setText(text);
+}
+
+void BadValuesEdit::selectAll()
+{
+   VERIFYNRV(mpBadValuesStr != NULL);
+   mpBadValuesStr->selectAll();
+}
+
+void BadValuesEdit::displayBadValuesDialog()
+{
+   // Remove the event filter on the edit button to prevent the focus
+   // out event from being sent when the edit dialog is invoked
+   mpEditButton->removeEventFilter(this);
+
+   // window() used as parent so the expand/collapse indicators for labeled sections are drawn properly
+   BadValuesDlg dlg(window());
+   FactoryResource<BadValues> pBadValues;
+   pBadValues->setBadValues(text().toStdString());
+   dlg.setBadValues(pBadValues.get());
+   if (dlg.exec() == QDialog::Accepted)
+   {
+      setText(QString::fromStdString(dlg.getBadValuesString()));
+   }
+   setFocus();
+
+   // Reinstall the event filter
+   mpEditButton->installEventFilter(this);
+}
+
+bool BadValuesEdit::eventFilter(QObject* pObject, QEvent* pEvent)
+{
+   if (pEvent != NULL)
+   {
+      if (pEvent->type() == QEvent::FocusOut)
+      {
+         QWidget* pFocusWidget = QApplication::focusWidget();
+         if ((pFocusWidget != mpBadValuesStr) && (pFocusWidget != mpEditButton))
+         {
+            QFocusEvent* pFocusEvent = static_cast<QFocusEvent*>(pEvent);
+            QApplication::sendEvent(this, pFocusEvent);
+         }
+      }
+   }
+
+   return QWidget::eventFilter(pObject, pEvent);
 }
