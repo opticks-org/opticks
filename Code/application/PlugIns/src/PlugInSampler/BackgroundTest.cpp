@@ -7,10 +7,10 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "BackgroundTest.h"
-#include "bthread.h"
 #include "AppConfig.h"
 #include "AppVerify.h"
+#include "BackgroundTest.h"
+#include "bthread.h"
 #include "DesktopServices.h"
 #include "MessageLogResource.h"
 #include "PlugInArg.h"
@@ -34,8 +34,6 @@ using namespace std;
 REGISTER_PLUGIN_BASIC(OpticksPlugInSampler, BackgroundTest);
 
 BackgroundTest::BackgroundTest() :
-   mInteractive(false),
-   mAbort(false),
    mpProgress(NULL),
    mpWorkerThread(NULL)
 {
@@ -49,25 +47,14 @@ BackgroundTest::BackgroundTest() :
    setProductionStatus(false);
    setDescriptorId("{D5A8A298-FF83-4fcf-A059-0EAC7AB18E42}");
    allowMultipleInstances(true);
-   destroyAfterExecute(false);
+   destroyAfterExecute(true);
+   setBackground(true);
+   setAbortSupported(true);
    setWizardSupported(false);
 }
 
 BackgroundTest::~BackgroundTest()
-{
-}
-
-bool BackgroundTest::setBatch()
-{
-   mInteractive = false;
-   return true;
-}
-
-bool BackgroundTest::setInteractive()
-{
-   mInteractive = true;
-   return true;
-}
+{}
 
 bool BackgroundTest::getInputSpecification(PlugInArgList*& pArgList)
 {
@@ -165,18 +152,14 @@ bool BackgroundTest::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLi
 
 bool BackgroundTest::abort()
 {
-   mAbort = true;
-   return true;
-}
+   bool success = AlgorithmShell::abort();
+   if (mpWorkerThread != NULL)
+   {
+      // Wait for the worker thread to finish before continuing
+      mpWorkerThread->ThreadWait();
+   }
 
-bool BackgroundTest::hasAbort()
-{
-   return true;
-}
-
-bool BackgroundTest::isBackground() const
-{
-   return true;
+   return success;
 }
 
 void BackgroundTest::runWorkerThread(void *pArg)
@@ -193,14 +176,15 @@ void BackgroundTest::runWorkerThread(void *pArg)
 
    // Create a callback to exit the background thread
    //
-   PlugInCallback* pCallback = new BackgroundTest::Callback(pSelf,
-                                                            pSelf->mpWorkerThread,
-                                                            returnValue,
-                                                            pSelf->mpProgress);
-   Service<DesktopServices> pDesktop;
+   PlugInCallback* pCallback = new BackgroundTest::Callback(pSelf, pSelf->mpWorkerThread, returnValue,
+      pSelf->mpProgress);
    if (pCallback != NULL)
    {
-      pDesktop->registerCallback(BACKGROUND_COMPLETE, pCallback);
+      Service<DesktopServices> pDesktop;
+      if (pDesktop->registerCallback(BACKGROUND_COMPLETE, pCallback) == false)
+      {
+         delete pCallback;
+      }
    }
 }
 
@@ -209,7 +193,7 @@ bool BackgroundTest::workerThread()
    SessionSaveLock lock;
    for (int tick = 0; tick < 50; ++tick)
    {
-      if (mAbort)
+      if (isAborted())
       {
          if (mpProgress != NULL)
          {
@@ -235,13 +219,12 @@ bool BackgroundTest::workerThread()
    return true;
 }
 
-BackgroundTest::Callback::Callback(BackgroundTest *pPlugin, BThread *pThread, bool returnValue, Progress *pProgress) :
-      mpPlugin(pPlugin),
-      mpThread(pThread),
-      mReturnValue(returnValue),
-      mpProgress(pProgress)
-{
-}
+BackgroundTest::Callback::Callback(BackgroundTest* pPlugin, BThread* pThread, bool returnValue, Progress* pProgress) :
+   mpPlugin(pPlugin),
+   mpThread(pThread),
+   mReturnValue(returnValue),
+   mpProgress(pProgress)
+{}
 
 BackgroundTest::Callback::~Callback()
 {

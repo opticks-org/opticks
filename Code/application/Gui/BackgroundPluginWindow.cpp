@@ -7,7 +7,7 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QApplication>
+#include <QtCore/QCoreApplication>
 #include <QtGui/QLabel>
 #include <QtGui/QLayout>
 #include <QtGui/QProgressBar>
@@ -19,7 +19,7 @@
 #include "PlugInCallback.h"
 #include "PlugInManagerServicesImp.h"
 #include "Progress.h"
-#include "ProgressAdapter.h"
+#include "Slot.h"
 
 using namespace std;
 
@@ -72,8 +72,7 @@ BackgroundPluginItem::BackgroundPluginItem(const QString& strPlugInName, Progres
 }
 
 BackgroundPluginItem::~BackgroundPluginItem()
-{
-}
+{}
 
 void BackgroundPluginItem::setData(int role, const QVariant& value)
 {
@@ -109,11 +108,6 @@ PlugIn* BackgroundPluginItem::getPlugIn() const
 
 void BackgroundPluginItem::update()
 {
-   if (mFinished)
-   {
-      return;
-   }
-
    string text;
    int percent;
    ReportingLevel gran;
@@ -151,7 +145,7 @@ void BackgroundPluginItem::setStatus(QString statusStr)
 // BackgroundPluginWindow
 /////////////////////////
 
-// Custom event types - these values must be bewteen 1000 and 65535 as stated in the QEvent documentation
+// Custom event types - these values must be between 1000 and 65535 as stated in the QEvent documentation
 const int BackgroundPluginWindow::BPW_PMODIFIED = 60000;
 const int BackgroundPluginWindow::BPW_CALLBACK = 60001;
 
@@ -159,7 +153,8 @@ BackgroundPluginWindow::BackgroundPluginWindow(const string& id, QWidget* parent
    DockWindowAdapter(id, "Background Plug-In Window", parent),
    mpStatusList(NULL),
    mpDismissButton(NULL),
-   mpAbortButton(NULL)
+   mpAbortButton(NULL),
+   mSessionClosing(false)
 {
    // Widget frame
    QWidget* pWindowWidget = new QWidget(this);
@@ -202,6 +197,13 @@ BackgroundPluginWindow::BackgroundPluginWindow(const string& id, QWidget* parent
    connect(mpStatusList, SIGNAL(itemSelectionChanged()), this, SLOT(changeSelection()));
    connect(mpDismissButton, SIGNAL(clicked()), this, SLOT(dismissClicked()));
    connect(mpAbortButton, SIGNAL(clicked()), this, SLOT(abortClicked()));
+   Service<SessionManager> pSessionMgr;
+   mpSessionMgrImp.reset(dynamic_cast<SessionManagerImp*>(pSessionMgr.get()));
+   mpSessionMgrImp.addSignal(SIGNAL_NAME(SessionManagerImp, SessionFullyClosed),
+      Slot(this, &BackgroundPluginWindow::sessionClosed));
+   mpSessionMgr.reset(pSessionMgr.get());
+   mpSessionMgr.addSignal(SIGNAL_NAME(SessionManager, Closed),
+      Slot(this, &BackgroundPluginWindow::sessionClosing));
 }
 
 BackgroundPluginWindow::~BackgroundPluginWindow()
@@ -256,17 +258,18 @@ void BackgroundPluginWindow::progressChanged(Subject &subject, const string &sig
    Progress* pProgress = dynamic_cast<Progress*>(&subject);
    if (NN(pProgress))
    {
-      QApplication::postEvent(this, new ModifiedEvent(pProgress));
+      QCoreApplication::postEvent(this, new ModifiedEvent(pProgress));
    }
 }
 
 bool BackgroundPluginWindow::addCallback(PlugInCallback *callback)
 {
-   if (callback != NULL)
+   if ((callback != NULL) && (mSessionClosing == false))
    {
-      QApplication::postEvent(this, new CallbackEvent(callback));
+      QCoreApplication::postEvent(this, new CallbackEvent(callback));
       return true;
    }
+
    return false;
 }
 
@@ -309,6 +312,7 @@ void BackgroundPluginWindow::customEvent(QEvent* pEvent)
 
                // finish the item and mark it as complete
                pItem->finish();
+               pItem->update();
 
                // detach so we don't get anymore updates
                Progress* pProgress(pItem->getProgress());
@@ -418,11 +422,45 @@ void BackgroundPluginWindow::abortClicked()
       {
          if (pItem->isFinished() == false)
          {
-            pItem->setStatus("Aborted");
             pItem->finish();
+            pItem->update();
          }
       }
    }
 
    changeSelection();
+}
+
+void BackgroundPluginWindow::sessionClosed(Subject& subject, const std::string& signal, const boost::any& value)
+{
+   // Enable callbacks to be registered again now that the session is closed
+   mSessionClosing = false;
+
+   // Clear the destroyed plug-in items from the list
+   mpStatusList->clear();
+}
+
+void BackgroundPluginWindow::sessionClosing(Subject& subject, const std::string& signal, const boost::any& value)
+{
+   // abort any background plug-ins that are running
+   for (int i = 0; i < mpStatusList->count(); ++i)
+   {
+      BackgroundPluginItem* pItem = static_cast<BackgroundPluginItem*>(mpStatusList->item(i));
+      if (pItem != NULL)
+      {
+         if (pItem->isFinished() == false)
+         {
+            pItem->finish();
+            pItem->update();
+         }
+      }
+   }
+
+   // Immediately process all registered callbacks to force all background
+   // plug-ins to finish processing before they are destroyed
+   QCoreApplication::sendPostedEvents(this, BPW_PMODIFIED);
+   QCoreApplication::sendPostedEvents(this, BPW_CALLBACK);
+
+   // Prevent any callbacks from being registered while the session is closing
+   mSessionClosing = true;
 }

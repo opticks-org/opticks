@@ -29,6 +29,15 @@ public:
     */
    SIGNAL_METHOD(SessionManagerImp, NameChanged)
 
+   /**
+    *  Emitted with a null boost::any when the session is fully closed.
+    *
+    *  This signal should be renamed to SessionClosed and moved to
+    *  SessionManager when the existing SessionManager::Closed signal is renamed
+    *  to SessionAboutToClose.
+    */
+   SIGNAL_METHOD(SessionManagerImp, SessionFullyClosed)
+
    static SessionManagerImp* instance();
    static void destroy();
 

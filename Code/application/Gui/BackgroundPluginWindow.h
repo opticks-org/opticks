@@ -15,7 +15,13 @@
 #include <QtGui/QListWidget>
 #include <QtGui/QListWidgetItem>
 
+#include "AttachmentPtr.h"
 #include "DockWindowAdapter.h"
+#include "SessionManager.h"
+#include "SessionManagerImp.h"
+
+#include <boost/any.hpp>
+#include <string>
 
 class PlugIn;
 class PlugInCallback;
@@ -23,6 +29,7 @@ class Progress;
 class QLabel;
 class QProgressBar;
 class QPushButton;
+class Subject;
 
 /**
  *  This is a QListWidgetItem which displays status messages
@@ -55,7 +62,6 @@ private:
    bool mFinished;
 };
 
-
 /**
  *  BackgroudnPluginWindow
  *  A DockWindow which displays progress and status information
@@ -67,7 +73,7 @@ class BackgroundPluginWindow : public DockWindowAdapter
 
 public:
    BackgroundPluginWindow(const std::string& id, QWidget* parent = 0);
-   ~BackgroundPluginWindow();
+   virtual ~BackgroundPluginWindow();
 
 public: // API
    /**
@@ -139,7 +145,7 @@ public slots:
 
    /**
     *  dismissClicked
-    *  Called when the Dismiss button is clicked. This function dismisses finised PlugIns
+    *  Called when the Dismiss button is clicked. This function dismisses finished PlugIns
     */
    void dismissClicked();
 
@@ -191,6 +197,9 @@ protected: // custom events
 
    void customEvent(QEvent* pEvent);
 
+   void sessionClosed(Subject& subject, const std::string& signal, const boost::any& value);
+   void sessionClosing(Subject& subject, const std::string& signal, const boost::any& value);
+
 private:
    BackgroundPluginWindow(const BackgroundPluginWindow& rhs);
    BackgroundPluginWindow& operator=(const BackgroundPluginWindow& rhs);
@@ -200,6 +209,10 @@ private:
 
    friend class ModifiedEvent;
    friend class CallbackEvent;
+   AttachmentPtr<SessionManagerImp> mpSessionMgrImp;
+   AttachmentPtr<SessionManager> mpSessionMgr;
+
+   bool mSessionClosing;
 };
 
 #endif

@@ -211,11 +211,5 @@ void CustomLayerPlugIn::setLayerDrawObject()
 void CustomLayerPlugIn::layerDeleted(Subject& subject, const std::string& signal, const boost::any& value)
 {
    // Destroy the plug-in when the layer is deleted
-   if (Service<SessionManager>()->isSessionLoading() == false) // If a session is being loaded while this plug-in is
-                                                               // running, the session manager will automatically
-                                                               // delete this plug-in instance; therefore do not
-                                                               // destroy the plug-in explicitly
-   {
-      abort();
-   }
+   abort();
 }

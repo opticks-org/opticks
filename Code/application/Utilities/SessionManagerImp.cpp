@@ -177,6 +177,7 @@ void SessionManagerImp::close()
    MessageLogMgrImp::instance()->clear();
 
    mName.clear();
+   notify(SIGNAL_NAME(SessionManagerImp, SessionFullyClosed));
 }
 
 SessionItem *SessionManagerImp::createPlotWidget(const string &type, const string &id, const std::string &name)
