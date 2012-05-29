@@ -825,6 +825,7 @@ bool ViewImp::getCurrentImage(QImage &image)
       vector<unsigned int> pixels(iWidth * iHeight);
       glReadPixels(0, 0, iWidth, iHeight, GL_RGBA, GL_UNSIGNED_BYTE, reinterpret_cast<GLvoid*>(&pixels.front()));
 
+      // Reorder the image data for the QImage::Format_ARGB32 format
       reorderImage(&pixels.front(), iWidth, iHeight);
 
       unsigned char* pBits = image.bits();
@@ -1174,15 +1175,20 @@ void ViewImp::reorderImage(unsigned int pImage[], int iWidth, int iHeight)
    int i;
    int j;
 
+   // Reorder individual image pixels
    if (Endian::getSystemEndian() == BIG_ENDIAN_ORDER)
    {
+      // Convert RGBA to ARGB
       for (i = 0; i < numPixels; i++)
       {
+         unsigned int alpha = pImage[i] & 0x000000ff;
          pImage[i] >>= 8;
+         pImage[i] |= (alpha << 24);
       }
    }
    else
    {
+      // Convert RGBA to BGRA
       unsigned char tempColor;
       unsigned char* pPixel = NULL;
       for (i = 0; i < numPixels; i++)
@@ -1194,6 +1200,7 @@ void ViewImp::reorderImage(unsigned int pImage[], int iWidth, int iHeight)
       }
    }
 
+   // Reorder all pixels from a lower left origin (OpenGL) to an upper left origin (Qt)
    unsigned int* pRow1 = NULL;
    unsigned int* pRow2 = NULL;
    int rows = iHeight;

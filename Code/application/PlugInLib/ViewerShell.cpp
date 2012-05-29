@@ -92,6 +92,10 @@ bool ViewerShell::abort()
    {
       Service<DesktopServices> pDesktop;
       bSuccess = pDesktop->registerCallback(BACKGROUND_COMPLETE, pCallback);
+      if (bSuccess == false)
+      {
+         delete pCallback;
+      }
    }
 
    return bSuccess;

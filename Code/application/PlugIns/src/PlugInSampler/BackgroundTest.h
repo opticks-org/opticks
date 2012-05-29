@@ -24,14 +24,10 @@ public:
    BackgroundTest();
    virtual ~BackgroundTest();
 
-   virtual bool setBatch();
-   virtual bool setInteractive();
    virtual bool getInputSpecification(PlugInArgList*& pArgList);
    virtual bool getOutputSpecification(PlugInArgList*& pArgList);
    virtual bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
    virtual bool abort();
-   virtual bool hasAbort();
-   virtual bool isBackground() const;
 
    static void runWorkerThread(void *pArg);
 
@@ -41,7 +37,7 @@ protected:
    class Callback : public PlugInCallback
    {
    public:
-      Callback(BackgroundTest *pPlugin, BThread *pThread, bool returnValue, Progress *pProgress);
+      Callback(BackgroundTest* pPlugin, BThread* pThread, bool returnValue, Progress* pProgress);
       virtual ~Callback();
       virtual void operator()();
       virtual bool finish();
@@ -56,8 +52,6 @@ protected:
    };
 
 private:
-   bool mInteractive;
-   bool mAbort;
    Service<PlugInManagerServices> mpPlugInManager;
    Service<UtilityServices> mpUtility;
 

@@ -448,36 +448,47 @@ QImage PlotWidgetImp::getCurrentImage()
 bool PlotWidgetImp::getCurrentImage(QImage& image)
 {
    // Get the pixmap for the widget
-   QPixmap pixPlotWidget = QPixmap::grabWidget(mpPlotWidget);
-
-   // Update the plot view to use a temporary display list when getting the pixmap
-   mpPlot->useTemporaryDisplayList(true);
-
-   // Get the pixmap for the plot view
-   int iWidth = image.width();
-   int iHeight = image.height();
-   QPixmap pixPlotView = mpPlot->renderPixmap(iWidth, iHeight);
-
-   // Restore the original plot view display list
-   mpPlot->useTemporaryDisplayList(false);
-
-   // Draw the plot view pixmap in the widget pixmap
-   if ((pixPlotWidget.isNull() == false) && (pixPlotView.isNull() == false))
-   {
-      QPoint ptPlot = mpPlot->mapTo(mpPlotWidget, QPoint(0, 0));
-      QRect rcPlot(ptPlot, QSize(mpPlot->width(), mpPlot->height()));
-
-      QPainter painterWidget(&pixPlotWidget);
-      painterWidget.drawPixmap(rcPlot, pixPlotView);
-      painterWidget.end();
-   }
-
-   if (pixPlotWidget.isNull() == true)
+   QPixmap widgetPixmap = QPixmap::grabWidget(mpPlotWidget);
+   if (widgetPixmap.isNull() == true)
    {
       return false;
    }
 
-   image = pixPlotWidget.toImage();
+   // Get the pixmap for the plot view
+   QPixmap plotPixmap;
+
+   QImage plotImage = mpPlot->getCurrentImage();
+   if (plotImage.isNull() == false)
+   {
+      plotPixmap.convertFromImage(plotImage);
+   }
+
+   if (plotPixmap.isNull() == true)
+   {
+      return false;
+   }
+
+   // Draw the plot view pixmap in the widget pixmap
+   QPoint ptPlot = mpPlot->mapTo(mpPlotWidget, QPoint(0, 0));
+   QRect rcPlot(ptPlot, QSize(mpPlot->width(), mpPlot->height()));
+
+   QPainter widgetPainter(&widgetPixmap);
+   widgetPainter.drawPixmap(rcPlot, plotPixmap);
+   widgetPainter.end();
+
+   // Set the image data
+   QImage widgetImage = widgetPixmap.toImage();
+
+   QSize imageSize = image.size();
+   if (imageSize.isEmpty() == false)
+   {
+      image = widgetImage.scaled(imageSize);
+   }
+   else
+   {
+      image = widgetImage;
+   }
+
    return true;
 }
 

@@ -91,8 +91,6 @@ public:
    virtual void translateDataToScreen(double dataX, double dataY, double& screenX, double& screenY) const;
 
    void draw();
-
-   void useTemporaryDisplayList(bool bTempList);
    GLuint getDisplayListIndex() const;
 
    bool toXml(XMLWriter* pXml) const;
@@ -150,8 +148,6 @@ private:
    PolygonPlotObjectAdapter mSelectionArea;
    bool mDisplayListInitialized;
    GLuint mDisplayListIndex;          // openGL display list index
-   GLuint mTemporaryDisplayListIndex; // display list index created in a temporary openGL context for renderPixmap
-   bool mbTemporaryDisplayList;       // used to tell when to create a temporary display list for the plot symbols
 
    PlotSelectionModeType mSelectionMode;
    PointSelectionDisplayType mSelectionDisplayMode;

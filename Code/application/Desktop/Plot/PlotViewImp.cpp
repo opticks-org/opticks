@@ -64,8 +64,6 @@ PlotViewImp::PlotViewImp(const string& id, const string& viewName, QGLContext* d
    mSelectionArea(this, false),
    mDisplayListInitialized(false),
    mDisplayListIndex(0),
-   mTemporaryDisplayListIndex(0),
-   mbTemporaryDisplayList(false),
    mSelectionMode(NORMAL_SELECTION), 
    mSelectionDisplayMode(SYMBOL_SELECTION),
    mEnableShading(false),
@@ -1768,20 +1766,7 @@ void PlotViewImp::initializeDisplayList()
    }
 
    mDisplayListInitialized = true;
-
-   // unable to share display lists while using renderPixmap method in the QGLWidget class
-   // so a temporary display list is created for the openGL context created by renderPixmap
-   GLuint displayListIndex = 0;
-   if (mbTemporaryDisplayList == true)
-   {
-      mTemporaryDisplayListIndex = glGenLists(DISPLAY_LIST_SIZE);
-      displayListIndex = mTemporaryDisplayListIndex;
-   }
-   else
-   {
-      mDisplayListIndex = glGenLists(DISPLAY_LIST_SIZE);
-      displayListIndex = mDisplayListIndex;
-   }
+   mDisplayListIndex = glGenLists(DISPLAY_LIST_SIZE);
 
    // Create the symbol display lists
    double dPixelX1 = -1;
@@ -1790,7 +1775,7 @@ void PlotViewImp::initializeDisplayList()
    double dPixelY2 = 1;
 
    // SOLID
-   glNewList(displayListIndex + Point::SOLID, GL_COMPILE);
+   glNewList(mDisplayListIndex + Point::SOLID, GL_COMPILE);
    glBegin(GL_QUADS);
    glVertex2d(dPixelX1, dPixelY1);
    glVertex2d(dPixelX2, dPixelY1);
@@ -1800,7 +1785,7 @@ void PlotViewImp::initializeDisplayList()
    glEndList();
 
    // X
-   glNewList(displayListIndex + Point::X, GL_COMPILE);
+   glNewList(mDisplayListIndex + Point::X, GL_COMPILE);
    glBegin(GL_LINES);
    glVertex2d(dPixelX1, dPixelY1);
    glVertex2d(dPixelX2, dPixelY2);
@@ -1810,7 +1795,7 @@ void PlotViewImp::initializeDisplayList()
    glEndList();
 
    // CROSS_HAIR
-   glNewList(displayListIndex + Point::CROSS_HAIR, GL_COMPILE);
+   glNewList(mDisplayListIndex + Point::CROSS_HAIR, GL_COMPILE);
    glBegin(GL_LINES);
    glVertex2d(dPixelX1, (dPixelY1 + dPixelY2) / 2);
    glVertex2d(dPixelX2, (dPixelY1 + dPixelY2) / 2);
@@ -1820,7 +1805,7 @@ void PlotViewImp::initializeDisplayList()
    glEndList();
 
    // VERTICAL_LINE
-   glNewList(displayListIndex + Point::VERTICAL_LINE, GL_COMPILE);
+   glNewList(mDisplayListIndex + Point::VERTICAL_LINE, GL_COMPILE);
    glBegin(GL_LINES);
    glVertex2d((dPixelX1 + dPixelX2) / 2, dPixelY1);
    glVertex2d((dPixelX1 + dPixelX2) / 2, dPixelY2);
@@ -1828,7 +1813,7 @@ void PlotViewImp::initializeDisplayList()
    glEndList();
 
    // HORIZONTAL_LINE
-   glNewList(displayListIndex + Point::HORIZONTAL_LINE, GL_COMPILE);
+   glNewList(mDisplayListIndex + Point::HORIZONTAL_LINE, GL_COMPILE);
    glBegin(GL_LINES);
    glVertex2d(dPixelX1, (dPixelY1 + dPixelY2) / 2);
    glVertex2d(dPixelX2, (dPixelY1 + dPixelY2) / 2);
@@ -1836,7 +1821,7 @@ void PlotViewImp::initializeDisplayList()
    glEndList();
 
    // ASTERISK
-   glNewList(displayListIndex + Point::ASTERISK, GL_COMPILE);
+   glNewList(mDisplayListIndex + Point::ASTERISK, GL_COMPILE);
    glBegin(GL_LINES);
    glVertex2d(dPixelX1, dPixelY1);
    glVertex2d(dPixelX2, dPixelY2);
@@ -1850,7 +1835,7 @@ void PlotViewImp::initializeDisplayList()
    glEndList();
 
    // FORWARD_SLASH
-   glNewList(displayListIndex + Point::FORWARD_SLASH, GL_COMPILE);
+   glNewList(mDisplayListIndex + Point::FORWARD_SLASH, GL_COMPILE);
    glBegin(GL_LINES);
    glVertex2d(dPixelX1, dPixelY1);
    glVertex2d(dPixelX2, dPixelY2);
@@ -1858,7 +1843,7 @@ void PlotViewImp::initializeDisplayList()
    glEndList();
 
    // BACK_SLASH
-   glNewList(displayListIndex + Point::BACK_SLASH, GL_COMPILE);
+   glNewList(mDisplayListIndex + Point::BACK_SLASH, GL_COMPILE);
    glBegin(GL_LINES);
    glVertex2d(dPixelX2, dPixelY1);
    glVertex2d(dPixelX1, dPixelY2);
@@ -1866,7 +1851,7 @@ void PlotViewImp::initializeDisplayList()
    glEndList();
 
    // BOXED_X
-   glNewList(displayListIndex + Point::BOXED_X, GL_COMPILE);
+   glNewList(mDisplayListIndex + Point::BOXED_X, GL_COMPILE);
    glBegin(GL_LINES);
    glVertex2d(dPixelX1, dPixelY1);
    glVertex2d(dPixelX2, dPixelY1);
@@ -1885,7 +1870,7 @@ void PlotViewImp::initializeDisplayList()
    glEndList();
 
    // BOXED_CROSS_HAIR
-   glNewList(displayListIndex + Point::BOXED_CROSS_HAIR, GL_COMPILE);
+   glNewList(mDisplayListIndex + Point::BOXED_CROSS_HAIR, GL_COMPILE);
    glBegin(GL_LINES);
    glVertex2d(dPixelX1, dPixelY1);
    glVertex2d(dPixelX2, dPixelY1);
@@ -1904,7 +1889,7 @@ void PlotViewImp::initializeDisplayList()
    glEndList();
 
    // BOXED_VERTICAL_LINE
-   glNewList(displayListIndex + Point::BOXED_VERTICAL_LINE, GL_COMPILE);
+   glNewList(mDisplayListIndex + Point::BOXED_VERTICAL_LINE, GL_COMPILE);
    glBegin(GL_LINES);
    glVertex2d(dPixelX1, dPixelY1);
    glVertex2d(dPixelX2, dPixelY1);
@@ -1921,7 +1906,7 @@ void PlotViewImp::initializeDisplayList()
    glEndList();
 
    // BOXED_HORIZONTAL_LINE
-   glNewList(displayListIndex + Point::BOXED_HORIZONTAL_LINE, GL_COMPILE);
+   glNewList(mDisplayListIndex + Point::BOXED_HORIZONTAL_LINE, GL_COMPILE);
    glBegin(GL_LINES);
    glVertex2d(dPixelX1, dPixelY1);
    glVertex2d(dPixelX2, dPixelY1);
@@ -1938,7 +1923,7 @@ void PlotViewImp::initializeDisplayList()
    glEndList();
 
    // BOXED_ASTERISK
-   glNewList(displayListIndex + Point::BOXED_ASTERISK, GL_COMPILE);
+   glNewList(mDisplayListIndex + Point::BOXED_ASTERISK, GL_COMPILE);
    glBegin(GL_LINES);
    glVertex2d(dPixelX1, dPixelY1);
    glVertex2d(dPixelX2, dPixelY1);
@@ -1961,7 +1946,7 @@ void PlotViewImp::initializeDisplayList()
    glEndList();
 
    // BOXED_FORWARD_SLASH
-   glNewList(displayListIndex + Point::BOXED_FORWARD_SLASH, GL_COMPILE);
+   glNewList(mDisplayListIndex + Point::BOXED_FORWARD_SLASH, GL_COMPILE);
    glBegin(GL_LINE_LOOP);
    glVertex2d(dPixelX2, dPixelY2);
    glVertex2d(dPixelX2, dPixelY1);
@@ -1973,7 +1958,7 @@ void PlotViewImp::initializeDisplayList()
    glEndList();
 
    // BOXED_BACK_SLASH
-   glNewList(displayListIndex + Point::BOXED_BACK_SLASH, GL_COMPILE);
+   glNewList(mDisplayListIndex + Point::BOXED_BACK_SLASH, GL_COMPILE);
    glBegin(GL_LINE_LOOP);
    glVertex2d(dPixelX1, dPixelY2);
    glVertex2d(dPixelX2, dPixelY2);
@@ -1985,7 +1970,7 @@ void PlotViewImp::initializeDisplayList()
    glEndList();
 
    // BOX
-   glNewList(displayListIndex + Point::BOX, GL_COMPILE);
+   glNewList(mDisplayListIndex + Point::BOX, GL_COMPILE);
    glBegin(GL_LINE_LOOP);
    glVertex2d(dPixelX1, dPixelY1);
    glVertex2d(dPixelX2, dPixelY1);
@@ -1995,7 +1980,7 @@ void PlotViewImp::initializeDisplayList()
    glEndList();
 
    // DIAMOND
-   glNewList(displayListIndex + Point::DIAMOND, GL_COMPILE);
+   glNewList(mDisplayListIndex + Point::DIAMOND, GL_COMPILE);
    glBegin(GL_LINE_LOOP);
    glVertex2d((dPixelX1 + dPixelX2) / 2, dPixelY1);
    glVertex2d(dPixelX2, (dPixelY1 + dPixelY2) / 2);
@@ -2005,7 +1990,7 @@ void PlotViewImp::initializeDisplayList()
    glEndList();
 
    // DIAMOND_FILLED
-   glNewList(displayListIndex + Point::DIAMOND_FILLED, GL_COMPILE);
+   glNewList(mDisplayListIndex + Point::DIAMOND_FILLED, GL_COMPILE);
    glBegin(GL_QUADS);
    glVertex2d((dPixelX1 + dPixelX2) / 2, dPixelY1);
    glVertex2d(dPixelX2, (dPixelY1 + dPixelY2) / 2);
@@ -2015,7 +2000,7 @@ void PlotViewImp::initializeDisplayList()
    glEndList();
 
    // DIAMOND_CROSS_HAIR
-   glNewList(displayListIndex + Point::DIAMOND_CROSS_HAIR, GL_COMPILE);
+   glNewList(mDisplayListIndex + Point::DIAMOND_CROSS_HAIR, GL_COMPILE);
    glBegin(GL_LINES);
    glVertex2d((dPixelX1 + dPixelX2) / 2, dPixelY1);
    glVertex2d(dPixelX2, (dPixelY1 + dPixelY2) / 2);
@@ -2034,7 +2019,7 @@ void PlotViewImp::initializeDisplayList()
    glEndList();
 
    // TRIANGLE
-   glNewList(displayListIndex + Point::TRIANGLE, GL_COMPILE);
+   glNewList(mDisplayListIndex + Point::TRIANGLE, GL_COMPILE);
    glBegin(GL_LINE_LOOP);
    glVertex2d((dPixelX1 + dPixelX2) / 2, dPixelY2);
    glVertex2d(dPixelX1, dPixelY1);
@@ -2043,7 +2028,7 @@ void PlotViewImp::initializeDisplayList()
    glEndList();
 
    // TRIANGLE_FILLED
-   glNewList(displayListIndex + Point::TRIANGLE_FILLED, GL_COMPILE);
+   glNewList(mDisplayListIndex + Point::TRIANGLE_FILLED, GL_COMPILE);
    glBegin(GL_TRIANGLES);
    glVertex2d((dPixelX1 + dPixelX2) / 2, dPixelY2);
    glVertex2d(dPixelX1, dPixelY1);
@@ -2052,7 +2037,7 @@ void PlotViewImp::initializeDisplayList()
    glEndList();
 
    // RIGHT_TRIANGLE
-   glNewList(displayListIndex + Point::RIGHT_TRIANGLE, GL_COMPILE);
+   glNewList(mDisplayListIndex + Point::RIGHT_TRIANGLE, GL_COMPILE);
    glBegin(GL_LINE_LOOP);
    glVertex2d(dPixelX1, dPixelY1);
    glVertex2d(dPixelX2, (dPixelY1 + dPixelY2) / 2);
@@ -2061,7 +2046,7 @@ void PlotViewImp::initializeDisplayList()
    glEndList();
 
    // RIGHT_TRIANGLE_FILLED
-   glNewList(displayListIndex + Point::RIGHT_TRIANGLE_FILLED, GL_COMPILE);
+   glNewList(mDisplayListIndex + Point::RIGHT_TRIANGLE_FILLED, GL_COMPILE);
    glBegin(GL_TRIANGLES);
    glVertex2d(dPixelX1, dPixelY1);
    glVertex2d(dPixelX2, (dPixelY1 + dPixelY2) / 2);
@@ -2070,7 +2055,7 @@ void PlotViewImp::initializeDisplayList()
    glEndList();
 
    // LEFT_TRIANGLE
-   glNewList(displayListIndex + Point::LEFT_TRIANGLE, GL_COMPILE);
+   glNewList(mDisplayListIndex + Point::LEFT_TRIANGLE, GL_COMPILE);
    glBegin(GL_LINE_LOOP);
    glVertex2d(dPixelX2, dPixelY1);
    glVertex2d(dPixelX2, dPixelY2);
@@ -2079,7 +2064,7 @@ void PlotViewImp::initializeDisplayList()
    glEndList();
 
    // LEFT_TRIANGLE_FILLED
-   glNewList(displayListIndex + Point::LEFT_TRIANGLE_FILLED, GL_COMPILE);
+   glNewList(mDisplayListIndex + Point::LEFT_TRIANGLE_FILLED, GL_COMPILE);
    glBegin(GL_TRIANGLES);
    glVertex2d(dPixelX2, dPixelY1);
    glVertex2d(dPixelX2, dPixelY2);
@@ -2088,7 +2073,7 @@ void PlotViewImp::initializeDisplayList()
    glEndList();
 
    // DOWN_TRIANGLE
-   glNewList(displayListIndex + Point::DOWN_TRIANGLE, GL_COMPILE);
+   glNewList(mDisplayListIndex + Point::DOWN_TRIANGLE, GL_COMPILE);
    glBegin(GL_LINE_LOOP);
    glVertex2d((dPixelX1 + dPixelX2) / 2, dPixelY1);
    glVertex2d(dPixelX2, dPixelY2);
@@ -2097,7 +2082,7 @@ void PlotViewImp::initializeDisplayList()
    glEndList();
 
    // DOWN_TRIANGLE_FILLED
-   glNewList(displayListIndex + Point::DOWN_TRIANGLE_FILLED, GL_COMPILE);
+   glNewList(mDisplayListIndex + Point::DOWN_TRIANGLE_FILLED, GL_COMPILE);
    glBegin(GL_TRIANGLES);
    glVertex2d((dPixelX1 + dPixelX2) / 2, dPixelY1);
    glVertex2d(dPixelX2, dPixelY2);
@@ -2106,17 +2091,17 @@ void PlotViewImp::initializeDisplayList()
    glEndList();
 
    // CIRCLE
-   glNewList(displayListIndex + Point::CIRCLE, GL_COMPILE);
+   glNewList(mDisplayListIndex + Point::CIRCLE, GL_COMPILE);
    DrawUtil::drawEllipse(LocationType(dPixelX1, dPixelY2), LocationType(dPixelX2, dPixelY1), false);
    glEndList();
 
    // CIRCLE_FILLED
-   glNewList(displayListIndex + Point::CIRCLE_FILLED, GL_COMPILE);
+   glNewList(mDisplayListIndex + Point::CIRCLE_FILLED, GL_COMPILE);
    DrawUtil::drawEllipse(LocationType(dPixelX1, dPixelY2), LocationType(dPixelX2, dPixelY1), true);
    glEndList();
 
    // OCTAGON
-   glNewList(displayListIndex + Point::OCTAGON, GL_COMPILE);
+   glNewList(mDisplayListIndex + Point::OCTAGON, GL_COMPILE);
    glBegin(GL_LINE_LOOP);
    glVertex2f( dPixelX1 / 2, dPixelY1);
    glVertex2f( dPixelX2 / 2, dPixelY1);
@@ -2128,9 +2113,9 @@ void PlotViewImp::initializeDisplayList()
    glVertex2f( dPixelX1, dPixelY1 / 2);
    glEnd();
    glEndList();
-   
+
    // OCTAGON_FILLED
-   glNewList(displayListIndex + Point::OCTAGON_FILLED, GL_COMPILE);
+   glNewList(mDisplayListIndex + Point::OCTAGON_FILLED, GL_COMPILE);
    glBegin(GL_POLYGON);
    glVertex2f( dPixelX1 / 2, dPixelY1);
    glVertex2f( dPixelX2 / 2, dPixelY1);
@@ -2142,9 +2127,9 @@ void PlotViewImp::initializeDisplayList()
    glVertex2f( dPixelX1, dPixelY1 / 2);
    glEnd();
    glEndList();
-   
+
    // OCTAGON_CROSS_HAIR
-   glNewList(displayListIndex + Point::OCTAGON_CROSS_HAIR, GL_COMPILE);
+   glNewList(mDisplayListIndex + Point::OCTAGON_CROSS_HAIR, GL_COMPILE);
    glBegin(GL_LINES);
    glVertex2f( dPixelX1 / 2, dPixelY1);
    glVertex2f( dPixelX2 / 2, dPixelY1);
@@ -2171,18 +2156,8 @@ void PlotViewImp::initializeDisplayList()
    glEndList();
 }
 
-void PlotViewImp::useTemporaryDisplayList(bool bTempList)
-{
-   mbTemporaryDisplayList = bTempList;
-}
-
 GLuint PlotViewImp::getDisplayListIndex() const
 {
-   if (mbTemporaryDisplayList == true)
-   {
-      return mTemporaryDisplayListIndex;
-   }
-
    return mDisplayListIndex;
 }
 
@@ -2243,8 +2218,6 @@ bool PlotViewImp::toXml(XMLWriter* pXml) const
    }
 
    pXml->addAttr("displayListIndex", mDisplayListIndex);
-   pXml->addAttr("tempDisplayListIndex", mTemporaryDisplayListIndex);
-   pXml->addAttr("tempDisplayList", mbTemporaryDisplayList);
    pXml->addAttr("plotSelectionMode", static_cast<int>(mSelectionMode));
    if (mpAnnotationLayer != NULL)
    {
@@ -2299,10 +2272,6 @@ bool PlotViewImp::fromXml(DOMNode* pDocument, unsigned int version)
 
    mDisplayListIndex = StringUtilities::fromXmlString<int>(
       A(pElem->getAttribute(X("displayListIndex"))));
-   mTemporaryDisplayListIndex = StringUtilities::fromXmlString<int>(
-      A(pElem->getAttribute(X("tempDisplayListIndex"))));
-   mbTemporaryDisplayList = StringUtilities::fromXmlString<bool>(
-      A(pElem->getAttribute(X("tempDisplayList"))));
 
    if (pElem->hasAttribute(X("annotationLayerId")))
    {
