@@ -237,6 +237,9 @@
     <ClInclude Include="Interfaces\Georeference.h">
       <Filter>Interfaces</Filter>
     </ClInclude>
+    <ClInclude Include="Interfaces\GeoreferenceDescriptor.h">
+      <Filter>Interfaces</Filter>
+    </ClInclude>
     <ClInclude Include="Interfaces\GpuProgramDescriptor.h">
       <Filter>Interfaces</Filter>
     </ClInclude>

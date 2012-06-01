@@ -164,6 +164,9 @@
     <ClCompile Include="OptionsGeneral.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="OptionsGeoreference.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="OptionsLatLonLayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -234,6 +237,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PropertiesGcpLayer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PropertiesGeoreference.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PropertiesGraphicObject.cpp">
@@ -875,9 +881,6 @@
     <ClCompile Include="Undo\ViewUndo.cpp">
       <Filter>Undo</Filter>
     </ClCompile>
-    <ClCompile Include="OptionsGeoreference.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AoiToolBarAdapter.h">
@@ -902,6 +905,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PropertiesGcpLayer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PropertiesGeoreference.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PropertiesHistogramPlot.h">
@@ -1356,6 +1362,9 @@
     <CustomBuild Include="OptionsGeneral.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="OptionsGeoreference.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
     <CustomBuild Include="OptionsLatLonLayer.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -1523,9 +1532,6 @@
     </CustomBuild>
     <CustomBuild Include="Undo\UndoStack.h">
       <Filter>Undo</Filter>
-    </CustomBuild>
-    <CustomBuild Include="OptionsGeoreference.h">
-      <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
 </Project>

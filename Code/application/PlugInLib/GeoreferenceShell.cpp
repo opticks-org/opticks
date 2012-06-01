@@ -8,11 +8,12 @@
  */
 
 #include "AppVerify.h"
+#include "GeoreferenceDescriptor.h"
 #include "GeoreferenceShell.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
-
-using namespace std;
+#include "RasterDataDescriptor.h"
+#include "RasterElement.h"
 
 GeoreferenceShell::GeoreferenceShell()
 {
@@ -21,7 +22,12 @@ GeoreferenceShell::GeoreferenceShell()
 }
 
 GeoreferenceShell::~GeoreferenceShell()
+{}
+
+bool GeoreferenceShell::setInteractive()
 {
+   ExecutableShell::setInteractive();
+   return false;
 }
 
 bool GeoreferenceShell::getOutputSpecification(PlugInArgList*& pArgList)
@@ -37,9 +43,10 @@ bool GeoreferenceShell::getInputSpecification(PlugInArgList*& pArgList)
    {
       pArgList = Service<PlugInManagerServices>()->getPlugInArgList();
       VERIFY(pArgList != NULL);
-      success = success && pArgList->addArg<RasterElement>(Executable::DataElementArg(), NULL, 
+      success = success && pArgList->addArg<RasterElement>(Executable::DataElementArg(), NULL,
          "Raster element on which georeferencing will be performed.");
-      success = success && pArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription());
+      success = success && pArgList->addArg<Progress>(Executable::ProgressArg(), NULL,
+         Executable::ProgressArgDescription());
    }
    else
    {
@@ -59,12 +66,38 @@ LocationType GeoreferenceShell::geoToPixelQuick(LocationType geo, bool* pAccurat
    return geoToPixel(geo, pAccurate);
 }
 
-QWidget* GeoreferenceShell::getGui(RasterElement* pRaster)
+QWidget* GeoreferenceShell::getWidget(RasterDataDescriptor* pDescriptor)
 {
    return NULL;
 }
 
-bool GeoreferenceShell::validateGuiInput() const
+bool GeoreferenceShell::validate(const RasterDataDescriptor* pDescriptor, std::string& errorMessage) const
 {
+   // Check for a valid data descriptor
+   if (pDescriptor == NULL)
+   {
+      errorMessage = "The raster data set information is invalid.";
+      return false;
+   }
+
+   // Check for a valid georeference descriptor
+   const GeoreferenceDescriptor* pGeorefDescriptor = pDescriptor->getGeoreferenceDescriptor();
+   if (pGeorefDescriptor == NULL)
+   {
+      errorMessage = "The georeference algorithm information is invalid.";
+      return false;
+   }
+
+   // If creating a results layer, check for an invalid layer name
+   if (pGeorefDescriptor->getCreateLayer() == true)
+   {
+      const std::string& layerName = pGeorefDescriptor->getLayerName();
+      if (layerName.empty() == true)
+      {
+         errorMessage = "The georeference results layer name is invalid.";
+         return false;
+      }
+   }
+
    return true;
 }

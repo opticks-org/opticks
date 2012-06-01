@@ -781,7 +781,7 @@ void PropertiesRasterLayer::setStretchUnits(RasterChannelType channel, RegionUni
       // so that the stretch values will be converted properly.
       // Block signals so observers ignore this temporary set and reset.
       UndoLock lock(mpRasterLayer->getView());
-      SignalBlocker sigBlock(*dynamic_cast<Subject*>(mpRasterLayer));
+      SignalBlocker sigBlock(*mpRasterLayer);
       RasterLayerImp* pLayerImp = dynamic_cast<RasterLayerImp*>(mpRasterLayer);
       if (pLayerImp != NULL)
       {

@@ -10,16 +10,14 @@
 #include "AppVerify.h"
 #include "SampleGeorefGui.h"
 
-#include <QtGui/QButtonGroup>
 #include <QtGui/QCheckBox>
 #include <QtGui/QGridLayout>
 #include <QtGui/QLabel>
-#include <QtGui/QRadioButton>
 #include <QtGui/QSpinBox>
 
-#include <limits>
-
-SampleGeorefGui::SampleGeorefGui()
+SampleGeorefGui::SampleGeorefGui(QWidget* pParent) :
+   QWidget(pParent),
+   mpDescriptor(NULL)
 {
    QLabel* pXLabel = new QLabel("X Size:", this);
    QLabel* pYLabel = new QLabel("Y Size:", this);
@@ -28,6 +26,7 @@ SampleGeorefGui::SampleGeorefGui()
    mpXSpin->setMinimum(0);
    mpXSpin->setMaximum(90);
    mpXSpin->setValue(10);
+
    mpYSpin = new QSpinBox(this);
    mpYSpin->setMinimum(0);
    mpYSpin->setMaximum(180);
@@ -35,58 +34,100 @@ SampleGeorefGui::SampleGeorefGui()
 
    mpExtrapolateCheck = new QCheckBox("Extrapolate", this);
 
-   mpAnimatedCheck = new QCheckBox("Animated", this);
-
-   QRadioButton* pTranslateButton = new QRadioButton("Translate", this);
-   mpRotateButton = new QRadioButton("Rotate", this);
-   pTranslateButton->setChecked(true);
-   pTranslateButton->setEnabled(false);
-   mpRotateButton->setEnabled(false);
-
+   // Layout
    QGridLayout* pGrid = new QGridLayout(this);
    pGrid->setMargin(0);
    pGrid->setSpacing(5);
    pGrid->addWidget(pXLabel, 0, 0);
-   pGrid->addWidget(pYLabel, 1, 0);
    pGrid->addWidget(mpXSpin, 0, 1);
+   pGrid->addWidget(pYLabel, 1, 0);
    pGrid->addWidget(mpYSpin, 1, 1);
    pGrid->addWidget(mpExtrapolateCheck, 2, 1);
-   pGrid->addWidget(mpAnimatedCheck, 3, 1);
-   pGrid->addWidget(pTranslateButton, 4, 1);
-   pGrid->addWidget(mpRotateButton, 5, 1);
-
-   pGrid->setRowStretch(6, 10);
+   pGrid->setRowStretch(3, 10);
    pGrid->setColumnStretch(2, 10);
 
-   VERIFYNR(connect(mpAnimatedCheck, SIGNAL(toggled(bool)), pTranslateButton, SLOT(setEnabled(bool))));
-   VERIFYNR(connect(mpAnimatedCheck, SIGNAL(toggled(bool)), mpRotateButton, SLOT(setEnabled(bool))));
+   // Connections
+   VERIFYNR(connect(mpXSpin, SIGNAL(valueChanged(int)), this, SLOT(setXSize(int))));
+   VERIFYNR(connect(mpYSpin, SIGNAL(valueChanged(int)), this, SLOT(setYSize(int))));
+   VERIFYNR(connect(mpExtrapolateCheck, SIGNAL(toggled(bool)), this, SLOT(setExtrapolate(bool))));
+
+   mpDescriptor.addSignal(SIGNAL_NAME(Subject, Modified), Slot(this, &SampleGeorefGui::georeferenceDescriptorModified));
 }
 
 SampleGeorefGui::~SampleGeorefGui()
+{}
+
+void SampleGeorefGui::setGeoreferenceDescriptor(GeoreferenceDescriptor* pDescriptor)
 {
+   if (pDescriptor != mpDescriptor.get())
+   {
+      mpDescriptor.reset(pDescriptor);
+
+      // Update the widgets based on the georeference parameters
+      updateFromGeoreferenceDescriptor();
+   }
 }
 
-int SampleGeorefGui::getXSize() const
+GeoreferenceDescriptor* SampleGeorefGui::getGeoreferenceDescriptor()
 {
-   return mpXSpin->value();
+   return mpDescriptor.get();
 }
 
-int SampleGeorefGui::getYSize() const
+const GeoreferenceDescriptor* SampleGeorefGui::getGeoreferenceDescriptor() const
 {
-   return mpYSpin->value();
+   return mpDescriptor.get();
 }
 
-bool SampleGeorefGui::getAnimated() const
+void SampleGeorefGui::georeferenceDescriptorModified(Subject& subject, const std::string& signal,
+                                                     const boost::any& value)
 {
-   return mpAnimatedCheck->isChecked();
+   updateFromGeoreferenceDescriptor();
 }
 
-bool SampleGeorefGui::getRotate() const
+void SampleGeorefGui::updateFromGeoreferenceDescriptor()
 {
-   return mpRotateButton->isChecked();
+   if (mpDescriptor.get() != NULL)
+   {
+      // Need to block signals when updating the widgets because DynamicObject::setAttributeByPath() does
+      // not check if the attribute value is modified before setting the value and notifying the signal
+
+      int xSize = dv_cast<int>(mpDescriptor->getAttributeByPath("SampleGeoref/XSize"), 10);
+      mpXSpin->blockSignals(true);
+      mpXSpin->setValue(xSize);
+      mpXSpin->blockSignals(false);
+
+      int ySize = dv_cast<int>(mpDescriptor->getAttributeByPath("SampleGeoref/YSize"), 5);
+      mpYSpin->blockSignals(true);
+      mpYSpin->setValue(ySize);
+      mpYSpin->blockSignals(false);
+
+      bool extrapolate = dv_cast<bool>(mpDescriptor->getAttributeByPath("SampleGeoref/Extrapolate"), false);
+      mpExtrapolateCheck->blockSignals(true);
+      mpExtrapolateCheck->setChecked(extrapolate);
+      mpExtrapolateCheck->blockSignals(false);
+   }
 }
 
-bool SampleGeorefGui::getExtrapolate() const
+void SampleGeorefGui::setXSize(int xSize)
 {
-   return mpExtrapolateCheck->isChecked();
+   if (mpDescriptor.get() != NULL)
+   {
+      mpDescriptor->setAttributeByPath("SampleGeoref/XSize", xSize);
+   }
+}
+
+void SampleGeorefGui::setYSize(int ySize)
+{
+   if (mpDescriptor.get() != NULL)
+   {
+      mpDescriptor->setAttributeByPath("SampleGeoref/YSize", ySize);
+   }
+}
+
+void SampleGeorefGui::setExtrapolate(bool extrapolate)
+{
+   if (mpDescriptor.get() != NULL)
+   {
+      mpDescriptor->setAttributeByPath("SampleGeoref/Extrapolate", extrapolate);
+   }
 }

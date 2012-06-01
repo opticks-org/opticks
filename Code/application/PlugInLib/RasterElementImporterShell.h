@@ -202,6 +202,7 @@ protected:
     *  - \link ImporterShell::VALID_CLASSIFICATION VALID_CLASSIFICATION \endlink
     *  - \link ImporterShell::RASTER_SIZE RASTER_SIZE \endlink
     *  - \link ImporterShell::VALID_DATA_TYPE VALID_DATA_TYPE \endlink
+    *  - \link ImporterShell::VALID_GEOREFERENCE_PARAMETERS VALID_GEOREFERENCE_PARAMETERS \endlink
     *  .
     *  \par
     *  Additionally, the following test is added if the ::ProcessingLocation is
@@ -228,20 +229,36 @@ protected:
    virtual int getValidationTest(const DataDescriptor* pDescriptor) const;
 
    /**
-    * Perform the a default import.
+    *  Imports the raster data.
     *
-    * This method performs a default import by creating a RasterPager if the processing
-    * location is ProcessingLocation::ON_DISK_READ_ONLY or by creating a separate 
-    * RasterElement and RasterPager and copying the data into the original RasterElement.
+    *  This method imports the raster data by creating a RasterPager if the
+    *  processing location is \link ProcessingLocation::ON_DISK_READ_ONLY
+    *  ON_DISK_READ_ONLY\endlink or by creating a separate RasterElement and
+    *  RasterPager and copying the data into the original RasterElement.
     *
-    * parseInputArgList() must be called before calling this method.  This method is 
-    * called from the default implementation of execute().
+    *  The parseInputArgList() method must be called before calling this method.
+    *  This method is called from the default implementation of execute().
     *
-    * @return \c true if the operation succeeded, or \c false otherwise.  Failure
-    *         may be due to an abort.  In case of failure, the Progress will have an
-    *         appropriate message.
+    *  @return  Returns \c true if the import succeeded, or \c false if the
+    *           import fails or is aborted.  If \c false is returned, the
+    *           Progress object returned by getProgress() will have an
+    *           appropriate message.
     */
    virtual bool performImport() const;
+
+   /**
+    *  Georeferences the raster data.
+    *
+    *  This method georeferences the raster data by executing the Georeference
+    *  plug-in returned from GeoreferenceDescriptor::getGeoreferencePlugInName()
+    *  if GeoreferenceDescriptor::getGeoreferenceOnImport() returns \c true.  If
+    *  the Georeference plug-in fails, the failure message is added as a warning
+    *  to the Progress object returned by getProgress().
+    *
+    *  This method is called from the default implementation of execute() after
+    *  createGcpList() is called.
+    */
+   virtual void performGeoreference() const;
 
    /**
     *  Creates a view for the imported data set.
@@ -310,8 +327,8 @@ protected:
     *
     *  This method is called from the default implementation of createView()
     *  after the GCP layer is created.  This method is not called if the
-    *  \link  Georeference::getSettingCreateLatLonLayer()
-    *  Georeference::CreateLatLonLayer\endlink setting is \c false.
+    *  \link  GeoreferenceDescriptor::getSettingCreateLayer()
+    *  GeoreferenceDescriptor::CreateLayer\endlink setting is \c false.
     *
     *  @param   pView
     *           The view in which to create the latitude/longitude layer.
@@ -325,9 +342,9 @@ protected:
     *           based on the previously georeferenced raster element.  If the
     *           layer is successfully created, the layer is shown or hidden
     *           based on the value of the
-    *           \link Georeference::getSettingDisplayLatLonLayer()
-    *           Georeference::DisplayLatLonLayer\endlink setting.  If the raster
-    *           element was not successfully georeferenced, the default
+    *           \link GeoreferenceDescriptor::getSettingDisplayLayer()
+    *           GeoreferenceDescriptor::DisplayLayer\endlink setting.  If the
+    *           raster element was not successfully georeferenced, the default
     *           implementation does nothing.
     *
     *  @see     createGcpLayer()
@@ -357,38 +374,6 @@ protected:
     *           method has not yet been called.
     */
    GcpList* getGcpList() const;
-
-   /**
-    *  Creates a Georeference plug-in that can be used to georeference the
-    *  raster data.
-    *
-    *  This method is called from within execute() if the configuration settings
-    *  to auto-georeference and to get the georeference plug-in from the
-    *  importer are enabled.  The method is called after calling createGcpList(),
-    *  regardless of whether a valid GCP list is returned.
-    *
-    *  The default implementation of this method creates an instance of the
-    *  GCP %Georeference plug-in and calls Georeference::canHandleRasterElement()
-    *  to see if it can georeference the raster data.  If the plug-in supports
-    *  the raster data, it is returned.  Otherwise the plug-in is destroyed and
-    *  \c NULL is returned.
-    *
-    *  Derived importers should override this method if a better Georeference
-    *  plug-in is available for the raster data.
-    *
-    *  @return  A pointer to the Georeference plug-in that will be used to
-    *           georeference the raster data.  The plug-in should support the
-    *           raster element returned by getRasterElement() such that
-    *           Georeference::canHandleRasterElement() returns \c true.
-    *           Ownership of the plug-in is transferred to the shell and will
-    *           be destroyed automatically.  \c NULL is returned if no plug-in
-    *           is available to georeference the raster data, or if the raster
-    *           data does not contain georeference information.
-    *
-    *  @see     getRasterElement(), Georeference::getSettingAutoGeoreference(),
-    *           Georeference::getSettingImporterGeoreferencePlugIn()
-    */
-   virtual PlugIn* getGeoreferencePlugIn() const;
 
    /**
     *  Create and set a RasterPager for a given RasterElement.

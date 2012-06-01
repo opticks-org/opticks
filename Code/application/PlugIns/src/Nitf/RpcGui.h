@@ -10,27 +10,38 @@
 #ifndef RPCGUI_H
 #define RPCGUI_H
 
+#include "AttachmentPtr.h"
+#include "GeoreferenceDescriptor.h"
+
 #include <QtGui/QWidget>
 
 class QSpinBox;
-class RasterElement;
 
 class RpcGui : public QWidget
 {
    Q_OBJECT
 
 public:
-   RpcGui(RasterElement* pRasterElement, QWidget* pParent = 0);
-   ~RpcGui();
-   int getHeightSize() const;
-   bool validateInput();
+   RpcGui(QWidget* pParent = NULL);
+   virtual ~RpcGui();
+
+   void setGeoreferenceDescriptor(GeoreferenceDescriptor* pDescriptor);
+   GeoreferenceDescriptor* getGeoreferenceDescriptor();
+   const GeoreferenceDescriptor* getGeoreferenceDescriptor() const;
+
+protected:
+   void georeferenceDescriptorModified(Subject& subject, const std::string& signal, const boost::any& value);
+   void updateFromGeoreferenceDescriptor();
+
+protected slots:
+   void setHeight(int heightValue);
 
 private:
    RpcGui(const RpcGui& rhs);
    RpcGui& operator=(const RpcGui& rhs);
 
-   RasterElement* mpRasterElement;
+   AttachmentPtr<GeoreferenceDescriptor> mpDescriptor;
    QSpinBox* mpHeightSpin;
 };
 
-#endif // RPCGUI_H
+#endif

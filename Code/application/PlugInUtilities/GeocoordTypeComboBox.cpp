@@ -22,7 +22,8 @@ GeocoordTypeComboBox::GeocoordTypeComboBox(QWidget* pParent) :
    addItem(QString::fromStdString(StringUtilities::toDisplayString(GEOCOORD_UTM)));
    addItem(QString::fromStdString(StringUtilities::toDisplayString(GEOCOORD_MGRS)));
 
-   VERIFYNR(connect(this, SIGNAL(activated(int)), this, SLOT(translateActivated(int))));
+   VERIFYNR(connect(this, SIGNAL(currentIndexChanged(const QString&)), this,
+      SLOT(translateIndexChanged(const QString&))));
 }
 
 GeocoordTypeComboBox::~GeocoordTypeComboBox()
@@ -58,16 +59,12 @@ GeocoordType GeocoordTypeComboBox::getGeocoordType() const
    return geocoordType;
 }
 
-void GeocoordTypeComboBox::translateActivated(int index)
+void GeocoordTypeComboBox::translateIndexChanged(const QString& text)
 {
    GeocoordType geocoordType;
-   if (index != -1)
+   if (text.isEmpty() == false)
    {
-      std::string typeText = itemText(index).toStdString();
-      if (typeText.empty() == false)
-      {
-         geocoordType = StringUtilities::fromDisplayString<GeocoordType>(typeText);
-      }
+      geocoordType = StringUtilities::fromDisplayString<GeocoordType>(text.toStdString());
    }
 
    emit geocoordTypeChanged(geocoordType);

@@ -70,7 +70,6 @@ public:
    void setClassification(const Classification* pClassification);
    void getClassificationText(std::string& classificationText) const;
    bool compare(const DynamicObject* pObject) const;
-   bool compare(const Classification* pClassification) const;
    bool isValid(std::string& errorMessage) const;
 
    bool toXml(XMLWriter* pXml) const;
@@ -276,10 +275,6 @@ private:
    void setClassification(const Classification* pClassification) \
    { \
       impClass::setClassification(pClassification); \
-   } \
-   bool compare(const Classification* pClassification) const \
-   { \
-      return impClass::compare(pClassification); \
    } \
    bool isValid(std::string& errorMessage) const \
    { \

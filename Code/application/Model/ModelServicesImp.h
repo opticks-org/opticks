@@ -56,6 +56,7 @@ public:
    DataElement* createElement(const std::string& name, const std::string& type, DataElement* pParent);
    DataElement* getElement(const std::string& name, const std::string& type, const DataElement* pParent) const;
    DataElement* getElement(const std::vector<std::string>& designator, const std::string& type) const;
+   DataElement* getElement(const DataDescriptor* pDescriptor) const;
    std::vector<DataElement*> getElements(const std::string& type) const;
    std::vector<DataElement*> getElements(const DataElement* pParent, const std::string& type) const;
    std::vector<DataElement*> getElements(const std::string& filename, const std::string& type) const;

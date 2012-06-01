@@ -32,7 +32,7 @@ DataDescriptorImp::DataDescriptorImp(const string& name, const string& type, Dat
       setClassification(pParent->getClassification());
    }
 
-   // Attach to the metadata and classification objects to notify when the they change
+   // Attach to the metadata and classification objects to notify when they change
    VERIFYNR(mMetadata.attach(SIGNAL_NAME(Subject, Modified), Slot(this, &DataDescriptorImp::notifyModified)));
    VERIFYNR(mClassification.attach(SIGNAL_NAME(Subject, Modified), Slot(this, &DataDescriptorImp::notifyModified)));
 
@@ -47,7 +47,7 @@ DataDescriptorImp::DataDescriptorImp(const string& name, const string& type, con
    mProcessingLocation(IN_MEMORY),
    mpFileDescriptor(NULL)
 {
-   // Attach to the metadata and classification objects to notify when the they change
+   // Attach to the metadata and classification objects to notify when they change
    VERIFYNR(mMetadata.attach(SIGNAL_NAME(Subject, Modified), Slot(this, &DataDescriptorImp::notifyModified)));
    VERIFYNR(mClassification.attach(SIGNAL_NAME(Subject, Modified), Slot(this, &DataDescriptorImp::notifyModified)));
 }

@@ -12,6 +12,7 @@
 
 #include "RasterElementImporterShell.h"
 
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
@@ -25,22 +26,19 @@ public:
    GeoTIFFImporter();
    virtual ~GeoTIFFImporter();
 
-   std::vector<ImportDescriptor*> getImportDescriptors(const std::string& filename);
    unsigned char getFileAffinity(const std::string& filename);
-   QWidget *getImportOptionsWidget(DataDescriptor *pDescriptor);
-   bool performImport() const;
-   PlugIn* getGeoreferencePlugIn() const;
-   bool createRasterPager(RasterElement *pRasterElement) const;
+   std::vector<ImportDescriptor*> getImportDescriptors(const std::string& filename);
+   QWidget* getImportOptionsWidget(DataDescriptor* pDescriptor);
    bool validate(const DataDescriptor* pDescriptor, std::string& errorMessage) const;
+   bool createRasterPager(RasterElement* pRasterElement) const;
 
 protected:
    bool populateDataDescriptor(RasterDataDescriptor* pDescriptor);
    virtual int getValidationTest(const DataDescriptor* pDescriptor) const;
-   void loadIsdMetadata(DataDescriptor* pDescriptor) const;
 
 private:
-   std::auto_ptr<OptionsTiffImporter> mImportOptionsWidget;
-   std::string mMetadataMessage;
+   std::auto_ptr<OptionsTiffImporter> mpImportOptionsWidget;
+   std::map<std::string, std::string> mMetadataMessages;
 };
 
 #endif

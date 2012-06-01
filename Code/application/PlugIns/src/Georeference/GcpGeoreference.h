@@ -19,6 +19,7 @@
 #include "UtilityServices.h"
 
 class GcpGui;
+class RasterElement;
 
 #include <vector>
 
@@ -29,17 +30,16 @@ class GcpGeoreference : public GeoreferenceShell
 {
 public:
    GcpGeoreference();
-   ~GcpGeoreference();
+   virtual ~GcpGeoreference();
 
    bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
    bool getInputSpecification(PlugInArgList*& pArgList);
-   bool setInteractive();
 
+   unsigned char getGeoreferenceAffinity(const RasterDataDescriptor* pDescriptor) const;
+   QWidget* getWidget(RasterDataDescriptor* pDescriptor);
+   bool validate(const RasterDataDescriptor* pDescriptor, std::string& errorMessage) const;
    LocationType pixelToGeo(LocationType pixel, bool* pAccurate = NULL) const;
    LocationType geoToPixel(LocationType geocoord, bool* pAccurate = NULL) const;
-   bool canHandleRasterElement(RasterElement *pRaster) const;
-   QWidget *getGui(RasterElement *pRaster);
-   bool validateGuiInput() const;
 
    bool serialize(SessionItemSerializer &serializer) const;
    bool deserialize(SessionItemDeserializer &deserializer);
@@ -71,4 +71,4 @@ private:
    std::string mMessageText;
 };
 
-#endif // GCPGEOREFERENCE_H
+#endif

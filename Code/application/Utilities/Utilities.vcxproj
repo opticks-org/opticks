@@ -164,6 +164,8 @@
     <ClCompile Include="FileFinderImp.cpp" />
     <ClCompile Include="FilenameImp.cpp" />
     <ClCompile Include="GeocoordLinkFunctor.cpp" />
+    <ClCompile Include="GeoreferenceDescriptorAdapter.cpp" />
+    <ClCompile Include="GeoreferenceDescriptorImp.cpp" />
     <ClCompile Include="ImportAgentImp.cpp" />
     <ClCompile Include="ImportDescriptorImp.cpp" />
     <ClCompile Include="MessageLogAdapter.cpp" />
@@ -200,6 +202,8 @@
     <ClInclude Include="FileFinderImp.h" />
     <ClInclude Include="FilenameImp.h" />
     <ClInclude Include="GeocoordLinkFunctor.h" />
+    <ClInclude Include="GeoreferenceDescriptorAdapter.h" />
+    <ClInclude Include="GeoreferenceDescriptorImp.h" />
     <ClInclude Include="ImportAgentAdapter.h" />
     <ClInclude Include="ImportAgentImp.h" />
     <ClInclude Include="ImportDescriptorImp.h" />

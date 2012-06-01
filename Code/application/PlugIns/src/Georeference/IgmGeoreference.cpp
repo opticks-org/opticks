@@ -13,9 +13,11 @@
 #include "DynamicObject.h"
 #include "IgmGeoreference.h"
 #include "IgmGui.h"
+#include "ImportDescriptor.h"
 #include "Importer.h"
 #include "GcpList.h"
 #include "GeoPoint.h"
+#include "GeoreferenceDescriptor.h"
 #include "GeoreferenceUtilities.h"
 #include "Layer.h"
 #include "LayerList.h"
@@ -38,6 +40,8 @@
 #include "XercesIncludes.h"
 #include "xmlreader.h"
 #include "xmlwriter.h"
+
+#include <QtCore/QFile>
 
 #include <list>
 #include <sstream>
@@ -71,74 +75,107 @@ IgmGeoreference::IgmGeoreference() :
 
 IgmGeoreference::~IgmGeoreference()
 {
-}
-
-bool IgmGeoreference::setInteractive()
-{
-   ExecutableShell::setInteractive();
-   return false;
+   delete mpGui;
 }
 
 bool IgmGeoreference::getInputSpecification(PlugInArgList*& pArgList)
 {
-   bool success = GeoreferenceShell::getInputSpecification(pArgList);
-   VERIFY(pArgList->addArg<RasterElement>("IGM Element", NULL, "If specified, this element contains the IGM data. "
-      "If not specified, the existing " IGM_GEO_NAME " child element will be used. If neither exists, the IGM data will be "
-      "loaded from the file specified in the GUI. In batch mode, either this argument must be specified or an existing "
-      IGM_GEO_NAME " child element must be present."));
-   return success;
+   if (GeoreferenceShell::getInputSpecification(pArgList) == false)
+   {
+      return false;
+   }
+
+   VERIFY(pArgList != NULL);
+   VERIFY(pArgList->addArg<RasterElement>("IGM Element", NULL, "If specified, this element contains the "
+      "IGM data.  If not specified, the IGM data will be loaded from the IGM File input.  If neither input "
+      "is specified, either the existing " IGM_GEO_NAME " child element or IGM filename contained in the " +
+      Executable::DataElementArg() + " input will be used."));
+   VERIFY(pArgList->addArg<Filename>("IGM File", NULL, "The name of the file containing the IGM data.  If "
+      "not specified, the IGM filename contained in the " + Executable::DataElementArg() + " input will be "
+      "used.  This value is ignored if the IGM Element input is specified."));
+
+   return true;
 }
 
 bool IgmGeoreference::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
    VERIFY(pInArgList != NULL);
 
-   ProgressTracker progress(pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg()),
+   mProgress.initialize(pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg()),
       "Georeferencing IGM...", "app", "{53992A0E-6D3A-40cc-9F59-058F21A497DB}");
 
    // Get RasterElement input.
    mpRaster = pInArgList->getPlugInArgValue<RasterElement>(Executable::DataElementArg());
    if (mpRaster == NULL)
    {
-      progress.report("No raster element specified", 0, ERRORS, true);
+      mProgress.report("No raster element specified", 0, ERRORS, true);
       return false;
    }
 
-   // Check the plug-in arg first, then the GUI, and finally look for an existing element
+   // Check the plug-in args for the IGM data
    mpIgmRaster.reset(pInArgList->getPlugInArgValue<RasterElement>("IGM Element"));
-   if (mpIgmRaster.get() == NULL && mpGui != NULL && !mpGui->useExisting() && !mpGui->getFilename().isEmpty())
-   {
-      ImporterResource importer("Auto Importer", mpGui->getFilename().toStdString(), progress.getCurrentProgress());
-      if (!importer->execute())
-      {
-         progress.report("Unable to load IGM data. The file type may not be recognized.", 0, ERRORS, true);
-         return false;
-      }
-      std::vector<DataElement*> igmDataElement = importer->getImportedElements();
-      if (igmDataElement.empty())
-      {
-         progress.report("Unable to load IGM data. The file type may not be recognized.", 0, ERRORS, true);
-         return false;
-      }
-      mpIgmRaster.reset(dynamic_cast<RasterElement*>(igmDataElement.front()));
-      if (mpIgmRaster.get() == NULL)
-      {
-         progress.report("Not a valid IGM file", 0, ERRORS, true);
-         return false;
-      }
-      Service<ModelServices>()->destroyElement(
-         Service<ModelServices>()->getElement(IGM_GEO_NAME, TypeConverter::toString<RasterElement>(), mpRaster));
-      Service<ModelServices>()->setElementParent(mpIgmRaster.get(), mpRaster);
-      Service<ModelServices>()->setElementName(mpIgmRaster.get(), IGM_GEO_NAME);
-   }
+   bool existingElementArgSet = (mpIgmRaster.get() != NULL);
+   std::string argFilename;
+   bool argFilenameSet = false;
+
    if (mpIgmRaster.get() == NULL)
    {
-      mpIgmRaster.reset(static_cast<RasterElement*>(Service<ModelServices>()->getElement(
-         IGM_GEO_NAME, TypeConverter::toString<RasterElement>(), mpRaster)));
+      Filename* pFilename = pInArgList->getPlugInArgValue<Filename>("IGM File");
+      if (pFilename != NULL)
+      {
+         argFilename = pFilename->getFullPathAndName();
+         if (argFilename.empty() == false)
+         {
+            if (loadIgmFile(argFilename) == false)
+            {
+               // Since a valid filename is specified, return false if an error occurs
+               return false;
+            }
+         }
+
+         argFilenameSet = true;
+      }
    }
+
+   // If the IGM data are not available from the plug-in args, check the georeference descriptor
    if (mpIgmRaster.get() == NULL)
    {
-      progress.report("No IGM specified", 0, ERRORS, true);
+      const RasterDataDescriptor* pRasterDescriptor =
+         dynamic_cast<const RasterDataDescriptor*>(mpRaster->getDataDescriptor());
+      if (pRasterDescriptor != NULL)
+      {
+         const GeoreferenceDescriptor* pGeorefDescriptor = pRasterDescriptor->getGeoreferenceDescriptor();
+         if (pGeorefDescriptor != NULL)
+         {
+            bool useExistingElement =
+               dv_cast<bool>(pGeorefDescriptor->getAttributeByPath(USE_EXISTING_ELEMENT), false);
+            if (useExistingElement == false)
+            {
+               std::string filename = dv_cast<std::string>(pGeorefDescriptor->getAttributeByPath(IGM_FILENAME),
+                  std::string());
+               if (filename.empty() == false)
+               {
+                  if (loadIgmFile(filename) == false)
+                  {
+                     // Since a valid filename is specified, return false if an error occurs
+                     return false;
+                  }
+               }
+            }
+         }
+      }
+   }
+
+   // If the IGM data are not available from the georeference descriptor, check for an existing child raster element
+   if (mpIgmRaster.get() == NULL)
+   {
+      mpIgmRaster.reset(static_cast<RasterElement*>(Service<ModelServices>()->getElement(IGM_GEO_NAME,
+         TypeConverter::toString<RasterElement>(), mpRaster)));
+   }
+
+   if (mpIgmRaster.get() == NULL)
+   {
+      mProgress.report("No IGM specified", 0, ERRORS, true);
       return false;
    }
 
@@ -151,14 +188,14 @@ bool IgmGeoreference::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
    VERIFY(mpIgmDesc != NULL);
    if (mpIgmDesc->getRowCount() != mNumRows || mpIgmDesc->getColumnCount() != mNumColumns)
    {
-      progress.report("IGM sizes do not match", 0, ERRORS, true);
+      mProgress.report("IGM sizes do not match", 0, ERRORS, true);
       return false;
    }
 
    EncodingType latLonType = mpIgmDesc->getDataType();
    if (latLonType != FLT4BYTES && latLonType != FLT8BYTES)
    {
-      progress.report("IGM types must be floating point", 0, ERRORS, true);
+      mProgress.report("IGM types must be floating point", 0, ERRORS, true);
       return false;
    }
 
@@ -201,7 +238,7 @@ bool IgmGeoreference::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
    unsigned int numCoeffs = COEFFS_FOR_ORDER(2);
    if (pixelValues.size() < numCoeffs)
    {
-      progress.report("Insufficient number of points for geo to pixel conversion.", 0, ERRORS, true);
+      mProgress.report("Insufficient number of points for geo to pixel conversion.", 0, ERRORS, true);
       return false;
    }
    mLatCoefficients.resize(numCoeffs, 0.0);
@@ -229,7 +266,7 @@ bool IgmGeoreference::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
    }
    if (badValues || badPixelValues)
    {
-      progress.report("Invalid IGM data. Unable to calculate geo to pixel coversion.", 0, ERRORS, true);
+      mProgress.report("Invalid IGM data. Unable to calculate geo to pixel conversion.", 0, ERRORS, true);
       return false;
    }
    if (maxLonSeparation > 180.0)
@@ -246,53 +283,193 @@ bool IgmGeoreference::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
    if (!GeoreferenceUtilities::computeFit(pixelValues, latlonValues, 0, mLatCoefficients) ||
        !GeoreferenceUtilities::computeFit(pixelValues, latlonValues, 1, mLonCoefficients))
    {
-      progress.report("Unable to calculate geo to pixel conversion.", 0, ERRORS, true);
+      mProgress.report("Unable to calculate geo to pixel conversion.", 0, ERRORS, true);
       return false;
    }
 
    mpRaster->setGeoreferencePlugin(this);
 
-   progress.report("Georeference finished", 100, NORMAL);
-   progress.upALevel();
-   return true;
-}
-
-bool IgmGeoreference::canHandleRasterElement(RasterElement* pRaster) const
-{
-   return true;
-}
-
-QWidget* IgmGeoreference::getGui(RasterElement* pRaster)
-{
-   if (pRaster == NULL)
+   // Update the georeference descriptor with the current georeference parameters if necessary
+   GeoreferenceDescriptor* pGeorefDescriptor = pMainDesc->getGeoreferenceDescriptor();
+   if (pGeorefDescriptor != NULL)
    {
-      delete mpGui;
+      // Georeference plug-in
+      const std::string& plugInName = getName();
+      pGeorefDescriptor->setGeoreferencePlugInName(plugInName);
+
+      // Use existing element and IGM filename
+      if ((existingElementArgSet == true) || (argFilenameSet == true))
+      {
+         pGeorefDescriptor->setAttributeByPath(USE_EXISTING_ELEMENT, existingElementArgSet);
+         pGeorefDescriptor->setAttributeByPath(IGM_FILENAME, argFilename);
+      }
+   }
+
+   mProgress.report("Georeference finished", 100, NORMAL);
+   mProgress.upALevel();
+   return true;
+}
+
+unsigned char IgmGeoreference::getGeoreferenceAffinity(const RasterDataDescriptor* pDescriptor) const
+{
+   if (pDescriptor == NULL)
+   {
+      return Georeference::CAN_NOT_GEOREFERENCE;
+   }
+
+   const GeoreferenceDescriptor* pGeorefDescriptor = pDescriptor->getGeoreferenceDescriptor();
+   VERIFY(pGeorefDescriptor != NULL);
+
+   // Define a return value that favors IGM Georeference over both RPC Georeference and GCP Georeference
+   const unsigned char CAN_GEOREFERENCE_WITH_IGM = Georeference::CAN_GEOREFERENCE + 20;
+
+   // Check whether a RasterElement exists, which indicates manual georeference after import
+   Service<ModelServices> pModel;
+
+   RasterElement* pRaster = dynamic_cast<RasterElement*>(pModel->getElement(pDescriptor));
+   if (pRaster != NULL)
+   {
+      // Check if the IGM element exists
+      if (pModel->getElement(IGM_GEO_NAME, TypeConverter::toString<RasterElement>(), pRaster) != NULL)
+      {
+         return CAN_GEOREFERENCE_WITH_IGM;
+      }
+
+      // Check if an IGM file exists
+      std::string filename = dv_cast<std::string>(pGeorefDescriptor->getAttributeByPath(IGM_FILENAME), std::string());
+      if ((filename.empty() == false) && (QFile::exists(QString::fromStdString(filename)) == true))
+      {
+         return CAN_GEOREFERENCE_WITH_IGM;
+      }
+
+      // Allow georeferencing with user input so that a valid IGM file can be specified
+      return Georeference::CAN_GEOREFERENCE_WITH_USER_INPUT;
+   }
+   else if (dv_cast<bool>(pGeorefDescriptor->getAttributeByPath(USE_EXISTING_ELEMENT), false) == true)
+   {
+      // The georeference will be performed by an importer with a child raster
+      // element being imported at the same time, so allow georeferencing
+      return CAN_GEOREFERENCE_WITH_IGM;
+   }
+
+   return Georeference::CAN_NOT_GEOREFERENCE;
+}
+
+QWidget* IgmGeoreference::getWidget(RasterDataDescriptor* pDescriptor)
+{
+   if (pDescriptor == NULL)
+   {
       return NULL;
    }
 
-   mpGui = new IgmGui(pRaster);
-   bool igmPresent = 
-      Service<ModelServices>()->getElement("IGM_GEO", TypeConverter::toString<RasterElement>(), pRaster) != NULL;
-   mpGui->hasExisting(igmPresent);
+   // Create the widget
+   if (mpGui == NULL)
+   {
+      mpGui = new IgmGui();
+   }
+
+   // Set the georeference data into the widget for the given raster data
+   GeoreferenceDescriptor* pGeorefDescriptor = pDescriptor->getGeoreferenceDescriptor();
+   if (pGeorefDescriptor != NULL)
+   {
+      Service<ModelServices> pModel;
+      RasterElement* pChild = NULL;
+
+      RasterElement* pRaster = dynamic_cast<RasterElement*>(pModel->getElement(pDescriptor));
+      if (pRaster != NULL)
+      {
+         pChild = dynamic_cast<RasterElement*>(pModel->getElement(IGM_GEO_NAME,
+            TypeConverter::toString<RasterElement>(), pRaster));
+      }
+
+      bool enableExistingElement = false;
+      if ((pRaster == NULL) || (pChild != NULL))   // IGM Georeference supports using an existing element if the parent
+                                                   // element is NULL, which indicates that georeferencing is being
+                                                   // performed on import and the child may be imported at the same
+                                                   // time as the parent, or if the child element exists after import
+      {
+         enableExistingElement = true;
+      }
+
+      bool enableIgmFilename = (pRaster != NULL);  // IGM Georeference only supports using an IGM filename
+                                                   // if the parent element is already imported
+
+      mpGui->setGeoreferenceData(pGeorefDescriptor, enableExistingElement, enableIgmFilename);
+   }
+
    return mpGui;
 }
 
-bool IgmGeoreference::validateGuiInput() const
+bool IgmGeoreference::validate(const RasterDataDescriptor* pDescriptor, std::string& errorMessage) const
 {
-   if (mpGui != NULL)
+   if (GeoreferenceShell::validate(pDescriptor, errorMessage) == false)
    {
-      return mpGui->validateInput();
+      return false;
    }
-   return false;
+
+   VERIFY(pDescriptor != NULL);
+
+   const GeoreferenceDescriptor* pGeorefDescriptor = pDescriptor->getGeoreferenceDescriptor();
+   VERIFY(pGeorefDescriptor != NULL);
+
+   // Check whether an existing IGM element should be used
+   if (dv_cast<bool>(pGeorefDescriptor->getAttributeByPath(USE_EXISTING_ELEMENT), false) == true)
+   {
+      // Using an existing IGM element, so check that it exists in the data model
+      Service<ModelServices> pModel;
+
+      RasterElement* pRaster = dynamic_cast<RasterElement*>(pModel->getElement(pDescriptor));
+      if (pRaster == NULL)
+      {
+         // Performing georeference on import, so just report a warning
+         errorMessage = "The IGM element does not exist.  Make sure that the IGM data will also be loaded when "
+            "loading this data set.";
+      }
+      else if (pModel->getElement(IGM_GEO_NAME, TypeConverter::toString<RasterElement>(), pRaster) == NULL)
+      {
+         errorMessage = "The IGM element does not exist.";
+         return false;
+      }
+   }
+   else
+   {
+      // Using an IGM file, so check that the file exists
+      std::string filename = dv_cast<std::string>(pGeorefDescriptor->getAttributeByPath(IGM_FILENAME), std::string());
+      if (filename.empty() == true)
+      {
+         errorMessage = "The IGM filename is invalid.";
+         return false;
+      }
+
+      if (QFile::exists(QString::fromStdString(filename)) == false)
+      {
+         errorMessage = "The IGM file does not exist.";
+         return false;
+      }
+   }
+
+   return true;
 }
 
 bool IgmGeoreference::serialize(SessionItemSerializer &serializer) const
 {
+   if (mpRaster == NULL)
+   {
+      // execute() has not yet been called so there is no need to serialize any parameters
+      return true;
+   }
+
    return false;
 }
 
 bool IgmGeoreference::deserialize(SessionItemDeserializer &deserializer)
 {
+   if (deserializer.getBlockSizes().empty() == true)
+   {
+      // The plug-in was serialized before execute() was called
+      return true;
+   }
+
    return false;
 }
 
@@ -375,4 +552,74 @@ LocationType IgmGeoreference::geoToPixel(LocationType geo, bool* pAccurate) cons
       *pAccurate = !(outsideCols || outsideRows);
    }
    return GeoreferenceUtilities::evaluatePolynomial(geo, mLatCoefficients, mLonCoefficients, 2);
+}
+
+bool IgmGeoreference::loadIgmFile(const std::string& igmFilename)
+{
+   if (igmFilename.empty() == true)
+   {
+      mProgress.report("The IGM filename is invalid.", 0, ERRORS, true);
+      return false;
+   }
+
+   ImporterResource importer("Auto Importer", igmFilename, mProgress.getCurrentProgress());
+
+   // Disable auto-georeference for the IGM data
+   std::vector<ImportDescriptor*> importDescriptors = importer->getImportDescriptors(igmFilename);
+   for (std::vector<ImportDescriptor*>::iterator iter = importDescriptors.begin();
+      iter != importDescriptors.end();
+      ++iter)
+   {
+      ImportDescriptor* pImportDescriptor = *iter;
+      if (pImportDescriptor != NULL)
+      {
+         RasterDataDescriptor* pDataDescriptor =
+            dynamic_cast<RasterDataDescriptor*>(pImportDescriptor->getDataDescriptor());
+         if (pDataDescriptor != NULL)
+         {
+            GeoreferenceDescriptor* pGeorefDescriptor = pDataDescriptor->getGeoreferenceDescriptor();
+            if (pGeorefDescriptor != NULL)
+            {
+               pGeorefDescriptor->setGeoreferenceOnImport(false);
+            }
+         }
+      }
+   }
+
+   // Import the IGM data
+   if (!importer->execute())
+   {
+      mProgress.report("Unable to load IGM data. The file type may not be recognized.", 0, ERRORS, true);
+      return false;
+   }
+
+   // Set the member variable
+   std::vector<DataElement*> igmDataElement = importer->getImportedElements();
+   if (igmDataElement.empty())
+   {
+      mProgress.report("Unable to load IGM data. The file type may not be recognized.", 0, ERRORS, true);
+      return false;
+   }
+
+   mpIgmRaster.reset(dynamic_cast<RasterElement*>(igmDataElement.front()));
+   if (mpIgmRaster.get() == NULL)
+   {
+      mProgress.report("Not a valid IGM file", 0, ERRORS, true);
+      return false;
+   }
+
+   // Destroy the previous IGM raster element if the loaded raster element did not replace it
+   Service<ModelServices> pModel;
+
+   DataElement* pPreviousIgm = pModel->getElement(IGM_GEO_NAME, TypeConverter::toString<RasterElement>(), mpRaster);
+   if (pPreviousIgm != mpIgmRaster.get())
+   {
+      pModel->destroyElement(pPreviousIgm);
+   }
+
+   // Rename and reparent the element to be a child of the raster element being georeferenced
+   pModel->setElementParent(mpIgmRaster.get(), mpRaster);
+   pModel->setElementName(mpIgmRaster.get(), IGM_GEO_NAME);
+
+   return true;
 }

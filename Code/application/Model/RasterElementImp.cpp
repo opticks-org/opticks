@@ -171,6 +171,7 @@ RasterElementImp::RasterElementImp(const DataDescriptorImp& descriptor, const st
       VERIFYNR(pDescriptor->attach(SIGNAL_NAME(RasterDataDescriptor, BadValuesChanged),
          Slot(this, &RasterElementImp::updateStatisticsBadValues)));
       addPropertiesPage("Wavelength Properties");
+      addPropertiesPage("Georeference Properties");
 
       RasterFileDescriptorImp* pFileDescriptor = dynamic_cast<RasterFileDescriptorImp*>(
          pDescriptor->getFileDescriptor());

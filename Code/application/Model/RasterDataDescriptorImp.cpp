@@ -8,7 +8,12 @@
  */
 
 #include "AppVerify.h"
+#include "Georeference.h"
 #include "ObjectResource.h"
+#include "PlugIn.h"
+#include "PlugInDescriptor.h"
+#include "PlugInManagerServices.h"
+#include "PlugInResource.h"
 #include "RasterDataDescriptor.h"
 #include "RasterDataDescriptorImp.h"
 #include "RasterFileDescriptorImp.h"
@@ -30,8 +35,10 @@ RasterDataDescriptorImp::RasterDataDescriptorImp(const string& name, const strin
    mYPixelSize(1.0),
    mDisplayMode(GRAYSCALE_MODE)
 {
-   // Attach to the units object to notify when it changes
-   VERIFYNR(mUnits.attach(SIGNAL_NAME(Subject, Modified), Slot(this, &RasterDataDescriptorImp::notifyUnitsModified)));
+   // Attach to the member units and georeference descriptor objects to notify when they change
+   VERIFYNR(mUnits.attach(SIGNAL_NAME(Subject, Modified), Slot(this, &RasterDataDescriptorImp::notifyModified)));
+   VERIFYNR(mGeorefDescriptor.attach(SIGNAL_NAME(Subject, Modified),
+      Slot(this, &RasterDataDescriptorImp::notifyModified)));
    mpBadValues.addSignal(SIGNAL_NAME(Subject, Modified), Slot(this, &RasterDataDescriptorImp::notifyBadValuesChanged));
 }
 
@@ -47,17 +54,19 @@ RasterDataDescriptorImp::RasterDataDescriptorImp(const string& name, const strin
    mYPixelSize(1.0),
    mDisplayMode(GRAYSCALE_MODE)
 {
-   // Attach to the units object to notify when it changes
-   VERIFYNR(mUnits.attach(SIGNAL_NAME(Subject, Modified), Slot(this, &RasterDataDescriptorImp::notifyUnitsModified)));
+   // Attach to the member units and georeference descriptor objects to notify when they change
+   VERIFYNR(mUnits.attach(SIGNAL_NAME(Subject, Modified), Slot(this, &RasterDataDescriptorImp::notifyModified)));
+   VERIFYNR(mGeorefDescriptor.attach(SIGNAL_NAME(Subject, Modified),
+      Slot(this, &RasterDataDescriptorImp::notifyModified)));
    mpBadValues.addSignal(SIGNAL_NAME(Subject, Modified), Slot(this, &RasterDataDescriptorImp::notifyBadValuesChanged));
 }
 
 RasterDataDescriptorImp::~RasterDataDescriptorImp()
 {}
 
-void RasterDataDescriptorImp::notifyUnitsModified(Subject &subject, const string &signal, const boost::any &data)
+void RasterDataDescriptorImp::notifyModified(Subject &subject, const string &signal, const boost::any &data)
 {
-   if (&subject == &mUnits)
+   if ((&subject == &mUnits) || (&subject == &mGeorefDescriptor))
    {
       notify(SIGNAL_NAME(Subject, Modified));
    }
@@ -545,6 +554,55 @@ const Units* RasterDataDescriptorImp::getUnits() const
    return &mUnits;
 }
 
+void RasterDataDescriptorImp::setGeoreferenceDescriptor(const GeoreferenceDescriptor* pGeorefDescriptor)
+{
+   if ((pGeorefDescriptor != NULL) && (mGeorefDescriptor.compare(pGeorefDescriptor) == false))
+   {
+      mGeorefDescriptor.clone(pGeorefDescriptor);  // Any changes to the descriptor values will automatically
+                                                   // notify Subject::Modified from within notifyModified()
+   }
+}
+
+GeoreferenceDescriptor* RasterDataDescriptorImp::getGeoreferenceDescriptor()
+{
+   return &mGeorefDescriptor;
+}
+
+const GeoreferenceDescriptor* RasterDataDescriptorImp::getGeoreferenceDescriptor() const
+{
+   return &mGeorefDescriptor;
+}
+
+void RasterDataDescriptorImp::setDefaultGeoreferencePlugIn()
+{
+   string plugInName;
+   unsigned char plugInAffinity = Georeference::CAN_NOT_GEOREFERENCE;
+
+   const vector<string>& plugIns = mGeorefDescriptor.getValidGeoreferencePlugIns();
+   for (vector<string>::const_iterator iter = plugIns.begin(); iter != plugIns.end(); ++iter)
+   {
+      string currentPlugInName = *iter;
+      if (currentPlugInName.empty() == false)
+      {
+         PlugInResource pCurrentPlugIn(currentPlugInName);
+
+         Georeference* pGeoreference = dynamic_cast<Georeference*>(pCurrentPlugIn.get());
+         if (pGeoreference != NULL)
+         {
+            unsigned char currentPlugInAffinity =
+               pGeoreference->getGeoreferenceAffinity(dynamic_cast<RasterDataDescriptor*>(this));
+            if (currentPlugInAffinity > plugInAffinity)
+            {
+               plugInName = currentPlugInName;
+               plugInAffinity = currentPlugInAffinity;
+            }
+         }
+      }
+   }
+
+   mGeorefDescriptor.setGeoreferencePlugInName(plugInName);
+}
+
 void RasterDataDescriptorImp::setDisplayBand(RasterChannelType eColor, DimensionDescriptor band)
 {
    switch (eColor)
@@ -639,6 +697,7 @@ DataDescriptor* RasterDataDescriptorImp::copy(const string& name, DataElement* p
       pDescriptor->setXPixelSize(mXPixelSize);
       pDescriptor->setYPixelSize(mYPixelSize);
       pDescriptor->setUnits(&mUnits);
+      pDescriptor->setGeoreferenceDescriptor(&mGeorefDescriptor);
       pDescriptor->setDisplayBand(GRAY, mGrayBand);
       pDescriptor->setDisplayBand(RED, mRedBand);
       pDescriptor->setDisplayBand(GREEN, mGreenBand);
@@ -664,6 +723,7 @@ DataDescriptor* RasterDataDescriptorImp::copy(const string& name, const vector<s
       pDescriptor->setXPixelSize(mXPixelSize);
       pDescriptor->setYPixelSize(mYPixelSize);
       pDescriptor->setUnits(&mUnits);
+      pDescriptor->setGeoreferenceDescriptor(&mGeorefDescriptor);
       pDescriptor->setDisplayBand(GRAY, mGrayBand);
       pDescriptor->setDisplayBand(RED, mRedBand);
       pDescriptor->setDisplayBand(GREEN, mGreenBand);
@@ -694,6 +754,7 @@ bool RasterDataDescriptorImp::clone(const DataDescriptor* pDescriptor)
       setXPixelSize(pRasterDescriptor->getXPixelSize());
       setYPixelSize(pRasterDescriptor->getYPixelSize());
       setUnits(pRasterDescriptor->getUnits());
+      setGeoreferenceDescriptor(pRasterDescriptor->getGeoreferenceDescriptor());
       setDisplayBand(GRAY, pRasterDescriptor->getDisplayBand(GRAY));
       setDisplayBand(RED, pRasterDescriptor->getDisplayBand(RED));
       setDisplayBand(GREEN, pRasterDescriptor->getDisplayBand(GREEN));
@@ -708,7 +769,7 @@ void RasterDataDescriptorImp::addToMessageLog(Message* pMessage) const
 {
    DataDescriptorImp::addToMessageLog(pMessage);
 
-   if (pMessage != NULL)
+   if (pMessage == NULL)
    {
       return;
    }
@@ -745,6 +806,16 @@ void RasterDataDescriptorImp::addToMessageLog(Message* pMessage) const
    pMessage->addProperty("Units Min", mUnits.getRangeMin());
    pMessage->addProperty("Units Max", mUnits.getRangeMax());
 
+   // Georeference descriptor
+   pMessage->addProperty("Georeference on Import", mGeorefDescriptor.getGeoreferenceOnImport());
+   pMessage->addProperty("Georeference Plug-In", mGeorefDescriptor.getGeoreferencePlugInName());
+   pMessage->addProperty("Valid Georeference Plug-Ins", mGeorefDescriptor.getValidGeoreferencePlugIns());
+   pMessage->addProperty("Create Layer", mGeorefDescriptor.getCreateLayer());
+   pMessage->addProperty("Layer Name", mGeorefDescriptor.getLayerName());
+   pMessage->addProperty("Display Layer", mGeorefDescriptor.getDisplayLayer());
+   pMessage->addProperty("Coordinate Type", mGeorefDescriptor.getGeocoordType());
+   pMessage->addProperty("Latitude/Longitude Format", mGeorefDescriptor.getLatLonFormat());
+
    // Gray band
    if (mGrayBand.isValid())
    {
@@ -776,110 +847,115 @@ void RasterDataDescriptorImp::addToMessageLog(Message* pMessage) const
 
 bool RasterDataDescriptorImp::toXml(XMLWriter* pXml) const
 {
-   if (pXml == NULL)
+   if ((pXml == NULL) || (DataDescriptorImp::toXml(pXml) == false))
    {
       return false;
    }
 
-   bool bSuccess = DataDescriptorImp::toXml(pXml);
-   if (bSuccess == true)
+   // Data type
+   pXml->addAttr("dataType", mDataType);
+
+   // Valid data types
+   pXml->pushAddPoint(pXml->addElement("ValidDataTypes"));
+   for (vector<EncodingType>::const_iterator iter = mValidDataTypes.begin(); iter != mValidDataTypes.end(); ++iter)
    {
-      pXml->addAttr("dataType", mDataType);
+      pXml->addText(StringUtilities::toXmlString(*iter), pXml->addElement("value"));
+   }
+   pXml->popAddPoint();
 
-      // Valid data types
-      pXml->pushAddPoint(pXml->addElement("ValidDataTypes"));
-      for (vector<EncodingType>::const_iterator iter = mValidDataTypes.begin(); iter != mValidDataTypes.end(); ++iter)
+   // Bad values
+   if (mpBadValues.get() != NULL)
+   {
+      pXml->pushAddPoint(pXml->addElement("BadValues"));
+      if (!mpBadValues->toXml(pXml))
       {
-         pXml->addText(StringUtilities::toXmlString(*iter), pXml->addElement("value"));
+         return false;
       }
       pXml->popAddPoint();
-
-      // Bad values
-      if (mpBadValues.get() != NULL)
-      {
-         pXml->pushAddPoint(pXml->addElement("BadValues"));
-         if (!mpBadValues->toXml(pXml))
-         {
-            return false;
-         }
-         pXml->popAddPoint();
-      }
-
-      // Rows
-      pXml->pushAddPoint(pXml->addElement("rows"));
-      XmlUtilities::serializeDimensionDescriptors("row", mRows, pXml);
-      pXml->popAddPoint();
-
-      // Columns
-      pXml->pushAddPoint(pXml->addElement("columns"));
-      XmlUtilities::serializeDimensionDescriptors("column", mColumns, pXml);
-      pXml->popAddPoint();
-
-      // Pixel size
-      stringstream buf;
-      buf << mXPixelSize << " " << mYPixelSize;
-      pXml->addText(buf.str().c_str(), pXml->addElement("pixelSize"));
-
-      // Units
-      pXml->pushAddPoint(pXml->addElement("units"));
-      bSuccess = mUnits.toXml(pXml);
-      pXml->popAddPoint();
-      // Interleave
-      pXml->addAttr("interleaveFormat", mInterleave);
-
-      // Bands
-      pXml->pushAddPoint(pXml->addElement("bands"));
-      XmlUtilities::serializeDimensionDescriptors("band", mBands, pXml);
-      pXml->popAddPoint();
-
-      // Gray Band
-      if ((bSuccess == true) && (mGrayBand.isValid()))
-      {
-         pXml->pushAddPoint(pXml->addElement("grayBand"));
-         XmlUtilities::serializeDimensionDescriptor(mGrayBand, pXml);
-         pXml->popAddPoint();
-      }
-
-      // Red Band
-      if ((bSuccess == true) && (mRedBand.isValid()))
-      {
-         pXml->pushAddPoint(pXml->addElement("redBand"));
-         XmlUtilities::serializeDimensionDescriptor(mRedBand, pXml);
-         pXml->popAddPoint();
-      }
-
-      // Green Band
-      if ((bSuccess == true) && (mGreenBand.isValid()))
-      {
-         pXml->pushAddPoint(pXml->addElement("greenBand"));
-         XmlUtilities::serializeDimensionDescriptor(mGreenBand, pXml);
-         pXml->popAddPoint();
-      }
-
-      // Blue Band
-      if ((bSuccess == true) && (mBlueBand.isValid()))
-      {
-         pXml->pushAddPoint(pXml->addElement("blueBand"));
-         XmlUtilities::serializeDimensionDescriptor(mBlueBand, pXml);
-         pXml->popAddPoint();
-      }
-
-      // Display Mode
-      if (bSuccess == true)
-      {
-         pXml->addAttr("displayMode", mDisplayMode);
-      }
    }
 
-   return bSuccess;
+   // Rows
+   pXml->pushAddPoint(pXml->addElement("rows"));
+   XmlUtilities::serializeDimensionDescriptors("row", mRows, pXml);
+   pXml->popAddPoint();
+
+   // Columns
+   pXml->pushAddPoint(pXml->addElement("columns"));
+   XmlUtilities::serializeDimensionDescriptors("column", mColumns, pXml);
+   pXml->popAddPoint();
+
+   // Pixel size
+   stringstream buf;
+   buf << mXPixelSize << " " << mYPixelSize;
+   pXml->addText(buf.str().c_str(), pXml->addElement("pixelSize"));
+
+   // Units
+   pXml->pushAddPoint(pXml->addElement("units"));
+   if (mUnits.toXml(pXml) == false)
+   {
+      return false;
+   }
+   pXml->popAddPoint();
+
+   // Georeference descriptor
+   pXml->pushAddPoint(pXml->addElement("georeference"));
+   if (mGeorefDescriptor.toXml(pXml) == false)
+   {
+      return false;
+   }
+   pXml->popAddPoint();
+
+   // Interleave
+   pXml->addAttr("interleaveFormat", mInterleave);
+
+   // Bands
+   pXml->pushAddPoint(pXml->addElement("bands"));
+   XmlUtilities::serializeDimensionDescriptors("band", mBands, pXml);
+   pXml->popAddPoint();
+
+   // Gray Band
+   if (mGrayBand.isValid() == true)
+   {
+      pXml->pushAddPoint(pXml->addElement("grayBand"));
+      XmlUtilities::serializeDimensionDescriptor(mGrayBand, pXml);
+      pXml->popAddPoint();
+   }
+
+   // Red Band
+   if (mRedBand.isValid() == true)
+   {
+      pXml->pushAddPoint(pXml->addElement("redBand"));
+      XmlUtilities::serializeDimensionDescriptor(mRedBand, pXml);
+      pXml->popAddPoint();
+   }
+
+   // Green Band
+   if (mGreenBand.isValid() == true)
+   {
+      pXml->pushAddPoint(pXml->addElement("greenBand"));
+      XmlUtilities::serializeDimensionDescriptor(mGreenBand, pXml);
+      pXml->popAddPoint();
+   }
+
+   // Blue Band
+   if (mBlueBand.isValid() == true)
+   {
+      pXml->pushAddPoint(pXml->addElement("blueBand"));
+      XmlUtilities::serializeDimensionDescriptor(mBlueBand, pXml);
+      pXml->popAddPoint();
+   }
+
+   // Display Mode
+   pXml->addAttr("displayMode", mDisplayMode);
+
+   return true;
 }
 
 bool RasterDataDescriptorImp::fromXml(DOMNode* pDocument, unsigned int version)
 {
    VERIFY(pDocument != NULL);
 
-   bool success = DataDescriptorImp::fromXml(pDocument, version);
-   if (!success)
+   if (DataDescriptorImp::fromXml(pDocument, version) == false)
    {
       return false;
    }
@@ -894,18 +970,19 @@ bool RasterDataDescriptorImp::fromXml(DOMNode* pDocument, unsigned int version)
    mGreenBand = DimensionDescriptor();
    mBlueBand = DimensionDescriptor();
 
+   UnitsAdapter units;
+   mUnits.setUnits(&units);
+
+   GeoreferenceDescriptorAdapter georefDescriptor;
+   mGeorefDescriptor.clone(&georefDescriptor);
+
    DOMElement* pElement = static_cast<DOMElement*>(pDocument);
 
-   mDataType = StringUtilities::fromXmlString<EncodingType>(
-      A(pElement->getAttribute(X("dataType"))));
+   mDataType = StringUtilities::fromXmlString<EncodingType>(A(pElement->getAttribute(X("dataType"))));
+   mInterleave = StringUtilities::fromXmlString<InterleaveFormatType>(A(pElement->getAttribute(X("interleaveFormat"))));
+   mDisplayMode = StringUtilities::fromXmlString<DisplayMode>(A(pElement->getAttribute(X("displayMode"))));
 
-   mInterleave = StringUtilities::fromXmlString<InterleaveFormatType>(
-      A(pElement->getAttribute(X("interleaveFormat"))));
-
-   mDisplayMode = StringUtilities::fromXmlString<DisplayMode>(
-      A(pElement->getAttribute(X("displayMode"))));
-
-   for (DOMNode* pChild = pDocument->getFirstChild(); success && pChild != NULL; pChild = pChild->getNextSibling())
+   for (DOMNode* pChild = pDocument->getFirstChild(); pChild != NULL; pChild = pChild->getNextSibling())
    {
       if (XMLString::equals(pChild->getNodeName(), X("pixelSize")))
       {
@@ -956,7 +1033,17 @@ bool RasterDataDescriptorImp::fromXml(DOMNode* pDocument, unsigned int version)
       }
       else if (XMLString::equals(pChild->getNodeName(), X("units")))
       {
-         success = mUnits.fromXml(pChild, version);
+         if (mUnits.fromXml(pChild, version) == false)
+         {
+            return false;
+         }
+      }
+      else if (XMLString::equals(pChild->getNodeName(), X("georeference")))
+      {
+         if (mGeorefDescriptor.fromXml(pChild, version) == false)
+         {
+            return false;
+         }
       }
       else if (XMLString::equals(pChild->getNodeName(), X("grayBand")))
       {
@@ -982,7 +1069,7 @@ bool RasterDataDescriptorImp::fromXml(DOMNode* pDocument, unsigned int version)
       mValidDataTypes = StringUtilities::getAllEnumValues<EncodingType>();
    }
 
-   return success;
+   return true;
 }
 
 const string& RasterDataDescriptorImp::getObjectType() const

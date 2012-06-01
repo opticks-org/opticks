@@ -43,6 +43,7 @@
 #include "PropertiesDataDescriptor.h"
 #include "PropertiesFileDescriptor.h"
 #include "PropertiesGcpLayer.h"
+#include "PropertiesGeoreference.h"
 #include "PropertiesGraphicObject.h"
 #include "PropertiesHistogramPlot.h"
 #include "PropertiesLatLonLayer.h"
@@ -118,6 +119,7 @@ REGISTER_PLUGIN(OpticksCore, OptionsView, OptionQWidgetWrapper<OptionsView>());
 REGISTER_PLUGIN_BASIC(OpticksCore, PropertiesClassification);
 REGISTER_PLUGIN_BASIC(OpticksCore, PropertiesDataDescriptor);
 REGISTER_PLUGIN_BASIC(OpticksCore, PropertiesFileDescriptor);
+REGISTER_PLUGIN_BASIC(OpticksCore, PropertiesGeoreference);
 REGISTER_PLUGIN_BASIC(OpticksCore, PropertiesMetadata);
 REGISTER_PLUGIN_BASIC(OpticksCore, PropertiesWavelengths);
 REGISTER_PLUGIN(OpticksCore, PropertiesAnnotationLayer, PropertiesQWidgetWrapper<PropertiesAnnotationLayer>());

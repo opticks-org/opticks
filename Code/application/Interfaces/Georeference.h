@@ -10,36 +10,38 @@
 #ifndef GEOREFERENCE_H
 #define GEOREFERENCE_H
 
-#include "ConfigurationSettings.h"
 #include "LocationType.h"
 
 #include <string>
-#include <vector>
 
 class QWidget;
-class RasterElement;
+class RasterDataDescriptor;
 
 /**
  *  Interface specific to georeference plug-ins.
  *
- *  Defines the georeference specific interface to all algorithm plug-ins. 
- *  This interface contains all georeference specific operations.
+ *  Defines the interface required to georeference raster data. This interface
+ *  contains the following georeference-specific operations:
  *
- *  For Georeference plug-ins to properly serialize and deserialize as part of
- *  a session, they need to implement SessionItem::serialize and 
- *  SessionItem::deserialize.
+ *  <table>
+ *    <tr><td><b>Operation</b></td><td><b>Available Methods</b></td></tr>
+ *    <tr><td>Query raster data to check if it can be georeferenced</td>
+ *      <td>getGeoreferenceAffinity()</td></tr>
+ *    <tr><td>Create a GUI for the user to modify georeference parameters</td>
+ *      <td>getWidget()</td></tr>
+ *    <tr><td>Verify that user-specified georeference parameters are acceptable
+ *      for georeferencing</td><td>validate()</td></tr>
+ *    <tr><td>Perform coordinate transformations</td><td>pixelToGeo()<br>
+ *      pixelToGeoQuick()<br>geoToPixel()<br>geoToPixelQuick()</td></tr>
+ *  </table>
+ *
+ *  A Georeference plug-in must implement SessionItem::serialize() and
+ *  SessionItem::deserialize() to save and restore properly as part of a
+ *  session.
  */
 class Georeference
 {
 public:
-   SETTING(AutoGeoreference, Georeference, bool, true)
-   SETTING(ImporterGeoreferencePlugIn, Georeference, bool, true)
-   SETTING(GeoreferencePlugIns, Georeference, std::vector<std::string>, std::vector<std::string>())
-   SETTING(CreateLatLonLayer, Georeference, bool, true)
-   SETTING(DisplayLatLonLayer, Georeference, bool, false)
-   SETTING(GeocoordType, Georeference, GeocoordType, GEOCOORD_LATLON)
-   SETTING(LatLonFormat, Georeference, DmsFormatType, DMS_FULL)
-
    /**
     *  The name for a GcpList argument.
     *
@@ -52,6 +54,142 @@ public:
    {
       return std::string("GCP List");
    }
+
+   /**
+    *  Determines if this georeferencing algorithm can be used for a given
+    *  raster data descriptor.
+    *
+    *  A Georeference plug-in must implement this method to provide information
+    *  about whether it supports a given raster data set, which is similar to
+    *  the functionality of Importer::getFileAffinity().
+    *
+    *  This method is called automatically on import if auto-georeferencing is
+    *  enabled and after import when the user manually georeferences the raster
+    *  data.
+    *
+    *  The following code demonstrates how a georeference plug-in can optionally
+    *  not support georeferencing on import but support georeferencing after
+    *  import:
+    *  \code
+    *  unsigned char MyGeoreferencePlugIn::getGeoreferenceAffinity(const RasterDataDescriptor* pDescriptor) const
+    *  {
+    *     // Check if the raster element is loaded, which indicates georeferencing after import.
+    *     if (Service<ModelServices>()->getElement(pDescriptor) != NULL)
+    *     {
+    *        return Georeference::CAN_GEOREFERENCE;
+    *     }
+    *
+    *     // The raster element is not loaded, which indicates georeferencing on import.
+    *     return Georeference::CAN_NOT_GEOREFERENCE;
+    *  }
+    *  \endcode
+    *
+    *  @param   pDescriptor
+    *           The raster data descriptor to test.
+    *
+    *  @return  Typically returns one of the following values, however any
+    *           unsigned char value can be returned if a specific Georeference
+    *           plug-in requires more granularity.
+    *           <ul>
+    *             <li>Georeference::CAN_NOT_GEOREFERENCE</li>
+    *             <li>Georeference::CAN_GEOREFERENCE_WITH_USER_INPUT</li>
+    *             <li>Georeference::CAN_GEOREFERENCE_DATA_TYPE</li>
+    *             <li>Georeference::CAN_GEOREFERENCE</li>
+    *           </ul>
+    *           A Georeference plug-in can return a value greater than
+    *           Georeference::CAN_GEOREFERENCE if it wishes to override another
+    *           plug-in that can georeference the raster data.  For example, the
+    *           RPC %Georeference plug-in may override the GCP %Georeference
+    *           plug-in if the georeferencing will be more accurate.
+    *
+    *  @see     validate()
+    */
+   virtual unsigned char getGeoreferenceAffinity(const RasterDataDescriptor* pDescriptor) const = 0;
+
+   /**
+    *  When a Georeference plug-in returns this value from
+    *  getGeoreferenceAffinity() it means the plug-in cannot georeference the
+    *  given raster data.
+    */
+   static const unsigned char CAN_NOT_GEOREFERENCE = 0;
+
+   /**
+    *  When a Georeference plug-in returns this value from
+    *  getGeoreferenceAffinity() it means the plug-in does not detect any
+    *  supported geographic information in the raster data, but may still be
+    *  able to georeference the raster data if provided additional user input.
+    *  For example, the IGM %Georeference plug-in can georeference any raster
+    *  data set, but will still require additional information (i.e. the IGM
+    *  filename) from the user.
+    */
+   static const unsigned char CAN_GEOREFERENCE_WITH_USER_INPUT = 64;
+
+   /**
+    *  When a Georeference plug-in returns this value from
+    *  getGeoreferenceAffinity() it means that the plug-in recognizes the
+    *  geographic information in the raster data but will still require
+    *  additional user input to successfully georeference the data.
+    */
+   static const unsigned char CAN_GEOREFERENCE_DATA_TYPE = 128;
+
+   /**
+    *  When a Georeference plug-in returns this value from
+    *  getGeoreferenceAffinity() it means the plug-in can georeference the given
+    *  raster data.
+    */
+   static const unsigned char CAN_GEOREFERENCE = 192;
+
+   /**
+    *  Returns a widget in which the user can modify parameters needed by the
+    *  georeferencing algorithm.
+    *
+    *  This method provides an interface for which specialized georeference
+    *  parameters for a data set can be displayed to the user.  The method
+    *  returns a Qt widget that is added to either the Import Options dialog
+    *  during import, or the %Georeference dialog after import.  The
+    *  Georeference plug-in should create the widget with a \c NULL parent, and
+    *  should destroy the widget when the plug-in itself is destroyed.
+    *
+    *  @param   pDescriptor
+    *           The raster data for which the create the widget containing
+    *           custom georeference parameters.
+    *
+    *  @return  A QWidget containing widgets to edit custom georeference
+    *           parameters, or \c NULL if the plug-in does not have any custom
+    *           parameters to display to the user.
+    */
+   virtual QWidget* getWidget(RasterDataDescriptor* pDescriptor) = 0;
+
+   /**
+    *  Queries whether a given raster data descriptor can be successfully
+    *  georeferenced by the plug-in.
+    *
+    *  This method is called automatically for the plug-in to parse the current
+    *  settings in the raster data descriptor to see if it supports
+    *  georeferencing the data as currently specified in the raster data
+    *  descriptor.  During import, this method is called each time the user
+    *  changes a value in the Import Options dialog.  After import, it is called
+    *  when the user clicks the OK button in the %Georeference dialog.
+    *
+    *  @param   pDescriptor
+    *           The raster data descriptor to query if it can be successfully
+    *           georeferenced.
+    *  @param   errorMessage
+    *           An error message string that is populated with the reason why
+    *           the plug-in cannot successfully georeference the given raster
+    *           data descriptor.  This message will be displayed to the user
+    *           either in the Import Options dialog or in a message box when
+    *           the user clicks the OK button in the %Georeference dialog.
+    *           If this method returns \c true, this message will be displayed
+    *           to the user as a warning.  If this method returns \c false, this
+    *           message will be displayed to the user as an error.
+    *
+    *  @return  Returns \c true if the plug-in can successfully georeference the
+    *           given raster data descriptor; otherwise returns \c false.
+    *
+    *  @see     getGeoreferenceAffinity()
+    */
+   virtual bool validate(const RasterDataDescriptor* pDescriptor, std::string& errorMessage) const = 0;
 
    /**
     *  Takes a scene pixel coordinate and returns the corresponding 
@@ -119,47 +257,14 @@ public:
     */
    virtual LocationType geoToPixelQuick(LocationType geo, bool* pAccurate = NULL) const = 0;
 
-   /**
-    *  Gets a QWidget to set all parameters needed by the georeferencing algorithm.
-    *
-    *  The calling method takes ownership of the returned widget.  The returned widget
-    *  may be destroyed at any time after calling Executable::execute() on the plug-in.
-    *
-    *  @param   pRaster
-    *           The RasterElement to create the GUI for.
-    *
-    *  @return  The widget with any appropriate controls, or \b NULL if interactive mode
-    *           is not supported or no controls are needed.
-    */
-   virtual QWidget* getGui(RasterElement* pRaster) = 0;
-
-   /**
-    *  Determines if the user input through the GUI is valid.
-    *
-    *  @return  Returns \b true if the input is valid, otherwise returns
-    *           \b false.
-    *
-    *  @see     getGui()
-    */
-   virtual bool validateGuiInput() const = 0;
-
-   /**
-    * Determine if this georeferencing algorithm can be used for the given 
-    * RasterElement.
-    *
-    * @param pRaster
-    *        The RasterElement to test.
-    * @return \c true if the plugin can handle the RasterElement, \c false otherwise
-    */
-   virtual bool canHandleRasterElement(RasterElement *pRaster) const = 0;
-
 protected:
    /**
     *  Since the Georeference interface is usually used in conjunction with the
     *  PlugIn and Executable interfaces, this should be destroyed by casting to
     *  the PlugIn interface and calling PlugInManagerServices::destroyPlugIn().
     */
-   virtual ~Georeference() {}
+   virtual ~Georeference()
+   {}
 };
 
 #endif

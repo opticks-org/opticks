@@ -12,6 +12,7 @@
 
 #include <QtCore/QMap>
 #include <QtCore/QString>
+#include <QtGui/QCheckBox>
 #include <QtGui/QDialog>
 #include <QtGui/QLabel>
 #include <QtGui/QPushButton>
@@ -29,6 +30,7 @@ class ClassificationWidget;
 class DataDescriptor;
 class DataDescriptorWidget;
 class FileDescriptorWidget;
+class GeoreferenceWidget;
 class ImportDescriptor;
 class Importer;
 class MetadataWidget;
@@ -74,6 +76,7 @@ protected:
    void editFileDescriptorColumnsModified(Subject& subject, const std::string& signal, const boost::any& value);
    void editFileDescriptorBandsModified(Subject& subject, const std::string& signal, const boost::any& value);
    void editClassificationModified(Subject& subject, const std::string& signal, const boost::any& value);
+   void editGeoreferenceOnImportModified(Subject& subject, const std::string& signal, const boost::any& value);
 
 protected slots:
    void datasetItemChanged(QTreeWidgetItem* pItem);
@@ -84,6 +87,7 @@ protected slots:
    void updateEditDataDescriptorColumns(const std::vector<DimensionDescriptor>& columns);
    void updateEditDataDescriptorBands(const std::vector<DimensionDescriptor>& bands);
    void updateClassificationLabel();
+   void enableGeoreference(bool enable);
    bool applyChanges();
 
 private:
@@ -112,6 +116,9 @@ private:
    SubsetWidget* mpSubsetPage;
    MetadataWidget* mpMetadataPage;
    WavelengthsWidget* mpWavelengthsPage;
+   QWidget* mpGeoreferencePage;
+   QCheckBox* mpGeoreferenceCheck;
+   GeoreferenceWidget* mpGeoreferenceWidget;
    QWidget* mpImporterPage;
    QLabel* mpValidationLabel;
    QPushButton* mpOkButton;

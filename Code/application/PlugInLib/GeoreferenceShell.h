@@ -10,9 +10,9 @@
 #ifndef GEOREFERENCESHELL_H
 #define GEOREFERENCESHELL_H
 
+#include "ExecutableShell.h"
 #include "Georeference.h"
 #include "LocationType.h"
-#include "ExecutableShell.h"
 
 /**
  *  \ingroup ShellModule
@@ -33,7 +33,16 @@ public:
    /**
     *  Destroys the georeference plug-in.
     */
-   ~GeoreferenceShell();
+   virtual ~GeoreferenceShell();
+
+   /**
+    *  @copydoc Executable::setInteractive()
+    *
+    *  @default The default implementation sets the plug-in to execute in
+    *           interactive mode, but returns \c false to indicate that
+    *           interactive mode is not supported.
+    */
+   bool setInteractive();
 
    /**
     *  @copydoc Executable::getInputSpecification()
@@ -68,18 +77,23 @@ public:
    LocationType geoToPixelQuick(LocationType geo, bool* pAccurate = NULL) const;
 
    /**
-    *  @copydoc Georeference::getGui()
+    *  @copydoc Georeference::getWidget()
     *
-    *  @default The default implementation returns \b NULL.
+    *  @default The default implementation does nothing and returns \c NULL.
     */
-   QWidget* getGui(RasterElement* pRaster);
+   QWidget* getWidget(RasterDataDescriptor* pDescriptor);
 
    /**
-    *  @copydoc Georeference::validateGuiInput()
+    *  @copydoc Georeference::validate()
     *
-    *  @default The default implementation returns \b true.
+    *  @default The default implementation of this method performs the following
+    *           tests:
+    *           - Check for a valid (i.e. non-\c NULL) RasterDataDescriptor.
+    *           - Check for a valid (i.e. non-\c NULL) GeoreferenceDescriptor.
+    *           - If creating a results layer, check for an invalid (i.e. empty)
+    *             layer name.
     */
-   bool validateGuiInput() const;
+   bool validate(const RasterDataDescriptor* pDescriptor, std::string& errorMessage) const;
 };
 
 #endif

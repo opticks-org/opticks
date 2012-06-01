@@ -12,52 +12,29 @@
 
 #include <QtGui/QDialog>
 
-#include "TypesFile.h"
-
-#include <string>
-#include <vector>
-
-class GeocoordTypeComboBox;
-class QCheckBox;
-class QLineEdit;
-class QListWidget;
-class QStackedWidget;
+class GeoreferenceWidget;
+class RasterDataDescriptor;
 
 class GeoreferenceDlg : public QDialog
 {
    Q_OBJECT
 
 public:
-   GeoreferenceDlg(const QString& title, const std::vector<std::string>& geoPluginNameList,
-      const std::vector<QWidget*>& geoPluginWidgetList, QWidget* pParent = NULL);
+   GeoreferenceDlg(QWidget* pParent = NULL);
    virtual ~GeoreferenceDlg();
 
-   void setResultsName(const std::string& name);
-   std::string getResultsName() const;
-   GeocoordType getGeocoordType() const;
+   void setDataDescriptor(RasterDataDescriptor* pDescriptor);
+   RasterDataDescriptor* getDataDescriptor();
+   const RasterDataDescriptor* getDataDescriptor() const;
 
-   int getGeorefAlgorithmIndex() const;
-   bool getCreateLayer() const;
-   bool getDisplayLayer() const;
-
-protected slots:
-   void setPlugin(int iPluginIndex);
-   void createLayerChanged(bool create);
-   void accept();
+public slots:
+   virtual void accept();
 
 private:
    GeoreferenceDlg(const GeoreferenceDlg& rhs);
    GeoreferenceDlg& operator=(const GeoreferenceDlg& rhs);
 
-   QListWidget* mpGeoList;
-   QStackedWidget* mpStack;
-
-   QLineEdit* mpResultsEdit;
-   QCheckBox* mpCreateLayer;
-   QCheckBox* mpDisplayLayer;
-   GeocoordTypeComboBox* mpCoordCombo;
-
-   std::vector<QWidget*> mWidgets;
+   GeoreferenceWidget* mpGeorefWidget;
 };
 
 #endif

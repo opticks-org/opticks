@@ -533,6 +533,9 @@ bool DynamicObjectImp::removeAttribute(const string& name)
       notify(SIGNAL_NAME(DynamicObject, AttributeRemoved),
          boost::any(pair<string, DataVariant*>(iter->first, &(iter->second))));
       mVariantAttributes.erase(iter);
+      notify(SIGNAL_NAME(Subject, Modified));   // This should be replaced with a new AttributeRemoved
+                                                // signal when the existing AttributeRemoved signal
+                                                // can be renamed as AttributeAboutToBeRemoved
       return true;
    }
 
@@ -624,10 +627,13 @@ bool DynamicObjectImp::compare(const DynamicObject* pObject) const
 
 void DynamicObjectImp::clear()
 {
-   // Since the map stores attributes by value, emit the signal before clearing
-   // the attributes to ensure that the values are still created and valid
-   notify(SIGNAL_NAME(DynamicObject, Cleared));
-   mVariantAttributes.clear();
+   if (mVariantAttributes.empty() == false)
+   {
+      // Since the map stores attributes by value, emit the signal before clearing
+      // the attributes to ensure that the values are still created and valid
+      notify(SIGNAL_NAME(DynamicObject, Cleared));
+      mVariantAttributes.clear();
+   }
 }
 
 const string& DynamicObjectImp::getObjectType() const

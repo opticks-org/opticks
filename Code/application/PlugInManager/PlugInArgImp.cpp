@@ -234,8 +234,8 @@ void PlugInArgImp::initArgTypes()
       mArgTypes.push_back("AoiLayer");
       mArgTypes.push_back("CartesianPlot");
       mArgTypes.push_back("ClassificationLayer");
-      mArgTypes.push_back("CustomLayer");
       mArgTypes.push_back("ColorType");
+      mArgTypes.push_back("CustomLayer");
       mArgTypes.push_back("DataDescriptor");
       mArgTypes.push_back("DataElement");
       mArgTypes.push_back("DateTime");
@@ -248,6 +248,7 @@ void PlugInArgImp::initArgTypes()
       mArgTypes.push_back("GcpLayer");
       mArgTypes.push_back("GcpList");
       mArgTypes.push_back("GeocoordType");
+      mArgTypes.push_back("GeoreferenceDescriptor");
       mArgTypes.push_back("GraphicElement");
       mArgTypes.push_back("GraphicLayer");
       mArgTypes.push_back("HistogramPlot");

@@ -20,7 +20,6 @@
 #include "DynamicObject.h"
 #include "FileDescriptor.h"
 #include "FileResource.h"
-#include "Georeference.h"
 #include "ImportDescriptor.h"
 #include "NitfConstants.h"
 #include "NitfImporterShell.h"
@@ -29,12 +28,12 @@
 #include "NitfUtilities.h"
 #include "ObjectResource.h"
 #include "PlugInArgList.h"
+#include "PlugInResource.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "RasterFileDescriptor.h"
 #include "RasterPager.h"
 #include "RasterUtilities.h"
-#include "Resource.h"
 #include "SpatialDataView.h"
 #include "SpecialMetadata.h"
 #include "StringUtilities.h"
@@ -286,26 +285,6 @@ SpatialDataView* Nitf::NitfImporterShell::createView() const
    }
 
    return pView;
-}
-
-PlugIn* Nitf::NitfImporterShell::getGeoreferencePlugIn() const
-{
-   RasterElement* pRaster = getRasterElement();
-   if (pRaster != NULL)
-   {
-      ExecutableResource geoPlugIn("RPC Georeference", string(), getProgress(), true);
-
-      const Georeference* pGeoPlugIn = dynamic_cast<const Georeference*>(geoPlugIn->getPlugIn());
-      if (pGeoPlugIn != NULL)
-      {
-         if (pGeoPlugIn->canHandleRasterElement(pRaster) == true)
-         {
-            return geoPlugIn->releasePlugIn();
-         }
-      }
-   }
-
-   return RasterElementImporterShell::getGeoreferencePlugIn();
 }
 
 bool Nitf::NitfImporterShell::createRasterPager(RasterElement *pRaster) const

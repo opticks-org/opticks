@@ -14,7 +14,7 @@
 
 #include "AppVerify.h"
 #include "GeocoordTypeComboBox.h"
-#include "Georeference.h"
+#include "GeoreferenceDescriptor.h"
 #include "PassAreaComboBox.h"
 #include "ResultsOptionsWidget.h"
 #include "StringUtilities.h"
@@ -37,7 +37,7 @@ ResultsOptionsWidget::ResultsOptionsWidget(QWidget* pParent) :
    mpCoordLabel->setEnabled(false);
 
    mpCoordCombo = new GeocoordTypeComboBox(this);
-   mpCoordCombo->setGeocoordType(Georeference::getSettingGeocoordType());
+   mpCoordCombo->setGeocoordType(GeoreferenceDescriptor::getSettingGeocoordType());
    mpCoordCombo->setEnabled(false);
 
    // Metadata

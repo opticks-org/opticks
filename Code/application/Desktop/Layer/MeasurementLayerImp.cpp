@@ -8,7 +8,7 @@
  */
 
 #include "AppVerify.h"
-#include "Georeference.h"
+#include "GeoreferenceDescriptor.h"
 #include "MeasurementLayer.h"
 #include "MeasurementLayerImp.h"
 #include "PropertiesAnnotationLayer.h"
@@ -32,8 +32,8 @@ MeasurementLayerImp::MeasurementLayerImp(const string& id, const string& layerNa
    mbDisplayBearingText = MeasurementLayer::getSettingDisplayBearingLabel();
    mbDisplayEndPointsText = MeasurementLayer::getSettingDisplayEndPointsLabel();
    mDistanceUnits = MeasurementLayer::getSettingDistanceUnits();
-   mGeocoordType = Georeference::getSettingGeocoordType();
-   mGeoFormat = Georeference::getSettingLatLonFormat();
+   mGeocoordType = GeoreferenceDescriptor::getSettingGeocoordType();
+   mGeoFormat = GeoreferenceDescriptor::getSettingLatLonFormat();
 
    VERIFYNR(connect(this, SIGNAL(distanceDisplayChanged(bool)), this, SIGNAL(modified())));
    VERIFYNR(connect(this, SIGNAL(bearingDisplayChanged(bool)), this, SIGNAL(modified())));

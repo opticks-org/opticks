@@ -19,10 +19,8 @@
 
 class DmsFormatTypeComboBox;
 class GeocoordTypeComboBox;
-class MutuallyExclusiveListWidget;
 class QCheckBox;
 class QLabel;
-class QRadioButton;
 
 class OptionsGeoreference : public QWidget
 {
@@ -89,24 +87,18 @@ public:
 protected slots:
    void createLayerChanged(bool create);
    void geocoordTypeChanged(GeocoordType geocoordType);
-   void enableAutoOptions(bool enabled);
 
 private:
    OptionsGeoreference(const OptionsGeoreference& rhs);
    OptionsGeoreference& operator=(const OptionsGeoreference& rhs);
 
    // Georeference
+   QCheckBox* mpAutoGeoreference;
    QCheckBox* mpCreateLayer;
    QCheckBox* mpDisplayLayer;
    GeocoordTypeComboBox* mpGeocoordTypeCombo;
    QLabel* mpLatLonFormatLabel;
    DmsFormatTypeComboBox* mpLatLonFormatCombo;
-
-   // Auto-georeference
-   QCheckBox* mpAutoGeoreference;
-   QRadioButton* mpImporterPlugInRadio;
-   QRadioButton* mpBestPlugInRadio;
-   MutuallyExclusiveListWidget* mpPlugInList;
 };
 
 #endif

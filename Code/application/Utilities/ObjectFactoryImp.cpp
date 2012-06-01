@@ -25,6 +25,7 @@
 #include "FileFinderImp.h"
 #include "FilenameImp.h"
 #include "FontImp.h"
+#include "GeoreferenceDescriptorAdapter.h"
 #include "GraphicObject.h"
 #include "ImportAgentAdapter.h"
 #include "Layer.h"
@@ -95,6 +96,11 @@ namespace
 
    Font* CreateFontObject();
    void DestroyFontObject(void* pObj);
+
+   GeoreferenceDescriptor* CreateGeoreferenceDescriptor();
+   void DestroyGeoreferenceDescriptor(void* pObj);
+   void* CreateVectorGeoreferenceDescriptor();
+   void DestroyVectorGeoreferenceDescriptor(void* pObj);
 
    void* CreateVectorLayer();
    void DestroyVectorLayer(void* pObj);
@@ -277,6 +283,8 @@ ObjectFactoryImp* ObjectFactoryImp::instance()
       sCreateObjectMap.insert(ObjectMapType::value_type("FileFinder", (void*(*)())CreateFileFinder));
       sCreateObjectMap.insert(ObjectMapType::value_type("Filename", (void*(*)())CreateFilename));
       sCreateObjectMap.insert(ObjectMapType::value_type("Font", (void*(*)())CreateFontObject));
+      sCreateObjectMap.insert(ObjectMapType::value_type("GeoreferenceDescriptor",
+         (void*(*)())CreateGeoreferenceDescriptor));
       sCreateObjectMap.insert(ObjectMapType::value_type("RasterFileDescriptor",
          (void*(*)())CreateRasterFileDescriptor));
       sCreateObjectMap.insert(ObjectMapType::value_type("SignatureFileDescriptor",
@@ -336,6 +344,8 @@ ObjectFactoryImp* ObjectFactoryImp::instance()
       sDestroyObjectMap.insert(ObjectMapType2::value_type("FileFinder", (void(*)(void*))DestroyFileFinder));
       sDestroyObjectMap.insert(ObjectMapType2::value_type("Filename", (void(*)(void*))DestroyFilename));
       sDestroyObjectMap.insert(ObjectMapType2::value_type("Font", (void(*)(void*))DestroyFontObject));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("GeoreferenceDescriptor",
+         (void(*)(void*))DestroyGeoreferenceDescriptor));
       sDestroyObjectMap.insert(ObjectMapType2::value_type("RasterFileDescriptor",
          (void(*)(void*))DestroyRasterFileDescriptor));
       sDestroyObjectMap.insert(ObjectMapType2::value_type("SignatureFileDescriptor",
@@ -388,6 +398,8 @@ ObjectFactoryImp* ObjectFactoryImp::instance()
          (void*(*)())CreateVectorFileDescriptor));
       sCreateObjectVectorMap.insert(VectorMapType::value_type("FileFinder", (void*(*)())CreateVectorFileFinder));
       sCreateObjectVectorMap.insert(VectorMapType::value_type("Filename", (void*(*)())CreateVectorFilename));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("GeoreferenceDescriptor",
+         (void*(*)())CreateVectorGeoreferenceDescriptor));
       sCreateObjectVectorMap.insert(VectorMapType::value_type("Layer", (void*(*)())CreateVectorLayer));
       sCreateObjectVectorMap.insert(VectorMapType::value_type("RasterFileDescriptor",
          (void*(*)())CreateVectorRasterFileDescriptor));
@@ -443,6 +455,8 @@ ObjectFactoryImp* ObjectFactoryImp::instance()
          (void(*)(void*))DestroyVectorFileDescriptor));
       sDestroyObjectVectorMap.insert(VectorMapType2::value_type("FileFinder", (void(*)(void*))DestroyVectorFileFinder));
       sDestroyObjectVectorMap.insert(VectorMapType2::value_type("Filename", (void(*)(void*))DestroyVectorFilename));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("GeoreferenceDescriptor",
+         (void(*)(void*))DestroyVectorGeoreferenceDescriptor));
       sDestroyObjectVectorMap.insert(VectorMapType2::value_type("Layer", (void(*)(void*))DestroyVectorLayer));
       sDestroyObjectVectorMap.insert(VectorMapType2::value_type("RasterFileDescriptor",
          (void(*)(void*))DestroyVectorRasterFileDescriptor));
@@ -776,6 +790,28 @@ Font* CreateFontObject()
 void DestroyFontObject(void* pObj)
 {
    delete reinterpret_cast<FontImp*>(pObj);
+}
+
+//=============================
+// GeoreferenceDescriptor
+GeoreferenceDescriptor* CreateGeoreferenceDescriptor()
+{
+   return new GeoreferenceDescriptorAdapter();
+}
+
+void DestroyGeoreferenceDescriptor(void* pObj)
+{
+   delete reinterpret_cast<GeoreferenceDescriptorAdapter*>(pObj);
+}
+
+void* CreateVectorGeoreferenceDescriptor()
+{
+   return new vector<GeoreferenceDescriptor*>();
+}
+
+void DestroyVectorGeoreferenceDescriptor(void* pObj)
+{
+   delete reinterpret_cast<vector<GeoreferenceDescriptor*>*>(pObj);
 }
 
 //=============================

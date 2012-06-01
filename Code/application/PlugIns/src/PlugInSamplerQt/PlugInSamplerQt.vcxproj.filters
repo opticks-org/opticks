@@ -192,6 +192,9 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PlugInSelectorDlg.cpp">
       <Filter>moc</Filter>
     </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_SampleGeorefGui.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CloseNotificationTest.h">
@@ -240,9 +243,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SampleGeoref.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SampleGeorefGui.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TiePointTester.h">
@@ -321,6 +321,9 @@
     </CustomBuild>
     <CustomBuild Include="DynamicColormap.ui">
       <Filter>uic</Filter>
+    </CustomBuild>
+    <CustomBuild Include="SampleGeorefGui.h">
+      <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
 </Project>

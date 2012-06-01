@@ -127,7 +127,10 @@ ClassificationImp& ClassificationImp::operator =(const ClassificationImp& rhs)
       // Only notify the Modified signal at the end instead of notifying potentially
       // numerous signals as attributes are cleared and added in the base class
       {
-         SignalBlocker block(*dynamic_cast<Subject*>(this));
+         Subject* pSubject = dynamic_cast<Subject*>(this);
+         VERIFYRV(pSubject != NULL, *this);
+
+         SignalBlocker block(*pSubject);
          DynamicObjectImp::operator =(rhs);
       }
 
@@ -988,16 +991,6 @@ void ClassificationImp::setClassification(const Classification* pClassification)
 bool ClassificationImp::compare(const DynamicObject* pObject) const
 {
    const Classification* pClassification = dynamic_cast<const Classification*>(pObject);
-   if (pClassification != NULL)
-   {
-      return compare(pClassification);
-   }
-
-   return DynamicObjectImp::compare(pObject);
-}
-
-bool ClassificationImp::compare(const Classification* pClassification) const
-{
    if (pClassification == NULL)
    {
       return false;
@@ -1027,7 +1020,7 @@ bool ClassificationImp::compare(const Classification* pClassification) const
       return false;
    }
 
-   return DynamicObjectImp::compare(pClassification);
+   return DynamicObjectImp::compare(pObject);
 }
 
 bool ClassificationImp::toXml(XMLWriter* pXml) const

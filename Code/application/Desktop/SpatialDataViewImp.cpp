@@ -28,7 +28,7 @@
 #include "DesktopServices.h"
 #include "DimensionDescriptor.h"
 #include "Endian.h"
-#include "Georeference.h"
+#include "GeoreferenceDescriptor.h"
 #include "glCommon.h"
 #include "GraphicGroupImp.h"
 #include "HistogramWindow.h"
@@ -1963,8 +1963,8 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
 
          if (validGeocoords == true)
          {
-            GeocoordType geocoordType = Georeference::getSettingGeocoordType();
-            DmsFormatType dmsFormat = Georeference::getSettingLatLonFormat();
+            GeocoordType geocoordType = GeoreferenceDescriptor::getSettingGeocoordType();
+            DmsFormatType dmsFormat = GeoreferenceDescriptor::getSettingLatLonFormat();
 
             LatLonLayer* pLatLonLayer = dynamic_cast<LatLonLayer*>(getTopMostLayer(LAT_LONG));
             if (pLatLonLayer != NULL)
@@ -2608,8 +2608,8 @@ void SpatialDataViewImp::toolTipEvent(QHelpEvent* pEvent)
          pLayer->translateWorldToData(dX, dY, dataCoord.mX, dataCoord.mY);
       }
 
-      GeocoordType geocoordType = Georeference::getSettingGeocoordType();
-      DmsFormatType dmsFormat = Georeference::getSettingLatLonFormat();
+      GeocoordType geocoordType = GeoreferenceDescriptor::getSettingGeocoordType();
+      DmsFormatType dmsFormat = GeoreferenceDescriptor::getSettingLatLonFormat();
 
       LatLonLayer* pLatLonLayer = dynamic_cast<LatLonLayer*>(getTopMostLayer(LAT_LONG));
       if (pLatLonLayer != NULL)

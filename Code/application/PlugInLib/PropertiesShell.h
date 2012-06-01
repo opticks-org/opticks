@@ -13,6 +13,11 @@
 #include "PlugInShell.h"
 #include "Properties.h"
 
+#include <string>
+
+class QWidget;
+class SessionItem;
+
 /**
  *  \ingroup ShellModule
  *  A base class for plug-in shells or plug-in instances.

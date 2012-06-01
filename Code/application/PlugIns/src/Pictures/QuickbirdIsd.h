@@ -10,25 +10,22 @@
 #ifndef QUICKBIRDISD_H
 #define QUICKBIRDISD_H
 
-#include <string>
+#include <QtCore/QString>
 
 class DynamicObject;
 
 class QuickbirdIsd
 {
 public:
-   QuickbirdIsd(const std::string &filename);
+   QuickbirdIsd(DynamicObject* pMetadata);
    ~QuickbirdIsd();
 
-   /**
-    * Copy data from the ISD file to a DynamicObject.
-    *
-    * This only copies information needed to run RpcGeoreference.
-    */
-   bool copyToMetadata(DynamicObject *pMetadata) const;
+   bool loadIsdMetadata(const QString& isdFilename);
+   QString getIsdFilename() const;
+   void removeIsdMetadata();
 
 private:
-   std::string mFilename;
+   DynamicObject* mpMetadata;
 };
 
 #endif

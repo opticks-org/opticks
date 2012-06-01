@@ -13,7 +13,6 @@
 #include "DynamicObject.h"
 #include "Endian.h"
 #include "FileResource.h"
-#include "Georeference.h"
 #include "GeoTIFFImporter.h"
 #include "ImportDescriptor.h"
 #include "MessageLogResource.h"
@@ -31,18 +30,17 @@
 #include "RasterUtilities.h"
 #include "UtilityServices.h"
 
-#include <stdio.h>
+#include <QtCore/QFileInfo>
+#include <QtCore/QString>
 
+#include <errno.h>
 #include <geotiff.h>
 #include <geovalues.h>
 #include <geo_normalize.h>
 #include <memory>
+#include <stdio.h>
 #include <vector>
 #include <xtiffio.h>
-
-#include <errno.h>
-#include <QtCore/QFileInfo>
-#include <QtCore/QString>
 
 using namespace std;
 
@@ -519,7 +517,8 @@ namespace
    }
 }
 
-GeoTIFFImporter::GeoTIFFImporter() : mImportOptionsWidget(NULL)
+GeoTIFFImporter::GeoTIFFImporter() :
+   mpImportOptionsWidget(NULL)
 {
    setName("GeoTIFF Importer");
    setCreator("Ball Aerospace & Technologies Corp.");
@@ -536,8 +535,7 @@ GeoTIFFImporter::GeoTIFFImporter() : mImportOptionsWidget(NULL)
 }
 
 GeoTIFFImporter::~GeoTIFFImporter()
-{
-}
+{}
 
 vector<ImportDescriptor*> GeoTIFFImporter::getImportDescriptors(const string& filename)
 {
@@ -578,7 +576,7 @@ vector<ImportDescriptor*> GeoTIFFImporter::getImportDescriptors(const string& fi
    return descriptors;
 }
 
-unsigned char GeoTIFFImporter::getFileAffinity(const std::string& filename)
+unsigned char GeoTIFFImporter::getFileAffinity(const string& filename)
 {
    if (getImportDescriptors(filename).empty())
    {
@@ -652,8 +650,40 @@ bool GeoTIFFImporter::populateDataDescriptor(RasterDataDescriptor* pDescriptor)
       return false;
    }
 
-   // Copy metadata
-   populateTiffMetadata(pTiffFile, pDescriptor->getMetadata(), mMetadataMessage);
+   // Metadata
+   DynamicObject* pMetadata = pDescriptor->getMetadata();
+   if (pMetadata != NULL)
+   {
+      // TIFF tags
+      string message;
+      populateTiffMetadata(pTiffFile, pDescriptor->getMetadata(), message);
+      if (message.empty() == false)
+      {
+         const string& rasterName = pDescriptor->getName();
+         mMetadataMessages[rasterName] = message;
+      }
+
+      // ISD metadata
+      QuickbirdIsd isd(pMetadata);
+
+      QString isdFilename = isd.getIsdFilename();
+      if (isdFilename.isEmpty() == true)
+      {
+         // An ISD filename has not yet been set, so check for an existing file based on the raster filename
+         const FileDescriptor* pFileDescriptor = pDescriptor->getFileDescriptor();
+         if (pFileDescriptor != NULL)
+         {
+            QFileInfo tiffInfo(QString::fromStdString(pFileDescriptor->getFilename().getFullPathAndName()));
+            QFileInfo isdInfo(tiffInfo.absolutePath() + "/" + tiffInfo.completeBaseName() + ".xml");
+            if (isdInfo.exists() == true)
+            {
+               isdFilename = isdInfo.absoluteFilePath();
+            }
+         }
+      }
+
+      isd.loadIsdMetadata(isdFilename);
+   }
 
    // Check for unsupported palette data
    unsigned short photometric = 0;
@@ -772,7 +802,7 @@ bool GeoTIFFImporter::populateDataDescriptor(RasterDataDescriptor* pDescriptor)
    // Bad values
    if ((dataType != FLT4BYTES) && (dataType != FLT8COMPLEX) && (dataType != FLT8BYTES))
    {
-      std::vector<int> badValues(1);
+      vector<int> badValues(1);
       badValues[0] = 0;
 
       pDescriptor->setBadValues(badValues);
@@ -911,117 +941,24 @@ int GeoTIFFImporter::getValidationTest(const DataDescriptor* pDescriptor) const
    return validationTest;
 }
 
-QWidget *GeoTIFFImporter::getImportOptionsWidget(DataDescriptor *pDescriptor)
+QWidget* GeoTIFFImporter::getImportOptionsWidget(DataDescriptor* pDescriptor)
 {
-   if (mImportOptionsWidget.get() == NULL)
+   RasterDataDescriptor* pRasterDescriptor = dynamic_cast<RasterDataDescriptor*>(pDescriptor);
+   if (pRasterDescriptor == NULL)
    {
-      QString initialDirectory;
-      QString isdFilename;
-      const FileDescriptor* pFileDescriptor = (pDescriptor == NULL) ? NULL : pDescriptor->getFileDescriptor();
-      if (pFileDescriptor != NULL)
-      {
-         initialDirectory = QString::fromStdString(pFileDescriptor->getFilename().getPath());
-         QFileInfo tiffInfo(QString::fromStdString(pFileDescriptor->getFilename().getFullPathAndName()));
-         QFileInfo isdInfo(tiffInfo.absolutePath() + "/" + tiffInfo.completeBaseName() + ".xml");
-         if (isdInfo.exists())
-         {
-            isdFilename = isdInfo.absoluteFilePath();
-         }
-      }
-
-      OptionsTiffImporter* pWidget = new OptionsTiffImporter(initialDirectory);
-      mImportOptionsWidget.reset(pWidget);
-      mImportOptionsWidget->setFilename(isdFilename);
-   }
-   return mImportOptionsWidget.get();
-}
-
-bool GeoTIFFImporter::performImport() const
-{
-   RasterElement* pRaster = getRasterElement();
-   if (pRaster != NULL)
-   {
-      loadIsdMetadata(pRaster->getDataDescriptor());
+      return NULL;
    }
 
-   return RasterElementImporterShell::performImport();
-}
-
-PlugIn* GeoTIFFImporter::getGeoreferencePlugIn() const
-{
-   RasterElement* pRaster = getRasterElement();
-   if (pRaster != NULL)
+   // Create the widget
+   if (mpImportOptionsWidget.get() == NULL)
    {
-      // Check if the RPC Georeference plug-in supports the raster data
-      // in case RPC metadata was loaded in loadIsdMetadata()
-      ExecutableResource geoPlugIn("RPC Georeference", string(), getProgress(), true);
-
-      const Georeference* pGeoPlugIn = dynamic_cast<const Georeference*>(geoPlugIn->getPlugIn());
-      if (pGeoPlugIn != NULL)
-      {
-         if (pGeoPlugIn->canHandleRasterElement(pRaster) == true)
-         {
-            return geoPlugIn->releasePlugIn();
-         }
-      }
+      mpImportOptionsWidget.reset(new OptionsTiffImporter());
    }
 
-   return RasterElementImporterShell::getGeoreferencePlugIn();
-}
+   // Set the data descriptor into the widget to update the metadata for the given raster data
+   mpImportOptionsWidget->setDataDescriptor(pRasterDescriptor);
 
-void GeoTIFFImporter::loadIsdMetadata(DataDescriptor* pDescriptor) const
-{
-   QString isdFilename;
-   if (mImportOptionsWidget.get() != NULL)
-   {
-      isdFilename = mImportOptionsWidget->getFilename();
-   }
-   else
-   {
-      const FileDescriptor* pFileDescriptor = (pDescriptor == NULL) ? NULL : pDescriptor->getFileDescriptor();
-      if (pFileDescriptor != NULL)
-      {
-         QFileInfo tiffInfo(QString::fromStdString(pFileDescriptor->getFilename().getFullPathAndName()));
-         QFileInfo isdInfo(tiffInfo.absolutePath() + "/" + tiffInfo.completeBaseName() + ".xml");
-         if (isdInfo.exists())
-         {
-            isdFilename = isdInfo.absoluteFilePath();
-         }
-      }
-   }
-   if (isdFilename.isEmpty())
-   {
-      // don't load any ISD metadata
-      return;
-   }
-   StepResource pStep("Load ISD Metadata", "app", "06b70af8-7ba5-43d6-8a92-826731da7a81");
-   QFileInfo isdInfo(isdFilename);
-   if (!isdInfo.isFile() || !isdInfo.exists())
-   {
-      string message = "ISD metadata file " + isdFilename.toStdString() +
-         " does not exist.\nMetadata will not be loaded.";
-      if (getProgress() != NULL)
-      {
-         getProgress()->updateProgress(message, 0, WARNING);
-      }
-      pStep->finalize(Message::Failure, message);
-      return;
-   }
-   QuickbirdIsd isd(isdFilename.toStdString());
-   if (!isd.copyToMetadata(pDescriptor->getMetadata()))
-   {
-      string message = "Unable to parse ISD metadata file " + isdFilename.toStdString() +
-         ".\nMetadata will not be loaded.";
-      if (getProgress() != NULL)
-      {
-         getProgress()->updateProgress(message, 0, WARNING);
-      }
-      pStep->finalize(Message::Failure, message);
-   }
-   else
-   {
-      pStep->finalize(Message::Success);
-   }
+   return mpImportOptionsWidget.get();
 }
 
 bool GeoTIFFImporter::createRasterPager(RasterElement *pRasterElement) const
@@ -1074,7 +1011,7 @@ bool GeoTIFFImporter::createRasterPager(RasterElement *pRasterElement) const
    return true;
 }
 
-bool GeoTIFFImporter::validate(const DataDescriptor* pDescriptor, std::string& errorMessage) const
+bool GeoTIFFImporter::validate(const DataDescriptor* pDescriptor, string& errorMessage) const
 {
    if (RasterElementImporterShell::validate(pDescriptor, errorMessage) == false)
    {
@@ -1098,15 +1035,26 @@ bool GeoTIFFImporter::validate(const DataDescriptor* pDescriptor, std::string& e
       return false;
    }
 
+   const RasterDataDescriptor* pRasterDescriptor = dynamic_cast<const RasterDataDescriptor*>(pDescriptor);
+   VERIFY(pRasterDescriptor != NULL);
+
    const RasterFileDescriptor* pRasterFileDescriptor =
-      dynamic_cast<const RasterFileDescriptor*>(pDescriptor->getFileDescriptor());
+      dynamic_cast<const RasterFileDescriptor*>(pRasterDescriptor->getFileDescriptor());
    VERIFY(pRasterFileDescriptor != NULL);
+
    if (pRasterFileDescriptor->getInterleaveFormat() == BIL)
    {
       errorMessage = "BIL interleave method not supported";
       return false;
    }
 
-   errorMessage += mMetadataMessage;
+   const string& rasterName = pRasterDescriptor->getName();
+
+   map<string, string>::const_iterator iter = mMetadataMessages.find(rasterName);
+   if (iter != mMetadataMessages.end())
+   {
+      errorMessage += iter->second;
+   }
+
    return true;
 }

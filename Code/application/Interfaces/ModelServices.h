@@ -478,6 +478,21 @@ public:
    virtual DataElement* getElement(const std::vector<std::string>& designator, const std::string& type) const = 0;
 
    /**
+    *  Retrieves a data element.
+    *
+    *  @param   pDescriptor
+    *           A data descriptor containing the name, type, and parent or
+    *           parent designator for the element to retrieve.
+    *
+    *  @return  Returns a pointer to the data element with the name, type, and
+    *           parent that are set in the given data descriptor.  If no element
+    *           is found where all of the parameters match, \c NULL is returned.
+    *
+    *  @see     model_cast()
+    */
+   virtual DataElement* getElement(const DataDescriptor* pDescriptor) const = 0;
+
+   /**
     *  Retrieves elements of a given type.
     *
     *  @param   type

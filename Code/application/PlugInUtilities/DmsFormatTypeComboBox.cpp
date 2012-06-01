@@ -7,18 +7,14 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "DmsFormatTypeComboBox.h"
-
 #include "AppVerify.h"
+#include "DmsFormatTypeComboBox.h"
 #include "StringUtilities.h"
 
 #include <string>
-#include <vector>
 
-using namespace std;
-
-DmsFormatTypeComboBox::DmsFormatTypeComboBox(QWidget* pParent)
-: QComboBox(pParent)
+DmsFormatTypeComboBox::DmsFormatTypeComboBox(QWidget* pParent) :
+   QComboBox(pParent)
 {
    setEditable(false);
 
@@ -26,8 +22,12 @@ DmsFormatTypeComboBox::DmsFormatTypeComboBox(QWidget* pParent)
    addItem(QString::fromStdString(StringUtilities::toDisplayString(DMS_FULL_DECIMAL)));
    addItem(QString::fromStdString(StringUtilities::toDisplayString(DMS_MINUTES_DECIMAL)));
 
-   VERIFYNR(connect(this, SIGNAL(activated(int)), this, SLOT(translateActivated(int))));
+   VERIFYNR(connect(this, SIGNAL(currentIndexChanged(const QString&)), this,
+      SLOT(translateIndexChanged(const QString&))));
 }
+
+DmsFormatTypeComboBox::~DmsFormatTypeComboBox()
+{}
 
 void DmsFormatTypeComboBox::setCurrentValue(DmsFormatType value)
 {
@@ -42,18 +42,19 @@ DmsFormatType DmsFormatTypeComboBox::getCurrentValue() const
    int index = currentIndex();
    if (index != -1)
    {
-      string curText = currentText().toStdString();
+      std::string curText = currentText().toStdString();
       retValue = StringUtilities::fromDisplayString<DmsFormatType>(curText);
    }
    return retValue;
 }
 
-void DmsFormatTypeComboBox::translateActivated(int newIndex)
+void DmsFormatTypeComboBox::translateIndexChanged(const QString& text)
 {
-   if (newIndex != -1)
+   DmsFormatType formatType;
+   if (text.isEmpty() == false)
    {
-      string curText = currentText().toStdString();
-      DmsFormatType curType = StringUtilities::fromDisplayString<DmsFormatType>(curText);
-      emit valueChanged(curType);
+      formatType = StringUtilities::fromDisplayString<DmsFormatType>(text.toStdString());
    }
+
+   emit valueChanged(formatType);
 }

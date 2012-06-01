@@ -21,6 +21,7 @@
 #include "DesktopServices.h"
 #include "FileFinderImp.h"
 #include "FilenameImp.h"
+#include "GeoreferenceDescriptor.h"
 #include "ImportAgentImp.h"
 #include "ImportDescriptor.h"
 #include "ImportDlg.h"
@@ -32,6 +33,7 @@
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
 #include "Progress.h"
+#include "RasterDataDescriptor.h"
 
 #include <algorithm>
 #include <map>
@@ -767,6 +769,23 @@ unsigned int ImportAgentImp::validateImportDescriptors(const vector<ImportDescri
          {
             DataDescriptor* pDescriptor = pImportDescriptor->getDataDescriptor();
 
+            // Set a georeference plug-in in the georeference descriptor if one has not yet been set regardless of
+            // the auto-georeference setting so that a default plug-in will be available for manual georeference
+            RasterDataDescriptor* pRasterDescriptor = dynamic_cast<RasterDataDescriptor*>(pDescriptor);
+            if (pRasterDescriptor != NULL)
+            {
+               GeoreferenceDescriptor* pGeorefDescriptor = pRasterDescriptor->getGeoreferenceDescriptor();
+               if (pGeorefDescriptor != NULL)
+               {
+                  const string& plugInName = pGeorefDescriptor->getGeoreferencePlugInName();
+                  if (plugInName.empty() == true)
+                  {
+                     pRasterDescriptor->setDefaultGeoreferencePlugIn();
+                  }
+               }
+            }
+
+            // Validate the data
             string currentError;
             bool validDescriptor = pImporter->validate(pDescriptor, currentError);
             if (currentError.empty() == false)

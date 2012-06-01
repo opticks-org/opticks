@@ -14,6 +14,7 @@
 #include "BadValues.h"
 #include "DataDescriptorImp.h"
 #include "DimensionDescriptor.h"
+#include "GeoreferenceDescriptorAdapter.h"
 #include "TypesFile.h"
 #include "UnitsAdapter.h"
 
@@ -78,6 +79,11 @@ public:
    Units* getUnits();
    const Units* getUnits() const;
 
+   void setGeoreferenceDescriptor(const GeoreferenceDescriptor* pGeorefDescriptor);
+   GeoreferenceDescriptor* getGeoreferenceDescriptor();
+   const GeoreferenceDescriptor* getGeoreferenceDescriptor() const;
+   void setDefaultGeoreferencePlugIn();
+
    void setDisplayBand(RasterChannelType eColor, DimensionDescriptor band);
    DimensionDescriptor getDisplayBand(RasterChannelType eColor) const;
    void setDisplayMode(DisplayMode displayMode);
@@ -98,7 +104,7 @@ public:
    static bool isKindOfDataDescriptor(const std::string& className);
 
 protected:
-   void notifyUnitsModified(Subject& subject, const std::string& signal, const boost::any& data);
+   void notifyModified(Subject& subject, const std::string& signal, const boost::any& data);
    void notifyBadValuesChanged(Subject& subject, const std::string& signal, const boost::any& value);
 
 private:
@@ -121,6 +127,7 @@ private:
    double mYPixelSize;
 
    UnitsAdapter mUnits;
+   GeoreferenceDescriptorAdapter mGeorefDescriptor;
 
    DimensionDescriptor mGrayBand;
    DimensionDescriptor mRedBand;
@@ -253,6 +260,22 @@ private:
    const Units* getUnits() const \
    { \
       return impClass::getUnits(); \
+   } \
+   void setGeoreferenceDescriptor(const GeoreferenceDescriptor* pGeorefDescriptor) \
+   { \
+      impClass::setGeoreferenceDescriptor(pGeorefDescriptor); \
+   } \
+   GeoreferenceDescriptor* getGeoreferenceDescriptor() \
+   { \
+      return impClass::getGeoreferenceDescriptor(); \
+   } \
+   const GeoreferenceDescriptor* getGeoreferenceDescriptor() const \
+   { \
+      return impClass::getGeoreferenceDescriptor(); \
+   } \
+   void setDefaultGeoreferencePlugIn() \
+   { \
+      impClass::setDefaultGeoreferencePlugIn(); \
    } \
    void setInterleaveFormat(InterleaveFormatType format) \
    { \

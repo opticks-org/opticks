@@ -9,7 +9,7 @@
 
 #include "AppVersion.h"
 #include "AppVerify.h"
-#include "Georeference.h"
+#include "GeoreferenceDescriptor.h"
 #include "LatLonLayer.h"
 #include "LayerList.h"
 #include "MessageLogResource.h"
@@ -108,7 +108,7 @@ bool SetViewDisplayArea::execute(PlugInArgList* pInArgList, PlugInArgList* pOutA
          }
          else if (mpRaster != NULL && mpRaster->isGeoreferenced() == true)
          {
-            geocoordType = Georeference::getSettingGeocoordType();
+            geocoordType = GeoreferenceDescriptor::getSettingGeocoordType();
          }
       }
 

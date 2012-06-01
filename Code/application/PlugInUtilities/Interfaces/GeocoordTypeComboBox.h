@@ -27,8 +27,8 @@ public:
    /**
     *  Creates a geocoordinate type combo box.
     *
-    *  Items for each \link GeocoordType\endlink value are automatically added,
-    *  and the combo box is set to not allow editing.
+    *  Items for each \link ::GeocoordType GeocoordType\endlink value are
+    *  automatically added, and the combo box is set to not allow editing.
     *
     *  @param   pParent
     *           The parent widget, which is passed into the QComboBox
@@ -75,7 +75,7 @@ private:
    GeocoordTypeComboBox& operator=(const GeocoordTypeComboBox& rhs);
 
 private slots:
-   void translateActivated(int index);
+   void translateIndexChanged(const QString& text);
 };
 
 #endif

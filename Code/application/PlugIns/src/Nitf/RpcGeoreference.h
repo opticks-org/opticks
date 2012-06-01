@@ -12,16 +12,15 @@
 
 #include "GeoreferenceShell.h"
 #include "NitfChipConverter.h"
-#include "PlugInManagerServices.h"
-#include "UtilityServices.h"
+
 #include <ossim/projection/ossimRpcModel.h>
 #include <memory>
 
-#define NUM_RPC_COEFFICIENTS 20 
+#define NUM_RPC_COEFFICIENTS 20
 
-class RasterElement;
 class DynamicObject;
 class PlugInArgList;
+class RasterElement;
 class RpcGui;
 
 namespace Nitf
@@ -30,25 +29,22 @@ namespace Nitf
    {
    public:
       RpcGeoreference();
-      ~RpcGeoreference();
+      virtual ~RpcGeoreference();
 
-      bool execute(PlugInArgList* pInParam, PlugInArgList* pOutParam);
       bool getInputSpecification(PlugInArgList*& pArgList);
-      bool getOutputSpecification(PlugInArgList*& pArgList);
+      bool execute(PlugInArgList* pInParam, PlugInArgList* pOutParam);
 
+      unsigned char getGeoreferenceAffinity(const RasterDataDescriptor* pDescriptor) const;
+      QWidget* getWidget(RasterDataDescriptor* pDescriptor);
+      bool validate(const RasterDataDescriptor* pDescriptor, std::string& errorMessage) const;
       LocationType pixelToGeo(LocationType pixel, bool* pAccurate = NULL) const;
       LocationType geoToPixel(LocationType geo, bool* pAccurate = NULL) const;
-      bool canHandleRasterElement(RasterElement* pRaster) const;
-
-      bool hasAbort();
 
       bool serialize(SessionItemSerializer &serializer) const;
       bool deserialize(SessionItemDeserializer &deserializer);
 
-      QWidget* getGui(RasterElement *pRaster);
-
    private:
-      const DynamicObject* getRpcInstance(RasterElement *pRaster) const;
+      const DynamicObject* getRpcInstance(const RasterDataDescriptor* pDescriptor) const;
 
       RasterElement* mpRaster;
       mutable std::string mRpcVersion;

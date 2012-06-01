@@ -14,6 +14,7 @@
 #include "GcpLayer.h"
 #include "GcpList.h"
 #include "Georeference.h"
+#include "GeoreferenceDescriptor.h"
 #include "LatLonLayer.h"
 #include "LayerList.h"
 #include "MessageLogResource.h"
@@ -132,65 +133,7 @@ bool RasterElementImporterShell::execute(PlugInArgList* pInArgList, PlugInArgLis
       mpGcpList = createGcpList();
 
       // Georeference the raster element
-      if (Georeference::getSettingAutoGeoreference() == true)
-      {
-         // Get the Georeference plug-in
-         PlugIn* pGeoPlugIn = NULL;
-         if (Georeference::getSettingImporterGeoreferencePlugIn() == true)
-         {
-            pGeoPlugIn = getGeoreferencePlugIn();
-         }
-         else
-         {
-            vector<string> plugInNames = Georeference::getSettingGeoreferencePlugIns();
-            for (vector<string>::const_iterator iter = plugInNames.begin(); iter != plugInNames.end(); ++iter)
-            {
-               PlugIn* pPlugIn = mpPlugInManager->createPlugIn(*iter);
-               if (pPlugIn != NULL)
-               {
-                  Georeference* pGeoreference = dynamic_cast<Georeference*>(pPlugIn);
-                  if (pGeoreference != NULL)
-                  {
-                     if (pGeoreference->canHandleRasterElement(mpRasterElement) == true)
-                     {
-                        pGeoPlugIn = pPlugIn;
-                        break;
-                     }
-                  }
-
-                  mpPlugInManager->destroyPlugIn(pPlugIn);
-               }
-            }
-         }
-
-         // Perform the Georeference
-         if (pGeoPlugIn != NULL)
-         {
-            ExecutableResource geoPlugIn(pGeoPlugIn, string(), mpProgress, true);
-            geoPlugIn->getInArgList().setPlugInArgValue(Executable::DataElementArg(), mpRasterElement);
-            geoPlugIn->getInArgList().setPlugInArgValue(Georeference::GcpListArg(), mpGcpList);
-            if (geoPlugIn->execute() == false)
-            {
-               string message = "Could not georeference the data set.";
-               if (mpProgress != NULL)
-               {
-                  mpProgress->updateProgress(message, 0, WARNING);
-               }
-
-               pStep->addMessage(message, "app", "A8050A4B-824A-4E60-88E5-729367DEEAD0");
-            }
-         }
-         else if (mpGcpList != NULL)
-         {
-            string message = "A georeference plug-in is not available to georeference the data set.";
-            if (mpProgress != NULL)
-            {
-               mpProgress->updateProgress(message, 0, WARNING);
-            }
-
-            pStep->addMessage(message, "app", "44E8D3C8-64C3-44DC-AB65-43F433D69DC8");
-         }
-      }
+      performGeoreference();
 
       // Create the view
       if (isBatch() == false)
@@ -372,6 +315,13 @@ QWidget* RasterElementImporterShell::getPreview(const DataDescriptor* pDescripto
    // Set the processing location to load on-disk read-only
    pLoadDescriptor->setProcessingLocation(ON_DISK_READ_ONLY);
 
+   // Do not georeference
+   GeoreferenceDescriptor* pLoadGeorefDescriptor = pLoadDescriptor->getGeoreferenceDescriptor();
+   if (pLoadGeorefDescriptor != NULL)
+   {
+      pLoadGeorefDescriptor->setGeoreferenceOnImport(false);
+   }
+
    // Validate the preview
    string errorMessage;
    bool bValidPreview = validate(pLoadDescriptor, errorMessage);
@@ -520,7 +470,7 @@ RasterElement* RasterElementImporterShell::getRasterElement() const
 int RasterElementImporterShell::getValidationTest(const DataDescriptor* pDescriptor) const
 {
    int validationTest = ImporterShell::getValidationTest(pDescriptor) | VALID_CLASSIFICATION |
-      RASTER_SIZE | VALID_DATA_TYPE;
+      RASTER_SIZE | VALID_DATA_TYPE | VALID_GEOREFERENCE_PARAMETERS;
    if (pDescriptor != NULL)
    {
       ProcessingLocation processingLocation = pDescriptor->getProcessingLocation();
@@ -660,6 +610,54 @@ bool RasterElementImporterShell::performImport() const
    return true;
 }
 
+void RasterElementImporterShell::performGeoreference() const
+{
+   const RasterDataDescriptor* pDescriptor =
+      dynamic_cast<const RasterDataDescriptor*>(mpRasterElement->getDataDescriptor());
+   VERIFYNRV(pDescriptor != NULL);
+
+   const GeoreferenceDescriptor* pGeorefDescriptor = pDescriptor->getGeoreferenceDescriptor();
+   VERIFYNRV(pGeorefDescriptor != NULL);
+
+   if (pGeorefDescriptor->getGeoreferenceOnImport() == true)
+   {
+      StepResource pStep("Perform georeference", "app", "1FD6FEE3-C53F-410F-AEEA-E0679144CE68");
+
+      const string& plugInName = pGeorefDescriptor->getGeoreferencePlugInName();
+      if (plugInName.empty() == false)
+      {
+         ExecutableResource geoPlugIn(plugInName, string(), mpProgress, true);
+         geoPlugIn->getInArgList().setPlugInArgValue(Executable::DataElementArg(), mpRasterElement);
+         geoPlugIn->getInArgList().setPlugInArgValue(Georeference::GcpListArg(), mpGcpList);
+         if (geoPlugIn->execute() == false)
+         {
+            string message = "Could not georeference the data set.";
+            if (mpProgress != NULL)
+            {
+               mpProgress->updateProgress(message, 0, WARNING);
+            }
+
+            pStep->addMessage(message, "app", "A8050A4B-824A-4E60-88E5-729367DEEAD0");
+         }
+         else
+         {
+            geoPlugIn.release();
+            pStep->finalize(Message::Success);
+         }
+      }
+      else if (mpGcpList != NULL)
+      {
+         string message = "A georeference plug-in is not available to georeference the data set.";
+         if (mpProgress != NULL)
+         {
+            mpProgress->updateProgress(message, 0, WARNING);
+         }
+
+         pStep->addMessage(message, "app", "44E8D3C8-64C3-44DC-AB65-43F433D69DC8");
+      }
+   }
+}
+
 bool RasterElementImporterShell::checkAbortOrError(string message, Step* pStep, bool checkForError) const
 {
    bool error = true;
@@ -738,9 +736,16 @@ SpatialDataView* RasterElementImporterShell::createView() const
       UndoLock lock(pView);
       createRasterLayer(pView, pStep.get());
       createGcpLayer(pView, pStep.get());
-      if (Georeference::getSettingCreateLatLonLayer() == true)
+
+      const RasterDataDescriptor* pRasterDescriptor =
+         dynamic_cast<const RasterDataDescriptor*>(mpRasterElement->getDataDescriptor());
+      if (pRasterDescriptor != NULL)
       {
-         createLatLonLayer(pView, pStep.get());
+         const GeoreferenceDescriptor* pGeorefDescriptor = pRasterDescriptor->getGeoreferenceDescriptor();
+         if ((pGeorefDescriptor != NULL) && (pGeorefDescriptor->getCreateLayer() == true))
+         {
+            createLatLonLayer(pView, pStep.get());
+         }
       }
    }
 
@@ -873,10 +878,28 @@ LatLonLayer* RasterElementImporterShell::createLatLonLayer(SpatialDataView* pVie
       return NULL;
    }
 
+   const RasterDataDescriptor* pRasterDescriptor =
+      dynamic_cast<const RasterDataDescriptor*>(mpRasterElement->getDataDescriptor());
+   VERIFYRV(pRasterDescriptor != NULL, NULL);
+
+   const GeoreferenceDescriptor* pGeorefDescriptor = pRasterDescriptor->getGeoreferenceDescriptor();
+   VERIFYRV(pGeorefDescriptor != NULL, NULL);
+
+   bool createLayer = pGeorefDescriptor->getCreateLayer();
+   string layerName = pGeorefDescriptor->getLayerName();
+   bool displayLayer = pGeorefDescriptor->getDisplayLayer();
+   GeocoordType geocoordType = pGeorefDescriptor->getGeocoordType();
+   DmsFormatType latLonFormat = pGeorefDescriptor->getLatLonFormat();
+
    ExecutableResource geoDisplayPlugIn("Georeference", string(), mpProgress, true);
    PlugInArgList& inArgList = geoDisplayPlugIn->getInArgList();
-   VERIFY(inArgList.setPlugInArgValue(Executable::DataElementArg(), mpRasterElement));
-   VERIFY(inArgList.setPlugInArgValue(Executable::ViewArg(), pView));
+   VERIFYRV(inArgList.setPlugInArgValue(Executable::DataElementArg(), mpRasterElement), NULL);
+   VERIFYRV(inArgList.setPlugInArgValue(Executable::ViewArg(), pView), NULL);
+   VERIFYRV(inArgList.setPlugInArgValue("Results Name", &layerName), NULL);
+   VERIFYRV(inArgList.setPlugInArgValue("Create Layer", &createLayer), NULL);
+   VERIFYRV(inArgList.setPlugInArgValue("Display Layer", &displayLayer), NULL);
+   VERIFYRV(inArgList.setPlugInArgValue("Coordinate Type", &geocoordType), NULL);
+   VERIFYRV(inArgList.setPlugInArgValue("Latitude/Longitude Format", &latLonFormat), NULL);
    if (geoDisplayPlugIn->execute() == false)
    {
       string message = "Could not create the latitude/longitude layer for the georeference data.";
@@ -896,7 +919,6 @@ LatLonLayer* RasterElementImporterShell::createLatLonLayer(SpatialDataView* pVie
    PlugInArgList& outArgList = geoDisplayPlugIn->getOutArgList();
 
    LatLonLayer* pLayer = outArgList.getPlugInArgValue<LatLonLayer>("Latitude/Longitude Layer");
-
    return pLayer;
 }
 
@@ -984,27 +1006,6 @@ GcpList* RasterElementImporterShell::createGcpList() const
 GcpList* RasterElementImporterShell::getGcpList() const
 {
    return mpGcpList;
-}
-
-PlugIn* RasterElementImporterShell::getGeoreferencePlugIn() const
-{
-   if (mpRasterElement == NULL)
-   {
-      return NULL;
-   }
-
-   ExecutableResource geoPlugIn("GCP Georeference", string(), mpProgress, true);
-
-   const Georeference* pGeoreference = dynamic_cast<const Georeference*>(geoPlugIn->getPlugIn());
-   if (pGeoreference != NULL)
-   {
-      if (pGeoreference->canHandleRasterElement(mpRasterElement) == true)
-      {
-         return geoPlugIn->releasePlugIn();
-      }
-   }
-
-   return NULL;
 }
 
 bool RasterElementImporterShell::createRasterPager(RasterElement* pRaster) const

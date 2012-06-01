@@ -17,6 +17,7 @@
 #include <vector>
 
 class BadValues;
+class GeoreferenceDescriptor;
 class Units;
 
 /**
@@ -29,7 +30,7 @@ class Units;
  *  - The following methods are called: setDataType(), setValidDataTypes(),
  *    setBadValues(), setInterleaveFormat(), setRows(), setColumns(),
  *    setBands(), setXPixelSize(), setYPixelSize(), setDisplayBand(),
- *    setDisplayMode(), and setUnits().
+ *    setDisplayMode(), setUnits(), and setGeoreferenceDescriptor().
  *  - All notifications documented in DataDescriptor.
  *
  *  @see        RasterElement
@@ -646,6 +647,74 @@ public:
     *           modify the values, call the non-const version of getUnits().
     */
    virtual const Units* getUnits() const = 0;
+
+   /**
+    *  Sets the georeference parameters that should be used to georeference the
+    *  data.
+    *
+    *  This method copies the parameters of the given georeference descriptor
+    *  using the GeoreferenceDescriptor::clone() method and does not assume
+    *  ownership over it.  It is the responsibility of the calling object to
+    *  destroy the given georeference descriptor appropriately.
+    *
+    *  @param   pGeorefDescriptor
+    *           The georeference descriptor containing the parameters to
+    *           georeference the data.
+    *
+    *  @notify  This method notifies Subject::signalModified() if the given
+    *           GeoreferenceDescriptor object is different than the current
+    *           GeoreferenceDescriptor object.
+    */
+   virtual void setGeoreferenceDescriptor(const GeoreferenceDescriptor* pGeorefDescriptor) = 0;
+
+   /**
+    *  Returns a pointer to the GeoreferenceDescriptor containing parameters to
+    *  georeference the data.
+    *
+    *  @return  A non-const pointer to the GeoreferenceDescriptor object
+    *           contained in the raster data descriptor, which is guaranteed to
+    *           never be \c NULL. The georeference descriptor is owned by the
+    *           raster data descriptor and should not be destroyed by the
+    *           calling object.
+    */
+   virtual GeoreferenceDescriptor* getGeoreferenceDescriptor() = 0;
+
+   /**
+    *  Returns read-only access to the GeoreferenceDescriptor containing
+    *  parameters to georeference the data.
+    *
+    *  @return  A const pointer to the GeoreferenceDescriptor object contained
+    *           in the raster data descriptor, which is guaranteed to never be
+    *           \c NULL.  The values and attributes contained in the returned
+    *           pointer should not be modified.  To modify their values, call
+    *           the non-const version of getGeoreferenceDescriptor() instead.
+    *           The georeference descriptor is owned by the raster data
+    *           descriptor and should not be destroyed by the calling object.
+    */
+   virtual const GeoreferenceDescriptor* getGeoreferenceDescriptor() const = 0;
+
+   /**
+    *  Automatically determines and sets a default Georeference plug-in to
+    *  georeference the raster data.
+    *
+    *  If GeoreferenceDescriptor::setGeoreferencePlugInName() has not been
+    *  called by the time the raster data is validated in the import process,
+    *  this method is called automatically to set a Georeference plug-in into
+    *  the georeference descriptor based on the valid georeference plug-ins set
+    *  in the georeference descriptor.
+    *
+    *  This method calls GeoreferenceDescriptor::getValidGeoreferencePlugIns()
+    *  and iterates over the returned plug-ins, setting the plug-in that returns
+    *  the highest value from Georeference::getGeoreferenceAffinity().  If
+    *  multiple Georeference plug-ins return the same affinity value and that
+    *  value is higher than all other affinity values, then the plug-in that
+    *  appears first in the vector of valid georeference plug-ins is set into
+    *  the georeference descriptor.
+    *
+    *  @see     Importer::validate(), Georeference::validate(),
+    *           GeoreferenceDescriptor::getValidGeoreferencePlugIns()
+    */
+   virtual void setDefaultGeoreferencePlugIn() = 0;
 
   /**
     *  Sets the band that is initially displayed in a RasterLayer.

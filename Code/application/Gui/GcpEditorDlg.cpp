@@ -26,7 +26,7 @@
 #include "GcpEditorDlg.h"
 #include "GeocoordTypeComboBox.h"
 #include "GeoPoint.h"
-#include "Georeference.h"
+#include "GeoreferenceDescriptor.h"
 #include "GcpLayerImp.h"
 #include "GcpList.h"
 #include "GcpListUndo.h"
@@ -46,7 +46,7 @@ GcpEditorDlg::GcpEditorDlg(QWidget* parent) :
    QDialog(parent),
    mpGcpList(NULL),
    mpLayer(NULL),
-   mGeocoordType(Georeference::getSettingGeocoordType()),
+   mGeocoordType(GeoreferenceDescriptor::getSettingGeocoordType()),
    mbModified(false)
 {
    // GCP list

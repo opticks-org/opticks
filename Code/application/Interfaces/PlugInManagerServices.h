@@ -358,6 +358,7 @@ public:
     *  - GcpLayer
     *  - GcpList
     *  - #GeocoordType
+    *  - GeoreferenceDescriptor
     *  - GraphicElement
     *  - GraphicLayer
     *  - HistogramPlot

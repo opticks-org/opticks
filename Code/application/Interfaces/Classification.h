@@ -34,8 +34,8 @@ class DateTime;
  *         setDeclassificationExemption(), setFileDowngrade(), setCountryCode(),
  *         setDowngradeDate(), setDescription(), setAuthority(),
  *         setAuthorityType(), setSecuritySourceDate(), setSecurityControlNumber(),
- *         setFileCopyNumber(), setFileNumberOfCopies(), setFileNumberOfCopies(),
- *         deserialize().
+ *         setFileCopyNumber(), setFileNumberOfCopies(), and
+ *         setFileNumberOfCopies().
  *     - Everything else documented in DynamicObject.
  *
  *  @see        DynamicObject, DataElement
@@ -549,26 +549,6 @@ public:
    virtual void getClassificationText(std::string& classificationText) const = 0;
 
    /**
-    *  Compares all values and attribues in this Classification object with
-    *  those of another Classification object.
-    *
-    *  This method compares both Classification field values and DynamicObject
-    *  attributes.
-    *
-    *  @param   pClassification
-    *           The Classification object with which to compare the values and
-    *           attributes in this Classification object.  This method does
-    *           nothing and returns \c false if \c NULL is passed in.
-    *
-    *  @return  Returns \c true if all values and attributes in
-    *           \em pClassification are the same as the values and attributes in
-    *           this Classification object; otherwise returns \c false.
-    *
-    *  @see     DynamicObject::compare()
-    */
-   virtual bool compare(const Classification* pClassification) const = 0;
-
-   /**
     *  Queries whether the classification is valid.
     *
     *  Currently this method only ensures that a TS classification has codewords.
@@ -589,4 +569,4 @@ protected:
    virtual ~Classification() {}
 };
 
-#endif   // _CLASSIFICATION
+#endif

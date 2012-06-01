@@ -18,7 +18,7 @@
 #include "ArrowObjectImp.h"
 #include "AppAssert.h"
 #include "DrawUtil.h"
-#include "Georeference.h"
+#include "GeoreferenceDescriptor.h"
 #include "GraphicLayer.h"
 #include "GraphicObject.h"
 #include "GraphicProperty.h"
@@ -481,8 +481,8 @@ void LatLonInsertObjectImp::updateLatLonText()
    if (mpGeoreference.get() != NULL)
    {
       // Get the text format from the current lat/long layer
-      GeocoordType eGeocoord = Georeference::getSettingGeocoordType();
-      DmsFormatType eDmsFormat = Georeference::getSettingLatLonFormat();
+      GeocoordType eGeocoord = GeoreferenceDescriptor::getSettingGeocoordType();
+      DmsFormatType eDmsFormat = GeoreferenceDescriptor::getSettingLatLonFormat();
 
       GraphicLayer* pLayer = getLayer();
       if (pLayer != NULL)

@@ -13,23 +13,31 @@
 #include "LabeledSectionGroup.h"
 
 class FileBrowser;
+class RasterDataDescriptor;
 
 class OptionsTiffImporter : public LabeledSectionGroup
 {
    Q_OBJECT
-   Q_PROPERTY(QString filename READ getFilename WRITE setFilename)
 
 public:
-   OptionsTiffImporter(const QString& initialDirectory = QString());
+   OptionsTiffImporter(QWidget* pParent = NULL);
    virtual ~OptionsTiffImporter();
 
+   void setDataDescriptor(RasterDataDescriptor* pDescriptor);
+   RasterDataDescriptor* getDataDescriptor();
+   const RasterDataDescriptor* getDataDescriptor() const;
+
    QString getFilename() const;
-   void setFilename(const QString &filename);
+   void setFilename(const QString& filename);
+
+protected slots:
+   void loadIsdMetadata(const QString& filename);
 
 private:
    OptionsTiffImporter(const OptionsTiffImporter& rhs);
    OptionsTiffImporter& operator=(const OptionsTiffImporter& rhs);
 
+   RasterDataDescriptor* mpDescriptor;
    FileBrowser* mpFilename;
 };
 

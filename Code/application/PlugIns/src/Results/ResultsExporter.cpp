@@ -16,7 +16,7 @@
 #include "DimensionDescriptor.h"
 #include "Filename.h"
 #include "GeoPoint.h"
-#include "Georeference.h"
+#include "GeoreferenceDescriptor.h"
 #include "LatLonLayer.h"
 #include "LayerList.h"
 #include "MathUtil.h"
@@ -164,7 +164,7 @@ QWidget* ResultsExporter::getExportOptionsWidget(const PlugInArgList *pInArgList
 
                if (hasGeoData == true)
                {
-                  geocoordType = Georeference::getSettingGeocoordType();
+                  geocoordType = GeoreferenceDescriptor::getSettingGeocoordType();
                }
             }
          }

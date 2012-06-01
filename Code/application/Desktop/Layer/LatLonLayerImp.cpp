@@ -13,7 +13,7 @@
 #include "AppConfig.h"
 #include "DrawUtil.h"
 #include "GeoPoint.h"
-#include "Georeference.h"
+#include "GeoreferenceDescriptor.h"
 #include "glCommon.h"
 #include "LatLonLayer.h"
 #include "LatLonLayerImp.h"
@@ -43,8 +43,8 @@ static double getStep(double diff);
 
 LatLonLayerImp::LatLonLayerImp(const string& id, const string& layerName, DataElement* pElement) :
    LayerImp(id, layerName, pElement),
-   mGeocoordType(Georeference::getSettingGeocoordType()),
-   mFormat(Georeference::getSettingLatLonFormat()),
+   mGeocoordType(GeoreferenceDescriptor::getSettingGeocoordType()),
+   mFormat(GeoreferenceDescriptor::getSettingLatLonFormat()),
    mStyle(LatLonLayer::getSettingGridlineStyle()),
    mColor(COLORTYPE_TO_QCOLOR(LatLonLayer::getSettingGridlineColor())),
    mWidth(LatLonLayer::getSettingGridlineWidth()),
@@ -783,8 +783,8 @@ void LatLonLayerImp::reset()
    setTickSpacing(LocationType(0.0, 0.0));
    setAutoTickSpacing(true);
    setFont(LatLonLayerImp::getDefaultFont());
-   setGeocoordType(Georeference::getSettingGeocoordType());
-   setLatLonFormat(Georeference::getSettingLatLonFormat());
+   setGeocoordType(GeoreferenceDescriptor::getSettingGeocoordType());
+   setLatLonFormat(GeoreferenceDescriptor::getSettingLatLonFormat());
 }
 
 void LatLonLayerImp::drawLabel(const LocationType& location, const LocationType& textOffset,

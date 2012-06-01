@@ -10,16 +10,18 @@
 #ifndef GCPGUI_H
 #define GCPGUI_H
 
-#include <QtGui/QComboBox>
-#include <QtGui/QLabel>
-#include <QtGui/QSpinBox>
+#include "AttachmentPtr.h"
+#include "GcpList.h"
+#include "GeoreferenceDescriptor.h"
+
 #include <QtGui/QWidget>
 
-#include "ModelServices.h"
-
+#include <list>
 #include <string>
-#include <vector>
 
+class QComboBox;
+class QLabel;
+class QSpinBox;
 class RasterElement;
 
 class GcpGui : public QWidget
@@ -27,32 +29,39 @@ class GcpGui : public QWidget
    Q_OBJECT
 
 public:
-   GcpGui(int maxOrder, const std::vector<std::string>& gcpLists, RasterElement* pRasterElement,
-      QWidget* pParent = 0);
-   ~GcpGui();
+   GcpGui(int maxOrder, QWidget* pParent = NULL);
+   virtual ~GcpGui();
 
-   unsigned short getOrder() const;
-   std::string getGcpListName() const;
-   bool validateInput();
+   void setGeoreferenceData(GeoreferenceDescriptor* pDescriptor, const std::list<GcpPoint>& gcps);
+   void setGeoreferenceData(GeoreferenceDescriptor* pDescriptor, const RasterElement* pRaster);
+   GeoreferenceDescriptor* getGeoreferenceDescriptor();
+   const GeoreferenceDescriptor* getGeoreferenceDescriptor() const;
+
+protected:
+   void georeferenceDescriptorModified(Subject& subject, const std::string& signal, const boost::any& value);
+   void updateFromGeoreferenceDescriptor();
+
+   int getMaxOrder(int numGcps) const;
+   void updateOrderRange();
+   void updateOrderLabel();
 
 protected slots:
-   bool validateOrder(int iOrder);
-   bool validateGcpList(const QString& strGcpList);
-   bool setCurrentGcpList(const QString& strGcpList);
+   void setGcpList(const QString& gcpList);
+   void setOrder(int order);
 
 private:
    GcpGui(const GcpGui& rhs);
    GcpGui& operator=(const GcpGui& rhs);
 
    const int mMaxOrder;
-   Service<ModelServices> mpModel;
-   RasterElement* mpRasterElement;
+   AttachmentPtr<GeoreferenceDescriptor> mpDescriptor;
+   std::list<GcpPoint> mGcps;
+   const RasterElement* mpRasterElement;
 
-   int getMaxOrder(int numGcps);
-
+   QLabel* mpGcpListLabel;
    QComboBox* mpGcpListCombo;
    QSpinBox* mpOrderSpin;
    QLabel* mpOrderLabel;
 };
 
-#endif // GCPGUI_H
+#endif

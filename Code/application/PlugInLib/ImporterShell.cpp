@@ -14,11 +14,14 @@
 #include "DynamicObject.h"
 #include "FileDescriptor.h"
 #include "FileResource.h"
+#include "Georeference.h"
+#include "GeoreferenceDescriptor.h"
 #include "ImporterShell.h"
 #include "MessageLogResource.h"
 #include "ModelServices.h"
 #include "ObjectResource.h"
 #include "PlugInManagerServices.h"
+#include "PlugInResource.h"
 #include "RasterDataDescriptor.h"
 #include "RasterFileDescriptor.h"
 #include "RasterUtilities.h"
@@ -500,6 +503,47 @@ bool ImporterShell::validate(const DataDescriptor* pDescriptor, string& errorMes
             "processing location or specify a subset.";
          mValidationError = AVAILABLE_MEMORY;
          return false;
+      }
+   }
+
+   // If no GeoreferenceDescriptor tests are performed, end here
+   if (validationTest < VALID_GEOREFERENCE_PLUGIN)
+   {
+      return true;
+   }
+
+   // Since georeference tests have been specified, always validate the georeference descriptor
+   const GeoreferenceDescriptor* pGeorefDescriptor =
+      dynamic_cast<const GeoreferenceDescriptor*>(pRasterDescriptor->getGeoreferenceDescriptor());
+   if (pGeorefDescriptor == NULL)
+   {
+      errorMessage = "The georeference algorithm information is invalid.";
+      return false;
+   }
+
+   if (pGeorefDescriptor->getGeoreferenceOnImport() == true)
+   {
+      PlugInResource pGeorefPlugIn(pGeorefDescriptor->getGeoreferencePlugInName());
+      Georeference* pGeoreference = dynamic_cast<Georeference*>(pGeorefPlugIn.get());
+
+      // Georeference plug-in
+      if (validationTest & VALID_GEOREFERENCE_PLUGIN)
+      {
+         if (pGeoreference == NULL)
+         {
+            errorMessage = "The georeference plug-in is invalid.";
+            return false;
+         }
+      }
+
+      // Georeference parameters
+      if ((validationTest & VALID_GEOREFERENCE_PARAMETERS) == VALID_GEOREFERENCE_PARAMETERS)
+      {
+         VERIFY(pGeoreference != NULL);
+         if (pGeoreference->validate(pRasterDescriptor, errorMessage) == false)
+         {
+            return false;
+         }
       }
    }
 

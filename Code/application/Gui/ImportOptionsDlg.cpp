@@ -11,6 +11,7 @@
 #include <QtGui/QLayout>
 #include <QtGui/QMessageBox>
 #include <QtGui/QSplitter>
+#include <QtGui/QStyleOptionButton>
 
 #include "AppVerify.h"
 #include "AppVersion.h"
@@ -20,6 +21,8 @@
 #include "DataVariant.h"
 #include "DynamicObject.h"
 #include "FileDescriptorWidget.h"
+#include "GeoreferenceDescriptor.h"
+#include "GeoreferenceWidget.h"
 #include "ImportDescriptor.h"
 #include "Importer.h"
 #include "ImportOptionsDlg.h"
@@ -115,6 +118,28 @@ ImportOptionsDlg::ImportOptionsDlg(Importer* pImporter, const QMap<QString, vect
    mpSubsetPage = new SubsetWidget();
    mpMetadataPage = new MetadataWidget();
    mpWavelengthsPage = new WavelengthsWidget();
+   mpGeoreferencePage = new QWidget();
+
+   mpGeoreferenceCheck = new QCheckBox("Automatically georeference on import", mpGeoreferencePage);
+   mpGeoreferenceWidget = new GeoreferenceWidget(this);
+   mpGeoreferenceWidget->setEnabled(false);
+
+   // Add the georeference connection here so that the georeference widget is properly enabled
+   // when initializing the tab widgets from the edit data descriptor later in the constructor
+   VERIFYNR(connect(mpGeoreferenceCheck, SIGNAL(toggled(bool)), this, SLOT(enableGeoreference(bool))));
+
+   QGridLayout* pGeoreferenceLayout = new QGridLayout(mpGeoreferencePage);
+   pGeoreferenceLayout->setMargin(10);
+   pGeoreferenceLayout->setSpacing(10);
+   pGeoreferenceLayout->addWidget(mpGeoreferenceCheck, 0, 0, 1, 2);
+   pGeoreferenceLayout->addWidget(mpGeoreferenceWidget, 1, 1);
+   pGeoreferenceLayout->setRowStretch(1, 10);
+   pGeoreferenceLayout->setColumnStretch(1, 10);
+
+   QStyleOptionButton option;
+   option.initFrom(mpGeoreferenceCheck);
+   int checkWidth = style()->subElementRect(QStyle::SE_CheckBoxIndicator, &option).width();
+   pGeoreferenceLayout->setColumnMinimumWidth(0, checkWidth);
 
    mpTabWidget->addTab(mpDataPage, "Data");
    mpTabWidget->addTab(mpFilePage, "File");
@@ -203,7 +228,7 @@ ImportOptionsDlg::ImportOptionsDlg(Importer* pImporter, const QMap<QString, vect
    // Initialization
    setWindowTitle("Import Options");
    setModal(true);
-   resize(700, 450);
+   resize(810, 500);
 
    pSplitter->addWidget(pDatasetWidget);
    pSplitter->addWidget(pInfoWidget);
@@ -430,6 +455,13 @@ void ImportOptionsDlg::setCurrentDataset(ImportDescriptor* pImportDescriptor)
             Slot(this, &ImportOptionsDlg::editDataDescriptorColumnsModified)));
          VERIFYNR(pRasterDescriptor->detach(SIGNAL_NAME(RasterDataDescriptor, BandsChanged),
             Slot(this, &ImportOptionsDlg::editDataDescriptorBandsModified)));
+
+         GeoreferenceDescriptor* pGeorefDescriptor = pRasterDescriptor->getGeoreferenceDescriptor();
+         if (pGeorefDescriptor != NULL)
+         {
+            VERIFYNR(pGeorefDescriptor->detach(SIGNAL_NAME(GeoreferenceDescriptor, GeoreferenceOnImportChanged),
+               Slot(this, &ImportOptionsDlg::editGeoreferenceOnImportModified)));
+         }
       }
 
       RasterFileDescriptor* pRasterFileDescriptor =
@@ -474,6 +506,13 @@ void ImportOptionsDlg::setCurrentDataset(ImportDescriptor* pImportDescriptor)
          Slot(this, &ImportOptionsDlg::editDataDescriptorColumnsModified)));
       VERIFYNR(pRasterDescriptor->attach(SIGNAL_NAME(RasterDataDescriptor, BandsChanged),
          Slot(this, &ImportOptionsDlg::editDataDescriptorBandsModified)));
+
+      GeoreferenceDescriptor* pGeorefDescriptor = pRasterDescriptor->getGeoreferenceDescriptor();
+      if (pGeorefDescriptor != NULL)
+      {
+         VERIFYNR(pGeorefDescriptor->attach(SIGNAL_NAME(GeoreferenceDescriptor, GeoreferenceOnImportChanged),
+            Slot(this, &ImportOptionsDlg::editGeoreferenceOnImportModified)));
+      }
    }
 
    if (pRasterFileDescriptor != NULL)
@@ -620,6 +659,40 @@ void ImportOptionsDlg::setCurrentDataset(ImportDescriptor* pImportDescriptor)
       if (bWavelengthsPageActive == true)
       {
          mpTabWidget->setCurrentWidget(mpWavelengthsPage);
+      }
+   }
+
+   // Georeference page
+   bool georeferencePageActive = false;
+   if (mpTabWidget->currentWidget() == mpGeoreferencePage)
+   {
+      georeferencePageActive = true;
+   }
+
+   index = mpTabWidget->indexOf(mpGeoreferencePage);
+   if (index != -1)
+   {
+      mpTabWidget->removeTab(index);
+   }
+
+   if (pRasterDescriptor != NULL)
+   {
+      bool georeference = GeoreferenceDescriptor::getSettingAutoGeoreference();
+
+      const GeoreferenceDescriptor* pGeorefDescriptor = pRasterDescriptor->getGeoreferenceDescriptor();
+      if (pGeorefDescriptor != NULL)
+      {
+         georeference = pGeorefDescriptor->getGeoreferenceOnImport();
+      }
+
+      mpGeoreferenceCheck->setChecked(georeference);
+      mpGeoreferenceWidget->setDataDescriptor(pRasterDescriptor);
+
+      mpTabWidget->addTab(mpGeoreferencePage, "Georeference");
+
+      if (georeferencePageActive == true)
+      {
+         mpTabWidget->setCurrentWidget(mpGeoreferencePage);
       }
    }
 
@@ -778,6 +851,21 @@ bool ImportOptionsDlg::validateDataset(DataDescriptor* pDescriptor, QString& val
    if (pDescriptor == NULL)
    {
       return false;
+   }
+
+   // Set a georeference plug-in in the georeference descriptor if one has not yet been set
+   RasterDataDescriptor* pRasterDescriptor = dynamic_cast<RasterDataDescriptor*>(pDescriptor);
+   if (pRasterDescriptor != NULL)
+   {
+      const GeoreferenceDescriptor* pGeorefDescriptor = pRasterDescriptor->getGeoreferenceDescriptor();
+      if (pGeorefDescriptor != NULL)
+      {
+         const string& plugInName = pGeorefDescriptor->getGeoreferencePlugInName();
+         if (plugInName.empty() == true)
+         {
+            pRasterDescriptor->setDefaultGeoreferencePlugIn();
+         }
+      }
    }
 
    // Validate the user inputs from the importer
@@ -1147,6 +1235,11 @@ void ImportOptionsDlg::editClassificationModified(Subject& subject, const string
    updateClassificationLabel();
 }
 
+void ImportOptionsDlg::editGeoreferenceOnImportModified(Subject& subject, const string& signal, const boost::any& value)
+{
+   mpGeoreferenceCheck->setChecked(boost::any_cast<bool>(value));
+}
+
 void ImportOptionsDlg::datasetItemChanged(QTreeWidgetItem* pItem)
 {
    if (pItem == NULL)
@@ -1325,6 +1418,21 @@ void ImportOptionsDlg::updateClassificationLabel()
    mpClassificationLabel->setText(strClassification);
 }
 
+void ImportOptionsDlg::enableGeoreference(bool enable)
+{
+   RasterDataDescriptor* pRasterDescriptor = dynamic_cast<RasterDataDescriptor*>(mpEditDescriptor);
+   if (pRasterDescriptor != NULL)
+   {
+      GeoreferenceDescriptor* pGeorefDescriptor = pRasterDescriptor->getGeoreferenceDescriptor();
+      if (pGeorefDescriptor != NULL)
+      {
+         pGeorefDescriptor->setGeoreferenceOnImport(enable);
+      }
+   }
+
+   mpGeoreferenceWidget->setEnabled(enable);
+}
+
 bool ImportOptionsDlg::applyChanges()
 {
    if (mpEditDescriptor == NULL)
@@ -1351,6 +1459,13 @@ bool ImportOptionsDlg::applyChanges()
             Slot(this, &ImportOptionsDlg::editDataDescriptorColumnsModified)));
          VERIFYNR(pRasterDescriptor->detach(SIGNAL_NAME(RasterDataDescriptor, BandsChanged),
             Slot(this, &ImportOptionsDlg::editDataDescriptorBandsModified)));
+
+         GeoreferenceDescriptor* pGeorefDescriptor = pRasterDescriptor->getGeoreferenceDescriptor();
+         if (pGeorefDescriptor != NULL)
+         {
+            VERIFYNR(pGeorefDescriptor->detach(SIGNAL_NAME(GeoreferenceDescriptor, GeoreferenceOnImportChanged),
+               Slot(this, &ImportOptionsDlg::editGeoreferenceOnImportModified)));
+         }
       }
 
       RasterFileDescriptor* pRasterFileDescriptor =

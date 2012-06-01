@@ -489,6 +489,29 @@ DataElement* ModelServicesImp::getElement(const vector<string>& designator, cons
    return pElement;
 }
 
+DataElement* ModelServicesImp::getElement(const DataDescriptor* pDescriptor) const
+{
+   if (pDescriptor == NULL)
+   {
+      return NULL;
+   }
+
+   const std::string& name = pDescriptor->getName();
+   const std::string& type = pDescriptor->getType();
+   DataElement* pParent = pDescriptor->getParent();
+
+   DataElement* pElement = getElement(name, type, pParent);
+   if (pElement == NULL)
+   {
+      std::vector<std::string> designator = pDescriptor->getParentDesignator();
+      designator.push_back(name);
+
+      pElement = getElement(designator, type);
+   }
+
+   return pElement;
+}
+
 vector<DataElement*> ModelServicesImp::getElements(const string& type) const
 {
    vector<DataElement*> elements;

@@ -228,6 +228,7 @@
     <ClCompile Include="PropertiesDlg.cpp" />
     <ClCompile Include="PropertiesFileDescriptor.cpp" />
     <ClCompile Include="PropertiesGcpLayer.cpp" />
+    <ClCompile Include="PropertiesGeoreference.cpp" />
     <ClCompile Include="PropertiesGraphicObject.cpp" />
     <ClCompile Include="PropertiesHistogramPlot.cpp" />
     <ClCompile Include="PropertiesLatLonLayer.cpp" />
@@ -1586,6 +1587,7 @@
     </CustomBuild>
     <ClInclude Include="PropertiesFileDescriptor.h" />
     <ClInclude Include="PropertiesGcpLayer.h" />
+    <ClInclude Include="PropertiesGeoreference.h" />
     <CustomBuild Include="PropertiesGraphicObject.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing %(Filename).h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"

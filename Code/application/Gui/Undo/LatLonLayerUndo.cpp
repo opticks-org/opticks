@@ -9,7 +9,7 @@
 
 #include <QtGui/QApplication>
 
-#include "Georeference.h"
+#include "GeoreferenceDescriptor.h"
 #include "LatLonLayer.h"
 #include "LatLonLayerImp.h"
 #include "LatLonLayerUndo.h"
@@ -267,8 +267,8 @@ LatLonLayerMemento::LatLonLayerMemento(LatLonLayer* pLayer) :
    mTickSpacing(LocationType()),
    mAutoSpacing(true),
    mFont(QApplication::font()),
-   mGeocoordType(Georeference::getSettingGeocoordType()),
-   mFormat(Georeference::getSettingLatLonFormat())
+   mGeocoordType(GeoreferenceDescriptor::getSettingGeocoordType()),
+   mFormat(GeoreferenceDescriptor::getSettingLatLonFormat())
 {
    LatLonLayerImp* pLayerImp = dynamic_cast<LatLonLayerImp*>(pLayer);
    if (pLayerImp != NULL)

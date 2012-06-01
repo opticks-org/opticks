@@ -8,6 +8,7 @@
  */
 
 #include "AppVerify.h"
+#include "DataVariant.h"
 #include "DynamicObject.h"
 #include "MessageLogMgr.h"
 #include "MessageLogResource.h"
@@ -15,30 +16,43 @@
 #include "QuickbirdIsd.h"
 #include "xmlreader.h"
 
-#include <QtCore/QString>
-#include <vector>
+#include <string>
 
 #define SET_FROM_XQUERY(path__, query__, accessor__, type__) \
    current = query__; \
    pResult = xml.query(query__, XERCES_CPP_NAMESPACE_QUALIFIER DOMXPathResult::FIRST_RESULT_TYPE); \
    VERIFY(pResult != NULL); \
-   pMetadata->setAttributeByPath(path__, static_cast<type__>(pResult->accessor__()));
+   mpMetadata->setAttributeByPath(path__, static_cast<type__>(pResult->accessor__()));
 
-QuickbirdIsd::QuickbirdIsd(const std::string &filename) : mFilename(filename)
-{
-}
+QuickbirdIsd::QuickbirdIsd(DynamicObject* pMetadata) :
+   mpMetadata(pMetadata)
+{}
 
 QuickbirdIsd::~QuickbirdIsd()
-{
-}
+{}
 
-bool QuickbirdIsd::copyToMetadata(DynamicObject *pMetadata) const
+bool QuickbirdIsd::loadIsdMetadata(const QString& isdFilename)
 {
-   XmlReader xml(Service<MessageLogMgr>()->getLog(), false);
-   if (mFilename.empty() || xml.parse(mFilename) == NULL)
+   if ((mpMetadata == NULL) || (isdFilename.isEmpty() == true))
    {
       return false;
    }
+
+   // Do not parse the file if it has already been parsed
+   QString filename = QString::fromStdString(dv_cast<std::string>(mpMetadata->getAttributeByPath("ISD/Filename"),
+      std::string()));
+   if (filename == isdFilename)
+   {
+      return true;
+   }
+
+   // Parse the data from the file
+   XmlReader xml(Service<MessageLogMgr>()->getLog(), false);
+   if (xml.parse(isdFilename.toStdString()) == NULL)
+   {
+      return false;
+   }
+
    std::string current;
    try
    {
@@ -77,7 +91,7 @@ bool QuickbirdIsd::copyToMetadata(DynamicObject *pMetadata) const
       VERIFY(pResult != NULL);
       for (int num = 1; pResult->iterateNext(); num++)
       {
-         pMetadata->setAttributeByPath(QString("NITF/TRE/RPC00B/0/LNNUMCOEF%1")
+         mpMetadata->setAttributeByPath(QString("NITF/TRE/RPC00B/0/LNNUMCOEF%1")
             .arg(num, 2, 10, QChar('0')).toStdString(), pResult->getNumberValue());
       }
       current = "fn:tokenize(//RPB/IMAGE/LINEDENCOEFList/LINEDENCOEF/text(), '\\s+')";
@@ -85,7 +99,7 @@ bool QuickbirdIsd::copyToMetadata(DynamicObject *pMetadata) const
       VERIFY(pResult != NULL);
       for (int num = 1; pResult->iterateNext(); num++)
       {
-         pMetadata->setAttributeByPath(QString("NITF/TRE/RPC00B/0/LNDENCOEF%1")
+         mpMetadata->setAttributeByPath(QString("NITF/TRE/RPC00B/0/LNDENCOEF%1")
             .arg(num, 2, 10, QChar('0')).toStdString(), pResult->getNumberValue());
       }
       current = "fn:tokenize(//RPB/IMAGE/SAMPNUMCOEFList/SAMPNUMCOEF/text(), '\\s+')";
@@ -93,7 +107,7 @@ bool QuickbirdIsd::copyToMetadata(DynamicObject *pMetadata) const
       VERIFY(pResult != NULL);
       for (int num = 1; pResult->iterateNext(); num++)
       {
-         pMetadata->setAttributeByPath(QString("NITF/TRE/RPC00B/0/SMPNUMCOEF%1")
+         mpMetadata->setAttributeByPath(QString("NITF/TRE/RPC00B/0/SMPNUMCOEF%1")
             .arg(num, 2, 10, QChar('0')).toStdString(), pResult->getNumberValue());
       }
       current = "fn:tokenize(//RPB/IMAGE/SAMPDENCOEFList/SAMPDENCOEF/text(), '\\s+')";
@@ -101,12 +115,13 @@ bool QuickbirdIsd::copyToMetadata(DynamicObject *pMetadata) const
       VERIFY(pResult != NULL);
       for (int num = 1; pResult->iterateNext(); num++)
       {
-         pMetadata->setAttributeByPath(QString("NITF/TRE/RPC00B/0/SMPDENCOEF%1")
+         mpMetadata->setAttributeByPath(QString("NITF/TRE/RPC00B/0/SMPDENCOEF%1")
             .arg(num, 2, 10, QChar('0')).toStdString(), pResult->getNumberValue());
       }
-      pMetadata->setAttributeByPath("NITF/TRE/RPC00B/0/SUCCESS", true);
+      mpMetadata->setAttributeByPath("NITF/TRE/RPC00B/0/SUCCESS", true);
       FactoryResource<DynamicObject> image;
-      pMetadata->setAttributeByPath("NITF/Image Subheader", *image);
+      mpMetadata->setAttributeByPath("NITF/Image Subheader", *image);
+      mpMetadata->setAttributeByPath("ISD/Filename", isdFilename.toStdString());
    }
    catch (const XERCES_CPP_NAMESPACE_QUALIFIER DOMException &exc)
    {
@@ -119,4 +134,24 @@ bool QuickbirdIsd::copyToMetadata(DynamicObject *pMetadata) const
    }
 
    return true;
+}
+
+QString QuickbirdIsd::getIsdFilename() const
+{
+   if (mpMetadata != NULL)
+   {
+      return QString::fromStdString(dv_cast<std::string>(mpMetadata->getAttributeByPath("ISD/Filename"),
+         std::string()));
+   }
+
+   return QString();
+}
+
+void QuickbirdIsd::removeIsdMetadata()
+{
+   if (mpMetadata != NULL)
+   {
+      mpMetadata->removeAttribute("NITF");
+      mpMetadata->removeAttribute("ISD");
+   }
 }

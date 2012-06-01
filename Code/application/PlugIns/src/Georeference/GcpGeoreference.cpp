@@ -12,6 +12,7 @@
 #include "GcpGui.h"
 #include "GcpList.h"
 #include "Georeference.h"
+#include "GeoreferenceDescriptor.h"
 #include "GeoreferenceUtilities.h"
 #include "MessageLogResource.h"
 #include "PlugInArg.h"
@@ -19,6 +20,7 @@
 #include "PlugInRegistration.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
+#include "RasterFileDescriptor.h"
 #include "SessionItemDeserializer.h"
 #include "SessionItemSerializer.h"
 #include "TypeConverter.h"
@@ -41,7 +43,7 @@ static int sNumAnchors = sNumAnchorFractions * sNumAnchorFractions;
 GcpGeoreference::GcpGeoreference() :
    mpGui(NULL),
    mpRaster(NULL),
-   mOrder(0),
+   mOrder(1),
    mReverseOrder(0),
    mNumRows(0),
    mNumColumns(0),
@@ -61,61 +63,78 @@ GcpGeoreference::GcpGeoreference() :
 
 GcpGeoreference::~GcpGeoreference()
 {
-}
-
-bool GcpGeoreference::setInteractive()
-{
-   ExecutableShell::setInteractive();
-   return false;
+   delete mpGui;
 }
 
 bool GcpGeoreference::getInputSpecification(PlugInArgList*& pArgList)
 {
-   bool success = GeoreferenceShell::getInputSpecification(pArgList);
-   success = success && pArgList->addArg<GcpList>(Georeference::GcpListArg(), NULL, "Corner coordinates.");
-   success = success && pArgList->addArg<int>("Order", 1, "Polynomial order for the georeferencing calculations.");
-   return success;
+   if (GeoreferenceShell::getInputSpecification(pArgList) == false)
+   {
+      return false;
+   }
+
+   // Do not set a default value in the input args so that the georeference
+   // descriptor values will be used if the arg value is not set
+   VERIFY(pArgList != NULL);
+   VERIFY(pArgList->addArg<GcpList>(Georeference::GcpListArg(), "The GCPs to use for the georeferencing.  If not "
+      "specified, the GCP list contained in the " + Executable::DataElementArg() + " input will be used.") == true);
+   VERIFY(pArgList->addArg<int>("Order", "Polynomial order for the georeferencing calculations.  If not specified, "
+      "the polynomial order contained in the " + Executable::DataElementArg() + " input will be used.") == true);
+
+   return true;
 }
 
 bool GcpGeoreference::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
    StepResource pStep("Run GCP Georeference", "app", "296120A0-1CD5-467E-A501-934BCA7775EA");
 
+   // Get the values from the input arg list
    Progress* pProgress = pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
    mpProgress = pProgress;
 
    FAIL_IF(!isBatch(), "Interactive mode is not supported.", return false);
 
-   int numPoints;
-
    mpRaster = pInArgList->getPlugInArgValue<RasterElement>(Executable::DataElementArg());
    FAIL_IF(mpRaster == NULL, "Unable to find raster element input", return false);
 
-   GcpList* pGcpList = NULL;
-   if (mpGui != NULL)
-   {
-      mOrder = mpGui->getOrder();
+   GcpList* pGcpList = pInArgList->getPlugInArgValue<GcpList>(Georeference::GcpListArg());
+   bool gcpListArgSet = (pGcpList != NULL);
+   bool orderArgSet = pInArgList->getPlugInArgValue<int>("Order", mOrder);
 
-      string gcpListName = mpGui->getGcpListName();
-      if (gcpListName.empty() == false)
+   // If the polynomial order or GCP list were not contained in the arg list,
+   // get the values from the georeference descriptor
+   GeoreferenceDescriptor* pGeorefDescriptor = NULL;
+
+   RasterDataDescriptor* pDescriptor = dynamic_cast<RasterDataDescriptor*>(mpRaster->getDataDescriptor());
+   if (pDescriptor != NULL)
+   {
+      pGeorefDescriptor = pDescriptor->getGeoreferenceDescriptor();
+   }
+
+   if (pGeorefDescriptor != NULL)
+   {
+      if (gcpListArgSet == false)
       {
-         pGcpList = static_cast<GcpList*>(mpDataModel->getElement(gcpListName,
-            TypeConverter::toString<GcpList>(), mpRaster));
+         string gcpListName =
+            dv_cast<string>(pGeorefDescriptor->getAttributeByPath("GCP Georeference/GcpListName"), string());
+         if (gcpListName.empty() == false)
+         {
+            GcpList* pAttributeGcpList = static_cast<GcpList*>(mpDataModel->getElement(gcpListName,
+               TypeConverter::toString<GcpList>(), mpRaster));
+            if (pAttributeGcpList != NULL)
+            {
+               pGcpList = pAttributeGcpList;
+            }
+         }
+      }
+
+      if (orderArgSet == false)
+      {
+         mOrder = dv_cast<int>(pGeorefDescriptor->getAttributeByPath("GCP Georeference/PolynomialOrder"), mOrder);
       }
    }
-   else
-   {
-      pInArgList->getPlugInArgValue<int>("Order", mOrder);
-      pGcpList = pInArgList->getPlugInArgValue<GcpList>(Georeference::GcpListArg());
-   }
 
-   if (pGcpList != NULL)
-   {
-      pStep->addProperty("gcpList", pGcpList->getName());
-   }
-   pStep->addProperty("polynomialOrder", mOrder);
-
-   FAIL_IF(pGcpList == NULL, "Unable to find GCP list.", return false);
+   FAIL_IF(pGcpList == NULL, "Unable to find the GCP list.", return false);
 
    if ((mOrder <= 0) || (mOrder > MAX_ORDER))
    {
@@ -131,10 +150,13 @@ bool GcpGeoreference::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
       return false;
    }
 
+   pStep->addProperty("gcpList", pGcpList->getName());
+   pStep->addProperty("polynomialOrder", mOrder);
+
    mReverseOrder = min(MAX_ORDER, mOrder+1);
 
    int numCoeffs = COEFFS_FOR_ORDER(mOrder);
-   numPoints = pGcpList->getSelectedPoints().size();
+   int numPoints = pGcpList->getSelectedPoints().size();
    if (numPoints < numCoeffs)
    {
       if (mpProgress)
@@ -266,7 +288,6 @@ bool GcpGeoreference::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
       success = GeoreferenceUtilities::computeFit(pixelValues, latlonValues, 1, mLonCoefficients);
    }
 
-   const RasterDataDescriptor* pDescriptor = dynamic_cast<const RasterDataDescriptor*>(mpRaster->getDataDescriptor());
    if (pDescriptor != NULL)
    {
       setCubeSize(pDescriptor->getRowCount(), pDescriptor->getColumnCount());
@@ -325,17 +346,190 @@ bool GcpGeoreference::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
    pGcpList->clearPoints();
    pGcpList->addPoints(newPoints);
 
-   mpGui = NULL;
+   mpRaster->setGeoreferencePlugin(this);
 
-   if (mpRaster != NULL)
+   // Update the georeference descriptor with the current georeference parameters if necessary
+   if (pGeorefDescriptor != NULL)
    {
-      mpRaster->setGeoreferencePlugin(this);
+      // Georeference plug-in
+      const string& plugInName = getName();
+      pGeorefDescriptor->setGeoreferencePlugInName(plugInName);
+
+      // GCP list
+      if ((gcpListArgSet == true) && (pGcpList != NULL))
+      {
+         const string& gcpListName = pGcpList->getName();
+         pGeorefDescriptor->setAttributeByPath("GCP Georeference/GcpListName", gcpListName);
+      }
+
+      // Polynomial order
+      if (orderArgSet == true)
+      {
+         pGeorefDescriptor->setAttributeByPath("GCP Georeference/PolynomialOrder", mOrder);
+      }
    }
 
    pStep->finalize(Message::Success);
    if (mpProgress)
    {
       mpProgress->updateProgress("GcpGeoreference finished.", 0, NORMAL);
+   }
+
+   return true;
+}
+
+unsigned char GcpGeoreference::getGeoreferenceAffinity(const RasterDataDescriptor* pDescriptor) const
+{
+   if (pDescriptor == NULL)
+   {
+      return Georeference::CAN_NOT_GEOREFERENCE;
+   }
+
+   // Check if the raster data is already loaded in the data model
+   RasterElement* pRaster = dynamic_cast<RasterElement*>(mpDataModel->getElement(pDescriptor));
+   if (pRaster != NULL)
+   {
+      // Raster data is loaded, so check for GCP lists with the raster element as a parent
+      vector<string> elementNames = mpDataModel->getElementNames(pRaster, TypeConverter::toString<GcpList>());
+      if (elementNames.empty() == false)
+      {
+         return Georeference::CAN_GEOREFERENCE;
+      }
+   }
+   else
+   {
+      // Raster data is not loaded, so check for valid GCPs in the file descriptor
+      const RasterFileDescriptor* pFileDescriptor =
+         dynamic_cast<const RasterFileDescriptor*>(pDescriptor->getFileDescriptor());
+      if (pFileDescriptor != NULL)
+      {
+         const list<GcpPoint>& gcps = pFileDescriptor->getGcps();
+         if (gcps.empty() == false)
+         {
+            return Georeference::CAN_GEOREFERENCE;
+         }
+      }
+   }
+
+   return CAN_NOT_GEOREFERENCE;
+}
+
+QWidget* GcpGeoreference::getWidget(RasterDataDescriptor* pDescriptor)
+{
+   if (pDescriptor == NULL)
+   {
+      return NULL;
+   }
+
+   // Create the widget
+   if (mpGui == NULL)
+   {
+      mpGui = new GcpGui(INTERACTIVE_MAX_ORDER);
+   }
+
+   // Set the georeference data into the widget for the given raster data
+   GeoreferenceDescriptor* pGeorefDescriptor = pDescriptor->getGeoreferenceDescriptor();
+   if (pGeorefDescriptor != NULL)
+   {
+      RasterElement* pRaster = dynamic_cast<RasterElement*>(mpDataModel->getElement(pDescriptor));
+      if (pRaster != NULL)
+      {
+         mpGui->setGeoreferenceData(pGeorefDescriptor, pRaster);
+      }
+      else
+      {
+         RasterFileDescriptor* pFileDescriptor = dynamic_cast<RasterFileDescriptor*>(pDescriptor->getFileDescriptor());
+         if (pFileDescriptor != NULL)
+         {
+            mpGui->setGeoreferenceData(pGeorefDescriptor, pFileDescriptor->getGcps());
+         }
+      }
+   }
+
+   return mpGui;
+}
+
+bool GcpGeoreference::validate(const RasterDataDescriptor* pDescriptor, string& errorMessage) const
+{
+   if (GeoreferenceShell::validate(pDescriptor, errorMessage) == false)
+   {
+      return false;
+   }
+
+   VERIFY(pDescriptor != NULL);
+
+   const GeoreferenceDescriptor* pGeorefDescriptor = pDescriptor->getGeoreferenceDescriptor();
+   VERIFY(pGeorefDescriptor != NULL);
+
+   // Check if the raster data is already loaded in the data model
+   GcpList* pGcpList = NULL;
+   list<GcpPoint> gcps;
+
+   RasterElement* pRaster = dynamic_cast<RasterElement*>(mpDataModel->getElement(pDescriptor));
+   if (pRaster != NULL)
+   {
+      // Raster data is loaded, so check the GCP list name
+      string gcpList = dv_cast<string>(pGeorefDescriptor->getAttributeByPath("GCP Georeference/GcpListName"),
+         string());
+      if (gcpList.empty() == true)
+      {
+         errorMessage = "The GCP list name is invalid.";
+         return false;
+      }
+
+      // Check for a valid GCP list
+      pGcpList = dynamic_cast<GcpList*>(Service<ModelServices>()->getElement(gcpList,
+         TypeConverter::toString<GcpList>(), pRaster));
+      if (pGcpList == NULL)
+      {
+         errorMessage = "Could not get the specified GCP list.";
+         return false;
+      }
+   }
+   else
+   {
+      // Raster data is not loaded, so check for valid GCPs in the file descriptor
+      const RasterFileDescriptor* pFileDescriptor =
+         dynamic_cast<const RasterFileDescriptor*>(pDescriptor->getFileDescriptor());
+      if (pFileDescriptor == NULL)
+      {
+         errorMessage = "The raster data set does not contain valid file information.";
+         return false;
+      }
+
+      gcps = pFileDescriptor->getGcps();
+      if (gcps.empty() == true)
+      {
+         errorMessage = "The raster data set does not contain valid GCPs.";
+         return false;
+      }
+   }
+
+   // The polynomial order cannot be zero or negative
+   int order = dv_cast<int>(pGeorefDescriptor->getAttributeByPath("GCP Georeference/PolynomialOrder"), 1);
+   if (order <= 0)
+   {
+      errorMessage = "The polynomial order is invalid.";
+      return false;
+   }
+
+   // The number of GCPs must support the polynomial order
+   int gcpsRequired = COEFFS_FOR_ORDER(order);
+   int gcpsPresent = 0;
+
+   if (pGcpList != NULL)
+   {
+      gcpsPresent = static_cast<int>(pGcpList->getSelectedPoints().size());
+   }
+   else
+   {
+      gcpsPresent = static_cast<int>(gcps.size());
+   }
+
+   if (gcpsPresent < gcpsRequired)
+   {
+      errorMessage = "There are not enough GCPs present to support the specified polynomial order.";
+      return false;
    }
 
    return true;
@@ -366,63 +560,22 @@ LocationType GcpGeoreference::pixelToGeo(LocationType pixel, bool* pAccurate) co
   return GeoreferenceUtilities::evaluatePolynomial(pixel, mLatCoefficients, mLonCoefficients, mOrder);
 }
 
-bool GcpGeoreference::canHandleRasterElement(RasterElement *pRaster) const
-{
-   vector<string> elementNames = mpDataModel->getElementNames(pRaster, "GcpList");
-   if (elementNames.empty() == true)
-   {
-      return false;
-   }
-
-   return true;
-}
-
-QWidget *GcpGeoreference::getGui(RasterElement *pRaster)
-{
-   if (pRaster == NULL)
-   {
-      return NULL;
-   }
-
-   vector<string> gcpNames = mpDataModel->getElementNames(pRaster, "GcpList");
-
-   vector<string> gcpNameList;
-   for (vector<string>::iterator iter = gcpNames.begin(); iter != gcpNames.end(); ++iter)
-   {
-      gcpNameList.push_back(*iter);
-   }
-   delete mpGui;
-
-   mpGui = new GcpGui(INTERACTIVE_MAX_ORDER, gcpNameList, pRaster);
-   return mpGui;
-}
-
-bool GcpGeoreference::validateGuiInput() const
-{
-   if (mpGui != NULL)
-   {
-      return mpGui->validateInput();
-   }
-   return false;
-}
-
 void GcpGeoreference::setCubeSize(unsigned int numRows, unsigned int numColumns)
 {
    mNumRows = numRows;
    mNumColumns = numColumns;
 }
 
-bool GcpGeoreference::serialize(SessionItemSerializer &serializer) const
+bool GcpGeoreference::serialize(SessionItemSerializer& serializer) const
 {
+   if (mpRaster == NULL)
+   {
+      // execute() has not yet been called so there is no need to serialize any parameters
+      return true;
+   }
+
    XMLWriter writer("GcpGeoreference");
-   if (mpRaster != NULL)
-   {
-      writer.addAttr("rasterId", mpRaster->getId());
-   }
-   else
-   {
-      return false;
-   }
+   writer.addAttr("rasterId", mpRaster->getId());
    writer.addAttr("order", mOrder);
    writer.addAttr("reverseOrder", mReverseOrder);
    writer.addAttr("numRows", mNumRows);
@@ -434,8 +587,14 @@ bool GcpGeoreference::serialize(SessionItemSerializer &serializer) const
    return serializer.serialize(writer);
 }
 
-bool GcpGeoreference::deserialize(SessionItemDeserializer &deserializer)
+bool GcpGeoreference::deserialize(SessionItemDeserializer& deserializer)
 {
+   if (deserializer.getBlockSizes().empty() == true)
+   {
+      // The plug-in was serialized before execute() was called
+      return true;
+   }
+
    XmlReader::StringStreamAssigner<int> toInt;
    XmlReader::StringStreamAssigner<unsigned short> toUShort;
    XmlReader reader(NULL, false);

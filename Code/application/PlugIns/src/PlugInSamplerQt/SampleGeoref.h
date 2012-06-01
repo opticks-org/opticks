@@ -10,10 +10,9 @@
 #ifndef SAMPLEGEOREF_H
 #define SAMPLEGEOREF_H
 
-#include "Animation.h"
-#include "AttachmentPtr.h"
 #include "GeoreferenceShell.h"
-#include "SampleGeorefGui.h"
+
+class SampleGeorefGui;
 
 /**
  * Sample GeoreferenceAlgorithm plugin.
@@ -24,49 +23,30 @@ class SampleGeoref : public GeoreferenceShell
 {
 public:
    SampleGeoref();
-   ~SampleGeoref();
-
-   bool setInteractive();
+   virtual ~SampleGeoref();
 
    bool getInputSpecification(PlugInArgList*& pArgList);
    bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
 
-   bool serialize(SessionItemSerializer &serializer) const;
-   bool deserialize(SessionItemDeserializer &deserializer);
-
+   unsigned char getGeoreferenceAffinity(const RasterDataDescriptor* pDescriptor) const;
+   QWidget* getWidget(RasterDataDescriptor* pDescriptor);
    LocationType geoToPixel(LocationType geo, bool* pAccurate = NULL) const;
    LocationType pixelToGeo(LocationType pixel, bool* pAccurate = NULL) const;
 
-   bool canHandleRasterElement(RasterElement *pRaster) const;
-
-   QWidget *getGui(RasterElement *pRaster);
-
-   bool validateGuiInput() const;
-
-   void animationFrameChanged(Subject &subject, const std::string &signal, const boost::any &data);
+   bool serialize(SessionItemSerializer &serializer) const;
+   bool deserialize(SessionItemDeserializer &deserializer);
 
 private:
    SampleGeoref(const SampleGeoref& rhs);
    SampleGeoref& operator=(const SampleGeoref& rhs);
 
-   static LocationType rotate(LocationType loc, double rad);
-
    int mXSize;
    int mYSize;
    double mXScale;
    double mYScale;
-
    bool mExtrapolate;
 
-   double mFrames;
-   unsigned int mCurrentFrame;
-
-   bool mRotate;
-
-   AttachmentPtr<Animation> mpAnimation;
    RasterElement* mpRaster;
-
-
    SampleGeorefGui* mpGui;
 };
 

@@ -7,23 +7,28 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include "AppVerify.h"
+#include "GcpGui.h"
+#include "GeoreferenceUtilities.h"
+#include "ModelServices.h"
+#include "RasterElement.h"
+#include "TypeConverter.h"
+
+#include <QtGui/QComboBox>
 #include <QtGui/QGridLayout>
 #include <QtGui/QLabel>
+#include <QtGui/QSpinBox>
 
-#include "GcpGeoreference.h"
-#include "GcpGui.h"
-#include "GcpList.h"
-#include "RasterElement.h"
+#include <vector>
 
-using namespace std;
-
-GcpGui::GcpGui(int maxOrder, const vector<string>& gcpLists, RasterElement* pRasterElement, QWidget* pParent) :
+GcpGui::GcpGui(int maxOrder, QWidget* pParent) :
    QWidget(pParent),
    mMaxOrder(maxOrder),
-   mpRasterElement(pRasterElement)
+   mpDescriptor(NULL),
+   mpRasterElement(NULL)
 {
    // Gcp list combo
-   QLabel* pGcpListLabel = new QLabel("GCP List:", this);
+   mpGcpListLabel = new QLabel("GCP List:", this);
    mpGcpListCombo = new QComboBox(this);
    mpGcpListCombo->setEditable(false);
 
@@ -40,169 +45,134 @@ GcpGui::GcpGui(int maxOrder, const vector<string>& gcpLists, RasterElement* pRas
    QGridLayout* pGrid = new QGridLayout(this);
    pGrid->setMargin(0);
    pGrid->setSpacing(10);
-   pGrid->addWidget(pGcpListLabel, 0, 0);
-   pGrid->addWidget(mpGcpListCombo, 0, 1, 1, 2);
+   pGrid->addWidget(mpGcpListLabel, 0, 0);
+   pGrid->addWidget(mpGcpListCombo, 0, 1);
    pGrid->addWidget(pOrderLabel, 1, 0);
-   pGrid->addWidget(mpOrderSpin, 1, 1);
-   pGrid->addWidget(mpOrderLabel, 2, 0, 1, 3);
+   pGrid->addWidget(mpOrderSpin, 1, 1, Qt::AlignLeft);
+   pGrid->addWidget(mpOrderLabel, 2, 0, 1, 2);
    pGrid->setRowStretch(3, 10);
-   pGrid->setColumnStretch(2, 10);
+   pGrid->setColumnStretch(1, 10);
 
-   // Initialization
-   vector<string>::const_iterator iter;
-   for (iter = gcpLists.begin(); iter != gcpLists.end(); ++iter)
+   // Connections
+   VERIFYNR(connect(mpGcpListCombo, SIGNAL(currentIndexChanged(const QString&)), this,
+      SLOT(setGcpList(const QString&))));
+   VERIFYNR(connect(mpOrderSpin, SIGNAL(valueChanged(int)), this, SLOT(setOrder(int))));
+
+   mpDescriptor.addSignal(SIGNAL_NAME(Subject, Modified), Slot(this, &GcpGui::georeferenceDescriptorModified));
+}
+
+GcpGui::~GcpGui()
+{}
+
+void GcpGui::setGeoreferenceData(GeoreferenceDescriptor* pDescriptor, const std::list<GcpPoint>& gcps)
+{
+   // Do not update the widget if the data has not changed.  If the same Georeference descriptor is passed
+   // in, update the widget if the GCP list combo is not visible, because it means that GcpList children
+   // of a raster element are currently being displayed instead of a specific list of GCPs.
+   if ((pDescriptor == mpDescriptor.get()) && (mpGcpListCombo->isVisibleTo(this) == false))
    {
-      string gcpList = *iter;
+      return;
+   }
+
+   mpDescriptor.reset(pDescriptor);
+   mGcps = gcps;
+   mpRasterElement = NULL;
+
+   mpGcpListLabel->hide();
+   mpGcpListCombo->clear();
+   mpGcpListCombo->hide();
+
+   // Update the widgets based on the georeference parameters
+   updateFromGeoreferenceDescriptor();
+}
+
+void GcpGui::setGeoreferenceData(GeoreferenceDescriptor* pDescriptor, const RasterElement* pRaster)
+{
+   // Do not update the widget if the data has not changed.  If the same Georeference descriptor is passed
+   // in, update the widget if the GCP list combo is visible, because it means that a specific list of
+   // GCPs is currently displayed instead of GcpList children of a raster element.
+   if ((pDescriptor == mpDescriptor.get()) && (mpGcpListCombo->isVisibleTo(this) == true))
+   {
+      return;
+   }
+
+   mpDescriptor.reset(pDescriptor);
+   mGcps.clear();
+   mpRasterElement = pRaster;
+
+   mpGcpListLabel->show();
+   mpGcpListCombo->show();
+   mpGcpListCombo->clear();
+   mpGcpListCombo->blockSignals(true);
+
+   std::vector<std::string> gcpLists = Service<ModelServices>()->getElementNames(mpRasterElement,
+      TypeConverter::toString<GcpList>());
+   for (std::vector<std::string>::const_iterator iter = gcpLists.begin(); iter != gcpLists.end(); ++iter)
+   {
+      std::string gcpList = *iter;
       if (gcpList.empty() == false)
       {
          mpGcpListCombo->addItem(QString::fromStdString(gcpList));
       }
    }
 
-   if (gcpLists.empty() == false)
-   {
-      setCurrentGcpList(gcpLists.front().c_str());
-   }
+   mpGcpListCombo->setCurrentIndex(-1);
+   mpGcpListCombo->blockSignals(false);
 
-   // Connections
-   connect(mpGcpListCombo, SIGNAL(activated(const QString&)), this, SLOT(setCurrentGcpList(const QString&)));
-   connect(mpOrderSpin, SIGNAL(valueChanged(int)), this, SLOT(validateOrder(int)));
+   // Update the widgets based on the georeference parameters
+   updateFromGeoreferenceDescriptor();
 }
 
-GcpGui::~GcpGui()
+GeoreferenceDescriptor* GcpGui::getGeoreferenceDescriptor()
 {
+   return mpDescriptor.get();
 }
 
-bool GcpGui::validateInput()
+const GeoreferenceDescriptor* GcpGui::getGeoreferenceDescriptor() const
 {
-   return validateGcpList(mpGcpListCombo->currentText());
+   return mpDescriptor.get();
 }
 
-bool GcpGui::validateGcpList(const QString& strGcpList)
+void GcpGui::georeferenceDescriptorModified(Subject& subject, const std::string& signal, const boost::any& value)
 {
-   bool bIsValid = false;
-   if (strGcpList.isEmpty() == true)
-   {
-      return bIsValid;
-   }
-
-   string gcpListName = strGcpList.toStdString();
-   GcpList* pGcpList = static_cast<GcpList*>(mpModel->getElement(gcpListName, "GcpList", mpRasterElement));
-
-   int iMaxOrder = 0;
-   if (pGcpList != NULL)
-   {
-      iMaxOrder = getMaxOrder(pGcpList->getSelectedPoints().size());
-   }
-
-   if (iMaxOrder <= 0)
-   {
-      bIsValid = false;
-   }
-   else
-   {
-      bIsValid = true;
-   }
-
-   bIsValid &= validateOrder(iMaxOrder);
-   return bIsValid;
+   updateFromGeoreferenceDescriptor();
 }
 
-bool GcpGui::setCurrentGcpList(const QString& strGcpList)
+void GcpGui::updateFromGeoreferenceDescriptor()
 {
-   bool bIsValid = false;
-   if (strGcpList.isEmpty() == true)
+   if (mpDescriptor.get() != NULL)
    {
-      return bIsValid;
-   }
+      // Need to block signals when updating the widgets because DynamicObject::setAttributeByPath() does
+      // not check if the attribute value is modified before setting the value and notifying the signal
 
-   string gcpListName = strGcpList.toStdString();
-   GcpList* pGcpList = static_cast<GcpList*>(mpModel->getElement(gcpListName, "GcpList", mpRasterElement));
-
-   int iMaxOrder = 0;
-   if (pGcpList != NULL)
-   {
-      iMaxOrder = getMaxOrder(pGcpList->getSelectedPoints().size());
-   }
-
-   if (iMaxOrder <= 0)
-   {
-      mpOrderSpin->setRange(0, 0);
-      mpOrderSpin->setEnabled(false);
-      mpOrderSpin->setValue(0);
-      bIsValid = false;
-   }
-   else
-   {
-      mpOrderSpin->setRange(1, iMaxOrder);
-      mpOrderSpin->setEnabled(true);
-      mpOrderSpin->setValue(iMaxOrder);
-      bIsValid = true;
-   }
-
-   bIsValid &= validateOrder(iMaxOrder);
-   return bIsValid;
-}
-
-bool GcpGui::validateOrder(int iOrder)
-{
-   bool bIsValid = false;
-   int iGcpsRequired = 3;
-   if (iOrder > 0)
-   {
-      iGcpsRequired = COEFFS_FOR_ORDER(iOrder);
-   }
-
-   QString strRequired;
-   QString strGcpList = mpGcpListCombo->currentText();
-
-   string gcpListName = strGcpList.toStdString();
-
-   GcpList* pGcpList = static_cast<GcpList*>(mpModel->getElement(gcpListName, "GcpList", mpRasterElement));
-   if (pGcpList == NULL)
-   {
-      strRequired.sprintf("%d GCPs required, invalid GCP List", iGcpsRequired);
-      bIsValid = false;
-   }
-   else
-   {
-      int iGcps = static_cast<int>(pGcpList->getSelectedPoints().size());
-      strRequired.sprintf("%d GCPs required, %d present", iGcpsRequired, iGcps);
-      if (iGcps < iGcpsRequired)
+      std::string gcpList = dv_cast<std::string>(mpDescriptor->getAttributeByPath("GCP Georeference/GcpListName"),
+         std::string());
+      if (gcpList.empty() == false)
       {
-         bIsValid = false;
+         int index = mpGcpListCombo->findText(QString::fromStdString(gcpList));
+         mpGcpListCombo->blockSignals(true);
+         mpGcpListCombo->setCurrentIndex(index);
+         mpGcpListCombo->blockSignals(false);
       }
-      else
+      else if (mpRasterElement != NULL)
       {
-         bIsValid = true;
+         // Select the first available GCP list, and do not block signals so that the GCP list name will be set
+         // in the georeference descriptor
+         mpGcpListCombo->setCurrentIndex(0);
       }
+
+      int order = dv_cast<int>(mpDescriptor->getAttributeByPath("GCP Georeference/PolynomialOrder"), 1);
+      mpOrderSpin->blockSignals(true);
+      mpOrderSpin->setValue(order);
+      mpOrderSpin->blockSignals(false);
    }
 
-   mpOrderLabel->setText(strRequired);
-   return bIsValid;
+   updateOrderRange();
 }
 
-unsigned short GcpGui::getOrder() const
+int GcpGui::getMaxOrder(int numGcps) const
 {
-   return mpOrderSpin->value();
-}
-
-string GcpGui::getGcpListName() const
-{
-   string listName = "";
-
-   QString strListName = mpGcpListCombo->currentText();
-   if (strListName.isEmpty() == false)
-   {
-      listName = strListName.toStdString();
-   }
-
-   return listName;
-}
-
-int GcpGui::getMaxOrder(int numGcps)
-{
-   // numBasisValues = (order+1)*(order+2)/2, solve for order
+   // numBasisValues = (order + 1) * (order + 2) / 2, solve for order
    // add fudge factor to prevent x.9999999 being truncated to x
    int maxOrder = static_cast<int>((-3.0 + sqrt(9.0 + 8.0 * (numGcps - 1))) / 2.0 + 0.00000001);
    if (maxOrder < 0)
@@ -216,4 +186,100 @@ int GcpGui::getMaxOrder(int numGcps)
    }
 
    return maxOrder;
+}
+
+void GcpGui::updateOrderRange()
+{
+   int maxOrder = 0;
+   if (mpGcpListCombo->isVisibleTo(this) == true)
+   {
+      QString gcpList = mpGcpListCombo->currentText();
+      if (gcpList.isEmpty() == false)
+      {
+         GcpList* pGcpList = dynamic_cast<GcpList*>(Service<ModelServices>()->getElement(gcpList.toStdString(),
+            TypeConverter::toString<GcpList>(), mpRasterElement));
+         if (pGcpList != NULL)
+         {
+            maxOrder = getMaxOrder(pGcpList->getSelectedPoints().size());
+         }
+      }
+   }
+   else if (mGcps.empty() == false)
+   {
+      maxOrder = getMaxOrder(static_cast<int>(mGcps.size()));
+   }
+
+   if (maxOrder <= 0)
+   {
+      mpOrderSpin->setRange(0, 0);
+      mpOrderSpin->setEnabled(false);
+      mpOrderSpin->setValue(0);
+   }
+   else
+   {
+      mpOrderSpin->setRange(1, maxOrder);
+      mpOrderSpin->setEnabled(true);
+      mpOrderSpin->setValue(maxOrder);
+   }
+
+   updateOrderLabel();
+}
+
+void GcpGui::updateOrderLabel()
+{
+   int gcpsRequired = 3;
+
+   int order = mpOrderSpin->value();
+   if (order > 0)
+   {
+      gcpsRequired = COEFFS_FOR_ORDER(order);
+   }
+
+   QString requiredText;
+   if (mpGcpListCombo->isVisibleTo(this) == true)
+   {
+      QString gcpList = mpGcpListCombo->currentText();
+      if (gcpList.isEmpty() == false)
+      {
+         GcpList* pGcpList = dynamic_cast<GcpList*>(Service<ModelServices>()->getElement(gcpList.toStdString(),
+            TypeConverter::toString<GcpList>(), mpRasterElement));
+         if (pGcpList != NULL)
+         {
+            int gcpsPresent = static_cast<int>(pGcpList->getSelectedPoints().size());
+            requiredText = QString("%1 GCPs required, %2 present").arg(gcpsRequired).arg(gcpsPresent);
+         }
+      }
+
+      if (requiredText.isEmpty() == true)
+      {
+         requiredText = QString("%1 GCPs required, invalid GCP List").arg(gcpsRequired);
+      }
+   }
+
+   if ((requiredText.isEmpty() == true) && (mGcps.empty() == false))
+   {
+      requiredText = QString("%1 GCPs required, %2 present").arg(gcpsRequired).arg(mGcps.size());
+   }
+
+   mpOrderLabel->setText(requiredText);
+}
+
+void GcpGui::setGcpList(const QString& gcpList)
+{
+   if (mpDescriptor.get() != NULL)
+   {
+      mpDescriptor->setAttributeByPath("GCP Georeference/GcpListName", gcpList.toStdString());
+   }
+
+   updateOrderRange();
+}
+
+void GcpGui::setOrder(int order)
+{
+   if (mpDescriptor.get() != NULL)
+   {
+      mpDescriptor->setAttributeByPath("GCP Georeference/PolynomialOrder", order);
+   }
+
+   updateOrderLabel();
 }

@@ -92,6 +92,11 @@ public:
     *  it can load this file.  The Importer should look at as little of the file
     *  as required as quickly as possible when determining the affinity.
     *
+    *  This functionality is similar to the functionality of
+    *  Georeference::getGeoreferenceAffinity() in that it provides information
+    *  about whether the plug-in supports importing the contents of a given
+    *  file.
+    *
     *  @param filename
     *         Full path and name of the file.
     *

@@ -624,7 +624,7 @@ public:
     * the application and is not intended to be passed to any
     * system api's or used to conditionally execute code, see
     * AppConfig.h for that.  This name is also not
-    * guaranteed to match any similiar operating system
+    * guaranteed to match any similar operating system
     * name returned by using system calls.
     *
     * @return The operating system name.
@@ -640,7 +640,7 @@ public:
     * the application and is not intended to be passed to any
     * system api's or used to conditionally execute code, see
     * AppConfig.h for that.  This name is also not
-    * guaranteed to match any similiar architecture 
+    * guaranteed to match any similar architecture 
     * name returned by using system calls.
     *
     * @return The architecture name.

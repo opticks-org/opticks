@@ -456,7 +456,9 @@ public:
     * @return  Returns \c true if the attribute was was successfully removed from the object,
     *          otherwise \c false.
     *
-    * @notify This method will notify Subject::signalModified.
+    * @notify  This method will notify signalAttributeRemoved() just before the
+    *          attribute is removed and Subject::signalModified() just after the
+    *          attribute is removed.
     *
     * @see     clear()
     */

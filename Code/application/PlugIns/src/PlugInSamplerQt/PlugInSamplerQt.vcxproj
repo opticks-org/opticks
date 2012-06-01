@@ -250,6 +250,7 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PixelAspectRatioGui.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PlotPropertiesDlg.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PlugInSelectorDlg.cpp" />
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_SampleGeorefGui.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="AddPlotDlg.h">
@@ -628,7 +629,20 @@
     <ClInclude Include="PlugInTester.h" />
     <ClInclude Include="RasterTimingTest.h" />
     <ClInclude Include="SampleGeoref.h" />
-    <ClInclude Include="SampleGeorefGui.h" />
+    <CustomBuild Include="SampleGeorefGui.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing %(Filename).h...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing %(Filename).h...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Filename).h...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Filename).h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+    </CustomBuild>
     <ClInclude Include="TiePointTester.h" />
     <ClInclude Include="TiePointTesterAlgorithm.h" />
     <ClInclude Include="TiePointTesterInputs.h" />

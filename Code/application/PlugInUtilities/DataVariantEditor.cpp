@@ -224,6 +224,9 @@ const vector<DataVariantEditorDelegate>& DataVariantEditor::getDelegates()
       DataVariantEditorDelegate temp = DataVariantEditorDelegate("DisplayMode", DataVariantEditorDelegate::ENUMERATION);
       temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<DisplayMode>());
       sDelegates.push_back(temp);
+      temp = DataVariantEditorDelegate("DmsFormatType", DataVariantEditorDelegate::ENUMERATION);
+      temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<DmsFormatType>());
+      sDelegates.push_back(temp);
       temp = DataVariantEditorDelegate("EncodingType", DataVariantEditorDelegate::ENUMERATION);
       temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<EncodingType>());
       sDelegates.push_back(temp);

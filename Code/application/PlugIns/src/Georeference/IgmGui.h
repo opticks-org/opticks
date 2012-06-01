@@ -10,16 +10,14 @@
 #ifndef IGMGUI_H
 #define IGMGUI_H
 
-#include "DesktopServices.h"
-#include "LabeledSectionGroup.h"
-#include "ModelServices.h"
+#include "AttachmentPtr.h"
+#include "GeoreferenceDescriptor.h"
+
+#include <QtGui/QWidget>
 
 #include <string>
-#include <vector>
 
 class FileBrowser;
-class Progress;
-class RasterElement;
 class QRadioButton;
 
 class IgmGui : public QWidget
@@ -27,21 +25,30 @@ class IgmGui : public QWidget
    Q_OBJECT
 
 public:
-   IgmGui(RasterElement* pRasterElement, QWidget* pParent = 0);
-   ~IgmGui();
-   bool validateInput();
-   bool useExisting() const;
-   void hasExisting(bool val);
-   QString getFilename() const;
+   IgmGui(QWidget* pParent = NULL);
+   virtual ~IgmGui();
+
+   void setGeoreferenceData(GeoreferenceDescriptor* pDescriptor, bool enableExistingElement, bool enableIgmFilename);
+   GeoreferenceDescriptor* getGeoreferenceDescriptor();
+   const GeoreferenceDescriptor* getGeoreferenceDescriptor() const;
 
 protected:
-   QRadioButton* mpUseExisting;
-   QRadioButton* mpLoad;
-   FileBrowser* mpFilename;
+   void georeferenceDescriptorModified(Subject& subject, const std::string& signal, const boost::any& value);
+   void updateFromGeoreferenceDescriptor();
+
+protected slots:
+   void setExistingElement(bool useExistingElement);
+   void setIgmFilename(const QString& filename);
 
 private:
    IgmGui(const IgmGui& rhs);
    IgmGui& operator=(const IgmGui& rhs);
+
+   AttachmentPtr<GeoreferenceDescriptor> mpDescriptor;
+
+   QRadioButton* mpUseExisting;
+   QRadioButton* mpLoad;
+   FileBrowser* mpFilename;
 };
 
-#endif // IGMGUI_H
+#endif

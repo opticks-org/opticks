@@ -69,14 +69,6 @@ namespace Nitf
       virtual SpatialDataView* createView() const;
 
       /**
-       * @copydoc RasterElementImporterShell::getGeoreferencePlugIn()
-       *
-       * @default The default implementation returns the RPC %Georeference
-       *          plug-in when available and GCP %Georeference otherwise.
-       */
-      virtual PlugIn* getGeoreferencePlugIn() const;
-
-      /**
        * @copydoc RasterElementImporterShell::createRasterPager()
        *
        * @default The default implementation creates an instance of the internal "NitfPager" plug-in.

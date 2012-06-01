@@ -193,9 +193,20 @@ protected:
                                                    \em NO_COLUMN_SUBSETS | \em NO_BAND_SUBSETS - Convenience value that
                                                    performs all \em NO_ROW_SUBSETS, \em NO_COLUMN_SUBSETS, and
                                                    \em NO_BAND_SUBSETS checks. */
-      AVAILABLE_MEMORY = 0x00800000           /**< 0x00800000 - Checks that the amount of required memory calculated
+      AVAILABLE_MEMORY = 0x00800000,          /**< 0x00800000 - Checks that the amount of required memory calculated
                                                    from the rows, columns, bands, and bytes per element set in the
                                                    raster data descriptor can be successfully allocated. */
+      VALID_GEOREFERENCE_PLUGIN = 0x01000000, /**< 0x01000000 - Checks that a valid Georeference plug-in name is set
+                                                   in the GeoreferenceDescriptor if the data will be georeferenced
+                                                   on import.\   No check is performed if
+                                                   GeoreferenceDescriptor::getGeoreferenceOnImport() returns
+                                                   \c false. */
+      VALID_GEOREFERENCE_PARAMETERS = 0x02000000 | VALID_GEOREFERENCE_PLUGIN /**< 0x02000000 |
+                                                   \em VALID_GEOREFERENCE_PLUGIN - Checks for valid georeference
+                                                   plug-in parameters by calling Georeference::validate() on the
+                                                   Georeference plug-in set in the GeoreferenceDescriptor.\   No check
+                                                   is performed if GeoreferenceDescriptor::getGeoreferenceOnImport()
+                                                   returns \c false. */
    };
 
    /**

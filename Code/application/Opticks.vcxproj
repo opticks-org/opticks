@@ -315,6 +315,7 @@
     <ClInclude Include="Interfaces\GcpLayer.h" />
     <ClInclude Include="Interfaces\GcpList.h" />
     <ClInclude Include="Interfaces\Georeference.h" />
+    <ClInclude Include="Interfaces\GeoreferenceDescriptor.h" />
     <ClInclude Include="Interfaces\GpuProgramDescriptor.h" />
     <ClInclude Include="Interfaces\GraphicElement.h" />
     <ClInclude Include="Interfaces\GraphicGroup.h" />

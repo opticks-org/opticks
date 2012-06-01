@@ -20,6 +20,8 @@ class DmsFormatTypeComboBox : public QComboBox
 
 public:
    DmsFormatTypeComboBox(QWidget* pParent);
+   virtual~DmsFormatTypeComboBox();
+
    void setCurrentValue(DmsFormatType value);
    DmsFormatType getCurrentValue() const;
 
@@ -31,7 +33,7 @@ private:
    DmsFormatTypeComboBox& operator=(const DmsFormatTypeComboBox& rhs);
 
 private slots:
-   void translateActivated(int newIndex);
+   void translateIndexChanged(const QString& text);
 };
 
 #endif

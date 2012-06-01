@@ -7,32 +7,30 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <vector>
-#include <string>
-#include <sstream>
-
 #include "AppVerify.h"
 #include "AppVersion.h"
-#include "RasterElement.h"
 #include "DataVariant.h"
 #include "DynamicObject.h"
+#include "GeoreferenceDescriptor.h"
 #include "MessageLogResource.h"
 #include "NitfConstants.h"
-#include "NitfUtilities.h"
 #include "NitfResource.h"
+#include "NitfUtilities.h"
 #include "PlugInArgList.h"
-#include "PlugInManagerServices.h"
 #include "PlugInRegistration.h"
+#include "Progress.h"
 #include "RasterDataDescriptor.h"
-#include "RasterFileDescriptor.h"
+#include "RasterElement.h"
 #include "RpcGeoreference.h"
 #include "RpcGui.h"
 #include "SessionItemDeserializer.h"
 #include "SessionItemSerializer.h"
-#include "TypeConverter.h"
-#include "UtilityServices.h"
 
 #include <ossim/base/ossimKeywordlist.h>
+
+#include <sstream>
+#include <string>
+#include <vector>
 
 using namespace Nitf;
 using namespace Nitf::TRE;
@@ -61,6 +59,7 @@ Nitf::RpcGeoreference::RpcGeoreference() :
 
 Nitf::RpcGeoreference::~RpcGeoreference()
 {
+   delete mpGui;
 }
 
 namespace
@@ -91,13 +90,11 @@ bool Nitf::RpcGeoreference::execute(PlugInArgList* pInParam, PlugInArgList* pOut
       return false;
    }
 
+   // Get the values from the input arg list
    mpRaster = pInParam->getPlugInArgValue<RasterElement>(Executable::DataElementArg());
    Progress* pProgress = pInParam->getPlugInArgValue<Progress>(Executable::ProgressArg());
+
    string messageText;
-   if (mpGui != NULL)
-   {
-      mHeight = mpGui->getHeightSize();
-   }
    if (mpRaster == NULL)
    {
       messageText = "No data cube passed to the plug-in.";
@@ -109,11 +106,34 @@ bool Nitf::RpcGeoreference::execute(PlugInArgList* pInParam, PlugInArgList* pOut
       return false;
    }
 
+   bool heightArgSet = pInParam->getPlugInArgValue<double>("Height", mHeight);
+
+   // If the height value was not contained in the arg list, get the value from the georeference descriptor
+   RasterDataDescriptor* pDescriptor = dynamic_cast<RasterDataDescriptor*>(mpRaster->getDataDescriptor());
+   if (pDescriptor == NULL)
+   {
+      messageText = "Could not find the raster data descriptor.";
+      if (pProgress)
+      {
+         pProgress->updateProgress(messageText, 0, ERRORS);
+      }
+      pStep->finalize(Message::Failure, messageText);
+      return false;
+   }
+
+   GeoreferenceDescriptor* pGeorefDescriptor = pDescriptor->getGeoreferenceDescriptor();
+   if (pGeorefDescriptor != NULL)
+   {
+      if (heightArgSet == false)
+      {
+         mHeight = dv_cast<double>(pGeorefDescriptor->getAttributeByPath("RPC Georeference/Height"), mHeight);
+      }
+   }
+
    if (pProgress)
    {
       pProgress->updateProgress(messageText, 100, NORMAL);
    }
-
 
    /********************************************************************************
    this is the RPC section of the Geocode referencing.  It will try to load the RPC parameters
@@ -122,7 +142,6 @@ bool Nitf::RpcGeoreference::execute(PlugInArgList* pInParam, PlugInArgList* pOut
    bool bInit = false;
 
    const DynamicObject* pMetadata = mpRaster->getMetadata();
-
    if (pMetadata == NULL)
    {
       messageText = "Invalid metadata in Raster Element!";
@@ -148,13 +167,13 @@ bool Nitf::RpcGeoreference::execute(PlugInArgList* pInParam, PlugInArgList* pOut
 
    //now we look up all of the parameters we need and put them in the 
    // geocoord matrix.
-   double lineRPCnumCoefficients[NUM_RPC_COEFFICIENTS]; 
-   double lineRPCdenCoefficients[NUM_RPC_COEFFICIENTS]; 
-   double sampRPCnumCoefficients[NUM_RPC_COEFFICIENTS]; 
-   double sampRPCdenCoefficients[NUM_RPC_COEFFICIENTS]; 
+   double lineRPCnumCoefficients[NUM_RPC_COEFFICIENTS];
+   double lineRPCdenCoefficients[NUM_RPC_COEFFICIENTS];
+   double sampRPCnumCoefficients[NUM_RPC_COEFFICIENTS];
+   double sampRPCdenCoefficients[NUM_RPC_COEFFICIENTS];
 
-   const DynamicObject* pRpc = getRpcInstance(mpRaster);
-   if (canHandleRasterElement(mpRaster) && pRpc != NULL)
+   const DynamicObject* pRpc = getRpcInstance(pDescriptor);
+   if (pRpc != NULL)
    {
       for (int i = 0; i < NUM_RPC_COEFFICIENTS; i++)
       {
@@ -203,18 +222,6 @@ bool Nitf::RpcGeoreference::execute(PlugInArgList* pInParam, PlugInArgList* pOut
       catch (const bad_cast&)
       {
          messageText = "RPC Georeference failed to extract all RPC fields from the RPC DynamicObject.";
-         if (pProgress)
-         {
-            pProgress->updateProgress(messageText, 0, ERRORS);
-         }
-         pStep->finalize(Message::Failure, messageText);
-         return false;
-      }
-
-      RasterDataDescriptor* pDescriptor = dynamic_cast<RasterDataDescriptor*>(mpRaster->getDataDescriptor());
-      if (pDescriptor == NULL)
-      {
-         messageText = "Could not find Raster Data Descriptor";
          if (pProgress)
          {
             pProgress->updateProgress(messageText, 0, ERRORS);
@@ -279,9 +286,20 @@ bool Nitf::RpcGeoreference::execute(PlugInArgList* pInParam, PlugInArgList* pOut
       return false;
    }
 
-   if (mpRaster != NULL)
+   mpRaster->setGeoreferencePlugin(this);
+
+   // Update the georeference descriptor with the current georeference parameters if necessary
+   if (pGeorefDescriptor != NULL)
    {
-      mpRaster->setGeoreferencePlugin(this);
+      // Georeference plug-in
+      const string& plugInName = getName();
+      pGeorefDescriptor->setGeoreferencePlugInName(plugInName);
+
+      // Height
+      if (heightArgSet == true)
+      {
+         pGeorefDescriptor->setAttributeByPath("RPC Georeference/Height", mHeight);
+      }
    }
 
    messageText = "RpcGeoreference execute completed.";
@@ -296,25 +314,17 @@ bool Nitf::RpcGeoreference::execute(PlugInArgList* pInParam, PlugInArgList* pOut
 
 bool Nitf::RpcGeoreference::getInputSpecification(PlugInArgList*& pArgList)
 {
-   pArgList = NULL;
-
-   if (!isBatch())
+   if (GeoreferenceShell::getInputSpecification(pArgList) == false)
    {
-      // do not support interactive
-      return true;
+      return false;
    }
 
-   // Set up list
-   VERIFY((pArgList = Service<PlugInManagerServices>()->getPlugInArgList()) != NULL);
-   VERIFY(pArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription()));
-   VERIFY(pArgList->addArg<RasterElement>(Executable::DataElementArg(), NULL, "Raster element on which georeferencing will be performed."));
+   // Do not set a default value in the input args so that the georeference
+   // descriptor values will be used if the arg value is not set
+   VERIFY(pArgList != NULL);
+   VERIFY(pArgList->addArg<double>("Height", "Height value for the georeferencing calculations in meters.  If not "
+      "specified, the height value contained in the " + Executable::DataElementArg() + " input will be used.") == true);
 
-   return true;
-}
-
-bool Nitf::RpcGeoreference::getOutputSpecification(PlugInArgList*& pArgList)
-{
-   pArgList = NULL;
    return true;
 }
 
@@ -364,80 +374,117 @@ LocationType Nitf::RpcGeoreference::geoToPixel(LocationType geo, bool* pAccurate
    return mpChipConverter->originalToActive(LocationType(imagePoint.x, imagePoint.y));
 }
 
-const DynamicObject* Nitf::RpcGeoreference::getRpcInstance(RasterElement *pRaster) const
+const DynamicObject* Nitf::RpcGeoreference::getRpcInstance(const RasterDataDescriptor* pDescriptor) const
 {
-   if (pRaster != NULL)
+   if (pDescriptor == NULL)
    {
-      DataDescriptor* pDd = pRaster->getDataDescriptor();
-      if (pDd != NULL)
+      return NULL;
+   }
+
+   const DynamicObject* pMetadata = pDescriptor->getMetadata();
+   if (pMetadata != NULL)
+   {
+      const DynamicObject* pNitfMetadata = pMetadata->getAttribute("NITF").getPointerToValue<DynamicObject>();
+      if (pNitfMetadata != NULL)
       {
-         DynamicObject* pMetadata = pDd->getMetadata();
-
-         if (pMetadata != NULL)
+         const DynamicObject* pTreData = pNitfMetadata->getAttribute("TRE").getPointerToValue<DynamicObject>();
+         if (pTreData != NULL)
          {
-            const DynamicObject* pNitfMetadata = pMetadata->getAttribute("NITF").getPointerToValue<DynamicObject>();
-            if (pNitfMetadata != NULL)
-            {
-               const DynamicObject* pTreData = pNitfMetadata->getAttribute("TRE").getPointerToValue<DynamicObject>();
-               if (pTreData != NULL)
-               {
-                  vector<string> keys;
-                  pTreData->getAttributeNames(keys);
+            vector<string> keys;
+            pTreData->getAttributeNames(keys);
 
-                  // look for something that matches RPC00?
-                  for (vector<string>::iterator it = keys.begin(); it != keys.end(); ++it)
+            // look for something that matches RPC00?
+            for (vector<string>::iterator it = keys.begin(); it != keys.end(); ++it)
+            {
+               if (it->substr(0, 5) == "RPC00")
+               {
+                  const DynamicObject* pRpc = getTagHandle<FindFirstValidRpc>(*pNitfMetadata, *it);
+                  if (pRpc != NULL)
                   {
-                     if (it->substr(0, 5) == "RPC00")
-                     {
-                        const DynamicObject* pRpc = getTagHandle<FindFirstValidRpc>(*pNitfMetadata, *it);
-                        if (pRpc != NULL)
-                        {
-                           mRpcVersion = *it;
-                           return pRpc;
-                        }
-                     }
+                     mRpcVersion = *it;
+                     return pRpc;
                   }
                }
             }
          }
       }
    }
+
    return NULL;
 }
 
-bool Nitf::RpcGeoreference::canHandleRasterElement(RasterElement* pRaster) const
+unsigned char Nitf::RpcGeoreference::getGeoreferenceAffinity(const RasterDataDescriptor* pDescriptor) const
 {
-   bool ret_val = false;
-   if (pRaster != NULL)
+   const DynamicObject* pRpc = getRpcInstance(pDescriptor);
+   if (pRpc != NULL)
    {
-      const DynamicObject* pRpc = getRpcInstance(pRaster);
-      if (pRpc != NULL)
+      if (dv_cast<bool>(pRpc->getAttribute("SUCCESS"), false) == true)
       {
-         try
-         {
-            ret_val = dv_cast<bool>(pRpc->getAttribute("SUCCESS"));
-         }
-         catch (bad_cast e)
-         {
-            // do nothing special
-         }
+         return Georeference::CAN_GEOREFERENCE + 10;   // Add additional value to favor RPC Georeference
+                                                       // over GCP Georeference
       }
    }
-   return ret_val;
+
+   return Georeference::CAN_NOT_GEOREFERENCE;
 }
 
-bool Nitf::RpcGeoreference::hasAbort()
+QWidget* Nitf::RpcGeoreference::getWidget(RasterDataDescriptor* pDescriptor)
 {
-   return false;
+   if (pDescriptor == NULL)
+   {
+      return NULL;
+   }
+
+   // Create the widget
+   if (mpGui == NULL)
+   {
+      mpGui = new RpcGui();
+   }
+
+   // Set the georeference data into the widget for the given raster data
+   GeoreferenceDescriptor* pGeorefDescriptor = pDescriptor->getGeoreferenceDescriptor();
+   if (pGeorefDescriptor != NULL)
+   {
+      mpGui->setGeoreferenceDescriptor(pGeorefDescriptor);
+   }
+
+   return mpGui;
 }
 
-
-bool Nitf::RpcGeoreference::serialize(SessionItemSerializer &serializer) const
+bool Nitf::RpcGeoreference::validate(const RasterDataDescriptor* pDescriptor, std::string& errorMessage) const
 {
-   if (mpRaster == NULL)
+   if (GeoreferenceShell::validate(pDescriptor, errorMessage) == false)
    {
       return false;
    }
+
+   VERIFY(pDescriptor != NULL);
+
+   // Check for valid RPC data
+   const DynamicObject* pRpc = getRpcInstance(pDescriptor);
+   if (pRpc == NULL)
+   {
+      errorMessage = "The raster data set does not contain RPC data.";
+      return false;
+   }
+
+   if (dv_cast<bool>(pRpc->getAttribute("SUCCESS"), false) == false)
+   {
+      errorMessage = "The RPC data contained in the raster data set is invalid.";
+      return false;
+   }
+
+   return true;
+}
+
+bool Nitf::RpcGeoreference::serialize(SessionItemSerializer& serializer) const
+{
+   if (mpRaster == NULL)
+   {
+      // execute() has not yet been called so there is no need to serialize any parameters
+      return true;
+   }
+
    string id = mpRaster->getId();
    serializer.serialize(id.c_str(), id.size());
    serializer.endBlock();
@@ -451,9 +498,15 @@ bool Nitf::RpcGeoreference::serialize(SessionItemSerializer &serializer) const
    return serializer.serialize(str.chars(), str.size());
 }
 
-bool Nitf::RpcGeoreference::deserialize(SessionItemDeserializer &deserializer)
+bool Nitf::RpcGeoreference::deserialize(SessionItemDeserializer& deserializer)
 {
    vector<int64_t> sizes = deserializer.getBlockSizes();
+   if (sizes.empty() == true)
+   {
+      // The plug-in was serialized before execute() was called
+      return true;
+   }
+
    if (sizes.size() != 2)
    {
       return false;
@@ -496,16 +549,4 @@ bool Nitf::RpcGeoreference::deserialize(SessionItemDeserializer &deserializer)
       return false;
    }
    return mModel.loadState(kwl);
-}
-
-QWidget* Nitf::RpcGeoreference::getGui(RasterElement* pRaster)
-{
-   if (pRaster == NULL)
-   {
-      return NULL;
-   }
-
-   delete mpGui;
-   mpGui = new RpcGui(pRaster);
-   return mpGui;
 }
