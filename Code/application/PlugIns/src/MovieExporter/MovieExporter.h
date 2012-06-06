@@ -148,7 +148,9 @@ public:
 
    void releaseResource(const Args& args, AVStream* pStream) const
    {
-      if (pStream != NULL && pStream->codec != NULL)
+      // need to check codec and codec->codec in case there is a partial initialization
+      // if we don't avcodec_close will crash
+      if (pStream != NULL && pStream->codec != NULL && pStream->codec->codec != NULL)
       {
          avcodec_close(pStream->codec);
       }
@@ -187,15 +189,16 @@ public:
    QWidget* getExportOptionsWidget(const PlugInArgList* pInArgList);
 
 protected:
-   bool setAvCodecOptions(AVCodecContext* pContext);
-   bool open_video(AVFormatContext* pFormat, AVStream* pVideoStream);
-   AVFrame* alloc_picture(int pixFmt, int width, int height);
-   bool write_video_frame(AVFormatContext* pFormat, AVStream* pVideoStream);
+   virtual bool setAvCodecOptions(AVCodecContext* pContext);
+   virtual bool open_video(AVFormatContext* pFormat, AVStream* pVideoStream);
+   virtual AVFrame* alloc_picture(int pixFmt, int width, int height);
+   virtual bool write_video_frame(AVFormatContext* pFormat, AVStream* pVideoStream);
 
    virtual AVOutputFormat* getOutputFormat() const = 0;
 
-   boost::rational<int> getFrameRate(const AnimationController* pController) const;
+   virtual boost::rational<int> getFrameRate(const AnimationController* pController) const;
    virtual boost::rational<int> convertToValidFrameRate(const boost::rational<int>& frameRate) const;
+   virtual bool convertToValidResolution(int& resolutionX, int& resolutionY) const;
 
 private:
    void log_error(const std::string& msg);

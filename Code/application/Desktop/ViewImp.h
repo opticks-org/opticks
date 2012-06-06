@@ -374,6 +374,8 @@ protected:
    QPoint mMouseCurrent;
    QPoint mMouseEnd;
 
+   View::SubImageIterator* mpSubImageIterator;
+
 private:
    ViewImp(const ViewImp& rhs);
 
@@ -413,8 +415,6 @@ private:
    bool mUndoBlocked;
    std::vector<UndoAction*>* mpUndoGroup;
    QString mUndoGroupText;
-
-   View::SubImageIterator* mpSubImageIterator;
 
    class ViewContext : public QGLContext
    {

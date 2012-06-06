@@ -52,9 +52,9 @@
     <Import Project="..\..\..\CompileSettings\AllCommonSettings-Release-32bit.props" />
     <Import Project="..\..\..\CompileSettings\Xerces-Release.props" />
     <Import Project="..\..\..\CompileSettings\Qt-Release.props" />
-    <Import Project="..\..\..\CompileSettings\ffmpeg.props" />
     <Import Project="..\..\..\CompileSettings\PlugInCommonSettings.props" />
     <Import Project="..\..\..\CompileSettings\EnableWarnings.props" />
+    <Import Project="..\..\..\CompileSettings\ffmpeg-release.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -63,9 +63,9 @@
     <Import Project="..\..\..\CompileSettings\AllCommonSettings-Debug-32bit.props" />
     <Import Project="..\..\..\CompileSettings\Xerces-Debug.props" />
     <Import Project="..\..\..\CompileSettings\Qt-Debug.props" />
-    <Import Project="..\..\..\CompileSettings\ffmpeg.props" />
     <Import Project="..\..\..\CompileSettings\PlugInCommonSettings.props" />
     <Import Project="..\..\..\CompileSettings\EnableWarnings.props" />
+    <Import Project="..\..\..\CompileSettings\ffmpeg-debug.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -74,9 +74,9 @@
     <Import Project="..\..\..\CompileSettings\AllCommonSettings-Release-64bit.props" />
     <Import Project="..\..\..\CompileSettings\Xerces-Release.props" />
     <Import Project="..\..\..\CompileSettings\Qt-Release.props" />
-    <Import Project="..\..\..\CompileSettings\ffmpeg.props" />
     <Import Project="..\..\..\CompileSettings\PlugInCommonSettings.props" />
     <Import Project="..\..\..\CompileSettings\EnableWarnings.props" />
+    <Import Project="..\..\..\CompileSettings\ffmpeg-release.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -85,9 +85,9 @@
     <Import Project="..\..\..\CompileSettings\AllCommonSettings-Debug-64bit.props" />
     <Import Project="..\..\..\CompileSettings\Xerces-Debug.props" />
     <Import Project="..\..\..\CompileSettings\Qt-Debug.props" />
-    <Import Project="..\..\..\CompileSettings\ffmpeg.props" />
     <Import Project="..\..\..\CompileSettings\PlugInCommonSettings.props" />
     <Import Project="..\..\..\CompileSettings\EnableWarnings.props" />
+    <Import Project="..\..\..\CompileSettings\ffmpeg-debug.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
@@ -153,6 +153,7 @@
     <ClCompile Include="AviExporter.cpp" />
     <ClCompile Include="BitrateWidget.cpp" />
     <ClCompile Include="FramerateWidget.cpp" />
+    <ClCompile Include="MjpegExporter.cpp" />
     <ClCompile Include="ModuleManager.cpp" />
     <ClCompile Include="MovieExporter.cpp" />
     <ClCompile Include="MovieExportOptionsWidget.cpp" />
@@ -202,6 +203,7 @@
 </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
     </CustomBuild>
+    <ClInclude Include="MjpegExporter.h" />
     <ClInclude Include="MovieExporter.h" />
     <ClInclude Include="MovieExportOptionsWidget.h" />
     <ClInclude Include="Mpeg1Exporter.h" />
