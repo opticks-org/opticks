@@ -17,6 +17,7 @@
 #include "Filename.h"
 #include "Jpeg2000Pager.h"
 #include "Jpeg2000Page.h"
+#include "Jpeg2000Utilities.h"
 #include "MessageLogResource.h"
 #include "ModelServices.h"
 #include "PlugInArg.h"
@@ -39,44 +40,6 @@
 #include <jp2.h>
 
 using namespace std;
-
-enum Jpeg2000FileTypeEnum {J2K_CFMT, JP2_CFMT};
-typedef EnumWrapper<Jpeg2000FileTypeEnum> Jpeg2000FileType;
-
-int getCodec(const char* pFilename)
-{
-   QFileInfo info(pFilename);
-   if (info.suffix() == "jp2")
-   {
-      return JP2_CFMT;
-   }
-   else if (info.suffix() == "j2k")
-   {
-      return J2K_CFMT;
-   }
-   return -1;
-}
-
-void error_callback(const char* msg, void *client_data) {
-#ifdef DEBUG
-   FILE* stream = (FILE*)client_data;
-   fprintf(stream, "[ERROR] %s", msg);
-#endif
-}
-
-void warning_callback(const char* msg, void* client_data) {
-#ifdef DEBUG
-   FILE* stream = (FILE*)client_data;
-   fprintf(stream, "[WARNING] %s", msg);
-#endif
-}
-
-void info_callback(const char* msg, void* client_data) {
-#ifdef DEBUG
-   (void)client_data;
-   fprintf(stdout, "[INFO] %s", msg);
-#endif
-}
 
 namespace Jpeg2000Cache
 {
@@ -311,7 +274,11 @@ bool Jpeg2000Pager::execute(PlugInArgList* pInputArgList, PlugInArgList *)
    //Done getting PlugIn Arguments
    
    mpRaster = pRaster;
-   mDecoderType = getCodec(pFilename->getFileName().c_str());
+   mDecoderType = Jpeg2000Utilities::get_file_format(pFilename->getFileName().c_str());
+   if (mDecoderType == -1)
+   {
+      return false;
+   }
 
    // open the JPEG2000
    mpJpeg2000 = fopen((pFilename->getFullPathAndName()).c_str(), "rb");
@@ -383,7 +350,7 @@ RasterPage* Jpeg2000Pager::getPage(DataRequest* pOriginalRequest,
       }
 
       Jpeg2000Cache::CacheUnit* pCacheUnit(mBlockCache.getCacheUnit(0, numBands - 1,
-                                             numRows * numColumns * 4 * numBands));
+         numRows * numColumns * bytesPerElement * numBands));
 
       // if this data block is already in the cache, retrieve it...otherwise create a new block
       if (pCacheUnit == NULL)
@@ -413,9 +380,9 @@ RasterPage* Jpeg2000Pager::getPage(DataRequest* pOriginalRequest,
 
          // configure the event callbacks
          memset(&eventMgr, 0, sizeof(opj_event_mgr_t));
-         eventMgr.error_handler = error_callback;
-         eventMgr.warning_handler = warning_callback;
-         eventMgr.info_handler = info_callback;
+         eventMgr.error_handler = Jpeg2000Utilities::error_callback;
+         eventMgr.warning_handler = Jpeg2000Utilities::warning_callback;
+         eventMgr.info_handler = Jpeg2000Utilities::info_callback;
 
          // set decoding parameters to default values
          opj_set_default_decoder_parameters(&parameters);
@@ -429,15 +396,15 @@ RasterPage* Jpeg2000Pager::getPage(DataRequest* pOriginalRequest,
          // decode the code-stream 
          switch(mDecoderType) 
          {
-            case J2K_CFMT: 
+            case Jpeg2000Utilities::J2K_CFMT:
                pDinfo = opj_create_decompress(CODEC_J2K);
                break;
-            case JP2_CFMT: 
+            case Jpeg2000Utilities::JP2_CFMT:
                pDinfo = opj_create_decompress(CODEC_JP2);
                break;
             default:
+               throw string("Unrecognized decoder type");
                break;
-
          }
 
          // catch events using our callbacks
@@ -460,14 +427,21 @@ RasterPage* Jpeg2000Pager::getPage(DataRequest* pOriginalRequest,
          opj_cio_close(pCio);
 
          // populate pData
+         int bandFactor = Jpeg2000Utilities::get_num_bands(pDescriptor->getDataType());
+         if (bandFactor == 0)
+         {
+            throw string("Unsupported data type.");
+         }
+         const size_t copySize = pDescriptor->getBytesPerElement() / bandFactor;
          for (unsigned int i = 0; i < numRows * numColumns; i++)
          {
             for(unsigned int j = 0; j < numBands; ++j)
             {
-//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This code will need to changed if Openjpeg is upgraded (mconsidi)")
-
-               // This allows for proper operation when the library puts one-byte data into an unsigned int
-               pData[(i * numBands + j)*4] = 0xFF & pImage->comps[j].data[i];
+               for (int k = 0; k < bandFactor; ++k)
+               {
+                  memcpy(pData, &pImage->comps[j * bandFactor + k].data[i], copySize);
+                  pData += copySize; // Increment by up to 16 bits (2 bytes).
+               }
             }
          }
          pCacheUnit->setIsEmpty(false);

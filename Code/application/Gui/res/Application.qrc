@@ -277,6 +277,7 @@
    <file alias="opencollada">OpenColladaLicense.txt</file>
    <file alias="opencv">OpenCvLicense.txt</file>
    <file alias="openjpeg">OpenJpegLicense.txt</file>
+   <file alias="openjpeg15">OpenJpeg15License.txt</file>
    <file alias="opticks">OpticksLicense.txt</file>
    <file alias="ossim">OssimLicense.txt</file>
    <file alias="pcre">PcreLicense.txt</file>

@@ -29,6 +29,9 @@
     <ClCompile Include="GeoTiffPager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Jpeg2000Exporter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="Jpeg2000Importer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -101,6 +104,9 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_OptionsTiffImporter.cpp">
       <Filter>moc</Filter>
     </ClCompile>
+    <ClCompile Include="Jpeg2000Utilities.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BmpDetails.h">
@@ -116,6 +122,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GeoTiffPager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Jpeg2000Exporter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Jpeg2000Importer.h">
@@ -155,6 +164,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TiffExportOptionsWidget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Jpeg2000Utilities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
