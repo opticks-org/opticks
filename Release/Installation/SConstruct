@@ -133,14 +133,12 @@ if OPTICKS_PLATFORM == "linux-x86_64":
                         PACKAGETYPE=deb,
                         X_DPKG_PRIORITY='extra',
                         X_DPKG_SECTION='science',
-                        X_DPKG_MAINTAINER='Kip Streithorst <kstreith@ball.com>',
+                        X_DPKG_MAINTAINER='Dustan Adkins <dadkins@ball.com>',
                         X_DPKG_DEPENDS='libtbb2 (>= 2.2+r009-1), libpq5 (>= 8.4.3)',
                         ARCHITECTURE='amd64',
                         SUMMARY='Opticks is a remote sensing P&E workbench.',
                         DESCRIPTION='''
- Opticks is an expandable remote sensing and imagery analysis software platform that is free and open source.
- 
- If you've used other commercial tools like: ERDAS IMAGINE, RemoteView, ENVI, or SOCET GXP, then you need to give Opticks a try. Unlike other competing tools, you can add capability to Opticks by creating an extension. Opticks provides the most advanced extension capability of any other remote sensing tool on the market.
+ Opticks is an expandable remote sensing and imagery analysis software platform that is free and open source. If you've used other commercial tools like: ERDAS IMAGINE, RemoteView, ENVI, or SOCET GXP, then you need to give Opticks a try. Unlike other competing tools, you can add capability to Opticks by creating an extension. Opticks provides the most advanced extension capability of any other remote sensing tool on the market.
 ''',
                         SOURCE_URL='http://opticks.org',
                         X_DPKG_HOMEPAGE='http://opticks.org'
