@@ -47,7 +47,7 @@ Jpeg2000Exporter::Jpeg2000Exporter()
    setCreator("Ball Aerospace & Technologies Corp.");
    setCopyright(APP_COPYRIGHT);
    setVersion(APP_VERSION_NUMBER);
-   setExtensions("Jpeg2000 files (*.jp2 *.j2k *.jp2f *.j2kf)");
+   setExtensions("Jpeg2000 files (*.jp2 *.j2k)");
    setShortDescription("Jpeg2000");
    setSubtype(TypeConverter::toString<RasterElement>());
    setDescriptorId("{9DE18FE8-DC11-4BDC-8211-18F70696B01F}");

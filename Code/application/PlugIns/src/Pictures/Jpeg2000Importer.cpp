@@ -61,7 +61,7 @@ Jpeg2000Importer::Jpeg2000Importer()
    setCreator("Ball Aerospace & Technologies Corp.");
    setCopyright(APP_COPYRIGHT);
    setVersion(APP_VERSION_NUMBER);
-   setExtensions("Jpeg2000 files (*.jp2 *.j2k *.jp2f *.j2kf)");
+   setExtensions("Jpeg2000 files (*.jp2 *.j2k)");
    setShortDescription("Jpeg2000");
    setDescriptorId("{ECC55485-16FC-4154-B31B-E78EA3669B8E}");
    allowMultipleInstances(true);
