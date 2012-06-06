@@ -10,11 +10,12 @@
 #ifndef VIEWRESOLUTIONWIDGET_H
 #define VIEWRESOLUTIONWIDGET_H
 
+#include "OptionsMovieExporter.h"
 #include <QtGui/QWidget>
 
-class QCheckBox;
 class QLineEdit;
 class QPushButton;
+class QRadioButton;
 
 class ViewResolutionWidget : public QWidget
 {
@@ -22,23 +23,26 @@ class ViewResolutionWidget : public QWidget
 
 public:
    ViewResolutionWidget(QWidget* pParent = NULL);
-   ~ViewResolutionWidget();
+   virtual ~ViewResolutionWidget();
 
-   void setResolution(const QSize& size);
+   void setResolution(const QSize& size, OptionsMovieExporter::ResolutionType resType);
    QSize getResolution() const;
+   OptionsMovieExporter::ResolutionType getResolutionType() const;
 
 protected:
    void updateResolution();
 
 protected slots:
-   void viewResolutionToggled(bool useViewResolution);
+   void resolutionChanged();
    void widthEdited();
    void heightEdited();
 
 private:
    ViewResolutionWidget(const ViewResolutionWidget& rhs);
    ViewResolutionWidget& operator=(const ViewResolutionWidget& rhs);
-   QCheckBox* mpViewResolutionCheck;
+   QRadioButton* mpViewResolution;
+   QRadioButton* mpFullResolution;
+   QRadioButton* mpFixedResolution;
    QLineEdit* mpWidthEdit;
    QLineEdit* mpHeightEdit;
    QPushButton* mpAspectLockButton;

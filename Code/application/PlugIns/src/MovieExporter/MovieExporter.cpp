@@ -14,20 +14,24 @@
 #include "AppVerify.h"
 #include "AppVersion.h"
 #include "BitrateWidget.h"
+#include "ColorType.h"
 #include "FileDescriptor.h"
 #include "FramerateWidget.h"
 #include "MovieExporter.h"
 #include "MovieExportOptionsWidget.h"
 #include "OptionsMovieExporter.h"
+#include "PerspectiveView.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
 #include "Progress.h"
+#include "SpatialDataView.h"
 #include "StringUtilities.h"
 #include "View.h"
 #include "ViewResolutionWidget.h"
 
 #include <QtCore/QString>
 #include <QtGui/QImage>
+#include <QtGui/QPainter>
 
 #include <sstream>
 #include <string>
@@ -180,6 +184,7 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
    string filename;
    View* pView(NULL);
    AnimationController* pController(NULL);
+   FrameType eType;
    AVOutputFormat* pOutFormat(NULL);
    int resolutionX(-1);
    int resolutionY(-1);
@@ -187,6 +192,7 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
    unsigned int bitrate(0);
    double startExport(0.0);
    double stopExport(0.0);
+   bool fullResolution(false);
 
    mpProgress = NULL;
    mpStep = StepResource("Export movie", "app", "2233BFC9-9C51-4e31-A8C5-2512925CBE6D");
@@ -239,14 +245,53 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
             ViewResolutionWidget* pResolutionWidget = mpOptionWidget->getResolutionWidget();
             VERIFY(pResolutionWidget != NULL);
 
-            QSize resolution = pResolutionWidget->getResolution();
-            resolutionX = resolution.width();
-            resolutionY = resolution.height();
+            switch(pResolutionWidget->getResolutionType())
+            {
+            case OptionsMovieExporter::VIEW_RESOLUTION:
+               resolutionX = -1;
+               resolutionY = -1;
+               fullResolution = false;
+               break;
+            case OptionsMovieExporter::FULL_RESOLUTION:
+               resolutionX = -1;
+               resolutionY = -1;
+               fullResolution = true;
+               break;
+            case OptionsMovieExporter::FIXED_RESOLUTION:
+            {
+               QSize resolution = pResolutionWidget->getResolution();
+               resolutionX = resolution.width();
+               resolutionY = resolution.height();
+               fullResolution = false;
+               break;
+            }
+            default:
+               break; // nothing
+            }
          }
          else
          {
-            resolutionX = OptionsMovieExporter::getSettingWidth();
-            resolutionY = OptionsMovieExporter::getSettingHeight();
+            switch(StringUtilities::fromXmlString<OptionsMovieExporter::ResolutionType>(
+               OptionsMovieExporter::getSettingResolutionType()))
+            {
+            case OptionsMovieExporter::VIEW_RESOLUTION:
+               resolutionX = -1;
+               resolutionY = -1;
+               fullResolution = false;
+               break;
+            case OptionsMovieExporter::FULL_RESOLUTION:
+               resolutionX = -1;
+               resolutionY = -1;
+               fullResolution = true;
+               break;
+            case OptionsMovieExporter::FIXED_RESOLUTION:
+               resolutionX = OptionsMovieExporter::getSettingWidth();
+               resolutionY = OptionsMovieExporter::getSettingHeight();
+               fullResolution = false;
+               break;
+            default:
+               break; // nothing
+            }
          }
       }
       else
@@ -262,6 +307,31 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
             resolutionX = pWidget->width();
             resolutionY = pWidget->height();
             resolutionFromInputArgs = false;
+            if (fullResolution)
+            {
+               PerspectiveView* pPersp = dynamic_cast<PerspectiveView*>(pView);
+               if (pPersp != NULL && pPersp->getZoomPercentage() > 100.)
+               {
+                  fullResolution = false;
+                  if (mpProgress != NULL)
+                  {
+                     mpProgress->updateProgress("Full resolution export will be smaller than "
+                        "view export, changing export resolution to current view size.", 0, WARNING);
+                  }
+               }
+               else
+               {
+                  // translate to data coordinate
+                  double x1 = 0.0;
+                  double y1 = 0.0;
+                  double x2 = 0.0;
+                  double y2 = 0.0;
+                  pView->translateScreenToWorld(0.0, 0.0, x1, y1);
+                  pView->translateScreenToWorld(resolutionX, resolutionY, x2, y2);
+                  resolutionX = (x2 > x1) ? (x2 - x1 + 0.5) : (x1 - x2 + 0.5);
+                  resolutionY = (y2 > y1) ? (y2 - y1 + 0.5) : (y1 - y2 + 0.5);
+               }
+            }
          }
          else
          {
@@ -270,22 +340,18 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
          }
       }
 
-      if (resolutionFromInputArgs && ((resolutionX % 2) != 0 || (resolutionY % 2) != 0))
+      int oldResX = resolutionX;
+      int oldResY = resolutionY;
+      if (!convertToValidResolution(resolutionX, resolutionY) ||
+            (resolutionFromInputArgs && (resolutionX != oldResX || resolutionY != oldResY)))
       {
          stringstream msg;
-         msg << "The export resolution must be even numbers. The input arguments were X resolution of "
-             << resolutionX << " and Y resolution of " << resolutionY << ".";
+         msg << "The export resolution does not meet the requirements of the the selected CODEC. "
+                "The input arguments were X resolution of "
+             << oldResX << " and Y resolution of " << oldResY << "."
+             << "The adjusted resolution was (" << resolutionX << ", " << resolutionY << ")";
          log_error(msg.str());
          return false;
-      }
-
-      if ((resolutionX % 2) != 0)
-      {
-         ++resolutionX;
-      }
-      if ((resolutionY % 2) != 0)
-      {
-         ++resolutionY;
       }
 
       pMsg->addProperty("Resolution", QString("%1 x %2").arg(resolutionX).arg(resolutionY).toStdString());
@@ -362,7 +428,7 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
       }
       pMsg->addProperty("Bitrate", QString::number(bitrate).toStdString());
 
-      FrameType eType = pController->getFrameType();
+      eType = pController->getFrameType();
       if (!pInArgList->getPlugInArgValue("Start Export", startExport))
       {
          if (mpOptionWidget.get() != NULL)
@@ -382,14 +448,12 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
             {
                startExport = pController->getStartFrame();
             }
-
-            // input arg and mpOptionsWidget return 1-based value for FRAME_ID so need to
-            // increment here since controller returns 0-based value
-            if (eType == FRAME_ID)
-            {
-               ++startExport;
-            }
          }
+      }
+      else
+      {
+         // adjust to 0-based since the input arg uses 1-based
+         --startExport;
       }
 
       if (!pInArgList->getPlugInArgValue("Stop Export", stopExport))
@@ -411,21 +475,17 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
             {
                stopExport = pController->getStopFrame();
             }
-
-            // input arg and mpOptionsWidget return 1-based value for FRAME_ID so need to
-            // increment here since controller returns 0-based value
-            if (eType == FRAME_ID)
-            {
-               ++stopExport;
-            }
          }
+      }
+      else
+      {
+         // adjust to 0-based since the input arg users 1-based
+         --stopExport;
       }
       string valueType("Time");
       if (eType == FRAME_ID)
       {
          valueType = "Frame";
-         --startExport;   // frame id type uses 1-based number of frames so subtract 1 for looping
-         --stopExport;
       }
 
       pMsg->addProperty("Start "+valueType, QString::number(startExport).toStdString());
@@ -491,8 +551,13 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
 
    // export the frames
    AVFrame* pTmpPicture = alloc_picture(PIX_FMT_RGBA32, pCodecContext->width, pCodecContext->height);
+   if (pTmpPicture == NULL)
+   {
+      QString msg("Unable to allocate frame buffer of size %1 x %2");
+      log_error(msg.arg(pCodecContext->width).arg(pCodecContext->height).toStdString());
+      return false;
+   }
    QImage image(pTmpPicture->data[0], pCodecContext->width, pCodecContext->height, QImage::Format_ARGB32);
-   FrameType eType = pController->getFrameType();
 
    // For frame id based animation, each band of the data set fills one second of animation. 
    // If the requested frame rate for export is 15 fps, then each band is replicated 15 times. The execution
@@ -504,6 +569,57 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
    if (eType == FRAME_ID)
    {
       stopExport += 0.99;
+   }
+
+   bool drawClassMarkings = fullResolution &&
+      Service<ConfigurationSettings>()->getSettingDisplayClassificationMarkings();
+   QString classText;
+   QFont classFont;
+   QColor classColor;
+   QPoint classPositionTop;
+   QPoint classPositionBottom;
+   const int shadowOffset = 2;
+   if (drawClassMarkings)
+   {
+      const int topMargin = 1;
+      const int bottomMargin = 4;
+      const int leftMargin = 5;
+      const int rightMargin = 5;
+
+      classText = QString::fromStdString(pView->getClassificationText());
+      classColor = COLORTYPE_TO_QCOLOR(pView->getClassificationColor());
+      pView->getClassificationFont(classFont);
+      QFontMetrics fontMetrics(classFont);
+      int classWidth = fontMetrics.width(classText);
+      int classHeight = fontMetrics.ascent();
+      int topX((pCodecContext->width / 2) - (classWidth / 2) + shadowOffset);
+      int bottomX((pCodecContext->width / 2) - (classWidth / 2));
+      // determine the classification position
+      switch (pView->getClassificationPosition())
+      {
+      case TOP_LEFT_BOTTOM_LEFT:
+         topX = leftMargin + shadowOffset;
+         bottomX = leftMargin + shadowOffset;
+         break;
+      case TOP_LEFT_BOTTOM_RIGHT:
+         topX = leftMargin + shadowOffset;
+         bottomX = pCodecContext->width - rightMargin - classWidth + shadowOffset;
+         break;
+      case TOP_RIGHT_BOTTOM_LEFT:
+         topX = pCodecContext->width - rightMargin - classWidth + shadowOffset;
+         bottomX = leftMargin + shadowOffset;
+         break;
+      case TOP_RIGHT_BOTTOM_RIGHT:
+         topX = pCodecContext->width - rightMargin - classWidth + shadowOffset;
+         bottomX = pCodecContext->width - rightMargin - classWidth + shadowOffset;
+         break;
+      default:
+         // nothing to do, markings centered by default
+         break;
+      }
+      int screenY = 1 + classHeight;
+      classPositionTop = QPoint(topX, 1 + classHeight);
+      classPositionBottom = QPoint(bottomX, pCodecContext->height - 1);
    }
 
    // make sure controller is not running prior to export. Save current state and restore after export finished
@@ -538,7 +654,98 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
          double progressValue = (video_pts - startExport) / (stopExport - startExport) * 100.0;
          mpProgress->updateProgress("Saving movie", static_cast<int>(progressValue), NORMAL);
       }
-      pView->getCurrentImage(image);
+      if (fullResolution)
+      {
+         QSize totalSize(pCodecContext->width, pCodecContext->height);
+         QSize subImageSize(pView->getWidget()->width(), pView->getWidget()->height());
+         // Make sure that the sub-image and the main image have the same aspect ratio to
+         // minimize wasted tile space
+         if (pCodecContext->width > pCodecContext->height)
+         {
+            subImageSize.setWidth(
+               totalSize.width() / static_cast<float>(totalSize.height()) * subImageSize.height() + 0.5);
+         }
+         else
+         {
+            subImageSize.setHeight(
+               totalSize.height() / static_cast<float>(totalSize.width()) * subImageSize.width() + 0.5);
+         }
+         // Remove pan and zoom limits so they don't interfere with the subimage grab
+         // and restore them when done
+         SpatialDataView* pSdv = dynamic_cast<SpatialDataView*>(pView);
+         PanLimitType panLimit;
+         if (pSdv != NULL)
+         {
+            panLimit = pSdv->getPanLimit();
+            pSdv->setPanLimit(NO_LIMIT);
+         }
+         View::SubImageIterator* pSubImage(pView->getSubImageIterator(totalSize, subImageSize));
+         if (pSubImage == NULL)
+         {
+            if (pSdv != NULL)
+            {
+               pSdv->setPanLimit(panLimit);
+            }
+            if (mpProgress != NULL)
+            {
+               mpProgress->updateProgress("Unable to render full scale data", 0, ERRORS);
+            }
+            pController->setAnimationState(savedAnimationState);
+            mpStep->finalize(Message::Failure);
+            return false;
+         }
+         QPainter outPainter(&image);
+         QPoint origin(0, image.height() - subImageSize.height());
+         while (pSubImage->hasNext())
+         {
+            QImage subImage;
+            if (!pSubImage->next(subImage))
+            {
+               if (pSdv != NULL)
+               {
+                  pSdv->setPanLimit(panLimit);
+               }
+               if (mpProgress != NULL)
+               {
+                  mpProgress->updateProgress("An error occurred when generating the image", 0, ERRORS);
+               }
+               pController->setAnimationState(savedAnimationState);
+               mpStep->finalize(Message::Failure);
+               delete pSubImage;
+               return false;
+            }
+            // copy this subimage to the output buffer
+            outPainter.drawImage(origin, subImage);
+
+            int newX = origin.x() + subImage.width();
+            int newY = origin.y();
+            if (newX >= totalSize.width())
+            {
+               newY -= subImage.height();
+               newX = 0;
+            }
+            origin = QPoint(newX, newY);
+         }
+         delete pSubImage;
+         if (drawClassMarkings)
+         {
+            outPainter.setFont(classFont);
+            outPainter.setPen(Qt::black);
+            outPainter.drawText(classPositionTop, classText);
+            outPainter.drawText(classPositionBottom, classText);
+            outPainter.setPen(classColor);
+            outPainter.drawText(classPositionTop - QPoint(shadowOffset, shadowOffset), classText);
+            outPainter.drawText(classPositionBottom - QPoint(shadowOffset, shadowOffset), classText);
+         }
+         if (pSdv != NULL)
+         {
+            pSdv->setPanLimit(panLimit);
+         }
+      }
+      else
+      {
+         pView->getCurrentImage(image);
+      }
       img_convert(reinterpret_cast<AVPicture*>(mpPicture),
          pCodecContext->pix_fmt,
          reinterpret_cast<AVPicture*>(pTmpPicture),
@@ -668,6 +875,134 @@ ValidationResultType MovieExporter::validate(const PlugInArgList* pArgList, stri
       }
    }
 
+   // check the frame resolution
+   int resolutionX(-1);
+   int resolutionY(-1);
+   bool fullResolution(false);
+   bool fixedResolution(false);
+   if (!pArgList->getPlugInArgValue("Resolution X", resolutionX) ||
+       !pArgList->getPlugInArgValue("Resolution Y", resolutionY))
+   {
+      if (mpOptionWidget.get() != NULL)
+      {
+         ViewResolutionWidget* pResolutionWidget = mpOptionWidget->getResolutionWidget();
+         VERIFYRV(pResolutionWidget != NULL, VALIDATE_FAILURE);
+
+         switch(pResolutionWidget->getResolutionType())
+         {
+         case OptionsMovieExporter::VIEW_RESOLUTION:
+            resolutionX = -1;
+            resolutionY = -1;
+            fullResolution = false;
+            break;
+         case OptionsMovieExporter::FULL_RESOLUTION:
+            resolutionX = -1;
+            resolutionY = -1;
+            fullResolution = true;
+            break;
+         case OptionsMovieExporter::FIXED_RESOLUTION:
+         {
+            QSize resolution = pResolutionWidget->getResolution();
+            resolutionX = resolution.width();
+            resolutionY = resolution.height();
+            fullResolution = false;
+            fixedResolution = true;
+            break;
+         }
+         default:
+            break; // nothing
+         }
+      }
+      else
+      {
+         switch(StringUtilities::fromXmlString<OptionsMovieExporter::ResolutionType>(
+            OptionsMovieExporter::getSettingResolutionType()))
+         {
+         case OptionsMovieExporter::VIEW_RESOLUTION:
+            resolutionX = -1;
+            resolutionY = -1;
+            fullResolution = false;
+            break;
+         case OptionsMovieExporter::FULL_RESOLUTION:
+            resolutionX = -1;
+            resolutionY = -1;
+            fullResolution = true;
+            break;
+         case OptionsMovieExporter::FIXED_RESOLUTION:
+            resolutionX = OptionsMovieExporter::getSettingWidth();
+            resolutionY = OptionsMovieExporter::getSettingHeight();
+            fullResolution = false;
+            fixedResolution = true;
+            break;
+         default:
+            break; // nothing
+         }
+      }
+   }
+
+   if (resolutionX <= 0 || resolutionY <= 0)
+   {
+      QWidget* pWidget = pView->getWidget();
+      if (pWidget != NULL)
+      {
+         resolutionX = pWidget->width();
+         resolutionY = pWidget->height();
+         if (fullResolution)
+         {
+            PerspectiveView* pPersp = dynamic_cast<PerspectiveView*>(pView);
+            if (pPersp != NULL && pPersp->getZoomPercentage() > 100.)
+            {
+               fullResolution = false;
+               if (mpProgress != NULL)
+               {
+                  errorMessage += "Full resolution export will be smaller than "
+                     "view export, export resolution will be changed to current view size.\n";
+                  if (result == VALIDATE_SUCCESS)
+                  {
+                     result = VALIDATE_INFO;
+                  }
+               }
+            }
+            else
+            {
+               // translate to data coordinate
+               double x1 = 0.0;
+               double y1 = 0.0;
+               double x2 = 0.0;
+               double y2 = 0.0;
+               pView->translateScreenToWorld(0.0, 0.0, x1, y1);
+               pView->translateScreenToWorld(resolutionX, resolutionY, x2, y2);
+               resolutionX = (x2 > x1) ? (x2 - x1 + 0.5) : (x1 - x2 + 0.5);
+               resolutionY = (y2 > y1) ? (y2 - y1 + 0.5) : (y1 - y2 + 0.5);
+            }
+         }
+      }
+      else
+      {
+         errorMessage += "Can't determine output resolution.\n";
+         return VALIDATE_FAILURE;
+      }
+   }
+
+   int oldResX = resolutionX;
+   int oldResY = resolutionY;
+   if (!convertToValidResolution(resolutionX, resolutionY) ||
+         (fixedResolution && (resolutionX != oldResX || resolutionY != oldResY)))
+   {
+      if (mpOptionWidget.get() != NULL)
+      {
+         ViewResolutionWidget* pResolutionWidget = mpOptionWidget->getResolutionWidget();
+         VERIFYRV(pResolutionWidget != NULL, VALIDATE_FAILURE);
+         pResolutionWidget->setResolution(QSize(resolutionX, resolutionY), pResolutionWidget->getResolutionType());
+      }
+      errorMessage +=
+         "The export resolution does not meet the requirements of the the selected CODEC and will be adjusted.\n";
+      if (result != VALIDATE_FAILURE)
+      {
+         result = VALIDATE_INFO;
+      }
+   }
+
    return result;
 }
 
@@ -685,7 +1020,9 @@ QWidget* MovieExporter::getExportOptionsWidget(const PlugInArgList* pInArgList)
       VERIFYRV(pResolutionWidget != NULL, NULL);
 
       QSize resolution(OptionsMovieExporter::getSettingWidth(), OptionsMovieExporter::getSettingHeight());
-      pResolutionWidget->setResolution(resolution);
+      pResolutionWidget->setResolution(resolution,
+         StringUtilities::fromXmlString<OptionsMovieExporter::ResolutionType>(
+            OptionsMovieExporter::getSettingResolutionType()));
 
       // Bitrate
       BitrateWidget* pBitrateWidget = mpOptionWidget->getBitrateWidget();
@@ -1022,4 +1359,17 @@ boost::rational<int> MovieExporter::convertToValidFrameRate(const boost::rationa
    }
 
    return validFrameRate;
+}
+
+bool MovieExporter::convertToValidResolution(int& resolutionX, int& resolutionY) const
+{
+   if ((resolutionX % 2) != 0)
+   {
+      ++resolutionX;
+   }
+   if ((resolutionY % 2) != 0)
+   {
+      ++resolutionY;
+   }
+   return true;
 }

@@ -702,11 +702,15 @@ void ViewImp::draw()
 {
    GlContextSave contextSave(this);
    drawContents();
-   drawMousePanAnchor();
-   drawCrossHair();
-   drawSelectionBox();
-   drawInset();
-   drawClassification();
+   if (mpSubImageIterator == NULL)
+   {
+      // don't overlay in sub-image iterator overlays
+      drawMousePanAnchor();
+      drawCrossHair();
+      drawSelectionBox();
+      drawInset();
+      drawClassification();
+   }
 }
 
 void ViewImp::renderText(int screenCoordX, int screenCoordY, const QString& strText, const QFont& fnt)

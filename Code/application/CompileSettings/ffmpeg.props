@@ -8,8 +8,5 @@
       <AdditionalIncludeDirectories>$(OPTICKSDEPENDENCIESINCLUDE)\ffmpeg;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>EMULATE_INTTYPES;_FILE_OFFSET_BITS=64;_LARGEFILE_SOURCE;_ISOC9X_SOURCE;MSVC8;BUILD_SHARED_AV;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <Link>
-      <AdditionalDependencies>avcodec.lib;avformat.lib;avutil.lib;%(AdditionalDependencies)</AdditionalDependencies>
-    </Link>
   </ItemDefinitionGroup>
 </Project>

@@ -12,6 +12,7 @@
 
 #include "AppVersion.h"
 #include "ConfigurationSettings.h"
+#include "EnumWrapper.h"
 #include "LabeledSectionGroup.h"
 
 #include <string>
@@ -23,9 +24,18 @@ class ViewResolutionWidget;
 class OptionsMovieExporter : public LabeledSectionGroup
 {
 public:
-   OptionsMovieExporter();
-   ~OptionsMovieExporter();
+   enum ResolutionTypeEnum
+   {
+      VIEW_RESOLUTION,
+      FULL_RESOLUTION,
+      FIXED_RESOLUTION
+   };
+   typedef EnumWrapper<ResolutionTypeEnum> ResolutionType;
 
+   OptionsMovieExporter();
+   virtual ~OptionsMovieExporter();
+
+   SETTING(ResolutionType, MovieExporter, std::string, "View");
    SETTING(Width, MovieExporter, int, -1);
    SETTING(Height, MovieExporter, int, -1);
    SETTING(Bitrate, MovieExporter, unsigned int, 0);

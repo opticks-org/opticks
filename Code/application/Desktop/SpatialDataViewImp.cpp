@@ -2353,14 +2353,17 @@ void SpatialDataViewImp::drawContents()
    // Origin
    drawOrigin();
 
-   // Axis
-   int viewPort[4];
-   glGetIntegerv(GL_VIEWPORT, viewPort);
+   if (mpSubImageIterator == NULL) // don't draw axis markers in sub-images
+   {
+      // Axis
+      int viewPort[4];
+      glGetIntegerv(GL_VIEWPORT, viewPort);
 
-   qglColor(Qt::black);
-   drawAxis(viewPort[0] + 31, viewPort[1] + viewPort[3] - 31);
-   qglColor(Qt::white);
-   drawAxis(viewPort[0] + 30, viewPort[1] + viewPort[3] - 30);
+      qglColor(Qt::black);
+      drawAxis(viewPort[0] + 31, viewPort[1] + viewPort[3] - 31);
+      qglColor(Qt::white);
+      drawAxis(viewPort[0] + 30, viewPort[1] + viewPort[3] - 30);
+   }
 }
 
 void SpatialDataViewImp::drawLayers()

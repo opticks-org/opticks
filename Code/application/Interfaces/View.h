@@ -23,6 +23,7 @@
 class AnimationController;
 class Classification;
 class MouseMode;
+class QFont;
 class QImage;
 class QSize;
 class QWidget;
@@ -372,6 +373,21 @@ public:
     */
    virtual std::string getClassificationText() const = 0;
 
+   /**
+    *  Retrieves the font used to draw the classification markings.
+    *
+    *  @param font
+    *         Output arg containing the QFont used to draw the classification markings.
+    */
+   virtual void getClassificationFont(QFont& font) const = 0;
+
+   /**
+    *  Retrieves the color used to draw the classification markings.
+    *
+    *  @return The ColorType used to draw the classification markings.
+    */
+   virtual ColorType getClassificationColor() const = 0;
+   
    /**
     *  Enables/disables display of classification markings.
     *

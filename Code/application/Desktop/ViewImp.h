@@ -97,12 +97,12 @@ public:
    void setName(const std::string& viewName);
    virtual ViewType getViewType() const = 0;
 
-   Classification* getClassification();
-   const Classification* getClassification() const;
+   virtual Classification* getClassification();
+   virtual const Classification* getClassification() const;
    QString getClassificationText() const;
-   QFont getClassificationFont() const;
+   virtual QFont getClassificationFont() const;
    QColor getClassificationColor() const;
-   PositionType getClassificationPosition() const;
+   virtual PositionType getClassificationPosition() const;
 
    QColor getBackgroundColor() const;
    DataOrigin getDataOrigin() const;
@@ -374,6 +374,8 @@ protected:
    QPoint mMouseCurrent;
    QPoint mMouseEnd;
 
+   View::SubImageIterator* mpSubImageIterator;
+
 private:
    ViewImp(const ViewImp& rhs);
 
@@ -413,8 +415,6 @@ private:
    bool mUndoBlocked;
    std::vector<UndoAction*>* mpUndoGroup;
    QString mUndoGroupText;
-
-   View::SubImageIterator* mpSubImageIterator;
 
    class ViewContext : public QGLContext
    {
@@ -524,6 +524,14 @@ private slots:
    std::string getClassificationText() const \
    { \
       return impClass::getClassificationText().toStdString(); \
+   } \
+   void getClassificationFont(QFont& font) const \
+   { \
+      font = impClass::getClassificationFont(); \
+   } \
+   ColorType getClassificationColor() const \
+   { \
+      return QCOLOR_TO_COLORTYPE(impClass::getClassificationColor()); \
    } \
    void setDataOrigin(const DataOrigin& dataOrigin) \
    { \

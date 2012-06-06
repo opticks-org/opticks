@@ -11,12 +11,13 @@
 #include "ViewResolutionWidget.h"
 
 #include <QtGui/QBitmap>
-#include <QtGui/QCheckBox>
 #include <QtGui/QIcon>
 #include <QtGui/QIntValidator>
 #include <QtGui/QLayout>
 #include <QtGui/QLineEdit>
 #include <QtGui/QPushButton>
+#include <QtGui/QRadioButton>
+#include <QtGui/QStyleOptionButton>
 
 namespace
 {
@@ -201,8 +202,10 @@ namespace
 ViewResolutionWidget::ViewResolutionWidget(QWidget* pParent) :
    QWidget(pParent)
 {
-   // Use View Resolution check box
-   mpViewResolutionCheck = new QCheckBox("Use View Resolution", this);
+   // Resolution radios
+   mpViewResolution = new QRadioButton("View Resolution", this);
+   mpFullResolution = new QRadioButton("Full (1:1) Resolution", this);
+   mpFixedResolution = new QRadioButton("Custom Resolution:", this);
 
    // Width and height edits
    QIntValidator* pValidator = new QIntValidator(this);
@@ -232,52 +235,79 @@ ViewResolutionWidget::ViewResolutionWidget(QWidget* pParent) :
    // Layout
    QGridLayout* pLayout = new QGridLayout(this);
    pLayout->setMargin(0);
-   pLayout->setSpacing(10);
-   pLayout->addWidget(mpViewResolutionCheck, 0, 0, 1, 2, Qt::AlignLeft);
-   pLayout->addWidget(mpWidthEdit, 1, 0);
-   pLayout->addWidget(mpHeightEdit, 2, 0);
-   pLayout->addWidget(mpAspectLockButton, 1, 1, 2, 1, Qt::AlignCenter);
-   pLayout->setColumnStretch(2, 10);
+   pLayout->setSpacing(5);
+   pLayout->addWidget(mpViewResolution, 0, 0, 1, 3, Qt::AlignLeft);
+   pLayout->addWidget(mpFullResolution, 1, 0, 1, 3, Qt::AlignLeft);
+   pLayout->addWidget(mpFixedResolution, 2, 0, 1, 3, Qt::AlignLeft);
+   pLayout->addWidget(mpWidthEdit, 3, 1);
+   pLayout->addWidget(mpHeightEdit, 4, 1);
+   pLayout->addWidget(mpAspectLockButton, 3, 2, 2, 1, Qt::AlignCenter);
+   QStyleOptionButton option;
+   option.initFrom(mpFixedResolution);
+   int radioWidth = style()->subElementRect(QStyle::SE_RadioButtonIndicator, &option).width();
+   pLayout->setColumnMinimumWidth(0, radioWidth);
+   pLayout->setColumnStretch(3, 10);
 
    // Connections
-   VERIFYNR(connect(mpViewResolutionCheck, SIGNAL(toggled(bool)), this, SLOT(viewResolutionToggled(bool))));
+   VERIFYNR(connect(mpViewResolution, SIGNAL(clicked()), this, SLOT(resolutionChanged())));
+   VERIFYNR(connect(mpFullResolution, SIGNAL(clicked()), this, SLOT(resolutionChanged())));
+   VERIFYNR(connect(mpFixedResolution, SIGNAL(clicked()), this, SLOT(resolutionChanged())));
    VERIFYNR(connect(mpWidthEdit, SIGNAL(editingFinished()), this, SLOT(widthEdited())));
    VERIFYNR(connect(mpHeightEdit, SIGNAL(editingFinished()), this, SLOT(heightEdited())));
 
    // Initialization after connections so that slots are called
-   setResolution(QSize());
+   resolutionChanged();
 }
 
 ViewResolutionWidget::~ViewResolutionWidget()
 {}
 
-void ViewResolutionWidget::setResolution(const QSize& size)
+void ViewResolutionWidget::setResolution(const QSize& size, OptionsMovieExporter::ResolutionType resType)
 {
-   if (size.isEmpty() == true)
+   switch(resType)
    {
-      mpViewResolutionCheck->setChecked(true);
+   case OptionsMovieExporter::VIEW_RESOLUTION:
+      mpViewResolution->setChecked(true);
       mResolution = QSize();
-      return;
-   }
+      mpWidthEdit->setEnabled(false);
+      mpHeightEdit->setEnabled(false);
+      mpAspectLockButton->setEnabled(false);
+      break;
+   case OptionsMovieExporter::FULL_RESOLUTION:
+      mpFullResolution->setChecked(true);
+      mResolution = QSize();
+      mpWidthEdit->setEnabled(false);
+      mpHeightEdit->setEnabled(false);
+      mpAspectLockButton->setEnabled(false);
+      break;
+   case OptionsMovieExporter::FIXED_RESOLUTION:
+      {
+         mpFixedResolution->setChecked(true);
 
-   mpViewResolutionCheck->setChecked(false);
+         const QValidator* pWidthValidator = mpWidthEdit->validator();
+         VERIFYNRV(pWidthValidator != NULL);
 
-   const QValidator* pWidthValidator = mpWidthEdit->validator();
-   VERIFYNRV(pWidthValidator != NULL);
+         const QValidator* pHeightValidator = mpHeightEdit->validator();
+         VERIFYNRV(pHeightValidator != NULL);
 
-   const QValidator* pHeightValidator = mpHeightEdit->validator();
-   VERIFYNRV(pHeightValidator != NULL);
+         QString widthStr = QString::number(size.width());
+         QString heightStr = QString::number(size.height());
+         int pos = 0;
 
-   QString widthStr = QString::number(size.width());
-   QString heightStr = QString::number(size.height());
-   int pos = 0;
-
-   if ((pWidthValidator->validate(widthStr, pos) == QValidator::Acceptable) &&
-      (pHeightValidator->validate(heightStr, pos) == QValidator::Acceptable))
-   {
-      mpWidthEdit->setText(widthStr);
-      mpHeightEdit->setText(heightStr);
-      mResolution = size;
+         if ((pWidthValidator->validate(widthStr, pos) == QValidator::Acceptable) &&
+            (pHeightValidator->validate(heightStr, pos) == QValidator::Acceptable))
+         {
+            mpWidthEdit->setText(widthStr);
+            mpHeightEdit->setText(heightStr);
+            mResolution = size;
+         }
+         mpWidthEdit->setEnabled(true);
+         mpHeightEdit->setEnabled(true);
+         mpAspectLockButton->setEnabled(true);
+         break;
+      }
+   default:
+      break; // nothing
    }
 }
 
@@ -286,21 +316,35 @@ QSize ViewResolutionWidget::getResolution() const
    return mResolution;
 }
 
+OptionsMovieExporter::ResolutionType ViewResolutionWidget::getResolutionType() const
+{
+   if (mpFullResolution->isChecked())
+   {
+      return OptionsMovieExporter::FULL_RESOLUTION;
+   }
+   else if (mpViewResolution->isChecked())
+   {
+      return OptionsMovieExporter::VIEW_RESOLUTION;
+   }
+   return OptionsMovieExporter::FIXED_RESOLUTION;
+}
+
 void ViewResolutionWidget::updateResolution()
 {
-   if (mpViewResolutionCheck->isChecked() == true)
-   {
-      mResolution = QSize();
-   }
-   else
+   if (mpFixedResolution->isChecked())
    {
       mResolution.setWidth(mpWidthEdit->text().toInt());
       mResolution.setHeight(mpHeightEdit->text().toInt());
    }
+   else
+   {
+      mResolution = QSize();
+   }
 }
 
-void ViewResolutionWidget::viewResolutionToggled(bool useViewResolution)
+void ViewResolutionWidget::resolutionChanged()
 {
+   bool useViewResolution = !mpFixedResolution->isChecked();
    mpWidthEdit->setDisabled(useViewResolution);
    mpHeightEdit->setDisabled(useViewResolution);
    mpAspectLockButton->setDisabled(useViewResolution);
@@ -311,15 +355,9 @@ void ViewResolutionWidget::viewResolutionToggled(bool useViewResolution)
 
 void ViewResolutionWidget::widthEdited()
 {
-   VERIFYNRV(mpViewResolutionCheck->isChecked() == false);
+   VERIFYNRV(mpFixedResolution->isChecked());
 
-   // Adjust the width to an even number
    unsigned int resWidth = mpWidthEdit->text().toUInt();
-   if ((resWidth % 2) != 0)
-   {
-      ++resWidth;
-      mpWidthEdit->setText(QString::number(resWidth));
-   }
 
    // Adjust the height based on the aspect ratio
    if (mpAspectLockButton->isChecked() == true)
@@ -328,11 +366,6 @@ void ViewResolutionWidget::widthEdited()
       if (mResolution.isEmpty() == false)
       {
          newHeight = (resWidth * mResolution.height()) / static_cast<double>(mResolution.width());
-      }
-
-      if ((newHeight % 2) != 0)
-      {
-         ++newHeight;
       }
 
       mpHeightEdit->setText(QString::number(newHeight));
@@ -344,15 +377,9 @@ void ViewResolutionWidget::widthEdited()
 
 void ViewResolutionWidget::heightEdited()
 {
-   VERIFYNRV(mpViewResolutionCheck->isChecked() == false);
+   VERIFYNRV(mpFixedResolution->isChecked());
 
-   // Adjust the height to an even number
    unsigned int resHeight = mpHeightEdit->text().toUInt();
-   if ((resHeight % 2) != 0)
-   {
-      ++resHeight;
-      mpHeightEdit->setText(QString::number(resHeight));
-   }
 
    // Adjust the width based on the aspect ratio
    if (mpAspectLockButton->isChecked() == true)
@@ -361,11 +388,6 @@ void ViewResolutionWidget::heightEdited()
       if (mResolution.isEmpty() == false)
       {
          newWidth = (resHeight * mResolution.width()) / static_cast<double>(mResolution.height());
-      }
-
-      if ((newWidth % 2) != 0)
-      {
-         ++newWidth;
       }
 
       mpWidthEdit->setText(QString::number(newWidth));

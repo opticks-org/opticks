@@ -13,9 +13,19 @@
 #include "OptionQWidgetWrapper.h"
 #include "OptionsMovieExporter.h"
 #include "PlugInRegistration.h"
+#include "StringUtilitiesMacros.h"
 #include "ViewResolutionWidget.h"
 
 REGISTER_PLUGIN(OpticksMovieExporter, OptionsMovieExporter, OptionQWidgetWrapper<OptionsMovieExporter>());
+
+namespace StringUtilities
+{
+BEGIN_ENUM_MAPPING_ALIAS(OptionsMovieExporter::ResolutionType, ViewResolutionType)
+ADD_ENUM_MAPPING(OptionsMovieExporter::VIEW_RESOLUTION, "View Resolution", "View")
+ADD_ENUM_MAPPING(OptionsMovieExporter::FULL_RESOLUTION, "Full Resolution", "Full")
+ADD_ENUM_MAPPING(OptionsMovieExporter::FIXED_RESOLUTION, "Fixed Resolution", "Fixed")
+END_ENUM_MAPPING()
+}
 
 OptionsMovieExporter::OptionsMovieExporter() :
    LabeledSectionGroup(NULL)
@@ -23,7 +33,9 @@ OptionsMovieExporter::OptionsMovieExporter() :
    // Resolution section
    mpResolutionWidget = new ViewResolutionWidget(this);
    mpResolutionWidget->setResolution(QSize(OptionsMovieExporter::getSettingWidth(),
-      OptionsMovieExporter::getSettingHeight()));
+         OptionsMovieExporter::getSettingHeight()),
+      StringUtilities::fromXmlString<ResolutionType>(
+         OptionsMovieExporter::getSettingResolutionType()));
 
    LabeledSection* pResolutionSection = new LabeledSection(mpResolutionWidget, "Output Resolution", this);
 
@@ -67,6 +79,8 @@ void OptionsMovieExporter::applyChanges()
    QSize resolution = mpResolutionWidget->getResolution();
    OptionsMovieExporter::setSettingWidth(resolution.width());
    OptionsMovieExporter::setSettingHeight(resolution.height());
+   OptionsMovieExporter::setSettingResolutionType(
+      StringUtilities::toXmlString<ResolutionType>(mpResolutionWidget->getResolutionType()));
    OptionsMovieExporter::setSettingBitrate(mpBitrateWidget->getBitrate());
    OptionsMovieExporter::setSettingMeMethod(mpAdvancedWidget->getMeMethod());
    OptionsMovieExporter::setSettingGopSize(mpAdvancedWidget->getGopSize());
