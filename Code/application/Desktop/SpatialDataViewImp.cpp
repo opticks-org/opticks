@@ -2076,14 +2076,8 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
                value = pDisplayedRaster->getPixelValue(column, row, band, complexComponent);
             }
 
-            // Multiply the value by the units scale factor
-            if (pUnits != NULL)
-            {
-               value *= pUnits->getScaleFromStandard();
-            }
-
             // Set the raster value on the status bar
-            pBar->setCubeValue(layerName, value);
+            pBar->setCubeValue(layerName, value, pUnits);
          }
          else
          {
@@ -2099,74 +2093,65 @@ void SpatialDataViewImp::updateStatusBar(const QPoint& screenCoord)
          if ((row.isValid() == true) && (column.isValid() == true) &&
             (redBand.isValid() == true || greenBand.isValid() == true || blueBand.isValid() == true))
          {
-            QString redValueText = "N/A";
-            QString greenValueText = "N/A";
-            QString blueValueText = "N/A";
+            double redValue(0.0);
+            const Units* pRedUnits(NULL);
+            double greenValue(0.0);
+            const Units* pGreenUnits(NULL);
+            double blueValue(0.0);
+            const Units* pBlueUnits(NULL);
 
             // Get the red band value
             if (redBand.isValid() == true)
             {
                // Get the value from the displayed raster element
-               double redValue = 0.0;
-
                RasterElement* pDisplayedRaster = pRasterLayer->getDisplayedRasterElement(RED);
                if (pDisplayedRaster != NULL)
                {
                   redValue = pDisplayedRaster->getPixelValue(column, row, redBand, complexComponent);
+                  const RasterDataDescriptor* pDesc =
+                     dynamic_cast<const RasterDataDescriptor*>(pDisplayedRaster->getDataDescriptor());
+                  if (pDesc != NULL)
+                  {
+                     pRedUnits = pDesc->getUnits();
+                  }
                }
-
-               // Multiply the value by the units scale factor
-               if (pUnits != NULL)
-               {
-                  redValue *= pUnits->getScaleFromStandard();
-               }
-
-               redValueText = QString::number(redValue, 'g', numeric_limits<double>::digits10);
             }
 
             // Get the green band value
             if (greenBand.isValid() == true)
             {
                // Get the value from the displayed raster element
-               double greenValue = 0.0;
-
                RasterElement* pDisplayedRaster = pRasterLayer->getDisplayedRasterElement(GREEN);
                if (pDisplayedRaster != NULL)
                {
                   greenValue = pDisplayedRaster->getPixelValue(column, row, greenBand, complexComponent);
+                  const RasterDataDescriptor* pDesc =
+                     dynamic_cast<const RasterDataDescriptor*>(pDisplayedRaster->getDataDescriptor());
+                  if (pDesc != NULL)
+                  {
+                     pGreenUnits = pDesc->getUnits();
+                  }
                }
-
-               // Multiply the value by the units scale factor
-               if (pUnits != NULL)
-               {
-                  greenValue *= pUnits->getScaleFromStandard();
-               }
-
-               greenValueText = QString::number(greenValue, 'g', numeric_limits<double>::digits10);
             }
 
             // Get the blue band value
             if (blueBand.isValid() == true)
             {
                // Get the value from the displayed raster element
-               double blueValue = 0.0;
-
                RasterElement* pDisplayedRaster = pRasterLayer->getDisplayedRasterElement(BLUE);
                if (pDisplayedRaster != NULL)
                {
                   blueValue = pDisplayedRaster->getPixelValue(column, row, blueBand, complexComponent);
+                  const RasterDataDescriptor* pDesc =
+                     dynamic_cast<const RasterDataDescriptor*>(pDisplayedRaster->getDataDescriptor());
+                  if (pDesc != NULL)
+                  {
+                     pBlueUnits = pDesc->getUnits();
+                  }
                }
-
-               // Multiply the value by the units scale factor
-               if (pUnits != NULL)
-               {
-                  blueValue *= pUnits->getScaleFromStandard();
-               }
-
-               blueValueText = QString::number(blueValue, 'g', numeric_limits<double>::digits10);
             }
 
-            pBar->setCubeValue(layerName, redValueText, greenValueText, blueValueText);
+            pBar->setCubeValue(layerName, redValue, greenValue, blueValue, pRedUnits, pGreenUnits, pBlueUnits);
          }
          else
          {

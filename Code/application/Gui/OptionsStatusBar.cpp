@@ -8,6 +8,7 @@
  */
 
 #include <QtGui/QCheckBox>
+#include <QtGui/QGridLayout>
 #include <QtGui/QVBoxLayout>
 
 #include "OptionsStatusBar.h"
@@ -23,22 +24,25 @@ OptionsStatusBar::OptionsStatusBar() :
    mpPixelCoordsCheck = new QCheckBox("Pixel Coordinate", pFieldsWidget);
    mpGeoCoordsCheck = new QCheckBox("Geo Coordinate", pFieldsWidget);
    mpCubeValueCheck = new QCheckBox("Cube Value", pFieldsWidget);
+   mpCubeValueUnitsCheck = new QCheckBox("Cube Value Units", pFieldsWidget);
    mpResultValueCheck = new QCheckBox("Result Layer Value", pFieldsWidget);
    mpRotationValueCheck = new QCheckBox("Rotation", pFieldsWidget);
    mpElevationValueCheck = new QCheckBox("Elevation", pFieldsWidget);
 
    LabeledSection* pFieldsSection = new LabeledSection(pFieldsWidget, "Displayed Fields", this);
 
-   QVBoxLayout* pFieldsLayout = new QVBoxLayout(pFieldsWidget);
+   QGridLayout* pFieldsLayout = new QGridLayout(pFieldsWidget);
    pFieldsLayout->setMargin(0);
    pFieldsLayout->setSpacing(5);
-   pFieldsLayout->addWidget(mpPixelCoordsCheck);
-   pFieldsLayout->addWidget(mpGeoCoordsCheck);
-   pFieldsLayout->addWidget(mpCubeValueCheck);
-   pFieldsLayout->addWidget(mpResultValueCheck);
-   pFieldsLayout->addWidget(mpRotationValueCheck);
-   pFieldsLayout->addWidget(mpElevationValueCheck);
-   pFieldsLayout->addStretch(10);
+   pFieldsLayout->addWidget(mpPixelCoordsCheck, 0, 0);
+   pFieldsLayout->addWidget(mpGeoCoordsCheck, 1, 0);
+   pFieldsLayout->addWidget(mpCubeValueCheck, 2, 0);
+   pFieldsLayout->addWidget(mpCubeValueUnitsCheck, 2, 1);
+   pFieldsLayout->addWidget(mpResultValueCheck, 3, 0);
+   pFieldsLayout->addWidget(mpRotationValueCheck, 4, 0);
+   pFieldsLayout->addWidget(mpElevationValueCheck, 5, 0);
+   pFieldsLayout->setRowStretch(5, 10);
+   pFieldsLayout->setColumnStretch(1, 10);
 
    // Dialog layout
    QVBoxLayout* pLayout = new QVBoxLayout(this);
@@ -47,9 +51,12 @@ OptionsStatusBar::OptionsStatusBar() :
    pLayout->addWidget(pFieldsSection);
    pLayout->addStretch(10);
 
+   VERIFYNR(connect(mpCubeValueCheck, SIGNAL(toggled(bool)), mpCubeValueUnitsCheck, SLOT(setEnabled(bool))));
+
    // Initialize From Settings
    mpPixelCoordsCheck->setChecked(ConfigurationSettings::getSettingShowStatusBarPixelCoords());
    mpGeoCoordsCheck->setChecked(ConfigurationSettings::getSettingShowStatusBarGeoCoords());
+   mpCubeValueUnitsCheck->setChecked(ConfigurationSettings::getSettingShowStatusBarCubeValueUnits());
    mpCubeValueCheck->setChecked(ConfigurationSettings::getSettingShowStatusBarCubeValue());
    mpResultValueCheck->setChecked(ConfigurationSettings::getSettingShowStatusBarResultValue());
    mpRotationValueCheck->setChecked(ConfigurationSettings::getSettingShowStatusBarRotationValue());
@@ -61,6 +68,7 @@ void OptionsStatusBar::applyChanges()
    ConfigurationSettings::setSettingShowStatusBarPixelCoords(mpPixelCoordsCheck->isChecked());
    ConfigurationSettings::setSettingShowStatusBarGeoCoords(mpGeoCoordsCheck->isChecked());
    ConfigurationSettings::setSettingShowStatusBarCubeValue(mpCubeValueCheck->isChecked());
+   ConfigurationSettings::setSettingShowStatusBarCubeValueUnits(mpCubeValueUnitsCheck->isChecked());
    ConfigurationSettings::setSettingShowStatusBarResultValue(mpResultValueCheck->isChecked());
    ConfigurationSettings::setSettingShowStatusBarRotationValue(mpRotationValueCheck->isChecked());
    ConfigurationSettings::setSettingShowStatusBarElevationValue(mpElevationValueCheck->isChecked());

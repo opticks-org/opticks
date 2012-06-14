@@ -51,9 +51,10 @@ public slots:
    void clearGeoCoords();
    void showGeoCoords(bool bShow);
 
-   void setCubeValue(const QString& layerName, double gray);
+   void setCubeValue(const QString& layerName, double gray, const Units* pUnits = NULL);
    void setCubeValue(const QString& layerName, const QString& strGray);
-   void setCubeValue(const QString& layerName, double red, double green, double blue);
+   void setCubeValue(const QString& layerName, double red, double green, double blue, const Units* pRedUnits = NULL,
+      const Units* pGreenUnits = NULL, const Units* pBlueUnits = NULL);
    void setCubeValue(const QString& layerName, const QString& strRed, const QString& strGreen, const QString& strBlue);
    void clearCubeValue();
    void showCubeValue(bool bShow);

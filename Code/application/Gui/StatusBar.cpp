@@ -202,9 +202,20 @@ void StatusBar::showGeoCoords(bool bShow)
    m_pGeoCoordinates_Label->setVisible(bShow);
 }
 
-void StatusBar::setCubeValue(const QString& layerName, double gray)
+void StatusBar::setCubeValue(const QString& layerName, double gray, const Units* pUnits)
 {
-   setCubeValue(layerName, QString::number(gray, 'g', numeric_limits<double>::digits10));
+   QString unitText;
+   if (pUnits != NULL)
+   {
+      unitText = QString::fromStdString(pUnits->getUnitName());
+      gray *= pUnits->getScaleFromStandard();
+   }
+   QString displayText = QString::number(gray, 'g', numeric_limits<double>::digits10);
+   if (ConfigurationSettings::getSettingShowStatusBarCubeValueUnits())
+   {
+      displayText += " " + unitText;
+   }
+   setCubeValue(layerName, displayText);
 }
 
 void StatusBar::setCubeValue(const QString& layerName, const QString& strGray)
@@ -219,14 +230,47 @@ void StatusBar::setCubeValue(const QString& layerName, const QString& strGray)
    m_pCubeValue_Label->setText(nameText + "Gray - " + strGray + " ");
 }
 
-void StatusBar::setCubeValue(const QString& layerName, double red, double green, double blue)
+void StatusBar::setCubeValue(const QString& layerName, double red, double green, double blue,
+   const Units* pRedUnits, const Units* pGreenUnits, const Units* pBlueUnits)
 {
+   string redText;
+   string greenText;
+   string blueText;
+   if (pRedUnits != NULL)
+   {
+      redText = pRedUnits->getUnitName();
+      red *= pRedUnits->getScaleFromStandard();
+   }
+   if (pGreenUnits != NULL)
+   {
+      greenText = pGreenUnits->getUnitName();
+      green *= pGreenUnits->getScaleFromStandard();
+   }
+   if (pBlueUnits != NULL)
+   {
+      blueText = pBlueUnits->getUnitName();
+      blue *= pBlueUnits->getScaleFromStandard();
+   }
+
+   // if units available for all channels and they all have same unit name, set unit text
+   QString unitText("Units vary by channel");
+   if (!redText.empty()&& !greenText.empty() && !blueText.empty() && redText == greenText && greenText == blueText)
+   {
+      unitText = QString::fromStdString(redText);
+   }
+
+   QString displayText = QString::number(blue, 'g', numeric_limits<double>::digits10);
+   if (ConfigurationSettings::getSettingShowStatusBarCubeValueUnits())
+   {
+      displayText += " " + unitText;
+   }
+
    setCubeValue(layerName, QString::number(red, 'g', numeric_limits<double>::digits10),
-      QString::number(green, 'g', numeric_limits<double>::digits10),
-      QString::number(blue, 'g', numeric_limits<double>::digits10));
+      QString::number(green, 'g', numeric_limits<double>::digits10), displayText);
 }
 
-void StatusBar::setCubeValue(const QString& layerName, const QString& strRed, const QString& strGreen, const QString& strBlue)
+void StatusBar::setCubeValue(const QString& layerName, const QString& strRed, const QString& strGreen,
+   const QString& strBlue)
 {
    QString nameText = " Raster";
    if (layerName.isEmpty() == false)

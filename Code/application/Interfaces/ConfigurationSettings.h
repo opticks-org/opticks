@@ -541,6 +541,7 @@ public:
    SETTING(NumberOfMruFiles, General, unsigned int, 3)
    SETTING_PTR(SupportFilesPath, FileLocations, Filename)
    SETTING(ShowStatusBarCubeValue, StatusBar, bool, true)
+   SETTING(ShowStatusBarCubeValueUnits, StatusBar, bool, true)
    SETTING(ShowStatusBarElevationValue, StatusBar, bool, true)
    SETTING(ShowStatusBarGeoCoords, StatusBar, bool, true)
    SETTING(ShowStatusBarPixelCoords, StatusBar, bool, true)

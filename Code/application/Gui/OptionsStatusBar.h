@@ -84,10 +84,10 @@ private:
    QCheckBox* mpPixelCoordsCheck;
    QCheckBox* mpGeoCoordsCheck;
    QCheckBox* mpCubeValueCheck;
+   QCheckBox* mpCubeValueUnitsCheck;
    QCheckBox* mpResultValueCheck;
    QCheckBox* mpRotationValueCheck;
    QCheckBox* mpElevationValueCheck;
-
 };
 
 #endif
