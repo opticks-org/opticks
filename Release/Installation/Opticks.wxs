@@ -150,6 +150,9 @@ are defined in Opticks-Version.wxi, so include that file now -->
             <Component Id="C__QtXml4_Dependency" Guid="$(var.C__QtXml4_DependencyGuid)" Win64="$(var.64Bit)">
                <File Name="QtXml4.dll" Id="F__QtXml4_Dependency" DiskId="1" KeyPath="yes" />
             </Component>
+            <Component Id="C__QtXmlPatterns4_Dependency" Guid="$(var.C__QtXmlPatterns4_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="QtXmlPatterns4.dll" Id="F__QtXmlPatterns4_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
             <Component Id="C__qwt5_Dependency" Guid="$(var.C__qwt5_DependencyGuid)" Win64="$(var.64Bit)">
                <File Name="qwt5.dll" Id="F__qwt5_Dependency" DiskId="1" KeyPath="yes" />
             </Component>
@@ -424,6 +427,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
          <ComponentRef Id="C__QtSql4_Dependency" />
          <ComponentRef Id="C__QtSvg4_Dependency" />
          <ComponentRef Id="C__QtXml4_Dependency" />
+         <ComponentRef Id="C__QtXmlPatterns4_Dependency" />
          <ComponentRef Id="C__qwt5_Dependency" />
          <ComponentRef Id="C__raptor_Dependency" />
          <ComponentRef Id="C__shapelib_Dependency" />

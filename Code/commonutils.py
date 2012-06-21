@@ -148,6 +148,7 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
         lla("libQtSql.so.4")
         lla("libQtSvg.so.4")
         lla("libQtXml.so.4")
+        lla("libQtXmlPatterns.so.4")
         lla("libhdf5.so.6")
         lla("libsz.so.2")
         la(join("plugins", "imageformats", "libqgif.so"), "imageformats")
@@ -227,6 +228,7 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
             la(join("lib", "QtSqld4.dll"))
             la(join("lib", "QtSvgd4.dll"))
             la(join("lib", "QtXmld4.dll"))
+            la(join("lib", "QtXmlPatternsd4.dll"))
         else:
             bla("ehs.dll")
             bla("opencv_haartraining.exe")
@@ -264,6 +266,7 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
             la(join("lib", "QtSql4.dll"))
             la(join("lib", "QtSvg4.dll"))
             la(join("lib", "QtXml4.dll"))
+            la(join("lib", "QtXmlPatterns4.dll"))
     return dp_list
 
 def create_qt_conf(path, verbosity):

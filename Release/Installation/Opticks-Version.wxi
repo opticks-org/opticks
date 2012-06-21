@@ -54,6 +54,7 @@
    <?define C__QtSql4_DependencyGuid = "91e020b7-6a33-41c5-9186-290535068c59" ?>
    <?define C__QtSvg4_DependencyGuid = "3dad72a4-1c77-4d7c-b66a-363ed84475c4" ?>
    <?define C__QtXml4_DependencyGuid = "7143e1b8-9bce-4b88-a0e6-5f1474690e37" ?>
+   <?define C__QtXmlPatterns4_DependencyGuid = "ec475f74-42e9-49cf-82be-e4b94bcfac83" ?>
    <?define C__qwt5_DependencyGuid = "0c2790a1-1dd4-4ad4-a30b-6101367977bb" ?>
    <?define C__shapelib_DependencyGuid = "d5af97c0-5dfa-4ae5-a919-cf4e8431aecd" ?>
    <?define C__tbb_DependencyGuid = "88b9fa58-e341-4ac2-bac2-945d7d945df3" ?>
@@ -166,6 +167,7 @@
    <?define C__QtSql4_DependencyGuid = "09c67a04-a95d-496c-811e-861255f1e210" ?>
    <?define C__QtSvg4_DependencyGuid = "58b9136b-c042-4e9a-925c-dd818c3ea498" ?>
    <?define C__QtXml4_DependencyGuid = "cfcfbc74-b54b-45af-bf8b-0b70b4557693" ?>
+   <?define C__QtXmlPatterns4_DependencyGuid = "21882b5b-19a0-42b9-8de3-ba9568082337" ?>
    <?define C__qwt5_DependencyGuid = "0c64ad2f-26f4-4508-898d-51569f0c2866" ?>
    <?define C__shapelib_DependencyGuid = "2b8945c1-8269-49fb-9557-6b138f5e3360" ?>
    <?define C__tbb_DependencyGuid = "530df795-84de-4096-b030-62d490215357" ?>
