@@ -92,6 +92,7 @@ private:
    OptionsAnimation(const OptionsAnimation& rhs);
    OptionsAnimation& operator=(const OptionsAnimation& rhs);
    QCheckBox* mpCanDropFrames;
+   QCheckBox* mpResetOnStop;
    AnimationCycleButton* mpCycle;
    QListWidget* mpFrameSpeedList;
    std::vector<double> mFrameSpeeds;

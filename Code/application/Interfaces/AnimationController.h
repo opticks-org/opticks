@@ -66,6 +66,7 @@ public:
    SETTING(FrameSpeedSelection, AnimationController, double, 0)
    SETTING(AnimationCycleSelection, AnimationController, AnimationCycle, PLAY_ONCE)
    SETTING(CanDropFrames, AnimationController, bool, false)
+   SETTING(ResetOnStop, AnimationController, bool, true)
 
    /**
     *  Emitted with boost::any<std::string> when the controller is renamed.
@@ -345,11 +346,11 @@ public:
     *
     *  This method provides the capability to effectively speed up or slow down the
     *  animations.  The interval is defined as the value that is set when the controller is
-    *  advanced based on the frequency.  The multipler will increase or decrease the
+    *  advanced based on the frequency.  The multiplier will increase or decrease the
     *  interval value used to set the current frame at the same frequency.
     *
     *  @param   multiplier
-    *           The value to mutliply the interval by when advancing frames in each
+    *           The value to multiply the interval by when advancing frames in each
     *           animation.  A value between 0.0 and 1.0 will effectively slow down the
     *           animations and a value greater than 1.0 will speed up the animations.  This
     *           method does nothing if the value is less than or equal to 0.0.  The
@@ -365,7 +366,7 @@ public:
     *  Returns the multiplier value associated with the value interval that is used
     *  when the controller is advanced.
     *
-    *  @return  The interval multipler value.
+    *  @return  The interval multiplier value.
     *
     *  @see     setIntervalMultiplier()
     */
@@ -455,6 +456,21 @@ public:
     *  @see     AnimationCycle
     */
    virtual AnimationCycle getAnimationCycle() const = 0;
+
+   /**
+    *  Sets the behavior of the controller after the animation is stopped.
+    *
+    *  @param   enableReset
+    *           The enabled status of resetting the animation when the animation is stopped.
+    */
+   virtual void setResetOnStop(bool enableReset) = 0;
+
+   /**
+    *  Returns the status of whether the controller will be reset when stopped.
+    *
+    *  @return  The current reset on stop status.
+    */
+   virtual bool getResetOnStop() const = 0;
 
    /**
     *  Sets the current frame to the starting frame value.

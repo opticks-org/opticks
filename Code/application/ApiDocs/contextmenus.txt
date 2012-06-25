@@ -90,6 +90,7 @@
  *    <tr><td>%Step backward</td><td>APP_ANIMATIONCONTROLLER_STEP_BACKWARD_ACTION()</td></tr>
  *    <tr><td>%Step forward</td><td>APP_ANIMATIONCONTROLLER_STEP_FORWARD_ACTION()</td></tr>
  *    <tr><td>Stop</td><td>APP_ANIMATIONCONTROLLER_STOP_ACTION()</td></tr>
+ *    <tr><td>Reset on Stop</td><td>APP_ANIMATIONCONTROLLER_RESET_ON_STOP_ACTION()</td></tr>
  *    <tr><td>Separator</td><td>APP_ANIMATIONCONTROLLER_BUMPER_SEPARATOR_ACTION()</td></tr>
  *    <tr><td>Bumpers Enabled</td><td>APP_ANIMATIONCONTROLLER_ENABLE_BUMPERS_ACTION()</td></tr>
  *    <tr><td>Left Bumper to Current Frame</td><td>APP_ANIMATIONCONTROLLER_SET_LEFT_BUMPER_ACTION()</td></tr>

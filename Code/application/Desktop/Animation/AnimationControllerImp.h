@@ -61,6 +61,8 @@ public:
    void setStartBumper(double frameValue);
    double getStopBumper() const;
    void setStopBumper(double frameValue);
+   bool getResetOnStop() const;
+   void setResetOnStop(bool enabled);
 
    void setIntervalMultiplier(double multiplier);
    double getIntervalMultiplier() const;
@@ -174,6 +176,7 @@ private:
    QAction* mpStoreBumpersAction;
    QAction* mpRestoreBumpersAction;
    QAction* mpCanDropFramesAction;
+   QAction* mpResetOnStopAction;
    static std::list<AnimationControllerImp*> mRunningControllers;
    static std::list<AnimationControllerImp*>::iterator mppActiveController;
 };
@@ -207,7 +210,7 @@ private:
    } \
    void destroyAnimation(Animation* pAnimation) \
    { \
-      return impClass::destroyAnimation(pAnimation); \
+      impClass::destroyAnimation(pAnimation); \
    } \
    FrameType getFrameType() const \
    { \
@@ -215,7 +218,7 @@ private:
    } \
    void setCurrentFrame(double frameValue) \
    { \
-      return impClass::setCurrentFrame(frameValue); \
+      impClass::setCurrentFrame(frameValue); \
    } \
    double getCurrentFrame() const \
    { \
@@ -235,7 +238,7 @@ private:
    } \
    void setBumpersEnabled(bool enabled) \
    { \
-      return impClass::setBumpersEnabled(enabled); \
+      impClass::setBumpersEnabled(enabled); \
    } \
    double getStartBumper() const \
    { \
@@ -243,7 +246,7 @@ private:
    } \
    void setStartBumper(double frameValue) \
    { \
-      return impClass::setStartBumper(frameValue); \
+      impClass::setStartBumper(frameValue); \
    } \
    double getStopBumper() const \
    { \
@@ -251,11 +254,19 @@ private:
    } \
    void setStopBumper(double frameValue) \
    { \
-      return impClass::setStopBumper(frameValue); \
+      impClass::setStopBumper(frameValue); \
+   } \
+   bool getResetOnStop() const \
+   { \
+      return impClass::getResetOnStop(); \
+   } \
+   void setResetOnStop(bool enableReset) \
+   { \
+      impClass::setResetOnStop(enableReset); \
    } \
    void setIntervalMultiplier(double multiplier) \
    { \
-      return impClass::setIntervalMultiplier(multiplier); \
+      impClass::setIntervalMultiplier(multiplier); \
    } \
    double getIntervalMultiplier() const \
    { \
@@ -275,7 +286,7 @@ private:
    } \
    void setAnimationState(AnimationState state) \
    { \
-      return impClass::setAnimationState(state); \
+      impClass::setAnimationState(state); \
    } \
    AnimationState getAnimationState() const \
    { \
@@ -283,7 +294,7 @@ private:
    } \
    void setAnimationCycle(AnimationCycle cycle) \
    { \
-      return impClass::setAnimationCycle(cycle); \
+      impClass::setAnimationCycle(cycle); \
    } \
    AnimationCycle getAnimationCycle() const \
    { \
@@ -291,23 +302,23 @@ private:
    } \
    void moveToBeginning() \
    { \
-      return impClass::moveToBeginning(); \
+      impClass::moveToBeginning(); \
    } \
    void moveToEnd() \
    { \
-      return impClass::moveToEnd(); \
+      impClass::moveToEnd(); \
    } \
    void pause() \
    { \
-      return impClass::pause(); \
+      impClass::pause(); \
    } \
    void stop() \
    { \
-      return impClass::stop(); \
+      impClass::stop(); \
    } \
    void setCanDropFrames(bool drop) \
    { \
-      return impClass::setCanDropFrames(drop); \
+      impClass::setCanDropFrames(drop); \
    } \
    bool getCanDropFrames() const \
    { \
@@ -315,23 +326,23 @@ private:
    } \
    void play() \
    { \
-      return impClass::play(); \
+      impClass::play(); \
    } \
    void stepForward() \
    { \
-      return impClass::stepForward(); \
+      impClass::stepForward(); \
    } \
    void stepBackward() \
    { \
-      return impClass::stepBackward(); \
+      impClass::stepBackward(); \
    } \
    void fastForward(double multiplier) \
    { \
-      return impClass::fastForward(multiplier); \
+      impClass::fastForward(multiplier); \
    } \
    void fastRewind(double multiplier) \
    { \
-      return impClass::fastRewind(multiplier); \
+      impClass::fastRewind(multiplier); \
    }
    
 #endif

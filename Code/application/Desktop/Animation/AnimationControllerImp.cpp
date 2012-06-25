@@ -91,7 +91,8 @@ AnimationControllerImp::AnimationControllerImp(FrameType frameType, const string
    mpSeparator3Action(NULL),
    mpStoreBumpersAction(NULL),
    mpRestoreBumpersAction(NULL),
-   mpCanDropFramesAction(NULL)
+   mpCanDropFramesAction(NULL),
+   mpResetOnStopAction(NULL)
 {
    // Context menu actions
    mpPlayAction = new QAction("Play", this);
@@ -139,6 +140,11 @@ AnimationControllerImp::AnimationControllerImp(FrameType frameType, const string
    mpCanDropFramesAction->setAutoRepeat(false);
    mpCanDropFramesAction->setCheckable(true);
    mpCanDropFramesAction->setChecked(AnimationController::getSettingCanDropFrames());
+
+   mpResetOnStopAction = new QAction("Reset on Stop", this);
+   mpResetOnStopAction->setAutoRepeat(false);
+   mpResetOnStopAction->setCheckable(true);
+   mpResetOnStopAction->setChecked(AnimationController::getSettingResetOnStop());
 
    mpSeparatorAction = new QAction("", this);
    mpSeparatorAction->setSeparator(true);
@@ -226,6 +232,7 @@ list<ContextMenuAction> AnimationControllerImp::getContextMenuActions() const
          menuActions.push_front(ContextMenuAction(mpStopAction, APP_ANIMATIONCONTROLLER_STOP_ACTION));
          menuActions.push_front(ContextMenuAction(mpPauseAction, APP_ANIMATIONCONTROLLER_PAUSE_ACTION));
       }
+      menuActions.push_back(ContextMenuAction(mpResetOnStopAction, APP_ANIMATIONCONTROLLER_RESET_ON_STOP_ACTION));
 
       menuActions.push_back(ContextMenuAction(mpSeparatorAction, APP_ANIMATIONCONTROLLER_BUMPER_SEPARATOR_ACTION));
       menuActions.push_back(ContextMenuAction(mpBumpersEnabledAction, APP_ANIMATIONCONTROLLER_ENABLE_BUMPERS_ACTION));
@@ -574,13 +581,16 @@ void AnimationControllerImp::stop()
       removeFromRunningControllers();
       setAnimationState(STOP);
 
-      if (previousState == PLAY_BACKWARD || previousState == PAUSE_BACKWARD)
+      if (mpResetOnStopAction->isChecked())
       {
-         moveToEnd();
-      }
-      else
-      {
-         moveToBeginning();
+         if (previousState == PLAY_BACKWARD || previousState == PAUSE_BACKWARD)
+         {
+            moveToEnd();
+         }
+         else
+         {
+            moveToBeginning();
+         }
       }
    }
 }
@@ -1465,4 +1475,14 @@ void AnimationControllerImp::adjustBumpers()
       setStartBumper(pFrameSubset->getStartFrame());
       setStopBumper(pFrameSubset->getStopFrame());
    }
+}
+
+bool AnimationControllerImp::getResetOnStop() const
+{
+   return mpResetOnStopAction->isChecked();
+}
+
+void AnimationControllerImp::setResetOnStop(bool enabled)
+{
+   mpResetOnStopAction->setChecked(enabled);
 }
