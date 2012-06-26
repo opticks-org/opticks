@@ -1,0 +1,280 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{94A7D2C4-8623-4EF3-8FC9-06CD470A15BD}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>Model</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\CompileSettings\32bitSettings.props" />
+    <Import Project="..\CompileSettings\Macros.props" />
+    <Import Project="..\CompileSettings\AllCommonSettings-Release-32bit.props" />
+    <Import Project="..\CompileSettings\ApplicationCommonSettings.props" />
+    <Import Project="..\CompileSettings\pthreads.props" />
+    <Import Project="..\CompileSettings\Xerces.props" />
+    <Import Project="..\CompileSettings\Qt.props" />
+    <Import Project="..\CompileSettings\Cg.props" />
+    <Import Project="..\CompileSettings\EnableWarnings.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\CompileSettings\32bitSettings.props" />
+    <Import Project="..\CompileSettings\Macros.props" />
+    <Import Project="..\CompileSettings\AllCommonSettings-Debug-32bit.props" />
+    <Import Project="..\CompileSettings\ApplicationCommonSettings.props" />
+    <Import Project="..\CompileSettings\pthreads.props" />
+    <Import Project="..\CompileSettings\Xerces.props" />
+    <Import Project="..\CompileSettings\Qt.props" />
+    <Import Project="..\CompileSettings\Cg.props" />
+    <Import Project="..\CompileSettings\EnableWarnings.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\CompileSettings\64bitSettings.props" />
+    <Import Project="..\CompileSettings\Macros.props" />
+    <Import Project="..\CompileSettings\AllCommonSettings-Release-64bit.props" />
+    <Import Project="..\CompileSettings\ApplicationCommonSettings.props" />
+    <Import Project="..\CompileSettings\pthreads.props" />
+    <Import Project="..\CompileSettings\Xerces.props" />
+    <Import Project="..\CompileSettings\Qt.props" />
+    <Import Project="..\CompileSettings\Cg.props" />
+    <Import Project="..\CompileSettings\EnableWarnings.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\CompileSettings\64bitSettings.props" />
+    <Import Project="..\CompileSettings\Macros.props" />
+    <Import Project="..\CompileSettings\AllCommonSettings-Debug-64bit.props" />
+    <Import Project="..\CompileSettings\ApplicationCommonSettings.props" />
+    <Import Project="..\CompileSettings\pthreads.props" />
+    <Import Project="..\CompileSettings\Xerces.props" />
+    <Import Project="..\CompileSettings\Qt.props" />
+    <Import Project="..\CompileSettings\Cg.props" />
+    <Import Project="..\CompileSettings\EnableWarnings.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\Gui\Graphic;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>
+      </AssemblerListingLocation>
+      <BrowseInformationFile>
+      </BrowseInformationFile>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\Gui\Graphic;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>
+      </AssemblerListingLocation>
+      <BrowseInformationFile>
+      </BrowseInformationFile>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\Gui\Graphic;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\Gui\Graphic;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="AnnotationElementAdapter.cpp" />
+    <ClCompile Include="AnnotationElementImp.cpp" />
+    <ClCompile Include="AnyAdapter.cpp" />
+    <ClCompile Include="AnyImp.cpp" />
+    <ClCompile Include="AoiElementAdapter.cpp" />
+    <ClCompile Include="AoiElementImp.cpp" />
+    <ClCompile Include="BitMaskImp.cpp" />
+    <ClCompile Include="ClassificationAdapter.cpp" />
+    <ClCompile Include="ClassificationImp.cpp" />
+    <ClCompile Include="ConvertToBilPage.cpp" />
+    <ClCompile Include="ConvertToBilPager.cpp" />
+    <ClCompile Include="ConvertToBipPage.cpp" />
+    <ClCompile Include="ConvertToBipPager.cpp" />
+    <ClCompile Include="ConvertToBsqPage.cpp" />
+    <ClCompile Include="ConvertToBsqPager.cpp" />
+    <ClCompile Include="DataDescriptorAdapter.cpp" />
+    <ClCompile Include="DataDescriptorImp.cpp" />
+    <ClCompile Include="DataElementAdapter.cpp" />
+    <ClCompile Include="DataElementGroupAdapter.cpp" />
+    <ClCompile Include="DataElementGroupImp.cpp" />
+    <ClCompile Include="DataElementImp.cpp" />
+    <ClCompile Include="DataRequestImp.cpp" />
+    <ClCompile Include="EndianSwapPage.cpp" />
+    <ClCompile Include="FileDescriptorAdapter.cpp" />
+    <ClCompile Include="FileDescriptorImp.cpp" />
+    <ClCompile Include="GcpListAdapter.cpp" />
+    <ClCompile Include="GcpListImp.cpp" />
+    <ClCompile Include="GraphicElementAdapter.cpp" />
+    <ClCompile Include="GraphicElementImp.cpp" />
+    <ClCompile Include="InMemoryPage.cpp" />
+    <ClCompile Include="InMemoryPager.cpp" />
+    <ClCompile Include="LibrarySignatureAdapter.cpp" />
+    <ClCompile Include="LibrarySignatureImp.cpp" />
+    <ClCompile Include="MemoryMappedMatrix.cpp" />
+    <ClCompile Include="MemoryMappedMatrixView.cpp" />
+    <ClCompile Include="MemoryMappedPage.cpp" />
+    <ClCompile Include="MemoryMappedPager.cpp" />
+    <ClCompile Include="ModelServicesImp.cpp" />
+    <ClCompile Include="RasterDataDescriptorAdapter.cpp" />
+    <ClCompile Include="RasterDataDescriptorImp.cpp" />
+    <ClCompile Include="RasterElementAdapter.cpp" />
+    <ClCompile Include="RasterElementImp.cpp" />
+    <ClCompile Include="RasterFileDescriptorAdapter.cpp" />
+    <ClCompile Include="RasterFileDescriptorImp.cpp" />
+    <ClCompile Include="SignatureAdapter.cpp" />
+    <ClCompile Include="SignatureDataDescriptorAdapter.cpp" />
+    <ClCompile Include="SignatureDataDescriptorImp.cpp" />
+    <ClCompile Include="SignatureFileDescriptorAdapter.cpp" />
+    <ClCompile Include="SignatureFileDescriptorImp.cpp" />
+    <ClCompile Include="SignatureImp.cpp" />
+    <ClCompile Include="SignatureLibraryAdapter.cpp" />
+    <ClCompile Include="SignatureLibraryImp.cpp" />
+    <ClCompile Include="SignatureSetAdapter.cpp" />
+    <ClCompile Include="SignatureSetImp.cpp" />
+    <ClCompile Include="StatisticsImp.cpp" />
+    <ClCompile Include="TiePointListAdapter.cpp" />
+    <ClCompile Include="TiePointListImp.cpp" />
+    <ClCompile Include="UnitsAdapter.cpp" />
+    <ClCompile Include="UnitsImp.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AnnotationElementAdapter.h" />
+    <ClInclude Include="AnnotationElementImp.h" />
+    <ClInclude Include="AnyAdapter.h" />
+    <ClInclude Include="AnyImp.h" />
+    <ClInclude Include="AoiElementAdapter.h" />
+    <ClInclude Include="AoiElementImp.h" />
+    <ClInclude Include="BitMaskImp.h" />
+    <ClInclude Include="ClassificationAdapter.h" />
+    <ClInclude Include="ClassificationImp.h" />
+    <ClInclude Include="ConvertToBilPage.h" />
+    <ClInclude Include="ConvertToBilPager.h" />
+    <ClInclude Include="ConvertToBipPage.h" />
+    <ClInclude Include="ConvertToBipPager.h" />
+    <ClInclude Include="ConvertToBsqPage.h" />
+    <ClInclude Include="ConvertToBsqPager.h" />
+    <ClInclude Include="DataDescriptorAdapter.h" />
+    <ClInclude Include="DataDescriptorImp.h" />
+    <ClInclude Include="DataElementAdapter.h" />
+    <ClInclude Include="DataElementGroupAdapter.h" />
+    <ClInclude Include="DataElementGroupImp.h" />
+    <ClInclude Include="DataElementImp.h" />
+    <ClInclude Include="DataRequestImp.h" />
+    <ClInclude Include="EndianSwapPage.h" />
+    <ClInclude Include="FileDescriptorAdapter.h" />
+    <ClInclude Include="FileDescriptorImp.h" />
+    <ClInclude Include="GcpListAdapter.h" />
+    <ClInclude Include="GcpListImp.h" />
+    <ClInclude Include="GraphicElementAdapter.h" />
+    <ClInclude Include="GraphicElementImp.h" />
+    <ClInclude Include="InMemoryPage.h" />
+    <ClInclude Include="InMemoryPager.h" />
+    <ClInclude Include="LibrarySignatureAdapter.h" />
+    <ClInclude Include="LibrarySignatureImp.h" />
+    <ClInclude Include="MemoryMappedMatrix.h" />
+    <ClInclude Include="MemoryMappedMatrixView.h" />
+    <ClInclude Include="MemoryMappedPage.h" />
+    <ClInclude Include="MemoryMappedPager.h" />
+    <ClInclude Include="ModelServicesImp.h" />
+    <ClInclude Include="RasterDataDescriptorAdapter.h" />
+    <ClInclude Include="RasterDataDescriptorImp.h" />
+    <ClInclude Include="RasterElementAdapter.h" />
+    <ClInclude Include="RasterElementImp.h" />
+    <ClInclude Include="RasterFileDescriptorAdapter.h" />
+    <ClInclude Include="RasterFileDescriptorImp.h" />
+    <ClInclude Include="SignatureAdapter.h" />
+    <ClInclude Include="SignatureDataDescriptorAdapter.h" />
+    <ClInclude Include="SignatureDataDescriptorImp.h" />
+    <ClInclude Include="SignatureFileDescriptorAdapter.h" />
+    <ClInclude Include="SignatureFileDescriptorImp.h" />
+    <ClInclude Include="SignatureImp.h" />
+    <ClInclude Include="SignatureLibraryAdapter.h" />
+    <ClInclude Include="SignatureLibraryImp.h" />
+    <ClInclude Include="SignatureSetAdapter.h" />
+    <ClInclude Include="SignatureSetImp.h" />
+    <ClInclude Include="StatisticsImp.h" />
+    <ClInclude Include="TiePointListAdapter.h" />
+    <ClInclude Include="TiePointListImp.h" />
+    <ClInclude Include="UnitsAdapter.h" />
+    <ClInclude Include="UnitsImp.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="SignatureLibrary.rationale" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

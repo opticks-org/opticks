@@ -1,0 +1,18 @@
+<pre>
+Regex for PCRE is distributed under the same licensing as PCRE.
+The general idea is that you either have to distribute it under the GPL,
+LGPL, or give proper credit to the use and source of this software package.
+
+Copyright Notice:
+
+Original PCRE wrapper written by:
+(C) Hugo Etchegoyen
+    hetchego@hasar.com
+    Buenos Aires, Argentina.
+
+Current wrapper written by:
+(C) Zachary Hansen
+    xaxxon@slackworks.com
+
+Note: Opticks uses a modified version of the PME library.
+</pre>
