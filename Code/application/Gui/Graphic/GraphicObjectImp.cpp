@@ -1795,6 +1795,13 @@ void GraphicObjectImp::drawLabel() const
             double screenY = 0.0;
             pLayer->translateDataToScreen(location.mX, location.mY, screenX, screenY);
 
+            string objectName = getName();
+            QFontMetrics metrics(getFont());
+            double width = metrics.boundingRect(QString::fromStdString(objectName)).width();
+            double height = metrics.height();
+            screenX -= width / 2.0;
+            screenY -= height / 2.0;
+
             pView->renderText(static_cast<int>(screenX), pView->height() - static_cast<int>(screenY),
                QString::fromStdString(getName()), getFont());
          }
@@ -1804,13 +1811,11 @@ void GraphicObjectImp::drawLabel() const
 
 LocationType GraphicObjectImp::getLabelPosition() const
 {
-   string objectName = getName();
-   QFontMetrics metrics(getFont());
    LocationType llCorner = getLlCorner();
    LocationType urCorner = getUrCorner();
    LocationType retval;
-   retval.mX = (llCorner.mX + urCorner.mX - metrics.width(QString::fromStdString(objectName))) / 2;
-   retval.mY = (llCorner.mY + urCorner.mY - metrics.height()) / 2;
+   retval.mX = (llCorner.mX + urCorner.mX) / 2;
+   retval.mY = (llCorner.mY + urCorner.mY) / 2;
 
    return retval;
 }
