@@ -198,7 +198,7 @@ void FusionAlgorithmInputsPage::aoiLayerDeleted(Subject& subject, const string& 
       SpatialDataView* pView = getPrimaryView();
       if (pView != NULL)
       {
-         AoiLayer* pNewLayer = static_cast<AoiLayer*>(pAoiLayer->copy(false));
+         AoiLayer* pNewLayer = static_cast<AoiLayer*>(pAoiLayer->copy());
          VERIFYNRV(pNewLayer != NULL);
 
          AoiElement* pNewLayerAoi = dynamic_cast<AoiElement*>(pNewLayer->getDataElement());
