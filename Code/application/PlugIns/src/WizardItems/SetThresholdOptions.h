@@ -40,6 +40,7 @@ private:
    RegionUnits mRegionUnits;
    SymbolType mSymbol;
    ColorType mColor;
+   unsigned int mDisplayBandNumber;
 };
 
 #endif

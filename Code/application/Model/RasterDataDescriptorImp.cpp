@@ -19,6 +19,7 @@
 #include "RasterFileDescriptorImp.h"
 #include "RasterUtilities.h"
 #include "StringUtilities.h"
+#include "XmlUtilities.h"
 
 XERCES_CPP_NAMESPACE_USE
 using namespace std;

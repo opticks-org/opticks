@@ -260,6 +260,7 @@ extern "C"
                                                      3 -> Everywhere except between 1st and 2nd threshold values. */
       uint32_t regionUnits;      /**< Define the units for the threshold values.
                                       0 -> Raw values, 1 -> Percentage, 2 -> Percentile, 3 -> Std dev. */
+      uint32_t displayedBand;    /**< The 0-based, active band number for the band displayed in the layer. */ 
    };
 
    /**

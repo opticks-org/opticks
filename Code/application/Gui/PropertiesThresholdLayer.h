@@ -10,18 +10,20 @@
 #ifndef PROPERTIESTHRESHOLDLAYER_H
 #define PROPERTIESTHRESHOLDLAYER_H
 
-#include <QtGui/QDoubleSpinBox>
-#include <QtGui/QLabel>
-
 #include "LabeledSectionGroup.h"
+#include "Modifier.h"
 #include "TypesFile.h"
 
 #include <string>
 
 class CustomColorButton;
 class PassAreaComboBox;
+class QComboBox;
+class QDoubleSpinBox;
+class QLabel;
 class RegionUnitsComboBox;
 class SessionItem;
+class StretchTypeComboBox;
 class SymbolTypeButton;
 class ThresholdLayer;
 
@@ -31,7 +33,7 @@ class PropertiesThresholdLayer : public LabeledSectionGroup
 
 public:
    PropertiesThresholdLayer();
-   ~PropertiesThresholdLayer();
+   virtual ~PropertiesThresholdLayer();
 
    bool initialize(SessionItem* pSessionItem);
    bool applyChanges();
@@ -56,9 +58,14 @@ private:
    ThresholdLayer* mpThresholdLayer;
    RegionUnits mUnits;
 
+   // Display
+   QComboBox* mpDisplayBand;
+   Modifier mDisplayModifier;
+
    // Pixel marker
    SymbolTypeButton* mpSymbolButton;
    CustomColorButton* mpColorButton;
+   Modifier mMarkerModifier;
 
    // Pass area
    PassAreaComboBox* mpPassAreaCombo;
@@ -66,6 +73,7 @@ private:
    QDoubleSpinBox* mpFirstValueSpin;
    QLabel* mpSecondValueLabel;
    QDoubleSpinBox* mpSecondValueSpin;
+   Modifier mPassModifier;
 };
 
 #endif

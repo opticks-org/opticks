@@ -10,6 +10,7 @@
 #ifndef THRESHOLDLAYERIMP_H
 #define THRESHOLDLAYERIMP_H
 
+#include "DimensionDescriptor.h"
 #include "LayerImp.h"
 #include "ObjectFactory.h"
 #include "ObjectResource.h"
@@ -28,7 +29,7 @@ public:
    static void getLayerTypes(std::vector<std::string>& classList);
 
    ThresholdLayerImp(const std::string& id, const std::string& layerName, DataElement* pElement);
-   ~ThresholdLayerImp();
+   virtual ~ThresholdLayerImp();
 
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;
@@ -46,6 +47,7 @@ public:
    double getFirstThreshold() const;
    double getSecondThreshold() const;
    QString getRegionUnitsAsString() const;
+   DimensionDescriptor getDisplayedBand() const;
 
    double convertThreshold(const RegionUnits& eUnits, double dThreshold,
       const RegionUnits& eNewUnits) const;
@@ -73,6 +75,7 @@ public slots:
    void setSecondThreshold(double dRawValue);
    void setColor(const QColor &color);
    void setSymbol(SymbolType symbol);
+   void setDisplayedBand(DimensionDescriptor band);
    void reset();
 
 signals:
@@ -82,6 +85,7 @@ signals:
    void secondThresholdChanged(double dThreshold);
    void colorChanged(const QColor& color);
    void symbolChanged(SymbolType symbol);
+   void displayedBandChanged(DimensionDescriptor band);
 
 protected:
    Statistics* getStatistics(RasterChannelType eColor) const;
@@ -96,6 +100,7 @@ private:
    double mdSecondThreshold;
    SymbolType mSymbol;
    QColor mColor;
+   DimensionDescriptor mDisplayedBand;
 
    mutable bool mbModified;
    mutable FactoryResource<BitMask> mpMask;
@@ -136,9 +141,17 @@ private:
    { \
       return impClass::setRegionUnits(eUnits); \
    } \
-   RegionUnits getRegionUnits() const \
+   void setDisplayedBand(DimensionDescriptor band) \
+   { \
+      return impClass::setDisplayedBand(band); \
+   } \
+      RegionUnits getRegionUnits() const \
    { \
       return impClass::getRegionUnits(); \
+   } \
+   DimensionDescriptor getDisplayedBand() const \
+   { \
+      return impClass::getDisplayedBand(); \
    } \
    double convertThreshold(const RegionUnits& eUnits, double dThreshold, const RegionUnits& eNewUnits) \
    { \

@@ -52,7 +52,8 @@ public:
       const Layer* pLayer, Progress* pProgress);
    void writeThresholdLayer(const std::string& hdfPath, const std::string& datasetPath, const std::string& layerName,
       double xScaleFactor, double yScaleFactor, double xOffset, double yOffset, SymbolType symbol, ColorType color,
-      double firstThreshold, double secondThreshold, RegionUnits regionUnits, PassArea passArea, Progress* pProgress);
+      double firstThreshold, double secondThreshold, RegionUnits regionUnits, PassArea passArea, Progress* pProgress,
+      unsigned int displayBandNumber);
    void abort();
    void setChunkSize(int chunkSize);
    void setCompressionType(IceCompressionType type);
@@ -91,7 +92,8 @@ private:
       const PseudocolorLayer* pLayer, Progress*pProgress);
    void writeThresholdLayerProperties(const std::string& hdfPath, const ThresholdLayer* pLayer, Progress* pProgress);
    void writeThresholdLayerProperties(const std::string& hdfPath, SymbolType symbol, ColorType color,
-      double firstThreshold, double secondThreshold, RegionUnits regionUnits, PassArea passArea, Progress* pProgress);
+      double firstThreshold, double secondThreshold, RegionUnits regionUnits, PassArea passArea, Progress* pProgress,
+      unsigned int displayBandNumber);
    void writeLayerProperties(const std::string& hdfPath, const Layer* pLayer, Progress* pProgress);
    void writeLayerProperties(const std::string& hdfPath, const std::string& name, LayerType type, double xScaleFactor,
       double yScaleFactor, double xOffset, double yOffset, Progress* pProgress);

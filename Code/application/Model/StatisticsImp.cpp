@@ -19,11 +19,11 @@
 #include "RasterElement.h"
 #include "RasterElementImp.h"
 #include "RasterDataDescriptor.h"
-#include "RasterFileDescriptorImp.h"
 #include "StatisticsImp.h"
 #include "switchOnEncoding.h"
 #include "UtilityServicesImp.h"
 #include "xmlreader.h"
+#include "XmlUtilities.h"
 #include "xmlwriter.h"
 
 #include <algorithm>

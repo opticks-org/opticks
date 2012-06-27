@@ -11,6 +11,7 @@
 #define THRESHOLDLAYERUNDO_H
 
 #include "ColorType.h"
+#include "DimensionDescriptor.h"
 #include "LayerUndo.h"
 #include "UndoAction.h"
 #include "TypesFile.h"
@@ -82,7 +83,6 @@ private:
    ColorType mNewColor;
 };
 
-
 class SetThresholdSymbol : public UndoAction
 {
 public:
@@ -99,6 +99,21 @@ private:
 };
 
 
+class SetThresholdBand : public UndoAction
+{
+public:
+   SetThresholdBand(ThresholdLayer* pLayer, DimensionDescriptor oldBand, DimensionDescriptor newBand);
+
+   void executeUndo();
+   void executeRedo();
+
+private:
+   SetThresholdBand(const SetThresholdBand& rhs);
+   SetThresholdBand& operator=(const SetThresholdBand& rhs);
+   DimensionDescriptor mOldBand;
+   DimensionDescriptor mNewBand;
+};
+
 class ThresholdLayerMemento : public LayerMemento
 {
 public:
@@ -114,6 +129,7 @@ private:
    RegionUnits mUnits;
    ColorType mColor;
    SymbolType mSymbol;
+   DimensionDescriptor mDisplayedBand;
 };
 
 #endif

@@ -123,18 +123,6 @@ private:
    std::vector<const Filename*> mBandFiles;
 };
 
-namespace XmlUtilities
-{
-   void serializeDimensionDescriptor(const DimensionDescriptor& desc, XMLWriter* pXml);
-   void deserializeDimensionDescriptor(DimensionDescriptor& desc, XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pNode);
-
-   void serializeDimensionDescriptors(const std::string& elementName,
-      const std::vector<DimensionDescriptor>& desc, XMLWriter* pXml);
-   void deserializeDimensionDescriptors(const std::string& elementName,
-      std::vector<DimensionDescriptor>& desc,
-      XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pNode);
-};
-
 #define RASTERFILEDESCRIPTORADAPTEREXTENSION_CLASSES \
    FILEDESCRIPTORADAPTEREXTENSION_CLASSES
 

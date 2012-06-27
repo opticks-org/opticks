@@ -130,13 +130,16 @@ void IceThresholdLayerExporter::finishWriting(IceWriter& writer)
    }
    else if (mpRaster != NULL)
    {
+      // layer is NULL so no displayed band specified - just use default of first active band
+      unsigned int bandNumber(0);
+
       if (mRegionUnits != RAW_VALUE)
       {
          const RasterDataDescriptor* pDescriptor =
             dynamic_cast<const RasterDataDescriptor*>(mpRaster->getDataDescriptor());
          ICEVERIFY_MSG(pDescriptor != NULL, "Unable to get the raster data descriptor.");
 
-         Statistics* pStatistics = mpRaster->getStatistics(pDescriptor->getActiveBand(0));
+         Statistics* pStatistics = mpRaster->getStatistics(pDescriptor->getActiveBand(bandNumber));
          ICEVERIFY_MSG(pStatistics != NULL, "Unable to get the raster element statistics.");
 
          mFirstThreshold = convertThreshold(pStatistics, mRegionUnits, mFirstThreshold);
@@ -145,7 +148,7 @@ void IceThresholdLayerExporter::finishWriting(IceWriter& writer)
 
       writer.writeThresholdLayer("/Layers/ThresholdLayer1", outputCubePath(), mpRaster->getName(), 1.0, 1.0, 0.0, 0.0,
          ThresholdLayer::getSettingMarkerSymbol(), ThresholdLayer::getSettingMarkerColor(), mFirstThreshold,
-         mSecondThreshold, mRegionUnits, mPassArea, mpProgress);
+         mSecondThreshold, mRegionUnits, mPassArea, mpProgress, bandNumber);
    }
 }
 

@@ -10,6 +10,7 @@
 #include "AppConfig.h"
 #include "ColorMap.h"
 #include "DesktopServices.h"
+#include "DimensionDescriptor.h"
 #include "DockWindow.h"
 #include "FileFinder.h"
 #include "Layer.h"
@@ -461,6 +462,19 @@ extern "C"
          setLastError(SIMPLE_BAD_PARAMS);
          return 1;
       }
+
+      // get the active band number for the displayed band
+      DimensionDescriptor desc = pThresh->getDisplayedBand();
+      if (desc.isActiveNumberValid())
+      {
+         pInfo->displayedBand = desc.getActiveNumber();
+      }
+      else
+      {
+         setLastError(SIMPLE_BAD_PARAMS);
+         return 1;
+      }
+
       // convert the threshold values to the current threshold region units
       pInfo->firstThreshold = pThresh->convertThreshold(RAW_VALUE,
          pThresh->getFirstThreshold(), pThresh->getRegionUnits());

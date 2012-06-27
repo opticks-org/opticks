@@ -9,11 +9,13 @@
 
 #ifndef THRESHOLDLAYER_H
 #define THRESHOLDLAYER_H
-
+#include "DimensionDescriptor.h"
 #include "ColorType.h"
 #include "ConfigurationSettings.h"
 #include "Layer.h"
 #include "TypesFile.h"
+
+class RasterElement;
 
 /**
  *  Adjusts the properties of a threshold layer.
@@ -71,6 +73,12 @@ public:
     *  Emitted with boost::any<ColorType> when the color is changed.
     */
    SIGNAL_METHOD(ThresholdLayer, ColorChanged)
+
+   /**
+    *  Emitted with boost::any<DimensionDescriptor>
+    *  when the displayed band is changed.
+    */
+   SIGNAL_METHOD(ThresholdLayer, DisplayedBandChanged)
 
    /**
     *  Sets the first threshold value for the current threshold layer.
@@ -224,6 +232,30 @@ public:
     *  @notify  This method will notify signalColorChanged() with boost::any<ColorType>.
     */
    virtual void setColor(const ColorType &color) = 0;
+
+   /**
+    *  Returns the displayed band for the layer.
+    *
+    *  @return  The displayed band for the layer.
+    */
+   virtual DimensionDescriptor getDisplayedBand() const = 0;
+
+   /**
+    *  Sets the band to display in the layer.
+    *
+    *  This method replaces the existing displayed band in the layer with
+    *  the given band.  The contrast stretch for the layer is not changed.
+    *
+    *  @param   band
+    *           The band to display.  Pass in an invalid band to not display
+    *           any band in the layer.
+    *
+    *  @notify  The signalDisplayedBandChanged() signal is emitted with
+    *           boost::any<DimensionDescriptor> containing the new displayed band.
+    *
+    *  @see     getDisplayedBand(), DimensionDescriptor::isValid()
+    */
+   virtual void setDisplayedBand(DimensionDescriptor band) = 0;
 
 protected:
    /**

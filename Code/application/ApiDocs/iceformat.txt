@@ -1119,6 +1119,7 @@ In addition, this group will also contain the attributes listed below.
 <b>HDF5 Path:</b> ThresholdLayerProperties <br>
 <b>HDF5 Container:</b> HDF5 Group <br>
 <b>Added In:</b> Version 1.20 <br>
+<b>Last Modified In:</b> Version 1.30 <br>
 <b>Removed In:</b> N/A <br>
 <b>Required In:</b> None <br>
 <b>Optional In:</b> Version >= 1.20 <br>
@@ -1128,6 +1129,7 @@ of a single threshold layer. Its members are provided below.
 <table align="center">
 <tr>
     <td><b>Name</b></td>
+    <td><b>Ice Version Present</b></td>
     <td><b>HDF5 Container</b></td>
     <td><b>HDF5 Type</b></td>
     <td><b>HDF5 DataSpace</b></td>
@@ -1135,6 +1137,7 @@ of a single threshold layer. Its members are provided below.
 </tr>
 <tr>
     <td>Symbol</td>
+    <td>1.20 to current</td>
     <td>HDF5 Attribute</td>
     <td>H5T_C_S1</td>
     <td>Scalar</td>
@@ -1146,6 +1149,7 @@ of a single threshold layer. Its members are provided below.
 </tr>
 <tr>
     <td>Color</td>
+    <td>1.20 to current</td>
     <td>HDF5 Attribute</td>
     <td>H5T_C_S1</td>
     <td>Scalar</td>
@@ -1157,6 +1161,7 @@ of a single threshold layer. Its members are provided below.
 </tr>
 <tr>
     <td>PassArea</td>
+    <td>1.20 to current</td>
     <td>HDF5 Attribute</td>
     <td>H5T_C_S1</td>
     <td>Scalar</td>
@@ -1167,6 +1172,7 @@ of a single threshold layer. Its members are provided below.
 </tr>
 <tr>
     <td>RegionUnits</td>
+    <td>1.20 to current</td>
     <td>HDF5 Attribute</td>
     <td>H5T_C_S1</td>
     <td>Scalar</td>
@@ -1177,6 +1183,7 @@ of a single threshold layer. Its members are provided below.
 </tr>
 <tr>
     <td>FirstThreshold</td>
+    <td>1.20 to current</td>
     <td>HDF5 Attribute</td>
     <td>H5T_NATIVE_DOUBLE</td>
     <td>Scalar</td>
@@ -1188,12 +1195,25 @@ of a single threshold layer. Its members are provided below.
 </tr>
 <tr>
     <td>SecondThreshold</td>
+    <td>1.20 to current</td>
     <td>HDF5 Attribute</td>
     <td>H5T_NATIVE_DOUBLE</td>
     <td>Scalar</td>
     <td>
     For pass areas of "Middle" and "Outside", this is the greater threshold value that is used in conjunction
     with the first threshold value to flag pixels. For pass areas of "Lower" and "Upper", this value is ignored.
+    </td>
+</tr>
+<tr>
+    <td>DisplayBandNumber</td>
+    <td>1.30 to current</td>
+    <td>HDF5 Attribute</td>
+    <td>H5T_NATIVE_UINT</td>
+    <td>Scalar</td>
+    <td>
+    This attribute is the zero-based index for the active band used for the layer display. The raster element
+    associated with a threshold layer may contain multiple bands. The layer display can be based on any band
+    in the element.
     </td>
 </tr>
 </table>

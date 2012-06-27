@@ -28,6 +28,7 @@
 #include "ThresholdLayerUndo.h"
 #include "UtilityServices.h"
 #include "View.h"
+#include "XmlUtilities.h"
 
 #include <vector>
 #include <algorithm>
@@ -135,12 +136,27 @@ ThresholdLayerImp::ThresholdLayerImp(const string& id, const string& layerName, 
    // Setting up the icon.
    setIcon(QIcon(":/icons/ThresholdLayer"));
 
+   // initialize to display first band
+   if (pElement != NULL)
+   {
+      RasterDataDescriptor* pDesc = dynamic_cast<RasterDataDescriptor*>(pElement->getDataDescriptor());
+      if (pDesc != NULL)
+      {
+         vector<DimensionDescriptor> bands = pDesc->getBands();
+         if (bands.empty() == false)
+         {
+            mDisplayedBand = bands.front();
+         }
+      }
+   }
+
    VERIFYNR(connect(this, SIGNAL(firstThresholdChanged(double)), this, SIGNAL(modified())));
    VERIFYNR(connect(this, SIGNAL(secondThresholdChanged(double)), this, SIGNAL(modified())));
    VERIFYNR(connect(this, SIGNAL(passAreaChanged(const PassArea&)), this, SIGNAL(modified())));
    VERIFYNR(connect(this, SIGNAL(regionUnitsChanged(const RegionUnits&)), this, SIGNAL(modified())));
    VERIFYNR(connect(this, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(modified())));
    VERIFYNR(connect(this, SIGNAL(symbolChanged(SymbolType)), this, SIGNAL(modified())));
+   VERIFYNR(connect(this, SIGNAL(displayedBandChanged(DimensionDescriptor)), this, SIGNAL(modified())));
 
    msThresholdLayers++;
 
@@ -194,6 +210,7 @@ ThresholdLayerImp& ThresholdLayerImp::operator=(const ThresholdLayerImp& thresho
       mdSecondThreshold = thresholdLayer.mdSecondThreshold;
       mColor = thresholdLayer.mColor;
       mSymbol = thresholdLayer.mSymbol;
+      mDisplayedBand = thresholdLayer.mDisplayedBand;
    }
 
    return *this;
@@ -261,13 +278,14 @@ void ThresholdLayerImp::draw()
       RasterElement* pRasterElement = dynamic_cast<RasterElement*>(pElement);
       if (pRasterElement != NULL)
       {
-         Statistics* pStatistics = pRasterElement->getStatistics();
+         Statistics* pStatistics = pRasterElement->getStatistics(mDisplayedBand);
          if (pStatistics != NULL)
          {
             pBadValues = pStatistics->getBadValues();
          }
 
-         if (pDescriptor->getBandCount() == 1 || pDescriptor->getInterleaveFormat() == BSQ)
+         if (pDescriptor->getBandCount() == 1 ||
+            (pDescriptor->getInterleaveFormat() == BSQ && mDisplayedBand == pDescriptor->getActiveBand(0)))
          {
             pData = pRasterElement->getRawData();
          }
@@ -275,6 +293,7 @@ void ThresholdLayerImp::draw()
          {
             FactoryResource<DataRequest> pRequest;
             pRequest->setInterleaveFormat(BSQ);
+            pRequest->setBands(mDisplayedBand, mDisplayedBand, 1);
             accessor = pRasterElement->getDataAccessor(pRequest.release());
          }
       }
@@ -631,7 +650,7 @@ Statistics* ThresholdLayerImp::getStatistics(RasterChannelType eColor) const
    RasterElement* pRasterElement = dynamic_cast<RasterElement*>(getDataElement());
    if (pRasterElement != NULL)
    {
-      pStatistics = pRasterElement->getStatistics();
+      pStatistics = pRasterElement->getStatistics(mDisplayedBand);
    }
 
    return pStatistics;
@@ -787,7 +806,10 @@ const BitMask* ThresholdLayerImp::getSelectedPixels() const
             unsigned int uiNumColumns = pDescriptor->getColumnCount();
             unsigned int uiNumRows = pDescriptor->getRowCount();
 
-            DataAccessor da = pRasterElement->getDataAccessor();
+            FactoryResource<DataRequest> pRequest;
+            pRequest->setInterleaveFormat(BSQ);
+            pRequest->setBands(mDisplayedBand, mDisplayedBand, 1);
+            DataAccessor da = pRasterElement->getDataAccessor(pRequest.release());
             if (da.isValid() == false)
             {
                return NULL;
@@ -802,7 +824,7 @@ const BitMask* ThresholdLayerImp::getSelectedPixels() const
 
             const BadValues* pBadValues(NULL);
 
-            Statistics* pStatistics = pRasterElement->getStatistics();
+            Statistics* pStatistics = pRasterElement->getStatistics(mDisplayedBand);
             if (pStatistics != NULL)
             {
                pBadValues = pStatistics->getBadValues();
@@ -834,6 +856,9 @@ bool ThresholdLayerImp::toXml(XMLWriter* pXml) const
    pXml->addAttr("symbolType", static_cast<int>(mSymbol));
    pXml->addAttr("symbolColor", mColor.name().toStdString());
 
+   // add display band info
+   XmlUtilities::serializeDimensionDescriptor(mDisplayedBand, pXml);
+
    return true;
 }
 
@@ -852,6 +877,10 @@ bool ThresholdLayerImp::fromXml(DOMNode* pDocument, unsigned int version)
       mdSecondThreshold = atof(A(pElement->getAttribute(X("secondThreshold"))));
       mSymbol = static_cast<SymbolTypeEnum>(atoi(A(pElement->getAttribute(X("symbolType")))));
       mColor = QColor(A(pElement->getAttribute(X("symbolColor"))));
+
+      // extract displayed band info
+      XmlUtilities::deserializeDimensionDescriptor(mDisplayedBand, pDocument);
+
       return true;
    }
    return false;
@@ -940,4 +969,54 @@ void ThresholdLayerImp::setSymbol(SymbolType symbol)
 
       mbLinking = false;
    }
+}
+
+void ThresholdLayerImp::setDisplayedBand(DimensionDescriptor band)
+{
+   VERIFYNRV(band.isValid());
+   if(band == mDisplayedBand)
+   {
+      return;
+   }
+
+   // make sure setting to a valid band 
+   RasterElement* pRaster = dynamic_cast<RasterElement*>(getDataElement());
+   VERIFYNRV(pRaster != NULL);
+   const RasterDataDescriptor* pDesc = dynamic_cast<const RasterDataDescriptor*>(pRaster->getDataDescriptor());
+   VERIFYNRV(pDesc != NULL);
+   const vector<DimensionDescriptor>& bands = pDesc->getBands();
+   const vector<DimensionDescriptor>::const_iterator iter = find(bands.begin(), bands.end(), band);
+   VERIFYNRV(iter != bands.end());
+
+   if(!mbLinking)
+   {
+      View* pView = getView();
+      if (pView != NULL)
+      {
+         pView->addUndoAction(new SetThresholdBand(dynamic_cast<ThresholdLayer*>(this), mDisplayedBand, band));
+      }
+      mDisplayedBand = band;
+      mbModified = true;
+      notify(SIGNAL_NAME(ThresholdLayer, DisplayedBandChanged), boost::any(band));
+      emit displayedBandChanged(mDisplayedBand);
+
+      mbLinking = true;
+
+      vector<Layer*> linkedLayers = getLinkedLayers();
+
+      for(vector<Layer*>::iterator iter = linkedLayers.begin(); iter != linkedLayers.end(); iter)
+      {
+         ThresholdLayerImp *pLayer = dynamic_cast<ThresholdLayerImp*>(*iter);
+         if(pLayer != NULL)
+         {
+            pLayer->setDisplayedBand(band);
+         }
+      }
+
+      mbLinking = false;
+   }
+}
+DimensionDescriptor ThresholdLayerImp::getDisplayedBand() const
+{
+   return mDisplayedBand;
 }

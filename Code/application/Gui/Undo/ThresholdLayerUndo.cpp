@@ -179,6 +179,36 @@ void SetThresholdSymbol::executeRedo()
    }
 }
 
+////////////////////////
+// SetThresholdBand //
+////////////////////////
+
+SetThresholdBand::SetThresholdBand(ThresholdLayer* pLayer, DimensionDescriptor oldBand, DimensionDescriptor newBand) :
+   UndoAction(pLayer),
+   mOldBand(oldBand),
+   mNewBand(newBand)
+{
+   setText("Set Threshold Band");
+}
+
+void SetThresholdBand::executeUndo()
+{
+   ThresholdLayer* pLayer = dynamic_cast<ThresholdLayer*>(getSessionItem());
+   if (pLayer != NULL)
+   {
+      pLayer->setDisplayedBand(mOldBand);
+   }
+}
+
+void SetThresholdBand::executeRedo()
+{
+   ThresholdLayer* pLayer = dynamic_cast<ThresholdLayer*>(getSessionItem());
+   if (pLayer != NULL)
+   {
+      pLayer->setDisplayedBand(mNewBand);
+   }
+}
+
 ///////////////////////////
 // ThresholdLayerMemento //
 ///////////////////////////
@@ -197,6 +227,7 @@ ThresholdLayerMemento::ThresholdLayerMemento(ThresholdLayer* pLayer) :
       mUnits = pLayer->getRegionUnits();
       mColor = pLayer->getColor();
       mSymbol = pLayer->getSymbol();
+      mDisplayedBand = pLayer->getDisplayedBand();
    }
 }
 
@@ -211,5 +242,6 @@ void ThresholdLayerMemento::toLayer(Layer* pLayer) const
       pThresholdLayer->setRegionUnits(mUnits);
       pThresholdLayer->setColor(mColor);
       pThresholdLayer->setSymbol(mSymbol);
+      pThresholdLayer->setDisplayedBand(mDisplayedBand);
    }
 }

@@ -464,7 +464,7 @@ void IceWriter::writeThresholdLayer(const std::string& hdfPath, const std::strin
                                     const std::string& layerName, double xScaleFactor, double yScaleFactor,
                                     double xOffset, double yOffset, SymbolType symbol, ColorType color,
                                     double firstThreshold, double secondThreshold, RegionUnits regionUnits,
-                                    PassArea passArea, Progress* pProgress)
+                                    PassArea passArea, Progress* pProgress, unsigned int displayBandNumber)
 {
    // Write out the Dataset if one was provided.
    HdfUtilities::createGroups(hdfPath, mFileHandle, true);
@@ -476,7 +476,7 @@ void IceWriter::writeThresholdLayer(const std::string& hdfPath, const std::strin
 
    // Write threshold layer attributes
    writeThresholdLayerProperties(hdfPath, symbol, color, firstThreshold, secondThreshold, regionUnits, passArea,
-      pProgress);
+      pProgress, displayBandNumber);
 
    // Write common layer attributes
    writeLayerProperties(hdfPath, layerName, THRESHOLD, xScaleFactor, yScaleFactor, xOffset, yOffset, pProgress);
@@ -1209,6 +1209,12 @@ void IceWriter::writeThresholdLayerProperties(const std::string& hdfPath, const 
       return;
    }
 
+   unsigned int bandNumber(0);  // default to first active band
+   DimensionDescriptor band = pLayer->getDisplayedBand();
+   if (band.isActiveNumberValid())
+   {
+      bandNumber = band.getActiveNumber();
+   }
    SymbolType symbol = pLayer->getSymbol();
    ColorType color = pLayer->getColor();
    double firstThreshold = pLayer->getFirstThreshold();
@@ -1217,12 +1223,12 @@ void IceWriter::writeThresholdLayerProperties(const std::string& hdfPath, const 
    PassArea passArea = pLayer->getPassArea();
 
    writeThresholdLayerProperties(hdfPath, symbol, color, firstThreshold, secondThreshold, regionUnits, passArea,
-      pProgress);
+      pProgress, bandNumber);
 }
 
 void IceWriter::writeThresholdLayerProperties(const std::string& hdfPath, SymbolType symbol, ColorType color,
                                               double firstThreshold, double secondThreshold, RegionUnits regionUnits,
-                                              PassArea passArea, Progress* pProgress)
+                                              PassArea passArea, Progress* pProgress, unsigned int displayBandNumber)
 {
    const string layerPath = hdfPath + "/ThresholdLayerProperties";
    HdfUtilities::createGroups(layerPath, mFileHandle, true);
@@ -1242,6 +1248,8 @@ void IceWriter::writeThresholdLayerProperties(const std::string& hdfPath, Symbol
       "Unable to write first threshold.");
    ICEVERIFY_MSG(HdfUtilities::writeAttribute(*layerGroup, "SecondThreshold", secondThreshold),
       "Unable to write second threshold.");
+   ICEVERIFY_MSG(HdfUtilities::writeAttribute(*layerGroup, "DisplayBandNumber", displayBandNumber),
+      "Unable to write display band number.");
 }
 
 void IceWriter::writeLayerProperties(const string& hdfPath, const Layer* pLayer, Progress* pProgress)

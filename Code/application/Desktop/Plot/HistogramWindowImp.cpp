@@ -447,60 +447,13 @@ PlotWidget* HistogramWindowImp::createPlot(Layer* pLayer, PlotSet* pPlotSet)
       return createPlot(pRasterLayer, GRAY, pPlotSet);
    }
 
-   if (pLayer->isKindOf("ThresholdLayer") == false)
+   ThresholdLayer* pThresholdLayer = dynamic_cast<ThresholdLayer*>(pLayer);
+   if (pThresholdLayer != NULL)
    {
-      return NULL;
+      return createPlot(pThresholdLayer, pPlotSet);
    }
 
-   // Do not add the plot if it already exists
-   if (getPlot(pLayer) != NULL)
-   {
-      return NULL;
-   }
-
-   // Get or create a plot set if necessary
-   if (pPlotSet == NULL)
-   {
-      View* pView = pLayer->getView();
-      if (pView != NULL)
-      {
-         string viewName = pView->getName();
-         if (viewName.empty() == false)
-         {
-            pPlotSet = mpPlotSetGroup->getPlotSet(viewName);
-            if (pPlotSet == NULL)
-            {
-               pPlotSet = mpPlotSetGroup->createPlotSet(viewName);
-            }
-         }
-      }
-   }
-
-   if (pPlotSet == NULL)
-   {
-      return NULL;
-   }
-
-   // Add the plot to the plot set
-   PlotWidget* pPlot = pPlotSet->createPlot(pLayer->getName(), HISTOGRAM_PLOT);
-   if (pPlot != NULL)
-   {
-      // Attach to the Layer::Deleted signal before calling setHistogram() so that the
-      // layerDeleted() slot is called before the histogram plot pointer is NULLed
-      VERIFYNR(pLayer->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &HistogramWindowImp::layerDeleted)));
-
-      // Set the histogram data in the plot
-      HistogramPlotImp* pHistogramPlot = dynamic_cast<HistogramPlotImp*>(pPlot->getPlot());
-      if (pHistogramPlot != NULL)
-      {
-         pHistogramPlot->setHistogram(pLayer);
-      }
-
-      // Activate the plot
-      mpPlotSetGroup->setCurrentPlot(pPlot);
-   }
-
-   return pPlot;
+   return NULL;
 }
 
 PlotWidget* HistogramWindowImp::createPlot(RasterLayer* pLayer, RasterChannelType channel)
@@ -1473,4 +1426,144 @@ bool HistogramWindowImp::HistogramUpdater::UpdateMomento::operator<(const Update
    }
 
    return pLeftLayer < pRightLayer;
+}
+
+PlotWidget* HistogramWindowImp::createPlot(ThresholdLayer* pLayer, PlotSet* pPlotSet)
+{
+   if (pLayer == NULL)
+   {
+      return NULL;
+   }
+
+   // Do not add the plot if it already exists
+   if (getPlot(pLayer) != NULL)
+   {
+      return NULL;
+   }
+
+   // Get or create a plot set if necessary
+   if (pPlotSet == NULL)
+   {
+      View* pView = pLayer->getView();
+      if (pView != NULL)
+      {
+         string viewName = pView->getName();
+         if (viewName.empty() == false)
+         {
+            pPlotSet = mpPlotSetGroup->getPlotSet(viewName);
+            if (pPlotSet == NULL)
+            {
+               pPlotSet = mpPlotSetGroup->createPlotSet(viewName);
+            }
+         }
+      }
+   }
+
+   if (pPlotSet == NULL)
+   {
+      return NULL;
+   }
+
+   // Add the plot to the plot set
+   PlotWidget* pPlot = pPlotSet->createPlot(pLayer->getName(), HISTOGRAM_PLOT);
+   if (pPlot != NULL)
+   {
+      // Attach to the Layer::Deleted signal before calling setHistogram() so that the
+      // layerDeleted() slot is called before the histogram plot pointer is NULLed
+      VERIFYNR(pLayer->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &HistogramWindowImp::layerDeleted)));
+      VERIFYNR(pLayer->attach(SIGNAL_NAME(ThresholdLayer, DisplayedBandChanged),
+         Slot(this, &HistogramWindowImp::thresholdBandChanged)));
+
+      // Set the histogram data in the plot
+      HistogramPlotImp* pHistogramPlot = dynamic_cast<HistogramPlotImp*>(pPlot->getPlot());
+      if (pHistogramPlot != NULL)
+      {
+         pHistogramPlot->setHistogram(pLayer);
+      }
+
+      // Update the displayed plot information
+      updateInfo(pLayer, pLayer->getDisplayedBand());
+
+      // Activate the plot
+      mpPlotSetGroup->setCurrentPlot(pPlot);
+   }
+
+   return pPlot;
+}
+
+void HistogramWindowImp::thresholdBandChanged(Subject& subject, const std::string& signal, const boost::any& value)
+{
+   ThresholdLayer* pLayer = dynamic_cast<ThresholdLayer*>(&subject);
+   if (pLayer == NULL)
+   {
+      return;
+   }
+   DimensionDescriptor band = boost::any_cast<DimensionDescriptor>(value);
+   if (band.isValid())
+   {
+      updateInfo(pLayer, band);
+   }
+}
+
+void HistogramWindowImp::updateInfo(ThresholdLayer* pLayer, DimensionDescriptor band)
+{
+   if (pLayer == NULL || band.isValid() == false)
+   {
+      return;
+   }
+
+   PlotWidgetImp* pPlotWidget = dynamic_cast<PlotWidgetImp*>(getPlot(pLayer));
+   if (pPlotWidget == NULL)
+   {
+      return;
+   }
+
+   // Get the layer name
+   string layerName = pLayer->getDisplayName(true);
+   QString strLayer = QString::fromStdString(layerName);
+   VERIFYNRV(strLayer.isEmpty() == false);
+
+   // Get the displayed element and band names
+   QString strElement = "No Element Displayed";
+   QString strBand = "No Band Displayed";
+
+   RasterElement* pElement = dynamic_cast<RasterElement*>(pLayer->getDataElement());
+   if (pElement != NULL)
+   {
+      string elementName = pElement->getDisplayName(true);
+
+      strElement = QString::fromStdString(elementName);
+
+      if (band.isActiveNumberValid() == true)
+      {
+         RasterDataDescriptor* pDescriptor =
+            dynamic_cast<RasterDataDescriptor*>(pElement->getDataDescriptor());
+         if (pDescriptor != NULL)
+         {
+            strBand = QString::fromStdString(RasterUtilities::getBandName(pDescriptor, band));
+         }
+      }
+   }
+
+   VERIFYNRV(strElement.isEmpty() == false);
+   VERIFYNRV(strBand.isEmpty() == false);
+
+   // Display the element and band names in the plot title
+   pPlotWidget->setTitle(strElement + " - " + strBand);
+   pPlotWidget->setTitleElideMode(Qt::ElideLeft);
+
+   // Add a tool tip for the plot tab in the window
+   PlotSetImp* pPlotSet = dynamic_cast<PlotSetImp*>(pPlotWidget->getPlotSet());
+   if (pPlotSet != NULL)
+   {
+      int index = pPlotSet->indexOf(pPlotWidget);
+      if (index != -1)
+      {
+         QString strTip = "<qt><table cellspacing=0><tr><td width=115><b>Layer:</b></td><td>" + strLayer +
+            "</td></tr><tr><td width=115><b>Displayed Element:</b></td><td>" + strElement +
+            "</td></tr><tr><td width=115><b>Displayed Band:</b></td><td>" + strBand + "</td></tr></table></qt>";
+
+         pPlotSet->setTabToolTip(index, strTip);
+      }
+   }
 }

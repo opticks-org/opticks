@@ -10,6 +10,7 @@
 #include "AppVerify.h"
 #include "BadValues.h"
 #include "Classification.h"
+#include "DimensionDescriptor.h"
 #include "DynamicObject.h"
 #include "Hdf5Attribute.h"
 #include "Hdf5Dataset.h"
@@ -1339,6 +1340,19 @@ bool IceReader::parseThresholdLayer(const Hdf5Group* pThresholdLayerGroup, Thres
    double secondThreshold = 0.0;
    PARSE_ATTRIBUTE_DEFAULT(pThresholdLayerGroup, "SecondThreshold", secondThreshold, double, 0.0);
    pThresholdLayer->setSecondThreshold(secondThreshold);
+
+   // displayed band
+   unsigned int bandNumber = 0;
+   PARSE_ATTRIBUTE_DEFAULT(pThresholdLayerGroup, "DisplayBandNumber", bandNumber, unsigned int, 0);
+   const RasterElement* pElement = dynamic_cast<const RasterElement*>(pThresholdLayer->getDataElement());
+   if (pElement != NULL)
+   {
+      const RasterDataDescriptor* pDesc = dynamic_cast<const RasterDataDescriptor*>(pElement->getDataDescriptor());
+      if (pDesc != NULL)
+      {
+         pThresholdLayer->setDisplayedBand(pDesc->getActiveBand(bandNumber));
+      }
+   }
 
    return true;
 }

@@ -13,12 +13,14 @@
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
 #include "PlugInRegistration.h"
+#include "RasterDataDescriptor.h"
 #include "SetThresholdOptions.h"
 #include "ThresholdLayer.h"
 
 REGISTER_PLUGIN_BASIC(OpticksWizardItems, SetThresholdOptions);
 
-SetThresholdOptions::SetThresholdOptions() : mFirstThreshold(0.0), mSecondThreshold(0.0), mHasFirst(false), mHasSecond(false)
+SetThresholdOptions::SetThresholdOptions() : mFirstThreshold(0.0), mSecondThreshold(0.0), mHasFirst(false),
+   mHasSecond(false)
 {
    setName("Set Threshold Options");
    setVersion(APP_VERSION_NUMBER);
@@ -31,8 +33,7 @@ SetThresholdOptions::SetThresholdOptions() : mFirstThreshold(0.0), mSecondThresh
 }
 
 SetThresholdOptions::~SetThresholdOptions()
-{
-}
+{}
 
 bool SetThresholdOptions::setBatch()
 {
@@ -57,6 +58,9 @@ bool SetThresholdOptions::getInputSpecification(PlugInArgList*& pArgList)
    VERIFY(pArgList->addArg<SymbolType>("Symbol", "The symbol that is used to mark the pixels that pass the "
       "threshold value(s)."));
    VERIFY(pArgList->addArg<ColorType>("Color", "The color that is used to draw the pixel symbols."));
+   unsigned int defaultBand(0);
+   VERIFY(pArgList->addArg<unsigned int>("Display Band", defaultBand, "The original band number to be displayed. "
+      "This is a one-based index. If no value is provided, the first active band will be displayed."));
 
    return true;
 }
@@ -82,6 +86,28 @@ bool SetThresholdOptions::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
    {
       reportError("Invalid layer specified.", "{82023d69-a504-45ed-b91b-335d7c8a634f}");
       return false;
+   }
+   
+   // set displayed band
+   const RasterDataDescriptor* pDesc =
+      dynamic_cast<const RasterDataDescriptor*>(mpLayer->getDataElement()->getDataDescriptor());
+   if (pDesc != NULL)
+   {
+      DimensionDescriptor band;
+      if (mDisplayBandNumber > 0)
+      {
+         band = pDesc->getOriginalBand(mDisplayBandNumber - 1);
+         if (band.isValid() == false)
+         {
+            reportError("The specified band is invalid.", "{456aae8d-46ed-4080-8771-abb28fbd2ab1}");
+            return false;
+         }
+      }
+      else
+      {
+         band = pDesc->getActiveBand(mDisplayBandNumber);
+      }
+      mpLayer->setDisplayedBand(band);
    }
 
    if (mHasFirst)
@@ -156,6 +182,7 @@ bool SetThresholdOptions::extractInputArgs(PlugInArgList* pInArgList)
    pInArgList->getPlugInArgValue("Region Units", mRegionUnits);
    pInArgList->getPlugInArgValue("Symbol", mSymbol);
    pInArgList->getPlugInArgValue("Color", mColor);
+   pInArgList->getPlugInArgValue("Display Band", mDisplayBandNumber);
 
    return true;
 }

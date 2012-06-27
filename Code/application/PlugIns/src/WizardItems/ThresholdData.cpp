@@ -115,6 +115,9 @@ bool ThresholdData::getInputSpecification(PlugInArgList*& pArgList)
       "The units for \"First Threshold\" and \"Second Threshold\"."));
    PassArea defaultPassArea(UPPER);
    VERIFY(pArgList->addArg<PassArea>("Pass Area", defaultPassArea, "The area which will be set in the output AOI."));
+   unsigned int defaultBand(0);
+   VERIFY(pArgList->addArg<unsigned int>("Display Band", defaultBand, "The original band number to be displayed. "
+      "This is a one-based index. If no value is provided, the first active band will be displayed."));
 
    return true;
 }
@@ -140,18 +143,36 @@ bool ThresholdData::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
       return false;
    }
 
-   DataAccessor acc = mpInputElement->getDataAccessor();
+   const RasterDataDescriptor* pDesc = static_cast<const RasterDataDescriptor*>(mpInputElement->getDataDescriptor());
+   VERIFY(pDesc);
+   DimensionDescriptor band;
+   if (mDisplayBandNumber > 0)
+   {
+      band = pDesc->getOriginalBand(mDisplayBandNumber - 1);
+      if (band.isValid() == false)
+      {
+         reportError("The specified band is invalid.", "{a529538b-5b82-425d-af10-385a2581beec}");
+         return false;
+      }
+   }
+   else
+   {
+      band = pDesc->getActiveBand(mDisplayBandNumber);
+   }
+   FactoryResource<DataRequest> pReq;
+   pReq->setInterleaveFormat(BSQ);
+   pReq->setBands(band, band, 1);
+   DataAccessor acc = mpInputElement->getDataAccessor(pReq.release());
    if (!acc.isValid())
    {
       reportError("Unable to access data element.", "{b5f1b7dd-7cf7-4cd5-b5bc-7b747d3561b9}");
       return false;
    }
-   const RasterDataDescriptor* pDesc = static_cast<const RasterDataDescriptor*>(mpInputElement->getDataDescriptor());
-   VERIFY(pDesc);
+
    // If necessary, convert region units
    if (mRegionUnits != RAW_VALUE)
    {
-      Statistics* pStatistics = mpInputElement->getStatistics(pDesc->getActiveBand(0));
+      Statistics* pStatistics = mpInputElement->getStatistics(band);
       if (pStatistics == NULL)
       {
          reportError("Unable to calculate data statistics.", "{61a44ced-a4aa-4423-b379-5783137eb980}");
@@ -276,6 +297,7 @@ bool ThresholdData::extractInputArgs(PlugInArgList* pInArgList)
          return false;
       }
    }
+   pInArgList->getPlugInArgValue("Display Band", mDisplayBandNumber);
 
    return true;
 }

@@ -36,6 +36,7 @@ private:
    double mSecondThreshold;
    PassArea mPassArea;
    RegionUnits mRegionUnits;
+   unsigned int mDisplayBandNumber;
 };
 
 #endif

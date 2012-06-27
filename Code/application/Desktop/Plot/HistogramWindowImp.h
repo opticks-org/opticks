@@ -13,6 +13,7 @@
 #include <QtGui/QAction>
 
 #include "AttachmentPtr.h"
+#include "DimensionDescriptor.h"
 #include "DesktopServices.h"
 #include "DockWindowImp.h"
 #include "RasterLayer.h"
@@ -27,6 +28,7 @@ class Layer;
 class PlotSetGroup;
 class PlotWidget;
 class PlotWidgetImp;
+class ThresholdLayer;
 
 class HistogramWindowImp : public DockWindowImp
 {
@@ -55,6 +57,7 @@ public slots:
    PlotWidget* createPlot(Layer* pLayer, PlotSet* pPlotSet);
    PlotWidget* createPlot(RasterLayer* pLayer, RasterChannelType channel);
    PlotWidget* createPlot(RasterLayer* pLayer, RasterChannelType channel, PlotSet* pPlotSet);
+   PlotWidget* createPlot(ThresholdLayer* pLayer, PlotSet* pPlotSet);
    void setCurrentPlot(Layer* pLayer);
    bool setCurrentPlot(Layer* pLayer, const RasterChannelType& eColor);          // Deprecated
    bool setCurrentPlot(RasterLayer* pLayer, RasterChannelType channel);
@@ -75,11 +78,13 @@ protected:
    void layerShown(Subject& subject, const std::string& signal, const boost::any& value);
    void layerDeleted(Subject& subject, const std::string& signal, const boost::any& value);
    void sessionRestored(Subject& subject, const std::string& signal, const boost::any& value);
+   void thresholdBandChanged(Subject& subject, const std::string& signal, const boost::any& value);
 
    void createPlots(RasterLayer* pLayer, DisplayMode displayMode);
    void createPlots(RasterLayer* pLayer, DisplayMode displayMode, PlotSet* pPlotSet);
    void deletePlots(RasterLayer* pLayer, DisplayMode displayMode);
    void updatePlotInfo(RasterLayer* pLayer, RasterChannelType channel);
+   void updateInfo(ThresholdLayer* pLayer, DimensionDescriptor band);
 
 protected slots:
    void setCurrentPlot(const DisplayMode& displayMode);

@@ -1020,6 +1020,8 @@ bool HistogramPlotImp::setHistogram(Layer* pLayer, RasterElement* pElement, Stat
       ThresholdLayerImp* pThresholdLayer = dynamic_cast<ThresholdLayerImp*>(pLayerImp);
       if (pThresholdLayer != NULL)
       {
+         VERIFYNR(disconnect(pThresholdLayer, SIGNAL(displayedBandChanged(DimensionDescriptor)),
+            this, SLOT(updateElement())));
          VERIFYNR(disconnect(pThresholdLayer, SIGNAL(passAreaChanged(const PassArea&)), this,
             SLOT(updatePassAreaAction())));
          VERIFYNR(disconnect(pThresholdLayer, SIGNAL(regionUnitsChanged(const RegionUnits&)), this,
@@ -1122,6 +1124,8 @@ bool HistogramPlotImp::setHistogram(Layer* pLayer, RasterElement* pElement, Stat
 
       if (pThresholdLayer != NULL)
       {
+         VERIFYNR(connect(pThresholdLayer, SIGNAL(displayedBandChanged(DimensionDescriptor)),
+            this, SLOT(updateElement())));
          VERIFYNR(connect(pThresholdLayer, SIGNAL(passAreaChanged(const PassArea&)), this,
             SLOT(updatePassAreaAction())));
          VERIFYNR(connect(pThresholdLayer, SIGNAL(regionUnitsChanged(const RegionUnits&)), this,
@@ -1865,6 +1869,7 @@ Statistics* HistogramPlotImp::getStatistics() const
    if (mpElement.get() != NULL)
    {
       const RasterLayer* pRasterLayer = dynamic_cast<const RasterLayer*>(mpLayer.get());
+      const ThresholdLayerImp* pThresholdLayer = dynamic_cast<const ThresholdLayerImp*>(mpLayer.get());
       if (pRasterLayer != NULL)
       {
          // Only get the statistics if the displayed band is valid
@@ -1874,10 +1879,15 @@ Statistics* HistogramPlotImp::getStatistics() const
             return mpElement->getStatistics(bandDim);
          }
       }
-      else
+      if (pThresholdLayer != NULL)
       {
-         return mpElement->getStatistics();
+         DimensionDescriptor bandDim = pThresholdLayer->getDisplayedBand();
+         if (bandDim.isValid())
+         {
+            return mpElement->getStatistics(bandDim);
+         }
       }
+      return mpElement->getStatistics();
    }
 
    return NULL;

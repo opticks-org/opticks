@@ -7,6 +7,9 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtGui/QComboBox>
+#include <QtGui/QDoubleSpinBox>
+#include <QtGui/QLabel>
 #include <QtGui/QLayout>
 #include <QtGui/QMessageBox>
 
@@ -15,7 +18,11 @@
 #include "LabeledSection.h"
 #include "PassAreaComboBox.h"
 #include "PropertiesThresholdLayer.h"
+#include "RasterDataDescriptor.h"
+#include "RasterElement.h"
+#include "RasterUtilities.h"
 #include "RegionUnitsComboBox.h"
+#include "StretchTypeComboBox.h"
 #include "SymbolTypeGrid.h"
 #include "ThresholdLayer.h"
 #include "Undo.h"
@@ -28,6 +35,19 @@ PropertiesThresholdLayer::PropertiesThresholdLayer() :
    LabeledSectionGroup(NULL),
    mpThresholdLayer(NULL)
 {
+   // Display
+   QWidget* pDisplayWidget = new QWidget(this);
+   QLabel* pBandLabel = new QLabel("Display band:", pDisplayWidget);
+   mpDisplayBand = new QComboBox(pDisplayWidget);
+   LabeledSection* pDisplaySection = new LabeledSection(pDisplayWidget, "Display", this);
+   QGridLayout* pDisplayGrid = new QGridLayout(pDisplayWidget);
+   pDisplayGrid->setMargin(0);
+   pDisplayGrid->setSpacing(5);
+   pDisplayGrid->addWidget(pBandLabel, 0, 0);
+   pDisplayGrid->addWidget(mpDisplayBand, 0, 1);
+   pDisplayGrid->setRowStretch(1, 10);
+   pDisplayGrid->setColumnStretch(2, 10);
+
    // Pixel marker
    QWidget* pMarkerWidget = new QWidget(this);
 
@@ -84,19 +104,26 @@ PropertiesThresholdLayer::PropertiesThresholdLayer() :
    pPassAreaGrid->setColumnStretch(1, 10);
 
    // Initialization
+   addSection(pDisplaySection);
    addSection(pMarkerSection);
    addSection(pPassAreaSection);
    addStretch(10);
-   setSizeHint(425, 225);
+   setSizeHint(425, 300);
 
    // Connections
    VERIFYNR(connect(mpPassAreaCombo, SIGNAL(valueChanged(PassArea)), this, SLOT(setPassArea(PassArea))));
    VERIFYNR(connect(mpUnitsCombo, SIGNAL(valueChanged(RegionUnits)), this, SLOT(setRegionUnits(RegionUnits))));
+   VERIFYNR(mDisplayModifier.attachSignal(mpDisplayBand, SIGNAL(currentIndexChanged(int))));
+   VERIFYNR(mMarkerModifier.attachSignal(mpSymbolButton, SIGNAL(valueChanged(SymbolType))));
+   VERIFYNR(mMarkerModifier.attachSignal(mpColorButton, SIGNAL(colorChanged(const QColor&))));
+   VERIFYNR(mPassModifier.attachSignal(mpPassAreaCombo, SIGNAL(valueChanged(PassArea))));
+   VERIFYNR(mPassModifier.attachSignal(mpUnitsCombo, SIGNAL(valueChanged(RegionUnits))));
+   VERIFYNR(mPassModifier.attachSignal(mpFirstValueSpin, SIGNAL(valueChanged(double))));
+   VERIFYNR(mPassModifier.attachSignal(mpSecondValueSpin, SIGNAL(valueChanged(double))));
 }
 
 PropertiesThresholdLayer::~PropertiesThresholdLayer()
-{
-}
+{}
 
 bool PropertiesThresholdLayer::initialize(SessionItem* pSessionItem)
 {
@@ -105,6 +132,23 @@ bool PropertiesThresholdLayer::initialize(SessionItem* pSessionItem)
    {
       return false;
    }
+
+   // Display
+   RasterElement* pElement = dynamic_cast<RasterElement*>(mpThresholdLayer->getDataElement());
+   VERIFY(pElement != NULL);
+   const RasterDataDescriptor* pDescriptor = dynamic_cast<const RasterDataDescriptor*>(pElement->getDataDescriptor());
+   VERIFY(pDescriptor != NULL);
+   // Get the band names from the element
+   QStringList strBandNames;
+   vector<string> bandNames = RasterUtilities::getBandNames(pDescriptor);
+   for (vector<string>::iterator iter = bandNames.begin(); iter != bandNames.end(); ++iter)
+   {
+      strBandNames.append(QString::fromStdString(*iter));
+   }
+   mpDisplayBand->addItems(strBandNames);
+   DimensionDescriptor displayBand = mpThresholdLayer->getDisplayedBand();
+   int index = displayBand.isActiveNumberValid() ? displayBand.getActiveNumber() : 0;
+   mpDisplayBand->setCurrentIndex(index);
 
    // Pixel marker
    mpSymbolButton->setCurrentValue(mpThresholdLayer->getSymbol());
@@ -141,24 +185,54 @@ bool PropertiesThresholdLayer::applyChanges()
       return false;
    }
 
+   int index = mpDisplayBand->currentIndex();
+   if (index < 0)
+   {
+      QMessageBox::warning(this, APP_NAME, "Invalid band selection.\nPlease select the band to display.");
+      return false;
+   }
+
+   bool refreshNeeded = (mDisplayModifier.isModified() || mMarkerModifier.isModified() || mPassModifier.isModified());
    string actionText = "Set " + getName();
    UndoGroup group(mpThresholdLayer->getView(), actionText);
 
+   // Display
+   if (mDisplayModifier.isModified())
+   {
+      RasterElement* pElement = dynamic_cast<RasterElement*>(mpThresholdLayer->getDataElement());
+      VERIFY(pElement != NULL);
+      const RasterDataDescriptor* pDescriptor = dynamic_cast<const RasterDataDescriptor*>(pElement->getDataDescriptor());
+      VERIFY(pDescriptor != NULL);
+      mpThresholdLayer->setDisplayedBand(pDescriptor->getActiveBand(index));
+      mDisplayModifier.setModified(false);
+   }
+
    // Pixel marker
-   mpThresholdLayer->setSymbol(mpSymbolButton->getCurrentValue());
-   mpThresholdLayer->setColor(QCOLOR_TO_COLORTYPE(mpColorButton->getColor()));
+   if (mMarkerModifier.isModified())
+   {
+      mpThresholdLayer->setSymbol(mpSymbolButton->getCurrentValue());
+      mpThresholdLayer->setColor(QCOLOR_TO_COLORTYPE(mpColorButton->getColor()));
+      mMarkerModifier.setModified(false);
+   }
 
    // Pass area
-   mpThresholdLayer->setPassArea(passArea);
-   mpThresholdLayer->setRegionUnits(mpUnitsCombo->getCurrentValue());
-   mpThresholdLayer->setFirstThreshold(mpThresholdLayer->convertThreshold(mUnits, dFirstValue, RAW_VALUE));
-   mpThresholdLayer->setSecondThreshold(mpThresholdLayer->convertThreshold(mUnits, dSecondValue, RAW_VALUE));
+   if (mPassModifier.isModified())
+   {
+      mpThresholdLayer->setPassArea(passArea);
+      mpThresholdLayer->setRegionUnits(mpUnitsCombo->getCurrentValue());
+      mpThresholdLayer->setFirstThreshold(mpThresholdLayer->convertThreshold(mUnits, dFirstValue, RAW_VALUE));
+      mpThresholdLayer->setSecondThreshold(mpThresholdLayer->convertThreshold(mUnits, dSecondValue, RAW_VALUE));
+      mPassModifier.setModified(false);
+   }
 
    // Refresh the view
-   View* pView = mpThresholdLayer->getView();
-   if (pView != NULL)
+   if (refreshNeeded)
    {
-      pView->refresh();
+      View* pView = mpThresholdLayer->getView();
+      if (pView != NULL)
+      {
+         pView->refresh();
+      }
    }
 
    return true;

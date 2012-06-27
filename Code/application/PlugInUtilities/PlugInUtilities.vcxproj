@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -1356,6 +1356,7 @@
     <ClInclude Include="Interfaces\XercesIncludes.h" />
     <ClInclude Include="Interfaces\xmlbase.h" />
     <ClInclude Include="Interfaces\xmlreader.h" />
+    <ClInclude Include="Interfaces\XmlUtilities.h" />
     <ClInclude Include="Interfaces\xmlwriter.h" />
     <ClInclude Include="pthreads-wrapper\bmutex.h" />
     <ClInclude Include="pthreads-wrapper\bthread.h" />
@@ -1539,6 +1540,7 @@
       <SmallerTypeCheck Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</SmallerTypeCheck>
     </ClCompile>
     <ClCompile Include="xmlreader.cpp" />
+    <ClCompile Include="XmlUtilities.cpp" />
     <ClCompile Include="xmlwriter.cpp" />
   </ItemGroup>
   <ItemGroup>
