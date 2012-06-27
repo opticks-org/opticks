@@ -1771,6 +1771,11 @@ QString RasterLayerImp::getStretchUnitsAsString(const RasterChannelType& eColor)
 double RasterLayerImp::convertStretchValue(const RasterChannelType& eColor, const RegionUnits& eUnits,
                                            double dStretchValue, const RegionUnits& eNewUnits) const
 {
+   if (eUnits == eNewUnits)
+   {
+      return dStretchValue;
+   }
+
    double dNewValue = 0.0;
 
    Statistics* pStatistics = getStatistics(eColor);
