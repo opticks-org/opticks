@@ -118,6 +118,7 @@
                            <File Name="ENVI_Exporter_Options.htm" Id="F__Help_envi_exporter_options.htm" />
                            <File Name="GeoTIFF_Exporter_Options.htm" Id="F__Help_geotiff_exporter_options.htm" />
                            <File Name="Ice_Exporter_Options.htm" Id="F__Help_ice_exporter_options.htm" />
+                           <File Name="JPEG2000_Exporter_Options.htm" Id="F__Help_jpeg2000_exporter_options.htm" />
                            <File Name="NITF_Exporter_Options.htm" Id="F__Help_nitf_exporter_options.htm" />
                            <File Name="Shape_File_Exporter_Options.htm" Id="F__Help_shape_file_exporter_options.htm" />
                         </Component>
@@ -128,6 +129,7 @@
                            <File Name="Bitmap_View_Exporter.htm" Id="F__Help_bitmap_view_exporter.htm" />
                            <File Name="GeoTIFF_View_Exporter_Options.htm" Id="F__Help_geotiff_view_exporter_options.htm" />
                            <File Name="JPEG_View_Exporter_Options.htm" Id="F__Help_jpeg_view_exporter_options.htm" />
+                           <File Name="MJPEG_Exporter_Options.htm" Id="F__Help_mjpeg_exporter_options.htm" />
                            <File Name="MPEG-1_Exporter_Options.htm" Id="F__Help_mpeg_1_exporter_options.htm" />
                            <File Name="PNG_View_Exporter_Options.htm" Id="F__Help_png_view_exporter_options.htm" />
                            <File Name="Product_Data_Exporters.htm" Id="F__Help_product_data_exporters.htm" />
@@ -455,6 +457,7 @@
                            <File Name="Export_NITF_DES_1.gif" Id="F__Help_export_nitf_des_1.gif" />
                            <File Name="Export_Options_DES.gif" Id="F__Help_export_options_des.gif" />
                            <File Name="Export_Product.gif" Id="F__Help_export_product.gif" />
+                           <File Name="Export_Product_Dialog.gif" Id="F__Help_export_product_dialog.gif" />
                            <File Name="Export_Roads_1.gif" Id="F__Help_export_roads_1.gif" />
                            <File Name="Export_Roads_2.gif" Id="F__Help_export_roads_2.gif" />
                            <File Name="Export_Roads_3.gif" Id="F__Help_export_roads_3.gif" />
@@ -511,6 +514,7 @@
                            <File Name="GeoTIFF_Export_Options_2.gif" Id="F__Help_geotiff_export_options_2.gif" />
                            <File Name="GeoTIFF_Viewer_Export_Options.gif" Id="F__Help_geotiff_viewer_export_options.gif" />
                            <File Name="Geo_dropdown.gif" Id="F__Help_geo_dropdown.gif" />
+                           <File Name="Geo_dropdown_31x22.gif" Id="F__Help_geo_dropdown_31x22.gif" />
                            <File Name="Geo_Mosaic_Stitiching_1.gif" Id="F__Help_geo_mosaic_stitiching_1.gif" />
                            <File Name="Geo_Mosaic_Stitiching_2.gif" Id="F__Help_geo_mosaic_stitiching_2.gif" />
                            <File Name="Geo_Mosaic_Window.gif" Id="F__Help_geo_mosaic_window.gif" />
@@ -687,6 +691,7 @@
                            <File Name="Pixel_Markers.gif" Id="F__Help_pixel_markers.gif" />
                            <File Name="Pixel_Select_List.gif" Id="F__Help_pixel_select_list.gif" />
                            <File Name="Play_Button.gif" Id="F__Help_play_button.gif" />
+                           <File Name="Play_Button_22x21.gif" Id="F__Help_play_button_22x21.gif" />
                            <File Name="Play_Once_Button.gif" Id="F__Help_play_once_button.gif" />
                            <File Name="Plug-Ins_Properties.gif" Id="F__Help_plug_ins_properties.gif" />
                            <File Name="Plug-Ins_Select.gif" Id="F__Help_plug_ins_select.gif" />
