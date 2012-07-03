@@ -85,6 +85,43 @@ public:
     */
    virtual AoiAddMode getAddMode() const = 0;
 
+   /**
+    *  Sets the AOI show labels flag.
+    *
+    *  This method sets whether the AOI labels are displayed
+    *  for all AOI layers, not just the current one.
+    *
+    *  @param show
+    *          Whether to show the label or not.
+    */
+   virtual void setAoiShowLabels(bool show) = 0;
+
+   /**
+    *  Returns the current state of the AOI show labels flag.
+    *
+    *  @return  The current AOI show labels state.
+    */
+   virtual bool getAoiShowLabels() const = 0;
+
+   /**
+    *  Sets the AOI show point labels flag.
+    *
+    *  This method acts on the curent AOI layer only.  It is a
+    *  convenience method for calling GraphicLayer::setShowLabels()
+    *  on the active AOI layer.
+    *
+    *  @param show
+    *         Whether to show the point labels or not
+    */
+   virtual void setAoiShowPointLabels(bool show) = 0;
+
+   /**
+    *  Returns the current state of the AOI show point labels flag.
+    *
+    *  @return  The current AOI show point labels state.
+    */
+   virtual bool getAoiShowPointLabels() const = 0;
+
 protected:
    /**
     *  This toolbar will be destroyed automatically when the application closes.

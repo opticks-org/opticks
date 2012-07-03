@@ -315,6 +315,11 @@ AoiAddMode AoiToolBarImp::getAddMode() const
    return mpAddMode->getCurrentValue();
 }
 
+void AoiToolBarImp::setAoiShowLabels(bool show)
+{
+   mpAoiShowLabels->setChecked(show);
+}
+
 bool AoiToolBarImp::getAoiShowLabels() const
 {
    return mpAoiShowLabels->isChecked();
@@ -323,6 +328,11 @@ bool AoiToolBarImp::getAoiShowLabels() const
 bool AoiToolBarImp::getAoiShowPointLabels() const
 {
    return mpAoiShowPointLabels->isChecked();
+}
+
+void AoiToolBarImp::setAoiShowPointLabels(bool show)
+{
+   setShowPointLabelState(show);
 }
 
 void AoiToolBarImp::aoiLayerDeleted(Subject& subject, const string& signal, const boost::any& value)

@@ -110,6 +110,14 @@ public:
    AoiAddMode getAddMode() const;
 
    /**
+    *  Sets the AOI show labels flag.
+    *
+    *  @param show
+    *          Whether to show the label or not.
+    */
+   void setAoiShowLabels(bool show);
+
+   /**
     *  Returns the current state of the AOI show labels flag
     *
     *  @return  The current AOI show labels state.
@@ -122,6 +130,14 @@ public:
     *  @return  The current AOI show point labels state.
     */
    bool getAoiShowPointLabels() const;
+
+   /**
+    *  Sets the AOI show point labels flag
+    *
+    *  @param show
+    *         Whether to show the point labels or not
+    */
+   void setAoiShowPointLabels(bool show);
 
    virtual bool toXml(XMLWriter* pXml) const;
    virtual bool fromXml(DOMNode* pDocument, unsigned int version);
@@ -211,6 +227,22 @@ private:
    AoiAddMode getAddMode() const \
    { \
       return impClass::getAddMode(); \
+   } \
+   void setAoiShowLabels(bool show) \
+   { \
+      impClass::setAoiShowLabels(show); \
+   } \
+   bool getAoiShowLabels() const \
+   { \
+      return impClass::getAoiShowLabels(); \
+   } \
+   bool getAoiShowPointLabels() const \
+   { \
+      return impClass::getAoiShowPointLabels(); \
+   } \
+   void setAoiShowPointLabels(bool show) \
+   { \
+      impClass::setAoiShowPointLabels(show); \
    }
 
 class AoiAddModeGrid : public PixmapGrid
