@@ -22,6 +22,10 @@ Workspace::Workspace(QWidget* parent) :
 {
    // This controls how subwindows are tiled and/or cascaded by the base class.
    setActivationOrder(QMdiArea::StackingOrder);
+
+   // Set the minimum size to (1, 1) to allow dock windows to take over as much of the workspace as possible.
+   // Setting this to (0, 0) causes the minimum size to be ignored.
+   setMinimumSize(1, 1);
 }
 
 void Workspace::resizeEvent(QResizeEvent * e)
