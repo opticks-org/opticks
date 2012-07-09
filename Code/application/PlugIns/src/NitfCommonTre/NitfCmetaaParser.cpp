@@ -807,7 +807,7 @@ bool Nitf::CmetaaParser::runAllTests(Progress* pProgress, ostream& failure)
       "08"                              // CMPLX_SIZE_1
       "NC"                              // CMPLX_IC_1
       "08"                              // CMPLX_SIZE_2
-      "NC"                              // CMPLX_IC_2
+      "  "                              // CMPLX_IC_2
       "00000"                           // CMPLX_IC_BPP
       "TAY"                             // CMPLX_WEIGHT
       "40"                              // CMPLX_AZ_SLL
@@ -1135,7 +1135,7 @@ bool Nitf::CmetaaParser::toDynamicObject(istream& input, size_t numBytes, Dynami
    readField<int>(input, output, success, CMETAA::CMPLX_SIZE_1, 2, errorMessage, buf);
    readField<string>(input, output, success, CMETAA::CMPLX_IC_1, 2, errorMessage, buf);
    readField<int>(input, output, success, CMETAA::CMPLX_SIZE_2, 2, errorMessage, buf);
-   readField<string>(input, output, success, CMETAA::CMPLX_IC_2, 2, errorMessage, buf);
+   readField<string>(input, output, success, CMETAA::CMPLX_IC_2, 2, errorMessage, buf, true);
    readField<int>(input, output, success, CMETAA::CMPLX_IC_BPP, 5, errorMessage, buf);
    readField<string>(input, output, success, CMETAA::CMPLX_WEIGHT, 3, errorMessage, buf);
    readField<int>(input, output, success, CMETAA::CMPLX_AZ_SLL, 2, errorMessage, buf);
@@ -1534,7 +1534,7 @@ Nitf::TreState Nitf::CmetaaParser::isTreValid(const DynamicObject& tre, ostream&
    testSet.insert("NS");
    testSet.insert("US");
    status = MaxState(status, testTagValidBcsASet(tre, reporter,
-      &numFields, "CMPLX_IC_2", testSet, false, true, true));
+      &numFields, "CMPLX_IC_2", testSet, true, true, true));
 
    status = MaxState(status, testTagValueRange<int>(tre, reporter,
       &numFields, "CMPLX_IC_BPP", 0, 64));
