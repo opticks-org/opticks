@@ -185,7 +185,7 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
         bla("cgc.exe")
         if arch == "32":
             bla("cgD3D8.dll")
-            bla("openjpeg.dll")
+        bla("openjpeg.dll")
         bla("cgD3D9.dll")
         bla("cgD3D10.dll")
         bla("cgGL.dll")

@@ -114,6 +114,9 @@ are defined in Opticks-Version.wxi, so include that file now -->
                <File Name="opencv_haartraining.exe" Id="F__opencv_haartraining_Dependency" DiskId="1" />
                <File Name="opencv_traincascade.exe" Id="F__opencv_traincascade_Dependency" DiskId="1" />
             </Component>
+            <Component Id="C__openjpeg_Dependency" Guid="$(var.C__openjpeg_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="openjpeg.dll" Id="F__openjpeg_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
             <Component Id="C__ossim_Dependency" Guid="$(var.C__ossim_DependencyGuid)" Win64="$(var.64Bit)">
                <File Name="ossim.dll" Id="F__ossim_Dependency" DiskId="1" KeyPath="yes" />
             </Component>
@@ -192,9 +195,6 @@ are defined in Opticks-Version.wxi, so include that file now -->
             </Component>
             <Component Id="C__glut32_Dependency" Guid="$(var.C__glut32_DependencyGuid)" Win64="no">
                <File Name="glut32.dll" Id="F__glut32_Dependency" DiskId="1" KeyPath="yes" />
-            </Component>
-            <Component Id="C__openjpeg_Dependency" Guid="$(var.C__openjpeg_DependencyGuid)" Win64="no">
-               <File Name="openjpeg.dll" Id="F__openjpeg_Dependency" DiskId="1" KeyPath="yes" />
             </Component>
             <?endif?>
          </Directory>
@@ -415,6 +415,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
          <ComponentRef Id="C__szlibdll_Dependency" />
          <ComponentRef Id="C__libexpat_Dependency" />
          <ComponentRef Id="C__opencv_Dependency" />
+         <ComponentRef Id="C__openjpeg_Dependency" />
          <ComponentRef Id="C__ossim_Dependency" />
          <ComponentRef Id="C__pthreadVC2_Dependency" />
          <ComponentRef Id="C__QtConf" />
@@ -498,7 +499,6 @@ are defined in Opticks-Version.wxi, so include that file now -->
          <?ifdef Is32Bit ?>
          <ComponentRef Id="C__cgD3D8_Dependency" />
          <ComponentRef Id="C__glut32_Dependency" />
-         <ComponentRef Id="C__openjpeg_Dependency" />
          <?endif?>
 
          <Feature Id="FT__Shortcuts" Title="Start Menu Shortcuts" Level="1"

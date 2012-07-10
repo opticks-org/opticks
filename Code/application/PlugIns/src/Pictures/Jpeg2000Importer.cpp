@@ -18,6 +18,7 @@
 #include "FileResource.h"
 #include "ImportDescriptor.h"
 #include "Jpeg2000Importer.h"
+#include "Jpeg2000Utilities.h"
 #include "MessageLogResource.h"
 #include "ModelServices.h"
 #include "ObjectFactory.h"
@@ -32,6 +33,7 @@
 #include "RasterLayer.h"
 #include "RasterUtilities.h"
 #include "SpatialDataView.h"
+#include "StringUtilities.h"
 #include "UtilityServices.h"
 
 #include <errno.h>
@@ -40,6 +42,7 @@
 
 #include <QtCore/QFileInfo>
 #include <QtCore/QString>
+#include <QtCore/QStringList>
 #include <QtCore/QVariant>
 
 // These must be in this order
@@ -50,24 +53,7 @@
 
 using namespace std;
 
-enum Jpeg2000FileTypeEnum {J2K_CFMT, JP2_CFMT};
-typedef EnumWrapper<Jpeg2000FileTypeEnum> Jpeg2000FileType;
-
 REGISTER_PLUGIN_BASIC(OpticksPictures, Jpeg2000Importer);
-
-int get_file_format(const char* pFilename)
-{
-   QFileInfo info(pFilename);
-   if (info.suffix() == "jp2")
-   {
-      return JP2_CFMT;
-   }
-   else if (info.suffix() == "j2k")
-   {
-      return J2K_CFMT;
-   }
-   return -1;
-}
 
 Jpeg2000Importer::Jpeg2000Importer()
 {
@@ -85,8 +71,7 @@ Jpeg2000Importer::Jpeg2000Importer()
 }
 
 Jpeg2000Importer::~Jpeg2000Importer()
-{
-}
+{}
 
 vector<ImportDescriptor*> Jpeg2000Importer::getImportDescriptors(const string& filename)
 {
@@ -102,8 +87,15 @@ vector<ImportDescriptor*> Jpeg2000Importer::getImportDescriptors(const string& f
       RasterDataDescriptor* pDescriptor = dynamic_cast<RasterDataDescriptor*>(pImportDescriptor->getDataDescriptor());
       if (pDescriptor != NULL)
       {
-         pDescriptor->setDataType(INT4UBYTES);     // INT4UBYTES is currently the only supported type
-         pDescriptor->setValidDataTypes(vector<EncodingType>(1, INT4UBYTES));
+         vector<EncodingType> validDataTypes;
+         validDataTypes.push_back(INT1UBYTE);
+         validDataTypes.push_back(INT1SBYTE);
+         validDataTypes.push_back(INT2UBYTES);
+         validDataTypes.push_back(INT2SBYTES);
+         validDataTypes.push_back(INT4UBYTES);
+         validDataTypes.push_back(INT4SBYTES);
+         validDataTypes.push_back(FLT4BYTES);
+         pDescriptor->setValidDataTypes(validDataTypes);
          pDescriptor->setProcessingLocation(IN_MEMORY);
 
          // Create and set a file descriptor in the data descriptor
@@ -134,8 +126,7 @@ vector<ImportDescriptor*> Jpeg2000Importer::getImportDescriptors(const string& f
 
 unsigned char Jpeg2000Importer::getFileAffinity(const std::string& filename)
 {
-
-   if (get_file_format(filename.c_str())== -1)
+   if (Jpeg2000Utilities::get_file_format(filename.c_str())== -1)
    {
       return Importer::CAN_NOT_LOAD;
    }
@@ -194,16 +185,16 @@ bool Jpeg2000Importer::populateDataDescriptor(RasterDataDescriptor* pDescriptor)
    fread(&pSrc[0], 1, fileLength, pFile);
 
    // decode the code-stream 
-   parameters.decod_format = get_file_format(fileName.c_str());
+   parameters.decod_format = Jpeg2000Utilities::get_file_format(fileName.c_str());
    switch(parameters.decod_format) 
    {
-      case J2K_CFMT:
+      case Jpeg2000Utilities::J2K_CFMT:
       {
          pDinfo = opj_create_decompress(CODEC_J2K);
       }
       break;
 
-      case JP2_CFMT:
+      case Jpeg2000Utilities::JP2_CFMT:
       {
          pDinfo = opj_create_decompress(CODEC_JP2);
       }
@@ -231,6 +222,33 @@ bool Jpeg2000Importer::populateDataDescriptor(RasterDataDescriptor* pDescriptor)
    // close the byte stream
    opj_cio_close(pCio);
 
+   // Bits per pixel doesn't work in OpenJpeg V 1.5
+   // If we upgrade to OpenJpg V 2.0 we need to check the library
+   unsigned short bitsPerElement = 32;
+   pFileDescriptor->setBitsPerElement(bitsPerElement);
+
+   EncodingType dataType = INT1UBYTE;
+
+   // Override with information from the filename, if present.
+   unsigned int bandFactor = 0;
+   QStringList parts = QString::fromStdString(fileName).split('.');
+   foreach (QString part, parts)
+   {
+      bool error;
+      EncodingType dataTypeTemp = StringUtilities::fromXmlString<EncodingType>(part.toStdString(), &error);
+      if (dataTypeTemp.isValid() == true && error == false)
+      {
+         bandFactor = Jpeg2000Utilities::get_num_bands(dataTypeTemp);
+         if (bandFactor != 0)
+         {
+            dataType = dataTypeTemp;
+            break;
+         }
+      }
+   }
+
+   pDescriptor->setDataType(dataType);
+
    // Rows
    unsigned int numRows = pImage->y1;
    vector<DimensionDescriptor> rows = RasterUtilities::generateDimensionVector(numRows, true, false, true);
@@ -245,12 +263,16 @@ bool Jpeg2000Importer::populateDataDescriptor(RasterDataDescriptor* pDescriptor)
 
    // Bands
    unsigned short numBands = pImage->numcomps;
+   if (bandFactor > 0)
+   {
+      numBands /= bandFactor;
+   }
    vector<DimensionDescriptor> bands = RasterUtilities::generateDimensionVector(numBands, true, false, true);
    pDescriptor->setBands(bands);
    pFileDescriptor->setBands(bands);
 
    // If red, green and blue bands exist, set the display mode to RGB.
-   if (pImage->numcomps >= 3)
+   if (numBands >= 3)
    {
       pDescriptor->setDisplayBand(RED, bands[0]);
       pDescriptor->setDisplayBand(GREEN, bands[1]);
@@ -258,65 +280,7 @@ bool Jpeg2000Importer::populateDataDescriptor(RasterDataDescriptor* pDescriptor)
       pDescriptor->setDisplayMode(RGB_MODE);
    }
 
-//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This code will need to set bits per pixel from the library if Openjpeg is upgraded (mconsidi)")
-
-   // Bits per pixel doesn't work in OpenJpeg V 1.3
-   // If we upgrade to OpenJpg V 2.0 we need check the library
-   unsigned short bitsPerElement = 32;
-   pFileDescriptor->setBitsPerElement(bitsPerElement);
-
-   EncodingType dataType = INT1UBYTE;
-
-   unsigned int bytesPerElement = bitsPerElement / 8;
-   switch (bytesPerElement)
-   {
-      case 1:
-         if (pImage->comps->sgnd)
-         {
-            dataType = INT1SBYTE;
-         }
-         else
-         {
-            dataType = INT1UBYTE;
-         }
-         break;
-
-      case 2:
-         if (pImage->comps->sgnd)
-         {
-            dataType = INT2SBYTES;
-         }
-         else
-         {
-            dataType = INT2UBYTES;
-         }
-         break;
-
-      case 4:
-         if (pImage->comps->sgnd)
-         {
-            dataType = INT4SBYTES;
-         }
-         else if (pImage->comps->sgnd)
-         {
-            dataType = FLT4BYTES;
-         }
-         else
-         {
-            dataType = INT4UBYTES;
-         }
-         break;
-
-      case 8:
-         dataType = FLT8BYTES;
-         break;
-
-      default:
-         break;
-   }
-
-   pDescriptor->setDataType(dataType);
-   if (pDinfo) 
+   if (pDinfo)
    {
       opj_destroy_decompress(pDinfo);
    }
@@ -333,7 +297,7 @@ bool Jpeg2000Importer::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
    }
 
    // Create a message log step
-   StepResource pStep("Execute JPEG200 Importer", "app", "CE0A6D86-5708-42f9-8486-A0D037355659", "Execute failed");
+   StepResource pStep("Execute JPEG2000 Importer", "app", "CE0A6D86-5708-42f9-8486-A0D037355659", "Execute failed");
 
    // Extract the input args
    bool bSuccess = parseInputArgList(pInArgList);

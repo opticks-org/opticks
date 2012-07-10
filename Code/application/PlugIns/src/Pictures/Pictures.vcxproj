@@ -85,6 +85,7 @@
     <Import Project="..\..\..\CompileSettings\PlugInCommonSettings.props" />
     <Import Project="..\..\..\CompileSettings\Qt-Debug.props" />
     <Import Project="..\..\..\CompileSettings\libtiff.props" />
+    <Import Project="..\..\..\CompileSettings\OpenJpeg.props" />
     <Import Project="..\..\..\CompileSettings\pthreads.props" />
     <Import Project="..\..\..\CompileSettings\proj4.props" />
     <Import Project="..\..\..\CompileSettings\geotiff.props" />
@@ -99,6 +100,7 @@
     <Import Project="..\..\..\CompileSettings\PlugInCommonSettings.props" />
     <Import Project="..\..\..\CompileSettings\Qt-Release.props" />
     <Import Project="..\..\..\CompileSettings\libtiff.props" />
+    <Import Project="..\..\..\CompileSettings\OpenJpeg.props" />
     <Import Project="..\..\..\CompileSettings\pthreads.props" />
     <Import Project="..\..\..\CompileSettings\proj4.props" />
     <Import Project="..\..\..\CompileSettings\geotiff.props" />
@@ -205,9 +207,11 @@
     <ClCompile Include="GeoTIFFImporter.cpp" />
     <ClCompile Include="GeoTiffPage.cpp" />
     <ClCompile Include="GeoTiffPager.cpp" />
+    <ClCompile Include="Jpeg2000Exporter.cpp" />
     <ClCompile Include="Jpeg2000Importer.cpp" />
     <ClCompile Include="Jpeg2000Page.cpp" />
     <ClCompile Include="Jpeg2000Pager.cpp" />
+    <ClCompile Include="Jpeg2000Utilities.cpp" />
     <ClCompile Include="JpegDetails.cpp" />
     <ClCompile Include="JpegExportOptionsWidget.cpp" />
     <ClCompile Include="ModuleManager.cpp" />
@@ -236,9 +240,11 @@
     <ClInclude Include="GeoTIFFImporter.h" />
     <ClInclude Include="GeoTiffPage.h" />
     <ClInclude Include="GeoTiffPager.h" />
+    <ClInclude Include="Jpeg2000Exporter.h" />
     <ClInclude Include="Jpeg2000Importer.h" />
     <ClInclude Include="Jpeg2000Page.h" />
     <ClInclude Include="Jpeg2000Pager.h" />
+    <ClInclude Include="Jpeg2000Utilities.h" />
     <ClInclude Include="JpegDetails.h" />
     <ClInclude Include="JpegExportOptionsWidget.h" />
     <CustomBuild Include="OptionsBmpExporter.h">
