@@ -79,7 +79,7 @@ public:
     *
     * @return The tick spacing as a LocationType.
     */
-   LocationType getTickSpacing() const;
+   LocationType getTickSpacing(bool bDrawing = false) const;
 
    /**
     * Gets the current state of auto computed tick spacing
@@ -96,6 +96,8 @@ public:
     * @return Returns the current latitude/longitude formatting of the layer
     */
    DmsFormatType getLatLonFormat() const;
+
+   bool getExtrapolation() const;
 
    void setBorderDirty(bool bDirty);
    void setTickSpacingDirty(bool bDirty);
@@ -159,6 +161,8 @@ public slots:
 
    void setLatLonFormat(const DmsFormatType& newFormat);
 
+   void setExtrapolation(bool bExtrapolate);
+
    void reset();
 
 signals:
@@ -168,6 +172,7 @@ signals:
    void widthChanged(unsigned int width);
    void tickSpacingChanged(const LocationType& spacing);
    void autoTickSpacingChanged(bool bAutoSpacing);
+   void extrapolationChanged(bool bExtrapolate);
    void coordTypeChanged(const GeocoordType& eGeocoord);
    void formatChanged(const DmsFormatType& eType);
 
@@ -180,7 +185,7 @@ protected:
    /**
      * Recomputes mComputedTickSpacing if necessary and clears mComputedTickSpacingDirty.
      */
-   void computeTickSpacing();
+   void computeTickSpacing(bool bDrawing = false);
 
    void setBoundingBox(const std::vector<LocationType> &boundingBox);
    const FontImp& getFontImp() const;
@@ -189,6 +194,7 @@ private:
    LatLonLayerImp(const LatLonLayerImp& rhs);
 
    GeocoordType mGeocoordType;
+   bool mbExtrapolate;                 // the current extrapolation setting
    DmsFormatType mFormat;
    LatLonStyle mStyle;                 // the current drawing style
    QColor mColor;                      // the current drawing color
@@ -196,12 +202,10 @@ private:
    LocationType mCubeSize;             // the size of the cube in pixels
    LocationType mMaxCoord;             // the maximum geocoord value found on the pixel border
    LocationType mMinCoord;             // the minimum geocoord value found on the pixel border
-   int mZone;
-   char mHemisphere;
-   std::string mMapGrid;
 
    bool mComputeTickSpacing;           // state of auto tick spacing
    LocationType mTickSpacing;          // currently set tick spacing
+   LocationType mUserTickSpacing;      // tick spacing passed in to setTickSpacing()
    LocationType mComputedTickSpacing;  // currently computed tick spacing
    bool mComputedTickSpacingDirty;     // whether computed tick spacing needs updating
    bool mBorderDirty;                  // whether the border needs updating
@@ -215,19 +219,10 @@ private:
     * @EnumWrapper LatLonLayerImp::BorderTypeEnum.
     */
    typedef EnumWrapper<BorderTypeEnum> BorderType;
-   BorderType getNearestBorder(const LocationType& location, 
-      const std::vector<LocationType>& box) const;
    void drawLabel(const LocationType& location, const LocationType& textOffset, 
-      const std::string& text, const BorderType& borderType, const double modelMatrix[16],
-      const double projectionMatrix[16], const int viewPort[4], bool adjustForRotation);
+      LocationType geoCoord, bool lat, const BorderType& borderType, const double modelMatrix[16],
+      const double projectionMatrix[16], const int viewPort[4], bool bProduct);
    LocationType convertPointToLatLon(const GeocoordType& type, const LocationType& point);
-   void clipToView(std::vector<LocationType>& vertices, const std::vector<LocationType>& clipBox,
-      const double modelMatrix[16], const double projectionMatrix[16], const int viewPort[4]);
-   void adjustBorderBox(std::vector<LocationType>& box, LocationType point1, LocationType point2,
-      bool latitudeLine);
-   bool isCloseTo(const LocationType& point1, const LocationType& point2, const double tolerance);
-   std::vector<LocationType> findVisibleLineSegment(const LocationType pixel1, 
-      const LocationType pixel2, const std::vector<LocationType>& box);
 };
 
 #define LATLONLAYERADAPTEREXTENSION_CLASSES \
@@ -311,6 +306,14 @@ private:
    DmsFormatType getLatLonFormat() const \
    { \
       return impClass::getLatLonFormat(); \
+   } \
+   void setExtrapolation(bool bExtrapolate) \
+   { \
+      impClass::setExtrapolation(bExtrapolate); \
+   } \
+   bool getExtrapolation() const \
+   { \
+      return impClass::getExtrapolation(); \
    }
 
 #endif

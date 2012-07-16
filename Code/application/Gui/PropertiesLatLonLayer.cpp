@@ -145,6 +145,7 @@ PropertiesLatLonLayer::PropertiesLatLonLayer() :
    // Connections
    VERIFYNR(connect(mpLatLonRadio, SIGNAL(toggled(bool)), mpLatLonFormatCombo, SLOT(setEnabled(bool))));
    VERIFYNR(connect(mpAutomaticRadio, SIGNAL(toggled(bool)), this, SLOT(autoTickSpacingEnabled(bool))));
+   VERIFYNR(connect(mpLatLonRadio, SIGNAL(toggled(bool)), this, SLOT(unitsChangedToLatLon(bool))));
 }
 
 PropertiesLatLonLayer::~PropertiesLatLonLayer()
@@ -207,39 +208,7 @@ bool PropertiesLatLonLayer::initialize(SessionItem* pSessionItem)
    mpWidthCombo->setCurrentValue(mpLatLonLayer->getWidth());
    mpColorButton->setColor(mpLatLonLayer->getColor());
 
-   LocationType tickSpacing = mpLatLonLayer->getTickSpacing();
-   switch (coordType)
-   {
-      case GEOCOORD_LATLON:
-      {
-         mpLatitudeLabel->setText("Latitude:");
-         mpLatitudeEdit->setMaximumWidth(75);
-         mpLatitudeEdit->setValue(DmsPoint(DmsPoint::DMS_DECIMAL, tickSpacing.mX));
-         mpLatitudeEdit->setAutoUpdate(true);
-
-         mpLongitudeLabel->setText("Longitude:");
-         mpLongitudeEdit->setMaximumWidth(75);
-         mpLongitudeEdit->setValue(DmsPoint(DmsPoint::DMS_DECIMAL, tickSpacing.mY));
-         mpLongitudeEdit->setAutoUpdate(true);
-         break;
-      }
-
-      case GEOCOORD_UTM:      // Intentional fall through
-      case GEOCOORD_MGRS:
-      {
-         mpLatitudeLabel->setText("Northing:");
-         mpLatitudeEdit->setText(QString::number(tickSpacing.mY));
-         mpLatitudeEdit->setAutoUpdate(false);
-
-         mpLongitudeLabel->setText("Easting:");
-         mpLongitudeEdit->setText(QString::number(tickSpacing.mX));
-         mpLongitudeEdit->setAutoUpdate(false);
-         break;
-      }
-
-      default:
-         break;
-   }
+   setSpacing(coordType);
 
    bool autoSpacing = mpLatLonLayer->getAutoTickSpacing();
    if (autoSpacing == true)
@@ -251,8 +220,85 @@ bool PropertiesLatLonLayer::initialize(SessionItem* pSessionItem)
       mpCustomRadio->setChecked(true);
    }
 
-   autoTickSpacingEnabled(autoSpacing);
    return true;
+}
+
+void PropertiesLatLonLayer::setSpacing(GeocoordType coordType)
+{
+   LocationType tickSpacing = mpLatLonLayer->getTickSpacing();
+   GeocoordType geoType = mpLatLonLayer->getGeocoordType();
+   switch (coordType)
+   {
+      case GEOCOORD_LATLON:
+      {
+         if (geoType != GEOCOORD_LATLON)
+         {
+            tickSpacing.mX = 0.0;
+            tickSpacing.mY = 0.0;
+         }
+
+         mpLatitudeLabel->setText("Latitude:");
+         mpLatitudeEdit->setMaximumWidth(75);
+         if (!mpAutomaticRadio->isChecked())
+         {
+            mpLatitudeEdit->setValue(DmsPoint(DmsPoint::DMS_DECIMAL, tickSpacing.mX));
+         }
+         else
+         {
+            mpLatitudeEdit->clear();
+         }
+         mpLatitudeEdit->setAutoUpdate(true);
+
+         mpLongitudeLabel->setText("Longitude:");
+         mpLongitudeEdit->setMaximumWidth(75);
+         if (!mpAutomaticRadio->isChecked())
+         {
+            mpLongitudeEdit->setValue(DmsPoint(DmsPoint::DMS_DECIMAL, tickSpacing.mY));
+         }
+         else
+         {
+            mpLongitudeEdit->clear();
+         }
+         mpLongitudeEdit->setAutoUpdate(true);
+         break;
+      }
+
+      case GEOCOORD_UTM:      // Intentional fall through
+      case GEOCOORD_MGRS:
+      {
+         if (!(geoType == GEOCOORD_UTM || geoType == GEOCOORD_MGRS))
+         {
+            tickSpacing.mX = 0.0;
+            tickSpacing.mY = 0.0;
+         }
+
+         mpLatitudeLabel->setText("Northing:");
+         if (!mpAutomaticRadio->isChecked())
+         {
+            mpLatitudeEdit->setText(QString::number(tickSpacing.mY));
+         }
+         else
+         {
+            mpLatitudeEdit->clear();
+         }
+         mpLatitudeEdit->setAutoUpdate(false);
+
+         mpLongitudeLabel->setText("Easting:");
+         if (!mpAutomaticRadio->isChecked())
+         {
+            mpLongitudeEdit->setText(QString::number(tickSpacing.mX));
+         }
+         else
+         {
+            mpLongitudeEdit->clear();
+         }
+         mpLongitudeEdit->setAutoUpdate(false);
+         break;
+      }
+
+      default:
+         break;
+   }
 }
 
 bool PropertiesLatLonLayer::applyChanges()
@@ -317,6 +363,18 @@ bool PropertiesLatLonLayer::applyChanges()
    return true;
 }
 
+void PropertiesLatLonLayer::unitsChangedToLatLon(bool bToggled)
+{
+   if (bToggled)
+   {
+      setSpacing(GEOCOORD_LATLON);
+   }
+   else
+   {
+      setSpacing(GEOCOORD_UTM);
+   }
+}
+
 const string& PropertiesLatLonLayer::getName()
 {
    static string name = "Latitude/Longitude Layer Properties";
@@ -378,37 +436,24 @@ void PropertiesLatLonLayer::autoTickSpacingEnabled(bool bEnable)
    mpLongitudeEdit->setEnabled(!bEnable);
 
    // Update the spacing values if necessary
-   if ((bEnable == true) && (mpLatLonLayer != NULL))
+   if (bEnable)
    {
-      // Get the current layer values
-      bool bAutoSpacing = mpLatLonLayer->getAutoTickSpacing();
-      LocationType currentSpacing = mpLatLonLayer->getTickSpacing();
-
-      // Prevent undo actions from being added
-      UndoLock lock(mpLatLonLayer->getView());
-
-      // Set the layer to calculate the default spacing for the given type
-      mpLatLonLayer->setAutoTickSpacing(true);
-      LocationType spacing = mpLatLonLayer->getTickSpacing();
-
-      // Update the edit boxes
-      GeocoordType coordType = mpLatLonLayer->getGeocoordType();
-      if (coordType == GEOCOORD_LATLON)
+      mpLatitudeEdit->clear();
+      mpLongitudeEdit->clear();
+   }
+   else
+   {
+      if (mpLatLonRadio->isChecked() == true)
       {
-         DmsPoint latitudePoint(DmsPoint::DMS_DECIMAL, spacing.mX);
-         DmsPoint longitudePoint(DmsPoint::DMS_DECIMAL, spacing.mY);
-
-         mpLatitudeEdit->setValue(latitudePoint);
-         mpLongitudeEdit->setValue(longitudePoint);
+         setSpacing(GEOCOORD_LATLON);
       }
-      else
+      else if (mpUtmRadio->isChecked() == true)
       {
-         mpLatitudeEdit->setText(QString::number(spacing.mY));
-         mpLongitudeEdit->setText(QString::number(spacing.mX));
+         setSpacing(GEOCOORD_UTM);
       }
-
-      // Reset the layer to its original values
-      mpLatLonLayer->setTickSpacing(currentSpacing);
-      mpLatLonLayer->setAutoTickSpacing(bAutoSpacing);
+      else if (mpMgrsRadio->isChecked() == true)
+      {
+         setSpacing(GEOCOORD_MGRS);
+      }
    }
 }

@@ -11,6 +11,7 @@
 #include <QtGui/QApplication>
 
 #include "AppConfig.h"
+#include "AppVerify.h"
 #include "DrawUtil.h"
 #include "GeoPoint.h"
 #include "GeoreferenceDescriptor.h"
@@ -34,16 +35,30 @@
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
 
+//Define the limits of the georeference plugins for resolving lat/lon points.  These will cap coordinates to
+//these values so that the geopoint utils don't return garbage strings for labels
+#define LAT_MIN -90.0
+#define LAT_MAX 90.0
+#define LAT_UTMMIN -80.0
+#define LAT_UTMMAX 84.0
+#define LON_MIN -180.0
+#define LON_MAX 360.0
+
+//Define how many samples in X (rown) and Y (column) directions to take to determine lat/lon min/max
+//in bounding box.
+#define ROW_SAMPLING 10
+#define COL_SAMPLING 10
+
 /**
   * The static methods are documented below near their definitions.
   */
-static LocationType adjustSegment(LocationType outside, LocationType inside, const vector<LocationType>& border);
 static double computeSpacing(double range);
 static double getStep(double diff);
 
 LatLonLayerImp::LatLonLayerImp(const string& id, const string& layerName, DataElement* pElement) :
    LayerImp(id, layerName, pElement),
    mGeocoordType(GeoreferenceDescriptor::getSettingGeocoordType()),
+   mbExtrapolate(LatLonLayer::getSettingAlwaysExtrapolate()),
    mFormat(GeoreferenceDescriptor::getSettingLatLonFormat()),
    mStyle(LatLonLayer::getSettingGridlineStyle()),
    mColor(COLORTYPE_TO_QCOLOR(LatLonLayer::getSettingGridlineColor())),
@@ -51,8 +66,6 @@ LatLonLayerImp::LatLonLayerImp(const string& id, const string& layerName, DataEl
    mCubeSize(LocationType(0.0, 0.0)),
    mMaxCoord(LocationType(0.0, 0.0)),
    mMinCoord(LocationType(0.0, 0.0)),
-   mZone(0),
-   mHemisphere('N'),
    mComputeTickSpacing(true),
    mTickSpacing(0.0, 0.0),
    mComputedTickSpacing(0.0, 0.0),
@@ -65,14 +78,15 @@ LatLonLayerImp::LatLonLayerImp(const string& id, const string& layerName, DataEl
 
    addPropertiesPage(PropertiesLatLonLayer::getName());
 
-   connect(this, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(modified()));
-   connect(this, SIGNAL(fontChanged(const QFont&)), this, SIGNAL(modified()));
-   connect(this, SIGNAL(styleChanged(const LatLonStyle&)), this, SIGNAL(modified()));
-   connect(this, SIGNAL(widthChanged(unsigned int)), this, SIGNAL(modified()));
-   connect(this, SIGNAL(tickSpacingChanged(const LocationType&)), this, SIGNAL(modified()));
-   connect(this, SIGNAL(autoTickSpacingChanged(bool)), this, SIGNAL(modified()));
-   connect(this, SIGNAL(coordTypeChanged(const GeocoordType&)), this, SIGNAL(modified()));
-   connect(this, SIGNAL(formatChanged(const DmsFormatType&)), this, SIGNAL(modified()));
+   VERIFYNR(connect(this, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(modified())));
+   VERIFYNR(connect(this, SIGNAL(fontChanged(const QFont&)), this, SIGNAL(modified())));
+   VERIFYNR(connect(this, SIGNAL(styleChanged(const LatLonStyle&)), this, SIGNAL(modified())));
+   VERIFYNR(connect(this, SIGNAL(widthChanged(unsigned int)), this, SIGNAL(modified())));
+   VERIFYNR(connect(this, SIGNAL(tickSpacingChanged(const LocationType&)), this, SIGNAL(modified())));
+   VERIFYNR(connect(this, SIGNAL(autoTickSpacingChanged(bool)), this, SIGNAL(modified())));
+   VERIFYNR(connect(this, SIGNAL(extrapolationChanged(bool)), this, SIGNAL(modified())));
+   VERIFYNR(connect(this, SIGNAL(coordTypeChanged(const GeocoordType&)), this, SIGNAL(modified())));
+   VERIFYNR(connect(this, SIGNAL(formatChanged(const DmsFormatType&)), this, SIGNAL(modified())));
 }
 
 LatLonLayerImp::~LatLonLayerImp()
@@ -165,10 +179,14 @@ void LatLonLayerImp::draw()
    int yCount;
    int i;
    int j;
-   vector<LocationType> stepValues;
-   stepValues.reserve(stepCount+2);
+   double stepValuesX[stepCount];
+   double stepValuesY[stepCount];
    LocationType geoVertex;
    LocationType pixelVertex;
+   LocationType lastGeoVertex;
+   LocationType badVertex(std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
+   LocationType lastPixelVertex;
+   LocationType firstGoodPixelVertex;
    bool haveX = false;
    bool haveY = false;
 
@@ -179,14 +197,8 @@ void LatLonLayerImp::draw()
    glGetDoublev(GL_PROJECTION_MATRIX, projectionMatrix);
    glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
 
-   double dMinX = 0.0;
-   double dMinY = 0.0;
-   double dMaxX = 0.0;
-   double dMaxY = 0.0;
-
    bool bProductView = false;
    LocationType textOffset;
-   vector<LocationType> viewportBox;
    int iHeight(0);
    ViewImp* pView = dynamic_cast<ViewImp*>(getView());
    if (pView == NULL)
@@ -204,10 +216,6 @@ void LatLonLayerImp::draw()
          bProductView = true;
 
          textOffset = LocationType(viewPort[0], viewPort[1]);
-         viewportBox.push_back(LocationType(viewPort[0], viewPort[1]));
-         viewportBox.push_back(LocationType(viewPort[0] + viewPort[2], viewPort[1]));
-         viewportBox.push_back(LocationType(viewPort[0] + viewPort[2], viewPort[1] + viewPort[3]));
-         viewportBox.push_back(LocationType(viewPort[0], viewPort[1] + viewPort[3]));
 
          if (mStyle != LATLONSTYLE_CROSS)
          {
@@ -225,21 +233,27 @@ void LatLonLayerImp::draw()
          glLoadIdentity();
       }
    }
-   pView->getExtents(dMinX, dMinY, dMaxX, dMaxY);
-
-   vector<LocationType> boundingBox;
-   boundingBox.push_back(LocationType(dMinX, dMinY));
-   boundingBox.push_back(LocationType(dMaxX, dMinY));
-   boundingBox.push_back(LocationType(dMaxX, dMaxY));
-   boundingBox.push_back(LocationType(dMinX, dMaxY));
-
-   setBoundingBox(boundingBox);
 
    RasterElement* pRaster = dynamic_cast<RasterElement*>(getDataElement());
    if (pRaster == NULL)
    {
       return;
    }
+
+   //Get bounding box of view
+   LocationType upperLeft;
+   LocationType upperRight;
+   LocationType lowerLeft;
+   LocationType lowerRight;
+   pView->getVisibleCorners(lowerLeft, upperLeft, upperRight, lowerRight);
+
+   vector<LocationType> boundingBox;
+   boundingBox.push_back(upperLeft);
+   boundingBox.push_back(upperRight);
+   boundingBox.push_back(lowerRight);
+   boundingBox.push_back(lowerLeft);
+
+   setBoundingBox(boundingBox);
 
    struct LineAttributeRestorer
    {
@@ -257,7 +271,7 @@ void LatLonLayerImp::draw()
    glColor4ub(mColor.red(), mColor.green(), mColor.blue(), mColor.alpha());
    glLineWidth(mWidth);
 
-   tickSpacing = getTickSpacing();
+   tickSpacing = getTickSpacing(true);
    if (tickSpacing.mX != 0.0)
    {
       haveX = true;
@@ -276,11 +290,13 @@ void LatLonLayerImp::draw()
       tickSpacing.mY = computeSpacing(mMaxCoord.mY - mMinCoord.mY);
    }
 
-   start.mX = floor(mMinCoord.mX / tickSpacing.mX) * tickSpacing.mX;
-   start.mY = floor(mMinCoord.mY / tickSpacing.mY) * tickSpacing.mY;
+   //Divide each lat/lon grid line into small segments for drawing.  Drawing will be from vertex to vertex.
+   //Calculate start lat and lon (x and y) based on commanded tick spacing (as well as lat/lon increment)
+   start.mX = ceil(mMinCoord.mX / tickSpacing.mX) * tickSpacing.mX;
+   start.mY = ceil(mMinCoord.mY / tickSpacing.mY) * tickSpacing.mY;
 
-   stop.mX = ceil(mMaxCoord.mX / tickSpacing.mX) * tickSpacing.mX;
-   stop.mY = ceil(mMaxCoord.mY / tickSpacing.mY) * tickSpacing.mY;
+   stop.mX = floor(mMaxCoord.mX / tickSpacing.mX) * tickSpacing.mX;
+   stop.mY = floor(mMaxCoord.mY / tickSpacing.mY) * tickSpacing.mY;
 
    stepSize.mX = (mMaxCoord.mX - mMinCoord.mX) / static_cast<double>(stepCount - 1);
    stepSize.mY = (mMaxCoord.mY - mMinCoord.mY) / static_cast<double>(stepCount - 1);
@@ -288,8 +304,10 @@ void LatLonLayerImp::draw()
    xCount = 1.5 + (stop.mX - start.mX) / tickSpacing.mX;
    yCount = 1.5 + (stop.mY - start.mY) / tickSpacing.mY;
 
+   //Vertices array will be populated wtih vertexes for drawing each lat/lon line
    vector<LocationType> vertices;
    vertices.reserve(stepCount);
+   bool vertexValid;
 
    if (mStyle == LATLONSTYLE_DASHED)
    {
@@ -299,345 +317,269 @@ void LatLonLayerImp::draw()
 
    if (mStyle == LATLONSTYLE_SOLID || mStyle == LATLONSTYLE_DASHED)
    {
-      bool onOff = false;
-      bool isInData = false;
       LocationType oldVertex;
 
-      // extend values by 1 step on each side
-      stepValues.push_back(LocationType(mMinCoord.mX - stepSize.mX, mMinCoord.mY - stepSize.mY));
       for (j = 0; j < stepCount; ++j)
       {
-         stepValues.push_back(LocationType(mMinCoord.mX + static_cast<double>(j) * stepSize.mX, 
-            mMinCoord.mY + static_cast<double>(j) * stepSize.mY));
+         stepValuesX[j] = mMinCoord.mX + static_cast<double>(j) * stepSize.mX;  //lat points for drawing lon lines
+         stepValuesY[j] = mMinCoord.mY + static_cast<double>(j) * stepSize.mY;  //lon points for drawing lat lines
       }
-      stepValues.push_back(LocationType(mMinCoord.mX + static_cast<double>(stepCount) * stepSize.mX, 
-         mMinCoord.mY + static_cast<double>(stepCount) * stepSize.mY));
 
-      int numSteps = static_cast<int>(stepValues.size());
+      BorderType startXBorderType = LEFT_BORDER;
+      BorderType endXBorderType = RIGHT_BORDER;
+      BorderType startYBorderType = TOP_BORDER;
+      BorderType endYBorderType = BOTTOM_BORDER;
 
-      vector<LocationType> borderBox(mBoundingBox);
-      BorderType nearestBorder;
+      LocationType minPixel = pRaster->convertGeocoordToPixel(mMinCoord);
+      LocationType maxPixel = pRaster->convertGeocoordToPixel(mMaxCoord);
+      if (minPixel.mX > maxPixel.mX)
+      {
+         startXBorderType = RIGHT_BORDER;
+         endXBorderType = LEFT_BORDER;
+      }
+      if (minPixel.mY < maxPixel.mY)
+      {
+         startYBorderType = BOTTOM_BORDER;
+         endYBorderType = TOP_BORDER;
+      }
+    
       LocationType startLabel;
       LocationType endLabel;
       LocationType clippedLabel;
-      LocationType labelLoc;
-      bool adjustForRotation(true);
 
-      if (haveX)
+      bool bDrewLatLine = false;
+      bool bDrewLonLine = false;
+      //Loop twice, once for lat once for lon
+      for (int axis = 0; axis < 2; axis++)
       {
-         for (i = 0; i < xCount; ++i)
+         //During lat pass, use X values for geo coordinates, switch to Y for lon
+         bool lat = true;
+         if (axis == 1)
          {
-            onOff = false;
-            isInData = false;
-            geoVertex.mX = start.mX + static_cast<double>(i) * tickSpacing.mX;
-            vertices.clear();
-            vertices.reserve(numSteps);
+            lat = false;
+         }
+         bool& haveAxis = (lat ? haveX : haveY);
+         int& count = (lat ? xCount : yCount);
+         double& geoVertexAxis = (lat ? geoVertex.mX : geoVertex.mY);
+         double& geoVertexOffAxis = (lat ? geoVertex.mY : geoVertex.mX);
+         double& lastGeoVertexAxis = (lat ? lastGeoVertex.mX : lastGeoVertex.mY);
+         double& lastGeoVertexOffAxis = (lat ? lastGeoVertex.mY : lastGeoVertex.mX);
+         double& startAxis = (lat ? start.mX : start.mY);
+         double& tickSpacingAxis = (lat ? tickSpacing.mX : tickSpacing.mY);
+         double* stepValuesOffAxis = (lat ? stepValuesY : stepValuesX);
+         BorderType& startBorderType = (lat ? startXBorderType : startYBorderType);
+         BorderType& endBorderType = (lat ? endXBorderType : endYBorderType);
+         bool& bDrewLine = (lat ? bDrewLatLine : bDrewLonLine);
 
-            string xLabel = "";
-            if (mGeocoordType == GEOCOORD_LATLON)
+         if (haveAxis)
+         {
+            //Loop for each lat or lon line that needs potentially drawn
+            for (i = 0; i < count; ++i)
             {
-               LatLonPoint latLonPoint(geoVertex);
-               xLabel = latLonPoint.getLatitudeText(mFormat);
-            }
-            else if (mGeocoordType == GEOCOORD_UTM)
-            {
-               UtmPoint utmPoint(geoVertex.mX, 0.0, mZone, mHemisphere);
-               xLabel = utmPoint.getEastingText() + ", " + utmPoint.getZoneText();
-            }
-            else if (mGeocoordType == GEOCOORD_MGRS)
-            {
-               xLabel = QString::number(geoVertex.mX, 'f', 1).toStdString();
-            }
+               //Fix lat or lon used for the current line being drawn.  This will not change during this iteration
+               //of the loop.
+               geoVertexAxis = startAxis + static_cast<double>(i) * tickSpacingAxis;
+               geoVertexOffAxis = 0.0;
+               vertices.clear();
 
-            // find left most location in data
-            int left(-1);
-            isInData = false;
-            while (!isInData && left < numSteps - 1)
-            {
-               ++left;
-               geoVertex.mY = stepValues[left].mY;
-               LocationType geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
-               pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
-               isInData = DrawUtil::isWithin(pixelVertex, &(*mBoundingBox.begin()), 4);
-            }
-
-            if (isInData)
-            {
-               // save left most vertex in data
-               vertices.push_back(pixelVertex);
-
-               // find right most location in data
-               int right(numSteps);
-               isInData = false;
-               while (!isInData)
+               if (lat)
                {
-                  --right;
-                  geoVertex.mY = stepValues[right].mY;
-                  LocationType geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
-                  pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
-                  isInData = DrawUtil::isWithin(pixelVertex, &(*mBoundingBox.begin()), 4);
+                  if (mGeocoordType == GEOCOORD_LATLON)
+                  {
+                     if (geoVertexAxis < LAT_MIN || geoVertexAxis > LAT_MAX)
+                     {
+                        continue;
+                     }
+                  }
+                  else
+                  {
+                     //UTM/MGRS only defined between S80 and N84
+                     if (geoVertexAxis < LAT_UTMMIN || geoVertexAxis > LAT_UTMMAX)
+                     {
+                        continue;
+                     }
+                  }
+               }
+               else
+               {
+                  if (geoVertexAxis < LON_MIN || geoVertexAxis > LON_MAX)
+                  {
+                     continue;
+                  }
                }
 
-               if (left > 0) // left most not at edge so need to get that pixel location
+               //Loop for each vertex point, drawing the line segment if it should be displayed
+               bool bVertexGoneValid = false;
+               for (int loc = 0; loc < stepCount; ++loc)
                {
-                  LocationType leftEdge;
-                  leftEdge.mX = geoVertex.mX;
-                  leftEdge.mY = stepValues[left-1].mY;
-                  LocationType geoDraw = convertPointToLatLon(mGeocoordType, leftEdge);
-                  pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
-                  pixelVertex = adjustSegment(pixelVertex, vertices.front(), mBoundingBox);
-                  vertices.insert(vertices.begin(), pixelVertex);
-               }
+                  double screenX1;
+                  double screenY1;
+                  double screenX2;
+                  double screenY2;
 
-               // add rest of locations in data
-               for (int loc = left + 1; loc <= right; ++loc)
-               {
-                  geoVertex.mY = stepValues[loc].mY;
-                  LocationType geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
-                  pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
-                  vertices.push_back(pixelVertex);
-               }
+                  //Latch the geo point along the line into geoVertex
+                  //Vertex is NOT valid if the geo reference says it is not.  Will not be drawn if not valid
+                  geoVertexOffAxis = stepValuesOffAxis[loc];
 
-               if (right < numSteps - 1)  // right most not at edge so need to get that pixel location
-               {
-                  LocationType rightEdge;
-                  rightEdge.mX = geoVertex.mX;
-                  rightEdge.mY = stepValues[right + 1].mY;
-                  LocationType geoDraw = convertPointToLatLon(mGeocoordType, rightEdge);
-                  pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
-                  pixelVertex = adjustSegment(pixelVertex, vertices.back(), mBoundingBox);
-                  vertices.push_back(pixelVertex);
+                  if (lat)
+                  {
+                     if (geoVertexOffAxis < LON_MIN || geoVertexOffAxis > LON_MAX)
+                     {
+                        continue;
+                     }
+                  }
+                  else
+                  {
+                     if (mGeocoordType == GEOCOORD_LATLON)
+                     {
+                        if (geoVertexOffAxis < LAT_MIN || geoVertexOffAxis > LAT_MAX)
+                        {
+                           continue;
+                        }
+                     }
+                     else
+                     {
+                        //UTM/MGRS only defined between S80 and N84
+                        if (geoVertexOffAxis < LAT_UTMMIN || geoVertexOffAxis > LAT_UTMMAX)
+                        {
+                           continue;
+                        }
+                     }
+                  }
+
+                  pixelVertex = pRaster->convertGeocoordToPixel(geoVertex, false, &vertexValid);
+                  vertexValid |= mbExtrapolate;
+
+                  //Check if pixel loc is in bounding box, if not it's invalid regardless of geo reference validity.
+                  if (vertexValid)
+                  {
+                     pView->translateWorldToScreen(pixelVertex.mX, pixelVertex.mY, screenX1, screenY1);
+                     vertexValid = (screenX1 > 0.0 && screenY1 > 0.0 &&
+                        screenX1 < pView->width() && screenY1 < pView->height());
+                  }
+
+                  if ((vertexValid != bVertexGoneValid) && loc != 0)
+                  {
+                     //The vertex is transitioning between invalid and valid, need to determine
+                     //where along the segment it changed and insert vertex there...
+                     lastGeoVertexAxis = geoVertexAxis;
+                     lastGeoVertexOffAxis = stepValuesOffAxis[loc-1];
+                     lastPixelVertex = pRaster->convertGeocoordToPixel(lastGeoVertex);
+                     pView->translateWorldToScreen(pixelVertex.mX, pixelVertex.mY, screenX1, screenY1);
+                     pView->translateWorldToScreen(lastPixelVertex.mX, lastPixelVertex.mY, screenX2, screenY2);
+                     //Start at valid vertex and work back one pixel at a time until bad vertex found...
+                     double geoPerPixel = (geoVertexOffAxis - lastGeoVertexOffAxis)/sqrt(pow((screenX1 - screenX2), 2) +
+                        pow((screenY1 - screenY2), 2));
+                     lastPixelVertex = pixelVertex;
+                     bool valid = vertexValid;
+                     while ((valid != bVertexGoneValid) && (geoVertexOffAxis > lastGeoVertexOffAxis))
+                     {
+                        firstGoodPixelVertex = lastPixelVertex;
+                        geoVertexOffAxis -= geoPerPixel;
+                        lastPixelVertex = pRaster->convertGeocoordToPixel(geoVertex, false, &valid);
+                        valid |= mbExtrapolate;
+
+                        if (valid)
+                        {
+                           //Georeference says it's valid, now check if it's in the view
+                           pView->translateWorldToScreen(lastPixelVertex.mX, lastPixelVertex.mY, screenX1, screenY1);
+                           valid = (screenX1 > 0.0 && screenY1 > 0.0 &&
+                              screenX1 < pView->width() && screenY1 < pView->height());
+                        }
+                     }
+                     //Found which pixel along the line segment was the first valid one, add it to the vertex array.
+                     vertices.push_back(firstGoodPixelVertex);
+                  }
+
+                  if (vertexValid)
+                  {
+                     //Mark that we have seen a valid vertex and add it to the vertex array for drawing.
+                     bVertexGoneValid = true;
+                     vertices.push_back(pixelVertex);
+                  }
+                  else //vertex not valid
+                  {
+                     //Mark this vertex as bad (don't draw to this vertex)
+                     bVertexGoneValid = false;
+                     vertices.push_back(badVertex);
+                  }
                }
 
                // now draw the grid line
-               if (vertices.empty() == false)
-               {
-                  startLabel = vertices.front();
-                  endLabel = vertices.back();
-               }
+               startLabel = badVertex;
+               endLabel = badVertex;
+ 
                if (bProductView)
                {
-                  clipToView(vertices, viewportBox, modelMatrix, projectionMatrix, viewPort);
-               }
-
-               if (vertices.empty() == false)
-               {
-                  adjustForRotation = true;
-                  borderBox = mBoundingBox;
-                  labelLoc = startLabel;
-                  if (bProductView)
+                  // project vertices to screen coordinates
+                  GLdouble winZ;
+                  for (vector<LocationType>::iterator it = vertices.begin(); it != vertices.end(); ++it)
                   {
-                     clippedLabel = vertices.front();
-                     DrawUtil::unProjectToZero(clippedLabel.mX, clippedLabel.mY, modelMatrix,
-                        projectionMatrix, viewPort, &clippedLabel.mX, &clippedLabel.mY);
-
-                     // if the original vertex has changed, then the label will be at edge
-                     // of the viewport (grid line clipped to the view) and not at edge
-                     // of data coordinates. Need to determine the nearest view border using
-                     // screen coords and not use the view's rotation in figuring the
-                     // label offset. Considered not changed if < 0.5 pixel distance between points.
-                     if (!isCloseTo(startLabel, clippedLabel, 0.25))
+                     if (*it != badVertex)
                      {
-                        labelLoc = vertices.front();
-                        borderBox = viewportBox;
-                        startLabel = clippedLabel;
-
-                        // nearest border will be determined using screen coordinates and
-                        // viewport not data coordinates and mBoundingBox, so turn off 
-                        // rotation and origin corrections in drawLabel.
-                        adjustForRotation = false;
+                        gluProject((*it).mX, (*it).mY, 0.0, modelMatrix, projectionMatrix, viewPort,
+                           &(*it).mX, &(*it).mY, &winZ);
                      }
                   }
-                  nearestBorder = getNearestBorder(labelLoc, borderBox);
-                  drawLabel(startLabel, textOffset, xLabel, nearestBorder, modelMatrix,
-                     projectionMatrix, viewPort, adjustForRotation);
+               }
+
+               if (!vertices.empty())
+               {
                   glLineWidth(1);
                   glLineWidth(mWidth);
                   glBegin (GL_LINE_STRIP);
                   vector<LocationType>::iterator it;
                   for (it = vertices.begin(); it != vertices.end(); ++it)
                   {
-                     glVertex2f(it->mX, it->mY);
+                     if (*it != badVertex)
+                     {
+                        if (startLabel == badVertex)
+                        {
+                           //First good vertex, save label position
+                           startLabel = *it;
+
+                        }
+                        glVertex2f(it->mX, it->mY);
+                        bDrewLine = true;
+                        endLabel = *it;  //End label will be drawn at last good vertex
+                     }
                   }
                   glEnd();
 
-                  borderBox = mBoundingBox;
-                  labelLoc = endLabel;
-                  adjustForRotation = true;
-                  if (bProductView)
+                  if (startLabel != badVertex)
                   {
-                     clippedLabel = vertices.back();
-                     DrawUtil::unProjectToZero(clippedLabel.mX, clippedLabel.mY, modelMatrix,
-                        projectionMatrix, viewPort, &clippedLabel.mX, &clippedLabel.mY);
-
-                     if (!isCloseTo(endLabel, clippedLabel, 0.25))
+                     if (bProductView)
                      {
-                        labelLoc = vertices.back();
-                        borderBox = viewportBox;
-                        endLabel = clippedLabel;
-                        adjustForRotation = false;
+                        DrawUtil::unProjectToZero(startLabel.mX, startLabel.mY, modelMatrix,
+                           projectionMatrix, viewPort, &startLabel.mX, &startLabel.mY);
                      }
+
+                     LocationType geoCoord = pRaster->convertPixelToGeocoord(startLabel);
+
+                     drawLabel(startLabel, textOffset, geoCoord, lat, startBorderType, modelMatrix,
+                        projectionMatrix, viewPort, bProductView);
                   }
-                  nearestBorder = getNearestBorder(labelLoc, borderBox);
-                  drawLabel(endLabel, textOffset, xLabel, nearestBorder, modelMatrix,
-                     projectionMatrix, viewPort, adjustForRotation);
+ 
+                  if (endLabel != badVertex)
+                  {
+                     if (bProductView)
+                     {
+                        DrawUtil::unProjectToZero(endLabel.mX, endLabel.mY, modelMatrix,
+                           projectionMatrix, viewPort, &endLabel.mX, &endLabel.mY);
+                     }
+
+                     LocationType geoCoord = pRaster->convertPixelToGeocoord(endLabel);
+
+                     drawLabel(endLabel, textOffset, geoCoord, lat, endBorderType, modelMatrix,
+                        projectionMatrix, viewPort, bProductView);
+                  }
                }
             }
          }
       }
-
-      if (haveY)
+      if (!(bDrewLatLine && bDrewLonLine))
       {
-         for (i = 0; i < yCount; ++i)
-         {
-            onOff = false;
-            isInData = false;
-            geoVertex.mY = start.mY + static_cast<double>(i) * tickSpacing.mY;
-            vertices.clear();
-            vertices.reserve(numSteps);
-
-            string yLabel = "";
-            if (mGeocoordType == GEOCOORD_LATLON)
-            {
-               LatLonPoint latLonPoint(geoVertex);
-               yLabel = latLonPoint.getLongitudeText(mFormat);
-            }
-            else if (mGeocoordType == GEOCOORD_UTM)
-            {
-               UtmPoint utmPoint(0.0, geoVertex.mY, mZone, mHemisphere);
-               yLabel = utmPoint.getNorthingText() + " " + utmPoint.getHemisphere();
-            }
-            else if (mGeocoordType == GEOCOORD_MGRS)
-            {
-               yLabel = QString::number(geoVertex.mY, 'f', 1).toStdString();
-            }
-
-            // find bottom most location in data
-            int bottom(-1);
-            isInData = false;
-            while (!isInData && bottom < numSteps - 1)
-            {
-               ++bottom;
-               geoVertex.mX = stepValues[bottom].mX;
-               LocationType geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
-               pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
-               isInData = DrawUtil::isWithin(pixelVertex, &(*mBoundingBox.begin()), 4);
-            }
-
-            if (isInData)
-            {
-               // save bottom most vertex in data
-               vertices.push_back(pixelVertex);
-
-               // find top most location in data
-               int top(numSteps);
-               isInData = false;
-               while (!isInData)
-               {
-                  --top;
-                  geoVertex.mX = stepValues[top].mX;
-                  LocationType geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
-                  pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
-                  isInData = DrawUtil::isWithin(pixelVertex, &(*mBoundingBox.begin()), 4);
-               }
-
-               if (bottom > 0) // bottom most not at edge so need to get that pixel location
-               {
-                  LocationType bottomEdge;
-                  bottomEdge.mX = stepValues[bottom-1].mX;
-                  bottomEdge.mY = geoVertex.mY;
-                  LocationType geoDraw = convertPointToLatLon(mGeocoordType, bottomEdge);
-                  pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
-                  pixelVertex = adjustSegment(pixelVertex, vertices.front(), mBoundingBox);
-                  vertices.insert(vertices.begin(), pixelVertex);
-               }
-
-               // add rest of locations in data
-               for (int loc = bottom + 1; loc <= top; ++loc)
-               {
-                  geoVertex.mX = stepValues[loc].mX;
-                  LocationType geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
-                  pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
-                  vertices.push_back(pixelVertex);
-               }
-
-               if (top < numSteps - 1)  // top most not at edge so need to get that pixel location
-               {
-                  LocationType topEdge;
-                  topEdge.mX = stepValues[top + 1].mX;
-                  topEdge.mY = geoVertex.mY;
-                  LocationType geoDraw = convertPointToLatLon(mGeocoordType, topEdge);
-                  pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
-                  pixelVertex = adjustSegment(pixelVertex, vertices.back(), mBoundingBox);
-                  vertices.push_back(pixelVertex);
-               }
-
-               // now draw the grid line
-               if (vertices.empty() == false)
-               {
-                  startLabel = vertices.front();
-                  endLabel = vertices.back();
-               }
-               if (bProductView)
-               {
-                  clipToView(vertices, viewportBox, modelMatrix, projectionMatrix, viewPort);
-               }
-
-               if (vertices.empty() == false)  // check again in case none visible in product view
-               {
-                  adjustForRotation = true;
-                  borderBox = mBoundingBox;
-                  labelLoc = startLabel;
-                  if (bProductView)
-                  {
-                     clippedLabel = vertices.front();
-                     DrawUtil::unProjectToZero(clippedLabel.mX, clippedLabel.mY, modelMatrix,
-                        projectionMatrix, viewPort, &clippedLabel.mX, &clippedLabel.mY);
-
-                     if (!isCloseTo(startLabel, clippedLabel, 0.25))
-                     {
-                        labelLoc = vertices.front();
-                        borderBox = viewportBox;
-                        startLabel = clippedLabel;
-                        adjustForRotation = false;
-                     }
-                  }
-                  nearestBorder = getNearestBorder(labelLoc, borderBox);
-                  drawLabel(startLabel, textOffset, yLabel, nearestBorder, modelMatrix,
-                     projectionMatrix, viewPort, adjustForRotation);
-                  glLineWidth(1);
-                  glLineWidth(mWidth);
-                  glBegin (GL_LINE_STRIP);
-                  vector<LocationType>::iterator it;
-                  for (it = vertices.begin(); it != vertices.end(); ++it)
-                  {
-                     glVertex2f(it->mX, it->mY);
-                  }
-                  glEnd();
-
-                  borderBox = mBoundingBox;
-                  labelLoc = endLabel;
-                  adjustForRotation = true;
-                  if (bProductView)
-                  {
-                     clippedLabel = vertices.back();
-                     DrawUtil::unProjectToZero(clippedLabel.mX, clippedLabel.mY, modelMatrix,
-                        projectionMatrix, viewPort, &clippedLabel.mX, &clippedLabel.mY);
-
-                     if (!isCloseTo(endLabel, clippedLabel, 0.25))
-                     {
-                        labelLoc = vertices.back();
-                        borderBox = viewportBox;
-                        endLabel = clippedLabel;
-                        adjustForRotation = false;
-                     }
-                  }
-                  nearestBorder = getNearestBorder(labelLoc, borderBox);
-                  drawLabel(endLabel, textOffset, yLabel, nearestBorder, modelMatrix,
-                     projectionMatrix, viewPort, adjustForRotation);
-               }
-            }
-         }
+         mComputedTickSpacingDirty = true;
       }
    }
    else if (mStyle == LATLONSTYLE_CROSS)
@@ -645,6 +587,7 @@ void LatLonLayerImp::draw()
       glBegin (GL_LINES);
       GLdouble winZ;
 
+      int numDrawn = 0;
       if (haveX)
       {
          for (i = 0; i < xCount; ++i)
@@ -653,19 +596,17 @@ void LatLonLayerImp::draw()
             for (j = 0; j < yCount; ++j)
             {
                geoVertex.mY = start.mY + static_cast<double>(j) * tickSpacing.mY;
-               LocationType geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
-               pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
-               if (DrawUtil::isWithin(pixelVertex, &(*mBoundingBox.begin()), 4))
+               pixelVertex = pRaster->convertGeocoordToPixel(geoVertex,false, &vertexValid);
+               vertexValid |= mbExtrapolate;
+               if (vertexValid && DrawUtil::isWithin(pixelVertex, &(*mBoundingBox.begin()), 4))
                {
                   vector<LocationType> verticalSegment;
                   geoVertex.mY -= tickSpacing.mY / 20.0;
-                  geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
-                  pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
+                  pixelVertex = pRaster->convertGeocoordToPixel(geoVertex);
                   verticalSegment.push_back(pixelVertex);
 
                   geoVertex.mY += tickSpacing.mY / 10.0;
-                  geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
-                  pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
+                  pixelVertex = pRaster->convertGeocoordToPixel(geoVertex);
                   verticalSegment.push_back(pixelVertex);
                   vector<LocationType>::iterator it;
                   for (it = verticalSegment.begin(); it != verticalSegment.end(); ++it)
@@ -676,6 +617,7 @@ void LatLonLayerImp::draw()
                            &it->mX, &it->mY, &winZ);
                      }
                      glVertex2f(it->mX, it->mY);
+                     ++numDrawn;
                   }
                }
             }
@@ -690,19 +632,17 @@ void LatLonLayerImp::draw()
             for (j = 0; j < xCount; ++j)
             {
                geoVertex.mX = start.mX + static_cast<double>(j) * tickSpacing.mX;
-               LocationType geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
-               pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
-               if (DrawUtil::isWithin(pixelVertex, &(*mBoundingBox.begin()), 4))
+               pixelVertex = pRaster->convertGeocoordToPixel(geoVertex, false, &vertexValid);
+               vertexValid |= mbExtrapolate;
+               if (vertexValid && DrawUtil::isWithin(pixelVertex, &(*mBoundingBox.begin()), 4))
                {
                   vector<LocationType> horizontalSegment;
                   geoVertex.mX -= tickSpacing.mX / 20.0;
-                  geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
-                  pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
+                  pixelVertex = pRaster->convertGeocoordToPixel(geoVertex);
                   horizontalSegment.push_back(pixelVertex);
 
                   geoVertex.mX += tickSpacing.mX / 10.0;
-                  geoDraw = convertPointToLatLon(mGeocoordType, geoVertex);
-                  pixelVertex = pRaster->convertGeocoordToPixel(geoDraw);
+                  pixelVertex = pRaster->convertGeocoordToPixel(geoVertex);
                   horizontalSegment.push_back(pixelVertex);
                   vector<LocationType>::iterator it;
                   for (it = horizontalSegment.begin(); it != horizontalSegment.end(); ++it)
@@ -713,11 +653,27 @@ void LatLonLayerImp::draw()
                            &it->mX, &it->mY, &winZ);
                      }
                      glVertex2f(it->mX, it->mY);
+                     ++numDrawn;
                   }
                }
             }
          }
       }
+
+      double dMinX = 0.0;
+      double dMinY = 0.0;
+      double dMaxX = 0.0;
+      double dMaxY = 0.0;
+      pView->getExtents(dMinX, dMinY, dMaxX, dMaxY);
+      if (!(DrawUtil::isWithin(LocationType(dMinX, dMinY), &(*mBoundingBox.begin()), 4) &&
+            DrawUtil::isWithin(LocationType(dMinX, dMaxY), &(*mBoundingBox.begin()), 4) &&
+            DrawUtil::isWithin(LocationType(dMaxX, dMinY), &(*mBoundingBox.begin()), 4) &&
+            DrawUtil::isWithin(LocationType(dMaxX, dMaxY), &(*mBoundingBox.begin()), 4)) ||
+            numDrawn < 16)
+      {
+         mComputedTickSpacingDirty = true;
+      }
+
       glEnd();
    }
 
@@ -782,18 +738,68 @@ void LatLonLayerImp::reset()
    //NOTE: There is no configuration setting for auto spacing, this is intentional
    setTickSpacing(LocationType(0.0, 0.0));
    setAutoTickSpacing(true);
+   setExtrapolation(false);
    setFont(LatLonLayerImp::getDefaultFont());
    setGeocoordType(GeoreferenceDescriptor::getSettingGeocoordType());
    setLatLonFormat(GeoreferenceDescriptor::getSettingLatLonFormat());
 }
 
 void LatLonLayerImp::drawLabel(const LocationType& location, const LocationType& textOffset,
-                               const string& text, const BorderType& borderType, const double modelMatrix[16],
-                               const double projectionMatrix[16], const int viewPort[4], bool adjustForRotation)
+                               LocationType geoCoord, bool lat, const BorderType& borderType,
+                               const double modelMatrix[16], const double projectionMatrix[16], const int viewPort[4],
+                               bool bProduct)
 {
-   if (text.empty() == true)
+   //Set up the label for this lat/lon line
+   string text = "";
+   if (mGeocoordType == GEOCOORD_LATLON)
    {
-      return;
+      LatLonPoint latLonPoint(geoCoord);
+      text = (lat ? latLonPoint.getLatitudeText(mFormat) : latLonPoint.getLongitudeText(mFormat));
+   }
+   else if (mGeocoordType == GEOCOORD_UTM || mGeocoordType == GEOCOORD_MGRS)
+   {
+      if (geoCoord.mX < LAT_UTMMIN)
+      {
+         geoCoord.mX = LAT_UTMMIN;
+      }
+      if (geoCoord.mX > LAT_UTMMAX)
+      {
+         geoCoord.mX = LAT_UTMMAX;
+      }
+      if (geoCoord.mY < LON_MIN)
+      {
+         geoCoord.mY = LON_MIN;
+      }
+      if (geoCoord.mY > LON_MAX)
+      {
+         geoCoord.mY = LON_MAX;
+      }
+      if (mGeocoordType == GEOCOORD_UTM)
+      {
+         UtmPoint utmPoint(geoCoord);
+         if (lat)
+         {
+            text = utmPoint.getNorthingText() + " " + utmPoint.getHemisphere();
+         }
+         else
+         {
+            text = utmPoint.getEastingText() + " " + utmPoint.getZoneText();
+         }
+      }
+      else
+      {
+         MgrsPoint mgrsPoint(geoCoord);
+         if (lat)
+         {
+            text = mgrsPoint.getZoneText() + mgrsPoint.getScrCodeText() + 
+               QString::number(static_cast<int>(mgrsPoint.getNorthing())).toStdString();
+         }
+         else
+         {
+            text = mgrsPoint.getZoneText() + mgrsPoint.getScrCodeText() + 
+               QString::number(static_cast<int>(mgrsPoint.getEasting())).toStdString();
+         }
+      }
    }
 
    ViewImp* pView = dynamic_cast<ViewImp*> (getView());
@@ -824,14 +830,8 @@ void LatLonLayerImp::drawLabel(const LocationType& location, const LocationType&
 
    if (pPerspectiveView != NULL)
    {
-      // If borderType was determined using data coordinates, then need to adjust for the
-      // view's rotation and pitch (origin).
-      // If it was determined using screen coordinates, then don't need to make adjustments.
-      if (adjustForRotation)
-      {
-         dRotation = pPerspectiveView->getRotation();
-         dPitch = pPerspectiveView->getPitch();
-      }
+      dRotation = pPerspectiveView->getRotation();
+      dPitch = pPerspectiveView->getPitch();
    }
 
    switch (borderType)
@@ -862,13 +862,50 @@ void LatLonLayerImp::drawLabel(const LocationType& location, const LocationType&
    double dPixelMargin = 5.0;
    offset.mX = (dWidth / 2.0 * cos(dRotation * PI / 180.0)) - (dWidth / 2.0) +
       (dPixelMargin * cos(dRotation * PI / 180.0));
-   offset.mY = (-dHeight / 2.0 * sin(dRotation * PI / 180.0)) - (dHeight / 2.0) -
+   offset.mY = (-dHeight/2.0 * sin(dRotation * PI / 180.0)) - (dHeight / 2.0) -
       (dPixelMargin * sin(dRotation * PI / 180.0));
 
-   LocationType textLocation = screenCoord + offset;
+   int screenX = static_cast<int>(screenCoord.mX + offset.mX);
 
-   int screenX = static_cast<int>(textLocation.mX);
-   int screenY = pView->height() - static_cast<int>(textLocation.mY);
+   if (screenX < 1)
+   {
+      if (!bProduct)
+      {
+         screenX = 1;
+         offset.mY -= (dHeight / 2.0 * abs(cos(dRotation * PI / 180.0)));
+      }
+      mComputedTickSpacingDirty = true;
+   }
+
+   if (screenX + dWidth > pView->width() - 1)
+   {
+      if (!bProduct)
+      {
+         screenX = pView->width() - dWidth - 1;
+         offset.mY -= (dHeight / 2.0 * abs(cos(dRotation * PI / 180.0)));
+      }
+      mComputedTickSpacingDirty = true;
+   }
+ 
+   int screenY = pView->height() - static_cast<int>(screenCoord.mY + offset.mY);
+
+   if (screenY - dHeight < 1)
+   {
+      if (!bProduct)
+      {
+         screenY = dHeight + 1;
+      }
+      mComputedTickSpacingDirty = true;
+   }
+
+   if (screenY > pView->height() - 1)
+   {
+      if (!bProduct)
+      {
+         screenY = pView->height() - 1;
+      }
+      mComputedTickSpacingDirty = true;
+   }
 
    pView->renderText(screenX, screenY, strLabel, mFont.getQFont());
 }
@@ -896,23 +933,35 @@ unsigned int LatLonLayerImp::getWidth() const
    return mWidth;
 }
 
-LocationType LatLonLayerImp::getTickSpacing() const
+LocationType LatLonLayerImp::getTickSpacing(bool bDrawing) const
 {
+   if (!bDrawing)
+   {
+      return mUserTickSpacing;
+   }
+
+   LocationType retVal = mTickSpacing;
+
    if (mComputeTickSpacing)
    {
       if (mComputedTickSpacingDirty)
       {
-         const_cast<LatLonLayerImp*>(this)->computeTickSpacing();
+         const_cast<LatLonLayerImp*>(this)->computeTickSpacing(bDrawing);
       }
 
-      return mComputedTickSpacing;
+      retVal = mComputedTickSpacing;
    }
    else if (mBorderDirty == true)
    {
       const_cast<LatLonLayerImp*>(this)->computeBorder();
    }
 
-   return mTickSpacing;
+   return retVal;
+}
+
+bool LatLonLayerImp::getExtrapolation() const
+{
+   return mbExtrapolate;
 }
 
 bool LatLonLayerImp::getAutoTickSpacing() const
@@ -967,6 +1016,7 @@ bool LatLonLayerImp::toXml(XMLWriter* pXml) const
    pXml->addAttr("latlonStyle", mStyle);
    pXml->addAttr("color", mColor.name().toStdString());
    pXml->addAttr("width", mWidth);
+   pXml->addAttr("extrapolate", mbExtrapolate);
 
    buf << mCubeSize.mX << " " << mCubeSize.mY;
    pXml->addAttr("cubeSize", buf.str());
@@ -979,9 +1029,6 @@ bool LatLonLayerImp::toXml(XMLWriter* pXml) const
    buf << mMinCoord.mX << " " << mMinCoord.mY;
    pXml->addAttr("minCoord", buf.str());
 
-   pXml->addAttr("zone", mZone);
-   pXml->addAttr("hemisphere", mHemisphere);
-   pXml->addAttr("mapGrid", mMapGrid);
    pXml->addAttr("computeTickSpacing", mComputeTickSpacing);
 
    buf.str("");
@@ -1008,6 +1055,7 @@ bool LatLonLayerImp::fromXml(DOMNode* pDocument, unsigned int version)
    mStyle = StringUtilities::fromXmlString<LatLonStyle>(A(pElement->getAttribute(X("latlonStyle"))));
    mColor = QColor(A(pElement->getAttribute(X("color"))));
    mWidth = StringUtilities::fromXmlString<unsigned int>(A(pElement->getAttribute(X("width"))));
+   mbExtrapolate = StringUtilities::fromXmlString<bool>(A(pElement->getAttribute(X("extrapolate"))));
    str << A(pElement->getAttribute(X("cubeSize")));
    str >> mCubeSize.mX >> mCubeSize.mY;
    str.clear();
@@ -1016,9 +1064,6 @@ bool LatLonLayerImp::fromXml(DOMNode* pDocument, unsigned int version)
    str.clear();
    str << A(pElement->getAttribute(X("minCoord")));
    str >> mMinCoord.mX >> mMinCoord.mY;
-   mZone = StringUtilities::fromXmlString<int>(A(pElement->getAttribute(X("zone"))));
-   mHemisphere = StringUtilities::fromXmlString<char>(A(pElement->getAttribute(X("hemisphere"))));
-   mMapGrid = A(pElement->getAttribute(X("mapGrid")));
    mComputeTickSpacing = StringUtilities::fromXmlString<bool>(A(pElement->getAttribute(X("computeTickSpacing"))));
    str.clear();
    str << A(pElement->getAttribute(X("tickSpacing")));
@@ -1180,7 +1225,7 @@ void LatLonLayerImp::setWidth(unsigned int width)
 
 void LatLonLayerImp::setTickSpacing(const LocationType& spacing)
 {
-   if (spacing == mTickSpacing)
+   if (spacing == mUserTickSpacing)
    {
       return;
    }
@@ -1195,8 +1240,26 @@ void LatLonLayerImp::setTickSpacing(const LocationType& spacing)
       {
          pView->addUndoAction(new SetLatLonTickSpacing(dynamic_cast<LatLonLayer*>(this), mTickSpacing, spacing));
       }
-
-      mTickSpacing = spacing;
+      mUserTickSpacing = spacing;
+      if (mGeocoordType == GEOCOORD_LATLON)
+      {
+         mTickSpacing = spacing;
+      }
+      else
+      {
+         RasterElement* pRaster = dynamic_cast<RasterElement*>(getDataElement());
+         if (pRaster == NULL)
+         {
+            mTickSpacing = spacing;
+         }
+         else
+         {
+            UtmPoint utm1(pRaster->convertPixelToGeocoord(LocationType(0.0, 0.0)));
+            UtmPoint utm2(utm1.getEasting() + spacing.mX, utm1.getNorthing() + spacing.mY,
+               utm1.getZone(), utm1.getHemisphere());
+            mTickSpacing = utm2.getLatLonCoordinates().getCoordinates() - utm1.getLatLonCoordinates().getCoordinates();
+         }
+      }
       emit tickSpacingChanged(mTickSpacing);
       notify(SIGNAL_NAME(LatLonLayer, TickSpacingChanged), boost::any(spacing));
 
@@ -1209,6 +1272,34 @@ void LatLonLayerImp::setTickSpacing(const LocationType& spacing)
          if (pLayer != NULL)
          {
             pLayer->setTickSpacing(spacing);
+         }
+      }
+
+      mbLinking = false;
+   }
+}
+
+void LatLonLayerImp::setExtrapolation(bool bExtrapolate)
+{
+   if (bExtrapolate == mbExtrapolate)
+   {
+      return;
+   }
+
+   if (mbLinking == false)
+   {
+      mbExtrapolate = bExtrapolate;
+      emit extrapolationChanged(mbExtrapolate);
+
+      mbLinking = true;
+
+      vector<Layer*> linkedLayers = getLinkedLayers();
+      for (vector<Layer*>::iterator iter = linkedLayers.begin(); iter != linkedLayers.end(); ++iter)
+      {
+         LatLonLayer* pLayer = dynamic_cast<LatLonLayer*>(*iter);
+         if (pLayer != NULL)
+         {
+            pLayer->setExtrapolation(bExtrapolate);
          }
       }
 
@@ -1269,46 +1360,62 @@ void LatLonLayerImp::computeBorder()
    double rows = pDescriptor->getRowCount();
    double cols = pDescriptor->getColumnCount();
 
-   mZone = 100;
    mCubeSize.mX = cols;
    mCubeSize.mY = rows;
    mMaxCoord = LocationType(-numeric_limits<double>::max(), -numeric_limits<double>::max());
    mMinCoord = LocationType(numeric_limits<double>::max(), numeric_limits<double>::max());
 
    vector<LocationType> borderPixels;
-   borderPixels.push_back(LocationType(0, 0));
-   borderPixels.push_back(LocationType(0, rows / 2));
-   borderPixels.push_back(LocationType(0, rows));
-   borderPixels.push_back(LocationType(cols / 2, rows));
-   borderPixels.push_back(LocationType(cols, rows));
-   borderPixels.push_back(LocationType(cols, rows / 2));
-   borderPixels.push_back(LocationType(cols, 0));
-   borderPixels.push_back(LocationType(cols / 2, 0));
+   //If we have a bounding box, use it.  Otherwise use the cube rows/cols
+   if (mBoundingBox.size() != 4)
+   {
+      borderPixels.push_back(LocationType(0, 0));
+      borderPixels.push_back(LocationType(0, rows / 2));
+      borderPixels.push_back(LocationType(0, rows));
+      borderPixels.push_back(LocationType(cols / 2, rows));
+      borderPixels.push_back(LocationType(cols, rows));
+      borderPixels.push_back(LocationType(cols, rows / 2));
+      borderPixels.push_back(LocationType(cols, 0));
+      borderPixels.push_back(LocationType(cols / 2, 0));
+   }
+   else
+   {
+      double startRow = mBoundingBox[0].mY;
+      double endRow = mBoundingBox[3].mY;
+      double startCol = mBoundingBox[0].mX;
+      double endCol = mBoundingBox[1].mX;
+      double rowInc = (endRow - startRow) / ROW_SAMPLING;
+      double colInc = (endCol - startCol) / COL_SAMPLING;
+      for (double row = startRow; row < endRow; row += rowInc)
+      {
+         for (double col = startCol; col < endCol; col += colInc)
+         {
+            borderPixels.push_back(LocationType(col, row));
+         }
+      }
+
+      borderPixels.push_back(mBoundingBox[0]);
+      borderPixels.push_back(LocationType(mBoundingBox[0].mX + (mBoundingBox[3].mX - mBoundingBox[0].mX)/2.0,
+         mBoundingBox[0].mY + (mBoundingBox[3].mY - mBoundingBox[0].mY) / 2.0));
+      borderPixels.push_back(mBoundingBox[3]);
+      borderPixels.push_back(LocationType(mBoundingBox[3].mX + (mBoundingBox[2].mX - mBoundingBox[3].mX)/2.0,
+         mBoundingBox[3].mY + (mBoundingBox[2].mY - mBoundingBox[3].mY) / 2.0));
+      borderPixels.push_back(mBoundingBox[2]);
+      borderPixels.push_back(LocationType(mBoundingBox[1].mX + (mBoundingBox[2].mX - mBoundingBox[1].mX)/2.0,
+         mBoundingBox[1].mY + (mBoundingBox[2].mY - mBoundingBox[1].mY) / 2.0));
+      borderPixels.push_back(mBoundingBox[1]);
+      borderPixels.push_back(LocationType(mBoundingBox[0].mX + (mBoundingBox[1].mX - mBoundingBox[0].mX)/2.0,
+         mBoundingBox[0].mY + (mBoundingBox[1].mY - mBoundingBox[0].mY) / 2.0));
+   }
 
    for (vector<LocationType>::const_iterator iter = borderPixels.begin(); iter != borderPixels.end(); ++iter)
    {
-      LocationType latlon = pRaster->convertPixelToGeocoord(*iter, true);
+      LocationType latlon = pRaster->convertPixelToGeocoord(*iter, false);
 
       LocationType geoCoord;
       LatLonPoint latLonPoint(latlon);
-      if (mGeocoordType == GEOCOORD_LATLON)
-      {
-         geoCoord = latLonPoint.getCoordinates();
-      }
-      else if (mGeocoordType == GEOCOORD_UTM)
-      {
-         UtmPoint utmPoint(latLonPoint);
-         geoCoord = utmPoint.getCoordinates();
-         mZone = utmPoint.getZone();
-         mHemisphere = utmPoint.getHemisphere();
-      }
-      else if (mGeocoordType == GEOCOORD_MGRS)
-      {
-         MgrsPoint mgrsPoint(latLonPoint);
-         geoCoord = mgrsPoint.getCoordinates();
-         mZone = mgrsPoint.getZone();
-         mMapGrid = mgrsPoint.getScrCodeText();
-      }
+
+      geoCoord = latLonPoint.getCoordinates();
 
       mMinCoord.mX = min(geoCoord.mX, mMinCoord.mX);
       mMinCoord.mY = min(geoCoord.mY, mMinCoord.mY);
@@ -1316,10 +1423,26 @@ void LatLonLayerImp::computeBorder()
       mMaxCoord.mY = max(geoCoord.mY, mMaxCoord.mY);
    }
 
+   if (mMinCoord.mX < LAT_MIN)
+   {
+      mMinCoord.mX = LAT_MIN;
+   }
+   if (mMaxCoord.mX > LAT_MAX)
+   {
+      mMaxCoord.mX = LAT_MAX;
+   }
+   if (mMinCoord.mY < LON_MIN)
+   {
+      mMinCoord.mY = LON_MIN;
+   }
+   if (mMinCoord.mY > LON_MAX)
+   {
+      mMinCoord.mY = LON_MAX;
+   }
    mBorderDirty = false;
 }
 
-void LatLonLayerImp::computeTickSpacing()
+void LatLonLayerImp::computeTickSpacing(bool bDrawing)
 {
    if (mBorderDirty)
    {
@@ -1335,178 +1458,13 @@ void LatLonLayerImp::computeTickSpacing()
    diff.mX = mMaxCoord.mX - mMinCoord.mX;
    diff.mY = mMaxCoord.mY - mMinCoord.mY;
 
-   if (mGeocoordType== GEOCOORD_LATLON)
-   {
-      mComputedTickSpacing.mX = computeSpacing(diff.mX);
-      mComputedTickSpacing.mY = computeSpacing(diff.mY);
-   }
-   else
-   {
-      mComputedTickSpacing.mX = getStep(diff.mX);
-      mComputedTickSpacing.mY = getStep(diff.mY);
-   }
+   mComputedTickSpacing.mX = computeSpacing(diff.mX);
+   mComputedTickSpacing.mY = computeSpacing(diff.mY);
 
-   mComputedTickSpacingDirty = false;
-}
-
-/**
-  * Determines where a line segment intersects the edge of the cube and
-  * returns the intersection point. It does this by dividing up the outside
-  * area into 9 regions (region 5 is inside the cube) as shown here:
-  * Regions:
-  * 123
-  * 456
-  * 789
-  * It determines which region the outside point resides in. This allows it
-  * to simply determine which edge of the cube the segment intersected.It then
-  * performs a simple computation to determine the intersection point.
-  *
-  * @param outside
-  *     The line segment end point that is outside the cube
-  *
-  * @param inside
-  *     The line segment end point that is inside the cube
-  *
-  * @param size
-  *     The size of the cube in pixels.
-  *
-  * @return The intersection point of the line segment with the edge of the cube
-  */
-static LocationType adjustSegment(LocationType outside, LocationType inside, const vector<LocationType>& border)
-{
-   enum { BELOW, BETWEEN, ABOVE } xRegion = BETWEEN, yRegion = BETWEEN;
-   enum { XABOVE, XBELOW, YABOVE, YBELOW } intersectLine = XBELOW;
-   LocationType intersection (0.0, 0.0);
-   LocationType delta (0.0, 0.0);
-   double f;
-
-   if (outside.mX < border[0].mX)
+   if (bDrawing)
    {
-      xRegion = BELOW;
+      mComputedTickSpacingDirty = false;
    }
-   else if (outside.mX > border[1].mX)
-   {
-      xRegion = ABOVE;
-   }
-
-   if (outside.mY < border[1].mY)
-   {
-      yRegion = BELOW;
-   }
-   else if (outside.mY > border[2].mY)
-   {
-      yRegion = ABOVE;
-   }
-
-   delta.mX = outside.mX - inside.mX;
-   delta.mY = outside.mY - inside.mY;
-
-   if (xRegion == BETWEEN) // in region 2 or 8
-   {
-      if (yRegion == ABOVE) // in region 2
-      {
-         intersectLine = YABOVE;
-      }
-      else // yRegion == BELOW: can't ==BETWEEN or both points would be inside: region 8
-      {
-         intersectLine = YBELOW;
-      }
-   }
-   else // xRegion != BETWEEN: region 1, 3, 4, 6, 7 or 9
-   {
-      if (yRegion == BETWEEN) // region 4 or 6
-      {
-         if (xRegion == ABOVE) // region 6
-         {
-            intersectLine = XABOVE;
-         }
-         else // xRegion == BELOW: region 4
-         {
-            intersectLine = XBELOW;
-         }
-      }
-      else // region 1, 3, 7 or 9: one of the 4 corners
-      {
-         if (xRegion == BELOW) // region 1 or 7
-         {
-            if (yRegion == BELOW) // region 7
-            {
-               if (outside.mY + delta.mY * (border[0].mX - outside.mX) / delta.mX >= border[1].mY)
-               {
-                  intersectLine = XBELOW;
-               }
-               else
-               {
-                  intersectLine = YBELOW;
-               }
-            }
-            else // yRegion == ABOVE: region 1
-            {
-               if (outside.mY + delta.mY * (border[0].mX - outside.mX) / delta.mX <= border[2].mY)
-               {
-                  intersectLine = XBELOW;
-               }
-               else
-               {
-                  intersectLine = YABOVE;
-               }
-            }
-         }
-         else // xRegion == ABOVE // region 3 or 9
-         {
-            if (yRegion == BELOW) // region 9
-            {
-               if (inside.mY + delta.mY * (border[1].mX - inside.mX) / delta.mX >= border[1].mY)
-               {
-                  intersectLine = XABOVE;
-               }
-               else
-               {
-                  intersectLine = YBELOW;
-               }
-            }
-            else // yRegion == ABOVE: region 3
-            {
-               if (inside.mY + delta.mY * (border[1].mX - inside.mX) / delta.mX <= border[2].mY)
-               {
-                  intersectLine = XABOVE;
-               }
-               else
-               {
-                  intersectLine = YABOVE;
-               }
-            }
-         }
-      }
-   }
-
-   switch (intersectLine)
-   {
-   case XABOVE:
-      f = (border[1].mX - inside.mX) / delta.mX;
-      intersection.mY = f * delta.mY + inside.mY;
-      intersection.mX = border[1].mX;
-      break;
-   case XBELOW:
-      f = (border[0].mX-inside.mX) / delta.mX;
-      intersection.mY = f * delta.mY + inside.mY;
-      intersection.mX = border[0].mX;
-      break;
-   case YABOVE:
-      f = (border[2].mY - inside.mY) / delta.mY;
-      intersection.mX = f * delta.mX + inside.mX;
-      intersection.mY = border[2].mY;
-      break;
-   case YBELOW:
-      f = (border[1].mY-inside.mY) / delta.mY;
-      intersection.mX = f * delta.mX + inside.mX;
-      intersection.mY = border[1].mY;
-      break;
-   default:
-      break;
-   }
-
-   return intersection;
 }
 
 /**
@@ -1618,42 +1576,6 @@ QFont LatLonLayerImp::getFont() const
    return mFont.toQFont();
 }
 
-LocationType LatLonLayerImp::convertPointToLatLon(const GeocoordType& type, const LocationType& point)
-{
-   LocationType coord;
-   char buffer[256];
-   switch (type)
-   {
-      case GEOCOORD_LATLON:
-         coord = point;
-         break;
-
-      case GEOCOORD_UTM:
-      {
-         UtmPoint utmPoint(point.mX, point.mY, mZone, mHemisphere);
-         LatLonPoint latLonPoint = utmPoint.getLatLonCoordinates();
-         coord = latLonPoint.getCoordinates();
-         break;
-      }
-
-      case GEOCOORD_MGRS:
-      {
-         snprintf(buffer, 255, "%d%s%05d%05d", mZone, mMapGrid.c_str(), static_cast<int>(point.mX),
-            static_cast<int>(point.mY));
-
-         MgrsPoint mgrsPoint(buffer);
-         LatLonPoint latLonPoint = mgrsPoint.getLatLonCoordinates();
-         coord = latLonPoint.getCoordinates();
-         break;
-      }
-
-      default:
-         break;
-   }
-
-   return coord;
-}
-
 void LatLonLayerImp::setGeocoordType(const GeocoordType& eGeocoord)
 {
    if (eGeocoord == mGeocoordType)
@@ -1694,299 +1616,4 @@ void LatLonLayerImp::setGeocoordType(const GeocoordType& eGeocoord)
 const FontImp& LatLonLayerImp::getFontImp() const
 {
    return mFont;
-}
-
-void LatLonLayerImp::clipToView(vector<LocationType>& vertices, const vector<LocationType>& clipBox,
-                    const double modelMatrix[16], const double projectionMatrix[16], const int viewPort[4])
-{
-   int numPts = static_cast<int>(vertices.size());
-   if (numPts < 2)
-   {
-      vertices.clear();
-      return;
-   }
-
-   // project vertices to screen coordinates
-   bool inClipBox;
-   bool firstFound(false);
-   bool lastFound(false);
-   int index(0);
-   int firstVisible(-1);
-   int lastVisible(numPts);
-   vector<LocationType>::iterator it;
-   LocationType pixel;
-   GLdouble winZ;
-   vector<LocationType> screenPixels;
-   screenPixels.reserve(numPts);
-   LocationType center((clipBox[0].mX + clipBox[1].mX) / 2.0, (clipBox[0].mY + clipBox[3].mY) / 2.0);
-   double closest(numeric_limits<double>::max());
-   int closestPoint(-1);
-   int secondClosestPoint(-1);
-   for (it = vertices.begin(); it != vertices.end(); ++it)
-   {
-      pixel = *it;
-      gluProject(pixel.mX, pixel.mY, 0.0, modelMatrix, projectionMatrix, viewPort,
-         &pixel.mX, &pixel.mY, &winZ);
-      double distance = sqrt(pow(center.mX - pixel.mX, 2.0) + pow(center.mY - pixel.mY, 2.0));
-      if (distance < closest)
-      {
-         secondClosestPoint = closestPoint;
-         closestPoint = index;
-         closest = distance;
-      }
-      inClipBox = DrawUtil::isWithin(pixel, &(*clipBox.begin()), 4);
-      if (inClipBox)
-      {
-         screenPixels.push_back(pixel);
-         if (firstFound == false)
-         {
-            firstVisible = index;
-            firstFound = true;
-         }
-         else
-         {
-            lastVisible = index;
-            lastFound = true;
-         }
-      }
-      ++index;
-   }
-
-   if (firstFound)                        // have at least one visible grid point
-   {
-      if (firstVisible > 0)               // need to extend line to edge
-      {
-         pixel = vertices[firstVisible - 1];
-         gluProject(pixel.mX, pixel.mY, 0.0, modelMatrix, projectionMatrix, viewPort,
-            &pixel.mX, &pixel.mY, &winZ);
-         pixel = adjustSegment(pixel, screenPixels.front(), clipBox);
-         screenPixels.insert(screenPixels.begin(), pixel);
-      }
-
-      if (lastFound)                      // have two visible grid points
-      {
-         if (lastVisible < numPts - 1)    // need to extend line to edge
-         {
-            pixel = vertices[lastVisible + 1];
-            gluProject(pixel.mX, pixel.mY, 0.0, modelMatrix, projectionMatrix, viewPort,
-               &pixel.mX, &pixel.mY, &winZ);
-            pixel = adjustSegment(pixel, screenPixels.back(), clipBox);
-            screenPixels.push_back(pixel);
-         }
-      }
-      else if (firstVisible + 1 < numPts) // only have one visible grid point and its not the last point,
-      {                                   // so need to extend to edge
-         pixel = vertices[firstVisible + 1];
-         gluProject(pixel.mX, pixel.mY, 0.0, modelMatrix, projectionMatrix, viewPort,
-            &pixel.mX, &pixel.mY, &winZ);
-         pixel = adjustSegment(pixel, screenPixels.back(), clipBox);
-         screenPixels.push_back(pixel);
-      }
-   }
-   // no visible grid points, check if line crosses clipBox
-   else if (closestPoint >= 0 && secondClosestPoint >= 0)
-   {
-      LocationType closestPixel = vertices[closestPoint];
-      gluProject(closestPixel.mX, closestPixel.mY, 0.0, modelMatrix, projectionMatrix, viewPort,
-         &closestPixel.mX, &closestPixel.mY, &winZ);
-      LocationType secondClosestPixel = vertices[secondClosestPoint];
-      gluProject(secondClosestPixel.mX, secondClosestPixel.mY, 0.0, modelMatrix, projectionMatrix, viewPort,
-         &secondClosestPixel.mX, &secondClosestPixel.mY, &winZ);
-
-      // get points in ascending mX order
-      LocationType first;
-      LocationType second;
-      if (closestPixel.mX < secondClosestPixel.mX)
-      {
-         first = closestPixel;
-         second = secondClosestPixel;
-      }
-      else
-      {
-         first = secondClosestPixel;
-         second = closestPixel;
-      }
-
-      screenPixels = findVisibleLineSegment(first, second, clipBox);
-   }
-
-   swap(vertices, screenPixels);
-}
-
-LatLonLayerImp::BorderType LatLonLayerImp::getNearestBorder(const LocationType& location, 
-   const vector<LocationType>& box) const
-{
-   BorderType nearest(LEFT_BORDER);
-   if (box.size() != 4)
-   {
-      return nearest;
-   }
-
-   BorderType sides[] = {BOTTOM_BORDER, RIGHT_BORDER, TOP_BORDER, LEFT_BORDER};
-
-   double minDistance = 1e38;
-   LocationType intersection;
-   for (int i = 0; i < 4; ++i)
-   {
-      double distance = DrawUtil::linePointDistance(box[i], box[(i + 1) % 4], location, &intersection);
-      if (distance < minDistance)
-      {
-         minDistance = distance;
-         nearest = sides[i];
-      }
-   }
-
-   return nearest;
-}
-
-void LatLonLayerImp::adjustBorderBox(vector<LocationType>& box, LocationType point1, LocationType point2,
-                                     bool latitudeLine)
-{
-   if (box.size() != 4)
-   {
-      return;
-   }
-
-   if (latitudeLine)
-   {
-      box[0].mX = point1.mX;
-      box[1].mX = point2.mX;
-      box[2].mX = point2.mX;
-      box[3].mX = point1.mX;
-   }
-   else
-   {
-      box[0].mY = point2.mY;
-      box[1].mY = point2.mY;
-      box[2].mY = point1.mY;
-      box[3].mY = point1.mY;
-   }
-}
-
-bool LatLonLayerImp::isCloseTo(const LocationType& point1, const LocationType& point2, const double tolerance)
-{
-   double xDiff = point2.mX - point1.mX;
-   double yDiff = point2.mY - point1.mY;
-   double distance = sqrt(xDiff * xDiff + yDiff * yDiff);
-
-   return distance <= tolerance;
-}
-
-vector<LocationType> LatLonLayerImp::findVisibleLineSegment(const LocationType pixel1, const LocationType pixel2,
-                                                            const vector<LocationType>& box)
-{
-   vector<LocationType> line;
-   if (box.size() != 4)
-   {
-      return line;
-   }
-   line.reserve(2);
-
-   // check if close to vertical line - undefined slope
-   if (abs(pixel2.mX - pixel1.mX) < 0.001)
-   {
-      // if x between clipBox x's then line visible
-      if (pixel1.mX >= box[0].mX && pixel1.mX <= box[1].mX)
-      {
-         line.push_back(LocationType(pixel1.mX, box[0].mY));
-         line.push_back(LocationType(pixel1.mX, box[3].mY));
-      }
-   }
-   else
-   {
-      // determine line equation, i.e. y = mx + b where m = (y2-y1)/(x2-x1)
-      double slope = (pixel2.mY - pixel1.mY) / (pixel2.mX - pixel1.mX);
-      double yIntercept = pixel1.mY - slope * pixel1.mX;
-
-      // check if close to horizontal line - slope ~ 0
-      if (abs(slope) < 0.001)
-      {
-         // since y = yIntercept for slope = 0, if y intercept between box y's then line visible
-         if (yIntercept >= box[0].mY && yIntercept <= box[3].mY)
-         {
-            line.push_back(LocationType(box[0].mX, yIntercept));
-            line.push_back(LocationType(box[1].mX, yIntercept));
-         }
-      }
-      else if (slope > 0.0) // positive slope, pixel1 point must be on left or bottom border to be visible
-      {
-         double x(0.0);
-         double y = box[0].mX * slope + yIntercept;
-         if (y >= box[0].mY && y <= box[3].mY)        // pixel1 point on left edge
-         {
-            line.push_back(LocationType(box[0].mX, y));
-         }
-         else                                         // find line's x value for box bottom
-         {
-            x = (box[0].mY - yIntercept) / slope;
-            if (x >= box[0].mX && x <= box[1].mX)     // pixel1 point on bottom edge
-            {
-               line.push_back(LocationType(x, box[0].mY));
-            }
-         }
-
-         if (line.empty() == false)                   // have pixel1 now find pixel2
-         {
-            y = box[1].mX * slope + yIntercept;
-            if (y >= box[1].mY && y < box[2].mY)      // pixel2 point on right edge
-            {
-               line.push_back(LocationType(box[1].mX, y));
-            }
-            else                                      // find line's x value for box top
-            {
-               x = (box[2].mY - yIntercept) / slope;
-               if (x >= box[3].mX && x <= box[2].mX)  // pixel2 point on top edge
-               {
-                  line.push_back(LocationType(x, box[2].mY));
-               }
-            }
-         }
-      }
-      else if (slope < 0.0) // negative slope, pixel1 point must be on left or top border to be visible
-      {
-         double x(0.0);
-         double y = box[0].mX * slope + yIntercept;
-         if (y >= box[0].mY && y <= box[3].mY)        // pixel1 point on left edge
-         {
-            line.push_back(LocationType(box[0].mX, y));
-         }
-         else                                         // find line's x value for box top
-         {
-            x = (box[3].mY - yIntercept) / slope;
-            if (x >= box[3].mX && x <= box[2].mX)     // pixel1 point on top edge
-            {
-               line.push_back(LocationType(x, box[3].mY));
-            }
-         }
-
-         if (line.empty() == false)                   // have pixel1 now find pixel2
-         {
-            y = box[1].mX * slope + yIntercept;
-            if (y >= box[1].mY && y < box[2].mY)      // pixel2 point on right edge
-            {
-               line.push_back(LocationType(box[1].mX, y));
-            }
-            else                                      // find line's x value for box bottom
-            {
-               x = (box[1].mY - yIntercept) / slope;
-               if (x >= box[0].mX && x <= box[1].mX)  // pixel2 point on bottom edge
-               {
-                  line.push_back(LocationType(x, box[1].mY));
-               }
-            }
-         }
-      }
-   }
-
-   // check that line is not being extrapolated - x end points within original segment
-   if (line.empty() == false)
-   {
-      if (DrawUtil::isBetween(line.front().mX, pixel1.mX, pixel2.mX) == false ||
-         DrawUtil::isBetween(line.back().mX, pixel1.mX, pixel2.mX) == false)
-      {
-         line.clear();
-      }
-   }
-
-   return line;
 }

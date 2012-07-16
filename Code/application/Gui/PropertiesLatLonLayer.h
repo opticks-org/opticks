@@ -16,6 +16,7 @@
 #include <QtGui/QRadioButton>
 
 #include "LabeledSectionGroup.h"
+#include "TypesFile.h"
 
 #include <string>
 
@@ -50,10 +51,12 @@ public:
 
 protected slots:
    void autoTickSpacingEnabled(bool bEnable);
+   void unitsChangedToLatLon(bool bToggled);
 
 private:
    PropertiesLatLonLayer(const PropertiesLatLonLayer& rhs);
    PropertiesLatLonLayer& operator=(const PropertiesLatLonLayer& rhs);
+   void setSpacing(GeocoordType coordType);
    LatLonLayer* mpLatLonLayer;
 
    // Coordinates

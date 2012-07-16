@@ -46,6 +46,7 @@ public:
    SETTING(GridlineColor, LatLonLayer, ColorType, ColorType())
    SETTING(GridlineStyle, LatLonLayer, LatLonStyle, LATLONSTYLE_SOLID)
    SETTING(GridlineWidth, LatLonLayer, unsigned int, 0)
+   SETTING(AlwaysExtrapolate, LatLonLayer, bool, false)
 
    /**
     *  Emitted with any<DmsFormatType> when the numeric format changes.
@@ -265,6 +266,37 @@ public:
     *  @see     DmsFormatType, getGeocoordType()
     */
    virtual DmsFormatType getLatLonFormat() const = 0;
+
+   /**
+    *  Sets whether or not to always extrapolate lat/long grid lines.
+    *
+    *  This method sets the extrapolation format for latitude/longitude values.
+    *  If extrapolation is true, the lat/long grid lines will always be
+    *  drawn to the edge of the view regardless of the validity of the
+    *  geo coordinates from the raster layer.
+    *
+    *  @param   bExtrapolate
+    *           The latitude/longitude extrapolation value.
+    *           True = Always draw grid lines to edge of view.
+    *           False = Only draw grid lines where geo reference is valid.
+    *
+    *  @notify  This method will notify Subject::signalModified.
+    *
+    *  @see     getExtrapolation()
+    */
+   virtual void setExtrapolation(bool bExtrapolate) = 0;
+
+   /**
+    *  Returns the extrapolation value of latitude/longitude grid lines.
+    *  Default is false.
+    *
+    *  @return  The latitude/longitude extrapolation value.
+    *           True = Always draws grid lines to edge of view.
+    *           False = Only draws grid lines where geo reference is valid.
+    *
+    *  @see     setGeocoordType()
+    */
+   virtual bool getExtrapolation() const = 0;
 
 protected:
    /**
