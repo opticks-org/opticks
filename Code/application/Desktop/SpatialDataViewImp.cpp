@@ -3214,8 +3214,8 @@ void SpatialDataViewImp::updateContextMenu(Subject& subject, const string& signa
       vector<Layer*> layers = mpLayerList->getLayers();
       for (vector<Layer*>::iterator iter = layers.begin(); iter != layers.end(); ++iter)
       {
-         Layer* pLayer = *iter;
-         if (pLayer != NULL)
+         QPointer<LayerImp> pLayer = dynamic_cast<LayerImp*>(*iter);
+         if (pLayer.data() != NULL)
          {
             list<ContextMenuAction> layerActions = pLayer->getContextMenuActions();
             if (layerActions.empty() == false)
@@ -3238,10 +3238,9 @@ void SpatialDataViewImp::updateContextMenu(Subject& subject, const string& signa
                pLayerMenu->addSeparator();
 
                // Activate
-               if (pLayer != getActiveLayer())
+               if (dynamic_cast<Layer*>(pLayer.data()) != getActiveLayer())
                {
-                  LayerImp* pLayerImp = dynamic_cast<LayerImp*>(pLayer);
-                  if ((pLayerImp != NULL) && (pLayerImp->acceptsMouseEvents() == true))
+                  if (pLayer->acceptsMouseEvents() == true)
                   {
                      QAction* pActivateAction = new QAction("Activate", pParent);
                      pActivateAction->setAutoRepeat(false);
@@ -3260,7 +3259,7 @@ void SpatialDataViewImp::updateContextMenu(Subject& subject, const string& signa
                pLayerMenu->addAction(pCopyAction);
 
                // Convert
-               if (getDerivedLayerTypes(pLayer).empty() == false)
+               if (getDerivedLayerTypes(dynamic_cast<Layer*>(pLayer.data())).empty() == false)
                {
                   QAction* pConvertAction = new QAction("Convert...", pParent);
                   pConvertAction->setAutoRepeat(false);
@@ -3307,8 +3306,8 @@ void SpatialDataViewImp::updateContextMenu(Subject& subject, const string& signa
       unsigned int numItems = items.size();
       if (numItems == 1)
       {
-         Layer* pLayer = dynamic_cast<Layer*>(items.front());
-         if ((pLayer != NULL) && (mpLayerList->containsLayer(pLayer) == true))
+         QPointer<LayerImp> pLayer = dynamic_cast<LayerImp*>(items.front());
+         if ((pLayer.data() != NULL) && (mpLayerList->containsLayer(dynamic_cast<Layer*>(pLayer.data())) == true))
          {
             string beforeAction = APP_SESSIONEXPLORER_RENAME_ACTION;
 
@@ -3327,7 +3326,7 @@ void SpatialDataViewImp::updateContextMenu(Subject& subject, const string& signa
             beforeAction = APP_SPATIALDATAVIEW_LAYER_DELETE_ACTION;
 
             // Convert
-            if (getDerivedLayerTypes(pLayer).empty() == false)
+            if (getDerivedLayerTypes(dynamic_cast<Layer*>(pLayer.data())).empty() == false)
             {
                QAction* pConvertAction = new QAction("Convert...", pParent);
                pConvertAction->setAutoRepeat(false);
@@ -3351,10 +3350,9 @@ void SpatialDataViewImp::updateContextMenu(Subject& subject, const string& signa
             beforeAction = APP_SPATIALDATAVIEW_SELECT_LAYERS_OF_TYPE_ACTION;
 
             // Activate
-            if (pLayer != getActiveLayer())
+            if (dynamic_cast<Layer*>(pLayer.data()) != getActiveLayer())
             {
-               LayerImp* pLayerImp = dynamic_cast<LayerImp*>(pLayer);
-               if ((pLayerImp != NULL) && (pLayerImp->acceptsMouseEvents() == true))
+               if (pLayer->acceptsMouseEvents() == true)
                {
                   // Separator
                   QAction* pActivateSeparatorAction = new QAction(pParent);
@@ -3468,7 +3466,7 @@ void SpatialDataViewImp::copyLayer()
    QAction* pAction = dynamic_cast<QAction*>(sender());
    if (pAction != NULL)
    {
-      Layer* pLayer = pAction->data().value<Layer*>();
+      Layer* pLayer = dynamic_cast<Layer*>(pAction->data().value<QPointer<LayerImp> >().data());
       if (pLayer != NULL)
       {
          LayerType layerType = pLayer->getLayerType();
@@ -3487,7 +3485,7 @@ void SpatialDataViewImp::convertLayer()
    QAction* pAction = dynamic_cast<QAction*>(sender());
    if (pAction != NULL)
    {
-      pLayer = pAction->data().value<Layer*>();
+      pLayer = dynamic_cast<Layer*>(pAction->data().value<QPointer<LayerImp> >().data());
    }
 
    if (pLayer == NULL)
@@ -3547,7 +3545,7 @@ void SpatialDataViewImp::setActiveLayer()
    QAction* pAction = dynamic_cast<QAction*>(sender());
    if (pAction != NULL)
    {
-      Layer* pLayer = pAction->data().value<Layer*>();
+      Layer* pLayer = dynamic_cast<Layer*>(pAction->data().value<QPointer<LayerImp> >().data());
       if (pLayer != NULL)
       {
          setMouseMode("LayerMode");
@@ -3623,7 +3621,7 @@ void SpatialDataViewImp::deleteLayer()
    QAction* pAction = dynamic_cast<QAction*>(sender());
    if (pAction != NULL)
    {
-      pLayer = pAction->data().value<Layer*>();
+      pLayer = dynamic_cast<Layer*>(pAction->data().value<QPointer<LayerImp> >().data());
    }
 
    if (pLayer == NULL)
@@ -3667,7 +3665,7 @@ void SpatialDataViewImp::exportLayer()
    QAction* pAction = dynamic_cast<QAction*>(sender());
    if (pAction != NULL)
    {
-      pLayer = pAction->data().value<Layer*>();
+      pLayer = dynamic_cast<Layer*>(pAction->data().value<QPointer<LayerImp> >().data());
    }
 
    if (pLayer == NULL)
@@ -3691,7 +3689,7 @@ void SpatialDataViewImp::displayLayerProperties()
    QAction* pAction = dynamic_cast<QAction*>(sender());
    if (pAction != NULL)
    {
-      pLayer = pAction->data().value<Layer*>();
+      pLayer = dynamic_cast<Layer*>(pAction->data().value<QPointer<LayerImp> >().data());
    }
 
    if (pLayer == NULL)

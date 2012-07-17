@@ -20,6 +20,9 @@
 #include "SpatialDataView.h"
 #include "TypesFile.h"
 
+#include <QtCore/QMetaType>
+#include <QtCore/QPointer>
+
 #include <string>
 #include <vector>
 
@@ -33,6 +36,8 @@ class RasterElement;
 class QMenu;
 class QHelpEvent;
 class StatusBar;
+
+Q_DECLARE_METATYPE(QPointer<LayerImp>)
 
 class SpatialDataViewImp : public PerspectiveViewImp, public Observer
 {
