@@ -1427,9 +1427,17 @@ void LatLonLayerImp::computeBorder()
    {
       mMinCoord.mX = LAT_MIN;
    }
+   if (mMinCoord.mX > LAT_MAX)
+   {
+      mMinCoord.mX = LAT_MAX;
+   }
    if (mMaxCoord.mX > LAT_MAX)
    {
       mMaxCoord.mX = LAT_MAX;
+   }
+   if (mMaxCoord.mX < LAT_MIN)
+   {
+      mMaxCoord.mX = LAT_MIN;
    }
    if (mMinCoord.mY < LON_MIN)
    {
@@ -1438,6 +1446,14 @@ void LatLonLayerImp::computeBorder()
    if (mMinCoord.mY > LON_MAX)
    {
       mMinCoord.mY = LON_MAX;
+   }
+   if (mMaxCoord.mY > LON_MAX)
+   {
+      mMaxCoord.mY = LON_MAX;
+   }
+   if (mMaxCoord.mY < LON_MIN)
+   {
+      mMaxCoord.mY = LON_MIN;
    }
    mBorderDirty = false;
 }
