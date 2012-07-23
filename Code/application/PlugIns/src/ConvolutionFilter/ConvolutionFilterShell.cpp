@@ -100,7 +100,7 @@ bool ConvolutionFilterShell::execute(PlugInArgList* pInArgList, PlugInArgList* p
    }
    BitMaskIterator iterChecker((mpAoi == NULL) ? NULL : mpAoi->getSelectedPoints(), 0, 0,
       mInput.mpDescriptor->getColumnCount() - 1, mInput.mpDescriptor->getRowCount() - 1);
-   EncodingType resultType = mInput.mForceFloat ? FLT8BYTES : mInput.mpDescriptor->getDataType();
+   EncodingType resultType = mInput.mForceFloat ? EncodingType(FLT8BYTES) : mInput.mpDescriptor->getDataType();
    if (resultType == INT4SCOMPLEX)
    {
       resultType = INT4SBYTES;
