@@ -60,6 +60,8 @@ protected:
       const BitMaskIterator* mpIterCheck;
       std::vector<unsigned int> mBands;
       NEWMAT::Matrix mKernel;
+      double mOffset;
+      bool mForceFloat;
    };
 
    ProgressTracker mProgress;

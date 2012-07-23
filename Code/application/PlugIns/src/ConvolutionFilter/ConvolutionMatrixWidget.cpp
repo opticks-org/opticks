@@ -367,6 +367,8 @@ void ConvolutionMatrixWidget::matrixButtonPressed(QAbstractButton* pButton)
       mpFilter->clear();
       resizeFilter();
       mpDivisor->setValue(1.0);
+      mpOffset->setValue(0.0);
+      mpForceFloat->setChecked(false);
       mpFilterName->setEditText(QString());
    }
    else if (mpMatrixButtons->buttonRole(pButton) == QDialogButtonBox::ApplyRole || 
@@ -506,6 +508,10 @@ void ConvolutionMatrixWidget::matrixButtonPressed(QAbstractButton* pButton)
          pConv->getInArgList().setPlugInArgValue("Result Name", &resultName);
          pConv->getInArgList().setPlugInArgValueLoose("Kernel", &kernel);
          pConv->getInArgList().setPlugInArgValue("Band Numbers", &bandNums);
+         double offset = mpOffset->value();
+         pConv->getInArgList().setPlugInArgValue("Offset", &offset);
+         bool forceFloat = mpForceFloat->isChecked();
+         pConv->getInArgList().setPlugInArgValue("Force Float", &forceFloat);
          pConv->execute();
       }
    }
@@ -518,7 +524,12 @@ void ConvolutionMatrixWidget::presetButtonPressed(QAbstractButton* pButton)
       QString filterName = mpFilterName->currentText();
       if (!filterName.isEmpty())
       {
-         mPresets[filterName] = qMakePair(getCurrentMatrix(), mpDivisor->value());
+         FilterSettings settings;
+         settings.mKernel = getCurrentMatrix();
+         settings.mDivisor = mpDivisor->value();
+         settings.mOffset = mpOffset->value();
+         settings.mFloatOutput = mpForceFloat->isChecked();
+         mPresets[filterName] = settings;
          if (mpFilterName->findText(mpFilterName->currentText()) == -1)
          {
             mpFilterName->addItem(mpFilterName->currentText());
@@ -529,7 +540,7 @@ void ConvolutionMatrixWidget::presetButtonPressed(QAbstractButton* pButton)
    else if (mpPresetButtons->buttonRole(pButton) == QDialogButtonBox::DestructiveRole) // Remove
    {
       QString filterName = mpFilterName->currentText();
-      QMap<QString, QPair<NEWMAT::Matrix, double> >::iterator pos = mPresets.find(filterName);
+      QMap<QString, FilterSettings>::iterator pos = mPresets.find(filterName);
       if (pos != mPresets.end() &&
           (QMessageBox::question(this, "Confirm removal",
            QString("Are you sure you want to remove the %1 filter?").arg(filterName),
@@ -543,10 +554,10 @@ void ConvolutionMatrixWidget::presetButtonPressed(QAbstractButton* pButton)
    else if (mpPresetButtons->buttonRole(pButton) == QDialogButtonBox::ActionRole) // Load
    {
       QString filterName = mpFilterName->currentText();
-      QMap<QString, QPair<NEWMAT::Matrix, double> >::iterator pos = mPresets.find(filterName);
+      QMap<QString, FilterSettings>::iterator pos = mPresets.find(filterName);
       if (pos != mPresets.end())
       {
-         NEWMAT::Matrix kernel = pos->first;
+         NEWMAT::Matrix kernel = pos->mKernel;
          mpLink->setChecked(kernel.Nrows() == kernel.Ncols());
          mpHeightSlider->setValue(sizeToSlider(kernel.Nrows()));
          mpWidthSlider->setValue(sizeToSlider(kernel.Ncols()));
@@ -557,7 +568,9 @@ void ConvolutionMatrixWidget::presetButtonPressed(QAbstractButton* pButton)
                mpFilter->item(row, col)->setData(Qt::DisplayRole, QVariant(kernel(row+1, col+1)));
             }
          }
-         mpDivisor->setValue(pos->second);
+         mpDivisor->setValue(pos->mDivisor);
+         mpOffset->setValue(pos->mOffset);
+         mpForceFloat->setChecked(pos->mFloatOutput);
       }
    }
 }
@@ -578,20 +591,22 @@ NEWMAT::Matrix ConvolutionMatrixWidget::getCurrentMatrix() const
 void ConvolutionMatrixWidget::saveToConfigurationSettings() const
 {
    FactoryResource<DynamicObject> pPresetsDo;
-   for (QMap<QString, QPair<NEWMAT::Matrix, double> >::const_iterator preset = mPresets.begin();
+   for (QMap<QString, FilterSettings>::const_iterator preset = mPresets.begin();
       preset != mPresets.end(); ++preset)
    {
       std::string presetPrefix = preset.key().toStdString();
-      pPresetsDo->setAttributeByPath(presetPrefix + "/divisor", preset->second);
-      pPresetsDo->setAttributeByPath(presetPrefix + "/rowcount", preset->first.Nrows());
-      pPresetsDo->setAttributeByPath(presetPrefix + "/colcount", preset->first.Ncols());
+      pPresetsDo->setAttributeByPath(presetPrefix + "/divisor", preset->mDivisor);
+      pPresetsDo->setAttributeByPath(presetPrefix + "/offset", preset->mOffset);
+      pPresetsDo->setAttributeByPath(presetPrefix + "/floatOutput", preset->mFloatOutput);
+      pPresetsDo->setAttributeByPath(presetPrefix + "/rowcount", preset->mKernel.Nrows());
+      pPresetsDo->setAttributeByPath(presetPrefix + "/colcount", preset->mKernel.Ncols());
       std::vector<double> elements;
-      elements.reserve(preset->first.Storage());
-      for (int row = 1; row <= preset->first.Nrows(); ++row)
+      elements.reserve(preset->mKernel.Storage());
+      for (int row = 1; row <= preset->mKernel.Nrows(); ++row)
       {
-         for (int col = 1; col <= preset->first.Ncols(); ++col)
+         for (int col = 1; col <= preset->mKernel.Ncols(); ++col)
          {
-            elements.push_back(preset->first(row, col));
+            elements.push_back(preset->mKernel(row, col));
          }
       }
       pPresetsDo->setAttributeByPath(presetPrefix + "/kernel", elements);
@@ -613,6 +628,8 @@ void ConvolutionMatrixWidget::loadFromConfigurationSettings()
    for (std::vector<std::string>::const_iterator name = names.begin(); name != names.end(); ++name)
    {
       double divisor = dv_cast<double>(pPresetsDo->getAttributeByPath(*name + "/divisor"), 1.0);
+      double offset = dv_cast<double>(pPresetsDo->getAttributeByPath(*name + "/offset"), 0.0);
+      bool floatOutput = dv_cast<bool>(pPresetsDo->getAttributeByPath(*name + "/floatOutput"), false);
       int rowcount = dv_cast<int>(pPresetsDo->getAttributeByPath(*name + "/rowcount"), 0);
       int colcount = dv_cast<int>(pPresetsDo->getAttributeByPath(*name + "/colcount"), 0);
       std::vector<double> elements = dv_cast<std::vector<double> >(
@@ -630,7 +647,12 @@ void ConvolutionMatrixWidget::loadFromConfigurationSettings()
             kernel(row, col) = *element++;
          }
       }
-      mPresets[QString::fromStdString(*name)] = qMakePair(kernel, divisor);
+      FilterSettings settings;
+      settings.mDivisor = divisor;
+      settings.mOffset = offset;
+      settings.mFloatOutput = floatOutput;
+      settings.mKernel = kernel;
+      mPresets[QString::fromStdString(*name)] = settings;
       mpFilterName->addItem(QString::fromStdString(*name));
    }
 }

@@ -66,6 +66,8 @@ bool ConvolutionFilterShell::getInputSpecification(PlugInArgList*& pInArgList)
    VERIFY(pInArgList->addArg<std::vector<unsigned int> >("Band Numbers", "The band numbers which will be convolved. Defaults to no bands. This argument takes precedence over the Band Number argument."));
    VERIFY(pInArgList->addArg<std::string>("Result Name", "The name of the new raster element. "
       "Defaults to the name of the input raster element with ' Convolved' appended."));
+   VERIFY(pInArgList->addArg<double>("Offset", 0.0, "Optional offset value to add to each output pixel"));
+   VERIFY(pInArgList->addArg<bool>("Force Float", false, "Optional flag to force output image to be 8-byte floating point."));
    return true;
 }
 
@@ -98,7 +100,7 @@ bool ConvolutionFilterShell::execute(PlugInArgList* pInArgList, PlugInArgList* p
    }
    BitMaskIterator iterChecker((mpAoi == NULL) ? NULL : mpAoi->getSelectedPoints(), 0, 0,
       mInput.mpDescriptor->getColumnCount() - 1, mInput.mpDescriptor->getRowCount() - 1);
-   EncodingType resultType = mInput.mpDescriptor->getDataType();
+   EncodingType resultType = mInput.mForceFloat ? FLT8BYTES : mInput.mpDescriptor->getDataType();
    if (resultType == INT4SCOMPLEX)
    {
       resultType = INT4SBYTES;
@@ -260,6 +262,18 @@ bool ConvolutionFilterShell::extractInputArgs(PlugInArgList* pInArgList)
          }
       }
    }
+
+   if (!pInArgList->getPlugInArgValue("Offset", mInput.mOffset))
+   {
+      mProgress.report("Error getting offset.", 0, ERRORS, true);
+      return false;
+   }
+
+   if (!pInArgList->getPlugInArgValue("Force Float", mInput.mForceFloat))
+   {
+      mProgress.report("Error getting float output.", 0, ERRORS, true);
+      return false;
+   }
    return true;
 }
 
@@ -377,7 +391,8 @@ void ConvolutionFilterShell::ConvolutionFilterThread::convolve(const T*)
          return;
       }
 
-      Service<ModelServices> pModel;
+      Service<ModelServices> model;
+      ModelServices* pModel = model.get();
       int numRows = stopRow - startRow + 1;
       for (int row_index = startRow; row_index <= stopRow; ++row_index)
       {
@@ -424,7 +439,8 @@ void ConvolutionFilterShell::ConvolutionFilterThread::convolve(const T*)
                return;
             }
 
-            switchOnEncoding(pResultDescriptor->getDataType(), assignResult, resultAccessor->getColumn(), accum);
+            switchOnEncoding(pResultDescriptor->getDataType(), assignResult,
+                             resultAccessor->getColumn(), accum + mInput.mOffset);
             resultAccessor->nextColumn();
          }
          resultAccessor->nextRow();

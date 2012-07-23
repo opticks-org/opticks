@@ -116,35 +116,34 @@ void ConnectionManager::mapConnection(ConnectionManager* pManager)
 */
 bool ConnectionManager::queryInterface(const char* interfaceName, void** interfaceAddress)
 {
-   string name = interfaceName;
    *interfaceAddress = NULL;
 
-   if (name == "ModelServices2")
+   if (strcmp(interfaceName, "ModelServices2") == 0)
    {
       *interfaceAddress = static_cast<ModelServices*>(ModelServicesImp::instance());
    }
 
-   if (name == "PlugInManagerServices2")
+   if (strcmp(interfaceName, "PlugInManagerServices2") == 0)
    {
       *interfaceAddress = static_cast<PlugInManagerServices*>(PlugInManagerServicesImp::instance());
    }
 
-   if (name == "UtilityServices2")
+   if (strcmp(interfaceName, "UtilityServices2") == 0)
    {
       *interfaceAddress = static_cast<UtilityServices*>(UtilityServicesImp::instance());
    }
 
-   if (name == "AnimationServices2")
+   if (strcmp(interfaceName, "AnimationServices2") == 0)
    {
       *interfaceAddress = static_cast<AnimationServices*>(AnimationServicesImp::instance());
    }
 
-   if (name == "DesktopServices2")
+   if (strcmp(interfaceName, "DesktopServices2") == 0)
    {
       *interfaceAddress = static_cast<DesktopServices*>(DesktopServicesImp::instance());
    }
 
-   if (name == "ApplicationServices2")
+   if (strcmp(interfaceName, "ApplicationServices2") == 0)
    {
       *interfaceAddress = static_cast<ApplicationServices*>(ApplicationServicesImp::instance());
    }

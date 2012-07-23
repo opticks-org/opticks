@@ -60,6 +60,15 @@ public:
    void setData(int role, const QVariant& value);
 };
 
+class FilterSettings
+{
+public:
+   NEWMAT::Matrix mKernel;
+   double mDivisor;
+   double mOffset;
+   bool mFloatOutput;
+};
+
 class ConvolutionMatrixWidget : public QWidget, private Ui_ConvolutionMatrixWidget
 {
    Q_OBJECT
@@ -84,7 +93,7 @@ private:
    ConvolutionMatrixWidget& operator=(const ConvolutionMatrixWidget& rhs);
    QIcon* mpLockIcon;
    QIcon* mpUnlockIcon;
-   QMap<QString, QPair<NEWMAT::Matrix, double> > mPresets;
+   QMap<QString, FilterSettings> mPresets;
    std::map<std::string, PreviousConvolutionExecution> mPreviousConvolves;
 };
 
