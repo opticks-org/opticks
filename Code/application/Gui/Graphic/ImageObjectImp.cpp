@@ -15,9 +15,7 @@
 #include "GraphicLayerImp.h"
 #include "ImageObjectImp.h"
 #include "View.h"
-#include "ViewImp.h"
 
-#include <QtGui/QPixmap>
 #include <QtOpenGL/QGLContext>
 
 #include <algorithm>
@@ -200,22 +198,6 @@ bool ImageObjectImp::setImageData(const QImage& image, ColorType transparent)
    }
 
    vector<unsigned int> data(iWidth * iHeight);
-   int colorDepth = 0;
-
-   GraphicLayer* pLayer = getLayer();
-   if (pLayer != NULL)
-   {
-      ViewImp* pView = dynamic_cast<ViewImp*>(pLayer->getView());
-      if (pView != NULL)
-      {
-         colorDepth = pView->depth();
-      }
-   }
-
-   if (colorDepth == 0)
-   {
-      colorDepth = QPixmap::defaultDepth();
-   }
 
    for (int i = 0; i < iHeight; i++)
    {
@@ -224,7 +206,7 @@ bool ImageObjectImp::setImageData(const QImage& image, ColorType transparent)
       {
          QRgb sourcePixel = image.pixel(j, i);
 
-         if (colorDepth < 32)
+         if (Endian::getSystemEndian() == BIG_ENDIAN_ORDER)
          {
             *pDestPixel = (qRed(sourcePixel) << 8) + (qGreen(sourcePixel) << 16) +
                (qBlue(sourcePixel) << 24) + (qAlpha(sourcePixel));
