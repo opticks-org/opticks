@@ -1678,11 +1678,7 @@ BadValuesEdit::BadValuesEdit(QWidget* pParent) :
 {
    // create line edit validator expression
    QRegExp badValuesExp;
-#if defined(WIN_API)
    badValuesExp.setPattern("^([<>]?[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?[,]?[<>]?[\\s]?)+$");
-#else
-   badValuesExp.setPattern("^([<>]?[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?[,]?[<>]?[\s]?)+$");
-#endif
 
    QHBoxLayout* pLayout = new QHBoxLayout(this);
    mpBadValuesStr = new QLineEdit(this);

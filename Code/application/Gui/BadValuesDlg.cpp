@@ -427,11 +427,7 @@ BadValueInputDlg::BadValueInputDlg(QWidget* pParent) :
    QFrame* pLine = new QFrame(this);
    pLine->setFrameStyle(QFrame::Sunken | QFrame::HLine);
    QRegExp numericExp;
-#if defined(WIN_API)
    numericExp.setPattern("^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$");
-#else
-   numericExp.setPattern("^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$");
-#endif
    QRegExpValidator* pValidator = new QRegExpValidator(numericExp, this);
    mpBadValue->setValidator(pValidator);
 
@@ -495,11 +491,7 @@ RangeInputDlg::RangeInputDlg(QWidget* pParent) :
    QFrame* pLine = new QFrame(this);
    pLine->setFrameStyle(QFrame::Sunken | QFrame::HLine);
    QRegExp numericExp;
-#if defined(WIN_API)
    numericExp.setPattern("^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$");
-#else
-   numericExp.setPattern("^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$");
-#endif
    QRegExpValidator* pValidator = new QRegExpValidator(numericExp, this);
    mpRangeStart->setValidator(pValidator);
    mpRangeEnd->setValidator(pValidator);
