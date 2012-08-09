@@ -363,6 +363,7 @@ public:
     *  - GraphicLayer
     *  - HistogramPlot
     *  - #InterleaveFormatType
+    *  - #InterpolationType
     *  - LatLonLayer
     *  - Layer
     *  - #LayerType

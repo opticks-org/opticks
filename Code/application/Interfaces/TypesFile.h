@@ -374,6 +374,24 @@ enum InterleaveFormatTypeEnum
 typedef EnumWrapper<InterleaveFormatTypeEnum> InterleaveFormatType;
 
 /**
+ * Types of interpolation.
+ */
+enum InterpolationTypeEnum
+{
+   INTERP_NEAREST_NEIGHBOR,   /**< Duplicate the nearest pixel value        */
+   INTERP_BILINEAR,           /**< Bilinear interpolation                   */
+   INTERP_BICUBIC,            /**< Bicubic interpolation over a 4x4 area    */
+   INTERP_AREA,               /**< Pixel area interpolation - useful for downsampling only.\   Up-sampling
+                                   with this filter is equivalent to \em INTERP_NEAREST_NEIGHBOR */
+   INTERP_LANCZOS4            /**< Lanczos - windowed filter for up-sampling using an 8x8 kernel  */
+};
+
+/**
+ * @EnumWrapper ::InterpolationTypeEnum.
+ */
+typedef EnumWrapper<InterpolationTypeEnum> InterpolationType;
+
+/**
  *  The line style for a latitude/longitude layer.
  */
 enum LatLonStyleEnum { LATLONSTYLE_SOLID, LATLONSTYLE_CROSS, LATLONSTYLE_NONE, LATLONSTYLE_DASHED };
@@ -911,6 +929,7 @@ template <> class VariantTypeValidator<GeocoordType> {};
 template <> class VariantTypeValidator<GraphicObjectType> {};
 template <> class VariantTypeValidator<InsetZoomMode> {};
 template <> class VariantTypeValidator<InterleaveFormatType> {};
+template <> class VariantTypeValidator<InterpolationType> {};
 template <> class VariantTypeValidator<LatLonStyle> {};
 template <> class VariantTypeValidator<LayerType> {};
 template <> class VariantTypeValidator<LineStyle> {};

@@ -276,6 +276,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
                <File Name="SecondMoment.dll" Id="F__SecondMomentPlugIn" DiskId="1" />
                <File Name="ShapeFileExporter.dll" Id="F__ShapeFileExporterPlugIn" DiskId="1" />
                <File Name="Sio.dll" Id="F__SioPlugIn" DiskId="1" />
+               <File Name="SpatialResampler.dll" Id="F__SpatialResamplerPlugIn" DiskId="1" />
                <File Name="Wavelength.dll" Id="F__WavelengthPlugIn" DiskId="1" />
                <File Name="WizardExecutor.dll" Id="F__WizardExecutorPlugIn" DiskId="1" />
                <File Name="WizardItems.dll" Id="F__WizardItemsPlugIn" DiskId="1" />

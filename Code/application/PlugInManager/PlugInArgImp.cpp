@@ -253,6 +253,7 @@ void PlugInArgImp::initArgTypes()
       mArgTypes.push_back("GraphicLayer");
       mArgTypes.push_back("HistogramPlot");
       mArgTypes.push_back("InterleaveFormatType");
+      mArgTypes.push_back("InterpolationType");
       mArgTypes.push_back("LatLonLayer");
       mArgTypes.push_back("Layer");
       mArgTypes.push_back("LayerType");

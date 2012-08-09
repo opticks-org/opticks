@@ -36,6 +36,7 @@
  *    - #GraphicObjectType
  *    - #InsetZoomMode
  *    - #InterleaveFormatType
+ *    - #InterpolationType
  *    - #LatLonStyle
  *    - #LayerType
  *    - #LineStyle

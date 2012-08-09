@@ -239,6 +239,9 @@ const vector<DataVariantEditorDelegate>& DataVariantEditor::getDelegates()
       temp = DataVariantEditorDelegate("InterleaveFormatType", DataVariantEditorDelegate::ENUMERATION);
       temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<InterleaveFormatType>());
       sDelegates.push_back(temp);
+      temp = DataVariantEditorDelegate("InterpolationType", DataVariantEditorDelegate::ENUMERATION);
+      temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<InterpolationType>());
+      sDelegates.push_back(temp);
       temp = DataVariantEditorDelegate("LayerType", DataVariantEditorDelegate::ENUMERATION);
       temp.setEnumValueStrings(StringUtilities::getAllEnumValuesAsDisplayString<LayerType>());
       sDelegates.push_back(temp);

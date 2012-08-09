@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Header Files">
@@ -114,6 +114,9 @@
       <Filter>Interfaces</Filter>
     </ClInclude>
     <ClInclude Include="Interfaces\GlTextureResource.h">
+      <Filter>Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Interfaces\InterpolationComboBox.h">
       <Filter>Interfaces</Filter>
     </ClInclude>
     <ClInclude Include="Interfaces\InterpreterUtilities.h">
@@ -341,6 +344,9 @@
       <Filter>moc</Filter>
     </ClCompile>
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_InfoBar.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_InterpolationComboBox.cpp">
       <Filter>moc</Filter>
     </ClCompile>
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_LabeledSection.cpp">
@@ -581,6 +587,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="InfoBar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="InterpolationComboBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="InterpreterUtilities.cpp">

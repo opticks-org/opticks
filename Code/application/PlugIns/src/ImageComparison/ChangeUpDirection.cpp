@@ -167,7 +167,7 @@ bool ChangeUpDirection::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
 
    int defaultBadValue(0);  // the rotate method will handle setting the default bad values into the rotated raster
    if (!RasterUtilities::rotate(pRotated.get(), pData, rotation, defaultBadValue,
-               RasterUtilities::NEAREST_NEIGHBOR, progress.getCurrentProgress(), &mAbort))
+      INTERP_NEAREST_NEIGHBOR, progress.getCurrentProgress(), &mAbort))
    {
       // error message already reported by rotate()
       return false;

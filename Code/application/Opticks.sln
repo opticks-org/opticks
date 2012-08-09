@@ -124,6 +124,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Collada", "PlugIns\src\Coll
 		{BFAA94F6-8CA1-4159-B0E1-90B09D9C3056} = {BFAA94F6-8CA1-4159-B0E1-90B09D9C3056}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SpatialResampler", "PlugIns\src\SpatialResampler\SpatialResampler.vcxproj", "{BBBDE64F-2E25-4E96-B2CC-4D59AA2C1708}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -608,6 +610,14 @@ Global
 		{8B25F228-190F-4C43-9545-70FB7511842C}.Release|Win32.Build.0 = Release|Win32
 		{8B25F228-190F-4C43-9545-70FB7511842C}.Release|x64.ActiveCfg = Release|x64
 		{8B25F228-190F-4C43-9545-70FB7511842C}.Release|x64.Build.0 = Release|x64
+		{BBBDE64F-2E25-4E96-B2CC-4D59AA2C1708}.Debug|Win32.ActiveCfg = Debug|Win32
+		{BBBDE64F-2E25-4E96-B2CC-4D59AA2C1708}.Debug|Win32.Build.0 = Debug|Win32
+		{BBBDE64F-2E25-4E96-B2CC-4D59AA2C1708}.Debug|x64.ActiveCfg = Debug|x64
+		{BBBDE64F-2E25-4E96-B2CC-4D59AA2C1708}.Debug|x64.Build.0 = Debug|x64
+		{BBBDE64F-2E25-4E96-B2CC-4D59AA2C1708}.Release|Win32.ActiveCfg = Release|Win32
+		{BBBDE64F-2E25-4E96-B2CC-4D59AA2C1708}.Release|Win32.Build.0 = Release|Win32
+		{BBBDE64F-2E25-4E96-B2CC-4D59AA2C1708}.Release|x64.ActiveCfg = Release|x64
+		{BBBDE64F-2E25-4E96-B2CC-4D59AA2C1708}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

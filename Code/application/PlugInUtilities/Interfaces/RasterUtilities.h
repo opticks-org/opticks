@@ -12,7 +12,6 @@
 
 #include "AppConfig.h"
 #include "DimensionDescriptor.h"
-#include "EnumWrapper.h"
 #include "TypesFile.h"
 
 #if defined(WIN_API)
@@ -996,21 +995,6 @@ namespace RasterUtilities
    int64_t calculateFileSize(const RasterFileDescriptor* pDescriptor);
 
    /**
-    * Types of interpolation.
-    */
-   enum InterpolationTypeEnum
-   {
-      NEAREST_NEIGHBOR, /**< Duplicate the nearest neighbor */
-      BILINEAR, /**< Bilinear interpolation */
-      BICUBIC /**< Bicubic interpolation */
-   };
-
-   /**
-    * @EnumWrapper RasterUtilities::InterpolationTypeEnum.
-    */
-   typedef EnumWrapper<InterpolationTypeEnum> InterpolationType;
-
-   /**
     *  Rotate a data set.
     *
     *  The original dimensions of the data set are maintained. This means that data clipping and padding may occur.
@@ -1025,7 +1009,7 @@ namespace RasterUtilities
     *         Pixels which do not map to anything in the original data set will be set to this value.
     *         This value will be added to the bad values list if it is not already there.
     *  @param interp
-    *         Interpolation type. Only NEAREST_NEIGHBOR is currently supported.
+    *         Interpolation type. Only ::INTERP_NEAREST_NEIGHBOR is currently supported.
     *  @param pProgress
     *         Report progress.
     *  @param pAbort
@@ -1033,7 +1017,7 @@ namespace RasterUtilities
     *  @return \c True if successful, \c false on error.
     */
    bool rotate(RasterElement* pDst, const RasterElement* pSrc, double angle, int defaultValue,
-               InterpolationType interp = NEAREST_NEIGHBOR, Progress* pProgress = NULL, bool* pAbort = NULL);
+               InterpolationType interp = INTERP_NEAREST_NEIGHBOR, Progress* pProgress = NULL, bool* pAbort = NULL);
 }
 
 #endif

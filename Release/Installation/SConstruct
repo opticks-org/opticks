@@ -95,6 +95,7 @@ if OPTICKS_PLATFORM == "linux-x86_64":
    debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/SecondMoment.so'))
    debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/ShapeFileExporter.so'))
    debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/Sio.so'))
+   debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/SpatialResampler.so'))
    debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/Wavelength.so'))
    debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/WizardExecutor.so'))
    debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/WizardItems.so'))

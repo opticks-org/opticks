@@ -1338,7 +1338,7 @@ int64_t RasterUtilities::calculateFileSize(const RasterFileDescriptor* pDescript
 }
 
 bool RasterUtilities::rotate(RasterElement* pDst, const RasterElement* pSrc, double angle, int defaultValue,
-                             RasterUtilities::InterpolationType interp, Progress* pProgress, bool* pAbort)
+                             InterpolationType interp, Progress* pProgress, bool* pAbort)
 {
    if (pDst == NULL || pSrc == NULL)
    {
@@ -1431,7 +1431,7 @@ bool RasterUtilities::rotate(RasterElement* pDst, const RasterElement* pSrc, dou
       }
       switch(interp)
       {
-      case NEAREST_NEIGHBOR:
+      case INTERP_NEAREST_NEIGHBOR:
          {
             unsigned int preStartRow = static_cast<int>(startMult * row + 0.5);
             unsigned int preEndRow = static_cast<int>(endMult * row + 0.5);
@@ -1439,8 +1439,10 @@ bool RasterUtilities::rotate(RasterElement* pDst, const RasterElement* pSrc, dou
             newRowEnd.push_back(newRowEndPre[preEndRow]);
             break;
          }
-      case BILINEAR:
-      case BICUBIC:
+      case INTERP_BILINEAR:
+      case INTERP_BICUBIC:
+      case INTERP_AREA:
+      case INTERP_LANCZOS4:
       default:
          if (pProgress != NULL)
          {
@@ -1523,14 +1525,16 @@ bool RasterUtilities::rotate(RasterElement* pDst, const RasterElement* pSrc, dou
             Opticks::PixelLocation sourcePixel;
             switch(interp)
             {
-            case NEAREST_NEIGHBOR:
+            case INTERP_NEAREST_NEIGHBOR:
                {
                   unsigned int preCol = static_cast<int>(mult * col + 0.5);
                   sourcePixel = newColPre[preCol];
                   break;
                }
-            case BILINEAR:
-            case BICUBIC:
+            case INTERP_BILINEAR:
+            case INTERP_BICUBIC:
+            case INTERP_AREA:
+            case INTERP_LANCZOS4:
             default:
                if (pProgress != NULL)
                {

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -1128,6 +1128,24 @@
 </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
     </CustomBuild>
+    <CustomBuild Include="Interfaces\InterpolationComboBox.h">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing %(Filename).h...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Filename).h...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing %(Filename).h...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Filename).h...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+    </CustomBuild>
     <ClInclude Include="Interfaces\InterpreterUtilities.h" />
     <ClInclude Include="Interfaces\IntValidator.h" />
     <CustomBuild Include="Interfaces\LabeledSection.h">
@@ -1403,6 +1421,7 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_ImageHandler.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_ImageResolutionWidget.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_InfoBar.cpp" />
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_InterpolationComboBox.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_LabeledSection.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_LabeledSectionGroup.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_LatLonLineEdit.cpp" />
@@ -1483,6 +1502,7 @@
     <ClCompile Include="ImageHandler.cpp" />
     <ClCompile Include="ImageResolutionWidget.cpp" />
     <ClCompile Include="InfoBar.cpp" />
+    <ClCompile Include="InterpolationComboBox.cpp" />
     <ClCompile Include="InterpreterUtilities.cpp" />
     <ClCompile Include="IntValidator.cpp" />
     <ClCompile Include="LabeledSection.cpp" />

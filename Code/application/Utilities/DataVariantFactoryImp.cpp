@@ -724,6 +724,7 @@ void DataVariantFactoryImp::initializeMaps()
    registerType<DataVariantValue<GraphicObjectType> >();
    registerType<DataVariantValue<InsetZoomMode> >();
    registerType<DataVariantValue<InterleaveFormatType> >();
+   registerType<DataVariantValue<InterpolationType> >();
    registerType<DataVariantValue<LatLonStyle> >();
    registerType<DataVariantValue<LayerType> >();
    registerType<DataVariantValue<LineStyle> >();
