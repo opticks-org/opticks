@@ -21,15 +21,53 @@ class RasterElement;
  * distance and azimuth of two coordinates.  The class also
  * contains methods to perform conversions common to distance
  * calculations.
+ *
+ * Vincenty algorithm initialization is run anytime coordinates have changed.
+ * So, if one Vincenty algorithm is run, initialization  will not be run
+ * again for the rest of the Vincenty algorithms, as long as the coordinates
+ * remain the same.
+ *
+ * Original Vincenty algorithm source:
+ *   T. Vincenty, "Direct and Inverse Solutions of Geodesics on the
+ *   Ellipsoid with Application of Nested Equations", Survey Review, vol.
+ *   23, no. 176, April 1975, pp 88-93
+ *
+ * Vincenty Transcription and Translation:
+ *   The Vincenty procedure was transcribed verbatim by Peter Cederholm,
+ *   August 12, 2003. It was modified and translated to English by Michael
+ *   Kleder.  Mr. Cederholm's website is http://www.plan.aau.dk/~pce/
+ *
+ * Vincenty Implementation:
+ *   Original Code was modified and converted to C++ by Nick Bays, BATC.
+ *
+ * Vincenty Notes:
+ *   -# Error correcting code, convergence failure traps, antipodal
+ *      corrections, polar error corrections, and WGS84 ellipsoid
+ *      parameters written by Michael Kleder, 2004.
+ *   -# Vincenty describes his original algorithm as precise to within
+ *      0.01 millimeters, subject to the ellipsoidal model.
+ *   -# Essentially antipodal points are treated as exactly
+ *      antipodal, potentially reducing accuracy by a small amount.
+ *   -# Failures for points exactly at the poles are eliminated by
+ *      moving the points by 0.6 millimeters.
+ *   -# This algorithm uses an ellipsoidal earth model and is,
+ *      therefore, more accurate than a spherical Earth model. The
+ *      maximum differences between this algorithm and the spherical
+ *      earth algorithm is:
+ *      - Max absolute difference: 38 kilometers
+ *      - Max fractional difference: 0.56 percent
  */
 class GeoAlgorithms
 {
 public:
    /**
-    * Initializes variables used by GeoAlgorithms
+    * Initializes variables used by GeoAlgorithms.
     */
    GeoAlgorithms();
 
+   /**
+   * Default destructor for GeoAlgorithms.
+   */
    virtual ~GeoAlgorithms(){}
 
    /**
@@ -74,6 +112,23 @@ public:
    static double getPythagoreanDistance(double ax, double ay, double az,
                                         double bx, double by, double bz);
 
+   /**
+    * Returns the distance between two coordinates.
+    *
+    * This method calculates the distance between two lat/lon coordinates.
+    * A spherical earth is assumed.
+    *
+    *   @param aLat1
+    *     The latitude of the first coordinate.
+    *   @param  aLon1
+    *     The longitude of the first coordinate.
+    *   @param aLat2
+    *     The latitude of the second coordinate.
+    *   @param aLon2
+    *     The longitude of the second coordinate.
+    *   @return
+    *     The distance from point 1 to point 2 in kilometers.
+    */
    static double getGCDistance(double aLat1, double aLon1,
                         double aLat2, double aLon2);
 
@@ -81,22 +136,21 @@ public:
     * Returns the distance between two coordinates.
     *
     * This method calculates the distance between two lat/lon coordinates.
-    * A WGS84 Ellipsoid earth is assumed
+    * A WGS84 ellipsoid earth is assumed.
     *
     *   @param aLat1
-    *     The latitude of the first coordinate
+    *     The latitude of the first coordinate.
     *   @param aLon1
-    *     The longitude of the first coordinate
+    *     The longitude of the first coordinate.
     *   @param aLat2
-    *     The latitude of the second coordinate
+    *     The latitude of the second coordinate.
     *   @param aLon2
-    *     The longitude of the second coordinate
+    *     The longitude of the second coordinate.
     *   @return
-    *     The distance between the two coordinates in meters
+    *     The distance between the two coordinates in meters.
     */
    static double getEllipsoidDistance(double aLat1, double aLon1,
                                double aLat2, double aLon2);
-
 
    /**
     *   Compute distance between points on the WGS-84 ellipsoidal
@@ -104,18 +158,16 @@ public:
     *   Vincenty's algorithm.
     *   
     *   Calculates distance between two points using the Vincenty
-    *   distance algorithm.  See description of InitVincenty for
-    *   details of the VincentyAlgorithms and the use of the 
-    *   InitVincenty method.
-
+    *   distance algorithm.
+    *
     *   @param aLat1
-    *     GEODETIC latitude of first point (-90(S) to 90(N))
+    *     GEODETIC latitude of first point (-90(S) to 90(N)).
     *   @param aLon1
-    *     Longitude of first point (-180(W) to 180(E))
+    *     Longitude of first point (-180(W) to 180(E)).
     *   @param aLat2
-    *     GEODETIC latitude of second point (-90(W) to 90(E))
+    *     GEODETIC latitude of second point (-90(S) to 90(N)).
     *   @param aLon2
-    *     Longitude of second point (-180(W) to 180(E))
+    *     Longitude of second point (-180(W) to 180(E)).
     *   @return
     *      Arc length distance in meters.  Returns -1 on error, otherwise,
     *      return value should be positive (>=0).
@@ -128,13 +180,13 @@ public:
     *   on the WGS-84 ellipsoidal and return the maximum.
     *   
     *   @param aLat1
-    *     GEODETIC latitude of first point (-90(S) to 90(N))
+    *     GEODETIC latitude of first point (-90(S) to 90(N)).
     *   @param aLon1
-    *     Longitude of first point (-180(W) to 180(E))
+    *     Longitude of first point (-180(W) to 180(E)).
     *   @param aLat2
-    *     GEODETIC latitude of second point (-90(W) to 90(E))
+    *     GEODETIC latitude of second point (-90(S) to 90(N)).
     *   @param aLon2
-    *     Longitude of second point (-180(W) to 180(E))
+    *     Longitude of second point (-180(W) to 180(E)).
     *   @param elevation1
     *     The elevation of the first point in meters.
     *   @param elevation2
@@ -147,7 +199,6 @@ public:
                                            double aLat2, double aLon2,
                                            double elevation1, double elevation2);
 
-
    /**
     * Returns the azimuth between two points.
     *
@@ -156,13 +207,13 @@ public:
     * an origin of 0.
     *
     *   @param aXStart
-    *     The X value of the first point
+    *     The X value of the first point.
     *   @param aYStart
-    *     The Y value of the first point
+    *     The Y value of the first point.
     *   @param aXEnd
-    *     The X value of the second point
+    *     The X value of the second point.
     *   @param aYEnd
-    *     The Y value of the second point
+    *     The Y value of the second point.
     *   @return
     *     The angle between the two points.  No units assumed.
     */
@@ -173,37 +224,35 @@ public:
     * Returns the azimuth between two coordinates.
     *
     * This method calculates the azimuth between two lat/lon coordinates.
-    * A Spherical earth is assumed.
+    * A spherical earth is assumed.
     *
     *   @param aLat1
-    *     The latitude of the first coordinate
+    *     The latitude of the first coordinate.
     *   @param  aLon1
-    *     The longitude of the first coordinate
+    *     The longitude of the first coordinate.
     *   @param aLat2
-    *     The latitude of the second coordinate
+    *     The latitude of the second coordinate.
     *   @param aLon2
-    *     The longitude of the second coordinate
+    *     The longitude of the second coordinate.
     *   @return
     *     The azimuth from point 1 to point 2 in degrees.
     */
    static double getGCAzimuth(double aLat1, double aLon1, double aLat2, double aLon2);
    
-   
    /**
-    *   Calculate azimuth using Vincenty algorithm
+    *   Calculate azimuth using Vincenty algorithm.
     *   
     *   This method determines the azimuth from one point to another.
-    *   Results are in radians.  See description of InitVincenty for details
-    *   of the VincentyAlgorithms and the use of the InitVincenty method.
+    *   Results are in radians.
     *
     *   @param aLat1
-    *     GEODETIC latitude of first point (-90(S) to 90(N))
+    *     GEODETIC latitude of first point (-90(S) to 90(N)).
     *   @param aLon1
-    *     Longitude of first point (-180(W) to 180(E))
+    *     Longitude of first point (-180(W) to 180(E)).
     *   @param aLat2
-    *     GEODETIC latitude of second point (-90(W) to 90(E))
+    *     GEODETIC latitude of second point (-90(W) to 90(E)).
     *   @param aLon2
-    *     Longitude of second point (-180(W) to 180(E))
+    *     Longitude of second point (-180(W) to 180(E)).
     *   @return
     *     The azimuth from point 1 (start) to point 2 (end) in radians.  If an
     *     error occurs, -1 is returned.
@@ -215,7 +264,7 @@ public:
     *  Calculates the distance between the origin and the number of columns in the cube. 
     *
     *  @param   pRaster
-    *           The RasterElement to compute the GSD for
+    *           The RasterElement for which to compute the GSD.
     *
     *  @return  This method returns the distance between the origin
     *           and the number of columns in the cube.
@@ -226,7 +275,7 @@ public:
     *  Calculates the distance between the origin and the number of rows in the cube. 
     *
     *  @param   pRaster
-    *           The RasterElement to compute the GSD for
+    *           The RasterElement for which to compute the GSD.
     *
     *  @return  This method returns the distance between the origin
     *           and the number of rows in the cube.
@@ -305,7 +354,7 @@ private:
     *   @param aLon1
     *     Longitude of first point (-180(W) to 180(E))
     *   @param aLat2
-    *     GEODETIC latitude of second point (-90(W) to 90(E))
+    *     GEODETIC latitude of second point (-90(S) to 90(N))
     *   @param aLon2
     *     Longitude of second point (-180(W) to 180(E))
     *   @return
@@ -324,42 +373,12 @@ private:
     *   will not be run again for the rest of the Vincenty algorithms, as long as
     *   the coordinates remain the same.
     *
-    *   Original algorithm source:
-    *     T. Vincenty, "Direct and Inverse Solutions of Geodesics on the
-    *     Ellipsoid with Application of Nested Equations", Survey Review, vol.
-    *     23, no. 176, April 1975, pp 88-93
-    *
-    *   Transcription and Translation:
-    *     The Vincenty procedure was transcribed verbatim by Peter Cederholm,
-    *     August 12, 2003. It was modified and translated to English by Michael
-    *     Kleder.  Mr. Cederholm's website is http://www.plan.aau.dk/~pce/
-    *
-    *   Implementation:
-    *     Original Code was modified and converted to C++ by Nick Bays, BATC.
-    *
-    *   Notes:
-    *     -# Error correcting code, convergence failure traps, antipodal
-    *        corrections, polar error corrections, and WGS84 ellipsoid
-    *        parameters written by Michael Kleder, 2004.
-    *     -# Vincenty describes his original algorithm as precise to within
-    *        0.01 millimeters, subject to the ellipsoidal model.
-    *     -# Essentially antipodal points are treated as exactly
-    *        antipodal, potentially reducing accuracy by a small amount.
-    *     -# Failures for points exactly at the poles are eliminated by
-    *        moving the points by 0.6 millimeters.
-    *     -# This algorithm uses an ellipsoidal earth model and is,
-    *        therefore, more accurate than a spherical Earth model. The
-    *        maximum differences between this algorithm and the spherical
-    *        earth algorithm is:
-    *        - Max absolute difference: 38 kilometers
-    *        - Max fractional difference: 0.56 percent
-    * 
     *   @param aLat1
     *     GEODETIC latitude of first point (-90(S) to 90(N))
     *   @param aLon1
     *     Longitude of first point (-180(W) to 180(E))
     *   @param aLat2
-    *     GEODETIC latitude of second point (-90(W) to 90(E))
+    *     GEODETIC latitude of second point (-90(S) to 90(N))
     *   @param aLon2
     *     Longitude of second point (-180(W) to 180(E))
     *   @return
