@@ -127,6 +127,9 @@ if OPTICKS_PLATFORM == "linux-x86_64":
    debenv.Install('$PREF/Templates', debenv.File('$CODEDIR/Release/Templates/ZoomedImages.spg'))
    debenv.Install('$PREF/Extensions/AutoInstall', debenv.File('#/linux_extra/.dummy'))
 
+   # NOTE: The DESCRIPTION field is newline sensitive.
+   # It must end in a newline but not contain other newlines. If you must have one see:
+   # http://www.debian.org/doc/debian-policy/ch-controlfields.html#s-f-Description
    pkg = debenv.Package(NAME='opticks',
                         VERSION=env['VERSION'],
                         PACKAGEROOT=env.Dir(env['OUTPUT_DIR']),
@@ -138,8 +141,7 @@ if OPTICKS_PLATFORM == "linux-x86_64":
                         X_DPKG_DEPENDS='libtbb2 (>= 2.2+r009-1), libpq5 (>= 8.4.3)',
                         ARCHITECTURE='amd64',
                         SUMMARY='Opticks is a remote sensing P&E workbench.',
-                        DESCRIPTION='''
- Opticks is an expandable remote sensing and imagery analysis software platform that is free and open source. If you've used other commercial tools like: ERDAS IMAGINE, RemoteView, ENVI, or SOCET GXP, then you need to give Opticks a try. Unlike other competing tools, you can add capability to Opticks by creating an extension. Opticks provides the most advanced extension capability of any other remote sensing tool on the market.
+                        DESCRIPTION='''Opticks is an expandable remote sensing and imagery analysis software platform that is free and open source. If you've used other commercial tools like: ERDAS IMAGINE, RemoteView, ENVI, or SOCET GXP, then you need to give Opticks a try. Unlike other competing tools, you can add capability to Opticks by creating an extension. Opticks provides the most advanced extension capability of any remote sensing tool on the market.
 ''',
                         SOURCE_URL='http://opticks.org',
                         X_DPKG_HOMEPAGE='http://opticks.org'
