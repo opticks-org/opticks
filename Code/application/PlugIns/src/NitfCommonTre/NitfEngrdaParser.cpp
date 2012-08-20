@@ -68,13 +68,32 @@ bool Nitf::EngrdaParser::toDynamicObject(std::istream& input,
       Nitf::readAndConvertFromStream(input, lbln, success, ENGRDA::ENGLN, 2, errorMessage, buf);
       Nitf::readField<std::string>(input, record, success, ENGRDA::ENGLBL, lbln, errorMessage, buf);
       Nitf::readField<unsigned int>(input, record, success, ENGRDA::ENGMTXC, 4, errorMessage, buf);
+      unsigned int mtxc = QString(&buf.front()).toUInt();
       Nitf::readField<unsigned int>(input, record, success, ENGRDA::ENGMTXR, 4, errorMessage, buf);
+      unsigned int mtxr = QString(&buf.front()).toUInt();
       Nitf::readField<std::string>(input, record, success, ENGRDA::ENGTYP, 1, errorMessage, buf);
       Nitf::readField<unsigned int>(input, record, success, ENGRDA::ENGDTS, 1, errorMessage, buf);
       int dts = QString(&buf.front()).toInt(); // bytes per element
       Nitf::readField<std::string>(input, record, success, ENGRDA::ENGDATU, 2, errorMessage, buf);
       unsigned int datc(0); // data count
       Nitf::readAndConvertFromStream(input, datc, success, ENGRDA::ENGDATC, 8, errorMessage, buf);
+
+      // do some sanity checks
+      if (mtxr == 0 || mtxc == 0 || datc == 0)
+      {
+         errorMessage += "ERROR: Invalid data count in ENGRDA\n";
+         return false;
+      }
+      // The spec is not entirely clear if datc = mtxr * mtxc
+      // or if datc = mtxr * mtxc * n where n >= 1
+      // so we'll handle the more generic case here.
+      // We'll also check and see if n is not an integer
+      if (datc % (mtxr * mtxc) != 0)
+      {
+         errorMessage += "WARNING: ENGDATC != ENGMTXR * ENGMTXC * n\n";
+         // try and guess without overflowing
+         datc = std::floor(datc / static_cast<float>(mtxr * mtxc)) * (mtxr * mtxc);
+      }
 
       // read the data
       Nitf::readFromStream(input, buf, datc * dts, false);

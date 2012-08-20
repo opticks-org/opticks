@@ -11,6 +11,7 @@
 #include "Blob.h"
 #include "DataDescriptor.h"
 #include "DataElement.h"
+#include "DesktopServices.h"
 #include "DynamicObject.h"
 #include "Endian.h"
 #include "EngrdaWidget.h"
@@ -164,6 +165,7 @@ void EngrdaWidget::updateData(QTreeWidgetItem* pItem)
             std::string type = dv_cast<std::string>(pDo->getAttribute(Nitf::TRE::ENGRDA::ENGTYP));
             std::string units = dv_cast<std::string>(pDo->getAttribute(Nitf::TRE::ENGRDA::ENGDATU));
             unsigned int dts = dv_cast<unsigned int>(pDo->getAttribute(Nitf::TRE::ENGRDA::ENGDTS));
+            unsigned int datc = dv_cast<unsigned int>(pDo->getAttribute(Nitf::TRE::ENGRDA::ENGDATC));
             if (dts == 0)
             {
                return;
@@ -183,10 +185,6 @@ void EngrdaWidget::updateData(QTreeWidgetItem* pItem)
             bool isAscii = false;
             EncodingType encoding;
             if (type == "S" && dts == 1)
-            {
-               encoding = INT1SBYTE;
-            }
-            else if (type == "S" && dts == 2)
             {
                encoding = INT1SBYTE;
             }
@@ -225,50 +223,67 @@ void EngrdaWidget::updateData(QTreeWidgetItem* pItem)
             else if (type == "A")
             {
                isAscii = true;
+               mpData->setColumnCount(1);
                if (dts != 1)
                {
                   return;
                }
             }
-            unsigned int datc  = data.size() / dts;
-            if ((!encoding.isValid() && !isAscii) || datc != (rows * cols))
+            if (!encoding.isValid() && !isAscii)
             {
+               // something is invalid
                mpData->setEnabled(false);
+               return;
+            }
+            else if (datc != (rows * cols))
+            {
+               // can't handle multiple items per cell
+               // I haven't actually seen this in real data
+               // so we're likely safe ignoring this condition for now
+               // The spec is unclear if this is even allowed but
+               // we are checking it just to be safe.
+               mpData->setEnabled(false);
+               Service<DesktopServices>()->showMessageBox("Unable to display data",
+                     "This ENGRDA contains more than one data item per matrix cell. This condition is not supported.",
+                     "Ok");
                return;
             }
             for (size_t row = 0; row < rows ; ++row)
             {
-               for (size_t col = 0; col < cols; ++col)
+               if (isAscii)
                {
-                  if (isAscii)
+                  // this is really a string per row.
+                  size_t idx = row * cols;
+                  const QByteArray buf(reinterpret_cast<const char*>(pData) + idx, cols);
+                  QTableWidgetItem* pItem = new QTableWidgetItem(QString(buf));
+                  mpData->setItem(row, 0, pItem);
+               }
+               else 
+               {
+                  for (size_t col = 0; col < cols; ++col)
                   {
-                     // Not tested due to lack of test data
-                     size_t idx = col + (row * cols); // datc chars per item
-                     const QByteArray buf(reinterpret_cast<const char*>(pData) + idx, 1);
-                     QTableWidgetItem* pItem = new QTableWidgetItem(QString(buf));
-                     mpData->setItem(row, col, pItem);
-                  }
-                  else if (encoding == FLT8COMPLEX)
-                  {
-                     // Complex hasn't been tested due to lack of test data
-                     //
-                     size_t idx = (col * 2) + (row * cols * 2); // 2 floats per item
-                     double real = std::numeric_limits<double>::quiet_NaN();
-                     switchOnEncoding(FLT4BYTES, getDataValue, pData, idx, real, endian);
-                     idx++;
-                     double imag = std::numeric_limits<double>::quiet_NaN();
-                     switchOnEncoding(FLT4BYTES, getDataValue, pData, idx, imag, endian);
-                     QTableWidgetItem* pItem = new QTableWidgetItem(
-                        QString::number(real, 'g', 12) + ", " + QString::number(imag, 'g', 12));
-                     mpData->setItem(row, col, pItem);
-                  }
-                  else
-                  {
-                     size_t idx = col + row * cols;
-                     double val = std::numeric_limits<double>::quiet_NaN();
-                     switchOnEncoding(encoding, getDataValue, pData, idx, val, endian);
-                     QTableWidgetItem* pItem = new QTableWidgetItem(QString::number(val, 'g', 12));
-                     mpData->setItem(row, col, pItem);
+                     if (encoding == FLT8COMPLEX)
+                     {
+                        // Complex hasn't been tested due to lack of test data
+                        //
+                        size_t idx = (col * 2) + (row * cols * 2); // 2 floats per item
+                        double real = std::numeric_limits<double>::quiet_NaN();
+                        switchOnEncoding(FLT4BYTES, getDataValue, pData, idx, real, endian);
+                        idx++;
+                        double imag = std::numeric_limits<double>::quiet_NaN();
+                        switchOnEncoding(FLT4BYTES, getDataValue, pData, idx, imag, endian);
+                        QTableWidgetItem* pItem = new QTableWidgetItem(
+                           QString::number(real, 'g', 12) + ", " + QString::number(imag, 'g', 12));
+                        mpData->setItem(row, col, pItem);
+                     }
+                     else
+                     {
+                        size_t idx = col + row * cols;
+                        double val = std::numeric_limits<double>::quiet_NaN();
+                        switchOnEncoding(encoding, getDataValue, pData, idx, val, endian);
+                        QTableWidgetItem* pItem = new QTableWidgetItem(QString::number(val, 'g', 12));
+                        mpData->setItem(row, col, pItem);
+                     }
                   }
                }
             }
