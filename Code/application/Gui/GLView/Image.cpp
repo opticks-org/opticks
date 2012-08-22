@@ -1328,7 +1328,11 @@ void Image::generateAllFullResTextures()
          zoomIndex.push_back(0);
       }
    }
-   updateTiles(tileToUpdate, zoomIndex);
+   if (!tileToUpdate.empty())
+   {
+      // only start the update threads if there are actually tiles to update
+      updateTiles(tileToUpdate, zoomIndex);
+   }
 }
 
 const Image::ImageData& Image::getImageData() const

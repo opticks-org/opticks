@@ -761,6 +761,11 @@ Result MultiThreadedAlgorithm<AlgInput, AlgOutput, AlgThread>::startAllThreads()
 template<class AlgInput, class AlgOutput, class AlgThread>
 Result MultiThreadedAlgorithm<AlgInput, AlgOutput, AlgThread>::waitForThreadsToComplete()
 {
+   if (mThreads.empty())
+   {
+      // sanity check: there weren't actually any threads to run so we'll return success
+      return SUCCESS;
+   }
    bool doneProcessing = false;
    int percentDone = 0;
 
