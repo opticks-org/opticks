@@ -34,8 +34,8 @@ using namespace std;
 
 //#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : These special cases for the display format type " \
 //   "should be removed when functional compatibility can be broken (dsulgrov)")
-const char* SignatureSelector::sMetadataType = "Metadata...";
-const char* SignatureSelector::sDashType = "-----------------------";
+const QString SignatureSelector::sMetadataType = "Metadata...";
+const QString SignatureSelector::sDashType = "-----------------------";
 
 SignatureSelector::SignatureSelector(Progress* pProgress, QWidget* pParent, QAbstractItemView::SelectionMode mode,
                                      bool addApply, const string& customButtonLabel) :

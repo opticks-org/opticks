@@ -98,9 +98,8 @@ bool PlotObjectImp::getExtents(double& dMinX, double& dMinY, double& dMaxX, doub
 
 const QPixmap& PlotObjectImp::getLegendPixmap(bool bSelected) const
 {
-   static QPixmap* nullPixmap(NULL);
-   if (!nullPixmap) nullPixmap = new QPixmap();
-   return *nullPixmap;
+   static QPixmap nullPixmap;
+   return nullPixmap;
 }
 
 void PlotObjectImp::setObjectName(const QString& strObjectName)

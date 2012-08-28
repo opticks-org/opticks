@@ -82,7 +82,7 @@ PlotManager::~PlotManager()
       // Delete the action
       if (pDesktop->getMainWidget() != NULL)
       {
-         //delete pAction;
+         delete pAction;
       }
    }
 }

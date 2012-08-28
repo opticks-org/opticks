@@ -404,8 +404,8 @@ private:
    Service<PlugInManagerServices> mpManager;
    Service<ModelServices> mpModel;
 
-   static const char* sMetadataType;
-   static const char* sDashType;
+   static const QString sMetadataType;
+   static const QString sDashType;
 
    QTreeWidget* mpFormatTree;
    QTreeWidgetItem* mpSignaturesItem;

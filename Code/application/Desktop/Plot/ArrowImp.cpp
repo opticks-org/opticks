@@ -168,23 +168,21 @@ bool ArrowImp::getExtents(double& dMinX, double& dMinY, double& dMaxX, double& d
 
 const QPixmap& ArrowImp::getLegendPixmap(bool bSelected) const
 {
-   static QPixmap* pix(NULL);
-   static QPixmap* selectedPix(NULL);
+   static QPixmap pix(25, 15);
+   static QPixmap selectedPix(25, 15);
    static ColorType pixColor;
    static ColorType selectedPixColor;
-   if (pix == NULL) pix = new QPixmap(25, 15);
-   if (selectedPix == NULL) selectedPix = new QPixmap(25, 15);
 
-   if ((bSelected == true) && (selectedPix->isNull() == false))
+   if ((bSelected == true) && (selectedPix.isNull() == false))
    {
       if (selectedPixColor != mLine.getLineColor())
       {
          selectedPixColor = mLine.getLineColor();
-         selectedPix->fill(Qt::transparent);
+         selectedPix.fill(Qt::transparent);
 
-         QRect rcPixmap = selectedPix->rect();
+         QRect rcPixmap = selectedPix.rect();
 
-         QPainter p(selectedPix);
+         QPainter p(&selectedPix);
          ColorType color = mLine.getLineColor();
          p.setPen(QPen(QColor(color.mRed, color.mGreen, color.mBlue), 3));
          p.drawLine(rcPixmap.left() + 2, rcPixmap.center().y(), rcPixmap.right() - 2, rcPixmap.center().y());
@@ -195,18 +193,18 @@ const QPixmap& ArrowImp::getLegendPixmap(bool bSelected) const
          p.end();
       }
 
-      return *selectedPix;
+      return selectedPix;
    }
-   else if ((bSelected == false) && (pix->isNull() == false))
+   else if ((bSelected == false) && (pix.isNull() == false))
    {
       if (pixColor != mLine.getLineColor())
       {
          pixColor = mLine.getLineColor();
-         pix->fill(Qt::transparent);
+         pix.fill(Qt::transparent);
 
-         QRect rcPixmap = pix->rect();
+         QRect rcPixmap = pix.rect();
 
-         QPainter p(pix);
+         QPainter p(&pix);
          ColorType color = mLine.getLineColor();
          p.setPen(QPen(QColor(color.mRed, color.mGreen, color.mBlue), 1));
          p.drawLine(rcPixmap.left() + 2, rcPixmap.center().y(), rcPixmap.right() - 2, rcPixmap.center().y());
@@ -217,7 +215,7 @@ const QPixmap& ArrowImp::getLegendPixmap(bool bSelected) const
          p.end();
       }
 
-      return *pix;
+      return pix;
    }
 
    return PlotObjectImp::getLegendPixmap(bSelected);

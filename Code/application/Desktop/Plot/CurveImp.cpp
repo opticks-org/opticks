@@ -289,21 +289,19 @@ bool CurveImp::getExtents(double& dMinX, double& dMinY, double& dMaxX, double& d
 
 const QPixmap& CurveImp::getLegendPixmap(bool bSelected) const
 {
-   static QPixmap* pix(NULL);
-   static QPixmap* selectedPix(NULL);
-   if(!pix) pix=new QPixmap(25, 15);
-   if(!selectedPix) selectedPix=new QPixmap(25, 15);
+   static QPixmap pix(25, 15);
+   static QPixmap selectedPix(25, 15);
    static QColor pixColor;
    static QColor selectedPixColor;
 
-   if ((bSelected == true) && (selectedPix->isNull() == false))
+   if ((bSelected == true) && (selectedPix.isNull() == false))
    {
       if (selectedPixColor != mColor)
       {
          selectedPixColor = mColor;
-         selectedPix->fill(Qt::transparent);
+         selectedPix.fill(Qt::transparent);
 
-         QRect rcPixmap = selectedPix->rect();
+         QRect rcPixmap = selectedPix.rect();
 
          QPolygon points(4);
          points.setPoint(0, rcPixmap.center().x() - 4, rcPixmap.center().y());
@@ -311,7 +309,7 @@ const QPixmap& CurveImp::getLegendPixmap(bool bSelected) const
          points.setPoint(2, rcPixmap.center().x() + 4, rcPixmap.center().y());
          points.setPoint(3, rcPixmap.center().x(), rcPixmap.center().y() - 4);
 
-         QPainter p(selectedPix);
+         QPainter p(&selectedPix);
          p.setPen(QPen(mColor, 1));
          p.drawLine(rcPixmap.left() + 2, rcPixmap.center().y(), rcPixmap.right() - 2, rcPixmap.center().y());
          p.setBrush(QBrush(selectedPixColor));
@@ -319,24 +317,24 @@ const QPixmap& CurveImp::getLegendPixmap(bool bSelected) const
          p.end();
       }
 
-      return *selectedPix;
+      return selectedPix;
    }
-   else if ((bSelected == false) && (pix->isNull() == false))
+   else if ((bSelected == false) && (pix.isNull() == false))
    {
       if (pixColor != mColor)
       {
          pixColor = mColor;
-         pix->fill(Qt::transparent);
+         pix.fill(Qt::transparent);
 
-         QRect rcPixmap = pix->rect();
+         QRect rcPixmap = pix.rect();
 
-         QPainter p(pix);
+         QPainter p(&pix);
          p.setPen(QPen(mColor, 1));
          p.drawLine(rcPixmap.left() + 2, rcPixmap.center().y(), rcPixmap.right() - 2, rcPixmap.center().y());
          p.end();
       }
 
-      return *pix;
+      return pix;
    }
 
    return PlotObjectImp::getLegendPixmap(bSelected);

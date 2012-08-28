@@ -310,20 +310,19 @@ bool HistogramImp::getExtents(double& dMinX, double& dMinY, double& dMaxX, doubl
 
 const QPixmap& HistogramImp::getLegendPixmap(bool bSelected) const
 {
-   static QPixmap* pix(NULL);
-   if (!pix)pix = new QPixmap(25, 15);
+   static QPixmap pix(25, 15);
    static QColor pixColor;
 
-   if (pix->isNull() == false)
+   if (pix.isNull() == false)
    {
       if (pixColor != mColor)
       {
          pixColor = mColor;
-         pix->fill(Qt::transparent);
+         pix.fill(Qt::transparent);
 
-         QRect rcPixmap = pix->rect();
+         QRect rcPixmap = pix.rect();
 
-         QPainter p(pix);
+         QPainter p(&pix);
          p.setPen(QPen(mColor, 2));
          p.drawLine(3, rcPixmap.bottom(), 3, 7);
          p.drawLine(6, rcPixmap.bottom(), 6, 9);
@@ -335,7 +334,7 @@ const QPixmap& HistogramImp::getLegendPixmap(bool bSelected) const
          p.end();
       }
 
-      return *pix;
+      return pix;
    }
 
    return PlotObjectImp::getLegendPixmap(bSelected);
