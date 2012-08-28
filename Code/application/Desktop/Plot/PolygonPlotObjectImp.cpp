@@ -248,8 +248,10 @@ bool PolygonPlotObjectImp::hit(LocationType point) const
 
 const QPixmap& PolygonPlotObjectImp::getLegendPixmap(bool bSelected) const
 {
-   static QPixmap pix(25, 15);
-   static QPixmap selectedPix(25, 15);
+   static QPixmap* pix(NULL);
+   static QPixmap* selectedPix(NULL);
+   if (!pix) pix=new QPixmap(25, 15);
+   if (!selectedPix) selectedPix=new QPixmap(25, 15);
    static bool pixLine;
    static QColor pixColor;
    static QColor pixFillColor;
@@ -269,7 +271,7 @@ const QPixmap& PolygonPlotObjectImp::getLegendPixmap(bool bSelected) const
    points.setPoint(4, 10, 2);
    points.setPoint(5, 6, 8);
 
-   if ((bSelected == true) && (selectedPix.isNull() == false))
+   if ((bSelected == true) && (selectedPix->isNull() == false))
    {
       if ((selectedPixLine != isLineDisplayed()) || (selectedPixColor != getLineColor()) ||
          (selectedPixFillColor != mFillColor) || (selectedPixFillStyle != mFillStyle) ||
@@ -280,9 +282,9 @@ const QPixmap& PolygonPlotObjectImp::getLegendPixmap(bool bSelected) const
          selectedPixFillColor = mFillColor;
          selectedPixFillStyle = mFillStyle;
          selectedPixHatchStyle = mHatchStyle;
-         selectedPix.fill(Qt::transparent);
+         selectedPix->fill(Qt::transparent);
 
-         QPainter p(&selectedPix);
+         QPainter p(selectedPix);
 
          if (isLineDisplayed() == true)
          {
@@ -373,9 +375,9 @@ const QPixmap& PolygonPlotObjectImp::getLegendPixmap(bool bSelected) const
          p.end();
       }
 
-      return selectedPix;
+      return *selectedPix;
    }
-   else if ((bSelected == false) && (pix.isNull() == false))
+   else if ((bSelected == false) && (pix->isNull() == false))
    {
       if ((pixLine != isLineDisplayed()) || (pixColor != getLineColor()) || (pixFillColor != mFillColor) ||
          (pixFillStyle != mFillStyle) || (pixHatchStyle != mHatchStyle))
@@ -385,9 +387,9 @@ const QPixmap& PolygonPlotObjectImp::getLegendPixmap(bool bSelected) const
          pixFillColor = mFillColor;
          pixFillStyle = mFillStyle;
          pixHatchStyle = mHatchStyle;
-         pix.fill(Qt::transparent);
+         pix->fill(Qt::transparent);
 
-         QPainter p(&pix);
+         QPainter p(pix);
 
          if (isLineDisplayed() == true)
          {
@@ -466,7 +468,7 @@ const QPixmap& PolygonPlotObjectImp::getLegendPixmap(bool bSelected) const
          p.end();
       }
 
-      return pix;
+      return *pix;
    }
 
    return PointSetImp::getLegendPixmap(bSelected);

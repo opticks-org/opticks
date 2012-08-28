@@ -278,10 +278,11 @@ bool RegionObjectImp::getExtents(double& dMinX, double& dMinY, double& dMaxX, do
 
 const QPixmap& RegionObjectImp::getLegendPixmap(bool bSelected) const
 {
-   static QPixmap pix(25, 15);
+   static QPixmap* pix(NULL);
+   if (!pix) pix=new QPixmap(25, 15);
    static QColor pixColor;
 
-   if (pix.isNull() == false)
+   if (pix->isNull() == false)
    {
       QColor currentColor = getColor();
       currentColor.setAlpha(mTransparency);
@@ -289,9 +290,9 @@ const QPixmap& RegionObjectImp::getLegendPixmap(bool bSelected) const
       if (pixColor != currentColor)
       {
          pixColor = currentColor;
-         pix.fill(Qt::transparent);
+         pix->fill(Qt::transparent);
 
-         QRect rcPixmap = pix.rect();
+         QRect rcPixmap = pix->rect();
 
          QPolygon points(4);
          points.setPoint(0, rcPixmap.left() + 2, rcPixmap.bottom() - 2);
@@ -299,14 +300,14 @@ const QPixmap& RegionObjectImp::getLegendPixmap(bool bSelected) const
          points.setPoint(2, rcPixmap.right() - 2, rcPixmap.top() + 2);
          points.setPoint(3, rcPixmap.left() + 2, rcPixmap.top() + 2);
 
-         QPainter p(&pix);
+         QPainter p(pix);
          p.setBrush(currentColor);
          p.setPen(Qt::black);
          p.drawPolygon(points);
          p.end();
       }
 
-      return pix;
+      return *pix;
    }
 
    return PlotObjectImp::getLegendPixmap(bSelected);

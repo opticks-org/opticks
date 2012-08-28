@@ -1325,7 +1325,10 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    {
       messageLogPath = pMessageLogPath->getFullPathAndName();
    }
-   QFileInfo tempFileInfo(tempnam(messageLogPath.c_str(), NULL));
+   char* pTempNam = tempnam(messageLogPath.c_str(), NULL);
+   QFileInfo tempFileInfo(pTempNam);
+   free(pTempNam);
+   pTempNam = NULL;
    // need to split out the unique temp file name and re-append
    // the path as tempnam() on Windows will use %TMP% as the path
    // if available regardless of the path you pass in
@@ -1355,8 +1358,10 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    QMainWindow::setAcceptDrops(true);
 }
 
+#include <QtGui/QPixmapCache>
 ApplicationWindow::~ApplicationWindow()
 {
+   QPixmapCache::clear();
    notify(SIGNAL_NAME(Subject, Deleted));
 
    mpSessionExplorer->detach(SIGNAL_NAME(SessionExplorer, AboutToShowSessionItemContextMenu),
@@ -5215,7 +5220,7 @@ bool ApplicationWindow::isDefaultWindow(Window* pWindow) const
 void ApplicationWindow::checkColorDepth(QWidget* pSplash)
 {
    // ensure we have enough colors available
-#if defined(UNIX_API)
+#if defined(SOLARIS)
    // Solaris supports different color depths for different applications
    // so we get the color depth of the current application by creating
    // a dummy OpenGL window and checking the depth of its X11 device

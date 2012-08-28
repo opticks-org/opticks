@@ -92,7 +92,7 @@ bool DynamicModuleImp::unload()
 #if defined(WIN_API)
       FreeLibrary(reinterpret_cast<HMODULE>(mpLibHandle));
 #elif defined(SOLARIS)
-      dlclose(mpLibHandle);
+      //dlclose(mpLibHandle);
 #endif
    }
 

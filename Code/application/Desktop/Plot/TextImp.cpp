@@ -178,54 +178,56 @@ bool TextImp::getExtents(double& dMinX, double& dMinY, double& dMaxX, double& dM
 
 const QPixmap& TextImp::getLegendPixmap(bool bSelected) const
 {
-   static QPixmap pix(25, 15);
-   static QPixmap selectedPix(25, 15);
+   static QPixmap* pix(NULL);
+   static QPixmap* selectedPix(NULL);
+   if (!pix) pix=new QPixmap(25, 15);
+   if (!selectedPix) selectedPix=new QPixmap(25, 15);
    static QColor pixColor;
    static QFont pixFont;
    static QColor selectedPixColor;
    static QFont selectedPixFont;
 
-   if ((bSelected == true) && (selectedPix.isNull() == false))
+   if ((bSelected == true) && (selectedPix->isNull() == false))
    {
       if ((selectedPixColor != mColor) || (selectedPixFont != mFont))
       {
          selectedPixColor = mColor;
          selectedPixFont = mFont;
-         selectedPix.fill(Qt::transparent);
+         selectedPix->fill(Qt::transparent);
 
          QFont ftPix = mFont;
          ftPix.setPointSize(8);
          ftPix.setBold(bSelected);
 
-         QPainter p(&selectedPix);
+         QPainter p(selectedPix);
          p.setFont(ftPix);
          p.setPen(mColor);
          p.drawText(QPoint(2, 12), "ABC");
          p.end();
       }
 
-      return selectedPix;
+      return *selectedPix;
    }
-   else if ((bSelected == false) && (pix.isNull() == false))
+   else if ((bSelected == false) && (pix->isNull() == false))
    {
       if ((pixColor != mColor) || (pixFont != mFont))
       {
          pixColor = mColor;
          pixFont = mFont;
-         pix.fill(Qt::transparent);
+         pix->fill(Qt::transparent);
 
          QFont ftPix = mFont;
          ftPix.setPointSize(8);
          ftPix.setBold(bSelected);
 
-         QPainter p(&pix);
+         QPainter p(pix);
          p.setFont(ftPix);
          p.setPen(mColor);
          p.drawText(QPoint(2, 12), "ABC");
          p.end();
       }
 
-      return pix;
+      return *pix;
    }
 
    return PlotObjectImp::getLegendPixmap(bSelected);
