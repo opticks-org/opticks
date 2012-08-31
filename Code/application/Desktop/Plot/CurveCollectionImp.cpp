@@ -303,8 +303,19 @@ bool CurveCollectionImp::getExtents(double& dMinX, double& dMinY, double& dMaxX,
 
 const QPixmap& CurveCollectionImp::getLegendPixmap(bool bSelected) const
 {
-   static QPixmap pix(25, 15);
-   static QPixmap selectedPix(25, 15);
+   // QPixmap must be destroyed before QApplication. This can't be guaranteed with
+   // a static object. A heap object will leak but since the lifespan of this object
+   // is the life of the application this is ok.
+   static QPixmap* spPix(NULL);
+   static QPixmap* spSelectedPix(NULL);
+   if (!spPix)
+   {
+      spPix = new QPixmap(25, 15);
+   }
+   if (!spSelectedPix)
+   {
+      spSelectedPix = new QPixmap(25, 15);
+   }
    static QColor pixColor;
    static QColor selectedPixColor;
 
@@ -314,14 +325,14 @@ const QPixmap& CurveCollectionImp::getLegendPixmap(bool bSelected) const
       currentColor = Qt::black;
    }
 
-   if ((bSelected == true) && (selectedPix.isNull() == false))
+   if ((bSelected == true) && (spSelectedPix->isNull() == false))
    {
       if (selectedPixColor != currentColor)
       {
          selectedPixColor = currentColor;
-         selectedPix.fill(Qt::transparent);
+         spSelectedPix->fill(Qt::transparent);
 
-         QRect rcPixmap = selectedPix.rect();
+         QRect rcPixmap = spSelectedPix->rect();
 
          QPolygon points(4);
          points.setPoint(0, rcPixmap.center().x() - 4, rcPixmap.center().y());
@@ -329,7 +340,7 @@ const QPixmap& CurveCollectionImp::getLegendPixmap(bool bSelected) const
          points.setPoint(2, rcPixmap.center().x() + 4, rcPixmap.center().y());
          points.setPoint(3, rcPixmap.center().x(), rcPixmap.center().y() - 4);
 
-         QPainter p(&selectedPix);
+         QPainter p(spSelectedPix);
          p.setPen(QPen(currentColor, 1));
          p.drawLine(rcPixmap.left() + 2, rcPixmap.center().y(), rcPixmap.right() - 2, rcPixmap.center().y());
          p.setBrush(QBrush(selectedPixColor));
@@ -337,24 +348,24 @@ const QPixmap& CurveCollectionImp::getLegendPixmap(bool bSelected) const
          p.end();
       }
 
-      return selectedPix;
+      return *spSelectedPix;
    }
-   else if ((bSelected == false) && (pix.isNull() == false))
+   else if ((bSelected == false) && (spPix->isNull() == false))
    {
       if (pixColor != currentColor)
       {
          pixColor = currentColor;
-         pix.fill(Qt::transparent);
+         spPix->fill(Qt::transparent);
 
-         QRect rcPixmap = pix.rect();
+         QRect rcPixmap = spPix->rect();
 
-         QPainter p(&pix);
+         QPainter p(spPix);
          p.setPen(QPen(currentColor, 1));
          p.drawLine(rcPixmap.left() + 2, rcPixmap.center().y(), rcPixmap.right() - 2, rcPixmap.center().y());
          p.end();
       }
 
-      return pix;
+      return *spPix;
    }
 
    return PlotObjectImp::getLegendPixmap(bSelected);

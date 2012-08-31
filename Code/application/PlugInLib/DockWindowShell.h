@@ -33,8 +33,8 @@
  *    method.
  *  - Creating the widget that is used as the dock window contents in an
  *    override of the createWidget() method.
- *  - Removing the action from a menu and/or toolbar and deleting it in the
- *    subclass destructor.
+ *  - Removing the action from a menu and/or toolbar in the subclass destructor.
+ *    Do not delete the action if it is parented to \c this.
  *
  *  Subclasses do not need to destroy the contents widget since it is
  *  automatically destroyed when the dock window is destroyed.
@@ -68,7 +68,7 @@ public:
     *
     *  The destructor destroys the dock window.  Subclasses should remove the
     *  action created in createAction() from the menu and/or toolbar to which
-    *  it was added and then delete the action.  Subclasses do not need
+    *  it was added.  Subclasses do not need
     *  to destroy the contents widget created in createWidget() since it is
     *  destroyed when the dock window is destroyed.
     */
@@ -183,8 +183,8 @@ protected:
     *  The execute() method will set the action to be checkable and to not
     *  auto-repeat, and will connect it to the displayDockWindow() slot.
     *
-    *  The action should be removed from the menu and/or toolbar and deleted in
-    *  the subclass destructor.
+    *  The action should be removed from the menu and/or toolbar in the subclass destructor.
+    *  Do not delete the action if it is parented to \c this.
     *
     *  Subclasses do not need to store a pointer to the created action.  It can
     *  be retrieved by calling getAction().

@@ -178,54 +178,65 @@ bool TextImp::getExtents(double& dMinX, double& dMinY, double& dMaxX, double& dM
 
 const QPixmap& TextImp::getLegendPixmap(bool bSelected) const
 {
-   static QPixmap pix(25, 15);
-   static QPixmap selectedPix(25, 15);
+   // QPixmap must be destroyed before QApplication. This can't be guaranteed with
+   // a static object. A heap object will leak but since the lifespan of this object
+   // is the life of the application this is ok.
+   static QPixmap* spPix(NULL);
+   static QPixmap* spSelectedPix(NULL);
+   if (!spPix)
+   {
+      spPix = new QPixmap(25, 15);
+   }
+   if (!spSelectedPix)
+   {
+      spSelectedPix = new QPixmap(25, 15);
+   }
    static QColor pixColor;
    static QFont pixFont;
    static QColor selectedPixColor;
    static QFont selectedPixFont;
 
-   if ((bSelected == true) && (selectedPix.isNull() == false))
+   if ((bSelected == true) && (spSelectedPix->isNull() == false))
    {
       if ((selectedPixColor != mColor) || (selectedPixFont != mFont))
       {
          selectedPixColor = mColor;
          selectedPixFont = mFont;
-         selectedPix.fill(Qt::transparent);
+         spSelectedPix->fill(Qt::transparent);
 
          QFont ftPix = mFont;
          ftPix.setPointSize(8);
          ftPix.setBold(bSelected);
 
-         QPainter p(&selectedPix);
+         QPainter p(spSelectedPix);
          p.setFont(ftPix);
          p.setPen(mColor);
          p.drawText(QPoint(2, 12), "ABC");
          p.end();
       }
 
-      return selectedPix;
+      return *spSelectedPix;
    }
-   else if ((bSelected == false) && (pix.isNull() == false))
+   else if ((bSelected == false) && (spPix->isNull() == false))
    {
       if ((pixColor != mColor) || (pixFont != mFont))
       {
          pixColor = mColor;
          pixFont = mFont;
-         pix.fill(Qt::transparent);
+         spPix->fill(Qt::transparent);
 
          QFont ftPix = mFont;
          ftPix.setPointSize(8);
          ftPix.setBold(bSelected);
 
-         QPainter p(&pix);
+         QPainter p(spPix);
          p.setFont(ftPix);
          p.setPen(mColor);
          p.drawText(QPoint(2, 12), "ABC");
          p.end();
       }
 
-      return pix;
+      return *spPix;
    }
 
    return PlotObjectImp::getLegendPixmap(bSelected);

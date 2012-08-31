@@ -34,8 +34,8 @@ using namespace std;
 
 //#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : These special cases for the display format type " \
 //   "should be removed when functional compatibility can be broken (dsulgrov)")
-const QString SignatureSelector::sMetadataType = "Metadata...";
-const QString SignatureSelector::sDashType = "-----------------------";
+const char* SignatureSelector::spMetadataType = "Metadata...";
+const char* SignatureSelector::spDashType = "-----------------------";
 
 SignatureSelector::SignatureSelector(Progress* pProgress, QWidget* pParent, QAbstractItemView::SelectionMode mode,
                                      bool addApply, const string& customButtonLabel) :
@@ -762,11 +762,11 @@ void SignatureSelector::apply()
 
 void SignatureSelector::setDisplayType(const QString& strFormat)
 {
-   if (strFormat == sMetadataType)
+   if (strFormat == spMetadataType)
    {
       createFilter();
    }
-   else if (strFormat == sDashType)
+   else if (strFormat == spDashType)
    {
       mpFormatTree->setCurrentItem(mpSignaturesItem);
    }
@@ -1195,7 +1195,7 @@ void SignatureSelector::createFilter()
          QMessageBox::warning(this, windowTitle(), "Another filter exists with the same name.  "
             "Please select a unique name for the filter.");
       }
-      else if ((filterName == sMetadataType) || (filterName == sDashType))
+      else if ((filterName == spMetadataType) || (filterName == spDashType))
       {
          QMessageBox::warning(this, windowTitle(), "The \"" + filterName + "\" filter name is reserved "
             "for internal use.  Please select a different name for the filter.");
@@ -1254,7 +1254,7 @@ void SignatureSelector::editFilter()
          QMessageBox::warning(this, windowTitle(), "Another filter exists with the same name.  "
             "Please select a unique name for the filter.");
       }
-      else if ((filterName == sMetadataType) || (filterName == sDashType))
+      else if ((filterName == spMetadataType) || (filterName == spDashType))
       {
          QMessageBox::warning(this, windowTitle(), "The \"" + filterName + "\" filter name is reserved "
             "for internal use.  Please select a different name for the filter.");
@@ -1295,7 +1295,7 @@ void SignatureSelector::checkFilterName(QTreeWidgetItem* pItem, int column)
       QMessageBox::warning(this, windowTitle(), "Another filter exists with the same name.  "
          "Please select a unique name for the filter.");
    }
-   else if ((filterName == sMetadataType) || (filterName == sDashType))
+   else if ((filterName == spMetadataType) || (filterName == spDashType))
    {
       QMessageBox::warning(this, windowTitle(), "The \"" + filterName + "\" filter name is reserved "
          "for internal use.  Please select a different name for the filter.");

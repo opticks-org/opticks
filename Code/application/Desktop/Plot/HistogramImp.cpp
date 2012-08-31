@@ -310,19 +310,26 @@ bool HistogramImp::getExtents(double& dMinX, double& dMinY, double& dMaxX, doubl
 
 const QPixmap& HistogramImp::getLegendPixmap(bool bSelected) const
 {
-   static QPixmap pix(25, 15);
+   // QPixmap must be destroyed before QApplication. This can't be guaranteed with
+   // a static object. A heap object will leak but since the lifespan of this object
+   // is the life of the application this is ok.
+   static QPixmap* spPix(NULL);
+   if (!spPix)
+   {
+      spPix = new QPixmap(25, 15);
+   }
    static QColor pixColor;
 
-   if (pix.isNull() == false)
+   if (spPix->isNull() == false)
    {
       if (pixColor != mColor)
       {
          pixColor = mColor;
-         pix.fill(Qt::transparent);
+         spPix->fill(Qt::transparent);
 
-         QRect rcPixmap = pix.rect();
+         QRect rcPixmap = spPix->rect();
 
-         QPainter p(&pix);
+         QPainter p(spPix);
          p.setPen(QPen(mColor, 2));
          p.drawLine(3, rcPixmap.bottom(), 3, 7);
          p.drawLine(6, rcPixmap.bottom(), 6, 9);
@@ -334,7 +341,7 @@ const QPixmap& HistogramImp::getLegendPixmap(bool bSelected) const
          p.end();
       }
 
-      return pix;
+      return *spPix;
    }
 
    return PlotObjectImp::getLegendPixmap(bSelected);

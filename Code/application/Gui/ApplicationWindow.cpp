@@ -1325,7 +1325,10 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    {
       messageLogPath = pMessageLogPath->getFullPathAndName();
    }
-   QFileInfo tempFileInfo(tempnam(messageLogPath.c_str(), NULL));
+   char* pTempNam = tempnam(messageLogPath.c_str(), NULL);
+   QFileInfo tempFileInfo(pTempNam);
+   free(pTempNam);
+   pTempNam = NULL;
    // need to split out the unique temp file name and re-append
    // the path as tempnam() on Windows will use %TMP% as the path
    // if available regardless of the path you pass in

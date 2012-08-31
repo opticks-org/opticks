@@ -278,10 +278,17 @@ bool RegionObjectImp::getExtents(double& dMinX, double& dMinY, double& dMaxX, do
 
 const QPixmap& RegionObjectImp::getLegendPixmap(bool bSelected) const
 {
-   static QPixmap pix(25, 15);
+   // QPixmap must be destroyed before QApplication. This can't be guaranteed with
+   // a static object. A heap object will leak but since the lifespan of this object
+   // is the life of the application this is ok.
+   static QPixmap* spPix(NULL);
+   if (!spPix)
+   {
+      spPix = new QPixmap(25, 15);
+   }
    static QColor pixColor;
 
-   if (pix.isNull() == false)
+   if (spPix->isNull() == false)
    {
       QColor currentColor = getColor();
       currentColor.setAlpha(mTransparency);
@@ -289,9 +296,9 @@ const QPixmap& RegionObjectImp::getLegendPixmap(bool bSelected) const
       if (pixColor != currentColor)
       {
          pixColor = currentColor;
-         pix.fill(Qt::transparent);
+         spPix->fill(Qt::transparent);
 
-         QRect rcPixmap = pix.rect();
+         QRect rcPixmap = spPix->rect();
 
          QPolygon points(4);
          points.setPoint(0, rcPixmap.left() + 2, rcPixmap.bottom() - 2);
@@ -299,14 +306,14 @@ const QPixmap& RegionObjectImp::getLegendPixmap(bool bSelected) const
          points.setPoint(2, rcPixmap.right() - 2, rcPixmap.top() + 2);
          points.setPoint(3, rcPixmap.left() + 2, rcPixmap.top() + 2);
 
-         QPainter p(&pix);
+         QPainter p(spPix);
          p.setBrush(currentColor);
          p.setPen(Qt::black);
          p.drawPolygon(points);
          p.end();
       }
 
-      return pix;
+      return *spPix;
    }
 
    return PlotObjectImp::getLegendPixmap(bSelected);

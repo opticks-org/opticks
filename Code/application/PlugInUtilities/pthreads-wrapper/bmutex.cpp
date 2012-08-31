@@ -22,7 +22,7 @@ BMutex::~BMutex()
    if (mMutexID != NULL)
    {
       pthread_mutex_destroy (mMutexID);
-      delete [] mMutexID;
+      delete mMutexID;
       mMutexID = NULL;
    }
 
@@ -64,7 +64,7 @@ bool BMutex::MutexDestroy()
    assert (mMutexID != NULL);
 
    pthread_mutex_destroy (mMutexID);
-   delete [] mMutexID;
+   delete mMutexID;
    mMutexID = NULL;
 
    return true;

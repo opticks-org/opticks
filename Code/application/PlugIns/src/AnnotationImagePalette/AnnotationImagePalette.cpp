@@ -41,10 +41,6 @@ AnnotationImagePalette::~AnnotationImagePalette()
       {
          pMenuBar->removeMenuItem(pWindowAction);
       }
-      if (Service<DesktopServices>()->getMainWidget() != NULL)
-      {
-         delete pWindowAction;
-      }
    }
 }
 

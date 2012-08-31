@@ -43,12 +43,6 @@ FlickerControls::~FlickerControls()
       {
          pMenuBar->removeMenuItem(pAction);
       }
-
-      // Delete the action
-      if (pDesktop->getMainWidget() != NULL)
-      {
-         delete pAction;
-      }
    }
 }
 

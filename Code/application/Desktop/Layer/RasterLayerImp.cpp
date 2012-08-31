@@ -73,6 +73,7 @@ RasterLayerImp::RasterLayerImp(const string& id, const string& layerName, DataEl
    mlstRedStretchValues(2),
    mlstGreenStretchValues(2),
    mlstBlueStretchValues(2),
+   mAlpha(255),
    mEnableFastContrastStretch(true),
    mOriginalGrayStretchValues(2),
    mOriginalRedStretchValues(2),

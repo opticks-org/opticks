@@ -98,8 +98,15 @@ bool PlotObjectImp::getExtents(double& dMinX, double& dMinY, double& dMaxX, doub
 
 const QPixmap& PlotObjectImp::getLegendPixmap(bool bSelected) const
 {
-   static QPixmap nullPixmap;
-   return nullPixmap;
+   // QPixmap must be destroyed before QApplication. This can't be guaranteed with
+   // a static object. A heap object will leak but since the lifespan of this object
+   // is the life of the application this is ok.
+   static QPixmap* spNullPixmap(NULL);
+   if (!spNullPixmap)
+   {
+      spNullPixmap = new QPixmap();
+   }
+   return *spNullPixmap;
 }
 
 void PlotObjectImp::setObjectName(const QString& strObjectName)

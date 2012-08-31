@@ -248,8 +248,19 @@ bool PolygonPlotObjectImp::hit(LocationType point) const
 
 const QPixmap& PolygonPlotObjectImp::getLegendPixmap(bool bSelected) const
 {
-   static QPixmap pix(25, 15);
-   static QPixmap selectedPix(25, 15);
+   // QPixmap must be destroyed before QApplication. This can't be guaranteed with
+   // a static object. A heap object will leak but since the lifespan of this object
+   // is the life of the application this is ok.
+   static QPixmap* spPix(NULL);
+   static QPixmap* spSelectedPix(NULL);
+   if (!spPix)
+   {
+      spPix = new QPixmap(25, 15);
+   }
+   if (!spSelectedPix)
+   {
+      spSelectedPix = new QPixmap(25, 15);
+   }
    static bool pixLine;
    static QColor pixColor;
    static QColor pixFillColor;
@@ -269,7 +280,7 @@ const QPixmap& PolygonPlotObjectImp::getLegendPixmap(bool bSelected) const
    points.setPoint(4, 10, 2);
    points.setPoint(5, 6, 8);
 
-   if ((bSelected == true) && (selectedPix.isNull() == false))
+   if ((bSelected == true) && (spSelectedPix->isNull() == false))
    {
       if ((selectedPixLine != isLineDisplayed()) || (selectedPixColor != getLineColor()) ||
          (selectedPixFillColor != mFillColor) || (selectedPixFillStyle != mFillStyle) ||
@@ -280,9 +291,9 @@ const QPixmap& PolygonPlotObjectImp::getLegendPixmap(bool bSelected) const
          selectedPixFillColor = mFillColor;
          selectedPixFillStyle = mFillStyle;
          selectedPixHatchStyle = mHatchStyle;
-         selectedPix.fill(Qt::transparent);
+         spSelectedPix->fill(Qt::transparent);
 
-         QPainter p(&selectedPix);
+         QPainter p(spSelectedPix);
 
          if (isLineDisplayed() == true)
          {
@@ -373,9 +384,9 @@ const QPixmap& PolygonPlotObjectImp::getLegendPixmap(bool bSelected) const
          p.end();
       }
 
-      return selectedPix;
+      return *spSelectedPix;
    }
-   else if ((bSelected == false) && (pix.isNull() == false))
+   else if ((bSelected == false) && (spPix->isNull() == false))
    {
       if ((pixLine != isLineDisplayed()) || (pixColor != getLineColor()) || (pixFillColor != mFillColor) ||
          (pixFillStyle != mFillStyle) || (pixHatchStyle != mHatchStyle))
@@ -385,9 +396,9 @@ const QPixmap& PolygonPlotObjectImp::getLegendPixmap(bool bSelected) const
          pixFillColor = mFillColor;
          pixFillStyle = mFillStyle;
          pixHatchStyle = mHatchStyle;
-         pix.fill(Qt::transparent);
+         spPix->fill(Qt::transparent);
 
-         QPainter p(&pix);
+         QPainter p(spPix);
 
          if (isLineDisplayed() == true)
          {
@@ -466,7 +477,7 @@ const QPixmap& PolygonPlotObjectImp::getLegendPixmap(bool bSelected) const
          p.end();
       }
 
-      return pix;
+      return *spPix;
    }
 
    return PointSetImp::getLegendPixmap(bSelected);

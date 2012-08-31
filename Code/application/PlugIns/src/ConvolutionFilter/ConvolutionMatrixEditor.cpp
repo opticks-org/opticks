@@ -41,10 +41,6 @@ ConvolutionMatrixEditor::~ConvolutionMatrixEditor()
       {
          pMenuBar->removeMenuItem(pWindowAction);
       }
-      if (Service<DesktopServices>()->getMainWidget() != NULL)
-      {
-         delete pWindowAction;
-      }
    }
 }
 

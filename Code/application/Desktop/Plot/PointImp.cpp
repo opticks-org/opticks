@@ -264,8 +264,19 @@ bool PointImp::getExtents(double& dMinX, double& dMinY, double& dMaxX, double& d
 
 const QPixmap& PointImp::getLegendPixmap(bool bSelected) const
 {
-   static QPixmap pix(25, 15);
-   static QPixmap selectedPix(25, 15);
+   // QPixmap must be destroyed before QApplication. This can't be guaranteed with
+   // a static object. A heap object will leak but since the lifespan of this object
+   // is the life of the application this is ok.
+   static QPixmap* spPix(NULL);
+   static QPixmap* spSelectedPix(NULL);
+   if (!spPix)
+   {
+      spPix = new QPixmap(25, 15);
+   }
+   if (!spSelectedPix)
+   {
+      spSelectedPix = new QPixmap(25, 15);
+   }
    static QColor pixColor;
    static Point::PointSymbolType pixSymbol;
    static int pixWidth;
@@ -296,7 +307,7 @@ const QPixmap& PointImp::getLegendPixmap(bool bSelected) const
       iHeight = 15;
    }
 
-   if ((bSelected == true) && (selectedPix.isNull() == false))
+   if ((bSelected == true) && (spSelectedPix->isNull() == false))
    {
       if ((selectedPixColor != mColor) || (selectedPixSymbol != mSymbol) ||
          (selectedPixWidth != iWidth) || (selectedPixHeight != iHeight))
@@ -305,15 +316,15 @@ const QPixmap& PointImp::getLegendPixmap(bool bSelected) const
          selectedPixSymbol = mSymbol;
          selectedPixWidth = iWidth;
          selectedPixHeight = iHeight;
-         selectedPix.fill(Qt::transparent);
+         spSelectedPix->fill(Qt::transparent);
 
-         QRect rcPix = selectedPix.rect();
+         QRect rcPix = spSelectedPix->rect();
 
          int iSymbolMinX = rcPix.center().x() - iSymbolWidth / 2.0;
          int iSymbolMinY = rcPix.center().y() - iSymbolHeight / 2.0;
          QRect rcSymbol(iSymbolMinX, iSymbolMinY, iSymbolWidth, iSymbolHeight);
 
-         QPainter p(&selectedPix);
+         QPainter p(spSelectedPix);
          p.setPen(QPen(mColor, 1));
 
          // Used with drawPolygon
@@ -546,9 +557,9 @@ const QPixmap& PointImp::getLegendPixmap(bool bSelected) const
          p.end();
       }
 
-      return selectedPix;
+      return *spSelectedPix;
    }
-   else if ((bSelected == false) && (pix.isNull() == false))
+   else if ((bSelected == false) && (spPix->isNull() == false))
    {
       if ((pixColor != mColor) || (pixSymbol != mSymbol) ||
          (pixWidth != iWidth) || (pixHeight != iHeight))
@@ -557,15 +568,15 @@ const QPixmap& PointImp::getLegendPixmap(bool bSelected) const
          pixSymbol = mSymbol;
          pixWidth = iWidth;
          pixHeight = iHeight;
-         pix.fill(Qt::transparent);
+         spPix->fill(Qt::transparent);
 
-         QRect rcPix = pix.rect();
+         QRect rcPix = spPix->rect();
 
          int iSymbolMinX = rcPix.center().x() - iSymbolWidth / 2.0;
          int iSymbolMinY = rcPix.center().y() - iSymbolHeight / 2.0;
          QRect rcSymbol(iSymbolMinX, iSymbolMinY, iSymbolWidth, iSymbolHeight);
 
-         QPainter p(&pix);
+         QPainter p(spPix);
          p.setPen(QPen(mColor, 1));
 
          // Used with drawPolygon
@@ -799,7 +810,7 @@ const QPixmap& PointImp::getLegendPixmap(bool bSelected) const
          p.end();
       }
 
-      return pix;
+      return *spPix;
    }
 
    return PlotObjectImp::getLegendPixmap(bSelected);

@@ -78,12 +78,6 @@ PlotManager::~PlotManager()
       {
          pToolBar->removeItem(pAction);
       }
-
-      // Delete the action
-      if (pDesktop->getMainWidget() != NULL)
-      {
-         delete pAction;
-      }
    }
 }
 
