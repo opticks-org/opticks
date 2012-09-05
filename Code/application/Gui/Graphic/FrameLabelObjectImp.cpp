@@ -264,8 +264,8 @@ void FrameLabelObjectImp::updateText()
          {
             const FrameType currentFrameType = pCurrentAnimation->getFrameType();
             if (pFrame == NULL ||
-                  ((findMinimum == true) && (pCurrentFrame < pFrame)) ||
-                  ((findMinimum == false) && (pCurrentFrame > pFrame)))
+                  ((findMinimum == true) && (*pCurrentFrame < *pFrame)) ||
+                  ((findMinimum == false) && (*pCurrentFrame > *pFrame)))
             {
                pFrame = pCurrentFrame;
                frameType = currentFrameType;
