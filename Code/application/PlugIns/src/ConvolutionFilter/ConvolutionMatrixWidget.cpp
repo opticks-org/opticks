@@ -655,4 +655,5 @@ void ConvolutionMatrixWidget::loadFromConfigurationSettings()
       mPresets[QString::fromStdString(*name)] = settings;
       mpFilterName->addItem(QString::fromStdString(*name));
    }
+   mpFilterName->setCurrentIndex(-1);
 }
