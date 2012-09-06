@@ -738,7 +738,7 @@ QImage ViewImp::getCurrentImage()
 
 bool ViewImp::getCurrentImage(QImage &image)
 {
-   if (QGLFramebufferObject::hasOpenGLFramebufferObjects())
+   if (View::getSettingUseFBO() && QGLFramebufferObject::hasOpenGLFramebufferObjects())
    {
       int curWidth = width();
       int curHeight = height();

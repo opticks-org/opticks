@@ -1420,7 +1420,7 @@ QImage SpatialDataViewImp::getLayerImage(Layer* pLayer, ColorType& transparent, 
    glGetDoublev(GL_PROJECTION_MATRIX, projectionMatrix);
    glGetDoublev(GL_MODELVIEW_MATRIX, modelMatrix);
 
-   if (QGLFramebufferObject::hasOpenGLFramebufferObjects())
+   if (View::getSettingUseFBO() && QGLFramebufferObject::hasOpenGLFramebufferObjects())
    {
       QPainter painter(this);
       painter.beginNativePainting();

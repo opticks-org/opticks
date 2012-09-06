@@ -66,6 +66,7 @@ public:
    SETTING(CrosshairBlend, View, bool, true);
    SETTING(CrosshairSize, View, int, 20);
    SETTING(CrosshairWidth, View, unsigned int, 1);
+   SETTING(UseFBO, View, bool, true);
    SETTING(UseViewResolution, View, bool, false);
    SETTING(AspectRatioLock, View, bool, false);
    SETTING(OutputWidth, View, unsigned int, 0);
