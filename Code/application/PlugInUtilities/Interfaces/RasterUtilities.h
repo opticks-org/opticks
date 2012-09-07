@@ -628,6 +628,52 @@ namespace RasterUtilities
       unsigned int bands, EncodingType encoding, InterleaveFormatType interleave = BIP, bool inMemory = true,
       DataElement* pParent = 0);
 
+   /** 
+    * Creates a RasterElement with the given parameters that can be immediately used.  This method
+    * should only be used by plug-ins that need to programmatically create a RasterElement to store
+    * results of an algorithm.  It should NOT be used by importers or exporters to create a RasterElement.
+    * It should also NOT be used to create a RasterElement that corresponds to a data file on the filesystem.
+    * The created element will inherit the parent's classification unless the parent is \c NULL, in which case
+    * the classification will be set to the system's highest level of classification. Use the DataElement convenience
+    * method copyClassification or setClassification if the parent is \c NULL or if you require different
+    * classification settings.
+    *
+    * @param name
+    *        The name for the new RasterDataDescriptor.
+    * @param rows
+    *        The number of rows for the new RasterDataDescriptor.
+    * @param columns
+    *        The number of columns for the new RasterDataDescriptor.
+    * @param bands
+    *        The number of bands for the new RasterDataDescriptor.
+    * @param encoding
+    *        The encoding for the new RasterDataDescriptor.
+    * @param location
+    *        The processing location for the new raster element.
+    * @param interleave
+    *        The interleave for the new RasterDataDescriptor.
+    * @param pParent
+    *        The parent element for the new RasterDataDescriptor.
+    * @param pData
+    *        Pointer to an existing block of data. Only valid if \em location is \link ProcessingLocation::IN_MEMORY_EXISTING IN_MEMORY_EXISTING\endlink,
+    *        otherwise must be \c NULL or an error is returned.
+    *        If this pointer is not \c NULL, RasterElement::setRawData will be called with this data block.
+    *        The data block MUST be formatted correctly for the given rows, columns, bands, encoding, and
+    *        interleave. The data must have been allocated with new[] (not malloc). Defaults to \c NULL.
+    * @param bOwner
+    *        A flag indicating who owns the data block provided in \em pData. If \c true, RasterElement owns the memory
+    *        allocated and will delete it when the raster element is deleted. If this parameter is \c false,
+    *        the caller assumes ownership of the memory and it is the callers responsibility to delete the
+    *        data and to only do so after the raster element has been destroyed. Defaults to \c true.
+    *
+    * @return A RasterElement created with the given parameters.
+    *
+    * @see DataElement::copyClassification, DataElement::setClassification
+    */
+   RasterElement* createRasterElement(const std::string& name, unsigned int rows, unsigned int columns,
+      unsigned int bands, EncodingType encoding, ProcessingLocation location, InterleaveFormatType interleave = BIP,
+      DataElement* pParent = NULL, void* pData = NULL, bool bOwner = true);
+
    /**
     * Determine the number of bytes in a single element of a
     * given EncodingType.

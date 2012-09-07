@@ -54,7 +54,7 @@ public:
    bool createTemporaryFile();
    bool createDefaultPager();
    bool createMemoryMappedPager();
-   bool createInMemoryPager();
+   bool createInMemoryPager(void* pData, bool bOwner = true);
    bool setPager(RasterPager* pPager);
    RasterPager* getPager() const;
 
@@ -77,6 +77,7 @@ public:
 
    const void *getRawData() const;
    void *getRawData();
+   bool setRawData(void* pData, bool bOwner = true);
    bool writeRawData(void* pData, InterleaveFormatType interleaveType,
       unsigned int startRow, unsigned int numRows, unsigned int startColumn, unsigned int numColumns,
       unsigned int startBand, unsigned int numBands);
@@ -249,9 +250,9 @@ private:
    { \
       return impClass::createTemporaryFile(); \
    } \
-   bool createInMemoryPager() \
+   bool createInMemoryPager(void* pData, bool bOwner = true) \
    { \
-      return impClass::createInMemoryPager(); \
+      return impClass::createInMemoryPager(pData, bOwner); \
    } \
    bool createMemoryMappedPager() \
    { \
@@ -280,6 +281,10 @@ private:
    void *getRawData() \
    { \
       return impClass::getRawData(); \
+   } \
+   bool setRawData(void* pData, bool bOwner = true) \
+   { \
+      return impClass::setRawData(pData, bOwner); \
    } \
    bool copyDataToChip(RasterElement *pRasterChip, \
       const std::vector<DimensionDescriptor> &selectedRows, \

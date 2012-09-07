@@ -332,7 +332,7 @@ DataElement* ModelServicesImp::createElement(const DataDescriptor* pDescriptor, 
          {
             if (pDescriptorImp->getProcessingLocation() == IN_MEMORY)
             {
-               if (!pRaster->createInMemoryPager())
+               if (!pRaster->createDefaultPager())
                {
                   delete dynamic_cast<RasterElementImp*>(pRaster);
                   pRaster = NULL;

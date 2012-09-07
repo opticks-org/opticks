@@ -630,8 +630,21 @@ RasterElement* RasterUtilities::createRasterElement(const std::string& name, uns
    unsigned int bands, EncodingType encoding, InterleaveFormatType interleave, bool inMemory,
    DataElement* pParent)
 {
-   RasterDataDescriptor* pDd = generateRasterDataDescriptor(name, pParent, rows, columns,
-      bands, interleave, encoding, (inMemory ? IN_MEMORY : ON_DISK));
+   return createRasterElement(name, rows, columns, bands, encoding, (inMemory ? IN_MEMORY : ON_DISK), interleave,
+      pParent, NULL, true);
+}
+
+RasterElement* RasterUtilities::createRasterElement(const std::string& name, unsigned int rows, unsigned int columns,
+   unsigned int bands, EncodingType encoding, ProcessingLocation location, InterleaveFormatType interleave,
+   DataElement* pParent, void* pData, bool bOwner)
+{
+   if (pData != NULL && location != IN_MEMORY_EXISTING)
+   {
+      return NULL;
+   }
+
+   RasterDataDescriptor* pDd;
+   pDd = generateRasterDataDescriptor(name, pParent, rows, columns, bands, interleave, encoding, location);
 
    ModelResource<RasterElement> pRasterElement(pDd);
    if (pRasterElement.get() == NULL)
@@ -639,12 +652,19 @@ RasterElement* RasterUtilities::createRasterElement(const std::string& name, uns
       return NULL;
    }
 
-   if (pRasterElement->createDefaultPager())
+   if (location != IN_MEMORY_EXISTING)
    {
-      return pRasterElement.release();
+      if (!pRasterElement->createDefaultPager())
+      {
+         return NULL;
+      }
+   }
+   else if (pData != NULL)
+   {
+      pRasterElement->setRawData(pData, bOwner);
    }
 
-   return NULL;
+   return pRasterElement.release();
 }
 
 RasterElement* RasterUtilities::createRasterElement(const std::string& name, unsigned int rows, unsigned int columns,

@@ -577,6 +577,11 @@ RasterElement* RasterElementImp::createChipInternal(DataElement* pParent, const 
    {
       pNewDescriptor->setProcessingLocation(ON_DISK);
    }
+   else if (pNewDescriptor->getProcessingLocation() == IN_MEMORY_EXISTING)
+   {
+      pNewDescriptor->setProcessingLocation(IN_MEMORY);
+   }
+
    const RasterFileDescriptorImp* pFileDescriptorImp = dynamic_cast<const RasterFileDescriptorImp*>(
       pDescriptor->getFileDescriptor());
    RasterFileDescriptorImp* pNewFileDescriptorImp = NULL;
@@ -1461,6 +1466,11 @@ bool RasterElementImp::deserialize(SessionItemDeserializer& deserializer)
       {
          deserializer.nextBlock();
 
+         if (pDescriptor->getProcessingLocation() == IN_MEMORY_EXISTING)
+         {
+            pDescriptor->setProcessingLocation(IN_MEMORY);
+         }
+
          if (!createDefaultPager())
          {
             // should never have on-disk read-only data saved to the session
@@ -1896,38 +1906,23 @@ bool RasterElementImp::createMemoryMappedPager(bool bUseDataDescriptor)
    return success;
 }
 
-bool RasterElementImp::createInMemoryPager()
+bool RasterElementImp::createInMemoryPager(void* pData, bool bOwner)
 {
+   if (pData == NULL)
+   {
+      return false;
+   }
+
    ExecutableResource pPlugin("In Memory Pager");
    VERIFY(pPlugin->getPlugIn() != NULL);
 
    RasterPager* pPager = dynamic_cast<RasterPager*>(pPlugin->getPlugIn());
    VERIFY(pPager != NULL);
 
-   void* pData = NULL;
-   Service<ModelServices> pModel;
-   const RasterDataDescriptorImp* pRasterDescriptor = dynamic_cast<const RasterDataDescriptorImp*>(getDataDescriptor());
-   if (pRasterDescriptor != NULL)
-   {
-      uint64_t numRows = pRasterDescriptor->getRowCount();
-      uint64_t numColumns = pRasterDescriptor->getColumnCount();
-      uint64_t numBands = pRasterDescriptor->getBandCount();
-      unsigned int bytesPerElement = pRasterDescriptor->getBytesPerElement();
-
-      uint64_t dataSize = numRows * numColumns * numBands * bytesPerElement;
-      if (dataSize <= numeric_limits<size_t>::max())
-      {
-         pData = pModel->getMemoryBlock(static_cast<size_t>(dataSize));
-      }
-   }
-
-   if (pData == NULL)
-   {
-      return false;
-   }
-
    VERIFY(pPlugin->getInArgList().setPlugInArgValue("Raster Element", dynamic_cast<RasterElement*>(this)));
    VERIFY(pPlugin->getInArgList().setPlugInArgValue("Memory", pData));
+   VERIFY(pPlugin->getInArgList().setPlugInArgValue("Owner", &bOwner));
+
 
    VERIFY(pPlugin->execute());
 
@@ -1945,19 +1940,37 @@ bool RasterElementImp::createDefaultPager()
       return true;
    }
 
-   DataDescriptorImp* pDescriptor = getDataDescriptor();
+   const RasterDataDescriptorImp* pDescriptor = dynamic_cast<const RasterDataDescriptorImp*>(getDataDescriptor());
    VERIFY(pDescriptor != NULL);
 
    switch (pDescriptor->getProcessingLocation())
    {
    case IN_MEMORY:
-      return createInMemoryPager();
+      {
+         uint64_t numRows = pDescriptor->getRowCount();
+         uint64_t numColumns = pDescriptor->getColumnCount();
+         uint64_t numBands = pDescriptor->getBandCount();
+         unsigned int bytesPerElement = pDescriptor->getBytesPerElement();
+
+         uint64_t dataSize = numRows * numColumns * numBands * bytesPerElement;
+         if (dataSize <= numeric_limits<size_t>::max())
+         {
+            Service<ModelServices> pModel;
+            char* pData = pModel->getMemoryBlock(static_cast<size_t>(dataSize));
+            return createInMemoryPager(pData, true);
+         }
+      }
+      break;
    case ON_DISK:
       return createTemporaryFile();
-   case ON_DISK_READ_ONLY: // fall through
+   case IN_MEMORY_EXISTING:
+      // Fall through
+   case ON_DISK_READ_ONLY: 
+      // Fall through
    default:
-      return false;
+      break;
    }
+   return false;
 }
 
 const void* RasterElementImp::getRawData() const
@@ -1992,6 +2005,19 @@ void *RasterElementImp::getRawData()
    }
 
    return NULL;
+}
+
+bool RasterElementImp::setRawData(void* pData, bool bOwner)
+{
+   const RasterDataDescriptor* pDescriptor = dynamic_cast<const RasterDataDescriptor*>(getDataDescriptor());
+   VERIFY(pDescriptor != NULL);
+
+   if ((pDescriptor->getProcessingLocation() != IN_MEMORY_EXISTING) || (mpPager != NULL))
+   {
+      return false;
+   }
+
+   return createInMemoryPager(pData, bOwner);
 }
 
 bool RasterElementImp::writeRawData(void* pData, InterleaveFormatType interleaveType,

@@ -20,7 +20,8 @@
 
 InMemoryPager::InMemoryPager() :
    mpRaster(NULL),
-   mpData(NULL)
+   mpData(NULL),
+   mbOwner(true)
 {
    setName("In Memory Pager");
    setCopyright("Copyright (2006) by Ball Aerospace & Technologies Corp.");
@@ -36,8 +37,11 @@ InMemoryPager::~InMemoryPager()
 {
    if (mpData != NULL)
    {
-      Service<ModelServices> pModel;
-      pModel->deleteMemoryBlock(reinterpret_cast<char*>(mpData));
+      if (mbOwner)
+      {
+         Service<ModelServices> pModel;
+         pModel->deleteMemoryBlock(reinterpret_cast<char*>(mpData));
+      }
    }
 }
 
@@ -50,6 +54,7 @@ bool InMemoryPager::getInputSpecification(PlugInArgList *&pArgList)
 
    VERIFY(pArgList->addArg<RasterElement>("Raster Element"));
    VERIFY(pArgList->addArg<void>("Memory"));
+   VERIFY(pArgList->addArg<bool>("Owner", &mbOwner));
 
    return true;
 }
@@ -61,6 +66,11 @@ bool InMemoryPager::execute(PlugInArgList* pInput, PlugInArgList* pOutput)
 
    mpRaster = pInput->getPlugInArgValue<RasterElement>("Raster Element");
    mpData = pInput->getPlugInArgValue<void>("Memory");
+   bool* pOwner = pInput->getPlugInArgValue<bool>("Owner");
+   if (pOwner != NULL)
+   {
+      mbOwner = *pOwner;
+   }
 
    return true;
 }

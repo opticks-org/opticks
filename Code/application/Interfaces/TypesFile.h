@@ -629,7 +629,7 @@ enum ProcessingLocationEnum
                              but has the advantage of not using memory or additional disk space.\   The
                              cube data however is accessed in a read-only fashion.  Please see above for
                              information on how to determine if the data may be overwritten. */
-   ON_DISK              /**< The cube data is not loaded into memory.\   It is accessed by parsing the
+   ON_DISK,             /**< The cube data is not loaded into memory.\   It is accessed by parsing the
                              original data from the disk.\   This can decrease processing performance,
                              but has the advantage of not using memory or additional disk space.\   The
                              cube data however is accessed in a read/write fashion, so algorithms can
@@ -640,6 +640,9 @@ enum ProcessingLocationEnum
                              entire time the cube is loaded into the application.\   It is up to the RasterPager
                              implementations to uphold this requirement.  Please see above for
                              information on how to determine if the data may be overwritten. */
+   IN_MEMORY_EXISTING   /**< The cube data is loaded entirely into memory, and the data can be accessed
+                             directly.\   The object creating the raster element must provide an existing memory
+                             block to be used as the data for the element by calling RasterElement::setRawData().*/
 };
 
 /**

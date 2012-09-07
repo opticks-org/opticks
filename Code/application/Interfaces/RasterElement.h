@@ -340,20 +340,35 @@ public:
     *  descriptor.
     *
     *  This method does not usually need to be called from a plug-in.
-    *  RasterElements with ProcessingLocation::IN_MEMORY automatically
-    *  have an in-memory pager created for them.
+    *  RasterElements with ProcessingLocation::IN_MEMORY, or with
+    *  ProcessingLocation::IN_MEMORY_EXISTING and setRawData() is called,
+    *  will automatically have an in-memory pager created for them.
+    *  @param   pData
+    *           A pointer to an existing in-memory block of raw data that
+    *           was allocated with operator new[] if the raster element is
+    *           to assume ownership of the data and is of the correct size
+    *           for the data described in the raster data descriptor.
+    *  @param   bOwner
+    *           A flag indicating whether the raster element owns and will
+    *           delete the data block (true), or if the caller assumes ownership
+    *           (false). If the raster element is to assume ownership, the data
+    *           must have been allocated with operator new[]. If the caller
+    *           maintains ownership it is the caller's responsibility to delete
+    *           the data block, but only after the raster element has been
+    *           destroyed.
     *
     *  @return  Returns \b true if the default pager plug-in was
     *           successfully created; otherwise returns \b false.
     */
-   virtual bool createInMemoryPager() = 0;
+   virtual bool createInMemoryPager(void* pData, bool bOwner = true) = 0;
 
    /**
     * If there is no pager set into the RasterElement, create a default
     * one.
     *
-    * This method create an appropriate default pager, including blank space
-    * to use for the data.
+    * This method creates an appropriate default pager based on the
+    * ProcessingLocation, including blank space to use for the data via
+    * ModelServices::getMemoryBlock() if ProcessingLocation::IN_MEMORY.
     *
     * @return True if there was already a pager or a default one was successfully
     *         created, false otherwise.
@@ -428,6 +443,37 @@ public:
     *  @see     RasterDataDescriptor::getDataType()
     */
    virtual void* getRawData() = 0;
+
+   /**
+    *  Sets a pointer to an existing memory block of formatted raster data.
+    *
+    *  This method will accept a pointer to an existing memory block of raw
+    *  raster data already loaded into memory. This block will be accepted
+    *  as the data block for the raster element ONLY if no data block has
+    *  yet been created. The caller is responsible for verifying that the
+    *  passed memory block is the correct size and correctly formatted for
+    *  the data described in the raster data descriptor. The data block
+    *  must have been allocated with operator new[] if RasterElement is to
+    *  assume ownership of the data.
+    *
+    *  @param   pData
+    *           A pointer to an existing in-memory block of raw data that
+    *           was allocated with operator new[] if RasterElement is to
+    *           assume ownership of the data and is of the correct size for
+    *           the data described in the raster data descriptor.
+    *  @param   bOwner
+    *           A flag indicating whether RasterElement owns and will delete
+    *           the data block (true), or if the caller assumes ownership
+    *           (false). If RasterElement is to assume ownership, the data 
+    *           must have been allocated with operator new[]. If the caller
+    *           maintains ownership it is the caller's responsibility to
+    *           delete the data block, but only after the raster element has
+    *           been destroyed.
+    *
+    *  @return  True if RasterElement does not already have a data block, false
+    *           otherwise.
+    */
+   virtual bool setRawData(void* pData, bool bOwner = true) = 0;
 
    /**
     *  Copies data from a buffer of the specified format.

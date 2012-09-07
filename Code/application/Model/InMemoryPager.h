@@ -32,6 +32,7 @@ public:
 private:
    RasterElement* mpRaster;
    void* mpData;
+   bool mbOwner;
 };
 
 #endif
