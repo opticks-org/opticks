@@ -69,7 +69,9 @@ f none $APPDIR/DefaultSettings/41-MovieExporter.cfg=$OpticksCodeDir/Release/Defa
 f none $APPDIR/DefaultSettings/42-Nitf.cfg=$OpticksCodeDir/Release/DefaultSettings/42-Nitf.cfg 644 root $GROUP
 f none $APPDIR/DefaultSettings/43-IceExporter.cfg=$OpticksCodeDir/Release/DefaultSettings/43-IceExporter.cfg 644 root $GROUP
 f none $APPDIR/DefaultSettings/44-AnnotationImagePalette.cfg=$OpticksCodeDir/Release/DefaultSettings/44-AnnotationImagePalette.cfg 644 root $GROUP
+f none $APPDIR/DefaultSettings/45-ConvolutionFilter.cfg=$OpticksCodeDir/Release/DefaultSettings/45-ConvolutionFilter.cfg 644 root $GROUP
 f none $APPDIR/DefaultSettings/50-KmlServer.cfg=$OpticksCodeDir/Release/DefaultSettings/50-KmlServer.cfg 644 root $GROUP
+f none $APPDIR/DefaultSettings/60-SpatialResampler.cfg=$OpticksCodeDir/Release/DefaultSettings/60-SpatialResampler.cfg 644 root $GROUP
 d none $APPDIR/PlugIns 2755 root $GROUP
 f none $APPDIR/PlugIns/AnnotationImagePalette.so=$OpticksBinariesDir/PlugIns/AnnotationImagePalette.so 644 root $GROUP
 f none $APPDIR/PlugIns/Aspam.so=$OpticksBinariesDir/PlugIns/Aspam.so 644 root $GROUP

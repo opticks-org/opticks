@@ -208,7 +208,9 @@ are defined in Opticks-Version.wxi, so include that file now -->
                <File Name="42-Nitf.cfg" Id="F__NitfCfg" />
                <File Name="43-IceExporter.cfg" Id="F__IceExporterCfg" />
                <File Name="44-AnnotationImagePalette.cfg" Id="F__AnnotationImagePaletteCfg" />
+               <File Name="45-ConvolutionFilter.cfg" Id="F__ConvolutionFilterCfg" />
                <File Name="50-KmlServer.cfg" Id="F__KmlServerCfg" />
+               <File Name="60-SpatialResampler.cfg" Id="F__SpatialResamplerCfg" />
                <Util:XmlFile Id="F__UpdateTempDirCfg" Action="bulkSetValue" File="[#F__TempDirCfg]" ElementPath="/ConfigurationSettings/group/attribute/attribute/value" Value="[TEMPDATADIR]" />
             </Component>
             <Component Id="C__SaveTempDataDirSelection" Guid="$(var.C__SaveTempDataDirSelectionGuid)" Win64="no">
