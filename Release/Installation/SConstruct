@@ -62,7 +62,7 @@ if OPTICKS_PLATFORM == "linux-x86_64":
    debenv.Install('$PREF/DefaultSettings', debenv.File('$CODEDIR/Release/DefaultSettings/42-Nitf.cfg'))
    debenv.Install('$PREF/DefaultSettings', debenv.File('$CODEDIR/Release/DefaultSettings/43-IceExporter.cfg'))
    debenv.Install('$PREF/DefaultSettings', debenv.File('$CODEDIR/Release/DefaultSettings/44-AnnotationImagePalette.cfg'))
-   debenv.Install('$PREF/DefaultSettings', debenv.File('$CODEDIR/Release/DefaultSettings/45-ConvolutionFilter.cfg'))
+   debenv.Install('$PREF/DefaultSettings', debenv.File('$CODEDIR/Release/DefaultSettings/45-ConvolutionFilters.cfg'))
    debenv.Install('$PREF/DefaultSettings', debenv.File('$CODEDIR/Release/DefaultSettings/50-KmlServer.cfg'))
    debenv.Install('$PREF/DefaultSettings', debenv.File('$CODEDIR/Release/DefaultSettings/60-SpatialResampler.cfg'))
    debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/AnnotationImagePalette.so'))
