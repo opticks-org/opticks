@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<ProductTemplate xmlns="https://comet.balldayton.com/standards/namespaces/2005/v1/comet.xsd" dpi="100" layerLocked="false" name="Layout" paperColor="#ffffffff" paperHeight="8.5" paperWidth="11" showLabels="false" snapToGrid="false" type="AnnotationLayer" version="3">
+
+  <AnnotationElement geocentric="false" name="Layout" type="AnnotationElement" version="3">
+    <DataDescriptor importerName="" name="Layout" processingLocation="inMemory" type="AnnotationElement" version="3">
+      <classification level="U" version="3"/>
+      <metadata version="3"/>
+    </DataDescriptor>
+    <group name="Group" type="Group" version="3">
+      <BoundingBox>
+        <boundingBox>0 0 1082.30143274 800.811922042</boundingBox>
+      </BoundingBox>
+      <Rotation rotation="0"/>
+      <objects>
+        <Graphic name="Border" type="Rectangle" version="3">
+          <BoundingBox>
+            <boundingBox>25.9972872059 273.252653162 1082.30143274 800.811922042</boundingBox>
+          </BoundingBox>
+          <DrawMode mode="draw"/>
+          <FillColor>
+            <color>255 0 0</color>
+          </FillColor>
+          <FillStyle style="empty"/>
+          <HatchStyle boxed="false" style="solid"/>
+          <LineColor>
+            <color>0 0 255</color>
+          </LineColor>
+          <LineOn on="true"/>
+          <LineScaled scaled="false"/>
+          <LineStyle style="solid"/>
+          <LineWidth width="4"/>
+          <PixelSymbol boxed="false" symbol="solid"/>
+          <Rotation rotation="0"/>
+        </Graphic>
+        <Graphic name="Main View" type="View" version="3">
+          <BoundingBox>
+            <boundingBox>461.106953985 285.107924956 34.2959847782 779.472455409</boundingBox>
+          </BoundingBox>
+          <DrawMode mode="draw"/>
+          <FillColor>
+            <color>128 128 128</color>
+          </FillColor>
+          <FillStyle style="solid"/>
+          <HatchStyle boxed="false" style="solid"/>
+          <LineColor>
+            <color>0 0 0</color>
+          </LineColor>
+          <LineOn on="true"/>
+          <LineScaled scaled="false"/>
+          <LineStyle style="solid"/>
+          <LineWidth width="1"/>
+          <PixelSymbol boxed="false" symbol="solid"/>
+          <Rotation rotation="0"/>
+          <objects>
+            <Graphic name="Text" textEditable="true" type="Text" version="3">
+              <BoundingBox>
+                <boundingBox>206.141073417 559.99712128 289.261865346 504.583259085</boundingBox>
+              </BoundingBox>
+              <DrawMode mode="draw"/>
+              <FillColor>
+                <color>255 0 0</color>
+              </FillColor>
+              <FillStyle style="empty"/>
+              <Font bold="false" face="Tahoma" italic="false" size="12" underline="false"/>
+              <HatchStyle boxed="false" style="solid"/>
+              <LineColor>
+                <color>0 0 255</color>
+              </LineColor>
+              <LineOn on="false"/>
+              <LineScaled scaled="false"/>
+              <LineStyle style="solid"/>
+              <LineWidth width="1"/>
+              <PixelSymbol boxed="false" symbol="solid"/>
+              <Rotation rotation="0"/>
+              <TextAlignment alignment="1"/>
+              <TextColor>
+                <color>0 0 0</color>
+              </TextColor>
+              <TextString>
+                <string>View not
+available</string>
+              </TextString>
+            </Graphic>
+          </objects>
+        </Graphic>
+        <Graphic name="Zoomed View3" type="View" version="3">
+          <BoundingBox>
+            <boundingBox>527.506094627 564.892160522 785.950888507 792.513234146</boundingBox>
+          </BoundingBox>
+          <DrawMode mode="draw"/>
+          <FillColor>
+            <color>128 128 128</color>
+          </FillColor>
+          <FillStyle style="solid"/>
+          <HatchStyle boxed="false" style="solid"/>
+          <LineColor>
+            <color>0 0 0</color>
+          </LineColor>
+          <LineOn on="true"/>
+          <LineScaled scaled="false"/>
+          <LineStyle style="solid"/>
+          <LineWidth width="1"/>
+          <PixelSymbol boxed="false" symbol="solid"/>
+          <Rotation rotation="0"/>
+          <objects>
+            <Graphic name="Text" textEditable="true" type="Text" version="3">
+              <BoundingBox>
+                <boundingBox>615.168095711 706.409628598 698.288887423 650.995766071</boundingBox>
+              </BoundingBox>
+              <DrawMode mode="draw"/>
+              <FillColor>
+                <color>255 0 0</color>
+              </FillColor>
+              <FillStyle style="empty"/>
+              <Font bold="false" face="Tahoma" italic="false" size="12" underline="false"/>
+              <HatchStyle boxed="false" style="solid"/>
+              <LineColor>
+                <color>0 0 255</color>
+              </LineColor>
+              <LineOn on="false"/>
+              <LineScaled scaled="false"/>
+              <LineStyle style="solid"/>
+              <LineWidth width="1"/>
+              <PixelSymbol boxed="false" symbol="solid"/>
+              <Rotation rotation="0"/>
+              <TextAlignment alignment="1"/>
+              <TextColor>
+                <color>0 0 0</color>
+              </TextColor>
+              <TextString>
+                <string>View not
+available</string>
+              </TextString>
+            </Graphic>
+          </objects>
+        </Graphic>
+        <Graphic name="Arrow3" type="Arrow" version="3">
+          <BoundingBox>
+            <boundingBox>531.031603476 570.819792785 291.555250617 664.47639722</boundingBox>
+          </BoundingBox>
+          <DrawMode mode="draw"/>
+          <LineColor>
+            <color>0 0 255</color>
+          </LineColor>
+          <LineScaled scaled="false"/>
+          <LineStyle style="solid"/>
+          <LineWidth width="1"/>
+          <PixelSymbol boxed="false" symbol="solid"/>
+          <Rotation rotation="0"/>
+          <Scale scale="1"/>
+        </Graphic>
+        <Graphic name="AOI3" type="Rectangle" version="3">
+          <BoundingBox>
+            <boundingBox>186.043390227 663.290874647 286.81314895 764.060622903</boundingBox>
+          </BoundingBox>
+          <DrawMode mode="draw"/>
+          <FillColor>
+            <color>255 0 0</color>
+          </FillColor>
+          <FillStyle style="empty"/>
+          <HatchStyle boxed="false" style="solid"/>
+          <LineColor>
+            <color>255 0 0</color>
+          </LineColor>
+          <LineOn on="true"/>
+          <LineScaled scaled="false"/>
+          <LineStyle style="solid"/>
+          <LineWidth width="1"/>
+          <PixelSymbol boxed="false" symbol="solid"/>
+          <Rotation rotation="0"/>
+        </Graphic>
+        <Graphic name="Zoomed View1" type="View" version="3">
+          <BoundingBox>
+            <boundingBox>526.289483746 287.478964048 656.209922792 499.688200275</boundingBox>
+          </BoundingBox>
+          <DrawMode mode="draw"/>
+          <FillColor>
+            <color>128 128 128</color>
+          </FillColor>
+          <FillStyle style="solid"/>
+          <HatchStyle boxed="false" style="solid"/>
+          <LineColor>
+            <color>0 0 0</color>
+          </LineColor>
+          <LineOn on="true"/>
+          <LineScaled scaled="false"/>
+          <LineStyle style="solid"/>
+          <LineWidth width="1"/>
+          <PixelSymbol boxed="false" symbol="solid"/>
+          <Rotation rotation="0"/>
+          <objects>
+            <Graphic name="Text" textEditable="true" type="Text" version="3">
+              <BoundingBox>
+                <boundingBox>549.689307618 421.290513101 632.810098921 365.876651222</boundingBox>
+              </BoundingBox>
+              <DrawMode mode="draw"/>
+              <FillColor>
+                <color>255 0 0</color>
+              </FillColor>
+              <FillStyle style="empty"/>
+              <Font bold="false" face="Tahoma" italic="false" size="12" underline="false"/>
+              <HatchStyle boxed="false" style="solid"/>
+              <LineColor>
+                <color>0 0 255</color>
+              </LineColor>
+              <LineOn on="false"/>
+              <LineScaled scaled="false"/>
+              <LineStyle style="solid"/>
+              <LineWidth width="1"/>
+              <PixelSymbol boxed="false" symbol="solid"/>
+              <Rotation rotation="0"/>
+              <TextAlignment alignment="1"/>
+              <TextColor>
+                <color>0 0 0</color>
+              </TextColor>
+              <TextString>
+                <string>View not
+available</string>
+              </TextString>
+            </Graphic>
+          </objects>
+        </Graphic>
+        <Graphic name="Arrow1" type="Arrow" version="3">
+          <BoundingBox>
+            <boundingBox>528.660537873 295.777648747 133.88021213 382.321101256</boundingBox>
+          </BoundingBox>
+          <DrawMode mode="draw"/>
+          <LineColor>
+            <color>0 0 255</color>
+          </LineColor>
+          <LineScaled scaled="false"/>
+          <LineStyle style="solid"/>
+          <LineWidth width="1"/>
+          <PixelSymbol boxed="false" symbol="solid"/>
+          <Rotation rotation="0"/>
+          <Scale scale="1"/>
+        </Graphic>
+        <Graphic name="AOI1" type="Rectangle" version="3">
+          <BoundingBox>
+            <boundingBox>69.8617799983 382.321102739 129.138108276 483.090850995</boundingBox>
+          </BoundingBox>
+          <DrawMode mode="draw"/>
+          <FillColor>
+            <color>255 0 0</color>
+          </FillColor>
+          <FillStyle style="empty"/>
+          <HatchStyle boxed="false" style="solid"/>
+          <LineColor>
+            <color>255 0 0</color>
+          </LineColor>
+          <LineOn on="true"/>
+          <LineScaled scaled="false"/>
+          <LineStyle style="solid"/>
+          <LineWidth width="1"/>
+          <PixelSymbol boxed="false" symbol="solid"/>
+          <Rotation rotation="0"/>
+        </Graphic>
+        <Graphic name="AOI2" type="Rectangle" version="3">
+          <BoundingBox>
+            <boundingBox>312.894724173 548.294796613 439.746060451 600.457960175</boundingBox>
+          </BoundingBox>
+          <DrawMode mode="draw"/>
+          <FillColor>
+            <color>255 0 0</color>
+          </FillColor>
+          <FillStyle style="empty"/>
+          <HatchStyle boxed="false" style="solid"/>
+          <LineColor>
+            <color>255 0 0</color>
+          </LineColor>
+          <LineOn on="true"/>
+          <LineScaled scaled="false"/>
+          <LineStyle style="solid"/>
+          <LineWidth width="1"/>
+          <PixelSymbol boxed="false" symbol="solid"/>
+          <Rotation rotation="0"/>
+        </Graphic>
+        <Graphic name="Arrow2" type="Arrow" version="3">
+          <BoundingBox>
+            <boundingBox>746.7974255 486.647401766 444.488166642 550.665846704</boundingBox>
+          </BoundingBox>
+          <DrawMode mode="draw"/>
+          <LineColor>
+            <color>0 0 255</color>
+          </LineColor>
+          <LineScaled scaled="false"/>
+          <LineStyle style="solid"/>
+          <LineWidth width="1"/>
+          <PixelSymbol boxed="false" symbol="solid"/>
+          <Rotation rotation="0"/>
+          <Scale scale="1"/>
+        </Graphic>
+        <Graphic name="Zoomed View2" type="View" version="3">
+          <BoundingBox>
+            <boundingBox>744.45744331 483.090822422 1062.17855414 554.222396107</boundingBox>
+          </BoundingBox>
+          <DrawMode mode="draw"/>
+          <FillColor>
+            <color>128 128 128</color>
+          </FillColor>
+          <FillStyle style="solid"/>
+          <HatchStyle boxed="false" style="solid"/>
+          <LineColor>
+            <color>0 0 0</color>
+          </LineColor>
+          <LineOn on="true"/>
+          <LineScaled scaled="false"/>
+          <LineStyle style="solid"/>
+          <LineWidth width="1"/>
+          <PixelSymbol boxed="false" symbol="solid"/>
+          <Rotation rotation="0"/>
+          <objects>
+            <Graphic name="Text" textEditable="true" type="Text" version="3">
+              <BoundingBox>
+                <boundingBox>861.757603148 546.363540346 944.878394305 490.949678183</boundingBox>
+              </BoundingBox>
+              <DrawMode mode="draw"/>
+              <FillColor>
+                <color>255 0 0</color>
+              </FillColor>
+              <FillStyle style="empty"/>
+              <Font bold="false" face="Tahoma" italic="false" size="12" underline="false"/>
+              <HatchStyle boxed="false" style="solid"/>
+              <LineColor>
+                <color>0 0 255</color>
+              </LineColor>
+              <LineOn on="false"/>
+              <LineScaled scaled="false"/>
+              <LineStyle style="solid"/>
+              <LineWidth width="1"/>
+              <PixelSymbol boxed="false" symbol="solid"/>
+              <Rotation rotation="0"/>
+              <TextAlignment alignment="1"/>
+              <TextColor>
+                <color>0 0 0</color>
+              </TextColor>
+              <TextString>
+                <string>View not
+available</string>
+              </TextString>
+            </Graphic>
+          </objects>
+        </Graphic>
+        <Graphic name="Comments Text" textEditable="true" type="Text" version="3">
+          <BoundingBox>
+            <boundingBox>35.4815009529 96.6092265319 270.21574667 42.0749979893</boundingBox>
+          </BoundingBox>
+          <DrawMode mode="draw"/>
+          <FillColor>
+            <color>255 0 0</color>
+          </FillColor>
+          <FillStyle style="empty"/>
+          <Font bold="true" face="Tahoma" italic="false" size="24" underline="false"/>
+          <HatchStyle boxed="false" style="solid"/>
+          <LineColor>
+            <color>0 0 255</color>
+          </LineColor>
+          <LineOn on="false"/>
+          <LineScaled scaled="false"/>
+          <LineStyle style="solid"/>
+          <LineWidth width="1"/>
+          <PixelSymbol boxed="false" symbol="solid"/>
+          <Rotation rotation="0"/>
+          <TextAlignment alignment="1"/>
+          <TextColor>
+            <color>0 0 0</color>
+          </TextColor>
+          <TextString>
+            <string>Comments</string>
+          </TextString>
+        </Graphic>
+        <Graphic name="Text 2" textEditable="false" type="Text" version="3">
+          <BoundingBox>
+            <boundingBox>0 0 0 0</boundingBox>
+          </BoundingBox>
+          <DrawMode mode="draw"/>
+          <FillColor>
+            <color>255 0 0</color>
+          </FillColor>
+          <FillStyle style="empty"/>
+          <Font bold="false" face="Tahoma" italic="false" size="8" underline="false"/>
+          <HatchStyle boxed="false" style="solid"/>
+          <LineColor>
+            <color>0 0 255</color>
+          </LineColor>
+          <LineOn on="false"/>
+          <LineScaled scaled="false"/>
+          <LineStyle style="solid"/>
+          <LineWidth width="1"/>
+          <PixelSymbol boxed="false" symbol="solid"/>
+          <Rotation rotation="0"/>
+          <TextAlignment alignment="4"/>
+          <TextColor>
+            <color>0 0 0</color>
+          </TextColor>
+          <TextString>
+            <string>ClassificationLabel</string>
+          </TextString>
+        </Graphic>
+      </objects>
+    </group>
+  </AnnotationElement>
+
+</ProductTemplate>

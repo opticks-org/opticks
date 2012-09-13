@@ -1,0 +1,889 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{cfa42a0e-0ac6-42eb-900b-51df954bb153}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{20b64dec-150d-4eac-8f84-e426097c8f91}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl</Extensions>
+    </Filter>
+    <Filter Include="Layer">
+      <UniqueIdentifier>{057c11eb-9af3-4178-ae17-11ed2aeec853}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Animation">
+      <UniqueIdentifier>{d52ce3e8-0d67-4552-88cf-1146a1a836e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Plot">
+      <UniqueIdentifier>{038af588-be98-4439-a25b-346194f5149e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="moc">
+      <UniqueIdentifier>{273df4da-896d-4dba-9108-d53f6b6c5827}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="AnimationModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ContextMenuImp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DesktopServicesImp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DockWindowAdapter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DockWindowImp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ElementModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FontImp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LayerListAdapter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LayerListImp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MouseModeImp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OrthographicViewImp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PerspectiveViewImp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PlugInModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ProductViewAdapter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ProductViewImp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ProductWindowAdapter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ProductWindowImp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SessionExplorerAdapter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SessionExplorerImp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SessionItemModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SpatialDataViewAdapter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SpatialDataViewImp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SpatialDataWindowAdapter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SpatialDataWindowImp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolBarAdapter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolBarImp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ViewImp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ViewWindowImp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowImp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WorkspaceWindowAdapter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WorkspaceWindowImp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Layer\AnnotationLayerAdapter.cpp">
+      <Filter>Layer</Filter>
+    </ClCompile>
+    <ClCompile Include="Layer\AnnotationLayerImp.cpp">
+      <Filter>Layer</Filter>
+    </ClCompile>
+    <ClCompile Include="Layer\AoiLayerAdapter.cpp">
+      <Filter>Layer</Filter>
+    </ClCompile>
+    <ClCompile Include="Layer\AoiLayerImp.cpp">
+      <Filter>Layer</Filter>
+    </ClCompile>
+    <ClCompile Include="Layer\ClassificationLayerAdapter.cpp">
+      <Filter>Layer</Filter>
+    </ClCompile>
+    <ClCompile Include="Layer\ClassificationLayerImp.cpp">
+      <Filter>Layer</Filter>
+    </ClCompile>
+    <ClCompile Include="Layer\CustomLayerAdapter.cpp">
+      <Filter>Layer</Filter>
+    </ClCompile>
+    <ClCompile Include="Layer\CustomLayerImp.cpp">
+      <Filter>Layer</Filter>
+    </ClCompile>
+    <ClCompile Include="Layer\GcpLayerAdapter.cpp">
+      <Filter>Layer</Filter>
+    </ClCompile>
+    <ClCompile Include="Layer\GcpLayerImp.cpp">
+      <Filter>Layer</Filter>
+    </ClCompile>
+    <ClCompile Include="Layer\GraphicLayerAdapter.cpp">
+      <Filter>Layer</Filter>
+    </ClCompile>
+    <ClCompile Include="Layer\GraphicLayerImp.cpp">
+      <Filter>Layer</Filter>
+    </ClCompile>
+    <ClCompile Include="Layer\LatLonLayerAdapter.cpp">
+      <Filter>Layer</Filter>
+    </ClCompile>
+    <ClCompile Include="Layer\LatLonLayerImp.cpp">
+      <Filter>Layer</Filter>
+    </ClCompile>
+    <ClCompile Include="Layer\LayerImp.cpp">
+      <Filter>Layer</Filter>
+    </ClCompile>
+    <ClCompile Include="Layer\MeasurementLayerAdapter.cpp">
+      <Filter>Layer</Filter>
+    </ClCompile>
+    <ClCompile Include="Layer\MeasurementLayerImp.cpp">
+      <Filter>Layer</Filter>
+    </ClCompile>
+    <ClCompile Include="Layer\PseudocolorLayerAdapter.cpp">
+      <Filter>Layer</Filter>
+    </ClCompile>
+    <ClCompile Include="Layer\PseudocolorLayerImp.cpp">
+      <Filter>Layer</Filter>
+    </ClCompile>
+    <ClCompile Include="Layer\RasterLayerAdapter.cpp">
+      <Filter>Layer</Filter>
+    </ClCompile>
+    <ClCompile Include="Layer\RasterLayerImp.cpp">
+      <Filter>Layer</Filter>
+    </ClCompile>
+    <ClCompile Include="Layer\ThresholdLayerAdapter.cpp">
+      <Filter>Layer</Filter>
+    </ClCompile>
+    <ClCompile Include="Layer\ThresholdLayerImp.cpp">
+      <Filter>Layer</Filter>
+    </ClCompile>
+    <ClCompile Include="Layer\TiePointLayerAdapter.cpp">
+      <Filter>Layer</Filter>
+    </ClCompile>
+    <ClCompile Include="Layer\TiePointLayerImp.cpp">
+      <Filter>Layer</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation\AnimationAdapter.cpp">
+      <Filter>Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation\AnimationControllerAdapter.cpp">
+      <Filter>Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation\AnimationControllerImp.cpp">
+      <Filter>Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation\AnimationImp.cpp">
+      <Filter>Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation\AnimationServicesImp.cpp">
+      <Filter>Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation\AnimationToolBarAdapter.cpp">
+      <Filter>Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation\AnimationToolBarImp.cpp">
+      <Filter>Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\ArrowAdapter.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\ArrowImp.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\AxisAdapter.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\AxisImp.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\CartesianGridlinesAdapter.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\CartesianGridlinesImp.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\CartesianPlotAdapter.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\CartesianPlotImp.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\CurveAdapter.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\CurveCollectionAdapter.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\CurveCollectionImp.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\CurveImp.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\GridlinesAdapter.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\GridlinesImp.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\HistogramAdapter.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\HistogramImp.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\HistogramPlotAdapter.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\HistogramPlotImp.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\HistogramWindowAdapter.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\HistogramWindowImp.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\Legend.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\LocatorAdapter.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\LocatorImp.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\PlotGroupAdapter.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\PlotGroupImp.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\PlotObjectImp.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\PlotSetAdapter.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\PlotSetGroupAdapter.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\PlotSetGroupImp.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\PlotSetImp.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\PlotViewAdapter.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\PlotViewImp.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\PlotWidgetAdapter.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\PlotWidgetImp.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\PointAdapter.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\PointImp.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\PointSetAdapter.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\PointSetImp.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\PolarGridlinesAdapter.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\PolarGridlinesImp.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\PolarPlotAdapter.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\PolarPlotImp.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\PolygonPlotObjectAdapter.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\PolygonPlotObjectImp.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\RegionObjectAdapter.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\RegionObjectImp.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\SignaturePlotAdapter.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\SignaturePlotImp.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\StatisticsWidget.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\TextAdapter.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="Plot\TextImp.cpp">
+      <Filter>Plot</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_AnimationControllerImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_AnimationImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_AnimationServicesImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_AnimationToolBarImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_AnnotationLayerImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_AoiLayerImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_ArrowImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_AxisImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_CartesianGridlinesImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_CartesianPlotImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_ClassificationLayerImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_CurveCollectionImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_CurveImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_CustomLayerImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_DockWindowImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_GcpLayerImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_GraphicLayerImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_GridlinesImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_HistogramImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_HistogramPlotImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_HistogramWindowImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_LatLonLayerImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_LayerImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_LayerListImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_Legend.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_LocatorImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_MeasurementLayerImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_OrthographicViewImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PerspectiveViewImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PlotGroupImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PlotObjectImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PlotSetGroupImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PlotSetImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PlotViewImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PlotWidgetImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PointImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PointSetImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PolarGridlinesImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PolarPlotImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PolygonPlotObjectImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_ProductViewImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PseudocolorLayerImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_RasterLayerImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_RegionObjectImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_SessionExplorerImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_SignaturePlotImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_SpatialDataViewImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_SpatialDataWindowImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_StatisticsWidget.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_TextImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_ThresholdLayerImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_TiePointLayerImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_ToolBarImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_ViewImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_WorkspaceWindowImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AnimationModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ContextMenuImp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DesktopServicesImp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DockWindowAdapter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ElementModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FontImp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LayerListAdapter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MouseModeImp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PlugInModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ProductViewAdapter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ProductWindowAdapter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ProductWindowImp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SessionExplorerAdapter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SessionItemModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SpatialDataViewAdapter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SpatialDataWindowAdapter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolBarAdapter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ViewWindowImp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowImp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WorkspaceWindowAdapter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Layer\AnnotationLayerAdapter.h">
+      <Filter>Layer</Filter>
+    </ClInclude>
+    <ClInclude Include="Layer\AoiLayerAdapter.h">
+      <Filter>Layer</Filter>
+    </ClInclude>
+    <ClInclude Include="Layer\ClassificationLayerAdapter.h">
+      <Filter>Layer</Filter>
+    </ClInclude>
+    <ClInclude Include="Layer\CustomLayerAdapter.h">
+      <Filter>Layer</Filter>
+    </ClInclude>
+    <ClInclude Include="Layer\GcpLayerAdapter.h">
+      <Filter>Layer</Filter>
+    </ClInclude>
+    <ClInclude Include="Layer\GraphicLayerAdapter.h">
+      <Filter>Layer</Filter>
+    </ClInclude>
+    <ClInclude Include="Layer\LatLonLayerAdapter.h">
+      <Filter>Layer</Filter>
+    </ClInclude>
+    <ClInclude Include="Layer\MeasurementLayerAdapter.h">
+      <Filter>Layer</Filter>
+    </ClInclude>
+    <ClInclude Include="Layer\PseudocolorLayerAdapter.h">
+      <Filter>Layer</Filter>
+    </ClInclude>
+    <ClInclude Include="Layer\RasterLayerAdapter.h">
+      <Filter>Layer</Filter>
+    </ClInclude>
+    <ClInclude Include="Layer\ThresholdLayerAdapter.h">
+      <Filter>Layer</Filter>
+    </ClInclude>
+    <ClInclude Include="Layer\TiePointLayerAdapter.h">
+      <Filter>Layer</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\AnimationAdapter.h">
+      <Filter>Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\AnimationControllerAdapter.h">
+      <Filter>Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\AnimationToolBarAdapter.h">
+      <Filter>Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Plot\ArrowAdapter.h">
+      <Filter>Plot</Filter>
+    </ClInclude>
+    <ClInclude Include="Plot\AxisAdapter.h">
+      <Filter>Plot</Filter>
+    </ClInclude>
+    <ClInclude Include="Plot\CartesianGridlinesAdapter.h">
+      <Filter>Plot</Filter>
+    </ClInclude>
+    <ClInclude Include="Plot\CartesianPlotAdapter.h">
+      <Filter>Plot</Filter>
+    </ClInclude>
+    <ClInclude Include="Plot\CurveAdapter.h">
+      <Filter>Plot</Filter>
+    </ClInclude>
+    <ClInclude Include="Plot\CurveCollectionAdapter.h">
+      <Filter>Plot</Filter>
+    </ClInclude>
+    <ClInclude Include="Plot\GridlinesAdapter.h">
+      <Filter>Plot</Filter>
+    </ClInclude>
+    <ClInclude Include="Plot\HistogramAdapter.h">
+      <Filter>Plot</Filter>
+    </ClInclude>
+    <ClInclude Include="Plot\HistogramPlotAdapter.h">
+      <Filter>Plot</Filter>
+    </ClInclude>
+    <ClInclude Include="Plot\HistogramWindowAdapter.h">
+      <Filter>Plot</Filter>
+    </ClInclude>
+    <ClInclude Include="Plot\LocatorAdapter.h">
+      <Filter>Plot</Filter>
+    </ClInclude>
+    <ClInclude Include="Plot\PlotGroupAdapter.h">
+      <Filter>Plot</Filter>
+    </ClInclude>
+    <ClInclude Include="Plot\PlotObjectAdapter.h">
+      <Filter>Plot</Filter>
+    </ClInclude>
+    <ClInclude Include="Plot\PlotSetAdapter.h">
+      <Filter>Plot</Filter>
+    </ClInclude>
+    <ClInclude Include="Plot\PlotSetGroupAdapter.h">
+      <Filter>Plot</Filter>
+    </ClInclude>
+    <ClInclude Include="Plot\PlotViewAdapter.h">
+      <Filter>Plot</Filter>
+    </ClInclude>
+    <ClInclude Include="Plot\PlotWidgetAdapter.h">
+      <Filter>Plot</Filter>
+    </ClInclude>
+    <ClInclude Include="Plot\PointAdapter.h">
+      <Filter>Plot</Filter>
+    </ClInclude>
+    <ClInclude Include="Plot\PointSetAdapter.h">
+      <Filter>Plot</Filter>
+    </ClInclude>
+    <ClInclude Include="Plot\PolarGridlinesAdapter.h">
+      <Filter>Plot</Filter>
+    </ClInclude>
+    <ClInclude Include="Plot\PolarPlotAdapter.h">
+      <Filter>Plot</Filter>
+    </ClInclude>
+    <ClInclude Include="Plot\PolygonPlotObjectAdapter.h">
+      <Filter>Plot</Filter>
+    </ClInclude>
+    <ClInclude Include="Plot\RegionObjectAdapter.h">
+      <Filter>Plot</Filter>
+    </ClInclude>
+    <ClInclude Include="Plot\SignaturePlotAdapter.h">
+      <Filter>Plot</Filter>
+    </ClInclude>
+    <ClInclude Include="Plot\TextAdapter.h">
+      <Filter>Plot</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="DockWindowImp.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="LayerListImp.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="OrthographicViewImp.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="PerspectiveViewImp.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="ProductViewImp.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="SessionExplorerImp.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="SpatialDataViewImp.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="SpatialDataWindowImp.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="ToolBarImp.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="ViewImp.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="WorkspaceWindowImp.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Layer\AnnotationLayerImp.h">
+      <Filter>Layer</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Layer\AoiLayerImp.h">
+      <Filter>Layer</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Layer\ClassificationLayerImp.h">
+      <Filter>Layer</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Layer\CustomLayerImp.h">
+      <Filter>Layer</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Layer\GcpLayerImp.h">
+      <Filter>Layer</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Layer\GraphicLayerImp.h">
+      <Filter>Layer</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Layer\LatLonLayerImp.h">
+      <Filter>Layer</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Layer\LayerImp.h">
+      <Filter>Layer</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Layer\MeasurementLayerImp.h">
+      <Filter>Layer</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Layer\PseudocolorLayerImp.h">
+      <Filter>Layer</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Layer\RasterLayerImp.h">
+      <Filter>Layer</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Layer\ThresholdLayerImp.h">
+      <Filter>Layer</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Layer\TiePointLayerImp.h">
+      <Filter>Layer</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Animation\AnimationControllerImp.h">
+      <Filter>Animation</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Animation\AnimationImp.h">
+      <Filter>Animation</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Animation\AnimationServicesImp.h">
+      <Filter>Animation</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Animation\AnimationToolBarImp.h">
+      <Filter>Animation</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Plot\ArrowImp.h">
+      <Filter>Plot</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Plot\AxisImp.h">
+      <Filter>Plot</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Plot\CartesianGridlinesImp.h">
+      <Filter>Plot</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Plot\CartesianPlotImp.h">
+      <Filter>Plot</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Plot\CurveCollectionImp.h">
+      <Filter>Plot</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Plot\CurveImp.h">
+      <Filter>Plot</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Plot\GridlinesImp.h">
+      <Filter>Plot</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Plot\HistogramImp.h">
+      <Filter>Plot</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Plot\HistogramPlotImp.h">
+      <Filter>Plot</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Plot\HistogramWindowImp.h">
+      <Filter>Plot</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Plot\Legend.h">
+      <Filter>Plot</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Plot\LocatorImp.h">
+      <Filter>Plot</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Plot\PlotGroupImp.h">
+      <Filter>Plot</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Plot\PlotObjectImp.h">
+      <Filter>Plot</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Plot\PlotSetGroupImp.h">
+      <Filter>Plot</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Plot\PlotSetImp.h">
+      <Filter>Plot</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Plot\PlotViewImp.h">
+      <Filter>Plot</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Plot\PlotWidgetImp.h">
+      <Filter>Plot</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Plot\PointImp.h">
+      <Filter>Plot</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Plot\PointSetImp.h">
+      <Filter>Plot</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Plot\PolarGridlinesImp.h">
+      <Filter>Plot</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Plot\PolarPlotImp.h">
+      <Filter>Plot</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Plot\PolygonPlotObjectImp.h">
+      <Filter>Plot</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Plot\RegionObjectImp.h">
+      <Filter>Plot</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Plot\SignaturePlotImp.h">
+      <Filter>Plot</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Plot\StatisticsWidget.h">
+      <Filter>Plot</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Plot\TextImp.h">
+      <Filter>Plot</Filter>
+    </CustomBuild>
+  </ItemGroup>
+</Project>
