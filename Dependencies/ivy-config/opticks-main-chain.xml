@@ -1,0 +1,8 @@
+<ivysettings>
+  <resolvers>
+    <chain name="opticks-main" dual="true">
+      <resolver ref="opticks-shared"/>
+      <resolver ref="opticks-public"/>
+    </chain>
+  </resolvers>
+</ivysettings>

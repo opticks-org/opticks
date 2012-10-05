@@ -1,0 +1,306 @@
+/** \page contextmenus Customizing Context Menus
+ *  \section introduction Introduction
+ *  Many widgets in the main application window have customizable context
+ *  menus.  Each customizable context menu uses ContextMenuAction objects that
+ *  define a unique ID for the action and optional placement using an
+ *  additional "buddy" action.  The menu actions are customized in a
+ *  ContextMenu.
+ *
+ *  Since each context menu may have different actions, debugging support is
+ *  provided through the message log.  Call the
+ *  ContextMenu::setSettingLogActions() method to enable or disable logging
+ *  of the actions.
+ *
+ *  @warning Context menu logging is provided for debugging purposes only
+ *           and is therefore only available in debug mode.  Enabling the
+ *           logging will do nothing in a release mode version of the
+ *           application.
+ *
+ *  \section callingsequence Calling Sequence
+ *  When the user right-clicks on a widget containing a customizable context
+ *  menu, the following calling sequence is invoked:
+ *  -# The SessionItem::getContextMenuActions() method is called to get the
+ *     default list of ContextMenuActions for that session item.  This may
+ *     include actions for additional session items, if the context areas of
+ *     multiple session items are to be combined.
+ *  -# The ContextMenu is created.
+ *  -# If ContextMenu::hasSettingLogActions() and
+ *     ContextMenu::getSettingLogActions() both return \c true, the default
+ *     actions are recorded in the message log.
+ *  -# The DesktopServices::signalAboutToShowContextMenu() signal is emitted
+ *     with the ContextMenu value indicating that the menu is about to be
+ *     displayed.  This gives attached objects a chance to add actions to the
+ *     default list or to remove actions from the list.  Custom actions can
+ *     also be created based on the current state of the session item(s) or the
+ *     point on which the user clicked to invoke the menu.
+ *  -# A custom widget signal may be emitted indicating that the user clicked
+ *     in that particular widget.  This provides the capability for objects to
+ *     attach to a particular session item signal instead of the
+ *     DesktopServices::signalAboutToShowContextMenu() signal.  Available
+ *     session item signals include the following:
+ *     - DockWindow::signalAboutToShowContextMenu()
+ *     - PlotWidget::signalAboutToShowContextMenu()
+ *     - View::signalAboutToShowContextMenu()
+ *  -# If the user clicked on a session item in the session explorer, the
+ *     SessionExplorer::signalAboutToShowSessionItemContextMenu() signal is
+ *     emitted.  The context menu will contain the session item(s) that are
+ *     currently selected in the session explorer.  If only one session item is
+ *     selected, the menu contains the actions returned by
+ *     SessionItem::getContextMenuActions() for that item.  If multiple session
+ *     items are selected in the session explorer, the menu initially contains
+ *     no actions.  Objects that are attached to the
+ *     DesktopServices::signalAboutToShowContextMenu() signal may also need to
+ *     attach to the SessionExplorer::signalAboutToShowSessionItemContextMenu()
+ *     signal if they are interested in the selected item(s) in the session
+ *     explorer.
+ *  -# After all slot methods connected to each signal are called, if
+ *     ContextMenu::hasSettingLogActions() and
+ *     ContextMenu::getSettingLogActions() both return \c true, the actions
+ *     that will be used in the menu is recorded in the message log.  These
+ *     actions are the raw ContextMenuAction object and not the final
+ *     QAction list that is displayed in the menu so that the placement and
+ *     removal of the actions is displayed.
+ *  -# A list of QActions that will be displayed in the menu is generated
+ *     from all ContextMenuAction objects.  First, all actions are ordered
+ *     according to the buddy action in each ContextMenuAction.  After all
+ *     actions have been ordered, actions are removed.
+ *  -# The context menu is displayed to the user with the generated list of
+ *     QActions.
+ *
+ *  \section defaultactions Default Context Menu Actions
+ *  Each action that may be added to a default context menu is listed in the
+ *  sections below according to the class that defines the action.  Each action
+ *  ID is provided for objects to remove them as necessary.  The ID values in
+ *  the tables do not represent the string value to pass into the
+ *  ContextMenu methods to add and remove actions, but rather a corresponding
+ *  \c \#define that can be used in place of the ID string.  All action \c \#defines
+ *  are located in the ContextMenuActions.h file.
+ *
+ *  Each of the ID names is prefixed with \c APP_ to prevent collisions with
+ *  other action IDs defined in plug-ins.  When creating context menu actions
+ *  in a plug-in, be sure to use a similar approach of prefixing the ID string
+ *  with a namespace identifier to avoid ID collisions with other plug-ins.
+ *
+ *  \subsection animationcontroller Animation Controller
+ *  <table>
+ *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
+ *    <tr><td>Pause</td><td>APP_ANIMATIONCONTROLLER_PAUSE_ACTION()</td></tr>
+ *    <tr><td>Play</td><td>APP_ANIMATIONCONTROLLER_PLAY_ACTION()</td></tr>
+ *    <tr><td>Change direction</td><td>APP_ANIMATIONCONTROLLER_CHANGE_DIRECTION_ACTION()</td></tr>
+ *    <tr><td>%Step backward</td><td>APP_ANIMATIONCONTROLLER_STEP_BACKWARD_ACTION()</td></tr>
+ *    <tr><td>%Step forward</td><td>APP_ANIMATIONCONTROLLER_STEP_FORWARD_ACTION()</td></tr>
+ *    <tr><td>Stop</td><td>APP_ANIMATIONCONTROLLER_STOP_ACTION()</td></tr>
+ *    <tr><td>Reset on Stop</td><td>APP_ANIMATIONCONTROLLER_RESET_ON_STOP_ACTION()</td></tr>
+ *    <tr><td>Separator</td><td>APP_ANIMATIONCONTROLLER_BUMPER_SEPARATOR_ACTION()</td></tr>
+ *    <tr><td>Bumpers Enabled</td><td>APP_ANIMATIONCONTROLLER_ENABLE_BUMPERS_ACTION()</td></tr>
+ *    <tr><td>Left Bumper to Current Frame</td><td>APP_ANIMATIONCONTROLLER_SET_LEFT_BUMPER_ACTION()</td></tr>
+ *    <tr><td>Right Bumper to Current Frame</td><td>APP_ANIMATIONCONTROLLER_SET_RIGHT_BUMPER_ACTION()</td></tr>
+ *    <tr><td>Adjust Bumpers...</td><td>APP_ANIMATIONCONTROLLER_ADJUST_BUMPERS_ACTION()</td></tr>
+ *    <tr><td>Reset Bumpers</td><td>APP_ANIMATIONCONTROLLER_RESET_BUMPERS_ACTION()</td></tr>
+ *    <tr><td>Separator</td><td>APP_ANIMATIONCONTROLLER_STORE_BUMPERS_SEPARATOR_ACTION()</td></tr>
+ *    <tr><td>Store Bumpers</td><td>APP_ANIMATIONCONTROLLER_STORE_BUMPERS_ACTION()</td></tr>
+ *    <tr><td>Restore Bumpers</td><td>APP_ANIMATIONCONTROLLER_RESTORE_BUMPERS_ACTION()</td></tr>
+ *    <tr><td>Separator</td><td>APP_ANIMATIONCONTROLLER_DROP_FRAMES_SEPARATOR_ACTION()</td></tr>
+ *    <tr><td>Can Drop Frames</td><td>APP_ANIMATIONCONTROLLER_DROP_FRAMES_ACTION()</td></tr>
+ *  </table>
+ *
+ *  \subsection animationservices Animation Services
+ *  <table>
+ *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
+ *    <tr><td>Activate</td><td>APP_ANIMATIONSERVICES_ACTIVATE_ACTION()</td></tr>
+ *    <tr><td>Delete</td><td>APP_ANIMATIONSERVICES_DELETE_ACTION()</td></tr>
+ *    <tr><td>Separator</td><td>APP_ANIMATIONSERVICES_SEPARATOR_ACTION()</td></tr>
+ *  </table>
+ *
+ *  \subsection applicationwindow Application Window
+ *  <table>
+ *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
+ *    <tr><td>Copy snapshot</td><td>APP_APPLICATIONWINDOW_COPY_SNAPSHOT_ACTION()</td></tr>
+ *    <tr><td>Separator</td><td>APP_APPLICATIONWINDOW_COPY_SNAPSHOT_SEPARATOR_ACTION()</td></tr>
+ *    <tr><td>Copy snapshot</td><td>APP_APPLICATIONWINDOW_COPY_SNAPSHOT_SIZED_ACTION()</td></tr>
+ *    <tr><td>Delete Data Element</td><td>APP_APPLICATIONWINDOW_DATAELEMENT_DELETE_ACTION()</td></tr>
+ *    <tr><td>Edit %Classification</td><td>APP_APPLICATIONWINDOW_EDIT_CLASSIFICATION_ACTION()</td></tr>
+ *    <tr><td>Export</td><td>APP_APPLICATIONWINDOW_EXPORT_ACTION()</td></tr>
+ *    <tr><td>Link</td><td>APP_APPLICATIONWINDOW_LINK_ACTION()</td></tr>
+ *    <tr><td>Separator</td><td>APP_APPLICATIONWINDOW_LINK_SEPARATOR_ACTION()</td></tr>
+ *    <tr><td>%Properties</td><td>APP_APPLICATIONWINDOW_PROPERTIES_ACTION()</td></tr>
+ *    <tr><td>Unlink</td><td>APP_APPLICATIONWINDOW_UNLINK_ACTION()</td></tr>
+ *  </table>
+ *
+ *  \subsection cartesianplot Cartesian Plot
+ *  In addition to the actions listed below, the context menu for a
+ *  CartesianPlot also includes all PlotView \ref plotview "actions".\n\n
+ *  <table>
+ *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
+ *    <tr><td>Custom zoom</td><td>APP_CARTESIANPLOT_CUSTOM_ZOOM_ACTION()</td></tr>
+ *    <tr><td>%Gridlines menu</td><td>APP_CARTESIANPLOT_GRIDLINES_MENU_ACTION()</td></tr>
+ *  </table>
+ *
+ *  \subsection dockwindow Dock Window
+ *  <table>
+ *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
+ *    <tr><td>Dock</td><td>APP_DOCKWINDOW_DOCK_ACTION()</td></tr>
+ *    <tr><td>Hide</td><td>APP_DOCKWINDOW_HIDE_ACTION()</td></tr>
+ *    <tr><td>Show</td><td>APP_DOCKWINDOW_SHOW_ACTION()</td></tr>
+ *    <tr><td>Undock</td><td>APP_DOCKWINDOW_UNDOCK_ACTION()</td></tr>
+ *  </table>
+ *
+ *  \subsection graphiclayer Graphic Layer
+ *  <table>
+ *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
+ *    <tr><td>Delete</td><td>APP_GRAPHICLAYER_OBJECT_DELETE_ACTION()</td></tr>
+ *    <tr><td>Separator</td><td>APP_GRAPHICLAYER_OBJECT_DELETE_SEPARATOR_ACTION()</td></tr>
+ *  </table>
+ *
+ *  \subsection histogramplot Histogram Plot
+ *  In addition to the actions listed below, the context menu for a
+ *  HistogramPlot also includes all CartesianPlot \ref cartesianplot "actions".\n\n
+ *  <table>
+ *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
+ *    <tr><td>Auto Zoom</td><td>APP_HISTOGRAMPLOT_AUTO_ZOOM_ACTION()</td></tr>
+ *    <tr><td>%Axis Scale menu</td><td>APP_HISTOGRAMPLOT_AXIS_SCALE_MENU_ACTION()</td></tr>
+ *    <tr><td>Bad Values</td><td>APP_HISTOGRAMPLOT_BAD_VALUES_ACTION()</td></tr>
+ *    <tr><td>Displayed Band menu</td><td>APP_HISTOGRAMPLOT_BAND_MENU_ACTION()</td></tr>
+ *    <tr><td>Color Map menu</td><td>APP_HISTOGRAMPLOT_COLOR_MAP_MENU_ACTION()</td></tr>
+ *    <tr><td>Complex Data menu</td><td>APP_HISTOGRAMPLOT_COMPLEX_DATA_MENU_ACTION()</td></tr>
+ *    <tr><td>Displayed Element menu</td><td>APP_HISTOGRAMPLOT_ELEMENT_MENU_ACTION()</td></tr>
+ *    <tr><td>Separator</td><td>APP_HISTOGRAMPLOT_END_SEPARATOR_ACTION()</td></tr>
+ *    <tr><td>Pass Area menu</td><td>APP_HISTOGRAMPLOT_PASS_AREA_MENU_ACTION()</td></tr>
+ *    <tr><td>Separator</td><td>APP_HISTOGRAMPLOT_RASTER_MENUS_SEPARATOR_ACTION()</td></tr>
+ *    <tr><td>Separator</td><td>APP_HISTOGRAMPLOT_RASTER_SEPARATOR_ACTION()</td></tr>
+ *    <tr><td>Refresh %Statistics</td><td>APP_HISTOGRAMPLOT_REFRESH_STATISTICS_ACTION()</td></tr>
+ *    <tr><td>Set Spatial Sampling</td><td>APP_HISTOGRAMPLOT_SAMPLING_ACTION()</td></tr>
+ *    <tr><td>Save</td><td>APP_HISTOGRAMPLOT_SAVE_ACTION()</td></tr>
+ *    <tr><td>%Statistics</td><td>APP_HISTOGRAMPLOT_STATISTICS_ACTION()</td></tr>
+ *    <tr><td>Stretch Favorites menu</td><td>APP_HISTOGRAMPLOT_STRETCH_FAVORITES_MENU_ACTION()</td></tr>
+ *    <tr><td>Stretch Reset menu</td><td>APP_HISTOGRAMPLOT_STRETCH_RESET_MENU_ACTION()</td></tr>
+ *    <tr><td>Stretch Type menu</td><td>APP_HISTOGRAMPLOT_STRETCH_TYPE_MENU_ACTION()</td></tr>
+ *    <tr><td>Synchronize Auto Zoom</td><td>APP_HISTOGRAMPLOT_SYNCHRONIZE_AUTO_ZOOM_ACTION()</td></tr>
+ *    <tr><td>Separator</td><td>APP_HISTOGRAMPLOT_THRESHOLD_SEPARATOR_ACTION()</td></tr>
+ *    <tr><td>Stretch/Threshold %Units menu</td><td>APP_HISTOGRAMPLOT_UNITS_MENU_ACTION()</td></tr>
+ *  </table>
+ *
+ *  \subsection layer Layer
+ *  <table>
+ *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
+ *    <tr><td>Displayed</td><td>APP_LAYER_DISPLAYED_ACTION()</td></tr>
+ *  </table>
+ *
+ *  \subsection plotset Plot Set
+ *  <table>
+ *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
+ *    <tr><td>Activate Plot</td><td>APP_PLOTSET_ACTIVATE_ACTION()</td></tr>
+ *    <tr><td>Delete</td><td>APP_PLOTSET_DELETE_ACTION()</td></tr>
+ *    <tr><td>Separator</td><td>APP_PLOTSET_SEPARATOR_ACTION()</td></tr>
+ *  </table>
+ *
+ *  \subsection plotview Plot View
+ *  <table>
+ *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
+ *    <tr><td>Mouse mode menu</td><td>APP_PLOTVIEW_MOUSE_MODE_MENU_ACTION()</td></tr>
+ *    <tr><td>Separator</td><td>APP_PLOTVIEW_MOUSE_MODE_SEPARATOR_ACTION()</td></tr>
+ *    <tr><td>Rescale axes</td><td>APP_PLOTVIEW_RESCALE_AXES_ACTION()</td></tr>
+ *    <tr><td>Separator</td><td>APP_PLOTVIEW_RESCALE_AXES_SEPARATOR_ACTION()</td></tr>
+ *  </table>
+ *
+ *  \subsection plotwidget Plot Widget
+ *  In addition to the actions listed below, the context menu for a PlotWidget
+ *  widget also includes all plot view actions for the specific plot view
+ *  displayed in the plot widget.  See the specific plot view documentation for
+ *  the list of the plot view's actions.\n\n
+ *  <table>
+ *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
+ *    <tr><td>Legend</td><td>APP_PLOTWIDGET_LEGEND_ACTION()</td></tr>
+ *    <tr><td>Separator</td><td>APP_PLOTWIDGET_LEGEND_SEPARATOR_ACTION()</td></tr>
+ *    <tr><td>Print</td><td>APP_PLOTWIDGET_PRINT_ACTION()</td></tr>
+ *    <tr><td>Separator</td><td>APP_PLOTWIDGET_PRINT_SEPARATOR_ACTION()</td></tr>
+ *    <tr><td>Toolbars menu</td><td>APP_PLOTWIDGET_TOOLBARS_MENU_ACTION()</td></tr>
+ *  </table>
+ *
+ *  \subsection polarplot Polar Plot
+ *  In addition to the actions listed below, the context menu for a PolarPlot
+ *  also includes all PlotView \ref plotview "actions".\n\n
+ *  <table>
+ *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
+ *    <tr><td>%Gridlines menu</td><td>APP_POLARPLOT_GRIDLINES_MENU_ACTION()</td></tr>
+ *  </table>
+ *
+ *  \subsection productview Product View
+ *  <table>
+ *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
+ *    <tr><td>Activate</td><td>APP_PRODUCTVIEW_LAYER_ACTIVATE_ACTION()</td></tr>
+ *    <tr><td>Activate</td><td>APP_PRODUCTVIEW_PROPERTIES_SEPARATOR_ACTION()</td></tr>
+ *  </table>
+ *
+ *  \subsection rasterlayer Raster Layer
+ *  In addition to the actions listed below, the context menu for a RasterLayer
+ *  also includes all Layer \ref layer "actions".\n\n
+ *  <table>
+ *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
+ *    <tr><td>Calculate %Statistics on Subset</td><td>APP_LAYER_CALCULATE_SUBSET_STATISTICS_ACTION()</td></tr>
+ *    <tr><td>Display as menu</td><td>APP_RASTERLAYER_DISPLAY_AS_MENU_ACTION()</td></tr>
+ *    <tr><td>Display mode menu</td><td>APP_RASTERLAYER_DISPLAY_MODE_MENU_ACTION()</td></tr>
+ *    <tr><td>Separator</td><td>APP_RASTERLAYER_SEPARATOR_ACTION()</td></tr>
+ *    <tr><td>Image stretch menu</td><td>APP_RASTERLAYER_STRETCH_MENU_ACTION()</td></tr>
+ *  </table>
+ *
+ *  \subsection sessionexplorer Session Explorer
+ *  In addition to the actions listed below, the context menu for the session
+ *  explorer also includes all DockWindow \ref dockwindow "actions".\n\n
+ *  <table>
+ *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
+ *    <tr><td>Collapse All</td><td>APP_SESSIONEXPLORER_COLLAPSE_ALL_ACTION()</td></tr>
+ *    <tr><td>Copy name to clipboard</td><td>APP_SESSIONEXPLORER_COPY_NAME_TO_CLIPBOARD_ACTION()</td></tr>
+ *    <tr><td>Expand All</td><td>APP_SESSIONEXPLORER_EXPAND_ALL_ACTION()</td></tr>
+ *    <tr><td>Rename</td><td>APP_SESSIONEXPLORER_RENAME_ACTION()</td></tr>
+ *    <tr><td>Separator</td><td>APP_SESSIONEXPLORER_SEPARATOR_ACTION()</td></tr>
+ *  </table>
+ *
+ *  \subsection spatialdataview Spatial Data View
+ *  <table>
+ *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
+ *    <tr><td>%Axis</td><td>APP_SPATIALDATAVIEW_AXIS_ACTION()</td></tr>
+ *    <tr><td>Background Color</td><td>APP_SPATIALDATAVIEW_BACKGROUND_COLOR_ACTION()</td></tr>
+ *    <tr><td>Crosshair</td><td>APP_SPATIALDATAVIEW_CROSSHAIR_ACTION()</td></tr>
+ *    <tr><td>Separator</td><td>APP_SPATIALDATAVIEW_CROSSHAIR_SEPARATOR_ACTION()</td></tr>
+ *    <tr><td>Hide Layers</td><td>APP_SPATIALDATAVIEW_HIDE_LAYERS_ACTION()</td></tr>
+ *    <tr><td>Select Layers of Type</td><td>APP_SPATIALDATAVIEW_SELECT_LAYERS_OF_TYPE_ACTION()</td></tr>
+ *    <tr><td>Activate</td><td>APP_SPATIALDATAVIEW_LAYER_ACTIVATE_ACTION()</td></tr>
+ *    <tr><td>Separator</td><td>APP_SPATIALDATAVIEW_LAYER_ACTIVATE_SEPARATOR_ACTION()</td></tr>
+ *    <tr><td>Convert</td><td>APP_SPATIALDATAVIEW_LAYER_CONVERT_ACTION()</td></tr>
+ *    <tr><td>Copy</td><td>APP_SPATIALDATAVIEW_LAYER_COPY_ACTION()</td></tr>
+ *    <tr><td>Delete</td><td>APP_SPATIALDATAVIEW_LAYER_DELETE_ACTION()</td></tr>
+ *    <tr><td>Separator</td><td>APP_SPATIALDATAVIEW_LAYER_DELETE_SEPARATOR_ACTION()</td></tr>
+ *    <tr><td>%Layer menu</td><td>APP_SPATIALDATAVIEW_LAYER_MENU_ACTION()</td></tr>
+ *    <tr><td>Separator</td><td>APP_SPATIALDATAVIEW_LAYER_SEPARATOR_ACTION()</td></tr>
+ *    <tr><td>Measurements %Properties</td><td>APP_SPATIALDATAVIEW_MEASUREMENTS_PROPERTIES_ACTION()</td></tr>
+ *    <tr><td>New %Layer menu</td><td>APP_SPATIALDATAVIEW_NEW_LAYER_MENU_ACTION()</td></tr>
+ *    <tr><td>Origin</td><td>APP_SPATIALDATAVIEW_ORIGIN_ACTION()</td></tr>
+ *    <tr><td>Origin Location menu</td><td>APP_SPATIALDATAVIEW_ORIGIN_MENU_ACTION()</td></tr>
+ *    <tr><td>Separator</td><td>APP_SPATIALDATAVIEW_ORIGIN_SEPARATOR_ACTION()</td></tr>
+ *    <tr><td>Separator</td><td>APP_SPATIALDATAVIEW_PROPERTIES_SEPARATOR_ACTION()</td></tr>
+ *    <tr><td>Show Layers</td><td>APP_SPATIALDATAVIEW_SHOW_LAYERS_ACTION()</td></tr>
+ *    <tr><td>Smooth</td><td>APP_SPATIALDATAVIEW_SMOOTH_ACTION()</td></tr>
+ *  </table>
+ *
+ *  \subsection thresholdlayer Threshold Layer
+ *  In addition to the actions listed below, the context menu for a ThresholdLayer
+ *  also includes all Layer \ref layer "actions".\n\n
+ *  <table>
+ *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
+ *    <tr><td>Calculate %Statistics on Subset</td><td>APP_LAYER_CALCULATE_SUBSET_STATISTICS_ACTION()</td></tr>
+ *  </table>
+ *
+ *  \subsection toolbar Toolbar
+ *  <table>
+ *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
+ *    <tr><td>Hide</td><td>APP_TOOLBAR_HIDE_ACTION()</td></tr>
+ *    <tr><td>Show</td><td>APP_TOOLBAR_SHOW_ACTION()</td></tr>
+ *  </table>
+ *
+ *  \subsection workspacewindow Workspace Window
+ *  <table>
+ *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
+ *    <tr><td>Activate</td><td>APP_WORKSPACEWINDOW_ACTIVATE_ACTION()</td></tr>
+ *  </table>
+ */

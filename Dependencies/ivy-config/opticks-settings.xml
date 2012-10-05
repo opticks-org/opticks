@@ -1,0 +1,13 @@
+<ivysettings>
+   <settings defaultResolver="opticks-default" />
+   <include file="${ivy.settings.dir}/opticks-public.xml"/>
+   <include file="${ivy.settings.dir}/opticks-shared.xml"/>
+   <include file="${ivy.settings.dir}/opticks-local.xml"/>
+   <include file="${ivy.settings.dir}/opticks-main-chain.xml"/>
+   <include file="${ivy.settings.dir}/opticks-default-chain.xml"/>
+   <triggers>
+      <ant-call target="expand-tar-gz" prefix="dep" event="post-retrieve-artifact" filter="ext=tgz OR ext=tar.gz" />
+      <ant-call target="expand-tar-bzip2" prefix="dep" event="post-retrieve-artifact" filter="ext=tar.bz2" />
+      <ant-call target="expand-zip" prefix="dep" event="post-retrieve-artifact" filter="ext=zip" />
+   </triggers>
+</ivysettings>

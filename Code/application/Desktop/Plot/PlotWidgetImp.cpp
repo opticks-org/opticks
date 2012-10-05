@@ -1,0 +1,1499 @@
+/*
+ * The information in this file is
+ * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * and is subject to the terms and conditions of the
+ * GNU Lesser General Public License Version 2.1
+ * The license text is available from   
+ * http://www.gnu.org/licenses/lgpl.html
+ */
+
+#include <QtGui/QBitmap>
+#include <QtGui/QImage>
+#include <QtGui/QLayout>
+#include <QtGui/QMenu>
+#include <QtGui/QMouseEvent>
+#include <QtGui/QPainter>
+#include <QtGui/QPixmap>
+#include <QtGui/QSplitter>
+#include <QtGui/QToolBar>
+
+#include "AppAssert.h"
+#include "ApplicationServices.h"
+#include "AppVerify.h"
+#include "AppVersion.h"
+#include "AnnotationLayer.h"
+#include "AnnotationToolBar.h"
+#include "AxisAdapter.h"
+#include "CartesianGridlines.h"
+#include "CartesianPlot.h"
+#include "Classification.h"
+#include "ConfigurationSettings.h"
+#include "ContextMenuAction.h"
+#include "ContextMenuActions.h"
+#include "ContextMenuImp.h"
+#include "DesktopServices.h"
+#include "ElidedLabel.h"
+#include "FloatingLabel.h"
+#include "GridlinesImp.h"
+#include "Legend.h"
+#include "Locator.h"
+#include "LocatorImp.h"
+#include "MouseMode.h"
+#include "PlotSet.h"
+#include "PlotViewImp.h"
+#include "PlotWidget.h"
+#include "PlotWidgetImp.h"
+#include "PrintPixmap.h"
+#include "SessionItemDeserializer.h"
+#include "SessionItemSerializer.h"
+#include "SessionManagerImp.h"
+#include "StringUtilities.h"
+#include "SystemServicesImp.h"
+#include "xmlreader.h"
+
+#include <string>
+
+using namespace std;
+using XERCES_CPP_NAMESPACE_QUALIFIER DOMElement;
+using XERCES_CPP_NAMESPACE_QUALIFIER XMLString;
+
+PlotWidgetImp::PlotWidgetImp(const string& id, const string& plotName, PlotType plotType, PlotSet* pPlotSet,
+   QWidget* parent) :
+   QMainWindow(parent),
+   SessionItemImp(id, plotName),
+   mpPrintAction(NULL),
+   mpSeparatorAction(NULL),
+   mpLegendAction(NULL),
+   mpSeparator2Action(NULL),
+   mpToolbarsMenu(NULL),
+   mpAnnotationToolBar(NULL),
+   mpMouseModeToolBar(NULL),
+   mpPlotWidget(NULL),
+   mpPlotSet(pPlotSet),
+   mpPlot(NULL),
+   mpXMouseLabel(NULL),
+   mpYMouseLabel(NULL),
+   mpXAxis(NULL),
+   mpYAxis(NULL),
+   mpLegend(NULL),
+   mOrganizationPosition(TOP_RIGHT_BOTTOM_LEFT),
+   mClassificationColor(Qt::black),
+   mOrganizationColor(Qt::black)
+{
+   // Context menu actions
+   Service<DesktopServices> pDesktop;
+   string shortcutContext = "Plot";
+
+   mpPrintAction = new QAction(QIcon(":/icons/Print"), "&Print...", this);
+   mpPrintAction->setAutoRepeat(false);
+   mpPrintAction->setShortcut(QKeySequence::Print);
+   mpPrintAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+   mpPrintAction->setStatusTip("Sends the displayed area of the current plot to the printer");
+   connect(mpPrintAction, SIGNAL(triggered()), this, SLOT(print()));
+   pDesktop->initializeAction(mpPrintAction, shortcutContext);
+   addAction(mpPrintAction);
+
+   mpSeparatorAction = new QAction(this);
+   mpSeparatorAction->setSeparator(true);
+
+   mpLegendAction = new QAction("&Legend", this);
+   mpLegendAction->setAutoRepeat(false);
+   mpLegendAction->setCheckable(true);
+   mpLegendAction->setShortcut(QKeySequence("Ctrl+L"));
+   mpLegendAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+   mpLegendAction->setStatusTip("Toggles the display of the legend");
+   connect(mpLegendAction, SIGNAL(toggled(bool)), this, SLOT(showLegend(bool)));
+   pDesktop->initializeAction(mpLegendAction, shortcutContext);
+   addAction(mpLegendAction);
+
+   mpSeparator2Action = new QAction(this);
+   mpSeparator2Action->setSeparator(true);
+
+   mpToolbarsMenu = new QMenu("&Toolbars", this);
+
+   // Annotation toolbar
+   mpAnnotationToolBar = new AnnotationToolBar(SessionItemImp::generateUniqueId(), this);
+   mpAnnotationToolBar->hide();
+
+   // Mouse mode toolbar
+   mpMouseModeToolBar = new QToolBar("Mouse Mode", this);
+   mpMouseModeToolBar->setIconSize(QSize(16, 16));
+   mpMouseModeToolBar->hide();
+
+   initialize(NULL, plotName, plotType);
+}
+
+PlotWidgetImp::~PlotWidgetImp()
+{
+   Service<DesktopServices> pDesktop;
+   detach(SIGNAL_NAME(PlotWidget, AboutToShowContextMenu),
+      Signal(pDesktop.get(), SIGNAL_NAME(DesktopServices, AboutToShowContextMenu)));
+}
+
+void PlotWidgetImp::initialize(PlotViewImp *pPlotView, const string& plotName, PlotType plotType)
+{
+   // cleanup a previous initialization
+   delete mpPlotWidget;
+
+   // Parent widget for the plot widgets
+   mpPlotWidget = new QWidget(this);
+
+   // Top labels
+   mpTopLeftLabel = new QLabel(mpPlotWidget);
+   mpTopCenterLabel = new QLabel(mpPlotWidget);
+   mpTopRightLabel = new QLabel(mpPlotWidget);
+
+   mpTopCenterLabel->setAlignment(Qt::AlignHCenter);
+
+   // Bottom labels
+   mpBottomLeftLabel = new QLabel(mpPlotWidget);
+   mpBottomCenterLabel = new QLabel(mpPlotWidget);
+   mpBottomRightLabel = new QLabel(mpPlotWidget);
+
+   mpBottomCenterLabel->setAlignment(Qt::AlignHCenter);
+
+   // Title
+   mpTitleLabel = new ElidedLabel(mpPlotWidget);
+   mpTitleLabel->setMinimumWidth(100);
+   mpTitleLabel->setAlignment(Qt::AlignHCenter);
+   mpTitleLabel->hide();
+
+   // Plot widget
+   QWidget* pPlotWidget = new QWidget(this);
+
+   // Plot
+   if (pPlotView == NULL)
+   {
+      mpPlot = dynamic_cast<PlotViewImp*>(Service<DesktopServices>()->createPlot(plotName, plotType, pPlotWidget));
+   }
+   else
+   {
+      mpPlot = pPlotView;
+   }
+   mpPlot->installEventFilter(this);
+
+   CartesianPlot* pCartesianPlot = dynamic_cast<CartesianPlot*>(mpPlot);
+   if (pCartesianPlot != NULL)
+   {
+      // Mouse locator labels
+      mpXMouseLabel = new FloatingLabel(Qt::Horizontal, pPlotWidget);
+      mpYMouseLabel = new FloatingLabel(Qt::Vertical, pPlotWidget);
+
+      // Axes
+      mpXAxis = new AxisAdapter(AXIS_BOTTOM, pPlotWidget);
+      mpYAxis = new AxisAdapter(AXIS_LEFT, pPlotWidget);
+
+      QFont ftAxis;
+      ftAxis.setBold(true);
+      ftAxis.setPointSize(10);
+
+      mpXAxis->setFont(ftAxis);
+      mpYAxis->setFont(ftAxis);
+
+      QString strXAxisText = QString::fromStdString(pCartesianPlot->getXDataType());
+      QString strYAxisText = QString::fromStdString(pCartesianPlot->getYDataType());
+      mpXAxis->setTitle(strXAxisText);
+      mpYAxis->setTitle(strYAxisText);
+   }
+
+   // Legend
+   mpLegend = new Legend();
+   mpLegend->setFrameStyle(QFrame::NoFrame);
+   mpLegend->setMinimumWidth(120);
+
+   // Splitter widget
+   mpSplitter = new QSplitter(Qt::Horizontal, mpPlotWidget);
+   mpSplitter->setOpaqueResize(true);
+   mpSplitter->installEventFilter(this);
+   mpSplitter->insertWidget(0, pPlotWidget);
+   mpSplitter->insertWidget(1, mpLegend);
+   mpSplitter->setStretchFactor(0, 10);
+
+   // Layout
+   QHBoxLayout* pTopLabelLayout = new QHBoxLayout();
+   pTopLabelLayout->setMargin(0);
+   pTopLabelLayout->setSpacing(5);
+   pTopLabelLayout->addWidget(mpTopLeftLabel, 0, Qt::AlignLeft);
+   pTopLabelLayout->addWidget(mpTopCenterLabel, 0, Qt::AlignHCenter);
+   pTopLabelLayout->addWidget(mpTopRightLabel, 0, Qt::AlignRight);
+
+   QHBoxLayout* pBottomLabelLayout = new QHBoxLayout();
+   pBottomLabelLayout->setMargin(0);
+   pBottomLabelLayout->setSpacing(5);
+   pBottomLabelLayout->addWidget(mpBottomLeftLabel, 0, Qt::AlignLeft);
+   pBottomLabelLayout->addWidget(mpBottomCenterLabel, 0, Qt::AlignHCenter);
+   pBottomLabelLayout->addWidget(mpBottomRightLabel, 0, Qt::AlignRight);
+
+   if (pCartesianPlot == NULL)
+   {
+      QVBoxLayout* pPlotLayout = new QVBoxLayout(pPlotWidget);
+      pPlotLayout->setMargin(0);
+      pPlotLayout->setSpacing(5);
+      pPlotLayout->addWidget(mpPlot);
+   }
+   else
+   {
+      QGridLayout* pPlotGrid = new QGridLayout(pPlotWidget);
+      pPlotGrid->setMargin(0);
+      pPlotGrid->setSpacing(0);
+      pPlotGrid->addWidget(mpXMouseLabel, 0, 1);
+      pPlotGrid->setRowMinimumHeight(1, 5);
+      pPlotGrid->addWidget(mpYAxis, 2, 0);
+      pPlotGrid->addWidget(mpPlot, 2, 1);
+      pPlotGrid->setColumnMinimumWidth(2, 5);
+      pPlotGrid->addWidget(mpYMouseLabel, 2, 3);
+      pPlotGrid->setColumnMinimumWidth(3, mpYMouseLabel->sizeHint().width());
+      pPlotGrid->addWidget(mpXAxis, 3, 1);
+      pPlotGrid->setRowStretch(2, 10);
+      pPlotGrid->setColumnStretch(1, 10);
+   }
+
+   QVBoxLayout* pPlotLayout = new QVBoxLayout(mpPlotWidget);
+   pPlotLayout->setMargin(10);
+   pPlotLayout->setSpacing(5);
+   pPlotLayout->addLayout(pTopLabelLayout);
+   pPlotLayout->addWidget(mpTitleLabel);
+   pPlotLayout->addWidget(mpSplitter, 10);
+   pPlotLayout->addLayout(pBottomLabelLayout);
+
+   // Initialization
+   setWindowFlags(Qt::Widget);
+   setBackgroundColor(Qt::white);
+   mpPlotWidget->setAutoFillBackground(true);
+   setCentralWidget(mpPlotWidget);
+   setContextMenuPolicy(Qt::DefaultContextMenu);
+   setFocusPolicy(Qt::StrongFocus);
+   setFocusProxy(mpPlot);
+   addToolBar(mpAnnotationToolBar);
+   addToolBar(mpMouseModeToolBar);
+
+   AnnotationLayer* pAnnotationLayer = mpPlot->getAnnotationLayer();
+   if (pAnnotationLayer != NULL)
+   {
+      mpAnnotationToolBar->setAnnotationLayer(pAnnotationLayer);
+   }
+
+   const MouseMode* pCurrentMouseMode = mpPlot->getCurrentMouseMode();
+   enableAnnotationToolBar(pCurrentMouseMode);
+
+   vector<const MouseMode*> mouseModes = mpPlot->getMouseModes();
+   for (vector<const MouseMode*>::const_iterator iter = mouseModes.begin(); iter != mouseModes.end(); ++iter)
+   {
+      const MouseMode* pMouseMode = *iter;
+      if (pMouseMode != NULL)
+      {
+         QAction* pAction = pMouseMode->getAction();
+         if (pAction != NULL)
+         {
+            mpMouseModeToolBar->addAction(pAction);
+         }
+      }
+   }
+
+   mpToolbarsMenu->addAction(mpAnnotationToolBar->toggleViewAction());
+   mpToolbarsMenu->addAction(mpMouseModeToolBar->toggleViewAction());
+
+   updateClassificationText(getClassificationText());
+
+   list<PlotObject*> plotObjects = mpPlot->getObjects();
+   for (list<PlotObject*>::iterator iter = plotObjects.begin(); iter != plotObjects.end(); ++iter)
+   {
+      PlotObject* pObject = *iter;
+      if (pObject != NULL)
+      {
+         mpLegend->insertItem(pObject);
+      }
+   }
+
+   showLegend(false);
+
+   // Connections
+   VERIFYNR(connect(mpPlot, SIGNAL(renamed(const QString&)), this, SLOT(updateName(const QString&))));
+   VERIFYNR(connect(mpPlot, SIGNAL(mouseModeChanged(const MouseMode*)), this,
+      SLOT(enableAnnotationToolBar(const MouseMode*))));
+   VERIFYNR(connect(mpPlot, SIGNAL(classificationTextChanged(const QString&)), this,
+      SLOT(updateClassificationText(const QString&))));
+   VERIFYNR(connect(mpPlot, SIGNAL(classificationFontChanged(const QFont&)), this,
+      SLOT(setClassificationFont(const QFont&))));
+   VERIFYNR(connect(mpPlot, SIGNAL(classificationColorChanged(const QColor&)), this,
+      SLOT(setClassificationColor(const QColor&))));
+   VERIFYNR(connect(mpPlot, SIGNAL(classificationPositionChanged(PositionType)), this,
+      SLOT(updateClassificationPosition())));
+   VERIFYNR(connect(mpPlot, SIGNAL(objectAdded(PlotObject*)), mpLegend, SLOT(insertItem(PlotObject*))));
+   VERIFYNR(connect(mpPlot, SIGNAL(objectDeleted(PlotObject*)), mpLegend, SLOT(removeItem(PlotObject*))));
+   VERIFYNR(connect(mpPlot, SIGNAL(objectSelected(PlotObject*, bool)), mpLegend,
+      SLOT(setItemSelected(PlotObject*, bool))));
+   VERIFYNR(connect(mpLegend, SIGNAL(itemSelected(PlotObject*, bool)), this,
+      SLOT(selectPlotObject(PlotObject*, bool))));
+
+   if (pCartesianPlot != NULL)
+   {
+      VERIFYNR(connect(mpPlot, SIGNAL(displayAreaChanged()), this, SLOT(updateScaleRange())));
+      VERIFYNR(connect(mpPlot, SIGNAL(xScaleTypeChanged(ScaleType)), mpXAxis, SLOT(setScaleType(ScaleType))));
+      VERIFYNR(connect(mpPlot, SIGNAL(yScaleTypeChanged(ScaleType)), mpYAxis, SLOT(setScaleType(ScaleType))));
+      VERIFYNR(connect(mpPlot, SIGNAL(xDataTypeChanged(const QString&)), mpXAxis, SLOT(setTitle(const QString&))));
+      VERIFYNR(connect(mpPlot, SIGNAL(yDataTypeChanged(const QString&)), mpYAxis, SLOT(setTitle(const QString&))));
+
+      GridlinesImp* pGridlines = dynamic_cast<GridlinesImp*>(pCartesianPlot->getGridlines(HORIZONTAL));
+      if (pGridlines != NULL)
+      {
+         VERIFYNR(connect(pGridlines, SIGNAL(maxNumMajorLinesChanged(int)), mpYAxis, SLOT(setMaxNumMajorTicks(int))));
+         VERIFYNR(connect(pGridlines, SIGNAL(maxNumMinorLinesChanged(int)), mpYAxis, SLOT(setMaxNumMinorTicks(int))));
+         VERIFYNR(connect(mpYAxis, SIGNAL(maxNumMajorTicksChanged(int)), pGridlines, SLOT(setMaxNumMajorLines(int))));
+         VERIFYNR(connect(mpYAxis, SIGNAL(maxNumMinorTicksChanged(int)), pGridlines, SLOT(setMaxNumMinorLines(int))));
+      }
+
+      pGridlines = dynamic_cast<GridlinesImp*>(pCartesianPlot->getGridlines(VERTICAL));
+      if (pGridlines != NULL)
+      {
+         VERIFYNR(connect(pGridlines, SIGNAL(maxNumMajorLinesChanged(int)), mpXAxis, SLOT(setMaxNumMajorTicks(int))));
+         VERIFYNR(connect(pGridlines, SIGNAL(maxNumMinorLinesChanged(int)), mpXAxis, SLOT(setMaxNumMinorTicks(int))));
+         VERIFYNR(connect(mpXAxis, SIGNAL(maxNumMajorTicksChanged(int)), pGridlines, SLOT(setMaxNumMajorLines(int))));
+         VERIFYNR(connect(mpXAxis, SIGNAL(maxNumMinorTicksChanged(int)), pGridlines, SLOT(setMaxNumMinorLines(int))));
+      }
+   }
+
+   LocatorImp* pLocator = dynamic_cast<LocatorImp*>(mpPlot->getMouseLocator());
+   if (pLocator != NULL)
+   {
+      VERIFYNR(connect(pLocator, SIGNAL(textChanged(const QString&, const QString&)), this,
+         SLOT(updateMouseLabel(const QString&, const QString&))));
+   }
+}
+
+const string& PlotWidgetImp::getObjectType() const
+{
+   static string type("PlotWidgetImp");
+   return type;
+}
+
+bool PlotWidgetImp::isKindOf(const string& className) const
+{
+   if ((className == getObjectType()) || (className == "PlotWidget"))
+   {
+      return true;
+   }
+
+   return SubjectImp::isKindOf(className);
+}
+
+PlotSet* PlotWidgetImp::getPlotSet() const
+{
+   return mpPlotSet;
+}
+
+PlotView* PlotWidgetImp::getPlot() const
+{
+   return dynamic_cast<PlotView*>(mpPlot);
+}
+
+void PlotWidgetImp::setName(const std::string& name)
+{
+   if (name != getName())
+   {
+      SessionItemImp::setName(name);
+      if (name != mpPlot->getName())
+      {
+         mpPlot->setName(name);
+      }
+
+      notify(SIGNAL_NAME(Subject, Modified));
+   }
+}
+
+list<ContextMenuAction> PlotWidgetImp::getContextMenuActions() const
+{
+   list<ContextMenuAction> menuActions;
+   menuActions.push_back(ContextMenuAction(mpPrintAction, APP_PLOTWIDGET_PRINT_ACTION));
+   menuActions.push_back(ContextMenuAction(mpSeparatorAction, APP_PLOTWIDGET_PRINT_SEPARATOR_ACTION));
+
+   ContextMenuAction toolbarsMenuAction(mpToolbarsMenu->menuAction(), APP_PLOTWIDGET_TOOLBARS_MENU_ACTION);
+   toolbarsMenuAction.mBuddyType = ContextMenuAction::AFTER;
+   toolbarsMenuAction.mBuddyId = APP_PLOTVIEW_MOUSE_MODE_SEPARATOR_ACTION;
+   menuActions.push_back(toolbarsMenuAction);
+
+   ContextMenuAction legendAction(mpLegendAction, APP_PLOTWIDGET_LEGEND_ACTION);
+   legendAction.mBuddyType = ContextMenuAction::AFTER;
+   legendAction.mBuddyId = APP_PLOTWIDGET_TOOLBARS_MENU_ACTION;
+   menuActions.push_back(legendAction);
+
+   ContextMenuAction separatorAction(mpSeparator2Action, APP_PLOTWIDGET_LEGEND_SEPARATOR_ACTION);
+   separatorAction.mBuddyType = ContextMenuAction::AFTER;
+   separatorAction.mBuddyId = APP_PLOTWIDGET_LEGEND_ACTION;
+   menuActions.push_back(separatorAction);
+
+   list<ContextMenuAction> plotActions = mpPlot->getContextMenuActions();
+   std::copy(plotActions.begin(), plotActions.end(), std::back_inserter(menuActions));
+
+   return menuActions;
+}
+
+vector<string> PlotWidgetImp::getPropertiesPages() const
+{
+   vector<string> propertiesPages = SessionItemImp::getPropertiesPages();
+
+   vector<string> plotPages = mpPlot->getPropertiesPages();
+   copy(plotPages.begin(), plotPages.end(), back_inserter(propertiesPages));
+
+   return propertiesPages;
+}
+
+QImage PlotWidgetImp::getCurrentImage()
+{
+   QImage image;
+   getCurrentImage(image);
+   return image;
+}
+
+bool PlotWidgetImp::getCurrentImage(QImage& image)
+{
+   // Get the pixmap for the widget
+   QPixmap widgetPixmap = QPixmap::grabWidget(mpPlotWidget);
+   if (widgetPixmap.isNull() == true)
+   {
+      return false;
+   }
+
+   // Get the pixmap for the plot view
+   QPixmap plotPixmap;
+
+   QImage plotImage = mpPlot->getCurrentImage();
+   if (plotImage.isNull() == false)
+   {
+      plotPixmap.convertFromImage(plotImage);
+   }
+
+   if (plotPixmap.isNull() == true)
+   {
+      return false;
+   }
+
+   // Draw the plot view pixmap in the widget pixmap
+   QPoint ptPlot = mpPlot->mapTo(mpPlotWidget, QPoint(0, 0));
+   QRect rcPlot(ptPlot, QSize(mpPlot->width(), mpPlot->height()));
+
+   QPainter widgetPainter(&widgetPixmap);
+   widgetPainter.drawPixmap(rcPlot, plotPixmap);
+   widgetPainter.end();
+
+   // Set the image data
+   QImage widgetImage = widgetPixmap.toImage();
+
+   QSize imageSize = image.size();
+   if (imageSize.isEmpty() == false)
+   {
+      image = widgetImage.scaled(imageSize);
+   }
+   else
+   {
+      image = widgetImage;
+   }
+
+   return true;
+}
+
+void PlotWidgetImp::setBackgroundColor(const QColor& backgroundColor)
+{
+   if ((backgroundColor.isValid() == true) && (backgroundColor != getBackgroundColor()))
+   {
+      QPalette plotPalette = mpPlotWidget->palette();
+      plotPalette.setColor(QPalette::Window, backgroundColor);
+      mpPlotWidget->setPalette(plotPalette);
+      notify(SIGNAL_NAME(Subject, Modified));
+   }
+}
+
+QColor PlotWidgetImp::getBackgroundColor() const
+{
+   QPalette plotPalette = mpPlotWidget->palette();
+   return plotPalette.color(QPalette::Window);
+}
+
+void PlotWidgetImp::setClassificationPosition(PositionType ePosition)
+{
+   if (ePosition != getClassificationPosition())
+   {
+      mpPlot->setClassificationPosition(ePosition);
+      notify(SIGNAL_NAME(Subject, Modified));
+   }
+}
+
+PositionType PlotWidgetImp::getClassificationPosition() const
+{
+   return mpPlot->getClassificationPosition();
+}
+
+void PlotWidgetImp::setClassification(const Classification* pClassification)
+{
+   mpPlot->setClassification(pClassification);
+}
+
+Classification* PlotWidgetImp::getClassification()
+{
+   return mpPlot->getClassification();
+}
+
+const Classification* PlotWidgetImp::getClassification() const
+{
+   return mpPlot->getClassification();
+}
+
+QString PlotWidgetImp::getClassificationText() const
+{
+   const Classification* pClassification = getClassification();
+   if (pClassification != NULL)
+   {
+      std::string tmp;
+      if (pClassification->isValid(tmp) == true)
+      {
+         string classificationText;
+         pClassification->getClassificationText(classificationText);
+         if (classificationText.empty() == false)
+         {
+            return QString::fromStdString(classificationText);
+         }
+      }
+   }
+
+   return QString();
+}
+
+void PlotWidgetImp::updateClassificationPosition()
+{
+   // Clear the text properties in the current position
+   QString classificationText = getClassificationText();
+   QString organizationText = getOrganizationText();
+   QFont classificationFont = getClassificationFont();
+   QColor classificationColor = getClassificationColor();
+
+   setLabelText(QString(), QString());
+   setClassificationFont(QFont());
+   setClassificationColor(Qt::black);
+
+   // Set the text properties at the new position
+   setLabelText(classificationText, organizationText);
+   setClassificationFont(classificationFont);
+   setClassificationColor(classificationColor);
+}
+
+void PlotWidgetImp::updateClassificationText(const QString& classificationText)
+{
+   setLabelText(classificationText, getOrganizationText());
+}
+
+void PlotWidgetImp::setClassificationFont(const QFont& ftClassification)
+{
+   setLabelFont(ftClassification, getOrganizationFont());
+}
+
+QFont PlotWidgetImp::getClassificationFont() const
+{
+   return mClassificationFont.toQFont();
+}
+
+void PlotWidgetImp::setClassificationColor(const QColor& clrClassification)
+{
+   if (clrClassification.isValid())
+   {
+      setLabelColor(clrClassification, getOrganizationColor());
+   }
+}
+
+QColor PlotWidgetImp::getClassificationColor() const
+{
+   return mClassificationColor;
+}
+
+void PlotWidgetImp::setOrganizationPosition(PositionType ePosition)
+{
+   if (ePosition == mOrganizationPosition)
+   {
+      return;
+   }
+
+   // Clear the text properties in the current position
+   QString strOrganization = getOrganizationText();
+   QFont ftOrganization = getOrganizationFont();
+   QColor clrOrganization = getOrganizationColor();
+
+   setOrganizationText(QString());
+   setOrganizationFont(QFont());
+   setOrganizationColor(Qt::black);
+
+   // Set the new position
+   mOrganizationPosition = ePosition;
+
+   // Notify attached objects of the change
+   notify(SIGNAL_NAME(Subject, Modified));
+
+   // Set the text properties at the new position
+   setOrganizationText(strOrganization);
+   setOrganizationFont(ftOrganization);
+   setOrganizationColor(clrOrganization);
+}
+
+PositionType PlotWidgetImp::getOrganizationPosition() const
+{
+   return mOrganizationPosition;
+}
+
+void PlotWidgetImp::setOrganizationText(const QString& strOrganization)
+{
+   setLabelText(getClassificationText(), strOrganization);
+}
+
+QString PlotWidgetImp::getOrganizationText() const
+{
+   return mOrganizationText;
+}
+
+void PlotWidgetImp::setOrganizationFont(const QFont& ftOrganization)
+{
+   setLabelFont(getClassificationFont(), ftOrganization);
+}
+
+QFont PlotWidgetImp::getOrganizationFont() const
+{
+   return mOrganizationFont.toQFont();
+}
+
+void PlotWidgetImp::setOrganizationColor(const QColor& clrOrganization)
+{
+   if (clrOrganization.isValid())
+   {
+      setLabelColor(getClassificationColor(), clrOrganization);
+   }
+}
+
+QColor PlotWidgetImp::getOrganizationColor() const
+{
+   return mOrganizationColor;
+}
+
+void PlotWidgetImp::setTitle(const QString& strTitle)
+{
+   if (strTitle != getTitle())
+   {
+      mpTitleLabel->setText(strTitle);
+      mpTitleLabel->setVisible(!strTitle.isEmpty());
+      notify(SIGNAL_NAME(Subject, Modified));
+   }
+}
+
+QString PlotWidgetImp::getTitle() const
+{
+   return mpTitleLabel->text();
+}
+
+void PlotWidgetImp::setTitleFont(const QFont& ftTitle)
+{
+   if (ftTitle != getTitleFont())
+   {
+      mTitleFont = ftTitle;
+      mpTitleLabel->setFont(ftTitle);
+      notify(SIGNAL_NAME(Subject, Modified));
+   }
+}
+
+QFont PlotWidgetImp::getTitleFont() const
+{
+   return mTitleFont.toQFont();
+}
+
+void PlotWidgetImp::setTitleElideMode(Qt::TextElideMode mode)
+{
+   mpTitleLabel->setElideMode(mode);
+}
+
+void PlotWidgetImp::showAxis(AxisPosition axis, bool bShow)
+{
+   if ((axis == AXIS_LEFT) && (mpYAxis != NULL))
+   {
+      mpYAxis->setShown(bShow);
+   }
+   else if ((axis == AXIS_BOTTOM) && (mpXAxis != NULL))
+   {
+      mpXAxis->setShown(bShow);
+   }
+}
+
+bool PlotWidgetImp::isAxisShown(AxisPosition axis) const
+{
+   bool bShown = false;
+   if ((axis == AXIS_LEFT) && (mpYAxis != NULL))
+   {
+      bShown = mpYAxis->isVisible();
+   }
+   else if ((axis == AXIS_BOTTOM) && (mpXAxis != NULL))
+   {
+      bShown = mpXAxis->isVisible();
+   }
+
+   return bShown;
+}
+
+Axis* PlotWidgetImp::getAxis(AxisPosition axis) const
+{
+   Axis* pAxis = NULL;
+   if (axis == AXIS_LEFT)
+   {
+      pAxis = dynamic_cast<Axis*>(mpYAxis);
+   }
+   else if (axis == AXIS_BOTTOM)
+   {
+      pAxis = dynamic_cast<Axis*>(mpXAxis);
+   }
+
+   return pAxis;
+}
+
+bool PlotWidgetImp::isLegendShown() const
+{
+   return mpLegend->isVisible();
+}
+
+Legend* PlotWidgetImp::getLegend() const
+{
+   return mpLegend;
+}
+
+void PlotWidgetImp::setLegendBackgroundColor(const QColor& backgroundColor)
+{
+   if ((backgroundColor.isValid() == true) && (backgroundColor != getLegendBackgroundColor()))
+   {
+      mpLegend->setBackgroundColor(backgroundColor);
+      notify(SIGNAL_NAME(Subject, Modified));
+   }
+}
+
+QColor PlotWidgetImp::getLegendBackgroundColor() const
+{
+   return mpLegend->getBackgroundColor();
+}
+
+void PlotWidgetImp::showLegend(bool bShow)
+{
+   if (bShow == false)
+   {
+      mpLegend->hide();
+   }
+   else if (bShow == true)
+   {
+      mpLegend->show();
+   }
+
+   mpLegendAction->setChecked(bShow);
+}
+
+void PlotWidgetImp::print(bool bDialog)
+{
+   SystemServicesImp::instance()->WriteLogInfo(string(APP_NAME) + " is Printing a Plot Widget");
+   QImage widgetImage = getCurrentImage();
+   PrintPixmap(QPixmap::fromImage(widgetImage), bDialog, this);
+}
+
+bool PlotWidgetImp::event(QEvent* pEvent)
+{
+   if (pEvent != NULL)
+   {
+      if (pEvent->type() == QEvent::Polish)
+      {
+         Service<DesktopServices> pDesktop;
+         attach(SIGNAL_NAME(PlotWidget, AboutToShowContextMenu),
+            Signal(pDesktop.get(), SIGNAL_NAME(DesktopServices, AboutToShowContextMenu)));
+      }
+   }
+
+   return QWidget::event(pEvent);
+}
+
+bool PlotWidgetImp::eventFilter(QObject* o, QEvent* e)
+{
+   if ((e != NULL) && (o != NULL) && (o == mpPlot))
+   {
+      QEvent::Type eventType = e->type();
+      if (eventType == QEvent::ContextMenu)
+      {
+         QContextMenuEvent* pMenuEvent = static_cast<QContextMenuEvent*>(e);
+         contextMenuEvent(pMenuEvent);
+         return true;
+      }
+   }
+
+   return QWidget::eventFilter(o, e);
+}
+
+void PlotWidgetImp::contextMenuEvent(QContextMenuEvent* pEvent)
+{
+   if (pEvent != NULL)
+   {
+      // Create the context menu
+      const QPoint& mouseLocation = pEvent->globalPos();
+      list<ContextMenuAction> defaultActions = getContextMenuActions();
+
+      vector<SessionItem*> sessionItems;
+      sessionItems.push_back(dynamic_cast<SessionItem*>(this));
+      sessionItems.push_back(dynamic_cast<SessionItem*>(mpPlot));
+
+      ContextMenuImp menu(sessionItems, mouseLocation, defaultActions, this);
+
+      // Notify to allow additional actions to be added
+      notify(SIGNAL_NAME(PlotWidget, AboutToShowContextMenu), boost::any(static_cast<ContextMenu*>(&menu)));
+
+      // Invoke the menu
+      if (menu.show() == true)
+      {
+         return;
+      }
+   }
+
+   QWidget::contextMenuEvent(pEvent);
+}
+
+const FontImp& PlotWidgetImp::getClassificationFontImp() const
+{
+   return mClassificationFont;
+}
+
+const FontImp& PlotWidgetImp::getOrganizationFontImp() const
+{
+   return mOrganizationFont;
+}
+
+const FontImp& PlotWidgetImp::getTitleFontImp() const
+{
+   return mTitleFont;
+}
+
+void PlotWidgetImp::updateName(const QString& strName)
+{
+   const string& widgetName = getName();
+   string viewName = strName.toStdString();
+
+   if (viewName != widgetName)
+   {
+      setName(viewName);
+   }
+}
+
+void PlotWidgetImp::enableAnnotationToolBar(const MouseMode* pMouseMode)
+{
+   bool enable = false;
+   if (pMouseMode != NULL)
+   {
+      string modeName;
+      pMouseMode->getName(modeName);
+      if (modeName == "AnnotationMode")
+      {
+         enable = true;
+      }
+   }
+
+   mpAnnotationToolBar->setEnabled(enable);
+   if (enable == true)
+   {
+      mpAnnotationToolBar->show();
+   }
+}
+
+void PlotWidgetImp::updateScaleRange()
+{
+   if ((mpXAxis == NULL) || (mpYAxis == NULL))
+   {
+      return;
+   }
+
+   double dMinX = 0.0;
+   double dMinY = 0.0;
+   double dMaxX = 0.0;
+   double dMaxY = 0.0;
+
+   mpPlot->translateScreenToData(0, 0, dMinX, dMinY);
+   mpPlot->translateScreenToData(mpPlot->width(), mpPlot->height(), dMaxX, dMaxY);
+
+   // Update the axes
+   mpXAxis->setValueRange(dMinX, dMaxX);
+   mpYAxis->setValueRange(dMinY, dMaxY);
+}
+
+void PlotWidgetImp::updateMouseLabel(const QString& strTextX, const QString& strTextY)
+{
+   if ((mpXMouseLabel == NULL) || (mpYMouseLabel == NULL))
+   {
+      return;
+   }
+
+   // Set the label text
+   mpXMouseLabel->setText(strTextX);
+   mpYMouseLabel->setText(strTextY);
+
+   // Set the label position
+   LocationType position;
+
+   const Locator* pLocator = mpPlot->getMouseLocator();
+   if (pLocator != NULL)
+   {
+      position = pLocator->getLocation();
+   }
+
+   double dX = 0;
+   double dY = 0;
+   mpPlot->translateDataToScreen(position.mX, position.mY, dX, dY);
+
+   mpXMouseLabel->setTextPosition(dX);
+   mpYMouseLabel->setTextPosition(mpPlot->height() - dY);
+}
+
+void PlotWidgetImp::setLabelText(const QString& strClassification, const QString& strOrganization)
+{
+   QString strTopLeftText;
+   QString strTopCenterText;
+   QString strTopRightText;
+   QString strBottomLeftText;
+   QString strBottomCenterText;
+   QString strBottomRightText;
+
+   // Set the organization text first so that the classification text can be appended/prepended
+   switch (mOrganizationPosition)
+   {
+      case TOP_LEFT_BOTTOM_LEFT:
+         strTopLeftText = strOrganization;
+         strBottomLeftText = strOrganization;
+         break;
+
+      case TOP_LEFT_BOTTOM_RIGHT:
+         strTopLeftText = strOrganization;
+         strBottomRightText = strOrganization;
+         break;
+
+      case TOP_RIGHT_BOTTOM_LEFT:
+         strTopRightText = strOrganization;
+         strBottomLeftText = strOrganization;
+         break;
+
+      case TOP_RIGHT_BOTTOM_RIGHT:
+         strTopRightText = strOrganization;
+         strBottomRightText = strOrganization;
+         break;
+
+      case CENTER:
+         strTopCenterText = strOrganization;
+         strBottomCenterText = strOrganization;
+         break;
+
+      default:
+         break;
+   }
+
+   // Do not add stray newlines if there is no classification text
+   // or if classification display is disabled
+   if (!strClassification.isEmpty() && ConfigurationSettings::getSettingDisplayClassificationMarkings())
+   {
+      switch (getClassificationPosition())
+      {
+         case TOP_LEFT_BOTTOM_LEFT:
+            if (strTopLeftText.isEmpty() == false)
+            {
+               strTopLeftText.prepend("\n");
+            }
+            strTopLeftText.prepend(strClassification);
+
+            if (strBottomLeftText.isEmpty() == false)
+            {
+               strBottomLeftText.append("\n");
+            }
+            strBottomLeftText.append(strClassification);
+
+            break;
+
+         case TOP_LEFT_BOTTOM_RIGHT:
+            if (strTopLeftText.isEmpty() == false)
+            {
+               strTopLeftText.prepend("\n");
+            }
+            strTopLeftText.prepend(strClassification);
+
+            if (strBottomRightText.isEmpty() == false)
+            {
+               strBottomRightText.append("\n");
+            }
+            strBottomRightText.append(strClassification);
+
+            break;
+
+         case TOP_RIGHT_BOTTOM_LEFT:
+            if (strTopRightText.isEmpty() == false)
+            {
+               strTopRightText.prepend("\n");
+            }
+            strTopRightText.prepend(strClassification);
+
+            if (strBottomLeftText.isEmpty() == false)
+            {
+               strBottomLeftText.append("\n");
+            }
+            strBottomLeftText.append(strClassification);
+
+            break;
+
+         case TOP_RIGHT_BOTTOM_RIGHT:
+            if (strTopRightText.isEmpty() == false)
+            {
+               strTopRightText.prepend("\n");
+            }
+            strTopRightText.prepend(strClassification);
+
+            if (strBottomRightText.isEmpty() == false)
+            {
+               strBottomRightText.append("\n");
+            }
+            strBottomRightText.append(strClassification);
+
+            break;
+
+         case CENTER:
+            if (strTopCenterText.isEmpty() == false)
+            {
+               strTopCenterText.prepend("\n");
+            }
+            strTopCenterText.prepend(strClassification);
+
+            if (strBottomCenterText.isEmpty() == false)
+            {
+               strBottomCenterText.append("\n");
+            }
+            strBottomCenterText.append(strClassification);
+
+            break;
+
+         default:
+            break;
+      }
+   }
+
+   // Add the release info
+   Service<ConfigurationSettings> pConfigSettings;
+
+   // Top text
+   if (strTopCenterText.isEmpty() == false)
+   {
+      strTopCenterText.append("\n");
+   }
+
+   strTopCenterText.append(QString::fromStdString(
+      StringUtilities::toDisplayString(pConfigSettings->getReleaseType())));
+
+   QString strReleaseDescription = QString::fromStdString(pConfigSettings->getReleaseDescription());
+   if (strReleaseDescription.isEmpty() == false)
+   {
+      if (strTopCenterText.isEmpty() == false)
+      {
+         strTopCenterText.append("\n");
+      }
+
+      strTopCenterText.append(strReleaseDescription);
+   }
+
+   if (pConfigSettings->isProductionRelease() == false)
+   {
+      // Bottom text
+      bool bNewLine = !(strBottomCenterText.isEmpty());
+      QString strProductionUse = "Not for Production Use";
+
+      strBottomCenterText.prepend(strProductionUse);
+
+      if (bNewLine == true)
+      {
+         strBottomCenterText.insert(strProductionUse.length(), "\n");
+      }
+   }
+
+   mpTopLeftLabel->setText(strTopLeftText);
+   mpTopCenterLabel->setText(strTopCenterText);
+   mpTopRightLabel->setText(strTopRightText);
+   mpBottomLeftLabel->setText(strBottomLeftText);
+   mpBottomCenterLabel->setText(strBottomCenterText);
+   mpBottomRightLabel->setText(strBottomRightText);
+   mOrganizationText = strOrganization;
+
+   notify(SIGNAL_NAME(Subject, Modified));
+}
+
+void PlotWidgetImp::setLabelFont(const QFont& ftClassification, const QFont& ftOrganization)
+{
+   QFont ftTopLeft;
+   QFont ftTopCenter;
+   QFont ftTopRight;
+   QFont ftBottomLeft;
+   QFont ftBottomCenter;
+   QFont ftBottomRight;
+
+   // Set the organization font first so that the classification font takes precedence
+   switch (mOrganizationPosition)
+   {
+      case TOP_LEFT_BOTTOM_LEFT:
+         ftTopLeft = ftOrganization;
+         ftBottomLeft = ftOrganization;
+         break;
+
+      case TOP_LEFT_BOTTOM_RIGHT:
+         ftTopLeft = ftOrganization;
+         ftBottomRight = ftOrganization;
+         break;
+
+      case TOP_RIGHT_BOTTOM_LEFT:
+         ftTopRight = ftOrganization;
+         ftBottomLeft = ftOrganization;
+         break;
+
+      case TOP_RIGHT_BOTTOM_RIGHT:
+         ftTopRight = ftOrganization;
+         ftBottomRight = ftOrganization;
+         break;
+
+      case CENTER:
+         ftTopCenter = ftOrganization;
+         ftBottomCenter = ftOrganization;
+         break;
+
+      default:
+         break;
+   }
+
+   switch (getClassificationPosition())
+   {
+      case TOP_LEFT_BOTTOM_LEFT:
+         ftTopLeft = ftClassification;
+         ftBottomLeft = ftClassification;
+         break;
+
+      case TOP_LEFT_BOTTOM_RIGHT:
+         ftTopLeft = ftClassification;
+         ftBottomRight = ftClassification;
+         break;
+
+      case TOP_RIGHT_BOTTOM_LEFT:
+         ftTopRight = ftClassification;
+         ftBottomLeft = ftClassification;
+         break;
+
+      case TOP_RIGHT_BOTTOM_RIGHT:
+         ftTopRight = ftClassification;
+         ftBottomRight = ftClassification;
+         break;
+
+      case CENTER:
+         ftTopCenter = ftClassification;
+         ftBottomCenter = ftClassification;
+         break;
+
+      default:
+         break;
+   }
+
+   mpTopLeftLabel->setFont(ftTopLeft);
+   mpTopCenterLabel->setFont(ftTopCenter);
+   mpTopRightLabel->setFont(ftTopRight);
+   mpBottomLeftLabel->setFont(ftBottomLeft);
+   mpBottomCenterLabel->setFont(ftBottomCenter);
+   mpBottomRightLabel->setFont(ftBottomRight);
+
+   mClassificationFont = ftClassification;
+   mOrganizationFont = ftOrganization;
+   notify(SIGNAL_NAME(Subject, Modified));
+}
+
+void PlotWidgetImp::setLabelColor(const QColor& clrClassification, const QColor& clrOrganization)
+{
+   QColor clrTopLeft;
+   QColor clrTopCenter;
+   QColor clrTopRight;
+   QColor clrBottomLeft;
+   QColor clrBottomCenter;
+   QColor clrBottomRight;
+
+   // Set the organization color first so that the classification color takes precedence
+   switch (mOrganizationPosition)
+   {
+      case TOP_LEFT_BOTTOM_LEFT:
+         clrTopLeft = clrOrganization;
+         clrBottomLeft = clrOrganization;
+         break;
+
+      case TOP_LEFT_BOTTOM_RIGHT:
+         clrTopLeft = clrOrganization;
+         clrBottomRight = clrOrganization;
+         break;
+
+      case TOP_RIGHT_BOTTOM_LEFT:
+         clrTopRight = clrOrganization;
+         clrBottomLeft = clrOrganization;
+         break;
+
+      case TOP_RIGHT_BOTTOM_RIGHT:
+         clrTopRight = clrOrganization;
+         clrBottomRight = clrOrganization;
+         break;
+
+      case CENTER:
+         clrTopCenter = clrOrganization;
+         clrBottomCenter = clrOrganization;
+         break;
+
+      default:
+         break;
+   }
+
+   switch (getClassificationPosition())
+   {
+      case TOP_LEFT_BOTTOM_LEFT:
+         clrTopLeft = clrClassification;
+         clrBottomLeft = clrClassification;
+         break;
+
+      case TOP_LEFT_BOTTOM_RIGHT:
+         clrTopLeft = clrClassification;
+         clrBottomRight = clrClassification;
+         break;
+
+      case TOP_RIGHT_BOTTOM_LEFT:
+         clrTopRight = clrClassification;
+         clrBottomLeft = clrClassification;
+         break;
+
+      case TOP_RIGHT_BOTTOM_RIGHT:
+         clrTopRight = clrClassification;
+         clrBottomRight = clrClassification;
+         break;
+
+      case CENTER:
+         clrTopCenter = clrClassification;
+         clrBottomCenter = clrClassification;
+         break;
+
+      default:
+         break;
+   }
+
+   QPalette topLeftPalette = mpTopLeftLabel->palette();
+   topLeftPalette.setColor(QPalette::WindowText, clrTopLeft);
+   mpTopLeftLabel->setPalette(topLeftPalette);
+
+   QPalette topCenterPalette = mpTopCenterLabel->palette();
+   topCenterPalette.setColor(QPalette::WindowText, clrTopCenter);
+   mpTopCenterLabel->setPalette(topCenterPalette);
+
+   QPalette topRightPalette = mpTopRightLabel->palette();
+   topRightPalette.setColor(QPalette::WindowText, clrTopRight);
+   mpTopRightLabel->setPalette(topRightPalette);
+
+   QPalette bottomLeftPalette = mpBottomLeftLabel->palette();
+   bottomLeftPalette.setColor(QPalette::WindowText, clrBottomLeft);
+   mpBottomLeftLabel->setPalette(bottomLeftPalette);
+
+   QPalette bottomCenterPalette = mpBottomCenterLabel->palette();
+   bottomCenterPalette.setColor(QPalette::WindowText, clrBottomCenter);
+   mpBottomCenterLabel->setPalette(bottomCenterPalette);
+
+   QPalette bottomRightPalette = mpBottomRightLabel->palette();
+   bottomRightPalette.setColor(QPalette::WindowText, clrBottomRight);
+   mpBottomRightLabel->setPalette(bottomRightPalette);
+
+   mClassificationColor = clrClassification;
+   mOrganizationColor = clrOrganization;
+   notify(SIGNAL_NAME(Subject, Modified));
+}
+
+bool PlotWidgetImp::serialize(SessionItemSerializer &serializer) const
+{
+   XMLWriter xml(getObjectType().c_str());
+
+   if (!toXml(&xml))
+   {
+      return false;
+   }
+
+   serializer.serialize(xml);
+   return true;
+}
+
+bool PlotWidgetImp::deserialize(SessionItemDeserializer &deserializer)
+{
+   XmlReader xml(NULL, false);
+   DOMNode* pRoot = deserializer.deserialize(xml, getObjectType().c_str());
+   return fromXml(pRoot, XmlBase::VERSION);
+}
+
+bool PlotWidgetImp::toXml(XMLWriter* pXml) const
+{
+   pXml->addAttr("name", getName());
+   pXml->addAttr("displayName", getDisplayName());
+   pXml->addAttr("displayText", getDisplayText());
+   pXml->addAttr("title", getTitle().toStdString());
+   pXml->addAttr("type", getObjectType());
+   pXml->addAttr("legendShown", isLegendShown());
+   pXml->addAttr("organizationPosition", mOrganizationPosition);
+
+   if (mpPlotSet != NULL)
+   {
+      pXml->addAttr("plotSetId", mpPlotSet->getId());
+   }
+   if (mpPlot != NULL)
+   {
+      pXml->addAttr("plotViewId", mpPlot->getId());
+   }
+
+   if (mpAnnotationToolBar != NULL)
+   {
+      pXml->addAttr("AnnotationToolbarId", mpAnnotationToolBar->getId());
+   }
+
+   pXml->pushAddPoint(pXml->addElement("TitleFont"));
+   if (!mTitleFont.toXml(pXml))
+   {
+      return false;
+   }
+   pXml->popAddPoint();
+
+   pXml->pushAddPoint(pXml->addElement("ClassificationFont"));
+   if (!mClassificationFont.toXml(pXml))
+   {
+      return false;
+   }
+   pXml->popAddPoint();
+
+   pXml->pushAddPoint(pXml->addElement("OrganizationFont"));
+   if (!mOrganizationFont.toXml(pXml))
+   {
+      return false;
+   }
+   pXml->popAddPoint();
+
+   if (mpXAxis != NULL)
+   {
+      pXml->pushAddPoint(pXml->addElement("Xaxis"));
+      if (!mpXAxis->toXml(pXml))
+      {
+         return false;
+      }
+      pXml->popAddPoint();
+   }
+   if (mpYAxis != NULL)
+   {
+      pXml->pushAddPoint(pXml->addElement("Yaxis"));
+      if (!mpYAxis->toXml(pXml))
+      {
+         return false;
+      }
+      pXml->popAddPoint();
+   }
+
+   return true;
+}
+
+bool PlotWidgetImp::fromXml(DOMNode* pDocument, unsigned int version)
+{
+   if (pDocument == NULL)
+   {
+      return false;
+   }
+
+   DOMElement* pElem = static_cast<DOMElement*>(pDocument);
+
+   // Initialize the child widgets based on the plot view before deserializing other attributes
+   // so that all widgets will be created before their values are set to the deserialized values
+   PlotViewImp* pPlotView = dynamic_cast<PlotViewImp*>(
+      SessionManagerImp::instance()->getSessionItem(A(pElem->getAttribute(X("plotViewId")))));
+   if (pPlotView != NULL)
+   {
+      initialize(pPlotView, "", PlotType());
+   }
+
+   PlotSet* pPlotSet = dynamic_cast<PlotSet*>(
+      SessionManagerImp::instance()->getSessionItem(A(pElem->getAttribute(X("plotSetId")))));
+   if (pPlotSet != NULL)
+   {
+      mpPlotSet = pPlotSet;
+   }
+
+   setName(A(pElem->getAttribute(X("name"))));
+   setDisplayName(A(pElem->getAttribute(X("displayName"))));
+   setDisplayText(A(pElem->getAttribute(X("displayText"))));
+   setTitle(QString::fromStdString(A(pElem->getAttribute(X("title")))));
+   showLegend(StringUtilities::fromXmlString<bool>(A(pElem->getAttribute(X("legendShown")))));
+
+   setOrganizationPosition(StringUtilities::fromXmlString<PositionType>(
+      A(pElem->getAttribute(X("organizationPosition")))));
+
+   for (DOMNode* pChld = pDocument->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
+   {
+      if (XMLString::equals(pChld->getNodeName(), X("TitleFont")))
+      {
+         if (!mTitleFont.fromXml(pChld, version))
+         {
+            return false;
+         }
+      }
+      else if (XMLString::equals(pChld->getNodeName(), X("ClassificationFont")))
+      {
+         if (!mClassificationFont.fromXml(pChld, version))
+         {
+            return false;
+         }
+      }
+      else if (XMLString::equals(pChld->getNodeName(), X("OrganizationFont")))
+      {
+         if (!mOrganizationFont.fromXml(pChld, version))
+         {
+            return false;
+         }
+      }
+      else if (XMLString::equals(pChld->getNodeName(), X("Xaxis")))
+      {
+         if (!mpXAxis->fromXml(pChld, version))
+         {
+            return false;
+         }
+      }
+      else if (XMLString::equals(pChld->getNodeName(), X("Yaxis")))
+      {
+         if (!mpYAxis->fromXml(pChld, version))
+         {
+            return false;
+         }
+      }
+   }
+
+   if ((mpAnnotationToolBar->getAnnotationLayer() != NULL) && (mpAnnotationToolBar->isEnabled() == false))
+   {
+      mpAnnotationToolBar->setEnabled(true);
+   }
+
+   return true;
+}
+
+bool PlotWidgetImp::canRename() const
+{
+   return mpPlot->canRename();
+}
+
+bool PlotWidgetImp::rename(const string &newName, string &errorMessage)
+{
+   PlotSet* pPlotSet = getPlotSet();
+   if (pPlotSet == NULL)
+   {
+      return SessionItemImp::rename(newName, errorMessage);
+   }
+   return pPlotSet->renamePlot(dynamic_cast<PlotWidget*>(this), newName);
+}
+
+QSplitter* PlotWidgetImp::getSplitter()
+{
+   return mpSplitter;
+}
+
+void PlotWidgetImp::selectPlotObject(PlotObject* pObject, bool bSelect)
+{
+   mpPlot->selectObject(pObject, bSelect);
+   mpPlot->repaint();
+}
