@@ -472,6 +472,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
          <ComponentRef Id="C__Help_tablestyles" />
          <ComponentRef Id="C__Help_export_data_options" />
          <ComponentRef Id="C__Help_layers" />
+         <ComponentRef Id="C__Help_bad_values" />
          <ComponentRef Id="C__Help_images1" />
          <ComponentRef Id="C__Help_items" />
          <ComponentRef Id="C__Help_annotation" />
