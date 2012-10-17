@@ -279,8 +279,12 @@ DimensionDescriptor RasterDataDescriptorImp::getOnDiskRow(unsigned int onDiskNum
 
 DimensionDescriptor RasterDataDescriptorImp::getActiveRow(unsigned int activeNumber) const
 {
-   VERIFYRV(activeNumber < mRows.size(), DimensionDescriptor());
-   return mRows[activeNumber];
+   if (activeNumber < mRows.size())
+   {
+      return mRows[activeNumber];
+   }
+
+   return DimensionDescriptor();
 }
 
 unsigned int RasterDataDescriptorImp::getRowCount() const
@@ -391,8 +395,12 @@ DimensionDescriptor RasterDataDescriptorImp::getOnDiskColumn(unsigned int onDisk
 
 DimensionDescriptor RasterDataDescriptorImp::getActiveColumn(unsigned int activeNumber) const
 {
-   VERIFYRV(activeNumber < mColumns.size(), DimensionDescriptor());
-   return mColumns[activeNumber];
+   if (activeNumber < mColumns.size())
+   {
+      return mColumns[activeNumber];
+   }
+
+   return DimensionDescriptor();
 }
 
 unsigned int RasterDataDescriptorImp::getColumnCount() const
@@ -488,8 +496,12 @@ DimensionDescriptor RasterDataDescriptorImp::getOnDiskBand(unsigned int onDiskNu
 
 DimensionDescriptor RasterDataDescriptorImp::getActiveBand(unsigned int activeNumber) const
 {
-   VERIFYRV(activeNumber < mBands.size(), DimensionDescriptor());
-   return mBands[activeNumber];
+   if (activeNumber < mBands.size())
+   {
+      return mBands[activeNumber];
+   }
+
+   return DimensionDescriptor();
 }
 
 unsigned int RasterDataDescriptorImp::getBandCount() const
