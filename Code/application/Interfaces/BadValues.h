@@ -35,7 +35,7 @@
 class BadValues : public Serializable, public Subject
 {
 public:
-   SETTING(Tolerance, BadValues, std::string, "0.0000001")
+   SETTING(Tolerance, BadValues, std::string, "0.000001")
 
    /**
     *  Adds a range of bad data values.

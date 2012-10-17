@@ -634,11 +634,7 @@ void BadValuesImp::generateAdjustedValues()
    }
 
    generateBadValuesString();
-
-   if (mBadValuesAsString != previousBadValuesStr)
-   {
-      notify(SIGNAL_NAME(Subject, Modified));
-   }
+   notify(SIGNAL_NAME(Subject, Modified));
 }
 
 const std::string& BadValuesImp::getObjectType() const

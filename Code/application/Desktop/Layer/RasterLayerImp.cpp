@@ -239,26 +239,26 @@ bool RasterLayerImp::isKindOf(const string& className) const
 
 void RasterLayerImp::elementModifiedGray(Subject& subject, const string& signal, const boost::any& v)
 {
-   elementModified(subject, signal, v);
    setImageChanged(true);
+   elementModified(subject, signal, v);
 }
 
 void RasterLayerImp::elementModifiedRed(Subject& subject, const string& signal, const boost::any& v)
 {
-   elementModified(subject, signal, v);
    setImageChanged(true);
+   elementModified(subject, signal, v);
 }
 
 void RasterLayerImp::elementModifiedGreen(Subject& subject, const string& signal, const boost::any& v)
 {
-   elementModified(subject, signal, v);
    setImageChanged(true);
+   elementModified(subject, signal, v);
 }
 
 void RasterLayerImp::elementModifiedBlue(Subject& subject, const string& signal, const boost::any& v)
 {
-   elementModified(subject, signal, v);
    setImageChanged(true);
+   elementModified(subject, signal, v);
 }
 
 void RasterLayerImp::elementDeletedGray(Subject& subject, const string& signal, const boost::any& data)

@@ -1359,10 +1359,6 @@ void DataDescriptorWidget::descriptorItemChanged(QTreeWidgetItem* pItem, int iCo
       return;
    }
 
-   RasterFileDescriptor* pRasterFileDescriptor =
-      dynamic_cast<RasterFileDescriptor*>(pRasterDescriptor->getFileDescriptor());
-   VERIFYNRV(pRasterFileDescriptor != NULL);
-
    Units* pUnits = pRasterDescriptor->getUnits();
    if ((pUnits != NULL) && (itemValue.isEmpty() == false))
    {
@@ -1424,6 +1420,9 @@ void DataDescriptorWidget::descriptorItemChanged(QTreeWidgetItem* pItem, int iCo
    {
       return;
    }
+
+   RasterFileDescriptor* pRasterFileDescriptor =
+      dynamic_cast<RasterFileDescriptor*>(pRasterDescriptor->getFileDescriptor());
 
    if ((itemName == "X Pixel Size") || (itemName == "Y Pixel Size"))
    {
@@ -1497,7 +1496,11 @@ void DataDescriptorWidget::descriptorItemChanged(QTreeWidgetItem* pItem, int iCo
          grayBand = pRasterDescriptor->getOriginalBand(itemValue.toUInt() - 1);
          if (grayBand.isValid() == false)
          {
-            grayBand = pRasterFileDescriptor->getOriginalBand(itemValue.toUInt() - 1);
+            if (pRasterFileDescriptor != NULL)
+            {
+               grayBand = pRasterFileDescriptor->getOriginalBand(itemValue.toUInt() - 1);
+            }
+
             if (grayBand.isValid() == false)
             {
                if (QMessageBox::warning(this, APP_NAME, "The gray display band does not exist!  "
@@ -1527,7 +1530,11 @@ void DataDescriptorWidget::descriptorItemChanged(QTreeWidgetItem* pItem, int iCo
          redBand = pRasterDescriptor->getOriginalBand(itemValue.toUInt() - 1);
          if (redBand.isValid() == false)
          {
-            redBand = pRasterFileDescriptor->getOriginalBand(itemValue.toUInt() - 1);
+            if (pRasterFileDescriptor != NULL)
+            {
+               redBand = pRasterFileDescriptor->getOriginalBand(itemValue.toUInt() - 1);
+            }
+
             if (redBand.isValid() == false)
             {
                if (QMessageBox::warning(this, APP_NAME, "The red display band does not exist!  "
@@ -1557,7 +1564,11 @@ void DataDescriptorWidget::descriptorItemChanged(QTreeWidgetItem* pItem, int iCo
          greenBand = pRasterDescriptor->getOriginalBand(itemValue.toUInt() - 1);
          if (greenBand.isValid() == false)
          {
-            greenBand = pRasterFileDescriptor->getOriginalBand(itemValue.toUInt() - 1);
+            if (pRasterFileDescriptor != NULL)
+            {
+               greenBand = pRasterFileDescriptor->getOriginalBand(itemValue.toUInt() - 1);
+            }
+
             if (greenBand.isValid() == false)
             {
                if (QMessageBox::warning(this, APP_NAME, "The green display band does not exist!  "
@@ -1587,7 +1598,11 @@ void DataDescriptorWidget::descriptorItemChanged(QTreeWidgetItem* pItem, int iCo
          blueBand = pRasterDescriptor->getOriginalBand(itemValue.toUInt() - 1);
          if (blueBand.isValid() == false)
          {
-            blueBand = pRasterFileDescriptor->getOriginalBand(itemValue.toUInt() - 1);
+            if (pRasterFileDescriptor != NULL)
+            {
+               blueBand = pRasterFileDescriptor->getOriginalBand(itemValue.toUInt() - 1);
+            }
+
             if (blueBand.isValid() == false)
             {
                if (QMessageBox::warning(this, APP_NAME, "The blue display band does not exist!  "
