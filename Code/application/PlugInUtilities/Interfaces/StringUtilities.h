@@ -189,8 +189,9 @@ namespace StringUtilities
     *        if there was an error while converting the value into
     *        a string, and false if the conversion was successful.
     *
-    * @return Returns the string representation of the given value. If there
-    *         was an error, an empty string will be returned.
+    * @return Returns the string representation of the given value.  The return
+    *         value is independent of whether an error occurred.  Check the
+    *         value of \em pError to determine whether an error occured.
     */
    template<typename T>
    std::string toXmlString(const T& value, bool* pError = NULL);
@@ -234,8 +235,9 @@ namespace StringUtilities
     *        if there was an error while converting the value into
     *        a string, and false if the conversion was successful.
     *
-    * @return Returns the string representation of the given value. If there
-    *         was an error, an empty string will be returned.
+    * @return Returns the string representation of the given value.  The return
+    *         value is independent of whether an error occurred.  Check the
+    *         value of \em pError to determine whether an error occured.
     */
    template<typename T>
    std::string toDisplayString(const T& value, bool* pError = NULL);

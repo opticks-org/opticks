@@ -172,7 +172,7 @@ std::string toDisplayString(const eName__& val, bool* pError)\
    }\
    if (pError != NULL)\
    {\
-      *pError = true;\
+      *pError = val.isValid();\
    }\
    return "";\
 }\
@@ -206,7 +206,7 @@ std::string toXmlString(const eName__& val, bool* pError)\
    }\
    if (pError != NULL)\
    {\
-      *pError = true;\
+      *pError = val.isValid();\
    }\
    return "";\
 }\
@@ -240,7 +240,7 @@ eName__ fromDisplayString<eName__>(std::string value, bool* pError)\
    }\
    if (pError != NULL)\
    {\
-      *pError = true;\
+      *pError = !value.empty();\
    }\
    return eName__();\
 }\
@@ -269,7 +269,7 @@ eName__ fromXmlString<eName__>(std::string value, bool* pError)\
    }\
    if (pError != NULL)\
    {\
-      *pError = true;\
+      *pError = !value.empty();\
    }\
    return eName__();\
 }\

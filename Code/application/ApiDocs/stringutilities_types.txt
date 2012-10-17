@@ -1,6 +1,7 @@
 /** \page stringutilities_types Supported StringUtilities Types
- * StringUtilities supports using the following types with StringUtilities::toDisplayString(),
- * StringUtilities::toXmlString(), StringUtilities::fromDisplayString() and StringUtilities::fromXmlString():
+ * StringUtilities supports using the types listed below with StringUtilities::toDisplayString(),
+ * StringUtilities::toXmlString(), StringUtilities::fromDisplayString() and StringUtilities::fromXmlString().
+ * For the enumerated types, an invalid enum is successfully converted to an empty string and vice versa.
  * - Enum Types
  *   - #AnimationCycle
  *   - #AnimationState
