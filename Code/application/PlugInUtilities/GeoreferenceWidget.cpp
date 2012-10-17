@@ -287,24 +287,23 @@ QListWidgetItem* GeoreferenceWidget::addPlugInItem(const std::string& plugInName
    if (pGeoreference != NULL)
    {
       unsigned char affinity = pGeoreference->getGeoreferenceAffinity(mpDescriptor);
-      if (affinity > Georeference::CAN_NOT_GEOREFERENCE)
+      VERIFYRV(affinity > Georeference::CAN_NOT_GEOREFERENCE, NULL);
+
+      QListWidgetItem* pItem = new QListWidgetItem(QString::fromStdString(plugInName), mpPlugInList);
+      pItem->setData(PlugInRole, QVariant::fromValue(pPlugIn.release()));
+
+      QWidget* pWidget = pGeoreference->getWidget(mpDescriptor);
+      if (pWidget != NULL)
       {
-         QListWidgetItem* pItem = new QListWidgetItem(QString::fromStdString(plugInName), mpPlugInList);
-         pItem->setData(PlugInRole, QVariant::fromValue(pPlugIn.release()));
-
-         QWidget* pWidget = pGeoreference->getWidget(mpDescriptor);
-         if (pWidget != NULL)
-         {
-            pItem->setData(WidgetRole, QVariant::fromValue(pWidget));
-            mpPlugInStack->addWidget(pWidget);
-         }
-         else
-         {
-            pItem->setData(WidgetRole, QVariant());
-         }
-
-         return pItem;
+         pItem->setData(WidgetRole, QVariant::fromValue(pWidget));
+         mpPlugInStack->addWidget(pWidget);
       }
+      else
+      {
+         pItem->setData(WidgetRole, QVariant());
+      }
+
+      return pItem;
    }
 
    return NULL;
@@ -360,17 +359,13 @@ void GeoreferenceWidget::updatePlugInItems()
    }
 
    // Update the list of available plug-ins that support the given data set
-   const GeoreferenceDescriptor* pGeorefDescriptor = mpDescriptor->getGeoreferenceDescriptor();
-   if (pGeorefDescriptor != NULL)
+   const std::vector<std::string>& plugIns = mpDescriptor->getValidGeoreferencePlugIns();
+   for (std::vector<std::string>::const_iterator iter = plugIns.begin(); iter != plugIns.end(); ++iter)
    {
-      const std::vector<std::string>& plugIns = pGeorefDescriptor->getValidGeoreferencePlugIns();
-      for (std::vector<std::string>::const_iterator iter = plugIns.begin(); iter != plugIns.end(); ++iter)
+      std::string plugInName = *iter;
+      if (plugInName.empty() == false)
       {
-         std::string plugInName = *iter;
-         if (plugInName.empty() == false)
-         {
-            addPlugInItem(plugInName);
-         }
+         addPlugInItem(plugInName);
       }
    }
 }

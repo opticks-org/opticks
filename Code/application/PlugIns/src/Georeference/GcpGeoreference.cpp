@@ -385,6 +385,10 @@ unsigned char GcpGeoreference::getGeoreferenceAffinity(const RasterDataDescripto
       return Georeference::CAN_NOT_GEOREFERENCE;
    }
 
+   // Define a return value that allows custom georeference plug-ins to automatically
+   // georeference with a lower affinity than GCP Georeference
+   const unsigned char CAN_GEOREFERENCE_WITH_GCP = Georeference::CAN_GEOREFERENCE + 10;
+
    // Check if the raster data is already loaded in the data model
    RasterElement* pRaster = dynamic_cast<RasterElement*>(mpDataModel->getElement(pDescriptor));
    if (pRaster != NULL)
@@ -393,7 +397,7 @@ unsigned char GcpGeoreference::getGeoreferenceAffinity(const RasterDataDescripto
       vector<string> elementNames = mpDataModel->getElementNames(pRaster, TypeConverter::toString<GcpList>());
       if (elementNames.empty() == false)
       {
-         return Georeference::CAN_GEOREFERENCE;
+         return CAN_GEOREFERENCE_WITH_GCP;
       }
    }
    else
@@ -406,12 +410,12 @@ unsigned char GcpGeoreference::getGeoreferenceAffinity(const RasterDataDescripto
          const list<GcpPoint>& gcps = pFileDescriptor->getGcps();
          if (gcps.empty() == false)
          {
-            return Georeference::CAN_GEOREFERENCE;
+            return CAN_GEOREFERENCE_WITH_GCP;
          }
       }
    }
 
-   return CAN_NOT_GEOREFERENCE;
+   return Georeference::CAN_NOT_GEOREFERENCE;
 }
 
 QWidget* GcpGeoreference::getWidget(RasterDataDescriptor* pDescriptor)

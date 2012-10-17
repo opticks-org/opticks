@@ -12,6 +12,7 @@
 
 #include "DataDescriptor.h"
 #include "DimensionDescriptor.h"
+#include "Georeference.h"
 #include "TypesFile.h"
 
 #include <vector>
@@ -694,25 +695,49 @@ public:
    virtual const GeoreferenceDescriptor* getGeoreferenceDescriptor() const = 0;
 
    /**
+    *  Returns the Georeference plug-ins that are available for the user to
+    *  select when georeferencing the raster data.
+    *
+    *  This method iterates over all Georeference plug-ins calling
+    *  Georeference::getGeoreferenceAffinity() to determine whether the plug-in
+    *  supports georeferencing this raster data.  The georeference affinity from
+    *  each plug-in is then compared with the given minimum affinity value to
+    *  determine whether the plug-in is considered valid.
+    *
+    *  @param   minimumAffinity
+    *           The minimum affinity value that indicates whether a Georeference
+    *           plug-in is considered valid.  This parameter is initialized to
+    *           return any Georeference plug-in that returns a value other than
+    *           Georeference::CAN_NOT_GEOREFERENCE from
+    *           Georeference::getGeoreferenceAffinity().
+    *
+    *  @return  Returns the names of the Georeference plug-ins that should be
+    *           displayed to the user when georeferencing the raster data.
+    *
+    *  @see     setDefaultGeoreferencePlugIn()
+    */
+   virtual std::vector<std::string> getValidGeoreferencePlugIns(unsigned char minimumAffinity =
+      Georeference::CAN_NOT_GEOREFERENCE + 1) const = 0;
+
+   /**
     *  Automatically determines and sets a default Georeference plug-in to
     *  georeference the raster data.
     *
     *  If GeoreferenceDescriptor::setGeoreferencePlugInName() has not been
     *  called by the time the raster data is validated in the import process,
     *  this method is called automatically to set a Georeference plug-in into
-    *  the georeference descriptor based on the valid georeference plug-ins set
-    *  in the georeference descriptor.
+    *  the georeference descriptor based on the valid georeference plug-ins.
     *
-    *  This method calls GeoreferenceDescriptor::getValidGeoreferencePlugIns()
-    *  and iterates over the returned plug-ins, setting the plug-in that returns
-    *  the highest value from Georeference::getGeoreferenceAffinity().  If
+    *  This method iterates over all Georeference plug-ins, setting the plug-in
+    *  that returns the highest value from
+    *  Georeference::getGeoreferenceAffinity() that is at least
+    *  Georeference::CAN_GEOREFERENCE into the georeference descriptor.  If
     *  multiple Georeference plug-ins return the same affinity value and that
-    *  value is higher than all other affinity values, then the plug-in that
-    *  appears first in the vector of valid georeference plug-ins is set into
-    *  the georeference descriptor.
+    *  value is higher than all other affinity values, then the first plug-in
+    *  that returned the value is set into the georeference descriptor.
     *
-    *  @see     Importer::validate(), Georeference::validate(),
-    *           GeoreferenceDescriptor::getValidGeoreferencePlugIns()
+    *  @see     Importer::validate()<br>Georeference::validate()<br>
+    *           getValidGeoreferencePlugIns()
     */
    virtual void setDefaultGeoreferencePlugIn() = 0;
 

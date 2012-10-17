@@ -10,6 +10,7 @@
 #include "DataAccessorImpl.h"
 #include "DataRequest.h"
 #include "DynamicObject.h"
+#include "GeoreferenceDescriptor.h"
 #include "ImportDescriptor.h"
 #include "Importer.h"
 #include "ModelServices.h"
@@ -271,6 +272,13 @@ bool SignatureLibraryImp::import(const string &filename, const string &importerN
 
    if (pCubeDescriptor != NULL)
    {
+      // Disable auto-georeference
+      GeoreferenceDescriptor* pGeorefDescriptor = pCubeDescriptor->getGeoreferenceDescriptor();
+      if (pGeorefDescriptor != NULL)
+      {
+         pGeorefDescriptor->setGeoreferenceOnImport(false);
+      }
+
       pCubeDescriptor->setProcessingLocation(ON_DISK);
       bool cubeSuccess = importer->execute();
       if (cubeSuccess)

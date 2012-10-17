@@ -14,7 +14,6 @@
 #include "TypesFile.h"
 
 #include <string>
-#include <vector>
 
 class DynamicObject;
 class GeoreferenceDescriptor;
@@ -29,10 +28,6 @@ public:
    virtual bool getGeoreferenceOnImport() const;
    virtual void setGeoreferencePlugInName(const std::string& plugInName);
    virtual const std::string& getGeoreferencePlugInName() const;
-   virtual void setValidGeoreferencePlugIns(const std::vector<std::string>& plugInNames);
-   virtual bool isValidGeoreferencePlugIn(const std::string& plugInName) const;
-   virtual const std::vector<std::string>& getValidGeoreferencePlugIns() const;
-   virtual void resetValidGeoreferencePlugIns();
    virtual void setCreateLayer(bool createLayer);
    virtual bool getCreateLayer() const;
    virtual void setLayerName(const std::string& layerName);
@@ -55,7 +50,6 @@ public:
 private:
    bool mGeoreferenceOnImport;
    std::string mPlugInName;
-   std::vector<std::string> mValidPlugIns;
    bool mCreateLayer;
    std::string mLayerName;
    bool mDisplayLayer;
@@ -83,22 +77,6 @@ private:
    const std::string& getGeoreferencePlugInName() const \
    { \
       return impClass::getGeoreferencePlugInName(); \
-   } \
-   void setValidGeoreferencePlugIns(const std::vector<std::string>& plugInNames) \
-   { \
-      impClass::setValidGeoreferencePlugIns(plugInNames); \
-   } \
-   bool isValidGeoreferencePlugIn(const std::string& plugInName) const \
-   { \
-      return impClass::isValidGeoreferencePlugIn(plugInName); \
-   } \
-   const std::vector<std::string>& getValidGeoreferencePlugIns() const \
-   { \
-      return impClass::getValidGeoreferencePlugIns(); \
-   } \
-   void resetValidGeoreferencePlugIns() \
-   { \
-      impClass::resetValidGeoreferencePlugIns(); \
    } \
    void setCreateLayer(bool createLayer) \
    { \

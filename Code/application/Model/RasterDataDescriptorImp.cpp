@@ -8,7 +8,6 @@
  */
 
 #include "AppVerify.h"
-#include "Georeference.h"
 #include "ObjectResource.h"
 #include "PlugIn.h"
 #include "PlugInDescriptor.h"
@@ -574,28 +573,66 @@ const GeoreferenceDescriptor* RasterDataDescriptorImp::getGeoreferenceDescriptor
    return &mGeorefDescriptor;
 }
 
+vector<string> RasterDataDescriptorImp::getValidGeoreferencePlugIns(unsigned char minimumAffinity) const
+{
+   vector<string> georeferencePlugIns;
+
+   vector<PlugInDescriptor*> plugIns =
+      Service<PlugInManagerServices>()->getPlugInDescriptors(PlugInManagerServices::GeoreferenceType());
+   for (vector<PlugInDescriptor*>::const_iterator iter = plugIns.begin(); iter != plugIns.end(); ++iter)
+   {
+      PlugInDescriptor* pPlugInDescriptor = *iter;
+      if (pPlugInDescriptor != NULL)
+      {
+         const string& plugInName = pPlugInDescriptor->getName();
+         if (plugInName.empty() == false)
+         {
+            PlugInResource pPlugIn(plugInName);
+
+            Georeference* pGeoreference = dynamic_cast<Georeference*>(pPlugIn.get());
+            if (pGeoreference != NULL)
+            {
+               unsigned char affinity =
+                  pGeoreference->getGeoreferenceAffinity(dynamic_cast<const RasterDataDescriptor*>(this));
+               if (affinity >= minimumAffinity)
+               {
+                  georeferencePlugIns.push_back(plugInName);
+               }
+            }
+         }
+      }
+   }
+
+   return georeferencePlugIns;
+}
+
 void RasterDataDescriptorImp::setDefaultGeoreferencePlugIn()
 {
    string plugInName;
-   unsigned char plugInAffinity = Georeference::CAN_NOT_GEOREFERENCE;
+   unsigned char plugInAffinity = Georeference::CAN_GEOREFERENCE - 1;
 
-   const vector<string>& plugIns = mGeorefDescriptor.getValidGeoreferencePlugIns();
-   for (vector<string>::const_iterator iter = plugIns.begin(); iter != plugIns.end(); ++iter)
+   vector<PlugInDescriptor*> plugIns =
+      Service<PlugInManagerServices>()->getPlugInDescriptors(PlugInManagerServices::GeoreferenceType());
+   for (vector<PlugInDescriptor*>::const_iterator iter = plugIns.begin(); iter != plugIns.end(); ++iter)
    {
-      string currentPlugInName = *iter;
-      if (currentPlugInName.empty() == false)
+      PlugInDescriptor* pPlugInDescriptor = *iter;
+      if (pPlugInDescriptor != NULL)
       {
-         PlugInResource pCurrentPlugIn(currentPlugInName);
-
-         Georeference* pGeoreference = dynamic_cast<Georeference*>(pCurrentPlugIn.get());
-         if (pGeoreference != NULL)
+         const string& currentPlugInName = pPlugInDescriptor->getName();
+         if (currentPlugInName.empty() == false)
          {
-            unsigned char currentPlugInAffinity =
-               pGeoreference->getGeoreferenceAffinity(dynamic_cast<RasterDataDescriptor*>(this));
-            if (currentPlugInAffinity > plugInAffinity)
+            PlugInResource pCurrentPlugIn(currentPlugInName);
+
+            Georeference* pGeoreference = dynamic_cast<Georeference*>(pCurrentPlugIn.get());
+            if (pGeoreference != NULL)
             {
-               plugInName = currentPlugInName;
-               plugInAffinity = currentPlugInAffinity;
+               unsigned char currentPlugInAffinity =
+                  pGeoreference->getGeoreferenceAffinity(dynamic_cast<RasterDataDescriptor*>(this));
+               if (currentPlugInAffinity > plugInAffinity)
+               {
+                  plugInName = currentPlugInName;
+                  plugInAffinity = currentPlugInAffinity;
+               }
             }
          }
       }
@@ -810,7 +847,6 @@ void RasterDataDescriptorImp::addToMessageLog(Message* pMessage) const
    // Georeference descriptor
    pMessage->addProperty("Georeference on Import", mGeorefDescriptor.getGeoreferenceOnImport());
    pMessage->addProperty("Georeference Plug-In", mGeorefDescriptor.getGeoreferencePlugInName());
-   pMessage->addProperty("Valid Georeference Plug-Ins", mGeorefDescriptor.getValidGeoreferencePlugIns());
    pMessage->addProperty("Create Layer", mGeorefDescriptor.getCreateLayer());
    pMessage->addProperty("Layer Name", mGeorefDescriptor.getLayerName());
    pMessage->addProperty("Display Layer", mGeorefDescriptor.getDisplayLayer());

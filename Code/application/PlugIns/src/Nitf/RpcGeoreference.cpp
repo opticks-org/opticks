@@ -420,7 +420,7 @@ unsigned char Nitf::RpcGeoreference::getGeoreferenceAffinity(const RasterDataDes
    {
       if (dv_cast<bool>(pRpc->getAttribute("SUCCESS"), false) == true)
       {
-         return Georeference::CAN_GEOREFERENCE + 10;   // Add additional value to favor RPC Georeference
+         return Georeference::CAN_GEOREFERENCE + 20;   // Add additional value to favor RPC Georeference
                                                        // over GCP Georeference
       }
    }

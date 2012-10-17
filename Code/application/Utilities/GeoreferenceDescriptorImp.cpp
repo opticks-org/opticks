@@ -15,7 +15,6 @@
 #include "SignalBlocker.h"
 #include "StringUtilities.h"
 
-#include <algorithm>
 XERCES_CPP_NAMESPACE_USE
 
 GeoreferenceDescriptorImp::GeoreferenceDescriptorImp() :
@@ -25,9 +24,7 @@ GeoreferenceDescriptorImp::GeoreferenceDescriptorImp() :
    mDisplayLayer(GeoreferenceDescriptor::getSettingDisplayLayer()),
    mGeocoordType(GeoreferenceDescriptor::getSettingGeocoordType()),
    mLatLonFormat(GeoreferenceDescriptor::getSettingLatLonFormat())
-{
-   resetValidGeoreferencePlugIns();
-}
+{}
 
 GeoreferenceDescriptorImp::~GeoreferenceDescriptorImp()
 {}
@@ -48,10 +45,14 @@ bool GeoreferenceDescriptorImp::getGeoreferenceOnImport() const
 
 void GeoreferenceDescriptorImp::setGeoreferencePlugInName(const std::string& plugInName)
 {
-   // Allow setting an empty string for the plug-in, so only check for a valid plug-in if the input name is not empty
-   if ((plugInName.empty() == false) && (isValidGeoreferencePlugIn(plugInName) == false))
+   // Ensure that the plug-in is a Georeference plug-in
+   if (plugInName.empty() == false)    // Allow setting an empty string for the plug-in
    {
-      return;
+      PlugInDescriptor* pPlugInDescriptor = Service<PlugInManagerServices>()->getPlugInDescriptor(plugInName);
+      if ((pPlugInDescriptor == NULL) || (pPlugInDescriptor->getType() != PlugInManagerServices::GeoreferenceType()))
+      {
+         return;
+      }
    }
 
    if (plugInName != mPlugInName)
@@ -64,69 +65,6 @@ void GeoreferenceDescriptorImp::setGeoreferencePlugInName(const std::string& plu
 const std::string& GeoreferenceDescriptorImp::getGeoreferencePlugInName() const
 {
    return mPlugInName;
-}
-
-void GeoreferenceDescriptorImp::setValidGeoreferencePlugIns(const std::vector<std::string>& plugInNames)
-{
-   Service<PlugInManagerServices> pManager;
-
-   std::vector<std::string> georeferencePlugIns;
-   for (std::vector<std::string>::const_iterator iter = plugInNames.begin(); iter != plugInNames.end(); ++iter)
-   {
-      PlugInDescriptor* pPlugInDescriptor = pManager->getPlugInDescriptor(*iter);
-      if ((pPlugInDescriptor != NULL) && (pPlugInDescriptor->getType() == PlugInManagerServices::GeoreferenceType()))
-      {
-         georeferencePlugIns.push_back(*iter);
-      }
-   }
-
-   if (georeferencePlugIns != mValidPlugIns)
-   {
-      mValidPlugIns = georeferencePlugIns;
-      notify(SIGNAL_NAME(GeoreferenceDescriptor, ValidGeoreferencePlugInsChanged), boost::any(mValidPlugIns));
-   }
-}
-
-bool GeoreferenceDescriptorImp::isValidGeoreferencePlugIn(const std::string& plugInName) const
-{
-   if (plugInName.empty() == false)
-   {
-      std::vector<std::string>::const_iterator iter = std::find(mValidPlugIns.begin(), mValidPlugIns.end(), plugInName);
-      return (iter != mValidPlugIns.end());
-   }
-
-   return false;
-}
-
-const std::vector<std::string>& GeoreferenceDescriptorImp::getValidGeoreferencePlugIns() const
-{
-   return mValidPlugIns;
-}
-
-void GeoreferenceDescriptorImp::resetValidGeoreferencePlugIns()
-{
-   std::vector<std::string> plugInNames;
-
-   std::vector<PlugInDescriptor*> plugIns =
-      Service<PlugInManagerServices>()->getPlugInDescriptors(PlugInManagerServices::GeoreferenceType());
-   for (std::vector<PlugInDescriptor*>::const_iterator iter = plugIns.begin(); iter != plugIns.end(); ++iter)
-   {
-      PlugInDescriptor* pPlugInDescriptor = *iter;
-      if (pPlugInDescriptor != NULL)
-      {
-         const std::string& plugInName = pPlugInDescriptor->getName();
-         if (plugInName.empty() == false)
-         {
-            plugInNames.push_back(plugInName);
-         }
-      }
-   }
-
-   if (plugInNames != mValidPlugIns)
-   {
-      mValidPlugIns = plugInNames;
-      notify(SIGNAL_NAME(GeoreferenceDescriptor, ValidGeoreferencePlugInsChanged), boost::any(mValidPlugIns));
-   }
 }
 
 void GeoreferenceDescriptorImp::setCreateLayer(bool createLayer)
@@ -209,7 +147,6 @@ bool GeoreferenceDescriptorImp::compare(const DynamicObject* pObject) const
 
    if ((pGeorefDescriptor->getGeoreferenceOnImport() != mGeoreferenceOnImport) ||
       (pGeorefDescriptor->getGeoreferencePlugInName() != mPlugInName) ||
-      (pGeorefDescriptor->getValidGeoreferencePlugIns() != mValidPlugIns) ||
       (pGeorefDescriptor->getCreateLayer() != mCreateLayer) ||
       (pGeorefDescriptor->getLayerName() != mLayerName) ||
       (pGeorefDescriptor->getDisplayLayer() != mDisplayLayer) ||
@@ -245,7 +182,6 @@ bool GeoreferenceDescriptorImp::clone(const GeoreferenceDescriptor* pGeorefDescr
 
       setGeoreferenceOnImport(pGeorefDescriptor->getGeoreferenceOnImport());
       setGeoreferencePlugInName(pGeorefDescriptor->getGeoreferencePlugInName());
-      setValidGeoreferencePlugIns(pGeorefDescriptor->getValidGeoreferencePlugIns());
       setCreateLayer(pGeorefDescriptor->getCreateLayer());
       setLayerName(pGeorefDescriptor->getLayerName());
       setDisplayLayer(pGeorefDescriptor->getDisplayLayer());
@@ -283,7 +219,6 @@ bool GeoreferenceDescriptorImp::toXml(XMLWriter* pXml) const
    {
       pXml->addAttr("georeferenceOnImport", mGeoreferenceOnImport);
       pXml->addAttr("plugInName", mPlugInName);
-      pXml->addAttr("validPlugIns", StringUtilities::toXmlString(mValidPlugIns));
       pXml->addAttr("createLayer", mCreateLayer);
       pXml->addAttr("layerName", mLayerName);
       pXml->addAttr("displayLayer", mDisplayLayer);
@@ -317,15 +252,6 @@ bool GeoreferenceDescriptorImp::fromXml(DOMNode* pDocument, unsigned int version
    }
 
    mPlugInName = A(pElement->getAttribute(X("plugInName")));
-
-   // Cannot call setValidGeoreferencePlugIns() here because when the MRU file list is deserialized on
-   // application startup, no plug-ins are available in PlugInManagerServices
-   mValidPlugIns = StringUtilities::fromXmlString<std::vector<std::string> >(
-      A(pElement->getAttribute(X("validPlugIns"))), &error);
-   if (error == true)
-   {
-      return false;
-   }
 
    mCreateLayer = StringUtilities::fromXmlString<bool>(A(pElement->getAttribute(X("createLayer"))), &error);
    if (error == true)

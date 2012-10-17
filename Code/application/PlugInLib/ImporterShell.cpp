@@ -30,6 +30,7 @@
 #include "Wavelengths.h"
 
 #include <sstream>
+#include <vector>
 using namespace std;
 
 ImporterShell::ImporterShell()
@@ -531,17 +532,37 @@ bool ImporterShell::validate(const DataDescriptor* pDescriptor, string& errorMes
       {
          if (pGeoreference == NULL)
          {
-            errorMessage = "The georeference plug-in is invalid.";
-            return false;
+            vector<string> georefPlugIns =
+               pRasterDescriptor->getValidGeoreferencePlugIns(Georeference::CAN_GEOREFERENCE);
+            if (georefPlugIns.empty() == true)
+            {
+               georefPlugIns = pRasterDescriptor->getValidGeoreferencePlugIns();
+               if (georefPlugIns.empty() == true)
+               {
+                  errorMessage = "No georeference plug-ins are able to georeference the raster data.  "
+                     "The data will not be georeferenced.";
+               }
+               else
+               {
+                  errorMessage = "No georeference plug-ins are able to georeference the raster data without "
+                     "additional input.  The data will not be georeferenced.";
+               }
+            }
+            else
+            {
+               errorMessage = "The georeference plug-in is invalid.";
+               mValidationError = VALID_GEOREFERENCE_PLUGIN;
+               return false;
+            }
          }
       }
 
       // Georeference parameters
       if ((validationTest & VALID_GEOREFERENCE_PARAMETERS) == VALID_GEOREFERENCE_PARAMETERS)
       {
-         VERIFY(pGeoreference != NULL);
-         if (pGeoreference->validate(pRasterDescriptor, errorMessage) == false)
+         if ((pGeoreference != NULL) && (pGeoreference->validate(pRasterDescriptor, errorMessage) == false))
          {
+            mValidationError = VALID_GEOREFERENCE_PARAMETERS;
             return false;
          }
       }

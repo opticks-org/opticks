@@ -15,7 +15,6 @@
 #include "TypesFile.h"
 
 #include <string>
-#include <vector>
 
 /**
  *  Algorithm parameters for performing georeference.
@@ -42,13 +41,12 @@
  *
  *  This subclass of Subject will notify upon the following conditions:
  *     - The following methods are called: setGeoreferenceOnImport(),
- *       setGeoreferencePlugInName(), setValidGeoreferencePlugIns(),
- *       resetValidGeoreferencePlugIns(), setCreateLayer(), setLayerName(),
+ *       setGeoreferencePlugInName(), setCreateLayer(), setLayerName(),
  *       setDisplayLayer(), setGeocoordType(), and setLatLonFormat().
  *     - Everything else documented in DynamicObject.
  *
- *  @see     DynamicObject, RasterDataDescriptor::setGeoreferenceDescriptor(),
- *           DynamicObject::setAttributeByPath()
+ *  @see     DynamicObject<br>RasterDataDescriptor::setGeoreferenceDescriptor()
+ *           <br>DynamicObject::setAttributeByPath()
  */
 class GeoreferenceDescriptor : public DynamicObject
 {
@@ -76,15 +74,6 @@ public:
     *  @see     setGeoreferencePlugInName()
     */
    SIGNAL_METHOD(GeoreferenceDescriptor, GeoreferencePlugInNameChanged)
-
-   /**
-    *  Emitted when the valid Georeference plug-ins change with
-    *  boost::any<std::vector<std::string> > containing the names of the
-    *  plug-ins that can perform the georeference.
-    *
-    *  @see     setValidGeoreferencePlugIns()
-    */
-   SIGNAL_METHOD(GeoreferenceDescriptor, ValidGeoreferencePlugInsChanged)
 
    /**
     *  Emitted when the create layer parameter changes with
@@ -170,14 +159,13 @@ public:
     *  @param   plugInName
     *           The name of the Georeference plug-in to use when georeferencing
     *           the data.  If \em plugInName is not empty and the plug-in is not
-    *           a valid Georeference plug-in as determined by
-    *           isValidGeoreferencePlugIn(), this method does nothing.
+    *           a Georeference plug-in, this method does nothing.
     *
     *  @notify  This method notifies signalGeoreferencePlugInNameChanged() when
     *           the plug-in name changes.
     *
-    *  @see     Importer::validate(), Georeference::validate(),
-    *           getValidGeoreferencePlugIns()
+    *  @see     Importer::validate()<br>Georeference::validate()<br>
+    *           RasterDataDescriptor::getValidGeoreferencePlugIns()
     */
    virtual void setGeoreferencePlugInName(const std::string& plugInName) = 0;
 
@@ -194,68 +182,6 @@ public:
     *  @see     setGeoreferencePlugInName()
     */
    virtual const std::string& getGeoreferencePlugInName() const = 0;
-
-   /**
-    *  Sets the Georeference plug-ins that can be selected by the user to
-    *  georeference the data.
-    *
-    *  Only valid Georeference plug-ins will be displayed to the user when
-    *  selecting a plug-in to perform georeference, either on import or after
-    *  import.  An importer may call this method to restrict the available
-    *  georeference plug-ins if the importer will perform the georeference
-    *  itself with a certain Georeference plug-in.
-    *
-    *  By default all Georeference plug-ins are valid.
-    *
-    *  @param   plugInNames
-    *           The name of the Georeference plug-ins to display to the user
-    *           when selecting a plug-in to georeference the data.  If a name
-    *           in the vector is empty or not a Georeference plug-in, it is
-    *           ignored.
-    *
-    *  @notify  This method notifies signalValidGeoreferencePlugInsChanged()
-    *           when the list of plug-ins changes.
-    *
-    *  @see     resetValidGeoreferencePlugIns()
-    */
-   virtual void setValidGeoreferencePlugIns(const std::vector<std::string>& plugInNames) = 0;
-
-   /**
-    *  Queries whether a Georeference plug-in is available to the user to
-    *  georeference the data.
-    *
-    *  @return  Returns \c true if the given Georeference plug-in name is
-    *           displayed to the user when selecting a plug-in to georeference
-    *           the data; otherwise returns \c false.
-    *
-    *  @see     setValidGeoreferencePlugIns()
-    */
-   virtual bool isValidGeoreferencePlugIn(const std::string& plugInName) const = 0;
-
-   /**
-    *  Returns the Georeference plug-ins that are available for the user to
-    *  select when georeferencing the data.
-    *
-    *  @return  Returns the names of the Georeference plug-ins that are
-    *           displayed to the user when georeferencing the data.
-    *
-    *  @see     setValidGeoreferencePlugIns()
-    */
-   virtual const std::vector<std::string>& getValidGeoreferencePlugIns() const = 0;
-
-   /**
-    *  Resets the Georeference plug-ins that can be selected by the user to
-    *  georeference the data.
-    *
-    *  This method resets the valid Georeference plug-ins to the default state
-    *  of all Georeference plug-ins.
-    *
-    *  @notify  This method notifies signalValidGeoreferencePlugInsChanged()
-    *           if the list of valid Georeference plug-ins changes.
-    *
-    *  @see     setValidGeoreferencePlugIns()
-    */
-   virtual void resetValidGeoreferencePlugIns() = 0;
 
    /**
     *  Sets whether a geographic results layer should be created after

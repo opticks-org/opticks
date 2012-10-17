@@ -14,6 +14,7 @@
 #include "BadValues.h"
 #include "DataDescriptorImp.h"
 #include "DimensionDescriptor.h"
+#include "Georeference.h"
 #include "GeoreferenceDescriptorAdapter.h"
 #include "TypesFile.h"
 #include "UnitsAdapter.h"
@@ -82,6 +83,8 @@ public:
    void setGeoreferenceDescriptor(const GeoreferenceDescriptor* pGeorefDescriptor);
    GeoreferenceDescriptor* getGeoreferenceDescriptor();
    const GeoreferenceDescriptor* getGeoreferenceDescriptor() const;
+   std::vector<std::string> getValidGeoreferencePlugIns(unsigned char minimumAffinity =
+      Georeference::CAN_NOT_GEOREFERENCE + 1) const;
    void setDefaultGeoreferencePlugIn();
 
    void setDisplayBand(RasterChannelType eColor, DimensionDescriptor band);
@@ -272,6 +275,11 @@ private:
    const GeoreferenceDescriptor* getGeoreferenceDescriptor() const \
    { \
       return impClass::getGeoreferenceDescriptor(); \
+   } \
+   std::vector<std::string> getValidGeoreferencePlugIns(unsigned char minimumAffinity = \
+      Georeference::CAN_NOT_GEOREFERENCE + 1) const \
+   { \
+      return impClass::getValidGeoreferencePlugIns(minimumAffinity); \
    } \
    void setDefaultGeoreferencePlugIn() \
    { \

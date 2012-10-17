@@ -57,17 +57,14 @@ IgmGui::IgmGui(QWidget* pParent) :
 IgmGui::~IgmGui()
 {}
 
-void IgmGui::setGeoreferenceData(GeoreferenceDescriptor* pDescriptor, bool enableExistingElement,
-                                 bool enableIgmFilename)
+void IgmGui::setGeoreferenceData(GeoreferenceDescriptor* pDescriptor, bool enableExistingElement)
 {
-   if ((pDescriptor != mpDescriptor.get()) || (mpUseExisting->isEnabled() != enableExistingElement) ||
-      (mpLoad->isEnabled() != enableIgmFilename))
+   if ((pDescriptor != mpDescriptor.get()) || (mpUseExisting->isEnabled() != enableExistingElement))
    {
       mpDescriptor.reset(pDescriptor);
 
-      // Enable/disable the radio buttons based on their availability
+      // Enable/disable the Use Existing Element radio button based on its availability
       mpUseExisting->setEnabled(enableExistingElement);
-      mpLoad->setEnabled(enableIgmFilename);
 
       // Update the georeference descriptor attribute to use the existing element based on the enabled radio buttons
       if (mpDescriptor.get() != NULL)
@@ -76,16 +73,6 @@ void IgmGui::setGeoreferenceData(GeoreferenceDescriptor* pDescriptor, bool enabl
          if ((useExistingElement == true) && (enableExistingElement == false))
          {
             mpDescriptor->setAttributeByPath(USE_EXISTING_ELEMENT, false);
-         }
-         else if ((useExistingElement == false) && (enableExistingElement == true))
-         {
-            // If the existing element is available and the IGM filename is not specified,
-            // set the default to use the existing element
-            std::string filename = dv_cast<std::string>(mpDescriptor->getAttributeByPath(IGM_FILENAME), std::string());
-            if (filename.empty() == true)
-            {
-               mpDescriptor->setAttributeByPath(USE_EXISTING_ELEMENT, true);
-            }
          }
       }
 

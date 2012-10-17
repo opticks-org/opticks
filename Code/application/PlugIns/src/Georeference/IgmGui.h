@@ -28,7 +28,7 @@ public:
    IgmGui(QWidget* pParent = NULL);
    virtual ~IgmGui();
 
-   void setGeoreferenceData(GeoreferenceDescriptor* pDescriptor, bool enableExistingElement, bool enableIgmFilename);
+   void setGeoreferenceData(GeoreferenceDescriptor* pDescriptor, bool enableExistingElement);
    GeoreferenceDescriptor* getGeoreferenceDescriptor();
    const GeoreferenceDescriptor* getGeoreferenceDescriptor() const;
 
