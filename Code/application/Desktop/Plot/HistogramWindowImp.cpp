@@ -786,7 +786,7 @@ void HistogramWindowImp::deleteStatisticsPlots(Layer* pLayer)
    for (std::vector<PlotWidget*>::iterator plot = plots.begin(); plot != plots.end(); ++plot)
    {
       HistogramPlotImp* pHistPlot = dynamic_cast<HistogramPlotImp*>((*plot)->getPlot());
-      if (pHistPlot->getLayer() == pLayer && pHistPlot->ownsStatistics())
+      if (pHistPlot != NULL && pHistPlot->getLayer() == pLayer && pHistPlot->ownsStatistics())
       {
          PlotSet* pPlotSet = (*plot)->getPlotSet();
          if (pPlotSet != NULL)
@@ -857,6 +857,7 @@ void HistogramWindowImp::createStatisticsWidget(PlotWidget* pPlotWidget)
       return;
    }
 
+   // Check if the statistics widget already exists
    QSplitter* pSplitter = pPlotWidgetImp->getSplitter();
    VERIFYNRV(pSplitter != NULL);
 
@@ -865,8 +866,14 @@ void HistogramWindowImp::createStatisticsWidget(PlotWidget* pPlotWidget)
       return;
    }
 
-   // Create the statistics widget
+   // Do not create a statistics widget if the plot is not a histogram plot
    HistogramPlotImp* pHistPlot = dynamic_cast<HistogramPlotImp*>(pPlotWidgetImp->getPlot());
+   if (pHistPlot == NULL)
+   {
+      return;
+   }
+
+   // Create the statistics widget
    StatisticsWidget* pStatisticsWidget = new StatisticsWidget(pHistPlot, this);
 
    // Initialization
