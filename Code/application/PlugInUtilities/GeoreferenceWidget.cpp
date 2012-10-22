@@ -420,22 +420,18 @@ void GeoreferenceWidget::metadataModified(Subject& subject, const std::string& s
    updatePlugInItems();
 
    // Set the previously selected plug-in
-   if (mpPlugInList->count() > 0)
+   if ((mpPlugInList->count() > 0) && (selectedPlugIn.isEmpty() == false))
    {
-      QListWidgetItem* pItem = mpPlugInList->item(0);
-      if (selectedPlugIn.isEmpty() == false)
+      QList<QListWidgetItem*> items = mpPlugInList->findItems(selectedPlugIn, Qt::MatchExactly);
+      if (items.empty() == false)
       {
-         QList<QListWidgetItem*> items = mpPlugInList->findItems(selectedPlugIn, Qt::MatchExactly);
-         if (items.empty() == false)
-         {
-            VERIFYNR(items.size() == 1);
-            pItem = items.front();
-         }
-      }
+         VERIFYNR(items.size() == 1);
 
-      if (pItem != NULL)
-      {
-         mpPlugInList->setItemSelected(pItem, true);
+         QListWidgetItem* pItem = items.front();
+         if (pItem != NULL)
+         {
+            mpPlugInList->setItemSelected(pItem, true);
+         }
       }
    }
 }
