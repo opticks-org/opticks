@@ -31,6 +31,7 @@
 #include <vector>
 
 class AnimationToolBarAdapter;
+class AnnotationLayer;
 class AnnotationToolBar;
 class AoiToolBarAdapter;
 class BackgroundPluginWindow;
@@ -41,7 +42,6 @@ class DockWindow;
 class FileDescriptor;
 class GcpEditorDlg;
 class GcpToolBar;
-class GraphicLayer;
 class HistogramWindowAdapter;
 class Layer;
 class MeasurementToolBar;
@@ -489,7 +489,7 @@ private:
    void dropEvent(QDropEvent *pEvent);
    void removeMenuCommands(const QList<QAction*>& commands);
    const std::vector<PlugInDescriptor*> &getAvailableExporters(const SessionItem *pItem) const;
-   GraphicLayer* getClipboardLayer() const;
+   AnnotationLayer* getClipboardLayer() const;
 
 private slots:
    void constructFileMenu();

@@ -2765,7 +2765,7 @@ bool ApplicationWindow::saveSessionAs()
 
 void ApplicationWindow::cut()
 {
-   GraphicLayer* pLayer = getClipboardLayer();
+   AnnotationLayer* pLayer = getClipboardLayer();
    if (pLayer != NULL)
    {
       copy();
@@ -2775,7 +2775,7 @@ void ApplicationWindow::cut()
 
 void ApplicationWindow::copy()
 {
-   GraphicLayer* pLayer = getClipboardLayer();
+   AnnotationLayer* pLayer = getClipboardLayer();
    if (pLayer == NULL)
    {
       return;
@@ -2810,7 +2810,7 @@ void ApplicationWindow::copy()
 
 void ApplicationWindow::paste()
 {
-   GraphicLayer* pLayer = getClipboardLayer();
+   AnnotationLayer* pLayer = getClipboardLayer();
    if (pLayer == NULL)
    {
       return;
@@ -6396,9 +6396,9 @@ const vector<PlugInDescriptor*> &ApplicationWindow::getAvailableExporters(const 
    return availableExporters;
 }
 
-GraphicLayer* ApplicationWindow::getClipboardLayer() const
+AnnotationLayer* ApplicationWindow::getClipboardLayer() const
 {
-   GraphicLayer* pLayer = NULL;
+   AnnotationLayer* pLayer = NULL;
 
    View* pView = getCurrentWorkspaceWindowView();
    if (pView != NULL)
@@ -6406,7 +6406,11 @@ GraphicLayer* ApplicationWindow::getClipboardLayer() const
       SpatialDataView* pSpatialDataView = dynamic_cast<SpatialDataView*>(pView);
       if (pSpatialDataView != NULL)
       {
-         pLayer = dynamic_cast<GraphicLayer*>(pSpatialDataView->getTopMostLayer(ANNOTATION));
+         pLayer = dynamic_cast<AnnotationLayer*>(pSpatialDataView->getActiveLayer());
+         if (pLayer == NULL)
+         {
+            pLayer = dynamic_cast<AnnotationLayer*>(pSpatialDataView->getTopMostLayer(ANNOTATION));
+         }
       }
 
       ProductView* pProductView = dynamic_cast<ProductView*>(pView);
