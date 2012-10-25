@@ -92,7 +92,7 @@ void DmsPoint::setValue(const string& valueText)
    posLcIndicator[0] = posCapIndicator[0] - 'A' + 'a';
    negLcIndicator[0] = negCapIndicator[0] - 'A' + 'a';
 
-   string format = string("%1[") + posCapIndicator + negCapIndicator + posLcIndicator + negLcIndicator +
+   string format = string("%1[") + negCapIndicator + posCapIndicator + posLcIndicator + negLcIndicator +
       "]%lg%1[Dd°*\x20]%lg%1[Mm'\x20]%lg%1[Ss\"\x20]";
 
    int fieldCount = sscanf(valueText.c_str(), format.c_str(), dirDelimiter, &degValue, degDelimiter,
@@ -122,7 +122,7 @@ void DmsPoint::setValue(const string& valueText)
 
    VERIFYNRV(fieldCount >= 1);
 
-   if (fieldCount == 1 || fieldCount == 2)    // Decimal degrees or concatenated format
+   if (fieldCount == 1 || fieldCount == 2)   // Decimal degrees or concatenated format
    {
       // Check for concatenated format
       string::size_type pos = valueText.find('.');
@@ -137,7 +137,7 @@ void DmsPoint::setValue(const string& valueText)
          ++startPos;
       }
 
-      if (pos - startPos > 5)      // Must have at least six numeric digits
+      if (pos > startPos + 5)                // Must have at least six numeric digits
       {
          string degText = valueText.substr(startPos, pos - 4 - startPos);
          string minText = valueText.substr(pos - 4, 2);
