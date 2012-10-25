@@ -84,6 +84,7 @@ void CustomColorButton::setColor(const QColor& clrNew)
       setIcon(QIcon(":/icons/Forbidden"));
    }
 
+   mpMenu->setSelectedColor(mColor);
    emit colorChanged(clrNew);
 }
 
