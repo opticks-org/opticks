@@ -49,13 +49,12 @@ namespace
    QString dndMimeType("text/x-annotation-image-filename");
 }
 
-PaletteModel::PaletteModel(QObject* pParent) : QDirModel(pParent)
-{
-}
+PaletteModel::PaletteModel(QObject* pParent) :
+   QDirModel(pParent)
+{}
 
 PaletteModel::~PaletteModel()
-{
-}
+{}
 
 QStringList PaletteModel::mimeTypes() const
 {
@@ -64,19 +63,19 @@ QStringList PaletteModel::mimeTypes() const
 
 QMimeData* PaletteModel::mimeData(const QModelIndexList& indexes) const
 {
-   QMimeData* pUrlData = QDirModel::mimeData(indexes);
-   if (pUrlData == NULL)
+   if (indexes.size() == 1)
    {
-      return NULL;
+      QString fileText = filePath(indexes.front());
+      if (fileText.isEmpty() == false)
+      {
+         QMimeData* pData = new QMimeData();
+         pData->setData(dndMimeType, fileText.toAscii());
+
+         return pData;
+      }
    }
-   QMimeData* pData = new QMimeData();
-   QList<QUrl> urls = pUrlData->urls();
-   if (!urls.empty())
-   {
-      pData->setData(dndMimeType, urls.front().toString().toAscii());
-   }
-   delete pUrlData;
-   return pData;
+
+   return NULL;
 }
 
 AnnotationImagePaletteWidget::AnnotationImagePaletteWidget(QWidget* pParent) : QToolBox(pParent)
@@ -243,7 +242,7 @@ void AnnotationImagePaletteWidget::windowDropEvent(SpatialDataView* pView, QDrop
 {
    VERIFYNRV(pEvent && pView);
 
-   QString filename = QUrl(pEvent->mimeData()->data(dndMimeType)).toLocalFile();
+   QString filename(pEvent->mimeData()->data(dndMimeType));
    if (filename.isEmpty())
    {
       return;
