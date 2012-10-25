@@ -13,16 +13,16 @@
 #include "TypesFile.h"
 
 #include <QtCore/QMap>
-#include <QtGui/QCheckBox>
-#include <QtGui/QRadioButton>
-#include <QtGui/QStackedWidget>
-#include <QtGui/QTreeWidgetItem>
 #include <QtGui/QWidget>
 
 #include <vector>
 
-class CustomTreeWidget;
 class Layer;
+class QCheckBox;
+class QRadioButton;
+class QStackedWidget;
+class QTreeWidget;
+class QTreeWidgetItem;
 class View;
 
 class LinkOptionsPage : public QWidget
@@ -30,8 +30,8 @@ class LinkOptionsPage : public QWidget
    Q_OBJECT
 
 public:
-   LinkOptionsPage(QWidget* parent = 0);
-   ~LinkOptionsPage();
+   LinkOptionsPage(QWidget* pParent = NULL);
+   virtual ~LinkOptionsPage();
 
    // Views
    std::vector<View*> getViewLinks() const;
@@ -51,7 +51,8 @@ protected slots:
 private:
    LinkOptionsPage(const LinkOptionsPage& rhs);
    LinkOptionsPage& operator=(const LinkOptionsPage& rhs);
-   CustomTreeWidget* mpLinksTree;
+
+   QTreeWidget* mpLinksTree;
    QMap<QTreeWidgetItem*, View*> mViews;
    QMap<QTreeWidgetItem*, Layer*> mLayers;
 

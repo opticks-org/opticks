@@ -7,46 +7,40 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QGroupBox>
-#include <QtGui/QButtonGroup>
-#include <QtGui/QHeaderView>
-#include <QtGui/QLabel>
-#include <QtGui/QLayout>
-
-#include "LinkOptionsPage.h"
-#include "CustomTreeWidget.h"
 #include "DesktopServices.h"
 #include "Layer.h"
 #include "LayerImp.h"
 #include "LayerList.h"
+#include "LinkOptionsPage.h"
 #include "SpatialDataView.h"
 #include "View.h"
 #include "WorkspaceWindow.h"
 
+#include <QtGui/QButtonGroup>
+#include <QtGui/QCheckBox>
+#include <QtGui/QGridLayout>
+#include <QtGui/QGroupBox>
+#include <QtGui/QLabel>
+#include <QtGui/QRadioButton>
+#include <QtGui/QStackedWidget>
+#include <QtGui/QTreeWidget>
+#include <QtGui/QTreeWidgetItem>
+#include <QtGui/QVBoxLayout>
+
 using namespace std;
 
-LinkOptionsPage::LinkOptionsPage(QWidget* parent) :
-   QWidget(parent)
+LinkOptionsPage::LinkOptionsPage(QWidget* pParent) :
+   QWidget(pParent)
 {
    // Links
    QLabel* pLinksLabel = new QLabel("Available Links:", this);
 
-   mpLinksTree = new CustomTreeWidget(this);
-   if (mpLinksTree != NULL)
-   {
-      mpLinksTree->setColumnCount(1);
-      mpLinksTree->setRootIsDecorated(true);
-      mpLinksTree->setSelectionMode(QAbstractItemView::SingleSelection);
-      mpLinksTree->setSortingEnabled(false);
-
-      QHeaderView* pHeader = mpLinksTree->header();
-      if (pHeader != NULL)
-      {
-         pHeader->setSortIndicatorShown(false);
-         pHeader->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-         pHeader->hide();
-      }
-   }
+   mpLinksTree = new QTreeWidget(this);
+   mpLinksTree->setColumnCount(1);
+   mpLinksTree->setRootIsDecorated(true);
+   mpLinksTree->setSelectionMode(QAbstractItemView::SingleSelection);
+   mpLinksTree->setSortingEnabled(false);
+   mpLinksTree->setHeaderHidden(true);
 
    // Options
    QLabel* pOptionsLabel = new QLabel("Options:", this);
@@ -143,15 +137,15 @@ vector<View*> LinkOptionsPage::getViewLinks() const
    QMap<QTreeWidgetItem*, View*>::const_iterator iter = mViews.begin();
    while (iter != mViews.end())
    {
-      CustomTreeWidget::CheckState eState = CustomTreeWidget::UNCHECKED;
+      Qt::CheckState checkState = Qt::Unchecked;
 
       QTreeWidgetItem* pItem = iter.key();
       if (pItem != NULL)
       {
-         eState = mpLinksTree->getCellCheckState(pItem, 0);
+         checkState = pItem->checkState(0);
       }
 
-      if (eState == CustomTreeWidget::CHECKED)
+      if (checkState == Qt::Checked)
       {
          View* pView = iter.value();
          if (pView != NULL)
@@ -178,15 +172,15 @@ vector<Layer*> LinkOptionsPage::getLayerLinks() const
    QMap<QTreeWidgetItem*, Layer*>::const_iterator iter = mLayers.begin();
    while (iter != mLayers.end())
    {
-      CustomTreeWidget::CheckState eState = CustomTreeWidget::UNCHECKED;
+      Qt::CheckState checkState = Qt::Unchecked;
 
       QTreeWidgetItem* pItem = iter.key();
       if (pItem != NULL)
       {
-         eState = mpLinksTree->getCellCheckState(pItem, 0);
+         checkState = pItem->checkState(0);
       }
 
-      if (eState == CustomTreeWidget::CHECKED)
+      if (checkState == Qt::Checked)
       {
          Layer* pLayer = iter.value();
          if (pLayer != NULL)
@@ -277,7 +271,7 @@ void LinkOptionsPage::setLinkObjects(const QString& strDataset)
             if (pItem != NULL)
             {
                pItem->setText(0, strName);
-               mpLinksTree->setCellCheckState(pItem, 0, CustomTreeWidget::UNCHECKED);
+               pItem->setCheckState(0, Qt::Unchecked);
                mLayers.insert(pItem, pLayer);
             }
          }
@@ -311,7 +305,7 @@ void LinkOptionsPage::setLinkObjects(const QString& strDataset)
       if (pItem != NULL)
       {
          pItem->setText(0, strViewName);
-         mpLinksTree->setCellCheckState(pItem, 0, CustomTreeWidget::UNCHECKED);
+         pItem->setCheckState(0, Qt::Unchecked);
          mViews.insert(pItem, pSpatialDataView);
       }
 
