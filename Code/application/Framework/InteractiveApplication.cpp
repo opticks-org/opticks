@@ -54,8 +54,7 @@ InteractiveApplication::InteractiveApplication(QCoreApplication& app) :
 }
 
 InteractiveApplication::~InteractiveApplication()
-{
-}
+{}
 
 int InteractiveApplication::run(int argc, char** argv)
 {
@@ -386,8 +385,6 @@ int InteractiveApplication::run(int argc, char** argv)
       executeStartupBatchWizards();
 
       // Destroy the progress object and progress dialog
-      mpProgress->detach(SIGNAL_NAME(Subject, Modified), Slot(pProgressDlg, &ProgressDlg::progressUpdated));
-      mpProgress->detach(SIGNAL_NAME(Subject, Deleted), Slot(pProgressDlg, &ProgressDlg::progressDeleted));
       delete dynamic_cast<ProgressAdapter*>(mpProgress);
 
       vector<string> autoExitOptions = pArgList->getOptions("autoExit");
