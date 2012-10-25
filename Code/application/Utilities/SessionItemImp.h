@@ -74,6 +74,7 @@ protected:
    virtual void setContextMenuActions(const std::list<ContextMenuAction>& actions);
    void setFilenameDisplay(bool bFilenameDisplay);
    virtual void addPropertiesPage(const std::string& plugInName);
+   virtual void insertPropertiesPage(const std::string& plugInName, unsigned int index);
    virtual void removePropertiesPage(const std::string& plugInName);
    virtual void setPropertiesPages(const std::vector<std::string>& plugInNames);
 

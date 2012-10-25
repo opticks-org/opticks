@@ -377,6 +377,12 @@ bool DataElementImp::fromXml(DOMNode* pDocument, unsigned int version)
          {
             throw XmlReader::DomParseException("Cannot deserialize data descriptor", pDocument);
          }
+
+         if (mpDataDescriptor->getFileDescriptor() != NULL)
+         {
+            // This call will not add the page if it was already added in the constructor
+            insertPropertiesPage("File Descriptor Properties", 1);
+         }
       }
    }
 

@@ -1442,6 +1442,12 @@ bool RasterElementImp::deserialize(SessionItemDeserializer& deserializer)
             {
                return false;
             }
+
+            if (pDescriptor->getFileDescriptor() != NULL)
+            {
+               // This call will not add the page if it was already added in the DataElementImp constructor
+               insertPropertiesPage("File Descriptor Properties", 1);
+            }
          }
          else if (XMLString::equals(pNode->getNodeName(), X("DisplayText")))
          {

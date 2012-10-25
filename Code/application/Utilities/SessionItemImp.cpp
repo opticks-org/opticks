@@ -267,6 +267,28 @@ void SessionItemImp::addPropertiesPage(const string& plugInName)
    }
 }
 
+void SessionItemImp::insertPropertiesPage(const string& plugInName, unsigned int index)
+{
+   if (plugInName.empty() == true)
+   {
+      return;
+   }
+
+   vector<string>::iterator iter = find(mPropertiesPages.begin(), mPropertiesPages.end(), plugInName);
+   if (iter == mPropertiesPages.end())
+   {
+      unsigned int i = 0;
+      for (iter = mPropertiesPages.begin(); iter != mPropertiesPages.end(); ++iter, ++i)
+      {
+         if (i == index)
+         {
+            mPropertiesPages.insert(iter, plugInName);
+            break;
+         }
+      }
+   }
+}
+
 void SessionItemImp::removePropertiesPage(const string& plugInName)
 {
    if (plugInName.empty() == true)
