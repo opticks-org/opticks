@@ -312,25 +312,35 @@ namespace
    {
       if (!band.isActiveNumberValid() || !band.isOriginalNumberValid())
       {
-         return "";
+         return std::string();
       }
-      unsigned int activeNumber = band.getActiveNumber();
+
+      std::string bandName;
       if (pBandNames != NULL)
       {
-         if ((activeNumber >= 0) && (activeNumber < pBandNames->size()))
+         unsigned int activeNumber = band.getActiveNumber();
+         if (activeNumber < pBandNames->size())
          {
-            return pBandNames->at(activeNumber);
+            bandName = pBandNames->at(activeNumber);
          }
       }
-      std::ostringstream formatter;
-      std::string bandPrefix = "Band";
-      if (pBandPrefix != NULL)
+
+      if (bandName.empty() == true)
       {
-         bandPrefix = *pBandPrefix;
+         std::string bandPrefix = "Band";
+         if (pBandPrefix != NULL)
+         {
+            bandPrefix = *pBandPrefix;
+         }
+
+         unsigned int originalNumber = band.getOriginalNumber() + 1;
+
+         std::ostringstream formatter;
+         formatter << bandPrefix << " " << originalNumber;
+         bandName = formatter.str();
       }
-      unsigned int originalNumber = band.getOriginalNumber() + 1;
-      formatter << bandPrefix << " " << originalNumber;
-      return formatter.str();
+
+      return bandName;
    }
 };
 
