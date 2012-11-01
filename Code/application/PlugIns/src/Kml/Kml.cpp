@@ -555,17 +555,20 @@ void Kml::generateGroundOverlayLayer(Layer* pLayer, bool visible, int order, con
       if (kedDoc != NULL)
       {
          XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pKedNode = kedDoc->getDocumentElement();
-         bool extraPop = false;
-         if (std::string(A(pKedNode->getNodeName())) != "ExtendedData")
+         if (pKedNode != NULL)
          {
-            mXml.pushAddPoint(mXml.addElement("ExtendedData"));
-            extraPop = true;
-         }
-         pKedNode = mXml.peekAddPoint()->getOwnerDocument()->importNode(pKedNode, true);
-         mXml.peekAddPoint()->appendChild(pKedNode);
-         if (extraPop)
-         {
-            mXml.popAddPoint();
+            bool extraPop = false;
+            if (std::string(A(pKedNode->getNodeName())) != "ExtendedData")
+            {
+               mXml.pushAddPoint(mXml.addElement("ExtendedData"));
+               extraPop = true;
+            }
+            pKedNode = mXml.peekAddPoint()->getOwnerDocument()->importNode(pKedNode, true);
+            mXml.peekAddPoint()->appendChild(pKedNode);
+            if (extraPop)
+            {
+               mXml.popAddPoint();
+            }
          }
       }
    }
