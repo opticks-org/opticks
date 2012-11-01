@@ -11,9 +11,11 @@
 #define NITFMETADATAPARSING_H
 
 #include "ConfigurationSettings.h"
-#include "PlugInResource.h"
 #include "NitfResource.h"
 #include "NitfTreParser.h"
+#include "PlugInResource.h"
+
+#include <ossim/base/ossimConstants.h>
 
 #include <map>
 #include <ostream>
@@ -21,17 +23,13 @@
 #include <vector>
 
 class DynamicObject;
-class RasterDataDescriptor;
-
-class ossimImageFileWriter;
 class ossimNitfFileHeaderV2_X;
 class ossimNitfImageHeaderV2_X;
 class ossimNitfRegisteredTag;
 class ossimNitfTagInformation;
 class ossimNitfWriter;
-class ossimContainerProperty;
-class ossimProperty;
 class ossimString;
+class RasterDataDescriptor;
 
 namespace Nitf
 {
