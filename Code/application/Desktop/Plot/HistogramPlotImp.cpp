@@ -1144,12 +1144,6 @@ bool HistogramPlotImp::setHistogram(Layer* pLayer, Statistics* pStatistics)
    return setHistogram(pLayer, NULL, pStatistics, GRAY);
 }
 
-void HistogramPlotImp::showEvent(QShowEvent* pEvent)
-{
-   QWidget::showEvent(pEvent);
-   mUpdater.update();
-}
-
 bool HistogramPlotImp::setHistogram(unsigned int binCount, const double* pBinCenters, const double* pValues,
                                     const double* pBinWidths, bool bAbove)
 {
@@ -1858,6 +1852,12 @@ bool HistogramPlotImp::getDataLowerUpper(double& lowerLimit, double& upperLimit)
    }
 
    return false;
+}
+
+void HistogramPlotImp::draw()
+{
+   mUpdater.update();
+   CartesianPlotImp::draw();
 }
 
 Statistics* HistogramPlotImp::getStatistics() const

@@ -90,6 +90,8 @@ public:
    };
    typedef EnumWrapper<ValuesTypeEnum> ValuesType;
 
+   virtual void draw();
+
    Statistics* getStatistics() const;
    bool ownsStatistics() const;
 
@@ -109,7 +111,6 @@ protected:
    void mousePressEvent(QMouseEvent* pEvent);
    void mouseMoveEvent(QMouseEvent* pEvent);
    void mouseReleaseEvent(QMouseEvent* pEvent);
-   void showEvent(QShowEvent * pEvent);
 
    bool getDataMinMax(double& minValue, double& maxValue) const;
    bool getDataLowerUpper(double& lowerLimit, double& upperLimit) const;
