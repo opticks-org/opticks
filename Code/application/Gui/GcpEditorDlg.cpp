@@ -24,11 +24,11 @@
 #include "CustomTreeWidget.h"
 #include "DesktopServices.h"
 #include "GcpEditorDlg.h"
+#include "GcpLayer.h"
 #include "GeocoordTypeComboBox.h"
 #include "GeoPoint.h"
 #include "GeoreferenceDescriptor.h"
 #include "GcpLayerImp.h"
-#include "GcpList.h"
 #include "GcpListUndo.h"
 #include "LayerList.h"
 #include "RasterElement.h"
@@ -38,15 +38,9 @@
 
 using namespace std;
 
-#define LATLON_BUTTON   0
-#define UTM_BUTTON      1
-#define MGRS_BUTTON     2
-
 GcpEditorDlg::GcpEditorDlg(QWidget* parent) :
    QDialog(parent),
-   mpGcpList(NULL),
    mpLayer(NULL),
-   mGeocoordType(GeoreferenceDescriptor::getSettingGeocoordType()),
    mbModified(false)
 {
    // GCP list
@@ -93,7 +87,7 @@ GcpEditorDlg::GcpEditorDlg(QWidget* parent) :
 
    mpCoordTypeLabel = new QLabel("Coordinate Type:", this);
    mpCoordTypeCombo = new GeocoordTypeComboBox(this);
-   mpCoordTypeCombo->setGeocoordType(mGeocoordType);
+   mpCoordTypeCombo->setGeocoordType(GeoreferenceDescriptor::getSettingGeocoordType());
 
    mpNewButton = new QPushButton("&New", pGcpGroup);
    mpDeleteButton = new QPushButton("&Delete", pGcpGroup);
@@ -143,7 +137,7 @@ GcpEditorDlg::GcpEditorDlg(QWidget* parent) :
    setModal(false);
    setWindowTitle("GCP Editor");
    resize(650, 450);
-   setCoordinateFormat(mGeocoordType);
+   setCoordinateFormat(mpCoordTypeCombo->getGeocoordType());
    updateLayers();
    enableGcp();
 
@@ -170,10 +164,15 @@ void GcpEditorDlg::attached(Subject& subject, const string& signal, const Slot& 
 
 void GcpEditorDlg::elementModified(Subject& subject, const string& signal, const boost::any& value)
 {
-   GcpList* pGcpList = dynamic_cast<GcpList*>(&subject);
-   if (pGcpList == mpGcpList && pGcpList != NULL)
+   if (mpLayer == NULL)
    {
-      const list<GcpPoint>& points = mpGcpList->getSelectedPoints();
+      return;
+   }
+
+   GcpList* pGcpList = dynamic_cast<GcpList*>(mpLayer->getDataElement());
+   if ((pGcpList != NULL) && (dynamic_cast<GcpList*>(&subject) == pGcpList))
+   {
+      const list<GcpPoint>& points = pGcpList->getSelectedPoints();
       updateGcpView(points);
       mbModified = false;
    }
@@ -183,47 +182,61 @@ bool GcpEditorDlg::setGcpLayer(Layer* pLayer)
 {
    mpGcpView->closeActiveCellWidget(true);
 
-   if (pLayer == NULL)
+   GcpLayer* pGcpLayer = NULL;
+   int layerIndex = -1;
+
+   if (pLayer != NULL)
+   {
+      // Check if the given layer is not a GCP layer
+      pGcpLayer = dynamic_cast<GcpLayer*>(pLayer);
+      if (pGcpLayer == NULL)
+      {
+         return false;
+      }
+
+      // Do not set the layer if it is not one of the available GCP layers for the active view
+      layerIndex = mGcpLayers.indexOf(pGcpLayer);
+      if (layerIndex == -1)
+      {
+         return false;
+      }
+   }
+
+   // Check if the given GCP layer is already the active layer
+   if (pGcpLayer == mpLayer)
    {
       return false;
    }
 
-   GcpLayer* pGcpLayer = dynamic_cast<GcpLayer*>(pLayer);
-   if (pGcpLayer == NULL)
+   // Detach from the previously active GCP list
+   if (mpLayer != NULL)
    {
-      return false;
-   }
+      GcpList* pGcpList = dynamic_cast<GcpList*>(mpLayer->getDataElement());
+      VERIFY(pGcpList != NULL);
 
-   int iIndex = mGcpLayers.indexOf(pGcpLayer);
-   if (iIndex == -1)
-   {
-      return false;
-   }
-
-   // Get the new GCP list element from the layer
-   GcpList* pGcpList = static_cast<GcpList*>(pLayer->getDataElement());
-
-   if (mpGcpList != NULL)
-   {
-      mpGcpList->detach(SIGNAL_NAME(Subject, Modified), Slot(this, &GcpEditorDlg::elementModified));
+      pGcpList->detach(SIGNAL_NAME(Subject, Modified), Slot(this, &GcpEditorDlg::elementModified));
    }
 
    mpLayer = pGcpLayer;
-   mpGcpList = pGcpList;
 
-   if (mpGcpList != NULL)
+   // Attach to the newly active GCP list
+   if (mpLayer != NULL)
    {
-      mpGcpList->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &GcpEditorDlg::elementModified));
+      GcpList* pGcpList = dynamic_cast<GcpList*>(mpLayer->getDataElement());
+      VERIFY(pGcpList != NULL);
+
+      pGcpList->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &GcpEditorDlg::elementModified));
    }
    else
    {
       mpGcpView->clear();
+      mEditGcps.clear();
    }
 
    // Set the current combo box item
-   if (iIndex < mpListCombo->count())
+   if (layerIndex < mpListCombo->count())
    {
-      mpListCombo->setCurrentIndex(iIndex);
+      mpListCombo->setCurrentIndex(layerIndex);    // layerIndex can be -1 if setting NULL as the active GCP layer
    }
 
    emit layerActivated(pLayer);
@@ -283,9 +296,13 @@ bool GcpEditorDlg::event(QEvent* pEvent)
             else if (iReturn == QMessageBox::No)
             {
                list<GcpPoint> points;
-               if (mpGcpList != NULL)
+               if (mpLayer != NULL)
                {
-                  points = mpGcpList->getSelectedPoints();
+                  GcpList* pGcpList = dynamic_cast<GcpList*>(mpLayer->getDataElement());
+                  if (pGcpList != NULL)
+                  {
+                     points = pGcpList->getSelectedPoints();
+                  }
                }
 
                updateGcpView(points);
@@ -323,7 +340,7 @@ QTreeWidgetItem* GcpEditorDlg::insertGcp(const GcpPoint& point)
    QTreeWidgetItem* pItem = NULL;
 
    LatLonPoint latLonPoint(point.mCoordinate);
-   switch (mGeocoordType)
+   switch (mpCoordTypeCombo->getGeocoordType())
    {
       case GEOCOORD_LATLON:
       {
@@ -439,58 +456,12 @@ QTreeWidgetItem* GcpEditorDlg::insertGcp(const GcpPoint& point)
          break;
    }
 
-   return pItem;
-}
-
-GcpPoint GcpEditorDlg::getGcp(QTreeWidgetItem* pItem)
-{
-   GcpPoint point;
-
    if (pItem != NULL)
    {
-      // Pixel coordinate
-      point.mPixel.mX = pItem->text(1).toDouble() - 1.0;
-      point.mPixel.mY = pItem->text(2).toDouble() - 1.0;
-
-      // Geocoordinate
-      switch (mGeocoordType)
-      {
-         case GEOCOORD_LATLON:
-         {
-            LatLonPoint latLonPoint(pItem->text(3).toStdString(), pItem->text(4).toStdString());
-            point.mCoordinate = latLonPoint.getCoordinates();
-            break;
-         }
-
-         case GEOCOORD_UTM:
-         {
-            UtmPoint utmPoint(pItem->text(3).toDouble(), pItem->text(4).toDouble(),
-               pItem->text(5).toInt(), pItem->text(6).toStdString().at(0));
-
-            LatLonPoint latLonPoint = utmPoint.getLatLonCoordinates();
-            point.mCoordinate = latLonPoint.getCoordinates();
-            break;
-         }
-
-         case GEOCOORD_MGRS:
-         {
-            MgrsPoint mgrsPoint(pItem->text(5).toStdString());
-
-            LatLonPoint latLonPoint = mgrsPoint.getLatLonCoordinates();
-            point.mCoordinate = latLonPoint.getCoordinates();
-            break;
-         }
-
-         default:
-            break;
-      }
-
-      // RMS error
-      point.mRmsError.mX = pItem->text(7).toDouble();
-      point.mRmsError.mY = pItem->text(8).toDouble();
+      mEditGcps.insert(pItem, point);
    }
 
-   return point;
+   return pItem;
 }
 
 bool GcpEditorDlg::addLayer(Layer* pLayer)
@@ -546,17 +517,11 @@ bool GcpEditorDlg::removeLayer(Layer* pLayer)
 
       if (mpListCombo->currentIndex() == iIndex)
       {
-         mpLayer = NULL;
-         mpGcpList = NULL;
+         setGcpLayer(NULL);
       }
 
       mGcpLayers.removeAt(iIndex);
       mpListCombo->removeItem(iIndex);
-
-      if (mGcpLayers.empty())
-      {
-         mpGcpView->clear();
-      }
 
       GcpLayerImp* pGcpLayerImp = dynamic_cast<GcpLayerImp*>(pGcpLayer);
       if (pGcpLayerImp != NULL)
@@ -618,6 +583,7 @@ void GcpEditorDlg::clearLayers()
    }
 
    mpGcpView->clear();
+   mEditGcps.clear();
 }
 
 void GcpEditorDlg::enableGcp()
@@ -641,6 +607,7 @@ void GcpEditorDlg::enableGcp()
 void GcpEditorDlg::updateGcpView(const list<GcpPoint>& gcps)
 {
    mpGcpView->clear();
+   mEditGcps.clear();
 
    list<GcpPoint>::const_iterator iter = gcps.begin();
    while (iter != gcps.end())
@@ -663,74 +630,175 @@ void GcpEditorDlg::updateGcpView(const list<GcpPoint>& gcps)
 
 void GcpEditorDlg::updateGcp(QTreeWidgetItem* pItem, int iColumn)
 {
-   if (pItem == NULL)
+   if ((pItem == NULL) || (iColumn == 0))
    {
       return;
    }
-
-   mbModified = true;
 
    QString strText = pItem->text(iColumn);
    if (strText.isEmpty() == true)
    {
+      QString gcpName = pItem->text(0);
+
+      list<GcpPoint> points;
+      for (int i = 0; i < mpGcpView->topLevelItemCount(); ++i)
+      {
+         QTreeWidgetItem* pCurrentItem = mpGcpView->topLevelItem(i);
+         if (pCurrentItem != NULL)
+         {
+            GcpPoint point = mEditGcps.value(pCurrentItem);
+            points.push_back(point);
+         }
+      }
+
+      updateGcpView(points);
+
+      for (int i = 0; i < mpGcpView->topLevelItemCount(); ++i)
+      {
+         QTreeWidgetItem* pCurrentItem = mpGcpView->topLevelItem(i);
+         if (pCurrentItem != NULL)
+         {
+            if (pCurrentItem->text(0) == gcpName)
+            {
+               pCurrentItem->setSelected(true);
+               break;
+            }
+         }
+      }
+
       return;
    }
 
-   // Only convert the text on the geocoord cells
-   if ((iColumn != 3) && (iColumn != 4))
+   GcpPoint point = mEditGcps.value(pItem);
+   if (iColumn == 1)
    {
-      return;
+      point.mPixel.mX = strText.toDouble() - 1.0;
+   }
+   else if (iColumn == 2)
+   {
+      point.mPixel.mY = strText.toDouble() - 1.0;
+   }
+   else if (iColumn == 7)
+   {
+      point.mRmsError.mX = strText.toDouble();
+   }
+   else if (iColumn == 8)
+   {
+      point.mRmsError.mY = strText.toDouble();
+   }
+   else
+   {
+      switch (mpCoordTypeCombo->getGeocoordType())
+      {
+         case GEOCOORD_LATLON:
+         {
+            VERIFYNRV((iColumn == 3) || (iColumn == 4));
+
+            // Convert the text string
+            QString strCoordinate;
+
+            DmsPoint::DmsType eDmsType = DmsPoint::DMS_LATITUDE;
+            if (iColumn == 4)
+            {
+               eDmsType = DmsPoint::DMS_LONGITUDE;
+            }
+
+            DmsPoint dmsPoint(eDmsType, strText.toStdString());
+
+            string dmsText = dmsPoint.getValueText();
+            if (dmsText.empty() == false)
+            {
+               strCoordinate = QString::fromStdString(dmsText);
+            }
+
+            if (strCoordinate.isEmpty() == false)
+            {
+               pItem->setText(iColumn, strCoordinate);
+            }
+
+            // Update the GCP coordinate
+            if (iColumn == 3)
+            {
+               point.mCoordinate.mX = dmsPoint.getValue();
+            }
+            else if (iColumn == 4)
+            {
+               point.mCoordinate.mY = dmsPoint.getValue();
+            }
+
+            break;
+         }
+
+         case GEOCOORD_UTM:
+         {
+            VERIFYNRV((iColumn == 3) || (iColumn == 4) || (iColumn == 5) || (iColumn == 6));
+
+            // Update the GCP coordinate
+            LatLonPoint latLonPoint(point.mCoordinate);
+            UtmPoint utmPoint(latLonPoint);
+
+            double northing = utmPoint.getNorthing();
+            double easting = utmPoint.getEasting();
+            int zone = utmPoint.getZone();
+            char hemisphere = utmPoint.getHemisphere();
+
+            if ((iColumn == 3) || (iColumn == 4))
+            {
+               // Convert the text string
+               QString strCoordinate;
+
+               double dUtmValue = strText.toDouble();
+               strCoordinate.sprintf("%.1f", dUtmValue);
+
+               if (strCoordinate.isEmpty() == false)
+               {
+                  pItem->setText(iColumn, strCoordinate);
+               }
+
+               // Update the UTM value
+               if (iColumn == 3)
+               {
+                  easting = dUtmValue;
+               }
+               else if (iColumn == 4)
+               {
+                  northing = dUtmValue;
+               }
+            }
+            else if (iColumn == 5)
+            {
+               zone = strText.toInt();
+            }
+            else if (iColumn == 6)
+            {
+               hemisphere = strText.toStdString().at(0);
+            }
+
+            utmPoint = UtmPoint(easting, northing, zone, hemisphere);
+            latLonPoint = utmPoint.getLatLonCoordinates();
+            point.mCoordinate = latLonPoint.getCoordinates();
+
+            break;
+         }
+
+         case GEOCOORD_MGRS:
+         {
+            VERIFYNRV(iColumn == 5);
+
+            MgrsPoint mgrsPoint(strText.toStdString());
+            LatLonPoint latLonPoint = mgrsPoint.getLatLonCoordinates();
+            point.mCoordinate = latLonPoint.getCoordinates();
+
+            break;
+         }
+
+         default:
+            return;
+      }
    }
 
-   switch (mGeocoordType)
-   {
-      case GEOCOORD_LATLON:
-      {
-         QString strCoordinate;
-
-         DmsPoint::DmsType eDmsType = DmsPoint::DMS_LATITUDE;
-         if (iColumn == 4)
-         {
-            eDmsType = DmsPoint::DMS_LONGITUDE;
-         }
-
-         DmsPoint dmsPoint(eDmsType, strText.toStdString());
-
-         string dmsText = dmsPoint.getValueText();
-         if (dmsText.empty() == false)
-         {
-            strCoordinate = QString::fromStdString(dmsText);
-         }
-
-         if (strCoordinate.isEmpty() == false)
-         {
-            pItem->setText(iColumn, strCoordinate);
-         }
-
-         break;
-      }
-
-      case GEOCOORD_UTM:
-      {
-         QString strCoordinate;
-
-         double dUtmValue = strText.toDouble();
-         strCoordinate.sprintf("%.1f", dUtmValue);
-
-         if (strCoordinate.isEmpty() == false)
-         {
-            pItem->setText(iColumn, strCoordinate);
-         }
-
-         break;
-      }
-
-      case GEOCOORD_MGRS:
-         break;
-
-      default:
-         break;
-   }
+   mEditGcps[pItem] = point;
+   mbModified = true;
 }
 
 void GcpEditorDlg::newGcp()
@@ -752,7 +820,7 @@ void GcpEditorDlg::deleteGcp()
       {
          if (mpGcpView->isItemSelected(pItem) == false)
          {
-            GcpPoint point = getGcp(pItem);
+            GcpPoint point = mEditGcps.value(pItem);
             gcps.push_back(point);
          }
       }
@@ -784,14 +852,13 @@ void GcpEditorDlg::setCoordinateFormat(GeocoordType geocoordType)
       QTreeWidgetItem* pItem = mpGcpView->topLevelItem(i);
       if (pItem != NULL)
       {
-         GcpPoint point = getGcp(pItem);
+         GcpPoint point = mEditGcps.value(pItem);
          points.push_back(point);
       }
    }
 
    // Update the columns
-   mGeocoordType = geocoordType;
-   switch (mGeocoordType)
+   switch (geocoordType)
    {
       case GEOCOORD_LATLON:
          pHeaderItem->setText(3, "Latitude");
@@ -852,7 +919,13 @@ void GcpEditorDlg::setGcpProperties()
 
 void GcpEditorDlg::apply()
 {
-   if ((mbModified == false) || (mpGcpList == NULL))
+   if ((mbModified == false) || (mpLayer == NULL))
+   {
+      return;
+   }
+
+   GcpList* pGcpList = dynamic_cast<GcpList*>(mpLayer->getDataElement());
+   if (pGcpList == NULL)
    {
       return;
    }
@@ -868,23 +941,20 @@ void GcpEditorDlg::apply()
       QTreeWidgetItem* pItem = mpGcpView->topLevelItem(i);
       if (pItem != NULL)
       {
-         GcpPoint point = getGcp(pItem);
+         GcpPoint point = mEditGcps.value(pItem);
          points.push_back(point);
       }
    }
 
-   if (mpLayer != NULL)
+   View* pView = mpLayer->getView();
+   if (pView != NULL)
    {
-      View* pView = mpLayer->getView();
-      if (pView != NULL)
-      {
-         const list<GcpPoint>& oldPoints = mpGcpList->getSelectedPoints();
-         pView->addUndoAction(new SetGcpPoints(mpGcpList, oldPoints, points));
-      }
+      const list<GcpPoint>& oldPoints = pGcpList->getSelectedPoints();
+      pView->addUndoAction(new SetGcpPoints(pGcpList, oldPoints, points));
    }
 
-   mpGcpList->clearPoints();
-   mpGcpList->addPoints(points);
+   pGcpList->clearPoints();
+   pGcpList->addPoints(points);
 
    mbModified = false;
 }

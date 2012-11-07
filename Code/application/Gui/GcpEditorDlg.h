@@ -10,18 +10,20 @@
 #ifndef GCPEDITORDLG_H
 #define GCPEDITORDLG_H
 
+#include <QtCore/QList>
+#include <QtCore/QMap>
 #include <QtGui/QDialog>
 
-#include "GcpLayer.h"
+#include "GcpList.h"
 #include "Observer.h"
 #include "TypesFile.h"
 
 #include <list>
 
 class CustomTreeWidget;
-class GcpList;
-class GcpPoint;
+class GcpLayer;
 class GeocoordTypeComboBox;
+class Layer;
 class QCheckBox;
 class QComboBox;
 class QLabel;
@@ -56,10 +58,7 @@ public:
    /**
     *  Destroys the GCP editor.
     */
-   ~GcpEditorDlg();
-
-   void elementModified(Subject& subject, const std::string& signal, const boost::any& value);
-   void attached(Subject& subject, const std::string& signal, const Slot& slot);
+   virtual ~GcpEditorDlg();
 
 public slots:
    /**
@@ -152,15 +151,8 @@ protected:
     */
    void closeEvent(QCloseEvent* e);
 
-   /**
-    *  Gets a GCP from the given tree widget item values.
-    *
-    *  @param   pItem
-    *           The tree widget item for which to get a GCP.  Cannot be NULL.
-    *
-    *  @return  The GCP point.
-    */
-   GcpPoint getGcp(QTreeWidgetItem* pItem);
+   void attached(Subject& subject, const std::string& signal, const Slot& slot);
+   void elementModified(Subject& subject, const std::string& signal, const boost::any& value);
 
 protected slots:
    /**
@@ -271,9 +263,8 @@ private:
    QPushButton* mpApplyButton;
 
    QList<GcpLayer*> mGcpLayers;
-   GcpList* mpGcpList;
    GcpLayer* mpLayer;
-   GeocoordType mGeocoordType;
+   QMap<QTreeWidgetItem*, GcpPoint> mEditGcps;
 
    bool mbModified;
 };
