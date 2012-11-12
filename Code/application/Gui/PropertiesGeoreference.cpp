@@ -19,6 +19,7 @@
 #include "PlugInResource.h"
 #include "ProductView.h"
 #include "ProductWindow.h"
+#include "Progress.h"
 #include "PropertiesGeoreference.h"
 #include "RasterElement.h"
 #include "SpatialDataView.h"
@@ -112,16 +113,14 @@ bool PropertiesGeoreference::applyChanges()
          GeoreferenceDescriptor* pGeorefDescriptor = pDescriptor->getGeoreferenceDescriptor();
          if (pGeorefDescriptor != NULL)
          {
-            // Copy the temporary georeference parameters (including the metadata) owned by the properties
-            // plug-in into the georeference descriptor contained in the raster data descriptor
+            // Copy the temporary georeference parameters owned by the properties plug-in
+            // into the georeference descriptor contained in the raster data descriptor
             if (pGeorefDescriptor->clone(mpDescriptor->getGeoreferenceDescriptor()) == false)
             {
                QMessageBox::critical(pGeoreferencePage, "Georeference", "Could not apply the georeference changes "
                   "to the raster element.");
                return false;
             }
-
-            pDescriptor->setMetadata(mpDescriptor->getMetadata());
 
             // Perform the georeference
             const std::string& plugInName = pGeorefDescriptor->getGeoreferencePlugInName();
@@ -139,8 +138,23 @@ bool PropertiesGeoreference::applyChanges()
             geoPlugIn->getInArgList().setPlugInArgValue(Executable::DataElementArg(), pElement);
             if (geoPlugIn->execute() == false)
             {
-               QMessageBox::warning(pGeoreferencePage, "Georeference", "The georeference paremeters could not be "
-                  "applied to the raster element.");
+               QString errorMessage = "The georeference parameters could not be applied to the raster element.";
+
+               Progress* pProgress = geoPlugIn->getProgress();
+               if (pProgress != NULL)
+               {
+                  std::string messageText;
+                  int percent = 0;
+                  ReportingLevel level;
+
+                  pProgress->getProgress(messageText, percent, level);
+                  if (messageText.empty() == false)
+                  {
+                     errorMessage += "\n" + QString::fromStdString(messageText);
+                  }
+               }
+
+               QMessageBox::warning(pGeoreferencePage, "Georeference", errorMessage);
                pElement->setGeoreferencePlugin(NULL);
                return true;   // Return true since the georeference parameters were already successfully
                               // applied to the raster element
