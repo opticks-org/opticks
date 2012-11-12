@@ -7,6 +7,7 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include "AnnotationLayer.h"
 #include "AppVersion.h"
 #include "AppVerify.h"
 #include "DesktopServices.h"
@@ -19,6 +20,7 @@
 #include "GeoPoint.h"
 #include "GeoreferenceDescriptor.h"
 #include "GeoreferenceUtilities.h"
+#include "GraphicObject.h"
 #include "Layer.h"
 #include "LayerList.h"
 #include "MatrixFunctions.h"
@@ -29,14 +31,16 @@
 #include "PlugInRegistration.h"
 #include "ProgressTracker.h"
 #include "PlugInResource.h"
+#include "ProductView.h"
 #include "RasterElement.h"
 #include "RasterDataDescriptor.h"
 #include "RasterUtilities.h"
 #include "SpatialDataView.h"
-#include "SpatialDataWindow.h"
 #include "SessionItemDeserializer.h"
 #include "SessionItemSerializer.h"
 #include "Statistics.h"
+#include "TypeConverter.h"
+#include "WorkspaceWindow.h"
 #include "XercesIncludes.h"
 #include "xmlreader.h"
 #include "xmlwriter.h"
@@ -470,22 +474,72 @@ bool IgmGeoreference::deserialize(SessionItemDeserializer &deserializer)
 
 void IgmGeoreference::elementDeleted(Subject& subject, const std::string& signal, const boost::any& data)
 {
-   // Delete any lat-lon layers in the raster's view since they will no longer be valid
-   Service<DesktopServices> pDesktop;
-   SpatialDataWindow* pWindow = dynamic_cast<SpatialDataWindow*>(pDesktop->getCurrentWorkspaceWindow());
-   SpatialDataView* pView = (pWindow == NULL) ? NULL : pWindow->getSpatialDataView();
-   if (pView == NULL)
+   // Delete any lat/lon layers displaying the parent raster element since the georeferencing will no longer be valid
+   std::vector<Window*> windows;
+   Service<DesktopServices>()->getWindows(TypeConverter::toString<WorkspaceWindow>(), windows);
+   for (std::vector<Window*>::iterator iter = windows.begin(); iter != windows.end(); ++iter)
    {
-      return;
-   }
-
-   std::vector<Layer*> latLonLayers;
-   pView->getLayerList()->getLayers(LAT_LONG, latLonLayers);
-   for (std::vector<Layer*>::const_iterator layer = latLonLayers.begin(); layer != latLonLayers.end(); ++layer)
-   {
-      if ((*layer)->getLayerType() == LAT_LONG && (*layer)->getDataElement()->getParent() == mpRaster->getParent())
+      WorkspaceWindow* pWindow = dynamic_cast<WorkspaceWindow*>(*iter);
+      if (pWindow != NULL)
       {
-         pView->deleteLayer((*layer));
+         SpatialDataView* pSpatialDataView = dynamic_cast<SpatialDataView*>(pWindow->getView());
+         if (pSpatialDataView != NULL)
+         {
+            LayerList* pLayerList = pSpatialDataView->getLayerList();
+            if (pLayerList != NULL)
+            {
+               std::vector<Layer*> layers;
+               pLayerList->getLayers(LAT_LONG, layers);
+               for (std::vector<Layer*>::const_iterator layer = layers.begin(); layer != layers.end(); ++layer)
+               {
+                  Layer* pLayer = *layer;
+                  if ((pLayer != NULL) && (pLayer->getDataElement() == mpRaster))
+                  {
+                     pSpatialDataView->deleteLayer(pLayer);
+                  }
+               }
+            }
+         }
+
+         ProductView* pProductView = dynamic_cast<ProductView*>(pWindow->getView());
+         if (pProductView != NULL)
+         {
+            AnnotationLayer* pLayoutLayer = pProductView->getLayoutLayer();
+            if (pLayoutLayer != NULL)
+            {
+               std::list<GraphicObject*> objects;
+               pLayoutLayer->getObjects(VIEW_OBJECT, objects);
+               for (std::list<GraphicObject*>::const_iterator object = objects.begin();
+                  object != objects.end();
+                  ++object)
+               {
+                  GraphicObject* pObject = *object;
+                  if (pObject != NULL)
+                  {
+                     SpatialDataView* pObjectView = dynamic_cast<SpatialDataView*>(pObject->getObjectView());
+                     if (pObjectView != NULL)
+                     {
+                        LayerList* pLayerList = pObjectView->getLayerList();
+                        if (pLayerList != NULL)
+                        {
+                           std::vector<Layer*> layers;
+                           pLayerList->getLayers(LAT_LONG, layers);
+                           for (std::vector<Layer*>::const_iterator layer = layers.begin();
+                              layer != layers.end();
+                              ++layer)
+                           {
+                              Layer* pLayer = *layer;
+                              if ((pLayer != NULL) && (pLayer->getDataElement() == mpRaster))
+                              {
+                                 pSpatialDataView->deleteLayer(pLayer);
+                              }
+                           }
+                        }
+                     }
+                  }
+               }
+            }
+         }
       }
    }
 }
