@@ -21,8 +21,10 @@
 #include <QtGui/QVBoxLayout>
 
 #include "AppVerify.h"
+#include "ConfigurationSettings.h"
 #include "CustomTreeWidget.h"
 #include "DesktopServices.h"
+#include "DmsFormatTypeComboBox.h"
 #include "GcpEditorDlg.h"
 #include "GcpLayer.h"
 #include "GeocoordTypeComboBox.h"
@@ -88,18 +90,23 @@ GcpEditorDlg::GcpEditorDlg(QWidget* parent) :
    mpCoordTypeLabel = new QLabel("Coordinate Type:", this);
    mpCoordTypeCombo = new GeocoordTypeComboBox(this);
    mpCoordTypeCombo->setGeocoordType(GeoreferenceDescriptor::getSettingGeocoordType());
+   mpLatLonFormatLabel = new QLabel("Latitude/Longitude Format:", this);
+   mpLatLonFormatCombo = new DmsFormatTypeComboBox(this);
+   mpLatLonFormatCombo->setCurrentValue(GeoreferenceDescriptor::getSettingLatLonFormat());
 
    mpNewButton = new QPushButton("&New", pGcpGroup);
    mpDeleteButton = new QPushButton("&Delete", pGcpGroup);
 
-   QHBoxLayout* pGcpLayout = new QHBoxLayout();
+   QGridLayout* pGcpLayout = new QGridLayout();
    pGcpLayout->setMargin(0);
    pGcpLayout->setSpacing(5);
-   pGcpLayout->addWidget(mpCoordTypeLabel);
-   pGcpLayout->addWidget(mpCoordTypeCombo);
-   pGcpLayout->addStretch();
-   pGcpLayout->addWidget(mpNewButton);
-   pGcpLayout->addWidget(mpDeleteButton);
+   pGcpLayout->addWidget(mpCoordTypeLabel, 0, 0);
+   pGcpLayout->addWidget(mpCoordTypeCombo, 0, 1);
+   pGcpLayout->addWidget(mpLatLonFormatLabel, 1, 0);
+   pGcpLayout->addWidget(mpLatLonFormatCombo, 1, 1);
+   pGcpLayout->addWidget(mpNewButton, 1, 3);
+   pGcpLayout->addWidget(mpDeleteButton, 1, 4);
+   pGcpLayout->setColumnStretch(2, 10);
 
    QVBoxLayout* pGcpGroupLayout = new QVBoxLayout(pGcpGroup);
    pGcpGroupLayout->setMargin(10);
@@ -149,13 +156,22 @@ GcpEditorDlg::GcpEditorDlg(QWidget* parent) :
    VERIFYNR(connect(mpDeleteButton, SIGNAL(clicked()), this, SLOT(deleteGcp())));
    VERIFYNR(connect(mpCoordTypeCombo, SIGNAL(geocoordTypeChanged(GeocoordType)), this,
       SLOT(setCoordinateFormat(GeocoordType))));
+   VERIFYNR(connect(mpLatLonFormatCombo, SIGNAL(valueChanged(DmsFormatType)), this,
+      SLOT(setLatLonFormat(DmsFormatType))));
    VERIFYNR(connect(mpPropertiesButton, SIGNAL(clicked()), this, SLOT(setGcpProperties())));
    VERIFYNR(connect(mpApplyButton, SIGNAL(clicked()), this, SLOT(apply())));
    VERIFYNR(connect(pCloseButton, SIGNAL(clicked()), this, SLOT(close())));
+
+   Service<ConfigurationSettings> pSettings;
+   VERIFYNR(pSettings->attach(SIGNAL_NAME(ConfigurationSettings, SettingModified),
+      Slot(this, &GcpEditorDlg::optionsModified)));
 }
 
 GcpEditorDlg::~GcpEditorDlg()
-{}
+{
+   Service<ConfigurationSettings> pSettings;
+   pSettings->detach(SIGNAL_NAME(ConfigurationSettings, SettingModified), Slot(this, &GcpEditorDlg::optionsModified));
+}
 
 void GcpEditorDlg::attached(Subject& subject, const string& signal, const Slot& slot)
 {
@@ -175,6 +191,19 @@ void GcpEditorDlg::elementModified(Subject& subject, const string& signal, const
       const list<GcpPoint>& points = pGcpList->getSelectedPoints();
       updateGcpView(points);
       mbModified = false;
+   }
+}
+
+void GcpEditorDlg::optionsModified(Subject &subject, const string &signal, const boost::any &value)
+{
+   string key = boost::any_cast<string>(value);
+   if (key == GeoreferenceDescriptor::getSettingGeocoordTypeKey())
+   {
+      setCoordinateFormat(GeoreferenceDescriptor::getSettingGeocoordType());
+   }
+   else if (key == GeoreferenceDescriptor::getSettingLatLonFormatKey())
+   {
+      setLatLonFormat(GeoreferenceDescriptor::getSettingLatLonFormat());
    }
 }
 
@@ -347,13 +376,13 @@ QTreeWidgetItem* GcpEditorDlg::insertGcp(const GcpPoint& point)
          QString strLatitude;
          QString strLongitude;
 
-         string latText = latLonPoint.getLatitudeText();
+         string latText = latLonPoint.getLatitudeText(mpLatLonFormatCombo->getCurrentValue());
          if (latText.empty() == false)
          {
             strLatitude = QString::fromStdString(latText);
          }
 
-         string longText = latLonPoint.getLongitudeText();
+         string longText = latLonPoint.getLongitudeText(mpLatLonFormatCombo->getCurrentValue());
          if (longText.empty() == false)
          {
             strLongitude = QString::fromStdString(longText);
@@ -594,11 +623,15 @@ void GcpEditorDlg::enableGcp()
       bEnable = true;
    }
 
+   GeocoordType geocoordType = mpCoordTypeCombo->getGeocoordType();
+
    mpGcpView->setEnabled(bEnable);
    mpNewButton->setEnabled(bEnable);
    mpDeleteButton->setEnabled(bEnable);
    mpCoordTypeLabel->setEnabled(bEnable);
    mpCoordTypeCombo->setEnabled(bEnable);
+   mpLatLonFormatLabel->setEnabled(bEnable && geocoordType == GEOCOORD_LATLON);
+   mpLatLonFormatCombo->setEnabled(bEnable && geocoordType == GEOCOORD_LATLON);
    mpAutoApply->setEnabled(bEnable);
    mpPropertiesButton->setEnabled(bEnable);
    mpApplyButton->setEnabled(bEnable);
@@ -705,7 +738,7 @@ void GcpEditorDlg::updateGcp(QTreeWidgetItem* pItem, int iColumn)
 
             DmsPoint dmsPoint(eDmsType, strText.toStdString());
 
-            string dmsText = dmsPoint.getValueText();
+            string dmsText = dmsPoint.getValueText(mpLatLonFormatCombo->getCurrentValue());
             if (dmsText.empty() == false)
             {
                strCoordinate = QString::fromStdString(dmsText);
@@ -845,6 +878,9 @@ void GcpEditorDlg::setCoordinateFormat(GeocoordType geocoordType)
       return;
    }
 
+   // Update the combo box value
+   mpCoordTypeCombo->setGeocoordType(geocoordType);
+
    // Get the list view GCPs
    list<GcpPoint> points;
    for (int i = 0; i < mpGcpView->topLevelItemCount(); ++i)
@@ -903,6 +939,38 @@ void GcpEditorDlg::setCoordinateFormat(GeocoordType geocoordType)
 
    // Update the GCPs for the new coordinate format
    updateGcpView(points);
+
+   // Enable/disable the latitude/longitude format widgets
+   mpLatLonFormatLabel->setEnabled(geocoordType == GEOCOORD_LATLON);
+   mpLatLonFormatCombo->setEnabled(geocoordType == GEOCOORD_LATLON);
+}
+
+void GcpEditorDlg::setLatLonFormat(DmsFormatType latLonFormat)
+{
+   if (latLonFormat.isValid() == false)
+   {
+      return;
+   }
+
+   // Update the combo box value
+   mpLatLonFormatCombo->setCurrentValue(latLonFormat);
+
+   // Update the GCPs for the new latitude/longitude format
+   if (mpCoordTypeCombo->getGeocoordType() == GEOCOORD_LATLON)
+   {
+      list<GcpPoint> points;
+      for (int i = 0; i < mpGcpView->topLevelItemCount(); ++i)
+      {
+         QTreeWidgetItem* pItem = mpGcpView->topLevelItem(i);
+         if (pItem != NULL)
+         {
+            GcpPoint point = mEditGcps.value(pItem);
+            points.push_back(point);
+         }
+      }
+
+      updateGcpView(points);
+   }
 }
 
 void GcpEditorDlg::setGcpProperties()

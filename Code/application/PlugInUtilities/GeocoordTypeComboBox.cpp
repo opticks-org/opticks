@@ -31,32 +31,34 @@ GeocoordTypeComboBox::~GeocoordTypeComboBox()
 
 void GeocoordTypeComboBox::setGeocoordType(GeocoordType geocoordType)
 {
-   int index = -1;
-   if (geocoordType.isValid() == true)
+   if (geocoordType != getGeocoordType())
    {
-      std::string typeText = StringUtilities::toDisplayString(geocoordType);
-      if (typeText.empty() == false)
+      int index = -1;
+      if (geocoordType.isValid() == true)
       {
-         index = findText(QString::fromStdString(typeText));
+         std::string typeText = StringUtilities::toDisplayString(geocoordType);
+         if (typeText.empty() == false)
+         {
+            index = findText(QString::fromStdString(typeText));
+         }
       }
-   }
 
-   setCurrentIndex(index);
+      setCurrentIndex(index);
+   }
 }
 
 GeocoordType GeocoordTypeComboBox::getGeocoordType() const
 {
-   GeocoordType geocoordType;
    if (currentIndex() != -1)
    {
       std::string typeText = currentText().toStdString();
       if (typeText.empty() == false)
       {
-         geocoordType = StringUtilities::fromDisplayString<GeocoordType>(typeText);
+         return StringUtilities::fromDisplayString<GeocoordType>(typeText);
       }
    }
 
-   return geocoordType;
+   return GeocoordType();
 }
 
 void GeocoordTypeComboBox::translateIndexChanged(const QString& text)

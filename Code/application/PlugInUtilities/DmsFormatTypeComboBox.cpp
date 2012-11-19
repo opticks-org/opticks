@@ -31,21 +31,26 @@ DmsFormatTypeComboBox::~DmsFormatTypeComboBox()
 
 void DmsFormatTypeComboBox::setCurrentValue(DmsFormatType value)
 {
-   QString strValue = QString::fromStdString(StringUtilities::toDisplayString(value));
-   int index = findText(strValue);
-   setCurrentIndex(index);
+   if (value != getCurrentValue())
+   {
+      QString strValue = QString::fromStdString(StringUtilities::toDisplayString(value));
+      int index = findText(strValue);
+      setCurrentIndex(index);
+   }
 }
 
 DmsFormatType DmsFormatTypeComboBox::getCurrentValue() const
 {
-   DmsFormatType retValue;
-   int index = currentIndex();
-   if (index != -1)
+   if (currentIndex() != -1)
    {
       std::string curText = currentText().toStdString();
-      retValue = StringUtilities::fromDisplayString<DmsFormatType>(curText);
+      if (curText.empty() == false)
+      {
+         return StringUtilities::fromDisplayString<DmsFormatType>(curText);
+      }
    }
-   return retValue;
+
+   return DmsFormatType();
 }
 
 void DmsFormatTypeComboBox::translateIndexChanged(const QString& text)

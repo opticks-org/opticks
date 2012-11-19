@@ -21,6 +21,7 @@
 #include <list>
 
 class CustomTreeWidget;
+class DmsFormatTypeComboBox;
 class GcpLayer;
 class GeocoordTypeComboBox;
 class Layer;
@@ -153,6 +154,7 @@ protected:
 
    void attached(Subject& subject, const std::string& signal, const Slot& slot);
    void elementModified(Subject& subject, const std::string& signal, const boost::any& value);
+   void optionsModified(Subject& subject, const std::string& signal, const boost::any& value);
 
 protected slots:
    /**
@@ -233,6 +235,21 @@ protected slots:
    void setCoordinateFormat(GeocoordType geocoordType);
 
    /**
+    *  Sets the current latitude/longitude display format of the GCPs.
+    *
+    *  This method is called when the user selects a new latitude/longitude
+    *  display format.  The GCP table is automatically updated to show the
+    *  latitude/longitude coordinates in the new format.
+    *
+    *  This method will still succeed if the current coordinate type is not
+    *  Latitude/Longitude, however the GCP values will not update.
+    *
+    *  @param   latLonFormat
+    *           The new latitude/longitude display format.
+    */
+   void setLatLonFormat(DmsFormatType latLonFormat);
+
+   /**
     *  Invokes the properties dialog for the user to change the layer properties.
     */
    void setGcpProperties();
@@ -258,6 +275,8 @@ private:
    QPushButton* mpDeleteButton;
    QLabel* mpCoordTypeLabel;
    GeocoordTypeComboBox* mpCoordTypeCombo;
+   QLabel* mpLatLonFormatLabel;
+   DmsFormatTypeComboBox* mpLatLonFormatCombo;
    QCheckBox* mpAutoApply;
    QPushButton* mpPropertiesButton;
    QPushButton* mpApplyButton;
