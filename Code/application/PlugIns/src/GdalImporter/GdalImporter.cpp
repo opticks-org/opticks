@@ -286,7 +286,9 @@ unsigned char GdalImporter::getFileAffinity(const std::string& filename)
    return CAN_NOT_LOAD;
 }
 
-bool GdalImporter::validate(const DataDescriptor* pDescriptor, std::string& errorMessage) const
+bool GdalImporter::validate(const DataDescriptor* pDescriptor,
+                            const std::vector<const DataDescriptor*>& importedDescriptors,
+                            std::string& errorMessage) const
 {
    errorMessage = "";
    if (!mErrors.empty())
@@ -296,7 +298,7 @@ bool GdalImporter::validate(const DataDescriptor* pDescriptor, std::string& erro
    }
 
    std::string baseErrorMessage;
-   bool valid = RasterElementImporterShell::validate(pDescriptor, baseErrorMessage);
+   bool valid = RasterElementImporterShell::validate(pDescriptor, importedDescriptors, baseErrorMessage);
    errorMessage = baseErrorMessage;
 
    if (!mWarnings.empty())

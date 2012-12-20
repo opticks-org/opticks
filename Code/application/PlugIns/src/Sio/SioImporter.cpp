@@ -423,7 +423,8 @@ unsigned char SioImporter::getFileAffinity(const string& filename)
    }
 }
 
-bool SioImporter::validate(const DataDescriptor* pDescriptor, string& errorMessage) const
+bool SioImporter::validate(const DataDescriptor* pDescriptor, const vector<const DataDescriptor*>& importedDescriptors,
+                           string& errorMessage) const
 {
    if (mVersion9Sio)
    {
@@ -439,7 +440,7 @@ bool SioImporter::validate(const DataDescriptor* pDescriptor, string& errorMessa
 
    string baseErrorMessage;
 
-   bool bValid = RasterElementImporterShell::validate(pDescriptor, baseErrorMessage);
+   bool bValid = RasterElementImporterShell::validate(pDescriptor, importedDescriptors, baseErrorMessage);
    if (bValid == false)
    {
       ValidationTest errorTest = getValidationError();

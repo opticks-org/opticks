@@ -40,7 +40,8 @@ public:
    /**
     *  @copydoc RasterElementImporterShell::validate()
     */
-   virtual bool validate(const DataDescriptor* pDescriptor, std::string& errorMessage) const;
+   virtual bool validate(const DataDescriptor* pDescriptor,
+      const std::vector<const DataDescriptor*>& importedDescriptors, std::string& errorMessage) const;
 
 protected:
    /**

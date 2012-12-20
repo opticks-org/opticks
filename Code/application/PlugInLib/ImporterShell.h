@@ -83,7 +83,8 @@ public:
     *           NO_EXISTING_DATA_ELEMENT\endlink) may fail since the import
     *           process has already started.
     */
-   virtual bool validate(const DataDescriptor* pDescriptor, std::string& errorMessage) const;
+   virtual bool validate(const DataDescriptor* pDescriptor,
+      const std::vector<const DataDescriptor*>& importedDescriptors, std::string& errorMessage) const;
 
    /**
     *  @copydoc Importer::getImportOptionsWidget()
@@ -125,83 +126,86 @@ protected:
                                                    descriptor is a valid file that exists on the disk. */
       NO_EXISTING_DATA_ELEMENT = 0x00000002,  /**< 0x00000002 - Checks that an existing DataElement does not already
                                                    exist by calling ModelServices::getElement(). */
-      VALID_CLASSIFICATION = 0x00000004,      /**< 0x00000004 - Checks for the existence of classification markings by
+      NO_CONFLICTING_DATA_ELEMENTS = 0x00000004, /**< 0x00000004 - Checks whether multiple data sets that are being
+                                                   imported have the same name, type, and parent element, which will
+                                                   prevent at least one data set from being added to ModelServices. */
+      VALID_CLASSIFICATION = 0x00000008,      /**< 0x00000008 - Checks for the existence of classification markings by
                                                    checking the return value of DataDescriptor::getClassification() for
                                                    a non-\c NULL pointer.\   Also reports a warning if the
                                                    classification level of the data being imported is greater than the
                                                    overall classification level of the system. */
-      VALID_METADATA = 0x00000008,            /**< 0x00000008 - Checks for the existence of metadata by checking the
+      VALID_METADATA = 0x00000010,            /**< 0x00000010 - Checks for the existence of metadata by checking the
                                                    return value of DataDescriptor::getMetadata() for a non-\c NULL
                                                    pointer. */
-      VALID_PROCESSING_LOCATION = 0x00000010, /**< 0x00000010 - Checks that the processing location set in the data
+      VALID_PROCESSING_LOCATION = 0x00000020, /**< 0x00000020 - Checks that the processing location set in the data
                                                    descriptor is valid by calling isProcessingLocationSupported(). */
-      RASTER_SIZE = 0x00000020,               /**< 0x00000020 - Checks for at least one data pixel by checking for a
+      RASTER_SIZE = 0x00000040,               /**< 0x00000040 - Checks for at least one data pixel by checking for a
                                                    non-zero number of rows, columns, bands, and bits per element. */
-      VALID_DATA_TYPE = 0x00000040,           /**< 0x00000040 - Checks that the data type set in the raster data
+      VALID_DATA_TYPE = 0x00000080,           /**< 0x00000080 - Checks that the data type set in the raster data
                                                    descriptor is one of the valid data types returned by
                                                    RasterDataDescriptor::getValidDataTypes(). */
-      NO_HEADER_BYTES = 0x00000080,           /**< 0x00000080 - Checks for no header bytes set on the raster file
+      NO_HEADER_BYTES = 0x00000100,           /**< 0x00000100 - Checks for no header bytes set on the raster file
                                                    descriptor. */
-      NO_PRE_POST_LINE_BYTES = 0x00000100,    /**< 0x00000100 - Checks for no preline or postline bytes set on the
+      NO_PRE_POST_LINE_BYTES = 0x00000200,    /**< 0x00000200 - Checks for no preline or postline bytes set on the
                                                    raster file descriptor. */
-      NO_PRE_POST_BAND_BYTES = 0x00000200,    /**< 0x00000200 - Checks for no preband or postband bytes set on the
+      NO_PRE_POST_BAND_BYTES = 0x00000400,    /**< 0x00000400 - Checks for no preband or postband bytes set on the
                                                    raster file descriptor. */
-      NO_TRAILER_BYTES = 0x00000400,          /**< 0x00000400 - Checks for no trailer bytes set on the raster file
+      NO_TRAILER_BYTES = 0x00000800,          /**< 0x00000800 - Checks for no trailer bytes set on the raster file
                                                    descriptor. */
-      FILE_SIZE = 0x00000800 | EXISTING_FILE, /**< 0x00000800 - Checks that the size of the file set in the raster file
+      FILE_SIZE = 0x00001000 | EXISTING_FILE, /**< 0x00001000 - Checks that the size of the file set in the raster file
                                                    descriptor (in bytes) is greater than or equal to required file size
                                                    determined by calling RasterUtilities::calculateFileSize(). */
-      NO_BAND_FILES = 0x00001000,             /**< 0x00001000 - Checks that the number of band files is zero.\   Should
+      NO_BAND_FILES = 0x00002000,             /**< 0x00002000 - Checks that the number of band files is zero.\   Should
                                                    not be combined with \em EXISTING_BAND_FILES. */
-      EXISTING_BAND_FILES = 0x00002000,       /**< 0x00002000 - Checks that number of band files is equal to the number
+      EXISTING_BAND_FILES = 0x00004000,       /**< 0x00004000 - Checks that number of band files is equal to the number
                                                    of bands in the raster file descriptor and that each of the band
                                                    files exists on the disk.\   Should not be combined with
                                                    \em NO_BAND_FILES. */
-      BAND_FILE_SIZES = 0x00004000 | EXISTING_BAND_FILES, /**< 0x00004000 - Checks that the size of each band file (in
+      BAND_FILE_SIZES = 0x00008000 | EXISTING_BAND_FILES, /**< 0x00008000 - Checks that the size of each band file (in
                                                    bytes) is greater than or equal to the required file size determined
                                                    by calling RasterUtilities::calculateFileSize(). */
-      VALID_BAND_NAMES = 0x00008000 | VALID_METADATA, /**< 0x00008000 | \em VALID_METADATA - Checks that the number of
+      VALID_BAND_NAMES = 0x00010000 | VALID_METADATA, /**< 0x00010000 | \em VALID_METADATA - Checks that the number of
                                                    band names set in the metadata is equal to the number of bands in
                                                    the raster file descriptor.\   This test will succeed if band names
                                                    are not present in the metadata. */
-      VALID_WAVELENGTHS = 0x00010000 | VALID_METADATA, /**< 0x00010000 | \em VALID_METADATA - Checks that the number of
+      VALID_WAVELENGTHS = 0x00020000 | VALID_METADATA, /**< 0x00020000 | \em VALID_METADATA - Checks that the number of
                                                    wavelengths set in the metadata is equal to the number of bands in
                                                    the raster file descriptor by calling
                                                    Wavelengths::getNumWavelengths().\   This test will succeed if
                                                    wavelengths are not present in the metadata. */
-      NO_INTERLEAVE_CONVERSIONS = 0x00020000, /**< 0x00020000 - Checks that the interleave format in the raster data
+      NO_INTERLEAVE_CONVERSIONS = 0x00040000, /**< 0x00040000 - Checks that the interleave format in the raster data
                                                    descriptor matches the interleave format in the raster file
                                                    descriptor.\   No check is performed if
                                                    RasterFileDescriptor::getBandCount() returns 1. */
-      NO_ROW_SKIP_FACTOR = 0x00040000,        /**< 0x00040000 - Checks for no skip factor in the raster data descriptor
+      NO_ROW_SKIP_FACTOR = 0x00080000,        /**< 0x00080000 - Checks for no skip factor in the raster data descriptor
                                                    rows by calling RasterDataDescriptor::getRowSkipFactor(). */
-      NO_COLUMN_SKIP_FACTOR = 0x00080000,     /**< 0x00080000 - Checks for no skip factor in the raster data descriptor
+      NO_COLUMN_SKIP_FACTOR = 0x00100000,     /**< 0x00100000 - Checks for no skip factor in the raster data descriptor
                                                    columns by calling RasterDataDescriptor::getColumnSkipFactor(). */
       NO_SKIP_FACTORS = NO_ROW_SKIP_FACTOR | NO_COLUMN_SKIP_FACTOR, /**< \em NO_ROW_SKIP_FACTOR |
                                                    \em NO_COLUMN_SKIP_FACTOR - Convenience value that performs both
                                                    \em NO_ROW_SKIP_FACTOR and \em NO_COLUMN_SKIP_FACTOR checks. */
-      NO_ROW_SUBSETS = 0x00100000,            /**< 0x00100000 - Checks that the number of rows to import in the raster
+      NO_ROW_SUBSETS = 0x00200000,            /**< 0x00200000 - Checks that the number of rows to import in the raster
                                                    data descriptor matches the number of rows in the raster file
                                                    descriptor. */
-      NO_COLUMN_SUBSETS = 0x00200000,         /**< 0x00200000 - Checks that the number of columns to import in the
+      NO_COLUMN_SUBSETS = 0x00400000,         /**< 0x00400000 - Checks that the number of columns to import in the
                                                    raster data descriptor matches the number of columns in the raster
                                                    file descriptor. */
-      NO_BAND_SUBSETS = 0x00400000,           /**< 0x00400000 - Checks that the number of bands to import in the raster
+      NO_BAND_SUBSETS = 0x00800000,           /**< 0x00800000 - Checks that the number of bands to import in the raster
                                                    data descriptor matches the number of bands in the raster file
                                                    descriptor. */
       NO_SUBSETS = NO_ROW_SUBSETS | NO_COLUMN_SUBSETS | NO_BAND_SUBSETS, /**< \em NO_ROW_SUBSETS |
                                                    \em NO_COLUMN_SUBSETS | \em NO_BAND_SUBSETS - Convenience value that
                                                    performs all \em NO_ROW_SUBSETS, \em NO_COLUMN_SUBSETS, and
                                                    \em NO_BAND_SUBSETS checks. */
-      AVAILABLE_MEMORY = 0x00800000,          /**< 0x00800000 - Checks that the amount of required memory calculated
+      AVAILABLE_MEMORY = 0x01000000,          /**< 0x01000000 - Checks that the amount of required memory calculated
                                                    from the rows, columns, bands, and bytes per element set in the
                                                    raster data descriptor can be successfully allocated. */
-      VALID_GEOREFERENCE_PLUGIN = 0x01000000, /**< 0x01000000 - Checks that a valid Georeference plug-in name is set
+      VALID_GEOREFERENCE_PLUGIN = 0x02000000, /**< 0x02000000 - Checks that a valid Georeference plug-in name is set
                                                    in the GeoreferenceDescriptor if the data will be georeferenced
                                                    on import.\   No check is performed if
                                                    GeoreferenceDescriptor::getGeoreferenceOnImport() returns
                                                    \c false. */
-      VALID_GEOREFERENCE_PARAMETERS = 0x02000000 | VALID_GEOREFERENCE_PLUGIN /**< 0x02000000 |
+      VALID_GEOREFERENCE_PARAMETERS = 0x04000000 | VALID_GEOREFERENCE_PLUGIN /**< 0x04000000 |
                                                    \em VALID_GEOREFERENCE_PLUGIN - Checks for valid georeference
                                                    plug-in parameters by calling Georeference::validate() on the
                                                    Georeference plug-in set in the GeoreferenceDescriptor.\   No check
@@ -234,6 +238,7 @@ protected:
     *           combination of the following tests:
     *           - \link ImporterShell::EXISTING_FILE EXISTING_FILE \endlink
     *           - \link ImporterShell::NO_EXISTING_DATA_ELEMENT NO_EXISTING_DATA_ELEMENT \endlink
+    *           - \link ImporterShell::NO_CONFLICTING_DATA_ELEMENTS NO_CONFLICTING_DATA_ELEMENTS \endlink
     *           - \link ImporterShell::VALID_PROCESSING_LOCATION VALID_PROCESSING_LOCATION \endlink
     */
    virtual int getValidationTest(const DataDescriptor* pDescriptor) const;

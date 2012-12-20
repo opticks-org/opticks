@@ -1011,9 +1011,10 @@ bool GeoTIFFImporter::createRasterPager(RasterElement *pRasterElement) const
    return true;
 }
 
-bool GeoTIFFImporter::validate(const DataDescriptor* pDescriptor, string& errorMessage) const
+bool GeoTIFFImporter::validate(const DataDescriptor* pDescriptor,
+                               const vector<const DataDescriptor*>& importedDescriptors, string& errorMessage) const
 {
-   if (RasterElementImporterShell::validate(pDescriptor, errorMessage) == false)
+   if (RasterElementImporterShell::validate(pDescriptor, importedDescriptors, errorMessage) == false)
    {
       ValidationTest errorTest = getValidationError();
       if (errorTest == NO_BAND_FILES)

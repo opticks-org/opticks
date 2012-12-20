@@ -545,6 +545,9 @@ bool ImportAgentImp::execute()
    createProgressDialog();
 
    // Create the data elements for all the selected data sets
+   vector<const DataDescriptor*> importedDataDescriptors =
+      ImportDescriptor::getImportedDataDescriptors(importDescriptors);
+
    vector<ImportDescriptor*> selectedDescriptors;
    for (vector<ImportDescriptor*>::iterator iter = importDescriptors.begin(); iter != importDescriptors.end(); ++iter)
    {
@@ -564,7 +567,7 @@ bool ImportAgentImp::execute()
       pImporter->polishDataDescriptor(pDescriptor);
 
       string errorMessage;
-      if (pImporter->validate(pDescriptor, errorMessage) == false)
+      if (pImporter->validate(pDescriptor, importedDataDescriptors, errorMessage) == false)
       {
          if (pProgress != NULL)
          {
@@ -758,6 +761,8 @@ unsigned int ImportAgentImp::validateImportDescriptors(const vector<ImportDescri
 
    errorMessage.clear();
 
+   vector<const DataDescriptor*> importedDataDescriptors = ImportDescriptor::getImportedDataDescriptors(descriptors);
+
    unsigned int numValid = 0;
    for (vector<ImportDescriptor*>::const_iterator iter = descriptors.begin(); iter != descriptors.end(); ++iter)
    {
@@ -787,7 +792,7 @@ unsigned int ImportAgentImp::validateImportDescriptors(const vector<ImportDescri
 
             // Validate the data
             string currentError;
-            bool validDescriptor = pImporter->validate(pDescriptor, currentError);
+            bool validDescriptor = pImporter->validate(pDescriptor, importedDataDescriptors, currentError);
             if (currentError.empty() == false)
             {
                if (errorMessage.empty() == false)

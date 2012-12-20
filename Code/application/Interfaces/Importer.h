@@ -198,6 +198,9 @@ public:
     *  @param   pDescriptor
     *           The data descriptor to query if it can be successfully
     *           imported.
+    *  @param   importedDescriptors
+    *           A vector containing pointers to all data descriptors that will
+    *           be imported, which may or may not include \em pDescriptor.
     *  @param   errorMessage
     *           An error message that is populated with the reason why the
     *           importer cannot load the given data descriptor.  This message
@@ -210,9 +213,12 @@ public:
     *  @return  Returns \c true if the importer can successfully import the
     *           given data descriptor; otherwise returns \c false.
     *
-    *  @see     DataDescriptor, FileDescriptor
+    *  @see     DataDescriptor<br>FileDescriptor<br>
+    *           ImportDescriptor::isImported()<br>
+    *           ImportDescriptor::getImportedDataDescriptors()
     */
-   virtual bool validate(const DataDescriptor* pDescriptor, std::string& errorMessage) const = 0;
+   virtual bool validate(const DataDescriptor* pDescriptor,
+      const std::vector<const DataDescriptor*>& importedDescriptors, std::string& errorMessage) const = 0;
 
    /**
     *  Returns a widget to display custom import option values.

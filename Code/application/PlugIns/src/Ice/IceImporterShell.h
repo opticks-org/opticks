@@ -24,7 +24,8 @@ public:
 
    std::vector<ImportDescriptor*> getImportDescriptors(const std::string& filename);
    unsigned char getFileAffinity(const std::string& filename);
-   bool validate(const DataDescriptor* pDescriptor, std::string& errorMessage) const;
+   bool validate(const DataDescriptor* pDescriptor, const std::vector<const DataDescriptor*>& importedDescriptors,
+      std::string& errorMessage) const;
    bool performImport() const;
 
 protected:

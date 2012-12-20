@@ -57,7 +57,8 @@ QWidget* ImporterShell::getPreview(const DataDescriptor* pDescriptor, Progress* 
    return NULL;
 }
 
-bool ImporterShell::validate(const DataDescriptor* pDescriptor, string& errorMessage) const
+bool ImporterShell::validate(const DataDescriptor* pDescriptor,
+                             const vector<const DataDescriptor*>& importedDescriptors, string& errorMessage) const
 {
    mValidationError = ValidationTest();
 
@@ -117,6 +118,35 @@ bool ImporterShell::validate(const DataDescriptor* pDescriptor, string& errorMes
          errorMessage = "The data set currently exists.  It may have already been imported.";
          mValidationError = NO_EXISTING_DATA_ELEMENT;
          return false;
+      }
+   }
+
+   // Conflicting data elements
+   if (validationTest & NO_CONFLICTING_DATA_ELEMENTS)
+   {
+      const string& name = pDescriptor->getName();
+      const string& type = pDescriptor->getType();
+      DataElement* pParent = pDescriptor->getParent();
+
+      for (vector<const DataDescriptor*>::const_iterator iter = importedDescriptors.begin();
+         iter != importedDescriptors.end();
+         ++iter)
+      {
+         const DataDescriptor* pCurrentDescriptor = *iter;
+         if ((pCurrentDescriptor != NULL) && (pCurrentDescriptor != pDescriptor))
+         {
+            const string& currentName = pCurrentDescriptor->getName();
+            const string& currentType = pCurrentDescriptor->getType();
+            DataElement* pCurrentParent = pCurrentDescriptor->getParent();
+
+            if ((name == currentName) && (type == currentType) && (pParent == pCurrentParent))
+            {
+               errorMessage = "Another data set is also being imported that has the same name, type, and "
+                  "parent data set as this data set.";
+               mValidationError = NO_CONFLICTING_DATA_ELEMENTS;
+               return false;
+            }
+         }
       }
    }
 
@@ -588,7 +618,7 @@ void ImporterShell::setExtensions(const string& extensions)
 
 int ImporterShell::getValidationTest(const DataDescriptor* pDescriptor) const
 {
-   return EXISTING_FILE | NO_EXISTING_DATA_ELEMENT | VALID_PROCESSING_LOCATION;
+   return EXISTING_FILE | NO_EXISTING_DATA_ELEMENT | NO_CONFLICTING_DATA_ELEMENTS | VALID_PROCESSING_LOCATION;
 }
 
 ImporterShell::ValidationTest ImporterShell::getValidationError() const

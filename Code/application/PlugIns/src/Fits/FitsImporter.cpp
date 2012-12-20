@@ -598,7 +598,9 @@ unsigned char FitsImporter::getFileAffinity(const std::string &filename)
    return CAN_NOT_LOAD;
 }
 
-bool FitsImporter::validate(const DataDescriptor *pDescriptor, std::string &errorMessage) const
+bool FitsImporter::validate(const DataDescriptor* pDescriptor,
+                            const std::vector<const DataDescriptor*>& importedDescriptors,
+                            std::string& errorMessage) const
 {
    VERIFY(pDescriptor);
    int hdu = StringUtilities::fromDisplayString<int>(pDescriptor->getFileDescriptor()->getDatasetLocation());
@@ -636,11 +638,11 @@ bool FitsImporter::validate(const DataDescriptor *pDescriptor, std::string &erro
    const std::string& type = pDescriptor->getType();
    if (type == TypeConverter::toString<RasterElement>())
    {
-      valid = RasterElementImporterShell::validate(pDescriptor, baseErrorMessage);
+      valid = RasterElementImporterShell::validate(pDescriptor, importedDescriptors, baseErrorMessage);
    }
    else if ((type == TypeConverter::toString<Signature>()) || (type == TypeConverter::toString<SignatureLibrary>()))
    {
-      valid = ImporterShell::validate(pDescriptor, baseErrorMessage);
+      valid = ImporterShell::validate(pDescriptor, importedDescriptors, baseErrorMessage);
    }
 
    if (valid == true)

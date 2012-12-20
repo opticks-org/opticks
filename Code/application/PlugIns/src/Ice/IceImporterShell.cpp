@@ -30,7 +30,8 @@ IceImporterShell::~IceImporterShell()
 {
 }
 
-bool IceImporterShell::validate(const DataDescriptor* pDescriptor, string& errorMessage) const
+bool IceImporterShell::validate(const DataDescriptor* pDescriptor,
+                                const vector<const DataDescriptor*>& importedDescriptors, string& errorMessage) const
 {
    errorMessage = "";
    if (!mErrors.empty())
@@ -42,7 +43,7 @@ bool IceImporterShell::validate(const DataDescriptor* pDescriptor, string& error
       return false;
    }
    string baseErrorMessage;
-   bool bValidate = Hdf5ImporterShell::validate(pDescriptor, baseErrorMessage);
+   bool bValidate = Hdf5ImporterShell::validate(pDescriptor, importedDescriptors, baseErrorMessage);
    if (!mWarnings.empty())
    {
       if (!baseErrorMessage.empty())

@@ -22,7 +22,8 @@ public:
 
    virtual unsigned char getFileAffinity(const std::string& filename);
    virtual std::vector<ImportDescriptor*> getImportDescriptors(const std::string& filename);
-   virtual bool validate(const DataDescriptor* pDescriptor, std::string& errorMessage) const;
+   virtual bool validate(const DataDescriptor* pDescriptor,
+      const std::vector<const DataDescriptor*>& importedDescriptors, std::string& errorMessage) const;
    virtual bool getInputSpecification(PlugInArgList*& pArgList);
    virtual bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
 

@@ -21,8 +21,6 @@
 #include "RasterFileDescriptor.h"
 #include "UtilityServices.h"
 
-using namespace std;
-
 HdfImporterShell::HdfImporterShell()
 {
    setName("HDF Importer");
@@ -37,9 +35,11 @@ HdfImporterShell::HdfImporterShell()
 HdfImporterShell::~HdfImporterShell()
 {}
 
-bool HdfImporterShell::validate(const DataDescriptor* pDescriptor, std::string& errorMessage) const
+bool HdfImporterShell::validate(const DataDescriptor* pDescriptor,
+                                const std::vector<const DataDescriptor*>& importedDescriptors,
+                                std::string& errorMessage) const
 {
-   bool isValid = RasterElementImporterShell::validate(pDescriptor, errorMessage);
+   bool isValid = RasterElementImporterShell::validate(pDescriptor, importedDescriptors, errorMessage);
    if (isValid == false)
    {
       ValidationTest errorTest = getValidationError();
@@ -97,7 +97,7 @@ int HdfImporterShell::getValidationTest(const DataDescriptor* pDescriptor) const
    return validationTest;
 }
 
-bool HdfImporterShell::createRasterPagerPlugIn(const string& pagerName, RasterElement& raster) const
+bool HdfImporterShell::createRasterPagerPlugIn(const std::string& pagerName, RasterElement& raster) const
 {
    const DataDescriptor* pDescriptor = raster.getDataDescriptor();
    if (pDescriptor == NULL)
@@ -111,7 +111,7 @@ bool HdfImporterShell::createRasterPagerPlugIn(const string& pagerName, RasterEl
       return false;
    }
 
-   const string& hdfName = pFileDescriptor->getDatasetLocation();
+   const std::string& hdfName = pFileDescriptor->getDatasetLocation();
 
    bool bWritable = false;
    if (pDescriptor->getProcessingLocation() == ON_DISK)

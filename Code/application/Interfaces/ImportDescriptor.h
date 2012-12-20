@@ -12,6 +12,8 @@
 
 #include "DataDescriptor.h"
 
+#include <vector>
+
 /**
  *  Specifies parameters for importing a single DataElement.
  *
@@ -82,6 +84,41 @@ public:
     *  @see     setImported()
     */
    virtual bool isImported() const = 0;
+
+   /**
+    *  Retrieves imported data sets from given import descriptors.
+    *
+    *  @param   importDescriptors
+    *           The import descriptors over which to search for imported data
+    *           sets.
+    *
+    *  @return  Returns a vector populated with const DataDescriptor pointers
+    *           representing the imported data sets contained in the given
+    *           import descriptors.
+    *
+    *  @see     isImported()<br>Importer::validate()
+    */
+   static std::vector<const DataDescriptor*>
+      getImportedDataDescriptors(const std::vector<ImportDescriptor*>& importDescriptors)
+   {
+      std::vector<const DataDescriptor*> importedDataDescriptors;
+      for (std::vector<ImportDescriptor*>::const_iterator iter = importDescriptors.begin();
+         iter != importDescriptors.end();
+         ++iter)
+      {
+         ImportDescriptor* pImportDescriptor = *iter;
+         if ((pImportDescriptor != NULL) && (pImportDescriptor->isImported() == true))
+         {
+            DataDescriptor* pDescriptor = pImportDescriptor->getDataDescriptor();
+            if (pDescriptor != NULL)
+            {
+               importedDataDescriptors.push_back(pDescriptor);
+            }
+         }
+      }
+
+      return importedDataDescriptors;
+   }
 
 protected:
    /**

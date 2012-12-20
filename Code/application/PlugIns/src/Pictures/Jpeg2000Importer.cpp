@@ -445,7 +445,7 @@ QWidget* Jpeg2000Importer::getPreview(const DataDescriptor* pDescriptor, Progres
    string errorMessage;
    // Try an in-memory preview
    pLoadDescriptor->setProcessingLocation(IN_MEMORY);
-   bool bValidPreview = validate(pLoadDescriptor, errorMessage);
+   bool bValidPreview = validate(pLoadDescriptor, vector<const DataDescriptor*>(), errorMessage);
 
    QWidget* pPreviewWidget = NULL;
    if (bValidPreview == true)

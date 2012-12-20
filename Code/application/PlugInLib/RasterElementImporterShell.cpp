@@ -164,9 +164,11 @@ bool RasterElementImporterShell::execute(PlugInArgList* pInArgList, PlugInArgLis
    return true;
 }
 
-bool RasterElementImporterShell::validate(const DataDescriptor* pDescriptor, string& errorMessage) const
+bool RasterElementImporterShell::validate(const DataDescriptor* pDescriptor,
+                                          const vector<const DataDescriptor*>& importedDescriptors,
+                                          string& errorMessage) const
 {
-   bool isValid = ImporterShell::validate(pDescriptor, errorMessage);
+   bool isValid = ImporterShell::validate(pDescriptor, importedDescriptors, errorMessage);
    if (isValid == false)
    {
       ValidationTest errorTest = getValidationError();
@@ -324,12 +326,12 @@ QWidget* RasterElementImporterShell::getPreview(const DataDescriptor* pDescripto
 
    // Validate the preview
    string errorMessage;
-   bool bValidPreview = validate(pLoadDescriptor, errorMessage);
+   bool bValidPreview = validate(pLoadDescriptor, vector<const DataDescriptor*>(), errorMessage);
    if (bValidPreview == false)
    {
       // Try an in-memory preview
       pLoadDescriptor->setProcessingLocation(IN_MEMORY);
-      bValidPreview = validate(pLoadDescriptor, errorMessage);
+      bValidPreview = validate(pLoadDescriptor, vector<const DataDescriptor*>(), errorMessage);
    }
 
    QWidget* pPreviewWidget = NULL;

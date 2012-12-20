@@ -819,7 +819,11 @@ XmlRpcParam* GetMetadata::operator()(const XmlRpcParams& params)
    }
    else
    {
-      if (!pImp->validate(descriptors[0]->getDataDescriptor(), errorMessage) && errorMessage.empty())
+      std::vector<const DataDescriptor*> importedDescriptors =
+         ImportDescriptor::getImportedDataDescriptors(descriptors);
+
+      if (!pImp->validate(descriptors[0]->getDataDescriptor(), importedDescriptors, errorMessage) &&
+         errorMessage.empty())
       {
          errorMessage = "Validate returned false";
       }
@@ -1115,6 +1119,8 @@ XmlRpcParam* Open::operator()(const XmlRpcParams& params)
    QString errors;
    bool cubePresent = false;
    std::vector<ImportDescriptor*> descriptors = pImporter->getImportDescriptors();
+   std::vector<const DataDescriptor*> importedDescriptors = ImportDescriptor::getImportedDataDescriptors(descriptors);
+
    for (std::vector<ImportDescriptor*>::iterator descriptor = descriptors.begin();
       descriptor != descriptors.end(); ++descriptor)
    {
@@ -1129,7 +1135,8 @@ XmlRpcParam* Open::operator()(const XmlRpcParams& params)
             (*descriptor)->getDataDescriptor()->setProcessingLocation(location);
          }
          std::string errorMessage;
-         if (!pImp->validate((*descriptor)->getDataDescriptor(), errorMessage) && !errorMessage.empty())
+         if (!pImp->validate((*descriptor)->getDataDescriptor(), importedDescriptors, errorMessage) &&
+            !errorMessage.empty())
          {
             if (!errors.isEmpty())
             {

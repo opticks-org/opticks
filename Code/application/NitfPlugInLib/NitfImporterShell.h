@@ -59,7 +59,8 @@ namespace Nitf
        * \par
        * The default implementation also returns warnings when lookup tables (LUTs) or other issues are detected.
        */
-      virtual bool validate(const DataDescriptor* pDescriptor, std::string& errorMessage) const;
+      virtual bool validate(const DataDescriptor* pDescriptor,
+         const std::vector<const DataDescriptor*>& importedDescriptors, std::string& errorMessage) const;
 
       /**
        * @copydoc RasterElementImporterShell::createView()

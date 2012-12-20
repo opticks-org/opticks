@@ -961,9 +961,10 @@ bool EnviImporter::parseHeader(const string& filename)
    return bSuccess;
 }
 
-bool EnviImporter::validate(const DataDescriptor* pDescriptor, string& errorMessage) const
+bool EnviImporter::validate(const DataDescriptor* pDescriptor, const vector<const DataDescriptor*>& importedDescriptors,
+                            string& errorMessage) const
 {
-   if (RasterElementImporterShell::validate(pDescriptor, errorMessage) == false)
+   if (RasterElementImporterShell::validate(pDescriptor, importedDescriptors, errorMessage) == false)
    {
       return false;
    }

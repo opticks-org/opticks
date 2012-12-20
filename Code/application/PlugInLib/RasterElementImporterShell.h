@@ -123,7 +123,8 @@ public:
     *           loaded, a warning is added to \em errorMessage and the method
     *           returns \c true.
     */
-   virtual bool validate(const DataDescriptor* pDescriptor, std::string& errorMessage) const;
+   virtual bool validate(const DataDescriptor* pDescriptor,
+      const std::vector<const DataDescriptor*>& importedDescriptors, std::string& errorMessage) const;
 
    /**
     *  @copydoc Importer::isProcessingLocationSupported()

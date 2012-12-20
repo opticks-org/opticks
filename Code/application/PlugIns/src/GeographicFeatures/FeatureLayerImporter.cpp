@@ -105,7 +105,9 @@ std::vector<ImportDescriptor*> FeatureLayerImporter::getImportDescriptors(const 
    return descriptors;
 }
 
-bool FeatureLayerImporter::validate(const DataDescriptor* pDescriptor, std::string& errorMessage) const
+bool FeatureLayerImporter::validate(const DataDescriptor* pDescriptor,
+                                    const std::vector<const DataDescriptor*>& importedDescriptors,
+                                    std::string& errorMessage) const
 {
    VERIFY(pDescriptor != NULL);
 

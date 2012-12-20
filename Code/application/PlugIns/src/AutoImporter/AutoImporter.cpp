@@ -296,7 +296,9 @@ QWidget* AutoImporter::getPreview(const DataDescriptor* pDescriptor, Progress* p
    return pPreviewWidget;
 }
 
-bool AutoImporter::validate(const DataDescriptor* pDescriptor, string& errorMessage) const
+bool AutoImporter::validate(const DataDescriptor* pDescriptor,
+                            const vector<const DataDescriptor*>& importedDescriptors,
+                            string& errorMessage) const
 {
    if (pDescriptor == NULL)
    {
@@ -308,7 +310,7 @@ bool AutoImporter::validate(const DataDescriptor* pDescriptor, string& errorMess
    Importer* pImporter = const_cast<AutoImporter*>(this)->findImporter(pDescriptor);
    if (pImporter != NULL)
    {
-      bValid = pImporter->validate(pDescriptor, errorMessage);
+      bValid = pImporter->validate(pDescriptor, importedDescriptors, errorMessage);
       if (errorMessage.empty() == false)
       {
          VERIFY(mpPlugIn != NULL);

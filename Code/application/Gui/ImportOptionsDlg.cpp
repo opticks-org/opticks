@@ -872,8 +872,30 @@ bool ImportOptionsDlg::validateDataset(DataDescriptor* pDescriptor, QString& val
    bool validDataset = false;
    if (mpImporter != NULL)
    {
+      vector<const DataDescriptor*> importedDataDescriptors;
+      for (map<ImportDescriptor*, QTreeWidgetItem*>::const_iterator iter = mDatasets.begin();
+         iter != mDatasets.end();
+         ++iter)
+      {
+         ImportDescriptor* pImportDescriptor = iter->first;
+         QTreeWidgetItem* pItem = iter->second;
+         if ((pImportDescriptor != NULL) && (pItem != NULL) && (pItem->checkState(0) == Qt::Checked))
+         {
+            DataDescriptor* pDataDescriptor = pImportDescriptor->getDataDescriptor();
+            if ((pImportDescriptor == mpCurrentDataset) && (pDescriptor == mpEditDescriptor))
+            {
+               pDataDescriptor = mpEditDescriptor;
+            }
+
+            if (pDataDescriptor != NULL)
+            {
+               importedDataDescriptors.push_back(pDataDescriptor);
+            }
+         }
+      }
+
       string errorMessage;
-      validDataset = mpImporter->validate(pDescriptor, errorMessage);
+      validDataset = mpImporter->validate(pDescriptor, importedDataDescriptors, errorMessage);
       if (!errorMessage.empty())
       {
          validationMessage = QString::fromStdString(errorMessage);
@@ -1251,6 +1273,27 @@ void ImportOptionsDlg::datasetItemChanged(QTreeWidgetItem* pItem)
       SLOT(datasetItemChanged(QTreeWidgetItem*))));
 
    enforceSelections(pItem);
+
+   // This method is called when any data set import state changes, so validate
+   // all data sets again with an updated vector of imported data sets
+   for (map<ImportDescriptor*, QTreeWidgetItem*>::const_iterator iter = mDatasets.begin();
+      iter != mDatasets.end();
+      ++iter)
+   {
+      // Must validate the current data set using the edit descriptor to properly validate any local
+      // changes made by the user and to properly update the OK button and validation label message
+      ImportDescriptor* pImportDescriptor = iter->first;
+      if ((pImportDescriptor != NULL) && (pImportDescriptor != mpCurrentDataset))
+      {
+         DataDescriptor* pDataDescriptor = pImportDescriptor->getDataDescriptor();
+         if (pDataDescriptor != NULL)
+         {
+            validateDataset(pDataDescriptor);
+         }
+      }
+   }
+
+   // Validate the current data set, which also updates the dialog OK button and validation label message
    validateEditDataset();
 
    VERIFYNR(connect(mpDatasetTree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this,
