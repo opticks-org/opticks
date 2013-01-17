@@ -280,7 +280,6 @@
    <file alias="opticks">OpticksLicense.txt</file>
    <file alias="ossim">OssimLicense.txt</file>
    <file alias="pcre">PcreLicense.txt</file>
-   <file alias="pme">PmeLicense.txt</file>
    <file alias="proj4">Proj4License.txt</file>
    <file alias="pthreads">PthreadsLicense.txt</file>
    <file alias="qt">QtLicense.txt</file>

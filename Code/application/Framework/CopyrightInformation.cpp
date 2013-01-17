@@ -32,7 +32,6 @@ CopyrightInformation::CopyrightInformation()
    addDependencyCopyright("OSSIM", Service<UtilityServices>()->getTextFromFile(":/licenses/ossim"));
    addDependencyCopyright("proj4", Service<UtilityServices>()->getTextFromFile(":/licenses/proj4"));
    addDependencyCopyright("PCRE", Service<UtilityServices>()->getTextFromFile(":/licenses/pcre"));
-   addDependencyCopyright("PME", Service<UtilityServices>()->getTextFromFile(":/licenses/pme"));
    addDependencyCopyright("Pthreads", Service<UtilityServices>()->getTextFromFile(":/licenses/pthreads"));
    addDependencyCopyright("Qt", Service<UtilityServices>()->getTextFromFile(":/licenses/qt"));
    addDependencyCopyright("Qwt", Service<UtilityServices>()->getTextFromFile(":/licenses/qwt"));

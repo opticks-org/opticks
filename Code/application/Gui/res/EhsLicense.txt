@@ -501,4 +501,6 @@ necessary.  Here is a sample; alter the names:
   Ty Coon, President of Vice
 
 That's all there is to it!
+
+NOTE: Opticks was built using a modified version of the EHS library.
 </pre>

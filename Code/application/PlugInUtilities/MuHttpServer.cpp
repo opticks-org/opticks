@@ -40,6 +40,12 @@ MuHttpServer::~MuHttpServer()
    {
       StopServer();
    }
+
+   // Destroy registrations here before the EHS class destructor is called
+   for (QMap<QString, EHS*>::iterator it = mRegistrations.begin(); it != mRegistrations.end(); ++it)
+   {
+      delete it.value();
+   }
 }
 
 bool MuHttpServer::start()
@@ -53,37 +59,26 @@ bool MuHttpServer::start()
    {
       return true;
    }
-   switch (StartServer(mParams))
+
+   try
    {
-   case STARTSERVER_SUCCESS:
-      mpTimer->start(); // fall through
-   case STARTSERVER_ALREADYRUNNING:
-      for (QMap<QString, EHS*>::iterator it = mRegistrations.begin(); it != mRegistrations.end(); ++it)
-      {
-         RegisterEHS(it.value(), it.key().toAscii());
-      }
-      mRegistrations.clear();
-      mServerIsRunning = true;
-      mSession.reset(Service<SessionManager>().get());
-      return true;
-   case STARTSERVER_INVALID:
-      warning("Invalid server specification.");
-      break;
-   case STARTSERVER_NODATASPECIFIED:
-      warning("No server data specified.");
-      break;
-   case STARTSERVER_SOCKETSNOTINITIALIZED:
-      warning("Unable to initialize server socket.");
-      break;
-   case STARTSERVER_THREADCREATIONFAILED:
-      warning("Unable to create server threads.");
-      break;
-   case STARTSERVER_FAILED:
-   default:
-      warning("Server failed for an unknown reason.");
-      break;
+      StartServer(mParams);
+      mpTimer->start();
    }
-   return false;
+   catch (...)
+   {
+      warning("Could not start the server.");
+      return false;
+   }
+
+   for (QMap<QString, EHS*>::iterator it = mRegistrations.begin(); it != mRegistrations.end(); ++it)
+   {
+      RegisterEHS(it.value(), it.key().toAscii());
+   }
+
+   mServerIsRunning = true;
+   mSession.reset(Service<SessionManager>().get());
+   return true;
 }
 
 void MuHttpServer::stop(Subject &subject, const std::string &signal, const boost::any &v)
@@ -115,24 +110,24 @@ ResponseCode MuHttpServer::HandleRequest(HttpRequest *pHttpRequest, HttpResponse
 {
    debug(pHttpRequest);
 
-   if (!mAllowNonLocal && pHttpRequest->GetAddress() != "127.0.0.1")
+   if (!mAllowNonLocal && pHttpRequest->RemoteAddress() != "127.0.0.1")
    {
       QString errorString = QString("<html><body><h1>Forbidden</h1>"
          "Connection from %1 has been blocked. Only localhost connections are allowed.</body></html>")
-         .arg(QString::fromStdString(pHttpRequest->GetAddress()));
+         .arg(QString::fromStdString(pHttpRequest->RemoteAddress()));
       pHttpResponse->SetBody(errorString.toAscii(), errorString.size());
       warning(errorString);
       return HTTPRESPONSECODE_403_FORBIDDEN;
    }
 
-   QString uri = QString::fromStdString(pHttpRequest->sUri).split("?")[0];
-   if (pHttpRequest->nRequestMethod == REQUESTMETHOD_GET || pHttpRequest->nRequestMethod == REQUESTMETHOD_POST)
+   QString uri = QString::fromStdString(pHttpRequest->Uri()).split("?")[0];
+   if (pHttpRequest->Method() == REQUESTMETHOD_GET || pHttpRequest->Method() == REQUESTMETHOD_POST)
    {
-      QString contentType = pHttpRequest->oRequestHeaders["content-type"].c_str();
-      QString body = pHttpRequest->sBody.c_str();
-      Response rsp = (pHttpRequest->nRequestMethod == REQUESTMETHOD_GET) ?
-         getRequest(uri, contentType, body, pHttpRequest->oFormValueMap) :
-         postRequest(uri, contentType, body, pHttpRequest->oFormValueMap);
+      QString contentType = pHttpRequest->Headers("content-type").c_str();
+      QString body = pHttpRequest->Body().c_str();
+      Response rsp = (pHttpRequest->Method() == REQUESTMETHOD_GET) ?
+         getRequest(uri, contentType, body, pHttpRequest->FormValues()) :
+         postRequest(uri, contentType, body, pHttpRequest->FormValues());
       if (rsp.mCode != HTTPRESPONSECODE_INVALID && rsp.mEncoding.isValid())
       {
          switch (rsp.mEncoding)
@@ -151,7 +146,7 @@ ResponseCode MuHttpServer::HandleRequest(HttpRequest *pHttpRequest, HttpResponse
          while (headerIt.hasNext())
          {
             headerIt.next();
-            pHttpResponse->oResponseHeaders[headerIt.key().toStdString()] = headerIt.value().toStdString();
+            pHttpResponse->SetHeader(headerIt.key().toStdString(), headerIt.value().toStdString());
          }
          return rsp.mCode;
       }
