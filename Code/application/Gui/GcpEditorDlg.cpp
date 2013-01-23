@@ -241,9 +241,11 @@ bool GcpEditorDlg::setGcpLayer(Layer* pLayer)
    if (mpLayer != NULL)
    {
       GcpList* pGcpList = dynamic_cast<GcpList*>(mpLayer->getDataElement());
-      VERIFY(pGcpList != NULL);
-
-      pGcpList->detach(SIGNAL_NAME(Subject, Modified), Slot(this, &GcpEditorDlg::elementModified));
+      if (pGcpList != NULL)   // pGcpList will be NULL if mpLayer is being deleted
+                              // as a result of the element being deleted
+      {
+         pGcpList->detach(SIGNAL_NAME(Subject, Modified), Slot(this, &GcpEditorDlg::elementModified));
+      }
    }
 
    mpLayer = pGcpLayer;
