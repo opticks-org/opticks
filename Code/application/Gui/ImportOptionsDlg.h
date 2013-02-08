@@ -65,6 +65,7 @@ protected:
    bool validateDataset(DataDescriptor* pDescriptor, QString& validationMessage);
    void selectCurrentDatasetItem();
    void validateEditDataset();
+   void validateAllDatasets();
    void enforceSelections(QTreeWidgetItem* pItem);
    void removeImporterPage();
 
