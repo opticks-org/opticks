@@ -1,0 +1,186 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{AE80D210-0F03-4CC0-940F-B68DDC231CB7}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>SimpleApiLib</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\CompileSettings\32bitSettings.props" />
+    <Import Project="..\CompileSettings\Macros.props" />
+    <Import Project="..\CompileSettings\AllCommonSettings-Release-32bit.props" />
+    <Import Project="..\CompileSettings\ApplicationCommonSettings.props" />
+    <Import Project="..\CompileSettings\Qt-Release.props" />
+    <Import Project="..\CompileSettings\Xerces-Release.props" />
+    <Import Project="..\CompileSettings\EnableWarnings.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\CompileSettings\32bitSettings.props" />
+    <Import Project="..\CompileSettings\Macros.props" />
+    <Import Project="..\CompileSettings\AllCommonSettings-Debug-32bit.props" />
+    <Import Project="..\CompileSettings\ApplicationCommonSettings.props" />
+    <Import Project="..\CompileSettings\Qt-Debug.props" />
+    <Import Project="..\CompileSettings\Xerces-Debug.props" />
+    <Import Project="..\CompileSettings\EnableWarnings.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\CompileSettings\64bitSettings.props" />
+    <Import Project="..\CompileSettings\Macros.props" />
+    <Import Project="..\CompileSettings\AllCommonSettings-Release-64bit.props" />
+    <Import Project="..\CompileSettings\ApplicationCommonSettings.props" />
+    <Import Project="..\CompileSettings\Qt-Release.props" />
+    <Import Project="..\CompileSettings\Xerces-Release.props" />
+    <Import Project="..\CompileSettings\EnableWarnings.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\CompileSettings\64bitSettings.props" />
+    <Import Project="..\CompileSettings\Macros.props" />
+    <Import Project="..\CompileSettings\AllCommonSettings-Debug-64bit.props" />
+    <Import Project="..\CompileSettings\ApplicationCommonSettings.props" />
+    <Import Project="..\CompileSettings\Qt-Debug.props" />
+    <Import Project="..\CompileSettings\Xerces-Debug.props" />
+    <Import Project="..\CompileSettings\EnableWarnings.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir>$(BuildDir)\Binaries-$(Platform)-$(Configuration)\Bin\</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Link>
+      <ImportLibrary>$(BuildDir)\Binaries-$(Platform)-$(Configuration)\Lib\$(TargetName).lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Link>
+      <ImportLibrary>$(BuildDir)\Binaries-$(Platform)-$(Configuration)\Lib\$(TargetName).lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Link>
+      <ImportLibrary>$(BuildDir)\Binaries-$(Platform)-$(Configuration)\Lib\$(TargetName).lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Link>
+      <ImportLibrary>$(BuildDir)\Binaries-$(Platform)-$(Configuration)\Lib\$(TargetName).lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="ApiUtilities.h" />
+    <ClInclude Include="DynamicTypes.h" />
+    <ClInclude Include="GeographicData.h" />
+    <ClInclude Include="Metadata.h" />
+    <ClInclude Include="RasterData.h" />
+    <ClInclude Include="SimpleAnimation.h" />
+    <ClInclude Include="SimpleAoi.h" />
+    <ClInclude Include="SimpleApiErrors.h" />
+    <ClInclude Include="SimpleExecution.h" />
+    <ClInclude Include="SimpleSignature.h" />
+    <ClInclude Include="SimpleViews.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ApiUtilities.cpp" />
+    <ClCompile Include="DynamicTypes.cpp" />
+    <ClCompile Include="GeographicData.cpp" />
+    <ClCompile Include="Metadata.cpp" />
+    <ClCompile Include="RasterData.cpp" />
+    <ClCompile Include="SimpleAnimation.cpp" />
+    <ClCompile Include="SimpleAoi.cpp" />
+    <ClCompile Include="SimpleApiErrors.cpp" />
+    <ClCompile Include="SimpleExecution.cpp" />
+    <ClCompile Include="SimpleSignature.cpp" />
+    <ClCompile Include="SimpleViews.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Desktop\Desktop.vcxproj">
+      <Project>{0a996cbc-8f48-499e-88d0-9a989d5439b1}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\Framework\Framework.vcxproj">
+      <Project>{acde6b09-d5e8-4002-83fc-96ed7c5a281f}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\Gui\Gui.vcxproj">
+      <Project>{bf9dec74-d1a6-448f-9c5c-8bf272b79055}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\Installer\Installer.vcxproj">
+      <Project>{d5b67bd1-5478-4534-8bf5-681df30cf0da}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\Model\Model.vcxproj">
+      <Project>{94a7d2c4-8623-4ef3-8fc9-06cd470a15bd}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\PlugInLib\PlugInLib.vcxproj">
+      <Project>{bfaa94f6-8ca1-4159-b0e1-90b09d9c3056}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\PlugInManager\PlugInManager.vcxproj">
+      <Project>{8dcb3c1b-ccbf-46b5-9f71-056cf68af1c2}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\PlugInUtilities\PlugInUtilities.vcxproj">
+      <Project>{4831b6df-aeac-4f12-a0b5-ce3ca703fb88}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\Utilities\Utilities.vcxproj">
+      <Project>{83190cff-a185-412d-82f0-b3e39954e8f3}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\Wizard\Wizard.vcxproj">
+      <Project>{9c7936f8-2c39-4e4a-b8ea-ddd29be5f653}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
