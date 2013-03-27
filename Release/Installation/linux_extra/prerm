@@ -1,0 +1,7 @@
+#!/bin/sh -e
+
+if [ "$1" = "upgrade" -o "$1" = "remove" ]; then
+# remove extensions
+   echo "+all" > /opt/Opticks/Extensions/pendinguninstall
+   /opt/Opticks/Bin/OpticksBatch > /dev/null
+fi

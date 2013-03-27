@@ -1,0 +1,11 @@
+<ivysettings>
+   <property name="opticks.public.root" value="http://opticks.org/downloads/ivy-repo/" override="false"/>
+   <property name="opticks.public.ivy.pattern" value="[organization]/[module]/[revision]/[module]-ivy.xml" override="false"/>
+   <property name="opticks.public.artifact.pattern" value="[organization]/[module]/[revision]/[artifact].[ext]" override="false"/>
+   <resolvers>
+      <url name="opticks-public">
+         <ivy pattern="${opticks.public.root}/${opticks.public.ivy.pattern}"/>
+         <artifact pattern="${opticks.public.root}/${opticks.public.artifact.pattern}"/>
+      </url>
+   </resolvers>
+</ivysettings>
