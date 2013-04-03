@@ -1,0 +1,6 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+<qresource prefix="/GeographicFeatures/icons">
+  <file alias="GeographicFeaturesWindow">icons/GeographicFeaturesWindow.png</file>
+</qresource>
+</RCC>

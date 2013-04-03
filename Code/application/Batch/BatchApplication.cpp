@@ -1,0 +1,254 @@
+/*
+ * The information in this file is
+ * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * and is subject to the terms and conditions of the
+ * GNU Lesser General Public License Version 2.1
+ * The license text is available from   
+ * http://www.gnu.org/licenses/lgpl.html
+ */
+
+#include <iostream>
+
+#include "Aeb.h"
+#include "AebIo.h"
+#include "AppVersion.h"
+#include "ApplicationServicesImp.h"
+#include "ArgumentList.h"
+#include "BatchApplication.h"
+#include "ConfigurationSettingsImp.h"
+#include "InstallerServicesImp.h"
+#include "PlugInManagerServicesImp.h"
+#include "ProgressBriefConsole.h"
+#include "ProgressConsole.h"
+#include "SessionManagerImp.h"
+
+#include <QtCore/QDirIterator>
+#include <QtCore/QFile>
+#include <QtCore/QString>
+
+#include <vector>
+using namespace std;
+
+BatchApplication::BatchApplication(QCoreApplication& app) :
+   Application(app)
+{
+   if (isXmlInitialized() == false)
+   {
+      reportError("Unable to initialize Xerces/XQilla.");
+      exit(-1);
+   }
+
+   Service<ApplicationServices> pApp;
+   attach(SIGNAL_NAME(Subject, Deleted), Signal(pApp.get(), SIGNAL_NAME(ApplicationServices, ApplicationClosed)));
+}
+
+BatchApplication::~BatchApplication()
+{
+   notify(SIGNAL_NAME(Subject, Deleted));
+}
+
+const string& BatchApplication::getObjectType() const
+{
+   static string sType("BatchApplication");
+   return sType;
+}
+
+bool BatchApplication::isKindOf(const string& className) const
+{
+   if (className == getObjectType())
+   {
+      return true;
+   }
+
+   return SubjectAdapter::isKindOf(className);
+}
+
+int BatchApplication::version(int argc, char** argv)
+{
+   // Initialize the application
+   int iReturn = Application::run(argc, argv);
+   if (iReturn == -1)
+   {
+      return -1;
+   }
+
+   // Set the application to run in batch mode
+   ApplicationServicesImp* pApp = ApplicationServicesImp::instance();
+   if (pApp != NULL)
+   {
+      pApp->setBatch();
+   }
+
+   PlugInManagerServicesImp* pPlugIn = PlugInManagerServicesImp::instance();
+   if (pPlugIn == NULL)
+   {
+      return -1;
+   }
+
+   vector<PlugInDescriptor*> plugins = pPlugIn->getPlugInDescriptors();
+
+   cout << endl;
+   cout << "Current Plug-In Configuration:" << endl;
+   cout << "Total of " << static_cast<unsigned int>(plugins.size()) << " Plug-Ins" << endl;
+
+   pPlugIn->listPlugIns(true, true, false);  // Show modules, show plug-ins, do not show full detail
+
+   // Close the session to cleanup created objects
+   SessionManagerImp::instance()->close();
+
+   return 0;
+}
+
+int BatchApplication::test(int argc, char** argv)
+{
+   return -1;
+}
+
+int BatchApplication::run(int argc, char** argv)
+{
+   // Generate the XML files
+   if (generateXml() == false)
+   {
+      return -1;
+   }
+
+   // Initialize the application
+   int iReturn = Application::run(argc, argv);
+   if (iReturn == -1)
+   {
+      return -1;
+   }
+
+   // Set the application to run in batch mode
+   ApplicationServicesImp* pApp = ApplicationServicesImp::instance();
+   if (pApp != NULL)
+   {
+      pApp->setBatch();
+   }
+
+   // Create the progress object
+   bool bBrief = false;
+   bool bVeryBrief = false;
+
+   ArgumentList* pArgumentList = ArgumentList::instance();
+   if (pArgumentList != NULL)
+   {
+      bBrief = pArgumentList->exists("brief");
+      bVeryBrief = pArgumentList->exists("verybrief");
+   }
+
+   if (bBrief == false && bVeryBrief == false)
+   {
+      mpProgress = new ProgressConsole();
+   }
+   else
+   {
+      mpProgress = new ProgressBriefConsole(bVeryBrief);
+   }
+
+   // process pending extension uninstalls
+   InstallerServicesImp::instance()->processPending(mpProgress);
+   string errMsg;
+   if(!ConfigurationSettingsImp::instance()->loadSettings(errMsg))
+   {
+      cerr << "Warning: unable to release application settings." << endl
+         << errMsg << endl << "Opticks will now exit." << endl;
+      return -1;
+   }
+
+   // process auto-installs
+   QDirIterator autos(QString::fromStdString(ConfigurationSettingsImp::instance()->getSettingExtensionFilesPath()->getFullPathAndName())
+      + "/AutoInstall", QStringList() << "*.aeb", QDir::Files);
+   vector<string> pendingInstall;
+   while (autos.hasNext())
+   {
+      pendingInstall.push_back(autos.next().toStdString());
+   }
+   int numExtFailed = 0;
+   bool autoInstallOccurred = false;
+   InstallerServicesImp::instance()->setPendingInstall(pendingInstall);
+   for (vector<string>::iterator autoIter = pendingInstall.begin();
+        autoIter != pendingInstall.end();
+        ++autoIter)
+   {
+      bool success = InstallerServicesImp::instance()->installExtension(*autoIter, mpProgress);
+      if(!success && mpProgress != NULL)
+      {
+         QFileInfo autoInfo(QString::fromStdString(*autoIter));
+         // Attempt to parse the AEB so we can get a better name
+         string extName = autoInfo.fileName().toStdString();
+         Aeb extension;
+         AebIo io(extension);
+         string errMsg; // ignored
+         if (io.fromFile(autoInfo.filePath().toStdString(), errMsg))
+         {
+            extName = extension.getName();
+         }
+         mpProgress->updateProgress("Unable to install " + extName + "\nThe extension will be removed.", 0, WARNING);
+         numExtFailed++;
+      }
+      if (success)
+      {
+         autoInstallOccurred = true;
+      }
+      QFile::remove(QString::fromStdString(*autoIter));
+   }
+   InstallerServicesImp::instance()->setPendingInstall();
+   if (numExtFailed != 0)
+   {
+      return -numExtFailed;
+   }
+   if (autoInstallOccurred)
+   {
+      // rescan the plug-ins
+      PlugInManagerServicesImp::instance()->buildPlugInList(Service<ConfigurationSettings>()->getPlugInPath());
+   }
+
+   // Perform the batch processing
+   PlugInManagerServicesImp* pManager = PlugInManagerServicesImp::instance();
+   if (pManager != NULL)
+   {
+      pManager->executeStartupPlugIns(mpProgress);
+   }
+
+   bool bSuccess = executeStartupBatchWizards();
+
+   // Close the session to cleanup created objects
+   SessionManagerImp::instance()->close();
+
+   // Cleanup
+   if (bBrief == false && bVeryBrief == false)
+   {
+      delete dynamic_cast<ProgressConsole*>(mpProgress);
+   }
+   else
+   {
+      delete dynamic_cast<ProgressBriefConsole*>(mpProgress);
+   }
+
+   if (bSuccess == true)
+   {
+      return 0;
+   }
+
+   return -1;
+}
+
+void BatchApplication::reportWarning(const string& warningMessage) const
+{
+   if (warningMessage.empty() == false)
+   {
+      cerr << endl << APP_NAME << " WARNING: " << warningMessage << endl;
+   }
+}
+
+void BatchApplication::reportError(const string& errorMessage) const
+{
+   string message = errorMessage;
+   if (message.empty() == true)
+   {
+      message = "Unknown error";
+   }
+
+   cerr << endl << APP_NAME << " ERROR: " << message << endl;
+}

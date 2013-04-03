@@ -1,0 +1,106 @@
+/** \page plugintutorial1 Tutorial 1 - Creating your first plug-in
+Files:
+ - \ref Tutorial/Tutorial1.h "Tutorial/Tutorial1.h"
+ - \ref Tutorial/Tutorial1.cpp "Tutorial/Tutorial1.cpp"
+
+This first plug-in is a simple "Hello world" example.
+It does very little interesting but is a framework for a plug-in.
+It demonstrates a basic executable plug-in framework, use of PlugInArgList, and use of Progress.
+
+If you would like to run this tutorial as you follow along with the code, see \ref RunningTutorial.
+If you would like to build and experiment with this tutorial as you follow along with the code, see \ref plugintutorial_building.
+If you are running this tutorial in %Opticks, you will need to select "Tutorial 1" from the Tutorial toolbar to execute it.
+
+\section header_file The Header File
+A plug-in is a C++ class which implements the PlugIn interface.
+%Opticks provides a number of shell classes with a default implementation of much of the interface.
+PlugInShell implements PlugIn and provides mutators for the PlugIn attributes.
+Most plug-ins provide additional functionality beyond PlugIn.
+Most will implement at least Executable.
+A majority of the Executable methods have default implementations in ExecutableShell so we'll use that as a starting point.
+ExecutableShell does not implement the Executable::getInputSpecification(), Executable::getOutputSpecification(), and Executable::execute() methods so our plug-in must provide implementations for at least these methods as well as a constructor and a destructor.
+Our plug-in does not have any state so there are no private members and there are no helper methods.
+
+\section cpp_file The Implementation File
+\dontinclude Tutorial/Tutorial1.cpp
+The various properties exposed by the PlugIn and Executable interfaces are set using mutators from ExecutableShell.
+Most of these are set in the plug-in's constructor.
+Certain shell classes will set default values such as plug-in type.
+See the documentation for the specific shell class for further information.
+\skip Tutorial1::Tutorial1()
+\until setDescriptorId
+The descriptor ID uniquely identifies a plug-in.
+When loading plug-ins, %Opticks will generate an error if there are multiple plug-ins with the same descriptor ID.
+This string is usually a UUID enclosed in {}.
+A UUID can be generated with the "Create GUID" tool on Windows or the makeuuid program on Solaris.
+\until setCopyright
+These statements set some informational metadata such as a name and description.
+\line setProductionStatus
+If the production status of any loaded plug-in is false, or the status of the application is development, all data and generated products will contain a "Not for production use" message.
+We are setting this to false since this example plug-in should never be used in a production environment.
+We suggest that you set this using a \#define in a configuration file common to all the plug-ins in a plug-in suite or in your build environment.
+When building a production plug-in this should be set to true.
+\line setType
+The plug-in type is a free-form string.
+Plug-ins can be searched and accessed based on type and certain types, such as %Importer, have special meaning to %Opticks.
+Generally, if your plug-in should be a special type, the type will be set by a corresponding shell class such as ImporterShell.
+\line setMenuLocation
+The menu location exposes your plug-in to the user.
+There are other ways to expose plug-in execution.
+See MenuBar::addCommand() for an alternate method.
+Plug-ins which execute automatically or are designed to be executed only in wizards will not usually set a menu location.
+The location is a "path" indicating a menu hierarchy.
+The square brackets [] indicate that the menu exists on the "Tutorial" toolbar.
+Refer to ExecutableShell::setMenuLocation() for more information on menu location strings.
+\until }
+This disables the abort button in the progress dialog.
+Our plug-in does not support aborting right now.
+We'll add that in later.
+
+The Tutorial1::~Tutorial() and Tutorial1::getOutputSpecification() methods don't do anything interesting right now but Tutorial1::getInputSpecification() does.
+\skip getInputSpecification
+\until VERIFY
+The VERIFY() macro checks for errors and if one is detected, logs a message and returns false.
+There are a few variations on VERIFY() including VERIFYNRV() and VERIFYRV().
+See the reference documentation for a complete list.
+VERIFY() should only be used for detecting programming errors as it may display an error dialog to the user with developer oriented debugging information.
+In this case, PlugInManagerServices::getPlugInArgList() will never return a \c NULL pointer unless there is a serious run-time error such as insufficient memory.
+
+Service is an %Opticks Resource which provides access to a service singleton such as PlugInManagerServices.
+We'll talk more about Resource and Service in a later tutorial.
+PlugInManagerServices is being used to create a new PlugInArgList.
+If we have no arguments, the PlugInArgList should be set to \c NULL like we are doing in Tutorial1::getOutputSpecification().
+\until }
+We are adding a new Progress argument.
+Some interfaces, such as Executable, expect certain plug-in arguments.
+The argument name is defined in the interface and should be used when creating and accessing those plug-in arguments.
+If you are adding an argument specific to your plug-in, you can use any name you like as long as it is not already used by another argument on one of the plug-in interfaces.
+Executable::ProgressArg() can be \c NULL when the plug-in is called in batch mode.
+Since \c NULL is a valid value, we'll make \c NULL the default.
+The last argument is an optional description.
+It is displayed to the user in various places.
+If the meaning of the argument is not obvious, a short description should be provided.
+
+Finally, the Tutorial1::execute() method provides the real functionality of the plug-in.
+It is called when the user selects the menu location.
+\skip execute
+\until }
+We created this PlugInArgList in Tutorial1::getInputSpecification() so it should not be \c NULL.
+We set the output argument list to \c NULL in Tutorial1::getOutputSpecification() since we have no output arguments.
+If we were returning data in the output argument list, we would ensure that pOutArgList is not \c NULL as well.
+\line Progress
+This gets the value of the Executable::ProgressArg() argument we declared in Tutorial1::getInputSpecification().
+\until }
+Remember that Executable::ProgressArg() is allowed to be \c NULL when calling Executable::execute() so we need to check for \c NULL here.
+If we have a valid progress, we display a message to the user.
+We indicate that the progress is 100\%.
+Normally, we should always set the progress to 100\% before returning successfully from Executable::execute().
+The progress dialog may close when the plug-in finishes executing so make sure the "Automatically close on process completion" option is not checked in "Tools->Options->Session->General->Progress Dialog".
+\until }
+Finally, indicate that the plug-in successfully executed.
+
+\example Tutorial/Tutorial1.h
+Declaration file for \ref plugintutorial1 "Tutorial 1".
+\example Tutorial/Tutorial1.cpp
+Implementation file for \ref plugintutorial1 "Tutorial 1".
+ */
