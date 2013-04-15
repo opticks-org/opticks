@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2013 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -12,21 +12,24 @@
 
 #include "AttachmentPtr.h"
 #include "DesktopServices.h"
+#include "Layer.h"
 #include "LayerList.h"
+#include "SpatialDataView.h"
 
 #include <boost/any.hpp>
+#include <QtCore/QMetaType>
 #include <QtGui/QWidget>
 
-class ElidedLabel;
-class QGroupBox;
+class QComboBox;
+class QDoubleSpinBox;
 class QLabel;
 class QPushButton;
-class QSlider;
 class QTimer;
-class RasterLayer;
-class SpatialDataView;
-class SpatialDataWindow;
-class WorkspaceWindow;
+class QwtKnob;
+class QwtSlider;
+class QwtWheel;
+
+Q_DECLARE_METATYPE(Layer*)
 
 class ImageAdjustWidget : public QWidget
 {
@@ -34,53 +37,54 @@ class ImageAdjustWidget : public QWidget
 
 public:
    ImageAdjustWidget(WorkspaceWindow* pWindow, QWidget* pParent);
-   ~ImageAdjustWidget();
+   virtual ~ImageAdjustWidget();
 
-   void windowActivated(Subject& subject, const std::string& signal, const boost::any& value);
-   void layerListChanged(Subject& subject, const std::string& signal, const boost::any& value);
+   virtual bool serialize(SessionItemSerializer& serializer) const;
+   virtual bool deserialize(SessionItemDeserializer& deserializer);
 
 protected:
-   void resetWidgets();
+   void windowActivated(Subject& subject, const std::string& signal, const boost::any& value);
+   void layerListChanged(Subject& subject, const std::string& signal, const boost::any& value);
+   void layerVisibilityChanged(Subject& subject, const std::string& signal, const boost::any& value);
+   void layerPropertyChanged(Subject& subject, const std::string& signal, const boost::any& value);
 
 protected slots:
-   void runFlicker(); // actually performs flickering
-   void startFlicker(); // starts timer, etc.
-
-   double computeFlickerRate(int position) const;
-   void changeFlickerRate(int position);
-   void changeFlickerAlpha(int position);
-
-   void stopFlicker();
-
-   void shift(int value);
+   void updateOffset(double value);
+   void updateControls();
+   void updateAlpha(double value);
+   void changeFlickerRate(double rate);
+   void changeVisibility(bool visible);
+   void changeVisibility();
+   void toggleAutoFlicker(bool state);
+   void changeLayerOffset(double value);
+   void changeLayerScale(double value);
 
 private:
    ImageAdjustWidget(const ImageAdjustWidget& rhs);
    ImageAdjustWidget& operator=(const ImageAdjustWidget& rhs);
-   QTimer* mpTimer;
-   QGroupBox* mpAutomatedFlickerBox;
-   QGroupBox* mpManualFlickerBox;
-   QLabel* mpFlickerMax;
-   ElidedLabel* mpCurrentCubeLayerLabel;
-   ElidedLabel* mpCurrentLayerLabel;
-   QLabel* mpCurrentFlickerSpeed;
-   QSlider* mpFlickerSlider;
-   QSlider* mpOpacitySlider;
-   QSlider* mpFlickerYSlider;
-   QSlider* mpFlickerXSlider;
-   QPushButton* mpManualFlicker;
-
-   RasterLayer* mpPrimaryLayer;
-   RasterLayer* mpSecondaryLayer;
-   AttachmentPtr<LayerList> mpLayerList;
-   AttachmentPtr<DesktopServices> mpDesktopServices;
-
-   void setLayerList(WorkspaceWindow* pWindow);
-   std::string getLayerName(RasterLayer* pRasterLayer);
-   DataElement* getDataElement(RasterLayer* pRasterLayer);
    void resetLayers();
-   void resetSliders();
-   void resetLabels(std::string layerName, std::string cubeLayerName);
+   Layer* getLayer() const;
+
+   AttachmentPtr<DesktopServices> mpDesktop;
+   double mXOffsetPrev;
+   double mYOffsetPrev;
+   AttachmentPtr<SpatialDataView> mpView;
+   AttachmentPtr<LayerList> mpLayerList;
+   AttachmentPtr<Layer> mpLayerAttachment;
+   QTimer* mpTimer;
+   QComboBox* mpLayerSelection;
+   QwtWheel* mpXOffsetWheel;
+   QDoubleSpinBox* mpXOffset;
+   QwtWheel* mpYOffsetWheel;
+   QDoubleSpinBox* mpYOffset;
+   QDoubleSpinBox* mpXScale;
+   QDoubleSpinBox* mpYScale;
+   QwtKnob* mpFramerateKnob;
+   QDoubleSpinBox* mpFlickerRate;
+   QPushButton* mpAutoFlickerButton;
+   QPushButton* mpManualFlickerButton;
+   QLabel* mpTransparencyLabel;
+   QwtSlider* mpAlpha;
 };
 
 #endif

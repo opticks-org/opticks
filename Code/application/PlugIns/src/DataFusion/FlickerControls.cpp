@@ -15,6 +15,8 @@
 #include "ImageAdjustWidget.h"
 #include "MenuBar.h"
 #include "PlugInRegistration.h"
+#include "SessionItemDeserializer.h"
+#include "SessionItemSerializer.h"
 #include "SpatialDataWindow.h"
 
 REGISTER_PLUGIN_BASIC(OpticksDataFusion, FlickerControls);
@@ -97,4 +99,34 @@ QWidget* FlickerControls::createWidget()
 
    SpatialDataWindow* pWindow = dynamic_cast<SpatialDataWindow*>(pDesktop->getCurrentWorkspaceWindow());
    return new ImageAdjustWidget(pWindow, pDesktop->getMainWidget());
+}
+
+bool FlickerControls::serialize(SessionItemSerializer& serializer) const
+{
+   if (!DockWindowShell::serialize(serializer))
+   {
+      return false;
+   }
+
+   serializer.endBlock();
+   if (getWidget() == NULL)
+   {
+      return false;
+   }
+   return static_cast<ImageAdjustWidget*>(getWidget())->serialize(serializer);
+}
+
+bool FlickerControls::deserialize(SessionItemDeserializer& deserializer)
+{
+   if (!DockWindowShell::deserialize(deserializer))
+   {
+      return false;
+   }
+
+   deserializer.nextBlock();
+   if (getWidget() == NULL)
+   {
+      return false;
+   }
+   return static_cast<ImageAdjustWidget*>(getWidget())->deserialize(deserializer);
 }

@@ -6,6 +6,10 @@
    <file alias="Splash">splash.png</file>
    <file alias="application-large">application-large.png</file>
    <file alias="application-progress">application-progress.gif</file>
+   <file alias="Toggle-switch-on">Toggle_Switch_On.png</file>
+   <file alias="Toggle-switch-off">Toggle_Switch_Off.png</file>
+   <file alias="Toggle-switch-on-disabled">Toggle_Switch_On_disabled.png</file>
+   <file alias="Toggle-switch-off-disabled">Toggle_Switch_Off_disabled.png</file>
 </qresource>
 <qresource prefix="/icons">
    <file alias="About">icons/AboutIcon.png</file>

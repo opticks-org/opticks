@@ -1,550 +1,514 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2013 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtCore/QEvent>
-#include <QtCore/QString>
-#include <QtCore/QTimer>
-#include <QtGui/QButtonGroup>
-#include <QtGui/QGroupBox>
-#include <QtGui/QLabel>
-#include <QtGui/QLayout>
-#include <QtGui/QLCDNumber>
-#include <QtGui/QPushButton>
-#include <QtGui/QSlider>
-
-#include "AttachmentPtr.h"
 #include "AppVerify.h"
-#include "ElidedLabel.h"
 #include "ImageAdjustWidget.h"
 #include "Layer.h"
-#include "LayerList.h"
 #include "RasterLayer.h"
-#include "RasterElement.h"
+#include "SessionItemDeserializer.h"
+#include "SessionItemSerializer.h"
+#include "SessionManager.h"
 #include "Slot.h"
-#include "RasterDataDescriptor.h"
 #include "SpatialDataView.h"
-#include "SpatialDataWindow.h"
+#include "StringUtilities.h"
+#include "WorkspaceWindow.h"
+#include "XercesIncludes.h"
+#include "xmlreader.h"
+#include "xmlwriter.h"
 
-#include <limits>
-using namespace std;
+#include <QtCore/QTimer>
+#include <QtCore/QVariant>
+#include <QtGui/QButtonGroup>
+#include <QtGui/QComboBox>
+#include <QtGui/QDoubleSpinBox>
+#include <QtGui/QGroupBox>
+#include <QtGui/QHBoxLayout>
+#include <QtGui/QLabel>
+#include <QtGui/QPushButton>
+#include <QtGui/QVBoxLayout>
+#include <QtGui/QWidget>
+#include <qwt_knob.h>
+#include <qwt_slider.h>
+#include <qwt_wheel.h>
 
-namespace
-{
-   inline int pctToAlpha(int pct)
-   {
-      if (pct > 100)
-      {
-         return 255;
-      }
-      if (pct < 0)
-      {
-         return 0;
-      }
-      return (pct*255)/100;
-   }
-}
-
-const float INTERVAL = 1000;
-const int MAX_FLICKER_RATE = 30;
-const QString NO_LAYER = "None";
+XERCES_CPP_NAMESPACE_USE
 
 ImageAdjustWidget::ImageAdjustWidget(WorkspaceWindow* pWindow, QWidget* pParent) :
    QWidget(pParent),
-   mpPrimaryLayer(NULL),
-   mpSecondaryLayer(NULL),
-   mpDesktopServices(Service<DesktopServices>().get(), SIGNAL_NAME(DesktopServices, WindowActivated),
+   mpDesktop(Service<DesktopServices>().get(), SIGNAL_NAME(DesktopServices, WindowActivated),
       Slot(this, &ImageAdjustWidget::windowActivated))
 {
-   setEnabled(false);
+   mpView.addSignal(SIGNAL_NAME(SpatialDataView, LayerShown), Slot(this, &ImageAdjustWidget::layerVisibilityChanged));
+   mpView.addSignal(SIGNAL_NAME(SpatialDataView, LayerHidden), Slot(this, &ImageAdjustWidget::layerVisibilityChanged));
+   mpLayerList.addSignal(SIGNAL_NAME(LayerList, LayerAdded), Slot(this, &ImageAdjustWidget::layerListChanged));
+   mpLayerList.addSignal(SIGNAL_NAME(LayerList, LayerDeleted), Slot(this, &ImageAdjustWidget::layerListChanged));
+   // listen to Subject::Modified since some of the signals we need only exist on Layer subclasses (alpha modified)
+   // It will call more often then necessary but the slot doesn't do a ton of work so there shouldn't be a noticable
+   // slow-down
+   mpLayerAttachment.addSignal(SIGNAL_NAME(Subject, Modified), Slot(this, &ImageAdjustWidget::layerPropertyChanged));
+
+   QHBoxLayout* pTopLevel = new QHBoxLayout(this);
+   pTopLevel->setMargin(10);
+   pTopLevel->setSpacing(10);
+   QVBoxLayout* pLeftSideLayout = new QVBoxLayout();
+   pLeftSideLayout->setMargin(0);
+   pLeftSideLayout->setSpacing(10);
+
+   // Layer selection
+   QHBoxLayout* pLayerSelectLayout = new QHBoxLayout();
+   pLayerSelectLayout->setMargin(0);
+   pLayerSelectLayout->setSpacing(5);
+   QLabel* pLayerLabel = new QLabel("Layer:", this);
+   pLayerSelectLayout->addWidget(pLayerLabel);
+
+   mpLayerSelection = new QComboBox(this);
+   pLayerSelectLayout->addWidget(mpLayerSelection, 10);
+
+   pLeftSideLayout->addLayout(pLayerSelectLayout);
+
+   // Offset/scale
+   QGroupBox* pOffsetScaleGroup = new QGroupBox("Offset/Scale Tools", this);
+   QVBoxLayout* pOsgTopLevel = new QVBoxLayout(pOffsetScaleGroup);
+   QHBoxLayout* pShiftLayout = new QHBoxLayout();
+
+   QLabel* pXShiftLabel = new QLabel("X Shift:", pOffsetScaleGroup);
+   pShiftLayout->addWidget(pXShiftLabel);
+   mpXOffsetWheel = new QwtWheel(pOffsetScaleGroup);
+   mpXOffsetWheel->setValid(false);
+   mpXOffsetWheel->setOrientation(Qt::Horizontal);
+   pShiftLayout->addWidget(mpXOffsetWheel);
+   mpXOffset = new QDoubleSpinBox(pOffsetScaleGroup);
+   mpXOffset->setMinimum(-10000);
+   mpXOffset->setMaximum(10000);
+   pShiftLayout->addWidget(mpXOffset);
+   pShiftLayout->addSpacing(10);
+
+   mpXOffsetWheel->setPeriodic(true);
+   mpXOffsetWheel->setRange(0, 10000, 1, 100);
+   mpXOffsetWheel->setTotalAngle(36000);
+   mXOffsetPrev = mpXOffsetWheel->value();
+
+   QLabel* pYShiftLabel = new QLabel("Y Shift:", pOffsetScaleGroup);
+   pShiftLayout->addWidget(pYShiftLabel);
+   mpYOffsetWheel = new QwtWheel(pOffsetScaleGroup);
+   pShiftLayout->addWidget(mpYOffsetWheel);
+   mpYOffset = new QDoubleSpinBox(pOffsetScaleGroup);
+   mpYOffset->setMinimum(-10000);
+   mpYOffset->setMaximum(10000);
+   pShiftLayout->addWidget(mpYOffset);
+   pShiftLayout->addStretch(10);
+
+   mpYOffsetWheel->setPeriodic(true);
+   mpYOffsetWheel->setRange(0, 10000, 1, 100);
+   mpYOffsetWheel->setTotalAngle(36000);
+   mYOffsetPrev = mpYOffsetWheel->value();
+
+   pOsgTopLevel->addLayout(pShiftLayout);
+
+   QHBoxLayout* pScaleLayout = new QHBoxLayout();
+   QLabel* pXScaleLabel = new QLabel("X Scale:", pOffsetScaleGroup);
+   pScaleLayout->addWidget(pXScaleLabel);
+   mpXScale = new QDoubleSpinBox(pOffsetScaleGroup);
+   mpXScale->setValue(1);
+   mpXScale->setSingleStep(0.1);
+   pScaleLayout->addWidget(mpXScale);
+   pScaleLayout->addSpacing(10);
+
+   QLabel* pYScaleLabel = new QLabel("Y Scale:", pOffsetScaleGroup);
+   pScaleLayout->addWidget(pYScaleLabel);
+   mpYScale = new QDoubleSpinBox(pOffsetScaleGroup);
+   mpYScale->setValue(1);
+   mpYScale->setSingleStep(0.1);
+   pScaleLayout->addWidget(mpYScale);
+   pScaleLayout->addStretch(10);
+
+   pOsgTopLevel->addLayout(pScaleLayout);
+   pOsgTopLevel->addStretch(10);
+   pLeftSideLayout->addWidget(pOffsetScaleGroup, 10);
+
+   // Flicker/blend
+   QGroupBox* pFlickerBlendGroup = new QGroupBox("Flicker/Blend Tools", this);
+   QGridLayout* pFbgLayout = new QGridLayout(pFlickerBlendGroup);
+
+   mpFramerateKnob = new QwtKnob(pFlickerBlendGroup);
+   // 15fps is usually plenty for the typical use case
+   // and a larger range on the knob makes it difficult to
+   // adjust since 1fps is a very small movement.
+   mpFramerateKnob->setRange(0.0, 15.0, 1);
+   mpFramerateKnob->setScale(0, 15, 3);
+   pFbgLayout->addWidget(mpFramerateKnob, 0, 0, 4, 1);
+
+   QLabel* pAutoFlickerRateLabel = new QLabel("Automated Flicker Rate (fps):", pFlickerBlendGroup);
+   pFbgLayout->addWidget(pAutoFlickerRateLabel, 0, 1, 1, 2);
+   mpFlickerRate = new QDoubleSpinBox(pFlickerBlendGroup);
+   mpFlickerRate->setRange(0.0, 15.0);
+   mpFlickerRate->setSingleStep(0.1);
+   pFbgLayout->addWidget(mpFlickerRate, 1, 1, 1, 2);
+   QLabel* pAutoFlickerLabel = new QLabel("Automated Flicker:", pFlickerBlendGroup);
+   pFbgLayout->addWidget(pAutoFlickerLabel, 2, 1);
+   mpAutoFlickerButton = new QPushButton(pFlickerBlendGroup);
+   mpAutoFlickerButton->setToolTip(
+      "When set to On, the layer will automatically flicker on and off at the predetermined rate.");
+   mpAutoFlickerButton->setCheckable(true);
+   mpAutoFlickerButton->setChecked(false);
+   mpAutoFlickerButton->setFlat(true);
+   mpAutoFlickerButton->setFixedSize(75,32);
+   pFbgLayout->addWidget(mpAutoFlickerButton, 3, 1);
+
+   QLabel* pManualFlickerLabel = new QLabel("Manual Flicker:", pFlickerBlendGroup);
+   pFbgLayout->addWidget(pManualFlickerLabel, 2, 2);
+   mpManualFlickerButton = new QPushButton(pFlickerBlendGroup);
+   mpManualFlickerButton->setToolTip("Indicates the current visibility of the layer.");
+   mpManualFlickerButton->setCheckable(true);
+   mpManualFlickerButton->setFlat(true);
+   mpManualFlickerButton->setFixedSize(75,32);
+   pFbgLayout->addWidget(mpManualFlickerButton, 3, 2);
+
+   QFrame* pLine = new QFrame(pFlickerBlendGroup);
+   pLine->setFrameStyle(QFrame::HLine | QFrame::Sunken);
+   pFbgLayout->addWidget(pLine, 4, 0, 1, 3);
+
+   mpTransparencyLabel = new QLabel("Transparency (% opacity):", pFlickerBlendGroup);
+   pFbgLayout->addWidget(mpTransparencyLabel, 5, 0, 1, 3);
+   mpAlpha = new QwtSlider(pFlickerBlendGroup);
+   mpAlpha->setAutoFillBackground(false);
+   mpAlpha->setScalePosition(QwtSlider::BottomScale);
+   mpAlpha->setBgStyle(QwtSlider::BgSlot);
+   pFbgLayout->addWidget(mpAlpha, 6, 0, 1, 3);
+
+   pFbgLayout->setRowStretch(7, 10);
+   pFbgLayout->setColumnStretch(3, 10);
+
+   pTopLevel->addLayout(pLeftSideLayout);
+   pTopLevel->addWidget(pFlickerBlendGroup);
+
+   setStyleSheet("QPushButton {"\
+         "background-image: url(:/images/Toggle-switch-off);"\
+         "background-repeat: no-repeat;"\
+         "background-clip: margin;"\
+         "margin: 0;"\
+         "border: 0;"\
+      "}"\
+      "QPushButton:checked {"\
+         "background-image: url(:/images/Toggle-switch-on) }"\
+      "QPushButton:disabled {"\
+         "background-image: url(:/images/Toggle-switch-off-disabled) }"\
+      "QPushButton:checked:disabled {"\
+         "background-image: url(:/images/Toggle-switch-on-disabled) }");
+
    mpTimer = new QTimer(this);
 
-   QVBoxLayout* pLayout = new QVBoxLayout(this);
-   pLayout->setMargin(10);
-   pLayout->setSpacing(10);
+   VERIFYNR(connect(mpFramerateKnob, SIGNAL(valueChanged(double)), mpFlickerRate, SLOT(setValue(double))));
+   VERIFYNR(connect(mpFlickerRate, SIGNAL(valueChanged(double)), mpFramerateKnob, SLOT(setValue(double))));
+   VERIFYNR(connect(mpXOffsetWheel, SIGNAL(valueChanged(double)), this, SLOT(updateOffset(double))));
+   VERIFYNR(connect(mpYOffsetWheel, SIGNAL(valueChanged(double)), this, SLOT(updateOffset(double))));
+   VERIFYNR(connect(mpLayerSelection, SIGNAL(currentIndexChanged(int)), this, SLOT(updateControls())));
+   VERIFYNR(connect(mpAlpha, SIGNAL(valueChanged(double)), this, SLOT(updateAlpha(double))));
+   VERIFYNR(connect(mpAutoFlickerButton, SIGNAL(toggled(bool)), this, SLOT(toggleAutoFlicker(bool))));
+   VERIFYNR(connect(mpManualFlickerButton, SIGNAL(toggled(bool)), this, SLOT(changeVisibility(bool))));
+   VERIFYNR(connect(mpXOffset, SIGNAL(valueChanged(double)), this, SLOT(changeLayerOffset(double))));
+   VERIFYNR(connect(mpYOffset, SIGNAL(valueChanged(double)), this, SLOT(changeLayerOffset(double))));
+   VERIFYNR(connect(mpXScale, SIGNAL(valueChanged(double)), this, SLOT(changeLayerScale(double))));
+   VERIFYNR(connect(mpYScale, SIGNAL(valueChanged(double)), this, SLOT(changeLayerScale(double))));
+   VERIFYNR(connect(mpFlickerRate, SIGNAL(valueChanged(double)), this, SLOT(changeFlickerRate(double))));
+   VERIFYNR(connect(mpTimer, SIGNAL(timeout()), this, SLOT(changeVisibility())));
 
-   QGridLayout* pCurrentLayerLayout = new QGridLayout();
-   pCurrentLayerLayout->setColumnStretch(1, 10);
-   pLayout->addLayout(pCurrentLayerLayout);
-  
-   QLabel* pLayerLabel = new QLabel("Current Flicker Layer: ", this);
-   pCurrentLayerLayout->addWidget(pLayerLabel, 1, 0);
+   mpFramerateKnob->setValue(2.0);
+   changeFlickerRate(2.0);
 
-   mpCurrentLayerLabel = new ElidedLabel(NO_LAYER, this);
-   mpCurrentLayerLabel->setMinimumWidth(100);
-   pCurrentLayerLayout->addWidget(mpCurrentLayerLabel, 1, 1, Qt::AlignLeft);
-
-   QLabel* pCubeLayerLabel = new QLabel("Data Cube Layer: ", this);
-   pCurrentLayerLayout->addWidget(pCubeLayerLabel, 2, 0);
-
-   mpCurrentCubeLayerLabel = new ElidedLabel(NO_LAYER, this);
-   mpCurrentCubeLayerLabel->setMinimumWidth(100);
-   pCurrentLayerLayout->addWidget(mpCurrentCubeLayerLabel, 2, 1, Qt::AlignLeft);
-
-   QGroupBox* pFlickerBox = new QGroupBox("Flicker / Blend Tools", this);
-   pLayout->addWidget(pFlickerBox, 10);
-
-   // Bottom Part - Flicker Tools
-   QVBoxLayout* pFlickerToolLayout = new QVBoxLayout(pFlickerBox);
-   pFlickerToolLayout->setMargin(10);
-   pFlickerToolLayout->setSpacing(10);
-
-   // top part - flicker tools
-   QHBoxLayout* pFlickerRateLayout = new QHBoxLayout();
-   pFlickerRateLayout->setMargin(0);
-   pFlickerRateLayout->setSpacing(5);
-
-   pFlickerToolLayout->addLayout(pFlickerRateLayout);
-
-   mpAutomatedFlickerBox = new QGroupBox("Automated Flicker", pFlickerBox);
-   pFlickerRateLayout->addWidget(mpAutomatedFlickerBox, 10);
-   QVBoxLayout* pAutomatedFlickerLayout = new QVBoxLayout(mpAutomatedFlickerBox);
-   pAutomatedFlickerLayout->setMargin(10);
-   pAutomatedFlickerLayout->setSpacing(5);
-
-   // Automated flicker section
-   // TOP ROW - Requested Flicker Rate
-   QHBoxLayout* pRequestedRateLayout = new QHBoxLayout();
-   pRequestedRateLayout->setMargin(0);
-   pRequestedRateLayout->setSpacing(5);
-
-   pAutomatedFlickerLayout->addLayout(pRequestedRateLayout);
-
-   QLabel* pRequestedFlickerRateLabel = new QLabel("Requested Flicker Rate (fps):", mpAutomatedFlickerBox);
-
-   pRequestedRateLayout->addWidget(pRequestedFlickerRateLabel);
-
-   mpCurrentFlickerSpeed = new QLabel("0", mpAutomatedFlickerBox);
-   pRequestedRateLayout->addWidget(mpCurrentFlickerSpeed);
-
-   pRequestedRateLayout->addStretch();
-
-   // MIDDLE ROW - Flicker Rate Slider & Labels
-   QHBoxLayout* pSliderLayout = new QHBoxLayout();
-   pSliderLayout->setMargin(0);
-   pSliderLayout->setSpacing(5);
-
-   pAutomatedFlickerLayout->addLayout(pSliderLayout);
-
-   QLabel* pMinimumFlickerRateLabel = new QLabel("0", mpAutomatedFlickerBox);
-   pSliderLayout->addWidget(pMinimumFlickerRateLabel);
-
-   mpFlickerSlider = new QSlider(mpAutomatedFlickerBox);
-   mpFlickerSlider->setFocusPolicy(Qt::WheelFocus);
-   mpFlickerSlider->setMaximum(100);
-   mpFlickerSlider->setPageStep(5);
-   mpFlickerSlider->setOrientation(Qt::Horizontal);
-   mpFlickerSlider->setTickPosition(QSlider::NoTicks);
-   mpFlickerSlider->setMinimumWidth(200);
-   pSliderLayout->addWidget(mpFlickerSlider, 10);
-
-   mpFlickerMax = new QLabel(QString::number(MAX_FLICKER_RATE), mpAutomatedFlickerBox);
-   pSliderLayout->addWidget(mpFlickerMax);
-
-   pSliderLayout->addStretch();
-
-   // BOTTOM ROW - flicker controls - start/stop
-   QHBoxLayout* pControlLayout = new QHBoxLayout();
-   pControlLayout->setMargin(0);
-   pControlLayout->setSpacing(5);
-
-   pAutomatedFlickerLayout->addLayout(pControlLayout);
-
-   QPushButton* pStartFlickerButton = new QPushButton("Start", mpAutomatedFlickerBox);
-   pControlLayout->addWidget(pStartFlickerButton);
-
-   QPushButton* pStopFlickerButton = new QPushButton("Stop", mpAutomatedFlickerBox);
-   pControlLayout->addWidget(pStopFlickerButton);
-
-   pControlLayout->addStretch();
-
-   // Manual flicker section
-   mpManualFlickerBox = new QGroupBox("Manual Flicker", pFlickerBox);
-   mpManualFlicker = new QPushButton("Toggle", mpManualFlickerBox);
-   mpManualFlicker->setEnabled(true);
-   mpManualFlicker->setCheckable(true);
-
-   QVBoxLayout* pManualLayout = new QVBoxLayout(mpManualFlickerBox);
-   pManualLayout->setMargin(10);
-   pManualLayout->setSpacing(5);
-   pManualLayout->addWidget(mpManualFlicker);
-   pManualLayout->addStretch();
-
-   pFlickerRateLayout->addWidget(mpManualFlickerBox, 0, Qt::AlignTop);
-
-   QFrame* pTransparencySeparator = new QFrame(pFlickerBox);
-   pTransparencySeparator->setFrameStyle(QFrame::HLine | QFrame::Sunken);
-   pFlickerToolLayout->addWidget(pTransparencySeparator);
-
-   QHBoxLayout* pAlphaChannelLayout = new QHBoxLayout();
-   pAlphaChannelLayout->setMargin(0);
-   pAlphaChannelLayout->setSpacing(5);
-
-   pFlickerToolLayout->addLayout(pAlphaChannelLayout);
-
-   QLabel* pTransparencyLabel = new QLabel("Transparent", pFlickerBox);
-   pAlphaChannelLayout->addWidget(pTransparencyLabel);
-
-   mpOpacitySlider = new QSlider(pFlickerBox);
-   mpOpacitySlider->setMaximum(100);
-   mpOpacitySlider->setValue(100);
-   mpOpacitySlider->setOrientation(Qt::Horizontal);
-   pAlphaChannelLayout->addWidget(mpOpacitySlider, 10);
-
-   QLabel* pOpaqueLabel = new QLabel("Opaque", pFlickerBox);
-   pAlphaChannelLayout->addWidget(pOpaqueLabel);
-
-   // Bottom part - Translation sliders
-   QFrame* pTranslationSeparator = new QFrame(pFlickerBox);
-   pTranslationSeparator->setFrameStyle(QFrame::HLine | QFrame::Sunken);
-   pFlickerToolLayout->addWidget(pTranslationSeparator);
-
-   QGridLayout* pTranslationLayout = new QGridLayout();
-   pTranslationLayout->setMargin(0);
-   pTranslationLayout->setSpacing(5);
-
-   pFlickerToolLayout->addLayout(pTranslationLayout);
-
-   QLabel* mpFlickerXLabel = new QLabel("X Shift", pFlickerBox);
-   pTranslationLayout->addWidget(mpFlickerXLabel, 0, 0);
-
-   QLabel* mpFlickerYLabel = new QLabel("Y Shift", pFlickerBox);
-   pTranslationLayout->addWidget(mpFlickerYLabel, 0, 3);
-
-   mpFlickerXSlider = new QSlider(pFlickerBox);
-   mpFlickerXSlider->setMouseTracking(true);
-   mpFlickerXSlider->setFocusPolicy(Qt::WheelFocus);
-   mpFlickerXSlider->setMinimum(-100);
-   mpFlickerXSlider->setMaximum(100);
-   mpFlickerXSlider->setPageStep(1);
-   mpFlickerXSlider->setOrientation(Qt::Horizontal);
-   mpFlickerXSlider->setTickPosition(QSlider::NoTicks);
-   mpFlickerXSlider->setMinimumWidth(125);
-   pTranslationLayout->addWidget(mpFlickerXSlider, 1, 0, 1, 2);
-
-   QLCDNumber* pFlickerXDisp = new QLCDNumber(pFlickerBox);
-
-   QPalette flickerXPalette = pFlickerXDisp->palette();
-   flickerXPalette.setColor(QPalette::Window, QColor(135, 135, 135));
-   pFlickerXDisp->setPalette(flickerXPalette);
-
-   pTranslationLayout->addWidget(pFlickerXDisp, 1, 2);
-
-   mpFlickerYSlider = new QSlider(pFlickerBox);
-   mpFlickerYSlider->setMouseTracking(true);
-   mpFlickerYSlider->setFocusPolicy(Qt::WheelFocus);
-   mpFlickerYSlider->setMinimum(-100);
-   mpFlickerYSlider->setMaximum(100);
-   mpFlickerYSlider->setSingleStep(1);
-   mpFlickerYSlider->setPageStep(1);
-   mpFlickerYSlider->setOrientation(Qt::Horizontal);
-   mpFlickerYSlider->setTickPosition(QSlider::NoTicks);
-   mpFlickerYSlider->setMinimumWidth(125);
-   pTranslationLayout->addWidget(mpFlickerYSlider, 1, 3, 1, 2);
-
-   QLCDNumber* pFlickerYDisp = new QLCDNumber(pFlickerBox);
-
-   QPalette flickerYPalette = pFlickerYDisp->palette();
-   flickerYPalette.setColor(QPalette::Window, QColor(135, 135, 135));
-   pFlickerYDisp->setPalette(flickerYPalette);
-
-   pTranslationLayout->addWidget(pFlickerYDisp, 1, 5);
-
-   pTranslationLayout->setColumnStretch(0, 10);
-   pTranslationLayout->setColumnStretch(3, 10);
-
-   resize(minimumSizeHint());
-
-   // Internal signal and slot connections
-   connect(mpFlickerXSlider, SIGNAL(valueChanged(int)), pFlickerXDisp, SLOT(display(int)));
-   connect(mpFlickerYSlider, SIGNAL(valueChanged(int)), pFlickerYDisp, SLOT(display(int)));
-   connect(mpFlickerSlider, SIGNAL(valueChanged(int)), this, SLOT(changeFlickerRate(int)));
-   connect(mpFlickerXSlider, SIGNAL(valueChanged(int)), this, SLOT(shift(int)));
-   connect(mpFlickerYSlider, SIGNAL(valueChanged(int)), this, SLOT(shift(int)));
-   connect(mpOpacitySlider, SIGNAL(valueChanged(int)), this, SLOT(changeFlickerAlpha(int)));
-   connect(mpManualFlicker, SIGNAL(toggled(bool)), this, SLOT(runFlicker()));
-   connect(pStartFlickerButton, SIGNAL(clicked()), this, SLOT(startFlicker()));
-   connect(pStopFlickerButton, SIGNAL(clicked()), this, SLOT(stopFlicker()));
-   connect(mpTimer, SIGNAL(timeout()), this, SLOT(runFlicker()));
-
-
-   double maxRate = (mpFlickerMax->text().toDouble());
-   mpFlickerMax->setNum(static_cast<int>(maxRate));
-   maxRate = log(maxRate)*INTERVAL;
-   mpFlickerSlider->setMaximum(maxRate);
-
-   // mpLayerList initialization.
-   setLayerList(pWindow);
-   mpLayerList.addSignal(SIGNAL_NAME(Subject, Modified), Slot(this, &ImageAdjustWidget::layerListChanged));
-   mpLayerList.addSignal(SIGNAL_NAME(Subject, Deleted), Slot(this, &ImageAdjustWidget::layerListChanged));
+   SpatialDataView* pView = (pWindow == NULL) ? NULL : dynamic_cast<SpatialDataView*>(pWindow->getView());
+   mpView.reset(pView);
+   mpLayerList.reset((pView == NULL) ? NULL : pView->getLayerList());
+   resetLayers();
 }
 
 ImageAdjustWidget::~ImageAdjustWidget()
+{}
+
+void ImageAdjustWidget::windowActivated(Subject& subject, const std::string& signal, const boost::any& value)
 {
-   // Nothing needs to be done here.
+   WorkspaceWindow* pWindow = boost::any_cast<WorkspaceWindow*>(value);
+   SpatialDataView* pView = (pWindow == NULL) ? NULL : dynamic_cast<SpatialDataView*>(pWindow->getView());
+   mpView.reset(pView);
+   mpLayerList.reset((pView == NULL) ? NULL : pView->getLayerList());
+   resetLayers();
 }
 
-void ImageAdjustWidget::runFlicker()
-{
-   if (mpSecondaryLayer != NULL)
-   {
-      if (mpSecondaryLayer->getAlpha() == 0)
-      {
-         mpSecondaryLayer->setAlpha(pctToAlpha(mpOpacitySlider->value()));
-      }
-      else
-      {
-         mpSecondaryLayer->setAlpha(pctToAlpha(0));
-      }
-   }
-}
-
-void ImageAdjustWidget::startFlicker()
-{
-   // rate is > 0 and timer is NOT active, so activate it
-   double fps = computeFlickerRate(mpFlickerSlider->value());
-   if (fps > 0)
-   {
-      if (mpTimer != NULL && !mpTimer->isActive())
-      {
-         mpTimer->start(1000/fps); // convert from fps -> ms between frames
-      }
-   }
-   else
-   {
-      stopFlicker();
-   }
-}
-
-void ImageAdjustWidget::stopFlicker()
-{
-   if (mpTimer != NULL)
-   {
-      mpTimer->stop();
-   }
-}
-
-void ImageAdjustWidget::changeFlickerAlpha(int position)
-{
-   if (mpSecondaryLayer != NULL)
-   {
-      mpSecondaryLayer->setAlpha(pctToAlpha(position));
-   }
-}
-
-double ImageAdjustWidget::computeFlickerRate(int position) const
-{
-   double maxFrameRate = mpFlickerMax->text().toInt(); // maximum frame rate
-   double fps = 0;
-   if (position > 0)
-   {
-      fps = exp(static_cast<double>(position)/INTERVAL)-1;
-   }
-
-   fps = (fps/(maxFrameRate-1))*maxFrameRate;
-   // get 2 decimal places for fps meter
-   fps = static_cast<int>(fps*100)/static_cast<double>(100);
-   return fps;
-}
-
-void ImageAdjustWidget::changeFlickerRate(int position)
-{
-   double fps = computeFlickerRate(position);
-   // interval in ms between frames = 1000/fps
-
-   if (mpTimer != NULL)
-   {
-      if (fps > 0 && mpTimer->isActive())
-      {
-         // is already active, so just change the rate
-         mpTimer->setInterval(1000/fps); // convert from fps -> ms between frames
-      }
-
-      // allow manual control iff fps == 0
-      mpManualFlicker->setEnabled(fps == 0);
-   }
-   mpCurrentFlickerSpeed->setNum(fps);
-}
-
-void ImageAdjustWidget::shift(int value)
-{
-   stopFlicker();
-   if (mpSecondaryLayer != NULL)
-   {
-      const QSlider* pSender = static_cast<const QSlider*>(sender());
-      if (pSender == mpFlickerXSlider)
-      {
-         mpSecondaryLayer->setXOffset(value);
-      }
-      else if (pSender == mpFlickerYSlider)
-      {
-         mpSecondaryLayer->setYOffset(value);
-      }
-
-      View* pView = mpSecondaryLayer->getView();
-      if (NN(pView))
-      {
-         pView->refresh();
-      }
-   }
-   startFlicker();
-}
-
-void ImageAdjustWidget::windowActivated(Subject& subject, const string& signal, const boost::any& value)
-{
-   setLayerList(boost::any_cast<WorkspaceWindow*>(value));
-}
-
-void ImageAdjustWidget::layerListChanged(Subject& subject, const string& signal, const boost::any& value)
-{
-   resetWidgets();
-}
-
-
-string ImageAdjustWidget::getLayerName(RasterLayer* pRasterLayer)
-{
-   if (pRasterLayer == NULL)
-   {
-      return NO_LAYER.toStdString();
-   }
-   else
-   {
-      return pRasterLayer->getName();
-   }
-}
-
-DataElement* ImageAdjustWidget::getDataElement(RasterLayer* pRasterLayer)
-{
-   if (pRasterLayer == NULL)
-   {
-      return NULL;
-   }
-   else
-   {
-      return pRasterLayer->getDataElement();
-   }
-}
-
-void ImageAdjustWidget::resetLabels(string layerName, string cubeLayerName)
-{
-   VERIFYNR(layerName.empty() == false);
-   mpCurrentLayerLabel->setText(layerName.c_str());
-
-   VERIFYNR(cubeLayerName.empty() == false);
-   mpCurrentCubeLayerLabel->setText(cubeLayerName.c_str());
-
-}
-
-void ImageAdjustWidget::resetWidgets()
+void ImageAdjustWidget::layerListChanged(Subject& subject, const std::string& signal, const boost::any& value)
 {
    resetLayers();
-   resetSliders();
-   resetLabels(getLayerName(mpPrimaryLayer), getLayerName(mpSecondaryLayer));
-   setEnabled(mpPrimaryLayer != NULL && mpSecondaryLayer != NULL);
 }
 
-void ImageAdjustWidget::setLayerList(WorkspaceWindow* pWindow)
+void ImageAdjustWidget::layerVisibilityChanged(Subject& subject, const std::string& signal, const boost::any& value)
 {
-   LayerList* pLayerList = NULL;
-
-   SpatialDataWindow* pSpatialDataWindow = dynamic_cast<SpatialDataWindow*>(pWindow);
-   if (pSpatialDataWindow != NULL)
+   Layer* pLayer = boost::any_cast<Layer*>(value);
+   if (pLayer != NULL && pLayer == getLayer())
    {
-      SpatialDataView* pSpatialDataView = pSpatialDataWindow->getSpatialDataView();
-      if (pSpatialDataView != NULL)
+      if (signal == SIGNAL_NAME(SpatialDataView, LayerShown))
       {
-         pLayerList = pSpatialDataView->getLayerList();
+         mpManualFlickerButton->setChecked(true);
+      }
+      else if (signal == SIGNAL_NAME(SpatialDataView, LayerHidden))
+      {
+         mpManualFlickerButton->setChecked(false);
       }
    }
+}
 
-   if (pLayerList != mpLayerList.get())
+void ImageAdjustWidget::layerPropertyChanged(Subject& subject, const std::string& signal, const boost::any& value)
+{
+   updateControls();
+}
+
+void ImageAdjustWidget::updateOffset(double value)
+{
+   QwtWheel* pSender = dynamic_cast<QwtWheel*>(sender());
+   if (pSender == mpXOffsetWheel)
    {
-      mpLayerList.reset(pLayerList);
-      mpPrimaryLayer = NULL;
-      mpSecondaryLayer = NULL;
-      resetWidgets();
+      double delta = value - mXOffsetPrev;
+      if (delta > (mpXOffsetWheel->maxValue() / 2))
+      {
+         delta -= mpXOffsetWheel->maxValue();
+      }
+      else if (-delta > (mpXOffsetWheel->maxValue() / 2))
+      {
+         delta += mpXOffsetWheel->maxValue();
+      }
+      mpXOffset->setValue(mpXOffset->value() + delta);
+      mXOffsetPrev = value;
+   }
+   else if (pSender == mpYOffsetWheel)
+   {
+      double delta = value - mYOffsetPrev;
+      if (delta > (mpYOffsetWheel->maxValue() / 2))
+      {
+         delta -= mpYOffsetWheel->maxValue();
+      }
+      else if (-delta > (mpYOffsetWheel->maxValue() / 2))
+      {
+         delta += mpYOffsetWheel->maxValue();
+      }
+      mpYOffset->setValue(mpYOffset->value() + delta);
+      mYOffsetPrev = value;
    }
 }
 
 void ImageAdjustWidget::resetLayers()
 {
-   // Initialize mpPrimaryLayer and mpSecondaryLayer to known values.
-   mpPrimaryLayer = NULL;
-   mpSecondaryLayer = NULL;
-
-   // Get a pointer to the current LayerList object.
-   LayerList* pLayerList = mpLayerList.get();
-   if (pLayerList != NULL)
+   if (mpLayerList.get() == NULL)
    {
-      // Retrieve all raster layers from pLayerList.
-      vector<Layer*> rasterLayers;
-      pLayerList->getLayers(LayerType(RASTER), rasterLayers);
+      mpLayerSelection->clear();
+      mpLayerAttachment.reset(NULL);
+      setEnabled(false);
+      return;
+   }
+   setEnabled(true);
+   int selected = mpLayerSelection->currentIndex();
+   std::vector<Layer*> layers = mpLayerList->getLayers();
+   mpLayerSelection->clear();
+   for (std::vector<Layer*>::const_iterator layer = layers.begin(); layer != layers.end(); ++layer)
+   {
+      mpLayerSelection->addItem(QString::fromStdString((*layer)->getDisplayName(true)), QVariant::fromValue(*layer));
+   }
+   if (selected >= 0 && selected < mpLayerSelection->count())
+   {
+      mpLayerSelection->setCurrentIndex(selected);
+   }
+   else if (layers.size() > 1)
+   {
+      // default to the second layer
+      // This is consistent with the behavior of the old
+      // flicker controls and the data fusion plug-in.
+      // Also, it is generally preferable to not change the
+      // offset of the primary layer (which is often the first layer)
+      // as this can lead to off behavior. Defaulting to layer two
+      // ensures that the user must purposefully select the first layer
+      // before making adjustments.
+      mpLayerSelection->setCurrentIndex(1);
+   }
+   updateControls();
+}
 
-      // Set the first layer to mpPrimaryLayer.
-      if (rasterLayers.empty() == false)
+void ImageAdjustWidget::updateControls()
+{
+   Layer* pLayer = getLayer();
+   if (pLayer != mpLayerAttachment.get())
+   {
+      mpLayerAttachment.reset(pLayer);
+   }
+   if (pLayer == NULL)
+   {
+      return;
+   }
+   mpXOffset->setValue(pLayer->getXOffset());
+   mpYOffset->setValue(pLayer->getYOffset());
+   mpXScale->setValue(pLayer->getXScaleFactor());
+   mpYScale->setValue(pLayer->getYScaleFactor());
+   mpManualFlickerButton->setChecked(mpView->isLayerDisplayed(pLayer));
+   mpAutoFlickerButton->setChecked(false);
+   RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(pLayer);
+   if (pRasterLayer != NULL)
+   {
+      mpTransparencyLabel->setEnabled(true);
+      mpAlpha->setEnabled(true);
+      mpAlpha->setValue(pRasterLayer->getAlpha() / 2.55); // scale is 0-99
+   }
+   else
+   {
+      mpTransparencyLabel->setEnabled(false);
+      mpAlpha->setEnabled(false);
+      mpAlpha->setValue(100);
+   }
+}
+
+void ImageAdjustWidget::updateAlpha(double value)
+{
+   RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(getLayer());
+   if (pRasterLayer != NULL)
+   {
+      // deal with rounding issues and ensure it's bound to 0-255
+      unsigned int alpha = (2.55 * value) + 0.5;
+      pRasterLayer->setAlpha(std::min(255u, alpha));
+   }
+}
+
+void ImageAdjustWidget::changeFlickerRate(double rate)
+{
+   mpTimer->setInterval(1000 / rate);
+}
+
+void ImageAdjustWidget::changeVisibility(bool visible)
+{
+   Layer* pLayer = getLayer();
+   if (pLayer != NULL)
+   {
+      if (visible)
       {
-         mpPrimaryLayer = dynamic_cast<RasterLayer*>(rasterLayers.front());
-
-         // Set the second layer to mpSecondaryLayer.
-         if (rasterLayers.size() > 1)
-         {
-            mpSecondaryLayer = dynamic_cast<RasterLayer*>(rasterLayers[1]);
-         }
+         mpView->showLayer(pLayer);
+      }
+      else
+      {
+         mpView->hideLayer(pLayer);
       }
    }
 }
 
-void ImageAdjustWidget::resetSliders()
+void ImageAdjustWidget::changeVisibility()
 {
-   RasterElement* pPrimaryRaster = dynamic_cast<RasterElement*>(getDataElement(mpPrimaryLayer));
-   RasterElement* pSecondaryRaster = dynamic_cast<RasterElement*>(getDataElement(mpSecondaryLayer));
-   if (pSecondaryRaster != NULL) // use the RasterElement bounds by default
+   Layer* pLayer = getLayer();
+   if (pLayer != NULL)
    {
-      const RasterDataDescriptor* pDescriptor =
-         dynamic_cast<const RasterDataDescriptor*>(pSecondaryRaster->getDataDescriptor());
-      if (NN(pDescriptor))
+      if (mpView->isLayerDisplayed(pLayer))
       {
-         // update translation bars based on the RasterLayer's RasterElement first
-         // also need to update extrema based on the scale factors since resample() is not being called
-         int numRows = static_cast<int>(pDescriptor->getRowCount());
-         numRows *= mpSecondaryLayer->getYScaleFactor();
-         int numColumns = static_cast<int>(pDescriptor->getColumnCount());
-         numColumns *= mpSecondaryLayer->getXScaleFactor();
-         if (pPrimaryRaster != NULL) // if the primary exists below the secondary, use its bounds instead
-         {
-            pDescriptor = dynamic_cast<const RasterDataDescriptor*>(pPrimaryRaster->getDataDescriptor());
-            if (NN(pDescriptor))
-            {
-               numRows = static_cast<int>(pDescriptor->getRowCount());
-               numColumns = static_cast<int>(pDescriptor->getColumnCount());
-               if (mpPrimaryLayer != NULL)
-               {
-                  numRows *= mpPrimaryLayer->getYScaleFactor();
-                  numColumns *= mpPrimaryLayer->getXScaleFactor();
-               }
-            }
-         }
-
-         VERIFYNR(disconnect(mpFlickerXSlider, SIGNAL(valueChanged(int)), this, SLOT(shift(int))));
-         VERIFYNR(disconnect(mpFlickerYSlider, SIGNAL(valueChanged(int)), this, SLOT(shift(int))));
-
-         // widen the slider ranges to accomodate a new offset
-         mpFlickerYSlider->setMinimum(min(-numRows, static_cast<int>(mpSecondaryLayer->getYOffset())));
-         mpFlickerYSlider->setMaximum(max(numRows, static_cast<int>(mpSecondaryLayer->getYOffset())));
-         mpFlickerXSlider->setMinimum(min(-numColumns, static_cast<int>(mpSecondaryLayer->getXOffset())));
-         mpFlickerXSlider->setMaximum(max(numColumns, static_cast<int>(mpSecondaryLayer->getXOffset())));
-
-         // fetch & set the offsets
-         mpFlickerYSlider->setValue(mpSecondaryLayer->getYOffset());
-         mpFlickerXSlider->setValue(mpSecondaryLayer->getXOffset());
-
-         VERIFYNR(connect(mpFlickerXSlider, SIGNAL(valueChanged(int)), this, SLOT(shift(int))));
-         VERIFYNR(connect(mpFlickerYSlider, SIGNAL(valueChanged(int)), this, SLOT(shift(int))));
+         mpView->hideLayer(pLayer);
+      }
+      else
+      {
+         mpView->showLayer(pLayer);
       }
    }
+}
+
+void ImageAdjustWidget::toggleAutoFlicker(bool state)
+{
+   if (state)
+   {
+      mpManualFlickerButton->setEnabled(false);
+      mpTimer->start();
+   }
+   else
+   {
+      mpManualFlickerButton->setEnabled(true);
+      Layer* pLayer = getLayer();
+      if (pLayer != NULL)
+      {
+         mpManualFlickerButton->setChecked(mpView->isLayerDisplayed(pLayer));
+      }
+      mpTimer->stop();
+   }
+}
+
+void ImageAdjustWidget::changeLayerOffset(double value)
+{
+   Layer* pLayer = getLayer();
+   QDoubleSpinBox* pSender = dynamic_cast<QDoubleSpinBox*>(sender());
+   if (pLayer != NULL && pSender == mpXOffset)
+   {
+      pLayer->setXOffset(value);
+   }
+   else if (pLayer != NULL && pSender == mpYOffset)
+   {
+      pLayer->setYOffset(value);
+   }
+}
+
+void ImageAdjustWidget::changeLayerScale(double value)
+{
+   Layer* pLayer = getLayer();
+   QDoubleSpinBox* pSender = dynamic_cast<QDoubleSpinBox*>(sender());
+   if (pLayer != NULL && pSender == mpXScale)
+   {
+      pLayer->setXScaleFactor(value);
+   }
+   else if (pLayer != NULL && pSender == mpYScale)
+   {
+      pLayer->setYScaleFactor(value);
+   }
+}
+
+Layer* ImageAdjustWidget::getLayer() const
+{
+   return qvariant_cast<Layer*>(mpLayerSelection->itemData(mpLayerSelection->currentIndex()));
+}
+
+bool ImageAdjustWidget::serialize(SessionItemSerializer& serializer) const
+{
+   XMLWriter writer("ImageAdjustWidget");
+   if (mpView.get() != NULL)
+   {
+      writer.pushAddPoint(writer.addElement("ViewId"));
+      writer.addText(mpView->getId());
+      writer.popAddPoint();
+   }
+   VERIFY(mpFlickerRate != NULL);
+   writer.addAttr("flickerRate", StringUtilities::toXmlString(mpFlickerRate->value()));
+
+   return serializer.serialize(writer);
+}
+
+bool ImageAdjustWidget::deserialize(SessionItemDeserializer& deserializer)
+{
+   XmlReader reader(NULL, false);
+
+   DOMElement* pRootElement = deserializer.deserialize(reader, "ImageAdjustWidget");
+   if (pRootElement == NULL)
+   {
+      return false;
+   }
+
+   for (DOMNode* pChild = pRootElement->getFirstChild(); pChild != NULL; pChild = pChild->getNextSibling())
+   {
+      DOMElement* pElement = static_cast<DOMElement*>(pChild);
+      if (XMLString::equals(pChild->getNodeName(), X("ViewId")))
+      {
+         std::string viewid = A(pChild->getTextContent());
+         SpatialDataView* pView = dynamic_cast<SpatialDataView*>(Service<SessionManager>()->getSessionItem(viewid));
+         if (pView != NULL)
+         {
+            mpView.reset(pView);
+            mpLayerList.reset(pView->getLayerList());
+            resetLayers();
+         }
+      }
+   }
+   double flickerRate = StringUtilities::fromXmlString<double>(A(pRootElement->getAttribute(X("flickerRate"))));
+   mpFlickerRate->setValue(flickerRate);
+
+   return true;
 }

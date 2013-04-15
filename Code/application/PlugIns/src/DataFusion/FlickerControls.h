@@ -16,7 +16,10 @@ class FlickerControls : public DockWindowShell
 {
 public:
    FlickerControls();
-   ~FlickerControls();
+   virtual ~FlickerControls();
+
+   virtual bool serialize(SessionItemSerializer& serializer) const;
+   virtual bool deserialize(SessionItemDeserializer& deserializer);
 
 protected:
    QAction* createAction();
