@@ -3,7 +3,9 @@ import glob
 ####
 # import the environment
 ####
-Import('env build_dir')
+Import('env build_dir TOOLPATH')
+env = env.Clone()
+env.Tool("qwt",toolpath=[TOOLPATH])
 
 ####
 # build sources
