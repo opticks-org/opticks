@@ -127,6 +127,7 @@ bool ImporterShell::validate(const DataDescriptor* pDescriptor,
       const string& name = pDescriptor->getName();
       const string& type = pDescriptor->getType();
       DataElement* pParent = pDescriptor->getParent();
+      vector<string> parentDesignator = pDescriptor->getParentDesignator();
 
       for (vector<const DataDescriptor*>::const_iterator iter = importedDescriptors.begin();
          iter != importedDescriptors.end();
@@ -138,8 +139,10 @@ bool ImporterShell::validate(const DataDescriptor* pDescriptor,
             const string& currentName = pCurrentDescriptor->getName();
             const string& currentType = pCurrentDescriptor->getType();
             DataElement* pCurrentParent = pCurrentDescriptor->getParent();
+            vector<string> currentParentDesignator = pCurrentDescriptor->getParentDesignator();
 
-            if ((name == currentName) && (type == currentType) && (pParent == pCurrentParent))
+            if ((name == currentName) && (type == currentType) && (pParent == pCurrentParent) &&
+               (parentDesignator == currentParentDesignator))
             {
                errorMessage = "Another data set is also being imported that has the same name, type, and "
                   "parent data set as this data set.";
