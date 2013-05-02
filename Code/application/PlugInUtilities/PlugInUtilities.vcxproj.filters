@@ -116,9 +116,6 @@
     <ClInclude Include="Interfaces\GlTextureResource.h">
       <Filter>Interfaces</Filter>
     </ClInclude>
-    <ClInclude Include="Interfaces\InterpolationComboBox.h">
-      <Filter>Interfaces</Filter>
-    </ClInclude>
     <ClInclude Include="Interfaces\InterpreterUtilities.h">
       <Filter>Interfaces</Filter>
     </ClInclude>
@@ -235,6 +232,9 @@
     </ClInclude>
     <ClInclude Include="pthreads-wrapper\thread_signal.h">
       <Filter>pthreads-wrapper</Filter>
+    </ClInclude>
+    <ClInclude Include="GeoreferenceUtilities.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -751,6 +751,9 @@
     <ClCompile Include="xmlwriter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GeoreferenceUtilities.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="ArcRegionComboBox.h">
@@ -944,6 +947,9 @@
     </CustomBuild>
     <CustomBuild Include="EventMessages.mc">
       <Filter>Source Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Interfaces\InterpolationComboBox.h">
+      <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
 </Project>

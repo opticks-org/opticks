@@ -310,22 +310,26 @@ namespace
                            const std::string* pBandPrefix,
                            const DimensionDescriptor& band)
    {
-      if (!band.isActiveNumberValid() || !band.isOriginalNumberValid())
-      {
-         return std::string();
-      }
-
       std::string bandName;
       if (pBandNames != NULL)
       {
-         unsigned int activeNumber = band.getActiveNumber();
-         if (activeNumber < pBandNames->size())
+         unsigned int index = pBandNames->size();
+         if (band.isActiveNumberValid() == true)
          {
-            bandName = pBandNames->at(activeNumber);
+            index = band.getActiveNumber();
+         }
+         else if (band.isOnDiskNumberValid() == true)
+         {
+            index = band.getOnDiskNumber();
+         }
+
+         if (index < pBandNames->size())
+         {
+            bandName = pBandNames->at(index);
          }
       }
 
-      if (bandName.empty() == true)
+      if ((bandName.empty() == true) && (band.isOriginalNumberValid() == true))
       {
          std::string bandPrefix = "Band";
          if (pBandPrefix != NULL)

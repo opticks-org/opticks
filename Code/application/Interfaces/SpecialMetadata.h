@@ -138,6 +138,14 @@
 #define NAMES_METADATA_NAME (std::string("Names"))
 
 /**
+ * The complete path for a std::vector<std::string> which contains the names of
+ * each band in the associated RasterElement.
+ *
+ * @see NAMES_METADATA_NAME
+ */
+#define BAND_NAMES_METADATA_PATH (SPECIAL_METADATA_NAME + "/" + BAND_METADATA_NAME + "/" + NAMES_METADATA_NAME)
+
+/**
  * The key for a string which contains a common prefix for the names of the associated
  * RasterElement's bands.
  * 

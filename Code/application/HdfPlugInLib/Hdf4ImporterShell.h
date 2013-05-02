@@ -70,20 +70,24 @@ protected:
 
 private:
    /**
-    * Creates an RasterPager Plug-In and sets it in the RasterElement.
+    *  Creates a RasterPager plug-in and sets it in the RasterElement.
     *
-    * This method can be overridden for importers that do not have a one-to-one correspondence between
-    * an HDF dataset and an RasterElement (ie. MODIS). Those that load one HDF dataset as a RasterElement
-    * can use the default implementation provided.
+    *  This method can be overridden for importers that do not have a one-to-one
+    *  correspondence between an HDF dataset and a RasterElement (e.g. MODIS).
+    *  Importers that load one HDF dataset as a RasterElement can use the
+    *  default implementation provided.
     *
-    * Called from HdfImporterShell::createRasterPagerPlugIn(const string&, const string&, RasterElement&).
+    *  Called from HdfImporterShell::createRasterPagerPlugIn(const std::string&, RasterElement&).
     *
-    * @param  pRaster
-    *         A pointer to the RasterElement for placing the raster pager plug-in.
+    *  @param   pRaster
+    *           A pointer to the RasterElement for placing the raster pager
+    *           plug-in.  This method does nothing and returns \c false if
+    *           \c NULL is passed in.
     *
-    * @return TRUE if the operation succeeds, FALSE otherwise.
+    *  @return  Returns \c true if pager plug-in is successfully created and set
+    *           in the given raster element; otherwise returns \c false.
     */
-   virtual bool createRasterPager(RasterElement *pRaster) const;
+   virtual bool createRasterPager(RasterElement* pRaster) const;
 };
 
 #endif

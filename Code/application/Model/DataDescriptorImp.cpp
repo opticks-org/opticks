@@ -340,6 +340,9 @@ bool DataDescriptorImp::toXml(XMLWriter* pXml) const
    pXml->addAttr("type", mType);
    pXml->addAttr("version", XmlBase::VERSION);
 
+   // Parent
+   pXml->addAttr("parent", mParentDesignator);
+
    // Classification
    bool bSuccess = mClassification.toXml(pXml);
 
@@ -395,6 +398,9 @@ bool DataDescriptorImp::fromXml(DOMNode* pDocument, unsigned int version)
    {
       throw XmlBase::XmlException("Element type does not match this element");
    }
+
+   XmlReader::StrToVector<string, XmlReader::StringStreamAssigner<string> >(mParentDesignator,
+      pElement->getAttribute(X("parent")));
    mProcessingLocation = StringUtilities::fromXmlString<ProcessingLocation>(
       A(pElement->getAttribute(X("processingLocation"))));
 

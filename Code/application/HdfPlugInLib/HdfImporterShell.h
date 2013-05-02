@@ -48,16 +48,18 @@ protected:
     *  @copydoc RasterElementImporterShell::getValidationTest()
     *
     *  \par
-    *  The following tests are added if the ::ProcessingLocation is
+    *  The following test is added if the ::ProcessingLocation is
     *  ::ON_DISK_READ_ONLY:
     *  - \link ImporterShell::NO_BAND_FILES NO_BAND_FILES \endlink
-    *  - \link ImporterShell::NO_ROW_SUBSETS NO_ROW_SUBSETS \endlink
-    *  - \link ImporterShell::NO_COLUMN_SUBSETS NO_COLUMN_SUBSETS \endlink
     *
     *  \par
-    *  The following test is removed if the ::ProcessingLocation is
+    *  The following tests are removed if the ::ProcessingLocation is
     *  ::ON_DISK_READ_ONLY and the ::InterleaveFormatType is ::BSQ:
+    *  - \link ImporterShell::NO_ROW_SUBSETS NO_ROW_SUBSETS \endlink
+    *  - \link ImporterShell::NO_COLUMN_SUBSETS NO_COLUMN_SUBSETS \endlink
     *  - \link ImporterShell::NO_BAND_SUBSETS NO_BAND_SUBSETS \endlink
+    *  - \link ImporterShell::NO_ROW_SKIP_FACTOR NO_ROW_SKIP_FACTOR \endlink
+    *  - \link ImporterShell::NO_COLUMN_SKIP_FACTOR NO_COLUMN_SKIP_FACTOR \endlink
     */
    virtual int getValidationTest(const DataDescriptor* pDescriptor) const;
 

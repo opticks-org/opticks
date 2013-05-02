@@ -14,7 +14,6 @@
 #include "WavelengthModel.h"
 
 #include <algorithm>
-#include <vector>
 
 WavelengthModel::WavelengthModel(QObject* pParent) :
    QAbstractTableModel(pParent),
@@ -203,7 +202,7 @@ QVariant WavelengthModel::data(const QModelIndex& index, int role) const
       {
          if (row < mAllBands.size())
          {
-            return QVariant(QString::number(mAllBands[row] + 1));
+            return QVariant(QString::fromStdString(mAllBands[row]));
          }
       }
       else if (mpWavelengths != NULL)
@@ -258,7 +257,8 @@ QVariant WavelengthModel::data(const QModelIndex& index, int role) const
    return QVariant();
 }
 
-void WavelengthModel::setWavelengths(const std::vector<DimensionDescriptor>& bands, Wavelengths* pWavelengths)
+void WavelengthModel::setWavelengths(const std::vector<DimensionDescriptor>& bands,
+                                     const std::vector<std::string>& bandNames, Wavelengths* pWavelengths)
 {
    if (pWavelengths != mpWavelengths)
    {
@@ -269,7 +269,13 @@ void WavelengthModel::setWavelengths(const std::vector<DimensionDescriptor>& ban
       mAllBands.resize(bands.size());
       for (std::vector<DimensionDescriptor>::size_type i = 0; i < bands.size(); ++i)
       {
-         mAllBands[i] = bands[i].getOriginalNumber();
+         std::string bandName = QString::number(bands[i].getOriginalNumber() + 1).toStdString();
+         if (i < bandNames.size())
+         {
+            bandName = bandNames[i];
+         }
+
+         mAllBands[i] = bandName;
       }
 
       mActiveBands.clear();
@@ -279,7 +285,8 @@ void WavelengthModel::setWavelengths(const std::vector<DimensionDescriptor>& ban
    }
 }
 
-void WavelengthModel::updateActiveWavelengths(const std::vector<DimensionDescriptor>& bands)
+void WavelengthModel::updateActiveWavelengths(const std::vector<DimensionDescriptor>& bands,
+                                              const std::vector<std::string>& bandNames)
 {
    if (mAllBands.empty() == true)
    {
@@ -289,7 +296,13 @@ void WavelengthModel::updateActiveWavelengths(const std::vector<DimensionDescrip
    mActiveBands.resize(bands.size());
    for (std::vector<DimensionDescriptor>::size_type i = 0; i < bands.size(); ++i)
    {
-      mActiveBands[i] = bands[i].getOriginalNumber();
+      std::string bandName = QString::number(bands[i].getOriginalNumber() + 1).toStdString();
+      if (i < bandNames.size())
+      {
+         bandName = bandNames[i];
+      }
+
+      mActiveBands[i] = bandName;
    }
 
    std::sort(mActiveBands.begin(), mActiveBands.end());

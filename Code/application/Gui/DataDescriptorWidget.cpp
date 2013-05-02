@@ -247,10 +247,14 @@ void DataDescriptorWidget::setDataDescriptor(DataDescriptor* pDescriptor, bool e
       DataElement* pParent = mpDescriptor->getParent();
       if (pParent != NULL)
       {
-         string name = pParent->getName();
-         if (name.empty() == false)
+         strParent = QString::fromStdString(pParent->getName());
+      }
+      else
+      {
+         vector<string> parentDesignator = mpDescriptor->getParentDesignator();
+         if (parentDesignator.empty() == false)
          {
-            strParent = QString::fromStdString(name);
+            strParent = QString::fromStdString(parentDesignator.back());
          }
       }
 

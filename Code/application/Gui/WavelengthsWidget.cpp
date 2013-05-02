@@ -34,6 +34,7 @@
 #include "PlugInResource.h"
 #include "Progress.h"
 #include "RasterElement.h"
+#include "RasterUtilities.h"
 #include "Slot.h"
 #include "WavelengthModel.h"
 #include "WavelengthsImp.h"
@@ -80,7 +81,6 @@ WavelengthsWidget::WavelengthsWidget(QWidget* pParent) :
    pWavelengthTable->setSelectionBehavior(QAbstractItemView::SelectRows);
    pWavelengthTable->setSelectionMode(QAbstractItemView::SingleSelection);
    pWavelengthTable->setSortingEnabled(false);
-   pWavelengthTable->setColumnWidth(0, 45);
 
    // Wavelength buttons
    QPushButton* pElementButton = new QPushButton("From Element...", this);
@@ -130,21 +130,23 @@ WavelengthsWidget::WavelengthsWidget(QWidget* pParent) :
 
 WavelengthsWidget::~WavelengthsWidget()
 {
-   setWavelengths(vector<DimensionDescriptor>(), NULL, NULL);
+   setWavelengths(vector<DimensionDescriptor>(), vector<string>(), NULL, NULL);
 }
 
-void WavelengthsWidget::setWavelengths(const vector<DimensionDescriptor>& bands, DynamicObject* pWavelengthData)
+void WavelengthsWidget::setWavelengths(const vector<DimensionDescriptor>& bands, const vector<string>& bandNames,
+                                       DynamicObject* pWavelengthData)
 {
-   setWavelengths(bands, pWavelengthData, NULL);
+   setWavelengths(bands, bandNames, pWavelengthData, NULL);
 }
 
-void WavelengthsWidget::setWavelengths(const vector<DimensionDescriptor>& bands, Wavelengths* pWavelengths)
-{
-   setWavelengths(bands, NULL, pWavelengths);
-}
-
-void WavelengthsWidget::setWavelengths(const vector<DimensionDescriptor>& bands, DynamicObject* pWavelengthData,
+void WavelengthsWidget::setWavelengths(const vector<DimensionDescriptor>& bands, const vector<string>& bandNames,
                                        Wavelengths* pWavelengths)
+{
+   setWavelengths(bands, bandNames, NULL, pWavelengths);
+}
+
+void WavelengthsWidget::setWavelengths(const vector<DimensionDescriptor>& bands, const vector<string>& bandNames,
+                                       DynamicObject* pWavelengthData, Wavelengths* pWavelengths)
 {
    if (mpWavelengthData != NULL)
    {
@@ -156,7 +158,7 @@ void WavelengthsWidget::setWavelengths(const vector<DimensionDescriptor>& bands,
 
          // Reset the wavelength model, which ensures the wavelengths are properly set into
          // the model if memory for the WavelengthsImp is allocated at the same address
-         mpWavelengthModel->setWavelengths(vector<DimensionDescriptor>(), NULL);
+         mpWavelengthModel->setWavelengths(vector<DimensionDescriptor>(), vector<string>(), NULL);
       }
    }
 
@@ -171,10 +173,15 @@ void WavelengthsWidget::setWavelengths(const vector<DimensionDescriptor>& bands,
    }
 
    // Set the wavelengths into the model
-   mpWavelengthModel->setWavelengths(bands, mpWavelengths);
+   mpWavelengthModel->setWavelengths(bands, bandNames, mpWavelengths);
 
    // Populate the widgets
    updateWidgetsFromWavelengths();
+}
+
+void WavelengthsWidget::highlightActiveBands(const vector<DimensionDescriptor>& bands, const vector<string>& bandNames)
+{
+   mpWavelengthModel->updateActiveWavelengths(bands, bandNames);
 }
 
 QSize WavelengthsWidget::sizeHint() const
@@ -182,14 +189,9 @@ QSize WavelengthsWidget::sizeHint() const
    return QSize(500, 300);
 }
 
-void WavelengthsWidget::highlightActiveBands(const vector<DimensionDescriptor>& bands)
-{
-   mpWavelengthModel->updateActiveWavelengths(bands);
-}
-
 void WavelengthsWidget::wavelengthDataDeleted(Subject& subject, const string& signal, const boost::any& value)
 {
-   setWavelengths(vector<DimensionDescriptor>(), NULL, NULL);
+   setWavelengths(vector<DimensionDescriptor>(), vector<string>(), NULL, NULL);
 }
 
 void WavelengthsWidget::showEvent(QShowEvent* pEvent)

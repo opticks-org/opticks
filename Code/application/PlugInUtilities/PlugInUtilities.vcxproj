@@ -672,6 +672,7 @@
 </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
     </CustomBuild>
+    <ClInclude Include="GeoreferenceUtilities.h" />
     <ClInclude Include="MathUtil.h" />
     <ClInclude Include="Mgrs.h" />
     <ClInclude Include="MgrsDatum.h" />
@@ -1449,6 +1450,7 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_SymbolTypeGrid.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_UndoAction.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_WavelengthUnitsComboBox.cpp" />
+    <ClCompile Include="GeoreferenceUtilities.cpp" />
     <ClCompile Include="pthreads-wrapper\bmutex.cpp" />
     <ClCompile Include="pthreads-wrapper\bthread.cpp" />
     <ClCompile Include="pthreads-wrapper\bthread_signal.cpp" />

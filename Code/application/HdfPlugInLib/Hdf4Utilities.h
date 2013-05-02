@@ -20,6 +20,7 @@
 #include "Hdf4Element.h"
 #include "DataVariant.h"
 #include "Resource.h"
+#include "TypesFile.h"
 
 #include <string>
 
@@ -60,10 +61,21 @@ namespace HdfUtilities
    }
 
    /**
+    *  Converts an HDF4 type to an ::EncodingType.
+    *
+    *  @param   type
+    *           The HDF4 type (e.g.: DFNT_CHAR).
+    * 
+    *  @return  An ::EncodingType equivalent to the HDF4 type specified or an
+    *           invalid ::EncodingType if there is none.
+    */
+   EncodingType hdf4TypeToEncodingType(long type);
+
+   /**
     *  Converts an HDF4 type to a string that can be used to create an Hdf4Attribute.
     *
     *  @param  type
-    *          The HDF4 type (ie. DFNT_CHAR).
+    *          The HDF4 type (e.g.: DFNT_CHAR).
     *  @param  count
     *          The number of elements whose data type is 'type'.
     * 
@@ -71,7 +83,6 @@ namespace HdfUtilities
     *          that DynamicObect::get() expresses types as strings.
     */
    std::string hdf4TypeToString(long type, size_t count);
-
 
    /**
     *  Given an open HDF4 Attribute identifier retrieves
@@ -125,10 +136,13 @@ namespace HdfUtilities
           * @param  filename
           *         The file that is opened.
           * @param  access
-          *         How the file will be opened (ie. DFACC_READ, DFACC_WRITE, etc.). See the HDF
+          *         How the file will be opened (e.g.: DFACC_READ, DFACC_WRITE, etc.). See the HDF
           *         documentation for details.
           */
-         Args(std::string filename, int32 access = DFACC_READ) : mFilename(filename), mAccess(access) {}
+         Args(std::string filename, int32 access = DFACC_READ) :
+            mFilename(filename),
+            mAccess(access)
+         {}
       };
 
       /**
@@ -179,8 +193,7 @@ namespace HdfUtilities
        */
       Hdf4FileResource(const char *pFilename, int32 access = DFACC_READ) :
          Resource<int32, Hdf4FileObject>(Hdf4FileObject::Args(pFilename, access))
-      {
-      }
+      {}
 
       /**
        * Allows for implict conversion of this resource type to an int32*.
@@ -237,8 +250,7 @@ namespace HdfUtilities
          Args(int32 fileHandle, int dsIndex) :
             mFileHandle(fileHandle),
             mIndex(dsIndex)
-         {
-         }
+         {}
 
          /**
           * Constructs an Args object for an HDF4 Dataset Object.
@@ -322,8 +334,7 @@ namespace HdfUtilities
        */
       Hdf4DatasetResource(int32 fileHandle, const std::string& datasetName) :
          Resource<int32, Hdf4DatasetObject>(Hdf4DatasetObject::Args(fileHandle, datasetName))
-      {
-      }
+      {}
 
       /**
        *  Creates a resource to an Hdf4 dataset handle.
@@ -337,8 +348,7 @@ namespace HdfUtilities
        */
       Hdf4DatasetResource(int32 fileHandle, int dsIndex) :
          Resource<int32, Hdf4DatasetObject>(Hdf4DatasetObject::Args(fileHandle, dsIndex))
-      {
-      }
+      {}
 
       /**
        * Allows for implict conversion of this resource type to an int32*.

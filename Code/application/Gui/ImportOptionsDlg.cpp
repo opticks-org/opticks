@@ -30,6 +30,7 @@
 #include "ModelServices.h"
 #include "RasterDataDescriptor.h"
 #include "RasterFileDescriptor.h"
+#include "RasterUtilities.h"
 #include "Slot.h"
 #include "SpecialMetadata.h"
 #include "SubsetWidget.h"
@@ -647,11 +648,13 @@ void ImportOptionsDlg::setCurrentDataset(ImportDescriptor* pImportDescriptor)
    {
       // Populate the wavelengths with the file descriptor bands since the metadata wavelengths
       // apply to all bands in the file
-      mpWavelengthsPage->setWavelengths(pRasterFileDescriptor->getBands(), mpEditDescriptor->getMetadata());
+      vector<string> bandNames = RasterUtilities::getBandNames(dynamic_cast<RasterDataDescriptor*>(mpEditDescriptor));
+      mpWavelengthsPage->setWavelengths(pRasterFileDescriptor->getBands(), bandNames, mpEditDescriptor->getMetadata());
 
       if (pRasterDescriptor != NULL)
       {
-         mpWavelengthsPage->highlightActiveBands(pRasterDescriptor->getBands());
+         bandNames = RasterUtilities::getBandNames(pRasterDescriptor);
+         mpWavelengthsPage->highlightActiveBands(pRasterDescriptor->getBands(), bandNames);
       }
 
       mpTabWidget->addTab(mpWavelengthsPage, "Wavelengths");
@@ -1237,7 +1240,8 @@ void ImportOptionsDlg::editDataDescriptorBandsModified(Subject& subject, const s
    }
 
    // Wavelengths page
-   mpWavelengthsPage->highlightActiveBands(importedBands);
+   vector<string> bandNames = RasterUtilities::getBandNames(dynamic_cast<RasterDataDescriptor*>(mpEditDescriptor));
+   mpWavelengthsPage->highlightActiveBands(importedBands, bandNames);
 }
 
 void ImportOptionsDlg::editFileDescriptorRowsModified(Subject& subject, const string& signal, const boost::any& value)
@@ -1270,8 +1274,9 @@ void ImportOptionsDlg::editFileDescriptorBandsModified(Subject& subject, const s
    // Wavelengths page
    if (mpEditDescriptor != NULL)
    {
-      mpWavelengthsPage->setWavelengths(bands, mpEditDescriptor->getMetadata());
-      mpWavelengthsPage->highlightActiveBands(bands);
+      vector<string> bandNames = RasterUtilities::getBandNames(dynamic_cast<RasterDataDescriptor*>(mpEditDescriptor));
+      mpWavelengthsPage->setWavelengths(bands, bandNames, mpEditDescriptor->getMetadata());
+      mpWavelengthsPage->highlightActiveBands(bands, bandNames);
    }
 }
 

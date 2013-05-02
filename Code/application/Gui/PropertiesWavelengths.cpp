@@ -12,6 +12,7 @@
 #include "DataElement.h"
 #include "PropertiesWavelengths.h"
 #include "RasterDataDescriptor.h"
+#include "RasterUtilities.h"
 #include "WavelengthsWidget.h"
 
 PropertiesWavelengths::PropertiesWavelengths()
@@ -47,7 +48,8 @@ bool PropertiesWavelengths::initialize(SessionItem* pSessionItem)
          if (pMetadata != NULL)
          {
             mWavelengths.initializeFromDynamicObject(pMetadata, true);
-            pWavelengthsPage->setWavelengths(pDescriptor->getBands(), &mWavelengths);
+            pWavelengthsPage->setWavelengths(pDescriptor->getBands(), RasterUtilities::getBandNames(pDescriptor),
+               &mWavelengths);
             return PropertiesShell::initialize(pSessionItem);
          }
       }

@@ -43,16 +43,55 @@ bool readAttribute(int32 obj_id, int32 attr_index, int32 count, DataVariant& val
 }
 }
 
+EncodingType HdfUtilities::hdf4TypeToEncodingType(long type)
+{
+   switch (type)
+   {
+      case DFNT_CHAR:   // Fall through
+      default:
+         break;
+
+      case DFNT_INT8:
+         return INT1SBYTE;
+
+      case DFNT_UCHAR:  // Fall through
+      case DFNT_UINT8:
+         return INT1UBYTE;
+
+      case DFNT_INT16:
+         return INT2SBYTES;
+
+      case DFNT_UINT16:
+         return INT2UBYTES;
+
+      case DFNT_INT32:
+         return INT4SBYTES;
+
+      case DFNT_UINT32:
+         return INT4UBYTES;
+
+      case DFNT_FLOAT32:
+         return FLT4BYTES;
+
+      case DFNT_FLOAT64:
+         return FLT8BYTES;
+   }
+
+   return EncodingType();
+}
+
 string HdfUtilities::hdf4TypeToString(long type, size_t count)
 {
    string strType = UNKNOWN_TYPE;
    switch (type)
    {
-      case DFNT_CHAR:  // fall through
+      case DFNT_CHAR:
+         strType = "string";
+         break;
       case DFNT_INT8:
          if (count > 1)
          {
-            strType = "string";
+            strType = "vector<char>";
          }
          else
          {
@@ -151,12 +190,10 @@ bool HdfUtilities::readHdf4Attribute(int32 obj_id, int32 attr_index, DataVariant
    bool success = false;
    switch (type)
    {
-      case DFNT_CHAR:  // fall through
-      case DFNT_INT8:
-         if (count > 1)
+      case DFNT_CHAR:
          {
             string temp;
-            temp.resize(count + 1);
+            temp.resize(count);
             iSuccess = SDreadattr(obj_id, attr_index, &(temp[0]));
             if (iSuccess != SUCCEED)
             {
@@ -165,17 +202,9 @@ bool HdfUtilities::readHdf4Attribute(int32 obj_id, int32 attr_index, DataVariant
             var = temp;
             success = var.isValid();
          }
-         else
-         {
-            char temp;
-            iSuccess = SDreadattr(obj_id, attr_index, &temp);
-            if (iSuccess != SUCCEED)
-            {
-               return false;
-            }
-            var = temp;
-            success = var.isValid();
-         }
+         break;
+      case DFNT_INT8:
+         success = readAttribute<char>(obj_id, attr_index, count, var);
          break;
       case DFNT_UCHAR:  // fall through
       case DFNT_UINT8:

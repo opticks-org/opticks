@@ -126,6 +126,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Collada", "PlugIns\src\Coll
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SpatialResampler", "PlugIns\src\SpatialResampler\SpatialResampler.vcxproj", "{BBBDE64F-2E25-4E96-B2CC-4D59AA2C1708}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Modis", "PlugIns\src\Modis\Modis.vcxproj", "{F2592679-3432-4D99-ABB4-39D9DFA3F4F0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -618,6 +620,14 @@ Global
 		{BBBDE64F-2E25-4E96-B2CC-4D59AA2C1708}.Release|Win32.Build.0 = Release|Win32
 		{BBBDE64F-2E25-4E96-B2CC-4D59AA2C1708}.Release|x64.ActiveCfg = Release|x64
 		{BBBDE64F-2E25-4E96-B2CC-4D59AA2C1708}.Release|x64.Build.0 = Release|x64
+		{F2592679-3432-4D99-ABB4-39D9DFA3F4F0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F2592679-3432-4D99-ABB4-39D9DFA3F4F0}.Debug|Win32.Build.0 = Debug|Win32
+		{F2592679-3432-4D99-ABB4-39D9DFA3F4F0}.Debug|x64.ActiveCfg = Debug|x64
+		{F2592679-3432-4D99-ABB4-39D9DFA3F4F0}.Debug|x64.Build.0 = Debug|x64
+		{F2592679-3432-4D99-ABB4-39D9DFA3F4F0}.Release|Win32.ActiveCfg = Release|Win32
+		{F2592679-3432-4D99-ABB4-39D9DFA3F4F0}.Release|Win32.Build.0 = Release|Win32
+		{F2592679-3432-4D99-ABB4-39D9DFA3F4F0}.Release|x64.ActiveCfg = Release|x64
+		{F2592679-3432-4D99-ABB4-39D9DFA3F4F0}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

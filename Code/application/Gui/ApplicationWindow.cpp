@@ -2076,7 +2076,9 @@ void ApplicationWindow::fileMenuActivated(QAction* pAction)
                      if ((pImporterDescriptor != NULL) && (pMruDescriptor != NULL))
                      {
                         if ((pImporterDescriptor->getName() == pMruDescriptor->getName()) &&
-                           (pImporterDescriptor->getType() == pMruDescriptor->getType()))
+                           (pImporterDescriptor->getType() == pMruDescriptor->getType()) &&
+                           (pImporterDescriptor->getParent() == pMruDescriptor->getParent()) &&
+                           (pImporterDescriptor->getParentDesignator() == pMruDescriptor->getParentDesignator()))
                         {
                            // Copy the MRU file data descriptor into the importer resource descriptors
                            // since the resource takes ownership

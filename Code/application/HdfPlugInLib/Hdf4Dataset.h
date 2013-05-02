@@ -35,7 +35,7 @@ public:
       FLT8COMPLEX = 8,  /**< complex float */
       FLT8BYTES = 9,    /**< double */
       STRING = 10,      /**< std::string */
-      COMPOUND = 11,    /**< Compund or VDATA dataset */
+      COMPOUND = 11,    /**< Compound or VDATA dataset */
       UNSUPPORTED = 12  /**< Indicates a value unsupported by HdfPlugInLib */
    };
 

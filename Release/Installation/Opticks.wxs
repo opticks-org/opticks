@@ -210,6 +210,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
                <File Name="44-AnnotationImagePalette.cfg" Id="F__AnnotationImagePaletteCfg" />
                <File Name="45-ConvolutionFilters.cfg" Id="F__ConvolutionFiltersCfg" />
                <File Name="50-KmlServer.cfg" Id="F__KmlServerCfg" />
+               <File Name="55-Modis.cfg" Id="F__ModisCfg" />
                <File Name="60-SpatialResampler.cfg" Id="F__SpatialResamplerCfg" />
                <Util:XmlFile Id="F__UpdateTempDirCfg" Action="bulkSetValue" File="[#F__TempDirCfg]" ElementPath="/ConfigurationSettings/group/attribute/attribute/value" Value="[TEMPDATADIR]" />
             </Component>
@@ -267,6 +268,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
                <File Name="Ice.dll" Id="F__IcePlugIn" DiskId="1" />
                <File Name="ImageComparison.dll" Id="F__ImageComparisonPlugIn" DiskId="1" />
                <File Name="Kml.dll" Id="F__KmlPlugIn" DiskId="1" />
+               <File Name="Modis.dll" Id="F__ModisPlugIn" DiskId="1" />
                <File Name="MovieExporter.dll" Id="F__MovieExporterPlugIn" DiskId="1" />
                <File Name="Nitf.dll" Id="F__NitfPlugIn" DiskId="1" />
                <File Name="NitfCommonTre.dll" Id="F__NitfCommonTrePlugIn" DiskId="1" />

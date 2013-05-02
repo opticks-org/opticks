@@ -208,8 +208,8 @@ void StatusBar::setCubeValue(const QString& layerName, double gray, const Units*
    if (pUnits != NULL)
    {
       unitText = QString::fromStdString(pUnits->getUnitName());
-      gray *= pUnits->getScaleFromStandard();
    }
+
    QString displayText = QString::number(gray, 'g', numeric_limits<double>::digits10);
    if (ConfigurationSettings::getSettingShowStatusBarCubeValueUnits())
    {
@@ -226,8 +226,8 @@ void StatusBar::setCubeValue(const QString& layerName, const QString& strGray)
       nameText += " (" + layerName + ")";
    }
 
-   nameText += ": ";
-   m_pCubeValue_Label->setText(nameText + "Gray - " + strGray + " ");
+   nameText += " - ";
+   m_pCubeValue_Label->setText(nameText + "Gray: " + strGray + " ");
 }
 
 void StatusBar::setCubeValue(const QString& layerName, double red, double green, double blue,
@@ -236,20 +236,20 @@ void StatusBar::setCubeValue(const QString& layerName, double red, double green,
    string redText;
    string greenText;
    string blueText;
+
    if (pRedUnits != NULL)
    {
       redText = pRedUnits->getUnitName();
-      red *= pRedUnits->getScaleFromStandard();
    }
+
    if (pGreenUnits != NULL)
    {
       greenText = pGreenUnits->getUnitName();
-      green *= pGreenUnits->getScaleFromStandard();
    }
+
    if (pBlueUnits != NULL)
    {
       blueText = pBlueUnits->getUnitName();
-      blue *= pBlueUnits->getScaleFromStandard();
    }
 
    // if units available for all channels and they all have same unit name, set unit text
@@ -278,8 +278,8 @@ void StatusBar::setCubeValue(const QString& layerName, const QString& strRed, co
       nameText += " (" + layerName + ")";
    }
 
-   nameText += ": ";
-   m_pCubeValue_Label->setText(nameText + "R,G,B - " + strRed + ", " + strGreen + ", " + strBlue + " ");
+   nameText += " - ";
+   m_pCubeValue_Label->setText(nameText + "R,G,B: " + strRed + ", " + strGreen + ", " + strBlue + " ");
 }
 
 void StatusBar::clearCubeValue()
@@ -327,7 +327,6 @@ void StatusBar::setResultValue(const QString& layerName, double value, const Uni
    if (pUnits != NULL)
    {
       unitText = QString::fromStdString(pUnits->getUnitName()) + " ";
-      value *= pUnits->getScaleFromStandard();
    }
 
    m_pResultValue_Label->setText(nameText + QString::number(value) + " " + unitText);

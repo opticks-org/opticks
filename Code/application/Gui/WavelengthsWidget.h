@@ -36,17 +36,17 @@ public:
    WavelengthsWidget(QWidget* pParent = NULL);
    ~WavelengthsWidget();
 
-   void setWavelengths(const std::vector<DimensionDescriptor>& bands, DynamicObject* pWavelengthData);
-   void setWavelengths(const std::vector<DimensionDescriptor>& bands, Wavelengths* pWavelengths);
+   void setWavelengths(const std::vector<DimensionDescriptor>& bands, const std::vector<std::string>& bandNames,
+      DynamicObject* pWavelengthData);
+   void setWavelengths(const std::vector<DimensionDescriptor>& bands, const std::vector<std::string>& bandNames,
+      Wavelengths* pWavelengths);
+   void highlightActiveBands(const std::vector<DimensionDescriptor>& bands, const std::vector<std::string>& bandNames);
 
    QSize sizeHint() const;
 
-public slots:
-   void highlightActiveBands(const std::vector<DimensionDescriptor>& bands);
-
 protected:
-   void setWavelengths(const std::vector<DimensionDescriptor>& bands, DynamicObject* pWavelengthData,
-      Wavelengths* pWavelengths);
+   void setWavelengths(const std::vector<DimensionDescriptor>& bands, const std::vector<std::string>& bandNames,
+      DynamicObject* pWavelengthData, Wavelengths* pWavelengths);
    void wavelengthDataDeleted(Subject& subject, const std::string& signal, const boost::any& value);
 
    void showEvent(QShowEvent* pEvent);

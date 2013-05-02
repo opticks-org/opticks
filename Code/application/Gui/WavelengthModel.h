@@ -14,6 +14,7 @@
 
 #include <QtCore/QAbstractTableModel>
 
+#include <string>
 #include <vector>
 
 class Wavelengths;
@@ -34,16 +35,19 @@ public:
    virtual bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole);
    virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
 
-   void setWavelengths(const std::vector<DimensionDescriptor>& bands, Wavelengths* pWavelengths);
-   void updateActiveWavelengths(const std::vector<DimensionDescriptor>& bands);
+   void setWavelengths(const std::vector<DimensionDescriptor>& bands, const std::vector<std::string>& bandNames,
+      Wavelengths* pWavelengths);
+   void updateActiveWavelengths(const std::vector<DimensionDescriptor>& bands,
+      const std::vector<std::string>& bandNames);
    void updateData();
 
 private:
    WavelengthModel(const WavelengthModel& rhs);
    WavelengthModel& operator=(const WavelengthModel& rhs);
+
    Wavelengths* mpWavelengths;
-   std::vector<unsigned int> mAllBands;
-   std::vector<unsigned int> mActiveBands;
+   std::vector<std::string> mAllBands;
+   std::vector<std::string> mActiveBands;
 };
 
 #endif

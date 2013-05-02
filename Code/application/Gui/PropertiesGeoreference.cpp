@@ -135,6 +135,7 @@ bool PropertiesGeoreference::applyChanges()
             // contained in the GeoreferenceWidget because the widget always destroys its plug-in instances
             // when it is destroyed
             ExecutableResource geoPlugIn(plugInName, std::string(), NULL, true);
+            geoPlugIn->createProgressDialog(true);
             geoPlugIn->getInArgList().setPlugInArgValue(Executable::DataElementArg(), pElement);
             if (geoPlugIn->execute() == false)
             {
