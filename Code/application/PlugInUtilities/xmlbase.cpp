@@ -106,15 +106,16 @@ std::string XmlBase::PathToURL(const std::string& path)
       // check for absolute vs. relative url
       bool isPathAbsolute = false;
       std::string pth(path);
-      if (pth[0] == '/')
-      {
-         isPathAbsolute = true;
-      }
-      else if ((pth.size() > 1) && (pth[1] == ':') && (std::isalpha(pth[0])))
+      if ((pth.size() > 1) && (((pth[1] == ':') && (std::isalpha(pth[0]))) ||
+         ((pth[0] == '\\') && (pth[1] == '\\')) || ((pth[0] == '/') && (pth[1] == '/'))))
       {
          isPathAbsolute = true;
          pth.insert(0, "/");
          std::replace(pth.begin(), pth.end(), '\\', '/');
+      }
+      else if (pth[0] == '/')
+      {
+         isPathAbsolute = true;
       }
       int mapPos(0);
       while (sTransMap[mapPos].mpC != NULL)
