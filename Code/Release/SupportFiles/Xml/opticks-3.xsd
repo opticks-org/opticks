@@ -252,6 +252,7 @@ http://www.gnu.org/licenses/lgpl.html
          <xsd:element name="metadata" type="opticks:DynamicObject" form="qualified" minOccurs="1" />
          <xsd:element name="FileDescriptor" type="opticks:FileDescriptor" form="qualified" minOccurs="0" />
       </xsd:sequence>
+      <xsd:attribute name="parent" type="xsd:string" use="optional" />
       <xsd:attribute name="processingLocation" type="opticks:ProcessingLocation" use="required" />
       <xsd:attribute name="importerName" type="xsd:string" use="optional" />
       <xsd:attributeGroup ref="opticks:idHeader" />
