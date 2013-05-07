@@ -119,6 +119,16 @@ bool CustomLayerImp::getExtents(double& x1, double& y1, double& x4, double& y4)
    return false;
 }
 
+bool CustomLayerImp::getExtents(vector<LocationType>& worldCoords)
+{
+   if (mpDrawObject.get() != NULL)
+   {
+      return mpDrawObject->getExtents(worldCoords);
+   }
+
+   return false;
+}
+
 bool CustomLayerImp::isKindOfLayer(const string& className)
 {
    if ((className == "CustomLayerImp") || (className == "CustomLayer"))

@@ -37,6 +37,8 @@ public:
    void updateHandles();
    bool hit(LocationType pixelCoord) const;
    GraphicObject* hitObject(const LocationType& pixelCoord) const;
+   bool getExtents(std::vector<LocationType>& dataCoords) const;
+   bool getRotatedExtents(std::vector<LocationType>& dataCoords) const;
    virtual void updateGeo();
    virtual void enableGeo();
 

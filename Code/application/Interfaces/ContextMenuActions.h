@@ -341,6 +341,11 @@
 #define APP_LAYER_DISPLAYED_ACTION "APP_LAYER_DISPLAYED_ACTION"
 
 /**
+ *  Zooms the view displaying the layer to the extents of the layer.
+ */
+#define APP_LAYER_ZOOM_TO_LAYER_ACTION "APP_LAYER_ZOOM_TO_LAYER_ACTION"
+
+/**
  *  Appearing only in a context menu for a PlotWidget, this action sets the
  *  plot widget to be the current plot widget in the plot set.
  */

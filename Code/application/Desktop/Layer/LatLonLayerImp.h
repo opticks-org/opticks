@@ -48,6 +48,7 @@ public:
    std::vector<ColorType> getColors() const;
    void draw();
    bool getExtents(double& x1, double& y1, double& x4, double& y4);
+   using LayerImp::getExtents;
 
    /**
     * Gets the color of the layer.
@@ -199,7 +200,6 @@ private:
    LatLonStyle mStyle;                 // the current drawing style
    QColor mColor;                      // the current drawing color
    unsigned int mWidth;                // the current drawing width
-   LocationType mCubeSize;             // the size of the cube in pixels
    LocationType mMaxCoord;             // the maximum geocoord value found on the pixel border
    LocationType mMinCoord;             // the minimum geocoord value found on the pixel border
 

@@ -25,6 +25,7 @@ public:
    void moveHandle(int handle, LocationType point, bool bMaintainAspect = false);
    void updateHandles();
    bool hit(LocationType pixelCoord) const;
+   bool getExtents(std::vector<LocationType>& dataCoords) const;
 
    const std::string& getObjectType() const;
    bool isKindOf(const std::string& className) const;

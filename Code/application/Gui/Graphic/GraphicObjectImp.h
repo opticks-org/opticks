@@ -105,6 +105,8 @@ public:
    LocationType getLlCorner() const;
    LocationType getUrCorner() const;
    void getRotatedBoundingBox(LocationType& llCorner, LocationType& urCorner) const;
+   virtual bool getExtents(std::vector<LocationType>& dataCoords) const;
+   virtual bool getRotatedExtents(std::vector<LocationType>& dataCoords) const;
    bool setRotation(double dAngle);
    double getRotation() const;
    void setName(const std::string &newName);
@@ -333,6 +335,14 @@ private:
    LocationType getUrCorner() const \
    { \
       return impClass::getUrCorner(); \
+   } \
+   bool getExtents(std::vector<LocationType>& dataCoords) const \
+   { \
+      return impClass::getExtents(dataCoords); \
+   } \
+   bool getRotatedExtents(std::vector<LocationType>& dataCoords) const \
+   { \
+      return impClass::getRotatedExtents(dataCoords); \
    } \
    bool setRotation(double dAngle) \
    { \

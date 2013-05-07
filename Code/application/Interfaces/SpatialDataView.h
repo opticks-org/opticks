@@ -370,6 +370,21 @@ public:
    virtual bool hideLayer(Layer* pLayer) = 0;
 
    /**
+    *  Zooms the view to the data extents of a given layer.
+    *
+    *  This method zooms the view out so that the entire data extents of the
+    *  given layer are displayed as returned by the
+    *  Layer::getExtents(std::vector<LocationType>&) method.
+    *
+    *  This method does not call refresh() so that multiple calls to modify view
+    *  settings can be made without refreshing the view after each modification.
+    *
+    *  @see     zoomExtents()<br>zoomToBox()<br>
+    *           Layer::getExtents(std::vector<LocationType>&)
+    */
+   virtual bool zoomToLayer(Layer* pLayer) = 0;
+
+   /**
     *  Retrieves the displayed layers in the layer list.
     *
     *  @param   displayedLayers

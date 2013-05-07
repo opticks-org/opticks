@@ -143,6 +143,28 @@ public:
    virtual void zoomToCenter(double dPercent) = 0;
 
    /**
+    *  Zooms the view to a custom area.
+    *
+    *  This method adjusts the zoom level of the view to the bounding box of the
+    *  given world coordinate locations.  This method differs from zoomToBox()
+    *  in that rotation of the view is taken into account when determining the
+    *  bounding box of the given coordinates.
+    *
+    *  This method does not call refresh() so that multiple calls to modify view
+    *  settings can be made without refreshing the view after each modification.
+    *
+    *  @param   worldCoords
+    *           A vector of world coordinates defining the area to display in
+    *           the view.
+    *
+    *  @notify  This method notifies signalZoomChanged() and
+    *           signalDisplayAreaChanged() when the display area changes.
+    *
+    *  @see     zoomToBox()<br>zoomExtents()
+    */
+   virtual void zoomToArea(const std::vector<LocationType>& worldCoords) = 0;
+
+   /**
     *  Returns the current zoom level as a percentage.
     *
     *  @return  The current zoom percentage.  The percentage is the relationship

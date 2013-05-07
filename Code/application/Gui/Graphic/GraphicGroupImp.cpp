@@ -36,7 +36,7 @@
 #include "xmlreader.h"
 
 #include <algorithm>
-
+#include <iterator>
 using namespace std;
 
 XERCES_CPP_NAMESPACE_USE
@@ -426,6 +426,78 @@ GraphicObject* GraphicGroupImp::hitObject(const LocationType& pixelCoord) const
    }
 
    return NULL;
+}
+
+bool GraphicGroupImp::getExtents(vector<LocationType>& dataCoords) const
+{
+   if (mObjects.empty() == true)
+   {
+      return false;
+   }
+
+   dataCoords.clear();
+
+   for (list<GraphicObject*>::const_iterator iter = mObjects.begin(); iter != mObjects.end(); ++iter)
+   {
+      GraphicObject* pObject = *iter;
+      if (pObject != NULL)
+      {
+         vector<LocationType> objectCoords;
+         pObject->getExtents(objectCoords);
+         if (objectCoords.empty() == false)
+         {
+            std::copy(objectCoords.begin(), objectCoords.end(), std::back_inserter(dataCoords));
+         }
+      }
+   }
+
+   return true;
+}
+
+bool GraphicGroupImp::getRotatedExtents(vector<LocationType>& dataCoords) const
+{
+   if (mObjects.empty() == true)
+   {
+      return false;
+   }
+
+   vector<LocationType> rotatedCoords;
+   for (list<GraphicObject*>::const_iterator iter = mObjects.begin(); iter != mObjects.end(); ++iter)
+   {
+      GraphicObject* pObject = *iter;
+      if (pObject != NULL)
+      {
+         vector<LocationType> objectCoords;
+         pObject->getRotatedExtents(objectCoords);
+         if (objectCoords.empty() == false)
+         {
+            std::copy(objectCoords.begin(), objectCoords.end(), std::back_inserter(rotatedCoords));
+         }
+      }
+   }
+
+   double rotation = getRotation();
+   if (rotation != 0.0)
+   {
+      LocationType lowerLeft = getLlCorner();
+      LocationType upperRight = getUrCorner();
+
+      LocationType center;
+      center.mX = (lowerLeft.mX + upperRight.mX) / 2.0;
+      center.mY = (lowerLeft.mY + upperRight.mY) / 2.0;
+
+      dataCoords.clear();
+      for (vector<LocationType>::const_iterator iter = rotatedCoords.begin(); iter != rotatedCoords.end(); ++iter)
+      {
+         dataCoords.push_back(DrawUtil::getRotatedCoordinate(*iter, center, rotation));
+      }
+   }
+   else
+   {
+      dataCoords = rotatedCoords;
+   }
+
+   return true;
 }
 
 void GraphicGroupImp::updateGeo()

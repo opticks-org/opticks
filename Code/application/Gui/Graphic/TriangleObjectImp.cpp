@@ -246,6 +246,20 @@ bool TriangleObjectImp::hit(LocationType pixelCoord) const
    return bHit;
 }
 
+bool TriangleObjectImp::getExtents(vector<LocationType>& dataCoords) const
+{
+   LocationType lowerLeft = getLlCorner();
+   LocationType upperRight = getUrCorner();
+   double apex = getApex();
+
+   dataCoords.clear();
+   dataCoords.push_back(lowerLeft);
+   dataCoords.push_back(LocationType(upperRight.mX, lowerLeft.mY));
+   dataCoords.push_back(LocationType(lowerLeft.mX + apex * (upperRight.mX - lowerLeft.mX), upperRight.mY));
+
+   return true;
+}
+
 const string& TriangleObjectImp::getObjectType() const
 {
    static string type("TriangleObjectImp");

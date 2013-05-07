@@ -1843,10 +1843,68 @@ bool GraphicLayerImp::getExtents(double& x1, double& y1, double& x4, double& y4)
 
    LocationType ll = pGroup->getLlCorner();
    LocationType ur = pGroup->getUrCorner();
-   x1 = min(ll.mX, ur.mX);
-   y1 = min(ll.mY, ur.mY);
-   x4 = max(ll.mX, ur.mX);
-   y4 = max(ll.mY, ur.mY);
+   double minX = min(ll.mX, ur.mX);
+   double minY = min(ll.mY, ur.mY);
+   double maxX = max(ll.mX, ur.mX);
+   double maxY = max(ll.mY, ur.mY);
+
+   if (willDrawAsPixels() == true)
+   {
+      minX = floor(minX);
+      minY = floor(minY);
+      maxX = ceil(maxX);
+      maxY = ceil(maxY);
+   }
+
+   translateDataToWorld(minX, minY, x1, y1);
+   translateDataToWorld(maxX, maxY, x4, y4);
+
+   return true;
+}
+
+bool GraphicLayerImp::getExtents(vector<LocationType>& worldCoords)
+{
+   GraphicGroup* pGroup = getGroup();
+   if (pGroup == NULL)
+   {
+      return false;
+   }
+
+   vector<LocationType> dataCoords;
+   if (pGroup->getRotatedExtents(dataCoords) == false)
+   {
+      return false;
+   }
+
+   worldCoords.clear();
+
+   for (vector<LocationType>::const_iterator iter = dataCoords.begin(); iter != dataCoords.end(); ++iter)
+   {
+      if (willDrawAsPixels() == true)
+      {
+         // Since the object will be drawn covering the whole pixel, add the four pixel
+         // corners instead of the coordinate itself to ensure accurate extents
+         LocationType worldCoord;
+
+         translateDataToWorld(floor(iter->mX), floor(iter->mY), worldCoord.mX, worldCoord.mY);
+         worldCoords.push_back(worldCoord);
+
+         translateDataToWorld(floor(iter->mX), ceil(iter->mY), worldCoord.mX, worldCoord.mY);
+         worldCoords.push_back(worldCoord);
+
+         translateDataToWorld(ceil(iter->mX), ceil(iter->mY), worldCoord.mX, worldCoord.mY);
+         worldCoords.push_back(worldCoord);
+
+         translateDataToWorld(ceil(iter->mX), floor(iter->mY), worldCoord.mX, worldCoord.mY);
+         worldCoords.push_back(worldCoord);
+      }
+      else
+      {
+         LocationType worldCoord;
+         translateDataToWorld(iter->mX, iter->mY, worldCoord.mX, worldCoord.mY);
+         worldCoords.push_back(worldCoord);
+      }
+   }
 
    return true;
 }

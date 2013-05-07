@@ -283,6 +283,11 @@ bool LatLonInsertObjectImp::hit(LocationType pixelCoord) const
    return mpGroup->hit(pixelCoord);
 }
 
+bool LatLonInsertObjectImp::getExtents(vector<LocationType>& dataCoords) const
+{
+   return mpGroup->getExtents(dataCoords);
+}
+
 bool LatLonInsertObjectImp::replicateObject(const GraphicObject* pObject)
 {
    const LatLonInsertObjectImp* pLLIObject = dynamic_cast<const LatLonInsertObjectImp*>(pObject);

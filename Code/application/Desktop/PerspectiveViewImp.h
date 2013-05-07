@@ -53,6 +53,7 @@ public slots:
    void zoomToCenter(double dPercent);
    virtual void zoomToBox(const QPoint& screenLowerLeft, const QPoint& screenUpperRight);
    virtual void zoomToBox(const LocationType& worldLowerLeft, const LocationType& worldUpperRight);
+   void zoomToArea(const std::vector<LocationType>& worldCoords);
    void zoomToInset();
    virtual void pan(const QPoint& screenBegin, const QPoint& screenEnd);
    virtual void pan(const LocationType& worldBegin, const LocationType& worldEnd);
@@ -151,6 +152,10 @@ private slots:
    void zoomToCenter(double dPercent) \
    { \
       return impClass::zoomToCenter(dPercent); \
+   } \
+   void zoomToArea(const std::vector<LocationType>& worldCoords) \
+   { \
+      impClass::zoomToArea(worldCoords); \
    } \
    double getZoomPercentage() const \
    { \

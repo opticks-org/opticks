@@ -135,6 +135,7 @@ public slots:
    void setTextureMode(const TextureMode& textureMode);
    bool showLayer(Layer* pLayer);
    bool hideLayer(Layer* pLayer);
+   bool zoomToLayer(Layer* pLayer);
    bool setFrontLayer(Layer* pLayer);
    bool setBackLayer(Layer* pLayer);
    bool bringLayerForward(Layer* pLayer);
@@ -341,6 +342,10 @@ private slots:
    bool hideLayer(Layer* pLayer) \
    { \
       return impClass::hideLayer(pLayer); \
+   } \
+   bool zoomToLayer(Layer* pLayer) \
+   { \
+      return impClass::zoomToLayer(pLayer); \
    } \
    void getDisplayedLayers(std::vector<Layer*>& displayedLayers) const \
    { \

@@ -29,6 +29,7 @@ public:
    void moveHandle(int handle, LocationType point, bool bMaintainAspect = false);
    void updateHandles();
    bool hit(LocationType pixelCoord) const;
+   bool getExtents(std::vector<LocationType>& dataCoords) const;
 
    LocationType getLocation(double dAngle) const;
    double getAngle(LocationType point) const;

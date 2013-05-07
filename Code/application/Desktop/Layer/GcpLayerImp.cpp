@@ -27,6 +27,8 @@
 #include "ViewImp.h"
 #include "xmlreader.h"
 
+#include <algorithm>
+#include <limits>
 #include <list>
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
@@ -215,7 +217,62 @@ void GcpLayerImp::draw()
 
 bool GcpLayerImp::getExtents(double& x1, double& y1, double& x4, double& y4)
 {
-   return false;
+   GcpList* pGcpList = dynamic_cast<GcpList*>(getDataElement());
+   if (pGcpList == NULL)
+   {
+      return false;
+   }
+
+   const list<GcpPoint>& points = pGcpList->getSelectedPoints();
+   if (points.empty() == true)
+   {
+      return false;
+   }
+
+   double minX = numeric_limits<double>::max();
+   double minY = numeric_limits<double>::max();
+   double maxX = -numeric_limits<double>::max();
+   double maxY = -numeric_limits<double>::max();
+
+   for (list<GcpPoint>::const_iterator iter = points.begin(); iter != points.end(); ++iter)
+   {
+      GcpPoint gcp = *iter;
+      minX = min(minX, gcp.mPixel.mX);
+      minY = min(minY, gcp.mPixel.mY);
+      maxX = max(maxX, gcp.mPixel.mX);
+      maxY = max(maxY, gcp.mPixel.mY);
+   }
+
+   translateDataToWorld(minX, minY, x1, y1);
+   translateDataToWorld(maxX, maxY, x4, y4);
+
+   return true;
+}
+
+bool GcpLayerImp::getExtents(vector<LocationType>& worldCoords)
+{
+   GcpList* pGcpList = dynamic_cast<GcpList*>(getDataElement());
+   if (pGcpList == NULL)
+   {
+      return false;
+   }
+
+   const list<GcpPoint>& points = pGcpList->getSelectedPoints();
+   if (points.empty() == true)
+   {
+      return false;
+   }
+
+   worldCoords.clear();
+
+   for (list<GcpPoint>::const_iterator iter = points.begin(); iter != points.end(); ++iter)
+   {
+      LocationType worldCoord;
+      translateDataToWorld(iter->mPixel.mX, iter->mPixel.mY, worldCoord.mX, worldCoord.mY);
+      worldCoords.push_back(worldCoord);
+   }
+
+   return true;
 }
 
 QColor GcpLayerImp::getColor() const

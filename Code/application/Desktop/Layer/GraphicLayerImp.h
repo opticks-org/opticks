@@ -53,6 +53,7 @@ public:
    GraphicLayerImp& operator= (const GraphicLayerImp& graphicLayer);
 
    virtual bool getExtents(double& x1, double& y1, double& x4, double& y4);
+   virtual bool getExtents(std::vector<LocationType>& worldCoords);
    virtual LayerType getLayerType() const;
 
    virtual void groupSelection();

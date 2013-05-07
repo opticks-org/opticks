@@ -798,6 +798,52 @@ void GraphicObjectImp::getRotatedBoundingBox(LocationType& llCorner, LocationTyp
    urCorner.mY = dEndRow;
 }
 
+bool GraphicObjectImp::getExtents(vector<LocationType>& dataCoords) const
+{
+   LocationType lowerLeft = getLlCorner();
+   LocationType upperRight = getUrCorner();
+
+   dataCoords.clear();
+   dataCoords.push_back(lowerLeft);
+   dataCoords.push_back(LocationType(upperRight.mX, lowerLeft.mY));
+   dataCoords.push_back(upperRight);
+   dataCoords.push_back(LocationType(lowerLeft.mX, upperRight.mY));
+
+   return true;
+}
+
+bool GraphicObjectImp::getRotatedExtents(vector<LocationType>& dataCoords) const
+{
+   vector<LocationType> coords;
+   if (getExtents(coords) == false)
+   {
+      return false;
+   }
+
+   double rotation = getRotation();
+   if (rotation != 0.0)
+   {
+      LocationType lowerLeft = getLlCorner();
+      LocationType upperRight = getUrCorner();
+
+      LocationType center;
+      center.mX = (lowerLeft.mX + upperRight.mX) / 2.0;
+      center.mY = (lowerLeft.mY + upperRight.mY) / 2.0;
+
+      dataCoords.clear();
+      for (vector<LocationType>::const_iterator iter = coords.begin(); iter != coords.end(); ++iter)
+      {
+         dataCoords.push_back(DrawUtil::getRotatedCoordinate(*iter, center, rotation));
+      }
+   }
+   else
+   {
+      dataCoords = coords;
+   }
+
+   return true;
+}
+
 bool GraphicObjectImp::setRotation(double dAngle)
 {
    if (hasProperty("Rotation") == false)

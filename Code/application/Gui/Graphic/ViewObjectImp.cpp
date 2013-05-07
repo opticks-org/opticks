@@ -90,6 +90,12 @@ void ViewObjectImp::setView(View* pView)
       VERIFYNR(disconnect(mpView, SIGNAL(backgroundColorChanged(const QColor&)), this,
          SLOT(setBackgroundColor(const QColor&))));
 
+      ViewImp* pViewImp = dynamic_cast<ViewImp*>(mpView);
+      if (pViewImp != NULL)
+      {
+         VERIFYNR(disconnect(pViewImp, SIGNAL(displayAreaChanged()), this, SLOT(refresh())));
+      }
+
       SpatialDataViewImp* pSpatialDataViewImp = dynamic_cast<SpatialDataViewImp*>(mpView);
       if (pSpatialDataViewImp != NULL)
       {
@@ -217,6 +223,12 @@ void ViewObjectImp::setView(View* pView)
          // Connections
          VERIFYNR(connect(mpView, SIGNAL(backgroundColorChanged(const QColor&)), this,
             SLOT(setBackgroundColor(const QColor&))));
+
+         ViewImp* pViewImp = dynamic_cast<ViewImp*>(mpView);
+         if (pViewImp != NULL)
+         {
+            VERIFYNR(connect(pViewImp, SIGNAL(displayAreaChanged()), this, SLOT(refresh())));
+         }
 
          SpatialDataViewImp* pSpatialDataViewImp = dynamic_cast<SpatialDataViewImp*>(mpView);
          if (pSpatialDataViewImp != NULL)

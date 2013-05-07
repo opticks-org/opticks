@@ -55,6 +55,7 @@ public:
    std::vector<ColorType> getColors() const;
    void draw();
    bool getExtents(double& x1, double& y1, double& x4, double& y4);
+   using LayerImp::getExtents;
 
    PseudocolorClass* addClass();
    PseudocolorClass* addClass(const QString& strClass, int iValue, const QColor& clrClass, bool bDisplayed);

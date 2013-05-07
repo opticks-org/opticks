@@ -171,42 +171,13 @@ void PerspectiveViewImp::zoomExtents()
    double dMaxY = 0.0;
    getExtents(dMinX, dMinY, dMaxX, dMaxY);
 
-   // Calculate the minimum and maximum screen coordinates at the world extents to account for rotation
-   double pixelX = 0.0;
-   double pixelY = 0.0;
-   double minPixelX = 0.0;
-   double minPixelY = 0.0;
-   double maxPixelX = 0.0;
-   double maxPixelY = 0.0;
+   vector<LocationType> area;
+   area.push_back(LocationType(dMinX, dMinY));
+   area.push_back(LocationType(dMaxX, dMinY));
+   area.push_back(LocationType(dMaxX, dMaxY));
+   area.push_back(LocationType(dMinX, dMaxY));
 
-   translateWorldToScreen(dMinX, dMinY, pixelX, pixelY);
-   minPixelX = maxPixelX = pixelX;
-   minPixelY = maxPixelY = pixelY;
-
-   translateWorldToScreen(dMaxX, dMinY, pixelX, pixelY);
-   minPixelX = min(minPixelX, pixelX);
-   maxPixelX = max(maxPixelX, pixelX);
-   minPixelY = min(minPixelY, pixelY);
-   maxPixelY = max(maxPixelY, pixelY);
-
-   translateWorldToScreen(dMaxX, dMaxY, pixelX, pixelY);
-   minPixelX = min(minPixelX, pixelX);
-   maxPixelX = max(maxPixelX, pixelX);
-   minPixelY = min(minPixelY, pixelY);
-   maxPixelY = max(maxPixelY, pixelY);
-
-   translateWorldToScreen(dMinX, dMaxY, pixelX, pixelY);
-   minPixelX = min(minPixelX, pixelX);
-   maxPixelX = max(maxPixelX, pixelX);
-   minPixelY = min(minPixelY, pixelY);
-   maxPixelY = max(maxPixelY, pixelY);
-
-   // Convert the screen coordinates back to world coordinates
-   translateScreenToWorld(minPixelX, minPixelY, dMinX, dMinY);
-   translateScreenToWorld(maxPixelX, maxPixelY, dMaxX, dMaxY);
-
-   // Update the distance
-   zoomToBox(LocationType(dMinX, dMinY), LocationType(dMaxX, dMaxY));
+   zoomToArea(area);
 }
 
 void PerspectiveViewImp::zoomBy(double dPercent)
@@ -380,6 +351,41 @@ void PerspectiveViewImp::zoomToBox(const LocationType& worldLowerLeft, const Loc
          boost::bind(static_cast<void (PerspectiveViewImp::*)(const LocationType&, const LocationType&)>
          (&PerspectiveViewImp::zoomToBox), _1, worldLowerLeft, worldUpperRight), GeocoordLinkFunctor(this));
    }
+}
+
+void PerspectiveViewImp::zoomToArea(const vector<LocationType>& worldCoords)
+{
+   if (worldCoords.empty() == true)
+   {
+      return;
+   }
+
+   // Calculate the minimum and maximum screen coordinates at the world extents to account for rotation
+   double minScreenX = numeric_limits<double>::max();
+   double minScreenY = numeric_limits<double>::max();
+   double maxScreenX = -numeric_limits<double>::max();
+   double maxScreenY = -numeric_limits<double>::max();
+
+   for (vector<LocationType>::const_iterator iter = worldCoords.begin(); iter != worldCoords.end(); ++iter)
+   {
+      double screenX = 0.0;
+      double screenY = 0.0;
+      translateWorldToScreen(iter->mX, iter->mY, screenX, screenY);
+
+      minScreenX = min(minScreenX, screenX);
+      minScreenY = min(minScreenY, screenY);
+      maxScreenX = max(maxScreenX, screenX);
+      maxScreenY = max(maxScreenY, screenY);
+   }
+
+   // Convert the screen coordinates back to world coordinates
+   LocationType worldLowerLeft;
+   LocationType worldUpperRight;
+   translateScreenToWorld(minScreenX, minScreenY, worldLowerLeft.mX, worldLowerLeft.mY);
+   translateScreenToWorld(maxScreenX, maxScreenY, worldUpperRight.mX, worldUpperRight.mY);
+
+   // Update the distance
+   zoomToBox(worldLowerLeft, worldUpperRight);
 }
 
 void PerspectiveViewImp::zoomToInset()

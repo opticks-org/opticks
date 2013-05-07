@@ -519,6 +519,17 @@ bool MultipointObjectImp::hit(LocationType pixelCoord) const
    return false;
 }
 
+bool MultipointObjectImp::getExtents(vector<LocationType>& dataCoords) const
+{
+   if (mVertices.empty() == true)
+   {
+      return false;
+   }
+
+   dataCoords = mVertices;
+   return true;
+}
+
 bool MultipointObjectImp::toXml(XMLWriter* pXml) const
 {
    if (pXml == NULL)

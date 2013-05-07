@@ -62,3 +62,23 @@ bool DrawObject::processMouseDoubleClick(const QPoint& screenCoord, Qt::MouseBut
 {
    return false;
 }
+
+bool DrawObject::getExtents(std::vector<LocationType>& worldCoords)
+{
+   double minX = 0.0;
+   double maxX = 0.0;
+   double minY = 0.0;
+   double maxY = 0.0;
+   if (getExtents(minX, minY, maxX, maxY) == false)
+   {
+      return false;
+   }
+
+   worldCoords.clear();
+   worldCoords.push_back(LocationType(minX, minY));
+   worldCoords.push_back(LocationType(maxX, minY));
+   worldCoords.push_back(LocationType(maxX, maxY));
+   worldCoords.push_back(LocationType(minX, maxY));
+
+   return true;
+}

@@ -476,6 +476,42 @@ bool ArcObjectImp::hit(LocationType pixelCoord) const
    return bHit;
 }
 
+bool ArcObjectImp::getExtents(vector<LocationType>& dataCoords) const
+{
+   int start = static_cast<int>(getStartAngle());
+   if (start < 0)
+   {
+      start--;
+   }
+
+   int stop = static_cast<int>(getStopAngle());
+   if (stop < 0)
+   {
+      stop--;
+   }
+
+   if (start == stop)
+   {
+      start = 0;
+      stop = 360;
+   }
+
+   dataCoords.clear();
+   for (int i = start; i <= stop; ++i)
+   {
+      LocationType arcPoint = getLocation(static_cast<double>(i));
+      dataCoords.push_back(arcPoint);
+   }
+
+   if (getArcRegion() == ARC_CENTER)
+   {
+      LocationType ellipseCenter = getCenter();
+      dataCoords.push_back(ellipseCenter);
+   }
+
+   return true;
+}
+
 LocationType ArcObjectImp::getLocation(double dAngle) const
 {
    dAngle = normalizeAngle(dAngle);

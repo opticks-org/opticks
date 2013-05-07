@@ -10,6 +10,7 @@
 #include "AnnotationElement.h"
 #include "AoiElement.h"
 #include "AppVerify.h"
+#include "AppVersion.h"
 #include "ContextMenuAction.h"
 #include "ContextMenuActions.h"
 #include "DataElementImp.h"
@@ -35,6 +36,8 @@
 #include "ViewImp.h"
 #include "xmlwriter.h"
 #include "xmlreader.h"
+
+#include <QtGui/QMessageBox>
 
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
@@ -62,6 +65,11 @@ LayerImp::LayerImp(const string& id, const string& layerName, DataElement* pElem
    mpDisplayedAction->setStatusTip("Toggles display of the layer");
    VERIFYNR(connect(mpDisplayedAction, SIGNAL(triggered(bool)), this, SLOT(showLayer(bool))));
 
+   mpZoomToLayerAction = new QAction("Zoom to Layer", this);
+   mpZoomToLayerAction->setAutoRepeat(false);
+   mpZoomToLayerAction->setStatusTip("Zooms the view to the extents of this layer");
+   VERIFYNR(connect(mpZoomToLayerAction, SIGNAL(triggered()), this, SLOT(zoomToLayer())));
+
    mpSubsetStatisticsAction = new QAction("Calculate Statistics on Subset", this);
    mpSubsetStatisticsAction->setAutoRepeat(false);
    mpSubsetStatisticsAction->setStatusTip("Calculate and display statistics over a spatial and spectral subset.");
@@ -72,6 +80,7 @@ LayerImp::LayerImp(const string& id, const string& layerName, DataElement* pElem
 
    // Initialization
    addContextMenuAction(ContextMenuAction(mpDisplayedAction, APP_LAYER_DISPLAYED_ACTION));
+   addContextMenuAction(ContextMenuAction(mpZoomToLayerAction, APP_LAYER_ZOOM_TO_LAYER_ACTION));
    setDataElement(pElement);
 
    // Connections
@@ -197,6 +206,26 @@ void LayerImp::setView(ViewImp* pView)
 View* LayerImp::getView() const
 {
    return dynamic_cast<View*>(mpView);
+}
+
+bool LayerImp::getExtents(vector<LocationType>& worldCoords)
+{
+   double minX = 0.0;
+   double maxX = 0.0;
+   double minY = 0.0;
+   double maxY = 0.0;
+   if (getExtents(minX, minY, maxX, maxY) == false)
+   {
+      return false;
+   }
+
+   worldCoords.clear();
+   worldCoords.push_back(LocationType(minX, minY));
+   worldCoords.push_back(LocationType(maxX, minY));
+   worldCoords.push_back(LocationType(maxX, maxY));
+   worldCoords.push_back(LocationType(minX, maxY));
+
+   return true;
 }
 
 vector<ColorType> LayerImp::getColors() const
@@ -732,6 +761,35 @@ void LayerImp::showLayer(bool show)
       else
       {
          pSDV->hideLayer(pLayer);
+      }
+   }
+}
+
+void LayerImp::zoomToLayer()
+{
+   SpatialDataView* pView = dynamic_cast<SpatialDataView*>(getView());
+   if (pView != NULL)
+   {
+      if (pView->getMaximumZoom() != 0.0 || pView->getMinimumZoom() != 0.0 || pView->getPanLimit() != NO_LIMIT)
+      {
+         Service<DesktopServices> pDesktop;
+
+         int button = QMessageBox::question(pDesktop->getMainWidget(), APP_NAME, "Zoom/pan limits will "
+            "be disabled for the " + QString::fromStdString(pView->getDisplayName(true)) + " view.  Do "
+            "you still want to zoom to the layer?", QMessageBox::Yes, QMessageBox::No);
+         if (button == QMessageBox::No)
+         {
+            return;
+         }
+
+         pView->setMaximumZoom(0.0);
+         pView->setMinimumZoom(0.0);
+         pView->setPanLimit(NO_LIMIT);
+      }
+
+      if (pView->zoomToLayer(dynamic_cast<Layer*>(this)) == true)
+      {
+         pView->refresh();
       }
    }
 }

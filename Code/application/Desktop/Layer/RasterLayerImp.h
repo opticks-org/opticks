@@ -83,6 +83,7 @@ public:
 
    void draw();
    bool getExtents(double& x1, double& y1, double& x4, double& y4);
+   using LayerImp::getExtents;
 
    std::list<ContextMenuAction> getContextMenuActions() const;
 

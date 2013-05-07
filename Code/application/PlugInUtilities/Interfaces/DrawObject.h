@@ -10,10 +10,13 @@
 #ifndef DRAWOBJECT_H
 #define DRAWOBJECT_H
 
+#include "LocationType.h"
 #include "SubjectAdapter.h"
 
 #include <QtCore/qnamespace.h>
 #include <QtCore/QPoint>
+
+#include <vector>
 
 class CustomLayer;
 
@@ -106,86 +109,121 @@ public:
     *
     *  @return  Returns \c true if the method was able to process the mouse press event, otherwise it returns \c false.
     *
-    *  @note    The default DrawObject implementation returns \c false.
+    *  @default The default implementation does nothing and returns \c false.
     */
    virtual bool processMousePress(const QPoint& screenCoord, Qt::MouseButton button, Qt::MouseButtons buttons,
       Qt::KeyboardModifiers modifiers);
 
    /**
-   *  This method provides custom processing for a mouse move event in the custom layer.
-   *
-   *  @param   screenCoord
-   *           The location in screen coordinates for the current mouse position.
-   *  @param   button
-   *           The mouse button that was pressed.
-   *  @param   buttons
-   *           The QFlags associated with the mouse button that was pressed.
-   *  @param   modifiers
-   *           The keyboard modifiers (e.g. Shift key) that are pressed when the mouse was moved.
-   *
-   *  @return  Returns \c true if the method was able to process the mouse move event, otherwise it returns \c false.
-   *
-   *  @note    The default DrawObject implementation returns \c false.
+    *  This method provides custom processing for a mouse move event in the custom layer.
+    *
+    *  @param   screenCoord
+    *           The location in screen coordinates for the current mouse position.
+    *  @param   button
+    *           The mouse button that was pressed.
+    *  @param   buttons
+    *           The QFlags associated with the mouse button that was pressed.
+    *  @param   modifiers
+    *           The keyboard modifiers (e.g. Shift key) that are pressed when the mouse was moved.
+    *
+    *  @return  Returns \c true if the method was able to process the mouse move event, otherwise it returns \c false.
+    *
+    *  @default The default implementation does nothing and returns \c false.
     */
    virtual bool processMouseMove(const QPoint& screenCoord, Qt::MouseButton button, Qt::MouseButtons buttons,
       Qt::KeyboardModifiers modifiers);
 
    /**
-   *  This method provides custom processing for a mouse release event in the custom layer.
-   *
-   *  @param   screenCoord
-   *           The location in screen coordinates for the mouse release.
-   *  @param   button
-   *           The mouse button that was pressed.
-   *  @param   buttons
-   *           The QFlags associated with the mouse button that was pressed.
-   *  @param   modifiers
-   *           The keyboard modifiers (e.g. Shift key) that are pressed when the mouse button was released.
-   *
-   *  @return  Returns \c true if the method was able to process the mouse release event,
-   *           otherwise it returns \c false.
-   *
-   *  @note    The default DrawObject implementation returns \c false.
+    *  This method provides custom processing for a mouse release event in the custom layer.
+    *
+    *  @param   screenCoord
+    *           The location in screen coordinates for the mouse release.
+    *  @param   button
+    *           The mouse button that was pressed.
+    *  @param   buttons
+    *           The QFlags associated with the mouse button that was pressed.
+    *  @param   modifiers
+    *           The keyboard modifiers (e.g. Shift key) that are pressed when the mouse button was released.
+    *
+    *  @return  Returns \c true if the method was able to process the mouse release event,
+    *           otherwise it returns \c false.
+    *
+    *  @default The default implementation does nothing and returns \c false.
     */
    virtual bool processMouseRelease(const QPoint& screenCoord, Qt::MouseButton button, Qt::MouseButtons buttons,
       Qt::KeyboardModifiers modifiers);
 
    /**
-   *  This method provides custom processing for a mouse double click event in the custom layer.
-   *
-   *  @param   screenCoord
-   *           The location in screen coordinates for the mouse double click.
-   *  @param   button
-   *           The mouse button that was double clicked.
-   *  @param   buttons
-   *           The QFlags associated with the mouse button that was pressed.
-   *  @param   modifiers
-   *           The keyboard modifiers (e.g. Shift key) that are pressed when the mouse button was double clicked.
-   *
-   *  @return  Returns \c true if the method was able to process the mouse double click event,
-   *           otherwise it returns \c false.
-   *
-   *  @note    The default DrawObject implementation returns \c false.
+    *  This method provides custom processing for a mouse double click event in the custom layer.
+    *
+    *  @param   screenCoord
+    *           The location in screen coordinates for the mouse double click.
+    *  @param   button
+    *           The mouse button that was double clicked.
+    *  @param   buttons
+    *           The QFlags associated with the mouse button that was pressed.
+    *  @param   modifiers
+    *           The keyboard modifiers (e.g. Shift key) that are pressed when the mouse button was double clicked.
+    *
+    *  @return  Returns \c true if the method was able to process the mouse double click event,
+    *           otherwise it returns \c false.
+    *
+    *  @default The default implementation does nothing and returns \c false.
     */
    virtual bool processMouseDoubleClick(const QPoint& screenCoord, Qt::MouseButton button, Qt::MouseButtons buttons,
       Qt::KeyboardModifiers modifiers);
 
    /**
-    *  This method returns the extents of the area within the custom layer that the draw object can draw.
+    *  Retrieves the bounding box of the area within the custom layer to which
+    *  the draw object will draw.
     *
     *  @param   x1
-    *           The minimum coordinate value of the draw area in the X dimension.
+    *           The minimum coordinate value of the draw area in the X
+    *           dimension.
     *  @param   y1
-    *           The minimum coordinate value of the draw area in the Y dimension.
+    *           The minimum coordinate value of the draw area in the Y
+    *           dimension.
     *  @param   x4
-    *           The maximum coordinate value of the draw area in the X dimension.
+    *           The maximum coordinate value of the draw area in the X
+    *           dimension.
     *  @param   y4
-    *           The maximum coordinate value of the draw area in the Y dimension.
+    *           The maximum coordinate value of the draw area in the Y
+    *           dimension.
     *
-    *  @return  Returns \c true if the extents are defined and the values are set in \em x1, \em y1, \em x4, \em y4,
-    *           otherwise \c false is returned and the parameters are invalid.
+    *  @return  Returns \c true if the drawing extents are defined and the
+    *           bounding box values are set in \em x1, \em y1, \em x4, and
+    *           \em y4; otherwise returns \c false and the parameters are
+    *           invalid.
+    *
+    *  @see     getExtents(std::vector<LocationType>&)<br>
+    *           Layer::getExtents(double&, double&, double&, double&)
     */
    virtual bool getExtents(double& x1, double& y1, double& x4, double& y4) = 0;
+
+   /**
+    *  Retrieves area within the custom layer to which the draw object will
+    *  draw.
+    *
+    *  @param   worldCoords
+    *           The extent locations that comprise the area to which the draw
+    *           object will draw.  This may be different from the bounding box
+    *           draw area returned by
+    *           getExtents(double&, double&, double&, double&) in that the
+    *           coordinates representing individual data locations are added to
+    *           the vector.
+    *
+    *  @return  Returns \c true if the drawing extents of the object were
+    *           successfully retrieved; otherwise returns \c false and the
+    *           parameter is invalid.
+    *
+    *  @default The default implementation calls
+    *           getExtents(double&, double&, double&, double&) and adds the four
+    *           corner locations derived from the bounding box to the vector.
+    *
+    *  @see     getExtents(double&, double&, double&, double&)<br>
+    *           Layer::getExtents(std::vector<LocationType>&)
+    */
+   virtual bool getExtents(std::vector<LocationType>& worldCoords);
 
    /**
     *  This method performs any reset functions that may be required to reset the draw object.

@@ -29,7 +29,6 @@
 #include <limits>
 #include <sstream>
 #include <vector>
-
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
 
@@ -301,23 +300,51 @@ bool TiePointLayerImp::getExtents(double& x1, double& y1, double& x4, double& y4
    VERIFY(pList != NULL);
 
    const vector<TiePoint>& points = pList->getTiePoints();
-   if (!points.empty())
+   if (points.empty() == true)
    {
-      int xMinData = numeric_limits<int>::max();
-      int yMinData = numeric_limits<int>::max();
-      int xMaxData = numeric_limits<int>::min();
-      int yMaxData = numeric_limits<int>::min();
-      
-      for (vector<TiePoint>::const_iterator pPoint = points.begin();
-         pPoint != points.end(); ++pPoint)
-      {
-         xMinData = min(xMinData, pPoint->mReferencePoint.mX);
-         yMinData = min(yMinData, pPoint->mReferencePoint.mY);
-         xMaxData = max(xMaxData, pPoint->mReferencePoint.mX);
-         yMaxData = max(yMaxData, pPoint->mReferencePoint.mY);
-      }
-      translateDataToWorld(xMinData, yMinData, x1, y1);
-      translateDataToWorld(xMaxData, yMaxData, x4, y4);
+      return false;
+   }
+
+   int minX = numeric_limits<int>::max();
+   int minY = numeric_limits<int>::max();
+   int maxX = numeric_limits<int>::min();
+   int maxY = numeric_limits<int>::min();
+
+   for (vector<TiePoint>::const_iterator iter = points.begin(); iter != points.end(); ++iter)
+   {
+      minX = min(minX, iter->mReferencePoint.mX);
+      minY = min(minY, iter->mReferencePoint.mY);
+      maxX = max(maxX, iter->mReferencePoint.mX);
+      maxY = max(maxY, iter->mReferencePoint.mY);
+   }
+
+   // Add 0.5 to the pixel extents since the tie points are drawn in the center of the pixel
+   translateDataToWorld(minX + 0.5, minY + 0.5, x1, y1);
+   translateDataToWorld(maxX + 0.5, maxY + 0.5, x4, y4);
+
+   return true;
+}
+
+bool TiePointLayerImp::getExtents(vector<LocationType>& worldCoords)
+{
+   TiePointList* pList = static_cast<TiePointList*>(getDataElement());
+   VERIFY(pList != NULL);
+
+   const vector<TiePoint>& points = pList->getTiePoints();
+   if (points.empty() == true)
+   {
+      return false;
+   }
+
+   worldCoords.clear();
+
+   for (vector<TiePoint>::const_iterator iter = points.begin(); iter != points.end(); ++iter)
+   {
+      // Add 0.5 to the pixel extents since the tie points are drawn in the center of the pixel
+      LocationType worldCoord;
+      translateDataToWorld(iter->mReferencePoint.mX + 0.5, iter->mReferencePoint.mY + 0.5,
+         worldCoord.mX, worldCoord.mY);
+      worldCoords.push_back(worldCoord);
    }
 
    return true;

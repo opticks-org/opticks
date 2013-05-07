@@ -649,6 +649,11 @@ bool ScaleBarObjectImp::hit(LocationType pixelCoord) const
    return mpGroup->hit(pixelCoord);
 }
 
+bool ScaleBarObjectImp::getExtents(vector<LocationType>& dataCoords) const
+{
+   return mpGroup->getExtents(dataCoords);
+}
+
 bool ScaleBarObjectImp::replicateObject(const GraphicObject* pObject)
 {
    const ScaleBarObjectImp* pScaleBar = dynamic_cast<const ScaleBarObjectImp*>(pObject);

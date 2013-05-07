@@ -43,6 +43,7 @@ public:
    std::vector<ColorType> getColors() const;
    void draw();
    bool getExtents(double& x1, double& y1, double& x4, double& y4);
+   bool getExtents(std::vector<LocationType>& worldCoords);
 
    void setColor(const QColor& colorType);
    QColor getColor() const;

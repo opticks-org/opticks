@@ -35,6 +35,7 @@ public:
    GraphicProperty* getProperty(const std::string& name) const;
    void moveHandle(int handle, LocationType pixel, bool bMaintainAspect = false);
    bool hit(LocationType pixelCoord) const;
+   bool getExtents(std::vector<LocationType>& dataCoords) const;
    const GraphicGroup &getGroup() const;
 
    bool replicateObject(const GraphicObject* pObject);

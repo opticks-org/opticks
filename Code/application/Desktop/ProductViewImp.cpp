@@ -1517,6 +1517,7 @@ void ProductViewImp::updateContextMenu(Subject& subject, const string& signal, c
 
             // Remove default layer actions
             pMenu->removeAction(APP_LAYER_DISPLAYED_ACTION);
+            pMenu->removeAction(APP_LAYER_ZOOM_TO_LAYER_ACTION);
          }
       }
    }

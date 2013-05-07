@@ -181,6 +181,11 @@ bool DirectionalArrowObjectImp::hit(LocationType pixelCoord) const
    return bHit;
 }
 
+bool DirectionalArrowObjectImp::getExtents(vector<LocationType>& dataCoords) const
+{
+   return mpGroup->getExtents(dataCoords);
+}
+
 bool DirectionalArrowObjectImp::isOriented() const
 {
    return mbOriented;

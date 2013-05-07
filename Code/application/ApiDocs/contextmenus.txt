@@ -184,6 +184,7 @@
  *  <table>
  *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
  *    <tr><td>Displayed</td><td>APP_LAYER_DISPLAYED_ACTION()</td></tr>
+ *    <tr><td>Zoom to %Layer</td><td>APP_LAYER_ZOOM_TO_LAYER_ACTION()</td></tr>
  *  </table>
  *
  *  \subsection plotset Plot Set

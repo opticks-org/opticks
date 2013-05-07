@@ -142,6 +142,18 @@ bool LineObjectImp::hit(LocationType pixelCoord) const
    return DrawUtil::lineHit(llCorner, urCorner, pixelCoord, dTolerance);
 }
 
+bool LineObjectImp::getExtents(vector<LocationType>& dataCoords) const
+{
+   LocationType lowerLeft = getLlCorner();
+   LocationType upperRight = getUrCorner();
+
+   dataCoords.clear();
+   dataCoords.push_back(lowerLeft);
+   dataCoords.push_back(upperRight);
+
+   return true;
+}
+
 const BitMask* LineObjectImp::getPixels(int iStartColumn, int iStartRow, int iEndColumn, int iEndRow)
 {
    if (getRotation() != 0)

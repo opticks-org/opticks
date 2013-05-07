@@ -169,11 +169,12 @@ public:
       DataElement* pElement = NULL) const = 0;
 
    /**
-    *  Retrieves the layer extents in world coordinates.
+    *  Retrieves the bounding box of the layer extents in world coordinates.
     *
     *  %Layer extents are defined as the pixel coordinate range of all data
     *  in the data element being displayed by the layer.  The populated extent
-    *  coordinates already account for layer scaling and offset values.
+    *  bounding box coordinates already account for layer scaling and offset
+    *  values.
     *
     *  @param   minX
     *           The minimum coordinate value of the layer in the X dimension.
@@ -184,12 +185,34 @@ public:
     *  @param   maxY
     *           The maximum coordinate value of the layer in the Y dimension.
     *
+    *  @return  Returns \c true if the bounding box of the layer extents was
+    *           successfully retrieved; otherwise returns \c false.
+    *
+    *  @see     getExtents(std::vector<LocationType>&)<br>View::getExtents()
+    */
+   virtual bool getExtents(double& minX, double& minY, double& maxX, double& maxY) = 0;
+
+   /**
+    *  Retrieves the layer extents in world coordinates.
+    *
+    *  %Layer extents are defined as the pixel coordinate range of all data
+    *  in the data element being displayed by the layer.  The populated extent
+    *  coordinates already account for layer scaling and offset values.
+    *
+    *  @param   worldCoords
+    *           The extent locations that comprise the layer data.  This may be
+    *           different from the bounding box of the layer extents returned by
+    *           getExtents(double&, double&, double&, double&) in that the
+    *           coordinates representing individual data locations are added to
+    *           the vector.
+    *
     *  @return  Returns \c true if the extents of the layer were successfully
     *           retrieved; otherwise returns \c false.
     *
-    *  @see     View::getExtents()
+    *  @see     getExtents(double&, double&, double&, double&)<br>
+    *           View::getExtents()
     */
-   virtual bool getExtents(double& minX, double& minY, double& maxX, double& maxY) = 0;
+   virtual bool getExtents(std::vector<LocationType>& worldCoords) = 0;
 
    /**
     *  Sets the X-dimension scale factor when drawing.

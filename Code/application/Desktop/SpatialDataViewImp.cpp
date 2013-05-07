@@ -1812,6 +1812,27 @@ bool SpatialDataViewImp::hideLayer(Layer* pLayer)
    return bSuccess;
 }
 
+bool SpatialDataViewImp::zoomToLayer(Layer* pLayer)
+{
+   if (pLayer == NULL)
+   {
+      return false;
+   }
+
+   // The layer must be contained in the view, but it can be hidden
+   if (mpLayerList->containsLayer(pLayer) == true)
+   {
+      vector<LocationType> worldCoords;
+      if (pLayer->getExtents(worldCoords) == true)
+      {
+         zoomToArea(worldCoords);
+         return true;
+      }
+   }
+
+   return false;
+}
+
 bool SpatialDataViewImp::setFrontLayer(Layer* pLayer)
 {
    if (pLayer == NULL)

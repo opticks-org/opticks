@@ -63,7 +63,6 @@ LatLonLayerImp::LatLonLayerImp(const string& id, const string& layerName, DataEl
    mStyle(LatLonLayer::getSettingGridlineStyle()),
    mColor(COLORTYPE_TO_QCOLOR(LatLonLayer::getSettingGridlineColor())),
    mWidth(LatLonLayer::getSettingGridlineWidth()),
-   mCubeSize(LocationType(0.0, 0.0)),
    mMaxCoord(LocationType(0.0, 0.0)),
    mMinCoord(LocationType(0.0, 0.0)),
    mComputeTickSpacing(true),
@@ -912,8 +911,18 @@ void LatLonLayerImp::drawLabel(const LocationType& location, const LocationType&
 
 bool LatLonLayerImp::getExtents(double& x1, double& y1, double& x4, double& y4)
 {
+   RasterElement* pRaster = dynamic_cast<RasterElement*>(getDataElement());
+   if (pRaster == NULL)
+   {
+      // This occurs during application shutdown when the overview window is open and pan limits have been disabled.
+      return false;
+   }
+
+   const RasterDataDescriptor* pDescriptor = dynamic_cast<const RasterDataDescriptor*>(pRaster->getDataDescriptor());
+   VERIFY(pDescriptor != NULL);
+
    translateDataToWorld(0, 0, x1, y1);
-   translateDataToWorld(mCubeSize.mX, mCubeSize.mY, x4, y4);
+   translateDataToWorld(pDescriptor->getColumnCount(), pDescriptor->getRowCount(), x4, y4);
 
    return true;
 }
@@ -1018,9 +1027,6 @@ bool LatLonLayerImp::toXml(XMLWriter* pXml) const
    pXml->addAttr("width", mWidth);
    pXml->addAttr("extrapolate", mbExtrapolate);
 
-   buf << mCubeSize.mX << " " << mCubeSize.mY;
-   pXml->addAttr("cubeSize", buf.str());
-
    buf.str("");
    buf << mMaxCoord.mX << " " << mMaxCoord.mY;
    pXml->addAttr("maxCoord", buf.str());
@@ -1056,9 +1062,6 @@ bool LatLonLayerImp::fromXml(DOMNode* pDocument, unsigned int version)
    mColor = QColor(A(pElement->getAttribute(X("color"))));
    mWidth = StringUtilities::fromXmlString<unsigned int>(A(pElement->getAttribute(X("width"))));
    mbExtrapolate = StringUtilities::fromXmlString<bool>(A(pElement->getAttribute(X("extrapolate"))));
-   str << A(pElement->getAttribute(X("cubeSize")));
-   str >> mCubeSize.mX >> mCubeSize.mY;
-   str.clear();
    str << A(pElement->getAttribute(X("maxCoord")));
    str >> mMaxCoord.mX >> mMaxCoord.mY;
    str.clear();
@@ -1360,8 +1363,6 @@ void LatLonLayerImp::computeBorder()
    double rows = pDescriptor->getRowCount();
    double cols = pDescriptor->getColumnCount();
 
-   mCubeSize.mX = cols;
-   mCubeSize.mY = rows;
    mMaxCoord = LocationType(-numeric_limits<double>::max(), -numeric_limits<double>::max());
    mMinCoord = LocationType(numeric_limits<double>::max(), numeric_limits<double>::max());
 

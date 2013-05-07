@@ -105,6 +105,8 @@ public:
     *  Returns the lower left corner position of the object's bounding box.
     *
     *  @return  The lower left corner position in pixel coordinates.
+    *
+    *  @see     getExtents()<br>getRotatedExtents()
     */
    virtual LocationType getLlCorner() const = 0;
 
@@ -112,8 +114,46 @@ public:
     *  Returns the upper right corner position of the object's bounding box.
     *
     *  @return  The upper right corner position in pixel coordinates.
+    *
+    *  @see     getExtents()<br>getRotatedExtents()
     */
    virtual LocationType getUrCorner() const = 0;
+
+   /**
+    *  Retrieves the object extents.
+    *
+    *  @param   dataCoords
+    *           The extent locations that comprise the object data.  This may be
+    *           different from the object bounding box returned by getLlCorner()
+    *           and getUrCorner() in that the coordinates representing
+    *           individual data locations are added to the vector.  The object
+    *           may not be drawn at these locations if the object has an applied
+    *           rotation value.  To retrieve the object extents to which the
+    *           rotated object is drawn, call getRotatedExtents() instead.
+    *
+    *  @return  Returns \c true if the object extents were successfully
+    *           retrieved; otherwise returns \c false.
+    *
+    *  @see     getRotatedExtents()<br>getLlCorner()<br>getUrCorner()
+    */
+   virtual bool getExtents(std::vector<LocationType>& dataCoords) const = 0;
+
+   /**
+    *  Retrieves the object extents at which the object is drawn.
+    *
+    *  @param   dataCoords
+    *           The extent locations that comprise the object data to which the
+    *           object is drawn, accounting for object rotation.  To retrieve
+    *           the raw object extents where the object data exists before
+    *           rotation, call getExtents() instead.
+    *
+    *  @return  Returns \c true if the rotated object extents to which the
+    *           object is drawn were successfully retrieved; otherwise returns
+    *           \c false.
+    *
+    *  @see     getExtents()<br>getLlCorner()<br>getUrCorner()
+    */
+   virtual bool getRotatedExtents(std::vector<LocationType>& dataCoords) const = 0;
 
    /**
     *  Sets the object rotation value.

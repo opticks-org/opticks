@@ -192,6 +192,29 @@ bool EllipseObjectImp::hit(LocationType pixelCoord) const
    return bHit;
 }
 
+bool EllipseObjectImp::getExtents(vector<LocationType>& dataCoords) const
+{
+   LocationType lowerLeft = getLlCorner();
+   LocationType upperRight = getUrCorner();
+
+   DrawUtil::initializeCircle();
+
+   double centerX = (lowerLeft.mX + upperRight.mX) / 2.0;
+   double centerY = (lowerLeft.mY + upperRight.mY) / 2.0;
+   double radiusX = fabs(lowerLeft.mX - upperRight.mX) / 2.0;
+   double radiusY = fabs(lowerLeft.mY - upperRight.mY) / 2.0;
+
+   dataCoords.clear();
+   for (int i = 0; i < DrawUtil::VERTEX_COUNT; ++i)
+   {
+      double xCoord = centerX + radiusX * DrawUtil::sCirclePoints[i].mX;
+      double yCoord = centerY + radiusY * DrawUtil::sCirclePoints[i].mY;
+      dataCoords.push_back(LocationType(xCoord, yCoord));
+   }
+
+   return true;
+}
+
 const string& EllipseObjectImp::getObjectType() const
 {
    static string type("EllipseObjectImp");

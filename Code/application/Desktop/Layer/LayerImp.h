@@ -18,6 +18,7 @@
 #include "AttachmentPtr.h"
 #include "ColorType.h"
 #include "DataElement.h"
+#include "LocationType.h"
 #include "SessionItemImp.h"
 #include "SubjectImp.h"
 #include "TypesFile.h"
@@ -69,6 +70,7 @@ public:
 
    virtual void draw() = 0;
    virtual bool getExtents(double& minX, double& minY, double& maxX, double& maxY) = 0;
+   virtual bool getExtents(std::vector<LocationType>& worldCoords);
 
    virtual bool acceptsMouseEvents() const;
    virtual QCursor getMouseCursor() const;
@@ -136,6 +138,7 @@ protected:
 
 protected slots:
    void showLayer(bool show);
+   void zoomToLayer();
    void calculateSubsetStatistics();
    void updateDisplayedAction(Layer* pLayer);
    void layerActivated(Layer* pLayer);
@@ -152,6 +155,7 @@ private:
    double mXOffset;
    double mYOffset;
    QAction* mpDisplayedAction;
+   QAction* mpZoomToLayerAction;
 
    static QMap<const DataElement*, int> mElementLayers;
 };
@@ -199,6 +203,10 @@ private:
    bool getExtents(double& minX, double& minY, double& maxX, double& maxY) \
    { \
       return impClass::getExtents(minX, minY, maxX, maxY); \
+   } \
+   bool getExtents(std::vector<LocationType>& worldCoords) \
+   { \
+      return impClass::getExtents(worldCoords); \
    } \
    void setXScaleFactor(double xScaleFactor) \
    { \

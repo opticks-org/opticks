@@ -46,6 +46,7 @@ public:
 
    virtual void draw();
    virtual bool getExtents(double& x1, double& y1, double& x4, double& y4);
+   virtual bool getExtents(std::vector<LocationType>& worldCoords);
 
    virtual bool acceptsMouseEvents() const;
    virtual QCursor getMouseCursor() const;

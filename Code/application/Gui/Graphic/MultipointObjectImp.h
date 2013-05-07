@@ -32,6 +32,7 @@ public:
    void updateGeo();
    void enableGeo();
    bool hit(LocationType pixelCoord) const;
+   bool getExtents(std::vector<LocationType>& dataCoords) const;
    bool setProperty(const GraphicProperty* pProperty);
    bool addVertices(const std::vector<LocationType> &vertices, 
       const std::vector<LocationType> &geoVertices);

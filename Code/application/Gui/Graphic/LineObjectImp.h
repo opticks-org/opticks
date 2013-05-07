@@ -27,6 +27,7 @@ public:
    void drawPixels(double zoomFactor) const;
 
    bool hit(LocationType pixelCoord) const;
+   bool getExtents(std::vector<LocationType>& dataCoords) const;
 
    const BitMask* getPixels(int iStartColumn, int iStartRow, int iEndColumn, int iEndRow);
 
