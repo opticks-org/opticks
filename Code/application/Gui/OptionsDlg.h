@@ -7,8 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #ifndef OPTIONSDLG_H
 #define OPTIONSDLG_H
 
@@ -18,6 +16,7 @@
 #include <vector>
 
 class Option;
+class QLabel;
 class QSplitter;
 class QStackedWidget;
 class QTreeWidget;
@@ -28,18 +27,20 @@ class OptionsDlg : public QDialog
    Q_OBJECT
 
 public:
-   OptionsDlg(QWidget* pParent = 0);
-   ~OptionsDlg();
+   OptionsDlg(QWidget* pParent = NULL);
+   virtual ~OptionsDlg();
+
+public slots:
+   virtual void accept();
 
 protected slots:
-   void accept();
-   void optionSelected(QTreeWidgetItem* pItem);
+   void updateOptionWidget();
 
 private:
    OptionsDlg(const OptionsDlg& rhs);
    OptionsDlg& operator=(const OptionsDlg& rhs);
+
    void populateDialogWithOptions();
-   void fixNodes(QTreeWidgetItem* pCurItem);
    void saveState();
    void restoreState();
    bool setCurrentOptionByPath(std::string path);
@@ -49,6 +50,7 @@ private:
    QTreeWidget* mpOptionSelection;
    std::vector<Option*> mOptionPlugIns;
    std::map<QTreeWidgetItem*, QWidget*> mOptionWidgets;
+   QLabel* mpNoOptionsWidget;
    QStackedWidget* mpOptionStack;
 };
 

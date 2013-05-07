@@ -37,7 +37,7 @@ public:
 
    static const std::string& getOptionName()
    {
-      static std::string var = "Session/File Locations";
+      static std::string var = "General/File Locations";
       return var;
    }
 

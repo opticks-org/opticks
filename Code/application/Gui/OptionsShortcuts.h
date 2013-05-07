@@ -35,7 +35,7 @@ public:
 
    static const std::string& getOptionName()
    {
-      static std::string var = "Session/Keyboard Shortcuts";
+      static std::string var = "General/Keyboard Shortcuts";
       return var;
    }
 

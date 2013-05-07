@@ -21,6 +21,7 @@
 #include "OptionsGeneral.h"
 #include "OptionsGeoreference.h"
 #include "OptionsLatLonLayer.h"
+#include "OptionsLayer.h"
 #include "OptionsMeasurementLayer.h"
 #include "OptionsOverviewWindow.h"
 #include "OptionsPseudocolorLayer.h"
@@ -104,6 +105,7 @@ REGISTER_PLUGIN(OpticksCore, OptionsGcpLayer, OptionQWidgetWrapper<OptionsGcpLay
 REGISTER_PLUGIN(OpticksCore, OptionsGeneral, OptionQWidgetWrapper<OptionsGeneral>());
 REGISTER_PLUGIN(OpticksCore, OptionsGeoreference, OptionQWidgetWrapper<OptionsGeoreference>());
 REGISTER_PLUGIN(OpticksCore, OptionsLatLonLayer, OptionQWidgetWrapper<OptionsLatLonLayer>());
+REGISTER_PLUGIN(OpticksCore, OptionsLayer, OptionQWidgetWrapper<OptionsLayer>());
 REGISTER_PLUGIN(OpticksCore, OptionsMeasurementLayer, OptionQWidgetWrapper<OptionsMeasurementLayer>());
 REGISTER_PLUGIN(OpticksCore, OptionsOverviewWindow, OptionQWidgetWrapper<OptionsOverviewWindow>());
 REGISTER_PLUGIN(OpticksCore, OptionsPseudocolorLayer, OptionQWidgetWrapper<OptionsPseudocolorLayer>());

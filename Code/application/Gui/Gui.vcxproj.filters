@@ -170,6 +170,9 @@
     <ClCompile Include="OptionsLatLonLayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="OptionsLayer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="OptionsMeasurementLayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -510,6 +513,9 @@
       <Filter>moc</Filter>
     </ClCompile>
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_OptionsLatLonLayer.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_OptionsLayer.cpp">
       <Filter>moc</Filter>
     </ClCompile>
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_OptionsMeasurementLayer.cpp">
@@ -1366,6 +1372,9 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="OptionsLatLonLayer.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="OptionsLayer.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="OptionsMeasurementLayer.h">

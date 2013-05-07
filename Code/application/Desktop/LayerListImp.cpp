@@ -402,6 +402,11 @@ vector<Layer*> LayerListImp::getLayers() const
    return mLayers;
 }
 
+vector<Layer*> LayerListImp::getLayers(DataElement* pElement) const
+{
+   return getLayers(LayerType(), pElement);
+}
+
 vector<Layer*> LayerListImp::getLayers(const LocationType& worldCoord) const
 {
    return getLayers(LayerType(), worldCoord);
@@ -416,6 +421,24 @@ vector<Layer*> LayerListImp::getLayers(LayerType layerType) const
       if ((pLayer != NULL) && (layerType.isValid() == false || pLayer->getLayerType() == layerType))
       {
          layers.push_back(pLayer);
+      }
+   }
+
+   return layers;
+}
+
+vector<Layer*> LayerListImp::getLayers(LayerType layerType, DataElement* pElement) const
+{
+   vector<Layer*> layers;
+   for (vector<Layer*>::const_iterator iter = mLayers.begin(); iter != mLayers.end(); ++iter)
+   {
+      Layer* pLayer = *iter;
+      if ((pLayer != NULL) && (layerType.isValid() == false || pLayer->getLayerType() == layerType))
+      {
+         if (pLayer->getDataElement() == pElement)
+         {
+            layers.push_back(pLayer);
+         }
       }
    }
 
@@ -453,6 +476,11 @@ unsigned int LayerListImp::getNumLayers() const
    return mLayers.size();
 }
 
+unsigned int LayerListImp::getNumLayers(DataElement* pElement) const
+{
+   return getNumLayers(LayerType(), pElement);
+}
+
 unsigned int LayerListImp::getNumLayers(const LocationType& worldCoord) const
 {
    return getNumLayers(LayerType(), worldCoord);
@@ -461,6 +489,12 @@ unsigned int LayerListImp::getNumLayers(const LocationType& worldCoord) const
 unsigned int LayerListImp::getNumLayers(LayerType layerType) const
 {
    vector<Layer*> layers = getLayers(layerType);
+   return layers.size();
+}
+
+unsigned int LayerListImp::getNumLayers(LayerType layerType, DataElement* pElement) const
+{
+   vector<Layer*> layers = getLayers(layerType, pElement);
    return layers.size();
 }
 

@@ -45,12 +45,16 @@ public:
    Layer* getLayer(const LayerType& layerType, const DataElement* pElement,
       const QString& strLayerName = QString()) const;
    std::vector<Layer*> getLayers() const;
+   std::vector<Layer*> getLayers(DataElement* pElement) const;
    std::vector<Layer*> getLayers(const LocationType& worldCoord) const;
    std::vector<Layer*> getLayers(LayerType layerType) const;
+   std::vector<Layer*> getLayers(LayerType layerType, DataElement* pElement) const;
    std::vector<Layer*> getLayers(LayerType layerType, const LocationType& worldCoord) const;
    unsigned int getNumLayers() const;
+   unsigned int getNumLayers(DataElement* pElement) const;
    unsigned int getNumLayers(const LocationType& worldCoord) const;
    unsigned int getNumLayers(LayerType layerType) const;
+   unsigned int getNumLayers(LayerType layerType, DataElement* pElement) const;
    unsigned int getNumLayers(LayerType layerType, const LocationType& worldCoord) const;
    bool renameLayer(Layer* pLayer, const QString& strNewName = QString()) const;
    bool isLayerNameUnique(const QString& strLayerName, const LayerType& layerType) const;
@@ -132,6 +136,10 @@ private:
    { \
       return impClass::getLayers(); \
    } \
+   std::vector<Layer*> getLayers(DataElement* pElement) const \
+   { \
+      return impClass::getLayers(pElement); \
+   } \
    std::vector<Layer*> getLayers(const LocationType& worldCoord) const \
    { \
       return impClass::getLayers(worldCoord); \
@@ -139,6 +147,10 @@ private:
    std::vector<Layer*> getLayers(LayerType layerType) const \
    { \
       return impClass::getLayers(layerType); \
+   } \
+   std::vector<Layer*> getLayers(LayerType layerType, DataElement* pElement) const \
+   { \
+      return impClass::getLayers(layerType, pElement); \
    } \
    std::vector<Layer*> getLayers(LayerType layerType, const LocationType& worldCoord) const \
    { \
@@ -152,9 +164,17 @@ private:
    { \
       return impClass::getNumLayers(); \
    } \
+   unsigned int getNumLayers(DataElement* pElement) const \
+   { \
+      return impClass::getNumLayers(pElement); \
+   } \
    unsigned int getNumLayers(const LocationType& worldCoord) const \
    { \
       return impClass::getNumLayers(worldCoord); \
+   } \
+   unsigned int getNumLayers(LayerType layerType, DataElement* pElement) const \
+   { \
+      return impClass::getNumLayers(layerType, pElement); \
    } \
    unsigned int getNumLayers(LayerType layerType, const LocationType& worldCoord) const \
    { \

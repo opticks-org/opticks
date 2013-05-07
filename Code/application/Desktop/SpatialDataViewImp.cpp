@@ -479,13 +479,10 @@ void SpatialDataViewImp::elementDeleted(Subject &subject, const string &signal, 
                   {
                      Service<DesktopServices> pDesktop;
                      pDesktop->deleteView(dynamic_cast<View*>(this));
-                  }
-                  else
-                  {
-                     deleteLayer(pLayer);
+                     break;
                   }
 
-                  break;
+                  deleteLayer(pLayer);
                }
             }
          }
@@ -792,7 +789,10 @@ bool SpatialDataViewImp::addLayer(Layer* pLayer)
    }
    else if (pElement != NULL)
    {
-      pElement->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &SpatialDataViewImp::elementDeleted));
+      if (mpLayerList->getNumLayers(pElement) == 0)
+      {
+         pElement->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &SpatialDataViewImp::elementDeleted));
+      }
    }
 
    return bSuccess;
@@ -1214,11 +1214,14 @@ bool SpatialDataViewImp::deleteLayer(Layer* pLayer, bool bClearUndo)
          this, SLOT(updateStatusBar())));
    }
 
-   // Detach the element
+   // Detach the element if it is the last layer in the view displaying the element
    DataElement* pElement = pLayer->getDataElement();
    if (pElement != NULL)
    {
-      pElement->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &SpatialDataViewImp::elementDeleted));
+      if (mpLayerList->getNumLayers(pElement) == 1)
+      {
+         pElement->detach(SIGNAL_NAME(Subject, Deleted), Slot(this, &SpatialDataViewImp::elementDeleted));
+      }
    }
 
    // Get the layer type

@@ -144,11 +144,27 @@ public:
     *
     *  @return  A vector containing pointers to all layers in the list.
     *
-    *  @see     getLayers(const LocationType&) const,
-    *           getLayers(LayerType) const,
-    *           getLayers(LayerType, const LocationType&) const
+    *  @see     getLayers(LayerType) const<br>
+    *           getLayers(DataElement*) const<br>
+    *           getLayers(const LocationType&) const
     */
    virtual std::vector<Layer*> getLayers() const = 0;
+
+   /**
+    *  Retrieves all layers in the list displaying a given data element.
+    *
+    *  @param   pElement
+    *           The data element to query.
+    *
+    *  @return  A vector containing pointers to the layers in the list that are
+    *           displaying the given data element.
+    *
+    *  @see     getLayers() const<br>
+    *           getLayers(LayerType) const<br>
+    *           getLayers(const LocationType&) const<br>
+    *           getLayers(LayerType, DataElement*) const
+    */
+   virtual std::vector<Layer*> getLayers(DataElement* pElement) const = 0;
 
    /**
     *  Retrieves all layers at a given pixel coordinate in the list.
@@ -159,9 +175,10 @@ public:
     *  @return  A vector containing pointers to the layers in the list whose
     *           extents include the given pixel coordinate.
     *
-    *  @see     getLayers() const,
-    *           getLayers(LayerType) const,
-    *           getLayers(LayerType, const LocationType&) const,
+    *  @see     getLayers() const<br>
+    *           getLayers(LayerType) const<br>
+    *           getLayers(DataElement*) const<br>
+    *           getLayers(LayerType, const LocationType&) const<br>
     *           Layer::getExtents()
     */
    virtual std::vector<Layer*> getLayers(const LocationType& worldCoord) const = 0;
@@ -175,11 +192,30 @@ public:
     *  @return  A vector containing pointers to the layers of the given type
     *           in the list.
     *
-    *  @see     getLayers()const,
-    *           getLayers(const LocationType&) const,
-    *           getLayers(LayerType, const LocationType&) const
+    *  @see     getLayers() const<br>
+    *           getLayers(DataElement*) const<br>
+    *           getLayers(const LocationType&) const
     */
    virtual std::vector<Layer*> getLayers(LayerType layerType) const = 0;
+
+   /**
+    *  Retrieves all layers in the list of a given type that are displaying a
+    *  given data element.
+    *
+    *  @param   layerType
+    *           The layer type.
+    *  @param   pElement
+    *           The data element to query.
+    *
+    *  @return  A vector containing pointers to the layers of the given type
+    *           in the list that are displaying the given data element.
+    *
+    *  @see     getLayers() const<br>
+    *           getLayers(LayerType) const<br>
+    *           getLayers(DataElement* pElement) const<br>
+    *           getLayers(LayerType, const LocationType&) const
+    */
+   virtual std::vector<Layer*> getLayers(LayerType layerType, DataElement* pElement) const = 0;
 
    /**
     *  Retrieves all layers of a given type at a given pixel coordinate in the
@@ -193,9 +229,10 @@ public:
     *  @return  A vector containing pointers to the layers of the given type
     *           in the list whose extents include the given pixel coordinate.
     *
-    *  @see     getLayers() const,
-    *           getLayers(LayerType) const,
-    *           getLayers(const LocationType&) const,
+    *  @see     getLayers() const<br>
+    *           getLayers(LayerType) const<br>
+    *           getLayers(const LocationType&) const<br>
+    *           getLayers(LayerType, DataElement*) const<br>
     *           Layer::getExtents()
     */
    virtual std::vector<Layer*> getLayers(LayerType layerType, const LocationType& worldCoord) const = 0;
@@ -209,9 +246,9 @@ public:
     *
     *  @return  The number of layers contained in the list of the given type.
     *
-    *  @see     getNumLayers() const,
-    *           getNumLayers(const LocationType&) const,
-    *           getNumLayers(LayerType, const LocationType&) const
+    *  @see     getNumLayers() const<br>
+    *           getNumLayers(DataElement*) const<br>
+    *           getNumLayers(const LocationType&) const
     */
    virtual unsigned int getNumLayers(LayerType layerType) const = 0;
 
@@ -220,11 +257,27 @@ public:
     *
     *  @return  The total number of layers contained in the list.
     *
-    *  @see     getNumLayers(LayerType) const,
-    *           getNumLayers(const LocationType&) const,
-    *           getNumLayers(LayerType, const LocationType&) const
+    *  @see     getNumLayers(LayerType) const<br>
+    *           getNumLayers(DataElement*) const<br>
+    *           getNumLayers(const LocationType&) const
     */
    virtual unsigned int getNumLayers() const = 0;
+
+   /**
+    *  Returns the number of layers in the list displaying a given data element.
+    *
+    *  @param   pElement
+    *           The data element to query.
+    *
+    *  @return  The number of layers contained in the list displaying the given
+    *           data element.
+    *
+    *  @see     getNumLayers() const<br>
+    *           getNumLayers(LayerType) const<br>
+    *           getNumLayers(const LocationType&) const<br>
+    *           getNumLayers(LayerType, DataElement*) const
+    */
+   virtual unsigned int getNumLayers(DataElement* pElement) const = 0;
 
    /**
     *  Returns the number of layers in the list at a given pixel coordinate.
@@ -235,12 +288,32 @@ public:
     *  @return  The number of layers contained in the list whose extents include
     *           the given pixel coordinate.
     *
-    *  @see     getNumLayers() const,
-    *           getNumLayers(LayerType) const,
-    *           getNumLayers(LayerType, const LocationType&) const,
+    *  @see     getNumLayers() const<br>
+    *           getNumLayers(LayerType) const<br>
+    *           getNumLayers(DataElement*) const<br>
+    *           getNumLayers(LayerType, const LocationType&) const<br>
     *           Layer::getExtents()
     */
    virtual unsigned int getNumLayers(const LocationType& worldCoord) const = 0;
+
+   /**
+    *  Returns the number of layers in the list of a given type that are
+    *  displaying a given data element.
+    *
+    *  @param   layerType
+    *           The layer type.
+    *  @param   pElement
+    *           The data element to query.
+    *
+    *  @return  The number of layers contained in the list of the given type
+    *           that are displaying the given data element.
+    *
+    *  @see     getNumLayers() const<br>
+    *           getNumLayers(LayerType) const<br>
+    *           getNumLayers(DataElement*) const<br>
+    *           getNumLayers(LayerType, const LocationType&) const
+    */
+   virtual unsigned int getNumLayers(LayerType layerType, DataElement* pElement) const = 0;
 
    /**
     *  Returns the number of layers of a given type at a given pixel coordinate
@@ -254,9 +327,10 @@ public:
     *  @return  The number of layers contained in the list of the given type
     *           whose extents include the given pixel coordinate.
     *
-    *  @see     getNumLayers() const,
-    *           getNumLayers(LayerType) const,
-    *           getNumLayers(const LocationType&) const,
+    *  @see     getNumLayers() const<br>
+    *           getNumLayers(LayerType) const<br>
+    *           getNumLayers(const LocationType&) const<br>
+    *           getNumLayers(LayerType, DataElement*) const<br>
     *           Layer::getExtents()
     */
    virtual unsigned int getNumLayers(LayerType layerType, const LocationType& worldCoord) const = 0;

@@ -1,54 +1,52 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2012 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef OPTIONSSESSION_H
-#define OPTIONSSESSION_H
+#ifndef OPTIONSLAYER_H
+#define OPTIONSLAYER_H
 
-#include <QtGui/QWidget>
 #include "AppVersion.h"
 
-class QCheckBox;
-class QComboBox;
-class QSpinBox;
+#include <QtGui/QWidget>
 
-class OptionsSession : public QWidget
+class QCheckBox;
+
+class OptionsLayer : public QWidget
 {
    Q_OBJECT
 
 public:
-   OptionsSession();
-   ~OptionsSession();
+   OptionsLayer();
+   virtual ~OptionsLayer();
 
    void applyChanges();
 
    static const std::string& getName()
    {
-      static std::string var = "Session Options";
+      static std::string var = "Layer Options";
       return var;
    }
 
    static const std::string& getOptionName()
    {
-      static std::string var = "Session";
+      static std::string var = "Layers";
       return var;
    }
 
    static const std::string& getDescription()
    {
-      static std::string var = "Widget to display session related options for the application";
+      static std::string var = "Widget to display options common to all layers";
       return var;
    }
 
    static const std::string& getShortDescription()
    {
-      static std::string var = "Widget to display session related options for the application";
-      return var;
+      return getDescription();
    }
 
    static const std::string& getCreator()
@@ -76,16 +74,16 @@ public:
 
    static const std::string& getDescriptorId()
    {
-      static std::string var = "{0180A593-3693-42a1-B1FB-1DD751D76F37}";
+      static std::string var = "{CE71F51B-724B-42D1-8DD5-F9A522E1DE2B}";
       return var;
    }
 
 private:
-   OptionsSession(const OptionsSession& rhs);
-   OptionsSession& operator=(const OptionsSession& rhs);
-   QComboBox* mpSaveCombo;
-   QCheckBox* mpAutoSaveEnabledCheck;
-   QSpinBox* mpAutoSaveIntervalSpin;
+   OptionsLayer(const OptionsLayer& rhs);
+   OptionsLayer& operator=(const OptionsLayer& rhs);
+
+   QCheckBox* mpRenameElementCheck;
+   QCheckBox* mpWarnRenameCheck;
 };
 
 #endif

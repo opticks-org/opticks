@@ -10,6 +10,7 @@
 #ifndef LAYER_H
 #define LAYER_H
 
+#include "ConfigurationSettings.h"
 #include "LocationType.h"
 #include "SessionItem.h"
 #include "Subject.h"
@@ -42,6 +43,9 @@ class View;
 class Layer : public SessionItem, public Subject, public Serializable
 {
 public:
+   SETTING(RenameElement, Layer, bool, false)
+   SETTING(WarnElementRename, Layer, bool, true)
+
    /**
     *  Emitted with any<std::string> when the layer name changes.
     */
@@ -368,8 +372,8 @@ public:
     *
     *  @param   newName
     *           The new name for the layer, which must be unique within the
-    *           layer list for the layer type.  This method does nothing and
-    *           returns \c false if an empty string is passed in.
+    *           layer list for the layer type.  If an empty string is passed in,
+    *           the user will be prompted to select a new name.
     *
     *  @return  Returns \c true if the layer was successfully renamed.  Returns
     *           \c false if another layer of the same type in the layer list

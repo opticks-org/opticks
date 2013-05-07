@@ -13,7 +13,10 @@
 #include <QtGui/QMessageBox>
 
 #include "AppVerify.h"
+#include "AppVersion.h"
 #include "DesktopServices.h"
+#include "Layer.h"
+#include "ModelServices.h"
 #include "SessionItem.h"
 #include "SessionItemImp.h"
 #include "SessionItemModel.h"
@@ -27,8 +30,7 @@ using namespace std;
 SessionItemModel::SessionItemModel(QObject* pParent) :
    QAbstractItemModel(pParent),
    mpRootWrapper(new SessionItemWrapper(this, NULL))
-{
-}
+{}
 
 SessionItemModel::~SessionItemModel()
 {
@@ -248,6 +250,43 @@ bool SessionItemModel::setData(const QModelIndex& index, const QVariant& value, 
       QMessageBox::warning(Service<DesktopServices>()->getMainWidget(), "Rename item", msg);
       return false;
    }
+
+   // Rename the data element if necessary when renaming a layer
+   Layer* pLayer = dynamic_cast<Layer*>(pItem);
+   if (pLayer != NULL)
+   {
+      if (Layer::getSettingRenameElement() == true)
+      {
+         DataElement* pElement = pLayer->getDataElement();
+         VERIFY(pElement != NULL);
+
+         // If multiple layers are displaying the element, query the user on whether to rename the element
+         if ((pLayer->hasUniqueElement() == false) && (Layer::getSettingWarnElementRename() == true))
+         {
+            int button = QMessageBox::question(Service<DesktopServices>()->getMainWidget(), APP_NAME, "Additional "
+               "layers are displaying the same element as this layer and they will not be renamed.\n\nDo you still "
+               "want to rename the element from \"" + QString::fromStdString(pElement->getDisplayName(true)) +
+               "\" to \"" + newItemName + "\"?", QMessageBox::Yes, QMessageBox::No);
+            if (button == QMessageBox::No)
+            {
+               return true;
+            }
+         }
+
+         // Rename the element
+         if (Service<ModelServices>()->setElementName(pElement, newItemName.toStdString()) == false)
+         {
+            if (QMessageBox::warning(Service<DesktopServices>()->getMainWidget(), APP_NAME, "The data element "
+               "could not be renamed.  Another data element may already have the same name.  Do you still "
+               "want to rename the layer?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
+            {
+               pItem->rename(oldName.toStdString(), errorMessage);
+               return false;
+            }
+         }
+      }
+   }
+
    emit dataChanged(index, index);
    return true;
 }
@@ -423,8 +462,7 @@ SessionItemModel::SessionItemWrapper::SessionItemWrapper(SessionItemModel* pMode
    mDisplayColor(Qt::black),
    mBackgroundColor(Qt::white),
    mpParent(pParent)
-{
-}
+{}
 
 SessionItemModel::SessionItemWrapper::~SessionItemWrapper()
 {

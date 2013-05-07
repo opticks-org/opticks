@@ -36,7 +36,7 @@ public:
 
    static const std::string& getOptionName()
    {
-      static std::string var = "Session/General";
+      static std::string var = "General";
       return var;
    }
 

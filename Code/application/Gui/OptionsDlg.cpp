@@ -7,25 +7,23 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QHeaderView>
-#include <QtGui/QPushButton>
-#include <QtGui/QGridLayout>
-#include <QtGui/QSplitter>
-#include <QtGui/QStackedWidget>
-#include <QtGui/QTreeWidget>
-
-#include "OptionsDlg.h"
-
-#include "ConfigurationSettings.h"
 #include "AppVerify.h"
+#include "ConfigurationSettings.h"
 #include "Option.h"
+#include "OptionsDlg.h"
 #include "PlugInDescriptor.h"
 #include "PlugInManagerServices.h"
 #include "PlugInResource.h"
 
+#include <QtGui/QHBoxLayout>
+#include <QtGui/QLabel>
+#include <QtGui/QPushButton>
+#include <QtGui/QSplitter>
+#include <QtGui/QStackedWidget>
+#include <QtGui/QTreeWidget>
+#include <QtGui/QVBoxLayout>
+
 #include <string>
-#include <vector>
 using namespace std;
 
 OptionsDlg::OptionsDlg(QWidget* pParent) :
@@ -35,12 +33,17 @@ OptionsDlg::OptionsDlg(QWidget* pParent) :
 
    mpOptionSelection = new QTreeWidget(mpSplitter);
    mpOptionSelection->setColumnCount(1);
-   mpOptionSelection->header()->hide();
+   mpOptionSelection->setHeaderHidden(true);
    mpOptionSelection->setSelectionBehavior(QAbstractItemView::SelectItems);
    mpOptionSelection->setSelectionMode(QAbstractItemView::SingleSelection);
-   mpOptionSelection->setMinimumWidth(160);
+   mpOptionSelection->setMinimumWidth(200);
 
    mpOptionStack = new QStackedWidget(mpSplitter);
+
+   mpNoOptionsWidget = new QLabel("No options are available for this item.  Please select one of its subitems.",
+      mpOptionStack);
+   mpNoOptionsWidget->setAlignment(Qt::AlignCenter);
+   mpOptionStack->addWidget(mpNoOptionsWidget);
 
    mpSplitter->insertWidget(0, mpOptionSelection);
    mpSplitter->insertWidget(1, mpOptionStack);
@@ -77,8 +80,7 @@ OptionsDlg::OptionsDlg(QWidget* pParent) :
    resize(minimumSizeHint());
 
    // Connections
-   VERIFYNR(connect(mpOptionSelection, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this,
-      SLOT(optionSelected(QTreeWidgetItem*))));
+   VERIFYNR(connect(mpOptionSelection, SIGNAL(itemSelectionChanged()), this, SLOT(updateOptionWidget())));
    VERIFYNR(connect(pOkButton, SIGNAL(clicked()), this, SLOT(accept())));
    VERIFYNR(connect(pCancelButton, SIGNAL(clicked()), this, SLOT(reject())));
 
@@ -107,7 +109,7 @@ void OptionsDlg::populateDialogWithOptions()
          string optionName = pOptionPlugIn->getOptionName();
          if ((pWidget != NULL) && (!optionName.empty()))
          {
-            mOptionPlugIns.push_back(pOptionPlugIn);               
+            mOptionPlugIns.push_back(pOptionPlugIn);
             pPlugInRes.release();
             mpOptionStack->addWidget(pWidget);
             //In the optionName, '/' is used to separate the tree hierarchy, but
@@ -138,6 +140,9 @@ void OptionsDlg::populateDialogWithOptions()
                {
                   QTreeWidgetItem* pNewItem = new QTreeWidgetItem(static_cast<QTreeWidgetItem*>(NULL),
                      QStringList(optionPartName));
+                  pNewItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+                  mOptionWidgets[pNewItem] = mpNoOptionsWidget;
+
                   pCurItem->addChild(pNewItem);
                   pCurItem = pNewItem;
                }
@@ -147,41 +152,16 @@ void OptionsDlg::populateDialogWithOptions()
                }
             }
 
-            mOptionWidgets.insert(pair<QTreeWidgetItem* const, QWidget*>(pCurItem, pWidget));
+            pCurItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+            mOptionWidgets[pCurItem] = pWidget;
          }
       }
    }
-
-   fixNodes(pRootItem);
 
    QList<QTreeWidgetItem*> pRootChildren = pRootItem->takeChildren();
    mpOptionSelection->addTopLevelItems(pRootChildren);
    mpOptionSelection->sortItems(0, Qt::AscendingOrder);
    delete pRootItem;
-}
-
-void OptionsDlg::fixNodes(QTreeWidgetItem* pCurItem)
-{
-   for (int childIndex = 0; childIndex < pCurItem->childCount(); ++childIndex)
-   {
-      QTreeWidgetItem* pCurChild = pCurItem->child(childIndex);
-      if (pCurChild->childCount() != 0) //non-leaf
-      {
-         pCurChild->setFlags(Qt::ItemIsEnabled);
-         map<QTreeWidgetItem*, QWidget*>::iterator iter = mOptionWidgets.find(pCurChild);
-         if (iter != mOptionWidgets.end())
-         {
-            //we have a custom widget associated with a non-leaf node, fix this by
-            //forcibly making it a leaf node
-            QTreeWidgetItem* pNewNode = new QTreeWidgetItem(static_cast<QTreeWidgetItem*>(NULL),
-               QStringList(pCurChild->text(0)));
-            pCurChild->addChild(pNewNode);
-            mOptionWidgets.insert(pair<QTreeWidgetItem* const, QWidget*>(pNewNode, iter->second));
-            mOptionWidgets.erase(iter);
-         }
-      }
-      fixNodes(pCurChild);
-   }
 }
 
 void OptionsDlg::saveState()
@@ -204,7 +184,7 @@ void OptionsDlg::saveState()
 
 void OptionsDlg::restoreState()
 {
-   string defaultOptionPage = "Session/General";
+   string defaultOptionPage = "General";
    Service<ConfigurationSettings> pSettings;
 
    DataVariant posVariant = pSettings->getSetting("OptionsDlg/geometry/posX");
@@ -275,6 +255,7 @@ bool OptionsDlg::setCurrentOptionByPath(std::string path)
    }
    if (pFoundItem != NULL)
    {
+      pFoundItem->setExpanded(true);
       mpOptionSelection->setCurrentItem(pFoundItem);
       return true;
    }
@@ -320,30 +301,38 @@ OptionsDlg::~OptionsDlg()
    //NOTE: The QWidget* returned by Option::getWidget() is not being re-parented
    //This is intentional, this causes a crash if the implementer of the Option interface
    //does not destroy the widget that they created in their destructor.
-   vector<Option*>::iterator iter;
    Service<PlugInManagerServices> pPlugMgr;
-   for (iter = mOptionPlugIns.begin(); iter != mOptionPlugIns.end(); ++iter)
+   for (vector<Option*>::iterator iter = mOptionPlugIns.begin(); iter != mOptionPlugIns.end(); ++iter)
    {
       pPlugMgr->destroyPlugIn(dynamic_cast<PlugIn*>(*iter));
    }
 }
 
-void OptionsDlg::optionSelected(QTreeWidgetItem* pItem)
+void OptionsDlg::updateOptionWidget()
 {
+   QList<QTreeWidgetItem*> selectedItems = mpOptionSelection->selectedItems();
+   VERIFYNRV(selectedItems.count() == 1);
+
+   QTreeWidgetItem* pItem = selectedItems.front();
+   VERIFYNRV(pItem != NULL);
+
    map<QTreeWidgetItem*, QWidget*>::iterator iter = mOptionWidgets.find(pItem);
    if (iter != mOptionWidgets.end())
-   {     
+   {
       mpOptionStack->setCurrentWidget(iter->second);
    }
 }
 
 void OptionsDlg::accept()
 {
-   vector<Option*>::iterator iter;
-   for (iter = mOptionPlugIns.begin(); iter != mOptionPlugIns.end(); ++iter)
+   for (vector<Option*>::iterator iter = mOptionPlugIns.begin(); iter != mOptionPlugIns.end(); ++iter)
    {
       Option* pOption = *iter;
-      pOption->applyChanges();
+      if (pOption != NULL)
+      {
+         pOption->applyChanges();
+      }
    }
+
    QDialog::accept();
 }
