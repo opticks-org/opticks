@@ -5403,38 +5403,47 @@ void ApplicationWindow::dragEnterEvent(QDragEnterEvent* pEvent)
       return;
    }
 
+   QString filename;
    if (pEvent->mimeData()->hasUrls())
    {
       const QList<QUrl> urls = pEvent->mimeData()->urls();
       for (int i = 0; i < urls.count(); ++i)
       {
          QUrl url = urls[i];
-         string filename = url.toLocalFile().toStdString();
-         if (filename.empty() == false)
+         filename = url.toLocalFile();
+         if (filename.isEmpty() == false)
          {
-            pEvent->acceptProposedAction();
-            return;
+            break;
          }
       }
    }
    else if (pEvent->mimeData()->hasFormat("text/plain"))
    {
-      QString filename = pEvent->mimeData()->text();
-      if (filename.isEmpty() == false)
+      filename = pEvent->mimeData()->text();
+   }
+
+   if (filename.isEmpty() == false)
+   {
+      if (pEvent->proposedAction() == Qt::CopyAction)
       {
          pEvent->acceptProposedAction();
+      }
+      else
+      {
+         pEvent->setDropAction(Qt::CopyAction);
+         pEvent->accept();
       }
    }
 }
 
-void ApplicationWindow::dropEvent(QDropEvent *pEvent)
+void ApplicationWindow::dropEvent(QDropEvent* pEvent)
 {
    if (pEvent == NULL)
    {
       return;
    }
 
-   if ((pEvent->proposedAction() != Qt::CopyAction) && (pEvent->proposedAction() != Qt::MoveAction))
+   if ((pEvent->proposedAction() != Qt::CopyAction) && (pEvent->dropAction() != Qt::CopyAction))
    {
       return;
    }
@@ -5445,7 +5454,7 @@ void ApplicationWindow::dropEvent(QDropEvent *pEvent)
    if (pEvent->mimeData()->hasUrls())
    {
       const QList<QUrl> urls = pEvent->mimeData()->urls();
-      for (int i=0; i<urls.count(); ++i)
+      for (int i = 0; i < urls.count(); ++i)
       {
          QUrl url = urls[i];
          string filename = url.toLocalFile().toStdString();
@@ -5461,7 +5470,7 @@ void ApplicationWindow::dropEvent(QDropEvent *pEvent)
       if (filename.isEmpty() == false)
       {
          QByteArray charArray = filename.toAscii();
-         for (int i=0; i<filename.length(); ++i)
+         for (int i = 0; i < filename.length(); ++i)
          {
             if (charArray[i] == '\\')
             {
@@ -5641,7 +5650,14 @@ void ApplicationWindow::dropEvent(QDropEvent *pEvent)
    }
 
    // Accept the drop action
-   pEvent->acceptProposedAction();
+   if (pEvent->proposedAction() == Qt::CopyAction)
+   {
+      pEvent->acceptProposedAction();
+   }
+   else if (pEvent->dropAction() == Qt::CopyAction)
+   {
+      pEvent->accept();
+   }
 
    // Invoke an immediate timer so that any currently queued events are processed first
    QTimer::singleShot(0, this, SLOT(processDropFiles()));
