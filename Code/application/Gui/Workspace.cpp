@@ -7,18 +7,21 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include "AppVerify.h"
 #include "Workspace.h"
-#include "DesktopServices.h"
 #include "WorkspaceWindow.h"
 #include "WorkspaceWindowImp.h"
 
+#include <QtCore/QEvent>
+
+#include <algorithm>
 using namespace std;
 
-Workspace::Workspace(QWidget* parent) :
-   QMdiArea(parent),
-   mbCustomTiling(false),
+Workspace::Workspace(QWidget* pParent) :
+   QMdiArea(pParent),
    mMaxFirst(true),
-   mTilingType(TILE_GRID)
+   mTilingType(TILE_GRID),
+   mUpdatingWorkspace(false)
 {
    // This controls how subwindows are tiled and/or cascaded by the base class.
    setActivationOrder(QMdiArea::StackingOrder);
@@ -28,22 +31,57 @@ Workspace::Workspace(QWidget* parent) :
    setMinimumSize(1, 1);
 }
 
-void Workspace::resizeEvent(QResizeEvent * e)
+Workspace::~Workspace()
+{}
+
+bool Workspace::eventFilter(QObject* pObject, QEvent* pEvent)
 {
-   QMdiArea::resizeEvent(e);
-   if (mbCustomTiling)
+   bool value = QMdiArea::eventFilter(pObject, pEvent);
+
+   // An event filter is automatically installed on each QMdiSubWindow by the QMdiArea base class, so an event
+   // filter should not be explicitly installed or removed in this class
+   QMdiSubWindow* pWindow = qobject_cast<QMdiSubWindow*>(pObject);
+   if ((pWindow != NULL) && (pEvent != NULL))
+   {
+      // Disable custom tiling when one of the tiled windows is moved or resized
+      if (std::find(mTileWindows.begin(), mTileWindows.end(), pWindow) != mTileWindows.end())
+      {
+         QEvent::Type eventType = pEvent->type();
+         if ((eventType == QEvent::Move) || (eventType == QEvent::Resize))
+         {
+            // Do not disable custom tiling if the window move or resize is caused by updating the tiled windows
+            // within the workspace as a result of performing the initial tiling or resizing the workspace
+            if (mUpdatingWorkspace == false)
+            {
+               disableCustomTiling();
+            }
+         }
+      }
+   }
+
+   return value;
+}
+
+void Workspace::resizeEvent(QResizeEvent* pEvent)
+{
+   QMdiArea::resizeEvent(pEvent);
+
+   // Update the tiled windows to fit the new size of the MDI area
+   if (mTileWindows.empty() == false)
    {
       QList<QMdiSubWindow*> windows = subWindowList();
-      QMdiSubWindow* pSubWindow = NULL;
 
-      int numViews = mTileWindows.size();
-      bool listValid = (numViews > 0);
-      for (int i = 0; i < numViews; i++)
+      // Disable custom tiling if one of the tiled windows was deleted
+      bool listValid = true;
+      for (vector<QMdiSubWindow*>::const_iterator iter = mTileWindows.begin(); iter != mTileWindows.end(); ++iter)
       {
-         pSubWindow = mTileWindows[i];
-         if (!windows.contains(pSubWindow))
+         QMdiSubWindow* pWindow = *iter;
+         VERIFYNRV(pWindow != NULL);
+
+         if (windows.contains(pWindow) == false)
          {
             listValid = false;
+            break;
          }
       }
 
@@ -53,35 +91,65 @@ void Workspace::resizeEvent(QResizeEvent * e)
       }
       else
       {
-         mbCustomTiling = false;
-         mTileWindows.clear();
+         disableCustomTiling();
       }
+   }
+}
+
+void Workspace::disableCustomTiling()
+{
+   if (mTileWindows.empty() == true)
+   {
+      return;
+   }
+
+   QList<QMdiSubWindow*> windows = subWindowList();
+   for (int i = 0; i < windows.count(); ++i)
+   {
+      QMdiSubWindow* pWindow = windows[i];
+      if (pWindow != NULL)
+      {
+         VERIFYNR(disconnect(pWindow, SIGNAL(windowStateChanged(Qt::WindowStates, Qt::WindowStates)), this,
+            SLOT(windowStateChanged(Qt::WindowStates, Qt::WindowStates))));
+      }
+   }
+
+   mTileWindows.clear();
+}
+
+void Workspace::windowStateChanged(Qt::WindowStates oldState, Qt::WindowStates newState)
+{
+   // Disable the custom tiling if a non-tiled window was activated or if any window was maximized,
+   // minimized, restored, or made full screen
+   QMdiSubWindow* pWindow = qobject_cast<QMdiSubWindow*>(sender());
+   if (pWindow != NULL)
+   {
+      if (std::find(mTileWindows.begin(), mTileWindows.end(), pWindow) != mTileWindows.end())
+      {
+         // The window is tiled, so remove the active window state change since it does not affect the tiling
+         oldState &= ~(Qt::WindowActive);
+         newState &= ~(Qt::WindowActive);
+      }
+   }
+
+   if (oldState != newState)
+   {
+      disableCustomTiling();
    }
 }
 
 void Workspace::refreshCustomView()
 {
-   if (mbCustomTiling)
+   if (mTileWindows.empty() == false)
    {
       int numViews = mTileWindows.size();
-
-      // if vector of windows is empty, tile all windows
-      if (numViews < 1)
-      {
-         QList<QMdiSubWindow*> workspaceWindows = subWindowList();
-         numViews = workspaceWindows.size();
-         for (int i = 0; i < numViews; ++i)
-         {
-            mTileWindows.push_back(workspaceWindows.at(i));
-         }
-      }
-
       int x;
       int y;
       int rowHeight;
       int colWidth;
       int leftOver;
 
+      mUpdatingWorkspace = true;
       switch (mTilingType)
       {
       case TILE_GRID:
@@ -209,35 +277,25 @@ void Workspace::refreshCustomView()
             y += rowHeight;
          }
          break;
+
       default:
-         return;
          break;
       }
 
-      Service<DesktopServices> pDesktop;
-      if (pDesktop.get() != NULL)
-      {
-         WorkspaceWindow* pWork = dynamic_cast<WorkspaceWindow*>(mTileWindows.front());
-         if (pWork != NULL)
-         {
-            pDesktop->setCurrentWorkspaceWindow(pWork);
-         }
-      }
+      mUpdatingWorkspace = false;
    }
 }
 
 void Workspace::cascadeSubWindows()
 {
-   mbCustomTiling = false;
-   mTileWindows.clear();
+   disableCustomTiling();
    QMdiArea::cascadeSubWindows();
 }
 
 void Workspace::tile(const TilingType eType)
 {
-   mbCustomTiling = false;
+   disableCustomTiling();
    mTilingType = eType;
-   mTileWindows.clear();
 
    QList<QMdiSubWindow*> windows = subWindowList();
    int numWindows = windows.count();
@@ -310,9 +368,13 @@ void Workspace::tile(const TilingType eType)
 
 bool Workspace::tileWindows(const vector<WorkspaceWindow*>& windows, bool maxFirst, const TilingType eType)
 {
-   mbCustomTiling = false;
+   disableCustomTiling();
    mTilingType = eType;
-   mTileWindows.clear();
+
+   if (windows.empty() == true)
+   {
+      return false;
+   }
 
    QList<QMdiSubWindow*> workspaceWindows = subWindowList();
    for (vector<WorkspaceWindow*>::const_iterator iter = windows.begin(); iter != windows.end(); ++iter)
@@ -329,12 +391,36 @@ bool Workspace::tileWindows(const vector<WorkspaceWindow*>& windows, bool maxFir
 
    if (windows.size() != mTileWindows.size())
    {
+      mTileWindows.clear();
       return false;
    }
 
-   mbCustomTiling = true;
    mMaxFirst = maxFirst;
    refreshCustomView();
+
+   // Ensure that all tiled windows are on top of any non-tiled windows
+   for (vector<QMdiSubWindow*>::reverse_iterator iter = mTileWindows.rbegin(); iter != mTileWindows.rend(); ++iter)
+   {
+      QMdiSubWindow* pWindow = *iter;
+      if (pWindow != NULL)
+      {
+         // Activate the window to bring it to the top, which must occur before connecting to the
+         // windowStateChanged() signal to prevent disabling the custom tiling if a non-tiled window
+         // is currently active
+         setActiveSubWindow(pWindow);
+      }
+   }
+
+   // Connect all windows to disable the custom tiling when the display state changes
+   for (int i = 0; i < workspaceWindows.count(); ++i)
+   {
+      QMdiSubWindow* pWindow = workspaceWindows[i];
+      if (pWindow != NULL)
+      {
+         VERIFYNR(connect(pWindow, SIGNAL(windowStateChanged(Qt::WindowStates, Qt::WindowStates)), this,
+            SLOT(windowStateChanged(Qt::WindowStates, Qt::WindowStates))));
+      }
+   }
 
    return true;
 }
@@ -349,5 +435,4 @@ void Workspace::setSubWindow(QMdiSubWindow* pSubWindow, int x, int y, int winWid
    pSubWindow->showNormal();
    pSubWindow->resize(winWidth, winHeight);
    pSubWindow->move(x, y);
-   pSubWindow->raise();
 }

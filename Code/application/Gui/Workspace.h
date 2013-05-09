@@ -7,8 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-
-
 #ifndef WORKSPACE_H
 #define WORKSPACE_H
 
@@ -34,28 +32,39 @@ class WorkspaceWindow;
  *           when calling this method as it is not virtual and pointers to the base class will not work correctly
  *           when custom tiling is in effect. Pointers to type Workspace should be used whenever possible.
  */
-
 class Workspace : public QMdiArea
 {
+   Q_OBJECT
+
 public:
-   Workspace(QWidget *parent = 0);
-   bool tileWindows(const std::vector<WorkspaceWindow*>& windows, 
-                    bool maxFirst = true, const TilingType eType = TILE_GRID);
+   Workspace(QWidget* pParent = NULL);
+   virtual ~Workspace();
+
+   bool tileWindows(const std::vector<WorkspaceWindow*>& windows, bool maxFirst = true,
+      const TilingType eType = TILE_GRID);
 
 public slots:
    void tile(const TilingType eType = TILE_GRID);
    void cascadeSubWindows();
 
 protected:
-   void resizeEvent(QResizeEvent* e);
+   virtual bool eventFilter(QObject* pObject, QEvent* pEvent);
+   virtual void resizeEvent(QResizeEvent* pEvent);
+
+   void disableCustomTiling();
+
+protected slots:
+   void windowStateChanged(Qt::WindowStates oldState, Qt::WindowStates newState);
 
 private:
    Workspace(const Workspace& rhs);
    Workspace& operator=(const Workspace& rhs);
-   bool mbCustomTiling;
+
    bool mMaxFirst;
    TilingType mTilingType;
    std::vector<QMdiSubWindow*> mTileWindows;
+   bool mUpdatingWorkspace;
+
    void refreshCustomView();
    void setSubWindow(QMdiSubWindow* pSubWindow, int x, int y, int winWidth, int winHeight);
 };

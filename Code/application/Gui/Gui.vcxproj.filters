@@ -662,6 +662,9 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_WizardWidget.cpp">
       <Filter>moc</Filter>
     </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_Workspace.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_ZoomCustomDlg.cpp">
       <Filter>moc</Filter>
     </ClCompile>
@@ -953,9 +956,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WizardLine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Workspace.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GLView\DrawUtil.h">
@@ -1504,6 +1504,9 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="WizardWidget.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Workspace.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="ZoomCustomDlg.h">
