@@ -38,9 +38,9 @@
 REGISTER_PLUGIN(OpticksPictures, TiffPicturesPlotWidgetExporter, PicturesPlotWidgetExporter(new TiffDetails));
 REGISTER_PLUGIN(OpticksPictures, TiffPicturesViewExporter, PicturesViewExporter(new TiffDetails));
 
-TiffDetails::TiffDetails() : mpOptionsWidget(NULL)
-{
-}
+TiffDetails::TiffDetails() :
+   mpOptionsWidget(NULL)
+{}
 
 std::string TiffDetails::name()
 {
@@ -54,12 +54,12 @@ std::string TiffDetails::shortDescription()
 
 std::string TiffDetails::description()
 {
-   return "Tagged Image File Format";
+   return "Tagged Image File Format (TIFF)";
 }
 
 std::string TiffDetails::extensions()
 {
-   return "TIFF Files (*.tif)";
+   return "TIFF Files (*.tif *.tiff)";
 }
 
 QWidget* TiffDetails::getExportOptionsWidget(const PlugInArgList* pInArgList)
@@ -126,9 +126,12 @@ bool TiffDetails::savePict(QString strFilename, QImage img, const SessionItem *p
       return false;
    }
 
+   unsigned int rowsPerStrip = OptionsTiffExporter::getSettingRowsPerStrip();
    bool packBits = OptionsTiffExporter::getSettingPackBitsCompression();
+
    if (mpOptionsWidget.get() != NULL)
    {
+      rowsPerStrip = mpOptionsWidget->getRowsPerStrip();
       packBits = mpOptionsWidget->getPackBitsCompression();
    }
 
@@ -139,7 +142,7 @@ bool TiffDetails::savePict(QString strFilename, QImage img, const SessionItem *p
    TIFFSetField(pOut, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
    TIFFSetField(pOut, TIFFTAG_SAMPLESPERPIXEL, 3);
    TIFFSetField(pOut, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
-   TIFFSetField(pOut, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(pOut, 1L));
+   TIFFSetField(pOut, TIFFTAG_ROWSPERSTRIP, rowsPerStrip);
    TIFFSetField(pOut, TIFFTAG_COMPRESSION, (packBits ? COMPRESSION_PACKBITS : COMPRESSION_NONE));
 
    //allocate the memory needed
@@ -189,12 +192,6 @@ bool TiffDetails::addGeoKeys(TIFF* pOut, int width, int height, const SessionIte
       return false;
    }
 
-   GTIF* pGtif = GTIFNew(pOut);
-   if (pGtif == NULL)
-   {
-      return false;
-   }
-
    RasterElement* pGeoreferencedRaster = NULL; // First raster element we find with georeferencing information
    const ProductView* pView = dynamic_cast<const ProductView*>(pInputView);
    if (pView != NULL)
@@ -202,7 +199,6 @@ bool TiffDetails::addGeoKeys(TIFF* pOut, int width, int height, const SessionIte
       AnnotationLayer* pAnno = pView->getLayoutLayer();
       if (pAnno == NULL)
       {
-         GTIFFree(pGtif);
          return false;
       }
 
@@ -216,8 +212,7 @@ bool TiffDetails::addGeoKeys(TIFF* pOut, int width, int height, const SessionIte
       pAnno->getObjects(VIEW_OBJECT, objs);
 
       // for every object, find the data set with a geocoord matrix
-      for (std::list<GraphicObject*>::iterator it = objs.begin();
-         it != objs.end(); ++it)
+      for (std::list<GraphicObject*>::iterator it = objs.begin(); it != objs.end(); ++it)
       {
          GraphicObject* pObj = *it;
          if (pObj != NULL)
@@ -254,61 +249,67 @@ bool TiffDetails::addGeoKeys(TIFF* pOut, int width, int height, const SessionIte
       }
    }
 
-   if (pGeoreferencedRaster != NULL)
+   if (pGeoreferencedRaster == NULL)
    {
-      LocationType lowerLeft;
-      LocationType upperLeft;
-      LocationType upperRight;
-      LocationType lowerRight;
-      pInputView->getVisibleCorners(lowerLeft, upperLeft, upperRight, lowerRight);
-
-      LocationType latLong;
-      //get the lat/long's (0,0)
-      latLong = pGeoreferencedRaster->convertPixelToGeocoord(upperLeft);
-      double ll1y = latLong.mY;               //delta long
-      double ll1x = latLong.mX;               //delta lat
-
-      latLong = pGeoreferencedRaster->convertPixelToGeocoord(upperRight);
-      double ll2y = latLong.mY;               //long  
-      double ll2x = latLong.mX;               //lat
-
-      latLong = pGeoreferencedRaster->convertPixelToGeocoord(lowerLeft);
-      double ll3y = latLong.mY;               //long
-      double ll3x = latLong.mX;               //lat
-
-      //compute transformation Matrix values
-      //added slight modification, must divide by magnitude
-      double a = (ll2y - ll1y) / width;
-      double b = (ll3y - ll1y) / height;
-      double d = (ll1y);
-      double e = (ll2x - ll1x) / width;
-      double f = (ll3x - ll1x) / height;
-      double h = (ll1x);
-      double k = 1.0;
-      double p = 1.0;
-
-      double tMatrix[16] = {a, b, 0.0, d,
-                            e, f, 0.0, h,
-                            0.0, 0.0, k, 0.0,
-                            0.0, 0.0, 0.0, p};
-
-      TIFFSetField(pOut, GTIFF_TRANSMATRIX, 16, tMatrix);
-    
-      GTIFKeySet(pGtif, GTModelTypeGeoKey, TYPE_SHORT, 1, ModelGeographic);
-      GTIFKeySet(pGtif, GTRasterTypeGeoKey, TYPE_SHORT, 1, RasterPixelIsArea);
-      GTIFKeySet(pGtif, GeogAngularUnitsGeoKey, TYPE_SHORT, 1, Angular_Degree);
-      GTIFKeySet(pGtif, GeogLinearUnitsGeoKey, TYPE_SHORT, 1, Linear_Meter);
-      GTIFKeySet(pGtif, ProjCenterLongGeoKey, TYPE_DOUBLE, 1, latLong.mY);
-      GTIFKeySet(pGtif, ProjCenterLatGeoKey, TYPE_DOUBLE, 1, latLong.mX);
-   
-      // Here we violate the GTIF abstraction to retarget on another file.
-      // We should just have a function for copying tags from one GTIF object
-      // to another.
-      pGtif->gt_tif = pOut;
-      pGtif->gt_flags |= FLAG_FILE_MODIFIED;
+      return false;
    }
 
-   // Install keys and tags 
+   GTIF* pGtif = GTIFNew(pOut);
+   if (pGtif == NULL)
+   {
+      return false;
+   }
+
+   LocationType lowerLeft;
+   LocationType upperLeft;
+   LocationType upperRight;
+   LocationType lowerRight;
+   pInputView->getVisibleCorners(lowerLeft, upperLeft, upperRight, lowerRight);
+
+   LocationType latLong;
+   //get the lat/long's (0,0)
+   latLong = pGeoreferencedRaster->convertPixelToGeocoord(upperLeft);
+   double ll1y = latLong.mY;               //delta long
+   double ll1x = latLong.mX;               //delta lat
+
+   latLong = pGeoreferencedRaster->convertPixelToGeocoord(upperRight);
+   double ll2y = latLong.mY;               //long
+   double ll2x = latLong.mX;               //lat
+
+   latLong = pGeoreferencedRaster->convertPixelToGeocoord(lowerLeft);
+   double ll3y = latLong.mY;               //long
+   double ll3x = latLong.mX;               //lat
+
+   //compute transformation Matrix values
+   //added slight modification, must divide by magnitude
+   double a = (ll2y - ll1y) / width;
+   double b = (ll3y - ll1y) / height;
+   double d = (ll1y);
+   double e = (ll2x - ll1x) / width;
+   double f = (ll3x - ll1x) / height;
+   double h = (ll1x);
+
+   double tMatrix[16] =
+   {
+      a,   b,   0.0, d,
+      e,   f,   0.0, h,
+      0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 1.0
+   };
+
+   TIFFSetField(pOut, GTIFF_TRANSMATRIX, 16, tMatrix);
+
+   GTIFKeySet(pGtif, GTRasterTypeGeoKey, TYPE_SHORT, 1, RasterPixelIsArea);
+   GTIFKeySet(pGtif, GTModelTypeGeoKey, TYPE_SHORT, 1, ModelGeographic);
+   GTIFKeySet(pGtif, GeographicTypeGeoKey, TYPE_SHORT, 1, GCS_WGS_84);
+
+   // Here we violate the GTIF abstraction to retarget on another file.
+   // We should just have a function for copying tags from one GTIF object
+   // to another.
+   pGtif->gt_tif = pOut;
+   pGtif->gt_flags |= FLAG_FILE_MODIFIED;
+
+   // Install keys and tags
    GTIFWriteKeys(pGtif);
    GTIFFree(pGtif);
    return true;

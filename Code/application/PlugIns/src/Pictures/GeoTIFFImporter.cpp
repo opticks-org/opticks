@@ -524,8 +524,8 @@ GeoTIFFImporter::GeoTIFFImporter() :
    setCreator("Ball Aerospace & Technologies Corp.");
    setCopyright(APP_COPYRIGHT);
    setVersion(APP_VERSION_NUMBER);
-   setExtensions("TIFF files (*.tif)");
-   setShortDescription("TIFF");
+   setDescription("Imports TIFF and GeoTIFF formatted files.");
+   setExtensions("TIFF files (*.tif *.tiff)");
    setDescriptorId("{F254DD8A-CF70-4835-B958-3E4FFD583E7F}");
    allowMultipleInstances(true);
    setProductionStatus(APP_IS_PRODUCTION_RELEASE);

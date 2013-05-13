@@ -20,10 +20,12 @@ class TiffExportOptionsWidget : public LabeledSectionGroup
 {
 public:
    TiffExportOptionsWidget();
-   ~TiffExportOptionsWidget();
+   virtual ~TiffExportOptionsWidget();
+
    void setResolution(unsigned int width, unsigned int height);
-   void getResolution(unsigned int& width, unsigned int& height);
-   bool getPackBitsCompression();
+   void getResolution(unsigned int& width, unsigned int& height) const;
+   unsigned int getRowsPerStrip() const;
+   bool getPackBitsCompression() const;
 
 private:
    TiffExportOptionsWidget(const TiffExportOptionsWidget& rhs);

@@ -61,20 +61,24 @@ TiffExportOptionsWidget::TiffExportOptionsWidget() :
 }
 
 TiffExportOptionsWidget::~TiffExportOptionsWidget()
-{
-}
+{}
 
 void TiffExportOptionsWidget::setResolution(unsigned int width, unsigned int height)
 {
    mpResolutionWidget->setResolution(width, height);
 }
 
-void TiffExportOptionsWidget::getResolution(unsigned int& width, unsigned int& height)
+void TiffExportOptionsWidget::getResolution(unsigned int& width, unsigned int& height) const
 {
    mpResolutionWidget->getResolution(width, height);
 }
 
-bool TiffExportOptionsWidget::getPackBitsCompression()
+unsigned int TiffExportOptionsWidget::getRowsPerStrip() const
+{
+   return static_cast<unsigned int>(mpRowsPerStrip->value());
+}
+
+bool TiffExportOptionsWidget::getPackBitsCompression() const
 {
    return mpPackBits->isChecked();
 }

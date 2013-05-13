@@ -16,7 +16,7 @@
 #include "ExporterShell.h"
 #include "Progress.h"
 
-class OptionsTiffExporter;
+class GeoTiffExportOptionsWidget;
 class RasterElement;
 class RasterFileDescriptor;
 class Step;
@@ -25,7 +25,7 @@ class GeoTIFFExporter : public ExporterShell
 {
 public:
    GeoTIFFExporter();
-   ~GeoTIFFExporter();
+   virtual ~GeoTIFFExporter();
 
    bool abort();
    bool hasAbort();
@@ -33,16 +33,16 @@ public:
    bool getInputSpecification(PlugInArgList*& pArgList);
    bool getOutputSpecification(PlugInArgList*& pArgList);
 
-   QWidget* getExportOptionsWidget(const PlugInArgList *pInArgList);
+   QWidget* getExportOptionsWidget(const PlugInArgList* pInArgList);
 
 private:
    bool CreateGeoTIFF(TIFF* pOut);
    bool applyWorldFile(TIFF* pOut);
-   void updateProgress(int current, int total, std::string progressString, ReportingLevel l = NORMAL);
+   void updateProgress(int current, int total, const std::string& progressString, ReportingLevel level = NORMAL);
    bool writeCube(TIFF* pOut);
 
    Step* mpStep;
-   std::auto_ptr<OptionsTiffExporter> mpOptionWidget;
+   std::auto_ptr<GeoTiffExportOptionsWidget> mpOptionWidget;
 
    Progress* mpProgress;
    RasterElement* mpRaster;

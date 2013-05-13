@@ -200,11 +200,11 @@ namespace
 ImageResolutionWidget::ImageResolutionWidget(QWidget* pParent) : QWidget(pParent)
 {
    // Resolution section
-   QLabel* pWidthLabel = new QLabel("Width", this);
+   QLabel* pWidthLabel = new QLabel("Width:", this);
    mpResolutionX = new QLineEdit(this);
    mpResolutionX->setStatusTip("The number of pixels in the image width");
    mpResolutionX->setToolTip("Image width");
-   QLabel* pHeightLabel = new QLabel("Height", this);
+   QLabel* pHeightLabel = new QLabel("Height:", this);
    mpResolutionY = new QLineEdit(this);
    mpResolutionY->setStatusTip("The number of pixels in the image height");
    mpResolutionY->setToolTip("Image height");
@@ -228,6 +228,8 @@ ImageResolutionWidget::ImageResolutionWidget(QWidget* pParent) : QWidget(pParent
    VERIFYNR(connect(mpResolutionY, SIGNAL(editingFinished()), this, SLOT(checkResolutionY())));
 
    QGridLayout* pResolutionLayout = new QGridLayout(this);
+   pResolutionLayout->setMargin(0);
+   pResolutionLayout->setSpacing(5);
    pResolutionLayout->addWidget(pWidthLabel, 1, 0);
    pResolutionLayout->addWidget(mpResolutionX, 1, 1);
    pResolutionLayout->addWidget(pHeightLabel, 2, 0);

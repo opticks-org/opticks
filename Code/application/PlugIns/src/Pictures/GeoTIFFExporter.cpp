@@ -18,14 +18,12 @@
 #include "AppVersion.h"
 #include "AppVerify.h"
 #include "DataAccessorImpl.h"
-#include "DesktopServices.h"
 #include "DimensionDescriptor.h"
 #include "DynamicObject.h"
 #include "GeoTIFFExporter.h"
+#include "GeoTiffExportOptionsWidget.h"
 #include "MessageLogResource.h"
-#include "ModelServices.h"
 #include "OptionsTiffExporter.h"
-#include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
 #include "PlugInRegistration.h"
@@ -33,8 +31,7 @@
 #include "RasterElement.h"
 #include "RasterDataDescriptor.h"
 #include "RasterFileDescriptor.h"
-
-#include <QtGui/QLayout>
+#include "StringUtilities.h"
 
 using namespace std;
 
@@ -77,7 +74,8 @@ GeoTIFFExporter::GeoTIFFExporter() :
    setCreator("Ball Aerospace & Technologies Corp.");
    setCopyright(APP_COPYRIGHT);
    setVersion(APP_VERSION_NUMBER);
-   setExtensions("TIFF Format Files (*.tif)");
+   setDescription("Exports raster data in the TIFF file format with GeoTIFF support data if available.");
+   setExtensions("TIFF Files (*.tif *.tiff)");
    setSubtype(TypeConverter::toString<RasterElement>());
    setDescriptorId("{6CFD45D6-564B-4c45-B907-FBD3AE8E2FD4}");
    allowMultipleInstances(true);
@@ -85,8 +83,7 @@ GeoTIFFExporter::GeoTIFFExporter() :
 }
 
 GeoTIFFExporter::~GeoTIFFExporter()
-{
-}
+{}
 
 bool GeoTIFFExporter::execute(PlugInArgList* pInParam, PlugInArgList* pOutParam)
 {
@@ -113,6 +110,10 @@ bool GeoTIFFExporter::execute(PlugInArgList* pInParam, PlugInArgList* pOutParam)
    if (isBatch() == true)
    {
       pInParam->getPlugInArgValue("Rows Per Strip", mRowsPerStrip);
+   }
+   else if (mpOptionWidget.get() != NULL)
+   {
+      mRowsPerStrip = mpOptionWidget->getRowsPerStrip();
    }
 
    // Check for complex data
@@ -218,7 +219,7 @@ bool GeoTIFFExporter::getInputSpecification(PlugInArgList*& pArgList)
 {
    Service<PlugInManagerServices> pPlugInManager;
    VERIFY(pPlugInManager.get() != NULL);
-   
+
    pArgList = pPlugInManager->getPlugInArgList();
    VERIFY(pArgList != NULL);
 
@@ -239,25 +240,24 @@ bool GeoTIFFExporter::getOutputSpecification(PlugInArgList*& pArgList)
    return true;
 }
 
-QWidget* GeoTIFFExporter::getExportOptionsWidget(const PlugInArgList *)
+QWidget* GeoTIFFExporter::getExportOptionsWidget(const PlugInArgList* pInArgList)
 {
    if (mpOptionWidget.get() == NULL)
    {
-      mpOptionWidget.reset(new OptionsTiffExporter());
+      mpOptionWidget.reset(new GeoTiffExportOptionsWidget());
    }
 
    return mpOptionWidget.get();
 }
 
-void GeoTIFFExporter::updateProgress(int current, int total, string progressString, ReportingLevel l)
+void GeoTIFFExporter::updateProgress(int current, int total, const string& progressString, ReportingLevel level)
 {
-   int lTotal = total;
-   if (lTotal == 0)
+   if (total <= 0)
    {
-      lTotal = 1;
+      total = 1;
    }
 
-   int percentDone = percentDone = (current * 100 / lTotal);
+   int percentDone = percentDone = (current * 100 / total);
    if (percentDone >= 100)
    {
       percentDone = 99;
@@ -265,7 +265,7 @@ void GeoTIFFExporter::updateProgress(int current, int total, string progressStri
 
    if (mpProgress)
    {
-      mpProgress->updateProgress(progressString, percentDone, l);
+      mpProgress->updateProgress(progressString, percentDone, level);
    }
 }
 
@@ -334,7 +334,6 @@ bool GeoTIFFExporter::writeCube(TIFF* pOut)
    bool packBits = OptionsTiffExporter::getSettingPackBitsCompression();
    if (mpOptionWidget.get() != NULL)
    {
-      mpOptionWidget->applyChanges();
       packBits = mpOptionWidget->getPackBitsCompression();
    }
    ttag_t compOpt = (packBits ? COMPRESSION_PACKBITS : COMPRESSION_NONE);
@@ -516,208 +515,171 @@ bool GeoTIFFExporter::writeCube(TIFF* pOut)
    return true;
 }
 
-bool GeoTIFFExporter::CreateGeoTIFF(TIFF *pOut)
+bool GeoTIFFExporter::CreateGeoTIFF(TIFF* pOut)
 {
-   if (mpFileDescriptor == NULL)
+   if ((mpFileDescriptor == NULL) || (mpRaster == NULL) || (mpRaster->isGeoreferenced() == false))
    {
       return false;
    }
 
+   // Get the exported row and column extents
+   const vector<DimensionDescriptor>& rows = mpFileDescriptor->getRows();
+   const vector<DimensionDescriptor>& columns = mpFileDescriptor->getColumns();
+
+   if ((rows.empty() == true) || (columns.empty() == true))
+   {
+      return false;
+   }
+
+   unsigned int startRow = 0;
+   unsigned int endRow = rows.size() - 1;
+
+   DimensionDescriptor startRowDim = rows.front();
+   if (startRowDim.isActiveNumberValid() == true)
+   {
+      startRow = startRowDim.getActiveNumber();
+   }
+
+   DimensionDescriptor endRowDim = rows.back();
+   if (endRowDim.isActiveNumberValid() == true)
+   {
+      endRow = endRowDim.getActiveNumber();
+   }
+
+   unsigned int startColumn = 0;
+   unsigned int endColumn = columns.size() - 1;
+
+   DimensionDescriptor startColumnDim = columns.front();
+   if (startColumnDim.isActiveNumberValid() == true)
+   {
+      startColumn = startColumnDim.getActiveNumber();
+   }
+
+   DimensionDescriptor endColumnDim = columns.back();
+   if (endColumnDim.isActiveNumberValid() == true)
+   {
+      endColumn = endColumnDim.getActiveNumber();
+   }
+
+   // Open the file for writing GeoTIFF tags
    GTIF* pGtif = GTIFNew(pOut);
    if (pGtif == NULL)
    {
       return false;
    }
 
-   // Get the exported lower left corner location
-   const vector<DimensionDescriptor>& rows = mpFileDescriptor->getRows();
-   const vector<DimensionDescriptor>& columns = mpFileDescriptor->getColumns();
-
-   unsigned int startRow = 0;
-   if (rows.empty() == false)
-   {
-      DimensionDescriptor rowDim = rows.front();
-      if (rowDim.isActiveNumberValid() == true)
-      {
-         startRow = rowDim.getActiveNumber();
-      }
-   }
-
-   unsigned int startColumn = 0;
-   if (columns.empty() == false)
-   {
-      DimensionDescriptor columnDim = columns.front();
-      if (columnDim.isActiveNumberValid() == true)
-      {
-         startColumn = columnDim.getActiveNumber();
-      }
-   }
-
+   // Get the latitude/longitude values for each corner of a single pixel
    LocationType llPixel(startColumn, startRow);
    LocationType urPixel = llPixel + 1.0;
-   LocationType llGeoCoord;
-   LocationType lrGeoCoord;
-   LocationType ulGeoCoord;
-   LocationType urGeoCoord;
 
-   bool bGeocoords = false;
+   LocationType llGeoCoord = mpRaster->convertPixelToGeocoord(llPixel);
+   LocationType lrGeoCoord = mpRaster->convertPixelToGeocoord(LocationType(urPixel.mX, llPixel.mY));
+   LocationType ulGeoCoord = mpRaster->convertPixelToGeocoord(LocationType(llPixel.mX, urPixel.mY));
+   LocationType urGeoCoord = mpRaster->convertPixelToGeocoord(urPixel);
 
-   if (mpRaster->isGeoreferenced())
-   {
-      // Get the lat/long values from the RasterElement
-      LocationType pixel = llPixel;
-      LocationType latLong = mpRaster->convertPixelToGeocoord(pixel);
-      llGeoCoord.mY = latLong.mY;
-      llGeoCoord.mX = latLong.mX;
-
-      pixel.mX = urPixel.mX;
-      pixel.mY = llPixel.mY;
-      latLong = mpRaster->convertPixelToGeocoord(pixel);
-      lrGeoCoord.mY = latLong.mY;
-      lrGeoCoord.mX = latLong.mX;
-
-      pixel.mX = llPixel.mX;
-      pixel.mY = urPixel.mY;
-      latLong = mpRaster->convertPixelToGeocoord(pixel);
-      ulGeoCoord.mY = latLong.mY;
-      ulGeoCoord.mX = latLong.mX;
-
-      pixel = urPixel;
-      latLong = mpRaster->convertPixelToGeocoord(pixel);
-      urGeoCoord.mY = latLong.mY;
-      urGeoCoord.mX = latLong.mX;
-
-      bGeocoords = true;
-   }
+   // Determine if the raster data is orthorectified
    bool isOrthoRectified = false;
-   DynamicObject* pMetaData = mpRaster->getMetadata();
-   bool hasMetaDataTag = false;
-   if (pMetaData != NULL)
+   bool hasMetadataTag = false;
+
+   const DynamicObject* pMetadata = mpRaster->getMetadata();
+   if (pMetadata != NULL)
    {
       try
       {
-         isOrthoRectified = dv_cast<bool>(pMetaData->getAttribute("orthorectified"));
-         hasMetaDataTag = true;
+         isOrthoRectified = dv_cast<bool>(pMetadata->getAttribute("orthorectified"));
+         hasMetadataTag = true;
       }
       catch (bad_cast&)
       {
-         // attribute is not present or is not a bool, so calculate isOrthoRectified
+         // The attribute is not present or is not a bool, so calculate isOrthoRectified
       }
    }
-   if (!hasMetaDataTag)
+
+   if (hasMetadataTag == false)
    {
-      // calculate the value of isOrthoRectified
-      if (mpRaster->isGeoreferenced() && !rows.empty() && !columns.empty())
+      if ((endRow > startRow) && (endColumn > startColumn))
       {
-         int endRow(-1);
-         int endColumn(-1);
-         for (vector<DimensionDescriptor>::const_reverse_iterator rowIt = rows.rbegin(); rowIt != rows.rend(); ++rowIt)
-         {
-            if (rowIt->isActiveNumberValid())
-            {
-               endRow = rowIt->getActiveNumber();
-               break;
-            }
-         }
-         for (vector<DimensionDescriptor>::const_reverse_iterator colIt = columns.rbegin();
-            colIt != columns.rend(); ++colIt)
-         {
-            if (colIt->isActiveNumberValid())
-            {
-               endColumn = colIt->getActiveNumber();
-               break;
-            }
-         }
+         // The chip's (0,0)
+         LocationType startPixel = llPixel;
+         LocationType startGeo = llGeoCoord;
 
-         if (endRow != -1 && endColumn != -1 &&
-            static_cast<unsigned int>(endRow) > startRow && static_cast<unsigned int>(endColumn) > startColumn)
-         {
-            // the chip's (0,0)
-            LocationType startPixel = llPixel;
-            LocationType startGeo = llGeoCoord;
+         // The chip's (0,max)
+         LocationType rowMax(startPixel.mX, endRow);
+         LocationType rowMaxGeo = mpRaster->convertPixelToGeocoord(rowMax);
 
-            // the chip's (0,max)
-            LocationType rowMax(startPixel.mX, endRow);
-            LocationType rowMaxGeo = mpRaster->convertPixelToGeocoord(rowMax);
+         // The chip's (max,0)
+         LocationType colMax(endColumn, startPixel.mY);
+         LocationType colMaxGeo = mpRaster->convertPixelToGeocoord(colMax);
 
-            // the chip's (max,0)
-            LocationType colMax(endColumn, startPixel.mY);
-            LocationType colMaxGeo = mpRaster->convertPixelToGeocoord(colMax);
+         LocationType rowMaxCheckGeo(rowMaxGeo.mX, startGeo.mY);
+         LocationType rowMaxCheck = mpRaster->convertGeocoordToPixel(rowMaxCheckGeo);
+         LocationType colMaxCheckGeo(startGeo.mX, colMaxGeo.mY);
+         LocationType colMaxCheck = mpRaster->convertGeocoordToPixel(colMaxCheckGeo);
 
-            // 
-            LocationType rowMaxCheckGeo(rowMaxGeo.mX, startGeo.mY);
-            LocationType rowMaxCheck = mpRaster->convertGeocoordToPixel(rowMaxCheckGeo);
-            LocationType colMaxCheckGeo(startGeo.mX, colMaxGeo.mY);
-            LocationType colMaxCheck = mpRaster->convertGeocoordToPixel(colMaxCheckGeo);
+         LocationType deltaRowMax = rowMaxCheck - rowMax;
+         LocationType deltaColMax = colMaxCheck - colMax;
 
-            LocationType deltaRowMax = rowMaxCheck - rowMax;
-            LocationType deltaColMax = colMaxCheck - colMax;
-
-            isOrthoRectified = (deltaRowMax.length() < 0.5) && (deltaColMax.length() < 0.5);
-         }
+         isOrthoRectified = (deltaRowMax.length() < 0.5) && (deltaColMax.length() < 0.5);
       }
    }
 
-   if (bGeocoords == false)
+   // If the data is orthorectified and the option is set, write out the tie point tag
+   // and the latitude/longitude pixel scale tag
+   OptionsTiffExporter::TransformationMethod transformationMethod =
+      StringUtilities::fromXmlString<OptionsTiffExporter::TransformationMethod>(
+      OptionsTiffExporter::getSettingTransformationMethod());
+   if (mpOptionWidget.get() != NULL)
    {
-      GTIFFree(pGtif);
-      return false;
+      transformationMethod = mpOptionWidget->getTransformationMethod();
    }
 
-   LocationType geoCoordCenter((llGeoCoord.mX + lrGeoCoord.mX + ulGeoCoord.mX + urGeoCoord.mX) / 4.0,
-                               (llGeoCoord.mY + lrGeoCoord.mY + ulGeoCoord.mY + urGeoCoord.mY) / 4.0);
-
-
-   // if the data is orthorectified, write out the appropriate tags
-   if (isOrthoRectified)
+   if ((isOrthoRectified == true) && (transformationMethod == OptionsTiffExporter::TIE_POINT_PIXEL_SCALE))
    {
-      double pTiepoints[6] = {0.0, 0.0, 0.0, llGeoCoord.mY, llGeoCoord.mX, 0.0};
+      // Write out the raster origin for the tie point tag, which is the location of the first exported pixel
+      double pTiepoints[6] = { 0.0, 0.0, 0.0, llGeoCoord.mY, llGeoCoord.mX, 0.0 };
       TIFFSetField(pOut, TIFFTAG_GEOTIEPOINTS, 6, pTiepoints);
-      /*
-        The following calculation can result in a negative scale for the latitude and/or longitude. This is correct 
-        and is explicitly called out in the GeoTIFF spec (GeoTIFF Format Specification version 1.8.1, section 2.6.1) 
-        as the proper way to handle flipping of the image. A negative latitude scale corresponds to an image with
-        its origin in the lower left or lower right corner, while a positive latitude scale corresponds to an image
-        with its origin in the upper left or upper right corner. Similarly for longitude scale.
-      */
-      double pPixelSize[3] = {urGeoCoord.mY - llGeoCoord.mY, llGeoCoord.mX - urGeoCoord.mX, 0.0};
+
+      // The pixel scale tag value can include a negative scale for the latitude and/or longitude (GeoTIFF Format
+      // Specification, Version 1.8.2, Section 2.6.1) to account for horizontal or vertical flipping.  A negative
+      // latitude scale corresponds to an image with its origin in the lower left or lower right corner, while a
+      // positive latitude scale corresponds to an image with its origin in the upper left or upper right corner.
+      // Similarly for longitude scale.
+      double pPixelSize[3] = { urGeoCoord.mY - llGeoCoord.mY, llGeoCoord.mX - urGeoCoord.mX, 0.0 };
       TIFFSetField(pOut, TIFFTAG_GEOPIXELSCALE, 3, pPixelSize);
    }
    else
    {
-      //compute transformation Matrix values
+      // Write out the transformation matrix tag based on the latitude/longitude of a single pixel
       double a = lrGeoCoord.mY - llGeoCoord.mY;
       double b = ulGeoCoord.mY - llGeoCoord.mY;
       double d = llGeoCoord.mY;
       double e = lrGeoCoord.mX - llGeoCoord.mX;
       double f = ulGeoCoord.mX - llGeoCoord.mX;
       double h = llGeoCoord.mX;
-      double k = 1.0;
-      double p = 1.0;
 
-      double tMatrix[16] = {a, b, 0.0, d,
-         e, f, 0.0, h,
-         0.0, 0.0, k, 0.0,
-         0.0, 0.0, 0.0, p};
+      double tMatrix[16] =
+      {
+         a,   b,   0.0, d,
+         e,   f,   0.0, h,
+         0.0, 0.0, 0.0, 0.0,
+         0.0, 0.0, 0.0, 1.0
+      };
 
       TIFFSetField(pOut, GTIFF_TRANSMATRIX, 16, tMatrix);
    }
 
-   GTIFKeySet(pGtif, GTModelTypeGeoKey, TYPE_SHORT, 1, ModelGeographic);
+   // Write out other tags to specify a geographic coordinate system
    GTIFKeySet(pGtif, GTRasterTypeGeoKey, TYPE_SHORT, 1, RasterPixelIsArea);
-   GTIFKeySet(pGtif, GeogAngularUnitsGeoKey, TYPE_SHORT, 1, Angular_Degree);
-   GTIFKeySet(pGtif, GeogLinearUnitsGeoKey, TYPE_SHORT, 1, Linear_Meter);
+   GTIFKeySet(pGtif, GTModelTypeGeoKey, TYPE_SHORT, 1, ModelGeographic);
    GTIFKeySet(pGtif, GeographicTypeGeoKey, TYPE_SHORT, 1, GCS_WGS_84);
-   GTIFKeySet(pGtif, ProjCenterLongGeoKey, TYPE_DOUBLE, 1, geoCoordCenter.mY);
-   GTIFKeySet(pGtif, ProjCenterLatGeoKey, TYPE_DOUBLE, 1, geoCoordCenter.mX);
 
-   ///* Here we violate the GTIF abstraction to retarget on another file.
-   //   We should just have a function for copying tags from one GTIF object
-   //   to another. 
+   // Here we violate the GTIF abstraction to retarget on another file.
+   // We should just have a function for copying tags from one GTIF object
+   // to another.
    pGtif->gt_tif = pOut;
    pGtif->gt_flags |= FLAG_FILE_MODIFIED;
 
-   //* Install keys and tags 
+   // Install keys and tags
    GTIFWriteKeys(pGtif);
    GTIFFree(pGtif);
 
@@ -770,7 +732,6 @@ bool GeoTIFFExporter::applyWorldFile(TIFF *pOut)
    // Write out pixel scale, and tiepoint information.
    if ((x_rot == 0.0) && (y_rot == 0.0))
    {
-      pPixsize[1] = abs(pPixsize[1]);
       pPixsize[2] = 0.0;
       TIFFSetField(pOut, GTIFF_PIXELSCALE, 3, pPixsize);
       pTiepoint[0] = 0.5;
@@ -783,7 +744,7 @@ bool GeoTIFFExporter::applyWorldFile(TIFF *pOut)
    }
    else
    {
-      memset(pAdfMatrix, 0, sizeof(double) * 16);       
+      memset(pAdfMatrix, 0, sizeof(double) * 16);
       pAdfMatrix[0] = pPixsize[0];
       pAdfMatrix[1] = x_rot;
       pAdfMatrix[3] = xoff - (pPixsize[0] + x_rot) * 0.5;

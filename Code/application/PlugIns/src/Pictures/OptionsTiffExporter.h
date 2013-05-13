@@ -12,9 +12,11 @@
 
 #include "AppVersion.h"
 #include "ConfigurationSettings.h"
+#include "EnumWrapper.h"
 #include "LabeledSectionGroup.h"
 
 class QCheckBox;
+class QRadioButton;
 class QSpinBox;
 class ResolutionWidget;
 
@@ -24,7 +26,7 @@ class OptionsTiffExporter : public LabeledSectionGroup
 
 public:
    OptionsTiffExporter();
-   ~OptionsTiffExporter();
+   virtual ~OptionsTiffExporter();
 
    SETTING(PackBitsCompression, TiffExporter, bool, false);
    SETTING(RowsPerStrip, TiffExporter, unsigned int, 1);
@@ -32,32 +34,38 @@ public:
    SETTING(AspectRatioLock, TiffExporter, bool, false);
    SETTING(OutputWidth, TiffExporter, unsigned int, 0);
    SETTING(OutputHeight, TiffExporter, unsigned int, 0);
+   SETTING(TransformationMethod, TiffExporter, std::string, "TiePointPixelScale");
 
-   bool getPackBitsCompression();
+   enum TransformationMethodEnum
+   {
+      TIE_POINT_PIXEL_SCALE,
+      TRANSFORMATION_MATRIX
+   };
+   typedef EnumWrapper<TransformationMethodEnum> TransformationMethod;
+
    void applyChanges();
 
    static const std::string& getName()
    {
-      static std::string sName = "GeoTIFF Exporter Options";
+      static std::string sName = "TIFF/GeoTIFF Exporter Options";
       return sName;
    }
 
    static const std::string& getOptionName()
    {
-      static std::string sOptionName = "Export/GeoTIFF";
+      static std::string sOptionName = "Export/TIFF//GeoTIFF";
       return sOptionName;
    }
 
    static const std::string& getDescription()
    {
-      static std::string sDescription = "Widget to display GeoTIFF exporter related options";
+      static std::string sDescription = "A widget to display TIFF and GeoTIFF Exporter related options.";
       return sDescription;
    }
 
    static const std::string& getShortDescription()
    {
-      static std::string sShortDescription = "Widget to display GeoTIFF exporter related options";
-      return sShortDescription;
+      return getDescription();
    }
 
    static const std::string& getCreator()
@@ -93,9 +101,11 @@ private:
    OptionsTiffExporter(const OptionsTiffExporter& rhs);
    OptionsTiffExporter& operator=(const OptionsTiffExporter& rhs);
 
-   QCheckBox* mpPackBits;
    QSpinBox* mpRowsPerStrip;
+   QCheckBox* mpPackBits;
    ResolutionWidget* mpResolutionWidget;
+   QRadioButton* mpTiePointRadio;
+   QRadioButton* mpMatrixRadio;
 };
 
 #endif
