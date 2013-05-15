@@ -8,7 +8,7 @@
       <AdditionalIncludeDirectories>$(OPTICKSDEPENDENCIESINCLUDE)\openjpeg;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>OpenJpeg.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>openjp2.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
 </Project>

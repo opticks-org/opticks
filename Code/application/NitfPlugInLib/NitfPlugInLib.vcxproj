@@ -53,6 +53,7 @@
     <Import Project="..\CompileSettings\Macros.props" />
     <Import Project="..\CompileSettings\AllCommonSettings-Debug-32bit.props" />
     <Import Project="..\CompileSettings\LibraryCommonSettings.props" />
+    <Import Project="..\CompileSettings\OpenJpeg.props" />
     <Import Project="..\CompileSettings\Ossim-Debug.props" />
     <Import Project="..\CompileSettings\Qt-Debug.props" />
     <Import Project="..\CompileSettings\EnableWarnings.props" />
@@ -63,6 +64,7 @@
     <Import Project="..\CompileSettings\Macros.props" />
     <Import Project="..\CompileSettings\AllCommonSettings-Release-32bit.props" />
     <Import Project="..\CompileSettings\LibraryCommonSettings.props" />
+    <Import Project="..\CompileSettings\OpenJpeg.props" />
     <Import Project="..\CompileSettings\Ossim-Release.props" />
     <Import Project="..\CompileSettings\Qt-Release.props" />
     <Import Project="..\CompileSettings\EnableWarnings.props" />
@@ -73,6 +75,7 @@
     <Import Project="..\CompileSettings\Macros.props" />
     <Import Project="..\CompileSettings\AllCommonSettings-Debug-64bit.props" />
     <Import Project="..\CompileSettings\LibraryCommonSettings.props" />
+    <Import Project="..\CompileSettings\OpenJpeg.props" />
     <Import Project="..\CompileSettings\Ossim-Debug.props" />
     <Import Project="..\CompileSettings\Qt-Debug.props" />
     <Import Project="..\CompileSettings\EnableWarnings.props" />
@@ -83,6 +86,7 @@
     <Import Project="..\CompileSettings\Macros.props" />
     <Import Project="..\CompileSettings\AllCommonSettings-Release-64bit.props" />
     <Import Project="..\CompileSettings\LibraryCommonSettings.props" />
+    <Import Project="..\CompileSettings\OpenJpeg.props" />
     <Import Project="..\CompileSettings\Ossim-Release.props" />
     <Import Project="..\CompileSettings\Qt-Release.props" />
     <Import Project="..\CompileSettings\EnableWarnings.props" />

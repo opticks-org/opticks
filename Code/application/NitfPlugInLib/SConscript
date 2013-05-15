@@ -6,6 +6,7 @@ import glob
 Import('env build_dir TOOLPATH')
 env = env.Clone()
 env.Tool("ossim",toolpath=[TOOLPATH])
+env.Tool("openjpeg",toolpath=[TOOLPATH])
 
 ####
 # build sources

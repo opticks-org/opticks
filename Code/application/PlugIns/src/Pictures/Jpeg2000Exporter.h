@@ -6,11 +6,9 @@
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
+
 #ifndef JPEG2000EXPORTER_H
 #define JPEG2000EXPORTER_H
-
-#include "AppConfig.h"
-#if defined (JPEG2000_SUPPORT)
 
 #include "ExporterShell.h"
 
@@ -24,5 +22,4 @@ public:
    virtual bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
 };
 
-#endif
 #endif

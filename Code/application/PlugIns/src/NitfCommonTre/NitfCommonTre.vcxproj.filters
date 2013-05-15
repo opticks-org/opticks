@@ -14,6 +14,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="EngrdaWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="ModuleManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -41,6 +44,9 @@
     <ClCompile Include="NitfCmetaaParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="NitfEngrdaParser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="NitfExoptaParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -51,6 +57,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NitfIchipbParser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NitfJ2klraParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NitfMensraParser.cpp">
@@ -92,6 +101,9 @@
     <ClCompile Include="NitfSensraParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="NitfSensrbParser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="NitfStdidbParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -102,15 +114,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NitfUse26aParser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NitfSensrbParser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="EngrdaWidget.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NitfEngrdaParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_EngrdaWidget.cpp">
@@ -142,6 +145,9 @@
     <ClInclude Include="NitfCmetaaParser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="NitfEngrdaParser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="NitfExoptaParser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -152,6 +158,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="NitfIchipbParser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NitfJ2klraParser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="NitfMensraParser.h">
@@ -193,6 +202,9 @@
     <ClInclude Include="NitfSensraParser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="NitfSensrbParser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="NitfStdidbParser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -203,12 +215,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="NitfUse26aParser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NitfSensrbParser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NitfEngrdaParser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

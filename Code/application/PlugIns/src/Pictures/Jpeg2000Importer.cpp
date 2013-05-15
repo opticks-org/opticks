@@ -7,28 +7,21 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "AppConfig.h"
-#if defined (JPEG2000_SUPPORT)
-
 #include "AppVerify.h"
 #include "AppVersion.h"
-#include "DataAccessorImpl.h"
+#include "CachedPager.h"
 #include "DimensionDescriptor.h"
-#include "Endian.h"
 #include "FileResource.h"
 #include "ImportDescriptor.h"
 #include "Jpeg2000Importer.h"
 #include "Jpeg2000Utilities.h"
 #include "MessageLogResource.h"
-#include "ModelServices.h"
-#include "ObjectFactory.h"
 #include "ObjectResource.h"
-#include "PlugInArg.h"
 #include "PlugInArgList.h"
-#include "PlugInManagerServices.h"
 #include "PlugInRegistration.h"
 #include "PlugInResource.h"
 #include "RasterDataDescriptor.h"
+#include "RasterElement.h"
 #include "RasterFileDescriptor.h"
 #include "RasterLayer.h"
 #include "RasterUtilities.h"
@@ -36,38 +29,28 @@
 #include "StringUtilities.h"
 #include "UtilityServices.h"
 
-#include <errno.h>
-#include <fstream>
-#include <iostream>
-
-#include <QtCore/QFileInfo>
 #include <QtCore/QString>
 #include <QtCore/QStringList>
-#include <QtCore/QVariant>
-
-// These must be in this order
-#include <openjpeg.h>
-#include <opj_includes.h>
-#include <j2k.h>
-#include <jp2.h>
 
 using namespace std;
 
 REGISTER_PLUGIN_BASIC(OpticksPictures, Jpeg2000Importer);
 
+std::map<std::string, std::vector<std::string> > Jpeg2000Importer::msWarnings;
+std::map<std::string, std::vector<std::string> > Jpeg2000Importer::msErrors;
+
 Jpeg2000Importer::Jpeg2000Importer()
 {
-   setName("Jpeg2000 Importer");
+   setName("JPEG2000 Importer");
    setCreator("Ball Aerospace & Technologies Corp.");
    setCopyright(APP_COPYRIGHT);
    setVersion(APP_VERSION_NUMBER);
-   setExtensions("Jpeg2000 files (*.jp2 *.j2k)");
-   setShortDescription("Jpeg2000");
+   setExtensions("JPEG2000 Files (*.jp2 *.j2k *.j2c *.jpc)");
+   setShortDescription("JPEG2000");
    setDescriptorId("{ECC55485-16FC-4154-B31B-E78EA3669B8E}");
    allowMultipleInstances(true);
    setProductionStatus(APP_IS_PRODUCTION_RELEASE);
    addDependencyCopyright("OpenJPEG", Service<UtilityServices>()->getTextFromFile(":/licenses/openjpeg"));
-   addDependencyCopyright("proj4", Service<UtilityServices>()->getTextFromFile(":/licenses/proj4"));
 }
 
 Jpeg2000Importer::~Jpeg2000Importer()
@@ -80,6 +63,12 @@ vector<ImportDescriptor*> Jpeg2000Importer::getImportDescriptors(const string& f
    {
       return descriptors;
    }
+
+   vector<string>& warnings = msWarnings[filename];
+   warnings.clear();
+
+   vector<string>& errors = msErrors[filename];
+   errors.clear();
 
    ImportDescriptor* pImportDescriptor = mpModel->createImportDescriptor(filename, "RasterElement", NULL);
    if (pImportDescriptor != NULL)
@@ -126,14 +115,147 @@ vector<ImportDescriptor*> Jpeg2000Importer::getImportDescriptors(const string& f
 
 unsigned char Jpeg2000Importer::getFileAffinity(const std::string& filename)
 {
-   if (Jpeg2000Utilities::get_file_format(filename.c_str())== -1)
+   // Read the image header info from the file
+   opj_image_t* pImage = getImageInfo(filename, false);
+   if (pImage != NULL)
    {
-      return Importer::CAN_NOT_LOAD;
+      opj_image_destroy(pImage);
+      return Importer::CAN_LOAD;
+   }
+
+   return Importer::CAN_NOT_LOAD;
+}
+
+bool Jpeg2000Importer::validate(const DataDescriptor* pDescriptor,
+                                const std::vector<const DataDescriptor*>& importedDescriptors,
+                                string& errorMessage) const
+{
+   if (RasterElementImporterShell::validate(pDescriptor, importedDescriptors, errorMessage) == false)
+   {
+      return false;
+   }
+
+   VERIFY(pDescriptor != NULL);
+
+   const FileDescriptor* pFileDescriptor = pDescriptor->getFileDescriptor();
+   VERIFY(pFileDescriptor != NULL);
+
+   const Filename& filenameObj = pFileDescriptor->getFilename();
+   string filename = filenameObj.getFullPathAndName();
+
+   // Report errors obtained when populating the import descriptors
+   map<string, vector<string> >::const_iterator errorIter = msErrors.find(filename);
+   if (errorIter != msErrors.end())
+   {
+      const std::vector<std::string>& errors = errorIter->second;
+      if (errors.empty() == false)
+      {
+         errorMessage = StringUtilities::join(errors, "\n");
+         return false;
+      }
+   }
+
+   // Report warnings obtained when populating the import descriptors
+   map<string, vector<string> >::const_iterator warningIter = msWarnings.find(filename);
+   if (warningIter != msWarnings.end())
+   {
+      const std::vector<std::string>& warnings = warningIter->second;
+      if (warnings.empty() == false)
+      {
+         if (errorMessage.empty() == false)
+         {
+            errorMessage += "\n";
+         }
+
+         errorMessage += StringUtilities::join(warnings, "\n");
+      }
+   }
+
+   return true;
+}
+
+opj_image_t* Jpeg2000Importer::getImageInfo(const string& filename, bool logErrors) const
+{
+   if (filename.empty() == true)
+   {
+      return NULL;
+   }
+
+   string filenameCopy = filename;
+
+   // open a byte stream from the file
+   FileResource pFile(filename.c_str(), "rb");
+   if (pFile.get() == NULL)
+   {
+      return NULL;
+   }
+
+   opj_stream_t* pStream = opj_stream_create_default_file_stream(pFile, true);
+   if (pStream == NULL)
+   {
+      return NULL;
+   }
+
+   // decode the code-stream
+   opj_dparameters_t parameters;
+   opj_set_default_decoder_parameters(&parameters);
+   parameters.decod_format = Jpeg2000Utilities::get_file_format(filename.c_str());
+
+   opj_codec_t* pCodec = NULL;
+   switch (parameters.decod_format)
+   {
+   case Jpeg2000Utilities::J2K_CFMT:
+      pCodec = opj_create_decompress(OPJ_CODEC_J2K);
+      break;
+
+   case Jpeg2000Utilities::JP2_CFMT:
+      pCodec = opj_create_decompress(OPJ_CODEC_JP2);
+      break;
+
+   default:
+      break;
+   }
+
+   if (pCodec == NULL)
+   {
+      opj_stream_destroy(pStream);
+      return NULL;
+   }
+
+   // setup the callbacks to report warnings and errors
+   if (logErrors == true)
+   {
+      opj_set_warning_handler(pCodec, Jpeg2000Importer::reportWarning, &filenameCopy);
+      opj_set_error_handler(pCodec, Jpeg2000Importer::reportError, &filenameCopy);
    }
    else
    {
-      return Importer::CAN_LOAD;
+      opj_set_warning_handler(pCodec, Jpeg2000Importer::defaultCallback, NULL);
+      opj_set_error_handler(pCodec, Jpeg2000Importer::defaultCallback, NULL);
    }
+
+   // setup the decoder decoding parameters
+   if (opj_setup_decoder(pCodec, &parameters) == OPJ_FALSE)
+   {
+      opj_stream_destroy(pStream);
+      opj_destroy_codec(pCodec);
+      return NULL;
+   }
+
+   // decode the stream and fill the image structure
+   opj_image_t* pImage = NULL;
+   if (opj_read_header(pStream, pCodec, &pImage) == OPJ_FALSE)
+   {
+      opj_stream_destroy(pStream);
+      opj_destroy_codec(pCodec);
+      return NULL;
+   }
+
+   // cleanup
+   opj_stream_destroy(pStream);
+   opj_destroy_codec(pCodec);
+
+   return pImage;
 }
 
 bool Jpeg2000Importer::populateDataDescriptor(RasterDataDescriptor* pDescriptor)
@@ -143,12 +265,8 @@ bool Jpeg2000Importer::populateDataDescriptor(RasterDataDescriptor* pDescriptor)
       return false;
    }
 
-   RasterFileDescriptor* pFileDescriptor = dynamic_cast<RasterFileDescriptor*>
-      (pDescriptor->getFileDescriptor());
-   if (pFileDescriptor == NULL)
-   {
-      return false;
-   }
+   RasterFileDescriptor* pFileDescriptor = dynamic_cast<RasterFileDescriptor*>(pDescriptor->getFileDescriptor());
+   VERIFY(pFileDescriptor != NULL);
 
    const string& fileName = pFileDescriptor->getFilename();
    if (fileName.empty() == true)
@@ -156,78 +274,55 @@ bool Jpeg2000Importer::populateDataDescriptor(RasterDataDescriptor* pDescriptor)
       return false;
    }
 
-   opj_dparameters_t parameters;
-   opj_event_mgr_t eventMgr;
-   opj_image_t* pImage = NULL;
-   vector<unsigned char> pSrc(NULL);
-   int fileLength;
-   opj_dinfo_t* pDinfo = NULL;
-   opj_cio_t* pCio = NULL;
-   opj_codestream_info_t cstrInfo;
-
-
-   // configure the event callbacks
-   memset(&eventMgr, 0, sizeof(opj_event_mgr_t));
-
-   // set decoding parameters to default values
-   opj_set_default_decoder_parameters(&parameters);
-
-   FileResource pFile(fileName.c_str(), "rb");
-   if (pFile.get() == NULL)
+   opj_image_t* pImage = getImageInfo(fileName, true);
+   if (pImage == NULL)
    {
       return false;
    }
 
-   fseek(pFile, 0, SEEK_END);
-   fileLength = ftell(pFile);
-   fseek(pFile, 0, SEEK_SET);
-   pSrc.resize(fileLength);
-   fread(&pSrc[0], 1, fileLength, pFile);
-
-   // decode the code-stream 
-   parameters.decod_format = Jpeg2000Utilities::get_file_format(fileName.c_str());
-   switch(parameters.decod_format) 
-   {
-      case Jpeg2000Utilities::J2K_CFMT:
-      {
-         pDinfo = opj_create_decompress(CODEC_J2K);
-      }
-      break;
-
-      case Jpeg2000Utilities::JP2_CFMT:
-      {
-         pDinfo = opj_create_decompress(CODEC_JP2);
-      }
-      break;
-      default:
-         return false;
-   }
-
-   // catch events using our callbacks
-   opj_set_event_mgr((opj_common_ptr)pDinfo, &eventMgr, stderr);
-
-   // setup the decoder decoding parameters
-   opj_setup_decoder(pDinfo, &parameters);
-
-   // open a byte stream
-   pCio = opj_cio_open((opj_common_ptr)pDinfo, &pSrc[0], fileLength);
-
-   // decode the stream and fill the image structure
-   pImage = opj_decode_with_info(pDinfo, pCio, &cstrInfo);
-   if(!pImage)
-   {
-      return false;
-   }
-
-   // close the byte stream
-   opj_cio_close(pCio);
-
-   // Bits per pixel doesn't work in OpenJpeg V 1.5
-   // If we upgrade to OpenJpg V 2.0 we need to check the library
-   unsigned short bitsPerElement = 32;
+   // Bits per element
+   unsigned int bitsPerElement = pImage->comps->prec;
    pFileDescriptor->setBitsPerElement(bitsPerElement);
 
+   // Data type
    EncodingType dataType = INT1UBYTE;
+   if (bitsPerElement <= 8)
+   {
+      if (pImage->comps->sgnd)
+      {
+         dataType = INT1SBYTE;
+      }
+      else
+      {
+         dataType = INT1UBYTE;
+      }
+   }
+   else if (bitsPerElement <= 16)
+   {
+      if (pImage->comps->sgnd)
+      {
+         dataType = INT2SBYTES;
+      }
+      else
+      {
+         dataType = INT2UBYTES;
+      }
+   }
+   else if (bitsPerElement <= 32)
+   {
+      if (pImage->comps->sgnd)
+      {
+         dataType = INT4SBYTES;
+      }
+      else
+      {
+         dataType = INT4UBYTES;
+      }
+   }
+   else if (bitsPerElement <= 64)
+   {
+      dataType = FLT8BYTES;
+   }
 
    // Override with information from the filename, if present.
    unsigned int bandFactor = 0;
@@ -250,19 +345,19 @@ bool Jpeg2000Importer::populateDataDescriptor(RasterDataDescriptor* pDescriptor)
    pDescriptor->setDataType(dataType);
 
    // Rows
-   unsigned int numRows = pImage->y1;
+   unsigned int numRows = pImage->comps->h;
    vector<DimensionDescriptor> rows = RasterUtilities::generateDimensionVector(numRows, true, false, true);
    pDescriptor->setRows(rows);
    pFileDescriptor->setRows(rows);
 
    // Columns
-   unsigned int numColumns = pImage->x1;
+   unsigned int numColumns = pImage->comps->w;
    vector<DimensionDescriptor> columns = RasterUtilities::generateDimensionVector(numColumns, true, false, true);
    pDescriptor->setColumns(columns);
    pFileDescriptor->setColumns(columns);
 
    // Bands
-   unsigned short numBands = pImage->numcomps;
+   unsigned int numBands = pImage->numcomps;
    if (bandFactor > 0)
    {
       numBands /= bandFactor;
@@ -280,67 +375,7 @@ bool Jpeg2000Importer::populateDataDescriptor(RasterDataDescriptor* pDescriptor)
       pDescriptor->setDisplayMode(RGB_MODE);
    }
 
-   if (pDinfo)
-   {
-      opj_destroy_decompress(pDinfo);
-   }
-   opj_destroy_cstr_info(&cstrInfo);
    opj_image_destroy(pImage);
-   return true;
-}
-
-bool Jpeg2000Importer::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
-{
-   if (pInArgList == NULL)
-   {
-      return false;
-   }
-
-   // Create a message log step
-   StepResource pStep("Execute JPEG2000 Importer", "app", "CE0A6D86-5708-42f9-8486-A0D037355659", "Execute failed");
-
-   // Extract the input args
-   bool bSuccess = parseInputArgList(pInArgList);
-   if (!bSuccess)
-   {
-      return false;
-   }
-
-   // Update the log and progress with the start of the import
-   Progress* pProgress = getProgress();
-   if (pProgress != NULL)
-   {
-      pProgress->updateProgress("JPEG2000 Importer Started", 1, NORMAL);
-   }
-
-   if (!performImport())
-   {
-      return false;
-   }
-
-   // Create the view
-   if (!isBatch() && !Service<SessionManager>()->isSessionLoading())
-   {
-      SpatialDataView* pView = createView();
-      if (pView == NULL)
-      {
-         pStep->finalize(Message::Failure, "The view could not be created.");
-         return false;
-      }
-
-      // Add the view to the output arg list
-      if (pOutArgList != NULL)
-      {
-         pOutArgList->setPlugInArgValue("View", pView);
-      }
-   }
-
-   if (pProgress != NULL)
-   {
-      pProgress->updateProgress("Jpeg2000 Import Complete.", 100, NORMAL);
-   }
-
-   pStep->finalize(Message::Success);
    return true;
 }
 
@@ -360,9 +395,9 @@ bool Jpeg2000Importer::createRasterPager(RasterElement* pRasterElement) const
    FactoryResource<Filename> pFilename;
    pFilename->setFullPathAndName(filename);
 
-   ExecutableResource pagerPlugIn("Jpeg2000Pager", string(), pProgress);
-   pagerPlugIn->getInArgList().setPlugInArgValue("Raster Element", pRasterElement);
-   pagerPlugIn->getInArgList().setPlugInArgValue("Filename", pFilename.get());
+   ExecutableResource pagerPlugIn("JPEG2000 Pager", string(), pProgress);
+   pagerPlugIn->getInArgList().setPlugInArgValue(CachedPager::PagedElementArg(), pRasterElement);
+   pagerPlugIn->getInArgList().setPlugInArgValue(CachedPager::PagedFilenameArg(), pFilename.get());
    bool success = pagerPlugIn->execute();
 
    RasterPager* pPager = dynamic_cast<RasterPager*>(pagerPlugIn->getPlugIn());
@@ -531,9 +566,29 @@ QWidget* Jpeg2000Importer::getPreview(const DataDescriptor* pDescriptor, Progres
    return pPreviewWidget;
 }
 
-bool Jpeg2000Importer::isProcessingLocationSupported(ProcessingLocation location) const
+void Jpeg2000Importer::defaultCallback(const char* pMessage, void* pClientData)
 {
-   return location == IN_MEMORY;
+   // Do nothing
+   Q_UNUSED(pMessage);
+   Q_UNUSED(pClientData);
 }
 
-#endif
+void Jpeg2000Importer::reportWarning(const char* pMessage, void* pClientData)
+{
+   string* pFilename = reinterpret_cast<string*>(pClientData);
+   if ((pFilename != NULL) && (pMessage != NULL))
+   {
+      vector<string>& warnings = msWarnings[*pFilename];
+      warnings.push_back(string(pMessage));
+   }
+}
+
+void Jpeg2000Importer::reportError(const char* pMessage, void* pClientData)
+{
+   string* pFilename = reinterpret_cast<string*>(pClientData);
+   if ((pFilename != NULL) && (pMessage != NULL))
+   {
+      vector<string>& errors = msErrors[*pFilename];
+      errors.push_back(string(pMessage));
+   }
+}

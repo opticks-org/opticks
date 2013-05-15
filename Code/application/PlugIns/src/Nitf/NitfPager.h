@@ -49,7 +49,7 @@ namespace Nitf
    private:
       Pager& operator=(const Pager& rhs);
 
-      int mSegment; // 1-based segment number
+      unsigned int mSegment; // 0-based segment number
       Nitf::OssimImageHandlerResource mpImageHandler;
       Step* mpStep;
    };

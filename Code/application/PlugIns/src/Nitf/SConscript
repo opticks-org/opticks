@@ -6,6 +6,7 @@ import glob
 Import('env build_dir TOOLPATH')
 env = env.Clone()
 env.Tool("ossim",toolpath=[TOOLPATH])
+env.Tool("openjpeg",toolpath=[TOOLPATH])
 env.Prepend(CPPPATH=["$COREDIR/NitfPlugInLib"], LIBS=["NitfPlugInLib"])
 if env["OS"] == "windows":
    env.AppendUnique(LINKFLAGS=["/FORCE:MULTIPLE", "/ignore:4006"])

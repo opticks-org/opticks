@@ -7,9 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "AppConfig.h"
-#if defined (JPEG2000_SUPPORT)
-
 #include "AppVerify.h"
 #include "AppVersion.h"
 #include "DataAccessorImpl.h"
@@ -34,28 +31,23 @@
 #include <QtCore/QFileInfo>
 #include <QtCore/QString>
 
-// These must be in this order
 #include <openjpeg.h>
-#include <opj_includes.h>
-#include <j2k.h>
-#include <jp2.h>
 
 REGISTER_PLUGIN_BASIC(OpticksPictures, Jpeg2000Exporter);
 
 Jpeg2000Exporter::Jpeg2000Exporter()
 {
-   setName("Jpeg2000 Exporter");
+   setName("JPEG2000 Exporter");
    setCreator("Ball Aerospace & Technologies Corp.");
    setCopyright(APP_COPYRIGHT);
    setVersion(APP_VERSION_NUMBER);
-   setExtensions("Jpeg2000 files (*.jp2 *.j2k)");
-   setShortDescription("Jpeg2000");
+   setExtensions("JPEG2000 Files (*.jp2 *.j2k *.j2c *.jpc)");
+   setShortDescription("JPEG2000");
    setSubtype(TypeConverter::toString<RasterElement>());
    setDescriptorId("{9DE18FE8-DC11-4BDC-8211-18F70696B01F}");
    allowMultipleInstances(true);
    setProductionStatus(APP_IS_PRODUCTION_RELEASE);
    addDependencyCopyright("OpenJPEG", Service<UtilityServices>()->getTextFromFile(":/licenses/openjpeg"));
-   addDependencyCopyright("proj4", Service<UtilityServices>()->getTextFromFile(":/licenses/proj4"));
 }
 
 Jpeg2000Exporter::~Jpeg2000Exporter()
@@ -65,13 +57,14 @@ bool Jpeg2000Exporter::getInputSpecification(PlugInArgList*& pArgList)
 {
    Service<PlugInManagerServices> pPlugInManager;
    VERIFY(pPlugInManager.get() != NULL);
-   
+
    pArgList = pPlugInManager->getPlugInArgList();
    VERIFY(pArgList != NULL);
 
    VERIFY(pArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription()));
    VERIFY(pArgList->addArg<RasterElement>(Exporter::ExportItemArg(), NULL, "Data element to be exported."));
-   VERIFY(pArgList->addArg<RasterFileDescriptor>(Exporter::ExportDescriptorArg(), NULL, "File descriptor for the output file."));
+   VERIFY(pArgList->addArg<RasterFileDescriptor>(Exporter::ExportDescriptorArg(), NULL, "File descriptor for the "
+      "output file."));
    VERIFY(pArgList->addArg<View>(Executable::ViewArg(), "View to be exported."));
    return true;
 }
@@ -115,7 +108,7 @@ bool Jpeg2000Exporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
    }
    else if (bandFactor > 1 && pProgress != NULL)
    {
-      pProgress->updateProgress("Data being encoded exceeds 16 bits in length."
+      pProgress->updateProgress("Data being encoded exceeds 16 bits in length.  "
          "This file will be saved but may not be viewable from other applications.", 10, WARNING);
    }
 
@@ -159,18 +152,18 @@ bool Jpeg2000Exporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
    }
 
    // Setup encoding parameters.
-   // Most of these parameters are set to default values of image_to_j2k.exe, written by the OpenJPEG group.
+   // Most of these parameters are set to default values of opj_compress.exe, written by the OpenJPEG group.
    opj_cparameters_t parameters;
    opj_set_default_encoder_parameters(&parameters);
    parameters.cod_format = Jpeg2000Utilities::get_file_format(filename.absoluteFilePath().toStdString().c_str());
    parameters.tcp_mct = bandCount == 3 ? 1 : 0;
-   parameters.numresolution = 6;
+   parameters.numresolution = 1;
    parameters.tcp_rates[0] = 0;
    parameters.tcp_numlayers = 1;
    parameters.cp_disto_alloc = 1;
    strncpy(parameters.outfile, filename.absoluteFilePath().toStdString().c_str(), sizeof(parameters.outfile) - 1);
 
-   OPJ_COLOR_SPACE colorSpace = bandCount >= 3 ? CLRSPC_SRGB : CLRSPC_GRAY;
+   OPJ_COLOR_SPACE colorSpace = bandCount >= 3 ? OPJ_CLRSPC_SRGB : OPJ_CLRSPC_GRAY;
    SpatialDataView* pView = dynamic_cast<SpatialDataView*>(pInArgList->getPlugInArgValue<View>(Executable::ViewArg()));
    if (pView != NULL)
    {
@@ -180,7 +173,7 @@ bool Jpeg2000Exporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
          RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(pLayerList->getLayer(RASTER, pRaster));
          if (pRasterLayer != NULL)
          {
-            colorSpace = pRasterLayer->getDisplayMode() == RGB_MODE ? CLRSPC_SRGB : CLRSPC_GRAY;
+            colorSpace = pRasterLayer->getDisplayMode() == RGB_MODE ? OPJ_CLRSPC_SRGB : OPJ_CLRSPC_GRAY;
          }
       }
    }
@@ -218,7 +211,7 @@ bool Jpeg2000Exporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
    pImage->x1 = columnCount;
    pImage->y1 = rowCount;
 
-   // JPEG 2000 data is always stored BIP, so force interleave conversion and subset options here.
+   // JPEG2000 data is always stored BIP, so force interleave conversion and subset options here.
    FactoryResource<DataRequest> pRequest;
    pRequest->setRows(startRow, stopRow, 1);
    pRequest->setColumns(startColumn, stopColumn, 1);
@@ -284,18 +277,18 @@ bool Jpeg2000Exporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
       }
    }
 
-   opj_cinfo_t* pCinfo = NULL;
+   opj_codec_t* pCodec = NULL;
    switch (parameters.cod_format)
    {
       case Jpeg2000Utilities::J2K_CFMT:
       {
-         pCinfo = opj_create_compress(CODEC_J2K);
+         pCodec = opj_create_compress(OPJ_CODEC_J2K);
          break;
       }
 
       case Jpeg2000Utilities::JP2_CFMT:
       {
-         pCinfo = opj_create_compress(CODEC_JP2);
+         pCodec = opj_create_compress(OPJ_CODEC_JP2);
          break;
       }
 
@@ -314,23 +307,19 @@ bool Jpeg2000Exporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
 
    if (pProgress != NULL)
    {
-      pProgress->updateProgress("Encoding data", 10, NORMAL);
+      pProgress->updateProgress("Encoding data...", 40, NORMAL);
    }
 
-   opj_event_mgr_t eventMgr;
-   memset(&eventMgr, 0, sizeof(opj_event_mgr_t));
-   eventMgr.error_handler = Jpeg2000Utilities::error_callback;
-   eventMgr.warning_handler = Jpeg2000Utilities::warning_callback;
-   eventMgr.info_handler = Jpeg2000Utilities::info_callback;
+   opj_set_info_handler(pCodec, Jpeg2000Utilities::reportMessage, pProgress);
+   opj_set_warning_handler(pCodec, Jpeg2000Utilities::reportWarning, pProgress);
+   opj_set_error_handler(pCodec, Jpeg2000Utilities::reportError, pProgress);
 
-   opj_set_event_mgr((opj_common_ptr)pCinfo, &eventMgr, stderr);
-   opj_setup_encoder(pCinfo, &parameters, pImage);
-   opj_cio_t* pCio = opj_cio_open((opj_common_ptr)pCinfo, NULL, 0);
-   if (opj_encode(pCinfo, pCio, pImage, NULL) == 0)
+   if (opj_setup_encoder(pCodec, &parameters, pImage) == OPJ_FALSE)
    {
-      opj_cio_close(pCio);
-      opj_destroy_compress(pCinfo);
-      const std::string message = "Encoding failed";
+      opj_image_destroy(pImage);
+      opj_destroy_codec(pCodec);
+
+      const std::string message = "The encoder could not be initialized properly.";
       if (pProgress != NULL)
       {
          pProgress->updateProgress(message, 0, ERRORS);
@@ -340,18 +329,13 @@ bool Jpeg2000Exporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
       return false;
    }
 
-   if (pProgress != NULL)
-   {
-      pProgress->updateProgress("Writing file", 80, NORMAL);
-   }
-
-   int codestream_length = cio_tell(pCio);
-   FileResource pFile(parameters.outfile, "wb");
+   FileResource pFile(parameters.outfile, "wb", true);
    if (pFile.get() == NULL)
    {
-      opj_cio_close(pCio);
-      opj_destroy_compress(pCinfo);
-      const std::string message = "Opening the output file for writing failed";
+      opj_image_destroy(pImage);
+      opj_destroy_codec(pCodec);
+
+      const std::string message = "Opening the output file for writing failed.";
       if (pProgress != NULL)
       {
          pProgress->updateProgress(message, 0, ERRORS);
@@ -361,11 +345,13 @@ bool Jpeg2000Exporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
       return false;
    }
 
-   if (fwrite(pCio->buffer, 1, codestream_length, pFile) < static_cast<size_t>(codestream_length))
+   opj_stream_t* pStream = opj_stream_create_default_file_stream(pFile, false);
+   if (pStream == NULL)
    {
-      opj_cio_close(pCio);
-      opj_destroy_compress(pCinfo);
-      const std::string message = "Writing to the output file failed";
+      opj_image_destroy(pImage);
+      opj_destroy_codec(pCodec);
+
+      const std::string message = "Could not write to the output file.";
       if (pProgress != NULL)
       {
          pProgress->updateProgress(message, 0, ERRORS);
@@ -375,8 +361,30 @@ bool Jpeg2000Exporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
       return false;
    }
 
-   opj_cio_close(pCio);
-   opj_destroy_compress(pCinfo);
+   int success = opj_start_compress(pCodec, pImage, pStream);
+   if (success == OPJ_TRUE)
+   {
+      success = opj_encode(pCodec, pStream);
+      opj_end_compress(pCodec, pStream);
+   }
+
+   opj_stream_destroy(pStream);
+   opj_destroy_codec(pCodec);
+   opj_image_destroy(pImage);
+
+   if (success == OPJ_FALSE)
+   {
+      const std::string message = "Writing to the output file failed.";
+      if (pProgress != NULL)
+      {
+         pProgress->updateProgress(message, 0, ERRORS);
+      }
+
+      pStep->finalize(Message::Failure, message);
+      return false;
+   }
+
+   pFile.setDeleteOnClose(false);
 
    if (pProgress != NULL)
    {
@@ -386,5 +394,3 @@ bool Jpeg2000Exporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
    pStep->finalize(Message::Success);
    return true;
 }
-
-#endif

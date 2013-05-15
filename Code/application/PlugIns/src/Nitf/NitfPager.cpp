@@ -32,7 +32,7 @@
 REGISTER_PLUGIN(OpticksNitf, Pager, Nitf::Pager);
 
 Nitf::Pager::Pager() :
-   mSegment(1),
+   mSegment(0),
    mpStep(NULL)
 {
    setCopyright(APP_COPYRIGHT);
@@ -49,13 +49,13 @@ Nitf::Pager::~Pager()
 bool Nitf::Pager::getInputSpecification(PlugInArgList*& pArgList)
 {
    return (CachedPager::getInputSpecification(pArgList) &&
-      pArgList != NULL && pArgList->addArg<int>("Segment Number", 1));
+      pArgList != NULL && pArgList->addArg<unsigned int>("Segment Number", mSegment));
 }
 
 bool Nitf::Pager::parseInputArgs(PlugInArgList* pInputArgList)
 {
    return (CachedPager::parseInputArgs(pInputArgList) &&
-      pInputArgList != NULL && pInputArgList->getPlugInArgValue<int>("Segment Number", mSegment));
+      pInputArgList != NULL && pInputArgList->getPlugInArgValue<unsigned int>("Segment Number", mSegment));
 }
 
 bool Nitf::Pager::openFile(const string& filename)
@@ -90,7 +90,7 @@ CachedPage::UnitPtr Nitf::Pager::fetchUnit(DataRequest *pOriginalRequest)
    ossimNitfTileSource* pTileSource = PTR_CAST(ossimNitfTileSource, mpImageHandler.get());
    VERIFYRV(pTileSource != NULL, CachedPage::UnitPtr());
    pTileSource->setExpandLut(false);
-   mpImageHandler->setCurrentEntry(mSegment - 1);
+   mpImageHandler->setCurrentEntry(mSegment);
 
    // Try to set the output band list.
    // If it cannot succeed (e.g.: for VQ), this is not an error.

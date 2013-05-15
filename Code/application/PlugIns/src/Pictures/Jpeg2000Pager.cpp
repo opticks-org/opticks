@@ -7,496 +7,450 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "AppConfig.h"
-#if defined (JPEG2000_SUPPORT)
-
 #include "AppVerify.h"
 #include "AppVersion.h"
-#include "bmutex.h"
 #include "DataRequest.h"
-#include "Filename.h"
+#include "DimensionDescriptor.h"
 #include "Jpeg2000Pager.h"
-#include "Jpeg2000Page.h"
 #include "Jpeg2000Utilities.h"
-#include "MessageLogResource.h"
-#include "ModelServices.h"
-#include "PlugInArg.h"
+#include "ObjectResource.h"
 #include "PlugInArgList.h"
-#include "PlugInManagerServices.h"
 #include "PlugInRegistration.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "RasterFileDescriptor.h"
+#include "StringUtilities.h"
 
-#include <functional>
-#include <algorithm>
-
-#include <QtCore/QFileInfo>
-
-// These must be in this order
-#include <openjpeg.h>
-#include <opj_includes.h>
-#include <j2k.h>
-#include <jp2.h>
-
-using namespace std;
-
-namespace Jpeg2000Cache
-{
-
-CacheUnit::CacheUnit(const vector<unsigned int>& blockNumbers, size_t blockSize) :
-   mReferenceCount(0),
-   mBlockNumbers(blockNumbers),
-   mDataSize(blockSize),
-   mpData(NULL),
-   mIsEmpty(true)
-{
-   mpData = mpModelSvcs->getMemoryBlock(mDataSize);
-}
-
-CacheUnit::~CacheUnit()
-{
-   if (mpData != NULL)
-   {
-      mpModelSvcs->deleteMemoryBlock(mpData);
-      mpData = NULL;
-   }
-}
-
-void CacheUnit::get()
-{
-   mReferenceCount++;
-}
-
-void CacheUnit::release()
-{
-   if (mReferenceCount > 0)
-   {
-      mReferenceCount--;
-   }
-}
-
-unsigned int CacheUnit::references() const
-{
-   return mReferenceCount;
-}
-
-const vector<unsigned int>& CacheUnit::blockNumbers() const
-{
-   return mBlockNumbers;
-}
-
-size_t CacheUnit::dataSize() const
-{
-   return mDataSize;
-}
-
-char* CacheUnit::data() const
-{
-   return mpData;
-}
-
-bool CacheUnit::isEmpty() const
-{
-   return mIsEmpty;
-}
-
-void CacheUnit::setIsEmpty(bool v)
-{
-   mIsEmpty = v;
-}
-
-Cache::Cache() : mCacheSize(8)
-{
-}
-
-Cache::~Cache()
-{
-   for (cache_t::iterator it = mCache.begin(); it != mCache.end(); ++it)
-   {
-      if (*it != NULL)
-      {
-         delete *it;
-      }
-   }
-   mCache.clear();
-}
-
-CacheUnit* Cache::getCacheUnit(unsigned int startBlock, unsigned int endBlock, size_t blockSize)
-{
-   // create a vector of block numbers which we require
-   vector<unsigned int> blocks(endBlock + 1 - startBlock, 1);
-   blocks[0] = startBlock;
-   transform(blocks.begin() + 1, blocks.end(), blocks.begin(), blocks.begin() + 1, plus<int>());
-   return getCacheUnit(blocks, blockSize);
-}
-
-CacheUnit* Cache::getCacheUnit(vector<unsigned int> &blocks, size_t blockSize)
-{
-   size_t dataSize(blocks.size() * blockSize);
-
-   // find or create the needed cache blocks
-   CacheUnit* returnUnit(NULL);
-   cache_t::iterator locate_it(find_if(mCache.begin(), mCache.end(), bind1st(ptr_fun(Cache::CacheLocator), blocks)));
-   if (locate_it != mCache.end())
-   {
-      // we found the CacheUnit
-      returnUnit = *locate_it;
-      mCache.erase(locate_it);
-   }
-   else
-   {
-      // we need to create a new CacheUnit
-      // is the cache full?
-      if (mCache.size() >= mCacheSize)
-      {
-         // remove the first available unit
-         cache_t::iterator clean_it(find_if(mCache.begin(), mCache.end(), Cache::CacheCleaner));
-         if (clean_it != mCache.end())
-         {
-            if (*clean_it != NULL)
-            {
-               delete *clean_it;
-            }
-            mCache.erase(clean_it);
-         }
-      }
-      returnUnit = new CacheUnit(blocks, dataSize);
-   }
-   if (returnUnit != NULL)
-   {
-      if (returnUnit->data() == NULL)
-      {
-         delete returnUnit;
-         returnUnit = NULL;
-      }
-      else
-      {
-         mCache.push_back(returnUnit);
-         returnUnit->get();
-      }
-   }
-   return returnUnit;
-}
-
-bool Cache::CacheLocator(vector<unsigned int> blockNumbers, CacheUnit* pUnit)
-{
-   // cases:
-   //  does this CacheUnit contain the exact blocks we need?
-   //  does this CacheUnit contain more blocks than we need?
-   //  does this CacheUnit contain fewer blocks than we need?
-   //  does this CacheUnit contain none of the blocks we need?
-   // for now, only the exact blocks will be used
-   if (blockNumbers.size() != pUnit->blockNumbers().size())
-   {
-      return false;
-   }
-   return equal(blockNumbers.begin(), blockNumbers.end(), pUnit->blockNumbers().begin());
-}
-
-bool Cache::CacheCleaner(const CacheUnit* pUnit)
-{
-   return (pUnit->references() == 0);
-}
-
-}; // namespace Cache
+#include <QtCore/QString>
+#include <QtCore/QStringList>
 
 REGISTER_PLUGIN_BASIC(OpticksPictures, Jpeg2000Pager);
 
-Jpeg2000Pager::Jpeg2000Pager() :
-         RasterPagerShell(),
-         mpRaster(NULL),
-         mpJpeg2000(NULL),
-         mpMutex(new BMutex)
-{
-   mpMutex->MutexCreate();
-   mpMutex->MutexInit();
+size_t Jpeg2000Pager::msMaxCacheSize = 1024 * 1024 * 50; // Specify a cache size (50MB) larger than the default
+                                                         // to minimize the number of calls to decode the image
 
-   setName("Jpeg2000Pager");
+Jpeg2000Pager::Jpeg2000Pager() :
+   CachedPager(msMaxCacheSize),
+   mpFile(NULL),
+   mOffset(0),
+   mSize(0)
+{
+   setName("JPEG2000 Pager");
    setCopyright(APP_COPYRIGHT);
    setCreator("Ball Aerospace & Technologies Corp.");
    setDescription("Provides access to on-disk JPEG2000 data");
    setDescriptorId("{CC0E8FBD-13AB-4b58-A8AC-4B27269C6E11}");
    setVersion(APP_VERSION_NUMBER);
    setProductionStatus(APP_IS_PRODUCTION_RELEASE);
-   setShortDescription("Jpeg2000");
+   setShortDescription("JPEG2000");
 }
 
 Jpeg2000Pager::~Jpeg2000Pager()
 {
-   mpMutex->MutexDestroy();
-   delete mpMutex;
-
-   if (mpJpeg2000 != NULL)
+   if (mpFile != NULL)
    {
-      fclose(mpJpeg2000);
-      mpJpeg2000 = NULL;
+      fclose(mpFile);
+      mpFile = NULL;
    }
 }
 
-bool Jpeg2000Pager::getInputSpecification(PlugInArgList* &pArgList)
+std::string Jpeg2000Pager::offsetArg()
 {
-   VERIFY((pArgList = mpPluginSvcs->getPlugInArgList()) != NULL);
-   VERIFY(pArgList->addArg<RasterElement>("Raster Element", NULL));
-   VERIFY(pArgList->addArg<Filename>("Filename", NULL));
+   static std::string sArgName = "Offset";
+   return sArgName;
+}
+
+std::string Jpeg2000Pager::sizeArg()
+{
+   static std::string sArgName = "Size";
+   return sArgName;
+}
+
+bool Jpeg2000Pager::getInputSpecification(PlugInArgList*& pArgList)
+{
+   if (CachedPager::getInputSpecification(pArgList) == false)
+   {
+      return false;
+   }
+
+   VERIFY(pArgList != NULL);
+   VERIFY(pArgList->addArg<uint64_t>(Jpeg2000Pager::offsetArg(), &mOffset, "The offset into the file in bytes "
+      "where the JPEG2000 data begins.  If no value is provided, the data is presumed to be located at the "
+      "beginning of the file."));
+   VERIFY(pArgList->addArg<uint64_t>(Jpeg2000Pager::sizeArg(), &mSize, "The size in bytes of the JPEG2000 data "
+      "contained in the file.  If no value is provided, the data is presumed to continue from the offset to "
+      "the end of the file."));
+
    return true;
 }
 
-bool Jpeg2000Pager::getOutputSpecification(PlugInArgList *&pArgList)
+bool Jpeg2000Pager::parseInputArgs(PlugInArgList* pArgList)
 {
-   // This plugin has no output arguments.
-   pArgList = NULL;
+   if (CachedPager::parseInputArgs(pArgList) == false)
+   {
+      return false;
+   }
+
+   VERIFY(pArgList != NULL);
+   VERIFY(pArgList->getPlugInArgValue<uint64_t>(Jpeg2000Pager::offsetArg(), mOffset));
+   VERIFY(pArgList->getPlugInArgValue<uint64_t>(Jpeg2000Pager::sizeArg(), mSize));
 
    return true;
 }
 
-bool Jpeg2000Pager::execute(PlugInArgList* pInputArgList, PlugInArgList *)
+bool Jpeg2000Pager::openFile(const std::string& filename)
 {
-   if ((mpRaster != NULL) || (pInputArgList == NULL))
+   if ((mpFile != NULL) || (filename.empty() == true))
    {
       return false;
    }
 
-   //Get PlugIn Arguments
-   RasterElement* pRaster = pInputArgList->getPlugInArgValue<RasterElement>("Raster Element");
-   if (pRaster == NULL)
-   {
-      return false;
-   }
-
-   //Get Filename argument
-   Filename* pFilename = pInputArgList->getPlugInArgValue<Filename>("Filename");
-   if (pFilename == NULL)
-   {
-      return false;
-   }
-
-   //Done getting PlugIn Arguments
-   
-   mpRaster = pRaster;
-   mDecoderType = Jpeg2000Utilities::get_file_format(pFilename->getFileName().c_str());
-   if (mDecoderType == -1)
-   {
-      return false;
-   }
-
-   // open the JPEG2000
-   mpJpeg2000 = fopen((pFilename->getFullPathAndName()).c_str(), "rb");
-   return (mpJpeg2000 != NULL);
+   mpFile = fopen(filename.c_str(), "rb");
+   return (mpFile != NULL);
 }
 
-RasterPage* Jpeg2000Pager::getPage(DataRequest* pOriginalRequest,
-      DimensionDescriptor startRow, 
-      DimensionDescriptor startColumn, 
-      DimensionDescriptor startBand)
+CachedPage::UnitPtr Jpeg2000Pager::fetchUnit(DataRequest* pOriginalRequest)
 {
-   if (mpRaster == NULL || pOriginalRequest == NULL)
+   if (pOriginalRequest == NULL)
    {
-      return NULL;
+      return CachedPage::UnitPtr();
    }
 
-   if (pOriginalRequest->getWritable())
+   // Check for interleave conversions, which are not supported by this pager
+   const RasterElement* pRaster = getRasterElement();
+   VERIFYRV(pRaster != NULL, CachedPage::UnitPtr());
+
+   const RasterDataDescriptor* pDescriptor = dynamic_cast<const RasterDataDescriptor*>(pRaster->getDataDescriptor());
+   VERIFYRV(pDescriptor != NULL, CachedPage::UnitPtr());
+
+   const RasterFileDescriptor* pFileDescriptor =
+      dynamic_cast<const RasterFileDescriptor*>(pDescriptor->getFileDescriptor());
+   VERIFYRV(pFileDescriptor != NULL, CachedPage::UnitPtr());
+
+   if (pFileDescriptor->getBandCount() > 1)
    {
-      return NULL;
+      InterleaveFormatType requestedInterleave = pOriginalRequest->getInterleaveFormat();
+      InterleaveFormatType fileInterleave = pFileDescriptor->getInterleaveFormat();
+      if (requestedInterleave != fileInterleave)
+      {
+         return CachedPage::UnitPtr();
+      }
+
+      VERIFYRV(requestedInterleave == BIP, CachedPage::UnitPtr());   // The JPEG2000 data is stored BIP
    }
 
-   Jpeg2000Page* pPage(NULL);
-   opj_dinfo_t* pDinfo = NULL;
-   opj_codestream_info_t cstrInfo;
-   opj_image_t* pImage = NULL;
+   // Get and validate the extents of the data to be loaded
+   DimensionDescriptor startRow = pOriginalRequest->getStartRow();
+   DimensionDescriptor stopRow = pOriginalRequest->getStopRow();
+   unsigned int concurrentRows = pOriginalRequest->getConcurrentRows();
 
-   // ensure only one thread enters this code at a time
-   mpMutex->MutexLock();
+   DimensionDescriptor startColumn = pOriginalRequest->getStartColumn();
+   DimensionDescriptor stopColumn = pOriginalRequest->getStopColumn();
+   unsigned int concurrentColumns = pOriginalRequest->getConcurrentColumns();
 
-   // we wrap all this in a try/catch so we can have one exit point
-   // and ensure that the mutex gets unlocked on an error
-   try
+   DimensionDescriptor startBand = pOriginalRequest->getStartBand();
+   DimensionDescriptor stopBand = pOriginalRequest->getStopBand();
+
+   if ((startRow.isOnDiskNumberValid() == false) || (stopRow.isOnDiskNumberValid() == false) ||
+      (startColumn.isOnDiskNumberValid() == false) || (stopColumn.isOnDiskNumberValid() == false) ||
+      (startBand.isOnDiskNumberValid() == false) || (stopBand.isOnDiskNumberValid() == false))
    {
-      const RasterDataDescriptor* pDescriptor =
-         dynamic_cast<const RasterDataDescriptor*>(mpRaster->getDataDescriptor());
-      if (pDescriptor == NULL)
+      return CachedPage::UnitPtr();
+   }
+
+   if ((startRow.getOnDiskNumber() > stopRow.getOnDiskNumber()) ||
+      (startColumn.getOnDiskNumber() > stopColumn.getOnDiskNumber()) ||
+      (startBand.getOnDiskNumber() > stopBand.getOnDiskNumber()))
+   {
+      return CachedPage::UnitPtr();
+   }
+
+   if ((startRow.getActiveNumber() + concurrentRows - 1) > stopRow.getActiveNumber())
+   {
+      concurrentRows = stopRow.getActiveNumber() - startRow.getActiveNumber() + 1;
+   }
+
+   if ((startColumn.getActiveNumber() + concurrentColumns - 1) > stopColumn.getActiveNumber())
+   {
+      concurrentColumns = stopColumn.getActiveNumber() - startColumn.getActiveNumber() + 1;
+   }
+
+   // Populate the image data based on the output data type
+   EncodingType outputDataType = pDescriptor->getDataType();
+   switch (outputDataType)
+   {
+   case INT1UBYTE:
+      return populateImageData<unsigned char>(startRow, startColumn, concurrentRows, concurrentColumns);
+
+   case INT1SBYTE:
+      return populateImageData<signed char>(startRow, startColumn, concurrentRows, concurrentColumns);
+
+   case INT2UBYTES:
+      return populateImageData<unsigned short>(startRow, startColumn, concurrentRows, concurrentColumns);
+
+   case INT2SBYTES:
+      return populateImageData<signed short>(startRow, startColumn, concurrentRows, concurrentColumns);
+
+   case INT4UBYTES:
+      return populateImageData<unsigned int>(startRow, startColumn, concurrentRows, concurrentColumns);
+
+   case INT4SBYTES:
+      return populateImageData<signed int>(startRow, startColumn, concurrentRows, concurrentColumns);
+
+   case FLT4BYTES:
+      return populateImageData<float>(startRow, startColumn, concurrentRows, concurrentColumns);
+
+   case FLT8BYTES:
+      return populateImageData<double>(startRow, startColumn, concurrentRows, concurrentColumns);
+
+   default:
+      break;
+   }
+
+   return CachedPage::UnitPtr();
+}
+
+double Jpeg2000Pager::getChunkSize() const
+{
+   // Set the chunk size as the maximum cache size to minimize the number of calls to decode the image
+   return msMaxCacheSize;
+}
+
+template <typename Out>
+CachedPage::UnitPtr Jpeg2000Pager::populateImageData(const DimensionDescriptor& startRow,
+                                                     const DimensionDescriptor& startColumn,
+                                                     unsigned int concurrentRows, unsigned int concurrentColumns) const
+{
+   VERIFYRV(startRow.isOnDiskNumberValid() == true, CachedPage::UnitPtr());
+   VERIFYRV(startColumn.isOnDiskNumberValid() == true, CachedPage::UnitPtr());
+   VERIFYRV(concurrentRows > 0, CachedPage::UnitPtr());
+   VERIFYRV(concurrentColumns > 0, CachedPage::UnitPtr());
+
+   // Get the rows, colums, and bands to load
+   unsigned int onDiskStartRow = startRow.getOnDiskNumber();
+   unsigned int onDiskStopRow = onDiskStartRow + concurrentRows;
+   unsigned int onDiskStartColumn = startColumn.getOnDiskNumber();
+   unsigned int onDiskStopColumn = onDiskStartColumn + concurrentColumns;
+
+   const RasterElement* pRaster = getRasterElement();
+   VERIFYRV(pRaster != NULL, CachedPage::UnitPtr());
+
+   const RasterDataDescriptor* pDescriptor = dynamic_cast<const RasterDataDescriptor*>(pRaster->getDataDescriptor());
+   VERIFYRV(pDescriptor != NULL, CachedPage::UnitPtr());
+
+   const RasterFileDescriptor* pFileDescriptor =
+      dynamic_cast<const RasterFileDescriptor*>(pDescriptor->getFileDescriptor());
+   VERIFYRV(pFileDescriptor != NULL, CachedPage::UnitPtr());
+
+   const std::vector<DimensionDescriptor>& allBands = pFileDescriptor->getBands();
+   if (allBands.empty() == true)
+   {
+      return CachedPage::UnitPtr();
+   }
+
+   // Create the output data
+   unsigned int numPixels = concurrentRows * concurrentColumns * allBands.size();
+   unsigned int numBytes = numPixels * getBytesPerBand();
+
+   if (numPixels > static_cast<unsigned int>(std::numeric_limits<int>::max()))   // ArrayResource only allocates up
+                                                                                 // to INT_MAX number of values
+   {
+      return CachedPage::UnitPtr();
+   }
+
+   ArrayResource<Out> pDestination(numPixels, true);
+   char* pDest = reinterpret_cast<char*>(pDestination.get());
+   if (pDest == NULL)
+   {
+      return CachedPage::UnitPtr();
+   }
+
+   memset(pDest, 0, numPixels);
+
+   // Decode the image from the file, first trying the codestream format then the file format
+   opj_image_t* pImage = decodeImage(onDiskStartRow, onDiskStartColumn, onDiskStopRow, onDiskStopColumn,
+      Jpeg2000Utilities::J2K_CFMT);
+   if (pImage == NULL)
+   {
+      pImage = decodeImage(onDiskStartRow, onDiskStartColumn, onDiskStopRow, onDiskStopColumn,
+         Jpeg2000Utilities::JP2_CFMT);
+   }
+
+   if (pImage == NULL)
+   {
+      return CachedPage::UnitPtr();
+   }
+
+   // Populate the output image data
+   int bandFactor = 1;
+
+   std::string filename = pRaster->getFilename();
+   if (filename.empty() == false)
+   {
+      QStringList parts = QString::fromStdString(filename).split('.');
+      foreach (QString part, parts)
       {
-         throw string("Invalid Data Descriptor");
-      }
-
-      const RasterFileDescriptor* pFileDescriptor =
-         dynamic_cast<const RasterFileDescriptor*>(pDescriptor->getFileDescriptor());
-      if (pFileDescriptor == NULL)
-      {
-         throw string("Invalid File Descriptor");
-      }
-
-      InterleaveFormatType interleave = pFileDescriptor->getInterleaveFormat();
-      unsigned int numBands = pFileDescriptor->getBandCount();
-      unsigned int numRows = pFileDescriptor->getRowCount();
-      unsigned int numColumns = pFileDescriptor->getColumnCount();
-      unsigned int bytesPerElement = pDescriptor->getBytesPerElement();
-
-      unsigned int concurrentRows = pOriginalRequest->getConcurrentRows();
-      unsigned int concurrentColumns = pOriginalRequest->getConcurrentColumns();
-      unsigned int concurrentBands = pOriginalRequest->getConcurrentBands();
-
-      unsigned int rowNumber = startRow.getOnDiskNumber();
-      unsigned int colNumber = startColumn.getOnDiskNumber();
-      unsigned int bandNumber = startBand.getOnDiskNumber();
-
-      // make sure the request is valid
-      if ((rowNumber >= numRows) || ((rowNumber + concurrentRows) > numRows) ||
-         (colNumber >= numColumns) || ((colNumber + concurrentColumns) > numColumns) ||
-         (bandNumber >= numBands) || ((bandNumber + concurrentBands) > numBands))
-      {
-         // Since it is acceptable to increment off the end of the data, do not report an error message
-         throw string();
-      }
-
-      Jpeg2000Cache::CacheUnit* pCacheUnit(mBlockCache.getCacheUnit(0, numBands - 1,
-         numRows * numColumns * bytesPerElement * numBands));
-
-      // if this data block is already in the cache, retrieve it...otherwise create a new block
-      if (pCacheUnit == NULL)
-      {
-         throw string("Can't create a cache unit");
-      }
-
-      if (interleave == BIP)
-      {
-         pPage = new Jpeg2000Page(pCacheUnit, (rowNumber * numColumns * numBands * bytesPerElement) +
-            (colNumber * numBands * bytesPerElement) + (bandNumber * bytesPerElement), numRows, numColumns, numBands);
-      }
-
-      if (pCacheUnit->isEmpty())
-      {
-         // we need to load this block
-         char* pData(pCacheUnit->data());
-         if (pData == NULL)
+         bool error;
+         EncodingType dataType = StringUtilities::fromXmlString<EncodingType>(part.toStdString(), &error);
+         if (dataType.isValid() == true && error == false)
          {
-            throw string("Data block has no data");
-         }
-         opj_dparameters_t parameters;
-         opj_event_mgr_t eventMgr;
-         vector<unsigned char> pSrc(NULL);
-         int fileLength;
-         opj_cio_t* pCio = NULL;
-
-         // configure the event callbacks
-         memset(&eventMgr, 0, sizeof(opj_event_mgr_t));
-         eventMgr.error_handler = Jpeg2000Utilities::error_callback;
-         eventMgr.warning_handler = Jpeg2000Utilities::warning_callback;
-         eventMgr.info_handler = Jpeg2000Utilities::info_callback;
-
-         // set decoding parameters to default values
-         opj_set_default_decoder_parameters(&parameters);
-
-         fseek(mpJpeg2000, 0, SEEK_END);
-         fileLength = ftell(mpJpeg2000);
-         fseek(mpJpeg2000, 0, SEEK_SET);
-         pSrc.resize(fileLength);
-         fread(&pSrc[0], 1, fileLength, mpJpeg2000);
-
-         // decode the code-stream 
-         switch(mDecoderType) 
-         {
-            case Jpeg2000Utilities::J2K_CFMT:
-               pDinfo = opj_create_decompress(CODEC_J2K);
-               break;
-            case Jpeg2000Utilities::JP2_CFMT:
-               pDinfo = opj_create_decompress(CODEC_JP2);
-               break;
-            default:
-               throw string("Unrecognized decoder type");
-               break;
-         }
-
-         // catch events using our callbacks
-         opj_set_event_mgr((opj_common_ptr)pDinfo, &eventMgr, stderr);
-
-         // setup the decoder decoding parameters
-         opj_setup_decoder(pDinfo, &parameters);
-
-         // open a byte stream
-         pCio = opj_cio_open((opj_common_ptr)pDinfo, &pSrc[0], fileLength);
-
-         // decode the stream and fill the image structure
-         pImage = opj_decode_with_info(pDinfo, pCio, &cstrInfo);
-         if(!pImage)
-         {
-            throw string("Invalid JPEG2000 Image");
-         }
-
-         // close the byte stream
-         opj_cio_close(pCio);
-
-         // populate pData
-         int bandFactor = Jpeg2000Utilities::get_num_bands(pDescriptor->getDataType());
-         if (bandFactor == 0)
-         {
-            throw string("Unsupported data type.");
-         }
-         const size_t copySize = pDescriptor->getBytesPerElement() / bandFactor;
-         for (unsigned int i = 0; i < numRows * numColumns; i++)
-         {
-            for(unsigned int j = 0; j < numBands; ++j)
+            int currentBandFactor = Jpeg2000Utilities::get_num_bands(dataType);
+            if (currentBandFactor > 0)
             {
-               for (int k = 0; k < bandFactor; ++k)
-               {
-                  memcpy(pData, &pImage->comps[j * bandFactor + k].data[i], copySize);
-                  pData += copySize; // Increment by up to 16 bits (2 bytes).
-               }
+               bandFactor = currentBandFactor;
+               break;
             }
          }
-         pCacheUnit->setIsEmpty(false);
+      }
+   }
 
-         // free remaining structures
-         if(pDinfo) 
+   const size_t copySize = pDescriptor->getBytesPerElement() / bandFactor;
+
+   for (unsigned int r = 0; r < concurrentRows; ++r)
+   {
+      for (unsigned int c = 0; c < concurrentColumns; ++c)
+      {
+         for (std::vector<DimensionDescriptor>::size_type b = 0; b < allBands.size(); ++b)
          {
-            opj_destroy_decompress(pDinfo);
+            for (int f = 0; f < bandFactor; ++f)
+            {
+               unsigned int componentIndex = b * bandFactor + f;
+               int imageWidth = pImage->comps[componentIndex].w;
+               int imageHeight = pImage->comps[componentIndex].h;
+
+               int columnSpan = 1;
+               if (imageWidth != static_cast<int>(concurrentColumns))
+               {
+                  columnSpan = pImage->comps[componentIndex].dx;
+               }
+
+               int rowSpan = 1;
+               if (imageHeight != static_cast<int>(concurrentRows))
+               {
+                  rowSpan = pImage->comps[componentIndex].dy;
+               }
+
+               VERIFYRV(columnSpan > 0, CachedPage::UnitPtr());
+               VERIFYRV(rowSpan > 0, CachedPage::UnitPtr());
+
+               if ((r < static_cast<unsigned int>(imageHeight) * rowSpan) &&
+                  (c < static_cast<unsigned int>(imageWidth) * columnSpan))
+               {
+                  int dataIndex = ((r / rowSpan) * imageWidth) + (c / columnSpan);
+                  memcpy(pDest, &pImage->comps[componentIndex].data[dataIndex], copySize);
+               }
+
+               pDest += copySize; // Increment by up to 16 bits (2 bytes).
+            }
          }
-         opj_destroy_cstr_info(&cstrInfo);
-         opj_image_destroy(pImage);
       }
    }
-   catch (const string& exc)
+
+   // Destroy the decoded image data
+   opj_image_destroy(pImage);
+
+   // Transfer ownership of the resulting data into a new page which will be owned by the caller of this method
+   return CachedPage::UnitPtr(new CachedPage::CacheUnit(reinterpret_cast<char*>(pDestination.release()), startRow,
+      static_cast<int>(concurrentRows), numBytes));
+}
+
+opj_image_t* Jpeg2000Pager::decodeImage(unsigned int originalStartRow, unsigned int originalStartColumn,
+                                        unsigned int originalStopRow, unsigned int originalStopColumn,
+                                        int decoderType) const
+{
+   // Open a byte stream of the required size
+   size_t fileLength = 0;
+   if (mSize > 0)
    {
-      releasePage(pPage);
-      pPage = NULL;
-      if(pDinfo) 
+      fileLength = static_cast<size_t>(mSize);
+   }
+   else
+   {
+      fseek(mpFile, 0, SEEK_END);
+
+      size_t fileSize = static_cast<size_t>(ftell(mpFile));
+      if (fileSize <= mOffset)
       {
-         opj_destroy_decompress(pDinfo);
+         return NULL;
       }
-      opj_destroy_cstr_info(&cstrInfo);
+
+      fileLength = fileSize - static_cast<size_t>(mOffset);
+   }
+
+   opj_stream_t* pStream = opj_stream_create_file_stream(mpFile, fileLength, true);
+   if (pStream == NULL)
+   {
+      return NULL;
+   }
+
+   opj_stream_set_user_data_length(pStream, fileLength);
+
+   // Seek to the required position in the file
+   fseek(mpFile, static_cast<long>(mOffset), SEEK_SET);
+
+   // Create the appropriate codec
+   opj_codec_t* pCodec = NULL;
+   switch (decoderType)
+   {
+   case Jpeg2000Utilities::J2K_CFMT:
+      pCodec = opj_create_decompress(OPJ_CODEC_J2K);
+      break;
+
+   case Jpeg2000Utilities::JP2_CFMT:
+      pCodec = opj_create_decompress(OPJ_CODEC_JP2);
+      break;
+
+   default:
+      opj_stream_destroy(pStream);
+      return NULL;
+   }
+
+   if (pCodec == NULL)
+   {
+      opj_stream_destroy(pStream);
+      return NULL;
+   }
+
+   // Setup the decoding parameters
+   opj_dparameters_t parameters;
+   opj_set_default_decoder_parameters(&parameters);
+   if (opj_setup_decoder(pCodec, &parameters) == OPJ_FALSE)
+   {
+      opj_stream_destroy(pStream);
+      opj_destroy_codec(pCodec);
+      return NULL;
+   }
+
+   // Read the header info from the stream and fill the image structure
+   opj_image_t* pImage = NULL;
+   if (opj_read_header(pStream, pCodec, &pImage) == OPJ_FALSE)
+   {
+      opj_stream_destroy(pStream);
+      opj_destroy_codec(pCodec);
+      return NULL;
+   }
+
+   // Set the portion of the image to decode
+   if (opj_set_decode_area(pCodec, pImage, originalStartColumn, originalStartRow, originalStopColumn,
+      originalStopRow) == OPJ_FALSE)
+   {
+      opj_stream_destroy(pStream);
+      opj_destroy_codec(pCodec);
+      return NULL;
+   }
+
+   // Decode the image
+   int success = opj_decode(pCodec, pStream, pImage);
+
+   // Cleanup
+   opj_stream_destroy(pStream);
+   opj_destroy_codec(pCodec);
+
+   if (success == OPJ_FALSE)
+   {
       opj_image_destroy(pImage);
-      if (exc.empty() == false)
-      {
-         MessageResource pMsg("Jpeg2000 Pager Error", "app", "CCC48CDE-DF3A-43d6-A750-85BF9BAD25A1");
-         pMsg->addProperty("Message", exc);
-      }
+      return NULL;
    }
 
-   //unlock the mutex now
-   mpMutex->MutexUnlock();
-   return pPage;
+   return pImage;
 }
-
-void Jpeg2000Pager::releasePage(RasterPage* pPage)
-{
-   if (pPage == NULL)
-   {
-      return;
-   }
-
-   //ensure only one thread enters this code at a time
-   mpMutex->MutexLock();
-
-   Jpeg2000Page* pJpeg2000Page = static_cast<Jpeg2000Page*>(pPage);
-   delete pJpeg2000Page;
-
-   //unlock the mutex now
-   mpMutex->MutexUnlock();
-}
-
-int Jpeg2000Pager::getSupportedRequestVersion() const
-{
-   return 1;
-}
-
-#endif 

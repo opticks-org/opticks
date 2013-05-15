@@ -53,6 +53,7 @@
     <Import Project="..\..\..\CompileSettings\PlugInCommonSettings.props" />
     <Import Project="..\..\..\CompileSettings\pthreads.props" />
     <Import Project="..\..\..\CompileSettings\NitfPlugInLibrary.props" />
+    <Import Project="..\..\..\CompileSettings\OpenJpeg.props" />
     <Import Project="..\..\..\CompileSettings\Ossim-Release.props" />
     <Import Project="..\..\..\CompileSettings\EnableWarnings.props" />
   </ImportGroup>
@@ -66,6 +67,7 @@
     <Import Project="..\..\..\CompileSettings\PlugInCommonSettings.props" />
     <Import Project="..\..\..\CompileSettings\pthreads.props" />
     <Import Project="..\..\..\CompileSettings\NitfPlugInLibrary.props" />
+    <Import Project="..\..\..\CompileSettings\OpenJpeg.props" />
     <Import Project="..\..\..\CompileSettings\Ossim-Debug.props" />
     <Import Project="..\..\..\CompileSettings\EnableWarnings.props" />
   </ImportGroup>
@@ -79,6 +81,7 @@
     <Import Project="..\..\..\CompileSettings\PlugInCommonSettings.props" />
     <Import Project="..\..\..\CompileSettings\pthreads.props" />
     <Import Project="..\..\..\CompileSettings\NitfPlugInLibrary.props" />
+    <Import Project="..\..\..\CompileSettings\OpenJpeg.props" />
     <Import Project="..\..\..\CompileSettings\Ossim-Release.props" />
     <Import Project="..\..\..\CompileSettings\EnableWarnings.props" />
   </ImportGroup>
@@ -92,6 +95,7 @@
     <Import Project="..\..\..\CompileSettings\PlugInCommonSettings.props" />
     <Import Project="..\..\..\CompileSettings\pthreads.props" />
     <Import Project="..\..\..\CompileSettings\NitfPlugInLibrary.props" />
+    <Import Project="..\..\..\CompileSettings\OpenJpeg.props" />
     <Import Project="..\..\..\CompileSettings\Ossim-Debug.props" />
     <Import Project="..\..\..\CompileSettings\EnableWarnings.props" />
   </ImportGroup>

@@ -33,7 +33,6 @@
    #elif defined(_WIN32)
       #define PTR_SIZE 4
    #endif
-   #define JPEG2000_SUPPORT
    #define CG_SUPPORTED
 
    //platform defines

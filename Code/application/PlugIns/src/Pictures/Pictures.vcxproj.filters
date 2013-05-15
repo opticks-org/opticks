@@ -38,9 +38,6 @@
     <ClCompile Include="Jpeg2000Importer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Jpeg2000Page.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Jpeg2000Pager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -134,9 +131,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Jpeg2000Importer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Jpeg2000Page.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Jpeg2000Pager.h">

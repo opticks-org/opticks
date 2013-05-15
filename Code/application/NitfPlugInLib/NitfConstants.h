@@ -153,6 +153,23 @@ namespace Nitf
       const std::string ICORDS_GEOGRAPHIC = "G";
       const std::string ICORDS_GEOCENTRIC = "C";   // NITF 02.00 only
       const std::string ICORDS_DECIMAL_DEGREES = "D";
+      const std::string IC_NC = "NC";
+      const std::string IC_NM = "NM";
+      const std::string IC_C1 = "C1";
+      const std::string IC_C3 = "C3";
+      const std::string IC_C4 = "C4";
+      const std::string IC_C5 = "C5";
+      const std::string IC_C6 = "C6";
+      const std::string IC_C7 = "C7";
+      const std::string IC_C8 = "C8";
+      const std::string IC_I1 = "I1";
+      const std::string IC_M1 = "M1";
+      const std::string IC_M3 = "M3";
+      const std::string IC_M4 = "M4";
+      const std::string IC_M5 = "M5";
+      const std::string IC_M6 = "M6";
+      const std::string IC_M7 = "M7";
+      const std::string IC_M8 = "M8";
    }
 
    namespace DesSubheaderFieldNames
@@ -698,6 +715,19 @@ namespace Nitf
          const static std::string SCALE_FACTOR = "SCALE_FACTOR";
          const static std::string ANAMRPH_CORR = "ANAMRPH_CORR";
          const static std::string SCANBLK_NUM = "SCANBLK_NUM";
+      }
+
+      namespace J2KLRA
+      {
+         const static std::string ORIG = "ORIG";
+         const static std::string NLEVELS_O = "NLEVELS_O";
+         const static std::string NBANDS_O = "NBANDS_O";
+         const static std::string NLAYERS_O = "NLAYERS_O";
+         const static std::string LAYER_ID = "LAYER_ID";
+         const static std::string BITRATE = "BITRATE";
+         const static std::string NLEVELS_I = "NLEVELS_I";
+         const static std::string NBANDS_I = "NBANDS_I";
+         const static std::string NLAYERS_I = "NLAYERS_I";
       }
 
       namespace MENSRA

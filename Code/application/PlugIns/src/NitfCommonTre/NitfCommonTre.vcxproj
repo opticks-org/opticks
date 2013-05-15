@@ -166,6 +166,7 @@
     <ClCompile Include="NitfExpltaParser.cpp" />
     <ClCompile Include="NitfExpltbParser.cpp" />
     <ClCompile Include="NitfIchipbParser.cpp" />
+    <ClCompile Include="NitfJ2klraParser.cpp" />
     <ClCompile Include="NitfMensraParser.cpp" />
     <ClCompile Include="NitfMensrbParser.cpp" />
     <ClCompile Include="NitfMod26aParser.cpp" />
@@ -213,6 +214,7 @@
     <ClInclude Include="NitfExpltaParser.h" />
     <ClInclude Include="NitfExpltbParser.h" />
     <ClInclude Include="NitfIchipbParser.h" />
+    <ClInclude Include="NitfJ2klraParser.h" />
     <ClInclude Include="NitfMensraParser.h" />
     <ClInclude Include="NitfMensrbParser.h" />
     <ClInclude Include="NitfMod26aParser.h" />

@@ -115,7 +115,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
                <File Name="opencv_traincascade.exe" Id="F__opencv_traincascade_Dependency" DiskId="1" />
             </Component>
             <Component Id="C__openjpeg_Dependency" Guid="$(var.C__openjpeg_DependencyGuid)" Win64="$(var.64Bit)">
-               <File Name="openjpeg.dll" Id="F__openjpeg_Dependency" DiskId="1" KeyPath="yes" />
+               <File Name="openjp2.dll" Id="F__openjpeg_Dependency" DiskId="1" KeyPath="yes" />
             </Component>
             <Component Id="C__ossim_Dependency" Guid="$(var.C__ossim_DependencyGuid)" Win64="$(var.64Bit)">
                <File Name="ossim.dll" Id="F__ossim_Dependency" DiskId="1" KeyPath="yes" />

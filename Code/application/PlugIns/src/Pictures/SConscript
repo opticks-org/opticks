@@ -8,8 +8,7 @@ env = env.Clone()
 env.Tool("geotiff",toolpath=[TOOLPATH])
 env.Tool("proj4",toolpath=[TOOLPATH])
 env.Tool("libtiff",toolpath=[TOOLPATH])
-if env["OS"] == "windows" and env["BITS"] == "32":
-   env.Tool("openjpeg",toolpath=[TOOLPATH])
+env.Tool("openjpeg",toolpath=[TOOLPATH])
 
 ####
 # build sources

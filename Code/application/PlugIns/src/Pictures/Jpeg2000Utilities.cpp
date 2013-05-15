@@ -7,12 +7,12 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "AppConfig.h"
-#if defined (JPEG2000_SUPPORT)
-
 #include "Jpeg2000Utilities.h"
+#include "Progress.h"
 
 #include <QtCore/QFileInfo>
+
+#include <string>
 
 namespace Jpeg2000Utilities
 {
@@ -23,7 +23,7 @@ namespace Jpeg2000Utilities
       {
          return JP2_CFMT;
       }
-      else if (info.suffix() == "j2k")
+      else if ((info.suffix() == "j2k") || (info.suffix() == "j2c") || (info.suffix() == "jpc"))
       {
          return J2K_CFMT;
       }
@@ -32,9 +32,8 @@ namespace Jpeg2000Utilities
 
    unsigned int get_num_bands(EncodingType type)
    {
-      // Since OpenJPEG only supports 16-bit lossless,
-      // determine the number of 16-bit bands which need
-      // to be used to represent the given data type.
+      // Since OpenJPEG encoding only supports 16-bit lossless, determine the number
+      // of 16-bit bands which need to be used to represent the given data type.
       switch (type)
       {
          case INT1UBYTE:    // Fall through
@@ -51,29 +50,35 @@ namespace Jpeg2000Utilities
       }
    }
 
-   void error_callback(const char* msg, void *client_data)
+   void reportMessage(const char* pMessage, void* pClientData)
    {
-   #ifdef DEBUG
-      FILE* stream = (FILE*)client_data;
-      fprintf(stream, "[ERROR] %s", msg);
-   #endif
+      Progress* pProgress = reinterpret_cast<Progress*>(pClientData);
+      if ((pProgress != NULL) && (pMessage != NULL))
+      {
+         std::string currentMessage;
+         int percent = 0;
+         ReportingLevel level;
+         pProgress->getProgress(currentMessage, percent, level);
+
+         pProgress->updateProgress(std::string(pMessage), percent, NORMAL);
+      }
    }
 
-   void warning_callback(const char* msg, void* client_data)
+   void reportWarning(const char* pMessage, void* pClientData)
    {
-   #ifdef DEBUG
-      FILE* stream = (FILE*)client_data;
-      fprintf(stream, "[WARNING] %s", msg);
-   #endif
+      Progress* pProgress = reinterpret_cast<Progress*>(pClientData);
+      if ((pProgress != NULL) && (pMessage != NULL))
+      {
+         pProgress->updateProgress(std::string(pMessage), 0, WARNING);
+      }
    }
 
-   void info_callback(const char* msg, void* client_data)
+   void reportError(const char* pMessage, void* pClientData)
    {
-   #ifdef DEBUG
-      (void)client_data;
-      fprintf(stdout, "[INFO] %s", msg);
-   #endif
+      Progress* pProgress = reinterpret_cast<Progress*>(pClientData);
+      if ((pProgress != NULL) && (pMessage != NULL))
+      {
+         pProgress->updateProgress(std::string(pMessage), 0, ERRORS);
+      }
    }
 }
-
-#endif

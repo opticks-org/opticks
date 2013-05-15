@@ -10,20 +10,22 @@
 #ifndef NITFIMPORTERSHELL_H
 #define NITFIMPORTERSHELL_H
 
+#include "NitfResource.h"
 #include "RasterElementImporterShell.h"
 
+#include <openjpeg.h>
 #include <ossim/base/ossimConstants.h>
-#include <string>
-#include <map>
 
-class ossimNitfFile;
+#include <map>
+#include <string>
+
 class ossimNitfFileHeaderV2_X;
 class ossimNitfImageHeaderV2_X;
 
 namespace Nitf
 {
    /**
-    * Base class for NITF importers.
+    *  Base class for NITF importers.
     */
    class NitfImporterShell : public RasterElementImporterShell
    {
@@ -41,125 +43,168 @@ namespace Nitf
       virtual ~NitfImporterShell();
 
       /**
-       * @copydoc RasterElementImporterShell::getImportDescriptors()
+       *  @copydoc RasterElementImporterShell::getImportDescriptors()
        *
-       * @default The default implementation returns image segments which can be imported by this importer.
+       *  @default The default implementation iterates over all image segments
+       *           found in the NITF file and returns all valid import
+       *           descriptors returned by getImportDescriptor() for each image
+       *           segment.
        */
       virtual std::vector<ImportDescriptor*> getImportDescriptors(const std::string& filename);
 
       /**
-       * @copydoc RasterElementImporterShell::getFileAffinity()
+       *  @copydoc RasterElementImporterShell::getFileAffinity()
        *
-       * @default The default implementation returns Importer::CAN_LOAD for all NITF 2.00 and NITF 2.10 files.
+       *  @default The default implementation checks for a NITF file header and
+       *           returns Importer::CAN_LOAD for all NITF 2.00 and NITF 2.10
+       *           files.
        */
       virtual unsigned char getFileAffinity(const std::string& filename);
 
       /**
-       * @copydoc RasterElementImporterShell::validate()
-       * \par
-       * The default implementation also returns warnings when lookup tables (LUTs) or other issues are detected.
+       *  @copydoc RasterElementImporterShell::validate()
+       *
+       *  \par
+       *  The default implementation also adds warnings to \em errorMessage when
+       *  lookup tables (LUTs) or other issues are detected.
        */
       virtual bool validate(const DataDescriptor* pDescriptor,
          const std::vector<const DataDescriptor*>& importedDescriptors, std::string& errorMessage) const;
 
       /**
-       * @copydoc RasterElementImporterShell::createView()
+       *  @copydoc RasterElementImporterShell::createView()
        *
-       * @default The default implementation sets the background color.
+       *  @default The default implementation calls the base class
+       *           implementation and sets the view background color based on
+       *           the value of the File Background Color (FBKGC) field of the
+       *           NITF file header.
        */
       virtual SpatialDataView* createView() const;
 
       /**
-       * @copydoc RasterElementImporterShell::createRasterPager()
+       *  @copydoc RasterElementImporterShell::createRasterPager()
        *
-       * @default The default implementation creates an instance of the internal "NitfPager" plug-in.
+       *  @default The default implementation creates an instance of the
+       *           "NitfPager" plug-in or the "JPEG2000 Pager" plug-in if the
+       *           value in the Image Compression (IC) field of the image
+       *           subheader is "C8" or "M8", representing JPEG2000 compression.
        */
       virtual bool createRasterPager(RasterElement* pRaster) const;
 
       /**
-       * Return the data type of the specified image.
+       *  Returns the data type of the specified image segment.
        *
-       * @param pImgHeader
-       *        The parsed subheader for this image segment.
+       *  @param   pImgHeader
+       *           The parsed subheader for this image segment.
        *
-       * @return The EncodingType to use for the specified image header.
+       *  @return  The ::EncodingType to use for the specified image header.
        */
-      static EncodingType ossimImageHeaderToEncodingType(ossimNitfImageHeaderV2_X* pImgHeader);
+      static EncodingType ossimImageHeaderToEncodingType(const ossimNitfImageHeaderV2_X* pImgHeader);
 
    protected:
       /**
-       *  @copydoc ImporterShell::getValidationTest()
+       *  @copydoc RasterElementImporterShell::getValidationTest()
        *
        *  \par
-       *  The following raster-specific tests are added to the base class defaults
-       *  listed above:
-       *  - \link ImporterShell::VALID_CLASSIFICATION VALID_CLASSIFICATION \endlink
-       *  - \link ImporterShell::RASTER_SIZE RASTER_SIZE \endlink
-       *  - \link ImporterShell::VALID_DATA_TYPE VALID_DATA_TYPE \endlink
+       *  The following test is added to the base class defaults listed above:
        *  - \link ImporterShell::VALID_METADATA VALID_METADATA \endlink
        *  .
        *  \par
-       *  Additionally, the following test is added if the ::ProcessingLocation is
-       *  ::IN_MEMORY:
-       *  - \link ImporterShell::AVAILABLE_MEMORY AVAILABLE_MEMORY \endlink
-       *  .
-       *  \par
        *  The following tests are added if the ::ProcessingLocation is
-       *  ::ON_DISK_READ_ONLY:
-       *  - \link ImporterShell::NO_INTERLEAVE_CONVERSIONS NO_INTERLEAVE_CONVERSIONS \endlink
+       *  ::ON_DISK_READ_ONLY and the value of the Image Compression (IC) field
+       *  in the NITF image subheader is not "C8" or "M8" (JPEG2000 compression):
+       *  - \link ImporterShell::NO_BAND_FILES NO_BAND_FILES \endlink
        *  - \link ImporterShell::NO_SUBSETS NO_SUBSETS \endlink
-       *  - \link ImporterShell::NO_SKIP_FACTORS NO_SKIP_FACTORS \endlink
-       *  - \link ImporterShell::NO_BAND_FILES NO_BAND_FILES \endlink
-       *  .
-       *  \par
-       *  The following tests are added if the ::InterleaveFormatType is not ::BSQ:
-       *  - \link ImporterShell::NO_PRE_POST_BAND_BYTES NO_PRE_POST_BAND_BYTES \endlink
-       *  - \link ImporterShell::NO_BAND_FILES NO_BAND_FILES \endlink
-       *  .
-       *  \par
-       *  The following test is added if multiple band files are present:
-       *  - \link ImporterShell::EXISTING_BAND_FILES EXISTING_BAND_FILES \endlink
-       *  .
        */
       virtual int getValidationTest(const DataDescriptor* pDescriptor) const;
 
       /**
-       * Allocate and return an ImportDescriptor for the specified image. This method should allocate an
-       * ImportDescriptor (if desired) and set whether it is imported by default. This method should not set any fields
-       * in the data descriptor or the file descriptor of the import descriptor. If changes to the defaults are
-       * required, the subclass should override getImportDescriptors(), call the base class implementation, and then
-       * make the necessary changes.
+       *  Allocates and returns an ImportDescriptor for a specified image
+       *  segment in a NITF file.
        *
-       * @param filename
-       *        The full path and name of the file.
+       *  This allocates an ImportDescriptor based on the information contained
+       *  in the NITF file header and image subheader, and sets whether the data
+       *  set is imported by default.  This method fully populates all fields in
+       *  the data descriptor and file descriptor contained in the import
+       *  descriptor.  If changes to the defaults are required, the subclass
+       *  should override this method instead of getImportDescriptors(), call
+       *  this base class implementation, and then make the necessary changes.
        *
-       * @param imageName
-       *        The name which will be used for image identification. This is a string of the form "I1", "I2", etc.
-       *        Using this name for the import descriptor is optional. This name will be used for the default pager and
-       *        image segment.
+       *  @param   filename
+       *           The full path and name of the NITF file.
+       *  @param   imageSegment
+       *           The zero-based index value of the image segment in the NITF
+       *           file for which to get an import descriptor.
+       *  @param   pFile
+       *           The NITF file being loaded.
+       *  @param   pFileHeader
+       *           The parsed file header for this NITF file.
+       *  @param   pImageSubheader
+       *           The parsed image subheader for this image segment.
        *
-       * @param pFile
-       *        The NITF file being loaded.
+       *  @return  Returns a pointer to a newly created ImportDescriptor or
+       *           \c NULL if an import descriptor cannot be created for the
+       *           given image segment.  A valid import descriptor will be
+       *           returned even if the data set cannot be successfully loaded
+       *           due to unsupported content.  If this occurs, the validate()
+       *           method will return \c false for this image segment.
        *
-       * @param pFileHeader
-       *        The parsed header for this NITF file.
+       *  @see     getImportDescriptors()
        *
-       * @param pImageSubheader
-       *        The parsed subheader for this image segment.
-       *
-       * @return A pointer to a newly created ImportDescriptor or \c NULL if no ImportDescriptor should be created.
-       *
-       * @see getImportDescriptors()
-       *
-       * @default The default implementation returns a descriptor marked as
-       *          imported for all image segments except those marked as NODISPLY.
+       *  @default The default implementation returns a fully populated import
+       *           descriptor for the given image segment.  If the value of the
+       *           Image Representation (IREP) field in the image subheader is
+       *           something other than "NODISPLY", the import descriptor is set
+       *           to be imported by default.
        */
-      virtual ImportDescriptor* getImportDescriptor(const std::string& filename, const std::string& imageName,
-         const ossimNitfFile* pFile, const ossimNitfFileHeaderV2_X* pFileHeader,
+      virtual ImportDescriptor* getImportDescriptor(const std::string& filename, ossim_uint32 imageSegment,
+         const Nitf::OssimFileResource& pFile, const ossimNitfFileHeaderV2_X* pFileHeader,
          const ossimNitfImageHeaderV2_X* pImageSubheader);
 
+      /**
+       *  Returns the offset in bytes to the beginning of the data of a given
+       *  image segment.
+       *
+       *  @param   filename
+       *           The name of the NITF file containing the image segment for
+       *           which to get the offset to its data.
+       *  @param   imageSegment
+       *           The zero-based index value of the image segment in the NITF
+       *           file for which to get the offset to its data.
+       *
+       *  @return  The offset in bytes of the given file to the beginning of the
+       *           given image segment data.  A value of 0 is returned if the
+       *           given file is not a valid NITF file, or if the given image
+       *           segment does not exist in the file.
+       *
+       *  @see     getImageSize()
+       */
+      uint64_t getImageOffset(const std::string& filename, unsigned int imageSegment) const;
+
+      /**
+       *  Returns the file size in bytes of the data for a given image segment.
+       *
+       *  @param   filename
+       *           The name of the NITF file containing the image segment for
+       *           which to get the size of its data.
+       *  @param   imageSegment
+       *           The zero-based index value of the image segment in the NITF
+       *           file for which to get the size of its data.
+       *
+       *  @return  The size in bytes of the given image segment data as stored
+       *           in the given NITF file.  A value of 0 is returned if the
+       *           given file is not a valid NITF file, or if the given image
+       *           segment does not exist in the file.
+       *
+       *  @see     getImageOffset()
+       */
+      uint64_t getImageSize(const std::string& filename, unsigned int imageSegment) const;
+
    private:
-      std::map<std::string, std::string> mParseMessages;
+      opj_image_t* getImageInfo(const std::string& filename, unsigned int imageSegment,
+         OPJ_CODEC_FORMAT decoderType) const;
+
+      std::map<ossim_uint32, std::string> mParseMessages;
    };
 }
 #endif

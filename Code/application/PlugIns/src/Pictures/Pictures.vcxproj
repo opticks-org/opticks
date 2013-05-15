@@ -210,7 +210,6 @@
     <ClCompile Include="GeoTiffPager.cpp" />
     <ClCompile Include="Jpeg2000Exporter.cpp" />
     <ClCompile Include="Jpeg2000Importer.cpp" />
-    <ClCompile Include="Jpeg2000Page.cpp" />
     <ClCompile Include="Jpeg2000Pager.cpp" />
     <ClCompile Include="Jpeg2000Utilities.cpp" />
     <ClCompile Include="JpegDetails.cpp" />
@@ -258,7 +257,6 @@
     <ClInclude Include="GeoTiffPager.h" />
     <ClInclude Include="Jpeg2000Exporter.h" />
     <ClInclude Include="Jpeg2000Importer.h" />
-    <ClInclude Include="Jpeg2000Page.h" />
     <ClInclude Include="Jpeg2000Pager.h" />
     <ClInclude Include="Jpeg2000Utilities.h" />
     <ClInclude Include="JpegDetails.h" />
