@@ -24,6 +24,8 @@
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 
+#include <limits>
+
 REGISTER_PLUGIN_BASIC(OpticksPictures, Jpeg2000Pager);
 
 size_t Jpeg2000Pager::msMaxCacheSize = 1024 * 1024 * 50; // Specify a cache size (50MB) larger than the default
