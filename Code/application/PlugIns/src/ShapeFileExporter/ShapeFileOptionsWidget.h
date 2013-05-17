@@ -11,18 +11,22 @@
 #define SHAPEFILEOPTIONSWIDGET_H
 
 #include <QtCore/QMap>
-#include <QtGui/QDialog>
-#include <QtGui/QComboBox>
-#include <QtGui/QLabel>
-#include <QtGui/QLineEdit>
-#include <QtGui/QTreeWidgetItem>
 #include <QtGui/QWidget>
 
+#include <string>
 #include <vector>
 
 class AoiElement;
 class CustomTreeWidget;
 class Feature;
+class GraphicObject;
+class QAction;
+class QActionGroup;
+class QComboBox;
+class QLabel;
+class QLineEdit;
+class QToolButton;
+class QTreeWidgetItem;
 class RasterElement;
 class ShapeFile;
 
@@ -31,19 +35,31 @@ class ShapeFileOptionsWidget : public QWidget
    Q_OBJECT
 
 public:
-   ShapeFileOptionsWidget(ShapeFile* pShapefile, const std::vector<AoiElement*>& aois, RasterElement* pRaster);
-   ~ShapeFileOptionsWidget();
+   ShapeFileOptionsWidget(ShapeFile* pShapefile, AoiElement* pDefaultAoi, const std::vector<AoiElement*>& aois,
+      RasterElement* pRaster, QWidget* pParent = NULL);
+   virtual ~ShapeFileOptionsWidget();
 
 protected:
    int getColumn(const QString& strField) const;
+   std::vector<Feature*> addFeatures(AoiElement* pAoi, GraphicObject* pObject, QString& message);
+   void applyFeatureClass(const std::string& className);
 
 protected slots:
    void updateFilenames();
    void browse();
    void setShape(const QString& strShape);
+   void displayFeatureContextMenu(const QPoint& pos);
+   void featureDisplayModeChanged(QAction* pAction);
+   void currentFeatureChanged(QTreeWidgetItem* pItem);
+   void zoomToFeature(QTreeWidgetItem* pItem);
+   void panToFeature(QTreeWidgetItem* pItem);
+   void selectFeature(QTreeWidgetItem* pItem, bool select);
    void addFeature();
+   void selectFeature(bool select);
    void removeFeature();
    void clearFeatures();
+   void applyFeatureClass();
+   void editFeatureClasses();
    void addField();
    void addField(const QString& strName, const QString& strType);
    void removeField();
@@ -54,9 +70,12 @@ protected slots:
 private:
    ShapeFileOptionsWidget(const ShapeFileOptionsWidget& rhs);
    ShapeFileOptionsWidget& operator=(const ShapeFileOptionsWidget& rhs);
+
    ShapeFile* mpShapeFile;
+   AoiElement* mpDefaultAoi;
    std::vector<AoiElement*> mAois;
    RasterElement* mpGeoref;
+
    QLineEdit* mpFilePathEdit;
    QLineEdit* mpBaseNameEdit;
    QLabel* mpShpFileLabel;
@@ -64,6 +83,13 @@ private:
    QLabel* mpDbfFileLabel;
    QComboBox* mpShapeCombo;
    CustomTreeWidget* mpFeatureTree;
+   QLineEdit* mpIntEdit;
+   QLineEdit* mpDoubleEdit;
+   QActionGroup* mpFeatureDisplayModeGroup;
+   QAction* mpFeatureZoomAction;
+   QAction* mpFeaturePanAction;
+   QToolButton* mpSelectFeatureButton;
+
    QMap<QTreeWidgetItem*, Feature*> mFeatures;
 };
 #endif

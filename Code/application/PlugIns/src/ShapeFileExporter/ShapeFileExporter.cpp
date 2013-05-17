@@ -16,9 +16,9 @@
 #include "FileDescriptor.h"
 #include "Filename.h"
 #include "GraphicGroup.h"
+#include "GraphicObject.h"
 #include "LayerList.h"
 #include "MessageLogResource.h"
-#include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInRegistration.h"
 #include "Progress.h"
@@ -26,17 +26,22 @@
 #include "ShapeFile.h"
 #include "ShapeFileExporter.h"
 #include "ShapeFileOptionsWidget.h"
+#include "ShapeFileTypes.h"
 #include "SpatialDataView.h"
 #include "UtilityServices.h"
 
 #include <QtCore/QString>
 #include <QtGui/QMessageBox>
 
+#include <list>
 using namespace std;
 
 REGISTER_PLUGIN_BASIC(OpticksShapeFileExporter, ShapeFileExporter);
 
-ShapeFileExporter::ShapeFileExporter() : mpAoi(NULL), mpGeoref(NULL), mpLayers(NULL)
+ShapeFileExporter::ShapeFileExporter() :
+   mpAoi(NULL),
+   mpGeoref(NULL),
+   mpLayers(NULL)
 {
    setName("Shape File Exporter");
    setCreator("Ball Aerospace & Technologies Corp.");
@@ -50,8 +55,7 @@ ShapeFileExporter::ShapeFileExporter() : mpAoi(NULL), mpGeoref(NULL), mpLayers(N
 }
 
 ShapeFileExporter::~ShapeFileExporter()
-{
-}
+{}
 
 bool ShapeFileExporter::getInputSpecification(PlugInArgList*& pArgList)
 {
@@ -159,7 +163,7 @@ QWidget* ShapeFileExporter::getExportOptionsWidget(const PlugInArgList* pInArgLi
          }
       }
 
-      mpOptionsWidget.reset(new ShapeFileOptionsWidget(&mShapefile, elements, mpGeoref));
+      mpOptionsWidget.reset(new ShapeFileOptionsWidget(&mShapefile, mpAoi, elements, mpGeoref));
    }
 
    return mpOptionsWidget.get();
@@ -221,8 +225,13 @@ bool ShapeFileExporter::extractInputs(const PlugInArgList* pInArgList, string& m
    // outside flag is true for this condition is handled in
    // ShapeFile::addFeatures()
    const BitMask* pMask = mpAoi->getSelectedPoints();
-   if (mpAoi->getGroup()->getObjects().empty() == true && 
-      pMask->isOutsideSelected() == false)
+   VERIFY(pMask != NULL);
+
+   GraphicGroup* pGroup = mpAoi->getGroup();
+   VERIFY(pGroup != NULL);
+
+   const list<GraphicObject*>& objects = pGroup->getObjects();
+   if (objects.empty() == true && pMask->isOutsideSelected() == false)
    {
       message = "The AOI does not contain any points to export.";
       return false;
@@ -234,10 +243,61 @@ bool ShapeFileExporter::extractInputs(const PlugInArgList* pInArgList, string& m
       return false;
    }
 
-   //add aoi to shape file
-   mShapefile.setShape(ShapefileTypes::MULTIPOINT_SHAPE);
+   // Add the AOI to the shape file
+   ShapefileTypes::ShapeType shapeType;
+
+   for (list<GraphicObject*>::const_iterator iter = objects.begin(); iter != objects.end(); ++iter)
+   {
+      GraphicObject* pObject = *iter;
+      if (pObject == NULL)
+      {
+         continue;
+      }
+
+      ShapefileTypes::ShapeType currentShapeType;
+
+      GraphicObjectType objectType = pObject->getGraphicObjectType();
+      switch (objectType)        // The cases in the switch represent the acceptable
+                                 // graphic object types in the AOI layer
+      {
+      case MULTIPOINT_OBJECT:    // Fall through
+      case BITMASK_OBJECT:       // Fall through
+      default:
+         currentShapeType = ShapefileTypes::MULTIPOINT_SHAPE;
+         break;
+
+      case LINE_OBJECT:          // Fall through
+      case HLINE_OBJECT:         // Fall through
+      case VLINE_OBJECT:         // Fall through
+      case POLYLINE_OBJECT:
+         currentShapeType = ShapefileTypes::POLYLINE_SHAPE;
+         break;
+
+      case POLYGON_OBJECT:       // Fall through
+      case RECTANGLE_OBJECT:     // Fall through
+      case ELLIPSE_OBJECT:
+         currentShapeType = ShapefileTypes::POLYGON_SHAPE;
+         break;
+      }
+
+      if (currentShapeType == shapeType)
+      {
+         continue;
+      }
+
+      if (shapeType.isValid() == true)
+      {
+         // Default to the multi-point shape if the AOI contains mixed object types
+         shapeType = ShapefileTypes::MULTIPOINT_SHAPE;
+         break;
+      }
+
+      shapeType = currentShapeType;
+   }
+
+   mShapefile.setShape(shapeType);
    string err;
-   mShapefile.addFeatures(mpAoi, mpGeoref, err);
+   mShapefile.addFeatures(mpAoi, NULL, mpGeoref, err);
 
    return true;
 }

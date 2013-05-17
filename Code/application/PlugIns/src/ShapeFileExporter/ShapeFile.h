@@ -13,23 +13,22 @@
 #include "Observer.h"
 #include "ShapeFileTypes.h"
 
-#include <shapefil.h>
-
 #include <boost/any.hpp>
 #include <map>
 #include <string>
 #include <vector>
 
-class DataElement;
+class AoiElement;
 class Feature;
+class GraphicObject;
 class Progress;
 class RasterElement;
 
-class ShapeFile: public Observer
+class ShapeFile : public Observer
 {
 public:
    ShapeFile();
-   ~ShapeFile();
+   virtual ~ShapeFile();
 
    void shapeModified(Subject& subject, const std::string& signal, const boost::any& v);
    void shapeAttached(Subject& subject, const std::string& signal, const boost::any& v);
@@ -41,7 +40,8 @@ public:
    void setShape(ShapefileTypes::ShapeType eShape);
    ShapefileTypes::ShapeType getShape() const;
 
-   std::vector<Feature*> addFeatures(DataElement* pElement, RasterElement* pGeoref, std::string& message);
+   std::vector<Feature*> addFeatures(AoiElement* pAoi, GraphicObject* pObject, RasterElement* pGeoref,
+      std::string& message);
    bool removeFeature(Feature* pFeature);
    const std::vector<Feature*>& getFeatures() const;
    unsigned int getNumFeatures() const;
@@ -58,9 +58,6 @@ public:
    bool save(Progress* pProgress, std::string& errorMessage);
 
 private:
-   void cleanup();
-   DBFHandle mpAttributeFile;
-   SHPHandle mpShapeFile;
    std::string mFilename;
    ShapefileTypes::ShapeType mShape;
    std::vector<Feature*> mFeatures;

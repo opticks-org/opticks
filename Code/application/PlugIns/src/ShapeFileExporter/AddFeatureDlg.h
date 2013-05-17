@@ -10,33 +10,44 @@
 #ifndef ADDFEATUREDLG_H
 #define ADDFEATUREDLG_H
 
-#include <QtCore/QMap>
-#include <QtGui/QDialog>
-#include <QtGui/QTreeWidget>
-#include <QtGui/QTreeWidgetItem>
+#include "AoiElement.h"
+#include "GraphicObject.h"
+#include "ShapeFileTypes.h"
 
+#include <QtCore/QMetaType>
+#include <QtGui/QDialog>
+
+#include <map>
 #include <vector>
 
-class AoiElement;
+class QCheckBox;
+class QComboBox;
+class QTreeWidget;
+
+Q_DECLARE_METATYPE(AoiElement*)
+Q_DECLARE_METATYPE(GraphicObject*)
 
 class AddFeatureDlg : public QDialog
 {
    Q_OBJECT
 
 public:
-   AddFeatureDlg(const std::vector<AoiElement*>& aois, QWidget* parent = 0);
-   ~AddFeatureDlg();
+   AddFeatureDlg(const std::vector<AoiElement*>& aois, ShapefileTypes::ShapeType shapeType, QWidget* pParent = NULL);
+   virtual ~AddFeatureDlg();
 
-   std::vector<AoiElement*> getAoiElements() const;
+   std::map<AoiElement*, std::vector<GraphicObject*> > getFeatureItems() const;
+   QString getFeatureClass() const;
 
-protected:
-   void accept();
+public slots:
+   virtual void accept();
 
 private:
    AddFeatureDlg(const AddFeatureDlg& rhs);
    AddFeatureDlg& operator=(const AddFeatureDlg& rhs);
+
    QTreeWidget* mpElementTree;
-   QMap<QTreeWidgetItem*, AoiElement*> mElements;
+   QCheckBox* mpFeatureClassCheck;
+   QComboBox* mpFeatureClassCombo;
 };
 
 #endif

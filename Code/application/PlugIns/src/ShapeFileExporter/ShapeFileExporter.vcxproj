@@ -56,6 +56,7 @@
     <Import Project="..\..\..\CompileSettings\AllCommonSettings-Release-32bit.props" />
     <Import Project="..\..\..\CompileSettings\PlugInCommonSettings.props" />
     <Import Project="..\..\..\CompileSettings\Qt-Release.props" />
+    <Import Project="..\..\..\CompileSettings\Xerces-Release.props" />
     <Import Project="..\..\..\CompileSettings\shapelib.props" />
     <Import Project="..\..\..\CompileSettings\EnableWarnings.props" />
   </ImportGroup>
@@ -66,6 +67,7 @@
     <Import Project="..\..\..\CompileSettings\AllCommonSettings-Debug-32bit.props" />
     <Import Project="..\..\..\CompileSettings\PlugInCommonSettings.props" />
     <Import Project="..\..\..\CompileSettings\Qt-Debug.props" />
+    <Import Project="..\..\..\CompileSettings\Xerces-Debug.props" />
     <Import Project="..\..\..\CompileSettings\shapelib.props" />
     <Import Project="..\..\..\CompileSettings\EnableWarnings.props" />
   </ImportGroup>
@@ -76,6 +78,7 @@
     <Import Project="..\..\..\CompileSettings\AllCommonSettings-Release-64bit.props" />
     <Import Project="..\..\..\CompileSettings\PlugInCommonSettings.props" />
     <Import Project="..\..\..\CompileSettings\Qt-Release.props" />
+    <Import Project="..\..\..\CompileSettings\Xerces-Release.props" />
     <Import Project="..\..\..\CompileSettings\shapelib.props" />
     <Import Project="..\..\..\CompileSettings\EnableWarnings.props" />
   </ImportGroup>
@@ -86,6 +89,7 @@
     <Import Project="..\..\..\CompileSettings\AllCommonSettings-Debug-64bit.props" />
     <Import Project="..\..\..\CompileSettings\PlugInCommonSettings.props" />
     <Import Project="..\..\..\CompileSettings\Qt-Debug.props" />
+    <Import Project="..\..\..\CompileSettings\Xerces-Debug.props" />
     <Import Project="..\..\..\CompileSettings\shapelib.props" />
     <Import Project="..\..\..\CompileSettings\EnableWarnings.props" />
   </ImportGroup>
@@ -144,12 +148,14 @@
     <ClCompile Include="AddFeatureDlg.cpp" />
     <ClCompile Include="AddFieldDlg.cpp" />
     <ClCompile Include="Feature.cpp" />
+    <ClCompile Include="FeatureClassDlg.cpp" />
     <ClCompile Include="ModuleManager.cpp" />
     <ClCompile Include="ShapeFile.cpp" />
     <ClCompile Include="ShapeFileExporter.cpp" />
     <ClCompile Include="ShapeFileOptionsWidget.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_AddFeatureDlg.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_AddFieldDlg.cpp" />
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_FeatureClassDlg.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_ShapeFileOptionsWidget.cpp" />
     <ClCompile Include="ShapeFileTypes.cpp" />
   </ItemGroup>
@@ -191,6 +197,20 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <ClInclude Include="Feature.h" />
+    <CustomBuild Include="FeatureClassDlg.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing %(Filename).h...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing %(Filename).h...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Filename).h...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Filename).h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+    </CustomBuild>
     <ClInclude Include="ShapeFile.h" />
     <ClInclude Include="ShapeFileExporter.h" />
     <CustomBuild Include="ShapeFileOptionsWidget.h">

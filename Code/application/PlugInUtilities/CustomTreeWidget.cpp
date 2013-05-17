@@ -251,34 +251,12 @@ void CustomTreeWidget::activateCellWidget(QTreeWidgetItem* pItem, int iColumn)
       return;
    }
 
-   // Scroll vertically to display the cell if necessary
-   scrollToItem(pItem);
-
-   // Get the edit widget rectangle
-   QRect rcWidget = getCellWidgetRect(pItem, iColumn);
-
-   // Scroll horizontally to display the cell if necessary
-   int iScrollLength = 0;
-
-   QPoint cellCenter = rcWidget.center();
-   QModelIndex cellIndex = indexAt(cellCenter);
-
-   QRect rcCellVisible = visualRect(cellIndex);
-   if (rcWidget.right() > rcCellVisible.right())
-   {
-      iScrollLength = rcWidget.right() - rcCellVisible.right() - 1;
-   }
-
-   else if (rcWidget.left() < 0)
-   {
-      iScrollLength = rcWidget.left() - 2;
-   }
-
-   scroll(iScrollLength, 0);
-   rcWidget.setLeft(rcWidget.left() - iScrollLength);
-   rcWidget.setRight(rcWidget.right() - iScrollLength);
+   // Scroll horizontally and vertically to display the cell if necessary
+   QModelIndex cellIndex = indexFromItem(pItem, iColumn);
+   scrollTo(cellIndex);
 
    // Shorten the cell rect to ensure the gridlines are displayed
+   QRect rcWidget = getCellWidgetRect(pItem, iColumn);
    if (areGridlinesShown(Qt::Vertical) == true)
    {
       rcWidget.setRight(rcWidget.right() - 1);

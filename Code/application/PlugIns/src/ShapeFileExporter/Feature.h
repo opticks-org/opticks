@@ -12,13 +12,13 @@
 
 #include "ObjectResource.h"
 #include "SubjectAdapter.h"
-#include "ShapeFileTypes.h"
 
 #include <string>
 #include <vector>
 
 class DataVariant;
 class DynamicObject;
+class SessionItem;
 
 class Feature : public SubjectAdapter
 {
@@ -46,10 +46,10 @@ public:
       double mZ;
    };
 
-   Feature(ShapefileTypes::ShapeType eShape);
+   Feature(SessionItem* pSessionItem);
    ~Feature();
 
-   virtual ShapefileTypes::ShapeType getShape() const;
+   SessionItem* getSessionItem() const;
 
    /**
     * @notify  signalVertexAdded with any<FeatureVertex>
@@ -95,7 +95,7 @@ public:
    virtual bool isKindOf(const std::string& className) const;
 
 private:
-   ShapefileTypes::ShapeType mShape;
+   SessionItem* mpSessionItem;
    std::vector<FeatureVertex> mVertices;
    FactoryResource<DynamicObject> mpFields;
 };

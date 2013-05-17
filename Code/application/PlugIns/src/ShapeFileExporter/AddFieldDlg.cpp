@@ -8,10 +8,13 @@
  */
 
 #include "AddFieldDlg.h"
+#include "AppVerify.h"
 
 #include <QtCore/QRegExp>
+#include <QtGui/QComboBox>
 #include <QtGui/QLabel>
 #include <QtGui/QLayout>
+#include <QtGui/QLineEdit>
 #include <QtGui/QMessageBox>
 #include <QtGui/QPushButton>
 #include <QtGui/QValidator>
@@ -34,6 +37,13 @@ AddFieldDlg::AddFieldDlg(QWidget* parent) :
    mpTypeCombo->addItem("int");
    mpTypeCombo->addItem("double");
    mpTypeCombo->addItem("string");
+
+   // Value
+   QLabel* pValueLabel = new QLabel("Value:", this);
+   mpValueEdit = new QLineEdit(this);
+   mpIntValidator = new QIntValidator(this);
+   mpDoubleValidator = new QDoubleValidator(this);
+   mpValueEdit->setValidator(mpIntValidator);
 
    // Description
    QLabel* pDescriptionLabel = new QLabel(this);
@@ -63,10 +73,12 @@ AddFieldDlg::AddFieldDlg(QWidget* parent) :
    pGrid->addWidget(mpNameEdit, 0, 1);
    pGrid->addWidget(pTypeLabel, 1, 0);
    pGrid->addWidget(mpTypeCombo, 1, 1, Qt::AlignLeft);
-   pGrid->addWidget(pDescriptionLabel, 2, 0, 1, 2, Qt::AlignTop);
-   pGrid->addWidget(pHLine, 3, 0, 1, 2);
-   pGrid->addLayout(pLayout, 4, 0, 1, 2);
-   pGrid->setRowStretch(2, 10);
+   pGrid->addWidget(pValueLabel, 2, 0);
+   pGrid->addWidget(mpValueEdit, 2, 1);
+   pGrid->addWidget(pDescriptionLabel, 3, 0, 1, 2, Qt::AlignTop);
+   pGrid->addWidget(pHLine, 4, 0, 1, 2);
+   pGrid->addLayout(pLayout, 5, 0, 1, 2);
+   pGrid->setRowStretch(3, 10);
    pGrid->setColumnStretch(1, 10);
 
    // Initialization
@@ -74,13 +86,13 @@ AddFieldDlg::AddFieldDlg(QWidget* parent) :
    setModal(true);
 
    // Connections
-   connect(pOkButton, SIGNAL(clicked()), this, SLOT(accept()));
-   connect(pCancelButton, SIGNAL(clicked()), this, SLOT(reject()));
+   VERIFYNR(connect(mpTypeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateValue(int))));
+   VERIFYNR(connect(pOkButton, SIGNAL(clicked()), this, SLOT(accept())));
+   VERIFYNR(connect(pCancelButton, SIGNAL(clicked()), this, SLOT(reject())));
 }
 
 AddFieldDlg::~AddFieldDlg()
-{
-}
+{}
 
 QString AddFieldDlg::getFieldName() const
 {
@@ -92,6 +104,31 @@ QString AddFieldDlg::getFieldType() const
    return mpTypeCombo->currentText();
 }
 
+DataVariant AddFieldDlg::getFieldValue() const
+{
+   DataVariant value;
+
+   QString valueText = mpValueEdit->text();
+   if (valueText.isEmpty() == false)
+   {
+      QString valueType = getFieldType();
+      if (valueType == "int")
+      {
+         value = DataVariant(valueText.toInt());
+      }
+      else if (valueType == "double")
+      {
+         value = DataVariant(valueText.toDouble());
+      }
+      else if (valueType == "string")
+      {
+         value = DataVariant(valueText.toStdString());
+      }
+   }
+
+   return value;
+}
+
 void AddFieldDlg::accept()
 {
    if (getFieldName().isEmpty())
@@ -101,4 +138,28 @@ void AddFieldDlg::accept()
    }
 
    QDialog::accept();
+}
+
+void AddFieldDlg::updateValue(int typeIndex)
+{
+   switch (typeIndex)
+   {
+   case 0:  // int
+      mpValueEdit->setValidator(mpIntValidator);
+      break;
+
+   case 1:  // double
+      mpValueEdit->setValidator(mpDoubleValidator);
+      break;
+
+   case 2:  // string
+   default:
+      mpValueEdit->setValidator(NULL);
+      break;
+   }
+
+   if (mpValueEdit->hasAcceptableInput() == false)
+   {
+      mpValueEdit->clear();
+   }
 }

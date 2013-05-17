@@ -13,16 +13,17 @@
 
 using namespace std;
 
-Feature::Feature(ShapefileTypes::ShapeType eShape)
+Feature::Feature(SessionItem* pSessionItem) :
+   mpSessionItem(pSessionItem)
 {}
-
-ShapefileTypes::ShapeType Feature::getShape() const
-{
-   return mShape;
-}
 
 Feature::~Feature()
 {}
+
+SessionItem* Feature::getSessionItem() const
+{
+   return mpSessionItem;
+}
 
 int Feature::addVertex(double dX, double dY, double dZ)
 {
@@ -138,7 +139,7 @@ bool Feature::setFieldValue(const string& name, const DataVariant &var)
 {
    if (mpFields->getAttribute(name).isValid())
    {
-      if (!mpFields->setAttribute(name, var))
+      if (mpFields->setAttribute(name, var) == true)
       {
          notify(SIGNAL_NAME(Subject, Modified));
          return true;

@@ -15,17 +15,16 @@
 #include "DesktopServices.h"
 #include "Feature.h"
 #include "GraphicGroup.h"
+#include "GraphicObject.h"
 #include "MessageLogResource.h"
 #include "ModelServices.h"
-#include "PolygonObject.h"
-#include "PolylineObject.h"
 #include "Progress.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "ShapeFile.h"
 #include "UtilityServices.h"
 
-#include <QtGui/QMessageBox>
+#include <QtCore/QString>
 
 #include <algorithm>
 #include <float.h>
@@ -43,15 +42,12 @@ namespace
 };
 
 ShapeFile::ShapeFile() :
-   mpAttributeFile(NULL),
-   mpShapeFile(NULL),
    mShape(ShapefileTypes::MULTIPOINT_SHAPE)
 {}
 
 ShapeFile::~ShapeFile()
 {
    removeAllFeatures();
-   cleanup();
 }
 
 void ShapeFile::attached(Subject& subject, const string& signal, const Slot& slot)
@@ -70,7 +66,24 @@ void ShapeFile::shapeAttached(Subject& subject, const string& signal, const boos
          string type = iter->second;
          if (!name.empty() && !type.empty())
          {
-            pFeature->addField(name, type);
+            DataVariant value;
+            if (type == "int")
+            {
+               int intValue = 0;
+               value = DataVariant(intValue);
+            }
+            else if (type == "double")
+            {
+               double doubleValue = 0.0;
+               value = DataVariant(doubleValue);
+            }
+            else if (type == "string")
+            {
+               string stringValue;
+               value = DataVariant(stringValue);
+            }
+
+            pFeature->addField(name, value);
          }
       }
    }
@@ -110,7 +123,10 @@ const string& ShapeFile::getFilename() const
 
 void ShapeFile::setShape(ShapefileTypes::ShapeType eShape)
 {
-   mShape = eShape;
+   if (eShape.isValid() == true)
+   {
+      mShape = eShape;
+   }
 }
 
 ShapefileTypes::ShapeType ShapeFile::getShape() const
@@ -118,12 +134,13 @@ ShapefileTypes::ShapeType ShapeFile::getShape() const
    return mShape;
 }
 
-vector<Feature*> ShapeFile::addFeatures(DataElement* pElement, RasterElement* pGeoref, string& message)
+vector<Feature*> ShapeFile::addFeatures(AoiElement* pAoi, GraphicObject* pObject, RasterElement* pGeoref,
+                                        string& message)
 {
    vector<Feature*> features;
    message.clear();
 
-   if (pElement == NULL)
+   if (pAoi == NULL)
    {
       message = "Features cannot be added because the data element is invalid!";
       return features;
@@ -135,28 +152,293 @@ vector<Feature*> ShapeFile::addFeatures(DataElement* pElement, RasterElement* pG
       return features;
    }
 
-   // Create the features
-   string elementName = pElement->getName();
-
-   AoiElement* pAoi = dynamic_cast<AoiElement*>(pElement);
-   if (pAoi != NULL)
+   // Do not allow erase or toggle objects
+   if (pObject != NULL)
    {
-      switch (mShape)
+      if (pObject->getDrawMode() != DRAW)
       {
-      case ShapefileTypes::POINT_SHAPE:
+         message = "The " + pObject->getName() + " object is an erase or toggle object, so a feature "
+            "will not be added.";
+         return features;
+      }
+   }
+
+   // Get the objects
+   list<GraphicObject*> objects;
+   if (pObject != NULL)
+   {
+      objects.push_back(pObject);
+   }
+   else
+   {
+      GraphicGroup* pGroup = pAoi->getGroup();
+      if (pGroup != NULL)
+      {
+         objects = pGroup->getObjects();
+      }
+   }
+
+   // Create the features
+   string elementName = pAoi->getName();
+
+   switch (mShape)
+   {
+   case ShapefileTypes::POINT_SHAPE:
+      {
+         // The BitMaskIterator does not support negative extents and
+         // the BitMask does not correctly handle the outside flag so
+         // the BitMaskIterator is used for cases when the outside flag is true and
+         // the BitMask is used for cases when the outside flag is false
+         const BitMask* pMask = pAoi->getSelectedPoints();
+         if (pObject != NULL)
          {
-            // The BitMaskIterator does not support negative extents and
-            // the BitMask does not correctly handle the outside flag so
-            // the BitMaskIterator is used for cases when the outside flag is true and
-            // the BitMask is used for cases when the outside flag is false
-            const BitMask* pMask = pAoi->getSelectedPoints();
-            if (pMask != NULL)
+            pMask = pObject->getPixels();
+            if (pMask == NULL)
             {
-               BitMaskIterator maskIt(pMask, pGeoref);
-               if ((maskIt.getCount() > 0 && pMask->isOutsideSelected() == true) ||
-                  (pMask->getCount() > 0 && pMask->isOutsideSelected() == false))
+               message = "The " + pObject->getName() + " object cannot be represented by the " +
+                  StringUtilities::toDisplayString(mShape) + " shape type, so a feature will not be added.";
+               return features;
+            }
+         }
+
+         if (pMask != NULL)
+         {
+            BitMaskIterator maskIt(pMask, pGeoref);
+            if ((maskIt.getCount() > 0 && pMask->isOutsideSelected() == true) ||
+               (pMask->getCount() > 0 && pMask->isOutsideSelected() == false))
+            {
+               // Add features for each selected pixel
+               int startColumn = 0;
+               int endColumn = 0;
+               int startRow = 0;
+               int endRow = 0;
+               if (pMask->isOutsideSelected() == true)
                {
-                  // Add features for each selected pixel
+                  maskIt.getBoundingBox(startColumn, startRow, endColumn, endRow);
+               }
+               else
+               {
+                  pMask->getBoundingBox(startColumn, startRow, endColumn, endRow);
+               }
+               LocationType pixel;
+               for (int i = startColumn; i <= endColumn; i++)
+               {
+                  for (int j = startRow; j <= endRow; j++)
+                  {
+                     if ((maskIt.getPixel(i, j) && pMask->isOutsideSelected() == true) ||
+                           (pMask->getPixel(i, j) && pMask->isOutsideSelected() == false))
+                     {
+                        // Add the feature
+                        SessionItem* pSessionItem = pAoi;
+                        if (pObject != NULL)
+                        {
+                           pSessionItem = pObject;
+                        }
+
+                        Feature* pFeature = new Feature(pSessionItem);
+                        if (pFeature != NULL)
+                        {
+                           features.push_back(pFeature);
+                           mFeatures.push_back(pFeature);
+                           pFeature->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &ShapeFile::shapeModified));
+
+                           pixel.mX = i + 0.5;
+                           pixel.mY = j + 0.5;
+
+                           // Fields
+                           pFeature->addField("Name", string());
+                           pFeature->addField("Pixel", string());
+
+                           if (!elementName.empty())
+                           {
+                              if (pObject != NULL)
+                              {
+                                 pFeature->setFieldValue("Name", elementName + ": " + pObject->getName());
+                              }
+                              else
+                              {
+                                 pFeature->setFieldValue("Name", elementName);
+                              }
+                           }
+
+                           QString pixelName = "(" + QString::number(i + 1) + ", " + QString::number(j + 1) + ")";
+                           pFeature->setFieldValue("Pixel", pixelName.toStdString());
+
+                           // Vertex
+                           pixel = pGeoref->convertPixelToGeocoord(pixel);
+                           pFeature->addVertex(pixel.mY, pixel.mX);    // Longitude as x-coord
+                        }
+                     }
+                  }
+               }
+            }
+         }
+      }
+      break;
+
+   case ShapefileTypes::POLYLINE_SHAPE:
+      {
+         if (objects.empty())
+         {
+            message = "Error Shape File 101: Cannot create a shape file from an empty AOI.";
+            return features;
+         }
+
+         for (list<GraphicObject*>::const_iterator it = objects.begin(); it != objects.end(); ++it)
+         {
+            GraphicObject* pCurrentObject = *it;
+            if (pCurrentObject != NULL)
+            {
+               GraphicObjectType objectType = pCurrentObject->getGraphicObjectType();
+               if ((objectType == LINE_OBJECT) || (objectType == POLYLINE_OBJECT) ||
+                  (objectType == HLINE_OBJECT) || (objectType == VLINE_OBJECT))
+               {
+                  // Do not allow erase or toggle objects
+                  if (pCurrentObject->getDrawMode() != DRAW)
+                  {
+                     continue;
+                  }
+
+                  string objectName = pCurrentObject->getName();
+
+                  vector<LocationType> vertices;
+                  pCurrentObject->getRotatedExtents(vertices);
+                  if (vertices.empty() == false)
+                  {
+                     Feature* pFeature = new Feature(pCurrentObject);
+                     features.push_back(pFeature);
+                     mFeatures.push_back(pFeature);
+                     pFeature->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &ShapeFile::shapeModified));
+
+                     pFeature->addField("Name", string());
+                     if (!elementName.empty())
+                     {
+                        pFeature->setFieldValue("Name", elementName + ": " + objectName);
+                     }
+
+                     for (vector<LocationType>::const_iterator iter = vertices.begin(); iter != vertices.end(); ++iter)
+                     {
+                        LocationType geo = pGeoref->convertPixelToGeocoord(*iter);
+                        pFeature->addVertex(geo.mY, geo.mX);
+                     }
+                  }
+               }
+            }
+         }
+      }
+      break;
+
+   case ShapefileTypes::POLYGON_SHAPE:
+      {
+         if (objects.empty())
+         {
+            message = "Error Shape File 101: Cannot create a shape file from an empty AOI.";
+            return features;
+         }
+
+         for (list<GraphicObject*>::const_iterator it = objects.begin(); it != objects.end(); ++it)
+         {
+            GraphicObject* pCurrentObject = *it;
+            if (pCurrentObject != NULL)
+            {
+               GraphicObjectType objectType = pCurrentObject->getGraphicObjectType();
+               if ((objectType == RECTANGLE_OBJECT) || (objectType == POLYGON_OBJECT))
+               {
+                  // Do not allow erase or toggle objects
+                  if (pCurrentObject->getDrawMode() != DRAW)
+                  {
+                     continue;
+                  }
+
+                  string objectName = pCurrentObject->getName();
+
+                  vector<LocationType> vertices;
+                  pCurrentObject->getRotatedExtents(vertices);
+                  if (vertices.empty() == false)
+                  {
+                     // To represent non-polygon objects as polygons, add the first vertex as the last vertex
+                     if (objectType != POLYGON_OBJECT)
+                     {
+                        vertices.push_back(vertices.front());
+                     }
+
+                     Feature* pFeature = new Feature(pCurrentObject);
+                     features.push_back(pFeature);
+                     mFeatures.push_back(pFeature);
+                     pFeature->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &ShapeFile::shapeModified));
+
+                     pFeature->addField("Name", string());
+                     if (!elementName.empty())
+                     {
+                        pFeature->setFieldValue("Name", elementName + ": " + objectName);
+                     }
+
+                     for (vector<LocationType>::const_iterator iter = vertices.begin(); iter != vertices.end(); ++iter)
+                     {
+                        LocationType geo = pGeoref->convertPixelToGeocoord(*iter);
+                        pFeature->addVertex(geo.mY, geo.mX);
+                     }
+                  }
+               }
+            }
+         }
+      }
+
+      break;
+
+   case ShapefileTypes::MULTIPOINT_SHAPE:
+      {
+         // The BitMaskIterator does not support negative extents and
+         // the BitMask does not correctly handle the outside flag so
+         // the BitMaskIterator is used for cases when the outside flag is true and
+         // the BitMask is used for cases when the outside flag is false
+         const BitMask* pMask = pAoi->getSelectedPoints();
+         if (pObject != NULL)
+         {
+            pMask = pObject->getPixels();
+            if (pMask == NULL)
+            {
+               message = "The " + pObject->getName() + " object cannot be represented by the " +
+                  StringUtilities::toDisplayString(mShape) + " shape type, so a feature will not be added.";
+               return features;
+            }
+         }
+
+         if (pMask != NULL)
+         {
+            BitMaskIterator maskIt(pMask, pGeoref);
+            if ((maskIt.getCount() > 0 && pMask->isOutsideSelected() == true) ||
+               (pMask->getCount() > 0 && pMask->isOutsideSelected() == false))
+            {
+               // Add the feature
+               SessionItem* pSessionItem = pAoi;
+               if (pObject != NULL)
+               {
+                  pSessionItem = pObject;
+               }
+
+               Feature* pFeature = new Feature(pSessionItem);
+               if (pFeature != NULL)
+               {
+                  features.push_back(pFeature);
+                  mFeatures.push_back(pFeature);
+                  pFeature->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &ShapeFile::shapeModified));
+
+                  // Fields
+                  pFeature->addField("Name", string());
+                  if (!elementName.empty())
+                  {
+                     if (pObject != NULL)
+                     {
+                        pFeature->setFieldValue("Name", elementName + ": " + pObject->getName());
+                     }
+                     else
+                     {
+                        pFeature->setFieldValue("Name", elementName);
+                     }
+                  }
+
+                  // Vertices
                   int startColumn = 0;
                   int endColumn = 0;
                   int startRow = 0;
@@ -175,213 +457,31 @@ vector<Feature*> ShapeFile::addFeatures(DataElement* pElement, RasterElement* pG
                      for (int j = startRow; j <= endRow; j++)
                      {
                         if ((maskIt.getPixel(i, j) && pMask->isOutsideSelected() == true) ||
-                              (pMask->getPixel(i, j) && pMask->isOutsideSelected() == false))
+                           (pMask->getPixel(i, j) && pMask->isOutsideSelected() == false))
                         {
-                           // Add the feature
-                           Feature* pFeature = new Feature(mShape);
-                           if (pFeature != NULL)
-                           {
-                              features.push_back(pFeature);
-                              mFeatures.push_back(pFeature);
-                              pFeature->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &ShapeFile::shapeModified));
+                           pixel.mX = i + 0.5;
+                           pixel.mY = j + 0.5;
+                           pixel = pGeoref->convertPixelToGeocoord(pixel);
 
-                              pixel.mX = i + 0.5;
-                              pixel.mY = j + 0.5;
-
-                              // Fields
-                              pFeature->addField("Name", string());
-                              pFeature->addField("Pixel", string());
-
-                              if (!elementName.empty())
-                              {
-                                 pFeature->setFieldValue("Name", elementName);
-                              }
-
-                              string pixelName = "";
-                              if (!pixelName.empty())
-                              {
-                                 pFeature->setFieldValue("Pixel", pixelName);
-                              }
-
-                              // Vertex
-                              pixel = pGeoref->convertPixelToGeocoord(pixel);
-                              pFeature->addVertex(pixel.mY, pixel.mX);    // Longitude as x-coord
-                           }
+                           pFeature->addVertex(pixel.mY, pixel.mX);    // Longitude as x-coord
                         }
                      }
                   }
                }
             }
          }
-         break;
-
-      case ShapefileTypes::POLYLINE_SHAPE:
-         {
-            GraphicGroup* pGroup = pAoi->getGroup();
-            if (pGroup != NULL)
-            {
-               const list<GraphicObject*>& objects = pGroup->getObjects();
-               if (objects.empty())
-               {
-                  message = "Error Shape File 101: Cannot create a shape file from an empty AOI.";
-                  return features;
-               }
-               for (std::list<GraphicObject*>::const_iterator it = objects.begin(); it != objects.end(); ++it)
-               {
-                  const PolylineObject* pObj = dynamic_cast<const PolylineObject*>(*it);
-                  if (pObj == NULL)
-                  {
-                     continue;
-                  }
-                  const std::vector<LocationType>& vertices = pObj->getVertices();
-                  Feature* pFeature = new Feature(mShape);
-                  if (pFeature != NULL)
-                  {
-                     features.push_back(pFeature);
-                     mFeatures.push_back(pFeature);
-                     pFeature->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &ShapeFile::shapeModified));
-
-                     pFeature->addField("Name", string());
-                     if (!elementName.empty())
-                     {
-                        pFeature->setFieldValue("Name", elementName + ": " + pObj->getName());
-                     }
-
-                     for (vector<LocationType>::const_iterator iter = vertices.begin(); iter != vertices.end(); ++iter)
-                     {
-                        LocationType geo = pGeoref->convertPixelToGeocoord(*iter);
-                        pFeature->addVertex(geo.mY, geo.mX);
-                     }
-                  }
-               }
-            }
-         }
-         break;
-
-      case ShapefileTypes::POLYGON_SHAPE:
-         {
-            GraphicGroup* pGroup = pAoi->getGroup();
-            if (pGroup != NULL)
-            {
-               const list<GraphicObject*>& objects = pGroup->getObjects();
-               if (objects.empty())
-               {
-                  message = "Error Shape File 101: Cannot create a shape file from an empty AOI.";
-                  return features;
-               }
-
-               for (std::list<GraphicObject*>::const_iterator it = objects.begin(); it != objects.end(); ++it)
-               {
-                  const PolygonObject* pObj = dynamic_cast<const PolygonObject*>(*it);
-                  if (pObj == NULL)
-                  {
-                     continue;
-                  }
-                  if (pObj->getDrawMode() == ERASE)
-                  {
-                     // currently the exporter can't handle holes, so skip.
-                     message = elementName + " contains polygons with holes. Currently this exporter only "
-                        "exports the outer polygons.";
-                     continue;
-                  }
-                  const std::vector<LocationType>& vertices = pObj->getVertices();
-                  Feature* pFeature = new Feature(mShape);
-                  if (pFeature != NULL)
-                  {
-                     features.push_back(pFeature);
-                     mFeatures.push_back(pFeature);
-                     pFeature->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &ShapeFile::shapeModified));
-
-                     pFeature->addField("Name", string());
-                     if (!elementName.empty())
-                     {
-                        pFeature->setFieldValue("Name", elementName + ": " + pObj->getName());
-                     }
-
-                     for (vector<LocationType>::const_iterator iter = vertices.begin(); iter != vertices.end(); ++iter)
-                     {
-                        LocationType geo = pGeoref->convertPixelToGeocoord(*iter);
-                        pFeature->addVertex(geo.mY, geo.mX);
-                     }
-                  }
-               }
-            }
-         }
-
-         break;
-
-      case ShapefileTypes::MULTIPOINT_SHAPE:
-         {
-            // The BitMaskIterator does not support negative extents and
-            // the BitMask does not correctly handle the outside flag so
-            // the BitMaskIterator is used for cases when the outside flag is true and
-            // the BitMask is used for cases when the outside flag is false
-            const BitMask* pMask = pAoi->getSelectedPoints();
-            if (pMask != NULL)
-            {
-               BitMaskIterator maskIt(pMask, pGeoref);
-               if ((maskIt.getCount() > 0 && pMask->isOutsideSelected() == true) ||
-                  (pMask->getCount() > 0 && pMask->isOutsideSelected() == false))
-               {
-                  // Add the feature
-                  Feature* pFeature = new Feature(mShape);
-                  if (pFeature != NULL)
-                  {
-                     features.push_back(pFeature);
-                     mFeatures.push_back(pFeature);
-                     pFeature->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &ShapeFile::shapeModified));
-
-                     // Fields
-                     pFeature->addField("Name", string());
-                     if (!elementName.empty())
-                     {
-                        pFeature->setFieldValue("Name", elementName);
-                     }
-
-                     // Vertices
-                     int startColumn = 0;
-                     int endColumn = 0;
-                     int startRow = 0;
-                     int endRow = 0;
-                     if (pMask->isOutsideSelected() == true)
-                     {
-                        maskIt.getBoundingBox(startColumn, startRow, endColumn, endRow);
-                     }
-                     else
-                     {
-                        pMask->getBoundingBox(startColumn, startRow, endColumn, endRow);
-                     }
-                     LocationType pixel;
-                     for (int i = startColumn; i <= endColumn; i++)
-                     {
-                        for (int j = startRow; j <= endRow; j++)
-                        {
-                           if ((maskIt.getPixel(i, j) && pMask->isOutsideSelected() == true) ||
-                              (pMask->getPixel(i, j) && pMask->isOutsideSelected() == false))
-                           {
-                              pixel.mX = i + 0.5;
-                              pixel.mY = j + 0.5;
-                              pixel = pGeoref->convertPixelToGeocoord(pixel);
-
-                              pFeature->addVertex(pixel.mY, pixel.mX);    // Longitude as x-coord
-                           }
-                        }
-                     }
-                  }
-               }
-            }
-         }
-         break;
-
-      default:
-         message = "Shape type not recognized.";
-         return features;
       }
+      break;
+
+   default:
+      message = "Shape type not recognized.";
+      return features;
    }
 
    if (features.empty())
    {
-      message = elementName + " has no selected points, so no features can be added.";
+      message = elementName + " has no objects that can be represented with the " +
+         StringUtilities::toDisplayString(mShape) + " shape type, so no features can be added.";
    }
 
    return features;
@@ -448,7 +548,24 @@ bool ShapeFile::addField(const string& name, const string& type)
       Feature* pFeature = *iter;
       if (pFeature != NULL)
       {
-         pFeature->addField(name, type);
+         DataVariant value;
+         if (type == "int")
+         {
+            int intValue = 0;
+            value = DataVariant(intValue);
+         }
+         else if (type == "double")
+         {
+            double doubleValue = 0.0;
+            value = DataVariant(doubleValue);
+         }
+         else if (type == "string")
+         {
+            string stringValue;
+            value = DataVariant(stringValue);
+         }
+
+         pFeature->addField(name, value);
       }
    }
 
@@ -763,18 +880,4 @@ bool ShapeFile::save(Progress* pProgress, string& errorMessage)
    }
 
    return true;
-}
-
-void ShapeFile::cleanup()
-{
-   if (mpAttributeFile != NULL)
-   {
-      DBFClose(mpAttributeFile);
-      mpAttributeFile = NULL;
-   }
-   if (mpShapeFile != NULL)
-   {
-      SHPClose(mpShapeFile);
-      mpShapeFile = NULL;
-   }
 }

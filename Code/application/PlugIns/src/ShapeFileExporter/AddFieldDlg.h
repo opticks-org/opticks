@@ -10,29 +10,42 @@
 #ifndef ADDFIELDDLG_H
 #define ADDFIELDDLG_H
 
-#include <QtGui/QComboBox>
+#include "DataVariant.h"
+
 #include <QtGui/QDialog>
-#include <QtGui/QLineEdit>
+
+class QComboBox;
+class QIntValidator;
+class QLineEdit;
+class QDoubleValidator;
 
 class AddFieldDlg : public QDialog
 {
    Q_OBJECT
 
 public:
-   AddFieldDlg(QWidget* parent = 0);
-   ~AddFieldDlg();
+   AddFieldDlg(QWidget* pParent = NULL);
+   virtual ~AddFieldDlg();
 
    QString getFieldName() const;
    QString getFieldType() const;
+   DataVariant getFieldValue() const;
 
-protected:
-   void accept();
+public slots:
+   virtual void accept();
+
+protected slots:
+   void updateValue(int typeIndex);
 
 private:
    AddFieldDlg(const AddFieldDlg& rhs);
    AddFieldDlg& operator=(const AddFieldDlg& rhs);
+
    QLineEdit* mpNameEdit;
    QComboBox* mpTypeCombo;
+   QLineEdit* mpValueEdit;
+   QIntValidator* mpIntValidator;
+   QDoubleValidator* mpDoubleValidator;
 };
 
 #endif

@@ -203,6 +203,7 @@
    <file alias="SaveSig">icons/SaveSigIcon.png</file>
    <file alias="ScaleBar">icons/ScaleBarIcon.png</file>
    <file alias="Script">icons/ScriptIcon.png</file>
+   <file alias="SelectObject">icons/SelectObjectIcon.png</file>
    <file alias="SemiChecked">icons/SemiCheckedIcon.png</file>
    <file alias="SensorUp">icons/SensorUpIcon.png</file>
    <file alias="SessionExplorer">icons/SessionExplorerIcon.png</file>
@@ -249,6 +250,7 @@
    <file alias="WizardBuilder">icons/WizardBuilderIcon.png</file>
    <file alias="WizardItem">icons/WizardItem.png</file>
    <file alias="WorkbookMode">icons/WorkbookModeIcon.png</file>
+   <file alias="Zoom">icons/ZoomIcon.png</file>
    <file alias="ZoomAndPanToPoint">icons/ZoomAndPanToPointIcon.png</file>
    <file alias="ZoomInCursor">icons/ZoomInCursor.png</file>
    <file alias="ZoomIn">icons/ZoomInIcon.png</file>
