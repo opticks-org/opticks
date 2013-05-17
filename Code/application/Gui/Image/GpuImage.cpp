@@ -411,6 +411,10 @@ private:
       int channelStep = totalChannels - currentChannel;
       if (bBadValues)
       {
+         double singleRangeLow;
+         double singleRangeHigh;
+         bool hasSingleBadValueRange = mInfo.mKey.mpBadValues1->getSingleBadValueRange(singleRangeLow,
+            singleRangeHigh);
          for (unsigned int y1 = 0; y1 < tileSizeY; y1++, pTargetBase += (mInfo.mTileSizeX * totalChannels))
          {
             Out* pTarget = pTargetBase;
@@ -421,7 +425,18 @@ private:
                *pTarget = static_cast<Out>(getFromSource(source));
 
                pTarget += channelStep;
-               if (mInfo.mKey.mpBadValues1->isBadValue(static_cast<double>(source)))
+               bool isBadValue = false;
+               double dSource = static_cast<double>(source);
+               if (hasSingleBadValueRange == true)
+               {
+                  isBadValue = dSource > singleRangeLow && dSource < singleRangeHigh;
+               }
+               else
+               {
+                  isBadValue = mInfo.mKey.mpBadValues1->isBadValue(dSource);
+               }
+
+               if (isBadValue)
                {
                   *pTarget = static_cast<Out> (0);
                }
@@ -671,10 +686,34 @@ private:
    void createRgb(EncodingType outputType)
    {
       bool hasRedBadValues = (mInfo.mKey.mpBadValues1 != NULL && mInfo.mKey.mpBadValues1->empty() == false);
+      double singleRangeLowRed = 0.0;
+      double singleRangeHighRed = 0.0;
+      bool hasSingleRedBadValueRange = false;
+      if (hasRedBadValues)
+      {
+         hasSingleRedBadValueRange = mInfo.mKey.mpBadValues1->getSingleBadValueRange(singleRangeLowRed,
+            singleRangeHighRed);
+      }
 
       bool hasGreenBadValues = (mInfo.mKey.mpBadValues2 != NULL && mInfo.mKey.mpBadValues2->empty() == false);
+      double singleRangeLowGreen = 0.0;
+      double singleRangeHighGreen = 0.0;
+      bool hasSingleGreenBadValueRange = false;
+      if (hasGreenBadValues)
+      {
+         hasSingleGreenBadValueRange = mInfo.mKey.mpBadValues2->getSingleBadValueRange(singleRangeLowGreen,
+            singleRangeHighGreen);
+      }
 
       bool hasBlueBadValues = (mInfo.mKey.mpBadValues3 != NULL && mInfo.mKey.mpBadValues3->empty() == false);
+      double singleRangeLowBlue = 0.0;
+      double singleRangeHighBlue = 0.0;
+      bool hasSingleBlueBadValueRange = false;
+      if (hasBlueBadValues)
+      {
+         hasSingleBlueBadValueRange = mInfo.mKey.mpBadValues3->getSingleBadValueRange(singleRangeLowBlue,
+            singleRangeHighBlue);
+      }
 
       bool hasBadValues = hasRedBadValues || hasGreenBadValues || hasBlueBadValues;
 
@@ -787,7 +826,14 @@ private:
 
                      if (hasRedBadValues)
                      {
-                        isRedValueBad = mInfo.mKey.mpBadValues1->isBadValue(source);
+                        if (hasSingleRedBadValueRange)
+                        {
+                           isRedValueBad = source > singleRangeLowRed && source < singleRangeHighRed;
+                        }
+                        else
+                        {
+                           isRedValueBad = mInfo.mKey.mpBadValues1->isBadValue(source);
+                        }
                      }
                      else
                      {
@@ -815,7 +861,14 @@ private:
 
                      if (hasGreenBadValues)
                      {
-                        isGreenValueBad = mInfo.mKey.mpBadValues2->isBadValue(source);
+                        if (hasSingleGreenBadValueRange)
+                        {
+                           isGreenValueBad = source > singleRangeLowGreen && source < singleRangeHighGreen;
+                        }
+                        else
+                        {
+                           isGreenValueBad = mInfo.mKey.mpBadValues2->isBadValue(source);
+                        }
                      }
                      else
                      {
@@ -843,7 +896,14 @@ private:
 
                      if (hasBlueBadValues)
                      {
-                        isBlueValueBad = mInfo.mKey.mpBadValues3->isBadValue(source);
+                        if (hasSingleBlueBadValueRange)
+                        {
+                           isBlueValueBad = source > singleRangeLowBlue && source < singleRangeHighBlue;
+                        }
+                        else
+                        {
+                           isBlueValueBad = mInfo.mKey.mpBadValues3->isBadValue(source);
+                        }
                      }
                      else
                      {

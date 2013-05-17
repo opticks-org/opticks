@@ -26,7 +26,10 @@ BadValuesImp::BadValuesImp() :
    mToleranceStr(BadValues::getSettingTolerance()),
    mBadValuesBeingUpdated(false),
    mAdjustedUpper(std::numeric_limits<double>::max()),
-   mAdjustedLower(-std::numeric_limits<double>::max())
+   mAdjustedLower(-std::numeric_limits<double>::max()),
+   mAdjustedSingleRangeValid(false),
+   mAdjustedSingleRangeLower(std::numeric_limits<double>::max()),
+   mAdjustedSingleRangeUpper(std::numeric_limits<double>::max())
 {
    mTolerance = StringUtilities::fromDisplayString<double>(mToleranceStr);
 }
@@ -44,12 +47,12 @@ std::string BadValuesImp::getUpperBadValueThreshold() const
    return mUpperThresholdStr;
 }
 
-const std::vector<std::pair<std::string, std::string> > BadValuesImp::getBadValueRanges() const
+const std::vector<std::pair<std::string, std::string> >& BadValuesImp::getBadValueRanges() const
 {
    return mRangeStrs;
 }
 
-const std::vector<std::string> BadValuesImp::getIndividualBadValues() const
+const std::vector<std::string>& BadValuesImp::getIndividualBadValues() const
 {
    return mBadValueStrs;
 }
@@ -84,6 +87,12 @@ double BadValuesImp::getDefaultBadValue() const
 
 bool BadValuesImp::isBadValue(double value) const
 {
+   // check for single bad value first for performance
+   if (mAdjustedSingleRangeValid == true)
+   {
+      return value > mAdjustedSingleRangeLower && value < mAdjustedSingleRangeUpper;
+   }
+
    if (empty())
    {
       return false;
@@ -109,6 +118,13 @@ bool BadValuesImp::isBadValue(double value) const
       }
    }
    return false;
+}
+
+bool BadValuesImp::getSingleBadValueRange(double& lower, double& upper) const
+{
+   lower = mAdjustedSingleRangeLower;
+   upper = mAdjustedSingleRangeUpper;
+   return mAdjustedSingleRangeValid;
 }
 
 std::string BadValuesImp::getBadValueTolerance() const
@@ -440,6 +456,9 @@ void BadValuesImp::clear()
    mBadValueStrs.clear();
    mToleranceStr = BadValues::getSettingTolerance();
    mTolerance = StringUtilities::fromDisplayString<double>(mToleranceStr);
+   mAdjustedSingleRangeValid = false;
+   mAdjustedSingleRangeLower = std::numeric_limits<double>::max();
+   mAdjustedSingleRangeUpper = std::numeric_limits<double>::max();
 
    if (!mBadValuesBeingUpdated)
    {
@@ -631,6 +650,20 @@ void BadValuesImp::generateAdjustedValues()
    {
       std::pair<double, double> range(it->first, it->second);
       mAdjustedRanges.push_back(range);
+   }
+
+   // special case a single range for better performance when calling isBadValue()
+   if (mAdjustedRanges.size() == 1)
+   {
+      mAdjustedSingleRangeValid = true;
+      mAdjustedSingleRangeLower = mAdjustedRanges.front().first;
+      mAdjustedSingleRangeUpper = mAdjustedRanges.front().second;
+   }
+   else
+   {
+      mAdjustedSingleRangeValid = false;
+      mAdjustedSingleRangeLower = std::numeric_limits<double>::max();
+      mAdjustedSingleRangeUpper = std::numeric_limits<double>::max();
    }
 
    generateBadValuesString();

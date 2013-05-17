@@ -30,11 +30,12 @@ public:
    BadValues* getBadValues();
    virtual double getDefaultBadValue() const;
    virtual bool isBadValue(double value) const;
+   virtual bool getSingleBadValueRange(double& lower, double& upper) const;
 
    virtual std::string getLowerBadValueThreshold() const;
    virtual std::string getUpperBadValueThreshold() const;
-   virtual const std::vector<std::pair<std::string, std::string> > getBadValueRanges() const;
-   virtual const std::vector<std::string> getIndividualBadValues() const;
+   virtual const std::vector<std::pair<std::string, std::string> >& getBadValueRanges() const;
+   virtual const std::vector<std::string>& getIndividualBadValues() const;
    virtual std::string getBadValuesString() const;
    virtual std::string getBadValueTolerance() const;
 
@@ -76,6 +77,9 @@ private:
    double mTolerance;
    double mAdjustedUpper;
    double mAdjustedLower;
+   bool mAdjustedSingleRangeValid;
+   double mAdjustedSingleRangeLower;
+   double mAdjustedSingleRangeUpper;
    bool mBadValuesBeingUpdated;
    std::string mErrorMsg;
 };
@@ -103,6 +107,10 @@ private:
    { \
       return impClass::isBadValue(value); \
    } \
+   bool getSingleBadValueRange(double& lower, double& upper) const \
+   { \
+      return impClass::getSingleBadValueRange(lower, upper); \
+   } \
    bool setLowerBadValueThreshold(const std::string& thresholdStr) \
    { \
       return impClass::setLowerBadValueThreshold(thresholdStr); \
@@ -119,11 +127,11 @@ private:
    { \
       return impClass::getUpperBadValueThreshold(); \
    } \
-   const std::vector<std::pair<std::string, std::string> > getBadValueRanges() const \
+   const std::vector<std::pair<std::string, std::string> >& getBadValueRanges() const \
    { \
       return impClass::getBadValueRanges(); \
    } \
-   const std::vector<std::string> getIndividualBadValues() const \
+   const std::vector<std::string>& getIndividualBadValues() const \
    { \
       return impClass::getIndividualBadValues(); \
    } \

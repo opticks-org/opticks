@@ -526,6 +526,15 @@ private:
 
       int bufSize = mInfo.mTileSizeX * mInfo.mTileSizeY * sizeof(unsigned char);
       bool hasBadValues = (mInfo.mKey.mpBadValues1 != NULL && mInfo.mKey.mpBadValues1->empty() == false);
+      double singleBadValueLower = 0.0;
+      double singleBadValueUpper = 0.0;
+      bool hasSingleBadValueRange = false;
+      if (hasBadValues)
+      {
+         hasSingleBadValueRange = mInfo.mKey.mpBadValues1->getSingleBadValueRange(singleBadValueLower,
+            singleBadValueUpper);
+      }
+
       if (mInfo.mFormat == GL_LUMINANCE_ALPHA)
       {
          bufSize *= 2;
@@ -587,13 +596,27 @@ private:
                   if (hasBadValues)
                   {
                      ++target;
-                     if (mInfo.mKey.mpBadValues1->isBadValue(dValue))
+                     if (hasSingleBadValueRange)
                      {
-                        *target = 0;
+                        if (dValue > singleBadValueLower && dValue < singleBadValueUpper)
+                        {
+                           *target = 0;
+                        }
+                        else
+                        {
+                           *target = 0xff;
+                        }
                      }
                      else
                      {
-                        *target = 0xff;
+                        if (mInfo.mKey.mpBadValues1->isBadValue(dValue))
+                        {
+                           *target = 0;
+                        }
+                        else
+                        {
+                           *target = 0xff;
+                        }
                      }
                   }
                   else if (mInfo.mFormat == GL_LUMINANCE_ALPHA)
@@ -637,6 +660,15 @@ private:
       Image::prepareScale(mInfo, mInfo.mKey.mStretchPoints1, scaleData, 0, maxValue-1);
 
       bool hasBadValues = (mInfo.mKey.mpBadValues1 != NULL && mInfo.mKey.mpBadValues1->empty() == false);
+      bool hasSingleBadValueRange = false;
+      double singleBadValueLower = 0.0;
+      double singleBadValueUpper = 0.0;
+      if (hasBadValues)
+      {
+         hasSingleBadValueRange = mInfo.mKey.mpBadValues1->getSingleBadValueRange(singleBadValueLower,
+            singleBadValueUpper);
+      }
+
       int channels = (mInfo.mFormat == GL_RGBA ? 4 : 3);
       int bufSize = mInfo.mTileSizeX * mInfo.mTileSizeY * channels * sizeof(unsigned char);
       vector<unsigned char> pTexData(bufSize);
@@ -700,14 +732,30 @@ private:
 
                   if (hasBadValues)
                   {
-                     if (mInfo.mKey.mpBadValues1->isBadValue(dValue))
+                     bool badValue = false;
+                     if (hasSingleBadValueRange)
                      {
-                        *target = 0;
+                        if (dValue > singleBadValueLower && dValue < singleBadValueUpper)
+                        {
+                           *target = 0;
+                        }
+                        else
+                        {
+                           *target = mInfo.mKey.mColorMap[index].mAlpha;
+                        }
                      }
                      else
                      {
-                        *target = mInfo.mKey.mColorMap[index].mAlpha;
+                        if (mInfo.mKey.mpBadValues1->isBadValue(dValue))
+                        {
+                           *target = 0;
+                        }
+                        else
+                        {
+                           *target = mInfo.mKey.mColorMap[index].mAlpha;
+                        }
                      }
+
                      ++target;
                   }
                   else if (channels == 4)
@@ -752,10 +800,34 @@ private:
       Image::prepareScale(mInfo, mInfo.mKey.mStretchPoints3, scaleDataBlue, 2);
 
       bool hasRedBadValues = (mInfo.mKey.mpBadValues1 != NULL && mInfo.mKey.mpBadValues1->empty() == false);
+      double singleRangeLowRed = 0.0;
+      double singleRangeHighRed = 0.0;
+      bool hasSingleRedBadValueRange = false;
+      if (hasRedBadValues)
+      {
+         hasSingleRedBadValueRange = mInfo.mKey.mpBadValues1->getSingleBadValueRange(singleRangeLowRed,
+            singleRangeHighRed);
+      }
 
       bool hasGreenBadValues = (mInfo.mKey.mpBadValues2 != NULL && mInfo.mKey.mpBadValues2->empty() == false);
+      double singleRangeLowGreen = 0.0;
+      double singleRangeHighGreen = 0.0;
+      bool hasSingleGreenBadValueRange = false;
+      if (hasGreenBadValues)
+      {
+         hasSingleGreenBadValueRange = mInfo.mKey.mpBadValues2->getSingleBadValueRange(singleRangeLowGreen,
+            singleRangeHighGreen);
+      }
 
       bool hasBlueBadValues = (mInfo.mKey.mpBadValues3 != NULL && mInfo.mKey.mpBadValues3->empty() == false);
+      double singleRangeLowBlue = 0.0;
+      double singleRangeHighBlue = 0.0;
+      bool hasSingleBlueBadValueRange = false;
+      if (hasBlueBadValues)
+      {
+         hasSingleBlueBadValueRange = mInfo.mKey.mpBadValues3->getSingleBadValueRange(singleRangeLowBlue,
+            singleRangeHighBlue);
+      }
 
       bool hasBadValues = hasRedBadValues || hasGreenBadValues || hasBlueBadValues;
 
@@ -866,7 +938,14 @@ private:
 
                      if (hasRedBadValues)
                      {
-                        isRedValueBad = mInfo.mKey.mpBadValues1->isBadValue(dValue);
+                        if (hasSingleRedBadValueRange)
+                        {
+                           isRedValueBad = dValue > singleRangeLowRed && dValue < singleRangeHighRed;
+                        }
+                        else
+                        {
+                           isRedValueBad = mInfo.mKey.mpBadValues1->isBadValue(dValue);
+                        }
                      }
                      else
                      {
@@ -894,7 +973,14 @@ private:
 
                      if (hasGreenBadValues)
                      {
-                        isGreenValueBad = mInfo.mKey.mpBadValues2->isBadValue(dValue);
+                        if (hasSingleGreenBadValueRange)
+                        {
+                           isGreenValueBad = dValue > singleRangeLowGreen && dValue < singleRangeHighGreen;
+                        }
+                        else
+                        {
+                           isGreenValueBad = mInfo.mKey.mpBadValues2->isBadValue(dValue);
+                        }
                      }
                      else
                      {
@@ -922,7 +1008,14 @@ private:
 
                      if (hasBlueBadValues)
                      {
-                        isBlueValueBad = mInfo.mKey.mpBadValues3->isBadValue(dValue);
+                        if (hasSingleBlueBadValueRange)
+                        {
+                           isBlueValueBad = dValue > singleRangeLowBlue && dValue < singleRangeHighBlue;
+                        }
+                        else
+                        {
+                           isBlueValueBad = mInfo.mKey.mpBadValues3->isBadValue(dValue);
+                        }
                      }
                      else
                      {

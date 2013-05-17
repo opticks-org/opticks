@@ -99,9 +99,27 @@ public:
     *  @return  Returns \c true if the value is a bad data value;
     *           otherwise returns \c false.
     *
-    *  @see     setBadValueTolerance(), getBadValueTolerance()
+    *  @see     setBadValueTolerance(), getBadValueTolerance(), getSingleBadValueRange()
     */
    virtual bool isBadValue(double value) const = 0;
+
+   /**
+    *  Queries whether there is a single bad value range defined. This method can be called instead of calling
+    *  isBadValue() repeatedly and is intended to be used when only a single bad value range exists. This allows
+    *  for much faster querying of bad values but can only be used reliably when the method returns \c true.
+    *
+    *  @param   lower
+    *           The lower threshold of the bad value range. Only valid when the method returns \c true.
+    *
+    *  @param   upper
+    *           The upper threshold of the bad value range. Only valid when the method returns \c true.
+    *
+    *  @return  Returns \c true if there is exactly one bad value range;
+    *           otherwise returns \c false.
+    *
+    *  @see     isBadValue()
+    */
+   virtual bool getSingleBadValueRange(double& lower, double& upper) const = 0;
 
    /**
     *  Sets the lower threshold for bad values.
@@ -160,7 +178,7 @@ public:
     *           greater than or equal to the start of a range and less than or equal to the end of a range
     *           is considered a bad value.
     */
-   virtual const std::vector<std::pair<std::string, std::string> > getBadValueRanges() const = 0;
+   virtual const std::vector<std::pair<std::string, std::string> >& getBadValueRanges() const = 0;
 
    /**
     *  Returns a vector of individual bad values.
@@ -168,7 +186,7 @@ public:
     *  @return  Returns a vector of string values that mark the individual bad data values. %Any data value
     *           equal to one of the values in the vector is considered a bad value.
     */
-   virtual const std::vector<std::string> getIndividualBadValues() const = 0;
+   virtual const std::vector<std::string>& getIndividualBadValues() const = 0;
 
    /**
     *  Returns a std::string representation of all bad data values.

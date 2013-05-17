@@ -811,6 +811,15 @@ void StatisticsThread::run()
 
    int oldPercentDone = -1;
 
+   bool hasBadValues = mInput.mpBadValues != NULL && mInput.mpBadValues->empty() == false;
+   bool hasSingleBadValueRange = false;
+   double badValueLower = 0.0;
+   double badValueUpper = 0.0;
+   if (hasBadValues)
+   {
+      hasSingleBadValueRange = mInput.mpBadValues->getSingleBadValueRange(badValueLower, badValueUpper);
+   }
+
    bool isBip = pDescriptor->getInterleaveFormat() == BIP;
    // Outer band loop not for BIP, will break if BIP
    for (std::vector<DimensionDescriptor>::const_iterator bandIt = mInput.mBandsToCalculate.begin();
@@ -861,7 +870,20 @@ void StatisticsThread::run()
             double temp = ModelServices::getDataValue(encoding,
                da->getColumn(), component, isBip ? bipBandIt->getActiveNumber() : 0);
 
-            if (mInput.mpBadValues == NULL || mInput.mpBadValues->isBadValue(temp) == false)
+            bool badValue = false;
+            if (hasBadValues)
+            {
+               if (hasSingleBadValueRange)
+               {
+                  badValue = temp > badValueLower && temp < badValueUpper;
+               }
+               else
+               {
+                  badValue = mInput.mpBadValues->isBadValue(temp);
+               }
+            }
+
+            if (!badValue)
             {
                if (!mMaxMinSet)
                {
@@ -1056,6 +1078,15 @@ void HistogramThread::run()
       EncodingType encoding = pDescriptor->getDataType();
       ComplexComponent component = mInput.mStatInput.mComplexComponent;
 
+      bool hasBadValues = mInput.mStatInput.mpBadValues != NULL && mInput.mStatInput.mpBadValues->empty() == false;
+      bool hasSingleBadValueRange = false;
+      double badValueLower = 0.0;
+      double badValueUpper = 0.0;
+      if (hasBadValues)
+      {
+         hasSingleBadValueRange = mInput.mStatInput.mpBadValues->getSingleBadValueRange(badValueLower, badValueUpper);
+      }
+
       int oldPercentDone = -1;
       // Iterate the band over the AOI or all bands in the case of BIP
 //#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : This should be changed to for (; fiter != diter.end(); diter += mInput.mResolution)  if/when BitMaskIterator is modified to be an STL iterator (tclarke)")
@@ -1081,7 +1112,20 @@ void HistogramThread::run()
                da->getColumn(), mInput.mStatInput.mComplexComponent,
                isBip ? bipBandIt->getActiveNumber() : 0);
 
-            if (mInput.mStatInput.mpBadValues == NULL || mInput.mStatInput.mpBadValues->isBadValue(temp) == false)
+            bool badValue = false;
+            if (hasBadValues)
+            {
+               if (hasSingleBadValueRange)
+               {
+                  badValue = temp > badValueLower && temp < badValueUpper;
+               }
+               else
+               {
+                  badValue = mInput.mStatInput.mpBadValues->isBadValue(temp);
+               }
+            }
+
+            if (!badValue)
             {
                int bin = static_cast<int>((temp-mInput.mStatistics.mMinimum) * toBin);
                if (bin >= HISTOGRAM_SIZE)
