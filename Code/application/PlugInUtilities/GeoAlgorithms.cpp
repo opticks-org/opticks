@@ -540,6 +540,9 @@ bool GeoAlgorithms::getAngleToNorth(const RasterElement* pRaster, double& angle,
       return false;
    }
 
+   double xPixelSize = 1.0;
+   double yPixelSize = 1.0;
+
    const RasterDataDescriptor* pDescriptor = static_cast<const RasterDataDescriptor*>(pRaster->getDataDescriptor());
    if (pDescriptor != NULL)
    {
@@ -559,6 +562,9 @@ bool GeoAlgorithms::getAngleToNorth(const RasterElement* pRaster, double& angle,
       {
          pixelStart.mX = 0.0;
       }
+
+      xPixelSize = pDescriptor->getXPixelSize();
+      yPixelSize = pDescriptor->getYPixelSize();
    }
 
    LocationType geocoordStart = pRaster->convertPixelToGeocoord(pixelStart);
@@ -570,8 +576,8 @@ bool GeoAlgorithms::getAngleToNorth(const RasterElement* pRaster, double& angle,
    LocationType geocoordEnd = LocationType(geocoordStart.mX + degLatDelta, geocoordStart.mY);
    LocationType pixelEnd = pRaster->convertGeocoordToPixel(geocoordEnd);
 
-   double dDeltaX = pixelEnd.mX - pixelStart.mX;
-   double dDeltaY = pixelEnd.mY - pixelStart.mY;
+   double dDeltaX = (pixelEnd.mX - pixelStart.mX) * xPixelSize;
+   double dDeltaY = (pixelEnd.mY - pixelStart.mY) * yPixelSize;
    if (dDeltaX == 0.0 && dDeltaY == 0.0)
    {
       return false;

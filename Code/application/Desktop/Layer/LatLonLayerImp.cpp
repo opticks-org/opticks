@@ -240,17 +240,26 @@ void LatLonLayerImp::draw()
    }
 
    //Get bounding box of view
-   LocationType upperLeft;
-   LocationType upperRight;
-   LocationType lowerLeft;
-   LocationType lowerRight;
-   pView->getVisibleCorners(lowerLeft, upperLeft, upperRight, lowerRight);
+   LocationType worldLowerLeft;
+   LocationType worldUpperLeft;
+   LocationType worldUpperRight;
+   LocationType worldLowerRight;
+   pView->getVisibleCorners(worldLowerLeft, worldUpperLeft, worldUpperRight, worldLowerRight);
+
+   LocationType dataLowerLeft;
+   LocationType dataUpperLeft;
+   LocationType dataUpperRight;
+   LocationType dataLowerRight;
+   translateWorldToData(worldLowerLeft.mX, worldLowerLeft.mY, dataLowerLeft.mX, dataLowerLeft.mY);
+   translateWorldToData(worldUpperLeft.mX, worldUpperLeft.mY, dataUpperLeft.mX, dataUpperLeft.mY);
+   translateWorldToData(worldUpperRight.mX, worldUpperRight.mY, dataUpperRight.mX, dataUpperRight.mY);
+   translateWorldToData(worldLowerRight.mX, worldLowerRight.mY, dataLowerRight.mX, dataLowerRight.mY);
 
    vector<LocationType> boundingBox;
-   boundingBox.push_back(upperLeft);
-   boundingBox.push_back(upperRight);
-   boundingBox.push_back(lowerRight);
-   boundingBox.push_back(lowerLeft);
+   boundingBox.push_back(dataUpperLeft);
+   boundingBox.push_back(dataUpperRight);
+   boundingBox.push_back(dataLowerRight);
+   boundingBox.push_back(dataLowerLeft);
 
    setBoundingBox(boundingBox);
 
@@ -452,7 +461,7 @@ void LatLonLayerImp::draw()
                   //Check if pixel loc is in bounding box, if not it's invalid regardless of geo reference validity.
                   if (vertexValid)
                   {
-                     pView->translateWorldToScreen(pixelVertex.mX, pixelVertex.mY, screenX1, screenY1);
+                     translateDataToScreen(pixelVertex.mX, pixelVertex.mY, screenX1, screenY1);
                      vertexValid = (screenX1 > 0.0 && screenY1 > 0.0 &&
                         screenX1 < pView->width() && screenY1 < pView->height());
                   }
@@ -464,8 +473,8 @@ void LatLonLayerImp::draw()
                      lastGeoVertexAxis = geoVertexAxis;
                      lastGeoVertexOffAxis = stepValuesOffAxis[loc-1];
                      lastPixelVertex = pRaster->convertGeocoordToPixel(lastGeoVertex);
-                     pView->translateWorldToScreen(pixelVertex.mX, pixelVertex.mY, screenX1, screenY1);
-                     pView->translateWorldToScreen(lastPixelVertex.mX, lastPixelVertex.mY, screenX2, screenY2);
+                     translateDataToScreen(pixelVertex.mX, pixelVertex.mY, screenX1, screenY1);
+                     translateDataToScreen(lastPixelVertex.mX, lastPixelVertex.mY, screenX2, screenY2);
                      //Start at valid vertex and work back one pixel at a time until bad vertex found...
                      double geoPerPixel = (geoVertexOffAxis - lastGeoVertexOffAxis)/sqrt(pow((screenX1 - screenX2), 2) +
                         pow((screenY1 - screenY2), 2));
@@ -481,7 +490,7 @@ void LatLonLayerImp::draw()
                         if (valid)
                         {
                            //Georeference says it's valid, now check if it's in the view
-                           pView->translateWorldToScreen(lastPixelVertex.mX, lastPixelVertex.mY, screenX1, screenY1);
+                           translateDataToScreen(lastPixelVertex.mX, lastPixelVertex.mY, screenX1, screenY1);
                            valid = (screenX1 > 0.0 && screenY1 > 0.0 &&
                               screenX1 < pView->width() && screenY1 < pView->height());
                         }
@@ -659,15 +668,23 @@ void LatLonLayerImp::draw()
          }
       }
 
-      double dMinX = 0.0;
-      double dMinY = 0.0;
-      double dMaxX = 0.0;
-      double dMaxY = 0.0;
-      pView->getExtents(dMinX, dMinY, dMaxX, dMaxY);
-      if (!(DrawUtil::isWithin(LocationType(dMinX, dMinY), &(*mBoundingBox.begin()), 4) &&
-            DrawUtil::isWithin(LocationType(dMinX, dMaxY), &(*mBoundingBox.begin()), 4) &&
-            DrawUtil::isWithin(LocationType(dMaxX, dMinY), &(*mBoundingBox.begin()), 4) &&
-            DrawUtil::isWithin(LocationType(dMaxX, dMaxY), &(*mBoundingBox.begin()), 4)) ||
+      double worldMinX = 0.0;
+      double worldMinY = 0.0;
+      double worldMaxX = 0.0;
+      double worldMaxY = 0.0;
+      pView->getExtents(worldMinX, worldMinY, worldMaxX, worldMaxY);
+
+      double dataMinX = 0.0;
+      double dataMinY = 0.0;
+      double dataMaxX = 0.0;
+      double dataMaxY = 0.0;
+      translateWorldToData(worldMinX, worldMinY, dataMinX, dataMinY);
+      translateWorldToData(worldMaxX, worldMaxY, dataMaxX, dataMaxY);
+
+      if (!(DrawUtil::isWithin(LocationType(dataMinX, dataMinY), &(*mBoundingBox.begin()), 4) &&
+            DrawUtil::isWithin(LocationType(dataMinX, dataMaxY), &(*mBoundingBox.begin()), 4) &&
+            DrawUtil::isWithin(LocationType(dataMaxX, dataMinY), &(*mBoundingBox.begin()), 4) &&
+            DrawUtil::isWithin(LocationType(dataMaxX, dataMaxY), &(*mBoundingBox.begin()), 4)) ||
             numDrawn < 16)
       {
          mComputedTickSpacingDirty = true;

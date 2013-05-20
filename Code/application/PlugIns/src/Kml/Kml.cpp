@@ -32,6 +32,7 @@
 #include "SpatialDataWindow.h"
 #include "Undo.h"
 #include "xmlreader.h"
+
 #include <QtCore/QBuffer>
 #include <QtCore/QByteArray>
 #include <QtCore/QDateTime>
@@ -41,6 +42,8 @@
 #include <QtCore/QTime>
 #include <QtCore/QUrl>
 #include <QtGui/QMatrix>
+
+#include <algorithm>
 #include <zip.h>
 
 using namespace std;
@@ -255,51 +258,69 @@ bool Kml::addLayer(Layer* pLayer, const Layer* pGeoLayer, const SpatialDataView*
    return true;
 }
 
-void Kml::generateBoundingBox(const Layer* pGeoLayer, int bbox[4])
+void Kml::generateBoundingBox(const Layer* pGeoLayer)
 {
    VERIFYNRV(pGeoLayer != NULL);
-   double dbbox[4];
-   pGeoLayer->translateScreenToData(bbox[0], bbox[1], dbbox[0], dbbox[1]);
-   pGeoLayer->translateScreenToData(bbox[2], bbox[3], dbbox[2], dbbox[3]);
-   if (dbbox[0] > dbbox[2])
-   {
-      std::swap(dbbox[0], dbbox[2]);
-   }
-   if (dbbox[1] > dbbox[3])
-   {
-      std::swap(dbbox[1], dbbox[3]);
-   }
+
+   // Translate the view's corner coordinates into layer coordinates
+   View* pView = pGeoLayer->getView();
+   VERIFYNRV(pView != NULL);
+
+   LocationType worldLowerLeft;
+   LocationType worldUpperLeft;
+   LocationType worldUpperRight;
+   LocationType worldLowerRight;
+   pView->getVisibleCorners(worldLowerLeft, worldUpperLeft, worldUpperRight, worldLowerRight);
+
+   LocationType dataLowerLeft;
+   LocationType dataUpperLeft;
+   LocationType dataUpperRight;
+   LocationType dataLowerRight;
+   pGeoLayer->translateWorldToData(worldLowerLeft.mX, worldLowerLeft.mY, dataLowerLeft.mX, dataLowerLeft.mY);
+   pGeoLayer->translateWorldToData(worldUpperLeft.mX, worldUpperLeft.mY, dataUpperLeft.mX, dataUpperLeft.mY);
+   pGeoLayer->translateWorldToData(worldUpperRight.mX, worldUpperRight.mY, dataUpperRight.mX, dataUpperRight.mY);
+   pGeoLayer->translateWorldToData(worldLowerRight.mX, worldLowerRight.mY, dataLowerRight.mX, dataLowerRight.mY);
+
+   // Translate the layer coordinates into geocoordinates
+   vector<LocationType> corners;
+   corners.push_back(dataLowerLeft);
+   corners.push_back(dataUpperLeft);
+   corners.push_back(dataUpperRight);
+   corners.push_back(dataLowerRight);
 
    RasterElement* pGeoElement = dynamic_cast<RasterElement*>(pGeoLayer->getDataElement());
    VERIFYNRV(pGeoElement != NULL);
-   RasterDataDescriptor* pDesc = static_cast<RasterDataDescriptor*>(pGeoElement->getDataDescriptor());
-   unsigned int elementWidth = pDesc->getColumnCount();
-   unsigned int elementHeight = pDesc->getRowCount();
-   mXml.pushAddPoint(mXml.addElement("LatLonAltBox"));
-   vector<LocationType> corners;
-   corners.push_back(LocationType(dbbox[0], dbbox[1]));
-   if (bbox[2] == bbox[0] && bbox[3] == bbox[1])
-   {
-      corners.push_back(LocationType(elementWidth, elementHeight));
-   }
-   else
-   {
-      corners.push_back(LocationType(dbbox[2], dbbox[3]));
-   }
+
    vector<LocationType> geoCorners = pGeoElement->convertPixelsToGeocoords(corners);
-   mXml.addText(geoCorners[0].mX, mXml.addElement("north"));
-   mXml.addText(geoCorners[1].mX, mXml.addElement("south"));
-   if (geoCorners[0].mY > geoCorners[1].mY)
+
+   // Determine the geo bounding box
+   double north = -90.0;
+   double south = 90.0;
+   double east = -180.0;
+   double west = 180.0;
+
+   for (vector<LocationType>::iterator iter = geoCorners.begin(); iter != geoCorners.end(); ++iter)
    {
-      mXml.addText(geoCorners[0].mY, mXml.addElement("east"));
-      mXml.addText(geoCorners[1].mY, mXml.addElement("west"));
+      LocationType geocoord = *iter;
+      north = std::max(geocoord.mX, north);
+      south = std::min(geocoord.mX, south);
+      east = std::max(geocoord.mY, east);
+      west = std::min(geocoord.mY, west);
    }
-   else
-   {
-      mXml.addText(geoCorners[0].mY, mXml.addElement("west"));
-      mXml.addText(geoCorners[1].mY, mXml.addElement("east"));
-   }
-   mXml.popAddPoint(); // LatLonBox
+
+   // Write the info to the file calling StringUtilities first to get higher precision
+   // instead of calling XmlWriter::addText() and passing in the double value
+   string northText = StringUtilities::toXmlString(north);
+   string southText = StringUtilities::toXmlString(south);
+   string eastText = StringUtilities::toXmlString(east);
+   string westText = StringUtilities::toXmlString(west);
+
+   mXml.pushAddPoint(mXml.addElement("LatLonAltBox"));
+   mXml.addText(northText, mXml.addElement("north"));
+   mXml.addText(southText, mXml.addElement("south"));
+   mXml.addText(eastText, mXml.addElement("east"));
+   mXml.addText(westText, mXml.addElement("west"));
+   mXml.popAddPoint();
 }
 
 void Kml::generatePolygonalLayer(const GraphicLayer* pGraphicLayer, bool visible, int order, const Layer* pGeoLayer)
@@ -499,7 +520,6 @@ void Kml::generateGroundOverlayLayer(Layer* pLayer, bool visible, int order, con
    mXml.addText(visible ? "1" : "0", mXml.addElement("visibility"));
    mXml.addText(QString::number(order).toAscii().data(), mXml.addElement("drawOrder"));
    QString layerId = QString::fromStdString(pLayer->getId());
-   int bbox[4] = {0, 0, 0, 0};
    if (mExportImages)
    {
       QByteArray bytes(5 * 1024 * 1024, '\0');
@@ -515,7 +535,7 @@ void Kml::generateGroundOverlayLayer(Layer* pLayer, bool visible, int order, con
          mXml.popAddPoint();
       }
       fileName += ".png";
-      if (ImageHandler::getSessionItemImage(pLayer, buffer, "PNG", frame, bbox))
+      if (ImageHandler::getSessionItemImage(pLayer, buffer, "PNG", frame))
       {
          mImages[fileName] = bytes;
          mXml.pushAddPoint(mXml.addElement("Icon"));
@@ -541,7 +561,7 @@ void Kml::generateGroundOverlayLayer(Layer* pLayer, bool visible, int order, con
       mXml.addText(imageUrl.toStdString(), mXml.addElement("href"));
       mXml.popAddPoint();
    }
-   generateBoundingBox(pGeoLayer, bbox);
+   generateBoundingBox(pGeoLayer);
 
    // add ExtendedData
    const DynamicObject* pMeta = pLayer->getDataElement()->getMetadata();

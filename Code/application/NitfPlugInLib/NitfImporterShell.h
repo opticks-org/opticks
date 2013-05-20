@@ -19,6 +19,7 @@
 #include <map>
 #include <string>
 
+class DataVariant;
 class ossimNitfFileHeaderV2_X;
 class ossimNitfImageHeaderV2_X;
 
@@ -203,6 +204,7 @@ namespace Nitf
    private:
       opj_image_t* getImageInfo(const std::string& filename, unsigned int imageSegment,
          OPJ_CODEC_FORMAT decoderType) const;
+      double getGsd(const DataVariant& spacing, const std::string& units) const;
 
       std::map<ossim_uint32, std::string> mParseMessages;
    };

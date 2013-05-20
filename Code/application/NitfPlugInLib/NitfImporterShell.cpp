@@ -16,10 +16,13 @@
 #include "CachedPager.h"
 #include "Classification.h"
 #include "DataDescriptor.h"
+#include "DataVariant.h"
 #include "DesktopServices.h"
 #include "DynamicObject.h"
 #include "FileDescriptor.h"
 #include "FileResource.h"
+#include "GeoConversions.h"
+#include "GeoPoint.h"
 #include "ImportDescriptor.h"
 #include "NitfConstants.h"
 #include "NitfImporterShell.h"
@@ -46,6 +49,7 @@
 #include <ossim/support_data/ossimNitfImageHeaderV2_X.h>
 #include <ossim/imaging/ossimNitfTileSource.h>
 
+#include <list>
 #include <sstream>
 #include <vector>
 
@@ -661,12 +665,129 @@ ImportDescriptor* Nitf::NitfImporterShell::getImportDescriptor(const string& fil
    if (Nitf::importMetadata(imageSegment + 1, pFile, pFileHeader, pImageSubheader, pDescriptor, parsers,
       errorMessage) == true)
    {
+      // Populate specific fields in the data descriptor or file descriptor from the TREs
       const DynamicObject* pMetadata = pDescriptor->getMetadata();
       VERIFYRV(pMetadata, NULL);
 
-      // This only checks the first BANDSB. It is possible to have multiple BANDSB TREs.
-      // If someone runs across real data where the bad band info is in another BANDSB TRE
-      // this code will need to be modified.
+      // Pixel size - This info is contained in multiple TREs, but there is no documentation on which
+      // TRE contains the more precise value if multiple TREs containing the info are present.  Choosing
+      // the order ACFTA, BANDSA, ACFTB, and BANDSB where the later "B" TREs will overwrite the values
+      // contained in the earlier "A" TREs.  The BANDSB TRE contains GSD values for each band, which is
+      // currently not supported, so only set the pixel size if the values in all bands are the same.
+      double xGsd = 1.0;
+      double yGsd = 1.0;
+
+      const string acrftaPath[] =
+      {
+         Nitf::NITF_METADATA,
+         Nitf::TRE_METADATA,
+         "ACFTA",
+         "0",
+         END_METADATA_NAME
+      };
+
+      const DynamicObject* pAcrftA = dv_cast<DynamicObject>(&pMetadata->getAttributeByPath(acrftaPath));
+      if (pAcrftA != NULL)
+      {
+         // The ACFTA spec calls out specific spacing units for "SAR" and "EO-IR" data, but does not indicate how
+         // this is determined.  It seems to be related to the ACFTB SENSOR_ID_TYPE field, but that field is not
+         // present in the ACFTA TRE.  So just check for "SAR" data from the ICAT field in the image subheader
+         // and assume every other data type is "EO-IR" data.
+         const string imageCategory = pImageSubheader->getCategory().trim();
+
+         const DataVariant& rowSpacing = pAcrftA->getAttribute(Nitf::TRE::ACFTA::ROW_SPACING);
+         if (rowSpacing.isValid() == true)
+         {
+            if (imageCategory == "SAR")
+            {
+               yGsd = getGsd(rowSpacing, "f");     // Feet
+            }
+            else
+            {
+               yGsd = getGsd(rowSpacing, "r");     // Micro-radians
+            }
+         }
+
+         const DataVariant& columnSpacing = pAcrftA->getAttribute(Nitf::TRE::ACFTA::COL_SPACING);
+         if (columnSpacing.isValid() == true)
+         {
+            if (imageCategory == "SAR")
+            {
+               xGsd = getGsd(columnSpacing, "f");  // Feet
+            }
+            else
+            {
+               xGsd = getGsd(columnSpacing, "r");  // Micro-radians
+            }
+         }
+      }
+
+      const string bandsaPath[] =
+      {
+         Nitf::NITF_METADATA,
+         Nitf::TRE_METADATA,
+         "BANDSA",
+         "0",
+         END_METADATA_NAME
+      };
+
+      const DynamicObject* pBandsA = dv_cast<DynamicObject>(&pMetadata->getAttributeByPath(bandsaPath));
+      if (pBandsA != NULL)
+      {
+         const DataVariant& rowSpacing = pBandsA->getAttribute(Nitf::TRE::BANDSA::ROW_SPACING);
+         if (rowSpacing.isValid() == true)
+         {
+            const DataVariant& rowSpacingUnits = pBandsA->getAttribute(Nitf::TRE::BANDSA::ROW_SPACING_UNITS);
+            if (rowSpacingUnits.isValid() == true)
+            {
+               yGsd = getGsd(rowSpacing, rowSpacingUnits.toXmlString());
+            }
+         }
+
+         const DataVariant& columnSpacing = pBandsA->getAttribute(Nitf::TRE::BANDSA::COL_SPACING);
+         if (columnSpacing.isValid() == true)
+         {
+            const DataVariant& columnSpacingUnits = pBandsA->getAttribute(Nitf::TRE::BANDSA::COL_SPACING_UNITS);
+            if (columnSpacingUnits.isValid() == true)
+            {
+               xGsd = getGsd(columnSpacing, columnSpacingUnits.toXmlString());
+            }
+         }
+      }
+
+      const string acrftbPath[] =
+      {
+         Nitf::NITF_METADATA,
+         Nitf::TRE_METADATA,
+         "ACFTB",
+         "0",
+         END_METADATA_NAME
+      };
+
+      const DynamicObject* pAcrftB = dv_cast<DynamicObject>(&pMetadata->getAttributeByPath(acrftbPath));
+      if (pAcrftB != NULL)
+      {
+         const DataVariant& rowSpacing = pAcrftB->getAttribute(Nitf::TRE::ACFTB::ROW_SPACING);
+         if (rowSpacing.isValid() == true)
+         {
+            const DataVariant& rowSpacingUnits = pAcrftB->getAttribute(Nitf::TRE::ACFTB::ROW_SPACING_UNITS);
+            if (rowSpacingUnits.isValid() == true)
+            {
+               yGsd = getGsd(rowSpacing, rowSpacingUnits.toXmlString());
+            }
+         }
+
+         const DataVariant& columnSpacing = pAcrftB->getAttribute(Nitf::TRE::ACFTB::COL_SPACING);
+         if (columnSpacing.isValid() == true)
+         {
+            const DataVariant& columnSpacingUnits = pAcrftB->getAttribute(Nitf::TRE::ACFTB::COL_SPACING_UNITS);
+            if (columnSpacingUnits.isValid() == true)
+            {
+               xGsd = getGsd(columnSpacing, columnSpacingUnits.toXmlString());
+            }
+         }
+      }
+
       const string bandsbPath[] =
       {
          Nitf::NITF_METADATA,
@@ -677,6 +798,229 @@ ImportDescriptor* Nitf::NitfImporterShell::getImportDescriptor(const string& fil
       };
 
       const DynamicObject* pBandsB = dv_cast<DynamicObject>(&pMetadata->getAttributeByPath(bandsbPath));
+      if (pBandsB != NULL)
+      {
+         bool validRowGsd = false;
+
+         const DataVariant& rowGsd = pBandsB->getAttribute(Nitf::TRE::BANDSB::ROW_GSD);
+         if (rowGsd.isValid() == true)
+         {
+            const DataVariant& rowGsdUnits = pBandsB->getAttribute(Nitf::TRE::BANDSB::ROW_GSD_UNIT);
+            if (rowGsdUnits.isValid() == true)
+            {
+               yGsd = getGsd(rowGsd, rowGsdUnits.toXmlString());
+               validRowGsd = true;
+            }
+         }
+
+         if (validRowGsd == false)
+         {
+            if (pBandsB->getAttribute(Nitf::TRE::BANDSB::ROW_GSD + "#0").isValid())
+            {
+               double commonYGsd = -1.0;
+
+               unsigned int numBands = pDescriptor->getBandCount();
+               for (unsigned int i = 0; i < numBands; ++i)
+               {
+                  double bandYGsd = -1.0;
+                  string bandPostfix = "#" + StringUtilities::toDisplayString(i);
+
+                  const DataVariant& bandRowGsd = pBandsB->getAttribute(Nitf::TRE::BANDSB::ROW_GSD + bandPostfix);
+                  if (bandRowGsd.isValid() == true)
+                  {
+                     const DataVariant& bandRowGsdUnits = pBandsB->getAttribute(Nitf::TRE::BANDSB::ROW_GSD_UNIT +
+                        bandPostfix);
+                     if (bandRowGsdUnits.isValid() == true)
+                     {
+                        bandYGsd = getGsd(bandRowGsd, bandRowGsdUnits.toXmlString());
+                     }
+                  }
+
+                  if (bandYGsd == commonYGsd)
+                  {
+                     continue;
+                  }
+
+                  if (commonYGsd != -1.0)
+                  {
+                     commonYGsd = -1.0;
+                     break;
+                  }
+
+                  commonYGsd = bandYGsd;
+               }
+
+               if (commonYGsd != 1.0)
+               {
+                  yGsd = commonYGsd;
+               }
+            }
+         }
+
+         bool validColumnGsd = false;
+
+         const DataVariant& columnGsd = pBandsB->getAttribute(Nitf::TRE::BANDSB::COL_GSD);
+         if (columnGsd.isValid() == true)
+         {
+            const DataVariant& columnGsdUnits = pBandsB->getAttribute(Nitf::TRE::BANDSB::COL_GSD_UNITS);
+            if (columnGsdUnits.isValid() == true)
+            {
+               xGsd = getGsd(columnGsd, columnGsdUnits.toXmlString());
+               validColumnGsd = true;
+            }
+         }
+
+         if (validColumnGsd == false)
+         {
+            if (pBandsB->getAttribute(Nitf::TRE::BANDSB::COL_GSD + "#0").isValid())
+            {
+               double commonXGsd = -1.0;
+
+               unsigned int numBands = pDescriptor->getBandCount();
+               for (unsigned int i = 0; i < numBands; ++i)
+               {
+                  double bandXGsd = -1.0;
+                  string bandPostfix = "#" + StringUtilities::toDisplayString(i);
+
+                  const DataVariant& bandRowGsd = pBandsB->getAttribute(Nitf::TRE::BANDSB::COL_GSD + bandPostfix);
+                  if (bandRowGsd.isValid() == true)
+                  {
+                     const DataVariant& bandRowGsdUnits = pBandsB->getAttribute(Nitf::TRE::BANDSB::COL_GSD_UNIT +
+                        bandPostfix);
+                     if (bandRowGsdUnits.isValid() == true)
+                     {
+                        bandXGsd = getGsd(bandRowGsd, bandRowGsdUnits.toXmlString());
+                     }
+                  }
+
+                  if (bandXGsd == commonXGsd)
+                  {
+                     continue;
+                  }
+
+                  if (commonXGsd != -1.0)
+                  {
+                     commonXGsd = -1.0;
+                     break;
+                  }
+
+                  commonXGsd = bandXGsd;
+               }
+
+               if (commonXGsd != 1.0)
+               {
+                  xGsd = commonXGsd;
+               }
+            }
+         }
+      }
+
+      double magFactor = 1.0;
+      ossimString imag = pImageSubheader->getImageMagnification().trim();
+      if (imag.empty() == false)
+      {
+         // Need to multiply the GSD values by the image magnification (IMAG) value in the image subheader
+         if (imag[0] == '/')
+         {
+            ossimString reciprocal = imag.substr(1);
+            magFactor = 1.0 / reciprocal.toDouble();
+         }
+         else
+         {
+            magFactor = imag.toDouble();
+         }
+
+         xGsd *= magFactor;
+         yGsd *= magFactor;
+      }
+
+      pDescriptor->setXPixelSize(xGsd);
+      pDescriptor->setYPixelSize(yGsd);
+
+      // Higher precision GCPs
+      const string blockaPath[] =
+      {
+         Nitf::NITF_METADATA,
+         Nitf::TRE_METADATA,
+         "BLOCKA",
+         "0",
+         END_METADATA_NAME
+      };
+
+      const DynamicObject* pBlockA = dv_cast<DynamicObject>(&pMetadata->getAttributeByPath(blockaPath));
+      if (pBlockA != NULL)
+      {
+         const DataVariant& blockLines = pBlockA->getAttribute(Nitf::TRE::BLOCKA::L_LINES);
+         if (blockLines.isValid() == true)
+         {
+            unsigned int numBlockRows = 0;
+            if (blockLines.getValue<unsigned int>(numBlockRows) == true)
+            {
+               // Need to multiply the number of rows by the image magnification (IMAG) value in the image subheader
+               numBlockRows = static_cast<unsigned int>(static_cast<double>(numBlockRows) * magFactor);
+               if (numBlockRows == pFileDescriptor->getRowCount())
+               {
+                  list<GcpPoint> updatedGcps;
+
+                  list<GcpPoint> gcps = pFileDescriptor->getGcps();
+                  for (list<GcpPoint>::iterator iter = gcps.begin(); iter != gcps.end(); ++iter)
+                  {
+                     GcpPoint gcp = *iter;
+                     string coordinateText;
+
+                     list<GcpPoint>::size_type index = updatedGcps.size();
+                     if (index == 0)
+                     {
+                        const DataVariant& gcp1 = pBlockA->getAttribute(Nitf::TRE::BLOCKA::FRFC_LOC);
+                        if (gcp1.isValid() == true)
+                        {
+                           coordinateText = gcp1.toXmlString();
+                        }
+                     }
+                     else if (index == 1)
+                     {
+                        const DataVariant& gcp2 = pBlockA->getAttribute(Nitf::TRE::BLOCKA::FRLC_LOC);
+                        if (gcp2.isValid() == true)
+                        {
+                           coordinateText = gcp2.toXmlString();
+                        }
+                     }
+                     else if (index == 2)
+                     {
+                        const DataVariant& gcp3 = pBlockA->getAttribute(Nitf::TRE::BLOCKA::LRLC_LOC);
+                        if (gcp3.isValid() == true)
+                        {
+                           coordinateText = gcp3.toXmlString();
+                        }
+                     }
+                     else if (index == 3)
+                     {
+                        const DataVariant& gcp4 = pBlockA->getAttribute(Nitf::TRE::BLOCKA::LRFC_LOC);
+                        if (gcp4.isValid() == true)
+                        {
+                           coordinateText = gcp4.toXmlString();
+                        }
+                     }
+
+                     if (StringUtilities::isAllBlank(coordinateText) == false)
+                     {
+                        coordinateText.insert(10, ", ");
+                        LatLonPoint latLon(coordinateText);
+                        gcp.mCoordinate = latLon.getCoordinates();
+                     }
+
+                     updatedGcps.push_back(gcp);
+                  }
+
+                  pFileDescriptor->setGcps(updatedGcps);
+               }
+            }
+         }
+      }
+
+      // This only checks the first BANDSB. It is possible to have multiple BANDSB TREs.
+      // If someone runs across real data where the bad band info is in another BANDSB TRE
+      // this code will need to be modified.
       if (pBandsB != NULL && pBandsB->getAttribute(Nitf::TRE::BANDSB::BAD_BAND + "#0").isValid())
       {
          const vector<DimensionDescriptor>& curBands = pDescriptor->getBands();
@@ -967,4 +1311,31 @@ opj_image_t* Nitf::NitfImporterShell::getImageInfo(const std::string& filename, 
    opj_destroy_codec(pCodec);
 
    return pImage;
+}
+
+double Nitf::NitfImporterShell::getGsd(const DataVariant& spacing, const string& units) const
+{
+   if ((spacing.isValid() == false) || (units.empty() == true))
+   {
+      return 1.0;
+   }
+
+   double gsd = 1.0;
+   if (spacing.getValue<double>(gsd) == false)
+   {
+      return 1.0;
+   }
+
+   // Convert the value to meters
+   if (StringUtilities::toLower(units) == "f")        // Feet
+   {
+      gsd = GeoConversions::convertFeetToMeters(gsd);
+   }
+   else if (StringUtilities::toLower(units) == "r")   // Micro-radians
+   {
+      double nauticalMiles = GeoConversions::convertRadToNm(gsd * 1e-6);
+      gsd = GeoConversions::convertNmToMeters(nauticalMiles);
+   }
+
+   return gsd;
 }

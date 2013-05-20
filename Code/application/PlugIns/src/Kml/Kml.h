@@ -36,7 +36,7 @@ public:
    bool addView(const SpatialDataView* pView);
    bool addLayer(Layer* pLayer, const Layer* pGeoLayer, const SpatialDataView* pView, int totalLayers);
 
-   void generateBoundingBox(const Layer* pGeoLayer, int bbox[4]);
+   void generateBoundingBox(const Layer* pGeoLayer);
    void generatePolygonalLayer(const GraphicLayer* pGraphicLayer, bool visible, int order, const Layer* pGeoLayer);
    void generateGroundOverlayLayer(Layer* pLayer, bool visible, int order, const Layer* pGeoLayer, int frame = -1);
 

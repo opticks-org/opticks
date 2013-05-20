@@ -26,6 +26,7 @@
 #include "Progress.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
+#include "RasterLayer.h"
 #include "SpatialDataView.h"
 #include "StringUtilities.h"
 #include "Undo.h"
@@ -238,6 +239,20 @@ bool GeoreferencePlugIn::execute(PlugInArgList* pInParam, PlugInArgList* pOutPar
          }
          else
          {
+            // Set the layer offset and scale factor to that of the corresponding raster layer
+            LayerList* pLayerList = mpView->getLayerList();
+            if (pLayerList != NULL)
+            {
+               RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(pLayerList->getLayer(RASTER, mpRaster));
+               if (pRasterLayer != NULL)
+               {
+                  pLatLonLayer->setXOffset(pRasterLayer->getXOffset());
+                  pLatLonLayer->setYOffset(pRasterLayer->getYOffset());
+                  pLatLonLayer->setXScaleFactor(pRasterLayer->getXScaleFactor());
+                  pLatLonLayer->setYScaleFactor(pRasterLayer->getYScaleFactor());
+               }
+            }
+
             pStep->addProperty("resultsName", mLayerName);
             pStep->addProperty("geocoordType", mGeocoordType);
             pStep->addProperty("latLonFormat", mLatLonFormat);

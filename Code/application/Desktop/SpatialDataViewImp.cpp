@@ -1415,6 +1415,11 @@ QImage SpatialDataViewImp::getLayerImage(Layer* pLayer, ColorType& transparent, 
       clrBackground = COLORTYPE_TO_QCOLOR(transparent);
    }
 
+   double xOffset = pLayerImp->getXOffset();
+   double yOffset = pLayerImp->getYOffset();
+   double xScale = pLayerImp->getXScaleFactor();
+   double yScale = pLayerImp->getYScaleFactor();
+
    // Save matrices
    double modelMatrix[16];
    double projectionMatrix[16];
@@ -1450,7 +1455,11 @@ QImage SpatialDataViewImp::getLayerImage(Layer* pLayer, ColorType& transparent, 
       qglClearColor(clrBackground);
       glClear(GL_COLOR_BUFFER_BIT);
 
+      glPushMatrix();
+      glTranslated(xOffset, yOffset, 0.0);
+      glScaled(xScale, yScale, 1.0);
       pLayerImp->draw();
+      glPopMatrix();
 
       fbo.release();
 
@@ -1458,7 +1467,7 @@ QImage SpatialDataViewImp::getLayerImage(Layer* pLayer, ColorType& transparent, 
       int iWidth = w;
       int iHeight = h;
 
-      QImage img = fbo.toImage();
+      QImage img = fbo.toImage().convertToFormat(QImage::Format_ARGB32);
 
       // Restore matrices
       painter.endNativePainting();
@@ -1476,10 +1485,10 @@ QImage SpatialDataViewImp::getLayerImage(Layer* pLayer, ColorType& transparent, 
       bbox[3] = 0;
 
       // Scan the buffer to find the actual bounding box that contains all pixels not equal to the background color
-      unsigned int backgroundCpack = clrBackground.red() + (clrBackground.green() << 8) + (clrBackground.blue() << 16);
+      unsigned int backgroundCpack = clrBackground.blue() + (clrBackground.green() << 8) + (clrBackground.red() << 16);
       if (Endian::getSystemEndian() == BIG_ENDIAN_ORDER)
       {
-         backgroundCpack = (clrBackground.red() << 24) + (clrBackground.green() << 16) + (clrBackground.blue() << 8);
+         backgroundCpack = (clrBackground.red() << 16) + (clrBackground.green() << 8) + clrBackground.blue();
       }
 
       for (int i = 0; i < iHeight; i++)
@@ -1520,11 +1529,7 @@ QImage SpatialDataViewImp::getLayerImage(Layer* pLayer, ColorType& transparent, 
          return QImage();
       }
 
-      // Get the pixel data of just the bounding box area
-      iWidth = bbox[2] - bbox[0] + 1;
-      iHeight = bbox[3] - bbox[1] + 1;
-
-      return img.copy(bbox[0], bbox[1], iWidth, iHeight).convertToFormat(QImage::Format_ARGB32);
+      return img;
    }
    else
    {
@@ -1542,7 +1547,11 @@ QImage SpatialDataViewImp::getLayerImage(Layer* pLayer, ColorType& transparent, 
       qglClearColor(clrBackground);
       glClear(GL_COLOR_BUFFER_BIT);
 
+      glPushMatrix();
+      glTranslated(xOffset, yOffset, 0.0);
+      glScaled(xScale, yScale, 1.0);
       pLayerImp->draw();
+      glPopMatrix();
 
       // Restore matrices
       glMatrixMode(GL_PROJECTION);
@@ -1609,24 +1618,18 @@ QImage SpatialDataViewImp::getLayerImage(Layer* pLayer, ColorType& transparent, 
          return QImage();
       }
 
-      // Get the pixel data of just the bounding box area
-      iWidth = bbox[2] - bbox[0] + 1;
-      iHeight = bbox[3] - bbox[1] + 1;
-
-      vector<unsigned int> bbPixels(iWidth * iHeight);
-      glReadPixels(bbox[0], bbox[1], iWidth, iHeight, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*) &bbPixels[0]);
-
-      ViewImp::reorderImage(&bbPixels[0], iWidth, iHeight);
+      // Reorder the image from RGBA to ARGB
+      ViewImp::reorderImage(&pixels[0], iWidth, iHeight);
 
       // Create the image from the pixel data
       QImage image(iWidth, iHeight, QImage::Format_ARGB32);
 
-      unsigned char* pBits = NULL;
-      pBits = image.bits();
+      unsigned char* pBits = image.bits();
       if (pBits != NULL)
       {
-         memcpy(pBits, &bbPixels[0], iWidth * iHeight * 4);
+         memcpy(pBits, &pixels[0], iWidth * iHeight * 4);
       }
+
       return image;
    }
 }

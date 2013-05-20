@@ -118,13 +118,6 @@ bool ImageHandler::getSessionItemImage(SessionItem* pItem, QBuffer& buffer, cons
             pRasterLayer->setDisplayMode(GRAYSCALE_MODE);
          }
          int bbox[4] = {0, 0, 0, 0};
-         QColor t = Qt::transparent;
-         ColorType realTransparent = QCOLOR_TO_COLORTYPE(t);
-         {
-            QImage dummyImage;
-            int dummyBbox[4] = {0,0,0,0};
-            pSDView->getLayerImage(pLayer, dummyImage, realTransparent, dummyBbox);
-         }
          ColorType transparent(255, 255, 254);
          success = pSDView->getLayerImage(pLayer, image, transparent, bbox);
          if (pBbox != NULL)
@@ -140,13 +133,12 @@ bool ImageHandler::getSessionItemImage(SessionItem* pItem, QBuffer& buffer, cons
          {
             alphaChannel.fill(0xff);
          }
-         QRgb realTransColor = COLORTYPE_TO_QCOLOR(realTransparent).rgb();
          QRgb transColor = COLORTYPE_TO_QCOLOR(transparent).rgb();
          for (int y = 0; y < image.height(); y++)
          {
             for (int x = 0; x < image.width(); x++)
             {
-               if (image.pixel(x, y) == transColor || image.pixel(x, y) == realTransColor)
+               if (image.pixel(x, y) == transColor)
                {
                   alphaChannel.setPixel(x, y, 0x00);
                }
