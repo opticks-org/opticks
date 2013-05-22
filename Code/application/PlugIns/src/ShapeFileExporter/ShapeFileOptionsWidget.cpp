@@ -470,7 +470,8 @@ void ShapeFileOptionsWidget::updateFilenames()
          mpDbfFileLabel->setText(strFilename + ".dbf");
          if (mpShapeFile != NULL)
          {
-            string filename = strFilename.toStdString();
+            // Set the shape file name as the filename in the ShapeFile object
+            string filename = strFilename.toStdString() + ".shp";
             mpShapeFile->setFilename(filename);
          }
       }

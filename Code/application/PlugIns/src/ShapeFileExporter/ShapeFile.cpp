@@ -24,6 +24,8 @@
 #include "ShapeFile.h"
 #include "UtilityServices.h"
 
+#include <QtCore/QDir>
+#include <QtCore/QFileInfo>
 #include <QtCore/QString>
 
 #include <algorithm>
@@ -669,9 +671,6 @@ bool ShapeFile::save(Progress* pProgress, string& errorMessage)
    }
 
    // Open the files
-   SHPHandle pShapeFile = NULL;
-   DBFHandle pAttributeFile = NULL;
-
    int iType = -1;
    switch (mShape)
    {
@@ -700,7 +699,12 @@ bool ShapeFile::save(Progress* pProgress, string& errorMessage)
       return false;
    }
 
-   pShapeFile = SHPCreate(mFilename.c_str(), iType);
+   QFileInfo fileInfo(QString::fromStdString(mFilename));
+   QDir fileDir = fileInfo.absoluteDir();
+   QString fileBaseName = fileDir.absoluteFilePath(fileInfo.completeBaseName());
+   std::string filename = fileBaseName.toStdString();
+
+   SHPHandle pShapeFile = SHPCreate(filename.c_str(), iType);
    if (pShapeFile == NULL)
    {
       errorMessage = "Cannot create the SHP and SHX files!";
@@ -712,7 +716,7 @@ bool ShapeFile::save(Progress* pProgress, string& errorMessage)
       return false;
    }
 
-   pAttributeFile = DBFCreate(mFilename.c_str());
+   DBFHandle pAttributeFile = DBFCreate(filename.c_str());
    if (pAttributeFile == NULL)
    {
       SHPClose(pShapeFile);
@@ -870,7 +874,7 @@ bool ShapeFile::save(Progress* pProgress, string& errorMessage)
    SHPClose(pShapeFile);
    DBFClose(pAttributeFile);
 
-   string prjFilename = mFilename + ".prj";
+   string prjFilename = filename + ".prj";
    ofstream prjFile(prjFilename.c_str());
    prjFile << prjFileContents;
    prjFile.close();
