@@ -65,8 +65,8 @@ protected slots:
    void proxyInitialized();
    void importGeodatabase();
    void refreshFeatureClass();
-   void exportFeatureClass();
    void displayFeatureClassProperties();
+   void displayFeatureClassTable();
 
 private:
    FeatureManager(const FeatureManager& rhs);

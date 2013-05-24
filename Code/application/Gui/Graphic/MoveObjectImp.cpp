@@ -205,24 +205,40 @@ bool MoveObjectImp::processMousePress(LocationType sceneCoord,
          pLayerImp->cloneSelection(pLayer);
       }
 
-      if (pLayerImp->grabHandle(sceneCoord, mpLastSelectedObject, mSelectedHandle))
+      bool deselected = false;
+      if (modifiers & Qt::ShiftModifier)
       {
-         // do nothing, grabHandle already set some members for us
-      }
-      else
-      {
-         mpLastSelectedObject = pLayerImp->hit(sceneCoord);
-
-         if ( !pLayer->isObjectSelected(mpLastSelectedObject) && !(modifiers & Qt::ShiftModifier) )
+         GraphicObject* pCurrentSelectedObject = pLayerImp->hit(sceneCoord);
+         if (pLayer->isObjectSelected(pCurrentSelectedObject))
          {
-            pLayer->deselectAllObjects();
+            pLayer->deselectObject(pCurrentSelectedObject);
+            mpLastSelectedObject = NULL;
+            mSelectedHandle = -1;
+            deselected = true;
          }
-
-         pLayer->selectObject(mpLastSelectedObject);
-
-         mLastCoord = sceneCoord;
-         mPressCoord = sceneCoord;
       }
+
+      if (! deselected)
+      {
+         if (pLayerImp->grabHandle(sceneCoord, mpLastSelectedObject, mSelectedHandle))
+         {
+            // do nothing, grabHandle already set some members for us
+         }
+         else
+         {
+            mpLastSelectedObject = pLayerImp->hit(sceneCoord);
+
+            if (!pLayer->isObjectSelected(mpLastSelectedObject) && !(modifiers & Qt::ShiftModifier))
+            {
+               pLayer->deselectAllObjects();
+            }
+
+            pLayer->selectObject(mpLastSelectedObject);
+         }
+      }
+
+      mLastCoord = sceneCoord;
+      mPressCoord = sceneCoord;
       used = true;
    }
 
@@ -303,7 +319,8 @@ bool MoveObjectImp::processMouseRelease(LocationType sceneCoord,
       {
          GraphicLayerImp* pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
          VERIFY(pLayer != NULL);
-         pLayer->selectObjects(mPressCoord, sceneCoord);
+         bool append = modifiers & Qt::ShiftModifier;
+         pLayer->selectObjects(mPressCoord, sceneCoord, append);
          ViewImp* pView = dynamic_cast<ViewImp*>(pLayer->getView());
          VERIFY(pView != NULL);
          pView->setSelectionBox(QRect());

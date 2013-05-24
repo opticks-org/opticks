@@ -6382,6 +6382,27 @@ const vector<PlugInDescriptor*> &ApplicationWindow::getAvailableExporters(const 
    Service<PlugInManagerServices> pPims;
    vector<PlugInDescriptor*> exporters = pPims->getPlugInDescriptors(PlugInManagerServices::ExporterType());
 
+   // Determine whether the selected item is part of a geographic layer.
+   bool geographicItem = false;
+   const DataElement* pElement = NULL;
+   const AnnotationLayer* pAnnLayer = dynamic_cast<const AnnotationLayer*>(pItem);
+   if (pAnnLayer != NULL)
+   {
+      pElement = pAnnLayer->getDataElement();
+   }
+   else
+   {
+      pElement = dynamic_cast<const DataElement*>(pItem);
+   }
+   if (pElement != NULL)
+   {
+      vector<DataElement*> children = Service<ModelServices>()->getElements(pElement, "FeatureClass");
+      if (children.empty() == false)
+      {
+         geographicItem = true;
+      }
+   }
+
    for (vector<PlugInDescriptor*>::const_iterator iter = exporters.begin(); iter != exporters.end(); ++iter)
    {
       PlugInDescriptor *pDescriptor = *iter;
@@ -6405,11 +6426,23 @@ const vector<PlugInDescriptor*> &ApplicationWindow::getAvailableExporters(const 
          continue;
       }
 
+      // This was added for OPTICKS-1472 to exclude exporters from being available for geographic elements/layers.
+      if (geographicItem == true)
+      {
+         const std::string pluginName = (*iter)->getName();
+         if (pluginName == "Annotation Layer Exporter" || pluginName == "CGM Exporter" ||
+            pluginName == "Annotation Model Exporter" || pluginName == "COLLADA Exporter")
+         {
+            continue;
+         }
+      }
+
       if (pTao->isKindOf(subtype))
       {
          availableExporters.push_back(*iter);
       }
    }
+
    pLastItem = pItem;
    return availableExporters;
 }

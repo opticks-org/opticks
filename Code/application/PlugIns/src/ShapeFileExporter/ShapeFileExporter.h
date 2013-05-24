@@ -18,7 +18,8 @@
 
 #include <memory>
 
-class AoiElement;
+class FileDescriptor;
+class GraphicElement;
 class LayerList;
 class RasterElement;
 class ShapeFileOptionsWidget;
@@ -38,7 +39,8 @@ private:
    Service<PlugInManagerServices> mpPlugInManager;
    std::auto_ptr<ShapeFileOptionsWidget> mpOptionsWidget;
    ShapeFile mShapefile;
-   AoiElement* mpAoi;
+   FileDescriptor* mpFileDesc;
+   GraphicElement* mpGraphicElement;
    RasterElement* mpGeoref;
    LayerList* mpLayers;
    bool extractInputs(const PlugInArgList* pInArgList, std::string& message);

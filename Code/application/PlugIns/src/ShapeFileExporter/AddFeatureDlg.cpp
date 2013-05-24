@@ -8,6 +8,7 @@
  */
 
 #include "AddFeatureDlg.h"
+#include "AnnotationLayer.h"
 #include "AppVerify.h"
 #include "ConfigurationSettings.h"
 #include "DataVariant.h"
@@ -30,7 +31,8 @@
 
 using namespace std;
 
-AddFeatureDlg::AddFeatureDlg(const vector<AoiElement*>& aois, ShapefileTypes::ShapeType shapeType, QWidget* pParent) :
+AddFeatureDlg::AddFeatureDlg(const vector<GraphicElement*>& graphicElements,
+   ShapefileTypes::ShapeType shapeType, QWidget* pParent) :
    QDialog(pParent)
 {
    // Element list
@@ -120,21 +122,33 @@ AddFeatureDlg::AddFeatureDlg(const vector<AoiElement*>& aois, ShapefileTypes::Sh
    setModal(true);
    resize(500, 300);
 
-   // Populate the list with AOI elements and their objects that are supported by the shape type
-   for (vector<AoiElement*>::const_iterator iter = aois.begin(); iter != aois.end(); ++iter)
+   // Populate the list with graphic elements and their objects that are supported by the shape type
+   for (vector<GraphicElement*>::const_iterator iter = graphicElements.begin(); iter != graphicElements.end(); ++iter)
    {
-      AoiElement* pElement = *iter;
+      GraphicElement* pElement = *iter;
       if (pElement != NULL)
       {
          QTreeWidgetItem* pElementItem = new QTreeWidgetItem(mpElementTree);
          pElementItem->setText(0, QString::fromStdString(pElement->getName()));
-         pElementItem->setText(1, "AOI");
+         pElementItem->setText(1, "Element");
          pElementItem->setData(1, Qt::UserRole, QVariant::fromValue(pElement));
 
          GraphicGroup* pGroup = pElement->getGroup();
          if (pGroup != NULL)
          {
-            const list<GraphicObject*>& objects = pGroup->getObjects();
+            std::list<GraphicObject*> objects;
+            // If annotation layer, get only the selected objects.
+            AnnotationLayer* pAnnotationLayer = dynamic_cast<AnnotationLayer*>(pGroup->getLayer());
+            if (pAnnotationLayer != NULL)
+            {
+               pAnnotationLayer->getSelectedObjects(objects);
+            }
+            // If no objects selected, or this is an AOI layer, get all objects.
+            if (objects.empty())
+            {
+               objects = pGroup->getObjects();
+            }
+
             for (list<GraphicObject*>::const_iterator objectIter = objects.begin();
                objectIter != objects.end();
                ++objectIter)
@@ -157,7 +171,12 @@ AddFeatureDlg::AddFeatureDlg(const vector<AoiElement*>& aois, ShapefileTypes::Sh
                      }
                      else if (shapeType == ShapefileTypes::POLYGON_SHAPE)
                      {
-                        if ((objectType != RECTANGLE_OBJECT) && (objectType != POLYGON_OBJECT))
+                        if ((objectType != RECTANGLE_OBJECT) &&
+                           (objectType != POLYGON_OBJECT) &&
+                           (objectType != ARC_OBJECT) &&
+                           (objectType != ROUNDEDRECTANGLE_OBJECT) &&
+                           (objectType != TRIANGLE_OBJECT) &&
+                           (objectType != ELLIPSE_OBJECT))
                         {
                            addItem = false;
                         }
@@ -195,9 +214,9 @@ AddFeatureDlg::AddFeatureDlg(const vector<AoiElement*>& aois, ShapefileTypes::Sh
 AddFeatureDlg::~AddFeatureDlg()
 {}
 
-map<AoiElement*, vector<GraphicObject*> > AddFeatureDlg::getFeatureItems() const
+map<GraphicElement*, vector<GraphicObject*> > AddFeatureDlg::getFeatureItems() const
 {
-   map<AoiElement*, vector<GraphicObject*> > featureItems;
+   map<GraphicElement*, vector<GraphicObject*> > featureItems;
 
    int numElements = mpElementTree->topLevelItemCount();
    for (int i = 0; i < numElements; ++i)
@@ -205,13 +224,13 @@ map<AoiElement*, vector<GraphicObject*> > AddFeatureDlg::getFeatureItems() const
       QTreeWidgetItem* pElementItem = mpElementTree->topLevelItem(i);
       if (pElementItem != NULL)
       {
-         AoiElement* pAoi = pElementItem->data(1, Qt::UserRole).value<AoiElement*>();
-         if (pAoi != NULL)
+         GraphicElement* pGraphicElement = pElementItem->data(1, Qt::UserRole).value<GraphicElement*>();
+         if (pGraphicElement != NULL)
          {
             if (pElementItem->isSelected() == true)
             {
-               // An empty vector indicates that all objects in the AOI should be used
-               featureItems[pAoi] = vector<GraphicObject*>();
+               // An empty vector indicates that all objects in the graphic element should be used
+               featureItems[pGraphicElement] = vector<GraphicObject*>();
             }
             else
             {
@@ -231,7 +250,7 @@ map<AoiElement*, vector<GraphicObject*> > AddFeatureDlg::getFeatureItems() const
 
                if (objects.empty() == false)
                {
-                  featureItems[pAoi] = objects;
+                  featureItems[pGraphicElement] = objects;
                }
             }
          }

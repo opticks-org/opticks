@@ -16,34 +16,47 @@
 
 #include "Feature.h"
 #include "LabeledSectionGroup.h"
+#include "TypesFile.h"
 
-class LabeledSection;
+class DisplaySelectionWidget;
+class DisplayQueryOptions;
+class FeatureClass;
+class FeatureQueryOptions;
 class GraphicSymbolWidget;
 class GraphicLineWidget;
 class GraphicFillWidget;
-class QGroupBox;
-class QLabel;
+class LabeledSection;
 class QueryBuilderWidget;
 class QueryOptions;
+
+class QGroupBox;
+class QLabel;
 
 class QueryOptionsWidget : public LabeledSectionGroup
 {
    Q_OBJECT
 
 public:
-   QueryOptionsWidget(QWidget* parent = NULL);
-   ~QueryOptionsWidget(void);
+   QueryOptionsWidget(QWidget* pParent = NULL);
+   virtual ~QueryOptionsWidget();
 
-   void setDisplayOptions(const QueryOptions &options);
-   QueryOptions getDisplayOptions() const;
+   void setDisplayOptions(const QueryOptions& options);
+   FeatureQueryOptions getDisplayOptions() const;
 
    void setFeatureType(ArcProxyLib::FeatureType featureType);
    void setFeatureFields(const std::vector<std::string> &fields,
       const std::vector<std::string> &types,
       const std::vector<std::string> &sampleValues);
    void setFeatureCount(unsigned int count);
+   void setFeatureClass(FeatureClass* pFeatureClass);
 
    void setHideQueryBuilder(bool hidden);
+   void setDisplayQueryOptions(const std::string& queryName);
+   void populateFieldValues(const std::string& field, std::vector<std::string>& values);
+
+public slots:
+   void selectDisplayQuery(const std::vector<DisplayQueryOptions*>& displayQueries);
+   bool updateQueries();
 
 protected slots:
    void addItemToFormatString(QTreeWidgetItem *pItem, int column);
@@ -79,23 +92,39 @@ private:
    QLineEdit* mpQueryNameEdit;
    QTreeWidget* mpFieldList;
    QLineEdit* mpFormatStringEdit;
-   
+
    LabeledSection* mpQuerySection;
    QLabel* mpNumberFile;
    QLabel* mpShapeType;
 
+   QueryBuilderWidget* mpQueryBuilderWidget;
    QStackedWidget* mpDisplayOptionsStack;
+   FeatureClass* mpFeatureClass;
+   std::vector<std::string> mSelectedDisplayQueryNames;
+   bool mbChangingSelection;
 
+   //point
+   QWidget* mpSymbolContainerWidget;
+   DisplaySelectionWidget* mpSymbolAttributePropertiesSection;
    GraphicSymbolWidget* mpSymbolWidget;
-   GraphicLineWidget* mpLineWidget;
+
+   //polygon
+   DisplaySelectionWidget* mpPolygonAttributePropertiesSection;
    QWidget* mpPolygonWidget;
    GraphicLineWidget* mpPolygonLineWidget;
    GraphicFillWidget* mpPolygonFillWidget;
-   QueryBuilderWidget* mpQueryBuilderWidget;
+
+   //polyline
+   QWidget* mpLineContainerWidget;
+   DisplaySelectionWidget* mpLineAttributePropertiesSection;
+   GraphicLineWidget* mpLineWidget;
 
 private:
    QueryOptionsWidget(const QueryOptionsWidget& rhs);
    QueryOptionsWidget& operator=(const QueryOptionsWidget& rhs);
+
+   void addDisplayUpdateSignals();
+   void removeDisplayUpdateSignals();
 };
 
 #endif

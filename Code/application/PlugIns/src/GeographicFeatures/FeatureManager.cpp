@@ -23,6 +23,7 @@
 #include "FeatureManager.h"
 #include "FeatureMenuEditorDlg.h"
 #include "FeatureProxyConnector.h"
+#include "GeographicFeaturesWidget.h"
 #include "ImportDescriptor.h"
 #include "MenuBar.h"
 #include "MessageLogResource.h"
@@ -47,7 +48,6 @@
 
 #include <QtGui/QDialog>
 #include <QtGui/QDialogButtonBox>
-#include <QtGui/QFileDialog>
 #include <QtGui/QFrame>
 #include <QtGui/QMenu>
 #include <QtGui/QVBoxLayout>
@@ -58,9 +58,10 @@ XERCES_CPP_NAMESPACE_USE
 REGISTER_PLUGIN_BASIC(OpticksGeographicFeatures, FeatureManager);
 
 #define APP_FEATUREMANAGER_REFRESH_ACTION "APP_FEATUREMANAGER_REFRESH_ACTION"
-#define APP_FEATUREMANAGER_SEPARATOR_ACTION "APP_FEATUREMANAGER_SEPARATOR_ACTION"
-#define APP_FEATUREMANAGER_EXPORT_ACTION "APP_FEATUREMANAGER_EXPORT_ACTION"
+#define APP_FEATUREMANAGER_SEPARATOR_ACTION1 "APP_FEATUREMANAGER_SEPARATOR_ACTION1"
+#define APP_FEATUREMANAGER_SEPARATOR_ACTION2 "APP_FEATUREMANAGER_SEPARATOR_ACTION2"
 #define APP_FEATUREMANAGER_PROPERTIES_ACTION "APP_FEATUREMANAGER_PROPERTIES_ACTION"
+#define APP_FEATUREMANAGER_FEATURE_TABLE_ACTION "APP_FEATUREMANAGER_FEATURE_TABLE_ACTION"
 
 const string FeatureManager::PLUGIN_NAME = "Feature Manager";
 const string FeatureManager::MENU_NAME = "Geographic Features";
@@ -219,7 +220,7 @@ bool FeatureManager::refresh(MenuBar &menuBar)
    return true;
 }
 
-void FeatureManager::menuItemTriggered(QAction *pAction)
+void FeatureManager::menuItemTriggered(QAction* pAction)
 {
    vector<QAction*>::size_type i;
    for (i = 0; i < mImportActions.size(); ++i)
@@ -235,7 +236,6 @@ void FeatureManager::menuItemTriggered(QAction *pAction)
    }
 
    const DynamicObject* pOptionsSet = FeatureManager::getSettingOptions();
-
    if (pOptionsSet == NULL)
    {
       return;
@@ -253,7 +253,7 @@ void FeatureManager::menuItemTriggered(QAction *pAction)
 
    ProgressResource pProgress("Importing " + name.toStdString());
 
-   ImporterResource featureLayerImporter(FeatureLayerImporter::PLUGIN_NAME, 
+   ImporterResource featureLayerImporter(FeatureLayerImporter::PLUGIN_NAME,
       FeatureLayerImporter::FILE_PLACEHOLDER, pProgress.get(), false);
 
    featureLayerImporter->getInArgList().setPlugInArgValue(FeatureLayerImporter::FEATURE_DYNAMIC_OBJECT_ARG, pOptions);
@@ -291,26 +291,30 @@ void FeatureManager::updateContextMenu(Subject &subject, const string &signal, c
    if (featureClasses.size() == 1)
    {
       // Separator
+      QAction* pSeparatorAction2 = new QAction(pMenu->getActionParent());
+      pSeparatorAction2->setSeparator(true);
+      pMenu->addActionAfter(pSeparatorAction2, APP_FEATUREMANAGER_SEPARATOR_ACTION1,
+         APP_FEATUREMANAGER_REFRESH_ACTION);
+
+      QAction* pTableAction = new QAction("&Display Geographic Features Table...", pMenu->getActionParent());
+      pTableAction->setAutoRepeat(false);
+      VERIFYNR(connect(pTableAction, SIGNAL(triggered()), this, SLOT(displayFeatureClassTable())));
+      pMenu->addActionAfter(pTableAction, APP_FEATUREMANAGER_FEATURE_TABLE_ACTION,
+         APP_FEATUREMANAGER_SEPARATOR_ACTION1);
+
+      // Separator
       QAction* pSeparatorAction = new QAction(pMenu->getActionParent());
       pSeparatorAction->setSeparator(true);
-      pMenu->addActionAfter(pSeparatorAction, APP_FEATUREMANAGER_SEPARATOR_ACTION, APP_FEATUREMANAGER_REFRESH_ACTION);
-
-      // Replace the default Export action
-      QIcon exportIcon(":/icons/Save");
-
-      QAction* pExportAction = new QAction(exportIcon, "Export", pMenu->getActionParent());
-      pExportAction->setAutoRepeat(false);
-      VERIFYNR(connect(pExportAction, SIGNAL(triggered()), this, SLOT(exportFeatureClass())));
-      pMenu->addActionAfter(pExportAction, APP_FEATUREMANAGER_EXPORT_ACTION, APP_FEATUREMANAGER_SEPARATOR_ACTION);
-
-      pMenu->removeAction(APP_APPLICATIONWINDOW_EXPORT_ACTION);
+      pMenu->addActionAfter(pSeparatorAction, APP_FEATUREMANAGER_SEPARATOR_ACTION2,
+         APP_FEATUREMANAGER_FEATURE_TABLE_ACTION);
 
       // Replace the default Properties action
       QIcon propertiesIcon(":/icons/Properties");
       QAction* pPropertiesAction = new QAction(propertiesIcon, "&Properties...", pMenu->getActionParent());
       pPropertiesAction->setAutoRepeat(false);
       VERIFYNR(connect(pPropertiesAction, SIGNAL(triggered()), this, SLOT(displayFeatureClassProperties())));
-      pMenu->addActionAfter(pPropertiesAction, APP_FEATUREMANAGER_PROPERTIES_ACTION, APP_FEATUREMANAGER_EXPORT_ACTION);
+      pMenu->addActionAfter(pPropertiesAction, APP_FEATUREMANAGER_PROPERTIES_ACTION,
+         APP_APPLICATIONWINDOW_EXPORT_ACTION);
 
       pMenu->removeAction(APP_APPLICATIONWINDOW_PROPERTIES_ACTION);
    }
@@ -320,8 +324,8 @@ void FeatureManager::refreshFeatureClass()
 {
    Service<SessionExplorer> pExplorer;
    vector<SessionItem*> filteredSessionItems;
-   vector<FeatureClass*> featureClasses = getFeatureClasses(
-      pExplorer->getSelectedSessionItems(), &filteredSessionItems);
+   vector<FeatureClass*> featureClasses = getFeatureClasses(pExplorer->getSelectedSessionItems(),
+      &filteredSessionItems);
 
    VERIFYNRV(filteredSessionItems.size() == featureClasses.size());
 
@@ -337,7 +341,7 @@ void FeatureManager::refreshFeatureClass()
       {
          pExplorer->collapseSessionItem(filteredSessionItems[i]);
       }
-      success = featureClasses[i]->update(pProgress.get(), errorMessage);
+      success = featureClasses[i]->update(pProgress.get(), errorMessage, false);
       if (expanded)
       {
          pExplorer->expandSessionItem(filteredSessionItems[i]);
@@ -354,38 +358,9 @@ void FeatureManager::refreshFeatureClass()
    }
 }
 
-void FeatureManager::exportFeatureClass()
-{
-   Service<SessionExplorer> pExplorer;
-   vector<FeatureClass*> featureClasses = getFeatureClasses(pExplorer->getSelectedSessionItems());
-   if (featureClasses.size() != 1)
-   {
-      return;
-   }
-
-   FeatureClass* pFeatureClass = featureClasses.front();
-
-   QString filename = QFileDialog::getSaveFileName(Service<DesktopServices>()->getMainWidget(), 
-      "Export to", QString(), "Geographic feature layer (*.geolayer)");
-   if (filename.isEmpty())
-   {
-      return;
-   }
-
-   FileResource pFile(filename.toStdString().c_str(), "wt");
-   VERIFYNRV(pFile != NULL);
-
-   FactoryResource<DynamicObject> pDynObj = pFeatureClass->toDynamicObject();
-
-   XMLWriter writer("GeoFeatureLayer");
-   pDynObj->toXml(&writer);
-   writer.writeToFile(pFile);
-}
-
 void FeatureManager::displayFeatureClassProperties()
 {
    vector<SessionItem*> sessionItems;
-
    Service<SessionExplorer> pExplorer;
    vector<FeatureClass*> featureClasses = getFeatureClasses(pExplorer->getSelectedSessionItems(), &sessionItems);
    if (featureClasses.size() != 1)
@@ -406,14 +381,40 @@ void FeatureManager::displayFeatureClassProperties()
    }
 }
 
+void FeatureManager::displayFeatureClassTable()
+{
+   Service<SessionExplorer> pExplorer;
+   vector<FeatureClass*> featureClasses = getFeatureClasses(pExplorer->getSelectedSessionItems());
+   if (featureClasses.empty())
+   {
+      return;
+   }
+   FeatureClass* pFeatureClass = featureClasses.front();
+   Service<DesktopServices> pDesktop;
+   std::string windowName = "Geographic Features Window";
+   DockWindow* pWindow = static_cast<DockWindow*>(pDesktop->getWindow(windowName, DOCK_WINDOW));
+   if (pWindow != NULL)
+   {
+      GeographicFeaturesWidget* pGeoFeaturesWidget = dynamic_cast<GeographicFeaturesWidget*>(pWindow->getWidget());
+      if (pGeoFeaturesWidget != NULL)
+      {
+         GraphicLayer* pLayer = pFeatureClass->getFeatureLayer();
+         if (pLayer != NULL)
+         {
+            pGeoFeaturesWidget->displayLayer(pLayer);
+         }
+      }
+      pWindow->show();
+   }
+}
+
 void FeatureManager::importGeodatabase()
 {
    ProgressResource pProgressRes("Geodatabase import");
    Progress* pProgress = pProgressRes.get();
    StepResource pStep("Run Algorithm", "app", "F218A414-6C65-457a-B012-AF676FC44C26");
 
-   ImporterResource pImporter(FeatureLayerImporter::PLUGIN_NAME, 
-      FeatureLayerImporter::FILE_PLACEHOLDER, pProgress);
+   ImporterResource pImporter(FeatureLayerImporter::PLUGIN_NAME, FeatureLayerImporter::FILE_PLACEHOLDER, pProgress);
 
    vector<ImportDescriptor*> descriptors = pImporter->getImportDescriptors();
    FAIL_IF(descriptors.size() != 1, "Could not get the import descriptor", return);
@@ -508,15 +509,14 @@ FeatureProxyConnector *FeatureManager::getProxy()
 }
 
 vector<FeatureClass*> FeatureManager::getFeatureClasses(const vector<SessionItem*> sessionItems,
-                                                              vector<SessionItem*> *pFilteredSessionItems)
+                                                        vector<SessionItem*>* pFilteredSessionItems)
 {
    if (pFilteredSessionItems != NULL)
    {
       pFilteredSessionItems->clear();
    }
    vector<FeatureClass*> featureClasses;
-   for (vector<SessionItem*>::const_iterator iter = sessionItems.begin();
-      iter != sessionItems.end(); ++iter)
+   for (vector<SessionItem*>::const_iterator iter = sessionItems.begin(); iter != sessionItems.end(); ++iter)
    {
       SessionItem* pItem = *iter;
       if (pItem == NULL)
@@ -551,8 +551,9 @@ vector<FeatureClass*> FeatureManager::getFeatureClasses(const vector<SessionItem
       {
          Service<ModelServices> pModel;
          vector<DataElement*> elements = pModel->getElements(pElement, "FeatureClass");
-         for (vector<DataElement*>::const_iterator elementIter = elements.begin(); 
-            elementIter != elements.end(); ++elementIter)
+         for (vector<DataElement*>::const_iterator elementIter = elements.begin();
+            elementIter != elements.end();
+            ++elementIter)
          {
             pFeatureClass = model_cast<FeatureClass*>(*elementIter);
             if (pFeatureClass != NULL)

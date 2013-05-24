@@ -9,7 +9,6 @@
 
 #include "AddFeatureDlg.h"
 #include "AddFieldDlg.h"
-#include "AoiElement.h"
 #include "AppVerify.h"
 #include "ConfigurationSettings.h"
 #include "CustomTreeWidget.h"
@@ -18,6 +17,8 @@
 #include "DynamicObject.h"
 #include "Feature.h"
 #include "FeatureClassDlg.h"
+#include "FileDescriptor.h"
+#include "GraphicElement.h"
 #include "GraphicGroup.h"
 #include "GraphicLayer.h"
 #include "GraphicObject.h"
@@ -53,13 +54,15 @@
 #include <string>
 using namespace std;
 
-ShapeFileOptionsWidget::ShapeFileOptionsWidget(ShapeFile* pShapefile, AoiElement* pDefaultAoi,
-                                               const vector<AoiElement*>& aois, RasterElement* pRaster,
-                                               QWidget* pParent) :
+ShapeFileOptionsWidget::ShapeFileOptionsWidget(FileDescriptor* pFileDesc, ShapeFile* pShapefile,
+                                               GraphicElement* pDefaultGraphicElement,
+                                               const vector<GraphicElement*>& graphicElements,
+                                               RasterElement* pRaster,  QWidget* pParent) :
    QWidget(pParent),
+   mpFileDesc(pFileDesc),
    mpShapeFile(pShapefile),
-   mpDefaultAoi(pDefaultAoi),
-   mAois(aois),
+   mpDefaultGraphicElement(pDefaultGraphicElement),
+   mGraphicElements(graphicElements),
    mpGeoref(pRaster)
 {
    // Filenames
@@ -346,9 +349,10 @@ int ShapeFileOptionsWidget::getColumn(const QString& strField) const
    return -1;
 }
 
-vector<Feature*> ShapeFileOptionsWidget::addFeatures(AoiElement* pAoi, GraphicObject* pObject, QString& message)
+vector<Feature*> ShapeFileOptionsWidget::addFeatures(GraphicElement* pGraphicElement, GraphicObject* pObject,
+                                                     QString& message)
 {
-   if ((pAoi == NULL) || (mpShapeFile == NULL))
+   if ((pGraphicElement == NULL) || (mpShapeFile == NULL))
    {
       return vector<Feature*>();
    }
@@ -356,7 +360,7 @@ vector<Feature*> ShapeFileOptionsWidget::addFeatures(AoiElement* pAoi, GraphicOb
    QTreeWidgetItem* pHeaderItem = mpFeatureTree->headerItem();
    string msg;
 
-   vector<Feature*> features = mpShapeFile->addFeatures(pAoi, pObject, mpGeoref, msg);
+   vector<Feature*> features = mpShapeFile->addFeatures(pGraphicElement, pObject, mpGeoref, msg);
    for (vector<Feature*>::const_iterator iter = features.begin(); iter != features.end(); ++iter)
    {
       Feature* pFeature = *iter;
@@ -474,6 +478,10 @@ void ShapeFileOptionsWidget::updateFilenames()
             string filename = strFilename.toStdString() + ".shp";
             mpShapeFile->setFilename(filename);
          }
+         if (mpFileDesc != NULL)
+         {
+            mpFileDesc->setFilename(strFilename.toStdString() + ".shp");
+         }
       }
    }
 }
@@ -506,8 +514,9 @@ void ShapeFileOptionsWidget::setShape(const QString& strShape)
    }
 
    int button = QMessageBox::question(this, windowTitle(), "Changing the output shape type will clear all existing "
-      "features.  Would you like to replace the features with the default features contained in the AOI layer, "
-      "which could take some time based on the number of selected pixels in the AOI?", "Clear", "Replace", "Cancel");
+      "features.  Would you like to replace the features with the default features contained in the layer, "
+      "which could take some time based on the number of selected pixels/objects in the layer?",
+      "Clear", "Replace", "Cancel");
    if (button == 2)  // Cancel
    {
       int index = ShapefileTypes::getIndex(currentShape);
@@ -524,7 +533,7 @@ void ShapeFileOptionsWidget::setShape(const QString& strShape)
    {
       QString message;
 
-      vector<Feature*> features = addFeatures(mpDefaultAoi, NULL, message);
+      vector<Feature*> features = addFeatures(mpDefaultGraphicElement, NULL, message);
       if (features.empty() == true)
       {
          QApplication::restoreOverrideCursor();
@@ -639,8 +648,8 @@ void ShapeFileOptionsWidget::zoomToFeature(QTreeWidgetItem* pItem)
          }
       }
 
-      AoiElement* pAoi = dynamic_cast<AoiElement*>(pFeature->getSessionItem());
-      if (pAoi != NULL)
+      GraphicElement* pGraphicElement = dynamic_cast<GraphicElement*>(pFeature->getSessionItem());
+      if (pGraphicElement != NULL)
       {
          Service<DesktopServices> pDesktop;
 
@@ -657,7 +666,7 @@ void ShapeFileOptionsWidget::zoomToFeature(QTreeWidgetItem* pItem)
                   LayerList* pLayerList = pCurrentView->getLayerList();
                   if (pLayerList != NULL)
                   {
-                     vector<Layer*> layers = pLayerList->getLayers(pAoi);
+                     vector<Layer*> layers = pLayerList->getLayers(pGraphicElement);
                      if (layers.empty() == false)
                      {
                         GraphicLayer* pLayer = dynamic_cast<GraphicLayer*>(layers.front());
@@ -729,8 +738,8 @@ void ShapeFileOptionsWidget::panToFeature(QTreeWidgetItem* pItem)
          }
       }
 
-      AoiElement* pAoi = dynamic_cast<AoiElement*>(pFeature->getSessionItem());
-      if (pAoi != NULL)
+      GraphicElement* pGraphicElement = dynamic_cast<GraphicElement*>(pFeature->getSessionItem());
+      if (pGraphicElement != NULL)
       {
          Service<DesktopServices> pDesktop;
 
@@ -747,13 +756,13 @@ void ShapeFileOptionsWidget::panToFeature(QTreeWidgetItem* pItem)
                   LayerList* pLayerList = pCurrentView->getLayerList();
                   if (pLayerList != NULL)
                   {
-                     vector<Layer*> layers = pLayerList->getLayers(pAoi);
+                     vector<Layer*> layers = pLayerList->getLayers(pGraphicElement);
                      if (layers.empty() == false)
                      {
                         GraphicLayer* pLayer = dynamic_cast<GraphicLayer*>(layers.front());
                         if (pLayer != NULL)
                         {
-                           GraphicGroup* pGroup = pAoi->getGroup();
+                           GraphicGroup* pGroup = pGraphicElement->getGroup();
                            if (pGroup != NULL)
                            {
                               // Center
@@ -808,8 +817,8 @@ void ShapeFileOptionsWidget::selectFeature(QTreeWidgetItem* pItem, bool select)
          }
       }
 
-      AoiElement* pAoi = dynamic_cast<AoiElement*>(pFeature->getSessionItem());
-      if (pAoi != NULL)
+      GraphicElement* pGraphicElement = dynamic_cast<GraphicElement*>(pFeature->getSessionItem());
+      if (pGraphicElement != NULL)
       {
          Service<DesktopServices> pDesktop;
 
@@ -826,7 +835,7 @@ void ShapeFileOptionsWidget::selectFeature(QTreeWidgetItem* pItem, bool select)
                   LayerList* pLayerList = pCurrentView->getLayerList();
                   if (pLayerList != NULL)
                   {
-                     vector<Layer*> layers = pLayerList->getLayers(pAoi);
+                     vector<Layer*> layers = pLayerList->getLayers(pGraphicElement);
                      if (layers.empty() == false)
                      {
                         GraphicLayer* pLayer = dynamic_cast<GraphicLayer*>(layers.front());
@@ -859,31 +868,31 @@ void ShapeFileOptionsWidget::addFeature()
       return;
    }
 
-   AddFeatureDlg dlg(mAois, mpShapeFile->getShape(), this);
+   AddFeatureDlg dlg(mGraphicElements, mpShapeFile->getShape(), this);
    if (dlg.exec() == QDialog::Rejected)
    {
       return;
    }
 
-   map<AoiElement*, vector<GraphicObject*> > featureItems = dlg.getFeatureItems();
+   map<GraphicElement*, vector<GraphicObject*> > featureItems = dlg.getFeatureItems();
    if (featureItems.empty() == true)
    {
       return;
    }
 
-   for (map<AoiElement*, vector<GraphicObject*> >::const_iterator featureIter = featureItems.begin();
+   for (map<GraphicElement*, vector<GraphicObject*> >::const_iterator featureIter = featureItems.begin();
       featureIter != featureItems.end();
       ++featureIter)
    {
-      AoiElement* pAoi = featureIter->first;
-      if (pAoi != NULL)
+      GraphicElement* pGraphicElement = featureIter->first;
+      if (pGraphicElement != NULL)
       {
          vector<GraphicObject*> objects = featureIter->second;
-         if (objects.empty() == true)    // An empty vector indicates that all objects in the AOI should be used
+         if (objects.empty() == true)    // An empty vector indicates that all objects in the graphic element should be used
          {
             QString message;
 
-            vector<Feature*> features = addFeatures(pAoi, NULL, message);
+            vector<Feature*> features = addFeatures(pGraphicElement, NULL, message);
             if ((features.empty() == true) && (message.isEmpty() == false))
             {
                QMessageBox::warning(this, windowTitle(), message);
@@ -900,7 +909,7 @@ void ShapeFileOptionsWidget::addFeature()
                {
                   QString message;
 
-                  vector<Feature*> features = addFeatures(pAoi, pObject, message);
+                  vector<Feature*> features = addFeatures(pGraphicElement, pObject, message);
                   if ((features.empty() == true) && (message.isEmpty() == false))
                   {
                      QMessageBox::warning(this, windowTitle(), message);

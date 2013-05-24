@@ -46,7 +46,7 @@ GraphicSymbolWidget::GraphicSymbolWidget(QWidget *pParent) : QWidget(pParent)
    mpSymbolPreview = new QLabel(this);
    mpSymbolPreview->setAlignment(Qt::AlignCenter);
    mpSymbolPreview->setWordWrap(true);
-   
+
    QLabel* pSymbolSizeLabel = new QLabel("Symbol size:", this);
    mpSymbolSizeSpin = new QSpinBox(this);
    mpSymbolSizeSpin->setRange(0, 500);
@@ -55,11 +55,11 @@ GraphicSymbolWidget::GraphicSymbolWidget(QWidget *pParent) : QWidget(pParent)
    QGridLayout* pLayout = new QGridLayout(this);
    pLayout->setMargin(0);
    pLayout->setSpacing(5);
-   pLayout->addWidget(pSymbolListLabel, 0, 0, Qt::AlignTop);
-   pLayout->addWidget(mpSymbolList, 0, 1);
-   pLayout->addWidget(mpSymbolPreview, 0, 2);
-   pLayout->addWidget(pSymbolSizeLabel, 1, 0);
-   pLayout->addWidget(mpSymbolSizeSpin, 1, 1, 1, 2, Qt::AlignLeft);
+   pLayout->addWidget(pSymbolListLabel, 0, 0, 1, 2);
+   pLayout->addWidget(mpSymbolList, 1, 0, 1, 2);
+   pLayout->addWidget(mpSymbolPreview, 1, 2);
+   pLayout->addWidget(pSymbolSizeLabel, 2, 0);
+   pLayout->addWidget(mpSymbolSizeSpin, 2, 1);
    pLayout->setRowStretch(0, 10);
    pLayout->setColumnStretch(1, 10);
 
@@ -75,8 +75,7 @@ GraphicSymbolWidget::GraphicSymbolWidget(QWidget *pParent) : QWidget(pParent)
 }
 
 GraphicSymbolWidget::~GraphicSymbolWidget()
-{
-}
+{}
 
 void GraphicSymbolWidget::setSymbolName(const QString &name)
 {

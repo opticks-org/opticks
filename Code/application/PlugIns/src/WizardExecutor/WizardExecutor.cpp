@@ -491,12 +491,15 @@ void WizardExecutor::populatePlugInArgList(PlugInArgList* pArgList, const Wizard
             {
                string nodeName = pNode->getName();
                string nodeType = pNode->getOriginalType();
+               const std::vector<std::string>& validNodeTypes =
+                  pNode->getValidTypes();
                if (nodeType.empty())
                {
                   nodeType = pNode->getType();
                }
 
-               if ((nodeName == argName) && (nodeType == argType))
+               if ((nodeName == argName) &&
+                  (validNodeTypes.end() != std::find(validNodeTypes.begin(), validNodeTypes.end(), argType)))
                {
                   void* pValue = pNode->getValue();
                   if (pValue != NULL)

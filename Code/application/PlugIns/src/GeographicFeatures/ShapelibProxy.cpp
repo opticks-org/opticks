@@ -224,7 +224,20 @@ bool ShapelibProxy::query(const std::string &handle, std::string &errorMessage,
 
          feature.setLabel(std::for_each(formattedLabel.begin(), formattedLabel.end(), ShapelibFormatStringProcessor(
             shapelibHandle, i)).getProcessedString());
-         
+
+         std::vector<std::string> attributes;
+         int fieldCount = DBFGetFieldCount(shapelibHandle.getDbfHandle());
+         for (int field = 0; field < fieldCount; ++field)
+         {
+            std::string name;
+            std::string type;
+            std::string value;
+            if (getFieldAttributes(shapelibHandle, name, type, value, field, i))
+            {
+               attributes.push_back(value);
+            }
+         }
+         feature.setAttributes(attributes);
          emit featureLoaded(feature);
       }
 

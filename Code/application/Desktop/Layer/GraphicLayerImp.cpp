@@ -423,13 +423,12 @@ bool GraphicLayerImp::selectObject(GraphicObject* pObject)
 void GraphicLayerImp::selectAllObjects()
 {
    list<GraphicObject*> objects = getObjects();
-   for (list<GraphicObject*>::iterator iter = objects.begin(); iter != objects.end(); ++iter)
+   if (mSelectedObjects.size() != objects.size())
    {
-      GraphicObject* pObject = *iter;
-      if (pObject != NULL)
-      {
-         selectObject(pObject);
-      }
+      mSelectedObjects = objects;
+      emit objectsSelected(mSelectedObjects);
+      emit modified();
+      notify(SIGNAL_NAME(GraphicLayer, ObjectsSelected), boost::any(mSelectedObjects));
    }
 }
 
@@ -521,22 +520,17 @@ unsigned int GraphicLayerImp::getNumSelectedObjectsImpl(const GraphicObjectType&
 
 bool GraphicLayerImp::deselectObject(GraphicObject* pObject)
 {
-   if (pObject == NULL)
+   if (isObjectSelected(pObject) == false)
    {
       return false;
    }
 
-   list<GraphicObject*>::iterator it = find(mSelectedObjects.begin(), mSelectedObjects.end(), pObject);
-   if (it != mSelectedObjects.end())
-   {
-      mSelectedObjects.erase(it);
-      emit objectsSelected(mSelectedObjects);
-      emit modified();
-      notify(SIGNAL_NAME(GraphicLayer, ObjectsSelected), boost::any(mSelectedObjects));
-      return true;
-   }
-
-   return false;
+   // The list should not contain duplicates, but remove them if it does.
+   mSelectedObjects.remove(pObject);
+   emit objectsSelected(mSelectedObjects);
+   emit modified();
+   notify(SIGNAL_NAME(GraphicLayer, ObjectsSelected), boost::any(mSelectedObjects));
+   return true;
 }
 
 void GraphicLayerImp::deselectAllObjects()
@@ -554,29 +548,27 @@ void GraphicLayerImp::deleteSelectedObjects()
 {
    if (!mLayerLocked)
    {
-      list<GraphicObject*> objects = getObjects();
-
-      UndoGroup group(getView(), "Delete Selected Objects");
-
-      for (list<GraphicObject*>::iterator iter = objects.begin(); iter != objects.end(); ++iter)
+      list<GraphicObject*> selectedObjects;
+      getSelectedObjects(selectedObjects);
+      if (selectedObjects.empty() == false)
       {
-         GraphicObject* pObject = *iter;
-         if (pObject == NULL)
+         UndoGroup group(getView(), "Delete Selected Objects");
+         deselectAllObjects();
+
+         for (list<GraphicObject*>::iterator iter = selectedObjects.begin(); iter != selectedObjects.end(); ++iter)
          {
-            continue;
+            GraphicObject* pObject = *iter;
+            if (pObject != NULL)
+            {
+               removeObject(pObject, true);
+            }
          }
 
-         bool bSelected = isObjectSelected(pObject);
-         if (bSelected == true)
+         View* pView = getView();
+         if (pView != NULL)
          {
-            removeObject(pObject, true);
+            pView->refresh();
          }
-      }
-
-      View* pView = getView();
-      if (pView != NULL)
-      {
-         pView->refresh();
       }
    }
 }
@@ -765,6 +757,11 @@ bool GraphicLayerImp::processMousePress(const QPoint& screenCoord, Qt::MouseButt
    }
 
    bool bUsedEvent = false;
+   if (getLayerLocked())
+   {
+      // This fixes a bug where annotation toolbar's lock checkbox is not respected, when Add New Object is pushed.
+      setCurrentGraphicObjectType(MOVE_OBJECT);
+   }
    if (mpInsertingObject == NULL)
    {
       if (button == Qt::LeftButton)
@@ -847,20 +844,24 @@ bool GraphicLayerImp::processMouseMove(const QPoint& screenCoord, Qt::MouseButto
    return bUsedEvent;
 }
 
-int GraphicLayerImp::selectObjects(const LocationType& corner1, const LocationType& corner2)
+int GraphicLayerImp::selectObjects(const LocationType& corner1, const LocationType& corner2, bool append)
 {
    int count = 0;
    double minx = min(corner1.mX, corner2.mX);
    double maxx = max(corner1.mX, corner2.mX);
    double miny = min(corner1.mY, corner2.mY);
    double maxy = max(corner1.mY, corner2.mY);
-   deselectAllObjects();
+
+   if (!append)
+   {
+      deselectAllObjects();
+   }
 
    list<GraphicObject*> objects = getObjects();
    for (list<GraphicObject*>::iterator it = objects.begin(); it != objects.end(); ++it)
    {
       GraphicObjectImp* pObject = dynamic_cast<GraphicObjectImp*>(*it);
-      if (pObject != NULL)
+      if (pObject != NULL && !isObjectSelected(*it))
       {
          LocationType llCorner = pObject->getLlCorner();
          LocationType urCorner = pObject->getUrCorner();
@@ -1337,6 +1338,10 @@ void GraphicLayerImp::cleanUpBadObject(GraphicObject* pObj)
 void GraphicLayerImp::cloneSelection(GraphicLayer* pDest)
 {
    GraphicLayerImp* pDestImp = dynamic_cast<GraphicLayerImp*>(pDest);
+   if (pDestImp == NULL || pDestImp->getLayerLocked())
+   {
+      return;
+   }
    list<GraphicObject*> objects = getObjects();
 
    View* pView = getView();

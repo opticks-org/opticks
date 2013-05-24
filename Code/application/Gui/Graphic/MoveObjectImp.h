@@ -17,6 +17,7 @@ class UndoGroup;
 /**
  * This class performs the following operations in a GraphicLayer:
  *  * Selection of a single object by clicking somewhere within it
+ *  * Deselection of a single object by shift-clicking somewhere on the object
  *  * Multiple selection by shift-clicking a second object
  *  * Multiple selection by dragging a bounding box
  *  * Duplicating an object by ctrl-clicking on it

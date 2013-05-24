@@ -53,7 +53,6 @@ namespace
 }
 
 const std::string QueryOptions::QUERY_NAME = "Query name";
-const std::string QueryOptions::FORMAT_STRING = "Format string";
 const std::string QueryOptions::QUERY_STRING = "Query string";
 const std::string QueryOptions::SYMBOL_NAME = "Symbol name";
 const std::string QueryOptions::SYMBOL_SIZE = "Symbol size";
@@ -71,6 +70,7 @@ const std::string QueryOptions::mDefaultName = "New Query";
 
 QueryOptions::QueryOptions() :
    mQueryName(mDefaultName),
+   mQueryString(std::string()),
    mSymbolName(GraphicLayer::getSettingSymbolName()),
    mSymbolSize(GraphicLayer::getSettingSymbolSize()),
    mLineState(GraphicLayer::getSettingFill()),
@@ -93,7 +93,6 @@ void QueryOptions::fromDynamicObject(const DynamicObject *pDynObj)
    VERIFYNRV(pDynObj != NULL);
 
    pDynObj->getAttribute(QUERY_NAME).getValue(mQueryName);
-   pDynObj->getAttribute(FORMAT_STRING).getValue(mFormatString);
    pDynObj->getAttribute(QUERY_STRING).getValue(mQueryString);
    pDynObj->getAttribute(SYMBOL_NAME).getValue(mSymbolName);
    pDynObj->getAttribute(SYMBOL_SIZE).getValue(mSymbolSize);
@@ -113,7 +112,6 @@ DynamicObject *QueryOptions::toDynamicObject() const
    VERIFYRV(pDynObj.get() != NULL, NULL);
 
    pDynObj->setAttribute(QUERY_NAME, mQueryName);
-   pDynObj->setAttribute(FORMAT_STRING, mFormatString);
    pDynObj->setAttribute(QUERY_STRING, mQueryString);
    pDynObj->setAttribute(SYMBOL_NAME, mSymbolName);
    pDynObj->setAttribute(SYMBOL_SIZE, mSymbolSize);
@@ -133,17 +131,29 @@ void QueryOptions::setOnGraphicObject(GraphicObject *pObj) const
 {
    VERIFYNRV(pObj != NULL);
 
-   pObj->setSymbolName(mSymbolName);
-   pObj->setSymbolSize(mSymbolSize);
-   pObj->setLineState(mLineState);
-   pObj->setLineStyle(mLineStyle);
-   pObj->setLineWidth(mLineWidth);
-   pObj->setLineColor(mLineColor);
-   pObj->setLineScaled(mLineScaled);
-   pObj->setFillColor(mFillColor);
-   pObj->setFillStyle(mFillStyle);
-   pObj->setHatchStyle(mHatchStyle);
-
+   GraphicObjectType type = pObj->getGraphicObjectType();
+   if (type == MULTIPOINT_OBJECT || 
+      type == POINT_OBJECT)
+   {
+      pObj->setSymbolName(mSymbolName);
+      pObj->setSymbolSize(mSymbolSize);
+   }
+   else
+   {
+      pObj->setLineState(mLineState);
+      pObj->setLineStyle(mLineStyle);
+      pObj->setLineWidth(mLineWidth);
+      pObj->setLineColor(mLineColor);
+      pObj->setLineScaled(mLineScaled);
+      if (type == POLYGON_OBJECT || type == RECTANGLE_OBJECT ||
+         type == TRIANGLE_OBJECT || type == ELLIPSE_OBJECT ||
+         type == ROUNDEDRECTANGLE_OBJECT || type == ARC_OBJECT)
+      {
+         pObj->setFillColor(mFillColor);
+         pObj->setFillStyle(mFillStyle);
+         pObj->setHatchStyle(mHatchStyle);
+      }
+   }
 }
 
 void QueryOptions::setQueryName(const std::string &queryName)
@@ -157,16 +167,6 @@ void QueryOptions::setQueryName(const std::string &queryName)
 const std::string &QueryOptions::getQueryName() const
 {
    return mQueryName;
-}
-
-void QueryOptions::setFormatString(const std::string &formatString)
-{
-   mFormatString = formatString;
-}
-
-const std::string &QueryOptions::getFormatString() const
-{
-   return mFormatString;
 }
 
 void QueryOptions::setQueryString(const std::string &queryString)

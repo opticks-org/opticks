@@ -77,14 +77,21 @@ bool PropertiesFeatureClass::applyChanges()
       return false;
    }
 
+   //this funtion changes the value retrieved from getDisplayOnlyChanges
    bool bSuccess = pWidget->applyChanges();
    if (bSuccess == true)
    {
+      //get whether the previous function applied changes that were display only
+      bool bDisplayOnlyChanges = pWidget->getDisplayOnlyChanges();
+
       ProgressResource pProgress("Geographic feature");
       string errorMessage;
-      mpFeatureClass->update(pProgress.get(), errorMessage);
+      mpFeatureClass->update(pProgress.get(), errorMessage, bDisplayOnlyChanges);
 
       pProgress->updateProgress("Complete", 100, NORMAL);
+      //now that changes have been applied, we know that the current state
+      //of the dialog is that no changes(thus display changes) are existing
+      pWidget->setDisplayOnlyChanges(true);
    }
 
    return bSuccess;

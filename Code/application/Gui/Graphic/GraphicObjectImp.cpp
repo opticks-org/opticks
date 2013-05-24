@@ -2123,6 +2123,6 @@ void GraphicObjectImp::setName(const string& newName)
       }
       SessionItemImp::setName(newName);
       emit nameChanged(QString::fromStdString(newName));
-      notify(SIGNAL_NAME(Subject, Modified));
+      notify(SIGNAL_NAME(GraphicObject, NameChanged), boost::any(newName));
    }
 }

@@ -74,7 +74,7 @@ protected:
    void handleRequest(const QString &request, QStringList &args);
    void queryFeatureClass(IFeatureClassPtr pFeatures, QStringList &args);
    const IFeatureClassPtr getFeatureClass(const ArcProxyLib::ConnectionParameters &params, std::string &errorMessage);
-   bool writeFeature(IFeaturePtr pFeature, const std::string &labelFormat);
+   bool writeFeature(IFeatureClassPtr pFeatures, IFeaturePtr pFeature, const std::string& labelFormat);
    QString convertWhereClause(IFeatureClassPtr pFeatures, const QString &original);
 
 private:

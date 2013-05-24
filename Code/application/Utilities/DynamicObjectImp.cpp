@@ -722,6 +722,11 @@ bool DynamicObjectImp::toXml(XMLWriter* pWriter) const
 
 bool DynamicObjectImp::fromXml(DOMNode* pDocument, unsigned int version)
 {
+   if (pDocument == NULL)
+   {
+      return false;
+   }
+
    clear();
 
    for (DOMNode* pNode = pDocument->getFirstChild(); pNode != NULL; pNode = pNode->getNextSibling())

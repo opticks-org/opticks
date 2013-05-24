@@ -734,26 +734,34 @@ void AnnotationToolBar::setLineWidth(const QPixmap& lineWidthPix)
 {
    if (mpAnnotationLayer != NULL)
    {
-      list<GraphicObject*> selectedObjects;
-      mpAnnotationLayer->getSelectedObjectsImpl(selectedObjects);
-      if (selectedObjects.empty() == true)
+      if (mpAnnotationLayer->getLayerLocked())
       {
          QMessageBox::critical(this, "Annotation", "The line width property cannot be set because "
-            "there are no selected objects!");
-         mpLineWidthGrid->setSelectedPixmap("NoLine");
+            "the layer is locked.");
       }
       else
       {
-         UndoGroup group(mpAnnotationLayer->getView(), "Set Line Width");
-         if (lineWidthPix.isNull() == false)
+         list<GraphicObject*> selectedObjects;
+         mpAnnotationLayer->getSelectedObjectsImpl(selectedObjects);
+         if (selectedObjects.empty() == true)
          {
-            double lineWidth = lineWidthPix.height();
-            GraphicUtilities::setLineWidth(selectedObjects, lineWidth);
-            GraphicUtilities::setLineState(selectedObjects, true);
+            QMessageBox::critical(this, "Annotation", "The line width property cannot be set because "
+               "there are no selected objects!");
+            mpLineWidthGrid->setSelectedPixmap("NoLine");
          }
          else
          {
-            GraphicUtilities::setLineState(selectedObjects, false);
+            UndoGroup group(mpAnnotationLayer->getView(), "Set Line Width");
+            if (lineWidthPix.isNull() == false)
+            {
+               double lineWidth = lineWidthPix.height();
+               GraphicUtilities::setLineWidth(selectedObjects, lineWidth);
+               GraphicUtilities::setLineState(selectedObjects, true);
+            }
+            else
+            {
+               GraphicUtilities::setLineState(selectedObjects, false);
+            }
          }
       }
    }
@@ -787,18 +795,26 @@ void AnnotationToolBar::setLineColor(const QColor& lineColor)
 
    if (mpAnnotationLayer != NULL)
    {
-      list<GraphicObject*> selectedObjects;
-      mpAnnotationLayer->getSelectedObjectsImpl(selectedObjects);
-      if (selectedObjects.empty() == true)
+      if (mpAnnotationLayer->getLayerLocked())
       {
          QMessageBox::critical(this, "Annotation", "The line color property cannot be set because "
-            "there are no selected objects!");
-         mpLineColorMenu->setSelectedColor(QColor());
+            "the layer is locked.");
       }
       else
       {
-         UndoGroup group(mpAnnotationLayer->getView(), "Set Line Color");
-         GraphicUtilities::setLineColor(selectedObjects, QCOLOR_TO_COLORTYPE(lineColor));
+         list<GraphicObject*> selectedObjects;
+         mpAnnotationLayer->getSelectedObjectsImpl(selectedObjects);
+         if (selectedObjects.empty() == true)
+         {
+            QMessageBox::critical(this, "Annotation", "The line color property cannot be set because "
+               "there are no selected objects!");
+            mpLineColorMenu->setSelectedColor(QColor());
+         }
+         else
+         {
+            UndoGroup group(mpAnnotationLayer->getView(), "Set Line Color");
+            GraphicUtilities::setLineColor(selectedObjects, QCOLOR_TO_COLORTYPE(lineColor));
+         }
       }
    }
 }
@@ -831,24 +847,32 @@ void AnnotationToolBar::setFillColor(const QColor& fillColor)
 
    if (mpAnnotationLayer != NULL)
    {
-      list<GraphicObject*> selectedObjects;
-      mpAnnotationLayer->getSelectedObjectsImpl(selectedObjects);
-      if (selectedObjects.empty() == true)
+      if (mpAnnotationLayer->getLayerLocked())
       {
          QMessageBox::critical(this, "Annotation", "The fill color property cannot be set because "
-            "there are no selected objects!");
-         mpFillColorMenu->setSelectedColor(QColor());
+            "the layer is locked.");
       }
       else
       {
-         ColorType newColor(fillColor.red(), fillColor.green(), fillColor.blue());
-         ColorType currentColor = GraphicUtilities::getFillColor(selectedObjects);
-
-         if (newColor != currentColor)
+         list<GraphicObject*> selectedObjects;
+         mpAnnotationLayer->getSelectedObjectsImpl(selectedObjects);
+         if (selectedObjects.empty() == true)
          {
-            UndoGroup group(mpAnnotationLayer->getView(), "Set Fill Color");
-            GraphicUtilities::setFillColor(selectedObjects, newColor);
-            GraphicUtilities::setFillState(selectedObjects, true);
+            QMessageBox::critical(this, "Annotation", "The fill color property cannot be set because "
+               "there are no selected objects!");
+            mpFillColorMenu->setSelectedColor(QColor());
+         }
+         else
+         {
+            ColorType newColor(fillColor.red(), fillColor.green(), fillColor.blue());
+            ColorType currentColor = GraphicUtilities::getFillColor(selectedObjects);
+
+            if (newColor != currentColor)
+            {
+               UndoGroup group(mpAnnotationLayer->getView(), "Set Fill Color");
+               GraphicUtilities::setFillColor(selectedObjects, newColor);
+               GraphicUtilities::setFillState(selectedObjects, true);
+            }
          }
       }
    }
@@ -956,23 +980,29 @@ void AnnotationToolBar::updateSelectedProperties(list<GraphicObject*>& selectedO
    }
    else
    {
+      bool layerLocked = false;
+      if (mpAnnotationLayer != NULL)
+      {
+         layerLocked = mpAnnotationLayer->getLayerLocked();
+      }
+
       string fontName = GraphicUtilities::getFontName(selectedObjects);
       int fontSize = GraphicUtilities::getFontSize(selectedObjects);
       bool bBold = GraphicUtilities::getFontBold(selectedObjects);
       bool bItalics = GraphicUtilities::getFontItalics(selectedObjects);
       bool bUnderline = GraphicUtilities::getFontUnderline(selectedObjects);
 
-      mpFont_Combo->setEnabled(true);
+      mpFont_Combo->setEnabled(!layerLocked);
       mpFont_Combo->setCurrentIndex(mpFont_Combo->findText(QString::fromStdString(fontName)));
 
-      mpSize_Combo->setEnabled(true);
+      mpSize_Combo->setEnabled(!layerLocked);
       mpSize_Combo->setCurrentValue(fontSize);
 
-      mpBold->setEnabled(true);
+      mpBold->setEnabled(!layerLocked);
       mpBold->setChecked(bBold);
-      mpItalic->setEnabled(true);
+      mpItalic->setEnabled(!layerLocked);
       mpItalic->setChecked(bItalics);
-      mpUnderline->setEnabled(true);
+      mpUnderline->setEnabled(!layerLocked);
       mpUnderline->setChecked(bUnderline);
    }
 }
@@ -1019,18 +1049,26 @@ void AnnotationToolBar::setTextColor(const QColor& textColor)
 
    if (mpAnnotationLayer != NULL)
    {
-      list<GraphicObject*> selectedObjects;
-      mpAnnotationLayer->getSelectedObjectsImpl(selectedObjects);
-      if (selectedObjects.empty() == true)
+      if (mpAnnotationLayer->getLayerLocked())
       {
          QMessageBox::critical(this, "Annotation", "The text color property cannot be set because "
-            "there are no selected text objects!");
-         mpTextColorMenu->setSelectedColor(QColor());
+            "the layer is locked.");
       }
       else
       {
-         UndoGroup group(mpAnnotationLayer->getView(), "Set Text Color");
-         GraphicUtilities::setTextColor(selectedObjects, QCOLOR_TO_COLORTYPE(textColor));
+         list<GraphicObject*> selectedObjects;
+         mpAnnotationLayer->getSelectedObjectsImpl(selectedObjects);
+         if (selectedObjects.empty() == true)
+         {
+            QMessageBox::critical(this, "Annotation", "The text color property cannot be set because "
+               "there are no selected text objects!");
+            mpTextColorMenu->setSelectedColor(QColor());
+         }
+         else
+         {
+            UndoGroup group(mpAnnotationLayer->getView(), "Set Text Color");
+            GraphicUtilities::setTextColor(selectedObjects, QCOLOR_TO_COLORTYPE(textColor));
+         }
       }
    }
 }
@@ -1044,19 +1082,27 @@ void AnnotationToolBar::setFontFace(const QString& strFont)
 
    if (mpAnnotationLayer != NULL)
    {
-      string fontName = strFont.toStdString();
-
-      list<GraphicObject*> selectedObjects;
-      mpAnnotationLayer->getSelectedObjectsImpl(selectedObjects);
-      if (selectedObjects.empty() == true)
+      if (mpAnnotationLayer->getLayerLocked())
       {
          QMessageBox::critical(this, "Annotation", "The font property cannot be set because "
-            "there are no selected text objects!");
+            "the layer is locked.");
       }
       else
       {
-         UndoGroup group(mpAnnotationLayer->getView(), "Set Text Font");
-         GraphicUtilities::setFontName(selectedObjects, strFont.toStdString());
+         string fontName = strFont.toStdString();
+
+         list<GraphicObject*> selectedObjects;
+         mpAnnotationLayer->getSelectedObjectsImpl(selectedObjects);
+         if (selectedObjects.empty() == true)
+         {
+            QMessageBox::critical(this, "Annotation", "The font property cannot be set because "
+               "there are no selected text objects!");
+         }
+         else
+         {
+            UndoGroup group(mpAnnotationLayer->getView(), "Set Text Font");
+            GraphicUtilities::setFontName(selectedObjects, strFont.toStdString());
+         }
       }
    }
 }
@@ -1065,17 +1111,25 @@ void AnnotationToolBar::setFontSize(int fontSize)
 {
    if (mpAnnotationLayer != NULL)
    {
-      list<GraphicObject*> selectedObjects;
-      mpAnnotationLayer->getSelectedObjectsImpl(selectedObjects);
-      if (selectedObjects.empty() == true)
+      if (mpAnnotationLayer->getLayerLocked())
       {
          QMessageBox::critical(this, "Annotation", "The font property cannot be set because "
-            "there are no selected text objects!");
+            "the layer is locked.");
       }
       else
       {
-         UndoGroup group(mpAnnotationLayer->getView(), "Set Text Font Size");
-         GraphicUtilities::setFontSize(selectedObjects, fontSize);
+         list<GraphicObject*> selectedObjects;
+         mpAnnotationLayer->getSelectedObjectsImpl(selectedObjects);
+         if (selectedObjects.empty() == true)
+         {
+            QMessageBox::critical(this, "Annotation", "The font property cannot be set because "
+               "there are no selected text objects!");
+         }
+         else
+         {
+            UndoGroup group(mpAnnotationLayer->getView(), "Set Text Font Size");
+            GraphicUtilities::setFontSize(selectedObjects, fontSize);
+         }
       }
    }
 }
@@ -1084,17 +1138,25 @@ void AnnotationToolBar::setFontBold(bool bBold)
 {
    if (mpAnnotationLayer != NULL)
    {
-      list<GraphicObject*> selectedObjects;
-      mpAnnotationLayer->getSelectedObjectsImpl(selectedObjects);
-      if (selectedObjects.empty() == true)
+      if (mpAnnotationLayer->getLayerLocked())
       {
          QMessageBox::critical(this, "Annotation", "The font property cannot be set because "
-            "there are no selected text objects!");
+            "the layer is locked.");
       }
       else
       {
-         UndoGroup group(mpAnnotationLayer->getView(), "Set Text Bold");
-         GraphicUtilities::setFontBold(selectedObjects, bBold);
+         list<GraphicObject*> selectedObjects;
+         mpAnnotationLayer->getSelectedObjectsImpl(selectedObjects);
+         if (selectedObjects.empty() == true)
+         {
+            QMessageBox::critical(this, "Annotation", "The font property cannot be set because "
+               "there are no selected text objects!");
+         }
+         else
+         {
+            UndoGroup group(mpAnnotationLayer->getView(), "Set Text Bold");
+            GraphicUtilities::setFontBold(selectedObjects, bBold);
+         }
       }
    }
 }
@@ -1103,17 +1165,25 @@ void AnnotationToolBar::setFontItalic(bool bItalics)
 {
    if (mpAnnotationLayer != NULL)
    {
-      list<GraphicObject*> selectedObjects;
-      mpAnnotationLayer->getSelectedObjectsImpl(selectedObjects);
-      if (selectedObjects.empty() == true)
+      if (mpAnnotationLayer->getLayerLocked())
       {
          QMessageBox::critical(this, "Annotation", "The font property cannot be set because "
-            "there are no selected text objects!");
+            "the layer is locked.");
       }
       else
       {
-         UndoGroup group(mpAnnotationLayer->getView(), "Set Text Italics");
-         GraphicUtilities::setFontItalics(selectedObjects, bItalics);
+         list<GraphicObject*> selectedObjects;
+         mpAnnotationLayer->getSelectedObjectsImpl(selectedObjects);
+         if (selectedObjects.empty() == true)
+         {
+            QMessageBox::critical(this, "Annotation", "The font property cannot be set because "
+               "there are no selected text objects!");
+         }
+         else
+         {
+            UndoGroup group(mpAnnotationLayer->getView(), "Set Text Italics");
+            GraphicUtilities::setFontItalics(selectedObjects, bItalics);
+         }
       }
    }
 }
@@ -1122,17 +1192,25 @@ void AnnotationToolBar::setFontUnderline(bool bUnderline)
 {
    if (mpAnnotationLayer != NULL)
    {
-      list<GraphicObject*> selectedObjects;
-      mpAnnotationLayer->getSelectedObjectsImpl(selectedObjects);
-      if (selectedObjects.empty() == true)
+      if (mpAnnotationLayer->getLayerLocked())
       {
          QMessageBox::critical(this, "Annotation", "The font property cannot be set because "
-            "there are no selected text objects!");
+            "the layer is locked.");
       }
       else
       {
-         UndoGroup group(mpAnnotationLayer->getView(), "Set Text Underline");
-         GraphicUtilities::setFontUnderline(selectedObjects, bUnderline);
+         list<GraphicObject*> selectedObjects;
+         mpAnnotationLayer->getSelectedObjectsImpl(selectedObjects);
+         if (selectedObjects.empty() == true)
+         {
+            QMessageBox::critical(this, "Annotation", "The font property cannot be set because "
+               "there are no selected text objects!");
+         }
+         else
+         {
+            UndoGroup group(mpAnnotationLayer->getView(), "Set Text Underline");
+            GraphicUtilities::setFontUnderline(selectedObjects, bUnderline);
+         }
       }
    }
 }
@@ -1141,7 +1219,14 @@ void AnnotationToolBar::group()
 {
    if (mpAnnotationLayer != NULL)
    {
-      mpAnnotationLayer->groupSelection();
+      if (mpAnnotationLayer->getLayerLocked())
+      {
+         QMessageBox::critical(this, "Annotation", "The selection cannot be grouped because the layer is locked.");
+      }
+      else
+      {
+         mpAnnotationLayer->groupSelection();
+      }
    }
 }
 
@@ -1149,7 +1234,14 @@ void AnnotationToolBar::ungroup()
 {
    if (mpAnnotationLayer != NULL)
    {
-      mpAnnotationLayer->ungroupSelection();
+      if (mpAnnotationLayer->getLayerLocked())
+      {
+         QMessageBox::critical(this, "Annotation", "The selection cannot be ungrouped because the layer is locked.");
+      }
+      else
+      {
+         mpAnnotationLayer->ungroupSelection();
+      }
    }
 }
 
@@ -1157,7 +1249,14 @@ void AnnotationToolBar::popFront()
 {
    if (mpAnnotationLayer != NULL)
    {
-      mpAnnotationLayer->popSelectedObjectToFront();
+      if (mpAnnotationLayer->getLayerLocked())
+      {
+         QMessageBox::critical(this, "Annotation", "The selection cannot be reordered because the layer is locked.");
+      }
+      else
+      {
+         mpAnnotationLayer->popSelectedObjectToFront();
+      }
    }
 }
 
@@ -1165,7 +1264,14 @@ void AnnotationToolBar::pushBack()
 {
    if (mpAnnotationLayer != NULL)
    {
-      mpAnnotationLayer->pushSelectedObjectToBack();
+      if (mpAnnotationLayer->getLayerLocked())
+      {
+         QMessageBox::critical(this, "Annotation", "The selection cannot be reordered because the layer is locked.");
+      }
+      else
+      {
+         mpAnnotationLayer->pushSelectedObjectToBack();
+      }
    }
 }
 
@@ -1173,7 +1279,14 @@ void AnnotationToolBar::nudgeUp()
 {
    if (mpAnnotationLayer != NULL)
    {
-      mpAnnotationLayer->nudgeSelectedObjects(0, 1);
+      if (mpAnnotationLayer->getLayerLocked())
+      {
+         QMessageBox::critical(this, "Annotation", "The selection cannot be nudged because the layer is locked.");
+      }
+      else
+      {
+         mpAnnotationLayer->nudgeSelectedObjects(0, 1);
+      }
    }
 }
 
@@ -1181,7 +1294,14 @@ void AnnotationToolBar::nudgeDown()
 {
    if (mpAnnotationLayer != NULL)
    {
-      mpAnnotationLayer->nudgeSelectedObjects(0, -1);
+      if (mpAnnotationLayer->getLayerLocked())
+      {
+         QMessageBox::critical(this, "Annotation", "The selection cannot be nudged because the layer is locked.");
+      }
+      else
+      {
+         mpAnnotationLayer->nudgeSelectedObjects(0, -1);
+      }
    }
 }
 
@@ -1189,7 +1309,14 @@ void AnnotationToolBar::nudgeLeft()
 {
    if (mpAnnotationLayer != NULL)
    {
-      mpAnnotationLayer->nudgeSelectedObjects(-1, 0);
+      if (mpAnnotationLayer->getLayerLocked())
+      {
+         QMessageBox::critical(this, "Annotation", "The selection cannot be nudged because the layer is locked.");
+      }
+      else
+      {
+         mpAnnotationLayer->nudgeSelectedObjects(-1, 0);
+      }
    }
 }
 
@@ -1197,7 +1324,14 @@ void AnnotationToolBar::nudgeRight()
 {
    if (mpAnnotationLayer != NULL)
    {
-      mpAnnotationLayer->nudgeSelectedObjects(1, 0);
+      if (mpAnnotationLayer->getLayerLocked())
+      {
+         QMessageBox::critical(this, "Annotation", "The selection cannot be nudged because the layer is locked.");
+      }
+      else
+      {
+         mpAnnotationLayer->nudgeSelectedObjects(1, 0);
+      }
    }
 }
 
@@ -1205,7 +1339,14 @@ void AnnotationToolBar::alignLeft()
 {
    if (mpAnnotationLayer != NULL)
    {
-      mpAnnotationLayer->alignSelectedObjects(ALIGN_LEFT);
+      if (mpAnnotationLayer->getLayerLocked())
+      {
+         QMessageBox::critical(this, "Annotation", "The selection cannot be aligned because the layer is locked.");
+      }
+      else
+      {
+         mpAnnotationLayer->alignSelectedObjects(ALIGN_LEFT);
+      }
    }
 }
 
@@ -1213,7 +1354,14 @@ void AnnotationToolBar::alignCenter()
 {
    if (mpAnnotationLayer != NULL)
    {
-      mpAnnotationLayer->alignSelectedObjects(ALIGN_CENTER);
+      if (mpAnnotationLayer->getLayerLocked())
+      {
+         QMessageBox::critical(this, "Annotation", "The selection cannot be aligned because the layer is locked.");
+      }
+      else
+      {
+         mpAnnotationLayer->alignSelectedObjects(ALIGN_CENTER);
+      }
    }
 }
 
@@ -1221,7 +1369,14 @@ void AnnotationToolBar::alignRight()
 {
    if (mpAnnotationLayer != NULL)
    {
-      mpAnnotationLayer->alignSelectedObjects(ALIGN_RIGHT);
+      if (mpAnnotationLayer->getLayerLocked())
+      {
+         QMessageBox::critical(this, "Annotation", "The selection cannot be aligned because the layer is locked.");
+      }
+      else
+      {
+         mpAnnotationLayer->alignSelectedObjects(ALIGN_RIGHT);
+      }
    }
 }
 
@@ -1229,7 +1384,14 @@ void AnnotationToolBar::alignTop()
 {
    if (mpAnnotationLayer != NULL)
    {
-      mpAnnotationLayer->alignSelectedObjects(ALIGN_TOP);
+      if (mpAnnotationLayer->getLayerLocked())
+      {
+         QMessageBox::critical(this, "Annotation", "The selection cannot be aligned because the layer is locked.");
+      }
+      else
+      {
+         mpAnnotationLayer->alignSelectedObjects(ALIGN_TOP);
+      }
    }
 }
 
@@ -1237,7 +1399,14 @@ void AnnotationToolBar::alignMiddle()
 {
    if (mpAnnotationLayer != NULL)
    {
-      mpAnnotationLayer->alignSelectedObjects(ALIGN_MIDDLE);
+      if (mpAnnotationLayer->getLayerLocked())
+      {
+         QMessageBox::critical(this, "Annotation", "The selection cannot be aligned because the layer is locked.");
+      }
+      else
+      {
+         mpAnnotationLayer->alignSelectedObjects(ALIGN_MIDDLE);
+      }
    }
 }
 
@@ -1245,7 +1414,14 @@ void AnnotationToolBar::alignBottom()
 {
    if (mpAnnotationLayer != NULL)
    {
-      mpAnnotationLayer->alignSelectedObjects(ALIGN_BOTTOM);
+      if (mpAnnotationLayer->getLayerLocked())
+      {
+         QMessageBox::critical(this, "Annotation", "The selection cannot be aligned because the layer is locked.");
+      }
+      else
+      {
+         mpAnnotationLayer->alignSelectedObjects(ALIGN_BOTTOM);
+      }
    }
 }
 
@@ -1253,7 +1429,14 @@ void AnnotationToolBar::distributeVertically()
 {
    if (mpAnnotationLayer != NULL)
    {
-      mpAnnotationLayer->distributeSelectedObjects(DISTRIBUTE_VERTICALLY);
+      if (mpAnnotationLayer->getLayerLocked())
+      {
+         QMessageBox::critical(this, "Annotation", "The selection cannot be distributed because the layer is locked.");
+      }
+      else
+      {
+         mpAnnotationLayer->distributeSelectedObjects(DISTRIBUTE_VERTICALLY);
+      }
    }
 }
 
@@ -1261,7 +1444,14 @@ void AnnotationToolBar::distributeHorizontally()
 {
    if (mpAnnotationLayer != NULL)
    {
-      mpAnnotationLayer->distributeSelectedObjects(DISTRIBUTE_HORIZONTALLY);
+      if (mpAnnotationLayer->getLayerLocked())
+      {
+         QMessageBox::critical(this, "Annotation", "The selection cannot be distributed because the layer is locked.");
+      }
+      else
+      {
+         mpAnnotationLayer->distributeSelectedObjects(DISTRIBUTE_HORIZONTALLY);
+      }
    }
 }
 

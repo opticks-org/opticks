@@ -7,8 +7,9 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QBoxLayout>
+#include <QtGui/QGridLayout>
 #include <QtGui/QGroupBox>
+#include <QtGui/QHBoxLayout>
 #include <QtGui/QHeaderView>
 #include <QtGui/QLabel>
 #include <QtGui/QLayout>
@@ -17,6 +18,7 @@
 #include "AppAssert.h"
 #include "AppVerify.h"
 #include "CustomColorButton.h"
+#include "FeatureClass.h"
 #include "GraphicFillWidget.h"
 #include "GraphicLineWidget.h"
 #include "GraphicSymbolWidget.h"
@@ -24,19 +26,22 @@
 #include "QueryOptions.h"
 #include "QueryOptionsWidget.h"
 #include "QueryBuilderWidget.h"
+#include "DisplaySelectionWidget.h"
 
 #include <sstream>
 using namespace std;
 
-QueryOptionsWidget::QueryOptionsWidget(QWidget *parent) :
-   LabeledSectionGroup(parent)
+QueryOptionsWidget::QueryOptionsWidget(QWidget* pParent) :
+   LabeledSectionGroup(pParent),
+   mpFeatureClass(NULL),
+   mbChangingSelection(false)
 {
    // Query
    QWidget* pQuerySectionWidget = new QWidget(this);
    QLabel* pQueryNameLabel = new QLabel("Name:", pQuerySectionWidget);
    mpQueryNameEdit = new QLineEdit(pQuerySectionWidget);
    mpQueryBuilderWidget = new QueryBuilderWidget(pQuerySectionWidget);
-   
+
    QScrollArea* pScrollArea = new QScrollArea(pQuerySectionWidget);
    pScrollArea->setWidgetResizable(true);
    pScrollArea->setWidget(mpQueryBuilderWidget);
@@ -54,21 +59,44 @@ QueryOptionsWidget::QueryOptionsWidget(QWidget *parent) :
    mpDisplayOptionsStack = new AutoResizeStackedWidget(this);
    mpDisplayOptionsStack->setEnabled(false);
 
-   mpSymbolWidget = new GraphicSymbolWidget(mpDisplayOptionsStack);
-   mpLineWidget = new GraphicLineWidget(mpDisplayOptionsStack);
+   mpSymbolContainerWidget = new QWidget(mpDisplayOptionsStack);
+   mpLineContainerWidget = new QWidget(mpDisplayOptionsStack);
+   mpSymbolAttributePropertiesSection = new DisplaySelectionWidget(mpSymbolContainerWidget);
+   mpLineAttributePropertiesSection = new DisplaySelectionWidget(mpLineContainerWidget);
+
+   mpSymbolWidget = new GraphicSymbolWidget(mpSymbolContainerWidget);
+   mpLineWidget = new GraphicLineWidget(mpLineContainerWidget);
    mpPolygonWidget = new QWidget(mpDisplayOptionsStack);
+   mpPolygonAttributePropertiesSection = new DisplaySelectionWidget(mpPolygonWidget);
    mpPolygonLineWidget = new GraphicLineWidget(mpPolygonWidget);
    mpPolygonFillWidget = new GraphicFillWidget(mpPolygonWidget);
 
-   mpDisplayOptionsStack->addWidget(mpSymbolWidget);
-   mpDisplayOptionsStack->addWidget(mpLineWidget);
+   mpDisplayOptionsStack->addWidget(mpSymbolContainerWidget);
+   mpDisplayOptionsStack->addWidget(mpLineContainerWidget);
    mpDisplayOptionsStack->addWidget(mpPolygonWidget);
 
-   QBoxLayout* pPolygonLayout = new QHBoxLayout(mpPolygonWidget);
+   QHBoxLayout* pPolygonLayout = new QHBoxLayout(mpPolygonWidget);
+   pPolygonLayout->setMargin(0);
+   pPolygonLayout->setSpacing(10);
+   pPolygonLayout->addWidget(mpPolygonAttributePropertiesSection, 10);
    pPolygonLayout->addWidget(mpPolygonLineWidget);
    pPolygonLayout->addWidget(mpPolygonFillWidget);
 
+   QHBoxLayout* pLineLayout = new QHBoxLayout(mpLineContainerWidget);
+   pLineLayout->setMargin(0);
+   pLineLayout->setSpacing(10);
+   pLineLayout->addWidget(mpLineAttributePropertiesSection, 10);
+   pLineLayout->addWidget(mpLineWidget);
+
+   QHBoxLayout* pSymbolLayout = new QHBoxLayout(mpSymbolContainerWidget);
+   pSymbolLayout->setMargin(0);
+   pSymbolLayout->setSpacing(10);
+   pSymbolLayout->addWidget(mpSymbolAttributePropertiesSection, 10);
+   pSymbolLayout->addWidget(mpSymbolWidget);
+
    LabeledSection* pDisplaySection = new LabeledSection(mpDisplayOptionsStack, "Display", this);
+
+   addDisplayUpdateSignals();
 
    // Fields
    QWidget* pFieldsSectionWidget = new QWidget(this);
@@ -112,7 +140,7 @@ QueryOptionsWidget::QueryOptionsWidget(QWidget *parent) :
 
    LabeledSection* pFieldsSection = new LabeledSection(pFieldsSectionWidget, "Fields", this);
 
-   connect(mpFieldList, SIGNAL(itemClicked(QTreeWidgetItem*, int)), 
+   connect(mpFieldList, SIGNAL(itemClicked(QTreeWidgetItem*, int)),
       this, SLOT(addItemToFormatString(QTreeWidgetItem*, int)));
 
    // File Info
@@ -130,7 +158,7 @@ QueryOptionsWidget::QueryOptionsWidget(QWidget *parent) :
 
    // Layout
    addSection(mpQuerySection, 1000);
-   addSection(pDisplaySection);
+   addSection(pDisplaySection, 1000);
    addSection(pFieldsSection, 1000);
    addSection(pFileInfoSection);
    addStretch(1);
@@ -143,9 +171,8 @@ QueryOptionsWidget::~QueryOptionsWidget()
 
 void QueryOptionsWidget::setDisplayOptions(const QueryOptions &options)
 {
+   removeDisplayUpdateSignals();
    mpQueryNameEdit->setText(QString::fromStdString(options.getQueryName()));
-   mpFormatStringEdit->setText(QString::fromStdString(options.getFormatString()));
-   mpQueryBuilderWidget->setQuery(options.getQueryString());
 
    mpSymbolWidget->setSymbolName(QString::fromStdString(options.getSymbolName()));
    mpSymbolWidget->setSymbolSize(options.getSymbolSize());
@@ -165,11 +192,22 @@ void QueryOptionsWidget::setDisplayOptions(const QueryOptions &options)
    mpPolygonFillWidget->setFillColor(COLORTYPE_TO_QCOLOR(options.getFillColor()));
    mpPolygonFillWidget->setFillStyle(options.getFillStyle());
    mpPolygonFillWidget->setHatchStyle(options.getHatchStyle());
+
+   addDisplayUpdateSignals();
+   const FeatureQueryOptions* pFeatureQuery = dynamic_cast<const FeatureQueryOptions*>(&options);
+   if (pFeatureQuery != NULL)
+   {
+      mpFormatStringEdit->setText(QString::fromStdString(pFeatureQuery->getFormatString()));
+      mpQueryBuilderWidget->setQuery(options.getQueryString());
+      mpSymbolAttributePropertiesSection->setDefaultQuery(options);
+      mpPolygonAttributePropertiesSection->setDefaultQuery(options);
+      mpLineAttributePropertiesSection->setDefaultQuery(options);
+   }
 }
 
-QueryOptions QueryOptionsWidget::getDisplayOptions() const
+FeatureQueryOptions QueryOptionsWidget::getDisplayOptions() const
 {
-   QueryOptions options;
+   FeatureQueryOptions options;
 
    options.setQueryName(mpQueryNameEdit->text().toStdString());
    options.setFormatString(mpFormatStringEdit->text().toStdString());
@@ -177,12 +215,12 @@ QueryOptions QueryOptionsWidget::getDisplayOptions() const
 
    QWidget* pCurrent = mpDisplayOptionsStack->currentWidget();
 
-   if (pCurrent == mpSymbolWidget)
+   if (pCurrent == mpSymbolContainerWidget)
    {
       options.setSymbolName(mpSymbolWidget->getSymbolName().toStdString());
       options.setSymbolSize(mpSymbolWidget->getSymbolSize());
    }
-   else if (pCurrent == mpLineWidget)
+   else if (pCurrent == mpLineContainerWidget)
    {
       options.setLineColor(mpLineWidget->getLineColor());
       options.setLineScaled(mpLineWidget->getLineScaled());
@@ -214,15 +252,15 @@ void QueryOptionsWidget::setFeatureType(ArcProxyLib::FeatureType featureType)
    {
    case ArcProxyLib::MULTIPOINT:
       shapeType += "Multipoint";
-      pPropertyWidget = mpSymbolWidget;
+      pPropertyWidget = mpSymbolContainerWidget;
       break;
    case ArcProxyLib::POINT:
       shapeType += "Point";
-      pPropertyWidget = mpSymbolWidget;
+      pPropertyWidget = mpSymbolContainerWidget;
       break;
    case ArcProxyLib::POLYLINE:
       shapeType += "Polyline";
-      pPropertyWidget = mpLineWidget;
+      pPropertyWidget = mpLineContainerWidget;
       break;
    case ArcProxyLib::POLYGON:
       shapeType += "Polygon";
@@ -267,6 +305,9 @@ void QueryOptionsWidget::setFeatureFields(const std::vector<std::string> &fields
          }
       }
    }
+   mpSymbolAttributePropertiesSection->populateAttributeList(fields, types);
+   mpPolygonAttributePropertiesSection->populateAttributeList(fields, types);
+   mpLineAttributePropertiesSection->populateAttributeList(fields, types);
 
    mpQueryBuilderWidget->setFields(fields);
 }
@@ -314,4 +355,157 @@ void QueryOptionsWidget::setHideQueryBuilder(bool hidden)
 {
    mpQuerySection->setHidden(hidden);
    mpQueryBuilderWidget->clearQueryElements();
+}
+
+void QueryOptionsWidget::setDisplayQueryOptions(const std::string& queryName)
+{
+   const std::vector<DisplayQueryOptions> queries = mpFeatureClass->getDisplayQueryOptions(queryName);
+   mpSymbolAttributePropertiesSection->initializeFromQueries(queries);
+   mpPolygonAttributePropertiesSection->initializeFromQueries(queries);
+   mpLineAttributePropertiesSection->initializeFromQueries(queries);
+}
+
+void QueryOptionsWidget::populateFieldValues(const std::string& field, std::vector<std::string>& values)
+{
+   mpSymbolAttributePropertiesSection->populateFieldValues(field, values);
+   mpPolygonAttributePropertiesSection->populateFieldValues(field, values);
+   mpLineAttributePropertiesSection->populateFieldValues(field, values);
+}
+
+bool QueryOptionsWidget::updateQueries()
+{
+   bool bSelected = false;
+   if (mbChangingSelection == false)
+   {
+      FeatureQueryOptions origOption = getDisplayOptions();
+      if (mSelectedDisplayQueryNames.empty() == false)
+      {
+         std::vector<DisplayQueryOptions*> options;
+         for (unsigned int i = 0; i < mSelectedDisplayQueryNames.size(); i++)
+         {
+            QueryOptions* pQueryOption = dynamic_cast<QueryOptions*>(&origOption);
+            DisplayQueryOptions* pOption = new DisplayQueryOptions(*pQueryOption);
+            pOption->setUniqueName(mSelectedDisplayQueryNames[i]);
+            options.push_back(pOption);
+         }
+         mpFeatureClass->modifyDisplayQuery(options, true);
+         bSelected = true;
+      }
+      else
+      {
+         mpFeatureClass->updateQuery(origOption);
+      }
+   }
+   return bSelected;
+}
+
+void QueryOptionsWidget::selectDisplayQuery(const std::vector<DisplayQueryOptions*>& displayQueries)
+{
+   //save off the previous selection
+   mbChangingSelection = true;
+   FeatureQueryOptions origOption = getDisplayOptions();
+   const std::string queryName = origOption.getQueryName();
+   if (displayQueries.empty() == true)
+   {
+      //display the feature class wide properties
+      FeatureQueryOptions* pOption = mpFeatureClass->getQueryByName(queryName);
+      if (pOption != NULL)
+      {
+         pOption->setFormatString(origOption.getFormatString());
+         setDisplayOptions(*pOption);
+      }
+   }
+   else
+   {
+      //display the display settings for the selected query option
+      std::vector<DisplayQueryOptions> pFeatureOptions = mpFeatureClass->getDisplayQueryOptions(queryName);
+      for (unsigned int i = 0; i < pFeatureOptions.size(); i++)
+      {
+         DisplayQueryOptions option = pFeatureOptions[i];
+         if (option.getUniqueName() == displayQueries.front()->getUniqueName())
+         {
+            setDisplayOptions(option);
+         }
+      }
+   }
+   mSelectedDisplayQueryNames.clear();
+   for (unsigned int i = 0; i < displayQueries.size(); i++)
+   {
+      mSelectedDisplayQueryNames.push_back(displayQueries[i]->getUniqueName());
+   }
+   mbChangingSelection = false;
+}
+
+void QueryOptionsWidget::setFeatureClass(FeatureClass* pFeatureClass)
+{
+   mpFeatureClass = pFeatureClass;
+   mpLineAttributePropertiesSection->setFeatureClass(mpFeatureClass);
+   mpPolygonAttributePropertiesSection->setFeatureClass(mpFeatureClass);
+   mpSymbolAttributePropertiesSection->setFeatureClass(mpFeatureClass);
+}
+
+void QueryOptionsWidget::addDisplayUpdateSignals()
+{
+   //symbol signals
+   VERIFYNR(connect(mpSymbolAttributePropertiesSection,
+      SIGNAL(selectDisplayQuery(const std::vector<DisplayQueryOptions*>&)),
+      this, SLOT(selectDisplayQuery(const std::vector<DisplayQueryOptions*>&))));
+   VERIFYNR(connect(mpSymbolWidget, SIGNAL(nameChanged(const QString&)), this, SLOT(updateQueries())));
+   VERIFYNR(connect(mpSymbolWidget, SIGNAL(sizeChanged(unsigned int)), this, SLOT(updateQueries())));
+
+   //polygon signals
+   VERIFYNR(connect(mpPolygonAttributePropertiesSection,
+      SIGNAL(selectDisplayQuery(const std::vector<DisplayQueryOptions*>&)),
+      this, SLOT(selectDisplayQuery(const std::vector<DisplayQueryOptions*>&))));
+   VERIFYNR(connect(mpPolygonLineWidget, SIGNAL(stateChanged(bool)), this, SLOT(updateQueries())));
+   VERIFYNR(connect(mpPolygonLineWidget, SIGNAL(styleChanged(LineStyle)), this, SLOT(updateQueries())));
+   VERIFYNR(connect(mpPolygonLineWidget, SIGNAL(widthChanged(unsigned int)), this, SLOT(updateQueries())));
+   VERIFYNR(connect(mpPolygonLineWidget, SIGNAL(colorChanged(const QColor&)), this, SLOT(updateQueries())));
+   VERIFYNR(connect(mpPolygonLineWidget, SIGNAL(scaledChanged(bool)), this, SLOT(updateQueries())));
+   VERIFYNR(connect(mpPolygonFillWidget, SIGNAL(styleChanged(FillStyle)), this, SLOT(updateQueries())));
+   VERIFYNR(connect(mpPolygonFillWidget, SIGNAL(colorChanged(const QColor&)), this, SLOT(updateQueries())));
+   VERIFYNR(connect(mpPolygonFillWidget, SIGNAL(hatchChanged(SymbolType)), this, SLOT(updateQueries())));
+
+   //line signals
+   VERIFYNR(connect(mpLineAttributePropertiesSection,
+      SIGNAL(selectDisplayQuery(const std::vector<DisplayQueryOptions*>&)),
+      this, SLOT(selectDisplayQuery(const std::vector<DisplayQueryOptions*>&))));
+   VERIFYNR(connect(mpLineWidget, SIGNAL(stateChanged(bool)), this, SLOT(updateQueries())));
+   VERIFYNR(connect(mpLineWidget, SIGNAL(styleChanged(LineStyle)), this, SLOT(updateQueries())));
+   VERIFYNR(connect(mpLineWidget, SIGNAL(widthChanged(unsigned int)), this, SLOT(updateQueries())));
+   VERIFYNR(connect(mpLineWidget, SIGNAL(colorChanged(const QColor&)), this, SLOT(updateQueries())));
+   VERIFYNR(connect(mpLineWidget, SIGNAL(scaledChanged(bool)), this, SLOT(updateQueries())));
+}
+
+void QueryOptionsWidget::removeDisplayUpdateSignals()
+{
+   //symbol signals
+   VERIFYNR(disconnect(mpSymbolAttributePropertiesSection,
+      SIGNAL(selectDisplayQuery(const std::vector<DisplayQueryOptions*>&)),
+      this, SLOT(selectDisplayQuery(const std::vector<DisplayQueryOptions*>&))));
+   VERIFYNR(disconnect(mpSymbolWidget, SIGNAL(nameChanged(const QString&)), this, SLOT(updateQueries())));
+   VERIFYNR(disconnect(mpSymbolWidget, SIGNAL(sizeChanged(unsigned int)), this, SLOT(updateQueries())));
+
+   //polygon signals
+   VERIFYNR(disconnect(mpPolygonAttributePropertiesSection,
+      SIGNAL(selectDisplayQuery(const std::vector<DisplayQueryOptions*>&)),
+      this, SLOT(selectDisplayQuery(const std::vector<DisplayQueryOptions*>&))));
+   VERIFYNR(disconnect(mpPolygonLineWidget, SIGNAL(stateChanged(bool)), this, SLOT(updateQueries())));
+   VERIFYNR(disconnect(mpPolygonLineWidget, SIGNAL(styleChanged(LineStyle)), this, SLOT(updateQueries())));
+   VERIFYNR(disconnect(mpPolygonLineWidget, SIGNAL(widthChanged(unsigned int)), this, SLOT(updateQueries())));
+   VERIFYNR(disconnect(mpPolygonLineWidget, SIGNAL(colorChanged(const QColor&)), this, SLOT(updateQueries())));
+   VERIFYNR(disconnect(mpPolygonLineWidget, SIGNAL(scaledChanged(bool)), this, SLOT(updateQueries())));
+   VERIFYNR(disconnect(mpPolygonFillWidget, SIGNAL(styleChanged(FillStyle)), this, SLOT(updateQueries())));
+   VERIFYNR(disconnect(mpPolygonFillWidget, SIGNAL(colorChanged(const QColor&)), this, SLOT(updateQueries())));
+   VERIFYNR(disconnect(mpPolygonFillWidget, SIGNAL(hatchChanged(SymbolType)), this, SLOT(updateQueries())));
+
+   //line signals
+   VERIFYNR(disconnect(mpLineAttributePropertiesSection,
+      SIGNAL(selectDisplayQuery(const std::vector<DisplayQueryOptions*>&)),
+      this, SLOT(selectDisplayQuery(const std::vector<DisplayQueryOptions*>&))));
+   VERIFYNR(disconnect(mpLineWidget, SIGNAL(stateChanged(bool)), this, SLOT(updateQueries())));
+   VERIFYNR(disconnect(mpLineWidget, SIGNAL(styleChanged(LineStyle)), this, SLOT(updateQueries())));
+   VERIFYNR(disconnect(mpLineWidget, SIGNAL(widthChanged(unsigned int)), this, SLOT(updateQueries())));
+   VERIFYNR(disconnect(mpLineWidget, SIGNAL(colorChanged(const QColor&)), this, SLOT(updateQueries())));
+   VERIFYNR(disconnect(mpLineWidget, SIGNAL(scaledChanged(bool)), this, SLOT(updateQueries())));
 }

@@ -7,29 +7,35 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "ConnectionParametersWidget.h"
 #include "AppVerify.h"
+#include "ConfigurationSettings.h"
+#include "ConnectionParametersWidget.h"
 #include "FeatureClass.h"
 #include "FeatureClassProperties.h"
 #include "FeatureClassWidget.h"
+#include "FileResource.h"
 #include "LatLonLineEdit.h"
 #include "ListInspectorWidget.h"
+#include "MessageLogMgr.h"
 #include "QueryOptionsWidget.h"
 
-#include <QtGui/QTabWidget>
+#include <QtCore/QFile>
 #include <QtGui/QGridLayout>
 #include <QtGui/QLabel>
 #include <QtGui/QListWidgetItem>
 #include <QtGui/QPushButton>
 #include <QtGui/QProgressBar>
 #include <QtGui/QRadioButton>
+#include <QtGui/QTabWidget>
 
 #include <algorithm>
 #include <boost/bind.hpp>
 
 FeatureClassWidget::FeatureClassWidget(QWidget* pParent) :
    QWidget(pParent),
-   mpFeatureClass(NULL)
+   mpEditFeatureClass(NULL),
+   mpFeatureClass(NULL),
+   mbDisplayOnlyChanges(false)
 {
    QTabWidget* pTabWidget = new QTabWidget(this);
 
@@ -43,7 +49,7 @@ FeatureClassWidget::FeatureClassWidget(QWidget* pParent) :
    pConnectionLayout->addWidget(mpLayerNameEdit, 0, 1);
    pConnectionLayout->addWidget(mpConnection, 1, 0, 1, 2);
 
-   QueryOptionsWidget* pInspector = new QueryOptionsWidget;
+   QueryOptionsWidget* pInspector = new QueryOptionsWidget(this);
    mpDisplay = new ListInspectorWidget(pInspector, this);
 
    mpClipping = new QWidget(this);
@@ -126,11 +132,11 @@ FeatureClassWidget::FeatureClassWidget(QWidget* pParent) :
    VERIFYNR(connect(pTestConnectionButton, SIGNAL(clicked()), this, SLOT(testConnection())));
 
    VERIFYNR(connect(mpDisplay, SIGNAL(addItems()), this, SLOT(addDisplayItems())));
-   VERIFYNR(connect(mpDisplay, SIGNAL(saveInspector(QWidget*, QListWidgetItem*)), 
+   VERIFYNR(connect(mpDisplay, SIGNAL(saveInspector(QWidget*, QListWidgetItem*)),
       this, SLOT(saveDisplayInspector(QWidget*, QListWidgetItem*))));
-   VERIFYNR(connect(mpDisplay, SIGNAL(loadInspector(QWidget*, QListWidgetItem*)), 
+   VERIFYNR(connect(mpDisplay, SIGNAL(loadInspector(QWidget*, QListWidgetItem*)),
       this, SLOT(loadDisplayInspector(QWidget*, QListWidgetItem*))));
-   VERIFYNR(connect(mpDisplay, SIGNAL(removeItem(QListWidgetItem*)), 
+   VERIFYNR(connect(mpDisplay, SIGNAL(removeItem(QListWidgetItem*)),
       this, SLOT(removeDisplayItem(QListWidgetItem*))));
 
    VERIFYNR(connect(mpNoClipButton, SIGNAL(toggled(bool)), this, SLOT(clipButtonClicked())));
@@ -140,46 +146,67 @@ FeatureClassWidget::FeatureClassWidget(QWidget* pParent) :
 
 FeatureClassWidget::~FeatureClassWidget()
 {
-}
-
-namespace
-{
-   template<typename T>
-   typename T::second_type second(const T &t)
+   if (mpEditFeatureClass != NULL)
    {
-      return t.second;
+      delete mpEditFeatureClass;
    }
 }
+
 bool FeatureClassWidget::applyChanges()
 {
-   VERIFY(mpFeatureClass != NULL);
+   VERIFY(mpFeatureClass != NULL && mpEditFeatureClass != NULL);
 
-   mpFeatureClass->setLayerName(mpLayerNameEdit->text().toStdString());
-
-   mpFeatureClass->setConnectionParameters(mpConnection->getConnectionParameters());
-
-   mpDisplay->applyChanges();
-
-   mpFeatureClass->clearQueries();
-   std::for_each(mQueries.begin(), mQueries.end(), boost::bind(&FeatureClass::addQuery, mpFeatureClass, 
-      boost::bind(second<std::pair<QListWidgetItem *const, QueryOptions> >, _1)));
+   FeatureClass::ClippingType origType = mpEditFeatureClass->getClippingType();
 
    if (mpNoClipButton->isChecked())
    {
-      mpFeatureClass->setClippingType(FeatureClass::NO_CLIP);
+      mpEditFeatureClass->setClippingType(FeatureClass::NO_CLIP);
    }
    if (mpSceneClipButton->isChecked())
    {
-      mpFeatureClass->setClippingType(FeatureClass::SCENE_CLIP);
+      mpEditFeatureClass->setClippingType(FeatureClass::SCENE_CLIP);
    }
    if (mpSpecifiedClipButton->isChecked())
    {
-      mpFeatureClass->setClippingType(FeatureClass::NO_CLIP);
+      //if the clipping corners have changed in any way, then set
+      //mbDisplayOnlyChanges to false to force a reload of shapes
+      std::pair<LocationType, LocationType> clipping = mpFeatureClass->getClipping();
+      mpEditFeatureClass->setClippingType(FeatureClass::NO_CLIP);
       LocationType ll(mpSouthEdit->getValue(), mpEastEdit->getValue());
       LocationType ur(mpNorthEdit->getValue(), mpWestEdit->getValue());
-      mpFeatureClass->setClipping(ll, ur);
-   }
+      if (ll.mX != clipping.first.mX || ll.mY != clipping.first.mY ||
+         ur.mX != clipping.second.mX || ur.mY != clipping.second.mY)
+      {
+         mbDisplayOnlyChanges = false;
+      }
 
+      mpEditFeatureClass->setClipping(ll, ur);
+   }
+   if (origType != mpEditFeatureClass->getClippingType())
+   {
+      //if the clipping type has changed, then set mbDisplayOnlyChanges
+      //to false to force a reload of the shapes
+      mbDisplayOnlyChanges = false;
+   }
+   //in this function, we are going to check if sufficient changes were made
+   //in the dialog to require a reload of the shapefile
+   if (mpEditFeatureClass->setConnectionParameters(mpConnection->getConnectionParameters()) == true)
+   {
+      mbDisplayOnlyChanges = false;
+   }
+   mpDisplay->applyChanges();
+   //copy the edit feature class back into the primary feature class
+   mpFeatureClass->fromDynamicObject(mpEditFeatureClass->toDynamicObject().get());
+   //now copy the data that is current state related that does not get written
+   //to the file
+   mpFeatureClass->copyQueryGraphicIds(mpEditFeatureClass->getQueries());
+   mpFeatureClass->setLayerName(mpLayerNameEdit->text().toStdString());
+   //if the queries determining which data is loaded have changed in
+   //any way, then set mbDisplayOnlyChanges to false to force the reload
+   if (compareQueriesForChanges(mpFeatureClass->getQueries()) == true)
+   {
+      mbDisplayOnlyChanges = false;
+   }
 
    return true;
 }
@@ -190,20 +217,33 @@ void FeatureClassWidget::initialize(FeatureClass *pFeatureClass)
    {
       return;
    }
+   QueryOptionsWidget* pWidget = dynamic_cast<QueryOptionsWidget*>(mpDisplay->getInspector());
 
    mpFeatureClass = pFeatureClass;
-
+   if (mpEditFeatureClass != NULL)
+   {
+      delete mpEditFeatureClass;
+   }
+   //create a copy feature class for editing
+   mpEditFeatureClass = new FeatureClass();
+   //copy the contents that are persisted to the file when saved
+   mpEditFeatureClass->fromDynamicObject(mpFeatureClass->toDynamicObject().get());
+   //copy the contents that deal with the current state of the class that
+   //don't get written when saved
+   mpEditFeatureClass->copyQueryGraphicIds(mpFeatureClass->getQueries());
+   mpEditFeatureClass->setParentElement(mpFeatureClass->getParentElement());
+   pWidget->setFeatureClass(mpEditFeatureClass);
    mpLayerNameEdit->setText(QString::fromStdString(mpFeatureClass->getLayerName()));
 
    // Initialize may have be called more than once, so reset related things
    mpDisplay->clearList();
    mQueries.clear();
 
-   const std::vector<QueryOptions>& queries = mpFeatureClass->getQueries();
-   for (std::vector<QueryOptions>::const_iterator iter = queries.begin();
-      iter != queries.end(); ++iter)
+   const std::vector<FeatureQueryOptions>& queries = mpFeatureClass->getQueries();
+   for (std::vector<FeatureQueryOptions>::const_iterator iter = queries.begin(); iter != queries.end(); ++iter)
    {
-      mQueries[mpDisplay->addItem(iter->getQueryName())] = *iter;
+      std::string queryName = iter->getQueryName();
+      mQueries[mpDisplay->addItem(queryName)] = *iter;
    }
 
    const ArcProxyLib::ConnectionParameters& connect = mpFeatureClass->getConnectionParameters();
@@ -245,15 +285,13 @@ void FeatureClassWidget::testConnection(bool onlyIfModified)
       std::string errorMessage;
 
       ArcProxyLib::ConnectionParameters connect = mpConnection->getConnectionParameters();
-      if (FeatureClass::testConnection(connect, featureClassProperties,
-         errorMessage))
+      if (FeatureClass::testConnection(connect, featureClassProperties, errorMessage))
       {
          if (mpLayerNameEdit->text().startsWith(QString::fromStdString(FeatureClass::DEFAULT_LAYER_NAME)))
          {
             mpLayerNameEdit->setText(QString::fromStdString(connect.getFeatureClass()));
          }
-         setFeatureClassProperties(featureClassProperties, 
-            mpConnection->getConnectionParameters().getConnectionType());
+         setFeatureClassProperties(featureClassProperties, mpConnection->getConnectionParameters().getConnectionType());
          mpDisplay->setEnabled(true);
          mpClipping->setEnabled(true);
       }
@@ -264,15 +302,13 @@ void FeatureClassWidget::testConnection(bool onlyIfModified)
          mpErrorLabel->setText(QString("Connection: %1").arg(QString::fromStdString(errorMessage)));
       }
       mpProgressBar->setHidden(true);
-
    }
 
    mpConnection->setModified(false);
 }
 
-void FeatureClassWidget::setFeatureClassProperties(
-   const ArcProxyLib::FeatureClassProperties &featureClassProperties,
-   ArcProxyLib::ConnectionType connectionType)
+void FeatureClassWidget::setFeatureClassProperties(const ArcProxyLib::FeatureClassProperties& featureClassProperties,
+                                                   ArcProxyLib::ConnectionType connectionType)
 {
    if (featureClassProperties.getFeatureType() == ArcProxyLib::UNKNOWN)
    {
@@ -286,26 +322,29 @@ void FeatureClassWidget::setFeatureClassProperties(
    if (hideQueries)
    {
       mpDisplay->clearList();
-      
-      VERIFYNRV(!mQueries.empty());
-      QueryOptions options = mQueries.begin()->second;
-      
-      mQueries.clear();
-      mQueries[mpDisplay->addItem(options.getQueryName())] = options;
+
+      if (!mQueries.empty())
+      {
+         FeatureQueryOptions options = mQueries.begin()->second;
+
+         mQueries.clear();
+         mQueries[mpDisplay->addItem(options.getQueryName())] = options;
+      }
    }
+   //need to make sure fields are defined before adding queries
+   pInspector->setFeatureFields(featureClassProperties.getFields(), featureClassProperties.getTypes(),
+      featureClassProperties.getSampleValues());
+
    mpDisplay->setHideList(hideQueries);
    pInspector->setHideQueryBuilder(hideQueries);
 
    pInspector->setFeatureType(featureClassProperties.getFeatureType());
    pInspector->setFeatureCount(featureClassProperties.getFeatureCount());
-   pInspector->setFeatureFields(featureClassProperties.getFields(), 
-      featureClassProperties.getTypes(), 
-      featureClassProperties.getSampleValues());
 }
 
 void FeatureClassWidget::addDisplayItems()
 {
-   QueryOptions options;
+   FeatureQueryOptions options;
    options.setQueryName(mpDisplay->getUniqueName(options.getQueryName()));
    mQueries[mpDisplay->addItem(options.getQueryName())] = options;
 }
@@ -319,19 +358,27 @@ void FeatureClassWidget::saveDisplayInspector(QWidget *pInspector, QListWidgetIt
 
    QueryOptionsWidget* pOptionsWidget = dynamic_cast<QueryOptionsWidget*>(pInspector);
    VERIFYNRV(pOptionsWidget != NULL);
+   saveDisplayQueryOptions();
 
-   std::map<QListWidgetItem*, QueryOptions>::iterator iter = mQueries.find(pItem);
+   std::map<QListWidgetItem*, FeatureQueryOptions>::iterator iter = mQueries.find(pItem);
    if (iter == mQueries.end())
    {
       return;
    }
+   FeatureQueryOptions currentOption = pOptionsWidget->getDisplayOptions();
+   QString currentName = QString::fromStdString(currentOption.getQueryName());
+   pItem->setText(currentName);
 
-   iter->second = pOptionsWidget->getDisplayOptions();
    if (pItem->text().toStdString() != iter->second.getQueryName())
    {
-      std::string newName = mpDisplay->getUniqueName(iter->second.getQueryName());
+      std::string oldName = iter->second.getQueryName();
+      std::string newName = currentName.toStdString();
+      bool bFound = mpEditFeatureClass->replaceQueryNameInQueriesLists(oldName, newName);
       iter->second.setQueryName(newName);
-      pItem->setText(QString::fromStdString(newName));
+      if (bFound == false)
+      {
+         mpEditFeatureClass->addQuery(iter->second);
+      }
    }
 }
 
@@ -340,23 +387,37 @@ void FeatureClassWidget::loadDisplayInspector(QWidget* pInspector, QListWidgetIt
    QueryOptionsWidget* pOptionsWidget = dynamic_cast<QueryOptionsWidget*>(pInspector);
    VERIFYNRV(pOptionsWidget != NULL);
 
-   std::map<QListWidgetItem*, QueryOptions>::iterator iter = mQueries.find(pItem);
+   std::map<QListWidgetItem*, FeatureQueryOptions>::iterator iter = mQueries.find(pItem);
    if (iter == mQueries.end())
    {
       return;
    }
 
    pOptionsWidget->setDisplayOptions(iter->second);
+   std::string queryName = iter->second.getQueryName();
+   if (mpEditFeatureClass != NULL)
+   {
+      //this check adds a query back to the list if the user
+      //has changed the name in the dialog
+      if (mpEditFeatureClass->getQueryByName(queryName) == NULL)
+      {
+         mpEditFeatureClass->addQuery(iter->second);
+      }
+      pOptionsWidget->setDisplayQueryOptions(queryName);
+   }
 }
 
 void FeatureClassWidget::removeDisplayItem(QListWidgetItem* pItem)
 {
-   std::map<QListWidgetItem*, QueryOptions>::iterator iter = mQueries.find(pItem);
+   std::map<QListWidgetItem*, FeatureQueryOptions>::iterator iter = mQueries.find(pItem);
    if (iter == mQueries.end())
    {
       return;
    }
-
+   if (mpEditFeatureClass != NULL)
+   {
+      mpEditFeatureClass->removeQuery(iter->second.getQueryName());
+   }
    mQueries.erase(iter);
 }
 
@@ -376,4 +437,91 @@ void FeatureClassWidget::setAvailableConnectionTypes(
    const std::vector<ArcProxyLib::ConnectionType> &types)
 {
    mpConnection->setAvailableConnectionTypes(types);
+}
+
+void FeatureClassWidget::setDisplayOnlyChanges(bool bValue)
+{
+   mbDisplayOnlyChanges = bValue;
+}
+
+bool FeatureClassWidget::getDisplayOnlyChanges() const
+{
+   return mbDisplayOnlyChanges;
+}
+
+bool FeatureClassWidget::compareQueriesForChanges(const std::vector<FeatureQueryOptions>& options)
+{
+   bool bChanged = false;
+   if (mQueries.size() != options.size())
+   {
+      bChanged = true;
+   }
+   else
+   {
+      for (unsigned int i = 0; i < options.size(); i++)
+      {
+         bool bFound = false;
+         //loop through each option contained in the dialog and compare 
+         //the passed in query to see if a change requiring a reload
+         //of shapes has occurred.
+         for (std::map<QListWidgetItem*, FeatureQueryOptions>::const_iterator iter = mQueries.begin();
+            iter != mQueries.end();
+            ++iter)
+         {
+            if (options[i].getQueryName() == (*iter).second.getQueryName())
+            {
+               bFound = true;
+               FeatureQueryOptions* pOption = mpFeatureClass->getQueryByName(options[i].getQueryName());
+               if (pOption != NULL)
+               {
+                  //the query string and the format string are changed through the 
+                  //QListWidgetItem map, and if it has changed, we need to apply it
+                  if (options[i].getQueryString() != (*iter).second.getQueryString())
+                  {
+                     bChanged = true;
+                     pOption->setQueryString((*iter).second.getQueryString());
+                  }
+                  if (options[i].getFormatString() != (*iter).second.getFormatString())
+                  {
+                     bChanged = true;
+                     pOption->setFormatString((*iter).second.getFormatString());
+                  }
+               }
+            }
+         }
+         if (bFound == false)
+         {
+            bChanged = true;
+         }
+      }
+   }
+   return bChanged;
+}
+
+void FeatureClassWidget::saveDisplayQueryOptions()
+{
+   QueryOptionsWidget* pOptionsWidget = dynamic_cast<QueryOptionsWidget*>(mpDisplay->getInspector());
+   if (pOptionsWidget != NULL)
+   {
+      //save off the previous selection
+      FeatureQueryOptions oldOption = pOptionsWidget->getDisplayOptions();
+      bool bSelected = pOptionsWidget->updateQueries();
+      std::map<QListWidgetItem*, FeatureQueryOptions>::iterator iter;
+      for (iter = mQueries.begin(); iter != mQueries.end(); ++iter)
+      {
+         //only set the default query option if no others are selected
+         if (iter->first->text().toStdString() == oldOption.getQueryName())
+         {
+            if (bSelected == false)
+            {
+               iter->second = oldOption;
+            }
+            else
+            {
+               iter->second.setQueryString(oldOption.getQueryString());
+               iter->second.setFormatString(oldOption.getFormatString());
+            }
+         }
+      }
+   }
 }

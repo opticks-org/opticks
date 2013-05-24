@@ -39,6 +39,7 @@
 #include "SessionResource.h"
 #include "ShapeFileImporter.h"
 #include "SpatialDataView.h"
+#include "StringUtilities.h"
 #include "Undo.h"
 #include "UtilityServices.h"
 
@@ -152,7 +153,8 @@ bool ShapeFileImporter::getInputSpecification(PlugInArgList*& pArgList)
 
    pArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription());
    pArgList->addArg<AnnotationElement>(Importer::ImportElementArg(), NULL, "Shapefile to be imported.");
-   pArgList->addArg<SpatialDataView>(Executable::ViewArg(), NULL, "View in which the imported shapefile will be inserted.");
+   pArgList->addArg<SpatialDataView>(Executable::ViewArg(), NULL,
+      "View in which the imported shapefile will be inserted.");
 
    return true;
 }
@@ -223,31 +225,53 @@ bool ShapeFileImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
       connect.getConnectionType()) == availableConnections.end(), 
       "The selected connection type is not available.", return false)
 
+   // Create annotation element, incrementing requested name by 1, until
+   // annotation element can be created.
    Service<ModelServices> pModel;
-   FAIL_IF(!pModel->setElementParent(pAnno, pRaster) || !pModel->setElementName(pAnno, connect.getFeatureClass()),
-      "This shape file has already been imported", return false)
+   std::string featureClassName = connect.getFeatureClass();
+   std::string newElementName = featureClassName;
+   int limit = 1;
+   bool found = true;
+   found = pModel->getElement(featureClassName, TypeConverter::toString<AnnotationElement>(), pRaster);
+   while ((found) && (limit < 1000))
+   {
+      ++limit;
+      newElementName = featureClassName + StringUtilities::toDisplayString<int>(limit);
+      DataElement* pElement = pModel->getElement(newElementName, TypeConverter::toString<AnnotationElement>(), pRaster);
+      if (pElement == NULL)
+      {
+         found = false;
+      }
+   }
+   VERIFY(pModel->setElementParent(pAnno, pRaster) && pModel->setElementName(pAnno, newElementName));
 
    FAIL_IF(pAnno->setGeocentric(true) == false, "Could not set the element to geocentric.", return false)
 
    string layerName = mpFeatureClass->getLayerName();
 
+   // Create the feature class element before creating the layer to ensure that the feature class is available
+   // to the Geographic Features Window when the layer is added to the view
+   ModelResource<Any> pAny("Geographic feature", pAnno, "FeatureClass");
+   mpFeatureClass->setParentElement(pAnno);
+   pAny->setData(mpFeatureClass.release());
+
+   // Need to get the FeatureClass pointer again since release() NULLs the pointer value
+   FeatureClass* pFeatureClass = dynamic_cast<FeatureClass*>(pAny->getData());
+
    pAnnotationLayer = static_cast<AnnotationLayer*>(pLayerList->getLayer(ANNOTATION, pAnno, layerName));
    if (pAnnotationLayer == NULL)
    {
+      // Create layer with requested layer name.
       pAnnotationLayer = static_cast<AnnotationLayer*>(pView->createLayer(ANNOTATION, pAnno, layerName));
    }
-   if (pAnnotationLayer != NULL && mpFeatureClass->hasLabels())
+   if (pAnnotationLayer != NULL && pFeatureClass->hasLabels())
    {
       pAnnotationLayer->setShowLabels(true);
    }
 
    pAnnotationLayer->setLayerLocked(true);
 
-   ModelResource<Any> pAny("Geographic feature", pAnno, "FeatureClass");
-
-   mpFeatureClass->setParentElement(pAnno);
-
-   if (!mpFeatureClass->open(mMessageText) || !mpFeatureClass->update(mpProgress, mMessageText))
+   if (!pFeatureClass->open(mMessageText) || !pFeatureClass->update(mpProgress, mMessageText, false))
    {
       if (mpProgress)
       {
@@ -258,7 +282,6 @@ bool ShapeFileImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
       return false;
    }
 
-   pAny->setData(mpFeatureClass.release());
    pAny.release();
    mpProgress->updateProgress("Complete", 100, NORMAL);
    pStep->finalize(Message::Success);
@@ -343,7 +366,7 @@ std::vector<ArcProxyLib::ConnectionType> ShapeFileImporter::getAvailableConnecti
    VERIFYRV(pProxy != NULL, types);
 
    types = pProxy->getAvailableConnectionTypes();
-   vector<ArcProxyLib::ConnectionType>::iterator sdeIter = 
+   vector<ArcProxyLib::ConnectionType>::iterator sdeIter =
       find(types.begin(), types.end(), ArcProxyLib::SDE_CONNECTION);
    if (sdeIter != types.end())
    {

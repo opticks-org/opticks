@@ -32,7 +32,8 @@ namespace ArcProxyLib
       void setType(FeatureType type) { mType = type; }
       std::string getLabel() const { return mLabel; }
       void setLabel(const std::string &label) { mLabel = label; }
-
+      const std::vector<std::string>& getAttributes() const { return mAttributeValues; }
+      void setAttributes(const std::vector<std::string>& attributes) { mAttributeValues = attributes; }
       const std::vector<std::pair<double, double> > &getVertices() const { return mVertices; }
       const std::vector<size_t> &getPaths() const { return mPaths; }
 
@@ -67,7 +68,24 @@ namespace ArcProxyLib
             {
                startNewPath();
             }
-            if (featureArgs.front().startsWith("LABEL"))
+            else if (featureArgs.front().startsWith("ATTRIBUTES"))
+            {
+               mAttributeValues.clear();
+               QStringList attributes = featureArgs.front().split("=");
+               if (attributes.size() == 2)
+               {
+                  QString endOfText(" ");
+                  endOfText[0] = 3;
+                  QStringList attributeValues = attributes[1].split(endOfText);
+
+                  for (int i = 0; i < attributeValues.size(); i++)
+                  {
+                     mAttributeValues.push_back(QUrl::
+                        fromPercentEncoding(attributeValues[i].toAscii()).toStdString());
+                  }
+               }
+            }
+            else if (featureArgs.front().startsWith("LABEL"))
             {
                QStringList label = featureArgs.front().split("=");
                if (label.size() == 2)
@@ -90,6 +108,7 @@ namespace ArcProxyLib
       FeatureType mType;
       std::vector<std::pair<double, double> > mVertices;
       std::vector<size_t> mPaths;
+      std::vector<std::string> mAttributeValues;
       std::string mLabel;
    };
 }

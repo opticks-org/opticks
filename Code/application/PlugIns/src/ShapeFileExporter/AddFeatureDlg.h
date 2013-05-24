@@ -10,7 +10,7 @@
 #ifndef ADDFEATUREDLG_H
 #define ADDFEATUREDLG_H
 
-#include "AoiElement.h"
+#include "GraphicElement.h"
 #include "GraphicObject.h"
 #include "ShapeFileTypes.h"
 
@@ -24,7 +24,7 @@ class QCheckBox;
 class QComboBox;
 class QTreeWidget;
 
-Q_DECLARE_METATYPE(AoiElement*)
+Q_DECLARE_METATYPE(GraphicElement*)
 Q_DECLARE_METATYPE(GraphicObject*)
 
 class AddFeatureDlg : public QDialog
@@ -32,10 +32,11 @@ class AddFeatureDlg : public QDialog
    Q_OBJECT
 
 public:
-   AddFeatureDlg(const std::vector<AoiElement*>& aois, ShapefileTypes::ShapeType shapeType, QWidget* pParent = NULL);
+   AddFeatureDlg(const std::vector<GraphicElement*>& graphicElements,
+                 ShapefileTypes::ShapeType shapeType, QWidget* pParent = NULL);
    virtual ~AddFeatureDlg();
 
-   std::map<AoiElement*, std::vector<GraphicObject*> > getFeatureItems() const;
+   std::map<GraphicElement*, std::vector<GraphicObject*> > getFeatureItems() const;
    QString getFeatureClass() const;
 
 public slots:

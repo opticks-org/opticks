@@ -8,14 +8,16 @@
  */
 
 #include "AoiElement.h"
-#include "AoiLayer.h"
+#include "AnnotationLayer.h"
 #include "AppVersion.h"
 #include "AppVerify.h"
 #include "BitMask.h"
 #include "DesktopServices.h"
 #include "FileDescriptor.h"
 #include "Filename.h"
+#include "GraphicElement.h"
 #include "GraphicGroup.h"
+#include "GraphicLayer.h"
 #include "GraphicObject.h"
 #include "LayerList.h"
 #include "MessageLogResource.h"
@@ -28,6 +30,7 @@
 #include "ShapeFileOptionsWidget.h"
 #include "ShapeFileTypes.h"
 #include "SpatialDataView.h"
+#include "TypeConverter.h"
 #include "UtilityServices.h"
 
 #include <QtCore/QString>
@@ -39,7 +42,8 @@ using namespace std;
 REGISTER_PLUGIN_BASIC(OpticksShapeFileExporter, ShapeFileExporter);
 
 ShapeFileExporter::ShapeFileExporter() :
-   mpAoi(NULL),
+   mpFileDesc(NULL),
+   mpGraphicElement(NULL),
    mpGeoref(NULL),
    mpLayers(NULL)
 {
@@ -50,7 +54,7 @@ ShapeFileExporter::ShapeFileExporter() :
    setDescriptorId("{6A4FBFF5-1642-4d66-95DC-AFBB1A7E5B1E}");
    setProductionStatus(APP_IS_PRODUCTION_RELEASE);
    setExtensions("Shape Files (*.shp *.shx *.dbf)");
-   setSubtype(TypeConverter::toString<AoiLayer>());
+   setSubtype(TypeConverter::toString<GraphicLayer>());
    addDependencyCopyright("shapelib", Service<UtilityServices>()->getTextFromFile(":/licenses/shapelib"));
 }
 
@@ -63,17 +67,20 @@ bool ShapeFileExporter::getInputSpecification(PlugInArgList*& pArgList)
    VERIFY(pArgList != NULL);
 
    VERIFY(pArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription()));
-   VERIFY(pArgList->addArg<FileDescriptor>(Exporter::ExportDescriptorArg(), NULL, "File descriptor for the output file."));
+   VERIFY(pArgList->addArg<FileDescriptor>(Exporter::ExportDescriptorArg(), NULL,
+      "File descriptor for the output file."));
 
    if (isBatch())
    {
-      VERIFY(pArgList->addArg<AoiElement>("AoiElement", NULL, "The AOI to be exported"));
-      VERIFY(pArgList->addArg<RasterElement>("RasterElement", NULL, 
-         "Source of georeference for the AOI being exported"));
+      VERIFY(pArgList->addArg<GraphicElement>(TypeConverter::toString<GraphicElement>(), NULL,
+         "The graphic element to be exported"));
+      VERIFY(pArgList->addArg<RasterElement>(TypeConverter::toString<RasterElement>(), NULL,
+         "Source of georeference for the graphic element being exported"));
    }
    else
    {
-      VERIFY(pArgList->addArg<AoiLayer>(Exporter::ExportItemArg(), NULL, "The AOI layer to be exported as shape file"));
+      VERIFY(pArgList->addArg<GraphicLayer>(Exporter::ExportItemArg(), NULL,
+         "The layer to be exported as a shape file"));
    }
 
    return true;
@@ -99,7 +106,7 @@ bool ShapeFileExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
    // Progress
    Progress* pProgress = pInArgList->getPlugInArgValue<Progress>(Executable::ProgressArg());
 
-   if (mpOptionsWidget.get() == NULL)  // then need to extract inputs and add mpAoi to mShapefile
+   if (mpOptionsWidget.get() == NULL)  // then need to extract inputs and add mpGraphicElement to mShapefile
    {
       if (extractInputs(pInArgList, msg) == false)
       {
@@ -148,22 +155,22 @@ QWidget* ShapeFileExporter::getExportOptionsWidget(const PlugInArgList* pInArgLi
          QMessageBox::warning(pDesktop->getMainWidget(), "Error Extracting Inputs", QString::fromStdString(msg));
          return NULL;
       }
-      vector<Layer*> aoiLayers;
+      vector<Layer*> graphicLayers;
       if (mpLayers != NULL)
       {
-         mpLayers->getLayers(AOI_LAYER, aoiLayers);
+         graphicLayers = mpLayers->getLayers();
       }
-      vector<AoiElement*> elements;
-      for (vector<Layer*>::iterator it = aoiLayers.begin(); it != aoiLayers.end(); ++it)
+      vector<GraphicElement*> elements;
+      for (vector<Layer*>::iterator it = graphicLayers.begin(); it != graphicLayers.end(); ++it)
       {
-         AoiElement* pAoi = dynamic_cast<AoiElement*>((*it)->getDataElement());
-         if (pAoi != NULL)
+         GraphicElement* pGraphicElement = dynamic_cast<GraphicElement*>((*it)->getDataElement());
+         if (pGraphicElement != NULL)
          {
-            elements.push_back(pAoi);
+            elements.push_back(pGraphicElement);
          }
       }
 
-      mpOptionsWidget.reset(new ShapeFileOptionsWidget(&mShapefile, mpAoi, elements, mpGeoref));
+      mpOptionsWidget.reset(new ShapeFileOptionsWidget(mpFileDesc, &mShapefile, mpGraphicElement, elements, mpGeoref));
    }
 
    return mpOptionsWidget.get();
@@ -177,29 +184,31 @@ bool ShapeFileExporter::extractInputs(const PlugInArgList* pInArgList, string& m
       return false;
    }
 
-   FileDescriptor* pFileDescriptor = pInArgList->getPlugInArgValue<FileDescriptor>(Exporter::ExportDescriptorArg());
-   if (pFileDescriptor == NULL)
+   mpFileDesc = pInArgList->getPlugInArgValue<FileDescriptor>(Exporter::ExportDescriptorArg());
+   if (mpFileDesc == NULL)
    {
       message = "No file specified.";
       return false;
    }
-   mShapefile.setFilename(pFileDescriptor->getFilename().getFullPathAndName());
+   mShapefile.setFilename(mpFileDesc->getFilename().getFullPathAndName());
+
+   GraphicLayer* pLayer = NULL;
 
    if (isBatch())
    {
-      mpAoi = pInArgList->getPlugInArgValue<AoiElement>("AoiElement");
+      mpGraphicElement = pInArgList->getPlugInArgValue<GraphicElement>("GraphicElement");
       mpGeoref = pInArgList->getPlugInArgValue<RasterElement>("RasterElement");
    }
    else
    {
-      AoiLayer* pLayer = pInArgList->getPlugInArgValue<AoiLayer>(Exporter::ExportItemArg());
+      pLayer = pInArgList->getPlugInArgValue<GraphicLayer>(Exporter::ExportItemArg());
       if (pLayer == NULL)
       {
          message = "Input argument list did not include anything to export.";
          return false;
       }
 
-      mpAoi = dynamic_cast<AoiElement*>(pLayer->getDataElement());
+      mpGraphicElement = dynamic_cast<GraphicElement*>(pLayer->getDataElement());
       SpatialDataView* pView = dynamic_cast<SpatialDataView*>(pLayer->getView());
       if (pView != NULL)
       {
@@ -211,7 +220,7 @@ bool ShapeFileExporter::extractInputs(const PlugInArgList* pInArgList, string& m
       }
    }
 
-   if (mpAoi == NULL)
+   if (mpGraphicElement == NULL)
    {
       message = "Could not identify the data element to export.";
       return false;
@@ -224,16 +233,33 @@ bool ShapeFileExporter::extractInputs(const PlugInArgList* pInArgList, string& m
    // This is the case when the outside flag is false. The case where the
    // outside flag is true for this condition is handled in
    // ShapeFile::addFeatures()
-   const BitMask* pMask = mpAoi->getSelectedPoints();
-   VERIFY(pMask != NULL);
-
-   GraphicGroup* pGroup = mpAoi->getGroup();
+   bool outsideSelected = false;
+   AoiElement* pAoi = dynamic_cast<AoiElement*>(mpGraphicElement);
+   if (pAoi != NULL)
+   {
+      const BitMask* pMask = pAoi->getSelectedPoints();
+      if (pMask != NULL)
+      {
+         outsideSelected = pMask->isOutsideSelected();
+      }
+   }
+   GraphicGroup* pGroup = mpGraphicElement->getGroup();
    VERIFY(pGroup != NULL);
 
-   const list<GraphicObject*>& objects = pGroup->getObjects();
-   if (objects.empty() == true && pMask->isOutsideSelected() == false)
+   std::list<GraphicObject*> objects;
+   // If annotation layer, get only the selected objects.
+   if (dynamic_cast<AnnotationLayer*>(pLayer) != NULL)
    {
-      message = "The AOI does not contain any points to export.";
+      pLayer->getSelectedObjects(objects);
+   }
+   // If no objects selected, or this is an AOI layer, get all objects.
+   if (objects.empty())
+   {
+      objects = pGroup->getObjects();
+   }
+   if (objects.empty() == true && outsideSelected == false)
+   {
+      message = "The graphic element does not contain any objects to export.";
       return false;
    }
 
@@ -243,7 +269,7 @@ bool ShapeFileExporter::extractInputs(const PlugInArgList* pInArgList, string& m
       return false;
    }
 
-   // Add the AOI to the shape file
+   // Add the graphic element's objects to the shape file
    ShapefileTypes::ShapeType shapeType;
 
    for (list<GraphicObject*>::const_iterator iter = objects.begin(); iter != objects.end(); ++iter)
@@ -258,7 +284,7 @@ bool ShapeFileExporter::extractInputs(const PlugInArgList* pInArgList, string& m
 
       GraphicObjectType objectType = pObject->getGraphicObjectType();
       switch (objectType)        // The cases in the switch represent the acceptable
-                                 // graphic object types in the AOI layer
+                                 // graphic object types in the graphic layer
       {
       case MULTIPOINT_OBJECT:    // Fall through
       case BITMASK_OBJECT:       // Fall through
@@ -273,8 +299,11 @@ bool ShapeFileExporter::extractInputs(const PlugInArgList* pInArgList, string& m
          currentShapeType = ShapefileTypes::POLYLINE_SHAPE;
          break;
 
-      case POLYGON_OBJECT:       // Fall through
-      case RECTANGLE_OBJECT:     // Fall through
+      case POLYGON_OBJECT:           // Fall through
+      case RECTANGLE_OBJECT:         // Fall through
+      case ROUNDEDRECTANGLE_OBJECT:  // Fall through
+      case TRIANGLE_OBJECT:          // Fall through
+      case ARC_OBJECT:               // Fall through
       case ELLIPSE_OBJECT:
          currentShapeType = ShapefileTypes::POLYGON_SHAPE;
          break;
@@ -287,7 +316,7 @@ bool ShapeFileExporter::extractInputs(const PlugInArgList* pInArgList, string& m
 
       if (shapeType.isValid() == true)
       {
-         // Default to the multi-point shape if the AOI contains mixed object types
+         // Default to the multi-point shape if the graphic layer contains mixed object types
          shapeType = ShapefileTypes::MULTIPOINT_SHAPE;
          break;
       }
@@ -297,7 +326,7 @@ bool ShapeFileExporter::extractInputs(const PlugInArgList* pInArgList, string& m
 
    mShapefile.setShape(shapeType);
    string err;
-   mShapefile.addFeatures(mpAoi, NULL, mpGeoref, err);
+   mShapefile.addFeatures(mpGraphicElement, NULL, mpGeoref, err);
 
    return true;
 }

@@ -18,6 +18,7 @@ if env["OS"] == "windows":
 # build sources
 ####
 srcs = map(lambda x,bd=build_dir: '%s/%s' % (bd,x), glob.glob("*.cpp"))
+srcs.append(env.Qrc("%s/GeographicFeatures.qrc" % build_dir))
 objs = env.SharedObject(srcs)
 
 ####

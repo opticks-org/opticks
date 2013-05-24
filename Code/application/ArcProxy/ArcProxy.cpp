@@ -462,7 +462,7 @@ void ArcProxy::queryFeatureClass(IFeatureClassPtr pFeatures, QStringList &args)
       IFeaturePtr pFeature;
       while(pCursor->NextFeature(&pFeature) == S_OK)
       {
-         if(!writeFeature(pFeature, labelFormat))
+         if (!writeFeature(pFeatures, pFeature, labelFormat))
          {
             break;
          }
@@ -549,7 +549,7 @@ const IFeatureClassPtr ArcProxy::getFeatureClass(const ArcProxyLib::ConnectionPa
 }
 
 
-bool ArcProxy::writeFeature(IFeaturePtr pFeature, const std::string &labelFormat)
+bool ArcProxy::writeFeature(IFeatureClassPtr pFeatures, IFeaturePtr pFeature, const std::string& labelFormat)
 {
    IGeometryPtr pShape;
    pFeature->get_Shape(&pShape);
@@ -596,6 +596,67 @@ bool ArcProxy::writeFeature(IFeaturePtr pFeature, const std::string &labelFormat
    std::string processedLabel = std::for_each(labelFormat.begin(), labelFormat.end(), 
       ArcFormatStringProcessor(pFeature)).getProcessedString();
    mStream << "LABEL=" << QUrl::toPercentEncoding(QString::fromStdString(processedLabel)).constData() << " ";
+
+   ArcFormatStringProcessor formatProcessor(pFeature);
+   IFieldsPtr pFields;
+   pFeatures->get_Fields(&pFields);
+   std::string value = "";
+   if (pFields != NULL)
+   {
+      mStream << "ATTRIBUTES=";
+      long numFields;
+      pFields->get_FieldCount(&numFields);
+      for (unsigned int i = 0; i < numFields; i++)
+      {
+         IFieldPtr pField;
+         pFields->get_Field(i, &pField);
+         if (pField != NULL)
+         {
+            esriFieldType type;
+            std::string typeString;
+            pField->get_Type(&type);
+
+            switch (type)
+            {
+            case esriFieldTypeSmallInteger:
+               typeString = "Small Integer";
+               break;
+            case esriFieldTypeInteger:
+               typeString = "Integer";
+               break;
+            case esriFieldTypeSingle:
+               typeString = "Single";
+               break;
+            case esriFieldTypeDouble:
+               typeString = "Double";
+               break;
+            case esriFieldTypeString:
+               typeString = "String";
+               break;
+            case esriFieldTypeDate:
+               typeString = "Date/Time";
+               break;
+            default:
+               // skipping ObjectID, Geometry, Blob, Raster, GUID, and GlobalID
+               // since they can't be usefully manipulated by the user
+               continue;
+            }
+
+            value = formatProcessor.getFieldValue(i + 1);
+            if (value != "[Error: Not stringable]")
+            {
+               mStream << QUrl::toPercentEncoding(QString::fromStdString(value)).constData();
+            }
+            if (i != numFields - 1)
+            {
+               QString endOfText(" ");
+               endOfText[0] = 3;
+               mStream << endOfText;
+            }
+         }
+      }
+      mStream << " ";
+   }
 
    IGeometryCollectionPtr pCollection(pShape);
    IPointCollectionPtr pPoints(pShape);

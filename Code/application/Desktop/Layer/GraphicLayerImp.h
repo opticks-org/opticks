@@ -90,7 +90,7 @@ public:
    virtual GraphicObject* getObjectByName(const std::string &name) const;
 
    virtual bool selectObject(GraphicObject* pObject);
-   virtual int selectObjects(const LocationType& corner1, const LocationType& corner2);
+   virtual int selectObjects(const LocationType& corner1, const LocationType& corner2, bool append = false);
    virtual void selectAllObjects();
    virtual bool isObjectSelected(GraphicObject* pObject) const;
    virtual void getSelectedObjects(std::list<GraphicObject*>& selectedObjects) const;

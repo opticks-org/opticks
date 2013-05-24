@@ -15,14 +15,19 @@
 #include "ConnectionParameters.h"
 #include "QueryOptions.h"
 
+#include <string>
+#include <vector>
+
 namespace ArcProxyLib
 {
    class FeatureClassProperties;
 }
 class ConnectionParametersWidget;
 class FeatureClass;
+class FeatureQueryOptions;
 class LatLonLineEdit;
 class ListInspectorWidget;
+class QueryOptionsWidget;
 
 class QLabel;
 class QLineEdit;
@@ -38,12 +43,13 @@ class FeatureClassWidget : public QWidget
 
 public:
    FeatureClassWidget(QWidget* pParent = NULL);
-   ~FeatureClassWidget();
+   virtual ~FeatureClassWidget();
 
    bool applyChanges();
    void initialize(FeatureClass *pFeatureClass);
 
    void setAvailableConnectionTypes(const std::vector<ArcProxyLib::ConnectionType> &types);
+   bool getDisplayOnlyChanges() const;
 
 public slots:
    void testConnection(bool onlyIfModified = true);
@@ -52,10 +58,13 @@ public slots:
    void loadDisplayInspector(QWidget *pInspector, QListWidgetItem *pItem);
    void removeDisplayItem(QListWidgetItem *pItem);
    void clipButtonClicked();
-   
+   void setDisplayOnlyChanges(bool bValue);
+
 protected:
    void setFeatureClassProperties(const ArcProxyLib::FeatureClassProperties &featureClassProperties,
       ArcProxyLib::ConnectionType connectionType);
+   bool compareQueriesForChanges(const std::vector<FeatureQueryOptions>& options);
+   void saveDisplayQueryOptions();
 
 private:
    FeatureClassWidget(const FeatureClassWidget& rhs);
@@ -75,13 +84,15 @@ private:
    LatLonLineEdit* mpEastEdit;
    LatLonLineEdit* mpWestEdit;
 
+   FeatureClass* mpEditFeatureClass;
    FeatureClass* mpFeatureClass;
-   std::map<QListWidgetItem*, QueryOptions> mQueries;
+   std::map<QListWidgetItem*, FeatureQueryOptions> mQueries;
 
    QLabel* mpErrorLabel;
    QProgressBar* mpProgressBar;
 
    std::vector<QWidget*> mSpecifiedClipWidgets;
+   bool mbDisplayOnlyChanges;
 };
 
 #endif

@@ -18,8 +18,9 @@
 #include <string>
 #include <vector>
 
-class AoiElement;
+class DynamicObject;
 class Feature;
+class GraphicElement;
 class GraphicObject;
 class Progress;
 class RasterElement;
@@ -40,7 +41,7 @@ public:
    void setShape(ShapefileTypes::ShapeType eShape);
    ShapefileTypes::ShapeType getShape() const;
 
-   std::vector<Feature*> addFeatures(AoiElement* pAoi, GraphicObject* pObject, RasterElement* pGeoref,
+   std::vector<Feature*> addFeatures(GraphicElement* pGraphicElement, GraphicObject* pObject, RasterElement* pGeoref,
       std::string& message);
    bool removeFeature(Feature* pFeature);
    const std::vector<Feature*>& getFeatures() const;
@@ -58,6 +59,12 @@ public:
    bool save(Progress* pProgress, std::string& errorMessage);
 
 private:
+   const DynamicObject* getSourceMetadata(const GraphicElement& element) const;
+   const DynamicObject* getSourceAttributeMetadata(const GraphicElement& element) const;
+   int getAttributeIndex(const GraphicObject& graphicObject, const DynamicObject& dynObj) const;
+   bool copyMetadata(const std::vector<std::string>& attrNames, int idx,
+      const DynamicObject& dynObj, Feature& feature) const;
+
    std::string mFilename;
    ShapefileTypes::ShapeType mShape;
    std::vector<Feature*> mFeatures;

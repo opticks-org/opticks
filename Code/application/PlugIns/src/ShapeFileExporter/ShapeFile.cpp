@@ -8,12 +8,16 @@
  */
 
 #include "AoiElement.h"
+#include "AnnotationElement.h"
+#include "AnnotationLayer.h"
 #include "BitMask.h"
 #include "BitMaskIterator.h"
 #include "AppVerify.h"
 #include "DataElement.h"
 #include "DesktopServices.h"
+#include "DynamicObject.h"
 #include "Feature.h"
+#include "GraphicElement.h"
 #include "GraphicGroup.h"
 #include "GraphicObject.h"
 #include "MessageLogResource.h"
@@ -41,6 +45,7 @@ namespace
    const string prjFileContents = "GEOGCS[\"GCS_WGS_1984\",DATUM["
       "\"D_WGS_1984\",SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],"
       "PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]]";
+   const string graphicObjectIdAttrName = "GraphicObjectIds";
 };
 
 ShapeFile::ShapeFile() :
@@ -136,13 +141,100 @@ ShapefileTypes::ShapeType ShapeFile::getShape() const
    return mShape;
 }
 
-vector<Feature*> ShapeFile::addFeatures(AoiElement* pAoi, GraphicObject* pObject, RasterElement* pGeoref,
-                                        string& message)
+const DynamicObject* ShapeFile::getSourceMetadata(const GraphicElement& element) const
+{
+   const AnnotationElement* pSourceElement = dynamic_cast<AnnotationElement*>(element.getParent());
+   if (pSourceElement == NULL)
+   {
+      pSourceElement = dynamic_cast<const AnnotationElement*>(&element);
+   }
+   const DynamicObject* pMetadata = NULL;
+   if (pSourceElement != NULL)
+   {
+      pMetadata = pSourceElement->getMetadata();
+   }
+
+   return pMetadata;
+}
+
+const DynamicObject* ShapeFile::getSourceAttributeMetadata(const GraphicElement& element) const
+{
+   const DynamicObject* pMetadata = getSourceMetadata(element);
+   if (pMetadata != NULL)
+   {
+      pMetadata = pMetadata->getAttribute("FeatureAttributes").getPointerToValue<DynamicObject>();
+   }
+   return pMetadata;
+}
+
+int ShapeFile::getAttributeIndex(const GraphicObject& graphicObject, const DynamicObject& dynObj) const
+{
+   const string objectId = graphicObject.getId();
+   VERIFYRV(objectId.empty() == false, -1);
+
+   DataVariant idsVar = dynObj.getAttribute(graphicObjectIdAttrName);
+   vector<string> objectIds;
+   idsVar.getValue(objectIds);
+   for (vector<string>::size_type i = 0; i < objectIds.size(); ++i)
+   {
+      if (objectIds[i] == objectId)
+      {
+         return static_cast<int>(i);
+      }
+   }
+
+   return -1;
+}
+
+bool ShapeFile::copyMetadata(const vector<string>& attrNames, int idx, const DynamicObject& dynObj,
+                             Feature& feature) const
+{
+   for (vector<string>::const_iterator iter = attrNames.begin(); iter != attrNames.end(); ++iter)
+   {
+      string attrName = *iter;
+
+      const DataVariant dv = dynObj.getAttribute(attrName);
+      string typeName = dv.getTypeName();
+
+      if (typeName.compare("vector<int>") == 0)
+      {
+         const vector<int>* pValues = dv.getPointerToValue<vector<int> >();
+         if (idx < static_cast<int>(pValues->size()))
+         {
+            feature.addField(attrName, int());
+            feature.setFieldValue(attrName, pValues->at(idx));
+         }
+      }
+      else if (typeName.compare("vector<double>") == 0)
+      {
+         const vector<double>* pValues = dv.getPointerToValue<vector<double> >();
+         if (idx < static_cast<int>(pValues->size()))
+         {
+            feature.addField(attrName, double());
+            feature.setFieldValue(attrName, pValues->at(idx));
+         }
+      }
+      else if (typeName.compare("vector<string>") == 0)
+      {
+         const vector<string>* pValues = dv.getPointerToValue<vector<string> >();
+         if (idx < static_cast<int>(pValues->size()))
+         {
+            feature.addField(attrName, string());
+            feature.setFieldValue(attrName, pValues->at(idx));
+         }
+      }
+   }
+
+   return true;
+}
+
+vector<Feature*> ShapeFile::addFeatures(GraphicElement* pGraphicElement, GraphicObject* pObject,
+                                        RasterElement* pGeoref, string& message)
 {
    vector<Feature*> features;
    message.clear();
 
-   if (pAoi == NULL)
+   if (pGraphicElement == NULL)
    {
       message = "Features cannot be added because the data element is invalid!";
       return features;
@@ -173,76 +265,177 @@ vector<Feature*> ShapeFile::addFeatures(AoiElement* pAoi, GraphicObject* pObject
    }
    else
    {
-      GraphicGroup* pGroup = pAoi->getGroup();
+      GraphicGroup* pGroup = pGraphicElement->getGroup();
       if (pGroup != NULL)
       {
-         objects = pGroup->getObjects();
+         // If the element is displayed in an annotation layer, use the selected objects
+         AnnotationLayer* pAnnotationLayer = dynamic_cast<AnnotationLayer*>(pGroup->getLayer());
+         if (pAnnotationLayer != NULL)
+         {
+            pAnnotationLayer->getSelectedObjects(objects);
+         }
+
+         if (objects.empty())
+         {
+            objects = pGroup->getObjects();
+         }
       }
    }
 
    // Create the features
-   string elementName = pAoi->getName();
+   string elementName = pGraphicElement->getName();
+   const DynamicObject* pMetadata = getSourceMetadata(*pGraphicElement);
 
    switch (mShape)
    {
    case ShapefileTypes::POINT_SHAPE:
       {
-         // The BitMaskIterator does not support negative extents and
-         // the BitMask does not correctly handle the outside flag so
-         // the BitMaskIterator is used for cases when the outside flag is true and
-         // the BitMask is used for cases when the outside flag is false
-         const BitMask* pMask = pAoi->getSelectedPoints();
-         if (pObject != NULL)
+         if (dynamic_cast<AnnotationElement*>(pGraphicElement) != NULL)
          {
-            pMask = pObject->getPixels();
-            if (pMask == NULL)
+            if (objects.empty())
             {
-               message = "The " + pObject->getName() + " object cannot be represented by the " +
-                  StringUtilities::toDisplayString(mShape) + " shape type, so a feature will not be added.";
+               message = "Cannot create a shape file from an empty element.";
                return features;
             }
-         }
 
-         if (pMask != NULL)
-         {
-            BitMaskIterator maskIt(pMask, pGeoref);
-            if ((maskIt.getCount() > 0 && pMask->isOutsideSelected() == true) ||
-               (pMask->getCount() > 0 && pMask->isOutsideSelected() == false))
+            // Get names of attributes which should be copied/exported.
+            vector<string> attrNames;
+            const DynamicObject* pAttributeMetadata = getSourceAttributeMetadata(*pGraphicElement);
+            if (pAttributeMetadata != NULL)
             {
-               // Add features for each selected pixel
-               int startColumn = 0;
-               int endColumn = 0;
-               int startRow = 0;
-               int endRow = 0;
-               if (pMask->isOutsideSelected() == true)
+               pAttributeMetadata->getAttributeNames(attrNames);
+            }
+
+            for (list<GraphicObject*>::const_iterator it = objects.begin(); it != objects.end(); ++it)
+            {
+               GraphicObject* pCurrentObject = *it;
+               if (pCurrentObject != NULL)
                {
-                  maskIt.getBoundingBox(startColumn, startRow, endColumn, endRow);
-               }
-               else
-               {
-                  pMask->getBoundingBox(startColumn, startRow, endColumn, endRow);
-               }
-               LocationType pixel;
-               for (int i = startColumn; i <= endColumn; i++)
-               {
-                  for (int j = startRow; j <= endRow; j++)
+                  // Do not allow erase or toggle objects
+                  if (pCurrentObject->getDrawMode() != DRAW)
                   {
-                     if ((maskIt.getPixel(i, j) && pMask->isOutsideSelected() == true) ||
-                           (pMask->getPixel(i, j) && pMask->isOutsideSelected() == false))
+                     continue;
+                  }
+
+                  string objectName = pCurrentObject->getName();
+                  vector<LocationType> vertices;
+                  pCurrentObject->getRotatedExtents(vertices);
+
+                  // Each point created from this object uses the same metadata.
+                  int idx = -1;
+                  if (pMetadata != NULL)
+                  {
+                     idx = getAttributeIndex(*pCurrentObject, *pMetadata);
+                  }
+
+                  LocationType pixel;
+                  for (vector<LocationType>::const_iterator verticesIter = vertices.begin();
+                     verticesIter != vertices.end();
+                     ++verticesIter)
+                  {
+                     // Add the feature
+                     SessionItem* pSessionItem = pGraphicElement;
+                     if (pObject != NULL)
                      {
-                        // Add the feature
-                        SessionItem* pSessionItem = pAoi;
+                        pSessionItem = pObject;
+                     }
+
+                     Feature* pFeature = new Feature(pSessionItem);
+                     features.push_back(pFeature);
+                     mFeatures.push_back(pFeature);
+                     VERIFYNR(pFeature->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &ShapeFile::shapeModified)));
+
+                     // Fields
+                     pFeature->addField("Name", string());
+
+                     if (!elementName.empty())
+                     {
                         if (pObject != NULL)
                         {
-                           pSessionItem = pObject;
+                           pFeature->setFieldValue("Name", elementName + ": " + pObject->getName());
                         }
-
-                        Feature* pFeature = new Feature(pSessionItem);
-                        if (pFeature != NULL)
+                        else
                         {
+                           pFeature->setFieldValue("Name", elementName + ": " + objectName);
+                        }
+                     }
+
+                     pixel.mX = verticesIter->mX + 0.5;
+                     pixel.mY = verticesIter->mY + 0.5;
+                     QString pixelName = "(" + QString::number(verticesIter->mX + 1) + ", " + 
+                        QString::number(verticesIter->mY + 1) + ")";
+                     pFeature->setFieldValue("Pixel", pixelName.toStdString());
+
+                     if (idx > -1 && pAttributeMetadata != NULL)
+                     {
+                        copyMetadata(attrNames, idx, *pAttributeMetadata, *pFeature);
+                     }
+
+                     LocationType geo = pGeoref->convertPixelToGeocoord(*verticesIter);
+                     pFeature->addVertex(geo.mY, geo.mX);
+                  }
+               }
+            }
+         }
+         else
+         {
+            // The BitMaskIterator does not support negative extents and
+            // the BitMask does not correctly handle the outside flag so
+            // the BitMaskIterator is used for cases when the outside flag is true and
+            // the BitMask is used for cases when the outside flag is false
+            AoiElement* pAoiElement = dynamic_cast<AoiElement*>(pGraphicElement);
+            VERIFYRV(pAoiElement != NULL, features);
+            const BitMask* pMask = pAoiElement->getSelectedPoints();
+            if (pObject != NULL)
+            {
+               pMask = pObject->getPixels();
+               if (pMask == NULL)
+               {
+                  message = "The " + pObject->getName() + " object cannot be represented by the " +
+                     StringUtilities::toDisplayString(mShape) + " shape type, so a feature will not be added.";
+                  return features;
+               }
+            }
+
+            if (pMask != NULL)
+            {
+               BitMaskIterator maskIt(pMask, pGeoref);
+               if ((maskIt.getCount() > 0 && pMask->isOutsideSelected() == true) ||
+                  (pMask->getCount() > 0 && pMask->isOutsideSelected() == false))
+               {
+                  // Add features for each selected pixel
+                  int startColumn = 0;
+                  int endColumn = 0;
+                  int startRow = 0;
+                  int endRow = 0;
+                  if (pMask->isOutsideSelected() == true)
+                  {
+                     maskIt.getBoundingBox(startColumn, startRow, endColumn, endRow);
+                  }
+                  else
+                  {
+                     pMask->getBoundingBox(startColumn, startRow, endColumn, endRow);
+                  }
+                  LocationType pixel;
+                  for (int i = startColumn; i <= endColumn; i++)
+                  {
+                     for (int j = startRow; j <= endRow; j++)
+                     {
+                        if ((maskIt.getPixel(i, j) && pMask->isOutsideSelected() == true) ||
+                           (pMask->getPixel(i, j) && pMask->isOutsideSelected() == false))
+                        {
+                           // Add the feature
+                           SessionItem* pSessionItem = pGraphicElement;
+                           if (pObject != NULL)
+                           {
+                              pSessionItem = pObject;
+                           }
+
+                           Feature* pFeature = new Feature(pSessionItem);
                            features.push_back(pFeature);
                            mFeatures.push_back(pFeature);
-                           pFeature->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &ShapeFile::shapeModified));
+                           VERIFYNR(pFeature->attach(SIGNAL_NAME(Subject, Modified),
+                              Slot(this, &ShapeFile::shapeModified)));
 
                            pixel.mX = i + 0.5;
                            pixel.mY = j + 0.5;
@@ -282,8 +475,16 @@ vector<Feature*> ShapeFile::addFeatures(AoiElement* pAoi, GraphicObject* pObject
       {
          if (objects.empty())
          {
-            message = "Error Shape File 101: Cannot create a shape file from an empty AOI.";
+            message = "Cannot create a shape file from an empty element.";
             return features;
+         }
+
+         // Get names of attributes which should be copied/exported.
+         vector<string> attrNames;
+         const DynamicObject* pAttributeMetadata = getSourceAttributeMetadata(*pGraphicElement);
+         if (pAttributeMetadata != NULL)
+         {
+            pAttributeMetadata->getAttributeNames(attrNames);
          }
 
          for (list<GraphicObject*>::const_iterator it = objects.begin(); it != objects.end(); ++it)
@@ -310,12 +511,22 @@ vector<Feature*> ShapeFile::addFeatures(AoiElement* pAoi, GraphicObject* pObject
                      Feature* pFeature = new Feature(pCurrentObject);
                      features.push_back(pFeature);
                      mFeatures.push_back(pFeature);
-                     pFeature->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &ShapeFile::shapeModified));
+                     VERIFYNR(pFeature->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &ShapeFile::shapeModified)));
 
                      pFeature->addField("Name", string());
                      if (!elementName.empty())
                      {
                         pFeature->setFieldValue("Name", elementName + ": " + objectName);
+                     }
+
+                     // Copy attributes.
+                     if ((pMetadata != NULL) && (pAttributeMetadata != NULL))
+                     {
+                        int idx = getAttributeIndex(*pCurrentObject, *pMetadata);
+                        if (idx > -1)
+                        {
+                           copyMetadata(attrNames, idx, *pAttributeMetadata, *pFeature);
+                        }
                      }
 
                      for (vector<LocationType>::const_iterator iter = vertices.begin(); iter != vertices.end(); ++iter)
@@ -334,8 +545,16 @@ vector<Feature*> ShapeFile::addFeatures(AoiElement* pAoi, GraphicObject* pObject
       {
          if (objects.empty())
          {
-            message = "Error Shape File 101: Cannot create a shape file from an empty AOI.";
+            message = "Cannot create a shape file from an empty element.";
             return features;
+         }
+
+         // Get names of attributes which should be copied/exported.
+         vector<string> attrNames;
+         const DynamicObject* pAttributeMetadata = getSourceAttributeMetadata(*pGraphicElement);
+         if (pAttributeMetadata != NULL)
+         {
+            pAttributeMetadata->getAttributeNames(attrNames);
          }
 
          for (list<GraphicObject*>::const_iterator it = objects.begin(); it != objects.end(); ++it)
@@ -344,7 +563,9 @@ vector<Feature*> ShapeFile::addFeatures(AoiElement* pAoi, GraphicObject* pObject
             if (pCurrentObject != NULL)
             {
                GraphicObjectType objectType = pCurrentObject->getGraphicObjectType();
-               if ((objectType == RECTANGLE_OBJECT) || (objectType == POLYGON_OBJECT))
+               if ((objectType == RECTANGLE_OBJECT) || (objectType == ROUNDEDRECTANGLE_OBJECT) ||
+                  (objectType == ELLIPSE_OBJECT) || (objectType == TRIANGLE_OBJECT) ||
+                  (objectType == POLYGON_OBJECT) || (objectType == ARC_OBJECT))
                {
                   // Do not allow erase or toggle objects
                   if (pCurrentObject->getDrawMode() != DRAW)
@@ -367,12 +588,22 @@ vector<Feature*> ShapeFile::addFeatures(AoiElement* pAoi, GraphicObject* pObject
                      Feature* pFeature = new Feature(pCurrentObject);
                      features.push_back(pFeature);
                      mFeatures.push_back(pFeature);
-                     pFeature->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &ShapeFile::shapeModified));
+                     VERIFYNR(pFeature->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &ShapeFile::shapeModified)));
 
                      pFeature->addField("Name", string());
                      if (!elementName.empty())
                      {
                         pFeature->setFieldValue("Name", elementName + ": " + objectName);
+                     }
+
+                     // Copy attributes.
+                     if ((pMetadata != NULL) && (pAttributeMetadata != NULL))
+                     {
+                        int idx = getAttributeIndex(*pCurrentObject, *pMetadata);
+                        if (idx > -1)
+                        {
+                           copyMetadata(attrNames, idx, *pAttributeMetadata, *pFeature);
+                        }
                      }
 
                      for (vector<LocationType>::const_iterator iter = vertices.begin(); iter != vertices.end(); ++iter)
@@ -385,46 +616,113 @@ vector<Feature*> ShapeFile::addFeatures(AoiElement* pAoi, GraphicObject* pObject
             }
          }
       }
-
       break;
 
    case ShapefileTypes::MULTIPOINT_SHAPE:
       {
-         // The BitMaskIterator does not support negative extents and
-         // the BitMask does not correctly handle the outside flag so
-         // the BitMaskIterator is used for cases when the outside flag is true and
-         // the BitMask is used for cases when the outside flag is false
-         const BitMask* pMask = pAoi->getSelectedPoints();
-         if (pObject != NULL)
+         if (dynamic_cast<AnnotationElement*>(pGraphicElement) != NULL)
          {
-            pMask = pObject->getPixels();
-            if (pMask == NULL)
+            if (objects.empty())
             {
-               message = "The " + pObject->getName() + " object cannot be represented by the " +
-                  StringUtilities::toDisplayString(mShape) + " shape type, so a feature will not be added.";
+               message = "Cannot create a shape file from an empty element.";
                return features;
             }
-         }
 
-         if (pMask != NULL)
-         {
-            BitMaskIterator maskIt(pMask, pGeoref);
-            if ((maskIt.getCount() > 0 && pMask->isOutsideSelected() == true) ||
-               (pMask->getCount() > 0 && pMask->isOutsideSelected() == false))
+            // Get names of attributes which should be copied/exported.
+            vector<string> attrNames;
+            const DynamicObject* pAttributeMetadata = getSourceAttributeMetadata(*pGraphicElement);
+            if (pAttributeMetadata != NULL)
             {
-               // Add the feature
-               SessionItem* pSessionItem = pAoi;
-               if (pObject != NULL)
-               {
-                  pSessionItem = pObject;
-               }
+               pAttributeMetadata->getAttributeNames(attrNames);
+            }
 
-               Feature* pFeature = new Feature(pSessionItem);
-               if (pFeature != NULL)
+            for (list<GraphicObject*>::const_iterator it = objects.begin(); it != objects.end(); ++it)
+            {
+               GraphicObject* pCurrentObject = *it;
+               if (pCurrentObject != NULL)
                {
+                  // Do not allow erase or toggle objects
+                  if (pCurrentObject->getDrawMode() != DRAW)
+                  {
+                     continue;
+                  }
+
+                  Feature* pFeature = new Feature(pGraphicElement);
                   features.push_back(pFeature);
                   mFeatures.push_back(pFeature);
-                  pFeature->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &ShapeFile::shapeModified));
+                  VERIFYNR(pFeature->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &ShapeFile::shapeModified)));
+
+                  // Fields
+                  pFeature->addField("Name", string());
+                  if (!elementName.empty())
+                  {
+                     if (pObject != NULL)
+                     {
+                        pFeature->setFieldValue("Name", elementName + ": " + pObject->getName());
+                     }
+                     else
+                     {
+                        pFeature->setFieldValue("Name", elementName);
+                     }
+                  }
+
+                  // Copy attributes.
+                  if ((pMetadata != NULL) && (pAttributeMetadata != NULL))
+                  {
+                     int idx = getAttributeIndex(*pCurrentObject, *pMetadata);
+                     if (idx > -1)
+                     {
+                        copyMetadata(attrNames, idx, *pAttributeMetadata, *pFeature);
+                     }
+                  }
+
+                  vector<LocationType> vertices;
+                  pCurrentObject->getRotatedExtents(vertices);
+                  for (vector<LocationType>::const_iterator iter = vertices.begin(); iter != vertices.end(); ++iter)
+                  {
+                     LocationType geo = pGeoref->convertPixelToGeocoord(*iter);
+                     pFeature->addVertex(geo.mY, geo.mX);
+                  }
+               }
+            }
+         }
+         else
+         {
+            // The BitMaskIterator does not support negative extents and
+            // the BitMask does not correctly handle the outside flag so
+            // the BitMaskIterator is used for cases when the outside flag is true and
+            // the BitMask is used for cases when the outside flag is false
+            AoiElement* pAoiElement = dynamic_cast<AoiElement*>(pGraphicElement);
+            VERIFYRV(pAoiElement != NULL, features);
+            const BitMask* pMask = pAoiElement->getSelectedPoints();
+            if (pObject != NULL)
+            {
+               pMask = pObject->getPixels();
+               if (pMask == NULL)
+               {
+                  message = "The " + pObject->getName() + " object cannot be represented by the " +
+                     StringUtilities::toDisplayString(mShape) + " shape type, so a feature will not be added.";
+                  return features;
+               }
+            }
+
+            if (pMask != NULL)
+            {
+               BitMaskIterator maskIt(pMask, pGeoref);
+               if ((maskIt.getCount() > 0 && pMask->isOutsideSelected() == true) ||
+                  (pMask->getCount() > 0 && pMask->isOutsideSelected() == false))
+               {
+                  // Add the feature
+                  SessionItem* pSessionItem = pGraphicElement;
+                  if (pObject != NULL)
+                  {
+                     pSessionItem = pObject;
+                  }
+
+                  Feature* pFeature = new Feature(pSessionItem);
+                  features.push_back(pFeature);
+                  mFeatures.push_back(pFeature);
+                  VERIFYNR(pFeature->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &ShapeFile::shapeModified)));
 
                   // Fields
                   pFeature->addField("Name", string());

@@ -45,6 +45,14 @@ class GraphicObject : public SessionItem, public Subject, public Serializable
 {
 public:
    /**
+    *  Emitted when the name of the graphic object changes with
+    *  boost::any<std::string> containing the new name.
+    *
+    *  @see     setName()
+    */
+   SIGNAL_METHOD(GraphicObject, NameChanged);
+
+   /**
     *  Returns the type of the object.
     *
     *  @return  The object type.
@@ -56,6 +64,9 @@ public:
     *
     *  @param   name
     *           The new name for the graphic object.
+    *
+    *  @notify  This method notifies signalNameChanged() if the given object
+    *           name is different than the current object name.
     */
    virtual void setName(const std::string& name) = 0;
 

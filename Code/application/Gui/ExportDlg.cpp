@@ -301,6 +301,17 @@ bool ExportDlg::invokeOptionsDialog()
    ExportOptionsDlg optionsDlg(mpExporter, this);
    if (optionsDlg.exec() == QDialog::Accepted)
    {
+      // Selecting file because the filename can be changed in Export Options widget (ie: ShapeFileOptionsWidget).
+      if (mpExporter.get() != NULL)
+      {
+         FileDescriptor* pFileDesc = mpExporter->getFileDescriptor();
+         if (pFileDesc != NULL)
+         {
+            std::string newFilename = pFileDesc->getFilename().getFullPathAndName();
+            selectFile(QString::fromStdString(newFilename));
+         }
+      }
+
       mValidated = true;
       return true;
    }

@@ -22,7 +22,7 @@ class QueryOptions
 {
 public:
    QueryOptions();
-   ~QueryOptions();
+   virtual ~QueryOptions();
 
    /**
     * Convert options to a DynamicObject.
@@ -30,16 +30,13 @@ public:
     * @return A DynamicObject containing the import options.  The caller is
     *         responsible for deleting this DynamicObject.
     */
-   DynamicObject *toDynamicObject() const;
-   void fromDynamicObject(const DynamicObject *pDynObj);
+   virtual DynamicObject *toDynamicObject() const;
+   virtual void fromDynamicObject(const DynamicObject *pDynObj);
 
    void setOnGraphicObject(GraphicObject *pObj) const;
 
    void setQueryName(const std::string &queryName);
    const std::string &getQueryName() const;
-
-   void setFormatString(const std::string &formatString);
-   const std::string &getFormatString() const;
 
    void setQueryString(const std::string &queryString);
    const std::string &getQueryString() const;
@@ -76,7 +73,6 @@ public:
 
 private:
    static const std::string QUERY_NAME;
-   static const std::string FORMAT_STRING;
    static const std::string QUERY_STRING;
    static const std::string SYMBOL_NAME;
    static const std::string SYMBOL_SIZE;
@@ -94,7 +90,6 @@ private:
 
    // feature
    std::string mQueryName;
-   std::string mFormatString;
    std::string mQueryString;
 
    // point

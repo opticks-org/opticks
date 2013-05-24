@@ -12,15 +12,33 @@
     <Filter Include="moc">
       <UniqueIdentifier>{a34d71b1-21ca-47eb-96d7-61b9523a1fa3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="resources">
+      <UniqueIdentifier>{67da3443-8ced-4a91-b559-84d77271b616}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AddQueriesDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AlphaNumericSortFilterProxyModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="ConnectionParametersWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DisplayQueryOptions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DisplaySelectionWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FeatureClass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FeatureClassWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FeatureLayerExporter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FeatureLayerImporter.cpp">
@@ -35,31 +53,31 @@
     <ClCompile Include="FeatureProxyConnector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="FeatureQueryOptions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FeatureTable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeographicFeaturesTabs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeographicFeaturesWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeographicFeaturesWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="ListInspectorWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ModuleManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PropertiesFeatureClass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="QueryBuilderWidget.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="QueryOptions.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="QueryOptionsWidget.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ShapeFileImporter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ShapelibProxy.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_AddQueriesDlg.cpp">
+      <Filter>moc</Filter>
     </ClCompile>
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_ConnectionParametersWidget.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_DisplaySelectionWidget.cpp">
       <Filter>moc</Filter>
     </ClCompile>
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_FeatureClass.cpp">
@@ -77,6 +95,18 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_FeatureProxyConnector.cpp">
       <Filter>moc</Filter>
     </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_FeatureTable.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_GeographicFeaturesTabs.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_GeographicFeaturesWidget.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_GeographicFeaturesWindow.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_ListInspectorWidget.cpp">
       <Filter>moc</Filter>
     </ClCompile>
@@ -89,9 +119,45 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_ShapelibProxy.cpp">
       <Filter>moc</Filter>
     </ClCompile>
+    <ClCompile Include="ModuleManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PropertiesFeatureClass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="QueryBuilderWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="QueryOptions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="QueryOptionsWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Res\$(ProjectName)\rcc_GeographicFeatures.cpp">
+      <Filter>resources</Filter>
+    </ClCompile>
+    <ClCompile Include="ShapeFileImporter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ShapelibProxy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AlphaNumericSortFilterProxyModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DisplayQueryOptions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FeatureLayerExporter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="FeatureLayerImporter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FeatureQueryOptions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PropertiesFeatureClass.h">
@@ -105,7 +171,13 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <CustomBuild Include="AddQueriesDlg.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
     <CustomBuild Include="ConnectionParametersWidget.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="DisplaySelectionWidget.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="FeatureClass.h">
@@ -123,6 +195,18 @@
     <CustomBuild Include="FeatureProxyConnector.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="FeatureTable.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="GeographicFeaturesTabs.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="GeographicFeaturesWidget.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="GeographicFeaturesWindow.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
     <CustomBuild Include="ListInspectorWidget.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -134,6 +218,9 @@
     </CustomBuild>
     <CustomBuild Include="ShapelibProxy.h">
       <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="GeographicFeatures.qrc">
+      <Filter>resources</Filter>
     </CustomBuild>
   </ItemGroup>
 </Project>

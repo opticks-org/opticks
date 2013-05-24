@@ -16,9 +16,10 @@
 #include <string>
 #include <vector>
 
-class AoiElement;
 class CustomTreeWidget;
 class Feature;
+class FileDescriptor;
+class GraphicElement;
 class GraphicObject;
 class QAction;
 class QActionGroup;
@@ -35,13 +36,13 @@ class ShapeFileOptionsWidget : public QWidget
    Q_OBJECT
 
 public:
-   ShapeFileOptionsWidget(ShapeFile* pShapefile, AoiElement* pDefaultAoi, const std::vector<AoiElement*>& aois,
-      RasterElement* pRaster, QWidget* pParent = NULL);
+   ShapeFileOptionsWidget(FileDescriptor* pFileDesc, ShapeFile* pShapefile, GraphicElement* pDefaultGraphicElement,
+      const std::vector<GraphicElement*>& graphicElements, RasterElement* pRaster, QWidget* pParent = NULL);
    virtual ~ShapeFileOptionsWidget();
 
 protected:
    int getColumn(const QString& strField) const;
-   std::vector<Feature*> addFeatures(AoiElement* pAoi, GraphicObject* pObject, QString& message);
+   std::vector<Feature*> addFeatures(GraphicElement* pGraphicElement, GraphicObject* pObject, QString& message);
    void applyFeatureClass(const std::string& className);
 
 protected slots:
@@ -71,9 +72,10 @@ private:
    ShapeFileOptionsWidget(const ShapeFileOptionsWidget& rhs);
    ShapeFileOptionsWidget& operator=(const ShapeFileOptionsWidget& rhs);
 
+   FileDescriptor* mpFileDesc;
    ShapeFile* mpShapeFile;
-   AoiElement* mpDefaultAoi;
-   std::vector<AoiElement*> mAois;
+   GraphicElement* mpDefaultGraphicElement;
+   std::vector<GraphicElement*> mGraphicElements;
    RasterElement* mpGeoref;
 
    QLineEdit* mpFilePathEdit;
