@@ -10,11 +10,16 @@
 #ifndef OPTIONSSHORTCUTS_H
 #define OPTIONSSHORTCUTS_H
 
+#include <QtCore/QList>
+#include <QtGui/QIcon>
 #include <QtGui/QWidget>
+
 #include "AppVersion.h"
 
 class CustomTreeWidget;
 class DynamicObject;
+class QAction;
+class QPoint;
 class QTreeWidgetItem;
 
 class OptionsShortcuts : public QWidget
@@ -80,11 +85,25 @@ public:
       return var;
    }
 
+protected:
+   QString getShortcut(QTreeWidgetItem* pItem) const;
+   QTreeWidgetItem* getShortcutItem(const QString& shortcut) const;
+
+   QList<QTreeWidgetItem*> getDuplicates(QTreeWidgetItem* pItem) const;
+   void updateDuplicateIndicators();
+   QIcon updateDuplicateIndicator(QTreeWidgetItem* pItem);
+
+   void shortcutsIntoGui(const DynamicObject* pCurObject, QTreeWidgetItem* pParent);
+   void shortcutsFromGui(QTreeWidgetItem* pCurObject, DynamicObject* pParent) const;
+
+protected slots:
+   void shortcutChanged(QTreeWidgetItem* pItem, int column);
+   void displayContextMenu(const QPoint& pos);
+   void activateDuplicate(QAction* pAction);
+
 private:
    OptionsShortcuts(const OptionsShortcuts& rhs);
    OptionsShortcuts& operator=(const OptionsShortcuts& rhs);
-   void shortcutsIntoGui(const DynamicObject* pCurObject, QTreeWidgetItem* pParent);
-   void shortcutsFromGui(QTreeWidgetItem* pCurObject, DynamicObject* pParent) const;
 
    CustomTreeWidget* mpShortcutTree;
 };

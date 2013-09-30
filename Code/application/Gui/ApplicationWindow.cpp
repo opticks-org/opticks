@@ -26,7 +26,9 @@
 #include <QtGui/QFrame>
 #include <QtGui/QGridLayout>
 #include <QtGui/QInputDialog>
+#include <QtGui/QKeySequence>
 #include <QtGui/QMessageBox>
+#include <QtGui/QShortcutEvent>
 #include <QtGui/QSplashScreen>
 #include <QtGui/QToolTip>
 #include <QtGui/QVBoxLayout>
@@ -3580,9 +3582,10 @@ void ApplicationWindow::registerPlugIns()
 ///////////////////////////////////////////////////////////////////////////////////////////
 // Options actions
 
-void ApplicationWindow::invokeOptionsDlg()
+void ApplicationWindow::invokeOptionsDlg(const QString& initialPage)
 {
    OptionsDlg dlgOptions(this);
+   dlgOptions.activatePage(initialPage);
    dlgOptions.exec();
 }
 
@@ -5176,23 +5179,47 @@ void ApplicationWindow::closeEvent(QCloseEvent* e)
 static QTime sIdleTime;
 bool ApplicationWindow::eventFilter(QObject* pObj, QEvent* pEvent)
 {
-   if (pEvent->type() == QEvent::ChildRemoved || pEvent->type() == QEvent::Destroy)
+   if (pEvent != NULL)
    {
-      return QMainWindow::eventFilter(pObj, pEvent);
-   }
+      QEvent::Type eventType = pEvent->type();
+      if (eventType == QEvent::ChildRemoved || eventType == QEvent::Destroy)
+      {
+         return QMainWindow::eventFilter(pObj, pEvent);
+      }
+      else if (eventType == QEvent::Shortcut)
+      {
+         QShortcutEvent* pShortcutEvent = dynamic_cast<QShortcutEvent*>(pEvent);
+         if (pShortcutEvent != NULL)
+         {
+            if (pShortcutEvent->isAmbiguous() == true)
+            {
+               const QKeySequence& keys = pShortcutEvent->key();
+               QString shortcutText = keys.toString(QKeySequence::NativeText);
 
-   if (pEvent->type() != QEvent::Timer)
-   {
-      sIdleTime = QTime::currentTime();
-      sIdleTime = sIdleTime.addSecs(3);
-   }
+               int button = QMessageBox::critical(this, APP_NAME, "The activated keyboard shortcut '" +
+                  shortcutText + "' conflicts with another keyboard shortcut defined in the user options.  "
+                  "The action will not be performed.", "Options...", "Close");
+               if (button == 0)
+               {
+                  invokeOptionsDlg("Keyboard Shortcuts");
+               }
+            }
+         }
+      }
 
-   if (pObj == mpAnnotationToolBar && pEvent->type() == QEvent::EnabledChange)
-   {
-      bool enable(mpAnnotationToolBar->isEnabled());
-      m_pCopy_Action->setEnabled(enable);
-      m_pCut_Action->setEnabled(enable);
-      m_pPaste_Action->setEnabled(enable);
+      if (eventType != QEvent::Timer)
+      {
+         sIdleTime = QTime::currentTime();
+         sIdleTime = sIdleTime.addSecs(3);
+      }
+
+      if (pObj == mpAnnotationToolBar && eventType == QEvent::EnabledChange)
+      {
+         bool enable(mpAnnotationToolBar->isEnabled());
+         m_pCopy_Action->setEnabled(enable);
+         m_pCut_Action->setEnabled(enable);
+         m_pPaste_Action->setEnabled(enable);
+      }
    }
 
    return QMainWindow::eventFilter(pObj, pEvent);

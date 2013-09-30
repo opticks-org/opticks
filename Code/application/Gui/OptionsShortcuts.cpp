@@ -7,11 +7,17 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtGui/QAction>
 #include <QtGui/QApplication>
 #include <QtGui/QHeaderView>
+#include <QtGui/QImage>
+#include <QtGui/QMenu>
+#include <QtGui/QPixmap>
+#include <QtGui/QTreeWidgetItem>
 #include <QtGui/QVBoxLayout>
 
 #include "ApplicationWindow.h"
+#include "AppVerify.h"
 #include "CustomTreeWidget.h"
 #include "DynamicObject.h"
 #include "LabeledSection.h"
@@ -25,7 +31,7 @@ using namespace std;
 OptionsShortcuts::OptionsShortcuts() :
    QWidget(NULL)
 {
-   // Shortcuts
+   // Shortcut tree
    QStringList columnNames;
    columnNames.append("Description");
    columnNames.append("Shortcut");
@@ -37,6 +43,8 @@ OptionsShortcuts::OptionsShortcuts() :
    mpShortcutTree->setSelectionMode(QAbstractItemView::SingleSelection);
    mpShortcutTree->setSortingEnabled(true);
    mpShortcutTree->setGridlinesShown(Qt::Horizontal | Qt::Vertical, true);
+   mpShortcutTree->setContextMenuPolicy(Qt::CustomContextMenu);
+
    QHeaderView* pHeader = mpShortcutTree->header();
    if (pHeader != NULL)
    {
@@ -46,18 +54,29 @@ OptionsShortcuts::OptionsShortcuts() :
       pHeader->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
       pHeader->setSortIndicatorShown(true);
    }
+
    LabeledSection* pShortcutSection = new LabeledSection(mpShortcutTree, "Current Shortcuts", this);
-   
+
    // Dialog layout
    QVBoxLayout* pLayout = new QVBoxLayout(this);
    pLayout->setMargin(0);
    pLayout->setSpacing(10);
    pLayout->addWidget(pShortcutSection);
 
+   // Connections
+   VERIFYNR(connect(mpShortcutTree, SIGNAL(cellTextChanged(QTreeWidgetItem*, int)), this,
+      SLOT(shortcutChanged(QTreeWidgetItem*, int))));
+   VERIFYNR(connect(mpShortcutTree, SIGNAL(customContextMenuRequested(const QPoint&)), this,
+      SLOT(displayContextMenu(const QPoint&))));
+
    // Initialize From Settings
    shortcutsIntoGui(ApplicationWindow::getSettingShortcuts(), NULL);
    mpShortcutTree->sortItems(0, Qt::AscendingOrder);
+   updateDuplicateIndicators();
 }
+
+OptionsShortcuts::~OptionsShortcuts()
+{}
 
 void OptionsShortcuts::applyChanges()
 {
@@ -117,8 +136,154 @@ void OptionsShortcuts::applyChanges()
    }
 }
 
-OptionsShortcuts::~OptionsShortcuts()
+QString OptionsShortcuts::getShortcut(QTreeWidgetItem* pItem) const
 {
+   if (pItem == NULL)
+   {
+      return QString();
+   }
+
+   QString shortcut = pItem->text(1);
+   if (shortcut.isEmpty() == false)
+   {
+      while (pItem != NULL)
+      {
+         QString shortcutContext = pItem->text(0);
+         if (shortcutContext.isEmpty() == false)
+         {
+            shortcut.prepend(shortcutContext + "/");
+         }
+
+         pItem = pItem->parent();
+      }
+   }
+
+   return shortcut;
+}
+
+QTreeWidgetItem* OptionsShortcuts::getShortcutItem(const QString& shortcut) const
+{
+   if (shortcut.isEmpty() == true)
+   {
+      return NULL;
+   }
+
+   QTreeWidgetItemIterator iter(mpShortcutTree);
+   while (*iter != NULL)
+   {
+      QTreeWidgetItem* pItem = *iter;
+      if (pItem != NULL)
+      {
+         QString currentShortcut = getShortcut(pItem);
+         if (currentShortcut == shortcut)
+         {
+            return pItem;
+         }
+      }
+
+      ++iter;
+   }
+
+   return NULL;
+}
+
+QList<QTreeWidgetItem*> OptionsShortcuts::getDuplicates(QTreeWidgetItem* pItem) const
+{
+   QList<QTreeWidgetItem*> duplicateItems;
+   if (pItem != NULL)
+   {
+      QString shortcutText = pItem->text(1);
+      if (shortcutText.isEmpty() == false)
+      {
+         QTreeWidgetItemIterator iter(mpShortcutTree);
+         while (*iter != NULL)
+         {
+            QTreeWidgetItem* pCurrentItem = *iter;
+            if ((pCurrentItem != pItem) && (pCurrentItem != NULL) && (pCurrentItem->text(1) == shortcutText))
+            {
+               duplicateItems.append(pCurrentItem);
+            }
+
+            ++iter;
+         }
+      }
+   }
+
+   return duplicateItems;
+}
+
+void OptionsShortcuts::updateDuplicateIndicators()
+{
+   for (int i = 0; i < mpShortcutTree->topLevelItemCount(); ++i)
+   {
+      QTreeWidgetItem* pTopItem = mpShortcutTree->topLevelItem(i);
+      if (pTopItem != NULL)
+      {
+         updateDuplicateIndicator(pTopItem);
+      }
+   }
+}
+
+QIcon OptionsShortcuts::updateDuplicateIndicator(QTreeWidgetItem* pItem)
+{
+   if (pItem == NULL)
+   {
+      return QIcon();
+   }
+
+   QIcon warningIcon(":/icons/Warning");
+   QIcon okIcon(":/icons/Ok");
+
+   QIcon duplicateIcon;
+   int column = 0;
+
+   int numChildren = pItem->childCount();
+   if (numChildren == 0)
+   {
+      column = 1;
+
+      QString shortcut = pItem->text(column);
+      if (shortcut.isEmpty() == false)
+      {
+         QList<QTreeWidgetItem*> duplicateItems = getDuplicates(pItem);
+         if (duplicateItems.empty() == true)
+         {
+            duplicateIcon = okIcon;
+         }
+         else
+         {
+            duplicateIcon = warningIcon;
+         }
+      }
+   }
+   else
+   {
+      duplicateIcon = okIcon;
+
+      QPixmap warningPix = warningIcon.pixmap(16, 16);
+      QImage warningImage = warningPix.toImage();
+
+      for (int i = 0; i < pItem->childCount(); ++i)
+      {
+         QTreeWidgetItem* pChildItem = pItem->child(i);
+         if (pChildItem != NULL)
+         {
+            QIcon childIcon = updateDuplicateIndicator(pChildItem);
+            if (childIcon.isNull() == false)
+            {
+               QPixmap childPix = childIcon.pixmap(16, 16);
+               QImage childImage = childPix.toImage();
+               if (childImage == warningImage)
+               {
+                  duplicateIcon = warningIcon;
+               }
+            }
+         }
+      }
+   }
+
+   pItem->setIcon(column, duplicateIcon);
+   return duplicateIcon;
 }
 
 void OptionsShortcuts::shortcutsIntoGui(const DynamicObject* pCurObject, QTreeWidgetItem* pParent)
@@ -200,5 +365,82 @@ void OptionsShortcuts::shortcutsFromGui(QTreeWidgetItem* pCurObject, DynamicObje
       string name = pCurObject->text(0).toStdString();
       string shortcut = pCurObject->text(1).toStdString();
       pParent->setAttribute(name, shortcut);
+   }
+}
+
+void OptionsShortcuts::shortcutChanged(QTreeWidgetItem* pItem, int column)
+{
+   if ((pItem != NULL) && (column == 1))
+   {
+      updateDuplicateIndicators();
+   }
+}
+
+void OptionsShortcuts::displayContextMenu(const QPoint& pos)
+{
+   QMenu contextMenu(mpShortcutTree);
+
+   QList<QTreeWidgetItem*> items = mpShortcutTree->selectedItems();
+   if (items.count() == 1)
+   {
+      QTreeWidgetItem* pItem  = items.front();
+      VERIFYNRV(pItem != NULL);
+
+      // Display a menu to activate duplicate items if the selected item is currently visible
+      QRect itemRect = mpShortcutTree->visualItemRect(pItem);
+      QRect treeRect = mpShortcutTree->rect();
+      bool visible = treeRect.intersects(itemRect);
+
+      QString shortcut = pItem->text(1);
+      if ((shortcut.isEmpty() == false) && (visible == true))
+      {
+         QList<QTreeWidgetItem*> duplicateItems = getDuplicates(pItem);
+         if (duplicateItems.empty() == false)
+         {
+            QMenu* pDuplicatesMenu = contextMenu.addMenu("Duplicates");
+            if (pDuplicatesMenu != NULL)
+            {
+               for (int i = 0; i < duplicateItems.count(); ++i)
+               {
+                  QTreeWidgetItem* pDuplicateItem = duplicateItems[i];
+                  if (pDuplicateItem != NULL)
+                  {
+                     QString shortcut = getShortcut(pDuplicateItem);
+                     if (shortcut.isEmpty() == false)
+                     {
+                        pDuplicatesMenu->addAction(shortcut);
+                     }
+                  }
+               }
+
+               VERIFYNRV(connect(pDuplicatesMenu, SIGNAL(triggered(QAction*)), this,
+                  SLOT(activateDuplicate(QAction*))));
+               contextMenu.addSeparator();
+            }
+         }
+      }
+   }
+
+   contextMenu.addAction("Expand All", mpShortcutTree, SLOT(expandAll()));
+   contextMenu.addAction("Collapse All", mpShortcutTree, SLOT(collapseAll()));
+   contextMenu.exec(mpShortcutTree->viewport()->mapToGlobal(pos));
+}
+
+void OptionsShortcuts::activateDuplicate(QAction* pAction)
+{
+   if (pAction == NULL)
+   {
+      return;
+   }
+
+   QString shortcut = pAction->text();
+   if (shortcut.isEmpty() == false)
+   {
+      QTreeWidgetItem* pItem = getShortcutItem(shortcut);
+      if (pItem != NULL)
+      {
+         mpShortcutTree->scrollToItem(pItem);
+         mpShortcutTree->setCurrentItem(pItem);
+      }
    }
 }

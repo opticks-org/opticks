@@ -30,6 +30,8 @@ public:
    OptionsDlg(QWidget* pParent = NULL);
    virtual ~OptionsDlg();
 
+   void activatePage(const QString& pageName);
+
 public slots:
    virtual void accept();
 

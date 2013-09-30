@@ -245,6 +245,7 @@
    <file alias="VLine">icons/VLineIcon.png</file>
    <file alias="ValueEdit">icons/ValueEditIcon.png</file>
    <file alias="ValueItem">icons/ValueItemIcon.png</file>
+   <file alias="Warning">icons/WarningIcon.png</file>
    <file alias="WhatsThis">icons/WhatsThisIcon.png</file>
    <file alias="WindowList">icons/WindowListIcon.png</file>
    <file alias="WizardBuilder">icons/WizardBuilderIcon.png</file>

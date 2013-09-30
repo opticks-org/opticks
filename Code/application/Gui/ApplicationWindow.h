@@ -265,7 +265,7 @@ protected slots:
    void showBatchEditor();
 
    // Options actions
-   void invokeOptionsDlg();
+   void invokeOptionsDlg(const QString& initialPage = QString());
 
    // Window actions
    void linkWindows();

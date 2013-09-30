@@ -87,6 +87,27 @@ OptionsDlg::OptionsDlg(QWidget* pParent) :
    restoreState();
 }
 
+void OptionsDlg::activatePage(const QString& pageName)
+{
+   if (pageName.isEmpty() == true)
+   {
+      return;
+   }
+
+   QTreeWidgetItemIterator iter(mpOptionSelection);
+   while (*iter != NULL)
+   {
+      QTreeWidgetItem* pItem = *iter;
+      if ((pItem != NULL) && (pItem->text(0) == pageName))
+      {
+         mpOptionSelection->setCurrentItem(pItem);
+         break;
+      }
+
+      ++iter;
+   }
+}
+
 void OptionsDlg::populateDialogWithOptions()
 {
    QTreeWidgetItem* pRootItem = new QTreeWidgetItem(0);
