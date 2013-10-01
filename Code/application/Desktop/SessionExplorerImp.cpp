@@ -7,6 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include "Animation.h"
+#include "AnimationController.h"
 #include "AnimationModel.h"
 #include "AppAssert.h"
 #include "ContextMenuAction.h"
@@ -18,6 +20,7 @@
 #include "SessionExplorerImp.h"
 #include "SessionItem.h"
 #include "SessionItemModel.h"
+#include "SessionManager.h"
 #include "WindowModel.h"
 
 #include <QtCore/QDataStream>
@@ -71,7 +74,7 @@ SessionExplorerImp::SessionExplorerImp(const string& id, const string& windowNam
    mpAnimationTree->setSelectionBehavior(QAbstractItemView::SelectItems);
    mpAnimationTree->sortByColumn(0, Qt::AscendingOrder);
    mpAnimationTree->setDragEnabled(true);
-   mpAnimationTree->setDragDropMode(QAbstractItemView::DragOnly);
+   mpAnimationTree->setDragDropMode(QAbstractItemView::InternalMove);
    mpAnimationTree->viewport()->installEventFilter(this);
 
    // Elements tree
@@ -532,6 +535,94 @@ bool SessionExplorerImp::eventFilter(QObject* pObject, QEvent* pEvent)
 
                      // Send the event to the tree view
                      return false;
+                  }
+               }
+            }
+         }
+      }
+      else if (pObject == mpAnimationTree->viewport())
+      {
+         if ((type == QEvent::DragEnter) || (type == QEvent::DragMove) || (type == QEvent::Drop))
+         {
+            mpAnimationTree->setDropIndicatorShown(false);
+
+            QDropEvent* pDropEvent = static_cast<QDropEvent*>(pEvent);
+
+            const QMimeData* pData = pDropEvent->mimeData();
+            if (pData != NULL)
+            {
+               if (pData->hasFormat("application/x-sessionitem-id") == true)
+               {
+                  QByteArray itemIdArray = pData->data("application/x-sessionitem-id");
+                  QDataStream itemIdStream(&itemIdArray, QIODevice::ReadOnly);
+
+                  // Get the dragged animation items
+                  vector<Animation*> animations;
+                  unsigned int itemCount = 0;
+
+                  while (itemIdStream.atEnd() == false)
+                  {
+                     QString itemId;
+                     itemIdStream >> itemId;
+                     if (itemId.isEmpty() == false)
+                     {
+                        Animation* pAnimation = dynamic_cast<Animation*>(Service<SessionManager>()->getSessionItem(
+                           itemId.toStdString()));
+                        if (pAnimation != NULL)
+                        {
+                           animations.push_back(pAnimation);
+                        }
+
+                        itemCount++;
+                     }
+                  }
+
+                  // Make sure the dragged items are all animation items
+                  if ((animations.empty() == false) && (animations.size() == itemCount))
+                  {
+                     // Get the animation controller to which the selected animations should be added
+                     AnimationController* pController = NULL;
+
+                     QPoint dropPos = pDropEvent->pos();
+                     QModelIndex dropIndex = mpAnimationTree->indexAt(dropPos);
+                     if (dropIndex.isValid() == true)
+                     {
+                        pController = dynamic_cast<AnimationController*>(dropIndex.data(
+                           SessionItemModel::SessionItemRole).value<SessionItem*>());
+                     }
+
+                     if (pController != NULL)
+                     {
+                        // Enable drops only if all of the selected animations can be added to the controller
+                        bool enableDrop = true;
+
+                        for (vector<Animation*>::iterator iter = animations.begin();
+                           iter != animations.end();
+                           ++iter)
+                        {
+                           Animation* pAnimation = *iter;
+                           if (pAnimation != NULL)
+                           {
+                              if ((pController->hasAnimation(pAnimation) == true) ||
+                                 (pController->hasAnimation(pAnimation->getName()) == true) ||
+                                 (pAnimation->getFrameType() != pController->getFrameType()))
+                              {
+                                 enableDrop = false;
+                                 break;
+                              }
+                           }
+                        }
+
+                        if (enableDrop == true)
+                        {
+                           if (type != QEvent::Drop)
+                           {
+                              mpAnimationTree->setDropIndicatorShown(true);
+                           }
+
+                           return false;     // Send the event to the tree view
+                        }
+                     }
                   }
                }
             }

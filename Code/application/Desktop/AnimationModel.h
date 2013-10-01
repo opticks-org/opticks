@@ -24,6 +24,9 @@ public:
    virtual ~AnimationModel();
 
    virtual Qt::ItemFlags flags(const QModelIndex& index) const;
+   virtual Qt::DropActions supportedDropActions() const;
+   virtual bool dropMimeData(const QMimeData* pData, Qt::DropAction action, int row, int column,
+      const QModelIndex& parentIndex);
 
    void addController(Subject& subject, const std::string& signal, const boost::any& value);
    void removeController(Subject& subject, const std::string& signal, const boost::any& value);

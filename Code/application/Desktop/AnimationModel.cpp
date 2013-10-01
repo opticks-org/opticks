@@ -10,8 +10,13 @@
 #include "Animation.h"
 #include "AnimationController.h"
 #include "AnimationModel.h"
+#include "AnimationServices.h"
 #include "DesktopServices.h"
+#include "SessionItemImp.h"
+#include "SessionManager.h"
 #include "Slot.h"
+
+#include <QtCore/QMimeData>
 
 using namespace std;
 
@@ -31,6 +36,8 @@ AnimationModel::AnimationModel(QObject* pParent) :
          addControllerItem(pController);
       }
    }
+
+   setSupportedDragActions(Qt::MoveAction);
 
    // Connections
    mpAnimationServices.addSignal(SIGNAL_NAME(AnimationServices, ControllerCreated),
@@ -69,10 +76,104 @@ Qt::ItemFlags AnimationModel::flags(const QModelIndex& index) const
    Qt::ItemFlags itemFlags = SessionItemModel::flags(index);
    if (index.isValid() == true)
    {
+      // Allow both animation controllers and animations to be dragged
       itemFlags |= Qt::ItemIsDragEnabled;
+
+      // Allow animations to be dropped only on animation controllers
+      if (index.parent().isValid() == false)
+      {
+         itemFlags |= Qt::ItemIsDropEnabled;
+      }
    }
 
    return itemFlags;
+}
+
+Qt::DropActions AnimationModel::supportedDropActions() const
+{
+   return Qt::MoveAction;
+}
+
+bool AnimationModel::dropMimeData(const QMimeData* pData, Qt::DropAction action, int row, int column,
+                                  const QModelIndex& parentIndex)
+{
+   if ((pData == NULL) || (action != Qt::MoveAction) || (parentIndex.isValid() == false))
+   {
+      return false;
+   }
+
+   if (pData->hasFormat("application/x-sessionitem-id") == false)
+   {
+      return false;
+   }
+
+   // Get the animation controller in which to insert the dragged animations
+   AnimationController* pNewController = dynamic_cast<AnimationController*>(
+      parentIndex.data(SessionItemModel::SessionItemRole).value<SessionItem*>());
+   if (pNewController == NULL)
+   {
+      return false;
+   }
+
+   // Get the dragged animations
+   vector<Animation*> animations;
+
+   QByteArray itemIdArray = pData->data("application/x-sessionitem-id");
+   QDataStream itemIdStream(&itemIdArray, QIODevice::ReadOnly);
+
+   while (itemIdStream.atEnd() == false)
+   {
+      QString itemId;
+      itemIdStream >> itemId;
+      VERIFY(itemId.isEmpty() == false);
+
+      Animation* pAnimation = dynamic_cast<Animation*>(Service<SessionManager>()->getSessionItem(itemId.toStdString()));
+      if (pAnimation != NULL)
+      {
+         // Check if the animation can be added to the destination controller
+         if ((pNewController->hasAnimation(pAnimation) == false) &&
+            (pNewController->hasAnimation(pAnimation->getName()) == false) &&
+            (pAnimation->getFrameType() == pNewController->getFrameType()))
+         {
+            animations.push_back(pAnimation);
+         }
+      }
+   }
+
+   if (animations.empty() == true)    // No new animations for the controller were included in the drag items
+   {
+      return false;
+   }
+
+   // Move each of the dragged animations
+   for (vector<Animation*>::iterator iter = animations.begin(); iter != animations.end(); ++iter)
+   {
+      Animation* pAnimation = *iter;
+      if (pAnimation != NULL)
+      {
+         // Remove the animation from its current controller
+         const vector<AnimationController*>& controllers = Service<AnimationServices>()->getAnimationControllers();
+         for (vector<AnimationController*>::const_iterator controllerIter = controllers.begin();
+            controllerIter != controllers.end();
+            ++controllerIter)
+         {
+            AnimationController* pCurrentController = *controllerIter;
+            if ((pCurrentController != NULL) && (pCurrentController->hasAnimation(pAnimation) == true))
+            {
+               pCurrentController->removeAnimation(pAnimation);
+               break;
+            }
+         }
+
+         // Add the animation to the destination controller
+         if (pNewController->insertAnimation(pAnimation) == false)
+         {
+            return false;
+         }
+      }
+   }
+
+   return true;
 }
 
 void AnimationModel::addController(Subject& subject, const string& signal, const boost::any& value)

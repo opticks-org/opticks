@@ -339,6 +339,17 @@ bool AnimationControllerImp::hasAnimation(const QString& strName) const
    return (pAnimation != NULL);
 }
 
+bool AnimationControllerImp::hasAnimation(Animation* pAnimation) const
+{
+   if (pAnimation == NULL)
+   {
+      return false;
+   }
+
+   vector<Animation*>::const_iterator iter = std::find(mAnimations.begin(), mAnimations.end(), pAnimation);
+   return (iter != mAnimations.end());
+}
+
 const vector<Animation*>& AnimationControllerImp::getAnimations() const
 {
    return mAnimations;
@@ -742,6 +753,11 @@ bool AnimationControllerImp::insertAnimation(Animation* pAnimation)
       return false;
    }
 
+   if (pAnimation->getFrameType() != mFrameType)
+   {
+      return false;
+   }
+
    AnimationImp* pAnimationImp = dynamic_cast<AnimationImp*>(pAnimation);
    VERIFY(pAnimationImp != NULL);
 
@@ -752,6 +768,7 @@ bool AnimationControllerImp::insertAnimation(Animation* pAnimation)
    pAnimation->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &AnimationControllerImp::movieDeleted));
    emit animationAdded(pAnimation);
    notify(SIGNAL_NAME(AnimationController, AnimationAdded), boost::any(pAnimation));
+   updateFrameData();
 
    return true;
 }

@@ -44,10 +44,13 @@ public:
    void setName(const std::string& name);
 
    Animation* createAnimation(const QString& strName);
+   bool insertAnimation(Animation* pAnimation);
    Animation* getAnimation(const QString& strName) const;
    bool hasAnimation(const QString& strName) const;
+   bool hasAnimation(Animation* pAnimation) const;
    const std::vector<Animation*>& getAnimations() const;
    unsigned int getNumAnimations() const;
+   void removeAnimation(Animation* pAnimation);
    void destroyAnimation(Animation* pAnimation);
 
    FrameType getFrameType() const;
@@ -119,10 +122,6 @@ signals:
    void bumperStartChanged(double newValue);
    void bumperStopChanged(double newValue);
 
-protected:
-   bool insertAnimation(Animation* pAnimation);
-   void removeAnimation(Animation* pAnimation);
-
 protected slots:
    void updateFrameData();
    void runAnimations();
@@ -192,6 +191,10 @@ private:
    { \
       return impClass::createAnimation(QString::fromStdString(name)); \
    } \
+   bool insertAnimation(Animation* pAnimation) \
+   { \
+      return impClass::insertAnimation(pAnimation); \
+   } \
    Animation* getAnimation(const std::string& name) const \
    { \
       return impClass::getAnimation(QString::fromStdString(name)); \
@@ -200,6 +203,10 @@ private:
    { \
       return impClass::hasAnimation(QString::fromStdString(name)); \
    } \
+   bool hasAnimation(Animation* pAnimation) const \
+   { \
+      return impClass::hasAnimation(pAnimation); \
+   } \
    const std::vector<Animation*>& getAnimations() const \
    { \
       return impClass::getAnimations(); \
@@ -207,6 +214,10 @@ private:
    unsigned int getNumAnimations() const \
    { \
       return impClass::getNumAnimations(); \
+   } \
+   void removeAnimation(Animation* pAnimation) \
+   { \
+      impClass::removeAnimation(pAnimation); \
    } \
    void destroyAnimation(Animation* pAnimation) \
    { \

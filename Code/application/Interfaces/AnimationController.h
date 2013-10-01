@@ -52,13 +52,13 @@ class Animation;
  *
  *  This subclass of Subject will notify upon the following conditions:
  *    - The controller is deleted.
- *    - The following methods are called: createAnimation(), setCurrentFrame(),
- *      setIntervalMultiplier(), setAnimationState(), setAnimationCycle(), and
- *      destroyAnimation().
+ *    - The following methods are called: createAnimation(), insertAnimation(),
+ *      setCurrentFrame(), setIntervalMultiplier(), setAnimationState(),
+ *      setAnimationCycle(), removeAnimation(), and destroyAnimation().
  *    - The frame set in one of the animations changes.
  *    - Other notifications documented in the Subject class.
  *
- *  @see     Animation, AnimationDialog
+ *  @see     Animation<br>AnimationToolBar
  */
 class AnimationController : public SessionItem, public Subject
 {
@@ -136,21 +136,52 @@ public:
    /**
     *  Creates a new animation and adds it to the controller.
     *
-    *  This method creates a new animation with the given name and the same frame type as
-    *  the controller.  The animation is then added to the internal vector of animations.  The
-    *  animation name must be unique within the controller.
+    *  This method creates a new animation with the given name and the same
+    *  frame type as the controller.  The animation is then added to the
+    *  internal vector of animations.
     *
     *  @param   name
-    *           The animation name.  This name cannot be empty and must be unique for all
-    *           animations in the controller.
+    *           The animation name, which must be unique for all other
+    *           animations already existing in the controller.  This method does
+    *           nothing and returns \c NULL if an empty string is passed in.
     *
-    *  @return  A pointer to the new animation.  NULL is returned if an animation of the given
-    *           name already exists in the controller.
+    *  @return  Returns a pointer to the new Animation, or \c NULL if an
+    *           animation of the given name already exists in the controller.
     *
-    *  @notify  This method will notify signalAnimationAdded() with any<Animation*> after the animation
-    *           is added to the internal vector.
+    *  @notify  This method notifies signalAnimationAdded() with
+    *           boost::any<\link Animation\endlink*> containing the given
+    *           animation after the animation is successfully added to the
+    *           controller.
+    *
+    *  @see     insertAnimation()
     */
    virtual Animation* createAnimation(const std::string& name) = 0;
+
+   /**
+    *  Adds an existing animation to the controller.
+    *
+    *  @param   pAnimation
+    *           A pointer to the Animation to add to the controller.  The name
+    *           of the animation must be unique among all other animations
+    *           already existing in the controller, and the frame type must
+    *           match the frame type of the controller.  This method does
+    *           nothing and returns \c false if \c NULL is passed in.
+    *
+    *  @return  Returns \c true if the animation was successfully added to the
+    *           controller.  Returns \c false if the animation already exists in
+    *           the controller, if another animation in the controller has the
+    *           same name as the given animation, or if the frame type of the
+    *           animation does not match the frame type of the controller as
+    *           returned by getFrameType().
+    *
+    *  @notify  This method notifies signalAnimationAdded() with
+    *           boost::any<\link Animation\endlink*> containing the given
+    *           animation after the animation is successfully added to the
+    *           controller.
+    *
+    *  @see     createAnimation()
+    */
+   virtual bool insertAnimation(Animation* pAnimation) = 0;
 
    /**
     *  Retrieves an animation with a given name.
@@ -167,12 +198,30 @@ public:
     *  Queries whether an animation with a given name exists in the controller.
     *
     *  @param   name
-    *           The animation name.
+    *           The animation name.  This method does nothing and returns
+    *           \c false if an empty string is passed in.
     *
-    *  @return  True if an animation with the given name exists in the controller, otherwise
-    *           false.
+    *  @return  Returns \c true if an animation with the given name exists in
+    *           the controller, or \c false otherwise.
+    *
+    *  @see     hasAnimation(Animation*) const
     */
    virtual bool hasAnimation(const std::string& name) const = 0;
+
+   /**
+    *  Queries whether a given animation exists in the controller.
+    *
+    *  @param   pAnimation
+    *           A pointer to the Animation to query for its existance in the
+    *           controller.  This method does nothing and returns \c false if
+    *           \c NULL is passed in.
+    *
+    *  @return  Returns \c true if the animation exists in the controller, or
+    *           \c false otherwise.
+    *
+    *  @see     hasAnimation(const std::string&) const
+    */
+   virtual bool hasAnimation(Animation* pAnimation) const = 0;
 
    /**
     *  Retrieves all animations in the controller.
@@ -193,17 +242,40 @@ public:
    virtual unsigned int getNumAnimations() const = 0;
 
    /**
+    *  Removes an existing animation from the controller but does not delete it.
+    *
+    *  @param   pAnimation
+    *           A pointer to the Animation object to remove.  This method does
+    *           nothing if \c NULL is passed in.
+    *
+    *  @notify  This method notifies signalAnimationRemoved() with
+    *           boost::any<\link Animation\endlink*> containing the given
+    *           animation after it has been removed from the controller.  If the
+    *           removal of the animation causes the overall frame range of the
+    *           controller to change, this method also notifies
+    *           signalFrameRangeChanged() after the removal notification.
+    *
+    *  @see     destroyAnimation()
+    */
+   virtual void removeAnimation(Animation* pAnimation) = 0;
+
+   /**
     *  Removes an existing animation from the controller and deletes it.
     *
     *  @param   pAnimation
-    *           The animation to destroy.
+    *           A pointer to the Animation object to destroy.  This method does
+    *           nothing if \c NULL is passed in.
     *
-    *  @notify  This method will notify signalAnimationRemoved() with any<Animation*> after the animation
-    *           has been removed from the controller but before the animation is deleted.  This
-    *           method will also notify a second time if the result of removing the
-    *           animation changes the start and/or stop values for the controller.  This
-    *           notification will occur after the removal notification and before the
-    *           animation is deleted.
+    *  @notify  This method notifies signalAnimationRemoved() with
+    *           boost::any<\link Animation\endlink*> containing the given
+    *           animation after the animation has been removed from the
+    *           controller but before it is deleted.  If the removal of the
+    *           animation causes the overall frame range of the controller to
+    *           change, this method also notifies signalFrameRangeChanged()
+    *           after the removal notification but before the animation is
+    *           deleted.
+    *
+    *  @see     removeAnimation()
     */
    virtual void destroyAnimation(Animation* pAnimation) = 0;
 
@@ -577,12 +649,13 @@ public:
     */
    virtual bool getCanDropFrames() const = 0;
 
-
 protected:
    /**
-    * This should be destroyed by calling AnimationToolbar::destroyAnimationController.
+    *  This object should be destroyed by calling
+    *  AnimationServices::destroyAnimationController().
     */
-   virtual ~AnimationController() {}
+   virtual ~AnimationController()
+   {}
 };
 
 #endif
