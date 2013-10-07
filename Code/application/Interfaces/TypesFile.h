@@ -927,6 +927,7 @@ template <> class VariantTypeValidator<DmsFormatType> {};
 template <> class VariantTypeValidator<EncodingType> {};
 template <> class VariantTypeValidator<EndianType> {};
 template <> class VariantTypeValidator<FillStyle> {};
+template <> class VariantTypeValidator<FrameType> {};
 template <> class VariantTypeValidator<GcpSymbol> {};
 template <> class VariantTypeValidator<GeocoordType> {};
 template <> class VariantTypeValidator<GraphicObjectType> {};

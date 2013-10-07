@@ -114,6 +114,13 @@
 #define APP_ANIMATIONSERVICES_DELETE_ACTION "APP_ANIMATIONSERVICES_DELETE_ACTION"
 
 /**
+ *  Appearing in the %Animation tab context menu in the Session Explorer when no
+ *  items are selected, this action creates and activates a new animation
+ *  controller, prompting the user for the controller name and type.
+ */
+#define APP_ANIMATIONSERVICES_NEW_CONTROLLER_ACTION "APP_ANIMATIONSERVICES_NEW_CONTROLLER_ACTION"
+
+/**
  *  Default menu separator.
  */
 #define APP_ANIMATIONSERVICES_SEPARATOR_ACTION "APP_ANIMATIONSERVICES_SEPARATOR_ACTION"

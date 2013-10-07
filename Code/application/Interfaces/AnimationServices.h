@@ -10,6 +10,7 @@
 #ifndef ANIMATIONSERVICES_H
 #define ANIMATIONSERVICES_H
 
+#include "ConfigurationSettings.h"
 #include "Service.h"
 #include "Subject.h"
 #include "TypesFile.h"
@@ -38,6 +39,8 @@ class AnimationFrame;
 class AnimationServices : public Subject
 {
 public:
+   SETTING(NewControllerType, AnimationServices, FrameType, FRAME_ID)
+
    /**
     *  Emitted with any<AnimationController*> when an animation controller is
     *  created.

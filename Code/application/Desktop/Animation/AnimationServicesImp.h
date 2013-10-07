@@ -61,6 +61,7 @@ protected:
    virtual ~AnimationServicesImp();
 
 protected slots:
+   void newController();
    void activateSelectedController();
    void destroySelectedControllers();
 

@@ -10,15 +10,26 @@
 #include <QtCore/QDateTime>
 #include <QtCore/QString>
 #include <QtGui/QAction>
+#include <QtGui/QComboBox>
+#include <QtGui/QDialog>
+#include <QtGui/QDialogButtonBox>
+#include <QtGui/QGridLayout>
+#include <QtGui/QLabel>
+#include <QtGui/QLineEdit>
 #include <QtGui/QMenu>
+#include <QtGui/QMessageBox>
 
 #include "AnimationControllerAdapter.h"
 #include "AnimationFrame.h"
 #include "AnimationServicesImp.h"
 #include "AnimationToolBar.h"
+#include "AppVerify.h"
+#include "AppVersion.h"
 #include "ContextMenu.h"
 #include "ContextMenuActions.h"
 #include "DesktopServices.h"
+#include "SessionExplorer.h"
+#include "StringUtilities.h"
 
 #include <boost/bind.hpp>
 #include <math.h>
@@ -58,10 +69,18 @@ void AnimationServicesImp::destroy()
 AnimationServicesImp::AnimationServicesImp() :
    mpExplorer(SIGNAL_NAME(SessionExplorer, AboutToShowSessionItemContextMenu),
       Slot(this, &AnimationServicesImp::updateContextMenu))
-{}
+{
+   Service<DesktopServices> pDesktop;
+   pDesktop->attach(SIGNAL_NAME(DesktopServices, AboutToShowContextMenu),
+      Slot(this, &AnimationServicesImp::updateContextMenu));
+}
 
 AnimationServicesImp::~AnimationServicesImp()
 {
+   Service<DesktopServices> pDesktop;
+   pDesktop->detach(SIGNAL_NAME(DesktopServices, AboutToShowContextMenu),
+      Slot(this, &AnimationServicesImp::updateContextMenu));
+
    // Notify of destruction
    notify(SIGNAL_NAME(Subject, Deleted));
 
@@ -116,6 +135,11 @@ AnimationController* AnimationServicesImp::createAnimationController(const strin
    {
       Service<SessionExplorer> pExplorer;
       mpExplorer.reset(pExplorer.get());
+   }
+
+   if (frameType.isValid() == false)
+   {
+      frameType = AnimationServices::getSettingNewControllerType();
    }
 
    // Create the controller
@@ -316,12 +340,39 @@ void AnimationServicesImp::updateContextMenu(Subject& subject, const string& sig
       return;
    }
 
+   QObject* pParent = pMenu->getActionParent();
+
+   // Check if the Session Explorer's menu is invoked without items selected
+   vector<SessionExplorer*> sessionItems = pMenu->getSessionItems<SessionExplorer>();
+   if (sessionItems.empty() == false)
+   {
+      VERIFYNRV(sessionItems.size() == 1);
+
+      SessionExplorer* pExplorer = sessionItems.front();
+      VERIFYNRV(pExplorer != NULL);
+
+      if (pExplorer->getItemViewType() == SessionExplorer::ANIMATION_ITEMS)
+      {
+         // Separator
+         QAction* pSeparatorAction = new QAction(pParent);
+         pSeparatorAction->setSeparator(true);
+         pMenu->addAction(pSeparatorAction, APP_ANIMATIONSERVICES_SEPARATOR_ACTION);
+
+         // Add an action to create a new animation controller
+         QAction* pNewAction = new QAction(QIcon(":/icons/New"), "New Animation Player...", pParent);
+         pNewAction->setAutoRepeat(false);
+         pNewAction->setStatusTip("Creates and activates a new animation controller");
+         VERIFYNR(connect(pNewAction, SIGNAL(triggered()), this, SLOT(newController())));
+         pMenu->addAction(pNewAction, APP_ANIMATIONSERVICES_NEW_CONTROLLER_ACTION);
+      }
+
+      return;
+   }
+
    // Get the selected controllers
    vector<AnimationController*> selectedControllers = pMenu->getSessionItems<AnimationController>();
    if (selectedControllers.empty() == false)
    {
-      QObject* pParent = pMenu->getActionParent();
-
       // Separator
       QAction* pSeparatorAction = new QAction(pParent);
       pSeparatorAction->setSeparator(true);
@@ -358,6 +409,103 @@ void AnimationServicesImp::updateContextMenu(Subject& subject, const string& sig
       pDeleteAction->setStatusTip("Destroys the selected animation controller(s)");
       connect(pDeleteAction, SIGNAL(triggered()), this, SLOT(destroySelectedControllers()));
       pMenu->addAction(pDeleteAction, APP_ANIMATIONSERVICES_DELETE_ACTION);
+   }
+}
+
+void AnimationServicesImp::newController()
+{
+   Service<DesktopServices> pDesktop;
+   QDialog dlg(pDesktop->getMainWidget());
+   dlg.setWindowTitle("New Animation Player");
+
+   QLabel* pNameLabel = new QLabel("Name:", &dlg);
+   QLineEdit* pNameEdit = new QLineEdit(&dlg);
+
+   QLabel* pTypeLabel = new QLabel("Type:", &dlg);
+   QComboBox* pTypeCombo = new QComboBox(&dlg);
+   pTypeCombo->setEditable(false);
+   pTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(FRAME_ID)));
+   pTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(FRAME_TIME)));
+   pTypeCombo->addItem(QString::fromStdString(StringUtilities::toDisplayString(FRAME_ELAPSED_TIME)));
+
+   QFrame* pLine = new QFrame(&dlg);
+   pLine->setFrameStyle(QFrame::HLine | QFrame::Sunken);
+
+   QDialogButtonBox* pButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
+      Qt::Horizontal, &dlg);
+
+   // Layout
+   QGridLayout* pLayout = new QGridLayout(&dlg);
+   pLayout->setMargin(10);
+   pLayout->setSpacing(10);
+   pLayout->addWidget(pNameLabel, 0, 0);
+   pLayout->addWidget(pNameEdit, 0, 1);
+   pLayout->addWidget(pTypeLabel, 1, 0);
+   pLayout->addWidget(pTypeCombo, 1, 1, Qt::AlignLeft);
+   pLayout->addWidget(pLine, 3, 0, 1, 2);
+   pLayout->addWidget(pButtonBox, 4, 0, 1, 2);
+   pLayout->setRowStretch(2, 10);
+   pLayout->setColumnStretch(1, 10);
+
+   // Initialization
+   unsigned int controllerNumber = getNumAnimationControllers() + 1;
+   QString controllerName = "Animation Player " + QString::number(controllerNumber);
+
+   while (hasAnimationController(controllerName.toStdString()) == true)
+   {
+      controllerName = "Animation Player " + QString::number(++controllerNumber);
+   }
+
+   pNameEdit->setText(controllerName);
+
+   FrameType frameType = AnimationServices::getSettingNewControllerType();
+   if (frameType.isValid() == true)
+   {
+      QString frameTypeText = QString::fromStdString(StringUtilities::toDisplayString(frameType));
+      if (frameTypeText.isEmpty() == false)
+      {
+         int typeIndex = pTypeCombo->findText(frameTypeText);
+         pTypeCombo->setCurrentIndex(typeIndex);
+      }
+   }
+
+   dlg.resize(275, 125);
+
+   // Connections
+   VERIFYNR(connect(pButtonBox, SIGNAL(accepted()), &dlg, SLOT(accept())));
+   VERIFYNR(connect(pButtonBox, SIGNAL(rejected()), &dlg, SLOT(reject())));
+
+   // Execute the dialog
+   if (dlg.exec() == QDialog::Accepted)
+   {
+      QString name = pNameEdit->text();
+      if (name.isEmpty() == true)
+      {
+         QMessageBox::critical(pDesktop->getMainWidget(), APP_NAME, "The animation player name is empty.  "
+            "A new player will not be created.");
+         return;
+      }
+
+      if (hasAnimationController(name.toStdString()) == true)
+      {
+         QMessageBox::critical(pDesktop->getMainWidget(), APP_NAME, "An animation player with the given name "
+            "already exists.  A new player will not be created.");
+         return;
+      }
+
+      QString type = pTypeCombo->currentText();
+      FrameType frameType = StringUtilities::fromDisplayString<FrameType>(type.toStdString());
+      VERIFYNRV(frameType.isValid() == true);
+
+      AnimationController* pController = createAnimationController(name.toStdString(), frameType);
+      if (pController != NULL)
+      {
+         AnimationToolBar* pToolBar = static_cast<AnimationToolBar*>(pDesktop->getWindow("Animation", TOOLBAR));
+         if (pToolBar != NULL)
+         {
+            pToolBar->setAnimationController(pController);
+         }
+      }
    }
 }
 

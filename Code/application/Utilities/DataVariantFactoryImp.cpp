@@ -719,6 +719,7 @@ void DataVariantFactoryImp::initializeMaps()
    registerType<DataVariantValue<EncodingType> >();
    registerType<DataVariantValue<EndianType> >();
    registerType<DataVariantValue<FillStyle> >();
+   registerType<DataVariantValue<FrameType> >();
    registerType<DataVariantValue<GcpSymbol> >();
    registerType<DataVariantValue<GeocoordType> >();
    registerType<DataVariantValue<GraphicObjectType> >();

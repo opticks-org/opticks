@@ -109,6 +109,7 @@
  *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
  *    <tr><td>Activate</td><td>APP_ANIMATIONSERVICES_ACTIVATE_ACTION()</td></tr>
  *    <tr><td>Delete</td><td>APP_ANIMATIONSERVICES_DELETE_ACTION()</td></tr>
+ *    <tr><td>New %Animation Controller</td><td>APP_ANIMATIONSERVICES_NEW_CONTROLLER_ACTION()</td></tr>
  *    <tr><td>Separator</td><td>APP_ANIMATIONSERVICES_SEPARATOR_ACTION()</td></tr>
  *  </table>
  *
