@@ -817,6 +817,7 @@ bool GeoTIFFImporter::populateDataDescriptor(RasterDataDescriptor* pDescriptor)
    char* pProj4Defn = GTIFGetProj4Defn(&defn);
    if (pProj4Defn != NULL)
    {
+      free(pProj4Defn);
       list<GcpPoint> gcps;
 
       // The pixel coordinate system for GeoTIFF is defined as referring to the
@@ -827,13 +828,9 @@ bool GeoTIFFImporter::populateDataDescriptor(RasterDataDescriptor* pDescriptor)
       // Upper left
       double x = 0;
       double y = 0;
-      if (GTIFImageToPCS(pGeoTiff, &x, &y))
+      if (GTIFImageToPCS(pGeoTiff, &x, &y) &&
+         (defn.Model == ModelTypeGeographic || GTIFProj4ToLatLong(&defn, 1, &x, &y)))
       {
-         if (defn.Model != ModelTypeGeographic)
-         {
-            GTIFProj4ToLatLong(&defn, 1, &x, &y);
-         }
-
          GcpPoint gcp;
          gcp.mPixel.mX = 0.0;
          gcp.mPixel.mY = 0.0;
@@ -845,13 +842,9 @@ bool GeoTIFFImporter::populateDataDescriptor(RasterDataDescriptor* pDescriptor)
       // Lower left
       x = 0;
       y = numRows - 1;
-      if (GTIFImageToPCS(pGeoTiff, &x, &y))
+      if (GTIFImageToPCS(pGeoTiff, &x, &y) &&
+         (defn.Model == ModelTypeGeographic || GTIFProj4ToLatLong(&defn, 1, &x, &y)))
       {
-         if (defn.Model != ModelTypeGeographic)
-         {
-            GTIFProj4ToLatLong(&defn, 1, &x, &y);
-         }
-
          GcpPoint gcp;
          gcp.mPixel.mX = 0.0;
          gcp.mPixel.mY = numRows - 1.0;
@@ -863,13 +856,9 @@ bool GeoTIFFImporter::populateDataDescriptor(RasterDataDescriptor* pDescriptor)
       // Upper right
       x = numColumns - 1;
       y = 0;
-      if (GTIFImageToPCS(pGeoTiff, &x, &y))
+      if (GTIFImageToPCS(pGeoTiff, &x, &y) &&
+         (defn.Model == ModelTypeGeographic || GTIFProj4ToLatLong(&defn, 1, &x, &y)))
       {
-         if (defn.Model != ModelTypeGeographic)
-         {
-            GTIFProj4ToLatLong(&defn, 1, &x, &y);
-         }
-
          GcpPoint gcp;
          gcp.mPixel.mX = numColumns - 1.0;
          gcp.mPixel.mY = 0.0;
@@ -881,13 +870,9 @@ bool GeoTIFFImporter::populateDataDescriptor(RasterDataDescriptor* pDescriptor)
       // Lower right
       x = numColumns - 1;
       y = numRows - 1;
-      if (GTIFImageToPCS(pGeoTiff, &x, &y))
+      if (GTIFImageToPCS(pGeoTiff, &x, &y) &&
+         (defn.Model == ModelTypeGeographic || GTIFProj4ToLatLong(&defn, 1, &x, &y)))
       {
-         if (defn.Model != ModelTypeGeographic)
-         {
-            GTIFProj4ToLatLong(&defn, 1, &x, &y);
-         }
-
          GcpPoint gcp;
          gcp.mPixel.mX = numColumns - 1.0;
          gcp.mPixel.mY = numRows - 1.0;
@@ -899,13 +884,9 @@ bool GeoTIFFImporter::populateDataDescriptor(RasterDataDescriptor* pDescriptor)
       // Center
       x = (numColumns - 1) / 2;
       y = (numRows - 1) / 2;
-      if (GTIFImageToPCS(pGeoTiff, &x, &y))
+      if (GTIFImageToPCS(pGeoTiff, &x, &y) &&
+         (defn.Model == ModelTypeGeographic || GTIFProj4ToLatLong(&defn, 1, &x, &y)))
       {
-         if (defn.Model != ModelTypeGeographic)
-         {
-            GTIFProj4ToLatLong(&defn, 1, &x, &y);
-         }
-
          GcpPoint gcp;
          // pixels in GeoTIFF refer to top-left corner of the rastered pixel, so floor the center
          gcp.mPixel.mX = floor((numColumns - 1.0) / 2.0);
