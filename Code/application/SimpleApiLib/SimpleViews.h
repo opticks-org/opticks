@@ -759,6 +759,26 @@ extern "C"
    EXPORT_SYMBOL View* getView(const char* pName, const char* pType);
 
    /**
+    * Get all Views of a given type.
+    *
+    * @param pType
+    *        If not \c NULL or empty, all Views of this type will be returned. If NULL, all Views of any type
+    *        will be returned. See TypeConverter for valid type names.
+    * @param maxLength
+    *        The maximum length of the pViews array. pViews must be preallocated to contain at least this many
+    *        View pointers. If this is 0, pViews should be \c NULL and the total number of Views will be returned.
+    * @param pViews
+    *         An array of pointers to the Views. If inadequate space is available for the number of Views, the
+    *         array will be truncated. If this is \c NULL no array is set and the number of Views will be returned.
+    * @return The number of Views set in pViews or -1 if there is an error.
+    *         getLastError() may be queried for information on the error.
+    *         If pViews is \c NULL and maxLength is 0, the total number of Views will be returned. This can be
+    *         used to allocate pViews.
+    * @see getView()
+    */
+   EXPORT_SYMBOL int getViews(const char* pType, int maxLength, View** pViews);
+
+   /**
     * Create a new View.
     *
     * @param pName

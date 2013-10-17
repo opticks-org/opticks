@@ -120,6 +120,26 @@ extern "C"
    EXPORT_SYMBOL DataElement* getDataElement(const char* pName, const char* pType, int create);
 
    /**
+    * Get all top-level DataElements of a given type.
+    *
+    * @param pType
+    *        If not \c NULL or empty, all top-level DataElements of this type will be returned. If NULL, all top-level DataElements of any type
+    *        will be returned. See TypeConverter for valid type names.
+    * @param maxLength
+    *        The maximum length of the pElements array. pElements must be preallocated to contain at least this many
+    *        DataElement pointers. If this is 0, pElements should be \c NULL and the total number of DataElements will be returned.
+    * @param pElements
+    *         An array of pointers to the DataElements. If inadequate space is available for the number of DataElements, the
+    *         array will be truncated. If this is \c NULL no array is set and the number of DataElements will be returned.
+    * @return The number of DataElements set in pElements or -1 if there is an error.
+    *         getLastError() may be queried for information on the error.
+    *         If pElements is \c NULL and maxLength is 0, the total number of DataElements will be returned. This can be
+    *         used to allocate pElements.
+    * @see getDataElement()
+    */
+   EXPORT_SYMBOL int getDataElements(const char* pType, int maxLength, DataElement** pElements);
+
+   /**
     * Permanently destroy a DataElement.
     *
     * Suitable for use as a cleanup callback.

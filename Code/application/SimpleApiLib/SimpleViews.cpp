@@ -1281,6 +1281,46 @@ extern "C"
       return pView;
    }
 
+   int getViews(const char* pType, int maxLength, View** pViews)
+   {
+      const std::string type(pType == NULL ? std::string() : pType);
+      std::vector<Window*> windows;
+      Service<DesktopServices>()->getWindows(windows);
+      if (pViews == NULL)
+      {
+         int cnt = 0;
+         for (size_t i = 0; i < windows.size(); ++i)
+         {
+            ViewWindow* pViewWindow = dynamic_cast<ViewWindow*>(windows[i]);
+            if (pViewWindow != NULL && pViewWindow->getView() != NULL)
+            {
+               if (type.empty() || pViewWindow->getView()->isKindOf(type))
+               {
+                  cnt++;
+               }
+            }
+         }
+         setLastError(SIMPLE_NO_ERROR);
+         return cnt;
+      }
+      int outidx = 0;
+      for (size_t i = 0; i < windows.size() && outidx < maxLength; ++i)
+      {
+         ViewWindow* pViewWindow = dynamic_cast<ViewWindow*>(windows[i]);
+         if (pViewWindow != NULL)
+         {
+            View* pView = pViewWindow->getView();
+            if (pView != NULL && (type.empty() || pView->isKindOf(type)))
+            {
+               pViews[outidx++] = pView;
+            }
+         }
+      }
+
+      setLastError(SIMPLE_NO_ERROR);
+      return outidx;
+   }
+
    View* createView(const char* pName, const char* pType, DataElement* pElement)
    {
       if (pName == NULL || pType == NULL)

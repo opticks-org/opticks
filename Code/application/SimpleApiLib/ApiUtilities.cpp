@@ -191,6 +191,25 @@ extern "C"
       return pElement;
    }
 
+   int getDataElements(const char* pType, int maxLength, DataElement** pElements)
+   {
+      const std::string type(pType == NULL ? std::string() : pType);
+      std::vector<DataElement*> elements = Service<ModelServices>()->getElements(type);
+      if (pElements == NULL)
+      {
+         setLastError(SIMPLE_NO_ERROR);
+         return elements.size();
+      }
+      int i;
+      for (i = 0; i < static_cast<int>(elements.size()) && i < maxLength; ++i)
+      {
+         pElements[i] = elements[i];
+      }
+
+      setLastError(SIMPLE_NO_ERROR);
+      return i;
+   }
+
    uint32_t getDataElementName(DataElement* pElement, char* pName, uint32_t nameSize)
    {
       if (pElement == NULL || pName == NULL)
