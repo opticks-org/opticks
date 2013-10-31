@@ -60,12 +60,12 @@ bool UhlHeader::readHeader(FILE* pInputFile)
       return false;
    }
 
-   if (!readLatLongInterval(pInputFile, mLatInterval))
+   if (!readLatLongInterval(pInputFile, mLongInterval))
    {
       return false;
    }
 
-   if (!readLatLongInterval(pInputFile, mLongInterval))
+   if (!readLatLongInterval(pInputFile, mLatInterval))
    {
       return false;
    }
@@ -85,12 +85,12 @@ bool UhlHeader::readHeader(FILE* pInputFile)
       return false;
    }
 
-   if (0 == readLatLongCount(pInputFile, mLatCount))
+   if (0 == readLatLongCount(pInputFile, mLongCount))
    {
       return false;
    }
 
-   if (0 == readLatLongCount(pInputFile, mLongCount))
+   if (0 == readLatLongCount(pInputFile, mLatCount))
    {
       return false;
    }

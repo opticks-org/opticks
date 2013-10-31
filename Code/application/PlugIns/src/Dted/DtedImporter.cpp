@@ -80,7 +80,7 @@ vector<ImportDescriptor*> DtedImporter::getImportDescriptors(const string& filen
       {
          const EncodingType dataType(INT2UBYTES);
          RasterDataDescriptor* pDescriptor = RasterUtilities::generateRasterDataDescriptor(filename, NULL,
-            mUhl_h.getLongCount(), mUhl_h.getLatCount(), 1, BIP, dataType, IN_MEMORY);
+            mUhl_h.getLatCount(), mUhl_h.getLongCount(), 1, BIP, dataType, IN_MEMORY);
          if (pDescriptor != NULL)
          {
             // Data types
