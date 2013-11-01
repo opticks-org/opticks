@@ -47,6 +47,7 @@
 
 #include <QtCore/QFile>
 
+#include <algorithm>
 #include <list>
 #include <sstream>
 #include <boost/tuple/tuple.hpp>
@@ -221,8 +222,8 @@ bool IgmGeoreference::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
    std::list<GcpPoint> gcpList;
    const unsigned int maxX = mpIgmDesc->getColumnCount() - 1;
    const unsigned int maxY = mpIgmDesc->getRowCount() - 1;
-   unsigned int skipX = maxX / 4;   // Appropriate skip factor for a well determined 2 order system.
-   unsigned int skipY = maxY / 4;   // Appropriate skip factor for a well determined 2 order system.
+   unsigned int skipX = std::max<unsigned int>(1, maxX / 4);   // Appropriate skip factor for a well determined 2 order system.
+   unsigned int skipY = std::max<unsigned int>(1, maxY / 4);   // Appropriate skip factor for a well determined 2 order system.
 
    std::vector<LocationType> latlonValues;
    std::vector<LocationType> pixelValues;
