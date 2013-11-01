@@ -241,6 +241,11 @@ bool DynamicObjectImp::setAttribute(const string& name, DataVariant& value, bool
 
 bool DynamicObjectImp::setAttributeByPath(QStringList pathComponents, DataVariant& value, bool swap)
 {
+   if (pathComponents.empty())
+   {
+      return false;
+   }
+
    if (!value.isValid())
    {
       return false;
@@ -388,6 +393,11 @@ DataVariant& DynamicObjectImp::getAttribute(const string& name)
 const DataVariant& DynamicObjectImp::getAttributeByPath(QStringList pathComponents) const
 {
    static DataVariant sEmptyVariant;
+
+   if (pathComponents.empty())
+   {
+      return sEmptyVariant;
+   }
 
    QString finalName = pathComponents.back();
    pathComponents.pop_back();
