@@ -10,6 +10,7 @@
 #include "AppVersion.h"
 #include "AppConfig.h"
 #include "ConnectionParameters.h"
+#include "CoordinateTransformation.h"
 #include "AppVerify.h"
 #include "FeatureManager.h"
 #include "FeatureProxyConnector.h"
@@ -61,6 +62,7 @@ FeatureProxyConnector::FeatureProxyConnector(const QString &executable, QObject 
 
 FeatureProxyConnector::~FeatureProxyConnector()
 {
+   VERIFYNR(mCoordinateTransformations.empty());
    terminate();
    if (mpServer != NULL)
    {
@@ -244,7 +246,13 @@ bool FeatureProxyConnector::openDataSource(const ArcProxyLib::ConnectionParamete
 {
    if (connParams.getConnectionType() == ArcProxyLib::SHAPELIB_CONNECTION)
    {
-      return mShapelibProxy.openDataSource(connParams, handle, errorMessage);
+      if (mShapelibProxy.openDataSource(connParams, handle, errorMessage) == false)
+      {
+         return false;
+      }
+
+      mCoordinateTransformations[handle] = new CoordinateTransformation(connParams);
+      return true;
    }
 
    if (mpProcess->state() != QProcess::Running)
@@ -268,16 +276,27 @@ bool FeatureProxyConnector::openDataSource(const ArcProxyLib::ConnectionParamete
    if (mLastReplyIsError)
    {
       errorMessage = mResponses.dequeue().toStdString();
+      return false;
    }
-   else
+
+   handle = mResponses.dequeue().toStdString();
+   if (connParams.getConnectionType() == ArcProxyLib::SHP_CONNECTION) // TODO: Test with Arc database to determine if this 'if' is needed!
    {
-      handle = mResponses.dequeue().toStdString();
+      mCoordinateTransformations[handle] = new CoordinateTransformation(connParams);
    }
-   return !mLastReplyIsError;
+
+   return true;
 }
 
 bool FeatureProxyConnector::closeDataSource(const std::string &handle, std::string &errorMessage)
 {
+   std::map<std::string, CoordinateTransformation*>::iterator iter = mCoordinateTransformations.find(handle);
+   if (iter != mCoordinateTransformations.end())
+   {
+      delete iter->second;
+      mCoordinateTransformations.erase(iter);
+   }
+
    if (mShapelibProxy.containsHandle(handle))
    {
       return mShapelibProxy.closeDataSource(handle, errorMessage);
@@ -345,9 +364,18 @@ bool FeatureProxyConnector::query(const std::string &handle,
    std::string &errorMessage, const std::string &whereClause, const std::string &labelFormat,
    LocationType minClip, LocationType maxClip)
 {
+   CoordinateTransformation* pCoordinateTransformation = NULL;
+   std::map<std::string, CoordinateTransformation*>::const_iterator iter =
+      mCoordinateTransformations.find(handle);
+   if (iter != mCoordinateTransformations.end())
+   {
+      pCoordinateTransformation = iter->second;
+   }
+
    if (mShapelibProxy.containsHandle(handle))
    {
-      return mShapelibProxy.query(handle, errorMessage, whereClause, labelFormat, minClip, maxClip);
+      return mShapelibProxy.query(handle, errorMessage, whereClause,
+         labelFormat, minClip, maxClip, pCoordinateTransformation);
    }
 
    if (mpProcess->state() != QProcess::Running)
@@ -359,6 +387,17 @@ bool FeatureProxyConnector::query(const std::string &handle,
    QString clipString;
    if (minClip.mX != 0.0 || minClip.mY != 0.0 || maxClip.mX != 0.0 || maxClip.mY != 0.0)
    {
+      // Convert from application coordinates to shapefile coordinates.
+      if (pCoordinateTransformation != NULL)
+      {
+         if (pCoordinateTransformation->translateAppToShape(minClip.mY, minClip.mX, minClip.mY, minClip.mX) == false ||
+            pCoordinateTransformation->translateAppToShape(maxClip.mY, maxClip.mX, maxClip.mY, maxClip.mX) == false)
+         {
+            errorMessage = "Coordinate transformation failed for clipping region. Check the .prj file and try again.";
+            return false;
+         }
+      }
+
       clipString = QString(" CLIP %1 %2 %3 %4").arg(minClip.mY)
                                               .arg(minClip.mX)
                                               .arg(maxClip.mY)

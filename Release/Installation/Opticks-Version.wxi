@@ -43,6 +43,7 @@
    <?define C__opencv_DependencyGuid = "518ec23f-159f-4f81-94ba-9b7bc7bfa294" ?>
    <?define C__openjpeg_DependencyGuid = "f2d20562-99f9-425a-bc6a-de49ebb966a5" ?>
    <?define C__ossim_DependencyGuid = "8b334180-6f14-4131-a36b-42e449b03a4c" ?>
+   <?define C__proj_DependencyGuid = "db4cd93f-425f-425d-9ae7-523c61de7f17" ?>
    <?define C__pthreadVC2_DependencyGuid = "9e3de2f5-503c-463f-9467-4f59f0649919" ?>
    <?define C__raptor_DependencyGuid = "86ab2c06-ef04-4784-871c-91de2675593f" ?>
    <?define C__QtConfGuid = "a8a70d54-12d7-4908-a631-cb0212426862" ?>
@@ -157,6 +158,7 @@
    <?define C__opencv_DependencyGuid = "0b735a73-ce99-4a8e-97b8-2896a67e089f" ?>
    <?define C__openjpeg_DependencyGuid = "7124cba0-87a9-4cd6-9e0c-b3038bbf6db2" ?>
    <?define C__ossim_DependencyGuid = "80fd3742-da0d-4305-8920-f1d0ef68c4c1" ?>
+   <?define C__proj_DependencyGuid = "ba828bc6-053b-49b9-afed-88066c43c343" ?>
    <?define C__pthreadVC2_DependencyGuid = "8ef628de-9baa-414a-8af6-d10048df9a6f" ?>
    <?define C__raptor_DependencyGuid = "bd6483d3-2e08-4848-835d-c0f084714aa0" ?>
    <?define C__QtConfGuid = "9e29fac8-b9ba-4399-aa83-e4e442e63402" ?>

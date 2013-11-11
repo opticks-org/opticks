@@ -7,6 +7,7 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include "CoordinateTransformation.h"
 #include "FormatStringProcessor.h"
 #include "ShapelibProxy.h"
 
@@ -168,7 +169,7 @@ bool ShapelibProxy::getFeatureClassProperties(const std::string &handle,
 
 bool ShapelibProxy::query(const std::string &handle, std::string &errorMessage, 
    const std::string &whereClause, const std::string &labelFormat,
-   LocationType minClip, LocationType maxClip)
+   LocationType minClip, LocationType maxClip, const CoordinateTransformation* pCoordinateTransformation)
 {
    std::map<std::string, ShapelibHandle>::iterator iter = mHandles.find(handle);
    if (iter == mHandles.end())
@@ -201,8 +202,22 @@ bool ShapelibProxy::query(const std::string &handle, std::string &errorMessage,
          continue;
       }
 
-      QRectF objectRect(QPointF(pShpObject->dfYMin, pShpObject->dfXMin),
-         QPointF(pShpObject->dfYMax, pShpObject->dfXMax));
+      // Convert from shapefile coordinates to application coordinates.
+      double minX = pShpObject->dfXMin;
+      double maxX = pShpObject->dfXMax;
+      double minY = pShpObject->dfYMin;
+      double maxY = pShpObject->dfYMax;
+      if (pCoordinateTransformation != NULL)
+      {
+         if (pCoordinateTransformation->translateShapeToApp(minX, minY, minX, minY) == false ||
+            pCoordinateTransformation->translateShapeToApp(maxX, maxY, maxX, maxY) == false)
+         {
+            errorMessage = "Coordinate transformation failed for bounding box. Check the .prj file and try again.";
+            return false;
+         }
+      }
+
+      QRectF objectRect(QPointF(minY, minX), QPointF(maxY, maxX));
       QRectF clipRect(QPointF(minClip.mX, minClip.mY), QPointF(maxClip.mX, maxClip.mY));
 
       if ((clipRect.isEmpty() == true) ||
@@ -214,7 +229,19 @@ bool ShapelibProxy::query(const std::string &handle, std::string &errorMessage,
 
          for (int vertex = 0; vertex < pShpObject->nVertices; ++vertex)
          {
-            feature.addVertex(std::make_pair(pShpObject->padfY[vertex], pShpObject->padfX[vertex]));
+            // Convert from shapefile coordinates to application coordinates.
+            double vertexX = pShpObject->padfX[vertex];
+            double vertexY = pShpObject->padfY[vertex];
+            if (pCoordinateTransformation != NULL)
+            {
+               if (pCoordinateTransformation->translateShapeToApp(vertexX, vertexY, vertexX, vertexY) == false)
+               {
+                  errorMessage = "Coordinate transformation failed for vertex. Check the .prj file and try again.";
+                  return false;
+               }
+            }
+
+            feature.addVertex(std::make_pair(vertexY, vertexX));
          }
 
          for (int path = 0; path < pShpObject->nParts; ++path)

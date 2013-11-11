@@ -26,6 +26,7 @@
 #include <string>
 #include <vector>
 
+class CoordinateTransformation;
 class QProcess;
 class QTcpServer;
 class QTcpSocket;
@@ -151,6 +152,8 @@ private:
    bool mLastReplyIsError;
 
    ShapelibProxy mShapelibProxy;
+
+   std::map<std::string, CoordinateTransformation*> mCoordinateTransformations;
 };
 
 #endif

@@ -193,6 +193,7 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
         bla("glut32.dll")
         bla("xerces-c_3_1.dll") #needed for GDAL
         bla("hdf5dll.dll") #needed for GDAL
+        bla("proj.dll") #needed for OGR
         if is_debug:
             bla("ehsd.dll")
             bla("opencv_core220d.dll")

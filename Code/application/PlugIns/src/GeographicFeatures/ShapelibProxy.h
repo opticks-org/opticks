@@ -23,6 +23,7 @@
 #include <vector>
 #include <map>
 
+class CoordinateTransformation;
 
 class ShapelibProxy : public QObject
 {
@@ -41,7 +42,8 @@ public:
       ArcProxyLib::FeatureClassProperties &properties, std::string &errorMessage);
    bool query(const std::string &handle, std::string &errorMessage,
       const std::string &whereClause = "", const std::string &labelFormat = "",
-      LocationType minClip = LocationType(), LocationType maxClip = LocationType());
+      LocationType minClip = LocationType(), LocationType maxClip = LocationType(),
+      const CoordinateTransformation* pCoordinateTransformation = NULL);
 
    class ShapelibHandle
    {

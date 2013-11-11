@@ -58,6 +58,8 @@
     <Import Project="..\..\..\CompileSettings\Xerces-Release.props" />
     <Import Project="..\..\..\CompileSettings\ArcProxyLib-Release.props" />
     <Import Project="..\..\..\CompileSettings\EnableWarnings.props" />
+    <Import Project="..\..\..\CompileSettings\gdal.props" />
+    <Import Project="..\..\..\CompileSettings\proj4.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -70,6 +72,8 @@
     <Import Project="..\..\..\CompileSettings\Xerces-Debug.props" />
     <Import Project="..\..\..\CompileSettings\ArcProxyLib-Debug.props" />
     <Import Project="..\..\..\CompileSettings\EnableWarnings.props" />
+    <Import Project="..\..\..\CompileSettings\gdal.props" />
+    <Import Project="..\..\..\CompileSettings\proj4.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -82,6 +86,8 @@
     <Import Project="..\..\..\CompileSettings\Xerces-Release.props" />
     <Import Project="..\..\..\CompileSettings\ArcProxyLib-Release.props" />
     <Import Project="..\..\..\CompileSettings\EnableWarnings.props" />
+    <Import Project="..\..\..\CompileSettings\gdal.props" />
+    <Import Project="..\..\..\CompileSettings\proj4.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -94,6 +100,8 @@
     <Import Project="..\..\..\CompileSettings\Xerces-Debug.props" />
     <Import Project="..\..\..\CompileSettings\ArcProxyLib-Debug.props" />
     <Import Project="..\..\..\CompileSettings\EnableWarnings.props" />
+    <Import Project="..\..\..\CompileSettings\gdal.props" />
+    <Import Project="..\..\..\CompileSettings\proj4.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
@@ -193,6 +201,7 @@
     <ClCompile Include="AddQueriesDlg.cpp" />
     <ClCompile Include="AlphaNumericSortFilterProxyModel.cpp" />
     <ClCompile Include="ConnectionParametersWidget.cpp" />
+    <ClCompile Include="CoordinateTransformation.cpp" />
     <ClCompile Include="DisplayQueryOptions.cpp" />
     <ClCompile Include="DisplaySelectionWidget.cpp" />
     <ClCompile Include="FeatureClass.cpp" />
@@ -267,6 +276,7 @@
 </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
     </CustomBuild>
+    <ClInclude Include="CoordinateTransformation.h" />
     <ClInclude Include="DisplayQueryOptions.h" />
     <CustomBuild Include="DisplaySelectionWidget.h">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"</Command>

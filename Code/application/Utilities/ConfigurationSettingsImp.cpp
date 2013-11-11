@@ -70,7 +70,7 @@ ConfigurationSettingsImp* ConfigurationSettingsImp::instance()
       }
       spInstance = new ConfigurationSettingsImp;
 
-      // The MRU files must be deserialized after the constructor because is calls fromXml, which, in turn, calls
+      // The MRU files must be deserialized after the constructor because it calls fromXml, which, in turn, calls
       // configuration settings methods, which call ConfigurationSettingsImp::instance, which, in turns, calls fromXml,
       // resulting in a stack overflow. There was a time where this occurred when first accessing MRU files, however,
       // this causes a slowdown and creates a bug where MRU files are not serialized if the File menu is never accessed.

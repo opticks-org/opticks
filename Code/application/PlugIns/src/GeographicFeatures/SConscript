@@ -8,6 +8,8 @@ env = env.Clone()
 env.Append(CPPDEFINES=["APPLICATION_XERCES"])
 env.Tool("ArcProxyLib",toolpath=[TOOLPATH])
 env.Tool("shapelib",toolpath=[TOOLPATH])
+env.Tool("gdal", toolpath=[TOOLPATH])
+env.Tool("proj4", toolpath=[TOOLPATH])
 if env["OS"] == "windows":
    if env["MODE"] == "debug":
       env.AppendUnique(LIBS=["QtNetworkd4"])
