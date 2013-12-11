@@ -229,6 +229,41 @@ public:
     *  should create the widget with a NULL parent, and should destroy the
     *  widget when the importer itself is destroyed.
     *
+    *  If the widget subclasses ModifierWidget, validate() will be called
+    *  automatically when any of the signals attached to the widget by calling
+    *  ModifierWidget::attachSignal() are emitted as a result of the user
+    *  making changes in the import options dialog.
+    *
+    *  If the import options widget subclasses a custom widget other than
+    *  QWidget, validation can still be performed by creating a ModifierWidget
+    *  instance, attaching it to an instance of the custom widget, and returning
+    *  a pointer to the ModifierWidget as shown in the code example below.
+    *
+    *  @code
+    *  QWidget* CustomImporter::getImportOptionsWidget(DataDescriptor* pDescriptor)
+    *  {
+    *     // Create the modifier widget
+    *     if (mpModifierWidget == NULL)
+    *     {
+    *        mpModifierWidget = new ModifierWidget(NULL);
+    *     }
+    *
+    *     // Create the custom widget and attach its changes to the modifier widget
+    *     if (mpCustomWidget == NULL)
+    *     {
+    *        mpCustomWidget = new CustomWidget(mpModifierWidget);
+    *        mpModifierWidget->attachSignal(mpCustomWidget, SIGNAL(customSignal()));
+    *
+    *        QLayout* pLayout = new QVBoxLayout(mpModifierWidget);
+    *        pLayout->setMargin(0);
+    *        pLayout->addWidget(mpCustomWidget);
+    *     }
+    *
+    *     // Return the modifier widget
+    *     return mpModifierWidget;
+    *  }
+    *  @endcode
+    *
     *  Importers should call QWidget::setWindowTitle() on the widget that is
     *  returned to set the name that appears on the tab in the import options
     *  dialog.  If the window title is not set, the importer name is displayed.

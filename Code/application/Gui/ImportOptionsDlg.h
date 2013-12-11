@@ -64,7 +64,6 @@ protected:
    bool validateDataset(DataDescriptor* pDescriptor);
    bool validateDataset(DataDescriptor* pDescriptor, QString& validationMessage);
    void selectCurrentDatasetItem();
-   void validateEditDataset();
    void validateAllDatasets();
    void enforceSelections(QTreeWidgetItem* pItem);
    void removeImporterPage();
@@ -82,6 +81,7 @@ protected:
 protected slots:
    void datasetItemChanged(QTreeWidgetItem* pItem);
    void updateEditDataset();
+   void validateEditDataset();
    void selectAllDatasets();
    void deselectAllDatasets();
    void updateEditDataDescriptorRows(const std::vector<DimensionDescriptor>& rows);

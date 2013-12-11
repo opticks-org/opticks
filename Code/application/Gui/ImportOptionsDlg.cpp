@@ -28,6 +28,7 @@
 #include "ImportOptionsDlg.h"
 #include "MetadataWidget.h"
 #include "ModelServices.h"
+#include "ModifierWidget.h"
 #include "RasterDataDescriptor.h"
 #include "RasterFileDescriptor.h"
 #include "RasterUtilities.h"
@@ -725,6 +726,12 @@ void ImportOptionsDlg::setCurrentDataset(ImportDescriptor* pImportDescriptor)
             }
          }
 
+         ModifierWidget* pModifier = dynamic_cast<ModifierWidget*>(mpImporterPage);
+         if (pModifier != NULL)
+         {
+            VERIFYNR(connect(pModifier, SIGNAL(modified()), this, SLOT(validateEditDataset())));
+         }
+
          QString strCaption = mpImporterPage->windowTitle();
          if (strCaption.isEmpty() == true)
          {
@@ -1169,6 +1176,13 @@ void ImportOptionsDlg::removeImporterPage()
    if (iIndex != -1)
    {
       mpTabWidget->removeTab(iIndex);
+   }
+
+   // Disconnect
+   ModifierWidget* pModifier = dynamic_cast<ModifierWidget*>(mpImporterPage);
+   if (pModifier != NULL)
+   {
+      VERIFYNR(disconnect(pModifier, SIGNAL(modified()), this, SLOT(validateEditDataset())));
    }
 
    // The importer is responsible for deleting the widget, so just reset the pointer
