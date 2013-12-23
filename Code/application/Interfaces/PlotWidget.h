@@ -88,6 +88,18 @@ public:
    SIGNAL_METHOD(PlotWidget, AboutToShowContextMenu)
 
    /**
+    *  Emitted with boost::any<std::string> containing the toolbar name when a
+    *  toolbar is shown or hidden.
+    *
+    *  Valid toolbar names include:
+    *  - "Annotation"
+    *  - "Mouse Mode"
+    *
+    *  @see     showToolBar()
+    */
+   SIGNAL_METHOD(PlotWidget, ToolBarVisibilityChanged);
+
+   /**
     *  @copydoc SessionItem::getContextMenuActions()
     *
     *  @default The default implementation returns the context menu actions
@@ -406,6 +418,40 @@ public:
     *           setTitleFont() instead.
     */
    virtual const Font& getTitleFont() const = 0;
+
+   /**
+    *  Shows or hides a toolbar in the plot widget.
+    *
+    *  @param   toolBarName
+    *           The name of the toolbar to show or hide.  This method does
+    *           nothing if the toolbar name is empty.  Valid toolbar names
+    *           include:
+    *           - "Annotation"
+    *           - "Mouse Mode"
+    *  @param   show
+    *           If set to \c true, the toolbar will be shown; otherwise the
+    *           toolbar will be hidden.
+    *
+    *  @notify  This method notifies signalToolBarVisibilityChanged() when a
+    *           toolbar is shown or hidden.
+    */
+   virtual void showToolBar(const std::string& toolBarName, bool show) = 0;
+
+   /**
+    *  Queries the current visiblity state of a toolbar in the plot widget.
+    *
+    *  @param   toolBarName
+    *           The name of the toolbar for which to query its visibility.  This
+    *           method does nothing and returns \c false if the toolbar name is
+    *           empty.  Valid toolbar names include:
+    *           - "Annotation"
+    *           - "Mouse Mode"
+    *
+    *  @return  Returns \c true if the toolbar is shown or \c false if the
+    *           toolbar is hidden.  Returns \c false if a toolbar with the given
+    *           name does not exist in the plot widget.
+    */
+   virtual bool isToolBarShown(const std::string& toolBarName) const = 0;
 
    /**
     *  Toggles the display state of an axis widget.

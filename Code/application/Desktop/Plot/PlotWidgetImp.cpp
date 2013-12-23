@@ -120,7 +120,14 @@ PlotWidgetImp::PlotWidgetImp(const string& id, const string& plotName, PlotType 
    mpMouseModeToolBar->setIconSize(QSize(16, 16));
    mpMouseModeToolBar->hide();
 
+   // Initialization
    initialize(NULL, plotName, plotType);
+
+   // Connections
+   VERIFYNR(connect(mpAnnotationToolBar, SIGNAL(visibilityChanged(bool)), this,
+      SLOT(notifyToolBarVisibilityChanged())));
+   VERIFYNR(connect(mpMouseModeToolBar, SIGNAL(visibilityChanged(bool)), this,
+      SLOT(notifyToolBarVisibilityChanged())));
 }
 
 PlotWidgetImp::~PlotWidgetImp()
@@ -705,6 +712,32 @@ void PlotWidgetImp::setTitleElideMode(Qt::TextElideMode mode)
    mpTitleLabel->setElideMode(mode);
 }
 
+void PlotWidgetImp::showToolBar(const string& toolBarName, bool show)
+{
+   if (toolBarName == "Annotation")
+   {
+      mpAnnotationToolBar->setVisible(show);
+   }
+   else if (toolBarName == "Mouse Mode")
+   {
+      mpMouseModeToolBar->setVisible(show);
+   }
+}
+
+bool PlotWidgetImp::isToolBarShown(const string& toolBarName) const
+{
+   if (toolBarName == "Annotation")
+   {
+      return mpAnnotationToolBar->isVisible();
+   }
+   else if (toolBarName == "Mouse Mode")
+   {
+      return mpMouseModeToolBar->isVisible();
+   }
+
+   return false;
+}
+
 void PlotWidgetImp::showAxis(AxisPosition axis, bool bShow)
 {
    if ((axis == AXIS_LEFT) && (mpYAxis != NULL))
@@ -893,6 +926,20 @@ void PlotWidgetImp::enableAnnotationToolBar(const MouseMode* pMouseMode)
    if (enable == true)
    {
       mpAnnotationToolBar->show();
+   }
+}
+
+void PlotWidgetImp::notifyToolBarVisibilityChanged()
+{
+   if (dynamic_cast<AnnotationToolBar*>(sender()) == mpAnnotationToolBar)
+   {
+      string toolBarName = "Annotation";
+      notify(SIGNAL_NAME(PlotWidget, ToolBarVisibilityChanged), boost::any(toolBarName));
+   }
+   else if (dynamic_cast<QToolBar*>(sender()) == mpMouseModeToolBar)
+   {
+      string toolBarName = "Mouse Mode";
+      notify(SIGNAL_NAME(PlotWidget, ToolBarVisibilityChanged), boost::any(toolBarName));
    }
 }
 

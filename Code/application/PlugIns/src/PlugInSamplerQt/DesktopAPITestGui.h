@@ -40,6 +40,7 @@ public:
 
 protected:
    bool eventFilter(QObject* pObject, QEvent* pEvent);
+   void toolBarVisibilityChanged(Subject& subject, const std::string& signal, const boost::any& value);
    void updateContextMenu(Subject& subject, const std::string& signal, const boost::any& value);
    void updatePropertiesDialog(Subject& subject, const std::string& signal, const boost::any& value);
    void dropSessionItem(Subject& subject, const std::string& signal, const boost::any& value);
@@ -57,6 +58,8 @@ protected slots:
    void setLegendBackgroundColor(const QColor& backgroundColor);
    void setTextColor(const QColor& textColor);
    void setTitleColor(const QColor& titleColor);
+   void showAnnotationToolBar(bool show);
+   void showMouseModeToolBar(bool show);
    void displayProperties();
    void setDocked(bool docked);
    void enableDrops(bool enable);
@@ -92,6 +95,8 @@ private:
    QComboBox* mpMouseModeCombo;
    QAction* mpMouseModeAction;
    QLineEdit* mpMarginEdit;
+   QCheckBox* mpAnnotationToolBarCheck;
+   QCheckBox* mpMouseModeToolBarCheck;
    QCheckBox* mpContextMenuCheck;
 
    // Dock window

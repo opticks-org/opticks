@@ -90,6 +90,10 @@ public:
    QString getTitle() const;
    QFont getTitleFont() const;
 
+   // Toolbars
+   void showToolBar(const std::string& toolBarName, bool show);
+   bool isToolBarShown(const std::string& toolBarName) const;
+
    // Axes
    void showAxis(AxisPosition axis, bool bShow);
    bool isAxisShown(AxisPosition axis) const;
@@ -138,6 +142,7 @@ protected slots:
    void updateClassificationPosition();
    void updateClassificationText(const QString& classificationText);
    void enableAnnotationToolBar(const MouseMode* pMouseMode);
+   void notifyToolBarVisibilityChanged();
    void updateScaleRange();
    void updateMouseLabel(const QString& strTextX, const QString& strTextY);
    void selectPlotObject(PlotObject* pObject, bool bSelect);
@@ -340,6 +345,14 @@ private:
    const Font& getTitleFont() const \
    { \
       return impClass::getTitleFontImp(); \
+   } \
+   void showToolBar(const std::string& toolBarName, bool show) \
+   { \
+      impClass::showToolBar(toolBarName, show); \
+   } \
+   bool isToolBarShown(const std::string& toolBarName) const \
+   { \
+      return impClass::isToolBarShown(toolBarName); \
    } \
    void showAxis(AxisPosition axis, bool bShow) \
    { \

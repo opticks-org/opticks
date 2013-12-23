@@ -154,6 +154,8 @@ DesktopAPITestGui::DesktopAPITestGui(QWidget* pParent) :
    CustomColorButton* pTitleColorButton = new CustomColorButton(pPlotWidget);
    pTitleColorButton->usePopupGrid(true);
 
+   mpAnnotationToolBarCheck = new QCheckBox("Show Annotation toolbar", pPlotWidget);
+   mpMouseModeToolBarCheck = new QCheckBox("Show Mouse Mode toolbar", pPlotWidget);
    mpContextMenuCheck = new QCheckBox("Add commands to the context menu", pPlotWidget);
 
    LabeledSection* pPlotWidgetSection = new LabeledSection(pPlotWidget, "Plot Widget", this);
@@ -229,7 +231,7 @@ DesktopAPITestGui::DesktopAPITestGui(QWidget* pParent) :
    QGridLayout* pPlotWidgetGrid = new QGridLayout(pPlotWidget);
    pPlotWidgetGrid->setMargin(0);
    pPlotWidgetGrid->setSpacing(5);
-   pPlotWidgetGrid->addWidget(mpPlotWidget->getWidget(), 0, 0, 9, 1);
+   pPlotWidgetGrid->addWidget(mpPlotWidget->getWidget(), 0, 0, 11, 1);
    pPlotWidgetGrid->addWidget(pMouseModeLabel, 0, 2);
    pPlotWidgetGrid->addWidget(mpMouseModeCombo, 0, 3);
    pPlotWidgetGrid->addWidget(pMouseModeApplyButton, 0, 4);
@@ -245,8 +247,10 @@ DesktopAPITestGui::DesktopAPITestGui(QWidget* pParent) :
    pPlotWidgetGrid->addWidget(pTextColorButton, 5, 3, 1, 2, Qt::AlignLeft);
    pPlotWidgetGrid->addWidget(pTitleColorLabel, 6, 2);
    pPlotWidgetGrid->addWidget(pTitleColorButton, 6, 3, 1, 2, Qt::AlignLeft);
-   pPlotWidgetGrid->addWidget(mpContextMenuCheck, 7, 2, 1, 3);
-   pPlotWidgetGrid->setRowStretch(8, 10);
+   pPlotWidgetGrid->addWidget(mpAnnotationToolBarCheck, 7, 2, 1, 3);
+   pPlotWidgetGrid->addWidget(mpMouseModeToolBarCheck, 8, 2, 1, 3);
+   pPlotWidgetGrid->addWidget(mpContextMenuCheck, 9, 2, 1, 3);
+   pPlotWidgetGrid->setRowStretch(10, 10);
    pPlotWidgetGrid->setColumnStretch(0, 10);
    pPlotWidgetGrid->setColumnStretch(3, 5);
    pPlotWidgetGrid->setColumnMinimumWidth(1, 15);
@@ -355,11 +359,15 @@ DesktopAPITestGui::DesktopAPITestGui(QWidget* pParent) :
       SLOT(setLegendBackgroundColor(const QColor&))));
    VERIFYNR(connect(pTextColorButton, SIGNAL(colorChanged(const QColor&)), this, SLOT(setTextColor(const QColor&))));
    VERIFYNR(connect(pTitleColorButton, SIGNAL(colorChanged(const QColor&)), this, SLOT(setTitleColor(const QColor&))));
+   VERIFYNR(connect(mpAnnotationToolBarCheck, SIGNAL(toggled(bool)), this, SLOT(showAnnotationToolBar(bool))));
+   VERIFYNR(connect(mpMouseModeToolBarCheck, SIGNAL(toggled(bool)), this, SLOT(showMouseModeToolBar(bool))));
    VERIFYNR(connect(pPropertiesButton, SIGNAL(clicked()), this, SLOT(displayProperties())));
    VERIFYNR(connect(pButtonBox, SIGNAL(rejected()), this, SLOT(reject())));
    VERIFYNR(connect(mpDockedCheck, SIGNAL(toggled(bool)), this, SLOT(setDocked(bool))));
    VERIFYNR(connect(pDragDropCheck, SIGNAL(toggled(bool)), this, SLOT(enableDrops(bool))));
    VERIFYNR(connect(pClearDropsButton, SIGNAL(clicked()), mpDragDropList, SLOT(clear())));
+   VERIFYNR(mpPlotWidget->attach(SIGNAL_NAME(PlotWidget, ToolBarVisibilityChanged), Slot(this,
+      &DesktopAPITestGui::toolBarVisibilityChanged)));
    VERIFYNR(mpDockWindow->attach(SIGNAL_NAME(Window, SessionItemDropped),
       Slot(this, &DesktopAPITestGui::dropSessionItem)));
    VERIFYNR(pDesktop->attach(SIGNAL_NAME(DesktopServices, AboutToShowPropertiesDialog),
@@ -429,6 +437,25 @@ bool DesktopAPITestGui::eventFilter(QObject* pObject, QEvent* pEvent)
    }
 
    return QDialog::eventFilter(pObject, pEvent);
+}
+
+void DesktopAPITestGui::toolBarVisibilityChanged(Subject& subject, const string& signal, const boost::any& value)
+{
+   string toolBarName = boost::any_cast<std::string>(value);
+   if (toolBarName.empty() == true)
+   {
+      return;
+   }
+
+   bool visible = mpPlotWidget->isToolBarShown(toolBarName);
+   if (toolBarName == "Annotation")
+   {
+      mpAnnotationToolBarCheck->setChecked(visible);
+   }
+   else if (toolBarName == "Mouse Mode")
+   {
+      mpMouseModeToolBarCheck->setChecked(visible);
+   }
 }
 
 void DesktopAPITestGui::updateContextMenu(Subject& subject, const string& signal, const boost::any& value)
@@ -771,6 +798,22 @@ void DesktopAPITestGui::setTitleColor(const QColor& titleColor)
       {
          pBottomAxis->setTitleColor(QCOLOR_TO_COLORTYPE(titleColor));
       }
+   }
+}
+
+void DesktopAPITestGui::showAnnotationToolBar(bool show)
+{
+   if (mpPlotWidget.get() != NULL)
+   {
+      mpPlotWidget->showToolBar("Annotation", show);
+   }
+}
+
+void DesktopAPITestGui::showMouseModeToolBar(bool show)
+{
+   if (mpPlotWidget.get() != NULL)
+   {
+      mpPlotWidget->showToolBar("Mouse Mode", show);
    }
 }
 
