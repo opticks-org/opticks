@@ -212,6 +212,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
                <File Name="43-IceExporter.cfg" Id="F__IceExporterCfg" />
                <File Name="44-AnnotationImagePalette.cfg" Id="F__AnnotationImagePaletteCfg" />
                <File Name="45-ConvolutionFilters.cfg" Id="F__ConvolutionFiltersCfg" />
+               <File Name="46-GeographicFeatures.cfg" Id="F__GeographicFeaturesCfg" />
                <File Name="50-KmlServer.cfg" Id="F__KmlServerCfg" />
                <File Name="55-Modis.cfg" Id="F__ModisCfg" />
                <File Name="60-SpatialResampler.cfg" Id="F__SpatialResamplerCfg" />

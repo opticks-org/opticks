@@ -15,6 +15,7 @@
 #include "GraphicLayer.h"
 #include "GraphicObject.h"
 #include "ObjectResource.h"
+#include "OptionsGeographicFeatures.h"
 #include "Progress.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
@@ -56,6 +57,8 @@ FeatureClass::FeatureClass() :
    mbUniqueLineColor(false),
    mCurrentQueryIndex(0)
 {
+   mConnection.setConnectionType(OptionsGeographicFeatures::getSettingUseArcAsDefaultConnection() ?
+      ArcProxyLib::SHP_CONNECTION : ArcProxyLib::SHAPELIB_CONNECTION);
    mQueries.push_back(FeatureQueryOptions());
 
    mpGraphicGroup.addSignal(SIGNAL_NAME(GraphicGroup, ObjectRemoved), Slot(this, &FeatureClass::removeObject));
@@ -264,17 +267,16 @@ bool FeatureClass::open(string &errorMessage)
    }
 
    FeatureProxyConnector* pProxy = FeatureProxyConnector::instance();
-   if (VERIFYNR(pProxy != NULL))
-   {
-      if (!pProxy->openDataSource(mConnection, mFeatureClassId, errorMessage))
-      {
-         return false;
-      }
+   VERIFY(pProxy != NULL);
 
-      if (!pProxy->getFeatureClassProperties(mFeatureClassId, mProperties, errorMessage))
-      {
-         return false;
-      }
+   if (!pProxy->openDataSource(mConnection, mFeatureClassId, errorMessage))
+   {
+      return false;
+   }
+
+   if (!pProxy->getFeatureClassProperties(mFeatureClassId, mProperties, errorMessage))
+   {
+      return false;
    }
 
    return true;

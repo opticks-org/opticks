@@ -10,45 +10,44 @@
 #ifndef CONNECTIONPARAMETERSWIDGET_H
 #define CONNECTIONPARAMETERSWIDGET_H
 
-#include <QtGui/QWidget>
 #include "ConnectionParameters.h"
+#include "ModifierWidget.h"
 
+#include <vector>
+
+class FileBrowser;
 class QCheckBox;
 class QLineEdit;
-class QPushButton;
 class QRadioButton;
 
-class ConnectionParametersWidget : public QWidget
+class ConnectionParametersWidget : public ModifierWidget
 {
    Q_OBJECT
 
 public:
-   ConnectionParametersWidget(QWidget *pParent = NULL);
-   ~ConnectionParametersWidget();
+   ConnectionParametersWidget(QWidget* pParent = NULL);
+   virtual ~ConnectionParametersWidget();
 
    ArcProxyLib::ConnectionParameters getConnectionParameters() const;
-   void setConnectionParameters(const ArcProxyLib::ConnectionParameters &connection);
+   void setConnectionParameters(const ArcProxyLib::ConnectionParameters& connection);
 
-   void setAvailableConnectionTypes(
-      const std::vector<ArcProxyLib::ConnectionType> &types);
+   void setAvailableConnectionTypes(const std::vector<ArcProxyLib::ConnectionType>& types);
 
-   bool isModified() const;
-
-public slots:
-   void setModified(bool modified = true);
-   void selectFileClicked();
+protected slots:
+   void updateWorkingDirectory(const QString& filename);
    void updateWidgets();
 
 private:
    ConnectionParametersWidget(const ConnectionParametersWidget& rhs);
    ConnectionParametersWidget& operator=(const ConnectionParametersWidget& rhs);
-   QRadioButton* mpSdeButton;
+
    QRadioButton* mpShpButton;
+   QWidget* mpShpWidget;
+   FileBrowser* mpFilenameEdit;
    QCheckBox* mpUseArcCheck;
 
-   QLineEdit* mpFilenameEdit;
-   QPushButton* mpSelectFileButton;
-
+   QRadioButton* mpSdeButton;
+   QWidget* mpSdeWidget;
    QLineEdit* mpUserEdit;
    QLineEdit* mpPasswordEdit;
    QLineEdit* mpDatabaseEdit;
@@ -57,10 +56,9 @@ private:
    QLineEdit* mpVersionEdit;
    QLineEdit* mpFeatureClassEdit;
 
-   std::vector<QWidget*> mFileWidgets;
-   std::vector<QWidget*> mDatabaseWidgets;
-
-   bool mModified;
+   bool mShapelibConnection;
+   bool mShpConnection;
+   bool mSdeConnection;
 };
 
 #endif

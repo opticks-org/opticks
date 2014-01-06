@@ -7,126 +7,155 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "AppConfig.h"
 #include "AppVerify.h"
 #include "ConfigurationSettings.h"
 #include "ConnectionParametersWidget.h"
+#include "FileBrowser.h"
 #include "Filename.h"
+#include "ObjectResource.h"
+#include "OptionsGeographicFeatures.h"
 #include "ShapeFileImporter.h"
 
+#include <QtCore/QDir>
+#include <QtCore/QFileInfo>
 #include <QtGui/QCheckBox>
-#include <QtGui/QFileDialog>
-#include <QtGui/QIcon>
+#include <QtGui/QGridLayout>
 #include <QtGui/QLabel>
 #include <QtGui/QLineEdit>
-#include <QtGui/QGridLayout>
-#include <QtGui/QPushButton>
 #include <QtGui/QRadioButton>
-#include <QtCore/QFileInfo>
-#include <QtCore/QDir>
+#include <QtGui/QStyleOptionButton>
 
 #include <algorithm>
-#include <boost/bind.hpp>
 
-ConnectionParametersWidget::ConnectionParametersWidget(QWidget *pParent) : QWidget(pParent), mModified(false)
+ConnectionParametersWidget::ConnectionParametersWidget(QWidget* pParent) :
+   ModifierWidget(pParent),
+   mShapelibConnection(true),
+   mShpConnection(true),
+   mSdeConnection(true)
 {
-   QLabel* pFilenameLabel = new QLabel("Filename: ", this);
-   QLabel* pUserLabel = new QLabel("Username: ", this);
-   QLabel* pPasswordLabel = new QLabel("Password: ", this);
-   QLabel* pDatabaseLabel = new QLabel("Database: ", this);
-   QLabel* pServerLabel = new QLabel("Server: ", this);
-   QLabel* pInstanceLabel = new QLabel("Instance: ", this);
-   QLabel* pVersionLabel = new QLabel("Version: ", this);
-   QLabel* pFeatureClassLabel = new QLabel("Feature class: ", this);
-
-   mFileWidgets.push_back(pFilenameLabel);
-   mDatabaseWidgets.push_back(pUserLabel);
-   mDatabaseWidgets.push_back(pPasswordLabel);
-   mDatabaseWidgets.push_back(pDatabaseLabel);
-   mDatabaseWidgets.push_back(pServerLabel);
-   mDatabaseWidgets.push_back(pInstanceLabel);
-   mDatabaseWidgets.push_back(pVersionLabel);
-   mDatabaseWidgets.push_back(pFeatureClassLabel);
-
+   // Shape file
    mpShpButton = new QRadioButton("Shape file", this);
+
+   mpShpWidget = new QWidget(this);
+   QLabel* pFilenameLabel = new QLabel("Filename: ", mpShpWidget);
+   mpFilenameEdit = new FileBrowser(mpShpWidget);
+   mpUseArcCheck = new QCheckBox("Use ArcGIS", mpShpWidget);
+
+   // Database
    mpSdeButton = new QRadioButton("ArcSDE Geodatabase", this);
 
-   mpUseArcCheck = new QCheckBox("Use ArcGIS", this);
-   // mpUseArcCheck gets special treatment in updateWidgets, don't need to add it to a vector
+   mpSdeWidget = new QWidget(this);
+   QLabel* pUserLabel = new QLabel("Username: ", mpSdeWidget);
+   QLabel* pPasswordLabel = new QLabel("Password: ", mpSdeWidget);
+   QLabel* pDatabaseLabel = new QLabel("Database: ", mpSdeWidget);
+   QLabel* pServerLabel = new QLabel("Server: ", mpSdeWidget);
+   QLabel* pInstanceLabel = new QLabel("Instance: ", mpSdeWidget);
+   QLabel* pVersionLabel = new QLabel("Version: ", mpSdeWidget);
+   QLabel* pFeatureClassLabel = new QLabel("Feature class: ", mpSdeWidget);
 
-   mpSelectFileButton = new QPushButton(QIcon(":/icons/Open"), QString(), this);
-   mFileWidgets.push_back(mpSelectFileButton);
+   mpUserEdit = new QLineEdit(mpSdeWidget);
+   mpPasswordEdit = new QLineEdit(mpSdeWidget);
+   mpPasswordEdit->setEchoMode(QLineEdit::Password);
+   mpDatabaseEdit = new QLineEdit(mpSdeWidget);
+   mpServerEdit = new QLineEdit(mpSdeWidget);
+   mpInstanceEdit = new QLineEdit(mpSdeWidget);
+   mpVersionEdit = new QLineEdit(mpSdeWidget);
+   mpFeatureClassEdit = new QLineEdit(mpSdeWidget);
 
-   mpFilenameEdit = new QLineEdit(this);
-   mpUserEdit = new QLineEdit(this);
-   mpPasswordEdit = new QLineEdit(this);
-   mpDatabaseEdit = new QLineEdit(this);
-   mpServerEdit = new QLineEdit(this);
-   mpInstanceEdit = new QLineEdit(this);
-   mpVersionEdit = new QLineEdit(this);
-   mpFeatureClassEdit = new QLineEdit(this);
+   // Layout
+   QGridLayout* pShpLayout = new QGridLayout(mpShpWidget);
+   pShpLayout->setMargin(0);
+   pShpLayout->setSpacing(5);
+   pShpLayout->addWidget(pFilenameLabel, 0, 0);
+   pShpLayout->addWidget(mpFilenameEdit, 0, 1);
+   pShpLayout->addWidget(mpUseArcCheck, 1, 1);
+   pShpLayout->setColumnStretch(1, 10);
 
-   mFileWidgets.push_back(mpFilenameEdit);
-   mDatabaseWidgets.push_back(mpUserEdit);
-   mDatabaseWidgets.push_back(mpPasswordEdit);
-   mDatabaseWidgets.push_back(mpDatabaseEdit);
-   mDatabaseWidgets.push_back(mpServerEdit);
-   mDatabaseWidgets.push_back(mpInstanceEdit);
-   mDatabaseWidgets.push_back(mpVersionEdit);
-   mDatabaseWidgets.push_back(mpFeatureClassEdit);
+   QGridLayout* pSdeLayout = new QGridLayout(mpSdeWidget);
+   pSdeLayout->setMargin(0);
+   pSdeLayout->setSpacing(5);
+   pSdeLayout->addWidget(pUserLabel, 0, 0);
+   pSdeLayout->addWidget(mpUserEdit, 0, 1);
+   pSdeLayout->addWidget(pPasswordLabel, 1, 0);
+   pSdeLayout->addWidget(mpPasswordEdit, 1, 1);
+   pSdeLayout->addWidget(pDatabaseLabel, 2, 0);
+   pSdeLayout->addWidget(mpDatabaseEdit, 2, 1);
+   pSdeLayout->addWidget(pServerLabel, 3, 0);
+   pSdeLayout->addWidget(mpServerEdit, 3, 1);
+   pSdeLayout->addWidget(pInstanceLabel, 4, 0);
+   pSdeLayout->addWidget(mpInstanceEdit, 4, 1);
+   pSdeLayout->addWidget(pVersionLabel, 5, 0);
+   pSdeLayout->addWidget(mpVersionEdit, 5, 1);
+   pSdeLayout->addWidget(pFeatureClassLabel, 6, 0);
+   pSdeLayout->addWidget(mpFeatureClassEdit, 6, 1);
+   pSdeLayout->setColumnStretch(1, 10);
+
+   QStyleOptionButton option;
+   option.initFrom(mpShpButton);
+   int radioWidth = style()->subElementRect(QStyle::SE_RadioButtonIndicator, &option).width();
 
    QGridLayout* pLayout = new QGridLayout(this);
    pLayout->setMargin(0);
    pLayout->setSpacing(5);
-   pLayout->setColumnMinimumWidth(0, 15);
-   pLayout->addWidget(mpShpButton, 0, 0, 1, 4);
-   pLayout->addWidget(pFilenameLabel, 1, 1);
-   pLayout->addWidget(mpFilenameEdit, 1, 2);
-   pLayout->addWidget(mpSelectFileButton, 1, 3);
-   pLayout->addWidget(mpUseArcCheck, 2, 2, 1, 2);
-   pLayout->addWidget(mpSdeButton, 3, 0, 1, 4);
-   pLayout->addWidget(pUserLabel, 4, 1);
-   pLayout->addWidget(mpUserEdit, 4, 2, 1, 2);
-   pLayout->addWidget(pPasswordLabel, 5, 1);
-   pLayout->addWidget(mpPasswordEdit, 5, 2, 1, 2);
-   pLayout->addWidget(pDatabaseLabel, 6, 1);
-   pLayout->addWidget(mpDatabaseEdit, 6, 2, 1, 2);
-   pLayout->addWidget(pServerLabel, 7, 1);
-   pLayout->addWidget(mpServerEdit, 7, 2, 1, 2);
-   pLayout->addWidget(pInstanceLabel, 8, 1);
-   pLayout->addWidget(mpInstanceEdit, 8, 2, 1, 2);
-   pLayout->addWidget(pVersionLabel, 9, 1);
-   pLayout->addWidget(mpVersionEdit, 9, 2, 1, 2);
-   pLayout->addWidget(pFeatureClassLabel, 10, 1);
-   pLayout->addWidget(mpFeatureClassEdit, 10, 2, 1, 2);
+   pLayout->setColumnMinimumWidth(0, radioWidth);
+   pLayout->addWidget(mpShpButton, 0, 0, 1, 2);
+   pLayout->addWidget(mpShpWidget, 1, 1);
+   pLayout->addWidget(mpSdeButton, 2, 0, 1, 2);
+   pLayout->addWidget(mpSdeWidget, 3, 1);
+   pLayout->setRowStretch(4, 10);
+   pLayout->setColumnStretch(1, 10);
 
-   pLayout->setRowStretch(11, 10);
+   // Initialization
+   QString directory;
 
-   VERIFYNR(connect(mpFilenameEdit, SIGNAL(textChanged(const QString&)), this, SLOT(setModified())));
-   VERIFYNR(connect(mpUserEdit, SIGNAL(textEdited(const QString&)), this, SLOT(setModified())));
-   VERIFYNR(connect(mpPasswordEdit, SIGNAL(textEdited(const QString&)), this, SLOT(setModified())));
-   VERIFYNR(connect(mpDatabaseEdit, SIGNAL(textEdited(const QString&)), this, SLOT(setModified())));
-   VERIFYNR(connect(mpServerEdit, SIGNAL(textEdited(const QString&)), this, SLOT(setModified())));
-   VERIFYNR(connect(mpInstanceEdit, SIGNAL(textEdited(const QString&)), this, SLOT(setModified())));
-   VERIFYNR(connect(mpVersionEdit, SIGNAL(textEdited(const QString&)), this, SLOT(setModified())));
-   VERIFYNR(connect(mpFeatureClassEdit, SIGNAL(textEdited(const QString&)), this, SLOT(setModified())));
-   VERIFYNR(connect(mpUseArcCheck, SIGNAL(toggled(bool)), this, SLOT(setModified())));
-   VERIFYNR(connect(mpShpButton, SIGNAL(toggled(bool)), this, SLOT(setModified())));
-   VERIFYNR(connect(mpSdeButton, SIGNAL(toggled(bool)), this, SLOT(setModified())));
+   const Filename* pWorkingDir = NULL;
+   if (ConfigurationSettings::hasSettingPluginWorkingDirectory(ShapeFileImporter::PLUGIN_SUBTYPE))
+   {
+      pWorkingDir = ConfigurationSettings::getSettingPluginWorkingDirectory(ShapeFileImporter::PLUGIN_SUBTYPE);
+   }
+   else
+   {
+      pWorkingDir = ConfigurationSettings::getSettingImportPath();
+   }
 
-   VERIFYNR(connect(mpSelectFileButton, SIGNAL(clicked(bool)), this, SLOT(selectFileClicked())));
+   if (pWorkingDir != NULL)
+   {
+      directory = QString::fromStdString(pWorkingDir->getFullPathAndName());
+   }
+
+   mpFilenameEdit->setBrowseCaption("Select Shape File");
+   mpFilenameEdit->setBrowseDirectory(directory);
+   mpFilenameEdit->setBrowseFileFilters("Shape Files (*.shp);;All Files (*)");
+   mpUseArcCheck->setChecked(OptionsGeographicFeatures::getSettingUseArcAsDefaultConnection());
+
+   mpShpButton->setChecked(true);
+   updateWidgets();
+
+   // Connections
    VERIFYNR(connect(mpShpButton, SIGNAL(toggled(bool)), this, SLOT(updateWidgets())));
+   VERIFYNR(connect(mpFilenameEdit, SIGNAL(filenameChanged(const QString&)), this,
+      SLOT(updateWorkingDirectory(const QString&))));
    VERIFYNR(connect(mpSdeButton, SIGNAL(toggled(bool)), this, SLOT(updateWidgets())));
+
+   VERIFYNR(attachSignal(mpShpButton, SIGNAL(toggled(bool))));
+   VERIFYNR(attachSignal(mpFilenameEdit, SIGNAL(filenameChanged(const QString&))));
+   VERIFYNR(attachSignal(mpUseArcCheck, SIGNAL(toggled(bool))));
+   VERIFYNR(attachSignal(mpSdeButton, SIGNAL(toggled(bool))));
+   VERIFYNR(attachSignal(mpUserEdit, SIGNAL(textEdited(const QString&))));
+   VERIFYNR(attachSignal(mpPasswordEdit, SIGNAL(textEdited(const QString&))));
+   VERIFYNR(attachSignal(mpDatabaseEdit, SIGNAL(textEdited(const QString&))));
+   VERIFYNR(attachSignal(mpServerEdit, SIGNAL(textEdited(const QString&))));
+   VERIFYNR(attachSignal(mpInstanceEdit, SIGNAL(textEdited(const QString&))));
+   VERIFYNR(attachSignal(mpVersionEdit, SIGNAL(textEdited(const QString&))));
+   VERIFYNR(attachSignal(mpFeatureClassEdit, SIGNAL(textEdited(const QString&))));
 }
 
 ConnectionParametersWidget::~ConnectionParametersWidget()
-{
-}
+{}
 
 ArcProxyLib::ConnectionParameters ConnectionParametersWidget::getConnectionParameters() const
 {
    ArcProxyLib::ConnectionParameters connection;
-   
    if (mpSdeButton->isChecked())
    {
       connection.setUser(mpUserEdit->text().toStdString());
@@ -136,12 +165,11 @@ ArcProxyLib::ConnectionParameters ConnectionParametersWidget::getConnectionParam
       connection.setInstance(mpInstanceEdit->text().toStdString());
       connection.setVersion(mpVersionEdit->text().toStdString());
       connection.setFeatureClass(mpFeatureClassEdit->text().toStdString());
-
       connection.setConnectionType(ArcProxyLib::SDE_CONNECTION);
    }
    else
    {
-      QFileInfo fileInfo(mpFilenameEdit->text());
+      QFileInfo fileInfo(mpFilenameEdit->getFilename());
       connection.setDatabase(fileInfo.absolutePath().toStdString());
       connection.setFeatureClass(fileInfo.fileName().toStdString());
 
@@ -154,10 +182,11 @@ ArcProxyLib::ConnectionParameters ConnectionParametersWidget::getConnectionParam
          connection.setConnectionType(ArcProxyLib::SHAPELIB_CONNECTION);
       }
    }
+
    return connection;
 }
 
-void ConnectionParametersWidget::setConnectionParameters(const ArcProxyLib::ConnectionParameters &connection)
+void ConnectionParametersWidget::setConnectionParameters(const ArcProxyLib::ConnectionParameters& connection)
 {
    if (connection.getConnectionType() == ArcProxyLib::SDE_CONNECTION)
    {
@@ -180,69 +209,70 @@ void ConnectionParametersWidget::setConnectionParameters(const ArcProxyLib::Conn
          filename = dir.absoluteFilePath(QString::fromStdString(connection.getFeatureClass()));
       }
 
-      mpFilenameEdit->setText(filename);
-
+      mpFilenameEdit->setFilename(filename);
       mpShpButton->setChecked(true);
-   }
-}
 
-bool ConnectionParametersWidget::isModified() const
-{
-   return mModified;
-}
-
-void ConnectionParametersWidget::setModified(bool modified)
-{
-   mModified = modified;
-}
-
-void ConnectionParametersWidget::updateWidgets()
-{
-   bool isFile = false;
-
-   if (mpShpButton->isChecked())
-   {
-      isFile = true;
-   }
-
-   std::for_each(mFileWidgets.begin(), mFileWidgets.end(),
-      boost::bind(&QWidget::setEnabled, _1, isFile));
-   std::for_each(mDatabaseWidgets.begin(), mDatabaseWidgets.end(), 
-      boost::bind(&QWidget::setDisabled, _1, isFile));
-
-   mpUseArcCheck->setEnabled(isFile && mpSdeButton->isEnabled());
-
-   setModified(true);
-}
-
-void ConnectionParametersWidget::selectFileClicked()
-{
-   QString directory = mpFilenameEdit->text();
-   if (directory.isEmpty())
-   {
-      const Filename* pWorkingDir = NULL;
-      if (ConfigurationSettings::hasSettingPluginWorkingDirectory(ShapeFileImporter::PLUGIN_SUBTYPE))
+      if (mpUseArcCheck->isEnabled() == true)
       {
-         pWorkingDir = ConfigurationSettings::getSettingPluginWorkingDirectory(ShapeFileImporter::PLUGIN_SUBTYPE);
-      }
-      else
-      {
-         pWorkingDir = ConfigurationSettings::getSettingImportPath();
-      }
-      if (pWorkingDir != NULL)
-      {
-         directory = QString::fromStdString(pWorkingDir->getFullPathAndName());
+         mpUseArcCheck->setChecked(connection.getConnectionType() == ArcProxyLib::SHP_CONNECTION);
       }
    }
-   QString filename = QFileDialog::getOpenFileName(this, "Select shape file", directory, "Shape files(*.shp)");
-   if (!filename.isEmpty())
+}
+
+void ConnectionParametersWidget::setAvailableConnectionTypes(const std::vector<ArcProxyLib::ConnectionType>& types)
+{
+   mShapelibConnection = (std::find(types.begin(), types.end(), ArcProxyLib::SHAPELIB_CONNECTION) != types.end());
+   mShpConnection = (std::find(types.begin(), types.end(), ArcProxyLib::SHP_CONNECTION) != types.end());
+   mSdeConnection = (std::find(types.begin(), types.end(), ArcProxyLib::SDE_CONNECTION) != types.end());
+
+   if (mShpConnection == false)
    {
-      mpFilenameEdit->setText(filename);
+      if (mShapelibConnection == false)
+      {
+         mpFilenameEdit->setFilename(QString());
 
-      QFileInfo fileInfo(filename);
-      QDir newDirectory(fileInfo.absoluteDir());
+         if (mSdeConnection == true)
+         {
+            mpSdeButton->setChecked(true);
+         }
+      }
 
-      newDirectory.path();
+      mpUseArcCheck->setChecked(false);
+   }
+
+   if (mSdeConnection == false)
+   {
+      if ((mShapelibConnection == true) || (mShpConnection == true))
+      {
+         mpShpButton->setChecked(true);
+      }
+
+      mpUserEdit->clear();
+      mpPasswordEdit->clear();
+      mpDatabaseEdit->clear();
+      mpServerEdit->clear();
+      mpInstanceEdit->clear();
+      mpVersionEdit->clear();
+      mpFeatureClassEdit->clear();
+   }
+
+   mpShpButton->setEnabled(mShapelibConnection || mShpConnection);
+   mpSdeButton->setEnabled(mSdeConnection);
+
+   updateWidgets();
+}
+
+void ConnectionParametersWidget::updateWorkingDirectory(const QString& filename)
+{
+   if (filename.isEmpty() == true)
+   {
+      return;
+   }
+
+   QFileInfo fileInfo(filename);
+   QDir newDirectory(fileInfo.absoluteDir());
+   if (newDirectory.exists() == true)
+   {
       FactoryResource<Filename> pNewWorkingDir;
       pNewWorkingDir->setFullPathAndName(newDirectory.path().toStdString());
 
@@ -252,31 +282,9 @@ void ConnectionParametersWidget::selectFileClicked()
    }
 }
 
-void ConnectionParametersWidget::setAvailableConnectionTypes(
-   const std::vector<ArcProxyLib::ConnectionType> &types)
+void ConnectionParametersWidget::updateWidgets()
 {
-   mpUseArcCheck->setEnabled(false);
-   mpShpButton->setEnabled(false);
-   mpSdeButton->setEnabled(false);
-
-   for (std::vector<ArcProxyLib::ConnectionType>::const_iterator iter = types.begin();
-      iter != types.end(); ++iter)
-   {
-      switch (*iter)
-      {
-         case ArcProxyLib::SHAPELIB_CONNECTION:
-            mpShpButton->setEnabled(true);
-            break;
-         case ArcProxyLib::SHP_CONNECTION:
-            mpShpButton->setEnabled(true);
-            mpUseArcCheck->setEnabled(true);
-            mpUseArcCheck->setChecked(true);
-            break;
-         case ArcProxyLib::SDE_CONNECTION:
-            mpSdeButton->setEnabled(true);
-            break;
-         default:
-            break;
-      }
-   }
+   mpShpWidget->setEnabled(mpShpButton->isEnabled() && mpShpButton->isChecked());
+   mpUseArcCheck->setEnabled(mpShpWidget->isEnabled() && mShpConnection);
+   mpSdeWidget->setEnabled(mpSdeButton->isEnabled() && mpSdeButton->isChecked());
 }

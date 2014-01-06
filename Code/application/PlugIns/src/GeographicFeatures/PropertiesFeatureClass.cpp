@@ -35,8 +35,7 @@ PropertiesFeatureClass::PropertiesFeatureClass() :
 }
 
 PropertiesFeatureClass::~PropertiesFeatureClass()
-{
-}
+{}
 
 bool PropertiesFeatureClass::initialize(SessionItem* pSessionItem)
 {
@@ -59,7 +58,10 @@ bool PropertiesFeatureClass::initialize(SessionItem* pSessionItem)
    VERIFY(pProxy != NULL);
 
    pWidget->initialize(mpFeatureClass);
-   pWidget->setAvailableConnectionTypes(pProxy->getAvailableConnectionTypes());
+   if (pProxy->isProcessInitialized() == true)
+   {
+      pWidget->setAvailableConnectionTypes(pProxy->getAvailableConnectionTypes());
+   }
 
    return true;
 }
@@ -86,7 +88,11 @@ bool PropertiesFeatureClass::applyChanges()
 
       ProgressResource pProgress("Geographic feature");
       string errorMessage;
-      mpFeatureClass->update(pProgress.get(), errorMessage, bDisplayOnlyChanges);
+      if (mpFeatureClass->update(pProgress.get(), errorMessage, bDisplayOnlyChanges) == false)
+      {
+         pProgress->updateProgress(errorMessage, 0, ERRORS);
+         return false;
+      }
 
       pProgress->updateProgress("Complete", 100, NORMAL);
       //now that changes have been applied, we know that the current state

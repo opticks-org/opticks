@@ -30,6 +30,7 @@
 #include "MessageLogResource.h"
 #include "ModelServices.h"
 #include "ObjectResource.h"
+#include "OptionsGeographicFeatures.h"
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
@@ -43,6 +44,7 @@
 #include "Undo.h"
 #include "UtilityServices.h"
 
+#include <algorithm>
 #include <vector>
 #include <cctype>
 
@@ -143,6 +145,66 @@ unsigned char ShapeFileImporter::getFileAffinity(const std::string& filename)
    }
 
    return Importer::CAN_LOAD;
+}
+
+bool ShapeFileImporter::validate(const DataDescriptor* pDescriptor,
+                                 const vector<const DataDescriptor*>& importedDescriptors,
+                                 string& errorMessage) const
+{
+   if (ImporterShell::validate(pDescriptor, importedDescriptors, errorMessage) == false)
+   {
+      return false;
+   }
+
+   // Get the feature class
+   const FeatureClass* pFeatureClass = NULL;
+   if (mpOptionsWidget != NULL)
+   {
+      pFeatureClass = mpOptionsWidget->getEditFeatureClass();
+   }
+
+   if (pFeatureClass == NULL)
+   {
+      pFeatureClass = mpFeatureClass.get();
+   }
+
+   if (pFeatureClass != NULL)
+   {
+      // Check for a valid connection type
+      ArcProxyLib::ConnectionType connection = pFeatureClass->getConnectionParameters().getConnectionType();
+      if (connection == ArcProxyLib::UNKNOWN_CONNECTION)
+      {
+         errorMessage = "The connection type is invalid.";
+         return false;
+      }
+
+      // Check for a valid ArcGIS license
+      if ((connection == ArcProxyLib::SHP_CONNECTION) || (connection == ArcProxyLib::SDE_CONNECTION))
+      {
+         FeatureProxyConnector* pProxy = FeatureProxyConnector::instance();
+         VERIFY(pProxy != NULL);
+
+         if (pProxy->isProcessInitialized() == true)
+         {
+            vector<ArcProxyLib::ConnectionType> connections = pProxy->getAvailableConnectionTypes();
+            if (find(connections.begin(), connections.end(), connection) == connections.end())
+            {
+               errorMessage = "A valid ArcGIS license could not be obtained to load the shape file.";
+               return false;
+            }
+         }
+         else if (mpOptionsWidget != NULL)
+         {
+            // The feature proxy connector has not yet attempted to get a valid ArcGIS license, so display
+            // a warning in the import options widget only indicating that a valid license is required
+            errorMessage = "The selected connection type requires a valid ArcGIS license that will be "
+               "obtained when loading the shape file, changing to the Display tab or Clipping tab, or "
+               "clicking the Test Connection button.";
+         }
+      }
+   }
+
+   return true;
 }
 
 bool ShapeFileImporter::getInputSpecification(PlugInArgList*& pArgList)
@@ -352,7 +414,20 @@ void ShapeFileImporter::createFeatureClassIfNeeded(const DataDescriptor *pDescri
       connect.setDatabase(filename.getPath());
       connect.setFeatureClass(filename.getFileName());
 
-      connect.setConnectionType(types.front());
+      ArcProxyLib::ConnectionType connectionType = ArcProxyLib::UNKNOWN_CONNECTION;
+      if (OptionsGeographicFeatures::getSettingUseArcAsDefaultConnection() == true)
+      {
+         if (find(types.begin(), types.end(), ArcProxyLib::SHP_CONNECTION) != types.end())
+         {
+            connectionType = ArcProxyLib::SHP_CONNECTION;
+         }
+      }
+      else if (find(types.begin(), types.end(), ArcProxyLib::SHAPELIB_CONNECTION) != types.end())
+      {
+         connectionType = ArcProxyLib::SHAPELIB_CONNECTION;
+      }
+
+      connect.setConnectionType(connectionType);
 
       mpFeatureClass->setConnectionParameters(connect);
    }
@@ -365,12 +440,22 @@ std::vector<ArcProxyLib::ConnectionType> ShapeFileImporter::getAvailableConnecti
    FeatureProxyConnector* pProxy = FeatureProxyConnector::instance();
    VERIFYRV(pProxy != NULL, types);
 
-   types = pProxy->getAvailableConnectionTypes();
-   vector<ArcProxyLib::ConnectionType>::iterator sdeIter =
-      find(types.begin(), types.end(), ArcProxyLib::SDE_CONNECTION);
-   if (sdeIter != types.end())
+   // Do not query the actual available connection types if ArcProxy has not yet been started
+   // to avoid potentially getting an Arc license unnecessarily
+   if (pProxy->isProcessInitialized() == true)
    {
-      types.erase(sdeIter);
+      types = pProxy->getAvailableConnectionTypes();
+      vector<ArcProxyLib::ConnectionType>::iterator sdeIter =
+         find(types.begin(), types.end(), ArcProxyLib::SDE_CONNECTION);
+      if (sdeIter != types.end())
+      {
+         types.erase(sdeIter);
+      }
+   }
+   else
+   {
+      types.push_back(ArcProxyLib::SHAPELIB_CONNECTION);
+      types.push_back(ArcProxyLib::SHP_CONNECTION);
    }
 
    return types;

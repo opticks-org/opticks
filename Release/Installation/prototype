@@ -70,6 +70,7 @@ f none $APPDIR/DefaultSettings/42-Nitf.cfg=$OpticksCodeDir/Release/DefaultSettin
 f none $APPDIR/DefaultSettings/43-IceExporter.cfg=$OpticksCodeDir/Release/DefaultSettings/43-IceExporter.cfg 644 root $GROUP
 f none $APPDIR/DefaultSettings/44-AnnotationImagePalette.cfg=$OpticksCodeDir/Release/DefaultSettings/44-AnnotationImagePalette.cfg 644 root $GROUP
 f none $APPDIR/DefaultSettings/45-ConvolutionFilters.cfg=$OpticksCodeDir/Release/DefaultSettings/45-ConvolutionFilters.cfg 644 root $GROUP
+f none $APPDIR/DefaultSettings/46-GeographicFeatures.cfg=$OpticksCodeDir/Release/DefaultSettings/46-GeographicFeatures.cfg 644 root $GROUP
 f none $APPDIR/DefaultSettings/50-KmlServer.cfg=$OpticksCodeDir/Release/DefaultSettings/50-KmlServer.cfg 644 root $GROUP
 f none $APPDIR/DefaultSettings/55-Modis.cfg=$OpticksCodeDir/Release/DefaultSettings/55-Modis.cfg 644 root $GROUP
 f none $APPDIR/DefaultSettings/60-SpatialResampler.cfg=$OpticksCodeDir/Release/DefaultSettings/60-SpatialResampler.cfg 644 root $GROUP

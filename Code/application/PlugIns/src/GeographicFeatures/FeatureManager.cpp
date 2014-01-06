@@ -153,6 +153,9 @@ bool FeatureManager::execute(PlugInArgList *pInputArgList, PlugInArgList *pOutpu
       }
    }
 
+   Service<ModelServices> pModel;
+   pModel->addElementType("FeatureClass");
+
    pStep->finalize(Message::Success);
    return true;
 }
@@ -503,13 +506,8 @@ FeatureProxyConnector *FeatureManager::getProxy()
       VERIFYRV(mpProxy != NULL, NULL);
       connect(mpProxy, SIGNAL(initialized()), this, SLOT(proxyInitialized()));
 
-      mpProxy->initialize();
-
       Service<SessionExplorer> pExplorer;
       mpExplorer.reset(pExplorer.get());
-
-      Service<ModelServices> pModel;
-      pModel->addElementType("FeatureClass");
    }
 
    return mpProxy;

@@ -96,7 +96,6 @@ public:
    FeatureProxyConnector(const QString &executable, QObject *pParent = NULL);
    ~FeatureProxyConnector();
 
-   bool initialize();
    bool terminate();
    bool openDataSource(const ArcProxyLib::ConnectionParameters &connParams, 
       std::string &handle, std::string &errorMessage);
@@ -106,7 +105,8 @@ public:
    bool query(const std::string &handle, std::string &errorMessage,
       const std::string &whereClause = "", const std::string &labelFormat = "",
       LocationType minClip = LocationType(), LocationType maxClip = LocationType());
-   bool isInitialized() const;
+   bool isProcessInitialized() const;
+   bool isExecutableInitialized() const;
 
    std::vector<ArcProxyLib::ConnectionType> getAvailableConnectionTypes() const;
 
@@ -118,6 +118,9 @@ signals:
    void featureClassProperties(const QString &properties);
    void features(std::vector<std::string> features);
    void featureLoaded(const ArcProxyLib::Feature &feature);
+
+protected:
+   void initialize();
 
 private slots:
    bool processReply();
@@ -139,9 +142,10 @@ private:
    typedef EnumWrapper<CommandsTypeEnum> CommandsType;
 
    CommandsType mPendingCommand;
-   bool mInitialized;
    QString mExecutable;
    QProcess* mpProcess;
+   bool mProcessInitialized;
+   bool mExecutableInitialized;
    QTextStream mStream;
    QLocalServer* mpServer;
    QLocalSocket* mpSocket;

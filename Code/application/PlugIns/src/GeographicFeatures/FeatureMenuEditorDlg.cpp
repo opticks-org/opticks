@@ -7,24 +7,18 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "FeatureMenuEditorDlg.h"
-
-#include "ConfigurationSettings.h"
 #include "AppVerify.h"
+#include "DynamicObject.h"
+#include "FeatureClass.h"
 #include "FeatureClassWidget.h"
-#include "FeatureProxyConnector.h"
-#include "Filename.h"
-#include "ListInspectorWidget.h"
-#include "ProgressResource.h"
-#include "QueryOptions.h"
-#include "QueryOptionsWidget.h"
 #include "FeatureManager.h"
+#include "FeatureMenuEditorDlg.h"
+#include "ListInspectorWidget.h"
+#include "ObjectResource.h"
 
-#include <QtGui/QPushButton>
-#include <QtGui/QListWidget>
-#include <QtGui/QGridLayout>
-#include <QtGui/QFileDialog>
 #include <QtGui/QDialogButtonBox>
+#include <QtGui/QListWidget>
+#include <QtGui/QVBoxLayout>
 
 using namespace std;
 
@@ -39,10 +33,6 @@ FeatureMenuEditorDlg::FeatureMenuEditorDlg(QWidget *pParent) : QDialog(pParent)
    }
 
    FeatureClassWidget* pInspectorWidget = new FeatureClassWidget(this);
-   
-   FeatureProxyConnector* pProxy = FeatureProxyConnector::instance();
-   std::vector<ArcProxyLib::ConnectionType> availableTypes = pProxy->getAvailableConnectionTypes();
-   pInspectorWidget->setAvailableConnectionTypes(availableTypes);
 
    mpListInspector = new ListInspectorWidget(pInspectorWidget, this);
    QLayout* pListInspectorLayout = mpListInspector->layout();
@@ -181,8 +171,3 @@ void FeatureMenuEditorDlg::removeItem(QListWidgetItem *pItem)
 
    mpOptionsSet->removeAttribute(pItem->text().toStdString());
 }
-
-
-
-
-

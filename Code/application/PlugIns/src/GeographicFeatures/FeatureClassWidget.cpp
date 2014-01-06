@@ -32,10 +32,10 @@
 #include <boost/bind.hpp>
 
 FeatureClassWidget::FeatureClassWidget(QWidget* pParent) :
-   QWidget(pParent),
+   ModifierWidget(pParent),
    mpEditFeatureClass(NULL),
    mpFeatureClass(NULL),
-   mbDisplayOnlyChanges(false)
+   mbDisplayOnlyChanges(true)
 {
    QTabWidget* pTabWidget = new QTabWidget(this);
 
@@ -108,7 +108,7 @@ FeatureClassWidget::FeatureClassWidget(QWidget* pParent) :
    // Word wrap
    mpErrorLabel->setWordWrap(true);
 
-   QPushButton* pTestConnectionButton = new QPushButton("Test connection", this);
+   QPushButton* pTestConnectionButton = new QPushButton("Test Connection", this);
 
    mpProgressBar = new QProgressBar(this);
    mpProgressBar->setRange(0, 0);
@@ -130,6 +130,9 @@ FeatureClassWidget::FeatureClassWidget(QWidget* pParent) :
    // Connections
    VERIFYNR(connect(pTabWidget, SIGNAL(currentChanged(int)), this, SLOT(testConnection())));
    VERIFYNR(connect(pTestConnectionButton, SIGNAL(clicked()), this, SLOT(testConnection())));
+
+   VERIFYNR(connect(mpConnection, SIGNAL(modified()), this, SLOT(updateConnectionParameters())));
+   VERIFYNR(attachSignal(mpConnection, SIGNAL(modified())));
 
    VERIFYNR(connect(mpDisplay, SIGNAL(addItems()), this, SLOT(addDisplayItems())));
    VERIFYNR(connect(mpDisplay, SIGNAL(saveInspector(QWidget*, QListWidgetItem*)),
@@ -290,6 +293,21 @@ void FeatureClassWidget::initialize(FeatureClass *pFeatureClass)
    }
 }
 
+FeatureClass* FeatureClassWidget::getFeatureClass()
+{
+   return mpFeatureClass;
+}
+
+const FeatureClass* FeatureClassWidget::getFeatureClass() const
+{
+   return mpFeatureClass;
+}
+
+const FeatureClass* FeatureClassWidget::getEditFeatureClass() const
+{
+   return mpEditFeatureClass;
+}
+
 void FeatureClassWidget::testConnection(bool onlyIfModified)
 {
    if (!onlyIfModified || mpConnection->isModified())
@@ -318,6 +336,7 @@ void FeatureClassWidget::testConnection(bool onlyIfModified)
          mpErrorLabel->setText(QString("Connection: %1").arg(QString::fromStdString(errorMessage)));
       }
       mpProgressBar->setHidden(true);
+      setModified(true);
    }
 
    mpConnection->setModified(false);
@@ -557,6 +576,18 @@ void FeatureClassWidget::saveDisplayQueryOptions()
                iter->second.setFormatString(oldOption.getFormatString());
             }
          }
+      }
+   }
+}
+
+void FeatureClassWidget::updateConnectionParameters()
+{
+   if (mpEditFeatureClass != NULL)
+   {
+      ArcProxyLib::ConnectionParameters connectionParams = mpConnection->getConnectionParameters();
+      if (mpEditFeatureClass->setConnectionParameters(connectionParams) == true)
+      {
+         mbDisplayOnlyChanges = false;
       }
    }
 }

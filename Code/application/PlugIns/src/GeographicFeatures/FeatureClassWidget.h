@@ -10,9 +10,8 @@
 #ifndef FEATURECLASSWIDGET_H
 #define FEATURECLASSWIDGET_H
 
-#include <QtGui/QWidget>
-
 #include "ConnectionParameters.h"
+#include "ModifierWidget.h"
 #include "QueryOptions.h"
 
 #include <string>
@@ -37,7 +36,7 @@ class QRadioButton;
 
 #include <map>
 
-class FeatureClassWidget : public QWidget
+class FeatureClassWidget : public ModifierWidget
 {
    Q_OBJECT
 
@@ -47,6 +46,9 @@ public:
 
    bool applyChanges();
    void initialize(FeatureClass *pFeatureClass);
+   FeatureClass* getFeatureClass();
+   const FeatureClass* getFeatureClass() const;
+   const FeatureClass* getEditFeatureClass() const;
 
    void setAvailableConnectionTypes(const std::vector<ArcProxyLib::ConnectionType> &types);
    bool getDisplayOnlyChanges() const;
@@ -65,6 +67,9 @@ protected:
       ArcProxyLib::ConnectionType connectionType);
    bool compareQueriesForChanges(const std::vector<FeatureQueryOptions>& options);
    void saveDisplayQueryOptions();
+
+protected slots:
+   void updateConnectionParameters();
 
 private:
    FeatureClassWidget(const FeatureClassWidget& rhs);

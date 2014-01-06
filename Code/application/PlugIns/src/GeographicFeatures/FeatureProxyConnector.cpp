@@ -45,8 +45,9 @@ FeatureProxyConnector *FeatureProxyConnector::instance()
 FeatureProxyConnector::FeatureProxyConnector(const QString &executable, QObject *pParent) :
    QObject(pParent),
    mPendingCommand(NO_COMMAND),
-   mInitialized(false),
    mExecutable(executable),
+   mProcessInitialized(false),
+   mExecutableInitialized(false),
    mpServer(NULL),
    mpSocket(NULL),
    mpConnectionTimer(NULL),
@@ -73,8 +74,13 @@ FeatureProxyConnector::~FeatureProxyConnector()
    }
 }
 
-bool FeatureProxyConnector::initialize()
+void FeatureProxyConnector::initialize()
 {
+   if (mProcessInitialized == true)
+   {
+      return;
+   }
+
    long pid = -1;
 #if defined(WIN_API)
    pid = GetCurrentProcessId();
@@ -94,7 +100,7 @@ bool FeatureProxyConnector::initialize()
    if (!mpServer->listen("OpticksFeatureProxyConnector" + QString::number(pid)))
    {
       terminate();
-      return false;
+      return;
    }
 
    QStringList args;
@@ -104,24 +110,23 @@ bool FeatureProxyConnector::initialize()
    }
 
    mpProcess->start(mExecutable, args);
+   mProcessInitialized = true;
    if (!mpProcess->waitForStarted())
    {
       terminate();
-      return false;
+      return;
    }
 
    if (!mpServer->waitForNewConnection(3000))
    {
       terminate();
-      return false;
+      return;
    }
    mpSocket = mpServer->nextPendingConnection();
    mpServer->close();
    mStream.setDevice(mpSocket);
    connect(mpSocket, SIGNAL(readyRead()), this, SLOT(processReply()));
    mStream << APP_VERSION_NUMBER << endl;
-
-   return true;
 }
 
 void FeatureProxyConnector::abortConnection()
@@ -148,14 +153,14 @@ bool FeatureProxyConnector::processReply()
    while (!mLastReplyIsError && !lines.empty())
    {
       QString line = lines.takeFirst();
-      if (!mInitialized)
+      if (!mExecutableInitialized)
       {
          if (line != APP_VERSION_NUMBER)
          {
             terminate();
             return false;
          }
-         mInitialized = true;
+         mExecutableInitialized = true;
          emit initialized();
       }
       else
@@ -242,7 +247,14 @@ bool FeatureProxyConnector::terminate()
 bool FeatureProxyConnector::openDataSource(const ArcProxyLib::ConnectionParameters &connParams, std::string &handle,
                                     std::string &errorMessage)
 {
-   if (connParams.getConnectionType() == ArcProxyLib::SHAPELIB_CONNECTION)
+   ArcProxyLib::ConnectionType connectionType = connParams.getConnectionType();
+   if (connectionType == ArcProxyLib::UNKNOWN_CONNECTION)
+   {
+      errorMessage = "The connection type is invalid.";
+      return false;
+   }
+
+   if (connectionType == ArcProxyLib::SHAPELIB_CONNECTION)
    {
       if (mShapelibProxy.openDataSource(connParams, handle, errorMessage) == false)
       {
@@ -253,9 +265,10 @@ bool FeatureProxyConnector::openDataSource(const ArcProxyLib::ConnectionParamete
       return true;
    }
 
+   initialize();
    if (mpProcess->state() != QProcess::Running)
    {
-      errorMessage = "ArcGIS must be installed to use that connection type.";
+      errorMessage = "ArcGIS must be installed to use the selected connection type.";
       return false;
    }
    mResponses.clear();
@@ -442,9 +455,14 @@ bool FeatureProxyConnector::query(const std::string &handle,
    return !mLastReplyIsError;
 }
 
-bool FeatureProxyConnector::isInitialized() const
+bool FeatureProxyConnector::isProcessInitialized() const
 {
-   return mInitialized;
+   return mProcessInitialized;
+}
+
+bool FeatureProxyConnector::isExecutableInitialized() const
+{
+   return mExecutableInitialized;
 }
 
 void FeatureProxyConnector::proxyExited()
@@ -459,6 +477,7 @@ std::vector<ArcProxyLib::ConnectionType>
 {
    std::vector<ArcProxyLib::ConnectionType> types;
 
+   const_cast<FeatureProxyConnector*>(this)->initialize();
    if (mpProcess->state() == QProcess::Running)
    {
       types.push_back(ArcProxyLib::SHP_CONNECTION); // should be first to prefer SHP over SHAPELIB

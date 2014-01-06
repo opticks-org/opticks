@@ -110,6 +110,9 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_ListInspectorWidget.cpp">
       <Filter>moc</Filter>
     </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_OptionsGeographicFeatures.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_QueryBuilderWidget.cpp">
       <Filter>moc</Filter>
     </ClCompile>
@@ -120,6 +123,9 @@
       <Filter>moc</Filter>
     </ClCompile>
     <ClCompile Include="ModuleManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OptionsGeographicFeatures.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PropertiesFeatureClass.cpp">
@@ -214,6 +220,9 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="ListInspectorWidget.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="OptionsGeographicFeatures.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="QueryBuilderWidget.h">
