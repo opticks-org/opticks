@@ -366,8 +366,17 @@ const ArcProxyLib::ConnectionParameters &FeatureClass::getConnectionParameters()
 
 bool FeatureClass::addQuery(const FeatureQueryOptions &query)
 {
-   mQueries.push_back(query);
+   // Check if the query has already been added
+   const std::string& queryName = query.getQueryName();
+   for (std::vector<FeatureQueryOptions>::iterator iter = mQueries.begin(); iter != mQueries.end(); ++iter)
+   {
+      if (iter->getQueryName() == queryName)
+      {
+         return false;
+      }
+   }
 
+   mQueries.push_back(query);
    return true;
 }
 
@@ -1038,7 +1047,7 @@ FactoryResource<DynamicObject> FeatureClass::toDynamicObject() const
       FactoryResource<DynamicObject> pQuery(pOption->toDynamicObject());
       VERIFYRV(pQuery.get() != NULL, pDynObj);
 
-      pDynObj->setAttributeByPath(DISPLAY_QUERY_KEY + "/" + pOption->getUniqueName(), *pQuery.get());
+      pDynObj->setAttributeByPath(DISPLAY_QUERY_KEY + "/" + pOption->getQueryName() + pOption->getUniqueName(), *pQuery.get());
    }
    pDynObj->setAttribute(CLIPPING_TYPE_KEY, static_cast<int>(mClippingType));
    pDynObj->setAttribute(CLIP_LL_KEY, mLlClip);
@@ -1359,11 +1368,12 @@ void FeatureClass::addDisplayQuery(DisplayQueryOptions* pQuery)
    mDisplayQueries.push_back(pQuery);
 }
 
-void FeatureClass::renameDisplayQuery(const std::string& oldName, const std::string& newName)
+void FeatureClass::renameDisplayQuery(const std::string& queryName, const std::string& oldName,
+                                      const std::string& newName)
 {
    for (unsigned int i = 0 ; i < mDisplayQueries.size(); i++)
    {
-      if (mDisplayQueries.at(i)->getUniqueName() == oldName)
+      if ((queryName == mDisplayQueries.at(i)->getQueryName()) && (oldName == mDisplayQueries.at(i)->getUniqueName()))
       {
          mDisplayQueries.at(i)->setUniqueName(newName);
       }
@@ -1490,13 +1500,25 @@ FeatureQueryOptions* FeatureClass::getQueryByName(const std::string& name)
 
 bool FeatureClass::replaceQueryNameInQueriesLists(const std::string& oldName, const std::string& newName)
 {
-   bool bFound = false;
+   if ((oldName.empty() == true) || (newName.empty() == true))
+   {
+      return false;
+   }
+
+   // Check if another query already exists with the new name
+   if (getQueryByName(newName) != NULL)
+   {
+      return false;
+   }
+
+   // Update the query name
    FeatureQueryOptions* pOption = getQueryByName(oldName);
    if (pOption != NULL)
    {
       pOption->setQueryName(newName);
-      bFound = true;
    }
+
+   // Update the query name in the display queries
    for (unsigned int i = 0; i < mDisplayQueries.size(); i++)
    {
       //traverse list of display queries in the feature class,
@@ -1510,7 +1532,8 @@ bool FeatureClass::replaceQueryNameInQueriesLists(const std::string& oldName, co
          }
       }
    }
-   return bFound;
+
+   return true;
 }
 
 template<typename T>

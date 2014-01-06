@@ -73,6 +73,11 @@ QListWidgetItem *ListInspectorWidget::addItem(const std::string &text)
    return pItem;
 }
 
+void ListInspectorWidget::setCurrentItem(QListWidgetItem* pItem)
+{
+   mpListWidget->setCurrentItem(pItem);
+}
+
 void ListInspectorWidget::applyChanges()
 {
    emit saveInspector(mpInspector, mpDisplayedItem);

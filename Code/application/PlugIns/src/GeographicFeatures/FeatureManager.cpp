@@ -286,7 +286,14 @@ void FeatureManager::updateContextMenu(Subject &subject, const string &signal, c
    QAction* pRefreshAction = new QAction("Refresh", pMenu->getActionParent());
    pRefreshAction->setAutoRepeat(false);
    VERIFYNR(connect(pRefreshAction, SIGNAL(triggered()), this, SLOT(refreshFeatureClass())));
-   pMenu->addActionBefore(pRefreshAction, APP_FEATUREMANAGER_REFRESH_ACTION, APP_APPLICATIONWINDOW_EXPORT_ACTION);
+   if (featureClasses.size() == 1)
+   {
+      pMenu->addActionBefore(pRefreshAction, APP_FEATUREMANAGER_REFRESH_ACTION, APP_APPLICATIONWINDOW_EXPORT_ACTION);
+   }
+   else
+   {
+      pMenu->addAction(pRefreshAction, APP_FEATUREMANAGER_REFRESH_ACTION);
+   }
 
    if (featureClasses.size() == 1)
    {

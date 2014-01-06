@@ -66,6 +66,14 @@ public:
    QListWidgetItem *addItem(const std::string &text);
 
    /**
+    * Sets the currently selected item in the list view.
+    *
+    * @param pItem
+    *        The item to select.
+    */
+   void setCurrentItem(QListWidgetItem* pItem);
+
+   /**
     * Get the inspector which was passed into the constructor.
     *
     * @return The inspector widget.

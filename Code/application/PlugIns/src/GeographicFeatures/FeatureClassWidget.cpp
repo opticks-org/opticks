@@ -239,11 +239,27 @@ void FeatureClassWidget::initialize(FeatureClass *pFeatureClass)
    mpDisplay->clearList();
    mQueries.clear();
 
+   QListWidgetItem* pFirstItem = NULL;
+
    const std::vector<FeatureQueryOptions>& queries = mpFeatureClass->getQueries();
    for (std::vector<FeatureQueryOptions>::const_iterator iter = queries.begin(); iter != queries.end(); ++iter)
    {
-      std::string queryName = iter->getQueryName();
-      mQueries[mpDisplay->addItem(queryName)] = *iter;
+      const std::string& queryName = iter->getQueryName();
+
+      QListWidgetItem* pItem = mpDisplay->addItem(queryName);
+      if (pItem != NULL)
+      {
+         mQueries[pItem] = *iter;
+         if (pFirstItem == NULL)
+         {
+            pFirstItem = pItem;
+         }
+      }
+   }
+
+   if (pFirstItem != NULL)
+   {
+      mpDisplay->setCurrentItem(pFirstItem);
    }
 
    const ArcProxyLib::ConnectionParameters& connect = mpFeatureClass->getConnectionParameters();
@@ -328,7 +344,13 @@ void FeatureClassWidget::setFeatureClassProperties(const ArcProxyLib::FeatureCla
          FeatureQueryOptions options = mQueries.begin()->second;
 
          mQueries.clear();
-         mQueries[mpDisplay->addItem(options.getQueryName())] = options;
+
+         QListWidgetItem* pItem = mpDisplay->addItem(options.getQueryName());
+         if (pItem != NULL)
+         {
+            mQueries[pItem] = options;
+            mpDisplay->setCurrentItem(pItem);
+         }
       }
    }
    //need to make sure fields are defined before adding queries
@@ -346,7 +368,13 @@ void FeatureClassWidget::addDisplayItems()
 {
    FeatureQueryOptions options;
    options.setQueryName(mpDisplay->getUniqueName(options.getQueryName()));
-   mQueries[mpDisplay->addItem(options.getQueryName())] = options;
+
+   QListWidgetItem* pItem = mpDisplay->addItem(options.getQueryName());
+   if (pItem != NULL)
+   {
+      mQueries[pItem] = options;
+      mpDisplay->setCurrentItem(pItem);
+   }
 }
 
 void FeatureClassWidget::saveDisplayInspector(QWidget *pInspector, QListWidgetItem *pItem)
@@ -373,12 +401,21 @@ void FeatureClassWidget::saveDisplayInspector(QWidget *pInspector, QListWidgetIt
    {
       std::string oldName = iter->second.getQueryName();
       std::string newName = currentName.toStdString();
-      bool bFound = mpEditFeatureClass->replaceQueryNameInQueriesLists(oldName, newName);
+
+      FeatureQueryOptions* pOldOptions = mpEditFeatureClass->getQueryByName(oldName);
+      mpEditFeatureClass->replaceQueryNameInQueriesLists(oldName, newName);
       iter->second.setQueryName(newName);
-      if (bFound == false)
+      if (pOldOptions == NULL)
       {
          mpEditFeatureClass->addQuery(iter->second);
       }
+   }
+
+   const std::string& oldQuery = iter->second.getQueryString();
+   const std::string& newQuery = currentOption.getQueryString();
+   if (newQuery != oldQuery)
+   {
+      iter->second.setQueryString(newQuery);
    }
 }
 
@@ -479,12 +516,10 @@ bool FeatureClassWidget::compareQueriesForChanges(const std::vector<FeatureQuery
                   if (options[i].getQueryString() != (*iter).second.getQueryString())
                   {
                      bChanged = true;
-                     pOption->setQueryString((*iter).second.getQueryString());
                   }
                   if (options[i].getFormatString() != (*iter).second.getFormatString())
                   {
                      bChanged = true;
-                     pOption->setFormatString((*iter).second.getFormatString());
                   }
                }
             }

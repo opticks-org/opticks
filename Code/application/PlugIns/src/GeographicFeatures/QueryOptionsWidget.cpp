@@ -13,10 +13,12 @@
 #include <QtGui/QHeaderView>
 #include <QtGui/QLabel>
 #include <QtGui/QLayout>
+#include <QtGui/QMessageBox>
 #include <QtGui/QScrollArea>
 
 #include "AppAssert.h"
 #include "AppVerify.h"
+#include "AppVersion.h"
 #include "CustomColorButton.h"
 #include "FeatureClass.h"
 #include "GraphicFillWidget.h"
@@ -34,7 +36,8 @@ using namespace std;
 QueryOptionsWidget::QueryOptionsWidget(QWidget* pParent) :
    LabeledSectionGroup(pParent),
    mpFeatureClass(NULL),
-   mbChangingSelection(false)
+   mbChangingSelection(false),
+   mSetQueryName(string())
 {
    // Query
    QWidget* pQuerySectionWidget = new QWidget(this);
@@ -140,8 +143,9 @@ QueryOptionsWidget::QueryOptionsWidget(QWidget* pParent) :
 
    LabeledSection* pFieldsSection = new LabeledSection(pFieldsSectionWidget, "Fields", this);
 
-   connect(mpFieldList, SIGNAL(itemClicked(QTreeWidgetItem*, int)),
-      this, SLOT(addItemToFormatString(QTreeWidgetItem*, int)));
+   VERIFYNR(connect(mpFieldList, SIGNAL(itemClicked(QTreeWidgetItem*, int)),
+      this, SLOT(addItemToFormatString(QTreeWidgetItem*, int))));
+   VERIFYNR(connect(mpQueryNameEdit, SIGNAL(editingFinished()), this, SLOT(updateQueryName())));
 
    // File Info
    QWidget* pFileInfoSectionWidget = new QWidget(this);
@@ -172,7 +176,8 @@ QueryOptionsWidget::~QueryOptionsWidget()
 void QueryOptionsWidget::setDisplayOptions(const QueryOptions &options)
 {
    removeDisplayUpdateSignals();
-   mpQueryNameEdit->setText(QString::fromStdString(options.getQueryName()));
+   mSetQueryName = options.getQueryName();
+   mpQueryNameEdit->setText(QString::fromStdString(mSetQueryName));
 
    mpSymbolWidget->setSymbolName(QString::fromStdString(options.getSymbolName()));
    mpSymbolWidget->setSymbolSize(options.getSymbolSize());
@@ -372,6 +377,30 @@ void QueryOptionsWidget::populateFieldValues(const std::string& field, std::vect
    mpLineAttributePropertiesSection->populateFieldValues(field, values);
 }
 
+void QueryOptionsWidget::updateQueryName()
+{
+   FeatureQueryOptions origOption = getDisplayOptions();
+   const string& newQueryName = origOption.getQueryName();
+   if (newQueryName != mSetQueryName)
+   {
+      VERIFYNR(disconnect(mpQueryNameEdit, SIGNAL(editingFinished()), this, SLOT(updateQueryName())));
+
+      if (mpFeatureClass->replaceQueryNameInQueriesLists(mSetQueryName, origOption.getQueryName()) == true)
+      {
+         mpFeatureClass->updateQuery(origOption);
+         mSetQueryName = origOption.getQueryName();
+      }
+      else
+      {
+         QMessageBox::critical(this, APP_NAME, "The \"" + QString::fromStdString(newQueryName) +
+            "\" query already exists, so the name will not be changed.");
+         mpQueryNameEdit->setText(QString::fromStdString(mSetQueryName));
+      }
+
+      VERIFYNR(connect(mpQueryNameEdit, SIGNAL(editingFinished()), this, SLOT(updateQueryName())));
+   }
+}
+
 bool QueryOptionsWidget::updateQueries()
 {
    bool bSelected = false;
@@ -412,6 +441,7 @@ void QueryOptionsWidget::selectDisplayQuery(const std::vector<DisplayQueryOption
       if (pOption != NULL)
       {
          pOption->setFormatString(origOption.getFormatString());
+         pOption->setQueryString(origOption.getQueryString());
          setDisplayOptions(*pOption);
       }
    }

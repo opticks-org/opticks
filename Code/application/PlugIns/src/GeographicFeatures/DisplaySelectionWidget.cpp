@@ -371,7 +371,7 @@ void DisplaySelectionWidget::textModified(QTreeWidgetItem* pItem, int iColumn)
          pItem->setData(0, QTreeWidgetItem::UserType, QVariant(newName));
          std::string oName = oldName.toStdString();
          std::string nName = newName.toStdString();
-         mpFeatureClass->renameDisplayQuery(oName, nName);
+         mpFeatureClass->renameDisplayQuery(mDefaultQuery.getQueryName(), oName, nName);
       }
    }
    else
@@ -437,8 +437,9 @@ void DisplaySelectionWidget::querySelectionChanged()
             pOptions.push_back(pOption);
          }
       }
+
+      emit selectDisplayQuery(pOptions);
    }
-   emit selectDisplayQuery(pOptions);
 }
 
 DisplayQueryOptions* DisplaySelectionWidget::createQueryOption(QTreeWidgetItem* pItem)

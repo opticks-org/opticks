@@ -60,6 +60,7 @@ public slots:
 
 protected slots:
    void addItemToFormatString(QTreeWidgetItem *pItem, int column);
+   void updateQueryName();
 
 private:
    /**
@@ -102,6 +103,7 @@ private:
    FeatureClass* mpFeatureClass;
    std::vector<std::string> mSelectedDisplayQueryNames;
    bool mbChangingSelection;
+   std::string mSetQueryName;
 
    //point
    QWidget* mpSymbolContainerWidget;

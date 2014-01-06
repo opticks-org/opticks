@@ -40,7 +40,6 @@ public slots:
 private:
    FeatureMenuEditorDlg(const FeatureMenuEditorDlg& rhs);
    FeatureMenuEditorDlg& operator=(const FeatureMenuEditorDlg& rhs);
-   void populateList();
 
    FeatureClass mCurrentFeatureClass;
    FactoryResource<DynamicObject> mpOptionsSet;

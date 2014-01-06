@@ -25,9 +25,6 @@
 #include <QtGui/QGridLayout>
 #include <QtGui/QFileDialog>
 #include <QtGui/QDialogButtonBox>
-#include <boost/bind.hpp>
-#include <algorithm>
-#include <sstream>
 
 using namespace std;
 
@@ -69,6 +66,7 @@ FeatureMenuEditorDlg::FeatureMenuEditorDlg(QWidget *pParent) : QDialog(pParent)
    QFrame* pHLine = new QFrame(this);
    pHLine->setFrameStyle(QFrame::HLine | QFrame::Sunken);
 
+   // Layout
    QVBoxLayout* pLayout = new QVBoxLayout(this);
    pLayout->setMargin(10);
    pLayout->setSpacing(5);
@@ -76,22 +74,28 @@ FeatureMenuEditorDlg::FeatureMenuEditorDlg(QWidget *pParent) : QDialog(pParent)
    pLayout->addWidget(pHLine);
    pLayout->addWidget(pButtons);
 
-   VERIFYNR(connect(pButtons, SIGNAL(accepted()), this, SLOT(accept())));
-   VERIFYNR(connect(pButtons, SIGNAL(rejected()), this, SLOT(reject())));
-
-   populateList();
-
-}
-
-void FeatureMenuEditorDlg::populateList()
-{
-   VERIFYNRV(mpListInspector != NULL);
-   VERIFYNRV(mpOptionsSet.get() != NULL);
-
+   // Initialization
    vector<string> names;
    mpOptionsSet->getAttributeNames(names);
 
-   std::for_each(names.begin(), names.end(), boost::bind(&ListInspectorWidget::addItem, mpListInspector, _1));
+   QListWidgetItem* pFirstItem = NULL;
+   for (vector<string>::iterator iter = names.begin(); iter != names.end(); ++iter)
+   {
+      QListWidgetItem* pItem = mpListInspector->addItem(*iter);
+      if (pFirstItem == NULL)
+      {
+         pFirstItem = pItem;
+      }
+   }
+
+   if (pFirstItem != NULL)
+   {
+      mpListInspector->setCurrentItem(pFirstItem);
+   }
+
+   // Connections
+   VERIFYNR(connect(pButtons, SIGNAL(accepted()), this, SLOT(accept())));
+   VERIFYNR(connect(pButtons, SIGNAL(rejected()), this, SLOT(reject())));
 }
 
 void FeatureMenuEditorDlg::accept()
@@ -113,7 +117,11 @@ void FeatureMenuEditorDlg::addItems()
    FactoryResource<DynamicObject> pOptions(featureClass.toDynamicObject());
    mpOptionsSet->setAttribute(newName, *pOptions.get());
 
-   mpListInspector->addItem(newName);
+   QListWidgetItem* pItem = mpListInspector->addItem(newName);
+   if (pItem != NULL)
+   {
+      mpListInspector->setCurrentItem(pItem);
+   }
 }
 
 void FeatureMenuEditorDlg::loadInspector(QWidget *pInspector, QListWidgetItem *pItem)

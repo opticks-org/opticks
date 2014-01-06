@@ -106,7 +106,7 @@ public:
 public slots:
    void addDisplayQuery(DisplayQueryOptions* pQuery);
    void modifyDisplayQuery(const std::vector<DisplayQueryOptions*>& pQueries, bool bGraphicChange);
-   void renameDisplayQuery(const std::string& oldName, const std::string& newName);
+   void renameDisplayQuery(const std::string& queryName, const std::string& oldName, const std::string& newName);
    void removeDisplayQuery(const std::vector<DisplayQueryOptions*>& pQueries);
 
    void populateDisplayQueries(const std::string& queryName, const std::string& field, bool isUniqueLineColor,
