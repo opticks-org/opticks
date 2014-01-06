@@ -331,6 +331,10 @@ void ScriptingWindow::updateInterpreters()
 
 void ScriptingWindow::clear()
 {
+   // Removing a tab in the tab widget shows another tab, so display the empty label widget
+   // first to prevent interpreters from being started if they have not yet been displayed
+   mpStack->setCurrentWidget(mpEmptyLabel);
+
    while (mpTabWidget->count() > 0)
    {
       ScriptingWidget* pWidget = static_cast<ScriptingWidget*>(mpTabWidget->widget(0));
@@ -490,6 +494,12 @@ bool ScriptingWindow::fromXml(DOMNode* pDocument, unsigned int version)
             }
          }
       }
+   }
+
+   // Set the window widget
+   if (mpTabWidget->count() > 0)
+   {
+      mpStack->setCurrentWidget(mpTabWidget);
    }
 
    return true;
