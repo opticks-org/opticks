@@ -227,6 +227,7 @@ bool ShapelibProxy::query(const std::string &handle, std::string &errorMessage,
          ArcProxyLib::Feature feature;
          feature.setType(featureType);
 
+         std::vector<std::pair<double, double> > vertices(pShpObject->nVertices);
          for (int vertex = 0; vertex < pShpObject->nVertices; ++vertex)
          {
             // Convert from shapefile coordinates to application coordinates.
@@ -241,8 +242,10 @@ bool ShapelibProxy::query(const std::string &handle, std::string &errorMessage,
                }
             }
 
-            feature.addVertex(std::make_pair(vertexY, vertexX));
+            vertices[vertex] = std::make_pair(vertexY, vertexX);
          }
+
+         feature.setVertices(vertices);
 
          for (int path = 0; path < pShpObject->nParts; ++path)
          {

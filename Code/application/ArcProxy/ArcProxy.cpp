@@ -19,8 +19,8 @@
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 #include <QtCore/QTimer>
-#include <QtNetwork/QHostAddress>
-#include <QtNetwork/QTcpSocket>
+#include <QtNetwork/QLocalSocket>
+
 #include <boost/lexical_cast.hpp>
 #include <string>
 
@@ -122,7 +122,6 @@ ArcProxy::ArcProxy(QObject *pParent) :
       long pid = QCoreApplication::arguments()[idx+1].toLong();
       ProcessStatusChecker *pChecker = new ProcessStatusChecker(this, pid, 30000);
       connect(pChecker, SIGNAL(processExited()), this, SLOT(serverExited()));
-      
    }
 }
 
@@ -137,14 +136,16 @@ ArcProxy::~ArcProxy()
 
 void ArcProxy::connectToServer()
 {
-   int idx = QCoreApplication::arguments().indexOf("-s");
-   if(idx == -1)
+   QString pid;
+
+   int idx = QCoreApplication::arguments().indexOf("-pid");
+   if (idx != -1)
    {
-      QCoreApplication::exit(1);
+      pid = QCoreApplication::arguments()[idx + 1];
    }
-   int port = QCoreApplication::arguments()[idx+1].toInt();
-   QTcpSocket *pSocket = new QTcpSocket(this);
-   pSocket->connectToHost(QHostAddress(QHostAddress::LocalHost), port);
+
+   QLocalSocket* pSocket = new QLocalSocket(this);
+   pSocket->connectToServer("OpticksFeatureProxyConnector" + pid);
    if(!pSocket->waitForConnected())
    {
       QCoreApplication::exit(1);

@@ -26,6 +26,7 @@
 #include "GraphicLayerImp.h"
 #include "GraphicLayerUndo.h"
 #include "GraphicObjectFactory.h"
+#include "Progress.h"
 #include "SessionManager.h"
 #include "StringUtilities.h"
 #include "TextObject.h"
@@ -520,12 +521,22 @@ void GraphicGroupImp::enableGeo()
    }
 }
 
-GraphicObject* GraphicGroupImp::createObject(GraphicObjectType eType, LocationType pixelCoord)
+GraphicObject* GraphicGroupImp::createObject(GraphicObjectType objectType, LocationType pixelCoord)
 {
    GraphicLayer* pLayer = getLayer();
-   GraphicObject* pObject = GraphicObjectFactory::createObject(eType, pLayer, pixelCoord);
+   GraphicObject* pObject = GraphicObjectFactory::createObject(objectType, pLayer, pixelCoord);
 
    return pObject;
+}
+
+list<GraphicObject*> GraphicGroupImp::createObjects(unsigned int numObjects, GraphicObjectType objectType,
+                                                    LocationType pixelCoord, Progress* pProgress)
+{
+   GraphicLayer* pLayer = getLayer();
+   list<GraphicObject*> objects = GraphicObjectFactory::createObjects(numObjects, objectType, pLayer, pixelCoord,
+      pProgress);
+
+   return objects;
 }
 
 GraphicObject* GraphicGroupImp::addObject(GraphicObjectType eType, LocationType point)
@@ -557,6 +568,43 @@ GraphicObject* GraphicGroupImp::addObject(GraphicObjectType eType, LocationType 
    return pObject;
 }
 
+list<GraphicObject*> GraphicGroupImp::addObjects(unsigned int numObjects, GraphicObjectType objectType,
+                                                 LocationType point, Progress* pProgress)
+{
+   View* pView = NULL;
+
+   GraphicLayer* pLayer = getLayer();
+   if (pLayer != NULL)
+   {
+      pView = pLayer->getView();
+   }
+
+   list<GraphicObject*> objects;
+   {
+      UndoLock lock(pView);
+      objects = createObjects(numObjects, objectType, point, pProgress);
+   }
+
+   if (objects.empty() == false)
+   {
+      if ((pView != NULL) && (pView->isUndoBlocked() == false))
+      {
+         for (list<GraphicObject*>::iterator iter = objects.begin(); iter != objects.end(); ++iter)
+         {
+            GraphicObject* pObject = *iter;
+            if (pObject != NULL)
+            {
+               pView->addUndoAction(new AddGraphicObject(dynamic_cast<GraphicGroup*>(this), pObject));
+            }
+         }
+      }
+
+      insertObjects(objects, pProgress);
+   }
+
+   return objects;
+}
+
 void GraphicGroupImp::insertObject(GraphicObject* pObject)
 {
    if (pObject != NULL)
@@ -573,29 +621,33 @@ void GraphicGroupImp::insertObject(GraphicObject* pObject)
    }
 }
 
-void GraphicGroupImp::insertObjects(list<GraphicObject*>& objects)
+void GraphicGroupImp::insertObjects(const list<GraphicObject*>& objects, Progress* pProgress)
 {
-   for_each(objects.begin(), objects.end(), ConnectObject(this));
-   mObjects.splice(mObjects.end(), objects);
-
-   for (list<GraphicObject*>::iterator iter = objects.begin(); iter != objects.end(); ++iter)
+   if (objects.empty() == true)
    {
-      notify(SIGNAL_NAME(GraphicGroup, ObjectAdded), boost::any(*iter));
+      return;
    }
 
-   updateBoundingBox();
-   emit modified();
-}
-
-void GraphicGroupImp::insertObjects(const list<GraphicObject*>& objects)
-{
-   list<GraphicObject*> localCopy = objects;
-   for_each(localCopy.begin(), localCopy.end(), ConnectObject(this));
-   mObjects.splice(mObjects.end(), localCopy);
-
-   for (list<GraphicObject*>::const_iterator iter = objects.begin(); iter != objects.end(); ++iter)
+   int i = 0;
+   for (list<GraphicObject*>::const_iterator iter = objects.begin(); iter != objects.end(); ++iter, ++i)
    {
-      notify(SIGNAL_NAME(GraphicGroup, ObjectAdded), boost::any(*iter));
+      if (pProgress != NULL)
+      {
+         pProgress->updateProgress("Adding objects to the group...", i * 100 / static_cast<int>(objects.size()),
+            NORMAL);
+      }
+
+      GraphicObject* pObject = *iter;
+      if (pObject != NULL)
+      {
+         if (pObject->isVisible())
+         {
+            mObjects.push_back(pObject);
+         }
+
+         ConnectObject(this)(pObject);
+         notify(SIGNAL_NAME(GraphicGroup, ObjectAdded), boost::any(pObject));
+      }
    }
 
    updateBoundingBox();
@@ -627,6 +679,32 @@ bool GraphicGroupImp::hasObject(GraphicObject* pObject) const
 const list<GraphicObject*>& GraphicGroupImp::getObjects() const
 {
    return mObjects;
+}
+
+list<GraphicObject*> GraphicGroupImp::getObjects(GraphicObjectType objectType) const
+{
+   list<GraphicObject*> objects;
+   for (list<GraphicObject*>::const_iterator iter = mObjects.begin(); iter != mObjects.end(); ++iter)
+   {
+      GraphicObject* pObject = *iter;
+      if ((pObject != NULL) && (pObject->getGraphicObjectType() == objectType))
+      {
+         objects.push_back(pObject);
+      }
+   }
+
+   return objects;
+}
+
+unsigned int GraphicGroupImp::getNumObjects() const
+{
+   return mObjects.size();
+}
+
+unsigned int GraphicGroupImp::getNumObjects(GraphicObjectType objectType) const
+{
+   list<GraphicObject*> objects = getObjects(objectType);
+   return objects.size();
 }
 
 bool GraphicGroupImp::moveObjectToBack(GraphicObject* pObject)
@@ -821,19 +899,17 @@ bool GraphicGroupImp::replicateObject(const GraphicObject* pObject)
 
       removeAllObjects(true);
 
-      list<GraphicObject*> objects = pGroup->getObjects();
-
       list<GraphicObject*> newObjects;
-      list<GraphicObject*>::iterator iter;
-      for (iter = objects.begin(); iter != objects.end(); ++iter)
+
+      const list<GraphicObject*>& objects = pGroup->getObjects();
+      for (list<GraphicObject*>::const_iterator iter = objects.begin(); iter != objects.end(); ++iter)
       {
          GraphicObject* pExistingObject = *iter;
          if (pExistingObject != NULL)
          {
             GraphicObjectType eObjectType = pExistingObject->getGraphicObjectType();
 
-            GraphicObject* pNewObject = NULL;
-            pNewObject = createObject(eObjectType);
+            GraphicObject* pNewObject = createObject(eObjectType);
             if (pNewObject != NULL)
             {
                bSuccess = dynamic_cast<GraphicObjectImp*>(pNewObject)->replicateObject(pExistingObject);

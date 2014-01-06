@@ -13,6 +13,7 @@
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 #include <QtCore/QUrl>
+
 #include <utility>
 #include <vector>
 
@@ -23,14 +24,23 @@ namespace ArcProxyLib
    class Feature
    {
    public:
+      Feature() :
+         mType(UNKNOWN)
+      {}
 
-      Feature() : mType(UNKNOWN) {}
-      Feature(const Feature &other) : mType(other.mType), mVertices(other.mVertices), mPaths(other.mPaths), mLabel(other.mLabel) {}
+      Feature(const Feature& feature) :
+         mType(feature.mType),
+         mVertices(feature.mVertices),
+         mPaths(feature.mPaths),
+         mAttributeValues(feature.mAttributeValues),
+         mLabel(feature.mLabel)
+      {}
+
       ~Feature() {}
 
       FeatureType getType() const { return mType; }
       void setType(FeatureType type) { mType = type; }
-      std::string getLabel() const { return mLabel; }
+      const std::string& getLabel() const { return mLabel; }
       void setLabel(const std::string &label) { mLabel = label; }
       const std::vector<std::string>& getAttributes() const { return mAttributeValues; }
       void setAttributes(const std::vector<std::string>& attributes) { mAttributeValues = attributes; }
@@ -38,6 +48,7 @@ namespace ArcProxyLib
       const std::vector<size_t> &getPaths() const { return mPaths; }
 
       void addVertex(std::pair<double, double> v) { mVertices.push_back(v); }
+      void setVertices(const std::vector<std::pair<double, double> >& v) { mVertices = v; }
       void startNewPath() { mPaths.push_back(mVertices.size()); }
       void addPathAtIndex(unsigned int path) { mPaths.push_back(path); }
 
@@ -77,11 +88,15 @@ namespace ArcProxyLib
                   QString endOfText(" ");
                   endOfText[0] = 3;
                   QStringList attributeValues = attributes[1].split(endOfText);
-
-                  for (int i = 0; i < attributeValues.size(); i++)
+                  if (attributeValues.empty() == false)
                   {
-                     mAttributeValues.push_back(QUrl::
-                        fromPercentEncoding(attributeValues[i].toAscii()).toStdString());
+                     int numValues = attributeValues.size();
+                     mAttributeValues.resize(numValues);
+
+                     for (int i = 0; i < numValues; ++i)
+                     {
+                        mAttributeValues[i] = QUrl::fromPercentEncoding(attributeValues[i].toAscii()).toStdString();
+                     }
                   }
                }
             }

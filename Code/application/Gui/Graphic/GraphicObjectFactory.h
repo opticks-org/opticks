@@ -12,10 +12,14 @@
 
 #include "GraphicObject.h"
 #include "GraphicObjectImp.h"
+#include "LocationType.h"
 #include "Resource.h"
 #include "TypesFile.h"
 
+#include <list>
+
 class GraphicLayer;
+class Progress;
 
 /**
  *  Since the GraphicGroup had to change to no longer be static, the factory
@@ -24,8 +28,10 @@ class GraphicLayer;
 class GraphicObjectFactory
 {
 public:
-   static GraphicObject* createObject(GraphicObjectType eType, GraphicLayer* pLayer,
+   static GraphicObject* createObject(GraphicObjectType objectType, GraphicLayer* pLayer,
       LocationType pixelCoord = LocationType());
+   static std::list<GraphicObject*> createObjects(unsigned int numObjects, GraphicObjectType objectType,
+      GraphicLayer* pLayer, LocationType pixelCoord = LocationType(), Progress* pProgress = NULL);
 };
 
 template <typename T>

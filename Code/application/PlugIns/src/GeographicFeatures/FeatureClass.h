@@ -21,9 +21,12 @@
 #include "FeatureQueryOptions.h"
 #include "GraphicElement.h"
 #include "GraphicGroup.h"
-#include "ObjectResource.h"
 #include "LocationType.h"
+#include "ObjectResource.h"
+#include "TypesFile.h"
 
+#include <list>
+#include <map>
 #include <vector>
 #include <utility>
 
@@ -112,6 +115,11 @@ public slots:
    void populateDisplayQueries(const std::string& queryName, const std::string& field, bool isUniqueLineColor,
       bool isUniqueFillColor);
 
+protected:
+   void addFeatures();
+   unsigned int getNumFeatures() const;
+   bool initializeObject(GraphicObject* pObject);
+
 protected slots:
    void addFeature(const ArcProxyLib::Feature &feature);
 
@@ -119,7 +127,6 @@ private:
    FeatureClass(const FeatureClass& rhs);
    FeatureClass& operator=(const FeatureClass& rhs);
    void refreshVerticalHeader(Subject& subject, const std::string& signal, const boost::any& data);
-   void addObject(Subject& subject, const std::string& signal, const boost::any& data);
    void removeObject(Subject& subject, const std::string& signal, const boost::any& data);
    void populateDisplayQueries();
 
@@ -144,6 +151,7 @@ private:
    ArcProxyLib::ConnectionParameters mConnection;
    ArcProxyLib::FeatureClassProperties mProperties;
    std::vector<std::string> mGraphicObjectIds;
+   std::map<GraphicObjectType, std::list<ArcProxyLib::Feature> > mFeatures;
    std::vector<FeatureQueryOptions> mQueries;
    std::vector<DisplayQueryOptions*> mDisplayQueries;
    ClippingType mClippingType;

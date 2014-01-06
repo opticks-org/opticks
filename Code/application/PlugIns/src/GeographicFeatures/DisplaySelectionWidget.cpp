@@ -791,10 +791,13 @@ void DisplaySelectionWidget::populateFieldValueCombos(std::string field)
       mpValueCombos[fieldIndex]->clear();
       if (fieldIndex < static_cast<int>(mpValueCombos.size()))
       {
+         QStringList fieldValues;
          for (unsigned int i = 0 ; i < mFieldValues[fieldIndex].size(); i++)
          {
-            mpValueCombos[fieldIndex]->addItem(QString::fromStdString(mFieldValues[fieldIndex].at(i)));
+            fieldValues << QString::fromStdString(mFieldValues[fieldIndex].at(i));
          }
+
+         mpValueCombos[fieldIndex]->addItems(fieldValues);
       }
    }
 }

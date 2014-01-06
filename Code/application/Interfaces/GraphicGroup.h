@@ -11,7 +11,11 @@
 #define GRAPHICGROUP_H
 
 #include "GraphicObject.h"
+#include "LocationType.h"
+
 #include <list>
+
+class Progress;
 
 /**
  * GraphicGroup is a graphic object which contains zero or more GraphicObjects.
@@ -43,7 +47,7 @@ public:
    /**
     *  Creates and inserts an object of the specified type.
     *
-    *  @param   type
+    *  @param   objectType
     *           The type of object to add.
     *  @param   point
     *           The starting point of the object.
@@ -51,17 +55,80 @@ public:
     *  @return  The added object.  The group owns this object.
     *
     *  @notify  This method will notify signalObjectAdded() with
-    *           any<GraphicObject*>.
+    *           boost::any<#GraphicObject*>.
+    *
+    *  @see     addObjects()
     */
-   virtual GraphicObject *addObject(GraphicObjectType type,
-      LocationType point = LocationType()) = 0;
+   virtual GraphicObject* addObject(GraphicObjectType objectType, LocationType point = LocationType()) = 0;
+
+   /**
+    *  Creates and inserts multiple objects of the specified type.
+    *
+    *  @param   numObjects
+    *           The number of objects to add.
+    *  @param   objectType
+    *           The type of object to add.
+    *  @param   point
+    *           The starting point for each object.
+    *  @param   pProgress
+    *           An optional pointer to a Progress object in which to report
+    *           progress and error messages while the objects are being created.
+    *
+    *  @return  A list containing pointers to all added objects.  All objects in
+    *           the list are contained in and owned by the group.
+    *
+    *  @notify  This method will notify signalObjectAdded() with
+    *           boost::any<#GraphicObject*> for each object that is successfully
+    *           created and added to the group.
+    *
+    *  @see     addObject()
+    */
+   virtual std::list<GraphicObject*> addObjects(unsigned int numObjects, GraphicObjectType objectType,
+      LocationType point = LocationType(), Progress* pProgress = NULL) = 0;
 
    /**
     *  Returns a list of all objects within the group.
     *
     *  @return  A list containing all objects that the group contains.
+    *
+    *  @see     getObjects(GraphicObjectType) const
     */
-   virtual const std::list<GraphicObject*> &getObjects() const = 0;
+   virtual const std::list<GraphicObject*>& getObjects() const = 0;
+
+   /**
+    *  Returns a list of all graphic objects of a given type within the group.
+    *
+    *  @param   objectType
+    *           The type of graphic object to get.
+    *
+    *  @return  A list that is filled with pointers to all graphic objects of
+    *           the given type in the group.
+    *
+    *  @see     getObjects() const
+    */
+   virtual std::list<GraphicObject*> getObjects(GraphicObjectType objectType) const = 0;
+
+   /**
+    *  Returns the number of graphic objects in the group.
+    *
+    *  @return  The total number of graphic objects in the group.
+    *
+    *  @see     getNumObjects(GraphicObjectType) const
+    */
+   virtual unsigned int getNumObjects() const = 0;
+
+   /**
+    *  Returns the number of graphic objects of a given type in the group.
+    *
+    *  @param   objectType
+    *           The type of object to query for the number of objects contained
+    *           in the group.
+    *
+    *  @return  The number of objects of the given type in the group.
+    *
+    *  @see     getNumObjects() const
+    */
+   virtual unsigned int getNumObjects(GraphicObjectType objectType) const = 0;
 
    /**
     *  Inserts an already existing object into the group.

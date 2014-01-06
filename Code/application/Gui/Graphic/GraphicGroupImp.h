@@ -12,6 +12,7 @@
 
 #include "GraphicObjectImp.h"
 #include "GraphicProperty.h"
+#include "LocationType.h"
 #include "TypesFile.h"
 #include "xmlwriter.h"
 
@@ -19,6 +20,7 @@
 #include <list>
 
 class GraphicLayer;
+class Progress;
 
 class GraphicGroupImp : public GraphicObjectImp
 {
@@ -42,14 +44,16 @@ public:
    virtual void updateGeo();
    virtual void enableGeo();
 
-   GraphicObject* createObject(GraphicObjectType eType, LocationType pixelCoord = LocationType());
-   virtual GraphicObject* addObject(GraphicObjectType eType,
-      LocationType point = LocationType());
+   GraphicObject* addObject(GraphicObjectType objectType, LocationType point = LocationType());
+   std::list<GraphicObject*> addObjects(unsigned int numObjects, GraphicObjectType objectType,
+      LocationType point = LocationType(), Progress* pProgress = NULL);
    void insertObject(GraphicObject* pObject);
-   void insertObjects(std::list<GraphicObject*>& objects);
-   void insertObjects(const std::list<GraphicObject*>& objects);
+   void insertObjects(const std::list<GraphicObject*>& objects, Progress* pProgress = NULL);
    bool hasObject(GraphicObject* pObject) const;
    const std::list<GraphicObject*>& getObjects() const;
+   std::list<GraphicObject*> getObjects(GraphicObjectType objectType) const;
+   unsigned int getNumObjects() const;
+   unsigned int getNumObjects(GraphicObjectType objectType) const;
    bool moveObjectToBack(GraphicObject* pObject);
    bool moveObjectToFront(GraphicObject* pObject);
    int getObjectStackingIndex(GraphicObject* pObject) const;
@@ -74,6 +78,10 @@ signals:
    void abortedAdd(GraphicObject *pObj);
 
 protected:
+   GraphicObject* createObject(GraphicObjectType objectType, LocationType pixelCoord = LocationType());
+   std::list<GraphicObject*> createObjects(unsigned int numObjects, GraphicObjectType objectType,
+      LocationType pixelCoord = LocationType(), Progress* pProgress = NULL);
+
    std::list<GraphicObject*> mObjects;
 
 protected slots:
@@ -94,14 +102,30 @@ private:
 
 #define GRAPHICGROUPADAPTER_METHODS(impClass) \
    GRAPHICOBJECTADAPTER_METHODS(impClass) \
-   GraphicObject *addObject(GraphicObjectType type, \
-      LocationType point = LocationType()) \
+   GraphicObject* addObject(GraphicObjectType objectType, LocationType point = LocationType()) \
    { \
-      return impClass::addObject(type, point); \
+      return impClass::addObject(objectType, point); \
    } \
-   const std::list<GraphicObject*> &getObjects() const \
+   std::list<GraphicObject*> addObjects(unsigned int numObjects, GraphicObjectType objectType, \
+      LocationType point = LocationType(), Progress* pProgress = NULL) \
+   { \
+      return impClass::addObjects(numObjects, objectType, point, pProgress); \
+   } \
+   const std::list<GraphicObject*>& getObjects() const \
    { \
       return impClass::getObjects(); \
+   } \
+   std::list<GraphicObject*> getObjects(GraphicObjectType objectType) const \
+   { \
+      return impClass::getObjects(objectType); \
+   } \
+   unsigned int getNumObjects() const \
+   { \
+      return impClass::getNumObjects(); \
+   } \
+   unsigned int getNumObjects(GraphicObjectType objectType) const \
+   { \
+      return impClass::getNumObjects(objectType); \
    } \
    void insertObject(GraphicObject *pObject) \
    { \

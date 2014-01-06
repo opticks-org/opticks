@@ -19,6 +19,7 @@
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "SessionResource.h"
+#include "StringUtilities.h"
 #include "TypeConverter.h"
 #include "Undo.h"
 
@@ -58,7 +59,6 @@ FeatureClass::FeatureClass() :
    mQueries.push_back(FeatureQueryOptions());
 
    mpGraphicGroup.addSignal(SIGNAL_NAME(GraphicGroup, ObjectRemoved), Slot(this, &FeatureClass::removeObject));
-   mpGraphicGroup.addSignal(SIGNAL_NAME(GraphicGroup, ObjectAdded), Slot(this, &FeatureClass::addObject));
 }
 
 FeatureClass::~FeatureClass()
@@ -313,12 +313,14 @@ bool FeatureClass::setParentElement(GraphicElement *pParentElement)
          // Add any existing objects.
          if (mpGraphicGroup.get() != NULL)
          {
-            const std::list<GraphicObject*>& graphicObjects = mpGraphicGroup->getObjects();
-            for (std::list<GraphicObject*>::const_iterator iter = graphicObjects.begin();
-               iter != graphicObjects.end();
-               ++iter)
+            const list<GraphicObject*>& objects = mpGraphicGroup->getObjects();
+            for (list<GraphicObject*>::const_iterator iter = objects.begin(); iter != objects.end(); ++iter)
             {
-               addObject(*(mpGraphicGroup.get()), SIGNAL_NAME(GraphicGroup, ObjectAdded), boost::any(*iter));
+               GraphicObject* pObject = *iter;
+               if (pObject != NULL)
+               {
+                  initializeObject(pObject);
+               }
             }
          }
       }
@@ -633,6 +635,7 @@ bool FeatureClass::update(Progress* pProgress, string& errorMessage, bool bEditD
       }
 
       mGraphicObjectIds.clear();
+      mFeatures.clear();
       VERIFYNR(connect(pProxy, SIGNAL(featureLoaded(const ArcProxyLib::Feature&)),
          this, SLOT(addFeature(const ArcProxyLib::Feature&))));
 
@@ -649,6 +652,8 @@ bool FeatureClass::update(Progress* pProgress, string& errorMessage, bool bEditD
 
       VERIFYNR(disconnect(pProxy, SIGNAL(featureLoaded(const ArcProxyLib::Feature&)), this,
          SLOT(addFeature(const ArcProxyLib::Feature&))));
+
+      addFeatures();
 
       //now that the the attributes are populated in the class, add them to the 
       //dynamic object
@@ -957,70 +962,148 @@ GraphicLayer* FeatureClass::getFeatureLayer() const
 
 void FeatureClass::addFeature(const ArcProxyLib::Feature& feature)
 {
-   // prevent session auto save while adding feature
+   // Prevent session auto save while adding features
    SessionSaveLock lock;
-
-   VERIFYNRV(mpLoadGroup != NULL && mpLoadQueryOptions != NULL);
 
    if (mpLoadProgress != NULL)
    {
-      unsigned int count = mGraphicObjectIds.size();
+      unsigned int count = getNumFeatures();
       if (count % 10 == 0)
       {
-         QString value = "Inserting shapes...  count: " + QString::number(count);
+         QString value = "Loading shapes...\nCount: " + QString::number(count);
          mpLoadProgress->updateProgress(value.toStdString(), mProgressBase + mProgress, NORMAL);
          mProgress = (mProgress + 1) % mProgressSize;
       }
    }
 
-   GraphicObjectType grobType(VIEW_OBJECT); // VIEW_OBJECT not supported so we use this as a NULL
+   GraphicObjectType objectType;
    switch (feature.getType())
    {
    case ArcProxyLib::POINT: // fall through
    case ArcProxyLib::MULTIPOINT:
-      grobType = MULTIPOINT_OBJECT; 
+      objectType = MULTIPOINT_OBJECT; 
       break;
+
    case ArcProxyLib::POLYLINE:
-      grobType = POLYLINE_OBJECT;
+      objectType = POLYLINE_OBJECT;
       break;
+
    case ArcProxyLib::POLYGON:
-      grobType = POLYGON_OBJECT;
+      objectType = POLYGON_OBJECT;
       break;
+
    default:
-      grobType = VIEW_OBJECT;
       break;
    }
-   if (grobType != VIEW_OBJECT)
+
+   if (objectType.isValid() == true)
    {
-      GraphicObject* pGraphic = mpLoadGroup->addObject(grobType, LocationType(0, 0));
-
-      pGraphic->setName(feature.getLabel());
-
-      std::vector<std::string> attributes;
-      attributes = feature.getAttributes();
-      for (unsigned int i = 0; i < mAttributeValues.size(); i++)
-      {
-         mAttributeValues[i].push_back(attributes[i]);
-      }
-
-      vector<pair<double, double> >::const_iterator currentVertex = feature.getVertices().begin();
-      vector<LocationType>::size_type previousIndex = 0;
-      for (vector<size_t>::const_iterator path = feature.getPaths().begin(); path != feature.getPaths().end(); ++path)
-      {
-         vector<pair<double, double> >::const_iterator endVertex = currentVertex + (*path - previousIndex);
-         vector<LocationType> vertices;
-         std::copy(currentVertex, endVertex, back_inserter(vertices));
-         pGraphic->addGeoVertices(vertices);
-         pGraphic->newPath();
-         currentVertex = endVertex;
-         previousIndex = *path;
-      }
-      vector<LocationType> vertices;
-      std::copy(currentVertex, feature.getVertices().end(), back_inserter(vertices));
-      pGraphic->addGeoVertices(vertices);
-      std::string id = pGraphic->getId();
-      mpLoadQueryOptions->addGraphicObjectId(id);
+      mFeatures[objectType].push_back(feature);
    }
+}
+
+void FeatureClass::addFeatures()
+{
+   VERIFYNRV(mpLoadGroup != NULL && mpLoadQueryOptions != NULL);
+
+   // Prevent session auto save while adding features
+   SessionSaveLock lock;
+
+   int numFeatures = static_cast<int>(getNumFeatures());
+   int startRow = rowCount();
+   int endRow = startRow + numFeatures - 1;
+
+   for (map<GraphicObjectType, list<ArcProxyLib::Feature> >::iterator typeIter = mFeatures.begin();
+      typeIter != mFeatures.end();
+      ++typeIter)
+   {
+      list<GraphicObject*> objects = mpLoadGroup->addObjects(typeIter->second.size(), typeIter->first, LocationType(),
+         mpLoadProgress);
+      VERIFYNRV(objects.size() == typeIter->second.size());
+
+      list<ArcProxyLib::Feature>::iterator featureIter;
+      list<GraphicObject*>::iterator objectIter;
+      int i = 0;
+      int percentComplete = 0;
+
+      for (featureIter = typeIter->second.begin(), objectIter = objects.begin();
+         featureIter != typeIter->second.end() && objectIter != objects.end();
+         ++featureIter, ++objectIter, ++i)
+      {
+         if (mpLoadProgress != NULL)
+         {
+            int percent = i * 100 / static_cast<int>(objects.size());
+            if (percent != percentComplete)
+            {
+               std::string message = "Initializing " + StringUtilities::toDisplayString(typeIter->first) +
+                  " objects...";
+               mpLoadProgress->updateProgress(message, percent, NORMAL);
+               percentComplete = percent;
+            }
+         }
+
+         GraphicObject* pGraphic = *objectIter;
+         if (pGraphic != NULL)
+         {
+            if (initializeObject(pGraphic) == true)
+            {
+               pGraphic->setName(featureIter->getLabel());
+
+               const std::vector<std::string>& attributes = featureIter->getAttributes();
+               for (unsigned int i = 0; i < mAttributeValues.size(); i++)
+               {
+                  mAttributeValues[i].push_back(attributes[i]);
+               }
+
+               const vector<pair<double, double> >& vertices = featureIter->getVertices();
+               const vector<size_t>& paths = featureIter->getPaths();
+
+               vector<pair<double, double> >::const_iterator currentVertex = vertices.begin();
+               vector<LocationType>::size_type previousIndex = 0;
+               for (vector<size_t>::const_iterator path = paths.begin(); path != paths.end(); ++path)
+               {
+                  vector<pair<double, double> >::const_iterator endVertex = currentVertex + (*path - previousIndex);
+                  vector<LocationType> geoVertices;
+                  std::copy(currentVertex, endVertex, back_inserter(geoVertices));
+                  pGraphic->addGeoVertices(geoVertices);
+                  pGraphic->newPath();
+                  currentVertex = endVertex;
+                  previousIndex = *path;
+               }
+               vector<LocationType> geoVertices;
+               std::copy(currentVertex, vertices.end(), back_inserter(geoVertices));
+               pGraphic->addGeoVertices(geoVertices);
+
+               const std::string& id = pGraphic->getId();
+               mpLoadQueryOptions->addGraphicObjectId(id);
+            }
+            else
+            {
+               mpLoadGroup->removeObject(pGraphic, true);
+               endRow--;
+            }
+         }
+      }
+   }
+
+   if ((startRow >= 0) && (endRow >= startRow))
+   {
+      beginInsertRows(QModelIndex(), startRow, endRow);
+      endInsertRows();
+   }
+}
+
+unsigned int FeatureClass::getNumFeatures() const
+{
+   unsigned int numFeatures = 0;
+   for (map<GraphicObjectType, list<ArcProxyLib::Feature> >::const_iterator iter = mFeatures.begin();
+      iter != mFeatures.end();
+      ++iter)
+   {
+      numFeatures += iter->second.size();
+   }
+
+   return numFeatures;
 }
 
 FactoryResource<DynamicObject> FeatureClass::toDynamicObject() const
@@ -1173,102 +1256,97 @@ void FeatureClass::refreshVerticalHeader(Subject& subject, const std::string& si
    }
 }
 
-void FeatureClass::addObject(Subject& subject, const std::string& signal, const boost::any& data)
+bool FeatureClass::initializeObject(GraphicObject* pObject)
 {
-   GraphicGroup* pGroup = dynamic_cast<GraphicGroup*>(&subject);
-   if (pGroup != NULL)
+   if (pObject == NULL)
    {
-      GraphicObject* pGraphicObject = boost::any_cast<GraphicObject*>(data);
-      if (pGraphicObject != NULL)
-      {
-         GraphicObjectTypeEnum type = pGraphicObject->getGraphicObjectType();
-         int rowIndex = rowCount();
-         if (rowIndex >= 0)
+      return false;
+   }
+
+   GraphicObjectType objectType = pObject->getGraphicObjectType();
+   switch (objectType)
+   {
+      case LINE_OBJECT:             // fall through
+      case RECTANGLE_OBJECT:        // fall through
+      case TRIANGLE_OBJECT:         // fall through
+      case ELLIPSE_OBJECT:          // fall through
+      case ROUNDEDRECTANGLE_OBJECT: // fall through
+      case ARC_OBJECT:              // fall through
+      case POLYLINE_OBJECT:         // fall through
+      case POLYGON_OBJECT:          // fall through
+      case MULTIPOINT_OBJECT:       // fall through
+      case HLINE_OBJECT:            // fall through
+      case VLINE_OBJECT:
+         // This attachment will fail when multiple feature classes are created for the same graphic element,
+         // which can occur when creating an edit feature class for the feature class widget
+         pObject->attach(SIGNAL_NAME(GraphicObject, NameChanged), Slot(this, &FeatureClass::refreshVerticalHeader));
+         mGraphicObjectIds.push_back(pObject->getId());
+         if (!(mAttributeValues.size() > 0 && mGraphicObjectIds.size() <= mAttributeValues[0].size()))
          {
-            switch (type)
+            // Metadata for the graphic objects created by the import of shapefiles is already populated in
+            // update() method (number of graphic object ids will equal the length of the attribute vectors).
+            // If user unlocks resulting layer and then manually adds graphic objects, metadata for the
+            // manually added graphic objects needs to be populated with default values (number of graphic
+            // object ids is less than the length of the attribute vectors).
+            DynamicObject* pMetadata = mpParentElement->getMetadata();
+            if (pMetadata != NULL)
             {
-               case LINE_OBJECT:             // fall through
-               case RECTANGLE_OBJECT:        // fall through
-               case TRIANGLE_OBJECT:         // fall through
-               case ELLIPSE_OBJECT:          // fall through
-               case ROUNDEDRECTANGLE_OBJECT: // fall through
-               case ARC_OBJECT:              // fall through
-               case POLYLINE_OBJECT:         // fall through
-               case POLYGON_OBJECT:          // fall through
-               case MULTIPOINT_OBJECT:       // fall through
-               case HLINE_OBJECT:            // fall through
-               case VLINE_OBJECT:
-                  pGraphicObject->attach(SIGNAL_NAME(GraphicObject, NameChanged),
-                     Slot(this, &FeatureClass::refreshVerticalHeader));
-                  mGraphicObjectIds.push_back(pGraphicObject->getId());
-                  if (!(mAttributeValues.size() > 0 && mGraphicObjectIds.size() <= mAttributeValues[0].size()))
+               pMetadata = pMetadata->getAttribute(FEATURE_ATTRIBUTES_NAME).getPointerToValue<DynamicObject>();
+            }
+            std::vector<std::string> attributeNames;
+            pMetadata->getAttributeNames(attributeNames);
+            for (unsigned k = 0; k < attributeNames.size(); k++)
+            {
+               DataVariant& variant = pMetadata->getAttribute(attributeNames[k]);
+               if (variant.getTypeName() == "vector<double>")
+               {
+                  vector<double>* pColumn = variant.getPointerToValue<vector<double> >();
+                  if ((pColumn != NULL) && (pColumn->size() < mGraphicObjectIds.size()))
                   {
-                     // Metadata for the graphic objects created by the import of shapefiles is already populated in
-                     // update() method (number of graphic object ids will equal the length of the attribute vectors).
-                     // If user unlocks resulting layer and then manually adds graphic objects, metadata for the
-                     // manually added graphic objects needs to be populated with default values (number of graphic
-                     // object ids is less than the length of the attribute vectors).
-                     DynamicObject* pMetadata = mpParentElement->getMetadata();
-                     if (pMetadata != NULL)
-                     {
-                        pMetadata = pMetadata->getAttribute(FEATURE_ATTRIBUTES_NAME).getPointerToValue<DynamicObject>();
-                     }
-                     std::vector<std::string> attributeNames;
-                     pMetadata->getAttributeNames(attributeNames);
-                     for (unsigned k = 0; k < attributeNames.size(); k++)
-                     {
-                        DataVariant& variant = pMetadata->getAttribute(attributeNames[k]);
-                        if (variant.getTypeName() == "vector<double>")
-                        {
-                           vector<double>* pColumn = variant.getPointerToValue<vector<double> >();
-                           if ((pColumn != NULL) && (pColumn->size() < mGraphicObjectIds.size()))
-                           {
-                              pColumn->push_back(0.0);
-                           }
-                        }
-                        else if (variant.getTypeName() == "vector<int>")
-                        {
-                           vector<int>* pColumn = variant.getPointerToValue<vector<int> >();
-                           if ((pColumn != NULL) && (pColumn->size() < mGraphicObjectIds.size()))
-                           {
-                              pColumn->push_back(0);
-                           }
-                        }
-                        else if (variant.getTypeName() == "vector<float>")
-                        {
-                           vector<float>* pColumn = variant.getPointerToValue<vector<float> >();
-                           if ((pColumn != NULL) && (pColumn->size() < mGraphicObjectIds.size()))
-                           {
-                              pColumn->push_back(0.0f);
-                           }
-                        }
-                        else if (variant.getTypeName() == "vector<string>")
-                        {
-                           vector<string>* pColumn = variant.getPointerToValue<vector<string> >();
-                           if ((pColumn != NULL) && (pColumn->size() < mGraphicObjectIds.size()))
-                           {
-                              pColumn->push_back(string());
-                           }
-                        }
-                        else if (variant.getTypeName() == "vector<short>")
-                        {
-                           vector<short>* pColumn = variant.getPointerToValue<vector<short> >();
-                           if ((pColumn != NULL) && (pColumn->size() < mGraphicObjectIds.size()))
-                           {
-                              pColumn->push_back(0);
-                           }
-                        }
-                     }
+                     pColumn->push_back(0.0);
                   }
-                  beginInsertRows(QModelIndex(), rowIndex, rowIndex);
-                  endInsertRows();
-                  break;
-               default:
-                  break;
+               }
+               else if (variant.getTypeName() == "vector<int>")
+               {
+                  vector<int>* pColumn = variant.getPointerToValue<vector<int> >();
+                  if ((pColumn != NULL) && (pColumn->size() < mGraphicObjectIds.size()))
+                  {
+                     pColumn->push_back(0);
+                  }
+               }
+               else if (variant.getTypeName() == "vector<float>")
+               {
+                  vector<float>* pColumn = variant.getPointerToValue<vector<float> >();
+                  if ((pColumn != NULL) && (pColumn->size() < mGraphicObjectIds.size()))
+                  {
+                     pColumn->push_back(0.0f);
+                  }
+               }
+               else if (variant.getTypeName() == "vector<string>")
+               {
+                  vector<string>* pColumn = variant.getPointerToValue<vector<string> >();
+                  if ((pColumn != NULL) && (pColumn->size() < mGraphicObjectIds.size()))
+                  {
+                     pColumn->push_back(string());
+                  }
+               }
+               else if (variant.getTypeName() == "vector<short>")
+               {
+                  vector<short>* pColumn = variant.getPointerToValue<vector<short> >();
+                  if ((pColumn != NULL) && (pColumn->size() < mGraphicObjectIds.size()))
+                  {
+                     pColumn->push_back(0);
+                  }
+               }
             }
          }
-      }
+         break;
+
+      default:
+         return false;
    }
+
+   return true;
 }
 
 void FeatureClass::removeObject(Subject& subject, const std::string& signal, const boost::any& data)

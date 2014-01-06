@@ -27,9 +27,9 @@
 #include <vector>
 
 class CoordinateTransformation;
+class QLocalServer;
+class QLocalSocket;
 class QProcess;
-class QTcpServer;
-class QTcpSocket;
 
 /**
  *  This manages the connection one or more feature proxies, currently the
@@ -143,8 +143,8 @@ private:
    QString mExecutable;
    QProcess* mpProcess;
    QTextStream mStream;
-   QTcpServer* mpServer;
-   QTcpSocket* mpSocket;
+   QLocalServer* mpServer;
+   QLocalSocket* mpSocket;
    QTimer* mpConnectionTimer;
 
    QQueue<QString> mResponses;

@@ -19,9 +19,8 @@
 #include <QtCore/QCoreApplication>
 #include <QtCore/QProcess>
 #include <QtCore/QTextStream>
-#include <QtNetwork/QHostAddress>
-#include <QtNetwork/QTcpServer>
-#include <QtNetwork/QTcpSocket>
+#include <QtNetwork/QLocalServer>
+#include <QtNetwork/QLocalSocket>
 
 #include <QtCore/QtDebug>
 
@@ -91,15 +90,14 @@ bool FeatureProxyConnector::initialize()
    {
       terminate();
    }
-   mpServer = new QTcpServer(this);
-   if (!mpServer->listen(QHostAddress::LocalHost))
+   mpServer = new QLocalServer(this);
+   if (!mpServer->listen("OpticksFeatureProxyConnector" + QString::number(pid)))
    {
       terminate();
       return false;
    }
-   
+
    QStringList args;
-   args << "-s" << QString::number(mpServer->serverPort());
    if (pid >= 0)
    {
       args << "-pid" << QString::number(pid);

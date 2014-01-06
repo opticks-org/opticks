@@ -345,26 +345,13 @@ list<GraphicObject*> GraphicLayerImp::getObjects() const
 
 list<GraphicObject*> GraphicLayerImp::getObjects(const GraphicObjectType& objectType) const
 {
-   list<GraphicObject*> objects;
-
-   const list<GraphicObject*>& allObjects = getObjects();
-
-   list<GraphicObject*>::const_iterator iter = allObjects.begin();
-   while (iter != allObjects.end())
+   GraphicGroup* pGroup = getGroup();
+   if (pGroup != NULL)
    {
-      GraphicObject* pObject = *iter;
-      if (pObject != NULL)
-      {
-         if (pObject->getGraphicObjectType() == objectType)
-         {
-            objects.push_back(pObject);
-         }
-      }
-
-      ++iter;
+      return pGroup->getObjects(objectType);
    }
 
-   return objects;
+   return list<GraphicObject*>();
 }
 
 unsigned int GraphicLayerImp::getNumObjects() const
