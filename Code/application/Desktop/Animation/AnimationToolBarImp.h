@@ -120,6 +120,7 @@ private:
       */
       void wheelEvent(QWheelEvent* pEvent);
       void paintEvent(QPaintEvent* pEvent);
+      void resizeEvent(QResizeEvent* pEvent);
 
    private:
       WheelEventSlider(const WheelEventSlider& rhs);

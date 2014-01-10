@@ -13,6 +13,7 @@
 #include <QtGui/QLayout>
 #include <QtGui/QLineEdit>
 #include <QtGui/QPainter>
+#include <QtGui/QResizeEvent>
 #include <QtGui/QToolButton>
 #include <QtGui/QWidgetAction>
 
@@ -471,7 +472,6 @@ void AnimationToolBarImp::updateFrameRange()
 {
    int numSteps = 1;
    int lineStep = 1;
-   int pageStep = 1;
    double currentFrame = -1.0;
 
    if (mpController != NULL)
@@ -506,15 +506,11 @@ void AnimationToolBarImp::updateFrameRange()
 
       // Define the line step size as one frame or one second
       lineStep = frequency / intervalMultiplier;
-
-      // Define the page step size so ten steps for the entire range
-      pageStep = numSteps / 10;
    }
 
    // Update the slider range
    mpFrameSlider->setRange(0, numSteps);
-   mpFrameSlider->setSingleStep(lineStep);
-   mpFrameSlider->setPageStep(pageStep);
+   mpFrameSlider->setSingleStep(lineStep);   // Page step is updated by the slider widget itself on resize
 
    // update bumpers
    updateBumpers();
@@ -930,6 +926,26 @@ void AnimationToolBarImp::WheelEventSlider::paintEvent(QPaintEvent* pEvent)
    }
 
    QSlider::paintEvent(pEvent);
+}
+
+void AnimationToolBarImp::WheelEventSlider::resizeEvent(QResizeEvent* pEvent)
+{
+   // Set the page step based on a fixed number of screen pixels
+   const int stepSize = 20;
+   int minValue = minimum();
+   int maxValue = maximum();
+
+   const QSize& newSize = pEvent->size();
+   int newWidth = newSize.width();
+
+   double pixelRatio = 1.0;
+   if (stepSize < newWidth)
+   {
+      pixelRatio = static_cast<double>(stepSize) / static_cast<double>(newWidth);
+   }
+
+   int pageSize = static_cast<int>((maxValue - minValue) * pixelRatio);
+   setPageStep(pageSize);
 }
 
 void AnimationToolBarImp::WheelEventSlider::setLeftBumper(int index)
