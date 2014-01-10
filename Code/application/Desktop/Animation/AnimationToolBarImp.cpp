@@ -181,9 +181,7 @@ AnimationToolBarImp::AnimationToolBarImp(const std::string& id, QWidget* parent)
    QWidget* pSliderWidget = new QWidget(this);
 
    mpFrameSlider = new WheelEventSlider(Qt::Horizontal, pSliderWidget);
-   mpFrameSlider->setFixedWidth(200);
    mpFrameSlider->setToolTip("The current position in the animation");
-   mpFrameSlider->setSizePolicy(QSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed));
    VERIFYNR(connect(mpFrameSlider, SIGNAL(sliderPressed()), this, SLOT(activateSlider())));
    VERIFYNR(connect(mpFrameSlider, SIGNAL(sliderReleased()), this, SLOT(releaseSlider())));
    VERIFYNR(connect(mpFrameSlider, SIGNAL(actionTriggered(int)), this, SLOT(sliderActionTriggered(int))));
@@ -209,8 +207,7 @@ AnimationToolBarImp::AnimationToolBarImp(const std::string& id, QWidget* parent)
 }
 
 AnimationToolBarImp::~AnimationToolBarImp()
-{
-}
+{}
 
 const std::string& AnimationToolBarImp::getObjectType() const
 {
