@@ -863,25 +863,13 @@ bool ImportOptionsDlg::validateDataset(DataDescriptor* pDescriptor, QString& val
       return false;
    }
 
-   // Set a georeference plug-in in the georeference descriptor if one has not yet been set
-   RasterDataDescriptor* pRasterDescriptor = dynamic_cast<RasterDataDescriptor*>(pDescriptor);
-   if (pRasterDescriptor != NULL)
-   {
-      const GeoreferenceDescriptor* pGeorefDescriptor = pRasterDescriptor->getGeoreferenceDescriptor();
-      if (pGeorefDescriptor != NULL)
-      {
-         const string& plugInName = pGeorefDescriptor->getGeoreferencePlugInName();
-         if (plugInName.empty() == true)
-         {
-            pRasterDescriptor->setDefaultGeoreferencePlugIn();
-         }
-      }
-   }
-
    // Validate the user inputs from the importer
    bool validDataset = false;
    if (mpImporter != NULL)
    {
+      // Allow the importer to modify the data descriptor if necessary
+      mpImporter->polishDataDescriptor(pDescriptor);
+
       vector<const DataDescriptor*> importedDataDescriptors;
       for (map<ImportDescriptor*, QTreeWidgetItem*>::const_iterator iter = mDatasets.begin();
          iter != mDatasets.end();

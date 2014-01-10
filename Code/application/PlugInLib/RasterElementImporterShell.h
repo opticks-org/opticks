@@ -148,6 +148,16 @@ public:
     */
    virtual QWidget* getPreview(const DataDescriptor* pDescriptor, Progress* pProgress);
 
+   /**
+    *  @copydoc Importer::polishDataDescriptor()
+    *
+    *  @default The default implementation sets a georeference plug-in in the
+    *           georeference descriptor if one has not yet been set regardless
+    *           of the auto-georeference setting so that a default plug-in will
+    *           be available for manual georeference.
+    */
+   virtual void polishDataDescriptor(DataDescriptor* pDescriptor);
+
 protected:
    /**
     *  Extracts the progress and sensor data from the given input arg list.

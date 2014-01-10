@@ -281,9 +281,12 @@ public:
    /**
     *  Modifies a data descriptor before it is imported.
     *
-    *  This method is called after the user has made changes to the data
-    *  descriptor contained in an ImportDescriptor returned in
-    *  getImportDescriptors() and before the element is created for import.
+    *  This method is called prior to validate() being called and the data
+    *  element being created for import to allow importers to inspect and modify
+    *  the values in the data descriptor.  In application interactive mode, this
+    *  method is called after the user has made changes in the Import Options
+    *  dialog to the data descriptor contained in an ImportDescriptor returned
+    *  in getImportDescriptors().
     *
     *  @warning It is generally not recommended for an importer to modify
     *           values that the user has the capability to change in the import
