@@ -7,12 +7,11 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include "OptionsAnimation.h"
-
 #include "AnimationController.h"
 #include "AnimationCycleButton.h"
 #include "AnimationToolBar.h"
 #include "LabeledSection.h"
+#include "OptionsAnimation.h"
 
 #include <QtGui/QCheckBox>
 #include <QtGui/QLabel>
@@ -45,6 +44,11 @@ OptionsAnimation::OptionsAnimation() :
       "animation is stopped.  If unchecked, remains on the current frame when the animation is stopped.");
    mpResetOnStop->setChecked(AnimationController::getSettingResetOnStop());
 
+   mpConfirmDelete = new QCheckBox("Confirm delete", this);
+   mpConfirmDelete->setToolTip("Displays a dialog to confirm deleting selected animation controllers in "
+      "the Session Explorer.");
+   mpConfirmDelete->setChecked(AnimationController::getSettingConfirmDelete());
+
    mpFrameSpeedList = new QListWidget(this);
    QLabel* pFrameSpeedLabel = new QLabel("Default Frame Speeds:", this);
    mFrameSpeeds = AnimationToolBar::getSettingFrameSpeeds();
@@ -62,20 +66,21 @@ OptionsAnimation::OptionsAnimation() :
    pAnimationLayout->setSpacing(5);
    pAnimationLayout->addWidget(mpCanDropFrames, 0, 0, 1, 2);
    pAnimationLayout->addWidget(mpResetOnStop, 1, 0, 1, 2);
-   pAnimationLayout->addWidget(pAnimationCycleSettingLabel, 2, 0);
-   pAnimationLayout->addWidget(mpCycle, 2, 1, Qt::AlignLeft);
-   pAnimationLayout->addWidget(pFrameSpeedLabel, 3, 0, 1, 2);
-   pAnimationLayout->addWidget(mpFrameSpeedList, 4, 0, 2, 2);
-   pAnimationLayout->addWidget(pAddButton, 4, 2);
-   pAnimationLayout->addWidget(pRemoveButton, 5, 2, Qt::AlignTop);
+   pAnimationLayout->addWidget(mpConfirmDelete, 2, 0, 1, 2);
+   pAnimationLayout->addWidget(pAnimationCycleSettingLabel, 3, 0);
+   pAnimationLayout->addWidget(mpCycle, 3, 1, Qt::AlignLeft);
+   pAnimationLayout->addWidget(pFrameSpeedLabel, 4, 0, 1, 2);
+   pAnimationLayout->addWidget(mpFrameSpeedList, 5, 0, 2, 2);
+   pAnimationLayout->addWidget(pAddButton, 5, 2);
+   pAnimationLayout->addWidget(pRemoveButton, 6, 2, Qt::AlignTop);
    pAnimationLayout->setColumnStretch(1, 20);
-   pAnimationLayout->setRowStretch(5, 20);
+   pAnimationLayout->setRowStretch(6, 20);
    LabeledSection* pAnimationSection = new LabeledSection(pAnimationLayoutWidget, "Animation", this);
 
    VERIFYNR(connect(pAddButton, SIGNAL(clicked()), this, SLOT(addFrameSpeed())));
    VERIFYNR(connect(pRemoveButton, SIGNAL(clicked()), this, SLOT(removeFrameSpeed())));
-   VERIFYNR(connect(mpFrameSpeedList, SIGNAL(itemChanged(QListWidgetItem *)), this, 
-            SLOT(editFrameSpeedFinished(QListWidgetItem *))));
+   VERIFYNR(connect(mpFrameSpeedList, SIGNAL(itemChanged(QListWidgetItem*)), this,
+      SLOT(editFrameSpeedFinished(QListWidgetItem*))));
 
    // Dialog layout
    QVBoxLayout* pLayout = new QVBoxLayout(this);
@@ -85,10 +90,14 @@ OptionsAnimation::OptionsAnimation() :
    pLayout->addStretch(1);
 }
 
+OptionsAnimation::~OptionsAnimation()
+{}
+
 void OptionsAnimation::applyChanges()
 {
    AnimationController::setSettingCanDropFrames(mpCanDropFrames->isChecked());
    AnimationController::setSettingResetOnStop(mpResetOnStop->isChecked());
+   AnimationController::setSettingConfirmDelete(mpConfirmDelete->isChecked());
    AnimationController::setSettingAnimationCycleSelection(mpCycle->getCurrentValue());
    AnimationToolBar::setSettingFrameSpeeds(mFrameSpeeds);
 }
@@ -140,8 +149,3 @@ void OptionsAnimation::removeFrameSpeed()
       }
    }
 }
-
-OptionsAnimation::~OptionsAnimation()
-{
-}
-

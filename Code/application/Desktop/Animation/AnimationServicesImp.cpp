@@ -537,6 +537,19 @@ void AnimationServicesImp::destroySelectedControllers()
    // Get the selected controllers
    Service<SessionExplorer> pExplorer;
    vector<AnimationController*> selectedControllers = pExplorer->getSelectedSessionItems<AnimationController>();
+   VERIFYNRV(selectedControllers.empty() == false);
+
+   // Get confirmation from the user if necessary
+   if (AnimationController::getSettingConfirmDelete() == true)
+   {
+      QMessageBox::StandardButton button = QMessageBox::question(Service<DesktopServices>()->getMainWidget(),
+         "Confirm Delete", "Are you sure that you want to delete the selected animation controllers?",
+         QMessageBox::Yes | QMessageBox::No);
+      if (button == QMessageBox::No)
+      {
+         return;
+      }
+   }
 
    // Destroy the selected controllers
    vector<AnimationController*>::iterator iter;

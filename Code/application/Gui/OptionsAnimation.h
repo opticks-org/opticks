@@ -26,7 +26,7 @@ class OptionsAnimation : public QWidget
 
 public:
    OptionsAnimation();
-   ~OptionsAnimation();
+   virtual ~OptionsAnimation();
 
    void applyChanges();
 
@@ -91,8 +91,10 @@ protected slots:
 private:
    OptionsAnimation(const OptionsAnimation& rhs);
    OptionsAnimation& operator=(const OptionsAnimation& rhs);
+
    QCheckBox* mpCanDropFrames;
    QCheckBox* mpResetOnStop;
+   QCheckBox* mpConfirmDelete;
    AnimationCycleButton* mpCycle;
    QListWidget* mpFrameSpeedList;
    std::vector<double> mFrameSpeeds;

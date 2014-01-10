@@ -67,6 +67,7 @@ public:
    SETTING(AnimationCycleSelection, AnimationController, AnimationCycle, PLAY_ONCE)
    SETTING(CanDropFrames, AnimationController, bool, false)
    SETTING(ResetOnStop, AnimationController, bool, true)
+   SETTING(ConfirmDelete, AnimationController, bool, true)
 
    /**
     *  Emitted with boost::any<std::string> when the controller is renamed.
