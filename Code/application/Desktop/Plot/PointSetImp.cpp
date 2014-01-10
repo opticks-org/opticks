@@ -115,7 +115,18 @@ void PointSetImp::draw()
 
       if (pPlot->isShadingEnabled() == false)
       {
-         glColor3ub(mLineColor.red(), mLineColor.green(), mLineColor.blue());
+         if (mLineColor.isValid() == true)
+         {
+            glColor3ub(mLineColor.red(), mLineColor.green(), mLineColor.blue());
+         }
+         else
+         {
+            glColor3ub(255, 255, 255);
+            glPushAttrib(GL_COLOR_BUFFER_BIT);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ZERO);
+         }
+
          glShadeModel(GL_FLAT);
       }
       else
@@ -182,8 +193,14 @@ void PointSetImp::draw()
 
       // Turn the shade model back to flat to not impact other types of plot objects
       glShadeModel(GL_FLAT);
+
+      if ((pPlot->isShadingEnabled() == false) && (mLineColor.isValid() == false))
+      {
+         glDisable(GL_BLEND);
+         glPopAttrib();
+      }
    }
-   
+
    // Points
    LocationType pixelSize(1.0, 1.0);
 
@@ -607,6 +624,10 @@ const QPixmap& PointSetImp::getLegendPixmap(bool bSelected) const
       if (selectedPixColor != mLineColor)
       {
          selectedPixColor = mLineColor;
+         if (selectedPixColor.isValid() == false)
+         {
+            selectedPixColor = Qt::black;
+         }
          spSelectedPix->fill(Qt::transparent);
 
          QRect rcPixmap = spSelectedPix->rect();
@@ -618,7 +639,7 @@ const QPixmap& PointSetImp::getLegendPixmap(bool bSelected) const
          points.setPoint(3, rcPixmap.center().x(), rcPixmap.center().y() - 4);
 
          QPainter p(spSelectedPix);
-         p.setPen(QPen(mLineColor, 1));
+         p.setPen(QPen(selectedPixColor, 1));
          p.drawLine(rcPixmap.left() + 2, rcPixmap.center().y(), rcPixmap.right() - 2, rcPixmap.center().y());
          p.setBrush(selectedPixColor);
          p.drawPolygon(points);
@@ -632,12 +653,16 @@ const QPixmap& PointSetImp::getLegendPixmap(bool bSelected) const
       if (pixColor != mLineColor)
       {
          pixColor = mLineColor;
+         if (pixColor.isValid() == false)
+         {
+            pixColor = Qt::black;
+         }
          spPix->fill(Qt::transparent);
 
          QRect rcPixmap = spPix->rect();
 
          QPainter p(spPix);
-         p.setPen(QPen(mLineColor, 1));
+         p.setPen(QPen(pixColor, 1));
          p.drawLine(rcPixmap.left() + 2, rcPixmap.center().y(), rcPixmap.right() - 2, rcPixmap.center().y());
          p.end();
       }
@@ -757,11 +782,6 @@ void PointSetImp::displayLine(bool bDisplay)
 
 void PointSetImp::setLineColor(const QColor& clrLine)
 {
-   if (clrLine.isValid() == false)
-   {
-      return;
-   }
-
    if (clrLine != mLineColor)
    {
       mLineColor = clrLine;

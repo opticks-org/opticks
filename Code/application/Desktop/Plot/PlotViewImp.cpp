@@ -171,6 +171,7 @@ PlotViewImp::PlotViewImp(const string& id, const string& viewName, QGLContext* d
 
    mMouseLocator.setVisible(false);
    mSelectionArea.setVisible(false);
+   mSelectionArea.setLineColor(ColorType());
 
    // Connections
    VERIFYNR(connect(this, SIGNAL(mouseModeAdded(const MouseMode*)), this,
